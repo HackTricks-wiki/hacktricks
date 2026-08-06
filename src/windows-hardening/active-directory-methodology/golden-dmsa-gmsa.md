@@ -1,41 +1,43 @@
-# Golden gMSA/dMSA Attack (Офлайн похідна паролів керованих облікових записів сервісів)
+# Golden gMSA/dMSA Attack (Offline Derivation of Managed Service Account Passwords)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Огляд
 
-Керовані облікові записи сервісів Windows (MSA) – це спеціальні принципи, призначені для запуску сервісів без необхідності вручну керувати їх паролями. Є два основних варіанти:
+Windows Managed Service Accounts (MSA) — це спеціальні principals, призначені для запуску служб без необхідності вручну керувати їхніми паролями.
+Існує два основні різновиди:
 
-1. **gMSA** – груповий керований обліковий запис сервісу – може використовуватися на кількох хостах, які авторизовані в його атрибуті `msDS-GroupMSAMembership`.
-2. **dMSA** – делегований керований обліковий запис сервісу – (попередній перегляд) наступник gMSA, що спирається на ту ж криптографію, але дозволяє більш детальні сценарії делегування.
+1. **gMSA** – group Managed Service Account – може використовуватися на кількох хостах, авторизованих в його атрибуті `msDS-GroupMSAMembership`.
+2. **dMSA** – delegated Managed Service Account – наступник gMSA (preview), який використовує ту саму криптографію, але забезпечує більш granular сценарії delegation.
 
-Для обох варіантів **пароль не зберігається** на кожному контролері домену (DC) як звичайний NT-хеш. Натомість кожен DC може **вивести** поточний пароль на льоту з:
+Для обох варіантів **пароль не зберігається** на кожному Domain Controller (DC), як звичайний NT-hash. Натомість кожен DC може **виводити** поточний пароль на льоту з:
 
-* Лісового **KDS Root Key** (`KRBTGT\KDS`) – випадковим чином згенерованим секретом з GUID-іменем, реплікованим на кожен DC під контейнером `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`.
-* Цільового облікового запису **SID**.
-* Переконаним **ManagedPasswordID** (GUID), знайденим в атрибуті `msDS-ManagedPasswordId`.
+* загальнолісового **KDS Root Key** (`KRBTGT\KDS`) – випадково згенерованого secret із назвою у форматі GUID, реплікованого на кожен DC у контейнері `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`.
+* **SID** цільового account.
+* залежного від account **ManagedPasswordID** (GUID), знайденого в атрибуті `msDS-ManagedPasswordId`.
 
-Виведення: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 байт блоб, який в кінцевому підсумку **base64-кодується** і зберігається в атрибуті `msDS-ManagedPassword`. Ніякий трафік Kerberos або взаємодія з доменом не потрібні під час звичайного використання пароля – член хоста виводить пароль локально, якщо знає три вхідні дані.
+Derivation має такий вигляд: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240-байтовий blob, який зрештою **base64-encoded** і зберігається в атрибуті `msDS-ManagedPassword`.
+Під час звичайного використання пароля не потрібні ані Kerberos traffic, ані взаємодія з domain – member host виводить пароль локально, якщо йому відомі ці три inputs.
 
 ## Golden gMSA / Golden dMSA Attack
 
-Якщо зловмисник може отримати всі три вхідні дані **офлайн**, він може обчислити **дійсні поточні та майбутні паролі** для **будь-якого gMSA/dMSA в лісі**, не торкаючись DC знову, обходячи:
+Якщо attacker може отримати всі три inputs **offline**, він може обчислити **дійсні поточні та майбутні паролі** для **будь-якого gMSA/dMSA у forest**, більше не взаємодіючи з DC, обходячи:<sup>[[1]](#references)[[2]](#references)</sup>
 
-* Аудит читання LDAP
-* Інтервали зміни паролів (вони можуть попередньо обчислити)
+* LDAP read auditing
+* інтервали зміни пароля (їх можна обчислити заздалегідь)
 
-Це аналогічно *Золотому квитку* для облікових записів сервісів.
+Це аналог *Golden Ticket* для service accounts.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Передумови
 
-1. **Компрометація на рівні лісу** **одного DC** (або Enterprise Admin), або доступ `SYSTEM` до одного з DC в лісі.
-2. Можливість перерахувати облікові записи сервісів (читання LDAP / брутфорс RID).
-3. Робоча станція .NET ≥ 4.7.2 x64 для запуску [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) або еквівалентного коду.
+1. **Компрометація рівня forest** одного **DC** (або Enterprise Admin) чи доступ `SYSTEM` до одного з DC у forest.
+2. Можливість перелічувати service accounts (LDAP read / RID brute-force).
+3. Робоча станція з .NET ≥ 4.7.2 x64 для запуску [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) або еквівалентного code.
 
 ### Golden gMSA / dMSA
-##### Фаза 1 – Витяг KDS Root Key
+#### Phase 1 – Extract the KDS Root Key
 
-Витяг з будь-якого DC (Копія тіньового тому / сирі хаби SAM+SECURITY або віддалені секрети):
+Dump з будь-якого DC (Volume Shadow Copy / raw SAM+SECURITY hives або remote secrets):<sup>[[1]](#references)[[2]](#references)</sup>
 ```cmd
 reg save HKLM\SECURITY security.hive
 reg save HKLM\SYSTEM  system.hive
@@ -51,70 +53,69 @@ GoldendMSA.exe kds
 # With GoldenGMSA
 GoldenGMSA.exe kdsinfo
 ```
-Базовий рядок base64 з міткою `RootKey` (ім'я GUID) потрібен на наступних етапах.
+Рядок base64 з позначкою `RootKey` (назва GUID) потрібен на наступних етапах.<sup>[[1]](#references)[[2]](#references)</sup>
 
-##### Фаза 2 – Перерахування об'єктів gMSA / dMSA
+##### Фаза 2 – Перерахувати об’єкти gMSA / dMSA
 
-Отримайте принаймні `sAMAccountName`, `objectSid` та `msDS-ManagedPasswordId`:
-```powershell
+Отримайте щонайменше `sAMAccountName`, `objectSid` і `msDS-ManagedPasswordId`:<sup>[[1]](#references)[[2]](#references)</sup>
+```bash
 # Authenticated or anonymous depending on ACLs
 Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
 Select sAMAccountName,objectSid,msDS-ManagedPasswordId
 
 GoldenGMSA.exe gmsainfo
 ```
-[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) реалізує допоміжні режими:
-```powershell
+[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) реалізує допоміжні режими:<sup>[[1]](#references)</sup>
+```bash
 # LDAP enumeration (kerberos / simple bind)
 GoldendMSA.exe info -d example.local -m ldap
 
 # RID brute force if anonymous binds are blocked
 GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```
-##### Фаза 3 – Вгадати / Виявити ManagedPasswordID (коли відсутній)
+##### Фаза 3 – Guess / Discover ManagedPasswordID (коли відсутній)
 
-Деякі розгортання *видаляють* `msDS-ManagedPasswordId` з ACL-захищених читань.  
-Оскільки GUID є 128-бітним, наївний брутфорс є недоцільним, але:
+Деякі розгортання *видаляють* `msDS-ManagedPasswordId` під час читання, захищеного ACL.
+Оскільки GUID має довжину 128 бітів, наївний bruteforce є нездійсненним, але:
 
-1. Перші **32 біти = Unix epoch time** створення облікового запису (з роздільною здатністю в хвилинах).  
-2. За ними слідують 96 випадкових бітів.
+1. Перші **32 біти = Unix epoch time** створення облікового запису (точність до хвилин).
+2. Далі йдуть 96 випадкових бітів.
 
-Отже, **вузький словник для кожного облікового запису** (± кілька годин) є реалістичним.
-```powershell
+Тому вузький **wordlist** для кожного облікового запису (± кілька годин) є реалістичним.
+```bash
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
-Інструмент обчислює кандидатні паролі та порівнює їх base64 blob з реальним атрибутом `msDS-ManagedPassword` – збіг вказує на правильний GUID.
+Інструмент обчислює паролі-кандидати та порівнює їхній base64 blob зі справжнім атрибутом `msDS-ManagedPassword` – збіг розкриває правильний GUID.
 
-##### Фаза 4 – Офлайн обчислення пароля та конвертація
+##### Фаза 4 – Офлайн-обчислення та перетворення пароля
 
-Як тільки ManagedPasswordID відомий, дійсний пароль знаходиться в одному командному рядку:
-```powershell
+Щойно ManagedPasswordID відомий, дійсний пароль можна отримати однією командою:<sup>[[1]](#references)[[2]](#references)</sup>
+```bash
 # derive base64 password
 GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>
 GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswordID>
 ```
-Отримані хеші можуть бути інжектовані за допомогою **mimikatz** (`sekurlsa::pth`) або **Rubeus** для зловживання Kerberos, що дозволяє здійснювати прихований **бічний рух** та **постійність**.
+Отримані хеші можна інжектити за допомогою **mimikatz** (`sekurlsa::pth`) або **Rubeus** для зловживання Kerberos, що забезпечує приховане **lateral movement** і **persistence**.
 
 ## Виявлення та пом'якшення
 
-* Обмежте можливості **резервного копіювання DC та читання реєстру** для адміністраторів Tier-0.
-* Моніторте створення **Режиму відновлення служб каталогів (DSRM)** або **Копії тіней томів** на DC.
-* Аудитуйте читання / зміни до `CN=Master Root Keys,…` та прапорців `userAccountControl` облікових записів служб.
-* Виявляйте незвичайні **записи паролів base64** або раптове повторне використання паролів служб на різних хостах.
-* Розгляньте можливість перетворення облікових записів gMSA з високими привілеями на **класичні облікові записи служб** з регулярними випадковими ротаціями, де ізоляція Tier-0 неможлива.
+* Обмежте можливості **резервного копіювання DC і читання вуликів реєстру** адміністраторами Tier-0.
+* Відстежуйте створення **Directory Services Restore Mode (DSRM)** або **Volume Shadow Copy** на DC.
+* Аудитуйте читання / зміни `CN=Master Root Keys,…` і прапорців `userAccountControl` облікових записів служб.
+* Виявляйте нетиповий запис паролів у **base64** або раптове повторне використання паролів служб на різних хостах.
+* Розгляньте можливість перетворення gMSA з високими привілеями на **classic service accounts** із регулярною випадковою ротацією паролів там, де ізоляція Tier-0 неможлива.
 
 ## Інструменти
 
-* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – реалізація посилання, використана на цій сторінці.
-* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – реалізація посилання, використана на цій сторінці.
+* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – еталонна реалізація, використана на цій сторінці.<sup>[[3]](#references)</sup>
+* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – еталонна реалізація, використана на цій сторінці.
 * [`mimikatz`](https://github.com/gentilkiwi/mimikatz) – `lsadump::secrets`, `sekurlsa::pth`, `kerberos::ptt`.
-* [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket з використанням похідних AES ключів.
+* [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket із використанням похідних AES-ключів.
 
 ## Посилання
 
-- [Golden dMSA – обхід аутентифікації для делегованих облікових записів керованих служб](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [gMSA атаки облікових записів Active Directory](https://www.semperis.com/blog/golden-gmsa-attack/)
-- [Репозиторій Semperis/GoldenDMSA на GitHub](https://github.com/Semperis/GoldenDMSA)
-- [Improsec – атака довіри Golden gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
+- [1] [Golden dMSA – обхід автентифікації для делегованих Managed Service Accounts](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [2] [Атаки на облікові записи gMSA Active Directory](https://www.semperis.com/blog/golden-gmsa-attack/)
+- [3] [Репозиторій Semperis/GoldenDMSA на GitHub](https://github.com/Semperis/GoldenDMSA)
 
 {{#include ../../banners/hacktricks-training.md}}

