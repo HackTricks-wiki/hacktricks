@@ -165,5 +165,3 @@ ad-certificates/account-persistence.md
 - [5] [NetExec - Request PFX via scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-

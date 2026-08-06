@@ -12,7 +12,7 @@ Processes can be opened on hosts where the username and either password or hash 
 
 ### Namespace
 
-Structured in a directory-style hierarchy, WMI's top-level container is \root, under which additional directories, referred to as namespaces, are organized.
+Structured in a directory-style hierarchy, WMI's top-level container is \root, under which additional directories, referred to as namespaces, are organized.<sup>[[1]](#references)</sup>
 Commands to list namespaces:
 
 ```bash
@@ -90,7 +90,7 @@ Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
 
-For attackers, WMI is a potent tool for enumerating sensitive data about systems or domains.
+For attackers, WMI is a potent tool for enumerating sensitive data about systems or domains.<sup>[[1]](#references)</sup>
 
 ```bash
 wmic computerystem list full /format:list
@@ -149,6 +149,3 @@ SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug a
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

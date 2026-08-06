@@ -165,8 +165,6 @@ WHERE  dp.name IN ('smsdbrole_MP','smsdbrole_MPUserSvc')
   abusing-ad-mssql.md
   {{#endref}}
 
-
-
 ## References
 - [1] [I’d Like to Speak to Your Manager: Stealing Secrets with Management Point Relays](https://specterops.io/blog/2025/07/15/id-like-to-speak-to-your-manager-stealing-secrets-with-management-point-relays/)
 - [2] [PXEthief](https://github.com/MWR-CyberSec/PXEThief)

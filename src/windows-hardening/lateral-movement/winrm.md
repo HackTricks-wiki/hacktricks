@@ -252,5 +252,3 @@ For multi-hop constraints after landing a first WinRM session, check:
 
 
 {{#include ../../banners/hacktricks-training.md}}
-
-

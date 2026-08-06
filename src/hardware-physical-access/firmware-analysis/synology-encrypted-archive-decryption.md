@@ -6,7 +6,7 @@
 
 Several Synology devices (DSM/BSM NAS, BeeStation, …) distribute their firmware and application packages in **encrypted PAT / SPK archives**.  Those archives can be decrypted *offline* with nothing but the public download files thanks to hard-coded keys embedded inside the official extraction libraries.
 
-This page documents, step-by-step, how the encrypted format works and how to fully recover the clear-text **TAR** that sits inside each package.  The procedure is based on Synacktiv research performed during Pwn2Own Ireland 2024 and implemented in the open-source tool [`synodecrypt`](https://github.com/synacktiv/synodecrypt).
+This page documents, step-by-step, how the encrypted format works and how to fully recover the clear-text **TAR** that sits inside each package.  The procedure is based on Synacktiv research performed during Pwn2Own Ireland 2024 and implemented in the open-source tool [`synodecrypt`](https://github.com/synacktiv/synodecrypt).<sup>[[1]](#references)[[2]](#references)</sup>
 
 > ⚠️  The format is exactly the same for both `*.pat` (system update) and `*.spk` (application) archives – they only differ in the pair of hard-coded keys that are selected.
 
@@ -22,7 +22,7 @@ $ wget https://archive.synology.com/download/Os/BSM/BSM_BST150-4T_65374.pat
 
 ## 2. Dump the PAT structure (optional)
 
-`*.pat` images are themselves a **cpio bundle** that embeds several files (boot loader, kernel, rootfs, packages…).  The free utility [`patology`](https://github.com/sud0woodo/patology) is convenient to inspect that wrapper:
+`*.pat` images are themselves a **cpio bundle** that embeds several files (boot loader, kernel, rootfs, packages…).  The free utility [`patology`](https://github.com/sud0woodo/patology) is convenient to inspect that wrapper:<sup>[[3]](#references)</sup>
 
 ```bash
 $ python3 patology.py --dump -i BSM_BST150-4T_65374.pat
@@ -52,7 +52,7 @@ usr/lib/libsynocodesign.so: ELF 64-bit LSB shared object, ARM aarch64, …
 
 ## 4. Recover the hard-coded keys (`get_keys`)
 
-Inside `libsynocodesign.so` the function `get_keys(int keytype)` simply returns two 128-bit global variables for the requested archive family:
+Inside `libsynocodesign.so` the function `get_keys(int keytype)` simply returns two 128-bit global variables for the requested archive family:<sup>[[1]](#references)</sup>
 
 ```c
 case 0:            // PAT (system)
@@ -75,7 +75,7 @@ You only have to dump those two constants once for each DSM major version.
 
 ## 5. Header structure & signature verification
 
-`synoarchive_open()` → `support_format_synoarchive()` → `archive_read_support_format_synoarchive()` performs the following:
+`synoarchive_open()` → `support_format_synoarchive()` → `archive_read_support_format_synoarchive()` performs the following:<sup>[[1]](#references)</sup>
 
 1. Read magic (3 bytes) `0xBFBAAD` **or** `0xADBEEF`.
 2. Read little-endian 32-bit `header_len`.
@@ -110,7 +110,7 @@ crypto_kdf_derive_from_key(kdf_subkey, 32, subkey_id, ctx, master_key);
 
 ## 7. Synology’s custom **libarchive** backend
 
-Synology bundles a patched libarchive that registers a fake "tar" format whenever the magic is `0xADBEEF`:
+Synology bundles a patched libarchive that registers a fake "tar" format whenever the magic is `0xADBEEF`:<sup>[[1]](#references)</sup>
 
 ```c
 register_format(
@@ -175,8 +175,8 @@ $ tar xf SynologyPhotos-rtd1619b-1.7.0-0794.tar
 
 ## References
 
-- [Extraction of Synology encrypted archives – Synacktiv (Pwn2Own IE 2024)](https://www.synacktiv.com/publications/extraction-des-archives-chiffrees-synology-pwn2own-irlande-2024.html)
-- [synodecrypt on GitHub](https://github.com/synacktiv/synodecrypt)
-- [patology on GitHub](https://github.com/sud0woodo/patology)
+- [1] [Extraction of Synology encrypted archives – Synacktiv (Pwn2Own IE 2024)](https://www.synacktiv.com/publications/extraction-des-archives-chiffrees-synology-pwn2own-irlande-2024.html)
+- [2] [synodecrypt on GitHub](https://github.com/synacktiv/synodecrypt)
+- [3] [patology on GitHub](https://github.com/sud0woodo/patology)
 
 {{#include ../../banners/hacktricks-training.md}}
