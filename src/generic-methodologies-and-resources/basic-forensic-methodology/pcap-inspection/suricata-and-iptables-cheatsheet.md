@@ -1,18 +1,18 @@
-# Suricata & Iptables Cheatsheet
+# Suricata & Iptables-Spickzettel
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Iptables
 
-### Chains
+### Ketten
 
-In iptables werden Listen von Regeln, die als Chains bekannt sind, sequenziell verarbeitet. Unter diesen sind drei primäre Chains universell vorhanden, während zusätzliche wie NAT je nach den Fähigkeiten des Systems potenziell unterstützt werden.
+In iptables werden Listen von Regeln, die als Ketten bezeichnet werden, sequenziell verarbeitet. Drei primäre Ketten sind grundsätzlich vorhanden; zusätzliche Ketten wie NAT werden abhängig von den Fähigkeiten des Systems möglicherweise unterstützt.
 
-- **Input Chain**: Wird verwendet, um das Verhalten eingehender Verbindungen zu verwalten.
-- **Forward Chain**: Wird verwendet, um eingehende Verbindungen zu behandeln, die nicht für das lokale System bestimmt sind. Dies ist typisch für Geräte, die als Router fungieren, bei denen die empfangenen Daten an ein anderes Ziel weitergeleitet werden sollen. Diese Chain ist hauptsächlich relevant, wenn das System am Routing, NATing oder ähnlichen Aktivitäten beteiligt ist.
+- **Input Chain**: Wird zur Verwaltung des Verhaltens eingehender Verbindungen verwendet.
+- **Forward Chain**: Wird zur Verarbeitung eingehender Verbindungen verwendet, die nicht für das lokale System bestimmt sind. Dies ist typisch für Geräte, die als Router fungieren, bei denen die empfangenen Daten an ein anderes Ziel weitergeleitet werden sollen. Diese Kette ist hauptsächlich relevant, wenn das System am Routing, NATing oder ähnlichen Aktivitäten beteiligt ist.
 - **Output Chain**: Dient der Regulierung ausgehender Verbindungen.
 
-Diese Chains gewährleisten die ordnungsgemäße Verarbeitung des Netzwerkverkehrs und ermöglichen die Spezifizierung detaillierter Regeln, die den Fluss von Daten in, durch und aus einem System steuern.
+Diese Ketten gewährleisten die geordnete Verarbeitung des Netzwerkverkehrs und ermöglichen die Festlegung detaillierter Regeln für den Datenfluss in ein System, durch ein System hindurch und aus einem System heraus.
 ```bash
 # Delete all rules
 iptables -F
@@ -51,7 +51,7 @@ iptables-restore < /etc/sysconfig/iptables
 ```
 ## Suricata
 
-### Installation & Konfiguration
+### Installation und Konfiguration
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -117,70 +117,70 @@ Type=simple
 
 systemctl daemon-reload
 ```
-### Regeln Definitionen
+### Regeldefinitionen
 
-[Aus den Dokumenten:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Eine Regel/Signatur besteht aus Folgendem:
+[Aus der Dokumentation:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Eine Regel/Signatur besteht aus Folgendem:
 
-- Die **Aktion**, bestimmt, was passiert, wenn die Signatur übereinstimmt.
-- Der **Header**, definiert das Protokoll, IP-Adressen, Ports und die Richtung der Regel.
-- Die **Regeloptionen**, definieren die Einzelheiten der Regel.
+- Die **action** bestimmt, was passiert, wenn die Signatur übereinstimmt.
+- Der **header** definiert das Protokoll, IP-Adressen, Ports und die Richtung der Regel.
+- Die **rule options** definieren die Details der Regel.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
 #### **Gültige Aktionen sind**
 
-- alert - ein Alarm generieren
-- pass - weitere Inspektion des Pakets stoppen
-- **drop** - Paket fallen lassen und Alarm generieren
-- **reject** - RST/ICMP unerreichbarer Fehler an den Absender des übereinstimmenden Pakets senden.
-- rejectsrc - dasselbe wie nur _reject_
-- rejectdst - RST/ICMP-Fehlerpaket an den Empfänger des übereinstimmenden Pakets senden.
-- rejectboth - RST/ICMP-Fehlerpakete an beide Seiten der Konversation senden.
+- alert - einen Alert erzeugen
+- pass - die weitere Inspektion des Pakets stoppen
+- **drop** - Paket verwerfen und einen Alert erzeugen
+- **reject** - einen RST/ICMP-unreachable-Fehler an den Absender des übereinstimmenden Pakets senden.
+- rejectsrc - dasselbe wie _reject_
+- rejectdst - ein RST/ICMP-Fehlerpaket an den Empfänger des übereinstimmenden Pakets senden.
+- rejectboth - RST/ICMP-Fehlerpakete an beide Seiten der Kommunikation senden.
 
 #### **Protokolle**
 
-- tcp (für tcp-Verkehr)
+- tcp (für tcp-traffic)
 - udp
 - icmp
-- ip (ip steht für 'alle' oder 'irgendein')
-- _layer7-Protokolle_: http, ftp, tls, smb, dns, ssh... (mehr in den [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip steht für „all“ oder „any“)
+- _Layer-7-Protokolle_: http, ftp, tls, smb, dns, ssh... (mehr in der [**Dokumentation**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
 
 #### Quell- und Zieladressen
 
-Es unterstützt IP-Bereiche, Negationen und eine Liste von Adressen:
+IP-Bereiche, Negationen und eine Liste von Adressen werden unterstützt:
 
-| Beispiel                       | Bedeutung                                  |
+| Beispiel                      | Bedeutung                                  |
 | ----------------------------- | ------------------------------------------ |
-| ! 1.1.1.1                     | Jede IP-Adresse außer 1.1.1.1             |
+| ! 1.1.1.1                     | Jede IP-Adresse außer 1.1.1.1              |
 | !\[1.1.1.1, 1.1.1.2]          | Jede IP-Adresse außer 1.1.1.1 und 1.1.1.2 |
-| $HOME_NET                     | Ihre Einstellung von HOME_NET in yaml      |
+| $HOME_NET                     | Deine Einstellung von HOME_NET in yaml     |
 | \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET und nicht HOME_NET            |
 | \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 außer 10.0.0.5                |
 
 #### Quell- und Zielports
 
-Es unterstützt Portbereiche, Negationen und Listen von Ports
+Portbereiche, Negationen und Listen von Ports werden unterstützt.
 
-| Beispiel         | Bedeutung                                |
-| ---------------- | ---------------------------------------- |
-| any              | jede Adresse                            |
-| \[80, 81, 82]    | Port 80, 81 und 82                      |
-| \[80: 82]        | Bereich von 80 bis 82                   |
-| \[1024: ]        | Von 1024 bis zur höchsten Portnummer    |
-| !80              | Jeder Port außer 80                     |
-| \[80:100,!99]    | Bereich von 80 bis 100, aber 99 ausgeschlossen |
-| \[1:80,!\[2,4]]  | Bereich von 1-80, außer Ports 2 und 4   |
+| Beispiel         | Bedeutung                              |
+| --------------- | -------------------------------------- |
+| any             | jede Adresse                          |
+| \[80, 81, 82]   | Port 80, 81 und 82                     |
+| \[80: 82]       | Bereich von 80 bis 82                  |
+| \[1024: ]       | Von 1024 bis zur höchsten Portnummer   |
+| !80             | Jeder Port außer 80                    |
+| \[80:100,!99]   | Bereich von 80 bis 100, außer Port 99  |
+| \[1:80,!\[2,4]] | Bereich von 1–80, außer den Ports 2 und 4 |
 
 #### Richtung
 
-Es ist möglich, die Richtung der angewendeten Kommunikationsregel anzugeben:
+Es ist möglich, die Richtung der Kommunikation anzugeben, auf die die Regel angewendet wird:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### Schlüsselwörter
 
-Es gibt **hunderte von Optionen** in Suricata, um das **spezifische Paket** zu suchen, das Sie suchen, hier wird erwähnt, ob etwas Interessantes gefunden wird. Überprüfen Sie die [**Dokumentation**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) für mehr!
+In Suricata stehen **Hunderte von Optionen** zur Verfügung, um nach dem **spezifischen Paket** zu suchen, nach dem du suchst. Hier wird erwähnt, wenn etwas Interessantes gefunden wird. Sieh dir die [**Dokumentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) für weitere Informationen an!
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule

@@ -1,37 +1,35 @@
-# Speicherabbildanalyse
+# Analyse von Memory Dumps
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Start
 
-Beginnen Sie mit der **Suche** nach **Malware** im pcap. Verwenden Sie die **Werkzeuge**, die in [**Malware-Analyse**](../malware-analysis.md) erwähnt werden.
+Beginne damit, im **pcap** nach **Malware** zu **suchen**. Verwende die in [**Malware Analysis**](../malware-analysis.md) erwähnten **Tools**.
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Volatility ist das Haupt-Open-Source-Framework für die Analyse von Speicherabbildern**. Dieses Python-Tool analysiert Dumps von externen Quellen oder VMware-VMs und identifiziert Daten wie Prozesse und Passwörter basierend auf dem OS-Profil des Dumps. Es ist mit Plugins erweiterbar, was es sehr vielseitig für forensische Untersuchungen macht.
+**Volatility ist das wichtigste Open-Source-Framework zur Analyse von Memory Dumps**. Dieses Python-Tool analysiert Dumps aus externen Quellen oder VMware-VMs und identifiziert anhand des OS-Profils des Dumps Daten wie Prozesse und Passwörter. Es ist durch Plugins erweiterbar und dadurch äußerst vielseitig für forensische Untersuchungen.
 
-[**Hier finden Sie ein Cheatsheet**](volatility-cheatsheet.md)
+[**Hier findest du einen Cheatsheet**](volatility-cheatsheet.md)
 
 ## Mini-Dump-Absturzbericht
 
-Wenn der Dump klein ist (nur einige KB, vielleicht ein paar MB), dann handelt es sich wahrscheinlich um einen Mini-Dump-Absturzbericht und nicht um ein Speicherabbild.
+Wenn der Dump klein ist (nur einige KB, vielleicht einige MB), handelt es sich wahrscheinlich um einen Mini-Dump-Absturzbericht und nicht um einen Memory Dump.
 
-![](<../../../images/image (532).png>)
+![Volatility - Mini-Dump-Absturzbericht: Wenn der Dump klein ist (nur einige KB, vielleicht einige MB), handelt es sich wahrscheinlich um einen Mini-Dump-Absturzbericht und nicht um einen Memory Dump](<../../../images/image (532).png>)
 
-Wenn Sie Visual Studio installiert haben, können Sie diese Datei öffnen und einige grundlegende Informationen wie Prozessname, Architektur, Ausnahmeinformationen und ausgeführte Module binden:
+Wenn Visual Studio installiert ist, kannst du diese Datei öffnen und einige grundlegende Informationen wie Prozessname, Architektur, Exception-Informationen und ausgeführte Module anzeigen:
 
-![](<../../../images/image (263).png>)
+![Volatility - Mini-Dump-Absturzbericht: Wenn Visual Studio installiert ist, kannst du diese Datei öffnen und grundlegende Informationen wie Prozessname, Architektur, Exception-Informationen und ... anzeigen](<../../../images/image (263).png>)
 
-Sie können auch die Ausnahme laden und die dekompilierten Anweisungen ansehen
+Du kannst außerdem die Exception laden und die dekompilierten Instructions anzeigen.
 
-![](<../../../images/image (142).png>)
+![Volatility - Mini-Dump-Absturzbericht: Du kannst außerdem die Exception laden und die dekompilierten Instructions anzeigen](<../../../images/image (142).png>)
 
-![](<../../../images/image (610).png>)
+![Volatility - Mini-Dump-Absturzbericht: Du kannst außerdem die Exception laden und die dekompilierten Instructions anzeigen](<../../../images/image (610).png>)
 
-Jedenfalls ist Visual Studio nicht das beste Werkzeug, um eine tiefgehende Analyse des Dumps durchzuführen.
+Visual Studio ist jedoch nicht das beste Tool für eine tiefgehende Analyse des Dumps.
 
-Sie sollten es **öffnen** und mit **IDA** oder **Radare** **gründlich** untersuchen.
-
-​
+Du solltest ihn mit **IDA** oder **Radare** öffnen, um ihn **eingehend** zu untersuchen.
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,41 +1,41 @@
-# Wifi Pcap Analyse
+# Wifi-Pcap-Analyse
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Überprüfen der BSSIDs
+## BSSIDs überprüfen
 
-Wenn Sie einen Capture erhalten, dessen Hauptverkehr Wifi ist, können Sie mit WireShark alle SSIDs des Captures untersuchen unter _Wireless --> WLAN Traffic_:
+Wenn du eine Capture erhältst, deren Hauptdatenverkehr über Wifi läuft, kannst du mit WireShark beginnen, alle SSIDs der Capture über _Wireless --> WLAN Traffic_ zu untersuchen:
 
-![](<../../../images/image (106).png>)
+![Wifi-Pcap-Analyse – BSSIDs überprüfen: Wenn du eine Capture erhältst, deren Hauptdatenverkehr über Wifi läuft, kannst du mit WireShark beginnen, alle SSIDs der Capture über Wireless --... zu untersuchen](<../../../images/image (106).png>)
 
-![](<../../../images/image (492).png>)
+![Wifi-Pcap-Analyse – BSSIDs überprüfen: Wenn du eine Capture erhältst, deren Hauptdatenverkehr über Wifi läuft, kannst du mit WireShark beginnen, alle SSIDs der Capture über Wireless --... zu untersuchen](<../../../images/image (492).png>)
 
 ### Brute Force
 
-Eine der Spalten auf diesem Bildschirm zeigt an, ob **irgendeine Authentifizierung im pcap gefunden wurde**. Wenn dies der Fall ist, können Sie versuchen, es mit `aircrack-ng` zu brute-forcen:
+Eine der Spalten dieses Bildschirms zeigt an, ob **eine Authentifizierung innerhalb der pcap gefunden wurde**. Falls dies der Fall ist, kannst du versuchen, sie mit `aircrack-ng` per Brute Force zu knacken:
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
-Zum Beispiel wird das WPA-Passwort abgerufen, das einen PSK (pre shared-key) schützt, das später zum Entschlüsseln des Verkehrs benötigt wird.
+Beispielsweise ruft es die WPA-Passphrase ab, die einen PSK (pre shared-key) schützt und später zum Entschlüsseln des Datenverkehrs erforderlich ist.
 
-## Daten in Beacons / Seitenkanal
+## Daten in Beacons / Side Channel
 
-Wenn Sie vermuten, dass **Daten in Beacons eines Wifi-Netzwerks geleakt werden**, können Sie die Beacons des Netzwerks mit einem Filter wie dem folgenden überprüfen: `wlan contains <NAMEofNETWORK>`, oder `wlan.ssid == "NAMEofNETWORK"` und in den gefilterten Paketen nach verdächtigen Zeichenfolgen suchen.
+Wenn du vermutest, dass **Daten innerhalb von Beacons eines Wifi-Netzwerks geleakt werden**, kannst du die Beacons des Netzwerks mit einem Filter wie dem folgenden überprüfen: `wlan contains <NAMEofNETWORK>` oder `wlan.ssid == "NAMEofNETWORK"` und innerhalb der gefilterten Pakete nach verdächtigen Zeichenfolgen suchen.
 
 ## Unbekannte MAC-Adressen in einem Wifi-Netzwerk finden
 
-Der folgende Link wird nützlich sein, um die **Maschinen zu finden, die Daten in einem Wifi-Netzwerk senden**:
+Der folgende Link ist nützlich, um die **Maschinen zu finden, die Daten innerhalb eines Wifi-Netzwerks senden**:
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-Wenn Sie bereits **MAC-Adressen kennen, können Sie diese aus der Ausgabe entfernen**, indem Sie Überprüfungen wie diese hinzufügen: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+Wenn du **MAC-Adressen bereits kennst, kannst du sie aus der Ausgabe entfernen**, indem du Prüfungen wie diese hinzufügst: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
 
-Sobald Sie **unbekannte MAC**-Adressen erkannt haben, die innerhalb des Netzwerks kommunizieren, können Sie **Filter** wie den folgenden verwenden: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)`, um den Verkehr zu filtern. Beachten Sie, dass ftp/http/ssh/telnet-Filter nützlich sind, wenn Sie den Verkehr entschlüsselt haben.
+Sobald du **unbekannte MAC-Adressen** erkannt hast, die innerhalb des Netzwerks kommunizieren, kannst du **Filter** wie den folgenden verwenden: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)`, um deren Datenverkehr zu filtern. Beachte, dass die ftp/http/ssh/telnet-Filter nützlich sind, wenn du den Datenverkehr entschlüsselt hast.
 
-## Verkehr entschlüsseln
+## Datenverkehr entschlüsseln
 
-Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
+Bearbeiten --> Einstellungen --> Protokolle --> IEEE 802.11--> Bearbeiten
 
-![](<../../../images/image (499).png>)
+![Unbekannte MAC-Adressen in einem Wifi-Netzwerk finden – Datenverkehr entschlüsseln: Sobald du unbekannte MAC-Adressen erkannt hast, die innerhalb des Netzwerks kommunizieren, kannst du Filter wie den folgenden verwenden:...](<../../../images/image (499).png>)
 
 {{#include ../../../banners/hacktricks-training.md}}

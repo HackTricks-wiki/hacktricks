@@ -1,6 +1,8 @@
+# Techniken zur Deobfuskierung von VBS-Dateien
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Einige Dinge, die nützlich sein könnten, um eine bösartige VBS-Datei zu debuggen/deobfuskieren:
+Einige Dinge, die beim Debuggen/Deobfuskieren einer schädlichen VBS-Datei nützlich sein könnten:
 
 ## echo
 ```bash

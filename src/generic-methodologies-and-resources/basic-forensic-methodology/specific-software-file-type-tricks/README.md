@@ -1,4 +1,4 @@
-# Spezifische Software-/Dateityp-Tricks
+# Tricks für bestimmte Software-/Dateitypen
 
 {{#include ../../../banners/hacktricks-training.md}}
 
