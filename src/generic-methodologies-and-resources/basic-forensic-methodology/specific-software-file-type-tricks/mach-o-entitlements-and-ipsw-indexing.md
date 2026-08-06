@@ -190,7 +190,7 @@ WHERE e.name = "launchd";
 
 Notes on DB portability (if you implement your own indexer):<sup>[[1]](#references)</sup>
 - Use an ORM/abstraction (e.g., SeaORM) to keep code DB-agnostic (SQLite/PostgreSQL).
-- SQLite requires AUTOINCREMENT only on an INTEGER PRIMARY KEY; if you want i64 PKs in Rust, generate entities as i32 and convert types, SQLite stores INTEGER as 8-byte signed internally.
+- SQLite requires AUTOINCREMENT only on an INTEGER PRIMARY KEY; if you want i64 PKs in Rust, generate entities as i32 and convert types, SQLite stores INTEGER as 8-byte signed internally.<sup>[[8]](#references)</sup>
 
 
 ## Open-source tooling and references for entitlement hunting

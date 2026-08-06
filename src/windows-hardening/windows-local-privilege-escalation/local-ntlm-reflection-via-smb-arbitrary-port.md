@@ -9,7 +9,7 @@ Recent Windows builds introduced **SMB client support for alternative TCP ports*
 3. Coerce a **privileged local client** to access the **same SMB share path**
 4. Relay the resulting **local NTLM authentication** back to the machine's real SMB service
 
-This is the primitive behind **CVE-2026-24294**, patched in **March 2026**.<sup>[[1]](#references)[[5]](#references)</sup>
+This is the primitive behind **CVE-2026-24294**, patched in **March 2026**.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ## Why it works
 
@@ -93,7 +93,7 @@ Typical tooling from the public writeup:<sup>[[1]](#references)</sup>
 
 ## Detection and hardening
 
-- Patch **CVE-2026-24294** from **March 2026 Patch Tuesday**<sup>[[5]](#references)</sup>
+- Patch **CVE-2026-24294** from **March 2026 Patch Tuesday**<sup>[[4]](#references)</sup>
 - Watch for `net use` or `New-SmbMapping` using **non-default SMB ports**<sup>[[1]](#references)</sup>
 - Alert on unusual outbound SMB from workstations or servers to **high TCP ports**<sup>[[1]](#references)</sup>
 - Review coercion opportunities such as **EFSRPC / PetitPotam-style** triggers<sup>[[1]](#references)</sup>
@@ -104,7 +104,6 @@ Typical tooling from the public writeup:<sup>[[1]](#references)</sup>
 - [1] [Synacktiv - Bypassing Windows authentication reflection mitigations for SYSTEM shells - Part 1](https://www.synacktiv.com/en/publications/bypassing-windows-authentication-reflection-mitigations-for-system-shells-part-1.html)
 - [2] [Microsoft Learn - Configure alternative SMB ports for Windows Server 2025](https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-ports)
 - [3] [Microsoft Learn - WNetAddConnection4W](https://learn.microsoft.com/en-us/windows/win32/api/winnetwk/nf-winnetwk-wnetaddconnection4w)
-- [4] [Project Zero - Windows Exploitation Tricks: Trapping Virtual Memory Access (2025 Update)](https://projectzero.google/2025/01/windows-exploitation-tricks-trapping.html)
-- [5] [MSRC - CVE-2026-24294](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-24294)
+- [4] [MSRC - CVE-2026-24294](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-24294)
 
 {{#include ../../banners/hacktricks-training.md}}

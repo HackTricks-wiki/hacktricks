@@ -462,7 +462,7 @@ Here we combined our previous 4D normal dataset with a handful of extreme outlie
 
 * extracts more intuitive clusters when some clusters are dense and others are sparse,
 * has only one real hyper-parameter (`min_cluster_size`) and a sensible default,
-* gives every point a cluster‐membership *probability* and an **outlier score** (`outlier_scores_`), which is extremely handy for threat-hunting dashboards.
+* gives every point a cluster‐membership *probability* and an **outlier score** (`outlier_scores_`), which is extremely handy for threat-hunting dashboards.<sup>[[1]](#references)</sup>
 
 > [!TIP]
 > *Use cases in cybersecurity:* HDBSCAN is very popular in modern threat-hunting pipelines – you will often see it inside notebook-based hunting playbooks shipped with commercial XDR suites.  One practical recipe is to cluster HTTP beaconing traffic during IR: user-agent, interval and URI length often form several tight groups of legitimate software updaters while C2 beacons remain as tiny low-density clusters or as pure noise.
@@ -502,7 +502,7 @@ print("Suspect beacon count:", len(suspects))
 
 Recent work has shown that **unsupervised learners are *not* immune to active attackers**:
 
-* **Data-poisoning against anomaly detectors.**  Chen *et al.* (IEEE S&P 2024) demonstrated that adding as little as 3 % crafted traffic can shift the decision boundary of Isolation Forest and ECOD so that real attacks look normal.  The authors released an open-source PoC (`udo-poison`) that automatically synthesises poison points.
+* **Data-poisoning against anomaly detectors.**  Chen *et al.* (IEEE S&P 2024) demonstrated that adding as little as 3 % crafted traffic can shift the decision boundary of Isolation Forest and ECOD so that real attacks look normal.  The authors released an open-source PoC (`udo-poison`) that automatically synthesises poison points.<sup>[[2]](#references)</sup>
 * **Backdooring clustering models.**  The *BadCME* technique (BlackHat EU 2023) implants a tiny trigger pattern; whenever that trigger appears, a K-Means-based detector quietly places the event inside a “benign” cluster.
 * **Evasion of DBSCAN/HDBSCAN.**  A 2025 academic pre-print from KU Leuven showed that an attacker can craft beaconing patterns that purposely fall into density gaps, effectively hiding inside *noise* labels.
 
@@ -547,8 +547,8 @@ evaluate_print("Ensemble", y_test, anomaly_scores)
 
 ## References
 
-- [HDBSCAN – Hierarchical density-based clustering](https://github.com/scikit-learn-contrib/hdbscan)
-- Chen, X. *et al.* “On the Vulnerability of Unsupervised Anomaly Detection to Data Poisoning.” *IEEE Symposium on Security and Privacy*, 2024.
+- [1] [HDBSCAN – Hierarchical density-based clustering](https://github.com/scikit-learn-contrib/hdbscan)
+- [2] Chen, X. *et al.* “On the Vulnerability of Unsupervised Anomaly Detection to Data Poisoning.” *IEEE Symposium on Security and Privacy*, 2024.
 
 
 

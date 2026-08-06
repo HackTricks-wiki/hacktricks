@@ -214,5 +214,3 @@ SharpMove.exe action=dcom computername=remote.host.local command="C:\windows\tem
 - [5] [Leveraging Excel DDE for lateral movement via DCOM](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-

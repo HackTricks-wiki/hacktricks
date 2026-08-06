@@ -70,7 +70,7 @@ Example `osquery` FIM configuration focused on attacker persistence paths:<sup>[
 }
 ```
 
-If you need **process attribution** instead of only path-level changes, prefer audit-backed telemetry such as `osquery` `process_file_events` or Wazuh `whodata` mode.<sup>[[1]](#references)</sup>
+If you need **process attribution** instead of only path-level changes, prefer audit-backed telemetry such as `osquery` `process_file_events` or Wazuh `whodata` mode.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ### Windows
 
@@ -118,5 +118,6 @@ Container FIM frequently misses the real write path. With Docker `overlay2`, cha
 
 - [1] [File Integrity Monitoring with osquery](https://osquery.readthedocs.io/en/stable/deployment/file-integrity-monitoring/)
 - [2] [Tracing Linux: A file integrity monitoring use case (Elastic)](https://www.elastic.co/blog/tracing-linux-file-integrity-monitoring-use-case)
+- [3] [Wazuh File Integrity Monitoring (Syscheck and whodata mode)](https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html)
 
 {{#include ../../banners/hacktricks-training.md}}
