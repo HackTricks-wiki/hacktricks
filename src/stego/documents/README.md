@@ -1,53 +1,54 @@
-# ドキュメントのステガノグラフィ
+# Document Steganography
 
 {{#include ../../banners/hacktricks-training.md}}
 
-ドキュメントはしばしば単なるコンテナです：
+Documents は多くの場合、単なるコンテナです:
 
-- PDF（埋め込みファイル、ストリーム）
-- Office OOXML (`.docx/.xlsx/.pptx` は ZIP です)
-- RTF / OLE のレガシー形式
+- PDF（embedded files、streams）
+- Office OOXML（`.docx/.xlsx/.pptx` は ZIP）
+- RTF / OLE legacy formats
 
 ## PDF
 
-### 手法
+### Technique
 
-PDFはオブジェクト、ストリーム、オプションの埋め込みファイルを持つ構造化されたコンテナです。CTFsでは以下の操作がしばしば必要になります：
+PDF は objects、streams、optional embedded files を含む structured container です。CTF では、次の作業が必要になることがよくあります:
 
-- 埋め込み添付ファイルを抽出する
-- コンテンツを検索できるように、オブジェクトストリームを展開/フラット化する
-- 隠されたオブジェクトを識別する（JS、埋め込み画像、異常なストリーム）
+- embedded attachments を抽出する
+- content を検索できるように object streams を decompress/flatten する
+- hidden objects（JS、embedded images、odd streams）を特定する
 
-### クイックチェック
+### Quick checks
 ```bash
 pdfinfo file.pdf
 pdfdetach -list file.pdf
 pdfdetach -saveall file.pdf
 qpdf --qdf --object-streams=disable file.pdf out.pdf
 ```
-次に `out.pdf` の内部を検索して、疑わしいオブジェクトや文字列を探します。
+次に、`out.pdf` 内を検索して suspicious な objects/strings を探します。
 
 ## Office OOXML
 
-### 手法
+### Technique
 
-OOXML を ZIP + XML のリレーションシップ・グラフとして扱う。payloads はしばしばメディア、リレーションシップ、または奇妙なカスタムパーツに隠れる。
+OOXML を ZIP + XML relationship graph として扱います。payload は media、relationships、または通常とは異なる custom parts に隠されていることがよくあります。
 
-OOXML ファイルは ZIP コンテナです。つまり:
+OOXML ファイルは ZIP containers です。つまり:
 
-- ドキュメントは XML とアセットのディレクトリツリーになっている。
-- `_rels/` の relationship ファイルは外部リソースや隠しパーツを指すことがある。
-- 埋め込まれたデータは `word/media/`、カスタム XML パーツ、または異常なリレーションシップに存在することが多い。
+- document は XML と assets の directory tree です。
+- `_rels/` relationship files は external resources や hidden parts を指すことがあります。
+- Embedded data は、`word/media/`、custom XML parts、または通常とは異なる relationships に存在することがよくあります。
 
-### クイックチェック
+### Quick checks
 ```bash
 7z l file.docx
 7z x file.docx -oout
 ```
-次に確認する:
+次に確認します:
 
 - `word/document.xml`
-- `word/_rels/`（外部リレーションシップ用）
+- 外部リレーションシップの `word/_rels/`
 - `word/media/` 内の埋め込みメディア
+
 
 {{#include ../../banners/hacktricks-training.md}}
