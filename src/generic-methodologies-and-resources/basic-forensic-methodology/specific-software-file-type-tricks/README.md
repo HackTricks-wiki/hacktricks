@@ -1,8 +1,8 @@
-# विशिष्ट सॉफ़्टवेयर/फ़ाइल प्रकार ट्रिक्स
+# Specific Software/File Type Tricks
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-यहाँ आप विशिष्ट फ़ाइल-प्रकारों और/या सॉफ़्टवेयर के लिए रोचक ट्रिक्स पा सकते हैं:
+यहाँ आप specific file-types और/या software के लिए interesting tricks पा सकते हैं:
 
 
 {{#ref}}

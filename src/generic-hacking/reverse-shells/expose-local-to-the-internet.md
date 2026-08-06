@@ -1,12 +1,12 @@
-# local को इंटरनेट पर एक्सपोज़ करें
+# local को internet पर expose करें
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**इस पेज का उद्देश्य ऐसे विकल्प प्रस्तावित करना है जो कम से कम local के raw TCP पोर्ट्स और local वेब्स (HTTP) को इंटरनेट पर एक्सपोज़ करने की अनुमति दें, दूसरे server पर कुछ भी install किए बिना (यदि आवश्यक हो तो केवल local में)।**
+**इस पेज का लक्ष्य ऐसे alternatives प्रस्तुत करना है जो कम से कम local raw TCP ports और local webs (HTTP) को internet पर expose करने की अनुमति दें, और इसके लिए दूसरे server में कुछ भी install करने की आवश्यकता न हो (यदि आवश्यक हो तो केवल local में)।**
 
 ## **Serveo**
 
-यह [https://serveo.net/](https://serveo.net/) कई http और port forwarding सुविधाएँ **मुफ्त में** प्रदान करता है।
+[https://serveo.net/](https://serveo.net/) से, यह कई http और port forwarding features **निःशुल्क** उपलब्ध कराता है।
 ```bash
 # Get a random port from serveo.net to expose local port 4444
 ssh -R 0:localhost:4444 serveo.net
@@ -16,7 +16,7 @@ ssh -R 80:localhost:3000 serveo.net
 ```
 ## SocketXP
 
-यह [https://www.socketxp.com/download](https://www.socketxp.com/download) से tcp और http एक्सपोज़ करने की अनुमति देता है:
+[https://www.socketxp.com/download](https://www.socketxp.com/download) से tcp और http को expose करने की अनुमति मिलती है:
 ```bash
 # Expose tcp port 22
 socketxp connect tcp://localhost:22
@@ -26,7 +26,7 @@ socketxp connect http://localhost:8080
 ```
 ## Ngrok
 
-[https://ngrok.com/](https://ngrok.com/) से यह http और tcp पोर्ट्स को एक्सपोज़ करने की अनुमति देता है:
+[https://ngrok.com/](https://ngrok.com/) से, यह HTTP और TCP ports को expose करने की अनुमति देता है:
 ```bash
 # Expose web in 3000
 ngrok http 8000
@@ -36,7 +36,7 @@ ngrok tcp 9000
 ```
 ## Telebit
 
-[https://telebit.cloud/](https://telebit.cloud/) से यह http और tcp पोर्ट्स को expose करने की अनुमति देता है:
+[https://telebit.cloud/](https://telebit.cloud/) से HTTP और TCP ports को expose किया जा सकता है:
 ```bash
 # Expose web in 3000
 /Users/username/Applications/telebit/bin/telebit http 3000
@@ -46,7 +46,7 @@ ngrok tcp 9000
 ```
 ## LocalXpose
 
-[https://localxpose.io/](https://localxpose.io/) से, यह कई http और port forwarding विशेषताएँ **मुफ्त में** उपलब्ध कराता है।
+[https://localxpose.io/](https://localxpose.io/) से **मुफ्त** में कई http और port forwarding सुविधाएं उपलब्ध होती हैं।
 ```bash
 # Expose web in port 8989
 loclx tunnel http -t 8989
@@ -56,7 +56,7 @@ loclx tunnel tcp --port 4545
 ```
 ## Expose
 
-[https://expose.dev/](https://expose.dev/) से यह http और tcp पोर्ट्स को expose करने की अनुमति देता है:
+[https://expose.dev/](https://expose.dev/) से http और tcp ports को expose किया जा सकता है:
 ```bash
 # Expose web in 3000
 ./expose share http://localhost:3000
@@ -66,14 +66,14 @@ loclx tunnel tcp --port 4545
 ```
 ## Localtunnel
 
-[https://github.com/localtunnel/localtunnel](https://github.com/localtunnel/localtunnel) से यह http को मुफ्त में एक्सपोज़ करने की अनुमति देता है:
+[https://github.com/localtunnel/localtunnel](https://github.com/localtunnel/localtunnel) से यह http को मुफ्त में expose करने की अनुमति देता है:
 ```bash
 # Expose web in port 8000
 npx localtunnel --port 8000
 ```
 ## Cloudflare Tunnel (cloudflared)
 
-Cloudflare का `cloudflared` CLI तेज़ डेमो के लिए बिना प्रमाणीकरण वाले "Quick" tunnels बना सकता है या आपके अपने domain/hostnames से बंधे named tunnels। यह HTTP(S) reverse proxies के साथ-साथ raw TCP mappings का भी समर्थन करता है, जो Cloudflare के edge के माध्यम से मार्गित होते हैं।
+Cloudflare का `cloudflared` CLI तेज़ demos के लिए unauthenticated "Quick" tunnels या आपके अपने domain/hostnames से bound named tunnels बना सकता है। यह HTTP(S) reverse proxies के साथ-साथ Cloudflare's edge के माध्यम से routed raw TCP mappings को भी support करता है।<sup>[[1]](#references)</sup>
 ```bash
 # Quick Tunnel exposing localhost:8080 (random trycloudflare subdomain)
 cloudflared tunnel --url http://localhost:8080
@@ -84,11 +84,11 @@ cloudflared tunnel create my-tunnel
 cloudflared tunnel route dns my-tunnel app.example.com
 cloudflared tunnel run my-tunnel --config tunnel.yml
 ```
-Named tunnels आपको `tunnel.yml` के अंदर multiple ingress rules (HTTP, SSH, RDP, आदि) define करने देते हैं, per-service access policies को Cloudflare Access के माध्यम से support करते हैं, और persistence के लिए systemd containers के रूप में run कर सकते हैं। Quick Tunnels anonymous और ephemeral होते हैं—phishing payload staging या webhook tests के लिए बढ़िया, लेकिन Cloudflare uptime की गारंटी नहीं देता।
+Named tunnels आपको `tunnel.yml` के अंदर कई ingress rules (HTTP, SSH, RDP आदि) define करने देते हैं, Cloudflare Access के माध्यम से per-service access policies का समर्थन करते हैं, और persistence के लिए systemd containers के रूप में चल सकते हैं। Quick Tunnels anonymous और ephemeral होते हैं—phishing payload staging या webhook tests के लिए उपयोगी, लेकिन Cloudflare uptime की guarantee नहीं देता।<sup>[[1]](#references)</sup>
 
 ## Tailscale Funnel / Serve
 
-Tailscale v1.52+ unified `tailscale serve` (tailnet के अंदर साझा करना) और `tailscale funnel` (विस्तृत इंटरनेट पर publish करना) workflows के साथ आता है। दोनों commands HTTP(S) को reverse proxy कर सकते हैं या automatic TLS और short `*.ts.net` hostnames के साथ raw TCP को forward कर सकते हैं।
+Tailscale v1.52+ में unified `tailscale serve` (tailnet के अंदर share करना) और `tailscale funnel` (विस्तृत internet पर publish करना) workflows शामिल हैं। दोनों commands automatic TLS और छोटे `*.ts.net` hostnames के साथ HTTP(S) को reverse proxy कर सकते हैं या raw TCP को forward कर सकते हैं।<sup>[[3]](#references)</sup>
 ```bash
 # Share localhost:3000 within the tailnet
 sudo tailscale serve 3000
@@ -99,14 +99,14 @@ sudo tailscale funnel --https=443 localhost:3000
 # Forward raw TCP (expose local SSH)
 sudo tailscale funnel --tcp=10000 tcp://localhost:22
 ```
-कॉन्फ़िगरेशन स्थायी करने के लिए `--bg` का उपयोग करें बिना किसी foreground process को चलाए रखने के, और यह ऑडिट करने के लिए कि कौन सी सेवाएँ सार्वजनिक इंटरनेट से पहुँच योग्य हैं, `tailscale funnel status` चलाएँ। क्योंकि Funnel लोकल नोड पर TLS को terminate करता है, कोई भी credential prompts, headers, या mTLS enforcement आपके नियंत्रण में रह सकती/रह सकते हैं।
+`--bg` का उपयोग foreground process को चालू रखे बिना configuration को persist करने के लिए करें, और public internet से reachable services का audit करने के लिए `tailscale funnel status` चलाएँ। क्योंकि Funnel local node पर TLS terminate करता है, इसलिए credential prompts, headers या mTLS enforcement आपके नियंत्रण में रह सकते हैं।
 
 ## Fast Reverse Proxy (frp)
 
-`frp` एक self-hosted विकल्प है जहाँ आप rendezvous server (`frps`) और क्लाइंट (`frpc`) को नियंत्रित करते हैं। यह उन red teams के लिए बेहतरीन है जिनके पास पहले से एक VPS है और जो deterministic domains/ports चाहते हैं।
+`frp` एक self-hosted विकल्प है, जिसमें आप rendezvous server (`frps`) और client (`frpc`) को नियंत्रित करते हैं। यह उन red teams के लिए उपयोगी है जिनके पास पहले से VPS है और जो deterministic domains/ports चाहते हैं।
 
 <details>
-<summary>frps/frpc कॉन्फ़िगरेशन का उदाहरण</summary>
+<summary>Sample frps/frpc configuration</summary>
 ```bash
 # Server: bind TCP/HTTP entry points and enable dashboard
 ./frps -c frps.toml
@@ -132,24 +132,27 @@ EOF
 ```
 </details>
 
-हालिया रिलीज़ में QUIC transport, token/OIDC auth, bandwidth caps, health checks, और Go-template-based range mappings जोड़े गए हैं — ये जल्दी से कई listeners खड़े करने में उपयोगी हैं जो अलग-अलग hosts पर मौजूद implants की ओर मैप होते हैं।
+हालिया releases में QUIC transport, token/OIDC auth, bandwidth caps, health checks और Go-template-based range mappings जोड़े गए हैं—ये अलग-अलग hosts पर implants से वापस map होने वाले कई listeners को जल्दी से शुरू करने के लिए उपयोगी हैं।<sup>[[4]](#references)</sup>
 
 ## Pinggy (SSH-based)
 
-Pinggy SSH-accessible tunnels को TCP/443 पर प्रदान करता है, इसलिए यह उन captive proxies के पीछे भी काम करता है जो केवल HTTPS की अनुमति देते हैं। Sessions free tier पर 60 मिनट तक चलते हैं और इन्हें quick demos या webhook relays के लिए scripted किया जा सकता है।
+Pinggy TCP/443 पर SSH-accessible tunnels प्रदान करता है, इसलिए यह captive proxies के पीछे भी काम करता है जो केवल HTTPS की अनुमति देते हैं। Free tier में sessions 60 मिनट तक चलते हैं और इन्हें quick demos या webhook relays के लिए script किया जा सकता है।<sup>[[5]](#references)</sup>
 ```bash
 # Random subdomain exposing localhost:3000 via SSH reverse tunnel
 ssh -p 443 -R0:localhost:3000 a.pinggy.io
 ```
-आप पेड टियर पर custom domains और longer-lived tunnels का अनुरोध कर सकते हैं, या कमांड को लूप में लपेटकर tunnels को स्वचालित रूप से रीसायकल कर सकते हैं।
+आप paid tier पर custom domains और longer-lived tunnels request कर सकते हैं, या command को loop में wrap करके tunnels को automatically recycle कर सकते हैं।
 
-## Threat intel & OPSEC notes
+## Threat intel और OPSEC notes
 
-हमलावर बढ़ती संख्या में ephemeral tunneling का दुरुपयोग कर रहे हैं (विशेषकर Cloudflare के unauthenticated `trycloudflare.com` endpoints) ताकि Remote Access Trojan payloads को स्टेज किया जा सके और C2 infrastructure छिपाया जा सके। Proofpoint ने फ़रवरी 2024 से ऐसी अभियानों को ट्रैक किया है जिन्होंने AsyncRAT, Xworm, VenomRAT, GuLoader, और Remcos को short-lived TryCloudflare URLs की ओर download stages निर्देशित करके वितरित किया, जिससे पारंपरिक static blocklists बहुत कम प्रभावी हो गए। tunnels और domains को proactively rotate करने पर विचार करें, और साथ ही उस tunneler के लिए संकेतक-स्वरूप external DNS lookups की निगरानी भी करें जिसे आप उपयोग कर रहे हैं, ताकि आप blue-team detection या infrastructure blocking प्रयासों का जल्दी पता लगा सकें।
+Adversaries ने ephemeral tunneling का increasingly abuse किया है (विशेष रूप से Cloudflare के unauthenticated `trycloudflare.com` endpoints का), ताकि Remote Access Trojan payloads को stage किया जा सके और C2 infrastructure को छिपाया जा सके। Proofpoint ने February 2024 से ऐसी campaigns को track किया है, जिनमें AsyncRAT, Xworm, VenomRAT, GuLoader और Remcos को short-lived TryCloudflare URLs पर download stages point करके deliver किया गया, जिससे traditional static blocklists काफी कम effective हो गईं। Tunnels और domains को proactively rotate करने पर विचार करें, लेकिन साथ ही आपके द्वारा उपयोग किए जा रहे tunneler के लिए होने वाले telltale external DNS lookups को भी monitor करें, ताकि blue-team detection या infrastructure blocking attempts को early stage पर identify किया जा सके।<sup>[[2]](#references)</sup>
 
 ## References
 
-- [Cloudflare Docs - Create a locally-managed tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/)
-- [Proofpoint - Threat Actor Abuses Cloudflare Tunnels to Deliver RATs](https://www.proofpoint.com/us/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
+- [1] [Cloudflare Docs - Create a locally-managed tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/)
+- [2] [Proofpoint - Threat Actor Abuses Cloudflare Tunnels to Deliver RATs](https://www.proofpoint.com/us/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
+- [3] [Tailscale - Reintroducing Serve and Funnel](https://tailscale.com/blog/reintroducing-serve-funnel)
+- [4] [fatedier/frp - Fast Reverse Proxy repository](https://github.com/fatedier/frp)
+- [5] [Pinggy Documentation - Usage](https://pinggy.io/docs/usages/)
 
 {{#include ../../banners/hacktricks-training.md}}

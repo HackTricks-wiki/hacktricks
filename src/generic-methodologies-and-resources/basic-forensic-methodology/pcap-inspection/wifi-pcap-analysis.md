@@ -2,40 +2,40 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Check BSSIDs
+## BSSIDs जांचें
 
-जब आप एक कैप्चर प्राप्त करते हैं जिसका मुख्य ट्रैफ़िक Wifi है और आप WireShark का उपयोग कर रहे हैं, तो आप कैप्चर के सभी SSIDs की जांच करना शुरू कर सकते हैं _Wireless --> WLAN Traffic_:
+जब आपको ऐसा capture मिलता है जिसमें मुख्य traffic Wifi का हो, तो WireShark का उपयोग करके आप _Wireless --> WLAN Traffic_ के माध्यम से capture के सभी SSIDs की जांच शुरू कर सकते हैं:
 
-![](<../../../images/image (106).png>)
+![Wifi Pcap Analysis - BSSIDs जांचें: जब आपको ऐसा capture मिलता है जिसमें मुख्य traffic Wifi का हो, तो WireShark का उपयोग करके आप Wireless --...](<../../../images/image (106).png>)
 
-![](<../../../images/image (492).png>)
+![Wifi Pcap Analysis - BSSIDs जांचें: जब आपको ऐसा capture मिलता है जिसमें मुख्य traffic Wifi का हो, तो WireShark का उपयोग करके आप Wireless --...](<../../../images/image (492).png>)
 
 ### Brute Force
 
-उस स्क्रीन के एक कॉलम में यह संकेत दिया गया है कि **क्या pcap के अंदर कोई प्रमाणीकरण पाया गया**। यदि ऐसा है, तो आप इसे `aircrack-ng` का उपयोग करके Brute force करने की कोशिश कर सकते हैं:
+उस screen के एक column से पता चलता है कि **क्या pcap के अंदर कोई authentication मिला है**। यदि ऐसा है, तो आप `aircrack-ng` का उपयोग करके इसे Brute force करने का प्रयास कर सकते हैं:
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
-उदाहरण के लिए, यह WPA पासफ़्रेज़ को पुनः प्राप्त करेगा जो एक PSK (पूर्व साझा कुंजी) की सुरक्षा करता है, जो बाद में ट्रैफ़िक को डिक्रिप्ट करने के लिए आवश्यक होगा।
+उदाहरण के लिए, यह PSK (pre shared-key) को सुरक्षित रखने वाला WPA passphrase प्राप्त करेगा, जिसकी बाद में traffic को decrypt करने के लिए आवश्यकता होगी।
 
-## बीकन / साइड चैनल में डेटा
+## Beacons / Side Channel में Data
 
-यदि आपको संदेह है कि **एक Wifi नेटवर्क के बीकन के अंदर डेटा लीक हो रहा है** तो आप निम्नलिखित फ़िल्टर का उपयोग करके नेटवर्क के बीकन की जांच कर सकते हैं: `wlan contains <NAMEofNETWORK>` या `wlan.ssid == "NAMEofNETWORK"` फ़िल्टर किए गए पैकेट्स के अंदर संदिग्ध स्ट्रिंग्स के लिए खोजें।
+यदि आपको संदेह है कि **किसी Wifi network के beacons के अंदर data leak हो रहा है**, तो आप निम्नलिखित जैसे filter का उपयोग करके network के beacons को check कर सकते हैं: `wlan contains <NAMEofNETWORK>`, या `wlan.ssid == "NAMEofNETWORK"`। फ़िल्टर किए गए packets के अंदर suspicious strings खोजें।
 
-## एक Wifi नेटवर्क में अज्ञात MAC पते खोजें
+## A Wifi Network में Unknown MAC Addresses खोजें
 
-निम्नलिखित लिंक **एक Wifi नेटवर्क के अंदर डेटा भेजने वाली मशीनों** को खोजने के लिए उपयोगी होगा:
+निम्नलिखित link **Wifi Network के अंदर data भेजने वाली machines** खोजने के लिए उपयोगी होगा:
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-यदि आप पहले से ही **MAC पते जानते हैं, तो आप उन्हें आउटपुट से हटा सकते हैं** इस तरह की जांच जोड़कर: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+यदि आप **MAC addresses पहले से जानते हैं, तो checks जोड़कर उन्हें output से हटा सकते हैं**: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
 
-एक बार जब आप नेटवर्क के अंदर संवाद कर रहे **अज्ञात MAC** पते का पता लगा लेते हैं, तो आप **फ़िल्टर** का उपयोग कर सकते हैं जैसे: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` इसके ट्रैफ़िक को फ़िल्टर करने के लिए। ध्यान दें कि ftp/http/ssh/telnet फ़िल्टर उपयोगी हैं यदि आपने ट्रैफ़िक को डिक्रिप्ट किया है।
+Network के अंदर communicate करने वाले **unknown MAC** addresses का पता लगाने के बाद, आप इसके traffic को filter करने के लिए निम्नलिखित जैसे **filters** का उपयोग कर सकते हैं: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)`। ध्यान दें कि ftp/http/ssh/telnet filters तब उपयोगी होते हैं जब आपने traffic को decrypt कर लिया हो।
 
-## ट्रैफ़िक डिक्रिप्ट करें
+## Traffic Decrypt करें
 
 Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 
-![](<../../../images/image (499).png>)
+![A Wifi Network में Unknown MAC Addresses खोजें - Traffic Decrypt करें: Network के अंदर communicate करने वाले unknown MAC addresses का पता लगाने के बाद, आप इसके traffic को filter करने के लिए निम्नलिखित जैसे filters का उपयोग कर सकते हैं...](<../../../images/image (499).png>)
 
 {{#include ../../../banners/hacktricks-training.md}}

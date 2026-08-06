@@ -1,4 +1,4 @@
-# Suricata & Iptables cheatsheet
+# Suricata & Iptables चीटशीट
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,13 +6,13 @@
 
 ### Chains
 
-iptables में, नियमों की सूचियाँ जिन्हें चेन कहा जाता है, अनुक्रमिक रूप से संसाधित की जाती हैं। इनमें से, तीन प्राथमिक चेन सार्वभौमिक रूप से उपस्थित होते हैं, जबकि NAT जैसी अतिरिक्त चेन सिस्टम की क्षमताओं के आधार पर संभावित रूप से समर्थित हो सकती हैं।
+iptables में, chains के रूप में ज्ञात rules की सूचियों को क्रमिक रूप से process किया जाता है। इनमें से तीन primary chains सार्वभौमिक रूप से मौजूद होती हैं, जबकि NAT जैसी अतिरिक्त chains system की capabilities के आधार पर supported हो सकती हैं।
 
-- **Input Chain**: आने वाले कनेक्शनों के व्यवहार को प्रबंधित करने के लिए उपयोग किया जाता है।
-- **Forward Chain**: उन आने वाले कनेक्शनों को संभालने के लिए उपयोग किया जाता है जो स्थानीय सिस्टम के लिए नहीं हैं। यह उन उपकरणों के लिए सामान्य है जो राउटर के रूप में कार्य करते हैं, जहाँ प्राप्त डेटा को किसी अन्य गंतव्य पर अग्रेषित किया जाना होता है। यह चेन मुख्य रूप से तब प्रासंगिक होती है जब सिस्टम राउटिंग, NATing, या समान गतिविधियों में शामिल होता है।
-- **Output Chain**: बाहर जाने वाले कनेक्शनों के विनियमन के लिए समर्पित है।
+- **Input Chain**: incoming connections के behavior को manage करने के लिए उपयोग की जाती है।
+- **Forward Chain**: ऐसी incoming connections को handle करने के लिए उपयोग की जाती है जो local system के लिए destined नहीं होतीं। यह उन devices के लिए सामान्य है जो routers के रूप में कार्य करते हैं, जहाँ received data को किसी अन्य destination पर forward किया जाना होता है। यह chain मुख्य रूप से तब relevant होती है जब system routing, NATing या इसी प्रकार की activities में शामिल हो।
+- **Output Chain**: outgoing connections को regulate करने के लिए dedicated होती है।
 
-ये चेन नेटवर्क ट्रैफ़िक के व्यवस्थित प्रसंस्करण को सुनिश्चित करती हैं, जिससे डेटा के प्रवाह को सिस्टम में, उसके माध्यम से, और बाहर निर्दिष्ट करने के लिए विस्तृत नियमों को निर्धारित किया जा सके।
+ये chains network traffic की orderly processing सुनिश्चित करती हैं और system में data के आने, system के माध्यम से गुजरने तथा system से बाहर जाने के flow को नियंत्रित करने वाले detailed rules specify करने की अनुमति देती हैं।
 ```bash
 # Delete all rules
 iptables -F
@@ -51,7 +51,7 @@ iptables-restore < /etc/sysconfig/iptables
 ```
 ## Suricata
 
-### इंस्टॉल और कॉन्फ़िगर
+### Install और Config
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -117,70 +117,70 @@ Type=simple
 
 systemctl daemon-reload
 ```
-### नियम परिभाषाएँ
+### Rules Definitions
 
-[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) एक नियम/सिग्नेचर निम्नलिखित से मिलकर बनता है:
+[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) एक rule/signature में निम्न शामिल होते हैं:
 
-- **क्रिया**, यह निर्धारित करती है कि सिग्नेचर मेल खाने पर क्या होता है।
-- **हेडर**, यह नियम के प्रोटोकॉल, IP पते, पोर्ट और दिशा को परिभाषित करता है।
-- **नियम विकल्प**, यह नियम की विशिष्टताओं को परिभाषित करते हैं।
+- **action**, signature के match होने पर क्या होता है, यह निर्धारित करता है।
+- **header**, rule के protocol, IP addresses, ports और direction को परिभाषित करता है।
+- **rule options**, rule की विशिष्टताओं को परिभाषित करते हैं।
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
-#### **मान्य क्रियाएँ हैं**
+#### **मान्य actions हैं**
 
-- alert - एक अलर्ट उत्पन्न करें
-- pass - पैकेट की आगे की जांच रोकें
-- **drop** - पैकेट को गिराएँ और अलर्ट उत्पन्न करें
-- **reject** - मेल खाने वाले पैकेट के प्रेषक को RST/ICMP अप्राप्य त्रुटि भेजें।
-- rejectsrc - बस _reject_ के समान
-- rejectdst - मेल खाने वाले पैकेट के रिसीवर को RST/ICMP त्रुटि पैकेट भेजें।
-- rejectboth - बातचीत के दोनों पक्षों को RST/ICMP त्रुटि पैकेट भेजें।
+- alert - alert generate करें
+- pass - packet की आगे की inspection रोकें
+- **drop** - packet drop करें और alert generate करें
+- **reject** - matching packet के sender को RST/ICMP unreachable error भेजें।
+- rejectsrc - केवल _reject_ के समान
+- rejectdst - matching packet के receiver को RST/ICMP error packet भेजें।
+- rejectboth - conversation के दोनों sides को RST/ICMP error packets भेजें।
 
-#### **प्रोटोकॉल**
+#### **Protocols**
 
 - tcp (tcp-traffic के लिए)
 - udp
 - icmp
-- ip (ip का अर्थ है 'सभी' या 'कोई भी')
-- _लेयर7 प्रोटोकॉल_: http, ftp, tls, smb, dns, ssh... (अधिक जानकारी के लिए [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip का अर्थ ‘all’ या ‘any’ है)
+- _layer7 protocols_: http, ftp, tls, smb, dns, ssh... ([**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html) में अधिक)
 
-#### स्रोत और गंतव्य पते
+#### Source और Destination Addresses
 
-यह IP रेंज, नकारात्मकता और पतों की सूची का समर्थन करता है:
+यह IP ranges, negations और addresses की list को support करता है:
 
-| उदाहरण                         | अर्थ                                      |
-| ------------------------------- | ---------------------------------------- |
-| ! 1.1.1.1                       | हर IP पता लेकिन 1.1.1.1                  |
-| !\[1.1.1.1, 1.1.1.2]            | हर IP पता लेकिन 1.1.1.1 और 1.1.1.2      |
-| $HOME_NET                       | yaml में HOME_NET का आपका सेटिंग       |
-| \[$EXTERNAL\_NET, !$HOME_NET]   | EXTERNAL_NET और HOME_NET नहीं           |
-| \[10.0.0.0/24, !10.0.0.5]       | 10.0.0.0/24 सिवाय 10.0.0.5              |
+| Example                       | Meaning                                  |
+| ----------------------------- | ---------------------------------------- |
+| ! 1.1.1.1                     | 1.1.1.1 को छोड़कर प्रत्येक IP address    |
+| !\[1.1.1.1, 1.1.1.2]          | 1.1.1.1 और 1.1.1.2 को छोड़कर प्रत्येक IP address |
+| $HOME_NET                     | yaml में HOME_NET की आपकी setting         |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET और HOME_NET नहीं            |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.5 को छोड़कर 10.0.0.0/24          |
 
-#### स्रोत और गंतव्य पोर्ट
+#### Source और Destination Ports
 
-यह पोर्ट रेंज, नकारात्मकता और पोर्ट की सूचियों का समर्थन करता है
+यह port ranges, negations और ports की lists को support करता है।
 
-| उदाहरण           | अर्थ                                    |
-| ----------------- | -------------------------------------- |
-| any               | कोई भी पता                              |
-| \[80, 81, 82]     | पोर्ट 80, 81 और 82                     |
-| \[80: 82]         | 80 से 82 तक की रेंज                   |
-| \[1024: ]         | 1024 से सबसे उच्च पोर्ट संख्या तक     |
-| !80               | हर पोर्ट लेकिन 80                      |
-| \[80:100,!99]     | 80 से 100 तक की रेंज लेकिन 99 को छोड़कर |
-| \[1:80,!\[2,4]]   | 1-80 की रेंज, पोर्ट 2 और 4 को छोड़कर  |
+| Example         | Meaning                                |
+| --------------- | -------------------------------------- |
+| any             | कोई भी address                         |
+| \[80, 81, 82]   | port 80, 81 और 82                      |
+| \[80: 82]       | 80 से 82 तक की range                  |
+| \[1024: ]       | 1024 से highest port-number तक         |
+| !80             | 80 को छोड़कर प्रत्येक port             |
+| \[80:100,!99]   | 80 से 100 तक की range, लेकिन 99 excluded |
+| \[1:80,!\[2,4]] | 1-80 तक की range, ports 2 और 4 को छोड़कर |
 
-#### दिशा
+#### Direction
 
-यह लागू की जा रही संचार नियम की दिशा को इंगित करना संभव है:
+लागू किए जा रहे communication rule की direction बताना संभव है:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
-#### Keywords
+#### कीवर्ड्स
 
-Suricata में **विशिष्ट पैकेट** खोजने के लिए **सैकड़ों विकल्प** उपलब्ध हैं, यहाँ उल्लेख किया जाएगा यदि कुछ दिलचस्प पाया जाता है। अधिक जानकारी के लिए [**दस्तावेज़** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) की जाँच करें!
+Suricata में उस **विशिष्ट packet** को खोजने के लिए **सैकड़ों विकल्प** उपलब्ध हैं जिसे आप ढूंढ रहे हैं। यहां कुछ दिलचस्प मिलने पर उसका उल्लेख किया जाएगा। अधिक जानकारी के लिए [**दस्तावेज़ीकरण** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) देखें!
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule

@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-### git repos और file system में secrets खोजने के लिए टूल्स
+### git repos और file system में secrets खोजने के Tools
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
@@ -12,7 +12,7 @@
 - [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
-- https://github.com/eth0izzle/shhgit (unmaintained)
+- https://github.com/eth0izzle/shhgit (maintained नहीं है)
 - [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
 - https://github.com/michenriksen/gitrob (archived)
 - https://github.com/anshumanbh/git-all-secrets (archived)
@@ -21,33 +21,33 @@
 - [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
 > नोट्स
-> - TruffleHog v3 कई credentials को live में verify कर सकता है और GitHub orgs, issues/PRs, gists, और wikis को scan कर सकता है। उदाहरण: `trufflehog github --org <ORG> --results=verified`.
-> - Gitleaks v8 git history, directories और archives को scan करना support करता है: `gitleaks detect -v --source .` या `gitleaks detect --source <repo> --log-opts="--all"`.
-> - Nosey Parker curated rules के साथ high-throughput scanning पर केंद्रित है और triage के लिए Explorer UI प्रदान करता है। उदाहरण: `noseyparker scan --datastore np.db <path|repo>` फिर `noseyparker report --datastore np.db`.
+> - TruffleHog v3 कई credentials को live verify कर सकता है और GitHub orgs, issues/PRs, gists और wikis को scan कर सकता है। उदाहरण: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)</sup>
+> - Gitleaks v8 git history, directories और archives को scan करने का समर्थन करता है: `gitleaks detect -v --source .` या `gitleaks detect --source <repo> --log-opts="--all"`.
+> - Nosey Parker curated rules के साथ high-throughput scanning पर केंद्रित है और triage के लिए Explorer UI प्रदान करता है। उदाहरण: पहले `noseyparker scan --datastore np.db <path|repo>` चलाएँ, फिर `noseyparker report --datastore np.db` चलाएँ।
 > - ggshield (GitGuardian CLI) pre-commit/CI hooks और Docker image scanning प्रदान करता है: `ggshield secret scan repo <path-or-url>`.
 
-### GitHub में जहाँ secrets आमतौर पर leak होते हैं
+### GitHub में secrets आमतौर पर कहाँ leak होते हैं
 
-- Repository files default और non-default branches में (UI में `repo:owner/name@branch` खोजें)।
-- Full git history और अन्य branches/tags (clone करके gitleaks/trufflehog से scan करें; GitHub search indexed content पर focused है)।
-- Issues, pull requests, comments, और descriptions (TruffleHog GitHub source इनको flags जैसे `--issue-comments`, `--pr-comments` के माध्यम से support करता है)।
-- Public repositories के Actions logs और artifacts (masking best-effort है; अगर visible हों तो logs/artifacts की review करें)।
+- Default और non-default branches में repository files (UI में `repo:owner/name@branch` खोजें)।
+- पूरी git history और अन्य branches/tags (clone करें और gitleaks/trufflehog से scan करें; GitHub search indexed content पर केंद्रित है)।
+- Issues, pull requests, comments और descriptions (TruffleHog GitHub source `--issue-comments`, `--pr-comments` जैसे flags के माध्यम से इन्हें support करता है)।
+- Public repositories के Actions logs और artifacts (masking best-effort है; यदि logs/artifacts दिखाई दें तो उनकी समीक्षा करें)।
 - Wikis और release assets।
-- Gists (tooling या UI से खोजें; कुछ tools gists शामिल कर सकते हैं)।
+- Gists (tooling या UI से search करें; कुछ tools gists को शामिल कर सकते हैं)।
 
 > सावधानियाँ
-> - GitHub का REST code search API legacy है और regex सपोर्ट नहीं करता; regex searches के लिए Web UI पसंद करें। gh CLI legacy API का उपयोग करता है।
-> - केवल वे files जो एक निश्चित size से नीचे हों search के लिए indexed होते हैं। Thorough होने के लिए, clone करके locally किसी secrets scanner से scan करें।
+> - GitHub का REST code search API legacy है और regex support नहीं करता; regex searches के लिए Web UI को प्राथमिकता दें। gh CLI legacy API का उपयोग करता है।
+> - Search के लिए केवल एक निश्चित size से छोटी files index की जाती हैं। पूरी तरह जाँच करने के लिए repository को clone करें और locally secrets scanner से scan करें।
 
 ### Programmatic org-wide scanning
 
-- TruffleHog (GitHub source):
+- TruffleHog (GitHub source):<sup>[[2]](#references)</sup>
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
 --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- Gitleaks सभी org repos पर (shallow clone करके scan):
+- सभी org repos पर Gitleaks (shallow clone और scan):
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
@@ -55,25 +55,25 @@ tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
 gitleaks detect --source "$tmp" -v || true; rm -rf "$tmp";
 done
 ```
-- mono checkout पर एक जिज्ञासु व्यक्ति:
+- एक mono checkout पर Nosey Parker:
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
 ```
-- ggshield त्वरित स्कैन:
+- ggshield त्वरित scans:
 ```bash
 # current working tree
 ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> सुझाव: git history के लिए, उन scanners को प्राथमिकता दें जो हटाए गए secrets पकड़ने के लिए `git log -p --all` पार्स करते हैं।
+> Tip: git history के लिए, हटाए गए secrets को पकड़ने हेतु `git log -p --all` को parse करने वाले scanners को प्राथमिकता दें।
 
-### आधुनिक टोकन के लिए Updated dorks
+### आधुनिक tokens के लिए Updated dorks
 
 - GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`
 - Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
-- Cloud and general:
+- Cloud और general:
 - `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
 - `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
 - `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
@@ -364,11 +364,9 @@ AWS SECRET
 wide-source-code-search.md
 {{#endref}}
 
-
-
-
 ## संदर्भ
 
-- सार्वजनिक रिपॉजिटरीज़ से secrets को बाहर रखना (GitHub Blog, Feb 29, 2024): https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/
-- TruffleHog v3 – Find, verify, and analyze leaked credentials: https://github.com/trufflesecurity/trufflehog
+- [1] [public repositories से secrets को बाहर रखना (GitHub Blog, Feb 29, 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – leaked credentials को ढूँढें, verify करें और analyze करें](https://github.com/trufflesecurity/trufflehog)
+
 {{#include ../../banners/hacktricks-training.md}}

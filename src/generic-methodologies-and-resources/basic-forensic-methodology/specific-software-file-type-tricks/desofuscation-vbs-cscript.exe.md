@@ -1,6 +1,8 @@
+# VBS Files के लिए Desobfuscation Techniques
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-कुछ चीजें जो एक दुर्भावनापूर्ण VBS फ़ाइल को डिबग/डिओबफस्केट करने के लिए उपयोगी हो सकती हैं:
+कुछ चीज़ें malicious VBS file को debug/deobfuscate करने में उपयोगी हो सकती हैं:
 
 ## echo
 ```bash
@@ -14,7 +16,7 @@ Wscript.Echo "Like this?"
 ```bash
 cscript.exe file.vbs
 ```
-## एक फ़ाइल में डेटा लिखें
+## फ़ाइल में डेटा लिखें
 ```js
 Function writeBinary(strBinary, strPath)
 

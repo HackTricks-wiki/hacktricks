@@ -1,37 +1,35 @@
-# मेमोरी डंप विश्लेषण
+# Memory dump analysis
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## प्रारंभ
+## शुरू करें
 
-**पीकैप** के अंदर **मैलवेयर** के लिए **खोज** करना शुरू करें। [**मैलवेयर विश्लेषण**](../malware-analysis.md) में उल्लिखित **उपकरणों** का उपयोग करें।
+pcap के अंदर **malware** को **search** करना शुरू करें। [**Malware Analysis**](../malware-analysis.md) में बताए गए **tools** का उपयोग करें।
 
-## [वोलाटिलिटी](volatility-cheatsheet.md)
+## [Volatility](volatility-cheatsheet.md)
 
-**वोलाटिलिटी मेमोरी डंप विश्लेषण के लिए मुख्य ओपन-सोर्स ढांचा है**। यह पायथन उपकरण बाहरी स्रोतों या VMware VMs से डंप का विश्लेषण करता है, डंप के OS प्रोफ़ाइल के आधार पर प्रक्रियाओं और पासवर्ड जैसी जानकारी की पहचान करता है। यह प्लगइन्स के साथ विस्तारित किया जा सकता है, जिससे यह फोरेंसिक जांच के लिए अत्यधिक बहुपरकारी बनता है।
+**Volatility मेमोरी dump analysis के लिए मुख्य open-source framework है**। यह Python tool external sources या VMware VMs से प्राप्त dumps का analysis करता है और dump के OS profile के आधार पर processes और passwords जैसी information की पहचान करता है। यह plugins के साथ extensible है, जिससे forensic investigations के लिए यह काफी versatile बन जाता है।
 
-[**यहां एक चीटशीट खोजें**](volatility-cheatsheet.md)
+[**यहाँ cheatsheet देखें**](volatility-cheatsheet.md)
 
-## मिनी डंप क्रैश रिपोर्ट
+## Mini dump crash report
 
-जब डंप छोटा होता है (केवल कुछ KB, शायद कुछ MB) तो यह शायद एक मिनी डंप क्रैश रिपोर्ट है और मेमोरी डंप नहीं है।
+जब dump छोटा हो (सिर्फ कुछ KB, या शायद कुछ MB), तो यह संभवतः memory dump नहीं, बल्कि mini dump crash report होता है।
 
-![](<../../../images/image (532).png>)
+![Volatility - Mini dump crash report: जब dump छोटा हो (सिर्फ कुछ KB, या शायद कुछ MB), तो यह संभवतः memory dump नहीं, बल्कि mini dump crash report होता है](<../../../images/image (532).png>)
 
-यदि आपके पास Visual Studio स्थापित है, तो आप इस फ़ाइल को खोल सकते हैं और प्रक्रिया का नाम, आर्किटेक्चर, अपवाद जानकारी और निष्पादित हो रहे मॉड्यूल जैसी कुछ बुनियादी जानकारी बाइंड कर सकते हैं:
+यदि Visual Studio install है, तो आप इस file को open करके process name, architecture, exception info और execute हो रहे modules जैसी basic information प्राप्त कर सकते हैं:
 
-![](<../../../images/image (263).png>)
+![Volatility - Mini dump crash report: यदि Visual Studio install है, तो आप इसे open करके process name, architecture, exception info और... जैसी basic information प्राप्त कर सकते हैं](<../../../images/image (263).png>)
 
-आप अपवाद को भी लोड कर सकते हैं और डिकंपाइल की गई निर्देशों को देख सकते हैं
+आप exception को load करके decompiled instructions भी देख सकते हैं।
 
-![](<../../../images/image (142).png>)
+![Volatility - Mini dump crash report: आप exception को load करके decompiled instructions भी देख सकते हैं](<../../../images/image (142).png>)
 
-![](<../../../images/image (610).png>)
+![Volatility - Mini dump crash report: आप exception को load करके decompiled instructions भी देख सकते हैं](<../../../images/image (610).png>)
 
-वैसे भी, Visual Studio डंप की गहराई का विश्लेषण करने के लिए सबसे अच्छा उपकरण नहीं है।
+फिर भी, dump का गहराई से analysis करने के लिए Visual Studio सबसे अच्छा tool नहीं है।
 
-आपको इसे **IDA** या **Radare** का उपयोग करके **गहराई** से निरीक्षण करना चाहिए।
-
-​
+आपको इसे **IDA** या **Radare** का उपयोग करके **depth** में inspection के लिए **open** करना चाहिए।
 
 {{#include ../../../banners/hacktricks-training.md}}
