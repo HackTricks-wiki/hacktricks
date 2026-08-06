@@ -1,8 +1,8 @@
-# Mouvement Latéral
+# Mouvement latéral
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Il existe différentes manières d'exécuter des commandes dans des systèmes externes, ici vous pouvez trouver les explications sur le fonctionnement des principales techniques de mouvement latéral Windows :
+Il existe différentes façons d’exécuter des commandes sur des systèmes externes. Vous trouverez ici les explications sur le fonctionnement des principales techniques de mouvement latéral Windows :
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)

