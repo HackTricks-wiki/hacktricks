@@ -2,88 +2,88 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic overview
+## 기본 개요
 
-**Active Directory**는 **network administrators**가 네트워크 내의 **domains**, **users**, **objects**를 효율적으로 생성하고 관리할 수 있게 해주는 기반 기술이다. 대규모로 확장되도록 설계되어, 많은 수의 사용자를 관리 가능한 **groups**와 **subgroups**로 조직하면서 여러 수준의 **access rights**를 제어할 수 있다.
+**Active Directory**는 **네트워크 관리자**가 네트워크 내에서 **도메인**, **사용자** 및 **객체**를 효율적으로 생성하고 관리할 수 있도록 하는 핵심 기술입니다. 확장성을 고려해 설계되었으며, 많은 수의 사용자를 관리 가능한 **그룹** 및 **하위 그룹**으로 구성하고 여러 수준에서 **접근 권한**을 제어할 수 있습니다.
 
-**Active Directory**의 구조는 세 가지 주요 계층으로 구성된다: **domains**, **trees**, **forests**. **domain**은 공통 데이터베이스를 공유하는 **users** 또는 **devices** 같은 객체들의 집합을 포함한다. **trees**는 공유 구조로 연결된 이러한 domains의 그룹이며, **forest**는 **trust relationships**로 상호 연결된 여러 trees의 집합을 나타내며 조직 구조의 최상위 계층을 형성한다. 각 수준마다 특정 **access** 및 **communication rights**를 지정할 수 있다.
+**Active Directory**의 구조는 세 가지 주요 계층인 **도메인**, **트리** 및 **포리스트**로 구성됩니다. **도메인**은 공통 데이터베이스를 공유하는 **사용자** 또는 **장치**와 같은 객체의 집합입니다. **트리**는 공통 구조로 연결된 이러한 도메인들의 그룹이며, **포리스트**는 **트러스트 관계**를 통해 서로 연결된 여러 트리의 집합으로, 조직 구조의 최상위 계층을 형성합니다. 각 수준에서 특정 **접근** 및 **통신 권한**을 지정할 수 있습니다.
 
-**Active Directory**의 핵심 개념은 다음과 같다:
+**Active Directory**의 주요 개념은 다음과 같습니다:
 
-1. **Directory** – Active Directory objects와 관련된 모든 정보를 보관한다.
-2. **Object** – **users**, **groups**, **shared folders**를 포함한 디렉터리 내의 엔티티를 의미한다.
-3. **Domain** – 디렉터리 객체의 컨테이너 역할을 하며, 하나의 **forest** 내에 여러 domain이 공존할 수 있고 각 domain은 자체 객체 집합을 유지한다.
-4. **Tree** – 공통 root domain을 공유하는 domains의 그룹이다.
-5. **Forest** – Active Directory에서 조직 구조의 정점이며, 여러 trees와 그들 사이의 **trust relationships**로 구성된다.
+1. **Directory** – Active Directory 객체와 관련된 모든 정보를 보관합니다.
+2. **Object** – **사용자**, **그룹** 또는 **공유 폴더**를 포함해 디렉터리 내의 엔터티를 나타냅니다.
+3. **Domain** – 디렉터리 객체를 담는 컨테이너입니다. 하나의 **포리스트** 내에 여러 도메인이 존재할 수 있으며, 각 도메인은 자체 객체 컬렉션을 유지합니다.
+4. **Tree** – 공통 루트 도메인을 공유하는 도메인들의 그룹입니다.
+5. **Forest** – Active Directory 조직 구조의 최상위 단계로, 서로 간에 **트러스트 관계**가 있는 여러 트리로 구성됩니다.
 
-**Active Directory Domain Services (AD DS)**는 네트워크 내 중앙 집중식 관리와 통신에 중요한 여러 서비스를 포함한다. 이러한 서비스는 다음과 같다:
+**Active Directory Domain Services (AD DS)**는 네트워크 내 중앙 집중식 관리 및 통신에 중요한 다양한 서비스를 포함합니다. 이러한 서비스는 다음과 같습니다:
 
-1. **Domain Services** – 데이터 저장을 중앙화하고 **users**와 **domains** 간의 상호작용을 관리하며, **authentication** 및 **search** 기능을 포함한다.
-2. **Certificate Services** – 보안 **digital certificates**의 생성, 배포, 관리를 담당한다.
-3. **Lightweight Directory Services** – **LDAP protocol**을 통해 directory-enabled applications를 지원한다.
-4. **Directory Federation Services** – 단일 세션에서 여러 웹 애플리케이션에 걸쳐 사용자를 인증할 수 있는 **single-sign-on** 기능을 제공한다.
-5. **Rights Management** – 무단 배포와 사용을 제어하여 저작권 자료를 보호하는 데 도움을 준다.
-6. **DNS Service** – **domain names**를 해석하는 데 필수적이다.
+1. **Domain Services** – 데이터 저장을 중앙 집중화하고 **사용자**와 **도메인** 간의 상호작용을 관리하며, **인증** 및 **검색** 기능을 포함합니다.
+2. **Certificate Services** – 보안 **디지털 인증서**의 생성, 배포 및 관리를 담당합니다.
+3. **Lightweight Directory Services** – **LDAP protocol**을 통해 디렉터리 사용 애플리케이션을 지원합니다.
+4. **Directory Federation Services** – 단일 세션에서 여러 웹 애플리케이션에 걸쳐 사용자를 인증할 수 있는 **single-sign-on** 기능을 제공합니다.
+5. **Rights Management** – 저작권 자료의 무단 배포 및 사용을 규제하여 보호하는 데 도움을 줍니다.
+6. **DNS Service** – **도메인 이름**을 확인하는 데 필수적입니다.
 
-더 자세한 설명은 여기서 확인: [**TechTerms - Active Directory Definition**](https://techterms.com/definition/active_directory)
+더 자세한 설명은 다음을 확인하세요: [**TechTerms - Active Directory Definition**](https://techterms.com/definition/active_directory)
 
 ### **Kerberos Authentication**
 
-**AD를 공격**하는 방법을 배우려면 **Kerberos authentication process**를 정말 잘 **understand**해야 한다.\
-[**작동 방식을 아직 모른다면 이 페이지를 읽어라.**](kerberos-authentication.md)
+**AD를 공격**하는 방법을 배우려면 **Kerberos authentication process**를 정말 잘 **이해해야** 합니다.\
+[**아직 작동 방식을 모른다면 이 페이지를 읽어보세요.**](kerberos-authentication.md)
 
 ## Cheat Sheet
 
-빠르게 어떤 명령으로 AD를 enumerate/exploit할 수 있는지 보려면 [https://wadcoms.github.io/](https://wadcoms.github.io)를 참고하면 된다.
+[https://wadcoms.github.io/](https://wadcoms.github.io)에서 많은 정보를 확인하여 AD를 열거하거나 exploit할 때 실행할 수 있는 명령을 빠르게 살펴볼 수 있습니다.
 
 > [!WARNING]
-> Kerberos communication은 작업을 수행할 때 **full qualifid name (FQDN)** 을 요구한다. IP address로 machine에 접근하려고 하면 **NTLM을 사용하고 kerberos는 사용하지 않는다**.
+> Kerberos 통신은 작업을 수행할 때 **정규화된 전체 이름 (FQDN)**을 **필요로** 합니다. IP 주소로 시스템에 접근하려고 하면 **kerberos가 아닌 NTLM을 사용합니다**.
 
 ## Recon Active Directory (No creds/sessions)
 
-AD environment에 접근은 가능하지만 credentials/sessions가 없다면 다음을 할 수 있다:
+AD 환경에 접근할 수 있지만 자격 증명이나 세션이 없다면 다음을 수행할 수 있습니다:
 
-- **Pentest the network:**
-- 네트워크를 스캔하고, machine과 open ports를 찾아 **exploit vulnerabilities**를 시도하거나 그 안에서 **credentials**를 추출한다(예를 들어, [printers could be very interesting targets](ad-information-in-printers.md).
-- DNS를 enumerate하면 web, printers, shares, vpn, media 등 domain 내 주요 서버에 대한 정보를 얻을 수 있다.
+- **네트워크 pentest:**
+- 네트워크를 스캔하고 시스템과 열린 포트를 찾은 다음, **취약점을 exploit**하거나 해당 시스템에서 **자격 증명을 추출**합니다(예: [프린터는 매우 흥미로운 target일 수 있습니다](ad-information-in-printers.md).
+- DNS를 열거하면 도메인 내의 웹, 프린터, 공유, vpn, 미디어 등에 해당하는 주요 서버에 대한 정보를 얻을 수 있습니다.
 - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
-- 이를 수행하는 방법에 대한 추가 정보는 일반 [**Pentesting Methodology**](../../generic-methodologies-and-resources/pentesting-methodology.md)에서 확인할 수 있다.
-- **smb services에서 null 및 Guest access를 확인**한다(이것은 최신 Windows 버전에서는 동작하지 않는다):
+- 이를 수행하는 방법에 대한 자세한 내용은 일반 [**Pentesting Methodology**](../../generic-methodologies-and-resources/pentesting-methodology.md)를 확인하세요.
+- **smb services에서 null 및 Guest 접근을 확인합니다** (최신 Windows 버전에서는 작동하지 않습니다):
 - `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
 - `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
 - `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
-- SMB server를 enumerate하는 더 자세한 가이드는 여기에서 찾을 수 있다:
+- SMB 서버를 열거하는 방법에 대한 더 자세한 가이드는 여기에서 확인할 수 있습니다:
 
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-smb/
 {{#endref}}
 
-- **Enumerate Ldap**
+- **Ldap 열거**
 - `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
-- LDAP를 enumerate하는 더 자세한 가이드는 여기에서 찾을 수 있다(특히 **anonymous access**에 주의하라):
+- LDAP를 열거하는 방법에 대한 더 자세한 가이드는 여기에서 확인할 수 있습니다 (**anonymous access에 특별히 주의하세요**):
 
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
-- **Poison the network**
-- [**Responder로 서비스인 척하며**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) credentials를 수집
-- [**relay attack을 악용하여**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) host에 접근
-- [**evil-S로 fake UPnP services를 노출하여**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856) credentials를 수집
+- **네트워크 poisoning**
+- [**Responder를 사용해 서비스를 impersonate하여**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) 자격 증명을 수집합니다.
+- [**relay attack을 악용하여**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) 호스트에 접근합니다.
+- [**evil-S로 가짜 UPnP services를 노출하여**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856) 자격 증명을 수집합니다.
 - [**OSINT**](https://book.hacktricks.wiki/en/generic-methodologies-and-resources/external-recon-methodology/index.html):
-- 내부 문서, social media, 그리고 domain environment 내부의 서비스(주로 web), 또한 공개적으로 उपलब्ध한 자료에서 usernames/names를 추출한다.
-- 회사 직원의 전체 이름을 찾았다면 다양한 AD **username conventions (**[**read this**](https://activedirectorypro.com/active-directory-user-naming-convention/))를 시도해볼 수 있다. 가장 흔한 규칙은 다음과 같다: _NameSurname_, _Name.Surname_, _NamSur_ (각각 3글자), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3개의 _random letters and 3 random numbers_ (abc123).
+- 내부 문서, 소셜 미디어, 도메인 환경 내부의 services(주로 웹) 및 공개적으로 이용 가능한 정보에서 username/name을 추출합니다.
+- 회사 직원의 전체 이름을 찾았다면 다양한 AD **username conventions (**[**이 글을 읽어보세요**](https://activedirectorypro.com/active-directory-user-naming-convention/))을 시도할 수 있습니다. 가장 일반적인 convention은 다음과 같습니다: _NameSurname_, _Name.Surname_, _NamSur_ (각각 3글자), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _random letters and 3 random numbers_ (abc123).
 - Tools:
 - [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
 - [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
 
 ### User enumeration
 
-- **Anonymous SMB/LDAP enum:** [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/index.html) 및 [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) 페이지를 확인하라.
-- **Kerbrute enum**: **invalid username**가 요청되면 서버는 **Kerberos error** code _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_를 사용해 응답하며, 이를 통해 username이 유효하지 않음을 판단할 수 있다. **Valid usernames**는 **AS-REP** 응답에서 **TGT**를 반환하거나, 사용자가 pre-authentication을 수행해야 함을 나타내는 에러 _KRB5KDC_ERR_PREAUTH_REQUIRED_를 반환한다.
-- **MS-NRPC에 대한 No Authentication**: domain controllers의 MS-NRPC (Netlogon) interface에 대해 auth-level = 1 (No authentication)을 사용한다. 이 방법은 MS-NRPC interface에 binding한 뒤 `DsrGetDcNameEx2` function을 호출하여 credentials 없이 user 또는 computer의 존재 여부를 확인한다. [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) tool이 이러한 enumeration을 구현한다. 연구 자료는 [here](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf)에서 확인할 수 있다.
+- **Anonymous SMB/LDAP enum:** [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/index.html) 및 [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) 페이지를 확인하세요.
+- **Kerbrute enum**: **잘못된 username이 요청되면** 서버는 _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_ **Kerberos error** code로 응답하므로 username이 유효하지 않음을 확인할 수 있습니다. **유효한 username**의 경우 **AS-REP** response로 **TGT**를 반환하거나 _KRB5KDC_ERR_PREAUTH_REQUIRED_ error를 반환하며, 이는 해당 사용자가 pre-authentication을 수행해야 함을 나타냅니다.
+- **MS-NRPC에 대한 No Authentication**: 도메인 컨트롤러의 MS-NRPC (Netlogon) interface에 auth-level = 1 (No authentication)을 사용합니다. 이 method는 MS-NRPC interface에 binding한 후 `DsrGetDcNameEx2` function을 호출하여 아무 credential 없이 user 또는 computer가 존재하는지 확인합니다. [NauthNRPC](https://github.com/sud0Ru/NauthNRPC) tool은 이러한 유형의 enumeration을 구현합니다. 연구 내용은 [여기](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf)<sup>[[11]](#references)</sup>에서 확인할 수 있습니다.
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -97,7 +97,7 @@ python3 nauth.py -t target -u users_file.txt #From https://github.com/sud0Ru/Nau
 ```
 - **OWA (Outlook Web Access) Server**
 
-네트워크에서 이러한 서버 중 하나를 찾았다면, **user enumeration**도 수행할 수 있습니다. 예를 들어, 다음 도구를 사용할 수 있습니다 [**MailSniper**](https://github.com/dafthack/MailSniper):
+네트워크에서 이러한 서버 중 하나를 발견했다면 해당 서버를 대상으로 **user enumeration**도 수행할 수 있습니다. 예를 들어 다음 도구를 사용할 수 있습니다: [**MailSniper**](https://github.com/dafthack/MailSniper):
 ```bash
 ipmo C:\Tools\MailSniper\MailSniper.ps1
 # Get info about the domain
@@ -110,24 +110,24 @@ Invoke-PasswordSprayOWA -ExchHostname [ip] -UserList .\valid.txt -Password Summe
 Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password Summer2021 -OutFile gal.txt
 ```
 > [!WARNING]
-> [**이 github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) 와 이것([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames))에서 username 목록을 찾을 수 있습니다.
+> [**이 GitHub repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names)와 이 repo([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames))에서 username 목록을 확인할 수 있습니다.
 >
-> 그러나, 이 전에 수행했어야 할 recon 단계에서 **회사에서 일하는 사람들의 이름**을 확보했어야 합니다. 이름과 성을 사용하면 스크립트 [**namemash.py**](https://gist.github.com/superkojiman/11076951)를 사용해 잠재적으로 유효한 usernames를 생성할 수 있습니다.
+> 그러나 이 작업 전에 수행했어야 하는 recon 단계에서 **회사의 직원 이름**을 확보했어야 합니다. 이름과 성을 사용하면 [**namemash.py**](https://gist.github.com/superkojiman/11076951) script로 유효할 가능성이 있는 username을 생성할 수 있습니다.
 
 ### Netlogon vulnerable-channel allow-list abuse (Onelogon)
 
-**Zerologon**이 DC에서 패치된 이후에도, 명시적으로 allow-listed된 계정은 여전히 **legacy/vulnerable Netlogon secure-channel behavior**에 노출될 수 있습니다. 위험한 설정은 GPO **`Domain controller: Allow vulnerable Netlogon secure channel connections`** 또는 일치하는 registry 값 **`HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\VulnerableChannelAllowList`** 입니다.
+DC에 **Zerologon** 패치가 적용된 후에도 명시적으로 allow-list에 추가된 account는 **legacy/vulnerable Netlogon secure-channel 동작**에 여전히 노출될 수 있습니다. 위험한 설정은 GPO **`Domain controller: Allow vulnerable Netlogon secure channel connections`** 또는 이에 대응하는 registry value **`HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters\VulnerableChannelAllowList`**입니다.
 
-그 값은 **SDDL security descriptor** 입니다([Security Descriptors](security-descriptors.md) 참조). DACL에서 관련 ACE가 부여된 모든 계정이나 그룹이 대상이 될 수 있습니다. 예를 들어, `O:BAG:BAD:(A;;RC;;;WD)`는 사실상 **Everyone**을 allow-list에 넣습니다.
+해당 value는 **SDDL security descriptor**입니다([Security Descriptors](security-descriptors.md) 참조). DACL에서 관련 ACE가 부여된 모든 account 또는 group을 target으로 지정할 수 있습니다. 예를 들어 `O:BAG:BAD:(A;;RC;;;WD)`는 사실상 **Everyone**을 allow-list에 추가합니다.
 
-실전 operator workflow:
+실제 operator workflow:
 
-1. **SYSVOL/GPO**와 **live DC registry**를 모두 확인하여 allow-listed principals를 식별합니다.
-2. SDDL에서 찾은 **SIDs**를 실제 AD users/computers로 해석하고, **DC machine accounts**, **trust accounts**, 그리고 다른 privileged machines를 우선순위로 둡니다.
-3. allow-listed account로 **MS-NRPC / Netlogon authentication**을 반복적으로 시도합니다.
-4. 성공적으로 맞히면, **Netlogon password-setting**을 악용해 target account password를 재설정합니다(public PoC는 이를 빈 문자열로 설정합니다).
+1. **SYSVOL/GPO**와 **live DC registry**를 모두 확인하여 allow-list에 추가된 principal을 식별합니다.
+2. SDDL에서 발견한 SID를 실제 AD user/computer로 resolve하고, **DC machine account**, **trust account** 및 기타 privileged machine을 우선 대상으로 지정합니다.
+3. allow-list에 추가된 account로 **MS-NRPC / Netlogon authentication**을 반복적으로 시도합니다.
+4. 유효한 추측에 성공한 후 **Netlogon password-setting**을 악용하여 target account의 password를 reset합니다(public PoC는 password를 빈 문자열로 설정합니다).<sup>[[9]](#references)[[10]](#references)</sup>
 
-공개 artifact에서의 빠른 triage / lab examples:
+공개 artifact의 간단한 triage / lab 예시는 다음과 같습니다:
 ```bash
 # Enumerate allow-listed accounts (scanner requires privileged registry access on the DC)
 poetry run scan --dc-ip <DC_IP> --username <USER> --password <PASSWORD>
@@ -139,26 +139,26 @@ poetry run onelogon --dc-ip <DC_IP> --dc-name <DC_HOSTNAME> --username '<TARGET_
 poetry run onelogon --dc-ip <DC_IP> --dc-name <DC_HOSTNAME> --username '<TARGET_ACCOUNT>' \
 --comp-username '<COMP_ACCOUNT>' --comp-pass '<COMP_PASSWORD>'
 ```
-Notes:
+메모:
 
-- **scanner**는 유효한 allow-list가 **SYSVOL**, **registry**, 또는 둘 다에 존재할 수 있기 때문에 유용합니다.
-- exploit path 자체가 중요한 이유는 취약한 계정이 식별된 뒤에는 **Domain Admin 권한이 필요하지 않기** 때문입니다.
-- `DC$`와 같은 **Domain Controller machine account**를 침해하는 것은 특히 위험합니다. 해당 비밀번호를 재설정하면 더 광범위한 **AD takeover** 경로를 직접 활성화할 수 있기 때문입니다.
-- **Brute-force 실현 가능성**은 모드에 따라 다릅니다. 공개 artifact는 meet-in-the-middle 접근법, 다른 computer account를 사용할 수 있을 때의 **24-bit** brute force, 그리고 더 느린 **32-bit** 변형을 설명합니다.
+- **scanner**는 유효한 allow-list가 **SYSVOL**, **registry**, 또는 두 곳 모두에 존재할 수 있기 때문에 유용합니다.
+- 취약한 계정이 식별되면 exploit path 자체에는 **Domain Admin privileges**가 필요하지 않으므로 중요합니다.
+- `DC$`와 같은 **Domain Controller machine account**를 Compromise하는 것은 특히 위험합니다. 해당 password를 reset하면 더 광범위한 **AD takeover** 경로가 직접 활성화될 수 있기 때문입니다.
+- **Brute-force feasibility**는 mode에 따라 달라집니다. 공개 artifact에는 meet-in-the-middle 접근 방식, 다른 computer account를 사용할 수 있을 때의 **24-bit** brute force, 그리고 더 느린 **32-bit** variants가 설명되어 있습니다.
 
-Detection / hardening notes:
+Detection / hardening 메모:
 
-- allow-list 정책을 감사하고, 일시적이고 명시적으로 필요한 호환성 예외를 제외한 모든 항목을 제거하세요.
-- 취약한 Netlogon 연결이 거부되거나, 발견되거나, 정책에 의해 명시적으로 허용되는 경우를 잡기 위해 DC **System** 이벤트 **5827/5828/5829/5830/5831**을 모니터링하세요.
-- 기존 legacy dependency가 제거될 때까지 `VulnerableChannelAllowList`의 계정은 **high-risk**로 취급하세요.
+- allow-list policy를 audit하고, 일시적으로 명시적인 호환성 예외가 필요한 경우를 제외한 모든 항목을 제거합니다.
+- DC **System** events **5827/5828/5829/5830/5831**을 monitor하여 vulnerable Netlogon connections가 denied, discovered되었거나 policy에 의해 명시적으로 allowed된 경우를 탐지합니다.
+- `VulnerableChannelAllowList`의 accounts는 legacy dependency가 제거될 때까지 **high-risk**로 취급합니다.
 
-### Knowing one or several usernames
+### 하나 이상의 username을 알고 있는 경우
 
-Ok, so you know you have already a valid username but no passwords... Then try:
+이미 유효한 username은 알고 있지만 password가 없는 경우에는 다음을 시도해 보세요.
 
-- [**ASREPRoast**](asreproast.md): If a user **doesn't have** the attribute _DONT_REQ_PREAUTH_ you can **request a AS_REP message** for that user that will contain some data encrypted by a derivation of the password of the user.
-- [**Password Spraying**](password-spraying.md): Let's try the most **common passwords** with each of the discovered users, maybe some user is using a bad password (keep in mind the password policy!).
-- Note that you can also **spray OWA servers** to try to get access to the users mail servers.
+- [**ASREPRoast**](asreproast.md): 사용자가 _DONT_REQ_PREAUTH_ attribute를 **가지고 있지 않다면**, 해당 사용자를 대상으로 **AS_REP message를 request**할 수 있습니다. 이 message에는 사용자의 password에서 derivation된 값으로 encrypted된 일부 data가 포함됩니다.
+- [**Password Spraying**](password-spraying.md): 발견한 각 user에게 가장 **common passwords**를 시도해 보세요. password가 취약한 user가 있을 수 있습니다(password policy를 확인해야 합니다!).
+- **OWA servers**에도 spray하여 사용자의 mail servers에 access할 수 있는지 시도할 수 있습니다.
 
 
 {{#ref}}
@@ -167,7 +167,7 @@ password-spraying.md
 
 ### LLMNR/NBT-NS Poisoning
 
-You might be able to **obtain** some challenge **hashes** to crack **poisoning** some protocols of the **network**:
+다음 **network** protocols를 **poisoning**하여 crack할 수 있는 challenge **hashes**를 **obtain**할 수 있습니다:
 
 
 {{#ref}}
@@ -176,31 +176,31 @@ You might be able to **obtain** some challenge **hashes** to crack **poisoning**
 
 ### NTLM Relay
 
-If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)  to get access to the AD env.
+active directory를 enumerate했다면 **더 많은 emails와 network에 대한 더 나은 이해**를 확보할 수 있습니다. NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)을 강제로 수행하여 AD env에 access할 수 있을지도 모릅니다.
 
 ### NetExec workspace-driven recon & relay posture checks
 
-- Use **`nxcdb` workspaces** to keep AD recon state per engagement: `workspace create <name>` spawns per-protocol SQLite DBs under `~/.nxc/workspaces/<name>` (smb/mssql/winrm/ldap/etc). Switch views with `proto smb|mssql|winrm` and list gathered secrets with `creds`. Manually purge sensitive data when done: `rm -rf ~/.nxc/workspaces/<name>`.
-- Quick subnet discovery with **`netexec smb <cidr>`** surfaces **domain**, **OS build**, **SMB signing requirements**, and **Null Auth**. Members showing `(signing:False)` are **relay-prone**, while DCs often require signing.
-- Generate **hostnames in /etc/hosts** straight from NetExec output to ease targeting:
+- **`nxcdb` workspaces**를 사용하여 engagement별 AD recon state를 유지합니다. `workspace create <name>`은 `~/.nxc/workspaces/<name>` 아래에 protocol별 SQLite DBs(smb/mssql/winrm/ldap/etc)를 생성합니다. `proto smb|mssql|winrm`으로 views를 전환하고 `creds`로 수집된 secrets를 나열합니다. 작업이 끝나면 sensitive data를 수동으로 purge합니다: `rm -rf ~/.nxc/workspaces/<name>`.<sup>[[6]](#references)</sup>
+- **`netexec smb <cidr>`**로 빠르게 subnet discovery를 수행하면 **domain**, **OS build**, **SMB signing requirements**, **Null Auth**가 표시됩니다. `(signing:False)`로 표시되는 Members는 **relay-prone**이며, DCs는 대개 signing을 요구합니다.
+- targeting을 쉽게 하도록 NetExec output에서 **/etc/hosts의 hostnames**를 직접 생성합니다:
 ```bash
 netexec smb 10.2.10.0/24 --generate-hosts-file hosts
 cat hosts /etc/hosts | sponge /etc/hosts
 ```
-- **SMB relay to the DC가 signing으로 차단**되어도, **LDAP** 보안 상태는 계속 확인하라: `netexec ldap <dc>`는 `(signing:None)` / 약한 channel binding을 강조한다. SMB signing은 필요하지만 LDAP signing이 비활성화된 DC는 **relay-to-LDAP** 대상로 여전히 유효하며, **SPN-less RBCD** 같은 abuse에 악용될 수 있다.
+- **SMB relay to the DC가 signing으로 차단된 경우에도** **LDAP** posture를 계속 점검하세요: `netexec ldap <dc>`는 `(signing:None)` / weak channel binding을 강조해 표시합니다. SMB signing이 required이지만 LDAP signing이 disabled인 DC는 **SPN-less RBCD**와 같은 abuse를 위한 실행 가능한 **relay-to-LDAP** target으로 남아 있습니다.
 
 ### Client-side printer credential leaks → bulk domain credential validation
 
-- Printer/web UI는 때때로 **마스킹된 admin password를 HTML에 포함**한다. 소스/devtools를 보면 평문이 드러날 수 있으며(예: `<input value="<password>">`), 이로써 Basic-auth로 scan/print repositories에 접근할 수 있다.
-- 가져온 print jobs에는 사용자별 password가 포함된 **plaintext onboarding docs**가 들어 있을 수 있다. 테스트할 때는 pairings를 정확히 맞춰라:
+- Printer/web UIs에 **masked admin passwords가 HTML에 포함**되는 경우가 있습니다. 소스/DevTools를 확인하면 cleartext(예: `<input value="<password>">`)가 노출되어 Basic-auth로 scan/print repositories에 접근할 수 있습니다.
+- Retrieved print jobs에는 사용자별 password가 포함된 **plaintext onboarding docs**가 있을 수 있습니다. 테스트할 때는 pairing을 서로 맞게 유지하세요:<sup>[[6]](#references)</sup>
 ```bash
 cat IT_Procedures.txt | grep Username: | cut -d' ' -f2 > usernames
 cat IT_Procedures.txt | grep Password: | cut -d' ' -f3 > passwords
 netexec smb <dc> -u usernames -p passwords --no-bruteforce --continue-on-success
 ```
-### Steal NTLM Creds
+### NTLM Creds 탈취
 
-If you can **access other PCs or shares** with the **null or guest user** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTLM authentication against you** so you can **steal** the **NTLM challenge** to crack it:
+**null 또는 guest user**로 **다른 PC 또는 share에 access**할 수 있다면, **파일**(예: SCF file)을 **배치**할 수 있습니다. 해당 파일이 어떻게든 access되면 **사용자를 대상으로 NTLM authentication을 trigger**하므로, **NTLM challenge**를 **탈취**하여 crack할 수 있습니다:
 
 
 {{#ref}}
@@ -209,34 +209,34 @@ If you can **access other PCs or shares** with the **null or guest user** you co
 
 ### Hash Shucking & NT-Candidate Attacks
 
-**Hash shucking** treats every NT hash you already possess as a candidate password for other, slower formats whose key material is derived directly from the NT hash. Instead of brute-forcing long passphrases in Kerberos RC4 tickets, NetNTLM challenges, or cached credentials, you feed the NT hashes into Hashcat’s NT-candidate modes and let it validate password reuse without ever learning the plaintext. This is especially potent after a domain compromise where you can harvest thousands of current and historical NT hashes.
+**Hash shucking**은 이미 보유한 모든 NT hash를 키 material이 NT hash에서 직접 파생되는 더 느린 형식의 후보 password로 취급합니다. Kerberos RC4 ticket, NetNTLM challenge 또는 cached credential에서 긴 passphrase를 brute-force하는 대신, NT hash를 Hashcat의 NT-candidate mode에 입력하여 plaintext를 알지 못한 채 password reuse 여부를 검증합니다. 이는 수천 개의 current 및 historical NT hash를 수집할 수 있는 domain compromise 이후 특히 강력합니다.<sup>[[5]](#references)</sup>
 
-Use shucking when:
+다음과 같은 경우 shucking을 사용합니다:
 
-- You have an NT corpus from DCSync, SAM/SECURITY dumps, or credential vaults and need to test for reuse in other domains/forests.
-- You capture RC4-based Kerberos material (`$krb5tgs$23$`, `$krb5asrep$23$`), NetNTLM responses, or DCC/DCC2 blobs.
-- You want to quickly prove reuse for long, uncrackable passphrases and immediately pivot via Pass-the-Hash.
+- DCSync, SAM/SECURITY dump 또는 credential vault에서 얻은 NT corpus가 있고, 다른 domain/forest에서 재사용되는지 확인해야 하는 경우
+- RC4 기반 Kerberos material (`$krb5tgs$23$`, `$krb5asrep$23$`), NetNTLM response 또는 DCC/DCC2 blob을 capture한 경우
+- crack할 수 없는 긴 passphrase의 reuse를 빠르게 입증하고 Pass-the-Hash를 통해 즉시 pivot하려는 경우
 
-The technique **does not work** against encryption types whose keys are not the NT hash (e.g., Kerberos etype 17/18 AES). If a domain enforces AES-only, you must revert to the regular password modes.
+이 technique은 키가 NT hash가 아닌 encryption type(예: Kerberos etype 17/18 AES)에는 **작동하지 않습니다**. Domain이 AES-only를 강제한다면 일반 password mode로 되돌아가야 합니다.
 
-#### Building an NT hash corpus
+#### NT hash corpus 구축
 
-- **DCSync/NTDS** – Use `secretsdump.py` with history to grab the largest possible set of NT hashes (and their previous values):
+- **DCSync/NTDS** – `secretsdump.py`를 history 옵션과 함께 사용하여 가능한 가장 많은 NT hash(및 이전 값)를 가져옵니다:
 
 ```bash
 secretsdump.py <domain>/<user>@<dc_ip> -just-dc-ntlm -history -user-status -outputfile smoke_dump
 grep -i ':::' smoke_dump.ntds | awk -F: '{print $4}' | sort -u > nt_candidates.txt
 ```
 
-History entries dramatically widen the candidate pool because Microsoft can store up to 24 previous hashes per account. For more ways to harvest NTDS secrets see:
+History entry는 Microsoft가 account당 최대 24개의 이전 hash를 저장할 수 있으므로 candidate pool을 크게 확장합니다. NTDS secret을 수집하는 다른 방법은 다음을 참조하세요:
 
 {{#ref}}
 dcsync.md
 {{#endref}}
 
-- **Endpoint cache dumps** – `nxc smb <ip> -u <local_admin> -p <password> --local-auth --lsa` (or Mimikatz `lsadump::sam /patch`) extracts local SAM/SECURITY data and cached domain logons (DCC/DCC2). Deduplicate and append those hashes to the same `nt_candidates.txt` list.
-- **Track metadata** – Keep the username/domain that produced each hash (even if the wordlist contains only hex). Matching hashes tell you immediately which principal is reusing a password once Hashcat prints the winning candidate.
-- Prefer candidates from the same forest or a trusted forest; that maximizes the chance of overlap when shucking.
+- **Endpoint cache dump** – `nxc smb <ip> -u <local_admin> -p <password> --local-auth --lsa`(또는 Mimikatz `lsadump::sam /patch`)는 local SAM/SECURITY data와 cached domain logon(DCC/DCC2)을 추출합니다. 해당 hash를 deduplicate한 후 동일한 `nt_candidates.txt` 목록에 추가합니다.
+- **Metadata 추적** – 각 hash를 생성한 username/domain을 기록해 둡니다(wordlist에 hex만 포함되어 있더라도). Hashcat이 winning candidate를 출력하면 일치하는 hash를 통해 어떤 principal이 password를 재사용하는지 즉시 알 수 있습니다.
+- Shucking 시 overlap 가능성을 최대화하려면 동일한 forest 또는 trusted forest에서 가져온 candidate를 우선 사용합니다.
 
 #### Hashcat NT-candidate modes
 
@@ -250,16 +250,16 @@ dcsync.md
 | Kerberos 5 etype 23 TGS-REP (Kerberoast) | 13100         | 35300             |
 | Kerberos 5 etype 23 AS-REP               | 18200         | 35400             |
 
-Notes:
+참고:
 
-- NT-candidate inputs **must remain raw 32-hex NT hashes**. Disable rule engines (no `-r`, no hybrid modes) because mangling corrupts the candidate key material.
-- These modes are not inherently faster, but the NTLM keyspace (~30,000 MH/s on an M3 Max) is ~100× quicker than Kerberos RC4 (~300 MH/s). Testing a curated NT list is far cheaper than exploring the entire password space in the slow format.
-- Always run the **latest Hashcat build** (`git clone https://github.com/hashcat/hashcat && make install`) because modes 31500/31600/35300/35400 shipped recently.
-- There is currently no NT mode for AS-REQ Pre-Auth, and AES etypes (19600/19700) require the plaintext password because their keys are derived via PBKDF2 from UTF-16LE passwords, not raw NT hashes.
+- NT-candidate input은 **raw 32-hex NT hash로 유지되어야 합니다**. Rule engine을 비활성화해야 합니다(`-r` 사용 금지, hybrid mode 사용 금지). Mangling은 candidate key material을 손상시키기 때문입니다.
+- 이 mode가 본질적으로 더 빠른 것은 아니지만, NTLM keyspace(~30,000 MH/s on an M3 Max)는 Kerberos RC4(~300 MH/s)보다 약 100배 빠릅니다. 엄선한 NT 목록을 test하는 것이 느린 형식에서 전체 password space를 탐색하는 것보다 훨씬 저렴합니다.
+- **최신 Hashcat build**를 항상 사용하세요(`git clone https://github.com/hashcat/hashcat && make install`). mode 31500/31600/35300/35400은 최근에 추가되었기 때문입니다.<sup>[[7]](#references)</sup>
+- 현재 AS-REQ Pre-Auth용 NT mode는 없으며, AES etype(19600/19700)는 plaintext password가 필요합니다. 해당 키는 raw NT hash가 아니라 UTF-16LE password에서 PBKDF2를 통해 파생되기 때문입니다.
 
 #### Example – Kerberoast RC4 (mode 35300)
 
-1. Capture an RC4 TGS for a target SPN with a low-privileged user (see the Kerberoast page for details):
+1. 낮은 권한의 user로 target SPN에 대한 RC4 TGS를 capture합니다(자세한 내용은 Kerberoast page 참조):
 
 {{#ref}}
 kerberoast.md
@@ -269,47 +269,47 @@ kerberoast.md
 GetUserSPNs.py -dc-ip <dc_ip> -request <domain>/<user> -outputfile roastable_TGS
 ```
 
-2. Shuck the ticket with your NT list:
+2. NT 목록으로 ticket을 shuck합니다:
 
 ```bash
 hashcat -m 35300 roastable_TGS nt_candidates.txt
 ```
 
-Hashcat derives the RC4 key from each NT candidate and validates the `$krb5tgs$23$...` blob. A match confirms that the service account uses one of your existing NT hashes.
+Hashcat은 각 NT candidate에서 RC4 key를 derive하고 `$krb5tgs$23$...` blob을 검증합니다. Match가 확인되면 해당 service account가 기존 NT hash 중 하나를 사용하고 있다는 뜻입니다.
 
-3. Immediately pivot via PtH:
+3. 즉시 PtH를 통해 pivot합니다:
 
 ```bash
 nxc smb <dc_ip> -u roastable -H <matched_nt_hash>
 ```
 
-You can optionally recover the plaintext later with `hashcat -m 1000 <matched_hash> wordlists/` if needed.
+필요하다면 나중에 `hashcat -m 1000 <matched_hash> wordlists/`를 사용하여 plaintext를 복구할 수 있습니다.
 
 #### Example – Cached credentials (mode 31600)
 
-1. Dump cached logons from a compromised workstation:
+1. Compromised workstation에서 cached logon을 dump합니다:
 
 ```bash
 nxc smb <host_ip> -u localadmin -p '<password>' --local-auth --lsa > lsa_dump.txt
 ```
 
-2. Copy the DCC2 line for the interesting domain user into `dcc2_highpriv.txt` and shuck it:
+2. 관심 있는 domain user의 DCC2 line을 `dcc2_highpriv.txt`에 복사한 후 shuck합니다:
 
 ```bash
 hashcat -m 31600 dcc2_highpriv.txt nt_candidates.txt
 ```
 
-3. A successful match yields the NT hash already known in your list, proving that the cached user is reusing a password. Use it directly for PtH (`nxc smb <dc_ip> -u highpriv -H <hash>`) or brute-force it in fast NTLM mode to recover the string.
+3. 성공적인 match는 이미 목록에 존재하는 NT hash를 반환하며, cached user가 password를 재사용하고 있음을 입증합니다. 이를 직접 PtH에 사용하거나(`nxc smb <dc_ip> -u highpriv -H <hash>`), fast NTLM mode에서 brute-force하여 string을 복구할 수 있습니다.
 
-The exact same workflow applies to NetNTLM challenge-responses (`-m 27000/27100`) and DCC (`-m 31500`). Once a match is identified you can launch relay, SMB/WMI/WinRM PtH, or re-crack the NT hash with masks/rules offline.
+동일한 workflow가 NetNTLM challenge-response(`-m 27000/27100`) 및 DCC(`-m 31500`)에도 적용됩니다. Match가 확인되면 relay, SMB/WMI/WinRM PtH를 시작하거나 offline에서 mask/rule을 사용해 NT hash를 다시 crack할 수 있습니다.
 
 
 
-## Enumerating Active Directory WITH credentials/session
+## credentials/session을 사용한 Active Directory 열거
 
-For this phase you need to have **compromised the credentials or a session of a valid domain account.** If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.
+이 단계에서는 **유효한 domain account의 credentials 또는 session을 compromise한 상태**여야 합니다. 유효한 credential 또는 domain user 권한의 shell이 있다면, **앞서 제시한 option들도 여전히 다른 user를 compromise하기 위한 방법**이라는 점을 기억해야 합니다.
 
-Before start the authenticated enumeration you should know what is the **Kerberos double hop problem.**
+Authenticated enumeration을 시작하기 전에 **Kerberos double hop problem**이 무엇인지 알아야 합니다.
 
 
 {{#ref}}
@@ -318,33 +318,33 @@ kerberos-double-hop-problem.md
 
 ### Enumeration
 
-Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
+Account를 compromise한 것은 **전체 domain을 compromise하기 위한 큰 진전**입니다. 이제 **Active Directory Enumeration**을 시작할 수 있기 때문입니다.
 
-Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account, empty passwords and new promising passwords.
+[**ASREPRoast**](asreproast.md)의 경우, 이제 취약할 가능성이 있는 모든 user를 찾을 수 있습니다. 또한 [**Password Spraying**](password-spraying.md)을 사용하면 **모든 username 목록**을 얻어 compromised account의 password, 빈 password 및 새롭게 가능성이 있는 password를 시도할 수 있습니다.
 
-- You could use the [**CMD to perform a basic recon**](../basic-cmd-for-pentesters.md#domain-info)
-- You can also use **powershell for recon**](../basic-powershell-for-pentesters/index.html) which will be stealthier
-- You can also [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information
-- Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a try. Find where users can RDP, find path to other groups, etc.
-- **Other automated AD enumeration tools are:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
-- [**DNS records of the AD**](ad-dns-records.md) as they might contain interesting information.
-- A **tool with GUI** that you can use to enumerate the directory is **AdExplorer.exe** from **SysInternal** Suite.
-- You can also search in the LDAP database with **ldapsearch** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even for _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) for other methods.
-- If you are using **Linux**, you could also enumerate the domain using [**pywerview**](https://github.com/the-useless-one/pywerview).
-- You could also try automated tools as:
+- [**CMD를 사용해 기본 recon 수행**](../basic-cmd-for-pentesters.md#domain-info)을 할 수 있습니다.
+- 더 stealthy한 방법으로 [**powershell을 recon에 사용**](../basic-powershell-for-pentesters/index.html)할 수도 있습니다.
+- [**powerview를 사용**](../basic-powershell-for-pentesters/powerview.md)하여 더 자세한 정보를 추출할 수도 있습니다.
+- Active Directory에서 recon에 사용할 수 있는 또 다른 뛰어난 tool은 [**BloodHound**](bloodhound.md)입니다. 이는 **매우 stealthy하지 않습니다**(사용하는 collection method에 따라 다름). 하지만 **그 점이 중요하지 않다면** 반드시 시도해 보세요. user가 RDP할 수 있는 위치, 다른 group으로 가는 path 등을 찾을 수 있습니다.
+- **다른 automated AD enumeration tool은 다음과 같습니다:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
+- **AD의 [**DNS record**](ad-dns-records.md)**에도 흥미로운 정보가 포함되어 있을 수 있습니다.
+- Directory를 열거하는 데 사용할 수 있는 **GUI tool**로는 **SysInternal** Suite의 **AdExplorer.exe**가 있습니다.
+- **ldapsearch**를 사용하여 LDAP database에서 _userPassword_ 및 _unixUserPassword_ field, 또는 _Description_을 검색해 credential을 찾을 수도 있습니다. 다른 method는 PayloadsAllTheThings의 [Password in AD User comment](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment)를 참조하세요.
+- **Linux**를 사용한다면 [**pywerview**](https://github.com/the-useless-one/pywerview)를 사용하여 domain을 열거할 수도 있습니다.
+- 다음과 같은 automated tool도 시도할 수 있습니다:
 - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
 - [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
-- **Extracting all domain users**
+- **모든 domain user 추출**
 
-It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser` or `wmic useraccount get name,sid`). In Linux, you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` or `enum4linux -a -u "user" -p "password" <DC IP>`
+Windows에서는 모든 domain username을 매우 쉽게 얻을 수 있습니다(`net user /domain`, `Get-DomainUser` 또는 `wmic useraccount get name,sid`). Linux에서는 다음을 사용할 수 있습니다: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` 또는 `enum4linux -a -u "user" -p "password" <DC IP>`
 
-> Even if this Enumeration section looks small this is the most important part of all. Access the links (mainly the one of cmd, powershell, powerview and BloodHound), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.
+> 이 Enumeration section이 짧아 보이더라도 전체 과정에서 가장 중요한 부분입니다. link(특히 cmd, powershell, powerview 및 BloodHound)를 열어 domain을 열거하는 방법을 배우고, 익숙해질 때까지 연습하세요. Assessment 중에는 DA로 가는 path를 찾거나 아무것도 할 수 없다고 판단하는 핵심 순간이 됩니다.
 
 ### Kerberoast
 
-Kerberoasting involves obtaining **TGS tickets** used by services tied to user accounts and cracking their encryption—which is based on user passwords—**offline**.
+Kerberoasting은 user account에 연결된 service가 사용하는 **TGS ticket**을 획득하고, **offline에서** 해당 ticket의 encryption을 crack하는 과정입니다. Encryption은 user password를 기반으로 합니다.
 
-More about this in:
+자세한 내용은 다음을 참조하세요:
 
 
 {{#ref}}
@@ -353,17 +353,17 @@ kerberoast.md
 
 ### Remote connexion (RDP, SSH, FTP, Win-RM, etc)
 
-Once you have obtained some credentials you could check if you have access to any **machine**. For that matter, you could use **CrackMapExec** to attempt connecting on several servers with different protocols, accordingly to your ports scans.
+Credential을 획득했다면 **machine**에 access할 수 있는지 확인할 수 있습니다. 이를 위해 port scan 결과에 따라 **CrackMapExec**을 사용하여 여러 protocol로 여러 server에 연결을 시도할 수 있습니다.
 
 ### Local Privilege Escalation
 
-If you have compromised credentials or a session as a regular domain user and you have **access** with this user to **any machine in the domain** you should try to find your way to **escalate privileges locally and looting for credentials**. This is because only with local administrator privileges you will be able to **dump hashes of other users** in memory (LSASS) and locally (SAM).
+일반 domain user의 credential 또는 session을 compromise했고 이 user로 **domain 내 어떤 machine에든 access**할 수 있다면, **local에서 privilege를 escalate하고 credential을 loot**할 방법을 찾아야 합니다. local administrator privilege가 있어야만 memory(LSASS) 및 local(SAM)에서 **다른 user의 hash를 dump**할 수 있기 때문입니다.
 
-There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/index.html) and a [**checklist**](../checklist-windows-privilege-escalation.md). Also, don't forget to use [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
+이 책에는 [**Windows의 local privilege escalation**](../windows-local-privilege-escalation/index.html)과 [**checklist**](../checklist-windows-privilege-escalation.md)에 대한 별도 page가 있습니다. 또한 [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite) 사용도 잊지 마세요.
 
 ### Current Session Tickets
 
-It's very **unlikely** that you will find **tickets** in the current user **giving you permission to access** unexpected resources, but you could check:
+현재 user에게 예상하지 못한 resource에 **access permission을 제공하는 ticket**을 찾을 가능성은 매우 **낮지만**, 다음을 확인해 볼 수 있습니다:
 ```bash
 ## List all tickets (if not admin, only current user tickets)
 .\Rubeus.exe triage
@@ -373,17 +373,17 @@ It's very **unlikely** that you will find **tickets** in the current user **givi
 ```
 ### NTLM Relay
 
-active directory를 열거하는 데 성공했다면 **더 많은 이메일과 네트워크에 대한 더 나은 이해**를 얻게 됩니다. NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**를 강제로 유도할 수도 있습니다.**
+Active Directory를 열거했다면 **더 많은 이메일을 확보하고 네트워크를 더 잘 이해할 수 있습니다**. NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**을 강제로 수행할 수 있을지도 모릅니다.**
 
-### Looks for Creds in Computer Shares | SMB Shares
+### 컴퓨터 공유 | SMB Shares에서 자격 증명 찾기
 
-이제 기본 자격 증명이 있으므로 **AD 내부에서 공유되고 있는 흥미로운 파일을 찾을 수 있는지** 확인해야 합니다. 수동으로도 할 수 있지만, 아주 지루하고 반복적인 작업입니다(특히 확인해야 할 문서가 수백 개라면 더더욱 그렇습니다).
+이제 기본적인 자격 증명을 확보했으므로 **AD 내부에서 공유되고 있는** **흥미로운 파일을 찾을 수 있는지** 확인해야 합니다. 수동으로 수행할 수도 있지만 매우 지루하고 반복적인 작업입니다(확인해야 할 문서를 수백 개 발견하면 더욱 그렇습니다).
 
-[**사용할 수 있는 도구에 대해 알아보려면 이 링크를 따르세요.**](../../network-services-pentesting/pentesting-smb/index.html#domain-shared-folders-search)
+[**사용할 수 있는 도구를 알아보려면 이 링크를 확인하세요.**](../../network-services-pentesting/pentesting-smb/index.html#domain-shared-folders-search)
 
-### Steal NTLM Creds
+### NTLM Creds 탈취
 
-다른 PC나 share에 **접근할 수 있다면**, (예: SCF file 같은) **파일을 배치**해서 누군가 그것에 접근할 때 **당신에게 NTLM authentication을 트리거**하도록 만들 수 있습니다. 그러면 **NTLM challenge를 훔쳐** 크랙할 수 있습니다:
+**다른 PC 또는 공유에 액세스할 수 있다면** SCF 파일과 같은 **파일을 배치**할 수 있습니다. 해당 파일에 누군가 액세스하면 **사용자를 대상으로 NTLM 인증을 트리거**하여 **NTLM challenge**를 탈취하고 이를 crack할 수 있습니다:
 
 
 {{#ref}}
@@ -392,32 +392,32 @@ active directory를 열거하는 데 성공했다면 **더 많은 이메일과 �
 
 ### CVE-2021-1675/CVE-2021-34527 PrintNightmare
 
-이 취약점은 인증된 어떤 사용자라도 **domain controller를 compromise**할 수 있게 했습니다.
+이 취약점을 통해 인증된 모든 사용자가 **도메인 컨트롤러를 침해**할 수 있었습니다.
 
 
 {{#ref}}
 printnightmare.md
 {{#endref}}
 
-## Privilege escalation on Active Directory WITH privileged credentials/session
+## 권한 있는 자격 증명/세션을 사용한 Active Directory 권한 상승
 
-**다음 기술들에서는 일반 domain user만으로는 충분하지 않으며, 이러한 공격을 수행하려면 특별한 privileges/credentials가 필요합니다.**
+**다음 techniques에는 일반 도메인 사용자만으로는 충분하지 않으며, 이러한 공격을 수행하려면 일부 특수 권한/자격 증명이 필요합니다.**
 
 ### Hash extraction
 
-아마도 [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) 및 relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/index.html)를 사용해 **local admin** 계정을 어느 정도 compromise했을 것입니다.\
-그렇다면 이제 메모리와 로컬에 있는 모든 hash를 dump할 차례입니다.\
-[**hash를 얻는 여러 방법에 대해 이 페이지를 읽어보세요.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+[AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), relaying을 포함한 [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md), [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [로컬에서 권한 상승](../windows-local-privilege-escalation/index.html)을 사용하여 **일부 local admin** 계정을 **침해**했기를 바랍니다.\
+이제 메모리와 로컬에 있는 모든 hash를 dump할 차례입니다.\
+[**hash를 획득하는 다양한 방법은 이 페이지를 확인하세요.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### Pass the Hash
 
-**사용자 hash를 얻었다면**, 그것을 이용해 그 사용자를 **impersonate**할 수 있습니다.\
-그 hash를 사용해 **NTLM authentication을 수행하는 tool**을 사용해야 하며, **또는** 새로운 **sessionlogon**을 생성한 뒤 그 hash를 **LSASS**에 **inject**할 수도 있습니다. 그러면 어떤 **NTLM authentication**이 수행되더라도 그 **hash가 사용됩니다.** 마지막 옵션이 mimikatz가 하는 방식입니다.\
-[**자세한 내용은 이 페이지를 읽어보세요.**](../ntlm/index.html#pass-the-hash)
+**사용자의 hash를 확보하면**, 이를 사용하여 해당 사용자를 **사칭**할 수 있습니다.\
+해당 **hash를 사용하여** **NTLM authentication을 수행**하는 **tool**을 사용해야 합니다. 또는 새로운 **sessionlogon**을 생성하고 해당 **hash를** **LSASS** 내부에 **inject**할 수도 있습니다. 그러면 **NTLM authentication이 수행될 때마다** 해당 **hash가 사용됩니다.** 마지막 방법이 mimikatz가 수행하는 방식입니다.\
+[**자세한 내용은 이 페이지를 확인하세요.**](../ntlm/index.html#pass-the-hash)
 
 ### Over Pass the Hash/Pass the Key
 
-이 공격은 일반적인 NTLM 프로토콜 기반 Pass The Hash의 대안으로, **사용자 NTLM hash를 사용해 Kerberos ticket을 요청**하는 것을 목표로 합니다. 따라서 **NTLM protocol이 비활성화되어 있고 Kerberos만 authentication protocol로 허용되는 네트워크**에서 특히 **유용**할 수 있습니다.
+이 공격은 일반적인 NTLM protocol을 통한 Pass The Hash의 대안으로 **사용자의 NTLM hash를 사용하여 Kerberos tickets를 요청**하는 것을 목표로 합니다. 따라서 NTLM protocol이 비활성화되고 **Kerberos만** authentication protocol로 **허용되는 네트워크에서 특히 유용**할 수 있습니다.
 
 
 {{#ref}}
@@ -426,7 +426,7 @@ over-pass-the-hash-pass-the-key.md
 
 ### Pass the Ticket
 
-**Pass The Ticket (PTT)** 공격 방식에서는 공격자가 password나 hash 값 대신 **사용자의 authentication ticket을 훔칩니다.** 그런 다음 이 stolen ticket을 사용해 **사용자를 impersonate**하고, 네트워크 내 resource와 service에 대한 무단 접근 권한을 얻습니다.
+**Pass The Ticket (PTT) 공격** 방식에서 공격자는 password 또는 hash 값 대신 **사용자의 authentication ticket을 탈취**합니다. 그런 다음 이 탈취한 ticket을 사용하여 **사용자를 사칭**하고 네트워크 내 리소스와 서비스에 대한 무단 액세스 권한을 얻습니다.
 
 
 {{#ref}}
@@ -435,20 +435,20 @@ pass-the-ticket.md
 
 ### Credentials Reuse
 
-**local administrator**의 **hash** 또는 **password**를 가지고 있다면 이를 사용해 다른 **PCs**에 **local login**을 시도해야 합니다.
+**local administrator**의 **hash** 또는 **password**를 가지고 있다면 이를 사용하여 다른 **PC에 로컬로 login**해 보아야 합니다.
 ```bash
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
 > [!WARNING]
-> Note that this is quite **noisy** and **LAPS** would **mitigate** it.
+> 이는 상당히 **noisy**하며 **LAPS**가 이를 **mitigate**할 수 있다는 점에 유의하세요.
 
 ### MSSQL Abuse & Trusted Links
 
-사용자가 **MSSQL 인스턴스에 access**할 권한이 있다면, 이를 사용해 MSSQL 호스트에서 **commands를 execute**할 수 있고(SA로 실행 중인 경우), NetNTLM **hash**를 **steal**하거나 심지어 **relay** **attack**을 수행할 수도 있습니다.\
-또한 MSSQL 인스턴스가 다른 MSSQL 인스턴스에 의해 신뢰된다면(database link), 사용자가 그 trusted database에 대해 권한을 가지고 있을 때 **trust relationship을 사용해 다른 인스턴스에서도 queries를 execute**할 수 있습니다. 이러한 trust는 체인처럼 이어질 수 있으며, 어느 시점에는 사용자가 misconfigured database를 찾아 commands를 execute할 수 있을지도 모릅니다.\
-**데이터베이스 간 link는 forest trust를 넘어도 동작합니다.**
+사용자에게 **MSSQL instances에 access**할 권한이 있다면, 이를 사용하여 MSSQL host에서 **commands를 execute**할 수 있고(이 경우 SA로 실행 중이어야 함), NetNTLM **hash를 steal**하거나 **relay** **attack**을 수행할 수도 있습니다.\
+또한 MSSQL instance가 다른 MSSQL instance의 trust(database link)를 받는 경우, 사용자에게 trusted database에 대한 권한이 있다면 **trust relationship을 사용하여 다른 instance에서도 queries를 execute**할 수 있습니다. 이러한 trust는 chain으로 연결될 수 있으며, 어느 시점에는 사용자가 commands를 execute할 수 있는 잘못 구성된 database를 찾을 수도 있습니다.\
+**Databases 간의 links는 forest trusts를 가로질러서도 작동합니다.**
 
 
 {{#ref}}
@@ -457,7 +457,7 @@ abusing-ad-mssql.md
 
 ### IT asset/deployment platforms abuse
 
-서드파티 inventory 및 deployment suite는 종종 credentials와 code execution으로 이어지는 강력한 경로를 노출합니다. 다음을 보세요:
+Third-party inventory 및 deployment suites는 credentials 및 code execution으로 이어지는 강력한 경로를 노출하는 경우가 많습니다. 다음을 참조하세요:
 
 {{#ref}}
 sccm-management-point-relay-sql-policy-secrets.md
@@ -469,9 +469,9 @@ lansweeper-security.md
 
 ### Unconstrained Delegation
 
-attribute [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>)가 있는 Computer object를 찾고, 해당 computer에서 domain privileges를 가지고 있다면, 그 computer에 로그인하는 모든 users의 메모리에서 TGT를 dump할 수 있습니다.\
-따라서 **Domain Admin이 그 computer에 login**하면, 그의 TGT를 dump해서 [Pass the Ticket](pass-the-ticket.md)을 사용해 impersonate할 수 있습니다.\
-constrained delegation 덕분에 **자동으로 Print Server를 compromise**할 수도 있습니다(가능하면 DC일 것입니다).
+[ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) attribute를 가진 Computer object를 찾았고 해당 computer에 domain privileges가 있다면, 해당 computer에 login하는 모든 users의 memory에서 TGTs를 dump할 수 있습니다.\
+따라서 **Domain Admin이 해당 computer에 login**하면, 그의 TGT를 dump하고 [Pass the Ticket](pass-the-ticket.md)을 사용하여 그를 impersonate할 수 있습니다.\
+constrained delegation 덕분에 **Print Server를 자동으로 compromise**할 수도 있습니다(바라건대 해당 서버가 DC이기를 바랍니다).
 
 
 {{#ref}}
@@ -480,8 +480,8 @@ unconstrained-delegation.md
 
 ### Constrained Delegation
 
-user 또는 computer가 "Constrained Delegation"을 허용받았다면, **특정 computer의 일부 services에 접근하기 위해 어떤 user든 impersonate**할 수 있습니다.\
-그런 다음, 이 user/computer의 **hash를 compromise**하면 **어떤 user든 impersonate**할 수 있으며(도메인 admin도 포함), 일부 services에 접근할 수 있습니다.
+user 또는 computer가 "Constrained Delegation"에 허용되어 있다면, **computer의 특정 services에 access하기 위해 모든 user를 impersonate**할 수 있습니다.\
+그런 다음 이 user/computer의 **hash를 compromise**하면, **모든 user**(domain admins 포함)를 **impersonate**하여 일부 services에 access할 수 있습니다.
 
 
 {{#ref}}
@@ -490,7 +490,7 @@ constrained-delegation.md
 
 ### Resourced-based Constrain Delegation
 
-원격 computer의 Active Directory object에 대해 **WRITE** 권한이 있으면, **elevated privileges**로 code execution을 얻을 수 있습니다:
+remote computer의 Active Directory object에 대해 **WRITE** privilege를 보유하면 **elevated privileges**로 code execution을 달성할 수 있습니다:
 
 
 {{#ref}}
@@ -499,7 +499,7 @@ resource-based-constrained-delegation.md
 
 ### Permissions/ACLs Abuse
 
-compromised user가 일부 domain objects에 대해 **흥미로운 privileges**를 가지고 있을 수 있으며, 이를 통해 나중에 **lateral move**/**escalate** privileges를 할 수 있습니다.
+compromised user는 일부 domain objects에 대해 **interesting privileges**를 가지고 있을 수 있으며, 이를 통해 나중에 lateral/**privileges를 escalate**할 수 있습니다.
 
 
 {{#ref}}
@@ -508,7 +508,7 @@ acl-persistence-abuse/
 
 ### Printer Spooler service abuse
 
-domain 내에서 **Spool service가 listening 중인 것**을 발견하면, 이를 **abused**하여 **new credentials를 acquire**하고 **escalate privileges**할 수 있습니다.
+domain 내부에서 **Spool service listening**을 발견하면 이를 **abuse**하여 **new credentials를 acquire**하고 **privileges를 escalate**할 수 있습니다.
 
 
 {{#ref}}
@@ -517,8 +517,8 @@ printers-spooler-service-abuse.md
 
 ### Third party sessions abuse
 
-**다른 users**가 **compromised**된 머신에 **access**하면, **memory에서 credentials를 gather**하고 심지어 그들의 프로세스에 **beacons를 inject**하여 그들을 impersonate할 수 있습니다.\
-보통 users는 RDP를 통해 시스템에 접근하므로, 여기서는 third party RDP sessions에 대해 몇 가지 attack을 수행하는 방법을 소개합니다:
+**other users**가 **compromised** machine에 **access**하면, memory에서 credentials를 **gather**하고 해당 users를 impersonate하기 위해 그들의 processes에 beacons를 **inject**할 수도 있습니다.\
+일반적으로 users는 RDP를 통해 system에 access하므로, 여기에서 third party RDP sessions에 대해 몇 가지 attacks를 수행하는 방법을 확인할 수 있습니다:
 
 
 {{#ref}}
@@ -527,7 +527,7 @@ rdp-sessions-abuse.md
 
 ### LAPS
 
-**LAPS**는 domain-joined computers에서 **local Administrator password**를 관리하는 시스템을 제공하며, 이 password가 **randomized**되고 고유하며 자주 **changed**되도록 보장합니다. 이 password들은 Active Directory에 저장되며, access는 ACL을 통해 권한이 있는 사용자만 가능하도록 제어됩니다. 이 password들에 access할 충분한 권한이 있으면, 다른 computers로 pivot하는 것이 가능합니다.
+**LAPS**는 domain-joined computers의 **local Administrator password**를 관리하는 system을 제공하며, password가 **randomized**되고 unique하며 자주 **changed**되도록 보장합니다. 이러한 passwords는 Active Directory에 저장되고 access는 authorized users만 가능하도록 ACLs를 통해 제어됩니다. 이 passwords에 access할 충분한 permissions가 있으면 다른 computers로 pivot할 수 있습니다.
 
 
 {{#ref}}
@@ -536,7 +536,7 @@ laps.md
 
 ### Certificate Theft
 
-compromised machine에서 **certificates를 gathering**하는 것은 환경 내부에서 privileges를 escalate하는 한 방법이 될 수 있습니다:
+compromised machine에서 **certificates를 gather**하는 것은 environment 내부에서 privileges를 escalate하는 방법이 될 수 있습니다:
 
 
 {{#ref}}
@@ -545,7 +545,7 @@ ad-certificates/certificate-theft.md
 
 ### Certificate Templates Abuse
 
-**vulnerable templates**가 구성되어 있다면, 이를 abused하여 privileges를 escalate할 수 있습니다:
+**vulnerable templates**가 configured되어 있다면 이를 abuse하여 privileges를 escalate할 수 있습니다:
 
 
 {{#ref}}
@@ -556,30 +556,30 @@ ad-certificates/domain-escalation.md
 
 ### Dumping Domain Credentials
 
-**Domain Admin** 또는 더 나아가 **Enterprise Admin** privileges를 얻으면, **domain database**인 _ntds.dit_를 **dump**할 수 있습니다.
+**Domain Admin** 또는 더 나아가 **Enterprise Admin** privileges를 얻으면 **domain database**인 _ntds.dit_를 **dump**할 수 있습니다.
 
-[**DCSync attack에 대한 더 많은 정보는 여기에서 확인할 수 있습니다**](dcsync.md).
+[**More information about DCSync attack can be found here**](dcsync.md).
 
-[**NTDS.dit를 steal하는 방법에 대한 더 많은 정보는 여기에서 확인할 수 있습니다**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+[**More information about how to steal the NTDS.dit can be found here**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### Privesc as Persistence
 
-앞서 논의한 몇 가지 techniques는 persistence에 사용할 수 있습니다.\
-예를 들어 다음과 같이 할 수 있습니다:
+앞서 설명한 일부 techniques는 persistence에 사용할 수 있습니다.\
+예를 들어 다음을 수행할 수 있습니다:
 
-- 사용자를 [**Kerberoast**](kerberoast.md)에 취약하게 만들기
+- Users를 [**Kerberoast**](kerberoast.md)에 취약하게 만들기
 
 ```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
 ```
 
-- 사용자를 [**ASREPRoast**](asreproast.md)에 취약하게 만들기
+- Users를 [**ASREPRoast**](asreproast.md)에 취약하게 만들기
 
 ```bash
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
 
-- 사용자에게 [**DCSync**](#dcsync) 권한 부여
+- User에게 [**DCSync**](#dcsync) privileges 부여
 
 ```bash
 Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
@@ -587,7 +587,7 @@ Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdenti
 
 ### Silver Ticket
 
-**Silver Ticket attack**은 **NTLM hash**(예를 들어 **PC account의 hash**)를 사용해 특정 service에 대한 **합법적인 Ticket Granting Service (TGS) ticket**을 생성합니다. 이 방법은 **service privileges에 접근**하는 데 사용됩니다.
+**Silver Ticket attack**은 **NTLM hash**(예: **PC account의 hash**)를 사용하여 특정 service에 대한 **legitimate Ticket Granting Service (TGS) ticket**을 생성합니다. 이 방법은 **service privileges에 access**하기 위해 사용됩니다.
 
 
 {{#ref}}
@@ -596,9 +596,9 @@ silver-ticket.md
 
 ### Golden Ticket
 
-**Golden Ticket attack**은 공격자가 Active Directory(AD) 환경에서 **krbtgt account의 NTLM hash**에 접근하는 것을 의미합니다. 이 account는 모든 **Ticket Granting Tickets (TGTs)** 를 서명하는 데 사용되기 때문에 특별하며, AD network 내 인증에 필수적입니다.
+**Golden Ticket attack**은 attacker가 Active Directory (AD) environment에서 **krbtgt account의 NTLM hash**에 access하는 것을 의미합니다. 이 account는 모든 **Ticket Granting Tickets (TGTs)**에 sign하는 데 사용되므로 특별하며, TGTs는 AD network 내부에서 authentication하는 데 필수적입니다.
 
-공격자가 이 hash를 얻으면, 원하는 어떤 account에 대해서도 **TGTs**를 만들 수 있습니다(Silver ticket attack).
+attacker가 이 hash를 획득하면 원하는 모든 account에 대한 **TGTs**를 생성할 수 있습니다(Silver ticket attack).
 
 
 {{#ref}}
@@ -607,7 +607,7 @@ golden-ticket.md
 
 ### Diamond Ticket
 
-이것들은 **일반적인 golden tickets 탐지 메커니즘을 우회하는 방식으로 forged된** golden ticket과 비슷합니다. 
+이는 **일반적인 golden tickets detection mechanisms를 bypass**하는 방식으로 forged된 golden tickets와 유사합니다.
 
 
 {{#ref}}
@@ -616,7 +616,7 @@ diamond-ticket.md
 
 ### **Certificates Account Persistence**
 
-**어떤 account의 certificates를 가지고 있거나 요청할 수 있다면**, 그 사용자의 account에서 지속적으로 남아 있기 매우 좋은 방법입니다(비밀번호가 바뀌어도):
+**account의 certificates를 보유하거나 이를 request할 수 있는 것**은 사용자가 password를 변경하더라도 해당 user account에 persistence할 수 있는 매우 좋은 방법입니다:
 
 
 {{#ref}}
@@ -625,7 +625,7 @@ ad-certificates/account-persistence.md
 
 ### **Certificates Domain Persistence**
 
-**certificates를 사용하면 domain 내부에서 높은 privileges로 persistence를 유지하는 것도 가능합니다:**
+**certificates를 사용하여 domain 내부에서 high privileges로 persistence**하는 것도 가능합니다:
 
 
 {{#ref}}
@@ -634,13 +634,13 @@ ad-certificates/domain-persistence.md
 
 ### AdminSDHolder Group
 
-Active Directory의 **AdminSDHolder** object는 모든 privileged groups(예: Domain Admins 및 Enterprise Admins)에 표준 **Access Control List (ACL)** 를 적용하여 무단 변경을 막음으로써 이들의 보안을 보장합니다. 하지만 이 기능은 악용될 수 있습니다. 공격자가 AdminSDHolder의 ACL을 수정해 일반 사용자에게 전체 access를 주면, 그 사용자는 모든 privileged groups에 대해 광범위한 control을 얻습니다. 보호하기 위한 이 보안 조치는, 따라서 면밀히 모니터링하지 않으면 오히려 역효과를 낼 수 있습니다.
+Active Directory의 **AdminSDHolder** object는 **privileged groups**(예: Domain Admins 및 Enterprise Admins)에 표준 **Access Control List (ACL)**을 적용하여 unauthorized changes를 방지함으로써 해당 groups의 security를 보장합니다. 그러나 이 feature는 exploit될 수 있습니다. attacker가 AdminSDHolder의 ACL을 수정하여 regular user에게 full access를 부여하면, 해당 user는 모든 privileged groups를 광범위하게 control할 수 있습니다. 보호를 목적으로 하는 이 security measure는 면밀히 monitor되지 않으면 오히려 역효과를 일으켜 부당한 access를 허용할 수 있습니다.
 
-[**AdminDSHolder Group에 대한 더 많은 정보는 여기.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
+[**More information about AdminDSHolder Group here.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
 ### DSRM Credentials
 
-모든 **Domain Controller (DC)** 내부에는 **local administrator** account가 존재합니다. 이런 머신에서 admin rights를 얻으면, **mimikatz**를 사용해 local Administrator hash를 추출할 수 있습니다. 그 다음에는 이 password의 **use를 enable**하기 위해 registry modification이 필요하며, 이를 통해 local Administrator account에 remote access할 수 있게 됩니다.
+모든 **Domain Controller (DC)** 내부에는 **local administrator** account가 존재합니다. 이러한 machine에서 admin rights를 획득하면 **mimikatz**를 사용하여 local Administrator hash를 extract할 수 있습니다. 그 후 이 password의 **use를 enable**하려면 registry modification이 필요하며, 이를 통해 local Administrator account에 remote access할 수 있습니다.
 
 
 {{#ref}}
@@ -649,7 +649,7 @@ dsrm-credentials.md
 
 ### ACL Persistence
 
-특정 domain objects에 대해 어떤 **user**에게 **special permissions**를 주면, 그 사용자가 **future에 privileges를 escalate**할 수 있게 됩니다.
+일부 specific domain objects에 대해 **user**에게 **special permissions**를 **give**하여 해당 user가 **향후 privileges를 escalate**할 수 있도록 할 수 있습니다.
 
 
 {{#ref}}
@@ -658,7 +658,7 @@ acl-persistence-abuse/
 
 ### Security Descriptors
 
-**security descriptors**는 **object가 다른 object에 대해 가지는 permissions**를 **store**하는 데 사용됩니다. object의 **security descriptor에 아주 작은 change만** 할 수 있어도, privileged group의 member가 아니더라도 그 object에 대해 매우 흥미로운 privileges를 얻을 수 있습니다.
+**security descriptors**는 **object가 다른 object에 대해 보유한 permissions**를 **store**하는 데 사용됩니다. Object의 **security descriptor**를 약간만 **change**할 수 있다면, privileged group의 member가 되지 않고도 해당 object에 대해 매우 흥미로운 privileges를 획득할 수 있습니다.
 
 
 {{#ref}}
@@ -667,7 +667,7 @@ security-descriptors.md
 
 ### Dynamic Objects Anti-Forensics / Evasion
 
-`dynamicObject` auxiliary class를 남용하여 `entryTTL`/`msDS-Entry-Time-To-Die`를 가진 단명 principals/GPOs/DNS records를 생성합니다. 이들은 tombstone 없이 self-delete하며, LDAP evidence를 지우는 동시에 orphan SID, 깨진 `gPLink` references, 또는 캐시된 DNS responses(예: AdminSDHolder ACE pollution 또는 악성 `gPCFileSysPath`/AD-integrated DNS redirects)를 남깁니다.
+`dynamicObject` auxiliary class를 abuse하여 `entryTTL`/`msDS-Entry-Time-To-Die`와 함께 수명이 짧은 principals/GPOs/DNS records를 생성합니다. 이러한 objects는 tombstones를 남기지 않고 self-delete되어 LDAP evidence를 지우지만, orphan SIDs, broken `gPLink` references 또는 cached DNS responses(예: AdminSDHolder ACE pollution 또는 malicious `gPCFileSysPath`/AD-integrated DNS redirects)는 남깁니다.
 
 {{#ref}}
 ad-dynamic-objects-anti-forensics.md
@@ -675,7 +675,7 @@ ad-dynamic-objects-anti-forensics.md
 
 ### Skeleton Key
 
-메모리에서 **LSASS**를 변경하여 모든 domain accounts에 접근 가능한 **universal password**를 설정합니다.
+**universal password**를 설정하기 위해 memory상의 **LSASS**를 alter하여 모든 domain accounts에 access할 수 있도록 합니다.
 
 
 {{#ref}}
@@ -684,8 +684,8 @@ skeleton-key.md
 
 ### Custom SSP
 
-[SSP (Security Support Provider)가 무엇인지 여기에서 알아보세요.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
-당신만의 **SSP**를 만들어, 머신에 접근하는 데 사용된 credentials를 **clear text**로 **capture**할 수 있습니다.
+[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
+machine에 access하는 데 사용되는 **credentials**를 **clear text**로 **capture**하도록 **own SSP**를 생성할 수 있습니다.
 
 
 {{#ref}}
@@ -694,8 +694,8 @@ custom-ssp.md
 
 ### DCShadow
 
-AD에 **새 Domain Controller**를 등록하고, 이를 사용해 지정된 objects에 **attributes를 push**(SIDHistory, SPNs...) 하면서도 변경에 대한 어떤 **logs**도 남기지 않습니다. **DA** privileges가 필요하고 **root domain** 내부에 있어야 합니다.\
-잘못된 데이터를 사용하면 꽤 보기 흉한 logs가 나타납니다.
+AD에 **new Domain Controller**를 register하고 이를 사용하여 specified objects에 **attributes**(SIDHistory, SPNs...)를 **push**하며, **modifications**에 관한 어떠한 **logs**도 남기지 않습니다. **DA** privileges가 필요하며 **root domain** 내부에 있어야 합니다.\
+잘못된 data를 사용하면 매우 좋지 않은 logs가 나타난다는 점에 유의하세요.
 
 
 {{#ref}}
@@ -704,7 +704,7 @@ dcshadow.md
 
 ### LAPS Persistence
 
-앞서 **LAPS passwords를 읽을 충분한 권한**이 있으면 privileges를 escalate하는 방법을 논의했습니다. 그러나 이 password들은 **persistence를 유지**하는 데도 사용할 수 있습니다.\
+앞서 **LAPS passwords를 read할 충분한 permission**이 있을 때 privileges를 escalate하는 방법에 대해 설명했습니다. 그러나 이러한 passwords는 **persistence를 maintain**하는 데에도 사용할 수 있습니다.\
 다음을 확인하세요:
 
 
@@ -714,62 +714,62 @@ laps.md
 
 ## Forest Privilege Escalation - Domain Trusts
 
-Microsoft는 **Forest**를 security boundary로 봅니다. 이는 **하나의 domain을 compromise하는 것만으로도 전체 Forest가 compromise될 수 있음을 의미**합니다.
+Microsoft는 **Forest**를 security boundary로 간주합니다. 이는 단일 domain을 **compromise**하면 잠재적으로 전체 Forest가 compromise될 수 있음을 의미합니다.<sup>[[1]](#references)</sup>
 
 ### Basic Information
 
-[**domain trust**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>)는 한 **domain**의 사용자가 다른 **domain**의 resources에 access할 수 있게 하는 security mechanism입니다. 이는 본질적으로 두 domain의 authentication system 사이에 link를 만들어 authentication verification이 원활하게 흐르도록 합니다. domains가 trust를 설정하면, 이들은 trust의 무결성에 중요한 특정 **keys**를 각자의 **Domain Controllers (DCs)** 내에서 교환하고 보관합니다.
+[**domain trust**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>)는 한 **domain**의 user가 다른 **domain**의 resources에 access할 수 있도록 하는 security mechanism입니다. 이는 본질적으로 두 domains의 authentication systems 사이에 linkage를 생성하여 authentication verifications가 seamless하게 flow하도록 합니다. Domains가 trust를 설정하면 trust의 integrity에 중요한 특정 **keys**를 교환하고 **Domain Controllers (DCs)** 내부에 보관합니다.
 
-일반적인 시나리오에서, 사용자가 **trusted domain**의 service에 access하려면 먼저 자신의 domain DC에서 **inter-realm TGT**라는 특수 ticket을 요청해야 합니다. 이 TGT는 두 domain이 합의한 공유 **key**로 암호화됩니다. 사용자는 이 TGT를 **trusted domain의 DC**에 제시하여 service ticket(**TGS**)을 받습니다. trusted domain DC가 inter-realm TGT를 성공적으로 검증하면 TGS를 발급하고, 사용자는 해당 service에 access할 수 있게 됩니다.
+일반적인 scenario에서 user가 **trusted domain**의 service에 access하려면 먼저 자신의 domain DC에서 **inter-realm TGT**라는 special ticket을 request해야 합니다. 이 TGT는 두 domains가 합의한 shared **key**로 encrypted됩니다. 그런 다음 user는 이 TGT를 **trusted domain의 DC**에 제시하여 service ticket(**TGS**)을 받습니다. Trusted domain의 DC가 inter-realm TGT를 성공적으로 validation하면 TGS를 issue하여 user에게 service access를 부여합니다.
 
 **Steps**:
 
-1. **Domain 1**의 **client computer**가 자신의 **NTLM hash**를 사용해 **Ticket Granting Ticket (TGT)** 를 **Domain Controller (DC1)** 에 요청하며 프로세스를 시작합니다.
-2. DC1은 client가 성공적으로 authenticated되면 새 TGT를 발급합니다.
-3. 그런 다음 client는 **Domain 2**의 resources에 access하는 데 필요한 **inter-realm TGT**를 DC1에 요청합니다.
-4. inter-realm TGT는 two-way domain trust의 일부로 DC1과 DC2가 공유하는 **trust key**로 암호화됩니다.
-5. client는 inter-realm TGT를 **Domain 2의 Domain Controller (DC2)** 로 가져갑니다.
-6. DC2는 공유 trust key를 사용해 inter-realm TGT를 검증하고, 유효하면 client가 access하려는 Domain 2의 server에 대한 **Ticket Granting Service (TGS)** 를 발급합니다.
-7. 마지막으로 client는 이 TGS를 server에 제시하며, 이 TGS는 server의 account hash로 암호화되어 Domain 2의 service에 access하게 됩니다.
+1. **Domain 1**의 **client computer**가 자신의 **NTLM hash**를 사용하여 **Domain Controller (DC1)**에 **Ticket Granting Ticket (TGT)**을 request하면서 process를 시작합니다.
+2. Client가 successfully authenticated되면 DC1이 new TGT를 issue합니다.
+3. 그런 다음 client는 **Domain 2**의 resources에 access하는 데 필요한 **inter-realm TGT**를 DC1에 request합니다.
+4. Inter-realm TGT는 two-way domain trust의 일부로 DC1과 DC2가 share하는 **trust key**로 encrypted됩니다.
+5. Client는 inter-realm TGT를 **Domain 2의 Domain Controller (DC2)**로 가져갑니다.
+6. DC2는 shared trust key를 사용하여 inter-realm TGT를 verify하고, valid하면 client가 access하려는 Domain 2의 server에 대한 **Ticket Granting Service (TGS)**를 issue합니다.
+7. 마지막으로 client는 이 TGS를 server에 제시합니다. TGS는 server's account hash로 encrypted되어 있으며, 이를 통해 Domain 2의 service에 access합니다.
 
 ### Different trusts
 
-**trust는 1 way 또는 2 ways**일 수 있다는 점이 중요합니다. 2 ways 옵션에서는 두 domain이 서로를 trust하지만, **1 way** trust relation에서는 한 domain이 **trusted** domain이고 다른 하나가 **trusting** domain입니다. 마지막 경우, **trusted domain에서 trusting domain 내부의 resources에만 access할 수 있습니다**.
+**trust는 1-way 또는 2-way일 수 있다**는 점을 알아두는 것이 중요합니다. 2-way option에서는 두 domains가 서로 trust하지만, **1-way** trust relation에서는 한 domain이 **trusted** domain이 되고 다른 domain이 **trusting** domain이 됩니다. 후자의 경우 **trusted domain에서 trusting domain 내부의 resources에만 access**할 수 있습니다.
 
-만약 Domain A가 Domain B를 trust한다면, A는 trusting domain이고 B는 trusted one입니다. 또한 **Domain A**에서는 이것이 **Outbound trust**이고, **Domain B**에서는 **Inbound trust**입니다.
+Domain A가 Domain B를 trust한다면 A는 trusting domain이고 B는 trusted domain입니다. 또한 **Domain A**에서는 이것이 **Outbound trust**이고, **Domain B**에서는 **Inbound trust**입니다.
 
 **Different trusting relationships**
 
-- **Parent-Child Trusts**: 같은 forest 내에서 흔한 설정으로, child domain은 parent domain과 자동으로 two-way transitive trust를 가집니다. 본질적으로 이는 parent와 child 사이에 authentication requests가 원활하게 흐를 수 있음을 의미합니다.
-- **Cross-link Trusts**: "shortcut trusts"라고도 하며, child domains 사이에 referral process를 빠르게 하기 위해 설정됩니다. 복잡한 forest에서는 authentication referrals가 보통 forest root까지 갔다가 다시 target domain으로 내려와야 합니다. cross-links를 만들면 여정이 짧아지며, 지리적으로 분산된 환경에서 특히 유리합니다.
-- **External Trusts**: 서로 관련 없는 다른 domains 사이에 설정되며, 본질적으로 non-transitive입니다. [Microsoft's documentation](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>)에 따르면, external trusts는 forest trust로 연결되지 않은 현재 forest 밖의 domain resources에 access하는 데 유용합니다. external trusts에서는 SID filtering으로 security가 강화됩니다.
-- **Tree-root Trusts**: forest root domain과 새로 추가된 tree root 사이에 자동으로 설정됩니다. 흔하진 않지만, tree-root trusts는 forest에 새 domain tree를 추가할 때 중요하며, 고유한 domain name을 유지하고 two-way transitivity를 보장합니다. 자세한 내용은 [Microsoft's guide](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>)에서 확인할 수 있습니다.
+- **Parent-Child Trusts**: 동일한 forest 내부에서 흔히 사용되는 설정으로, child domain은 parent domain과 자동으로 two-way transitive trust를 가집니다. 이는 authentication requests가 parent와 child 사이에서 seamless하게 flow할 수 있음을 의미합니다.
+- **Cross-link Trusts**: "shortcut trusts"라고도 하며, referral process를 expedite하기 위해 child domains 사이에 설정됩니다. Complex forests에서는 authentication referrals가 일반적으로 forest root까지 올라갔다가 target domain으로 내려와야 합니다. Cross-links를 생성하면 이 경로가 짧아지며, 이는 지리적으로 분산된 environments에서 특히 유용합니다.
+- **External Trusts**: 서로 다르고 관련 없는 domains 사이에 설정되며 본질적으로 non-transitive입니다. [Microsoft's documentation](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>)에 따르면 external trusts는 forest trust로 연결되지 않은 현재 forest 외부 domain의 resources에 access하는 데 유용합니다. External trusts에서는 SID filtering을 통해 security가 강화됩니다.
+- **Tree-root Trusts**: forest root domain과 새로 추가된 tree root 사이에 자동으로 설정됩니다. 일반적으로 자주 접하지는 않지만, tree-root trusts는 forest에 new domain trees를 추가하는 데 중요하며, unique domain name을 유지하고 two-way transitivity를 보장합니다. 자세한 정보는 [Microsoft's guide](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>)에서 확인할 수 있습니다.
 - **Forest Trusts**: 두 forest root domains 사이의 two-way transitive trust이며, security measures를 강화하기 위해 SID filtering도 적용합니다.
-- **MIT Trusts**: non-Windows, [RFC4120-compliant](https://tools.ietf.org/html/rfc4120) Kerberos domains와 설정되는 trusts입니다. MIT trusts는 다소 더 특수하며, Windows ecosystem 밖의 Kerberos-based systems와 통합이 필요한 환경을 위한 것입니다.
+- **MIT Trusts**: Windows가 아닌 [RFC4120-compliant](https://tools.ietf.org/html/rfc4120) Kerberos domains와 설정됩니다. MIT trusts는 더욱 specialized되어 있으며 Windows ecosystem 외부의 Kerberos-based systems와 integration이 필요한 environments에 적합합니다.
 
 #### Other differences in **trusting relationships**
 
-- trust relationship는 **transitive**(A trust B, B trust C이면 A trust C)일 수도 있고 **non-transitive**일 수도 있습니다.
-- trust relationship는 **bidirectional trust**(서로 trust) 또는 **one-way trust**(한쪽만 다른 쪽을 trust)로 설정할 수 있습니다.
+- Trust relationship은 **transitive**일 수도 있습니다(A가 B를 trust하고 B가 C를 trust하면 A가 C를 trust함). 또는 **non-transitive**일 수 있습니다.
+- Trust relationship은 **bidirectional trust**(서로 trust함) 또는 **one-way trust**(한쪽만 다른 쪽을 trust함)로 설정할 수 있습니다.
 
 ### Attack Path
 
-1. trusting relationships를 **Enumerate**합니다.
-2. 어떤 **security principal**(user/group/computer)이 **other domain**의 resources에 **access**할 수 있는지 확인합니다. ACE entries 때문이거나 other domain의 groups에 속해 있기 때문일 수 있습니다. **domains across relationships**를 찾아보세요(아마 이 목적으로 trust가 생성된 것입니다).
-1. 이 경우 kerberoast도 또 다른 옵션일 수 있습니다.
-3. domains를 통해 **pivot**할 수 있는 **accounts**를 **Compromise**합니다.
+1. **trusting relationships를 Enumerate**
+2. 어떤 **security principal**(user/group/computer)이 **other domain**의 resources에 **access**할 수 있는지 확인합니다. ACE entries를 통해서일 수도 있고 other domain의 groups에 속해 있기 때문일 수도 있습니다. **domains 간 relationships**를 찾아보세요(아마도 trust가 이를 위해 생성되었을 것입니다).
+1. 이 경우 kerberoast가 또 다른 option일 수 있습니다.
+3. domains를 **pivot**할 수 있는 **accounts를 Compromise**합니다.
 
-Attackers with could access to resources in another domain through three primary mechanisms:
+Attacker가 other domain의 resources에 access할 수 있는 주요 mechanisms는 다음 세 가지입니다:
 
-- **Local Group Membership**: Principals might be added to local groups on machines, such as the “Administrators” group on a server, granting them significant control over that machine.
-- **Foreign Domain Group Membership**: Principals can also be members of groups within the foreign domain. However, the effectiveness of this method depends on the nature of the trust and the scope of the group.
-- **Access Control Lists (ACLs)**: Principals might be specified in an **ACL**, particularly as entities in **ACEs** within a **DACL**, providing them access to specific resources. For those looking to dive deeper into the mechanics of ACLs, DACLs, and ACEs, the whitepaper titled “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” is an invaluable resource.
+- **Local Group Membership**: Principals가 machine의 local groups(예: server의 “Administrators” group)에 추가되어 해당 machine에 대한 상당한 control을 부여받을 수 있습니다.
+- **Foreign Domain Group Membership**: Principals는 foreign domain 내부의 groups member일 수도 있습니다. 그러나 이 방법의 effectiveness는 trust의 특성과 group의 scope에 따라 달라집니다.
+- **Access Control Lists (ACLs)**: Principals가 **ACL**, 특히 **DACL** 내부의 **ACEs**에 entity로 지정되어 specific resources에 access할 수 있습니다. ACLs, DACLs 및 ACEs의 mechanics를 자세히 알아보려는 경우 “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” whitepaper가 매우 유용한 resource입니다.<sup>[[17]](#references)</sup>
 
 ### Find external users/groups with permissions
 
-**`CN=<user_SID>,CN=ForeignSecurityPrincipals,DC=domain,DC=com`**를 확인하면 도메인에서 foreign security principals를 찾을 수 있습니다. 이는 **external domain/forest**의 user/group입니다.
+domain 내부의 foreign security principals를 찾으려면 **`CN=<user_SID>,CN=ForeignSecurityPrincipals,DC=domain,DC=com`**을 확인할 수 있습니다. 이들은 **external domain/forest**의 user/group입니다.
 
-이것은 **Bloodhound**에서 확인하거나 powerview를 사용해 확인할 수 있습니다:
+이를 **Bloodhound** 또는 powerview를 사용하여 확인할 수 있습니다:
 ```powershell
 # Get users that are i groups outside of the current domain
 Get-DomainForeignUser
@@ -777,7 +777,7 @@ Get-DomainForeignUser
 # Get groups inside a domain with users our
 Get-DomainForeignGroupMember
 ```
-### Child-to-Parent forest 권한 상승
+### Child-to-Parent forest privilege escalation
 ```bash
 # Fro powerview
 Get-DomainTrust
@@ -790,7 +790,7 @@ TrustDirection  : Bidirectional       --> Trust direction (2ways in this case)
 WhenCreated     : 2/19/2021 1:28:00 PM
 WhenChanged     : 2/19/2021 1:28:00 PM
 ```
-도메인 trust를 열거하는 다른 방법:
+도메인 신뢰 관계를 열거하는 다른 방법:
 ```bash
 # Get DCs
 nltest /dsgetdc:<DOMAIN>
@@ -803,8 +803,8 @@ nltest /dclist:sub.domain.local
 nltest /server:dc.sub.domain.local /domain_trusts /all_trusts
 ```
 > [!WARNING]
-> There are **2 trusted keys**, one for _Child --> Parent_ and another one for _Parent_ --> _Child_.\
-> You can the one used by the current domain them with:
+> **신뢰된 키는 2개**이며, 하나는 _Child --> Parent_용이고 다른 하나는 _Parent_ --> _Child_용입니다.\
+> 현재 도메인에서 사용되는 키는 다음 명령으로 확인할 수 있습니다.
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
@@ -813,7 +813,7 @@ nltest /server:dc.sub.domain.local /domain_trusts /all_trusts
 
 #### SID-History Injection
 
-SID-History injection을 사용해 trust를 악용하여 Enterprise admin으로 child/parent domain에서 권한 상승:
+SID-History injection을 악용하여 child/parent domain에 Enterprise admin으로 권한을 상승시킵니다:
 
 
 {{#ref}}
@@ -822,19 +822,19 @@ sid-history-injection.md
 
 #### Exploit writeable Configuration NC
 
-Configuration Naming Context (NC)가 어떻게 악용될 수 있는지 이해하는 것은 매우 중요합니다. Configuration NC는 Active Directory (AD) 환경에서 forest 전반의 configuration data를 위한 중앙 저장소 역할을 합니다. 이 data는 forest 내의 모든 Domain Controller (DC)로 복제되며, writable DC는 Configuration NC의 writable copy를 유지합니다. 이를 악용하려면 **DC에서 SYSTEM privileges**가 있어야 하며, 가능하면 child DC가 좋습니다.
+Configuration Naming Context (NC)를 어떻게 악용할 수 있는지 이해하는 것은 매우 중요합니다. Configuration NC는 Active Directory (AD) 환경에서 forest 전반의 configuration data를 저장하는 중앙 repository 역할을 합니다. 이 data는 forest 내 모든 Domain Controller (DC)에 복제되며, writable DC는 Configuration NC의 writable copy를 유지합니다. 이를 악용하려면 **DC에서 SYSTEM privileges**를 보유해야 하며, 가능하면 child DC가 좋습니다.
 
 **Link GPO to root DC site**
 
-Configuration NC의 Sites container에는 AD forest 내 모든 domain-joined computers의 sites 정보가 들어 있습니다. 어떤 DC에서든 SYSTEM privileges로 동작하면, 공격자는 GPO를 root DC sites에 link할 수 있습니다. 이 작업은 해당 site에 적용되는 policies를 조작하여 root domain을 잠재적으로 compromise할 수 있습니다.
+Configuration NC의 Sites container에는 AD forest 내 모든 domain-joined computer의 site 정보가 포함됩니다. 어떤 DC에서든 SYSTEM privileges로 동작하면 공격자는 GPO를 root DC sites에 연결할 수 있습니다. 이 작업은 해당 sites에 적용되는 policies를 조작하여 root domain을 잠재적으로 침해할 수 있습니다.
 
-자세한 정보는 [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research) research를 참고할 수 있습니다.
+자세한 내용은 [Bypassing SID Filtering](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)에 대한 research를 참고할 수 있습니다.<sup>[[12]](#references)</sup>
 
 **Compromise any gMSA in the forest**
 
-공격 벡터 중 하나는 domain 내의 privileged gMSA를 노리는 것입니다. gMSA의 passwords를 계산하는 데 필수적인 KDS Root key는 Configuration NC에 저장됩니다. 어떤 DC에서든 SYSTEM privileges가 있으면 KDS Root key에 접근하여 forest 전반의 어떤 gMSA든 passwords를 계산할 수 있습니다.
+한 가지 attack vector는 domain 내 privileged gMSA를 대상으로 하는 것입니다. gMSA의 passwords를 계산하는 데 필수적인 KDS Root key는 Configuration NC에 저장됩니다. 어떤 DC에서든 SYSTEM privileges를 보유하면 KDS Root key에 접근하여 forest 전체의 모든 gMSA에 대한 passwords를 계산할 수 있습니다.
 
-자세한 분석과 단계별 가이드는 다음에서 확인할 수 있습니다:
+자세한 analysis와 단계별 guidance는 다음에서 확인할 수 있습니다:
 
 
 {{#ref}}
@@ -848,19 +848,19 @@ golden-dmsa-gmsa.md
 badsuccessor-dmsa-migration-abuse.md
 {{#endref}}
 
-추가 외부 research: [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
+추가 external research: [Golden gMSA Trust Attacks](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-5).<sup>[[13]](#references)</sup>
 
 **Schema change attack**
 
-이 방법은 새로운 privileged AD objects가 생성되기를 기다려야 하므로 인내가 필요합니다. SYSTEM privileges를 사용하면 공격자는 AD Schema를 수정하여 어떤 사용자에게든 모든 classes에 대한 complete control을 부여할 수 있습니다. 이는 새로 생성되는 AD objects에 대한 무단 접근과 통제를 초래할 수 있습니다.
+이 method는 새로운 privileged AD objects가 생성될 때까지 기다리는 인내심이 필요합니다. SYSTEM privileges를 사용하면 공격자는 AD Schema를 수정하여 모든 user에게 모든 classes에 대한 complete control을 부여할 수 있습니다. 이로 인해 새로 생성되는 AD objects에 대한 unauthorized access 및 control이 발생할 수 있습니다.
 
-추가 읽을거리는 [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)에서 확인할 수 있습니다.
+자세한 내용은 [Schema Change Trust Attacks](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-6)에서 확인할 수 있습니다.<sup>[[14]](#references)</sup>
 
 **From DA to EA with ADCS ESC5**
 
-ADCS ESC5 vulnerability는 Public Key Infrastructure (PKI) objects에 대한 control을 노려, forest 내의 어떤 사용자로도 authentication할 수 있게 해주는 certificate template를 생성합니다. PKI objects는 Configuration NC에 있으므로, writable child DC를 compromise하면 ESC5 attacks를 실행할 수 있습니다.
+ADCS ESC5 vulnerability는 Public Key Infrastructure (PKI) objects에 대한 control을 악용하여 forest 내 모든 user로 authentication할 수 있는 certificate template을 생성합니다. PKI objects는 Configuration NC에 존재하므로 writable child DC를 compromise하면 ESC5 attacks를 실행할 수 있습니다.
 
-이에 대한 더 자세한 내용은 [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c)에서 읽을 수 있습니다. ADCS가 없는 시나리오에서는, 공격자가 필요한 구성 요소를 직접 설정할 수 있으며, 이는 [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/)에서 설명합니다.
+자세한 내용은 [From DA to EA with ESC5](https://specterops.io/blog/2023/05/16/from-da-to-ea-with-esc5/)에서 확인할 수 있습니다.<sup>[[15]](#references)</sup> ADCS가 없는 scenario에서는 [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/)에서 설명하는 것처럼 공격자가 필요한 components를 설정할 수 있습니다.<sup>[[16]](#references)</sup>
 
 ### External Forest Domain - One-Way (Inbound) or bidirectional
 ```bash
@@ -873,14 +873,14 @@ TrustDirection  : Inbound          --> Inboud trust
 WhenCreated     : 2/19/2021 10:50:56 PM
 WhenChanged     : 2/19/2021 10:50:56 PM
 ```
-이 시나리오에서 **your domain**은 외부 도메인에 의해 **trusted** 되어 있으며, 그 도메인에 대해 **undetermined permissions** 를 가지고 있습니다. 당신은 **your domain의 어떤 principals가 external domain에 대해 어떤 access를 가지고 있는지** 찾아낸 다음, 이를 exploit하려고 시도해야 합니다:
+이 시나리오에서는 **사용자의 domain이 외부 domain에 의해 trusted**되며, 해당 외부 domain에 대해 **정해지지 않은 권한**을 부여받습니다. 사용자의 domain에 속한 **어떤 principal이 외부 domain에 대해 어떤 access를 보유하는지** 확인한 후 이를 exploit해야 합니다:
 
 
 {{#ref}}
 external-forest-domain-oneway-inbound.md
 {{#endref}}
 
-### External Forest Domain - One-Way (Outbound)
+### 외부 Forest Domain - One-Way (Outbound)
 ```bash
 Get-DomainTrust -Domain current.local
 
@@ -892,70 +892,70 @@ TrustDirection  : Outbound        --> Outbound trust
 WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
-In this scenario **your domain** is **trusting** some **privileges** to principal from a **different domains**.
+이 시나리오에서 **your domain**은 **different domains**의 principal에게 일부 **privileges**를 **trusting**하고 있습니다.
 
-However, when a **domain is trusted** by the trusting domain, the trusted domain **creates a user** with a **predictable name** that uses as **password the trusted password**. Which means that it's possible to **access a user from the trusting domain to get inside the trusted one** to enumerate it and try to escalate more privileges:
+하지만 **domain is trusted** by the trusting domain인 경우, trusted domain은 **predictable name**을 사용하는 사용자를 생성하고, 해당 사용자는 **trusted password**를 비밀번호로 사용합니다. 즉, **trusting domain의 사용자에 access하여 trusted domain 내부로 들어간 뒤**, 이를 열거하고 추가적인 **privileges** 상승을 시도할 수 있습니다:
 
 
 {{#ref}}
 external-forest-domain-one-way-outbound.md
 {{#endref}}
 
-Another way to compromise the trusted domain is to find a [**SQL trusted link**](abusing-ad-mssql.md#mssql-trusted-links) created in the **opposite direction** of the domain trust (which isn't very common).
+trusted domain을 compromise하는 또 다른 방법은 domain trust와 **opposite direction**으로 생성된 [**SQL trusted link**](abusing-ad-mssql.md#mssql-trusted-links)를 찾는 것입니다. (이는 그다지 일반적이지 않습니다.)
 
-Another way to compromise the trusted domain is to wait in a machine where a **user from the trusted domain can access** to login via **RDP**. Then, the attacker could inject code in the RDP session process and **access the origin domain of the victim** from there.\
-Moreover, if the **victim mounted his hard drive**, from the **RDP session** process the attacker could store **backdoors** in the **startup folder of the hard drive**. This technique is called **RDPInception.**
+trusted domain을 compromise하는 또 다른 방법은 **trusted domain의 사용자가 access할 수 있는** 머신에서 대기하며, 해당 사용자가 **RDP**를 통해 로그인하도록 하는 것입니다. 그러면 공격자는 RDP 세션 프로세스에 코드를 주입하고, 그곳에서 **victim의 origin domain에 access**할 수 있습니다.\
+또한 **victim이 자신의 하드 드라이브를 mounted한 경우**, 공격자는 **RDP session** 프로세스에서 해당 하드 드라이브의 **startup folder**에 **backdoors**를 저장할 수 있습니다. 이 technique은 **RDPInception**이라고 합니다.
 
 
 {{#ref}}
 rdp-sessions-abuse.md
 {{#endref}}
 
-### Domain trust abuse mitigation
+### Domain trust abuse 완화
 
 ### **SID Filtering:**
 
-- SID history 속성을 활용하는 공격 위험은 forest trust 전반에서 SID Filtering으로 완화되며, 이는 모든 inter-forest trust에서 기본적으로 활성화되어 있다. 이는 Microsoft의 입장에 따라 domain이 아니라 forest를 security boundary로 간주하며, intra-forest trust는 안전하다는 가정에 기반한다.
-- 그러나 문제가 하나 있는데, SID filtering은 application과 user access를 방해할 수 있어 때때로 비활성화되기도 한다.
+- forest trusts를 대상으로 SID history attribute를 활용하는 공격의 위험은 SID Filtering으로 완화됩니다. SID Filtering은 모든 inter-forest trusts에서 기본적으로 활성화되어 있습니다. 이는 Microsoft의 입장에 따라 domain이 아닌 forest를 security boundary로 간주하고, intra-forest trusts가 안전하다는 가정에 기반합니다.
+- 하지만 주의할 점이 있습니다. SID filtering은 applications와 user access를 방해할 수 있으므로, 경우에 따라 비활성화됩니다.
 
 ### **Selective Authentication:**
 
-- inter-forest trust에서는 Selective Authentication을 사용하면 두 forest의 사용자들이 자동으로 authenticated되지 않는다. 대신 trusting domain 또는 forest 내의 domain과 server에 접근하려면 명시적인 권한이 필요하다.
-- 이러한 조치들은 writable Configuration Naming Context (NC)나 trust account에 대한 공격으로부터는 보호하지 못한다는 점을 알아야 한다.
+- inter-forest trusts에서는 Selective Authentication을 사용하면 두 forest의 사용자들이 자동으로 authenticated되지 않습니다. 대신 사용자가 trusting domain 또는 forest 내부의 domains와 servers에 access하려면 명시적인 permissions가 필요합니다.
+- 이러한 조치는 writable Configuration Naming Context (NC)의 exploitation이나 trust account에 대한 공격을 방어하지 못한다는 점에 유의해야 합니다.
 
-[**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
+[**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)<sup>[[3]](#references)</sup>
 
-## LDAP-based AD Abuse from On-Host Implants
+## On-Host Implants에서의 LDAP-based AD Abuse
 
-The [LDAP BOF Collection](https://github.com/P0142/LDAP-Bof-Collection) re-implements bloodyAD-style LDAP primitives as x64 Beacon Object Files that run entirely inside an on-host implant (e.g., Adaptix C2). Operators compile the pack with `git clone https://github.com/P0142/ldap-bof-collection.git && cd ldap-bof-collection && make`, load `ldap.axs`, and then call `ldap <subcommand>` from the beacon. All traffic rides the current logon security context over LDAP (389) with signing/sealing or LDAPS (636) with auto certificate trust, so no socks proxies or disk artifacts are required.
+[LDAP BOF Collection](https://github.com/P0142/LDAP-Bof-Collection)은 bloodyAD 스타일의 LDAP primitives를 on-host implant(예: Adaptix C2) 내부에서 완전히 실행되는 x64 Beacon Object Files로 재구현합니다. Operators는 `git clone https://github.com/P0142/ldap-bof-collection.git && cd ldap-bof-collection && make`로 pack을 compile하고, `ldap.axs`를 load한 다음 beacon에서 `ldap <subcommand>`를 호출합니다. 모든 traffic은 현재 logon security context를 통해 signing/sealing이 적용된 LDAP (389) 또는 auto certificate trust가 적용된 LDAPS (636)를 사용하므로 socks proxies나 disk artifacts가 필요하지 않습니다.<sup>[[4]](#references)</sup>
 
 ### Implant-side LDAP enumeration
 
-- `get-users`, `get-computers`, `get-groups`, `get-usergroups`, and `get-groupmembers` resolve short names/OU paths into full DNs and dump the corresponding objects.
-- `get-object`, `get-attribute`, and `get-domaininfo` pull arbitrary attributes (including security descriptors) plus the forest/domain metadata from `rootDSE`.
-- `get-uac`, `get-spn`, `get-delegation`, and `get-rbcd` expose roasting candidates, delegation settings, and existing [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) descriptors directly from LDAP.
-- `get-acl` and `get-writable --detailed` parse the DACL to list trustees, rights (GenericAll/WriteDACL/WriteOwner/attribute writes), and inheritance, giving immediate targets for ACL privilege escalation.
+- `get-users`, `get-computers`, `get-groups`, `get-usergroups`, `get-groupmembers`는 short names/OU paths를 full DNs로 resolve하고 해당 objects를 dump합니다.
+- `get-object`, `get-attribute`, `get-domaininfo`는 임의의 attributes( security descriptors 포함)와 `rootDSE`의 forest/domain metadata를 가져옵니다.
+- `get-uac`, `get-spn`, `get-delegation`, `get-rbcd`는 LDAP에서 직접 roasting candidates, delegation settings 및 기존 [Resource-based Constrained Delegation](resource-based-constrained-delegation.md) descriptors를 노출합니다.
+- `get-acl`과 `get-writable --detailed`는 DACL을 parse하여 trustees, rights(GenericAll/WriteDACL/WriteOwner/attribute writes) 및 inheritance를 나열하므로 ACL privilege escalation을 위한 즉각적인 targets를 제공합니다.
 ```powershell
 ldap get-users --ldaps
 ldap get-computers -ou "OU=Servers,DC=corp,DC=local"
 ldap get-writable --detailed
 ldap get-acl "CN=Tier0,OU=Admins,DC=corp,DC=local"
 ```
-### LDAP write primitives for escalation & persistence
+### LDAP escalation 및 persistence를 위한 write primitives
 
-- Object creation BOFs (`add-user`, `add-computer`, `add-group`, `add-ou`)는 operator가 OU 권한이 있는 곳 어디서든 새 principal 또는 machine account를 준비할 수 있게 해준다. `add-groupmember`, `set-password`, `add-attribute`, `set-attribute`는 write-property 권한이 발견되면 대상 계정을 직접 hijack한다.
-- `add-ace`, `set-owner`, `add-genericall`, `add-genericwrite`, `add-dcsync` 같은 ACL 중심 명령은 어떤 AD object든 WriteDACL/WriteOwner를 password reset, group membership control, 또는 DCSync replication privilege로 바꾸며, PowerShell/ADSI artifact를 남기지 않는다. `remove-*` 대응 명령은 주입된 ACE를 정리한다.
+- Object creation BOF(`add-user`, `add-computer`, `add-group`, `add-ou`)를 사용하면 OU 권한이 존재하는 위치에 새로운 principal 또는 machine account를 operator가 staging할 수 있습니다. `add-groupmember`, `set-password`, `add-attribute`, `set-attribute`는 write-property 권한이 확인된 후 대상을 직접 hijack합니다.
+- `add-ace`, `set-owner`, `add-genericall`, `add-genericwrite`, `add-dcsync`와 같은 ACL 중심 command는 모든 AD object에 대한 WriteDACL/WriteOwner를 password reset, group membership control 또는 DCSync replication privilege로 변환하며, PowerShell/ADSI artifact를 남기지 않습니다. `remove-*` counterpart는 주입된 ACE를 정리합니다.
 
-### Delegation, roasting, and Kerberos abuse
+### Delegation, roasting 및 Kerberos abuse
 
-- `add-spn`/`set-spn`은 compromised user를 즉시 Kerberoastable하게 만든다. `add-asreproastable` (UAC toggle)은 password를 건드리지 않고 AS-REP roasting 대상으로 표시한다.
-- Delegation macros (`add-delegation`, `set-delegation`, `add-constrained`, `add-unconstrained`, `add-rbcd`)는 beacon에서 `msDS-AllowedToDelegateTo`, UAC flags, 또는 `msDS-AllowedToActOnBehalfOfOtherIdentity`를 다시 써서 constrained/unconstrained/RBCD attack path를 가능하게 하고, remote PowerShell이나 RSAT가 필요 없게 만든다.
+- `add-spn`/`set-spn`은 compromised user를 즉시 Kerberoastable하게 만들며, `add-asreproastable`(UAC toggle)는 password를 건드리지 않고 AS-REP roasting 대상으로 표시합니다.
+- Delegation macro(`add-delegation`, `set-delegation`, `add-constrained`, `add-unconstrained`, `add-rbcd`)는 beacon에서 `msDS-AllowedToDelegateTo`, UAC flag 또는 `msDS-AllowedToActOnBehalfOfOtherIdentity`를 다시 작성하여 constrained/unconstrained/RBCD attack path를 활성화하고, remote PowerShell 또는 RSAT가 필요하지 않게 합니다.
 
-### sidHistory injection, OU relocation, and attack surface shaping
+### sidHistory injection, OU relocation 및 attack surface shaping
 
-- `add-sidhistory`는 controlled principal의 SID history에 privileged SID를 주입한다([SID-History Injection](sid-history-injection.md) 참조). 이를 통해 LDAP/LDAPS만으로 stealthy access inheritance를 제공한다.
-- `move-object`는 computers 또는 users의 DN/OU를 변경하여, 공격자가 이미 delegated rights가 존재하는 OU로 asset을 옮긴 뒤 `set-password`, `add-groupmember`, 또는 `add-spn`을 악용할 수 있게 한다.
-- 범위가 좁은 removal 명령들(`remove-attribute`, `remove-delegation`, `remove-rbcd`, `remove-uac`, `remove-groupmember`, etc.)은 operator가 credentials나 persistence를 확보한 뒤 빠르게 rollback할 수 있게 해주며, telemetry를 최소화한다.
+- `add-sidhistory`는 제어 중인 principal의 SID history에 privileged SID를 주입합니다([SID-History Injection](sid-history-injection.md) 참조). 이를 통해 LDAP/LDAPS만으로 stealthy access inheritance를 제공합니다.
+- `move-object`는 computer 또는 user의 DN/OU를 변경하므로, attacker는 `set-password`, `add-groupmember` 또는 `add-spn`을 abuse하기 전에 delegated rights가 이미 존재하는 OU로 asset을 이동할 수 있습니다.
+- 범위가 엄격히 지정된 removal command(`remove-attribute`, `remove-delegation`, `remove-rbcd`, `remove-uac`, `remove-groupmember` 등)는 operator가 credential 또는 persistence를 수집한 후 신속한 rollback을 수행하여 telemetry를 최소화할 수 있게 합니다.
 
 ## AD -> Azure & Azure -> AD
 
@@ -964,74 +964,81 @@ ldap get-acl "CN=Tier0,OU=Admins,DC=corp,DC=local"
 https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/azure-ad-connect-hybrid-identity/index.html
 {{#endref}}
 
-## Some General Defenses
+## 일반적인 방어 방법
 
-[**Learn more about how to protect credentials here.**](../stealing-credentials/credentials-protections.md)
+[**credential 보호 방법에 대해 자세히 알아보세요.**](../stealing-credentials/credentials-protections.md)
 
-### **Defensive Measures for Credential Protection**
+### **Credential Protection을 위한 Defensive Measures**
 
-- **Domain Admins Restrictions**: Domain Admins는 Domain Controllers에서만 login 하도록 허용하고, 다른 host에서의 사용은 피하는 것이 권장된다.
-- **Service Account Privileges**: 보안을 유지하기 위해 service는 Domain Admin (DA) privileges로 실행해서는 안 된다.
-- **Temporal Privilege Limitation**: DA privileges가 필요한 task는 그 duration을 제한해야 한다. 이는 다음으로 구현할 수 있다: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
-- **LDAP relay mitigation**: Event IDs 2889/3074/3075를 audit한 뒤, DCs/clients에서 LDAP signing과 LDAPS channel binding을 강제하여 LDAP MITM/relay 시도를 차단한다.
+- **Domain Admins Restrictions**: Domain Admins는 Domain Controller에만 login할 수 있도록 제한하고, 다른 host에서는 사용하지 않는 것이 좋습니다.
+- **Service Account Privileges**: 보안을 유지하려면 service를 Domain Admin(DA) privilege로 실행해서는 안 됩니다.
+- **Temporal Privilege Limitation**: DA privilege가 필요한 task의 경우 해당 privilege 사용 기간을 제한해야 합니다. 다음과 같이 수행할 수 있습니다: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+- **LDAP relay mitigation**: Event ID 2889/3074/3075를 audit한 다음 DC/client에서 LDAP signing과 LDAPS channel binding을 적용하여 LDAP MITM/relay 시도를 차단합니다.
 
 {{#ref}}
 ldap-signing-and-channel-binding.md
 {{#endref}}
 
-### Protocol-level fingerprinting of Impacket activity
+### Impacket activity의 protocol-level fingerprinting
 
-일반적인 AD tradecraft를 탐지하고 싶다면, 이름이 바뀐 binaries, service names, temp batch files, output paths 같은 **operator-controlled artifacts에만 의존하지 말라**. 정상 Windows client가 [Kerberos](kerberos-authentication.md), [NTLM](../ntlm/README.md), SMB, LDAP, DCE/RPC, WMI traffic을 어떻게 만드는지 baseline을 잡고, operator가 `psexec.py`, `wmiexec.py`, `dcomexec.py`, `atexec.py`, `ntlmrelayx.py`를 수정한 뒤에도 남는 **implementation quirks**를 찾아라.
+일반적인 AD tradecraft를 탐지하려면 renamed binary, service name, temp batch file 또는 output path와 같은 **operator-controlled artifact**에만 의존하지 마세요. 정상적인 Windows client가 [Kerberos](kerberos-authentication.md), [NTLM](../ntlm/README.md), SMB, LDAP, DCE/RPC 및 WMI traffic을 생성하는 방식을 baseline으로 설정한 다음, operator가 `psexec.py`, `wmiexec.py`, `dcomexec.py`, `atexec.py` 또는 `ntlmrelayx.py`를 수정한 후에도 남아 있는 **implementation quirk**를 찾아야 합니다.<sup>[[8]](#references)</sup>
 
-- **High-confidence standalone candidates** (자신의 baseline과 검증한 뒤):
+- **High-confidence standalone candidate**(자체 baseline으로 검증한 후):
 - `auth_context_id = 79231 + ctx_id`를 사용하는 authenticated DCE/RPC
 - `0xff`로 채워진 DCE/RPC authentication padding
-- raw Kerberos `AP-REQ`를 SPNEGO `mechToken`에 직접 넣는 LDAP Kerberos bind
-- ASCII처럼 보이는 `ClientGuid` 값을 가진 SMB2/3 negotiate request
+- SPNEGO `mechToken`에 raw Kerberos `AP-REQ`를 직접 배치하는 LDAP Kerberos bind
+- ASCII처럼 보이는 `ClientGuid` 값을 포함하는 SMB2/3 negotiate request
 - 비표준 namespace `//./root/cimv2`를 사용하는 WMI `IWbemLevel1Login::NTLMLogin`
-- Hardcoded Kerberos nonce 값
-- **Better as correlation/scoring features**:
-- Sparse 또는 duplicated Kerberos etype lists, unusual/missing `PA-DATA`, 또는 native Windows와 다른 TGS-REQ etype ordering
-- version info가 없는 NTLM Type 1 메시지, 또는 null host names가 있는 Type 3 메시지
-- SPNEGO 대신 DCE/RPC에 실린 raw NTLMSSP, missing DCE/RPC verification trailers, 또는 SPNEGO/Kerberos OID mismatches
-- 같은 host/user/session/time window에서 이런 특성이 여러 개 보이면, 약한 단일 field보다 훨씬 강하다
-- **Use as enrichment, not as standalone alerts**:
-- Default filenames, output paths, random service names, temporary batch names, default computer account names, tool-specific HTTP/WebDAV/RDP/MSSQL strings
-- 이것들은 operator가 쉽게 바꿀 수 있으므로, cross-protocol cluster가 왜 suspicious한지 설명할 때 보조적으로 쓰는 것이 좋다
+- Hardcoded Kerberos nonce value
+- **Correlation/scoring feature로 더 적합한 항목**:
+- Sparse 또는 duplicated Kerberos etype list, 비정상적이거나 누락된 `PA-DATA`, 또는 native Windows와 다른 TGS-REQ etype ordering
+- Version info가 없는 NTLM Type 1 message 또는 null host name을 포함하는 Type 3 message
+- SPNEGO 대신 DCE/RPC에 포함된 raw NTLMSSP, 누락된 DCE/RPC verification trailer 또는 SPNEGO/Kerberos OID mismatch
+- 동일한 host/user/session/time window에서 이러한 trait가 여러 개 나타나는 경우 단일한 weak field보다 훨씬 강한 신호입니다.
+- **Standalone alert가 아닌 enrichment로 사용**:
+- Default filename, output path, random service name, temporary batch name, default computer account name 및 tool-specific HTTP/WebDAV/RDP/MSSQL string
+- 이러한 항목은 operator가 쉽게 변경할 수 있으므로 cross-protocol cluster가 의심스러운 이유를 설명하는 데 사용하는 것이 가장 좋습니다.
 - **Operational notes**:
-- 일부 signal은 decrypted traffic, [PCAP/Zeek parsing](../../generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/README.md), ETW, 또는 service-side visibility가 필요하다
-- alert로 승격하기 전에 Samba/Linux clients, appliances, legacy software를 기준으로 검증하라
-- baseline에 대한 confidence를 쌓아가면서 detection을 enrichment -> hunting -> alerting 순으로 승격하라
+- 이러한 signal 중 일부는 decrypted traffic, [PCAP/Zeek parsing](../../generic-methodologies-and-resources/basic-forensic-methodology/pcap-inspection/README.md), ETW 또는 service-side visibility가 필요합니다.
+- Alert로 승격하기 전에 Samba/Linux client, appliance 및 legacy software를 기준으로 검증하세요.
+- Baseline에 대한 신뢰도를 높이면서 detection을 enrichment -> hunting -> alerting 순서로 승격하세요.
 
-### **Implementing Deception Techniques**
+### **Deception Techniques 구현**
 
-- deception을 구현하려면 decoy users나 computers처럼 trap을 설치해야 하며, password가 만료되지 않거나 Trusted for Delegation으로 표시된 feature를 포함할 수 있다. 상세한 접근 방식에는 특정 rights를 가진 users를 만들거나 high privilege groups에 추가하는 것이 포함된다.
-- 실용적인 예시는 다음과 같은 tools를 사용하는 것이다: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
-- deception techniques 배포에 대한 더 자세한 내용은 [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception)에서 확인할 수 있다.
+- Deception 구현에는 decoy user 또는 computer와 같은 trap을 설정하는 작업이 포함되며, password가 expire되지 않거나 Trusted for Delegation으로 표시되는 feature를 사용할 수 있습니다. 구체적인 approach에는 특정 right를 가진 user를 생성하거나 high privilege group에 추가하는 작업이 포함됩니다.<sup>[[2]](#references)</sup>
+- 실용적인 예시는 다음과 같은 tool을 사용하는 것입니다: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
+- Deception Techniques 배포에 대한 자세한 내용은 [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception)에서 확인할 수 있습니다.
 
-### **Identifying Deception**
+### **Deception 식별**
 
-- **For User Objects**: atypical ObjectSID, infrequent logons, creation dates, low bad password counts 같은 suspicious indicator가 포함된다.
-- **General Indicators**: potential decoy objects의 attribute를 genuine object와 비교하면 inconsistency를 드러낼 수 있다. [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) 같은 tool이 이런 deception 식별을 도와줄 수 있다.
+- **User Object**: 의심스러운 indicator에는 비정상적인 ObjectSID, 드문 logon, creation date 및 낮은 bad password count가 포함됩니다.
+- **General Indicator**: 잠재적인 decoy object의 attribute를 실제 object의 attribute와 비교하면 inconsistency를 확인할 수 있습니다. [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster)와 같은 tool은 이러한 deception을 식별하는 데 도움을 줄 수 있습니다.
 
-### **Bypassing Detection Systems**
+### **Detection System 우회**
 
 - **Microsoft ATA Detection Bypass**:
-- **User Enumeration**: ATA detection을 피하기 위해 Domain Controllers에서 session enumeration을 하지 않는다.
-- **Ticket Impersonation**: ticket creation에 **aes** keys를 사용하면 NTLM으로 downgrade하지 않으므로 탐지를 회피하는 데 도움이 된다.
-- **DCSync Attacks**: Domain Controller가 아닌 곳에서 실행하면 ATA detection을 피할 수 있다. Domain Controller에서 직접 실행하면 alert가 발생한다.
+- **User Enumeration**: ATA detection을 방지하기 위해 Domain Controller에서 session enumeration을 피합니다.
+- **Ticket Impersonation**: ticket 생성에 **aes** key를 사용하면 NTLM으로 downgrade하지 않으므로 detection을 우회하는 데 도움이 됩니다.
+- **DCSync Attack**: ATA detection을 피하려면 non-Domain Controller에서 실행하는 것이 좋습니다. Domain Controller에서 직접 실행하면 alert가 발생합니다.
 
 ## References
 
-- [http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/](http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/)
-- [https://www.labofapenetrationtester.com/2018/10/deploy-deception.html](https://www.labofapenetrationtester.com/2018/10/deploy-deception.html)
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
-- [LDAP BOF Collection – In-Memory LDAP Toolkit for Active Directory Exploitation](https://github.com/P0142/LDAP-Bof-Collection)
-- [TrustedSec – Holy Shuck! Weaponizing NTLM Hashes as a Wordlist](https://trustedsec.com/blog/holy-shuck-weaponizing-ntlm-hashes-as-a-wordlist)
-- [Barbhack 2025 CTF (NetExec AD Lab) – Pirates](https://0xdf.gitlab.io/2026/01/29/barbhack-2025-ctf.html)
-- [Hashcat](https://github.com/hashcat/hashcat)
-- [ThatTotallyRealMyth/Impacket-IoCs – Dissecting Impacket](https://github.com/ThatTotallyRealMyth/Impacket-IoCs)
-- [rub-softsec/onelogon - Onelogon: Taking over Active Directory Accounts via Netlogon](https://github.com/rub-softsec/onelogon)
-- [Microsoft - How to manage the changes in Netlogon secure channel connections associated with CVE-2020-1472](https://support.microsoft.com/en-us/topic/how-to-manage-the-changes-in-netlogon-secure-channel-connections-associated-with-cve-2020-1472-f7e8cc17-0309-1d6a-304e-5ba73cd1a11ee)
+- [1] [A Guide to Attacking Domain Trusts](https://blog.harmj0y.net/redteaming/a-guide-to-attacking-domain-trusts/)
+- [2] [Forging Trusts for Deception in Active Directory](https://www.labofapenetrationtester.com/2018/10/deploy-deception.html)
+- [3] [From Domain Admin to Enterprise Admin](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
+- [4] [LDAP BOF Collection – In-Memory LDAP Toolkit for Active Directory Exploitation](https://github.com/P0142/LDAP-Bof-Collection)
+- [5] [TrustedSec – Holy Shuck! Weaponizing NTLM Hashes as a Wordlist](https://trustedsec.com/blog/holy-shuck-weaponizing-ntlm-hashes-as-a-wordlist)
+- [6] [Barbhack 2025 CTF (NetExec AD Lab) – Pirates](https://0xdf.gitlab.io/2026/01/29/barbhack-2025-ctf.html)
+- [7] [Hashcat](https://github.com/hashcat/hashcat)
+- [8] [ThatTotallyRealMyth/Impacket-IoCs – Dissecting Impacket](https://github.com/ThatTotallyRealMyth/Impacket-IoCs)
+- [9] [rub-softsec/onelogon - Onelogon: Taking over Active Directory Accounts via Netlogon](https://github.com/rub-softsec/onelogon)
+- [10] [Microsoft - How to manage the changes in Netlogon secure channel connections associated with CVE-2020-1472](https://support.microsoft.com/en-us/topic/how-to-manage-the-changes-in-netlogon-secure-channel-connections-associated-with-cve-2020-1472-f7e8cc17-0309-1d6a-304e-5ba73cd1a11e)
+- [11] [A journey into forgotten Null Session and MS-RPC interfaces](https://media.kasperskycontenthub.com/wp-content/uploads/sites/43/2024/05/22190247/A-journey-into-forgotten-Null-Session-and-MS-RPC-interfaces.pdf)
+- [12] [SID filter as security boundary between domains? (Part 4) - Bypass SID filtering research](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+- [13] [SID filter as security boundary between domains? (Part 5) - Golden GMSA trust attack - from child to parent](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-5)
+- [14] [SID filter as security boundary between domains? (Part 6) - Schema change trust attack - from child to parent](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-6)
+- [15] [From DA to EA with ESC5](https://specterops.io/blog/2023/05/16/from-da-to-ea-with-esc5/)
+- [16] [Escalating from child domain's admins to enterprise admins in 5 minutes by abusing AD CS, a follow up](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/)
+- [17] [An ACE Up the Sleeve: Designing Active Directory DACL Backdoors](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)
 
 {{#include ../../banners/hacktricks-training.md}}

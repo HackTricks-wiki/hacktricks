@@ -4,54 +4,54 @@
 
 ## 기본 정보
 
-SPI (Serial Peripheral Interface)는 IC(집적 회로) 간의 단거리 통신을 위해 임베디드 시스템에서 사용되는 동기식 직렬 통신 프로토콜입니다. SPI 통신 프로토콜은 클럭 및 칩 선택 신호에 의해 조정되는 마스터-슬레이브 아키텍처를 사용합니다. 마스터-슬레이브 아키텍처는 EEPROM, 센서, 제어 장치 등과 같은 외부 주변 장치를 관리하는 마스터(일반적으로 마이크로프로세서)로 구성되며, 이들은 슬레이브로 간주됩니다.
+SPI (Serial Peripheral Interface)는 임베디드 시스템에서 IC (Integrated Circuits) 간 단거리 통신에 사용되는 Synchronous Serial Communication Protocol입니다. SPI Communication Protocol은 Clock 및 Chip Select Signal에 의해 조정되는 master-slave architecture를 사용합니다. master-slave architecture는 EEPROM, 센서, 제어 장치 등 외부 주변 장치를 관리하는 master (일반적으로 microprocessor)와 slave로 간주되는 이러한 장치들로 구성됩니다.
 
-여러 슬레이브가 마스터에 연결될 수 있지만 슬레이브끼리는 서로 통신할 수 없습니다. 슬레이브는 클럭 및 칩 선택의 두 핀으로 관리됩니다. SPI는 동기식 통신 프로토콜이므로 입력 및 출력 핀은 클럭 신호를 따릅니다. 칩 선택은 마스터가 슬레이브를 선택하고 상호작용하는 데 사용됩니다. 칩 선택이 높을 때 슬레이브 장치는 선택되지 않으며, 낮을 때는 칩이 선택되어 마스터가 슬레이브와 상호작용하게 됩니다.
+여러 slave를 하나의 master에 연결할 수 있지만, slave끼리는 서로 통신할 수 없습니다. Slave는 clock과 chip select라는 두 개의 핀으로 관리됩니다. SPI는 synchronous communication protocol이므로 input 및 output 핀은 clock signal을 따릅니다. Chip select는 master가 slave를 선택하고 상호작용하는 데 사용됩니다. Chip select가 high이면 slave device가 선택되지 않은 상태이며, low이면 chip이 선택된 상태이고 master가 slave와 상호작용합니다.
 
-MOSI (Master Out, Slave In) 및 MISO (Master In, Slave Out)는 데이터 전송 및 수신을 담당합니다. 데이터는 MOSI 핀을 통해 슬레이브 장치로 전송되며, 이때 칩 선택은 낮게 유지됩니다. 입력 데이터는 슬레이브 장치 공급업체의 데이터 시트에 따라 명령, 메모리 주소 또는 데이터가 포함됩니다. 유효한 입력이 있을 경우, MISO 핀은 마스터로 데이터를 전송하는 역할을 합니다. 출력 데이터는 입력이 끝난 다음 클럭 주기에서 정확히 전송됩니다. MISO 핀은 데이터가 완전히 전송되거나 마스터가 칩 선택 핀을 높게 설정할 때까지 데이터를 전송합니다(이 경우 슬레이브는 전송을 중지하고 마스터는 그 이후의 클럭 주기에서 듣지 않습니다).
+MOSI (Master Out, Slave In)와 MISO (Master In, Slave Out)는 데이터 전송 및 수신을 담당합니다. Chip select가 low로 유지되는 동안 MOSI 핀을 통해 slave device로 데이터가 전송됩니다. Input data에는 slave device vendor의 datasheet에 따른 instruction, memory address 또는 data가 포함됩니다. 유효한 input이 수신되면 MISO 핀이 master로 데이터를 전송합니다. Output data는 input이 끝난 바로 다음 clock cycle에 정확히 전송됩니다. MISO 핀은 데이터가 완전히 전송되거나 master가 chip select 핀을 high로 설정할 때까지 데이터를 전송합니다. 후자의 경우 slave는 전송을 중지하며, master는 해당 clock cycle 이후의 데이터를 수신하지 않습니다.
 
-## EEPROM에서 펌웨어 덤프하기
+## EEPROM에서 Firmware Dumping
 
-펌웨어 덤프는 펌웨어를 분석하고 그 안의 취약점을 찾는 데 유용할 수 있습니다. 종종 펌웨어는 인터넷에서 사용할 수 없거나 모델 번호, 버전 등과 같은 다양한 요인으로 인해 관련성이 없습니다. 따라서 물리적 장치에서 직접 펌웨어를 추출하는 것이 위협을 탐색하는 데 도움이 될 수 있습니다.
+Firmware dumping은 firmware를 분석하고 취약점을 찾는 데 유용할 수 있습니다. Firmware가 인터넷에 제공되지 않거나 model number, version 등의 요인에 따른 변형으로 인해 관련성이 없는 경우가 많습니다. 따라서 physical device에서 직접 firmware를 추출하면 threat hunting 시 특정 장치에 맞춰 분석하는 데 도움이 될 수 있습니다.
 
-직렬 콘솔을 얻는 것은 유용할 수 있지만, 종종 파일이 읽기 전용인 경우가 있습니다. 이는 다양한 이유로 분석을 제약합니다. 예를 들어, 패키지를 전송하고 수신하는 데 필요한 도구가 펌웨어에 없을 수 있습니다. 따라서 이진 파일을 추출하여 리버스 엔지니어링하는 것은 실현 가능하지 않습니다. 따라서 시스템에 전체 펌웨어를 덤프하고 분석을 위해 이진 파일을 추출하는 것이 매우 유용할 수 있습니다.
+Serial Console을 확보하는 것이 도움이 될 수 있지만, 파일이 read-only인 경우가 많습니다. 이는 여러 이유로 분석을 제한합니다. 예를 들어, package를 전송하고 수신하는 데 필요한 tool이 firmware에 존재하지 않을 수 있습니다. 따라서 binary를 추출해 reverse engineer하는 것은 실행하기 어렵습니다. 그러므로 전체 firmware를 system에 dump하고 분석을 위해 binary를 추출할 수 있다면 매우 유용합니다.
 
-또한, 레드 팀 활동 중 장치에 물리적으로 접근할 때, 펌웨어를 덤프하면 파일을 수정하거나 악성 파일을 주입한 후 메모리에 다시 플래시하는 데 도움이 될 수 있으며, 이는 장치에 백도어를 심는 데 유용할 수 있습니다. 따라서 펌웨어 덤프를 통해 잠금 해제할 수 있는 수많은 가능성이 있습니다.
+또한 red teaming 및 device에 대한 physical access를 확보하는 과정에서 firmware dumping을 통해 파일을 수정하거나 malicious file을 주입한 후 memory에 다시 reflash할 수 있습니다. 이는 device에 backdoor를 implant하는 데 도움이 될 수 있습니다. 따라서 firmware dumping으로 다양한 가능성을 활용할 수 있습니다.
 
-### CH341A EEPROM 프로그래머 및 리더
+### CH341A EEPROM Programmer and Reader
 
-이 장치는 EEPROM에서 펌웨어를 덤프하고 펌웨어 파일로 다시 플래시하는 데 사용되는 저렴한 도구입니다. 이는 컴퓨터 BIOS 칩(단순히 EEPROM임) 작업에 인기 있는 선택입니다. 이 장치는 USB를 통해 연결되며 시작하는 데 최소한의 도구가 필요합니다. 또한 일반적으로 작업을 빠르게 완료하므로 물리적 장치 접근에도 유용할 수 있습니다.
+이 device는 EEPROM에서 firmware를 dump하고 firmware file로 다시 reflash할 수 있는 저렴한 tool입니다. 컴퓨터 BIOS chip (단순한 EEPROM임)을 다루는 데 널리 사용되어 왔습니다. 이 device는 USB를 통해 연결되며 시작하는 데 필요한 tool이 거의 없습니다. 또한 일반적으로 작업을 빠르게 완료하므로 physical device access 상황에서도 유용할 수 있습니다.
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-CH341a 프로그래머와 EEPROM 메모리를 연결하고 장치를 컴퓨터에 연결합니다. 장치가 감지되지 않는 경우, 컴퓨터에 드라이버를 설치해 보십시오. 또한 EEPROM이 올바른 방향으로 연결되어 있는지 확인하십시오(일반적으로 VCC 핀을 USB 커넥터와 반대 방향으로 배치) 그렇지 않으면 소프트웨어가 칩을 감지할 수 없습니다. 필요시 다이어그램을 참조하십시오:
+EEPROM memory를 CH341a Programmer에 연결하고 device를 computer에 연결합니다. Device가 감지되지 않으면 computer에 driver를 설치해 보세요. 또한 EEPROM이 올바른 방향으로 연결되어 있는지 확인하세요. 일반적으로 VCC Pin을 USB connector와 반대 방향으로 배치합니다. 그렇지 않으면 software가 chip을 감지하지 못합니다. 필요한 경우 diagram을 참조하세요.
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-마지막으로 flashrom, G-Flash (GUI) 등의 소프트웨어를 사용하여 펌웨어를 덤프합니다. G-Flash는 최소한의 GUI 도구로 빠르며 EEPROM을 자동으로 감지합니다. 이는 펌웨어를 신속하게 추출해야 할 때, 문서와 많은 조작 없이 유용할 수 있습니다.
+마지막으로 flashrom, G-Flash (GUI) 등의 software를 사용해 firmware를 dump합니다. G-Flash는 빠르게 동작하는 minimal GUI tool이며 EEPROM을 자동으로 감지합니다. Documentation을 많이 확인하지 않고 firmware를 신속하게 추출해야 할 때 유용할 수 있습니다.
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-펌웨어를 덤프한 후, 이진 파일에 대한 분석을 수행할 수 있습니다. strings, hexdump, xxd, binwalk 등의 도구를 사용하여 펌웨어 및 전체 파일 시스템에 대한 많은 정보를 추출할 수 있습니다.
+Firmware를 dump한 후 binary file을 분석할 수 있습니다. strings, hexdump, xxd, binwalk 등의 tool을 사용하면 firmware와 전체 file system에서 많은 정보를 추출할 수 있습니다.
 
-펌웨어에서 내용을 추출하기 위해 binwalk를 사용할 수 있습니다. Binwalk는 헥사 서명을 분석하고 이진 파일에서 파일을 식별하며 이를 추출할 수 있는 기능이 있습니다.
+Firmware의 contents를 추출하려면 binwalk를 사용할 수 있습니다. Binwalk는 hex signature를 분석하고 binary file에서 file을 식별하며 이를 추출할 수 있습니다.
 ```
 binwalk -e <filename>
 ```
-이것은 사용된 도구와 구성에 따라 .bin 또는 .rom일 수 있습니다.
+도구와 구성에 따라 `.bin` 또는 `.rom`일 수 있습니다.
 
 > [!CAUTION]
-> 펌웨어 추출은 섬세한 과정이며 많은 인내가 필요합니다. 잘못 다루면 펌웨어가 손상되거나 완전히 지워져 장치가 사용 불가능해질 수 있습니다. 펌웨어를 추출하기 전에 특정 장치를 연구하는 것이 권장됩니다.
+> firmware extraction은 섬세한 작업이며 많은 인내심이 필요합니다. 잘못 다루면 firmware가 손상되거나 완전히 지워져 장치를 사용할 수 없게 될 수 있습니다. firmware를 추출하기 전에 해당 장치를 충분히 조사하는 것이 좋습니다.
 
 ### Bus Pirate + flashrom
 
-![](<../../images/image (910).png>)
+![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Bus Pirate + flashrom](<../../images/image (910).png>)
 
-Pirate Bus의 핀 배치가 SPI에 연결할 **MOSI** 및 **MISO** 핀을 나타내더라도 일부 SPI는 핀을 DI 및 DO로 나타낼 수 있습니다. **MOSI -> DI, MISO -> DO**
+Pirate Bus의 PINOUT에 SPI 연결을 위한 **MOSI** 및 **MISO** 핀이 표시되어 있더라도 일부 SPI는 핀을 DI 및 DO로 표시할 수 있습니다. **MOSI -> DI, MISO -> DO**
 
-![](<../../images/image (360).png>)
+![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Note that even if the PINOUT of the Pirate Bus indicates pins for MOSI and MISO to connect to SPI however some SPIs may...](<../../images/image (360).png>)
 
-Windows 또는 Linux에서는 [**`flashrom`**](https://www.flashrom.org/Flashrom) 프로그램을 사용하여 다음과 같이 플래시 메모리의 내용을 덤프할 수 있습니다:
+Windows 또는 Linux에서는 [**`flashrom`**](https://www.flashrom.org/Flashrom) 프로그램을 사용하여 다음과 같은 명령을 실행해 flash memory의 내용을 dump할 수 있습니다:
 ```bash
 # In this command we are indicating:
 # -VV Verbose

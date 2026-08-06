@@ -4,11 +4,11 @@
 
 ### 변수의 Ownership
 
-Memory는 다음 규칙에 따라 compiler가 compile time에 확인하는 Ownership system을 통해 관리됩니다:
+Memory는 compiler가 compile time에 확인하는 다음 Ownership 시스템을 통해 관리됩니다:
 
 1. Rust의 각 value에는 owner라고 하는 variable이 있습니다.
 2. 한 번에 하나의 owner만 존재할 수 있습니다.
-3. owner가 scope를 벗어나면 value는 dropped됩니다.
+3. owner가 scope를 벗어나면 value가 drop됩니다.
 ```rust
 fn main() {
 let student_age: u32 = 20;
@@ -39,7 +39,7 @@ Wrapper::new("Foo").value, "Foo"
 ```
 ### Option, Some & None
 
-Option 타입은 값이 Some 타입(무언가 있음)이거나 None일 수 있음을 의미합니다:
+Option 타입은 값이 Some 타입(무언가가 있음)일 수도 있고 None일 수도 있음을 의미합니다:
 ```rust
 pub enum Option<T> {
 None,
@@ -51,7 +51,7 @@ Some(T),
 
 ### Result, Ok & Err
 
-오류를 반환하고 전파하는 데 사용됩니다.
+오류를 반환하고 전파하는 데 사용됩니다
 ```rust
 pub enum Result<T, E> {
 Ok(T),
@@ -60,13 +60,13 @@ Err(E),
 ```
 `is_ok()` 또는 `is_err()`와 같은 함수를 사용하여 result의 값을 확인할 수 있습니다.
 
-`Option` enum은 값이 존재하지 않을 수 있는(`None`일 수 있는) 상황에서 사용해야 합니다.
-`Result` enum은 수행하려는 작업이 실패할 수 있는 상황에서 사용해야 합니다.
+값이 존재하지 않을 수 있는(`None`일 수 있는) 상황에서는 `Option` enum을 사용해야 합니다.
+수행하려는 작업에서 문제가 발생할 수 있는 상황에서는 `Result` enum을 사용해야 합니다.
 
 
 ### 매크로
 
-매크로는 작성한 코드보다 더 많은 코드를 생성하도록 확장되기 때문에 함수보다 강력합니다. 예를 들어 함수 시그니처에는 함수가 받는 매개변수의 개수와 타입을 선언해야 합니다. 반면 매크로는 가변 개수의 매개변수를 받을 수 있습니다. `println!("hello")`처럼 인수 하나를 사용하여 호출할 수도 있고, `println!("hello {}", name)`처럼 인수 두 개를 사용하여 호출할 수도 있습니다. 또한 매크로는 compiler가 코드의 의미를 해석하기 전에 확장되므로, 매크로는 예를 들어 주어진 타입에 trait를 구현할 수 있습니다. 함수는 runtime에 호출되고 trait는 compile time에 구현되어야 하므로 그렇게 할 수 없습니다.
+매크로는 작성한 코드보다 더 많은 코드를 생성하도록 확장되기 때문에 함수보다 강력합니다. 예를 들어 함수 시그니처에는 함수가 받는 매개변수의 개수와 타입을 선언해야 합니다. 반면 매크로는 가변 개수의 매개변수를 받을 수 있습니다. `println!("hello")`처럼 인수를 하나 전달하거나 `println!("hello {}", name)`처럼 인수를 두 개 전달하여 호출할 수 있습니다. 또한 매크로는 컴파일러가 코드의 의미를 해석하기 전에 확장되므로, 매크로를 사용하면 예를 들어 주어진 타입에 trait을 구현할 수 있습니다. 함수는 런타임에 호출되고 trait은 컴파일 타임에 구현되어야 하므로 그렇게 할 수 없습니다.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -91,7 +91,7 @@ println!("Check out my macro!");
 }
 }
 ```
-### 반복하기
+### 반복 Iteration
 ```rust
 // Iterate through a vector
 let my_fav_fruits = vec!["banana", "raspberry"];
@@ -108,7 +108,7 @@ for (key, hashvalue) in &*map {
 for key in map.keys() {
 for value in map.values() {
 ```
-### 재귀 Box
+### Recursive Box
 ```rust
 enum List {
 Cons(i32, List),
@@ -182,7 +182,7 @@ println!("{}", n);
 n += 1;
 }
 ```
-#### for
+#### 을 위한
 ```rust
 for n in 1..101 {
 if n % 15 == 0 {
@@ -286,11 +286,11 @@ assert_ne!(true, false);
 }
 }
 ```
-### 스레딩
+### Threading
 
 #### Arc
 
-Arc는 Clone을 사용하여 객체에 대한 참조를 추가로 생성하고, 이를 스레드에 전달할 수 있습니다. 값에 대한 마지막 참조 포인터가 스코프를 벗어나면 변수가 drop됩니다.
+Arc는 Clone을 사용하여 객체에 대한 추가 references를 생성하고 이를 threads에 전달할 수 있습니다. 값에 대한 마지막 reference pointer가 scope를 벗어나면 variable이 drop됩니다.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");
@@ -303,7 +303,7 @@ println!("{:?}", apple);
 ```
 #### Threads
 
-이 경우 thread가 수정할 수 있는 변수를 thread에 전달합니다.
+이 경우에는 thread가 수정할 수 있는 변수를 thread에 전달합니다.
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));
@@ -321,19 +321,19 @@ thread::sleep(Duration::from_millis(500));
 }
 }
 ```
-### 보안 필수 사항
+### Security Essentials
 
-Rust는 기본적으로 강력한 memory-safety 보장을 제공하지만, `unsafe` code, dependency 문제 또는 logic 실수를 통해 여전히 치명적인 vulnerability를 도입할 수 있습니다. 다음 mini-cheatsheet는 Rust software에 대한 offensive 또는 defensive security review에서 가장 자주 다루게 될 primitives를 정리한 것입니다.
+Rust는 기본적으로 강력한 memory-safety 보장을 제공하지만, `unsafe` code, dependency 문제 또는 logic 실수를 통해 여전히 critical vulnerability를 도입할 수 있습니다. 다음 mini-cheatsheet는 Rust software에 대한 offensive 또는 defensive security review에서 가장 자주 다루게 되는 primitive를 정리한 것입니다.
 
-#### Unsafe code 및 memory safety
+#### Unsafe code & memory safety
 
-`unsafe` blocks는 compiler의 aliasing 및 bounds checks를 비활성화하므로, **모든 전통적인 memory-corruption bugs (OOB, use-after-free, double free 등)가 다시 발생할 수 있습니다**. 빠른 audit checklist:
+`unsafe` blocks는 compiler의 aliasing 및 bounds checks를 비활성화하므로, **모든 전통적인 memory-corruption bug(OOB, use-after-free, double free 등)가 다시 나타날 수 있습니다**. 빠른 audit checklist:
 
 * `unsafe` blocks, `extern "C"` functions, `ptr::copy*`, `std::mem::transmute`, `MaybeUninit`, raw pointers 또는 `ffi` modules를 사용하는 부분을 찾습니다.
-* low-level functions에 전달되는 모든 pointer arithmetic 및 length arguments를 검증합니다.
-* 누군가 `unsafe`를 다시 도입했을 때 compilation이 실패하도록 `#![forbid(unsafe_code)]` (crate 전체) 또는 `#[deny(unsafe_op_in_unsafe_fn)]` (1.68 이상)을 우선 사용합니다.
+* low-level functions에 전달되는 모든 pointer arithmetic 및 length argument를 검증합니다.
+* 누군가 `unsafe`를 다시 도입했을 때 compilation이 실패하도록 `#![forbid(unsafe_code)]`(crate 전체) 또는 `#[deny(unsafe_op_in_unsafe_fn)]`(1.68 이상)을 사용하는 것을 선호합니다.
 
-raw pointers로 생성된 overflow 예제:
+raw pointers로 생성한 overflow 예시:
 ```rust
 use std::ptr;
 
@@ -347,14 +347,14 @@ dst.set_len(src.len());
 dst
 }
 ```
-Miri를 실행하는 것은 테스트 시점에 UB를 감지하는 비용이 적게 드는 방법입니다:
+Miri를 실행하면 테스트 시점에 UB를 감지할 수 있는 비용 효율적인 방법입니다:
 ```bash
 rustup component add miri
 cargo miri test  # hunts for OOB / UAF during unit tests
 ```
 #### RustSec / cargo-audit로 dependencies 감사
 
-실제 환경의 Rust 취약점 대부분은 third-party crates에 존재합니다. 커뮤니티가 관리하는 RustSec advisory DB는 로컬에서 조회할 수 있습니다:<sup>[[1]](#references)</sup>
+실제 환경의 Rust 취약점 대부분은 third-party crates에 존재합니다. RustSec advisory DB(커뮤니티 기반)는 로컬에서 조회할 수 있습니다:<sup>[[1]](#references)</sup>
 ```bash
 cargo install cargo-audit
 cargo audit              # flags vulnerable versions listed in Cargo.lock
@@ -363,38 +363,38 @@ CI에 통합하고 `--deny warnings`에서 실패하도록 설정합니다.
 
 `cargo deny check advisories`는 유사한 기능과 함께 라이선스 및 ban-list 검사도 제공합니다.
 
-#### cargo-tarpaulin을 사용한 code coverage
+#### cargo-tarpaulin을 사용한 코드 커버리지
 
-`cargo tarpaulin`은 Cargo 빌드 시스템을 위한 code coverage 보고 도구입니다
+`cargo tarpaulin`은 Cargo 빌드 시스템을 위한 코드 커버리지 보고 도구입니다
 ```bash
 cargo binstall cargo-tarpaulin
 cargo tarpaulin              # no options are required, if no root directory is defined Tarpaulin will run in the current working directory.
 ```
-Linux에서 Tarpaulin의 기본 tracing backend는 여전히 Ptrace이며 x86_64 프로세서에서만 작동합니다. `--engine llvm`을 사용하면 llvm coverage instrumentation으로 변경할 수 있습니다. Mac과 Windows에서는 이것이 기본 collection method입니다.
+Linux에서 Tarpaulin의 기본 tracing backend는 여전히 Ptrace이며 x86_64 processors에서만 작동합니다. `--engine llvm`을 사용하면 llvm coverage instrumentation으로 변경할 수 있습니다. Mac과 Windows에서는 이것이 기본 collection method입니다.
 
 #### cargo-vet을 사용한 supply-chain verification (2024)
 
-`cargo vet`은 가져오는 모든 crate에 대한 review hash를 기록하고, 인지하지 못한 upgrades를 방지합니다:
+`cargo vet`은 import하는 모든 crate의 review hash를 기록하고, 인지하지 못한 upgrades를 방지합니다:
 ```bash
 cargo install cargo-vet
 cargo vet init      # generates vet.toml
 cargo vet --locked  # verifies packages referenced in Cargo.lock
 ```
-이 tool은 Rust project infrastructure와 점점 더 많은 orgs에서 poisoned-package attacks를 완화하기 위해 도입되고 있습니다.<sup>[[2]](#references)</sup>
+이 도구는 poisoned-package attacks를 완화하기 위해 Rust 프로젝트 인프라와 점점 더 많은 조직에서 도입되고 있습니다.<sup>[[2]](#references)</sup>
 
 #### API surface Fuzzing (cargo-fuzz)
 
-Fuzz tests는 DoS 또는 side-channel issues로 이어질 수 있는 panics, integer overflows 및 logic bugs를 쉽게 탐지합니다:
+Fuzz 테스트는 DoS 또는 side-channel 문제가 될 수 있는 panic, integer overflow 및 logic bug를 쉽게 탐지합니다:
 ```bash
 cargo install cargo-fuzz
 cargo fuzz init              # creates fuzz_targets/
 cargo fuzz run fuzz_target_1 # builds with libFuzzer & runs continuously
 ```
-리포지토리에 fuzz target을 추가하고 pipeline에서 실행하세요.
+fuzz target을 repo에 추가하고 pipeline에서 실행하세요.
 
-## 참고 자료
+## References
 
 - [1] [RustSec Advisory Database](https://rustsec.org)
-- [2] [Cargo-vet: Auditing your Rust Dependencies](https://mozilla.github.io/cargo-vet/)
+- [2] [Cargo-vet: "Auditing your Rust Dependencies"](https://mozilla.github.io/cargo-vet/)
 
 {{#include ../banners/hacktricks-training.md}}
