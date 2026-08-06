@@ -2,105 +2,104 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Le build recenti di Windows hanno introdotto il **supporto SMB client per porte TCP alternative**. Questa funzionalità può essere abusata per trasformare l'**autenticazione NTLM locale** in una **privilege escalation locale SYSTEM** quando l'attaccante può:
+Le build recenti di Windows hanno introdotto il **supporto del client SMB per porte TCP alternative**. Questa funzionalita puo essere sfruttata per trasformare l'**autenticazione NTLM locale** in una **local privilege escalation a SYSTEM** quando l'attaccante puo:<sup>[[1]](#references)</sup>
 
-1. Aprire una connessione SMB verso un listener controllato dall'attaccante su una **porta diversa da 445**
-2. Mantenere viva quella connessione TCP
-3. Costringere un **client locale privilegiato** ad accedere allo **stesso percorso della share SMB**
-4. Relay dell'**autenticazione NTLM locale** risultante verso il vero servizio SMB della macchina
+1. Aprire una connessione SMB verso un listener controllato dall'attaccante su una **porta diversa dalla 445**
+2. Mantenere attiva la connessione TCP
+3. Indurre un **client locale privilegiato** ad accedere allo **stesso percorso della share SMB**
+4. Eseguire il relay della **autenticazione NTLM locale** risultante verso il vero servizio SMB della macchina
 
-Questa è la primitive dietro **CVE-2026-24294**, corretta nel **March 2026**.
+Questa e la primitive alla base di **CVE-2026-24294**, corretta nel **marzo 2026**.<sup>[[1]](#references)[[4]](#references)</sup>
 
-## Why it works
+## Perche funziona
 
-Il vecchio trucco di reflection CMTI / serialized-SPN è trattato qui:
+La tecnica piu vecchia di reflection CMTI / serialized-SPN e descritta qui:
 
 {{#ref}}
 ../ntlm/README.md
 {{#endref}}
 
-Questa variante più recente **non** richiede un hostname marshalled. Invece abusa di due comportamenti del client SMB:
+Questa variante piu recente **non** richiede un hostname marshalled. Sfrutta invece due comportamenti del client SMB:<sup>[[1]](#references)</sup>
 
-- **Supporto per porte alternative** su **Windows 11 24H2** e **Windows Server 2025**, esposto agli utenti con `net use \\host\share /tcpport:<port>`
-- **Riutilizzo / multiplexing della connessione SMB**, dove più sessioni autenticate possono viaggiare sulla stessa connessione TCP
+- **Supporto per porte alternative** su **Windows 11 24H2** e **Windows Server 2025**, esposto agli utenti tramite `net use \\host\share /tcpport:<port>`
+- **Riuso / multiplexing delle connessioni SMB**, in cui piu sessioni autenticate possono utilizzare la stessa connessione TCP
 
-Questo significa che un utente con privilegi bassi può prima creare una connessione TCP dal client SMB verso un server SMB dell'attaccante su una porta alta, poi costringere un servizio privilegiato ad accedere allo **stesso identico percorso UNC**. Se Windows decide di riutilizzare la connessione TCP esistente, lo scambio NTLM privilegiato viene inviato sul trasporto controllato dall'attaccante e può essere relayato al server SMB locale.
+Questo significa che un utente con pochi privilegi puo prima creare una connessione TCP dal client SMB verso un server SMB dell'attaccante su una porta alta, quindi indurre un servizio privilegiato ad accedere al **percorso UNC esatto**. Se Windows decide di riutilizzare la connessione TCP esistente, lo scambio NTLM privilegiato viene inviato attraverso il transport controllato dall'attaccante e puo essere sottoposto a relay verso il server SMB locale.<sup>[[1]](#references)</sup>
 
-## Preconditions
+## Prerequisiti
 
-- Il target supporta porte SMB alternative:
-- **Windows 11 24H2** o successivo
-- **Windows Server 2025** o successivo
-- L'attaccante può eseguire un server SMB locale o remoto su una porta alta scelta
-- L'attaccante può costringere un servizio privilegiato ad accedere a un percorso UNC
-- L'autenticazione privilegiata deve essere **NTLM local authentication**
-- Il target deve essere relayable:
-- Synacktiv ha segnalato che funzionava di default su **Windows Server 2025**
-- La loro chain **non** funzionava su **Windows 11 24H2** perché lì SMB signing in uscita è imposto di default
+- Il target supporta le porte alternative SMB:<sup>[[2]](#references)</sup>
+- **Windows 11 24H2** o versioni successive
+- **Windows Server 2025** o versioni successive
+- L'attaccante puo eseguire un server SMB locale o remoto su una porta alta scelta
+- L'attaccante puo indurre un servizio privilegiato ad accedere a un percorso UNC
+- L'autenticazione privilegiata deve essere una **autenticazione NTLM locale**
+- Il target deve essere relayable:<sup>[[1]](#references)</sup>
+- Synacktiv ha riportato che la tecnica funzionava per impostazione predefinita su **Windows Server 2025**
+- La loro chain **non** funzionava su **Windows 11 24H2** perche la firma SMB in uscita e applicata li per impostazione predefinita
 
-## Userland and internals
+## Userland e internals
 
-Dalla command line la funzionalità sembra semplice:
+Dalla command line la funzionalita appare semplice:
 ```cmd
 net use \\192.168.56.3\share /tcpport:12345
 ```
-Programmaticamente, il client usa `WNetAddConnection4W` con dati `lpUseOptions` non documentati. L'opzione rilevante è `TraP` (transport parameters), che alla fine raggiunge il client SMB del kernel tramite un FSCTL ed è analizzata da `mrxsmb`.
+Programmaticamente, il client usa `WNetAddConnection4W` con dati `lpUseOptions` non documentati. L'opzione rilevante è `TraP` (transport parameters), che alla fine raggiunge il client SMB del kernel tramite un FSCTL e viene analizzata da `mrxsmb`.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Note pratiche importanti:
+Note pratiche importanti:<sup>[[1]](#references)</sup>
 
-- **La sintassi UNC non ha ancora un campo per la porta**
-- **`net use` è per-logon-session**
-- Il bypass funziona ancora perché **la connessione TCP e la sessione SMB sono oggetti separati**
-- Riutilizzare lo **stesso share path** è obbligatorio se l'exploit dipende dal fatto che il client SMB riusi la connessione TCP creata in precedenza
+- **La sintassi UNC continua a non avere un campo per la porta**
+- **`net use` è per-sessione di logon**
+- Il bypass funziona comunque perché **la connessione TCP e la sessione SMB sono oggetti separati**
+- Riutilizzare **lo stesso percorso della share** è obbligatorio se l'exploit dipende dal riutilizzo, da parte del client SMB, della connessione TCP creata in precedenza
 
-## Flusso di exploitation
+## Exploitation flow
 
 ### 1. Create the attacker-controlled SMB transport
 
-Esegui un SMB server su una porta alta e fai connettere Windows ad esso:
+Esegui un server SMB su una porta alta e fai connettere Windows a essa:
 ```cmd
 net use \\192.168.56.3\share /tcpport:12345
 ```
-Il server può accettare qualsiasi coppia di credenziali che controlli, per esempio `user:user`. L’obiettivo di questo passo non è ancora il privilege escalation, ma solo far aprire al client SMB di Windows e mantenere una connessione TCP riutilizzabile verso il tuo listener.
+Il server può accettare qualsiasi coppia di credenziali sotto il tuo controllo, ad esempio `user:user`. L'obiettivo di questo passaggio non è ancora la privilege escalation, ma solo fare in modo che il client SMB di Windows apra e mantenga una connessione TCP riutilizzabile verso il tuo listener.<sup>[[1]](#references)</sup>
 
-### 2. Costringere un servizio privilegiato allo stesso percorso UNC
+### 2. Forzare un servizio privilegiato verso lo stesso percorso UNC
 
-Usa una coercion primitive come **PetitPotam** contro lo **stesso** percorso `\\192.168.56.3\share`. Se il client forzato è privilegiato e il nome target è locale (`localhost` o un host/IP locale), Windows esegue **NTLM local authentication**.
+Usa una coercion primitive come **PetitPotam** sullo **stesso** percorso `\\192.168.56.3\share`. Se il client forzato dispone di privilegi e il nome di destinazione è locale (`localhost` o un IP/host locale), Windows esegue una **local authentication NTLM**.
 
-Poiché la connessione TCP viene riutilizzata, quello scambio NTLM privilegiato viaggia verso il servizio SMB dell’attaccante invece che direttamente al vero server SMB locale.
+Poiché la connessione TCP viene riutilizzata, questo scambio NTLM privilegiato viene inviato al servizio SMB dell'attacker invece che direttamente al vero server SMB locale.<sup>[[1]](#references)</sup>
 
-### 3. Relay dell’autenticazione privilegiata verso SMB locale
+### 3. Eseguire il relay dell'autenticazione privilegiata verso SMB locale
 
-Il servizio SMB controllato dall’attaccante inoltra lo scambio NTLM privilegiato a `ntlmrelayx.py`, che lo relaya al vero listener SMB della macchina e ottiene una sessione come `NT AUTHORITY\SYSTEM`.
+Il servizio SMB controllato dall'attacker inoltra lo scambio NTLM privilegiato a `ntlmrelayx.py`, che esegue il relay verso il listener SMB reale della macchina e ottiene una sessione come `NT AUTHORITY\SYSTEM`.<sup>[[1]](#references)</sup>
 
-Tool tipici dalla public writeup:
+Strumenti tipici riportati nella writeup pubblica:<sup>[[1]](#references)</sup>
 
-- `smbserver.py` su una porta custom per ricevere l’auth privilegiata sulla connessione TCP riutilizzata
-- `ntlmrelayx.py` per relayare l’NTLM catturato verso SMB locale
-- `PetitPotam.exe` o un’altra coercion primitive per forzare l’autenticazione privilegiata
+- `smbserver.py` su una porta personalizzata per ricevere l'autenticazione privilegiata tramite la connessione TCP riutilizzata
+- `ntlmrelayx.py` per eseguire il relay dell'NTLM catturato verso SMB locale
+- `PetitPotam.exe` o un'altra coercion primitive per forzare l'autenticazione privilegiata
 
-## Note operative
+## Note per l'operatore
 
-- Questa è una tecnica di **local privilege escalation**, non un generico remote relay trick
-- Il servizio SMB controllato dall’attaccante deve gestire l’autenticazione privilegiata sulla **stessa connessione TCP** usata inizialmente per il mount della share
-- Se l’accesso forzato colpisce un **percorso di share diverso**, Windows può stabilire una connessione diversa e la chain si rompe
-- I requisiti di SMB signing possono bloccare il relay anche quando il passo della porta arbitraria funziona
-- Se hai solo materiale Kerberos o non puoi forzare NTLM locale, questa variante esatta non basta
+- Questa è una tecnica di **local privilege escalation**, non un generico trucco di remote relay<sup>[[1]](#references)</sup>
+- Il servizio SMB controllato dall'attacker deve gestire l'autenticazione privilegiata sulla **stessa connessione TCP** utilizzata originariamente per il montaggio della share<sup>[[1]](#references)</sup>
+- Se l'accesso forzato raggiunge un **percorso share differente**, Windows potrebbe stabilire una connessione diversa e la catena si interromperebbe<sup>[[1]](#references)</sup>
+- I requisiti di SMB signing possono bloccare il relay anche quando il passaggio tramite porta arbitraria funziona<sup>[[1]](#references)</sup>
+- Se disponi solo di materiale Kerberos o non puoi forzare NTLM locale, questa variante esatta non è sufficiente<sup>[[1]](#references)</sup>
 
-## Detection and hardening
+## Rilevamento e hardening
 
-- Patch **CVE-2026-24294** da **March 2026 Patch Tuesday**
-- Monitora `net use` o `New-SmbMapping` che usano **porte SMB non di default**
-- Allerta su SMB in uscita insolito da workstation o server verso **porte TCP alte**
-- Esamina opportunità di coercion come trigger **EFSRPC / PetitPotam-style**
-- Applica SMB signing dove possibile; Synacktiv nota specificamente che questo ha bloccato il loro relay su Windows 11 24H2
+- Installa la patch per **CVE-2026-24294** inclusa nel **Patch Tuesday di marzo 2026**<sup>[[4]](#references)</sup>
+- Monitora l'uso di `net use` o `New-SmbMapping` con **porte SMB non predefinite**<sup>[[1]](#references)</sup>
+- Genera un alert per traffico SMB in uscita insolito dalle workstation o dai server verso **porte TCP elevate**<sup>[[1]](#references)</sup>
+- Verifica le opportunità di coercion, come i trigger in stile **EFSRPC / PetitPotam**<sup>[[1]](#references)</sup>
+- Applica SMB signing dove possibile; Synacktiv specifica che questa misura ha bloccato il loro relay su Windows 11 24H2<sup>[[1]](#references)</sup>
 
-## References
+## Riferimenti
 
-- [Synacktiv - Bypassing Windows authentication reflection mitigations for SYSTEM shells - Part 1](https://www.synacktiv.com/en/publications/bypassing-windows-authentication-reflection-mitigations-for-system-shells-part-1.html)
-- [Microsoft Learn - Configure alternative SMB ports for Windows Server 2025](https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-ports)
-- [Microsoft Learn - WNetAddConnection4W](https://learn.microsoft.com/en-us/windows/win32/api/winnetwk/nf-winnetwk-wnetaddconnection4w)
-- [Project Zero - Windows Exploitation Tricks: Trapping Virtual Memory Access (2025 Update)](https://projectzero.google/2025/01/windows-exploitation-tricks-trapping.html)
-- [MSRC - CVE-2026-24294](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-24294)
+- [1] [Synacktiv - Bypassing Windows authentication reflection mitigations for SYSTEM shells - Part 1](https://www.synacktiv.com/en/publications/bypassing-windows-authentication-reflection-mitigations-for-system-shells-part-1.html)
+- [2] [Microsoft Learn - Configure alternative SMB ports for Windows Server 2025](https://learn.microsoft.com/en-us/windows-server/storage/file-server/smb-ports)
+- [3] [Microsoft Learn - WNetAddConnection4W](https://learn.microsoft.com/en-us/windows/win32/api/winnetwk/nf-winnetwk-wnetaddconnection4w)
+- [4] [MSRC - CVE-2026-24294](https://msrc.microsoft.com/update-guide/vulnerability/CVE-2026-24294)
 
 {{#include ../../banners/hacktricks-training.md}}

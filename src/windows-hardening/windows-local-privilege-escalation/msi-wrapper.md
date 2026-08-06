@@ -2,21 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Scarica l'applicazione della versione gratuita da [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), eseguila e avvolgi il binario "maligno" su di essa.\
-Nota che puoi avvolgere un "**.bat**" se vuoi **solo** **eseguire** **comandi (invece di cmd.exe seleziona il file .bat)**
+Scarica la versione gratuita dell'app da [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), eseguila e crea un wrapper del binario "**malicious**".\
+Nota che puoi creare un wrapper anche per un "**.bat**" se vuoi **solo** **eseguire** **righe di comando (invece di cmd.exe seleziona il file .bat)**
 
-![](<../../images/image (417).png>)
+![MSI Wrapper: Nota che puoi creare un wrapper anche per un " .bat " se vuoi solo eseguire righe di comando (invece di cmd.exe seleziona il file .bat)](<../../images/image (417).png>)
 
 E questa è la parte più importante della configurazione:
 
-![](<../../images/image (312).png>)
+![MSI Wrapper: E questa è la parte più importante della configurazione](<../../images/image (312).png>)
 
-![](<../../images/image (346).png>)
+![MSI Wrapper: E questa è la parte più importante della configurazione](<../../images/image (346).png>)
 
-![](<../../images/image (1072).png>)
+![MSI Wrapper: E questa è la parte più importante della configurazione](<../../images/image (1072).png>)
 
-(Per favore, nota che se provi a impacchettare il tuo binario, sarai in grado di modificare questi valori)
+(Nota che, se provi a impacchettare un tuo binario, potrai modificare questi valori)
 
-Da qui clicca semplicemente sui **pulsanti successivi** e l'ultimo **pulsante di costruzione e il tuo installer/wrapper sarà generato.**
+Da qui fai clic sui **pulsanti Next** e, infine, sul **pulsante build**: verrà generato il tuo installer/wrapper.
 
 {{#include ../../banners/hacktricks-training.md}}
