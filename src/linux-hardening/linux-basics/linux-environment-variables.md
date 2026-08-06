@@ -52,7 +52,7 @@ If you are looking for **credentials** or **interesting service configuration** 
 
 ## Common variables
 
-From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
+From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)<sup>[[5]](#references)</sup>
 
 - **DISPLAY** – the display used by **X**. This variable is usually set to **:0.0**, which means the first display on the current computer.
 - **EDITOR** – the user’s preferred text editor.
@@ -181,7 +181,7 @@ These variables influence the **dynamic linker**:
 - `LD_LIBRARY_PATH`: prepend library search directories.
 - `LD_AUDIT`: load auditor libraries that observe library loading and symbol resolution.
 
-They are extremely valuable for **hooking**, **instrumentation**, and **privilege escalation** if a privileged command preserves them. In **secure-execution** mode (`AT_SECURE`, e.g. setuid/setgid/capabilities), the loader strips or restricts many of these variables. However, parser bugs in that early loader stage are still high-impact because they run **before** the target program.
+They are extremely valuable for **hooking**, **instrumentation**, and **privilege escalation** if a privileged command preserves them. In **secure-execution** mode (`AT_SECURE`, e.g. setuid/setgid/capabilities), the loader strips or restricts many of these variables. However, parser bugs in that early loader stage are still high-impact because they run **before** the target program.<sup>[[2]](#references)</sup>
 
 ```bash
 env | grep -E '^LD_'
@@ -209,7 +209,7 @@ EOF
 BASH_ENV=/tmp/pre.sh bash -c 'echo target'
 ```
 
-Bash itself disables these startup files when the **real/effective IDs differ** unless `-p` is used, so the exact behavior depends on how the wrapper invokes the shell. Be careful with privileged wrappers that call `setuid()`/`setgid()` **before** launching Bash: once the IDs match again, Bash may trust `BASH_ENV`, `ENV`, and related shell state that would otherwise be ignored.
+Bash itself disables these startup files when the **real/effective IDs differ** unless `-p` is used, so the exact behavior depends on how the wrapper invokes the shell. Be careful with privileged wrappers that call `setuid()`/`setgid()` **before** launching Bash: once the IDs match again, Bash may trust `BASH_ENV`, `ENV`, and related shell state that would otherwise be ignored.<sup>[[1]](#references)</sup>
 
 ### **PYTHONPATH, PYTHONHOME, PYTHONSTARTUP & PYTHONINSPECT**
 
@@ -229,7 +229,7 @@ PYTHONPATH=/tmp/pylib python3 -c 'import htmod'
 PYTHONPATH=/tmp/pylib python3 -I -c 'import htmod'   # ignored in isolated mode
 ```
 
-A recent real-world example was the 2024 **needrestart** LPE on Ubuntu/Debian systems: the root-owned scanner copied an unprivileged process's `PYTHONPATH` from `/proc/<PID>/environ` and then executed Python. The published exploit planted `importlib/__init__.so` in the attacker-controlled path so Python executed attacker code during its own initialization, before the helper's hard-coded script even mattered.
+A recent real-world example was the 2024 **needrestart** LPE on Ubuntu/Debian systems: the root-owned scanner copied an unprivileged process's `PYTHONPATH` from `/proc/<PID>/environ` and then executed Python. The published exploit planted `importlib/__init__.so` in the attacker-controlled path so Python executed attacker code during its own initialization, before the helper's hard-coded script even mattered.<sup>[[3]](#references)</sup>
 
 ### **PERL5OPT & PERL5LIB**
 
@@ -257,7 +257,7 @@ PERL5LIB=/tmp/perllib PERL5OPT=-MHT perl -e 'print "target\n"'
 - `--require <file>`: preload a CommonJS file before the target script.
 - `--import <module>`: preload an ES module before the target script.
 
-Node rejects some dangerous flags in `NODE_OPTIONS`, but `--require` and `--import` are explicitly allowed and are processed **before** the regular command-line arguments.
+Node rejects some dangerous flags in `NODE_OPTIONS`, but `--require` and `--import` are explicitly allowed and are processed **before** the regular command-line arguments.<sup>[[4]](#references)</sup>
 
 ```bash
 cat > /tmp/preload.js <<'EOF'
@@ -281,7 +281,7 @@ printf 'warn "[+] RUBYOPT preload reached"\n' > /tmp/rubylib/ht.rb
 RUBYLIB=/tmp/rubylib RUBYOPT='-rht' ruby -e 'puts :target'
 ```
 
-The 2024 **needrestart** vulnerabilities showed that this is not just a lab trick: the same root-owned helper that was vulnerable to `PYTHONPATH` abuse could also be coerced into running Ruby with an attacker-controlled `RUBYLIB`, loading `enc/encdb.so` from an attacker directory.
+The 2024 **needrestart** vulnerabilities showed that this is not just a lab trick: the same root-owned helper that was vulnerable to `PYTHONPATH` abuse could also be coerced into running Ruby with an attacker-controlled `RUBYLIB`, loading `enc/encdb.so` from an attacker directory.<sup>[[3]](#references)</sup>
 
 ### **PAGER, MANPAGER, GIT_PAGER, GIT_EDITOR & LESSOPEN**
 
@@ -338,9 +338,10 @@ One background job, one stopped and last command didn't finish correctly:
 
 ## References
 
-- [GNU Bash Manual - Bash Startup Files](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)
-- [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
-- [Qualys - LPEs in needrestart](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
-- [Node.js CLI documentation - `NODE_OPTIONS`](https://nodejs.org/api/cli.html)
+- [1] [GNU Bash Manual - Bash Startup Files](https://www.gnu.org/software/bash/manual/html_node/Bash-Startup-Files.html)
+- [2] [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [3] [Qualys - LPEs in needrestart](https://www.qualys.com/2024/11/19/needrestart/needrestart.txt)
+- [4] [Node.js CLI documentation - `NODE_OPTIONS`](https://nodejs.org/api/cli.html)
+- [5] [Common environment variables - Geek University](https://geek-university.com/linux/common-environment-variables/)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ## Overview
 
-The time namespace virtualizes selected monotonic-style clocks instead of the host wall clock. In practice this means private offsets for **`CLOCK_MONOTONIC`** and **`CLOCK_BOOTTIME`**, plus the closely related **`CLOCK_MONOTONIC_COARSE`**, **`CLOCK_MONOTONIC_RAW`**, and **`CLOCK_BOOTTIME_ALARM`** views. It does **not** virtualize **`CLOCK_REALTIME`**, so `date` and certificate-expiry logic still observe the host wall clock unless some other mechanism interferes.
+The time namespace virtualizes selected monotonic-style clocks instead of the host wall clock. In practice this means private offsets for **`CLOCK_MONOTONIC`** and **`CLOCK_BOOTTIME`**, plus the closely related **`CLOCK_MONOTONIC_COARSE`**, **`CLOCK_MONOTONIC_RAW`**, and **`CLOCK_BOOTTIME_ALARM`** views. It does **not** virtualize **`CLOCK_REALTIME`**, so `date` and certificate-expiry logic still observe the host wall clock unless some other mechanism interferes.<sup>[[1]](#references)</sup>
 
 The main purpose is to let a process observe controlled elapsed-time offsets without changing the host's global time view. This is useful for checkpoint/restore workflows, deterministic testing, and advanced runtime behavior. It is not usually a headline isolation control in the same way as mount or user namespaces, but it still contributes to making the process environment more self-contained.
 
@@ -31,17 +31,17 @@ Support varies by kernel and tool versions, so this page is more about understan
 
 ### Creation Nuance
 
-Time namespaces are slightly unusual compared to mount, PID, or network namespaces:
+Time namespaces are slightly unusual compared to mount, PID, or network namespaces:<sup>[[1]](#references)</sup>
 
 - `unshare(CLONE_NEWTIME)` creates a new time namespace for **future children**.
 - The calling task stays in its current time namespace.
 - `/proc/<pid>/ns/time_for_children` is therefore often more interesting than `/proc/<pid>/ns/time` when debugging runtime setup.
 
-The write window is also special. Offsets in `/proc/<pid>/timens_offsets` must be written before the new time namespace is fully populated with running tasks; in practice runtimes do this during the narrow setup window between namespace creation and starting the final payload. Once a task is already running there, later writes fail with `EACCES`. This is why low-level runtimes handle time-namespace setup as an early bootstrap step instead of trying to patch offsets from inside an already-started container process.
+The write window is also special. Offsets in `/proc/<pid>/timens_offsets` must be written before the new time namespace is fully populated with running tasks; in practice runtimes do this during the narrow setup window between namespace creation and starting the final payload. Once a task is already running there, later writes fail with `EACCES`. This is why low-level runtimes handle time-namespace setup as an early bootstrap step instead of trying to patch offsets from inside an already-started container process.<sup>[[1]](#references)</sup>
 
 ### Time Offsets
 
-Linux time namespaces expose the per-namespace offsets through `/proc/<pid>/timens_offsets`. The format is a set of clock names or IDs plus second/nanosecond deltas relative to the initial time namespace.
+Linux time namespaces expose the per-namespace offsets through `/proc/<pid>/timens_offsets`. The format is a set of clock names or IDs plus second/nanosecond deltas relative to the initial time namespace.<sup>[[1]](#references)</sup>
 
 In practice, the most reliable user-facing workflow is to let `unshare` write those offsets for you:
 
@@ -88,7 +88,7 @@ Time namespaces are newer and less universally exercised than mount or PID names
 
 This matters because it turns time namespacing from a niche kernel primitive into something that runtimes can request portably. It also explains why runtime internals need an explicit synchronization step: the offset must be written to `/proc/<pid>/timens_offsets` before the container payload fully enters the new namespace.
 
-Checkpoint/restore stacks such as CRIU are one of the main real-world reasons this exists at all. Without time namespaces, restoring a paused workload would make monotonic and boot-time clocks jump by the amount of time the workload spent suspended.
+Checkpoint/restore stacks such as CRIU are one of the main real-world reasons this exists at all. Without time namespaces, restoring a paused workload would make monotonic and boot-time clocks jump by the amount of time the workload spent suspended.<sup>[[2]](#references)</sup>
 
 ## Security Impact
 
@@ -167,7 +167,7 @@ For most container breakouts, the time namespace is not the first control you wi
 
 ## References
 
-- [Linux `time_namespaces(7)` manual page](https://man7.org/linux/man-pages/man7/time_namespaces.7.html)
-- [Time Namespaces - Linux Kernel Internals](https://kernel-internals.org/time/time-namespaces/)
+- [1] [Linux `time_namespaces(7)` manual page](https://man7.org/linux/man-pages/man7/time_namespaces.7.html)
+- [2] [Time Namespaces - Linux Kernel Internals](https://kernel-internals.org/time/time-namespaces/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}

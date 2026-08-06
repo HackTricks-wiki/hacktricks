@@ -23,7 +23,7 @@ If Mythic is already running, you can normally add a new agent or profile with `
 
 Mythic supports multiple agents, which are the **payloads that perform tasks on the compromised systems**. Each agent can be tailored to specific needs and can run on different operating systems.
 
-By default Mythic doesn't have any agents installed. The open-source community agents live in [**https://github.com/MythicAgents**](https://github.com/MythicAgents), and the [**community feature matrix**](https://mythicmeta.github.io/overview/agent_matrix.html) is useful to quickly check supported operating systems, payload formats, wrappers, and C2 profiles.
+By default Mythic doesn't have any agents installed. The open-source community agents live in [**https://github.com/MythicAgents**](https://github.com/MythicAgents), and the [**community feature matrix**](https://mythicmeta.github.io/overview/agent_matrix.html) is useful to quickly check supported operating systems, payload formats, wrappers, and C2 profiles.<sup>[[1]](#references)</sup>
 
 To install an agent from that org you can run:
 
@@ -62,14 +62,36 @@ Current operator-relevant profiles to keep in mind:
   local Docker context instead of silently reusing the remote image.
 - Browser scripts are one of Mythic's highest-value quality-of-life features
   for operators: they can turn raw command output into tables, screenshot
-  viewers, download links, and buttons that issue follow-on tasking directly
-  from the UI. This is especially useful for repetitive `ls`, `ps`, triage,
-  and file-browser workflows.
+  viewers, download links, search links, and buttons that issue follow-on
+  tasking directly from the UI. Current Mythic builds let each operator keep
+  their own scripts, toggle them globally or per-task, and get the best results
+  when agents return structured JSON instead of plaintext. This is especially
+  useful for repetitive `ls`, `ps`, triage, and file-browser workflows.<sup>[[4]](#references)[[6]](#references)</sup>
 - Newer Mythic builds also support interactive tasking and Push C2 patterns
   that reduce the need for `sleep 0` polling during PTY/SOCKS/rpfwd-heavy
   operations. When an agent/profile supports it, this is usually lower-overhead
   than hammering the server with constant check-ins just to keep an interactive
-  channel usable.
+  channel usable.<sup>[[3]](#references)</sup>
+- Current 3.4-era Mythic builders are more context-aware than older writeups
+  imply: build parameters can now be grouped or hidden based on the selected OS
+  or other build options, payload types can declare whether they support
+  multiple C2 profiles or multiple instances of the same C2 in one build, and
+  C2 parameter deviations let an agent hide fields it does not actually
+  implement. This matters when you bounce between `http`, `httpx`, `smb`,
+  `tcp`, and `websocket` because the safe/valid build surface is no longer a
+  flat static form.<sup>[[5]](#references)</sup>
+- If you are building a custom agent/profile pair and you don't want Mythic's
+  JSON message format or default crypto on the wire, use a
+  `translation_container`: Mythic strips the UUID, hands the encrypted blob and
+  key material to the translator over gRPC, and expects agent-native bytes
+  back. This is the clean way to support binary protocols, custom framing, or
+  agent-side encryption without rewriting the whole server.
+- Remember that linked/P2P callbacks do not just shuttle tasking. Mythic's
+  `get_tasking` flow can also carry responses plus `delegates`, `socks`,
+  `rpfwd`, and `interactive` data. In practice, one egress callback can service
+  inner callbacks and pivot channels in the same polling loop; if the child
+  agents perform their own periodic check-ins, `get_delegate_tasks=false` keeps
+  the parent from accidentally consuming the inner callback's queued jobs.
 
 ### Wrapper payloads
 
@@ -80,7 +102,7 @@ Wrapper payloads let you keep the same agent logic while changing the on-disk re
 
 ## [Apollo Agent](https://github.com/MythicAgents/Apollo)
 
-Apollo is a Windows agent written in C# using the 4.0 .NET Framework designed to be used in SpecterOps training offerings.
+Apollo is a Windows agent written in C# using the 4.0 .NET Framework designed to be used in SpecterOps training offerings.<sup>[[2]](#references)</sup>
 
 Install it with:
 
@@ -93,7 +115,10 @@ Install it with:
 - Apollo can currently emit `WinExe`, `Shellcode`, `Service`, and `Source` payloads.
 - The commonly used Apollo profiles are `http`, `httpx`, `smb`, `tcp`, and `websocket`.
 - `httpx` is usually the more flexible option when you need domain rotation, proxy support, custom message placement, and message transforms instead of the older static `http` profile.
+- Apollo is one of the more feature-complete community agents and currently exposes Mythic-side integrations such as browser scripts, file/process browser views, screenshots, keylogging, SOCKS, rpfwd, Push C2, and P2P routing.
 - Apollo supports wrapper payloads such as `service_wrapper` and `scarecrow_wrapper`.
+- Apollo supports dynamic command loading, so you can keep the initial payload lean and load extra commands or Forge modules later instead of compiling every post-ex capability into the first build.
+- When generating shellcode output, Apollo's current builder also exposes Donut format choices (`Binary`, `Base64`, `C`, `Ruby`, `Python`, `Powershell`, `C#`, `Hex`) and Donut bypass behavior (`None`, `Abort on fail`, `Continue on fail`). This is useful if the end goal is to re-wrap the shellcode with `service_wrapper`, `scarecrow_wrapper`, or a custom loader.
 - `register_file` and `register_assembly` are the staging primitives for `execute_assembly`, `execute_pe`, `inline_assembly`, `execute_coff`, `powershell_import`, and `powerpick`. In current Apollo builds, those staged artifacts are cached client-side as DPAPI-protected AES256 blobs.
 - `ls` and `ps` results integrate especially well with Mythic's browser scripts and file/process browser, which makes operator triage noticeably faster in collaborative operations.
 - Apollo's fork-and-run jobs inherit their sacrificial process settings from
@@ -188,7 +213,9 @@ For BOFs, remember that Forge does **not** just pass one flat argument string
  to Apollo. It maps BOF parameters into Mythic's typed-array format and then
  forwards them into Apollo's `execute_coff` flow. If a Forge-loaded BOF behaves
  strangely, check the expected BOF argument types / entrypoint rather than only
- the command line you typed.
+ the command line you typed. Also note that Apollo's newer BOF loader changed
+ argument handling relative to much older 2.3.1-era builds, so stale BOFs or
+ old collections can fail purely because the marshaling expectations changed.
 
 ### PowerShell & scripting execution
 
@@ -232,6 +259,7 @@ Poseidon is a Golang agent that compiles into **Linux and macOS** executables.
 - Current Poseidon builds target Linux and macOS on both `x86_64` and `arm64`.
 - Supported output formats include native executables plus shared-library style outputs such as `dylib` and `so`.
 - Poseidon supports `http`, `websocket`, `tcp`, and `dynamichttp`, and current builders expose multi-egress settings such as `egress_order` and failover thresholds.
+- Poseidon's current capability metadata also advertises browser scripts, file/process browser integration, interactive tasking, keylogging, screenshots, Push C2, SOCKS, rpfwd, and P2P, so it can work as a real Linux/macOS pivot node rather than just a simple remote shell.
 - Build-time options such as `proxy_bypass` and `garble` are worth checking when you need either cleaner network behavior or extra Go binary obfuscation.
 - `pty` is one of the most useful newer-quality-of-life commands for Linux/macOS
   operations because it opens an interactive PTY and can expose a Mythic-side
@@ -298,13 +326,13 @@ When used on Linux or macOS it has some interesting commands:
 - `run`: Execute a command from disk with arguments, allowing for the execution of binaries or scripts on the target system.
 - `pty`: Open up an interactive PTY, allowing for direct interaction with the shell on the target system.
 
-
-
-
 ## References
 
-- [Mythic Community Agent Feature Matrix](https://mythicmeta.github.io/overview/agent_matrix.html)
-- [Apollo README](https://github.com/MythicAgents/Apollo/blob/master/README.md)
-- [Mythic v3.2 Highlights: Interactive Tasking, Push C2, and Dynamic File Browser](https://posts.specterops.io/mythic-v3-2-highlights-interactive-tasking-push-c2-and-dynamic-file-browser-7035065e2b3d)
-- [Browser Scripts - Mythic Documentation](https://docs.mythic-c2.net/operational-pieces/browser-scripts)
+- [1] [Mythic Community Agent Feature Matrix](https://mythicmeta.github.io/overview/agent_matrix.html)
+- [2] [Apollo README](https://github.com/MythicAgents/Apollo/blob/master/README.md)
+- [3] [Mythic v3.2 Highlights: Interactive Tasking, Push C2, and Dynamic File Browser](https://posts.specterops.io/mythic-v3-2-highlights-interactive-tasking-push-c2-and-dynamic-file-browser-7035065e2b3d)
+- [4] [Browser Scripts - Mythic Documentation](https://docs.mythic-c2.net/operational-pieces/browser-scripts)
+- [5] [Mythic 3.3->3.4 Updates](https://docs.mythic-c2.net/updating/mythic-3.3-greater-than-3.4-updates)
+- [6] [Transforming Red Team Ops with Mythic's Hidden Gems: Browser Scripting](https://specterops.io/blog/2025/08/21/transforming-red-team-ops-with-mythics-hidden-gems-browser-scripting/)
+
 {{#include ../banners/hacktricks-training.md}}

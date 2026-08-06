@@ -33,8 +33,44 @@ This entitlement allows to **load frameworks, plug-ins, or libraries without bei
 
 ### `com.apple.private.security.clear-library-validation`
 
-This entitlement is very similar to **`com.apple.security.cs.disable-library-validation`** but **instead** of **directly disabling** library validation, it allows the process to **call a `csops` system call to disable it**.\
-Check [**this for more info**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
+This entitlement is very similar to **`com.apple.security.cs.disable-library-validation`** but **instead** of **directly disabling** library validation, it allows the process to **call a `csops` system call to disable it** at runtime.
+
+The entitlement name is hardcoded in XNU next to the `csops` operation that consumes it:<sup>[[2]](#references)</sup>
+
+```c
+/* bsd/sys/codesign.h */
+#define CLEAR_LV_ENTITLEMENT "com.apple.private.security.clear-library-validation"
+...
+#define CS_OPS_CLEAR_LV     15  /* clear the library validation flag */
+```
+
+The kernel handler for `CS_OPS_CLEAR_LV` (`bsd/kern/kern_proc.c`) shows exactly how narrow the primitive is:<sup>[[3]](#references)</sup>
+
+```c
+case CS_OPS_CLEAR_LV: {
+#if !defined(XNU_TARGET_OS_OSX)
+        // We only support dropping library validation on macOS
+        error = ENOTSUP;
+#else
+        if (forself == 1 && IOTaskHasEntitlement(proc_task(pt), CLEAR_LV_ENTITLEMENT)) {
+                proc_lock(pt);
+                if (!(proc_getcsflags(pt) & CS_INSTALLER) && (pt->p_subsystem_root_path == NULL)) {
+                        proc_csflags_clear(pt, CS_REQUIRE_LV | CS_FORCED_LV);
+                        error = 0;
+```
+
+So the operation:
+
+- Is **macOS-only** (`ENOTSUP` on every other platform).
+- Only works on **itself** (`forself == 1`) — you cannot strip library validation off another process with it.
+- Requires the process to actually **hold the entitlement**, and refuses if the process is flagged `CS_INSTALLER` or is running under a subsystem root path.
+- Clears **`CS_REQUIRE_LV | CS_FORCED_LV`** from the process' code-signing flags.
+
+The XNU comment explains the intended use case, and also why it is interesting to an attacker:
+
+> This option is used to remove library validation from a running process. This is used in plugin architectures when a program needs to load untrusted libraries. [...] Once a process has loaded the untrusted library, relying on library validation in the future will not be effective.
+
+In other words, **any binary carrying this entitlement is a dylib-injection target**: get code running inside it (or convince it to load your plug-in) after it has dropped `CS_REQUIRE_LV`, and you inherit whatever the host process is trusted to do.
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
@@ -260,6 +296,10 @@ For detailed IOKit/DriverKit exploitation, see:
 ../mac-os-architecture/macos-iokit.md
 {{#endref}}
 
+## References
 
+- [1] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
+- [2] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [3] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -42,9 +42,9 @@ Docker can apply a default or custom AppArmor profile when the host supports it.
 
 The practical point is that AppArmor is not a "Docker feature". It is a host-kernel feature that several runtimes can choose to apply. If the host does not support it or the runtime is told to run unconfined, the supposed protection is not really there.
 
-For Kubernetes specifically, the modern API is `securityContext.appArmorProfile`. Since Kubernetes `v1.30`, the older beta AppArmor annotations are deprecated. On supported hosts, `RuntimeDefault` is the default profile, while `Localhost` points at a profile that must already be loaded on the node. This matters during review because a manifest may look AppArmor-aware while still depending entirely on node-side support and preloaded profiles.
+For Kubernetes specifically, the modern API is `securityContext.appArmorProfile`. Since Kubernetes `v1.30`, the older beta AppArmor annotations are deprecated. On supported hosts, `RuntimeDefault` is the default profile, while `Localhost` points at a profile that must already be loaded on the node. This matters during review because a manifest may look AppArmor-aware while still depending entirely on node-side support and preloaded profiles.<sup>[[1]](#references)</sup>
 
-One subtle but useful operational detail is that explicitly setting `appArmorProfile.type: RuntimeDefault` is stricter than simply omitting the field. If the field is explicitly set and the node does not support AppArmor, admission should fail. If the field is omitted, the workload may still run on a node without AppArmor and simply not receive that extra confinement layer. From an attacker's point of view, this is a good reason to check both the manifest and the actual node state.
+One subtle but useful operational detail is that explicitly setting `appArmorProfile.type: RuntimeDefault` is stricter than simply omitting the field. If the field is explicitly set and the node does not support AppArmor, admission should fail. If the field is omitted, the workload may still run on a node without AppArmor and simply not receive that extra confinement layer. From an attacker's point of view, this is a good reason to check both the manifest and the actual node state.<sup>[[1]](#references)</sup>
 
 On Docker-capable AppArmor hosts, the best-known default is `docker-default`. That profile is generated from Moby's AppArmor template and is important because it explains why some capability-based PoCs still fail in a default container. In broad terms, `docker-default` allows ordinary networking, denies writes to much of `/proc`, denies access to sensitive parts of `/sys`, blocks mount operations, and restricts ptrace so that it is not a general host-probing primitive. Understanding that baseline helps distinguish "the container has `CAP_SYS_ADMIN`" from "the container can actually use that capability against the kernel interfaces I care about".
 
@@ -111,7 +111,7 @@ This is especially useful during host-side review because it bridges the gap bet
 
 ### High-Signal Rules To Audit
 
-When you can read a profile, do not stop at simple `deny` lines. Several rule types materially change how useful AppArmor will be against a container escape attempt:
+When you can read a profile, do not stop at simple `deny` lines. Several rule types materially change how useful AppArmor will be against a container escape attempt:<sup>[[2]](#references)</sup>
 
 - `ux` / `Ux`: execute the target binary unconfined. If a reachable helper, shell, or interpreter is allowed under `ux`, that is usually the first thing to test.
 - `px` / `Px` and `cx` / `Cx`: perform profile transitions on exec. These are not automatically bad, but they are worth auditing because a transition may land in a much broader profile than the current one.
@@ -259,6 +259,7 @@ For AppArmor, the most important variable is often the **host**, not only the ru
 
 ## References
 
-- [Kubernetes security context: AppArmor profile fields and node-support behavior](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
-- [Ubuntu 24.04 `apparmor.d(5)` manpage: exec transitions, `change_profile`, `userns`, and profile flags](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
+- [1] [Kubernetes security context: AppArmor profile fields and node-support behavior](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [2] [Ubuntu 24.04 `apparmor.d(5)` manpage: exec transitions, `change_profile`, `userns`, and profile flags](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
+
 {{#include ../../../../banners/hacktricks-training.md}}

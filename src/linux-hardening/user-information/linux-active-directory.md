@@ -68,7 +68,7 @@ If you want the **Linux-specific ticket harvesting workflows** (`FILE`, `DIR`, `
 
 ### CCACHE ticket reuse from /tmp
 
-CCACHE files are binary formats for **storing Kerberos credentials**. `FILE:/tmp/krb5cc_%{uid}` is still common, but modern Linux deployments also use `DIR:/run/user/%{uid}/krb5cc*`, `KEYRING:persistent:%{uid}`, or `KCM:%{uid}`. Check the **`KRB5CCNAME`** environment variable and the `default_ccache_name` setting before assuming tickets live in `/tmp`.
+CCACHE files are binary formats for **storing Kerberos credentials**. `FILE:/tmp/krb5cc_%{uid}` is still common, but modern Linux deployments also use `DIR:/run/user/%{uid}/krb5cc*`, `KEYRING:persistent:%{uid}`, or `KCM:%{uid}`. Check the **`KRB5CCNAME`** environment variable and the `default_ccache_name` setting before assuming tickets live in `/tmp`.<sup>[[1]](#references)</sup>
 
 ```bash
 # Where is the current process reading credentials from?
@@ -97,7 +97,7 @@ make CONF=Release
 /tmp/tickey -i
 ```
 
-This procedure will attempt to inject into various sessions, indicating success by storing extracted tickets in `/tmp` with a naming convention of `__krb_UID.ccache`.
+This procedure will attempt to inject into various sessions, indicating success by storing extracted tickets in `/tmp` with a naming convention of `__krb_UID.ccache`.<sup>[[1]](#references)</sup>
 
 ### CCACHE ticket reuse from SSSD KCM
 
@@ -201,7 +201,7 @@ This is a good bridge between **Linux post-exploitation** and **AD object abuse*
 
 ### Linux gMSA / Managed Service Account artefacts
 
-Recent Linux deployments can consume **Managed Service Accounts** directly from AD. In practice this means that, after compromising a Linux server, you may find not only the host keytab but also **service-specific keytabs** generated from a gMSA. Common places to inspect are `/etc/gmsad.conf`, deployment-specific config files, and additional `*.keytab` files under `/etc`.
+Recent Linux deployments can consume **Managed Service Accounts** directly from AD. In practice this means that, after compromising a Linux server, you may find not only the host keytab but also **service-specific keytabs** generated from a gMSA. Common places to inspect are `/etc/gmsad.conf`, deployment-specific config files, and additional `*.keytab` files under `/etc`.<sup>[[2]](#references)</sup>
 
 ```bash
 # Look for gMSA-related configuration and extra keytabs
@@ -225,8 +225,8 @@ This gives you a reusable Kerberos identity for the SPNs bound to that gMSA **wi
 
 ## References
 
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-- [https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/integrating_rhel_systems_directly_with_windows_active_directory/assembly_accessing-ad-with-a-managed-service-account_integrating-rhel-systems-directly-with-active-directory](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/integrating_rhel_systems_directly_with_windows_active_directory/assembly_accessing-ad-with-a-managed-service-account_integrating-rhel-systems-directly-with-active-directory)
+- [1] [Kerberos (II): How to attack Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [2] [Accessing AD with a managed service account – Integrating RHEL systems directly with Active Directory](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/integrating_rhel_systems_directly_with_windows_active_directory/assembly_accessing-ad-with-a-managed-service-account_integrating-rhel-systems-directly-with-active-directory)
 
 {{#include ../../banners/hacktricks-training.md}}
 

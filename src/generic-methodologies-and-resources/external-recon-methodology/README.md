@@ -163,7 +163,7 @@ def fav_hash(url):
 
 You can also get favicon hashes at scale with [**httpx**](https://github.com/projectdiscovery/httpx) (`httpx -l targets.txt -favicon`) and then pivot in Shodan/Censys.
 
-Useful things to remember when using favicon fingerprints:
+Useful things to remember when using favicon fingerprints:<sup>[[3]](#references)[[4]](#references)</sup>
 
 - **Treat the hash as an indicator, not proof**: MMH3 is compact and collisions are possible; operators can also replace favicons or intentionally reuse a misleading icon.
 - **Probe more than** `/favicon.ico`: many products expose icons in framework/build paths or via `manifest.json`, `site.webmanifest`, `browserconfig.xml`, `apple-touch-icon*`, inline `data:` URLs, or HTML `<link rel="icon">` tags. The path itself can fingerprint a product family.
@@ -526,11 +526,9 @@ echo www | subzuf facebook.com
 
 Check this blog post I wrote about how to **automate the subdomain discovery** from a domain using **Trickest workflows** so I don't need to launch manually a bunch of tools in my computer:
 
-
 {{#ref}}
 https://trickest.com/blog/full-subdomain-discovery-using-workflow/
 {{#endref}}
-
 
 {{#ref}}
 https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/
@@ -548,7 +546,7 @@ You can find some **VHosts in IPs using** [**HostHunter**](https://github.com/Sp
 
 If you suspect that some subdomain can be hidden in a web server you could try to brute force it:
 
-When the **IP redirects to a hostname** (name-based vhosts), fuzz the `Host` header directly and let ffuf **auto-calibrate** to highlight responses that differ from the default vhost:
+When the **IP redirects to a hostname** (name-based vhosts), fuzz the `Host` header directly and let ffuf **auto-calibrate** to highlight responses that differ from the default vhost:<sup>[[2]](#references)</sup>
 
 ```bash
 ffuf -u http://10.10.10.10 -H "Host: FUZZ.example.com" \
@@ -697,7 +695,6 @@ You can use the **tool** [**Leakos**](https://github.com/carlospolop/Leakos) to 
 
 Check also this **page** for potential **github dorks** you could also search for in the organization you are attacking:
 
-
 {{#ref}}
 github-leaked-secrets.md
 {{#endref}}
@@ -722,7 +719,6 @@ If you find **valid leaked** credentials or API tokens, this is a very easy win.
 If you found that the company has **open-source code** you can **analyse** it and search for **vulnerabilities** on it.
 
 **Depending on the language** there are different **tools** you can use:
-
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-web/code-review-tools.md
@@ -763,11 +759,11 @@ There are several tools out there that will perform part of the proposed actions
 - [**https://github.com/six2dez/reconftw**](https://github.com/six2dez/reconftw)
 - [**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) - A little old and not updated
 
-## **References**
+## References
 
-- All free courses of [**@Jhaddix**](https://twitter.com/Jhaddix) like [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)
-- [0xdf – HTB: Guardian](https://0xdf.gitlab.io/2026/02/28/htb-guardian.html)
-- [Bishop Fox – On Favicons: From Browser Icons to Attack Surface Intelligence](https://bishopfox.com/blog/on-favicons-from-browser-icons-to-attack-surface-intelligence)
-- [BishopFox/Favicons](https://github.com/BishopFox/Favicons)
+- [1] All free courses of [**@Jhaddix**](https://twitter.com/Jhaddix) like [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)
+- [2] [0xdf – HTB: Guardian](https://0xdf.gitlab.io/2026/02/28/htb-guardian.html)
+- [3] [Bishop Fox – On Favicons: From Browser Icons to Attack Surface Intelligence](https://bishopfox.com/blog/on-favicons-from-browser-icons-to-attack-surface-intelligence)
+- [4] [BishopFox/Favicons](https://github.com/BishopFox/Favicons)
 
 {{#include ../../banners/hacktricks-training.md}}

