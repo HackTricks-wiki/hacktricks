@@ -1,47 +1,49 @@
-# Telephony tapsrv Arbitrary DWORD Write to RCE (TAPI Server Mode)
+# Escritura arbitraria de DWORD de tapsrv de Telephony a RCE (modo TAPI server)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-When the Windows Telephony service (TapiSrv, `tapisrv.dll`) is configured as a **TAPI server**, it exposes the **`tapsrv` MSRPC interface over the `\pipe\tapsrv` named pipe** to authenticated SMB clients. A design bug in the asynchronous event delivery for remote clients lets an attacker turn a mailslot handle into a **controlled 4-byte write to any pre-existing file writable by `NETWORK SERVICE`**. That primitive can be chained to overwrite the Telephony admin list and abuse an **admin-only arbitrary DLL load** to execute code as `NETWORK SERVICE`.
+Cuando el servicio Windows Telephony (TapiSrv, `tapisrv.dll`) está configurado como un **TAPI server**, expone la interfaz **`tapsrv` MSRPC a través de la named pipe `\pipe\tapsrv`** a clientes SMB autenticados. Un error de diseño en la entrega de eventos asíncronos para clientes remotos permite a un atacante convertir un handle de mailslot en una **escritura controlada de 4 bytes en cualquier archivo existente con permisos de escritura para `NETWORK SERVICE`**. Esta primitiva puede encadenarse para sobrescribir la lista de administradores de Telephony y abusar de una **carga arbitraria de DLL exclusiva para administradores** para ejecutar código como `NETWORK SERVICE`.<sup>[[1]](#references)</sup>
 
-## Attack Surface
-- **Remote exposure only when enabled**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Telephony\Server\DisableSharing` must allow sharing (or configured via `TapiMgmt.msc` / `tcmsetup /c <server>`). By default `tapsrv` is local-only.
-- Interface: MS-TRP (`tapsrv`) over **SMB named pipe**, so the attacker needs valid SMB auth.
-- Service account: `NETWORK SERVICE` (manual start, on-demand).
+## Superficie de ataque
 
-## Primitive: Mailslot Path Confusion → Arbitrary DWORD Write
-- `ClientAttach(pszDomainUser, pszMachine, ...)` initializes async event delivery. In pull mode, the service does:
+- **Exposición remota solo cuando está habilitada**: `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Telephony\Server\DisableSharing` debe permitir el uso compartido (o configurarse mediante `TapiMgmt.msc` / `tcmsetup /c <server>`). De forma predeterminada, `tapsrv` solo está disponible localmente.
+- Interfaz: MS-TRP (`tapsrv`) a través de **SMB named pipe**, por lo que el atacante necesita una autenticación SMB válida.
+- Cuenta del servicio: `NETWORK SERVICE` (inicio manual, bajo demanda).<sup>[[1]](#references)</sup>
+
+## Primitiva: confusión de la ruta del mailslot → escritura arbitraria de DWORD
+- `ClientAttach(pszDomainUser, pszMachine, ...)` inicializa la entrega de eventos asíncronos. En modo pull, el servicio hace lo siguiente:
 ```c
 CreateFileW(pszDomainUser, GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 ```
-without validating that `pszDomainUser` is a mailslot path (`\\*\MAILSLOT\...`). Any **existing filesystem path** writable by `NETWORK SERVICE` is accepted.
-- Every async event write stores a single **`DWORD` = `InitContext`** (attacker-controlled in the subsequent `Initialize` request) to the opened handle, yielding **write-what/write-where (4 bytes)**.
+sin validar que `pszDomainUser` sea una ruta de mailslot (`\\*\MAILSLOT\...`). Se acepta cualquier **ruta del sistema de archivos existente** en la que `NETWORK SERVICE` tenga permisos de escritura.
+- Cada escritura de evento asíncrono almacena un único **`DWORD` = `InitContext`** (controlado por el atacante en la solicitud `Initialize` posterior) en el handle abierto, lo que proporciona una primitiva **write-what/write-where de 4 bytes**.<sup>[[1]](#references)</sup>
 
-## Forcing Deterministic Writes
-1. **Open target file**: `ClientAttach` with `pszDomainUser = <existing writable path>` (e.g., `C:\Windows\TAPI\tsec.ini`).
-2. For each `DWORD` to write, execute this RPC sequence against `ClientRequest`:
-- `Initialize` (`Req_Func 47`): set `InitContext = <4-byte value>` and `pszModuleName = DIALER.EXE` (or another top entry in the per-user priority list).
-- `LRegisterRequestRecipient` (`Req_Func 61`): `dwRequestMode = LINEREQUESTMODE_MAKECALL`, `bEnable = 1` (registers the line app, recalculates highest priority recipient).
-- `TRequestMakeCall` (`Req_Func 121`): forces `NotifyHighestPriorityRequestRecipient`, generating the async event.
-- `GetAsyncEvents` (`Req_Func 0`): dequeue/completes the write.
-- `LRegisterRequestRecipient` again with `bEnable = 0` (unregister).
-- `Shutdown` (`Req_Func 86`) to tear down the line app.
-- Priority control: the “highest priority” recipient is chosen by comparing `pszModuleName` against `HKCU\Software\Microsoft\Windows\CurrentVersion\Telephony\HandoffPriorities\RequestMakeCall` (read while impersonating the client). If needed, insert your module name via `LSetAppPriority` (`Req_Func 69`).
-- The file **must already exist** because `OPEN_EXISTING` is used. Common `NETWORK SERVICE`-writable candidates: `C:\Windows\System32\catroot2\dberr.txt`, `C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Temp\MpCmdRun.log`, `...\MpSigStub.log`.
+## Forzar escrituras deterministas
+1. **Abrir el archivo objetivo**: ejecutar `ClientAttach` con `pszDomainUser = <existing writable path>` (por ejemplo, `C:\Windows\TAPI\tsec.ini`).
+2. Para cada `DWORD` que se quiera escribir, ejecutar esta secuencia RPC contra `ClientRequest`:
+- `Initialize` (`Req_Func 47`): establecer `InitContext = <4-byte value>` y `pszModuleName = DIALER.EXE` (u otra entrada superior de la lista de prioridades por usuario).
+- `LRegisterRequestRecipient` (`Req_Func 61`): `dwRequestMode = LINEREQUESTMODE_MAKECALL`, `bEnable = 1` (registra la aplicación de línea y recalcula el recipient de mayor prioridad).
+- `TRequestMakeCall` (`Req_Func 121`): fuerza `NotifyHighestPriorityRequestRecipient`, generando el evento asíncrono.
+- `GetAsyncEvents` (`Req_Func 0`): extrae y completa la escritura.
+- Ejecutar de nuevo `LRegisterRequestRecipient` con `bEnable = 0` (anular el registro).
+- `Shutdown` (`Req_Func 86`) para desmontar la aplicación de línea.
+- Control de prioridad: el recipient de “mayor prioridad” se elige comparando `pszModuleName` con `HKCU\Software\Microsoft\Windows\CurrentVersion\Telephony\HandoffPriorities\RequestMakeCall` (que se lee mientras se suplanta al cliente). Si es necesario, insertar el nombre del módulo mediante `LSetAppPriority` (`Req_Func 69`).
+- El archivo **debe existir previamente** porque se utiliza `OPEN_EXISTING`. Candidatos comunes con permisos de escritura para `NETWORK SERVICE`: `C:\Windows\System32\catroot2\dberr.txt`, `C:\Windows\ServiceProfiles\NetworkService\AppData\Local\Temp\MpCmdRun.log`, `...\MpSigStub.log`.<sup>[[1]](#references)</sup>
 
-## From DWORD Write to RCE inside TapiSrv
-1. **Grant yourself Telephony “admin”**: target `C:\Windows\TAPI\tsec.ini` and append `[TapiAdministrators]\r\n<DOMAIN\\user>=1` using the 4-byte writes above. Start a **new** session (`ClientAttach`) so the service re-reads the INI and sets `ptClient->dwFlags |= 9` for your account.
-2. **Admin-only DLL load**: send `GetUIDllName` with `dwObjectType = TUISPIDLL_OBJECT_PROVIDERID` and supply a path via `dwProviderFilenameOffset`. For admins, the service does `LoadLibrary(path)` then calls the export `TSPI_providerUIIdentify`:
-- Works with UNC paths to a real Windows SMB share; some attacker SMB servers fail with `ERROR_SMB_GUEST_LOGON_BLOCKED`.
-- Alternative: slowly drop a local DLL using the same 4-byte write primitive, then load it.
-3. **Payload**: the export executes under `NETWORK SERVICE`. A minimal DLL can run `cmd.exe /c whoami /all > C:\Windows\Temp\poc.txt` and return a non-zero value (e.g., `0x1337`) so the service unloads the DLL, confirming execution.
+## De la escritura de DWORD a RCE dentro de TapiSrv
+1. **Concederse privilegios de “administrador” de Telephony**: seleccionar como objetivo `C:\Windows\TAPI\tsec.ini` y añadir `[TapiAdministrators]\r\n<DOMAIN\\user>=1` mediante las escrituras de 4 bytes anteriores. Iniciar una sesión nueva (`ClientAttach`) para que el servicio vuelva a leer el INI y establezca `ptClient->dwFlags |= 9` para la cuenta.
+2. **Carga de DLL exclusiva para administradores**: enviar `GetUIDllName` con `dwObjectType = TUISPIDLL_OBJECT_PROVIDERID` y proporcionar una ruta mediante `dwProviderFilenameOffset`. Para los administradores, el servicio ejecuta `LoadLibrary(path)` y después llama al export `TSPI_providerUIIdentify`:
+- Funciona con rutas UNC a un recurso compartido SMB real de Windows; algunos servidores SMB del atacante fallan con `ERROR_SMB_GUEST_LOGON_BLOCKED`.
+- Alternativa: colocar lentamente una DLL local mediante la misma primitiva de escritura de 4 bytes y cargarla después.
+3. **Payload**: el export se ejecuta como `NETWORK SERVICE`. Una DLL mínima puede ejecutar `cmd.exe /c whoami /all > C:\Windows\Temp\poc.txt` y devolver un valor distinto de cero (por ejemplo, `0x1337`) para que el servicio descargue la DLL, confirmando la ejecución.<sup>[[1]](#references)</sup>
 
-## Hardening / Detection Notes
-- Disable TAPI server mode unless required; block remote access to `\pipe\tapsrv`.
-- Enforce mailslot namespace validation (`\\*\MAILSLOT\`) before opening client-supplied paths.
-- Lock down `C:\Windows\TAPI\tsec.ini` ACLs and monitor changes; alert on `GetUIDllName` calls loading non-default paths.
+## Notas de hardening / detección
+- Deshabilitar el modo TAPI server salvo que sea necesario; bloquear el acceso remoto a `\pipe\tapsrv`.
+- Aplicar la validación del namespace de mailslot (`\\*\MAILSLOT\`) antes de abrir rutas proporcionadas por el cliente.
+- Restringir las ACL de `C:\Windows\TAPI\tsec.ini` y monitorizar los cambios; generar alertas ante llamadas a `GetUIDllName` que carguen rutas no predeterminadas.<sup>[[1]](#references)</sup>
 
-## References
-- [Who’s on the line? Exploiting RCE in Windows Telephony Service (CVE-2026-20931)](https://swarm.ptsecurity.com/whos-on-the-line-exploiting-rce-in-windows-telephony-service/)
+## Referencias
+
+- [1] [Who’s on the line? Exploiting RCE in Windows Telephony Service (CVE-2026-20931)](https://swarm.ptsecurity.com/whos-on-the-line-exploiting-rce-in-windows-telephony-service/)
 
 {{#include ../../banners/hacktricks-training.md}}

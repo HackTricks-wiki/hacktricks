@@ -2,15 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Esta página cubre la variante de **robo manual de token** donde un contexto de **High Integrity** que ya tiene **`SeDebugPrivilege`** y **`SeImpersonatePrivilege`** abre un proceso **SYSTEM** مناسب, **duplica su token** y **lanza un nuevo proceso** con ese token.
+Esta página cubre la variante de **manual token-theft**, en la que un contexto de **High Integrity** que ya tiene **`SeDebugPrivilege`** y **`SeImpersonatePrivilege`** abre un proceso **SYSTEM** adecuado, **duplica su token** y **crea un proceso nuevo** con ese token.
 
-Si solo necesitas un shell rápido de `SYSTEM` desde un proceso admin privilegiado, revisa también:
+Si solo necesitas un shell de **SYSTEM** rápido desde un proceso de administrador con privilegios, consulta también:
 
 {{#ref}}
 seimpersonate-from-high-to-system.md
 {{#endref}}
 
-Si **no** tienes una ruta de process-handle pero sí tienes **`SeImpersonatePrivilege`**, la ruta de **named-pipe / Potato** suele ser más fácil:
+Si **no** tienes una ruta de process-handle, pero sí tienes **`SeImpersonatePrivilege`**, la ruta de **named-pipe / Potato** suele ser más sencilla:
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -20,39 +20,39 @@ named-pipe-client-impersonation.md
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Quick triage
+## Evaluación rápida
 
-Antes de probar la ruta de copiar token, confirma que el proceso actual ya está en un contexto útil:
+Antes de probar la ruta de token-copy, confirma que el proceso actual ya se encuentra en un contexto útil:
 ```cmd
 whoami /groups | findstr /i "high mandatory"
 whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege"
 ```
 Notas:
 
-- **`SeDebugPrivilege`** es lo que te permite abrir muchos procesos SYSTEM **no protegidos** incluso cuando su DACL normalmente te bloquearía.
-- **`SeImpersonatePrivilege`** es lo que hace práctico **`CreateProcessWithTokenW`** después.
-- Si la ruta de copia de token solo te da un token SYSTEM débil o filtrado, simplemente roba de un **proceso SYSTEM diferente**.
+- **`SeDebugPrivilege`** es lo que permite abrir muchos procesos **SYSTEM no protegidos**, incluso cuando su DACL normalmente lo impediría.
+- **`SeImpersonatePrivilege`** es lo que hace práctico usar **`CreateProcessWithTokenW`** después.
+- Si la ruta de copia del token solo proporciona un token SYSTEM débil o filtrado, simplemente roba uno de un **proceso SYSTEM diferente**.
 
-## Elige el proceso objetivo con cuidado
+## Elige cuidadosamente el proceso objetivo
 
-La técnica normalmente se muestra contra **`lsass.exe`**, pero en Windows moderno ese suele ser el **objetivo incorrecto**:
+La técnica suele mostrarse contra **`lsass.exe`**, pero en las versiones modernas de Windows a menudo es el objetivo **equivocado**:
 
-- Si **LSA Protection / RunAsPPL** está habilitado, **`lsass.exe`** está protegido y un proceso admin normal con `SeDebugPrivilege` seguirá sin poder abrirlo.
-- Prefiere procesos SYSTEM **no-PPL** como **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`** o una instancia temprana de **`svchost.exe`**.
-- Los **procesos protegidos** y algunos procesos especiales como **`System`** o **`csrss.exe`** no son objetivos realistas en user-mode para esta técnica.
-- Usa **Process Hacker / Process Explorer** ejecutados con privilegios elevados para verificar si el token del objetivo realmente tiene los privilegios que quieres antes de duplicarlo.
+- Si **LSA Protection / RunAsPPL** está habilitado, **`lsass.exe`** está protegido y un proceso administrador normal con **`SeDebugPrivilege`** seguirá sin poder abrirlo.<sup>[[2]](#references)</sup>
+- Prefiere procesos SYSTEM **no PPL**, como **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`** o una instancia temprana de **`svchost.exe`**.
+- Los **procesos protegidos** y algunos procesos especiales, como **`System`** o **`csrss.exe`**, no son objetivos realistas en user-mode para esta técnica.
+- Usa **Process Hacker / Process Explorer** ejecutado con privilegios elevados para verificar que el token objetivo tenga realmente los privilegios que quieres antes de duplicarlo.
 
-## Detalles de la API que importan en la práctica
+## Detalles de la API importantes en la práctica
 
-Muchos PoCs públicos solicitan **`PROCESS_ALL_ACCESS`** y **`TOKEN_ALL_ACCESS`**, pero eso es más ruidoso de lo necesario. En la práctica:
+Muchos PoC públicos solicitan **`PROCESS_ALL_ACCESS`** y **`TOKEN_ALL_ACCESS`**, pero eso genera más ruido del necesario. En la práctica:
 
-- Abre el proceso objetivo solo con los permisos que necesites (normalmente **`PROCESS_QUERY_INFORMATION`** o **`PROCESS_QUERY_LIMITED_INFORMATION`**).
-- Abre el token con los permisos necesarios para crear procesos: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
-- Usa **`DuplicateTokenEx(..., TokenPrimary, ...)`** para crear un **primary token**; un impersonation token por sí solo no basta para crear un nuevo proceso.
+- Abre el proceso objetivo únicamente con los derechos que necesites (normalmente **`PROCESS_QUERY_INFORMATION`** o **`PROCESS_QUERY_LIMITED_INFORMATION`**).
+- Abre el token con los derechos necesarios para crear el proceso: **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.
+- Usa **`DuplicateTokenEx(..., TokenPrimary, ...)`** para crear un **token primario**; un token de impersonation por sí solo no basta para crear un proceso nuevo.
 - Si **`CreateProcessWithTokenW`** falla con **`1314`**, cambia a **`CreateProcessAsUserW`**.
-- Si ejecutas desde un **service / Session 0**, recuerda que **`CreateProcessWithTokenW`** mantiene al hijo en la **sesión del llamador**. Si necesitas una shell visible en el escritorio, usa **`CreateProcessAsUserW`** y mueve el token a la sesión deseada.
+- Si ejecutas desde un **service / Session 0**, recuerda que **`CreateProcessWithTokenW`** mantiene al proceso hijo en la **session** del **caller**. Si necesitas un shell de escritorio visible, usa **`CreateProcessAsUserW`** y mueve el token a la session deseada.<sup>[[1]](#references)</sup>
 
-Un flujo moderno mínimo tiene este aspecto:
+Un flujo moderno mínimo sería:
 ```c
 HANDLE hp = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, pid);
 HANDLE hTok = NULL, hDup = NULL;
@@ -63,15 +63,15 @@ CreateProcessWithTokenW(hDup, LOGON_WITH_PROFILE,
 L"C:\\Windows\\System32\\cmd.exe",
 NULL, 0, NULL, NULL, &si, &pi);
 ```
-## Full service PoC
+## PoC de servicio completo
 
-El siguiente código **explota los privilegios `SeDebugPrivilege` y `SeImpersonatePrivilege`** para copiar el token de un **process en ejecución como SYSTEM** y con **todos los token privileges**. En este caso, el código puede compilarse y usarse como un **Windows service binary** para verificar que la primitive funciona.
+El siguiente código **explota los privilegios `SeDebugPrivilege` y `SeImpersonatePrivilege`** para copiar el token de un **proceso que se ejecuta como SYSTEM** y con **todos los privilegios del token**. En este caso, el código se puede compilar y utilizar como un **binario de servicio de Windows** para verificar que la primitive funciona.<sup>[[3]](#references)</sup>
 
-La parte principal del **code donde ocurre la elevación** está dentro de la función **`Exploit`**. Dentro de esa función puedes ver que se busca **`lsass.exe`**, se copia su **token**, y finalmente ese token se usa para iniciar un nuevo **`cmd.exe`** con todos los privileges del token copiado.
+La parte principal del **código donde ocurre la elevación** está dentro de la función **`Exploit`**. Dentro de esa función se puede ver que se busca **`lsass.exe`**, se **copia su token** y, finalmente, ese token se utiliza para iniciar un nuevo **`cmd.exe`** con todos los privilegios del token copiado.
 
-En hosts modernos, a menudo querrás reemplazar **`lsass.exe`** por otro **non-PPL SYSTEM process** como **`winlogon.exe`**, **`wininit.exe`** o **`services.exe`**.
+En hosts modernos, normalmente querrás reemplazar **`lsass.exe`** por otro **proceso SYSTEM que no sea PPL**, como **`winlogon.exe`**, **`wininit.exe`** o **`services.exe`**.
 
-Otros processes que se ejecutan como SYSTEM con todos o la mayoría de los token privileges son: **`services.exe`**, **`svchost.exe`** (algunos de los primeros), **`wininit.exe`**, **`csrss.exe`**... Recuerda que, por lo general, **no podrás copiar un token from un protected process**.
+Otros procesos que se ejecutan como SYSTEM con todos o la mayoría de los privilegios del token son: **`services.exe`**, **`svchost.exe`** (algunos de los primeros), **`wininit.exe`**, **`csrss.exe`**... Recuerda que, por lo general, **no podrás copiar un token de un proceso protegido**.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>
@@ -276,8 +276,10 @@ StartServiceCtrlDispatcher( serviceTable );
 return 0;
 }
 ```
-## References
+## Referencias
 
-- [CreateProcessWithTokenW function (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
-- [Configure added LSA protection (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [1] [Función CreateProcessWithTokenW (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [2] [Configurar la protección LSA adicional (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
+- [3] [Ejecutar mi programa como un servicio (cboard.cprogramming.com) – esqueleto de servicio de Windows utilizado por el PoC](https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html)
+
 {{#include ../../banners/hacktricks-training.md}}

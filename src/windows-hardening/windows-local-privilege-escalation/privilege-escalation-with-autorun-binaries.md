@@ -1,4 +1,4 @@
-# Privilege Escalation with Autoruns
+# Escalada de privilegios con Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,14 +6,14 @@
 
 ## WMIC
 
-**Wmic** se puede usar para ejecutar programas al **inicio**. Ve qué binarios están programados para ejecutarse al inicio con:
+**Wmic** se puede utilizar para ejecutar programas durante el **inicio**. Comprueba qué binarios están programados para ejecutarse durante el inicio con:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
 ## Tareas programadas
 
-**Tasks** pueden programarse para ejecutarse con una **cierta frecuencia**. Mira qué binarios están programados para ejecutarse con:
+Las **tareas** pueden programarse para ejecutarse con una **frecuencia determinada**. Consulta qué binarios están programados para ejecutarse con:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Carpetas
 
-Todos los binarios ubicados en las **carpetas Startup se ejecutarán al iniciar**. Las carpetas de inicio comunes son las que se enumeran a continuación, pero la carpeta de inicio está indicada en el registro. [Lee esto para aprender dónde.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Todos los binarios ubicados en las **carpetas de inicio se ejecutarán durante el arranque**. Las carpetas de inicio comunes son las que se enumeran a continuación, pero la carpeta de inicio se indica en el registro. [Lee esto para saber dónde.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -35,7 +35,7 @@ dir /b "%appdata%\Microsoft\Windows\Start Menu\Programs\Startup" 2>nul
 Get-ChildItem "C:\Users\All Users\Start Menu\Programs\Startup"
 Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ```
-> **FYI**: Las vulnerabilidades de *path traversal* en la extracción de archivos comprimidos (como la explotada en WinRAR antes de 7.13 – CVE-2025-8088) pueden aprovecharse para **depositar payloads directamente dentro de estas carpetas Startup durante la descompresión**, lo que resulta en ejecución de código en el siguiente inicio de sesión del usuario. Para un análisis profundo de esta técnica, consulta:
+> **PARA TU INFORMACION**: Las vulnerabilidades de *path traversal* durante la extraccion de archivos (como la explotada en WinRAR antes de la version 7.13 - CVE-2025-8088) pueden aprovecharse para **depositar payloads directamente dentro de estas carpetas Startup durante la descompresion**, lo que provoca la ejecucion de codigo en el siguiente inicio de sesion del usuario. Para un analisis detallado de esta tecnica, consulta:
 
 
 {{#ref}}
@@ -44,14 +44,14 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 
 
-## Registry
+## Registro
 
 > [!TIP]
-> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): La entrada de registro **Wow6432Node** indica que estás ejecutando una versión de Windows de 64 bits. El sistema operativo usa esta clave para mostrar una vista separada de HKEY_LOCAL_MACHINE\SOFTWARE para aplicaciones de 32 bits que se ejecutan en versiones de Windows de 64 bits.
+> [Nota desde aqui](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): La entrada de registro **Wow6432Node** indica que estas ejecutando una version de Windows de 64 bits. El sistema operativo utiliza esta clave para mostrar una vista independiente de HKEY_LOCAL_MACHINE\SOFTWARE para las aplicaciones de 32 bits que se ejecutan en versiones de Windows de 64 bits.
 
-### Runs
+### Ejecuciones
 
-**Commonly known** AutoRun registry:
+**AutoRun** conocido habitualmente:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -65,9 +65,9 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Las claves de registro conocidas como **Run** y **RunOnce** están diseñadas para ejecutar programas automáticamente cada vez que un usuario inicia sesión en el sistema. La línea de comando asignada como valor de datos de una clave está limitada a 260 caracteres o menos.
+Las claves de registro conocidas como **Run** y **RunOnce** estan diseñadas para ejecutar programas automaticamente cada vez que un usuario inicia sesion en el sistema. La linea de comandos asignada como valor de datos de una clave esta limitada a 260 caracteres o menos.<sup>[[2]](#references)</sup>
 
-**Service runs** (can control automatic startup of services during boot):
+**Ejecuciones de servicios** (pueden controlar el inicio automatico de los servicios durante el arranque):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -83,15 +83,15 @@ Las claves de registro conocidas como **Run** y **RunOnce** están diseñadas pa
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-En Windows Vista y versiones posteriores, las claves de registro **Run** y **RunOnce** no se generan automáticamente. Las entradas en estas claves pueden iniciar programas directamente o especificarlos como dependencias. Por ejemplo, para cargar un archivo DLL al iniciar sesión, se podría usar la clave de registro **RunOnceEx** junto con una clave "Depend". Esto se demuestra agregando una entrada de registro para ejecutar "C:\temp\evil.dll" durante el inicio del sistema:
+En Windows Vista y versiones posteriores, las claves de registro **Run** y **RunOnce** no se generan automaticamente. Las entradas de estas claves pueden iniciar programas directamente o especificarlos como dependencias. Por ejemplo, para cargar un archivo DLL al iniciar sesion, se podria utilizar la clave de registro **RunOnceEx** junto con una clave "Depend". Esto se demuestra agregando una entrada de registro para ejecutar "C:\temp\evil.dll" durante el inicio del sistema:<sup>[[2]](#references)</sup>
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!TIP]
-> **Exploit 1**: Si puedes escribir dentro de cualquiera de los registry mencionados en **HKLM** puedes escalar privilegios cuando un usuario diferente inicie sesión.
+> **Exploit 1**: Si puedes escribir dentro de cualquiera de las claves del registro mencionadas en **HKLM**, puedes escalar privilegios cuando otro usuario inicie sesión.
 
 > [!TIP]
-> **Exploit 2**: Si puedes sobrescribir cualquiera de los binaries indicados en cualquiera de los registry dentro de **HKLM** puedes modificar ese binary con una backdoor cuando un usuario diferente inicie sesión y escalar privilegios.
+> **Exploit 2**: Si puedes sobrescribir cualquiera de los binarios indicados en alguna de las claves del registro en **HKLM**, puedes modificar ese binario con un backdoor cuando otro usuario inicie sesión y escalar privilegios.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -147,17 +147,17 @@ Get-ItemProperty -Path 'Registry::HKLM\Software\Wow6432Node\Microsoft\Windows\Ru
 Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\RunOnceEx'
 Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\RunOnceEx'
 ```
-### Startup Path
+### Ruta de inicio
 
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Los accesos directos colocados en la carpeta **Startup** activarán automáticamente servicios o aplicaciones para iniciarse durante el inicio de sesión del usuario o el reinicio del sistema. La ubicación de la carpeta **Startup** se define en el registro tanto para los ámbitos de **Local Machine** como de **Current User**. Esto significa que cualquier acceso directo añadido a estas ubicaciones **Startup** especificadas garantizará que el servicio o programa vinculado se inicie después del proceso de inicio de sesión o reinicio, lo que lo convierte en un método sencillo para programar programas para que se ejecuten automáticamente.
+Los accesos directos colocados en la carpeta **Startup** activarán automáticamente servicios o aplicaciones durante el inicio de sesión del usuario o el reinicio del sistema. La ubicación de la carpeta **Startup** se define en el registro tanto para el ámbito de la **Local Machine** como para el de **Current User**. Esto significa que cualquier acceso directo añadido a estas ubicaciones **Startup** especificadas garantizará que el servicio o programa vinculado se inicie después del proceso de inicio de sesión o reinicio, lo que constituye un método sencillo para programar la ejecución automática de programas.<sup>[[1]](#references)[[2]](#references)</sup>
 
 > [!TIP]
-> Si puedes sobrescribir cualquier carpeta **[User] Shell Folder** bajo **HKLM**, podrás apuntarla a una carpeta controlada por ti y colocar un backdoor que se ejecutará cada vez que un usuario inicie sesión en el sistema, escalando privilegios.
+> Si puedes sobrescribir cualquier carpeta \[User] Shell bajo **HKLM**, podrás apuntarla a una carpeta controlada por ti y colocar un backdoor que se ejecutará cada vez que un usuario inicie sesión en el sistema, escalando privilegios.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -173,10 +173,10 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 - `HKCU\Environment\UserInitMprLogonScript`
 
-Este valor de registro por usuario puede apuntar a un script o comando que se ejecuta cuando ese usuario inicia sesión. Es principalmente una primitiva de **persistence** porque solo se ejecuta en el contexto del usuario afectado, pero aun así merece la pena comprobarlo durante post-exploitation y revisiones de autoruns.
+Este valor del registro por usuario puede apuntar a un script o comando que se ejecuta cuando ese usuario inicia sesión. Se utiliza principalmente como primitiva de **persistence**, porque solo se ejecuta en el contexto del usuario afectado, pero aun así vale la pena comprobarlo durante las revisiones de post-exploitation y autoruns.<sup>[[3]](#references)[[6]](#references)[[7]](#references)</sup>
 
 > [!TIP]
-> Si puedes escribir este valor para el usuario actual, puedes volver a activar la ejecución en el siguiente inicio de sesión interactivo sin necesitar privilegios de admin. Si puedes escribirlo para otro hive de usuario, puedes obtener code execution cuando ese usuario inicie sesión.
+> Si puedes escribir este valor para el usuario actual, puedes volver a activar la ejecución en el siguiente inicio de sesión interactivo sin necesitar derechos de administrador. Si puedes escribirlo en el hive de otro usuario, podrías obtener ejecución de código cuando ese usuario inicie sesión.
 ```bash
 reg query "HKCU\Environment" /v "UserInitMprLogonScript"
 reg add "HKCU\Environment" /v "UserInitMprLogonScript" /t REG_SZ /d "C:\Users\Public\logon.bat" /f
@@ -188,15 +188,15 @@ Remove-ItemProperty -Path 'Registry::HKCU\Environment' -Name "UserInitMprLogonSc
 ```
 Notas:
 
-- Preferir rutas completas a archivos `.bat`, `.cmd`, `.ps1` u otros launchers ya legibles por el usuario objetivo.
-- Esto persiste tras cerrar sesión/reiniciar hasta que se elimine el valor.
-- A diferencia de `HKLM\...\Run`, esto **no** otorga elevación por sí mismo; es persistencia a nivel de usuario.
+- Prefiere rutas completas a archivos `.bat`, `.cmd`, `.ps1` u otros archivos launcher que ya sean legibles por el usuario objetivo.
+- Esto persiste después de cerrar sesión o reiniciar hasta que se elimine el valor.
+- A diferencia de `HKLM\...\Run`, esto **no** otorga elevación por sí solo; es persistencia en el ámbito del usuario.
 
-### Winlogon Keys
+### Claves de Winlogon
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Normalmente, la clave **Userinit** se establece en **userinit.exe**. Sin embargo, si esta clave se modifica, el ejecutable especificado también será lanzado por **Winlogon** al iniciar sesión el usuario. Del mismo modo, la clave **Shell** está pensada para apuntar a **explorer.exe**, que es el shell predeterminado de Windows.
+Normalmente, la clave **Userinit** está configurada como **userinit.exe**. Sin embargo, si esta clave se modifica, el ejecutable especificado también será iniciado por **Winlogon** cuando el usuario inicie sesión. De forma similar, la clave **Shell** está destinada a apuntar a **explorer.exe**, que es el shell predeterminado de Windows.<sup>[[1]](#references)</sup>
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -206,7 +206,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 > [!TIP]
 > Si puedes sobrescribir el valor del registro o el binario, podrás escalar privilegios.
 
-### Policy Settings
+### Configuración de directivas
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
@@ -220,51 +220,51 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 ```
 ### AlternateShell
 
-### Cambiando el Command Prompt de Safe Mode
+### Cambiar el símbolo del sistema del Modo seguro
 
-En el Windows Registry bajo `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, hay un valor **`AlternateShell`** establecido por defecto en `cmd.exe`. Esto significa que cuando eliges "Safe Mode with Command Prompt" durante el inicio (pulsando F8), se usa `cmd.exe`. Pero es posible configurar tu computadora para iniciar automáticamente en este modo sin necesidad de pulsar F8 y seleccionarlo manualmente.
+En el Registro de Windows, bajo `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, existe un valor **`AlternateShell`** establecido de forma predeterminada en `cmd.exe`. Esto significa que, cuando seleccionas "Modo seguro con símbolo del sistema" durante el inicio (presionando F8), se utiliza `cmd.exe`. Sin embargo, es posible configurar el equipo para que se inicie automáticamente en este modo sin tener que presionar F8 y seleccionarlo manualmente.
 
-Pasos para crear una opción de arranque para iniciar automáticamente en "Safe Mode with Command Prompt":
+Pasos para crear una opción de inicio que arranque automáticamente en "Modo seguro con símbolo del sistema":<sup>[[5]](#references)</sup>
 
-1. Cambia los atributos del archivo `boot.ini` para quitar los flags de solo lectura, sistema y oculto: `attrib c:\boot.ini -r -s -h`
+1. Cambia los atributos del archivo `boot.ini` para eliminar las marcas de solo lectura, sistema y oculto: `attrib c:\boot.ini -r -s -h`
 2. Abre `boot.ini` para editarlo.
 3. Inserta una línea como: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. Guarda los cambios en `boot.ini`.
 5. Vuelve a aplicar los atributos originales del archivo: `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** Cambiar la clave de registry **AlternateShell** permite configurar una command shell personalizada, con posibilidad de acceso no autorizado.
-- **Exploit 2 (PATH Write Permissions):** Tener permisos de escritura en cualquier parte de la variable de sistema **PATH**, especialmente antes de `C:\Windows\system32`, te permite ejecutar un `cmd.exe` personalizado, que podría ser una backdoor si el sistema arranca en Safe Mode.
-- **Exploit 3 (PATH and boot.ini Write Permissions):** Tener acceso de escritura a `boot.ini` permite el inicio automático en Safe Mode, facilitando el acceso no autorizado en el siguiente reinicio.
+- **Exploit 1:** Cambiar la clave de Registro **AlternateShell** permite configurar un shell de comandos personalizado, potencialmente para obtener acceso no autorizado.
+- **Exploit 2 (Permisos de escritura en PATH):** Tener permisos de escritura en cualquier parte de la variable **PATH** del sistema, especialmente antes de `C:\Windows\system32`, permite ejecutar un `cmd.exe` personalizado, que podría actuar como una puerta trasera si el sistema se inicia en Modo seguro.
+- **Exploit 3 (Permisos de escritura en PATH y boot.ini):** Tener acceso de escritura a `boot.ini` permite iniciar automáticamente el Modo seguro, facilitando el acceso no autorizado en el siguiente reinicio.
 
-Para comprobar la configuración actual de **AlternateShell**, usa estos comandos:
+Para comprobar la configuración actual de **AlternateShell**, utiliza estos comandos:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
 ```
 ### Installed Component
 
-Active Setup es una feature de Windows que **se inicia antes de que el entorno de escritorio se cargue por completo**. Prioriza la ejecución de ciertos comandos, que deben completarse antes de que continúe el logon del usuario. Este proceso ocurre incluso antes de que se disparen otras entradas de inicio, como las de las secciones del registry Run o RunOnce.
+Active Setup es una característica de Windows que **se inicia antes de que el entorno de escritorio se cargue por completo**. Prioriza la ejecución de ciertos comandos, que deben completarse antes de que continúe el inicio de sesión del usuario. Este proceso ocurre incluso antes de que se ejecuten otras entradas de inicio, como las de las secciones de registro Run o RunOnce.
 
-Active Setup se gestiona a través de las siguientes registry keys:
+Active Setup se gestiona mediante las siguientes claves del registro:
 
 - `HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Dentro de estas keys, existen varios subkeys, cada uno correspondiente a un componente específico. Los key values de interés particular incluyen:
+Dentro de estas claves existen varias subclaves, cada una correspondiente a un componente específico. Los valores de las claves de especial interés incluyen:
 
 - **IsInstalled:**
 - `0` indica que el comando del componente no se ejecutará.
-- `1` significa que el comando se ejecutará una vez por cada usuario, que es el comportamiento por defecto si el valor `IsInstalled` falta.
-- **StubPath:** Define el comando que Active Setup ejecutará. Puede ser cualquier línea de comandos válida, como lanzar `notepad`.
+- `1` significa que el comando se ejecutará una vez para cada usuario, que es el comportamiento predeterminado si falta el valor `IsInstalled`.
+- **StubPath:** Define el comando que ejecutará Active Setup. Puede ser cualquier línea de comandos válida, como iniciar `notepad`.
 
 **Security Insights:**
 
-- Modificar o escribir en una key donde **`IsInstalled`** esté establecido en `"1"` con un **`StubPath`** específico puede llevar a la ejecución no autorizada de comandos, potencialmente para privilege escalation.
-- Alterar el archivo binario referenciado en cualquier valor **`StubPath`** también podría lograr privilege escalation, dadas las permisos suficientes.
+- Modificar o escribir en una clave donde **`IsInstalled`** está establecido en `"1"` con un **`StubPath`** específico puede provocar la ejecución no autorizada de comandos, lo que podría permitir la escalada de privilegios.
+- Alterar el archivo binario referenciado en cualquier valor **`StubPath`** también podría permitir la escalada de privilegios, siempre que se disponga de permisos suficientes.
 
-Para inspeccionar las configuraciones de **`StubPath`** en los componentes de Active Setup, se pueden usar estos comandos:
+Para inspeccionar las configuraciones de **`StubPath`** en los componentes de Active Setup, se pueden utilizar estos comandos:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -275,30 +275,30 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Overview of Browser Helper Objects (BHOs)
 
-Browser Helper Objects (BHOs) son módulos DLL que añaden funciones extra a Microsoft Internet Explorer. Se cargan en Internet Explorer y Windows Explorer en cada inicio. Sin embargo, su ejecución puede bloquearse configurando la clave **NoExplorer** en 1, evitando que se carguen con instancias de Windows Explorer.
+Browser Helper Objects (BHOs) son módulos DLL que añaden funciones adicionales a Microsoft's Internet Explorer. Se cargan en Internet Explorer y Windows Explorer en cada inicio. Sin embargo, su ejecución puede bloquearse estableciendo la clave **NoExplorer** en 1, lo que impide que se carguen con las instancias de Windows Explorer.<sup>[[1]](#references)</sup>
 
-BHOs son compatibles con Windows 10 a través de Internet Explorer 11, pero no están soportados en Microsoft Edge, el navegador predeterminado en versiones más nuevas de Windows.
+Los BHO son compatibles con Windows 10 mediante Internet Explorer 11, pero no son compatibles con Microsoft Edge, el navegador predeterminado en las versiones más recientes de Windows.
 
-Para explorar los BHOs registrados en un sistema, puedes inspeccionar las siguientes claves del registro:
+Para explorar los BHO registrados en un sistema, puedes inspeccionar las siguientes claves del registro:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-Cada BHO está representado por su **CLSID** en el registro, sirviendo como un identificador único. La información detallada de cada CLSID puede encontrarse en `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
+Cada BHO está representado por su **CLSID** en el registro, que sirve como identificador único. Puedes encontrar información detallada sobre cada CLSID en `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Para consultar BHOs en el registro, se pueden utilizar estos comandos:
+Para consultar los BHO en el registro, se pueden utilizar estos comandos:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 ```
-### Internet Explorer Extensions
+### Extensiones de Internet Explorer
 
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-Ten en cuenta que el registry contendrá 1 nueva clave de registry por cada dll y estará representada por el **CLSID**. Puedes encontrar la información del CLSID en `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
+Ten en cuenta que el registro contendrá 1 nueva entrada por cada dll y estará representada por el **CLSID**. Puedes encontrar la información del CLSID en `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`
 
-### Font Drivers
+### Controladores de fuentes
 
 - `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers`
 - `HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers`
@@ -308,7 +308,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Dr
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
-### Abrir comando
+### Comando Open
 
 - `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 - `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
@@ -318,30 +318,29 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command" /v ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Classes\htmlfile\shell\open\command' -Name ""
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command' -Name ""
 ```
-### Opciones de Ejecución de Archivos de Imagen
+### Opciones de ejecución de archivos de imagen
 ```
 HKLM\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options
 HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Execution Options
 ```
 ## SysInternals
 
-Tenga en cuenta que todos los sitios donde puede encontrar autoruns **ya son buscados por**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Sin embargo, para una **lista más completa de archivos autoejecutados** podría usar [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)de systinternals:
+Ten en cuenta que todos los sitios donde puedes encontrar autoruns ya son **buscados por**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Sin embargo, para obtener una lista **más completa de archivos autoejecutados**, puedes usar [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)de systinternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## Más
 
-**Encuentra más Autoruns como registros en** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**Find more Autoruns like registries in** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)<sup>[[4]](#references)</sup>
 
 ## Referencias
 
-- [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
-- [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
-- [https://attack.mitre.org/techniques/T1037/001/](https://attack.mitre.org/techniques/T1037/001/)
-- [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
-- [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
-- [https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
-
-
+- [1] [Mecanismos comunes de persistencia de malware](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
+- [2] [MITRE ATT&CK T1547.001 – Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder](https://attack.mitre.org/techniques/T1547/001/)
+- [3] [MITRE ATT&CK T1037.001 – Boot or Logon Initialization Scripts: Logon Script (Windows)](https://attack.mitre.org/techniques/T1037/001/)
+- [4] [Autoruns – Categorías de inicio automático (Solución de problemas con las herramientas Windows Sysinternals, 2.ª edición)](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+- [5] [¿Cómo puedo agregar una opción de arranque que inicie un shell alternativo?](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
+- [6] [Metasploit Wrap-Up 04/03/2026](https://www.rapid7.com/blog/post/pt-metasploit-wrap-up-04-03-2026)
+- [7] [Metasploit PR #21032 – windows/persistence/userinit_mpr_logon_script](https://github.com/rapid7/metasploit-framework/pull/21032)
 
 {{#include ../../banners/hacktricks-training.md}}

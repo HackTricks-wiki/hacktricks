@@ -1,14 +1,16 @@
+# De High Integrity a SYSTEM con Name Pipes
+
 {{#include ../../banners/hacktricks-training.md}}
 
-**Flujo de código:**
+**Flujo del código:**
 
 1. Crear un nuevo Pipe
-2. Crear y comenzar un servicio que se conectará al pipe creado y escribirá algo. El código del servicio ejecutará este código PS codificado: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. El servicio recibe los datos del cliente en el pipe, llama a ImpersonateNamedPipeClient y espera a que el servicio termine
+2. Crear e iniciar un servicio que se conectará al Pipe creado y escribirá algo. El código del servicio ejecutará este código PS codificado: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. El servicio recibe los datos del cliente en el Pipe, llama a ImpersonateNamedPipeClient y espera a que finalice el servicio
 4. Finalmente, utiliza el token obtenido del servicio para iniciar un nuevo _cmd.exe_
 
 > [!WARNING]
-> Si no tienes suficientes privilegios, el exploit puede quedar atascado y nunca regresar.
+> Si no tienes suficientes privilegios, el exploit puede quedar bloqueado y no devolver nunca el resultado.
 ```c
 #include <windows.h>
 #include <time.h>

@@ -1,27 +1,27 @@
-# Abusing Tokens
+# Abuso de Tokens
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Tokens
 
-Si **no sabes qué son Windows Access Tokens** lee esta página antes de continuar:
+Si **no sabes qué son los Windows Access Tokens**, lee esta página antes de continuar:
 
 
 {{#ref}}
 access-tokens.md
 {{#endref}}
 
-**Quizá puedas escalar privilegios abusando de los tokens que ya tienes**
+**Tal vez puedas escalar privilegios abusando de los tokens que ya tienes**
 
 ### SeImpersonatePrivilege
 
-Este es un privilege que posee cualquier process y permite la impersonation (pero no la creación) de cualquier token, siempre que se pueda obtener un handle a él. Se puede adquirir un privileged token desde un Windows service (DCOM) induciéndolo a realizar autenticación NTLM contra un exploit, habilitando posteriormente la ejecución de un process con privilegios SYSTEM. Esta vulnerability puede explotarse usando varias tools, como [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (que requiere que winrm esté deshabilitado), [SweetPotato](https://github.com/CCob/SweetPotato) y [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
+Este privilegio, presente en cualquier proceso, permite la suplantación (pero no la creación) de cualquier token, siempre que se pueda obtener un handle hacia él. Se puede adquirir un token privilegiado desde un servicio de Windows (DCOM) provocando que realice una autenticación NTLM contra un exploit, lo que posteriormente permite ejecutar un proceso con privilegios de SYSTEM.<sup>[[2]](#references)</sup> Esta vulnerabilidad puede explotarse usando varias herramientas, como [juicy-potato](https://github.com/ohpe/juicy-potato), [RogueWinRM](https://github.com/antonioCoco/RogueWinRM) (que requiere que winrm esté deshabilitado), [SweetPotato](https://github.com/CCob/SweetPotato) y [PrintSpoofer](https://github.com/itm4n/PrintSpoofer).
 
-Modern operator notes:
+Notas modernas para operadores:
 
-- **JuicyPotato is legacy**: on Windows 10 1809+/Server 2019+, prefer **GodPotato**, **SigmaPotato**, **PrintNotifyPotato**, **RoguePotato**, **SharpEfsPotato/EfsPotato**, or **PrintSpoofer** depending on which RPC/COM surface is still reachable.
-- If you compromised a service running as **`LOCAL SERVICE`** or **`NETWORK SERVICE`** and `whoami /priv` shows a **filtered token** without `SeImpersonatePrivilege`/`SeAssignPrimaryTokenPrivilege`, recover the account's **default privilege set** first (for example with **FullPowers**) and retry the potato family afterwards.
-- Some newer forks are more operator-friendly than the original tools. For example, **SigmaPotato** adds reflection/in-memory execution and modern Windows compatibility, while **PrintNotifyPotato** abuses the PrintNotify COM service and is often useful when the classic Spooler path is disabled.
+- **JuicyPotato es legacy**: en Windows 10 1809+/Server 2019+, se recomienda usar **GodPotato**, **SigmaPotato**, **PrintNotifyPotato**, **RoguePotato**, **SharpEfsPotato/EfsPotato** o **PrintSpoofer**, dependiendo de qué superficie RPC/COM siga siendo accesible.
+- Si has comprometido un servicio que se ejecuta como **`LOCAL SERVICE`** o **`NETWORK SERVICE`** y `whoami /priv` muestra un **filtered token** sin `SeImpersonatePrivilege`/`SeAssignPrimaryTokenPrivilege`, recupera primero el **default privilege set** de la cuenta (por ejemplo, con **FullPowers**) y vuelve a probar después la familia de potato.<sup>[[3]](#references)</sup>
+- Algunas forks más recientes son más prácticas para los operadores que las herramientas originales. Por ejemplo, **SigmaPotato** añade ejecución mediante reflection/en memoria y compatibilidad con versiones modernas de Windows, mientras que **PrintNotifyPotato** abusa del servicio COM PrintNotify y suele ser útil cuando la ruta clásica del Spooler está deshabilitada.
 ```cmd
 FullPowers.exe -c "cmd /c whoami /priv" -z
 GodPotato.exe -cmd "cmd /c whoami"
@@ -39,18 +39,18 @@ juicypotato.md
 
 ### SeAssignPrimaryPrivilege
 
-Es muy similar a **SeImpersonatePrivilege**, usará el **mismo método** para obtener un token privilegiado.\
-Luego, este privilegio permite **asignar un primary token** a un proceso nuevo/suspendido. Con el token de impersonation privilegiado puedes derivar un primary token (DuplicateTokenEx).\
-Con el token, puedes crear un **nuevo proceso** con 'CreateProcessAsUser' o crear un proceso suspendido y **establecer el token** (en general, no puedes modificar el primary token de un proceso en ejecución).
+Es muy similar a **SeImpersonatePrivilege**; utilizará el **mismo método** para obtener un token privilegiado.\
+Después, este privilegio permite **asignar un token primario** a un proceso nuevo o suspendido. Con el token de impersonación privilegiado, se puede derivar un token primario (DuplicateTokenEx).\
+Con el token, puedes crear un **proceso nuevo** con 'CreateProcessAsUser' o crear un proceso suspendido y **establecer el token** (en general, no puedes modificar el token primario de un proceso en ejecución).<sup>[[2]](#references)</sup>
 
 ### SeTcbPrivilege
 
-Si tienes habilitado este token puedes usar **KERB_S4U_LOGON** para obtener un **impersonation token** para cualquier otro usuario sin conocer las credenciales, **añadir un grupo arbitrario** (admins) al token, establecer el **integrity level** del token en "**medium**", y asignar este token al **current thread** (SetThreadToken).
+Si tienes este token habilitado, puedes usar **KERB_S4U_LOGON** para obtener un **token de impersonación** para cualquier otro usuario sin conocer las credenciales, **añadir un grupo arbitrario** (admins) al token, establecer el **nivel de integridad** del token en "**medium**" y asignar este token al **hilo actual** (SetThreadToken).<sup>[[2]](#references)</sup>
 
 ### SeBackupPrivilege
 
-El sistema hace que se **conceda todo el acceso de lectura** a cualquier archivo (limitado a operaciones de lectura) mediante este privilegio. Se utiliza para **leer los password hashes del local Administrator** desde el registro, tras lo cual se pueden usar herramientas como "**psexec**" o "**wmiexec**" con el hash (técnica Pass-the-Hash). Sin embargo, esta técnica falla bajo dos condiciones: cuando la cuenta Local Administrator está deshabilitada, o cuando hay una policy que elimina los derechos administrativos de los Local Administrators que se conectan remotamente.\
-En la práctica, el flujo de trabajo integrado más fiable suele ser **VSS + `robocopy /b`**: crear/exponer una shadow copy, y luego copiar `SAM`/`SYSTEM` o `NTDS.dit` en **backup mode**, lo que omite los file ACLs.
+Este privilegio hace que el sistema **otorgue control de acceso de lectura** a cualquier archivo (limitado a operaciones de lectura). Se utiliza para **leer los hashes de las contraseñas de las cuentas locales de Administrator** desde el registro; después, se pueden usar herramientas como "**psexec**" o "**wmiexec**" con el hash (técnica Pass-the-Hash). Sin embargo, esta técnica falla en dos condiciones: cuando la cuenta de Local Administrator está deshabilitada o cuando existe una directiva que elimina los derechos administrativos de los Local Administrators que se conectan remotamente.<sup>[[2]](#references)</sup>\
+En la práctica, el flujo de trabajo integrado más fiable suele ser **VSS + `robocopy /b`**: crear o exponer una shadow copy y después copiar `SAM`/`SYSTEM` o `NTDS.dit` en **modo backup**, lo que evita las ACL de los archivos.<sup>[[4]](#references)</sup>
 ```cmd
 :: shadow.txt
 set context persistent nowriters
@@ -77,32 +77,32 @@ Puedes **abusar de este privilegio** con:
 
 ### SeRestorePrivilege
 
-Este privilegio proporciona permiso de **write access** a cualquier archivo del sistema, independientemente de la Access Control List (ACL) del archivo. Abre numerosas posibilidades de escalada, incluida la capacidad de **modify services**, realizar DLL Hijacking y configurar **debuggers** mediante Image File Execution Options, entre otras técnicas.
+Este privilegio proporciona permiso de **acceso de escritura** a cualquier archivo del sistema, independientemente de la Access Control List (ACL) del archivo. Abre numerosas posibilidades para la escalada, incluida la capacidad de **modificar servicios**, realizar DLL Hijacking y establecer **debuggers** mediante Image File Execution Options, entre muchas otras técnicas.<sup>[[2]](#references)</sup>
 
 ### SeCreateTokenPrivilege
 
-SeCreateTokenPrivilege es un permiso poderoso, especialmente útil cuando un usuario tiene la capacidad de impersonate tokens, pero también en ausencia de SeImpersonatePrivilege. Esta capacidad depende de la posibilidad de impersonar un token que represente al mismo usuario y cuyo integrity level no exceda el del proceso actual.
+SeCreateTokenPrivilege es un permiso potente, especialmente útil cuando un usuario tiene la capacidad de suplantar tokens, pero también en ausencia de SeImpersonatePrivilege. Esta capacidad depende de poder suplantar un token que represente al mismo usuario y cuyo nivel de integridad no supere el del proceso actual.<sup>[[2]](#references)</sup>
 
 **Puntos clave:**
 
-- **Impersonation sin SeImpersonatePrivilege:** Es posible aprovechar SeCreateTokenPrivilege para EoP impersonando tokens bajo condiciones específicas.
-- **Condiciones para Token Impersonation:** La impersonation exitosa requiere que el target token pertenezca al mismo usuario y tenga un integrity level menor o igual al integrity level del proceso que intenta la impersonation.
-- **Creación y modificación de Impersonation Tokens:** Los usuarios pueden crear un impersonation token y mejorarlo añadiendo el SID (Security Identifier) de un grupo privilegiado.
+- **Suplantación sin SeImpersonatePrivilege:** Es posible aprovechar SeCreateTokenPrivilege para realizar EoP mediante la suplantación de tokens bajo condiciones específicas.
+- **Condiciones para la suplantación de tokens:** Para que la suplantación tenga éxito, el token objetivo debe pertenecer al mismo usuario y tener un nivel de integridad menor o igual al nivel de integridad del proceso que intenta realizar la suplantación.
+- **Creación y modificación de tokens de suplantación:** Los usuarios pueden crear un token de suplantación y mejorarlo añadiendo el SID (Security Identifier) de un grupo privilegiado.
 
 ### SeLoadDriverPrivilege
 
-Este privilegio permite **load and unload device drivers** con la creación de una entrada de registry con valores específicos para `ImagePath` y `Type`. Como el write access directo a `HKLM` (HKEY_LOCAL_MACHINE) está restringido, debe utilizarse `HKCU` (HKEY_CURRENT_USER) en su lugar. Sin embargo, para que `HKCU` sea reconocible por el kernel para la configuración del driver, debe seguirse una ruta específica.
+Este privilegio permite **cargar y descargar controladores de dispositivos** mediante la creación de una entrada del registro con valores específicos para `ImagePath` y `Type`. Dado que el acceso de escritura directo a `HKLM` (HKEY_LOCAL_MACHINE) está restringido, se debe utilizar `HKCU` (HKEY_CURRENT_USER). Sin embargo, para que el kernel reconozca `HKCU` al configurar el controlador, se debe seguir una ruta específica.<sup>[[2]](#references)</sup>
 
-El uso ofensivo moderno suele ser **BYOVD** (bring your own vulnerable driver): cargar un driver de kernel **signed but vulnerable** y luego usar sus IOCTLs para desactivar protecciones o saltar a ejecución de código en kernel. Ten en cuenta que en versiones recientes de Windows 11/Server, la **Microsoft vulnerable driver blocklist** y/o **HVCI/Memory Integrity** a menudo rompen cadenas públicas antiguas, por lo que los ejemplos clásicos al estilo `szkg64.sys` ya no son fiables universalmente.
+El uso ofensivo moderno suele consistir en **BYOVD** (bring your own vulnerable driver): cargar un controlador de kernel **firmado pero vulnerable** y utilizar sus IOCTL para deshabilitar protecciones o lograr la ejecución de código en el kernel. Ten en cuenta que, en versiones recientes de Windows 11/Server, la **Microsoft vulnerable driver blocklist** y/o **HVCI/Memory Integrity** suelen impedir las cadenas antiguas, por lo que los ejemplos clásicos del tipo `szkg64.sys` ya no son fiables de forma universal.
 
-Esta ruta es `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, donde `<RID>` es el Relative Identifier del usuario actual. Dentro de `HKCU`, debe crearse toda esta ruta, y hay que establecer dos valores:
+Esta ruta es `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, donde `<RID>` es el Relative Identifier del usuario actual. Dentro de `HKCU`, se debe crear la ruta completa y establecer dos valores:<sup>[[2]](#references)</sup>
 
 - `ImagePath`, que es la ruta al binario que se ejecutará
 - `Type`, con un valor de `SERVICE_KERNEL_DRIVER` (`0x00000001`).
 
 **Pasos a seguir:**
 
-1. Acceder a `HKCU` en lugar de `HKLM` debido al write access restringido.
+1. Acceder a `HKCU` en lugar de `HKLM` debido al acceso de escritura restringido.
 2. Crear la ruta `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName` dentro de `HKCU`, donde `<RID>` representa el Relative Identifier del usuario actual.
 3. Establecer `ImagePath` en la ruta de ejecución del binario.
 4. Asignar `Type` como `SERVICE_KERNEL_DRIVER` (`0x00000001`).
@@ -121,7 +121,7 @@ Más formas de abusar de este privilegio en [https://www.ired.team/offensive-sec
 
 ### SeTakeOwnershipPrivilege
 
-Esto es similar a **SeRestorePrivilege**. Su función principal permite a un proceso **asumir la propiedad de un objeto**, eludiendo el requisito de acceso discrecional explícito mediante la concesión de derechos de acceso WRITE_OWNER. El proceso consiste primero en obtener la propiedad de la clave de registro objetivo para fines de escritura, y luego alterar la DACL para habilitar operaciones de escritura.
+Es similar a **SeRestorePrivilege**. Su función principal permite que un proceso **asuma la propiedad de un objeto**, evitando el requisito de acceso discrecional explícito mediante la concesión de derechos de acceso WRITE_OWNER. El proceso consiste primero en obtener la propiedad de la clave del registro objetivo con fines de escritura y, posteriormente, modificar la DACL para habilitar las operaciones de escritura.<sup>[[2]](#references)</sup>
 ```bash
 takeown /f 'C:\some\file.txt' #Now the file is owned by you
 icacls 'C:\some\file.txt' /grant <your_username>:F #Now you have full access
@@ -139,15 +139,15 @@ c:\inetpub\wwwwroot\web.config
 ```
 ### SeDebugPrivilege
 
-Este privilegio permite **depurar otros procesos**, incluyendo leer y escribir en la memoria. Con este privilegio se pueden emplear varias estrategias de memory injection, capaces de evadir la mayoría de soluciones antivirus y host intrusion prevention.
+Este privilegio permite **depurar otros procesos**, incluido leer y escribir en la memoria. Con este privilegio se pueden emplear diversas estrategias de inyección de memoria capaces de evadir la mayoría de las soluciones antivirus y de prevención de intrusiones en el host.<sup>[[2]](#references)</sup>
 
-En Windows moderno, recuerda que `SeDebugPrivilege` suele ser suficiente para abrir **procesos SYSTEM no protegidos** y duplicar sus tokens, pero **no** garantiza que puedas tocar **LSASS**. Si **RunAsPPL / LSA Protection** está habilitado, los procesos no protegidos no pueden leer ni inyectar en LSASS aunque `SeDebugPrivilege` esté presente. En ese caso, roba un token de otro proceso SYSTEM no-PPL, o encadena con un bypass de PPL/BYOVD en lugar de asumir que `procdump` funcionará. Para un ejemplo completo de copia de token usando `SeDebugPrivilege` + `SeImpersonatePrivilege`, consulta [this page](sedebug-+-seimpersonate-copy-token.md).
+En las versiones modernas de Windows, recuerda que `SeDebugPrivilege` normalmente basta para abrir **procesos SYSTEM no protegidos** y duplicar sus tokens, pero **no garantiza** que puedas acceder a **LSASS**. Si **RunAsPPL / LSA Protection** está habilitado, los procesos no protegidos no pueden leer ni inyectarse en LSASS, incluso aunque `SeDebugPrivilege` esté presente. En ese caso, roba un token de otro proceso SYSTEM no PPL o encadena un bypass de PPL/BYOVD, en lugar de asumir que `procdump` funcionará. Para ver un ejemplo completo de copia de tokens usando `SeDebugPrivilege` + `SeImpersonatePrivilege`, consulta [esta página](sedebug-+-seimpersonate-copy-token.md).
 
-#### Dump memory
+#### Volcar memoria
 
-Podrías usar [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) de la [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) para **capturar la memoria de un proceso**. En concreto, esto puede aplicarse al proceso **Local Security Authority Subsystem Service (**[**LSASS**](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)**)**, que es responsable de almacenar las credenciales del usuario una vez que este ha iniciado sesión correctamente en un sistema.
+Puedes usar [ProcDump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) de [SysInternals Suite](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) para **capturar la memoria de un proceso**. Concretamente, esto puede aplicarse al proceso **Local Security Authority Subsystem Service (**[**LSASS**](https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service)**)**, que se encarga de almacenar las credenciales de los usuarios una vez que han iniciado sesión correctamente en un sistema.
 
-Luego puedes cargar este dump en mimikatz para obtener passwords:
+A continuación, puedes cargar este volcado en mimikatz para obtener las contraseñas:
 ```
 mimikatz.exe
 mimikatz # log
@@ -156,7 +156,7 @@ mimikatz # sekurlsa::logonpasswords
 ```
 #### RCE
 
-Si quieres obtener una shell `NT SYSTEM` podrías usar:
+Si quieres obtener una shell de `NT SYSTEM`, puedes usar:
 
 - [**SeDebugPrivilege-Exploit (C++)**](https://github.com/bruno-1337/SeDebugPrivilege-Exploit)
 - [**SeDebugPrivilegePoC (C#)**](https://github.com/daem0nc0re/PrivFu/tree/main/PrivilegedOperations/SeDebugPrivilegePoC)
@@ -167,19 +167,19 @@ import-module psgetsys.ps1; [MyProcess]::CreateProcessFromParent(<system_pid>,<c
 ```
 ### SeManageVolumePrivilege
 
-Este derecho (Perform volume maintenance tasks) permite abrir manejadores de dispositivo de volumen sin procesar (p. ej., \\.\C:) para I/O directo de disco que omite las ACL de NTFS. Con esto puedes copiar bytes de cualquier archivo del volumen leyendo los bloques subyacentes, lo que permite la lectura arbitraria de archivos de material sensible (p. ej., claves privadas de la máquina en %ProgramData%\Microsoft\Crypto\, hives del registro, SAM/NTDS mediante VSS). Es especialmente impactante en servidores CA, donde extraer la clave privada de la CA permite forjar un Golden Certificate para suplantar a cualquier principal.
+Este derecho (Perform volume maintenance tasks) permite abrir identificadores de dispositivo de volumen sin formato (por ejemplo, \\.\C:) para realizar operaciones de E/S de disco directas que omiten las ACL de NTFS. Con él puedes copiar los bytes de cualquier archivo del volumen leyendo los bloques subyacentes, lo que permite leer arbitrariamente archivos con información confidencial (por ejemplo, claves privadas de máquina en %ProgramData%\Microsoft\Crypto\, colmenas del registro, SAM/NTDS mediante VSS).<sup>[[5]](#references)</sup> Es especialmente importante en servidores CA, donde exfiltrar la clave privada de la CA permite falsificar un Golden Certificate para suplantar a cualquier principal.<sup>[[6]](#references)</sup>
 
-See detailed techniques and mitigations:
+Consulta las técnicas detalladas y las mitigaciones:
 
 {{#ref}}
 semanagevolume-perform-volume-maintenance-tasks.md
 {{#endref}}
 
-## Check privileges
+## Comprobar privilegios
 ```
 whoami /priv
 ```
-Los **tokens que aparecen como Disabled** generalmente pueden habilitarse, así que a menudo puedes abusar tanto de privilegios _Enabled_ como _Disabled_.
+Los **tokens que aparecen como Disabled** normalmente se pueden habilitar, por lo que a menudo puedes abusar de los privilegios _Enabled_ y _Disabled_.
 
 ### Habilitar todos los tokens
 
@@ -188,31 +188,31 @@ Si tienes privilegios deshabilitados, puedes usar el script [**EnableAllTokenPri
 .\EnableAllTokenPrivs.ps1
 whoami /priv
 ```
-O el **script** incrustado en este [**post**](https://www.leeholmes.com/adjusting-token-privileges-in-powershell/).
+O el **script** incluido en este [**post**](https://www.leeholmes.com/adjusting-token-privileges-in-powershell/).
 
-## Table
+## Tabla
 
-Lista completa de privilegios de token en [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin), el resumen de abajo solo enumerará formas directas de explotar el privilegio para obtener una sesión de admin o leer archivos sensibles.
+Guía rápida completa de token privileges en [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin); el resumen siguiente solo incluye formas directas de explotar el privilege para obtener una sesión de admin o leer archivos sensibles.<sup>[[1]](#references)</sup>
 
-| Privilege                  | Impact      | Tool                    | Execution path                                                                                                                                                                                                                                                                                                                                     | Remarks                                                                                                                                                                                                                                                                                                                        |
-| ------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`SeAssignPrimaryToken`** | _**Admin**_ | 3rd party tool          | _"It would allow a user to impersonate tokens and privesc to nt system using tools such as potato.exe, rottenpotato.exe and juicypotato.exe"_                                                                                                                                                                                                      | Gracias [Aurélien Chalot](https://twitter.com/Defte_) por la actualización. Intentaré reformularlo pronto con un estilo más tipo receta.                                                                                                                                                                                       |
-| **`SeBackup`**             | **Threat**  | _**Built-in commands**_ | Leer archivos sensibles con `robocopy /b` o helpers dedicados compatibles con SeBackup.                                                                                                                                                                                                                                                                 | <p>- Genial para `SAM`/`SYSTEM`, `SECURITY`, `NTDS.dit`, y a veces `%WINDIR%\MEMORY.DMP`.<br><br>- `robocopy` es cómodo, pero los cmdlets/APIs dedicados a SeBackup suelen ser más flexibles para archivos bloqueados/abiertos.</p>                                                                                                   |
-| **`SeCreateToken`**        | _**Admin**_ | 3rd party tool          | Crear un token arbitrario, incluidos derechos de admin local, con `NtCreateToken`.                                                                                                                                                                                                                                                                  |                                                                                                                                                                                                                                                                                                                                |
-| **`SeDebug`**              | _**Admin**_ | **PowerShell**          | Duplicar un token SYSTEM **no-PPL** o volcar memoria desde un proceso no protegido.                                                                                                                                                                                                                                                                 | <p>El volcado de LSASS suele bloquearse si RunAsPPL/LSA Protection está habilitado.</p><p>Script que se encuentra en [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1)</p>                                                                                                               |
-| **`SeImpersonate`**        | _**Admin**_ | 3rd party tool          | Usar la familia **Potato** / suplantación por named-pipe para lanzar SYSTEM (`PrintSpoofer`, `RoguePotato`, `GodPotato`, `SigmaPotato`, `PrintNotifyPotato`, etc.).                                                                                                                                                                                    | <p>Lo más práctico es hacerlo desde service accounts como IIS APPPOOL, MSSQL, tareas programadas, o cualquier contexto que ya tenga `SeImpersonatePrivilege`.</p>                                                                                                                                                                            |
-| **`SeLoadDriver`**         | _**Admin**_ | 3rd party tool          | <p>1. Cargar un driver de kernel firmado pero vulnerable (BYOVD)<br>2. Usar los IOCTLs del driver para obtener lectura/escritura en kernel, desactivar herramientas de seguridad o elevar a SYSTEM<br><br>Alternativamente, el privilegio puede usarse para descargar drivers relacionados con seguridad con el comando builtin <code>fltMC</code>, es decir <code>fltMC sysmondrv</code></p>                     | <p>Drivers públicos antiguos como <code>szkg64.sys</code> están cada vez más bloqueados en Windows moderno por la vulnerable-driver blocklist / HVCI.</p>                                                                                                                                                                               |
-| **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. Iniciar PowerShell/ISE con el privilegio SeRestore presente.<br>2. Habilitar el privilegio con <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a>).<br>3. Renombrar utilman.exe a utilman.old<br>4. Renombrar cmd.exe a utilman.exe<br>5. Bloquear la consola y pulsar Win+U</p> | <p>El ataque puede ser detectado por algún software AV.</p><p>Un método alternativo se basa en reemplazar binarios de servicios almacenados en "Program Files" usando el mismo privilegio</p>                                                                                                                                                            |
-| **`SeTakeOwnership`**      | _**Admin**_ | _**Built-in commands**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icacls.exe "%windir%\system32" /grant "%username%":F</code><br>3. Renombrar cmd.exe a utilman.exe<br>4. Bloquear la consola y pulsar Win+U</p>                                                                                                                                       | <p>El ataque puede ser detectado por algún software AV.</p><p>Un método alternativo se basa en reemplazar binarios de servicios almacenados en "Program Files" usando el mismo privilegio.</p>                                                                                                                                                           |
-| **`SeTcb`**                | _**Admin**_ | 3rd party tool          | <p>Manipular tokens para que incluyan derechos de admin local. Puede requerir SeImpersonate.</p><p>Pendiente de verificar.</p>                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                |
+| Privilege                  | Impacto      | Tool                    | Ruta de ejecución                                                                                                                                                                                                                                                                                                                                     | Observaciones                                                                                                                                                                                                                                                                                                                        |
+| -------------------------- | ----------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`SeAssignPrimaryToken`** | _**Admin**_ | 3rd party tool          | _"Permitiría a un usuario impersonate tokens y hacer privesc a nt system mediante tools como potato.exe, rottenpotato.exe y juicypotato.exe"_                                                                                                                                                                                                      | Gracias a [Aurélien Chalot](https://twitter.com/Defte_) por la actualización. Intentaré reformularlo pronto como una receta más práctica.                                                                                                                                                                                         |
+| **`SeBackup`**             | **Threat**  | _**Built-in commands**_ | Leer archivos sensibles con `robocopy /b` o helpers de copia específicos compatibles con SeBackup.                                                                                                                                                                                                                                                                 | <p>- Muy útil para `SAM`/`SYSTEM`, `SECURITY`, `NTDS.dit` y, en ocasiones, `%WINDIR%\MEMORY.DMP`.<br><br>- `robocopy` es práctico, pero los cmdlets/APIs específicos de SeBackup suelen ser más flexibles para archivos bloqueados/abiertos.</p>                                                                                                   |
+| **`SeCreateToken`**        | _**Admin**_ | 3rd party tool          | Crear un token arbitrario, incluidos los local admin rights, con `NtCreateToken`.                                                                                                                                                                                                                                                                          |                                                                                                                                                                                                                                                                                                                                |
+| **`SeDebug`**              | _**Admin**_ | **PowerShell**          | Duplicar un token SYSTEM **non-PPL** o volcar la memoria de un proceso no protegido.                                                                                                                                                                                                                                                                 | <p>El volcado de LSASS suele estar bloqueado si RunAsPPL/LSA Protection está habilitado.</p><p>El script se encuentra en [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1)</p>                                                                                                               |
+| **`SeImpersonate`**        | _**Admin**_ | 3rd party tool          | Usar la **Potato family** / impersonation mediante named pipes para lanzar SYSTEM (`PrintSpoofer`, `RoguePotato`, `GodPotato`, `SigmaPotato`, `PrintNotifyPotato`, etc.).                                                                                                                                                                                    | <p>Es más práctico desde service accounts como IIS APPPOOL, MSSQL, scheduled tasks o cualquier contexto que ya tenga `SeImpersonatePrivilege`.</p>                                                                                                                                                                            |
+| **`SeLoadDriver`**         | _**Admin**_ | 3rd party tool          | <p>1. Cargar un kernel driver firmado pero vulnerable (BYOVD)<br>2. Usar los IOCTLs del driver para obtener kernel R/W, deshabilitar security tooling o elevar a SYSTEM<br><br>Como alternativa, el privilege puede utilizarse para descargar drivers relacionados con la seguridad mediante el comando builtin <code>fltMC</code>, por ejemplo, <code>fltMC sysmondrv</code></p>                     | <p>Los drivers públicos antiguos, como <code>szkg64.sys</code>, se bloquean cada vez más en las versiones modernas de Windows mediante la vulnerable-driver blocklist / HVCI.</p>                                                                                                                                                                               |
+| **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. Iniciar PowerShell/ISE con el privilege SeRestore presente.<br>2. Habilitar el privilege con <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a>).<br>3. Cambiar el nombre de utilman.exe a utilman.old<br>4. Cambiar el nombre de cmd.exe a utilman.exe<br>5. Bloquear la consola y pulsar Win+U</p> | <p>Algunos AV software pueden detectar el ataque.</p><p>Un método alternativo consiste en reemplazar service binaries almacenados en "Program Files" usando el mismo privilege</p>                                                                                                                                                            |
+| **`SeTakeOwnership`**      | _**Admin**_ | _**Built-in commands**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icacls.exe "%windir%\system32" /grant "%username%":F</code><br>3. Cambiar el nombre de cmd.exe a utilman.exe<br>4. Bloquear la consola y pulsar Win+U</p>                                                                                                                                       | <p>Algunos AV software pueden detectar el ataque.</p><p>Un método alternativo consiste en reemplazar service binaries almacenados en "Program Files" usando el mismo privilege.</p>                                                                                                                                                           |
+| **`SeTcb`**                | _**Admin**_ | 3rd party tool          | <p>Manipular tokens para incluir local admin rights. Puede requerir SeImpersonate.</p><p>Debe verificarse.</p>                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                |
 
-## References
+## Referencias
 
-- Mira esta tabla que define Windows tokens: [https://github.com/gtworek/Priv2Admin](https://github.com/gtworek/Priv2Admin)
-- Mira [**este paper**](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt) sobre privesc con tokens.
-- itm4n – Give Me Back My Privileges! Please? (restricted service tokens / FullPowers): https://itm4n.github.io/localservice-privileges/
-- Microsoft – Robocopy (`/b` backup mode bypasses file/folder ACL checks): https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy
-- Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege): https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks
-- 0xdf – HTB: Certificate (SeManageVolumePrivilege → CA key exfil → Golden Certificate): https://0xdf.gitlab.io/2025/10/04/htb-certificate.html
+- [1] [gtworek/Priv2Admin - exploitation paths from Windows privileges to admin](https://github.com/gtworek/Priv2Admin)
+- [2] [Abusing Token Privileges For LPE](https://github.com/hatRiot/token-priv/blob/master/abusing_token_eop_1.0.txt)
+- [3] [itm4n – Give Me Back My Privileges! Please?](https://itm4n.github.io/localservice-privileges/)
+- [4] [Microsoft – Robocopy (`/b` backup mode bypasses file/folder ACL checks)](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/robocopy)
+- [5] [Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
+- [6] [0xdf – HTB: Certificate (SeManageVolumePrivilege → CA key exfil → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
 
 {{#include ../../banners/hacktricks-training.md}}
