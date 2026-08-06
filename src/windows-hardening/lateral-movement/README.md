@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Es gibt verschiedene Möglichkeiten, Befehle in externen Systemen auszuführen. Hier finden Sie die Erklärungen, wie die wichtigsten Techniken für laterale Bewegungen in Windows funktionieren:
+Es gibt verschiedene Möglichkeiten, Befehle auf externen Systemen auszuführen. Hier findest du Erklärungen dazu, wie die wichtigsten Windows-Lateral-Movement-Techniken funktionieren:
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)

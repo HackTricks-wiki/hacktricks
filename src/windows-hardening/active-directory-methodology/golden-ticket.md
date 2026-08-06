@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Golden ticket
+## Golden Ticket
 
-Ein **Golden Ticket**-Angriff besteht in der **Erstellung eines legitimen Ticket Granting Ticket (TGT), das einen beliebigen Benutzer imitiert**, durch die Verwendung des **NTLM-Hashs des krbtgt-Kontos der Active Directory (AD)**. Diese Technik ist besonders vorteilhaft, weil sie **Zugriff auf jeden Dienst oder jede Maschine** innerhalb der Domäne als der imitierte Benutzer ermöglicht. Es ist entscheidend, sich daran zu erinnern, dass die **Anmeldedaten des krbtgt-Kontos nie automatisch aktualisiert werden**.
+Ein **Golden Ticket**-Angriff besteht in der **Erstellung eines legitimen Ticket Granting Ticket (TGT), das einen beliebigen Benutzer imitiert**, unter Verwendung des **NTLM-Hashs des Active Directory (AD)-Kontos krbtgt**. Diese Technik ist besonders vorteilhaft, da sie **den Zugriff auf jeden Dienst oder Computer** innerhalb der Domäne als der imitierte Benutzer ermöglicht. Es ist wichtig zu beachten, dass die **Anmeldedaten des Kontos krbtgt niemals automatisch aktualisiert werden**.<sup>[[1]](#references)</sup>
 
-Um den **NTLM-Hash** des krbtgt-Kontos zu **erhalten**, können verschiedene Methoden eingesetzt werden. Er kann aus dem Prozess **Local Security Authority Subsystem Service (LSASS)** oder aus der **NT Directory Services (NTDS.dit)**-Datei extrahiert werden, die sich auf einem beliebigen Domain Controller (DC) innerhalb der Domäne befindet. Darüber hinaus ist die **Ausführung eines DCsync-Angriffs** eine weitere Strategie, um diesen NTLM-Hash zu erhalten; dies kann mit Tools wie dem **lsadump::dcsync-Modul** in Mimikatz oder dem **secretsdump.py-Skript** von Impacket durchgeführt werden. Wichtig ist zu betonen, dass für diese Operationen in der Regel **Domain-Admin-Rechte oder ein vergleichbares Zugriffslevel erforderlich** sind.
+Um den **NTLM-Hash** des Kontos krbtgt zu **erlangen**, können verschiedene Methoden eingesetzt werden. Er kann aus dem **Local Security Authority Subsystem Service (LSASS)-Prozess** oder der **NT Directory Services (NTDS.dit)-Datei** extrahiert werden, die sich auf jedem Domain Controller (DC) innerhalb der Domäne befindet. Darüber hinaus ist die **Ausführung eines DCsync-Angriffs** eine weitere Strategie, um diesen NTLM-Hash zu erhalten. Dies kann mithilfe von Tools wie dem **lsadump::dcsync-Modul** in Mimikatz oder dem **secretsdump.py-Skript** von Impacket erfolgen. Es ist wichtig zu betonen, dass für die Durchführung dieser Vorgänge normalerweise **Domain-Admin-Berechtigungen oder ein vergleichbares Zugriffslevel erforderlich sind**.<sup>[[2]](#references)</sup>
 
-Obwohl der NTLM-Hash eine praktikable Methode für diesen Zweck darstellt, wird aus Gründen der operationalen Sicherheit **dringend empfohlen**, Tickets mit den **Advanced Encryption Standard (AES) Kerberos-Schlüsseln (AES128 und AES256)** zu fälschen. Dies ist in modernen Domänen noch wichtiger, da die **Verwendung von RC4 schrittweise abgeschafft wird** und in der Kerberos-Telemetrie deutlich stärker auffällt.
+Obwohl der NTLM-Hash für diesen Zweck verwendet werden kann, wird aus Gründen der operativen Sicherheit **dringend empfohlen**, Tickets mithilfe der **Advanced Encryption Standard (AES)-Kerberos-Schlüssel (AES128 und AES256)** zu **fälschen**. Dies ist in modernen Domänen noch wichtiger, da die **Verwendung von RC4 schrittweise eingestellt wird** und in der Kerberos-Telemetrie deutlich stärker auffällt.<sup>[[5]](#references)</sup>
 ```bash:From Linux
 python ticketer.py -nthash 25b2076cda3bfd6209161a6c78a69c1c -domain-sid S-1-5-21-1339291983-1349129144-367733775 -domain jurassic.park stegosaurus
 export KRB5CCNAME=/root/impacket-examples/stegosaurus.ccache
@@ -32,53 +32,53 @@ klist #List tickets in memory
 # Example using aes key
 kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /aes256:430b2fdb13cc820d73ecf123dddd4c9d76425d4c2156b89ac551efb9d591a439 /ticket:golden.kirbi
 ```
-### Moderne Notizen zum Ticket Crafting
+### Moderne Hinweise zum Ticket Crafting
 
-Wenn möglich, **frage zuerst LDAP und SYSVOL ab** und forge dann das Ticket mit der echten Domain-Policy und den User-PAC-Werten, statt sie manuell zu erfinden:
+Wenn möglich, **frage zuerst LDAP und SYSVOL ab** und fälsche anschließend das Ticket mithilfe der echten Domain Policy und der PAC-Werte des Benutzers, anstatt sie manuell zu erfinden:<sup>[[4]](#references)</sup>
 ```bash
 Rubeus.exe golden /aes256:<krbtgt_aes256> /user:<username> /ldap /printcmd /nowrap
 ```
-- `/ldap` fragt den DC nach den Benutzer-, Gruppen-, NetBIOS- und Policy-Daten, die zum Aufbau eines realistischeren PAC verwendet werden.
-- `/printcmd` gibt eine Offline-Commandline aus, die die abgerufenen PAC-Felder enthält; das ist nützlich, wenn du später dasselbe Ticket erneut fälschen willst, ohne LDAP noch einmal zu berühren.
-- `/extendedupndns` fügt die neueren `UpnDns`-PAC-Elemente hinzu, die `samAccountName` und die Account-SID enthalten.
-- `/oldpac` entfernt die neueren `Requestor`- und `Attributes`-PAC-Buffers; das ist hauptsächlich nützlich für Kompatibilitätstests gegen ältere Umgebungen, nicht für standardmäßiges Tradecraft.
+- `/ldap` fragt den DC nach den Benutzer-, Gruppen-, NetBIOS- und Richtliniendaten, die zum Erstellen eines realistischeren PAC verwendet werden.
+- `/printcmd` gibt eine Offline-Befehlszeile mit den abgerufenen PAC-Feldern aus. Das ist nützlich, wenn du später dasselbe Ticket fälschen möchtest, ohne erneut LDAP zu verwenden.
+- `/extendedupndns` fügt die neueren `UpnDns`-PAC-Elemente hinzu, die den `samAccountName` und die Konto-SID enthalten.
+- `/oldpac` entfernt die neueren `Requestor`- und `Attributes`-PAC-Puffer. Dies ist hauptsächlich für Kompatibilitätstests mit älteren Umgebungen nützlich und nicht für den standardmäßigen Einsatz.
 
-Unter Linux unterstützen aktuelle Impacket-Versionen außerdem das Hinzufügen der neueren PAC-Strukturen und das Setzen einer realistischen Gültigkeitsdauer:
+Unter Linux unterstützen aktuelle Impacket-Versionen ebenfalls das Hinzufügen der neueren PAC-Strukturen und das Festlegen eines realistischen Gültigkeitszeitraums:
 ```bash
 python3 ticketer.py -aesKey <krbtgt_aes256> -domain-sid <DOMAIN_SID> -domain <DOMAIN> \
 -user-id 500 -groups 512,513,518,519 -duration 10 \
 -extra-pac administrator
 ```
-- `-duration` ist in **Stunden**. Der Standardwert sind **10 Jahre**, was auffällig ist.
-- `-extra-pac` fügt die neueren `UPN_DNS` PAC-Informationen hinzu.
-- `-old-pac` erzwingt das alte PAC-Layout.
-- `-extra-sid` ist nützlich, wenn das PAC zusätzliche SIDs benötigt (zum Beispiel in Child-to-Parent-Eskalationsszenarien, die in [SID-History Injection](sid-history-injection.md) behandelt werden).
+- `-duration` wird in **Stunden** angegeben. Der Standardwert beträgt **10 Jahre**, was auffällig ist.
+- `-extra-pac` fügt die neueren `UPN_DNS`-PAC-Informationen hinzu.
+- `-old-pac` erzwingt das Legacy-PAC-Layout.
+- `-extra-sid` ist nützlich, wenn der PAC zusätzliche SIDs benötigt (beispielsweise bei Szenarien zur Eskalation von Child zu Parent, die unter [SID-History Injection](sid-history-injection.md) behandelt werden).
 
-**Sobald** du den **golden Ticket injiziert** hast, kannst du auf die freigegebenen Dateien **(C$)** zugreifen und Dienste sowie WMI ausführen. Du könntest also **psexec** oder **wmiexec** verwenden, um eine Shell zu erhalten (es sieht so aus, als ob du über winrm keine Shell bekommen kannst).
+**Sobald** du das **golden Ticket injiziert** hast, kannst du auf die freigegebenen Dateien **(C$)** zugreifen sowie Dienste und WMI ausführen. Du könntest also **psexec** oder **wmiexec** verwenden, um eine shell zu erhalten (es scheint, dass du über winrm keine shell erhalten kannst).
 
-### Bypassing common detections
+### Umgehen gängiger Erkennungen
 
-Die häufigste Methode, ein golden ticket zu erkennen, ist das **Inspektieren von Kerberos-Traffic** auf dem Wire. Standardmäßig **signiert Mimikatz das TGT für 10 Jahre**, was bei nachfolgenden TGS-Requests, die damit gemacht werden, als Anomalie auffallen wird.
+Die häufigste Methode zur Erkennung eines golden Tickets besteht darin, den **Kerberos-Datenverkehr** im Netzwerk zu untersuchen. Standardmäßig **signiert** Mimikatz das TGT für **10 Jahre**, was bei nachfolgenden damit durchgeführten TGS-Anfragen als anormal auffällt.
 
 `Lifetime : 3/11/2021 12:39:57 PM ; 3/9/2031 12:39:57 PM ; 3/9/2031 12:39:57 PM`
 
-Verwende die Parameter `/startoffset`, `/endin` und `/renewmax`, um den Start-Offset, die Dauer und die maximale Anzahl an Erneuerungen zu steuern (alles in Minuten).
+Verwende die Parameter `/startoffset`, `/endin` und `/renewmax`, um den Startversatz, die Dauer und die maximale Anzahl der Erneuerungen zu steuern (alle Angaben in Minuten).
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
-Leider wird die Lebensdauer des TGT nicht in 4769 protokolliert, daher findest du diese Information nicht in den Windows-Ereignisprotokollen. Was du jedoch korrelieren kannst, ist **4769's ohne ein vorheriges 4768** zu sehen. Es ist **nicht möglich, ein TGS ohne ein TGT anzufordern**, und wenn es keinen Nachweis dafür gibt, dass ein TGT ausgestellt wurde, können wir daraus schließen, dass es offline gefälscht wurde.
+Leider wird die Lebensdauer des TGT nicht in den 4769-Ereignissen protokolliert, daher wirst du diese Information nicht in den Windows-Ereignisprotokollen finden. Was du jedoch korrelieren kannst, ist das **Auftreten von 4769-Ereignissen ohne vorheriges 4768-Ereignis**. Es ist **nicht möglich, einen TGS ohne einen TGT anzufordern**. Wenn es keinen Eintrag darüber gibt, dass ein TGT ausgestellt wurde, können wir daraus schließen, dass er offline gefälscht wurde.
 
-In **neueren Windows-Builds** stellen die Event IDs **4768** und **4769** auch deutlich bessere **Encryption-Type-Telemetrie** bereit. Ein gefälschtes TGT/TGS mit **RC4 (`0x17`)** in einer Domäne, in der `krbtgt`, Clients und Services bereits AES-Keys haben, ist viel leichter zu erkennen als noch vor ein paar Jahren. Das ist ein weiterer Grund, **AES-backed Golden Tickets** zu bevorzugen und die normale Kerberos-Policy der Domäne so genau wie möglich zu imitieren.
+In **neueren Windows-Builds** stellen die Ereignis-IDs **4768** und **4769** außerdem deutlich bessere Telemetriedaten zum **Verschlüsselungstyp** bereit. Ein gefälschter TGT/TGS mit **RC4 (`0x17`)** in einer Domäne, in der `krbtgt`, Clients und Dienste bereits AES-Schlüssel besitzen, ist wesentlich leichter zu erkennen als noch vor einigen Jahren. Dies ist ein weiterer Grund, **AES-basierte Golden Tickets** zu bevorzugen und die normale Kerberos-Richtlinie der Domäne so genau wie möglich nachzuahmen.
 
-Ein weiteres OPSEC-Problem ist die **PAC-Fidelity**. Tickets mit unmöglichen Gruppenmitgliedschaften, fehlenden neueren PAC-Buffern oder Account-Metadaten, die nicht zu LDAP passen, sind leichter zu erkennen, wenn Verteidiger den PAC-Inhalt gegen AD-Daten validieren. Wenn du ein TGT brauchst, das aussieht, als wäre es wirklich von einem DC ausgestellt worden, schau dir an:
+Ein weiteres OPSEC-Problem ist die **PAC-Treue**. Tickets mit unmöglichen Gruppenmitgliedschaften, fehlenden neueren PAC-Puffern oder Kontometadaten, die nicht mit LDAP übereinstimmen, lassen sich leichter erkennen, wenn Defender die PAC-Inhalte mit den AD-Daten validieren. Wenn du einen TGT benötigst, der so aussieht, als wäre er tatsächlich von einem DC ausgestellt worden, sieh dir Folgendes an:
 
 {{#ref}}
 diamond-ticket.md
 {{#endref}}
 
-Es gibt auch **umgebungsbedingte Grenzen** für Persistenz. Das Konto `krbtgt` hat eine **Passwort-Historie von 2**, daher kann ein gefälschtes TGT über den **ersten** `krbtgt`-Reset hinweg gültig bleiben, wenn es mit dem vorherigen Key signiert wurde. Deshalb machen Verteidiger Golden Tickets ungültig, indem sie `krbtgt` **zweimal zurücksetzen** und zwischen den Resets mindestens die maximale Ticket-Lebensdauer der Domäne abwarten.
+Es gibt außerdem **umgebungsbedingte Grenzen** für die Persistenz. Das Konto `krbtgt` führt einen **Passwortverlauf von 2**, daher kann ein gefälschter TGT den **ersten** `krbtgt`-Reset überstehen, wenn er mit dem vorherigen Schlüssel signiert wurde. Deshalb machen Defender Golden Tickets ungültig, indem sie `krbtgt` **zweimal zurücksetzen** und zwischen den Resets mindestens die maximale Ticketlebensdauer der Domäne abwarten.<sup>[[3]](#references)</sup>
 
-Um diese **Erkennung zu umgehen**, schau dir die diamond tickets an.
+Um diese **Erkennung zu umgehen**, sieh dir die Diamond Tickets an.
 
 ### Mitigation
 
@@ -86,13 +86,14 @@ Um diese **Erkennung zu umgehen**, schau dir die diamond tickets an.
 - 4672: Admin Logon
 - `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
-Andere kleine Tricks, die Verteidiger einsetzen können, sind **Alerts auf 4769's für sensible Benutzer** wie das standardmäßige Domänen-Administratorkonto sowie Alerts auf **RC4-Nutzung für `krbtgt`** in Domänen, die normalerweise AES-Tickets ausstellen.
+Weitere kleine Tricks, die Defender einsetzen können, sind **Warnungen für 4769-Ereignisse bei sensiblen Benutzern**, beispielsweise beim standardmäßigen Domänenadministratorkonto, sowie Warnungen bei der **Verwendung von RC4 für `krbtgt`** in Domänen, die normalerweise AES-Tickets ausstellen.<sup>[[5]](#references)</sup>
 
-## References
+## Referenzen
 
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)
-- [https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-the-krbtgt-password](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-the-krbtgt-password)
-- [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
+- [1] [Kerberos (II): How to attack Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [2] [Kerberos: Golden Tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)
+- [3] [AD Forest Recovery - Reset the krbtgt password | Microsoft Learn](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-the-krbtgt-password)
+- [4] [GhostPack/Rubeus](https://github.com/GhostPack/Rubeus)
+- [5] [Microsoft – How to manage Kerberos KDC usage of RC4 for service account ticket issuance (CVE-2026-20833)](https://support.microsoft.com/en-us/topic/how-to-manage-kerberos-kdc-usage-of-rc4-for-service-account-ticket-issuance-changes-related-to-cve-2026-20833-1ebcda33-720a-4da8-93c1-b0496e1910dc)
 
 {{#include ../../banners/hacktricks-training.md}}

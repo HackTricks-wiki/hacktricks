@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Wie es funktioniert
+## Funktionsweise
 
-**RDPexec** dient im Grunde dazu, Befehle auszuführen, indem man sich über RDP in das System einloggt.
+**RDPexec** dient im Wesentlichen dazu, sich über RDP am System anzumelden und Befehle auszuführen.
 
-Für weitere Informationen siehe:
+Weitere Informationen findest du unter:
 
 
 {{#ref}}

