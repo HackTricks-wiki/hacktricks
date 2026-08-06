@@ -43,7 +43,7 @@ Modern GPU Rowhammer attacks become much more useful when they target **GPU virt
 - **GDDRHammer** targets last-level page-table entries, while **GeForge** shows that corrupting a page-directory level can be easier because one bit flip can retarget a larger translation subtree. Do not treat only one paging layer as security-critical.<sup>[[1]](#references)[[2]](#references)</sup>
 - **IOMMU** still matters because it blocks the direct arbitrary-host-memory path used by GDDRHammer/GeForge, but it is **not a complete mitigation**. **GPUBreach** shows a second-stage pivot where the attacker corrupts GPU-writable, driver-owned CPU buffers and then triggers NVIDIA driver memory-safety bugs to obtain a kernel write primitive and a **root shell** even with IOMMU enabled.<sup>[[3]](#references)</sup>
 - **System-level ECC** is a practical hardening step on supported workstation/server GPUs. Consumer GPUs without ECC expose a weaker defense surface.<sup>[[4]](#references)</sup>
-- These attacks are not purely theoretical: **GeForge** reported **1,171** bit flips on an RTX 3060 and **202** on an RTX A6000, which was enough to build a working host-privilege-escalation chain.<sup>[[2]](#references)</sup>
+- These attacks are not purely theoretical: **GeForge** reported **1,171** bit flips on an RTX 3060 and **202** on an RTX A6000, which was enough to build a working host-privilege-escalation chain.<sup>[[2]](#references)[[9]](#references)</sup>
 
 ---
 
