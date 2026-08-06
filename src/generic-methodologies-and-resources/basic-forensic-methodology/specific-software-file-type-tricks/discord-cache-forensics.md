@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ta strona podsumowuje sposób analizy artefaktów cache Discord Desktop w celu odzyskania eksfiltrowanych plików, endpointów webhooków oraz osi czasu aktywności. Discord Desktop jest aplikacją Electron/Chromium i używa na dysku Chromium Simple Cache.
+Ta strona podsumowuje sposób przeprowadzania triage artefaktów cache Discord Desktop w celu odzyskania eksfiltrowanych plików, endpointów webhooków i osi czasu aktywności. Discord Desktop jest aplikacją Electron/Chromium i używa na dysku Chromium Simple Cache.
 
 ## Gdzie szukać (Windows/macOS/Linux)
 
@@ -13,19 +13,19 @@ Ta strona podsumowuje sposób analizy artefaktów cache Discord Desktop w celu o
 Kluczowe struktury na dysku wewnątrz Cache_Data:<sup>[[1]](#references)</sup>
 - index: baza danych indeksu Simple Cache
 - data_#: binarne pliki bloków cache, które mogą zawierać wiele obiektów cache
-- f_######: pojedyncze wpisy cache przechowywane jako samodzielne pliki (często zawierające większe body)
+- f_######: pojedyncze wpisy cache przechowywane jako niezależne pliki (często zawierające większe body)
 
 Uwaga: usunięcie wiadomości/kanałów/serwerów w Discord nie usuwa tego lokalnego cache. Elementy cache często pozostają, a znaczniki czasu plików odpowiadają aktywności użytkownika, umożliwiając odtworzenie osi czasu.<sup>[[1]](#references)</sup>
 
 ## Co można odzyskać
 
-- Eksfiltrowane załączniki i miniatury pobrane przez cdn.discordapp.com/media.discordapp.net
-- Obrazy, GIF-y, wideo (np. .jpg, .png, .gif, .webp, .mp4, .webm)
+- Eksfiltrowane załączniki i miniatury pobrane z cdn.discordapp.com/media.discordapp.net
+- Obrazy, GIF-y, filmy (np. .jpg, .png, .gif, .webp, .mp4, .webm)
 - URL-e webhooków (https://discord.com/api/webhooks/…)<sup>[[3]](#references)</sup>
 - Wywołania Discord API (https://discord.com/api/vX/…)
-- Przydatne do korelowania beaconingu/aktywności eksfiltracyjnej oraz haszowania multimediów w celu dopasowania do danych wywiadowczych<sup>[[1]](#references)</sup>
+- Przydatne do korelowania beaconingu/aktywności eksfiltracyjnej i haszowania multimediów na potrzeby dopasowywania z danymi wywiadowczymi<sup>[[1]](#references)</sup>
 
-## Szybka analiza (ręczna)
+## Szybki triage (manualny)
 
 - Przeszukaj cache pod kątem artefaktów o wysokiej wartości sygnałowej:
 - Endpointy webhooków:
@@ -35,24 +35,24 @@ Uwaga: usunięcie wiadomości/kanałów/serwerów w Discord nie usuwa tego lokal
 - strings -a Cache_Data/* | grep -Ei "https://(cdn|media)\.discord(app)?\.com/attachments/"
 - Wywołania Discord API:
 - strings -a Cache_Data/* | grep -Ei "https://discord(app)?\.com/api/v[0-9]+/"
-- Posortuj wpisy cache według czasu modyfikacji, aby utworzyć szybką oś czasu (mtime odzwierciedla moment zapisania obiektu w cache):
+- Posortuj wpisy cache według czasu modyfikacji, aby szybko utworzyć oś czasu (mtime odzwierciedla moment zapisania obiektu w cache):
 - Windows PowerShell: Get-ChildItem "$env:AppData\discord\Cache\Cache_Data" -File -Recurse | Sort-Object LastWriteTime | Select-Object LastWriteTime, FullName
 
-## Analiza wpisów f_* (body HTTP + nagłówki)
+## Parsowanie wpisów f_* (body HTTP + nagłówki)
 
-Pliki zaczynające się od f_ zawierają nagłówki odpowiedzi HTTP, a następnie body. Blok nagłówków zwykle kończy się sekwencją \r\n\r\n. Przydatne nagłówki odpowiedzi obejmują:
+Pliki zaczynające się od f_ zawierają nagłówki odpowiedzi HTTP, a następnie body. Blok nagłówków zazwyczaj kończy się sekwencją \r\n\r\n. Przydatne nagłówki odpowiedzi obejmują:
 - Content-Type: do określenia typu multimediów
 - Content-Location lub X-Original-URL: oryginalny zdalny URL do podglądu/korelacji
 - Content-Encoding: może mieć wartość gzip/deflate/br (Brotli)
 
-Multimedia można wyodrębnić, oddzielając nagłówki od body i opcjonalnie dekompresując je na podstawie Content-Encoding. Rozpoznawanie na podstawie magic bytes jest przydatne, gdy Content-Type nie jest dostępny.
+Media można wyodrębnić, oddzielając nagłówki od body i opcjonalnie dekompresując dane na podstawie Content-Encoding. Wykrywanie magicznych bajtów jest przydatne, gdy Content-Type nie jest dostępny.
 
-## Automatyczna analiza DFIR: Discord Forensic Suite (CLI/GUI)
+## Automated DFIR: Discord Forensic Suite (CLI/GUI)
 
-- Repozytorium: https://github.com/jwdfir/discord_cache_parser
-- Funkcja: rekursywnie skanuje folder cache Discord, wyszukuje URL-e webhooków/API/załączników, analizuje body f_*, opcjonalnie wyodrębnia multimedia i generuje raporty osi czasu w formatach HTML + CSV wraz z hashami SHA-256.<sup>[[2]](#references)</sup>
+- Repo: https://github.com/jwdfir/discord_cache_parser<sup>[[2]](#references)</sup>
+- Funkcja: rekurencyjnie skanuje folder cache Discord, wyszukuje URL-e webhooków/API/załączników, parsuje body f_*, opcjonalnie odzyskuje media i generuje raporty osi czasu w formatach HTML + CSV z hashami SHA‑256.<sup>[[2]](#references)</sup>
 
-Przykład użycia CLI:
+Przykładowe użycie CLI:
 ```bash
 # Acquire cache (copy directory for offline parsing), then run:
 python3 discord_forensic_suite_cli \
@@ -70,15 +70,15 @@ Kluczowe opcje:
 - --format html|csv|both
 - --timeline: Generuje uporządkowaną oś czasu CSV (według czasu modyfikacji)
 - --extra: Skanuje również sąsiednie katalogi Code Cache i GPUCache
-- --carve: Wydobywa media z surowych bajtów w pobliżu trafień regex (obrazy/wideo)
-- Output: Raport HTML, raport CSV, oś czasu CSV oraz folder media z wydobytymi/wyekstrahowanymi plikami
+- --carve: Wydobywa multimedia z nieprzetworzonych bajtów w pobliżu trafień regex (obrazy/wideo)
+- Wyjście: raport HTML, raport CSV, oś czasu CSV oraz folder multimediów z wydobytymi/wyodrębnionymi plikami
 
-## Wskazówki dla analityka
+## Wskazówki dla analityków
 
 - Skoreluj czas modyfikacji (mtime) plików f_* i data_* z oknami aktywności użytkownika/atakującego, aby odtworzyć oś czasu.
-- Oblicz hash odzyskanych plików media (SHA-256) i porównaj je ze znanymi złośliwymi zbiorami danych lub zbiorami danych exfil.
-- Wyekstrahowane adresy URL webhooków można testować pod kątem dostępności lub rotować; rozważ dodanie ich do blocklist oraz przeprowadzenie retro-polowania w proxy.
-- Cache pozostaje po stronie serwera po „wyczyszczeniu”. Jeśli możliwe jest pozyskanie danych, zbierz cały katalog Cache oraz powiązane sąsiednie cache (Code Cache, GPUCache).<sup>[[1]](#references)</sup>
+- Oblicz hash odzyskanych multimediów (SHA-256) i porównaj je ze znanymi złośliwymi zbiorami danych lub zbiorami danych exfil.
+- Wyodrębnione adresy URL webhooków można sprawdzić pod kątem aktywności lub rotacji; rozważ dodanie ich do blocklist oraz przeprowadzenie retroaktywnego wyszukiwania w proxy.
+- Cache pozostaje po stronie serwera nawet po „wyczyszczeniu”. Jeśli możliwe jest pozyskanie danych, zbierz cały katalog Cache oraz powiązane sąsiednie cache (Code Cache, GPUCache).<sup>[[1]](#references)</sup>
 
 ## Referencje
 

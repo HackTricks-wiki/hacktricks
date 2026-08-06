@@ -1,10 +1,10 @@
-# SeImpersonate od High do System
+# SeImpersonate z High do System
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ta strona dotyczy **ręcznej** metody przejścia z procesu administratora o **High Integrity** do **`NT AUTHORITY\SYSTEM`** poprzez **otwarcie niezabezpieczonego procesu SYSTEM, zduplikowanie jego tokenu i uruchomienie procesu potomnego z tym tokenem**.
+Ta strona opisuje **manualną** metodę przejścia z procesu administratora o **High Integrity** do **`NT AUTHORITY\SYSTEM`** poprzez **otwarcie niezabezpieczonego procesu SYSTEM, zduplikowanie jego tokenu i uruchomienie procesu potomnego z użyciem tego tokenu**.
 
-Jeśli masz tylko **`SeImpersonatePrivilege`** / **`SeAssignPrimaryTokenPrivilege`**, ale **nie możesz otworzyć odpowiedniego procesu SYSTEM**, ścieżka **Potato / named-pipe** jest zwykle bardziej niezawodna:
+Jeśli masz tylko **`SeImpersonatePrivilege`** / **`SeAssignPrimaryTokenPrivilege`**, ale **nie możesz otworzyć odpowiedniego procesu SYSTEM**, ścieżka **Potato / named-pipe** jest zazwyczaj bardziej niezawodna:
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -14,7 +14,7 @@ named-pipe-client-impersonation.md
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-Jeśli potrzebujesz nie tylko `SYSTEM`, ale **tokenu SYSTEM z możliwie największą liczbą uprawnień**, sprawdź również:
+Jeśli chcesz uzyskać nie tylko `SYSTEM`, ale także **token SYSTEM z możliwie największą liczbą uprawnień**, sprawdź również:
 
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
@@ -29,33 +29,33 @@ whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege SeAssignPrima
 ```
 Praktyczne uwagi:
 
-- Token administratora **High Integrity** zwykle wystarcza do **włączenia `SeDebugPrivilege`** i otwarcia wielu niezabezpieczonych procesów SYSTEM.
+- Token administratora o **High Integrity** zazwyczaj wystarcza do **włączenia `SeDebugPrivilege`** i otwarcia wielu niezabezpieczonych procesów SYSTEM.
 - **`CreateProcessWithTokenW` wymaga `SeImpersonatePrivilege`** od procesu wywołującego. Jeśli to API zakończy się błędem `1314`, przełącz się na `CreateProcessAsUserW`, gdy wcześniej zduplikowano już główny token SYSTEM.
-- We współczesnym Windows **`lsass.exe` często jest złym celem**, ponieważ **LSA protection / PPL** blokuje dostęp nawet administratorom z `SeDebugPrivilege`. Preferuj **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`** lub wczesny **`svchost.exe`** działający jako SYSTEM.
-- Nie każdy proces SYSTEM ma token o takiej samej użyteczności. Jeśli uzyskasz SYSTEM, ale zauważysz brak niektórych uprawnień, spróbuj użyć innego procesu SYSTEM zamiast zakładać, że technika nie działa.
+- We współczesnych wersjach Windows **`lsass.exe` jest często kiepskim celem**, ponieważ **LSA protection / PPL** blokuje dostęp nawet administratorom z `SeDebugPrivilege`. Preferuj **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`** lub wczesny proces **`svchost.exe`** uruchomiony jako SYSTEM.
+- Nie każdy proces SYSTEM ma równie użyteczny token. Jeśli uzyskasz SYSTEM, ale zauważysz brak niektórych uprawnień, spróbuj innego procesu SYSTEM zamiast zakładać, że technika nie działa.
 
-## Ostrożnie wybierz PID
+## Starannie wybierz PID
 
-Najłatwiejszym sposobem na niezawodne wykonanie tej techniki jest **wybranie procesu SYSTEM, którego DACL rzeczywiście pozwala grupie Administrators na odpytywanie procesu i duplikowanie jego tokena**.
+Najłatwiejszym sposobem na niezawodne wykonanie tej techniki jest **wybranie procesu SYSTEM, którego DACL faktycznie pozwala grupie Administrators na odpytywanie procesu i duplikowanie jego tokena**.
 
 Dobrzy kandydaci do przetestowania w pierwszej kolejności:
 
 - `winlogon.exe`
 - `wininit.exe`
 - `services.exe`
-- niektóre wczesne instancje `svchost.exe` działające jako SYSTEM
+- niektóre wczesne instancje `svchost.exe` uruchomione jako SYSTEM
 
 Domyślnie unikaj:
 
 - `lsass.exe` na hostach, na których włączono **RunAsPPL / LSA protection**
-- procesów chronionych / wrażliwych pod względem bezpieczeństwa, które zwracają `Access denied` nawet po włączeniu `SeDebugPrivilege`
+- procesów chronionych lub wrażliwych z punktu widzenia bezpieczeństwa, które zwracają `Access denied` nawet po włączeniu `SeDebugPrivilege`
 
-Możesz sprawdzić procesy kandydujące oraz ich tokeny/ACL za pomocą **Process Explorer** lub **Process Hacker** uruchomionych z podwyższonymi uprawnieniami.
+Procesy kandydujące oraz ich tokeny/ACL można sprawdzić za pomocą **Process Explorer** lub **Process Hacker** uruchomionych z podwyższonymi uprawnieniami.
 
 ### Kod
 
-Poniższy kod pochodzi [stąd](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Pozwala **podać identyfikator procesu jako argument**, a następnie uruchamia CMD **jako użytkownik** wskazanego procesu.\
-Uruchamiając go w procesie High Integrity, możesz **podać PID procesu działającego jako System** (takiego jak `winlogon` lub `wininit`) i uruchomić `cmd.exe` jako SYSTEM.<sup>[[3]](#references)</sup>
+Poniższy kod pochodzi [stąd](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Pozwala **podać Process ID jako argument**, a następnie uruchomiony zostanie CMD **jako użytkownik** wskazanego procesu.<sup>[[3]](#references)</sup>\
+Uruchamiając go w procesie o High Integrity, możesz **podać PID procesu uruchomionego jako System** (np. `winlogon`, `wininit`) i wykonać `cmd.exe` jako SYSTEM.<sup>[[3]](#references)</sup>
 ```cpp
 impersonateuser.exe 1234
 ```
@@ -190,20 +190,20 @@ printf("[-] CreateProcessWithTokenW Error: %i\n", GetLastError());
 return 0;
 }
 ```
-## Przydatne informacje o API / prawach dostępu
+## Przydatne uwagi dotyczące API / praw dostępu
 
 Przykład używa `MAXIMUM_ALLOWED`, ale w przypadku rzeczywistych operacji warto pamiętać o minimalnych wymaganych elementach:
 
-- `OpenProcessToken()` wymaga jedynie, aby **uchwyt procesu** został otwarty z użyciem **`PROCESS_QUERY_LIMITED_INFORMATION`**.
-- Aby użyć `CreateProcessWithTokenW()`, **uchwyt tokenu primary** musi mieć prawa **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.<sup>[[1]](#references)</sup>
-- `DuplicateTokenEx()` musi utworzyć **token primary** (`TokenPrimary`), a nie tylko token impersonation.
-- Jeśli wykonano już impersonation SYSTEM, a `CreateProcessWithTokenW()` nadal kończy się błędem `1314`, spróbuj zamiast tego użyć `CreateProcessAsUserW()`.
+- `OpenProcessToken()` wymaga jedynie, aby **uchwyt procesu** został otwarty z prawem **`PROCESS_QUERY_LIMITED_INFORMATION`**.
+- Aby użyć `CreateProcessWithTokenW()`, **uchwyt tokenu głównego** musi mieć prawa **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`**.<sup>[[1]](#references)</sup>
+- `DuplicateTokenEx()` musi utworzyć **token główny** (`TokenPrimary`), a nie tylko token impersonacji.
+- Jeśli impersonacja SYSTEM już się powiodła, ale `CreateProcessWithTokenW()` nadal kończy się błędem `1314`, spróbuj użyć zamiast niego `CreateProcessAsUserW()`.
 
-Oznacza to, że otwieranie procesu docelowego z **`PROCESS_ALL_ACCESS`** jest zwykle niepotrzebne i bardziej hałaśliwe niż zażądanie tylko praw wymaganych do odczytania tokenu.
+Oznacza to, że otwieranie docelowego procesu z prawem `PROCESS_ALL_ACCESS` jest zwykle niepotrzebne i bardziej rzuca się w oczy niż żądanie wyłącznie praw wymaganych do odczytania tokenu.
 
 ## Błąd
 
-W niektórych przypadkach możesz spróbować wykonać impersonation System, ale operacja nie powiedzie się i wyświetli wynik podobny do poniższego:
+Czasami próba impersonacji System może się nie powieść i wyświetlić wynik podobny do poniższego:
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!
@@ -214,42 +214,42 @@ W niektórych przypadkach możesz spróbować wykonać impersonation System, ale
 [-] CreateProcessWithTokenW Return Code: 0
 [-] CreateProcessWithTokenW Error: 1326
 ```
-Oznacza to, że nawet jeśli działasz na poziomie **High Integrity**, **nie masz wystarczających uprawnień** do docelowego procesu/tokena.\
-Sprawdźmy bieżące uprawnienia Administratora do procesów `svchost.exe` za pomocą **Process Explorer** (możesz również użyć **Process Hacker**):
+Oznacza to, że nawet jeśli działasz na poziomie High Integrity, **nie masz wystarczających uprawnień** do docelowego procesu/tokena.\
+Sprawdźmy bieżące uprawnienia grupy Administrators do procesów `svchost.exe` za pomocą **Process Explorer** (możesz również użyć **Process Hacker**):
 
 1. Wybierz proces `svchost.exe`
 2. Kliknij prawym przyciskiem myszy --> Properties
-3. W zakładce "Security" kliknij w prawym dolnym rogu przycisk "Permissions"
+3. W zakładce "Security" kliknij przycisk "Permissions" w prawym dolnym rogu
 4. Kliknij "Advanced"
 5. Wybierz "Administrators" i kliknij "Edit"
 6. Kliknij "Show advanced permissions"
 
-![Kod - Błąd: 6. Kliknij "Show advanced permissions"](<../../images/image (437).png>)
+![Code - Error: 6. Click on "Show advanced permissions"](<../../images/image (437).png>)
 
-Powyższy obraz zawiera wszystkie uprawnienia grupy "Administrators" do wybranego procesu (jak widać w przypadku `svchost.exe`, grupa ma tylko uprawnienia "Query").
+Powyższy obraz zawiera wszystkie uprawnienia grupy "Administrators" do wybranego procesu (jak widać, w przypadku `svchost.exe` mają oni wyłącznie uprawnienia "Query").
 
 Zobacz uprawnienia grupy "Administrators" do `winlogon.exe`:
 
-![Kod - Błąd: Zobacz uprawnienia grupy "Administrators" do winlogon.exe](<../../images/image (1102).png>)
+![Code - Error: See the privileges "Administrators" have over winlogon.exe](<../../images/image (1102).png>)
 
-W przypadku tego procesu grupa "Administrators" może wykonywać operacje "Read Memory" i "Read Permissions", co prawdopodobnie umożliwia Administratorom impersonate token używany przez ten proces.
+W przypadku tego procesu grupa "Administrators" może wykonywać operacje "Read Memory" i "Read Permissions", co prawdopodobnie umożliwia jej impersonation tokena używanego przez ten proces.
 
-### Typowe przyczyny niepowodzeń
+### Najczęstsze przyczyny niepowodzeń
 
-- **`OpenProcess()` / `OpenProcessToken()` -> `5 (Access denied)`**: DACL procesu blokuje dostęp albo cel jest **protected/PPL**. Wybierz inny proces SYSTEM.
-- **`DuplicateTokenEx()` -> `5 (Access denied)`**: uchwyt tokena został otwarty bez wystarczających praw albo DACL docelowego tokena uniemożliwia jego duplikację.
+- **`OpenProcess()` / `OpenProcessToken()` -> `5 (Access denied)`**: DACL procesu blokuje dostęp albo proces docelowy jest **protected/PPL**. Wybierz inny proces SYSTEM.
+- **`DuplicateTokenEx()` -> `5 (Access denied)`**: uchwyt tokena został otwarty bez wystarczających praw albo DACL tokena docelowego uniemożliwia jego duplikowanie.
 - **`CreateProcessWithTokenW()` -> `1314`**: wywołujący nie ma obecnie włączonego **`SeImpersonatePrivilege`**. Spróbuj najpierw go włączyć albo użyj `CreateProcessAsUserW()` ze zduplikowanym tokenem primary.
-- **`CreateProcessWithTokenW()` -> `1326`** po wcześniejszych niepowodzeniach: często oznacza to po prostu, że wcześniejszy etap duplikacji/impersonation tokena zakończył się niepowodzeniem, więc nie ma użytecznego tokena primary do uruchomienia procesu potomnego.
+- **`CreateProcessWithTokenW()` -> `1326`** po wcześniejszych niepowodzeniach: często oznacza to po prostu, że wcześniejszy etap duplikowania/impersonation tokena nie powiódł się, więc nie ma użytecznego tokena primary do uruchomienia procesu potomnego.
 
 ## Uwagi operatora
 
-- Ta technique sprawdza się świetnie, gdy masz już **local admin + high integrity** i chcesz szybko, manualnie uzyskać SYSTEM bez uruchamiania usługi ani tworzenia łańcucha wymuszania przez named pipe.
-- W hardened środowiskach Windows 11 / Server **LSA protection** staje się coraz powszechniejsze, dlatego workflow zakładający, że `lsass.exe` jest zawsze dostępny do odczytu, jest zawodny. **`winlogon.exe` / `wininit.exe` / `services.exe` to zwykle lepsze cele pierwszego wyboru**.<sup>[[2]](#references)</sup>
-- Jeśli uzyskasz kontekst **service account**, a nie podwyższony desktop administratora, **Potato family** zwykle będzie lepiej dopasowana niż ta strona.
+- Ta technika sprawdza się świetnie, gdy masz już **local admin + high integrity** i potrzebujesz szybkiej, ręcznej ścieżki do SYSTEM bez uruchamiania usługi ani tworzenia łańcucha coercion z użyciem named pipe.
+- W zahartowanych środowiskach Windows 11 / Server **LSA protection** staje się coraz powszechniejsze, dlatego workflow zakładający, że `lsass.exe` jest zawsze dostępny do odczytu, jest zawodny. **`winlogon.exe` / `wininit.exe` / `services.exe` to zazwyczaj lepsze wybory na początek**.<sup>[[2]](#references)</sup>
+- Jeśli trafisz do kontekstu **service account**, a nie do podniesionego pulpitu administratora, **Potato family** będzie zwykle lepszym rozwiązaniem niż ta strona.
 
 
 
-## References
+## Referencje
 
 - [1] [Microsoft: CreateProcessWithTokenW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
 - [2] [SensePost: Abusing Windows' tokens to compromise Active Directory without touching LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)

