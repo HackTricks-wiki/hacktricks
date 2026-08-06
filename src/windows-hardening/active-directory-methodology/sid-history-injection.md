@@ -22,7 +22,7 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 > [!WARNING]
 > Note that it's possible to disable SID history in a trust relationship which will make this attack fail.
 
-According to the [**docs**](https://technet.microsoft.com/library/cc835085.aspx):
+According to the [**docs**](https://technet.microsoft.com/library/cc835085.aspx):<sup>[[3]](#references)</sup>
 - **Disabling SIDHistory on forest trusts** using the netdom tool (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
 - **Applying SID Filter Quarantining to external trusts** using the netdom tool (`netdom trust /domain: /quarantine:yes on the domain controller`)
 - **Applying SID Filtering to domain trusts within a single forest** is not recommended as it is an unsupported configuration and can cause breaking changes. If a domain within a forest is untrustworthy then it should not be a member of the forest. In this situation it is necessary to first split the trusted and untrusted domains into separate forests where SID Filtering can be applied to an interforest trust
@@ -158,7 +158,7 @@ raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 
 - [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
 - [2] [What is Security Identifier (SID)? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
+- [3] [Security Considerations for Trusts - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
 
 {{#include ../../banners/hacktricks-training.md}}
-
 

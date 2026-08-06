@@ -21,7 +21,7 @@ Note: Deleting messages/channels/servers in Discord does not purge this local ca
 
 - Exfiltrated attachments and thumbnails fetched via cdn.discordapp.com/media.discordapp.net
 - Images, GIFs, videos (e.g., .jpg, .png, .gif, .webp, .mp4, .webm)
-- Webhook URLs (https://discord.com/api/webhooks/…)
+- Webhook URLs (https://discord.com/api/webhooks/…)<sup>[[3]](#references)</sup>
 - Discord API calls (https://discord.com/api/vX/…)
 - Helpful for correlating beaconing/exfil activity and hashing media for intel matching<sup>[[1]](#references)</sup>
 
