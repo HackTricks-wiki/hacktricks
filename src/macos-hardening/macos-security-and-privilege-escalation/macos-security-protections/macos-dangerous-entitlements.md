@@ -310,5 +310,6 @@ For detailed IOKit/DriverKit exploitation, see:
 - [10] [Apple Developer — Allow Execution of JIT-compiled Code Entitlement (`com.apple.security.cs.allow-jit`)](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit)
 - [11] [Apple Developer — Allow Unsigned Executable Memory Entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)
 - [12] [Apple Developer — Disable Executable Memory Protection Entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection)
+- [13] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
 
 {{#include ../../../banners/hacktricks-training.md}}
