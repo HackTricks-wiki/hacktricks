@@ -1,12 +1,14 @@
+# VBS 파일을 위한 Desobfuscation Techniques
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-악성 VBS 파일을 디버깅/디오브퓨스케이트하는 데 유용할 수 있는 몇 가지 사항:
+악성 VBS 파일을 debug/deobfuscate하는 데 유용할 수 있는 몇 가지 방법:
 
 ## echo
 ```bash
 Wscript.Echo "Like this?"
 ```
-## 댓글
+## 주석
 ```bash
 ' this is a comment
 ```

@@ -1,18 +1,18 @@
-# Suricata & Iptables cheatsheet
+# Suricata & Iptables 치트시트
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Iptables
 
-### Chains
+### 체인
 
-iptables에서 규칙 목록은 체인으로 알려져 있으며 순차적으로 처리됩니다. 이 중 세 가지 주요 체인은 보편적으로 존재하며, 시스템의 기능에 따라 NAT와 같은 추가 체인이 지원될 수 있습니다.
+iptables에서는 체인으로 알려진 규칙 목록이 순차적으로 처리됩니다. 이 중 세 가지 기본 체인은 항상 존재하며, NAT와 같은 추가 체인은 시스템의 기능에 따라 지원될 수 있습니다.
 
 - **Input Chain**: 들어오는 연결의 동작을 관리하는 데 사용됩니다.
-- **Forward Chain**: 로컬 시스템을 대상으로 하지 않는 들어오는 연결을 처리하는 데 사용됩니다. 이는 라우터 역할을 하는 장치에서 일반적이며, 수신된 데이터는 다른 목적지로 전달되도록 되어 있습니다. 이 체인은 시스템이 라우팅, NAT 또는 유사한 활동에 관여할 때 주로 관련이 있습니다.
-- **Output Chain**: 나가는 연결의 규제를 전담합니다.
+- **Forward Chain**: 로컬 시스템을 대상으로 하지 않는 들어오는 연결을 처리하는 데 사용됩니다. 이는 수신된 데이터가 다른 대상으로 전달되는 라우터 역할을 하는 장치에서 일반적입니다. 이 체인은 주로 시스템이 라우팅, NAT 또는 이와 유사한 작업에 관여할 때 사용됩니다.
+- **Output Chain**: 나가는 연결을 제어하는 데 사용됩니다.
 
-이러한 체인은 네트워크 트래픽의 질서 있는 처리를 보장하며, 시스템으로 들어오고, 통과하고, 나가는 데이터 흐름을 규제하는 세부 규칙을 지정할 수 있게 합니다.
+이러한 체인은 네트워크 트래픽이 질서 있게 처리되도록 하며, 시스템으로 들어오고 시스템을 통과하며 시스템에서 나가는 데이터의 흐름을 제어하는 세부 규칙을 지정할 수 있게 합니다.
 ```bash
 # Delete all rules
 iptables -F
@@ -119,68 +119,68 @@ systemctl daemon-reload
 ```
 ### 규칙 정의
 
-[문서에서:] (https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) 규칙/서명은 다음으로 구성됩니다:
+[문서에서:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) 규칙/시그니처는 다음으로 구성됩니다:
 
-- **작업**: 서명이 일치할 때 발생하는 일을 결정합니다.
-- **헤더**: 규칙의 프로토콜, IP 주소, 포트 및 방향을 정의합니다.
-- **규칙 옵션**: 규칙의 세부 사항을 정의합니다.
+- **action**은 시그니처가 일치할 때 발생하는 동작을 결정합니다.
+- **header**는 규칙의 프로토콜, IP 주소, 포트 및 방향을 정의합니다.
+- **rule options**는 규칙의 세부 사항을 정의합니다.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
-#### **유효한 작업은**
+#### **유효한 action은**
 
-- alert - 경고 생성
-- pass - 패킷의 추가 검사를 중지
-- **drop** - 패킷을 드롭하고 경고 생성
-- **reject** - 일치하는 패킷의 발신자에게 RST/ICMP 도달 불가 오류 전송
-- rejectsrc - 단순히 _reject_와 동일
-- rejectdst - 일치하는 패킷의 수신자에게 RST/ICMP 오류 패킷 전송
-- rejectboth - 대화의 양쪽에 RST/ICMP 오류 패킷 전송
+- alert - alert 생성
+- pass - packet의 추가 inspection 중지
+- **drop** - packet을 drop하고 alert 생성
+- **reject** - 일치하는 packet의 sender에게 RST/ICMP unreachable error 전송
+- rejectsrc - _reject_와 동일
+- rejectdst - 일치하는 packet의 receiver에게 RST/ICMP error packet 전송
+- rejectboth - conversation의 양쪽에 RST/ICMP error packet 전송
 
-#### **프로토콜**
+#### **Protocols**
 
-- tcp (tcp 트래픽용)
+- tcp (tcp-traffic용)
 - udp
 - icmp
-- ip (ip는 '모든' 또는 '아무'를 의미)
-- _layer7 프로토콜_: http, ftp, tls, smb, dns, ssh... (자세한 내용은 [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html)에서 확인)
+- ip (ip는 ‘all’ 또는 ‘any’를 의미)
+- _layer7 protocols_: http, ftp, tls, smb, dns, ssh... ([**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html)에 더 있음)
 
-#### 출발지 및 목적지 주소
+#### Source 및 Destination Addresses
 
-IP 범위, 부정 및 주소 목록을 지원합니다:
+IP ranges, negations 및 address 목록을 지원합니다:
 
-| 예시                          | 의미                                   |
-| ----------------------------- | -------------------------------------- |
-| ! 1.1.1.1                     | 1.1.1.1을 제외한 모든 IP 주소         |
-| !\[1.1.1.1, 1.1.1.2]          | 1.1.1.1과 1.1.1.2를 제외한 모든 IP 주소 |
-| $HOME_NET                     | yaml에서 설정한 HOME_NET              |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET 및 HOME_NET 제외          |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24에서 10.0.0.5 제외         |
+| Example                       | Meaning                                  |
+| ----------------------------- | ---------------------------------------- |
+| ! 1.1.1.1                     | 1.1.1.1을 제외한 모든 IP address             |
+| !\[1.1.1.1, 1.1.1.2]          | 1.1.1.1 및 1.1.1.2를 제외한 모든 IP address |
+| $HOME_NET                     | yaml의 HOME_NET 설정         |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET이며 HOME_NET은 아님            |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.5를 제외한 10.0.0.0/24          |
 
-#### 출발지 및 목적지 포트
+#### Source 및 Destination Ports
 
-포트 범위, 부정 및 포트 목록을 지원합니다:
+port ranges, negations 및 port 목록을 지원합니다.
 
-| 예시            | 의미                                   |
+| Example         | Meaning                                |
 | --------------- | -------------------------------------- |
-| any             | 모든 주소                             |
-| \[80, 81, 82]   | 포트 80, 81 및 82                     |
-| \[80: 82]       | 80부터 82까지의 범위                  |
-| \[1024: ]       | 1024부터 가장 높은 포트 번호까지     |
-| !80             | 80을 제외한 모든 포트                 |
-| \[80:100,!99]   | 80부터 100까지의 범위에서 99 제외     |
-| \[1:80,!\[2,4]] | 1-80 범위에서 포트 2와 4 제외         |
+| any             | 모든 address                            |
+| \[80, 81, 82]   | port 80, 81 및 82                     |
+| \[80: 82]       | 80부터 82까지의 range                  |
+| \[1024: ]       | 1024부터 가장 높은 port-number까지 |
+| !80             | 80을 제외한 모든 port                      |
+| \[80:100,!99]   | 80부터 100까지의 range에서 99는 제외 |
+| \[1:80,!\[2,4]] | 1-80 range에서 port 2 및 4 제외  |
 
-#### 방향
+#### Direction
 
-적용되는 통신 규칙의 방향을 나타낼 수 있습니다:
+적용되는 communication rule의 direction을 지정할 수 있습니다:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
-#### 키워드
+#### Keywords
 
-Suricata에는 찾고 있는 **특정 패킷**을 검색할 수 있는 **수백 가지 옵션**이 있습니다. 흥미로운 것이 발견되면 여기에서 언급됩니다. 더 많은 정보는 [**문서**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)를 확인하세요!
+Suricata에는 찾고 있는 **특정 packet**을 검색할 수 있는 **수백 가지 옵션**이 있으며, 여기서는 흥미로운 항목이 발견되면 언급합니다. 자세한 내용은 [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)을 확인하세요!
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule

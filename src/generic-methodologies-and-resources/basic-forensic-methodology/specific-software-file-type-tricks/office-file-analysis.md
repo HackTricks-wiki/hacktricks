@@ -3,15 +3,15 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-자세한 정보는 [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)를 확인하세요. 다음은 요약입니다:
+추가 정보는 [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)를 확인하세요. 다음은 간단한 요약입니다:<sup>[[4]](#references)</sup>
 
-Microsoft는 여러 office 문서 포맷을 만들었으며, 주요 유형 두 가지는 **OLE formats**(예: RTF, DOC, XLS, PPT)과 **Office Open XML (OOXML) formats**(예: DOCX, XLSX, PPTX)입니다. 이들 포맷은 macros를 포함할 수 있어 phishing 및 malware의 표적이 됩니다. OOXML 파일은 zip 컨테이너 구조로 되어 있어 압축을 풀어 파일/폴더 계층과 XML 파일 내용을 확인할 수 있습니다.
+Microsoft는 다양한 Office 문서 형식을 만들었으며, 주요 유형으로는 **OLE formats**(RTF, DOC, XLS, PPT 등)와 **Office Open XML (OOXML) formats**(DOCX, XLSX, PPTX 등)이 있습니다. 이러한 형식에는 macros가 포함될 수 있으므로 phishing 및 malware의 대상이 됩니다. OOXML 파일은 zip 컨테이너로 구성되어 있어 압축을 해제하면 파일 및 폴더 계층 구조와 XML 파일의 내용을 확인할 수 있습니다.
 
-OOXML 파일 구조를 조사하기 위해 문서를 unzip하는 명령과 출력 구조가 제공됩니다. 이 파일들에 데이터를 숨기는 기법들이 문서화되어 있으며, CTF 과제에서 데이터 은닉 기법이 계속해서 발전하고 있음을 보여줍니다.
+OOXML 파일 구조를 탐색하기 위해 문서의 압축을 해제하는 명령과 출력 구조가 제공됩니다. 이러한 파일에 데이터를 숨기는 기법이 문서화되어 있으며, 이는 CTF challenges에서 데이터를 은닉하는 방법이 지속적으로 발전하고 있음을 보여줍니다.
 
-분석을 위해 **oletools**와 **OfficeDissector**는 OLE와 OOXML 문서를 모두 검사할 수 있는 포괄적인 도구 세트를 제공합니다. 이 도구들은 embedded macros를 식별하고 분석하는 데 도움을 주며, 해당 매크로들은 종종 malware 전달 벡터로 사용되어 추가 악성 페이로드를 다운로드하고 실행합니다. VBA macros 분석은 Microsoft Office 없이 Libre Office를 이용해 수행할 수 있으며, breakpoint와 watch variables로 디버깅할 수 있습니다.
+분석에는 **oletools**와 **OfficeDissector**가 OLE 및 OOXML 문서를 검사하기 위한 종합적인 toolset을 제공합니다. 이러한 tool은 embedded macros를 식별하고 분석하는 데 도움이 되며, embedded macros는 malware를 전달하는 vector로 사용되는 경우가 많고 일반적으로 추가적인 malicious payload를 download하고 execute합니다. VBA macros는 Microsoft Office 없이도 Libre Office를 사용하여 분석할 수 있으며, Libre Office에서는 breakpoints 및 watch variables를 활용한 debugging이 가능합니다.
 
-**oletools**의 설치와 사용은 간단하며, pip로 설치하고 문서에서 macros를 추출하는 명령이 제공됩니다. 매크로의 자동 실행은 `AutoOpen`, `AutoExec`, `Document_Open` 같은 함수로 트리거됩니다.
+**oletools**의 설치와 사용은 간단합니다. pip를 사용하여 설치하고 문서에서 macros를 추출하는 명령이 제공됩니다. `AutoOpen`, `AutoExec` 또는 `Document_Open`과 같은 functions가 macros의 automatic execution을 trigger합니다.
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
@@ -20,78 +20,81 @@ olevba -c /path/to/document #Extract macros
 
 ## OLE Compound File exploitation: Autodesk Revit RFA – ECC recomputation and controlled gzip
 
-Revit RFA models are stored as an [OLE Compound File](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation) (aka CFBF). The serialized model is under storage/stream:
+Revit RFA 모델은 [OLE Compound File](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation)(일명 CFBF)로 저장됩니다. 직렬화된 모델은 다음 storage/stream에 있습니다:<sup>[[1]](#references)</sup>
 
 - Storage: `Global`
 - Stream: `Latest` → `Global\Latest`
 
-Key layout of `Global\Latest` (observed on Revit 2025):
+`Global\Latest`의 주요 구조(Revit 2025에서 관찰됨):
 
 - Header
-- GZIP-compressed payload (the actual serialized object graph)
+- GZIP-compressed payload (실제 직렬화된 object graph)
 - Zero padding
 - Error-Correcting Code (ECC) trailer
 
-Revit will auto-repair small perturbations to the stream using the ECC trailer and will reject streams that don’t match the ECC. Therefore, naïvely editing the compressed bytes won’t persist: your changes are either reverted or the file is rejected. To ensure byte-accurate control over what the deserializer sees you must:
+Revit은 ECC trailer를 사용해 stream에 발생한 작은 변경을 자동으로 복구하며, ECC와 일치하지 않는 stream은 거부합니다. 따라서 압축된 bytes를 단순히 수정하면 변경 사항이 유지되지 않습니다. 변경 사항이 되돌려지거나 파일이 거부됩니다. Deserializer가 확인하는 내용을 byte-accurate하게 제어하려면 다음을 수행해야 합니다.
 
-- Recompress with a Revit-compatible gzip implementation (so the compressed bytes Revit produces/accepts match what it expects).
-- Recompute the ECC trailer over the padded stream so Revit will accept the modified stream without auto-repairing it.
+- Revit-compatible gzip implementation으로 다시 압축합니다(Revit이 생성하거나 허용하는 compressed bytes가 예상 값과 일치하도록 하기 위해).
+- Padded stream에 대해 ECC trailer를 다시 계산하여 Revit이 수정된 stream을 자동 복구 없이 허용하도록 합니다.
 
-Practical workflow for patching/fuzzing RFA contents:
+RFA contents를 patching/fuzzing하기 위한 실용적인 workflow:<sup>[[1]](#references)</sup>
 
-1) Expand the OLE compound document
+1) OLE compound document를 확장합니다
 ```bash
 # Expand RFA into a folder tree (storages → folders, streams → files)
 CompoundFileTool /e model.rfa /o rfa_out
 # rfa_out/Global/Latest is the serialized stream of interest
 ```
-2) gzip/ECC 규율로 Global\Latest 편집
+2) gzip/ECC 규칙에 따라 Global\Latest 편집
 
-- `Global/Latest`을 분해: 헤더는 유지하고, payload를 gunzip하여 바이트를 변형한 다음 Revit 호환 deflate 매개변수로 다시 gzip합니다.
-- zero-padding을 보존하고 ECC 트레일러를 재계산하여 변경된 바이트가 Revit에서 수용되도록 합니다.
-- 결정론적 byte-for-byte 재현이 필요하면, Revit의 DLL을 감싼 최소한의 래퍼를 만들어 그 gzip/gunzip 경로와 ECC 계산을 호출하거나(연구에서 시연된 것처럼), 이러한 동작을 복제하는 기존 헬퍼를 재사용하세요.
+- `Global/Latest`를 분해합니다. 헤더는 유지하고, payload를 gunzip한 다음 바이트를 변경하고, Revit과 호환되는 deflate parameters를 사용해 다시 gzip합니다.
+- zero-padding을 유지하고 ECC trailer를 다시 계산하여 새 바이트가 Revit에서 허용되도록 합니다.
+- 결정론적인 byte-for-byte 재현이 필요한 경우, 연구에서 입증된 것처럼 Revit의 DLL을 기반으로 최소한의 wrapper를 만들어 해당 gzip/gunzip 경로와 ECC 계산을 호출하거나, 이러한 semantics를 재현하는 사용 가능한 helper를 재사용합니다.
 
-3) OLE compound document 재구성
+3) OLE compound document 재구축
 ```bash
 # Repack the folder tree back into an OLE file
 CompoundFileTool /c rfa_out /o model_patched.rfa
 ```
-- CompoundFileTool writes storages/streams to the filesystem with escaping for characters invalid in NTFS names; the stream path you want is exactly `Global/Latest` in the output tree.
-- When delivering mass attacks via ecosystem plugins that fetch RFAs from cloud storage, ensure your patched RFA passes Revit’s integrity checks locally first (gzip/ECC correct) before attempting network injection.
+Notes:<sup>[[1]](#references)</sup>
 
-Exploitation insight (to guide what bytes to place in the gzip payload):
+- CompoundFileTool은 NTFS 이름에 사용할 수 없는 문자에 대한 escaping을 적용하여 storages/streams를 filesystem에 기록합니다. 원하는 stream path는 output tree에서 정확히 `Global/Latest`입니다.
+- cloud storage에서 RFA를 가져오는 ecosystem plugins를 통해 mass attacks를 수행할 때는 network injection을 시도하기 전에 patched RFA가 로컬에서 Revit의 integrity checks를 먼저 통과하는지 확인해야 합니다(gzip/ECC가 올바른지 확인).
 
-- The Revit deserializer reads a 16-bit class index and constructs an object. Certain types are non‑polymorphic and lack vtables; abusing destructor handling yields a type confusion where the engine executes an indirect call through an attacker-controlled pointer.
-- Picking `AString` (class index `0x1F`) places an attacker-controlled heap pointer at object offset 0. During the destructor loop, Revit effectively executes:
+Exploitation insight (gzip payload에 배치할 bytes를 결정하는 데 참고):<sup>[[1]](#references)</sup>
+
+- Revit deserializer는 16-bit class index를 읽고 object를 생성합니다. 특정 type은 non‑polymorphic이며 vtable이 없습니다. destructor handling을 악용하면 type confusion이 발생하여 engine이 attacker-controlled pointer를 통한 indirect call을 실행하게 됩니다.
+- `AString`(class index `0x1F`)을 선택하면 object offset 0에 attacker-controlled heap pointer가 배치됩니다. destructor loop 중 Revit은 사실상 다음을 실행합니다:
 ```asm
 rcx = [rbx]              ; object pointer (e.g., AString*)
 rax = [rcx]              ; attacker-controlled pointer to AString buffer
 call qword ptr [rax]     ; one attacker-chosen gadget per object
 ```
-- 직렬화된 그래프에 이러한 객체들을 여러 개 배치하여, destructor loop의 각 반복에서 하나의 gadget(“weird machine”)가 실행되도록 하고, stack pivot을 통해 conventional x64 ROP chain으로 연결하세요.
+- 직렬화된 그래프에 이러한 객체를 여러 개 배치하여 destructor loop의 각 반복이 하나의 gadget(“weird machine”)을 실행하도록 하고, conventional x64 ROP chain으로 stack pivot을 수행하도록 구성합니다.
 
-See Windows x64 pivot/gadget building details here:
+Windows x64 pivot/gadget 구축 세부 사항은 다음을 참조하세요:
 
 {{#ref}}
 ../../../binary-exploitation/stack-overflow/stack-pivoting.md
 {{#endref}}
 
-and general ROP guidance here:
+일반적인 ROP 지침은 다음을 참조하세요:
 
 {{#ref}}
 ../../../binary-exploitation/rop-return-oriented-programing/README.md
 {{#endref}}
 
-도구:
+Tooling:<sup>[[1]](#references)</sup>
 
-- CompoundFileTool (OSS) to expand/rebuild OLE compound files: https://github.com/thezdi/CompoundFileTool
-- IDA Pro + WinDBG TTD for reverse/taint; TTD로 page heap을 비활성화하면 트레이스를 작게 유지할 수 있음.
-- 로컬 프록시(예: Fiddler)는 plugin 트래픽에서 RFAs를 교체하여 supply-chain 전달을 시뮬레이션하는 데 사용할 수 있음.
+- CompoundFileTool (OSS): OLE compound files를 확장하고 재구성하는 도구: https://github.com/thezdi/CompoundFileTool
+- IDA Pro + WinDBG TTD: reverse/taint 분석용. trace를 간결하게 유지하려면 TTD에서 page heap을 비활성화합니다.
+- 로컬 proxy(예: Fiddler): 테스트를 위해 plugin traffic의 RFA를 교체하여 supply-chain delivery를 시뮬레이션할 수 있습니다.
 
-## 참고자료
+## References
 
-- [Crafting a Full Exploit RCE from a Crash in Autodesk Revit RFA File Parsing (ZDI blog)](https://www.thezdi.com/blog/2025/10/6/crafting-a-full-exploit-rce-from-a-crash-in-autodesk-revit-rfa-file-parsing)
-- [CompoundFileTool (GitHub)](https://github.com/thezdi/CompoundFileTool)
-- [OLE Compound File (CFBF) docs](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation)
+- [1] [Crash에서 Full Exploit RCE 제작: Autodesk Revit RFA File Parsing (ZDI blog)](https://www.thezdi.com/blog/2025/10/6/crafting-a-full-exploit-rce-from-a-crash-in-autodesk-revit-rfa-file-parsing)
+- [2] [CompoundFileTool (GitHub)](https://github.com/thezdi/CompoundFileTool)
+- [3] [OLE Compound File (CFBF) 문서](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation)
+- [4] [Forensics CTF Field Guide](https://trailofbits.github.io/ctf/forensics/)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,93 +1,92 @@
-# 흥미로운 Windows Registry Keys
+# 흥미로운 Windows Registry 키
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Windows Registry hive는 _무슨 일이 일어났나?_에서 _어떤 user가, 언제, 어디서?_로 가장 빠르게 pivot하는 방법 중 하나다. live analysis에서는 `CurrentControlSet`를 우선 사용하고, offline hive analysis에서는 `ControlSet001`을 hardcoding하지 말고 먼저 어떤 `ControlSet00x`가 active였는지 resolve하라.
+Windows Registry hive는 _무슨 일이 발생했는가?_에서 _어떤 사용자가, 언제, 어디에서 발생시켰는가?_로 가장 빠르게 pivot할 수 있는 방법 중 하나입니다. live analysis에서는 `CurrentControlSet`을 우선 사용하고, offline hive analysis에서는 `ControlSet001`을 하드코딩하지 말고 먼저 어떤 `ControlSet00x`가 활성 상태였는지 확인해야 합니다.
 
-### Windows Version and Owner Info
+### Windows 버전 및 소유자 정보
 
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion`: Windows edition/build, install time, registered owner, product name, and other build metadata.
-- `SYSTEM\Select`: `Current`, `Default`, 그리고 `LastKnownGood`를 system이 사용한 실제 `ControlSet00x` 값에 매핑한다.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion`: Windows edition/build, 설치 시간, 등록된 소유자, product name 및 기타 build metadata.
+- `SYSTEM\Select`: `Current`, `Default`, `LastKnownGood`를 시스템에서 사용한 실제 `ControlSet00x` 값에 매핑합니다.
 
-### Computer Name
+### 컴퓨터 이름
 
-- `SYSTEM\CurrentControlSet\Control\ComputerName\ComputerName`: current hostname.
+- `SYSTEM\CurrentControlSet\Control\ComputerName\ComputerName`: 현재 hostname.
 
-### Time Zone Setting
+### Time Zone 설정
 
-- `SYSTEM\CurrentControlSet\Control\TimeZoneInformation`: configured time zone and DST-related values.
+- `SYSTEM\CurrentControlSet\Control\TimeZoneInformation`: 구성된 time zone 및 DST 관련 값.
 
-### Access Time Tracking
+### Access Time 추적
 
-- `SYSTEM\CurrentControlSet\Control\FileSystem`: `NtfsDisableLastAccessUpdate`는 NTFS last-access timestamps가 업데이트되는지 여부를 나타낸다.
-- 이를 enable하려면: `fsutil behavior set disablelastaccess 0`
+- `SYSTEM\CurrentControlSet\Control\FileSystem`: `NtfsDisableLastAccessUpdate`는 NTFS last-access timestamp가 업데이트되는지 나타냅니다.
+- 활성화하려면 다음을 사용합니다: `fsutil behavior set disablelastaccess 0`
 
-### Shutdown Details
+### Shutdown 세부 정보
 
-- `SYSTEM\CurrentControlSet\Control\Windows`: last shutdown time.
-- `SYSTEM\CurrentControlSet\Control\Watchdog\Display`: older systems may also expose shutdown counters.
+- `SYSTEM\CurrentControlSet\Control\Windows`: 마지막 shutdown 시간.
+- `SYSTEM\CurrentControlSet\Control\Watchdog\Display`: 이전 시스템에서는 shutdown counter도 노출될 수 있습니다.
 
-### Network Configuration
+### Network 구성
 
-- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: interface IPs, DHCP leases, gateway and DNS data.
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: network profile name/SSID plus first and last connection times.
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` and `...\Unmanaged\{GUID}`: gateway MAC address and DNS suffix 같은 profile correlation data.
-- `SYSTEM\CurrentControlSet\Services\LanmanServer\Shares`: host가 공개한 local shared folders.
+- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: interface IP, DHCP lease, gateway 및 DNS data.<sup>[[1]](#references)</sup>
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: network profile name/SSID 및 최초와 마지막 connection 시간.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` 및 `...\Unmanaged\{GUID}`: gateway MAC address 및 DNS suffix와 같은 profile correlation data.
+- `SYSTEM\CurrentControlSet\Services\LanmanServer\Shares`: host가 publish한 local shared folder.
 
-### Remote Access and Network Share History
+### Remote Access 및 Network Share History
 
-- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: outbound RDP MRU list (`MRU0`..`MRU9`).
-- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: per-host outbound RDP history. Subkeys commonly store `UsernameHint`, and the key `LastWrite` time is a useful pivot.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: 특정 user에 연결된 mapped network drives, UNC shares, 및 removable-media mount points.
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: outbound RDP MRU list (`MRU0`..`MRU9`).<sup>[[1]](#references)</sup>
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: host별 outbound RDP history. Subkey에는 일반적으로 `UsernameHint`가 저장되며, key의 `LastWrite` 시간은 유용한 pivot입니다.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: 특정 사용자에게 연결된 mapped network drive, UNC share 및 removable-media mount point.
 
-### Programs that Start Automatically and Scheduled Persistence
+### 자동 시작 프로그램 및 Scheduled Persistence
 
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`
 - `SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 - `SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` and `...\Tasks\{GUID}`: scheduled task metadata. 여기에는 task가 존재하지만 `Tree\<TaskName>`에서 `SD` 값이 없다면, hidden Tarrask-style task tampering을 의심하고 `C:\Windows\System32\Tasks\<TaskName>`와 연관시켜라.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` 및 `...\Tasks\{GUID}`: scheduled task metadata. 여기에 task가 존재하지만 `Tree\<TaskName>`에서 `SD` value가 누락된 경우, 숨겨진 Tarrask-style task tampering을 의심하고 `C:\Windows\System32\Tasks\<TaskName>`와 correlation해야 합니다.
 
-### Searches, Typed Paths, and MRUs
+### Search, Typed Path 및 MRU
 
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery`: File Explorer search terms.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: manually typed Explorer paths.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`: 마지막 26개의 `Win + R` commands. `MRUList`는 순서를 보존한다.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`: recently opened documents and folders.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery`: File Explorer search term.<sup>[[1]](#references)</sup>
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: Explorer에 수동으로 입력한 path.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`: 마지막 26개의 `Win + R` command. `MRUList`는 순서를 보존합니다.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`: 최근에 연 document 및 folder.
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePidlMRU`
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedPidlMRU`
-- `NTUSER.DAT\Software\Microsoft\Office\<VERSION>\UserMRU\*\FileMRU`: Office recent files.
+- `NTUSER.DAT\Software\Microsoft\Office\<VERSION>\UserMRU\*\FileMRU`: Office recent file.
 
-### User Activity Tracking
+### User Activity 추적
 
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: GUI-driven execution history. Value names are ROT13-encoded, and the binary data includes run counters and last run time.
-- `UserAssist`는 standalone verdict가 아니라 강한 supporting evidence로 다뤄라: 주로 Explorer를 통해 실행된 apps나 `.lnk` files를 추적하며, command-line이나 service execution은 놓칠 수 있다. Windows 10+에서는 일부 항목이 process가 완전히 실행되었다는 뜻은 아닐 수도 있다.
-- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` and `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: SID attribution과 last execution time이 포함된 modern Windows 10/11 execution traces. 이는 locally executed binaries에 특히 유용하지만, older entries는 빨리 age out될 수 있고 network shares/removable media에서의 executions는 신뢰도가 더 낮다.
-- Prefetch, Amcache, ShimCache, 그리고 SRUM 같은 broader execution artifacts는 main [Windows forensics overview](README.md#programs-executed)를 참고하라.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: GUI 기반 execution history. Value name은 ROT13으로 encoding되어 있으며, binary data에는 run counter 및 마지막 run 시간이 포함됩니다.<sup>[[1]](#references)</sup>
+- `UserAssist`는 standalone verdict가 아니라 강력한 supporting evidence로 취급해야 합니다. 주로 Explorer를 통해 실행된 app 또는 `.lnk` file을 추적하므로 command-line 또는 service execution을 놓칠 수 있습니다. Windows 10 이상에서는 일부 entry가 process가 실제로 완전히 실행되었다는 의미가 아닐 수 있습니다.
+- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` 및 `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: SID attribution 및 마지막 execution 시간이 포함된 최신 Windows 10/11 execution trace. 이는 local에서 실행된 binary에 특히 유용하지만, 오래된 entry는 빠르게 age out될 수 있으며 network share/removable media에서의 execution은 신뢰도가 낮습니다.
+- Prefetch, Amcache, ShimCache 및 SRUM과 같은 더 광범위한 execution artifact는 주요 [Windows forensics overview](README.md#programs-executed)를 참조하십시오.
 
-### Shellbags
+### Shellbag
 
-- Shellbags are stored in both `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU` / `Bags` and `UsrClass.dat\Local Settings\Software\Microsoft\Windows\Shell\BagMRU` / `Bags`.
-- `NTUSER.DAT` entries are especially useful for UNC/network browsing, while `UsrClass.dat` is where Windows Vista+ commonly stores local/removable-folder shellbags.
-- 폴더가 삭제된 뒤에도 folder existence, traversal, 그리고 folder-view preferences를 보여줄 수 있다. archive files에 대한 Explorer-like access도 shellbag traces를 남길 수 있다.
-- 모든 shellbag이 성공적인 folder access를 증명하는 것은 아니므로, LNKs, Jump Lists, timestamps, 또는 volume mappings와 corroborate하라.
-- 이를 parse하려면 **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** 또는 **SBECmd**를 사용하라.
+- Shellbag은 `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU` / `Bags` 및 `UsrClass.dat\Local Settings\Software\Microsoft\Windows\Shell\BagMRU` / `Bags` 양쪽에 저장됩니다.<sup>[[1]](#references)</sup>
+- `NTUSER.DAT` entry는 UNC/network browsing에 특히 유용하며, Windows Vista 이상에서는 local/removable-folder shellbag이 일반적으로 `UsrClass.dat`에 저장됩니다.
+- folder가 삭제된 후에도 folder의 존재, traversal 및 folder-view preference를 보여줄 수 있습니다. archive file에 대한 Explorer와 유사한 access도 shellbag trace를 남길 수 있습니다.<sup>[[1]](#references)</sup>
+- 모든 shellbag이 성공적인 folder access를 입증하는 것은 아니므로 LNK, Jump List, timestamp 또는 volume mapping과 corroborate해야 합니다.
+- 이를 parse하려면 **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** 또는 **SBECmd**를 사용하십시오.
 
-### USB Information
+### USB 정보
 
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: USB mass-storage devices의 primary inventory (vendor, product, revision, serial/device instance).
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: non-storage devices를 포함한 더 넓은 USB device inventory.
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: recent Windows 10/11 builds에서는 install, first install, last arrival, last removal 같은 per-device lifecycle timestamps를 얻기에 매우 가치가 높은 위치다.
-- `HKLM\SYSTEM\MountedDevices`: volume과 device identifiers를 drive letters / volume GUIDs에 매핑한다. 각 drive letter에 대해 마지막 mapping만 남을 수 있다.
-- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: volume serial numbers와 previous media metadata를 위한 useful pivot.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: user-specific drive-letter 및 share interaction history.
-- MTP/PTP로 연결된 modern phones and tablets는 `USBSTOR` 아래에 **나타나지 않을 수 있다**. `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM`와 `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices`도 확인하라.
-- device를 user와 연결하려면, device 또는 volume identifiers에서 shellbags, LNKs, Jump Lists, `RecentDocs`, `MountPoints2` 같은 per-user artifacts로 pivot하라.
-
-
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: USB mass-storage device의 주요 inventory (vendor, product, revision, serial/device instance).
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: non-storage device를 포함한 더 광범위한 USB device inventory.
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: 최신 Windows 10/11 build에서는 install, first install, last arrival 및 last removal과 같은 device별 lifecycle timestamp를 확인할 수 있는 high-value 지점입니다.<sup>[[2]](#references)</sup>
+- `HKLM\SYSTEM\MountedDevices`: volume 및 device identifier를 drive letter / volume GUID에 매핑합니다. 특정 drive letter에 대한 마지막 mapping만 남을 수 있습니다.
+- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: volume serial number 및 이전 media metadata로 pivot하는 데 유용합니다.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: user별 drive-letter 및 share interaction history.<sup>[[2]](#references)</sup>
+- MTP/PTP를 통해 연결된 최신 phone 및 tablet은 `USBSTOR` 아래에 나타나지 **않을 수 있습니다**. `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` 및 `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices`도 확인하십시오.<sup>[[2]](#references)</sup>
+- device를 user와 연결하려면 device 또는 volume identifier에서 shellbag, LNK, Jump List, `RecentDocs` 및 `MountPoints2`와 같은 per-user artifact로 pivot하십시오.<sup>[[2]](#references)</sup>
 
 ## References
 
-- [Windows Registry Forensics Cheat Sheet 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
-- [USB Device Forensics on Windows 10 and 11 - ElcomSoft](https://blog.elcomsoft.com/2026/02/usb-device-forensics-on-windows-10-and-11/)
+- [1] [Windows Registry Forensics Cheat Sheet 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
+- [2] [USB Device Forensics on Windows 10 and 11 - ElcomSoft](https://blog.elcomsoft.com/2026/02/usb-device-forensics-on-windows-10-and-11/)
+
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,145 +1,145 @@
-# Partitions/File Systems/Carving
+# 파티션/파일 시스템/카빙
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Partitions
+## 파티션
 
-하드 드라이브 또는 **SSD 디스크는 데이터를 물리적으로 분리하기 위해 서로 다른 파티션을 포함할 수 있습니다**.\
-디스크의 **최소** 단위는 **섹터**(정상적으로 512B로 구성됨)입니다. 따라서 각 파티션 크기는 그 크기의 배수여야 합니다.
+하드 드라이브 또는 **SSD 디스크에는 데이터를 물리적으로 분리하기 위한 서로 다른 파티션이 포함될 수 있습니다**.\
+디스크의 **최소 단위**는 **섹터**입니다(일반적으로 512B로 구성됨). 따라서 각 파티션의 크기는 이 크기의 배수여야 합니다.
 
-### MBR (master Boot Record)
+### MBR (마스터 부트 레코드)
 
-이는 **부트 코드의 446B 이후 디스크의 첫 번째 섹터에 할당됩니다**. 이 섹터는 PC에 파티션을 무엇으로부터 어디에 마운트해야 하는지를 나타내는 데 필수적입니다.\
-최대 **4개의 파티션**을 허용합니다(최대 **1개**만 활성/**부팅 가능**). 그러나 더 많은 파티션이 필요하면 **확장 파티션**을 사용할 수 있습니다. 이 첫 번째 섹터의 **마지막 바이트**는 부트 레코드 서명 **0x55AA**입니다. 활성으로 표시할 수 있는 파티션은 하나뿐입니다.\
-MBR은 **최대 2.2TB**를 허용합니다.
+MBR은 **부트 코드 446B 다음 디스크의 첫 번째 섹터**에 할당됩니다. 이 섹터는 PC에 어떤 파티션을 어디에서 마운트해야 하는지 알려주는 데 필수적입니다.\
+최대 **4개의 파티션**을 허용하며(최대 **1개만** 활성/**부팅 가능**), 더 많은 파티션이 필요한 경우 **확장 파티션**을 사용할 수 있습니다. 이 첫 번째 섹터의 **마지막 바이트**는 부트 레코드 시그니처인 **0x55AA**입니다. 활성으로 표시할 수 있는 파티션은 하나뿐입니다.\
+MBR은 **최대 2.2TB**를 지원합니다.
 
-![](<../../../images/image (350).png>)
+![파티션 - MBR (마스터 부트 레코드): MBR은 최대 2.2TB를 지원합니다](<../../../images/image (350).png>)
 
-![](<../../../images/image (304).png>)
+![파티션 - MBR (마스터 부트 레코드): MBR은 최대 2.2TB를 지원합니다](<../../../images/image (304).png>)
 
-**MBR의 440에서 443 바이트**에서 **Windows 디스크 서명**을 찾을 수 있습니다(Windows가 사용되는 경우). 하드 디스크의 논리 드라이브 문자는 Windows 디스크 서명에 따라 달라집니다. 이 서명을 변경하면 Windows가 부팅되지 않을 수 있습니다(도구: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**)**.
+MBR의 **바이트 440~443**에서는(Windows를 사용하는 경우) **Windows 디스크 시그니처**를 확인할 수 있습니다. 하드 디스크의 논리 드라이브 문자는 Windows 디스크 시그니처에 따라 결정됩니다. 이 시그니처를 변경하면 Windows가 부팅되지 않을 수 있습니다(도구: [**Active Disk Editor**](https://www.disk-editor.org/index.html)**).
 
-![](<../../../images/image (310).png>)
+![파티션 - MBR (마스터 부트 레코드): MBR의 바이트 440~443에서는(Windows를 사용하는 경우) Windows 디스크 시그니처를 확인할 수 있습니다. 하드 디스크의 논리 드라이브...](<../../../images/image (310).png>)
 
-**Format**
+**형식**
 
-| Offset      | Length     | Item                |
+| 오프셋       | 길이       | 항목                |
 | ----------- | ---------- | ------------------- |
-| 0 (0x00)    | 446(0x1BE) | Boot code           |
-| 446 (0x1BE) | 16 (0x10)  | First Partition     |
-| 462 (0x1CE) | 16 (0x10)  | Second Partition    |
-| 478 (0x1DE) | 16 (0x10)  | Third Partition     |
-| 494 (0x1EE) | 16 (0x10)  | Fourth Partition    |
-| 510 (0x1FE) | 2 (0x2)    | Signature 0x55 0xAA |
+| 0 (0x00)    | 446(0x1BE) | 부트 코드           |
+| 446 (0x1BE) | 16 (0x10)  | 첫 번째 파티션      |
+| 462 (0x1CE) | 16 (0x10)  | 두 번째 파티션       |
+| 478 (0x1DE) | 16 (0x10)  | 세 번째 파티션       |
+| 494 (0x1EE) | 16 (0x10)  | 네 번째 파티션       |
+| 510 (0x1FE) | 2 (0x2)    | 시그니처 0x55 0xAA |
 
-**Partition Record Format**
+**파티션 레코드 형식**
 
-| Offset    | Length   | Item                                                   |
+| 오프셋    | 길이     | 항목                                                   |
 | --------- | -------- | ------------------------------------------------------ |
-| 0 (0x00)  | 1 (0x01) | Active flag (0x80 = bootable)                          |
-| 1 (0x01)  | 1 (0x01) | Start head                                             |
-| 2 (0x02)  | 1 (0x01) | Start sector (bits 0-5); upper bits of cylinder (6- 7) |
-| 3 (0x03)  | 1 (0x01) | Start cylinder lowest 8 bits                           |
-| 4 (0x04)  | 1 (0x01) | Partition type code (0x83 = Linux)                     |
-| 5 (0x05)  | 1 (0x01) | End head                                               |
-| 6 (0x06)  | 1 (0x01) | End sector (bits 0-5); upper bits of cylinder (6- 7)   |
-| 7 (0x07)  | 1 (0x01) | End cylinder lowest 8 bits                             |
-| 8 (0x08)  | 4 (0x04) | Sectors preceding partition (little endian)            |
-| 12 (0x0C) | 4 (0x04) | Sectors in partition                                   |
+| 0 (0x00)  | 1 (0x01) | 활성 플래그 (0x80 = 부팅 가능)                         |
+| 1 (0x01)  | 1 (0x01) | 시작 헤드                                             |
+| 2 (0x02)  | 1 (0x01) | 시작 섹터 (비트 0~5); 실린더 상위 비트 (6~7)           |
+| 3 (0x03)  | 1 (0x01) | 시작 실린더 하위 8비트                                  |
+| 4 (0x04)  | 1 (0x01) | 파티션 유형 코드 (0x83 = Linux)                        |
+| 5 (0x05)  | 1 (0x01) | 끝 헤드                                               |
+| 6 (0x06)  | 1 (0x01) | 끝 섹터 (비트 0~5); 실린더 상위 비트 (6~7)             |
+| 7 (0x07)  | 1 (0x01) | 끝 실린더 하위 8비트                                    |
+| 8 (0x08)  | 4 (0x04) | 파티션 이전의 섹터 수 (리틀 엔디언)                    |
+| 12 (0x0C) | 4 (0x04) | 파티션 내 섹터 수                                      |
 
-MBR을 Linux에 마운트하려면 먼저 시작 오프셋을 가져와야 합니다( `fdisk` 및 `p` 명령을 사용할 수 있습니다).
+Linux에서 MBR을 마운트하려면 먼저 시작 오프셋을 확인해야 합니다(`fdisk`와 `p` 명령을 사용할 수 있음).
 
-![](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
+![파티션 - MBR (마스터 부트 레코드): Linux에서 MBR을 마운트하려면 먼저 시작 오프셋을 확인해야 합니다(fdisk와 p 명령을 사용할 수 있음)](<../../../images/image (413) (3) (3) (3) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-그런 다음 다음 코드를 사용하십시오.
+그런 다음 다음 코드를 사용합니다
 ```bash
 #Mount MBR in Linux
 mount -o ro,loop,offset=<Bytes>
 #63x512 = 32256Bytes
 mount -o ro,loop,offset=32256,noatime /path/to/image.dd /media/part/
 ```
-**LBA (논리 블록 주소 지정)**
+**LBA (Logical block addressing)**
 
-**논리 블록 주소 지정** (**LBA**)은 컴퓨터 저장 장치에 저장된 데이터 블록의 위치를 지정하는 데 사용되는 일반적인 방식으로, 일반적으로 하드 디스크 드라이브와 같은 보조 저장 시스템에서 사용됩니다. LBA는 특히 간단한 선형 주소 지정 방식으로, **블록은 정수 인덱스로 위치가 지정되며**, 첫 번째 블록은 LBA 0, 두 번째는 LBA 1 등으로 이어집니다.
+**Logical block addressing** (**LBA**)는 컴퓨터 저장 장치, 일반적으로 하드 디스크 드라이브와 같은 보조 저장 시스템에 저장된 **데이터 블록의 위치를 지정**하는 데 사용되는 일반적인 방식입니다. LBA는 특히 단순한 선형 주소 지정 방식으로, **블록은 정수 인덱스로 식별**됩니다. 첫 번째 블록은 LBA 0, 두 번째 블록은 LBA 1이며, 이후에도 같은 방식으로 이어집니다.
 
-### GPT (GUID 파티션 테이블)
+### GPT (GUID Partition Table)
 
-GUID 파티션 테이블, 즉 GPT는 MBR (마스터 부트 레코드)와 비교하여 향상된 기능으로 선호됩니다. 파티션에 대한 **전 세계적으로 고유한 식별자**로 구별되는 GPT는 여러 면에서 두드러집니다:
+GUID Partition Table(GPT)은 MBR (Master Boot Record)에 비해 향상된 기능을 제공하기 때문에 선호됩니다. 파티션에 대한 **globally unique identifier**가 특징인 GPT는 다음과 같은 여러 측면에서 차이가 있습니다.
 
-- **위치 및 크기**: GPT와 MBR 모두 **섹터 0**에서 시작합니다. 그러나 GPT는 **64비트**로 작동하며, MBR의 32비트와 대조됩니다.
-- **파티션 한계**: GPT는 Windows 시스템에서 최대 **128개의 파티션**을 지원하며, 최대 **9.4ZB**의 데이터를 수용할 수 있습니다.
-- **파티션 이름**: 최대 36개의 유니코드 문자로 파티션 이름을 지정할 수 있는 기능을 제공합니다.
+- **위치 및 크기**: GPT와 MBR 모두 **sector 0**에서 시작합니다. 그러나 GPT는 MBR의 32비트와 달리 **64비트**로 동작합니다.
+- **파티션 제한**: GPT는 Windows 시스템에서 최대 **128개의 파티션**을 지원하며, 최대 **9.4ZB**의 데이터를 처리할 수 있습니다.
+- **파티션 이름**: 최대 36개의 Unicode 문자로 파티션 이름을 지정할 수 있습니다.
 
 **데이터 복원력 및 복구**:
 
-- **중복성**: MBR과 달리 GPT는 파티션 및 부트 데이터를 단일 장소에 국한하지 않습니다. 이 데이터를 디스크 전반에 복제하여 데이터 무결성과 복원력을 향상시킵니다.
-- **순환 중복 검사 (CRC)**: GPT는 데이터 무결성을 보장하기 위해 CRC를 사용합니다. 데이터 손상을 적극적으로 모니터링하며, 손상이 감지되면 GPT는 다른 디스크 위치에서 손상된 데이터를 복구하려고 시도합니다.
+- **Redundancy**: MBR과 달리 GPT는 파티션 및 boot 데이터를 한 곳에만 저장하지 않습니다. 이 데이터를 디스크 전체에 복제하여 데이터 무결성과 복원력을 향상합니다.
+- **Cyclic Redundancy Check (CRC)**: GPT는 데이터 무결성을 보장하기 위해 CRC를 사용합니다. 데이터 손상을 적극적으로 모니터링하며, 손상이 감지되면 GPT는 디스크의 다른 위치에서 손상된 데이터를 복구하려고 시도합니다.
 
-**보호 MBR (LBA0)**:
+**Protective MBR (LBA0)**:
 
-- GPT는 보호 MBR을 통해 하위 호환성을 유지합니다. 이 기능은 레거시 MBR 공간에 존재하지만, 이전 MBR 기반 유틸리티가 GPT 디스크를 실수로 덮어쓰지 않도록 설계되어 GPT 형식의 디스크에서 데이터 무결성을 보호합니다.
+- GPT는 protective MBR을 통해 backward compatibility를 유지합니다. 이 기능은 기존 MBR 영역에 존재하지만, 이전 MBR 기반 유틸리티가 GPT 디스크를 실수로 덮어쓰지 못하도록 설계되어 GPT 형식 디스크의 데이터 무결성을 보호합니다.
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/GUID_Partition_Table_Scheme.svg/800px-GUID_Partition_Table_Scheme.svg.png](<../../../images/image (1062).png>)
 
-**하이브리드 MBR (LBA 0 + GPT)**
+**Hybrid MBR (LBA 0 + GPT)**
 
-[위키백과에서](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)<sup>[[1]](#references)</sup>
 
-**EFI** 대신 **BIOS** 서비스를 통해 **GPT 기반 부팅**을 지원하는 운영 체제에서는 첫 번째 섹터가 **부트로더** 코드의 첫 번째 단계를 저장하는 데 여전히 사용될 수 있지만, **GPT** **파티션**을 인식하도록 **수정**됩니다. MBR의 부트로더는 512바이트의 섹터 크기를 가정해서는 안 됩니다.
+EFI가 아닌 **BIOS** 서비스를 통해 **GPT 기반 boot**을 지원하는 운영 체제에서는 첫 번째 sector가 여전히 **bootloader** code의 첫 번째 단계를 저장하는 데 사용될 수 있습니다. 단, **GPT** **partitions**를 인식하도록 **modified**되어야 합니다. MBR의 bootloader는 sector 크기가 512바이트라고 가정해서는 안 됩니다.
 
-**파티션 테이블 헤더 (LBA 1)**
+**Partition table header (LBA 1)**
 
-[위키백과에서](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+[From Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)<sup>[[1]](#references)</sup>
 
-파티션 테이블 헤더는 디스크에서 사용 가능한 블록을 정의합니다. 또한 파티션 테이블을 구성하는 파티션 항목의 수와 크기를 정의합니다 (테이블의 오프셋 80 및 84).
+Partition table header는 디스크에서 사용 가능한 블록을 정의합니다. 또한 partition table을 구성하는 partition entry의 수와 크기도 정의합니다(table의 offset 80 및 84).
 
-| 오프셋    | 길이   | 내용                                                                                                                                                                     |
-| --------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 0 (0x00)  | 8 바이트  | 서명 ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h 또는 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#_note-8)리틀 엔디안 머신에서) |
-| 8 (0x08)  | 4 바이트  | UEFI 2.8에 대한 수정 1.0 (00h 00h 01h 00h)                                                                                                                                  |
-| 12 (0x0C) | 4 바이트  | 리틀 엔디안의 헤더 크기 (바이트 단위, 일반적으로 5Ch 00h 00h 00h 또는 92 바이트)                                                                                                 |
-| 16 (0x10) | 4 바이트  | [CRC32](https://en.wikipedia.org/wiki/CRC32) 헤더의 CRC (오프셋 +0에서 헤더 크기까지) 리틀 엔디안, 이 필드는 계산 중에 0으로 설정됨                                         |
-| 20 (0x14) | 4 바이트  | 예약; 0이어야 함                                                                                                                                                       |
-| 24 (0x18) | 8 바이트  | 현재 LBA (이 헤더 복사본의 위치)                                                                                                                                   |
-| 32 (0x20) | 8 바이트  | 백업 LBA (다른 헤더 복사본의 위치)                                                                                                                               |
-| 40 (0x28) | 8 바이트  | 파티션의 첫 번째 사용 가능한 LBA (기본 파티션 테이블의 마지막 LBA + 1)                                                                                                       |
-| 48 (0x30) | 8 바이트  | 마지막 사용 가능한 LBA (보조 파티션 테이블의 첫 번째 LBA − 1)                                                                                                                    |
-| 56 (0x38) | 16 바이트 | 혼합 엔디안의 디스크 GUID                                                                                                                                                    |
-| 72 (0x48) | 8 바이트  | 파티션 항목 배열의 시작 LBA (기본 복사본에서 항상 2)                                                                                                     |
-| 80 (0x50) | 4 바이트  | 배열의 파티션 항목 수                                                                                                                                         |
-| 84 (0x54) | 4 바이트  | 단일 파티션 항목의 크기 (일반적으로 80h 또는 128)                                                                                                                        |
-| 88 (0x58) | 4 바이트  | 리틀 엔디안의 파티션 항목 배열의 CRC32                                                                                                                            |
-| 92 (0x5C) | \*       | 예약; 블록의 나머지 부분에 대해 0이어야 함 (512바이트의 섹터 크기에 대해 420바이트; 그러나 더 큰 섹터 크기로 더 많을 수 있음)                                      |
+| Offset    | Length   | Contents                                                                                                                                                                     |
+| --------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0 (0x00)  | 8 bytes  | Signature ("EFI PART", 45h 46h 49h 20h 50h 41h 52h 54h 또는 little-endian 시스템에서 0x5452415020494645ULL[ ](https://en.wikipedia.org/wiki/GUID_Partition_Table#_note-8)) |
+| 8 (0x08)  | 4 bytes  | UEFI 2.8의 Revision 1.0 (00h 00h 01h 00h)                                                                                                                                  |
+| 12 (0x0C) | 4 bytes  | little endian의 Header size (바이트 단위, 일반적으로 5Ch 00h 00h 00h 또는 92바이트)                                                                                                 |
+| 16 (0x10) | 4 bytes  | little endian의 header [CRC32](https://en.wikipedia.org/wiki/CRC32) (offset +0부터 header size까지). 계산 중에는 이 field를 0으로 설정                             |
+| 20 (0x14) | 4 bytes  | Reserved; 0이어야 함                                                                                                                                                       |
+| 24 (0x18) | 8 bytes  | Current LBA (이 header copy의 위치)                                                                                                                                   |
+| 32 (0x20) | 8 bytes  | Backup LBA (다른 header copy의 위치)                                                                                                                               |
+| 40 (0x28) | 8 bytes  | partitions에 사용 가능한 첫 번째 LBA (primary partition table의 마지막 LBA + 1)                                                                                                       |
+| 48 (0x30) | 8 bytes  | 사용 가능한 마지막 LBA (secondary partition table의 첫 번째 LBA − 1)                                                                                                                    |
+| 56 (0x38) | 16 bytes | mixed endian 형식의 Disk GUID                                                                                                                                                    |
+| 72 (0x48) | 8 bytes  | partition entry array의 Starting LBA (primary copy에서는 항상 2)                                                                                                     |
+| 80 (0x50) | 4 bytes  | array에 포함된 partition entry 수                                                                                                                                         |
+| 84 (0x54) | 4 bytes  | 단일 partition entry의 크기 (일반적으로 80h 또는 128)                                                                                                                        |
+| 88 (0x58) | 4 bytes  | little endian 형식의 partition entry array CRC32                                                                                                                            |
+| 92 (0x5C) | \*       | Reserved; block의 나머지 부분은 0이어야 함 (sector 크기가 512바이트인 경우 420바이트이며, 더 큰 sector 크기에서는 더 많을 수 있음)                                      |
 
-**파티션 항목 (LBA 2–33)**
+**Partition entries (LBA 2–33)**
 
-| GUID 파티션 항목 형식 |          |                                                                                                               |
-| --------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| 오프셋                | 길이     | 내용                                                                                                      |
-| 0 (0x00)              | 16 바이트 | [파티션 유형 GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (혼합 엔디안) |
-| 16 (0x10)             | 16 바이트 | 고유 파티션 GUID (혼합 엔디안)                                                                          |
-| 32 (0x20)             | 8 바이트  | 첫 번째 LBA ([리틀 엔디안](https://en.wikipedia.org/wiki/Little_endian))                                      |
-| 40 (0x28)             | 8 바이트  | 마지막 LBA (포함, 일반적으로 홀수)                                                                             |
-| 48 (0x30)             | 8 바이트  | 속성 플래그 (예: 비트 60은 읽기 전용을 나타냄)                                                               |
-| 56 (0x38)             | 72 바이트 | 파티션 이름 (36 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE 코드 유닛)                               |
+| GUID partition entry format |          |                                                                                                               |
+| --------------------------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| Offset                      | Length   | Contents                                                                                                      |
+| 0 (0x00)                    | 16 bytes | [Partition type GUID](https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs) (mixed endian) |
+| 16 (0x10)                   | 16 bytes | Unique partition GUID (mixed endian)                                                                          |
+| 32 (0x20)                   | 8 bytes  | First LBA ([little endian](https://en.wikipedia.org/wiki/Little_endian))                                      |
+| 40 (0x28)                   | 8 bytes  | Last LBA (inclusive, 일반적으로 홀수)                                                                             |
+| 48 (0x30)                   | 8 bytes  | Attribute flags (예: bit 60은 read-only를 의미)                                                               |
+| 56 (0x38)                   | 72 bytes | Partition name (36개의 [UTF-16](https://en.wikipedia.org/wiki/UTF-16)LE code units)                               |
 
-**파티션 유형**
+**Partitions Types**
 
-![](<../../../images/image (83).png>)
+![MBR (master Boot Record) - GPT (GUID Partition Table): 56 (0x38) | 72 bytes | Partition name (36 UTF-16LE code units)](<../../../images/image (83).png>)
 
-더 많은 파티션 유형은 [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)에서 확인할 수 있습니다.
+더 많은 partition type은 [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)에서 확인할 수 있습니다.
 
-### 검사
+### Inspecting
 
-[**ArsenalImageMounter**](https://arsenalrecon.com/downloads/)로 포렌식 이미지를 마운트한 후, Windows 도구인 [**Active Disk Editor**](https://www.disk-editor.org/index.html)**를 사용하여 첫 번째 섹터를 검사할 수 있습니다.** 다음 이미지에서 **섹터 0**에서 **MBR**이 감지되고 해석되었습니다:
+[**ArsenalImageMounter**](https://arsenalrecon.com/downloads/)로 forensics image를 mount한 후 Windows tool인 [**Active Disk Editor**](https://www.disk-editor.org/index.html)**.**를 사용하여 첫 번째 sector를 검사할 수 있습니다. 다음 image에서는 **MBR**이 **sector 0**에서 감지되어 해석되었습니다.
 
-![](<../../../images/image (354).png>)
+![GPT (GUID Partition Table) - Inspecting: ArsenalImageMounter로 forensics image를 mount한 후 Windows tool인 Active Disk Editor를 사용하여 첫 번째 sector를 검사할 수 있습니다. 다음...](<../../../images/image (354).png>)
 
-만약 **MBR 대신 GPT 테이블**이었다면 **섹터 1**에 서명 _EFI PART_가 나타나야 합니다 (이전 이미지에서는 비어 있습니다).
+**MBR** 대신 **GPT table**인 경우 **sector 1**에 _EFI PART_ signature가 표시되어야 합니다(이전 image에서는 비어 있는 위치).
 
-## 파일 시스템
+## File-Systems
 
-### Windows 파일 시스템 목록
+### Windows file-systems list
 
 - **FAT12/16**: MSDOS, WIN95/98/NT/200
 - **FAT32**: 95/2000/XP/2003/VISTA/7/8/10
@@ -149,86 +149,87 @@ GUID 파티션 테이블, 즉 GPT는 MBR (마스터 부트 레코드)와 비교�
 
 ### FAT
 
-**FAT (파일 할당 테이블)** 파일 시스템은 볼륨의 시작에 위치한 파일 할당 테이블을 중심으로 설계되었습니다. 이 시스템은 **두 개의 복사본**을 유지하여 데이터 무결성을 보장합니다. 테이블과 루트 폴더는 **고정된 위치**에 있어야 하며, 이는 시스템의 시작 프로세스에 중요합니다.
+**FAT (File Allocation Table)** file system은 volume의 시작 부분에 배치된 핵심 구성 요소인 file allocation table을 중심으로 설계되었습니다. 이 system은 table을 **두 개 복사본**으로 유지하여 한 복사본이 손상되더라도 데이터 무결성을 보장합니다. table과 root folder는 **고정된 위치**에 있어야 하며, 이는 system startup process에 중요합니다.
 
-파일 시스템의 기본 저장 단위는 **클러스터, 일반적으로 512B**로, 여러 섹터로 구성됩니다. FAT는 다음과 같은 버전으로 발전해왔습니다:
+file system의 기본 storage unit은 **cluster(일반적으로 512B)**이며, 여러 sector로 구성됩니다. FAT는 다음과 같이 발전해 왔습니다.
 
-- **FAT12**, 12비트 클러스터 주소를 지원하며 최대 4078 클러스터를 처리합니다 (UNIX와 함께 4084).
-- **FAT16**, 16비트 주소로 향상되어 최대 65,517 클러스터를 수용합니다.
-- **FAT32**, 32비트 주소로 더욱 발전하여 볼륨당 인상적인 268,435,456 클러스터를 허용합니다.
+- **FAT12**: 12비트 cluster address를 지원하며 최대 4078개의 cluster를 처리합니다(UNIX에서는 4084개).
+- **FAT16**: 16비트 address로 확장되어 최대 65,517개의 cluster를 수용합니다.
+- **FAT32**: 32비트 address로 더욱 확장되어 volume당 최대 268,435,456개의 cluster를 허용합니다.
 
-FAT 버전 전반에 걸쳐 중요한 제한 사항은 **4GB 최대 파일 크기**로, 이는 파일 크기 저장에 사용되는 32비트 필드에 의해 부과됩니다.
+모든 FAT version의 중요한 제한 사항은 **4GB의 maximum file size**입니다. 이는 file size 저장에 사용되는 32비트 field로 인해 발생합니다.
 
-특히 FAT12 및 FAT16의 루트 디렉토리의 주요 구성 요소는 다음과 같습니다:
+root directory의 주요 구성 요소, 특히 FAT12 및 FAT16에서는 다음과 같습니다.
 
-- **파일/폴더 이름** (최대 8자)
-- **속성**
-- **생성, 수정 및 마지막 접근 날짜**
-- **FAT 테이블 주소** (파일의 시작 클러스터를 나타냄)
-- **파일 크기**
+- **File/Folder Name** (최대 8자)
+- **Attributes**
+- **Creation, Modification, and Last Access Dates**
+- **FAT Table Address** (file의 start cluster를 나타냄)
+- **File Size**
 
 ### EXT
 
-**Ext2**는 **저널링하지 않는** 파티션 (**변경이 많지 않은 파티션**)에 가장 일반적인 파일 시스템입니다. **Ext3/4**는 **저널링**을 지원하며 일반적으로 **나머지 파티션**에 사용됩니다.
+**Ext2**는 boot partition과 같은 **not journaling** partitions(**변경이 많지 않은 partitions**)에서 가장 일반적인 file system입니다. **Ext3/4**는 **journaling** 방식이며 일반적으로 **나머지 partitions**에 사용됩니다.
 
-## **메타데이터**
+## **Metadata**
 
-일부 파일에는 메타데이터가 포함되어 있습니다. 이 정보는 파일의 내용에 대한 것으로, 파일 유형에 따라 분석가에게 흥미로울 수 있는 정보가 포함될 수 있습니다:
+일부 file에는 metadata가 포함되어 있습니다. 이 정보는 file content에 대한 정보이며, file type에 따라 analyst에게 유용할 수 있는 다음과 같은 정보를 포함할 수 있습니다.
 
-- 제목
-- 사용된 MS Office 버전
-- 저자
-- 생성 및 마지막 수정 날짜
-- 카메라 모델
-- GPS 좌표
-- 이미지 정보
+- Title
+- 사용된 MS Office Version
+- Author
+- Creation 및 last modification 날짜
+- Camera model
+- GPS coordinates
+- Image information
 
-[**exiftool**](https://exiftool.org) 및 [**Metadiver**](https://www.easymetadata.com/metadiver-2/)와 같은 도구를 사용하여 파일의 메타데이터를 얻을 수 있습니다.
+[**exiftool**](https://exiftool.org) 및 [**Metadiver**](https://www.easymetadata.com/metadiver-2/)와 같은 tool을 사용하여 file의 metadata를 확인할 수 있습니다.
 
-## **삭제된 파일 복구**
+## **Deleted Files Recovery**
 
-### 기록된 삭제된 파일
+### Logged Deleted Files
 
-이전에 보았듯이, 파일이 "삭제"된 후에도 여러 장소에 여전히 저장됩니다. 이는 일반적으로 파일 시스템에서 파일을 삭제하는 것이 단순히 삭제된 것으로 표시할 뿐, 데이터는 손대지 않기 때문입니다. 따라서 파일의 레지스트리(예: MFT)를 검사하고 삭제된 파일을 찾는 것이 가능합니다.
+앞에서 살펴본 것처럼 file이 "deleted"된 후에도 여전히 저장되어 있는 여러 위치가 있습니다. 일반적으로 file system에서 file을 삭제하면 file이 deleted로 표시될 뿐 데이터 자체는 변경되지 않기 때문입니다. 따라서 file의 registry(예: MFT)를 검사하여 deleted file을 찾을 수 있습니다.<sup>[[2]](#references)</sup>
 
-또한, OS는 파일 시스템 변경 및 백업에 대한 많은 정보를 저장하므로, 이를 사용하여 파일이나 가능한 한 많은 정보를 복구할 수 있습니다.
+또한 OS는 일반적으로 file system 변경 사항과 backup에 대한 많은 정보를 저장하므로, 이를 사용하여 file 또는 가능한 한 많은 정보를 복구할 수 있습니다.
 
-{{#ref}}
-file-data-carving-recovery-tools.md
-{{#endref}}
-
-### **파일 카빙**
-
-**파일 카빙**은 **대량의 데이터에서 파일을 찾으려는 기술**입니다. 이러한 도구가 작동하는 주요 방법은 **파일 유형 헤더 및 풋터 기반**, 파일 유형 **구조 기반**, 및 **내용** 자체 기반의 3가지입니다.
-
-이 기술은 **조각화된 파일을 검색하는 데는 작동하지 않음을 유의하십시오**. 파일이 **연속 섹터에 저장되지 않으면**, 이 기술은 파일을 찾거나 적어도 일부를 찾을 수 없습니다.
-
-파일 카빙을 위해 검색할 파일 유형을 지정할 수 있는 여러 도구가 있습니다.
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### 데이터 스트림 **C**arving
+### **File Carving**
 
-데이터 스트림 카빙은 파일 카빙과 유사하지만 **완전한 파일을 찾는 대신 흥미로운 정보 조각을 찾습니다**.\
-예를 들어, 기록된 URL을 포함하는 완전한 파일을 찾는 대신, 이 기술은 URL을 검색합니다.
+**File Carving**은 **대량의 데이터에서 file을 찾는** technique입니다. 이러한 tool은 주로 3가지 방식으로 동작합니다. **file type의 header와 footer 기반**, file type의 **structure 기반**, 그리고 **content** 자체를 기반으로 하는 방식입니다.
+
+이 technique은 **fragmented file을 검색하는 데는 동작하지 않는다**는 점에 유의해야 합니다. file이 **연속된 sector에 저장되어 있지 않으면**, 이 technique으로는 file 전체 또는 최소한 일부를 찾을 수 없습니다.
+
+검색하려는 file type을 지정하여 사용할 수 있는 File Carving tool이 여러 가지 있습니다.
+
 
 {{#ref}}
 file-data-carving-recovery-tools.md
 {{#endref}}
 
-### 안전한 삭제
+### Data Stream **C**arving
 
-명백히, **파일 및 해당 로그의 일부를 "안전하게" 삭제하는 방법이 있습니다**. 예를 들어, 파일의 내용을 여러 번 쓰레기 데이터로 덮어쓰고, **$MFT** 및 **$LOGFILE**에서 파일에 대한 **로그**를 제거하고, **볼륨 섀도 복사본**을 제거하는 것이 가능합니다.\
-이 작업을 수행하더라도 **파일의 존재가 여전히 기록된 다른 부분이 있을 수 있으며**, 이는 사실이며 포렌식 전문가의 작업 중 하나는 이를 찾는 것입니다.
+Data Stream Carving은 File Carving과 유사하지만 **완전한 file 대신 흥미로운 정보 fragment를 찾습니다**.\
+예를 들어 logged URL이 포함된 complete file을 찾는 대신, 이 technique은 URL을 검색합니다.
 
-## 참고 문헌
 
-- [https://en.wikipedia.org/wiki/GUID_Partition_Table](https://en.wikipedia.org/wiki/GUID_Partition_Table)
-- [http://ntfs.com/ntfs-permissions.htm](http://ntfs.com/ntfs-permissions.htm)
-- [https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html](https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html)
-- [https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service](https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service)
-- **iHackLabs 인증 디지털 포렌식 Windows**
+{{#ref}}
+file-data-carving-recovery-tools.md
+{{#endref}}
+
+### Secure Deletion
+
+분명히 file과 해당 file에 대한 log 일부를 **"secure하게" 삭제**하는 방법이 있습니다. 예를 들어 file의 **content를 junk data로 여러 번 overwrite**한 다음, 해당 file에 대한 **$MFT** 및 **$LOGFILE**의 **log**를 **remove**하고 **Volume Shadow Copies**를 **remove**할 수 있습니다.<sup>[[3]](#references)</sup>\
+이 작업을 수행하더라도 file의 존재가 여전히 기록된 **다른 부분**이 있을 수 있으며, 이는 사실입니다. 이러한 부분을 찾는 것이 forensics professional 업무의 일부입니다.
+
+## References
+
+- [1] [GUID Partition Table - Wikipedia](https://en.wikipedia.org/wiki/GUID_Partition_Table)
+- [2] [How to scan NTFS $I30 (directory) entries for evidence of deleted files](https://www.osforensics.com/faqs-and-tutorials/how-to-scan-ntfs-i30-entries-deleted-files.html)
+- [3] [Volume Shadow Copy Service (VSS)](https://docs.microsoft.com/en-us/windows-server/storage/file-server/volume-shadow-copy-service)
 
 {{#include ../../../banners/hacktricks-training.md}}

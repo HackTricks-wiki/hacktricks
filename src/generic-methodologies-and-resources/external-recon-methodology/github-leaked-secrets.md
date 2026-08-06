@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-### Tools to find secrets in git repos and file system
+### git repo 및 file system에서 secrets를 찾는 Tools
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
@@ -20,34 +20,34 @@
 - [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
-> 노트
-> - TruffleHog v3는 많은 자격 증명(credentials)을 실시간으로 검증하고 GitHub orgs, issues/PRs, gists, wikis를 스캔할 수 있습니다. 예: `trufflehog github --org <ORG> --results=verified`.
-> - Gitleaks v8은 git history, 디렉터리 및 아카이브 스캔을 지원합니다: `gitleaks detect -v --source .` 또는 `gitleaks detect --source <repo> --log-opts="--all"`.
-> - Nosey Parker는 선별된 규칙으로 고처리량 스캔에 중점을 두며 triage용 Explorer UI를 제공합니다. 예: `noseyparker scan --datastore np.db <path|repo>` 그런 다음 `noseyparker report --datastore np.db`.
-> - ggshield (GitGuardian CLI)는 pre-commit/CI 훅과 Docker 이미지 스캔을 제공합니다: `ggshield secret scan repo <path-or-url>`.
+> 참고
+> - TruffleHog v3는 많은 credentials를 실시간으로 검증하고 GitHub orgs, issues/PRs, gists 및 wikis를 scan할 수 있습니다. 예시: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)</sup>
+> - Gitleaks v8은 git history, directories 및 archives scan을 지원합니다: `gitleaks detect -v --source .` 또는 `gitleaks detect --source <repo> --log-opts="--all"`.
+> - Nosey Parker는 엄선된 rules를 사용한 high-throughput scanning에 중점을 두며 triage를 위한 Explorer UI를 제공합니다. 예시: `noseyparker scan --datastore np.db <path|repo>`를 실행한 다음 `noseyparker report --datastore np.db`를 실행합니다.
+> - ggshield (GitGuardian CLI)는 pre-commit/CI hooks 및 Docker image scanning을 제공합니다: `ggshield secret scan repo <path-or-url>`.
 
-### Where secrets commonly leak in GitHub
+### GitHub에서 secrets가 일반적으로 leak되는 위치
 
-- Repository files in default and non-default branches (search `repo:owner/name@branch` in the UI).
-- Full git history and other branches/tags (clone and scan with gitleaks/trufflehog; GitHub search focuses on indexed content).
-- Issues, pull requests, comments, and descriptions (TruffleHog GitHub source supports these via flags like `--issue-comments`, `--pr-comments`).
-- Actions logs and artifacts of public repositories (masking is best-effort; review logs/artifacts if visible).
-- Wikis and release assets.
-- Gists (search with tooling or the UI; some tools can include gists).
+- default 및 non-default branches의 Repository files (UI에서 `repo:owner/name@branch`를 검색).
+- 전체 git history 및 기타 branches/tags (clone한 후 gitleaks/trufflehog로 scan; GitHub search는 indexed content에 집중).
+- Issues, pull requests, comments 및 descriptions (TruffleHog GitHub source는 `--issue-comments`, `--pr-comments`와 같은 flags를 통해 이를 지원).
+- Public repositories의 Actions logs 및 artifacts (masking은 best-effort 방식이므로, 표시되는 경우 logs/artifacts를 검토).
+- Wikis 및 release assets.
+- Gists (tooling 또는 UI를 사용해 검색; 일부 tools는 gists를 포함할 수 있음).
 
-> 주의사항
-> - GitHub의 REST code search API는 레거시이며 정규식(Regex)을 지원하지 않습니다; 정규식 검색에는 Web UI를 권장합니다. gh CLI는 레거시 API를 사용합니다.
-> - 검색 인덱싱은 특정 크기 이하의 파일만 포함합니다. 철저히 확인하려면 리포지토리를 clone하고 로컬에서 secrets 스캐너로 스캔하세요.
+> 주의 사항
+> - GitHub의 REST code search API는 legacy이며 regex를 지원하지 않습니다. Regex searches에는 Web UI를 사용하는 것이 좋습니다. gh CLI는 legacy API를 사용합니다.
+> - 일정 크기 이하의 files만 search를 위해 indexed됩니다. 철저히 확인하려면 repository를 clone하고 secrets scanner로 로컬에서 scan합니다.
 
 ### Programmatic org-wide scanning
 
-- TruffleHog (GitHub source):
+- TruffleHog (GitHub source):<sup>[[2]](#references)</sup>
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
 --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- Gitleaks를 모든 org 저장소에서 실행(얕게 클론한 뒤 스캔):
+- 모든 조직 repo에서 Gitleaks 실행 (shallow clone 및 scan):
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
@@ -55,7 +55,7 @@ tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
 gitleaks detect --source "$tmp" -v || true; rm -rf "$tmp";
 done
 ```
-- mono checkout 위에서 꼬치꼬치 캐묻는 사람:
+- mono checkout에서의 Nosey Parker:
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
@@ -67,13 +67,13 @@ ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> 팁: git 히스토리의 경우, 제거된 secrets를 포착하기 위해 `git log -p --all`을 파싱하는 스캐너를 사용하는 것이 좋습니다.
+> 팁: Git history의 경우 삭제된 secret을 포착할 수 있도록 `git log -p --all`을 파싱하는 scanner를 우선 사용하세요.
 
-### 현대 토큰을 위한 업데이트된 dorks
+### 최신 token을 위한 업데이트된 dorks
 
 - GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`
 - Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
-- Cloud and general:
+- 클라우드 및 일반:
 - `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
 - `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
 - `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
@@ -364,11 +364,9 @@ AWS SECRET
 wide-source-code-search.md
 {{#endref}}
 
+## 참고 자료
 
+- [1] [공개 repository에 secret이 노출되지 않도록 하기 (GitHub Blog, 2024년 2월 29일)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – 유출된 credential 찾기, 검증 및 분석](https://github.com/trufflesecurity/trufflehog)
 
-
-## 참고자료
-
-- 공개 리포지토리에 비밀을 올리지 않기 (GitHub Blog, Feb 29, 2024): https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/
-- TruffleHog v3 – leaked credentials를 찾고, 검증하며 분석합니다: https://github.com/trufflesecurity/trufflehog
 {{#include ../../banners/hacktricks-training.md}}

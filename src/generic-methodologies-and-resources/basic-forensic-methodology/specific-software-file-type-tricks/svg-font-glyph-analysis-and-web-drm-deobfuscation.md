@@ -2,27 +2,27 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-이 페이지는 위치가 지정된 glyph runs와 요청별 벡터 glyph 정의(SVG paths)를 함께 전송하고, 스크래핑을 방지하기 위해 요청마다 glyph ID를 무작위화하는 웹 리더로부터 텍스트를 복구하는 실용적 기술들을 문서화합니다. 핵심 아이디어는 요청 범위의 숫자 glyph IDs를 무시하고 래스터 해싱(raster hashing)으로 시각적 형태를 지문화한 다음, 참조 font atlas에 대해 SSIM을 사용해 형태를 문자로 매핑하는 것입니다. 이 워크플로우는 Kindle Cloud Reader를 넘어 유사한 보호를 가진 모든 뷰어에 일반화됩니다.
+이 페이지에서는 위치가 지정된 glyph run과 요청별 vector glyph 정의(SVG paths)를 제공하고, scraping을 방지하기 위해 요청마다 glyph ID를 무작위화하는 web reader에서 텍스트를 복구하는 실용적인 기법을 설명합니다. 핵심 아이디어는 요청 범위의 숫자 glyph ID를 무시하고 raster hashing을 사용해 시각적 형태의 fingerprint를 생성한 다음, reference font atlas에 대해 SSIM을 사용하여 형태를 문자에 매핑하는 것입니다. 이 workflow는 Kindle Cloud Reader 외에도 유사한 보호 기능을 사용하는 모든 viewer에 적용할 수 있습니다.<sup>[[1]](#references)</sup>
 
-경고: 정당하게 소유한 콘텐츠를 백업하는 경우 및 해당 법률과 약관을 준수하는 경우에만 이러한 기술을 사용하십시오.
+경고: 이러한 기법은 합법적으로 소유한 content를 백업하고 관련 법률 및 약관을 준수하는 경우에만 사용하십시오.
 
 ## Acquisition (example: Kindle Cloud Reader)
 
-Endpoint observed:
+관찰된 endpoint:<sup>[[1]](#references)</sup>
 - [https://read.amazon.com/renderer/render](https://read.amazon.com/renderer/render)
 
-Required materials per session:
-- Browser session cookies (normal Amazon login)
-- Rendering token from a startReading API call
-- Additional ADP session token used by the renderer
+세션별 필수 자료:
+- Browser session cookies (일반 Amazon login)
+- startReading API call에서 얻은 rendering token
+- renderer에서 사용하는 추가 ADP session token
 
-Behavior:
-- Each request, when sent with browser-equivalent headers and cookies, returns a TAR archive limited to 5 pages.
-- For a long book you will need many batches; each batch uses a different randomized mapping of glyph IDs.
+동작:
+- Browser와 동등한 headers 및 cookies를 사용해 각 request를 전송하면, 최대 5 pages로 제한된 TAR archive가 반환됩니다.
+- 긴 book의 경우 여러 batch가 필요하며, 각 batch는 서로 다른 무작위 glyph ID mapping을 사용합니다.
 
-Typical TAR contents:
-- page_data_0_4.json — positioned text runs as sequences of glyph IDs (not Unicode)
-- glyphs.json — per-request SVG path definitions for each glyph and fontFamily
+일반적인 TAR contents:
+- page_data_0_4.json — glyph ID sequence로 구성된 위치 지정 text runs (Unicode 아님)
+- glyphs.json — 각 glyph 및 fontFamily에 대한 request별 SVG path definitions
 - toc.json — table of contents
 - metadata.json — book metadata
 - location_map.json — logical→visual position mappings
@@ -44,50 +44,50 @@ Example page run structure:
 "24": {"path": "M 450 1480 L 820 1480 L 820 0 L 1050 0 L 1050 1480 ...", "fontFamily": "bookerly_normal"}
 }
 ```
-anti-scraping path tricks에 대한 메모:
-- 경로에는 많은 벡터 파서와 단순한 경로 샘플링을 혼란시키는 마이크로 상대 이동이 포함될 수 있음(예: `m3,1 m1,6 m-4,-7`).
-- 명령/좌표 차분을 하지 말고 강력한 SVG 엔진(예: CairoSVG)으로 항상 채워진 완전한 경로를 렌더링하세요.
+스크래핑 방지 경로 트릭에 대한 참고 사항:
+- 경로에는 많은 vector parser와 단순한 path sampling을 혼란스럽게 하는 미세한 상대 이동(예: `m3,1 m1,6 m-4,-7`)이 포함될 수 있습니다.
+- command/coordinate differencing을 수행하는 대신, 항상 강력한 SVG engine(예: CairoSVG)으로 채워진 완전한 경로를 render하세요.
 
-## Why naïve decoding fails
+## 단순한 decoding이 실패하는 이유
 
-- Per-request randomized glyph substitution: glyph ID→character 매핑이 배치마다 무작위화됨; ID는 전역적으로 의미가 없음.
-- Direct SVG coordinate comparison은 취약함: 동일한 모양이라도 요청마다 수치 좌표나 명령 인코딩이 다를 수 있음.
-- OCR on isolated glyphs 성능이 낮음(≈50%): 구두점과 유사 글리프를 혼동하고 ligatures를 무시함.
+- 요청마다 무작위화된 glyph substitution: glyph ID→character mapping은 각 batch마다 변경되며, ID는 전역적으로 의미가 없습니다.<sup>[[1]](#references)</sup>
+- 직접적인 SVG coordinate 비교는 취약합니다. 동일한 shape라도 요청마다 numeric coordinate 또는 command encoding이 다를 수 있습니다.
+- 분리된 glyph에 대한 OCR 성능은 낮고(약 50%), punctuation과 유사한 glyph를 혼동하며 ligature를 무시합니다.
 
-## Working pipeline: request-agnostic glyph normalization and mapping
+## 실용적인 pipeline: 요청에 종속되지 않는 glyph normalization 및 mapping
 
-1) Rasterize per-request SVG glyphs
-- 제공된 `path`로 글리프별 최소 SVG 문서를 만들고 CairoSVG 또는 까다로운 경로 시퀀스를 처리하는 동등한 엔진을 사용해 고정 캔버스(예: 512×512)로 렌더링합니다.
-- 채우기는 검정/흰색으로 렌더링하고, 렌더러와 AA에 따른 아티팩트를 제거하기 위해 strokes는 피합니다.
+1) 요청별 SVG glyph rasterize
+- 제공된 `path`를 사용해 glyph별 최소 SVG document를 만들고, CairoSVG 또는 까다로운 path sequence를 처리할 수 있는 동등한 engine을 사용해 고정 canvas(예: 512×512)로 render합니다.<sup>[[1]](#references)[[2]](#references)</sup>
+- 흰색 배경에 검은색으로 채워 render하고, renderer 및 AA에 따른 artifact를 제거하기 위해 stroke는 사용하지 않습니다.
 
-2) Perceptual hashing for cross-request identity
-- 각 글리프 이미지에 대해 perceptual hash(예: `imagehash.phash`를 통한 pHash)를 계산합니다.
-- 해시를 안정적 ID로 취급하세요: 요청 간 동일한 시각적 모양은 동일한 perceptual hash로 수렴하여 무작위화된 ID를 무력화합니다.
+2) 요청 간 identity를 위한 perceptual hashing
+- 각 glyph image의 perceptual hash(예: `imagehash.phash`를 통한 pHash)를 계산합니다.<sup>[[3]](#references)</sup>
+- hash를 stable ID로 취급합니다. 요청 간 동일한 visual shape는 동일한 perceptual hash로 통합되어 무작위화된 ID를 무력화합니다.
 
-3) Reference font atlas generation
-- 대상 TTF/OTF 폰트를 다운로드합니다(예: Bookerly normal/italic/bold/bold-italic).
-- A–Z, a–z, 0–9, punctuation, 특수 기호(em/en dashes, quotes) 및 명시적 ligatures: `ff`, `fi`, `fl`, `ffi`, `ffl`에 대한 후보를 렌더링합니다.
-- 폰트 변형(normal/italic/bold/bold-italic)별로 별도 아틀라스를 유지합니다.
-- ligatures에 대해 글리프 수준의 충실도가 필요하면 proper text shaper(HarfBuzz)를 사용하세요; 단순히 ligature 문자열을 직접 렌더링하고 shaping 엔진이 이를 해결하면 Pillow ImageFont로의 간단한 래스터화도 충분할 수 있습니다.
+3) Reference font atlas 생성
+- 대상 TTF/OTF font(예: Bookerly normal/italic/bold/bold-italic)를 download합니다.
+- A–Z, a–z, 0–9, punctuation, special marks(em/en dash, quote), 그리고 명시적인 ligature인 `ff`, `fi`, `fl`, `ffi`, `ffl`에 대한 candidate를 render합니다.
+- font variant(normal/italic/bold/bold-italic)별로 별도의 atlas를 유지합니다.
+- ligature에 대해 glyph 수준의 fidelity가 필요하다면 적절한 text shaper(HarfBuzz)를 사용합니다. Pillow ImageFont를 통한 단순한 rasterization도 ligature string을 직접 render하고 shaping engine이 이를 resolve한다면 충분할 수 있습니다.
 
-4) Visual similarity matching with SSIM
-- 각 미확인 글리프 이미지에 대해 모든 폰트 변형 아틀라스의 후보 이미지들과 SSIM(Structural Similarity Index)을 계산합니다.
-- 최고 점수를 받은 매치의 문자 문자열을 할당합니다. SSIM은 픽셀 정확 비교보다 작은 안티앨리어싱, 스케일, 좌표 차이를 더 잘 흡수합니다.
+4) SSIM을 사용한 visual similarity matching
+- 각 unknown glyph image에 대해 모든 font variant atlas의 모든 candidate image와 SSIM(Structural Similarity Index)을 계산합니다.<sup>[[4]](#references)</sup>
+- 가장 높은 score의 match에 해당하는 character string을 할당합니다. SSIM은 pixel-exact 비교보다 작은 antialiasing, scale 및 coordinate 차이를 더 잘 흡수합니다.
 
-5) Edge handling and reconstruction
-- 글리프가 ligature(다중 문자)로 매핑되면 디코딩 시 확장합니다.
-- 런 사각형(top/left/right/bottom)을 사용해 문단 구분(Y 델타), 정렬(X 패턴), 스타일 및 크기를 추론합니다.
-- `fontStyle`, `fontWeight`, `fontSize` 및 내부 링크를 보존하여 HTML/EPUB로 직렬화합니다.
+5) Edge 처리 및 reconstruction
+- glyph가 ligature(multi-char)에 매핑되면 decoding 중 이를 expand합니다.
+- run rectangle(top/left/right/bottom)를 사용해 paragraph break(Y delta), alignment(X pattern), style 및 size를 추론합니다.
+- `fontStyle`, `fontWeight`, `fontSize` 및 internal link를 보존하면서 HTML/EPUB로 serialize합니다.
 
 ### Implementation tips
 
-- 해싱 및 SSIM 전에 모든 이미지를 동일한 크기와 그레이스케일로 정규화하세요.
-- 퍼셉추얼 해시로 캐시하여 배치 간 반복 글리프에 대해 SSIM 재계산을 피하세요.
-- 더 나은 식별을 위해 고품질 래스터 크기(예: 256–512 px)를 사용하고, SSIM 가속을 위해 필요 시 축소하세요.
-- Pillow로 TTF 후보를 렌더링하는 경우 동일한 캔버스 크기를 설정하고 글리프를 가운데에 배치하며, ascender/descender가 잘리지 않도록 패딩하세요.
+- hashing 및 SSIM 전에 모든 image를 동일한 size와 grayscale로 normalize합니다.
+- batch 간 반복되는 glyph에 대해 SSIM을 다시 계산하지 않도록 perceptual hash별로 cache합니다.
+- 더 나은 discrimination을 위해 고품질 raster size(예: 256–512 px)를 사용하고, SSIM을 가속해야 할 경우 필요에 따라 downscale합니다.
+- Pillow를 사용해 TTF candidate를 render하는 경우 동일한 canvas size를 설정하고 glyph를 중앙에 배치합니다. ascender/descender가 잘리지 않도록 padding을 추가합니다.
 
 <details>
-<summary>Python: end-to-end glyph normalization and matching (raster hash + SSIM)</summary>
+<summary>Python: end-to-end glyph normalization 및 matching(raster hash + SSIM)</summary>
 ```python
 # pip install cairosvg pillow imagehash scikit-image uharfbuzz freetype-py
 import io, json, tarfile, base64, math
@@ -222,41 +222,41 @@ return out_runs
 ```
 </details>
 
-## Layout/EPUB reconstruction heuristics
+## Layout/EPUB 재구성 휴리스틱
 
-- Paragraph breaks: 다음 run의 top Y가 이전 줄의 baseline을 폰트 크기에 상대적인 임계값 이상으로 초과하면 새 문단을 시작합니다.
-- Alignment: 왼쪽 정렬 문단은 유사한 left X로 그룹화합니다; 가운데 정렬은 대칭 여백으로 감지하고; 오른쪽 정렬은 오른쪽 가장자리로 감지합니다.
-- Styling: 기울임/굵게는 `fontStyle`/`fontWeight`로 보존합니다; 제목과 본문을 근사화하기 위해 `fontSize` 버킷별로 CSS 클래스를 달리합니다.
-- Links: runs에 링크 메타데이터(예: `positionId`)가 포함되어 있으면 앵커와 내부 href를 생성합니다.
+- Paragraph breaks: 다음 run의 top Y가 이전 줄의 baseline을 font size에 상대적인 threshold 이상 초과하면 새 paragraph를 시작합니다.<sup>[[1]](#references)</sup>
+- Alignment: left-aligned paragraph는 유사한 left X를 기준으로 그룹화하고, 대칭적인 여백으로 centered line을 감지하며, right edge로 right-aligned를 감지합니다.
+- Styling: `fontStyle`/`fontWeight`를 사용해 italic/bold를 유지하고, `fontSize` bucket별로 CSS class를 달리해 heading과 body를 근사합니다.
+- Links: run에 link metadata(예: `positionId`)가 포함되어 있으면 anchor와 internal href를 생성합니다.
 
-## Mitigating SVG anti-scraping path tricks
+## SVG anti-scraping path tricks 완화
 
-- Use filled paths with `fill-rule: nonzero` and a proper renderer (CairoSVG, resvg). 경로 토큰 정규화에 의존하지 마세요.
-- Avoid stroke rendering; 채워진 솔리드에 집중하여 미세한 상대 이동으로 발생하는 헤어라인 아티팩트를 회피하세요.
-- 렌더마다 안정적인 `viewBox`를 유지하여 동일한 도형이 배치 간에 일관되게 래스터화되도록 합니다.
+- `fill-rule: nonzero`를 사용하는 filled path와 적절한 renderer(CairoSVG, resvg)를 사용합니다. path token normalization에 의존하지 마세요.<sup>[[1]](#references)</sup>
+- stroke rendering을 피하고 filled solid에 집중해 micro relative move로 발생하는 hairline artifact를 우회합니다.
+- batch 간 동일한 shape가 일관되게 rasterize되도록 render마다 안정적인 viewBox를 유지합니다.
 
-## Performance notes
+## Performance 참고 사항
 
-- 실무에서는 책이 수백 개의 고유 글리프(예: 합자 포함 약 361개)로 수렴합니다. SSIM 결과를 perceptual hash로 캐시하세요.
-- 초기 발견 이후 이후 배치들은 주로 알려진 해시를 재사용하므로 디코딩이 I/O-bound가 됩니다.
-- 평균 SSIM ≈0.95는 강한 신호입니다; 점수가 낮은 매치는 수동 검토를 위해 플래그하는 것을 고려하세요.
+- 실제로 books는 수백 개의 unique glyph(예: ligature를 포함해 약 361개)로 수렴합니다. perceptual hash를 기준으로 SSIM 결과를 cache하세요.<sup>[[1]](#references)</sup>
+- 초기 discovery 이후에는 이후 batch가 대부분 알려진 hash를 재사용하므로 decoding은 I/O-bound가 됩니다.
+- Average SSIM ≈0.95는 강한 signal입니다. score가 낮은 match는 manual review 대상으로 표시하는 것을 고려하세요.
 
-## Generalization to other viewers
+## 다른 viewer로의 일반화
 
-다음을 제공하는 모든 시스템:
-- 요청 범위의 숫자 ID와 함께 위치 지정된 glyph runs를 반환
-- 요청별 벡터 글리프(SVG paths 또는 subset fonts)를 전송
-- 대량 추출을 방지하기 위해 요청당 페이지 수를 제한
+다음 조건을 만족하는 모든 system은:<sup>[[1]](#references)</sup>
+- request-scoped numeric ID가 포함된 positioned glyph run을 반환하고
+- request별 vector glyph(SVG path 또는 subset font)를 제공하며
+- bulk export를 방지하기 위해 request당 page 수를 제한하는 경우
 
-…같은 정규화로 처리할 수 있습니다:
-- 요청별 도형 래스터화 → perceptual hash → shape ID
-- 글꼴 변형별 후보 글리프/합자 아틀라스
-- 문자를 할당하기 위한 SSIM(또는 유사한 perceptual metric)
-- run 사각형/스타일로부터 레이아웃 재구성
+…동일한 normalization으로 처리할 수 있습니다:
+- request별 shape rasterize → perceptual hash → shape ID
+- font variant별 candidate glyph/ligature atlas
+- SSIM(또는 유사한 perceptual metric)으로 character 할당
+- run rectangle/style에서 layout 재구성
 
 ## Minimal acquisition example (sketch)
 
-브라우저의 DevTools를 사용하여 reader가 `/renderer/render`를 요청할 때 사용되는 정확한 헤더, 쿠키 및 토큰을 캡처하세요. 그런 다음 스크립트나 curl에서 이를 복제하세요. 예시 개요:
+browser의 DevTools를 사용해 reader가 `/renderer/render`를 요청할 때 사용하는 정확한 headers, cookies 및 tokens를 capture합니다. 그런 다음 script 또는 curl에서 이를 replicate합니다.<sup>[[1]](#references)</sup> Example outline:
 ```bash
 curl 'https://read.amazon.com/renderer/render' \
 -H 'Cookie: session-id=...; at-main=...; sess-at-main=...' \
@@ -266,19 +266,19 @@ curl 'https://read.amazon.com/renderer/render' \
 -H 'Accept: application/x-tar' \
 --compressed --output batch_000.tar
 ```
-독자의 요청에 맞게 파라미터(책 ASIN, 페이지 윈도우, viewport)를 조정하세요. 요청당 최대 5페이지 제한이 적용됩니다.
+독자의 요청에 맞게 parameterization(도서 ASIN, page window, viewport)을 조정합니다. 요청당 5페이지 제한을 예상합니다.
 
 ## 달성 가능한 결과
 
-- perceptual hashing을 통해 100개 이상의 무작위화된 알파벳을 단일 글리프 공간으로 축소
-- 아틀라스가 합자(ligatures)와 변형(variants)을 포함할 때 고유 글리프를 평균 SSIM ~0.95로 100% 매핑
-- 재구성된 EPUB/HTML이 원본과 시각적으로 구별 불가
+- perceptual hashing<sup>[[1]](#references)</sup>을 사용하여 100개 이상의 randomized alphabet을 단일 glyph space로 축소
+- atlas에 ligature와 variant가 포함된 경우 평균 SSIM ~0.95로 고유 glyph를 100% 매핑
+- 원본과 시각적으로 구분할 수 없는 EPUB/HTML 재구성
 
 ## References
 
-- [Kindle Web DRM: Breaking Randomized SVG Glyph Obfuscation with Raster Hashing + SSIM (Pixelmelt blog)](https://blog.pixelmelt.dev/kindle-web-drm/)
-- [CairoSVG – SVG to PNG renderer](https://cairosvg.org/)
-- [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
-- [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
+- [1] [Kindle Web DRM: Breaking Randomized SVG Glyph Obfuscation with Raster Hashing + SSIM (Pixelmelt blog)](https://blog.pixelmelt.dev/kindle-web-drm/)
+- [2] [CairoSVG – SVG to PNG renderer](https://cairosvg.org/)
+- [3] [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
+- [4] [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
 
 {{#include ../../../banners/hacktricks-training.md}}

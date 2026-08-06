@@ -1,24 +1,34 @@
+# Reverse Shells
+
 {{#include ../../banners/hacktricks-training.md}}
 
-# [**쉘 - 리눅스**](linux.md)
+## [Shells - Linux](linux.md)
 
-# [**쉘 - 윈도우**](windows.md)
+---
 
-# [**MSFVenom - 치트시트**](msfvenom.md)
+## [Shells - Windows](windows.md)
 
-# [**전체 TTY**](full-ttys.md)
+---
 
-# **자동 생성된 쉘**
+## [MSFVenom - CheatSheet](msfvenom.md)
 
-- [**https://reverse-shell.sh/**](https://reverse-shell.sh/)
-- [**https://www.revshells.com/**](https://www.revshells.com/)
-- [**https://github.com/ShutdownRepo/shellerator**](https://github.com/ShutdownRepo/shellerator)
-- [**https://github.com/0x00-0x00/ShellPop**](https://github.com/0x00-0x00/ShellPop)
-- [**https://github.com/cybervaca/ShellReverse**](https://github.com/cybervaca/ShellReverse)
-- [**https://liftoff.github.io/pyminifier/**](https://liftoff.github.io/pyminifier/)
-- [**https://github.com/xct/xc/**](https://github.com/xct/xc/)
-- [**https://weibell.github.io/reverse-shell-generator/**](https://weibell.github.io/reverse-shell-generator/)
-- [**https://github.com/t0thkr1s/revshellgen**](https://github.com/t0thkr1s/revshellgen)
-- [**https://github.com/mthbernardes/rsg**](https://github.com/mthbernardes/rsg)
+---
+
+## [Full TTYs](full-ttys.md)
+
+---
+
+## 참고 문헌
+
+- [1] [reverse-shell.sh - Reverse shell generator](https://reverse-shell.sh/)
+- [2] [revshells.com - Reverse shell generator](https://www.revshells.com/)
+- [3] [Shellerator - 여러 언어로 bind 및 reverse shell을 생성하는 CLI tool](https://github.com/ShutdownRepo/shellerator)
+- [4] [ShellPop - master처럼 shell을 띄우기](https://github.com/0x00-0x00/ShellPop)
+- [5] [ShellReverse - python, perl, ruby, bash, netcat, php, java, powershell 등을 위한 Shell reverse creator](https://github.com/cybervaca/ShellReverse)
+- [6] [pyminifier - Python code minifier/obfuscator](https://liftoff.github.io/pyminifier/)
+- [7] [xc - Linux 및 Windows용 소형 reverse shell](https://github.com/xct/xc/)
+- [8] [Reverse Shell Generator](https://weibell.github.io/reverse-shell-generator/)
+- [9] [revshellgen - Python 3로 작성된 Reverse shell generator](https://github.com/t0thkr1s/revshellgen)
+- [10] [rsg (ReverShellGenerator) - reverse shell을 실행하는 다양한 방법을 생성하는 tool](https://github.com/mthbernardes/rsg)
 
 {{#include ../../banners/hacktricks-training.md}}
