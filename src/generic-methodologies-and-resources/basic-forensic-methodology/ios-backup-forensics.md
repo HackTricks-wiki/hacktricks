@@ -1,24 +1,24 @@
-# iOS Backup Forensics (Messaging‑centric triage)
+# iOS Backup Forensics (Boodskapgesentreerde triage)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Hierdie bladsy beskryf praktiese stappe om iOS-rugsteun te herbou en te ontleed vir tekens van 0‑click eksplootlewering via boodskap‑app‑aanhangsels. Dit fokus op die omskakeling van Apple se gehashde rugsteunstruktuur na mensleesbare paadjies, en daarna die opsomming en deursoeking van aanhangsels oor algemene apps.
+Hierdie bladsy beskryf praktiese stappe om iOS-backups te rekonstrueer en te ontleed vir tekens van 0-click exploit-lewering via boodskapapp-aanhegsels. Dit fokus daarop om Apple se gehashte backuplay-out na mensleesbare paaie om te skakel, en dan aanhegsels oor algemene apps heen te inventariseer en te skandeer.
 
 Doelwitte:
-- Herbou mensleesbare paadjies vanaf Manifest.db
-- Enumereer boodskapdatabasisse (iMessage, WhatsApp, Signal, Telegram, Viber)
-- Los aanhangselpaadjies op, onttrek ingebedde objekte (PDF/Images/Fonts), en voer dit aan strukturele detektore
+- Herbou leesbare paaie vanaf Manifest.db
+- Inventariseer boodskapdatabasisse (iMessage, WhatsApp, Signal, Telegram, Viber)
+- Los aanhegselpaaie op, onttrek ingebedde objekte (PDF/Images/Fonts), en voer dit aan strukturele detektors
 
-## Herbouing van 'n iOS‑rugsteun
+## Rekonstruksie van ’n iOS-backup
 
-Rugsteune gestoor onder MobileSync gebruik gehashde lêernaamE wat nie mensleesbaar is nie. Die Manifest.db SQLite databasis karteer elke gestoorde objek na sy logiese pad.
+Backups wat onder MobileSync gestoor word, gebruik gehashte lêername wat nie mensleesbaar is nie. Die Manifest.db SQLite-databasis koppel elke gestoorde objek aan sy logiese pad.
 
-Hoëvlak prosedure:
-1) Maak Manifest.db oop en lees die filerekords (domain, relativePath, flags, fileID/hash)
-2) Herstel die oorspronklike vouerhiërargie gebaseer op domain + relativePath
-3) Kopieer of hardlink elke gestoorde objek na sy heropgeboude pad
+Hoëvlakprosedure:
+1) Maak Manifest.db oop en lees die lêerrekords (domain, relativePath, flags, fileID/hash)
+2) Herskep die oorspronklike vouerhiërargie gebaseer op domain + relativePath
+3) Kopieer of hardlink elke gestoorde objek na sy gerekonstueerde pad
 
-Voorbeeld‑werksvloei met 'n hulpmiddel wat dit end‑to‑end implementeer (ElegantBouncer):
+Voorbeeldwerkvloei met ’n tool wat dit end-to-end implementeer (ElegantBouncer):<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 # Rebuild the backup into a readable folder tree
 $ elegant-bouncer --ios-extract /path/to/backup --output /tmp/reconstructed
@@ -26,21 +26,21 @@ $ elegant-bouncer --ios-extract /path/to/backup --output /tmp/reconstructed
 ✓ iOS backup extraction completed successfully!
 ```
 Aantekeninge:
-- Hanteer versleutelde rugsteunkopieë deur die rugsteunwagwoord aan jou extractor te verskaf
-- Behou oorspronklike tydstempels/ACLs waar moontlik vir bewyswaarde
+- Hanteer geënkripteerde rugsteune deur die rugsteunwagwoord aan jou extractor te verskaf
+- Behou oorspronklike tydstempels/ACL's waar moontlik vir bewyswaarde
 
-### Verkryging & ontsleuteling van die rugsteun (USB / Finder / libimobiledevice)
+### Verkryging en dekripsie van die rugsteun (USB / Finder / libimobiledevice)
 
-- Op macOS/Finder stel "Encrypt local backup" en skep 'n *vars* versleutelde rugsteun sodat keychain-items teenwoordig is.
-- Platformonafhanklik: `idevicebackup2` (libimobiledevice ≥1.4.0) verstaan iOS 17/18 rugsteunprotokolveranderinge en herstel vroeër restore/backup-handshake-foute.
+- Stel op macOS/Finder "Encrypt local backup" en skep 'n *vars* geënkripteerde rugsteun sodat sleutelketting-items teenwoordig is.
+- Kruisplatform: `idevicebackup2` (libimobiledevice ≥1.4.0) verstaan iOS 17/18-rugsteunprotokolveranderinge en stel vroeëre herstel-/rugsteun-handshake-foute reg.<sup>[[4]](#references)</sup>
 ```bash
 # Pair then create a full encrypted backup over USB
 $ idevicepair pair
 $ idevicebackup2 backup --full --encrypt --password '<pwd>' ~/backups/iphone17
 ```
-### IOC‑gedrewe triage met MVT
+### IOC-gedrewe triage met MVT
 
-Amnesty se Mobile Verification Toolkit (mvt-ios) werk nou direk op geënkripteerde iTunes/Finder‑rugsteun, en outomatiseer die ontsleuteling en IOC‑vergelyking vir huursigware‑sake.
+Amnesty se Mobile Verification Toolkit (mvt-ios) werk nou direk met geënkripteerde iTunes/Finder-rugsteunkopieë en outomatiseer dekripsie en IOC-passing vir gevalle van huursoldaat-spyware.<sup>[[3]](#references)</sup>
 ```bash
 # Optionally extract a reusable key file
 $ mvt-ios extract-key -k /tmp/keyfile ~/backups/iphone17
@@ -51,20 +51,20 @@ $ mvt-ios decrypt-backup -p '<pwd>' -d /tmp/dec-backup ~/backups/iphone17
 # Run IOC scanning on the decrypted tree
 $ mvt-ios check-backup -i indicators.csv /tmp/dec-backup
 ```
-Uitsette beland onder `mvt-results/` (bv., analytics_detected.json, safari_history_detected.json) en kan gekorreleer word met die aanhangselpaaie wat hieronder gevind is.
+Uitsette word onder `mvt-results/` gestoor (bv. `analytics_detected.json`, `safari_history_detected.json`) en kan gekorreleer word met die aanhegselpaaie wat hieronder herwin is.
 
 ### Algemene artefakontleding (iLEAPP)
 
-Voer iLEAPP direk op die backup-lêergids uit (ondersteun iOS 11‑17 skemas):
+Vir tydlyn-/metadata buite boodskappe, voer iLEAPP direk op die backup-lêergids uit (ondersteun iOS 11‑17-skemas):
 ```bash
 $ python3 ileapp.py -b /tmp/dec-backup -o /tmp/ileapp-report
 ```
-## Enumerasie van boodskap-app-aanhangsels
+## Enumerasie van aanhegsels in messaging-apps
 
-Na rekonstruksie, lys aanhangsels vir gewilde apps. Die presiese skema verskil per app/weergawe, maar die benadering is soortgelyk: voer navrae op die boodskapdatabasis uit, koppel boodskappe aan aanhangsels, en los padlokasies op die skyf op.
+Na rekonstruksie, enumereer aanhegsels vir gewilde apps. Die presiese skema verskil volgens app/weergawe, maar die benadering is soortgelyk: doen navraag oor die messaging-databasis, koppel boodskappe aan aanhegsels, en bepaal die paaie op skyf.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### iMessage (sms.db)
-Belangrike tabelle: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ)
+Sleuteltabelle: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ)
 
 Voorbeeldnavrae:
 ```sql
@@ -93,10 +93,10 @@ JOIN message_attachment_join maj ON maj.message_id = m.ROWID
 JOIN attachment a ON a.ROWID = maj.attachment_id
 ORDER BY m.date DESC;
 ```
-Aanhangselspaaie kan absoluut wees of relatief tot die herboude lêerboom onder Library/SMS/Attachments/.
+Aanhegselpaaie kan absoluut wees of relatief tot die gerekonstrueerde boom onder Library/SMS/Attachments/.
 
 ### WhatsApp (ChatStorage.sqlite)
-Algemene koppeling: message table ↔ media/attachment table (benaming verskil per weergawe). Voer navrae uit op media-rye om paaie op skyf te bekom. Onlangse iOS-boue openbaar steeds `ZMEDIALOCALPATH` in `ZWAMEDIAITEM`.
+Algemene koppeling: boodskapstabel ↔ media-/aanhegselstabel (benaming wissel volgens weergawe). Doen navraag oor media-rye om paaie op skyf te verkry. Onlangse iOS-builds stel steeds `ZMEDIALOCALPATH` in `ZWAMEDIAITEM` bloot.
 ```sql
 SELECT
 m.Z_PK                 AS message_pk,
@@ -108,19 +108,19 @@ LEFT JOIN ZWAMEDIAITEM mi ON mi.Z_PK = m.ZMEDIAITEM
 WHERE mi.ZMEDIALOCALPATH IS NOT NULL
 ORDER BY m.ZMESSAGEDATE DESC;
 ```
-Paaie los gewoonlik op onder `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/` binne die hergestelde rugsteun.
+Paaie word gewoonlik opgelos onder `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/` binne die gerekonstrueerde backup.
 
 ### Signal / Telegram / Viber
-- Signal: die boodskap-DB is versleutel; egter is aanhegsels wat op skyf in die cache gestoor is (en miniatuurbeelde) gewoonlik deursoekbaar
-- Telegram: die cache bly onder `Library/Caches/` binne die sandbox; iOS 18-weergawes vertoon cache-skoonmaak-foute, so groot residuele mediacaches is algemene bewysbronne
-- Viber: Viber.sqlite bevat boodskap-/aanhegsel-tabelle met op-skyf verwysings
+- Signal: die message DB is geïnkripteer; aanhegsels wat op die skyf gekas is (en duimnaels) kan egter gewoonlik geskandeer word
+- Telegram: die kas bly onder `Library/Caches/` binne die sandbox; iOS 18 builds toon foute met die skoonmaak van die kas, dus is groot oorblywende mediakasse algemene bewysbronne<sup>[[5]](#references)</sup>
+- Viber: Viber.sqlite bevat message-/attachment-tabelle met verwysings na data op die skyf
 
-Wenk: selfs wanneer metadata versleutel is, bring die deursoeking van die media-/cache-gidse steeds kwaadwillige objekte aan die lig.
+Wenk: selfs wanneer metadata geïnkripteer is, bring die skandering van die media-/kas-gidse steeds malicious objects na vore.
 
 
-## Scanning attachments for structural exploits
+## Skandering van aanhegsels vir structural exploits
 
-Sodra jy aanhegsels‑paadjies het, voer hulle in strukturele detektore in wat lêer‑formaat‑invariantes valideer in plaas van handtekeninge. Voorbeeld met ElegantBouncer:
+Sodra jy attachment-paaie het, voer hulle na structural detectors wat file-format-invariante valideer in plaas van signatures. Voorbeeld met ElegantBouncer:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 # Recursively scan only messaging attachments under the reconstructed tree
 $ elegant-bouncer --scan --messaging /tmp/reconstructed
@@ -128,26 +128,27 @@ $ elegant-bouncer --scan --messaging /tmp/reconstructed
 ✗ THREAT in WhatsApp chat 'John Doe': suspicious_document.pdf → FORCEDENTRY (JBIG2)
 ✗ THREAT in iMessage: photo.webp → BLASTPASS (VP8L)
 ```
-Detections covered by structural rules include:
-- PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860): onmoontlike JBIG2 woordeboektoestande
-- WebP/VP8L BLASTPASS (CVE‑2023‑4863): oorgroot Huffman-tabelkonstruksies
-- TrueType TRIANGULATION (CVE‑2023‑41990): ondokumenteerde bytecode-opkodes
-- DNG/TIFF CVE‑2025‑43300: onversoenbaarhede tussen metadata en stroomkomponente
+Opsporings wat deur strukturele reëls gedek word, sluit in:<sup>[[1]](#references)[[2]](#references)</sup>
+- PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860): onmoontlike JBIG2-woordeboektoestande
+- WebP/VP8L BLASTPASS (CVE‑2023‑4863): buitensporig groot Huffman-tabelkonstruksies
+- TrueType TRIANGULATION (CVE‑2023‑41990): ongedokumenteerde bytecode-opkodes
+- DNG/TIFF CVE‑2025‑43300: wanpassings tussen metadata- en stroomkomponente
 
 
-## Validering, kanttekeninge en vals positiewe
+## Validering, voorbehoude en vals positiewe
 
-- Tydomskakelings: iMessage stoor datums in Apple-epochs/eenhede in sekere weergawes; skakel dit toepaslik om tydens rapportering
-- Skemadrift: app SQLite-skema's verander oor tyd; bevestig tabel- en kolomname per toestelbou
-- Rekursiewe uittrekking: PDF's kan JBIG2-strome en lettertipes inkorporeer; ekstraheer en ondersoek binneste objekte
-- Vals positiewe: strukturele heuristieke is konserwatief, maar kan seldsame misvormde maar onskadelike media aandui
+- Tydomskakelings: iMessage stoor datums in Apple-epogge/eenhede op sommige weergawes; skakel dit toepaslik om tydens verslagdoening
+- Skemaveranderinge: app SQLite-skemas verander met verloop van tyd; bevestig tabel-/kolomname per toestelbou
+- Rekursiewe ekstraksie: PDF's kan JBIG2-strome en fonts inbed; ekstraheer en skandeer interne objekte
+- Vals positiewe: strukturele heuristieke is konserwatief, maar kan seldsame, misvormde maar onskadelike media aandui<sup>[[1]](#references)[[2]](#references)</sup>
 
 
-## References
+## Verwysings
 
-- [ELEGANTBOUNCER: When You Can't Get the Samples but Still Need to Catch the Threat](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
-- [ElegantBouncer project (GitHub)](https://github.com/msuiche/elegant-bouncer)
-- [MVT iOS backup workflow](https://docs.mvt.re/en/latest/ios/backup/check/)
-- [libimobiledevice 1.4.0 release notes](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
+- [1] [ELEGANTBOUNCER: Wanneer jy nie die samples kan bekom nie, maar steeds die bedreiging moet opspoor](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
+- [2] [ElegantBouncer-projek (GitHub)](https://github.com/msuiche/elegant-bouncer)
+- [3] [MVT iOS-rugsteunwerkvloei](https://docs.mvt.re/en/latest/ios/backup/check/)
+- [4] [libimobiledevice 1.4.0-vrystellingsnotas](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
+- [5] [Opdatering 11.2 het kasopruiming op iOS 18.0.1 gebreek (Telegram-foutspoorder)](https://bugs.telegram.org/c/44361)
 
 {{#include ../../banners/hacktricks-training.md}}

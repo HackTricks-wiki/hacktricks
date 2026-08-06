@@ -1,4 +1,4 @@
-# Spesifieke sagteware/lêertipe-truuks
+# Spesifieke sagteware-/lêertipe-truuks
 
 {{#include ../../../banners/hacktricks-training.md}}
 

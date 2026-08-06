@@ -1,37 +1,35 @@
-# Geheugenaflaai-analise
+# Geheue-dump-analise
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Begin
 
-Begin **soek** vir **kwaadaardige sagteware** binne die pcap. Gebruik die **gereedskap** genoem in [**Kwaadaardige sagteware analise**](../malware-analysis.md).
+Begin om binne die **pcap** vir **malware** te **soek**. Gebruik die **tools** wat in [**Malware Analysis**](../malware-analysis.md) genoem word.
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Volatility is die hoof oopbronraamwerk vir geheugenaflaai-analise**. Hierdie Python-gereedskap analiseer aflaaie van eksterne bronne of VMware VM's, en identifiseer data soos prosesse en wagwoorde gebaseer op die aflaai se OS-profiel. Dit is uitbreidbaar met plugins, wat dit baie veelsydig maak vir forensiese ondersoeke.
+**Volatility is die belangrikste open-source framework vir geheue-dump-analise**. Hierdie Python-tool ontleed dumps van eksterne bronne of VMware-VM's en identifiseer data soos prosesse en wagwoorde gebaseer op die dump se OS-profiel. Dit is uitbreibaar met plugins, wat dit baie veelsydig maak vir forensiese ondersoeke.
 
 [**Vind hier 'n cheatsheet**](volatility-cheatsheet.md)
 
-## Mini aflaai krashverslag
+## Mini dump crash report
 
-Wanneer die aflaai klein is (net 'n paar KB, dalk 'n paar MB) dan is dit waarskynlik 'n mini aflaai krashverslag en nie 'n geheugenaflaai nie.
+Wanneer die dump klein is (net 'n paar KB, moontlik 'n paar MB), is dit waarskynlik 'n mini dump crash report en nie 'n geheue-dump nie.
 
-![](<../../../images/image (532).png>)
+![Volatility - Mini dump crash report: Wanneer die dump klein is (net 'n paar KB, moontlik 'n paar MB), is dit waarskynlik 'n mini dump crash report en nie 'n geheue-dump nie](<../../../images/image (532).png>)
 
-As jy Visual Studio geïnstalleer het, kan jy hierdie lêer oopmaak en 'n paar basiese inligting soos prosesnaam, argitektuur, uitsondering inligting en modules wat uitgevoer word bind:
+As jy Visual Studio geïnstalleer het, kan jy hierdie lêer oopmaak en basiese inligting soos die prosesnaam, argitektuur, uitsonderingsinligting en modules wat uitgevoer word, bekom:
 
-![](<../../../images/image (263).png>)
+![Volatility - Mini dump crash report: As jy Visual Studio geïnstalleer het, kan jy hierdie lêer oopmaak en basiese inligting soos die prosesnaam, argitektuur, uitsonderingsinligting en...](<../../../images/image (263).png>)
 
-Jy kan ook die uitsondering laai en die gedecompileerde instruksies sien
+Jy kan ook die uitsondering laai en die gedekompileerde instruksies sien
 
-![](<../../../images/image (142).png>)
+![Volatility - Mini dump crash report: Jy kan ook die uitsondering laai en die gedekompileerde instruksies sien](<../../../images/image (142).png>)
 
-![](<../../../images/image (610).png>)
+![Volatility - Mini dump crash report: Jy kan ook die uitsondering laai en die gedekompileerde instruksies sien](<../../../images/image (610).png>)
 
-In elk geval, Visual Studio is nie die beste gereedskap om 'n analise van die diepte van die aflaai uit te voer nie.
+In elk geval is Visual Studio nie die beste tool om 'n diepgaande analise van die dump uit te voer nie.
 
-Jy moet dit **oopmaak** met **IDA** of **Radare** om dit in **diepte** te inspekteer.
-
-​
+Jy behoort dit met **IDA** of **Radare** oop te maak om dit **diepgaand** te inspekteer.
 
 {{#include ../../../banners/hacktricks-training.md}}

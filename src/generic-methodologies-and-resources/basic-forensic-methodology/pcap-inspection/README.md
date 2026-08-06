@@ -1,27 +1,28 @@
-# Pcap Inspeksie
+# Pcap-inspeksie
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> 'n Nota oor **PCAP** teenoor **PCAPNG**: daar is twee weergawes van die PCAP lêerformaat; **PCAPNG is nuwer en word nie deur alle gereedskap ondersteun nie**. U mag 'n lêer van PCAPNG na PCAP moet omskakel met Wireshark of 'n ander kompatible gereedskap, om daarmee in sommige ander gereedskap te werk.
+> 'n Nota oor **PCAP** vs **PCAPNG**: daar is twee weergawes van die PCAP-lêerformaat; **PCAPNG is nuwer en word nie deur alle tools ondersteun nie**. Jy moet dalk 'n lêer van PCAPNG na PCAP omskakel deur Wireshark of 'n ander versoenbare tool te gebruik om daarmee in sommige ander tools te werk.
 
-## Aanlyn gereedskap vir pcaps
+## Aanlyn tools vir pcaps
 
-- As die kop van u pcap **gebroke** is, moet u probeer om dit te **herstel** met: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
-- Trek **inligting** uit en soek vir **malware** binne 'n pcap in [**PacketTotal**](https://packettotal.com)
-- Soek vir **kwaadaardige aktiwiteit** met [**www.virustotal.com**](https://www.virustotal.com) en [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
-- **Volledige pcap analise vanaf die blaaier in** [**https://apackets.com/**](https://apackets.com/)
+- As die kopskrif van jou pcap **gebreek** is, moet jy probeer om dit reg te stel deur: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
+- Onttrek **inligting** en soek vir **malware** binne 'n pcap in [**PacketTotal**](https://packettotal.com)
+- Soek vir **kwaadwillige aktiwiteit** deur [**www.virustotal.com**](https://www.virustotal.com) en [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com) te gebruik
+- **Volledige pcap-analise vanuit die blaaier in** [**https://apackets.com/**](https://apackets.com/)
 
-## Trek Inligting Uit
+## Onttrek inligting
 
-Die volgende gereedskap is nuttig om statistieke, lêers, ens. uit te trek.
+Die volgende tools is nuttig om statistieke, lêers, ensovoorts te onttrek.
 
 ### Wireshark
 
 > [!TIP]
-> **As u 'n PCAP gaan analiseer, moet u basies weet hoe om Wireshark te gebruik**
+> **As jy 'n PCAP gaan analiseer, moet jy basies weet hoe om Wireshark te gebruik**
 
-U kan 'n paar Wireshark truuks vind in:
+Jy kan sommige Wireshark-truuks vind in:
+
 
 {{#ref}}
 wireshark-tricks.md
@@ -29,11 +30,11 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-Pcap analise vanaf die blaaier.
+Pcap-analise vanuit die blaaier.
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(slegs linux)_ kan **analiseer** 'n **pcap** en inligting daaruit onttrek. Byvoorbeeld, uit 'n pcap lêer onttrek Xplico elke e-pos (POP, IMAP, en SMTP protokolle), al HTTP-inhoud, elke VoIP-oproep (SIP), FTP, TFTP, ensovoorts.
+[**Xplico** ](https://github.com/xplico/xplico)_(slegs linux)_ kan 'n **pcap** **analiseer** en inligting daaruit onttrek. Byvoorbeeld, uit 'n pcap-lêer onttrek Xplico elke e-pos (POP-, IMAP- en SMTP-protokolle), alle HTTP-inhoud, elke VoIP-oproep (SIP), FTP, TFTP, en so meer.
 
 **Installeer**
 ```bash
@@ -42,33 +43,33 @@ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE
 sudo apt-get update
 sudo apt-get install xplico
 ```
-**Hardloop**
+**Voer uit**
 ```
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
-Toegang tot _**127.0.0.1:9876**_ met inligting _**xplico:xplico**_
+Kry toegang tot _**127.0.0.1:9876**_ met die geloofsbriewe _**xplico:xplico**_
 
-Skep dan 'n **nuwe saak**, skep 'n **nuwe sessie** binne die saak en **laai die pcap** lêer op.
+Skep dan 'n **nuwe case**, skep 'n **nuwe session** binne die case en **upload die pcap**-lêer.
 
 ### NetworkMiner
 
-Soos Xplico is dit 'n hulpmiddel om **te analiseer en voorwerpe uit pcaps te onttrek**. Dit het 'n gratis weergawe wat jy kan **aflaai** [**hier**](https://www.netresec.com/?page=NetworkMiner). Dit werk met **Windows**.\
-Hierdie hulpmiddel is ook nuttig om **ander inligting te analiseer** uit die pakkette om te weet wat gebeur het op 'n **sneller** manier.
+Soos Xplico is dit 'n hulpmiddel om **objects uit pcaps te analiseer en te onttrek**. Dit het 'n gratis uitgawe wat jy [**hier**](https://www.netresec.com/?page=NetworkMiner) kan **download**. Dit werk met **Windows**.\
+Hierdie hulpmiddel is ook nuttig om **ander ontleedde inligting** uit die pakkette te verkry, sodat jy op 'n **vinniger** manier kan weet wat gebeur het.
 
 ### NetWitness Investigator
 
-Jy kan [**NetWitness Investigator van hier**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **aflaai** **(Dit werk in Windows)**.\
-Dit is 'n ander nuttige hulpmiddel wat **die pakkette analiseer** en die inligting op 'n nuttige manier sorteer om **te weet wat binne gebeur**.
+Jy kan [**NetWitness Investigator hier download**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Dit werk in Windows)**.\
+Dit is nog 'n nuttige hulpmiddel wat die **pakkette analiseer** en die inligting op 'n nuttige manier sorteer om te **weet wat binne gebeur**.
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- Onttrek en kodeer gebruikersname en wagwoorde (HTTP, FTP, Telnet, IMAP, SMTP...)
-- Onttrek verifikasie-hashes en kraak dit met Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
-- Bou 'n visuele netwerkdiagram (Netwerk nodes & gebruikers)
-- Onttrek DNS versoeke
-- Herbou alle TCP & UDP Sessies
-- Lêer Carving
+- Onttrek en encode usernames en passwords (HTTP, FTP, Telnet, IMAP, SMTP...)
+- Onttrek authentication hashes en crack hulle met Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
+- Bou 'n visuele network diagram (Network nodes & users)
+- Onttrek DNS queries
+- Rekonstrueer alle TCP- en UDP-sessies
+- File Carving
 
 ### Capinfos
 ```
@@ -76,13 +77,13 @@ capinfos capture.pcap
 ```
 ### Ngrep
 
-As jy **soek** na **iets** binne die pcap kan jy **ngrep** gebruik. Hier is 'n voorbeeld wat die hooffilters gebruik:
+As jy op soek is na **iets** binne die pcap, kan jy **ngrep** gebruik. Hier is ’n voorbeeld wat die belangrikste filters gebruik:
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
 ### Carving
 
-Die gebruik van algemene carving tegnieke kan nuttig wees om lêers en inligting uit die pcap te onttrek:
+Die gebruik van algemene carving-tegnieke kan nuttig wees om lêers en inligting uit die pcap te onttrek:
 
 
 {{#ref}}
@@ -91,9 +92,9 @@ Die gebruik van algemene carving tegnieke kan nuttig wees om lêers en inligting
 
 ### Capturing credentials
 
-Jy kan gereedskap soos [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) gebruik om akrediteerbare inligting uit 'n pcap of 'n lewende koppelvlak te ontleed.
+Jy kan tools soos [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) gebruik om credentials uit 'n pcap of 'n lewendige interface te ontleed.
 
-## Check Exploits/Malware
+## Kontroleer Exploits/Malware
 
 ### Suricata
 
@@ -110,17 +111,17 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) is 'n hulpmiddel wat
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) is ’n tool wat
 
-- 'n PCAP-lêer lees en Http-strome onttrek.
-- gzip ontplof enige gecomprimeerde strome
-- elke lêer met yara skandeer
-- 'n report.txt skryf
-- Opsioneel ooreenstemmende lêers na 'n gids stoor
+- ’n PCAP File lees en Http Streams onttrek.
+- enige saamgeperste streams met gzip dekomprimeer
+- elke file met yara skandeer
+- ’n report.txt skryf
+- opsioneel ooreenstemmende files in ’n Dir stoor
 
-### Malware Analise
+### Malware-analise
 
-Kyk of jy enige vingerafdruk van 'n bekende malware kan vind:
+Kyk of jy enige vingerafdruk van bekende malware kan vind:
 
 
 {{#ref}}
@@ -129,11 +130,11 @@ Kyk of jy enige vingerafdruk van 'n bekende malware kan vind:
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) is 'n passiewe, oopbron netwerkverkeer analiseerder. Baie operateurs gebruik Zeek as 'n Netwerk Sekuriteits Monitor (NSM) om ondersoeke van verdagte of kwaadwillige aktiwiteite te ondersteun. Zeek ondersteun ook 'n wye reeks verkeer analise take buite die sekuriteitsdomein, insluitend prestasiemeting en probleemoplossing.
+> [Zeek](https://docs.zeek.org/en/master/about.html) is ’n passiewe, open-source network traffic analyzer. Baie operateurs gebruik Zeek as ’n Network Security Monitor (NSM) om ondersoeke van verdagte of kwaadwillige aktiwiteit te ondersteun. Zeek ondersteun ook ’n wye reeks traffic analysis-take buite die security-domein, insluitend prestasiemeting en troubleshooting.
 
-Basies, logs wat deur `zeek` geskep word, is nie **pcaps** nie. Daarom sal jy **ander hulpmiddels** moet gebruik om die logs te analiseer waar die **inligting** oor die pcaps is.
+Basies is logs wat deur `zeek` geskep word nie **pcaps** nie. Daarom sal jy **ander tools** moet gebruik om die logs te ontleed waarin die **information** oor die pcaps is.
 
-### Verbinding Inligting
+### Connections Info
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -200,7 +201,7 @@ cat dns.log | zeek-cut qtype_name | sort | uniq -c | sort -nr
 #See top DNS domain requested with rita
 rita show-exploded-dns -H --limit 10 zeek_logs
 ```
-## Ander pcap ontledingswenke
+## Ander pcap-analise-truuks
 
 
 {{#ref}}
@@ -216,7 +217,5 @@ wifi-pcap-analysis.md
 {{#ref}}
 usb-keystrokes.md
 {{#endref}}
-
-​
 
 {{#include ../../../banners/hacktricks-training.md}}

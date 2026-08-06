@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-### Gereedskap om secrets in git repos en file system te vind
+### Tools om secrets in git repos en die lêerstelsel te vind
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
@@ -12,42 +12,42 @@
 - [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
 - [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
 - [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
-- https://github.com/eth0izzle/shhgit (unmaintained)
+- https://github.com/eth0izzle/shhgit (word nie meer onderhou nie)
 - [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
-- https://github.com/michenriksen/gitrob (archived)
-- https://github.com/anshumanbh/git-all-secrets (archived)
+- https://github.com/michenriksen/gitrob (geargiveer)
+- https://github.com/anshumanbh/git-all-secrets (geargiveer)
 - [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
 - [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
-> Aantekeninge
-> - TruffleHog v3 kan baie credentials live verifieer en GitHub orgs, issues/PRs, gists, en wikis scan. Voorbeeld: `trufflehog github --org <ORG> --results=verified`.
-> - Gitleaks v8 ondersteun die skandering van git history, directories en archives: `gitleaks detect -v --source .` of `gitleaks detect --source <repo> --log-opts="--all"`.
-> - Nosey Parker fokus op hoë-deurset skandering met gekuurde reëls en het 'n Explorer UI vir triage. Voorbeeld: `noseyparker scan --datastore np.db <path|repo>` dan `noseyparker report --datastore np.db`.
+> Notas
+> - TruffleHog v3 kan baie credentials live verifieer en GitHub-orgs, issues/PRs, gists en wikis scan. Voorbeeld: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)</sup>
+> - Gitleaks v8 ondersteun die scanning van git history, directories en archives: `gitleaks detect -v --source .` of `gitleaks detect --source <repo> --log-opts="--all"`.
+> - Nosey Parker fokus op hoë-deurset scanning met saamgestelde rules en het ’n Explorer UI vir triage. Voorbeeld: `noseyparker scan --datastore np.db <path|repo>` gevolg deur `noseyparker report --datastore np.db`.
 > - ggshield (GitGuardian CLI) verskaf pre-commit/CI hooks en Docker image scanning: `ggshield secret scan repo <path-or-url>`.
 
 ### Waar secrets algemeen in GitHub leak
 
-- Repository-lêers in default en non-default branches (soek `repo:owner/name@branch` in die UI).
-- Volledige git history en ander branches/tags (clone en scan met gitleaks/trufflehog; GitHub search fokus op geïndekseerde inhoud).
-- Issues, pull requests, comments, en descriptions (TruffleHog GitHub source ondersteun dit via vlagte soos `--issue-comments`, `--pr-comments`).
-- Actions logs en artifacts van publieke repositories (masking is best-effort; hersien logs/artifacts as sigbaar).
+- Repository-lêers in default- en nie-default branches (soek `repo:owner/name@branch` in die UI).
+- Volledige git history en ander branches/tags (clone en scan met gitleaks/trufflehog; GitHub search fokus op geïndekseerde content).
+- Issues, pull requests, comments en descriptions (TruffleHog GitHub source ondersteun dit via flags soos `--issue-comments`, `--pr-comments`).
+- Actions logs en artifacts van publieke repositories (masking is best-effort; review logs/artifacts indien sigbaar).
 - Wikis en release assets.
 - Gists (soek met tooling of die UI; sommige tools kan gists insluit).
 
-> Valstrikke
-> - GitHub se REST code search API is legacy en ondersteun nie regex nie; gebruik eerder die Web UI vir regex soektogte. Die gh CLI gebruik die legacy API.
-> - Slegs lêers onder 'n sekere grootte word geïndekseer vir soektog. Om deeglik te wees, clone en scan lokaal met 'n secrets scanner.
+> Slaggate
+> - GitHub se REST code search API is legacy en ondersteun nie regex nie; verkies die Web UI vir regex searches. Die gh CLI gebruik die legacy API.
+> - Slegs lêers onder ’n sekere grootte word vir search geïndekseer. Om deeglik te wees, clone en scan plaaslik met ’n secrets scanner.
 
-### Programmatiese org-wye skandering
+### Programmatiese org-wye scanning
 
-- TruffleHog (GitHub source):
+- TruffleHog (GitHub source):<sup>[[2]](#references)</sup>
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
 --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- Gitleaks oor alle org repos (clone shallow and scan):
+- Gitleaks oor alle org-repos (clone shallow en scan):
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
@@ -55,7 +55,7 @@ tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
 gitleaks detect --source "$tmp" -v || true; rm -rf "$tmp";
 done
 ```
-- Nuuskierige Parker oor 'n mono checkout:
+- Nosey Parker oor ’n mono checkout:
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
@@ -67,7 +67,7 @@ ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> Wenk: Vir git-geskiedenis, verkies skandeerders wat `git log -p --all` ontleed om verwyderde secrets te vang.
+> Wenk: Vir git-geskiedenis, verkies scanners wat `git log -p --all` ontleed om verwyderde secrets op te spoor.
 
 ### Opgedateerde dorks vir moderne tokens
 
@@ -364,11 +364,9 @@ AWS SECRET
 wide-source-code-search.md
 {{#endref}}
 
-
-
-
 ## Verwysings
 
-- Hou geheime uit openbare repositories (GitHub Blog, Feb 29, 2024): https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/
-- TruffleHog v3 – Vind, verifieer, en analiseer leaked credentials: https://github.com/trufflesecurity/trufflehog
+- [1] [Hou secrets uit publieke repositories (GitHub Blog, 29 Februarie 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – Vind, verifieer en ontleed leaked credentials](https://github.com/trufflesecurity/trufflehog)
+
 {{#include ../../banners/hacktricks-training.md}}

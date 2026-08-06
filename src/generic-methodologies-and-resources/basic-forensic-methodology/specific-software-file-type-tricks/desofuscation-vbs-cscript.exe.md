@@ -1,6 +1,8 @@
+# Desobfuskasietegnieke vir VBS-lêers
+
 {{#include ../../../banners/hacktricks-training.md}}
 
-Sommige dinge wat nuttig kan wees om 'n kwaadwillige VBS-lêer te debug/deobfuskeer:
+Sommige dinge wat nuttig kan wees om ’n kwaadwillige VBS-lêer te debug/deobfuscate:
 
 ## echo
 ```bash

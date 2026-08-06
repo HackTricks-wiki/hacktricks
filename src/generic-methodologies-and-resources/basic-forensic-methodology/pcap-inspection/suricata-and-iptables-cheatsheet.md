@@ -1,18 +1,18 @@
-# Suricata & Iptables cheatsheet
+# Suricata & Iptables-spiekbrief
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Iptables
 
-### Chains
+### Kettings
 
-In iptables, lyste van reëls bekend as chains word opeenvolgend verwerk. Onder hierdie is daar drie primêre chains wat universeel teenwoordig is, met addisionele soos NAT wat moontlik ondersteun word, afhangende van die stelsels se vermoëns.
+In iptables word lyste reëls, bekend as kettings, opeenvolgend verwerk. Hiervan is drie primêre kettings universeel teenwoordig, terwyl bykomende kettings soos NAT moontlik ondersteun word, afhangend van die stelsel se vermoëns.
 
-- **Input Chain**: Gebruik om die gedrag van inkomende verbindings te bestuur.
-- **Forward Chain**: Gebruik om inkomende verbindings te hanteer wat nie bestem is vir die plaaslike stelsel nie. Dit is tipies vir toestelle wat as routers optree, waar die data wat ontvang word bedoel is om na 'n ander bestemming gestuur te word. Hierdie chain is hoofsaaklik relevant wanneer die stelsel betrokke is by routing, NATing, of soortgelyke aktiwiteite.
-- **Output Chain**: Toegewyd aan die regulering van uitgaande verbindings.
+- **Input Chain**: Word gebruik om die gedrag van inkomende verbindings te bestuur.
+- **Forward Chain**: Word gebruik om inkomende verbindings te hanteer wat nie vir die plaaslike stelsel bestem is nie. Dit is tipies vir toestelle wat as routers optree, waar die ontvangde data na ’n ander bestemming aangestuur moet word. Hierdie ketting is hoofsaaklik relevant wanneer die stelsel by routing, NATing of soortgelyke aktiwiteite betrokke is.
+- **Output Chain**: Word toegewy aan die regulering van uitgaande verbindings.
 
-Hierdie chains verseker die ordelike verwerking van netwerkverkeer, wat die spesifikasie van gedetailleerde reëls wat die vloei van data in, deur, en uit 'n stelsel regeer, moontlik maak.
+Hierdie kettings verseker die ordelike verwerking van netwerkverkeer, wat die spesifikasie van gedetailleerde reëls moontlik maak om die vloei van data na, deur en uit ’n stelsel te beheer.
 ```bash
 # Delete all rules
 iptables -F
@@ -51,7 +51,7 @@ iptables-restore < /etc/sysconfig/iptables
 ```
 ## Suricata
 
-### Installeer & Konfigureer
+### Installering en konfigurasie
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -117,70 +117,70 @@ Type=simple
 
 systemctl daemon-reload
 ```
-### Reëls Definisies
+### Reëldefinisies
 
-[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) 'n Reël/handtekening bestaan uit die volgende:
+[Uit die dokumentasie:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) ’n Reël/handtekening bestaan uit die volgende:
 
-- Die **aksie**, bepaal wat gebeur wanneer die handtekening ooreenstem.
-- Die **kop**, definieer die protokol, IP adresse, poorte en rigting van die reël.
-- Die **reël opsies**, definieer die spesifieke van die reël.
+- Die **aksie** bepaal wat gebeur wanneer die handtekening ooreenstem.
+- Die **kopteks** definieer die protokol, IP-adresse, poorte en rigting van die reël.
+- Die **reëlopsies** definieer die besonderhede van die reël.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
-#### **Geldige aksies is**
+#### **Geldige actions is**
 
-- alert - genereer 'n waarskuwing
-- pass - stop verdere inspeksie van die pakket
-- **drop** - laat pakket val en genereer waarskuwing
-- **reject** - stuur RST/ICMP onbereikbaar fout na die sender van die ooreenstemmende pakket.
+- alert - genereer ’n alert
+- pass - stop verdere inspection van die packet
+- **drop** - drop die packet en genereer ’n alert
+- **reject** - stuur ’n RST/ICMP unreachable error na die sender van die matching packet.
 - rejectsrc - dieselfde as net _reject_
-- rejectdst - stuur RST/ICMP foutpakket na die ontvanger van die ooreenstemmende pakket.
-- rejectboth - stuur RST/ICMP foutpakkette na albei kante van die gesprek.
+- rejectdst - stuur ’n RST/ICMP error packet na die receiver van die matching packet.
+- rejectboth - stuur RST/ICMP error packets na beide kante van die gesprek.
 
 #### **Protokolle**
 
-- tcp (vir tcp-verkeer)
+- tcp (for tcp-traffic)
 - udp
 - icmp
-- ip (ip staan vir 'alle' of 'enige')
-- _laag7 protokolle_: http, ftp, tls, smb, dns, ssh... (meer in die [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip staan vir ‘all’ of ‘any’)
+- _layer7 protocols_: http, ftp, tls, smb, dns, ssh... (meer in die [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
 
-#### Bron- en Bestemmingsadresse
+#### Source- en Destination-addresses
 
-Dit ondersteun IP-reekse, ontkennings en 'n lys van adresse:
+Dit ondersteun IP-ranges, negations en ’n lys addresses:
 
-| Voorbeeld                       | Betekenis                                  |
-| ------------------------------- | ------------------------------------------ |
-| ! 1.1.1.1                       | Elke IP-adres behalwe 1.1.1.1             |
-| !\[1.1.1.1, 1.1.1.2]            | Elke IP-adres behalwe 1.1.1.1 en 1.1.1.2 |
-| $HOME_NET                       | Jou instelling van HOME_NET in yaml       |
-| \[$EXTERNAL\_NET, !$HOME_NET]  | EXTERNAL_NET en nie HOME_NET nie         |
-| \[10.0.0.0/24, !10.0.0.5]       | 10.0.0.0/24 behalwe vir 10.0.0.5          |
+| Example                       | Betekenis                                  |
+| ----------------------------- | ------------------------------------------ |
+| ! 1.1.1.1                     | Elke IP-address behalwe 1.1.1.1             |
+| !\[1.1.1.1, 1.1.1.2]          | Elke IP-address behalwe 1.1.1.1 en 1.1.1.2 |
+| $HOME_NET                     | Jou instelling van HOME_NET in yaml         |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET en nie HOME_NET nie            |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 behalwe 10.0.0.5          |
 
-#### Bron- en Bestemmingspoorte
+#### Source- en Destination-ports
 
-Dit ondersteun poortreekse, ontkennings en lyste van poorte
+Dit ondersteun port ranges, negations en lyste van ports
 
-| Voorbeeld         | Betekenis                                |
-| ----------------- | ---------------------------------------- |
-| any               | enige adres                              |
-| \[80, 81, 82]     | poort 80, 81 en 82                      |
-| \[80: 82]         | Reeks van 80 tot 82                     |
-| \[1024: ]         | Van 1024 tot die hoogste poortnommer    |
-| !80               | Elke poort behalwe 80                    |
-| \[80:100,!99]     | Reeks van 80 tot 100 maar 99 uitgesluit  |
-| \[1:80,!\[2,4]]   | Reeks van 1-80, behalwe poorte 2 en 4   |
+| Example         | Betekenis                                |
+| --------------- | -------------------------------------- |
+| any             | enige address                            |
+| \[80, 81, 82]   | port 80, 81 en 82                     |
+| \[80: 82]       | Range van 80 tot 82                  |
+| \[1024: ]       | Vanaf 1024 tot die hoogste port-number |
+| !80             | Elke port behalwe 80                      |
+| \[80:100,!99]   | Range van 80 tot 100, maar 99 uitgesluit |
+| \[1:80,!\[2,4]] | Range van 1-80, behalwe ports 2 en 4  |
 
-#### Rigting
+#### Direction
 
-Dit is moontlik om die rigting van die kommunikasie reël wat toegepas word aan te dui:
+Dit is moontlik om die rigting van die kommunikasie aan te dui waarop die rule toegepas word:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### Sleutelwoorde
 
-Daar is **honderde opsies** beskikbaar in Suricata om die **spesifieke pakket** te soek waarna jy op soek is, hier sal genoem word of iets interessant gevind word. Kyk na die [**dokumentasie** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) vir meer!
+Daar is **honderde opsies** beskikbaar in Suricata om na die **spesifieke pakkie** te soek waarna jy op soek is; hier sal dit vermeld word indien iets interessants gevind word. Kyk na die [**dokumentasie** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)vir meer!
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule

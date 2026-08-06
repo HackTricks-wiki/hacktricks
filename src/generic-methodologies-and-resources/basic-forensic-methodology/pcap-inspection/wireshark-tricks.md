@@ -1,111 +1,111 @@
-# Wireshark tricks
+# Wireshark-truuks
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Verbeter jou Wireshark-vaardighede
 
-### Tutorials
+### Tutoriale
 
-Die volgende tutorials is uitstekend om ’n paar cool basiese tricks te leer:
+Die volgende tutoriale is uitstekend om ’n paar nuttige basiese truuks te leer:
 
 - [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/](https://unit42.paloaltonetworks.com/using-wireshark-identifying-hosts-and-users/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/](https://unit42.paloaltonetworks.com/using-wireshark-exporting-objects-from-a-pcap/)
 
-### Geanaliseerde Inligting
+### Geanaliseerde inligting
 
 **Expert Information**
 
-Deur op _**Analyze** --> **Expert Information**_ te klik, sal jy ’n **oorsig** hê van wat in die **geanaliseerde** pakkies gebeur:
+Deur op _**Analyze** --> **Expert Information**_ te klik, kry jy ’n **oorsig** van wat in die **geanaliseerde** pakkette gebeur:
 
-![](<../../../images/image (256).png>)
+![Tutoriale - Geanaliseerde inligting: Deur op Analyze -- Expert Information te klik, kry jy ’n oorsig van wat in die geanaliseerde pakkette gebeur](<../../../images/image (256).png>)
 
 **Resolved Addresses**
 
-Onder _**Statistics --> Resolved Addresses**_ kan jy verskeie **inligting** vind wat deur wireshark "**opgelos**" is, soos port/transport na protocol, MAC na die vervaardiger, ens. Dit is interessant om te weet wat by die kommunikasie betrokke is.
+Onder _**Statistics --> Resolved Addresses**_ kan jy verskeie stukke **inligting** vind wat deur Wireshark "**resolved**" is, soos poort/vervoer na protokol, MAC na die vervaardiger, ens. Dit is interessant om te weet wat by die kommunikasie betrokke is.
 
-![](<../../../images/image (893).png>)
+![Tutoriale - Geanaliseerde inligting: Onder Statistics -- Resolved Addresses kan jy verskeie stukke inligting vind wat deur Wireshark " resolved " is, soos poort/vervoer na protokol, MAC na die...](<../../../images/image (893).png>)
 
 **Protocol Hierarchy**
 
-Onder _**Statistics --> Protocol Hierarchy**_ kan jy die **protocols** vind wat by die kommunikasie betrokke is, sowel as data daaroor.
+Onder _**Statistics --> Protocol Hierarchy**_ kan jy die **protokolle** wat by die kommunikasie **betrokke** is, sowel as data daaroor, vind.
 
-![](<../../../images/image (586).png>)
+![Tutoriale - Geanaliseerde inligting: Onder Statistics -- Protocol Hierarchy kan jy die protokolle vind wat by die kommunikasie betrokke is, sowel as data daaroor](<../../../images/image (586).png>)
 
 **Conversations**
 
-Onder _**Statistics --> Conversations**_ kan jy ’n **opsomming van die conversations** in die kommunikasie en data daaroor vind.
+Onder _**Statistics --> Conversations**_ kan jy ’n **opsomming van die gesprekke** in die kommunikasie, sowel as data daaroor, vind.
 
-![](<../../../images/image (453).png>)
+![Tutoriale - Geanaliseerde inligting: Onder Statistics -- Conversations kan jy ’n opsomming van die gesprekke in die kommunikasie, sowel as data daaroor, vind](<../../../images/image (453).png>)
 
 **Endpoints**
 
-Onder _**Statistics --> Endpoints**_ kan jy ’n **opsomming van die endpoints** in die kommunikasie en data oor elkeen van hulle vind.
+Onder _**Statistics --> Endpoints**_ kan jy ’n **opsomming van die eindpunte** in die kommunikasie, sowel as data oor elkeen, vind.
 
-![](<../../../images/image (896).png>)
+![Tutoriale - Geanaliseerde inligting: Onder Statistics -- Endpoints kan jy ’n opsomming van die eindpunte in die kommunikasie, sowel as data oor elkeen, vind](<../../../images/image (896).png>)
 
-**DNS info**
+**DNS-inligting**
 
-Onder _**Statistics --> DNS**_ kan jy statistieke oor die vasgelegde DNS request vind.
+Onder _**Statistics --> DNS**_ kan jy statistieke oor die vasgelegde DNS-versoek vind.
 
-![](<../../../images/image (1063).png>)
+![Tutoriale - Geanaliseerde inligting: Onder Statistics -- DNS kan jy statistieke oor die vasgelegde DNS-versoek vind](<../../../images/image (1063).png>)
 
 **I/O Graph**
 
 Onder _**Statistics --> I/O Graph**_ kan jy ’n **grafiek van die kommunikasie** vind.
 
-![](<../../../images/image (992).png>)
+![Tutoriale - Geanaliseerde inligting: Onder Statistics -- I/O Graph kan jy ’n grafiek van die kommunikasie vind](<../../../images/image (992).png>)
 
 ### Filters
 
-Hier kan jy wireshark filters vind, afhangend van die protocol: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
-In huidige Wireshark gebruik `tls.*` in plaas van die ou `ssl.*` filter name.\
+Hier kan jy Wireshark-filters volgens die protokol vind: [https://www.wireshark.org/docs/dfref/](https://www.wireshark.org/docs/dfref/)\
+In die huidige Wireshark gebruik `tls.*` in plaas van die ou `ssl.*`-filtern gevalle.\
 Ander interessante filters:
 
 - `(http.request or tls.handshake.type == 1) and !(udp.port eq 1900)`
-- HTTP and initial HTTPS traffic
+- HTTP en aanvanklike HTTPS-verkeer
 - `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002) and !(udp.port eq 1900)`
-- HTTP and initial HTTPS traffic + TCP SYN
+- HTTP en aanvanklike HTTPS-verkeer + TCP SYN
 - `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
-- HTTP and initial HTTPS traffic + TCP SYN + DNS requests
+- HTTP en aanvanklike HTTPS-verkeer + TCP SYN + DNS-versoeke
 - `tls.handshake.extensions_server_name contains "example.com"`
-- Pivot op die SNI gestuur in die ClientHello selfs wanneer jy nie die payload kan decrypt nie
+- Pivot op die SNI wat in die ClientHello gestuur word, selfs wanneer jy nie die payload kan dekripteer nie
 - `tls.handshake.extensions_alpn_str == "h2" or tls.handshake.extensions_alpn_str == "h3"`
-- Skei classic HTTPS, HTTP/2 en HTTP/3-kapabele sessions vinnig
+- Skei klassieke HTTPS-, HTTP/2- en HTTP/3-vermoënde sessies vinnig
 - `quic or http3`
-- Vind moderne UDP/443 traffic wat gemis sal word as jy slegs TCP conversations hersien
+- Vind moderne UDP/443-verkeer wat gemis sal word as jy slegs TCP-gesprekke nagaan
 
-### Search
+### Soek
 
-As jy **search** vir **content** binne die **packets** van die sessions wil doen, druk _CTRL+f_. Jy kan nuwe layers by die hoofinligtingbalk voeg (No., Time, Source, ens.) deur op die regterknoppie te druk en dan die edit column.
+As jy vir **inhoud** binne die **pakkette** van die sessies wil **soek**, druk _CTRL+f_. Jy kan nuwe lae by die hoofinligtingsbalk (No., Time, Source, ens.) voeg deur die regterknoppie te druk en dan die kolom te wysig.
 
-### Following multiplexed streams
+### Volg van multiplexed streams
 
-Onlangse Wireshark-weergawes kan `TLS`, `HTTP/2` en `QUIC` streams direk volg. Op geraasagtige captures is dit gewoonlik vinniger as om slegs `Follow TCP Stream` te gebruik, veral wanneer verskeie requests dieselfde connection deel.
+Onlangse Wireshark-weergawes kan `TLS`-, `HTTP/2`- en `QUIC`-streams direk volg. In raserige captures is dit gewoonlik vinniger as om slegs `Follow TCP Stream` te gebruik, veral wanneer verskeie versoeke dieselfde verbinding deel.
 
-### Free pcap labs
+### Gratis pcap-laboratoriums
 
-**Practice with the free challenges of:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
+**Oefen met die gratis uitdagings by:** [**https://www.malware-traffic-analysis.net/**](https://www.malware-traffic-analysis.net)
 
-## Identifying Domains
+## Identifisering van domeine
 
-You can add a column that shows the Host HTTP header:
+Jy kan ’n kolom byvoeg wat die Host HTTP-header vertoon:
 
-![](<../../../images/image (639).png>)
+![Gratis pcap-laboratoriums - Identifisering van domeine: Jy kan ’n kolom byvoeg wat die Host HTTP-header vertoon](<../../../images/image (639).png>)
 
-And a column that add the Server name from an initiating HTTPS connection (**tls.handshake.type == 1**):
+En ’n kolom wat die bedienernaam van ’n aanvanklike HTTPS-verbinding byvoeg (**tls.handshake.type == 1**):
 
-![](<../../../images/image (408) (1).png>)
+![Gratis pcap-laboratoriums - Identifisering van domeine: En ’n kolom wat die bedienernaam van ’n aanvanklike HTTPS-verbinding byvoeg ( tls.handshake.type == 1 )](<../../../images/image (408) (1).png>)
 
-If the capture is mostly encrypted, adding these fields as columns will speed up triage a lot:
+As die capture meestal geënkripteer is, sal dit triage aansienlik versnel om hierdie velde as kolomme by te voeg:
 
 - `tls.handshake.extensions_server_name`
 - `tls.handshake.extensions_alpn_str`
 - `tls.handshake.ja3`
 - `tls.handshake.ja4` (Wireshark 4.2+)
 
-This lets you cluster sessions by hostname, ALPN (`http/1.1`, `h2`, `h3`, etc.) and client fingerprint even when the payload itself stays encrypted. For decrypted HTTP/2 and HTTP/3 captures, it is also useful to add `http2.header.value` or `http3.headers.header.value` as columns and pivot on paths, authorities and other interesting metadata.
+Dit stel jou in staat om sessies volgens gasheernaam, ALPN (`http/1.1`, `h2`, `h3`, ens.) en kliëntvingerafdruk te groepeer, selfs wanneer die payload self geënkripteer bly. Vir gedekripteerde HTTP/2- en HTTP/3-captures is dit ook nuttig om `http2.header.value` of `http3.headers.header.value` as kolomme by te voeg en op paths, authorities en ander interessante metadata te pivot.<sup>[[2]](#references)</sup>
 ```bash
 tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
 -e frame.number -e ip.src -e ip.dst \
@@ -113,51 +113,51 @@ tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
 -e tls.handshake.extensions_alpn_str \
 -e tls.handshake.ja3 -e tls.handshake.ja4
 ```
-## Identifying local hostnames
+## Identifisering van plaaslike hostnames
 
-### From DHCP
+### Vanaf DHCP
 
-In current Wireshark instead of `bootp` you need to search for `DHCP`
+In huidige Wireshark moet jy in plaas van `bootp` vir `DHCP` soek
 
-![](<../../../images/image (1013).png>)
+![Identifisering van plaaslike hostnames - Vanaf DHCP: In huidige Wireshark moet jy in plaas van bootp vir DHCP soek](<../../../images/image (1013).png>)
 
-### From NBNS
+### Vanaf NBNS
 
-![](<../../../images/image (1003).png>)
+![Vanaf DHCP - Vanaf NBNS: In huidige Wireshark moet jy in plaas van bootp vir DHCP soek](<../../../images/image (1003).png>)
 
-## Decrypting TLS
+## Dekriptering van TLS
 
-### Decrypting https traffic with server private key
+### Dekriptering van https-verkeer met die private sleutel van die server
 
 _edit > preferences > protocols > tls >_
 
-![](<../../../images/image (1103).png>)
+![Dekriptering van TLS - Dekriptering van https-verkeer met die private sleutel van die server: Dekriptering van https-verkeer met die private sleutel van die server](<../../../images/image (1103).png>)
 
-Druk _Edit_ en voeg al die data van die server en die private key by (_IP, Port, Protocol, Key file and password_)
+Druk _Edit_ en voeg al die data van die server en die private sleutel by (_IP, Port, Protocol, Key file en password_)
 
-This method only works in a limited number of cases. For current TLS 1.3 / ECDHE traffic, the session key log method below is usually the practical option.
+Hierdie metode werk slegs in ’n beperkte aantal gevalle. Vir huidige TLS 1.3 / ECDHE-verkeer is die session key log-metode hieronder gewoonlik die praktiese opsie.<sup>[[1]](#references)</sup>
 
-### Decrypting https traffic with symmetric session keys
+### Dekriptering van https-verkeer met simmetriese session keys
 
-Both Firefox and Chrome have the capability to log TLS session keys, which can be used with Wireshark to decrypt TLS traffic. This allows for in-depth analysis of secure communications. More details on how to perform this decryption can be found in a guide at [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/). This is also the normal route for decrypting modern TLS 1.3 and QUIC/HTTP/3 captures.
+Firefox en Chrome kan albei TLS-session keys log, wat saam met Wireshark gebruik kan word om TLS-verkeer te dekripteer. Dit maak diepgaande ontleding van veilige kommunikasie moontlik. Meer besonderhede oor hoe om hierdie dekripsie uit te voer, kan gevind word in ’n gids by [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).<sup>[[3]](#references)</sup> Dit is ook die normale metode vir die dekripsie van moderne TLS 1.3- en QUIC/HTTP/3-captures.<sup>[[2]](#references)</sup>
 
-Om dit op te spoor, soek binne die environment vir die variable `SSLKEYLOGFILE`
+Om dit op te spoor, soek binne die environment vir die veranderlike `SSLKEYLOGFILE`
 
-A file of shared keys will look like this:
+’n Lêer met gedeelde keys sal soos volg lyk:
 
-![](<../../../images/image (820).png>)
+![Dekriptering van https-verkeer met die private sleutel van die server - Dekriptering van https-verkeer met simmetriese session keys: ’n Lêer met gedeelde keys sal soos volg lyk](<../../../images/image (820).png>)
 
-If the capture is `pcapng`, check whether it already contains embedded decryption secrets before hunting the host filesystem:
+As die capture `pcapng` is, kyk of dit reeds ingebedde decryption secrets bevat voordat jy die host se filesystem deursoek:<sup>[[1]](#references)</sup>
 ```bash
 editcap --extract-secrets capture.pcapng tls-secrets.txt
 ```
-Om dit in wireshark in te voer gaan na \_edit > preferences > protocols > tls > en voer dit in by (Pre)-Master-Secret log filename:
+Om dit in Wireshark in te voer, gaan na \_edit > preferences > protocols > tls > en voer dit in by **(Pre)-Master-Secret log filename**:
 
-![](<../../../images/image (989).png>)
+![Decryptering van HTTPS-verkeer met bediener se private sleutel - Decryptering van HTTPS-verkeer met simmetriese sessiesleutels: editcap --extract-secrets capture.pcapng tls-secrets.txt](<../../../images/image (989).png>)
 
-## ADB kommunikasie
+## ADB-kommunikasie
 
-Onttrek ’n APK uit ’n ADB kommunikasie waar die APK gestuur is:
+Onttrek ’n APK uit ’n ADB-kommunikasie waar die APK gestuur is:
 ```python
 from scapy.all import *
 
@@ -186,7 +186,8 @@ f.close()
 ```
 ## Verwysings
 
-- [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
-- [Decrypting and parsing HTTP/3 traffic in Wireshark](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
+- [1] [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
+- [2] [Dekriptering en ontleding van HTTP/3-verkeer in Wireshark](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
+- [3] [Dekriptering van TLS-blaaierverkeer met Wireshark – Die maklike manier!](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)
 
 {{#include ../../../banners/hacktricks-training.md}}

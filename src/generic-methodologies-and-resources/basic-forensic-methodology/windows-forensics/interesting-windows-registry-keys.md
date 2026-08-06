@@ -1,93 +1,92 @@
-# Interessante Windows Registry Keys
+# Interessante Windows Registry-sleutels
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Windows Registry hives is een van die vinnigste maniere om te pivoteer van _wat het gebeur?_ na _watter user, wanneer, en van waar af?_. Vir live analysis verkies `CurrentControlSet`; vir offline hive analysis los eers op watter `ControlSet00x` aktief was eerder as om `ControlSet001` hard te kodeer.
+Windows Registry-hives is een van die vinnigste maniere om van _wat het gebeur?_ na _watter gebruiker, wanneer en van waar?_ te beweeg. Verkies `CurrentControlSet` vir lewendige ontleding; los eers vir offline hive-ontleding op watter `ControlSet00x` aktief was, eerder as om `ControlSet001` hard te kodeer.
 
-### Windows Version and Owner Info
+### Windows-weergawe en eienaarinligting
 
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion`: Windows edition/build, install time, registered owner, product name, en ander build metadata.
-- `SYSTEM\Select`: map `Current`, `Default`, en `LastKnownGood` na die werklike `ControlSet00x` values wat deur die system gebruik word.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion`: Windows-uitgawe/-build, installasietyd, geregistreerde eienaar, produknaam en ander build-metadata.
+- `SYSTEM\Select`: koppel `Current`, `Default` en `LastKnownGood` aan die werklike `ControlSet00x`-waardes wat deur die stelsel gebruik word.
 
-### Computer Name
+### Rekenaarnaam
 
-- `SYSTEM\CurrentControlSet\Control\ComputerName\ComputerName`: current hostname.
+- `SYSTEM\CurrentControlSet\Control\ComputerName\ComputerName`: huidige hostname.
 
-### Time Zone Setting
+### Tydsone-instelling
 
-- `SYSTEM\CurrentControlSet\Control\TimeZoneInformation`: configured time zone en DST-related values.
+- `SYSTEM\CurrentControlSet\Control\TimeZoneInformation`: gekonfigureerde tydsone en DST-verwante waardes.
 
-### Access Time Tracking
+### Nasporing van toegangstye
 
-- `SYSTEM\CurrentControlSet\Control\FileSystem`: `NtfsDisableLastAccessUpdate` dui aan of NTFS last-access timestamps opgedateer word.
-- Om dit te enable, use: `fsutil behavior set disablelastaccess 0`
+- `SYSTEM\CurrentControlSet\Control\FileSystem`: `NtfsDisableLastAccessUpdate` dui aan of NTFS se laaste-toegang-tydstempels opgedateer word.
+- Om dit te aktiveer, gebruik: `fsutil behavior set disablelastaccess 0`
 
-### Shutdown Details
+### Afsluitingsbesonderhede
 
-- `SYSTEM\CurrentControlSet\Control\Windows`: last shutdown time.
-- `SYSTEM\CurrentControlSet\Control\Watchdog\Display`: older systems may also expose shutdown counters.
+- `SYSTEM\CurrentControlSet\Control\Windows`: tyd van die laaste afsluiting.
+- `SYSTEM\CurrentControlSet\Control\Watchdog\Display`: ouer stelsels kan ook afsluitingstellers blootstel.
 
-### Network Configuration
+### Netwerkkonfigurasie
 
-- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: interface IPs, DHCP leases, gateway en DNS data.
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: network profile name/SSID plus first en last connection times.
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` en `...\Unmanaged\{GUID}`: profile correlation data such as gateway MAC address en DNS suffix.
-- `SYSTEM\CurrentControlSet\Services\LanmanServer\Shares`: local shared folders published by the host.
+- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: koppelvlak-IP's, DHCP-leases, gateway- en DNS-data.<sup>[[1]](#references)</sup>
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: netwerkprofielnaam/SSID plus eerste en laaste verbindingstye.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` en `...\Unmanaged\{GUID}`: profielkorrelasiedata soos gateway-MAC-adres en DNS-agtervoegsel.
+- `SYSTEM\CurrentControlSet\Services\LanmanServer\Shares`: plaaslike gedeelde vouers wat deur die host gepubliseer word.
 
-### Remote Access and Network Share History
+### Afstandtoegang en geskiedenis van netwerkdelings
 
-- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: outbound RDP MRU list (`MRU0`..`MRU9`).
-- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: per-host outbound RDP history. Subkeys commonly store `UsernameHint`, en die key `LastWrite` time is a useful pivot.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: mapped network drives, UNC shares, en removable-media mount points tied to a specific user.
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: uitgaande RDP MRU-lys (`MRU0`..`MRU9`).<sup>[[1]](#references)</sup>
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: uitgaande RDP-geskiedenis per host. Subsleutels stoor gewoonlik `UsernameHint`, en die sleutel se `LastWrite`-tyd is 'n nuttige pivot.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: gekarteerde netwerkaandrywers, UNC-delings en monteringspunte vir verwyderbare media wat aan 'n spesifieke gebruiker gekoppel is.
 
-### Programs that Start Automatically and Scheduled Persistence
+### Programme wat outomaties begin en geskeduleerde persistence
 
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`
 - `SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 - `SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` en `...\Tasks\{GUID}`: scheduled task metadata. If a task exists here but die `SD` value is missing from `Tree\<TaskName>`, suspect hidden Tarrask-style task tampering en correlate it with `C:\Windows\System32\Tasks\<TaskName>`.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` en `...\Tasks\{GUID}`: metadata van geskeduleerde take. As 'n taak hier bestaan, maar die `SD`-waarde in `Tree\<TaskName>` ontbreek, vermoed versteekte Tarrask-styl taammanipulasie en korreleer dit met `C:\Windows\System32\Tasks\<TaskName>`.
 
-### Searches, Typed Paths, and MRUs
+### Soektogte, getikte paaie en MRU's
 
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery`: File Explorer search terms.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: manually typed Explorer paths.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`: die laaste 26 `Win + R` commands. `MRUList` preserve their order.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`: recently opened documents and folders.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery`: File Explorer-soekterme.<sup>[[1]](#references)</sup>
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: Explorer-paaie wat handmatig getik is.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU`: die laaste 26 `Win + R`-opdragte. `MRUList` behou hul volgorde.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs`: dokumente en vouers wat onlangs oopgemaak is.
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\OpenSavePidlMRU`
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\ComDlg32\LastVisitedPidlMRU`
-- `NTUSER.DAT\Software\Microsoft\Office\<VERSION>\UserMRU\*\FileMRU`: Office recent files.
+- `NTUSER.DAT\Software\Microsoft\Office\<VERSION>\UserMRU\*\FileMRU`: onlangse Office-lêers.
 
-### User Activity Tracking
+### Nasporing van gebruikersaktiwiteit
 
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: GUI-driven execution history. Value names are ROT13-encoded, en die binary data includes run counters en last run time.
-- Treat `UserAssist` as strong supporting evidence, not a standalone verdict: it mainly tracks apps or `.lnk` files launched through Explorer en can miss command-line or service execution. On Windows 10+, some entries do not necessarily mean the process fully ran.
-- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` en `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: modern Windows 10/11 execution traces with SID attribution en last execution time. These are especially useful for locally executed binaries, but older entries can age out quickly en executions from network shares/removable media are less reliable.
-- For broader execution artifacts such as Prefetch, Amcache, ShimCache, en SRUM, see the main [Windows forensics overview](README.md#programs-executed).
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: GUI-gedrewe uitvoergeskiedenis. Waardename is ROT13-geënkodeer, en die binêre data bevat uitvoertellers en die laaste uitvoeringstyd.<sup>[[1]](#references)</sup>
+- Behandel `UserAssist` as sterk ondersteunende bewyse, nie as 'n selfstandige uitspraak nie: dit volg hoofsaaklik toepassings of `.lnk`-lêers wat deur Explorer geloods is en kan command-line- of diensuitvoering mis. Op Windows 10+ beteken sommige inskrywings nie noodwendig dat die proses volledig uitgevoer is nie.
+- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` en `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: moderne Windows 10/11-uitvoerspore met SID-toeskrywing en laaste uitvoeringstyd. Dit is veral nuttig vir binaries wat plaaslik uitgevoer is, maar ouer inskrywings kan vinnig verouder en uitvoerings vanaf netwerkdelings/verwyderbare media is minder betroubaar.
+- Vir breër uitvoerartefakte soos Prefetch, Amcache, ShimCache en SRUM, sien die hoof-[Windows forensics overview](README.md#programs-executed).
 
 ### Shellbags
 
-- Shellbags are stored in both `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU` / `Bags` en `UsrClass.dat\Local Settings\Software\Microsoft\Windows\Shell\BagMRU` / `Bags`.
-- `NTUSER.DAT` entries are especially useful for UNC/network browsing, while `UsrClass.dat` is where Windows Vista+ commonly stores local/removable-folder shellbags.
-- They can show folder existence, traversal, en folder-view preferences even after the folder was deleted. Explorer-like access to archive files can also leave shellbag traces.
-- Not every shellbag proves successful folder access, so corroborate with LNKs, Jump Lists, timestamps, or volume mappings.
-- Use **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** or **SBECmd** to parse them.
+- Shellbags word in beide `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU` / `Bags` en `UsrClass.dat\Local Settings\Software\Microsoft\Windows\Shell\BagMRU` / `Bags` gestoor.<sup>[[1]](#references)</sup>
+- `NTUSER.DAT`-inskrywings is veral nuttig vir UNC-/netwerkblaai, terwyl `UsrClass.dat` is waar Windows Vista+ gewoonlik plaaslike/verwyderbare-vouer-shellbags stoor.
+- Hulle kan die bestaan, deurkruising en voueraansigvoorkeure van vouers wys, selfs nadat die vouer uitgevee is. Explorer-agtige toegang tot argieflêers kan ook shellbag-spore laat.<sup>[[1]](#references)</sup>
+- Nie elke shellbag bewys suksesvolle vouertoegang nie, dus moet dit met LNK's, Jump Lists, tydstempels of volume-karterings gestaaf word.
+- Gebruik **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** of **SBECmd** om hulle te ontleed.
 
-### USB Information
+### USB-inligting
 
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: primary inventory of USB mass-storage devices (vendor, product, revision, serial/device instance).
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: broader USB device inventory, including non-storage devices.
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: on recent Windows 10/11 builds this is a high-value spot for per-device lifecycle timestamps such as install, first install, last arrival, en last removal.
-- `HKLM\SYSTEM\MountedDevices`: maps volumes en device identifiers to drive letters / volume GUIDs. Only the last mapping for a given drive letter may survive.
-- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: useful pivot for volume serial numbers en previous media metadata.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: user-specific drive-letter en share interaction history.
-- Modern phones and tablets connected via MTP/PTP may **not** appear under `USBSTOR`. Check `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` en `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices` as well.
-- To tie a device to a user, pivot from device or volume identifiers into per-user artifacts such as shellbags, LNKs, Jump Lists, `RecentDocs`, en `MountPoints2`.
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: primêre inventaris van USB-massastoor-toestelle (vervaardiger, produk, hersiening, reeks-/toestelinstansie).
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: breër USB-toestelinventaris, insluitend nie-stoortoestelle.
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: op onlangse Windows 10/11-builds is dit 'n waardevolle plek vir toestelspesifieke lewensiklustydstempels soos installering, eerste installering, laaste aankoms en laaste verwydering.<sup>[[2]](#references)</sup>
+- `HKLM\SYSTEM\MountedDevices`: koppel volumes en toestelidentifiseerders aan aandrywerletters / volume-GUID's. Slegs die laaste kartering vir 'n gegewe aandrywerletter kan behoue bly.
+- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: nuttige pivot vir volumenommers en metadata van vorige media.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: gebruikerspesifieke geskiedenis van aandrywerletter- en deelinteraksie.<sup>[[2]](#references)</sup>
+- Moderne fone en tablette wat via MTP/PTP gekoppel is, verskyn moontlik **nie** onder `USBSTOR` nie. Kontroleer ook `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` en `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices`.<sup>[[2]](#references)</sup>
+- Om 'n toestel aan 'n gebruiker te koppel, pivot vanaf toestel- of volume-identifiseerders na per-gebruiker-artefakte soos shellbags, LNK's, Jump Lists, `RecentDocs` en `MountPoints2`.<sup>[[2]](#references)</sup>
 
+## Verwysings
 
+- [1] [Windows Registry Forensics Cheat Sheet 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
+- [2] [USB Device Forensics on Windows 10 and 11 - ElcomSoft](https://blog.elcomsoft.com/2026/02/usb-device-forensics-on-windows-10-and-11/)
 
-## References
-
-- [Windows Registry Forensics Cheat Sheet 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
-- [USB Device Forensics on Windows 10 and 11 - ElcomSoft](https://blog.elcomsoft.com/2026/02/usb-device-forensics-on-windows-10-and-11/)
 {{#include ../../../banners/hacktricks-training.md}}
