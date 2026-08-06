@@ -2,151 +2,150 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Lista Kontroli Dostępu (ACL)**
+## **Access Control List (ACL)**
 
-Lista Kontroli Dostępu (ACL) składa się z uporządkowanego zestawu wpisów Kontroli Dostępu (ACE), które określają zabezpieczenia dla obiektu i jego właściwości. W istocie, ACL definiuje, które działania przez które podmioty bezpieczeństwa (użytkowników lub grupy) są dozwolone lub zabronione na danym obiekcie.
+Access Control List (ACL) składa się z uporządkowanego zestawu Access Control Entries (ACE), które określają zabezpieczenia obiektu i jego właściwości. Zasadniczo ACL definiuje, które działania wykonywane przez określone security principals (użytkowników lub grupy) są dozwolone lub zabronione dla danego obiektu.
 
 Istnieją dwa typy ACL:
 
-- **Lista Kontroli Dostępu na Żądanie (DACL):** Określa, którzy użytkownicy i grupy mają lub nie mają dostępu do obiektu.
-- **Systemowa Lista Kontroli Dostępu (SACL):** Reguluje audyt prób dostępu do obiektu.
+- **Discretionary Access Control List (DACL):** Określa, którzy użytkownicy i grupy mają lub nie mają dostępu do obiektu.
+- **System Access Control List (SACL):** Zarządza audytowaniem prób dostępu do obiektu.
 
-Proces uzyskiwania dostępu do pliku polega na tym, że system sprawdza opis zabezpieczeń obiektu w porównaniu do tokena dostępu użytkownika, aby określić, czy dostęp powinien być przyznany oraz w jakim zakresie, na podstawie ACE.
+Proces uzyskiwania dostępu do pliku obejmuje sprawdzenie przez system deskryptora zabezpieczeń obiektu względem access token użytkownika w celu ustalenia, czy dostęp powinien zostać przyznany oraz jaki powinien być jego zakres, na podstawie ACE.<sup>[[1]](#references)</sup>
 
-### **Kluczowe Składniki**
+### **Key Components**
 
-- **DACL:** Zawiera ACE, które przyznają lub odmawiają uprawnień dostępu użytkownikom i grupom do obiektu. To zasadniczo główna ACL, która dyktuje prawa dostępu.
-- **SACL:** Używana do audytowania dostępu do obiektów, gdzie ACE definiują rodzaje dostępu, które mają być rejestrowane w Dzienniku Zdarzeń Zabezpieczeń. Może to być nieocenione w wykrywaniu nieautoryzowanych prób dostępu lub rozwiązywaniu problemów z dostępem.
+- **DACL:** Zawiera ACE, które przyznają lub odmawiają użytkownikom i grupom uprawnień dostępu do obiektu. Jest to zasadniczo główna ACL określająca prawa dostępu.
+- **SACL:** Służy do audytowania dostępu do obiektów, gdzie ACE definiują typy dostępu zapisywane w Security Event Log. Może to być niezwykle przydatne do wykrywania nieautoryzowanych prób dostępu lub rozwiązywania problemów z dostępem.<sup>[[1]](#references)</sup>
 
-### **Interakcja Systemu z ACL**
+### **System Interaction with ACLs**
 
-Każda sesja użytkownika jest powiązana z tokenem dostępu, który zawiera informacje o zabezpieczeniach istotne dla tej sesji, w tym tożsamości użytkownika, grupy i uprawnienia. Ten token zawiera również SID logowania, który unikalnie identyfikuje sesję.
+Każda sesja użytkownika jest powiązana z access token zawierającym informacje związane z zabezpieczeniami tej sesji, w tym tożsamości użytkownika i grup oraz uprawnienia. Token zawiera również logon SID, który jednoznacznie identyfikuje sesję.
 
-Lokalna Władza Bezpieczeństwa (LSASS) przetwarza żądania dostępu do obiektów, badając DACL w poszukiwaniu ACE, które pasują do podmiotu bezpieczeństwa próbującego uzyskać dostęp. Dostęp jest natychmiast przyznawany, jeśli nie znaleziono odpowiednich ACE. W przeciwnym razie, LSASS porównuje ACE z SID podmiotu bezpieczeństwa w tokenie dostępu, aby określić uprawnienia dostępu.
+Local Security Authority (LSASS) przetwarza żądania dostępu do obiektów, sprawdzając DACL pod kątem ACE pasujących do security principal próbującego uzyskać dostęp. Dostęp jest natychmiast przyznawany, jeśli nie znaleziono odpowiednich ACE. W przeciwnym razie LSASS porównuje ACE z SID security principal w access token, aby określić, czy dostęp może zostać przyznany.<sup>[[1]](#references)</sup>
 
-### **Podsumowany Proces**
+### **Summarized Process**
 
-- **ACL:** Definiują uprawnienia dostępu poprzez DACL i zasady audytu poprzez SACL.
-- **Token Dostępu:** Zawiera informacje o użytkowniku, grupie i uprawnieniach dla sesji.
-- **Decyzja o Dostępie:** Podejmowana poprzez porównanie ACE DACL z tokenem dostępu; SACL są używane do audytu.
+- **ACLs:** Definiują uprawnienia dostępu za pośrednictwem DACL oraz reguły audytowania za pośrednictwem SACL.
+- **Access Token:** Zawiera informacje o użytkowniku, grupie i uprawnieniach dla sesji.
+- **Access Decision:** Jest podejmowana przez porównanie ACE w DACL z access token; SACL służą do audytowania.<sup>[[1]](#references)</sup>
 
 ### ACEs
 
-Istnieją **trzy główne typy Wpisów Kontroli Dostępu (ACE)**:
+Istnieją **trzy główne typy Access Control Entries (ACE)**:<sup>[[1]](#references)</sup>
 
-- **ACE Odrzucony Dostęp:** Ten ACE wyraźnie odmawia dostępu do obiektu dla określonych użytkowników lub grup (w DACL).
-- **ACE Dozwolony Dostęp:** Ten ACE wyraźnie przyznaje dostęp do obiektu dla określonych użytkowników lub grup (w DACL).
-- **ACE Audytu Systemowego:** Umieszczony w Systemowej Liście Kontroli Dostępu (SACL), ten ACE jest odpowiedzialny za generowanie dzienników audytu po próbach dostępu do obiektu przez użytkowników lub grupy. Dokumentuje, czy dostęp został przyznany, czy odrzucony oraz charakter dostępu.
+- **Access Denied ACE**: Ta ACE jawnie odmawia dostępu do obiektu określonym użytkownikom lub grupom (w DACL).
+- **Access Allowed ACE**: Ta ACE jawnie przyznaje dostęp do obiektu określonym użytkownikom lub grupom (w DACL).
+- **System Audit ACE**: Umieszczona w System Access Control List (SACL), ta ACE odpowiada za generowanie logów audytowych podczas prób dostępu użytkowników lub grup do obiektu. Dokumentuje, czy dostęp został dozwolony lub odrzucony, a także jego rodzaj.
 
-Każdy ACE ma **cztery kluczowe składniki**:
+Każda ACE ma **cztery kluczowe elementy**:<sup>[[1]](#references)</sup>
 
-1. **Identyfikator Zabezpieczeń (SID)** użytkownika lub grupy (lub ich nazwa główna w graficznej reprezentacji).
-2. **Flaga**, która identyfikuje typ ACE (odmowa dostępu, dozwolony lub audyt systemowy).
-3. **Flagi dziedziczenia**, które określają, czy obiekty podrzędne mogą dziedziczyć ACE od ich rodzica.
-4. [**Maska dostępu**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), 32-bitowa wartość określająca przyznane prawa obiektu.
+1. **Security Identifier (SID)** użytkownika lub grupy (albo nazwa principal w reprezentacji graficznej).
+2. **Flaga** identyfikująca typ ACE (odmowa dostępu, zezwolenie na dostęp lub audyt systemowy).
+3. **Flagi dziedziczenia** określające, czy obiekty podrzędne mogą dziedziczyć ACE po obiekcie nadrzędnym.
+4. [**access mask**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), 32-bitowa wartość określająca prawa przyznane do obiektu.
 
-Określenie dostępu odbywa się poprzez sekwencyjne badanie każdego ACE, aż do:
+Ustalanie dostępu odbywa się poprzez sekwencyjne sprawdzanie każdej ACE aż do momentu, gdy:<sup>[[1]](#references)</sup>
 
-- **ACE Odrzucony Dostęp** wyraźnie odmawia żądanych praw zaufanemu podmiotowi zidentyfikowanemu w tokenie dostępu.
-- **ACE Dozwolony Dostęp** wyraźnie przyznaje wszystkie żądane prawa zaufanemu podmiotowi w tokenie dostępu.
-- Po sprawdzeniu wszystkich ACE, jeśli jakiekolwiek żądane prawo **nie zostało wyraźnie przyznane**, dostęp jest domyślnie **odmówiony**.
+- **Access-Denied ACE** jawnie odmawia trustee zidentyfikowanemu w access token żądanych praw.
+- **Access-Allowed ACE** jawnie przyznają trustee w access token wszystkie żądane prawa.
+- Po sprawdzeniu wszystkich ACE, jeśli którekolwiek żądane prawo **nie zostało jawnie dozwolone**, dostęp jest domyślnie **odrzucany**.
 
-### Kolejność ACEs
+### Order of ACEs
 
-Sposób, w jaki **ACEs** (zasady mówiące, kto może lub nie może uzyskać dostęp do czegoś) są umieszczane na liście zwanej **DACL**, jest bardzo ważny. Dzieje się tak, ponieważ gdy system przyznaje lub odmawia dostępu na podstawie tych zasad, przestaje patrzeć na resztę.
+Sposób umieszczenia **ACE** (reguł określających, kto może lub nie może uzyskać dostępu do czegoś) na liście zwanej **DACL** jest bardzo ważny. Dzieje się tak, ponieważ gdy system przyzna lub odmówi dostępu na podstawie tych reguł, przestaje sprawdzać pozostałe.<sup>[[1]](#references)</sup>
 
-Istnieje najlepszy sposób organizacji tych ACE, zwany **"kolejnością kanoniczną."** Ta metoda pomaga zapewnić, że wszystko działa płynnie i sprawiedliwie. Oto jak to wygląda w systemach takich jak **Windows 2000** i **Windows Server 2003**:
+Istnieje najlepszy sposób organizowania tych ACE, nazywany **„canonical order”**. Metoda ta pomaga zapewnić prawidłowe i przewidywalne działanie. Dla systemów takich jak **Windows 2000** i **Windows Server 2003** wygląda to następująco:
 
-- Najpierw umieść wszystkie zasady, które są **specjalnie dla tego elementu**, przed tymi, które pochodzą z innego miejsca, jak folder nadrzędny.
-- W tych specyficznych zasadach umieść te, które mówią **"nie" (odmowa)** przed tymi, które mówią **"tak" (zezwolenie)**.
-- Dla zasad pochodzących z innego miejsca, zacznij od tych z **najbliższego źródła**, jak rodzic, a następnie wróć stamtąd. Ponownie, umieść **"nie"** przed **"tak."**
+- Najpierw umieść wszystkie reguły utworzone **bezpośrednio dla tego elementu**, a dopiero potem reguły pochodzące z innego miejsca, takiego jak folder nadrzędny.
+- Wśród tych bezpośrednich reguł umieść reguły mówiące **„nie” (deny)** przed regułami mówiącymi **„tak” (allow)**.
+- W przypadku reguł pochodzących z innego miejsca zacznij od reguł z **najbliższego źródła**, takiego jak obiekt nadrzędny, a następnie przechodź dalej. Ponownie umieść **„nie”** przed **„tak”**.
 
-Ta konfiguracja pomaga na dwa główne sposoby:
+Taka konfiguracja zapewnia dwie ważne korzyści:
 
-- Zapewnia, że jeśli istnieje konkretne **"nie,"** jest ono respektowane, niezależnie od innych zasad **"tak."**
-- Pozwala właścicielowi elementu mieć **ostateczne zdanie** na temat tego, kto ma dostęp, zanim jakiekolwiek zasady z folderów nadrzędnych lub dalszych wejdą w grę.
+- Gwarantuje, że konkretne **„nie”** będzie respektowane niezależnie od innych reguł **„tak”**.
+- Pozwala właścicielowi elementu mieć **ostateczne zdanie** na temat tego, kto uzyska dostęp, zanim zastosowane zostaną reguły z folderów nadrzędnych lub dalszych poziomów.
 
-Dzięki temu właściciel pliku lub folderu może być bardzo precyzyjny co do tego, kto ma dostęp, zapewniając, że odpowiednie osoby mogą wejść, a niewłaściwe nie.
+Dzięki takiemu uporządkowaniu właściciel pliku lub folderu może precyzyjnie określić, kto uzyska dostęp, zapewniając dostęp właściwym osobom i blokując go niewłaściwym.
 
-![](https://www.ntfs.com/images/screenshots/ACEs.gif)
+![Diagram kolejności Access Control Entries w NTFS](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
-Tak więc, ta **"kolejność kanoniczna"** ma na celu zapewnienie, że zasady dostępu są jasne i działają dobrze, umieszczając zasady specyficzne na pierwszym miejscu i organizując wszystko w inteligentny sposób.
+Ten **„canonical order”** ma więc zapewnić przejrzystość i prawidłowe działanie reguł dostępu poprzez umieszczenie reguł bezpośrednich na początku i odpowiednie uporządkowanie pozostałych.
 
-### Przykład GUI
+### GUI Example
 
-[**Przykład stąd**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
+[**Przykład stąd**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)<sup>[[2]](#references)</sup>
 
-To klasyczna zakładka zabezpieczeń folderu pokazująca ACL, DACL i ACEs:
+To klasyczna karta zabezpieczeń folderu pokazująca ACL, DACL i ACE:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/classicsectab.jpg](../../images/classicsectab.jpg)
 
-Jeśli klikniemy przycisk **Zaawansowane**, otrzymamy więcej opcji, takich jak dziedziczenie:
+Po kliknięciu przycisku **Advanced** otrzymamy więcej opcji, takich jak dziedziczenie:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/aceinheritance.jpg](../../images/aceinheritance.jpg)
 
-A jeśli dodasz lub edytujesz Podmiot Zabezpieczeń:
+Po dodaniu lub edycji Security Principal:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/editseprincipalpointers1.jpg](../../images/editseprincipalpointers1.jpg)
 
-A na koniec mamy SACL w zakładce Audyt:
+Na końcu mamy SACL na karcie Auditing:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/audit-tab.jpg](../../images/audit-tab.jpg)
 
-### Wyjaśnienie Kontroli Dostępu w Uproszczony Sposób
+### Explaining Access Control in a Simplified Manner
 
-Zarządzając dostępem do zasobów, takich jak folder, używamy list i zasad znanych jako Listy Kontroli Dostępu (ACL) i Wpisy Kontroli Dostępu (ACE). Te definiują, kto może lub nie może uzyskać dostęp do określonych danych.
+Podczas zarządzania dostępem do zasobów, takich jak folder, używamy list i reguł znanych jako Access Control Lists (ACL) oraz Access Control Entries (ACE). Określają one, kto może, a kto nie może uzyskać dostępu do określonych danych.<sup>[[1]](#references)</sup>
 
-#### Odrzucenie Dostępu dla Konkretnej Grupy
+#### Denying Access to a Specific Group
 
-Wyobraź sobie, że masz folder o nazwie Koszt, i chcesz, aby wszyscy mieli do niego dostęp, z wyjątkiem zespołu marketingowego. Poprzez poprawne ustawienie zasad, możemy zapewnić, że zespół marketingowy jest wyraźnie pozbawiony dostępu przed zezwoleniem wszystkim innym. Robimy to, umieszczając zasadę odmawiającą dostępu zespołowi marketingowemu przed zasadą, która zezwala na dostęp dla wszystkich.
+Załóżmy, że masz folder o nazwie Cost i chcesz, aby każdy miał do niego dostęp z wyjątkiem zespołu marketingowego. Poprzez prawidłowe skonfigurowanie reguł możemy zapewnić, że zespołowi marketingowemu dostęp zostanie jawnie zabroniony, zanim dostęp zostanie przyznany wszystkim pozostałym. Osiąga się to poprzez umieszczenie reguły odmawiającej dostępu zespołowi marketingowemu przed regułą zezwalającą na dostęp wszystkim.
 
-#### Zezwolenie na Dostęp dla Konkretnego Członka Odrzuconej Grupy
+#### Allowing Access to a Specific Member of a Denied Group
 
-Powiedzmy, że Bob, dyrektor marketingu, potrzebuje dostępu do folderu Koszt, mimo że zespół marketingowy generalnie nie powinien mieć dostępu. Możemy dodać konkretną zasadę (ACE) dla Boba, która przyznaje mu dostęp, i umieścić ją przed zasadą, która odmawia dostępu zespołowi marketingowemu. W ten sposób Bob uzyskuje dostęp mimo ogólnego ograniczenia dla jego zespołu.
+Załóżmy, że Bob, dyrektor marketingu, potrzebuje dostępu do folderu Cost, mimo że zespół marketingowy zasadniczo nie powinien mieć do niego dostępu. Możemy dodać konkretną regułę (ACE) dla Boba, która przyzna mu dostęp, i umieścić ją przed regułą odmawiającą dostępu zespołowi marketingowemu. W ten sposób Bob uzyska dostęp pomimo ogólnego ograniczenia dotyczącego jego zespołu.
 
-#### Zrozumienie Wpisów Kontroli Dostępu
+#### Understanding Access Control Entries
 
-ACEs to indywidualne zasady w ACL. Identyfikują użytkowników lub grupy, określają, jaki dostęp jest dozwolony lub odrzucony, i ustalają, jak te zasady mają zastosowanie do elementów podrzędnych (dziedziczenie). Istnieją dwa główne typy ACE:
+ACE to pojedyncze reguły w ACL. Identyfikują użytkowników lub grupy, określają, jaki dostęp jest dozwolony lub zabroniony, oraz definiują sposób stosowania tych reguł do elementów podrzędnych (dziedziczenie). Istnieją dwa główne typy ACE:
 
-- **Ogólne ACE:** Te mają zastosowanie szeroko, wpływając na wszystkie typy obiektów lub rozróżniając tylko między kontenerami (jak foldery) a nie-kontenerami (jak pliki). Na przykład zasada, która pozwala użytkownikom zobaczyć zawartość folderu, ale nie uzyskać dostępu do plików w nim.
-- **Specyficzne dla Obiektu ACE:** Te zapewniają bardziej precyzyjną kontrolę, pozwalając na ustawienie zasad dla konkretnych typów obiektów lub nawet poszczególnych właściwości w obiekcie. Na przykład, w katalogu użytkowników zasada może pozwolić użytkownikowi zaktualizować swój numer telefonu, ale nie godziny logowania.
+- **Generic ACEs**: Mają szerokie zastosowanie i dotyczą wszystkich typów obiektów albo rozróżniają wyłącznie kontenery (takie jak foldery) i obiekty niebędące kontenerami (takie jak pliki). Przykładem jest reguła zezwalająca użytkownikom na wyświetlanie zawartości folderu, ale nie na dostęp do znajdujących się w nim plików.
+- **Object-Specific ACEs**: Zapewniają bardziej precyzyjną kontrolę, umożliwiając ustawienie reguł dla określonych typów obiektów, a nawet pojedynczych właściwości obiektu. Na przykład w katalogu użytkowników reguła może zezwalać użytkownikowi na aktualizowanie numeru telefonu, ale nie jego godzin logowania.
 
-Każdy ACE zawiera ważne informacje, takie jak do kogo zasada ma zastosowanie (używając Identyfikatora Zabezpieczeń lub SID), co zasada pozwala lub odmawia (używając maski dostępu) oraz jak jest dziedziczona przez inne obiekty.
+Każda ACE zawiera ważne informacje, takie jak podmiot, którego dotyczy reguła (z użyciem Security Identifier lub SID), działania dozwolone lub zabronione przez regułę (z użyciem access mask) oraz sposób dziedziczenia reguły przez inne obiekty.
 
-#### Kluczowe Różnice Między Typami ACE
+#### Key Differences Between ACE Types
 
-- **Ogólne ACE** są odpowiednie dla prostych scenariuszy kontroli dostępu, gdzie ta sama zasada ma zastosowanie do wszystkich aspektów obiektu lub do wszystkich obiektów w kontenerze.
-- **Specyficzne dla Obiektu ACE** są używane w bardziej złożonych scenariuszach, szczególnie w środowiskach takich jak Active Directory, gdzie może być konieczne kontrolowanie dostępu do konkretnych właściwości obiektu w inny sposób.
+- **Generic ACEs** nadają się do prostych scenariuszy kontroli dostępu, w których ta sama reguła dotyczy wszystkich aspektów obiektu lub wszystkich obiektów w kontenerze.
+- **Object-Specific ACEs** są używane w bardziej złożonych scenariuszach, szczególnie w środowiskach takich jak Active Directory, gdzie może być konieczne różne kontrolowanie dostępu do konkretnych właściwości obiektu.
 
-Podsumowując, ACL i ACE pomagają definiować precyzyjne kontrole dostępu, zapewniając, że tylko odpowiednie osoby lub grupy mają dostęp do wrażliwych informacji lub zasobów, z możliwością dostosowania praw dostępu do poziomu poszczególnych właściwości lub typów obiektów.
+Podsumowując, ACL i ACE pomagają definiować precyzyjną kontrolę dostępu, zapewniając dostęp do poufnych informacji lub zasobów wyłącznie właściwym osobom lub grupom oraz umożliwiając dostosowanie praw dostępu aż do poziomu pojedynczych właściwości lub typów obiektów.
 
-### Układ Wpisu Kontroli Dostępu
+### Access Control Entry Layout
 
-| Pole ACE   | Opis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ACE Field   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Typ        | Flaga, która wskazuje typ ACE. Windows 2000 i Windows Server 2003 obsługują sześć typów ACE: Trzy ogólne typy ACE, które są przypisane do wszystkich obiektów zabezpieczonych. Trzy specyficzne dla obiektu typy ACE, które mogą występować dla obiektów Active Directory.                                                                                                                                                                                                                                                            |
-| Flagi       | Zestaw bitowych flag, które kontrolują dziedziczenie i audyt.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Rozmiar        | Liczba bajtów pamięci, które są przydzielane dla ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Maska dostępu | 32-bitowa wartość, której bity odpowiadają prawom dostępu do obiektu. Bity mogą być ustawione włączone lub wyłączone, ale znaczenie ustawienia zależy od typu ACE. Na przykład, jeśli bit odpowiadający prawu do odczytu uprawnień jest włączony, a typ ACE to Odrzuć, ACE odmawia prawa do odczytu uprawnień obiektu. Jeśli ten sam bit jest ustawiony włączony, ale typ ACE to Zezwól, ACE przyznaje prawo do odczytu uprawnień obiektu. Więcej szczegółów dotyczących maski dostępu znajduje się w następnej tabeli. |
-| SID         | Identyfikuje użytkownika lub grupę, których dostęp jest kontrolowany lub monitorowany przez ten ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Type        | Flaga wskazująca typ ACE. Windows 2000 i Windows Server 2003 obsługują sześć typów ACE: trzy ogólne typy ACE dołączane do wszystkich obiektów podlegających zabezpieczeniom oraz trzy typy ACE specyficzne dla obiektów, które mogą występować dla obiektów Active Directory.                                                                                                                                                                                                                                                            |
+| Flags       | Zestaw flag bitowych kontrolujących dziedziczenie i audytowanie.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Size        | Liczba bajtów pamięci przydzielonych dla ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Access mask | 32-bitowa wartość, której bity odpowiadają prawom dostępu do obiektu. Bity mogą być ustawione lub wyłączone, ale znaczenie ustawienia zależy od typu ACE. Na przykład jeśli bit odpowiadający prawu odczytu uprawnień jest włączony, a typ ACE to Deny, ACE odmawia prawa do odczytu uprawnień obiektu. Jeśli ten sam bit jest ustawiony, ale typ ACE to Allow, ACE przyznaje prawo do odczytu uprawnień obiektu. Więcej informacji o access mask znajduje się w następnej tabeli. |
+| SID         | Identyfikuje użytkownika lub grupę, których dostęp jest kontrolowany lub monitorowany przez tę ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
-### Układ Maski Dostępu
+### Access Mask Layout
 
-| Bit (Zakres) | Znaczenie                            | Opis/Przykład                       |
+| Bit (Range) | Meaning                            | Description/Example                       |
 | ----------- | ---------------------------------- | ----------------------------------------- |
-| 0 - 15      | Specyficzne dla obiektu prawa dostępu      | Odczyt danych, Wykonaj, Dodaj dane           |
-| 16 - 22     | Standardowe prawa dostępu             | Usuń, Zapisz ACL, Zapisz właściciela            |
-| 23          | Może uzyskać dostęp do ACL zabezpieczeń            |                                           |
-| 24 - 27     | Zarezerwowane                           |                                           |
-| 28          | Ogólne WSZYSTKO (Odczyt, Zapis, Wykonaj) | Wszystko poniżej                          |
-| 29          | Ogólne Wykonaj                    | Wszystko, co jest potrzebne do wykonania programu |
-| 30          | Ogólne Zapisz                      | Wszystko, co jest potrzebne do zapisu do pliku   |
-| 31          | Ogólne Odczyt                       | Wszystko, co jest potrzebne do odczytu pliku       |
+| 0 - 15      | Object Specific Access Rights      | Odczyt danych, wykonywanie, dołączanie danych           |
+| 16 - 22     | Standard Access Rights             | Usuwanie, zapis ACL, zapis właściciela            |
+| 23          | Can access security ACL            |                                           |
+| 24 - 27     | Reserved                           |                                           |
+| 28          | Generic ALL (Read, Write, Execute) | Wszystko poniżej                          |
+| 29          | Generic Execute                    | Wszystko, co jest niezbędne do wykonania programu |
+| 30          | Generic Write                      | Wszystko, co jest niezbędne do zapisu w pliku   |
+| 31          | Generic Read                       | Wszystko, co jest niezbędne do odczytu pliku       |
 
-## Odnośniki
+## References
 
-- [https://www.ntfs.com/ntfs-permissions-acl-use.htm](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
-- [https://secureidentity.se/acl-dacl-sacl-and-the-ace/](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
-- [https://www.coopware.in2.info/\_ntfsacl_ht.htm](https://www.coopware.in2.info/_ntfsacl_ht.htm)
+- [1] [How the System Uses ACLs - NTFS.com](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
+- [2] [ACL, DACL, SACL and the ACE - secureidentity.se](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
 
 {{#include ../../banners/hacktricks-training.md}}

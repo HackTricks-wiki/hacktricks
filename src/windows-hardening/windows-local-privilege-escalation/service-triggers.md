@@ -1,56 +1,56 @@
-# Windows Service Triggers: Enumeration and Abuse
+# Windows Service Triggers: Enumeracja i nadużycia
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Windows Service Triggers pozwalają Service Control Manager (SCM) uruchamiać/zatrzymywać usługę, gdy wystąpi określony warunek (np. adres IP staje się dostępny, podejmowana jest próba połączenia z named pipe, publikowane jest zdarzenie ETW). Nawet jeśli nie masz praw SERVICE_START do docelowej usługi, możesz nadal być w stanie ją uruchomić, wywołując jej trigger.
+Windows Service Triggers pozwalają Service Control Manager (SCM) uruchamiać/zatrzymywać usługę, gdy wystąpi określony warunek (np. stanie się dostępny adres IP, zostanie podjęta próba połączenia z named pipe lub zostanie opublikowane zdarzenie ETW). Nawet jeśli nie masz uprawnień SERVICE_START do docelowej usługi, nadal możesz być w stanie ją uruchomić, powodując aktywację jej triggera.<sup>[[1]](#references)</sup>
 
-Ta strona koncentruje się na przyjaznym dla atakującego enum oraz na mało inwazyjnych sposobach aktywacji typowych triggerów.
+Ta strona koncentruje się na przyjaznej atakującemu enumeracji oraz prostych sposobach aktywowania popularnych triggerów.
 
-> Tip: Uruchomienie uprzywilejowanej wbudowanej usługi (np. RemoteRegistry, WebClient/WebDAV, EFS) może ujawnić nowe RPC/named-pipe listenery i odblokować dalsze łańcuchy abuse.
+> Wskazówka: Uruchomienie uprzywilejowanej wbudowanej usługi (np. RemoteRegistry, WebClient/WebDAV, EFS) może udostępnić nowe listenery RPC/named pipe i otworzyć drogę do kolejnych abuse chains.
 
-## Enumerating Service Triggers
+## Enumeracja Service Triggers
 
-- sc.exe (local)
-- Wypisz triggery usługi: `sc.exe qtriggerinfo <ServiceName>`
-- Registry (local)
-- Triggery znajdują się pod: `HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo`
-- Zrzut rekurencyjny: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo /s`
-- Win32 API (local)
+- sc.exe (lokalnie)
+- Wyświetlenie triggerów usługi: `sc.exe qtriggerinfo <ServiceName>`
+- Registry (lokalnie)
+- Triggery znajdują się w: `HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo`
+- Rekurencyjny dump: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<ServiceName>\TriggerInfo /s`
+- Win32 API (lokalnie)
 - Wywołaj QueryServiceConfig2 z SERVICE_CONFIG_TRIGGER_INFO (8), aby pobrać SERVICE_TRIGGER_INFO.
-- Docs: QueryServiceConfig2[W/A] and SERVICE_TRIGGER/SERVICE_TRIGGER_SPECIFIC_DATA
-- RPC over MS‑SCMR (remote)
-- SCM można odpytać zdalnie, aby pobrać informacje o triggerach, używając MS‑SCMR. TrustedSec’s Titanis udostępnia to: `Scm.exe qtriggers`.
-- Impacket definiuje struktury w msrpc MS-SCMR; możesz zaimplementować zdalne zapytanie, używając ich.
-- PowerShell (bulk enumeration)
-- Szybko wypisz każdą usługę, która ma klucz `TriggerInfo`:
+- Dokumentacja: QueryServiceConfig2[W/A] i SERVICE_TRIGGER/SERVICE_TRIGGER_SPECIFIC_DATA<sup>[[2]](#references)</sup>
+- RPC przez MS-SCMR (zdalnie)
+- SCM można odpytać zdalnie w celu pobrania informacji o triggerach za pomocą MS-SCMR. Titanis firmy TrustedSec udostępnia tę funkcję: `Scm.exe qtriggers`.
+- Impacket definiuje struktury w msrpc MS-SCMR; możesz za ich pomocą zaimplementować zdalne zapytanie.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
+- PowerShell (enumeracja zbiorcza)
+- Szybkie wyświetlenie każdej usługi udostępniającej klucz `TriggerInfo`:
 ```powershell
 Get-ChildItem 'HKLM:\SYSTEM\CurrentControlSet\Services' |
 Where-Object { Test-Path "$($_.PSPath)\TriggerInfo" } |
 ForEach-Object { sc.exe qtriggerinfo $_.PSChildName }
 ```
-- PowerShell (programmatic)
-- Moduł Jamesa Forshawa `NtObjectManager` udostępnia `Get-Win32ServiceTrigger` do parsowania metadanych triggerów bez scrape'owania wyjścia `sc.exe`.
+- PowerShell (programowo)
+- Moduł `NtObjectManager` autorstwa Jamesa Forshawa udostępnia `Get-Win32ServiceTrigger` do parsowania metadanych triggerów bez przetwarzania wyjścia `sc.exe`.
 
-## High-Value Trigger Types and How to Activate Them
+## Najcenniejsze typy triggerów i sposoby ich aktywacji
 
 ### Network Endpoint Triggers
 
-Te triggery uruchamiają usługę, gdy klient próbuje komunikować się z endpointem IPC. Są użyteczne dla low-priv users, ponieważ SCM automatycznie uruchomi usługę, zanim klient zdoła się faktycznie połączyć.
+Uruchamiają usługę, gdy klient próbuje komunikować się z endpointem IPC. Są przydatne dla użytkowników o niskich uprawnieniach, ponieważ SCM automatycznie uruchomi usługę, zanim klient faktycznie będzie mógł się z nią połączyć.<sup>[[1]](#references)</sup>
 
 - Named pipe trigger
-- Behaviour: Próba połączenia klienta z \\.\pipe\<PipeName> powoduje, że SCM uruchamia usługę, aby mogła zacząć nasłuch.
-- Activation (PowerShell):
+- Działanie: Próba połączenia klienta z \\.\pipe\<PipeName> powoduje, że SCM uruchamia usługę, aby mogła rozpocząć nasłuchiwanie.
+- Aktywacja (PowerShell):
 ```powershell
 $pipe = new-object System.IO.Pipes.NamedPipeClientStream('.', 'PipeNameFromTrigger', [System.IO.Pipes.PipeDirection]::InOut)
 try { $pipe.Connect(1000) } catch {}
 $pipe.Dispose()
 ```
-- Internals note: named-pipe triggery są wspierane przez `npsvctrig.sys`, filesystem minifilter, który obserwuje otwarcia względem zarejestrowanych nazw pipe triggerów. Dlatego próba otwarcia może uruchomić usługę jeszcze zanim sama usługa utworzy/nasłuchuje na pipe.
-- See also: Named Pipe Client Impersonation for post-start abuse.
+- Uwaga dotycząca działania wewnętrznego: Triggery named pipe są obsługiwane przez `npsvctrig.sys`, czyli filesystem minifilter monitorujący otwarcia zarejestrowanych nazw triggerów pipe. Dlatego próba otwarcia może uruchomić usługę, zanim sama usługa utworzy pipe lub rozpocznie na nim nasłuchiwanie.<sup>[[5]](#references)</sup>
+- Zobacz także: Named Pipe Client Impersonation w celu wykorzystania usługi po jej uruchomieniu.
 
 - RPC endpoint trigger (Endpoint Mapper)
-- Behaviour: Odpytywanie Endpoint Mapper (EPM, TCP/135) o UUID interfejsu powiązany z usługą powoduje, że SCM uruchamia ją, aby mogła zarejestrować swój endpoint.
-- Activation (Impacket):
+- Działanie: Odpytywanie Endpoint Mapper (EPM, TCP/135) o interface UUID powiązany z usługą powoduje, że SCM ją uruchamia, aby mogła zarejestrować swój endpoint.
+- Aktywacja (Impacket):
 ```bash
 # Queries local EPM; replace UUID with the service interface GUID
 python3 rpcdump.py @127.0.0.1 -uuid <INTERFACE-UUID>
@@ -58,13 +58,13 @@ python3 rpcdump.py @127.0.0.1 -uuid <INTERFACE-UUID>
 
 ### Custom (ETW) Triggers
 
-Usługa może zarejestrować trigger powiązany z providerem/zdarzeniem ETW. Jeśli nie skonfigurowano dodatkowych filtrów (keyword/level/binary/string), dowolne zdarzenie z tego providera uruchomi usługę.
+Usługa może zarejestrować trigger powiązany z providerem/zdarzeniem ETW. Jeśli nie skonfigurowano dodatkowych filtrów (keyword/level/binary/string), dowolne zdarzenie od tego providera uruchomi usługę.<sup>[[1]](#references)</sup>
 
-- Example (WebClient/WebDAV): provider {22B6D684-FA63-4578-87C9-EFFCBE6643C7}
-- List trigger: `sc.exe qtriggerinfo webclient`
-- Verify provider is registered: `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
-- Emitowanie pasujących eventów zwykle wymaga kodu, który loguje do tego providera; jeśli nie ma filtrów, wystarczy dowolne event.
-- Minimal C shape for firing the provider (when no additional ETW filters are configured):
+- Przykład (WebClient/WebDAV): provider {22B6D684-FA63-4578-87C9-EFFCBE6643C7}<sup>[[6]](#references)</sup>
+- Wyświetlenie triggera: `sc.exe qtriggerinfo webclient`
+- Sprawdzenie, czy provider jest zarejestrowany: `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
+- Emitowanie pasujących zdarzeń zazwyczaj wymaga kodu logującego do tego providera; jeśli nie ma filtrów, wystarczy dowolne zdarzenie.
+- Minimalny kształt kodu C do wyzwolenia providera (gdy nie skonfigurowano dodatkowych filtrów ETW):
 ```c
 GUID g = {0x22B6D684,0xFA63,0x4578,{0x87,0xC9,0xEF,0xFC,0xBE,0x66,0x43,0xC7}};
 REGHANDLE h; EVENT_DESCRIPTOR d;
@@ -76,16 +76,16 @@ EventUnregister(h);
 
 ### Group Policy Triggers
 
-Podtypy: Machine/User. Na hostach dołączonych do domeny, gdzie istnieje odpowiadająca polityka, trigger uruchamia się przy boot. `gpupdate` samo w sobie nie wywoła tego bez zmian, ale:
+Podtypy: Machine/User. Na hostach dołączonych do domeny, na których istnieje odpowiednia policy, trigger uruchamia się podczas boot. Samo `gpupdate` nie uruchomi triggera bez zmian, ale:<sup>[[1]](#references)</sup>
 
-- Activation: `gpupdate /force`
-- Jeśli istnieje odpowiedni typ polityki, to niezawodnie powoduje uruchomienie triggera i start usługi.
+- Aktywacja: `gpupdate /force`
+- Jeśli istnieje odpowiedni typ policy, spowoduje to niezawodną aktywację triggera i uruchomienie usługi.
 
 ### IP Address Available
 
-Uruchamia się, gdy pierwszy IP zostanie uzyskany (lub ostatni zostanie utracony). Często triggeruje przy boot.
+Uruchamia się po uzyskaniu pierwszego adresu IP (lub utracie ostatniego). Często aktywuje się podczas boot.<sup>[[1]](#references)</sup>
 
-- Activation: Przełącz łączność, aby wywołać trigger ponownie, np.:
+- Aktywacja: Przełącz łączność, aby ponownie wywołać trigger, np.:
 ```cmd
 netsh interface set interface name="Ethernet" admin=disabled
 netsh interface set interface name="Ethernet" admin=enabled
@@ -93,51 +93,51 @@ netsh interface set interface name="Ethernet" admin=enabled
 
 ### Device Interface Arrival
 
-Uruchamia usługę, gdy pojawi się pasujący device interface. Jeśli nie podano żadnego itemu danych, dowolne urządzenie pasujące do GUID podtypu triggera wywoła trigger. Oceniane przy boot oraz po hot-plug.
+Uruchamia usługę po pojawieniu się pasującego interfejsu urządzenia. Jeśli nie określono elementu danych, dowolne urządzenie pasujące do GUID podtypu triggera aktywuje trigger. Jest sprawdzany podczas boot oraz po hot-plug.<sup>[[1]](#references)</sup>
 
-- Activation: Podłącz/włóż urządzenie (fizyczne lub wirtualne), które pasuje do class/hardware ID określonego przez podtyp triggera.
+- Aktywacja: Podłącz/włóż urządzenie (fizyczne lub wirtualne) pasujące do klasy/hardware ID określonego przez podtyp triggera.
 
 ### Domain Join State
 
-Mimo mylącego brzmienia w MSDN, to ocenia stan domeny przy boot:
+Pomimo mylącego sformułowania w MSDN, ten trigger sprawdza stan domeny podczas boot:<sup>[[1]](#references)</sup>
 - DOMAIN_JOIN_GUID → uruchom usługę, jeśli host jest dołączony do domeny
-- DOMAIN_LEAVE_GUID → uruchom usługę tylko jeśli host NIE jest dołączony do domeny
+- DOMAIN_LEAVE_GUID → uruchom usługę tylko wtedy, gdy host NIE jest dołączony do domeny
 
 ### System State Change – WNF (undocumented)
 
-Niektóre usługi używają nieudokumentowanych triggerów opartych o WNF (SERVICE_TRIGGER_TYPE 0x7). Aktywacja wymaga opublikowania odpowiedniego stanu WNF; szczegóły zależą od nazwy stanu. Tło badawcze: Windows Notification Facility internals.
+Niektóre usługi używają undocumented triggerów opartych na WNF (SERVICE_TRIGGER_TYPE 0x7). Aktywacja wymaga opublikowania odpowiedniego stanu WNF; szczegóły zależą od nazwy stanu. Materiały wprowadzające: Windows Notification Facility internals.
 
 ### Aggregate Service Triggers (undocumented)
 
-Zaobserwowane w Windows 11 dla niektórych usług (np. CDPSvc). Skonfigurowany agregat jest przechowywany w:
+Zaobserwowano je w Windows 11 dla niektórych usług (np. CDPSvc). Zagregowana konfiguracja jest przechowywana w:
 
 - HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents
 
-Wartość Trigger usługi to GUID; podklucz z tym GUID definiuje agregowany event. Wywołanie dowolnego składowego eventu uruchamia usługę.
+Wartość Trigger usługi to GUID; podklucz z tym GUID definiuje zagregowane zdarzenie. Aktywacja dowolnego składowego zdarzenia uruchamia usługę.<sup>[[1]](#references)</sup>
 
 ### Firewall Port Event (quirks and DoS risk)
 
-Trigger powiązany z konkretnym portem/protokółem zaobserwowano jako uruchamiający się przy dowolnej zmianie reguły firewalla (disable/delete/add), a nie tylko dla wskazanego portu. Co gorsza, skonfigurowanie portu bez protokołu może uszkodzić start BFE po rebootach, powodując lawinę błędów wielu usług i psując zarządzanie firewallem. Traktuj to z najwyższą ostrożnością.
+Zaobserwowano, że trigger ograniczony do konkretnego portu/protokołu uruchamia się po dowolnej zmianie reguły firewalla (wyłączeniu/usunięciu/dodaniu), a nie tylko dla określonego portu. Co gorsza, skonfigurowanie portu bez protokołu może uszkodzić uruchamianie BFE po rebootach, powodując kaskadowe awarie wielu usług i uniemożliwiając zarządzanie firewallem. Należy zachować najwyższą ostrożność.<sup>[[1]](#references)</sup>
 
 ## Practical Workflow
 
-1) Enum triggerów na interesujących usługach (RemoteRegistry, WebClient, EFS, …):
+1) Wylicz triggery interesujących usług (RemoteRegistry, WebClient, EFS, …):
 - `sc.exe qtriggerinfo <Service>`
 - `reg query HKLM\SYSTEM\CurrentControlSet\Services\<Service>\TriggerInfo /s`
 
 2) Jeśli istnieje Network Endpoint trigger:
-- Named pipe → spróbuj client open do \\.\pipe\<PipeName>
-- RPC endpoint → wykonaj lookup w Endpoint Mapper dla UUID interfejsu
+- Named pipe → spróbuj otworzyć pipe jako klient \\.\pipe\<PipeName>
+- RPC endpoint → wykonaj zapytanie Endpoint Mapper dla interface UUID
 
 3) Jeśli istnieje ETW trigger:
-- Sprawdź provider i filtry przez `sc.exe qtriggerinfo`; jeśli nie ma filtrów, dowolny event z tego provider uruchomi usługę
+- Sprawdź providera i filtry za pomocą `sc.exe qtriggerinfo`; jeśli nie ma filtrów, dowolne zdarzenie od tego providera uruchomi usługę
 
 4) Dla triggerów Group Policy/IP/Device/Domain:
-- Użyj dźwigni środowiskowych: `gpupdate /force`, przełączaj NIC, hot-plug urządzeń itd.
+- Użyj dźwigni środowiskowych: `gpupdate /force`, przełącz interfejsy NIC, podłącz urządzenia hot-plug itd.
 
 ## Related
 
-- Po uruchomieniu uprzywilejowanej usługi przez Named Pipe trigger możesz być w stanie ją impersonate:
+- Po uruchomieniu uprzywilejowanej usługi za pomocą Named Pipe trigger możesz być w stanie dokonać jej impersonation:
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -145,31 +145,30 @@ named-pipe-client-impersonation.md
 
 ## Quick command recap
 
-- List triggers (local): `sc.exe qtriggerinfo <Service>`
-- Registry view: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<Service>\TriggerInfo /s`
+- Wyświetlenie triggerów (lokalnie): `sc.exe qtriggerinfo <Service>`
+- Widok Registry: `reg query HKLM\SYSTEM\CurrentControlSet\Services\<Service>\TriggerInfo /s`
 - Win32 API: `QueryServiceConfig2(..., SERVICE_CONFIG_TRIGGER_INFO, ...)`
-- RPC remote (Titanis): `Scm.exe qtriggers`
-- ETW provider check (WebClient): `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
+- Zdalny RPC (Titanis): `Scm.exe qtriggers`
+- Sprawdzenie providera ETW (WebClient): `logman query providers | findstr /I 22b6d684-fa63-4578-87c9-effcbe6643c7`
 
 ## Gotchas / Operator Notes
 
-- Najpierw sprawdź typ startu usługi przez `sc.exe qc <Service>`. Jeśli jest `DISABLED`, samo wywołanie triggera nie wystarczy; najpierw musisz znaleźć sposób na zmianę konfiguracji.
-- Usługi uruchamiane przez trigger mogą ponownie się zatrzymać, gdy staną się idle. Jeśli dalsza akcja zależy od krótkotrwałego listenera (RPC/named pipe/WebDAV), wywołaj trigger i użyj go natychmiast.
-- `sc.exe qtriggerinfo` nie w pełni rozumie każdy nieudokumentowany typ triggera. Dla aggregate triggers na nowszych buildach Windows potwierdź wspierający GUID i składowe eventy w `HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents`.
+- Najpierw sprawdź typ uruchamiania usługi za pomocą `sc.exe qc <Service>`. Jeśli ma wartość `DISABLED`, aktywacja triggera nie wystarczy; najpierw musisz znaleźć sposób na zmianę konfiguracji.
+- Usługi uruchamiane przez triggery mogą ponownie się zatrzymać po przejściu w stan bezczynności. Jeśli kolejne działanie zależy od krótkotrwałego listenera (RPC/named pipe/WebDAV), aktywuj trigger i użyj listenera natychmiast.
+- `sc.exe qtriggerinfo` nie obsługuje w pełni każdego undocumented typu triggera. W przypadku aggregate triggerów w nowszych kompilacjach Windows potwierdź bazowy GUID i składowe zdarzenia w `HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents`.
 
 ## Detection and Hardening Notes
 
-- Zbuduj baseline i audytuj TriggerInfo w usługach. Przejrzyj też `HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents` pod kątem aggregate triggers.
-- Monitoruj podejrzane lookupy EPM dla UUID uprzywilejowanych usług oraz próby połączeń z named-pipe, które poprzedzają start usług.
-- Ogranicz, kto może modyfikować triggery usług; traktuj nieoczekiwane awarie BFE po zmianach triggerów jako podejrzane.
+- Utwórz baseline i przeprowadzaj audyt TriggerInfo dla usług. Sprawdź również `HKLM\SYSTEM\CurrentControlSet\Control\ServiceAggregatedEvents` pod kątem aggregate triggerów.
+- Monitoruj podejrzane zapytania EPM dotyczące UUID uprzywilejowanych usług oraz próby połączeń z named pipe poprzedzające uruchomienia usług.
+- Ogranicz osoby, które mogą modyfikować triggery usług; nieoczekiwane awarie BFE po zmianach triggerów traktuj jako podejrzane.
 
 ## References
-- [There’s More than One Way to Trigger a Windows Service (TrustedSec)](https://trustedsec.com/blog/theres-more-than-one-way-to-trigger-a-windows-service)
-- [QueryServiceConfig2 function (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceconfig2a)
-- [MS-SCMR: Service Control Manager Remote Protocol – QueryServiceConfig2](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/705b624a-13de-43cc-b8a2-99573da3635f)
-- [TrustedSec Titanis (SCM trigger enumeration)](https://github.com/trustedsec/Titanis)
-- [Cobalt Strike BOF example – sc_qtriggerinfo](https://github.com/trustedsec/CS-Situational-Awareness-BOF/blob/5d6f70be2e5023c340dc5f82303449504a9b7786/src/SA/sc_qtriggerinfo/entry.c#L56)
-- [Reversing npsvctrig.sys - Named Pipe Service Triggers (Inbits)](https://inbits-sec.com/posts/npsvctrig-notes/)
-- [Starting WebClient Service Programmatically (Tyranid)](https://www.tiraniddo.dev/2015/03/starting-webclient-service.html)
+- [1] [There’s More than One Way to Trigger a Windows Service (TrustedSec)](https://trustedsec.com/blog/theres-more-than-one-way-to-trigger-a-windows-service)
+- [2] [QueryServiceConfig2 function (Win32 API)](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceconfig2a)
+- [3] [MS-SCMR: Service Control Manager Remote Protocol – QueryServiceConfig2](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/705b624a-13de-43cc-b8a2-99573da3635f)
+- [4] [TrustedSec Titanis (SCM trigger enumeration)](https://github.com/trustedsec/Titanis)
+- [5] [Reversing npsvctrig.sys - Named Pipe Service Triggers (Inbits)](https://inbits-sec.com/posts/npsvctrig-notes/)
+- [6] [Starting WebClient Service Programmatically (Tyranid)](https://www.tiraniddo.dev/2015/03/starting-webclient-service.html)
 
 {{#include ../../banners/hacktricks-training.md}}
