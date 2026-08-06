@@ -1,29 +1,29 @@
-# Piattaforme Online con API
+# Piattaforme online con API
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-Puoi chiedere se un IP è correlato ad attività sospette/maligne. Completamente gratuito.
+Puoi verificare se un IP è associato ad attività sospette/maliziose. Completamente gratuito.
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
-Controlla se l'indirizzo IP è correlato a un bot che registra account. Può anche controllare nomi utente e email. Inizialmente gratuito.
+Verifica se l'indirizzo IP è associato a un bot che registra account. Può anche verificare username ed email. Inizialmente gratuito.
 
 ## [Hunter](https://hunter.io/)
 
 Trova e verifica email.\
-Alcune richieste API gratuite, per di più devi pagare.\
+Alcune richieste API sono gratuite; per un numero maggiore è necessario pagare.\
 Commerciale?
 
 ## [AlientVault](https://otx.alienvault.com/api)
 
-Trova attività maligne correlate a IP e domini. Gratuito.
+Trova attività malevole correlate a IP e domini. Gratuito.
 
 ## [Clearbit](https://dashboard.clearbit.com/)
 
-Trova dati personali correlati a un'email (profili su altre piattaforme), dominio (informazioni di base sull'azienda, email e persone che lavorano) e aziende (ottieni informazioni sull'azienda dall'email).\
-Devi pagare per accedere a tutte le possibilità.\
+Trova dati personali correlati a un'email (profili su altre piattaforme), a un dominio (informazioni di base sull'azienda, email e persone che vi lavorano) e ad aziende (ottieni informazioni sull'azienda a partire dall'email).\
+È necessario pagare per accedere a tutte le possibilità.\
 Commerciale?
 
 ## [BuiltWith](https://builtwith.com/)
@@ -33,53 +33,53 @@ Commerciale?
 
 ## [Fraudguard](https://fraudguard.io/)
 
-Controlla se un host (dominio o IP) è correlato ad attività sospette/maligne. Ha un accesso API gratuito.\
+Verifica se un host (dominio o IP) è associato ad attività sospette/maliziose. Offre un accesso API gratuito limitato.\
 Commerciale?
 
 ## [FortiGuard](https://fortiguard.com/)
 
-Controlla se un host (dominio o IP) è correlato ad attività sospette/maligne. Ha un accesso API gratuito.
+Verifica se un host (dominio o IP) è associato ad attività sospette/maliziose. Offre un accesso API gratuito limitato.
 
 ## [SpamCop](https://www.spamcop.net/)
 
-Indica se l'host è correlato ad attività di spam. Ha un accesso API gratuito.
+Indica se un host è associato ad attività di spam. Offre un accesso API gratuito limitato.
 
 ## [mywot](https://www.mywot.com/)
 
-Basato su opinioni e altre metriche, verifica se un dominio è correlato a informazioni sospette/maligne.
+In base alle opinioni e ad altre metriche, determina se un dominio è associato a informazioni sospette/maliziose.
 
 ## [ipinfo](https://ipinfo.io/)
 
-Ottiene informazioni di base da un indirizzo IP. Puoi testare fino a 100K/mese.
+Ottiene informazioni di base da un indirizzo IP. Puoi effettuare fino a 100K test al mese.
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
-Questa piattaforma fornisce informazioni su domini e indirizzi IP come domini all'interno di un IP o all'interno di un server di dominio, domini posseduti da un'email (trova domini correlati), cronologia IP dei domini (trova l'host dietro CloudFlare), tutti i domini che utilizzano un nameserver....\
-Hai un accesso gratuito.
+Questa piattaforma fornisce informazioni su domini e indirizzi IP, come i domini presenti all'interno di un IP o di un server di dominio, i domini di proprietà di un'email (trova domini correlati), la cronologia degli IP dei domini (trova l'host dietro CloudFlare), tutti i domini che utilizzano un nameserver....\
+Hai accesso gratuito limitato.
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-Permette di cercare per email, dominio o nome dell'azienda e recuperare informazioni "personali" correlate. Può anche verificare email. C'è un accesso gratuito.
+Consente di effettuare ricerche tramite email, dominio o nome dell'azienda e recuperare informazioni "personali" correlate. Può anche verificare le email. È disponibile un accesso gratuito limitato.
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-Molte informazioni su domini e IP anche nella versione gratuita/comunitaria.
+Molte informazioni su domini e IP anche nella versione gratuita/community.
 
 ## [\_IntelligenceX](https://intelx.io/)
 
-Cerca domini, IP ed email e ottieni informazioni da dump. Ha un accesso gratuito.
+Cerca domini, IP ed email e ottiene informazioni dai dump. Offre un accesso gratuito limitato.
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Cerca per IP e raccogli informazioni correlate ad attività sospette. C'è un accesso gratuito.
+Cerca tramite IP e raccoglie informazioni relative ad attività sospette. È disponibile un accesso gratuito limitato.
 
 ## [Greynoise](https://viz.greynoise.io/)
 
-Cerca per IP o intervallo di IP e ottieni informazioni sugli IP che scansionano Internet. Accesso gratuito per 15 giorni.
+Cerca tramite IP o intervallo di IP e ottiene informazioni sugli IP che eseguono scansioni su Internet. Accesso gratuito per 15 giorni.
 
 ## [Shodan](https://www.shodan.io/)
 
-Ottieni informazioni di scansione di un indirizzo IP. Ha un accesso API gratuito.
+Ottieni informazioni sulle scansioni di un indirizzo IP. Offre un accesso API gratuito limitato.
 
 ## [Censys](https://censys.io/)
 
@@ -87,39 +87,39 @@ Molto simile a shodan
 
 ## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-Trova bucket S3 aperti cercando per parola chiave.
+Trova bucket S3 aperti cercando tramite parola chiave.
 
 ## [Dehashed](https://www.dehashed.com/data)
 
-Trova credenziali trapelate di email e persino domini\
+Trova credenziali leak di email e persino domini\
 Commerciale?
 
 ## [psbdmp](https://psbdmp.ws/)
 
-Cerca pastebin dove è apparsa un'email. Commerciale?
+Cerca pastebin in cui è comparsa un'email. Commerciale?
 
 ## [emailrep.io](https://emailrep.io/key)
 
-Ottieni reputazione di un'email. Commerciale?
+Ottieni la reputazione di un'email. Commerciale?
 
 ## [ghostproject](https://ghostproject.fr/)
 
-Ottieni password da email trapelate. Commerciale?
+Ottieni password da email leak. Commerciale?
 
 ## [Binaryedge](https://www.binaryedge.io/)
 
-Ottieni informazioni interessanti da IP
+Ottieni informazioni interessanti dagli IP
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-Cerca per dominio e email e verifica se è stato compromesso e le password. Commerciale?
+Cerca tramite dominio ed email e verifica se sono stati pwned e se sono presenti password. Commerciale?
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
-Rileva geolocalizzazione IP, data center, ASN e persino informazioni VPN. Offre 30K query gratuite al mese.
+Rileva la geolocalizzazione dell'IP, il data center, l'ASN e persino informazioni sulle VPN. Offre 30K query gratuite al mese.
 
 ### [IPQuery.io](https://www.ipquery.io/)
-Geolocalizzazione IP e OISNT con punti dati mirati. Non commerciale.
+Geolocalizzazione degli IP e OISNT con datapoint mirati. Non commerciale.
 
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(in uno strumento commerciale?)

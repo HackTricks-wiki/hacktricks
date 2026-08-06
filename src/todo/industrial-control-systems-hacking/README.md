@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Informazioni su questa Sezione
+## Informazioni su questa sezione
 
-Questa sezione contiene tutto sui Sistemi di Controllo Industriale, inclusi concetti e metodologie per hackerarli con vari problemi di sicurezza che persistono in essi.
+Questa sezione tratta tutto ciò che riguarda i Sistemi di Controllo Industriale, inclusi i concetti e le metodologie per effettuare il loro hacking sfruttando le varie vulnerabilità di sicurezza che li caratterizzano.
 
-I Sistemi di Controllo Industriale sono ovunque, poiché le industrie sono vitali per lo sviluppo economico di una nazione. Ma questi ICS sono difficili da aggiornare e ci sono pochi progressi in questo campo. Pertanto, trovare vulnerabilità di sicurezza è comune qui. La maggior parte dei protocolli e degli standard utilizzati qui sono stati sviluppati negli anni '90 e hanno capacità molto inferiori rispetto agli attuali scenari di attacco.
+I Sistemi di Controllo Industriale sono ovunque, poiché le industrie sono fondamentali per lo sviluppo economico di una nazione. Tuttavia, questi ICS sono difficili da aggiornare e in questo campo vengono compiuti meno progressi. Di conseguenza, trovare falle di sicurezza è comune. La maggior parte dei protocolli e degli standard utilizzati è stata sviluppata negli anni '90 e dispone di capacità molto inferiori rispetto agli attuali scenari di attacco.
 
-È diventato importante proteggere questi sistemi poiché danneggiarli può costare molto e persino vite nel peggiore dei casi. Per comprendere la sicurezza dei Sistemi di Controllo Industriale, è necessario conoscere i loro interni.
+È diventato importante proteggere questi sistemi, poiché danneggiarli può avere costi elevati e, nel peggiore dei casi, può persino causare vittime. Per comprendere la sicurezza dei Sistemi di Controllo Industriale, è necessario conoscerne il funzionamento interno.
 
-Poiché i Sistemi di Controllo Industriale sono installati seguendo standard stabiliti, conoscere ogni componente aiuterebbe a interconnettere ogni altro meccanismo nel sistema di controllo. L'installazione di questi dispositivi come PLC e sistemi SCADA è diversa in varie industrie, quindi la raccolta di informazioni è critica.
+Poiché i Sistemi di Controllo Industriale vengono installati seguendo standard prestabiliti, conoscere ciascun componente aiuta a interconnettere tutti gli altri meccanismi del sistema di controllo. L'installazione di dispositivi come PLC e sistemi SCADA varia a seconda dei settori industriali, pertanto la raccolta di informazioni è fondamentale.
 
-I Sistemi di Controllo Industriale possono essere complicati a volte e quindi richiedono molta pazienza per fare qualsiasi cosa. Si tratta di sondare e fare ricognizione prima di pianificare attacchi e sviluppare exploit.
+I Sistemi di Controllo Industriale possono essere complicati e richiedono quindi molta pazienza per intervenire su di essi. Prima di pianificare gli attacchi e sviluppare eventuali exploit, è fondamentale effettuare probing e reconnaissance.
 
-Queste tecniche possono essere utilizzate anche per proteggere contro attacchi e blue teaming per i sistemi di controllo industriale.
+Queste tecniche possono essere utilizzate anche per proteggersi dagli attacchi e per il blue teaming dei sistemi di controllo industriale.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,13 +1,17 @@
-# Furto di Informazioni Sensibili da un Web
+# Sottrarre la divulgazione di informazioni sensibili dal Web
 
 {{#include ../banners/hacktricks-training.md}}
 
-Se a un certo punto trovi una **pagina web che ti presenta informazioni sensibili basate sulla tua sessione**: Potrebbe riflettere cookie, stampare dettagli della carta di credito o qualsiasi altra informazione sensibile, potresti provare a rubarla.\
-Qui ti presento i principali modi per cercare di ottenerla:
+Se a un certo punto trovi una **pagina Web che presenta informazioni sensibili in base alla tua sessione**: potrebbe riflettere i cookie, oppure stampare dati di pagamento o dettagli CC o qualsiasi altra informazione sensibile, potresti provare a sottrarla.\
+Qui presento i principali metodi che puoi provare a utilizzare:
 
-- [**CORS bypass**](../pentesting-web/cors-bypass.md): Se riesci a bypassare le intestazioni CORS, sarai in grado di rubare le informazioni eseguendo una richiesta Ajax per una pagina malevola.
-- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html): Se trovi una vulnerabilità XSS sulla pagina, potresti essere in grado di abusarne per rubare le informazioni.
-- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): Se non puoi iniettare tag XSS, potresti comunque essere in grado di rubare le informazioni utilizzando altri tag HTML regolari.
-- [**Clickjaking**](../pentesting-web/clickjacking.md): Se non c'è protezione contro questo attacco, potresti essere in grado di ingannare l'utente per inviarti i dati sensibili (un esempio [qui](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
+- [**CORS bypass**](../pentesting-web/cors-bypass.md): se riesci ad aggirare gli header CORS, potrai sottrarre le informazioni eseguendo una richiesta Ajax da una pagina dannosa.
+- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html): se trovi una vulnerabilità XSS nella pagina, potresti riuscire a sfruttarla per sottrarre le informazioni.
+- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): se non puoi iniettare tag XSS, potresti comunque riuscire a sottrarre le informazioni utilizzando altri normali tag HTML.
+- [**Clickjaking**](../pentesting-web/clickjacking.md): se non è presente alcuna protezione contro questo attacco, potresti riuscire a indurre l'utente a inviarti i dati sensibili (un esempio [qui](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).<sup>[[1]](#references)</sup>
+
+## Riferimenti
+
+- [1] [Un servlet di esempio Apache porta alla divulgazione di informazioni](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
 
 {{#include ../banners/hacktricks-training.md}}

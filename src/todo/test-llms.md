@@ -1,55 +1,54 @@
-# Test LLMs
+# Testare gli LLM
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Esegui e addestra modelli localmente
+## Eseguire e addestrare modelli localmente
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers è una delle librerie open-source più popolari per utilizzare, addestrare e distribuire LLM come GPT, BERT e molti altri. Offre un ecosistema completo che include modelli pre-addestrati, dataset e integrazione senza soluzione di continuità con l'Hugging Face Hub per il fine-tuning e la distribuzione.
+Hugging Face Transformers è una delle librerie open-source più popolari per utilizzare, addestrare e distribuire LLM come GPT, BERT e molti altri. Offre un ecosistema completo che include modelli pre-addestrati, dataset e un'integrazione perfetta con Hugging Face Hub per il fine-tuning e la distribuzione.
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain è un framework progettato per costruire applicazioni con LLM. Permette agli sviluppatori di connettere modelli linguistici con fonti di dati esterne, API e database. LangChain fornisce strumenti per l'ingegneria avanzata dei prompt, la gestione della cronologia delle conversazioni e l'integrazione degli LLM in flussi di lavoro complessi.
+LangChain è un framework progettato per creare applicazioni con gli LLM. Consente agli sviluppatori di connettere i modelli linguistici a fonti di dati esterne, API e database. LangChain fornisce strumenti per il prompt engineering avanzato, la gestione della cronologia delle conversazioni e l'integrazione degli LLM in workflow complessi.
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT è un progetto sviluppato da Lightning AI che sfrutta il framework Lightning per facilitare l'addestramento, il fine-tuning e la distribuzione di modelli basati su GPT. Si integra senza problemi con altri strumenti di Lightning AI, fornendo flussi di lavoro ottimizzati per gestire modelli linguistici su larga scala con prestazioni e scalabilità migliorate.
+LitGPT è un progetto sviluppato da Lightning AI che sfrutta il framework Lightning per facilitare l'addestramento, il fine-tuning e la distribuzione di modelli basati su GPT. Si integra perfettamente con gli altri strumenti di Lightning AI, fornendo workflow ottimizzati per la gestione di modelli linguistici su larga scala con prestazioni e scalabilità migliorate.
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
 **Descrizione:**\
-LitServe è uno strumento di distribuzione di Lightning AI progettato per distribuire rapidamente ed efficientemente modelli AI. Semplifica l'integrazione degli LLM in applicazioni in tempo reale fornendo capacità di servizio scalabili e ottimizzate.
+LitServe è uno strumento di distribuzione di Lightning AI progettato per distribuire modelli di AI in modo rapido ed efficiente. Semplifica l'integrazione degli LLM nelle applicazioni in tempo reale fornendo funzionalità di serving scalabili e ottimizzate.
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl è una piattaforma basata su cloud progettata per semplificare la distribuzione, la scalabilità e la gestione di modelli AI, inclusi gli LLM. Offre funzionalità come scalabilità automatizzata, monitoraggio e integrazione con vari servizi cloud, rendendo più facile distribuire modelli in ambienti di produzione senza una gestione infrastrutturale estesa.
+Axolotl è una piattaforma basata sul cloud progettata per semplificare la distribuzione, la scalabilità e la gestione dei modelli di AI, inclusi gli LLM. Offre funzionalità come scaling automatizzato, monitoraggio e integrazione con vari cloud service, semplificando la distribuzione dei modelli negli ambienti di produzione senza una gestione estesa dell'infrastruttura.
 
-## Prova modelli online
+## Provare i modelli online
 
 ### [**Hugging Face**](https://huggingface.co/)
 
-**Hugging Face** è una piattaforma e comunità leader per l'apprendimento automatico, particolarmente nota per il suo lavoro nell'elaborazione del linguaggio naturale (NLP). Fornisce strumenti, librerie e risorse che rendono più facile sviluppare, condividere e distribuire modelli di apprendimento automatico.\
-Offre diverse sezioni come:
+**Hugging Face** è una piattaforma e community leader per il machine learning, particolarmente nota per il suo lavoro nell'elaborazione del linguaggio naturale (NLP). Fornisce strumenti, librerie e risorse che semplificano lo sviluppo, la condivisione e la distribuzione dei modelli di machine learning.\
+Offre diverse sezioni, tra cui:
 
-* **Modelli**: Un vasto repository di **modelli di apprendimento automatico pre-addestrati** dove gli utenti possono navigare, scaricare e integrare modelli per vari compiti come generazione di testo, traduzione, riconoscimento di immagini e altro.
-* **Dataset:** Una **collezione completa di dataset** utilizzati per addestrare e valutare modelli. Facilita l'accesso a fonti di dati diverse, consentendo agli utenti di trovare e utilizzare dati per i loro specifici progetti di apprendimento automatico.
-* **Spazi:** Una piattaforma per ospitare e condividere **applicazioni interattive di apprendimento automatico** e dimostrazioni. Permette agli sviluppatori di **mostrare** i loro modelli in azione, creare interfacce user-friendly e collaborare con altri condividendo dimostrazioni dal vivo.
+* **Models**: Un vasto repository di **modelli di machine learning pre-addestrati** in cui gli utenti possono cercare, scaricare e integrare modelli per varie attività, come la generazione di testo, la traduzione, il riconoscimento delle immagini e altro.
+* **Datasets:** Una **raccolta completa di dataset** utilizzati per addestrare e valutare i modelli. Facilita l'accesso a diverse fonti di dati, consentendo agli utenti di trovare e utilizzare i dati per i propri progetti di machine learning specifici.
+* **Spaces:** Una piattaforma per ospitare e condividere **applicazioni e demo interattive di machine learning**. Consente agli sviluppatori di **mostrare** i propri modelli in azione, creare interfacce intuitive e collaborare con altri condividendo demo live.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub** è un repository completo di moduli di apprendimento automatico riutilizzabili sviluppati da Google. Si concentra sul facilitare la condivisione e la distribuzione di modelli di apprendimento automatico, specialmente quelli costruiti con TensorFlow.
+**TensorFlow Hub** è un repository completo di moduli di machine learning riutilizzabili sviluppati da Google. Si concentra sulla facilitazione della condivisione e della distribuzione dei modelli di machine learning, in particolare quelli creati con TensorFlow.
 
-* **Moduli:** Una vasta collezione di modelli pre-addestrati e componenti di modelli dove gli utenti possono navigare, scaricare e integrare moduli per compiti come classificazione delle immagini, embedding di testo e altro.
-* **Tutorial:** Guide passo-passo ed esempi che aiutano gli utenti a capire come implementare e ottimizzare modelli utilizzando TensorFlow Hub.
-* **Documentazione:** Guide complete e riferimenti API che assistono gli sviluppatori nell'utilizzare efficacemente le risorse del repository.
+* **Modules:** Una vasta raccolta di modelli e componenti di modelli pre-addestrati, in cui gli utenti possono cercare, scaricare e integrare moduli per attività come la classificazione delle immagini, il text embedding e altro.
+* **Tutorials:** Guide ed esempi passo passo che aiutano gli utenti a comprendere come implementare ed eseguire il fine-tuning dei modelli utilizzando TensorFlow Hub.
+* **Documentation:** Guide complete e riferimenti alle API che aiutano gli sviluppatori a utilizzare efficacemente le risorse del repository.
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** è una piattaforma che consente agli sviluppatori di eseguire modelli di apprendimento automatico nel cloud tramite una semplice API. Si concentra sul rendere i modelli ML facilmente accessibili e distribuibili senza la necessità di una configurazione infrastrutturale estesa.
+**Replicate** è una piattaforma che consente agli sviluppatori di eseguire modelli di machine learning nel cloud tramite una semplice API. Si concentra sul rendere i modelli di ML facilmente accessibili e distribuibili senza la necessità di una configurazione estesa dell'infrastruttura.
 
-* **Modelli:** Un repository di modelli di apprendimento automatico contribuiti dalla comunità che gli utenti possono navigare, provare e integrare nei loro applicativi con il minimo sforzo.
-* **Accesso API:** API semplici per eseguire modelli che consentono agli sviluppatori di distribuire e scalare modelli senza sforzo all'interno delle proprie applicazioni.
-
+* **Models:** Un repository di modelli di machine learning forniti dalla community, in cui gli utenti possono cercare, provare e integrare i modelli nelle proprie applicazioni con il minimo sforzo.
+* **API Access:** API semplici per eseguire i modelli che consentono agli sviluppatori di distribuire e scalare i modelli senza difficoltà nelle proprie applicazioni.
 
 {{#include ../banners/hacktricks-training.md}}

