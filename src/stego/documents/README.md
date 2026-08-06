@@ -2,52 +2,53 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-दस्तावेज़ अक्सर सिर्फ कंटेनर होते हैं:
+Documents अक्सर केवल containers होते हैं:
 
 - PDF (embedded files, streams)
-- Office OOXML (`.docx/.xlsx/.pptx` are ZIPs)
-- RTF / OLE पुराने फॉर्मैट
+- Office OOXML (`.docx/.xlsx/.pptx` ZIPs होते हैं)
+- RTF / OLE legacy formats
 
 ## PDF
 
-### तकनीक
+### Technique
 
-PDF एक संरचित कंटेनर है जिसमें objects, streams, और वैकल्पिक embedded files होते हैं। CTFs में आपको अक्सर निम्न करना होता है:
+PDF objects, streams और optional embedded files वाला एक structured container है। CTFs में आपको अक्सर यह करना पड़ता है:
 
-- embedded attachments निकालें
-- Decompress/flatten object streams ताकि आप सामग्री खोज सकें
-- छुपे हुए objects की पहचान करें (JS, embedded images, odd streams)
+- Embedded attachments extract करना
+- Object streams को decompress/flatten करना ताकि आप content में search कर सकें
+- Hidden objects (JS, embedded images, असामान्य streams) identify करना
 
-### त्वरित जाँच
+### Quick checks
 ```bash
 pdfinfo file.pdf
 pdfdetach -list file.pdf
 pdfdetach -saveall file.pdf
 qpdf --qdf --object-streams=disable file.pdf out.pdf
 ```
-फिर `out.pdf` के अंदर संदेहजनक ऑब्जेक्ट/स्ट्रिंग्स खोजें।
+फिर संदिग्ध objects/strings के लिए `out.pdf` के अंदर search करें।
 
 ## Office OOXML
 
-### तकनीक
+### Technique
 
-OOXML को एक ZIP + XML relationship graph के रूप में समझें; payloads अक्सर media, relationships, या असामान्य custom parts में छिपे होते हैं।
+OOXML को ZIP + XML relationship graph की तरह समझें; payloads अक्सर media, relationships या अजीब custom parts में छिपे होते हैं।
 
-OOXML फ़ाइलें ZIP containers होती हैं। इसका मतलब:
+OOXML files ZIP containers होती हैं। इसका मतलब है:
 
-- दस्तावेज़ XML और assets का directory tree होता है।
-- `_rels/` relationship फ़ाइलें external resources या hidden parts की ओर इशारा कर सकती हैं।
-- Embedded डेटा अक्सर `word/media/`, custom XML parts, या असामान्य relationships में रहता है।
+- Document XML और assets की directory tree होता है।
+- `_rels/` relationship files external resources या hidden parts की ओर point कर सकती हैं।
+- Embedded data अक्सर `word/media/`, custom XML parts या unusual relationships में रहती है।
 
-### त्वरित जांच
+### Quick checks
 ```bash
 7z l file.docx
 7z x file.docx -oout
 ```
-फिर जाँच करें:
+फिर निरीक्षण करें:
 
 - `word/document.xml`
-- `word/_rels/` बाहरी संबंधों के लिए
-- `word/media/` में एम्बेडेड मीडिया
+- बाहरी relationships के लिए `word/_rels/`
+- `word/media/` में embedded media
+
 
 {{#include ../../banners/hacktricks-training.md}}
