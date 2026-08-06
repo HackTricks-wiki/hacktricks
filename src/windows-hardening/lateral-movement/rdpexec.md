@@ -4,9 +4,10 @@
 
 ## Jinsi Inavyofanya Kazi
 
-**RDPexec** ni kimsingi kutekeleza amri kwa kuingia kwenye mfumo kwa kutumia RDP.
+**RDPexec** kimsingi hutumika kutekeleza commands kwa kuingia kwenye mfumo kwa kutumia RDP.
 
 Kwa maelezo zaidi angalia:
+
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-rdp.md

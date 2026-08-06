@@ -6,16 +6,16 @@
 
 ### C2 Listeners
 
-`Cobalt Strike -> Listeners -> Add/Edit` kisha unaweza kuchagua wapi kusikiliza, aina gani ya beacon ya kutumia (http, dns, smb...) na zaidi.
+`Cobalt Strike -> Listeners -> Add/Edit` kisha unaweza kuchagua mahali pa kusikiliza, aina ya beacon ya kutumia (http, dns, smb...) na zaidi.
 
 ### Peer2Peer Listeners
 
-Beacons za listeners hawa hazihitaji kuzungumza na C2 moja kwa moja; zinaweza kuwasiliana nayo kupitia beacons nyingine.
+Beacon za listeners hawa hazihitaji kuwasiliana na C2 moja kwa moja; zinaweza kuwasiliana nayo kupitia beacon nyingine.
 
-`Cobalt Strike -> Listeners -> Add/Edit` kisha unahitaji kuchagua TCP au SMB beacons
+`Cobalt Strike -> Listeners -> Add/Edit` kisha unahitaji kuchagua TCP au SMB beacon.
 
-* The **TCP beacon will set a listener in the port selected**. Ili kuunganishwa kwenye TCP beacon tumia amri `connect <ip> <port>` kutoka kwa beacon nyingine
-* The **smb beacon will listen in a pipename with the selected name**. Ili kuunganishwa kwenye SMB beacon unahitaji kutumia amri `link [target] [pipe]`.
+* **TCP beacon itaweka listener kwenye port iliyochaguliwa**. Ili kuunganisha kwenye TCP beacon, tumia command `connect <ip> <port>` kutoka kwenye beacon nyingine.
+* **SMB beacon itasikiliza kwenye pipename yenye jina lililochaguliwa**. Ili kuunganisha kwenye SMB beacon, unahitaji kutumia command `link [target] [pipe]`.
 
 ### Generate & Host payloads
 
@@ -23,23 +23,23 @@ Beacons za listeners hawa hazihitaji kuzungumza na C2 moja kwa moja; zinaweza ku
 
 `Attacks -> Packages ->`
 
-* **`HTMLApplication`** kwa faili za HTA
-* **`MS Office Macro`** kwa nyaraka za Office zilizo na macro
+* **`HTMLApplication`** kwa mafaili ya HTA
+* **`MS Office Macro`** kwa document ya Office yenye macro
 * **`Windows Executable`** kwa .exe, .dll au service .exe
-* **`Windows Executable (S)`** kwa .exe, .dll au service .exe **stageless** (stageless ni bora kuliko staged, ina IoCs chache)
+* **`Windows Executable (S)`** kwa .exe, .dll au service .exe ya **stageless** (stageless ni bora kuliko staged kwa sababu ina IoCs chache)
 
 #### Generate & Host payloads
 
-`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` Hii itaizalisha script/executable kushusha beacon kutoka cobalt strike katika miundo kama: bitsadmin, exe, powershell na python
+`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` Hii itatengeneza script/executable ya kudownload beacon kutoka Cobalt Strike katika formats kama: bitsadmin, exe, powershell na python.
 
 #### Host Payloads
 
-Ikiwa tayari una faili unayotaka ku-host kwenye web server, nenda `Attacks -> Web Drive-by -> Host File` na chagua faili ya ku-host na usanidi wa web server.
+Ikiwa tayari una file unayotaka kuhost kwenye web server, nenda kwenye `Attacks -> Web Drive-by -> Host File` kisha uchague file ya kuhost na configuration ya web server.
 
 ### Beacon Options
 
 <details>
-<summary>Chaguzi na amri za Beacon</summary>
+<summary>Beacon options and commands</summary>
 ```bash
 # Execute local .NET binary
 execute-assembly </path/to/executable.exe>
@@ -194,48 +194,48 @@ beacon> ssh 10.10.17.12:22 username password
 
 ### Custom implants / Linux Beacons
 
-- A custom agent only needs to speak the Cobalt Strike Team Server HTTP/S protocol (default malleable C2 profile) to register/check-in and receive tasks. Implement the same URIs/headers/metadata crypto defined in the profile to reuse the Cobalt Strike UI for tasking and output.
-- An Aggressor Script (e.g., `CustomBeacon.cna`) can wrap payload generation for the non-Windows beacon so operators can select the listener and produce ELF payloads directly from the GUI.
-- Example Linux task handlers exposed to the Team Server: `sleep`, `cd`, `pwd`, `shell` (exec arbitrary commands), `ls`, `upload`, `download`, and `exit`. These map to task IDs expected by the Team Server and must be implemented server-side to return output in the proper format.
-- BOF support on Linux can be added by loading Beacon Object Files in-process with [TrustedSec's ELFLoader](https://github.com/trustedsec/ELFLoader) (supports Outflank-style BOFs too), allowing modular post-exploitation to run inside the implant's context/privileges without spawning new processes.
-- Embed a SOCKS handler in the custom beacon to keep pivoting parity with Windows Beacons: when the operator runs `socks <port>` the implant should open a local proxy to route operator tooling through the compromised Linux host into internal networks.
+- Agent maalum inahitaji tu kuwasiliana na Cobalt Strike Team Server HTTP/S protocol (default malleable C2 profile) ili kujisajili/check-in na kupokea tasks. Tekeleza URIs/headers/metadata crypto zilezile zilizofafanuliwa kwenye profile ili kutumia tena Cobalt Strike UI kwa tasking na output.<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+- Aggressor Script (kwa mfano, `CustomBeacon.cna`) inaweza kufunga payload generation kwa beacon isiyo ya Windows ili operators waweze kuchagua listener na kuzalisha ELF payloads moja kwa moja kutoka kwenye GUI.
+- Mifano ya Linux task handlers zinazowasilishwa kwa Team Server: `sleep`, `cd`, `pwd`, `shell` (kutekeleza commands kiholela), `ls`, `upload`, `download`, na `exit`. Hizi huendana na task IDs zinazotarajiwa na Team Server na lazima zitekelezwe server-side ili kurudisha output katika format sahihi.
+- BOF support kwenye Linux inaweza kuongezwa kwa kupakia Beacon Object Files ndani ya process kwa kutumia [TrustedSec's ELFLoader](https://github.com/trustedsec/ELFLoader) (pia inaunga mkono BOFs za mtindo wa Outflank), hivyo kuruhusu modular post-exploitation kuendeshwa ndani ya context/privileges za implant bila kuanzisha processes mpya.<sup>[[2]](#references)[[3]](#references)</sup>
+- Embed SOCKS handler ndani ya custom beacon ili kudumisha pivoting parity na Windows Beacons: operator anapoendesha `socks <port>`, implant inapaswa kufungua local proxy ya kupitisha operator tooling kupitia Linux host iliyo-compromise kwenda kwenye internal networks.
 
 ## Opsec
 
 ### Execute-Assembly
 
-The **`execute-assembly`** uses a **sacrificial process** using remote process injection to execute the indicated program. This is very noisy as to inject inside a process certain Win APIs are used that every EDR is checking. However, there are some custom tools that can be used to load something in the same process:
+**`execute-assembly`** hutumia **sacrificial process** kwa kutumia remote process injection ili kutekeleza program iliyoonyeshwa. Hii inaonekana sana kwa sababu ili ku-inject ndani ya process hutumika Win APIs fulani ambazo kila EDR huzikagua. Hata hivyo, kuna custom tools zinazoweza kutumika kupakia kitu ndani ya process hiyo hiyo:
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
 - [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
-- In Cobalt Strike you can also use BOF (Beacon Object Files): [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
+- Katika Cobalt Strike unaweza pia kutumia BOF (Beacon Object Files): [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
 
-The agressor script `https://github.com/outflanknl/HelpColor` will create the `helpx` command in Cobalt Strike which will put colors in commands indicating if they are BOFs (green), if they are Frok&Run (yellow) and similar, or if they are ProcessExecution, injection or similar (red). Which helps to know which commands are more stealthy.
+Agressor script `https://github.com/outflanknl/HelpColor` itaunda command ya `helpx` ndani ya Cobalt Strike ambayo itaweka rangi kwenye commands zinazoonyesha ikiwa ni BOFs (kijani), ikiwa ni Frok&Run (manjano) na kadhalika, au ikiwa ni ProcessExecution, injection au kadhalika (nyekundu). Hii husaidia kujua ni commands zipi zenye stealth zaidi.
 
 ### Act as the user
 
-You could check events like `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents`:
+Unaweza kukagua events kama `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents`:
 
-- Security EID 4624 - Check all the interactive logons to know the usual operating hours.
-- System EID 12,13 - Check the shutdown/startup/sleep frequency.
-- Security EID 4624/4625 - Check inbound valid/invalid NTLM attempts.
-- Security EID 4648 - This event is created when plaintext credentials are used to logon. If a process generated it, the binary potentially has the credentials in clear text ina  config file or inside the code.
+- Security EID 4624 - Kagua interactive logons zote ili kujua saa za kawaida za kazi.
+- System EID 12,13 - Kagua frequency ya shutdown/startup/sleep.
+- Security EID 4624/4625 - Kagua majaribio ya inbound NTLM yaliyo valid/invalid.
+- Security EID 4648 - Event hii huundwa plaintext credentials zinapotumika kufanya logon. Ikiwa process imeizalisha, binary huenda ina credentials katika clear text ndani ya config file au ndani ya code.
 
-When using `jump` from cobalt strike, it's better to use the `wmi_msbuild` method to make the new process look more legit.
+Unapotumia `jump` kutoka cobalt strike, ni bora kutumia `wmi_msbuild` method ili process mpya ionekane kuwa legit zaidi.
 
 ### Use computer accounts
 
-It's common for defenders to be checking weird behaviours generated from users abd **exclude service accounts and computer accounts like `*$` from their monitoring**. You could use these accounts to perform lateral movement or privilege escalation.
+Ni kawaida kwa defenders kukagua weird behaviours zinazozalishwa na users na **kuondoa service accounts na computer accounts kama `*$` kwenye monitoring yao**. Unaweza kutumia accounts hizi kufanya lateral movement au privilege escalation.
 
 ### Use stageless payloads
 
-Stageless payloads are less noisy than staged ones because they don't need to download a second stage from the C2 server. This means that they don't generate any network traffic after the initial connection, making them less likely to be detected by network-based defenses.
+Stageless payloads huwa na kelele kidogo kuliko staged payloads kwa sababu hazihitaji kupakua second stage kutoka kwa C2 server. Hii inamaanisha kwamba hazizalishi network traffic yoyote baada ya initial connection, hivyo uwezekano wa kugunduliwa na network-based defenses huwa mdogo.
 
 ### Tokens & Token Store
 
-Be careful when you steal or generate tokens because it might be posisble for an EDR to enumerate all the tokens of all the threads and find a **token belonging to a different user** or even SYSTEM in the process.
+Kuwa mwangalifu unapoiba au kuzalisha tokens kwa sababu inaweza kuwa inawezekana kwa EDR ku-enumerate tokens zote za threads zote na kupata **token belonging to a different user** au hata SYSTEM ndani ya process.
 
-This allows to store tokens **per beacon** so it's not needed to steal the same token again and again. This is useful for lateral movement or when you need to use a stolen token multiple times:
+Hii inaruhusu kuhifadhi tokens **per beacon** ili isiwe muhimu kuiba token ileile tena na tena. Hii ni muhimu kwa lateral movement au unapohitaji kutumia token iliyoibwa mara nyingi:
 
 - token-store steal <pid>
 - token-store steal-and-use <pid>
@@ -244,66 +244,66 @@ This allows to store tokens **per beacon** so it's not needed to steal the same 
 - token-store remove <id>
 - token-store remove-all
 
-When moving laterally, usually is better to **steal a token than to generate a new one** or perform a pass the hash attack.
+Unapofanya lateral movement, kwa kawaida ni bora **kuiba token kuliko kuzalisha mpya** au kufanya pass the hash attack.
 
 ### Guardrails
 
-Cobalt Strike has a feature called **Guardrails** that helps to prevent the use of certain commands or actions that could be detected by defenders. Guardrails can be configured to block specific commands, such as `make_token`, `jump`, `remote-exec`, and others that are commonly used for lateral movement or privilege escalation.
+Cobalt Strike ina feature inayoitwa **Guardrails**, ambayo husaidia kuzuia matumizi ya commands au actions fulani yanayoweza kugunduliwa na defenders. Guardrails zinaweza kusanidiwa kuzuia commands maalum, kama `make_token`, `jump`, `remote-exec`, na nyingine zinazotumika kwa kawaida katika lateral movement au privilege escalation.
 
-Moreover, the repo [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) also contains some checks and ideas you could consider before executing a payload.
+Zaidi ya hayo, repo [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) pia ina baadhi ya checks na mawazo unayoweza kuzingatia kabla ya kutekeleza payload.
 
 ### Tickets encryption
 
-In an AD be careful with the encryption of the tickets. By default, some tools will use RC4 encryption for Kerberos tickets, which is less secure than AES encryption and by default up to date environments will use AES. This can be detected by defenders who are monitoring for weak encryption algorithms.
+Katika AD kuwa mwangalifu na encryption ya tickets. Kwa default, baadhi ya tools zitatumia RC4 encryption kwa Kerberos tickets, ambayo si salama kama AES encryption, na kwa default environments zilizosasishwa zitatumia AES. Hili linaweza kugunduliwa na defenders wanaofuatilia weak encryption algorithms.
 
 ### Avoid Defaults
 
-When using Cobalt Stricke by default the SMB pipes will have the name `msagent_####` and `"status_####`. Change those names. It's possible to check the names of the existing pipes from Cobal Strike with the command: `ls \\.\pipe\`
+Unapotumia Cobalt Stricke, kwa default SMB pipes zitakuwa na majina `msagent_####` na `"status_####"`. Badilisha majina hayo. Inawezekana kukagua majina ya pipes zilizopo kutoka Cobal Strike kwa command: `ls \\.\pipe\`
 
-Moreover, with SSH sessions a pipe called `\\.\pipe\postex_ssh_####` is created. Chage it with `set ssh_pipename "<new_name>";`.
+Zaidi ya hayo, katika SSH sessions pipe iitwayo `\\.\pipe\postex_ssh_####` huundwa. Ibadilishe kwa `set ssh_pipename "<new_name>";`.
 
-Also in poext exploitation attack the pipes `\\.\pipe\postex_####` can be modified with `set pipename "<new_name>"`.
+Pia katika poext exploitation attack pipes `\\.\pipe\postex_####` zinaweza kubadilishwa kwa `set pipename "<new_name>"`.
 
-In Cobalt Strike profiles you can also modify things like:
+Katika Cobalt Strike profiles unaweza pia kubadilisha vitu kama:
 
-- Avoiding using `rwx`
-- How the process injection behavior works (which APIs will be used) in the `process-inject {...}` block
-- How the "fork and run" works in the `post-ex {…}` block
-- The sleep time
-- The max size of binaries to be loaded in memory
-- The memory footprint and DLL content with `stage {...}` block
-- The network traffic
+- Kuepuka kutumia `rwx`
+- Jinsi process injection behavior inavyofanya kazi (ni APIs zipi zitatumika) katika block ya `process-inject {...}`
+- Jinsi "fork and run" inavyofanya kazi katika block ya `post-ex {…}`
+- Muda wa sleep
+- Ukubwa wa juu wa binaries zitakazopakiwa kwenye memory
+- Memory footprint na DLL content kwa kutumia block ya `stage {...}`
+- Network traffic
 
 ### Bypass memory scanning
 
-Some ERDs scan memory for some know malware signatures. Coblat Strike allows to modify the `sleep_mask` function as a BOF that will be able to encrypt in memory the bacldoor.
+Baadhi ya ERDs hukagua memory kutafuta malware signatures zinazojulikana. Coblat Strike inaruhusu kubadilisha function ya `sleep_mask` kuwa BOF itakayoweza ku-encrypt backdoor kwenye memory.
 
 ### Noisy proc injections
 
-When injecting code into a process this is usually very noisy, this is because **no regular process usually performs this action and because the ways to do this are very limited**. Tehrefore, it' could be detected by behaviour-based detection systems. Moroever, it could also be detected by EDRs scanning the network for **threads containing code that is not in disk** (although processes such as browsers using JIT have this commonly). Example: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+Unapo-inject code kwenye process, kwa kawaida hii huwa na kelele sana kwa sababu **hakuna process ya kawaida inayofanya action hii na kwa sababu njia za kufanya hivi ni chache sana**. Kwa hiyo, inaweza kugunduliwa na behaviour-based detection systems. Zaidi ya hayo, inaweza pia kugunduliwa na EDRs zinazochanganua network kutafuta **threads zenye code ambayo haipo kwenye disk** (ingawa processes kama browsers zinazotumia JIT huwa zina hali hii mara kwa mara). Mfano: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
 ### Spawnas | PID and PPID relationships
 
-When spawning a new process it's important to **maintain a regular parent-child** relationship between processes to avoid detection. If svchost.exec is executing iexplorer.exe it'll look suspicious, as svchost.exe is not a parent of iexplorer.exe in a normal Windows environment.
+Unapozalisha process mpya, ni muhimu **kudumisha regular parent-child** relationship kati ya processes ili kuepuka detection. Ikiwa svchost.exec inaendesha iexplorer.exe, itaonekana ya kutia shaka, kwa sababu svchost.exe si parent wa iexplorer.exe katika mazingira ya kawaida ya Windows.
 
-When a new beacon is spawned in Cobalt Strike by default a process using **`rundll32.exe`** is created to run the new listener. This is not very stealthy and can be easily detected by EDRs. Moreover, `rundll32.exe` is run without any args making it even more suspicious.
+Beacon mpya inapozalishwa katika Cobalt Strike, kwa default process inayotumia **`rundll32.exe`** huundwa ili kuendesha listener mpya. Hii si stealthy sana na inaweza kugunduliwa kwa urahisi na EDRs. Zaidi ya hayo, `rundll32.exe` huendeshwa bila args yoyote, jambo linaloifanya iwe ya kutia shaka zaidi.
 
-With the following Cobalt Strike command, you can specify a different process to spawn the new beacon, making it less detectable:
+Kwa command ifuatayo ya Cobalt Strike, unaweza kubainisha process tofauti ya kuzalisha beacon mpya, na kuifanya isiwe rahisi kugunduliwa:
 ```bash
 spawnto x86 svchost.exe
 ```
-Unaweza pia kubadilisha mpangilio huu **`spawnto_x86` and `spawnto_x64`** katika profaili.
+Unaweza pia kubadilisha setting hii **`spawnto_x86` na `spawnto_x64`** kwenye profile.
 
-### Proxying attackers traffic
+### Ku-proxy traffic ya attackers
 
-Wadukuzi wakati mwingine watahitaji kuweza kuendesha zana ndani ya mashine kwa mtaa (locally), hata kwenye mashine za Linux, na kufanya trafiki ya wahanga ifikie zana (mfano NTLM relay).
+Attackers wakati mwingine watahitaji kuweza kuendesha tools locally, hata kwenye mashine za Linux, na kufanya traffic ya victims ifikie tool hiyo (mfano NTLM relay).
 
-Zaidi ya hayo, wakati mwingine kwa kufanya shambulio la pass-the.hash au pass-the-ticket ni siri zaidi kwa mdukuzi **kuongeza hash au tiketi hii katika mchakato wake wa LSASS** kwa ndani na kisha kutumia pivot kutoka kwake badala ya kuharibu mchakato wa LSASS wa mashine ya mwathirika.
+Aidha, wakati mwingine ili kufanya pass-the-hash au pass-the-ticket attack, ni stealthier kwa attacker **kuongeza hash au ticket hiyo kwenye LSASS process yake mwenyewe** locally, kisha kufanya pivot kupitia hiyo badala ya kurekebisha LSASS process ya mashine ya victim.
 
-Hata hivyo, unahitaji kuwa **makini na trafiki iliyotengenezwa**, kwa kuwa unaweza kutuma trafiki isiyo ya kawaida (kerberos?) kutoka kwa mchakato wako wa backdoor. Kwa hili unaweza ku-pivot hadi browser process (ingawa unaweza kukamatwa ukiingiza yako ndani ya mchakato hivyo fikiria njia ya siri ya kufanya hili).
+Hata hivyo, unahitaji kuwa **mwangalifu na traffic inayozalishwa**, kwa sababu unaweza kuwa unatuma traffic isiyo ya kawaida (Kerberos?) kutoka kwenye backdoor process yako. Kwa hili unaweza kufanya pivot kwenda kwenye browser process (ingawa unaweza kugunduliwa kwa kujidunga kwenye process, kwa hiyo fikiria njia ya stealth ya kufanya hivyo).
 
 
-### Avoiding AVs
+### Kuepuka AVs
 
 #### AV/AMSI/ETW Bypass
 
@@ -317,45 +317,45 @@ av-bypass.md
 
 #### Artifact Kit
 
-Kawaida katika `/opt/cobaltstrike/artifact-kit` unaweza kupata code na pre-compiled templates (katika `/src-common`) za payloads ambazo cobalt strike itatumia kuunda binary beacons.
+Kwa kawaida kwenye `/opt/cobaltstrike/artifact-kit` unaweza kupata code na templates zilizotengenezwa awali (kwenye `/src-common`) za payloads ambazo cobalt strike itatumia kutengeneza binary beacons.
 
-Kwa kutumia [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) na backdoor iliyotengenezwa (au tu na template iliyokunjwa) unaweza kugundua ni nini kinachosababisha defender kuanzisha tahadhari. Kawaida ni string. Kwa hiyo unaweza kubadilisha code inayotengeneza backdoor ili string hiyo isionekane katika binary ya mwisho.
+Kwa kutumia [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) pamoja na backdoor iliyotengenezwa (au template iliyocompilewa pekee), unaweza kubaini kinachosababisha defender kutoa alert. Kwa kawaida huwa ni string. Kwa hiyo unaweza tu kurekebisha code inayotengeneza backdoor ili string hiyo isionekane kwenye binary ya mwisho.
 
-Baada ya kubadilisha code endesha tu `./build.sh` kutoka katika direktori hiyo hiyo na nakili folda ya `dist-pipe/` kwenye client ya Windows katika `C:\Tools\cobaltstrike\ArtifactKit`.
+Baada ya kurekebisha code, endesha tu `./build.sh` kutoka kwenye directory hiyo hiyo na unakili folder ya `dist-pipe/` kwenye Windows client katika `C:\Tools\cobaltstrike\ArtifactKit`.
 ```
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
-Usisahau ku-load script kali `dist-pipe\artifact.cna` ili kumwambia Cobalt Strike atumie rasilimali kutoka diski tunazotaka badala ya zile zilizopakiwa.
+Usisahau kupakia script ya aggressive `dist-pipe\artifact.cna` ili kuielekeza Cobalt Strike itumie resources zilizo kwenye disk tunazotaka, badala ya zile zilizopakiwa.
 
 #### Resource Kit
 
-Folda ya ResourceKit ina templates za script-based payloads za Cobalt Strike, zikiwemo PowerShell, VBA na HTA.
+Folder ya ResourceKit ina templates za payloads za Cobalt Strike zinazotegemea script, zikiwemo PowerShell, VBA na HTA.
 
-Ukivitumia ThreatCheck pamoja na templates unaweza kuona ni nini Defender (AMSI katika kesi hii) hakipendi na kuibadilisha:
+Kwa kutumia [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) pamoja na templates, unaweza kubaini ni sehemu gani Defender (AMSI katika hali hii) haikubali na kuibadilisha:
 ```
 .\ThreatCheck.exe -e AMSI -f .\cobaltstrike\ResourceKit\template.x64.ps1
 ```
-Kwa kubadilisha mistari iliyotambuliwa, unaweza kuunda kiolezo ambacho hakitakamatwa.
+Kwa kurekebisha mistari iliyotambuliwa, unaweza kutengeneza template ambayo haitagunduliwa.
 
-Usisahau kupakia script mkali `ResourceKit\resources.cna` ili kumwonyesha Cobalt Strike kutumia rasilimali kutoka diski tunazotaka na si zile zilizopakiwa.
+Usisahau kupakia script ya aggressive `ResourceKit\resources.cna` ili kuielekeza Cobalt Strike kutumia resources kutoka kwenye disk tunazotaka, badala ya zile zilizopakiwa.
 
 #### Function hooks | Syscall
 
-Function hooking ni mbinu ya kawaida sana ya EDRs kugundua shughuli zenye madhara. Cobalt Strike inakuwezesha kupitisha hooks hizi kwa kutumia **syscalls** badala ya wito wa kawaida wa Windows API kwa kutumia config ya **`None`**, au kutumia toleo la `Nt*` la function kwa setting ya **`Direct`**, au kuruka tu juu ya function ya `Nt*` kwa chaguo la **`Indirect`** katika malleable profile. Kulingana na mfumo, chaguo moja linaweza kuwa la kimya zaidi kuliko jingine.
+Function hooking ni mbinu inayotumika sana na ERDs kugundua shughuli hasidi. Cobalt Strike hukuruhusu bypass hooks hizi kwa kutumia **syscalls** badala ya standard Windows API calls kwa kutumia config ya **`None`**, au kutumia toleo la **`Nt*`** la function kwa setting ya **`Direct`**, au kuruka tu juu ya function ya **`Nt*`** kwa option ya **`Indirect`** kwenye malleable profile. Kulingana na mfumo, option moja inaweza kuwa stealthier kuliko nyingine.
 
-Hii inaweza kuwekwa katika profile au kwa kutumia amri **`syscall-method``**.
+Hii inaweza kuwekwa kwenye profile au kwa kutumia command **`syscall-method`**
 
-Hata hivyo, hii pia inaweza kusababisha kelele.
+Hata hivyo, hii pia inaweza kuwa noisy.
 
-Chaguo moja kinachotolewa na Cobalt Strike kwa kuruka function hooks ni kuondoa hooks hizo kwa kutumia: [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof).
+Option moja inayotolewa na Cobalt Strike ya kubypass function hooks ni kuondoa hooks hizo kwa kutumia: [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof).
 
-Unaweza pia kuangalia ni functions gani zimehookiwa kwa kutumia [**https://github.com/Mr-Un1k0d3r/EDRs**](https://github.com/Mr-Un1k0d3r/EDRs) au [**https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector**](https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector)
+Unaweza pia kuangalia ni functions zipi zimehookiwa kwa kutumia [**https://github.com/Mr-Un1k0d3r/EDRs**](https://github.com/Mr-Un1k0d3r/EDRs) au [**https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector**](https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector)
 
 
 
 
 <details>
-<summary>Amri mbalimbali za Cobalt Strike</summary>
+<summary>Misc Cobalt Strike commands</summary>
 ```bash
 cd C:\Tools\neo4j\bin
 neo4j.bat console
@@ -381,12 +381,12 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 
 ## Marejeo
 
-- [Cobalt Strike Linux Beacon (custom implant PoC)](https://github.com/EricEsquivel/CobaltStrike-Linux-Beacon)
-- [TrustedSec ELFLoader & Linux BOFs](https://github.com/trustedsec/ELFLoader)
-- [Outflank nix BOF template](https://github.com/outflanknl/nix_bof_template)
-- [Unit42 analysis of Cobalt Strike metadata encryption](https://unit42.paloaltonetworks.com/cobalt-strike-metadata-encryption-decryption/)
-- [SANS ISC diary on Cobalt Strike traffic](https://isc.sans.edu/diary/27968)
-- [cs-decrypt-metadata-py](https://blog.didierstevens.com/2021/10/22/new-tool-cs-decrypt-metadata-py/)
-- [SentinelOne CobaltStrikeParser](https://github.com/Sentinel-One/CobaltStrikeParser)
+- [1] [Cobalt Strike Linux Beacon (custom implant PoC)](https://github.com/EricEsquivel/CobaltStrike-Linux-Beacon)
+- [2] [TrustedSec ELFLoader & Linux BOFs](https://github.com/trustedsec/ELFLoader)
+- [3] [Outflank nix BOF template](https://github.com/outflanknl/nix_bof_template)
+- [4] [Uchambuzi wa Unit42 kuhusu usimbaji fiche wa metadata ya Cobalt Strike](https://unit42.paloaltonetworks.com/cobalt-strike-metadata-encryption-decryption/)
+- [5] [Diary ya SANS ISC kuhusu traffic ya Cobalt Strike](https://isc.sans.edu/diary/27968)
+- [6] [cs-decrypt-metadata-py](https://blog.didierstevens.com/2021/10/22/new-tool-cs-decrypt-metadata-py/)
+- [7] [SentinelOne CobaltStrikeParser](https://github.com/Sentinel-One/CobaltStrikeParser)
 
 {{#include ../banners/hacktricks-training.md}}

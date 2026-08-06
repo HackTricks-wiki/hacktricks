@@ -1,33 +1,33 @@
-# Kerberos Double Hop Tatizo
+# Kerberos Double Hop Problem
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
 ## Utangulizi
 
-Tatizo la Kerberos "Double Hop" linaonekana wakati mshambuliaji anajaribu kutumia **Kerberos authentication across two** **hops**, kwa mfano akitumia **PowerShell**/**WinRM**.
+Tatizo la Kerberos "Double Hop" hutokea wakati mshambuliaji anapojaribu kutumia **Kerberos authentication kupitia** **hops** mbili, kwa mfano akitumia **PowerShell**/**WinRM**.
 
-Wakati **authentication** inapotokea kupitia **Kerberos**, **credentials** **hazihifadhiwi** kwenye **memory.** Kwa hivyo, ikiwa utaendesha mimikatz hutaona **credentials** za mtumiaji kwenye mashine hata kama anafanya michakato.
+Wakati **authentication** inapotokea kupitia **Kerberos**, **credentials** **hazihifadhiwi** kwenye **memory.** Kwa hivyo, ukiendesha mimikatz **hutapata credentials** za mtumiaji kwenye mashine hata kama anaendesha processes.
 
-Hii ni kwa sababu wakati wa kuunganishwa kwa Kerberos hatua ni hizi:
+Hii hutokea kwa sababu wakati wa kuunganisha kwa Kerberos, hatua huwa kama zifuatazo:<sup>[[1]](#references)</sup>
 
-1. User1 anatoa **credentials** na **domain controller** hurudisha Kerberos **TGT** kwa User1.
-2. User1 anatumia **TGT** kuomba **service ticket** ili **connect** na Server1.
-3. User1 **connects** kwa **Server1** na anatoa **service ticket**.
-4. **Server1** **haina** **credentials** za User1 zilizohifadhiwa (cached) au **TGT** ya User1. Kwa hivyo, wakati User1 kutoka Server1 anapojaribu kuingia kwenye server ya pili, yeye **hatawezi kuthibitisha utambulisho**.
+1. User1 hutoa credentials na **domain controller** hurudisha Kerberos **TGT** kwa User1.
+2. User1 hutumia **TGT** kuomba **service ticket** ili **kuunganisha** kwenye Server1.
+3. User1 **huunganisha** kwenye **Server1** na kutoa **service ticket**.
+4. **Server1** **haina** **credentials** za User1 zilizohifadhiwa au **TGT** ya User1. Kwa hivyo, User1 anapojaribu ku-login kwenye server ya pili kutoka Server1, **hawezi kufanya authentication**.
 
 ### Unconstrained Delegation
 
-If **unconstrained delegation** is enabled in the PC, this won't happen as the **Server** will **get** a **TGT** of each user accessing it. Moreover, if unconstrained delegation is used you probably can **compromise the Domain Controller** from it.\
-[**More info in the unconstrained delegation page**](unconstrained-delegation.md).
+Ikiwa **unconstrained delegation** imewezeshwa kwenye PC, hili halitatokea kwa sababu **Server** **itapata** **TGT** ya kila mtumiaji anayeifikia. Zaidi ya hayo, ikiwa unconstrained delegation inatumika, huenda ukaweza **kucompromise Domain Controller** kutoka humo.\
+[**Maelezo zaidi kwenye ukurasa wa unconstrained delegation**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Another way to avoid this problem which is [**notably insecure**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) is **Credential Security Support Provider**. From Microsoft:
+Njia nyingine ya kuepuka tatizo hili ambayo ni [**notably insecure**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) ni **Credential Security Support Provider**. Kutoka kwa Microsoft:
 
-> CredSSP authentication inapeleka credentials za mtumiaji kutoka kwenye kompyuta ya eneo hadi kwenye kompyuta ya mbali. Tabia hii inaongeza hatari ya usalama ya operesheni ya mbali. Ikiwa kompyuta ya mbali imevamiwa, wakati credentials zinapopitishwa kwako, credentials zinaweza kutumika kudhibiti kikao cha mtandao.
+> CredSSP authentication hukabidhi credentials za mtumiaji kutoka kwenye kompyuta ya ndani kwenda kwenye kompyuta ya mbali. Zoezi hili huongeza security risk ya operesheni ya mbali. Ikiwa kompyuta ya mbali imecompromise, credentials zinapopitishwa kwake, zinaweza kutumiwa kudhibiti network session.
 
-Inashauriwa sana kwamba **CredSSP** izimwe kwenye systems za production, mitandao yenye hisia, na mazingira yanayofanana kutokana na masuala ya usalama. Ili kubaini kama **CredSSP** imewezeshwa, unaweza kuendesha amri `Get-WSManCredSSP`. Amri hii inaruhusu **checking of CredSSP status** na inaweza hata kuendeshwa kwa mbali, mradi tu **WinRM** imewezeshwa.
+Inapendekezwa sana kwamba **CredSSP** izimwe kwenye production systems, networks nyeti, na mazingira yanayofanana kutokana na security concerns. Ili kubaini ikiwa **CredSSP** imewezeshwa, command ya `Get-WSManCredSSP` inaweza kuendeshwa. Command hii huruhusu **kukagua hali ya CredSSP** na inaweza hata kutekelezwa remotely, mradi **WinRM** imewezeshwa.
 ```bash
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
@@ -35,32 +35,32 @@ Get-WSManCredSSP
 ```
 ### Remote Credential Guard (RCG)
 
-**Remote Credential Guard** inahifadhi TGT ya mtumiaji kwenye workstation ya asili huku ikiruhusu kikao cha RDP kuomba tiketi mpya za huduma za Kerberos kwenye hop inayofuata. Weka **Computer Configuration > Administrative Templates > System > Credentials Delegation > Restrict delegation of credentials to remote servers** na chagua **Require Remote Credential Guard**, kisha ungane kwa kutumia `mstsc.exe /remoteGuard /v:server1` badala ya kurejea kwa CredSSP.
+**Remote Credential Guard** huhifadhi TGT ya mtumiaji kwenye workstation asili huku ikiendelea kuruhusu RDP session kuomba Kerberos service tickets mpya kwenye hop inayofuata. Washa **Computer Configuration > Administrative Templates > System > Credentials Delegation > Restrict delegation of credentials to remote servers** na uchague **Require Remote Credential Guard**, kisha unganisha kwa `mstsc.exe /remoteGuard /v:server1` badala ya kutumia CredSSP.
 
-Microsoft iliharibu RCG kwa ufikiaji wa multi-hop kwenye Windows 11 22H2+ hadi **April 2024 cumulative updates** (KB5036896/KB5036899/KB5036894). Sakinisha patch kwenye client na intermediary server, vinginevyo second hop bado itashindwa. Ukaguzi mfupi wa hotfix:
+Microsoft ilivuruga RCG kwa multi-hop access kwenye Windows 11 22H2+ hadi **April 2024 cumulative updates** (KB5036896/KB5036899/KB5036894). Fanya patch client na intermediary server, vinginevyo second hop bado itashindikana.<sup>[[5]](#references)</sup> Ukaguzi wa haraka wa hotfix:
 ```powershell
 ("KB5036896","KB5036899","KB5036894") | ForEach-Object {
 Get-HotFix -Id $_ -ErrorAction SilentlyContinue
 }
 ```
-Kwa kuwa matoleo hayo yamesanikishwa, RDP hop inaweza kutimiza changamoto za Kerberos zinazofuata bila kufichua siri zinazoweza kutumika tena kwenye server ya kwanza.
+Kwa builds hizo zikiwa zimesakinishwa, RDP hop inaweza kukidhi Kerberos challenges za downstream bila kufichua secrets zinazoweza kutumika tena kwenye server ya kwanza.
 
 ## Workarounds
 
 ### Invoke Command
 
-Ili kushughulikia tatizo la double hop, inatolewa njia inayohusisha `Invoke-Command` iliyowekwa ndani. Hii haisuluhishi tatizo moja kwa moja lakini inatoa suluhisho la kuzunguka bila kuhitaji usanidi maalum. Njia hii inaruhusu kutekeleza amri (`hostname`) kwenye server ya pili kupitia amri ya PowerShell inayotekelezwa kutoka kwenye attacking machine ya awali au kupitia PS-Session iliyowekwa awali na server ya kwanza. Hapa jinsi inavyofanywa:
+Ili kushughulikia tatizo la double hop, method inayohusisha `Invoke-Command` iliyowekwa ndani ya nyingine inawasilishwa. Hii haisuluhishi tatizo moja kwa moja, lakini hutoa workaround bila kuhitaji configurations maalum. Approach hii inaruhusu kutekeleza command (`hostname`) kwenye server ya pili kupitia PowerShell command inayotekelezwa kutoka kwa attacking machine ya awali au kupitia PS-Session iliyokuwa imeanzishwa awali na server ya kwanza. Hivi ndivyo inavyofanywa:<sup>[[2]](#references)</sup>
 ```bash
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
-Badala yake, kuanzisha PS-Session na server ya kwanza na kuendesha `Invoke-Command` ukitumia `$cred` kunapendekezwa kwa ajili ya kuzingatia majukumu.
+Vinginevyo, inapendekezwa kuanzisha PS-Session na server ya kwanza na kuendesha `Invoke-Command` kwa kutumia `$cred` ili kuweka tasks katika sehemu moja.
 
-### Register PSSession Configuration
+### Sajili PSSession Configuration
 
-Suluhisho la kukwepa tatizo la double hop linahusisha kutumia `Register-PSSessionConfiguration` pamoja na `Enter-PSSession`. Njia hii inahitaji mbinu tofauti kuliko `evil-winrm` na inaruhusu session ambayo haiko chini ya kikwazo cha double hop.
+Suluhisho la kukwepa double hop problem linahusisha kutumia `Register-PSSessionConfiguration` pamoja na `Enter-PSSession`. Mbinu hii inahitaji njia tofauti na `evil-winrm` na inaruhusu session ambayo haiathiriwi na kizuizi cha double hop.<sup>[[3]](#references)[[4]](#references)</sup>
 ```bash
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
@@ -69,52 +69,51 @@ klist
 ```
 ### PortForwarding
 
-Kwa wasimamizi wa ndani kwenye lengo la mpatanishi, port forwarding inaruhusu maombi kutumwa kwa seva ya mwisho. Kwa kutumia `netsh`, kanuni inaweza kuongezwa kwa ajili ya port forwarding, pamoja na kanuni ya Windows firewall ili kuruhusu port iliyotumwa.
+Kwa local administrators kwenye intermediary target, port forwarding huruhusu requests kutumwa kwenye final server. Kwa kutumia `netsh`, rule inaweza kuongezwa kwa port forwarding, pamoja na Windows firewall rule ili kuruhusu forwarded port.<sup>[[2]](#references)</sup>
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
 ```
 #### winrs.exe
 
-`winrs.exe` inaweza kutumika kwa forwarding maombi ya WinRM, pengine kama chaguo isiyogundulika ikiwa ufuatiliaji wa PowerShell ni wasiwasi. Amri hapa chini inaonyesha matumizi yake:
+`winrs.exe` inaweza kutumiwa kusambaza maombi ya WinRM, na huenda ikawa chaguo lisilotambulika kwa urahisi ikiwa ufuatiliaji wa PowerShell ni tatizo.<sup>[[2]](#references)</sup> Amri iliyo hapa chini inaonyesha matumizi yake:
 ```bash
 winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
 ### OpenSSH
 
-Kufunga OpenSSH kwenye seva ya kwanza kunaruhusu njia mbadala kwa tatizo la double-hop, haswa muhimu kwa jump box scenarios. Njia hii inahitaji ufungaji kupitia CLI na usanidi wa OpenSSH kwa Windows. Ikiwa imesanidiwa kwa Password Authentication, hii inamruhusu seva ya kati kupata TGT kwa niaba ya mtumiaji.
+Kusakinisha OpenSSH kwenye server ya kwanza huwezesha workaround ya tatizo la double-hop, ambayo ni muhimu hasa katika hali za jump box. Njia hii inahitaji usakinishaji na usanidi wa OpenSSH for Windows kupitia CLI. Ikisanidiwa kwa Password Authentication, server ya kati inaweza kupata TGT kwa niaba ya mtumiaji.<sup>[[2]](#references)</sup>
 
-#### Hatua za Ufungaji za OpenSSH
+#### Hatua za Usakinishaji wa OpenSSH
 
-1. Pakua na hamisha zip ya toleo la hivi karibuni la OpenSSH kwenye seva lengwa.
-2. Toa (unzip) na endesha script ya `Install-sshd.ps1`.
-3. Ongeza sheria ya firewall ili kufungua port 22 na hakiki kuwa huduma za SSH zinaendelea kufanya kazi.
+1. Pakua na uhamishe zip ya toleo jipya zaidi la OpenSSH kwenye server lengwa.
+2. Ifungue na uendeshe script ya `Install-sshd.ps1`.
+3. Ongeza firewall rule ya kufungua port 22 na uthibitishe kuwa huduma za SSH zinafanya kazi.
 
-Ili kutatua makosa ya `Connection reset`, ruhusa zinaweza kuhitaji kusasishwa ili kumruhusu kila mtu haki za kusoma na kutekeleza kwenye directory ya OpenSSH.
+Ili kutatua errors za `Connection reset`, huenda ruhusa zikahitaji kusasishwa ili kuruhusu kila mtu kupata ruhusa za kusoma na kutekeleza kwenye directory ya OpenSSH.
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
-### LSA Whisperer CacheLogon (Ya hali ya juu)
+### LSA Whisperer CacheLogon (Advanced)
 
-**LSA Whisperer** (2024) inafichua mwito wa kifurushi `msv1_0!CacheLogon` ili uweze kupandia *network logon* iliyopo na NT hash inayojulikana badala ya kuunda kikao kipya kwa `LogonUser`. Kwa kuingiza hash ndani ya kikao cha logon ambacho WinRM/PowerShell tayari imefungua kwenye hop #1, host hiyo inaweza ku-authenticate kwa hop #2 bila kuhifadhi explicit credentials au kuzalisha matukio ya ziada ya 4624.
+**LSA Whisperer** (2024) hufichua package call ya `msv1_0!CacheLogon`, hivyo unaweza ku-seed *network logon* iliyopo kwa kutumia NT hash inayojulikana badala ya kuunda session mpya kwa `LogonUser`. Kwa ku-inject hash hiyo kwenye logon session ambayo WinRM/PowerShell tayari imefungua kwenye hop #1, host hiyo inaweza ku-authenticate kwenye hop #2 bila kuhifadhi credentials za moja kwa moja au kuzalisha events za ziada za 4624.<sup>[[6]](#references)</sup>
 
-1. Pata utekelezaji wa msimbo ndani ya LSASS (ama uzime/tumia vibaya PPL au endesha kwenye VM ya maabara unayodhibiti).
-2. Orodhesha vikao vya logon (mf. `lsa.exe sessions`) na kamata LUID inayolingana na muktadha wako wa remoting.
-3. Hesabu mapema NT hash na uipe `CacheLogon`, kisha ufute wakati umemaliza.
+1. Pata code execution ndani ya LSASS (ama zima/tumia vibaya PPL au endesha kwenye lab VM unayoidhibiti).
+2. Enumerate logon sessions (kwa mfano, `lsa.exe sessions`) na capture LUID inayohusiana na remoting context yako.
+3. Pre-compute NT hash na uipe kwa `CacheLogon`, kisha i-clear ukimaliza.
 ```powershell
 lsa.exe cachelogon --session 0x3e4 --domain ta --username redsuit --nthash a7c5480e8c1ef0ffec54e99275e6e0f7
 lsa.exe cacheclear --session 0x3e4
 ```
-Baada ya kuanzisha cache, endelea tena `Invoke-Command`/`New-PSSession` kutoka hop #1: LSASS itatumia tena hash iliyopachikwa ili kutosheleza changamoto za Kerberos/NTLM kwa hop ya pili, kwa ufanisi kuepuka vikwazo vya double hop. Gharama yake ni telemetry nzito (code execution in LSASS), hivyo uitumie tu kwa mazingira yenye ugumu mkubwa ambapo CredSSP/RCG haziruhusiwi.
+Baada ya cache seed, endesha tena `Invoke-Command`/`New-PSSession` kutoka hop #1: LSASS itatumia tena hash iliyoingizwa ili kutimiza changamoto za Kerberos/NTLM kwa hop ya pili, na hivyo kukwepa kwa urahisi kizuizi cha double hop. Hasara ni telemetry nyingi zaidi (utekelezaji wa code ndani ya LSASS), kwa hivyo itumie katika mazingira yenye vikwazo vikali ambapo CredSSP/RCG hairuhusiwi.
 
 ## Marejeo
 
-- [https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
-- [https://posts.slayerlabs.com/double-hop/](https://posts.slayerlabs.com/double-hop/)
-- [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
-- [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
-- [https://support.microsoft.com/en-au/topic/april-9-2024-kb5036896-os-build-17763-5696-efb580f1-2ce4-4695-b76c-d2068a00fb92](https://support.microsoft.com/en-au/topic/april-9-2024-kb5036896-os-build-17763-5696-efb580f1-2ce4-4695-b76c-d2068a00fb92)
-- [https://specterops.io/blog/2024/04/17/lsa-whisperer/](https://specterops.io/blog/2024/04/17/lsa-whisperer/)
-
+- [1] [Kuelewa Kerberos Double Hop - Microsoft Community Hub](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
+- [2] [Njia Mbadala za Kerberos Double-Hop](https://posts.slayerlabs.com/double-hop/)
+- [3] [Suluhisho lingine la multi-hop PowerShell remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
+- [4] [Tatua tatizo la PowerShell multi-hop bila kutumia CredSSP](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
+- [5] [Aprili 9, 2024—KB5036896 (OS Build 17763.5696)](https://support.microsoft.com/en-au/topic/april-9-2024-kb5036896-os-build-17763-5696-efb580f1-2ce4-4695-b76c-d2068a00fb92)
+- [6] [LSA Whisperer](https://specterops.io/blog/2024/04/17/lsa-whisperer/)
 
 {{#include ../../banners/hacktricks-training.md}}

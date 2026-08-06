@@ -1,8 +1,8 @@
-# External Forest Domain - One-Way (Outbound)
+# Kikoa cha Forest ya Nje - One-Way (Outbound)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Katika hali hii **domain yako** inatoa **trust** kwa baadhi ya **privileges** kwa principals kutoka **domain/forest** nyingine.
+Katika hali hii, **domain yako** inaamini **privileges** fulani kwa principals kutoka **domain/forest** tofauti.
 
 ## Enumeration
 
@@ -28,7 +28,7 @@ MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
 MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
-Ikiwa una AD module inapatikana, kagua pia **Trusted Domain Object (TDO)** moja kwa moja. Hii inakupa data ghafi ya trust inayotegemea LDAP ambayo baadaye utaihitaji unapoamua kama njia rahisi ni **FSP/group abuse** au **trust-account abuse**:
+Ikiwa una AD module, kagua moja kwa moja **Trusted Domain Object (TDO)** pia. Hii inakupa data ghafi ya trust inayotegemea LDAP utakayohitaji baadaye unapoamua kama njia rahisi ni **FSP/group abuse** au **trust-account abuse**:
 ```powershell
 # Enumerate the TDO created for the foreign forest/domain
 Get-ADObject -LDAPFilter '(objectClass=trustedDomain)' -SearchBase "CN=System,$((Get-ADDomain).DistinguishedName)" -Properties trustDirection,trustType,trustAttributes,flatName,securityIdentifier,whenCreated,whenChanged |
@@ -37,37 +37,37 @@ Select Name,flatName,trustDirection,trustType,trustAttributes,securityIdentifier
 # Fast trust hygiene check from the outbound side
 Get-ADTrust -Identity ext.local -Properties ForestTransitive,SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation
 ```
-Unapaswa pia kuorodhesha mahali ambapo principals za kigeni kutoka `CN=ForeignSecurityPrincipals` zilipewa access kweli. Ushindi wa kawaida ni:
+Unapaswa pia kuorodhesha mahali ambapo foreign principals kutoka `CN=ForeignSecurityPrincipals` walipewa access. Mifano ya kawaida ni:
 
 - **Local admin** kwenye server/DC katika domain yako ya sasa
-- Uanachama katika **custom domain group** ambayo ina ACLs juu ya users/computers/GPOs
-- Haki za kurekebisha **computer objects**, ambazo baadaye zinaweza kuwa [RBCD](resource-based-constrained-delegation.md) ikiwa trust configuration inaruhusu
+- Uanachama katika **custom domain group** yenye ACLs juu ya users/computers/GPOs
+- Ruhusa za kurekebisha **computer objects**, ambazo baadaye zinaweza kutumika kwa [RBCD](resource-based-constrained-delegation.md) ikiwa trust configuration inaruhusu
 
 ## Trust Account Attack
 
-Wakati one-way trust inaundwa kutoka domain/forest **B** kwenda domain/forest **A** (**B trusts A**), **trust account** kwa **B** huundwa katika **A**. Katika outbound-trust view ya **A**, hii ni muhimu kwa sababu ukipata compromise ya **B** baadaye (the trusting side), unaweza dump trust secret hapo na authenticate kurudi **A** kama `B$`.
+Wakati one-way trust inaundwa kutoka domain/forest **B** kwenda domain/forest **A** (**B trusts A**), **trust account** ya **B** huundwa ndani ya **A**. Katika outbound-trust view ya **A**, hii ni muhimu kwa sababu ikiwa baadaye uta-compromise **B** (upande unao-trust), unaweza kudump trust secret huko na ku-authenticate kurudi **A** kama `B$`.<sup>[[1]](#references)</sup>
 
-Sehemu muhimu ya kuelewa hapa ni kwamba password na Kerberos material kwa trust account hiyo zinaweza kutolewa kutoka kwa Domain Controller katika domain ya **trusting** kwa kutumia:
+Jambo muhimu la kuelewa hapa ni kwamba password na Kerberos material ya trust account hiyo zinaweza kutolewa kutoka kwa Domain Controller katika domain **trusting** kwa kutumia:<sup>[[1]](#references)</sup>
 ```bash
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
-Hii hufanya kazi kwa sababu akaunti ya trust iliyoundwa katika domain **trusted** ni principal iliyowezeshwa ambayo huishia na baseline rights za mtumiaji wa kawaida wa domain huko. Hilo mara nyingi hutosha kuanza kuenumerate LDAP, kuomba tickets, na kupata njia inayofuata ya escalation.
+Hii hufanya kazi kwa sababu trust account iliyoundwa katika domain ya **trusted** ni principal iliyowashwa ambayo huishia kuwa na baseline rights za domain user wa kawaida humo. Mara nyingi hilo hutosha kuanza ku-enumerate LDAP, ku-request tickets, na kupata njia inayofuata ya escalation.<sup>[[1]](#references)</sup>
 
-Katika scenario ambapo `ext.local` ni domain ya **trusting** na `root.local` ni domain ya **trusted**, akaunti ya mtumiaji inayoitwa `EXT$` huundwa ndani ya `root.local`. Dumping trust keys kutoka `ext.local` hufichua credentials ambazo zinaweza kutumika kama `root.local\EXT$` dhidi ya `root.local`:
+Katika scenario ambapo `ext.local` ni domain ya **trusting** na `root.local` ni domain ya **trusted**, user account yenye jina `EXT$` huundwa ndani ya `root.local`. Kudump trust keys kutoka `ext.local` hufichua credentials zinazoweza kutumika kama `root.local\EXT$` dhidi ya `root.local`:<sup>[[1]](#references)</sup>
 ```bash
 lsadump::trust /patch
 ```
-Kufuatia hili, tumia ufunguo uliotolewa wa **RC4** kuthibitisha kama `root.local\EXT$` ndani ya `root.local`:
+Baada ya hayo, tumia key ya **RC4** iliyotolewa kufanya uthibitishaji kama `root.local\EXT$` ndani ya `root.local`:<sup>[[1]](#references)</sup>
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
-Kisha hesabia trusted domain kama principal huyo, kwa mfano kwa Kerberoasting SPN yenye thamani kubwa katika `root.local`:
+Kisha enumerate domain inayoaminika kama principal huyo, kwa mfano kwa kufanya Kerberoasting ya SPN yenye thamani kubwa katika `root.local`:<sup>[[1]](#references)</sup>
 ```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
 ### Kutoka Linux
 
-Kama umerecover **RC4** trust-account key, wazo lilelile linafanya kazi kutoka Linux na Impacket:
+Ikiwa ulipata **RC4** trust-account key, wazo hilo hilo linafanya kazi kutoka Linux kwa kutumia Impacket:
 ```bash
 python getTGT.py -dc-ip dc.root.local root.local/EXT\$ -hashes :<RC4>
 export KRB5CCNAME=EXT\$.ccache
@@ -78,41 +78,41 @@ GetUserSPNs.py -request -k -no-pass -dc-ip dc.root.local root.local/EXT\$ -outpu
 # Or reduce noise and request only one user
 GetUserSPNs.py -request-user svc_sql -k -no-pass -dc-ip dc.root.local root.local/EXT\$
 ```
-Ikiwa **RC4** haikubaliwi, rudi kwenye **cleartext password** iliyorejeshwa (au **AES** keys zilizo derive) na utumie tena kawaida [Over-Pass-the-Hash / Pass-the-Key](over-pass-the-hash-pass-the-key.md) na [Kerberoast](kerberoast.md) workflows kutoka kwenye foothold hiyo.
+Ikiwa **RC4** haikubaliwi, tumia **cleartext password** iliyopatikana (au funguo za **AES** zilizotokana nayo) na urudie workflows za kawaida za [Over-Pass-the-Hash / Pass-the-Key](over-pass-the-hash-pass-the-key.md) na [Kerberoast](kerberoast.md) kutoka kwenye foothold hiyo.
 
-### Key material gotchas
+### Mambo ya kuzingatia kuhusu key material
 
-Usichanganye **trust keys** na **trust-account credentials**:
+Usichanganye **trust keys** na **trust-account credentials**:<sup>[[1]](#references)</sup>
 
-- Katika one-way trust, pande zote mbili huhifadhi **TDO**, lakini **`EXT$` user account** halisi ipo tu katika trusted domain.
-- Nenosiri la trust-account la sasa linaonekana kwenye TDO trust secret (`NewPassword` / current trust key).
-- **RC4** trust key ndio artifact rahisi zaidi kutumia tena kwa `asktgt` kama trust account; katika default setups hii kwa kawaida ndiyo enctype inayofanya kazi kwa sababu trust account mara nyingi haina tupu `msDS-SupportedEncryptionTypes`.
-- Ukifikiria kwa upande wa **AES trust keys**, kumbuka hazibadilishaniki na trust-account AES keys kwa sababu salts ni tofauti.
+- Katika one-way trust, pande zote mbili huhifadhi **TDO**, lakini akaunti halisi ya mtumiaji **`EXT$` inapatikana tu katika trusted domain**.
+- Password ya sasa ya trust-account inaonyeshwa katika trust secret ya TDO (`NewPassword` / current trust key).
+- **RC4** trust key ndiyo artifact rahisi zaidi kutumia tena kwa `asktgt` kama trust account; katika setups za kawaida, hii huwa enctype inayofanya kazi kwa sababu trust account mara nyingi huwa na `msDS-SupportedEncryptionTypes` tupu.
+- Ikiwa unafikiria kuhusu **AES trust keys**, kumbuka kuwa hazibadilishani na trust-account AES keys kwa sababu salts hutofautiana.
 
-Kwa hiyo, kwa technique kwenye ukurasa huu, pendelea ama dumped **RC4** material au recovered **cleartext** password.
+Kwa hiyo, kwa technique iliyo kwenye ukurasa huu, pendelea ama **RC4** material iliyodumpiwa au password ya **cleartext** iliyopatikana.<sup>[[1]](#references)</sup>
 
-### Gathering cleartext trust password
+### Kukusanya cleartext trust password
 
-Katika flow iliyopita ilitumika trust hash badala ya **cleartext password** (ambayo pia **dumped by mimikatz**).
+Katika flow iliyotangulia, trust hash ilitumika badala ya **cleartext password** (ambayo pia **hutolewa na mimikatz**).<sup>[[1]](#references)</sup>
 
-Cleartext password inaweza kupatikana kwa kubadilisha output ya \[ CLEAR ] kutoka mimikatz kutoka hexadecimal na kuondoa null bytes `\x00`:
+Cleartext password inaweza kupatikana kwa kubadilisha output ya \[ CLEAR ] kutoka mimikatz kutoka hexadecimal na kuondoa null bytes `\x00`:<sup>[[1]](#references)</sup>
 
-![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be obtained by converting the ( CLEAR ) output from mimikatz from hexadecimal and removing null...](<../../images/image (938).png>)
+![Trust Account Attack - Kukusanya cleartext trust password: Cleartext password inaweza kupatikana kwa kubadilisha output ya ( CLEAR ) kutoka mimikatz kutoka hexadecimal na kuondoa null...](<../../images/image (938).png>)
 
-Wakati mwingine wakati wa kuunda trust relationship, user lazima aingize password kwa ajili ya trust. Katika demonstration hii, key ni original trust password na kwa hiyo inaweza kusomeka na binadamu. Key inapozunguka (default: kila siku 30), cleartext kwa kawaida huacha kuwa human readable lakini bado technically inaweza kutumika.
+Wakati mwingine, trust relationship inapoundwa, password lazima iandikwe na mtumiaji kwa ajili ya trust hiyo. Katika demonstration hii, key ni trust password ya awali na hivyo inaweza kusomeka na binadamu. Key inapozungushwa (default: kila siku 30), cleartext kwa kawaida itaacha kusomeka na binadamu, lakini bado inaweza kutumika kitaalamu.<sup>[[1]](#references)</sup>
 
-Cleartext password inaweza kutumika kufanya regular authentication kama trust account, kama mbadala wa kuomba TGT kwa kutumia Kerberos secret key ya trust account. Hapa, querying `root.local` kutoka `ext.local` kwa members wa `Domain Admins`:
+Cleartext password inaweza kutumika kufanya authentication ya kawaida kama trust account, kama mbadala wa kuomba TGT kwa kutumia Kerberos secret key ya trust account. Hapa, uki-query `root.local` kutoka `ext.local` kwa ajili ya members wa `Domain Admins`:<sup>[[1]](#references)</sup>
 
-![Trust Account Attack - Gathering cleartext trust password: The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT...](<../../images/image (792).png>)
+![Trust Account Attack - Kukusanya cleartext trust password: Cleartext password inaweza kutumika kufanya authentication ya kawaida kama trust account, kama mbadala wa kuomba TGT...](<../../images/image (792).png>)
 
-### Practical limitations
+### Vizuizi vya kiutendaji
 
 > [!WARNING]
-> Trust accounts ni awkward principals. Interactive logons kama **RUNAS / console / RDP** si expected path hapa, na **NTLM** authentication attempts zinaweza kushindwa kwa `STATUS_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT`. Panga kwa **Kerberos network logons** (`asktgt`, LDAP, CIFS, Kerberoast) badala yake.
+> Trust accounts ni principals wasio rahisi kutumia. Interactive logons kama **RUNAS / console / RDP** si njia inayotarajiwa hapa, na majaribio ya authentication ya **NTLM** yanaweza kushindikana kwa `STATUS_NOLOGON_INTERDOMAIN_TRUST_ACCOUNT`. Panga kutumia **Kerberos network logons** (`asktgt`, LDAP, CIFS, Kerberoast) badala yake.<sup>[[1]](#references)</sup>
 
-### Persistence / cleanup note
+### Dokezo kuhusu Persistence / cleanup
 
-Ikiwa defenders watatambua kuwa trusting domain imecompromise, wanapaswa ku-rotate trust secret kwenye **pande zote mbili** kwa `netdom trust ... /resetOneSide ...`. Kutoka kwa operator perspective hii ni muhimu kwa sababu **manual reset invalidates old trust material immediately**, wakati normal trust-password rotation huacha current/previous values zikibaki wakati wa rollover.
+Ikiwa defenders watatambua kuwa trusting domain imecompromise, wanapaswa kuzungusha trust secret kwenye **pande zote mbili** kwa `netdom trust ... /resetOneSide ...`. Kwa mtazamo wa operator, hili ni muhimu kwa sababu **manual reset hubatilisha trust material ya zamani mara moja**, ilhali trust-password rotation ya kawaida huacha thamani za sasa/za awali wakati wa rollover.<sup>[[2]](#references)</sup>
 ```bash
 # Run once from the trusted side
 netdom trust root.local /domain:ext.local /resetOneSide /passwordT:<NEWPASS> /userO:administrator /passwordO:*
@@ -120,9 +120,9 @@ netdom trust root.local /domain:ext.local /resetOneSide /passwordT:<NEWPASS> /us
 # Run once from the trusting side
 netdom trust ext.local /domain:root.local /resetOneSide /passwordT:<NEWPASS> /userO:administrator /passwordO:*
 ```
-## Marejeo
+## Marejeleo
 
-- [https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7)
-- [https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
+- [1] [SID filter as security boundary between domains? (Part 7) – Trust account attack – from trusting to trusted](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-7)
+- [2] [AD Forest Recovery – Kuweka upya trust password](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/forest-recovery-guide/ad-forest-recovery-reset-trust)
 
 {{#include ../../banners/hacktricks-training.md}}

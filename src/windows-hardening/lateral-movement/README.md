@@ -1,8 +1,8 @@
-# Lateral Movement
+# Uhamaji wa Pembeni
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Kuna njia tofauti za kutekeleza amri katika mifumo ya nje, hapa unaweza kupata maelezo kuhusu jinsi mbinu kuu za Windows za lateral movement zinavyofanya kazi:
+Kuna njia mbalimbali za kutekeleza commands katika mifumo ya nje; hapa unaweza kupata maelezo kuhusu jinsi mbinu kuu za Windows lateral movement zinavyofanya kazi:
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)
