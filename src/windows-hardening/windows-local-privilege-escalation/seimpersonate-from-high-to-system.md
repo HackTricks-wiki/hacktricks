@@ -1,10 +1,10 @@
-# SeImpersonate from High To System
+# High से System तक SeImpersonate
 
 {{#include ../../banners/hacktricks-training.md}}
 
-यह page एक **High Integrity administrator process** से **`NT AUTHORITY\SYSTEM`** तक जाने के **manual** तरीके के बारे में है। इसमें **non-protected SYSTEM process को खोलना, उसके token को duplicate करना और उस token के साथ child process को spawn करना** शामिल है।
+यह पेज **High Integrity administrator process** से **`NT AUTHORITY\SYSTEM`** तक जाने के **manual** तरीके के बारे में है। इसमें **non-protected SYSTEM process को खोलना, उसके token को duplicate करना और उस token के साथ child process शुरू करना** शामिल है।
 
-यदि आपके पास केवल **`SeImpersonatePrivilege`** / **`SeAssignPrimaryTokenPrivilege`** है, लेकिन आप suitable SYSTEM process को open **नहीं कर सकते**, तो **Potato / named-pipe** path आमतौर पर अधिक reliable होता है:
+यदि आपके पास केवल **`SeImpersonatePrivilege`** / **`SeAssignPrimaryTokenPrivilege`** है, लेकिन आप किसी उपयुक्त SYSTEM process को खोल नहीं सकते, तो **Potato / named-pipe** path आमतौर पर अधिक विश्वसनीय होता है:
 
 {{#ref}}
 named-pipe-client-impersonation.md
@@ -14,7 +14,7 @@ named-pipe-client-impersonation.md
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-यदि आपका उद्देश्य केवल `SYSTEM` नहीं, बल्कि अधिक से अधिक privileges वाला **SYSTEM token** प्राप्त करना है, तो यह भी देखें:
+यदि आपका उद्देश्य केवल `SYSTEM` प्राप्त करना नहीं, बल्कि अधिकतम संभव privileges वाला **SYSTEM token** प्राप्त करना है, तो यह भी देखें:
 
 {{#ref}}
 sedebug-+-seimpersonate-copy-token.md
@@ -29,33 +29,33 @@ whoami /priv | findstr /i "SeDebugPrivilege SeImpersonatePrivilege SeAssignPrima
 ```
 व्यावहारिक नोट्स:
 
-- एक **High Integrity** admin token आमतौर पर **`SeDebugPrivilege` enable करने** और कई non-protected SYSTEM processes को open करने के लिए पर्याप्त होता है।
-- **`CreateProcessWithTokenW` को caller पर `SeImpersonatePrivilege` की आवश्यकता होती है। यदि वह API `1314` के साथ fail हो, तो SYSTEM primary token को पहले duplicate करने के बाद `CreateProcessAsUserW` पर switch करें।
-- आधुनिक Windows पर **`lsass.exe` अक्सर खराब target होता है**, क्योंकि **LSA protection / PPL** administrators को **`SeDebugPrivilege`** के साथ भी access करने से रोकता है। इसके बजाय **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, या SYSTEM के रूप में running शुरुआती **`svchost.exe`** को prefer करें।
-- हर SYSTEM process का token समान रूप से उपयोगी नहीं होता। यदि आपको SYSTEM मिल जाए लेकिन कुछ privileges missing दिखें, तो technique को broken मानने के बजाय कोई दूसरा SYSTEM process आज़माएँ।
+- **High Integrity** admin token आमतौर पर **`SeDebugPrivilege` enable करने** और कई non-protected SYSTEM processes को open करने के लिए पर्याप्त होता है।
+- Caller के पास **`SeImpersonatePrivilege`** होना **`CreateProcessWithTokenW` के लिए आवश्यक** है। यदि वह API `1314` के साथ fail हो, तो SYSTEM primary token को पहले ही duplicate करने के बाद `CreateProcessAsUserW` पर switch करें।
+- आधुनिक Windows पर **`lsass.exe` अक्सर खराब target** होता है, क्योंकि **LSA protection / PPL**, `SeDebugPrivilege` वाले administrators के लिए भी access को block करता है। इसके बजाय **`winlogon.exe`**, **`wininit.exe`**, **`services.exe`**, या SYSTEM के रूप में चल रहे किसी शुरुआती **`svchost.exe`** को prefer करें।
+- हर SYSTEM process का token समान रूप से उपयोगी नहीं होता। यदि आपको SYSTEM मिल जाए लेकिन कुछ privileges missing दिखाई दें, तो technique के broken होने की धारणा बनाने के बजाय कोई दूसरा SYSTEM process try करें।
 
 ## PID सावधानी से चुनें
 
-इस technique को reliably काम कराने का सबसे आसान तरीका है ऐसा SYSTEM process **choose करना, जिसकी DACL वास्तव में Administrators को process query करने और उसके token को duplicate करने की अनुमति देती हो**।
+इस technique को reliably काम कराने का सबसे आसान तरीका है कि ऐसा SYSTEM process **choose करें जिसकी DACL वास्तव में Administrators को process query करने और उसके token को duplicate करने की अनुमति देती हो**।
 
 पहले test करने के लिए अच्छे candidates:
 
 - `winlogon.exe`
 - `wininit.exe`
 - `services.exe`
-- SYSTEM के रूप में running कुछ शुरुआती `svchost.exe` instances
+- SYSTEM के रूप में चलने वाले कुछ शुरुआती `svchost.exe` instances
 
-Default रूप से avoid करें:
+By default इनसे बचें:
 
-- उन hosts पर `lsass.exe` जहाँ **RunAsPPL / LSA protection** enabled है
-- protected / security-sensitive processes, जो **`SeDebugPrivilege` enable करने के बाद भी `Access denied`** return करते हैं
+- उन hosts पर `lsass.exe` जहाँ **RunAsPPL / LSA protection** enabled हो
+- protected / security-sensitive processes, जो `SeDebugPrivilege` enable करने के बाद भी `Access denied` return करते हों
 
-आप elevated रूप से running **Process Explorer** या **Process Hacker** से candidate processes और उनके token/ACLs inspect कर सकते हैं।
+आप elevated रूप में चल रहे **Process Explorer** या **Process Hacker** से candidate processes और उनके token/ACLs inspect कर सकते हैं।
 
 ### Code
 
-[यहाँ](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962) दिया गया following code **Process ID को argument के रूप में indicate करने** की अनुमति देता है और indicated process के user के रूप में **running CMD** को run करता है।\
-High Integrity process में run करते हुए आप SYSTEM के रूप में running process (जैसे `winlogon`, `wininit`) का **PID indicate** कर सकते हैं और SYSTEM के रूप में `cmd.exe` execute कर सकते हैं।<sup>[[3]](#references)</sup>
+[यहाँ](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962) दिया गया निम्न code **Process ID को argument के रूप में indicate करने** की अनुमति देता है और indicate किए गए process के **user के रूप में running CMD** को run करता है।<sup>[[3]](#references)</sup>\
+High Integrity process में running होने पर आप **System के रूप में running process का PID** (जैसे `winlogon`, `wininit`) **indicate कर सकते हैं** और SYSTEM के रूप में `cmd.exe` execute कर सकते हैं।<sup>[[3]](#references)</sup>
 ```cpp
 impersonateuser.exe 1234
 ```
@@ -192,16 +192,16 @@ return 0;
 ```
 ## उपयोगी API / access-right notes
 
-Sample में `MAXIMUM_ALLOWED` का उपयोग किया गया है, लेकिन real operations के लिए इसमें शामिल minimum components को याद रखना उपयोगी है:
+इस sample में `MAXIMUM_ALLOWED` का उपयोग किया गया है, लेकिन वास्तविक operations के लिए शामिल minimum pieces को याद रखना उपयोगी है:
 
 - `OpenProcessToken()` के लिए केवल यह आवश्यक है कि **process handle** को **`PROCESS_QUERY_LIMITED_INFORMATION`** के साथ खोला गया हो।
-- `CreateProcessWithTokenW()` का उपयोग करने के लिए **primary token handle** में **`TOKEN_QUERY | TOKEN_DUPLICATE | `** होना चाहिए।<sup>[[1]](#references)</sup>
-- `DuplicateTokenEx()` को केवल impersonation token नहीं, बल्कि एक **primary token** (`TokenPrimary`) बनाना चाहिए।
-- यदि आपने पहले ही SYSTEM का impersonation कर लिया है और `CreateProcessWithTokenW()` फिर भी `1314` के साथ fail होता है, तो इसके बजाय `CreateProcessAsUserW()` आज़माएँ।
+- `CreateProcessWithTokenW()` का उपयोग करने के लिए, **primary token handle** में **`TOKEN_QUERY | TOKEN_DUPLICATE | TOKEN_ASSIGN_PRIMARY`** होना चाहिए।<sup>[[1]](#references)</sup>
+- `DuplicateTokenEx()` को केवल impersonation token नहीं, बल्कि **primary token** (`TokenPrimary`) बनाना चाहिए।
+- यदि आपने पहले से SYSTEM का impersonation किया है और फिर भी `CreateProcessWithTokenW()` `1314` के साथ fail हो रहा है, तो इसके बजाय `CreateProcessAsUserW()` आज़माएँ।
 
-इसका अर्थ है कि target process को `PROCESS_ALL_ACCESS` के साथ खोलना आमतौर पर अनावश्यक और अधिक noisy होता है; token को query करने के लिए आवश्यक rights माँगना पर्याप्त है।
+इसका अर्थ है कि target process को `PROCESS_ALL_ACCESS` के साथ खोलना आमतौर पर अनावश्यक और अधिक noisy होता है; इसके बजाय token को query करने के लिए आवश्यक rights ही request करें।
 
-## Error
+## त्रुटि
 
 कुछ occasions पर आप System का impersonation करने का प्रयास कर सकते हैं, लेकिन यह काम नहीं करेगा और निम्नलिखित जैसा output दिखाएगा:
 ```cpp
@@ -214,32 +214,32 @@ Sample में `MAXIMUM_ALLOWED` का उपयोग किया गया
 [-] CreateProcessWithTokenW Return Code: 0
 [-] CreateProcessWithTokenW Error: 1326
 ```
-इसका अर्थ है कि भले ही आप High Integrity level पर चल रहे हों, फिर भी आपके पास उस target process/token पर **पर्याप्त permissions नहीं हैं**।\
-आइए **Process Explorer** से `svchost.exe` processes पर वर्तमान Administrator permissions जांचते हैं (आप **Process Hacker** का भी उपयोग कर सकते हैं):
+इसका मतलब है कि भले ही आप High Integrity level पर चल रहे हों, फिर भी आपके पास उस target process/token पर **पर्याप्त permissions नहीं हैं**।\
+आइए **Process Explorer** के साथ `svchost.exe` processes पर वर्तमान Administrator permissions देखते हैं (आप **Process Hacker** का भी उपयोग कर सकते हैं):
 
 1. `svchost.exe` का कोई process चुनें
 2. Right Click --> Properties
-3. "Security" Tab के अंदर नीचे दाईं ओर "Permissions" button पर click करें
-4. "Advanced" पर click करें
-5. "Administrators" चुनें और "Edit" पर click करें
-6. "Show advanced permissions" पर click करें
+3. "Security" Tab के अंदर नीचे दाईं ओर "Permissions" button पर क्लिक करें
+4. "Advanced" पर क्लिक करें
+5. "Administrators" चुनें और "Edit" पर क्लिक करें
+6. "Show advanced permissions" पर क्लिक करें
 
-![Code - Error: 6. Click on "Show advanced permissions"](<../../images/image (437).png>)
+![Code - Error: 6. "Show advanced permissions" पर क्लिक करें](<../../images/image (437).png>)
 
-पिछली image में selected process पर "Administrators" के पास मौजूद सभी privileges हैं (जैसा कि आप `svchost.exe` के मामले में देख सकते हैं, उनके पास केवल "Query" privileges हैं)
+पिछली image में वे सभी privileges शामिल हैं जो चुने गए process पर "Administrators" के पास हैं (जैसा कि आप `svchost.exe` के मामले में देख सकते हैं, उनके पास केवल "Query" privileges हैं)
 
 देखें कि `winlogon.exe` पर "Administrators" के पास कौन-से privileges हैं:
 
-![Code - Error: See the privileges "Administrators" have over winlogon.exe](<../../images/image (1102).png>)
+![Code - Error: `winlogon.exe` पर "Administrators" के privileges देखें](<../../images/image (1102).png>)
 
 उस process के अंदर "Administrators" "Read Memory" और "Read Permissions" कर सकते हैं, जो संभवतः Administrators को इस process द्वारा उपयोग किए जा रहे token को impersonate करने की अनुमति देता है।
 
-### सामान्य विफलता के कारण
+### सामान्य failure causes
 
-- **`OpenProcess()` / `OpenProcessToken()` -> `5 (Access denied)`**: process DACL आपको block करता है, या target **protected/PPL** है। कोई अन्य SYSTEM process चुनें।
+- **`OpenProcess()` / `OpenProcessToken()` -> `5 (Access denied)`**: process DACL आपको रोक रहा है, या target **protected/PPL** है। कोई अन्य SYSTEM process चुनें।
 - **`DuplicateTokenEx()` -> `5 (Access denied)`**: आपका token handle पर्याप्त rights के बिना खोला गया था, या target token का DACL duplication को रोकता है।
 - **`CreateProcessWithTokenW()` -> `1314`**: caller के पास वर्तमान में **`SeImpersonatePrivilege`** enabled नहीं है। पहले इसे enable करने का प्रयास करें या duplicated primary token के साथ `CreateProcessAsUserW()` का उपयोग करें।
-- पिछली विफलताओं के बाद **`CreateProcessWithTokenW()` -> `1326`**: इसका अक्सर केवल यह अर्थ होता है कि पिछला token duplication/impersonation step विफल रहा, इसलिए child process launch करने के लिए कोई usable primary token नहीं है।
+- पिछले failures के बाद **`CreateProcessWithTokenW()` -> `1326`**: इसका अक्सर केवल यह अर्थ होता है कि पिछला token duplication/impersonation step fail हो गया, इसलिए child process launch करने के लिए कोई usable primary token नहीं है।
 
 ## Operator notes
 
@@ -252,7 +252,7 @@ Sample में `MAXIMUM_ALLOWED` का उपयोग किया गया
 ## References
 
 - [1] [Microsoft: CreateProcessWithTokenW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
-- [2] [SensePost: Abusing Windows' tokens to compromise Active Directory without touching LSASS](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
-- [3] [Understanding and Abusing Process Tokens — Part II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+- [2] [SensePost: Windows' tokens का दुरुपयोग करके LSASS को छुए बिना Active Directory को compromise करना](https://sensepost.com/blog/2022/abusing-windows-tokens-to-compromise-active-directory-without-touching-lsass/)
+- [3] [Process Tokens को समझना और उनका दुरुपयोग करना — Part II](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 {{#include ../../banners/hacktricks-training.md}}

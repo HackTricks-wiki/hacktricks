@@ -1,21 +1,21 @@
-# Mach-O Entitlements Extraction & IPSW Indexing
+# Mach-O Entitlements Extraction और IPSW Indexing
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Overview
+## Mach-O में Entitlements: ये कहाँ मौजूद होते हैं
 
-यह पेज प्रोग्रामेटिक रूप से Mach-O binaries से entitlements extract करने के तरीके को कवर करता है, जिसमें LC_CODE_SIGNATURE के माध्यम से आगे बढ़ना और code signing SuperBlob को parse करना शामिल है। साथ ही, यह Apple IPSW firmwares पर इस प्रक्रिया को scale करने के लिए उनकी contents को mount और index करने के तरीके को भी कवर करता है, ताकि forensic search/diff किया जा सके।
+यह पेज प्रोग्रामेटिक रूप से Mach-O binaries से entitlements extract करने के तरीके को कवर करता है। इसके लिए LC_CODE_SIGNATURE को traverse करके code signing SuperBlob को parse किया जाता है। साथ ही, Apple IPSW firmwares में इस प्रक्रिया को scale करने के लिए उनके contents को mount और index करने का तरीका भी बताया गया है, ताकि forensic search/diff किया जा सके।
 
-यदि आपको Mach-O format और code signing का refresher चाहिए, तो यह भी देखें: macOS code signing और SuperBlob internals।
+यदि आपको Mach-O format और code signing का refresh चाहिए, तो यह भी देखें: macOS code signing और SuperBlob internals।
 - macOS code signing details (SuperBlob, Code Directory, special slots) देखें: [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
-- सामान्य Mach-O structures/load commands देखें: [Universal binaries & Mach-O Format](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
+- General Mach-O structures/load commands देखें: [Universal binaries & Mach-O Format](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
 
 
-## Entitlements in Mach-O: where they live
+## Mach-O में Entitlements: ये कहाँ मौजूद होते हैं
 
-Entitlements, LC_CODE_SIGNATURE load command द्वारा referenced और __LINKEDIT segment में रखे गए code signature data के अंदर store होते हैं। यह signature एक CS_SuperBlob होता है, जिसमें multiple blobs (code directory, requirements, entitlements, CMS, आदि) होते हैं। Entitlements blob एक CS_GenericBlob होता है, जिसका data एक Apple Binary Property List (bplist00) है और जो entitlement keys को values से map करता है।<sup>[[1]](#references)</sup>
+Entitlements, LC_CODE_SIGNATURE load command द्वारा referenced code signature data के अंदर store होते हैं और __LINKEDIT segment में रखे जाते हैं। Signature एक CS_SuperBlob होता है जिसमें कई blobs (code directory, requirements, entitlements, CMS आदि) होते हैं। Entitlements blob एक CS_GenericBlob होता है, जिसका data एक Apple Binary Property List (bplist00) होता है और जो entitlement keys को values से map करता है।<sup>[[1]](#references)</sup>
 
-Key structures (from xnu):<sup>[[6]](#references)[[7]](#references)</sup>
+मुख्य structures (xnu से):<sup>[[6]](#references)[[7]](#references)</sup>
 ```c
 /* mach-o/loader.h */
 struct mach_header_64 {
@@ -67,26 +67,26 @@ char data[];      /* Apple Binary Plist containing entitlements */
 - Entitlements blob type (CSMAGIC_EMBEDDED_ENTITLEMENTS) = 0xfade7171
 - DER entitlements special slot (जैसे, -7) के माध्यम से मौजूद हो सकते हैं; special slots और DER entitlements notes के लिए macOS Code Signing page देखें
 
-नोट: Multi-arch (fat) binaries में कई Mach-O slices होते हैं। आपको उस architecture के लिए slice चुनना होगा जिसे आप inspect करना चाहते हैं, और फिर उसके load commands को traverse करना होगा।
+ध्यान दें: Multi-arch (fat) binaries में कई Mach-O slices होते हैं। आपको उस architecture के लिए slice चुनना होगा जिसका निरीक्षण करना है, और फिर उसके load commands को पढ़ना होगा।
 
 
 ## Extraction steps (generic, lossless-enough)
 
-1) Mach-O header को parse करें; `load_command` records के `ncmds` के अनुसार iterate करें।
-2) `LC_CODE_SIGNATURE` locate करें; `linkedit_data_command.dataoff/datasize` पढ़कर `__LINKEDIT` में रखे गए Code Signing SuperBlob को map करें।
-3) `CS_SuperBlob.magic == 0xfade0cc0` validate करें; `CS_BlobIndex` की `count` entries को iterate करें।
-4) `index.type == 0xfade7171` (embedded entitlements) locate करें। Point किए गए `CS_GenericBlob` को पढ़ें और उसके data को Apple binary plist (`bplist00`) के रूप में parse करके key/value entitlements प्राप्त करें।<sup>[[1]](#references)</sup>
+1) Mach-O header को parse करें; ncmds के बराबर load_command records पर iterate करें।
+2) LC_CODE_SIGNATURE खोजें; __LINKEDIT में रखे गए Code Signing SuperBlob को map करने के लिए linkedit_data_command.dataoff/datasize पढ़ें।
+3) CS_SuperBlob.magic == 0xfade0cc0 को validate करें; CS_BlobIndex की count entries पर iterate करें।
+4) index.type == 0xfade7171 (embedded entitlements) खोजें। संबंधित CS_GenericBlob पढ़ें और उसके data को Apple binary plist (bplist00) के रूप में parse करके key/value entitlements प्राप्त करें।<sup>[[1]](#references)</sup>
 
 Implementation notes:
-- Code signature structures big-endian fields का उपयोग करते हैं; little-endian hosts पर parsing करते समय byte order swap करें।
-- Entitlements `GenericBlob` का data स्वयं एक binary plist है (जिसे standard plist libraries संभाल सकती हैं)।
-- कुछ iOS binaries में DER entitlements हो सकते हैं; साथ ही, platforms/versions के अनुसार कुछ stores/slots अलग हो सकते हैं। आवश्यकता के अनुसार standard और DER entitlements दोनों को cross-check करें।
-- Fat binaries के लिए Mach-O load commands को traverse करने से पहले, सही slice और offset locate करने हेतु fat headers (`FAT_MAGIC`/`FAT_MAGIC_64`) का उपयोग करें।<sup>[[1]](#references)</sup>
+- Code signature structures big-endian fields का उपयोग करते हैं; little-endian hosts पर parse करते समय byte order swap करें।
+- Entitlements GenericBlob का data स्वयं एक binary plist है (इसे standard plist libraries संभाल सकती हैं)।
+- कुछ iOS binaries में DER entitlements हो सकते हैं; साथ ही, अलग-अलग platforms/versions में stores/slots भी अलग हो सकते हैं। आवश्यकता के अनुसार standard और DER entitlements दोनों को cross-check करें।
+- Fat binaries के लिए, Mach-O load commands को पढ़ने से पहले सही slice और offset खोजने हेतु fat headers (FAT_MAGIC/FAT_MAGIC_64) का उपयोग करें।<sup>[[1]](#references)</sup>
 
 
 ## Minimal parsing outline (Python)
 
-निम्न compact outline entitlements को find और decode करने का control flow दिखाता है। संक्षिप्तता के लिए इसमें robust bounds checks और full fat binary support को जानबूझकर शामिल नहीं किया गया है।<sup>[[1]](#references)</sup>
+नीचे entitlements खोजने और decode करने के control flow को दिखाने वाला एक compact outline दिया गया है। संक्षिप्तता के लिए इसमें robust bounds checks और पूर्ण fat binary support जानबूझकर शामिल नहीं किए गए हैं।<sup>[[1]](#references)</sup>
 ```python
 import plistlib, struct
 
@@ -138,27 +138,27 @@ data = blob[boff+8: boff+glen]
 return plistlib.loads(data)
 return None
 ```
-उपयोग संबंधी सुझाव:
-- fat binaries को संभालने के लिए, पहले struct fat_header/fat_arch पढ़ें, इच्छित architecture slice चुनें, फिर subrange को parse_entitlements में पास करें।
+Usage tips:
+- fat binaries को handle करने के लिए, पहले struct fat_header/fat_arch पढ़ें, इच्छित architecture slice चुनें, फिर subrange को parse_entitlements में पास करें।
 - macOS पर आप परिणामों को इस तरह validate कर सकते हैं: codesign -d --entitlements :- /path/to/binary
 
 
-## उदाहरण में प्राप्त निष्कर्ष
+## Example findings
 
-Privileged platform binaries अक्सर sensitive entitlements का अनुरोध करते हैं:<sup>[[1]](#references)</sup>
+Privileged platform binaries अक्सर sensitive entitlements request करते हैं:<sup>[[1]](#references)</sup>
 - com.apple.security.network.server = true
 - com.apple.rootless.storage.early_boot_mount = true
 - com.apple.private.kernel.system-override = true
 - com.apple.private.pmap.load-trust-cache = ["cryptex1.boot.os", "cryptex1.boot.app", "cryptex1.safari-downlevel"]
 
-Firmware images में बड़े पैमाने पर इन्हें search करना attack surface mapping और विभिन्न releases/devices के बीच diffing के लिए अत्यंत उपयोगी है।
+Firmware images में बड़े पैमाने पर इन्हें search करना attack surface mapping और releases/devices के बीच diffing के लिए बेहद उपयोगी है।
 
 
-## IPSWs पर बड़े पैमाने पर scaling (mounting और indexing)
+## IPSWs में Scaling (mounting और indexing)
 
-Full images को store किए बिना executables enumerate करने और entitlements extract करने के लिए:<sup>[[1]](#references)</sup>
+Full images store किए बिना executables enumerate करने और entitlements को बड़े पैमाने पर extract करने के लिए:<sup>[[1]](#references)</sup>
 
-- Firmware filesystems को download और mount करने के लिए @blacktop के ipsw tool का उपयोग करें। Mounting में apfs-fuse का उपयोग होता है, इसलिए आप full extraction के बिना APFS volumes को traverse कर सकते हैं।<sup>[[1]](#references)[[3]](#references)</sup>
+- Firmware filesystems को download और mount करने के लिए @blacktop के ipsw tool का उपयोग करें। Mounting apfs-fuse का लाभ उठाती है, इसलिए आप full extraction के बिना APFS volumes को traverse कर सकते हैं।<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 # Download latest IPSW for iPhone11,2 (iPhone XS)
 ipsw download ipsw -y --device iPhone11,2 --latest
@@ -166,12 +166,12 @@ ipsw download ipsw -y --device iPhone11,2 --latest
 # Mount IPSW filesystem (uses underlying apfs-fuse)
 ipsw mount fs <IPSW_FILE>
 ```
-- Mach-O files का पता लगाने के लिए mounted volumes में खोजें (magic जांचें और/या file/otool का उपयोग करें), फिर entitlements और imported frameworks को parse करें।
-- हज़ारों IPSWs में linear growth से बचने के लिए normalized view को relational database में persist करें:
+- Mounted volumes पर जाकर Mach-O files खोजें (magic चेक करें और/या file/otool का उपयोग करें), फिर entitlements और imported frameworks को parse करें।
+- हजारों IPSWs में linear growth से बचने के लिए normalized view को relational database में persist करें:
 - executables, operating_system_versions, entitlements, frameworks
 - many-to-many: executable↔OS version, executable↔entitlement, executable↔framework
 
-किसी दिए गए executable name वाली सभी OS versions की सूची बनाने के लिए उदाहरण query:
+किसी दिए गए executable name वाले सभी OS versions की सूची बनाने के लिए उदाहरण query:
 ```sql
 SELECT osv.version AS "Versions"
 FROM device d
@@ -181,17 +181,17 @@ LEFT JOIN executable e ON e.id = eosv.executable_id
 WHERE e.name = "launchd";
 ```
 DB portability पर नोट्स (यदि आप अपना indexer implement करते हैं):<sup>[[1]](#references)</sup>
-- Code को DB-agnostic (SQLite/PostgreSQL) बनाए रखने के लिए ORM/abstraction (जैसे SeaORM) का उपयोग करें।
-- SQLite में AUTOINCREMENT केवल INTEGER PRIMARY KEY पर आवश्यक है; यदि आप Rust में i64 PKs चाहते हैं, तो entities को i32 के रूप में generate करें और types convert करें। SQLite internally INTEGER को 8-byte signed के रूप में store करता है।<sup>[[8]](#references)</sup>
+- Code को DB-agnostic (SQLite/PostgreSQL) रखने के लिए ORM/abstraction (जैसे SeaORM) का उपयोग करें।
+- SQLite में AUTOINCREMENT केवल INTEGER PRIMARY KEY पर आवश्यक है; यदि आप Rust में i64 PKs चाहते हैं, तो entities को i32 के रूप में generate करें और types convert करें। SQLite आंतरिक रूप से INTEGER को 8-byte signed रूप में store करता है।<sup>[[8]](#references)</sup>
 
 
-## Entitlement hunting के लिए open-source tooling और references
+## Entitlement hunting के लिए Open-source tooling और references
 
-- Firmware mount/download: https://github.com/blacktop/ipsw
+- Firmware mount/download: https://github.com/blacktop/ipsw<sup>[[3]](#references)</sup>
 - Entitlement databases और references:
-- Jonathan Levin का entitlement DB: https://newosxbook.com/ent.php
-- entdb: https://github.com/ChiChou/entdb
-- Large-scale indexer (Rust, self-hosted Web UI + OpenAPI): https://github.com/synacktiv/appledb_rs
+- Jonathan Levin’s entitlement DB: https://newosxbook.com/ent.php<sup>[[4]](#references)</sup>
+- entdb: https://github.com/ChiChou/entdb<sup>[[5]](#references)</sup>
+- Large-scale indexer (Rust, self-hosted Web UI + OpenAPI): https://github.com/synacktiv/appledb_rs<sup>[[2]](#references)</sup>
 - Structures और constants के लिए Apple headers:
 - loader.h (Mach-O headers, load commands)
 - cs_blobs.h (SuperBlob, GenericBlob, CodeDirectory)

