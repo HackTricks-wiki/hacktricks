@@ -36,16 +36,16 @@ Two threat actors are sufficient to describe the abuse surface:<sup>[[1]](#refer
 
 Rely on clients that expose the underlying E2EE protocol so you can craft packets outside UI constraints, specify arbitrary `message_id`s, and log precise timestamps:
 
-* **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web protocol) or [Cobalt](https://github.com/Auties00/Cobalt) (mobile-oriented) let you emit raw `ReactionMessage`, `ProtocolMessage` (edit/delete), and `Receipt` frames while keeping the double-ratchet state in sync.
-* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) combined with [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) exposes every message type via CLI/API. Current `signal-cli` syntax uses `sendReaction RECIPIENT --target-author --target-timestamp`; keep `receive` or `daemon` running so delivery receipts are actually collected. Example self-reaction toggle:
+* **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web protocol) or [Cobalt](https://github.com/Auties00/Cobalt) (mobile-oriented) let you emit raw `ReactionMessage`, `ProtocolMessage` (edit/delete), and `Receipt` frames while keeping the double-ratchet state in sync.<sup>[[3]](#references)[[4]](#references)</sup>
+* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) combined with [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) exposes every message type via CLI/API.<sup>[[5]](#references)[[7]](#references)</sup> Current `signal-cli` syntax uses `sendReaction RECIPIENT --target-author --target-timestamp`; keep `receive` or `daemon` running so delivery receipts are actually collected.<sup>[[6]](#references)</sup> Example self-reaction toggle:
   ```bash
   signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
       --target-timestamp 1712345678901 --emoji "👍"
   signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
       --target-timestamp 1712345678901 --remove
   ```
-* **Threema:** Source of the Android client documents how delivery receipts are consolidated before they leave the device, explaining why the side channel has negligible bandwidth there.
-* **Turnkey PoCs:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) ships WhatsApp/Signal backends, defaults to silent delete probes, and labels `active` vs `standby` with a rolling-median threshold (`RTT < 0.9 * median`). [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) is a lighter WhatsApp-first CLI with `--delay`, `--concurrent`, CSV/Prometheus exporters, and Grafana-friendly output. Treat both as reconnaissance helpers rather than protocol references; the important takeaway is how little code is needed once raw client access exists.
+* **Threema:** Source of the Android client documents how delivery receipts are consolidated before they leave the device, explaining why the side channel has negligible bandwidth there.<sup>[[1]](#references)</sup>
+* **Turnkey PoCs:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) ships WhatsApp/Signal backends, defaults to silent delete probes, and labels `active` vs `standby` with a rolling-median threshold (`RTT < 0.9 * median`).<sup>[[8]](#references)</sup> [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) is a lighter WhatsApp-first CLI with `--delay`, `--concurrent`, CSV/Prometheus exporters, and Grafana-friendly output.<sup>[[9]](#references)</sup> Treat both as reconnaissance helpers rather than protocol references; the important takeaway is how little code is needed once raw client access exists.
 
 When custom tooling is unavailable, you can still trigger silent actions from WhatsApp Web or Signal Desktop and sniff the encrypted websocket/WebRTC channel, but raw APIs remove UI delays and allow invalid operations.
 

@@ -226,4 +226,5 @@ What is interesting here:
 
 - [1] [containerd socket exploitation part 1](https://thegreycorner.com/2025/02/12/containerd-socket-exploitation-part-1.html)
 - [2] [Kubernetes API Server Bypass Risks](https://kubernetes.io/docs/concepts/security/api-server-bypass-risks/)
+
 {{#include ../../../banners/hacktricks-training.md}}

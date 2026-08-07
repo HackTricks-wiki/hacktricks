@@ -280,7 +280,6 @@ echo "wait for the next pod scheduled on this node"
 
 This is not as immediate as a mounted `docker.sock`, but it is often more realistic in compromised Kubernetes infrastructure pods. The important point is that the modified binary is later executed by the host network setup flow, not by the current container.
 
-
 ## Runtime Sockets
 
 Sensitive host mounts often include runtime sockets rather than full directories. These are so important that they deserve explicit repetition here:
@@ -363,4 +362,5 @@ What is interesting here:
 
 - [1] [Local Files And Paths Used By The Kubelet](https://kubernetes.io/docs/reference/node/kubelet-files/)
 - [2] [cilium-agent container can access the host via `hostPath` mount](https://github.com/cilium/cilium/security/advisories/GHSA-4hc4-pgfx-3mrx)
+
 {{#include ../../../banners/hacktricks-training.md}}

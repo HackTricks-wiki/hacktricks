@@ -36,7 +36,7 @@ PERL5LIB=/tmp/ PERL5OPT=-Mpmod perl victim.pl
 
 ### Other interesting environment variables
 
-* **`PERL5DB`** – when the interpreter is started with the **`-d`** (debugger) flag, the content of `PERL5DB` is executed as Perl code *inside* the debugger context.  
+- **`PERL5DB`** – when the interpreter is started with the **`-d`** (debugger) flag, the content of `PERL5DB` is executed as Perl code *inside* the debugger context.  
   If you can influence both the environment **and** the command-line flags of a privileged Perl process you can do something like:
   
   ```bash
@@ -44,7 +44,7 @@ PERL5LIB=/tmp/ PERL5OPT=-Mpmod perl victim.pl
   sudo perl -d /usr/bin/some_admin_script.pl   # will drop a shell before executing the script
   ```
 
-* **`PERL5SHELL`** – on Windows this variable controls which shell executable Perl will use when it needs to spawn a shell. It is mentioned here only for completeness, as it is not relevant on macOS.
+- **`PERL5SHELL`** – on Windows this variable controls which shell executable Perl will use when it needs to spawn a shell. It is mentioned here only for completeness, as it is not relevant on macOS.
 
 Although `PERL5DB` requires the `-d` switch, it is common to find maintenance or installer scripts that are executed as *root* with this flag enabled for verbose troubleshooting, making the variable a valid escalation vector.
 

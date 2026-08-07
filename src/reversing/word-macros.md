@@ -16,6 +16,3 @@ Using the **GetObject** function it's possible to obtain data from forms of the 
 ![Junk Code - Macro Forms: Using the GetObject function it's possible to obtain data from forms of the macro. This can be used to difficult the analysis. The following is a photo of a...](<../images/image (344).png>)
 
 {{#include ../banners/hacktricks-training.md}}
-
-
-

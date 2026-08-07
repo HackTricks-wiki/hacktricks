@@ -209,3 +209,4 @@ https://0xrick.github.io/hack-the-box/kryptos/
 - [1] [Trail of Bits – Carelessness versus craftsmanship in cryptography](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
 
 {{#include ../../banners/hacktricks-training.md}}
+

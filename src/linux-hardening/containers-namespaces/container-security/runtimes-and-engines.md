@@ -88,7 +88,7 @@ That is why one of the first steps in container assessment should always be to a
 
 Not every container escape comes from operator misconfiguration. Sometimes the runtime itself is the vulnerable component. This matters because a workload may be running with what looks like a careful configuration and still be exposed through a low-level runtime flaw.
 
-The classic example is **CVE-2019-5736** in `runc`, where a malicious container could overwrite the host `runc` binary and then wait for a later `docker exec` or similar runtime invocation to trigger attacker-controlled code. The exploit path is very different from a simple bind-mount or capability mistake because it abuses how the runtime re-enters the container process space during exec handling.
+The classic example is **CVE-2019-5736** in `runc`, where a malicious container could overwrite the host `runc` binary and then wait for a later `docker exec` or similar runtime invocation to trigger attacker-controlled code. The exploit path is very different from a simple bind-mount or capability mistake because it abuses how the runtime re-enters the container process space during exec handling.<sup>[[1]](#references)</sup>
 
 A minimal reproduction workflow from a red-team perspective is:
 
@@ -106,4 +106,9 @@ docker exec -it <container-name> /bin/sh
 The key lesson is not the exact historical exploit implementation, but the assessment implication: if the runtime version is vulnerable, ordinary in-container code execution may be enough to compromise the host even when the visible container configuration does not look blatantly weak.
 
 Recent runtime CVEs such as `CVE-2024-21626` in `runc`, BuildKit mount races, and containerd parsing bugs reinforce the same point. Runtime version and patch level are part of the security boundary, not merely maintenance trivia.
+
+## References
+
+- [1] [Breaking out of Docker via runC – Explaining CVE-2019-5736](https://unit42.paloaltonetworks.com/breaking-docker-via-runc-explaining-cve-2019-5736/)
+
 {{#include ../../../banners/hacktricks-training.md}}

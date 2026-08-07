@@ -121,7 +121,7 @@ An example of this is **CVE-2021-26089** which managed to **overwrite a periodic
 
 ### Empty Payload
 
-It's possible to just generate a **`.pkg`** file with **pre and post-install scripts** without any real payload apart from the malware inside the scripts.
+It's possible to just generate a **`.pkg`** file with **pre and post-install scripts** without any real payload apart from the malware inside the scripts.<sup>[[2]](#references)</sup>
 
 ### JS in Distribution xml
 
@@ -213,6 +213,3 @@ productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pk
 - [8] [DEF CON 25 - Patrick Wardle - Death By 1000 Installers on macOS and it's all broken!](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

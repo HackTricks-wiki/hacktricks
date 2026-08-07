@@ -54,4 +54,5 @@ Then inspect:
 - `word/_rels/` for external relationships
 - embedded media in `word/media/`
 
+
 {{#include ../../banners/hacktricks-training.md}}

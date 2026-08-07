@@ -58,6 +58,6 @@ This approach avoids direct file downloads and leverages familiar UI elements to
 ## References
 
 - [1] [From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
-- [2] [Discord Custom Invite Link Documentation](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
+- [2] [Custom Invite Link – Discord Support](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
 
 {{#include ../../banners/hacktricks-training.md}}

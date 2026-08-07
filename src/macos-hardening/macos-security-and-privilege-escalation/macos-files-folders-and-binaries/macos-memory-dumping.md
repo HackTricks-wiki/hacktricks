@@ -172,7 +172,7 @@ Older userland tools such as [`readmem`](https://github.com/gdbinit/readmem) als
 
 ## Heap / VM snapshots with `.memgraph`
 
-If you mainly care about **heap objects**, **allocation provenance**, or a snapshot that can be moved to another machine, a `.memgraph` is often more practical than a giant Mach-O core. The `leaks` tooling can generate one from a live process:
+If you mainly care about **heap objects**, **allocation provenance**, or a snapshot that can be moved to another machine, a `.memgraph` is often more practical than a giant Mach-O core. The `leaks` tooling can generate one from a live process:<sup>[[2]](#references)</sup>
 
 ```bash
 # Capture a memory graph from a live process
@@ -261,5 +261,3 @@ For more object-level runtime triage once you can already inspect the process, c
 - [2] [leaks(1) man page](https://keith.github.io/xcode-man-pages/leaks.1.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-

@@ -45,7 +45,7 @@ sox input.wav -n spectrogram -o spectrogram.png
 
 ## FSK / modem decoding
 
-Frequency-shift keyed audio often looks like alternating single tones in a spectrogram.<sup>[[1]](#references)</sup> Once you have a rough center/shift and baud estimate, brute force with `minimodem`:
+Frequency-shift keyed audio often looks like alternating single tones in a spectrogram. Once you have a rough center/shift and baud estimate, brute force with `minimodem`:<sup>[[1]](#references)</sup>
 
 ```bash
 # Visualize the band to pick baud/frequency
@@ -79,7 +79,7 @@ Other audio-hiding families you may encounter:
 
 ### WavSteg
 
-From: https://github.com/ragibson/Steganography#WavSteg
+From: https://github.com/ragibson/Steganography#WavSteg<sup>[[2]](#references)</sup>
 
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
@@ -104,6 +104,6 @@ Online decoders:
 ## References
 
 - [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [2] [ragibson/Steganography](https://github.com/ragibson/Steganography#WavSteg)
 
 {{#include ../../banners/hacktricks-training.md}}
-

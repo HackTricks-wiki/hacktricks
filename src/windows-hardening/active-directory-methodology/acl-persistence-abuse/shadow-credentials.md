@@ -65,6 +65,3 @@ ShadowSpray aims to **exploit GenericWrite/GenericAll permissions that wide user
 - [4] [pywhisker - Python version of the Shadow Credentials tool](https://github.com/ShutdownRepo/pywhisker)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

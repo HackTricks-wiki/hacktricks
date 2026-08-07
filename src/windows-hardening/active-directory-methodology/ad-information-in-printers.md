@@ -15,6 +15,7 @@ Some introductory blogs about the topic:
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)<sup>[[5]](#references)</sup>
 
 ---
+
 ## Printer Configuration
 
 - **Location**: The LDAP server list is usually found in the web interface (e.g. *Network ➜ LDAP Setting ➜ Setting Up LDAP*).
@@ -22,6 +23,7 @@ Some introductory blogs about the topic:
 - **Exploit**: Redirect the LDAP server address to an attacker-controlled host and use the *Test Connection* / *Address Book Sync* button to force the printer to bind to you.
 
 ---
+
 ## Capturing Credentials
 
 ### Method 1 – Netcat Listener
@@ -50,6 +52,7 @@ When the printer performs its lookup you will see the clear-text credentials in 
 > 💡  You can also use `impacket/examples/ldapd.py` (Python rogue LDAP) or `Responder -w -r -f` to harvest NTLMv2 hashes over LDAP/SMB.
 
 ---
+
 ## Recent Pass-Back Vulnerabilities (2024-2025)
 
 Pass-back is *not* a theoretical issue – vendors keep publishing advisories in 2024/2025 that exactly describe this attack class.
@@ -80,6 +83,7 @@ The vendor guidance explicitly recommends:
 3. Avoiding privileged AD accounts for printer integration.
 
 ---
+
 ## Automated Enumeration / Exploitation Tools
 
 | Tool | Purpose | Example |
@@ -90,6 +94,7 @@ The vendor guidance explicitly recommends:
 | **impacket-ldapd.py** | Lightweight rogue LDAP service to receive clear-text binds | `python ldapd.py -debug` |
 
 ---
+
 ## Hardening & Detection
 
 1. **Patch / firmware-update** MFPs promptly (check vendor PSIRT bulletins).
@@ -101,6 +106,7 @@ The vendor guidance explicitly recommends:
 7. **SNMPv3 or disable SNMP** – community `public` often leaks device & LDAP config.
 
 ---
+
 ## References
 
 - [1] [It's just a printer… What's the worst that could happen?](https://grimhacker.com/2018/03/09/just-a-printer/)

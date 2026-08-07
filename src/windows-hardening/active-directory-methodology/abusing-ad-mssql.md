@@ -321,5 +321,3 @@ sccm-management-point-relay-sql-policy-secrets.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
-
-

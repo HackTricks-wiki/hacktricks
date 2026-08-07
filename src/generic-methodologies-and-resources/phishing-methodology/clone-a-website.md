@@ -30,8 +30,4 @@ goclone <url>
 #https://github.com/trustedsec/social-engineer-toolkit
 ```
 
-
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

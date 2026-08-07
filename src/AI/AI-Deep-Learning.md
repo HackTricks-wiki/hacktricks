@@ -389,8 +389,6 @@ print("Confusion matrix (rows = true, cols = pred):")
 print(confusion_matrix(labels_all, preds_all))
 ```
 
-
-
 ## Recurrent Neural Networks (RNNs)
 
 Recurrent Neural Networks (RNNs) are a class of neural networks designed for processing sequential data, such as time series or natural language. Unlike traditional feedforward neural networks, RNNs have connections that loop back on themselves, allowing them to maintain a hidden state that captures information about previous inputs in the sequence.

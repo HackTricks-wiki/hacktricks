@@ -4,11 +4,11 @@
 
 ## Overview
 
-Burp's **MCP Server** extension can expose intercepted HTTP(S) traffic to MCP-capable LLM clients so they can **reason over real requests/responses** for passive vulnerability discovery and report drafting. The intent is evidence-driven review (no fuzzing or blind scanning), keeping Burp as the source of truth.<sup>[[1]](#references)</sup>
+Burp's **MCP Server** extension can expose intercepted HTTP(S) traffic to MCP-capable LLM clients so they can **reason over real requests/responses** for passive vulnerability discovery and report drafting. The intent is evidence-driven review (no fuzzing or blind scanning), keeping Burp as the source of truth.
 
 ## Architecture
 
-- **Burp MCP Server (BApp)** listens on `127.0.0.1:9876` and exposes intercepted traffic via MCP.
+- **Burp MCP Server (BApp)** listens on `127.0.0.1:9876` and exposes intercepted traffic via MCP.<sup>[[1]](#references)[[2]](#references)</sup>
 - **MCP proxy JAR** bridges stdio (client side) to Burp's MCP SSE endpoint.
 - **Optional local reverse proxy** (Caddy) normalizes headers for strict MCP handshake checks.
 - **Clients/backends**: Codex CLI (cloud), Gemini CLI (cloud), or Ollama (local).
@@ -17,7 +17,7 @@ Burp's **MCP Server** extension can expose intercepted HTTP(S) traffic to MCP-ca
 
 ### 1) Install Burp MCP Server
 
-Install **MCP Server** from the Burp BApp Store and verify it is listening on `127.0.0.1:9876`.<sup>[[3]](#references)</sup>
+Install **MCP Server** from the Burp BApp Store and verify it is listening on `127.0.0.1:9876`.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### 2) Extract the proxy JAR
 
@@ -25,7 +25,7 @@ In the MCP Server tab, click **Extract server proxy jar** and save `mcp-proxy.ja
 
 ### 3) Configure an MCP client (Codex example)
 
-Point the client to the proxy JAR and Burp's SSE endpoint:<sup>[[1]](#references)</sup>
+Point the client to the proxy JAR and Burp's SSE endpoint:
 
 ```toml
 # ~/.codex/config.toml
@@ -43,7 +43,7 @@ codex
 
 ### 4) Fix strict Origin/header validation with Caddy (if needed)
 
-If the MCP handshake fails due to strict `Origin` checks or extra headers, use a local reverse proxy to normalize headers (this matches the workaround for the Burp MCP strict validation issue).<sup>[[1]](#references)[[4]](#references)</sup>
+If the MCP handshake fails due to strict `Origin` checks or extra headers, use a local reverse proxy to normalize headers (this matches the workaround for the Burp MCP strict validation issue).<sup>[[1]](#references)[[3]](#references)</sup>
 
 ```bash
 brew install caddy
@@ -81,7 +81,7 @@ codex
 
 ### Gemini CLI
 
-The **burp-mcp-agents** repo provides launcher helpers:<sup>[[2]](#references)</sup>
+The **burp-mcp-agents** repo provides launcher helpers:<sup>[[4]](#references)</sup>
 
 ```bash
 source /path/to/burp-mcp-agents/gemini-cli/burpgemini.sh
@@ -105,7 +105,7 @@ Example local models and approximate VRAM needs:
 
 ## Prompt pack for passive review
 
-The **burp-mcp-agents** repo includes prompt templates for evidence-driven analysis of Burp traffic:<sup>[[2]](#references)</sup>
+The **burp-mcp-agents** repo includes prompt templates for evidence-driven analysis of Burp traffic:<sup>[[4]](#references)</sup>
 
 - `passive_hunter.md`: broad passive vulnerability surfacing.
 - `idor_hunter.md`: IDOR/BOLA/object/tenant drift and auth mismatches.
@@ -118,7 +118,7 @@ The **burp-mcp-agents** repo includes prompt templates for evidence-driven analy
 
 ## Optional attribution tagging
 
-To tag Burp/LLM traffic in logs, add a header rewrite (proxy or Burp Match/Replace):
+To tag Burp/LLM traffic in logs, add a header rewrite (proxy or Burp Match/Replace):<sup>[[1]](#references)</sup>
 
 ```text
 Match:   ^User-Agent: (.*)$
@@ -133,7 +133,7 @@ Replace: User-Agent: $1 BugBounty-Username
 
 ## Burp AI Agent (AI-assisted triage + MCP tools)
 
-**Burp AI Agent** is a Burp extension that couples local/cloud LLMs with passive/active analysis (62 vulnerability classes) and exposes 53+ MCP tools so external MCP clients can orchestrate Burp. Highlights:<sup>[[5]](#references)</sup>
+**Burp AI Agent** is a Burp extension that couples local/cloud LLMs with passive/active analysis (62 vulnerability classes) and exposes 53+ MCP tools so external MCP clients can orchestrate Burp.<sup>[[5]](#references)</sup> Highlights:
 
 - **Context-menu triage**: capture traffic via Proxy, open **Proxy > HTTP History**, right-click a request → **Extensions > Burp AI Agent > Analyze this request** to spawn an AI chat bound to that request/response.
 - **Backends** (selectable per profile):
@@ -153,14 +153,15 @@ JAVA_HOME=/path/to/jdk-21 ./gradlew clean shadowJar
 # load build/libs/Burp-AI-Agent-<version>.jar via Burp Extensions > Add (Java)
 ```
 
-Operational cautions: cloud backends may exfiltrate session cookies/PII unless privacy mode is enforced; MCP exposure grants remote orchestration of Burp so restrict access to trusted agents and monitor the integrity-hashed audit log.<sup>[[5]](#references)</sup>
+Operational cautions: cloud backends may exfiltrate session cookies/PII unless privacy mode is enforced; MCP exposure grants remote orchestration of Burp so restrict access to trusted agents and monitor the integrity-hashed audit log.
 
 ## References
 
 - [1] [Burp MCP + Codex CLI integration and Caddy handshake fix](https://pentestbook.six2dez.com/others/burp)
-- [2] [Burp MCP Agents (workflows, launchers, prompt pack)](https://github.com/six2dez/burp-mcp-agents)
-- [3] [Burp MCP Server BApp](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
-- [4] [PortSwigger MCP server strict Origin/header validation issue](https://github.com/PortSwigger/mcp-server/issues/34)
+- [2] [Burp MCP Server BApp](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
+- [3] [PortSwigger MCP server strict Origin/header validation issue](https://github.com/PortSwigger/mcp-server/issues/34)
+- [4] [Burp MCP Agents (workflows, launchers, prompt pack)](https://github.com/six2dez/burp-mcp-agents)
 - [5] [Burp AI Agent](https://github.com/six2dez/burp-ai-agent)
 
 {{#include ../banners/hacktricks-training.md}}
+
