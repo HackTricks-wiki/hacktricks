@@ -122,3 +122,4 @@ Instead of static image patches, recent MADRL work uses *behavioral sequences* (
 - [4] [RLHFPoison: Reward Poisoning Attack for RLHF](https://aclanthology.org/2024.acl-long.140/)
 
 {{#include ../banners/hacktricks-training.md}}
+

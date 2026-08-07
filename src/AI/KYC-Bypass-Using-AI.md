@@ -48,3 +48,4 @@ When reviewing a KYC or liveness integration, verify whether it:<sup>[[1]](#refe
 - [4] [MDN - MediaDevices.getUserMedia()](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia)
 
 {{#include ../banners/hacktricks-training.md}}
+
