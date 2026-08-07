@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Osnovni Payloadi
+## Osnovni Payloads
 
-- **Jednostavna lista:** Samo lista koja sadrži jedan unos u svakoj liniji
-- **Runtime fajl:** Lista koja se čita u runtime-u (nije učitana u memoriju). Za podršku velikim listama.
-- **Izmena slučajeva:** Primeni neke promene na listu stringova (Bez promene, na mala slova, na VELIKA, na Prvo slovo - Prvo veliko, a ostalo malo-, na Prvo Ime - Prvo veliko, a ostalo ostaje isto-).
-- **Brojevi:** Generiši brojeve od X do Y koristeći Z korak ili nasumično.
-- **Brute Forcer:** Skup karaktera, minimalna i maksimalna dužina.
+- **Simple List:** Samo lista koja sadrži jednu stavku u svakom redu
+- **Runtime File:** Lista koja se čita tokom izvršavanja (ne učitava se u memoriju). Za podršku velikim listama.
+- **Case Modification:** Primena izmena na listu stringova (bez izmena, mala slova, VELIKA SLOVA, Proper name - prvo slovo veliko, a ostatak mala slova-, Proper Name -prvo slovo veliko, a ostatak ostaje isti-.
+- **Numbers:** Generisanje brojeva od X do Y koristeći korak Z ili nasumično.
+- **Brute Forcer:** Skup karaktera, min. i maks. dužina.
 
 [https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Payload za izvršavanje komandi i preuzimanje izlaza putem DNS zahteva ka burpcollab.
 

@@ -2,52 +2,58 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Ovaj odeljak se fokusira na **pronalaženje i izvlačenje skrivenih podataka** iz fajlova (images/audio/video/documents/archives) i iz text-based steganography.
+Ovaj odeljak se fokusira na **pronalaženje i izdvajanje skrivenih podataka** iz datoteka (slika/audio/video dokumenata/arhiva) i na steganografiju zasnovanu na tekstu.
 
-Ako ste ovde zbog cryptographic attacks, idite u sekciju **Crypto**.
+Ako ste ovde zbog kriptografskih napada, pređite na odeljak **Crypto**.
 
-## Ulazna tačka
+## Entry Point
 
-Pristupite steganography kao forensics problemu: identifikujte pravi container, nabrojte lokacije sa visokim signalom (metadata, appended data, embedded files), i tek onda primenite tehnike ekstrakcije na nivou sadržaja.
+Pristupite steganografiji kao forenzičkom problemu: identifikujte pravi kontejner, popišite lokacije sa visokim signalom (metapodaci, dodati podaci, ugrađene datoteke), a tek zatim primenite tehnike izdvajanja na nivou sadržaja.
 
-### Tok rada i trijaža
+### Workflow & triage
 
-Strukturisan tok rada koji prioritizuje identifikaciju container-a, metadata/string inspekciju, carving, i grananje specifično za format.
+Strukturisani workflow koji daje prioritet identifikaciji kontejnera, pregledu metapodataka/stringova, carving-u i grananju specifičnom za format.
+
 {{#ref}}
 workflow/README.md
 {{#endref}}
 
-### Slike
+### Images
 
-Gde većina CTF stego zadataka nastaje: LSB/bit-planes (PNG/BMP), chunk/file-format weirdness, JPEG tooling, i multi-frame GIF trikovi.
+Ovde se nalazi najveći deo CTF stega: LSB/bit-planes (PNG/BMP), neobičnosti chunk/file-format strukture, alati za JPEG i trikovi sa GIF datotekama sa više frejmova.
+
 {{#ref}}
 images/README.md
 {{#endref}}
 
 ### Audio
 
-Poruke u spektrogramu, sample LSB embedding, i tonovi telefonske tastature (DTMF) su česti obrasci.
+Poruke u spectrogram-u, LSB embedding u uzorcima i tonovi telefonske tastature (DTMF) predstavljaju česte obrasce.
+
 {{#ref}}
 audio/README.md
 {{#endref}}
 
-### Tekst
+### Text
 
-Ako se tekst normalno prikazuje ali se ponaša neočekivano, razmotrite Unicode homoglyphs, zero-width characters, ili kodiranje zasnovano na whitespace-u.
+Ako se tekst normalno prikazuje, ali se ponaša neočekivano, razmotrite Unicode homoglyphs, zero-width characters ili encoding zasnovan na razmacima.
+
 {{#ref}}
 text/README.md
 {{#endref}}
 
-### Dokumenti
+### Documents
 
-PDFs i Office fajlovi su pre svega kontejneri; napadi se obično zasnivaju na embedded files/streams, object/relationship graphs i ZIP ekstrakciji.
+PDF i Office datoteke su prvenstveno kontejneri; napadi se obično vrte oko ugrađenih datoteka/stream-ova, object/relationship grafova i ZIP ekstrakcije.
+
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Malware i delivery-style steganography
+### Malware and delivery-style steganography
 
-Payload delivery često koristi fajlove koji izgledaju validno (npr. GIF/PNG) koji sadrže marker-delimited text payloads, umesto skrivanja na nivou piksela.
+Isporuka payload-a često koristi datoteke koje izgledaju validno (npr. GIF/PNG), a koje sadrže tekstualne payload-e razgraničene markerima, umesto skrivanja na nivou piksela.
+
 {{#ref}}
 malware-and-network/README.md
 {{#endref}}

@@ -1,34 +1,34 @@
-# Audio Steganography
+# Audio steganografija
 
 {{#include ../../banners/hacktricks-training.md}}
 
 Uobičajeni obrasci:
 
-- Spectrogram messages
+- Poruke u spektrogramu
 - WAV LSB embedding
-- DTMF / dial tones encoding
-- Metadata payloads
+- DTMF / kodiranje tonskih signala
+- Payloadi u metapodacima
 
 ## Brza trijaža
 
 Pre korišćenja specijalizovanih alata:
 
-- Proverite detalje codec/container formata i anomalije:
+- Proverite detalje kodeka/kontejnera i anomalije:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Ako audio sadrži sadržaj nalik šumu ili tonalnu strukturu, rano pregledajte spectrogram.
+- Ako audio sadrži sadržaj nalik šumu ili tonalnu strukturu, rano pregledajte spektrogram.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-## Steganografija spektrograma
+## Steganografija pomoću spektrograma
 
 ### Tehnika
 
-Spectrogram stego skriva podatke oblikovanjem energije kroz vreme/frekvenciju, tako da postaju vidljivi samo na grafiku vremena i frekvencije (često su nečujni ili se doživljavaju kao šum).
+Spectrogram stego skriva podatke oblikovanjem energije kroz vreme/frekvenciju, tako da postaju vidljivi samo na prikazu vremensko-frekvencijskog odnosa (često su nečujni ili se doživljavaju kao šum).
 
 ### Sonic Visualiser
 
-Primarni alat za pregled spektrograma:
+Primarni alat za analizu spektrograma:
 
 - [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
@@ -39,9 +39,9 @@ Primarni alat za pregled spektrograma:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
-## FSK / modem dekodiranje
+## FSK / dekodiranje modema
 
-Audio sa frequency-shift keying često izgleda kao smenjivanje pojedinačnih tonova u spektrogramu.<sup>[[1]](#references)</sup> Kada imate približnu procenu centra/pomaka i baud rate-a, primenite brute force pomoću `minimodem`:
+Audio sa frekvencijskim pomeranjem često izgleda kao smenjivanje pojedinačnih tonova na spektrogramu. Kada imate približnu procenu centralne frekvencije/pomeraja i baud rate-a, primenite brute force pomoću `minimodem`:<sup>[[1]](#references)</sup>
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,28 +52,28 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` automatski podešava pojačanje i automatski detektuje mark/space tonove; podesite `--rx-invert` ili `--samplerate` ako je izlaz nečitak.
+`minimodem` automatski podešava pojačanje i detektuje mark/space tonove; prilagodite `--rx-invert` ili `--samplerate` ako je izlaz nečitljiv.
 
 ## WAV LSB
 
 ### Technique
 
-Kod nekompresovanog PCM-a (WAV), svaki uzorak je ceo broj. Izmena bitova nižeg reda veoma malo menja talasni oblik, pa napadači mogu sakriti:
+Za nekompresovani PCM (WAV), svaki sample je ceo broj. Izmena bitova nižeg reda veoma malo menja talasni oblik, pa napadači mogu sakriti:
 
-- 1 bit po uzorku (ili više)
-- Prošarano između kanala
-- Pomoću koraka/permutacije
+- 1 bit po sample-u (ili više)
+- Između kanala
+- Pomoću stride/permutation
 
 Druge familije za skrivanje u audio-zapisima na koje možete naići:
 
 - Phase coding
 - Echo hiding
 - Spread-spectrum embedding
-- Codec-side channels (zavisno od formata i alata)
+- Codec-side channels (zavisi od formata i alata)
 
 ### WavSteg
 
-From: https://github.com/ragibson/Steganography#WavSteg
+Izvor: https://github.com/ragibson/Steganography#WavSteg<sup>[[2]](#references)</sup>
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
@@ -82,11 +82,11 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 - [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / tonovi biranja
+## DTMF / tonski signali
 
 ### Tehnika
 
-DTMF kodira znakove kao parove fiksnih frekvencija (telefonska tastatura). Ako audio podseća na tonove tastature ili pravilne dvostruke frekvencijske tonove, rano testirajte DTMF dekodiranje.
+DTMF kodira znakove kao parove fiksnih frekvencija (telefonska tastatura). Ako audio podseća na tonove tastature ili pravilne dvostruke frekvencijske zvučne signale, rano testirajte DTMF dekodiranje.
 
 Online dekoderi:
 
@@ -96,5 +96,6 @@ Online dekoderi:
 ## Reference
 
 - [1] [Flagvent 2025 (Medium) — pink, Deda Mrazova lista želja, Božićni metapodaci, Uhvaćeni šum](https://0xdf.gitlab.io/flagvent2025/medium)
+- [2] [ragibson/Steganography](https://github.com/ragibson/Steganography#WavSteg)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,17 +2,17 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Junk Code
+### Neupotrebljivi kod
 
-Veoma je uobičajeno pronaći **junk code koji se nikada ne koristi** kako bi se otežalo obrnuto inženjerstvo makroa.\
-Na primer, na sledećoj slici možete videti da se If koji nikada neće biti tačan koristi za izvršavanje nekog junk i beskorisnog koda.
+Veoma je uobičajeno pronaći **neupotrebljivi kod koji se nikada ne koristi** kako bi se otežala analiza makroa.\
+Na primer, na sledećoj slici možete videti da se koristi `If` za izvršavanje neupotrebljivog i beskorisnog koda, iako taj uslov nikada neće biti ispunjen.
 
-![](<../images/image (369).png>)
+![Word Macros - Neupotrebljivi kod: Na primer, na sledećoj slici možete videti da se koristi If za izvršavanje neupotrebljivog i beskorisnog koda, iako taj uslov nikada neće biti ispunjen](<../images/image (369).png>)
 
-### Macro Forms
+### Forme makroa
 
-Korišćenjem **GetObject** funkcije moguće je dobiti podatke iz formi makroa. Ovo se može koristiti za otežavanje analize. Sledeća slika prikazuje makro formu koja se koristi za **sakrivanje podataka unutar tekstualnih okvira** (tekstualni okvir može sakriti druge tekstualne okvire):
+Korišćenjem funkcije **GetObject** moguće je dobiti podatke iz formi makroa. Ovo može otežati analizu. U nastavku je prikazana forma makroa koja se koristi za **skrivanje podataka unutar tekstualnih polja** (tekstualno polje može skrivati druga tekstualna polja):
 
-![](<../images/image (344).png>)
+![Neupotrebljivi kod - Forme makroa: Korišćenjem funkcije GetObject moguće je dobiti podatke iz formi makroa. Ovo može otežati analizu. U nastavku je prikazana fotografija...](<../images/image (344).png>)
 
 {{#include ../banners/hacktricks-training.md}}

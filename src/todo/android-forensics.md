@@ -1,27 +1,32 @@
-# Android Forensics
+# Android forenzika
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Zaključan uređaj
+## Otključan uređaj
 
-Da biste započeli ekstrakciju podataka sa Android uređaja, mora biti otključan. Ako je zaključan, možete:
+Da biste započeli ekstrakciju podataka sa Android uređaja, on mora biti otključan. Ako je zaključan, možete:
 
-- Proveriti da li je uređaj aktivirao debagovanje putem USB-a.
-- Proveriti za mogući [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
-- Pokušati sa [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
+- Proveriti da li je debugging putem USB-a aktiviran.
+- Proveriti mogućnost [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)<sup>[[1]](#references)</sup>
+- Pokušati sa [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)<sup>[[2]](#references)</sup>
 
 ## Akvizicija podataka
 
-Kreirajte [android backup koristeći adb](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) i ekstraktujte ga koristeći [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
+Napravite [android backup using adb](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) i ekstraktujte ga pomoću [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
 
 ### Ako postoji root pristup ili fizička veza sa JTAG interfejsom
 
-- `cat /proc/partitions` (pronađite putanju do flash memorije, obično je prvi unos _mmcblk0_ i odgovara celoj flash memoriji).
+- `cat /proc/partitions` (potražite putanju do flash memorije; uglavnom je prvi unos _mmcblk0_ i odgovara celoj flash memoriji).
 - `df /data` (otkrijte veličinu bloka sistema).
-- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (izvršite to sa informacijama prikupljenim o veličini bloka).
+- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (izvršite komandu koristeći informacije dobijene o veličini bloka).
 
 ### Memorija
 
-Koristite Linux Memory Extractor (LiME) za ekstrakciju RAM informacija. To je kernel ekstenzija koja treba da se učita putem adb.
+Koristite Linux Memory Extractor (LiME) za ekstrakciju informacija iz RAM-a. To je kernel ekstenzija koja treba da bude učitana putem adb-a.
+
+## Reference
+
+- [1] [Smudge Attacks on Smartphone Touch Screens](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
+- [2] [This brute force device can crack any iPhone's PIN code](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
 
 {{#include ../banners/hacktricks-training.md}}

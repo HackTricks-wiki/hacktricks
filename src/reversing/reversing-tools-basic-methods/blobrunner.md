@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**BlobRunner**](https://github.com/OALabs/BlobRunner) je mali Windows **shellcode loader za debugging**: alocira RWX memoriju, kopira blob, ispisuje base address / entry point i prebacuje izvršavanje na tu adresu. Ovo je korisno kada je uzorak **raw shellcode**, **dekriptovana faza izdvojena iz malware-a** ili **position-independent blob** koji nema PE header.
+[**BlobRunner**](https://github.com/OALabs/BlobRunner) je mali Windows **shellcode loader za debugging**: alocira RWX memoriju, kopira blob, ispisuje baznu adresu / entry point i tamo preusmerava izvršavanje. Ovo je korisno kada je uzorak **raw shellcode**, **decrypted stage extracted from malware** ili **position-independent blob** koji nema PE header.
 
-Ispod je isečak koji zadržava originalnu ideju, ali koristi **`%p` za ispis pointera**, tako da x64 build ne skraćuje adrese dok pokušavate da attach-ujete debugger ili promenite bazu blob-a u svom RE alatu.
+Isječak u nastavku zadržava originalnu ideju, ali koristi **`%p` za ispis pointera** kako x64 build ne bi skratio adrese dok pokušavate da prikačite debugger ili rebazirate blob u svom RE alatu.
 
 ## Build
 
-Najjednostavniji način da build-ujete originalni projekat jeste iz **Visual Studio Developer Command Prompt** okruženja:
+Najjednostavniji način za build originalnog projekta jeste iz **Visual Studio Developer Command Prompt** okruženja:
 ```bash
 cl blobrunner.c
 cl /Feblobrunner64.exe /Foblobrunner64.out blobrunner.c
 ```
-Kod takođe možete nalepiti u mali Visual Studio / VS Code C projekat i tamo ga kompajlirati.
+Možete takođe nalepiti code u mali Visual Studio / VS Code C project i tamo ga kompajlirati.
 
 ## Korisni obrasci upotrebe
 ```bash
@@ -29,19 +29,19 @@ BlobRunner.exe shellcode.bin --nopause
 # Force an access violation and let the configured JIT debugger catch it
 BlobRunner.exe shellcode.bin --jit
 ```
-- U **x86**, BlobRunner pravi pauzu, a zatim vrši direktan skok na ulaznu tačku blob-a.
-- U **x64**, kreira **suspended thread**, tako da možete postaviti breakpoint na adresu početka thread-a pre nastavljanja izvršavanja.
-- `--offset` je naročito koristan kada dumped blob počinje sa **decoder / unpacking stub**-om, a već znate stvarnu ulaznu tačku.
+- U **x86**, BlobRunner pravi pauzu, a zatim vrši direktan skok na početnu tačku blob-a.
+- U **x64**, kreira **suspended thread**, tako da možete postaviti prekid na početnu adresu thread-a pre nego što nastavite izvršavanje.
+- `--offset` je naročito koristan kada dump-ovani blob počinje sa **decoder / unpacking stub** delom, a već znate stvarnu početnu tačku.
 
 ## Praktične napomene
 
-### Ispravite ispisane adrese u x64 labovima
+### Ispravite ispisane adrese u x64 laboratorijama
 
-Stariji BlobRunner kod ispisuje adrese pomoću cast-ova kao što su `(int)(size_t)lpvBase` i `%08x` / `%016x`. U 64-bitnim workflow-ima to može skratiti gornju polovinu pointer-a i otežati rebasing / postavljanje breakpoint-a. Isječak ispod to već ispravlja direktnim ispisom **`%p`** vrednosti.
+Stariji BlobRunner kod ispisuje adrese pomoću cast-ova kao što su `(int)(size_t)lpvBase` i `%08x` / `%016x`. U 64-bitnim workflow-ima to može skratiti višu polovinu pointer-a i otežati rebase / postavljanje breakpoint-a. Ispravka u isečku ispod već rešava ovaj problem direktnim ispisivanjem vrednosti pomoću **`%p`**.
 
 ### `--jit` je koristan za breakpoint-e na prvoj instrukciji
 
-`--jit` uklanja execute access sa prvog bajta shellcode-a i omogućava Windows-u da podigne **access violation** kada blob počne da se izvršava. Ovo je korisno kada želite da **konfigurisani JIT debugger** (na primer x64dbg) uhvati prvi pokušaj izvršavanja, umesto da ručno pokušavate da se nakačite na vreme. Nakon što debugger napravi prekid, vratite execute prava i nastavite izvršavanje.
+`--jit` uklanja execute pristup sa prvog bajta shellcode-a i omogućava Windows-u da podigne **access violation** kada blob počne sa izvršavanjem. Ovo je korisno kada želite da **konfigurisani JIT debugger** (na primer x64dbg) uhvati prvi pokušaj izvršavanja, umesto da ručno pokušavate da se priključite na vreme. Nakon što debugger zaustavi izvršavanje, vratite execute prava i nastavite.
 
 Praktičan **x64dbg** tok je:
 ```text
@@ -54,33 +54,33 @@ Prve dve komande registruju x64dbg kao JIT debugger, a `setpagerights` vraća pr
 
 ### Vremenski pratite shellcode umesto da ga pratite korak po korak uživo
 
-Veoma praktičan noviji workflow jeste snimanje BlobRunner-a pod **TTD**, a zatim pregledanje trace-a u **Binary Ninja** / **WinDbg**. Ovo je odlično kada blob sam dešifruje svoj sadržaj, dinamički razrešava API-je ili izvršava nekoliko kratkotrajnih faza. Od verzije **Binary Ninja 4.1**, podrška za TTD više nije samo beta kvaliteta: ona može da pokreće reverse-debugging i direktno iz Binary Ninja pojednostavi WinDbg / TTD workflow.<sup>[[1]](#references)</sup>
+Veoma praktičan noviji workflow jeste snimanje BlobRunner-a pod **TTD**, a zatim pregledanje trace-a u alatima **Binary Ninja** / **WinDbg**. Ovo je odlično kada blob sam sebe dešifruje, dinamički razrešava API-je ili izvršava nekoliko kratkotrajnih faza. Od verzije **Binary Ninja 4.1**, TTD podrška više nije samo beta kvaliteta: može da pokreće reverse-debugging i direktno iz alata Binary Ninja pojednostavi WinDbg / TTD workflow.<sup>[[1]](#references)</sup>
 ```bash
 TTD.exe .\blobrunner.exe .\shellcode.bin
 ```
-Važno je da **zabeležite dodeljenu osnovnu adresu koju BlobRunner ispisuje** i zatim izvršite **rebase** prikaza shellcode-a na tu adresu pre ponovnog reprodukovanja trace-a. Takođe imajte na umu da Microsoft TTD recording dokumentuje kao **invasive**: pokrenite ga iz **elevated** prompt-a, očekujte primetno usporavanje i ograničite trajanje recording-a kako biste izbegli ogromne trace fajlove.
+Važno je **zabeležiti dodeljenu osnovnu adresu koju BlobRunner ispisuje**, a zatim **rebase-ovati** prikaz shellcode-a na tu adresu pre ponovnog reprodukovanja trace-a. Takođe imajte na umu da Microsoft dokumentuje TTD snimanje kao **invasive**: pokrenite ga iz **elevated** prompt-a, očekujte primetno usporavanje i neka period snimanja bude kratak kako biste izbegli ogromne trace datoteke.<sup>[[1]](#references)</sup>
 
 ### Ako blob zahteva prateće podatke, koristite PE wrapper
 
-Neki shellcode očekuje da u memoriji postoji **drugi blob**, **mapped file** ili neki drugi **structured content**. BlobRunner je namerno minimalan, pa za ove slučajeve runner kao što je **SCLauncher** može biti praktičniji jer može da:<sup>[[2]](#references)</sup>
+Neki shellcode očekuje da u memoriji postoji **drugi blob**, **mapirana datoteka** ili neki drugi **strukturirani sadržaj**. BlobRunner je namerno minimalan, pa u tim slučajevima runner kao što je **SCLauncher** može biti praktičniji jer može da:<sup>[[2]](#references)</sup>
 
 - pauzira pre izvršavanja,
-- ubaci `INT3` breakpoint,
-- učita **additional content** u memoriju,
+- umetne `INT3` breakpoint,
+- učita **dodatni sadržaj** u memoriju,
 - memory-map-uje taj dodatni sadržaj ili
-- obmota shellcode unutar privremenog **PE** fajla radi lakše analize u alatima koji preferiraju normalne executable fajlove.
+- obuhvati shellcode privremenim **PE** fajlom radi lakše analize u alatima koji preferiraju uobičajene izvršne datoteke.
 
 Primer:
 ```bash
 SCLauncher.exe -f=shellcode.bin -pause -d=config.bin -mm
 SCLauncher.exe -f=shellcode.bin -pe -64 -ep=0x120
 ```
-Za dopunske workflow-e kao što su **jmp2it**, emulacija pomoću alata **Cutter** ili praćenje shellcode-a zasnovano na alatu **scdbg**, pogledajte [matičnu stranicu za reverse engineering shellcode-a](README.md).
+Za dopunske workflows kao što su **jmp2it**, emulacija pomoću alata **Cutter** ili praćenje shellcode-a zasnovano na alatu **scdbg**, pogledajte [parent shellcode reversing page](README.md).
 
 ## Izvorni kod
 
 Jedine izmenjene linije u odnosu na [originalni kod](https://github.com/OALabs/BlobRunner) jesu linije za ispis pokazivača, koje se koriste za izbegavanje skraćivanja x64 adresa.  
-Da biste ga kompajlirali, samo **kreirajte C/C++ projekat u Visual Studio Code-u, kopirajte i nalepite kod i izgradite ga**.
+Da biste ga kompajlirali, samo **kreirajte C/C++ projekat u Visual Studio Code-u, kopirajte i nalepite kod, a zatim ga izgradite**.
 ```c
 #include <stdio.h>
 #include <windows.h>
@@ -286,6 +286,7 @@ return 0;
 ```
 ## Reference
 
-- [1] [Debugging Shellcode-a pomoću Time Travel Debugging-a u alatu Binary Ninja](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
-- [2] [Analiza Shellcode-a pomoću alata SCLauncher](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
+- [1] [Time Travel Debugging Shellcode with Binary Ninja](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
+- [2] [Analiziranje Shellcode-a pomoću SCLauncher-a](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
+
 {{#include ../../banners/hacktricks-training.md}}

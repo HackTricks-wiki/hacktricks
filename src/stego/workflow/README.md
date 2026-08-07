@@ -2,58 +2,58 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Većina stego problema se brže rešava sistematskom trijažom nego pokušajima nasumičnih alata.
+Većina stego problema rešava se brže sistematskom trijažom nego nasumičnim isprobavanjem alata.
 
 ## Osnovni tok
 
-### Brza kontrolna lista za trijažu
+### Kontrolna lista za brzu trijažu
 
 Cilj je efikasno odgovoriti na dva pitanja:
 
 1. Koji je stvarni kontejner/format?
-2. Da li je payload u metadata, appended bytes, embedded files, ili content-level stego?
+2. Da li se payload nalazi u metapodacima, dodatim bajtovima, ugrađenim datotekama ili u content-level stego tehnici?
 
 #### 1) Identifikujte kontejner
 ```bash
 file target
 ls -lah target
 ```
-Ako `file` i ekstenzija nisu u saglasnosti, verujte `file`-u. Tretirajte uobičajene formate kao kontejnere kada je to prikladno (npr. OOXML dokumenti su ZIP fajlovi).
+Ako se `file` i ekstenzija ne podudaraju, verujte komandi `file`. Kada je prikladno, tretirajte uobičajene formate kao kontejnere (npr. OOXML dokumenti su ZIP datoteke).
 
-#### 2) Potražite metapodatke i očigledne tekstualne nizove
+#### 2) Potražite metapodatke i očigledne stringove
 ```bash
 exiftool target
 strings -n 6 target | head
 strings -n 6 target | tail
 ```
-Isprobajte više enkodiranja:
+Isprobajte više kodiranja:
 ```bash
 strings -e l -n 6 target | head
 strings -e b -n 6 target | head
 ```
-#### 3) Proveri da li ima dodatih podataka / ugrađenih fajlova
+#### 3) Proverite dodate podatke / ugrađene datoteke
 ```bash
 binwalk target
 binwalk -e target
 ```
-Ako ekstrakcija ne uspe ali su prijavljeni potpisi, ručno izrežite region po offset-ima pomoću `dd` i ponovo pokrenite `file` na izrezanom regionu.
+Ako ekstrakcija ne uspe, ali se prijave potpisi, ručno izdvojte offsete pomoću `dd`, a zatim ponovo pokrenite `file` nad izdvojenim regionom.
 
 #### 4) Ako je slika
 
-- Pregledajte anomalije: `magick identify -verbose file`
-- Ako je PNG/BMP, izlistajte bit-ploče/LSB: `zsteg -a file.png`
+- Proverite anomalije: `magick identify -verbose file`
+- Ako je PNG/BMP, nabrojte bit-plane/LSB: `zsteg -a file.png`
 - Proverite strukturu PNG-a: `pngcheck -v file.png`
-- Koristite vizuelne filtere (Stegsolve / StegoVeritas) kada sadržaj može biti otkriven transformacijama kanala/ploča
+- Koristite vizuelne filtere (Stegsolve / StegoVeritas) kada sadržaj može biti otkriven transformacijama kanala/plane-a
 
 #### 5) Ako je audio
 
-- Prvo spektrogram (Sonic Visualiser)
-- Dekodirajte/ispitajte streamove: `ffmpeg -v info -i file -f null -`
-- Ako audio liči na strukturisane tonove, testirajte DTMF dekodiranje
+- Prvo napravite spektrogram (Sonic Visualiser)
+- Dekodirajte/pregledajte stream-ove: `ffmpeg -v info -i file -f null -`
+- Ako audio podseća na strukturisane tonove, testirajte DTMF decoding
 
 ### Osnovni alati
 
-Ovi obično pogađaju česte slučajeve na nivou kontejnera: metadata payloads, dodati bajtovi i ugnježdene fajlove prikrivene ekstenzijom.
+Ovi alati otkrivaju najčešće slučajeve na nivou kontejnera: payload u metapodacima, dodate bajtove i ugrađene fajlove sakrivene ekstenzijom.<sup>[[1]](#references)</sup>
 
 #### Binwalk
 ```bash
@@ -65,12 +65,14 @@ binwalk --dd '.*' file
 ```bash
 foremost -i file
 ```
-Nemam direktan pristup repozitorijumu. Molim te nalepi sadržaj fajla src/stego/workflow/README.md ovde i ja ću ga prevesti na srpski uz zadržavanje iste markdown/html sintakse i pravila koja si naveo.
+Repozitorijum: https://github.com/korczis/foremost
+
+#### Exiftool / Exiv2
 ```bash
 exiftool file
 exiv2 file
 ```
-Navedite sadržaj fajla src/stego/workflow/README.md koji želite da prevedem — nalepite tekst ovde.
+#### file / strings
 ```bash
 file file
 strings -n 6 file
@@ -79,20 +81,20 @@ strings -n 6 file
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-### Kontejneri, priloženi podaci i polyglot trikovi
+### Kontejneri, dodati podaci i polyglot trikovi
 
-Mnogi steganography izazovi su dodatni bajtovi nakon ispravne datoteke, ili ugrađeni arhivi prikriveni ekstenzijom.
+Mnogi steganography izazovi podrazumevaju dodatne bajtove nakon validne datoteke ili ugrađene arhive maskirane ekstenzijom.
 
-#### Prikačeni payloads
+#### Dodati payload-i
 
-Mnogi formati ignorišu prateće bajtove. ZIP/PDF/script se može prikačiti za image/audio kontejner.
+Mnogi formati ignorišu završne bajtove. ZIP/PDF/script mogu biti dodati image/audio kontejneru.
 
 Brze provere:
 ```bash
 binwalk file
 tail -c 200 file | xxd
 ```
-Ako znate offset, carve pomoću `dd`:
+Ako znate ofset, izdvojte pomoću `dd`:
 ```bash
 dd if=file of=carved.bin bs=1 skip=<offset>
 file carved.bin
@@ -103,35 +105,34 @@ Kada je `file` zbunjen, potražite magične bajtove pomoću `xxd` i uporedite ih
 ```bash
 xxd -g 1 -l 32 file
 ```
-#### Zip u prerušavanju
+#### Zip pod maskom
 
-Pokušajte sa `7z` i `unzip` čak i ako ekstenzija ne ukazuje na zip:
+Isprobaj `7z` i `unzip` čak i ako ekstenzija ne ukazuje da je u pitanju zip:
 ```bash
 7z l file
 unzip -l file
 ```
-### Near-stego neobičnosti
+### Neobičnosti povezane sa stego tehnikom
 
-Kratke veze za obrasce koji se redovno pojavljuju pored stega (QR-from-binary, braille, itd).
+Brze veze ka obrascima koji se često pojavljuju uz stego (QR iz binarnog zapisa, brajevo pismo itd.).
 
-#### QR kodovi iz binarnog
+#### QR kodovi iz binarnog zapisa
 
-Ako je dužina bloba savršen kvadrat, to može predstavljati sirove piksele za sliku/QR.
+Ako je dužina blob-a savršen kvadrat, on može predstavljati sirove piksele slike/QR koda.
 ```python
 import math
 math.isqrt(2500)  # 50
 ```
-Pomoćnik za konverziju binarnog u sliku:
+Pomoćni alat za konverziju binarnog zapisa u sliku:
 
 - [https://www.dcode.fr/binary-image](https://www.dcode.fr/binary-image)
 
-#### Brajeovo pismo
+#### Brajevo pismo
 
 - [https://www.branah.com/braille-translator](https://www.branah.com/braille-translator)
 
-## Liste referenci
+## Reference
 
-- [https://0xrick.github.io/lists/stego/](https://0xrick.github.io/lists/stego/)
-- [https://github.com/DominicBreuker/stego-toolkit](https://github.com/DominicBreuker/stego-toolkit)
+- [1] [DominicBreuker/stego-toolkit - Docker image sa najpopularnijim steganografskim alatima objedinjenim na jednom mestu](https://github.com/DominicBreuker/stego-toolkit)
 
 {{#include ../../banners/hacktricks-training.md}}

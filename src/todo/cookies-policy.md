@@ -1,45 +1,45 @@
-# Cookies Policy
+# Politika kolačića
 
-Last updated: 02/04/2023
+Poslednje ažuriranje: 02/04/2023
 
-### Introduction
+### Uvod
 
-Ova Politika kolačića se primenjuje na sledeće veb sajtove u vlasništvu i pod upravom HackTricks tima ("HackTricks", "mi", "nas" ili "naš"):
+Ova Politika kolačića primenjuje se na sledeće veb-sajtove u vlasništvu i pod upravljanjem HackTricks tima („HackTricks“, „mi“, „nas“ ili „naš“):
 
 * hacktricks.wiki
 * [www.hacktricks.wiki](https://www.hacktricks.wiki/)
 * book.hacktricks.wiki
 * cloud.hacktricks.wiki
 
-Korišćenjem bilo kog od ovih veb sajtova, slažete se sa upotrebom kolačića u skladu sa ovom Politikom kolačića. Ako se ne slažete, molimo vas da onemogućite kolačiće u podešavanjima vašeg pregledača ili se suzdržite od korišćenja naših veb sajtova.
+Korišćenjem bilo kog od ovih veb-sajtova saglasni ste sa upotrebom kolačića u skladu sa ovom Politikom kolačića. Ako niste saglasni, onemogućite kolačiće u podešavanjima svog browsera ili nemojte koristiti naše veb-sajtove.
 
-### What are cookies?
+### Šta su kolačići?
 
-Kolačići su mali tekstualni fajlovi koji se čuvaju na vašem računaru ili mobilnom uređaju kada posetite veb sajt. Široko se koriste za omogućavanje rada veb sajtova, poboljšanje njihove funkcionalnosti i pružanje personalizovanijeg korisničkog iskustva.
+Kolačići su male tekstualne datoteke koje se čuvaju na vašem računaru ili mobilnom uređaju kada posetite veb-sajt. Široko se koriste za omogućavanje rada veb-sajtova, poboljšanje njihove funkcionalnosti i pružanje personalizovanijeg korisničkog iskustva.
 
-### How we use cookies
+### Kako koristimo kolačiće
 
-Koristimo kolačiće na našim veb sajtovima u sledeće svrhe:
+Na našim veb-sajtovima koristimo kolačiće u sledeće svrhe:
 
-1. Essential cookies: Ovi kolačići su neophodni za osnovnu funkcionalnost naših veb sajtova, kao što su omogućavanje autentifikacije korisnika, održavanje bezbednosti i pamćenje vaših preferencija.
-2. Performance cookies: Ovi kolačići nam pomažu da razumemo kako posetioci interaguju sa našim veb sajtovima, prikupljajući i izveštavajući informacije anonimno. To nam omogućava da poboljšamo performanse našeg veb sajta i korisničko iskustvo.
-3. Functionality cookies: Ovi kolačići omogućavaju našim veb sajtovima da pamte izbore koje napravite, kao što su vaš jezik ili region, kako bi pružili personalizovanije iskustvo.
-4. Targeting/advertising cookies: Ovi kolačići se koriste za isporuku relevantnih oglasa i marketinških komunikacija na osnovu vaših interesa, istorije pretraživanja i interakcija sa našim veb sajtovima.
+1. Neophodni kolačići: Ovi kolačići su potrebni za osnovnu funkcionalnost naših veb-sajtova, kao što su omogućavanje autentifikacije korisnika, održavanje bezbednosti i pamćenje vaših podešavanja.
+2. Kolačići za performanse: Ovi kolačići nam pomažu da razumemo kako posetioci stupaju u interakciju sa našim veb-sajtovima, prikupljanjem i anonimnim izveštavanjem o informacijama. To nam omogućava da poboljšamo performanse našeg veb-sajta i korisničko iskustvo.
+3. Funkcionalni kolačići: Ovi kolačići omogućavaju našim veb-sajtovima da zapamte izbore koje napravite, kao što su jezik ili region, kako bi vam pružili personalizovanije iskustvo.
+4. Kolačići za ciljanje/oglašavanje: Ovi kolačići se koriste za prikazivanje relevantnih oglasa i marketinških komunikacija na osnovu vaših interesovanja, istorije pregledanja i interakcija sa našim veb-sajtovima.
 
-Pored toga, stranice book.hacktricks.wiki i cloud.hacktricks.wiki su hostovane na Gitbook-u. Možete pronaći više informacija o kolačićima Gitbook-a na [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+Pored toga, stranice book.hacktricks.wiki i cloud.hacktricks.wiki hostovane su na Gitbook-u. Više informacija o Gitbook kolačićima možete pronaći na [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
 
-### Third-party cookies
+### Kolačići trećih strana
 
-Pored naših kolačića, možemo takođe koristiti kolačiće trećih strana za izveštavanje o statistikama korišćenja veb sajta, isporuku oglasa i omogućavanje dugmadi za deljenje na društvenim mrežama. Korišćenje kolačića trećih strana podložno je njihovim odgovarajućim politikama privatnosti.
+Pored sopstvenih kolačića, možemo koristiti i kolačiće trećih strana za izveštavanje o statistici korišćenja veb-sajta, prikazivanje oglasa i omogućavanje dugmadi za deljenje na društvenim mrežama. Korišćenje kolačića trećih strana podleže njihovim odgovarajućim politikama privatnosti.
 
-Managing cookies
+Upravljanje kolačićima
 
-Većina veb pregledača omogućava vam da upravljate kolačićima putem svojih podešavanja. Možete izabrati da blokirate, obrišete ili ograničite upotrebu kolačića na vašem uređaju. Međutim, imajte na umu da onemogućavanje kolačića može uticati na funkcionalnost i performanse naših veb sajtova.
+Većina veb browsera omogućava upravljanje kolačićima putem svojih podešavanja. Možete izabrati da blokirate, obrišete ili ograničite upotrebu kolačića na svom uređaju. Međutim, imajte na umu da onemogućavanje kolačića može uticati na funkcionalnost i performanse naših veb-sajtova.
 
-Changes to this Cookies Policy
+Izmene ove Politike kolačića
 
-Možemo povremeno ažurirati ovu Politiku kolačića kako bismo odražavali promene u našim praksama ili relevantnim zakonima. Ohrabrujemo vas da povremeno pregledate ovu stranicu za najnovije informacije o našim praksama kolačića.
+Ovu Politiku kolačića možemo povremeno ažurirati kako bismo odrazili izmene u našoj praksi ili relevantnim zakonima. Preporučujemo vam da povremeno pregledate ovu stranicu radi najnovijih informacija o našoj praksi u vezi sa kolačićima.
 
-### Contact us
+### Kontaktirajte nas
 
-Ako imate bilo kakva pitanja ili nedoumice u vezi sa ovom Politikom kolačića, molimo vas da nas kontaktirate na [support@hacktricks.xyz](mailto:support@hacktricks.xyz)
+Ako imate pitanja ili nedoumice u vezi sa ovom Politikom kolačića, kontaktirajte nas na [support@hacktricks.xyz](mailto:support@hacktricks.xyz)

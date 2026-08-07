@@ -4,7 +4,7 @@
 
 ## Bus Pirate
 
-Da biste testirali da li Bus Pirate radi, povežite +5V sa VPU i 3.3V sa ADC i pristupite bus pirate-u (koristeći Tera Term na primer) i upotrebite komandu `~`:
+Da biste testirali da li Bus Pirate radi, povežite +5V sa VPU i 3.3V sa ADC i pristupite Bus Pirate-u (na primer, koristeći Tera Term), a zatim upotrebite komandu `~`:
 ```bash
 # Use command
 HiZ>~
@@ -43,18 +43,18 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-Kao što možete videti u prethodnoj komandnoj liniji, rečeno je da nije pronađena nijedna greška. Ovo je veoma korisno da se zna da funkcioniše nakon kupovine ili nakon flešovanja firmvera.
+Kao što možete videti u prethodnoj komandnoj liniji, pisalo je da je pronađeno 0 grešaka. Ovo je veoma korisno da biste znali da uređaj radi nakon kupovine ili flashovanja firmware-a.
 
-Da biste se povezali sa bus pirate, možete pratiti dokumentaciju:
+Da biste se povezali sa bus pirate-om, možete pratiti dokumentaciju:
 
-![](<../../images/image (484).png>)
+![Use command - Press space: Da biste se povezali sa bus pirate-om, možete pratiti dokumentaciju](<../../images/image (484).png>)
 
-U ovom slučaju, povezaću se sa EPROM-om: ATMEL901 24C256 PU27:
+U ovom slučaju povezaću se sa EPROM-om: ATMEL901 24C256 PU27:
 
-![](<../../images/image (964).png>)
+![Use command - Press space: U ovom slučaju povezaću se sa EPROM-om: ATMEL901 24C256 PU27](<../../images/image (964).png>)
 
-Da bih razgovarao sa bus pirate, koristio sam Tera Term povezan na COM port bus pirata sa podešavanjem --> Serijski port --> Brzina od 115200.\
-U sledećoj komunikaciji možete pronaći kako pripremiti bus pirate za razgovor I2C i kako pisati i čitati iz memorije (Komentari se pojavljuju koristeći "#", ne očekujte taj deo u komunikaciji):
+Za komunikaciju sa bus pirate-om koristio sam Tera Term povezan sa COM portom bus pirate-a, uz podešavanje Setup --> Serial Port --> Speed na 115200.\
+U sledećoj komunikaciji možete videti kako pripremiti bus pirate za komunikaciju putem I2C-a i kako upisivati i čitati iz memorije (komentari se pojavljuju pomoću znaka "#", nemojte očekivati taj deo u komunikaciji):
 ```bash
 # Check communication with buspirate
 i
@@ -155,9 +155,9 @@ NACK
 ```
 ### Sniffer
 
-U ovom scenariju ćemo prisluškivati I2C komunikaciju između arduino-a i prethodnog EPROM-a, samo treba da povežete oba uređaja i zatim povežete bus pirate na SCL, SDA i GND pinove:
+U ovom scenariju ćemo prisluškivati I2C komunikaciju između arduina i prethodne EPROM memorije; potrebno je samo da komunicirate sa oba uređaja, a zatim povežete bus pirate sa pinovima SCL, SDA i GND:
 
-![](<../../images/image (166).png>)
+![Čitanje 20B sa adrese 0x69 prethodno konfigurisane - Sniffer: U ovom scenariju ćemo prisluškivati I2C komunikaciju između arduina i prethodne EPROM memorije; potrebno je samo da...](<../../images/image (166).png>)
 ```bash
 I2C>m
 1. HiZ
