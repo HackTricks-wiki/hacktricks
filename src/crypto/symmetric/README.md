@@ -1,121 +1,121 @@
-# Symmetric Crypto
+# Simetrična kriptografija
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Šta tražiti na CTF-ovima
+## Na šta treba obratiti pažnju u CTF-ovima
 
-- **Mode misuse**: ECB patterns, CBC malleability, CTR/GCM nonce reuse.
-- **Padding oracles**: različite greške/tajming za loš padding.
-- **MAC confusion**: using CBC-MAC with variable-length messages, or MAC-then-encrypt mistakes.
-- **XOR everywhere**: stream ciphers i prilagođene konstrukcije često se svode na XOR sa keystream-om.
+- **Pogrešna upotreba režima**: ECB obrasci, CBC malleability, CTR/GCM ponovna upotreba nonce-a.
+- **Padding oracles**: različite greške/vremena odziva za neispravan padding.
+- **MAC konfuzija**: korišćenje CBC-MAC-a sa porukama promenljive dužine ili greške tipa MAC-then-encrypt.
+- **XOR svuda**: stream ciphers i prilagođene konstrukcije često se svode na XOR sa keystream-om.
 
-## AES modovi i zloupotrebe
+## AES režimi i pogrešna upotreba
 
 ### ECB: Electronic Codebook
 
-ECB leaks patterns: equal plaintext blocks → equal ciphertext blocks. To omogućava:
+ECB otkriva obrasce: jednaki blokovi plaintext-a → jednaki blokovi ciphertext-a. To omogućava:
 
-- Cut-and-paste / block reordering
+- Cut-and-paste / preuređivanje blokova
 - Brisanje blokova (ako format ostane validan)
 
-Ako možeš kontrolisati plaintext i posmatrati ciphertext (ili cookies), pokušaj da napraviš ponovljene blokove (npr. mnogo `A`-ova) i traži ponavljanja.
+Ako možete da kontrolišete plaintext i posmatrate ciphertext (ili cookies), pokušajte da napravite ponovljene blokove (npr. mnogo `A` znakova) i potražite ponavljanja.
 
 ### CBC: Cipher Block Chaining
 
-- CBC is **malleable**: flipping bits in `C[i-1]` flips predictable bits in `P[i]`.
-- Ako sistem otkriva validan padding naspram nevalidnog, možda imaš **padding oracle**.
+- CBC je **malleable**: menjanje bitova u `C[i-1]` menja predvidive bitove u `P[i]`.
+- Ako sistem otkriva validan naspram nevalidnog padding-a, možda imate **padding oracle**.
 
 ### CTR
 
-CTR turns AES into a stream cipher: `C = P XOR keystream`.
+CTR pretvara AES u stream cipher: `C = P XOR keystream`.
 
 Ako se nonce/IV ponovo koristi sa istim ključem:
 
-- `C1 XOR C2 = P1 XOR P2` (classic keystream reuse)
-- Ako je plaintext poznat, možeš rekonstruisati keystream i dešifrovati druge.
+- `C1 XOR C2 = P1 XOR P2` (klasična ponovna upotreba keystream-a)
+- Uz poznati plaintext možete rekonstruisati keystream i dekriptovati druge podatke.
 
-Obrasci eksploatacije ponovnog korišćenja Nonce/IV
+**Obrasci iskorišćavanja ponovne upotrebe nonce-a/IV-a**
 
-- Rekonstruši keystream gde je plaintext poznat/pogodiv:
+- Rekonstruišite keystream svuda gde je plaintext poznat ili se može pogoditi:
 
 ```text
 keystream[i..] = ciphertext[i..] XOR known_plaintext[i..]
 ```
 
-Primeni rekonstruisane keystream bajtove da dešifruješ bilo koji drugi ciphertext koji je proizveden sa istim key+IV na istim offset-ima.
-- Visoko strukturirani podaci (npr. ASN.1/X.509 certificates, file headers, JSON/CBOR) daju velike poznate plaintext regione. Često možeš XOR-ovati ciphertext sertifikata sa predvidivim telom sertifikata da izvedeš keystream, zatim dešifruješ druge tajne enkriptovane pod reuse-ovanim IV. Vidi takođe [TLS & Certificates](../tls-and-certificates/README.md) za tipične layout-e sertifikata.
-- Kada je više tajni istog serijalizovanog formata/veličine enkriptovano pod istim key+IV, poravnanje polja curi čak i bez potpunog poznatog plaintext-a. Primer: PKCS#8 RSA keys iste veličine modula stavljaju faktore na podudarne offset-e (~99.6% poravnanje za 2048-bit). XOR-ovanjem dva ciphertext-a pod reuse-ovanim keystream-om izoluješ `p ⊕ p'` / `q ⊕ q'`, što se može bruteforce-ovano rekonstruisati za sekunde.
-- Podrazumevani IV u bibliotekama (npr. konstantni `000...01`) su kritična pogrešna praksa: svaka enkripcija ponavlja isti keystream, pretvarajući CTR u reuse-ovani one-time pad.
+Primenite rekonstruisane bajtove keystream-a da dekriptujete bilo koji drugi ciphertext kreiran istim ključem+IV-om na istim offsetima.
+- Visoko strukturirani podaci (npr. ASN.1/X.509 sertifikati, zaglavlja fajlova, JSON/CBOR) daju velike regione poznatog plaintext-a. Često možete XOR-ovati ciphertext sertifikata sa predvidivim telom sertifikata da biste izveli keystream, a zatim dekriptovati druge tajne šifrovane ponovo korišćenim IV-om. Pogledajte i [TLS & Certificates](../tls-and-certificates/README.md) za tipične rasporede sertifikata.<sup>[[1]](#references)</sup>
+- Kada je više tajni istog **serijalizovanog formata/veličine** šifrovano istim ključem+IV-om, poravnanje polja otkriva informacije čak i bez potpunog poznatog plaintext-a. Primer: PKCS#8 RSA ključevi iste veličine modula postavljaju proste faktore na odgovarajuće offsete (oko 99,6% poravnanja za 2048-bitne ključeve). XOR-ovanje dva ciphertext-a uz ponovo korišćeni keystream izoluje `p ⊕ p'` / `q ⊕ q'`, što se može brute-force-ovati za nekoliko sekundi.<sup>[[1]](#references)</sup>
+- Podrazumevani IV-ovi u bibliotekama (npr. konstantni `000...01`) predstavljaju kritičan footgun: svako šifrovanje ponavlja isti keystream, pretvarajući CTR u ponovo korišćeni one-time pad.<sup>[[1]](#references)</sup>
 
-CTR malleability
+**CTR malleability**
 
-- CTR pruža samo konfidencijalnost: flipovanje bitova u ciphertext-u deterministički flipuje iste bitove u plaintext-u. Bez autentikacionog taga, napadači mogu neprimetno menjati podatke (npr. tweak-ovati ključeve, flagove ili poruke).
-- Koristi AEAD (GCM, GCM-SIV, ChaCha20-Poly1305, itd.) i primoraj verifikaciju taga da otkriješ bit-flipove.
+- CTR pruža samo poverljivost: menjanje bitova u ciphertext-u deterministički menja iste bitove u plaintext-u. Bez authentication tag-a, napadači mogu neprimećeno da menjaju podatke (npr. ključeve, flagove ili poruke).
+- Koristite AEAD (GCM, GCM-SIV, ChaCha20-Poly1305 itd.) i zahtevajte proveru tag-a kako biste otkrili izmene bitova.
 
 ### GCM
 
-GCM takođe loše pada pod nonce reuse. Ako se isti key+nonce koristi više puta, obično dobijaš:
+GCM se takođe ozbiljno kompromituje pri ponovnoj upotrebi nonce-a. Ako se isti key+nonce koristi više puta, obično dobijate:
 
-- Keystream reuse za enkripciju (kao CTR), omogućavajući oporavak plaintext-a kad god je neki plaintext poznat.
-- Gubitak integriteta. U zavisnosti šta je izloženo (više message/tag parova pod istim nonce-om), napadači mogu biti u mogućnosti da forge-uju tagove.
+- Ponovnu upotrebu keystream-a pri šifrovanju (kao kod CTR-a), što omogućava oporavak plaintext-a kada je bilo koji plaintext poznat.
+- Gubitak garancija integriteta. U zavisnosti od toga šta je izloženo (više parova poruka/tag-ova sa istim nonce-om), napadači mogu moći da falsifikuju tag-ove.
 
-Operativna uputstva:
+Operativne smernice:
 
-- Tretiraj "nonce reuse" u AEAD kao kritičnu ranjivost.
-- Misuse-resistant AEADs (npr. GCM-SIV) smanjuju posledice nonce-misuse-a ali i dalje zahtevaju jedinstvene nonces/IV-e.
-- Ako imaš više ciphertext-ova pod istim nonce-om, počni proverom relacija tipa `C1 XOR C2 = P1 XOR P2`.
+- Tretirajte „ponovnu upotrebu nonce-a“ u AEAD-u kao kritičnu ranjivost.
+- AEAD algoritmi otporni na pogrešnu upotrebu (npr. GCM-SIV) smanjuju posledice pogrešne upotrebe nonce-a, ali i dalje zahtevaju jedinstvene nonce-ove/IV-ove.
+- Ako imate više ciphertext-ova sa istim nonce-om, počnite proverom relacija tipa `C1 XOR C2 = P1 XOR P2`.
 
-### Tools
+### Alati
 
-- CyberChef for quick experiments: https://gchq.github.io/CyberChef/
-- Python: `pycryptodome` for scripting
+- CyberChef za brze eksperimente: https://gchq.github.io/CyberChef/
+- Python: `pycryptodome` za scripting
 
-## Obrasci eksploatacije ECB-a
+## Obrasci iskorišćavanja ECB-a
 
 ECB (Electronic Code Book) šifruje svaki blok nezavisno:
 
-- equal plaintext blocks → equal ciphertext blocks
-- ovo curi strukturu i omogućava cut-and-paste stil napada
+- jednaki blokovi plaintext-a → jednaki blokovi ciphertext-a
+- ovo otkriva strukturu i omogućava napade tipa cut-and-paste
 
-![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
+![Dijagram dekripcije blokova u ECB režimu](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-### Ideja detekcije: token/cookie pattern
+### Ideja za detekciju: obrazac tokena/cookie-ja
 
-Ako se prijaviš više puta i **uvek dobijaš isti cookie**, ciphertext može biti deterministički (ECB ili fiksni IV).
+Ako se prijavite nekoliko puta i **uvek dobijete isti cookie**, ciphertext može biti deterministički (ECB ili fiksni IV).
 
-Ako kreiraš dva user-a sa uglavnom identičnim plaintext layout-ima (npr. dugi ponovljeni karakteri) i vidiš ponovljene ciphertext blokove na istim offset-ima, ECB je glavni osumnjičeni.
+Ako kreirate dva korisnika sa uglavnom identičnim rasporedom plaintext-a (npr. dugim ponovljenim karakterima) i vidite ponovljene blokove ciphertext-a na istim offsetima, ECB je glavni osumnjičeni.
 
-### Obrasci eksploatacije
+### Obrasci iskorišćavanja
 
-#### Removing entire blocks
+#### Uklanjanje čitavih blokova
 
-Ako je token format nešto poput `<username>|<password>` i granica bloka se poklapa, ponekad možeš kreirati user-a tako da se `admin` blok poravna, pa zatim ukloniti prethodne blokove da dobiješ validan token za `admin`.
+Ako je format tokena nešto poput `<username>|<password>` i granica bloka je poravnata, ponekad možete kreirati korisnika tako da blok `admin` bude poravnat, a zatim ukloniti prethodne blokove da biste dobili validan token za `admin`.
 
-#### Moving blocks
+#### Pomeranje blokova
 
-Ako backend toleriše padding/dodatne razmake (`admin` vs `admin    `), možeš:
+Ako backend prihvata padding/dodatne razmake (`admin` naspram `admin    `), možete:
 
 - Poravnati blok koji sadrži `admin   `
-- Zameniti/ponovo iskoristiti taj ciphertext blok u drugom tokenu
+- Zameniti/ponovo upotrebiti taj ciphertext blok u drugom tokenu
 
 ## Padding Oracle
 
 ### Šta je to
 
-U CBC modu, ako server otkriva (direktno ili indirektno) da li dekriptovani plaintext ima **valid PKCS#7 padding**, često možeš:
+U CBC režimu, ako server direktno ili indirektno otkriva da li dekriptovani plaintext ima **validan PKCS#7 padding**, često možete:
 
-- Dešifrovati ciphertext bez ključa
-- Enkriptovati izabrani plaintext (forge-ovati ciphertext)
+- Dekriptovati ciphertext bez ključa
+- Šifrovati izabrani plaintext (falsifikovati ciphertext)
 
 Oracle može biti:
 
-- Specifična poruka o grešci
+- Konkretna poruka o grešci
 - Drugačiji HTTP status / veličina odgovora
-- Razlika u tajmingu
+- Razlika u vremenu odziva
 
-### Praktična eksploatacija
+### Praktično iskorišćavanje
 
-PadBuster is the classic tool:
+PadBuster je klasičan alat:
 
 {{#ref}}
 https://github.com/AonCyberLabs/PadBuster
@@ -130,46 +130,46 @@ Napomene:
 
 - Veličina bloka je često `16` za AES.
 - `-encoding 0` znači Base64.
-- Koristite `-error` ako je oracle specifičan string.
+- Koristite `-error` ako je oracle određeni string.
 
-### Zašto radi
+### Zašto funkcioniše
 
-CBC dekripcija izračunava `P[i] = D(C[i]) XOR C[i-1]`. Menjanjem bajtova u `C[i-1]` i posmatranjem da li je padding važeći, možete povratiti `P[i]` bajt-po-bajt.
+CBC dešifrovanje izračunava `P[i] = D(C[i]) XOR C[i-1]`. Menjanjem bajtova u `C[i-1]` i posmatranjem da li je padding validan, možete oporaviti `P[i]` bajt po bajt.
 
-## Bit-flipping u CBC
+## Bit-flipping u CBC-u
 
-Čak i bez padding oracle-a, CBC je malleable. Ako možete izmeniti blokove šifroteksta i aplikacija koristi dekriptovani plaintext kao strukturirane podatke (npr. `role=user`), možete flip-ovati specifične bitove da promenite odabrane bajtove plaintext-a na odabranoj poziciji u sledećem bloku.
+Čak i bez padding oracle-a, CBC je malleable. Ako možete da menjate blokove ciphertext-a, a aplikacija koristi dešifrovani plaintext kao strukturisane podatke (npr. `role=user`), možete promeniti određene bitove kako biste izmenili odabrane bajtove plaintext-a na izabranoj poziciji u sledećem bloku.
 
 Tipičan CTF obrazac:
 
 - Token = `IV || C1 || C2 || ...`
 - Vi kontrolišete bajtove u `C[i]`
-- Ciljate bajtove plaintext-a u `P[i+1]` jer `P[i+1] = D(C[i+1]) XOR C[i]`
+- Ciljate bajtove plaintext-a u `P[i+1]`, jer je `P[i+1] = D(C[i+1]) XOR C[i]`
 
-Ovo samo po sebi nije kršenje poverljivosti, ali je uobičajen primitiv za eskalaciju privilegija kada nedostaje integritet.
+Ovo samo po sebi nije razbijanje poverljivosti, ali je čest primitive za privilege-escalation kada integritet nedostaje.
 
 ## CBC-MAC
 
-CBC-MAC je siguran samo pod specifičnim uslovima (naročito **poruke fiksne dužine** i ispravno odvajanje domena).
+CBC-MAC je bezbedan samo pod određenim uslovima (posebno za **poruke fiksne dužine** i ispravnu separaciju domena).
 
-### Klasičan obrazac falsifikovanja za promenljivu dužinu
+### Klasičan obrazac forgery-ja za promenljivu dužinu
 
-CBC-MAC se obično izračunava kao:
+CBC-MAC se obično izračunava ovako:
 
 - IV = 0
 - `tag = last_block( CBC_encrypt(key, message, IV=0) )`
 
-Ako možete dobiti tagove za poruke po izboru, često možete napraviti tag za konkatenaciju (ili srodnu konstrukciju) bez poznavanja ključa, iskorišćujući kako CBC povezuje blokove.
+Ako možete da dobijete tag-ove za poruke po izboru, često možete da kreirate tag za konkatenaciju (ili srodnu konstrukciju) bez poznavanja ključa, iskorišćavanjem načina na koji CBC ulančava blokove.
 
-Ovo se često pojavljuje u CTF cookie-ima/tokens koji MAC-uju username ili role pomoću CBC-MAC.
+Ovo se često pojavljuje u CTF cookies/token-ima koji koriste CBC-MAC za MAC korisničkog imena ili role-a.
 
 ### Bezbednije alternative
 
 - Koristite HMAC (SHA-256/512)
 - Koristite CMAC (AES-CMAC) ispravno
-- Uključite dužinu poruke / odvajanje domena
+- Uključite dužinu poruke / separaciju domena
 
-## Stream ciphers: XOR and RC4
+## Stream cipher-i: XOR i RC4
 
 ### Mentalni model
 
@@ -179,12 +179,12 @@ Većina situacija sa stream cipher-ima svodi se na:
 
 Dakle:
 
-- Ako znate plaintext, dobijate keystream.
+- Ako znate plaintext, oporavljate keystream.
 - Ako se keystream ponovo koristi (isti key+nonce), `C1 XOR C2 = P1 XOR P2`.
 
 ### XOR-based encryption
 
-Ako znate bilo koji segment plaintext-a na poziciji `i`, možete rekonstruisati bajtove keystream-a i dekriptovati druge šifrotekste na tim pozicijama.
+Ako znate bilo koji segment plaintext-a na poziciji `i`, možete da oporavite bajtove keystream-a i dešifrujete druge ciphertext-e na tim pozicijama.
 
 Autosolvers:
 
@@ -192,18 +192,18 @@ Autosolvers:
 
 ### RC4
 
-RC4 je stream cipher; enkripcija/dekripcija su ista operacija.
+RC4 je stream cipher; encrypt/decrypt su ista operacija.
 
-Ako možete dobiti RC4 enkripciju poznatog plaintext-a pod istim ključem, možete rekonstruisati keystream i dekriptovati druge poruke iste dužine/offseta.
+Ako možete da dobijete RC4 encryption poznatog plaintext-a pod istim ključem, možete da oporavite keystream i dešifrujete druge poruke iste dužine/offset-a.
 
-Reference writeup (HTB Kryptos):
+Referentni writeup (HTB Kryptos):
 
 {{#ref}}
 https://0xrick.github.io/hack-the-box/kryptos/
 {{#endref}}
 
-## References
+## Reference
 
-- [Trail of Bits – Carelessness versus craftsmanship in cryptography](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
+- [1] [Trail of Bits – Carelessness versus craftsmanship in cryptography](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
 
 {{#include ../../banners/hacktricks-training.md}}

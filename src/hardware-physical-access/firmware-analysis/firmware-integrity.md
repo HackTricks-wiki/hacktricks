@@ -1,41 +1,41 @@
-# Firmware Integrity
+# Integritet firmware-a
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Custom firmware i/ili compiled binaries mogu da se uploaduju da bi se iskoristile flaws u integrity ili signature verification.** Sledeći koraci mogu da se prate za backdoor bind shell kompajlaciju:
+**Custom firmware i/ili kompajlirani binaries mogu se otpremiti radi iskorišćavanja propusta u proveri integriteta ili potpisa**. Za kompajliranje bind shell backdoor-a mogu se pratiti sledeći koraci:
 
-1. Firmware može da se ekstrahuje koristeći firmware-mod-kit (FMK).
-2. Arhitektura target firmware-a i endianness treba da se identifikuju.
-3. Cross compiler može da se izgradi koristeći Buildroot ili druge odgovarajuće metode za environment.
-4. Backdoor može da se izgradi koristeći cross compiler.
-5. Backdoor može da se kopira u /usr/bin direktorijum ekstrahovanog firmware-a.
-6. Odgovarajući QEMU binary može da se kopira u rootfs ekstrahovanog firmware-a.
-7. Backdoor može da se emulira koristeći chroot i QEMU.
-8. Backdoor može da se pristupi preko netcat.
-9. QEMU binary treba da se ukloni iz rootfs-a ekstrahovanog firmware-a.
-10. Modifikovani firmware može da se ponovo spakuje koristeći FMK.
-11. Firmware sa backdoor-om može da se testira emulacijom pomoću firmware analysis toolkit (FAT) i povezivanjem na target backdoor IP i port koristeći netcat.
+1. Firmware se može izdvojiti pomoću firmware-mod-kit-a (FMK).
+2. Potrebno je identifikovati arhitekturu i endianness ciljnog firmware-a.
+3. Cross compiler se može izgraditi pomoću Buildroot-a ili drugih odgovarajućih metoda za dato okruženje.
+4. Backdoor se može izgraditi pomoću cross compiler-a.
+5. Backdoor se može kopirati u /usr/bin direktorijum izdvojenog firmware-a.
+6. Odgovarajući QEMU binary može se kopirati u rootfs izdvojenog firmware-a.
+7. Backdoor se može emulirati pomoću chroot-a i QEMU-a.
+8. Backdoor-u se može pristupiti pomoću netcat-a.
+9. QEMU binary treba ukloniti iz rootfs-a izdvojenog firmware-a.
+10. Izmenjeni firmware se može ponovo zapakovati pomoću FMK-a.
+11. Backdoored firmware se može testirati emulacijom pomoću firmware analysis toolkit-a (FAT) i povezivanjem na IP adresu i port ciljnog backdoor-a pomoću netcat-a.
 
-Ako je root shell već dobijen kroz dynamic analysis, bootloader manipulation, ili hardware security testing, unapred kompajlirani malicious binaries kao što su implants ili reverse shells mogu da se izvrše. Automated payload/implant alati kao što su Metasploit framework i 'msfvenom' mogu da se iskoriste koristeći sledeće korake:
+Ako je root shell već dobijen putem dinamičke analize, manipulacije bootloader-om ili testiranja hardverske bezbednosti, mogu se izvršiti unapred kompajlirani zlonamerni binaries, kao što su implants ili reverse shells. Automatizovani payload/implant alati, poput Metasploit framework-a i alata 'msfvenom', mogu se iskoristiti pomoću sledećih koraka:
 
-1. Arhitektura target firmware-a i endianness treba da se identifikuju.
-2. Msfvenom može da se koristi da se specificiraju target payload, attacker host IP, listening port number, filetype, architecture, platform, i output file.
-3. Payload može da se prenese na compromised device i da se obezbedi da ima execution permissions.
-4. Metasploit može da se pripremi da rukuje incoming requests pokretanjem msfconsole i konfigurisanjem settings prema payload-u.
-5. meterpreter reverse shell može da se izvrši na compromised device.
+1. Potrebno je identifikovati arhitekturu i endianness ciljnog firmware-a.
+2. Msfvenom se može koristiti za definisanje ciljnog payload-a, IP adrese hosta napadača, broja porta za osluškivanje, tipa fajla, arhitekture, platforme i izlaznog fajla.
+3. Payload se može preneti na kompromitovani uređaj i potrebno je proveriti da ima dozvole za izvršavanje.
+4. Metasploit se može pripremiti za obradu dolaznih zahteva pokretanjem msfconsole-a i konfigurisanjem podešavanja u skladu sa payload-om.
+5. Meterpreter reverse shell se može izvršiti na kompromitovanom uređaju.
 
-## Unauthenticated transport bridges to privileged update protocols
+## Neautentifikovani transportni mostovi ka privilegovanim update protokolima
 
-Uobičajena embedded design greška je izlaganje **istog internog command protocol-a preko više transporta**, ali enforceovanje authentication samo na jednom od njih. Na primer, USB može da zahteva challenge-response dok BLE jednostavno prosleđuje unauthenticated **GATT writes** u isti privileged firmware-update handler.
+Česta greška u dizajnu embedded sistema jeste izlaganje **istog internog command protokola preko više transporta**, uz sprovođenje autentifikacije samo na jednom od njih. Na primer, USB može zahtevati challenge-response, dok BLE jednostavno prosleđuje neautentifikovane **GATT writes** istom privilegovanom firmware-update handler-u.<sup>[[1]](#references)</sup>
 
 Tipičan offensive workflow:
 
-1. Enumeriši BLE GATT database i identifikuj writable characteristics koje koristi official mobile app.
-2. Sniffuj app traffic i traži **magic bytes / opcodes** koji se poklapaju sa wired protocol-om.
-3. Reprodukuj privileged commands preko BLE **bez pairing-a** i proveri da li sensitive operations i dalje rade.
-4. Ako su firmware upgrade, config write, debug, ili factory-test opcodes dostupni, tretiraj BLE kao **radio-reachable admin port**.
+1. Enumerisati BLE GATT bazu podataka i identifikovati writable characteristics koje koristi zvanična mobilna aplikacija.
+2. Snimiti saobraćaj aplikacije i potražiti **magic bytes / opcodes** koji odgovaraju wired protokolu.
+3. Reprodukovati privilegovane komande preko BLE-a **bez pairing-a** i proveriti da li osetljive operacije i dalje funkcionišu.
+4. Ako su firmware upgrade, config write, debug ili factory-test opcodes dostupni, BLE treba tretirati kao **radio-reachable admin port**.
 
-Quick checks:
+Brze provere:
 ```bash
 # Enumerate services/characteristics
 ble.enum <MAC>
@@ -46,80 +46,80 @@ ble.write <MAC> <UUID> <HEX_DATA>
 # gatttool equivalent
 # gatttool -b <MAC> --char-write-req -a <HANDLE> -n <HEX_DATA>
 ```
-Stvari koje treba proveriti tokom reversing-a:
+Stvari koje treba proveriti tokom reverse engineeringa:
 
-- Da li BLE zahteva **pairing/bonding** ili je dovoljna obična konekcija?
-- Da li su svi transporti usmereni na istu internu dispatcher tabelu?
-- Da li se privilegovani opcodes filtriraju drugačije na USB / BLE / UART / Wi-Fi?
-- Može li mobile app daljinski da pokrene firmware update, recovery ili diagnostic handlere?
+- Da li BLE zahteva **pairing/bonding** ili samo običnu konekciju?
+- Da li se svi transporti prosleđuju istoj internoj dispatcher tabeli?
+- Da li se privilegovani opcodes različito filtriraju na USB / BLE / UART / Wi-Fi?
+- Da li mobilna aplikacija može daljinski da pokrene firmware update, recovery ili diagnostic handlere?
 
-## Firmware kontejneri sa samo checksum-om su i dalje attacker-controlled firmware
+## Checksum-only firmware containers are still attacker-controlled firmware
 
-Firmware kontejner zaštićen samo **nekeyed checksum-om** (CRC32, SHA-256, MD5, itd.) obezbeđuje detekciju korupcije, **ne i autenticity**. Ako napadač može da dođe do update rutine, može da izmeni image, ponovo izračuna checksum i flešuje proizvoljan kod.
+Firmware container zaštićen samo **unkeyed checksum-om** (CRC32, SHA-256, MD5 itd.) omogućava detekciju oštećenja, **ne autentičnost**. Ako attacker može da dođe do update rutine, može da izmeni image, ponovo izračuna checksum i flash-uje proizvoljan kod.<sup>[[1]](#references)</sup>
 
-Crvene zastavice tokom RE:
+Red flags tokom RE:
 
-- Update kod validira samo završni checksum blob kao što je `CHK2`, `CRC` ili `SHA256`.
-- Nema signature verification niti secure-boot root of trust.
+- Update kod validira samo završni checksum blob kao što su `CHK2`, `CRC` ili `SHA256`.
+- Ne postoji provera potpisa niti secure-boot root of trust.
 - Ne koristi se device-bound MAC / HMAC / authenticated encryption.
-- Recovery mode prihvata isti neautentifikovani image format.
+- Recovery mode prihvata isti unauthenticated image format.
 
-Praktični tok validacije:
+Praktičan tok validacije:
 
-1. Ekstrahuj firmware container i identifikuj bootloader, glavni firmware i integrity metadata.
-2. Izmeni bezopasnu string vrednost ili banner u image-u.
-3. Ponovo izračunaj checksum tačno kako updater očekuje.
-4. Ponovo flešuj image kroz normalan update path.
-5. Potvrdi izmenu pri boot-u da bi dokazao proizvoljnu zamenu firmware-a.
+1. Extract-ujte firmware container i identifikujte bootloader, glavni firmware i integrity metadata.
+2. Izmenite bezopasan string ili banner u image-u.
+3. Ponovo izračunajte checksum tačno onako kako updater očekuje.
+4. Reflash-ujte image kroz uobičajeni update path.
+5. Potvrdite izmenu pri boot-u da biste dokazali proizvoljnu zamenu firmware-a.
 
-Ako ovo radi preko remotelly reachable transport-a kao što je BLE/Wi-Fi, bug je efektivno **unauthenticated OTA firmware replacement**.
+Ako ovo funkcioniše preko daljinski dostupnog transporta kao što su BLE/Wi-Fi, bug je praktično **unauthenticated OTA firmware replacement**.
 
-## Pretvaranje trusted USB peripheral-a u BadUSB putem firmware reflashing-a
+## Turning a trusted USB peripheral into BadUSB via firmware reflashing
 
-Kada je ciljni uređaj već trusted od strane host-a preko USB-a, malicious firmware možda ne mora da implementira potpuno novi USB stack. Mnogo lakši pivot je često da se **ponovo iskoristi postojeća HID podrška**.
+Kada host već veruje ciljnom uređaju preko USB-a, malicious firmware često ne mora da implementira potpuno novi USB stack. Mnogo lakši pivot obično je **reuse postojeće HID podrške**.<sup>[[1]](#references)</sup>
 
-Koristan pattern:
+Korisni obrazac:
 
-1. Proveri da li se uređaj već enumeriše kao **HID Consumer Control** / media / vendor HID interface.
-2. Lociraj postojeći **HID report descriptor** u firmware-u.
-3. Dodaj ili zameni descriptor entry-je tako da uređaj takođe reklamira **keyboard** capability.
-4. Ponovo iskoristi postojeće firmware rutine koje već šalju HID reports umesto pisanja nove transport implementacije.
-5. Ubaci key press + key release reports da ukucaš komande na host-u.
+1. Proverite da li se uređaj već enumeriše kao **HID Consumer Control** / media / vendor HID interface.
+2. Pronađite postojeći **HID report descriptor** u firmware-u.
+3. Dodajte ili zamenite descriptor entries tako da uređaj oglašava i **keyboard** capability.
+4. Ponovo iskoristite postojeće firmware rutine koje već šalju HID reports, umesto pisanja nove transport implementacije.
+5. Inject-ujte key press + key release reports da biste kucali komande na hostu.
 
-Ovo pretvara compromise firmware-a u **host compromise** zato što će PC verovati reflashed peripheral-u kao legitimnoj tastaturi.
+Ovo pretvara kompromitovanje firmware-a u **host compromise**, jer će PC verovati reflash-ovanoj periferiji kao legitimnoj tastaturi.
 
-### Minimalna checklist-a za procenu
+### Minimal assessment checklist
 
-- Da li `dmesg`, Device Manager ili USB descriptors pokazuju postojeći HID interface?
-- Da li ima slobodnog prostora blizu report descriptor-a ili relocatable descriptor tabele?
-- Da li se postojeće media-control send rutine mogu ponovo iskoristiti za keyboard reports?
-- Da li host automatski prihvata novi keyboard interface posle reflashing-a?
+- Da li `dmesg`, Device Manager ili USB descriptors prikazuju postojeći HID interface?
+- Da li postoji slobodan prostor u blizini report descriptor-a ili relocatable descriptor table?
+- Da li postojeće media-control send rutine mogu ponovo da se koriste za keyboard reports?
+- Da li host automatski prihvata novi keyboard interface nakon reflashing-a?
 
-## Pouzdano izvršavanje payload-a unutar RTOS firmware-a
+## Reliable payload execution inside RTOS firmware
 
-Umesto ubacivanja krhkih trampolines u nasumične code path-ove, potraži **postojeće RTOS tasks** koje su neiskorišćene ili imaju mali uticaj tokom normalnog rada.
+Umesto ubacivanja fragilnih trampoline-a u nasumične code paths, potražite **postojeće RTOS taskove** koji se ne koriste ili imaju mali uticaj tokom normalnog rada.<sup>[[1]](#references)</sup>
 
 Zašto je ovo korisno:
 
-- Scheduler prirodno pokreće tvoj payload tokom boot-a.
-- Izbegavaš kvarenje kritičnog control flow-a.
-- Odloženi payload-i će manje verovatno izazvati watchdog resets nego kada se izvršavaju unutar latency-sensitive USB/network handler-a.
+- Scheduler prirodno pokreće vaš payload tokom boot-a.
+- Izbegavate korumpiranje kritičnog control flow-a.
+- Delayed payload-i ređe aktiviraju watchdog reset nego kada se izvršavaju unutar latency-sensitive USB/network handler-a.
 
-Dobri targeti su diagnostic, factory-test, telemetry ili coprocessor service tasks koje deluju dormant tokom normalne upotrebe.
+Dobri targets su diagnostic, factory-test, telemetry ili coprocessor service taskovi koji deluju dormant tokom uobičajene upotrebe.
 
-## Brza iteracija exploit-a: ponovna upotreba benignih protocol handler-a
+## Fast exploit iteration: repurpose benign protocol handlers
 
-Kada je firmware patching moguć, kompaktan način da se ubrza RE je da se pregazi bezopasan command handler (na primer **echo/debug opcode**) custom **memory read / write / execute** primitivama. Ovo izbegava potpuno reflashing za svaki eksperiment i posebno je korisno kada uređaj podržava modifikovani handler preko brzog wired transport-a.
+Kada je patching firmware-a moguć, kompaktan način za ubrzavanje RE-a jeste da bezopasan command handler (na primer **echo/debug opcode**) zamenite prilagođenim **memory read / write / execute** primitivama. Ovo izbegava potpuno reflashing-ovanje pri svakom eksperimentu i naročito je korisno kada uređaj podržava izmenjeni handler preko brzog wired transporta.<sup>[[1]](#references)</sup>
 
-Koristi ovo za:
+Koristite ovo za:
 
-- Verifikaciju scatter-loaded memory map-a
-- Pregled heap/task stanja uživo
-- Testiranje malih payload-ova pre nego što ih upišeš u flash
-- Bezbedno vraćanje function pointers, strings i descriptor tables
+- Verifikaciju scatter-loaded memory mapa
+- Live pregled heap/task stanja
+- Testiranje malih payload-a pre njihovog upisivanja u flash
+- Bezbedno pronalaženje function pointer-a, stringova i descriptor tabela
 
 ## Reference
 
-- [Pwnd Blaster: Hacking your PC using your speaker without ever touching it](https://blog.nns.ee/2026/06/03/katana-badusb/)
+- [1] [Pwnd Blaster: Hacking your PC using your speaker without ever touching it](https://blog.nns.ee/2026/06/03/katana-badusb/)
 
 {{#include ../../banners/hacktricks-training.md}}

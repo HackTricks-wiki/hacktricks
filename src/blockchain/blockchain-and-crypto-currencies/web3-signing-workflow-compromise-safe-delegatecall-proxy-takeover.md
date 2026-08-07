@@ -1,17 +1,17 @@
-# Web3 Signing Workflow Compromise & Safe Delegatecall Proxy Takeover
+# Kompromitovanje Web3 procesa potpisivanja i preuzimanje Safe Delegatecall Proxy-ja
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-Kampanja krađe cold-wallet uređaja kombinovala je **supply-chain compromise of the Safe{Wallet} web UI** sa **on-chain delegatecall primitive that overwrote a proxy’s implementation pointer (slot 0)**. Ključne poente su:
+Lanac krađe sa cold wallet-a kombinovao je **supply-chain compromise web UI-ja Safe{Wallet}** sa **on-chain delegatecall primitivom koji je prepisao pokazivač na implementaciju proxy-ja (slot 0)**. Ključni zaključci su:
 
-- Ako dApp može da ubaci kod u signing path, može naterati signer-a da proizvede validan **EIP-712 signature over attacker-chosen fields** dok vraća originalne UI podatke tako da ostali signeri ostanu neupućeni.
-- Safe proxies čuvaju `masterCopy` (implementation) na **storage slot 0**. Delegatecall ka ugovoru koji piše u slot 0 efektivno „nadograđuje“ Safe na attacker logic, dajući potpunu kontrolu nad wallet-om.
+- Ako dApp može da ubaci code u proces potpisivanja, može navesti signer-a da generiše važeći **EIP-712 potpis nad poljima koja je izabrao attacker**, a zatim vratiti originalne UI podatke kako drugi signer-i ne bi ništa primetili.
+- Safe proxy-ji čuvaju `masterCopy` (implementaciju) u **storage slot-u 0**. Delegatecall ka contract-u koji upisuje u slot 0 efektivno „upgrade-uje“ Safe na attacker logiku, čime se dobija potpuna kontrola nad wallet-om.
 
-## Off-chain: Targeted signing mutation in Safe{Wallet}
+## Van lanca: Ciljana mutacija potpisivanja u Safe{Wallet}-u
 
-Izmenjeni Safe bundle (`_app-*.js`) selektivno je napadao određene Safe + signer adrese. Ubaćena logika se izvršavala neposredno pre signing poziva:
+Izmenjeni Safe bundle (`_app-*.js`) selektivno je napadao određene Safe + signer adrese. Injected logic se izvršavao neposredno pre poziva za potpisivanje:<sup>[[1]](#references)[[3]](#references)</sup>
 ```javascript
 // Pseudocode of the malicious flow
 orig = structuredClone(tx.data);
@@ -28,23 +28,23 @@ return sig;
 }
 ```
 ### Svojstva napada
-- **Context-gated**: hard-coded allowlists za victim Safes/signers sprečavale su šum i smanjivale mogućnost detekcije.
-- **Last-moment mutation**: polja (`to`, `data`, `operation`, gas) su bila prepisana neposredno pre `signTransaction`, a zatim vraćena, tako da su payload-ovi predloga u UI izgledali benigno dok su potpisi odgovarali payload-u napadača.
-- **EIP-712 opacity**: wallets su prikazivali strukturirane podatke ali nisu dekodirali ugnježdeni calldata niti isticali `operation = delegatecall`, što je dovodilo do toga da je mutirana poruka u praksi potpisana na slepo.
+- **Context-gated**: hard-coded allowlists za victimske Safe-ove/signere sprečavale su noise i smanjivale detekciju.<sup>[[1]](#references)[[3]](#references)</sup>
+- **Last-moment mutation**: polja (`to`, `data`, `operation`, gas) bila su prepisana neposredno pre `signTransaction`, a zatim vraćena, tako da su proposal payloads u UI-ju izgledali benigno, dok su signatures odgovarali attacker payload-u.
+- **EIP-712 opacity**: wallets su prikazivali strukturirane podatke, ali nisu dekodirali nested calldata niti isticali `operation = delegatecall`, zbog čega je mutated message praktično bio blind-signed.
 
-### Relevancija validacije Gateway-a
-Safe proposals se podnose na **Safe Client Gateway**. Pre uvođenja ojačanih provera, gateway je mogao prihvatiti predlog gde `safeTxHash`/signature korespondira sa drugim poljima nego JSON body ako je UI prepisao ta polja nakon potpisivanja. Nakon incidenta, gateway sada odbija predloge čiji hash/signature ne odgovaraju podnetoj transakciji. Slična serverska verifikacija hasha treba biti sprovedena za svaki signing-orchestration API.
+### Relevantnost Gateway validation-a
+Safe proposals se šalju na **Safe Client Gateway**. Pre uvođenja hardened checks, gateway je mogao da prihvati proposal u kojem su `safeTxHash`/signature odgovarali drugačijim fields od onih u JSON body-ju ako ih je UI prepisao nakon signing-a. Nakon incidenta, gateway sada odbija proposals čiji hash/signature ne odgovaraju submitted transaction-u. Slična server-side hash verification treba da bude obavezna na svakom signing-orchestration API-ju.
 
-### 2025 Bybit/Safe istaknuto
-- The February 21, 2025 Bybit cold-wallet drain (~401k ETH) je ponovio isti pattern: kompromitovan Safe S3 bundle je bio okidač samo za Bybit signere i zamenio je `operation=0` → `1`, pokazujući `to` na pre-deploy-ovani attacker contract koji upisuje slot 0.
-- Wayback-cached `_app-52c9031bfa03da47.js` prikazuje logiku koja je ključirana na Bybit’s Safe (`0x1db9…cf4`) i adrese signera, a zatim je odmah vraćena na čisti bundle dva minuta nakon izvršenja, što odražava trik “mutate → sign → restore”.
-- Malicious contract (npr. `0x9622…c7242`) je sadržao jednostavne funkcije `sweepETH/sweepERC20` plus `transfer(address,uint256)` koja upisuje implementation slot. Izvršenje `execTransaction(..., operation=1, to=contract, data=transfer(newImpl,0))` pomerilo je proxy implementation i obezbedilo potpunu kontrolu.
+### Istaknuti detalji Bybit/Safe incidenta iz 2025.
+- Pražnjenje Bybit cold wallet-a 21. februara 2025. (~401k ETH) koristilo je isti pattern: kompromitovani Safe S3 bundle aktivirao se samo za Bybit signers i zamenio `operation=0` → `1`, usmeravajući `to` na pre-deployed attacker contract koji upisuje slot 0.<sup>[[1]](#references)[[3]](#references)</sup>
+- Wayback-cached `_app-52c9031bfa03da47.js` prikazuje da je logika bila vezana za Bybit-ov Safe (`0x1db9…cf4`) i signer addresses, a zatim je odmah vraćena na clean bundle dva minuta nakon izvršenja, što oponaša trik „mutate → sign → restore“.<sup>[[1]](#references)[[2]](#references)</sup>
+- Malicious contract (npr. `0x9622…c7242`) sadržao je jednostavne functions `sweepETH/sweepERC20` i `transfer(address,uint256)` koji upisuje implementation slot. Izvršavanje `execTransaction(..., operation=1, to=contract, data=transfer(newImpl,0))` promenilo je proxy implementation i omogućilo potpunu kontrolu.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Na lancu: Delegatecall proxy takeover via slot collision
+## On-chain: Delegatecall proxy takeover putem slot collision-a
 
-Safe proxies čuvaju `masterCopy` na **storage slot 0** i delegiraju svu logiku njemu. Pošto Safe podržava **`operation = 1` (delegatecall)**, svaka potpisana transakcija može ukazivati na proizvoljan contract i izvršavati njegov kod u storage kontekstu proxya.
+Safe proxies čuvaju `masterCopy` u **storage slot 0** i svu logiku prosleđuju na njega. Pošto Safe podržava **`operation = 1` (delegatecall)**, svaka signed transaction može da uputi poziv ka proizvoljnom contract-u i izvrši njegov code u storage context-u proxy-ja.<sup>[[3]](#references)</sup>
 
-Maliciozni contract je imitirao ERC-20 `transfer(address,uint256)` ali je umesto toga upisivao `_to` u slot 0:
+Attacker contract je imitirao ERC-20 `transfer(address,uint256)`, ali je umesto toga upisivao `_to` u slot 0:<sup>[[1]](#references)[[3]](#references)</sup>
 ```solidity
 // Decompiler view (storage slot 0 write)
 uint256 stor0; // slot 0
@@ -52,30 +52,30 @@ function transfer(address _to, uint256 _value) external {
 stor0 = uint256(uint160(_to));
 }
 ```
-Execution path:
+Putanja izvršavanja:<sup>[[1]](#references)[[3]](#references)</sup>
 1. Žrtve potpisuju `execTransaction` sa `operation = delegatecall`, `to = attackerContract`, `data = transfer(newImpl, 0)`.
-2. Safe `masterCopy` verifikuje potpise nad ovim parametrima.
-3. Proxy izvršava delegatecall u `attackerContract`; telo `transfer` upisuje slot 0.
-4. Slot 0 (`masterCopy`) sada pokazuje na logiku pod kontrolom napadača → **potpuno preuzimanje wallet-a i isisavanje sredstava**.
+2. Safe masterCopy validira potpise nad ovim parametrima.
+3. Proxy izvršava delegatecall u `attackerContract`; telo funkcije `transfer` upisuje slot 0.
+4. Slot 0 (`masterCopy`) sada pokazuje na logiku pod kontrolom napadača → **potpuno preuzimanje walleta i pražnjenje sredstava**.
 
-### Guard & version notes (post-incident hardening)
-- Safes >= v1.3.0 mogu instalirati **Guard** koji može vetovati `delegatecall` ili primenjivati ACLs na `to`/selektore; Bybit je pokretao v1.1.1, pa Guard hook nije postojao. Nadogradnja kontrakata (i ponovno dodavanje owners) je potrebna da biste dobili ovaj control plane.
+### Beleške o Guard-u i verziji (ojačavanje nakon incidenta)
+- Safes >= v1.3.0 mogu instalirati **Guard** za blokiranje `delegatecall` ili primenu ACL-ova na `to`/selektore; Bybit je koristio v1.1.1, tako da nije postojao Guard hook. Neophodno je nadograditi contracts (i ponovo dodati owners) da bi se dobila ova kontrolna ravan.
 
-## Detection & hardening checklist
+## Kontrolna lista za detekciju i ojačavanje
 
-- **UI integrity**: pinujte JS assets / SRI; monitorujte bundle diffs; tretirajte signing UI kao deo trust boundary-a.
-- **Sign-time validation**: hardware wallets sa **EIP-712 clear-signing**; eksplicitno prikažite `operation` i dekodirajte ugnježdeni calldata. Odbijte potpisivanje kada je `operation = 1` osim ako politika to ne dozvoljava.
-- **Server-side hash checks**: gateways/services koji prosleđuju predloge moraju ponovo izračunati `safeTxHash` i verifikovati da potpisi odgovaraju poslatim poljima.
-- **Policy/allowlists**: preflight pravila za `to`, selektore, tipove asset-a, i zabrana `delegatecall` osim za provere/odobrene tokove. Zahtevajte interni policy servis pre emitovanja potpuno potpisanih transakcija.
-- **Contract design**: izbegavajte izlaganje proizvoljnog `delegatecall` u multisig/treasury wallets osim ako nije apsolutno neophodno. Postavite pokazivače za upgrade van slota 0 ili ih zaštitite eksplicitnom logikom za upgrade i kontrolom pristupa.
-- **Monitoring**: podesite alert pri izvršenjima `delegatecall` iz wallet-a koji drže treasury funds, i na predloge koji menjaju `operation` iz uobičajenih `call` obrazaca.
+- **Integritet UI-ja**: fiksirati JS assets / SRI; pratiti razlike između bundle-ova; tretirati signing UI kao deo granice poverenja.
+- **Validacija u trenutku potpisivanja**: hardware wallets sa **EIP-712 clear-signing**; eksplicitno prikazati `operation` i dekodirati ugnježdeni calldata. Odbiti potpisivanje kada je `operation = 1`, osim ako policy to dozvoljava.
+- **Provere hash-eva na strani servera**: gateways/services koji prosleđuju proposals moraju ponovo izračunati `safeTxHash` i proveriti da potpisi odgovaraju poslatim poljima.
+- **Policy/allowlists**: preflight rules za `to`, selektore, tipove asseta i zabranu delegatecall-a, osim kod proverenih tokova. Zahtevati interni policy service pre broadcast-a potpuno potpisanih transakcija.
+- **Dizajn contracta**: izbegavati izlaganje proizvoljnom delegatecall-u u multisig/treasury walletima, osim ako je strogo neophodno. Postaviti upgrade pointers izvan slota 0 ili ih zaštititi eksplicitnom upgrade logikom i access control-om.
+- **Monitoring**: generisati upozorenja za delegatecall izvršavanja iz walleta koji drže treasury sredstva, kao i za proposals kod kojih se `operation` menja u odnosu na uobičajene `call` obrasce.
 
-## References
+## Reference
 
-- [AnChain.AI forensic breakdown of the Bybit Safe exploit](https://www.anchain.ai/blog/bybit)
-- [Zero Hour Technology analysis of the Safe bundle compromise](https://www.panewslab.com/en/articles/7r34t0qk9a15)
-- [In-depth technical analysis of the Bybit hack (NCC Group)](https://www.nccgroup.com/research-blog/in-depth-technical-analysis-of-the-bybit-hack/)
-- [EIP-712](https://eips.ethereum.org/EIPS/eip-712)
-- [safe-client-gateway (GitHub)](https://github.com/safe-global/safe-client-gateway)
+- [1] [Forenzička analiza Bybit Safe exploita kompanije AnChain.AI](https://www.anchain.ai/blog/bybit)
+- [2] [Analiza kompromitovanja Safe bundle-a kompanije Zero Hour Technology](https://www.panewslab.com/en/articles/7r34t0qk9a15)
+- [3] [Detaljna tehnička analiza Bybit hack-a (NCC Group)](https://www.nccgroup.com/research-blog/in-depth-technical-analysis-of-the-bybit-hack/)
+- [4] [EIP-712](https://eips.ethereum.org/EIPS/eip-712)
+- [5] [safe-client-gateway (GitHub)](https://github.com/safe-global/safe-client-gateway)
 
 {{#include ../../banners/hacktricks-training.md}}
