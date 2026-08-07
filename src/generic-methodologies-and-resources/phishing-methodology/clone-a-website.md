@@ -1,21 +1,26 @@
+# Kloning van ’n webwerf
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Vir 'n phishing-assessering kan dit soms nuttig wees om 'n webwerf heeltemal te **kloneer**.
 
-Let daarop dat jy ook 'n paar payloads aan die geklonde webwerf kan voeg, soos 'n BeEF-hook om die gebruiker se oortjie te "beheer".
+Vir ’n phishing-assessering kan dit soms nuttig wees om ’n webwerf volledig te **kloon/af te laai**.
 
-Daar is verskillende gereedskap wat jy vir hierdie doel kan gebruik:
+Let daarop dat jy ook sommige payloads by die gekloonde webwerf kan voeg, soos ’n BeEF hook om die gebruiker se oortjie te “beheer”.
+
+Daar is verskillende tools wat jy hiervoor kan gebruik:
 
 ## wget
-```text
-wget -mk -nH
+```bash
+wget --mirror --page-requisites --convert-links --adjust-extension <URL>
+cd <URL>
+python3 -m http.server 8000
 ```
 ## goclone
 ```bash
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
-## Sosiale Ingenieurskap Gereedskap
+## Sosiale Ingenieurswese Toolit
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit
 ```

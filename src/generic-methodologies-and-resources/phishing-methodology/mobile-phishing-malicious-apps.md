@@ -1,34 +1,34 @@
-# Mobile Phishing & Kwaadwillige App Verspreiding (Android & iOS)
+# Mobile Phishing & Malicious App Distribution (Android & iOS)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!INFO]
-> Hierdie bladsy dek tegnieke wat deur bedreigingsakteurs gebruik word om **kwaadwillige Android APKs** en **iOS mobile-configuration profiles** deur phishing te versprei (SEO, social engineering, fake stores, dating apps, ens.).
-> Die materiaal is aangepas van die SarangTrap-veldtog wat deur Zimperium zLabs (2025) blootgelê is en ander openbare navorsing.
+> Hierdie bladsy dek tegnieke wat deur threat actors gebruik word om **malicious Android APKs** en **iOS mobile-configuration profiles** deur phishing (SEO, social engineering, fake stores, dating apps, ens.) te versprei.
+> Die materiaal is aangepas uit die SarangTrap campaign wat deur Zimperium zLabs (2025) blootgelê is, asook ander openbare navorsing.<sup>[[1]](#references)</sup>
 
-## Attack Flow
+## Aanvalsvloei
 
 1. **SEO/Phishing Infrastructure**
 * Registreer dosyne look-alike domains (dating, cloud share, car service…).
-– Gebruik plaaslike taal sleutelwoorde en emojis in die `<title>` element om in Google te rangskik.
-– Host *beide* Android (`.apk`) en iOS install instructions op dieselfde landing page.
+– Gebruik sleutelwoorde in die plaaslike taal en emojis in die `<title>`-element om in Google te ranglys.
+– Host *beide* Android (`.apk`)- en iOS-install instructions op dieselfde landing page.
 2. **First Stage Download**
-* Android: direkte skakel na 'n *unsigned* of “third-party store” APK.
-* iOS: `itms-services://` of plain HTTPS skakel na 'n kwaadwillige **mobileconfig** profile (sien hieronder).
+* Android: direkte skakel na ’n *unsigned* of “third-party store” APK.
+* iOS: `itms-services://`- of gewone HTTPS-skakel na ’n malicious **mobileconfig** profile (sien hieronder).
 3. **Android Post-install Behaviour**
-* C2-gated execution, permission abuse, dropper bypasses, background collection, en ander post-install malware behaviour word gedek op die toegewyde Android Malware Post-Exploitation bladsy hieronder.
+* C2-gated execution, permission abuse, dropper bypasses, background collection, en ander post-install malware behaviour word op die toegewyde Android Malware Post-Exploitation-bladsy hieronder gedek.
 4. **iOS Delivery Technique**
-* 'n Enkele **mobile-configuration profile** kan `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` ens. aanvra om die toestel in “MDM”-agtige supervision te registreer.
+* ’n Enkele **mobile-configuration profile** kan `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration`, ens. aanvra om die device in “MDM”-agtige supervision te enroll.
 * Social-engineering instructions:
 1. Open Settings ➜ *Profile downloaded*.
-2. Tap *Install* drie keer (screenshots op die phishing page).
-3. Trust the unsigned profile ➜ attacker kry *Contacts* & *Photo* entitlement sonder App Store review.
+2. Tik drie keer op *Install* (screenshots op die phishing page).
+3. Trust the unsigned profile ➜ attacker gains *Contacts* & *Photo* entitlement sonder App Store review.
 5. **iOS Web Clip Payload (phishing app icon)**
-* `com.apple.webClip.managed` payloads kan **'n phishing URL op die Home Screen vaspen** met 'n branded icon/label.
-* Web Clips kan **full-screen** loop (versteek die browser UI) en as **non-removable** gemerk word, wat die slagoffer dwing om die profile te delete om die icon te verwyder.
+* `com.apple.webClip.managed` payloads kan **’n phishing URL aan die Home Screen pin** met ’n branded icon/label.
+* Web Clips kan **full-screen** loop (verberg die browser UI) en as **non-removable** gemerk word, wat die victim dwing om die profile te delete om die icon te verwyder.<sup>[[3]](#references)</sup>
 6. **Network Layer**
-* Plain HTTP, dikwels op port 80 met HOST header soos `api.<phishingdomain>.com`.
-* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (no TLS → maklik om raak te sien).
+* Plain HTTP, dikwels op port 80 met ’n HOST header soos `api.<phishingdomain>.com`.
+* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (geen TLS → maklik om raak te sien).
 
 ## Android Malware Post-Exploitation
 
@@ -38,11 +38,11 @@ Vir post-install Android malware tradecraft soos C2, Accessibility abuse, overla
 ../basic-forensic-methodology/android-malware-post-exploitation.md
 {{#endref}}
 
-## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
+## Socket.IO/WebSocket-gebaseerde APK Smuggling + Valse Google Play-bladsye
 
-Aanvallers vervang toenemend statiese APK-skakels met 'n Socket.IO/WebSocket channel ingebed in Google Play-agtige lures. Dit verberg die payload URL, omseil URL/extension filters, en behou 'n realistiese install UX.
+Attackers vervang toenemend statiese APK-skakels met ’n Socket.IO/WebSocket-kanaal wat in Google Play-agtige lures ingebed is. Dit verberg die payload URL, omseil URL/extension filters, en behou ’n realistiese install UX.<sup>[[2]](#references)[[4]](#references)</sup>
 
-Tipiese client flow waargeneem in die wild:
+Tipiese client flow wat in die wild waargeneem is:
 
 <details>
 <summary>Socket.IO fake Play downloader (JavaScript)</summary>
@@ -67,9 +67,9 @@ document.body.appendChild(a); a.click();
 ```
 </details>
 
-Waarom dit eenvoudige kontroles ontduik:
-- Geen statiese APK-URL word blootgestel nie; die payload word in geheue herbou vanaf WebSocket-frames.
-- URL/MIME/extensie-filters wat direkte .apk-antwoorde blokkeer, kan binêre data wat via WebSockets/Socket.IO getunnel word, miskyk.
+Waarom dit eenvoudige beheermaatreëls ontduik:
+- Geen statiese APK-URL word blootgestel nie; die payload word in geheue uit WebSocket-raamwerke gerekonstrueer.
+- URL/MIME/uitbreidingsfilters wat direkte .apk-antwoorde blokkeer, kan binêre data wat via WebSockets/Socket.IO getonnel word, mis.
 - Crawlers en URL-sandboxes wat nie WebSockets uitvoer nie, sal nie die payload ophaal nie.
 
 Sien ook WebSocket tradecraft en tooling:
@@ -79,11 +79,11 @@ Sien ook WebSocket tradecraft en tooling:
 {{#endref}}
 
 
-## References
+## Verwysings
 
-
-- [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
-- [Socket.IO](https://socket.io)
-- [Web Clips payload settings for Apple devices](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
+- [1] [Die Donker Kant van Romanse: SarangTrap-afpersingsveldtog](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
+- [2] [Socket.IO](https://socket.io)
+- [3] [Web Clips-payloadinstellings vir Apple-toestelle](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
+- [4] [Banker Trojan wat Indonesiese en Viëtnamese Android-gebruikers teiken](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 
 {{#include ../../banners/hacktricks-training.md}}
