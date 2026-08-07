@@ -1,27 +1,32 @@
-# 안드로이드 포렌식
+# Android Forensics
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 잠금 장치
+## Locked Device
 
-안드로이드 장치에서 데이터를 추출하려면 장치가 잠금 해제되어야 합니다. 잠금 상태인 경우 다음을 수행할 수 있습니다:
+Android device에서 data를 추출하려면 기기의 잠금을 해제해야 합니다. 잠겨 있다면 다음을 수행할 수 있습니다:
 
-- USB를 통한 디버깅이 활성화되어 있는지 확인합니다.
-- 가능한 [스머지 공격](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)을 확인합니다.
-- [브루트 포스](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)로 시도해 봅니다.
+- 기기에서 USB를 통한 debugging이 활성화되어 있는지 확인합니다.
+- 가능한 [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)<sup>[[1]](#references)</sup>을 확인합니다.
+- [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)<sup>[[2]](#references)</sup>를 시도합니다.
 
-## 데이터 수집
+## Data Acquisition
 
-[adb를 사용하여 안드로이드 백업을 생성](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup)하고 [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/)를 사용하여 추출합니다: `java -jar abe.jar unpack file.backup file.tar`
+[adb를 사용하여 Android backup 생성](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) 후 [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/)를 사용하여 추출합니다: `java -jar abe.jar unpack file.backup file.tar`
 
-### 루트 접근 또는 JTAG 인터페이스에 물리적 연결이 있는 경우
+### If root access or physical connection to JTAG interface
 
-- `cat /proc/partitions` (플래시 메모리의 경로를 검색합니다. 일반적으로 첫 번째 항목은 _mmcblk0_이며 전체 플래시 메모리에 해당합니다).
-- `df /data` (시스템의 블록 크기를 확인합니다).
-- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (블록 크기에서 수집한 정보를 사용하여 실행합니다).
+- `cat /proc/partitions` (flash memory의 경로를 검색합니다. 일반적으로 첫 번째 항목은 _mmcblk0_이며 전체 flash memory에 해당합니다.)
+- `df /data` (system의 block size를 확인합니다.)
+- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (block size 정보를 바탕으로 실행합니다.)
 
-### 메모리
+### Memory
 
-Linux Memory Extractor (LiME)를 사용하여 RAM 정보를 추출합니다. 이는 adb를 통해 로드해야 하는 커널 확장입니다.
+Linux Memory Extractor (LiME)를 사용하여 RAM 정보를 추출합니다. 이는 adb를 통해 로드해야 하는 kernel extension입니다.
+
+## References
+
+- [1] [Smudge Attacks on Smartphone Touch Screens](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
+- [2] [This brute force device can crack any iPhone's PIN code](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
 
 {{#include ../banners/hacktricks-training.md}}

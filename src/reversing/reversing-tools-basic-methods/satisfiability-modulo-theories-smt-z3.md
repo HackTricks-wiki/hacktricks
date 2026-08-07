@@ -1,8 +1,8 @@
-# 아주 기본적으로, 이 도구는 일부 조건을 만족해야 하는 변수의 값을 찾는 데 도움을 주며, 이를 직접 계산하는 것은 매우 번거로울 수 있습니다. 따라서 Z3에 변수가 만족해야 하는 조건을 지정하면, 가능한 경우 해당 값을 찾아줍니다.
+# 아주 기본적으로, 이 도구는 특정 조건을 만족해야 하는 변수의 값을 찾는 데 도움을 주며, 이를 직접 계산하는 작업은 매우 번거로울 수 있습니다. 따라서 변수들이 만족해야 하는 조건을 Z3에 지정하면, Z3가 가능한 경우 해당 값을 찾아줍니다.
 
 {{#include ../../banners/hacktricks-training.md}}
 
-# 기본 연산
+# Basic Operations
 
 ## Booleans/And/Or/Not
 ```python
@@ -20,7 +20,7 @@ s.add(And(Or(x, y, Not(z)), y))
 s.check() # If response is "sat" then the model is satisfiable, if "unsat" something is wrong
 print(s.model()) # Print valid values to satisfy the model
 ```
-## Ints/Simplify/Reals
+## 정수/Simplify/실수
 ```python
 from z3 import *
 
@@ -60,7 +60,7 @@ print("%s = %s" % (d.name(), m[d]))
 ```
 # Machine Arithmetic
 
-현대 CPU와 mainstream programming language는 고정 크기 bit-vector에 대한 산술 연산을 사용합니다. Machine arithmetic은 Z3Py에서 Bit-Vectors로 사용할 수 있습니다.<sup>[[1]](#references)</sup>
+Modern CPU와 mainstream programming language는 고정 크기 bit-vector에 대한 arithmetic을 사용합니다. Machine arithmetic은 Z3Py에서 Bit-Vectors로 사용할 수 있습니다.
 ```python
 from z3 import *
 
@@ -77,7 +77,7 @@ print(simplify(a == b)) # This is False
 ```
 ## Signed/Unsigned Numbers
 
-Z3는 bit-vector를 signed 또는 unsigned로 처리하는지에 따라 연산 결과가 달라지는 산술 연산의 특수한 signed 버전을 제공합니다. Z3Py에서 연산자 `<`, `<=`, `>`, `>=`, `/`, `%`, `>>`는 signed 버전에 해당합니다. 이에 대응하는 unsigned 연산자는 `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem`, `LShR`입니다.<sup>[[1]](#references)</sup>
+Z3는 bit-vector가 signed 또는 unsigned로 처리되는지에 따라 결과가 달라지는 산술 연산의 특수한 signed 버전을 제공합니다. Z3Py에서 연산자 `<`, `<=`, `>`, `>=`, `/`, `%`, `>>`는 signed 버전에 해당합니다. 이에 대응하는 unsigned 연산자는 `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem`, `LShR`입니다.<sup>[[1]](#references)</sup>
 ```python
 from z3 import *
 
@@ -97,7 +97,7 @@ solve(ULT(x, 0))
 ```
 ## 함수
 
-산술과 같은 해석된 함수는 고정된 표준 해석을 가집니다. 비해석 함수와 상수는 최대한 유연하며, 해당 함수 또는 상수에 대한 제약 조건과 일관되는 모든 해석을 허용합니다.<sup>[[1]](#references)</sup>
+산술과 같은 해석된 함수는 고정된 표준 해석을 갖습니다. 해석되지 않은 함수와 상수는 최대한 유연하며, 해당 함수 또는 상수에 대한 제약 조건과 일관되는 모든 해석을 허용합니다.<sup>[[1]](#references)</sup>
 
 예시: `f`를 `x`에 두 번 적용하면 다시 `x`가 되지만, `f`를 `x`에 한 번 적용한 결과는 `x`와 다릅니다.
 ```python
@@ -120,11 +120,11 @@ print(s.model())
 ```
 # Reversing 중심 패턴
 
-binary 전체에 대해 수동으로 몇 가지 검사만 lifting하는 대신 full symbolic execution이 필요하다면 [Angr - Examples](angr/angr-examples.md)를 확인하세요. 실제로는 decompiler/assembly에서 관련 predicate를 복구하고, Z3에서 흥미로운 arithmetic 또는 memory constraint만 다시 구성하는 workflow가 매우 일반적입니다.
+바이너리에서 몇 가지 검사만 수동으로 lifting하는 대신 전체 symbolic execution이 필요하다면 [Angr - Examples](angr/angr-examples.md)를 확인하세요. 실제로는 decompiler/assembly에서 관련 predicate를 복구한 다음, 흥미로운 산술 또는 memory constraint만 Z3에서 다시 구축하는 workflow가 매우 일반적입니다.
 
 ## user-controlled data를 먼저 bytes로 모델링하기
 
-Reversing에서는 일반적으로 각 input byte에 `BitVec(..., 8)`을 사용하여 시작한 다음, target이 수행하는 방식 그대로 word를 다시 구성하는 것이 좋습니다. 이렇게 하면 wrap-around, signedness bug, shift, rotate 및 byte-order 문제를 보존할 수 있습니다.
+Reversing에서는 일반적으로 각 input byte에 `BitVec(..., 8)`을 사용해 시작한 다음, target이 수행하는 방식 그대로 word를 다시 구축하는 것이 좋습니다. 이렇게 하면 wrap-around, signedness bug, shift, rotate 및 byte-order 문제를 보존할 수 있습니다.<sup>[[2]](#references)</sup>
 ```python
 from z3 import *
 
@@ -141,14 +141,14 @@ print(hex(s.model().eval(dword).as_long()))
 ```
 Assembly 또는 decompiler code를 번역할 때 유용한 helper:
 
-- `Concat`: bytes에서 16/32/64-bit 값을 재구성
-- `Extract`: high/low word를 비교하거나 mask/shift 에뮬레이션
-- `ZeroExt` / `SignExt`: zero/sign extension 버그를 올바르게 모델링
-- `LShR` / `RotateLeft` / `RotateRight`: crackme, hash, obfuscator에서 흔히 사용
+- `Concat`: byte에서 16/32/64-bit 값을 재구성
+- `Extract`: high/low word 비교 또는 mask/shift 에뮬레이션
+- `ZeroExt` / `SignExt`: zero/sign extension bug를 올바르게 모델링
+- `LShR` / `RotateLeft` / `RotateRight`: crackmes, hash, obfuscator에서 일반적으로 사용
 
-## arrays를 사용해 model memory/register tables
+## array로 memory/register table 모델링
 
-check가 `buf[i]`, lookup table 또는 emulated memory에 의존하는 경우, 수십 개의 개별 variable을 만드는 것보다 `Array`가 더 깔끔할 수 있습니다.
+check가 `buf[i]`, lookup table 또는 emulated memory에 의존하는 경우, 수십 개의 별도 variable을 만드는 것보다 `Array`가 더 깔끔할 수 있습니다.<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -165,11 +165,11 @@ s = Solver()
 s.add(word == 0x4241)
 print(s.check())
 ```
-이는 특히 binary가 값을 검증하기 전에 memory 내에서 복사하거나, 전체 program을 실행하지 않고 몇 가지 `mov`/`xor`/`add` 연산의 효과를 model하려는 경우에 유용합니다.
+이는 binary가 값을 검증하기 전에 memory에서 값을 복사하거나, 전체 program을 실행하지 않고 몇 가지 `mov`/`xor`/`add` 연산의 효과를 모델링하려 할 때 특히 유용합니다.
 
-## Incremental solving은 branch triage에 매우 유용합니다
+## Incremental solving은 branch triage에 유용합니다
 
-기본 constraints를 이미 추출했다면 `push()` / `pop()` (또는 assumptions)을 사용해 매번 solver를 다시 구축하지 않고 대체 branch를 테스트할 수 있습니다:
+기본 constraints를 이미 추출했다면, 매번 solver를 다시 구성하지 않고 `push()` / `pop()` (또는 assumptions)을 사용해 여러 branch를 테스트할 수 있습니다:<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -187,11 +187,11 @@ s.add(x < 0x100)
 print("branch 2:", s.check())
 s.pop()
 ```
-이는 decompiler에서 복구한 path conditions를 재생하거나, model을 `unsat`으로 만드는 비교가 무엇인지 빠르게 식별할 때 유용합니다.
+이는 decompiler에서 복구한 path conditions를 재생하거나, 어떤 comparison 때문에 model이 `unsat`이 되는지 빠르게 식별할 때 유용합니다.
 
-## 더 나은 payload를 위해 최적화
+## 더 나은 payload 최적화
 
-model이 satisfiable 상태가 되면 `Optimize()`를 사용해 더 유용한 solution을 얻을 수 있습니다. 예를 들어 출력 가능한 바이트를 선호하거나, checksum 구성 요소를 최소화하거나, 복구된 비밀번호를 더 쉽게 입력하거나 복사할 수 있도록 특정 구조를 최대화할 수 있습니다.
+model이 satisfiable이 되면 `Optimize()`를 사용해 더 활용하기 쉬운 solution을 얻을 수 있습니다. 예를 들어 printable bytes를 우선하거나, checksum component를 최소화하거나, 복구한 password를 더 쉽게 입력하거나 복사할 수 있도록 특정 structure를 최대화할 수 있습니다.<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -204,9 +204,9 @@ o.add_soft(And(c >= 0x20, c <= 0x7e))
 print(o.check())
 print(bytes(o.model()[c].as_long() for c in key))
 ```
-## 형식 중심 serial을 위한 문자열/시퀀스
+## 형식이 중요한 serial을 위한 문자열/시퀀스
 
-대상이 주로 접두사, 접미사, 부분 문자열 또는 정규식과 유사한 구조를 확인한다면, `String`/`Seq` 제약 조건이 바이트 단위 bit-vectors보다 더 간단할 수 있습니다:
+대상이 주로 prefix, suffix, substring 또는 regex와 유사한 구조를 검사한다면 `String`/`Seq` 제약 조건이 byte 단위 bit-vector보다 더 간단할 수 있습니다:<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -217,9 +217,9 @@ s.add(PrefixOf(StringVal("HTB{"), serial))
 s.add(SuffixOf(StringVal("}"), serial))
 s.add(Contains(serial, StringVal("_")))
 ```
-그러나 binary가 문자에 대해 산술 연산, rotation, checksum 또는 cast를 수행하기 시작하면 일반적으로 8-bit bit-vector로 돌아가는 것이 좋습니다.
+하지만 binary가 문자에 대해 arithmetic, rotation, checksum 또는 cast를 수행하기 시작하면 일반적으로 8-bit bit-vector로 돌아가는 것이 더 좋습니다.
 
-# 예시
+# Examples
 
 ## Sudoku solver
 ```python
@@ -269,10 +269,10 @@ print_matrix(r)
 else:
 print("failed to solve")
 ```
-## 참고 문헌
+## 참고 자료
 
-- [1] [Z3Py 가이드 - 예제 (ericpony)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-- [2] [Z3 가이드 (Microsoft)](https://microsoft.github.io/z3guide/)
-- [3] [Z3 프로그래밍 (Stanford)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+- [1] [예제가 포함된 Z3Py Guide (ericpony z3py-tutorial)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Z3 Guide - Bit-Vectors theory (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
+- [3] [Programming Z3 (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 
 {{#include ../../banners/hacktricks-training.md}}

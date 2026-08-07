@@ -4,7 +4,7 @@
 
 ## Bus Pirate
 
-Bus Pirate가 작동하는지 테스트하려면 +5V를 VPU에 연결하고 3.3V를 ADC에 연결한 후 버스 파이레트를 접근합니다 (예: Tera Term 사용) 그리고 명령어 `~`를 사용합니다:
+Bus Pirate가 작동하는지 테스트하려면 +5V를 VPU에 연결하고 3.3V를 ADC에 연결한 다음 Bus Pirate에 액세스합니다(예: Tera Term 사용). 그리고 다음 명령어 `~`을 사용합니다:
 ```bash
 # Use command
 HiZ>~
@@ -43,18 +43,18 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-이전 명령줄에서 0개의 오류가 발견되었다고 표시된 것을 볼 수 있습니다. 이는 구매 후 또는 펌웨어를 플래시한 후에 작동하는지 아는 데 매우 유용합니다.
+이전 명령줄에서 볼 수 있듯이 오류가 0개 발견되었다고 표시됩니다. 이는 구매 후 또는 firmware를 flashing한 후 정상적으로 작동하는지 확인하는 데 매우 유용합니다.
 
-버스 파이레와 연결하려면 문서를 참조할 수 있습니다:
+Bus Pirate에 연결하려면 docs를 따를 수 있습니다:
 
-![](<../../images/image (484).png>)
+![명령 사용 - Space 누르기: Bus Pirate에 연결하려면 docs를 따를 수 있습니다](<../../images/image (484).png>)
 
-이 경우 EPROM: ATMEL901 24C256 PU27에 연결할 것입니다:
+이 경우 EPROM인 ATMEL901 24C256 PU27에 연결하겠습니다:
 
-![](<../../images/image (964).png>)
+![명령 사용 - Space 누르기: 이 경우 EPROM인 ATMEL901 24C256 PU27에 연결하겠습니다](<../../images/image (964).png>)
 
-버스 파이레와 대화하기 위해 Tera Term을 사용하여 파이레 버스 COM 포트에 연결했습니다. 설정 --> 직렬 포트 --> 속도를 115200으로 설정했습니다.\
-다음 통신에서는 버스 파이레를 I2C와 대화하도록 준비하는 방법과 메모리에서 읽고 쓰는 방법을 찾을 수 있습니다(주석은 "#"을 사용하여 나타나며, 통신에서 해당 부분을 기대하지 마십시오):
+Bus Pirate와 통신하기 위해 Tera Term을 사용했으며, Setup --> Serial Port --> Speed를 115200으로 설정하여 Bus Pirate의 COM 포트에 연결했습니다.\
+다음 통신 내용에서 Bus Pirate가 I2C와 통신하도록 준비하는 방법과 memory에 쓰고 읽는 방법을 확인할 수 있습니다 (댓글은 "#"을 사용하여 표시되며, 통신 내용에는 해당 부분이 포함되지 않는다고 생각하면 됩니다):
 ```bash
 # Check communication with buspirate
 i
@@ -155,9 +155,9 @@ NACK
 ```
 ### Sniffer
 
-이 시나리오에서는 아두이노와 이전 EPROM 간의 I2C 통신을 스니핑할 것입니다. 두 장치를 통신한 다음 버스 해적을 SCL, SDA 및 GND 핀에 연결하기만 하면 됩니다:
+이 시나리오에서는 arduino와 이전 EPROM 간의 I2C 통신을 sniff합니다. 두 장치가 서로 통신하도록 한 다음 bus pirate를 SCL, SDA 및 GND 핀에 연결하면 됩니다:
 
-![](<../../images/image (166).png>)
+![이전에 구성한 주소 0x69에서 20B 읽기 - Sniffer: 이 시나리오에서는 arduino와 이전 EPROM 간의 I2C 통신을 sniff합니다. 두 장치가 서로 통신하도록 한 다음...](<../../images/image (166).png>)
 ```bash
 I2C>m
 1. HiZ

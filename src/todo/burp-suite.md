@@ -4,14 +4,13 @@
 
 ## Basic Payloads
 
-- **간단한 목록:** 각 줄에 항목이 포함된 목록
-- **런타임 파일:** 런타임에 읽는 목록(메모리에 로드되지 않음). 큰 목록을 지원하기 위해.
-- **대소문자 수정:** 문자열 목록에 일부 변경 사항 적용(변경 없음, 소문자, 대문자, 고유명사 - 첫 글자만 대문자, 나머지는 소문자-, 고유명사 - 첫 글자만 대문자, 나머지는 그대로-).
-- **숫자:** Z 단계 또는 무작위로 X에서 Y까지 숫자 생성.
-- **브루트 포서:** 문자 집합, 최소 및 최대 길이.
+- **Simple List:** 각 줄에 하나의 entry가 포함된 list
+- **Runtime File:** runtime에 읽는 list (memory에 로드되지 않음). 큰 list를 지원하기 위한 용도.
+- **Case Modification:** 문자열 list에 일부 변경 사항 적용(변경 없음, 소문자로 변환, 대문자로 변환, Proper name - 첫 글자만 대문자이고 나머지는 소문자-, Proper Name -첫 글자만 대문자이고 나머지는 그대로 유지-.
+- **Numbers:** Z step 또는 random 방식으로 X부터 Y까지의 숫자 생성.
+- **Brute Forcer:** Character set, min 및 max length.
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : 명령을 실행하고 burpcollab에 대한 DNS 요청을 통해 출력을 가져오는 페이로드.
-
+[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : burpcollab에 DNS requests를 보내 commands를 실행하고 output을 가져오는 Payload.
 
 {{#ref}}
 https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e
