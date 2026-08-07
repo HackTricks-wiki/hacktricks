@@ -1,4 +1,4 @@
-# Angr - Examples
+# Angr - 示例
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -7,7 +7,7 @@
 
 代码取自 [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### 输入以到达地址（指示该地址）
+### 用于到达地址的输入（指示地址）
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 到达地址的输入（表示打印内容）
+### 到达地址的输入（表示打印输出）
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-在此场景中，输入通过 `scanf("%u %u")` 获取，并传入了值 `"1 1"`，因此栈中的 **`0x00000001`** 值来自**用户输入**。你可以看到这些值从 `$ebp - 8` 开始。因此，在代码中，我们对 `$esp` **减去了 8 字节**（因为此时 `$ebp` 和 `$esp` 的值相同），然后压入了 BVS。
+在此场景中，输入通过 `scanf("%u %u")` 获取，并提供了值 `"1 1"`，因此栈中的 **`0x00000001`** 值来自**用户输入**。你可以看到这些值从 `$ebp - 8` 开始。因此，在代码中我们对 `$esp` **减去了 8 个字节（因为当时 `$ebp` 和 `$esp` 的值相同）**，然后 push 了 BVS。
 
-![将 bit vectors 放入栈中，以找出栈位置需要达到的值，从而实现程序流程控制：在此场景中，输入通过 scanf("%u %u") 获取，并传入了值 "1...](<../../../images/image (136).png>)
+![将位向量放入栈中，以找出需要对该栈位置执行减法或加法才能到达某个程序流程的值：在此场景中，输入通过 scanf("%u %u") 获取，并提供了值 "1...](<../../../images/image (136).png>)
 
 ### 静态内存值（全局变量）
 ```python
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> Note that the symbolic file could also contain constant data merged with symbolic data:
+> 注意，symbolic file 也可能包含与 symbolic data 合并的 constant data：
 >
 > ```python
 >  # Hello world, my name is John.
@@ -407,8 +407,8 @@ main(sys.argv)
 ### 应用约束
 
 > [!TIP]
-> 有时，简单的人类操作（例如将两个长度为 16 的单词 **逐字符**（循环）进行比较）对 **angr** 来说可能会消耗大量资源，因为它需要生成呈**指数级增长**的分支：每个 if 生成一个分支，即 `2^16`\
-> 因此，更简单的方法是让 **angr 返回到之前的某个位置**（此时真正困难的部分已经完成），然后**手动设置这些约束**。
+> 有时，一些简单的人类操作，例如将两个长度为 16 的单词进行 **char by char** 比较（循环），对 **angr** 来说也非常 **costly**，因为它需要生成呈指数增长的分支：每个 if 生成一个分支，即 `2^16`\
+> 因此，更简单的方法是 **让 angr 回到之前的某个点**（真正困难的部分已经完成），然后**手动设置这些约束**。
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> 在某些场景中，你可以启用 **veritesting**，它会合并相似的状态，从而节省无用的分支并找到解：`simulation = project.factory.simgr(initial_state, veritesting=True)`
+> 在某些场景中，你可以启用 **veritesting**，它会合并相似的状态，从而节省无用的分支并找到解决方案：`simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> 在这些场景中，你还可以 **hook 该函数，为 angr 提供更容易理解的内容**。
+> 在这些场景中，你还可以**hook 该函数，为 angr 提供更容易理解的内容**。
 
 ### Simulation Managers
 
-某些 simulation manager 比其他的更有用。在前面的示例中存在一个问题：创建了大量有用的分支。在这里，**veritesting** 技术会合并这些分支并找到解。\
-此 simulation manager 也可以通过以下方式启用：`simulation = project.factory.simgr(initial_state, veritesting=True)`
+某些模拟管理器可能比其他管理器更有用。在前面的示例中存在一个问题，因为创建了大量有用的分支。在这里，**veritesting** 技术会合并这些分支并找到解决方案。\
+该模拟管理器也可以通过以下方式启用：`simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/绕过对函数的一次调用
+### Hooking/Bypassing 对函数的一次调用
 ```python
 # This level performs the following computations:
 #
@@ -809,6 +809,6 @@ main(sys.argv)
 ```
 ## 参考资料
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}

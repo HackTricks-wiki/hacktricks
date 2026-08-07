@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-此 cheatsheet 的一部分基于 [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)。<sup>[[1]](#references)</sup>
+本 cheatsheet 的部分内容基于 [angr 文档](https://docs.angr.io/_/downloads/en/stable/pdf/)。<sup>[[1]](#references)</sup>
 
 ## 安装
 ```bash
@@ -69,7 +69,7 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
-### 符号和重定位
+### 符号与重定位
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -86,7 +86,7 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
-### 基本块
+### 代码块
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -96,7 +96,7 @@ block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x4016
 ```
 ## 动态分析
 
-### Simulation Manager、状态
+### 仿真管理器、状态
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -121,9 +121,9 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ### 调用函数
 
-- You can 通过 `args` 传递参数列表，并通过 `env` 将环境变量字典传入 `entry_state` 和 `full_init_state`。这些结构中的值可以是字符串或 bitvectors，并会作为模拟执行的参数和环境序列化到 state 中。默认的 `args` 是空列表，因此如果你分析的程序至少需要找到 `argv[0]`，就应始终提供它！
-- 如果你希望 `argc` 是 symbolic，可以在 `entry_state` 和 `full_init_state` 构造函数中将 symbolic bitvector 作为 `argc` 传入。不过请注意：如果这样做，还应向生成的 state 添加约束，确保你的 argc 值不会大于传入 `args` 的参数数量。
-- 要使用 call state，应通过 `.call_state(addr, arg1, arg2, ...)` 调用它，其中 `addr` 是你要调用的函数地址，`argN` 是该函数的第 N 个参数，可以是 python 整数、字符串、数组或 bitvector。如果你希望分配内存并实际传入指向某个对象的指针，应将其包装在 PointerWrapper 中，即 `angr.PointerWrapper("point to me!")`。此 API 的结果可能有些不可预测，但我们正在持续改进。
+- 你可以通过 `args` 传递参数列表，并通过 `env` 将环境变量字典传入 `entry_state` 和 `full_init_state`。这些结构中的值可以是字符串或位向量，并会作为模拟执行的参数和环境序列化到状态中。默认的 `args` 是空列表，因此如果你分析的程序需要至少找到一个 `argv[0]`，就应始终提供它！
+- 如果你希望 `argc` 具有符号性，可以将符号位向量作为 `argc` 传入 `entry_state` 和 `full_init_state` 构造函数。不过要注意：如果这样做，还应向生成的状态添加一个约束，确保你的 argc 值不大于传入 `args` 的参数数量。
+- 要使用 call state，应通过 `.call_state(addr, arg1, arg2, ...)` 调用它，其中 `addr` 是你要调用的函数地址，`argN` 是该函数的第 N 个参数，可以是 Python 整数、字符串、数组或位向量。如果你希望分配内存并实际传入指向某个对象的指针，则应将其封装在 PointerWrapper 中，即 `angr.PointerWrapper("point to me!")`。此 API 的结果可能有些不可预测，但我们正在改进它。
 
 ### 位向量
 ```python
@@ -186,12 +186,12 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-此外，你可以使用 `proj.hook_symbol(name, hook)`，将符号名称作为第一个参数，从而 hook 符号所在的地址<sup>[[1]](#references)</sup>
+此外，你还可以使用 `proj.hook_symbol(name, hook)`，将符号名称作为第一个参数，从而 hook 符号所在的地址<sup>[[1]](#references)</sup>
 
 ## 示例
 
 ## 参考资料
 
-- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
+- [1] [angr 文档](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
 {{#include ../../../banners/hacktricks-training.md}}
