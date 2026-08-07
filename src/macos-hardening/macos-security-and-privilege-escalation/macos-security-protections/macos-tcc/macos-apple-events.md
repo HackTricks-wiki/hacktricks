@@ -4,16 +4,16 @@
 
 ## Basiese Inligting
 
-**Apple Events** is 'n kenmerk in Apple se macOS wat toelaat dat toepassings met mekaar kommunikeer. Dit is deel van die **Apple Event Manager**, wat 'n komponent van die macOS-bedryfstelsel is wat verantwoordelik is vir die hantering van interproseskommunikasie. Hierdie stelsel stel een toepassing in staat om 'n boodskap aan 'n ander toepassing te stuur om te vra dat dit 'n spesifieke operasie uitvoer, soos om 'n lêer te open, data te verkry, of 'n opdrag uit te voer.
+**Apple Events** is 'n funksie in Apple se macOS wat toepassings toelaat om met mekaar te kommunikeer. Hulle vorm deel van die **Apple Event Manager**, wat 'n komponent van die macOS-bedryfstelsel is wat verantwoordelik is vir die hantering van interproseskommunikasie. Hierdie stelsel stel een toepassing in staat om 'n boodskap aan 'n ander toepassing te stuur om te versoek dat dit 'n bepaalde bewerking uitvoer, soos om 'n lêer oop te maak, data te verkry of 'n opdrag uit te voer.
 
-Die mina daemon is `/System/Library/CoreServices/appleeventsd` wat die diens `com.apple.coreservices.appleevents` registreer.
+Die hoof-daemon is `/System/Library/CoreServices/appleeventsd`, wat die diens `com.apple.coreservices.appleevents` registreer.
 
-Elke toepassing wat gebeurtenisse kan ontvang, sal met hierdie daemon nagaan deur sy Apple Event Mach Port te verskaf. En wanneer 'n app 'n gebeurtenis na dit wil stuur, sal die app hierdie poort van die daemon aan vra.
+Elke toepassing wat events kan ontvang, sal by hierdie daemon registreer deur sy Apple Event Mach Port te verskaf. Wanneer 'n toepassing 'n event daarheen wil stuur, sal die toepassing hierdie port by die daemon aanvra.
 
-Sandboxed toepassings vereis voorregte soos `allow appleevent-send` en `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` om in staat te wees om gebeurtenisse te stuur. Let daarop dat regte soos `com.apple.security.temporary-exception.apple-events` kan beperk wie toegang het om gebeurtenisse te stuur, wat regte soos `com.apple.private.appleevents` benodig.
+Sandboxed applications benodig voorregte soos `allow appleevent-send` en `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` om events te kan stuur. Let daarop dat entitlements soos `com.apple.security.temporary-exception.apple-events` kan beperk wie toegang het om events te stuur, wat entitlements soos `com.apple.private.appleevents` sal vereis.
 
 > [!TIP]
-> Dit is moontlik om die env veranderlike **`AEDebugSends`** te gebruik om inligting oor die gestuurde boodskap te log:
+> Dit is moontlik om die omgewingsveranderlike **`AEDebugSends`** te gebruik om inligting oor die gestuurde boodskap te log:
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
