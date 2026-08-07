@@ -14,7 +14,7 @@ end tell
 ```
 
 Here you have some examples: [https://github.com/abbeycode/AppleScripts](https://github.com/abbeycode/AppleScripts)\
-Find more info about malware using applescripts [**here**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).
+Find more info about malware using applescripts [**here**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).<sup>[[3]](#references)</sup>
 
 ### Automation / TCC quirks
 
@@ -64,5 +64,3 @@ However, there are still some tools that can be used to understand this kind of 
 - [4] [FADE DEAD | Adventures in Reversing Malicious Run-Only AppleScripts](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
-

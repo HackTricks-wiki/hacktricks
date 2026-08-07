@@ -12,7 +12,7 @@ macOS keeps a single UI instance per Chromium profile, so instrumentation normal
 
 #### `--load-extension` Flag
 
-The `--load-extension` flag auto-loads unpacked extensions (comma-separated paths). Pair it with `--disable-extensions-except` to block legitimate extensions while forcing only your payload to run. Malicious extensions can request high-impact permissions such as `debugger`, `webRequest`, and `cookies` to pivot into DevTools protocols, patch CSP headers, downgrade HTTPS, or exfiltrate session material as soon as the browser starts.
+The `--load-extension` flag auto-loads unpacked extensions (comma-separated paths). Pair it with `--disable-extensions-except` to block legitimate extensions while forcing only your payload to run. Malicious extensions can request high-impact permissions such as `debugger`, `webRequest`, and `cookies` to pivot into DevTools protocols, patch CSP headers, downgrade HTTPS, or exfiltrate session material as soon as the browser starts.<sup>[[4]](#references)</sup>
 
 #### `--remote-debugging-port` / `--remote-debugging-pipe` Flags
 
@@ -24,7 +24,7 @@ This flag redirects the entire browser profile (History, Cookies, Login Data, Pr
 
 #### `--use-fake-ui-for-media-stream` Flag
 
-This switch bypasses the camera/mic permission prompt so any page that calls `getUserMedia` receives access immediately. Combine it with flags such as `--auto-select-desktop-capture-source="Entire Screen"`, `--kiosk`, or CDP `Browser.grantPermissions` commands to silently capture audio/video, desk-share, or satisfy WebRTC permission checks without user interaction.
+This switch bypasses the camera/mic permission prompt so any page that calls `getUserMedia` receives access immediately. Combine it with flags such as `--auto-select-desktop-capture-source="Entire Screen"`, `--kiosk`, or CDP `Browser.grantPermissions` commands to silently capture audio/video, desk-share, or satisfy WebRTC permission checks without user interaction.<sup>[[4]](#references)</sup>
 
 ## Delivery & Relaunch Patterns Seen in the Wild
 
