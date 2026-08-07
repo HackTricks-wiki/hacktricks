@@ -1,23 +1,23 @@
-# 가치 중심의 Web3 Red Teaming (MITRE AADAPT)
+# 가치 중심 Web3 Red Teaming (MITRE AADAPT)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) 매트릭스는 인프라만이 아니라 디지털 가치 자체를 조작하는 공격자 행동을 포착합니다. 이를 위협 모델링의 척추(backbone)로 다루세요: 자산을 mint, 가격결정, 승인, 또는 라우팅할 수 있는 모든 구성요소를 나열하고, 해당 접점들을 AADAPT 기법에 매핑한 뒤, 환경이 되돌릴 수 없는 경제적 손실을 견딜 수 있는지 측정하는 red-team 시나리오를 설계하세요.
+MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) matrix는 단순히 인프라만 다루는 것이 아니라 디지털 가치를 조작하는 공격자의 행동을 정리합니다. 이를 **threat-modeling의 backbone**으로 활용하세요. 자산을 발행하거나, 가격을 책정하거나, 승인하거나, 라우팅할 수 있는 모든 구성 요소를 열거하고, 해당 접점을 AADAPT techniques에 매핑한 다음, 환경이 되돌릴 수 없는 경제적 손실을 견딜 수 있는지 측정하는 red-team 시나리오를 실행합니다.
 
-## 1. 가치 보유 구성요소 인벤토리 작성
-오프체인이라도 가치 상태에 영향을 줄 수 있는 모든 것을 도식화하세요.
+## 1. 가치가 포함된 구성 요소 인벤토리 작성
+온체인 외부에 있더라도 가치 상태에 영향을 줄 수 있는 모든 요소를 매핑합니다.<sup>[[1]](#references)</sup>
 
-- **Custodial signing services** (HSM/KMS clusters, Vault/KMaaS, signing APIs used by bots or back-office jobs). 키 ID, 정책, 자동화 ID, 승인 워크플로우를 캡처하세요.
-- **Admin & upgrade paths** for contracts (proxy admins, governance timelocks, emergency pause keys, parameter registries). 누가/무엇이 호출할 수 있는지, 어떤 쿼럼이나 지연 조건인지 포함하세요.
-- **On-chain protocol logic** handling lending, AMMs, vaults, staking, bridges, or settlement rails. 그들이 가정하는 불변조건(invariants)들을 문서화하세요 (oracle prices, collateral ratios, rebalance cadence…).
-- **Off-chain automation** that builds transactions (market-making bots, CI/CD pipelines, cron jobs, serverless functions). 이러한 것들은 서명 요청을 할 수 있는 API 키나 서비스 주체를 보유하는 경우가 많습니다.
-- **Oracles & data feeds** (aggregator composition, quorum, deviation thresholds, update cadence). 자동화된 리스크 로직이 의존하는 모든 업스트림을 기록하세요.
-- **Bridges and cross-chain routers** (lock/mint contracts, relayers, settlement jobs) 체인이나 관리 서비스 스택을 연결하는 요소들을 포함하세요.
+- **Custodial signing services** (HSM/KMS clusters, Vault/KMaaS, bots 또는 back-office jobs에서 사용하는 signing APIs). key IDs, policies, automation identities, approval workflows를 기록합니다.
+- **Admin & upgrade paths** for contracts (proxy admins, governance timelocks, emergency pause keys, parameter registries). 이를 호출할 수 있는 주체와 필요한 quorum 또는 delay도 포함합니다.
+- **On-chain protocol logic**: lending, AMMs, vaults, staking, bridges 또는 settlement rails를 처리하는 로직입니다. 해당 로직이 가정하는 invariants(oracle prices, collateral ratios, rebalance cadence…)를 문서화합니다.
+- **Off-chain automation**: transactions를 생성하는 구성 요소입니다(market-making bots, CI/CD pipelines, cron jobs, serverless functions). 이러한 구성 요소는 종종 signatures를 요청할 수 있는 API keys 또는 service principals를 보유합니다.
+- **Oracles & data feeds** (aggregator composition, quorum, deviation thresholds, update cadence). 자동화된 risk logic이 의존하는 모든 upstream을 기록합니다.
+- **Bridges and cross-chain routers** (lock/mint contracts, relayers, settlement jobs): chains 또는 custodial stacks를 연결합니다.
 
-Deliverable: 자산이 어떻게 이동하는지, 누가 이동을 승인하는지, 어떤 외부 신호가 비즈니스 로직에 영향을 주는지를 보여주는 value-flow 다이어그램.
+산출물: 자산의 이동 방식, 이동을 승인하는 주체, business logic에 영향을 주는 외부 신호를 보여주는 value-flow diagram.
 
-## 2. 구성요소를 AADAPT 행동에 매핑
-AADAPT 분류체계를 각 구성요소별 구체적 공격 후보로 변환하세요.
+## 2. 구성 요소를 AADAPT behaviors에 매핑
+AADAPT taxonomy를 각 구성 요소별 구체적인 attack candidates로 변환합니다.<sup>[[1]](#references)</sup>
 
 | Component | Primary AADAPT focus |
 | --- | --- |
@@ -27,82 +27,82 @@ AADAPT 분류체계를 각 구성요소별 구체적 공격 후보로 변환하�
 | Automation pipelines | Compromised bot/CI identities, batch replay, unauthorized deployment |
 | Bridges/routers | Cross-chain evasion, rapid hop laundering, settlement desynchronization |
 
-이 매핑은 계약뿐만 아니라 가치에 간접적으로 영향을 줄 수 있는 모든 identity/automation을 테스트하게 합니다.
+이 매핑을 통해 contracts뿐 아니라 간접적으로 가치를 조정할 수 있는 모든 identity/automation도 테스트할 수 있습니다.
 
-## 3. 공격자 실현 가능성 vs 비즈니스 영향으로 우선순위 지정
+## 3. 공격자 실행 가능성과 business impact를 기준으로 우선순위 지정
 
-1. **Operational weaknesses**: 노출된 CI 자격증명, 권한이 과다한 IAM 역할, 잘못 구성된 KMS 정책, 임의 서명 요청이 가능한 자동화 계정, 브리지 설정이 공개된 버킷 등.
-2. **Value-specific weaknesses**: 취약한 오라클 파라미터, 다자 승인 없는 업그레이드 가능한 계약, flash-loan에 민감한 유동성, timelock을 우회할 수 있는 거버넌스 액션 등.
+1. **Operational weaknesses**: 노출된 CI credentials, 과도한 권한이 부여된 IAM roles, 잘못 구성된 KMS policies, 임의의 signatures를 요청할 수 있는 automation accounts, bridge configs가 저장된 public buckets 등.
+2. **Value-specific weaknesses**: 취약한 oracle parameters, multi-party approvals 없이 upgradable contracts, flash-loan에 민감한 liquidity, timelocks를 우회하는 governance actions.
 
-공격자처럼 큐를 운영하세요: 오늘 성공할 수 있는 운영적 발판부터 시작해, 깊은 프로토콜/경제적 조작 경로로 진행하세요.
+공격자처럼 queue를 처리합니다. 오늘 당장 성공할 수 있는 operational footholds부터 시작한 뒤, 심층적인 protocol/economic manipulation paths로 진행합니다.<sup>[[1]](#references)</sup>
 
-## 4. 통제된, 실운영과 유사한 환경에서 실행
-- **Forked mainnets / isolated testnets**: 바이트코드, 스토리지, 유동성을 복제해 flash-loan 경로, 오라클 드리프트, 브리지 플로우가 실제 자금 없이 end-to-end로 실행되게 하세요.
-- **Blast-radius planning**: 시나리오 실행 전 서킷브레이커, 일시정지 모듈, 롤백 런북, 테스트 전용 관리자 키를 정의하세요.
-- **Stakeholder coordination**: 수탁자, 오라클 운영자, 브리지 파트너, 컴플라이언스팀에 통지해 모니터링 팀이 트래픽을 예상하게 하세요.
-- **Legal sign-off**: 시뮬레이션이 규제 구간을 넘을 수 있는 경우 범위, 승인, 중단 조건을 문서화하세요.
+## 4. 통제되고 production-realistic한 환경에서 실행
+- **Forked mainnets / isolated testnets**: bytecode, storage, liquidity를 복제하여 실제 funds에 영향을 주지 않고 flash-loan paths, oracle drifts, bridge flows를 end-to-end로 실행합니다.<sup>[[1]](#references)</sup>
+- **Blast-radius planning**: 시나리오를 실행하기 전에 circuit breakers, pausable modules, rollback runbooks, test-only admin keys를 정의합니다.
+- **Stakeholder coordination**: custodians, oracle operators, bridge partners, compliance에 통지하여 monitoring teams가 해당 traffic을 예상할 수 있도록 합니다.
+- **Legal sign-off**: simulations가 regulated rails를 넘나들 수 있는 경우 scope, authorization, stop conditions를 문서화합니다.
 
-## 5. AADAPT 기법에 맞춘 텔레메트리
-모든 시나리오가 실질적 탐지 데이터를 생성하도록 텔레메트리 스트림을 계측하세요.
+## 5. AADAPT techniques에 맞춘 Telemetry
+모든 시나리오가 실행 가능한 detection data를 생성하도록 telemetry streams를 구성합니다.<sup>[[1]](#references)</sup>
 
-- **Chain-level traces**: 전체 호출 그래프, gas 사용량, 트랜잭션 논스, 블록 타임스탬프—flash-loan 번들, 재진입(reentrancy)-유사 구조, 크로스컨트랙트 홉을 재구성하기 위해 필요합니다.
-- **Application/API logs**: 각 온체인 tx를 사람 또는 자동화 ID(session ID, OAuth client, API key, CI job ID)와 IP 및 인증 방법으로 연결하세요.
-- **KMS/HSM logs**: 키 ID, 호출자 주체, 정책 결과, 목적지 주소, 각 서명에 대한 이유 코드. 변경 윈도우와 고위험 작업의 기준선을 확보하세요.
-- **Oracle/feed metadata**: 업데이트별 데이터 소스 구성, 보고된 값, 롤링 평균 대비 편차, 트리거된 임계값, 페일오버 경로.
-- **Bridge/swap traces**: 체인 간 lock/mint/unlock 이벤트를 상관 ID, 체인 ID, relayer 정체, 홉 타이밍과 함께 연관 지으세요.
-- **Anomaly markers**: 슬리피지 급증, 비정상적 담보비율, 이상한 gas 밀도, 크로스체인 속도성 같은 파생 지표들.
+- **Chain-level traces**: full call graphs, gas usage, transaction nonces, block timestamps를 수집하여 flash-loan bundles, reentrancy-like structures, cross-contract hops를 재구성합니다.
+- **Application/API logs**: 각 on-chain tx를 IPs 및 auth methods와 함께 human 또는 automation identity(session ID, OAuth client, API key, CI job ID)에 연결합니다.
+- **KMS/HSM logs**: 모든 signature에 대해 key ID, caller principal, policy result, destination address, reason codes를 기록합니다. change windows와 high-risk operations의 baseline을 설정합니다.
+- **Oracle/feed metadata**: 각 update의 data source composition, reported value, rolling averages와의 deviation, triggered thresholds, 실행된 failover paths를 기록합니다.
+- **Bridge/swap traces**: correlation IDs, chain IDs, relayer identity, hop timing을 사용하여 chains 간 lock/mint/unlock events를 상호 연관시킵니다.
+- **Anomaly markers**: slippage spikes, abnormal collateralization ratios, unusual gas density, cross-chain velocity 등의 derived metrics를 생성합니다.
 
-모든 것을 시나리오 ID 또는 합성 사용자 ID로 태깅해 분석가가 관찰값을 실행한 AADAPT 기법과 정렬할 수 있게 하세요.
+분석자가 observables를 실행 중인 AADAPT technique에 맞출 수 있도록 모든 항목에 scenario IDs 또는 synthetic user IDs를 태깅합니다.
 
-## 6. Purple-team 루프 & 성숙도 지표
-1. 통제된 환경에서 시나리오를 실행하고 탐지(알림, 대시보드, 호출된 대응자)를 캡처하세요.
-2. 각 단계를 특정 AADAPT 기법과 체인/앱/KMS/오라클/브리지 평면에서 생성된 관찰값에 매핑하세요.
-3. 탐지 가설(임계값 규칙, 상관 검색, 불변성 검사)을 수립하고 배포하세요.
-4. MTTD 및 MTTC가 비즈니스 허용범위에 도달하고 플레이북이 가치 손실을 신뢰성 있게 차단할 때까지 재실행하세요.
+## 6. Purple-team loop & maturity metrics
+1. 통제된 환경에서 시나리오를 실행하고 detections(alerts, dashboards, responders paged)을 수집합니다.<sup>[[1]](#references)</sup>
+2. 각 단계를 구체적인 AADAPT techniques 및 chain/app/KMS/oracle/bridge planes에서 생성된 observables에 매핑합니다.
+3. detection hypotheses(threshold rules, correlation searches, invariant checks)를 수립하고 배포합니다.
+4. mean time to detect (MTTD)와 mean time to contain (MTTC)이 business tolerances를 충족하고 playbooks가 value loss를 안정적으로 중단할 때까지 다시 실행합니다.
 
-프로그램 성숙도는 세 축으로 추적하세요:
-- **Visibility**: 모든 중요한 가치 경로에 각 평면의 텔레메트리가 존재.
-- **Coverage**: 우선순위가 높은 AADAPT 기법 중 end-to-end로 실행된 비율.
-- **Response**: 계약 일시중지, 키 폐기, 흐름 동결 등 되돌릴 수 없는 손실 이전에 조치할 수 있는 능력.
+다음 세 가지 축으로 program maturity를 추적합니다.<sup>[[1]](#references)</sup>
+- **Visibility**: 모든 critical value path에 각 plane의 telemetry가 존재하는지 여부.
+- **Coverage**: 우선순위가 지정된 AADAPT techniques 중 end-to-end로 실행한 비율.
+- **Response**: irreversible loss가 발생하기 전에 contracts를 pause하고, keys를 revoke하거나, flows를 freeze할 수 있는 능력.
 
-일반적인 마일스톤: (1) 가치 인벤토리 및 AADAPT 매핑 완료, (2) 탐지가 구현된 첫 번째 end-to-end 시나리오, (3) 분기별 purple-team 사이클로 커버리지 확장 및 MTTD/MTTC 단축.
+일반적인 milestones: (1) value inventory + AADAPT mapping 완료, (2) detections가 구현된 첫 end-to-end scenario, (3) coverage를 확대하고 MTTD/MTTC를 줄이는 quarterly purple-team cycles.<sup>[[1]](#references)</sup>
 
-## 7. 시나리오 템플릿
-이 반복 가능한 청사진들을 사용해 AADAPT 행동에 직접 매핑되는 시뮬레이션을 설계하세요.
+## 7. Scenario templates
+AADAPT behaviors에 직접 매핑되는 simulations를 설계할 때 다음의 반복 가능한 blueprints를 사용합니다.<sup>[[1]](#references)</sup>
 
 ### Scenario A – Flash-loan economic manipulation
-- **Objective**: 한 트랜잭션 내에서 일시적 자본을 빌려 AMM의 가격/유동성을 왜곡해 잘못 가격된 차입, 청산, 또는 mint를 트리거한 뒤 상환합니다.
+- **Objective**: 하나의 transaction 내부에서 일시적인 capital을 borrow하여 AMM prices/liquidity를 왜곡하고, 상환 전에 mispriced borrows, liquidations 또는 mints를 유발합니다.
 - **Execution**:
-1. 대상 체인을 fork하고 생산 수준의 유동성으로 풀을 시드하세요.
-2. flash loan으로 큰 노티션을 빌리세요.
-3. 대차로 계산된 스왑을 수행해 대출, vault, 파생 로직이 의존하는 가격/임계값을 넘기세요.
-4. 왜곡 직후 피해자 계약을 호출(차입, 청산, mint)하고 flash loan을 상환하세요.
-- **Measurement**: 불변성 위반이 성공했나요? 슬리피지/가격 편차 모니터, 서킷브레이커, 거버넌스 일시정지 훅이 트리거되었나요? 비정상적 gas/호출 그래프 패턴이 분석에 표시되기까지 얼마나 걸렸나요?
+1. target chain을 fork하고 production과 유사한 liquidity로 pools를 구성합니다.
+2. flash loan을 통해 큰 notional을 borrow합니다.
+3. lending, vault 또는 derivative logic이 의존하는 price/threshold boundaries를 넘도록 조정된 swaps를 실행합니다.
+4. 왜곡 직후 victim contract를 호출하여(borrow, liquidate, mint) flash loan을 상환합니다.
+- **Measurement**: invariant violation이 성공했습니까? slippage/price-deviation monitors, circuit breakers 또는 governance pause hooks가 trigger되었습니까? analytics가 비정상적인 gas/call graph pattern을 감지하기까지 얼마나 걸렸습니까?
 
 ### Scenario B – Oracle/data-feed poisoning
-- **Objective**: 조작된 피드가 대량 청산이나 잘못된 정산 같은 파괴적 자동화 동작을 유발할 수 있는지 확인합니다.
+- **Objective**: manipulated feeds가 destructive automated actions(mass liquidations, incorrect settlements)를 trigger할 수 있는지 확인합니다.
 - **Execution**:
-1. fork/testnet에서 악성 피드 배포하거나 aggregator 가중치/쿼럼/업데이트 주기를 허용 편차를 넘게 조정하세요.
-2. 의존하는 계약들이 오염된 값을 소비하고 표준 로직을 실행하게 하세요.
-- **Measurement**: 피드 레벨의 오프-밴드(alert) 여부, fallback oracle 활성화, 최소/최대 바운드 시행, 이상 발생 시점부터 운영자 반응까지의 지연.
+1. fork/testnet에서 malicious feed를 deploy하거나 aggregator weights/quorum/update cadence를 허용되는 deviation을 초과하도록 조정합니다.
+2. dependent contracts가 poisoned values를 사용하고 standard logic을 실행하도록 둡니다.
+- **Measurement**: feed-level out-of-band alerts, fallback oracle activation, min/max bound enforcement, anomaly 발생부터 operator response까지의 latency를 측정합니다.
 
 ### Scenario C – Credential/signing abuse
-- **Objective**: 단일 서명자 또는 자동화 ID를 탈취해 권한 없는 업그레이드, 파라미터 변경, 또는 금고(트레저리) 유출이 가능한지 테스트합니다.
+- **Objective**: 단일 signer 또는 automation identity의 compromise가 unauthorized upgrades, parameter changes 또는 treasury drains를 가능하게 하는지 테스트합니다.
 - **Execution**:
-1. 민감한 서명 권한을 가진 ID(운영자, CI 토큰, KMS/HSM를 호출하는 서비스 계정, multisig 참가자)를 열거하세요.
-2. 실험 범위 내에서 해당 자격증명/키를 재사용해 탈취를 시뮬레이션하세요.
-3. 권한 작업을 시도하세요: 프록시 업그레이드, 리스크 파라미터 변경, 자산 mint/pause, 또는 거버넌스 제안 트리거 등.
-- **Measurement**: KMS/HSM 로그가 이상 알림(시간대, 목적지 편차, 고위험 작업 급증)을 발생시키나요? 정책이나 multisig 임계값이 단독 남용을 막을 수 있나요? 스로틀/레이트 리밋이나 추가 승인 절차가 적용되나요?
+1. 민감한 signing rights를 가진 identities(operators, CI tokens, KMS/HSM을 호출하는 service accounts, multisig participants)를 열거합니다.
+2. compromise를 시뮬레이션합니다(lab scope 내에서 해당 credentials/keys를 재사용).
+3. privileged actions를 시도합니다: proxies upgrade, risk parameters 변경, assets mint/pause 또는 governance proposals trigger.
+- **Measurement**: KMS/HSM logs가 anomaly alerts(time-of-day, destination drift, high-risk operations의 burst)를 발생시킵니까? policies 또는 multisig thresholds가 unilateral abuse를 방지할 수 있습니까? throttles/rate limits 또는 additional approvals가 적용됩니까?
 
 ### Scenario D – Cross-chain evasion & traceability gaps
-- **Objective**: 브리지, DEX 라우터, 프라이버시 홉을 통해 자산을 빠르게 세탁할 때 수비 측이 얼마나 신속하게 자산을 추적·차단할 수 있는지 평가합니다.
+- **Objective**: bridges, DEX routers, privacy hops를 통해 신속하게 launder된 assets를 defenders가 얼마나 잘 추적하고 차단할 수 있는지 평가합니다.
 - **Execution**:
-1. 일반적인 브리지들을 따라 lock/mint 작업을 연결하고 각 홉에서 스왑/믹서를 섞어가며 per-hop correlation ID를 유지하세요.
-2. 전송을 가속해 모니터링 지연을 스트레스하세요(몇 분/블록 내 멀티홉).
-- **Measurement**: 텔레메트리 + 상용 체인 분석을 통해 이벤트를 상관하는 시간, 재구성된 경로의 완전성, 실제 사건에서 동결 가능한 choke point 식별 능력, 비정상적 크로스체인 속도/가치에 대한 알림 정확성.
+1. common bridges를 통한 lock/mint operations를 연결하고, 각 hop에서 swaps/mixers를 삽입하며, hop별 correlation IDs를 유지합니다.
+2. monitoring latency에 부하를 주도록 transfers를 가속합니다(multi-hop within minutes/blocks).
+- **Measurement**: telemetry 및 commercial chain analytics 간 events를 correlate하는 시간, reconstructed path의 완전성, 실제 incident에서 freezing을 위한 choke points를 식별하는 능력, 비정상적인 cross-chain velocity/value에 대한 alert fidelity를 측정합니다.
 
 ## References
 
-- [MITRE AADAPT Framework as a Red Team Roadmap (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
+- [1] [MITRE AADAPT Framework as a Red Team Roadmap (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
 
 {{#include ../../banners/hacktricks-training.md}}
