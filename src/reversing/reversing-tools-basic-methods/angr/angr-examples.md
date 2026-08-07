@@ -3,7 +3,7 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> プログラムが `scanf` を使用して**stdin から複数の値を一度に取得する**場合は、**`scanf`** の後から開始する state を生成する必要があります。
+> プログラムが`scanf`を使用して**stdinから複数の値を一度に取得**している場合は、**`scanf`**の後から開始するstateを生成する必要があります。
 
 Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-このシナリオでは、入力は `scanf("%u %u")` で取得され、値 `"1 1"` が指定されているため、stack 上の **`0x00000001`** という値は **user input** に由来します。この値が `$ebp - 8` から始まっていることがわかります。したがって、コードでは **`$esp` から 8 bytes を減算**し（その時点では `$ebp` と `$esp` は同じ値でした）、その後 BVS を push しています。
+このシナリオでは、入力は `scanf("%u %u")` で取得され、値 `"1 1"` が与えられたため、stack の **`0x00000001`** という値は **user input** に由来します。この値が `$ebp - 8` から始まっていることが分かります。したがって、コードでは **`$esp` から 8 bytes を減算し（その時点では `$ebp` と `$esp` が同じ値だったため）、その後 BVS を push しています。**
 
-![stack に bit vectors を配置して、その stack position がどの値になる必要があるかを確認し、program flow に到達する: このシナリオでは、入力は scanf("%u %u") で取得され、値 "1...](<../../../images/image (136).png>)
+![stack に bit vectors を配置して、program flow に到達するために stack position が保持すべき値を確認する: このシナリオでは、入力は scanf("%u %u") で取得され、値 "1...](<../../../images/image (136).png>)
 
 ### Static Memory values (Global variables)
 ```python
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> symbolic file には、symbolic data と結合された constant data も含められることに注意してください:
+> symbolic fileには、symbolic dataと結合されたconstant dataが含まれる場合もあることに注意してください。
 >
 > ```python
 >  # Hello world, my name is John.
@@ -402,13 +402,13 @@ main(sys.argv)
 >  # the string from the file, except four symbolic bytes where the name would be
 >  # stored.
 >  # (!)
-> ```
+>  ```
 
-### 制約の適用
+### Constrainsの適用
 
 > [!TIP]
-> 16文字の単語2つを **char by char**（loop）で比較するような単純な人間の操作でも、**angr** にとっては多くの **cost** がかかることがあります。これは、各 if に対して1つの branch を生成するため、branch を **指数関数的** に生成する必要があるからです: `2^16`\
-> そのため、**angr に以前のポイントまで戻らせ**（実際に難しい部分がすでに完了している地点）、それらの **constraints を手動で設定する**ほうが簡単です。
+> 16文字の2つの単語を**1文字ずつ**（loopで）比較するような単純な人間の操作でも、**angr**にとっては多くの**コスト**がかかる場合があります。これは、各ifごとに1つのbranchを生成するため、**指数関数的に**branchesを生成する必要があるからです: `2^16`\
+> そのため、**angrに以前のポイントへ戻らせ**（本当に難しい部分がすでに完了している地点）、それらの**constraintsを手動で設定する**ほうが簡単です。
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> 一部のシナリオでは **veritesting** を有効化できます。これにより類似した status がマージされ、不要なブランチを節約して解決策を見つけられます: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> 一部のシナリオでは **veritesting** を有効化できます。これは類似した状態をマージして、不要なブランチを省き、解を見つけるものです: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> これらのシナリオでできるもう一つのことは、**angr がより簡単に理解できるものを渡す function を hook すること**です。
+> これらのシナリオでできるもう1つのことは、**angr がより容易に理解できるものを与える関数を hook する**ことです。
 
-### Simulation Managers
+### シミュレーションマネージャー
 
-一部の Simulation Managers は、他のものより便利です。前の例では、多数の有用なブランチが作成されるという問題がありました。ここでは、**veritesting** technique によってそれらをマージし、解決策を見つけます。\
-この Simulation Manager は、次のようにして有効化することもできます: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+一部のシミュレーションマネージャーは、他のものよりも有用です。前の例では、多数の有用なブランチが作成されるという問題がありました。ここでは、**veritesting** technique がそれらをマージして、解を見つけます。\
+このシミュレーションマネージャーは、次の方法でも有効化できます: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 関数への1回の呼び出しのHooking/Bypassing
+### 関数への1回の呼び出しをHooking/Bypassing
 ```python
 # This level performs the following computations:
 #
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 関数のHook / Simprocedure
+### 関数のHooking / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -807,8 +807,8 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-## 参考資料
+## References
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}

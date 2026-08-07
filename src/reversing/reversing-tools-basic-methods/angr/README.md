@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-このcheatsheetの一部は、[angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)に基づいています。<sup>[[1]](#references)</sup>
+このcheatsheetの一部は、[angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>に基づいています。
 
 ## インストール
 ```bash
@@ -30,9 +30,9 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## Loaded and Main object information
+## ロード済みおよびメインオブジェクトの情報
 
-### Loaded Data
+### ロード済みデータ
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -121,11 +121,11 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ### 関数の呼び出し
 
-- `args` を通じて引数のリストを、`env` を通じて環境変数の辞書を `entry_state` と `full_init_state` に渡すことができます。これらの構造体の値には文字列またはビットベクトルを使用でき、シミュレーション実行時の引数および環境として state にシリアライズされます。デフォルトの `args` は空のリストであるため、解析対象のプログラムが少なくとも `argv[0]` を見つけることを想定している場合は、必ず指定してください。
-- `argc` を symbolic にしたい場合は、`entry_state` および `full_init_state` のコンストラクターに、symbolic bitvector を `argc` として渡すことができます。ただし、この場合は、`args` に渡した引数の数を `argc` の値が超えられないよう、生成された state に constraint も追加する必要があります。
-- call state を使用するには、`.call_state(addr, arg1, arg2, ...)` の形式で呼び出します。ここで `addr` は呼び出す関数のアドレス、`argN` はその関数の N 番目の引数であり、python の整数、文字列、配列、または bitvector を指定できます。メモリを割り当ててオブジェクトへのポインターを実際に渡したい場合は、`angr.PointerWrapper("point to me!")` のように `PointerWrapper` でラップしてください。この API の結果はやや予測しにくい場合がありますが、現在改善に取り組んでいます。
+- `args` を介して引数のリストを、`env` を介して環境変数の辞書を `entry_state` と `full_init_state` に渡せます。これらの構造体の値には文字列またはビットベクタを指定でき、シミュレートされた実行における引数と環境として state にシリアライズされます。デフォルトの `args` は空のリストなので、解析対象のプログラムが少なくとも `argv[0]` を必要とする場合は、必ず指定してください。
+- `argc` を symbolic にしたい場合は、`entry_state` と `full_init_state` のコンストラクタに `argc` として symbolic bitvector を渡せます。ただし、この場合は、`args` に渡した引数の数を `argc` の値が超えられないよう、結果の state に constraint も追加する必要があります。
+- call state を使用するには、`.call_state(addr, arg1, arg2, ...)` の形式で呼び出します。ここで `addr` は呼び出す関数のアドレス、`argN` はその関数の N 番目の引数で、Python の整数、文字列、配列、またはビットベクタを指定できます。メモリを確保してオブジェクトへのポインタを実際に渡したい場合は、`angr.PointerWrapper("point to me!")` のように `PointerWrapper` でラップしてください。この API の結果は少し予測しにくい場合がありますが、現在対応を進めています。
 
-### BitVectors
+### ビットベクタ
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -134,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### Symbolic BitVectors と制約
+### Symbolic BitVectorsとConstraints
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -186,7 +186,7 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-さらに、`proj.hook_symbol(name, hook)` を使用し、最初の引数としてシンボル名を指定することで、シンボルが存在するアドレスにフックできます<sup>[[1]](#references)</sup>
+さらに、`proj.hook_symbol(name, hook)` を使用して、最初の引数にシンボル名を指定し、そのシンボルが存在するアドレスに hook を設定できます<sup>[[1]](#references)</sup>
 
 ## 例
 
