@@ -1,108 +1,108 @@
-# Değer-Odaklı Web3 Red Teaming (MITRE AADAPT)
+# Değer Odaklı Web3 Red Teaming (MITRE AADAPT)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) matrisi, altyapıyı değil dijital değeri manipüle eden saldırgan davranışlarını yakalar. Bunu bir tehdit-modelleme omurgası olarak ele alın: varlık mint edebilen, fiyatlayabilen, yetkilendirebilen veya yönlendirebilen her bileşeni listeleyin, bu temas noktalarını AADAPT tekniklerine eşleyin ve ardından ortamın geri döndürülemeyecek ekonomik kayba karşı direnip direnemeyeceğini ölçen red-team senaryoları tasarlayın.
+MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) matrisi, yalnızca altyapıyı değil, dijital değeri manipüle eden saldırgan davranışlarını kapsar. Bunu bir **threat-modeling omurgası** olarak ele alın: varlıkları mint edebilen, fiyatlandırabilen, yetkilendirebilen veya yönlendirebilen her bileşeni listeleyin, bu temas noktalarını AADAPT teknikleriyle eşleyin ve ardından ortamın geri döndürülemez ekonomik kayba dayanıp dayanamayacağını ölçen red-team senaryoları yürütün.
 
-## 1. Değer-taşıyan bileşenleri envanterleyin
-Değer durumunu etkileyebilecek her şeyi, zincir dışı olsa bile, haritalandırın.
+## 1. Değer taşıyan bileşenlerin envanterini çıkarın
+Off-chain olsa bile değer durumunu etkileyebilen her şeyi haritalandırın.<sup>[[1]](#references)</sup>
 
-- Custodial signing services (HSM/KMS clusters, Vault/KMaaS, signing APIs used by bots or back-office jobs). Anahtar ID'lerini, politikaları, otomasyon kimliklerini ve onay iş akışlarını kaydedin.
-- Admin & upgrade paths for contracts (proxy admins, governance timelocks, emergency pause keys, parameter registries). Kimlerin/neyin çağırabileceğini ve hangi çoğunluk veya gecikme altında olduğunu dahil edin.
-- On-chain protocol logic handling lending, AMMs, vaults, staking, bridges, or settlement rails. Varsaydıkları invariantları belgeleyin (oracle fiyatları, teminat oranları, rebalance cadences…).
-- Off-chain automation that builds transactions (market-making bots, CI/CD pipelines, cron jobs, serverless functions). Bunlar genellikle imza talep edebilen API anahtarları veya service principals tutar.
-- Oracles & data feeds (aggregator composition, quorum, deviation thresholds, update cadence). Otomatik risk mantığı tarafından güvenilen her upstream'i not alın.
-- Bridges and cross-chain routers (lock/mint contracts, relayers, settlement jobs) zincirleri veya custodial stack'leri birbirine bağlayan.
+- **Custodial signing services** (HSM/KMS kümeleri, Vault/KMaaS, botlar veya back-office işleri tarafından kullanılan signing API'leri). Key ID'leri, policy'leri, automation identity'lerini ve approval workflow'larını kaydedin.
+- Kontratlar için **admin ve upgrade yolları** (proxy admin'leri, governance timelock'ları, emergency pause key'leri, parameter registry'leri). Bunları kimin/ne tarafından ve hangi quorum veya delay altında çağırabildiğini ekleyin.
+- Lending, AMM, vault, staking, bridge veya settlement rail işlemlerini yöneten **on-chain protocol logic**. Bu bileşenlerin varsaydığı invariant'ları (oracle fiyatları, collateral oranları, rebalance sıklığı…) belgeleyin.
+- Transaction oluşturan **off-chain automation** (market-making bot'ları, CI/CD pipeline'ları, cron job'ları, serverless function'lar). Bunlar çoğu zaman signature talep edebilen API key'leri veya service principal'ları barındırır.
+- **Oracle'lar ve data feed'ler** (aggregator bileşimi, quorum, deviation threshold'ları, update sıklığı). Automated risk logic tarafından kullanılan her upstream kaynağı not edin.
+- Chain'leri veya custodial stack'leri birbirine bağlayan **bridge'ler ve cross-chain router'lar** (lock/mint contract'ları, relayer'lar, settlement job'ları).
 
-Teslimat: Varlıkların nasıl hareket ettiğini, kimin hareketi yetkilendirdiğini ve hangi dış sinyallerin iş mantığını etkilediğini gösteren bir değer-akış diyagramı.
+Teslimat: Varlıkların nasıl hareket ettiğini, hareketi kimin yetkilendirdiğini ve hangi external signal'ların business logic'i etkilediğini gösteren bir value-flow diagram.
 
-## 2. Bileşenleri AADAPT davranışlarına eşleyin
-AADAPT taksonomisini bileşen başına somut saldırı adaylarına çevirin.
+## 2. Bileşenleri AADAPT davranışlarıyla eşleyin
+AADAPT taxonomy'sini her bileşen için somut attack candidate'larına dönüştürün.<sup>[[1]](#references)</sup>
 
-| Component | Primary AADAPT focus |
+| Bileşen | Birincil AADAPT odağı |
 | --- | --- |
-| Signing/KMS estates | Credential theft, policy bypass, signing-abuse, governance takeover |
-| Oracles/feeds | Input poisoning, aggregation manipulation, deviation-threshold evasion |
-| On-chain protocols | Flash-loan economic manipulation, invariant breaking, parameter reconfiguration |
-| Automation pipelines | Compromised bot/CI identities, batch replay, unauthorized deployment |
-| Bridges/routers | Cross-chain evasion, rapid hop laundering, settlement desynchronization |
+| Signing/KMS estate'leri | Credential theft, policy bypass, signing-abuse, governance takeover |
+| Oracle'lar/feed'ler | Input poisoning, aggregation manipulation, deviation-threshold evasion |
+| On-chain protocol'ler | Flash-loan economic manipulation, invariant breaking, parameter reconfiguration |
+| Automation pipeline'ları | Compromised bot/CI identity'leri, batch replay, unauthorized deployment |
+| Bridge'ler/router'lar | Cross-chain evasion, rapid hop laundering, settlement desynchronization |
 
-Bu eşleme, sadece contract'ları değil, dolaylı olarak değeri yönlendirebilecek her kimliği/otomasyonu test etmenizi sağlar.
+Bu eşleme, yalnızca contract'ları değil, değeri dolaylı olarak yönlendirebilen her identity/automation bileşenini test etmenizi sağlar.
 
-## 3. Saldırganın yapılabilirliği vs. iş etkisine göre önceliklendirin
+## 3. Saldırganın uygulanabilirliği ile business impact'e göre önceliklendirin
 
-1. Operational weaknesses: açığa çıkmış CI credentials, fazla ayrıcalıklı IAM rolleri, yanlış yapılandırılmış KMS politikaları, rastgele imza talep edebilen otomasyon hesapları, bridge konfigürasyonlarına açık public bucket'lar vb.
-2. Value-specific weaknesses: kırılgan oracle parametreleri, çok taraflı onay olmadan upgrade edilebilen contract'lar, flash-loan hassas likidite, timelock'ları atlayan governance eylemleri.
+1. **Operational weakness'lar**: exposed CI credential'ları, fazla yetkili IAM role'leri, yanlış yapılandırılmış KMS policy'leri, arbitrary signature talep edebilen automation account'ları, bridge config'lerini içeren public bucket'lar vb.
+2. **Value-specific weakness'lar**: hassas oracle parameter'ları, multi-party approval olmadan upgrade edilebilen contract'lar, flash-loan'a duyarlı liquidity, timelock'ları bypass eden governance action'ları.
 
-Sıralamayı bir saldırgan gibi çalıştırın: bugün başarılı olabilecek operasyonel ayak izleriyle başlayın, sonra derin protokol/ekonomik manipülasyon yollarına ilerleyin.
+Kuyruğu bir adversary gibi yönetin: bugün başarılı olabilecek operational foothold'larla başlayın, ardından derin protocol/economic manipulation yollarına ilerleyin.<sup>[[1]](#references)</sup>
 
-## 4. Kontrollü, production-gerçekçi ortamlarda yürütün
-- Forked mainnets / isolated testnets: bytecode, storage ve likiditeyi çoğaltın ki flash-loan yolları, oracle driftleri ve bridge akışları gerçek fonlara dokunmadan uçtan uca çalışsın.
-- Blast-radius planning: bir senaryoyu patlatmadan önce circuit breaker'ları, pausable modülleri, rollback runbook'larını ve yalnızca test için admin anahtarlarını tanımlayın.
-- Stakeholder coordination: custodian'lar, oracle operator'ler, bridge partner'ları ve compliance'i bilgilendirin ki onların monitoring ekipleri trafiği beklesin.
-- Legal sign-off: simülasyonlar regüle edilmiş rayları aşabilecekse kapsamı, yetkilendirmeyi ve durdurma koşullarını belgeleyin.
+## 4. Kontrollü ve production-gerçekçi ortamlarda yürütün
+- **Forked mainnet'ler / isolated testnet'ler**: flash-loan path'lerinin, oracle drift'lerinin ve bridge flow'larının gerçek fonlara dokunmadan uçtan uca çalışması için bytecode'u, storage'ı ve liquidity'yi çoğaltın.<sup>[[1]](#references)</sup>
+- **Blast-radius planning**: bir senaryoyu patlatmadan önce circuit breaker'ları, pausable module'leri, rollback runbook'larını ve yalnızca testte kullanılacak admin key'lerini tanımlayın.
+- **Stakeholder coordination**: custodian'ları, oracle operator'larını, bridge partner'larını ve compliance ekiplerini bilgilendirin; böylece monitoring ekipleri trafiği bekler.
+- **Legal sign-off**: simülasyonların regulated rail'lere ulaşabileceği durumlarda kapsamı, yetkilendirmeyi ve stop condition'ları belgeleyin.
 
-## 5. AADAPT teknikleriyle hizalanmış telemetri
-Her senaryonun eyleme geçirilebilir tespit verisi üretmesi için telemetri akışlarını instrument edin.
+## 5. AADAPT teknikleriyle hizalanmış telemetry
+Her senaryonun kullanılabilir detection verisi üretmesi için telemetry stream'lerini instrument edin.<sup>[[1]](#references)</sup>
 
-- Chain-level traces: flash-loan paketlerini, reentrancy-benzeri yapıları ve cross-contract hop'ları yeniden oluşturmak için tam çağrı grafikleri, gas kullanımı, transaction nonce'ları, blok zaman damgaları.
-- Application/API logs: her on-chain tx'yi bir insan veya otomasyon kimliğiyle (session ID, OAuth client, API key, CI job ID) IP'ler ve auth yöntemleri ile bağlayın.
-- KMS/HSM logs: her imza için key ID, caller principal, policy sonucu, destination adres ve reason code'ları. Değişim pencerelerini ve yüksek riskli işlemleri baseline'layın.
-- Oracle/feed metadata: update başına veri kaynağı bileşimi, raporlanan değer, rolling average'lardan sapma, tetiklenen threshold'lar ve failover yolları.
-- Bridge/swap traces: zincirler arasında lock/mint/unlock event'lerini correlation ID'ler, chain ID'ler, relayer identity ve hop timing ile korele edin.
-- Anomaly markers: slippage spike'ları, anormal collateralization oranları, olağandışı gas yoğunluğu veya cross-chain velocity gibi türetilmiş metrikler.
+- **Chain-level trace'ler**: flash-loan bundle'larını, reentrancy-like structure'ları ve cross-contract hop'larını yeniden oluşturmak için full call graph'lar, gas kullanımı, transaction nonce'ları ve block timestamp'leri.
+- **Application/API log'ları**: her on-chain tx'i IP'ler ve auth method'larıyla birlikte bir human veya automation identity'sine (session ID, OAuth client, API key, CI job ID) bağlayın.
+- **KMS/HSM log'ları**: her signature için key ID, caller principal, policy sonucu, destination address ve reason code'ları. Change window'ları ve high-risk operation'ları baseline olarak belirleyin.
+- **Oracle/feed metadata'sı**: her update için data source bileşimi, bildirilen değer, rolling average'lardan sapma, tetiklenen threshold'lar ve kullanılan failover path'leri.
+- **Bridge/swap trace'leri**: chain'ler arasındaki lock/mint/unlock event'lerini correlation ID'ler, chain ID'ler, relayer identity'si ve hop timing ile ilişkilendirin.
+- **Anomaly marker'ları**: slippage spike'ları, anormal collateralization ratio'ları, unusual gas density veya cross-chain velocity gibi türetilmiş metric'ler.
 
-Her şeyi scenario ID'leri veya sentetik kullanıcı ID'leri ile tag'leyin ki analistler gözlemleri çalıştırılan AADAPT tekniği ile hizalayabilsin.
+Analistlerin observables'ı uygulanan AADAPT tekniğiyle eşleştirebilmesi için her şeyi scenario ID'leri veya synthetic user ID'leriyle etiketleyin.
 
-## 6. Purple-team döngüsü & olgunluk metrikleri
-1. Senaryoyu kontrollü ortamda çalıştırın ve tespitleri (alert'ler, dashboard'lar, responder'ların çağrılması) yakalayın.
-2. Her adımı zincir/app/KMS/oracle/bridge düzlemlerinde üretilen gözlemlerle birlikte belirli AADAPT tekniklerine eşleyin.
-3. Tespit hipotezleri oluşturun ve devreye alın (eşik kuralları, korelasyon aramaları, invariant kontrolleri).
-4. MTTD ve MTTC iş toleranslarını karşılayana kadar yeniden çalıştırın ve playbook'lar değer kaybını güvenilir şekilde durdurana dek iyileştirin.
+## 6. Purple-team döngüsü ve maturity metric'leri
+1. Senaryoyu kontrollü ortamda çalıştırın ve detection'ları (alert'ler, dashboard'lar, pager'a gönderilen responder bildirimleri) kaydedin.<sup>[[1]](#references)</sup>
+2. Her adımı belirli AADAPT teknikleriyle ve chain/app/KMS/oracle/bridge plane'lerinde üretilen observables ile eşleyin.
+3. Detection hypothesis'leri (threshold rule'ları, correlation search'leri, invariant check'leri) oluşturup deploy edin.
+4. Mean time to detect (MTTD) ve mean time to contain (MTTC) business tolerance'larını karşılayana ve playbook'lar value loss'u güvenilir biçimde durdurana kadar yeniden çalıştırın.
 
-Program olgunluğunu üç eksende takip edin:
-- Visibility: her kritik değer yolunun her düzlemde telemetriye sahip olması.
-- Coverage: önceliklendirilen AADAPT tekniklerinin uçtan uca ne oranda tatbik edildiği.
-- Response: irreversible kayıp olmadan önce contract'ları pause etme, anahtarları iptal etme veya akışları dondurma yeteneği.
+Program maturity'sini üç eksende izleyin:<sup>[[1]](#references)</sup>
+- **Visibility**: her kritik value path'in her plane'de telemetry'si bulunması.
+- **Coverage**: önceliklendirilen AADAPT tekniklerinin uçtan uca uygulanan oranı.
+- **Response**: geri döndürülemez kayıptan önce contract'ları pause etme, key'leri revoke etme veya flow'ları freeze etme becerisi.
 
-Tipik kilometre taşları: (1) tamamlanmış değer envanteri + AADAPT eşlemesi, (2) tespitlerle ilk uçtan uca senaryo, (3) kapsama alanını genişleten ve MTTD/MTTC'yi düşüren üç aylık purple-team döngüleri.
+Tipik kilometre taşları: (1) tamamlanmış value inventory + AADAPT mapping, (2) detection'ları uygulanmış ilk uçtan uca senaryo, (3) coverage'ı genişleten ve MTTD/MTTC'yi düşüren quarterly purple-team cycle'ları.<sup>[[1]](#references)</sup>
 
-## 7. Senaryo şablonları
-AADAPT davranışlarına doğrudan eşlenen simülasyonlar tasarlamak için bu tekrarlanabilir blueprint'leri kullanın.
+## 7. Senaryo template'leri
+AADAPT davranışlarıyla doğrudan eşleşen simülasyonlar tasarlamak için bu tekrarlanabilir blueprint'leri kullanın.<sup>[[1]](#references)</sup>
 
 ### Scenario A – Flash-loan economic manipulation
-- Objective: borrow transient capital inside one transaction to distort AMM prices/liquidity and trigger mispriced borrows, liquidations, or mints before repaying.
-- Execution:
-1. Fork the target chain and seed pools with production-like liquidity.
-2. Borrow large notional via flash loan.
-3. Perform calibrated swaps to cross price/threshold boundaries relied on by lending, vault, or derivative logic.
-4. Invoke the victim contract immediately after the distortion (borrow, liquidate, mint) and repay the flash loan.
-- Measurement: Invariant ihlali başarılı oldu mu? Slippage/price-deviation monitörleri, circuit breaker'lar veya governance pause hook'ları tetiklendi mi? Analitiklerin anormal gas/çağrı grafiği desenini ne kadar sürede işaretlediği?
+- **Objective**: tek bir transaction içinde geçici sermaye borçlanarak AMM fiyatlarını/liquidity'yi bozmak ve geri ödemeden önce yanlış fiyatlandırılmış borrow, liquidation veya mint işlemlerini tetiklemek.
+- **Execution**:
+1. Target chain'i fork edin ve pool'ları production benzeri liquidity ile seed edin.
+2. Flash loan aracılığıyla büyük bir notional borçlanın.
+3. Lending, vault veya derivative logic'inin dayandığı price/threshold boundary'lerini aşmak için kalibre edilmiş swap'ler gerçekleştirin.
+4. Distortion'ın hemen ardından victim contract'ı çağırın (borrow, liquidate, mint) ve flash loan'u geri ödeyin.
+- **Measurement**: Invariant violation başarılı oldu mu? Slippage/price-deviation monitor'ları, circuit breaker'lar veya governance pause hook'ları tetiklendi mi? Analytics'in abnormal gas/call graph pattern'ini işaretlemesi ne kadar sürdü?
 
 ### Scenario B – Oracle/data-feed poisoning
-- Objective: determine whether manipulated feeds can trigger destructive automated actions (mass liquidations, incorrect settlements).
-- Execution:
-1. In the fork/testnet, deploy a malicious feed or adjust aggregator weights/quorum/update cadence beyond tolerated deviation.
-2. Let dependent contracts consume the poisoned values and execute their standard logic.
-- Measurement: Feed seviyesinde out-of-band alert'ler, fallback oracle activation, min/max bound enforcement ve anomali başlangıcı ile operator yanıtı arasındaki gecikme.
+- **Objective**: manipulated feed'lerin destructive automated action'ları (mass liquidation, hatalı settlement) tetikleyip tetikleyemeyeceğini belirlemek.
+- **Execution**:
+1. Fork/testnet üzerinde malicious feed deploy edin veya aggregator weight'lerini/quorum'u/update cadence'i tolerated deviation'ın ötesine taşıyacak şekilde değiştirin.
+2. Bağımlı contract'ların poisoned value'ları tüketmesine ve standart logic'lerini çalıştırmasına izin verin.
+- **Measurement**: Feed-level out-of-band alert'leri, fallback oracle activation, min/max bound enforcement ve anomaly onset ile operator response arasındaki latency.
 
 ### Scenario C – Credential/signing abuse
-- Objective: test whether compromising a single signer or automation identity enables unauthorized upgrades, parameter changes, or treasury drains.
-- Execution:
-1. Enumerate identities with sensitive signing rights (operators, CI tokens, service accounts invoking KMS/HSM, multisig participants).
-2. Simulate compromise (re-use their credentials/keys within the lab scope).
-3. Attempt privileged actions: upgrade proxies, change risk parameters, mint/pause assets, or trigger governance proposals.
-- Measurement: KMS/HSM log'ları anomaly alert'leri (time-of-day, destination drift, burst of high-risk operations) yükseltiyor mu? Politika veya multisig eşikleri tek taraflı suistimali engelleyebiliyor mu? Throttle'lar/rate limit'ler veya ek onaylar uygulanıyor mu?
+- **Objective**: tek bir signer'ın veya automation identity'sinin compromise edilmesinin unauthorized upgrade, parameter change veya treasury drain işlemlerini mümkün kılıp kılmadığını test etmek.
+- **Execution**:
+1. Sensitive signing right'lara sahip identity'leri listeleyin (operator'lar, CI token'ları, KMS/HSM çağıran service account'lar, multisig participant'ları).
+2. Compromise'ı simüle edin (credential/key'lerini lab scope içinde yeniden kullanın).
+3. Privileged action'ları deneyin: proxy'leri upgrade edin, risk parameter'larını değiştirin, asset mint/pause işlemleri gerçekleştirin veya governance proposal'ları tetikleyin.
+- **Measurement**: KMS/HSM log'ları anomaly alert'leri (time-of-day, destination drift, high-risk operation burst'ü) oluşturuyor mu? Policy'ler veya multisig threshold'ları unilateral abuse'u engelleyebiliyor mu? Throttle/rate limit'leri veya additional approval'lar uygulanıyor mu?
 
 ### Scenario D – Cross-chain evasion & traceability gaps
-- Objective: evaluate how well defenders can trace and interdict assets rapidly laundered across bridges, DEX routers, and privacy hops.
-- Execution:
-1. Chain together lock/mint operations across common bridges, interleave swaps/mixers on each hop, and maintain per-hop correlation IDs.
-2. Accelerate transfers to stress monitoring latency (multi-hop within minutes/blocks).
-- Measurement: Telemetri + commercial chain analytics arasında olayları korelasyonlamak için geçen süre, yeniden inşa edilen yolun tamlığı, gerçek bir olayda dondurmak için tanımlanabilecek choke point'lerin tespiti ve anormal cross-chain velocity/value için alert doğruluğu.
+- **Objective**: defender'ların bridge'ler, DEX router'lar ve privacy hop'ları arasında hızla launder edilen asset'leri ne kadar iyi trace edip interdict edebildiğini değerlendirmek.
+- **Execution**:
+1. Common bridge'ler arasında lock/mint operation'larını zincirleyin, her hop'ta swap/mixer işlemlerini araya ekleyin ve hop başına correlation ID'leri koruyun.
+2. Monitoring latency'sini zorlamak için transfer'leri hızlandırın (dakikalar/block'lar içinde multi-hop).
+- **Measurement**: Telemetry + commercial chain analytics genelinde event'leri correlate etme süresi, yeniden oluşturulan path'in eksiksizliği, gerçek bir incident sırasında freeze için choke point'leri belirleyebilme ve abnormal cross-chain velocity/value için alert fidelity.
 
-## References
+## Kaynaklar
 
-- [MITRE AADAPT Framework as a Red Team Roadmap (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
+- [1] [MITRE AADAPT Framework as a Red Team Roadmap (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
 
 {{#include ../../banners/hacktricks-training.md}}

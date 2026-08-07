@@ -2,191 +2,191 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## CTF'lerde ne aranır
+## CTF'lerde ne aranmalı
 
 - **Mode misuse**: ECB patterns, CBC malleability, CTR/GCM nonce reuse.
-- **Padding oracles**: kötü padding için farklı hata/zamanlama davranışları.
-- **MAC confusion**: CBC-MAC'in değişken uzunluklu mesajlarla kullanılması veya MAC-then-encrypt hataları.
-- **XOR everywhere**: stream ciphers ve custom constructions genellikle keystream ile XOR'a indirgenir.
+- **Padding oracles**: hatalı padding için farklı hatalar/zamanlamalar.
+- **MAC confusion**: variable-length messages ile CBC-MAC kullanımı veya MAC-then-encrypt hataları.
+- **XOR everywhere**: stream ciphers ve custom constructions çoğunlukla keystream ile XOR işlemine indirgenir.
 
-## AES modları ve yanlış kullanımı
+## AES modes and misuse
 
 ### ECB: Electronic Codebook
 
-ECB leaks patterns: equal plaintext blocks → equal ciphertext blocks. That enables:
+ECB patterns'i leak eder: eşit plaintext blokları → eşit ciphertext blokları. Bu, şunları mümkün kılar:
 
 - Cut-and-paste / block reordering
-- Block deletion (if the format remains valid)
+- Block deletion (format geçerli kalıyorsa)
 
-Eğer plaintext'i kontrol edip ciphertext'i (veya cookies) gözlemleyebiliyorsanız, tekrarlı bloklar (örn. birçok `A`) oluşturup tekrarları arayın.
+Plaintext'i kontrol edebiliyor ve ciphertext'i (veya cookies) gözlemleyebiliyorsanız, tekrarlanan bloklar oluşturmaya çalışın (ör. çok sayıda `A`) ve tekrarları arayın.
 
 ### CBC: Cipher Block Chaining
 
-- CBC is **malleable**: `C[i-1]`'de bitleri değiştirmenin `P[i]`'de öngörülebilir bitleri değiştirmesi.
-- Sistem geçerli padding ile geçersiz padding'i ayırıyorsa, bir **padding oracle**'ınız olabilir.
+- CBC **malleable**'dır: `C[i-1]` içindeki bitleri değiştirmek, `P[i]` içindeki öngörülebilir bitleri değiştirir.
+- Sistem valid padding ile invalid padding arasında ayrım yapıyorsa, bir **padding oracle** sahibi olabilirsiniz.
 
 ### CTR
 
-CTR turns AES into a stream cipher: `C = P XOR keystream`.
+CTR, AES'i bir stream cipher'a dönüştürür: `C = P XOR keystream`.
 
-If a nonce/IV is reused with the same key:
+Bir nonce/IV aynı key ile yeniden kullanılırsa:
 
 - `C1 XOR C2 = P1 XOR P2` (classic keystream reuse)
-- With known plaintext, you can recover the keystream and decrypt others.
+- Known plaintext ile keystream'i kurtarabilir ve diğerlerini decrypt edebilirsiniz.
 
 **Nonce/IV reuse exploitation patterns**
 
-- Recover keystream wherever plaintext is known/guessable:
+- Plaintext'in bilindiği/tahmin edilebildiği yerlerde keystream'i kurtarın:
 
 ```text
 keystream[i..] = ciphertext[i..] XOR known_plaintext[i..]
 ```
 
-Apply the recovered keystream bytes to decrypt any other ciphertext produced with the same key+IV at the same offsets.
-- Highly structured data (e.g., ASN.1/X.509 certificates, file headers, JSON/CBOR) gives large known-plaintext regions. You can often XOR the ciphertext of the certificate with the predictable certificate body to derive keystream, then decrypt other secrets encrypted under the reused IV. See also [TLS & Certificates](../tls-and-certificates/README.md) for typical certificate layouts.
-- When multiple secrets of the **same serialized format/size** are encrypted under the same key+IV, field alignment leaks even without full known plaintext. Example: PKCS#8 RSA keys of the same modulus size place prime factors at matching offsets (~99.6% alignment for 2048-bit). XORing two ciphertexts under the reused keystream isolates `p ⊕ p'` / `q ⊕ q'`, which can be brute-recovered in seconds.
-- Default IVs in libraries (e.g., constant `000...01`) are a critical footgun: every encryption repeats the same keystream, turning CTR into a reused one-time pad.
+Kurtarılan keystream byte'larını, aynı key+IV ile aynı offset'lerde üretilen diğer ciphertext'leri decrypt etmek için uygulayın.
+- Highly structured data (ör. ASN.1/X.509 certificates, file headers, JSON/CBOR) geniş known-plaintext bölgeleri sağlar. Keystream'i elde etmek için çoğunlukla certificate ciphertext'ini predictable certificate body ile XOR edebilir, ardından reused IV altında encrypt edilmiş diğer secrets'ları decrypt edebilirsiniz. Typical certificate layouts için ayrıca [TLS & Certificates](../tls-and-certificates/README.md) bölümüne bakın.<sup>[[1]](#references)</sup>
+- Birden fazla secret aynı serialized format/size ile aynı key+IV altında encrypt edildiğinde, full known plaintext olmadan bile field alignment leak eder. Örnek: aynı modulus size'a sahip PKCS#8 RSA keys, prime factors'ı matching offsets'lere yerleştirir (2048-bit için ~%99.6 alignment). Reused keystream altında iki ciphertext'i XOR'lamak `p ⊕ p'` / `q ⊕ q'` değerlerini izole eder; bunlar saniyeler içinde brute-force ile kurtarılabilir.<sup>[[1]](#references)</sup>
+- Kütüphanelerdeki default IV'ler (ör. sabit `000...01`) kritik bir footgun'dır: her encryption aynı keystream'i tekrarlar ve CTR'yi reused one-time pad'e dönüştürür.<sup>[[1]](#references)</sup>
 
 **CTR malleability**
 
-- CTR provides confidentiality only: flipping bits in ciphertext deterministically flips the same bits in plaintext. Without an authentication tag, attackers can tamper data (e.g., tweak keys, flags, or messages) undetected.
-- Use AEAD (GCM, GCM-SIV, ChaCha20-Poly1305, etc.) and enforce tag verification to catch bit-flips.
+- CTR yalnızca confidentiality sağlar: ciphertext içindeki bitleri değiştirmek, plaintext'teki aynı bitleri deterministically değiştirir. Authentication tag olmadan saldırganlar verileri fark edilmeden tamper edebilir (ör. keys, flags veya messages üzerinde değişiklik yapabilir).
+- AEAD (GCM, GCM-SIV, ChaCha20-Poly1305 vb.) kullanın ve bit-flip'leri yakalamak için tag verification uygulayın.
 
 ### GCM
 
-GCM also breaks badly under nonce reuse. If the same key+nonce is used more than once, you typically get:
+GCM de nonce reuse durumunda ciddi şekilde bozulur. Aynı key+nonce birden fazla kez kullanılırsa genellikle şunları elde edersiniz:
 
-- Keystream reuse for encryption (like CTR), enabling plaintext recovery when any plaintext is known.
-- Loss of integrity guarantees. Depending on what is exposed (multiple message/tag pairs under the same nonce), attackers may be able to forge tags.
+- Encryption için keystream reuse (CTR gibi); herhangi bir plaintext bilindiğinde plaintext recovery mümkün olur.
+- Integrity guarantees kaybı. Neyin açığa çıktığına (aynı nonce altındaki birden fazla message/tag pair) bağlı olarak saldırganlar tag forge edebilir.
 
-Operasyonel öneriler:
+Operational guidance:
 
-- Treat "nonce reuse" in AEAD as a critical vulnerability.
-- Misuse-resistant AEADs (e.g., GCM-SIV) reduce nonce-misuse fallout but still require unique nonces/IVs.
-- If you have multiple ciphertexts under the same nonce, start by checking `C1 XOR C2 = P1 XOR P2` style relations.
+- AEAD'de "nonce reuse" durumunu critical vulnerability olarak değerlendirin.
+- Misuse-resistant AEAD'ler (ör. GCM-SIV), nonce-misuse etkilerini azaltır ancak yine de unique nonces/IVs gerektirir.
+- Aynı nonce altında birden fazla ciphertext varsa, `C1 XOR C2 = P1 XOR P2` tarzı ilişkileri kontrol ederek başlayın.
 
-### Araçlar
+### Tools
 
-- CyberChef for quick experiments: https://gchq.github.io/CyberChef/
-- Python: `pycryptodome` for scripting
+- Hızlı denemeler için CyberChef: https://gchq.github.io/CyberChef/
+- Python: scripting için `pycryptodome`
 
 ## ECB exploitation patterns
 
-ECB (Electronic Code Book) encrypts each block independently:
+ECB (Electronic Code Book) her block'u bağımsız olarak encrypt eder:
 
-- equal plaintext blocks → equal ciphertext blocks
-- this leaks structure and enables cut-and-paste style attacks
+- eşit plaintext blokları → eşit ciphertext blokları
+- bu durum structure'ı leak eder ve cut-and-paste style attacks'i mümkün kılar
 
-![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
+![ECB mode decryption block diagram](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
 ### Detection idea: token/cookie pattern
 
-If you login several times and **always get the same cookie**, the ciphertext may be deterministic (ECB or fixed IV).
+Birden fazla kez login oluyor ve **her zaman aynı cookie'yi alıyorsanız**, ciphertext deterministic olabilir (ECB veya fixed IV).
 
-If you create two users with mostly identical plaintext layouts (e.g., long repeated characters) and see repeated ciphertext blocks at the same offsets, ECB is a prime suspect.
+Mostly identical plaintext layouts'a sahip iki user oluşturur (ör. uzun repeated characters) ve aynı offset'lerde tekrarlanan ciphertext blocks görürseniz, ECB güçlü bir şüphelidir.
 
 ### Exploitation patterns
 
 #### Removing entire blocks
 
-If the token format is something like `<username>|<password>` and the block boundary aligns, you can sometimes craft a user so the `admin` block appears aligned, then remove preceding blocks to obtain a valid token for `admin`.
+Token formatı `<username>|<password>` gibiyse ve block boundary hizalanıyorsa, `admin` block'unun aligned görünmesini sağlayacak bir user craft edebilir, ardından preceding blocks'ları kaldırarak `admin` için valid bir token elde edebilirsiniz.
 
 #### Moving blocks
 
-If the backend tolerates padding/extra spaces (`admin` vs `admin    `), you can:
+Backend padding/extra spaces'ı (`admin` ile `admin    ` arasındaki farkı) tolere ediyorsa:
 
-- Align a block that contains `admin   `
-- Swap/reuse that ciphertext block into another token
+- `admin   ` içeren bir block'u align edin
+- Bu ciphertext block'unu başka bir token'a swap/reuse edin
 
 ## Padding Oracle
 
 ### What it is
 
-In CBC mode, if the server reveals (directly or indirectly) whether decrypted plaintext has **valid PKCS#7 padding**, you can often:
+CBC mode'da server, decrypted plaintext'in **valid PKCS#7 padding** içerip içermediğini doğrudan veya dolaylı olarak açıklıyorsa çoğunlukla şunları yapabilirsiniz:
 
-- Decrypt ciphertext without the key
-- Encrypt chosen plaintext (forge ciphertext)
+- Key olmadan ciphertext'i decrypt etmek
+- Chosen plaintext encrypt etmek (ciphertext forge etmek)
 
-The oracle can be:
+Oracle şunlardan biri olabilir:
 
-- A specific error message
-- A different HTTP status / response size
-- A timing difference
+- Specific error message
+- Farklı bir HTTP status / response size
+- Timing difference
 
 ### Practical exploitation
 
-PadBuster is the classic tool:
+PadBuster klasik tool'dur:
 
 {{#ref}}
 https://github.com/AonCyberLabs/PadBuster
 {{#endref}}
 
-Example:
+Örnek:
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 16 \
 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
 ```
 Notlar:
 
-- Blok boyutu genellikle `16`'dır (AES).
-- `-encoding 0` Base64 anlamına gelir.
-- Eğer oracle belirli bir string ise `-error` kullanın.
+- Block size AES için genellikle `16` olur.
+- `-encoding 0`, Base64 anlamına gelir.
+- Oracle belirli bir string ise `-error` kullanın.
 
-### Why it works
+### Neden çalışır
 
-CBC decryption computes `P[i] = D(C[i]) XOR C[i-1]`. `C[i-1]` içindeki byte'ları değiştirip padding'in geçerli olup olmadığını izleyerek `P[i]`'yi byte byte geri elde edebilirsiniz.
+CBC decryption, `P[i] = D(C[i]) XOR C[i-1]` hesaplamasını yapar. `C[i-1]` içindeki byte'ları değiştirip padding'in geçerli olup olmadığını gözlemleyerek `P[i]` değerini byte byte kurtarabilirsiniz.
 
-## Bit-flipping in CBC
+## CBC'de bit flipping
 
-Padding oracle olmadan bile, CBC değiştirilebilir (malleable). Eğer ciphertext bloklarını değiştirebiliyorsanız ve uygulama decrypt edilmiş plaintext'i yapılandırılmış veri olarak kullanıyorsa (ör. `role=user`), belirli bitleri çevirerek sonraki bloktaki seçili plaintext byte'larını istenen pozisyonda değiştirebilirsiniz.
+Padding oracle olmadan da CBC malleable'dır. Ciphertext block'larını değiştirebiliyor ve uygulama decrypted plaintext'i yapılandırılmış veri olarak kullanıyorsa (ör. `role=user`), sonraki block'ta seçilen plaintext byte'larını değiştirmek için belirli bit'leri flip edebilirsiniz.
 
-Tipik CTF pattern:
+Yaygın CTF pattern'i:
 
 - Token = `IV || C1 || C2 || ...`
-- `C[i]` içindeki byte'ları siz kontrol ediyorsunuz
-- Hedefiniz `P[i+1]` içindeki plaintext byte'larıdır çünkü `P[i+1] = D(C[i+1]) XOR C[i]`
+- `C[i]` içindeki byte'ları kontrol edersiniz
+- `P[i+1]` içindeki plaintext byte'larını hedeflersiniz; çünkü `P[i+1] = D(C[i+1]) XOR C[i]`
 
-Bu tek başına confidentiality ihlali değildir, ancak integrity eksik olduğunda yaygın bir privilege-escalation primitive'dir.
+Bu tek başına confidentiality'nin kırılması değildir, ancak integrity eksik olduğunda yaygın bir privilege-escalation primitive'idir.
 
 ## CBC-MAC
 
-CBC-MAC yalnızca belirli koşullar altında güvenlidir (özellikle **sabit-uzunluklu mesajlar** ve doğru domain ayrımı).
+CBC-MAC yalnızca belirli koşullar altında güvenlidir (özellikle **sabit uzunluktaki mesajlar** ve doğru domain separation).
 
-### Classic variable-length forgery pattern
+### Klasik variable-length forgery pattern'i
 
 CBC-MAC genellikle şu şekilde hesaplanır:
 
 - IV = 0
 - `tag = last_block( CBC_encrypt(key, message, IV=0) )`
 
-Eğer seçtiğiniz mesajlar için tag'lar alabiliyorsanız, CBC'nin blokları nasıl zincirlediğini kullanarak anahtarı bilmeden birleştirme (veya ilgili yapı) için sıklıkla bir tag oluşturabilirsiniz.
+Seçtiğiniz mesajlar için tag elde edebiliyorsanız, CBC'nin block'ları birbirine bağlama şeklinden yararlanarak key'i bilmeden bir concatenation (veya ilişkili bir construction) için tag oluşturabilirsiniz.
 
-Bu durum genellikle username veya role'u CBC-MAC ile MAC'leyen CTF cookie/token'larında görülür.
+Bu durum, username veya role değerlerini CBC-MAC ile MAC'leyen CTF cookie/token'larında sıkça görülür.
 
-### Safer alternatives
+### Daha güvenli alternatifler
 
 - HMAC (SHA-256/512) kullanın
-- CMAC (AES-CMAC) doğru şekilde kullanın
-- Mesaj uzunluğunu / domain separation'ı dahil edin
+- CMAC'i (AES-CMAC) doğru şekilde kullanın
+- Mesaj uzunluğunu / domain separation ekleyin
 
-## Stream ciphers: XOR and RC4
+## Stream ciphers: XOR ve RC4
 
-### The mental model
+### Zihinsel model
 
-Çoğu stream cipher durumu şu ifadeye indirgenir:
+Çoğu stream cipher durumu şu modele indirgenir:
 
 `ciphertext = plaintext XOR keystream`
 
-Yani:
+Buna göre:
 
-- Eğer plaintext'i biliyorsanız, keystream'i geri elde edersiniz.
-- Eğer keystream yeniden kullanılıyorsa (aynı key+nonce), `C1 XOR C2 = P1 XOR P2`.
+- Plaintext'i biliyorsanız keystream'i kurtarırsınız.
+- Keystream yeniden kullanılırsa (aynı key+nonce), `C1 XOR C2 = P1 XOR P2`.
 
 ### XOR-based encryption
 
-Pozisyon `i`'deki herhangi bir plaintext segmentini biliyorsanız, keystream byte'larını geri elde edip o pozisyonlardaki diğer ciphertext'leri çözebilirsiniz.
+`i` konumundaki herhangi bir plaintext segmentini biliyorsanız keystream byte'larını kurtarabilir ve diğer ciphertext'leri aynı konumlarda decrypt edebilirsiniz.
 
-Autosolvers:
+Autosolver'lar:
 
 - [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 
@@ -194,9 +194,9 @@ Autosolvers:
 
 RC4 bir stream cipher'dır; encrypt/decrypt aynı işlemdir.
 
-Aynı anahtar altında bilinen plaintext'in RC4 şifrelenmesini elde edebiliyorsanız, keystream'i geri elde edip aynı uzunluk/offset'teki diğer mesajları çözebilirsiniz.
+Aynı key altında bilinen plaintext'in RC4 encryption'ını elde edebiliyorsanız keystream'i kurtarabilir ve aynı uzunlukta/offset'teki diğer mesajları decrypt edebilirsiniz.
 
-Reference writeup (HTB Kryptos):
+Referans writeup (HTB Kryptos):
 
 {{#ref}}
 https://0xrick.github.io/hack-the-box/kryptos/
@@ -204,6 +204,6 @@ https://0xrick.github.io/hack-the-box/kryptos/
 
 ## References
 
-- [Trail of Bits – Carelessness versus craftsmanship in cryptography](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
+- [1] [Trail of Bits – Carelessness versus craftsmanship in cryptography](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,13 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Mutation testing, sözleşme koduna sistematik olarak küçük değişiklikler (mutants) ekleyip test setini yeniden çalıştırarak "testlerinizi test eder". Bir test başarısız olursa, mutant öldürülür. Testler yine de geçerse, mutant hayatta kalır ve line/branch coverage ile tespit edilemeyen bir kör noktayı ortaya çıkarır.
+Mutation testing, sözleşme koduna sistematik olarak küçük değişiklikler (mutant'lar) uygulayıp test paketini yeniden çalıştırarak "testlerinizi test eder". Bir test başarısız olursa mutant öldürülür. Testler hâlâ başarılı olursa mutant hayatta kalır ve line/branch coverage'ın tespit edemediği bir kör noktayı ortaya çıkarır.
 
-Temel fikir: Coverage, kodun çalıştırıldığını gösterir; mutation testing ise davranışın gerçekten assert edilip edilmediğini gösterir.
+Temel fikir: Coverage, kodun çalıştırıldığını gösterir; mutation testing ise davranışın gerçekten doğrulanıp doğrulanmadığını gösterir.<sup>[[2]](#references)</sup>
 
-## Why coverage can deceive
+## Coverage neden yanıltabilir?
 
-Bu basit threshold kontrolünü düşünün:
+Şu basit eşik kontrolünü düşünün:
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 if (deposit >= 1 ether) {
@@ -18,154 +18,154 @@ return false;
 }
 }
 ```
-Sadece eşik altındaki ve eşik üstündeki bir değeri kontrol eden unit tests, eşitlik sınırını (==) doğrulamayı atlayarak %100 line/branch coverage elde edebilir. `deposit >= 2 ether` için yapılan bir refactor bu tür tests'i yine geçebilir ve protocol logic'i sessizce bozabilir.
+Yalnızca eşik değerinin altında ve üstünde bir değeri kontrol eden Unit testleri, eşitlik sınırını (`==`) doğrulamadan %100 satır/dal kapsamına ulaşabilir. `deposit >= 2 ether` ifadesine yapılacak bir refactor, bu testlerin yine de başarılı olmasını sağlayarak protokol mantığını sessizce bozabilir.<sup>[[2]](#references)</sup>
 
-Mutation testing, condition'ı mutate edip tests'in fail olmasını doğrulayarak bu boşluğu ortaya çıkarır.
+Mutation testing, koşulu mutate ederek ve testlerin başarısız olduğunu doğrulayarak bu boşluğu ortaya çıkarır.
 
-Smart contracts için surviving mutants çoğu zaman şu eksik kontrollerle eşleşir:
-- Authorization ve role sınırları
-- Accounting/value-transfer invariants
-- Revert koşulları ve failure paths
-- Boundary conditions (`==`, zero values, empty arrays, max/min values)
+Smart contract'lar için hayatta kalan mutant'lar sıklıkla şu konulardaki eksik kontrollerle eşleşir:
+- Authorization ve rol sınırları
+- Muhasebe/değer transferi invariant'ları
+- Revert koşulları ve hata yolları
+- Sınır koşulları (`==`, sıfır değerler, boş diziler, maksimum/minimum değerler)
 
-## En yüksek security signal'a sahip mutation operators
+## En yüksek security sinyaline sahip mutation operator'ları
 
-Contract auditing için faydalı mutation sınıfları:
-- **High severity**: execute edilmemiş paths'i ortaya çıkarmak için statements'i `revert()` ile değiştirin
-- **Medium severity**: doğrulanmamış side effects'i açığa çıkarmak için satırları yorum satırı yapın / logic'i kaldırın
-- **Low severity**: `>=` -> `>` veya `+` -> `-` gibi ince operator veya constant değişimleri
-- Diğer yaygın edits: assignment replacement, boolean flips, condition negation ve type changes
+Contract auditing için kullanışlı mutation sınıfları:<sup>[[1]](#references)[[2]](#references)</sup>
+- **Yüksek önem**: Çalıştırılmayan yolları ortaya çıkarmak için ifadeleri `revert()` ile değiştirme
+- **Orta önem**: Doğrulanmamış side effect'leri ortaya çıkarmak için satırları comment out etme / mantığı kaldırma
+- **Düşük önem**: `>=` -> `>` veya `+` -> `-` gibi ince operator ya da constant değişiklikleri
+- Diğer yaygın düzenlemeler: assignment değiştirme, boolean flip'leri, condition negation ve type değişiklikleri
 
-Pratik hedef: anlamlı tüm mutants'ları öldürmek ve alakasız veya semantically equivalent olan survivors için açıkça gerekçe sunmak.
+Pratik hedef: Anlamlı tüm mutant'ları kill etmek ve alakasız veya semantically equivalent olan hayatta kalan mutant'ları açıkça gerekçelendirmektir.
 
-## Neden syntax-aware mutation regex'ten daha iyidir
+## Syntax-aware mutation neden regex'ten daha iyidir
 
-Eski mutation engines regex veya line-oriented rewrites'a dayanıyordu. Bu çalışır, ama önemli sınırlamaları vardır:
-- Multi-line statements güvenli şekilde mutate etmek zordur
-- Language structure anlaşılmaz, bu yüzden comments/tokens yanlış hedeflenebilir
-- Zayıf bir line üzerinde her olası variant'ı üretmek büyük miktarda runtime israf eder
+Daha eski mutation engine'leri regex veya satır odaklı yeniden yazımlara dayanıyordu. Bu işe yarar, ancak önemli sınırlamaları vardır:<sup>[[1]](#references)</sup>
+- Çok satırlı ifadeleri güvenli bir şekilde mutate etmek zordur
+- Dil yapısı anlaşılmadığından comment/token'lar hatalı şekilde hedeflenebilir
+- Zayıf bir satır üzerinde mümkün olan her varyantı üretmek, runtime'ın büyük miktarının boşa harcanmasına neden olur
 
-AST- veya Tree-sitter-tabanlı tooling, raw lines yerine structured nodes'u hedefleyerek bunu iyileştirir:
-- **slither-mutate** Slither'ın Solidity AST'sini kullanır
-- **mewt** language-agnostic bir core olarak Tree-sitter kullanır
-- **MuTON**, `mewt` üzerine kurulur ve FunC, Tolk ve Tact gibi TON dilleri için first-class support ekler
+AST veya Tree-sitter tabanlı tooling, ham satırlar yerine yapılandırılmış node'ları hedefleyerek bunu iyileştirir:<sup>[[1]](#references)</sup>
+- **slither-mutate**, Slither'ın Solidity AST'sini kullanır
+- **mewt**, language-agnostic bir core olarak Tree-sitter kullanır
+- **MuTON**, `mewt` üzerine kuruludur ve FunC, Tolk ve Tact gibi TON dilleri için first-class support ekler
 
-Bu, multi-line construct'ları ve expression-level mutations'ı regex-only yaklaşımlardan çok daha güvenilir hale getirir.
+Bu, çok satırlı construct'ları ve expression-level mutation'ları regex-only yaklaşımlara kıyasla çok daha güvenilir hale getirir.
 
 ## slither-mutate ile mutation testing çalıştırma
 
-Requirements: Slither v0.10.2+.
+Gereksinimler: Slither v0.10.2+.
 
-- Options ve mutators listesini çıkarın:
+- Seçenekleri ve mutator'ları listeleme:
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Foundry örneği (sonuçları yakala ve tam bir log tut):
+- Foundry örneği (sonuçları yakalayın ve tam bir log tutun):<sup>[[2]](#references)</sup>
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
-- Foundry kullanmıyorsanız, `--test-cmd` yerine testleri nasıl çalıştırıyorsanız onu yazın (ör. `npx hardhat test`, `npm test`).
+- Foundry kullanmıyorsanız, `--test-cmd` seçeneğini testleri çalıştırma yönteminizle değiştirin (ör. `npx hardhat test`, `npm test`).
 
-Artifacts varsayılan olarak `./mutation_campaign` içinde saklanır. Yakalanmayan (surviving) mutantlar inceleme için oraya kopyalanır.
+Artifacts varsayılan olarak `./mutation_campaign` konumunda depolanır. Yakalanmayan (hayatta kalan) mutantlar incelenmek üzere buraya kopyalanır.<sup>[[5]](#references)</sup>
 
 ### Çıktıyı anlama
 
-Rapor satırları şöyle görünür:
+Rapor satırları şu şekilde görünür:
 ```text
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
-- Köşeli parantez içindeki tag, mutator alias’ıdır (ör. `CR` = Comment Replacement).
-- `UNCAUGHT`, testlerin mutated behavior altında geçtiği anlamına gelir → missing assertion.
+- Köşeli parantez içindeki tag, mutator alias'ıdır (ör. `CR` = Comment Replacement).
+- `UNCAUGHT`, mutant davranışı altında testlerin geçtiği anlamına gelir → eksik assertion.
 
-## Runtime’ı azaltma: etkili mutants’ları önceliklendirin
+## Çalışma süresini azaltma: etkili mutantlara öncelik verme
 
-Mutation kampanyaları saatler veya günler sürebilir. Maliyeti azaltmak için ipuçları:
-- Scope: Önce yalnızca kritik contracts/directory’lerden başlayın, sonra genişletin.
-- Mutators’ı önceliklendirin: Bir satırdaki yüksek öncelikli mutant hayatta kalırsa (ör. `revert()` veya comment-out), o satır için daha düşük öncelikli varyantları atlayın.
-- İki aşamalı kampanyalar kullanın: önce odaklı/hızlı testleri çalıştırın, sonra sadece uncaught mutants’ları full suite ile yeniden test edin.
-- Mümkünse mutation targets’ı belirli test commands ile eşleştirin (ör. auth code -> auth tests).
-- Zaman kısıtlıysa kampanyaları yüksek/orta severity mutant’larla sınırlayın.
-- Runner’ınız destekliyorsa testleri paralelleştirin; dependencies/builds için cache kullanın.
-- Fail-fast: bir değişiklik assertion gap’i açıkça gösteriyorsa erken durun.
+Mutation campaign'ler saatler veya günler sürebilir. Maliyeti azaltmak için ipuçları:<sup>[[1]](#references)[[2]](#references)</sup>
+- Kapsam: Önce yalnızca kritik contract/directory'lerle başlayın, ardından kapsamı genişletin.
+- Mutator'lara öncelik verin: Bir satırdaki yüksek öncelikli mutant hayatta kalırsa (örneğin `revert()` veya comment-out), o satır için daha düşük öncelikli varyantları atlayın.
+- İki aşamalı campaign'ler kullanın: Önce odaklanmış/hızlı testleri çalıştırın, ardından yalnızca yakalanmamış mutantları full suite ile yeniden test edin.
+- Mümkün olduğunda mutation target'larını belirli test command'leriyle eşleyin (örneğin auth code -> auth tests).
+- Zaman kısıtlıysa campaign'leri high/medium severity mutant'larla sınırlayın.
+- Runner destekliyorsa testleri paralel çalıştırın; dependency/build'leri cache'leyin.
+- Fail-fast: Bir değişiklik assertion gap'i açıkça gösterdiğinde erken durun.
 
-Runtime hesabı acımasızdır: `1000 mutants x 5-minute tests ~= 83 hours`, bu yüzden kampanya tasarımı mutator’ın kendisi kadar önemlidir.
+Çalışma süresi hesabı acımasızdır: `1000 mutants x 5-minute tests ~= 83 hours`; bu nedenle campaign tasarımı, mutator'ın kendisi kadar önemlidir.
 
-## Kalıcı kampanyalar ve ölçekli triage
+## Kalıcı campaign'ler ve geniş ölçekte triage
 
-Eski workflow’ların bir zayıflığı, sonuçları yalnızca `stdout`’a dökmeleridir. Uzun kampanyalarda bu, pause/resume, filtreleme ve review’u zorlaştırır.
+Daha eski workflow'ların bir zayıflığı, sonuçları yalnızca `stdout`'a dökmeleridir. Uzun campaign'lerde bu durum pause/resume, filtering ve review işlemlerini zorlaştırır.<sup>[[1]](#references)</sup>
 
-`mewt`/`MuTON` bunu, mutants ve outcomes’ları SQLite-backed campaigns içinde saklayarak iyileştirir. Faydaları:
-- İlerlemeyi kaybetmeden uzun çalışmaları duraklatıp devam ettirebilme
-- Belirli bir file veya mutation class içindeki sadece uncaught mutants’ları filtreleme
-- Review tooling için sonuçları SARIF’e export/translate etme
-- AI-assisted triage’a ham terminal logs yerine daha küçük, filtrelenmiş result sets verme
+`mewt`/`MuTON`, mutant'ları ve sonuçları SQLite-backed campaign'lerde saklayarak bunu iyileştirir. Faydaları:<sup>[[1]](#references)</sup>
+- Uzun çalışmaları ilerlemeyi kaybetmeden pause ve resume etme
+- Belirli bir file veya mutation class içindeki yalnızca yakalanmamış mutantları filtreleme
+- Sonuçları review tooling için SARIF'e export/translate etme
+- AI-assisted triage'a raw terminal log'ları yerine daha küçük ve filtrelenmiş result set'leri sağlama
 
-Kalıcı sonuçlar, mutation testing tek seferlik manuel review yerine audit pipeline’ın bir parçası haline geldiğinde özellikle faydalıdır.
+Kalıcı sonuçlar, mutation testing tek seferlik manual review yerine bir audit pipeline'ın parçası olduğunda özellikle kullanışlıdır.
 
-## Hayatta kalan mutants’lar için triage workflow’u
+## Hayatta kalan mutantlar için triage workflow'u
 
-1) Mutated line ve behavior’ı inceleyin.
-- Mutated line’ı uygulayıp odaklı bir test çalıştırarak yerelde yeniden üretin.
+1) Mutated line'ı ve davranışı inceleyin.
+- Mutated line'ı uygulayıp focused test çalıştırarak local ortamda yeniden üretin.
 
-2) Testleri yalnızca return values değil, state’i de assert edecek şekilde güçlendirin.
-- Equality-boundary kontrolleri ekleyin (ör. threshold `==` test edin).
-- Post-conditions’ları assert edin: balances, total supply, authorization effects ve emitted events.
+2) Testleri yalnızca return value'ları değil, state'i de assert edecek şekilde güçlendirin.
+- Equality boundary kontrolleri ekleyin (ör. threshold `==` değerini test edin).
+- Post-condition'ları assert edin: balances, total supply, authorization effects ve emitted events.
 
-3) Fazla permissive mocks’ları gerçekçi behavior ile değiştirin.
-- Mocks’un transfers, failure paths ve on-chain gerçekleşen event emissions’ları enforce ettiğinden emin olun.
+3) Aşırı permissive mock'ları realistic behavior ile değiştirin.
+- Mock'ların on-chain gerçekleşen transfer'leri, failure path'lerini ve event emission'larını enforce ettiğinden emin olun.
 
-4) Fuzz tests için invariants ekleyin.
-- Örn. value conservation, negative olmayan balances, authorization invariants, uygun olduğu yerlerde monotonic supply.
+4) Fuzz test'leri için invariant'lar ekleyin.
+- Örn. value conservation, non-negative balances, authorization invariant'ları ve uygun olduğunda monotonic supply.
 
-5) Gerçek positives ile semantic no-op’ları ayırın.
-- Örnek: `x > 0` -> `x != 0`, `x` unsigned ise anlamsızdır.
+5) True positive'ları semantic no-op'lerden ayırın.
+- Örnek: `x > 0` -> `x != 0`, `x` unsigned olduğunda anlamsızdır.
 
-6) Survivors öldürülene veya açıkça gerekçelendirilene kadar kampanyayı yeniden çalıştırın.
+6) Survivor'lar öldürülene veya açıkça gerekçelendirilene kadar campaign'i yeniden çalıştırın.
 
-## Case study: eksik state assertions’ları ortaya çıkarma (Arkis protocol)
+## Case study: eksik state assertion'larını ortaya çıkarma (Arkis protocol)
 
-Arkis DeFi protocol’ünün audit’i sırasında yapılan bir mutation campaign şu survivors’ları ortaya çıkardı:
+Arkis DeFi protocol'ünün audit'i sırasında gerçekleştirilen bir mutation campaign, şu survivor'lar gibi sonuçları ortaya çıkardı:<sup>[[2]](#references)[[3]](#references)</sup>
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Atamanın yorum satırına alınması testleri bozmadı; bu da eksik post-state assertions olduğunu kanıtlıyor. Kök neden: kod, gerçek token transferlerini doğrulamak yerine kullanıcı kontrollü bir `_cmd.value` değerine güvendi. Bir saldırgan, beklenen ve gerçek transferleri desynchronize ederek fonları drain edebilirdi. Sonuç: protokol solvency için yüksek şiddette risk.
+Atamanın yorum satırına alınması testleri bozmadı; bu da eksik post-state assertion'larının bulunduğunu kanıtladı. Kök neden: kod, gerçek token transferlerini doğrulamak yerine kullanıcı tarafından kontrol edilen `_cmd.value` değerine güveniyordu. Bir saldırgan, beklenen ve gerçek transferleri senkron dışına çıkararak fonları boşaltabilirdi. Sonuç: protocol solvency açısından yüksek önem dereceli risk.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Guidance: Değer transferlerini, accounting’i veya access control’u etkileyen survivors’ları öldürülene kadar high-risk olarak ele alın.
+Yol gösterici ilke: Value transfer'larını, accounting'i veya access control'ü etkileyen ve hayatta kalan mutantları, etkisiz hale getirilene kadar yüksek riskli kabul edin.
 
-## Her mutantı öldürmek için körlemesine test üretmeyin
+## Her mutantı etkisiz hale getirmek için körü körüne test üretmeyin
 
-Mutation-driven test generation, mevcut implementation yanlışsa geri tepebilir. Örnek: `priority >= 2` ifadesini `priority > 2` olarak mutating davranışı değiştirir, ancak doğru fix her zaman " `priority == 2` için bir test yaz" değildir. Bu davranışın kendisi bug olabilir.
+Mutation-driven test generation, mevcut implementation hatalıysa ters tepebilir. Örneğin `priority >= 2` ifadesini `priority > 2` olarak mutate etmek davranışı değiştirir; ancak doğru çözüm her zaman "`priority == 2` için bir test yazmak" değildir. Bu davranışın kendisi de bug olabilir.<sup>[[1]](#references)</sup>
 
 Daha güvenli workflow:
-- Surviving mutants’ları ambiguous requirements’ları belirlemek için kullanın
-- Beklenen davranışı specs, protocol docs veya reviewers’dan doğrulayın
-- Ancak ondan sonra bu davranışı test/invariant olarak encode edin
+- Hayatta kalan mutantları belirsiz gereksinimleri belirlemek için kullanın
+- Beklenen davranışı spec'lerden, protocol dokümanlarından veya reviewer'lardan doğrulayın
+- Ancak bundan sonra davranışı bir test/invariant olarak kodlayın
 
-Aksi halde, implementation kazalarını test suite içine hard-code eder ve yanlış bir güven hissi kazanırsınız.
+Aksi takdirde implementation kazalarını test suite içine sabitleme ve yanlış güven kazanma riskiyle karşılaşırsınız.
 
 ## Pratik checklist
 
 - Hedefli bir campaign çalıştırın:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Regex-only mutation yerine mümkün olduğunda syntax-aware mutators (AST/Tree-sitter) tercih edin.
-- Survivors’ları triage edin ve mutating davranış altında başarısız olacak tests/invariants yazın.
-- Balances, supply, authorizations ve events için assertions ekleyin.
-- Boundary tests ekleyin (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
-- Gerçekçi olmayan mocks’ları değiştirin; failure modes’u simüle edin.
-- Tooling destekliyorsa results’ları persist edin ve triage öncesi uncaught mutants’ları filtreleyin.
-- Runtime’ı yönetilebilir tutmak için iki aşamalı veya target başına campaign’ler kullanın.
-- Tüm mutants öldürülene ya da comments ve rationale ile justified edilene kadar iterate edin.
+- Kullanılabilir olduğunda regex-only mutation yerine syntax-aware mutator'ları (AST/Tree-sitter) tercih edin.
+- Hayatta kalan mutantları triage edin ve mutate edilmiş davranış altında başarısız olacak testler/invariant'lar yazın.
+- Balance'ları, supply'yi, authorization'ları ve event'leri assert edin.
+- Boundary test'leri ekleyin (`==`, overflow/underflow, zero-address, zero-amount, empty array'ler).
+- Gerçekçi olmayan mock'ları değiştirin; failure mode'ları simulate edin.
+- Tooling destekliyorsa sonuçları persist edin ve triage öncesinde yakalanmamış mutantları filter edin.
+- Runtime'ı yönetilebilir tutmak için two-phase veya per-target campaign'ler kullanın.
+- Tüm mutantlar etkisiz hale getirilene veya yorumlar ve gerekçelerle açıklanana kadar iterate edin.
 
 ## References
 
-- [Mutation testing for the agentic era](https://blog.trailofbits.com/2026/04/01/mutation-testing-for-the-agentic-era/)
-- [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
-- [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
-- [Slither (GitHub)](https://github.com/crytic/slither)
-- [Slither Mutator documentation](https://github.com/crytic/slither/blob/master/docs/src/tools/Mutator.md)
-- [mewt](https://github.com/trailofbits/mewt)
-- [MuTON](https://github.com/trailofbits/muton)
+- [1] [Agentic era için mutation testing](https://blog.trailofbits.com/2026/04/01/mutation-testing-for-the-agentic-era/)
+- [2] [Testlerinizin yakalayamadığı bug'ları bulmak için mutation testing kullanın (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
+- [3] [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
+- [4] [Slither (GitHub)](https://github.com/crytic/slither)
+- [5] [Slither Mutator documentation](https://github.com/crytic/slither/blob/master/docs/src/tools/Mutator.md)
+- [6] [mewt](https://github.com/trailofbits/mewt)
+- [7] [MuTON](https://github.com/trailofbits/muton)
 
 {{#include ../../banners/hacktricks-training.md}}
