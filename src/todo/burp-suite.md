@@ -2,15 +2,15 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Cargas Útiles Básicas
+## Payloads básicos
 
-- **Lista Simple:** Solo una lista que contiene una entrada en cada línea
-- **Archivo en Tiempo de Ejecución:** Una lista leída en tiempo de ejecución (no cargada en memoria). Para soportar listas grandes.
-- **Modificación de Caso:** Aplicar algunos cambios a una lista de cadenas (Sin cambio, a minúsculas, a MAYÚSCULAS, a Nombre Propio - Primera letra en mayúscula y el resto en minúsculas-, a Nombre Propio - Primera letra en mayúscula y el resto permanece igual-).
-- **Números:** Generar números de X a Y usando Z pasos o aleatoriamente.
-- **Fuerza Bruta:** Conjunto de caracteres, longitud mínima y máxima.
+- **Simple List:** Solo una lista que contiene una entrada en cada línea
+- **Runtime File:** Una lista leída durante la ejecución (no cargada en memoria). Para admitir listas grandes.
+- **Case Modification:** Aplicar algunos cambios a una lista de strings (sin cambios, a minúsculas, a MAYÚSCULAS, a nombre propio -la primera letra en mayúscula y el resto en minúsculas-, a Nombre Propio -la primera letra en mayúscula y el resto permanece igual-.
+- **Numbers:** Generar números de X a Y usando un paso Z o aleatoriamente.
+- **Brute Forcer:** Conjunto de caracteres, longitud mínima y máxima.
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Carga útil para ejecutar comandos y obtener la salida a través de solicitudes DNS a burpcollab.
+[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Payload para ejecutar comandos y obtener el resultado mediante solicitudes DNS a burpcollab.
 
 {{#ref}}
 https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e

@@ -10,26 +10,26 @@ Busca:
 
 ## Ruta práctica
 
-Si el texto sin formato se comporta de forma inesperada, inspecciona los puntos de código y normaliza con cuidado (no destruyas las evidencias).
+Si el texto plano se comporta de forma inesperada, inspecciona los puntos de código y normaliza con cuidado (no destruyas evidencias).
 
 ### Técnica
 
-El stego de texto suele depender de caracteres que se representan de forma idéntica (o invisible):
+La esteganografía de texto suele basarse en caracteres que se muestran de forma idéntica (o son invisibles):
 
-- Homoglifos: distintos puntos de código Unicode que parecen iguales (la `a` latina frente a la `а` cirílica)
-- Caracteres de ancho cero: unificadores, no unificadores y espacios de ancho cero
+- Homoglifos: diferentes puntos de código Unicode que parecen iguales (la `a` latina frente a la `а` cirílica)
+- Caracteres de ancho cero: joiners, non-joiners y espacios de ancho cero
 - Codificaciones mediante espacios en blanco: espacios frente a tabulaciones, espacios finales y patrones de longitud de línea<sup>[[1]](#references)</sup>
 
-Casos adicionales de alta señal:
+Casos adicionales de alta relevancia:
 
 - Caracteres de control/sobrescritura bidireccionales (pueden reordenar visualmente el texto)
-- Selectores de variación y caracteres combinados utilizados como canal encubierto
+- Selectores de variación y caracteres combinantes utilizados como canal encubierto
 
 ### Ayudas para decodificar
 
-- Entorno de pruebas de homoglifos Unicode y caracteres de ancho cero: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- Herramienta para experimentar con homoglifos Unicode y caracteres de ancho cero: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
 
-### Inspecciona los puntos de código
+### Inspeccionar puntos de código
 ```bash
 python3 - <<'PY'
 import sys
@@ -41,11 +41,11 @@ PY
 ```
 ## Canales `unicode-range` de CSS
 
-Las reglas `@font-face` pueden codificar bytes en entradas `unicode-range: U+..`. Extrae los codepoints, concatena el hexadecimal y decodifica:
+Las reglas `@font-face` pueden codificar bytes en entradas `unicode-range: U+..`. Extrae los puntos de código, concatena el hexadecimal y decodifica:
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Si los rangos contienen varios bytes por declaración, sepáralos primero por comas y normalízalos (`tr ',+' '\n'`). Python facilita el análisis y la emisión de bytes cuando el formato es inconsistente.
+Si los rangos contienen varios bytes por declaración, sepáralos primero por comas y normalízalos (`tr ',+' '\n'`). Python facilita el análisis y la emisión de bytes cuando el formato es inconsistente.<sup>[[1]](#references)</sup>
 
 ## Referencias
 
