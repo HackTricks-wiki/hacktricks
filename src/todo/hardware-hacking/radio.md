@@ -4,7 +4,7 @@
 
 ## SigDigger
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger)is a free digital signal analyzer for GNU/Linux and macOS, designed to extract information of unknown radio signals. It supports a variety of SDR devices through SoapySDR, and allows adjustable demodulation of FSK, PSK and ASK signals, decode analog video, analyze bursty signals and listen to analog voice channels (all in real time).
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)is a free digital signal analyzer for GNU/Linux and macOS, designed to extract information of unknown radio signals. It supports a variety of SDR devices through SoapySDR, and allows adjustable demodulation of FSK, PSK and ASK signals, decode analog video, analyze bursty signals and listen to analog voice channels (all in real time).<sup>[[1]](#references)</sup>
 
 ### Basic Config
 
@@ -32,7 +32,7 @@ In the GUI behaviour it's recommended to enable a few things if your PC support 
 
 ### Synchronize with radio channel
 
-With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with the channel you want to hear, configure "Baseband audio preview" option, configure the bandwith to get all the info being sent and then set the Tuner to the level before the noise is really starting to increase:
+With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with the channel you want to hear, configure "Baseband audio preview" option, configure the bandwith to get all the info being sent and then set the Tuner to the level before the noise is really starting to increase:<sup>[[1]](#references)</sup>
 
 ![SigDigger synchronized radio channel with baseband audio preview and bandwidth configured](<../../images/image (585).png>)
 
@@ -72,7 +72,7 @@ sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw
 
 #### Checking the envelope
 
-Checking AM info with [**SigDigger** ](https://github.com/BatchDrake/SigDigger)and just looking at the **envelop** you can see different clear amplitude levels. The used signal is sending pulses with information in AM, this is how one pulse looks like:
+Checking AM info with [**SigDigger** ](https://github.com/BatchDrake/SigDigger)and just looking at the **envelop** you can see different clear amplitude levels. The used signal is sending pulses with information in AM, this is how one pulse looks like:<sup>[[1]](#references)</sup>
 
 ![SigDigger AM signal envelope with clear pulse amplitude levels](<../../images/image (590).png>)
 
@@ -198,5 +198,9 @@ You can use the **same technique as the one used in the AM example** to get the 
 ### Get Bits
 
 You can use the **same technique as the one used in the AM example** to get the bits once you have **found the signal is modulated in frequency** and the **symbol rate**.
+
+## References
+
+- [1] [SigDigger - Free digital signal analyzer for GNU/Linux and macOS](https://github.com/BatchDrake/SigDigger)
 
 {{#include ../../banners/hacktricks-training.md}}

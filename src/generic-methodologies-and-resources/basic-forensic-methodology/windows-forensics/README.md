@@ -170,7 +170,7 @@ A screenshot depicting the task's content is provided: ![USB Detective - Plug an
 
 This configuration ensures regular maintenance and cleanup of drivers, with provisions for reattempting the task in case of consecutive failures.
 
-**For more information check:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
+**For more information check:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)<sup>[[1]](#references)</sup>
 
 ## Emails
 
@@ -275,7 +275,7 @@ interesting-windows-registry-keys.md
 
 ### Basic Windows Processes
 
-In [this post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) you can learn about the common Windows processes to detect suspicious behaviours.
+In [this post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) you can learn about the common Windows processes to detect suspicious behaviours.<sup>[[2]](#references)</sup>
 
 ### Windows Recent APPs
 
@@ -503,6 +503,7 @@ Security EventID 1102 signals the deletion of logs, a critical event for forensi
 ## References
 
 - [1] [Windows Plug and Play Cleanup](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
+- [2] [jonahacks.medium.com - Investigating Common Windows Processes](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d)
 
 {{#include ../../../banners/hacktricks-training.md}}
 

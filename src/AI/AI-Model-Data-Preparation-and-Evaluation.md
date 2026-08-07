@@ -122,7 +122,6 @@ Data transformation involves converting the data into a format suitable for mode
   - **TF-IDF (Term Frequency-Inverse Document Frequency)**: A statistical measure that evaluates the importance of a word in a document relative to a collection of documents (corpus). It combines term frequency (how often a word appears in a document) and inverse document frequency (how rare a word is across all documents).
     - For example, if the word "cat" appears frequently in a document but is rare in the entire corpus, it will have a high TF-IDF score, indicating its importance in that document.
 
-
 - **Feature Engineering**: Creating new features from existing ones to enhance the model's predictive power. This can involve combining features, extracting date/time components, or applying domain-specific transformations.
 
 ## Data Splitting
@@ -237,7 +236,6 @@ The confusion matrix is a table that summarizes the performance of a classificat
 - **False Negative (FN)**: The model incorrectly predicted the negative class (Type II error).
 
 The confusion matrix can be used to calculate various evaluation metrics, such as accuracy, precision, recall, and F1 score.
-
 
 {{#include ../banners/hacktricks-training.md}}
 

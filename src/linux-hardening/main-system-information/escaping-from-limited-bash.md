@@ -179,7 +179,7 @@ type -a bash sh rbash ssh vi vim less more man awk find tar zip git scp script 2
 
 ### Modify PATH
 
-Check if you can modify the PATH env variable
+Check if you can modify the PATH env variable<sup>[[2]](#references)</sup>
 
 ```bash
 echo $PATH #See the path of the executables that you can use
@@ -351,9 +351,9 @@ debug.debug()
 
 ## References
 
-- [https://www.youtube.com/watch?v=UO618TeyCWo](https://www.youtube.com/watch?v=UO618TeyCWo) (Slides: [https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions\_-_Bucsay_Balazs.pdf](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf))
-- [https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html](https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html)
-- [https://git-scm.com/docs/git-shell](https://git-scm.com/docs/git-shell)
+- [1] [Chw00t: How To Break Out from Various Chroot Solutions (Bucsay Balazs, DeepSec talk and slides)](https://www.youtube.com/watch?v=UO618TeyCWo)
+- [2] [GNU Bash Reference Manual – The Restricted Shell](https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html)
+- [3] [git-shell – Git Documentation](https://git-scm.com/docs/git-shell)
 
 {{#include ../../banners/hacktricks-training.md}}
 

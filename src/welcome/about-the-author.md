@@ -10,5 +10,4 @@ HackTricks is an educational wiki about **cyber-security** led by Carlos with hu
 
 HackTricks is also a wiki where **researchers share their latest findings**, so it's a great place to keep up to date with the latest hacking techniques.
 
-
 {{#include ../banners/hacktricks-training.md}}

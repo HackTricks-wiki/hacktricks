@@ -2,7 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
 ## Squashing Basic Info
 
 NFS will usually (specially in linux) trust the indicated `uid` and `gid` by the client conencting to access the files (if kerberos is not used). However, there are some configurations that can be set in the server to **change this behavior**:
@@ -14,7 +13,6 @@ NFS will usually (specially in linux) trust the indicated `uid` and `gid` by the
 In the **/etc/exports** file, if you find some directory that is configured as **no_root_squash**, then you can **access** it from **as a client** and **write inside** that directory **as** if you were the local **root** of the machine.
 
 For more information about **NFS** check:
-
 
 {{#ref}}
 ../../network-services-pentesting/nfs-service-pentesting.md
@@ -146,5 +144,3 @@ drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 - [1] [A tale of a lesser known NFS privesc](https://www.errno.fr/nfs_privesc.html)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-

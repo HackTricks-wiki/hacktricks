@@ -32,7 +32,7 @@ Because every glyph is identified internally by its **Unicode code point**, a si
 | Armenian | U+0530-058F | `օ` (U+0585) | Latin `o` |
 | Cherokee | U+13A0-13FF | `Ꭲ` (U+13A2) | Latin `T` |
 
-> Tip: Full Unicode charts are available at [unicode.org](https://home.unicode.org/).
+> Tip: Full Unicode charts are available at [unicode.org](https://home.unicode.org/).<sup>[[2]](#references)</sup>
 
 ## Detection Techniques
 
@@ -82,7 +82,7 @@ print(puny)  # xn--yl8hpyal.com
 
 ### 3. Homoglyph Dictionaries / Algorithms
 
-Tools such as **dnstwist** (`--homoglyph`) or **urlcrazy** can enumerate visually-similar domain permutations and are useful for proactive takedown / monitoring.
+Tools such as **dnstwist** (`--homoglyph`) or **urlcrazy** can enumerate visually-similar domain permutations and are useful for proactive takedown / monitoring.<sup>[[3]](#references)</sup>
 
 ## Prevention & Mitigation
 

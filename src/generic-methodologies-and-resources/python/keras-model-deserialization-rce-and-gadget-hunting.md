@@ -74,7 +74,7 @@ Notes:
 
 Root cause:
 - _retrieve_class_or_fn used unrestricted importlib.import_module() with attacker-controlled module strings from config.json.
-- Impact: Arbitrary import of any installed module (or attacker-planted module on sys.path). Import-time code runs, then object construction occurs with attacker kwargs.<sup>[[1]](#references)[[4]](#references)</sup>
+- Impact: Arbitrary import of any installed module (or attacker-planted module on sys.path). Import-time code runs, then object construction occurs with attacker kwargs.<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 
 Exploit idea:
 
@@ -151,9 +151,9 @@ Important limitation:
 
 ## ML pickle import allowlisting for AI/ML models (Fickling)
 
-Many AI/ML model formats (PyTorch .pt/.pth/.ckpt, joblib/scikit-learn, older TensorFlow artifacts, etc.) embed Python pickle data. Attackers routinely abuse pickle GLOBAL imports and object constructors to achieve RCE or model swapping during load. Blacklist-based scanners often miss novel or unlisted dangerous imports.<sup>[[8]](#references)</sup>
+Many AI/ML model formats (PyTorch .pt/.pth/.ckpt, joblib/scikit-learn, older TensorFlow artifacts, etc.) embed Python pickle data. Attackers routinely abuse pickle GLOBAL imports and object constructors to achieve RCE or model swapping during load. Blacklist-based scanners often miss novel or unlisted dangerous imports.<sup>[[8]](#references)[[14]](#references)</sup>
 
-A practical fail-closed defense is to hook Python’s pickle deserializer and only allow a reviewed set of harmless ML-related imports during unpickling. Trail of Bits’ Fickling implements this policy and ships a curated ML import allowlist built from thousands of public Hugging Face pickles.<sup>[[8]](#references)</sup>
+A practical fail-closed defense is to hook Python’s pickle deserializer and only allow a reviewed set of harmless ML-related imports during unpickling. Trail of Bits’ Fickling implements this policy and ships a curated ML import allowlist built from thousands of public Hugging Face pickles.<sup>[[8]](#references)[[13]](#references)</sup>
 
 Security model for “safe” imports (intuitions distilled from research and practice): imported symbols used by a pickle must simultaneously:<sup>[[8]](#references)</sup>
 - Not execute code or cause execution (no compiled/source code objects, shelling out, hooks, etc.)
@@ -192,9 +192,9 @@ fickling.hook.activate_safe_ml_environment(also_allow=[
   - with fickling.check_safety(): for scoped enforcement
   - fickling.load(path) / fickling.is_likely_safe(path) for one-off checks
 
-- Prefer non-pickle model formats when possible (e.g., SafeTensors). If you must accept pickle, run loaders under least privilege without network egress and enforce the allowlist.
+- Prefer non-pickle model formats when possible (e.g., SafeTensors).<sup>[[15]](#references)</sup> If you must accept pickle, run loaders under least privilege without network egress and enforce the allowlist.
 
-This allowlist-first strategy demonstrably blocks common ML pickle exploit paths while keeping compatibility high. In ToB’s benchmark, Fickling flagged 100% of synthetic malicious files and allowed ~99% of clean files from top Hugging Face repos.<sup>[[8]](#references)</sup>
+This allowlist-first strategy demonstrably blocks common ML pickle exploit paths while keeping compatibility high. In ToB’s benchmark, Fickling flagged 100% of synthetic malicious files and allowed ~99% of clean files from top Hugging Face repos.<sup>[[8]](#references)[[10]](#references)</sup>
 
 
 ## Researcher toolkit

@@ -44,14 +44,14 @@ Tips
 
 ## First contact with OpenOCD (scan and IDCODE)
 
-OpenOCD is the de‑facto OSS for JTAG/SWD. With a supported adapter you can scan the chain and read IDCODEs:
+OpenOCD is the de‑facto OSS for JTAG/SWD. With a supported adapter you can scan the chain and read IDCODEs:<sup>[[1]](#references)</sup>
 
 - Generic example with a J‑Link:
 ```
 openocd -f interface/jlink.cfg -c "transport select jtag; adapter speed 1000" \
   -c "init; scan_chain; shutdown"
 ```
-- ESP32‑S3 built‑in USB‑JTAG (no external probe required):
+- ESP32‑S3 built‑in USB‑JTAG (no external probe required):<sup>[[2]](#references)</sup>
 ```
 openocd -f board/esp32s3-builtin.cfg -c "init; scan_chain; shutdown"
 ```
@@ -61,7 +61,7 @@ Notes
 
 ## Halting the CPU and dumping memory/flash
 
-Once the TAP is recognized and a target script is chosen, you can halt the core and dump memory regions or internal flash. Examples (adjust target, base addresses and sizes):
+Once the TAP is recognized and a target script is chosen, you can halt the core and dump memory regions or internal flash. Examples (adjust target, base addresses and sizes):<sup>[[1]](#references)</sup>
 
 - Generic target after init:
 ```
@@ -73,7 +73,7 @@ openocd -f interface/jlink.cfg -f target/stm32f1x.cfg \
 openocd -f interface/ftdi/ft232h.cfg -f target/riscv.cfg \
   -c "init; riscv set_prefer_sba on; halt; dump_image sram.bin 0x80000000 0x20000; shutdown"
 ```
-- ESP32‑S3, program or read via OpenOCD helper:
+- ESP32‑S3, program or read via OpenOCD helper:<sup>[[2]](#references)</sup>
 ```
 openocd -f board/esp32s3-builtin.cfg \
   -c "program_esp app.bin 0x10000 verify exit"
@@ -85,7 +85,7 @@ Tips
 
 ## Boundary‑scan tricks (EXTEST/SAMPLE)
 
-Even when the CPU debug access is locked, boundary‑scan may still be exposed. With UrJTAG/OpenOCD you can:
+Even when the CPU debug access is locked, boundary‑scan may still be exposed. With UrJTAG/OpenOCD you can:<sup>[[1]](#references)</sup>
 - SAMPLE to snapshot pin states while the system runs (find bus activity, confirm pin mapping).
 - EXTEST to drive pins (e.g., bit‑bang external SPI flash lines via the MCU to read it offline if board wiring allows).
 

@@ -83,4 +83,3 @@ Notes:
 - [1] [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

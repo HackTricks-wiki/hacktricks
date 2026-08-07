@@ -157,7 +157,7 @@ Microsoft developed **Group Managed Service Accounts (gMSA)** to simplify the ma
 
 The passwords for gMSAs are stored in the LDAP property _**msDS-ManagedPassword**_ and are automatically reset every 30 days by Domain Controllers (DCs). This password, an encrypted data blob known as [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), can only be retrieved by authorized administrators and the servers on which the gMSAs are installed, ensuring a secure environment. To access this information, a secured connection such as LDAPS is required, or the connection must be authenticated with 'Sealing & Secure'.
 
-![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)
+![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)<sup>[[1]](#references)</sup>
 
 You can read this password with [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**<sup>[[2]](#references)</sup>
 
@@ -165,7 +165,7 @@ You can read this password with [**GMSAPasswordReader**](https://github.com/rvaz
 /GMSAPasswordReader --AccountName jkohler
 ```
 
-[**Find more info in this post**](https://cube0x0.github.io/Relaying-for-gMSA/)
+[**Find more info in this post**](https://cube0x0.github.io/Relaying-for-gMSA/)<sup>[[1]](#references)</sup>
 
 Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read** the **password** of **gMSA**.<sup>[[1]](#references)</sup>
 

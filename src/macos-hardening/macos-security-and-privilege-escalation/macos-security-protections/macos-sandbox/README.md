@@ -409,5 +409,3 @@ Sandbox also has a user daemon running exposing the XPC Mach service `com.apple.
 - [8] [HITBGSEC 2016 SG - The Apple Sandbox: Deeper Into The Quagmire - Jonathan Levin](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
-

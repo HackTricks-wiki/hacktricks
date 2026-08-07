@@ -89,4 +89,5 @@ That will fork and exec `/usr/libexec/security_authtrampoline /bin/ls` as root, 
 
 - [1] [authenticate-admin-nonshared - Overview of the macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
 
+
 {{#include ../../../banners/hacktricks-training.md}}

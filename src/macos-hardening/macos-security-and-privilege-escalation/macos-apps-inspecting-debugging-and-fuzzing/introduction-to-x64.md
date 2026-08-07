@@ -448,6 +448,3 @@ dup2:
 - [3] [Packet Storm - macOS 127.0.0.1:4444 Reverse Shell Shellcode](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

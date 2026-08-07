@@ -63,7 +63,7 @@ High-signal paths to review:
 - `.mcp.json`
 - `.vscode/` tasks, settings, extensions recommendations, or other editor files that steer AI helpers
 
-This pattern was highlighted in the Miasma npm supply-chain campaign: after package compromise, the attacker can use stolen maintainer access to push repository-local assistant configuration, shifting the trigger from `npm install` to **repository open / assistant load**.<sup>[[12]](#references)</sup> During reviews, treat new assistant-policy files with the same suspicion level as new workflow files, shell scripts, package hooks, or build-system metadata.
+This pattern was highlighted in the Miasma npm supply-chain campaign: after package compromise, the attacker can use stolen maintainer access to push repository-local assistant configuration, shifting the trigger from `npm install` to **repository open / assistant load**.<sup>[[13]](#references)</sup> During reviews, treat new assistant-policy files with the same suspicion level as new workflow files, shell scripts, package hooks, or build-system metadata.
 
 Defensive checks:
 
@@ -154,7 +154,7 @@ AuthN/AuthZ
 
 ### Pre-Session Abuse: OAuth Discovery to Local Code Execution
 
-When a desktop client reaches a remote MCP server through a helper such as `mcp-remote`, the dangerous surface may appear **before** `initialize`, `tools/list`, or any ordinary JSON-RPC traffic. In 2025, researchers showed that `mcp-remote` versions `0.0.5` to `0.1.15` could accept attacker-controlled OAuth discovery metadata and forward a crafted `authorization_endpoint` string into the operating system URL handler (`open`, `xdg-open`, `start`, etc.), yielding local code execution on the connecting workstation.<sup>[[11]](#references)</sup>
+When a desktop client reaches a remote MCP server through a helper such as `mcp-remote`, the dangerous surface may appear **before** `initialize`, `tools/list`, or any ordinary JSON-RPC traffic. In 2025, researchers showed that `mcp-remote` versions `0.0.5` to `0.1.15` could accept attacker-controlled OAuth discovery metadata and forward a crafted `authorization_endpoint` string into the operating system URL handler (`open`, `xdg-open`, `start`, etc.), yielding local code execution on the connecting workstation.<sup>[[11]](#references)[[12]](#references)</sup>
 
 Offensive implications:
 - A malicious remote MCP server can weaponize the very first auth challenge, so compromise happens during server onboarding rather than during a later tool call.
@@ -251,7 +251,8 @@ Impact highlights
 - [8] [Equixly: MCP server security issues in the wild](https://equixly.com/blog/2025/03/29/mcp-server-new-security-nightmare/)
 - [9] [Caught in the Hook: RCE and API Token Exfiltration Through Claude Code Project Files](https://research.checkpoint.com/2026/rce-and-api-token-exfiltration-through-claude-code-project-files-cve-2025-59536/)
 - [10] [OpenAI Codex CLI Vulnerability: Command Injection](https://research.checkpoint.com/2025/openai-codex-cli-command-injection-vulnerability/)
-- [11] [When OAuth Becomes a Weapon: Lessons from CVE-2025-6514](https://amlalabs.com/blog/oauth-cve-2025-6514/)
-- [12] [What the Miasma campaign reveals about the new supply chain threat model and the underground market for developer credentials](https://www.tenable.com/blog/what-the-miasma-campaign-reveals-about-the-new-supply-chain-threat-model-and-the-underground)
+- [11] [OS command injection in mcp-remote when connecting to untrusted MCP servers (JFrog Security Research, JFSA-2025-001290844)](https://research.jfrog.com/vulnerabilities/mcp-remote-command-injection-rce-jfsa-2025-001290844/)
+- [12] [When OAuth Becomes a Weapon: Lessons from CVE-2025-6514](https://amlalabs.com/blog/oauth-cve-2025-6514/)
+- [13] [What the Miasma campaign reveals about the new supply chain threat model and the underground market for developer credentials](https://www.tenable.com/blog/what-the-miasma-campaign-reveals-about-the-new-supply-chain-threat-model-and-the-underground)
 
 {{#include ../../banners/hacktricks-training.md}}

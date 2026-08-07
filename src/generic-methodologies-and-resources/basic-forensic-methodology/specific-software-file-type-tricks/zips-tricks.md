@@ -5,7 +5,7 @@
 **Command-line tools** for managing **zip files** are essential for diagnosing, repairing, and cracking zip files. Here are some key utilities:<sup>[[1]](#references)</sup>
 
 - **`unzip`**: Reveals why a zip file may not decompress.
-- **`zipdetails -v`**: Offers detailed analysis of zip file format fields.
+- **`zipdetails -v`**: Offers detailed analysis of zip file format fields.<sup>[[3]](#references)</sup>
 - **`zipinfo`**: Lists contents of a zip file without extracting them.
 - **`zip -F input.zip --out output.zip`** and **`zip -FF input.zip --out output.zip`**: Try to repair corrupted zip files.
 - **[fcrackzip](https://github.com/hyc/fcrackzip)**: A tool for brute-force cracking of zip passwords, effective for passwords up to around 7 characters.

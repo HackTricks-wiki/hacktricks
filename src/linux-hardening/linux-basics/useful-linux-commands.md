@@ -362,4 +362,3 @@ Add `--grep 'Invalid user' --case-sensitive` or `-k` (kernel ring buffer only) w
 - [2] [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}
-

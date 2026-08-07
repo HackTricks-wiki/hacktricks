@@ -135,3 +135,4 @@ function initialize(address newOwner) external {
 - [3] [ERC-7562: Account Abstraction Validation Scope Rules](https://eips.ethereum.org/EIPS/eip-7562)
 
 {{#include ../../banners/hacktricks-training.md}}
+

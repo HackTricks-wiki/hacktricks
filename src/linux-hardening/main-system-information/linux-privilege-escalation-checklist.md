@@ -150,10 +150,8 @@
 - [ ] Can you [**abuse NFS to escalate privileges**](../linux-basics/linux-privilege-escalation/index.html#nfs-privilege-escalation)?
 - [ ] Do you need to [**escape from a restrictive shell**](../linux-basics/linux-privilege-escalation/index.html#escaping-from-restricted-shells)?
 
-
-
 ## References
 
-- [Sudo advisory: sudoedit arbitrary file edit](https://www.sudo.ws/security/advisories/sudoedit_any/)
-- [Oracle Linux docs: systemd drop-in configuration](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
+- [1] [Sudo advisory: sudoedit arbitrary file edit](https://www.sudo.ws/security/advisories/sudoedit_any/)
+- [2] [Oracle Linux docs: systemd drop-in configuration](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
 {{#include ../../banners/hacktricks-training.md}}

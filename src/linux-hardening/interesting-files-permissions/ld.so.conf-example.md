@@ -186,8 +186,6 @@ ldd sharedvuln
 
 **As you can see, having sudo privileges over `ldconfig` you can exploit the same vulnerability.**
 
-
-
 ## References
 
 - [1] [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)

@@ -51,7 +51,7 @@ An alternative command sequence using Rubeus.exe demonstrates another facet of t
 
 This method mirrors the **Pass the Key** approach, with a focus on commandeering and utilizing the ticket directly for authentication purposes. In practice:
 
-- `Rubeus asktgt` sends the **raw Kerberos AS-REQ/AS-REP** itself and does **not** need admin rights unless you want to target another logon session with `/luid` or create a separate one with `/createnetonly`.
+- `Rubeus asktgt` sends the **raw Kerberos AS-REQ/AS-REP** itself and does **not** need admin rights unless you want to target another logon session with `/luid` or create a separate one with `/createnetonly`.<sup>[[2]](#references)</sup>
 - `mimikatz sekurlsa::pth` patches credential material into a logon session and therefore **touches LSASS**, which usually requires local admin or `SYSTEM` and is noisier from an EDR perspective.
 
 Examples with Mimikatz:

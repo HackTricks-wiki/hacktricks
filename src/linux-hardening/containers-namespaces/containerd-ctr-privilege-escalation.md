@@ -6,7 +6,6 @@
 
 Go to the following link to learn **where `containerd` and `ctr` fit in the container stack**:
 
-
 {{#ref}}
 container-security/runtimes-and-engines.md
 {{#endref}}
@@ -45,7 +44,6 @@ You can run a privileged container as:
 ```
 
 Then you can use some of the techniques mentioned in the following page to **escape from it abusing privileged capabilities**:
-
 
 {{#ref}}
 container-security/

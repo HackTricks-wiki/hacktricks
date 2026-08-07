@@ -22,7 +22,7 @@ Side-channel attacks recover secrets by observing physical or micro-architectura
 ## Power Analysis
 
 ### Simple Power Analysis (SPA)
-Observe a *single* trace and directly associate peaks/valleys with operations (e.g. DES S-boxes).  
+Observe a *single* trace and directly associate peaks/valleys with operations (e.g. DES S-boxes).<sup>[[1]](#references)</sup>  
 ```python
 # ChipWhisperer-husky example – capture one AES trace
 from chipwhisperer.capture.api.programmers import STMLink
@@ -53,8 +53,8 @@ Near-field EM probes (500 MHz–3 GHz) leak identical information to power analy
 ## Timing & Micro-architectural Attacks
 Modern CPUs leak secrets through shared resources:
 * **Hertzbleed (2022)** – DVFS frequency scaling correlates with Hamming weight, allowing *remote* extraction of EdDSA keys.<sup>[[2]](#references)</sup>
-* **Downfall / Gather Data Sampling (Intel, 2023)** – transient-execution to read AVX-gather data across SMT threads.
-* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – speculative vector mis-prediction leaks registers cross-domain.
+* **Downfall / Gather Data Sampling (Intel, 2023)** – transient-execution to read AVX-gather data across SMT threads.<sup>[[3]](#references)</sup>
+* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – speculative vector mis-prediction leaks registers cross-domain.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
 
 ---
 
@@ -102,6 +102,8 @@ Combining faults with side-channel leakage shortcuts key search (e.g. 1-trace AE
 
 - [1] [ChipWhisperer Documentation](https://chipwhisperer.readthedocs.io/en/latest/)
 - [2] [Hertzbleed Attack Paper](https://www.hertzbleed.com/)
-
+- [3] [Downfall: Exploiting Speculative Data Gathering](https://downfall.page/)
+- [4] [Zenbleed](https://lock.cmpxchg8b.com/zenbleed.html)
+- [5] [Inception: Exposing New Attack Surfaces with Training in Transient Execution](https://comsec.ethz.ch/research/microarch/inception/)
 
 {{#include ../../banners/hacktricks-training.md}}

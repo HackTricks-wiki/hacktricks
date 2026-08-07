@@ -130,3 +130,4 @@ ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached
 - [7] [HashiCorp – HCSEC-2025-01: go-slug Vulnerable to Zip Slip Attack (CVE-2025-0377)](https://discuss.hashicorp.com/t/hcsec-2025-01-hashicorp-go-slug-vulnerable-to-zip-slip-attack/72719)
 
 {{#include ../banners/hacktricks-training.md}}
+

@@ -137,7 +137,7 @@ The cgroup namespace should be treated as a visibility-hardening layer rather th
 
 ## References
 
-- [1] [Linux cgroup_namespaces(7)](https://man7.org/linux/man-pages/man7/cgroup_namespaces.7.html)
-- [2] [Linux kernel cgroup v2 documentation](https://docs.kernel.org/admin-guide/cgroup-v2.html)
+- [1] [cgroup_namespaces(7) — Linux manual page](https://man7.org/linux/man-pages/man7/cgroup_namespaces.7.html)
+- [2] [Control Group v2 — The Linux Kernel documentation](https://docs.kernel.org/admin-guide/cgroup-v2.html)
 
 {{#include ../../../../../banners/hacktricks-training.md}}

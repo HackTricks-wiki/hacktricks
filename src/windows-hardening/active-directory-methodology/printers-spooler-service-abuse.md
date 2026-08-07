@@ -94,7 +94,7 @@ If an attacker has already compromised a computer with [Unconstrained Delegation
 
 ## RPC Force authentication
 
-[Coercer](https://github.com/p0dalirius/Coercer)
+[Coercer](https://github.com/p0dalirius/Coercer)<sup>[[5]](#references)</sup>
 
 ### RPC UNC-path coercion matrix (interfaces/opnums that trigger outbound auth)
 - MS-RPRN (Print System Remote Protocol)

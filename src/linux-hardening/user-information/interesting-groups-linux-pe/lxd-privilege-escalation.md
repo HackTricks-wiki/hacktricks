@@ -91,6 +91,3 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 ```
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
