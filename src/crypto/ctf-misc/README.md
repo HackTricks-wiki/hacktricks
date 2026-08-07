@@ -2,24 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Συλλογή σελίδων που εμφανίζονται συχνά σε crypto challenges, αλλά δεν ταιριάζουν εύκολα αλλού.
+Σελίδες με διάφορα θέματα που εμφανίζονται συχνά σε crypto challenges, αλλά δεν ταιριάζουν εύκολα αλλού.
 
-## Εσοτερικές γλώσσες
+## Esoteric languages
 
-### Τεχνική
+### Technique
 
-Χρησιμοποίησε αυτό όταν ένα crypto task στην πραγματικότητα είναι: τρέξε ένα esolang πρόγραμμα και μετά αποκωδικοποίησε το output του.
+Χρησιμοποίησέ το όταν μια crypto εργασία είναι στην πραγματικότητα: εκτέλεση ενός προγράμματος esolang και στη συνέχεια αποκωδικοποίηση της εξόδου του.
 
-Αν ένα challenge σου δώσει κώδικα που δεν μοιάζει με μια τυπική γλώσσα:
+Αν ένα challenge σου δίνει κώδικα που δεν μοιάζει με standard γλώσσα:
 
-- Προσδιόρισε την esolang (Google ένα χαρακτηριστικό token).
-- Χρησιμοποίησε έναν online interpreter ή μια Docker image.
-- Αν το output είναι περίεργο, ψάξε για στρωματοποιημένη κωδικοποίηση/συμπίεση μετά την εκτέλεση.
+- Εντόπισε το esolang (κάνε Google έναν χαρακτηριστικό token).
+- Χρησιμοποίησε έναν online interpreter ή ένα Docker image.
+- Αν η έξοδος είναι περίεργη, αναζήτησε layered encoding/compression μετά την εκτέλεση.
 
-Καλή αρχική λίστα:
+Καλή αρχική λίστα:<sup>[[1]](#references)</sup>
 
 {{#ref}}
 https://esolangs.org/wiki/Main_Page
 {{#endref}}
+
+## Αναφορές
+
+- [1] [Esolang, το wiki των esoteric programming languages](https://esolangs.org/wiki/Main_Page)
 
 {{#include ../../banners/hacktricks-training.md}}
