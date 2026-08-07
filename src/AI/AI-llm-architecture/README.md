@@ -1,12 +1,12 @@
-# LLM Training - Przygotowanie Danych
+# Trening LLM - przygotowanie danych
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**To są moje notatki z bardzo polecanej książki** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **z dodatkowymi informacjami.**
+**Są to moje notatki z bardzo polecanej książki** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **z dodatkowymi informacjami.**<sup>[[1]](#references)</sup>
 
-## Podstawowe Informacje
+## Podstawowe informacje
 
-Powinieneś zacząć od przeczytania tego posta, aby poznać podstawowe pojęcia, które powinieneś znać:
+Na początek przeczytaj ten post dotyczący podstawowych pojęć, które warto znać:
 
 
 {{#ref}}
@@ -16,41 +16,41 @@ Powinieneś zacząć od przeczytania tego posta, aby poznać podstawowe pojęcia
 ## 1. Tokenizacja
 
 > [!TIP]
-> Celem tej początkowej fazy jest bardzo proste: **Podzielić dane wejściowe na tokeny (id) w sposób, który ma sens**.
+> Cel tej początkowej fazy jest bardzo prosty: **Podzielić dane wejściowe na tokeny (ids) w sposób, który ma sens.**
 
 
 {{#ref}}
 1.-tokenizing.md
 {{#endref}}
 
-## 2. Próbkowanie Danych
+## 2. Próbkowanie danych
 
 > [!TIP]
-> Celem tej drugiej fazy jest bardzo proste: **Próbkować dane wejściowe i przygotować je do fazy treningowej, zazwyczaj dzieląc zbiór danych na zdania o określonej długości i generując również oczekiwaną odpowiedź.**
+> Cel tej drugiej fazy jest bardzo prosty: **Próbkować dane wejściowe i przygotować je do fazy treningu, zwykle oddzielając dataset na zdania o określonej długości i generując również oczekiwaną odpowiedź.**
 
 
 {{#ref}}
 2.-data-sampling.md
 {{#endref}}
 
-## 3. Osadzenia Tokenów
+## 3. Embeddingi tokenów
 
 > [!TIP]
-> Celem tej trzeciej fazy jest bardzo proste: **Przypisać każdemu z poprzednich tokenów w słowniku wektor o pożądanych wymiarach do trenowania modelu.** Każde słowo w słowniku będzie punktem w przestrzeni o X wymiarach.\
-> Zauważ, że początkowo pozycja każdego słowa w przestrzeni jest po prostu "losowo" inicjowana, a te pozycje są parametrami, które można trenować (będą poprawiane podczas treningu).
+> Cel tej trzeciej fazy jest bardzo prosty: **Przypisać każdemu z wcześniejszych tokenów w vocabulary wektor o wymaganych wymiarach, aby wytrenować model.** Każde słowo w vocabulary będzie punktem w przestrzeni o X wymiarach.\
+> Należy zauważyć, że początkowo pozycja każdego słowa w przestrzeni jest inicjalizowana „losowo”, a pozycje te są trainable parameters (będą ulepszane podczas treningu).
 >
-> Ponadto, podczas osadzania tokenów **tworzona jest kolejna warstwa osadzeń**, która reprezentuje (w tym przypadku) **absolutną pozycję słowa w zdaniu treningowym**. W ten sposób słowo w różnych pozycjach w zdaniu będzie miało różne reprezentacje (znaczenie).
+> Ponadto podczas tworzenia embeddingów tokenów **tworzona jest kolejna warstwa embeddingów**, która reprezentuje (w tym przypadku) **absolutną pozycję słowa w zdaniu treningowym**. Dzięki temu słowo znajdujące się na różnych pozycjach w zdaniu będzie miało inną reprezentację (znaczenie).
 
 
 {{#ref}}
 3.-token-embeddings.md
 {{#endref}}
 
-## 4. Mechanizmy Uwagowe
+## 4. Mechanizmy attention
 
 > [!TIP]
-> Celem tej czwartej fazy jest bardzo proste: **Zastosować pewne mechanizmy uwagi**. Będą to liczne **powtarzające się warstwy**, które będą **uchwytywać relację słowa w słowniku z jego sąsiadami w aktualnym zdaniu używanym do trenowania LLM**.\
-> Do tego celu używa się wielu warstw, więc wiele parametrów do trenowania będzie uchwytywać te informacje.
+> Cel tej czwartej fazy jest bardzo prosty: **Zastosować mechanizmy attention**. Będą to liczne **powtarzające się warstwy**, które będą **wychwytywać relację słowa w vocabulary z jego sąsiadami w aktualnym zdaniu używanym do trenowania LLM**.\
+> Wykorzystywanych jest do tego wiele warstw, dlatego wiele trainable parameters będzie przechwytywać te informacje.
 
 
 {{#ref}}
@@ -60,53 +60,57 @@ Powinieneś zacząć od przeczytania tego posta, aby poznać podstawowe pojęcia
 ## 5. Architektura LLM
 
 > [!TIP]
-> Celem tej piątej fazy jest bardzo proste: **Opracować architekturę całego LLM**. Połączyć wszystko, zastosować wszystkie warstwy i stworzyć wszystkie funkcje do generowania tekstu lub przekształcania tekstu na ID i odwrotnie.
+> Cel tej piątej fazy jest bardzo prosty: **Opracować architekturę pełnego LLM**. Połączyć wszystko, zastosować wszystkie warstwy i utworzyć wszystkie funkcje służące do generowania tekstu lub przekształcania tekstu na IDs i z powrotem.
 >
-> Ta architektura będzie używana zarówno do treningu, jak i przewidywania tekstu po jego wytrenowaniu.
+> Architektura ta będzie używana zarówno do treningu, jak i do przewidywania tekstu po zakończeniu treningu.
 
 
 {{#ref}}
 5.-llm-architecture.md
 {{#endref}}
 
-## 6. Wstępne trenowanie i ładowanie modeli
+## 6. Pre-training i ładowanie modeli
 
 > [!TIP]
-> Celem tej szóstej fazy jest bardzo proste: **Wytrenować model od podstaw**. W tym celu zostanie użyta wcześniejsza architektura LLM z pewnymi pętlami przechodzącymi przez zbiory danych, korzystając z zdefiniowanych funkcji straty i optymalizatora do trenowania wszystkich parametrów modelu.
+> Cel tej szóstej fazy jest bardzo prosty: **Wytrenować model od podstaw**. W tym celu zostanie użyta wcześniejsza architektura LLM wraz z pętlami przetwarzającymi datasety, wykorzystującymi zdefiniowane funkcje straty i optimizer do trenowania wszystkich parametrów modelu.
 
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
 {{#endref}}
 
-## 7.0. Ulepszenia LoRA w dostrajaniu
+## 7.0. Ulepszenia LoRA w fine-tuning
 
 > [!TIP]
-> Użycie **LoRA znacznie zmniejsza obliczenia** potrzebne do **dostrajania** już wytrenowanych modeli.
+> Zastosowanie **LoRA znacznie ogranicza obliczenia** wymagane do wykonania **fine-tuning** już wytrenowanych modeli.
 
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
 {{#endref}}
 
-## 7.1. Dostrajanie do klasyfikacji
+## 7.1. Fine-Tuning do klasyfikacji
 
 > [!TIP]
-> Celem tej sekcji jest pokazanie, jak dostroić już wytrenowany model, aby zamiast generować nowy tekst, LLM podałby **prawdopodobieństwa, że dany tekst zostanie zaklasyfikowany w każdej z podanych kategorii** (na przykład, czy tekst jest spamem, czy nie).
+> Celem tej sekcji jest pokazanie, jak wykonać fine-tuning już pre-trained modelu, aby zamiast generować nowy tekst LLM **podawał prawdopodobieństwa zaklasyfikowania danego tekstu do każdej z określonych kategorii** (na przykład czy tekst jest spamem).
 
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
 {{#endref}}
 
-## 7.2. Dostrajanie do wykonywania poleceń
+## 7.2. Fine-Tuning w celu wykonywania instrukcji
 
 > [!TIP]
-> Celem tej sekcji jest pokazanie, jak **dostroić już wytrenowany model do wykonywania poleceń** zamiast tylko generować tekst, na przykład, odpowiadając na zadania jako chatbot.
+> Celem tej sekcji jest pokazanie, jak wykonać **fine-tuning już pre-trained modelu, aby wykonywał instrukcje**, zamiast jedynie generować tekst, na przykład odpowiadając na zadania jako chatbot.
 
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
+
+## Referencje
+
+- [1] [Build a Large Language Model (From Scratch) - Manning](https://www.manning.com/books/build-a-large-language-model-from-scratch)
 
 {{#include ../../banners/hacktricks-training.md}}
