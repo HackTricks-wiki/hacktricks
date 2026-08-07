@@ -1,46 +1,46 @@
-# Crypto
+# Kriptografija
 
 {{#include ../banners/hacktricks-training.md}}
 
-Ova sekcija se fokusira na **praktičnu kriptografiju za hacking/CTFs**: kako brzo prepoznati uobičajene obrasce, odabrati prave alate i primeniti poznate napade.
+Ovaj odeljak se fokusira na **praktičnu kriptografiju za hacking/CTF-ove**: kako brzo prepoznati uobičajene obrasce, izabrati odgovarajuće alate i primeniti poznate napade.
 
-Ako ste ovde da sakrijete podatke u fajlovima, idite u **Stego** sekciju.
+Ako ste ovde zbog skrivanja podataka unutar datoteka, pređite na odeljak **Stego**.
 
-## Kako koristiti ovu sekciju
+## Kako koristiti ovaj odeljak
 
-Crypto izazovi nagrađuju brzinu: klasifikujte primitiv, identifikujte šta kontrolišete (oracle/leak/nonce reuse), a zatim primenite poznati šablon napada.
+Crypto izazovi nagrađuju brzinu: klasifikujte primitiv, utvrdite čime možete da upravljate (oracle/leak/ponovna upotreba nonce-a), a zatim primenite poznati obrazac napada.
 
 ### CTF workflow
 {{#ref}}
 ctf-workflow/README.md
 {{#endref}}
 
-### Symmetric crypto
+### Simetrična kriptografija
 {{#ref}}
 symmetric/README.md
 {{#endref}}
 
-### Hashes, MACs, and KDFs
+### Hash-evi, MAC-ovi i KDF-ovi
 {{#ref}}
 hashes/README.md
 {{#endref}}
 
-### Public-key crypto
+### Kriptografija sa javnim ključem
 {{#ref}}
 public-key/README.md
 {{#endref}}
 
-### TLS and certificates
+### TLS i sertifikati
 {{#ref}}
 tls-and-certificates/README.md
 {{#endref}}
 
-### Crypto in malware
+### Crypto u malware-u
 {{#ref}}
 crypto-in-malware/README.md
 {{#endref}}
 
-### Misc
+### Razno
 {{#ref}}
 ctf-misc/README.md
 {{#endref}}
@@ -48,7 +48,7 @@ ctf-misc/README.md
 ## Brzo podešavanje
 
 - Python: `python3 -m venv .venv && source .venv/bin/activate`
-- Libraries: `pip install pycryptodome gmpy2 sympy pwntools`
-- SageMath (često neophodan za lattice/RSA/ECC): https://www.sagemath.org/
+- Biblioteke: `pip install pycryptodome gmpy2 sympy pwntools`
+- SageMath (često neophodan za lattice/RSA/ECC): <https://www.sagemath.org/>
 
 {{#include ../banners/hacktricks-training.md}}

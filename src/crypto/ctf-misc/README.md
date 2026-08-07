@@ -1,25 +1,29 @@
-# Crypto CTF Razno
+# Crypto CTF Misc
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Skup stranica koje se često pojavljuju u crypto izazovima, ali se ne uklapaju lepo negde drugde.
+Stranice sa raznim sadržajem koje se često pojavljuju u crypto izazovima, ali se ne uklapaju uredno na druga mesta.
 
-## Esoterični jezici
+## Ezoterični jezici
 
 ### Tehnika
 
-Koristite ovo kada je crypto zadatak zapravo: pokrenuti esolang program i zatim dekodirati ono što ispisuje.
+Koristite ovo kada je crypto zadatak zapravo: pokrenite esolang program, a zatim dekodirajte njegov izlaz.
 
-Ako vam izazov daje kod koji ne liči na standardni jezik:
+Ako vam izazov daje kod koji ne izgleda kao kod standardnog jezika:
 
-- Identifikujte esolang (Google-ujte prepoznatljiv token).
-- Koristite onlajn interpreter ili Docker image.
-- Ako je izlaz čudan, tražite višeslojno kodiranje/kompresiju nakon izvršavanja.
+- Identifikujte esolang (pretražite Google koristeći karakterističan token).
+- Koristite online interpreter ili Docker image.
+- Ako je izlaz neobičan, nakon izvršavanja potražite višeslojno encoding/compression.
 
-Dobar početni spisak:
+Dobra početna lista:<sup>[[1]](#references)</sup>
 
 {{#ref}}
 https://esolangs.org/wiki/Main_Page
 {{#endref}}
+
+## Reference
+
+- [1] [Esolang, wiki o ezoteričnim programskim jezicima](https://esolangs.org/wiki/Main_Page)
 
 {{#include ../../banners/hacktricks-training.md}}

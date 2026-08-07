@@ -2,17 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Većina teškog CTF crypto-a završava ovde: RSA, ECC/ECDSA, lattices, i loša nasumičnost.
+
+Većina hard crypto CTF zadataka na kraju se svodi na ovo: RSA, ECC/ECDSA, lattice pristupe i lošu slučajnost.
 
 ## Preporučeni alati
 
 - SageMath (LLL/lattices, modularna aritmetika): https://www.sagemath.org/
-- RsaCtfTool (višenamenski alat): https://github.com/Ganapati/RsaCtfTool
-- factordb (brze provere faktora): http://factordb.com/
+- RsaCtfTool (švajcarski nož): https://github.com/Ganapati/RsaCtfTool
+- factordb (brza provera faktora): http://factordb.com/
 
 ## RSA
 
-Počnite ovde kada imate `n,e,c` i neki dodatni nagoveštaj (deljeni modul, mali eksponent, delimični bitovi, povezane poruke).
+Počnite ovde kada imate `n,e,c` i neki dodatni hint (shared modulus, low exponent, partial bits, related messages).
 
 {{#ref}}
 rsa/README.md
@@ -20,38 +21,38 @@ rsa/README.md
 
 ## ECC / ECDSA
 
-Ako su uključeni potpisi, prvo proverite probleme sa nonce-om (reuse/bias/leaks) pre nego što pretpostavite tešku matematiku.
+Ako su uključeni potpisi, prvo testirajte nonce probleme (reuse/bias/leaks) pre nego što pretpostavite da je potrebna napredna matematika.
 
 ### ECDSA nonce reuse / bias
 
-Ako dva potpisa ponovo koriste isti nonce `k`, privatni ključ može biti rekonstruisan.
+Ako dva potpisa koriste isti nonce `k`, private key se može povratiti.
 
-Čak i ako `k` nije identičan, bias/leakage bitova nonce-a kroz potpise može biti dovoljan za oporavak korišćenjem lattices (uobičajena tema u CTF-u).
+Čak i kada `k` nije identičan, **bias/leakage** nonce bitova kroz više potpisa može biti dovoljan za lattice recovery (česta CTF tema).
 
-Tehnički oporavak kada se `k` ponovo koristi:
+Tehnički postupak oporavka kada se `k` ponavlja:
 
 ECDSA jednačine potpisa (red grupe `n`):
 
 - `r = (kG)_x mod n`
 - `s = k^{-1}(h(m) + r*d) mod n`
 
-Ako se isti `k` ponovo koristi za dve poruke `m1, m2` koje daju potpise `(r, s1)` i `(r, s2)`:
+Ako se isti `k` koristi za dve poruke `m1, m2`, pri čemu se dobijaju potpisi `(r, s1)` i `(r, s2)`:
 
 - `k = (h(m1) - h(m2)) * (s1 - s2)^{-1} mod n`
 - `d = (s1*k - h(m1)) * r^{-1} mod n`
 
-### Napadi na nevažeće krive
+### Invalid-curve attacks
 
-Ako protokol ne proverava da li su tačke na očekivanoj krivi (ili podgrupi), napadač može primorati operacije u slaboj grupi i rekonstruisati tajne.
+Ako protokol ne proverava da li se tačke nalaze na očekivanoj krivoj (ili podgrupi), napadač može da natera operacije da se izvršavaju u slaboj grupi i povrati tajne.
 
 Tehnička napomena:
 
-- Proverite da li su tačke na krivi i u ispravnoj podgrupi.
-- Mnogi CTF zadaci modeluju ovo kao "server pomnoži napadačem odabranu tačku tajnim skalarom i vrati nešto."
+- Proverite da li su tačke na krivoj i u odgovarajućoj podgrupi.
+- Mnogi CTF zadaci ovo modeluju kao: "server množi point koji je izabrao napadač tajnim skalarom i vraća nešto."
 
 ### Alati
 
-- SageMath za aritmetiku krive / lattices
-- `ecdsa` Python library za parsiranje/verifikaciju
+- SageMath za računanje na krivama / lattices
+- `ecdsa` Python biblioteka za parsiranje/verifikaciju
 
 {{#include ../../banners/hacktricks-training.md}}
