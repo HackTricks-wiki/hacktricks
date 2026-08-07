@@ -5,21 +5,21 @@
 ## Objective-C
 
 > [!CAUTION]
-> Notez que les programmes écrits en Objective-C **conservent** leurs déclarations de classe **lorsqu'ils sont** **compilés** en [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Ces déclarations de classe **incluent** le nom et le type de :
+> Notez que les programmes écrits en Objective-C **conservent** leurs déclarations de classes **lorsqu'ils sont** **compilés** en [binaires Mach-O](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Ces déclarations de classes **incluent** le nom et le type de :
 
 - La classe
 - Les méthodes de la classe
 - Les variables d'instance de la classe
 
-Vous pouvez obtenir ces informations en utilisant [**class-dump**](https://github.com/nygard/class-dump) :
+Vous pouvez obtenir ces informations avec [**class-dump**](https://github.com/nygard/class-dump) :
 ```bash
 class-dump Kindle.app
 ```
-Notez que ces noms pourraient être obfusqués pour rendre l'inversion du binaire plus difficile.
+Notez que ces noms peuvent être obfusqués afin de rendre le reverse engineering du binaire plus difficile.
 
-## Classes, Méthodes & Objets
+## Classes, méthodes et objets
 
-### Interface, Propriétés & Méthodes
+### Interface, propriétés et méthodes
 ```objectivec
 // Declare the interface of the class
 @interface MyVehicle : NSObject
@@ -50,9 +50,9 @@ self.numberOfWheels += value;
 
 @end
 ```
-### **Objet & Appeler Méthode**
+### **Méthode d’objet et d’appel**
 
-Pour créer une instance d'une classe, la méthode **`alloc`** est appelée, ce qui **alloue de la mémoire** pour chaque **propriété** et **met à zéro** ces allocations. Ensuite, **`init`** est appelée, ce qui **initialise les propriétés** aux **valeurs requises**.
+Pour créer une instance d’une classe, la méthode **`alloc`** est appelée afin d’**allouer de la mémoire** pour chaque **propriété** et de **mettre à zéro** ces allocations. Ensuite, **`init`** est appelée pour **initialiser les propriétés** avec les **valeurs requises**.
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -66,13 +66,13 @@ MyVehicle *newVehicle = [MyVehicle new];
 ```
 ### **Méthodes de classe**
 
-Les méthodes de classe sont définies avec le **signe plus** (+) et non le tiret (-) qui est utilisé avec les méthodes d'instance. Comme la méthode de classe **NSString** **`stringWithString`** :
+Les méthodes de classe sont définies avec le **signe plus** (+), et non avec le trait d’union (-) utilisé avec les méthodes d’instance. Comme la méthode de classe **`stringWithString`** de la classe **NSString** :
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
 ### Setter & Getter
 
-Pour **définir** & **obtenir** des propriétés, vous pouvez le faire avec une **notation par points** ou comme si vous appeliez une **méthode** :
+Pour **définir** et **récupérer** des propriétés, vous pouvez le faire avec une **notation par points** ou comme si vous **appeliez une méthode** :
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -82,20 +82,20 @@ newVehicle.numberOfWheels = 2;
 NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
-### **Variables d'instance**
+### **Variables d’instance**
 
-Alternativement aux méthodes setter et getter, vous pouvez utiliser des variables d'instance. Ces variables ont le même nom que les propriétés mais commencent par un "\_":
+Au lieu des méthodes setter et getter, vous pouvez utiliser des variables d’instance. Ces variables portent le même nom que les propriétés, mais commencent par un « \_ » :
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
 NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 }
 ```
-### Protocoles
+### Protocols
 
-Les protocoles sont un ensemble de déclarations de méthodes (sans propriétés). Une classe qui implémente un protocole implémente les méthodes déclarées.
+Les protocols sont un ensemble de déclarations de méthodes (sans propriétés). Une classe qui implémente un protocol implémente les méthodes déclarées.
 
-Il existe 2 types de méthodes : **obligatoires** et **facultatives**. Par **défaut**, une méthode est **obligatoire** (mais vous pouvez également l'indiquer avec un tag **`@required`**). Pour indiquer qu'une méthode est facultative, utilisez **`@optional`**.
+Il existe 2 types de méthodes : **mandatory** et **optional**. Par **défaut**, une méthode est **mandatory** (mais vous pouvez également l’indiquer avec un tag **`@required`**). Pour indiquer qu’une méthode est optional, utilisez **`@optional`**.
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -105,7 +105,7 @@ Il existe 2 types de méthodes : **obligatoires** et **facultatives**. Par **dé
 - (void) method3; //optional
 @end
 ```
-### Tous ensemble
+### Tout ensemble
 ```objectivec
 // gcc -framework Foundation test_obj.m -o test_obj
 #import <Foundation/Foundation.h>
@@ -157,18 +157,18 @@ NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
 ```
 ### Classes de base
 
-#### Chaîne
+#### String
 ```objectivec
 // NSString
 NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-Les classes de base sont **immuables**, donc pour ajouter une chaîne à une chaîne existante, **une nouvelle NSString doit être créée**.
+Les classes de base sont **immutables** ; pour ajouter une chaîne à une chaîne existante, il faut créer un **nouveau NSString**.
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
-Ou vous pourriez également utiliser une classe de chaîne **mutable** :
+Ou vous pourriez également utiliser une classe de chaînes **mutable** :
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
 [mutableString appendString:bookTitle];
@@ -177,7 +177,7 @@ NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "]
 [mutableString appendString:@" and published in "];
 [mutableString appendString:bookPublicationYear];
 ```
-#### Nombre
+#### Numéro
 ```objectivec
 // character literals.
 NSNumber *theLetterZ = @'Z'; // equivalent to [NSNumber numberWithChar:'Z']
@@ -196,7 +196,7 @@ NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:
 NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
-#### Tableau, Ensembles & Dictionnaire
+#### Tableaux, ensembles et dictionnaire
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -244,7 +244,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 ```
 ### Blocs
 
-Les blocs sont **des fonctions qui se comportent comme des objets** donc ils peuvent être passés à des fonctions ou **stockés** dans des **tableaux** ou des **dictionnaires**. De plus, ils peuvent **représenter une valeur s'ils reçoivent des valeurs** donc c'est similaire aux lambdas.
+Les blocs sont des **fonctions qui se comportent comme des objets**, ce qui leur permet d'être transmis à des fonctions ou **stockés** dans des **tableaux** ou des **dictionnaires**. Ils peuvent également **représenter une valeur lorsqu'on leur fournit des valeurs**, ce qui les rend similaires aux lambdas.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -304,7 +304,7 @@ if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
 NSLog(@"Removed successfully");
 }
 ```
-Il est également possible de gérer des fichiers **en utilisant des objets `NSURL` au lieu d'objets `NSString`**. Les noms des méthodes sont similaires, mais **avec `URL` au lieu de `Path`**.
+Il est également possible de gérer les fichiers **à l’aide d’objets `NSURL` plutôt que d’objets `NSString`**. Les noms des méthodes sont similaires, mais **avec `URL` à la place de `Path`**.
 ```objectivec
 
 
