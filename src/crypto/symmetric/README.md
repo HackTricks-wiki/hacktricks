@@ -1,179 +1,179 @@
-# Symmetric Crypto
+# Симетрична криптографія
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## На що звертати увагу в CTFs
+## На що звертати увагу в CTF
 
-- **Неправильне використання режимів**: ECB patterns, CBC malleability, CTR/GCM nonce reuse.
-- **Padding oracles**: різні помилки/затримки при некоректному padding.
-- **MAC confusion**: використання CBC-MAC з повідомленнями змінної довжини або помилки типу MAC-then-encrypt.
-- **XOR everywhere**: потокові шифри та кастомні конструкції часто зводяться до XOR з keystream.
+- **Неправильне використання режимів**: патерни ECB, malleability CBC, повторне використання nonce у CTR/GCM.
+- **Padding oracles**: різні помилки/таймінги для неправильного padding.
+- **Плутанина з MAC**: використання CBC-MAC для повідомлень змінної довжини або помилки MAC-then-encrypt.
+- **XOR всюди**: stream ciphers і custom constructions часто зводяться до XOR із keystream.
 
-## AES modes and misuse
+## Режими AES і неправильне використання
 
 ### ECB: Electronic Codebook
 
-ECB leaks patterns: equal plaintext blocks → equal ciphertext blocks. Це дозволяє:
+ECB leak-ить патерни: однакові блоки plaintext → однакові блоки ciphertext. Це дає змогу:
 
-- Cut-and-paste / block reordering
-- Block deletion (if the format remains valid)
+- Виконувати cut-and-paste / перестановку блоків
+- Видаляти блоки (якщо формат залишається коректним)
 
-Якщо ви можете контролювати plaintext і спостерігати ciphertext (або cookies), спробуйте зробити повторювані блоки (наприклад, багато `A`s) і шукати повтори.
+Якщо ви можете контролювати plaintext і спостерігати ciphertext (або cookies), спробуйте створити повторювані блоки (наприклад, багато `A`) і пошукайте повтори.
 
 ### CBC: Cipher Block Chaining
 
-- CBC є **malleable**: зміна бітів у `C[i-1]` призводить до зміни передбачуваних бітів у `P[i]`.
-- Якщо система видає (безпосередньо або опосередковано) інформацію про валідний чи невалідний padding, у вас може бути **padding oracle**.
+- CBC є **malleable**: зміна бітів у `C[i-1]` змінює передбачувані біти в `P[i]`.
+- Якщо система розкриває інформацію про коректний або некоректний padding, у вас може бути **padding oracle**.
 
 ### CTR
 
-CTR перетворює AES на потоковий шифр: `C = P XOR keystream`.
+CTR перетворює AES на stream cipher: `C = P XOR keystream`.
 
 Якщо nonce/IV повторно використовується з тим самим ключем:
 
-- `C1 XOR C2 = P1 XOR P2` (classic keystream reuse)
-- З відомим plaintext можна відновити keystream і розшифрувати інші повідомлення.
+- `C1 XOR C2 = P1 XOR P2` (класичне повторне використання keystream)
+- Знаючи plaintext, можна відновити keystream і розшифрувати інші дані.
 
-**Nonce/IV reuse exploitation patterns**
+**Патерни exploitation повторного використання Nonce/IV**
 
-- Відновіть keystream де відомий/можна вгадати plaintext:
+- Відновлюйте keystream всюди, де plaintext відомий або його можна передбачити:
 
 ```text
 keystream[i..] = ciphertext[i..] XOR known_plaintext[i..]
 ```
 
-Застосуйте відновлені байти keystream для розшифровки будь-якого іншого ciphertext, згенерованого з тим самим key+IV на тих же офсетах.
-- Highly structured data (наприклад, ASN.1/X.509 certificates, file headers, JSON/CBOR) дають великі області відомого plaintext. Ви часто можете XORити ciphertext сертифіката з передбачуваною частиною сертифіката, щоб вивести keystream, а потім розшифрувати інші секрети, зашифровані під тим самим IV. See also [TLS & Certificates](../tls-and-certificates/README.md) for typical certificate layouts.
-- Коли кілька секретів того ж самого serialized формату/розміру зашифровані під тим самим key+IV, вирівнювання полів пролить інформацію навіть без повного відомого plaintext. Приклад: PKCS#8 RSA keys одного розміру модуля розміщують прості фактори в тих самих офсетах (~99.6% вирівнювання для 2048-bit). XOR двох ciphertext під повторно використаним keystream ізолює `p ⊕ p'` / `q ⊕ q'`, що може бути відновлено перебором за секунди.
-- Default IVs in libraries (e.g., constant `000...01`) are a critical footgun: кожне шифрування повторює той самий keystream, перетворюючи CTR у повторно використаний one-time pad.
+Застосовуйте відновлені байти keystream для розшифрування будь-якого іншого ciphertext, створеного з тим самим key+IV, на тих самих offsets.
+- Дані з чіткою структурою (наприклад, сертифікати ASN.1/X.509, заголовки файлів, JSON/CBOR) містять великі області відомого plaintext. Часто можна виконати XOR ciphertext сертифіката з передбачуваним тілом сертифіката, щоб отримати keystream, а потім розшифрувати інші secrets, зашифровані з повторно використаним IV. Див. також [TLS і Certificates](../tls-and-certificates/README.md) для типових структур сертифікатів.<sup>[[1]](#references)</sup>
+- Коли кілька secrets однакового **serialized format/size** зашифровані з тим самим key+IV, вирівнювання полів leak-ить інформацію навіть без повністю відомого plaintext. Наприклад, RSA keys формату PKCS#8 з однаковим розміром модуля розміщують прості множники на відповідних offsets (приблизно 99,6% вирівнювання для 2048-bit). XOR двох ciphertext із повторно використаним keystream ізолює `p ⊕ p'` / `q ⊕ q'`, що можна brute-force відновити за секунди.<sup>[[1]](#references)</sup>
+- Стандартні IV у libraries (наприклад, константа `000...01`) є критичною footgun: кожне шифрування повторює той самий keystream, перетворюючи CTR на повторно використаний one-time pad.<sup>[[1]](#references)</sup>
 
-**CTR malleability**
+**Malleability CTR**
 
-- CTR надає лише конфіденційність: зміна бітів у ciphertext детерміновано змінює ті ж біти в plaintext. Без authentication tag атакувальники можуть підміняти дані (наприклад, tweak keys, flags або messages) непоміченими.
-- Використовуйте AEAD (GCM, GCM-SIV, ChaCha20-Poly1305, etc.) і забезпечуйте верифікацію тегу, щоб виявляти bit-flips.
+- CTR забезпечує лише confidentiality: зміна бітів у ciphertext детерміновано змінює ті самі біти в plaintext. Без authentication tag attackers можуть непомітно змінювати дані (наприклад, keys, flags або messages).
+- Використовуйте AEAD (GCM, GCM-SIV, ChaCha20-Poly1305 тощо) і забезпечте перевірку tag, щоб виявляти bit-flips.
 
 ### GCM
 
-GCM також сильно ламається при повторному використанні nonce. Якщо той самий key+nonce використовується більше ніж один раз, зазвичай ви отримуєте:
+GCM також серйозно ламається в разі повторного використання nonce. Якщо той самий key+nonce використовується більше одного разу, зазвичай виникає таке:
 
-- Keystream reuse для шифрування (як CTR), що дозволяє відновити plaintext, коли будь-який plaintext відомий.
-- Втрату гарантій цілісності. Залежно від того, що відкрите (кілька message/tag пар під тим самим nonce), атакувальники можуть сформувати теги.
+- Повторне використання keystream для encryption (як у CTR), що дає змогу відновити plaintext, якщо відомий будь-який plaintext.
+- Втрата гарантій integrity. Залежно від того, що саме відкрито (кілька пар message/tag з тим самим nonce), attackers можуть підробляти tags.
 
 Операційні рекомендації:
 
-- Розглядайте "nonce reuse" в AEAD як критичну вразливість.
-- Misuse-resistant AEADs (наприклад, GCM-SIV) зменшують наслідки повторного використання nonce, але все одно вимагають унікальних nonces/IVs.
-- Якщо у вас є кілька ciphertext під тим самим nonce, почніть з перевірки відношень типу `C1 XOR C2 = P1 XOR P2`.
+- Вважайте "nonce reuse" критичною vulnerability в AEAD.
+- Misuse-resistant AEAD (наприклад, GCM-SIV) зменшують наслідки неправильного використання nonce, але все одно потребують унікальних nonces/IVs.
+- Якщо у вас є кілька ciphertext з тим самим nonce, почніть із перевірки співвідношень на кшталт `C1 XOR C2 = P1 XOR P2`.
 
 ### Tools
 
-- CyberChef for quick experiments: https://gchq.github.io/CyberChef/
-- Python: `pycryptodome` for scripting
+- CyberChef для швидких експериментів: https://gchq.github.io/CyberChef/
+- Python: `pycryptodome` для scripting
 
-## ECB exploitation patterns
+## Патерни exploitation ECB
 
 ECB (Electronic Code Book) шифрує кожен блок незалежно:
 
-- equal plaintext blocks → equal ciphertext blocks
-- this leaks structure and enables cut-and-paste style attacks
+- однакові блоки plaintext → однакові блоки ciphertext
+- це leak-ить структуру і дає змогу виконувати атаки у стилі cut-and-paste
 
-![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
+![Діаграма розшифрування блоків у режимі ECB](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-### Detection idea: token/cookie pattern
+### Ідея виявлення: патерн token/cookie
 
-Якщо ви логінитесь кілька разів і **завжди отримуєте той самий cookie**, ciphertext може бути детермінований (ECB або фіксований IV).
+Якщо ви входите в систему кілька разів і **завжди отримуєте той самий cookie**, ciphertext може бути deterministic (ECB або fixed IV).
 
-Якщо ви створите двох користувачів з майже ідентичними plaintext layouts (наприклад, довгі повторювані символи) і побачите повторювані ciphertext blocks в тих самих офсетах, ECB — головний підозрюваний.
+Якщо ви створюєте двох users із майже ідентичними layout plaintext (наприклад, із довгими повторюваними символами) і бачите повторювані блоки ciphertext на тих самих offsets, ECB є головним підозрюваним.
 
-### Exploitation patterns
+### Патерни exploitation
 
-#### Removing entire blocks
+#### Видалення цілих блоків
 
-Якщо формат token виглядає як `<username>|<password>` і межа блока вирівняна, іноді можна створити користувача так, щоб блок із `admin` опинився вирівняним, потім видалити попередні блоки, щоб отримати дійсний token для `admin`.
+Якщо формат token має вигляд `<username>|<password>` і межа блоку вирівняна, іноді можна створити user так, щоб блок `admin` був вирівняний, а потім видалити попередні блоки й отримати коректний token для `admin`.
 
-#### Moving blocks
+#### Переміщення блоків
 
-Якщо бекенд терпить padding/extra spaces (`admin` vs `admin    `), ви можете:
+Якщо backend допускає padding/додаткові пробіли (`admin` проти `admin    `), можна:
 
 - Вирівняти блок, що містить `admin   `
-- Замінити/повторно використати той ciphertext block у іншому token
+- Замінити/повторно використати цей блок ciphertext в іншому token
 
 ## Padding Oracle
 
-### What it is
+### Що це таке
 
-У режимі CBC, якщо сервер розкриває (безпосередньо або опосередковано), чи розшифрований plaintext має **valid PKCS#7 padding**, ви часто можете:
+У режимі CBC, якщо server прямо або опосередковано розкриває, чи має розшифрований plaintext **коректний PKCS#7 padding**, часто можна:
 
 - Розшифрувати ciphertext без ключа
-- Зашифрувати вибраний plaintext (зфабрикувати ciphertext)
+- Зашифрувати вибраний plaintext (підробити ciphertext)
 
-The oracle can be:
+Oracle може бути:
 
-- A specific error message
-- A different HTTP status / response size
-- A timing difference
+- Конкретне повідомлення про помилку
+- Інший HTTP status / розмір response
+- Різниця в timing
 
-### Practical exploitation
+### Практичне exploitation
 
-PadBuster is the classic tool:
+PadBuster — класичний tool:
 
 {{#ref}}
 https://github.com/AonCyberLabs/PadBuster
 {{#endref}}
 
-Example:
+Приклад:
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 16 \
 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
 ```
-Примітки:
+Notes:
 
-- Block size is often `16` for AES.
-- `-encoding 0` means Base64.
-- Use `-error` if the oracle is a specific string.
+- Розмір блоку часто дорівнює `16` для AES.
+- `-encoding 0` означає Base64.
+- Використовуйте `-error`, якщо oracle повертає певний рядок.
 
 ### Чому це працює
 
-CBC decryption computes `P[i] = D(C[i]) XOR C[i-1]`. Модифікуючи байти в `C[i-1]` і спостерігаючи, чи є padding валідним, ви можете відновити `P[i]` по байту.
+CBC-розшифрування обчислює `P[i] = D(C[i]) XOR C[i-1]`. Змінюючи байти в `C[i-1]` і спостерігаючи, чи є padding коректним, можна відновити `P[i]` побайтно.
 
-## Bit-flipping у CBC
+## Bit-flipping in CBC
 
-Навіть без padding oracle, CBC є змінюваним. Якщо ви можете модифікувати блоки шифротексту і додаток використовує розшифрований текст як структуровані дані (наприклад, `role=user`), ви можете інвертувати конкретні біти, щоб змінити вибрані байти у наступному блоці на заданій позиції.
+Навіть без padding oracle CBC є malleable. Якщо ви можете змінювати блоки ciphertext, а застосунок використовує розшифрований plaintext як структуровані дані (наприклад, `role=user`), можна змінювати окремі біти, щоб змінити вибрані байти plaintext у потрібній позиції наступного блоку.
 
 Типовий CTF-патерн:
 
 - Token = `IV || C1 || C2 || ...`
 - Ви контролюєте байти в `C[i]`
-- Ви націлюєтеся на байти в `P[i+1]`, бо `P[i+1] = D(C[i+1]) XOR C[i]`
+- Ви націлюєтеся на байти plaintext у `P[i+1]`, оскільки `P[i+1] = D(C[i+1]) XOR C[i]`
 
-Саме по собі це не злом конфіденційності, але це поширений примітив privilege-escalation, коли відсутня цілісність.
+Саме по собі це не є зламом confidentiality, але це поширений primitive для privilege escalation, коли integrity відсутня.
 
 ## CBC-MAC
 
-CBC-MAC є безпечним лише за певних умов (зокрема **фіксованої довжини повідомлень** та правильного розділення доменів).
+CBC-MAC є безпечним лише за певних умов (зокрема, для **повідомлень фіксованої довжини** та за умови коректного domain separation).
 
-### Класичний патерн підробки для повідомлень змінної довжини
+### Класичний патерн forgery для повідомлень змінної довжини
 
 CBC-MAC зазвичай обчислюється так:
 
 - IV = 0
 - `tag = last_block( CBC_encrypt(key, message, IV=0) )`
 
-Якщо ви можете отримати теги для вибраних повідомлень, ви часто можете створити тег для конкатенації (або спорідненої конструкції) без знання ключа, експлуатуючи те, як CBC зв'язує блоки.
+Якщо ви можете отримувати tags для вибраних повідомлень, часто можна створити tag для конкатенації (або пов'язаної конструкції), не знаючи ключа, використовуючи спосіб, у який CBC об'єднує блоки.
 
-Це часто зустрічається в CTF у cookie/tokens, які MAC-ують username або role за допомогою CBC-MAC.
+Це часто трапляється в CTF cookies/tokens, які використовують CBC-MAC для MAC username або role.
 
-### Більш безпечні альтернативи
+### Безпечніші альтернативи
 
 - Використовуйте HMAC (SHA-256/512)
-- Використовуйте CMAC (AES-CMAC) правильно
-- Включайте довжину повідомлення / розділення доменів
+- Коректно використовуйте CMAC (AES-CMAC)
+- Додавайте довжину повідомлення / domain separation
 
-## Потокові шифри: XOR та RC4
+## Stream ciphers: XOR and RC4
 
 ### Ментальна модель
 
-Більшість сценаріїв з потоковими шифрами зводяться до:
+Більшість ситуацій зі stream cipher зводиться до:
 
 `ciphertext = plaintext XOR keystream`
 
@@ -182,19 +182,19 @@ CBC-MAC зазвичай обчислюється так:
 - Якщо ви знаєте plaintext, ви відновлюєте keystream.
 - Якщо keystream повторно використовується (той самий key+nonce), `C1 XOR C2 = P1 XOR P2`.
 
-### Шифрування на основі XOR
+### XOR-based encryption
 
-Якщо ви знаєте будь-який сегмент plaintext на позиції `i`, ви можете відновити байти keystream і дешифрувати інші шифротексти на тих позиціях.
+Якщо ви знаєте будь-який сегмент plaintext у позиції `i`, можна відновити байти keystream і розшифрувати інші ciphertext у цих позиціях.
 
-Автоматичні інструменти:
+Autosolvers:
 
 - [https://wiremask.eu/tools/xor-cracker/](https://wiremask.eu/tools/xor-cracker/)
 
 ### RC4
 
-RC4 — потоковий шифр; операції encrypt/decrypt однакові.
+RC4 — це stream cipher; encrypt/decrypt є тією самою операцією.
 
-Якщо ви можете отримати RC4 encryption відомого plaintext під тим самим ключем, ви можете відновити keystream і дешифрувати інші повідомлення тієї самої довжини/зсуву.
+Якщо ви можете отримати RC4 encryption відомого plaintext з тим самим key, можна відновити keystream і розшифрувати інші повідомлення такої самої довжини/зміщення.
 
 Reference writeup (HTB Kryptos):
 
@@ -202,8 +202,8 @@ Reference writeup (HTB Kryptos):
 https://0xrick.github.io/hack-the-box/kryptos/
 {{#endref}}
 
-## Посилання
+## References
 
-- [Trail of Bits – Carelessness versus craftsmanship in cryptography](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
+- [1] [Trail of Bits – Carelessness versus craftsmanship in cryptography](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
 
 {{#include ../../banners/hacktricks-training.md}}

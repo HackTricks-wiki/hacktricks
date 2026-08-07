@@ -1,41 +1,41 @@
-# Firmware Integrity
+# Цілісність firmware
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
+**Custom firmware та/або скомпільовані бінарні файли можна завантажити для експлуатації вразливостей перевірки цілісності або підпису**. Для компіляції bind shell із backdoor можна виконати такі кроки:
 
-1. The firmware can be extracted using firmware-mod-kit (FMK).
-2. The target firmware architecture and endianness should be identified.
-3. A cross compiler can be built using Buildroot or other suitable methods for the environment.
-4. The backdoor can be built using the cross compiler.
-5. The backdoor can be copied to the extracted firmware /usr/bin directory.
-6. The appropriate QEMU binary can be copied to the extracted firmware rootfs.
-7. The backdoor can be emulated using chroot and QEMU.
-8. The backdoor can be accessed via netcat.
-9. The QEMU binary should be removed from the extracted firmware rootfs.
-10. The modified firmware can be repackaged using FMK.
-11. The backdoored firmware can be tested by emulating it with firmware analysis toolkit (FAT) and connecting to the target backdoor IP and port using netcat.
+1. Firmware можна витягти за допомогою firmware-mod-kit (FMK).
+2. Необхідно визначити архітектуру та endianness цільової firmware.
+3. За допомогою Buildroot або інших відповідних методів для цього середовища можна створити cross compiler.
+4. Backdoor можна зібрати за допомогою cross compiler.
+5. Backdoor можна скопіювати до директорії /usr/bin витягнутої firmware.
+6. Відповідний бінарний файл QEMU можна скопіювати до rootfs витягнутої firmware.
+7. Backdoor можна емулювати за допомогою chroot і QEMU.
+8. Доступ до backdoor можна отримати через netcat.
+9. Бінарний файл QEMU слід видалити з rootfs витягнутої firmware.
+10. Модифіковану firmware можна перепакувати за допомогою FMK.
+11. Backdoored firmware можна протестувати, емулювавши її за допомогою firmware analysis toolkit (FAT) і підключившись до IP-адреси та порту цільового backdoor через netcat.
 
-If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled malicious binaries such as implants or reverse shells can be executed. Automated payload/implant tools like the Metasploit framework and 'msfvenom' can be leveraged using the following steps:
+Якщо root shell уже отримано за допомогою dynamic analysis, маніпуляцій із bootloader або hardware security testing, можна виконати попередньо скомпільовані malicious binaries, наприклад implants або reverse shells. Automated payload/implant tools, такі як Metasploit framework і 'msfvenom', можна використати за допомогою таких кроків:
 
-1. The target firmware architecture and endianness should be identified.
-2. Msfvenom can be used to specify the target payload, attacker host IP, listening port number, filetype, architecture, platform, and the output file.
-3. The payload can be transferred to the compromised device and ensured that it has execution permissions.
-4. Metasploit can be prepared to handle incoming requests by starting msfconsole and configuring the settings according to the payload.
-5. The meterpreter reverse shell can be executed on the compromised device.
+1. Необхідно визначити архітектуру та endianness цільової firmware.
+2. Msfvenom можна використати для визначення цільового payload, IP-адреси host атакувальника, номера порту для прослуховування, filetype, архітектури, платформи та вихідного файлу.
+3. Payload можна передати на скомпрометований пристрій і переконатися, що він має права на виконання.
+4. Metasploit можна підготувати для обробки вхідних запитів, запустивши msfconsole і налаштувавши параметри відповідно до payload.
+5. Reverse shell meterpreter можна виконати на скомпрометованому пристрої.
 
-## Unauthenticated transport bridges to privileged update protocols
+## Неавтентифіковані transport bridges до privileged update protocols
 
-A common embedded design mistake is exposing the **same internal command protocol over several transports** but enforcing authentication on only one of them. For example, USB may require challenge-response while BLE simply forwards unauthenticated **GATT writes** into the same privileged firmware-update handler.
+Поширена помилка embedded design полягає у відкритті **того самого внутрішнього command protocol через кілька transport**, але автентифікація застосовується лише до одного з них. Наприклад, USB може вимагати challenge-response, тоді як BLE просто пересилає неавтентифіковані **GATT writes** до того самого privileged firmware-update handler.<sup>[[1]](#references)</sup>
 
-Typical offensive workflow:
+Типовий offensive workflow:
 
-1. Enumerate the BLE GATT database and identify writable characteristics used by the official mobile app.
-2. Sniff app traffic and look for **magic bytes / opcodes** that match the wired protocol.
-3. Replay privileged commands over BLE **without pairing** and verify whether sensitive operations still work.
-4. If firmware upgrade, config write, debug, or factory-test opcodes are reachable, treat BLE as a **radio-reachable admin port**.
+1. Перерахувати BLE GATT database і визначити writable characteristics, які використовує офіційний mobile app.
+2. Перехопити app traffic і знайти **magic bytes / opcodes**, що відповідають wired protocol.
+3. Повторно надіслати privileged commands через BLE **без pairing** і перевірити, чи досі працюють sensitive operations.
+4. Якщо доступні firmware upgrade, config write, debug або factory-test opcodes, розглядати BLE як **radio-reachable admin port**.
 
-Quick checks:
+Швидкі перевірки:
 ```bash
 # Enumerate services/characteristics
 ble.enum <MAC>
@@ -46,80 +46,80 @@ ble.write <MAC> <UUID> <HEX_DATA>
 # gatttool equivalent
 # gatttool -b <MAC> --char-write-req -a <HANDLE> -n <HEX_DATA>
 ```
-Things to verify while reversing:
+Що потрібно перевірити під час reverse engineering:
 
-- Чи BLE вимагає **pairing/bonding** чи лише простого connection?
-- Чи всі transports спрямовуються до тієї самої внутрішньої dispatcher table?
-- Чи privileged opcodes фільтруються по-різному на USB / BLE / UART / Wi-Fi?
-- Чи може mobile app віддалено викликати firmware update, recovery або diagnostic handlers?
+- Чи потребує BLE **pairing/bonding**, чи достатньо звичайного з'єднання?
+- Чи всі transport спрямовуються до однієї внутрішньої таблиці dispatcher?
+- Чи фільтруються привілейовані opcodes по-різному через USB / BLE / UART / Wi-Fi?
+- Чи може mobile app віддалено запускати firmware update, recovery або diagnostic handlers?
 
-## Checksum-only firmware containers are still attacker-controlled firmware
+## Контейнери прошивки, захищені лише контрольною сумою, усе одно містять firmware під контролем attacker
 
-A firmware container protected only by an **unkeyed checksum** (CRC32, SHA-256, MD5, etc.) provides corruption detection, **not authenticity**. If the attacker can reach the update routine, they can patch the image, recompute the checksum, and flash arbitrary code.
+Контейнер firmware, захищений лише **невмонтованою контрольною сумою** (CRC32, SHA-256, MD5 тощо), забезпечує виявлення пошкоджень, **але не автентичність**. Якщо attacker може отримати доступ до update routine, він може пропатчити image, повторно обчислити checksum і прошити довільний code.<sup>[[1]](#references)</sup>
 
-Red flags during RE:
+Red flags під час RE:
 
-- Update code validates only a trailing checksum blob such as `CHK2`, `CRC`, or `SHA256`.
-- No signature verification or secure-boot root of trust is present.
-- No device-bound MAC / HMAC / authenticated encryption is used.
-- Recovery mode accepts the same unauthenticated image format.
+- Update code перевіряє лише кінцевий checksum blob, наприклад `CHK2`, `CRC` або `SHA256`.
+- Відсутня перевірка signature або root of trust для secure boot.
+- Не використовується device-bound MAC / HMAC / authenticated encryption.
+- Recovery mode приймає такий самий неавтентифікований формат image.
 
-Practical validation flow:
+Практичний validation flow:
 
-1. Extract the firmware container and identify bootloader, main firmware, and integrity metadata.
-2. Modify a harmless string or banner in the image.
-3. Recompute the checksum exactly as the updater expects.
-4. Reflash the image through the normal update path.
-5. Confirm the change on boot to prove arbitrary firmware replacement.
+1. Витягніть firmware container і визначте bootloader, основну firmware та integrity metadata.
+2. Змініть нешкідливий string або banner в image.
+3. Повторно обчисліть checksum точно так, як очікує updater.
+4. Прошийте image через звичайний update path.
+5. Підтвердьте зміну під час boot, щоб довести можливість довільної заміни firmware.
 
-If this works over a remotely reachable transport such as BLE/Wi-Fi, the bug is effectively **unauthenticated OTA firmware replacement**.
+Якщо це працює через remotely reachable transport, наприклад BLE/Wi-Fi, вразливість фактично є **unauthenticated OTA firmware replacement**.
 
-## Turning a trusted USB peripheral into BadUSB via firmware reflashing
+## Перетворення довіреного USB peripheral на BadUSB через повторне прошивання firmware
 
-When the target device is already trusted by the host over USB, malicious firmware may not need to implement a full new USB stack. A much easier pivot is often to **reuse existing HID support**.
+Коли target device уже trusted host через USB, malicious firmware може не потребувати реалізації повного нового USB stack. Значно простішим pivot часто є **повторне використання наявної HID support**.<sup>[[1]](#references)</sup>
 
-Useful pattern:
+Корисний pattern:
 
-1. Check whether the device already enumerates as a **HID Consumer Control** / media / vendor HID interface.
-2. Locate the existing **HID report descriptor** in firmware.
-3. Append or replace descriptor entries so the device also advertises **keyboard** capability.
-4. Reuse existing firmware routines that already send HID reports instead of writing a new transport implementation.
-5. Inject key press + key release reports to type commands on the host.
+1. Перевірте, чи вже enumerates device як **HID Consumer Control** / media / vendor HID interface.
+2. Знайдіть наявний **HID report descriptor** у firmware.
+3. Додайте або замініть descriptor entries, щоб device також оголошував **keyboard** capability.
+4. Повторно використайте наявні firmware routines, які вже надсилають HID reports, замість написання нової transport implementation.
+5. Інжектуйте key press + key release reports, щоб вводити commands на host.
 
-This turns firmware compromise into **host compromise** because the PC will trust the reflashed peripheral as a legitimate keyboard.
+Це перетворює firmware compromise на **host compromise**, оскільки PC довірятиме повторно прошитому peripheral як легітимній keyboard.
 
-### Minimal assessment checklist
+### Мінімальний assessment checklist
 
-- Does `dmesg`, Device Manager, or USB descriptors show an existing HID interface?
-- Is there spare room near the report descriptor or a relocatable descriptor table?
-- Can existing media-control send routines be reused for keyboard reports?
-- Does the host auto-accept the new keyboard interface after reflashing?
+- Чи показують `dmesg`, Device Manager або USB descriptors наявний HID interface?
+- Чи є вільне місце поруч із report descriptor або relocatable descriptor table?
+- Чи можна повторно використати наявні media-control send routines для keyboard reports?
+- Чи host автоматично приймає новий keyboard interface після повторного прошивання?
 
-## Reliable payload execution inside RTOS firmware
+## Надійне виконання payload усередині RTOS firmware
 
-Instead of inserting fragile trampolines into random code paths, look for **existing RTOS tasks** that are unused or low-impact in normal operation.
+Замість вставлення fragile trampolines у випадкові code paths шукайте **наявні RTOS tasks**, які не використовуються або мають низький вплив під час нормальної роботи.<sup>[[1]](#references)</sup>
 
-Why this is useful:
+Чому це корисно:
 
-- The scheduler starts your payload naturally during boot.
-- You avoid corrupting critical control flow.
-- Delayed payloads are less likely to trigger watchdog resets than when run inside a latency-sensitive USB/network handler.
+- Scheduler природно запускає ваш payload під час boot.
+- Ви уникаєте пошкодження критичного control flow.
+- Delayed payloads із меншою ймовірністю спричинять watchdog resets, ніж payloads, запущені всередині latency-sensitive USB/network handler.
 
-Good targets are diagnostic, factory-test, telemetry, or coprocessor service tasks that appear dormant in normal usage.
+Добрі targets — diagnostic, factory-test, telemetry або coprocessor service tasks, які виглядають dormant під час звичайного використання.
 
-## Fast exploit iteration: repurpose benign protocol handlers
+## Швидка ітерація exploit: повторне використання benign protocol handlers
 
-Once firmware patching is possible, a compact way to accelerate RE is to overwrite a harmless command handler (for example an **echo/debug opcode**) with custom **memory read / write / execute** primitives. This avoids full reflashing for every experiment and is especially useful when the device supports the modified handler over a fast wired transport.
+Коли patching firmware можливе, компактний спосіб прискорити RE — перезаписати нешкідливий command handler (наприклад **echo/debug opcode**) власними примітивами **memory read / write / execute**. Це усуває потребу в повному reflashing для кожного експерименту й особливо корисно, коли device підтримує modified handler через fast wired transport.<sup>[[1]](#references)</sup>
 
-Use this to:
+Використовуйте це, щоб:
 
-- Verify scatter-loaded memory maps
-- Inspect heap/task state live
-- Test small payloads before burning them into flash
-- Recover function pointers, strings, and descriptor tables safely
+- Перевіряти scatter-loaded memory maps
+- У реальному часі переглядати heap/task state
+- Тестувати невеликі payloads перед їх записом у flash
+- Безпечно відновлювати function pointers, strings і descriptor tables
 
 ## References
 
-- [Pwnd Blaster: Hacking your PC using your speaker without ever touching it](https://blog.nns.ee/2026/06/03/katana-badusb/)
+- [1] [Pwnd Blaster: Hacking your PC using your speaker without ever touching it](https://blog.nns.ee/2026/06/03/katana-badusb/)
 
 {{#include ../../banners/hacktricks-training.md}}

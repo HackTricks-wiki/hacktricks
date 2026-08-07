@@ -1,85 +1,85 @@
-# RSA Attacks
+# Атаки на RSA
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Fast triage
+## Швидкий triage
 
-Збирайте:
+Зберіть:
 
-- `n`, `e`, `c` (та будь-які додаткові ciphertexts)
-- Будь-які зв’язки між повідомленнями (same plaintext? shared modulus? structured plaintext?)
-- Будь-які leak (partial `p/q`, bits of `d`, `dp/dq`, known padding)
+- `n`, `e`, `c` (а також будь-які додаткові ciphertexts)
+- Будь-які зв’язки між повідомленнями (той самий plaintext? спільний modulus? структурований plaintext?)
+- Будь-які leaks (часткові `p/q`, біти `d`, `dp/dq`, відоме padding)
 
 Потім спробуйте:
 
-- Перевірку factorization (Factordb / `sage: factor(n)` для small-ish)
-- Патерни low exponent (`e=3`, broadcast)
-- Common modulus / repeated primes
+- Перевірку факторизації (Factordb / `sage: factor(n)` для відносно малих чисел)
+- Патерни малих експонент (`e=3`, broadcast)
+- Common modulus / повторювані прості числа
 - Lattice methods (Coppersmith/LLL), коли щось майже відоме
 
-## Common RSA attacks
+## Поширені атаки на RSA
 
 ### Common modulus
 
-Якщо два ciphertexts `c1, c2` encrypt the **same message** під **тим самим modulus** `n`, але з різними exponents `e1, e2` (і `gcd(e1,e2)=1`), ви можете відновити `m` using the extended Euclidean algorithm:
+Якщо два ciphertexts `c1, c2` шифрують **те саме повідомлення** за допомогою **того самого modulus** `n`, але з різними експонентами `e1, e2` (і `gcd(e1,e2)=1`), можна відновити `m` за допомогою розширеного алгоритму Евкліда:
 
-`m = c1^a * c2^b mod n` where `a*e1 + b*e2 = 1`.
+`m = c1^a * c2^b mod n`, де `a*e1 + b*e2 = 1`.
 
-Приклад outline:
+Приблизний алгоритм:
 
-1. Обчисліть `(a, b) = xgcd(e1, e2)`, so `a*e1 + b*e2 = 1`
-2. If `a < 0`, interpret `c1^a` as `inv(c1)^{-a} mod n` (same for `b`)
-3. Multiply and reduce modulo `n`
+1. Обчисліть `(a, b) = xgcd(e1, e2)`, щоб `a*e1 + b*e2 = 1`
+2. Якщо `a < 0`, інтерпретуйте `c1^a` як `inv(c1)^{-a} mod n` (так само для `b`)
+3. Перемножте та зведіть за модулем `n`
 
-### Shared primes across moduli
+### Спільні прості числа між modulus
 
-If you have multiple RSA moduli from the same challenge, check whether they share a prime:
+Якщо у вас є кілька RSA modulus з одного challenge, перевірте, чи не мають вони спільного простого числа:
 
-- `gcd(n1, n2) != 1` implies a catastrophic key-generation failure.
+- `gcd(n1, n2) != 1` означає катастрофічну помилку генерації ключів.
 
-This shows up frequently in CTFs as "we generated many keys quickly" or "bad randomness".
+Це часто трапляється в CTF як наслідок ситуацій на кшталт "ми швидко згенерували багато ключів" або "погана випадковість".
 
-### Sparse / short-sleeve moduli
+### Розріджені / short-sleeve modulus
 
-Some broken big-integer generators leak structure directly into the public modulus: each limb contains only a small random subfield and the rest of the bits are `0`. In practice this appears as **regularly spaced zero blocks** across `n`, often aligned to 32-bit or 128-bit limbs.
+Деякі зламані генератори big-integer безпосередньо витікають структуру в public modulus: кожен limb містить лише невелике випадкове підполе, а решта бітів дорівнює `0`. На практиці це проявляється як **регулярно розташовані блоки нулів** у `n`, часто вирівняні за 32-бітними або 128-бітними limbs.<sup>[[1]](#references)</sup>
 
-Quick checks:
+Швидкі перевірки:
 
-- Dump `n` in hex and look for repeated zero windows at a fixed stride.
-- Re-slice `n` as limbs (`2^32`, `2^64`, `2^128`) and inspect whether each limb is unusually small.
-- Audit public SSH/TLS keys with tooling such as **badkeys** when you suspect weak host-key generation.
+- Виведіть `n` у hex і пошукайте повторювані нульові вікна з фіксованим stride.
+- Повторно розділіть `n` на limbs (`2^32`, `2^64`, `2^128`) і перевірте, чи не є кожен limb незвично малим.
+- Перевірте public SSH/TLS keys за допомогою таких інструментів, як **badkeys**, якщо підозрюєте слабку генерацію host-key.<sup>[[2]](#references)[[3]](#references)</sup>
 
-This is more serious than a statistical bias: if both private factors `p` and `q` are short-sleeved, the modulus may become **easy to factor**.
+Це серйозніше за статистичне відхилення: якщо обидва приватні множники `p` і `q` мають short-sleeve структуру, modulus може стати **легким для факторизації**.<sup>[[1]](#references)</sup>
 
-### Polynomial factorization of structured RSA keys
+### Polynomial factorization структурованих RSA keys
 
-For a suspected limb width `w`, write the modulus in base `B = 2^w`:
+Для підозрюваної ширини limb `w` запишіть modulus у базі `B = 2^w`:
 
 - `n = Σ_i n_i B^i`
 - `f_n(x) = Σ_i n_i x^i`
 
-Because evaluation is multiplicative, `f_a(B) * f_c(B) = (f_a * f_c)(B)`. If the factors also have sparse limb coefficients, then:
+Оскільки обчислення є мультиплікативним, `f_a(B) * f_c(B) = (f_a * f_c)(B)`. Якщо factors також мають розріджені limb coefficients, тоді:
 
 - `n = p*q`
 - `f_n(x) = f_p(x) * f_q(x)`
 
-Attack outline:
+Приблизний алгоритм атаки:
 
-1. Guess the limb width `w`.
-2. Convert the public modulus `n` into `f_n(x)` using base `2^w`.
-3. Factor `f_n(x)` over the integers.
-4. Evaluate candidate factors back at `B = 2^w`.
-5. Verify which candidates multiply to `n`.
+1. Вгадайте ширину limb `w`.
+2. Перетворіть public modulus `n` на `f_n(x)`, використовуючи базу `2^w`.
+3. Розкладіть `f_n(x)` на множники над цілими числами.
+4. Обчисліть candidate factors назад при `B = 2^w`.
+5. Перевірте, які candidates перемножуються в `n`.
 
-This **does not break normal RSA**. It only works when the prime factors themselves have very small, highly structured limb coefficients.
+Це **не ламає нормальний RSA**. Метод працює лише тоді, коли прості множники самі мають дуже малі, чітко структуровані limb coefficients.<sup>[[1]](#references)</sup>
 
 ### Shifted limb leakage
 
-The sparse bytes are not always aligned at the low end of each limb. If direct base-`2^w` conversion produces large coefficients, search for shifts `i,j` such that `2^i p` and `2^j q` become sparse in that limb basis. The product polynomial can still be derived from the public modulus, factored, and recombined into the original integer factors.
+Розріджені bytes не завжди вирівняні за молодшим кінцем кожного limb. Якщо пряме перетворення в базу `2^w` створює великі coefficients, шукайте зсуви `i,j`, за яких `2^i p` і `2^j q` стають розрідженими в цій limb basis. Product polynomial усе ще можна вивести з public modulus, розкласти на множники та recombine в оригінальні цілі множники.<sup>[[1]](#references)</sup>
 
-### Implementation smell: byte-to-limb RNG bug
+### Запах реалізації: byte-to-limb RNG bug
 
-A dangerous pattern is computing the number of **32-bit limbs**, allocating only that many **bytes**, and copying them into the limb array:
+Небезпечний патерн полягає в обчисленні кількості **32-бітних limbs**, виділенні лише такої кількості **bytes** та їх копіюванні в масив limbs:
 ```csharp
 int numLimbs = bits / 32;
 byte[] array = new byte[numLimbs];
@@ -87,82 +87,82 @@ rngProvider.GetNonZeroBytes(array);
 Array.Copy(array, 0, bignumLimbs, 0, numLimbs);
 bignumLimbs[numLimbs - 1] |= 0x80000000;
 ```
-Це дає кожному 32-бітному limb лише **8 біт ентропії** плюс примусово встановлений верхній біт у останньому limb. Отримані RSA-прості числа часто можна розпізнати й факторизувати лише з public key.
+Це дає кожній 32-бітній частині лише **8 бітів ентропії** плюс примусово встановлений старший біт в останній частині. Отримані RSA-прості числа часто можна розпізнати й факторизувати, маючи лише відкритий ключ.<sup>[[1]](#references)</sup>
 
-### Пов’язаний режим збою DSA
+### Related DSA failure mode
 
-Якщо той самий зламаний big-integer routine повторно використовується для генерації private exponent у DSA, public key `y = g^x` може розкрити **різко зменшений і структурований** search space для `x`. Коли шаблон limb уже відомий, discrete-log атаки на кшталт **baby-step giant-step** можуть стати практичними проти public parameters.
+Якщо ту саму зламану процедуру роботи з великими цілими числами повторно використовують для генерації приватного експонента DSA, відкритий ключ `y = g^x` може розкрити **різко зменшений і структурований** простір пошуку для `x`. Коли шаблон частин відомий, атаки на дискретний логарифм, такі як **baby-step giant-step**, можуть стати практичними проти публічних параметрів.<sup>[[1]](#references)</sup>
 
 ### Håstad broadcast / low exponent
 
-Якщо той самий plaintext надсилається кільком отримувачам із малим `e` (часто `e=3`) і без правильного padding, можна відновити `m` через CRT та integer root.
+Якщо те саме повідомлення надсилається кільком одержувачам із малим `e` (часто `e=3`) і без належного padding, можна відновити `m` за допомогою CRT та цілочисельного кореня.
 
 Технічна умова:
 
-Якщо у вас є `e` ciphertexts одного й того ж повідомлення під попарно взаємно простими moduli `n_i`:
+Якщо у вас є `e` ciphertexts того самого повідомлення під попарно взаємно простими модулями `n_i`:
 
-- Використайте CRT, щоб відновити `M = m^e` над добутком `N = Π n_i`
-- Якщо `m^e < N`, тоді `M` є справжнім цілим степенем, і `m = integer_root(M, e)`
+- Використайте CRT, щоб відновити `M = m^e` за модулем добутку `N = Π n_i`
+- Якщо `m^e < N`, тоді `M` є справжнім цілочисельним степенем, а `m = integer_root(M, e)`
 
 ### Wiener attack: small private exponent
 
-Якщо `d` занадто малий, continued fractions можуть відновити його з `e/n`.
+Якщо `d` занадто мале, continued fractions можуть відновити його з `e/n`.
 
-### Pitfalls textbook RSA
+### Textbook RSA pitfalls
 
 Якщо ви бачите:
 
-- Немає OAEP/PSS, raw modular exponentiation
+- Відсутність OAEP/PSS, raw modular exponentiation
 - Deterministic encryption
 
-тоді algebraic attacks та oracle abuse стають набагато ймовірнішими.
+тоді алгебраїчні атаки та зловживання oracle стають набагато ймовірнішими.
 
-### Tools
+### Інструменти
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
 - SageMath (CRT, roots, CF): https://www.sagemath.org/
 
-## Related-message patterns
+## Шаблони пов'язаних повідомлень
 
-Якщо ви бачите два ciphertexts під одним і тим самим modulus із повідомленнями, які algebraically related (наприклад, `m2 = a*m1 + b`), шукайте "related-message" attacks, такі як Franklin–Reiter. Зазвичай вони потребують:
+Якщо ви бачите два ciphertexts під тим самим модулем із повідомленнями, що мають алгебраїчний зв'язок (наприклад, `m2 = a*m1 + b`), шукайте атаки "related-message", такі як Franklin–Reiter. Зазвичай для цього потрібні:
 
-- same modulus `n`
-- same exponent `e`
-- known relationship between plaintexts
+- той самий модуль `n`
+- той самий експонент `e`
+- відомий зв'язок між plaintexts
 
-На практиці це часто розв’язують у Sage, задаючи polynomials modulo `n` і обчислюючи GCD.
+На практиці це часто розв'язують у Sage, задаючи поліноми за модулем `n` і обчислюючи GCD.
 
 ## Lattices / Coppersmith
 
-Використовуйте це, коли маєте partial bits, structured plaintext або close relations, що роблять невідоме малим.
+Застосовуйте цей підхід, коли маєте часткові біти, структурований plaintext або близькі зв'язки, які роблять невідоме малим.
 
-Lattice methods (LLL/Coppersmith) з’являються, коли є partial information:
+Lattice methods (LLL/Coppersmith) з'являються щоразу, коли у вас є часткова інформація:
 
-- Частково відомий plaintext (structured message з невідомим хвостом)
-- Частково відомі `p`/`q` (витекли старші біти)
-- Малі невідомі різниці між related values
+- Частково відомий plaintext (структуроване повідомлення з невідомим хвостом)
+- Частково відомі `p`/`q` (старші біти leaked)
+- Малі невідомі різниці між пов'язаними значеннями
 
 ### Що розпізнавати
 
-Типові підказки в задачах:
+Типові підказки у challenge:
 
 - "We leaked the top/bottom bits of p"
 - "The flag is embedded like: `m = bytes_to_long(b\"HTB{\" + unknown + b\"}\")`"
 - "We used RSA but with a small random padding"
 
-### Tooling
+### Інструменти
 
-На практиці ви використовуватимете Sage для LLL і готовий template для конкретного випадку.
+На практиці ви використовуватимете Sage для LLL і відомий template для конкретного екземпляра.
 
-Гарні стартові точки:
+Хороші початкові матеріали:
 
 - Sage CTF crypto templates: https://github.com/defund/coppersmith
 - A survey-style reference: https://martinralbrecht.wordpress.com/2013/05/06/coppersmiths-method/
 
 ## References
 
-- [Trail of Bits - Factoring "short-sleeve" RSA keys with polynomials](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
-- [badkeys](https://badkeys.info/)
-- [badkeys standalone tool](https://github.com/badkeys/badkeys)
+- [1] [Trail of Bits - Factoring "short-sleeve" RSA keys with polynomials](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
+- [2] [badkeys](https://badkeys.info/)
+- [3] [badkeys standalone tool](https://github.com/badkeys/badkeys)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,190 +1,190 @@
-# Blockchain and Crypto-Currencies
+# Blockchain і Crypto-Currencies
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Concepts
+## Основні поняття
 
-- **Smart Contracts** — це програми, що виконуються на blockchain, коли виконуються певні умови, автоматизуючи виконання угод без посередників.
-- **Decentralized Applications (dApps)** будуються на основі smart contracts, мають зручний front-end і прозорий, аудиторний back-end.
-- **Tokens & Coins** розрізняються тим, що coins слугують цифровими грошима, тоді як tokens представляють цінність або право власності в конкретних контекстах.
-- **Utility Tokens** надають доступ до сервісів, а **Security Tokens** позначають право власності на актив.
-- **DeFi** означає Decentralized Finance, пропонуючи фінансові послуги без центральних органів.
-- **DEX** і **DAOs** означають Decentralized Exchange Platforms та Decentralized Autonomous Organizations відповідно.
+- **Smart Contracts** визначаються як програми, що виконуються в blockchain, коли виконуються певні умови, автоматизуючи виконання угод без посередників.
+- **Decentralized Applications (dApps)** базуються на smart contracts і містять зручний для користувача front-end та прозорий, доступний для аудиту back-end.
+- **Tokens & Coins** відрізняються тим, що coins використовуються як цифрові гроші, тоді як tokens представляють цінність або право власності в певному контексті.
+- **Utility Tokens** надають доступ до сервісів, а **Security Tokens** засвідчують право власності на активи.
+- **DeFi** означає Decentralized Finance і пропонує фінансові послуги без центральних органів управління.
+- **DEX** і **DAOs** означають відповідно Decentralized Exchange Platforms і Decentralized Autonomous Organizations.
 
-## Consensus Mechanisms
+## Механізми консенсусу
 
-Consensus mechanisms забезпечують безпечну та узгоджену валідацію транзакцій у blockchain:
+Механізми консенсусу забезпечують безпечну та узгоджену валідацію транзакцій у blockchain:
 
-- **Proof of Work (PoW)** спирається на обчислювальну потужність для верифікації транзакцій.
-- **Proof of Stake (PoS)** вимагає, щоб валідатори тримали певну кількість tokens, зменшуючи споживання енергії порівняно з PoW.
+- **Proof of Work (PoW)** покладається на обчислювальні потужності для перевірки транзакцій.
+- **Proof of Stake (PoS)** вимагає, щоб валідатори володіли певною кількістю токенів, зменшуючи споживання енергії порівняно з PoW.<sup>[[1]](#references)</sup>
 
-## Bitcoin Essentials
+## Основи Bitcoin
 
-### Transactions
+### Транзакції
 
-Bitcoin transactions передбачають переказ коштів між адресами. Транзакції валідуються через digital signatures, що гарантує, що лише власник private key може ініціювати перекази.
+Транзакції Bitcoin передбачають переказ коштів між адресами. Транзакції перевіряються за допомогою цифрових підписів, що гарантує: лише власник приватного ключа може ініціювати перекази.<sup>[[2]](#references)</sup>
 
-#### Key Components:
+#### Основні компоненти:
 
-- **Multisignature Transactions** вимагають кількох signatures для авторизації transaction.
-- Transactions складаються з **inputs** (джерело коштів), **outputs** (призначення), **fees** (сплачуються miners) і **scripts** (правила transaction).
+- **Multisignature Transactions** потребують кількох підписів для авторизації транзакції.<sup>[[3]](#references)</sup>
+- Транзакції складаються з **inputs** (джерело коштів), **outputs** (призначення), **fees** (сплачуються майнерам) і **scripts** (правила транзакції).
 
 ### Lightning Network
 
-Має на меті підвищити масштабованість Bitcoin, дозволяючи виконувати multiple transactions у межах channel, і лише фінальний стан передаючи до blockchain.
+Має на меті підвищити масштабованість Bitcoin, дозволяючи виконувати кілька транзакцій у межах каналу та транслюючи в blockchain лише фінальний стан.
 
-## Bitcoin Privacy Concerns
+## Проблеми приватності Bitcoin
 
-Privacy attacks, такі як **Common Input Ownership** і **UTXO Change Address Detection**, використовують шаблони transactions. Стратегії на кшталт **Mixers** і **CoinJoin** покращують анонімність, приховуючи зв’язки між transactions користувачів.
+Атаки на приватність, такі як **Common Input Ownership** і **UTXO Change Address Detection**, використовують шаблони транзакцій. Такі стратегії, як **Mixers** і **CoinJoin**, покращують анонімність, приховуючи зв’язки між транзакціями користувачів.
 
-## Acquiring Bitcoins Anonymously
+## Анонімне придбання Bitcoin
 
-Способи включають готівкові угоди, mining і використання mixers. **CoinJoin** змішує multiple transactions, ускладнюючи відстеження, тоді як **PayJoin** маскує CoinJoins під звичайні transactions для вищого рівня privacy.
+Методи включають торгівлю за готівку, майнінг і використання mixers. **CoinJoin** змішує кілька транзакцій, щоб ускладнити відстеження, тоді як **PayJoin** маскує CoinJoins під звичайні транзакції для підвищення приватності.
 
-# Bitcoin Privacy Atacks
+# Атаки на приватність Bitcoin
 
-# Summary of Bitcoin Privacy Attacks
+# Огляд атак на приватність Bitcoin
 
-У світі Bitcoin privacy транзакцій і анонімність користувачів часто є предметом занепокоєння. Ось спрощений огляд кількох поширених методів, за допомогою яких attackers можуть скомпрометувати Bitcoin privacy.
+У світі Bitcoin приватність транзакцій і анонімність користувачів часто викликають занепокоєння. Нижче наведено спрощений огляд кількох поширених методів, за допомогою яких зловмисники можуть скомпрометувати приватність Bitcoin.<sup>[[6]](#references)</sup>
 
 ## **Common Input Ownership Assumption**
 
-Зазвичай рідко, коли inputs від різних користувачів об’єднуються в одній transaction через складність цього процесу. Тому **дві input addresses в одній transaction часто вважаються такими, що належать одному й тому самому власнику**.
+Зазвичай inputs різних користувачів рідко об’єднуються в одній транзакції через пов’язану з цим складність. Тому часто вважається, що **дві input-адреси в одній транзакції належать одному власнику**.
 
 ## **UTXO Change Address Detection**
 
-UTXO, або **Unspent Transaction Output**, має бути повністю витрачений у transaction. Якщо лише частину надіслано на іншу address, решта переходить на нову change address. Спостерігачі можуть припустити, що ця нова address належить відправнику, що компрометує privacy.
+UTXO, або **Unspent Transaction Output**, має бути повністю витрачений у межах транзакції. Якщо на іншу адресу надсилається лише його частина, решта надходить на нову change-адресу. Спостерігачі можуть припустити, що ця нова адреса належить відправнику, що ставить під загрозу приватність.
 
-### Example
+### Приклад
 
-Щоб зменшити це, можуть допомогти mixing services або використання кількох addresses для приховування ownership.
+Щоб зменшити цей ризик, можна використовувати mixing-сервіси або кілька адрес для приховування права власності.
 
 ## **Social Networks & Forums Exposure**
 
-Користувачі інколи діляться своїми Bitcoin addresses онлайн, що робить **easy to link the address to its owner**.
+Користувачі іноді публікують свої Bitcoin-адреси в Інтернеті, через що стає **легко пов’язати адресу з її власником**.
 
 ## **Transaction Graph Analysis**
 
-Transactions можна візуалізувати як graphs, що виявляє потенційні зв’язки між користувачами на основі руху коштів.
+Транзакції можна візуалізувати у вигляді графів, виявляючи потенційні зв’язки між користувачами на основі руху коштів.
 
 ## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
 
-Ця heuristic базується на аналізі transactions з кількома inputs і outputs, щоб вгадати, який output є change, що повертається відправнику.
+Ця евристика ґрунтується на аналізі транзакцій із кількома inputs і outputs, щоб припустити, який output є рештою, що повертається відправнику.
 
-### Example
+### Приклад
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
 Якщо додавання більшої кількості inputs робить change output більшим за будь-який окремий input, це може заплутати heuristic.
 
-## **Forced Address Reuse**
+## **Примусове повторне використання адрес**
 
-Attackers можуть надсилати малі суми на вже використані addresses, сподіваючись, що отримувач поєднає їх з іншими inputs у майбутніх transactions, тим самим пов’язуючи addresses між собою.
+Атакувальники можуть надсилати невеликі суми на раніше використані адреси, сподіваючись, що одержувач у майбутньому об'єднає їх з іншими inputs у транзакціях і таким чином пов'яже адреси між собою.
 
-### Correct Wallet Behavior
+### Правильна поведінка Wallet
 
-Wallets мають уникати використання coins, отриманих на вже використані, порожні addresses, щоб запобігти цьому privacy leak.
+Wallets повинні уникати використання coins, отриманих на вже використані порожні адреси, щоб запобігти цьому privacy leak.
 
-## **Other Blockchain Analysis Techniques**
+## **Інші методи аналізу Blockchain**
 
-- **Exact Payment Amounts:** Transactions без change імовірно відбуваються між двома addresses, що належать одному й тому самому user.
-- **Round Numbers:** Кругле число в transaction вказує на payment, а не круглий output, імовірно, є change.
-- **Wallet Fingerprinting:** Різні wallets мають унікальні patterns створення transactions, що дає analysts змогу визначити використане software і потенційно change address.
-- **Amount & Timing Correlations:** Розкриття часу або сум transactions може зробити transactions відстежуваними.
+- **Точні суми платежів:** Транзакції без change, імовірно, відбуваються між двома адресами, що належать одному користувачу.
+- **Круглі числа:** Кругле число в транзакції свідчить про те, що це payment, а output, який не є круглим числом, імовірно, є change.
+- **Fingerprinting Wallet:** Різні wallets мають унікальні шаблони створення транзакцій, що дає змогу аналітикам визначити використане software і потенційно адресу change.
+- **Кореляції суми та часу:** Розголошення часу або сум транзакцій може зробити транзакції відстежуваними.
 
-## **Traffic Analysis**
+## **Аналіз трафіку**
 
-Відстежуючи network traffic, attackers можуть потенційно пов’язати transactions або blocks з IP addresses, компрометуючи user privacy. Це особливо актуально, якщо entity керує багатьма Bitcoin nodes, посилюючи її здатність моніторити transactions.
+Відстежуючи мережевий трафік, атакувальники можуть потенційно пов'язати транзакції або блоки з IP-адресами, поставивши під загрозу privacy користувачів. Це особливо актуально, якщо певна entity керує багатьма Bitcoin nodes, що розширює її можливості з моніторингу транзакцій.
 
-## More
+## Більше
 
-For a comprehensive list of privacy attacks and defenses, visit [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
+Вичерпний список privacy атак і засобів захисту наведено на сторінці [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
 
-# Anonymous Bitcoin Transactions
+# Анонімні Bitcoin Transactions
 
-## Ways to Get Bitcoins Anonymously
+## Способи анонімного отримання Bitcoins
 
-- **Cash Transactions**: Отримання bitcoin через cash.
-- **Cash Alternatives**: Купівля gift cards і обмін їх онлайн на bitcoin.
-- **Mining**: Найбільш приватний method заробити bitcoins — через mining, особливо якщо робити це самостійно, тому що mining pools можуть знати IP address miner. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: Теоретично, крадіжка bitcoin могла б бути іншим method отримати його anonymously, хоча це незаконно і не рекомендується.
+- **Cash Transactions:** Отримання bitcoin за готівку.
+- **Cash Alternatives:** Купівля gift cards і їхній онлайн-обмін на bitcoin.
+- **Mining:** Найбільш приватний спосіб заробляти bitcoins — це mining, особливо якщо займатися ним самостійно, оскільки mining pools можуть знати IP-адресу miner. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
+- **Theft:** Теоретично крадіжка bitcoin могла б бути ще одним способом анонімного отримання bitcoin, хоча це незаконно і не рекомендується.
 
 ## Mixing Services
 
-Using a mixing service, user може **send bitcoins** і отримати **different bitcoins in return**, що ускладнює відстеження original owner. Проте це вимагає довіри до service: він не має зберігати logs і справді повинен повернути bitcoins. Альтернативні mixing options включають Bitcoin casinos.
+Використовуючи mixing service, користувач може **send bitcoins** і отримати **different bitcoins in return**, що ускладнює відстеження початкового власника. Однак для цього потрібно довіряти service: він не повинен зберігати logs і має фактично повернути bitcoins. Альтернативні варіанти mixing включають Bitcoin casinos.
 
 ## CoinJoin
 
-**CoinJoin** об’єднує multiple transactions від different users в одну, ускладнюючи процес для будь-кого, хто намагається зіставити inputs з outputs. Попри свою ефективність, transactions з унікальними input і output sizes усе ще потенційно можна відстежити.
+**CoinJoin** об'єднує кілька транзакцій від різних користувачів в одну, ускладнюючи процес зіставлення inputs з outputs для будь-кого, хто намагається це зробити. Попри свою ефективність, транзакції з унікальною кількістю inputs і outputs усе ще потенційно можна відстежити.
 
-Приклади transactions, що могли використовувати CoinJoin, включають `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` і `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+Прикладами транзакцій, у яких міг використовуватися CoinJoin, є `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` і `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
-For more information, visit [CoinJoin](https://coinjoin.io/en). For a similar service on Ethereum, check out [Tornado Cash](https://tornado.cash), which anonymizes transactions with funds from miners.
+Докладніше дивіться на сторінці [CoinJoin](https://coinjoin.io/en). Аналогічний service для Ethereum — [Tornado Cash](https://tornado.cash), який анонімізує транзакції за допомогою коштів від miners.
 
 ## PayJoin
 
-Варіант CoinJoin, **PayJoin** (або P2EP), маскує transaction між двома parties (наприклад, customer і merchant) під звичайну transaction, без характерних однакових outputs, властивих CoinJoin. Це робить її надзвичайно складною для виявлення і може знецінити common-input-ownership heuristic, який використовують transaction surveillance entities.
+Варіант CoinJoin, **PayJoin** (або P2EP), маскує транзакцію між двома сторонами (наприклад, customer і merchant) під звичайну транзакцію без характерних однакових outputs, властивих CoinJoin. Це робить її надзвичайно складною для виявлення і може спростувати common-input-ownership heuristic, яку використовують entities, що здійснюють surveillance транзакцій.
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
-Транзакції, подібні до наведених вище, можуть бути PayJoin, підвищуючи приватність і водночас залишаючись невідрізнюваними від стандартних bitcoin-транзакцій.
+Такі транзакції, як наведена вище, можуть бути PayJoin, що підвищує приватність, залишаючись невідмінними від стандартних bitcoin-транзакцій.
 
-**Використання PayJoin може значно порушити традиційні методи спостереження**, роблячи його перспективною розробкою в прагненні до транзакційної приватності.
+**Використання PayJoin може суттєво порушити традиційні методи surveillance**, що робить його перспективною розробкою у прагненні до приватності транзакцій.
 
-# Найкращі практики для приватності в криптовалютах
+# Найкращі практики забезпечення приватності в криптовалютах
 
-## **Техніки синхронізації гаманця**
+## **Методи синхронізації гаманця**
 
-Щоб підтримувати приватність і безпеку, синхронізація гаманців із блокчейном є критично важливою. Вирізняються два методи:
+Для забезпечення приватності та безпеки критично важливо синхронізувати гаманці з blockchain. Особливо вирізняються два методи:
 
-- **Повний вузол**: Завантажуючи весь блокчейн, повний вузол забезпечує максимальну приватність. Усі транзакції, коли-небудь здійснені, зберігаються локально, що унеможливлює для супротивників визначити, якими транзакціями або адресами цікавиться користувач.
-- **Фільтрація блоків на боці клієнта**: Цей метод передбачає створення фільтрів для кожного блоку в блокчейні, що дозволяє гаманцям визначати релевантні транзакції без розкриття конкретних інтересів мережевим спостерігачам. Легкі гаманці завантажують ці фільтри, отримуючи повні блоки лише тоді, коли знайдено збіг з адресами користувача.
+- **Full node**: Завантаження всього blockchain забезпечує максимальну приватність. Усі коли-небудь здійснені транзакції зберігаються локально, тому adversaries не можуть визначити, які транзакції або адреси цікавлять користувача.
+- **Фільтрація блоків на стороні клієнта**: Цей метод передбачає створення фільтрів для кожного блоку в blockchain, що дає змогу гаманцям знаходити релевантні транзакції, не розкриваючи конкретні інтереси спостерігачам мережі. Lightweight-гаманці завантажують ці фільтри й отримують повні блоки лише тоді, коли знаходять збіг з адресами користувача.
 
 ## **Використання Tor для анонімності**
 
-Оскільки Bitcoin працює в peer-to-peer мережі, рекомендується використовувати Tor, щоб приховати вашу IP-адресу, підвищуючи приватність під час взаємодії з мережею.
+Оскільки Bitcoin працює в peer-to-peer мережі, рекомендується використовувати Tor для маскування IP-адреси й підвищення приватності під час взаємодії з мережею.
 
 ## **Запобігання повторному використанню адрес**
 
-Щоб захистити приватність, важливо використовувати нову адресу для кожної транзакції. Повторне використання адрес може скомпрометувати приватність, пов’язуючи транзакції з тією самою сутністю. Сучасні гаманці відмовляють від повторного використання адрес завдяки своїй архітектурі.
+Для захисту приватності важливо використовувати нову адресу для кожної транзакції. Повторне використання адрес може порушити приватність, пов’язавши транзакції з однією і тією самою особою або організацією. Сучасні гаманці перешкоджають повторному використанню адрес завдяки своїй архітектурі.
 
-## **Стратегії для приватності транзакцій**
+## **Стратегії забезпечення приватності транзакцій**
 
-- **Кілька транзакцій**: Розділення платежу на кілька транзакцій може приховати суму транзакції, ускладнюючи privacy attacks.
-- **Уникнення change**: Вибір транзакцій, які не потребують change outputs, підвищує приватність, порушуючи методи виявлення change.
-- **Кілька change outputs**: Якщо уникнути change неможливо, генерація кількох change outputs все ще може покращити приватність.
+- **Кілька транзакцій**: Розподіл платежу між кількома транзакціями може приховати суму транзакції та перешкодити privacy attacks.
+- **Уникнення здачі**: Вибір транзакцій, які не потребують виходів зі здачею, підвищує приватність, ускладнюючи методи виявлення здачі.
+- **Кілька виходів зі здачею**: Якщо уникнути здачі неможливо, створення кількох виходів зі здачею все одно може підвищити приватність.
 
-# **Monero: Маяк анонімності**
+# **Monero: Орієнтир анонімності**
 
-Monero задовольняє потребу в абсолютній анонімності в цифрових транзакціях, встановлюючи високий стандарт приватності.
+Monero задовольняє потребу в абсолютній анонімності цифрових транзакцій, встановлюючи високий стандарт приватності.
 
 # **Ethereum: Gas і транзакції**
 
 ## **Розуміння Gas**
 
-Gas вимірює обчислювальні зусилля, потрібні для виконання операцій в Ethereum, і оцінюється в **gwei**. Наприклад, транзакція, що коштує 2,310,000 gwei (або 0.00231 ETH), включає gas limit і base fee, а також tip для стимулювання miners. Користувачі можуть встановити max fee, щоб не переплатити, а надлишок буде повернено.
+Gas вимірює обчислювальні ресурси, необхідні для виконання операцій в Ethereum, і оцінюється в **gwei**. Наприклад, транзакція вартістю 2,310,000 gwei (або 0.00231 ETH) має gas limit і базову комісію, а також tip для стимулювання майнерів. Користувачі можуть встановити максимальну комісію, щоб не переплачувати; надлишок буде повернено.<sup>[[5]](#references)</sup>
 
 ## **Виконання транзакцій**
 
-Транзакції в Ethereum включають відправника і одержувача, якими можуть бути адреси користувача або smart contract. Вони потребують fee і мають бути mined. Істотна інформація в транзакції включає одержувача, підпис відправника, value, optional data, gas limit і fees. Важливо, що адреса відправника виводиться з підпису, тому немає потреби включати її в дані транзакції.
+Транзакції в Ethereum включають відправника й отримувача, якими можуть бути адреси користувачів або smart contract. Вони потребують комісії та мають бути замайнені. Основна інформація в транзакції включає отримувача, підпис відправника, значення, необов’язкові дані, gas limit і комісії. Важливо, що адреса відправника визначається з підпису, тому її не потрібно вказувати в даних транзакції.<sup>[[4]](#references)</sup>
 
-Ці практики та механізми є базовими для кожного, хто хоче працювати з криптовалютами, надаючи пріоритет приватності та безпеці.
+Ці практики та механізми є фундаментальними для всіх, хто прагне взаємодіяти з криптовалютами, надаючи пріоритет приватності та безпеці.
 
-## Value-Centric Web3 Red Teaming
+## Red Teaming Web3, орієнтований на цінність
 
-- Inventory value-bearing components (signers, oracles, bridges, automation) to understand who can move funds and how.
-- Map each component to relevant MITRE AADAPT tactics to expose privilege escalation paths.
-- Rehearse flash-loan/oracle/credential/cross-chain attack chains to validate impact and document exploitable preconditions.
+- Проведіть інвентаризацію компонентів, що містять цінність (signers, oracles, bridges, automation), щоб зрозуміти, хто може переміщувати кошти та яким чином.
+- Зіставте кожен компонент із відповідними тактиками MITRE AADAPT, щоб виявити шляхи підвищення привілеїв.
+- Відпрацюйте ланцюги атак із використанням flash loan, oracle, credential і cross-chain, щоб перевірити вплив та задокументувати передумови, необхідні для експлуатації.
 
 {{#ref}}
 value-centric-web3-red-teaming.md
 {{#endref}}
 
-## Web3 Signing Workflow Compromise
+## Компрометація процесу підписання Web3
 
-- Supply-chain tampering of wallet UIs can mutate EIP-712 payloads right before signing, harvesting valid signatures for delegatecall-based proxy takeovers (e.g., slot-0 overwrite of Safe masterCopy).
+- Tampering у supply chain інтерфейсів wallet UI може змінити EIP-712 payload безпосередньо перед підписанням, збираючи дійсні підписи для захоплення proxy на основі delegatecall (наприклад, перезапис slot-0 у Safe masterCopy).
 
 {{#ref}}
 web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
@@ -192,29 +192,29 @@ web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
 
 ## Account Abstraction (ERC-4337)
 
-- Common smart-account failure modes include bypassing `EntryPoint` access control, unsigned gas fields, stateful validation, ERC-1271 replay, and fee-drain via revert-after-validation.
+- Поширені режими відмови smart account включають обхід контролю доступу `EntryPoint`, непідписані gas-поля, stateful validation, replay ERC-1271 і вичерпання комісії через revert-after-validation.
 
 {{#ref}}
 erc-4337-smart-account-security-pitfalls.md
 {{#endref}}
 
-## Smart Contract Security
+## Безпека Smart Contract
 
-- Mutation testing to find blind spots in test suites:
+- Mutation testing для виявлення blind spots у test suites:
 
 {{#ref}}
 ../smart-contract-security/mutation-testing-with-slither.md
 {{#endref}}
 
-## ZK Proof / zkVM Guest Integrity
+## Цілісність ZK Proof / zkVM Guest
 
-Коли prover використовує **zkVM** або application-specific proof circuit для підтвердження твердження, verifier дізнається лише те, що **guest program виконалася так, як написано**. Якщо guest містить **unsafe deserialization**, **undefined behavior** або **missing semantic constraints**, зловмисний prover може згенерувати proof, який перевіряється, тоді як **public metrics або claimed invariant є хибними**.
+Коли prover використовує **zkVM** або application-specific proof circuit для підтвердження твердження, verifier дізнається лише про те, що **guest program виконала код відповідно до його написання**. Якщо guest містить **unsafe deserialization**, **undefined behavior** або **відсутні semantic constraints**, зловмисний prover може створити proof, який буде успішно перевірено, хоча **public metrics або заявлений invariant є хибними**.<sup>[[7]](#references)</sup>
 
-### Unsafe deserialization inside proof guests
+### Небезпечна десеріалізація всередині proof guests
 
-- Сприймайте bytes приватного witness/circuit як **недовірений вхід від атакувальника**, навіть якщо їх приховує proof.
-- Уникайте десеріалізації за допомогою unchecked helpers, таких як `rkyv::access_unchecked`, якщо bytes не були вже попередньо валідовані поза межами.
-- Enum discriminants, relative pointers, lengths і indexes, завантажені з недовірених serialized data, мають бути перевірені перед тим, як вони вплинуть на control flow або memory access.
+- Розглядайте байти private witness/circuit як **untrusted attacker input**, навіть якщо вони приховані proof.
+- Уникайте їх десеріалізації за допомогою unchecked helpers, таких як `rkyv::access_unchecked`, якщо ці байти не були попередньо перевірені out-of-band.
+- Enum discriminants, relative pointers, lengths та indexes, завантажені з untrusted serialized data, необхідно перевіряти до того, як вони вплинуть на control flow або доступ до пам’яті.
 
 Практичний шаблон аудиту:
 ```rust
@@ -223,30 +223,30 @@ let ops = unsafe {
 rkyv::access_unchecked::<rkyv::Archived<Vec<Op>>>(&private_circuit_bytes)
 };
 ```
-Якщо поле на кшталт `op.kind` є enum і атакер може ввести **discriminant поза діапазоном**, кожен подальший `match` по цьому значенню стає підозрілим.
+Якщо таке поле, як `op.kind`, є enum, і атакер може впровадити **дискримінант поза допустимим діапазоном**, кожен наступний `match` для цього значення стає підозрілим.
 
 ### Jump-table / UB counter bypass
 
-Якщо Rust зводить великий `match` у **jump table**, невалідний discriminant enum може спричинити **undefined control flow**. Небезпечний шаблон такий:
+Якщо Rust перетворює великий `match` на **таблицю переходів**, некоректний дискримінант enum може спричинити **невизначене керування потоком**. Небезпечною є така схема:<sup>[[7]](#references)[[9]](#references)</sup>
 
-1. Один `match` оновлює **security-critical counters/constraints**.
-2. Другий `match` виконує **реальну семантику інструкції**.
-3. Discriminant поза діапазоном індексує за межі першої jump table і потрапляє в код, пов’язаний із другою.
+1. Один `match` оновлює **критичні для безпеки лічильники/обмеження**.
+2. Другий `match` реалізує **фактичну семантику інструкції**.
+3. Дискримінант поза допустимим діапазоном індексує пам'ять за межами першої таблиці переходів і потрапляє до коду, пов'язаного з другою таблицею.
 
-Результат: операція все одно виконується, але шлях обліку пропускається. У zkVM це може підробити proofs, які показують неможливі метрики, як-от менше gates, менше дорогих операцій або інші фальсифіковані bounded resources.
+Результат: операція все одно виконується, але шлях обліку пропускається. У zkVM це може дозволити підробити докази, які повідомляють про неможливі метрики, як-от меншу кількість gate-ів, меншу кількість дорогих операцій або інші сфальсифіковані обмежені ресурси.
 
-Checklist для перевірки:
+Чекліст перевірки:
 
-- Шукайте enum, контрольовані атакером, десеріалізовані з witness/private input.
-- Перевіряйте повторні `match`-вирази над тим самим opcode/kind полем.
-- Розглядайте `unsafe` + unchecked deserialization + великий opcode dispatch як високоризикову комбінацію.
-- За потреби реверс-інженерте згенерований binary; layout jump-table може мати більше значення, ніж source.
+- Шукайте enum, контрольовані атакером, які десеріалізуються з witness/private input.
+- Перевіряйте повторювані оператори `match` для того самого поля opcode/kind.
+- Розглядайте комбінацію `unsafe` + unchecked deserialization + великої диспетчеризації opcode як високоризикову.
+- За потреби виконуйте reverse engineering скомпільованого binary; розташування таблиць переходів може мати більше значення, ніж вихідний код.
 
-### Missing semantic constraints in reversible/specialized interpreters
+### Відсутні семантичні обмеження у reversible/specialized interpreters
 
-Не просто перевіряйте memory safety; також перевіряйте **semantic rules**, які proof має enforce.
+Не перевіряйте лише безпеку пам'яті; також перевіряйте **семантичні правила**, виконання яких має забезпечувати proof.
 
-Для reversible/quantum-like instruction sets переконайтеся, що операнди, які мають бути різними, справді constrained як різні. Операція на кшталт Toffoli/CCX, реалізована як:
+Для reversible/quantum-like instruction sets переконайтеся, що операнди, які мають бути різними, справді обмежені як різні. Операція на кшталт Toffoli/CCX, реалізована як:<sup>[[7]](#references)[[8]](#references)</sup>
 ```rust
 let v = cond & self.qubit(op.q_control1) & self.qubit(op.q_control2);
 *self.qubit_mut(op.q_target) ^= v;
@@ -255,44 +255,44 @@ let v = cond & self.qubit(op.q_control1) & self.qubit(op.q_control2);
 ```text
 op.q_control1 == op.q_control2 == op.q_target
 ```
-У такому випадку перехід зводиться до:
+У такому разі перехід зводиться до:
 ```text
 q = q ^ (q & q) = 0
 ```
-Це створює **deterministic reset primitive**, ламаючи припущення про оборотність і даючи змогу виконувати дешевші ненавмисні обчислення. У proof systems, що підтверджують використання ресурсів, це може дозволити атакувальникам проходити функціональні перевірки, водночас обходячи cost model, який, як вважає verifier, застосовується.
+Це створює **детермінований примітив скидання**, руйнуючи припущення про оборотність і дозволяючи дешевші непередбачені обчислення. У proof systems, які засвідчують використання ресурсів, це може дозволити attackers проходити функціональні перевірки, обходячи cost model, який, на думку verifier, має забезпечуватися.
 
 ### Що тестувати в ZK systems
 
-- Fuzz усі guest parsers із malformed witness/private-input encodings.
-- Перевіряйте validation діапазону enum перед opcode dispatch.
-- Додавайте semantic checks для operand aliasing та інших invalid instruction forms.
-- Порівнюйте reported/public counters з незалежною reference implementation.
-- Пам’ятайте, що valid proof усе ще може доводити **wrong statement**, якщо guest program має bug.
+- Fuzz усіх guest parsers за допомогою некоректних кодувань witness/private-input.
+- Перевіряти діапазон enum перед opcode dispatch.
+- Додавати семантичні перевірки aliasing операндів та інших некоректних форм інструкцій.
+- Порівнювати reported/public counters з незалежною reference implementation.
+- Пам’ятайте, що valid proof все одно може доводити **неправильне твердження**, якщо guest program містить помилку.
 
-## DeFi/AMM Exploitation
+## Експлуатація DeFi/AMM
 
-Якщо ви досліджуєте практичну exploitation DEXes і AMMs (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), дивіться:
+Якщо ви досліджуєте практичну експлуатацію DEXes і AMMs (hooks Uniswap v4, зловживання округленням/точністю, swaps із flash-loan amplification для перетину порогових значень), перегляньте:
 
 {{#ref}}
 defi-amm-hook-precision.md
 {{#endref}}
 
-Для multi-asset weighted pools, що кешують virtual balances і можуть бути poisoned, коли `supply == 0`, вивчіть:
+Для multi-asset weighted pools, які кешують virtual balances і можуть бути отруєні, коли `supply == 0`, ознайомтеся з:
 
 {{#ref}}
 defi-amm-virtual-balance-cache-exploitation.md
 {{#endref}}
 
-## References
+## Посилання
 
-- [https://en.wikipedia.org/wiki/Proof_of_stake](https://en.wikipedia.org/wiki/Proof_of_stake)
-- [https://www.mycryptopedia.com/public-key-private-key-explained/](https://www.mycryptopedia.com/public-key-private-key-explained/)
-- [https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
-- [https://ethereum.org/en/developers/docs/transactions/](https://ethereum.org/en/developers/docs/transactions/)
-- [https://ethereum.org/en/developers/docs/gas/](https://ethereum.org/en/developers/docs/gas/)
-- [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
-- [Trail of Bits - We beat Google's zero-knowledge proof of quantum cryptanalysis](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
-- [Google patched paper version](https://arxiv.org/abs/2603.28846v2)
-- [Trail of Bits proof-of-concept repository](https://github.com/trailofbits/quantum-zk-proof-poc)
+- [1] [Proof of stake - Wikipedia](https://en.wikipedia.org/wiki/Proof_of_stake)
+- [2] [Пояснення public key і private key - Mycryptopedia](https://www.mycryptopedia.com/public-key-private-key-explained/)
+- [3] [Що таке multi-signature transactions? - Bitcoin Stack Exchange](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
+- [4] [Transactions | ethereum.org](https://ethereum.org/en/developers/docs/transactions/)
+- [5] [Gas і fees | ethereum.org](https://ethereum.org/en/developers/docs/gas/)
+- [6] [Privacy - Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
+- [7] [Trail of Bits - Ми перемогли Google's zero-knowledge proof of quantum cryptanalysis](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
+- [8] [Захист Elliptic Curve Cryptocurrencies від Quantum Vulnerabilities: Resource Estimates and Mitigations (patched version)](https://arxiv.org/abs/2603.28846v2)
+- [9] [Proof-of-concept repository Trail of Bits](https://github.com/trailofbits/quantum-zk-proof-poc)
 
 {{#include ../../banners/hacktricks-training.md}}
