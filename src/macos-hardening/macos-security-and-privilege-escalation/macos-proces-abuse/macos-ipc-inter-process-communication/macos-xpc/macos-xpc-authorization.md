@@ -1,16 +1,16 @@
-# Uidhinishaji wa XPC
+# macOS XPC Authorization
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## Uidhinishaji wa XPC
+## XPC Authorization
 
-Apple pia inapendekeza njia nyingine ya kuthibitisha ikiwa process inayounganisha ina **ruhusa za kuita exposed XPC method**.
+Apple pia inapendekeza njia nyingine ya kuthibitisha ikiwa process inayounganisha ina **ruhusa za kuita exposed XPC method**.<sup>[[2]](#references)</sup>
 
-Wakati application inahitaji **kutekeleza vitendo kama mtumiaji mwenye privilege**, badala ya kuendesha app kama mtumiaji mwenye privilege, kwa kawaida husakinisha HelperTool kama root ikiwa ni XPC service ambayo inaweza kuitwa kutoka kwenye app ili kutekeleza vitendo hivyo. Hata hivyo, app inayoita service inapaswa kuwa na authorization ya kutosha.
+Wakati application inahitaji **kutekeleza vitendo kama mtumiaji mwenye privileged**, badala ya kuendesha app kama mtumiaji mwenye privileged, kwa kawaida husakinisha HelperTool kama root ikiwa XPC service ambayo inaweza kuitwa kutoka kwenye app ili kutekeleza vitendo hivyo. Hata hivyo, app inayoiita service inapaswa kuwa na authorization ya kutosha.
 
 ### ShouldAcceptNewConnection always YES
 
-Mfano unaweza kupatikana kwenye [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). Kwenye `App/AppDelegate.m` inajaribu **kuunganisha** na **HelperTool**. Na kwenye `HelperTool/HelperTool.m`, function **`shouldAcceptNewConnection`** **haitakagua** mahitaji yoyote yaliyoonyeshwa awali. Kila mara itarudisha YES:<sup>[[1]](#references)</sup>
+Mfano unaweza kupatikana katika [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). Katika `App/AppDelegate.m` inajaribu **kuunganisha** kwenye **HelperTool**. Na katika `HelperTool/HelperTool.m`, function **`shouldAcceptNewConnection`** **haitakagua** mahitaji yoyote yaliyoonyeshwa hapo awali. Daima itarudisha YES:<sup>[[1]](#references)</sup>
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
 // Called by our XPC listener when a new connection comes in.  We configure the connection
@@ -36,10 +36,10 @@ macos-xpc-connecting-process-check/
 
 ### Haki za application
 
-Hata hivyo, kuna **authorization inayofanyika wakati method kutoka kwa HelperTool inaitwa**.
+Hata hivyo, kuna **authorization inayofanyika wakati method kutoka kwa HelperTool inapoitwa**.
 
-Function **`applicationDidFinishLaunching`** kutoka `App/AppDelegate.m` itaunda authorization reference tupu baada ya app kuanza. Hii inapaswa kufanya kazi kila wakati.\
-Kisha, itajaribu **kuongeza rights** kwenye authorization reference hiyo kwa kuita `setupAuthorizationRights`:
+Function **`applicationDidFinishLaunching`** kutoka `App/AppDelegate.m` itaunda authorization reference tupu baada ya app kuanza. Hii inapaswa kufanya kazi kila mara.\
+Kisha, itajaribu **kuongeza rights kwenye authorization reference hiyo** kwa kuita `setupAuthorizationRights`:
 ```objectivec
 - (void)applicationDidFinishLaunching:(NSNotification *)note
 {
@@ -95,7 +95,7 @@ assert(blockErr == errAuthorizationSuccess);
 }];
 }
 ```
-Function `enumerateRightsUsingBlock` ndiyo inayotumiwa kupata ruhusa za programu, ambazo zimefafanuliwa katika `commandInfo`:
+Function `enumerateRightsUsingBlock` ndiyo inayotumika kupata ruhusa za applications, ambazo zimefafanuliwa katika `commandInfo`:
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -173,15 +173,15 @@ block(authRightName, authRightDefault, authRightDesc);
 }];
 }
 ```
-Hii inamaanisha kwamba mwishoni mwa mchakato huu, permissions zilizotangazwa ndani ya `commandInfo` zitahifadhiwa katika `/var/db/auth.db`. Kumbuka kwamba hapo unaweza kupata kwa **kila method** ambayo it**ahitaji authentication**, **jina la permission** na **`kCommandKeyAuthRightDefault`**. Hii ya mwisho **inaonyesha ni nani anayeweza kupata right hii**.
+Hii inamaanisha kwamba mwishoni mwa mchakato huu, permissions zilizotangazwa ndani ya `commandInfo` zitahifadhiwa katika `/var/db/auth.db`. Kumbuka kwamba hapo unaweza kupata kwa **kila method** itakayo**hitaji authentication**, **jina la permission** na **`kCommandKeyAuthRightDefault`**. Hii ya mwisho **inaonyesha nani anaweza kupata right hii**.<sup>[[1]](#references)</sup>
 
-Kuna scopes tofauti za kuonyesha ni nani anayeweza kufikia right. Baadhi yake zimefafanuliwa katika [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (unaweza kupata [zote hapa](https://www.dssw.co.uk/reference/authorization-rights/)), lakini kwa muhtasari:
+Kuna scopes tofauti zinazoonyesha nani anaweza kufikia right. Baadhi yake zimefafanuliwa katika [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (unaweza kupata [zote hapa](https://www.dssw.co.uk/reference/authorization-rights/)), lakini kwa muhtasari:<sup>[[9]](#references)[[10]](#references)</sup>
 
-<table><thead><tr><th width="284.3333333333333">Name</th><th width="165">Value</th><th>Description</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Mtu yeyote</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Hakuna mtu</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Mtumiaji wa sasa anahitaji kuwa admin (ndani ya admin group)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Muombe mtumiaji athibitishe utambulisho wake.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Muombe mtumiaji athibitishe utambulisho wake. Anahitaji kuwa admin (ndani ya admin group)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Taja rules</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Taja maoni ya ziada kuhusu right</td></tr></tbody></table>
+<table><thead><tr><th width="284.3333333333333">Jina</th><th width="165">Thamani</th><th>Maelezo</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Mtu yeyote</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Hakuna mtu</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Mtumiaji wa sasa anahitaji kuwa admin (ndani ya admin group)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Muombe mtumiaji afanye authentication.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Muombe mtumiaji afanye authentication. Anahitaji kuwa admin (ndani ya admin group)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Taja rules</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Taja maoni ya ziada kuhusu right</td></tr></tbody></table>
 
-### Uthibitishaji wa Rights
+### Uthibitishaji wa Haki
 
-Katika `HelperTool/HelperTool.m`, function **`readLicenseKeyAuthorization`** hukagua ikiwa caller ameidhinishwa **kutekeleza method hiyo** kwa kuita function **`checkAuthorization`**. Function hii hukagua ikiwa **`authData`** iliyotumwa na calling process ina **format sahihi**, kisha hukagua **kinachohitajika ili kupata right** ya kuita method mahususi. Ikiwa kila kitu kitaenda vizuri, **`error` itakayerudishwa itakuwa `nil`**:
+Katika `HelperTool/HelperTool.m`, function **`readLicenseKeyAuthorization`** hukagua ikiwa caller ameidhinishwa **ku-execute method hiyo** kwa kuita function **`checkAuthorization`**. Function hii hukagua ikiwa **authData** iliyotumwa na calling process ina **format sahihi**, kisha hukagua **kinachohitajika ili kupata right** ya kuita method husika. Ikiwa kila kitu kitaenda vizuri, **`error` itakayerudishwa itakuwa `nil`**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
@@ -229,9 +229,9 @@ assert(junk == errAuthorizationSuccess);
 return error;
 }
 ```
-Kumbuka kwamba ili **kuangalia mahitaji ya kupata ruhusa** ya kuita method hiyo, function `authorizationRightForCommand` itaangalia tu object **`commandInfo`** iliyotajwa hapo awali. Kisha, itaita **`AuthorizationCopyRights`** kuangalia **ikiwa ina ruhusa** za kuita function hiyo (kumbuka kwamba flags zinaruhusu mwingiliano na mtumiaji).
+Kumbuka kwamba ili **kuangalia mahitaji ya kupata haki** ya kuita method hiyo, function `authorizationRightForCommand` itaangalia tu object **`commandInfo`** iliyotajwa awali. Kisha, itaita **`AuthorizationCopyRights`** kuangalia **ikiwa ina haki** za kuita function hiyo (kumbuka kwamba flags zinaruhusu mwingiliano na user).<sup>[[1]](#references)[[3]](#references)</sup>
 
-Katika hali hii, ili kuita function `readLicenseKeyAuthorization`, `kCommandKeyAuthRightDefault` imefafanuliwa kuwa `@kAuthorizationRuleClassAllow`. Kwa hiyo, **mtu yeyote anaweza kuiita**.
+Katika hali hii, ili kuita function `readLicenseKeyAuthorization`, `kCommandKeyAuthRightDefault` imefafanuliwa kuwa `@kAuthorizationRuleClassAllow`. Kwa hiyo **mtu yeyote anaweza kuiita**.
 
 ### Taarifa za DB
 
@@ -241,25 +241,25 @@ sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-Kisha, unaweza kusoma ni nani anayeweza kufikia haki hiyo kwa:
+Kisha, unaweza kusoma ni nani anayeweza kufikia haki hiyo kwa kutumia:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
-### Ruhusa zinazoruhusu
+### Ruhusa zenye masharti nafuu
 
-Unaweza kupata **mipangilio yote ya permissions** [**hapa**](https://www.dssw.co.uk/reference/authorization-rights/), lakini mchanganyiko ambao hautahitaji mwingiliano wa mtumiaji ni:
+Unaweza kupata **mipangilio yote ya ruhusa** [**hapa**](https://www.dssw.co.uk/reference/authorization-rights/), lakini michanganyiko ambayo haitahitaji mwingiliano wa mtumiaji ni:<sup>[[10]](#references)</sup>
 
 1. **'authenticate-user': 'false'**
-- Hii ndiyo key ya moja kwa moja zaidi. Ikiwekwa kuwa `false`, inabainisha kwamba mtumiaji hahitaji kutoa authentication ili kupata ruhusa hii.
-- Hii hutumiwa **pamoja na mojawapo ya chaguo 2 hapa chini au kwa kubainisha group** ambalo mtumiaji lazima awe mwanachama wake.
+- Hii ndiyo key ya moja kwa moja zaidi. Ikiwekwa kuwa `false`, inaonyesha kwamba mtumiaji hahitaji kutoa authentication ili kupata ruhusa hii.
+- Hii hutumiwa **pamoja na mojawapo ya keys 2 zilizo hapa chini au kuonyesha group** ambalo mtumiaji lazima awe mwanachama wake.
 2. **'allow-root': 'true'**
-- Ikiwa mtumiaji anaendesha kama root user (mwenye permissions zilizoinuliwa), na key hii imewekwa kuwa `true`, root user anaweza kupata ruhusa hii bila authentication ya ziada. Hata hivyo, kwa kawaida, kufikia hali ya root user tayari kunahitaji authentication, kwa hiyo hii si hali ya "no authentication" kwa watumiaji wengi.
+- Ikiwa mtumiaji anaendesha kama root user (ambaye ana permissions zilizoinuliwa), na key hii imewekwa kuwa `true`, root user anaweza kupata ruhusa hii bila authentication zaidi. Hata hivyo, kwa kawaida, kufikia hali ya root user tayari huhitaji authentication, kwa hiyo hii si hali ya "no authentication" kwa watumiaji wengi.
 3. **'session-owner': 'true'**
-- Ikiwekwa kuwa `true`, mmiliki wa session (mtumiaji aliyeingia kwa sasa) atapata ruhusa hii moja kwa moja. Hii inaweza kupita authentication ya ziada ikiwa mtumiaji tayari ameingia.
+- Ikiwekwa kuwa `true`, owner wa session (mtumiaji aliyeingia kwa sasa) atapata ruhusa hii kiotomatiki. Hii inaweza kupita authentication ya ziada ikiwa mtumiaji tayari ameingia.
 4. **'shared': 'true'**
-- Key hii haitoi ruhusa bila authentication. Badala yake, ikiwekwa kuwa `true`, inamaanisha kwamba baada ya ruhusa kuidhinishwa, inaweza kushirikiwa kati ya processes nyingi bila kila process kuhitaji kufanya authentication tena. Hata hivyo, utoaji wa awali wa ruhusa bado utahitaji authentication isipokuwa iwe imeunganishwa na keys nyingine kama vile `'authenticate-user': 'false'`.
+- Key hii haitoi ruhusa bila authentication. Badala yake, ikiwekwa kuwa `true`, inamaanisha kwamba baada ya ruhusa kuthibitishwa, inaweza kushirikiwa kati ya processes nyingi bila kila moja kuhitaji kufanya authentication tena. Hata hivyo, utoaji wa awali wa ruhusa bado utahitaji authentication isipokuwa iwe imeunganishwa na keys nyingine kama `'authenticate-user': 'false'`.
 
-Unaweza [**kutumia script hii**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) kupata rights zinazovutia:
+Unaweza [**kutumia script hii**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) kupata ruhusa zinazovutia:
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -270,46 +270,46 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
-### Uchunguzi wa Kesi za Authorization Bypass
+### Mifano ya Uchunguzi wa Authorization Bypass
 
-- **CVE-2025-65842 – Acustica Audio Aquarius HelperTool**: Huduma ya privileged Mach `com.acustica.HelperTool` inakubali kila connection, na routine yake ya `checkAuthorization:` huita `AuthorizationCopyRights(NULL, …)`, hivyo blob yoyote ya baiti 32 hupita. Kisha `executeCommand:authorization:withReply:` huingiza strings zinazodhibitiwa na attacker na kutenganishwa kwa koma kwenye `NSTask` ikiwa na root, na kufanya payload kama:
+- **CVE-2025-65842 – Acustica Audio Aquarius HelperTool**: Mach service yenye privileged `com.acustica.HelperTool` inakubali kila connection, na routine yake ya `checkAuthorization:` huita `AuthorizationCopyRights(NULL, …)`, hivyo blob yoyote yenye baiti 32 hupita. Kisha `executeCommand:authorization:withReply:` hupitisha strings zinazodhibitiwa na attacker, zilizotenganishwa kwa koma, kwenda kwa `NSTask` kama root, na kufanya payloads kama:
 ```bash
 "/bin/sh,-c,cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash"
 ```
-trivially tengeneza shell ya SUID root. Maelezo yako katika [write-up hii](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/).<sup>[[6]](#references)</sup>
-- **CVE-2025-55076 – Plugin Alliance InstallationHelper**: Listener daima hurudisha YES na pattern ileile ya NULL `AuthorizationCopyRights` inaonekana katika `checkAuthorization:`. Method `exchangeAppWithReply:` huunganisha input ya attacker kwenye string ya `system()` mara mbili, hivyo kuingiza shell metacharacters katika `appPath` (kwa mfano `"/Applications/Test.app";chmod 4755 /tmp/rootbash;`) huwezesha root code execution kupitia Mach service `com.plugin-alliance.pa-installationhelper`. Maelezo zaidi [hapa](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/).<sup>[[7]](#references)</sup>
-- **CVE-2024-4395 – Jamf Compliance Editor helper**: Kuendesha audit huunda `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist`, hufichua Mach service `com.jamf.complianceeditor.helper`, na ku-export `-executeScriptAt:arguments:then:` bila kuthibitisha `AuthorizationExternalForm` au code signature ya caller. Exploit rahisi huunda reference tupu kwa `AuthorizationCreate`, huunganisha kwa `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]`, na kuita method hiyo ili kutekeleza binaries kiholela kama root. Maelezo kamili ya reversing (pamoja na PoC) yako katika [write-up ya Mykola Grymalyuk](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html).<sup>[[4]](#references)</sup>
-- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac 7.0.0–7.0.14, 7.2.0–7.2.8 na 7.4.0–7.4.2 zilikubali ujumbe wa XPC ulioundwa maalum ambao ulifikia helper yenye privileged bila authorization gates. Kwa kuwa helper iliitegemea `AuthorizationRef` yake yenyewe yenye privileged, user yeyote wa ndani aliyeweza kutuma ujumbe kwa service angeweza kuilazimisha kutekeleza mabadiliko ya configuration au commands kiholela kama root. Maelezo yako katika [muhtasari wa advisory wa SentinelOne](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/).<sup>[[5]](#references)</sup>
+trivially create a SUID root shell. Details in [this write-up](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/).<sup>[[6]](#references)</sup>
+- **CVE-2025-55076 – Plugin Alliance InstallationHelper**: Listener daima hurudisha YES na pattern ileile ya NULL `AuthorizationCopyRights` inaonekana katika `checkAuthorization:`. Method `exchangeAppWithReply:` huunganisha input ya attacker kwenye string ya `system()` mara mbili, hivyo kuingiza shell metacharacters kwenye `appPath` (kwa mfano `"/Applications/Test.app";chmod 4755 /tmp/rootbash;`) hutoa root code execution kupitia Mach service `com.plugin-alliance.pa-installationhelper`. Maelezo zaidi [hapa](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/).<sup>[[7]](#references)</sup>
+- **CVE-2024-4395 – Jamf Compliance Editor helper**: Kuendesha audit huacha `/Library/LaunchDaemons/com.jamf.complianceeditor.helper.plist`, hufichua Mach service `com.jamf.complianceeditor.helper`, na hutoa `-executeScriptAt:arguments:then:` bila kuthibitisha `AuthorizationExternalForm` au code signature ya caller. Exploit rahisi huunda `AuthorizationCreate` yenye reference tupu, huunganisha kwa `[[NSXPCConnection alloc] initWithMachServiceName:options:NSXPCConnectionPrivileged]`, na kuita method hiyo ili kutekeleza binaries kiholela kama root. Maelezo kamili ya reversing (pamoja na PoC) yako kwenye [write-up ya Mykola Grymalyuk](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html).<sup>[[4]](#references)</sup>
+- **CVE-2025-25251 – FortiClient Mac helper**: FortiClient Mac 7.0.0–7.0.14, 7.2.0–7.2.8 na 7.4.0–7.4.2 ilikubali XPC messages zilizoundwa mahsusi ambazo zilifikia privileged helper isiyokuwa na authorization gates. Kwa kuwa helper iliamini `AuthorizationRef` yake yenyewe ya privileged, local user yeyote aliyeweza kutuma messages kwenye service angeweza kuilazimisha kutekeleza configuration changes au commands kiholela kama root. Maelezo yako kwenye [muhtasari wa ushauri wa SentinelOne](https://www.sentinelone.com/vulnerability-database/cve-2025-25251/).<sup>[[5]](#references)</sup>
 
-#### Vidokezo vya rapid triage
+#### Vidokezo vya Rapid triage
 
-- App inapokuwa na GUI na helper kwa pamoja, linganisha code requirements zao na uangalie kama `shouldAcceptNewConnection` inafunga listener kwa `-setCodeSigningRequirement:` (au inathibitisha `SecCodeCopySigningInformation`). Kukosekana kwa checks kwa kawaida husababisha scenarios za CWE-863 kama ilivyo katika kesi ya Jamf. Ukaguzi wa haraka huonekana hivi:
+- App inapokuja na GUI pamoja na helper, linganisha code requirements zake na uangalie ikiwa `shouldAcceptNewConnection` inafunga listener kwa `-setCodeSigningRequirement:` (au inathibitisha `SecCodeCopySigningInformation`). Ukosefu wa checks kwa kawaida husababisha scenarios za CWE-863 kama ilivyokuwa katika kesi ya Jamf. Ukaguzi wa haraka huonekana hivi:
 ```bash
 codesign --display --requirements - /Applications/Jamf\ Compliance\ Editor.app
 ```
-- Linganisha kile helper *inachodhani* kuwa inakidhinisha na kile ambacho client inatoa. Wakati wa reversing, weka breakpoint kwenye `AuthorizationCopyRights` na uthibitishe kuwa `AuthorizationRef` inatoka kwenye `AuthorizationCreateFromExternalForm` (iliyotolewa na client), badala ya context yake yenye privilege; vinginevyo huenda umegundua muundo wa CWE-863 unaofanana na kesi zilizo hapo juu.
+- Linganisha kile helper *anachofikiri* anaki-authorize na kile client anachotoa. Wakati wa reversing, weka breakpoint kwenye `AuthorizationCopyRights` na uthibitishe kuwa `AuthorizationRef` inatoka kwenye `AuthorizationCreateFromExternalForm` (iliyotolewa na client), badala ya context yenye privileges ya helper yenyewe; vinginevyo huenda umepata pattern ya CWE-863 inayofanana na cases zilizo hapo juu.
 
-## Kuchambua Authorization
+## Reversing Authorization
 
 ### Kuangalia kama EvenBetterAuthorization inatumika
 
-Ukipata function: **`[HelperTool checkAuthorization:command:]`**, huenda process inatumia schema ya authorization iliyotajwa awali:
+Ukipata function: **`[HelperTool checkAuthorization:command:]`**, huenda process inatumia schema iliyotajwa awali ya authorization:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-Hii, ikiwa function hii inaita functions kama `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, inatumia [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
+Ikiwa function hii inaita functions kama `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, inatumia [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
 Kagua **`/var/db/auth.db`** ili kuona kama inawezekana kupata permissions za kuita privileged action fulani bila user interaction.
 
 ### Mawasiliano ya Protocol
 
-Kisha, unahitaji kupata protocol schema ili uweze kuanzisha mawasiliano na XPC service.
+Kisha, unahitaji kupata schema ya protocol ili uweze kuanzisha mawasiliano na XPC service.
 
 Function **`shouldAcceptNewConnection`** inaonyesha protocol inayotolewa:
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
-Katika hali hii, tuna kitu kilekile kama kwenye EvenBetterAuthorizationSample, [**angalia mstari huu**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
+Katika hali hii, tunayo sawa na iliyo kwenye EvenBetterAuthorizationSample, [**angalia mstari huu**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
 Kwa kujua jina la protocol inayotumika, inawezekana **kudump header definition yake** kwa kutumia:
 ```bash
@@ -325,7 +325,7 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 @end
 [...]
 ```
-Mwisho, tunahitaji tu kujua **name ya exposed Mach Service** ili kuanzisha mawasiliano nayo. Kuna njia kadhaa za kuipata:
+Mwisho, tunahitaji tu kujua **jina la Mach Service iliyo exposed** ili kuanzisha mawasiliano nayo. Kuna njia kadhaa za kulipata:
 
 - Katika **`[HelperTool init]`**, ambapo unaweza kuona Mach Service inayotumika:
 
@@ -344,14 +344,14 @@ cat /Library/LaunchDaemons/com.example.HelperTool.plist
 </dict>
 [...]
 ```
-### Exploit Example
+### Mfano wa Exploit
 
 Katika mfano huu vimeundwa:
 
 - Ufafanuzi wa protocol pamoja na functions
-- auth tupu ya kutumia kuomba access
-- Muunganisho wa XPC service
-- Wito wa function ikiwa muunganisho ulifanikiwa
+- empty auth ya kutumia kuomba access
+- Connection kwenye XPC service
+- Wito wa function ikiwa connection ilifanikiwa
 ```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl
 
@@ -435,7 +435,7 @@ NSLog(@"Finished!");
 
 ## Marejeleo
 
-- [1] [Apple Developer — EvenBetterAuthorizationSample](https://developer.apple.com/library/archive/samplecode/EvenBetterAuthorizationSample/Introduction/Intro.html) ([mirror on GitHub](https://github.com/brenwell/EvenBetterAuthorizationSample))
+- [1] [Apple Developer — EvenBetterAuthorizationSample](https://developer.apple.com/library/archive/samplecode/EvenBetterAuthorizationSample/Introduction/Intro.html) ([mirror kwenye GitHub](https://github.com/brenwell/EvenBetterAuthorizationSample))
 - [2] [Apple Developer — Authorization Services](https://developer.apple.com/documentation/security/authorization-services)
 - [3] [Apple Developer — `AuthorizationCopyRights`](https://developer.apple.com/documentation/security/authorizationcopyrights(_:_:_:_:_:))
 - [4] [CVE-2024-4395: Jamf Compliance Editor Privilege Escalation](https://khronokernel.com/macos/2024/05/01/CVE-2024-4395.html)
@@ -443,5 +443,7 @@ NSLog(@"Finished!");
 - [6] [CVE-2025-65842 – Acustica Audio HelperTool XPC Service Local Privilege Escalation in Aquarius Desktop on macOS](https://almightysec.com/helpertool-xpc-service-local-privilege-escalation/)
 - [7] [CVE-2025-55076 – Plugin Alliance InstallationHelper XPC Service Local Privilege Escalation](https://almightysec.com/Plugin-Alliance-HelperTool-XPC-Service-Local-Privilege-Escalation/)
 - [8] [CVE-2019-8805: Apple EndpointSecurity framework Privilege Escalation (SecureLayer7)](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
+- [9] [Apple Open Source — AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h)
+- [10] [Authorization Rights Reference (dssw.co.uk)](https://www.dssw.co.uk/reference/authorization-rights/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}

@@ -9,12 +9,12 @@
 {{#endref}}
 
 
-Binaries za Mach-o zina load command inayoitwa **`LC_CODE_SIGNATURE`**, ambayo inaonyesha **offset** na **size** ya signatures zilizo ndani ya binary. Kwa kweli, kwa kutumia zana ya GUI MachOView, inawezekana kupata mwishoni mwa binary sehemu inayoitwa **Code Signature** yenye taarifa hizi:
+Binaries za Mach-o zina load command inayoitwa **`LC_CODE_SIGNATURE`** ambayo huonyesha **offset** na **size** ya signatures zilizo ndani ya binary. Kwa kutumia GUI tool MachOView, inawezekana kupata sehemu inayoitwa **Code Signature** mwishoni mwa binary, ikiwa na taarifa hizi:
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-Magic header ya Code Signature ni **`0xFADE0CC0`** (embedded code signature) au **`0xFADE0CC1`** (detached code signature). Kisha kuna taarifa kama vile urefu na idadi ya blobs za superBlob inayozihifadhi.\
-Inawezekana kupata taarifa hii katika [source code hapa](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):<sup>[[1]](#references)</sup>】【。
+Magic header ya Code Signature ni **`0xFADE0CC0`** (embedded code signature) au **`0xFADE0CC1`** (detached code signature). Kisha kuna taarifa kama vile urefu na idadi ya blobs za superBlob inayozijumuisha.\
+Inawezekana kupata taarifa hii katika [source code here](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):<sup>[[1]](#references)</sup>
 ```c
 /*
 * Structure of an embedded-signature SuperBlob
@@ -43,10 +43,10 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-Blob zinazopatikana kwa kawaida ni Code Directory, Requirements na Entitlements, pamoja na Cryptographic Message Syntax (CMS).\
-Aidha, zingatia kwamba data iliyosimbwa katika blobs imesimbwa kwa **Big Endian.**
+Blobs zinazopatikana kwa kawaida ni Code Directory, Requirements na Entitlements, pamoja na Cryptographic Message Syntax (CMS).\
+Zaidi ya hayo, zingatia jinsi data iliyosimbwa kwenye blobs inavyosimbwa kwa **Big Endian.**
 
-Aidha, kumbuka kwamba signatures zinaweza kutenganishwa kutoka kwenye binaries na kuhifadhiwa katika `/var/db/DetachedSignatures` (inayotumiwa na iOS).
+Zaidi ya hayo, signatures zinaweza kutenganishwa na binaries na kuhifadhiwa katika `/var/db/DetachedSignatures` (inayotumiwa na iOS).
 
 ## Code Directory Blob
 
@@ -106,14 +106,14 @@ char end_withLinkage[0];
 } CS_CodeDirectory
 __attribute__ ((aligned(1)));
 ```
-Note kwamba kuna matoleo tofauti ya struct hii ambapo ya zamani yanaweza kuwa na taarifa chache.
+Kumbuka kwamba kuna matoleo tofauti ya struct hii, ambapo matoleo ya zamani yanaweza kuwa na taarifa chache zaidi.
 
-Note kwamba Code directory inaweza kutumia hashing algorithm yoyote. Kwa sasa, inayotumika zaidi ni **SHA256** (inayoonyeshwa na thamani 2 katika field ya `hashType`), lakini baadaye hash hii ikivunjwa, Apple inaweza kuanza kutumia nyingine.
+Kumbuka kwamba directory ya Code inaweza kutumia hashing algorithm yoyote. Kwa sasa, inayotumika zaidi ni **SHA256** (inayoonyeshwa na thamani 2 katika field `hashType`), lakini baadaye ikiwa hash hii itavunjwa, Apple inaweza kuanza kutumia nyingine.
 
-## Kusaini Code Pages
+## Kusaini Kurasa za Code
 
-Kuhash binary nzima kungekuwa hakufai na hata hakuna maana ikiwa inapakiwa kwenye memory kwa sehemu tu. Kwa hiyo, code signature kwa kweli ni hash ya hashes ambapo kila binary page inahashwa kivyake.\
-Kwa kweli, katika code ya awali ya **Code Directory** unaweza kuona kwamba **page size imeainishwa** katika mojawapo ya fields zake. Zaidi ya hayo, ikiwa size ya binary si multiple ya size ya page, field ya **CodeLimit** huainisha mahali ambapo signature inaishia.
+Kuhash binary nzima kungekuwa hakufai na hata kutokuwa na maana ikiwa inapakiwa kwenye memory kwa sehemu tu. Kwa hiyo, code signature kwa kweli ni hash ya hashes ambapo kila binary page inahashwa kivyake.\
+Kwa hakika, katika code ya awali ya **Code Directory** unaweza kuona kwamba **page size imeainishwa** katika mojawapo ya fields zake. Zaidi ya hayo, ikiwa size ya binary si kizidisho cha size ya page, field **CodeLimit** huonyesha mahali ambapo signature inaishia.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -184,25 +184,25 @@ openssl sha256 /tmp/*.page.*
 ```
 ## Entitlements Blob
 
-Kumbuka kwamba applications huenda pia zikawa na **entitlement blob** ambapo entitlements zote zimefafanuliwa. Zaidi ya hayo, baadhi ya iOS binaries zinaweza kuwa na entitlements zake katika special slot -7 (badala ya special slot -5 ya entitlements).
+Kumbuka kwamba applications zinaweza pia kuwa na **entitlement blob** ambapo entitlements zote hufafanuliwa. Isitoshe, baadhi ya iOS binaries zinaweza kuwa na entitlements zao katika special slot -7 (badala ya special slot -5 ya entitlements).
 
 ## Special Slots
 
-Applications za MacOS hazina kila kitu zinachohitaji ili kutekelezwa ndani ya binary, bali pia hutumia **external resources** (kwa kawaida zilizo ndani ya **bundle** ya application). Kwa hiyo, kuna slots kadhaa ndani ya binary ambazo huwa na hashes za baadhi ya external resources muhimu, ili kuthibitisha kwamba hazijabadilishwa.
+Applications za MacOS hazina kila kitu kinachohitajika ili kutekelezwa ndani ya binary, bali pia hutumia **external resources** (kwa kawaida zilizo ndani ya **bundle** ya application). Kwa hiyo, kuna slots ndani ya binary zitakazokuwa na hashes za baadhi ya external resources muhimu, ili kuthibitisha kwamba hazijabadilishwa.
 
-Kwa kweli, inawezekana kuona katika Code Directory structs parameter inayoitwa **`nSpecialSlots`**, inayobainisha idadi ya special slots. Hakuna special slot 0, na zinazotumika zaidi (kutoka -1 hadi -6) ni:
+Kwa kweli, inawezekana kuona katika Code Directory structs parameter inayoitwa **`nSpecialSlots`**, inayoonyesha idadi ya special slots. Hakuna special slot 0, na zinazotumika zaidi (kutoka -1 hadi -6) ni:
 
 - Hash ya `info.plist` (au ile iliyo ndani ya `__TEXT.__info__plist`).
 - Hash ya Requirements
-- Hash ya Resource Directory (hash ya faili `_CodeSignature/CodeResources` ndani ya bundle).
-- Application-specific (haitumiki)
+- Hash ya Resource Directory (hash ya faili `_CodeSignature/CodeResources` iliyo ndani ya bundle).
+- Application specific (unused)
 - Hash ya entitlements
-- DMG code signatures pekee
+- DMG code signatures only
 - DER Entitlements
 
 ## Code Signing Flags
 
-Kila process ina bitmask inayohusiana nayo, inayojulikana kama `status`, ambayo huanzishwa na kernel, na baadhi ya flags zake zinaweza kubatilishwa na **code signature**. Flags hizi zinazoweza kujumuishwa katika code signing [zimefafanuliwa kwenye code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[[1]](#references)</sup>
+Kila process ina bitmask inayohusiana nayo, inayojulikana kama `status`, ambayo huanzishwa na kernel, na baadhi ya flags zake zinaweza kubadilishwa na **code signature**. Flags hizi zinazoweza kujumuishwa katika code signing [zimefafanuliwa kwenye code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[[1]](#references)</sup>
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -251,11 +251,11 @@ Kumbuka kwamba function [**exec_mach_imgact**](https://github.com/apple-oss-dist
 
 ## Mahitaji ya Code Signature
 
-Kila application huhifadhi **requirements** ambazo lazima **itimie** ili iweze ku-execute. Ikiwa **application ina requirements ambazo hazijatimizwa na application hiyo**, haitatekelezwa (kwa kuwa huenda imebadilishwa).
+Kila application huhifadhi baadhi ya **requirements** ambazo lazima **ikidhi** ili iweze ku-execute. Ikiwa **application ina requirements ambazo hazijatimizwa na application**, haitatekelezwa (kwa sababu huenda imebadilishwa).
 
-Requirements za binary hutumia **grammar maalum** ambayo ni stream ya **expressions**, na hu-encodewa kama blobs kwa kutumia `0xfade0c00` kama magic, ambao **hash** yake huhifadhiwa katika code slot maalum.
+Requirements za binary hutumia **special grammar** ambayo ni mkondo wa **expressions**, na huwekwa encoded kama blobs zikitumia `0xfade0c00` kama magic, ambayo **hash** yake huhifadhiwa katika special code slot.<sup>[[4]](#references)</sup>
 
-Requirements za binary zinaweza kuonekana kwa ku-run:
+Requirements za binary zinaweza kuonekana kwa kuendesha:
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls
@@ -266,9 +266,9 @@ Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
 > [!TIP]
-> Zingatia jinsi signatures hizi zinavyoweza kukagua vitu kama certification information, TeamID, IDs, entitlements na data nyingine nyingi.
+> Zingatia jinsi signatures hizi zinavyoweza kukagua vitu kama taarifa za certification, TeamID, IDs, entitlements na data nyingine nyingi.
 
-Zaidi ya hayo, inawezekana kutengeneza requirements zilizocompile kwa kutumia tool ya `csreq`:
+Zaidi ya hayo, inawezekana kutengeneza compiled requirements kwa kutumia tool ya `csreq`:
 ```bash
 # Generate compiled requirements
 csreq -b /tmp/output.csreq -r='identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR'
@@ -280,60 +280,60 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
-Inawezekana kufikia taarifa hizi na kuunda au kurekebisha requirements kwa kutumia baadhi ya APIs kutoka `Security.framework` kama vile:<sup>[[4]](#references)</sup>
+Inawezekana kufikia taarifa hii na kuunda au kurekebisha requirements kwa kutumia baadhi ya APIs kutoka `Security.framework` kama vile:<sup>[[3]](#references)</sup>
 
 #### **Kukagua Uhalali**
 
 - **`Sec[Static]CodeCheckValidity`**: Hukagua uhalali wa SecCodeRef kulingana na Requirement.
 - **`SecRequirementEvaluate`**: Huthibitisha requirement katika muktadha wa certificate.
-- **`SecTaskValidateForRequirement`**: Huthibitisha SecTask inayoendesha dhidi ya requirement ya `CFString`.
+- **`SecTaskValidateForRequirement`**: Huthibitisha SecTask inayoendeshwa dhidi ya requirement ya `CFString`.
 
 #### **Kuunda na Kusimamia Code Requirements**
 
 - **`SecRequirementCreateWithData`:** Huunda `SecRequirementRef` kutoka kwenye binary data inayowakilisha requirement.
 - **`SecRequirementCreateWithString`:** Huunda `SecRequirementRef` kutoka kwenye string expression ya requirement.
-- **`SecRequirementCopy[Data/String]`**: Hupata uwakilishi wa binary data wa `SecRequirementRef`.
+- **`SecRequirementCopy[Data/String]`**: Hurejesha uwakilishi wa binary data wa `SecRequirementRef`.
 - **`SecRequirementCreateGroup`**: Huunda requirement kwa ajili ya uanachama wa app-group.
 
 #### **Kufikia Taarifa za Code Signing**
 
 - **`SecStaticCodeCreateWithPath`**: Huanzisha object ya `SecStaticCodeRef` kutoka kwenye file system path kwa ajili ya kukagua code signatures.
-- **`SecCodeCopySigningInformation`**: Hupata taarifa za signing kutoka kwenye `SecCodeRef` au `SecStaticCodeRef`.
+- **`SecCodeCopySigningInformation`**: Hupata signing information kutoka kwenye `SecCodeRef` au `SecStaticCodeRef`.
 
 #### **Kurekebisha Code Requirements**
 
 - **`SecCodeSignerCreate`**: Huunda object ya `SecCodeSignerRef` kwa ajili ya kutekeleza shughuli za code signing.
-- **`SecCodeSignerSetRequirement`**: Huweka requirement mpya kwa code signer ili itumike wakati wa signing.
+- **`SecCodeSignerSetRequirement`**: Huweka requirement mpya ambayo code signer atatumia wakati wa signing.
 - **`SecCodeSignerAddSignature`**: Huongeza signature kwenye code inayosainiwa kwa kutumia signer maalum.
 
-#### **Kuthibitisha Code kwa kutumia Requirements**
+#### **Kuthibitisha Code kwa Requirements**
 
-- **`SecStaticCodeCheckValidity`**: Huthibitisha static code object dhidi ya requirements zilizobainishwa.
+- **`SecStaticCodeCheckValidity`**: Huthibitisha static code object dhidi ya requirements maalum.
 
 #### **APIs Nyingine Muhimu**
 
-- **`SecCodeCopy[Internal/Designated]Requirement`:** Hupata SecRequirementRef kutoka kwenye SecCodeRef.
+- **`SecCodeCopy[Internal/Designated]Requirement`: Hupata SecRequirementRef kutoka kwenye SecCodeRef**
 - **`SecCodeCopyGuestWithAttributes`**: Huunda `SecCodeRef` inayowakilisha code object kulingana na attributes maalum, ambayo ni muhimu kwa sandboxing.
-- **`SecCodeCopyPath`**: Hupata file system path inayohusishwa na `SecCodeRef`.
+- **`SecCodeCopyPath`**: Hurejesha file system path inayohusishwa na `SecCodeRef`.
 - **`SecCodeCopySigningIdentifier`**: Hupata signing identifier (kwa mfano, Team ID) kutoka kwenye `SecCodeRef`.
 - **`SecCodeGetTypeID`**: Hurejesha type identifier ya objects za `SecCodeRef`.
 - **`SecRequirementGetTypeID`**: Hupata CFTypeID ya `SecRequirementRef`.
 
-#### **Code Signing Flags na Constants**
+#### **Code Signing Flags and Constants**
 
-- **`kSecCSDefaultFlags`**: Flags chaguomsingi zinazotumiwa na functions nyingi za `Security.framework` kwa shughuli za code signing.
-- **`kSecCSSigningInformation`**: Flag inayotumiwa kubainisha kwamba taarifa za signing zinapaswa kupatikana.
+- **`kSecCSDefaultFlags`**: Flags chaguomsingi zinazotumiwa katika functions nyingi za Security.framework kwa shughuli za code signing.
+- **`kSecCSSigningInformation`**: Flag inayotumiwa kubainisha kwamba signing information inapaswa kupatikana.
 
 ## Utekelezaji wa Code Signature
 
-**kernel** ndiyo **hukagua code signature** kabla ya kuruhusu code ya app kutekelezwa. Zaidi ya hayo, njia mojawapo ya kuweza kuandika na kutekeleza code mpya kwenye memory ni kutumia vibaya JIT ikiwa `mprotect` itaitwa kwa flag ya `MAP_JIT`. Kumbuka kwamba application inahitaji entitlement maalum ili kuweza kufanya hivyo.
+**kernel** ndiyo **hukagua code signature** kabla ya kuruhusu code ya app kutekelezwa. Zaidi ya hayo, njia mojawapo ya kuweza kuandika na kutekeleza code mpya kwenye memory ni kutumia vibaya JIT ikiwa `mprotect` itaitwa ikiwa na flag ya `MAP_JIT`. Kumbuka kwamba application inahitaji entitlement maalum ili kuweza kufanya hivyo.
 
 ## `cs_blobs` & `cs_blob`
 
-Struct ya [**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) ina taarifa kuhusu entitlement ya running process inayohusishwa nayo. `csb_platform_binary` pia huonyesha ikiwa application ni **platform binary** (ambayo hukaguliwa katika nyakati tofauti na OS ili kutumia security mechanisms kama kulinda SEND rights za task ports za processes hizi).
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct ina taarifa kuhusu entitlement ya process inayoendeshwa. `csb_platform_binary` pia huonyesha ikiwa application ni **platform binary** (ambayo hukaguliwa na OS katika nyakati tofauti ili kutumia security mechanisms kama vile kulinda SEND rights kwenye task ports za processes hizi).<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> Kumbuka kwamba hatua kadhaa za usalama zinategemea binary kuwa platform binary, kwa hiyo njia moja ya ku-escalate privileges ni **kuifanya binary kuwa platform binary** (kwa mfano, kwa kuisaini tena kwa certificate inayoruhusu hilo).
+> Kumbuka kwamba hatua kadhaa za security zinategemea binary kuwa platform binary, hivyo njia ya ku-escalate privileges ni **kuifanya binary iwe platform binary** (kwa mfano, kwa kui-sign tena kwa certificate inayoiruhusu).
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;
@@ -394,10 +394,10 @@ bool csb_csm_managed;
 ```
 ## Marejeo
 
-- [1] [XNU — `osfmk/kern/cs_blobs.h` (`CodeDirectory`, `CS_*` flags, blob magic values)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
-- [2] [XNU — `bsd/kern/ubc_subr.c` (`cs_blob` handling and signature validation)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
-- [3] [XNU — `bsd/sys/codesign.h` (`csops`/`csops_audittoken` operations)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-- [4] [Apple Security framework source — `libsecurity_codesigning`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/libsecurity_codesigning)
-- [5] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Introduction/Introduction.html)
+- [1] [XNU — `osfmk/kern/cs_blobs.h` (`CodeDirectory`, `CS_*` flags, thamani za magic za blob)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
+- [2] [XNU — `bsd/kern/ubc_subr.c` (ushughulikiaji wa `cs_blob` na uthibitishaji wa signature)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
+- [3] [Msimbo chanzo wa Apple Security framework — `libsecurity_codesigning`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/libsecurity_codesigning)
+- [4] [Apple Developer — Mwongozo wa Code Signing](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Introduction/Introduction.html)
+- [5] [XNU — `bsd/sys/codesign.h` (operesheni za `csops`/`csops_audittoken`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
 
 {{#include ../../../banners/hacktricks-training.md}}

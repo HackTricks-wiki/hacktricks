@@ -6,7 +6,7 @@
 
 ### Taarifa za Msingi
 
-Mach hutumia **tasks** kama **kitengo kidogo zaidi** cha kushirikisha rasilimali, na kila task inaweza kuwa na **threads nyingi**. **Tasks na threads** hizi zimepangwa kwa uwiano wa 1:1 na **processes na threads za POSIX**.
+Mach hutumia **tasks** kama **kitengo kidogo zaidi** cha kushirikisha rasilimali, na kila task inaweza kuwa na **threads nyingi**. Hizi **tasks na threads zimepangwa 1:1 na POSIX processes na threads**.
 
 Mawasiliano kati ya tasks hufanyika kupitia Mach Inter-Process Communication (IPC), kwa kutumia njia za mawasiliano za upande mmoja. **Messages huhamishwa kati ya ports**, ambazo hufanya kazi kama **message queues** zinazosimamiwa na kernel.
 
@@ -14,67 +14,67 @@ Mawasiliano kati ya tasks hufanyika kupitia Mach Inter-Process Communication (IP
 
 Kila process ina **IPC table**, ambamo inawezekana kupata **mach ports za process**. Jina la mach port kwa kweli ni namba (pointer inayoelekeza kwenye kernel object).
 
-Process pia inaweza kutuma jina la port pamoja na rights fulani **kwenye task tofauti**, na kernel itafanya entry hii ionekane katika **IPC table ya task nyingine**.
+Process inaweza pia kutuma jina la port pamoja na rights fulani **kwenda kwa task tofauti**, na kernel itafanya entry hii ionekane katika **IPC table ya task nyingine**.
 
 ### Port Rights
 
-Port rights, ambazo hufafanua shughuli ambazo task inaweza kufanya, ni muhimu katika mawasiliano haya. **Port rights** zinazowezekana ni ([definitions from here](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):<sup>[[1]](#references)</sup>
+Port rights, ambazo hufafanua operations ambazo task inaweza kutekeleza, ni muhimu kwa mawasiliano haya. **Port rights** zinazowezekana ni ([definitions from here](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):<sup>[[1]](#references)</sup>
 
-- **Receive right**, inayoruhusu kupokea messages zilizotumwa kwenye port. Mach ports ni queues za MPSC (multiple-producer, single-consumer), kumaanisha kwamba kunaweza kuwa na **receive right moja tu kwa kila port** katika mfumo mzima (tofauti na pipes, ambapo processes nyingi zinaweza kumiliki file descriptors zinazoelekeza kwenye upande wa kusoma wa pipe moja).
-- **Task yenye Receive right** inaweza kupokea messages na **kuunda Send rights**, hivyo kuiwezesha kutuma messages. Mwanzoni, **task yenyewe tu ndiyo huwa na Receive right juu ya por**t yake.
-- Ikiwa mwenye Receive right **atakufa** au akaiua, **send right huwa haina manufaa (dead name).**
-- **Send right**, inayoruhusu kutuma messages kwenye port.
-- Send right inaweza **kuigwa**, hivyo task inayomiliki Send right inaweza kuiga right hiyo na **kumpa task ya tatu**.
-- Kumbuka kwamba **port rights** pia zinaweza **kupitishwa** kupitia Mach messages.
-- **Send-once right**, inayoruhusu kutuma message moja kwenye port, kisha kutoweka.
-- Right hii **haiwezi** **kuigwa**, lakini inaweza **kuhamishwa**.
-- **Port set right**, inayowakilisha _port set_ badala ya port moja. Kuondoa message kutoka kwenye port set huondoa message kutoka kwenye moja ya ports zilizomo. Port sets zinaweza kutumika kusikiliza ports kadhaa kwa wakati mmoja, sawa na `select`/`poll`/`epoll`/`kqueue` katika Unix.
-- **Dead name**, ambayo si port right halisi, bali ni placeholder tu. Port inapoharibiwa, port rights zote zilizopo za port hiyo hubadilika kuwa dead names.
+- **Receive right**, ambayo inaruhusu kupokea messages zinazotumwa kwenye port. Mach ports ni MPSC (multiple-producer, single-consumer) queues, kumaanisha kwamba kunaweza kuwa na **receive right moja tu kwa kila port** katika mfumo mzima (tofauti na pipes, ambapo processes nyingi zinaweza zote kuwa na file descriptors za mwisho wa kusomea wa pipe moja).
+- **Task yenye Receive** right inaweza kupokea messages na **kuunda Send rights**, hivyo kuiwezesha kutuma messages. Awali ni **task yake yenyewe tu yenye Receive right kwenye por**t yake.
+- Ikiwa mwenye Receive right **atakufa** au kuiua, **send right inakuwa haina matumizi (dead name).**
+- **Send right**, ambayo inaruhusu kutuma messages kwenye port.
+- Send right inaweza **kufanyiwa clone**, hivyo task iliyo na Send right inaweza ku-clone right hiyo na **kuikabidhi kwa task ya tatu**.
+- Kumbuka kwamba **port rights** zinaweza pia **kupitishwa** kupitia Mac messages.
+- **Send-once right**, ambayo inaruhusu kutuma message moja kwenye port na kisha kutoweka.
+- Right hii **haiwezi** kufanyiwa **clone**, lakini inaweza **kuhamishwa**.
+- **Port set right**, ambayo huwakilisha _port set_ badala ya port moja. Kuondoa message kutoka kwenye port set huondoa message kutoka kwenye mojawapo ya ports ilizo nazo. Port sets zinaweza kutumika kusikiliza ports kadhaa kwa wakati mmoja, kama vile `select`/`poll`/`epoll`/`kqueue` katika Unix.
+- **Dead name**, ambayo si port right halisi, bali ni placeholder tu. Port inapoharibiwa, port rights zote zilizopo za port hiyo hugeuka kuwa dead names.
 
-**Tasks zinaweza kuhamisha SEND rights kwa wengine**, na kuwawezesha kutuma messages kurudi. **SEND rights pia zinaweza kuigwa, hivyo task inaweza kunakili na kumpa task ya tatu right hiyo**. Hili, pamoja na process ya kati inayojulikana kama **bootstrap server**, huwezesha mawasiliano bora kati ya tasks.
+**Tasks zinaweza kuhamisha SEND rights kwa wengine**, na kuwawezesha kutuma messages kurudi. **SEND rights pia zinaweza kufanyiwa clone, hivyo task inaweza kunakili na kumpa task ya tatu right hiyo**. Hili, pamoja na process ya kati inayojulikana kama **bootstrap server**, huwezesha mawasiliano bora kati ya tasks.
 
 ### File Ports
 
-File ports huruhusu ku-encapsulate file descriptors ndani ya Mac ports (kwa kutumia Mach port rights). Inawezekana kuunda `fileport` kutoka kwa FD fulani kwa kutumia `fileport_makeport`, na kuunda FD kutoka kwa fileport kwa kutumia `fileport_makefd`.
+File ports huruhusu ku-encapsulate file descriptors katika Mac ports (kwa kutumia Mach port rights). Inawezekana kuunda `fileport` kutoka kwa FD fulani kwa kutumia `fileport_makeport`, na kuunda FD kutoka kwa fileport kwa kutumia `fileport_makefd`.
 
 ### Kuanzisha mawasiliano
 
-Kama ilivyotajwa hapo awali, inawezekana kutuma rights kwa kutumia Mach messages, hata hivyo, **huwezi kutuma right bila kuwa tayari una right** ya kutuma Mach message. Kwa hiyo, mawasiliano ya kwanza yanaanzishwaje?
+Kama ilivyotajwa awali, inawezekana kutuma rights kwa kutumia Mach messages, hata hivyo, **huwezi kutuma right bila kuwa tayari una right** ya kutuma Mach message. Kwa hiyo, mawasiliano ya kwanza yanaanzishwaje?
 
-Kwa hili, **bootstrap server** (**launchd** kwenye mac) huhusika, kwa sababu **kila mtu anaweza kupata SEND right kwa bootstrap server**, hivyo inawezekana kuiomba right ya kutuma message kwa process nyingine:
+Kwa hili, **bootstrap server** (**launchd** katika mac) huhusika, kwa sababu **kila mtu anaweza kupata SEND right kwa bootstrap server**, hivyo inawezekana kuiomba right ya kutuma message kwa process nyingine:
 
 1. Task **A** huunda **port mpya**, na kupata **RECEIVE right** juu yake.
 2. Task **A**, ikiwa imeshikilia RECEIVE right, **huunda SEND right kwa ajili ya port hiyo**.
-3. Task **A** huanzisha **connection** na **bootstrap server**, na kuitumia kutuma **SEND right** ya port iliyoundwa mwanzoni.
+3. Task **A** huanzisha **connection** na **bootstrap server**, na **huutumilia SEND right** wa port iliyoundwa mwanzoni.
 - Kumbuka kwamba mtu yeyote anaweza kupata SEND right kwa bootstrap server.
 4. Task A hutuma message ya `bootstrap_register` kwa bootstrap server ili **kuhusisha port iliyotolewa na jina** kama `com.apple.taska`
-5. Task **B** huwasiliana na **bootstrap server** ili kufanya **lookup ya bootstrap** kwa jina la service (`bootstrap_lookup`). Ili bootstrap server iweze kujibu, task B itaitumia kutuma **SEND right ya port iliyokuwa imeunda hapo awali** ndani ya lookup message. Ikiwa lookup imefanikiwa, **server huiga SEND right** iliyopokelewa kutoka Task A na **kuituma kwa Task B**.
+5. Task **B** huwasiliana na **bootstrap server** ili kutekeleza bootstrap **lookup ya jina** la service (`bootstrap_lookup`). Ili bootstrap server iweze kujibu, task B itatuma **SEND right kwa port iliyokuwa imeunda awali** ndani ya lookup message. Ikiwa lookup itafanikiwa, **server hu-duplicate SEND right** iliyopokelewa kutoka Task A na **kuituma kwa Task B**.
 - Kumbuka kwamba mtu yeyote anaweza kupata SEND right kwa bootstrap server.
 6. Kwa kutumia SEND right hii, **Task B** inaweza **kutuma** **message** **kwa Task A**.
 7. Kwa mawasiliano ya pande mbili, kwa kawaida task **B** huunda port mpya yenye **RECEIVE** right na **SEND** right, kisha humpa **Task A SEND right** ili iweze kutuma messages kwa TASK B (mawasiliano ya pande mbili).
 
-Bootstrap server **haiwezi kuthibitisha** jina la service linalodaiwa na task. Hii inamaanisha kwamba **task** inaweza uwezekano wa **kujifanya kuwa task yoyote ya mfumo**, kwa mfano kudai kwa uongo kuwa ni jina la authorization service na kisha kuidhinisha kila ombi.
+Bootstrap server **haiwezi kuthibitisha** service name inayodaiwa na task. Hii inamaanisha kwamba **task** inaweza kinadharia **kuiga utambulisho wa system task yoyote**, kwa mfano **kudai kwa uongo jina la authorization service** na kisha kuidhinisha kila request.
 
-Kisha, Apple huhifadhi **majina ya services zinazotolewa na mfumo** katika secure configuration files, zilizoko kwenye directories zinazolindwa na **SIP**: `/System/Library/LaunchDaemons` na `/System/Library/LaunchAgents`. Pamoja na kila jina la service, **binary inayohusishwa pia huhifadhiwa**. Bootstrap server huunda na kushikilia **RECEIVE right kwa kila moja ya majina haya ya services**.
+Kisha, Apple huhifadhi **majina ya services zinazotolewa na mfumo** katika secure configuration files, zilizoko kwenye directories zinazolindwa na **SIP**: `/System/Library/LaunchDaemons` na `/System/Library/LaunchAgents`. Pamoja na kila jina la service, **binary inayohusishwa nayo pia huhifadhiwa**. Bootstrap server huunda na kushikilia **RECEIVE right kwa kila moja ya majina haya ya services**.
 
-Kwa services hizi zilizofafanuliwa awali, **lookup process** hutofautiana kidogo. Jina la service linapotafutwa, launchd huanzisha service hiyo dynamically. Workflow mpya huwa kama ifuatavyo:
+Kwa services hizi zilizofafanuliwa awali, **lookup process hutofautiana kidogo**. Jina la service linapotafutwa, launchd huanzisha service hiyo dynamically. Workflow mpya huwa kama ifuatavyo:
 
-- Task **B** huanzisha **lookup** ya bootstrap kwa jina la service.
-- **launchd** hukagua ikiwa task inaendeshwa na, ikiwa haiendeshwi, **huianzisha**.
-- Task **A** (service) hufanya **bootstrap check-in** (`bootstrap_check_in()`). Hapa, **bootstrap** server huunda SEND right, huihifadhi, na **huhamisha RECEIVE right kwenda kwa Task A**.
-- launchd huiga **SEND right na kuituma kwa Task B**.
-- **Task B** huunda port mpya yenye **RECEIVE** right na **SEND** right, kisha humpa **Task A SEND right** (svc) ili iweze kutuma messages kwa TASK B (mawasiliano ya pande mbili).
+- Task **B** huanzisha bootstrap **lookup** ya jina la service.
+- **launchd** hukagua ikiwa task inaendesha, na ikiwa haiendeshi, **huianzisha**.
+- Task **A** (service) hutekeleza **bootstrap check-in** (`bootstrap_check_in()`). Hapa, **bootstrap** server huunda SEND right, huihifadhi, na **kuhamisha RECEIVE right kwenda kwa Task A**.
+- launchd hu-duplicate **SEND right na kuituma kwa Task B**.
+- **Task B** huunda port mpya yenye **RECEIVE** right na **SEND** right, kisha humpa **Task A** (svc) **SEND right** ili iweze kutuma messages kwa TASK B (mawasiliano ya pande mbili).
 
-Hata hivyo, mchakato huu hutumika tu kwa system tasks zilizofafanuliwa awali. Non-system tasks bado hufanya kazi kama ilivyoelezwa mwanzoni, jambo ambalo linaweza kuruhusu impersonation.
+Hata hivyo, process hii inatumika tu kwa system tasks zilizofafanuliwa awali. Non-system tasks bado hufanya kazi kama ilivyoelezwa awali, jambo ambalo linaweza kuruhusu impersonation.
 
 > [!CAUTION]
-> Kwa hiyo, launchd haipaswi kamwe ku-crash, vinginevyo **system nzima ita-crash**.
+> Kwa hiyo, launchd haipaswi kamwe ku-crash, vinginevyo mfumo mzima uta-crash.
 
 ### A Mach Message
 
 [Find more info here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)<sup>[[4]](#references)</sup>
 
-Function ya `mach_msg`, ambayo kimsingi ni system call, hutumika kutuma na kupokea Mach messages. Function hii inahitaji message itakayotumwa kama argument ya kwanza. Message hii lazima ianze na structure ya `mach_msg_header_t`, ikifuatiwa na maudhui halisi ya message. Structure hiyo imefafanuliwa kama ifuatavyo:
+Function ya `mach_msg`, ambayo kimsingi ni system call, hutumika kutuma na kupokea Mach messages. Function hii inahitaji message itakayotumwa iwe argument ya kwanza. Message hii lazima ianze na muundo wa `mach_msg_header_t`, ukifuatiwa na maudhui halisi ya message. Muundo huo umefafanuliwa kama ifuatavyo:
 ```c
 typedef struct {
 mach_msg_bits_t               msgh_bits;
@@ -85,17 +85,17 @@ mach_port_name_t              msgh_voucher_port;
 mach_msg_id_t                 msgh_id;
 } mach_msg_header_t;
 ```
-Processes zilizo na _**receive right**_ zinaweza kupokea messages kwenye Mach port. Kinyume chake, **senders** hupewa _**send**_ au _**send-once right**_. Send-once right hutumika pekee kutuma message moja, kisha inakuwa invalid.
+Processes zilizo na _**receive right**_ zinaweza kupokea ujumbe kwenye Mach port. Kinyume chake, **senders** hupewa _**send**_ au _**send-once right**_. Send-once right hutumika pekee kutuma ujumbe mmoja, na baada ya hapo huwa batili.<sup>[[11]](#references)</sup>
 
-Field ya mwanzo **`msgh_bits`** ni bitmap:
+Sehemu ya awali **`msgh_bits`** ni bitmap:
 
-- Bit ya kwanza (iliyo na uzito mkubwa zaidi) hutumika kuonyesha kuwa message ni complex (maelezo zaidi hapa chini)
-- Ya 3 na ya 4 hutumiwa na kernel
-- **Bits 5 zenye uzito mdogo zaidi za byte ya 2** zinaweza kutumika kwa **voucher**: aina nyingine ya port ya kutuma mchanganyiko wa key/value.
-- **Bits 5 zenye uzito mdogo zaidi za byte ya 3** zinaweza kutumika kwa **local port**
-- **Bits 5 zenye uzito mdogo zaidi za byte ya 4** zinaweza kutumika kwa **remote port**
+- Biti ya kwanza (iliyo na umuhimu mkubwa zaidi) hutumika kuonyesha kwamba ujumbe ni changamano (maelezo zaidi hapa chini)
+- Biti ya 3 na ya 4 hutumiwa na kernel
+- **Biti 5 zisizo na umuhimu mkubwa zaidi za byte ya 2** zinaweza kutumika kwa **voucher**: aina nyingine ya port ya kutuma mchanganyiko wa key/value.
+- **Biti 5 zisizo na umuhimu mkubwa zaidi za byte ya 3** zinaweza kutumika kwa **local port**
+- **Biti 5 zisizo na umuhimu mkubwa zaidi za byte ya 4** zinaweza kutumika kwa **remote port**
 
-Aina zinazoweza kubainishwa kwenye voucher, local na remote ports ni (kutoka [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
+Aina zinazoweza kubainishwa kwenye voucher, local port na remote port zinapatikana kutoka [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html):<sup>[[5]](#references)</sup>
 ```c
 #define MACH_MSG_TYPE_MOVE_RECEIVE      16      /* Must hold receive right */
 #define MACH_MSG_TYPE_MOVE_SEND         17      /* Must hold send right(s) */
@@ -108,32 +108,32 @@ Aina zinazoweza kubainishwa kwenye voucher, local na remote ports ni (kutoka [**
 #define MACH_MSG_TYPE_DISPOSE_SEND      25      /* must hold send right(s) */
 #define MACH_MSG_TYPE_DISPOSE_SEND_ONCE 26      /* must hold sendonce right */
 ```
-Kwa mfano, `MACH_MSG_TYPE_MAKE_SEND_ONCE` inaweza kutumika **kuonyesha** kwamba **send-once** **right** inapaswa kutolewa na kuhamishwa kwa port hii. Pia inaweza kubainishwa `MACH_PORT_NULL` ili kumzuia mpokeaji asiweze kujibu.
+Kwa mfano, `MACH_MSG_TYPE_MAKE_SEND_ONCE` inaweza kutumika **kuonyesha** kwamba **send-once** **right** inapaswa kuundwa na kuhamishwa kwa port hii. Pia inaweza kubainishwa kuwa `MACH_PORT_NULL` ili kumzuia mpokeaji asiweze kutuma jibu.
 
-Ili kufanikisha **mawasiliano ya pande mbili** kwa urahisi, process inaweza kubainisha **mach port** katika **message header** ya mach inayoitwa _reply port_ (**`msgh_local_port`**), ambapo **receiver** wa message anaweza **kutuma jibu** kwa message hii.
+Ili kufanikisha **mawasiliano ya pande mbili** kwa urahisi, process inaweza kubainisha **mach port** katika **message header** ya mach inayoitwa _reply port_ (**`msgh_local_port`**), ambapo **receiver** wa ujumbe anaweza **kutuma jibu** kwa ujumbe huu.
 
 > [!TIP]
-> Kumbuka kwamba aina hii ya mawasiliano ya pande mbili hutumika katika messages za XPC zinazotarajia jibu (`xpc_connection_send_message_with_reply` na `xpc_connection_send_message_with_reply_sync`). Lakini **kwa kawaida ports tofauti huundwa** kama ilivyoelezwa awali ili kuunda mawasiliano ya pande mbili.
+> Kumbuka kwamba aina hii ya mawasiliano ya pande mbili hutumika katika ujumbe wa XPC unaotarajia jibu (`xpc_connection_send_message_with_reply` na `xpc_connection_send_message_with_reply_sync`). Lakini **kwa kawaida ports tofauti huundwa** kama ilivyoelezwa awali ili kuunda mawasiliano ya pande mbili.
 
-Sehemu nyingine za message header ni:
+Fields nyingine za message header ni:
 
 - `msgh_size`: ukubwa wa packet nzima.
-- `msgh_remote_port`: port ambayo message hii inatumwa.
+- `msgh_remote_port`: port ambayo ujumbe huu unatumiwa.
 - `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach_vouchers.html).
-- `msgh_id`: ID ya message hii, ambayo hutafsiriwa na receiver.
+- `msgh_id`: ID ya ujumbe huu, ambayo hutafsiriwa na receiver.
 
 > [!CAUTION]
-> Kumbuka kwamba **mach messages hutumwa kupitia `mach port`**, ambayo ni channel ya mawasiliano ya **receiver mmoja**, **senders wengi** iliyojengwa ndani ya mach kernel. **Processes nyingi** zinaweza **kutuma messages** kwenye mach port, lakini wakati wowote ni **process moja tu inayoweza kusoma** kutoka humo.
+> Kumbuka kwamba **mach messages hutumwa kupitia `mach port`**, ambayo ni communication channel ya **single receiver**, **multiple sender** iliyojengwa ndani ya mach kernel. **Processes nyingi** zinaweza **kutuma messages** kwenye mach port, lakini wakati wowote ni **process moja tu inayoweza kusoma** kutoka kwayo.
 
-Messages huundwa na header ya **`mach_msg_header_t`**, ikifuatiwa na **body** na **trailer** (ikiwa ipo), na inaweza kutoa ruhusa ya kuijibu. Katika hali hizi, kernel inahitaji tu kupitisha message kutoka task moja hadi nyingine.
+Messages huundwa na **`mach_msg_header_t`** header ikifuatiwa na **body** na **trailer** (ikiwa ipo), na inaweza kutoa ruhusa ya kuijibu. Katika hali hizi, kernel inahitaji tu kupitisha ujumbe kutoka task moja hadi nyingine.
 
-**Trailer** ni **taarifa inayoongezwa kwenye message na kernel** (haiwezi kuwekwa na user), ambayo inaweza kuombwa wakati wa kupokea message kwa kutumia flags `MACH_RCV_TRAILER_<trailer_opt>` (kuna taarifa tofauti zinazoweza kuombwa).
+**Trailer** ni **taarifa inayoongezwa kwenye ujumbe na kernel** (haiwezi kuwekwa na user), ambayo inaweza kuombwa wakati wa kupokea ujumbe kwa flags `MACH_RCV_TRAILER_<trailer_opt>` (kuna taarifa tofauti zinazoweza kuombwa).
 
-#### Messages Changamano
+#### Messages Complex
 
-Hata hivyo, kuna messages nyingine **changamano** zaidi, kama zile zinazopitisha port rights za ziada au kushiriki memory, ambapo kernel pia inahitaji kutuma objects hizi kwa recipient. Katika hali hizi, bit muhimu zaidi ya header `msgh_bits` huwekwa.
+Hata hivyo, kuna messages nyingine zilizo **complex** zaidi, kama zile zinazopitisha port rights za ziada au kushiriki memory, ambapo kernel pia inahitaji kutuma objects hizi kwa recipient. Katika hali hizi, bit muhimu zaidi ya header `msgh_bits` huwekwa.
 
-Descriptors zinazoweza kupitishwa zimefafanuliwa katika [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html):
+Descriptors zinazowezekana za kupitisha zimefafanuliwa katika [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html):<sup>[[5]](#references)</sup>
 ```c
 #define MACH_MSG_PORT_DESCRIPTOR                0
 #define MACH_MSG_OOL_DESCRIPTOR                 1
@@ -153,30 +153,30 @@ mach_msg_descriptor_type_t    type : 8;
 Katika 32bits, descriptors zote zina ukubwa wa 12B na aina ya descriptor iko katika ya 11. Katika 64 bits, ukubwa hutofautiana.
 
 > [!CAUTION]
-> Kernel itanakili descriptors kutoka task moja hadi nyingine, lakini kwanza **ikiunda nakala katika memory ya kernel**. Technique hii, inayojulikana kama "Feng Shui", imetumiwa vibaya katika exploits kadhaa ili kufanya **kernel inakili data kwenye memory yake** kwa kufanya process itume descriptors kwake yenyewe. Kisha process inaweza kupokea messages (kernel itazifree).
+> Kernel itanakili descriptors kutoka task moja hadi nyingine, lakini kwanza **ikifanya nakala katika kernel memory**. Technique hii, inayojulikana kama "Feng Shui", imetumiwa vibaya katika exploits kadhaa kufanya **kernel inakili data kwenye memory yake** kwa kufanya process itume descriptors kwake yenyewe. Kisha process inaweza kupokea messages (kernel itazifuta).
 >
-> Pia inawezekana **kutuma port rights kwa process iliyo vulnerable**, na port rights zitaonekana tu katika process hiyo (hata kama haizishughulikii).
+> Pia inawezekana **kutuma port rights kwa process iliyo vulnerable**, na port rights zitaonekana tu katika process hiyo (hata kama hai- handle).
 
 ### Mac Ports APIs
 
-Kumbuka kuwa ports zinahusishwa na task namespace, kwa hiyo ili kuunda au kutafuta port, task namespace pia huulizwa (maelezo zaidi katika `mach/mach_port.h`):
+Kumbuka kwamba ports zinahusishwa na task namespace, kwa hiyo ili kuunda au kutafuta port, task namespace pia huulizwa (zaidi katika `mach/mach_port.h`):<sup>[[6]](#references)</sup>
 
 - **`mach_port_allocate` | `mach_port_construct`**: **Unda** port.
 - `mach_port_allocate` inaweza pia kuunda **port set**: receive right juu ya group ya ports. Kila message inapopokelewa, port iliyotoka huonyeshwa.
-- `mach_port_allocate_name`: Badilisha jina la port (kwa default ni integer ya 32bit)
-- `mach_port_names`: Pata majina ya ports kutoka kwa target
+- `mach_port_allocate_name`: Badilisha name ya port (kwa default ni integer ya 32bit)
+- `mach_port_names`: Pata port names kutoka kwa target
 - `mach_port_type`: Pata rights za task juu ya name
 - `mach_port_rename`: Badilisha jina la port (kama dup2 kwa FDs)
 - `mach_port_allocate`: Allocate RECEIVE, PORT_SET au DEAD_NAME mpya
 - `mach_port_insert_right`: Unda right mpya katika port ambayo una RECEIVE
 - `mach_port_...`
-- **`mach_msg`** | **`mach_msg_overwrite`**: Functions zinazotumiwa **kutuma na kupokea mach messages**. Toleo la overwrite huruhusu kubainisha buffer tofauti kwa ajili ya kupokea messages (toleo jingine litatumia tena buffer hiyo).
+- **`mach_msg`** | **`mach_msg_overwrite`**: Functions zinazotumika **kutuma na kupokea mach messages**. Toleo la overwrite linaruhusu kubainisha buffer tofauti kwa ajili ya kupokea message (toleo lingine litatumia tena buffer hiyo).
 
 ### Debug mach_msg
 
-Kwa kuwa functions **`mach_msg`** na **`mach_msg_overwrite`** ndizo zinazotumiwa kutuma na kupokea messages, kuweka breakpoint juu yake kungewezesha kukagua messages zilizotumwa na zilizopokelewa.
+Kwa kuwa functions **`mach_msg`** na **`mach_msg_overwrite`** ndizo zinazotumika kutuma na kupokea messages, kuweka breakpoint juu yake kungewezesha kukagua messages zilizotumwa na zilizopokelewa.
 
-Kwa mfano, anza debugging application yoyote unayoweza ku-debug kwa sababu itaload **`libSystem.B` ambayo itatumia function hii**.
+Kwa mfano, anza debugging ya application yoyote unayoweza ku-debug, kwa kuwa itapakia **`libSystem.B` ambayo itatumia function hii**.
 
 <pre class="language-armasm"><code class="lang-armasm"><strong>(lldb) b mach_msg
 </strong>Breakpoint 1: where = libsystem_kernel.dylib`mach_msg, address = 0x00000001803f6c20
@@ -205,7 +205,7 @@ frame #8: 0x000000018e59e6ac libSystem.B.dylib`libSystem_initializer + 236
 frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&) const::$_0::operator()() const + 168
 </code></pre>
 
-Ili kupata arguments za **`mach_msg`**, angalia registers. Hizi ndizo arguments (kutoka [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
+Ili kupata arguments za **`mach_msg`**, kagua registers. Hizi ndizo arguments (kutoka [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
 ```c
 __WATCHOS_PROHIBITED __TVOS_PROHIBITED
 extern mach_msg_return_t        mach_msg(
@@ -228,7 +228,7 @@ x4 = 0x0000000000001f03 ;mach_port_name_t (rcv_name)
 x5 = 0x0000000000000000 ;mach_msg_timeout_t (timeout)
 x6 = 0x0000000000000000 ;mach_port_name_t (notify)
 ```
-Kagua kichwa cha ujumbe ukikagua argument ya kwanza:
+Kagua kichwa cha ujumbe ukiangalia argument ya kwanza:
 ```armasm
 (lldb) x/6w $x0
 0x124e04ce8: 0x00131513 0x00000388 0x00000807 0x00001f03
@@ -267,8 +267,8 @@ name      ipc-object    rights     flags   boost  reqs  recv  send sonce oref  q
 +     send        --------        ---            1         <-                                       0x00002603  (74295) passd
 [...]
 ```
-The **name** ni jina la msingi linalopewa port (angalia jinsi linavyo **ongezeka** katika bytes 3 za kwanza). **`ipc-object`** ni **kitambulishi** cha kipekee **kilichofichwa** cha port.\
-Pia zingatia jinsi ports zilizo na haki ya **`send`** pekee **zinavyomtambulisha mmiliki** wake (jina la port + pid).\
+**jina** ndilo jina la kawaida linalopewa port (angalia jinsi linavyo**ongezeka** katika bytes 3 za kwanza). **`ipc-object`** ni **kitambulisho** cha kipekee **kilichofichwa** cha port.\
+Pia zingatia jinsi ports zilizo na ruhusa ya **`send`** pekee **zinavyotambulisha mmiliki** wake (jina la port + pid).\
 Pia zingatia matumizi ya **`+`** kuashiria **tasks nyingine zilizounganishwa kwenye port hiyo hiyo**.
 
 Pia inawezekana kutumia [**procesxp**](https://www.newosxbook.com/tools/procexp.html) ili kuona pia **majina ya services zilizosajiliwa** (SIP ikiwa imezimwa kwa sababu ya hitaji la `com.apple.system-task-port`):
@@ -279,7 +279,7 @@ Unaweza kusakinisha tool hii kwenye iOS kwa kuipakua kutoka [http://newosxbook.c
 
 ### Mfano wa code
 
-Angalia jinsi **sender** **inatenga** port, inatengeneza **send right** kwa jina `org.darlinghq.example` na kuituma kwa **bootstrap server**, huku sender akiomba **send right** ya jina hilo na kuitumia **kutuma ujumbe**.<sup>[[1]](#references)</sup>
+Kumbuka jinsi **sender** **anavyotenga** port, kuunda **send right** kwa jina `org.darlinghq.example` na kuituma kwa **bootstrap server**, huku sender akiomba **send right** ya jina hilo na kuitumia **kutuma ujumbe**.<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="receiver.c"}}
@@ -407,32 +407,32 @@ printf("Sent a message\n");
 
 ## Privileged Ports
 
-Kuna ports maalum ambazo huruhusu **kutekeleza vitendo fulani nyeti au kufikia data fulani nyeti** iwapo task ina ruhusa za **SEND** juu yake. Hii inazifanya ports hizi zivutie sana kwa mtazamo wa attackers, si kwa sababu ya capabilities zake pekee, bali pia kwa sababu inawezekana **kushiriki ruhusa za SEND kati ya tasks**.
+Kuna ports maalum ambazo huruhusu **kufanya vitendo fulani nyeti au kufikia data fulani nyeti** ikiwa task ina **SEND** permissions juu yake. Hii hufanya ports hizi ziwe za kuvutia sana kwa mtazamo wa attackers, si kwa sababu tu ya uwezo wake, bali pia kwa sababu inawezekana **kushiriki SEND permissions kati ya tasks**.
 
 ### Host Special Ports
 
-Ports hizi zinawakilishwa na nambari.
+Ports hizi zinawakilishwa na namba.
 
-Haki za **SEND** zinaweza kupatikana kwa kuita **`host_get_special_port`**, na haki za **RECEIVE** kwa kuita **`host_set_special_port`**. Hata hivyo, miito yote miwili inahitaji port ya **`host_priv`**, ambayo ni root pekee anayeweza kuifikia. Zaidi ya hayo, zamani root aliweza kuita **`host_set_special_port`** na kuteka nyara ports arbitrary, jambo lililoruhusu, kwa mfano, kupita code signatures kwa kuteka nyara `HOST_KEXTD_PORT` (SIP sasa inazuia hili).
+Haki za **SEND** zinaweza kupatikana kwa kuita **`host_get_special_port`**, na haki za **RECEIVE** kwa kuita **`host_set_special_port`**. Hata hivyo, calls zote mbili zinahitaji port ya **`host_priv`**, ambayo inaweza kufikiwa na root pekee. Zaidi ya hayo, zamani root aliweza kuita **`host_set_special_port`** na kufanya hijack ya ports za kiholela, jambo ambalo, kwa mfano, liliruhusu bypass ya code signatures kupitia hijack ya `HOST_KEXTD_PORT` (SIP sasa inazuia hili).
 
-Zimegawanywa katika makundi 2: **ports 7 za kwanza zinamilikiwa na kernel**, ambapo ya 1 ni `HOST_PORT`, ya 2 ni `HOST_PRIV_PORT`, ya 3 ni `HOST_IO_MASTER_PORT`, na ya 7 ni `HOST_MAX_SPECIAL_KERNEL_PORT`.\
-Zinazoanzia **nambari** 8 **zinamilikiwa na system daemons**, na zinaweza kupatikana zikiwa zimetangazwa katika [**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html).
+Hizi zimegawanywa katika makundi 2: **ports 7 za kwanza zinamilikiwa na kernel**, zikiwa 1 `HOST_PORT`, 2 `HOST_PRIV_PORT`, 3 `HOST_IO_MASTER_PORT`, na 7 ikiwa `HOST_MAX_SPECIAL_KERNEL_PORT`.\
+Zinazoanzia **namba** **8** **zinamilikiwa na system daemons**, na zinaweza kupatikana zikiwa zimetangazwa katika [**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html).
 
-- **Host port**: Ikiwa process ina privilege ya **SEND** juu ya port hii, inaweza kupata **taarifa** kuhusu **system** kwa kuita routines zake kama:
+- **Host port**: Ikiwa process ina **SEND** privilege juu ya port hii, inaweza kupata **taarifa** kuhusu **system** kwa kuita routines zake kama:
 - `host_processor_info`: Pata taarifa za processor
 - `host_info`: Pata taarifa za host
-- `host_virtual_physical_table_info`: Jedwali la kurasa za Virtual/Physical (linahitaji MACH_VMDEBUG)
-- `host_statistics`: Pata statistics za host
-- `mach_memory_info`: Pata mpangilio wa kernel memory
-- **Host Priv port**: Process yenye haki ya **SEND** juu ya port hii inaweza kutekeleza vitendo vya **privileged**, kama kuonyesha boot data au kujaribu kupakia kernel extension. **Process inahitaji kuwa root** ili kupata ruhusa hii.
+- `host_virtual_physical_table_info`: Virtual/Physical page table (inahitaji MACH_VMDEBUG)
+- `host_statistics`: Pata host statistics
+- `mach_memory_info`: Pata kernel memory layout
+- **Host Priv port**: Process yenye **SEND** right juu ya port hii inaweza kufanya vitendo vya **privileged**, kama kuonyesha boot data au kujaribu kupakia kernel extension. **Process inahitaji kuwa root** ili kupata permission hii.
 - Zaidi ya hayo, ili kuita API ya **`kext_request`**, inahitajika kuwa na entitlements nyingine **`com.apple.private.kext*`**, ambazo hupewa Apple binaries pekee.
 - Routines nyingine zinazoweza kuitwa ni:
 - `host_get_boot_info`: Pata `machine_boot_info()`
 - `host_priv_statistics`: Pata privileged statistics
 - `vm_allocate_cpm`: Tenga Contiguous Physical Memory
-- `host_processors`: Tuma send right kwa host processors
+- `host_processors`: Tuma SEND right kwa host processors
 - `mach_vm_wire`: Fanya memory iwe resident
-- Kwa kuwa **root** anaweza kufikia ruhusa hii, anaweza kuita `host_set_[special/exception]_port[s]` ili **kuteka nyara host special au exception ports**.
+- Kwa kuwa **root** anaweza kufikia permission hii, anaweza kuita `host_set_[special/exception]_port[s]` ili kufanya **hijack ya host special au exception ports**.
 
 Inawezekana **kuona host special ports zote** kwa kuendesha:
 ```bash
@@ -440,7 +440,7 @@ procexp all ports | grep "HSP"
 ```
 ### Ports Maalum za Task
 
-Hizi ni ports zilizotengwa kwa ajili ya services zinazojulikana. Inawezekana kuzipata/kuzweka kwa kuita `task_[get/set]_special_port`. Zinaweza kupatikana katika `task_special_ports.h`:
+Hizi ni ports zilizotengwa kwa ajili ya huduma zinazojulikana. Inawezekana kuzipata/kuz 설정 kwa kuziita `task_[get/set]_special_port`. Zinaweza kupatikana katika `task_special_ports.h`:
 ```c
 typedef	int	task_special_port_t;
 
@@ -451,51 +451,51 @@ world.*/
 #define TASK_WIRED_LEDGER_PORT	5	/* Wired resource ledger for task. */
 #define TASK_PAGED_LEDGER_PORT	6	/* Paged resource ledger for task. */
 ```
-Kutoka [hapa](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html):<sup>[[9]](#references)</sup>
+Kutoka [hapa](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html):<sup>[[8]](#references)</sup>
 
 - **TASK_KERNEL_PORT**\[task-self send right]: Port inayotumika kudhibiti task hii. Hutumika kutuma messages zinazoathiri task. Hii ndiyo port inayorejeshwa na **mach_task_self (see Task Ports below)**.
-- **TASK_BOOTSTRAP_PORT**\[bootstrap send right]: Bootstrap port ya task. Hutumika kutuma messages zinazoomba kurejeshwa kwa system service ports nyingine.
+- **TASK_BOOTSTRAP_PORT**\[bootstrap send right]: Bootstrap port ya task. Hutumika kutuma messages zinazoomba port za huduma nyingine za mfumo.
 - **TASK_HOST_NAME_PORT**\[host-self send right]: Port inayotumika kuomba taarifa kuhusu host iliyo na task hii. Hii ndiyo port inayorejeshwa na **mach_host_self**.
-- **TASK_WIRED_LEDGER_PORT**\[ledger send right]: Port inayoonyesha chanzo ambacho task hii inapata wired kernel memory yake.
-- **TASK_PAGED_LEDGER_PORT**\[ledger send right]: Port inayoonyesha chanzo ambacho task hii inapata default memory managed memory yake.
+- **TASK_WIRED_LEDGER_PORT**\[ledger send right]: Port inayotaja chanzo ambacho task hii hupata wired kernel memory yake.
+- **TASK_PAGED_LEDGER_PORT**\[ledger send right]: Port inayotaja chanzo ambacho task hii hupata default memory managed memory yake.
 
 ### Task Ports
 
-Hapo awali Mach haikuwa na "processes"; ilikuwa na "tasks", ambazo zilichukuliwa zaidi kama container ya threads. Mach ilipounganishwa na BSD, **kila task ilihusishwa na BSD process**. Kwa hiyo, kila BSD process ina maelezo inayohitaji ili kuwa process, na kila Mach task pia ina utendaji wake wa ndani (isipokuwa pid 0 ambayo haipo, yaani `kernel_task`).
+Mwanzoni Mach haikuwa na "processes"; ilikuwa na "tasks", ambazo zilichukuliwa zaidi kama container ya threads. Mach ilipounganishwa na BSD, **kila task iliunganishwa na BSD process**. Kwa hiyo, kila BSD process ina maelezo inayohitaji ili kuwa process, na kila Mach task pia ina utendaji wake wa ndani (isipokuwa pid 0 isiyokuwepo, ambayo ni `kernel_task`).
 
-Kuna functions mbili zinazohusiana sana na hili:
+Kuna functions mbili zinazovutia sana zinazohusiana na hili:<sup>[[7]](#references)</sup>
 
-- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: Pata SEND right ya task port ya task inayohusishwa na `pid` iliyobainishwa, kisha ipe kwenye `target_task_port` iliyoonyeshwa (ambayo kwa kawaida ni caller task iliyotumia `mach_task_self()`, lakini inaweza kuwa SEND port ya task nyingine).
-- `pid_for_task(task, &pid)`: Ukipewa SEND right ya task, tambua PID ambayo task hii inahusishwa nayo.
+- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: Pata SEND right ya task port ya task inayohusishwa na `pid` iliyotajwa na uipe kwa `target_task_port` iliyoonyeshwa (ambayo kwa kawaida ni task ya caller iliyotumia `mach_task_self()`, lakini inaweza kuwa SEND port ya task nyingine).
+- `pid_for_task(task, &pid)`: Ukipewa SEND right ya task, tafuta PID ambayo task hii inahusishwa nayo.
 
-Ili kutekeleza actions ndani ya task, task ilihitaji SEND right kwake yenyewe kwa kuita `mach_task_self()` (inayotumia `task_self_trap` (28)). Kwa permission hii, task inaweza kutekeleza actions kadhaa kama:
+Ili kutekeleza actions ndani ya task, task ilihitaji SEND right kwa itself kwa kuita `mach_task_self()` (inayotumia `task_self_trap` (28)). Kwa permission hii, task inaweza kutekeleza actions kadhaa kama:
 
 - `task_threads`: Pata SEND right juu ya task ports zote za threads za task
 - `task_info`: Pata taarifa kuhusu task
 - `task_suspend/resume`: Suspend au resume task
 - `task_[get/set]_special_port`
-- `thread_create`: Unda thread
+- `thread_create`: Create thread
 - `task_[get/set]_state`: Dhibiti hali ya task
-- na nyinginezo zinapatikana katika [**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)
+- na zaidi zinaweza kupatikana katika [**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)
 
 > [!CAUTION]
-> Kumbuka kwamba ukiwa na SEND right juu ya task port ya **task nyingine**, inawezekana kutekeleza actions hizo kwenye task nyingine.
+> Kumbuka kwamba ukiwa na SEND right juu ya task port ya **task nyingine**, inawezekana kutekeleza actions kama hizi juu ya task nyingine.
 
-Zaidi ya hayo, task_port pia ni **`vm_map`** port inayoruhusu **kusoma na kurekebisha memory** ndani ya task kwa kutumia functions kama `vm_read()` na `vm_write()`. Hii inamaanisha kwamba task yenye SEND rights juu ya task_port ya task nyingine itaweza **kuingiza code kwenye task hiyo**.
+Zaidi ya hayo, task_port pia ni **`vm_map`** port inayoruhusu **kusoma na kurekebisha memory** ndani ya task kwa kutumia functions kama `vm_read()` na `vm_write()`. Hii inamaanisha kwamba task yenye SEND rights juu ya task_port ya task nyingine itaweza **ku-inject code kwenye task hiyo**.
 
-Kumbuka kwamba kwa sababu **kernel pia ni task**, mtu akifanikiwa kupata **SEND permissions** juu ya **`kernel_task`**, ataweza kuifanya kernel itekeleze chochote (jailbreaks).
+Kumbuka kwamba kwa kuwa **kernel pia ni task**, mtu akifanikiwa kupata **SEND permissions** juu ya **`kernel_task`**, ataweza kufanya kernel itekeleze chochote (jailbreaks).
 
-- Ita `mach_task_self()` ili **kupata jina** la port hii kwa caller task. Port hii **inarithiwa** kupitia **`exec()`** pekee; task mpya iliyoundwa kwa `fork()` hupata task port mpya (kama hali maalum, task pia hupata task port mpya baada ya `exec()` kwenye suid binary). Njia pekee ya kuanzisha task na kupata port yake ni kutekeleza ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) wakati wa kufanya `fork()`.
-- Haya ndiyo masharti ya kufikia port hii (kutoka `macos_task_policy` katika binary `AppleMobileFileIntegrity`):
-- Ikiwa app ina **`com.apple.security.get-task-allow` entitlement**, processes kutoka kwa **user yuleyule zinaweza kufikia task port** (mara nyingi huongezwa na Xcode kwa ajili ya debugging). Mchakato wa **notarization** hautaruhusu hii katika production releases.
-- Apps zenye **`com.apple.system-task-ports`** entitlement zinaweza kupata **task port ya process yoyote**, isipokuwa kernel. Katika versions za zamani iliitwa **`task_for_pid-allow`**. Hii hutolewa kwa Apple applications pekee.
-- **Root inaweza kufikia task ports** za applications **ambazo hazikukompilewa** kwa kutumia **hardened** runtime (na ambazo si za Apple).
+- Ita `mach_task_self()` ili **kupata name** ya port hii kwa caller task. Port hii **inarithiwa** kupitia **`exec()`** pekee; task mpya iliyoundwa kwa `fork()` hupata task port mpya (kama hali maalum, task pia hupata task port mpya baada ya `exec()`in a suid binary). Njia pekee ya ku-spawn task na kupata port yake ni kutekeleza ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) wakati wa kufanya `fork()`.
+- Hizi ndizo restrictions za kufikia port hii (kutoka `macos_task_policy` katika binary ya `AppleMobileFileIntegrity`):
+- Ikiwa app ina **`com.apple.security.get-task-allow` entitlement**, processes kutoka kwa **user yuleyule zinaweza kufikia task port** (mara nyingi huongezwa na Xcode kwa ajili ya debugging). Mchakato wa **notarization** hautaruhusu hili katika production releases.
+- Apps zenye **`com.apple.system-task-ports`** entitlement zinaweza kupata **task port ya** process **yoyote**, isipokuwa kernel. Katika versions za zamani iliitwa **`task_for_pid-allow`**. Hii hutolewa kwa Apple applications pekee.
+- **Root inaweza kufikia task ports** za applications **zisizocompilewa** kwa **hardened** runtime (na zisizotoka Apple).
 
-**The task name port:** Ni version isiyo na privileges ya _task port_. Inarejelea task, lakini hairuhusu kuidhibiti. Kitu pekee kinachoonekana kupatikana kupitia hiyo ni `task_info()`.
+**Task name port:** Toleo lisilo na privileges la _task port_. Inarejelea task, lakini hairuhusu kuidhibiti. Kitu pekee kinachoonekana kupatikana kupitia hiyo ni `task_info()`.
 
 ### Thread Ports
 
-Threads pia zina ports zinazohusishwa nazo, ambazo zinaonekana kutoka kwa task inayoita **`task_threads`** na kutoka kwa processor kwa kutumia `processor_set_threads`. SEND right ya thread port inaruhusu kutumia function kutoka kwenye `thread_act` subsystem, kama vile:
+Threads pia zina ports zinazohusishwa nazo, ambazo zinaonekana kutoka kwa task inayoiita **`task_threads`** na kutoka kwa processor kwa kutumia `processor_set_threads`. SEND right kwa thread port inaruhusu kutumia function kutoka kwenye `thread_act` subsystem, kama vile:
 
 - `thread_terminate`
 - `thread_[get/set]_state`
@@ -506,7 +506,7 @@ Threads pia zina ports zinazohusishwa nazo, ambazo zinaonekana kutoka kwa task i
 
 Thread yoyote inaweza kupata port hii kwa kuita **`mach_thread_sef`**.
 
-### Shellcode Injection in thread via Task port
+### Shellcode Injection kwenye thread kupitia Task port
 
 Unaweza kuchukua shellcode kutoka:
 
@@ -561,7 +561,7 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-**Compile** programu ya awali na uongeze **entitlements** ili uweze kuingiza code kwa mtumiaji huyo huyo (la sivyo utahitaji kutumia **sudo**).<sup>[[3]](#references)</sup>
+**Compile** programu uliotangulia na uongeze **entitlements** ili uweze kuingiza code kwa kutumia user yuleyule (vinginevyo utahitaji kutumia **sudo**).<sup>[[3]](#references)</sup>
 
 <details>
 
@@ -771,17 +771,17 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ./inject <pi or string>
 ```
 > [!TIP]
-> Ili hii ifanye kazi kwenye iOS unahitaji entitlement `dynamic-codesigning` ili uweze kufanya memory inayoweza kuandikwa iwe executable.
+> Ili hii ifanye kazi kwenye iOS unahitaji entitlement `dynamic-codesigning` ili uweze kufanya writable memory iwe executable.
 
-### Dylib Injection in thread via Task port
+### Dylib Injection katika thread kupitia Task port
 
-Katika macOS **threads** zinaweza kudhibitiwa kupitia **Mach** au kwa kutumia **posix `pthread` api**. Thread tuliyotengeneza kwenye injection iliyotangulia, ilitengenezwa kwa kutumia Mach api, kwa hiyo **si posix compliant**.
+Kwenye macOS, **threads** zinaweza kudhibitiwa kupitia **Mach** au kwa kutumia **posix `pthread` api**. Thread tuliyotengeneza kwenye injection ya awali ilitengenezwa kwa kutumia Mach api, hivyo **haiendani na posix**.
 
-Iliwezekana **kuingiza shellcode rahisi** ya kutekeleza command kwa sababu **haikuhitaji kufanya kazi na posix** compliant apis, bali na Mach pekee. **Injections changamano zaidi** zingehitaji **thread** pia iwe **posix compliant**.
+Iliwezekana **kuingiza shellcode rahisi** ili kutekeleza command kwa sababu **haikuhitaji kufanya kazi na api zinazoendana na posix**, bali na Mach pekee. **Injections changamano zaidi** zingehitaji **thread** hiyo pia **iendane na posix**.
 
-Kwa hiyo, ili **kuboresha thread**, inapaswa kuita **`pthread_create_from_mach_thread`**, ambayo **itatengeneza pthread halali**. Kisha pthread hii mpya inaweza **kuita dlopen** ili **kupakia dylib** kutoka kwenye system; hivyo, badala ya kuandika shellcode mpya kwa ajili ya kutekeleza actions tofauti, inawezekana kupakia libraries maalum.<sup>[[2]](#references)</sup>
+Kwa hiyo, ili **kuiboresha thread**, inapaswa kuita **`pthread_create_from_mach_thread`**, ambayo **itatengeneza pthread halali**. Kisha pthread hii mpya inaweza **kuita dlopen** ili **kupakia dylib** kutoka kwenye mfumo. Hivyo, badala ya kuandika shellcode mpya kwa ajili ya kutekeleza vitendo tofauti, inawezekana kupakia libraries maalum.<sup>[[2]](#references)</sup>
 
-Unaweza kupata **example dylibs** katika (kwa mfano, ile inayozalisha log ambayo unaweza kuisikiliza):
+Unaweza kupata **example dylibs** katika (kwa mfano, ile inayotengeneza log ambayo unaweza kuisikiliza):
 
 
 {{#ref}}
@@ -1068,38 +1068,38 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ```
 ### Thread Hijacking via Task port <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
 
-Katika technique hii, thread ya process inatekwa:
+Katika technique hii thread ya process inatekwa:
 
 
 {{#ref}}
 macos-thread-injection-via-task-port.md
 {{#endref}}
 
-### Task Port Injection Utambuzi
+### Task Port Injection Detection
 
-Unapoitumia `task_for_pid` au `thread_create_*`, counter huongezwa kwenye struct ya task kutoka kernel, ambayo inaweza kufikiwa kutoka user mode kwa kuita task_info(task, TASK_EXTMOD_INFO, ...)
+Wakati wa kuita `task_for_pid` au `thread_create_*`, counter huongezwa kwenye struct task kutoka kernel, ambayo inaweza kufikiwa kutoka user mode kwa kuita task_info(task, TASK_EXTMOD_INFO, ...)
 
 ## Exception Ports
 
-Exception inapotokea kwenye thread, exception hiyo hutumwa kwenye exception port iliyoteuliwa ya thread. Ikiwa thread haiishughulikii, hutumwa kwenye task exception ports. Ikiwa task haiishughulikii, hutumwa kwenye host port inayosimamiwa na launchd, ambako itathibitishwa. Hii huitwa exception triage.
+Exception inapotokea kwenye thread, exception hii hutumwa kwenye exception port iliyoteuliwa ya thread hiyo. Ikiwa thread haiishughulikii, basi hutumwa kwenye exception ports za task. Ikiwa task haiishughulikii, basi hutumwa kwenye host port inayodhibitiwa na launchd (ambapo itathibitishwa). Hii huitwa exception triage.
 
-Kumbuka kwamba kwa kawaida, mwishoni, ikiwa report haikushughulikiwa ipasavyo, itaishia kushughulikiwa na ReportCrash daemon. Hata hivyo, inawezekana thread nyingine ndani ya task hiyo hiyo isimamie exception; hivi ndivyo zana za crash reporting kama `PLCreashReporter` hufanya.
+Kumbuka kwamba mwishowe, ikiwa report haikushughulikiwa ipasavyo, kwa kawaida itaishia kushughulikiwa na ReportCrash daemon. Hata hivyo, inawezekana thread nyingine ndani ya task hiyo hiyo isimamie exception; hivi ndivyo crash reporting tools kama `PLCreashReporter` hufanya.
 
-## Objects Nyingine
+## Other Objects
 
 ### Clock
 
-User yeyote anaweza kufikia taarifa kuhusu clock, hata hivyo ili kuweka muda au kurekebisha settings nyingine, lazima uwe root.
+Mtumiaji yeyote anaweza kufikia taarifa kuhusu clock, hata hivyo ili kuweka muda au kurekebisha settings nyingine, lazima uwe root.
 
-Ili kupata taarifa, inawezekana kuita functions kutoka `clock` subsystem kama: `clock_get_time`, `clock_get_attributtes` au `clock_alarm`\
+Ili kupata taarifa, inawezekana kuita functions kutoka kwenye `clock` subsystem kama: `clock_get_time`, `clock_get_attributtes` au `clock_alarm`\
 Ili kurekebisha values, `clock_priv` subsystem inaweza kutumiwa pamoja na functions kama `clock_set_time` na `clock_set_attributes`
 
-### Processors na Processor Set
+### Processors and Processor Set
 
-Processor APIs huruhusu kudhibiti logical processor moja kwa kuita functions kama `processor_start`, `processor_exit`, `processor_info`, `processor_get_assignment`...
+processor apis huruhusu kudhibiti logical processor moja kwa kuita functions kama `processor_start`, `processor_exit`, `processor_info`, `processor_get_assignment`...
 
-Zaidi ya hayo, **processor set** APIs hutoa njia ya kupanga processors nyingi katika group. Inawezekana kupata processor set ya default kwa kuita **`processor_set_default`**.\
-Hizi ni baadhi ya APIs zinazovutia za kuingiliana na processor set:
+Zaidi ya hayo, **processor set** apis hutoa njia ya kuweka processors nyingi katika group. Inawezekana kupata default processor set kwa kuita **`processor_set_default`**.\
+Hizi ni APIs za kuvutia za kuingiliana na processor set:
 
 - `processor_set_statistics`
 - `processor_set_tasks`: Hurejesha array ya send rights kwa tasks zote zilizo ndani ya processor set
@@ -1107,8 +1107,8 @@ Hizi ni baadhi ya APIs zinazovutia za kuingiliana na processor set:
 - `processor_set_stack_usage`
 - `processor_set_info`
 
-Kama ilivyotajwa kwenye [**post hii**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), hapo awali hii iliruhusu kukwepa protection iliyotajwa awali ili kupata task ports katika processes nyingine na kuzidhibiti kwa kuita **`processor_set_tasks`** na kupata host port kwenye kila process.\
-Siku hizi unahitaji root kutumia function hiyo, na hii inalindwa, kwa hivyo utaweza kupata ports hizi tu kwenye processes ambazo hazijalindwa.<sup>[[11]](#references)</sup>
+Kama ilivyotajwa kwenye [**this post**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), hapo awali hii iliruhusu kupita ulinzi uliotajwa awali ili kupata task ports katika processes nyingine na kuzidhibiti kwa kuita **`processor_set_tasks`** na kupata host port kwenye kila process.<sup>[[10]](#references)</sup>\
+Siku hizi unahitaji root kutumia function hiyo na hii inalindwa, kwa hivyo utaweza kupata ports hizi tu kwenye processes ambazo hazijalindwa.<sup>[[10]](#references)</sup>
 
 Unaweza kuijaribu kwa:
 
@@ -1245,7 +1245,7 @@ macos-mig-mach-interface-generator.md
 
 ## MIG handler type confusion -> fake vtable pointer-chain hijack
 
-If a MIG handler **retrieves a C++ object by Mach message-supplied ID** (e.g., from an internal Object Map) and then **assumes a specific concrete type without validating the real dynamic type**, later virtual calls can dispatch through attacker-controlled pointers. In `coreaudiod`’s `com.apple.audio.audiohald` service (CVE-2024-54529), `_XIOContext_Fetch_Workgroup_Port` used the looked-up `HALS_Object` as an `ioct` and executed a vtable call via:<sup>[[10]](#references)</sup>
+If a MIG handler **retrieves a C++ object by Mach message-supplied ID** (e.g., from an internal Object Map) and then **assumes a specific concrete type without validating the real dynamic type**, later virtual calls can dispatch through attacker-controlled pointers. In `coreaudiod`’s `com.apple.audio.audiohald` service (CVE-2024-54529), `_XIOContext_Fetch_Workgroup_Port` used the looked-up `HALS_Object` as an `ioct` and executed a vtable call via:<sup>[[9]](#references)</sup>
 
 ```asm
 mov rax, qword ptr [rdi]
@@ -1280,11 +1280,11 @@ HALS_Object + 0x68  -> controlled_object
 - [3] [knightsc/inject.c – dlopen dylib injection into a remote Mach task (Gist)](https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a)
 - [4] [Don't talk all at once: Elevating privileges on macOS by audit token spoofing – Sector 7](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 - [5] [XNU — `osfmk/mach/message.h` (Mach message structures and flags)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
-- [6] [XNU — `osfmk/ipc/ipc_port.h` (port rights and internals)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/ipc/ipc_port.h)
-- [7] [XNU — `osfmk/mach/mach_port.defs` (port manipulation MIG interface)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
-- [8] [XNU — `osfmk/mach/task.defs` (`task_for_pid`, thread/task port operations)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
-- [9] [task_get_special_port – MIT Darwin XNU manual](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html)
-- [10] [Project Zero – Sound Barrier 2](https://projectzero.google/2026/01/sound-barrier-2.html)
-- [11] [About the processor_set_tasks() access to kernel memory vulnerability – reverse.put.as](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/)
+- [6] [XNU — `osfmk/mach/mach_port.defs` (port manipulation MIG interface)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
+- [7] [XNU — `osfmk/mach/task.defs` (`task_for_pid`, thread/task port operations)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
+- [8] [task_get_special_port – MIT Darwin XNU manual](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html)
+- [9] [Project Zero – Sound Barrier 2](https://projectzero.google/2026/01/sound-barrier-2.html)
+- [10] [About the processor_set_tasks() access to kernel memory vulnerability – reverse.put.as](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/)
+- [11] [XNU — `osfmk/ipc/ipc_port.h` (port rights and internals)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/ipc/ipc_port.h)
 
 {{#include ../../../../banners/hacktricks-training.md}}

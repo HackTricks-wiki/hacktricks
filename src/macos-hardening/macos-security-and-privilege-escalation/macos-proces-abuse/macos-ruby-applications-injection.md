@@ -4,21 +4,21 @@
 
 ## RUBYOPT
 
-Kwa kutumia hii env variable inawezekana **kuongeza params mpya** kwa **ruby** kila wakati inatekelezwa. Ingawa param **`-e`** haiwezi kutumika kubaini msimbo wa ruby wa kutekeleza, inawezekana kutumia params **`-I`** na **`-r`** kuongeza folda mpya kwenye maktaba za kupakia na kisha **kubaini maktaba ya kupakia**.
+Kwa kutumia env variable hii, inawezekana **kuongeza params mpya** kwenye **ruby** kila inapotekelezwa. Ingawa param **`-e`** haiwezi kutumiwa kubainisha ruby code ya kutekeleza, inawezekana kutumia params **`-I`** na **`-r`** kuongeza folder mpya kwenye library load path, kisha **kubainisha library ya kupakia**.
 
-Unda maktaba **`inject.rb`** katika **`/tmp`**:
+Create library **`inject.rb`** ndani ya **`/tmp`**:
 ```ruby:inject.rb
 puts `whoami`
 ```
-Tengeneza popote script ya ruby kama:
+Unda popote script ya Ruby kama vile:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-Kisha fanya script ya ruby isiyo na mpangilio iipakue na:
+Kisha fanya script ya ruby ya kiholela kuipakia kwa:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-Fahamu ya kufurahisha, inafanya kazi hata na param **`--disable-rubyopt`**:
+Ukweli wa kuvutia, inafanya kazi hata kwa param **`--disable-rubyopt`**:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 ```

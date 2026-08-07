@@ -8,7 +8,7 @@
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Amri Maalum za MacOS
+### Amri Mahususi za MacOS
 ```bash
 #System info
 date
@@ -117,7 +117,7 @@ sudo killall -HUP mDNSResponder
 ```
 ### Ukaguzi wa haraka wa anti-analysis / virtualization
 
-Baadhi ya macOS stealers huita `system_profiler` ili kutambua VMs na **kuacha kutekeleza kwa exit code maalum (kwa mfano, 100)** ili kuepuka sandbox detonation<sup>[[1]](#references)</sup>:
+Baadhi ya macOS stealers huita `system_profiler` ili kutambua VMs na **abort kwa exit code tofauti (k.m., 100)** ili kuepuka sandbox detonation<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,14 +125,14 @@ fi
 ```
 ### Programu na Huduma Zilizosakinishwa
 
-Kagua programu **zinazotiliwa shaka** zilizosakinishwa na **ruhusa** juu ya rasilimali zilizosakinishwa:
+Kagua programu **zinazotia shaka** zilizosakinishwa na **mapendeleo** juu ya rasilimali zilizosakinishwa:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Michakato ya Watumiaji
+### Michakato ya Mtumiaji
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -145,11 +145,11 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### Unda mtumiaji
 
-Bila prompts
+Bila vidokezo
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## Marejeleo
+## Marejeo
 
 - [1] [2025, mwaka wa Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 

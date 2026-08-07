@@ -1,10 +1,10 @@
-# macOS Default Sandbox Debug
+# Utatuzi wa Default Sandbox ya macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Katika ukurasa huu unaweza kupata jinsi ya kuunda programu ya kuzindua amri za kawaida kutoka ndani ya sanduku la kawaida la macOS:
+Katika ukurasa huu unaweza kupata jinsi ya kuunda app ya kuzindua amri arbitrary kutoka ndani ya Default Sandbox ya macOS:
 
-1. Jenga programu:
+1. Compile application:
 ```objectivec:main.m
 #include <Foundation/Foundation.h>
 
@@ -34,9 +34,9 @@ system(input);
 return 0;
 }
 ```
-Kusanya inayoendesha: `clang -framework Foundation -o SandboxedShellApp main.m`
+Iunde kwa kuiendesha: `clang -framework Foundation -o SandboxedShellApp main.m`
 
-2. Jenga kifurushi cha `.app`
+2. Unda bundle ya `.app`
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +58,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Eleza haki
+3. Bainisha entitlements
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Saini programu (unahitaji kuunda cheti katika keychain)
+4. Saini app (unahitaji kuunda certificate katika keychain)
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp

