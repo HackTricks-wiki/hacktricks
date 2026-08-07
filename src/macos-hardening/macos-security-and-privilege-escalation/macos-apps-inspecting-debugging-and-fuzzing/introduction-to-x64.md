@@ -4,72 +4,72 @@
 
 ## **x64 का परिचय**
 
-x64, जिसे x86-64 के नाम से भी जाना जाता है, एक 64-bit processor architecture है जिसका उपयोग मुख्य रूप से desktop और server computing में किया जाता है। Intel द्वारा निर्मित x86 architecture से उत्पन्न होकर और बाद में AMD द्वारा AMD64 नाम से अपनाया गया यह architecture आज personal computers और servers में सबसे अधिक प्रचलित है।
+x64, जिसे x86-64 के नाम से भी जाना जाता है, एक 64-bit processor architecture है जिसका उपयोग मुख्य रूप से desktop और server computing में किया जाता है। इसकी उत्पत्ति Intel द्वारा निर्मित x86 architecture से हुई और बाद में AMD ने इसे AMD64 नाम से अपनाया। आज यह personal computers और servers में सबसे अधिक प्रचलित architecture है।
 
 ### **Registers**
 
-x64, x86 architecture का विस्तार करता है और इसमें **16 general-purpose registers** होते हैं, जिन्हें `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi`, और `r8` से `r15` तक नामित किया गया है। इनमें से प्रत्येक **64-bit** (8-byte) value store कर सकता है। Compatibility और विशेष tasks के लिए इन registers में 32-bit, 16-bit और 8-bit sub-registers भी होते हैं।
+x64, x86 architecture का विस्तार करता है और इसमें **16 general-purpose registers** होते हैं, जिन्हें `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` और `r8` से `r15` तक नाम दिया गया है। इनमें से प्रत्येक **64-bit** (8-byte) value store कर सकता है। Compatibility और विशिष्ट कार्यों के लिए इन registers में 32-bit, 16-bit और 8-bit sub-registers भी होते हैं।
 
 1. **`rax`** - परंपरागत रूप से functions से प्राप्त **return values** के लिए उपयोग किया जाता है।
 2. **`rbx`** - memory operations के लिए अक्सर **base register** के रूप में उपयोग किया जाता है।
-3. **`rcx`** - सामान्यतः **loop counters** के लिए उपयोग किया जाता है।
-4. **`rdx`** - extended arithmetic operations सहित विभिन्न भूमिकाओं में उपयोग किया जाता है।
+3. **`rcx`** - आमतौर पर **loop counters** के लिए उपयोग किया जाता है।
+4. **`rdx`** - extended arithmetic operations सहित विभिन्न कार्यों में उपयोग किया जाता है।
 5. **`rbp`** - stack frame के लिए **base pointer**।
-6. **`rsp`** - **Stack pointer**, जो stack के top का track रखता है।
+6. **`rsp`** - **stack pointer**, जो stack के शीर्ष का पता रखता है।
 7. **`rsi`** और **`rdi`** - string/memory operations में **source** और **destination** indexes के लिए उपयोग किए जाते हैं।
 8. **`r8`** से **`r15`** - x64 में जोड़े गए अतिरिक्त general-purpose registers।
 
 ### **Calling Convention**
 
-x64 calling convention अलग-अलग operating systems में अलग होती है। उदाहरण के लिए:
+x64 calling convention अलग-अलग operating systems में भिन्न होता है। उदाहरण के लिए:
 
-- **Windows**: पहले **चार parameters** registers **`rcx`**, **`rdx`**, **`r8`**, और **`r9`** में pass किए जाते हैं। अतिरिक्त parameters को stack पर push किया जाता है। Return value **`rax`** में होती है।
-- **System V (आमतौर पर UNIX-like systems में उपयोग किया जाता है)**: पहले **छह integer या pointer parameters** registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, और **`r9`** में pass किए जाते हैं। Return value भी **`rax`** में होती है।
+- **Windows**: पहले **चार parameters** registers **`rcx`**, **`rdx`**, **`r8`**, और **`r9`** में पास किए जाते हैं। अतिरिक्त parameters को stack पर push किया जाता है। Return value **`rax`** में होती है।
+- **System V (आमतौर पर UNIX-like systems में उपयोग किया जाता है)**: पहले **छह integer या pointer parameters** registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`**, और **`r9`** में पास किए जाते हैं। Return value भी **`rax`** में होती है।
 
-यदि function में छह से अधिक inputs हैं, तो **बाकी को stack पर pass किया जाएगा**। **RSP**, यानी stack pointer, **16 bytes aligned** होना चाहिए, जिसका अर्थ है कि जिस address की ओर यह point करता है वह किसी भी call के होने से पहले 16 से विभाज्य होना चाहिए। इसका अर्थ है कि सामान्यतः function call करने से पहले हमें अपने shellcode में यह सुनिश्चित करना होगा कि RSP उचित रूप से aligned हो। हालांकि, व्यवहार में system calls कई बार इस requirement के पूरा न होने पर भी काम करते हैं।
+यदि function में छह से अधिक inputs हों, तो **बाकी को stack पर पास किया जाएगा**। **RSP**, यानी stack pointer, **16 bytes aligned** होना चाहिए। इसका अर्थ है कि call होने से पहले जिस address की ओर यह point करता है, वह 16 से divisible होना चाहिए। इसका मतलब है कि सामान्यतः function call करने से पहले हमें अपने shellcode में यह सुनिश्चित करना होगा कि RSP सही रूप से aligned हो। हालांकि, व्यवहार में system calls कई बार इस requirement के पूरी न होने पर भी काम करते हैं।
 
-### Swift में Calling Convention
+### Calling Convention in Swift
 
-Swift की अपनी **calling convention** है, जिसे [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64) पर पाया जा सकता है।
+Swift का अपना **calling convention** है, जिसे [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64) पर पाया जा सकता है।
 
 ### **Common Instructions**
 
-x64 instructions का एक समृद्ध set है, जो पुराने x86 instructions के साथ compatibility बनाए रखता है और नए instructions भी प्रस्तुत करता है।
+x64 instructions का एक समृद्ध set है, जो पुराने x86 instructions के साथ compatibility बनाए रखते हुए नए instructions भी प्रस्तुत करता है।
 
-- **`mov`**: किसी **register** या **memory location** से किसी अन्य register या memory location में value **Move** करता है।
-- उदाहरण: `mov rax, rbx` — `rbx` की value को `rax` में Move करता है।
+- **`mov`**: किसी **register** या **memory location** से value को दूसरे स्थान पर **move** करता है।
+- उदाहरण: `mov rax, rbx` — `rbx` की value को `rax` में move करता है।
 - **`push`** और **`pop`**: values को **stack** पर push या stack से pop करते हैं।
 - उदाहरण: `push rax` — `rax` की value को stack पर push करता है।
-- उदाहरण: `pop rax` — stack की top value को `rax` में pop करता है।
+- उदाहरण: `pop rax` — stack की top value को stack से `rax` में pop करता है।
 - **`add`** और **`sub`**: **Addition** और **subtraction** operations।
 - उदाहरण: `add rax, rcx` — `rax` और `rcx` की values को जोड़कर result को `rax` में store करता है।
-- **`mul`** और **`div`**: **Multiplication** और **division** operations। ध्यान दें: operands के उपयोग के संबंध में इनका specific behavior होता है।
+- **`mul`** और **`div`**: **Multiplication** और **division** operations। ध्यान दें: operands के उपयोग के संबंध में इनका behavior विशिष्ट होता है।
 - **`call`** और **`ret`**: **functions को call करने** और **उनसे return करने** के लिए उपयोग किए जाते हैं।
 - **`int`**: software **interrupt** trigger करने के लिए उपयोग किया जाता है। उदाहरण के लिए, 32-bit x86 Linux में system calls के लिए `int 0x80` का उपयोग किया जाता था।
-- **`cmp`**: दो values की **Compare** करता है और result के आधार पर CPU के flags set करता है।
+- **`cmp`**: दो values की **compare** करता है और result के आधार पर CPU के flags set करता है।
 - उदाहरण: `cmp rax, rdx` — `rax` की तुलना `rdx` से करता है।
 - **`je`, `jne`, `jl`, `jge`, ...**: **Conditional jump** instructions, जो पिछले `cmp` या test के results के आधार पर control flow बदलते हैं।
-- उदाहरण: `cmp rax, rdx` instruction के बाद `je label` — यदि `rax`, `rdx` के बराबर है, तो `label` पर jump करता है।
+- उदाहरण: `cmp rax, rdx` instruction के बाद, `je label` — यदि `rax`, `rdx` के बराबर है, तो `label` पर jump करता है।
 - **`syscall`**: कुछ x64 systems (जैसे modern Unix) में **system calls** के लिए उपयोग किया जाता है।
 - **`sysenter`**: कुछ platforms पर optimized **system call** instruction।
 
 ### **Function Prologue**
 
 1. **पुराने base pointer को push करें**: `push rbp` (caller के base pointer को save करता है)
-2. **वर्तमान stack pointer को base pointer में Move करें**: `mov rbp, rsp` (वर्तमान function के लिए नया base pointer set करता है)
-3. **local variables के लिए stack पर space allocate करें**: `sub rsp, <size>` (जहां `<size>` आवश्यक bytes की संख्या है)
+2. **वर्तमान stack pointer को base pointer में move करें**: `mov rbp, rsp` (वर्तमान function के लिए नया base pointer set करता है)
+3. **Local variables के लिए stack पर space allocate करें**: `sub rsp, <size>` (जहाँ `<size>` आवश्यक bytes की संख्या है)
 
 ### **Function Epilogue**
 
-1. **वर्तमान base pointer को stack pointer में Move करें**: `mov rsp, rbp` (local variables को deallocate करता है)
+1. **वर्तमान base pointer को stack pointer में move करें**: `mov rsp, rbp` (local variables को deallocate करता है)
 2. **पुराने base pointer को stack से pop करें**: `pop rbp` (caller के base pointer को restore करता है)
-3. **Return करें**: `ret` (control को caller के पास return करता है)
+3. **Return करें**: `ret` (control को caller को वापस देता है)
 
 ## macOS
 
 ### syscalls
 
-syscalls की अलग-अलग classes होती हैं, जिन्हें आप [**यहां पा सकते हैं**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
+syscalls की अलग-अलग classes होती हैं, जिन्हें आप [**यहाँ पा सकते हैं**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -78,7 +78,7 @@ syscalls की अलग-अलग classes होती हैं, जिन्
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-इसके बाद, आप प्रत्येक syscall number [**इस URL में**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:** મેળવી सकते हैं।
+फिर, आप प्रत्येक syscall number [**इस URL में**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)** पा सकते हैं:**
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -106,7 +106,7 @@ Compile करने के लिए:
 nasm -f macho64 shell.asm -o shell.o
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 ```
-bytes निकालने के लिए:
+Bytes निकालने के लिए:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
 for c in $(objdump -d "shell.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
@@ -168,7 +168,7 @@ return 0;
 
 #### Shell
 
-[**यहां**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) से लिया गया और समझाया गया।<sup>[[1]](#references)</sup>
+[**यहाँ**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) से लिया गया और समझाया गया है।<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -209,7 +209,7 @@ syscall
 
 #### cat से पढ़ें
 
-लक्ष्य `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` को execute करना है, इसलिए दूसरा argument (x1) params की एक array है (जो memory में addresses का stack होता है)।
+लक्ष्य `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` को execute करना है, इसलिए दूसरा argument (x1) params की एक array है (memory में इसका अर्थ addresses का stack है)।
 ```armasm
 bits 64
 section .text
@@ -280,7 +280,7 @@ touch_command:  db "touch /tmp/lalala", 0
 ```
 #### Bind shell
 
-[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) से **पोर्ट 4444** पर Bind shell<sup>[[2]](#references)</sup>।
+[https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html](https://packetstormsecurity.com/files/151731/macOS-TCP-4444-Bind-Shell-Null-Free-Shellcode.html) से **port 4444** में Bind shell<sup>[[2]](#references)</sup>।
 ```armasm
 section .text
 global _main
@@ -357,7 +357,7 @@ syscall
 ```
 #### Reverse Shell
 
-[https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html) से Reverse shell। **127.0.0.1:4444** पर Reverse shell<sup>[[3]](#references)</sup>।
+[https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html) से Reverse shell। **127.0.0.1:4444** पर Reverse shell<sup>[[3]](#references)</sup>】【。
 ```armasm
 section .text
 global _main

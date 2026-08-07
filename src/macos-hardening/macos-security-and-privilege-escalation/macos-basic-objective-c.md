@@ -5,21 +5,21 @@
 ## Objective-C
 
 > [!CAUTION]
-> ध्यान दें कि Objective-C में लिखे गए प्रोग्राम **रखते** हैं अपनी क्लास घोषणाएँ **जब** **संकलित** होते हैं [Mach-O बाइनरीज़](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) में। ऐसी क्लास घोषणाएँ **शामिल** करती हैं नाम और प्रकार के:
+> ध्यान दें कि Objective-C में लिखे गए programs [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) में **compiled** होने पर भी अपनी class declarations **retain** रखते हैं। ऐसी class declarations में निम्नलिखित के नाम और type **शामिल** होते हैं:
 
-- क्लास
-- क्लास विधियाँ
-- क्लास उदाहरण चर
+- Class
+- Class methods
+- Class instance variables
 
-आप इस जानकारी को [**class-dump**](https://github.com/nygard/class-dump) का उपयोग करके प्राप्त कर सकते हैं:
+आप यह जानकारी [**class-dump**](https://github.com/nygard/class-dump) का उपयोग करके प्राप्त कर सकते हैं:
 ```bash
 class-dump Kindle.app
 ```
-ध्यान दें कि इन नामों को बाइनरी के रिवर्सिंग को अधिक कठिन बनाने के लिए ओबफस्केट किया जा सकता है।
+ध्यान दें कि इन names को binary की reversing को अधिक कठिन बनाने के लिए obfuscated किया जा सकता है।
 
-## क्लासेस, मेथड्स और ऑब्जेक्ट्स
+## Classes, Methods और Objects
 
-### इंटरफेस, प्रॉपर्टीज और मेथड्स
+### Interface, Properties और Methods
 ```objectivec
 // Declare the interface of the class
 @interface MyVehicle : NSObject
@@ -34,7 +34,7 @@ class-dump Kindle.app
 
 @end
 ```
-### **क्लास**
+### **Class**
 ```objectivec
 @implementation MyVehicle : NSObject
 
@@ -50,9 +50,9 @@ self.numberOfWheels += value;
 
 @end
 ```
-### **ऑब्जेक्ट और कॉल मेथड**
+### **Object और Call Method**
 
-क्लास का एक उदाहरण बनाने के लिए **`alloc`** मेथड को कॉल किया जाता है जो प्रत्येक **प्रॉपर्टी** के लिए **मेमोरी आवंटित** करता है और उन आवंटनों को **शून्य** करता है। फिर **`init`** को कॉल किया जाता है, जो **प्रॉपर्टीज** को **आवश्यक मानों** पर **आरंभ** करता है।
+किसी class का instance बनाने के लिए **`alloc`** method को call किया जाता है, जो प्रत्येक **property** के लिए **memory allocate** करता है और उन allocations को **zero** करता है। इसके बाद **`init`** को call किया जाता है, जो **properties** को **required values** से **initialize** करता है।
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -64,15 +64,15 @@ MyVehicle *newVehicle = [MyVehicle new];
 // [myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]
 [newVehicle addWheels:4];
 ```
-### **क्लास मेथड्स**
+### **Class Methods**
 
-क्लास मेथड्स को **प्लस साइन** (+) के साथ परिभाषित किया जाता है, न कि हाइफन (-) के साथ जो इंस्टेंस मेथड्स के लिए उपयोग किया जाता है। जैसे कि **NSString** क्लास मेथड **`stringWithString`**:
+Class methods को **plus sign** (+) से define किया जाता है, न कि hyphen (-) से, जिसका उपयोग instance methods के साथ किया जाता है। जैसे **NSString** class method **`stringWithString`**:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
 ### Setter & Getter
 
-गुणों को **सेट** और **गेट** करने के लिए, आप इसे **डॉट नोटेशन** के साथ या जैसे कि आप **एक विधि को कॉल** कर रहे हों, कर सकते हैं:
+**properties** को **set** और **get** करने के लिए, आप इसे **dot notation** से या ऐसे कर सकते हैं जैसे आप **method** को **call** कर रहे हों:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -82,20 +82,20 @@ newVehicle.numberOfWheels = 2;
 NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
-### **इंस्टेंस वेरिएबल्स**
+### **Instance Variables**
 
-Setter और getter मेथड्स के विकल्प के रूप में आप इंस्टेंस वेरिएबल्स का उपयोग कर सकते हैं। ये वेरिएबल्स प्रॉपर्टीज के समान नाम रखते हैं लेकिन "\_" से शुरू होते हैं:
+setter और getter methods के विकल्प के रूप में आप instance variables का उपयोग कर सकते हैं। इन variables का नाम properties जैसा ही होता है, लेकिन इसकी शुरुआत "\_" से होती है:
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
 NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 }
 ```
-### प्रोटोकॉल
+### Protocols
 
-प्रोटोकॉल विधि घोषणाओं का सेट होते हैं (बिना गुणों के)। एक वर्ग जो प्रोटोकॉल को लागू करता है, घोषित विधियों को लागू करता है।
+Protocols, methods declarations (बिना properties) का एक set होते हैं। जो class किसी protocol को implement करती है, वह उसमें declare किए गए methods को implement करती है।
 
-विधियों के 2 प्रकार होते हैं: **अनिवार्य** और **वैकल्पिक**। **डिफ़ॉल्ट** रूप से एक विधि **अनिवार्य** होती है (लेकिन आप इसे **`@required`** टैग के साथ भी संकेत कर सकते हैं)। यह संकेत करने के लिए कि एक विधि वैकल्पिक है, **`@optional`** का उपयोग करें।
+Methods 2 प्रकार के होते हैं: **mandatory** और **optional**। **Default** रूप से कोई method **mandatory** होता है (लेकिन आप इसे **`@required`** tag से भी indicate कर सकते हैं)। किसी method को optional indicate करने के लिए **`@optional`** का उपयोग करें।
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -155,20 +155,20 @@ NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
 [mySuperCar makeLongTruck];
 }
 ```
-### मूल वर्ग
+### मूलभूत Classes
 
-#### स्ट्रिंग
+#### String
 ```objectivec
 // NSString
 NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-बुनियादी कक्षाएँ **अपरिवर्तनीय** होती हैं, इसलिए एक मौजूदा स्ट्रिंग में एक स्ट्रिंग जोड़ने के लिए **एक नई NSString बनानी होगी**।
+Basic classes **immutable** होते हैं, इसलिए किसी मौजूदा string में string जोड़ने के लिए **एक नया NSString बनाना आवश्यक है**।
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
-या आप एक **mutable** स्ट्रिंग क्लास का भी उपयोग कर सकते हैं:
+या आप **mutable** string class का भी उपयोग कर सकते हैं:
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
 [mutableString appendString:bookTitle];
@@ -196,7 +196,7 @@ NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:
 NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
-#### एरे, सेट और डिक्शनरी
+#### Array, Sets और Dictionary
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -244,7 +244,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 ```
 ### Blocks
 
-Blocks **एक्सप्रेशन हैं जो ऑब्जेक्ट्स की तरह व्यवहार करते हैं** इसलिए इन्हें फ़ंक्शंस में पास किया जा सकता है या **arrays** या **dictionaries** में **स्टोर** किया जा सकता है। इसके अलावा, यदि इन्हें मान दिए जाएं तो ये **एक मान का प्रतिनिधित्व कर सकते हैं** इसलिए यह lambdas के समान है।
+Blocks ऐसे **functions हैं जो objects की तरह behave करते हैं**, इसलिए उन्हें functions में pass किया जा सकता है या **arrays** या **dictionaries** में **stored** किया जा सकता है। इसके अलावा, **यदि उन्हें values दी जाएँ**, तो वे **value represent** कर सकते हैं, इसलिए वे lambdas के समान होते हैं।
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -257,7 +257,7 @@ return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-यह भी संभव है कि **एक ब्लॉक प्रकार को एक पैरामीटर के रूप में उपयोग करने के लिए परिभाषित किया जाए** फ़ंक्शनों में:
+functions में **parameter के रूप में उपयोग किए जाने वाले block type को define करना** भी संभव है:
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);
@@ -304,7 +304,7 @@ if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
 NSLog(@"Removed successfully");
 }
 ```
-यह फ़ाइलों को **`NSString`** ऑब्जेक्ट्स के बजाय **`NSURL`** ऑब्जेक्ट्स का उपयोग करके प्रबंधित करना भी संभव है। विधि नाम समान हैं, लेकिन **`Path`** के बजाय **`URL`** के साथ।
+`NSString` objects के बजाय **`NSURL` objects का उपयोग करके** files को manage करना भी संभव है। Method names समान हैं, लेकिन **`Path` के बजाय `URL`** का उपयोग होता है।
 ```objectivec
 
 

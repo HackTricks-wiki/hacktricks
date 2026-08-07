@@ -4,37 +4,37 @@
 
 ## Basic Information
 
-Apple उपकरण 2010 के बाद **12 अल्फ़ान्यूमेरिक वर्णों** वाले सीरियल नंबर रखते हैं, प्रत्येक खंड विशिष्ट जानकारी प्रदान करता है:
+2010 के बाद के Apple devices के serial numbers में **12 alphanumeric characters** होते हैं, जिनका प्रत्येक segment विशिष्ट जानकारी प्रदान करता है:
 
-- **पहले 3 वर्ण**: **निर्माण स्थान** को दर्शाते हैं।
-- **वर्ण 4 और 5**: **निर्माण का वर्ष और सप्ताह** दर्शाते हैं।
-- **वर्ण 6 से 8**: प्रत्येक उपकरण के लिए **विशिष्ट पहचानकर्ता** के रूप में कार्य करते हैं।
-- **अंतिम 4 वर्ण**: **मॉडल नंबर** निर्दिष्ट करते हैं।
+- **First 3 Characters**: **manufacturing location** दर्शाते हैं।
+- **Characters 4 & 5**: **year and week of manufacture** दर्शाते हैं।
+- **Characters 6 to 8**: प्रत्येक device के लिए **unique identifier** के रूप में कार्य करते हैं।
+- **Last 4 Characters**: **model number** निर्दिष्ट करते हैं।
 
-उदाहरण के लिए, सीरियल नंबर **C02L13ECF8J2** इस संरचना का पालन करता है।
+उदाहरण के लिए, serial number **C02L13ECF8J2** इसी structure का पालन करता है।
 
 ### **Manufacturing Locations (First 3 Characters)**
 
-कुछ कोड विशिष्ट कारखानों का प्रतिनिधित्व करते हैं:
+कुछ codes विशिष्ट factories को दर्शाते हैं:
 
-- **FC, F, XA/XB/QP/G8**: अमेरिका में विभिन्न स्थान।
-- **RN**: मेक्सिको।
-- **CK**: कॉर्क, आयरलैंड।
-- **VM**: फॉक्सकॉन, चेक गणराज्य।
-- **SG/E**: सिंगापुर।
-- **MB**: मलेशिया।
-- **PT/CY**: कोरिया।
-- **EE/QT/UV**: ताइवान।
-- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: चीन में विभिन्न स्थान।
-- **C0, C3, C7**: चीन के विशिष्ट शहर।
-- **RM**: नवीनीकरण किए गए उपकरण।
+- **FC, F, XA/XB/QP/G8**: USA में विभिन्न locations।
+- **RN**: Mexico।
+- **CK**: Cork, Ireland।
+- **VM**: Foxconn, Czech Republic।
+- **SG/E**: Singapore।
+- **MB**: Malaysia।
+- **PT/CY**: Korea।
+- **EE/QT/UV**: Taiwan।
+- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: China में अलग-अलग locations।
+- **C0, C3, C7**: China के विशिष्ट cities।
+- **RM**: Refurbished devices।
 
 ### **Year of Manufacturing (4th Character)**
 
-यह वर्ण 'C' (2010 के पहले आधे का प्रतिनिधित्व करता है) से लेकर 'Z' (2019 के दूसरे आधे) तक भिन्न होता है, विभिन्न अक्षर विभिन्न आधे वर्ष की अवधि को दर्शाते हैं।
+यह character 'C' (जो 2010 के first half को दर्शाता है) से लेकर 'Z' (2019 के second half) तक vary करता है, जिसमें अलग-अलग letters अलग-अलग half-year periods को दर्शाते हैं।
 
 ### **Week of Manufacturing (5th Character)**
 
-अंक 1-9 सप्ताह 1-9 के अनुरूप होते हैं। अक्षर C-Y (स्वर और 'S' को छोड़कर) सप्ताह 10-27 का प्रतिनिधित्व करते हैं। वर्ष के दूसरे आधे के लिए, इस संख्या में 26 जोड़ा जाता है।
+Digits 1-9 weeks 1-9 के अनुरूप होते हैं। Letters C-Y (vowels और 'S' को छोड़कर) weeks 10-27 को दर्शाते हैं। वर्ष के second half के लिए, इस number में 26 जोड़ा जाता है।
 
 {{#include ../../../banners/hacktricks-training.md}}

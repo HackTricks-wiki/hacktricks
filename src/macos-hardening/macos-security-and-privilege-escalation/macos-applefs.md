@@ -4,27 +4,31 @@
 
 ## Apple Proprietary File System (APFS)
 
-**Apple File System (APFS)** एक आधुनिक फ़ाइल प्रणाली है जिसे Hierarchical File System Plus (HFS+) के स्थान पर लाने के लिए डिज़ाइन किया गया है। इसके विकास की आवश्यकता **बेहतर प्रदर्शन, सुरक्षा, और दक्षता** के कारण हुई थी।
+**Apple File System (APFS)** एक आधुनिक file system है, जिसे Hierarchical File System Plus (HFS+) के स्थान पर लाने के लिए डिज़ाइन किया गया है। इसका विकास **बेहतर performance, security और efficiency** की आवश्यकता के कारण किया गया था।
 
-APFS की कुछ उल्लेखनीय विशेषताएँ हैं:
+APFS की कुछ उल्लेखनीय विशेषताओं में शामिल हैं:<sup>[[1]](#references)</sup>
 
-1. **स्पेस शेयरिंग**: APFS कई वॉल्यूम को **एक ही भौतिक डिवाइस पर समान अंतर्निहित मुक्त संग्रहण साझा करने** की अनुमति देता है। यह अधिक कुशल स्थान उपयोग की अनुमति देता है क्योंकि वॉल्यूम बिना मैनुअल आकार बदलने या पुनः विभाजन की आवश्यकता के बिना गतिशील रूप से बढ़ और घट सकते हैं।
-1. इसका मतलब है, पारंपरिक विभाजनों की तुलना में फ़ाइल डिस्क में, **कि APFS में विभिन्न विभाजन (वॉल्यूम) सभी डिस्क स्थान साझा करते हैं**, जबकि एक नियमित विभाजन आमतौर पर एक निश्चित आकार का होता था।
-2. **स्नैपशॉट**: APFS **स्नैपशॉट बनाने का समर्थन करता है**, जो **पढ़ने के लिए केवल** फ़ाइल प्रणाली के समय-निर्धारित उदाहरण होते हैं। स्नैपशॉट कुशल बैकअप और आसान सिस्टम रोलबैक की अनुमति देते हैं, क्योंकि वे न्यूनतम अतिरिक्त संग्रहण का उपभोग करते हैं और जल्दी से बनाए या वापस लाए जा सकते हैं।
-3. **क्लोन**: APFS **फ़ाइल या निर्देशिका क्लोन बना सकता है जो मूल के समान संग्रहण साझा करते हैं** जब तक कि या तो क्लोन या मूल फ़ाइल में संशोधन नहीं किया जाता। यह सुविधा फ़ाइलों या निर्देशिकाओं की प्रतियाँ बनाने का एक कुशल तरीका प्रदान करती है बिना संग्रहण स्थान को डुप्लिकेट किए।
-4. **एन्क्रिप्शन**: APFS **पूर्ण-डिस्क एन्क्रिप्शन** के साथ-साथ प्रति-फ़ाइल और प्रति-निर्देशिका एन्क्रिप्शन का **स्वाभाविक रूप से समर्थन करता है**, विभिन्न उपयोग मामलों में डेटा सुरक्षा को बढ़ाता है।
-5. **क्रैश सुरक्षा**: APFS एक **कॉपी-ऑन-राइट मेटाडेटा योजना का उपयोग करता है जो फ़ाइल प्रणाली की स्थिरता सुनिश्चित करता है** यहां तक कि अचानक पावर लॉस या सिस्टम क्रैश के मामलों में, डेटा भ्रष्टाचार के जोखिम को कम करता है।
+1. **Space Sharing**: APFS कई volumes को एक ही physical device पर मौजूद **समान underlying free storage साझा करने** की अनुमति देता है। इससे space utilization अधिक efficient हो जाता है, क्योंकि volumes manual resizing या repartitioning की आवश्यकता के बिना dynamically बढ़ और घट सकते हैं।
+1. इसका अर्थ है कि file disks में traditional partitions की तुलना में, **APFS में अलग-अलग partitions (volumes) पूरे disk space को साझा करते हैं**, जबकि एक regular partition का आकार आमतौर पर fixed होता था।
+2. **Snapshots**: APFS **snapshots बनाने** का समर्थन करता है, जो file system के **read-only**, point-in-time instances होते हैं। Snapshots efficient backups और आसान system rollbacks सक्षम करते हैं, क्योंकि वे बहुत कम additional storage का उपयोग करते हैं और उन्हें जल्दी बनाया या revert किया जा सकता है।
+3. **Clones**: APFS **ऐसे file या directory clones बना सकता है जो original के साथ समान storage साझा करते हैं**, जब तक कि clone या original file में बदलाव न किया जाए। यह सुविधा storage space को duplicate किए बिना files या directories की copies बनाने का efficient तरीका प्रदान करती है।
+4. **Encryption**: APFS **native रूप से full-disk encryption** के साथ-साथ per-file और per-directory encryption का भी समर्थन करता है, जिससे अलग-अलग use cases में data security बेहतर होती है।
+5. **Crash Protection**: APFS एक **copy-on-write metadata scheme का उपयोग करता है, जो file system consistency सुनिश्चित करती है**, भले ही अचानक power loss या system crash हो जाए। इससे data corruption का risk कम होता है।
 
-कुल मिलाकर, APFS Apple उपकरणों के लिए एक अधिक आधुनिक, लचीली, और कुशल फ़ाइल प्रणाली प्रदान करता है, जिसमें बेहतर प्रदर्शन, विश्वसनीयता, और सुरक्षा पर ध्यान केंद्रित किया गया है।
+कुल मिलाकर, APFS Apple devices के लिए एक अधिक आधुनिक, flexible और efficient file system प्रदान करता है, जिसका focus बेहतर performance, reliability और security पर है।
 ```bash
 diskutil list # Get overview of the APFS volumes
 ```
 ## Firmlinks
 
-`Data` वॉल्यूम **`/System/Volumes/Data`** में माउंट किया गया है (आप इसे `diskutil apfs list` के साथ चेक कर सकते हैं)।
+`Data` volume **`/System/Volumes/Data`** में mounted है (आप इसे `diskutil apfs list` से check कर सकते हैं)।
 
-फिरmlink की सूची **`/usr/share/firmlinks`** फ़ाइल में पाई जा सकती है।
+firmlinks की list **`/usr/share/firmlinks`** file में मिल सकती है।
 ```bash
 
 ```
+## संदर्भ
+
+- [1] [APFS Guide - Features - Apple Developer Documentation](https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/APFS_Guide/Features/Features.html)
+
 {{#include ../../banners/hacktricks-training.md}}

