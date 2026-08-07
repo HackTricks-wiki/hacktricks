@@ -1,12 +1,12 @@
-# LLM Training - Data Preparation
+# Mafunzo ya LLM - Maandalizi ya Data
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Hizi ni nota zangu kutoka kwa kitabu kinachopendekezwa sana** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **pamoja na taarifa za ziada.**
+**Haya ni maelezo yangu kutoka kwenye kitabu kinachopendekezwa sana** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **pamoja na maelezo ya ziada.**<sup>[[1]](#references)</sup>
 
-## Basic Information
+## Taarifa za Msingi
 
-Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopaswa kujua kuhusu:
+Unapaswa kuanza kwa kusoma chapisho hili kuhusu dhana za msingi unazopaswa kuzifahamu:
 
 
 {{#ref}}
@@ -16,7 +16,7 @@ Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopasw
 ## 1. Tokenization
 
 > [!TIP]
-> Lengo la awamu hii ya awali ni rahisi sana: **Gawanya ingizo katika tokens (ids) kwa njia ambayo ina maana**.
+> Lengo la awamu hii ya awali ni rahisi sana: **Gawanya input kuwa tokens (ids) kwa namna yenye mantiki**.
 
 
 {{#ref}}
@@ -26,7 +26,7 @@ Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopasw
 ## 2. Data Sampling
 
 > [!TIP]
-> Lengo la awamu hii ya pili ni rahisi sana: **Chukua sampuli ya data ya ingizo na kuandaa kwa awamu ya mafunzo kwa kawaida kwa kutenganisha dataset katika sentensi za urefu maalum na pia kuzalisha jibu linalotarajiwa.**
+> Lengo la awamu hii ya pili ni rahisi sana: **Chukua sampuli za input data na uitayarishe kwa awamu ya training, kwa kawaida kwa kugawanya dataset kuwa sentensi zenye urefu maalum na pia kutengeneza jibu linalotarajiwa.**
 
 
 {{#ref}}
@@ -36,10 +36,10 @@ Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopasw
 ## 3. Token Embeddings
 
 > [!TIP]
-> Lengo la awamu hii ya tatu ni rahisi sana: **Patia kila moja ya tokens zilizopita katika msamiati vector ya vipimo vinavyotakiwa ili kufundisha mfano.** Kila neno katika msamiati litakuwa na pointi katika nafasi ya vipimo X.\
-> Kumbuka kwamba awali nafasi ya kila neno katika nafasi inaanzishwa "kwa bahati" na nafasi hizi ni vigezo vinavyoweza kufundishwa (vitaboreshwa wakati wa mafunzo).
+> Lengo la awamu hii ya tatu ni rahisi sana: **Wape kila token ya awali katika vocabulary vector yenye dimensions zinazohitajika ili ku-train model.** Kila neno katika vocabulary litakuwa pointi katika space yenye dimensions X.\
+> Kumbuka kuwa mwanzoni nafasi ya kila neno katika space huanzishwa kwa njia ya "random" na nafasi hizi ni trainable parameters (zitaboreshwa wakati wa training).
 >
-> Zaidi ya hayo, wakati wa token embedding **tabaka lingine la embeddings linaundwa** ambalo linawakilisha (katika kesi hii) **nafasi halisi ya neno katika sentensi ya mafunzo**. Kwa njia hii neno katika nafasi tofauti katika sentensi litakuwa na uwakilishi tofauti (maana).
+> Zaidi ya hayo, wakati wa token embedding **layer nyingine ya embeddings huundwa** ambayo inawakilisha (katika hali hii) **nafasi ya absolute ya neno katika training sentence**. Kwa njia hii, neno lililo katika nafasi tofauti katika sentence litakuwa na representation (maana) tofauti.
 
 
 {{#ref}}
@@ -49,8 +49,8 @@ Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopasw
 ## 4. Attention Mechanisms
 
 > [!TIP]
-> Lengo la awamu hii ya nne ni rahisi sana: **Tumia baadhi ya mitambo ya umakini**. Hizi zitakuwa **tabaka nyingi zinazojirudia** ambazo zitakuwa **zinakamata uhusiano wa neno katika msamiati na majirani zake katika sentensi ya sasa inayotumika kufundisha LLM**.\
-> Tabaka nyingi zinatumika kwa hili, hivyo vigezo vingi vinavyoweza kufundishwa vitakuwa vinakamata taarifa hii.
+> Lengo la awamu hii ya nne ni rahisi sana: **Tumia attention mechanisms**. Hizi zitakuwa **layers nyingi zinazojirudia** ambazo **zitakamata uhusiano wa neno katika vocabulary na majirani zake katika sentence ya sasa inayotumika ku-train LLM**.\
+> Layers nyingi hutumika kwa ajili hii, hivyo trainable parameters nyingi zitakamata taarifa hii.
 
 
 {{#ref}}
@@ -60,9 +60,9 @@ Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopasw
 ## 5. LLM Architecture
 
 > [!TIP]
-> Lengo la awamu hii ya tano ni rahisi sana: **Tengeneza muundo wa LLM kamili**. Panga kila kitu pamoja, tumia tabaka zote na uunde kazi zote za kuzalisha maandiko au kubadilisha maandiko kuwa IDs na kinyume chake.
+> Lengo la awamu hii ya tano ni rahisi sana: **Tengeneza architecture ya LLM kamili**. Unganisha kila kitu, tumia layers zote na uunde functions zote za kuzalisha text au kubadilisha text kuwa IDs na kinyume chake.
 >
-> Muundo huu utatumika kwa mafunzo na kutabiri maandiko baada ya kufundishwa.
+> Architecture hii itatumika kwa training na pia kwa predicting text baada ya model ku-trainiwa.
 
 
 {{#ref}}
@@ -72,7 +72,7 @@ Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopasw
 ## 6. Pre-training & Loading models
 
 > [!TIP]
-> Lengo la awamu hii ya sita ni rahisi sana: **Fundisha mfano kutoka mwanzo**. Kwa hili muundo wa awali wa LLM utatumika na miduara kadhaa ikipita juu ya seti za data kwa kutumia kazi za hasara zilizofafanuliwa na msaidizi kufundisha vigezo vyote vya mfano.
+> Lengo la awamu hii ya sita ni rahisi sana: **Train model kutoka mwanzo**. Kwa ajili hii, architecture ya awali ya LLM itatumika pamoja na loops zinazopitia data sets kwa kutumia loss functions na optimizer zilizofafanuliwa ili ku-train parameters zote za model.
 
 
 {{#ref}}
@@ -82,7 +82,7 @@ Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopasw
 ## 7.0. LoRA Improvements in fine-tuning
 
 > [!TIP]
-> Matumizi ya **LoRA hupunguza sana hesabu** inayohitajika ili **kurekebisha** mifano iliyofundishwa tayari.
+> Matumizi ya **LoRA hupunguza sana computation** inayohitajika ili **fine-tune** models ambazo tayari zime-trainiwa.
 
 
 {{#ref}}
@@ -92,7 +92,7 @@ Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopasw
 ## 7.1. Fine-Tuning for Classification
 
 > [!TIP]
-> Lengo la sehemu hii ni kuonyesha jinsi ya kurekebisha mfano ambao tayari umefundishwa ili badala ya kuzalisha maandiko mapya LLM itachagua kutoa **uwezekano wa maandiko yaliyotolewa kuainishwa katika kila moja ya makundi yaliyotolewa** (kama maandiko ni spam au la).
+> Lengo la sehemu hii ni kuonyesha jinsi ya kufanya fine-tune model ambayo tayari ime-pre-trainiwa ili badala ya kuzalisha text mpya, LLM itoe **probabilities za text iliyotolewa kuainishwa katika kila mojawapo ya categories zilizotolewa** (kwa mfano, ikiwa text ni spam au la).
 
 
 {{#ref}}
@@ -102,11 +102,15 @@ Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopasw
 ## 7.2. Fine-Tuning to follow instructions
 
 > [!TIP]
-> Lengo la sehemu hii ni kuonyesha jinsi ya **kurekebisha mfano ambao tayari umefundishwa ili kufuata maelekezo** badala ya tu kuzalisha maandiko, kwa mfano, kujibu kazi kama roboti ya mazungumzo.
+> Lengo la sehemu hii ni kuonyesha jinsi ya **kufanya fine-tune model ambayo tayari ime-pre-trainiwa ili ifuate instructions** badala ya kuzalisha text tu, kwa mfano, kujibu tasks kama chat bot.
 
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
+
+## Marejeo
+
+- [1] [Build a Large Language Model (From Scratch) - Manning](https://www.manning.com/books/build-a-large-language-model-from-scratch)
 
 {{#include ../../banners/hacktricks-training.md}}
