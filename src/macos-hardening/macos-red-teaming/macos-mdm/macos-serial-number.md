@@ -1,27 +1,27 @@
-# macOS Serial Number
+# Número de série do macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Informações Básicas
+## Informações básicas
 
-Dispositivos Apple pós-2010 têm números de série consistindo de **12 caracteres alfanuméricos**, cada segmento transmitindo informações específicas:
+Os dispositivos Apple lançados após 2010 têm números de série compostos por **12 caracteres alfanuméricos**, e cada segmento transmite informações específicas:
 
-- **Primeiros 3 Caracteres**: Indicam a **localização de fabricação**.
-- **Caracteres 4 e 5**: Denotam o **ano e a semana de fabricação**.
+- **Primeiros 3 caracteres**: Indicam o **local de fabricação**.
+- **Caracteres 4 e 5**: Indicam o **ano e a semana de fabricação**.
 - **Caracteres 6 a 8**: Servem como um **identificador único** para cada dispositivo.
-- **Últimos 4 Caracteres**: Especificam o **número do modelo**.
+- **Últimos 4 caracteres**: Especificam o **número do modelo**.
 
 Por exemplo, o número de série **C02L13ECF8J2** segue essa estrutura.
 
-### **Locais de Fabricação (Primeiros 3 Caracteres)**
+### **Locais de fabricação (primeiros 3 caracteres)**
 
-Certos códigos representam fábricas específicas:
+Alguns códigos representam fábricas específicas:
 
 - **FC, F, XA/XB/QP/G8**: Vários locais nos EUA.
 - **RN**: México.
 - **CK**: Cork, Irlanda.
 - **VM**: Foxconn, República Tcheca.
-- **SG/E**: Cingapura.
+- **SG/E**: Singapura.
 - **MB**: Malásia.
 - **PT/CY**: Coreia.
 - **EE/QT/UV**: Taiwan.
@@ -29,12 +29,12 @@ Certos códigos representam fábricas específicas:
 - **C0, C3, C7**: Cidades específicas na China.
 - **RM**: Dispositivos recondicionados.
 
-### **Ano de Fabricação (4º Caractere)**
+### **Ano de fabricação (4º caractere)**
 
-Este caractere varia de 'C' (representando a primeira metade de 2010) a 'Z' (segunda metade de 2019), com diferentes letras indicando diferentes períodos de meio ano.
+Esse caractere varia de 'C' (representando a primeira metade de 2010) a 'Z' (segunda metade de 2019), com letras diferentes indicando diferentes períodos de seis meses.
 
-### **Semana de Fabricação (5º Caractere)**
+### **Semana de fabricação (5º caractere)**
 
-Dígitos 1-9 correspondem às semanas 1-9. Letras C-Y (excluindo vogais e 'S') representam as semanas 10-27. Para a segunda metade do ano, 26 é adicionado a esse número.
+Os dígitos de 1 a 9 correspondem às semanas 1 a 9. As letras de C a Y (excluindo as vogais e o 'S') representam as semanas 10 a 27. Para a segunda metade do ano, 26 é adicionado a esse número.
 
 {{#include ../../../banners/hacktricks-training.md}}

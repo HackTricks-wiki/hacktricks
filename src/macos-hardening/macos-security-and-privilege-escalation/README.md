@@ -1,10 +1,10 @@
-# Segurança e Escalonamento de Privilégios no macOS
+# Segurança e Escalada de Privilégios no macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Noções básicas do MacOS
+## MacOS Básico
 
-Se você não estiver familiarizado com o macOS, comece aprendendo o básico do macOS:
+Se você não está familiarizado com o macOS, deve começar aprendendo o básico do macOS:
 
 - **Arquivos e permissões** especiais do macOS:
 
@@ -34,7 +34,7 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- **Serviços e protocolos de rede** comuns do macOS
+- **Serviços e protocolos de n**etwork** comuns do macOS
 
 
 {{#ref}}
@@ -44,9 +44,9 @@ macos-protocols.md
 - macOS **Opensource**: [https://opensource.apple.com/](https://opensource.apple.com/)
 - Para baixar um `tar.gz`, altere uma URL como [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) para [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
-### MDM do MacOS
+### MacOS MDM
 
-Nas empresas, é altamente provável que os sistemas **macOS** sejam **gerenciados com um MDM**. Portanto, do ponto de vista de um atacante, é interessante saber **como isso funciona**:
+Nas empresas, os sistemas **macOS** provavelmente serão **gerenciados com um MDM**. Portanto, da perspectiva de um atacante, é interessante saber **como isso funciona**:
 
 
 {{#ref}}
@@ -71,15 +71,15 @@ macos-security-protections/
 
 ### Permissões de Arquivos
 
-Se um **processo em execução como root grava** um arquivo que pode ser controlado por um usuário, o usuário pode abusar disso para **escalonar privilégios**.\
+Se um **processo executado como root grava** um arquivo que pode ser controlado por um usuário, o usuário pode abusar disso para **escalar privilégios**.\
 Isso pode ocorrer nas seguintes situações:
 
 - O arquivo usado já foi criado por um usuário (pertence ao usuário)
 - O arquivo usado pode ser gravado pelo usuário por causa de um grupo
 - O arquivo usado está dentro de um diretório pertencente ao usuário (o usuário pode criar o arquivo)
-- O arquivo usado está dentro de um diretório pertencente ao root, mas o usuário tem acesso de gravação a ele por causa de um grupo (o usuário pode criar o arquivo)
+- O arquivo usado está dentro de um diretório pertencente ao root, mas o usuário tem acesso de gravação sobre ele por causa de um grupo (o usuário pode criar o arquivo)
 
-Ser capaz de **criar um arquivo** que será **usado pelo root** permite que um usuário **se aproveite do seu conteúdo** ou até mesmo crie **symlinks/hardlinks** para apontá-lo para outro local.
+Ser capaz de **criar um arquivo** que será **usado pelo root** permite que um usuário **se aproveite do conteúdo dele** ou até mesmo crie **symlinks/hardlinks** para apontá-lo para outro local.
 
 Para esse tipo de vulnerabilidade, não se esqueça de **verificar instaladores `.pkg` vulneráveis**:
 
@@ -88,7 +88,7 @@ Para esse tipo de vulnerabilidade, não se esqueça de **verificar instaladores 
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Extensão de Arquivo e handlers de esquema de URL de aplicativos
+### Extensão de Arquivo e Manipuladores de esquemas de URL
 
 Aplicativos estranhos registrados por extensões de arquivo podem ser abusados, e diferentes aplicativos podem ser registrados para abrir protocolos específicos
 
@@ -97,26 +97,26 @@ Aplicativos estranhos registrados por extensões de arquivo podem ser abusados, 
 macos-file-extension-apps.md
 {{#endref}}
 
-## Escalonamento de Privilégios macOS TCC / SIP
+## Escalada de Privilégios no macOS TCC / SIP
 
-No macOS, **aplicativos e binários podem ter permissões** para acessar pastas ou configurações que os tornam mais privilegiados do que outros.
+No macOS, **aplicativos e binários podem ter permissões** para acessar pastas ou configurações que os tornam mais privilegiados que outros.
 
-Portanto, um atacante que deseja comprometer com sucesso uma máquina macOS precisará **escalonar seus privilégios TCC** (ou até mesmo **bypassar o SIP**, dependendo de suas necessidades).
+Portanto, um atacante que deseja comprometer com sucesso uma máquina macOS precisará **escalar seus privilégios no TCC** (ou até mesmo **bypassar o SIP**, dependendo de suas necessidades).
 
-Esses privilégios geralmente são concedidos na forma de **entitlements** com os quais o aplicativo é assinado, ou o aplicativo pode solicitar determinados acessos e, após o **usuário aprová-los**, eles podem ser encontrados nos **bancos de dados do TCC**. Outra maneira de um processo obter esses privilégios é sendo **filho de um processo** com esses **privilégios**, pois eles geralmente são **herdados**.
+Esses privilégios geralmente são concedidos na forma de **entitlements** com os quais o aplicativo é assinado, ou o aplicativo pode ter solicitado determinados acessos e, após a **aprovação do usuário**, eles podem ser encontrados nos **bancos de dados do TCC**. Outra forma de um processo obter esses privilégios é sendo **filho de um processo** com esses **privilégios**, pois eles geralmente são **herdados**.<sup>[[5]](#references)</sup>
 
-Siga estes links para encontrar diferentes maneiras de [**escalonar privilégios no TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**bypassar o TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) e descobrir como, no passado, o [**SIP foi bypassado**](macos-security-protections/macos-sip.md#sip-bypasses).
+Siga estes links para encontrar diferentes formas de [**escalar privilégios no TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**bypassar o TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) e saber como, no passado, o [**SIP foi bypassado**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## Escalonamento de Privilégios Tradicional no macOS
+## Escalada de Privilégios Tradicional no macOS
 
-É claro que, do ponto de vista de red teams, você também deve ter interesse em escalonar para root. Consulte o artigo a seguir para obter algumas dicas:
+É claro que, da perspectiva de red teams, você também deve estar interessado em escalar para root. Consulte o post a seguir para obter algumas dicas:
 
 
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
 
-## Compliance do macOS
+## Conformidade do macOS
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 

