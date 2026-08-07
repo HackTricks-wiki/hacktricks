@@ -106,3 +106,4 @@ Use these repeatable blueprints to design simulations that map directly to AADAP
 - [1] [MITRE AADAPT Framework as a Red Team Roadmap (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
 
 {{#include ../../banners/hacktricks-training.md}}
+

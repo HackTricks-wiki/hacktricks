@@ -308,3 +308,4 @@ defi-amm-virtual-balance-cache-exploitation.md
 - [9] [Trail of Bits proof-of-concept repository](https://github.com/trailofbits/quantum-zk-proof-poc)
 
 {{#include ../../banners/hacktricks-training.md}}
+
