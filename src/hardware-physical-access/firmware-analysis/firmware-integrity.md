@@ -1,41 +1,41 @@
-# Firmware Integrity
+# Firmware-Integrität
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Die **benutzerdefinierte Firmware und/oder kompilierte Binaries können hochgeladen werden, um Integritäts- oder Signaturverifikationsfehler auszunutzen**. Die folgenden Schritte können für die Kompilierung einer backdoor bind shell verwendet werden:
+Die **custom firmware und/oder kompilierten Binaries können hochgeladen werden, um Schwachstellen bei der Integritäts- oder Signaturprüfung auszunutzen**. Für die Kompilierung einer backdoor bind shell können die folgenden Schritte durchgeführt werden:
 
-1. Die Firmware kann mit firmware-mod-kit (FMK) extrahiert werden.
-2. Die Architektur und Endianness der Ziel-Firmware sollten identifiziert werden.
-3. Ein Cross-Compiler kann mit Buildroot oder anderen geeigneten Methoden für die Umgebung gebaut werden.
-4. Die backdoor kann mit dem Cross-Compiler gebaut werden.
-5. Die backdoor kann in das extrahierte Firmware-Verzeichnis /usr/bin kopiert werden.
-6. Die passende QEMU-Binary kann in das extrahierte Firmware rootfs kopiert werden.
+1. Die firmware kann mit firmware-mod-kit (FMK) extrahiert werden.
+2. Die Architektur und Endianness der Ziel-firmware sollten identifiziert werden.
+3. Mit Buildroot oder anderen geeigneten Methoden kann ein Cross-Compiler für die Umgebung erstellt werden.
+4. Die backdoor kann mit dem Cross-Compiler kompiliert werden.
+5. Die backdoor kann in das Verzeichnis /usr/bin der extrahierten firmware kopiert werden.
+6. Die passende QEMU-Binary kann in das Rootfs der extrahierten firmware kopiert werden.
 7. Die backdoor kann mit chroot und QEMU emuliert werden.
-8. Auf die backdoor kann über netcat zugegriffen werden.
-9. Die QEMU-Binary sollte aus dem extrahierten Firmware rootfs entfernt werden.
-10. Die modifizierte Firmware kann mit FMK neu verpackt werden.
-11. Die backdoored Firmware kann getestet werden, indem sie mit firmware analysis toolkit (FAT) emuliert und mit netcat zur Ziel-Backdoor-IP und zum -Port verbunden wird.
+8. Auf die backdoor kann mit netcat zugegriffen werden.
+9. Die QEMU-Binary sollte aus dem Rootfs der extrahierten firmware entfernt werden.
+10. Die modifizierte firmware kann mit FMK neu gepackt werden.
+11. Die backdoored firmware kann getestet werden, indem sie mit dem firmware analysis toolkit (FAT) emuliert und mit netcat eine Verbindung zur IP-Adresse und zum Port der Ziel-backdoor hergestellt wird.
 
-Wenn bereits eine root shell durch dynamische Analyse, Bootloader-Manipulation oder hardware security testing erlangt wurde, können vorkompilierte bösartige Binaries wie implants oder reverse shells ausgeführt werden. Automatisierte payload/implant-Tools wie das Metasploit framework und 'msfvenom' können mit den folgenden Schritten genutzt werden:
+Wenn bereits über dynamische Analyse, Manipulation des Bootloaders oder Hardware-Sicherheitstests eine Root-Shell erlangt wurde, können vorkompilierte bösartige Binaries wie Implants oder Reverse Shells ausgeführt werden. Automatisierte Payload-/Implant-Tools wie das Metasploit framework und 'msfvenom' können anhand der folgenden Schritte eingesetzt werden:
 
-1. Die Architektur und Endianness der Ziel-Firmware sollten identifiziert werden.
-2. Msfvenom kann verwendet werden, um den Ziel-payload, die IP des Angreifer-Hosts, die Listening-Port-Nummer, den filetype, die Architektur, die Plattform und die Ausgabedatei anzugeben.
-3. Der payload kann auf das kompromittierte Gerät übertragen werden, und es sollte sichergestellt werden, dass er Ausführungsrechte hat.
-4. Metasploit kann vorbereitet werden, um eingehende Anfragen zu verarbeiten, indem msfconsole gestartet und die Einstellungen entsprechend dem payload konfiguriert werden.
-5. Die meterpreter reverse shell kann auf dem kompromittierten Gerät ausgeführt werden.
+1. Die Architektur und Endianness der Ziel-firmware sollten identifiziert werden.
+2. Mit Msfvenom können der Ziel-Payload, die IP-Adresse des Angreifer-Hosts, die Listening-Portnummer, der Dateityp, die Architektur, die Plattform und die Ausgabedatei angegeben werden.
+3. Der Payload kann auf das kompromittierte Gerät übertragen und mit Ausführungsberechtigungen versehen werden.
+4. Metasploit kann für die Verarbeitung eingehender Anfragen vorbereitet werden, indem msfconsole gestartet und die Einstellungen entsprechend dem Payload konfiguriert werden.
+5. Die Meterpreter-Reverse-Shell kann auf dem kompromittierten Gerät ausgeführt werden.
 
-## Unauthenticated transport bridges to privileged update protocols
+## Nicht authentifizierte Transport-Bridges zu privilegierten Update-Protokollen
 
-Ein häufiger Fehler im embedded design ist, **denselben internen Befehlsprotokoll über mehrere Transports bereitzustellen**, aber Authentifizierung nur für einen davon zu erzwingen. Zum Beispiel kann USB challenge-response erfordern, während BLE einfach unauthentifizierte **GATT writes** in denselben privilegierten Firmware-Update-Handler weiterleitet.
+Ein häufiger Designfehler bei Embedded-Systemen besteht darin, **dass dasselbe interne command protocol über mehrere Transportwege bereitgestellt wird**, aber nur einer davon eine Authentifizierung durchsetzt. Beispielsweise kann USB eine Challenge-Response erfordern, während BLE einfach nicht authentifizierte **GATT writes** an denselben privilegierten firmware-update handler weiterleitet.<sup>[[1]](#references)</sup>
 
-Typischer offensiver Ablauf:
+Typischer offensiver Workflow:
 
-1. Die BLE GATT-Datenbank auflisten und schreibbare Characteristics identifizieren, die von der offiziellen mobilen App verwendet werden.
-2. Den App-Traffic sniffen und nach **magic bytes / opcodes** suchen, die zum kabelgebundenen Protokoll passen.
-3. Privilegierte Befehle über BLE **ohne Pairing** erneut senden und prüfen, ob sensible Operationen weiterhin funktionieren.
-4. Wenn Firmware-Upgrade-, Config-Write-, Debug- oder Factory-Test-opcodes erreichbar sind, BLE als **radio-reachable admin port** behandeln.
+1. Die BLE-GATT-Datenbank enumerieren und beschreibbare Characteristics identifizieren, die von der offiziellen Mobile-App verwendet werden.
+2. Den App-Traffic sniffen und nach **magic bytes / opcodes** suchen, die dem kabelgebundenen Protokoll entsprechen.
+3. Privilegierte Befehle über BLE **ohne Pairing** wiedergeben und überprüfen, ob sensible Operationen weiterhin funktionieren.
+4. Wenn Firmware-Upgrade-, Config-Write-, Debug- oder Factory-Test-opcodes erreichbar sind, BLE als einen **per Funk erreichbaren Admin-Port** betrachten.
 
-Quick checks:
+Schnellprüfungen:
 ```bash
 # Enumerate services/characteristics
 ble.enum <MAC>
@@ -46,80 +46,80 @@ ble.write <MAC> <UUID> <HEX_DATA>
 # gatttool equivalent
 # gatttool -b <MAC> --char-write-req -a <HANDLE> -n <HEX_DATA>
 ```
-Zu verifizieren beim Reverse Engineering:
+Zu überprüfende Punkte beim Reversing:
 
-- Benötigt BLE **pairing/bonding** oder nur eine einfache Verbindung?
-- Werden alle Transports auf dieselbe interne Dispatcher-Tabelle geroutet?
-- Werden privilegierte Opcodes auf USB / BLE / UART / Wi-Fi unterschiedlich gefiltert?
-- Kann die mobile App Firmware-Update, Recovery oder Diagnostic-Handler remote auslösen?
+- Erfordert BLE **Pairing/Bonding** oder nur eine einfache Verbindung?
+- Werden alle Transporte an dieselbe interne Dispatcher-Tabelle weitergeleitet?
+- Werden privilegierte Opcodes über USB / BLE / UART / Wi-Fi unterschiedlich gefiltert?
+- Kann die mobile App Firmware-Update-, Recovery- oder Diagnose-Handler remote auslösen?
 
-## Checksum-only firmware containers are still attacker-controlled firmware
+## Nur durch Checksums geschützte Firmware-Container werden weiterhin vom Angreifer kontrolliert
 
-Ein Firmware-Container, der nur durch eine **unkeyed checksum** geschützt ist (CRC32, SHA-256, MD5 usw.), bietet Korruptionserkennung, **keine Authentizität**. Wenn der Angreifer die Update-Routine erreichen kann, kann er das Image patchen, die checksum neu berechnen und beliebigen Code flashen.
+Ein Firmware-Container, der nur durch eine **unkeyed checksum** (CRC32, SHA-256, MD5 usw.) geschützt ist, erkennt Beschädigungen, gewährleistet aber **keine Authentizität**. Wenn der Angreifer die Update-Routine erreichen kann, kann er das Image patchen, die Checksumme neu berechnen und beliebigen Code flashen.<sup>[[1]](#references)</sup>
 
-Red flags während RE:
+Warnsignale während des RE:
 
-- Update-Code validiert nur einen nachgestellten checksum-Blob wie `CHK2`, `CRC` oder `SHA256`.
-- Keine signature verification oder secure-boot root of trust vorhanden.
-- Kein device-bound MAC / HMAC / authenticated encryption wird verwendet.
-- Recovery mode akzeptiert dasselbe unauthentifizierte image format.
+- Der Update-Code validiert nur einen nachgestellten Checksum-Blob wie `CHK2`, `CRC` oder `SHA256`.
+- Es ist keine Signaturprüfung oder Secure-Boot-Root-of-Trust vorhanden.
+- Es wird kein gerätegebundener MAC / HMAC / keine authentifizierte Verschlüsselung verwendet.
+- Der Recovery-Modus akzeptiert dasselbe nicht authentifizierte Image-Format.
 
 Praktischer Validierungsablauf:
 
-1. Extrahiere den Firmware-Container und identifiziere Bootloader, Main Firmware und Integritätsmetadaten.
-2. Ändere einen harmlosen String oder Banner im Image.
-3. Berechne die checksum genau so neu, wie der Updater es erwartet.
-4. Spiele das Image über den normalen Update-Pfad erneut auf.
-5. Bestätige die Änderung beim Booten, um beliebigen Firmware-Austausch zu beweisen.
+1. Firmware-Container extrahieren und Bootloader, Haupt-Firmware sowie Integritätsmetadaten identifizieren.
+2. Eine harmlose Zeichenkette oder ein Banner im Image ändern.
+3. Die Checksumme genau so neu berechnen, wie es der Updater erwartet.
+4. Das Image über den normalen Update-Pfad erneut flashen.
+5. Die Änderung beim Booten bestätigen, um den beliebigen Austausch der Firmware nachzuweisen.
 
-Wenn das über einen remote erreichbaren Transport wie BLE/Wi-Fi funktioniert, ist der Bug effektiv **unauthenticated OTA firmware replacement**.
+Wenn dies über einen remote erreichbaren Transport wie BLE/Wi-Fi funktioniert, handelt es sich effektiv um einen **unauthenticated OTA firmware replacement**-Fehler.
 
-## Turning a trusted USB peripheral into BadUSB via firmware reflashing
+## Ein vertrauenswürdiges USB-Peripheriegerät durch erneutes Flashen der Firmware in BadUSB verwandeln
 
-Wenn das Zielgerät dem Host bereits über USB vertraut ist, muss malicious firmware oft keinen vollständigen neuen USB-Stack implementieren. Ein deutlich einfacher Pivot ist häufig, **vorhandene HID-Unterstützung wiederzuverwenden**.
+Wenn das Zielgerät vom Host bereits über USB als vertrauenswürdig eingestuft wird, muss die schädliche Firmware möglicherweise keinen vollständig neuen USB-Stack implementieren. Ein wesentlich einfacherer Pivot ist oft die **Wiederverwendung der vorhandenen HID-Unterstützung**.<sup>[[1]](#references)</sup>
 
-Nützliches Muster:
+Nützliches Vorgehensmuster:
 
-1. Prüfe, ob das Gerät bereits als **HID Consumer Control** / Media- / Vendor-HID-Interface enumeriert.
-2. Finde den vorhandenen **HID report descriptor** in der Firmware.
-3. Hänge Descriptor-Einträge an oder ersetze sie, sodass das Gerät zusätzlich **keyboard**-Fähigkeit bewirbt.
-4. Nutze vorhandene Firmware-Routinen wieder, die bereits HID reports senden, statt eine neue Transport-Implementierung zu schreiben.
-5. Sende key press + key release reports, um Befehle auf dem Host einzutippen.
+1. Prüfen, ob das Gerät bereits als **HID Consumer Control**- / Media- / Vendor-HID-Interface enumeriert wird.
+2. Den vorhandenen **HID report descriptor** in der Firmware lokalisieren.
+3. Descriptor-Einträge anhängen oder ersetzen, damit das Gerät zusätzlich **Keyboard**-Fähigkeiten bewirbt.
+4. Vorhandene Firmware-Routinen wiederverwenden, die bereits HID-Reports senden, anstatt eine neue Transport-Implementierung zu schreiben.
+5. Key-Press- und Key-Release-Reports injizieren, um Befehle auf dem Host einzugeben.
 
-Das macht aus firmware compromise einen **host compromise**, weil der PC das reflashed peripheral als legitime Tastatur vertraut.
+Dadurch wird die Kompromittierung der Firmware zur **Kompromittierung des Hosts**, weil der PC das erneut geflashte Peripheriegerät als legitime Tastatur vertraut.
 
-### Minimal assessment checklist
+### Minimale Assessment-Checkliste
 
-- Zeigen `dmesg`, Device Manager oder USB descriptors ein vorhandenes HID-Interface?
-- Gibt es freien Platz nahe am report descriptor oder eine relocatable descriptor table?
-- Können vorhandene media-control-Send-Routinen für keyboard reports wiederverwendet werden?
-- Akzeptiert der Host die neue keyboard interface nach dem Reflash automatisch?
+- Zeigen `dmesg`, der Geräte-Manager oder USB-Deskriptoren ein vorhandenes HID-Interface?
+- Gibt es freien Platz in der Nähe des Report-Descriptors oder eine relocatable Descriptor-Tabelle?
+- Können vorhandene Routinen zum Senden von Media-Control-Reports für Keyboard-Reports wiederverwendet werden?
+- Akzeptiert der Host das neue Keyboard-Interface nach dem erneuten Flashen automatisch?
 
-## Reliable payload execution inside RTOS firmware
+## Zuverlässige Payload-Ausführung innerhalb von RTOS-Firmware
 
-Statt fragile trampolines in zufällige code paths einzubauen, suche nach **existing RTOS tasks**, die im Normalbetrieb ungenutzt oder wenig kritisch sind.
+Anstatt fragile Trampolines in zufällige Codepfade einzufügen, sollte nach **vorhandenen RTOS-Tasks** gesucht werden, die im normalen Betrieb ungenutzt sind oder nur geringe Auswirkungen haben.<sup>[[1]](#references)</sup>
 
-Warum das nützlich ist:
+Warum dies nützlich ist:
 
-- Der Scheduler startet dein Payload natürlich während des Boots.
-- Du vermeidest es, kritische control flow zu korrumpieren.
-- Verzögerte Payloads lösen weniger wahrscheinlich watchdog resets aus als bei Ausführung in einem latenzsensitiven USB-/network-handler.
+- Der Scheduler startet deine Payload beim Booten auf natürliche Weise.
+- Die Beschädigung kritischer Kontrollflüsse wird vermieden.
+- Verzögerte Payloads lösen seltener Watchdog-Resets aus, als wenn sie innerhalb eines latenzsensitiven USB-/Netzwerk-Handlers ausgeführt werden.
 
-Gute Ziele sind diagnostic-, factory-test-, telemetry- oder coprocessor-service-Tasks, die im normalen Gebrauch inaktiv wirken.
+Geeignete Ziele sind Diagnose-, Factory-Test-, Telemetrie- oder Coprozessor-Service-Tasks, die im normalen Betrieb inaktiv zu sein scheinen.
 
-## Fast exploit iteration: repurpose benign protocol handlers
+## Schnelle Exploit-Iteration: Harmlose Protokoll-Handler zweckentfremden
 
-Sobald Firmware-Patching möglich ist, ist ein kompakter Weg zur Beschleunigung von RE, einen harmlosen command handler (zum Beispiel einen **echo/debug opcode**) mit eigenen **memory read / write / execute**-Primitives zu überschreiben. Das vermeidet vollständiges Reflashing für jedes Experiment und ist besonders nützlich, wenn das Gerät den modifizierten Handler über einen schnellen kabelgebundenen Transport unterstützt.
+Sobald Firmware-Patching möglich ist, besteht eine kompakte Möglichkeit zur Beschleunigung des RE darin, einen harmlosen Command-Handler (beispielsweise einen **echo/debug opcode**) durch benutzerdefinierte **memory read / write / execute**-Primitives zu ersetzen. Dadurch entfällt das vollständige erneute Flashen bei jedem Experiment. Dies ist besonders nützlich, wenn das Gerät den modifizierten Handler über einen schnellen kabelgebundenen Transport unterstützt.<sup>[[1]](#references)</sup>
 
-Nutze das, um:
+Dies kann verwendet werden, um:
 
-- scatter-loaded memory maps zu verifizieren
-- heap/task state live zu inspizieren
-- kleine Payloads zu testen, bevor du sie in flash brennst
-- function pointers, strings und descriptor tables sicher wiederherzustellen
+- Scatter-geladene Memory-Maps zu überprüfen
+- Heap-/Task-Zustände live zu untersuchen
+- Kleine Payloads zu testen, bevor sie in den Flash geschrieben werden
+- Funktionszeiger, Zeichenketten und Descriptor-Tabellen sicher wiederherzustellen
 
-## References
+## Referenzen
 
-- [Pwnd Blaster: Hacking your PC using your speaker without ever touching it](https://blog.nns.ee/2026/06/03/katana-badusb/)
+- [1] [Pwnd Blaster: Hacking your PC using your speaker without ever touching it](https://blog.nns.ee/2026/06/03/katana-badusb/)
 
 {{#include ../../banners/hacktricks-training.md}}

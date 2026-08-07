@@ -4,72 +4,72 @@
 
 ## Zeitstempel
 
-Ein Angreifer könnte daran interessiert sein, **die Zeitstempel von Dateien zu ändern**, um nicht entdeckt zu werden.\
-Es ist möglich, die Zeitstempel im MFT in den Attributen `$STANDARD_INFORMATION` \_\_ und \_\_ `$FILE_NAME` zu finden.
+Ein Angreifer könnte daran interessiert sein, **die Zeitstempel von Dateien zu ändern**, um einer Entdeckung zu entgehen.\
+Die Zeitstempel können innerhalb der MFT in den Attributen `$STANDARD_INFORMATION` \_\_ und \_\_ `$FILE_NAME` gefunden werden.
 
-Beide Attribute haben 4 Zeitstempel: **Änderung**, **Zugriff**, **Erstellung** und **MFT-Registrierungsänderung** (MACE oder MACB).
+Beide Attribute enthalten 4 Zeitstempel: **Änderung**, **Zugriff**, **Erstellung** und **Änderung des MFT-Eintrags** (MACE oder MACB).
 
 **Windows Explorer** und andere Tools zeigen die Informationen aus **`$STANDARD_INFORMATION`** an.
 
 ### TimeStomp - Anti-forensisches Tool
 
-Dieses Tool **modifiziert** die Zeitstempelinformationen innerhalb von **`$STANDARD_INFORMATION`**, **aber** **nicht** die Informationen innerhalb von **`$FILE_NAME`**. Daher ist es möglich, **verdächtige** **Aktivitäten** zu **identifizieren**.
+Dieses Tool **ändert** die Zeitstempelinformationen innerhalb von **`$STANDARD_INFORMATION`**, jedoch **nicht** die Informationen innerhalb von **`$FILE_NAME`**. Daher ist es möglich, **verdächtige** **Aktivitäten** zu **identifizieren**.
 
 ### Usnjrnl
 
-Das **USN Journal** (Update Sequence Number Journal) ist eine Funktion des NTFS (Windows NT-Dateisystem), die Änderungen am Volume verfolgt. Das [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) Tool ermöglicht die Untersuchung dieser Änderungen.
+Das **USN Journal** (Update Sequence Number Journal) ist eine Funktion von NTFS (Windows NT file system), die Änderungen an Volumes protokolliert. Das Tool [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) ermöglicht die Untersuchung dieser Änderungen.
 
-![](<../../images/image (801).png>)
+![TimeStomp - Anti-forensisches Tool - Usnjrnl: Das USN Journal (Update Sequence Number Journal) ist eine Funktion von NTFS (Windows NT file system), die Änderungen an Volumes protokolliert. Das...](<../../images/image (801).png>)
 
-Das vorherige Bild ist die **Ausgabe**, die von dem **Tool** angezeigt wird, wo zu beobachten ist, dass einige **Änderungen vorgenommen wurden**.
+Das vorherige Bild zeigt die vom **Tool** angezeigte **Ausgabe**, in der zu erkennen ist, dass einige **Änderungen an der Datei vorgenommen wurden**.
 
 ### $LogFile
 
-**Alle Metadatenänderungen an einem Dateisystem werden** in einem Prozess protokolliert, der als [Write-Ahead Logging](https://en.wikipedia.org/wiki/Write-ahead_logging) bekannt ist. Die protokollierten Metadaten werden in einer Datei namens `**$LogFile**` gespeichert, die sich im Stammverzeichnis eines NTFS-Dateisystems befindet. Tools wie [LogFileParser](https://github.com/jschicht/LogFileParser) können verwendet werden, um diese Datei zu analysieren und Änderungen zu identifizieren.
+**Alle Metadatenänderungen an einem Dateisystem werden** in einem als [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging) bekannten Prozess **protokolliert**. Die protokollierten Metadaten werden in einer Datei namens `**$LogFile**` gespeichert, die sich im Stammverzeichnis eines NTFS-Dateisystems befindet. Tools wie [LogFileParser](https://github.com/jschicht/LogFileParser) können zum Parsen dieser Datei und zum Identifizieren von Änderungen verwendet werden.
 
-![](<../../images/image (137).png>)
+![Usnjrnl - $LogFile: Alle Metadatenänderungen an einem Dateisystem werden in einem als write-ahead logging bekannten Prozess protokolliert. Die protokollierten Metadaten werden in einer Datei namens $LogFile gespeichert, die sich im Stammverzeichnis...](<../../images/image (137).png>)
 
-Wiederum ist es in der Ausgabe des Tools möglich zu sehen, dass **einige Änderungen vorgenommen wurden**.
+Auch in der Ausgabe des Tools ist zu erkennen, dass **einige Änderungen vorgenommen wurden**.
 
-Mit demselben Tool ist es möglich zu identifizieren, **zu welcher Zeit die Zeitstempel geändert wurden**:
+Mit demselben Tool kann ermittelt werden, **wann die Zeitstempel geändert wurden**:
 
-![](<../../images/image (1089).png>)
+![Usnjrnl - $LogFile: Mit demselben Tool kann ermittelt werden, wann die Zeitstempel geändert wurden](<../../images/image (1089).png>)
 
 - CTIME: Erstellungszeit der Datei
 - ATIME: Änderungszeit der Datei
-- MTIME: MFT-Registrierungsänderung der Datei
+- MTIME: Änderung des MFT-Eintrags der Datei
 - RTIME: Zugriffszeit der Datei
 
 ### Vergleich von `$STANDARD_INFORMATION` und `$FILE_NAME`
 
-Eine weitere Möglichkeit, verdächtig modifizierte Dateien zu identifizieren, wäre der Vergleich der Zeit auf beiden Attributen auf **Unstimmigkeiten**.
+Eine weitere Möglichkeit, verdächtig geänderte Dateien zu identifizieren, besteht darin, die Zeitangaben beider Attribute zu vergleichen und nach **Abweichungen** zu suchen.
 
 ### Nanosekunden
 
-**NTFS**-Zeitstempel haben eine **Präzision** von **100 Nanosekunden**. Daher ist es sehr **verdächtig**, Dateien mit Zeitstempeln wie 2010-10-10 10:10:**00.000:0000 zu finden.
+Zeitstempel von **NTFS** haben eine **Genauigkeit** von **100 Nanosekunden**. Daher ist es sehr verdächtig, Dateien mit Zeitstempeln wie 2010-10-10 10:10:**00.000:0000 zu finden**.
 
 ### SetMace - Anti-forensisches Tool
 
-Dieses Tool kann beide Attribute `$STANDARD_INFORMATION` und `$FILE_NAME` modifizieren. Allerdings ist es seit Windows Vista notwendig, dass ein aktives Betriebssystem diese Informationen ändert.
+Dieses Tool kann beide Attribute `$STARNDAR_INFORMATION` und `$FILE_NAME` ändern. Ab Windows Vista ist jedoch ein laufendes OS erforderlich, um diese Informationen zu ändern.
 
-## Datenversteckung
+## Datenverbergung
 
-NFTS verwendet einen Cluster und die minimale Informationsgröße. Das bedeutet, dass, wenn eine Datei einen Cluster und einen halben Cluster belegt, der **verbleibende halbe Cluster niemals verwendet wird**, bis die Datei gelöscht wird. Dann ist es möglich, **Daten in diesem Slack-Space zu verstecken**.
+NFTS verwendet Cluster und die minimale Informationsgröße. Das bedeutet, dass bei einer Datei, die einen Cluster und einen halben Cluster belegt, die **verbleibende Hälfte niemals verwendet wird**, bis die Datei gelöscht wird. Daher ist es möglich, **Daten in diesem Slack Space zu verbergen**.
 
-Es gibt Tools wie Slacker, die es ermöglichen, Daten in diesem "versteckten" Raum zu verbergen. Eine Analyse des `$logfile` und `$usnjrnl` kann jedoch zeigen, dass einige Daten hinzugefügt wurden:
+Es gibt Tools wie slacker, die das Verbergen von Daten in diesem „verborgenen“ Bereich ermöglichen. Eine Analyse von `$logfile` und `$usnjrnl` kann jedoch zeigen, dass Daten hinzugefügt wurden:
 
-![](<../../images/image (1060).png>)
+![SetMace - Anti-forensisches Tool - Datenverbergung: Es gibt Tools wie slacker, die das Verbergen von Daten in diesem „verborgenen“ Bereich ermöglichen. Eine Analyse von $logfile und $usnjrnl kann jedoch zeigen, dass...](<../../images/image (1060).png>)
 
-Dann ist es möglich, den Slack-Space mit Tools wie FTK Imager wiederherzustellen. Beachten Sie, dass diese Art von Tool den Inhalt obfuskiert oder sogar verschlüsselt speichern kann.
+Anschließend kann der Slack Space mit Tools wie FTK Imager abgerufen werden. Beachte, dass diese Art von Tool den Inhalt obfuskiert oder sogar verschlüsselt speichern kann.
 
 ## UsbKill
 
-Dies ist ein Tool, das den Computer **ausschaltet, wenn eine Änderung an den USB**-Ports erkannt wird.\
-Eine Möglichkeit, dies zu entdecken, wäre, die laufenden Prozesse zu inspizieren und **jedes laufende Python-Skript zu überprüfen**.
+Dies ist ein Tool, das den Computer **ausschaltet, wenn eine Änderung an den USB-Ports** erkannt wird.\
+Eine Möglichkeit, dies zu erkennen, besteht darin, die laufenden Prozesse zu untersuchen und **jedes laufende Python-Skript zu überprüfen**.
 
-## Live Linux-Distributionen
+## Live-Linux-Distributionen
 
-Diese Distributionen werden **im RAM** ausgeführt. Die einzige Möglichkeit, sie zu erkennen, besteht darin, **wenn das NTFS-Dateisystem mit Schreibberechtigungen gemountet ist**. Wenn es nur mit Lesezugriff gemountet ist, wird es nicht möglich sein, die Eindringung zu erkennen.
+Diese Distros werden **im RAM** ausgeführt. Die einzige Möglichkeit, sie zu erkennen, besteht darin, dass das NTFS-Dateisystem **mit Schreibberechtigungen eingebunden** ist. Wenn es nur mit Leseberechtigungen eingebunden ist, kann der Intrusion nicht erkannt werden.
 
 ## Sichere Löschung
 
@@ -77,73 +77,73 @@ Diese Distributionen werden **im RAM** ausgeführt. Die einzige Möglichkeit, si
 
 ## Windows-Konfiguration
 
-Es ist möglich, mehrere Windows-Protokollierungsmethoden zu deaktivieren, um die forensische Untersuchung erheblich zu erschweren.
+Es ist möglich, mehrere Windows-Logging-Methoden zu deaktivieren, um die forensische Untersuchung erheblich zu erschweren.
 
 ### Zeitstempel deaktivieren - UserAssist
 
-Dies ist ein Registrierungsschlüssel, der Daten und Uhrzeiten speichert, wann jede ausführbare Datei vom Benutzer ausgeführt wurde.
+Dies ist ein Registry-Schlüssel, der Datum und Uhrzeit speichert, zu denen jede ausführbare Datei vom Benutzer ausgeführt wurde.
 
 Das Deaktivieren von UserAssist erfordert zwei Schritte:
 
-1. Setzen Sie zwei Registrierungsschlüssel, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` und `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, beide auf null, um anzuzeigen, dass wir UserAssist deaktivieren möchten.
-2. Löschen Sie Ihre Registrierungssubbäume, die wie `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>` aussehen.
+1. Setze die beiden Registry-Schlüssel `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` und `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled` beide auf null, um zu signalisieren, dass UserAssist deaktiviert werden soll.
+2. Lösche deine Registry-Teilbäume, die wie `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>` aussehen.
 
 ### Zeitstempel deaktivieren - Prefetch
 
-Dies speichert Informationen über die ausgeführten Anwendungen mit dem Ziel, die Leistung des Windows-Systems zu verbessern. Dies kann jedoch auch für forensische Praktiken nützlich sein.
+Hierdurch werden Informationen über ausgeführte Anwendungen gespeichert, um die Performance des Windows-Systems zu verbessern. Diese Informationen können jedoch auch für forensische Untersuchungen nützlich sein.
 
-- Führen Sie `regedit` aus
-- Wählen Sie den Dateipfad `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
-- Klicken Sie mit der rechten Maustaste auf `EnablePrefetcher` und `EnableSuperfetch`
-- Wählen Sie Ändern für jeden dieser Werte, um den Wert von 1 (oder 3) auf 0 zu ändern
-- Neustarten
+- Führe `regedit` aus
+- Wähle den Dateipfad `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
+- Klicke mit der rechten Maustaste auf `EnablePrefetcher` und `EnableSuperfetch`
+- Wähle bei jedem Eintrag „Modify“, um den Wert von 1 (oder 3) auf 0 zu ändern
+- Neustart
 
 ### Zeitstempel deaktivieren - Letzte Zugriffszeit
 
-Immer wenn ein Ordner von einem NTFS-Volume auf einem Windows NT-Server geöffnet wird, nimmt das System sich die Zeit, um **ein Zeitstempelfeld für jeden aufgelisteten Ordner zu aktualisieren**, das als letzte Zugriffszeit bezeichnet wird. Bei einem stark genutzten NTFS-Volume kann dies die Leistung beeinträchtigen.
+Immer wenn ein Ordner von einem NTFS-Volume auf einem Windows NT-Server geöffnet wird, aktualisiert das System ein **Zeitstempelfeld in jedem aufgelisteten Ordner**, das als „letzte Zugriffszeit“ bezeichnet wird. Auf einem stark verwendeten NTFS-Volume kann dies die Performance beeinträchtigen.
 
-1. Öffnen Sie den Registrierungs-Editor (Regedit.exe).
-2. Navigieren Sie zu `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Suchen Sie nach `NtfsDisableLastAccessUpdate`. Wenn es nicht existiert, fügen Sie dieses DWORD hinzu und setzen Sie seinen Wert auf 1, um den Prozess zu deaktivieren.
-4. Schließen Sie den Registrierungs-Editor und starten Sie den Server neu.
+1. Öffne den Registry Editor (Regedit.exe).
+2. Navigiere zu `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
+3. Suche nach `NtfsDisableLastAccessUpdate`. Falls der Eintrag nicht existiert, füge dieses DWORD hinzu und setze seinen Wert auf 1, wodurch der Prozess deaktiviert wird.
+4. Schließe den Registry Editor und starte den Server neu.
 
-### USB-Historie löschen
+### USB-Verlauf löschen
 
-Alle **USB-Geräteeinträge** werden in der Windows-Registrierung unter dem **USBSTOR**-Registrierungsschlüssel gespeichert, der Unterschlüssel enthält, die erstellt werden, wenn Sie ein USB-Gerät an Ihren PC oder Laptop anschließen. Sie finden diesen Schlüssel hier: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Durch das Löschen dieses Schlüssels** löschen Sie die USB-Historie.\
-Sie können auch das Tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) verwenden, um sicherzustellen, dass Sie sie gelöscht haben (und um sie zu löschen).
+Alle **USB-Geräteeinträge** werden in der Windows Registry unter dem Registry-Schlüssel **USBSTOR** gespeichert. Dieser enthält Unterschlüssel, die jedes Mal erstellt werden, wenn du ein USB-Gerät an deinen PC oder Laptop anschließt. Du findest diesen Schlüssel hier: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Durch das Löschen** dieses Schlüssels wird der USB-Verlauf gelöscht.\
+Du kannst auch das Tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) verwenden, um sicherzustellen, dass du sie gelöscht hast (und um sie zu löschen).
 
-Eine weitere Datei, die Informationen über die USBs speichert, ist die Datei `setupapi.dev.log` im Verzeichnis `C:\Windows\INF`. Diese sollte ebenfalls gelöscht werden.
+Eine weitere Datei, in der Informationen über die USB-Geräte gespeichert werden, ist die Datei `setupapi.dev.log` in `C:\Windows\INF`. Auch diese sollte gelöscht werden.
 
-### Schattenkopien deaktivieren
+### Shadow Copies deaktivieren
 
-**Listen** Sie Schattenkopien mit `vssadmin list shadowstorage`\
-**Löschen** Sie sie, indem Sie `vssadmin delete shadow` ausführen.
+**Liste** Shadow Copies mit `vssadmin list shadowstorage` auf.\
+**Lösche** sie mit `vssadmin delete shadow`.
 
-Sie können sie auch über die GUI löschen, indem Sie die Schritte in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html) befolgen.
+Du kannst sie auch über die GUI löschen, indem du die in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html) beschriebenen Schritte befolgst.
 
-Um Schattenkopien zu deaktivieren, [folgen Sie diesen Schritten](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Um Shadow Copies zu deaktivieren, befolge [diese Schritte](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Öffnen Sie das Programm Dienste, indem Sie "Dienste" in das Textsuchfeld eingeben, nachdem Sie auf die Windows-Starttaste geklickt haben.
-2. Suchen Sie in der Liste nach "Volume Shadow Copy", wählen Sie es aus und greifen Sie dann mit einem Rechtsklick auf die Eigenschaften zu.
-3. Wählen Sie Deaktiviert aus dem Dropdown-Menü "Starttyp" und bestätigen Sie die Änderung, indem Sie auf Übernehmen und OK klicken.
+1. Öffne das Programm „Services“, indem du nach dem Klicken auf die Windows-Startschaltfläche „services“ in das Textsuchfeld eingibst.
+2. Suche in der Liste nach „Volume Shadow Copy“, wähle den Eintrag aus und öffne per Rechtsklick die Eigenschaften.
+3. Wähle im Dropdown-Menü „Startup type“ die Option „Disabled“ und bestätige die Änderung mit „Apply“ und „OK“.
 
-Es ist auch möglich, die Konfiguration zu ändern, welche Dateien in der Schattenkopie kopiert werden sollen, in der Registrierung `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`.
+Es ist auch möglich, in der Registry unter `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot` die Konfiguration der Dateien zu ändern, die in der Shadow Copy kopiert werden.
 
 ### Gelöschte Dateien überschreiben
 
-- Sie können ein **Windows-Tool** verwenden: `cipher /w:C`. Dies weist Cipher an, alle Daten aus dem verfügbaren ungenutzten Speicherplatz auf dem C-Laufwerk zu entfernen.
-- Sie können auch Tools wie [**Eraser**](https://eraser.heidi.ie) verwenden.
+- Du kannst ein **Windows-Tool** verwenden: `cipher /w:C`. Dadurch wird cipher angewiesen, alle Daten aus dem verfügbaren, ungenutzten Speicherplatz auf dem Laufwerk C zu entfernen.
+- Du kannst auch Tools wie [**Eraser**](https://eraser.heidi.ie) verwenden.
 
 ### Windows-Ereignisprotokolle löschen
 
-- Windows + R --> eventvwr.msc --> Erweitern Sie "Windows-Protokolle" --> Klicken Sie mit der rechten Maustaste auf jede Kategorie und wählen Sie "Protokoll löschen"
+- Windows + R --> eventvwr.msc --> „Windows Logs“ erweitern --> Mit der rechten Maustaste auf jede Kategorie klicken und „Clear Log“ auswählen
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
 ### Windows-Ereignisprotokolle deaktivieren
 
 - `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Deaktivieren Sie im Abschnitt Dienste den Dienst "Windows-Ereignisprotokoll"
+- Deaktiviere im Bereich „Services“ den Dienst „Windows Event Log“.
 - `WEvtUtil.exec clear-log` oder `WEvtUtil.exe cl`
 
 ### $UsnJrnl deaktivieren
@@ -152,13 +152,13 @@ Es ist auch möglich, die Konfiguration zu ändern, welche Dateien in der Schatt
 
 ---
 
-## Fortgeschrittene Protokollierung & Spurenmanipulation (2023-2025)
+## Erweiterte Protokollierung und Manipulation von Spuren (2023-2025)
 
-### PowerShell ScriptBlock/Modul-Protokollierung
+### PowerShell ScriptBlock/Module Logging
 
-Neuere Versionen von Windows 10/11 und Windows Server speichern **reiche PowerShell-forensische Artefakte** unter
+Aktuelle Versionen von Windows 10/11 und Windows Server speichern **umfangreiche PowerShell-Forensik-Artefakte** unter
 `Microsoft-Windows-PowerShell/Operational` (Ereignisse 4104/4105/4106).
-Angreifer können sie im laufenden Betrieb deaktivieren oder löschen:
+Angreifer können diese spontan deaktivieren oder löschen:
 ```powershell
 # Turn OFF ScriptBlock & Module logging (registry persistence)
 New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
@@ -170,11 +170,11 @@ New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShel
 Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
 Remove-WinEvent               # requires admin & Win11 23H2+
 ```
-Verteidiger sollten Änderungen an diesen Registrierungsschlüsseln und eine hohe Anzahl von entfernten PowerShell-Ereignissen überwachen.
+Verteidiger sollten Änderungen an diesen Registrierungsschlüsseln und das Entfernen von PowerShell-Ereignissen in großer Anzahl überwachen.
 
-### ETW (Event Tracing for Windows) Patch
+### ETW (Event Tracing for Windows)-Patch
 
-Endpoint-Sicherheitsprodukte verlassen sich stark auf ETW. Eine beliebte Umgehungsmethode aus dem Jahr 2024 besteht darin, `ntdll!EtwEventWrite`/`EtwEventWriteFull` im Speicher zu patchen, sodass jeder ETW-Aufruf `STATUS_SUCCESS` zurückgibt, ohne das Ereignis auszugeben:
+Endpoint-Sicherheitsprodukte verlassen sich in hohem Maße auf ETW. Eine beliebte Umgehungsmethode aus dem Jahr 2024 besteht darin, `ntdll!EtwEventWrite`/`EtwEventWriteFull` im Speicher zu patchen, sodass jeder ETW-Aufruf `STATUS_SUCCESS` zurückgibt, ohne das Ereignis auszugeben:
 ```c
 // 0xC3 = RET on x64
 unsigned char patch[1] = { 0xC3 };
@@ -182,41 +182,50 @@ WriteProcessMemory(GetCurrentProcess(),
 GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
 patch, sizeof(patch), NULL);
 ```
-Öffentliche PoCs (z.B. `EtwTiSwallow`) implementieren dasselbe Primitive in PowerShell oder C++. Da der Patch **prozesslokal** ist, können EDRs, die in anderen Prozessen laufen, ihn möglicherweise übersehen. Erkennung: Vergleiche `ntdll` im Speicher mit dem auf der Festplatte oder hooke vor dem Benutzermodus.
+Öffentliche PoCs (z. B. `EtwTiSwallow`) implementieren dasselbe Primitive in PowerShell oder C++.
+Da der Patch **prozesslokal** ist, übersehen EDRs, die innerhalb anderer Prozesse ausgeführt werden, ihn möglicherweise.
+Erkennung: `ntdll` im Speicher mit der Version auf der Festplatte vergleichen oder bereits vor dem User-Mode hooken.
 
-### Wiederbelebung von Alternativen Datenströmen (ADS)
+### Alternate Data Streams (ADS) Revival
 
-Malware-Kampagnen im Jahr 2023 (z.B. **FIN12** Loader) wurden beobachtet, wie sie zweite Stufen-Binärdateien innerhalb von ADS platzieren, um sich vor traditionellen Scannern zu verstecken:
+Bei Malware-Kampagnen im Jahr 2023 (z. B. **FIN12**-Loader) wurde beobachtet, dass Binaries der zweiten Stufe in ADS abgelegt wurden,
+um außerhalb des Sichtfelds herkömmlicher Scanner zu bleiben:
 ```cmd
 rem Hide cobalt.bin inside an ADS of a PDF
 type cobalt.bin > report.pdf:win32res.dll
 rem Execute directly
 wmic process call create "cmd /c report.pdf:win32res.dll"
 ```
-Enumerieren Sie Streams mit `dir /R`, `Get-Item -Stream *` oder Sysinternals `streams64.exe`. Das Kopieren der Host-Datei auf FAT/exFAT oder über SMB entfernt den versteckten Stream und kann von Ermittlern verwendet werden, um die Nutzlast wiederherzustellen.
+Streams mit `dir /R`, `Get-Item -Stream *` oder Sysinternals `streams64.exe` aufzählen.
+Das Kopieren der Host-Datei nach FAT/exFAT oder über SMB entfernt den versteckten Stream und kann von
+Ermittlern zur Wiederherstellung des Payloads genutzt werden.
 
 ### BYOVD & “AuKill” (2023)
 
-Bring-Your-Own-Vulnerable-Driver wird jetzt routinemäßig für **Anti-Forensik** bei Ransomware-Einbrüchen verwendet. Das Open-Source-Tool **AuKill** lädt einen signierten, aber anfälligen Treiber (`procexp152.sys`), um EDR- und forensische Sensoren **vor der Verschlüsselung & Protokolldestruktion** anzuhalten oder zu beenden:
+Bring-Your-Own-Vulnerable-Driver wird inzwischen routinemäßig für **anti-forensics** bei Ransomware-
+Intrusionen eingesetzt.
+Das Open-Source-Tool **AuKill** lädt einen signierten, aber verwundbaren Treiber (`procexp152.sys`), um
+EDR- und forensische Sensoren **vor der Verschlüsselung & Log-Zerstörung** zu pausieren oder zu beenden:<sup>[[1]](#references)</sup>
 ```cmd
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
-Der Treiber wird anschließend entfernt, wodurch minimale Artefakte hinterlassen werden.  
-Minderungen: Aktivieren Sie die Microsoft-Blockliste für anfällige Treiber (HVCI/SAC) und alarmieren Sie bei der Erstellung von Kernel-Diensten aus benutzerschreibbaren Pfaden.
+Der Treiber wird anschließend entfernt, sodass nur minimale Artefakte zurückbleiben.<sup>[[1]](#references)</sup>
+Gegenmaßnahmen: die Microsoft-Blocklist für verwundbare Treiber (HVCI/SAC) aktivieren
+und bei der Erstellung von Kernel-Services aus benutzerschreibbaren Pfaden Alarm auslösen.
 
 ---
 
-## Linux Anti-Forensik: Selbstpatching und Cloud C2 (2023–2025)
+## Linux Anti-Forensik: Self-Patching und Cloud C2 (2023–2025)
 
-### Selbstpatching kompromittierter Dienste zur Reduzierung der Erkennung (Linux)  
-Gegner "selbstpatchen" zunehmend einen Dienst direkt nach der Ausnutzung, um sowohl eine erneute Ausnutzung zu verhindern als auch erkenntnisbasierte Erkennungen zu unterdrücken. Die Idee ist, anfällige Komponenten durch die neuesten legitimen Upstream-Binärdateien/JARs zu ersetzen, sodass Scanner den Host als gepatcht melden, während Persistenz und C2 bestehen bleiben.
+### Self-Patching kompromittierter Services zur Reduzierung der Erkennung (Linux)
+Angreifer führen zunehmend direkt nach dem Exploit eines Services ein „Self-Patching“ durch, um sowohl eine erneute Ausnutzung zu verhindern als auch auf Schwachstellen basierende Erkennungen zu unterdrücken. Dabei werden verwundbare Komponenten durch die neuesten legitimen Upstream-Binaries/JARs ersetzt, sodass Scanner den Host als gepatcht melden, während Persistenz und C2 bestehen bleiben.<sup>[[3]](#references)</sup>
 
-Beispiel: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
-- Nach der Ausnutzung holten sich Angreifer legitime JARs von Maven Central (repo1.maven.org), löschten anfällige JARs in der ActiveMQ-Installation und starteten den Broker neu.  
-- Dies schloss die ursprüngliche RCE, während andere Fußfassen (cron, SSH-Konfigurationsänderungen, separate C2-Implantate) erhalten blieben.
+Beispiel: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)<sup>[[3]](#references)[[4]](#references)</sup>
+- Nach der Post-Exploitation luden Angreifer legitime JARs von Maven Central (repo1.maven.org) herunter, löschten verwundbare JARs aus der ActiveMQ-Installation und starteten den Broker neu.
+- Dadurch wurde die initiale RCE geschlossen, während andere Footholds (Cron, Änderungen an der SSH-Konfiguration, separate C2-Implants) erhalten blieben.
 
-Betriebliche Beispiel (veranschaulichend)
+Operatives Beispiel (illustrativ)
 ```bash
 # ActiveMQ install root (adjust as needed)
 AMQ_DIR=/opt/activemq
@@ -234,61 +243,57 @@ ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
 # Apply changes without removing persistence
 systemctl restart activemq || service activemq restart
 ```
-Forensische/Jagd Tipps
-- Überprüfen Sie Servicedirektoren auf nicht geplante binäre/JAR-Ersetzungen:
-- Debian/Ubuntu: `dpkg -V activemq` und vergleichen Sie Dateihashes/Pfade mit Repo-Spiegeln.
-- RHEL/CentOS: `rpm -Va 'activemq*'`
-- Suchen Sie nach JAR-Versionen, die auf der Festplatte vorhanden sind und nicht vom Paketmanager verwaltet werden, oder nach symbolischen Links, die außerhalb des Bandes aktualisiert wurden.
-- Zeitachse: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort`, um ctime/mtime mit dem Kompromissfenster zu korrelieren.
-- Shell-Historie/Prozess-Telemetrie: Beweise für `curl`/`wget` zu `repo1.maven.org` oder anderen Artefakt-CDNs unmittelbar nach der ersten Ausnutzung.
-- Änderungsmanagement: Validieren Sie, wer den „Patch“ angewendet hat und warum, nicht nur, dass eine gepatchte Version vorhanden ist.
+Forensik-/Hunting-Tipps
+- Überprüfe Service-Verzeichnisse auf nicht geplante Ersetzungen von Binärdateien/JARs:
+- Debian/Ubuntu: `dpkg -V activemq` und vergleiche Datei-Hashes/-Pfade mit Repository-Mirrors.
+- Suche nach JAR-Versionen auf dem Datenträger, die nicht dem Paketmanager gehören, oder nach außerhalb des Änderungsprozesses aktualisierten symbolischen Links.
+- Timeline: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort`, um ctime/mtime mit dem Zeitraum der Kompromittierung zu korrelieren.
+- Shell-History/Process-Telemetrie: Hinweise auf `curl`/`wget` zu `repo1.maven.org` oder anderen Artifact-CDNs unmittelbar nach der initialen Exploitation.
+- Change Management: Überprüfe, wer den „Patch“ angewendet hat und warum, nicht nur, ob eine gepatchte Version vorhanden ist.
 
-### Cloud-Service C2 mit Bearer-Token und Anti-Analyse-Stagern
-Beobachtete Handwerkskunst kombinierte mehrere langfristige C2-Pfade und Anti-Analyse-Pakete:
-- Passwortgeschützte PyInstaller ELF-Loader, um Sandboxing und statische Analyse zu behindern (z. B. verschlüsseltes PYZ, temporäre Extraktion unter `/_MEI*`).
-- Indikatoren: `strings` Treffer wie `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
-- Laufzeitartefakte: Extraktion nach `/tmp/_MEI*` oder benutzerdefinierte `--runtime-tmpdir` Pfade.
-- Dropbox-unterstütztes C2 mit fest codierten OAuth Bearer-Token
+### Cloud-Service-C2 mit Bearer-Tokens und Anti-Analyse-Stagern
+Die beobachtete Vorgehensweise kombinierte mehrere langlebige C2-Pfade und Anti-Analyse-Packaging:<sup>[[3]](#references)</sup>
+- Passwortgeschützte PyInstaller-ELF-Loader, um Sandboxing und statische Analyse zu erschweren (z. B. verschlüsseltes PYZ, temporäre Extraktion unter `/_MEI*`).
+- Indikatoren: `strings`-Treffer wie `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
+- Laufzeit-Artefakte: Extraktion nach `/tmp/_MEI*` oder in benutzerdefinierte `--runtime-tmpdir`-Pfade.
+- Dropbox-gestütztes C2 mit fest einprogrammierten OAuth-Bearer-Tokens
 - Netzwerkmarker: `api.dropboxapi.com` / `content.dropboxapi.com` mit `Authorization: Bearer <token>`.
-- Suchen Sie in Proxy/NetFlow/Zeek/Suricata nach ausgehenden HTTPS zu Dropbox-Domains von Serverlasten, die normalerweise keine Dateien synchronisieren.
-- Parallel/Backup C2 über Tunneling (z. B. Cloudflare Tunnel `cloudflared`), Kontrolle behalten, wenn ein Kanal blockiert ist.
-- Host-IOCs: `cloudflared` Prozesse/Einheiten, Konfiguration unter `~/.cloudflared/*.json`, ausgehendes 443 zu Cloudflare-Edges.
+- Suche in Proxy/NetFlow/Zeek/Suricata nach ausgehendem HTTPS zu Dropbox-Domains von Server-Workloads, die normalerweise keine Dateien synchronisieren.
+- Paralleles/Backup-C2 über Tunneling (z. B. Cloudflare Tunnel `cloudflared`), um die Kontrolle aufrechtzuerhalten, falls ein Kanal blockiert wird.
+- Host-IOCs: `cloudflared`-Prozesse/-Units, Konfiguration unter `~/.cloudflared/*.json`, ausgehende Verbindungen über Port 443 zu Cloudflare-Edges.
 
-### Persistenz und „Härtungs-Rollback“, um den Zugriff aufrechtzuerhalten (Linux-Beispiele)
-Angreifer kombinieren häufig Selbstpatching mit dauerhaften Zugangswegen:
-- Cron/Anacron: Änderungen am `0anacron` Stub in jedem `/etc/cron.*/` Verzeichnis für die periodische Ausführung.
-- Suchen:
+### Persistenz und „Hardening-Rollback“ zur Aufrechterhaltung des Zugriffs (Linux-Beispiele)
+Angreifer kombinieren Self-Patching häufig mit dauerhaften Zugriffspfaden:<sup>[[3]](#references)</sup>
+- Cron/Anacron: Änderungen am `0anacron`-Stub in jedem `/etc/cron.*/`-Verzeichnis für regelmäßige Ausführung.
+- Suche:
 ```bash
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
 grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
 ```
-- SSH-Konfigurationshärtungs-Rollback: Aktivierung von Root-Logins und Änderung der Standard-Shells für niedrigprivilegierte Konten.
-- Suchen Sie nach der Aktivierung von Root-Logins:
+- Rollback der SSH-Konfigurationshärtung: Aktivierung von Root-Logins und Änderung der Standard-Shells für Accounts mit geringen Berechtigungen.
+- Suche nach Aktivierung von Root-Logins:
 ```bash
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
-# Flag-Werte wie "yes" oder übermäßig permissive Einstellungen
+# Werte wie "yes" oder übermäßig freizügige Einstellungen markieren
 ```
-- Suchen Sie nach verdächtigen interaktiven Shells auf Systemkonten (z. B. `games`):
+- Suche nach verdächtigen interaktiven Shells für System-Accounts (z. B. `games`):
 ```bash
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
-- Zufällige, kurz benannte Beacon-Artefakte (8 alphabetische Zeichen), die auf die Festplatte geschrieben werden und ebenfalls Cloud-C2 kontaktieren:
-- Suchen:
+- Zufällige Beacon-Artefakte mit kurzen Namen (8 alphabetische Zeichen), die auf dem Datenträger abgelegt werden und zusätzlich Cloud-C2 kontaktieren:
+- Suche:
 ```bash
 find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
 -exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
 ```
 
-Verteidiger sollten diese Artefakte mit externen Expositionen und Service-Patching-Ereignissen korrelieren, um anti-forensische Selbstbehebungen aufzudecken, die verwendet werden, um die ursprüngliche Ausnutzung zu verbergen.
+Verteidiger sollten diese Artefakte mit externer Angriffsfläche und Ereignissen beim Patching von Services korrelieren, um die zur Verschleierung der initialen Exploitation verwendete anti-forensische Selbstbereinigung aufzudecken.
 
 ## Referenzen
 
-- Sophos X-Ops – “AuKill: Ein bewaffneter verwundbarer Treiber zur Deaktivierung von EDR” (März 2023)
-https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
-- Red Canary – “Patching EtwEventWrite für Stealth: Erkennung & Jagd” (Juni 2024)
-https://redcanary.com/blog/etw-patching-detection
-
-- [Red Canary – Patching für Persistenz: Wie DripDropper Linux-Malware durch die Cloud bewegt](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
-- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
+- [1] [Sophos X-Ops – AuKill: Ein weaponisierter verwundbarer Treiber zur Deaktivierung von EDR (März 2023)](https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr)
+- [2] [Red Canary – Patching von EtwEventWrite zur Verschleierung: Erkennung und Hunting (Juni 2024)](https://redcanary.com/blog/etw-patching-detection)
+- [3] [Red Canary – Patching zur Persistenz: Wie sich die Linux-Malware DripDropper durch die Cloud bewegt](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [4] [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}
