@@ -3,9 +3,9 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> 프로그램이 `scanf`를 사용하여 **stdin에서 한 번에 여러 값을 가져오는 경우**, **`scanf`** 이후부터 시작하는 state를 생성해야 합니다.
+> 프로그램이 `scanf`를 사용하여 **stdin에서 한 번에 여러 값을 가져오는 경우**, **`scanf`** 이후에서 시작하는 state를 생성해야 합니다.
 
-Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+코드는 [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)에서 가져왔습니다.<sup>[[1]](#references)</sup>
 
 ### 주소에 도달하기 위한 입력 (주소 지정)
 ```python
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 주소에 도달하기 위한 입력 (출력을 나타냄)
+### 주소에 도달하기 위한 입력(출력 표시)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -139,7 +139,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Stack 값
+### 스택 값
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
 # have to reach a rogram flow
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-이 시나리오에서는 `scanf("%u %u")`를 사용해 입력을 받고 `"1 1"` 값을 입력했으므로, stack의 **`0x00000001`** 값은 **user input**에서 비롯됩니다. 이 값이 `$ebp - 8`에서 시작하는 것을 확인할 수 있습니다. 따라서 해당 시점에 `$ebp`와 `$esp`가 같은 값을 가지고 있었으므로, 코드에서는 **`$esp`에서 8바이트를 뺀 후** BVS를 push했습니다.
+이 시나리오에서 입력은 `scanf("%u %u")`를 사용해 받았고 `"1 1"` 값이 전달되었으므로, 스택의 **`0x00000001`** 값은 **사용자 입력**에서 비롯됩니다. 이 값이 `$ebp - 8`에서 시작하는 것을 확인할 수 있습니다. 따라서 코드에서는 **`$esp`에서 8바이트를 뺐고**(당시 `$ebp`와 `$esp`가 같은 값을 가지고 있었으므로), 그다음 BVS를 push했습니다.
 
-![Put bit vectors in th stack to find out the vallue that stack position need to - have to reach a rogram flow: In this scenario, the input was taken with scanf("%u %u") and the value "1...](<../../../images/image (136).png>)
+![스택에 bit vector를 배치하여 프로그램 흐름에 도달하기 위해 해당 스택 위치가 가져야 하는 값을 확인: 이 시나리오에서 입력은 scanf("%u %u")를 사용해 받았고 "1...](<../../../images/image (136).png>)
 
 ### Static Memory values (Global variables)
 ```python
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> symbolic file에는 symbolic data와 병합된 constant data가 포함될 수도 있습니다:
+> symbolic file에는 symbolic data와 병합된 constant data도 포함될 수 있습니다:
 >
 > ```python
 >  # Hello world, my name is John.
@@ -402,13 +402,13 @@ main(sys.argv)
 >  # the string from the file, except four symbolic bytes where the name would be
 >  # stored.
 >  # (!)
-> ```
+>  ```
 
 ### 제약 조건 적용
 
 > [!TIP]
-> 때로는 길이가 16인 두 단어를 **char by char**(loop)로 비교하는 것과 같은 간단한 작업도 **angr**에서는 많은 **cost**가 발생합니다. 각 if마다 1개의 branch를 생성하므로 **exponentially** 많은 branch를 생성해야 하기 때문입니다: `2^16`\
-> 따라서 **angr에게 이전 지점으로 이동하도록 요청하고**(실제로 어려운 부분이 이미 완료된 지점), 해당 **제약 조건을 수동으로 설정하는** 편이 더 쉽습니다.
+> 때로는 길이가 16인 두 단어를 **char by char**(loop)로 비교하는 것과 같은 간단한 사람의 작업도 **angr**에는 많은 **cost**가 발생합니다. 각 if마다 하나의 branch를 생성하므로 **exponentially** 많은 branch를 생성해야 하기 때문입니다: `2^16`\
+> 따라서 **angr에 이전 지점으로 이동하도록 요청하고**(실제로 어려운 부분이 이미 처리된 지점) 해당 **제약 조건을 수동으로 설정하는** 편이 더 쉽습니다.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,14 +480,14 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> 일부 시나리오에서는 **veritesting**을 활성화할 수 있습니다. 이는 유사한 상태를 병합하여 불필요한 분기를 줄이고 solution을 찾습니다: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> 일부 시나리오에서는 **veritesting**을 활성화하여 유사한 상태를 병합할 수 있습니다. 이렇게 하면 불필요한 branch를 줄이고 solution을 찾을 수 있습니다: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> 이러한 시나리오에서 할 수 있는 또 다른 방법은 **angr가 더 쉽게 이해할 수 있는 무언가를 제공하도록 function을 hook하는 것**입니다.
+> 이러한 시나리오에서 할 수 있는 또 다른 방법은 **angr이 더 쉽게 이해할 수 있는 무언가를 제공하도록 function을 hook하는 것**입니다.
 
 ### Simulation Managers
 
-일부 simulation manager는 다른 것보다 더 유용할 수 있습니다. 앞의 예제에서는 유용한 분기가 많이 생성된다는 문제가 있었습니다. 여기서는 **veritesting** technique이 이러한 분기를 병합하고 solution을 찾습니다.\
+일부 simulation manager는 다른 것보다 더 유용할 수 있습니다. 이전 예제에서는 유용한 branch가 너무 많이 생성되는 문제가 있었습니다. 여기서는 **veritesting** technique이 해당 branch를 병합하고 solution을 찾습니다.\
 이 simulation manager는 다음과 같이 활성화할 수도 있습니다: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 함수에 대한 한 번의 호출 Hooking/Bypassing
+### 함수 호출 한 번을 Hooking/Bypassing하기
 ```python
 # This level performs the following computations:
 #
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 함수 후킹 / Simprocedure
+### 함수 Hooking / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -809,6 +809,6 @@ main(sys.argv)
 ```
 ## 참고 자료
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}

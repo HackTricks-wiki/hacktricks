@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-이 cheatsheet의 일부는 [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>을 기반으로 합니다.
+이 치트시트의 일부는 [angr 문서](https://docs.angr.io/_/downloads/en/stable/pdf/)를 기반으로 작성되었습니다.<sup>[[1]](#references)</sup>
 
 ## 설치
 ```bash
@@ -30,7 +30,7 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## 로드된 객체 및 메인 객체 정보
+## 로드된 데이터 및 메인 객체 정보
 
 ### 로드된 데이터
 ```python
@@ -96,7 +96,7 @@ block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x4016
 ```
 ## 동적 분석
 
-### 시뮬레이션 관리자, 상태
+### Simulation Manager, 상태
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -121,9 +121,9 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ### 함수 호출
 
-- `args`를 통해 인자 목록을, `env`를 통해 환경 변수 dictionary를 `entry_state` 및 `full_init_state`에 전달할 수 있습니다. 이러한 구조의 값은 문자열 또는 bitvector일 수 있으며, 시뮬레이션된 실행에 대한 인자와 환경으로 state에 직렬화됩니다. 기본 `args`는 빈 목록이므로, 분석 중인 프로그램이 최소한 `argv[0]`을 찾을 것으로 예상된다면 항상 이를 제공해야 합니다!
-- `argc`를 symbolic으로 사용하려면 `entry_state` 및 `full_init_state` 생성자에 symbolic bitvector를 `argc`로 전달할 수 있습니다. 단, 이렇게 하는 경우 결과 state에 `argc` 값이 `args`에 전달한 인자 수보다 클 수 없다는 constraint도 추가해야 합니다.
-- call state를 사용하려면 `.call_state(addr, arg1, arg2, ...)`를 호출해야 합니다. 여기서 `addr`은 호출하려는 함수의 address이고, `argN`은 해당 함수의 N번째 인자로서 Python integer, string, array 또는 bitvector 중 하나입니다. 메모리를 할당하고 객체에 대한 pointer를 실제로 전달하려면 `PointerWrapper`로 감싸야 합니다. 예: `angr.PointerWrapper("point to me!")`. 이 API의 결과는 다소 예측하기 어려울 수 있지만, 현재 개선 작업을 진행 중입니다.
+- `args`를 통해 인수 목록을, `env`를 통해 환경 변수 dictionary를 `entry_state` 및 `full_init_state`에 전달할 수 있습니다. 이러한 구조의 값은 문자열 또는 bitvector일 수 있으며, simulated execution을 위한 인수와 환경으로 state에 직렬화됩니다. 기본 `args`는 빈 목록이므로, 분석 중인 프로그램이 최소한 `argv[0]`을 찾을 것으로 예상된다면 항상 이를 제공해야 합니다!
+- `argc`를 symbolic으로 설정하려면 `entry_state` 및 `full_init_state` constructor에 symbolic bitvector를 `argc`로 전달할 수 있습니다. 단, 이렇게 하는 경우 결과 state에 `argc` 값이 `args`에 전달한 인수 개수보다 클 수 없도록 constraint도 추가해야 합니다.
+- call state를 사용하려면 `.call_state(addr, arg1, arg2, ...)`로 호출해야 합니다. 여기서 `addr`은 호출할 함수의 address이고 `argN`은 해당 함수의 N번째 인수입니다. 인수는 Python 정수, 문자열, 배열 또는 bitvector일 수 있습니다. memory를 할당하고 객체에 대한 pointer를 실제로 전달하려면 `PointerWrapper`로 감싸야 합니다. 예: `angr.PointerWrapper("point to me!")`. 이 API의 결과는 다소 예측하기 어려울 수 있지만, 현재 개선 작업이 진행 중입니다.
 
 ### BitVectors
 ```python
@@ -134,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### 심볼릭 BitVectors 및 제약 조건
+### Symbolic BitVectors 및 제약 조건
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -186,9 +186,9 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-또한 첫 번째 인수로 symbol의 이름을 제공하는 `proj.hook_symbol(name, hook)`를 사용하여 symbol이 존재하는 주소에 hook을 설치할 수 있습니다<sup>[[1]](#references)</sup>
+또한 첫 번째 인자로 심볼의 이름을 제공하는 `proj.hook_symbol(name, hook)`을 사용하여 심볼이 위치한 주소에 hook을 설정할 수 있습니다<sup>[[1]](#references)</sup>
 
-## 예시
+## 예제
 
 ## 참고 자료
 
