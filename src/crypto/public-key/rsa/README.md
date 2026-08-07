@@ -1,85 +1,85 @@
-# RSA Attacks
+# Attaques RSA
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Triaging rapide
+## Triage rapide
 
-Collecter :
+Collectez :
 
-- `n`, `e`, `c` (et tout ciphertext supplémentaire)
+- `n`, `e`, `c` (ainsi que tout ciphertext supplémentaire)
 - Toute relation entre les messages (même plaintext ? modulus partagé ? plaintext structuré ?)
-- Toute leak (partielle `p/q`, bits de `d`, `dp/dq`, padding connu)
+- Tout leak (partie de `p/q`, bits de `d`, `dp/dq`, padding connu)
 
-Puis essayer :
+Essayez ensuite :
 
-- Vérification de factorisation (Factordb / `sage: factor(n)` pour les petits cas)
-- Motifs à faible exposant (`e=3`, broadcast)
-- Common modulus / repeated primes
-- Méthodes de lattice (Coppersmith/LLL) quand quelque chose est presque connu
+- Vérification de la factorisation (Factordb / `sage: factor(n)` pour les valeurs relativement petites)
+- Motifs liés aux petits exposants (`e=3`, broadcast)
+- Modulus partagé / primes répétées
+- Méthodes par lattice (Coppersmith/LLL) lorsqu'une partie est presque connue
 
 ## Attaques RSA courantes
 
-### Common modulus
+### Modulus partagé
 
-Si deux ciphertexts `c1, c2` chiffrent le **même message** sous le **même modulus** `n` mais avec des exposants différents `e1, e2` (et `gcd(e1,e2)=1`), vous pouvez récupérer `m` en utilisant l’algorithme d’Euclide étendu :
+Si deux ciphertexts `c1, c2` chiffrent le **même message** avec le **même modulus** `n`, mais avec des exposants différents `e1, e2` (et `gcd(e1,e2)=1`), vous pouvez récupérer `m` à l'aide de l'algorithme d'Euclide étendu :
 
 `m = c1^a * c2^b mod n` où `a*e1 + b*e2 = 1`.
 
-Exemple de démarche :
+Exemple :
 
-1. Calculer `(a, b) = xgcd(e1, e2)` pour obtenir `a*e1 + b*e2 = 1`
-2. Si `a < 0`, interpréter `c1^a` comme `inv(c1)^{-a} mod n` (idem pour `b`)
-3. Multiplier et réduire modulo `n`
+1. Calculez `(a, b) = xgcd(e1, e2)` afin d'obtenir `a*e1 + b*e2 = 1`
+2. Si `a < 0`, interprétez `c1^a` comme `inv(c1)^{-a} mod n` (même chose pour `b`)
+3. Effectuez la multiplication et réduisez modulo `n`
 
-### Shared primes across moduli
+### Primes partagées entre les modulus
 
-Si vous avez plusieurs moduli RSA issus du même challenge, vérifiez s’ils partagent un premier :
+Si vous disposez de plusieurs modulus RSA provenant du même challenge, vérifiez s'ils partagent une prime :
 
-- `gcd(n1, n2) != 1` implique une défaillance catastrophique de génération de clé.
+- `gcd(n1, n2) != 1` implique une défaillance catastrophique de la génération de clé.
 
-Cela apparaît souvent dans les CTF sous la forme de « nous avons généré beaucoup de clés rapidement » ou « mauvaise randomness ».
+Cela apparaît fréquemment dans les CTF sous la forme « nous avons généré beaucoup de clés rapidement » ou « mauvaise entropie ».
 
-### Sparse / short-sleeve moduli
+### Modulus sparse / short-sleeve
 
-Certains générateurs de grands entiers cassés fuient la structure directement dans le modulus public : chaque limb contient seulement un petit sous-espace aléatoire et le reste des bits est `0`. En pratique, cela apparaît comme des **blocs de zéros régulièrement espacés** dans `n`, souvent alignés sur des limbs de 32 bits ou 128 bits.
+Certains générateurs d'entiers de grande taille défectueux leakent directement une structure dans le modulus public : chaque limb ne contient qu'un petit sous-champ aléatoire, le reste des bits étant à `0`. En pratique, cela apparaît sous la forme de **blocs de zéros régulièrement espacés** dans `n`, souvent alignés sur des limbs de 32 ou 128 bits.<sup>[[1]](#references)</sup>
 
 Vérifications rapides :
 
-- Afficher `n` en hexadécimal et chercher des fenêtres de zéros répétées à un espacement fixe.
-- Re-découper `n` en limbs (`2^32`, `2^64`, `2^128`) et inspecter si chaque limb est anormalement petit.
-- Auditer les clés SSH/TLS publiques avec un outil comme **badkeys** si vous suspectez une génération faible de host-key.
+- Affichez `n` en hexadécimal et recherchez des fenêtres de zéros répétées avec un stride fixe.
+- Re-découpez `n` en limbs (`2^32`, `2^64`, `2^128`) et vérifiez si chaque limb est anormalement petit.
+- Auditez les clés SSH/TLS publiques avec des outils tels que **badkeys** lorsque vous suspectez une génération faible de host keys.<sup>[[2]](#references)[[3]](#references)</sup>
 
-C’est plus grave qu’un biais statistique : si les deux facteurs privés `p` et `q` sont short-sleeved, le modulus peut devenir **facile à factoriser**.
+C'est plus grave qu'un biais statistique : si les deux facteurs privés `p` et `q` sont short-sleeve, le modulus peut devenir **facile à factoriser**.<sup>[[1]](#references)</sup>
 
 ### Factorisation polynomiale de clés RSA structurées
 
-Pour une largeur de limb suspectée `w`, écrire le modulus en base `B = 2^w` :
+Pour une largeur de limb `w` suspectée, écrivez le modulus en base `B = 2^w` :
 
 - `n = Σ_i n_i B^i`
 - `f_n(x) = Σ_i n_i x^i`
 
-Comme l’évaluation est multiplicative, `f_a(B) * f_c(B) = (f_a * f_c)(B)`. Si les facteurs ont aussi des coefficients de limb sparses, alors :
+Comme l'évaluation est multiplicative, `f_a(B) * f_c(B) = (f_a * f_c)(B)`. Si les facteurs possèdent également des coefficients de limb sparse, alors :
 
 - `n = p*q`
 - `f_n(x) = f_p(x) * f_q(x)`
 
-Démarche d’attaque :
+Déroulement de l'attaque :
 
-1. Deviner la largeur de limb `w`.
-2. Convertir le modulus public `n` en `f_n(x)` en utilisant la base `2^w`.
-3. Factoriser `f_n(x)` sur les entiers.
-4. Réévaluer les facteurs candidats en `B = 2^w`.
-5. Vérifier quels candidats se multiplient pour donner `n`.
+1. Devinez la largeur de limb `w`.
+2. Convertissez le modulus public `n` en `f_n(x)` en utilisant la base `2^w`.
+3. Factorisez `f_n(x)` sur les entiers.
+4. Réévaluez les facteurs candidats avec `B = 2^w`.
+5. Vérifiez quels candidats se multiplient pour obtenir `n`.
 
-Cela **ne casse pas le RSA normal**. Cela ne fonctionne que lorsque les facteurs premiers eux-mêmes ont des coefficients de limb très petits et très structurés.
+Cela **ne casse pas RSA normal**. Cela fonctionne uniquement lorsque les facteurs premiers eux-mêmes possèdent des coefficients de limb très petits et hautement structurés.<sup>[[1]](#references)</sup>
 
-### Shifted limb leakage
+### Leak de limbs décalés
 
-Les bytes sparses ne sont pas toujours alignés au début de chaque limb. Si une conversion directe en base `2^w` produit de gros coefficients, chercher des shifts `i,j` tels que `2^i p` et `2^j q` deviennent sparses dans cette base de limbs. Le polynôme produit peut encore être dérivé du modulus public, factorisé, puis recombiné en facteurs entiers originaux.
+Les bytes sparse ne sont pas toujours alignés sur l'extrémité basse de chaque limb. Si la conversion directe en base `2^w` produit de grands coefficients, recherchez des décalages `i,j` tels que `2^i p` et `2^j q` deviennent sparse dans cette base de limbs. Le polynôme produit peut toujours être dérivé du modulus public, factorisé, puis recombiné pour retrouver les facteurs entiers d'origine.<sup>[[1]](#references)</sup>
 
-### Implementation smell: byte-to-limb RNG bug
+### Signal d'implémentation : bug du RNG byte-to-limb
 
-Un pattern dangereux consiste à calculer le nombre de **limbs 32-bit**, allouer seulement ce nombre de **bytes**, puis les copier dans le tableau de limbs :
+Un schéma dangereux consiste à calculer le nombre de **limbs de 32 bits**, à n'allouer que ce nombre d'**octets**, puis à les copier dans le tableau de limbs :
 ```csharp
 int numLimbs = bits / 32;
 byte[] array = new byte[numLimbs];
@@ -87,62 +87,62 @@ rngProvider.GetNonZeroBytes(array);
 Array.Copy(array, 0, bignumLimbs, 0, numLimbs);
 bignumLimbs[numLimbs - 1] |= 0x80000000;
 ```
-Cela donne à chaque limb de 32 bits seulement **8 bits d'entropie** plus un bit de tête forcé dans le dernier limb. Les primes RSA résultants peuvent souvent être reconnus et factorisés à partir de la clé publique seule.
+Cela donne à chaque limb de 32 bits seulement **8 bits d'entropie**, plus un bit de poids fort forcé dans le dernier limb. Les primes RSA résultantes peuvent souvent être reconnues et factorisées à partir de la clé publique seule.<sup>[[1]](#references)</sup>
 
-### Related DSA failure mode
+### Mode d'échec DSA associé
 
-Si la même routine big-integer défectueuse est réutilisée pour la génération de l'exposant privé DSA, la clé publique `y = g^x` peut exposer un espace de recherche **drastiquement réduit et structuré** pour `x`. Une fois le motif des limbs connu, des attaques de discrete-log comme **baby-step giant-step** peuvent devenir pratiques contre les paramètres publics.
+Si la même routine big-integer défectueuse est réutilisée pour générer l'exposant privé DSA, la clé publique `y = g^x` peut révéler un espace de recherche **considérablement réduit et structuré** pour `x`. Une fois le motif des limbs connu, les attaques de logarithme discret telles que **baby-step giant-step** peuvent devenir pratiques contre les paramètres publics.<sup>[[1]](#references)</sup>
 
 ### Håstad broadcast / low exponent
 
-Si le même plaintext est envoyé à plusieurs destinataires avec un petit `e` (souvent `e=3`) et sans padding correct, vous pouvez récupérer `m` via CRT et integer root.
+Si le même plaintext est envoyé à plusieurs destinataires avec un petit `e` (souvent `e=3`) et sans padding approprié, vous pouvez récupérer `m` via CRT et une racine entière.
 
 Condition technique :
 
-Si vous avez `e` ciphertexts du même message sous des moduli `n_i` pairwise-coprime :
+Si vous avez `e` ciphertexts du même message sous des moduli `n_i` premiers entre eux deux à deux :
 
 - Utilisez CRT pour récupérer `M = m^e` sur le produit `N = Π n_i`
-- Si `m^e < N`, alors `M` est la vraie puissance entière, et `m = integer_root(M, e)`
+- Si `m^e < N`, alors `M` est la véritable puissance entière, et `m = integer_root(M, e)`
 
-### Wiener attack: small private exponent
+### Wiener attack: petit exposant privé
 
-Si `d` est trop petit, les continued fractions peuvent le récupérer à partir de `e/n`.
+Si `d` est trop petit, les fractions continues peuvent le récupérer à partir de `e/n`.
 
-### Textbook RSA pitfalls
+### Pièges du RSA textbook
 
 Si vous voyez :
 
-- Pas de OAEP/PSS, modular exponentiation brute
-- Encryption déterministe
+- Aucun OAEP/PSS, seulement une exponentiation modulaire brute
+- Un chiffrement déterministe
 
-alors les algebraic attacks et l'abus d'oracle deviennent beaucoup plus probables.
+alors les attaques algébriques et l'abus d'oracles deviennent beaucoup plus probables.
 
-### Tools
+### Outils
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
 - SageMath (CRT, roots, CF): https://www.sagemath.org/
 
-## Related-message patterns
+## Motifs de messages associés
 
-Si vous voyez deux ciphertexts sous le même modulus avec des messages qui sont algebraically related (par exemple, `m2 = a*m1 + b`), cherchez des attaques de "related-message" comme Franklin–Reiter. Celles-ci nécessitent généralement :
+Si vous voyez deux ciphertexts sous le même modulus avec des messages qui sont liés algébriquement (par exemple, `m2 = a*m1 + b`), recherchez des attaques de type "related-message", comme Franklin–Reiter. Elles nécessitent généralement :
 
-- même modulus `n`
-- même exponent `e`
-- relation connue entre les plaintexts
+- le même modulus `n`
+- le même exponent `e`
+- une relation connue entre les plaintexts
 
-En pratique, cela se résout souvent avec Sage en mettant en place des polynomials modulo `n` et en calculant un GCD.
+En pratique, cela se résout souvent avec Sage en construisant des polynômes modulo `n` et en calculant un PGCD.
 
 ## Lattices / Coppersmith
 
-Utilisez cela lorsque vous avez des bits partiels, un plaintext structuré, ou des relations proches qui rendent l'inconnu petit.
+Utilisez cette approche lorsque vous disposez de bits partiels, d'un plaintext structuré ou de relations proches qui rendent l'inconnue petite.
 
-Les méthodes de lattice (LLL/Coppersmith) apparaissent dès que vous avez des informations partielles :
+Les méthodes sur les lattices (LLL/Coppersmith) apparaissent dès que vous avez des informations partielles :
 
-- Plaintext partiellement connu (message structuré avec queue inconnue)
-- `p`/`q` partiellement connus (bits de poids fort divulgués)
-- Petites différences inconnues entre des valeurs liées
+- Plaintext partiellement connu (message structuré avec une fin inconnue)
+- `p`/`q` partiellement connus (bits de poids fort leakés)
+- Petites différences inconnues entre des valeurs associées
 
-### What to recognize
+### Éléments à reconnaître
 
 Indices typiques dans les challenges :
 
@@ -150,19 +150,19 @@ Indices typiques dans les challenges :
 - "The flag is embedded like: `m = bytes_to_long(b\"HTB{\" + unknown + b\"}\")`"
 - "We used RSA but with a small random padding"
 
-### Tooling
+### Outils
 
-En pratique, vous utiliserez Sage pour LLL et un template connu pour l'instance spécifique.
+En pratique, vous utiliserez Sage pour LLL ainsi qu'un template connu adapté à l'instance spécifique.
 
-Bon points de départ :
+Points de départ utiles :
 
 - Sage CTF crypto templates: https://github.com/defund/coppersmith
-- Une référence de type survey: https://martinralbrecht.wordpress.com/2013/05/06/coppersmiths-method/
+- A survey-style reference: https://martinralbrecht.wordpress.com/2013/05/06/coppersmiths-method/
 
-## References
+## Références
 
-- [Trail of Bits - Factoring "short-sleeve" RSA keys with polynomials](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
-- [badkeys](https://badkeys.info/)
-- [badkeys standalone tool](https://github.com/badkeys/badkeys)
+- [1] [Trail of Bits - Factoring "short-sleeve" RSA keys with polynomials](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
+- [2] [badkeys](https://badkeys.info/)
+- [3] [badkeys standalone tool](https://github.com/badkeys/badkeys)
 
 {{#include ../../../banners/hacktricks-training.md}}

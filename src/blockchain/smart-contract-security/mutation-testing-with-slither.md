@@ -1,14 +1,14 @@
-# Mutation Testing for Smart Contracts (slither-mutate, mewt, MuTON)
+# Mutation Testing pour les Smart Contracts (slither-mutate, mewt, MuTON)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Le mutation testing "tests your tests" en introduisant systématiquement de petits changements (mutants) dans le code du contrat puis en relançant la suite de tests. Si un test échoue, le mutant est killed. Si les tests passent toujours, le mutant survives, révélant un angle mort que la line/branch coverage ne peut pas détecter.
+Le Mutation Testing « teste vos tests » en introduisant systématiquement de petites modifications (mutants) dans le code du contract, puis en réexécutant la suite de tests. Si un test échoue, le mutant est tué. Si les tests réussissent toujours, le mutant survit, révélant un angle mort que la couverture des lignes/blocs ne peut pas détecter.
 
-Idée clé : la Coverage montre que le code a été exécuté ; le mutation testing montre si le comportement est réellement asserted.
+Idée clé : la couverture montre que le code a été exécuté ; le Mutation Testing montre si le comportement est réellement vérifié.<sup>[[2]](#references)</sup>
 
-## Pourquoi la coverage peut tromper
+## Pourquoi la couverture peut être trompeuse
 
-Considérez ce simple contrôle de seuil :
+Considérez cette simple vérification de seuil :
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 if (deposit >= 1 ether) {
@@ -18,130 +18,130 @@ return false;
 }
 }
 ```
-Les tests unitaires qui vérifient seulement une valeur en dessous et une valeur au-dessus du seuil peuvent atteindre 100 % de coverage ligne/branch tout en ne vérifiant pas la boundary d’égalité (==). Un refactor vers `deposit >= 2 ether` passerait encore de tels tests, cassant silencieusement la logique du protocole.
+Les tests unitaires qui vérifient uniquement une valeur inférieure et une valeur supérieure au seuil peuvent atteindre une couverture de 100 % des lignes/branches tout en ne vérifiant pas la limite d'égalité (`==`). Une refactorisation en `deposit >= 2 ether` réussirait tout de même ces tests, rompant silencieusement la logique du protocole.<sup>[[2]](#references)</sup>
 
-Le mutation testing expose cette faille en mutating la condition et en vérifiant que les tests échouent.
+Le mutation testing révèle cette lacune en mutant la condition et en vérifiant que les tests échouent.
 
-Pour les smart contracts, les mutants survivants correspondent souvent à des checks manquants autour de :
-- Authorization et role boundaries
-- Accounting/value-transfer invariants
-- Revert conditions et failure paths
-- Boundary conditions (`==`, zero values, empty arrays, max/min values)
+Pour les smart contracts, les mutants survivants correspondent souvent à des vérifications manquantes autour des éléments suivants :
+- Autorisation et limites des rôles
+- Invariants de comptabilité/transfert de valeur
+- Conditions de revert et chemins d'échec
+- Conditions limites (`==`, valeurs nulles, tableaux vides, valeurs max/min)
 
-## Mutation operators avec le plus fort signal de sécurité
+## Mutation operators avec le meilleur signal de sécurité
 
-Classes de mutation utiles pour l’audit de contrats :
-- **High severity** : remplacer des statements par `revert()` pour exposer les paths non exécutés
-- **Medium severity** : commenter des lignes / remove logic pour révéler des side effects non vérifiés
-- **Low severity** : swaps subtils d’opérateurs ou de constantes comme `>=` -> `>` ou `+` -> `-`
-- Autres modifications courantes : remplacement d’assignation, boolean flips, negation de condition, et changements de type
+Classes de mutations utiles pour l'audit de contrats :<sup>[[1]](#references)[[2]](#references)</sup>
+- **High severity** : remplacer les statements par `revert()` pour révéler les chemins non exécutés
+- **Medium severity** : commenter des lignes / supprimer de la logique pour révéler les effets de bord non vérifiés
+- **Low severity** : substitutions subtiles d'opérateurs ou de constantes, comme `>=` -> `>` ou `+` -> `-`
+- Autres modifications courantes : remplacement d'assignation, inversions booléennes, négation de conditions et changements de type
 
-Objectif pratique : kill all meaningful mutants, et justifier explicitement les survivants qui sont non pertinents ou sémantiquement équivalents.
+Objectif pratique : éliminer tous les mutants significatifs et justifier explicitement les mutants survivants qui sont sans rapport ou sémantiquement équivalents.
 
-## Why syntax-aware mutation is better than regex
+## Pourquoi la mutation prenant en compte la syntaxe est meilleure que les regex
 
-Les anciens moteurs de mutation reposaient sur des regex ou des réécritures orientées lignes. Cela fonctionne, mais avec des limites importantes :
-- Les statements multi-lignes sont difficiles à muter en sécurité
-- La structure du langage n’est pas comprise, donc les commentaires/tokens peuvent être ciblés de façon incorrecte
-- Générer toutes les variantes possibles sur une ligne faible consomme énormément de runtime
+Les anciens moteurs de mutation s'appuyaient sur des regex ou des réécritures orientées lignes. Cela fonctionne, mais présente d'importantes limites :<sup>[[1]](#references)</sup>
+- Les statements multilignes sont difficiles à muter de manière sûre
+- La structure du langage n'est pas comprise, ce qui peut cibler incorrectement les commentaires/tokens
+- Générer toutes les variantes possibles sur une ligne peu pertinente gaspille d'importantes quantités de runtime
 
-Les outils basés sur AST ou Tree-sitter améliorent cela en ciblant des nœuds structurés plutôt que des lignes brutes :
-- **slither-mutate** utilise l’AST Solidity de Slither
-- **mewt** utilise Tree-sitter comme core agnostique du langage
-- **MuTON** s’appuie sur `mewt` et ajoute un support natif des langages TON comme FunC, Tolk, et Tact
+Les outils basés sur AST ou Tree-sitter améliorent cela en ciblant des nœuds structurés plutôt que des lignes brutes :<sup>[[1]](#references)</sup>
+- **slither-mutate** utilise l'AST Solidity de Slither
+- **mewt** utilise Tree-sitter comme core indépendant du langage
+- **MuTON** s'appuie sur `mewt` et ajoute un support de première classe pour les langages TON tels que FunC, Tolk et Tact
 
-Cela rend les constructs multi-lignes et les mutations au niveau des expressions beaucoup plus fiables que les approches uniquement basées sur regex.
+Cela rend les constructions multilignes et les mutations au niveau des expressions beaucoup plus fiables que les approches reposant uniquement sur les regex.
 
-## Running mutation testing with slither-mutate
+## Exécuter un mutation testing avec slither-mutate
 
-Requirements: Slither v0.10.2+.
+Prérequis : Slither v0.10.2+.
 
-- List options and mutators:
+- Lister les options et mutators :
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Exemple Foundry (capturer les résultats et conserver un log complet) :
+- Exemple Foundry (capturer les résultats et conserver un journal complet) :<sup>[[2]](#references)</sup>
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
-- Si vous n'utilisez pas Foundry, remplacez `--test-cmd` par la commande avec laquelle vous exécutez les tests (par ex. `npx hardhat test`, `npm test`).
+- Si vous n’utilisez pas Foundry, remplacez `--test-cmd` par la commande utilisée pour exécuter vos tests (par exemple, `npx hardhat test`, `npm test`).
 
-Les artifacts sont stockés par défaut dans `./mutation_campaign`. Les mutants non capturés (survivants) y sont copiés pour inspection.
+Par défaut, les artifacts sont stockés dans `./mutation_campaign`. Les mutants non détectés (survivants) y sont copiés pour inspection.<sup>[[5]](#references)</sup>
 
 ### Comprendre la sortie
 
-Les lignes du rapport ressemblent à :
+Les lignes du rapport ressemblent à ceci :
 ```text
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
-- Le tag entre crochets est l’alias du mutator (par ex. `CR` = Comment Replacement).
-- `UNCAUGHT` signifie que les tests ont réussi sous le comportement muté → assertion manquante.
+- La balise entre crochets correspond à l’alias du mutator (par exemple, `CR` = Comment Replacement).
+- `UNCAUGHT` signifie que les tests ont réussi avec le comportement muté → assertion manquante.
 
-## Réduire le runtime : prioriser les mutants les plus impactants
+## Réduire le runtime : donner la priorité aux mutants les plus impactants
 
-Les campagnes de mutation peuvent prendre des heures ou des jours. Conseils pour réduire le coût :
-- Scope : commencez uniquement par les contrats/répertoires critiques, puis élargissez.
-- Priorisez les mutators : si un mutant à haute priorité sur une ligne survit (par exemple `revert()` ou comment-out), ignorez les variantes de priorité inférieure pour cette ligne.
-- Utilisez des campagnes en deux phases : lancez d’abord des tests ciblés/rapides, puis retestez uniquement les mutants `uncaught` avec la suite complète.
-- Mappez, si possible, les cibles de mutation à des commandes de test spécifiques (par exemple code auth -> tests auth).
-- Limitez les campagnes aux mutants de sévérité élevée/moyenne quand le temps est compté.
-- Parallélisez les tests si votre runner le permet ; mettez en cache les dépendances/builds.
-- Fail-fast : arrêtez tôt lorsqu’un changement démontre clairement un manque d’assertion.
+Les campagnes de mutation peuvent prendre des heures ou des jours. Conseils pour réduire le coût :<sup>[[1]](#references)[[2]](#references)</sup>
+- Périmètre : commencez uniquement par les contrats/répertoires critiques, puis élargissez.
+- Donner la priorité aux mutators : si un mutant prioritaire sur une ligne survit (par exemple `revert()` ou comment-out), ignorez les variantes moins prioritaires pour cette ligne.
+- Utiliser des campagnes en deux phases : exécutez d’abord des tests ciblés/rapides, puis retestez uniquement les mutants non détectés avec la suite complète.
+- Lorsque c’est possible, associez les cibles de mutation à des commandes de test spécifiques (par exemple, code d’authentification -> tests d’authentification).
+- Limitez les campagnes aux mutants de gravité élevée/moyenne lorsque le temps est limité.
+- Exécutez les tests en parallèle si votre runner l’autorise ; mettez en cache les dépendances/builds.
+- Fail-fast : arrêtez rapidement lorsqu’une modification démontre clairement une lacune dans les assertions.
 
-Le calcul du runtime est brutal : `1000 mutants x 5-minute tests ~= 83 heures`, donc la conception de la campagne compte autant que le mutator lui-même.
+Les calculs de runtime sont brutaux : `1000 mutants x 5-minute tests ~= 83 hours`, la conception de la campagne est donc aussi importante que le mutator lui-même.
 
 ## Campagnes persistantes et triage à grande échelle
 
-Une faiblesse des anciens workflows est de ne renvoyer les résultats que vers `stdout`. Pour les longues campagnes, cela rend plus difficiles la pause/reprise, le filtrage et la revue.
+L’une des faiblesses des anciens workflows est de vider les résultats uniquement vers `stdout`. Pour les longues campagnes, cela rend la mise en pause/reprise, le filtrage et la revue plus difficiles.<sup>[[1]](#references)</sup>
 
-`mewt`/`MuTON` améliorent cela en stockant les mutants et leurs résultats dans des campagnes basées sur SQLite. Avantages :
+`mewt`/`MuTON` améliorent cela en stockant les mutants et les résultats dans des campagnes basées sur SQLite. Avantages :<sup>[[1]](#references)</sup>
 - Mettre en pause et reprendre de longues exécutions sans perdre la progression
-- Filtrer uniquement les mutants `uncaught` dans un fichier spécifique ou une classe de mutation
+- Filtrer uniquement les mutants non détectés dans un fichier ou une classe de mutation spécifique
 - Exporter/traduire les résultats en SARIF pour les outils de revue
-- Donner au triage assisté par IA des ensembles de résultats plus petits et filtrés au lieu de logs bruts de terminal
+- Fournir au triage assisté par AI des ensembles de résultats plus petits et filtrés au lieu de logs bruts du terminal
 
-Les résultats persistants sont particulièrement utiles lorsque la mutation testing devient une partie d’un pipeline d’audit au lieu d’une revue manuelle ponctuelle.
+Les résultats persistants sont particulièrement utiles lorsque le mutation testing devient partie intégrante d’un pipeline d’audit plutôt qu’une revue manuelle ponctuelle.
 
-## Workflow de triage pour les mutants survivants
+## Workflow de triage des mutants survivants
 
-1) Inspectez la ligne mutée et le comportement.
-- Reproduisez localement en appliquant la ligne mutée et en exécutant un test ciblé.
+1) Inspectez la ligne mutée et son comportement.
+- Reproduisez localement le problème en appliquant la ligne mutée et en exécutant un test ciblé.
 
-2) Renforcez les tests pour vérifier l’état, pas seulement les valeurs de retour.
-- Ajoutez des vérifications de bornes d’égalité (par ex. test du seuil `==`).
-- Vérifiez les post-conditions : balances, total supply, effets d’autorisation, et events émis.
+2) Renforcez les tests afin d’asserter l’état, et pas uniquement les valeurs de retour.
+- Ajoutez des vérifications des limites d’égalité (par exemple, testez le seuil `==`).
+- Assertez les post-conditions : soldes, supply totale, effets de l’autorisation et événements émis.
 
 3) Remplacez les mocks trop permissifs par un comportement réaliste.
-- Assurez-vous que les mocks imposent les transferts, les chemins d’échec, et les émissions d’events qui se produisent on-chain.
+- Assurez-vous que les mocks appliquent les transferts, les chemins d’échec et les émissions d’événements qui se produisent on-chain.
 
-4) Ajoutez des invariants pour les fuzz tests.
-- Par ex. conservation de la valeur, balances non négatives, invariants d’autorisation, supply monotone quand applicable.
+4) Ajoutez des invariants aux fuzz tests.
+- Par exemple, conservation de la valeur, soldes non négatifs, invariants d’autorisation, supply monotone lorsque cela s’applique.
 
-5) Séparez les vrais positifs des semantic no-ops.
-- Exemple : `x > 0` -> `x != 0` est sans effet lorsque `x` est unsigned.
+5) Distinguez les vrais positifs des no-ops sémantiques.
+- Exemple : `x > 0` -> `x != 0` n’a aucun sens lorsque `x` est unsigned.
 
 6) Relancez la campagne jusqu’à ce que les survivants soient éliminés ou explicitement justifiés.
 
-## Étude de cas : révéler des assertions d’état manquantes (Arkis protocol)
+## Étude de cas : révéler des assertions d’état manquantes (protocole Arkis)
 
-Une campagne de mutation pendant un audit du protocole DeFi Arkis a mis au jour des survivants comme :
+Une campagne de mutation menée lors d’un audit du protocole DeFi Arkis a révélé des survivants tels que :<sup>[[2]](#references)[[3]](#references)</sup>
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Commenter l’assignation n’a pas cassé les tests, ce qui prouve l’absence d’assertions post-state. Cause racine : le code faisait confiance à `_cmd.value`, contrôlé par l’utilisateur, au lieu de valider les transferts réels de tokens. Un attaquant pouvait désynchroniser les transferts attendus et réels pour drainer des fonds. Résultat : risque de haute gravité pour la solvabilité du protocole.
+Commenter l’affectation n’a pas fait échouer les tests, ce qui prouve l’absence d’assertions sur l’état final. Cause racine : le code faisait confiance à `_cmd.value`, contrôlé par l’utilisateur, au lieu de valider les transferts de tokens réellement effectués. Un attaquant pouvait désynchroniser les transferts attendus des transferts réels afin de drainer les fonds. Résultat : risque de gravité élevée pour la solvabilité du protocole.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Conseil : Traitez les survivants qui affectent les transferts de valeur, la comptabilité ou le contrôle d’accès comme à haut risque tant qu’ils ne sont pas tués.
+Conseil : considérez les mutants survivants qui affectent les transferts de valeur, la comptabilité ou le contrôle d’accès comme présentant un risque élevé jusqu’à leur élimination.
 
-## Ne générez pas aveuglément des tests pour tuer chaque mutant
+## Ne générez pas aveuglément des tests pour éliminer chaque mutant
 
-La génération de tests guidée par mutation peut se retourner contre vous si l’implémentation actuelle est incorrecte. Exemple : muter `priority >= 2` en `priority > 2` change le comportement, mais la bonne correction n’est pas toujours « écrire un test pour `priority == 2` ». Ce comportement peut lui-même être le bug.
+La génération de tests guidée par les mutants peut être contre-productive si l’implémentation actuelle est incorrecte. Exemple : muter `priority >= 2` en `priority > 2` modifie le comportement, mais la bonne correction n’est pas toujours d’« écrire un test pour `priority == 2` ». Ce comportement peut lui-même être le bug.<sup>[[1]](#references)</sup>
 
-Flux de travail plus sûr :
+Workflow plus sûr :
 - Utilisez les mutants survivants pour identifier les exigences ambiguës
-- Validez le comportement attendu à partir des specs, de la documentation du protocole ou des reviewers
-- Ce n’est qu’ensuite que vous encodez ce comportement en test/invariant
+- Validez le comportement attendu à partir des spécifications, de la documentation du protocole ou des reviewers
+- Encodez ensuite seulement le comportement sous forme de test/invariant
 
 Sinon, vous risquez de figer des accidents d’implémentation dans la suite de tests et d’obtenir une fausse confiance.
 
@@ -149,23 +149,23 @@ Sinon, vous risquez de figer des accidents d’implémentation dans la suite de 
 
 - Lancez une campagne ciblée :
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Préférez des mutateurs sensibles à la syntaxe (AST/Tree-sitter) plutôt que des mutations basées uniquement sur des regex quand c’est possible.
-- Triez les survivants et écrivez des tests/invariants qui échoueraient face au comportement muté.
-- Vérifiez les soldes, l’offre, les autorisations et les événements.
-- Ajoutez des tests de bornes (`==`, overflow/underflow, zero-address, zero-amount, tableaux vides).
-- Remplacez les mocks irréalistes ; simulez les modes de défaillance.
-- Conservez les résultats lorsque l’outil le permet, et filtrez les mutants non détectés avant le triage.
-- Utilisez des campagnes en deux phases ou par cible pour garder un runtime gérable.
-- Itérez jusqu’à ce que tous les mutants soient tués ou justifiés avec des commentaires et une rationale.
+- Préférez les mutateurs sensibles à la syntaxe (AST/Tree-sitter) aux mutations utilisant uniquement des regex, lorsqu’ils sont disponibles.
+- Triez les mutants survivants et écrivez des tests/invariants qui échoueraient avec le comportement muté.
+- Vérifiez les soldes, la supply, les autorisations et les événements.
+- Ajoutez des tests aux limites (`==`, overflows/underflows, zero-address, zero-amount, tableaux vides).
+- Remplacez les mocks irréalistes ; simulez les modes d’échec.
+- Conservez les résultats lorsque l’outil le permet et filtrez les mutants non détectés avant le triage.
+- Utilisez des campagnes en deux phases ou par cible pour maintenir un temps d’exécution raisonnable.
+- Itérez jusqu’à ce que tous les mutants soient éliminés ou justifiés par des commentaires et une explication.
 
 ## Références
 
-- [Mutation testing for the agentic era](https://blog.trailofbits.com/2026/04/01/mutation-testing-for-the-agentic-era/)
-- [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
-- [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
-- [Slither (GitHub)](https://github.com/crytic/slither)
-- [Slither Mutator documentation](https://github.com/crytic/slither/blob/master/docs/src/tools/Mutator.md)
-- [mewt](https://github.com/trailofbits/mewt)
-- [MuTON](https://github.com/trailofbits/muton)
+- [1] [Mutation testing pour l’ère agentique](https://blog.trailofbits.com/2026/04/01/mutation-testing-for-the-agentic-era/)
+- [2] [Utiliser Mutation testing pour trouver les bugs que vos tests ne détectent pas (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
+- [3] [Security Review du Prime Brokerage DeFi d’Arkis (Annexe C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
+- [4] [Slither (GitHub)](https://github.com/crytic/slither)
+- [5] [Documentation du Slither Mutator](https://github.com/crytic/slither/blob/master/docs/src/tools/Mutator.md)
+- [6] [mewt](https://github.com/trailofbits/mewt)
+- [7] [MuTON](https://github.com/trailofbits/muton)
 
 {{#include ../../banners/hacktricks-training.md}}
