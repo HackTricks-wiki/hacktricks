@@ -2,21 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 初步排查清单
+## 分流检查清单
 
-1. 识别手上是什么：encoding vs encryption vs hash vs signature vs MAC。
-2. 确定哪些是受控的：plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage。
-3. 分类：symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR)。
-4. 优先应用命中概率最高的检查：decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior。
-5. 仅在必要时升级到高级方法：lattices (LLL/Coppersmith), SMT/Z3, side-channels。
+1. 确定你拥有的内容：encoding、encryption、hash、signature 还是 MAC。
+2. 确定受控内容：plaintext/ciphertext、IV/nonce、key、oracle（padding/error/timing）或部分泄露。
+3. 分类：对称加密（AES/CTR/GCM）、公钥加密（RSA/ECC）、hash/MAC（SHA/MD5/HMAC）或经典密码（Vigenere/XOR）。
+4. 优先执行成功概率最高的检查：解码各层、已知明文 XOR、nonce 重用、模式误用、oracle 行为。
+5. 仅在必要时升级到高级方法：lattices（LLL/Coppersmith）、SMT/Z3、side-channels。
 
 ## 在线资源与工具
 
-这些在任务为识别和剥离层次，或需要快速验证假设时非常有用。
+当任务是识别和剥离编码层，或需要快速验证某个假设时，这些资源很有用。
 
-### Hash lookups
+### Hash 查询
 
-- 用 Google 搜索 hash（出奇地有效）。
+- 在 Google 中搜索 hash（效果出奇地好）。
 - [https://crackstation.net/](https://crackstation.net/)
 - [https://md5decrypt.net/](https://md5decrypt.net/)
 - [https://hashes.org/search.php](https://hashes.org/search.php)
@@ -24,50 +24,50 @@
 - [https://gpuhash.me/](https://gpuhash.me/)
 - [http://hashtoolkit.com/reverse-hash](http://hashtoolkit.com/reverse-hash)
 
-### Identification helpers
+### 识别辅助工具
 
-- CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
-- dCode (ciphers/encodings playground): https://www.dcode.fr/tools-list
-- Boxentriq (substitution solvers): https://www.boxentriq.com/code-breaking
+- CyberChef（magic、decode、convert）：https://gchq.github.io/CyberChef/
+- dCode（ciphers/encodings playground）：https://www.dcode.fr/tools-list
+- Boxentriq（substitution solvers）：https://www.boxentriq.com/code-breaking
 
-### Practice platforms / references
+### 练习平台 / 参考资料
 
-- CryptoHack (hands-on crypto challenges): https://cryptohack.org/
-- Cryptopals (classic modern crypto pitfalls): https://cryptopals.com/
+- CryptoHack（hands-on crypto challenges）：https://cryptohack.org/
+- Cryptopals（经典的现代密码学陷阱）：https://cryptopals.com/
 
-### Automated decoding
+### 自动解码
 
-- Ciphey: https://github.com/Ciphey/Ciphey
-- python-codext (tries many bases/encodings): https://github.com/dhondta/python-codext
+- Ciphey：https://github.com/Ciphey/Ciphey
+- python-codext（尝试多种 bases/encodings）：https://github.com/dhondta/python-codext
 
-## Encodings & classical ciphers
+## Encodings 与经典密码
 
 ### Technique
 
-许多 CTF crypto 题目是分层变换：base encoding + simple substitution + compression。目标是识别各层并安全地剥离它们。
+许多 CTF crypto 任务都是分层变换：base encoding + simple substitution + compression。目标是识别各层，并安全地逐层剥离。
 
-### Encodings: try many bases
+### Encodings：尝试多种 bases
 
-如果怀疑是分层编码（base64 → base32 → …），尝试：
+如果你怀疑存在分层 encoding（base64 → base32 → …），可以尝试：
 
 - CyberChef "Magic"
-- `codext` (python-codext): `codext <string>`
+- `codext`（python-codext）：`codext <string>`
 
 常见特征：
 
-- Base64: `A-Za-z0-9+/=` (padding `=` is common)
-- Base32: `A-Z2-7=` (often lots of `=` padding)
-- Ascii85/Base85: dense punctuation; sometimes wrapped in `<~ ~>`
+- Base64：`A-Za-z0-9+/=`（padding `=` 很常见）
+- Base32：`A-Z2-7=`（通常有大量 `=` padding）
+- Ascii85/Base85：标点符号密集；有时会包裹在 `<~ ~>` 中
 
 ### Substitution / monoalphabetic
 
-- Boxentriq cryptogram solver: https://www.boxentriq.com/code-breaking/cryptogram
-- quipqiup: https://quipqiup.com/
+- Boxentriq cryptogram solver：https://www.boxentriq.com/code-breaking/cryptogram
+- quipqiup：https://quipqiup.com/
 
 ### Caesar / ROT / Atbash
 
-- Nayuki auto breaker: https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript
-- Atbash: http://rumkin.com/tools/cipher/atbash.php
+- Nayuki auto breaker：https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript
+- Atbash：http://rumkin.com/tools/cipher/atbash.php
 
 ### Vigenère
 
@@ -76,41 +76,41 @@
 
 ### Bacon cipher
 
-Often appears as groups of 5 bits or 5 letters:
+通常以 5 bits 或 5 个字母为一组出现：
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
 ```
-### Morse
+### 摩尔斯
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
 ### 符文
 
-符文通常是替代字母表；搜索 "futhark cipher" 并尝试映射表。
+Runes 通常是 substitution alphabets；搜索 "futhark cipher" 并尝试使用 mapping tables。
 
-## 挑战中的压缩
+## challenges 中的压缩
 
 ### 技术
 
-压缩经常作为额外层出现（zlib/deflate/gzip/xz/zstd），有时是嵌套的。如果输出几乎可以解析但看起来像垃圾，就怀疑是压缩。
+Compression 经常作为额外一层出现（zlib/deflate/gzip/xz/zstd），有时还会嵌套。如果输出看起来几乎可以解析，但实际像垃圾数据，请怀疑存在 compression。
 
-### Quick identification
+### 快速识别
 
 - `file <blob>`
-- Look for magic bytes:
+- 查找 magic bytes：
 - gzip: `1f 8b`
-- zlib: 通常 `78 01/9c/da`
+- zlib: 通常为 `78 01/9c/da`
 - zip: `50 4b 03 04`
-- bzip2: `42 5a 68` (`BZh`)
+- bzip2: `42 5a 68`（`BZh`）
 - xz: `fd 37 7a 58 5a 00`
 - zstd: `28 b5 2f fd`
 
 ### Raw DEFLATE
 
-CyberChef 有 **Raw Deflate/Raw Inflate**，当 blob 看起来被压缩但 `zlib` 失败时，这通常是最快的路径。
+CyberChef 提供 **Raw Deflate/Raw Inflate**，当 blob 看起来经过 compression 但 `zlib` 失败时，这通常是最快的处理方式。
 
-### 有用的 CLI
+### 实用 CLI
 ```bash
 python3 - <<'PY'
 import sys, zlib
@@ -126,7 +126,7 @@ PY
 
 ### Technique
 
-这些常见出现，因为它们是现实中的开发者错误或常用库被错误使用。目标通常是识别并应用已知的提取或重构工作流。
+这些内容经常出现，因为它们通常源于现实中的 developer 错误或对常见 libraries 的错误使用。目标通常是识别问题，并应用已知的提取或重构流程。
 
 ### Fernet
 
@@ -137,34 +137,34 @@ PY
 
 ### Shamir Secret Sharing
 
-如果你看到多个份额并且提到了阈值 `t`，很可能是 Shamir。
+如果你看到多个 share，并且提到了 threshold `t`，那么很可能使用的是 Shamir。
 
-- Online reconstructor (handy for CTFs): http://christian.gen.co/secrets/
+- Online reconstructor（方便用于 CTF）：http://christian.gen.co/secrets/
 
 ### OpenSSL salted formats
 
-CTF 题目有时会给出 `openssl enc` 输出（header 通常以 `Salted__` 开头）。
+CTF 有时会提供 `openssl enc` 输出（header 通常以 `Salted__` 开头）。
 
-Bruteforce helpers:
+Bruteforce helpers：
 
 - [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
-### General toolset
+### 通用工具集
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
 - featherduster: https://github.com/nccgroup/featherduster
 - cryptovenom: https://github.com/lockedbyte/cryptovenom
 
-## Recommended local setup
+## 推荐的本地环境
 
-Practical CTF stack:
+实用的 CTF stack：
 
-- Python + `pycryptodome` 用于对称原语和快速原型开发
-- SageMath 用于模运算、CRT、格以及 RSA/ECC 相关工作
-- Z3 用于基于约束的题目（当密码学问题化为约束时）
+- Python + `pycryptodome`，用于 symmetric primitives 和快速 prototyping
+- SageMath，用于 modular arithmetic、CRT、lattices 以及 RSA/ECC work
+- Z3，用于基于 constraint 的 challenges（当 crypto 可归约为 constraints 时）
 
-Suggested Python packages:
+推荐的 Python packages：
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
