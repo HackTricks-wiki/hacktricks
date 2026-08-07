@@ -4,46 +4,42 @@
 
 ## Genel Bakış
 
-Burp'un **MCP Server** eklentisi, yakalanan HTTP(S) trafiğini MCP özellikli LLM istemcilerine açabilir; böylece gerçek istek/yanıtlar üzerinde değerlendirme yaparak pasif zafiyet keşfi ve rapor taslağı oluşturabilirler. Amaç, fuzzing veya blind scanning olmadan kanıta dayalı inceleme yapmak ve Burp'u tek doğruluk kaynağı olarak tutmaktır.
+Burp'ın **MCP Server** extension'ı, intercept edilen HTTP(S) trafiğini MCP destekli LLM istemcilerine sunarak bu istemcilerin **gerçek request/response'lar üzerinde akıl yürütmesini**, pasif vulnerability discovery ve report drafting işlemlerini gerçekleştirmesini sağlar. Amaç, Burp'ı doğruluk kaynağı olarak tutarak evidence-driven review gerçekleştirmektir (fuzzing veya blind scanning yoktur).
 
 ## Mimari
 
-- **Burp MCP Server (BApp)** `127.0.0.1:9876` üzerinde dinler ve yakalanan trafiği MCP üzerinden açar.
-- **MCP proxy JAR** stdio (istemci tarafı) ile Burp'un MCP SSE endpoint'i arasında köprü kurar.
-- **Optional local reverse proxy** (Caddy) sıkı MCP el sıkışma kontrolleri için başlıkları normalleştirir.
-- **Clients/backends**: Codex CLI (cloud), Gemini CLI (cloud), veya Ollama (local).
+- **Burp MCP Server (BApp)** `127.0.0.1:9876` adresini dinler ve intercept edilen trafiği MCP üzerinden sunar.<sup>[[1]](#references)[[2]](#references)</sup>
+- **MCP proxy JAR**, stdio'yu (client tarafı) Burp'ın MCP SSE endpoint'ine bağlar.
+- **İsteğe bağlı local reverse proxy** (Caddy), strict MCP handshake kontrolleri için header'ları normalize eder.
+- **Client/backend'ler**: Codex CLI (cloud), Gemini CLI (cloud) veya Ollama (local).
 
 ## Kurulum
 
-### 1) Burp MCP Server'ı yükleyin
+### 1) Burp MCP Server'ı yükleme
 
-Burp BApp Store'dan **MCP Server**'ı yükleyin ve `127.0.0.1:9876` üzerinde dinlediğini doğrulayın.
+Burp BApp Store'dan **MCP Server**'ı yükleyin ve `127.0.0.1:9876` adresini dinlediğini doğrulayın.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### 2) Proxy JAR'ı çıkarın
+### 2) Proxy JAR'ı çıkarma
 
-MCP Server sekmesinde **Extract server proxy jar**'a tıklayın ve `mcp-proxy.jar` olarak kaydedin.
+MCP Server sekmesinde **Extract server proxy jar** seçeneğine tıklayın ve `mcp-proxy.jar` olarak kaydedin.
 
-### 3) MCP istemcisini yapılandırın (Codex örneği)
+### 3) Bir MCP client yapılandırma (Codex örneği)
 
-İstemciyi proxy JAR'a ve Burp'un SSE endpoint'ine yönlendirin:
+Client'ı proxy JAR'a ve Burp'ın SSE endpoint'ine yönlendirin:
 ```toml
 # ~/.codex/config.toml
 [mcp_servers.burp]
 command = "java"
 args = ["-jar", "/absolute/path/to/mcp-proxy.jar", "--sse-url", "http://127.0.0.1:19876"]
 ```
-Belirttiğiniz dosyanın (src/AI/AI-Burp-MCP.md) içeriğini buraya yapıştırın lütfen; onu Türkçeye çevireyim. 
-
-Not: Burada "Codex" veya dış araçları doğrudan çalıştıramam. İsterseniz Codex ile yapılacak bir çıktıyı ben simüle edebilirim veya sizden Codex çıktısını yapıştırmanızı isteyebilirim.
-
-Ayrıca "MCP tools" derken tam olarak hangi MCP'yi kastettiğinizi belirtin (ör. Managed Control Plane, Mobile/Modular C2 Platform, Burp MCP extension vb.). Hangi MCP kastedildiğini belirtirseniz, ilgili araçları listeleyip açıklayabilirim.
+Ardından Codex'i çalıştırın ve MCP araçlarını listeleyin:
 ```bash
 codex
 # inside Codex: /mcp
 ```
-### 4) Caddy ile sıkı Origin/header doğrulamasını düzeltin (gerekirse)
+### 4) Gerekirse Caddy ile katı Origin/header validation sorununu düzeltme
 
-Eğer MCP handshake, sıkı `Origin` kontrolleri veya ek header'lar nedeniyle başarısız oluyorsa, header'ları normalize etmek için yerel bir reverse proxy kullanın (bu, Burp MCP sıkı validation sorununa yönelik workaround ile aynıdır).
+MCP handshake, katı `Origin` kontrolleri veya ek header'lar nedeniyle başarısız olursa, header'ları normalize etmek için yerel bir reverse proxy kullanın (bu, Burp MCP strict validation sorunu için uygulanan workaround ile aynıdır).<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 brew install caddy
 mkdir -p ~/burp-mcp
@@ -63,92 +59,92 @@ header_up -Connection
 }
 EOF
 ```
-proxy ve client'i başlatın:
+Proxy'yi ve client'ı başlatın:
 ```bash
 caddy run --config ~/burp-mcp/Caddyfile &
 codex
 ```
-## Farklı istemciler
+## Farklı client'ları kullanma
 
 ### Codex CLI
 
-- Yukarıdaki gibi `~/.codex/config.toml` dosyasını yapılandırın.
-- `codex` çalıştırın, ardından Burp araç listesini doğrulamak için `/mcp` komutunu çalıştırın.
+- `~/.codex/config.toml` dosyasını yukarıdaki gibi yapılandırın.
+- `codex` komutunu çalıştırın, ardından Burp araçları listesini doğrulamak için `/mcp` komutunu kullanın.
 
 ### Gemini CLI
 
-The **burp-mcp-agents** repo provides launcher helpers:
+**burp-mcp-agents** repo'su launcher yardımcıları sağlar:<sup>[[4]](#references)</sup>
 ```bash
 source /path/to/burp-mcp-agents/gemini-cli/burpgemini.sh
 burpgemini
 ```
-### Ollama (local)
+### Ollama (yerel)
 
-Sağlanan launcher yardımcısını kullanın ve bir yerel model seçin:
+Sağlanan launcher helper'ı kullanın ve yerel bir model seçin:
 ```bash
 source /path/to/burp-mcp-agents/ollama/burpollama.sh
 burpollama deepseek-r1:14b
 ```
-Example local models and approximate VRAM needs:
+Örnek local modeller ve yaklaşık VRAM gereksinimleri:
 
 - `deepseek-r1:14b` (~16GB VRAM)
 - `gpt-oss:20b` (~20GB VRAM)
 - `llama3.1:70b` (48GB+ VRAM)
 
-## Prompt pack for passive review
+## Passive review için prompt paketi
 
-The **burp-mcp-agents** repo includes prompt templates for evidence-driven analysis of Burp traffic:
+**burp-mcp-agents** repo'su, Burp traffic için evidence-driven analysis prompt şablonları içerir:<sup>[[4]](#references)</sup>
 
-- `passive_hunter.md`: geniş kapsamlı pasif zafiyet keşfi.
-- `idor_hunter.md`: IDOR/BOLA/object/tenant sapmaları ve auth uyumsuzlukları.
-- `auth_flow_mapper.md`: authenticated ile unauthenticated yolların karşılaştırılması.
-- `ssrf_redirect_hunter.md`: URL fetch parametreleri/redirect zincirlerinden SSRF/open-redirect adayları.
-- `logic_flaw_hunter.md`: çok adımlı mantık hataları.
-- `session_scope_hunter.md`: token audience/scope yanlış kullanımı.
-- `rate_limit_abuse_hunter.md`: throttling/abuse boşlukları.
-- `report_writer.md`: kanıta odaklı raporlama.
+- `passive_hunter.md`: kapsamlı passive vulnerability tespiti.
+- `idor_hunter.md`: IDOR/BOLA/object/tenant drift ve auth uyumsuzlukları.
+- `auth_flow_mapper.md`: authenticated ve unauthenticated path'leri karşılaştırır.
+- `ssrf_redirect_hunter.md`: URL fetch parametreleri ve redirect chain'lerinden SSRF/open-redirect adayları.
+- `logic_flaw_hunter.md`: çok adımlı logic flaw'lar.
+- `session_scope_hunter.md`: token audience/scope kötüye kullanımı.
+- `rate_limit_abuse_hunter.md`: throttling/abuse açıkları.
+- `report_writer.md`: evidence-focused reporting.
 
-## Optional attribution tagging
+## İsteğe bağlı attribution tagging
 
-To tag Burp/LLM traffic in logs, add a header rewrite (proxy or Burp Match/Replace):
+Log'larda Burp/LLM traffic'ini tag'lemek için bir header rewrite ekleyin (proxy veya Burp Match/Replace):<sup>[[1]](#references)</sup>
 ```text
 Match:   ^User-Agent: (.*)$
 Replace: User-Agent: $1 BugBounty-Username
 ```
 ## Güvenlik notları
 
-- Trafikte hassas veriler olduğunda **yerel modelleri** tercih edin.
-- Bir bulgu için gereken asgari kanıtı paylaşın.
-- Burp'u doğruluk kaynağı olarak koruyun; modeli tarama için değil, **analiz ve raporlama** için kullanın.
+- Trafik hassas veriler içerdiğinde **local models** kullanmayı tercih edin.
+- Bir bulgu için yalnızca gereken minimum kanıtı paylaşın.
+- Burp'ü gerçek kaynak olarak tutun; modeli scanning için değil, **analysis and reporting** amacıyla kullanın.
 
-## Burp AI Agent (AI-assisted triage + MCP tools)
+## Burp AI Agent (AI destekli triage + MCP tools)
 
-**Burp AI Agent** is a Burp extension that couples local/cloud LLMs with passive/active analysis (62 vulnerability classes) and exposes 53+ MCP tools so external MCP clients can orchestrate Burp. Öne çıkanlar:
+**Burp AI Agent**, local/cloud LLM'leri pasif/aktif analysis (62 zafiyet sınıfı) ile birleştiren ve harici MCP client'ların Burp'ü yönetebilmesi için 53+ MCP tools sunan bir Burp extension'dır.<sup>[[5]](#references)</sup> Öne çıkanlar:
 
-- **Context-menu triage**: Proxy aracılığıyla trafiği yakalayın, **Proxy > HTTP History**'yi açın, bir isteğe sağ tıklayın → **Extensions > Burp AI Agent > Analyze this request** ile o istek/yanıtla bağlı bir AI sohbeti başlatın.
-- **Backends** (selectable per profile):
+- **Context-menu triage**: Proxy üzerinden trafiği yakalayın, **Proxy > HTTP History**'yi açın, bir request'e sağ tıklayın → **Extensions > Burp AI Agent > Analyze this request** seçeneğine tıklayarak bu request/response'a bağlı bir AI chat başlatın.
+- **Backends** (profil başına seçilebilir):
 - Local HTTP: **Ollama**, **LM Studio**.
 - Remote HTTP: **OpenAI-compatible** endpoint (base URL + model name).
-- Cloud CLIs: **Gemini CLI** (`gemini auth login`), **Claude CLI** (`export ANTHROPIC_API_KEY=...` or `claude login`), **Codex CLI** (`export OPENAI_API_KEY=...`), **OpenCode CLI** (provider-specific login).
-- **Agent profiles**: prompt şablonları otomatik olarak `~/.burp-ai-agent/AGENTS/` altına kurulur; özel analiz/tarama davranışları eklemek için ek `*.md` dosyalarını buraya bırakın.
-- **MCP server**: Burp işlemlerini herhangi bir MCP istemcisine açmak için **Settings > MCP Server** üzerinden etkinleştirin (53+ araç). Claude Desktop'i sunucuya yönlendirmek için `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) veya `%APPDATA%\Claude\claude_desktop_config.json` (Windows) dosyasını düzenleyin.
-- **Privacy controls**: STRICT / BALANCED / OFF, uzak modellere göndermeden önce hassas istek verilerini sansürler; sırlarla çalışırken yerel backendlere öncelik verin.
-- **Audit logging**: AI/MCP eylemlerinin tahrifata karşı izlenebilirliği için her kayıt için SHA-256 bütünlük karması içeren JSONL logları.
-- **Build/load**: download the release JAR or build with Java 21:
+- Cloud CLIs: **Gemini CLI** (`gemini auth login`), **Claude CLI** (`export ANTHROPIC_API_KEY=...` veya `claude login`), **Codex CLI** (`export OPENAI_API_KEY=...`), **OpenCode CLI** (provider-specific login).
+- **Agent profiles**: prompt templates otomatik olarak `~/.burp-ai-agent/AGENTS/` altına yüklenir; özel analysis/scanning davranışları eklemek için buraya ilave `*.md` dosyaları bırakın.
+- **MCP server**: Burp işlemlerini herhangi bir MCP client'a sunmak için **Settings > MCP Server** üzerinden etkinleştirin (53+ tools). Claude Desktop, macOS'ta `~/Library/Application Support/Claude/claude_desktop_config.json` veya Windows'ta `%APPDATA%\Claude\claude_desktop_config.json` dosyası düzenlenerek bu server'a yönlendirilebilir.
+- **Privacy controls**: STRICT / BALANCED / OFF, remote models'a gönderilmeden önce hassas request verilerini redact eder; secret'larla çalışırken local backends kullanmayı tercih edin.
+- **Audit logging**: AI/MCP işlemlerinin müdahale edildiğinin anlaşılmasını sağlayan izlenebilirlik için, her kayıt için SHA-256 integrity hashing içeren JSONL logları.
+- **Build/load**: release JAR'ı indirin veya Java 21 ile build edin:
 ```bash
 git clone https://github.com/six2dez/burp-ai-agent.git
 cd burp-ai-agent
 JAVA_HOME=/path/to/jdk-21 ./gradlew clean shadowJar
 # load build/libs/Burp-AI-Agent-<version>.jar via Burp Extensions > Add (Java)
 ```
-Operasyonel uyarılar: cloud backends, privacy mode etkinleştirilmediği sürece session cookies/PII'yi exfiltrate edebilir; MCP exposure Burp'un uzaktan orkestrasyonunu mümkün kılar; bu yüzden erişimi trusted agents ile sınırlandırın ve integrity-hashed audit log'un bütünlüğünü izleyin.
+Operasyonel dikkat: cloud backends, privacy mode zorunlu kılınmadığı sürece session cookie'lerini/PII'yi exfiltrate edebilir; MCP exposure, Burp'un uzaktan orchestration'ını mümkün kılar. Bu nedenle erişimi trusted agents ile sınırlayın ve integrity-hashed audit log'un bütünlüğünü izleyin.
 
 ## Referanslar
 
-- [Burp MCP + Codex CLI integration and Caddy handshake fix](https://pentestbook.six2dez.com/others/burp)
-- [Burp MCP Agents (workflows, launchers, prompt pack)](https://github.com/six2dez/burp-mcp-agents)
-- [Burp MCP Server BApp](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
-- [PortSwigger MCP server strict Origin/header validation issue](https://github.com/PortSwigger/mcp-server/issues/34)
-- [Burp AI Agent](https://github.com/six2dez/burp-ai-agent)
+- [1] [Burp MCP + Codex CLI entegrasyonu ve Caddy handshake düzeltmesi](https://pentestbook.six2dez.com/others/burp)
+- [2] [Burp MCP Server BApp](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
+- [3] [PortSwigger MCP server strict Origin/header doğrulama sorunu](https://github.com/PortSwigger/mcp-server/issues/34)
+- [4] [Burp MCP Agents (workflows, launchers, prompt pack)](https://github.com/six2dez/burp-mcp-agents)
+- [5] [Burp AI Agent](https://github.com/six2dez/burp-ai-agent)
 
 {{#include ../banners/hacktricks-training.md}}
