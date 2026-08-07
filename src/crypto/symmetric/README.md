@@ -2,68 +2,68 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Nini cha kutafuta katika CTFs
+## Cha kutafuta katika CTFs
 
-- **Mode misuse**: ECB patterns, CBC malleability, CTR/GCM nonce reuse.
-- **Padding oracles**: makosa tofauti / utofauti wa muda wa majibu kwa bad padding.
-- **MAC confusion**: kutumia CBC-MAC na ujumbe wenye urefu tofauti, au makosa ya MAC-then-encrypt.
-- **XOR everywhere**: stream ciphers na custom constructions mara nyingi hupungua kuwa XOR na keystream.
+- **Mode misuse**: mifumo ya ECB, CBC malleability, na nonce reuse katika CTR/GCM.
+- **Padding oracles**: errors/timings tofauti kwa padding isiyo sahihi.
+- **MAC confusion**: kutumia CBC-MAC na messages zenye urefu unaobadilika, au makosa ya MAC-then-encrypt.
+- **XOR kila mahali**: stream ciphers na custom constructions mara nyingi hupunguzwa kuwa XOR yenye keystream.
 
-## AES modes and misuse
+## AES modes na misuse
 
 ### ECB: Electronic Codebook
 
-ECB leaks patterns: equal plaintext blocks → equal ciphertext blocks. Hii inaruhusu:
+ECB hu-leak patterns: plaintext blocks zilizo sawa → ciphertext blocks zilizo sawa. Hili huwezesha:
 
 - Cut-and-paste / block reordering
-- Block deletion (ikiwa format inabaki kuwa valid)
+- Block deletion (ikiwa format itaendelea kuwa valid)
 
-Kama unaweza kudhibiti plaintext na kuona ciphertext (au cookies), jaribu kutengeneza repeated blocks (mfano, many `A`s) na angalia repeats.
+Ikiwa unaweza kudhibiti plaintext na kuona ciphertext (au cookies), jaribu kutengeneza blocks zinazorudiwa (kwa mfano, `A` nyingi) na utafute marudio.
 
 ### CBC: Cipher Block Chaining
 
-- CBC ni **malleable**: flipping bits katika `C[i-1]` hupiga bits zinazoweza kutabiriwa katika `P[i]`.
-- Ikiwa mfumo unaonyesha valid padding dhidi ya invalid padding, unaweza kuwa na **padding oracle**.
+- CBC ni **malleable**: kubadilisha bits katika `C[i-1]` hubadilisha bits zinazotabirika katika `P[i]`.
+- Ikiwa mfumo unaonyesha padding valid dhidi ya padding invalid, huenda una **padding oracle**.
 
 ### CTR
 
-CTR inaweka AES kuwa stream cipher: `C = P XOR keystream`.
+CTR hubadilisha AES kuwa stream cipher: `C = P XOR keystream`.
 
-Kama nonce/IV inatumiwa tena kwa key ileile:
+Ikiwa nonce/IV inatumiwa tena na key ileile:
 
 - `C1 XOR C2 = P1 XOR P2` (classic keystream reuse)
-- Kwa known plaintext, unaweza kurecover keystream na ku-decrypt nyingine.
+- Ukiwa na plaintext inayojulikana, unaweza kurecover keystream na ku-decrypt nyingine.
 
 **Nonce/IV reuse exploitation patterns**
 
-- Recover keystream ambapo plaintext inajulikana/inatabirika:
+- Recover keystream mahali popote ambapo plaintext inajulikana au inaweza kukisiwa:
 
 ```text
 keystream[i..] = ciphertext[i..] XOR known_plaintext[i..]
 ```
 
-Tumia keystream uliopatikana ku-decrypt ciphertext nyingine yoyote iliyotengenezwa na key+IV ileile kwa offsets ileile.
-- Data yenye muundo thabiti (mfano, ASN.1/X.509 certificates, file headers, JSON/CBOR) inatoa maeneo makubwa ya known-plaintext. Mara nyingi unaweza XOR ciphertext ya certificate na sehemu inayotarajiwa ya certificate kupata keystream, kisha u-decrypt siri nyingine zilizofunikwa chini ya IV iliyotumika tena. Angalia pia [TLS & Certificates](../tls-and-certificates/README.md) kwa layouts za kawaida za certificate.
-- Wakati siri nyingi za same serialized format/size zinafunikwa chini ya key+IV ileile, alignment ya fields huitoka hata bila known plaintext kamili. Mfano: PKCS#8 RSA keys za size ya modulus ileile zinaweka factors za primes kwenye offsets zinazolingana (~99.6% alignment kwa 2048-bit). XOR ya ciphertext mbili chini ya reused keystream inatoa `p ⊕ p'` / `q ⊕ q'`, ambazo zinaweza ku-recover kwa brute force kwa sekunde.
-- Default IVs katika libraries (mfano, constant `000...01`) ni hatari muhimu: kila encryption inarudia keystream ileile, ikigeuza CTR kuwa reused one-time pad.
+Tumia bytes za keystream zilizorecoveriwa ku-decrypt ciphertext nyingine yoyote iliyotengenezwa kwa key+IV ileile katika offsets zilezile.
+- Data yenye muundo mkubwa (kwa mfano, vyeti vya ASN.1/X.509, file headers, JSON/CBOR) hutoa maeneo makubwa ya known-plaintext. Mara nyingi unaweza kufanya XOR ya ciphertext ya certificate na certificate body inayotabirika ili kupata keystream, kisha ku-decrypt secrets nyingine zilizonencryptiwa chini ya IV iliyotumiwa tena. Tazama pia [TLS & Certificates](../tls-and-certificates/README.md) kwa miundo ya kawaida ya certificates.<sup>[[1]](#references)</sup>
+- Secrets nyingi zenye **serialized format/size ileile** zinapo-encryptiwa chini ya key+IV ileile, field alignment hu-leak hata bila known plaintext kamili. Mfano: PKCS#8 RSA keys zenye modulus size ileile huweka prime factors katika offsets zinazolingana (~99.6% alignment kwa 2048-bit). Kufanya XOR ya ciphertext mbili chini ya keystream iliyotumiwa tena hutenga `p ⊕ p'` / `q ⊕ q'`, ambazo zinaweza kurecoveriwa kwa brute force ndani ya sekunde.<sup>[[1]](#references)</sup>
+- Default IVs katika libraries (kwa mfano, constant `000...01`) ni critical footgun: kila encryption hurudia keystream ileile, na kugeuza CTR kuwa one-time pad iliyotumiwa tena.<sup>[[1]](#references)</sup>
 
 **CTR malleability**
 
-- CTR inatoa confidentiality tu: flipping bits katika ciphertext kwa deterministic huweka flip za bits sawa katika plaintext. Bila authentication tag, attackers wanaweza tamper data (mfano, tweak keys, flags, au messages) bila kugunduliwa.
-- Tumia AEAD (GCM, GCM-SIV, ChaCha20-Poly1305, etc.) na linde verification ya tag ili kugundua bit-flips.
+- CTR hutoa confidentiality pekee: kubadilisha bits katika ciphertext hubadilisha deterministically bits zilezile katika plaintext. Bila authentication tag, attackers wanaweza kutamper data (kwa mfano, kubadilisha keys, flags, au messages) bila kugunduliwa.
+- Tumia AEAD (GCM, GCM-SIV, ChaCha20-Poly1305, n.k.) na enforce tag verification ili kugundua bit-flips.
 
 ### GCM
 
-GCM pia huharibika vibaya chini ya nonce reuse. Ikiwa key+nonce ileile inatumiwa zaidi ya mara moja, kawaida unapata:
+GCM pia huvunjika vibaya nonce inapotumiwa tena. Ikiwa key+nonce ileile inatumiwa zaidi ya mara moja, kwa kawaida utapata:
 
-- Keystream reuse kwa encryption (kama CTR), kuruhusu recovery ya plaintext pale plaintext yoyote inapoonekana.
-- Kupoteza guarantees za integrity. Kulingana na kinachochapuka (multiple message/tag pairs chini ya nonce ileile), attackers wanaweza kufaulu ku-forge tags.
+- Keystream reuse kwa encryption (kama CTR), inayowezesha plaintext recovery wakati plaintext yoyote inajulikana.
+- Kupotea kwa guarantees za integrity. Kulingana na kinachowekwa wazi (message/tag pairs nyingi chini ya nonce ileile), attackers wanaweza kuwa na uwezo wa kuforge tags.
 
 Mwongozo wa uendeshaji:
 
-- Tendea "nonce reuse" katika AEAD kama vulnerability muhimu.
-- Misuse-resistant AEADs (mfano, GCM-SIV) hupunguza fallout ya nonce-misuse lakini bado zinahitaji nonces/IVs za kipekee.
-- Kama una ciphertext nyingi chini ya nonce ileile, anza kwa kuangalia relation za `C1 XOR C2 = P1 XOR P2`.
+- Chukulia "nonce reuse" katika AEAD kuwa vulnerability muhimu.
+- Misuse-resistant AEADs (kwa mfano, GCM-SIV) hupunguza madhara ya nonce-misuse lakini bado zinahitaji nonces/IVs za kipekee.
+- Ikiwa una ciphertexts nyingi chini ya nonce ileile, anza kwa kuangalia mahusiano ya aina ya `C1 XOR C2 = P1 XOR P2`.
 
 ### Tools
 
@@ -72,61 +72,61 @@ Mwongozo wa uendeshaji:
 
 ## ECB exploitation patterns
 
-ECB (Electronic Code Book) ina-encrypt kila block kwa njia huru:
+ECB (Electronic Code Book) hu-encrypt kila block kivyake:
 
-- equal plaintext blocks → equal ciphertext blocks
-- hii inaonyesha structure na inaruhusu cut-and-paste style attacks
+- plaintext blocks zilizo sawa → ciphertext blocks zilizo sawa
+- hii hu-leak structure na kuwezesha attacks za mtindo wa cut-and-paste
 
-![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
+![ECB mode decryption block diagram](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
 ### Detection idea: token/cookie pattern
 
-Kama una-login mara kadhaa na **daima unapata cookie ileile**, ciphertext inaweza kuwa deterministic (ECB au fixed IV).
+Uki-login mara kadhaa na **kila mara ukapata cookie ileile**, ciphertext huenda ni deterministic (ECB au fixed IV).
 
-Kama unatumia two users wenye layout ya plaintext karibu sawa (mfano, long repeated characters) na unaona repeated ciphertext blocks kwa offsets sawa, ECB ni mshukiwa mkuu.
+Ukitengeneza users wawili wenye plaintext layouts zinazofanana kwa kiasi kikubwa (kwa mfano, characters ndefu zinazojirudia) na ukaona ciphertext blocks zinazorudiwa katika offsets zilezile, ECB ni suspect mkubwa.
 
 ### Exploitation patterns
 
 #### Removing entire blocks
 
-Kama format ya token iko kama `<username>|<password>` na block boundary inalingana, unaweza mara nyingine kuunda user ili block yenye `admin` ionekane imepangwa, kisha uondoe blocks zilizotangulia kupata token halali ya `admin`.
+Ikiwa token format ni kitu kama `<username>|<password>` na block boundary inalingana, wakati mwingine unaweza kuunda user ili block ya `admin` iwe aligned, kisha uondoe blocks zilizo mbele ili kupata token valid ya `admin`.
 
 #### Moving blocks
 
-Kama backend inakubali padding/extra spaces (`admin` vs `admin    `), unaweza:
+Ikiwa backend inavumilia padding/extra spaces (`admin` dhidi ya `admin    `), unaweza:
 
-- Panga block yenye `admin   `
-- Badilisha/tumiza ciphertext block hiyo katika token nyingine
+- Ku-align block yenye `admin   `
+- Kubadilisha/kutumia tena ciphertext block hiyo katika token nyingine
 
 ## Padding Oracle
 
-### What it is
+### Ni nini
 
-Katika CBC mode, kama server inaonyesha (moja kwa moja au kwa njia isiyo ya moja kwa moja) kama decrypted plaintext ina **valid PKCS#7 padding**, mara nyingi unaweza:
+Katika CBC mode, ikiwa server inaonyesha (moja kwa moja au kwa njia isiyo ya moja kwa moja) ikiwa plaintext iliyodecryptiwa ina **valid PKCS#7 padding**, mara nyingi unaweza:
 
-- Decrypt ciphertext bila key
-- Encrypt chosen plaintext (forge ciphertext)
+- Ku-decrypt ciphertext bila key
+- Ku-encrypt chosen plaintext (ku-forge ciphertext)
 
 Oracle inaweza kuwa:
 
 - Ujumbe maalum wa error
-- HTTP status tofauti / response size tofauti
+- HTTP status / response size tofauti
 - Tofauti ya timing
 
 ### Practical exploitation
 
-PadBuster ni tool classic:
+PadBuster ni tool ya classic:
 
 {{#ref}}
 https://github.com/AonCyberLabs/PadBuster
 {{#endref}}
 
-Example:
+Mfano:
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 16 \
 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
 ```
-Vidokezo:
+Notes:
 
 - Ukubwa wa block mara nyingi ni `16` kwa AES.
 - `-encoding 0` inamaanisha Base64.
@@ -134,57 +134,57 @@ Vidokezo:
 
 ### Kwa nini inafanya kazi
 
-CBC decryption computes `P[i] = D(C[i]) XOR C[i-1]`. Kwa kurekebisha baiti katika `C[i-1]` na kuangalia kama padding ni halali, unaweza kurejesha `P[i]` baiti kwa baiti.
+CBC decryption hukokotoa `P[i] = D(C[i]) XOR C[i-1]`. Kwa kurekebisha bytes katika `C[i-1]` na kuchunguza ikiwa padding ni valid, unaweza kurejesha `P[i]` byte kwa byte.
 
-## Bit-flipping in CBC
+## Bit-flipping katika CBC
 
-Hata bila padding oracle, CBC inaweza kubadilishwa. Ikiwa unaweza kubadilisha ciphertext blocks na application inatumia plaintext iliyofumbuliwa kama data iliyopangwa (mfano, `role=user`), unaweza kubadili biti maalumu kubadilisha baiti maalum za plaintext katika nafasi uliyochagua katika block inayofuata.
+Hata bila padding oracle, CBC inaweza kubadilishwa. Ikiwa unaweza kurekebisha ciphertext blocks na application inatumia plaintext iliyodecryptiwa kama structured data (kwa mfano, `role=user`), unaweza kubadilisha bits maalum ili kubadilisha plaintext bytes zilizochaguliwa katika nafasi fulani ya block inayofuata.
 
-Typical CTF pattern:
+Muundo wa kawaida wa CTF:
 
 - Token = `IV || C1 || C2 || ...`
-- Unadhibiti baiti katika `C[i]`
-- Unalenga baiti za plaintext katika `P[i+1]` kwa sababu `P[i+1] = D(C[i+1]) XOR C[i]`
+- Unadhibiti bytes katika `C[i]`
+- Unalenga plaintext bytes katika `P[i+1]` kwa sababu `P[i+1] = D(C[i+1]) XOR C[i]`
 
-Hii sio kuvunjwa kwa usiri yenyewe, lakini ni primitive ya kawaida ya privilege-escalation wakati uadilifu (integrity) unapokosekana.
+Hii si kuvunja confidentiality yenyewe, lakini ni privilege-escalation primitive ya kawaida wakati integrity haipo.
 
 ## CBC-MAC
 
-CBC-MAC ni salama tu chini ya masharti maalum (notably **fixed-length messages** and correct domain separation).
+CBC-MAC ni secure tu chini ya masharti maalum (hasa **fixed-length messages** na domain separation sahihi).
 
 ### Classic variable-length forgery pattern
 
-CBC-MAC kawaida huhesabiwa kama:
+CBC-MAC kwa kawaida hukokotolewa kama:
 
 - IV = 0
 - `tag = last_block( CBC_encrypt(key, message, IV=0) )`
 
-Ikiwa unaweza kupata tags kwa ujumbe uliyochagua, mara nyingi unaweza kutengeneza tag kwa concatenation (au muundo unaohusiana) bila kujua key, kwa kutumia jinsi CBC inavyounganisha blocks.
+Ikiwa unaweza kupata tags za messages ulizochagua, mara nyingi unaweza kutengeneza tag ya concatenation (au construction inayohusiana) bila kujua key, kwa kutumia jinsi CBC inavyounganisha blocks.
 
-Hii mara nyingi inaonekana katika CTF cookies/tokens ambazo MAC username au role kwa CBC-MAC.
+Hii hutokea mara nyingi katika CTF cookies/tokens ambazo hufanya MAC ya username au role kwa kutumia CBC-MAC.
 
 ### Safer alternatives
 
 - Tumia HMAC (SHA-256/512)
 - Tumia CMAC (AES-CMAC) kwa usahihi
-- Jumuisha urefu wa ujumbe / domain separation
+- Jumuisha message length / domain separation
 
-## Stream ciphers: XOR and RC4
+## Stream ciphers: XOR na RC4
 
-### Mfano wa kifikiri
+### The mental model
 
-Mazingira mengi ya stream cipher yanarejea kwa:
+Hali nyingi za stream cipher hupunguzwa kuwa:
 
 `ciphertext = plaintext XOR keystream`
 
-Hivyo:
+Kwa hiyo:
 
 - Ikiwa unajua plaintext, unapata keystream.
-- Ikiwa keystream imetumika tena (same key+nonce), `C1 XOR C2 = P1 XOR P2`.
+- Ikiwa keystream imetumika tena (key+nonce ileile), `C1 XOR C2 = P1 XOR P2`.
 
 ### XOR-based encryption
 
-Ikiwa unajua sehemu yoyote ya plaintext katika nafasi `i`, unaweza kupata baiti za keystream na kufumbua ciphertext nyingine katika nafasi hizo.
+Ikiwa unajua plaintext segment yoyote katika position `i`, unaweza kupata keystream bytes na ku-decrypt ciphertext nyingine katika positions hizo.
 
 Autosolvers:
 
@@ -192,9 +192,9 @@ Autosolvers:
 
 ### RC4
 
-RC4 ni stream cipher; encrypt/decrypt ni operesheni moja hiyo.
+RC4 ni stream cipher; encrypt/decrypt ni operation ileile.
 
-Ikiwa unaweza kupata RC4 encryption ya plaintext inayojulikana kwa key ile ile, unaweza kupata keystream na kufumbua ujumbe mwingine wenye urefu/offset sawa.
+Ikiwa unaweza kupata RC4 encryption ya plaintext unayoijua kwa kutumia key ileile, unaweza kupata keystream na ku-decrypt messages nyingine zenye length/offset ileile.
 
 Reference writeup (HTB Kryptos):
 
@@ -202,8 +202,8 @@ Reference writeup (HTB Kryptos):
 https://0xrick.github.io/hack-the-box/kryptos/
 {{#endref}}
 
-## References
+## Marejeo
 
-- [Trail of Bits – Carelessness versus craftsmanship in cryptography](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
+- [1] [Trail of Bits – Carelessness versus craftsmanship in cryptography](https://blog.trailofbits.com/2026/02/18/carelessness-versus-craftsmanship-in-cryptography/)
 
 {{#include ../../banners/hacktricks-training.md}}

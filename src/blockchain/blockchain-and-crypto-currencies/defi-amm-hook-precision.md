@@ -1,53 +1,51 @@
-# Matumizi Mabaya ya DeFi/AMM: Uniswap v4 Hook Precision/Rounding Abuse
+# Unyonyaji wa DeFi/AMM: Unyonyaji wa Usahihi wa Hook/Rounding katika Uniswap v4
 
 {{#include ../../banners/hacktricks-training.md}}
 
+Ukurasa huu unaeleza aina ya mbinu za unyonyaji wa DeFi/AMM dhidi ya DEX za mtindo wa Uniswap v4 zinazopanua hesabu msingi kwa kutumia custom hooks. Tukio la hivi karibuni katika Bunni V2 lilitumia hitilafu ya rounding/precision katika Liquidity Distribution Function (LDF) iliyotekelezwa kwenye kila swap, na kumwezesha mshambuliaji kukusanya credits chanya na kutoa liquidity.<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
 
+Wazo kuu: ikiwa hook itatekeleza accounting ya ziada inayotegemea fixed-point math, tick rounding, na threshold logic, mshambuliaji anaweza kuunda exact-input swaps zinazovuka thresholds maalum ili tofauti za rounding zikusanyike kwa faida yake. Kwa kurudia muundo huo na kisha kutoa balance iliyoongezwa, mshambuliaji hutengeneza faida, mara nyingi akifadhili operesheni hiyo kwa flash loan.
 
-Ukurasa huu unaelezea daraja la mbinu za matumizi mabaya ya DeFi/AMM dhidi ya DEXes za mtindo wa Uniswap v4 ambazo zinaongeza hisabati ya msingi kwa hooks za kawaida. Tukio la hivi karibuni katika Bunni V2 lilitumia kasoro ya rounding/precision katika Liquidity Distribution Function (LDF) inayotekelezwa kila swap, na kumruhusu attacker kupata mikopo chanya na kuondoa liquidity.
+## Msingi: Uniswap v4 hooks na mtiririko wa swap
 
-Key idea: kama hook inatekeleza uhasibu wa ziada unaotegemea fixed‑point math, tick rounding, na mantiki ya vizingiti, attacker anaweza kutengeneza exact‑input swaps zinazovuka vizingiti maalum ili tofauti za rounding zikusanye kwa faida yao. Kurudia mtindo huo kisha kutoa salio lililojaa linaleta faida, mara nyingi likifadhiliwa na flash loan.
+- Hooks ni contracts ambazo PoolManager huita katika pointi maalum za lifecycle (kwa mfano, beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity, beforeInitialize/afterInitialize, beforeDonate/afterDonate).<sup>[[3]](#references)[[6]](#references)</sup>
+- Pools huanzishwa kwa PoolKey inayojumuisha hooks address. Ikiwa si zero, PoolManager hutekeleza callbacks kwenye kila operation husika.<sup>[[6]](#references)</sup>
+- Hooks zinaweza kurudisha **custom deltas** zinazobadilisha mabadiliko ya mwisho ya balance ya swap au liquidity action (custom accounting). Deltas hizo husettle kama net balances mwishoni mwa call, hivyo error yoyote ya rounding ndani ya hook hujilimbikiza kabla ya settlement.<sup>[[5]](#references)</sup>
+- Core math hutumia fixed-point formats kama Q64.96 kwa sqrtPriceX96 na tick arithmetic yenye 1.0001^tick. Hesabu yoyote custom iliyowekwa juu yake lazima ilingane kwa uangalifu na rounding semantics ili kuzuia invariant drift.<sup>[[4]](#references)[[8]](#references)</sup>
+- Swaps zinaweza kuwa exactInput au exactOutput. Katika v3/v4, bei husogea kwenye ticks; kuvuka tick boundary kunaweza kuamilisha/kuzima range liquidity. Hooks zinaweza kutekeleza logic ya ziada wakati wa threshold/tick crossings.<sup>[[5]](#references)</sup>
 
-## Mandhari: Uniswap v4 hooks and swap flow
+## Aina ya udhaifu: threshold-crossing precision/rounding drift
 
-- Hooks ni mikataba ambayo PoolManager huita katika pointi maalum za mzunguko wa maisha (e.g., beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity, beforeInitialize/afterInitialize, beforeDonate/afterDonate).
-- Pools zinaanzishwa na PoolKey inayojumuisha anwani ya hooks. Ikiwa si‑zero, PoolManager hufanya callbacks kwa kila operesheni inayohusiana.
-- Hooks zinaweza kurudisha **custom deltas** zinazobadilisha mabadiliko ya salio ya mwisho ya swap au liquidity action (custom accounting). Deltas hizo zinalipishwa kama salio net mwishoni mwa wito, kwa hivyo kosa lolote la rounding ndani ya hisabati ya hook linakusanyika kabla ya settlement.
-- Hisabati ya msingi inatumia fixed‑point formats kama Q64.96 kwa sqrtPriceX96 na tick arithmetic na 1.0001^tick. Hisabati yoyote ya ziada iliyowekwa juu lazima iendane kwa uangalifu na semantiki za rounding ili kuepuka invariant drift.
-- Swaps zinaweza kuwa exactInput au exactOutput. Katika v3/v4, bei inasogea kwa ticks; kuvuka mpaka wa tick kunaweza kuamsha/kuzima range liquidity. Hooks zinaweza kutekeleza mantiki ya ziada kwenye kuvuka vizingiti/ticks.
+Muundo wa kawaida ulio hatarini katika custom hooks:
 
-## Vulnerability archetype: threshold‑crossing precision/rounding drift
+1. Hook hukokotoa liquidity au balance deltas za kila swap kwa kutumia integer division, mulDiv, au fixed-point conversions (kwa mfano, token ↔ liquidity kwa kutumia sqrtPrice na tick ranges).
+2. Threshold logic (kwa mfano, rebalancing, stepwise redistribution, au per-range activation) huanzishwa wakati ukubwa wa swap au price movement unapovuka boundary ya ndani.
+3. Rounding hutumiwa bila ulinganifu (kwa mfano, truncation kuelekea zero, floor dhidi ya ceil) kati ya forward calculation na settlement path. Tofauti ndogo hazifutani, bali humcredit caller.
+4. Exact-input swaps zilizowekwa kwa usahihi ili kuvuka boundaries hizo huvuna mara kwa mara positive rounding remainder. Baadaye mshambuliaji hutoa credit iliyokusanywa.
 
-Muundo dhaifu wa kawaida katika hooks za custom:
-
-1. Hook inahesabu per‑swap liquidity au balance deltas kwa kutumia integer division, mulDiv, au fixed‑point conversions (e.g., token ↔ liquidity kutumia sqrtPrice na tick ranges).
-2. Mantiki ya vizingiti (e.g., rebalancing, stepwise redistribution, au per‑range activation) inachochewa wakati ukubwa wa swap au mabadiliko ya bei yanapovuka mpaka wa ndani.
-3. Rounding/ukataji unatumika kwa ukosefu wa mshikamano (e.g., truncation toward zero, floor versus ceil) kati ya hesabu ya mbele na njia ya malipo. Tofauti ndogo hazibatilishi na badala yake zinampa caller mkopo.
-4. Exact‑input swaps, zilizo na ukubwa sahihi kuvuka vizingiti hivyo, mara kwa mara hupunguza mabaki chanya ya rounding. Baadaye attacker anatoa credit iliyokusanywa.
-
-Attack preconditions
-- Pool inayotumia custom v4 hook inayofanya hisabati ya ziada kwenye kila swap (e.g., LDF/rebalancer).
-- Angalau njia moja ya utekelezaji ambapo rounding inamfaidi swap initiator wakati wa kuvuka vizingiti.
-- Uwezo wa kurudia swaps nyingi atomically (flash loans ni nzuri kutoa float ya muda mfupi na kugawanya gas).
+Masharti ya shambulio
+- Pool inayotumia custom v4 hook inayofanya hesabu za ziada kwenye kila swap (kwa mfano, LDF/rebalancer).
+- Angalau execution path moja ambapo rounding humfaidi swap initiator wakati wa threshold crossings.
+- Uwezo wa kurudia swaps nyingi atomically (flash loans ni bora kwa kutoa float ya muda na kugawanya gharama ya gas).
 
 ## Mbinu ya vitendo ya shambulio
 
-1) Tambua pools zinazowezekana zilizo na hooks
-- Orodhesha v4 pools na angalia PoolKey.hooks != address(0).
-- Kagua hook bytecode/ABI kwa callbacks: beforeSwap/afterSwap na njia zozote za custom rebalancing.
-- Tafuta hisabati inayofanya: kugawanya kwa liquidity, kubadilisha kati ya token amounts na liquidity, au kujumlisha BalanceDelta na rounding.
+1) Tambua pools zinazoweza kuwa na hooks
+- Orodhesha v4 pools na ukague PoolKey.hooks != address(0).
+- Kagua hook bytecode/ABI kwa callbacks: beforeSwap/afterSwap na methods zozote custom za rebalancing.
+- Tafuta math inayofanya yafuatayo: kugawanya kwa liquidity, kubadilisha kati ya token amounts na liquidity, au kujumlisha BalanceDelta kwa rounding.
 
-2) Fanya mfano wa hisabati na vizingiti vya hook
-- Rekreeta formula ya liquidity/redistribution ya hook: inputs kawaida ni sqrtPriceX96, tickLower/Upper, currentTick, fee tier, na net liquidity.
-- Ramani za threshold/step functions: ticks, bucket boundaries, au LDF breakpoints. Tambua upande wa kila mpaka ambapo delta inakatwa/rounded.
-- Tambua mahali ambapo conversions zinakata kati ya uint256/int256, zinatumia SafeCast, au tegemea mulDiv yenye implicit floor.
+2) Model hook math na thresholds zake
+- Unda upya formula ya hook ya liquidity/redistribution: inputs kwa kawaida hujumuisha sqrtPriceX96, tickLower/Upper, currentTick, fee tier, na net liquidity.
+- Chora threshold/step functions: ticks, bucket boundaries, au LDF breakpoints. Bainisha upande ambao delta inarounded kwenye kila boundary.
+- Tambua mahali ambapo conversions hubadilisha kati ya uint256/int256, hutumia SafeCast, au hutegemea mulDiv yenye implicit floor.
 
-3) Sanidi exact‑input swaps kuvuka vizingiti
-- Tumia Foundry/Hardhat simulations kuhesabu minimal Δin inayohitajika kusonga bei ikivuka mpaka na kuchochea tawi la hook.
-- Thibitisha kwamba afterSwap settlement inampa caller zaidi kuliko gharama, ikiacha BalanceDelta chanya au credit katika uhasibu wa hook.
-- Rudia swaps kukusanya credit; kisha piga njia ya hook ya withdrawal/settlement.
+3) Calibrate exact-input swaps ili kuvuka boundaries
+- Tumia Foundry/Hardhat simulations kukokotoa Δin ya chini kabisa inayohitajika kusogeza bei ivuke boundary kidogo na kuanzisha branch ya hook.
+- Thibitisha kwamba afterSwap settlement inamcredit caller zaidi ya gharama, na kuacha positive BalanceDelta au credit katika accounting ya hook.
+- Rudia swaps ili kukusanya credit; kisha ita hook’s withdrawal/settlement path.
 
-Example Foundry‑style test harness (pseudocode)
+Mfano wa test harness ya mtindo wa Foundry (pseudocode)
 ```solidity
 function test_precision_rounding_abuse() public {
 // 1) Arrange: set up pool with hook
@@ -80,16 +78,16 @@ sqrtPriceLimitX96: 0 // allow tick crossing
 bunniHook.withdrawCredits(msg.sender);
 }
 ```
-Kurekebisha exactInput
-- Hesabu ΔsqrtP kwa hatua ya tick: sqrtP_next = sqrtP_current × 1.0001^(Δtick).
-- Kadiria Δin kutumia fomula za v3/v4: Δx ≈ L × (ΔsqrtP / (sqrtP_next × sqrtP_current)). Hakikisha mwelekeo wa kuzungusha (rounding) unalingana na hesabu ya msingi.
-- Rekebisha Δin kwa ±1 wei karibu na mpaka ili kupata tawi ambapo hook inazungusha kwa faida yako.
+Calibrating the exactInput
+- Compute ΔsqrtP for a tick step: sqrtP_next = sqrtP_current × 1.0001^(Δtick).
+- Approximate Δin using v3/v4 formulas: Δx ≈ L × (ΔsqrtP / (sqrtP_next × sqrtP_current)). Ensure rounding direction matches core math.
+- Adjust Δin by ±1 wei around the boundary to find the branch where the hook rounds in your favor.
 
-4) Kuongeza kwa kutumia flash loans
-- Kopa kiasi kikubwa (mfano, 3M USDT au 2000 WETH) ili kuendesha marudio mengi kwa atomiki.
-- Tekeleza loop ya swap iliyorekebishwa, kisha toa na ulipie ndani ya callback ya flash loan.
+4) Amplify with flash loans
+- Borrow a large notional (e.g., 3M USDT or 2000 WETH) to run many iterations atomically.<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
+- Execute the calibrated swap loop, then withdraw and repay within the flash loan callback.
 
-Muundo wa flash loan wa Aave V3
+Aave V3 flash loan skeleton
 ```solidity
 function executeOperation(
 address[] calldata assets,
@@ -111,69 +109,69 @@ IERC20(assets[j]).approve(address(POOL), amounts[j] + premiums[j]);
 return true;
 }
 ```
-5) Kuondoka na uenezaji kuvuka‑mnyororo
-- If hooks are deployed on multiple chains, rudia utatuzi huo huo kwa kila mnyororo.
-- Bridge inarudi kwenye target chain na, kwa hiari, inaweza kuzunguka kupitia protokoli za lending ili kuficha mtiririko.
+5) Kutoka na replication ya cross-chain
+- Ikiwa hooks zimetumwa kwenye chains nyingi, rudia calibration ileile kwa kila chain.
+- Peleka mapato kurudi kwenye chain lengwa na, kwa hiari, yapitishe kwa mzunguko kupitia lending protocols ili kuficha mtiririko wa fedha.<sup>[[2]](#references)</sup>
 
-## Common root causes in hook math
+## Sababu kuu za msingi katika hesabu za hook
 
-- Mixed rounding semantics: mulDiv floors while later paths effectively round up; or conversions between token/liquidity apply different rounding.
-- Tick alignment errors: kutumia ticks zisizozungushwa katika njia moja na tick‑spaced rounding katika nyingine.
-- BalanceDelta sign/overflow issues when converting between int256 and uint256 during settlement.
-- Precision loss in Q64.96 conversions (sqrtPriceX96) not mirrored in reverse mapping.
-- Accumulation pathways: mabaki kwa kila swap yafuatwa kama mikopo inayoweza kuondolewa na caller badala ya kuchomwa/zero‑sum.
+- Semantiki mchanganyiko za rounding: mulDiv hufanya floor huku paths zinazofuata zikifanya rounding up; au conversions kati ya token/liquidity zikitumia rounding tofauti.
+- Hitilafu za tick alignment: kutumia ticks ambazo hazijarounded katika path moja na rounding ya tick-spaced katika nyingine.
+- Masuala ya sign/overflow ya BalanceDelta wakati wa kubadilisha kati ya int256 na uint256 wakati wa settlement.
+- Kupotea kwa precision katika conversions za Q64.96 (sqrtPriceX96) kusikofuatwa na mapping ya reverse.
+- Njia za mkusanyiko: remainders za kila swap kufuatiliwa kama credits zinazoweza kutolewa na caller badala ya kuchomwa/kufanya mfumo wa zero-sum.
 
 ## Custom accounting & delta amplification
 
-- Uniswap v4 custom accounting inaruhusu hooks kurudisha deltas zinazobadilisha moja kwa moja kile mtia wito analia/analipwa. Ikiwa hook inafuata mikopo ndani yake, mabaki ya rounding yanaweza kukusanyika kwenye shughuli ndogo nyingi **kabla** ya settlement ya mwisho kutokea.
-- Hii inafanya matumizi mabaya ya boundary/threshold kuwa yenye nguvu zaidi: mshambulizi anaweza kubadilisha kati ya `swap → withdraw → swap` katika tx ile ile, akilazimisha hook kukokotoa deltas upya kwenye state kidogo tofauti wakati salio zote bado zinatarajiwa.
-- Wakati wa kukagua hooks, fuatilia jinsi BalanceDelta/HookDelta zinatengenezwa na kusuluhishwa. Kuizungusha yenye upendeleo katika tawi moja inaweza kuwa mkopo unaoongezeka wakati deltas zinakaribiwa kukokotwa tena kwa mara nyingi.
+- Uniswap v4 custom accounting huruhusu hooks kurudisha deltas zinazobadilisha moja kwa moja kiasi ambacho caller anadaiwa/anachopokea. Ikiwa hook inafuatilia credits internally, rounding residue inaweza kujikusanya katika operations nyingi ndogo **kabla** ya final settlement kufanyika.<sup>[[5]](#references)</sup>
+- Hii hufanya boundary/threshold abuse kuwa imara zaidi: attacker anaweza kubadilisha `swap → withdraw → swap` katika tx ileile, na kulazimisha hook kuhesabu upya deltas kwenye state tofauti kidogo huku balances zote bado zikiwa pending.
+- Wakati wa kukagua hooks, fuatilia kila mara jinsi BalanceDelta/HookDelta inavyotengenezwa na kusettle-iwa. Rounding yenye upendeleo katika branch moja inaweza kuwa credit inayojilimbikiza wakati deltas zinapohesabiwa upya mara kwa mara.
 
-## Defensive guidance
+## Mwongozo wa kujilinda
 
-- Differential testing: tengeneza picha ya hisabati ya hook dhidi ya implementation ya rejea ukitumia hesabu ya rational yenye usahihi wa juu na thibitisha usawa au kosa lililowekwa ambalo siku zote linakuwa la advesarial (si faida kwa caller).
+- Differential testing: linganisha math ya hook na reference implementation inayotumia high-precision rational arithmetic na uthibitishe equality au bounded error ambayo daima ni ya upande wa attacker (kamwe isiwe na manufaa kwa caller).
 - Invariant/property tests:
-- Jumla ya deltas (tokens, liquidity) kwenye njia za swap na marekebisho ya hook lazima ihifadhi thamani modulo ada.
-- Hakuna njia inapaswa kuunda mkopo chanya kwa mtia wito wa swap baada ya kurudia iteresheni za exactInput.
-- Majaribio ya boundary/threshold za tick karibu na ±1 wei inputs kwa both exactInput/exactOutput.
-- Sera ya kuzungusha: centralize helper za rounding ambazo kila mara huzungusha dhidi ya user; ondoa casts zisizo thabiti na implicit floors.
-- Settlement sinks: kusanya mabaki ya rounding yasiyotepukika kwenye hazina ya protocol au kuyachoma; usiwachambulishe kama mali za msg.sender.
-- Rate‑limits/guardrails: ukubwa mdogo wa swap kwa vichocheo vya rebalancing; zima rebalances ikiwa deltas ni sub‑wei; angalia sanity deltas dhidi ya anuwai zinazotarajiwa.
-- Kagua callbacks za hook kwa ujumla: beforeSwap/afterSwap na before/after liquidity changes zinapaswa kukubaliana kwenye tick alignment na rounding ya delta.
+- Jumla ya deltas (tokens, liquidity) katika swap paths na hook adjustments lazima ihifadhi value, isipokuwa fees.
+- Hakuna path inayopaswa kuunda net credit chanya kwa swap initiator baada ya exactInput iterations zinazorudiwa.
+- Threshold/tick boundary tests karibu na inputs za ±1 wei kwa exactInput/exactOutput zote.
+- Rounding policy: centralize rounding helpers ambazo daima hufanya rounding dhidi ya user; ondoa casts zisizolingana na implicit floors.
+- Settlement sinks: kusanya rounding residue isiyoweza kuepukwa kwenye protocol treasury au ichome; kamwe usiipe msg.sender.
+- Rate-limits/guardrails: weka minimum swap sizes kwa rebalancing triggers; zima rebalances ikiwa deltas ziko chini ya wei; hakiki sanity ya deltas dhidi ya ranges zinazotarajiwa.
+- Kagua hook callbacks kwa ujumla: beforeSwap/afterSwap na before/after liquidity changes zinapaswa kukubaliana kuhusu tick alignment na delta rounding.
 
-## Case study: Bunni V2 (2025‑09‑02)
+## Case study: Bunni V2 (2025-09-02)
 
-- Protocol: Bunni V2 (Uniswap v4 hook) na LDF iliyowekwa kwa kila swap kwa ajili ya rebalancing.
-- Affected pools: USDC/USDT on Ethereum na weETH/ETH on Unichain, jumla takriban $8.4M.
-- Step 1 (price push): mshambulizi alikopa kwa flash takriban ~3M USDT na kufanya swap kusukuma tick hadi ~5000, akipunguza salio la **active** USDC hadi ~28 wei.
-- Step 2 (rounding drain): misukumo 44 midogo ya withdraw ilitumia floor rounding katika `BunniHubLogic::withdraw()` kupunguza salio la active USDC kutoka 28 wei hadi 4 wei (‑85.7%) wakati sehemu ndogo sana ya LP shares ilichomwa. Liquidity zote zilikadiriwa chini kwa takriban ~84.4%.
-- Step 3 (liquidity rebound sandwich): swap kubwa ilisukuma tick hadi ~839,189 (1 USDC ≈ 2.77e36 USDT). Makadirio ya liquidity yalibadilika na kuongezeka kwa ~16.8%, kuruhusu sandwich ambapo mshambulizi alibadilisha tena kwa bei iliyopandishwa na kutoka na faida.
-- Fix identified in the post‑mortem: badilisha update ya idle‑balance iwe round **up** ili withdrawals ndogo zinazorudiwa zisizoweza kupunguza salio la active la pool.
+- Protocol: Bunni V2 (Uniswap v4 hook) yenye LDF inayotumika kwa kila swap ili kufanya rebalance.<sup>[[7]](#references)</sup>
+- Pools zilizoathiriwa: USDC/USDT kwenye Ethereum na weETH/ETH kwenye Unichain, zenye jumla ya takriban $8.4M.<sup>[[1]](#references)[[2]](#references)</sup>
+- Hatua ya 1 (price push): attacker alikopa kwa flash takriban 3M USDT na kufanya swap ili kusukuma tick hadi takriban 5000, na kupunguza **active** USDC balance hadi takriban 28 wei.<sup>[[7]](#references)</sup>
+- Hatua ya 2 (rounding drain): withdrawals 44 ndogo zilitumia floor rounding katika `BunniHubLogic::withdraw()` ili kupunguza active USDC balance kutoka 28 wei hadi 4 wei (-85.7%) huku sehemu ndogo sana ya LP shares ikiwa burned. Jumla ya liquidity ilikadiriwa chini kwa takriban 84.4%.<sup>[[2]](#references)[[7]](#references)</sup>
+- Hatua ya 3 (liquidity rebound sandwich): swap kubwa ilisogeza tick hadi takriban 839,189 (1 USDC ≈ 2.77e36 USDT). Makadirio ya liquidity yalibadilika na kuongezeka kwa takriban 16.8%, na kuwezesha sandwich ambapo attacker alifanya swap ya kurudi kwa bei iliyoinflatiwa na kutoka akiwa na profit.<sup>[[7]](#references)</sup>
+- Fix iliyotambuliwa katika post-mortem: badilisha update ya idle-balance ifanye rounding **up** ili micro-withdrawals zinazorudiwa zisiweze kushusha active balance ya pool hatua kwa hatua.<sup>[[7]](#references)</sup>
 
-Simplified vulnerable line (and post‑mortem fix)
+Mstari uliorahisishwa ulio vulnerable (na fix ya post-mortem)<sup>[[7]](#references)</sup>
 ```solidity
 // BunniHubLogic::withdraw() idle balance update (simplified)
 uint256 newBalance = balance - balance.mulDiv(shares, currentTotalSupply);
 // Fix: round up to avoid cumulative underestimation
 uint256 newBalance = balance - balance.mulDivUp(shares, currentTotalSupply);
 ```
-## Orodha ya uchunguzi
+## Orodha ya ukaguzi wa Hunting
 
-- Je, pool inatumia anwani ya hooks isiyo sifuri? Ni callbacks gani zimeruhusiwa?
-- Je, kuna per‑swap redistributions/rebalances zinazotumia custom math? Kuna tick/threshold logic yoyote?
-- Wapi divisions/mulDiv, Q64.96 conversions, au SafeCast zimetumika? Je, rounding semantics ni thabiti kwa ujumla?
-- Je, unaweza kuunda Δin ambayo inavuka mpaka kwa karibu na kusababisha tawi la rounding lenye manufaa? Jaribu pande zote mbili na exactInput na exactOutput.
-- Je, hook inafuatilia per‑caller credits au deltas ambazo zinaweza kutolewa baadaye? Hakikisha mabaki yameondolewa.
+- Je, pool inatumia hooks address isiyo sifuri? Ni callbacks zipi zimewezeshwa?
+- Je, kuna ugawaji upya/rebalance za kila swap zinazotumia custom math? Kuna logic yoyote ya tick/threshold?
+- Divisions/mulDiv, ubadilishaji wa Q64.96, au SafeCast zinatumika wapi? Je, semantics za rounding zinaendana kote?
+- Je, unaweza kutengeneza Δin inayovuka boundary kwa kiasi kidogo na kutoa rounding branch yenye faida? Test pande zote mbili na exactInput pamoja na exactOutput.
+- Je, hook inafuatilia credits au deltas za kila caller ambazo zinaweza kutolewa baadaye? Hakikisha residue inafutiliwa mbali.
 
 ## Marejeo
 
-- [Bunni V2 Exploit: $8.3M Drained via Liquidity Flaw (summary)](https://quillaudits.medium.com/bunni-v2-exploit-8-3m-drained-50acbdcd9e7b)
-- [Bunni V2 Exploit: Full Hack Analysis](https://www.quillaudits.com/blog/hack-analysis/bunni-v2-exploit)
-- [Uniswap v4 background (QuillAudits research)](https://www.quillaudits.com/research/uniswap-development)
-- [Liquidity mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
-- [Swap mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
-- [Uniswap v4 Hooks and Security Considerations](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/uniswap-v4-hooks-and-security)
-- [Bunni Exploit Post Mortem (Sep 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
-- [Uniswap v4 Core Whitepaper](https://app.uniswap.org/whitepaper-v4.pdf)
+- [1] [Bunni V2 Exploit: $8.3M Zilitolewa kupitia Kasoro ya Liquidity (muhtasari)](https://quillaudits.medium.com/bunni-v2-exploit-8-3m-drained-50acbdcd9e7b)
+- [2] [Bunni V2 Exploit: Uchambuzi Kamili wa Hack](https://www.quillaudits.com/blog/hack-analysis/bunni-v2-exploit)
+- [3] [Usuli wa Uniswap v4 (utafiti wa QuillAudits)](https://www.quillaudits.com/research/uniswap-development)
+- [4] [Mekanika za Liquidity katika Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
+- [5] [Mekanika za Swap katika Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
+- [6] [Hooks za Uniswap v4 na Mazingatio ya Usalama](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/uniswap-v4-hooks-and-security)
+- [7] [Post Mortem ya Bunni Exploit (Sep 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
+- [8] [Whitepaper ya Uniswap v4 Core](https://app.uniswap.org/whitepaper-v4.pdf)
 
 {{#include ../../banners/hacktricks-training.md}}
