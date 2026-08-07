@@ -3,7 +3,7 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Якщо програма використовує `scanf`, щоб отримати **кілька значень одночасно зі stdin**, потрібно створити стан, який починається після **`scanf`**.
+> Якщо програма використовує `scanf`, щоб отримати **кілька значень одночасно зі stdin**, потрібно згенерувати стан, який починається після **`scanf`**.
 
 Коди взято з [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Вхідні дані для досягнення адреси (із зазначенням виводів)
+### Вхідні дані для досягнення адреси (із зазначенням виведених даних)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-У цьому сценарії введення було отримано за допомогою `scanf("%u %u")`, і було передано значення `"1 1"`, тому значення **`0x00000001`** у stack походять із **user input**. Ви можете побачити, як ці значення починаються з `$ebp - 8`. Отже, у коді ми **відняли 8 байтів від `$esp` (оскільки в цей момент `$ebp` і `$esp` мали однакове значення)**, а потім виконали push BVS.
+У цьому сценарії вхідні дані було отримано за допомогою `scanf("%u %u")`, і було передано значення `"1 1"`, тому значення **`0x00000001`** у stack походять від **введених користувачем даних**. Ви можете побачити, що ці значення починаються з `$ebp - 8`. Отже, у коді ми **відняли 8 байтів від `$esp` (оскільки в той момент `$ebp` і `$esp` мали однакове значення)**, а потім виконали push BVS.
 
-![Розміщення bit vectors у stack, щоб визначити значення, якого має досягти ця позиція stack для переходу до потрібного program flow: У цьому сценарії введення було отримано за допомогою scanf("%u %u"), і було передано значення "1...](<../../../images/image (136).png>)
+![Розміщення bit vectors у stack, щоб визначити значення, якого має досягти позиція stack для переходу до потрібного потоку виконання: У цьому сценарії вхідні дані було отримано за допомогою scanf("%u %u"), і було передано значення "1...](<../../../images/image (136).png>)
 
-### Static Memory values (Global variables)
+### Статичні значення пам'яті (глобальні змінні)
 ```python
 import angr
 import claripy
@@ -325,7 +325,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Симуляція файлу
+### Імітація файлу
 ```python
 #In this challenge a password is read from a file and we want to simulate its content
 
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> Зверніть увагу, що symbolic file також може містити constant data, об'єднані із symbolic data:
+> Зверніть увагу, що символічний файл також може містити константні дані, об'єднані із символічними даними:
 >
 > ```python
 >  # Hello world, my name is John.
@@ -402,13 +402,13 @@ main(sys.argv)
 >  # the string from the file, except four symbolic bytes where the name would be
 >  # stored.
 >  # (!)
-> ```
+>  ```
 
 ### Застосування обмежень
 
 > [!TIP]
-> Іноді прості операції, які виконує людина, як-от порівняння 2 слів довжиною 16 **char by char** (loop), **cost** для **angr** багато ресурсів, оскільки йому потрібно генерувати гілки **exponentially**, бо він генерує 1 гілку на кожен if: `2^16`\
-> Тому простіше **ask angr get to a previous point** (де справді складна частина вже виконана) і **set those constrains manually**.
+> Іноді прості операції, які виконує людина, як-от порівняння 2 слів довжиною 16 **char by char** (loop), можуть **cost** для **angr** багато ресурсів, оскільки йому потрібно генерувати **branches** експоненційно, адже він створює 1 branch на кожен if: `2^16`\
+> Тому простіше **ask angr get to a previous point** (де справді складну частину вже виконано) і **set those constrains manually**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> У деяких сценаріях можна активувати **veritesting**, який об'єднає подібні стани, щоб уникнути непотрібних гілок і знайти рішення: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> У деяких сценаріях можна активувати **veritesting**, що об'єднає схожі стани, щоб уникнути непотрібних гілок і знайти рішення: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Ще одна річ, яку можна зробити в таких сценаріях, — **hook function, яка надає angr щось, що він може легше зрозуміти**.
+> Ще одна річ, яку можна зробити в таких сценаріях, — **hook the function giving angr something it can understand** простіше.
 
-### Simulation Managers
+### Менеджери симуляції
 
-Деякі simulation managers можуть бути кориснішими за інші. У попередньому прикладі виникла проблема, оскільки було створено багато корисних гілок. Тут техніка **veritesting** об'єднає їх і знайде рішення.\
-Цей simulation manager також можна активувати за допомогою: `simulation = project.factory.simgr(initial_state, veritesting=True)`.
+Деякі менеджери симуляції можуть бути кориснішими за інші. У попередньому прикладі виникла проблема, оскільки було створено багато корисних гілок. Тут техніка **veritesting** об'єднає їх і знайде рішення.\
+Цей менеджер симуляції також можна активувати за допомогою: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Перехоплення/обхід одного виклику функції
+### Hooking/Bypassing одного виклику функції
 ```python
 # This level performs the following computations:
 #
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Перехоплення функції / Simprocedure
+### Хук функції / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -678,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Імітація scanf з кількома параметрами
+### Імітація scanf із кількома параметрами
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -809,6 +809,6 @@ main(sys.argv)
 ```
 ## Посилання
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}

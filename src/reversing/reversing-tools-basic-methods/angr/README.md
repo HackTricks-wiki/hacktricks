@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Частина цієї шпаргалки базується на [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
+Частина цієї шпаргалки базується на [документації angr](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
 ## Встановлення
 ```bash
@@ -121,11 +121,11 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ### Виклик функцій
 
-- Ви можете передати список аргументів через `args` і словник змінних середовища через `env` у `entry_state` та `full_init_state`. Значення в цих структурах можуть бути рядками або bitvectors і будуть серіалізовані у state як аргументи та середовище для симульованого виконання. Типове значення `args` — порожній список, тому якщо програма, яку ви аналізуєте, очікує наявність принаймні `argv[0]`, завжди вказуйте його!
-- Якщо ви хочете, щоб `argc` був symbolic, ви можете передати symbolic bitvector як `argc` у конструкторах `entry_state` і `full_init_state`. Однак будьте обережні: якщо ви це зробите, слід також додати constraint до отриманого state, щоб ваше значення argc не було більшим за кількість аргументів, переданих у `args`.
-- Щоб використати call state, викличте його через `.call_state(addr, arg1, arg2, ...)`, де `addr` — адреса функції, яку ви хочете викликати, а `argN` — N-й аргумент цієї функції: python integer, string, array або bitvector. Якщо ви хочете виділити пам'ять і фактично передати вказівник на об'єкт, обгорніть його в PointerWrapper, наприклад `angr.PointerWrapper("point to me!")`. Результати цього API можуть бути дещо непередбачуваними, але ми працюємо над цим.
+- Ви можете передати список аргументів через `args` і словник змінних середовища через `env` до `entry_state` та `full_init_state`. Значення в цих структурах можуть бути рядками або bitvectors і будуть серіалізовані у state як аргументи та середовище для змодельованого виконання. Типове значення `args` — порожній список, тому якщо програма, яку ви аналізуєте, очікує наявність щонайменше `argv[0]`, ви завжди повинні його вказувати!
+- Якщо ви хочете, щоб `argc` був symbolic, ви можете передати symbolic bitvector як `argc` до конструкторів `entry_state` і `full_init_state`. Однак будьте обережні: якщо ви це зробите, вам також слід додати constraint до отриманого state, що ваше значення argc не може бути більшим за кількість аргументів, переданих через `args`.
+- Щоб використовувати call state, його слід викликати через `.call_state(addr, arg1, arg2, ...)`, де `addr` — адреса функції, яку ви хочете викликати, а `argN` — N-й аргумент цієї функції: python integer, string або array, або bitvector. Якщо ви хочете виділити пам'ять і фактично передати pointer на об'єкт, його слід обгорнути в PointerWrapper, тобто `angr.PointerWrapper("point to me!")`. Результати цього API можуть бути дещо непередбачуваними, але ми працюємо над цим.
 
-### Бітові вектори
+### BitVectors
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -134,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### Символічні BitVectors і обмеження
+### Символічні BitVectors та обмеження
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -186,12 +186,12 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Крім того, ви можете використовувати `proj.hook_symbol(name, hook)`, передаючи ім’я символу як перший аргумент, щоб встановити hook за адресою, де розташований символ<sup>[[1]](#references)</sup>
+Крім того, ви можете використати `proj.hook_symbol(name, hook)`, передавши ім’я символу як перший аргумент, щоб встановити hook за адресою, де розташований символ<sup>[[1]](#references)</sup>
 
 ## Приклади
 
 ## Посилання
 
-- [1] [документація angr](https://docs.angr.io/_/downloads/en/stable/pdf/)
+- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
 {{#include ../../../banners/hacktricks-training.md}}
