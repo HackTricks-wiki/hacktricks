@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Interpreters permitidos por Sudo
+## Intérpretes permitidos por Sudo
 
-Si `sudo -l` permite a un usuario ejecutar un interpreter como root, trátalo como ejecución directa de código. Los interpreters están diseñados para ejecutar código arbitrario, por lo que una regla que permita `python3`, `perl`, `ruby`, `lua`, `node` u otros binarios similares suele equivaler a la ejecución de comandos como root, a menos que los argumentos estén estrictamente restringidos y validados.
+Si `sudo -l` permite a un usuario ejecutar un intérprete como root, trátalo como ejecución directa de código. Los intérpretes están diseñados para ejecutar código arbitrario, por lo que una regla que permita los binarios `python3`, `perl`, `ruby`, `lua`, `node` o similares suele equivaler a la ejecución de comandos como root, a menos que los argumentos estén estrictamente restringidos y validados.
 
-Flujo común de revisión:
+Flujo de revisión habitual:
 ```bash
 sudo -l
 sudo /usr/bin/python3 -c 'import os; os.system("id")'
@@ -35,12 +35,12 @@ sudo /usr/bin/less /etc/hosts
 ```
 ### Ejecución de comandos con Nano
 
-Cuando `nano` está permitido mediante sudo, la ejecución de comandos puede estar disponible desde la interfaz del editor:
+Cuando `nano` está permitido mediante sudo, la ejecución de comandos puede ser accesible desde la interfaz del editor:
 ```text
 Ctrl+R
 Ctrl+X
 ```
-Entonces, proporciona un comando como:
+Entonces proporciona un comando como:
 ```bash
 id
 /bin/sh
@@ -51,9 +51,9 @@ reset; /bin/sh 1>&0 2>&0
 ```
 La secuencia exacta de teclas puede variar según la versión de nano y las opciones de compilación, pero el problema de seguridad es el mismo: el editor se está ejecutando como root y puede invocar comandos externos.
 
-### Otros escapes comunes de editores
+### Otras formas comunes de escape desde editores
 
-Los editores de estilo Vim suelen permitir la ejecución de comandos mediante `:!`:
+Los editores estilo Vim suelen permitir la ejecución de comandos mediante `:!`:
 ```text
 :!/bin/sh
 ```
@@ -65,7 +65,8 @@ Los paginadores como `less` también pueden permitir la ejecución de shell:
 
 - Evita conceder interpreters o editores interactivos mediante sudo.
 - Prefiere wrappers fijos propiedad de root que realicen una única acción administrativa específica.
-- Si no se puede evitar un interpreter, restringe la ruta exacta del script y evita los argumentos controlados por el usuario, los imports escribibles, `PYTHONPATH` y la preservación insegura del entorno.
-- Si se requiere editar archivos, restringe la ruta exacta del archivo y considera `sudoedit` con versiones parcheadas de sudo y un manejo estricto del entorno.
-- Revisa `SETENV`, `env_keep`, los directorios de trabajo escribibles, las rutas de módulos/import escribibles, `NOEXEC`, `use_pty` y el logging, pero no los consideres un sandbox completo.
+- Si no se puede evitar un interpreter, restringe la ruta exacta del script y evita los argumentos controlados por el usuario, los imports modificables, `PYTHONPATH` y la preservación insegura del entorno.
+- Si se requiere editar archivos, restringe la ruta exacta del archivo y considera `sudoedit` con versiones parcheadas de sudo y una gestión estricta del entorno.
+- Revisa `SETENV`, `env_keep`, los directorios de trabajo modificables, las rutas de módulos/imports modificables, `NOEXEC`, `use_pty` y el logging, pero no los consideres un sandbox completo.
+
 {{#include ../../banners/hacktricks-training.md}}

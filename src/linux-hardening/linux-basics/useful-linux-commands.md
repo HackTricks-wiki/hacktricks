@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Bash comunes
+## Comandos comunes de Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -303,7 +303,7 @@ iptables -P OUTPUT ACCEPT
 ```
 ## Telemetría de eBPF y búsqueda de rootkits
 
-Los rootkits modernos (TripleCross, variantes de BPFDoor, etc.) persisten cada vez más como programas eBPF ocultos. Establece una línea base de tu flota con `bpftool`/`eBPFmon` para detectar programas sin firmar, hooks de cgroup inesperados o contenido malicioso en los mapas antes de desvincularlos.
+Los rootkits modernos (TripleCross, variantes de BPFDoor, etc.) persisten cada vez más como programas eBPF ocultos. Establece una línea base de tu flota con `bpftool`/`eBPFmon` para detectar programas sin firma, hooks de cgroup inesperados o contenido malicioso en los mapas antes de desvincularlos.<sup>[[1]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Correlaciona la salida de bpftool con las asociaciones esperadas de NIC/cgroup; un programa `xdp` o `kprobe` repentino cuyo propietario sea un PID no aprobado es un indicador sólido de un payload eBPF inyectado.
+Correlaciona la salida de bpftool con las vinculaciones esperadas de NIC/cgroup; un programa `xdp` o `kprobe` repentino cuyo propietario sea un PID no aprobado es un indicador claro de una carga útil eBPF inyectada.
 
 ## Triage de incidentes de Journald
 
-systemd-journald conserva metadatos estructurados, por lo que puedes pivotar por arranque, severidad, unidad o UID sin acceder a `/var/log/*`. Combina filtros con marcas de tiempo relativas para aislar rápidamente las ventanas de ataque o demostrar la manipulación de logs.
+systemd-journald conserva metadatos estructurados, por lo que puedes pivotar por arranque, severidad, unidad o UID sin tocar `/var/log/*`. Combina filtros con marcas de tiempo relativas para aislar rápidamente las ventanas de ataque o demostrar la manipulación de logs.<sup>[[2]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -340,7 +340,7 @@ Añade `--grep 'Invalid user' --case-sensitive` o `-k` (solo el kernel ring buff
 
 ## Referencias
 
-- [eBPFmon: Una nueva herramienta para explorar e interactuar con aplicaciones eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [Cómo usar el comando journalctl para ver logs de Linux](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: Una nueva herramienta para explorar e interactuar con aplicaciones eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Cómo usar el comando journalctl para ver logs de Linux](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}

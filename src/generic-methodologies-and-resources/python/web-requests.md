@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Solicitudes de Python
+## Python Requests
 ```python
 import requests
 

