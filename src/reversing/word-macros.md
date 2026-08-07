@@ -1,18 +1,18 @@
-# Word Macros
+# Makra Worda
 
 {{#include ../banners/hacktricks-training.md}}
 
 ### Junk Code
 
-Bardzo często można znaleźć **śmieciowy kod, który nigdy nie jest używany**, aby utrudnić analizę makra.\
-Na przykład, na poniższym obrazku widać, że warunek If, który nigdy nie będzie prawdziwy, jest używany do wykonania jakiegoś śmieciowego i bezużytecznego kodu.
+Bardzo często można znaleźć **junk code, który nigdy nie jest używany**, aby utrudnić reversing makra.\
+Na przykład na poniższym obrazie widać, że użyto instrukcji If, która nigdy nie będzie prawdziwa, aby wykonać pewien bezużyteczny junk code.
 
-![](<../images/image (369).png>)
+![Makra Worda - Junk Code: Na poniższym obrazie widać, że użyto instrukcji If, która nigdy nie będzie prawdziwa, aby wykonać pewien bezużyteczny junk code](<../images/image (369).png>)
 
-### Macro Forms
+### Formularze makr
 
-Używając funkcji **GetObject**, możliwe jest uzyskanie danych z formularzy makra. Może to być użyte do utrudnienia analizy. Poniżej znajduje się zdjęcie formularza makra używanego do **ukrywania danych w polach tekstowych** (pole tekstowe może ukrywać inne pola tekstowe):
+Za pomocą funkcji **GetObject** można uzyskać dane z formularzy makra. Można to wykorzystać do utrudnienia analizy. Poniżej znajduje się zdjęcie formularza makra używanego do **ukrywania danych w polach tekstowych** (pole tekstowe może ukrywać inne pola tekstowe):
 
-![](<../images/image (344).png>)
+![Junk Code - Formularze makr: Za pomocą funkcji GetObject można uzyskać dane z formularzy makra. Można to wykorzystać do utrudnienia analizy. Poniżej znajduje się zdjęcie...](<../images/image (344).png>)
 
 {{#include ../banners/hacktricks-training.md}}

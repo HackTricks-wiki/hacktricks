@@ -5,9 +5,9 @@
 Typowe wzorce:
 
 - Wiadomości w spektrogramie
-- Osadzanie WAV LSB
-- Kodowanie DTMF / tonów wybierania
-- Ładunki w metadanych
+- Osadzanie LSB w WAV
+- Kodowanie DTMF / tonami wybierania numeru
+- Payloady w metadanych
 
 ## Szybka analiza wstępna
 
@@ -16,11 +16,11 @@ Przed użyciem specjalistycznych narzędzi:
 - Sprawdź szczegóły kodeka/kontenera i anomalie:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Jeśli audio zawiera treści przypominające szum lub strukturę tonalną, wcześnie przeanalizuj spektrogram.
+- Jeśli audio zawiera treści przypominające szum lub strukturę tonalną, wcześnie sprawdź spektrogram.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-## Steganografia spektrogramu
+## Steganografia spektrogramowa
 
 ### Technika
 
@@ -28,7 +28,7 @@ Spectrogram stego ukrywa dane poprzez kształtowanie energii w czasie/częstotli
 
 ### Sonic Visualiser
 
-Podstawowe narzędzie do inspekcji spektrogramów:
+Podstawowe narzędzie do analizy spektrogramów:
 
 - [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
@@ -39,9 +39,9 @@ Podstawowe narzędzie do inspekcji spektrogramów:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
-## FSK / dekodowanie modemu
+## Dekodowanie FSK / modemu
 
-Dźwięk z kluczowaniem z przesuwem częstotliwości często wygląda na spektrogramie jak naprzemienne pojedyncze tony.<sup>[[1]](#references)</sup> Gdy masz już przybliżone wartości częstotliwości środkowej, przesunięcia i baud rate, użyj brute force z `minimodem`:
+Dźwięk z kluczowaniem częstotliwością często wygląda na spektrogramie jak naprzemienne pojedyncze tony. Po uzyskaniu przybliżonych wartości częstotliwości centralnej, przesunięcia i szybkości transmisji w bodach, wykonaj brute force za pomocą `minimodem`:<sup>[[1]](#references)</sup>
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -61,19 +61,19 @@ minimodem -f noise.wav 2400
 W przypadku nieskompresowanego PCM (WAV) każda próbka jest liczbą całkowitą. Modyfikowanie najmłodszych bitów nieznacznie zmienia przebieg fali, dlatego atakujący mogą ukrywać:
 
 - 1 bit na próbkę (lub więcej)
-- Dane przeplatane między kanałami
-- Dane z użyciem kroku/permutacji
+- Przeplatane między kanałami
+- Z użyciem kroku/permutacji
 
-Inne rodziny technik ukrywania danych w audio, z którymi możesz się spotkać:
+Inne rodziny technik ukrywania danych w dźwięku, z którymi możesz się spotkać:
 
 - Kodowanie fazy
 - Ukrywanie echa
-- Osadzanie z użyciem spread-spectrum
+- Osadzanie w widmie rozproszonym
 - Kanały po stronie kodeka (zależne od formatu i narzędzia)
 
 ### WavSteg
 
-Źródło: https://github.com/ragibson/Steganography#WavSteg
+From: https://github.com/ragibson/Steganography#WavSteg<sup>[[2]](#references)</sup>
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
@@ -82,11 +82,11 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 - [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / tony wybierania
+## DTMF / sygnały wybierania
 
 ### Technika
 
-DTMF koduje znaki jako pary stałych częstotliwości (klawiatura telefonu). Jeśli dźwięk przypomina tony klawiatury lub regularne sygnały o podwójnej częstotliwości, wcześnie przetestuj dekodowanie DTMF.
+DTMF koduje znaki jako pary stałych częstotliwości (klawiatura telefoniczna). Jeśli dźwięk przypomina sygnały klawiatury lub regularne dwuczęstotliwościowe beepnięcia, warto wcześnie przetestować dekodowanie DTMF.
 
 Dekodery online:
 
@@ -96,5 +96,6 @@ Dekodery online:
 ## Referencje
 
 - [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [2] [ragibson/Steganography](https://github.com/ragibson/Steganography#WavSteg)
 
 {{#include ../../banners/hacktricks-training.md}}
