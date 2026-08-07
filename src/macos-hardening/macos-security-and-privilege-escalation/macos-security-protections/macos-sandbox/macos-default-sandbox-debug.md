@@ -1,10 +1,10 @@
-# macOS डिफ़ॉल्ट सैंडबॉक्स डिबग
+# macOS Default Sandbox Debug
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-इस पृष्ठ पर आप यह जान सकते हैं कि डिफ़ॉल्ट macOS सैंडबॉक्स के अंदर से मनमाने कमांड लॉन्च करने के लिए एक ऐप कैसे बनाया जाए:
+इस page में आप जान सकते हैं कि default macOS sandbox के अंदर से arbitrary commands launch करने के लिए एक app कैसे बनाई जाती है:
 
-1. एप्लिकेशन को संकलित करें:
+1. application को Compile करें:
 ```objectivec:main.m
 #include <Foundation/Foundation.h>
 
@@ -34,9 +34,9 @@ system(input);
 return 0;
 }
 ```
-इसे संकलित करें: `clang -framework Foundation -o SandboxedShellApp main.m`
+इसे चलाकर compile करें: `clang -framework Foundation -o SandboxedShellApp main.m`
 
-2. `.app` बंडल बनाएं
+2. `.app` bundle बनाएँ
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +58,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. अधिकारों को परिभाषित करें
+3. Entitlements परिभाषित करें
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. ऐप पर हस्ताक्षर करें (आपको कीचेन में एक प्रमाणपत्र बनाना होगा)
+4. App को sign करें (आपको keychain में एक certificate बनाना होगा)
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
