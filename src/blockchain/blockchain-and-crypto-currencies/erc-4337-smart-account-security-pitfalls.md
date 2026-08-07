@@ -1,18 +1,18 @@
-# Підводні камені безпеки Smart Account ERC-4337
+# Недоліки безпеки Smart Account ERC-4337
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Абстракція акаунтів ERC-4337 перетворює гаманці на програмовані системи. Основний flow — **validate-then-execute** у межах усього bundle: `EntryPoint` перевіряє кожну `UserOperation` перед виконанням будь-якої з них. Такий порядок створює неочевидну attack surface, коли validation є надто permissive, stateful або не узгоджується з правилами симуляції bundler.
+Абстракція акаунтів ERC-4337 перетворює гаманці на програмовані системи. Основний процес — **validate-then-execute** для всього bundle: `EntryPoint` перевіряє кожен `UserOperation`, перш ніж виконати будь-який із них. Такий порядок створює неочевидну поверхню атаки, якщо перевірка є надто permissive, залежить від стану або не узгоджується з правилами симуляції bundler.
 
-## 1) Обхід через прямий виклик privileged functions
-Будь-яку externally callable функцію `execute` (або функцію, що переміщує кошти), яка не обмежена `EntryPoint` (або перевіреним executor module), можна викликати напряму для спустошення акаунта.<sup>[[1]](#references)</sup>
+## 1) Обхід обмежень privileged-функцій через прямий виклик
+Будь-яку externally callable функцію `execute` (або функцію, що переміщує кошти), яка не обмежена `EntryPoint` (або перевіреним executor module), можна викликати напряму, щоб спустошити акаунт.<sup>[[1]](#references)</sup>
 ```solidity
 function execute(address target, uint256 value, bytes calldata data) external {
 (bool ok,) = target.call{value: value}(data);
 require(ok, "exec failed");
 }
 ```
-Безпечний шаблон: обмежте доступ до `EntryPoint` і використовуйте `msg.sender == address(this)` для потоків адміністрування/самокерування (встановлення модулів, зміни валідаторів, оновлення).
+Безпечний шаблон: обмежте до `EntryPoint` і використовуйте `msg.sender == address(this)` для потоків адміністрування/самокерування (встановлення модулів, зміни валідаторів, оновлення).
 ```solidity
 address public immutable entryPoint;
 
@@ -22,8 +22,8 @@ require(msg.sender == entryPoint, "not entryPoint");
 require(ok, "exec failed");
 }
 ```
-## 2) Непідписані або неперевірені поля gas -> drain комісій
-Якщо перевірка підпису охоплює лише намір (`callData`), але не поля, пов’язані з gas, bundler або frontrunner може завищити комісії та вивести ETH. Підписаний payload має щонайменше прив’язувати:<sup>[[1]](#references)</sup>
+## 2) Непідписані або неперевірені gas-поля -> fee drain
+Якщо перевірка підпису охоплює лише intent (`callData`), але не поля, пов’язані з gas, bundler або frontrunner може завищити комісії та drain ETH. Підписаний payload має щонайменше включати:<sup>[[1]](#references)</sup>
 
 - `preVerificationGas`
 - `verificationGasLimit`
@@ -31,7 +31,7 @@ require(ok, "exec failed");
 - `maxFeePerGas`
 - `maxPriorityFeePerGas`
 
-Захисний підхід: використовуйте наданий `EntryPoint` `userOpHash` (який містить поля gas) та/або суворо обмежуйте кожне поле.<sup>[[1]](#references)</sup>
+Захисний підхід: використовувати наданий `EntryPoint` `userOpHash` (який містить поля gas) та/або суворо обмежувати кожне поле.<sup>[[1]](#references)</sup>
 ```solidity
 function validateUserOp(UserOperation calldata op, bytes32 userOpHash, uint256)
 external
@@ -41,45 +41,45 @@ require(_isApprovedCall(userOpHash, op.signature), "bad sig");
 return 0;
 }
 ```
-## 3) Перезапис результатів stateful validation (семантика bundle)
-Оскільки всі validations виконуються перед будь-яким execution, зберігати результати validation у state контракту небезпечно. Інша op у тому самому bundle може їх перезаписати, через що ваш execution використає state, на який вплинув attacker.<sup>[[1]](#references)</sup>
+## 3) Перезаписування стану валідації (семантика bundle)
+Оскільки всі валідації виконуються до будь-якого виконання, зберігати результати валідації у стані контракту небезпечно. Інша операція в тому самому bundle може їх перезаписати, через що ваше виконання використовуватиме стан, на який вплинув attacker.<sup>[[1]](#references)</sup>
 
-Уникайте запису в storage у `validateUserOp`. Якщо цього не уникнути, прив'язуйте тимчасові дані до `userOpHash` і детерміновано видаляйте їх після використання (краще використовувати stateless validation).<sup>[[1]](#references)</sup>
+Уникайте запису в storage у `validateUserOp`. Якщо це неминуче, прив’язуйте тимчасові дані до `userOpHash` і детерміновано видаляйте їх після використання (надавайте перевагу stateless validation).<sup>[[1]](#references)</sup>
 
-## 4) ERC-1271 replay між accounts/chains (відсутність domain separation)
-`isValidSignature(bytes32 hash, bytes sig)` має прив'язувати signatures до **цього contract** і **цього chain**. Відновлення підписанта для raw hash дає змогу повторно використовувати signatures між accounts або chains.<sup>[[1]](#references)</sup>
+## 4) Replay ERC-1271 між акаунтами та chain (відсутній domain separation)
+`isValidSignature(bytes32 hash, bytes sig)` має прив’язувати підписи до **цього контракту** та **цього chain**. Відновлення підписувача за raw hash дає змогу відтворювати підписи між акаунтами або chain.<sup>[[1]](#references)</sup>
 
-Використовуйте EIP-712 typed data (domain містить `verifyingContract` і `chainId`) і повертайте точне ERC-1271 magic value `0x1626ba7e` у разі успіху.<sup>[[1]](#references)</sup>
+Використовуйте EIP-712 typed data (domain містить `verifyingContract` і `chainId`) і повертайте точне magic value ERC-1271 `0x1626ba7e` у разі успіху.<sup>[[1]](#references)</sup>
 
-## 5) Reverts не повертають кошти після validation
-Після успішного виконання `validateUserOp` fees вважаються committed, навіть якщо execution згодом завершується revert. Attackers можуть багаторазово надсилати ops, які завершаться помилкою, і все одно списувати fees з account.<sup>[[1]](#references)</sup>
+## 5) Revert не повертає кошти після валідації
+Після успішного виконання `validateUserOp` комісії вважаються зафіксованими, навіть якщо виконання згодом завершиться revert. Attackers можуть повторно надсилати ops, які завершаться помилкою, і все одно стягувати комісії з акаунта.<sup>[[1]](#references)</sup>
 
-Для paymasters оплата зі shared pool у `validateUserOp` і стягнення коштів з users у `postOp` є ненадійними, оскільки `postOp` може завершитися revert без скасування payment. Захищайте кошти під час validation (per-user escrow/deposit), зводьте `postOp` до мінімуму та не допускайте revert, а `paymasterPostOpGasLimit` розраховуйте для worst-case reimbursement path.<sup>[[1]](#references)</sup>
+Для paymasters оплата зі спільного pool у `validateUserOp` і стягнення коштів із користувачів у `postOp` є ненадійними, оскільки `postOp` може завершитися revert без скасування платежу. Резервуйте кошти під час валідації (окремий escrow/deposit для кожного користувача), залишайте `postOp` мінімальним і таким, що не завершується revert, та закладайте в `paymasterPostOpGasLimit` бюджет для шляху відшкодування у найгіршому випадку.<sup>[[1]](#references)</sup>
 
-## 6) Counterfactual deployment / припущення щодо factory
-Перша `UserOperation` часто містить `initCode`, що спричиняє deployment account через **factory** під час validation. Цей path легко недооцінити під час аудиту, оскільки він виконується лише під час першого використання.<sup>[[2]](#references)</sup>
+## 6) Припущення щодо counterfactual deployment / factory
+Перша `UserOperation` часто містить `initCode`, що спричиняє deployment акаунта через **factory** під час валідації. Цей шлях легко недостатньо перевірити, оскільки він виконується лише під час першого використання.<sup>[[2]](#references)</sup>
 
 Поширені помилки:
 
-- Factory/initializer покладається на `msg.sender == entryPoint`, але шлях deployment в ERC-4337 **не** викликає `initCode` безпосередньо з `EntryPoint`.
-- Salt, owner, validator або конфігурація module не повністю прив'язані до signed intent, тому frontrunner може випередити перший deployment і зайняти counterfactual address із settings, контрольованими attacker.
-- Factory є non-idempotent, тому повторний flow першого використання ламає wallet замість повернення вже створеної address.
+- Factory/initializer довіряє умові `msg.sender == entryPoint`, але шлях deployment в ERC-4337 **не** викликає `initCode` безпосередньо з `EntryPoint`.
+- Salt, owner, validator або конфігурація module не повністю прив’язані до підписаного intent, тому frontrunner може випередити перший deployment і зайняти counterfactual address із налаштуваннями, контрольованими attacker.
+- Factory не є idempotent, тому повторний flow першого використання робить wallet непридатним замість повернення вже створеної address.
 
-Безпечний pattern: повторно обчислюйте expected sender із signed deployment parameters, зробіть deployment детермінованим (зазвичай через `CREATE2`) і виконуйте initialization лише один раз.<sup>[[2]](#references)</sup>
+Безпечний pattern: повторно обчислюйте очікуваний sender на основі підписаних параметрів deployment, робіть deployment детермінованим (зазвичай через `CREATE2`) і виконуйте initialization лише один раз.<sup>[[2]](#references)</sup>
 ```solidity
 bytes32 salt = keccak256(abi.encode(owner, validator, saltNonce));
 address predicted = Create2.computeAddress(salt, keccak256(initCode));
 require(predicted == sender, "bad sender");
 ```
-## 7) Логіка валідації, яку відхиляють bundlers
-Код валідації може бути коректним у локальних тестах і водночас непридатним для використання в реальних bundlers. Публічні bundlers симулюють `validateUserOp()` / `validatePaymasterUserOp()` off-chain і зазвичай виконують повний `debug_traceCall(handleOps)` перед включенням.
+## 7) Validation logic that bundlers reject
+Код validation може бути коректним у локальних тестах і водночас непридатним для використання в реальних bundlers. Public bundlers симулюють `validateUserOp()` / `validatePaymasterUserOp()` off-chain і зазвичай виконують повний `debug_traceCall(handleOps)` перед включенням.<sup>[[3]](#references)</sup>
 
-Це робить такі шаблони небезпечними всередині валідації:
+Через це такі патерни є небезпечними всередині validation:
 
-- Операкоди, залежні від блоку, такі як `TIMESTAMP`, `NUMBER` або `BLOCKHASH`
-- Записи до стану, такі як `SSTORE`
+- Опкоди, залежні від блоку, як-от `TIMESTAMP`, `NUMBER` або `BLOCKHASH`
+- Записи до state, як-от `SSTORE`
 - Необмежена ітерація по storage
-- Довільні зовнішні виклики або читання oracle, які можуть змінитися між симуляцією та включенням
+- Довільні external calls або oracle reads, які можуть змінитися між simulation і включенням
 
 Поганий приклад:
 ```solidity
@@ -93,10 +93,10 @@ require(oracle.isAllowed(op.sender), "oracle changed");
 return 0;
 }
 ```
-Розглядайте validation як детерміновану, обмежену preflight-функцію. Якщо вам справді потрібен shared state або зовнішні lookups, перенесіть цю складність у staked/reputation-tracked entities і тестуйте точний шлях bundler simulation, а не лише unit tests.
+Розглядайте validation як детерміновану, обмежену preflight-функцію. Якщо вам справді потрібен shared state або зовнішні lookup-запити, перенесіть цю складність у staked/reputation-tracked entities і тестуйте точний bundler simulation path, а не лише unit tests.
 
 ## 8) ERC-7702 initialization frontrun
-ERC-7702 дає змогу EOA виконувати код smart-account протягом однієї tx. Якщо initialization доступна для зовнішнього виклику, frontrunner може призначити себе owner.<sup>[[1]](#references)</sup>
+ERC-7702 дає змогу EOA виконувати код smart-account протягом однієї tx. Якщо initialization можна викликати externally, frontrunner може призначити себе owner.<sup>[[1]](#references)</sup>
 
 Mitigation: дозволяйте initialization лише через **self-call** і лише один раз.<sup>[[1]](#references)</sup>
 ```solidity
@@ -107,20 +107,19 @@ owner = newOwner;
 }
 ```
 ## Швидкі перевірки перед злиттям
-- Перевіряйте підписи за допомогою `userOpHash` з `EntryPoint` (прив’язує поля gas).
-- Обмежуйте привілейовані функції `EntryPoint` та/або `address(this)` відповідно до ситуації.
-- Зберігайте `validateUserOp` безстанною, детермінованою та сумісною з правилами симуляції bundler.
+- Перевіряйте підписи за допомогою `userOpHash` з `EntryPoint` (він прив'язує поля gas).
+- Обмежуйте привілейовані функції до `EntryPoint` та/або `address(this)` відповідно до вимог.
+- Робіть `validateUserOp` безстанним, детермінованим і сумісним із правилами симуляції bundler.
 - Забезпечуйте розділення доменів EIP-712 для ERC-1271 і повертайте `0x1626ba7e` у разі успіху.
-- Робіть `postOp` мінімальною, обмеженою за ресурсами та такою, що не спричиняє revert; захищайте комісії під час валідації.
+- Робіть `postOp` мінімальним, обмеженим за ресурсами та таким, що не спричиняє revert; захищайте комісії під час валідації.
 - Окремо тестуйте перший шлях `initCode`: детерміноване розгортання, ідемпотентну поведінку factory та одноразову ініціалізацію.
 - Перед випуском запускайте повну симуляцію bundler (`simulateValidation` разом із трасованим `handleOps`).
 - Для ERC-7702 дозволяйте init лише під час self-call і лише один раз.
 
-
-
 ## Посилання
 
-- [1] [Шість помилок у смарт-акаунтах ERC-4337 (Trail of Bits)](https://blog.trailofbits.com/2026/03/11/six-mistakes-in-erc-4337-smart-accounts/)
-- [2] [ERC-4337: абстракція акаунтів із використанням Alt Mempool](https://eips.ethereum.org/EIPS/eip-4337)
+- [1] [Шість помилок у smart accounts ERC-4337 (Trail of Bits)](https://blog.trailofbits.com/2026/03/11/six-mistakes-in-erc-4337-smart-accounts/)
+- [2] [ERC-4337: абстракція акаунтів із використанням альтернативного mempool](https://eips.ethereum.org/EIPS/eip-4337)
+- [3] [ERC-7562: правила області валідації абстракції акаунтів](https://eips.ethereum.org/EIPS/eip-7562)
 
 {{#include ../../banners/hacktricks-training.md}}

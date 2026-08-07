@@ -1,22 +1,22 @@
-# Crypto CTF Робочий процес
+# Crypto CTF Workflow
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Контрольний список тріажу
+## Чекліст тріажу
 
-1. Визначте, що у вас є: encoding vs encryption vs hash vs signature vs MAC.
-2. Визначте, що контролюється: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
+1. Визначте, що саме у вас є: encoding, encryption, hash, signature чи MAC.
+2. Визначте, що контролюється: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), частковий leak.
 3. Класифікуйте: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Застосовуйте найімовірніші перевірки першими: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
-5. Переходьте до просунутих методів тільки за потреби: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+4. Спочатку застосуйте перевірки з найвищою ймовірністю успіху: декодування шарів, XOR із відомим plaintext, повторне використання nonce, неправильне використання режиму, поведінка oracle.
+5. Переходьте до складніших методів лише за потреби: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
 ## Онлайн-ресурси та утиліти
 
-Це корисно, коли завдання — ідентифікація та зняття шарів, або коли потрібно швидко підтвердити гіпотезу.
+Вони корисні, коли завдання полягає в ідентифікації та знятті шарів або коли потрібно швидко підтвердити гіпотезу.
 
-### Hash lookups
+### Пошук hash
 
-- Google the hash (surprisingly effective).
+- Пошукайте hash у Google (на диво ефективно).
 - [https://crackstation.net/](https://crackstation.net/)
 - [https://md5decrypt.net/](https://md5decrypt.net/)
 - [https://hashes.org/search.php](https://hashes.org/search.php)
@@ -24,40 +24,40 @@
 - [https://gpuhash.me/](https://gpuhash.me/)
 - [http://hashtoolkit.com/reverse-hash](http://hashtoolkit.com/reverse-hash)
 
-### Інструменти для ідентифікації
+### Допоміжні інструменти для ідентифікації
 
 - CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
-- dCode (ciphers/encodings playground): https://www.dcode.fr/tools-list
-- Boxentriq (substitution solvers): https://www.boxentriq.com/code-breaking
+- dCode (майданчик для ciphers/encodings): https://www.dcode.fr/tools-list
+- Boxentriq (розв'язувачі substitution): https://www.boxentriq.com/code-breaking
 
-### Платформи для практики / посилання
+### Платформи для практики / reference
 
-- CryptoHack (hands-on crypto challenges): https://cryptohack.org/
-- Cryptopals (classic modern crypto pitfalls): https://cryptopals.com/
+- CryptoHack (практичні crypto challenges): https://cryptohack.org/
+- Cryptopals (класичні сучасні crypto pitfalls): https://cryptopals.com/
 
 ### Автоматичне декодування
 
 - Ciphey: https://github.com/Ciphey/Ciphey
-- python-codext (tries many bases/encodings): https://github.com/dhondta/python-codext
+- python-codext (перебирає багато bases/encodings): https://github.com/dhondta/python-codext
 
-## Кодування та класичні шифри
+## Encodings та classical ciphers
 
-### Метод
+### Technique
 
-Багато CTF crypto задач — це багатошарові трансформації: base encoding + simple substitution + compression. Мета — ідентифікувати шари та зняти їх безпечно.
+Багато crypto-завдань у CTF є багаторівневими перетвореннями: base encoding + проста substitution + compression. Мета полягає в тому, щоб визначити шари та безпечно зняти їх.
 
-### Encodings: try many bases
+### Encodings: спробуйте багато bases
 
-Якщо підозрюєте багатошарове кодування (base64 → base32 → …), спробуйте:
+Якщо ви підозрюєте багаторівневе encoding (base64 → base32 → …), спробуйте:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
-Поширені ознаки:
+Типові ознаки:
 
-- Base64: `A-Za-z0-9+/=` (padding `=` is common)
-- Base32: `A-Z2-7=` (often lots of `=` padding)
-- Ascii85/Base85: dense punctuation; sometimes wrapped in `<~ ~>`
+- Base64: `A-Za-z0-9+/=` (padding `=` є поширеним)
+- Base32: `A-Z2-7=` (часто багато padding-символів `=`)
+- Ascii85/Base85: щільна punctuation; іноді обгортається в `<~ ~>`
 
 ### Substitution / monoalphabetic
 
@@ -76,7 +76,7 @@
 
 ### Bacon cipher
 
-Часто зустрічається як групи по 5 біт або 5 літер:
+Часто зустрічається у вигляді груп із 5 bits або 5 letters:
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
@@ -87,13 +87,13 @@ AABBB ABBAB ABABA AAAAA ...
 ```
 ### Руни
 
-Руни часто є алфавітами підстановки; пошукайте "futhark cipher" і спробуйте таблиці відображень.
+Руни часто є алфавітами підстановки; шукайте "futhark cipher" і спробуйте таблиці відповідностей.
 
-## Стиснення в задачах
+## Стиснення у challenge
 
 ### Техніка
 
-Стиснення часто зустрічається як додатковий шар (zlib/deflate/gzip/xz/zstd), іноді вкладений. Якщо вивід майже парситься, але виглядає як сміття, підозрюйте стиснення.
+Стиснення постійно зустрічається як додатковий шар (zlib/deflate/gzip/xz/zstd), іноді вкладений. Якщо результат майже парситься, але виглядає як сміття, запідозріть стиснення.
 
 ### Швидка ідентифікація
 
@@ -108,9 +108,9 @@ AABBB ABBAB ABABA AAAAA ...
 
 ### Raw DEFLATE
 
-CyberChef має **Raw Deflate/Raw Inflate**, що часто є найшвидшим шляхом, коли blob виглядає стисненим, але `zlib` не справляється.
+У CyberChef є **Raw Deflate/Raw Inflate** — це часто найшвидший шлях, коли blob виглядає стисненим, але `zlib` не спрацьовує.
 
-### Корисні CLI
+### Корисний CLI
 ```bash
 python3 - <<'PY'
 import sys, zlib
@@ -122,11 +122,11 @@ except Exception:
 pass
 PY
 ```
-## Поширені конструкції crypto для CTF
+## Поширені криптографічні конструкції CTF
 
-### Техніка
+### Technique
 
-Вони часто зустрічаються, оскільки це реалістичні помилки розробників або поширені бібліотеки, використані неправильно. Мета зазвичай — розпізнати їх і застосувати відому методику вилучення або реконструкції.
+Вони часто трапляються, оскільки є реалістичними помилками розробників або результатом неправильного використання поширених бібліотек. Зазвичай мета полягає у розпізнаванні та застосуванні відомого workflow для extraction або reconstruction.
 
 ### Fernet
 
@@ -137,13 +137,13 @@ PY
 
 ### Shamir Secret Sharing
 
-Якщо ви бачите кілька shares і згадується поріг `t`, ймовірно, це Shamir.
+Якщо ви бачите кілька shares і згадується threshold `t`, найімовірніше, це Shamir.
 
 - Online reconstructor (handy for CTFs): http://christian.gen.co/secrets/
 
 ### OpenSSL salted formats
 
-CTF іноді дають `openssl enc` outputs (header often begins with `Salted__`).
+У CTF іноді надають результати `openssl enc` (заголовок часто починається з `Salted__`).
 
 Bruteforce helpers:
 
@@ -161,10 +161,10 @@ Bruteforce helpers:
 Практичний стек для CTF:
 
 - Python + `pycryptodome` для симетричних примітивів і швидкого прототипування
-- SageMath для модульної арифметики, CRT, решіток та роботи з RSA/ECC
-- Z3 для задач на основі обмежень (коли crypto зводиться до обмежень)
+- SageMath для модульної арифметики, CRT, lattices і роботи з RSA/ECC
+- Z3 для challenges на основі constraints (коли криптографія зводиться до constraints)
 
-Рекомендовані Python пакети:
+Рекомендовані Python packages:
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
