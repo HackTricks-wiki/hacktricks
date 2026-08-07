@@ -3,11 +3,11 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Jeśli program używa `scanf` do pobrania **kilku wartości naraz ze stdin**, musisz wygenerować stan rozpoczynający się po **`scanf`**.
+> Jeśli program używa `scanf` do pobrania **kilku wartości naraz ze standardowego wejścia**, musisz wygenerować stan rozpoczynający się po **`scanf`**.
 
-Kody pochodzą z [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Kod pochodzi z [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Dane wejściowe prowadzące do adresu (ze wskazaniem adresu)
+### Dane wejściowe umożliwiające dotarcie do adresu (z podaniem adresu)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Dane wejściowe prowadzące do adresu (wskazujące wywołania print)
+### Dane wejściowe prowadzące do adresu (wskazujące instrukcje `print`)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-W tym scenariuszu dane wejściowe zostały pobrane za pomocą `scanf("%u %u")` i podano wartość `"1 1"`, więc wartości **`0x00000001`** na stosie pochodzą od **danych wejściowych użytkownika**. Widać, że te wartości zaczynają się od `$ebp - 8`. Dlatego w kodzie **odjęliśmy 8 bajtów od `$esp` (ponieważ w tym momencie `$ebp` i `$esp` miały tę samą wartość)**, a następnie umieściliśmy BVS.
+W tym scenariuszu dane wejściowe zostały pobrane za pomocą `scanf("%u %u")` i podano wartość `"1 1"`, dlatego wartości **`0x00000001`** na stacku pochodzą z **danych wejściowych użytkownika**. Możesz zobaczyć, że te wartości zaczynają się od `$ebp - 8`. Dlatego w kodzie **odjęliśmy 8 bajtów od `$esp` (ponieważ w tym momencie `$ebp` i `$esp` miały tę samą wartość)**, a następnie wykonaliśmy push BVS.
 
-![Umieszczanie wektorów bitowych na stosie w celu ustalenia wartości, jaką musi mieć dana pozycja stosu, aby osiągnąć określony przepływ programu: W tym scenariuszu dane wejściowe zostały pobrane za pomocą scanf("%u %u") i podano wartość "1...](<../../../images/image (136).png>)
+![Umieść wektory bitowe na stacku, aby ustalić wartość, do której dana pozycja stacka musi dotrzeć, żeby osiągnąć określony przepływ programu: W tym scenariuszu dane wejściowe zostały pobrane za pomocą scanf("%u %u") i podano wartość "1...](<../../../images/image (136).png>)
 
 ### Statyczne wartości pamięci (zmienne globalne)
 ```python
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> Zauważ, że symbolic file może również zawierać stałe dane połączone z danymi symbolicznymi:
+> Należy pamiętać, że plik symboliczny może również zawierać dane stałe połączone z danymi symbolicznymi:
 >
 > ```python
 >  # Hello world, my name is John.
@@ -407,8 +407,8 @@ main(sys.argv)
 ### Stosowanie ograniczeń
 
 > [!TIP]
-> Czasami proste operacje wykonywane przez człowieka, takie jak porównanie 2 słów o długości 16 **znak po znaku** (pętla), **kosztują** **angr** bardzo dużo, ponieważ musi on generować gałęzie **wykładniczo**, gdyż tworzy 1 gałąź dla każdego if: `2^16`\
-> Dlatego łatwiej jest **poprosić angr o powrót do wcześniejszego punktu** (w którym najtrudniejsza część została już wykonana) i **ustawić te ograniczenia ręcznie**.
+> Czasami proste operacje wykonywane przez człowieka, takie jak porównanie 2 słów o długości 16 **znak po znaku** (pętla), są dla **angr** bardzo **kosztowne**, ponieważ musi on generować rozgałęzienia **wykładniczo** — generuje 1 rozgałęzienie na każde `if`: `2^16`\
+> Dlatego łatwiej jest **poprosić angr o przejście do wcześniejszego punktu** (w którym trudna część została już wykonana) i **ustawić te ograniczenia ręcznie**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> W niektórych scenariuszach można aktywować **veritesting**, który połączy podobne stany, aby uniknąć niepotrzebnych gałęzi i znaleźć rozwiązanie: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> W niektórych scenariuszach możesz aktywować **veritesting**, który połączy podobne statusy, aby pominąć niepotrzebne gałęzie i znaleźć rozwiązanie: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Inną rzeczą, którą można zrobić w tych scenariuszach, jest **hook funkcji, dostarczając angr coś, co może łatwiej zrozumieć**.
+> Inną rzeczą, którą możesz zrobić w tych scenariuszach, jest **hook funkcji, dostarczając angr coś, co może łatwiej zrozumieć**.
 
-### Menedżery symulacji
+### Simulation Managers
 
-Niektóre menedżery symulacji mogą być bardziej użyteczne od innych. W poprzednim przykładzie pojawił się problem, ponieważ utworzono wiele użytecznych gałęzi. Tutaj technika **veritesting** połączy je i znajdzie rozwiązanie.\
-Ten menedżer symulacji można również aktywować za pomocą: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Niektóre simulation managers mogą być bardziej przydatne niż inne. W poprzednim przykładzie pojawił się problem, ponieważ utworzono wiele użytecznych gałęzi. Tutaj technika **veritesting** połączy je i znajdzie rozwiązanie.\
+Ten simulation manager można również aktywować za pomocą: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Bypassing jednego wywołania funkcji
+### Hooking/omijanie jednego wywołania funkcji
 ```python
 # This level performs the following computations:
 #
@@ -807,8 +807,8 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-## Odniesienia
+## References
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}

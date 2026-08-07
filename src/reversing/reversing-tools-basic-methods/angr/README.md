@@ -30,7 +30,7 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## Informacje o załadowanym i głównym obiekcie
+## Informacje o załadowanych i głównym obiekcie
 
 ### Załadowane dane
 ```python
@@ -55,7 +55,7 @@ proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
-### Główny obiekt
+### Obiekt główny
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -121,9 +121,9 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ### Wywoływanie funkcji
 
-- Możesz przekazać listę argumentów przez `args` oraz słownik zmiennych środowiskowych przez `env` do `entry_state` i `full_init_state`. Wartości w tych strukturach mogą być ciągami znaków lub wektorami bitowymi i zostaną zserializowane do stanu jako argumenty i środowisko symulowanego wykonania. Domyślna wartość `args` to pusta lista, więc jeśli analizowany program oczekuje znalezienia co najmniej `argv[0]`, zawsze należy ją podać!
-- Jeśli chcesz, aby `argc` było symboliczne, możesz przekazać symboliczny wektor bitowy jako `argc` do konstruktorów `entry_state` i `full_init_state`. Należy jednak zachować ostrożność: jeśli to zrobisz, powinieneś również dodać do wynikowego stanu ograniczenie, że wartość `argc` nie może być większa niż liczba argumentów przekazanych do `args`.
-- Aby użyć stanu wywołania, należy wywołać go za pomocą `.call_state(addr, arg1, arg2, ...)`, gdzie `addr` to adres funkcji, którą chcesz wywołać, a `argN` to N-ty argument tej funkcji, podany jako liczba całkowita języka Python, ciąg znaków, tablica lub wektor bitowy. Jeśli chcesz przydzielić pamięć i faktycznie przekazać wskaźnik do obiektu, powinieneś opakować go w `PointerWrapper`, np. `angr.PointerWrapper("point to me!")`. Wyniki tego API mogą być nieco nieprzewidywalne, ale pracujemy nad tym.
+- Możesz przekazać listę argumentów przez `args` oraz słownik zmiennych środowiskowych przez `env` do `entry_state` i `full_init_state`. Wartości w tych strukturach mogą być stringami lub bitvectorami i zostaną zserializowane do stanu jako argumenty i środowisko symulowanego wykonania. Domyślne `args` to pusta lista, więc jeśli analizowany program oczekuje co najmniej `argv[0]`, zawsze należy ją przekazać!
+- Jeśli chcesz, aby `argc` było symboliczne, możesz przekazać symboliczny bitvector jako `argc` do konstruktorów `entry_state` i `full_init_state`. Zachowaj jednak ostrożność: jeśli to zrobisz, powinieneś również dodać do wynikowego stanu ograniczenie, że wartość `argc` nie może być większa niż liczba argumentów przekazanych do `args`.
+- Aby użyć call state, wywołaj go za pomocą `.call_state(addr, arg1, arg2, ...)`, gdzie `addr` to adres funkcji, którą chcesz wywołać, a `argN` to N-ty argument tej funkcji — jako liczba całkowita języka Python, string lub tablica albo bitvector. Jeśli chcesz zaalokować pamięć i rzeczywiście przekazać wskaźnik do obiektu, opakuj go w PointerWrapper, np. `angr.PointerWrapper("point to me!")`. Wyniki tego API mogą być nieco nieprzewidywalne, ale pracujemy nad tym.
 
 ### Wektory bitowe
 ```python
@@ -186,11 +186,11 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Ponadto możesz użyć `proj.hook_symbol(name, hook)`, podając nazwę symbolu jako pierwszy argument, aby podpiąć hook do adresu, pod którym znajduje się symbol<sup>[[1]](#references)</sup>
+Ponadto możesz użyć `proj.hook_symbol(name, hook)`, podając nazwę symbolu jako pierwszy argument, aby założyć hook na adresie, pod którym znajduje się symbol<sup>[[1]](#references)</sup>
 
 ## Przykłady
 
-## Odniesienia
+## Referencje
 
 - [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
