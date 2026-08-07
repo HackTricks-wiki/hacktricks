@@ -6,14 +6,14 @@
 
 ### मूल जानकारी
 
-**macOS Big Sur (11.0)** से, system volume को **APFS snapshot hash tree** का उपयोग करके cryptographically seal किया जाता है। इसे **Sealed System Volume (SSV)** कहा जाता है। system partition को **read-only** रूप में mount किया जाता है और कोई भी modification seal को तोड़ देता है, जिसकी boot के दौरान verification की जाती है।
+**macOS Big Sur (11.0)** से शुरू होकर, system volume को **APFS snapshot hash tree** का उपयोग करके cryptographically sealed किया जाता है। इसे **Sealed System Volume (SSV)** कहा जाता है। system partition को **read-only** mount किया जाता है और कोई भी modification seal को तोड़ देती है, जिसकी boot के दौरान verification की जाती है।<sup>[[11]](#references)</sup>
 
-SSV यह प्रदान करता है:
-- **Tamper detection** — system binaries/frameworks में कोई भी modification टूटे हुए cryptographic seal के माध्यम से detect किया जा सकता है
+SSV प्रदान करता है:
+- **Tamper detection** — system binaries/frameworks में कोई भी modification, टूटे हुए cryptographic seal के माध्यम से detect की जा सकती है
 - **Rollback protection** — boot process system snapshot की integrity verify करता है
 - **Rootkit prevention** — root भी system volume पर files को persistently modify नहीं कर सकता (seal तोड़े बिना)
 
-### SSV Status की जाँच
+### SSV Status की जाँच करना
 ```bash
 # Check if authenticated root is enabled (SSV seal verification)
 csrutil authenticated-root status
@@ -35,10 +35,10 @@ diskutil apfs listVolumeGroups
 |---|---|
 | `com.apple.private.apfs.revert-to-snapshot` | system volume को पिछले snapshot पर revert करना |
 | `com.apple.private.apfs.create-sealed-snapshot` | system updates के बाद नया sealed snapshot बनाना |
-| `com.apple.rootless.install.heritable` | SIP-protected paths में write करना (child processes को inherit होता है) |
+| `com.apple.rootless.install.heritable` | SIP-protected paths में write करना (child processes द्वारा inherited) |
 | `com.apple.rootless.install` | SIP-protected paths में write करना |
 
-### SSV Writers को ढूँढना
+### SSV Writers ढूँढना
 ```bash
 # Search for binaries with SSV-related entitlements
 find /System /usr -type f -perm +111 -exec sh -c '
@@ -58,7 +58,7 @@ WHERE c.name = 'ssv_writer';"
 
 #### Snapshot Rollback Attack
 
-यदि कोई attacker `com.apple.private.apfs.revert-to-snapshot` वाले binary को compromise कर लेता है, तो वह **system volume को update से पहले की state पर rollback** कर सकता है और ज्ञात vulnerabilities को फिर से सक्रिय कर सकता है:
+यदि कोई attacker `com.apple.private.apfs.revert-to-snapshot` वाले binary को compromise कर लेता है, तो वह **system volume को update से पहले की स्थिति में roll back कर सकता है**, जिससे ज्ञात vulnerabilities पुनर्स्थापित हो जाती हैं:
 ```bash
 # Conceptual — the snapshot revert operation would:
 # 1. List available snapshots
@@ -72,20 +72,20 @@ diskutil apfs listSnapshots disk3s1
 
 #### System Binary Replacement
 
-SIP bypass + SSV write capability के साथ, attacker:
+SIP bypass + SSV write capability के साथ, attacker यह कर सकता है:
 
-1. system volume को read-write के रूप में mount कर सकता है
-2. किसी system daemon या framework library को trojaned version से replace कर सकता है
-3. snapshot को re-seal कर सकता है (या यदि SIP पहले से degraded है, तो broken seal को स्वीकार कर सकता है)
-4. rootkit reboots के बाद भी persist करता है और userland detection tools से invisible रहता है
+1. system volume को read-write के रूप में mount करना
+2. किसी system daemon या framework library को trojaned version से replace करना
+3. snapshot को re-seal करना (या broken seal को स्वीकार करना, यदि SIP पहले से degraded है)
+4. rootkit reboots के बाद भी persist करता है और userland detection tools को दिखाई नहीं देता
 
 ### Real-World CVEs
 
 | CVE | Description |
 |---|---|
-| CVE-2021-30892 | **Shrootless** — `system_installd` के `com.apple.rootless.install.heritable` entitlement का abuse करके SIP bypass, जिससे arbitrary post-install scripts चलाए जा सकते हैं ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)) |
-| CVE-2022-22583 | SIP bypass: `system_installd` ने post-install script को `/tmp` के अंदर SIP-protected folder में stage किया, लेकिन स्वयं `/tmp` SIP-protected नहीं है, इसलिए उसके ऊपर image mount करके folder को swap किया जा सकता था ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)) |
-| CVE-2022-46689 | **MacDirtyCow** — XNU में copy-on-write race, जो read-only root-owned files में writes की अनुमति देती है ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)) |
+| CVE-2021-30892 | **Shrootless** — `system_installd` के `com.apple.rootless.install.heritable` entitlement का दुरुपयोग करने वाला SIP bypass, जिससे arbitrary post-install scripts चलाए जा सकते हैं ([Microsoft](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/))<sup>[[1]](#references)</sup> |
+| CVE-2022-22583 | SIP bypass: `system_installd` ने post-install script को `/tmp` के अंतर्गत SIP-protected folder में stage किया, लेकिन स्वयं `/tmp` SIP-protected नहीं है, इसलिए उसके ऊपर image mount करके folder को swap किया जा सकता था ([Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html))<sup>[[2]](#references)</sup> |
+| CVE-2022-46689 | **MacDirtyCow** — XNU में copy-on-write race, जिससे read-only root-owned files में writes संभव हो जाती हैं ([Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/))<sup>[[3]](#references)</sup> |
 
 ---
 
@@ -93,7 +93,7 @@ SIP bypass + SSV write capability के साथ, attacker:
 
 ### Basic Information
 
-**DataVault** sensitive system databases के लिए Apple की protection layer है। यहां तक कि **root भी DataVault-protected files को access नहीं कर सकता** — केवल specific entitlements वाली processes ही उन्हें read या modify कर सकती हैं।<sup>[[1]](#references)</sup> Protected stores में शामिल हैं:
+**DataVault** संवेदनशील system databases के लिए Apple की protection layer है। यहां तक कि **root भी DataVault-protected files को access नहीं कर सकता** — केवल specific entitlements वाले processes ही उन्हें read या modify कर सकते हैं।<sup>[[4]](#references)</sup> Protected stores में शामिल हैं:
 
 | Protected Database | Path | Content |
 |---|---|---|
@@ -102,7 +102,7 @@ SIP bypass + SSV write capability के साथ, attacker:
 | Keychain (system) | `/Library/Keychains/System.keychain` | System keychain |
 | Keychain (user) | `~/Library/Keychains/login.keychain-db` | User keychain |
 
-DataVault protection **filesystem level** पर extended attributes और volume protection flags का उपयोग करके enforce की जाती है, जिसकी verification kernel द्वारा की जाती है।
+DataVault protection **filesystem level** पर extended attributes और volume protection flags का उपयोग करके लागू की जाती है, और kernel द्वारा verify की जाती है।
 
 ### DataVault Controller Entitlements
 ```
@@ -111,7 +111,7 @@ com.apple.private.tcc.manager.check-by-audit-token — TCC checks via audit toke
 com.apple.private.tcc.allow           — Access specific TCC-protected resources
 com.apple.rootless.storage.TCC        — Write to TCC database (SIP-related)
 ```
-### DataVault Controllers ढूँढना
+### DataVault Controllers की खोज
 ```bash
 # Check DataVault protection on the TCC database
 ls -le@ "/Library/Application Support/com.apple.TCC/TCC.db"
@@ -134,7 +134,7 @@ WHERE c.name = 'datavault_controller';"
 
 #### Direct TCC Database Modification
 
-यदि कोई attacker DataVault controller binary (जैसे `com.apple.private.tcc.manager` वाले process में code injection के माध्यम से) को compromise कर लेता है, तो वह किसी भी application को कोई भी TCC permission देने के लिए **TCC database को सीधे modify** कर सकता है:
+यदि कोई attacker DataVault controller binary से compromise करता है (उदाहरण के लिए, `com.apple.private.tcc.manager` वाले process में code injection के माध्यम से), तो वह **किसी भी application को कोई भी TCC permission देने के लिए TCC database को सीधे modify कर सकता है**:<sup>[[12]](#references)</sup>
 ```sql
 -- Grant Full Disk Access to a malicious binary (conceptual)
 INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_version)
@@ -145,13 +145,13 @@ INSERT INTO access (service, client, client_type, auth_value, auth_reason, auth_
 VALUES ('kTCCServiceCamera', 'com.attacker.malware', 0, 2, 4, 1);
 ```
 > [!CAUTION]
-> TCC database modification **सबसे प्रभावी privacy bypass** है — यह बिना किसी user prompt या visible indicator के किसी भी permission को silently grant करता है। ऐतिहासिक रूप से, कई macOS privilege escalation chains का अंतिम payload TCC database writes रहा है।
+> TCC database modification **अंतिम privacy bypass** है — यह बिना किसी user prompt या दिखाई देने वाले indicator के किसी भी permission को चुपचाप प्रदान करता है। ऐतिहासिक रूप से, कई macOS privilege escalation chains का अंतिम payload TCC database writes रहा है।
 
 #### Keychain Database Access
 
-DataVault keychain backing files को भी protect करता है। एक compromised DataVault controller यह कर सकता है:
+DataVault keychain की backing files को भी सुरक्षित रखता है। Compromised DataVault controller यह कर सकता है:
 
-1. Raw keychain database files को read करना
+1. Raw keychain database files पढ़ना
 2. Encrypted keychain items extract करना
 3. User के password या recovered keys का उपयोग करके offline decryption का प्रयास करना
 
@@ -159,17 +159,26 @@ DataVault keychain backing files को भी protect करता है। �
 
 | CVE | Description |
 |---|---|
-| CVE-2024-44131 | FileProvider symlink race, जिससे एक privileged helper TCC-protected data तक पहुंच सकता है ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)) |
-| CVE-2023-40424 | Root के रूप में, **एक नया user बनाना जिसका `NFSHomeDirectory` attacker-controlled `TCC.db` की ओर point करता है**; login के समय `tccd` इसे consume करता है और grants apply हो जाते हैं, जिससे अन्य users के data तक पहुंच मिलती है ([Kandji](https://blog.kandji.io/malware-bypass-tcc)) |
-| CVE-2021-30970 | "powerdir": attacker-controlled TCC.db plant करने के लिए user की home dir बदलना ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)) |
-| CVE-2021-30713 | Bundle-conclusion flaw, जिससे कोई app बिना prompt के **donor bundle के TCC grants inherit** कर सकता है; desktop का screenshot लेने के लिए इसे **XCSSET** ने in the wild exploit किया ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)) |
-| CVE-2020-9934 | `tccd` ने `$HOME` से DB path बनाया, इसलिए `launchctl setenv HOME` इसे attacker-controlled `TCC.db` की ओर redirect कर सकता था ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)) |
-| CVE-2020-29621 | `coreaudiod` के पास `com.apple.private.tcc.manager` **था और library validation disabled था**, इसलिए `/Library/Audio/Plug-Ins/HAL` में drop किया गया HAL plug-in arbitrary TCC rights grant कर सकता था ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)) |
+| CVE-2024-44131 | FileProvider symlink race, जिससे एक privileged helper TCC-protected data तक पहुंच सकता है ([Jamf](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/))<sup>[[5]](#references)</sup> |
+| CVE-2023-40424 | Root के रूप में, **एक नया user बनाना जिसका `NFSHomeDirectory` attacker-controlled `TCC.db` की ओर point करता हो**; login पर `tccd` इसे consume करता है और grants लागू हो जाते हैं, जिससे अन्य users के data तक पहुंच मिलती है ([Kandji](https://blog.kandji.io/malware-bypass-tcc))<sup>[[6]](#references)</sup> |
+| CVE-2021-30970 | "powerdir": attacker-controlled TCC.db रखने के लिए user की home dir बदलना ([Microsoft](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/))<sup>[[7]](#references)</sup> |
+| CVE-2021-30713 | Bundle-conclusion flaw, जिससे कोई app बिना prompt के **donor bundle के TCC grants inherit** कर सकता है; desktop का screenshot लेने के लिए इसे **XCSSET** ने wild में exploit किया ([Jamf](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/))<sup>[[8]](#references)</sup> |
+| CVE-2020-9934 | `tccd` ने `$HOME` से DB path बनाया, इसलिए `launchctl setenv HOME` इसे attacker-controlled `TCC.db` की ओर redirect कर सकता था ([Matt Shockley](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8))<sup>[[9]](#references)</sup> |
+| CVE-2020-29621 | `coreaudiod` के पास `com.apple.private.tcc.manager` **था** और library validation **disabled** थी, इसलिए `/Library/Audio/Plug-Ins/HAL` में रखा गया HAL plug-in arbitrary TCC rights प्रदान कर सकता था ([Wojciech Reguła](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/))<sup>[[10]](#references)</sup> |
 
 ## References
 
-- [1] [Apple Platform Security — Data Protection](https://support.apple.com/guide/security/data-protection-overview-sece3bee0835/web)
-- [2] [The Nightmare of Apple OTA Updates (APFS Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
-- [3] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
+- [1] [Microsoft finds new macOS vulnerability, Shrootless, that could bypass System Integrity Protection](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/)
+- [2] [Technical Analysis: CVE-2022-22583 - Trend Micro](https://www.trendmicro.com/en_us/research/22/l/a-technical-analysis-of-cve-2022-22583-and-cve-2022-32800.html)
+- [3] [MacDirtyCow - Worth Doing Badly](https://worthdoingbadly.com/macdirtycow/)
+- [4] [Apple Platform Security — Data Protection](https://support.apple.com/guide/security/data-protection-overview-sece3bee0835/web)
+- [5] [Jamf Threat Labs - CVE-2024-44131: TCC bypass steals data from iCloud](https://www.jamf.com/blog/tcc-bypass-steals-data-from-icloud/)
+- [6] [Kandji - Uncovering macOS Malware: Bypassing TCC](https://blog.kandji.io/malware-bypass-tcc)
+- [7] [New macOS vulnerability, "powerdir," could lead to unauthorized user data access](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/)
+- [8] [Zero-Day TCC bypass discovered in XCSSET malware](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
+- [9] [CVE-2020–9934: Bypassing the macOS Transparency, Consent, and Control (TCC) Framework](https://medium.com/@mattshockl/cve-2020-9934-bypassing-the-os-x-transparency-consent-and-control-tcc-framework-for-4e14806f1de8)
+- [10] [Play the music and bypass TCC aka CVE-2020-29621](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)
+- [11] [The Nightmare of Apple OTA Updates (APFS Snapshots)](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
+- [12] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
