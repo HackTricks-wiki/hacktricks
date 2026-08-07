@@ -71,7 +71,7 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python cmd 以利用 RCE
+## 利用 RCE 的 Python 命令
 ```python
 import requests
 import re

