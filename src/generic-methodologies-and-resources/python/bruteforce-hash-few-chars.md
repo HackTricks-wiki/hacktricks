@@ -1,3 +1,5 @@
+# Bruteforce хешу з кількома символами
+
 {{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib

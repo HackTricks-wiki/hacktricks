@@ -1,9 +1,9 @@
-# Веб Запити
+# Вебзапити
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Python Запити
+## Python Requests
 ```python
 import requests
 
@@ -71,7 +71,7 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python cmd для експлуатації RCE
+## Python cmd для exploit RCE
 ```python
 import requests
 import re

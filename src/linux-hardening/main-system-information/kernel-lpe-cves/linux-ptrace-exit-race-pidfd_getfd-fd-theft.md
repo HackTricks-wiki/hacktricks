@@ -1,42 +1,42 @@
-# Linux ptrace exit-race `pidfd_getfd()` FD theft
+# Linux ptrace exit-race `pidfd_getfd()` крадіжка FD
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Корисний **Linux kernel privesc pattern** полягає в перетворенні **ptrace authorization bug** на **file descriptor theft** із привілейованого процесу.
+Корисний **Linux kernel privesc pattern** полягає в тому, щоб перетворити **ptrace authorization bug** на **крадіжку file descriptor** із privileged process.
 
-У case study Qualys щодо `__ptrace_may_access()` (CVE-2026-46333) зловмисник створює race з **привілейованим процесом, який завершує роботу або скидає credentials**, і використовує `pidfd_getfd()`, щоб продублювати FD у процес зловмисника.
+У case study Qualys щодо `__ptrace_may_access()` (CVE-2026-46333) attacker створює race з **privileged process, який завершує роботу або скидає credentials**, і використовує `pidfd_getfd()`, щоб дублювати FD у процес attacker.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Core idea
+## Основна ідея
 
-`pidfd_getfd()` дублює file descriptor з іншого процесу, але спочатку перевіряє ptrace-style permissions щодо цільового процесу. Якщо цей дозвіл помилково надається під час **teardown window**, unprivileged attacker може скопіювати:
+`pidfd_getfd()` дублює file descriptor з іншого process, але спочатку перевіряє права у стилі ptrace щодо target. Якщо цю authorization помилково надано під час **teardown window**, unprivileged attacker може скопіювати:
 
-- FD для **sensitive files**, уже відкритих привілейованим helper
-- FD для **authenticated IPC channels**, уже авторизованих як root
+- FD для **sensitive files**, які вже відкрив privileged helper
+- FD для **authenticated IPC channels**, які вже авторизовані як root
 
-Це перетворює authorization bug на рівні kernel на дуже практичний userspace primitive.
+Це перетворює authorization bug на рівні kernel на дуже практичний userspace primitive.<sup>[[1]](#references)</sup>
 
-## Why the primitive is dangerous
+## Чому цей primitive небезпечний
 
-Для атаки **не потрібен bug у самому привілейованому helper**. Helper має лише тимчасово утримувати щось цінне:
+Для attack **не потрібен bug у самому privileged helper**. Helper має лише тимчасово утримувати щось цінне:
 
 - `/etc/shadow`
 - `/etc/ssh/*_key`
-- привілейоване D-Bus / systemd connection
+- privileged D-Bus / systemd connection
 - будь-який інший уже відкритий secret або authorized channel
 
-Після дублювання у процес зловмисника kernel застосовує операції до **stolen FD**, а не до оригінального pathname чи нового authentication flow.
+Після дублювання в процес attacker kernel застосовує operations до **stolen FD**, а не до початкового pathname і не до нового authentication flow.<sup>[[1]](#references)</sup>
 
-## Exploitation pattern
+## Pattern exploitation
 
-1. Identify **setuid / setgid / file-capability binary** або **root daemon**, який відкриває sensitive files чи підтримує корисні IPC connections.
-2. Establish relationship, що відповідає relevant ptrace policy checks для target path (наприклад, бути **parent** породженого privileged child за permissive налаштувань YAMA).
-3. Створити race з процесом, поки він **завершує роботу**, **скидає credentials** або іншим чином переходить у стан, у якому ptrace access уже мав би стати недоступним.
-4. Використати `pidfd_open()` + `pidfd_getfd()`, щоб продублювати target FD протягом вузького authorization window.
+1. Визначити **setuid / setgid / file-capability binary** або **root daemon**, який відкриває sensitive files чи підтримує корисні IPC connections.
+2. Отримати relationship, що задовольняє відповідні ptrace policy checks для target path (наприклад, бути **parent** створеного privileged child за permissive налаштувань YAMA).
+3. Створити race з процесом, поки він **завершує роботу**, **скидає credentials** або іншим чином переходить у state, у якому ptrace access уже має стати недоступним.
+4. Використати `pidfd_open()` + `pidfd_getfd()`, щоб дублювати target FD під час вузького authorization window.
 5. Повторно використати stolen FD з unprivileged context:
 - `read()` secrets із privileged file descriptor
-- надсилати requests через stolen authenticated IPC channel, щоб отримувати **root-side actions**
+- надсилати requests через stolen authenticated IPC channel, щоб отримати **root-side actions**<sup>[[1]](#references)</sup>
 
-Minimal primitive shape:
+Мінімальна форма primitive:<sup>[[1]](#references)[[3]](#references)</sup>
 ```c
 int p = pidfd_open(victim_pid, 0);
 int stolen = pidfd_getfd(p, victim_fd, 0);
@@ -44,48 +44,48 @@ int stolen = pidfd_getfd(p, victim_fd, 0);
 ```
 ## Практичні цілі для аудиту
 
-Надавайте пріоритет бінарним файлам і daemon, які, навіть ненадовго, роблять одну з таких дій:
+Пріоритезуйте бінарні файли та daemons, які навіть протягом короткого часу виконують одну з таких дій:<sup>[[1]](#references)</sup>
 
 - відкривають файли, доступні лише root, до завершення переходів привілеїв
 - підключаються до **system bus** і зберігають уже авторизований канал
 - передають привілейовані FD через межі helper-процесів
-- виконують чутливі до безпеки операції під час teardown, суміжного з `do_exit()`
+- виконують чутливі до безпеки дії під час teardown, наближеного до `do_exit()`
 
-Добрі кандидати для hunting:
+Добрі кандидати для пошуку:<sup>[[1]](#references)</sup>
 
-- helper-процеси для керування паролями / обліковими записами
-- SSH helper-процеси
-- helper-процеси, опосередковані PolicyKit / D-Bus
-- root desktop daemon, які відкривають методи D-Bus
+- helper-програми для керування паролями / обліковими записами
+- SSH helpers
+- helpers, що працюють через PolicyKit / D-Bus
+- root desktop daemons, які відкривають D-Bus methods
 
 ## YAMA як exploit gate
 
-`kernel.yama.ptrace_scope` є важливим практичним обмежувачем для зловживань сімейством ptrace:
+`kernel.yama.ptrace_scope` є важливим практичним бар'єром для зловживань сімейством ptrace:<sup>[[4]](#references)</sup>
 
-- `0`: класична поведінка ptrace для одного UID
-- `1`: зазвичай дозволяє трасування parent -> child, що може зберігати доступність деяких public exploit paths
-- `2`: вимагає `CAP_SYS_PTRACE` для доступу в режимі attach і блокує зловживання `pidfd_getfd()` непривілейованими користувачами в цьому path
+- `0`: класична поведінка ptrace для того самого UID
+- `1`: зазвичай дозволяє трасування parent -> child, що може зберігати доступність деяких публічних exploit paths
+- `2`: вимагає `CAP_SYS_PTRACE` для доступу у стилі attach і блокує непривілейоване зловживання `pidfd_getfd()` у цьому path
 - `3`: повністю вимикає ptrace attach до перезавантаження
 
-Для цієї техніки `ptrace_scope=2` є сильним **тимчасовим mitigation**, оскільки він ламає public `pidfd_getfd()` exploitation path, повертаючи `-EPERM` для непривілейованих користувачів.
+Для цієї техніки `ptrace_scope=2` є сильною **тимчасовою мірою захисту**, оскільки ламає публічний шлях експлуатації `pidfd_getfd()` і повертає `-EPERM` для непривілейованих користувачів.<sup>[[1]](#references)</sup>
 
-## Ідеї для detection / review
+## Ідеї для виявлення / перевірки
 
 Під час аудиту привілейованого Linux software шукайте такі комбінації:
 
-- **privileged child process** + **attacker-controlled parent**
+- **привілейований child process** + **parent, контрольований attacker'ом**
 - тимчасовий доступ до **цінних відкритих файлів**
-- тимчасовий доступ до **автентифікованих D-Bus/systemd каналів**
-- рішення щодо безпеки, які повторно використовують **ptrace-style authorization** поза межами класичного `ptrace(2)`
-- kernel API, здатні **дублювати, успадковувати або повторно експортувати** наявні привілейовані FD
+- тимчасовий доступ до **автентифікованих каналів D-Bus/systemd**
+- рішення щодо безпеки, які повторно використовують **авторизацію у стилі ptrace** за межами класичного `ptrace(2)`
+- kernel APIs, здатні **дублювати, успадковувати або повторно експортувати** вже привілейовані FD
 
-Під час аудиту kernel вважайте high risk будь-який path, який виконує **ptrace-equivalent authorization** під час **task teardown**, особливо якщо успіх надає прямий доступ до `task->files` або інших уже авторизованих process resources.
+Під час аудиту kernel вважайте шлях, який виконує **еквівалентну ptrace авторизацію** під час **teardown task**, високоризиковим, особливо якщо успіх надає прямий доступ до `task->files` або інших уже авторизованих ресурсів процесу.
 
-## Посилання
+## References
 
-- [Блог Qualys: CVE-2026-46333](https://blog.qualys.com/vulnerabilities-threat-research/2026/05/20/cve-2026-46333-local-root-privilege-escalation-and-credential-disclosure-in-the-linux-kernel-ptrace-path)
-- [Текст рекомендацій Qualys](https://cdn2.qualys.com/advisory/2026/05/20/cve-2026-46333-ptrace.txt)
-- [Сторінка посібника pidfd_getfd(2)](https://man7.org/linux/man-pages/man2/pidfd_getfd.2.html)
-- [Документація Linux kernel щодо Yama](https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html)
+- [1] [CVE-2026-46333: Local Root Privilege Escalation and Credential Disclosure in the Linux Kernel ptrace Path (Qualys)](https://blog.qualys.com/vulnerabilities-threat-research/2026/05/20/cve-2026-46333-local-root-privilege-escalation-and-credential-disclosure-in-the-linux-kernel-ptrace-path)
+- [2] [Qualys advisory TXT](https://cdn2.qualys.com/advisory/2026/05/20/cve-2026-46333-ptrace.txt)
+- [3] [pidfd_getfd(2) manual page](https://man7.org/linux/man-pages/man2/pidfd_getfd.2.html)
+- [4] [Linux kernel Yama documentation](https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

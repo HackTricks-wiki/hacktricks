@@ -149,7 +149,7 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
-## Grep-вирази
+## Greps
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -258,7 +258,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Довідка з пошуку Nmap
+## Пошук довідки Nmap
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -301,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## Телеметрія eBPF та полювання на Rootkit
+## Телеметрія eBPF та пошук rootkit-ів
 
-Сучасні rootkit-и (TripleCross, варіанти BPFDoor тощо) дедалі частіше закріплюються як приховані програми eBPF. Створіть базову конфігурацію вашого парку за допомогою `bpftool`/`eBPFmon`, щоб виявляти програми без підпису, неочікувані хуки cgroup або шкідливий вміст map до їх від’єднання.
+Сучасні rootkit-и (TripleCross, варіанти BPFDoor тощо) дедалі частіше зберігаються як приховані програми eBPF. Створіть базову конфігурацію свого парку за допомогою `bpftool`/`eBPFmon`, щоб виявляти непідписані програми, неочікувані хуки cgroup або шкідливий вміст map до їхнього від'єднання.<sup>[[1]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Зіставляйте вивід bpftool з очікуваними підключеннями NIC/cgroup; раптова програма `xdp` або `kprobe`, якою володіє несанкціонований PID, є вагомою ознакою ін’єктованого eBPF payload.
+Співвіднесіть вивід bpftool з очікуваними підключеннями NIC/cgroup; раптово виявлена програма `xdp` або `kprobe`, якою володіє несанкціонований PID, є надійною ознакою впровадженого eBPF payload.
 
-## Тріаж інцидентів Journald
+## Тріаж інцидентів у Journald
 
-systemd-journald зберігає структуровані метадані, тож можна виконувати pivot за boot, severity, unit або UID, не звертаючись до `/var/log/*`. Поєднуйте фільтри з відносними часовими мітками, щоб швидко ізолювати вікна атаки або довести підроблення логів.
+systemd-journald зберігає структуровані метадані, тож можна виконувати пошук за завантаженням системи, рівнем серйозності, unit або UID, не звертаючись до `/var/log/*`. Поєднуйте фільтри з відносними часовими мітками, щоб швидко ізолювати періоди атак або підтвердити підроблення логів.<sup>[[2]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +336,11 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Додайте `--grep 'Invalid user' --case-sensitive` або `-k` (лише kernel ring buffer), коли потрібні точніші фільтри, і пам’ятайте, що селектори `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` та `_TRANSPORT` комбінуються для пошуку в multi-tenant середовищах.
+Додавайте `--grep 'Invalid user' --case-sensitive` або `-k` (лише кільцевий буфер ядра), коли потрібні точніші фільтри, і пам'ятайте, що селектори `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` та `_TRANSPORT` комбінуються для пошуку в багатокористувацьких середовищах.
 
 ## Посилання
 
-- [eBPFmon: новий інструмент для дослідження та взаємодії із застосунками eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [Як використовувати команду journalctl для перегляду журналів Linux](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}

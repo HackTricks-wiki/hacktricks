@@ -1,10 +1,10 @@
-# Забруднення класів (Забруднення прототипів Python)
+# Class Pollution (Python's Prototype Pollution)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Основний приклад
+## Базовий приклад
 
-Перевірте, як можливо забруднити класи об'єктів рядками:
+Перевірте, як можна забруднювати класи об'єктів за допомогою рядків:<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +28,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## Приклад базової вразливості
+## Базовий приклад вразливості
 ```python
 # Initial state
 class Employee: pass
@@ -61,11 +61,11 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Приклади гаджетів
+## Приклади Gadget
 
 <details>
 
-<summary>Створення значення за замовчуванням для властивості класу для RCE (subprocess)</summary>
+<summary>Створення значення властивості класу за замовчуванням для RCE (subprocess)</summary><sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Забруднення інших класів та глобальних змінних через <code>globals</code></summary>
+<summary>Забруднення інших класів і глобальних змінних через <code>globals</code></summary><sup>[[1]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Випадкове виконання підпроцесів</summary>
+<summary>Произвольне виконання підпроцесів</summary><sup>[[1]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -180,9 +180,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Перезаписування <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Перезапис <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** є спеціальним атрибутом усіх функцій, згідно з документацією Python [documentation](https://docs.python.org/3/library/inspect.html), це “відображення будь-яких значень за замовчуванням для **тільки-ключових** параметрів”. Забруднення цього атрибута дозволяє нам контролювати значення за замовчуванням ключових параметрів функції, це параметри функції, які йдуть після \* або \*args.
+**`__kwdefaults__`** — це спеціальний атрибут усіх функцій; згідно з [документацією Python](https://docs.python.org/3/library/inspect.html), це «відображення будь-яких значень за замовчуванням для параметрів **keyword-only**». Забруднення цього атрибута дозволяє нам контролювати значення за замовчуванням параметрів **keyword-only** функції — параметрів функції, які йдуть після \* або \*args.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,25 +223,26 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Перезаписування секрету Flask через файли</summary>
+<summary>Перезапис Flask secret у різних файлах</summary>
 
-Отже, якщо ви можете зробити класове забруднення над об'єктом, визначеним у головному python файлі веб-додатку, але **клас якого визначено в іншому файлі**, ніж головний. Тому що для доступу до \_\_globals\_\_ у попередніх payload вам потрібно отримати доступ до класу об'єкта або методів класу, ви зможете **отримати доступ до globals у цьому файлі, але не в головному**. \
-Отже, ви **не зможете отримати доступ до глобального об'єкта Flask app**, який визначив **секретний ключ** на головній сторінці:
+Отже, якщо ви можете виконати class pollution над об'єктом, визначеним в основному Python-файлі вебзастосунку, але **його клас визначений в іншому файлі**, а не в основному. Оскільки для доступу до \_\_globals\_\_ у попередніх payloads потрібно отримати доступ до класу об'єкта або методів класу, ви зможете **отримати доступ до globals у цьому файлі, але не в основному файлі**. \
+Тому ви **не зможете отримати доступ до глобального об'єкта Flask app**, у якому на головній сторінці визначено **secret key**:<sup>[[1]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-У цьому сценарії вам потрібен гаджет для обходу файлів, щоб дістатися до основного, щоб **отримати доступ до глобального об'єкта `app.secret_key`**, щоб змінити секретний ключ Flask і мати можливість [**підвищити привілеї**, знаючи цей ключ](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+У цьому сценарії вам потрібен gadget для обходу файлів, щоб дістатися до основного та **отримати доступ до глобального об’єкта `app.secret_key`**, змінити секретний ключ Flask і отримати можливість [**підвищити привілеї**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign), знаючи цей ключ.
 
-Пейлоад, подібний до цього [з цього звіту](https://ctftime.org/writeup/36082):
+Payload на кшталт цього [з цього writeup](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Використовуйте цей payload, щоб **змінити `app.secret_key`** (ім'я у вашому додатку може бути іншим), щоб мати можливість підписувати нові та більш привілейовані flask cookies.
+Використайте цей payload, щоб **змінити `app.secret_key`** (назва у вашому застосунку може відрізнятися) і отримати можливість підписувати нові Flask cookies з більшими привілеями.
 
 </details>
 
-Перевірте також наступну сторінку для додаткових гаджетів лише для читання:
+Також перегляньте наведену нижче сторінку з додатковими read-only gadgets:
+
 
 {{#ref}}
 python-internal-read-gadgets.md
@@ -249,6 +250,7 @@ python-internal-read-gadgets.md
 
 ## Посилання
 
-- [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}
