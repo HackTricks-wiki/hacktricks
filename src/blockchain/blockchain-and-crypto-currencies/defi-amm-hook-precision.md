@@ -1,53 +1,51 @@
-# DeFi/AMM Exploitation: Uniswap v4 Hook Precision/Rounding Abuse
+# Sfruttamento DeFi/AMM: abuso della precisione e dell’arrotondamento degli hook di Uniswap v4
 
 {{#include ../../banners/hacktricks-training.md}}
 
+Questa pagina documenta una classe di tecniche di exploitation DeFi/AMM contro DEX in stile Uniswap v4 che estendono la matematica core con hook personalizzati. Un incidente recente in Bunni V2 ha sfruttato un difetto di arrotondamento/precisione in una Liquidity Distribution Function (LDF) eseguita a ogni swap, consentendo all’attaccante di accumulare crediti positivi e drenare liquidità.<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
 
+L’idea chiave è la seguente: se un hook implementa un accounting aggiuntivo che dipende da matematica fixed-point, arrotondamento dei tick e logica basata su soglie, un attaccante può creare swap exact-input che attraversano soglie specifiche, facendo sì che le discrepanze di arrotondamento si accumulino a suo favore. Ripetendo il pattern e ritirando successivamente il saldo gonfiato, si realizza un profitto, spesso finanziato tramite un flash loan.
 
-Questa pagina documenta una classe di tecniche di exploit DeFi/AMM contro DEX in stile Uniswap v4 che estendono la matematica core con hook personalizzati. Un incidente recente in Bunni V2 ha sfruttato un difetto di arrotondamento/precisione in una Liquidity Distribution Function (LDF) eseguita ad ogni swap, permettendo all'attaccante di accumulare crediti positivi e drenare la liquidità.
+## Background: hook di Uniswap v4 e flusso degli swap
 
-Idea chiave: se un hook implementa una contabilità aggiuntiva che dipende da matematica a punto fisso, arrotondamento dei tick e logica a soglia, un attaccante può costruire swap exact‑input che attraversano soglie specifiche in modo che le discrepanze di arrotondamento si accumulino a suo favore. Ripetendo il pattern e poi ritirando il saldo gonfiato si realizza il profitto, spesso finanziato con un flash loan.
+- Gli hook sono contratti che il PoolManager chiama in specifici punti del ciclo di vita (ad esempio beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity, beforeInitialize/afterInitialize, beforeDonate/afterDonate).<sup>[[3]](#references)[[6]](#references)</sup>
+- I pool vengono inizializzati con una PoolKey che include l’indirizzo degli hook. Se è diverso da zero, PoolManager esegue callback per ogni operazione rilevante.<sup>[[6]](#references)</sup>
+- Gli hook possono restituire **custom deltas** che modificano le variazioni finali del saldo di uno swap o di un’operazione di liquidità (custom accounting). Questi delta vengono regolati come saldi netti al termine della chiamata, quindi qualsiasi errore di arrotondamento nella matematica dell’hook si accumula prima del settlement.<sup>[[5]](#references)</sup>
+- La matematica core utilizza formati fixed-point come Q64.96 per sqrtPriceX96 e l’aritmetica dei tick con 1.0001^tick. Qualsiasi matematica personalizzata applicata sopra di essa deve replicare attentamente la semantica di arrotondamento per evitare un drift dell’invariante.<sup>[[4]](#references)[[8]](#references)</sup>
+- Gli swap possono essere exactInput o exactOutput. In v3/v4, il prezzo si muove lungo i tick; l’attraversamento di un confine di tick può attivare/disattivare la liquidità di un range. Gli hook possono implementare logica aggiuntiva al superamento di soglie/tick.<sup>[[5]](#references)</sup>
 
-## Background: Uniswap v4 hooks and swap flow
+## Archetype della vulnerabilità: drift di precisione/arrotondamento durante il superamento di soglie
 
-- Hooks sono contratti che il PoolManager chiama in punti specifici del ciclo di vita (es. beforeSwap/afterSwap, beforeAddLiquidity/afterAddLiquidity, beforeRemoveLiquidity/afterRemoveLiquidity, beforeInitialize/afterInitialize, beforeDonate/afterDonate).
-- I pool sono inizializzati con un PoolKey che include l'indirizzo hooks. Se non‑zero, il PoolManager esegue callback ad ogni operazione pertinente.
-- Gli hook possono restituire **custom deltas** che modificano i cambiamenti di bilancio finali di uno swap o di un'azione di liquidity (custom accounting). Quei delta vengono compensati come saldi netti alla fine della chiamata, quindi qualsiasi errore di arrotondamento nella matematica dell'hook si accumula prima della liquidazione.
-- La matematica core usa formati a punto fisso come Q64.96 per sqrtPriceX96 e aritmetica dei tick con 1.0001^tick. Qualsiasi matematica personalizzata stratificata sopra deve attentamente corrispondere alle semantiche di arrotondamento per evitare drift invarianti.
-- Gli swap possono essere exactInput o exactOutput. In v3/v4, il prezzo si muove lungo i tick; attraversare un confine di tick può attivare/disattivare liquidity di range. Gli hook possono implementare logiche aggiuntive su crossing di soglie/tick.
+Un pattern tipicamente vulnerabile negli hook personalizzati:
 
-## Vulnerability archetype: threshold‑crossing precision/rounding drift
+1. L’hook calcola delta di liquidità o di saldo per ogni swap usando divisione intera, mulDiv o conversioni fixed-point (ad esempio, da token a liquidità usando sqrtPrice e i range dei tick).
+2. La logica delle soglie (ad esempio, rebalancing, redistribuzione a step o attivazione per range) viene attivata quando la dimensione dello swap o il movimento del prezzo attraversa un confine interno.
+3. L’arrotondamento viene applicato in modo incoerente (ad esempio, troncamento verso zero, floor invece di ceil) tra il calcolo forward e il percorso di settlement. Le piccole discrepanze non si annullano e accreditano invece il chiamante.
+4. Gli swap exact-input, dimensionati precisamente per attraversare tali confini, raccolgono ripetutamente il resto positivo dell’arrotondamento. L’attaccante ritira in seguito il credito accumulato.
 
-Un pattern tipico vulnerabile in hook personalizzati:
+Prerequisiti dell’attacco
+- Un pool che utilizza un hook v4 personalizzato e che esegue matematica aggiuntiva a ogni swap (ad esempio, un LDF/rebalancer).
+- Almeno un percorso di esecuzione in cui l’arrotondamento favorisce l’iniziatore dello swap durante il superamento delle soglie.
+- Possibilità di ripetere molti swap in modo atomico (i flash loan sono ideali per fornire liquidità temporanea e ammortizzare il gas).
 
-1. L'hook calcola delta di liquidity o del bilancio per swap usando divisione intera, mulDiv, o conversioni a punto fisso (es. token ↔ liquidity usando sqrtPrice e range di tick).
-2. La logica a soglia (es. rebalancing, redistribuzione a step, o attivazione per range) viene attivata quando la dimensione dello swap o lo spostamento di prezzo supera un bordo interno.
-3. L'arrotondamento viene applicato in modo incoerente (es. troncamento verso zero, floor vs ceil) tra il calcolo forward e il percorso di settlement. Piccole discrepanze non si annullano e invece accreditano il caller.
-4. Swap exact‑input, dimensionati con precisione per barcamenarsi su quei confini, raccolgono ripetutamente il resto positivo dell'arrotondamento. L'attaccante poi ritira il credito accumulato.
+## Metodologia pratica dell’attacco
 
-Prerequisiti dell'attacco
-- Un pool che usa un hook v4 personalizzato che esegue matematica aggiuntiva ad ogni swap (es. un LDF/rebalancer).
-- Almeno un percorso di esecuzione dove l'arrotondamento avvantaggia lo initiator dello swap attraverso crossing di soglie.
-- Capacità di ripetere molti swap in modo atomico (i flash loan sono ideali per fornire float temporaneo e ammortizzare il gas).
+1) Identificare i pool candidati con hook
+- Enumerare i pool v4 e verificare che PoolKey.hooks != address(0).
+- Esaminare bytecode/ABI dell’hook alla ricerca delle callback: beforeSwap/afterSwap e di eventuali metodi personalizzati di rebalancing.
+- Cercare matematica che: divida per la liquidità, converta tra quantità di token e liquidità oppure aggreghi BalanceDelta con arrotondamento.
 
-## Metodologia pratica dell'attacco
+2) Modellare la matematica e le soglie dell’hook
+- Ricreare la formula di liquidità/redistribuzione dell’hook: gli input includono tipicamente sqrtPriceX96, tickLower/Upper, currentTick, il fee tier e la liquidità netta.
+- Mappare le funzioni a soglia/step: tick, confini dei bucket o breakpoint dell’LDF. Determinare su quale lato di ogni confine viene applicato l’arrotondamento al delta.
+- Identificare i punti in cui le conversioni eseguono cast tra uint256/int256, utilizzano SafeCast o si affidano a mulDiv con floor implicito.
 
-1) Identificare pool candidati con hooks
-- Enumerare i pool v4 e controllare PoolKey.hooks != address(0).
-- Ispezionare hook bytecode/ABI per callback: beforeSwap/afterSwap e qualsiasi metodo custom di rebalancing.
-- Cercare matematica che: divide per liquidity, converte tra token amounts e liquidity, o aggrega BalanceDelta con arrotondamento.
+3) Calibrare gli swap exact-input per attraversare i confini
+- Utilizzare simulazioni Foundry/Hardhat per calcolare il Δin minimo necessario a spostare il prezzo appena oltre un confine e attivare il branch dell’hook.
+- Verificare che il settlement afterSwap accrediti al chiamante più del costo, lasciando un BalanceDelta positivo o un credito nell’accounting dell’hook.
+- Ripetere gli swap per accumulare credito; quindi chiamare il percorso di withdrawal/settlement dell’hook.
 
-2) Modellare la matematica e le soglie dell'hook
-- Ricreare la formula di liquidity/redistribuzione dell'hook: gli input tipici includono sqrtPriceX96, tickLower/Upper, currentTick, fee tier, e net liquidity.
-- Mappare funzioni a soglia/step: tick, confini di bucket, o breakpoints LDF. Determinare su quale lato di ogni confine il delta viene arrotondato.
-- Identificare dove le conversioni castano tra uint256/int256, usano SafeCast, o si basano su mulDiv con floor implicito.
-
-3) Calibrare swap exact‑input per attraversare i confini
-- Usare Foundry/Hardhat simulations per calcolare il Δin minimo necessario a muovere il prezzo appena oltre un confine e triggerare il branch dell'hook.
-- Verificare che dopo la settlement dello swap il caller venga accreditato più del costo, lasciando un BalanceDelta positivo o un credito nella contabilità dell'hook.
-- Ripetere gli swap per accumulare credito; poi chiamare il percorso di withdrawal/settlement dell'hook.
-
-Example Foundry‑style test harness (pseudocode)
+Esempio di test harness in stile Foundry (pseudocodice)
 ```solidity
 function test_precision_rounding_abuse() public {
 // 1) Arrange: set up pool with hook
@@ -80,16 +78,16 @@ sqrtPriceLimitX96: 0 // allow tick crossing
 bunniHook.withdrawCredits(msg.sender);
 }
 ```
-Calibrazione dell'exactInput
-- Calcolare ΔsqrtP per un passo di tick: sqrtP_next = sqrtP_current × 1.0001^(Δtick).
-- Approssimare Δin usando le formule v3/v4: Δx ≈ L × (ΔsqrtP / (sqrtP_next × sqrtP_current)). Assicurarsi che la direzione dell'arrotondamento corrisponda alla matematica del core.
-- Regolare Δin di ±1 wei attorno al limite per trovare il ramo in cui l'hook arrotonda a tuo favore.
+Calibrazione di exactInput
+- Calcola ΔsqrtP per un tick step: sqrtP_next = sqrtP_current × 1.0001^(Δtick).
+- Approssima Δin usando le formule v3/v4: Δx ≈ L × (ΔsqrtP / (sqrtP_next × sqrtP_current)). Assicurati che la direzione dell'arrotondamento corrisponda alla core math.
+- Modifica Δin di ±1 wei intorno al boundary per trovare il branch in cui l'hook arrotonda a tuo vantaggio.
 
-4) Amplificare con flash loans
-- Prendere in prestito un importo nozionale elevato (es., 3M USDT o 2000 WETH) per eseguire molte iterazioni in modo atomico.
-- Eseguire il loop di swap calibrato, quindi ritirare e rimborsare all'interno della callback del flash loan.
+4) Amplifica con flash loans
+- Prendi in prestito un notional elevato (ad esempio, 3M USDT o 2000 WETH) per eseguire molte iterazioni in modo atomico.<sup>[[1]](#references)[[2]](#references)[[7]](#references)</sup>
+- Esegui il loop di swap calibrato, quindi preleva e rimborsa all'interno del callback del flash loan.
 
-Aave V3 flash loan skeleton
+Struttura di flash loan di Aave V3
 ```solidity
 function executeOperation(
 address[] calldata assets,
@@ -111,46 +109,46 @@ IERC20(assets[j]).approve(address(POOL), amounts[j] + premiums[j]);
 return true;
 }
 ```
-5) Exit e replica cross‑chain
-- Se gli hook sono deployati su più chain, ripetere la stessa calibrazione per ogni chain.
-- I proventi vengono bridgeati indietro verso la chain di destinazione e opzionalmente girati tramite lending protocol per offuscare i flussi.
+5) Uscita e replica cross-chain
+- Se gli hooks sono distribuiti su più chain, ripetere la stessa calibrazione per ogni chain.
+- Eseguire il bridge dei proventi verso la chain target e, facoltativamente, effettuare cicli tramite protocolli di lending per offuscare i flussi.<sup>[[2]](#references)</sup>
 
-## Common root causes in hook math
+## Cause principali comuni nella matematica degli hooks
 
-- Mixed rounding semantics: mulDiv floors while later paths effectively round up; or conversions between token/liquidity apply different rounding.
-- Tick alignment errors: using unrounded ticks in one path and tick‑spaced rounding in another.
-- BalanceDelta sign/overflow issues when converting between int256 and uint256 during settlement.
-- Precision loss in Q64.96 conversions (sqrtPriceX96) not mirrored in reverse mapping.
-- Accumulation pathways: per‑swap remainders tracked as credits that are withdrawable by the caller instead of being burned/zero‑sum.
+- Semantiche di rounding miste: `mulDiv` esegue il floor mentre i percorsi successivi effettuano di fatto un round up; oppure le conversioni tra token/liquidità applicano rounding diversi.
+- Errori di allineamento dei tick: utilizzo di tick non arrotondati in un percorso e di un rounding basato sul tick spacing in un altro.
+- Problemi di segno/overflow di `BalanceDelta` durante la conversione tra `int256` e `uint256` in fase di settlement.
+- Perdita di precisione nelle conversioni Q64.96 (`sqrtPriceX96`) non replicata nella mappatura inversa.
+- Percorsi di accumulo: i resti per swap vengono tracciati come crediti prelevabili dal caller invece di essere bruciati o inclusi in un bilancio zero-sum.
 
-## Custom accounting & delta amplification
+## Custom accounting e amplificazione dei delta
 
-- Uniswap v4 custom accounting lets hooks return deltas that directly adjust what the caller owes/receives. If the hook tracks credits internally, rounding residue can accumulate across many small operations **before** the final settlement happens.
-- This makes boundary/threshold abuse stronger: the attacker can alternate `swap → withdraw → swap` in the same tx, forcing the hook to recompute deltas on slightly different state while all balances are still pending.
-- When reviewing hooks, always trace how BalanceDelta/HookDelta is produced and settled. A single biased rounding in one branch can become a compounding credit when deltas are repeatedly re‑computed.
+- Il custom accounting di Uniswap v4 consente agli hooks di restituire delta che modificano direttamente quanto il caller deve o riceve. Se l’hook tiene traccia internamente dei crediti, il residuo di rounding può accumularsi attraverso molte operazioni di piccola entità **prima** che avvenga il settlement finale.<sup>[[5]](#references)</sup>
+- Questo rende più efficace l’abuso dei boundary/threshold: l’attacker può alternare `swap → withdraw → swap` nella stessa tx, obbligando l’hook a ricalcolare i delta su uno stato leggermente diverso mentre tutti i saldi sono ancora pending.
+- Durante la revisione degli hooks, tracciare sempre come `BalanceDelta`/`HookDelta` viene prodotto e sottoposto a settlement. Un singolo rounding distorto in un ramo può trasformarsi in un credito cumulativo quando i delta vengono ricalcolati ripetutamente.
 
-## Defensive guidance
+## Indicazioni difensive
 
-- Differential testing: mirror the hook’s math vs a reference implementation using high‑precision rational arithmetic and assert equality or bounded error that is always adversarial (never favorable to caller).
-- Invariant/property tests:
-- Sum of deltas (tokens, liquidity) across swap paths and hook adjustments must conserve value modulo fees.
-- No path should create positive net credit for the swap initiator over repeated exactInput iterations.
-- Threshold/tick boundary tests around ±1 wei inputs for both exactInput/exactOutput.
-- Rounding policy: centralize rounding helpers that always round against the user; eliminate inconsistent casts and implicit floors.
-- Settlement sinks: accumulate unavoidable rounding residue to protocol treasury or burn it; never attribute to msg.sender.
-- Rate‑limits/guardrails: minimum swap sizes for rebalancing triggers; disable rebalances if deltas are sub‑wei; sanity‑check deltas against expected ranges.
-- Review hook callbacks holistically: beforeSwap/afterSwap and before/after liquidity changes should agree on tick alignment and delta rounding.
+- Differential testing: confrontare la matematica dell’hook con un’implementazione di riferimento che utilizzi aritmetica razionale ad alta precisione e verificare l’uguaglianza o un errore limitato che sia sempre avverso (mai favorevole al caller).
+- Test di invarianti/proprietà:
+- La somma dei delta (token, liquidità) lungo i percorsi di swap e le modifiche dell’hook deve conservare il valore, al netto delle fee.
+- Nessun percorso deve creare un credito netto positivo per l’iniziatore dello swap attraverso iterazioni ripetute di `exactInput`.
+- Test dei threshold/boundary dei tick intorno a input di ±1 wei sia per `exactInput` sia per `exactOutput`.
+- Politica di rounding: centralizzare gli helper di rounding in modo che arrotondino sempre contro l’utente; eliminare cast incoerenti e floor impliciti.
+- Settlement sinks: accumulare il residuo inevitabile del rounding nella tesoreria del protocollo o bruciarlo; non attribuirlo mai a `msg.sender`.
+- Rate-limits/guardrail: dimensioni minime degli swap per i trigger di rebalancing; disabilitare i rebalancing se i delta sono inferiori a un wei; verificare la plausibilità dei delta rispetto agli intervalli attesi.
+- Esaminare olisticamente le callback dell’hook: `beforeSwap`/`afterSwap` e le modifiche alla liquidità `before`/`after` devono essere coerenti sull’allineamento dei tick e sul rounding dei delta.
 
-## Case study: Bunni V2 (2025‑09‑02)
+## Case study: Bunni V2 (2025-09-02)
 
-- Protocol: Bunni V2 (Uniswap v4 hook) with an LDF applied per swap to rebalance.
-- Affected pools: USDC/USDT on Ethereum and weETH/ETH on Unichain, totaling about $8.4M.
-- Step 1 (price push): l'attaccante ha flash‑borrowed ~3M USDT e ha swapped per spingere il tick a ~5000, riducendo il **active** USDC balance a ~28 wei.
-- Step 2 (rounding drain): 44 tiny withdrawals hanno sfruttato il floor rounding in `BunniHubLogic::withdraw()` per ridurre il active USDC balance da 28 wei a 4 wei (‑85.7%) mentre solo una frazione minima di LP shares è stata burned. La liquidità totale è stata sottostimata di ~84.4%.
-- Step 3 (liquidity rebound sandwich): un grande swap ha spostato il tick a ~839,189 (1 USDC ≈ 2.77e36 USDT). Le stime di liquidity sono invertite e aumentate di ~16.8%, permettendo un sandwich dove l'attaccante ha swapped indietro al prezzo gonfiato ed è uscito con profitto.
-- Fix identified in the post‑mortem: change the idle‑balance update to round **up** so repeated micro‑withdrawals can’t ratchet the pool’s active balance downward.
+- Protocollo: Bunni V2 (Uniswap v4 hook) con un LDF applicato per swap per effettuare il rebalancing.<sup>[[7]](#references)</sup>
+- Pool interessati: USDC/USDT su Ethereum e weETH/ETH su Unichain, per un totale di circa 8,4 milioni di dollari.<sup>[[1]](#references)[[2]](#references)</sup>
+- Step 1 (price push): l’attacker ha preso in prestito tramite flash loan circa 3 milioni di USDT ed eseguito uno swap per spingere il tick a circa 5000, riducendo il saldo USDC **attivo** a circa 28 wei.<sup>[[7]](#references)</sup>
+- Step 2 (rounding drain): 44 prelievi di piccola entità hanno sfruttato il floor rounding in `BunniHubLogic::withdraw()` per ridurre il saldo USDC attivo da 28 wei a 4 wei (-85,7%), mentre veniva bruciata solo una frazione minima delle quote LP. La liquidità totale è stata sottostimata di circa l’84,4%.<sup>[[2]](#references)[[7]](#references)</sup>
+- Step 3 (liquidity rebound sandwich): un large swap ha spostato il tick a circa 839.189 (1 USDC ≈ 2,77e36 USDT). Le stime della liquidità si sono invertite e sono aumentate di circa il 16,8%, consentendo un sandwich in cui l’attacker ha eseguito lo swap inverso al prezzo gonfiato e ha chiuso l’operazione in profitto.<sup>[[7]](#references)</sup>
+- Correzione identificata nel post-mortem: modificare l’aggiornamento del saldo idle in modo che arrotondi **per eccesso**, così che i micro-prelievi ripetuti non possano ridurre progressivamente il saldo attivo della pool.<sup>[[7]](#references)</sup>
 
-Simplified vulnerable line (and post‑mortem fix)
+Riga vulnerabile semplificata (e correzione del post-mortem)<sup>[[7]](#references)</sup>
 ```solidity
 // BunniHubLogic::withdraw() idle balance update (simplified)
 uint256 newBalance = balance - balance.mulDiv(shares, currentTotalSupply);
@@ -159,21 +157,21 @@ uint256 newBalance = balance - balance.mulDivUp(shares, currentTotalSupply);
 ```
 ## Checklist di hunting
 
-- Il pool usa un non‑zero hooks address? Quali callbacks sono abilitati?
-- Ci sono redistribuzioni/ribilanciamenti per‑swap che usano matematica custom? Qualche logica di tick/threshold?
-- Dove vengono usate divisions/mulDiv, conversioni Q64.96, o SafeCast? Le semantiche di arrotondamento sono coerenti a livello globale?
-- È possibile costruire una Δin che appena oltrepassa un confine e produce un ramo di arrotondamento favorevole? Testa entrambe le direzioni e sia exactInput che exactOutput.
-- L'hook traccia credits o deltas per‑caller che possono essere ritirati in seguito? Assicurati che i residui siano neutralizzati.
+- Il pool usa un hooks address non-zero? Quali callback sono abilitate?
+- Sono presenti redistribuzioni/rebalance per-swap che usano custom math? È presente una logica basata su tick/threshold?
+- Dove vengono usati division, mulDiv, conversioni Q64.96 o SafeCast? Le semantiche di rounding sono coerenti globalmente?
+- È possibile costruire un Δin che superi appena una boundary e produca un rounding branch favorevole? Testare entrambe le direzioni e sia exactInput sia exactOutput.
+- L'hook tiene traccia di crediti o delta per-caller che possono essere ritirati in seguito? Assicurarsi che il residuo venga neutralizzato.
 
 ## Riferimenti
 
-- [Bunni V2 Exploit: $8.3M Drained via Liquidity Flaw (summary)](https://quillaudits.medium.com/bunni-v2-exploit-8-3m-drained-50acbdcd9e7b)
-- [Bunni V2 Exploit: Full Hack Analysis](https://www.quillaudits.com/blog/hack-analysis/bunni-v2-exploit)
-- [Uniswap v4 background (QuillAudits research)](https://www.quillaudits.com/research/uniswap-development)
-- [Liquidity mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
-- [Swap mechanics in Uniswap v4 core](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
-- [Uniswap v4 Hooks and Security Considerations](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/uniswap-v4-hooks-and-security)
-- [Bunni Exploit Post Mortem (Sep 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
-- [Uniswap v4 Core Whitepaper](https://app.uniswap.org/whitepaper-v4.pdf)
+- [1] [Bunni V2 Exploit: $8.3M Drained via Liquidity Flaw (riepilogo)](https://quillaudits.medium.com/bunni-v2-exploit-8-3m-drained-50acbdcd9e7b)
+- [2] [Bunni V2 Exploit: Analisi completa dell'hack](https://www.quillaudits.com/blog/hack-analysis/bunni-v2-exploit)
+- [3] [Contesto di Uniswap v4 (ricerca di QuillAudits)](https://www.quillaudits.com/research/uniswap-development)
+- [4] [Meccaniche della liquidità nel core di Uniswap v4](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/liquidity-mechanics-in-uniswap-v4-core)
+- [5] [Meccaniche degli swap nel core di Uniswap v4](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/swap-mechanics-in-uniswap-v4-core)
+- [6] [Uniswap v4 Hooks e considerazioni di sicurezza](https://www.quillaudits.com/research/uniswap-development/uniswap-v4/uniswap-v4-hooks-and-security)
+- [7] [Post Mortem dell'exploit di Bunni (set 2025)](https://blog.bunni.xyz/posts/exploit-post-mortem/)
+- [8] [Whitepaper del core di Uniswap v4](https://app.uniswap.org/whitepaper-v4.pdf)
 
 {{#include ../../banners/hacktricks-training.md}}
