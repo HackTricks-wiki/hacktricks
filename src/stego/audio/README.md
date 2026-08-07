@@ -13,18 +13,18 @@
 
 在使用 specialized tooling 之前：
 
-- 确认 codec/container 详情及异常：
+- 确认 codec/container 细节和异常：
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- 如果音频包含类似噪声的内容或音调结构，尽早检查 Spectrogram。
+- 如果音频包含类似噪声的内容或音调结构，应尽早检查 spectrogram。
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-## Spectrogram steganography
+## 频谱图隐写术
 
-### Technique
+### 技术
 
-Spectrogram stego 通过塑造时间/频率上的能量分布来隐藏数据，使其仅在时频图中可见（通常人耳无法听到，或会被感知为噪声）。
+Spectrogram stego 通过塑造能量在时间和频率上的分布来隐藏数据，使其仅在时频图中可见（通常人耳无法听到，或会被感知为噪声）。
 
 ### Sonic Visualiser
 
@@ -32,16 +32,16 @@ Spectrogram stego 通过塑造时间/频率上的能量分布来隐藏数据，�
 
 - [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
-### Alternatives
+### 替代工具
 
 - Audacity（频谱图视图、filters）：https://www.audacityteam.org/
-- `sox` 可从 CLI 生成频谱图：
+- `sox` 可以从 CLI 生成频谱图：
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
 ## FSK / modem 解码
 
-Frequency-shift keyed 音频在频谱图中通常表现为交替出现的单音。<sup>[[1]](#references)</sup> 获得大致的中心频率/频移和波特率估计后，可以使用 `minimodem` 进行暴力尝试：
+Frequency-shift keyed 音频在 spectrogram 中通常表现为交替的单音。获得大致的中心频率/频移和 baud 估计值后，使用 `minimodem` 进行 brute force：<sup>[[1]](#references)</sup>
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -58,13 +58,13 @@ minimodem -f noise.wav 2400
 
 ### Technique
 
-对于未压缩的 PCM（WAV），每个 sample 都是一个整数。修改低位只会极其轻微地改变 waveform，因此攻击者可以隐藏：
+对于未压缩的 PCM（WAV），每个 sample 都是一个整数。修改低位只会使波形发生非常轻微的变化，因此攻击者可以隐藏：
 
 - 每个 sample 1 bit（或更多）
-- 在多个 channel 之间交错
+- 在多个声道之间交错
 - 使用 stride/permutation
 
-你可能会遇到的其他 audio-hiding 类型：
+你可能会遇到的其他音频隐藏类型：
 
 - Phase coding
 - Echo hiding
@@ -73,7 +73,7 @@ minimodem -f noise.wav 2400
 
 ### WavSteg
 
-来源：https://github.com/ragibson/Steganography#WavSteg
+来源：https://github.com/ragibson/Steganography#WavSteg<sup>[[2]](#references)</sup>
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
@@ -86,7 +86,7 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 ### Technique
 
-DTMF 将字符编码为成对的固定频率（电话键盘）。如果音频听起来像键盘按键音或规则的双频蜂鸣声，请尽早测试 DTMF 解码。
+DTMF 将字符编码为成对的固定频率（电话键盘）。如果音频听起来像键盘音或规律的双频 beep，请尽早测试 DTMF decoding。
 
 Online decoders:
 
@@ -95,6 +95,7 @@ Online decoders:
 
 ## References
 
-- [1] [Flagvent 2025 (Medium) — pink、Santa 的愿望清单、Christmas Metadata、Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink、Santa’s Wishlist、Christmas Metadata、Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [2] [ragibson/Steganography](https://github.com/ragibson/Steganography#WavSteg)
 
 {{#include ../../banners/hacktricks-training.md}}

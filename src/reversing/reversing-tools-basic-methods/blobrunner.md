@@ -2,20 +2,20 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**BlobRunner**](https://github.com/OALabs/BlobRunner) 是一个用于 **debugging** 的小型 Windows **shellcode loader**：它会分配 RWX 内存、复制 blob、打印基地址 / entry point，然后将执行转移到该地址。当样本是 **raw shellcode**、从 malware 中提取的**解密 stage**，或是不包含 PE header 的**位置无关 blob** 时，这非常实用。
+[**BlobRunner**](https://github.com/OALabs/BlobRunner) 是一个小型 Windows **用于调试的 shellcode loader**：它会分配 RWX 内存、复制 blob、打印基地址 / 入口点，然后将执行流转移到该地址。当样本是 **raw shellcode**、从 malware 中提取的**已解密 stage**，或不包含 PE header 的**位置无关 blob** 时，这非常实用。
 
-下面的代码片段保留了原始思路，但使用 **`%p` 打印指针**，这样在尝试附加 debugger 或在 RE tool 中重新定位 blob 时，x64 构建不会截断地址。
+下面的代码片段保留了原始思路，但使用 **`%p` 打印指针**，这样在尝试附加 debugger 或在 RE tool 中对 blob 进行 rebase 时，x64 构建不会截断地址。
 
-## Build
+## 构建
 
 构建原始项目最简单的方法是使用 **Visual Studio Developer Command Prompt**：
 ```bash
 cl blobrunner.c
 cl /Feblobrunner64.exe /Foblobrunner64.out blobrunner.c
 ```
-你也可以将代码粘贴到一个小型的 Visual Studio / VS Code C 项目中，并在那里编译。
+你也可以将代码粘贴到一个小型 Visual Studio / VS Code C 项目中，并在那里进行编译。
 
-## 有用的使用模式
+## 常用使用模式
 ```bash
 # Execute from the beginning of the blob
 BlobRunner.exe shellcode.bin
@@ -29,19 +29,19 @@ BlobRunner.exe shellcode.bin --nopause
 # Force an access violation and let the configured JIT debugger catch it
 BlobRunner.exe shellcode.bin --jit
 ```
-- 在 **x86** 中，BlobRunner 会暂停，然后直接跳转到 blob 的入口点。
-- 在 **x64** 中，它会创建一个**挂起线程**，因此你可以在恢复执行之前，针对线程起始地址设置断点。
-- 当转储的 blob 以 **decoder / unpacking stub** 开头，而你已经知道真实入口点时，`--offset` 尤其有用。
+- 在 **x86** 中，BlobRunner 会暂停，然后直接跳转到 blob entry point。
+- 在 **x64** 中，它会创建一个 **suspended thread**，因此你可以在恢复执行前，针对 thread start address 设置断点。
+- 当转储的 blob 以 **decoder / unpacking stub** 开头，且你已经知道真实 entry point 时，`--offset` 尤其有用。
 
 ## 实用说明
 
 ### 修复 x64 labs 中打印的地址
 
-旧版 BlobRunner 代码会通过 `(int)(size_t)lpvBase` 和 `%08x` / `%016x` 等转换方式打印地址。在 64-bit 工作流中，这可能会截断指针的高半部分，使 rebase / 断点设置变得麻烦。下面的代码片段已经通过直接打印 **`%p`** 值修复了这一问题。
+旧版 BlobRunner 代码会通过 `(int)(size_t)lpvBase` 和 `%08x` / `%016x` 等 cast 打印地址。在 64-bit workflows 中，这可能截断指针的高半部分，从而使 rebasing / breakpoint placement 变得麻烦。下面的代码片段已经通过直接打印 **`%p`** 值修复了这一问题。
 
-### `--jit` 适用于设置第一条指令的断点
+### `--jit` 适用于 first-instruction breakpoints
 
-`--jit` 会移除 shellcode 第一个字节的执行权限，并让 Windows 在 blob 开始执行时引发**访问冲突**。当你希望配置好的 **JIT debugger**（例如 x64dbg）捕获第一次执行尝试，而不是手动争分夺秒地进行 attach 时，这非常有用。调试器中断后，恢复执行权限并继续执行。
+`--jit` 会移除 shellcode 第一个字节的 execute 权限，并让 Windows 在 blob 开始执行时触发 **access violation**。当你希望配置的 **JIT debugger**（例如 x64dbg）捕获第一次执行尝试，而不是手动争取 attach 时机，这非常有用。debugger 断下后，恢复 execute 权限并继续执行。
 
 一个实用的 **x64dbg** 流程是：
 ```text
@@ -50,37 +50,37 @@ setjitauto on
 BlobRunner.exe shellcode.bin --jit
 setpagerights <region>, ExecuteReadWrite
 ```
-前两个命令会将 x64dbg 注册为 JIT debugger，而 `setpagerights` 会恢复 BlobRunner 在 debugger 捕获 access violation 后打印出的区域的执行权限。
+前两个命令会将 x64dbg 注册为 JIT debugger，而 `setpagerights` 会在 debugger 捕获 access violation 后，恢复 BlobRunner 输出的内存区域的 execute 权限。
 
-### 使用 Time-travel 检查 shellcode，而不是实时单步执行
+### 对 shellcode 执行 time-travel，而不是实时单步执行
 
-一种非常实用的近期 workflow 是在 **TTD** 下记录 BlobRunner，然后在 **Binary Ninja** / **WinDbg** 中检查 trace。当 blob 会自行解密、动态解析 API 或执行多个短暂阶段时，这种方式非常有效。自 **Binary Ninja 4.1** 起，TTD 支持不再只是 beta quality：它可以驱动 reverse-debugging，并直接从 Binary Ninja 简化 WinDbg / TTD workflow。<sup>[[1]](#references)</sup>
+一种非常实用的新近 workflow，是在 **TTD** 下记录 BlobRunner，然后在 **Binary Ninja** / **WinDbg** 中检查 trace。当 blob 会自行解密、动态解析 APIs，或执行多个短暂阶段时，这种方法非常有效。自 **Binary Ninja 4.1** 起，TTD 支持已不再只是 beta quality：它可以驱动 reverse-debugging，并直接从 Binary Ninja 简化 WinDbg / TTD workflow。<sup>[[1]](#references)</sup>
 ```bash
 TTD.exe .\blobrunner.exe .\shellcode.bin
 ```
-重要的是要**记下 BlobRunner 打印的已分配基址**，然后在重放 trace 之前，将 shellcode 视图 **rebase** 到该地址。另请注意，Microsoft 将 TTD recording 记录为**侵入式**操作：请从**提升权限**的提示符运行，预计会出现明显的 slowdown，并缩短 recording 窗口，以避免生成巨大的 trace 文件。
+重要的是要**记录 BlobRunner 打印的已分配基址**，然后在重放 trace 之前，将 shellcode 视图 **rebase** 到该地址。另外请注意，Microsoft 将 TTD recording 记录为 **invasive**：请从**提升权限的**命令提示符运行，预期会出现明显的 slowdown，并将 recording 窗口保持较短，以避免生成 massive trace files。<sup>[[1]](#references)</sup>
 
-### 如果 blob 需要配套数据，请改用 PE wrapper
+### 如果 blob 需要 companion data，请改用 PE wrapper
 
-某些 shellcode 需要内存中存在**第二个 blob**、**mapped file** 或其他**结构化内容**。BlobRunner 有意保持最小化，因此对于这些情况，使用 **SCLauncher** 之类的 runner 可能更方便，因为它可以：<sup>[[2]](#references)</sup>
+某些 shellcode 需要内存中存在**第二个 blob**、**mapped file** 或其他**结构化内容**。BlobRunner 刻意保持 minimal，因此在这些情况下，使用类似 **SCLauncher** 的 runner 可能更加方便，因为它可以：<sup>[[2]](#references)</sup>
 
 - 在 execution 前暂停，
 - 插入 `INT3` breakpoint，
-- 将**其他内容**加载到内存中，
-- 对这些额外内容进行 memory-map，或者
-- 将 shellcode 包装到临时 **PE** 中，以便在偏好普通 executable 的 tools 中进行更轻松的 analysis。
+- 将**额外内容**加载到内存中，
+- 对额外内容进行 memory-map，或
+- 将 shellcode 包装进临时 **PE**，以便在偏好使用普通 executable 的 tools 中进行更轻松的分析。
 
-Example:
+示例：
 ```bash
 SCLauncher.exe -f=shellcode.bin -pause -d=config.bin -mm
 SCLauncher.exe -f=shellcode.bin -pe -64 -ep=0x120
 ```
-对于 **jmp2it**、**Cutter** 仿真或基于 **scdbg** 的 shellcode 跟踪等辅助工作流，请查看[上级 shellcode reversing 页面](README.md)。
+对于 **jmp2it**、**Cutter** emulation 或基于 **scdbg** 的 shellcode tracing 等辅助工作流，请查看 [parent shellcode reversing page](README.md)。
 
 ## 源代码
 
-与[原始代码](https://github.com/OALabs/BlobRunner)相比，唯一修改的部分是用于避免 x64 地址截断的指针打印代码行。  
-要进行编译，只需在 Visual Studio Code 中**创建一个 C/C++ 项目，复制并粘贴代码，然后进行构建**。
+与 [original code](https://github.com/OALabs/BlobRunner) 相比，唯一修改的代码行是用于避免 x64 地址截断的 pointer-printing 行。
+要进行编译，只需在 Visual Studio Code 中**创建一个 C/C++ project，复制并粘贴代码，然后构建即可**。
 ```c
 #include <stdio.h>
 #include <windows.h>
@@ -286,6 +286,7 @@ return 0;
 ```
 ## 参考资料
 
-- [1] [使用 Binary Ninja 对 Shellcode 进行时间旅行调试](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
+- [1] [使用 Binary Ninja 对 Shellcode 进行 Time Travel Debugging](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
 - [2] [使用 SCLauncher 分析 Shellcode](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
+
 {{#include ../../banners/hacktricks-training.md}}

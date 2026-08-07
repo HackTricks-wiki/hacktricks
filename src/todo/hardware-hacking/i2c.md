@@ -4,7 +4,7 @@
 
 ## Bus Pirate
 
-要测试 Bus Pirate 是否正常工作，将 +5V 连接到 VPU，将 3.3V 连接到 ADC，然后访问 Bus Pirate（例如使用 Tera Term），并使用命令 `~`：
+要测试 Bus Pirate 是否正常工作，请将 +5V 连接到 VPU，将 3.3V 连接到 ADC，然后访问 bus pirate（例如使用 Tera Term），并使用命令 `~`：
 ```bash
 # Use command
 HiZ>~
@@ -43,18 +43,18 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-如您在前面的命令行中看到的，它显示找到 0 个错误。这在购买后或刷新固件后确认其正常工作非常有用。
+如你在上一条命令行中看到的，它显示发现了 0 个错误。购买设备或刷写 firmware 后，确认其正常工作非常有用。
 
-要连接到 bus pirate，您可以参考文档：
+要连接 Bus Pirate，可以参考文档：
 
-![](<../../images/image (484).png>)
+![使用命令 - 按空格键：要连接 Bus Pirate，可以参考文档](<../../images/image (484).png>)
 
-在这种情况下，我将连接到一个 EPROM：ATMEL901 24C256 PU27：
+在本例中，我将连接到一个 EPROM：ATMEL901 24C256 PU27：
 
-![](<../../images/image (964).png>)
+![使用命令 - 按空格键：在本例中，我将连接到一个 EPROM：ATMEL901 24C256 PU27](<../../images/image (964).png>)
 
-与 bus pirate 通信时，我使用 Tera Term 连接到 pirate bus COM 端口，设置为 Setup --> Serial Port --> Speed 为 115200。\
-在以下通信中，您可以找到如何准备 bus pirate 以进行 I2C 通信，以及如何从内存中写入和读取（注释部分使用 "#"，请不要期待在通信中看到该部分）：
+为了与 Bus Pirate 通信，我使用 Tera Term 连接到 Bus Pirate 的 COM 端口，并在 Setup --> Serial Port --> Speed 中将速度设置为 115200。\
+在以下通信内容中，你可以看到如何设置 Bus Pirate 以使用 I2C，以及如何从 memory 中写入和读取数据（注释使用 "#"，不要将这部分视为通信内容）：
 ```bash
 # Check communication with buspirate
 i
@@ -155,9 +155,9 @@ NACK
 ```
 ### Sniffer
 
-在这个场景中，我们将嗅探 Arduino 和之前的 EPROM 之间的 I2C 通信，您只需将两个设备连接起来，然后将总线海盗连接到 SCL、SDA 和 GND 引脚：
+在此场景中，我们将 sniff Arduino 与前一个 EPROM 之间的 I2C 通信。你只需让两个设备进行通信，然后将 bus pirate 连接到 SCL、SDA 和 GND 引脚：
 
-![](<../../images/image (166).png>)
+![Read 20B from address 0x69 configured before - Sniffer: 在此场景中，我们将 sniff Arduino 与前一个 EPROM 之间的 I2C 通信。你只需让两个设备进行通信，然后将 bus pirate 连接到...](<../../images/image (166).png>)
 ```bash
 I2C>m
 1. HiZ

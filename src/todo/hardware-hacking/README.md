@@ -1,52 +1,52 @@
-# 硬件黑客
+# Hardware Hacking
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## JTAG
 
-JTAG 允许执行边界扫描。边界扫描分析某些电路，包括每个引脚的嵌入式边界扫描单元和寄存器。
+JTAG 可以执行 boundary scan。Boundary scan 会分析特定电路，包括嵌入式 boundary-scan cells，以及每个引脚对应的 registers。
 
-JTAG 标准定义了 **进行边界扫描的特定命令**，包括以下内容：
+JTAG standard 定义了**用于执行 boundary scans 的特定 commands**，包括：
 
-- **BYPASS** 允许您测试特定芯片，而无需通过其他芯片。
-- **SAMPLE/PRELOAD** 在设备正常工作模式下，获取进入和离开设备的数据样本。
-- **EXTEST** 设置和读取引脚状态。
+- **BYPASS** 允许你在不经过其他芯片所产生额外开销的情况下测试特定芯片。
+- **SAMPLE/PRELOAD** 在设备处于正常工作模式时，对进入和离开设备的数据进行采样。
+- **EXTEST** 设置并读取引脚状态。
 
-它还可以支持其他命令，例如：
+它还支持其他 commands，例如：
 
 - **IDCODE** 用于识别设备
-- **INTEST** 用于设备的内部测试
+- **INTEST** 用于对设备进行内部测试
 
-当您使用像 JTAGulator 这样的工具时，可能会遇到这些指令。
+使用 JTAGulator 等工具时，可能会遇到这些 instructions。
 
-### 测试接入端口
+### The Test Access Port
 
-边界扫描包括对四线 **测试接入端口 (TAP)** 的测试，这是一个通用端口，提供 **对 JTAG 测试支持** 功能的访问。TAP 使用以下五个信号：
+Boundary scans 包括对四线 **Test Access Port (TAP)** 的测试。TAP 是一种通用端口，用于访问组件内置的 **JTAG test support** functions。TAP 使用以下五种 signals：
 
-- 测试时钟输入 (**TCK**) TCK 是定义 TAP 控制器执行单个操作频率的 **时钟**（换句话说，跳转到状态机中的下一个状态）。
-- 测试模式选择 (**TMS**) 输入 TMS 控制 **有限状态机**。在每个时钟脉冲上，设备的 JTAG TAP 控制器检查 TMS 引脚上的电压。如果电压低于某个阈值，则信号被视为低并解释为 0；如果电压高于某个阈值，则信号被视为高并解释为 1。
-- 测试数据输入 (**TDI**) TDI 是将 **数据通过扫描单元发送到芯片** 的引脚。每个供应商负责定义该引脚上的通信协议，因为 JTAG 并未定义此内容。
-- 测试数据输出 (**TDO**) TDO 是将 **数据从芯片发送出去** 的引脚。
-- 测试复位 (**TRST**) 输入 可选的 TRST 将有限状态机 **重置为已知良好状态**。或者，如果 TMS 在五个连续的时钟周期内保持为 1，则会调用复位，方式与 TRST 引脚相同，这就是 TRST 是可选的原因。
+- Test clock input (**TCK**) TCK 是定义 TAP controller 多久执行一次操作的 **clock**（换句话说，就是多久跳转到 state machine 的下一个 state）。
+- Test mode select (**TMS**) input TMS 控制 **finite state machine**。在 clock 的每个 beat 上，设备的 JTAG TAP controller 都会检查 TMS 引脚上的电压。如果电压低于某个 threshold，则该 signal 被视为 low，并解释为 0；如果电压高于某个 threshold，则该 signal 被视为 high，并解释为 1。
+- Test data input (**TDI**) TDI 是通过 **scan cells 将 data 送入芯片**的引脚。每个 vendor 负责定义通过该引脚进行通信的 protocol，因为 JTAG 并未对此进行定义。
+- Test data output (**TDO**) TDO 是将 **data 从芯片送出**的引脚。
+- Test reset (**TRST**) input 可选的 TRST 会将 finite state machine 重置**到已知的良好状态**。另外，如果将 TMS 保持为 1 并持续五个 clock cycles，也会触发 reset，效果与 TRST 引脚相同，因此 TRST 是可选的。
 
-有时您可以在 PCB 上找到这些引脚的标记。在其他情况下，您可能需要 **找到它们**。
+有时你可以在 PCB 上找到标记出的这些 pins。在其他情况下，你可能需要**找到它们**。
 
-### 识别 JTAG 引脚
+### Identifying JTAG pins
 
-检测 JTAG 端口的最快但最昂贵的方法是使用 **JTAGulator**，这是一种专门为此目的创建的设备（尽管它也 **可以检测 UART 引脚**）。
+检测 JTAG ports 最快但最昂贵的方法，是使用专门为此目的创建的 **JTAGulator**（不过它**也能检测 UART pinouts**）。
 
-它有 **24 个通道**，您可以连接到电路板引脚。然后，它执行 **BF 攻击**，发送所有可能组合的 **IDCODE** 和 **BYPASS** 边界扫描命令。如果收到响应，它会显示每个 JTAG 信号对应的通道。
+它有 **24 个 channels**，你可以将其连接到 board 的 pins。然后它会对所有可能的 combinations 执行 **BF attack**，发送 **IDCODE** 和 **BYPASS** boundary scan commands。如果收到 response，它会显示每个 JTAG signal 对应的 channel。
 
-一种更便宜但速度较慢的识别 JTAG 引脚的方法是使用 [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) 加载在 Arduino 兼容的微控制器上。
+一种更便宜但慢得多的识别 JTAG pinouts 方法，是在 Arduino-compatible microcontroller 上加载 [**JTAGenum**](https://github.com/cyphunk/JTAGenum/)。
 
-使用 **JTAGenum**，您首先需要 **定义您将用于枚举的探测设备的引脚**。您需要参考设备的引脚图，然后将这些引脚与目标设备上的测试点连接。
+使用 **JTAGenum** 时，你首先需要**定义用于 enumeration 的 probing device 的 pins**。你需要参考该 device 的 pinout diagram，然后将这些 pins 与 target device 上的 test points 连接起来。
 
-识别 JTAG 引脚的 **第三种方法** 是通过 **检查 PCB** 中的引脚图。在某些情况下，PCB 可能方便地提供 **Tag-Connect 接口**，这清楚地表明该电路板也具有 JTAG 连接器。您可以在 [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/) 查看该接口的外观。此外，检查 PCB 上芯片组的 **数据表** 可能会揭示指向 JTAG 接口的引脚图。
+识别 JTAG pins 的**第三种方法**，是**检查 PCB** 是否存在某种 pinout。在某些情况下，PCB 可能会方便地提供 **Tag-Connect interface**，这清楚表明该 board 也有一个 JTAG connector。你可以在 [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/) 查看该 interface 的外观。此外，检查 **PCB 上 chipset 的 datasheets** 也可能找到指向 JTAG interfaces 的 pinout diagrams。
 
 ## SDW
 
-SWD 是一种专为调试设计的 ARM 特定协议。
+SWD 是一种专为 ARM 设计的 debugging protocol。
 
-SWD 接口需要 **两个引脚**：一个双向的 **SWDIO** 信号，相当于 JTAG 的 **TDI 和 TDO 引脚** 以及一个时钟，和 **SWCLK**，相当于 JTAG 中的 **TCK**。许多设备支持 **串行线或 JTAG 调试端口 (SWJ-DP)**，这是一个结合了 JTAG 和 SWD 接口的接口，使您能够将 SWD 或 JTAG 探头连接到目标。
+SWD interface 需要 **两个 pins**：双向的 **SWDIO** signal，它相当于 JTAG 的 **TDI 和 TDO pins 以及一个 clock**；以及 **SWCLK**，它相当于 JTAG 中的 **TCK**。许多 devices 支持 **Serial Wire or JTAG Debug Port (SWJ-DP)**，这是一种组合式 JTAG 和 SWD interface，允许你将 SWD 或 JTAG probe 连接到 target。
 
 {{#include ../../banners/hacktricks-training.md}}

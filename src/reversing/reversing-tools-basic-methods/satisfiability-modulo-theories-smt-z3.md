@@ -1,10 +1,10 @@
-# 简单来说，这个工具可以帮助我们找出满足某些条件的变量值，而手动计算这些值会非常麻烦。因此，你可以将变量需要满足的条件告知 Z3，它就会找出一些值（如果可能的话）。
+# 基本来说，这个工具可以帮助我们找到满足某些条件的变量值，而手动计算这些值会非常麻烦。因此，你可以将变量需要满足的条件告知 Z3，它会找到一些值（如果可能）。
 
 {{#include ../../banners/hacktricks-training.md}}
 
 # 基本操作
 
-## 布尔值/And/Or/Not
+## Booleans/And/Or/Not
 ```python
 # pip3 install z3-solver
 from z3 import *
@@ -60,7 +60,7 @@ print("%s = %s" % (d.name(), m[d]))
 ```
 # 机器算术
 
-现代 CPU 和主流编程语言使用固定大小的位向量进行算术运算。Machine arithmetic 在 Z3Py 中以 Bit-Vectors 的形式提供。<sup>[[1]](#references)</sup>
+现代 CPU 和主流编程语言使用固定大小 bit-vectors 上的算术运算。Machine arithmetic 在 Z3Py 中以 Bit-Vectors 的形式提供。
 ```python
 from z3 import *
 
@@ -77,7 +77,7 @@ print(simplify(a == b)) # This is False
 ```
 ## 有符号/无符号数
 
-Z3 提供了特殊的有符号算术运算版本，在这些运算中，将 bit-vector 视为有符号数还是无符号数会产生差异。在 Z3Py 中，运算符 `<`、`<=`、`>`、`>=`、`/`、`%` 和 `>>` 对应有符号版本。相应的无符号运算符为 `ULT`、`ULE`、`UGT`、`UGE`、`UDiv`、`URem` 和 `LShR`。<sup>[[1]](#references)</sup>
+Z3 提供了特殊的有符号算术运算版本，因为在处理位向量时，将其视为有符号数还是无符号数会产生差异。在 Z3Py 中，运算符 `<`、`<=`、`>`、`>=`、`/`、`%` 和 `>>` 对应有符号版本。相应的无符号运算符为 `ULT`、`ULE`、`UGT`、`UGE`、`UDiv`、`URem` 和 `LShR`。<sup>[[1]](#references)</sup>
 ```python
 from z3 import *
 
@@ -95,11 +95,11 @@ solve(x < 0)
 # Using unsigned version of <
 solve(ULT(x, 0))
 ```
-## 函数
+## Functions
 
-算术等 interpreted functions 具有固定的标准解释。Uninterpreted functions 和常量具有最大的灵活性；它们允许任何与针对该函数或常量的约束一致的解释。<sup>[[1]](#references)</sup>
+像算术这样的已解释函数具有固定的标准解释。未解释函数和常量具有最大的灵活性；它们允许任何与函数或常量相关约束一致的解释。<sup>[[1]](#references)</sup>
 
-示例：对 `x` 应用两次 `f` 后再次得到 `x`，但对 `x` 应用一次 `f` 的结果不同于 `x`。
+示例：`f` 对 `x` 应用两次后再次得到 `x`，但对 `x` 应用一次 `f` 的结果与 `x` 不同。
 ```python
 from z3 import *
 
@@ -120,11 +120,11 @@ print(s.model())
 ```
 # 面向 Reversing 的模式
 
-如果你需要对 binary 进行完整的 symbolic execution，而不是手动提升少量 checks，请查看 [Angr - Examples](angr/angr-examples.md)。在实践中，一种非常常见的工作流是从 decompiler/assembly 中恢复相关 predicates，然后仅在 Z3 中重建有意义的 arithmetic 或 memory constraints。
+如果需要对 binary 进行完整的 symbolic execution，而不是手动 lifting 少量检查，请查看 [Angr - Examples](angr/angr-examples.md)。在实践中，一个非常常见的 workflow 是从 decompiler/assembly 中恢复相关 predicates，然后仅在 Z3 中重建有意义的 arithmetic 或 memory constraints。
 
-## 首先将用户可控数据建模为字节
+## 首先将 user-controlled data 建模为 bytes
 
-对于 Reversing，通常最好先为每个输入字节使用 `BitVec(..., 8)`，然后按照 target 的确切方式重建 words。这样可以保留 wrap-around、signedness bugs、shifts、rotates 以及 byte-order 问题。
+对于 Reversing，通常最好先为每个输入 byte 使用 `BitVec(..., 8)`，然后按照 target 的确切方式重建 words。这样可以保留 wrap-around、signedness bugs、shifts、rotates 以及 byte-order 问题。<sup>[[2]](#references)</sup>
 ```python
 from z3 import *
 
@@ -139,16 +139,16 @@ s.add(RotateRight(dword, 8) == 0x41444342)
 print(s.check())
 print(hex(s.model().eval(dword).as_long()))
 ```
-翻译 assembly 或 decompiler code 时的实用辅助函数：
+翻译 assembly 或反编译器代码时的实用辅助函数：
 
 - `Concat`：从字节重建 16/32/64 位值
-- `Extract`：比较高位/低位字，或模拟掩码/移位操作
+- `Extract`：比较高位/低位字，或模拟掩码/移位
 - `ZeroExt` / `SignExt`：正确建模零扩展/符号扩展 bug
-- `LShR` / `RotateLeft` / `RotateRight`：常见于 crackmes、哈希和混淆器
+- `LShR` / `RotateLeft` / `RotateRight`：常用于 crackmes、hashes 和 obfuscators
 
 ## 使用 arrays 建模内存/寄存器表
 
-当检查依赖于 `buf[i]`、查找表或模拟内存时，使用 `Array` 通常比创建几十个独立变量更简洁。
+当检查依赖于 `buf[i]`、lookup tables 或 emulated memory 时，使用 `Array` 可能比创建几十个独立变量更简洁。<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -165,11 +165,11 @@ s = Solver()
 s.add(word == 0x4241)
 print(s.check())
 ```
-当二进制程序在验证值之前将其复制到内存中的其他位置时，或者当你希望在不运行整个程序的情况下模拟几个 `mov`/`xor`/`add` 操作的效果时，这尤其有用。
+当 binary 在验证值之前将其复制到内存中的其他位置时，这尤其有用；或者当你希望在不运行整个程序的情况下，建模少量 `mov`/`xor`/`add` 操作的效果时，也很有用。
 
-## Incremental solving 非常适合进行分支筛选
+## Incremental solving 非常适合 branch triage
 
-当你已经提取出基础约束后，可以使用 `push()` / `pop()`（或 assumptions）测试不同的分支，而无需每次都重新构建 solver：
+当你已经提取出基础约束后，可以使用 `push()` / `pop()`（或 assumptions）来测试不同的 branch，而无需每次都重新构建 solver：<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -187,11 +187,11 @@ s.add(x < 0x100)
 print("branch 2:", s.check())
 s.pop()
 ```
-在重放从 decompiler 中恢复的路径条件时，或者想快速确定哪个比较操作导致模型变为 `unsat` 时，这非常有用。
+当重放从 decompiler 中恢复的路径条件时，或者想快速确定哪个比较操作导致模型变为 `unsat` 时，这非常有用。
 
-## 优化以获得更易用的 payload
+## Optimize 以获得更实用的 payloads
 
-模型满足条件后，`Optimize()` 可以帮助你获得更实用的解决方案：例如，优先选择可打印的字节、最小化校验和组件，或最大化某些结构，使恢复出的密码更容易输入或复制。
+模型可满足后，`Optimize()` 可以帮助你获得更实用的解决方案：例如，优先选择可打印字节、最小化 checksum 组件，或最大化某种结构，使恢复出的密码更易于输入或复制。<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -204,9 +204,9 @@ o.add_soft(And(c >= 0x20, c <= 0x7e))
 print(o.check())
 print(bytes(o.model()[c].as_long() for c in key))
 ```
-## 面向格式的字符串/序列
+## 格式密集型序列的字符串/序列
 
-如果目标主要检查前缀、后缀、子字符串或类似 regex 的结构，那么 `String`/`Seq` 约束可能比逐字节 bit-vector 更简单：
+如果目标主要检查前缀、后缀、子字符串或类似 regex 的结构，那么 `String`/`Seq` 约束可能比逐字节 bit-vectors 更容易：<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -217,11 +217,11 @@ s.add(PrefixOf(StringVal("HTB{"), serial))
 s.add(SuffixOf(StringVal("}"), serial))
 s.add(Contains(serial, StringVal("_")))
 ```
-然而，一旦 binary 开始对字符执行算术运算、旋转、校验和计算或类型转换，通常最好回到 8-bit bit-vectors。
+然而，一旦 binary 开始对字符执行算术运算、旋转、校验和或类型转换，通常最好改回使用 8-bit bit-vectors。
 
 # 示例
 
-## Sudoku solver
+## 数独求解器
 ```python
 # 9x9 matrix of integer variables
 X = [[Int("x_%s_%s" % (i+1, j+1)) for j in range(9)]
@@ -269,10 +269,10 @@ print_matrix(r)
 else:
 print("failed to solve")
 ```
-## References
+## 参考资料
 
-- [1] [Z3Py 指南 - 示例 (ericpony)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-- [2] [Z3 指南 (Microsoft)](https://microsoft.github.io/z3guide/)
-- [3] [Z3 编程 (Stanford)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+- [1] [带示例的 Z3Py 指南（ericpony z3py-tutorial）](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Z3 指南 - Bit-Vectors 理论（Microsoft z3guide）](https://microsoft.github.io/z3guide/)
+- [3] [Programming Z3（Nikolaj Bjørner、Leonardo de Moura、Lev Nachmanson、Christoph Wintersteiger）](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 
 {{#include ../../banners/hacktricks-training.md}}

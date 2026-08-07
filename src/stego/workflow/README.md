@@ -2,25 +2,25 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-大多数 stego 问题通过系统化的分诊比尝试随机工具更快被解决。
+大多数 stego 问题，通过系统化 triage 解决的速度比随机尝试工具更快。
 
 ## 核心流程
 
-### 快速分诊检查表
+### 快速 triage 清单
 
 目标是高效回答两个问题：
 
-1. 实际的容器/格式是什么？
-2. 有效载荷是在 metadata、附加字节、嵌入文件，还是内容级 stego？
+1. 真正的容器/格式是什么？
+2. payload 位于 metadata、追加的字节、嵌入的文件，还是内容级 stego 中？
 
 #### 1) 识别容器
 ```bash
 file target
 ls -lah target
 ```
-如果 `file` 与扩展名不符，以 `file` 为准。在适当情况下将常见格式视为容器（例如，OOXML 文档是 ZIP 文件）。
+如果 `file` 和扩展名不一致，以 `file` 的结果为准。适当时，将常见格式视为容器（例如，OOXML 文档是 ZIP 文件）。
 
-#### 2) 查找元数据和明显的字符串
+#### 2) 查找 metadata 和明显字符串
 ```bash
 exiftool target
 strings -n 6 target | head
@@ -31,29 +31,29 @@ strings -n 6 target | tail
 strings -e l -n 6 target | head
 strings -e b -n 6 target | head
 ```
-#### 3) 检查附加数据 / 嵌入的文件
+#### 3) 检查追加数据 / 嵌入文件
 ```bash
 binwalk target
 binwalk -e target
 ```
-如果提取失败但检测到签名，使用 `dd` 手动分割偏移并在分割出的区域上重新运行 `file`。
+如果提取失败但报告了 signatures，使用 `dd` 手动 carve offsets，然后对 carve 出的区域重新运行 `file`。
 
 #### 4) 如果是图像
 
-- 检查异常： `magick identify -verbose file`
-- 如果是 PNG/BMP，枚举位平面/LSB： `zsteg -a file.png`
-- 验证 PNG 结构： `pngcheck -v file.png`
-- 当内容可能通过通道/平面变换显现时，使用可视滤镜 (Stegsolve / StegoVeritas)
+- 检查异常：`magick identify -verbose file`
+- 如果是 PNG/BMP，枚举 bit-planes/LSB：`zsteg -a file.png`
+- 验证 PNG 结构：`pngcheck -v file.png`
+- 当内容可能通过 channel/plane transforms 显现时，使用 visual filters（Stegsolve / StegoVeritas）
 
 #### 5) 如果是音频
 
-- 先做频谱分析 (Sonic Visualiser)
-- 解码/检查流： `ffmpeg -v info -i file -f null -`
-- 如果音频类似结构化音调，则测试 DTMF 解码
+- 首先生成 Spectrogram（Sonic Visualiser）
+- Decode/inspect streams：`ffmpeg -v info -i file -f null -`
+- 如果音频类似结构化 tones，测试 DTMF decoding
 
-### 基本常用工具
+### 常用工具
 
-这些工具可处理高频出现的容器级案例：metadata payloads、appended bytes 和 embedded files disguised by extension。
+这些工具可以捕获高频的 container-level cases：metadata payloads、appended bytes，以及伪装成其他扩展名的 embedded files。<sup>[[1]](#references)</sup>
 
 #### Binwalk
 ```bash
@@ -61,11 +61,15 @@ binwalk file
 binwalk -e file
 binwalk --dd '.*' file
 ```
+Repo: https://github.com/ReFirmLabs/binwalk
+
 #### Foremost
 ```bash
 foremost -i file
 ```
-我无法直接从 GitHub 拉取文件内容。请把 src/stego/workflow/README.md 中需要翻译的英文内容粘贴到这里（或指定你要翻译的片段），我会把其中的可翻译英文译成中文，并严格保留原有的 Markdown/HTML 语法、代码、路径、标签和不可翻译的专有名词（如 Exiftool、Exiv2、hack 技术名、链接、路径等）。
+仓库：https://github.com/korczis/foremost
+
+#### Exiftool / Exiv2
 ```bash
 exiftool file
 exiv2 file
@@ -79,59 +83,58 @@ strings -n 6 file
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-### 容器、追加数据，以及 polyglot tricks
+### 容器、附加数据和 polyglot 技巧
 
-许多 steganography 挑战是在有效文件之后的额外字节，或是被扩展名伪装的嵌入归档文件。
+许多 steganography challenges 是有效文件之后存在额外字节，或是通过扩展名伪装的 embedded archives。
 
-#### 附加 payloads
+#### 附加 payload
 
-许多格式会忽略尾随字节。可以将 ZIP/PDF/script 追加到图像/音频容器中。
+许多格式会忽略尾部字节。可以将 ZIP/PDF/script 附加到 image/audio container 中。
 
 快速检查：
 ```bash
 binwalk file
 tail -c 200 file | xxd
 ```
-如果你知道一个 offset，使用 `dd` 来 carve：
+如果你知道偏移量，可以使用 `dd` 进行 carve：
 ```bash
 dd if=file of=carved.bin bs=1 skip=<offset>
 file carved.bin
 ```
 #### Magic bytes
 
-当 `file` 无法判断时，使用 `xxd` 查找 magic bytes 并将其与已知签名比较：
+当 `file` 无法判断时，使用 `xxd` 查找 magic bytes，并与已知签名进行比较：
 ```bash
 xxd -g 1 -l 32 file
 ```
 #### Zip-in-disguise
 
-即使扩展名没有显示 zip，也要尝试使用 `7z` 和 `unzip`：
+即使扩展名没有表明它是 zip，也要尝试使用 `7z` 和 `unzip`：
 ```bash
 7z l file
 unzip -l file
 ```
-### 近 stego 的奇异现象
+### Near-stego 异常
 
-常出现在 stego 附近的模式的快速链接 (QR-from-binary, braille, etc)。
+用于查看经常出现在 stego 附近的模式的快速链接（从 binary 生成 QR codes、盲文等）。
 
-#### 来自二进制的 QR 码
+#### 从 binary 生成 QR codes
 
-如果 blob 的长度是完全平方数，它可能是图像/QR 的原始像素。
+如果 blob 长度是完全平方数，它可能是某个图像/QR 的原始像素。
 ```python
 import math
 math.isqrt(2500)  # 50
 ```
-Binary-to-image 转换工具:
+Binary-to-image helper:
 
 - [https://www.dcode.fr/binary-image](https://www.dcode.fr/binary-image)
 
-#### 盲文
+#### Braille
 
 - [https://www.branah.com/braille-translator](https://www.branah.com/braille-translator)
 
-## 参考列表
+## 参考资料
 
-- [https://0xrick.github.io/lists/stego/](https://0xrick.github.io/lists/stego/)
-- [https://github.com/DominicBreuker/stego-toolkit](https://github.com/DominicBreuker/stego-toolkit)
+- [1] [DominicBreuker/stego-toolkit - 集成了最常用 steganography tools 的 Docker image](https://github.com/DominicBreuker/stego-toolkit)
 
 {{#include ../../banners/hacktricks-training.md}}
