@@ -1,22 +1,22 @@
-# Crypto CTF Workflow
+# Crypto CTF 워크플로
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Triage checklist
+## Triage 체크리스트
 
-1. 어떤 것이 있는지 파악: 인코딩 vs 암호화 vs 해시 vs 서명 vs MAC.
-2. 어떤 항목이 제어되는지 판단: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
-3. 분류: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. 가능성이 높은 검사부터 먼저 적용: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
-5. 필요한 경우에만 고급 기법으로 확대: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+1. 가지고 있는 것이 무엇인지 식별합니다: encoding, encryption, hash, signature 또는 MAC.
+2. 무엇을 제어할 수 있는지 확인합니다: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
+3. 분류합니다: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
+4. 가능성이 가장 높은 검사부터 적용합니다: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
+5. 필요한 경우에만 advanced methods로 진행합니다: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
 ## Online resources & utilities
 
-이 리소스들은 식별 및 레이어 벗기기(layer peeling)를 하거나 가설을 빠르게 검증할 때 유용하다.
+이 항목들은 task가 identification 및 layer peeling인 경우나, 가설을 빠르게 확인해야 할 때 유용합니다.
 
 ### Hash lookups
 
-- 해시를 Google에 검색해 보라 (의외로 효과적임).
+- Google에서 hash를 검색합니다 (놀라울 정도로 효과적입니다).
 - [https://crackstation.net/](https://crackstation.net/)
 - [https://md5decrypt.net/](https://md5decrypt.net/)
 - [https://hashes.org/search.php](https://hashes.org/search.php)
@@ -26,7 +26,7 @@
 
 ### Identification helpers
 
-- CyberChef (Magic, decode, convert): https://gchq.github.io/CyberChef/
+- CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
 - dCode (ciphers/encodings playground): https://www.dcode.fr/tools-list
 - Boxentriq (substitution solvers): https://www.boxentriq.com/code-breaking
 
@@ -44,20 +44,20 @@
 
 ### Technique
 
-많은 CTF crypto 문제는 base encoding + simple substitution + compression 같은 레이어형 변환이다. 목표는 레이어를 식별하고 안전하게 벗기는 것이다.
+많은 CTF crypto task는 layered transforms입니다: base encoding + simple substitution + compression. 목표는 layer를 식별하고 안전하게 하나씩 제거하는 것입니다.
 
 ### Encodings: try many bases
 
-레이어 인코딩이 의심되면 (base64 → base32 → …) 다음을 시도하라:
+layered encoding (base64 → base32 → …)이라고 의심되면 다음을 시도합니다:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
 Common tells:
 
-- Base64: `A-Za-z0-9+/=` (패딩 `=`가 흔함)
-- Base32: `A-Z2-7=` (종종 많은 `=` 패딩)
-- Ascii85/Base85: 구두점이 빽빽함; 때때로 `<~ ~>`로 감싸짐
+- Base64: `A-Za-z0-9+/=` (padding `=`이 흔함)
+- Base32: `A-Z2-7=` (대개 `=` padding이 많음)
+- Ascii85/Base85: punctuation이 조밀하게 나타남. 때로는 `<~ ~>`로 감싸짐
 
 ### Substitution / monoalphabetic
 
@@ -76,7 +76,7 @@ Common tells:
 
 ### Bacon cipher
 
-종종 5비트 또는 5글자 그룹으로 나타난다:
+대개 5 bits 또는 5 letters 단위의 그룹으로 나타납니다:
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
@@ -87,20 +87,20 @@ AABBB ABBAB ABABA AAAAA ...
 ```
 ### Runes
 
-Runes는 자주 치환 알파벳입니다; "futhark cipher"를 검색하고 매핑 테이블을 시도해보세요.
+Runes는 자주 치환 알파벳으로 사용됩니다. `"futhark cipher"`를 검색하고 매핑 테이블을 시도해 보세요.
 
-## 챌린지에서의 압축
+## challenges에서의 압축
 
-### Technique
+### 기법
 
-압축은 추가 레이어로 자주 등장합니다 (zlib/deflate/gzip/xz/zstd), 때로는 중첩되기도 합니다. 출력이 거의 파싱되지만 엉망으로 보인다면 압축을 의심하세요.
+압축은 추가 계층으로 매우 자주 등장합니다(zlib/deflate/gzip/xz/zstd). 때로는 중첩되어 있기도 합니다. 출력이 거의 파싱될 것처럼 보이지만 깨진 데이터처럼 보인다면 압축을 의심하세요.
 
-### Quick identification
+### 빠른 식별
 
 - `file <blob>`
-- 매직 바이트를 찾아보세요:
+- 매직 바이트를 확인합니다:
 - gzip: `1f 8b`
-- zlib: often `78 01/9c/da`
+- zlib: 보통 `78 01/9c/da`
 - zip: `50 4b 03 04`
 - bzip2: `42 5a 68` (`BZh`)
 - xz: `fd 37 7a 58 5a 00`
@@ -108,7 +108,7 @@ Runes는 자주 치환 알파벳입니다; "futhark cipher"를 검색하고 매�
 
 ### Raw DEFLATE
 
-CyberChef has **Raw Deflate/Raw Inflate**, which is often the fastest path when the blob looks compressed but `zlib` fails.
+CyberChef에는 **Raw Deflate/Raw Inflate**가 있으며, blob이 압축된 것처럼 보이지만 `zlib`가 실패할 때 가장 빠른 방법인 경우가 많습니다.
 
 ### 유용한 CLI
 ```bash
@@ -124,47 +124,47 @@ PY
 ```
 ## 일반적인 CTF crypto 구성
 
-### 기법
+### Technique
 
-이것들은 현실적인 개발자 실수이거나 잘못 사용된 일반적인 라이브러리이기 때문에 자주 등장합니다. 목표는 보통 이를 식별하고 알려진 추출 또는 재구성 워크플로우를 적용하는 것입니다.
+이러한 구성은 현실적인 개발자 실수나 흔히 잘못 사용되는 library 때문에 자주 등장합니다. 보통 목표는 이를 식별하고 알려진 추출 또는 재구성 workflow를 적용하는 것입니다.
 
 ### Fernet
 
-일반적인 힌트: 두 개의 Base64 문자열 (token + key).
+일반적인 hint: 두 개의 Base64 문자열(token + key).
 
 - Decoder/notes: https://asecuritysite.com/encryption/ferdecode
-- In Python: `from cryptography.fernet import Fernet`
+- Python에서: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-여러 shares가 보이고 임계값 `t`가 언급되어 있다면, 이는 Shamir일 가능성이 높습니다.
+여러 개의 share가 보이고 threshold `t`가 언급된다면, Shamir일 가능성이 높습니다.
 
-- Online reconstructor (handy for CTFs): http://christian.gen.co/secrets/
+- Online reconstructor (CTF에 유용): http://christian.gen.co/secrets/
 
 ### OpenSSL salted formats
 
-CTF에서는 때때로 `openssl enc` 출력(헤더가 종종 `Salted__`로 시작)을 제공합니다.
+CTF에서는 `openssl enc` output이 주어지는 경우가 있습니다(header는 대개 `Salted__`로 시작).
 
 Bruteforce helpers:
 
 - [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
-### 일반 도구 모음
+### 일반적인 toolset
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
 - featherduster: https://github.com/nccgroup/featherduster
 - cryptovenom: https://github.com/lockedbyte/cryptovenom
 
-## 권장 로컬 설정
+## 권장 local setup
 
-실용적인 CTF 스택:
+실용적인 CTF stack:
 
-- Python + `pycryptodome` for symmetric primitives and fast prototyping
-- SageMath for modular arithmetic, CRT, lattices, and RSA/ECC work
-- Z3 for constraint-based challenges (when the crypto reduces to constraints)
+- 대칭 primitive와 빠른 prototyping을 위한 Python + `pycryptodome`
+- modular arithmetic, CRT, lattice 및 RSA/ECC 작업을 위한 SageMath
+- constraint 기반 challenge를 위한 Z3 (crypto가 constraint로 축소되는 경우)
 
-권장 Python 패키지:
+권장 Python packages:
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```

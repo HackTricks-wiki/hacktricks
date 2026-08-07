@@ -2,17 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-대부분의 CTF 고난도 crypto는 여기로 모입니다: RSA, ECC/ECDSA, lattices, 그리고 약한 randomness.
+
+대부분의 CTF hard crypto는 여기서 다룹니다: RSA, ECC/ECDSA, lattices, 그리고 나쁜 randomness.
 
 ## Recommended tooling
 
 - SageMath (LLL/lattices, modular arithmetic): https://www.sagemath.org/
 - RsaCtfTool (Swiss-army knife): https://github.com/Ganapati/RsaCtfTool
-- factordb (quick factor checks): http://factordb.com/
+- factordb (빠른 factor 확인): http://factordb.com/
 
 ## RSA
 
-`n,e,c`와 몇 가지 추가 힌트(공유된 modulus, low exponent, partial bits, 관련 메시지)가 있을 때 여기서 시작하세요.
+`n,e,c`와 추가 힌트(shared modulus, low exponent, partial bits, related messages)가 있을 때 여기서 시작하세요.
 
 {{#ref}}
 rsa/README.md
@@ -20,34 +21,34 @@ rsa/README.md
 
 ## ECC / ECDSA
 
-서명이 관여된 경우, 어려운 수학을 가정하기 전에 먼저 nonce 문제(reuse/bias/leaks)를 테스트하세요.
+signatures가 관련된 경우, 어려운 수학을 가정하기 전에 nonce 문제(reuse/bias/leaks)를 먼저 테스트하세요.
 
 ### ECDSA nonce reuse / bias
 
-두 서명이 동일한 nonce `k`를 재사용하면 private key를 복원할 수 있습니다.
+두 signatures가 동일한 nonce `k`를 재사용하면 private key를 복구할 수 있습니다.
 
-비록 `k`가 완전히 같지 않더라도, 서명들 간의 nonce 비트에 대한 **bias/leakage**는 lattice 복구에 충분할 수 있습니다(흔한 CTF 테마).
+`k`가 동일하지 않더라도, signatures 간 nonce bits의 **bias/leakage**만으로도 lattice recovery가 가능할 수 있습니다(일반적인 CTF 주제).
 
-기술적 복구 (k 재사용 시):
+`k`가 재사용된 경우의 technical recovery:
 
-ECDSA 서명 방정식 (group order `n`):
+ECDSA signature equations (group order `n`):
 
 - `r = (kG)_x mod n`
 - `s = k^{-1}(h(m) + r*d) mod n`
 
-동일한 `k`가 두 메시지 `m1, m2`에 대해 재사용되어 서명 `(r, s1)` 및 `(r, s2)`를 생성하면:
+동일한 `k`가 두 messages `m1, m2`에 재사용되어 signatures `(r, s1)` 및 `(r, s2)`가 생성된 경우:
 
 - `k = (h(m1) - h(m2)) * (s1 - s2)^{-1} mod n`
 - `d = (s1*k - h(m1)) * r^{-1} mod n`
 
 ### Invalid-curve attacks
 
-프로토콜이 포인트가 기대하는 곡선(on-curve) 위에 있고 올바른 subgroup에 속하는지를 검증하지 않으면, 공격자는 약한 그룹에서 연산을 강제해 비밀을 회수할 수 있습니다.
+protocol이 points가 예상된 curve(또는 subgroup) 위에 있는지 검증하지 않으면, attacker가 weak group에서 연산을 수행하도록 유도하여 secrets를 복구할 수 있습니다.
 
-기술적 메모:
+Technical note:
 
-- 포인트가 on-curve이며 올바른 subgroup에 속하는지 검증하세요.
-- 많은 CTF 과제는 이를 "server가 공격자가 선택한 포인트에 secret scalar를 곱하고 무언가를 반환"하는 식으로 모델링합니다.
+- points가 on-curve에 있고 올바른 subgroup에 속하는지 검증하세요.
+- 많은 CTF tasks에서는 이를 "server가 attacker가 선택한 point에 secret scalar를 곱하고 무언가를 반환하는 경우"로 모델링합니다.
 
 ### Tooling
 
