@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Comprobación rápida anti-análisis / de virtualización
+### Comprobación rápida de anti-análisis / virtualización
 
-Algunos stealers de macOS llaman a `system_profiler` para detectar VMs y **abortan con un código de salida distintivo (p. ej., 100)** para evitar la detonación en sandbox<sup>[[1]](#references)</sup>:
+Algunos stealers de macOS llaman a `system_profiler` para detectar VMs y **se abortan con un código de salida distintivo (p. ej., 100)** para evitar la detonación en sandbox<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -151,6 +151,6 @@ Sin prompts
 
 ## Referencias
 
-- [1] [2025, el año del Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

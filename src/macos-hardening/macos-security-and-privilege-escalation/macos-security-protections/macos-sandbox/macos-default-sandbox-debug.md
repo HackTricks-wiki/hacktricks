@@ -1,8 +1,8 @@
-# macOS Default Sandbox Debug
+# Depuración del Sandbox predeterminado de macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-En esta página puedes encontrar cómo crear una aplicación para lanzar comandos arbitrarios desde dentro del sandbox predeterminado de macOS:
+En esta página puedes encontrar cómo crear una aplicación para ejecutar comandos arbitrarios desde dentro del Sandbox predeterminado de macOS:
 
 1. Compila la aplicación:
 ```objectivec:main.m
@@ -58,7 +58,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Definir los derechos
+3. Define los entitlements
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Firma la aplicación (necesitas crear un certificado en el llavero)
+4. Firma la app (necesitas crear un certificado en el keychain)
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
