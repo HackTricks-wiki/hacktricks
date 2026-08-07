@@ -4,21 +4,21 @@
 
 ## RUBYOPT
 
-Mit dieser Umgebungsvariable ist es möglich, **neue Parameter** zu **ruby** hinzuzufügen, wann immer es ausgeführt wird. Obwohl der Parameter **`-e`** nicht verwendet werden kann, um Ruby-Code anzugeben, ist es möglich, die Parameter **`-I`** und **`-r`** zu verwenden, um einen neuen Ordner zum Bibliotheksladepfad hinzuzufügen und dann **eine Bibliothek zum Laden anzugeben**.
+Mit dieser Umgebungsvariable ist es möglich, **neue Parameter** zu **ruby** hinzuzufügen, sobald es ausgeführt wird. Obwohl der Parameter **`-e`** nicht verwendet werden kann, um auszuführenden Ruby-Code anzugeben, ist es möglich, die Parameter **`-I`** und **`-r`** zu verwenden, um dem Suchpfad der zu ladenden Bibliotheken einen neuen Ordner hinzuzufügen und anschließend **eine zu ladende Bibliothek anzugeben**.
 
-Erstellen Sie die Bibliothek **`inject.rb`** in **`/tmp`**:
+Erstelle die Bibliothek **`inject.rb`** in **`/tmp`**:
 ```ruby:inject.rb
 puts `whoami`
 ```
-Erstellen Sie irgendwo ein Ruby-Skript wie:
+Erstelle irgendwo ein Ruby-Skript wie:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-Dann lassen Sie ein beliebiges Ruby-Skript es mit:
+Lassen Sie dann ein beliebiges Ruby-Skript es laden mit:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-Fun Fact: Es funktioniert sogar mit dem Parameter **`--disable-rubyopt`**:
+Interessante Tatsache: Es funktioniert sogar mit dem Parameter **`--disable-rubyopt`**:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 ```

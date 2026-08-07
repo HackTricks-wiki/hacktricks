@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Automatische macOS-Enumerationstools
+### Automatische Enumeration-Tools für macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -117,15 +117,15 @@ sudo killall -HUP mDNSResponder
 ```
 ### Schneller Anti-Analyse-/Virtualisierungscheck
 
-Einige macOS-Stealer rufen `system_profiler` auf, um VMs zu erkennen, und **brechen mit einem eindeutigen Exit-Code (z. B. 100) ab**, um eine Detonation in der Sandbox zu vermeiden<sup>[[1]](#references)</sup>:
+Einige macOS-Stealer rufen `system_profiler` auf, um VMs zu erkennen, und **brechen mit einem eindeutigen Exit-Code (z. B. 100) ab**, um eine Sandbox-Detonation zu vermeiden<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Installierte Software & Services
+### Installierte Software und Services
 
-Überprüfe installierte **verdächtige** Anwendungen und **Berechtigungen** für die installierten Ressourcen:
+Überprüfe, ob **verdächtige** Anwendungen installiert sind und welche **Berechtigungen** für die installierten Ressourcen bestehen:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -143,14 +143,14 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
-### Benutzer erstellen
+### Einen Benutzer erstellen
 
-Ohne Rückfragen
+Ohne Eingabeaufforderungen
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
 ## Referenzen
 
-- [1] [2025, das Jahr des Infostealers](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

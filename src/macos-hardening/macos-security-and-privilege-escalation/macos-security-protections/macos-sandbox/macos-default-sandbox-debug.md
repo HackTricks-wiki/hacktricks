@@ -1,10 +1,10 @@
-# macOS Standard-Sandbox-Debug
+# macOS-Standard-Sandbox debuggen
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Auf dieser Seite erfahren Sie, wie Sie eine App erstellen, um beliebige Befehle aus dem Standard-macOS-Sandbox auszuführen:
+Auf dieser Seite erfährst du, wie du eine App erstellst, um beliebige Befehle innerhalb der macOS-Standard-Sandbox zu starten:
 
-1. Kompilieren Sie die Anwendung:
+1. Kompiliere die Anwendung:
 ```objectivec:main.m
 #include <Foundation/Foundation.h>
 
@@ -34,9 +34,9 @@ system(input);
 return 0;
 }
 ```
-Kompilieren Sie es mit: `clang -framework Foundation -o SandboxedShellApp main.m`
+Kompiliere es mit: `clang -framework Foundation -o SandboxedShellApp main.m`
 
-2. Erstellen Sie das `.app`-Bundle
+2. Erstelle das `.app`-Bundle
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +58,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Definieren Sie die Berechtigungen
+3. Entitlements definieren
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Signieren Sie die App (Sie müssen ein Zertifikat im Schlüsselbund erstellen)
+4. Signiere die App (du musst ein Zertifikat im Schlüsselbund erstellen)
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
