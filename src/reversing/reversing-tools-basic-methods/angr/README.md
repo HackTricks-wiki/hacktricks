@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ein Teil dieses Cheatsheets basiert auf der [angr-Dokumentation](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
+Ein Teil dieses Cheat Sheets basiert auf der [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
 ## Installation
 ```bash
@@ -30,7 +30,7 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## Informationen zu geladenen und Hauptobjekten
+## Informationen zum geladenen und Hauptobjekt
 
 ### Geladene Daten
 ```python
@@ -96,7 +96,7 @@ block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x4016
 ```
 ## Dynamische Analyse
 
-### Simulation Manager, Zustände
+### Simulationsmanager, Zustände
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -121,11 +121,11 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ### Funktionen aufrufen
 
-- Du kannst eine Liste von Argumenten über `args` und ein Dictionary mit Umgebungsvariablen über `env` an `entry_state` und `full_init_state` übergeben. Die Werte in diesen Strukturen können Strings oder Bitvektoren sein und werden als Argumente und Umgebung der simulierten Ausführung in den Zustand serialisiert. Das Standard-`args` ist eine leere Liste. Wenn das von dir analysierte Programm also erwartet, mindestens ein `argv[0]` zu finden, solltest du dieses immer angeben!
-- Wenn `argc` symbolisch sein soll, kannst du einen symbolischen Bitvektor als `argc` an die Konstruktoren `entry_state` und `full_init_state` übergeben. Sei dabei jedoch vorsichtig: Wenn du dies tust, solltest du dem resultierenden Zustand außerdem eine Constraint hinzufügen, dass dein `argc`-Wert nicht größer als die Anzahl der an `args` übergebenen Argumente sein kann.
-- Um den Call State zu verwenden, solltest du ihn mit `.call_state(addr, arg1, arg2, ...)` aufrufen, wobei `addr` die Adresse der aufzurufenden Funktion und `argN` das N-te Argument dieser Funktion ist, entweder als Python-Integer, String oder Array oder als Bitvektor. Wenn du Speicher allokieren und tatsächlich einen Pointer auf ein Objekt übergeben möchtest, solltest du es in einen PointerWrapper einschließen, z. B. `angr.PointerWrapper("point to me!")`. Die Ergebnisse dieser API können etwas unvorhersehbar sein, aber wir arbeiten daran.
+- Du kannst eine Liste von Argumenten über `args` und ein Dictionary mit Umgebungsvariablen über `env` an `entry_state` und `full_init_state` übergeben. Die Werte in diesen Strukturen können Strings oder Bitvectors sein und werden als Argumente und Umgebung der simulierten Ausführung in den State serialisiert. Der Standardwert für `args` ist eine leere Liste. Wenn das von dir analysierte Programm also mindestens ein `argv[0]` erwartet, solltest du dieses immer angeben!
+- Wenn `argc` symbolisch sein soll, kannst du einen symbolischen Bitvector als `argc` an die Konstruktoren `entry_state` und `full_init_state` übergeben. Sei dabei jedoch vorsichtig: In diesem Fall solltest du dem resultierenden State außerdem eine Constraint hinzufügen, dass dein `argc`-Wert nicht größer als die Anzahl der an `args` übergebenen Argumente sein kann.
+- Um den Call State zu verwenden, solltest du ihn mit `.call_state(addr, arg1, arg2, ...)` aufrufen. Dabei ist `addr` die Adresse der aufzurufenden Funktion und `argN` das N-te Argument dieser Funktion, entweder als Python-Integer, String oder Array oder als Bitvector. Wenn Speicher alloziert und tatsächlich ein Pointer auf ein Objekt übergeben werden soll, musst du es in einen `PointerWrapper` einschließen, z. B. `angr.PointerWrapper("point to me!")`. Die Ergebnisse dieser API können etwas unvorhersehbar sein, aber wir arbeiten daran.
 
-### Bitvektoren
+### BitVectors
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -186,12 +186,12 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Außerdem kannst du `proj.hook_symbol(name, hook)` verwenden, wobei du den Namen eines Symbols als erstes Argument angibst, um die Adresse, an der sich das Symbol befindet, zu hooken<sup>[[1]](#references)</sup>
+Außerdem kannst du `proj.hook_symbol(name, hook)` verwenden, wobei du als erstes Argument den Namen eines Symbols angibst, um die Adresse zu hooken, an der sich das Symbol befindet<sup>[[1]](#references)</sup>
 
 ## Beispiele
 
 ## Referenzen
 
-- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
+- [1] [angr-Dokumentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
 {{#include ../../../banners/hacktricks-training.md}}

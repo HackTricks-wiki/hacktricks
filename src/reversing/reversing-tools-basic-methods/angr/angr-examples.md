@@ -1,9 +1,9 @@
-# Angr - Examples
+# Angr - Beispiele
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Wenn das Programm `scanf` verwendet, um **mehrere Werte gleichzeitig aus stdin** einzulesen, musst du einen Zustand erzeugen, der nach dem **`scanf`** beginnt.
+> Wenn das Programm `scanf` verwendet, um **mehrere Werte auf einmal aus stdin** zu lesen, musst du einen Zustand erzeugen, der nach dem **`scanf`** beginnt.
 
 Codes entnommen aus [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Eingabe zum Erreichen der Adresse (Ausgaben anzeigend)
+### Eingabe zum Erreichen der Adresse (zeigt Prints an)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -75,7 +75,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Registry-Werte
+### Registrierungswerte
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -139,7 +139,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Stack-Werte
+### Stackwerte
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
 # have to reach a rogram flow
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-In diesem Szenario wurde die Eingabe mit `scanf("%u %u")` eingelesen und der Wert `"1 1"` angegeben, daher stammen die Werte **`0x00000001`** auf dem Stack aus der **Benutzereingabe**. Man kann sehen, wie diese Werte bei `$ebp - 8` beginnen. Daher haben wir im Code **8 Bytes von `$esp` subtrahiert (da `$ebp` und `$esp` zu diesem Zeitpunkt denselben Wert hatten)** und anschließend den BVS gepusht.
+In diesem Szenario wurde die Eingabe mit `scanf("%u %u")` eingelesen und der Wert `"1 1"` angegeben, sodass die Werte **`0x00000001`** auf dem Stack aus der **Benutzereingabe** stammen. Man kann sehen, wie diese Werte bei `$ebp - 8` beginnen. Daher haben wir im Code **8 Bytes von `$esp` subtrahiert (da `$ebp` und `$esp` in diesem Moment denselben Wert hatten)** und anschließend den BVS gepusht.
 
-![Bit-Vektoren auf den Stack legen, um herauszufinden, welchen Wert diese Stack-Position benötigt, um einen Programmablauf zu erreichen: In diesem Szenario wurde die Eingabe mit scanf("%u %u") eingelesen und der Wert "1...](<../../../images/image (136).png>)
+![Bit-Vektoren auf dem Stack platzieren, um den Wert zu ermitteln, den diese Stack-Position erreichen muss, damit ein Programmfluss entsteht: In diesem Szenario wurde die Eingabe mit scanf("%u %u") eingelesen und der Wert "1...](<../../../images/image (136).png>)
 
-### Statische Speicherwerte (globale Variablen)
+### Statische Speicherwerte (Globale Variablen)
 ```python
 import angr
 import claripy
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> Beachte, dass die symbolische Datei auch konstante Daten enthalten kann, die mit symbolischen Daten kombiniert wurden:
+> Beachte, dass die symbolische Datei auch konstante Daten enthalten kann, die mit symbolischen Daten zusammengeführt wurden:
 >
 > ```python
 >  # Hello world, my name is John.
@@ -404,11 +404,11 @@ main(sys.argv)
 >  # (!)
 > ```
 
-### Anwenden von Constraints
+### Constraints anwenden
 
 > [!TIP]
-> Manchmal kosten einfache Operationen, die Menschen durchführen, wie das Vergleichen von 2 Wörtern mit einer Länge von 16 **char by char** (Schleife), **angr** sehr viel, da es **exponentiell** viele Branches erzeugen muss: einen Branch pro if: `2^16`\
-> Daher ist es einfacher, **angr** an einen vorherigen Punkt zurückkehren zu lassen (an dem der tatsächlich schwierige Teil bereits erledigt wurde) und diese Constraints **manuell zu setzen**.
+> Manchmal kosten einfache Operationen für Menschen, wie das Vergleichen von 2 Wörtern mit einer Länge von 16 **char by char** (Schleife), **angr** sehr viel, weil es **exponentiell** viele Branches erzeugen muss, da es pro if 1 Branch erzeugt: `2^16`\
+> Daher ist es einfacher, **angr zu bitten, einen vorherigen Punkt zu erreichen** (an dem der wirklich schwierige Teil bereits erledigt wurde) und **diese Constraints manuell zu setzen**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,10 +480,10 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> In einigen Szenarien kannst du **veritesting** aktivieren. Dabei werden ähnliche Zustände zusammengeführt, um unnötige Branches zu vermeiden und die Lösung zu finden: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> In einigen Szenarien kannst du **veritesting** aktivieren. Dabei werden ähnliche Zustände zusammengeführt, um unnötige Branches einzusparen und die Lösung zu finden: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Eine weitere Möglichkeit in diesen Szenarien besteht darin, die **Funktion zu hooken und angr etwas zu geben, das es leichter verstehen kann**.
+> Eine weitere Möglichkeit in diesen Szenarien besteht darin, die **Funktion zu hooken und angr etwas zu geben, das es** leichter verstehen kann.
 
 ### Simulation Managers
 
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Bypassing eines Funktionsaufrufs
+### Hooking/Umgehen eines einzelnen Aufrufs einer Funktion
 ```python
 # This level performs the following computations:
 #
@@ -809,6 +809,6 @@ main(sys.argv)
 ```
 ## Referenzen
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}
