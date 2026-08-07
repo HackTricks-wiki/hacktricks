@@ -2,17 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-La maggior parte della crypto difficile nei CTF finisce qui: RSA, ECC/ECDSA, lattices e scarsa entropia.
+
+La maggior parte dei CTF di crittografia avanzata finisce qui: RSA, ECC/ECDSA, reticoli e scarsa casualità.
 
 ## Strumenti consigliati
 
-- SageMath (LLL/lattices, modular arithmetic): https://www.sagemath.org/
-- RsaCtfTool (Swiss-army knife): https://github.com/Ganapati/RsaCtfTool
-- factordb (quick factor checks): http://factordb.com/
+- SageMath (LLL/reticoli, aritmetica modulare): https://www.sagemath.org/
+- RsaCtfTool (coltellino svizzero): https://github.com/Ganapati/RsaCtfTool
+- factordb (controlli rapidi dei fattori): http://factordb.com/
 
 ## RSA
 
-Inizia da qui quando hai `n,e,c` e qualche indizio extra (modulo condiviso, esponente basso, bit parziali, messaggi correlati).
+Inizia da qui quando hai `n,e,c` e qualche indizio aggiuntivo (modulo condiviso, esponente basso, bit parziali, messaggi correlati).
 
 {{#ref}}
 rsa/README.md
@@ -20,38 +21,38 @@ rsa/README.md
 
 ## ECC / ECDSA
 
-Se sono coinvolte firme, testa prima problemi di nonce (reuse/bias/leaks) prima di assumere che sia matematica difficile.
+Se sono coinvolte firme, verifica prima i problemi relativi al nonce (riutilizzo/bias/leak) prima di presumere che si tratti di matematica complessa.
 
-### ECDSA nonce reuse / bias
+### Riutilizzo / bias del nonce ECDSA
 
 Se due firme riutilizzano lo stesso nonce `k`, la chiave privata può essere recuperata.
 
-Anche se `k` non è identico, **bias/leakage** dei bit del nonce tra le firme può essere sufficiente per il recupero tramite lattice (tema comune nei CTF).
+Anche se `k` non è identico, un **bias/leakage** dei bit del nonce tra le firme può essere sufficiente per il recupero tramite reticoli (un tema comune nei CTF).
 
-Recupero tecnico quando `k` è riutilizzato:
+Recupero tecnico quando `k` viene riutilizzato:
 
 Equazioni della firma ECDSA (ordine del gruppo `n`):
 
 - `r = (kG)_x mod n`
 - `s = k^{-1}(h(m) + r*d) mod n`
 
-Se lo stesso `k` è riutilizzato per due messaggi `m1, m2` producendo firme `(r, s1)` e `(r, s2)`:
+Se lo stesso `k` viene riutilizzato per due messaggi `m1, m2` che producono le firme `(r, s1)` e `(r, s2)`:
 
 - `k = (h(m1) - h(m2)) * (s1 - s2)^{-1} mod n`
 - `d = (s1*k - h(m1)) * r^{-1} mod n`
 
-### Invalid-curve attacks
+### Attacchi invalid-curve
 
-Se un protocollo non verifica che i punti siano sulla curva attesa (o nel sottogruppo corretto), un attaccante può forzare operazioni in un gruppo debole e recuperare segreti.
+Se un protocollo non verifica che i punti appartengano alla curva prevista (o al sottogruppo), un attaccante può forzare le operazioni all'interno di un gruppo debole e recuperare i segreti.
 
 Nota tecnica:
 
-- Verificare che i punti siano sulla curva e nel sottogruppo corretto.
-- Molti task CTF modellano questo come "server multiplies attacker-chosen point by secret scalar and returns something."
+- Verifica che i punti appartengano alla curva e al sottogruppo corretto.
+- Molti task CTF modellano questo scenario come: "il server moltiplica un punto scelto dall'attaccante per uno scalare segreto e restituisce qualcosa."
 
-### Tooling
+### Strumenti
 
-- SageMath per l'aritmetica delle curve / lattices
-- `ecdsa` Python library per parsing/verifica
+- SageMath per l'aritmetica delle curve / i reticoli
+- Libreria Python `ecdsa` per il parsing/la verifica
 
 {{#include ../../banners/hacktricks-training.md}}
