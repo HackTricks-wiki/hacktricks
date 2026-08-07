@@ -1,51 +1,45 @@
-# Burp MCP: LLM 协助的流量审查
+# Burp MCP：LLM 辅助的流量审查
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## 概述
 
-Burp 的 **MCP Server** 扩展可以将拦截到的 HTTP(S) 流量暴露给支持 MCP 的 LLM 客户端，使其能够对真实的 requests/responses 进行推理，以用于被动漏洞发现和报告起草。目标是以证据为驱动的审查（不进行 fuzzing 或盲目扫描），并保持 Burp 作为事实来源。
+Burp 的 **MCP Server** extension 可以将拦截到的 HTTP(S) 流量暴露给支持 MCP 的 LLM 客户端，使其能够针对**真实请求/响应进行推理**，用于被动漏洞发现和报告草拟。其目标是基于证据进行审查（不进行 fuzzing 或盲目扫描），并让 Burp 作为事实来源。
 
 ## 架构
 
-- **Burp MCP Server (BApp)** 监听 `127.0.0.1:9876`，并通过 MCP 暴露拦截的流量。
-- **MCP proxy JAR** 将 stdio（客户端）桥接到 Burp 的 MCP SSE endpoint。
-- **Optional local reverse proxy**（Caddy）标准化头以满足严格的 MCP 握手检查。
-- **Clients/backends**：Codex CLI (cloud)、Gemini CLI (cloud) 或 Ollama (local)。
+- **Burp MCP Server (BApp)** 监听 `127.0.0.1:9876`，并通过 MCP 暴露拦截到的流量。<sup>[[1]](#references)[[2]](#references)</sup>
+- **MCP proxy JAR** 将 stdio（客户端侧）桥接到 Burp 的 MCP SSE endpoint。
+- **可选的本地 reverse proxy**（Caddy）用于规范化 headers，以满足严格的 MCP handshake 检查。
+- **Clients/backends**：Codex CLI（cloud）、Gemini CLI（cloud）或 Ollama（local）。
 
 ## 设置
 
-### 1) Install Burp MCP Server
+### 1) 安装 Burp MCP Server
 
-从 Burp BApp Store 安装 **MCP Server**，并确认其在 `127.0.0.1:9876` 上监听。
+从 Burp BApp Store 安装 **MCP Server**，并确认其正在监听 `127.0.0.1:9876`。<sup>[[1]](#references)[[2]](#references)</sup>
 
-### 2) Extract the proxy JAR
+### 2) 提取 proxy JAR
 
-在 MCP Server 选项卡中，点击 **Extract server proxy jar** 并保存 `mcp-proxy.jar`。
+在 MCP Server tab 中，点击 **Extract server proxy jar** 并保存为 `mcp-proxy.jar`。
 
-### 3) Configure an MCP client (Codex example)
+### 3) 配置 MCP client（Codex 示例）
 
-将客户端指向 proxy JAR 和 Burp 的 SSE endpoint：
+将 client 指向 proxy JAR 和 Burp 的 SSE endpoint：
 ```toml
 # ~/.codex/config.toml
 [mcp_servers.burp]
 command = "java"
 args = ["-jar", "/absolute/path/to/mcp-proxy.jar", "--sse-url", "http://127.0.0.1:19876"]
 ```
-我没有收到 src/AI/AI-Burp-MCP.md 的内容。请把该文件的文本粘贴到这里，或确认我可以访问的文本片段，我会按你的要求把相关英文翻译成中文并保持原有的 markdown/html 语法与标签不变。
-
-另外：
-- 我无法直接“运行 Codex”或其它外部模型/程序。如果你希望我模拟 Codex 的输出或基于已知资料列出 MCP 工具，请明确是否接受我用我的知识库生成的列表，或提供 Codex 的输入/提示与期望格式。
-- 请说明你所说的 “MCP tools” 的确切含义（例如是 Burp Extensions、Microservice/Cloud 管理工具、或某个特定项目/插件集），以便我列出准确的工具清单。
-
-把文件内容和/或对上述问题的回答发给我后，我会立刻翻译并列出 MCP 工具。
+然后运行 Codex 并列出 MCP tools：
 ```bash
 codex
 # inside Codex: /mcp
 ```
-### 4) Fix strict Origin/header validation with Caddy (if needed)
+### 4) 使用 Caddy 修复严格的 Origin/请求头验证（如有需要）
 
-如果 MCP handshake 因严格的 `Origin` checks 或额外的 headers 导致失败，使用本地 reverse proxy 来 normalize headers（这与 Burp MCP 严格验证问题的 workaround 相匹配）。
+如果 MCP 握手因严格的 `Origin` 检查或额外请求头而失败，请使用本地反向代理来规范化请求头（这与 Burp MCP strict validation issue 的 workaround 一致）。<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 brew install caddy
 mkdir -p ~/burp-mcp
@@ -65,7 +59,7 @@ header_up -Connection
 }
 EOF
 ```
-启动代理和客户端：
+启动 proxy 和 client：
 ```bash
 caddy run --config ~/burp-mcp/Caddyfile &
 codex
@@ -74,83 +68,83 @@ codex
 
 ### Codex CLI
 
-- 将 `~/.codex/config.toml` 按上文配置。
-- 运行 `codex`，然后执行 `/mcp` 以验证 Burp 工具列表。
+- 按上述内容配置 `~/.codex/config.toml`。
+- 运行 `codex`，然后运行 `/mcp` 以验证 Burp 工具列表。
 
 ### Gemini CLI
 
-该 **burp-mcp-agents** 仓库提供启动器辅助脚本：
+**burp-mcp-agents** repo 提供了启动器辅助工具：<sup>[[4]](#references)</sup>
 ```bash
 source /path/to/burp-mcp-agents/gemini-cli/burpgemini.sh
 burpgemini
 ```
-### Ollama (local)
+### Ollama（本地）
 
 使用提供的 launcher helper 并选择一个本地模型：
 ```bash
 source /path/to/burp-mcp-agents/ollama/burpollama.sh
 burpollama deepseek-r1:14b
 ```
-Example local models and approximate VRAM needs:
+示例本地 models 及其大致 VRAM 需求：
 
-- `deepseek-r1:14b` (~16GB VRAM)
-- `gpt-oss:20b` (~20GB VRAM)
-- `llama3.1:70b` (48GB+ VRAM)
+- `deepseek-r1:14b`（约 16GB VRAM）
+- `gpt-oss:20b`（约 20GB VRAM）
+- `llama3.1:70b`（48GB+ VRAM）
 
-## Prompt pack for passive review
+## 用于被动 review 的 Prompt pack
 
-The **burp-mcp-agents** repo includes prompt templates for evidence-driven analysis of Burp traffic:
+**burp-mcp-agents** repo 包含用于对 Burp traffic 进行 evidence-driven analysis 的 prompt templates：<sup>[[4]](#references)</sup>
 
-- `passive_hunter.md`: 用于广泛的被动漏洞发现。
-- `idor_hunter.md`: 检测 IDOR/BOLA、object/tenant 漂移和 auth mismatches。
-- `auth_flow_mapper.md`: 比较已认证与未认证路径。
-- `ssrf_redirect_hunter.md`: 来自 URL fetch 参数/重定向链的 SSRF/open-redirect 候选项。
-- `logic_flaw_hunter.md`: 多步骤逻辑缺陷。
-- `session_scope_hunter.md`: token audience/scope 滥用。
-- `rate_limit_abuse_hunter.md`: 限流/滥用 缺口。
-- `report_writer.md`: 以证据为中心的报告生成。
+- `passive_hunter.md`：广泛发现 passive vulnerabilities。
+- `idor_hunter.md`：IDOR/BOLA/object/tenant drift 及 auth mismatches。
+- `auth_flow_mapper.md`：比较 authenticated 与 unauthenticated paths。
+- `ssrf_redirect_hunter.md`：从 URL fetch params/redirect chains 中发现 SSRF/open-redirect candidates。
+- `logic_flaw_hunter.md`：发现 multi-step logic flaws。
+- `session_scope_hunter.md`：发现 token audience/scope misuse。
+- `rate_limit_abuse_hunter.md`：发现 throttling/abuse gaps。
+- `report_writer.md`：以 evidence 为重点进行 reporting。
 
-## Optional attribution tagging
+## 可选的 attribution tagging
 
-要在日志中标记 Burp/LLM 流量，请添加一个 header rewrite（proxy 或 Burp Match/Replace）：
+要在 logs 中标记 Burp/LLM traffic，可添加 header rewrite（proxy 或 Burp Match/Replace）：<sup>[[1]](#references)</sup>
 ```text
 Match:   ^User-Agent: (.*)$
 Replace: User-Agent: $1 BugBounty-Username
 ```
 ## 安全注意事项
 
-- 当流量包含敏感数据时，优先使用 **本地模型**。
-- 只共享得出结论所需的最少证据。
-- 将 Burp 保持为事实来源；将模型用于 **分析与报告**，而不是扫描。
+- 当流量包含敏感数据时，优先使用 **local models**。
+- 对于每个发现，仅分享所需的最少证据。
+- 将 Burp 作为事实来源；使用模型进行**分析和报告**，而不是扫描。
 
-## Burp AI Agent (AI 辅助分诊 + MCP 工具)
+## Burp AI Agent（AI 辅助分流 + MCP 工具）
 
-**Burp AI Agent** 是一个 Burp 扩展，将本地/云 LLMs 与被动/主动分析（62 个漏洞类别）结合，并暴露 53+ MCP 工具，使外部 MCP 客户端能够编排 Burp。要点：
+**Burp AI Agent** 是一个将 local/cloud LLMs 与被动/主动分析（62 类 vulnerability classes）结合起来的 Burp 扩展，并暴露 53+ 个 MCP 工具，使外部 MCP 客户端能够编排 Burp。<sup>[[5]](#references)</sup> 主要功能：
 
-- **Context-menu triage**：通过 Proxy 捕获流量，打开 **Proxy > HTTP History**，右键单击某个请求 → **Extensions > Burp AI Agent > Analyze this request**，以生成与该请求/响应绑定的 AI 聊天。
-- **Backends**（可为每个 profile 选择）：
-  - 本地 HTTP：**Ollama**, **LM Studio**。
-  - 远程 HTTP：**OpenAI-compatible** 端点（base URL + model name）。
-  - 云 CLI：**Gemini CLI** (`gemini auth login`), **Claude CLI** (`export ANTHROPIC_API_KEY=...` or `claude login`), **Codex CLI** (`export OPENAI_API_KEY=...`), **OpenCode CLI** (provider-specific login)。
-- **Agent profiles**：prompt 模板会自动安装到 `~/.burp-ai-agent/AGENTS/`；将额外的 `*.md` 文件放入该目录以添加自定义分析/扫描行为。
-- **MCP server**：通过 **Settings > MCP Server** 启用，以将 Burp 操作暴露给任何 MCP 客户端（53+ 工具）。可以通过编辑 `~/Library/Application Support/Claude/claude_desktop_config.json`（macOS）或 `%APPDATA%\Claude\claude_desktop_config.json`（Windows）来将 Claude Desktop 指向该服务器。
-- **Privacy controls**：STRICT / BALANCED / OFF 会在发送到远程模型之前对敏感请求数据进行脱敏；在处理秘密时优先使用本地后端。
-- **Audit logging**：JSONL 日志对每条记录使用 SHA-256 完整性哈希，提供防篡改的 AI/MCP 操作可追溯性。
-- **Build/load**：下载发布的 JAR 或使用 Java 21 构建：
+- **Context-menu triage**：通过 Proxy 捕获流量，打开 **Proxy > HTTP History**，右键单击一个 request → **Extensions > Burp AI Agent > Analyze this request**，即可启动一个绑定到该 request/response 的 AI chat。
+- **Backends**（可按 profile 选择）：
+- Local HTTP：**Ollama**、**LM Studio**。
+- Remote HTTP：**OpenAI-compatible** endpoint（base URL + model name）。
+- Cloud CLIs：**Gemini CLI**（`gemini auth login`）、**Claude CLI**（`export ANTHROPIC_API_KEY=...` 或 `claude login`）、**Codex CLI**（`export OPENAI_API_KEY=...`）、**OpenCode CLI**（provider-specific login）。
+- **Agent profiles**：prompt templates 会自动安装到 `~/.burp-ai-agent/AGENTS/`；将额外的 `*.md` 文件放入其中，即可添加自定义的分析/扫描行为。
+- **MCP server**：通过 **Settings > MCP Server** 启用，可向任何 MCP 客户端暴露 Burp 操作（53+ 个工具）。可以通过编辑 `~/Library/Application Support/Claude/claude_desktop_config.json`（macOS）或 `%APPDATA%\Claude\claude_desktop_config.json`（Windows），将 Claude Desktop 指向该 server。
+- **Privacy controls**：STRICT / BALANCED / OFF 会在将敏感 request data 发送到 remote models 前对其进行 redact；处理 secrets 时优先使用 local backends。
+- **Audit logging**：JSONL logs 为每个条目生成 SHA-256 integrity hashing，从而为 AI/MCP actions 提供防篡改的 traceability。
+- **Build/load**：下载 release JAR，或使用 Java 21 构建：
 ```bash
 git clone https://github.com/six2dez/burp-ai-agent.git
 cd burp-ai-agent
 JAVA_HOME=/path/to/jdk-21 ./gradlew clean shadowJar
 # load build/libs/Burp-AI-Agent-<version>.jar via Burp Extensions > Add (Java)
 ```
-操作注意：除非启用 privacy mode，否则 cloud backends 可能会 exfiltrate session cookies/PII；MCP 暴露会授予对 Burp 的远程编排，因此应将访问限制为受信任的 agents 并监视 integrity-hashed audit log。
+操作注意事项：除非强制启用 privacy mode，否则 cloud backends 可能会 exfiltrate session cookies/PII；MCP exposure 可远程 orchestration Burp，因此应将访问限制为 trusted agents，并监控经过 integrity-hashed 的 audit log。
 
-## References
+## 参考资料
 
-- [Burp MCP + Codex CLI integration and Caddy handshake fix](https://pentestbook.six2dez.com/others/burp)
-- [Burp MCP Agents (workflows, launchers, prompt pack)](https://github.com/six2dez/burp-mcp-agents)
-- [Burp MCP Server BApp](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
-- [PortSwigger MCP server strict Origin/header validation issue](https://github.com/PortSwigger/mcp-server/issues/34)
-- [Burp AI Agent](https://github.com/six2dez/burp-ai-agent)
+- [1] [Burp MCP + Codex CLI integration and Caddy handshake fix](https://pentestbook.six2dez.com/others/burp)
+- [2] [Burp MCP Server BApp](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
+- [3] [PortSwigger MCP server strict Origin/header validation issue](https://github.com/PortSwigger/mcp-server/issues/34)
+- [4] [Burp MCP Agents (workflows, launchers, prompt pack)](https://github.com/six2dez/burp-mcp-agents)
+- [5] [Burp AI Agent](https://github.com/six2dez/burp-ai-agent)
 
 {{#include ../banners/hacktricks-training.md}}
