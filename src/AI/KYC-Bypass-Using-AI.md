@@ -1,44 +1,44 @@
-# KYC Bypass με AI
+# Παράκαμψη KYC με χρήση AI
 
 {{#include ../banners/hacktricks-training.md}}
 
-Τα Generative models μπορούν να χρησιμοποιηθούν για **bypass browser-based KYC, age-verification και biometric liveness workflows**. Το αδύναμο σημείο συχνά **δεν** είναι το transport ή ο cloud liveness provider, αλλά το **camera trust boundary**: ένας desktop browser συνήθως εμπιστεύεται οποιαδήποτε συσκευή εκθέτει το `getUserMedia()` ως webcam.<sup>[[1]](#references)</sup>
+Τα Generative models μπορούν να χρησιμοποιηθούν για **παράκαμψη KYC μέσω browser, επαλήθευσης ηλικίας και ροών βιομετρικής ανίχνευσης ζωντανής παρουσίας**. Το αδύναμο σημείο συχνά **δεν** είναι η μεταφορά ή ο cloud πάροχος liveness, αλλά το **όριο εμπιστοσύνης της κάμερας**: ένας desktop browser συνήθως εμπιστεύεται οποιαδήποτε συσκευή εκθέτει το `getUserMedia()` ως webcam.<sup>[[1]](#references)</sup>
 
-## Practical Attack Chain
+## Πρακτική αλυσίδα επίθεσης
 
-1. **Δημιουργία challenge-compliant media** με ένα video-to-video model, χρησιμοποιώντας έναν source actor και μια victim reference image.
-2. **Injection του forged stream πριν από signing ή upload**, για παράδειγμα μέσω μιας Linux virtual camera που δημιουργήθηκε με `v4l2loopback` και τροφοδοτείται από OBS ή FFmpeg.
-3. Επιτρέψτε στον browser και στο vendor SDK (WebRTC, AWS κ.λπ.) να **κάνουν capture, sign και upload τα attacker-controlled frames σαν να προέρχονταν από πραγματική webcam**.
+1. **Δημιουργία media που συμμορφώνονται με τα challenges** με ένα video-to-video model, χρησιμοποιώντας έναν source actor και μια εικόνα αναφοράς του θύματος.<sup>[[1]](#references)</sup>
+2. **Εισαγωγή του forged stream πριν από την υπογραφή ή το upload**, για παράδειγμα μέσω μιας Linux virtual camera που δημιουργήθηκε με `v4l2loopback` και τροφοδοτείται από OBS ή FFmpeg.<sup>[[3]](#references)</sup>
+3. Αφήστε τον browser και το vendor SDK (WebRTC, AWS κ.λπ.) να **συλλάβουν, υπογράψουν και ανεβάσουν τα frames που ελέγχει ο attacker, σαν να προέρχονταν από πραγματική webcam**.<sup>[[2]](#references)</sup>
 
-Αυτό είναι σημαντικό κατά τη διάρκεια assessments, επειδή τα signed WebSocket chunks ή το proprietary SDK framing μπορεί να κάνουν το **network-layer tampering** μη πρακτικό, ενώ το **camera-layer injection** εξακολουθεί να λειτουργεί.<sup>[[1]](#references)</sup>
+Αυτό είναι σημαντικό κατά τις αξιολογήσεις, επειδή τα υπογεγραμμένα WebSocket chunks ή το proprietary SDK framing μπορεί να καθιστούν το **network-layer tampering** μη πρακτικό, ενώ το **camera-layer injection** εξακολουθεί να λειτουργεί.<sup>[[1]](#references)</sup>
 
-## High-Value Testing Angles
+## Πολύτιμες κατευθύνσεις testing
 
-- **Virtual webcam acceptance**: αν το flow λειτουργεί από desktop browser, ελέγξτε αν τα OBS, `v4l2loopback` ή vendor virtual cameras γίνονται αποδεκτά ως κανονικά peripherals.
-- **Camera API redirection on mobile**: τα native mobile flows μπορεί να παραμένουν ευάλωτα όταν το Frida κάνει hooks στα camera APIs και αντικαθιστά τα sensor buffers με frames από ένα MP4 ή emulator-backed virtual camera.
-- **Constraint weakening**: σελίδες που απαιτούν ακριβή `deviceId`, `frameRate`, `width`, `height` ή `facingMode` μπορούν μερικές φορές να γίνουν bypass μέσω monkeypatching του `navigator.mediaDevices.getUserMedia` και αντικατάστασης των strict constraints με ευρύτερα ranges.
-- **Low-quality generation plus post-processing**: δημιουργήστε το φθηνότερο video που μπορεί να κάνει reliably render το model και, στη συνέχεια, χρησιμοποιήστε FFmpeg upscaling ή frame interpolation για να ικανοποιήσετε τις capture requirements.
-- **Predictable active challenges**: επαναλαμβανόμενες ακολουθίες κινήσεων του κεφαλιού ή light flashes αξίζει να καταγραφούν και να επαναχρησιμοποιηθούν μέσω ενός generative workflow.
-- **Weak replay detection**: απλές scene perturbations, όπως crop ή position shifts, overlay changes ή ελαφριά κίνηση, μπορεί να είναι αρκετές όταν η anti-replay λογική ελέγχει μόνο superficial frame similarity.<sup>[[1]](#references)</sup>
+- **Αποδοχή virtual webcam**: αν η ροή λειτουργεί από desktop browser, ελέγξτε αν τα OBS, `v4l2loopback` ή οι virtual cameras του vendor γίνονται αποδεκτά ως κανονικά peripherals.<sup>[[1]](#references)</sup>
+- **Ανακατεύθυνση Camera API σε mobile**: οι native mobile ροές μπορεί να παραμένουν ευάλωτες όταν τα Frida hooks στις camera APIs αντικαθιστούν τα sensor buffers με frames από ένα MP4 ή από virtual camera που υποστηρίζεται από emulator.
+- **Αποδυνάμωση constraints**: σελίδες που απαιτούν ακριβή `deviceId`, `frameRate`, `width`, `height` ή `facingMode` μπορούν μερικές φορές να παρακαμφθούν με monkeypatching του `navigator.mediaDevices.getUserMedia` και αντικατάσταση των strict constraints με ευρύτερα ranges.<sup>[[4]](#references)</sup>
+- **Generation χαμηλής ποιότητας και post-processing**: δημιουργήστε το φθηνότερο video που μπορεί να αποδώσει αξιόπιστα το model και, στη συνέχεια, χρησιμοποιήστε FFmpeg upscaling ή frame interpolation για να ικανοποιήσετε τις απαιτήσεις capture.
+- **Προβλέψιμα active challenges**: επαναλαμβανόμενες ακολουθίες κίνησης του κεφαλιού ή αναλαμπών φωτός αξίζει να καταγράφονται και να αναπαράγονται μέσω generative workflow.
+- **Αδύναμη ανίχνευση replay**: απλές μεταβολές της σκηνής, όπως αλλαγές crop ή θέσης, αλλαγές overlay ή ελαφριά κίνηση, μπορεί να επαρκούν όταν η anti-replay λογική ελέγχει μόνο επιφανειακή ομοιότητα frames.<sup>[[1]](#references)</sup>
 
-## Mobile vs. Desktop Trust Differences
+## Διαφορές εμπιστοσύνης μεταξύ Mobile και Desktop
 
-Τα native mobile apps μπορούν να αυξήσουν το κόστος του attacker με:
+Οι native mobile εφαρμογές μπορούν να αυξήσουν το κόστος για τον attacker μέσω:<sup>[[1]](#references)</sup>
 
-- **sensor ή Secure Element attestation** για camera buffers·
-- **execution-integrity** signals, όπως τα **Play Integrity** ή **App Attest**·
-- **motion correlation** μεταξύ video και accelerometer ή gyroscope telemetry.
+- **attestation αισθητήρων ή Secure Element** για camera buffers·
+- σημάτων **execution-integrity**, όπως τα **Play Integrity** ή **App Attest**·
+- **συσχέτισης κίνησης** μεταξύ video και telemetry από accelerometer ή gyroscope.
 
-Τα desktop web flows συνήθως δεν διαθέτουν αντίστοιχο camera chain of trust, επομένως γενικά αποτελούν το path of least resistance.<sup>[[1]](#references)</sup>
+Οι desktop web ροές συνήθως δεν διαθέτουν αντίστοιχη chain of trust για την κάμερα, επομένως αποτελούν γενικά τη διαδρομή με τη μικρότερη αντίσταση.<sup>[[1]](#references)</sup>
 
-## Defensive Review Notes
+## Σημειώσεις αμυντικού ελέγχου
 
-Κατά την ανασκόπηση ενός KYC ή liveness integration, επαληθεύστε αν:
+Κατά την αξιολόγηση μιας ενσωμάτωσης KYC ή liveness, επαληθεύστε αν:<sup>[[1]](#references)</sup>
 
-- επιτρέπει ένα **desktop-browser fallback** για ένα workflow που είχε threat-modeled μόνο για mobile capture·
-- βασίζεται κυρίως σε **algorithmic liveness** χωρίς ισχυρό human escalation για ύποπτα sessions·
-- χρησιμοποιεί **stable ή predictable challenges** που μπορούν να προ-καταγραφούν και να τροφοδοτηθούν σε ένα generation pipeline·
-- ανιχνεύει **`getUserMedia` monkeypatching**, virtual cameras, inconsistent browser hardware telemetry ή missing device attestation.<sup>[[1]](#references)</sup>
+- επιτρέπει **desktop-browser fallback** για μια ροή που είχε μοντελοποιηθεί ως προς τις απειλές μόνο για mobile capture·
+- βασίζεται κυρίως σε **algorithmic liveness** χωρίς ισχυρή ανθρώπινη κλιμάκωση για ύποπτα sessions·
+- χρησιμοποιεί **σταθερά ή προβλέψιμα challenges** που μπορούν να προ-καταγραφούν και να τροφοδοτηθούν σε generation pipeline·
+- ανιχνεύει **`getUserMedia` monkeypatching**, virtual cameras, ασυνεπή telemetry hardware του browser ή απουσία device attestation.<sup>[[1]](#references)</sup>
 
 ## References
 
