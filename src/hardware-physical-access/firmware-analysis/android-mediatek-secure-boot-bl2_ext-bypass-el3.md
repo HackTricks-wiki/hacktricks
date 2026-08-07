@@ -2,36 +2,36 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Bu sayfa, cihaz bootloader yapılandırması (seccfg) "unlocked" olduğunda doğrulama boşluğundan yararlanarak birden fazla MediaTek platformunda gerçekleştirilen pratik bir secure-boot kırılmasını belgeler. Hata, ARM EL3'te yama uygulanmış bir bl2_ext'in çalıştırılmasına izin vererek aşağı akıştaki imza doğrulamasını devre dışı bırakır, güven zincirini çökertir ve rastgele imzasız TEE/GZ/LK/Kernel yüklemeye imkan tanır.
+Bu sayfa, cihaz bootloader yapılandırması (seccfg) "unlocked" durumundayken bir verification gap'i kötüye kullanarak birden fazla MediaTek platformunda gerçekleştirilebilen pratik bir secure-boot kırma yöntemini belgeler. Bu flaw, ARM EL3 seviyesinde patched bir bl2_ext çalıştırarak sonraki signature verification işlemlerini devre dışı bırakmaya, trust chain'i çökertmeye ve imzasız TEE/GZ/LK/Kernel yüklemesini mümkün kılmaya izin verir.<sup>[[1]](#references)</sup>
 
-> Uyarı: Early-boot patching offset'ler yanlışsa cihazları kalıcı olarak brickleyebilir. Her zaman full dumps ve güvenilir bir recovery path saklayın.
+> Dikkat: Early-boot patching, offset'ler yanlışsa cihazları kalıcı olarak brick edebilir. Her zaman full dump'ları ve güvenilir bir recovery yolunu hazır bulundurun.
 
-## Etkilenen boot akışı (MediaTek)
+## Affected boot flow (MediaTek)
 
-- Normal path: BootROM → Preloader → bl2_ext (EL3, verified) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
-- Vulnerable path: seccfg "unlocked" olarak ayarlandığında, Preloader bl2_ext'in doğrulamasını atlayabilir. Preloader yine de EL3'te bl2_ext'e atlar; bu yüzden hazırlanmış bir bl2_ext sonrasında doğrulanmamış bileşenleri yükleyebilir.
+- Normal yol: BootROM → Preloader → bl2_ext (EL3, verified) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
+- Vulnerable yol: seccfg unlocked olarak ayarlandığında Preloader, bl2_ext'i verify etmeyi atlayabilir. Preloader yine de bl2_ext'e EL3 seviyesinde geçiş yapar; bu nedenle crafted bir bl2_ext, bundan sonraki unverified bileşenleri yükleyebilir.
 
-Ana güven sınırı:
-- bl2_ext EL3'te çalışır ve TEE, GenieZone, LK/AEE ve kernel'i doğrulamaktan sorumludur. Eğer bl2_ext'in kendisi authenticate edilmemişse, zincirin geri kalan kısmı kolayca bypass edilir.
+Temel trust boundary:
+- bl2_ext, EL3 seviyesinde çalışır ve TEE, GenieZone, LK/AEE ile kernel'i verify etmekten sorumludur. bl2_ext'in kendisi authenticated değilse chain'in geri kalanı trivially bypass edilebilir.<sup>[[1]](#references)</sup>
 
-## Temel neden
+## Root cause
 
-Etkilenen cihazlarda, seccfg "unlocked" durumunu gösterdiğinde Preloader bl2_ext bölümünün authentication'ını zorunlu kılmaz. Bu, saldırgan kontrollü bir bl2_ext'in flashlenmesine ve EL3'te çalıştırılmasına izin verir.
+Etkilenen cihazlarda Preloader, seccfg bir "unlocked" durumu belirttiğinde bl2_ext partition'ının authentication işlemini zorunlu kılmaz. Bu, attacker-controlled bir bl2_ext'in flash edilmesine ve EL3 seviyesinde çalıştırılmasına izin verir.
 
-bl2_ext içinde, doğrulama politikası fonksiyonu koşulsuz olarak doğrulamanın gerekli olmadığını (veya her zaman başarılı olduğunu) raporlayacak şekilde patch'lenebilir; bu da boot zincirinin imzasız TEE/GZ/LK/Kernel görüntülerini kabul etmesine zorlar. Bu patch EL3'te çalıştığı için, aşağı akış bileşenleri kendi kontrollerini uygulasalar bile etkili olur.
+bl2_ext içinde verification policy function, verification'ın gerekli olmadığını koşulsuz olarak bildirecek (veya her zaman başarılı olacak) şekilde patched edilebilir; böylece boot chain, imzasız TEE/GZ/LK/Kernel image'larını kabul etmeye zorlanır. Bu patch EL3 seviyesinde çalıştığından, downstream bileşenler kendi kontrollerini uygulasa bile etkilidir.<sup>[[1]](#references)</sup>
 
-## Pratik exploit zinciri
+## Practical exploit chain
 
-1. Bootloader partition'larını (Preloader, bl2_ext, LK/AEE, vb.) OTA/firmware paketleri, EDL/DA readback veya donanım dump'ları ile edinin.
-2. bl2_ext doğrulama rutinini tespit edin ve doğrulamayı her zaman atlayacak/kabul edecek şekilde patch'leyin.
-3. Değiştirilmiş bl2_ext'i fastboot, DA veya unlocked cihazlarda hâlâ izin verilen benzer bakım kanalları aracılığıyla flash'layın.
-4. Yeniden başlatın; Preloader EL3'te patch'lenmiş bl2_ext'e atlar ve ardından imzasız downstream görüntüleri (patch'lenmiş TEE/GZ/LK/Kernel) yükleyip imza zorlamasını devre dışı bırakır.
+1. Bootloader partition'larını (Preloader, bl2_ext, LK/AEE vb.) OTA/firmware package'ları, EDL/DA readback veya hardware dumping yoluyla elde edin.
+2. bl2_ext verification routine'ini belirleyin ve verification'ı her zaman skip/accept edecek şekilde patch'leyin.
+3. Modified bl2_ext'i, unlocked cihazlarda hâlâ izin verilen fastboot, DA veya benzer maintenance channel'larını kullanarak flash edin.
+4. Reboot edin; Preloader, patched bl2_ext'e EL3 seviyesinde geçiş yapar. bl2_ext daha sonra imzasız downstream image'ları (patched TEE/GZ/LK/Kernel) yükler ve signature enforcement'ı devre dışı bırakır.<sup>[[1]](#references)</sup>
 
-Cihaz seccfg locked olarak yapılandırılmışsa (seccfg locked), Preloader'ın bl2_ext'i doğrulaması beklenir. Bu yapılandırmada, başka bir vulnerability unsigned bl2_ext yüklemeye izin vermedikçe bu attack başarısız olur.
+Cihaz locked olarak yapılandırılmışsa (seccfg locked), Preloader'ın bl2_ext'i verify etmesi beklenir. Bu yapılandırmada, başka bir vulnerability imzasız bir bl2_ext yüklenmesine izin vermediği sürece bu attack başarısız olur.
 
 ## Triage (expdb boot logs)
 
-- bl2_ext yüklemesi çevresindeki boot/expdb log'larını dump edin. Eğer `img_auth_required = 0` ve sertifika doğrulama süresi ~0 ms ise, doğrulamanın atlanmış olması muhtemeldir.
+- bl2_ext yüklemesi çevresindeki boot/expdb log'larını dump edin. `img_auth_required = 0` ise ve certificate verification süresi yaklaşık 0 ms ise verification büyük olasılıkla skip edilmiştir.<sup>[[1]](#references)</sup>
 
 Örnek log alıntısı:
 ```
@@ -39,58 +39,58 @@ Cihaz seccfg locked olarak yapılandırılmışsa (seccfg locked), Preloader'ın
 [PART] Image with header, name: bl2_ext, addr: FFFFFFFFh, mode: FFFFFFFFh, size:654944, magic:58881688h
 [PART] part: lk_a img: bl2_ext cert vfy(0 ms)
 ```
-- Bazı cihazlar kilitli olsa bile bl2_ext doğrulamasını atlıyor; lk2 ikincil bootloader yolları aynı açığı gösterdi. Eğer post-OTA Preloader, cihaz kilitsizken bl2_ext için `img_auth_required = 1` kaydı tutuyorsa, doğrulama zorlaması muhtemelen geri getirilmiştir.
+- Bazı cihazlar kilitli olsalar bile bl2_ext doğrulamasını atlar; lk2 secondary bootloader yollarında da aynı açık görülmüştür. OTA sonrası Preloader, cihaz kilidi açıkken bl2_ext için `img_auth_required = 1` kaydederse enforcement muhtemelen geri yüklenmiştir.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Doğrulama mantığının bulunduğu yerler
+## Doğrulama mantığının konumları
 
-- İlgili kontrol genellikle bl2_ext imajı içinde, `verify_img` veya `sec_img_auth` gibi adlandırılmış fonksiyonlarda bulunur.
-- Yamanmış sürüm, fonksiyonun başarı döndürmesini zorlar veya doğrulama çağrısını tamamen atlar.
+- İlgili kontrol genellikle bl2_ext image içinde, `verify_img` veya `sec_img_auth` benzeri adlara sahip functions içinde bulunur.
+- Patched version, function'ın success döndürmesini zorlar veya verification call'u tamamen bypass eder.<sup>[[1]](#references)</sup>
 
-Örnek yama yaklaşımı (kavramsal):
-- TEE, GZ, LK ve kernel imajlarında `sec_img_auth` çağıran fonksiyonu bulun.
-- Gövdesini hemen başarı döndüren bir stub ile değiştirin veya doğrulama hatasını işleyen koşullu dalı üzerine yazın.
+Örnek patch yaklaşımı (kavramsal):
+- TEE, GZ, LK ve kernel images üzerinde `sec_img_auth` çağıran function'ı bulun.
+- Body'sini hemen success döndüren bir stub ile değiştirin veya verification failure'ı işleyen conditional branch'i overwrite edin.
 
-Yamanın stack/frame kurulumunu koruduğundan ve çağıranlara beklenen durum kodlarını döndürdüğünden emin olun.
+Patch'in stack/frame setup'ı koruduğundan ve caller'ların beklediği status code'ları döndürdüğünden emin olun.<sup>[[1]](#references)</sup>
 
 ## Fenrir PoC iş akışı (Nothing/CMF)
 
-Fenrir, bu sorun için referans bir yama araç takımıdır (Nothing Phone (2a) tam desteklenir; CMF Phone 1 kısmen). Yüksek düzey:
-- Cihaz bootloader imajını `bin/<device>.bin` olarak yerleştirin.
-- bl2_ext doğrulama politikasını devre dışı bırakan yamanmış bir imaj oluşturun.
-- Oluşan payload'u flash'layın (fastboot helper sağlanmıştır).
+Fenrir, bu sorun için bir reference patching toolkit'tir (Nothing Phone (2a) tamamen desteklenir; CMF Phone 1 kısmen desteklenir).<sup>[[1]](#references)</sup> Genel hatlarıyla:
+- Cihazın bootloader image'ını `bin/<device>.bin` olarak yerleştirin.
+- bl2_ext verification policy'yi devre dışı bırakan patched image oluşturun.
+- Ortaya çıkan payload'ı flash edin (fastboot helper sağlanmıştır).
 ```bash
 ./build.sh pacman                    # build from bin/pacman.bin
 ./build.sh pacman /path/to/boot.bin  # build from a custom bootloader path
 ./flash.sh                           # flash via fastboot
 ```
-Use another flashing channel if fastboot is unavailable.
+Use fastboot kullanılamıyorsa başka bir flashing channel kullanın.
 
-## EL3 yama notları
+## EL3 patching notları
 
-- bl2_ext ARM EL3'te çalışır. Buradaki çöküşler cihazı EDL/DA veya test noktaları ile yeniden flash'lanana kadar tuğlalaştırabilir.
-- Çalışma yolunu doğrulamak ve çöküşleri teşhis etmek için board'a özel logging/UART kullanın.
-- Değiştirilen tüm partition'ların yedeklerini tutun ve önce harcanabilir bir donanımda test edin.
+- bl2_ext ARM EL3'te çalışır. Buradaki crash'ler, cihaz EDL/DA veya test points üzerinden yeniden flash edilene kadar cihazı brick edebilir.
+- Execution path'i doğrulamak ve crash'leri teşhis etmek için board'a özel logging/UART kullanın.
+- Değiştirilen tüm partition'ların backup'larını alın ve önce disposable hardware üzerinde test edin.<sup>[[1]](#references)</sup>
 
-## Etkileri
+## Çıkarımlar
 
-- Preloader'dan sonra EL3 kodu yürütme ve geriye kalan önyükleme yolunun tam zincir-güveninin çökmesi.
-- İmzalanmamış TEE/GZ/LK/Kernel'i boot etme yeteneği; secure/verified boot beklentilerini atlayarak kalıcı bir ele geçirilme sağlar.
+- Preloader'dan sonra EL3 code execution ve boot path'in geri kalanı için tüm chain-of-trust'un çökmesi.
+- Unsigned TEE/GZ/LK/Kernel boot etme, secure/verified boot beklentilerini bypass etme ve persistent compromise sağlama yeteneği.<sup>[[1]](#references)</sup>
 
 ## Cihaz notları
 
-- Onaylı destek: Nothing Phone (2a) (Pacman)
-- Çalıştığı biliniyor (tam destek değil): CMF Phone 1 (Tetris)
-- Gözlemlendi: Vivo X80 Pro'nun bl2_ext'i kilitli olsa bile doğrulamadığı bildirildi
-- NothingOS 4 stable (BP2A.250605.031.A3, Nov 2025) bl2_ext doğrulamayı yeniden etkinleştirdi; fenrir `pacman-v2.0` beta Preloader ile yamalanmış bir LK'yi karıştırarak bypass'ı geri getiriyor
-- Sektör haberleri aynı mantık hatasını içeren ek lk2-tabanlı tedarikçilerin ürünler gönderdiğini vurguluyor; bu nedenle 2024–2025 MTK sürümleri arasında daha fazla örtüşme bekleyin.
+- Desteklendiği doğrulanan: Nothing Phone (2a) (Pacman)
+- Çalıştığı bilinen (incomplete support): CMF Phone 1 (Tetris)
+- Gözlemlenen: Vivo X80 Pro'nun locked durumdayken bile bl2_ext'i doğrulamadığı bildirildi<sup>[[1]](#references)</sup>
+- NothingOS 4 stable (BP2A.250605.031.A3, Nov 2025), bl2_ext verification'ı yeniden etkinleştirdi; fenrir `pacman-v2.0`, beta Preloader'ı patched LK ile mix ederek bypass'ı geri getiriyor<sup>[[3]](#references)</sup>
+- Industry coverage, aynı logic flaw'ı içeren ve lk2 tabanlı ek vendor'ların da bu yapıyı kullandığını vurguluyor; bu nedenle 2024–2025 MTK release'leri arasında daha fazla örtüşme bekleyin.<sup>[[2]](#references)[[4]](#references)</sup>
 
-## MTK DA readback and seccfg manipulation with Penumbra
+## Penumbra ile MTK DA readback ve seccfg manipulation
 
-Penumbra, Rust crate/CLI/TUI olup MTK preloader/bootrom ile USB üzerinden DA-modu işlemlerini otomatikleştirir. Fiziksel erişime sahip ve savunmasız bir cihaza (DA uzantıları izinliyse) MTK USB portunu keşfedebilir, bir Download Agent (DA) blob'u yükleyebilir ve seccfg kilidi çevirme ile partition okuma gibi ayrıcalıklı komutlar gönderebilir.
+Penumbra, USB üzerinden MTK preloader/bootrom ile DA-mode operations etkileşimini otomatikleştiren bir Rust crate/CLI/TUI'dir. Vulnerable bir handset'e physical access ile (DA extensions allowed), MTK USB port'unu keşfedebilir, bir Download Agent (DA) blob'u yükleyebilir ve seccfg lock flipping ile partition readback gibi privileged command'lar gönderebilir.<sup>[[5]](#references)</sup>
 
-- **Environment/driver setup**: On Linux install `libudev`, add the user to the `dialout` group, and create udev rules or run with `sudo` if the device node is not accessible. Windows support is unreliable; it sometimes works only after replacing the MTK driver with WinUSB using Zadig (per project guidance).
-- **Workflow**: Read a DA payload (e.g., `std::fs::read("../DA_penangf.bin")`), poll for the MTK port with `find_mtk_port()`, and build a session using `DeviceBuilder::with_mtk_port(...).with_da_data(...)`. After `init()` completes the handshake and gathers device info, check protections via `dev_info.target_config()` bitfields (bit 0 set → SBC enabled). Enter DA mode and attempt `set_seccfg_lock_state(LockFlag::Unlock)`—this only succeeds if the device accepts extensions. Partitions can be dumped with `read_partition("lk_a", &mut progress_cb, &mut writer)` for offline analysis or patching.
-- **Security impact**: Successful seccfg unlocking reopens flashing paths for unsigned boot images, enabling persistent compromises such as the bl2_ext EL3 patching described above. Partition readback provides firmware artifacts for reverse engineering and crafting modified images.
+- **Environment/driver setup**: Linux'ta `libudev` kurun, user'ı `dialout` group'una ekleyin ve udev rules oluşturun veya device node'a erişilemiyorsa `sudo` ile çalıştırın. Windows support güvenilir değildir; project guidance'a göre bazen MTK driver'ı Zadig kullanarak WinUSB ile değiştirdikten sonra çalışır.
+- **Workflow**: Bir DA payload okuyun (ör. `std::fs::read("../DA_penangf.bin")`), `find_mtk_port()` ile MTK port'u poll edin ve `DeviceBuilder::with_mtk_port(...).with_da_data(...)` kullanarak bir session oluşturun. `init()` handshake'i tamamlayıp device info'yu topladıktan sonra `dev_info.target_config()` bitfield'leri üzerinden protections'ı kontrol edin (bit 0 set → SBC enabled). DA mode'a girin ve `set_seccfg_lock_state(LockFlag::Unlock)` işlemini deneyin—bu yalnızca device extensions'ı kabul ederse başarılı olur. Partition'lar, offline analysis veya patching için `read_partition("lk_a", &mut progress_cb, &mut writer)` ile dump edilebilir.
+- **Security impact**: Başarılı seccfg unlocking, unsigned boot image'lar için flashing path'lerini yeniden açar ve yukarıda açıklanan bl2_ext EL3 patching gibi persistent compromise'ları mümkün kılar. Partition readback, reverse engineering ve modified image'lar hazırlamak için firmware artifact'ları sağlar.
 
 <details>
 <summary>Rust DA session + seccfg unlock + partition dump (Penumbra)</summary>
@@ -129,12 +129,12 @@ Ok(())
 ```
 </details>
 
-## Kaynaklar
+## Referanslar
 
-- [Fenrir – MediaTek bl2_ext secure‑boot bypass (PoC)](https://github.com/R0rt1z2/fenrir)
-- [Cyber Security News – PoC Exploit Released For Nothing Phone Code Execution Vulnerability](https://cybersecuritynews.com/nothing-phone-code-execution-vulnerability/)
-- [Fenrir pacman-v2.0 release (NothingOS 4 bypass bundle)](https://github.com/R0rt1z2/fenrir/releases/tag/pacman-v2.0)
-- [The Cyber Express – Fenrir PoC breaks secure boot on Nothing Phone 2a/CMF1](https://thecyberexpress.com/fenrir-poc-for-nothing-phone-2a-cmf1/)
-- [Penumbra – MTK DA flash/readback & seccfg tooling](https://github.com/shomykohai/penumbra)
+- [1] [Fenrir – MediaTek bl2_ext secure‑boot bypass (PoC)](https://github.com/R0rt1z2/fenrir)
+- [2] [Cyber Security News – Nothing Phone Code Execution Vulnerability için PoC Exploit yayınlandı](https://cybersecuritynews.com/nothing-phone-code-execution-vulnerability/)
+- [3] [Fenrir pacman-v2.0 sürümü (NothingOS 4 bypass paketi)](https://github.com/R0rt1z2/fenrir/releases/tag/pacman-v2.0)
+- [4] [The Cyber Express – Fenrir PoC, Nothing Phone 2a/CMF1 üzerindeki secure boot'u kırıyor](https://thecyberexpress.com/fenrir-poc-for-nothing-phone-2a-cmf1/)
+- [5] [Penumbra – MTK DA flash/readback ve seccfg araçları](https://github.com/shomykohai/penumbra)
 
 {{#include ../../banners/hacktricks-training.md}}

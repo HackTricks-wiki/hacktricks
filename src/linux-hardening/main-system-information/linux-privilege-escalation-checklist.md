@@ -1,67 +1,68 @@
-# Linux Privilege Escalation Checklist
+# Linux Yetki Yükseltme Kontrol Listesi
 
 {{#include ../../banners/hacktricks-training.md}}
 
-# Checklist - Linux Privilege Escalation
+# Kontrol Listesi - Linux Yetki Yükseltme
 
 
 
-### **Linux yerel privilege escalation vector'lerini aramak için en iyi araç:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+### **Linux yerel yetki yükseltme vektörlerini aramak için en iyi tool:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-### [System Information](../linux-basics/linux-privilege-escalation/index.html#system-information)
+### [Sistem Bilgileri](../linux-basics/linux-privilege-escalation/index.html#system-information)
 
 - [ ] **OS bilgilerini** alın
-- [ ] [**PATH**](../linux-basics/linux-privilege-escalation/index.html#path) kontrolü yapın, **yazılabilir klasör** var mı?
+- [ ] [**PATH**](../linux-basics/linux-privilege-escalation/index.html#path) kontrolü, **yazılabilir klasör** var mı?
 - [ ] [**env değişkenlerini**](../linux-basics/linux-privilege-escalation/index.html#env-info) kontrol edin, hassas bir detay var mı?
-- [ ] [**kernel exploit'lerini**](../linux-basics/linux-privilege-escalation/index.html#kernel-exploits) **script'ler kullanarak** arayın (DirtyCow?)
-- [ ] [**sudo sürümünün** güvenlik açığı içerip içermediğini](../linux-basics/linux-privilege-escalation/index.html#sudo-version) **kontrol edin**
-- [ ] [**Dmesg** signature verification failed](../linux-basics/linux-privilege-escalation/index.html#dmesg-signature-verification-failed)
-- [ ] [**kernel module ve module-loading yanlış yapılandırmalarını**](kernel-modules-and-modprobe.md#kernel-module-and-module-loading-misconfigurations) inceleyin: `insmod`, `modinfo`, `lsmod`, `dmesg`, signature enforcement ve `modules_disabled`.
-- [ ] Yardımcı yol değiştirilebiliyor veya tetiklenebiliyorsa [**kernel.modprobe / modprobe_path abuse yollarını**](kernel-modules-and-modprobe.md#kernelmodprobe--modprobe_path-abuse-checks) kontrol edin.
-- [ ] Yazılabilir `.ko*` dosyaları ve `modules.*` metadata'sı dahil olmak üzere [**yazılabilir /lib/modules yollarını**](kernel-modules-and-modprobe.md#writable-libmodules-review) kontrol edin.
-- [ ] Daha fazla system enum ([date, system stats, cpu info, printers](../linux-basics/linux-privilege-escalation/index.html#more-system-enumeration))
-- [ ] [Daha fazla defense enumerate edin](../linux-basics/linux-privilege-escalation/index.html#enumerate-possible-defenses)
+- [ ] **script kullanarak** [**kernel exploit'lerini**](../linux-basics/linux-privilege-escalation/index.html#kernel-exploits) arayın (DirtyCow?)
+- [ ] [**sudo sürümünün** vulnerable](../linux-basics/linux-privilege-escalation/index.html#sudo-version) olup olmadığını **kontrol edin**
+- [ ] [**Dmesg** imza doğrulaması başarısız](../linux-basics/linux-privilege-escalation/index.html#dmesg-signature-verification-failed)
+- [ ] [**kernel module ve module-loading yanlış yapılandırmalarını**](kernel-modules-and-modprobe.md#kernel-module-and-module-loading-misconfigurations) inceleyin: `insmod`, `modinfo`, `lsmod`, `dmesg`, imza zorlaması ve `modules_disabled`.
+- [ ] Yardımcı path değiştirilebiliyor veya tetiklenebiliyorsa [**kernel.modprobe / modprobe_path abuse path'lerini**](kernel-modules-and-modprobe.md#kernelmodprobe--modprobe_path-abuse-checks) kontrol edin.
+- [ ] Yazılabilir `.ko*` dosyaları ve `modules.*` metadata'sı dahil olmak üzere [**yazılabilir /lib/modules path'lerini**](kernel-modules-and-modprobe.md#writable-libmodules-review) kontrol edin.
+- [ ] Daha fazla sistem enum'u ([tarih, sistem istatistikleri, CPU bilgisi, yazıcılar](../linux-basics/linux-privilege-escalation/index.html#more-system-enumeration))
+- [ ] [Daha fazla defense enum'u yapın](../linux-basics/linux-privilege-escalation/index.html#enumerate-possible-defenses)
 
-### [Drives](../linux-basics/linux-privilege-escalation/index.html#drives)
+### [Drive'lar](../linux-basics/linux-privilege-escalation/index.html#drives)
 
 - [ ] **Mount edilmiş** drive'ları listeleyin
 - [ ] **Mount edilmemiş bir drive var mı?**
-- [ ] fstab içinde **credential var mı?**
+- [ ] **fstab içinde credential var mı?**
 
-### [**Installed Software**](../linux-basics/linux-privilege-escalation/index.html#installed-software)
+### [**Yüklü Software**](../linux-basics/linux-privilege-escalation/index.html#installed-software)
 
-- [ ] **Yüklü**[ **faydalı software**](../linux-basics/linux-privilege-escalation/index.html#useful-software) **var mı kontrol edin**
-- [ ] **Yüklü** [**güvenlik açığı içeren software**](../linux-basics/linux-privilege-escalation/index.html#vulnerable-software-installed) **var mı kontrol edin**
+- [ ] **Yüklü** [**faydalı software**](../linux-basics/linux-privilege-escalation/index.html#useful-software) **var mı kontrol edin**
+- [ ] **Yüklü** [**vulnerable software**](../linux-basics/linux-privilege-escalation/index.html#vulnerable-software-installed) **var mı kontrol edin**
 
-### [Processes](../linux-basics/linux-privilege-escalation/index.html#processes)
+### [Process'ler](../linux-basics/linux-privilege-escalation/index.html#processes)
 
 - [ ] Bilinmeyen bir **software çalışıyor mu**?
-- [ ] Herhangi bir software sahip olması gerekenden **daha fazla privilege ile çalışıyor mu**?
-- [ ] **Çalışan process'lerin exploit'lerini** arayın (özellikle çalışan sürümü).
+- [ ] Herhangi bir software **olması gerekenden daha fazla privilege ile çalışıyor mu**?
+- [ ] **Çalışan process'ler için exploit** arayın (özellikle çalışan sürüm için).
 - [ ] Çalışan herhangi bir process'in **binary'sini değiştirebilir misiniz**?
 - [ ] **Process'leri monitor edin** ve ilginç bir process'in sık çalışıp çalışmadığını kontrol edin.
-- [ ] İlginç bir **process memory'sini okuyabilir misiniz** (password'lerin kaydedilmiş olabileceği yer)?
+- [ ] İlginç bir **process memory'sini okuyabilir misiniz** (password'ların kaydedilmiş olabileceği yer)?
 
-### [Scheduled/Cron jobs?](../linux-basics/linux-privilege-escalation/index.html#scheduled-jobs)
+### [Zamanlanmış/Cron job'ları?](../linux-basics/linux-privilege-escalation/index.html#scheduled-jobs)
 
-- [ ] [**PATH** ](../linux-basics/linux-privilege-escalation/index.html#cron-path)herhangi bir cron tarafından değiştiriliyor mu ve bu konuma **write** edebiliyor musunuz?
-- [ ] Bir cron job içinde [**wildcard** ](../linux-basics/linux-privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)var mı?
-- [ ] Bazı [**değiştirilebilir script'ler** ](../linux-basics/linux-privilege-escalation/index.html#cron-script-overwriting-and-symlink) **çalıştırılıyor** veya **değiştirilebilir bir klasörün** içinde mi?
-- [ ] Bir **script'in** [**çok **sık** çalıştırılabileceğini](../linux-basics/linux-privilege-escalation/index.html#frequent-cron-jobs) veya çalıştırıldığını tespit ettiniz mi? (her 1, 2 ya da 5 dakikada bir)
+- [ ] [**PATH** ](../linux-basics/linux-privilege-escalation/index.html#cron-path)bir cron tarafından değiştiriliyor ve içine **write** edebiliyor musunuz?
+- [ ] Bir cron job'ında [**wildcard** ](../linux-basics/linux-privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)var mı?
+- [ ] Bazı [**değiştirilebilir script'ler** ](../linux-basics/linux-privilege-escalation/index.html#cron-script-overwriting-and-symlink)**execute** ediliyor veya **değiştirilebilir bir klasörün** içinde mi?
+- [ ] Bir **script'in** [**çok sık execute edildiğini**](../linux-basics/linux-privilege-escalation/index.html#frequent-cron-jobs) tespit ettiniz mi veya edilebilir mi? (her 1, 2 veya 5 dakikada)
 
-### [Services](../linux-basics/linux-privilege-escalation/index.html#services)
+### [Servis'ler](../linux-basics/linux-privilege-escalation/index.html#services)
 
 - [ ] Yazılabilir bir **.service** dosyası var mı?
-- [ ] Bir **service** tarafından çalıştırılan yazılabilir bir **binary** var mı?
-- [ ] systemd PATH içinde yazılabilir bir klasör var mı?
-- [ ] `/etc/systemd/system/<unit>.d/*.conf` içinde `ExecStart`/`User` değerlerini override edebilecek yazılabilir bir **systemd unit drop-in** var mı?
+- [ ] Bir **servis tarafından** execute edilen yazılabilir bir **binary** var mı?
+- [ ] **systemd PATH içinde** yazılabilir bir klasör var mı?
+- [ ] `/etc/systemd/system/<unit>.d/*.conf` içinde `ExecStart`/`User` değerlerini override edebilecek yazılabilir bir **systemd unit drop-in** var mı?<sup>[[2]](#references)</sup>
 
-### [Timers](../linux-basics/linux-privilege-escalation/index.html#timers)
+### [Timer'lar](../linux-basics/linux-privilege-escalation/index.html#timers)
 
 - [ ] Yazılabilir bir **timer** var mı?
 
-### [Sockets](../linux-basics/linux-privilege-escalation/index.html#sockets)
+### [Socket'ler](../linux-basics/linux-privilege-escalation/index.html#sockets)
 
+- [ ] Yazılabilir bir **.socket** dosyası var mı?
 - [ ] Herhangi bir **socket ile iletişim kurabilir misiniz**?
 - [ ] İlginç bilgiler içeren **HTTP socket'leri** var mı?
 
@@ -71,48 +72,48 @@
 
 ### [Network](../linux-basics/linux-privilege-escalation/index.html#network)
 
-- [ ] Nerede olduğunuzu öğrenmek için network'ü enumerate edin
-- [ ] Makinenin içinde shell elde etmeden önce erişemediğiniz **açık port'lar** var mı?
+- [ ] Nerede olduğunuzu anlamak için network'ü enum edin
+- [ ] Makinenin içine shell aldıktan sonra daha önce erişemediğiniz **açık port'lar** var mı?
 - [ ] `tcpdump` kullanarak **traffic sniff edebilir misiniz**?
 
-### [Users](../linux-basics/linux-privilege-escalation/index.html#users)
+### [Kullanıcılar](../linux-basics/linux-privilege-escalation/index.html#users)
 
-- [ ] Genel user/group **enumeration**
-- [ ] **Çok büyük bir UID'niz** mi var? **Machine** **vulnerable** mı?
-- [ ] Ait olduğunuz bir group sayesinde [**privilege escalation yapabilir misiniz**](../user-information/interesting-groups-linux-pe/index.html)?
+- [ ] Genel kullanıcı/grup **enum'u**
+- [ ] **Çok büyük bir UID'ye** mi sahipsiniz? **Makine** **vulnerable** mı?
+- [ ] Üyesi olduğunuz bir [**grup sayesinde privilege escalate edebilir misiniz**](../user-information/interesting-groups-linux-pe/index.html)?
 - [ ] **Clipboard** verisi var mı?
 - [ ] Password Policy?
-- [ ] Daha önce keşfettiğiniz her **known password'ü**, mümkün olan **her user ile** login olmak için **kullanmaya** çalışın. Ayrıca password olmadan da login olmayı deneyin.
+- [ ] Daha önce keşfettiğiniz **bilinen her password'ü**, mümkün olan **her kullanıcıyla** login olmak için **kullanmaya** çalışın. Password olmadan da login olmayı deneyin.
 
-### [Writable PATH](../linux-basics/linux-privilege-escalation/index.html#writable-path-abuses)
+### [Yazılabilir PATH](../linux-basics/linux-privilege-escalation/index.html#writable-path-abuses)
 
-- [ ] PATH içindeki bir klasör üzerinde **write privilege'larınız** varsa privilege escalation yapabilirsiniz
+- [ ] **PATH içindeki bir klasör üzerinde write privilege'ınız** varsa privilege escalate edebilirsiniz
 
-### [SUDO and SUID commands](../linux-basics/linux-privilege-escalation/index.html#sudo-and-suid)
+### [SUDO ve SUID command'leri](../linux-basics/linux-privilege-escalation/index.html#sudo-and-suid)
 
-- [ ] **sudo ile herhangi bir command çalıştırabilir misiniz**? Herhangi bir şeyi root olarak READ, WRITE veya EXECUTE etmek için kullanabilir misiniz? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] `sudo -l`, `sudoedit` kullanımına izin veriyorsa, vulnerable sürümlerde (`sudo -V` < 1.9.12p2) arbitrary dosyaları düzenlemek için `SUDO_EDITOR`/`VISUAL`/`EDITOR` üzerinden **sudoedit argument injection** (CVE-2023-22809) kontrolü yapın. Örnek: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`
+- [ ] **sudo ile herhangi bir command execute edebilir misiniz**? Bunu root olarak herhangi bir şeyi READ, WRITE veya EXECUTE etmek için kullanabilir misiniz? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] `sudo -l` `sudoedit` kullanımına izin veriyorsa, vulnerable sürümlerde (`sudo -V` < 1.9.12p2) herhangi bir dosyayı düzenlemek için `SUDO_EDITOR`/`VISUAL`/`EDITOR` üzerinden **sudoedit argument injection** (CVE-2023-22809) kontrolü yapın. Örnek: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`<sup>[[1]](#references)</sup>
 - [ ] Exploit edilebilir bir **SUID binary** var mı? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] [**sudo** command'ları **path** ile sınırlı mı? Kısıtlamaları [**bypass edebilir misiniz**](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths)?
-- [ ] [**Path belirtilmeden kullanılan Sudo/SUID binary**](../linux-basics/linux-privilege-escalation/index.html#sudo-command-suid-binary-without-command-path) var mı?
-- [ ] [**Path belirten SUID binary**](../linux-basics/linux-privilege-escalation/index.html#suid-binary-with-command-path) var mı? Bypass edin
+- [ ] [**sudo** command'leri **path ile** sınırlandırılmış mı? Kısıtlamaları **bypass edebilir misiniz**](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths)?
+- [ ] [**Path belirtilmemiş Sudo/SUID binary**](../linux-basics/linux-privilege-escalation/index.html#sudo-command-suid-binary-without-command-path) var mı?
+- [ ] [**Path belirten SUID binary**](../linux-basics/linux-privilege-escalation/index.html#suid-binary-with-command-path) var mı? Bypass
 - [ ] [**LD_PRELOAD vuln**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#ld_preload-ld_library_path-and-suid)
-- [ ] Yazılabilir bir klasörde [**SUID binary'de .so library eksikliği**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#missing-shared-object-injection) var mı?
+- [ ] Yazılabilir bir klasörden gelen [**SUID binary içinde .so library eksikliği**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#missing-shared-object-injection) var mı?
 - [ ] [**SUID RPATH/RUNPATH veya yazılabilir library path**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#rpath-and-runpath) var mı?
-- [ ] [**SUDO token'ları mevcut mu**](../linux-basics/linux-privilege-escalation/index.html#reusing-sudo-tokens)? [**SUDO token oluşturabilir misiniz**](../linux-basics/linux-privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
+- [ ] [**Kullanılabilir SUDO token'ları**](../linux-basics/linux-privilege-escalation/index.html#reusing-sudo-tokens) var mı? [**SUDO token oluşturabilir misiniz**](../linux-basics/linux-privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than)?
 - [ ] [**sudoers dosyalarını okuyabilir veya değiştirebilir misiniz**](../linux-basics/linux-privilege-escalation/index.html#etc-sudoers-etc-sudoers-d)?
-- [ ] [**/etc/ld.so.conf.d/ dosyasını değiştirebilir misiniz**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#linker-configuration)?
-- [ ] [**OpenBSD DOAS**](../linux-basics/linux-privilege-escalation/index.html#doas) command
+- [ ] [**/etc/ld.so.conf.d/ değiştirebilir misiniz**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#linker-configuration)?
+- [ ] [**OpenBSD DOAS**](../linux-basics/linux-privilege-escalation/index.html#doas) command'i
 
 ### [Capabilities](../linux-basics/linux-privilege-escalation/index.html#capabilities)
 
-- [ ] Herhangi bir binary'de **beklenmeyen bir capability** var mı?
+- [ ] Herhangi bir binary'de **beklenmeyen capability** var mı?
 
-### [ACLs](../linux-basics/linux-privilege-escalation/index.html#acls)
+### [ACL'ler](../linux-basics/linux-privilege-escalation/index.html#acls)
 
-- [ ] Herhangi bir dosyada **beklenmeyen bir ACL** var mı?
+- [ ] Herhangi bir dosyada **beklenmeyen ACL** var mı?
 
-### [Open Shell sessions](../linux-basics/linux-privilege-escalation/index.html#open-shell-sessions)
+### [Açık Shell session'ları](../linux-basics/linux-privilege-escalation/index.html#open-shell-sessions)
 
 - [ ] **screen**
 - [ ] **tmux**
@@ -122,37 +123,35 @@
 - [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](../linux-basics/linux-privilege-escalation/index.html#debian-openssl-predictable-prng-cve-2008-0166)
 - [ ] [**SSH Interesting configuration values**](../linux-basics/linux-privilege-escalation/index.html#ssh-interesting-configuration-values)
 
-### [Interesting Files](../linux-basics/linux-privilege-escalation/index.html#interesting-files)
+### [İlginç Dosyalar](../linux-basics/linux-privilege-escalation/index.html#interesting-files)
 
-- [ ] **Profile files** - Hassas verileri okuyabilir misiniz? Privesc için write edebilir misiniz?
-- [ ] **passwd/shadow files** - Hassas verileri okuyabilir misiniz? Privesc için write edebilir misiniz?
-- [ ] Hassas veriler için **genellikle ilginç olan klasörleri kontrol edin**
+- [ ] **Profile dosyaları** - Hassas verileri okuyabilir misiniz? Privesc için write edebilir misiniz?
+- [ ] **passwd/shadow dosyaları** - Hassas verileri okuyabilir misiniz? Privesc için write edebilir misiniz?
+- [ ] Hassas veriler için **genellikle ilginç klasörleri kontrol edin**
 - [ ] Erişebileceğiniz veya executable dosyaları değiştirebileceğiniz **tuhaf konumlu/sahipli dosyalar**
 - [ ] Son dakikalarda **değiştirilmiş** dosyalar
-- [ ] **Sqlite DB files**
-- [ ] **Hidden files**
+- [ ] **Sqlite DB dosyaları**
+- [ ] **Gizli dosyalar**
 - [ ] **PATH içindeki script/binary'ler**
-- [ ] **Web files** (password'ler?)
+- [ ] **Web dosyaları** (password'lar?)
 - [ ] **Backup'lar**?
 - [ ] **Password içeren bilinen dosyalar**: **Linpeas** ve **LaZagne** kullanın
-- [ ] **Generic search**
+- [ ] **Genel arama**
 
-### [**Writable Files**](../linux-basics/linux-privilege-escalation/index.html#writable-files)
+### [**Yazılabilir Dosyalar**](../linux-basics/linux-privilege-escalation/index.html#writable-files)
 
-- [ ] Arbitrary command'ler çalıştırmak için **python library'sini değiştirebilir misiniz**?
+- [ ] Arbitrary command execute etmek için **Python library'sini değiştirebilir misiniz**?
 - [ ] **Log dosyalarını değiştirebilir misiniz**? **Logtotten** exploit'i
-- [ ] **/etc/sysconfig/network-scripts/** dosyasını değiştirebilir misiniz? Centos/Redhat exploit'i
+- [ ] **/etc/sysconfig/network-scripts/** değiştirebilir misiniz? Centos/Redhat exploit'i
 - [ ] [**ini, int.d, systemd veya rc.d dosyalarına write edebilir misiniz**](../linux-basics/linux-privilege-escalation/index.html#init-init-d-systemd-and-rc-d)?
 
-### [**Other tricks**](../linux-basics/linux-privilege-escalation/index.html#other-tricks)
+### [**Diğer trick'ler**](../linux-basics/linux-privilege-escalation/index.html#other-tricks)
 
-- [ ] [**Privilege escalation yapmak için NFS'yi abuse edebilir misiniz**](../linux-basics/linux-privilege-escalation/index.html#nfs-privilege-escalation)?
+- [ ] [**Privilege escalate etmek için NFS'yi abuse edebilir misiniz**](../linux-basics/linux-privilege-escalation/index.html#nfs-privilege-escalation)?
 - [ ] [**Restrictive shell'den escape etmeniz gerekiyor mu**](../linux-basics/linux-privilege-escalation/index.html#escaping-from-restricted-shells)?
 
+## Referanslar
 
-
-## References
-
-- [Sudo advisory: sudoedit arbitrary file edit](https://www.sudo.ws/security/advisories/sudoedit_any/)
-- [Oracle Linux docs: systemd drop-in configuration](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
+- [1] [Sudo advisory: sudoedit arbitrary file edit](https://www.sudo.ws/security/advisories/sudoedit_any/)
+- [2] [Oracle Linux docs: systemd drop-in configuration](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
 {{#include ../../banners/hacktricks-training.md}}

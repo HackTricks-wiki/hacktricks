@@ -1,10 +1,10 @@
-# Sınıf Kirliliği (Python'un Prototip Kirliliği)
+# Class Pollution (Python's Prototype Pollution)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Temel Örnek
 
-Dize ile nesne sınıflarını nasıl kirletebileceğinizi kontrol edin:
+Nesnelerin class'larını strings kullanarak nasıl pollute etmenin mümkün olduğunu inceleyin:<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +28,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## Temel Güvenlik Açığı Örneği
+## Temel Zafiyet Örneği
 ```python
 # Initial state
 class Employee: pass
@@ -65,7 +65,7 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>Sınıf özelliği varsayılan değerini RCE (subprocess) oluşturma</summary>
+<summary>RCE için class property varsayılan değeri oluşturma (subprocess)</summary><sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Diğer sınıfları ve global değişkenleri <code>globals</code> aracılığıyla kirletmek</summary>
+<summary><code>globals</code> aracılığıyla diğer class'ları ve global değişkenleri pollution'a uğratma</summary><sup>[[1]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Rastgele alt süreç yürütme</summary>
+<summary>Keyfi subprocess çalıştırma</summary><sup>[[1]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -180,9 +180,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Üzerine Yazma <strong><code>__kwdefaults__</code></strong></summary>
+<summary> <strong><code>__kwdefaults__</code></strong> Üzerine Yazma</summary>
 
-**`__kwdefaults__`** tüm fonksiyonların özel bir niteliğidir, Python [belgelerine](https://docs.python.org/3/library/inspect.html) göre, bu “**anahtar kelime yalnızca** parametreler için herhangi bir varsayılan değerin eşlemesidir”. Bu niteliği kirletmek, bir fonksiyonun anahtar kelime yalnızca parametrelerinin varsayılan değerlerini kontrol etmemizi sağlar, bunlar \* veya \*args'den sonra gelen fonksiyonun parametreleridir.
+**`__kwdefaults__`**, [Python documentation](https://docs.python.org/3/library/inspect.html)'a göre tüm functions için özel bir attribute'tur ve “**keyword-only** parametreler için varsayılan değerlerin mapping'idir”. Bu attribute'u kirletmek, bir function'ın **keyword-only** parametrelerinin varsayılan değerlerini kontrol etmemizi sağlar; bunlar function'ın \* veya \*args'tan sonra gelen parametreleridir.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,25 +223,26 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Flask gizli anahtarını dosyalar arasında geçersiz kılma</summary>
+<summary>Dosyalar genelinde Flask secret değerinin üzerine yazma</summary>
 
-Yani, eğer web'in ana python dosyasında tanımlı bir nesne üzerinde bir sınıf kirlenmesi yapabiliyorsanız ama **sınıfı ana dosyadan farklı bir dosyada tanımlıysa**. Çünkü önceki yüklerde \_\_globals\_\_'a erişmek için nesnenin sınıfına veya sınıfın yöntemlerine erişmeniz gerekiyor, o dosyadaki **globals'a erişebileceksiniz, ama ana dosyadaki globals'a erişemeyeceksiniz**. \
-Bu nedenle, **ana sayfada tanımlı olan Flask uygulama global nesnesine erişemeyeceksiniz**:
+Yani web uygulamasının ana Python dosyasında tanımlanmış, ancak **sınıfı ana dosyadan farklı bir dosyada tanımlanmış** bir nesne üzerinde class pollution gerçekleştirebiliyorsanız. Önceki payload'larda \_\_globals\_\_ öğesine erişmek için nesnenin sınıfına veya sınıfın method'larına erişmeniz gerektiğinden, **ana dosyadaki globals'a değil, o dosyadaki globals'a erişebileceksiniz**. \
+Bu nedenle, ana sayfada **secret key** değerini tanımlayan **Flask app global nesnesine erişemeyeceksiniz**:<sup>[[1]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Bu senaryoda, Flask gizli anahtarını değiştirmek ve bu anahtarı bilerek [**yetki yükseltmek**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign) için ana dosyaya ulaşmak üzere dosyaları geçmek için bir alete ihtiyacınız var **global nesne `app.secret_key`**. 
+Bu senaryoda, dosyalarda gezinerek ana dosyaya ulaşacak ve **global object `app.secret_key`** değerine **access** sağlayarak Flask secret key değerini değiştirecek ve bu key'i bilerek [**privileges escalate**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign) edebilmenizi sağlayacak bir gadget gerekir.
 
-Bu yazıdan [şu şekilde bir yük](https://ctftime.org/writeup/36082):
+[Bu writeup'tan](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup> böyle bir payload:
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Bu yükü kullanarak **`app.secret_key`**'i (uygulamanızdaki adı farklı olabilir) değiştirin, böylece yeni ve daha fazla yetkiye sahip flask çerezlerini imzalayabilirsiniz.
+Use this payload to **`app.secret_key` değerini** (uygulamanızdaki ad farklı olabilir) değiştirerek yeni ve daha ayrıcalıklı Flask cookie'lerini imzalayabilirsiniz.
 
 </details>
 
-Ayrıca daha fazla yalnızca okunabilir gadget için aşağıdaki sayfayı kontrol edin:
+Daha fazla read-only gadget için aşağıdaki sayfaya da bakın:
+
 
 {{#ref}}
 python-internal-read-gadgets.md
@@ -249,6 +250,7 @@ python-internal-read-gadgets.md
 
 ## Referanslar
 
-- [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Python'da Prototype Pollution](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}

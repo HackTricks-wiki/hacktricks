@@ -1,3 +1,5 @@
+# Birkaç Karakterli Hash Brute-force
+
 {{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib

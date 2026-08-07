@@ -1,18 +1,18 @@
-# Kernel Modülleri ve modprobe Kötüye Kullanımı
+# Kernel Modules ve modprobe Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Kernel modülü ve modül yükleme yanlış yapılandırmaları
+## Kernel module ve module-loading misconfiguration'ları
 
-Kernel modülü desteği, Linux privilege escalation incelemesi sırasında yüksek etkili bir alandır. Her unsigned-module mesajını tek başına exploitable olarak değerlendirmeyin; bunun yerine pratik soruları yanıtlamak için kullanın:
+Kernel module desteği, Linux privilege escalation incelemesi sırasında yüksek etkili bir alandır. Her unsigned-module mesajını tek başına exploitable olarak değerlendirmeyin; bunun yerine şu pratik sorulara yanıt bulmak için kullanın:
 
-- Mevcut kullanıcı `sudo`, capabilities veya yazılabilir bir helper path aracılığıyla modül yükleyebilir mi?
-- Modül yükleme hâlâ etkin mi?
-- Modül imzası zorlaması devre dışı mı?
-- Modül dizinleri veya modül dosyaları yazılabilir mi?
-- Ne olduğunu doğrulamak için kernel logları okunabilir mi?
+- Mevcut kullanıcı `sudo`, capabilities veya writable bir helper path üzerinden module yükleyebilir mi?
+- Module loading hâlâ etkin mi?
+- Module signature enforcement devre dışı mı?
+- Module dizinleri veya module dosyaları writable mı?
+- Ne olduğunu doğrulamak için kernel log'ları okunabilir mi?
 
-Hızlı ön değerlendirme:
+Hızlı triage:
 ```bash
 uname -a
 uname -r
@@ -23,16 +23,16 @@ dmesg 2>/dev/null | grep -Ei 'module|signature|taint|verification'
 find /lib/modules/$(uname -r) -type d -writable -ls 2>/dev/null
 find /lib/modules/$(uname -r) -type f -name '*.ko*' -writable -ls 2>/dev/null
 ```
-Yorumlama:
+Yorum:
 
 - `modules_disabled=1`, yeniden başlatılana kadar yeni modüllerin yüklenemeyeceği anlamına gelir.
 - `module_sig_enforce=1`, genellikle imzasız modülleri engeller.
 - `dmesg_restrict=0`, birçok sistemde ayrıcalıksız kullanıcıların kernel günlüklerini okumasına izin verir.
-- `/lib/modules/$(uname -r)/` altındaki yazılabilir yollar tehlikelidir; çünkü modül keşfi ve otomatik yükleme bu ağaçtaki verilere güvenebilir.
+- `/lib/modules/$(uname -r)/` altındaki yazılabilir yollar tehlikelidir; çünkü modül keşfi ve otomatik yükleme bu ağaçta yer alan dosyalara güvenebilir.
 
-### Bir modül yükleme ve kernel çıktısını okuma
+### Modül yükleme ve kernel çıktısını okuma
 
-Yerel bir modülü yüklemek için meşru izniniz varsa `insmod`, sağladığınız tam `.ko` dosyasını ekler. Modülün init işlevi hemen çalışır ve `printk()` ile yazılan mesajlar kernel günlüklerinde görünür.
+Yerel bir modülü yüklemek için meşru izniniz varsa `insmod`, sağladığınız tam `.ko` dosyasını ekler. Modülün init function'ı hemen çalışır ve `printk()` ile yazılan mesajlar kernel günlüklerinde görünür.
 
 İnceleme veya lab ortamları için minimal iş akışı:
 ```bash
@@ -44,14 +44,14 @@ dmesg | tail -n 30
 sudo rmmod example
 dmesg | tail -n 30
 ```
-`sudo -l`, `insmod`, `modprobe` veya bunların etrafındaki bir wrapper kullanımına izin veriyorsa bunu kritik kabul edin:
+`sudo -l` `insmod`, `modprobe` veya bunların etrafındaki bir wrapper'a izin veriyorsa bunu kritik olarak değerlendirin:
 ```bash
 sudo -l
 sudo /sbin/insmod ./example.ko
 ```
 ### Sudo ile izin verilen `insmod`
 
-Bir kullanıcının `insmod` çalıştırmasına izin veren bir sudo kuralı, normal bir administrative helper çalıştırılmasına izin vermekle karşılaştırılamaz. Modülün initialization code'u `.ko` eklenir eklenmez kernel context içinde çalışır; bu nedenle pratik inceleme sorusu şudur: "Bu kullanıcı yüklenecek modülü seçebilir veya değiştirebilir mi?"
+Bir kullanıcının `insmod` çalıştırmasına izin veren bir sudo kuralı, normal bir yönetim yardımcısına izin verilmesiyle karşılaştırılamaz. Modülün başlatma kodu `.ko` eklenir eklenmez kernel context içinde çalışır; bu nedenle pratik inceleme sorusu şudur: "Bu kullanıcı yüklenen modülü seçebilir veya değiştirebilir mi?"
 
 Genel inceleme akışı:
 ```bash
@@ -63,7 +63,7 @@ lsmod | grep -i candidate
 dmesg | tail -n 30
 sudo /sbin/rmmod candidate
 ```
-Kullanıcı rastgele bir `.ko` sağlayabiliyorsa, yetkili bir değerlendirmede bu kural tam sistem compromise olarak ele alınmalıdır. Daha güvenli bir operasyonel yaklaşım, module loading işlemini sudo üzerinden devretmekten kaçınmaktır; kaçınılmazsa tam yolu, sahipliği, izinleri, imzalama politikasını ve kaldırma iş akışını kısıtlayın.
+Kullanıcı rastgele bir `.ko` sağlayabiliyorsa, yetkilendirilmiş bir değerlendirmede bu kural tam sistem compromise olarak değerlendirilmelidir. Daha güvenli bir operasyonel yaklaşım, module loading işlemini sudo üzerinden devretmekten kaçınmaktır; kaçınılmazsa tam yolu, sahipliği, izinleri, imzalama politikasını ve kaldırma iş akışını kısıtlayın.
 
 Kontrollü bir lab ortamında zararsız bir module-building pattern için minimal source ve Makefile şu şekilde görünür:
 ```c
@@ -93,7 +93,7 @@ make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 clean:
 make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 ```
-Yalnızca yetkilendirilmiş bir lab ortamında derleyin ve yükleyin:
+Yalnızca yetkili bir laboratuvarda derleyin ve yükleyin:
 ```bash
 make
 sudo insmod demo.ko
@@ -102,7 +102,7 @@ sudo rmmod demo
 ```
 ### `kernel.modprobe` / `modprobe_path` kötüye kullanım kontrolleri
 
-`kernel.modprobe`, kernel'in module-loading desteğine ihtiyaç duyduğunda çağırdığı userspace helper'ı kontrol eder. Bir attacker bunu writable bir executable path'e değiştirebilir ve unknown binary format'ı veya başka bir module request path'ini tetikleyebilirse, bu durum root code execution'a dönüşebilir.
+`kernel.modprobe`, kernel'in module-loading işlemi için yardıma ihtiyaç duyduğunda çağırdığı userspace helper'ı kontrol eder. Bir attacker bunu writable bir executable path ile değiştirebilir ve unknown binary format veya başka bir module request path tetikleyebilirse, bu durum root code execution'a dönüşebilir.
 
 Mevcut helper'ı kontrol edin:
 ```bash
@@ -110,13 +110,13 @@ cat /proc/sys/kernel/modprobe 2>/dev/null
 sysctl kernel.modprobe 2>/dev/null
 ls -l "$(cat /proc/sys/kernel/modprobe 2>/dev/null)" 2>/dev/null
 ```
-Bunu etkileyip etkileyemeyeceğinizi kontrol edin:
+Etkileyip etkileyemeyeceğinizi kontrol edin:
 ```bash
 ls -l /proc/sys/kernel/modprobe
 sudo -l | grep -E 'sysctl|tee|bash|sh|modprobe'
 getcap -r / 2>/dev/null | grep -E 'cap_sys_admin|cap_sys_module'
 ```
-Genel, yalnızca lab ortamına özgü örüntü:
+Genel, yalnızca laboratuvar ortamına özgü kalıp:
 ```bash
 # Example only: requires permission to write kernel.modprobe
 printf '#!/bin/sh\nid > /tmp/modprobe-helper-ran\n' > /tmp/helper
@@ -133,7 +133,7 @@ Güçlendirilmiş sistemlerde bu işlem başarısız olmalıdır; çünkü ayrı
 
 ### Yazılabilir `/lib/modules` incelemesi
 
-Yazılabilir module dizinleri, `modprobe` daha sonra nasıl çağrıldığına bağlı olarak module değiştirmeye, kötü amaçlı module yerleştirmeye veya auto-load abuse işlemlerine olanak sağlayabilir.
+Yazılabilir module dizinleri, `modprobe` daha sonra nasıl çağrıldığına bağlı olarak module değiştirmeye, kötü amaçlı module yerleştirmeye veya auto-load kötüye kullanımına olanak sağlayabilir.
 
 Yazılabilir konumları inceleyin:
 ```bash
@@ -151,7 +151,8 @@ grep -R "<module_name>" /lib/modules/$(uname -r)/modules.* 2>/dev/null
 Savunma notları:
 
 - `/lib/modules` dizininin sahipliğini `root:root` olarak koruyun ve kullanıcılar tarafından yazılabilir olmamasını sağlayın.
-- Operasyonel olarak mümkün olduğunda, boot sonrasında `kernel.modules_disabled=1` değerini ayarlayın.
-- Yüklenebilir modül gerektiren sistemlerde modül imzalamayı zorunlu kılın.
-- `/proc/sys/kernel/modprobe` ve `/lib/modules` üzerindeki yazma işlemlerini ve beklenmeyen `insmod`/`modprobe` çalıştırmalarını izleyin.
+- Operasyonel olarak mümkün olduğunda, önyükleme sonrasında `kernel.modules_disabled=1` ayarını yapın.
+- Yüklenebilir modüllere ihtiyaç duyan sistemlerde modül imzalamayı zorunlu kılın.
+- `/proc/sys/kernel/modprobe` ve `/lib/modules` üzerine yapılan yazma işlemlerini ve beklenmeyen `insmod`/`modprobe` çalıştırmalarını izleyin.
+
 {{#include ../../banners/hacktricks-training.md}}

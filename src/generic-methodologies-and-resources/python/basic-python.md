@@ -1,19 +1,19 @@
-# Basic Python
+# Temel Python
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Python Basics
+## Python Temelleri
 
 ### Yararlı bilgiler
 
-Aşağıdaki tüm örnekler, aksi açıkça belirtilmedikçe **Python 3** varsayar.\
-`range()` Python 3'te bir iterable nesne döndürür (Python 2'deki `xrange()` benzeri).\
-Bir **tuple** ile bir **list** arasındaki fark, bir tuple içindeki bir değerin **konumu** genellikle ona anlam kazandırırken, bir list genellikle yalnızca değerlerin sıralı bir dizisi olmasıdır.
+Aşağıdaki tüm örneklerde aksi açıkça belirtilmediği sürece **Python 3** kullanıldığı varsayılır.\
+`range()` Python 3'te yinelenebilir bir nesne döndürür (Python 2'deki `xrange()`'e benzer).\
+**tuple** ile **list** arasındaki fark, tuple içindeki bir değerin **konumunun** genellikle ona anlam kazandırması, list'in ise genellikle yalnızca sıralı bir değer dizisi olmasıdır.
 
-### Ana işlemler
+### Temel işlemler
 
-Bir sayıyı üsse yükseltmek için şunu kullanırsınız: `3**2` (`3^2` değil)\
-Python 3'te `2/3 == 0.666666...`, जबकि `2//3 == 0` tam sayı bölmesi yapar.\
+Bir sayının kuvvetini almak için `3**2` kullanılır (`3^2` değil).\
+Python 3'te `2/3 == 0.666666...`, `2//3 == 0` ise tamsayı bölmesi gerçekleştirir.\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -35,21 +35,21 @@ Python 3'te `2/3 == 0.666666...`, जबकि `2//3 == 0` tam sayı bölmesi ya
 `"abc" in "abcdef"`\
 `"abc\n".strip() == "abc"`\
 `"apbc".replace("p", "") == "abc"`\
-`dir(str)` = mevcut metodların listesi\
-`help(str)` = `str` sınıfının tanımı\
+`dir(str)` = kullanılabilir method'ların listesi\
+`help(str)` = `str` class'ının tanımı\
 `"a".upper() == "A"`\
 `"A".lower() == "a"`\
 `"abc".capitalize() == "Abc"`\
 `sum([1, 2, 3]) == 6`\
 `sorted([1, 43, 5, 3, 21, 4]) == [1, 3, 4, 5, 21, 43]`
 
-**Karakterleri birleştir**\
+**Karakterleri birleştirme**\
 `3 * 'a' == 'aaa'`\
 `'a' + 'b' == 'ab'`\
 `'a' + str(3) == 'a3'`\
 `[1, 2, 3] + [4, 5] == [1, 2, 3, 4, 5]`
 
-**Bir list / string parçası**\
+**Bir list'in / string'in bölümleri**\
 `'abc'[0] == 'a'`\
 `'abc'[-1] == 'c'`\
 `'abc'[1:3] == 'bc'`\
@@ -88,15 +88,15 @@ int.from_bytes(b"\x41\x42\x43", "big") == 0x414243
 "admin".encode() == b"admin"
 b"admin".decode() == "admin"
 ```
-### Tuples
+### Tuple'lar
 
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
-`(4,)` = singleton\
-`d = ()` empty tuple\
-`d += (4,)` --> tuple içine ekle\
-`# t1[1] = 'new value'` --> tuples immutable\
+`(4,)` = tek elemanlı tuple\
+`d = ()` boş tuple\
+`d += (4,)` --> tuple'a ekleme\
+`# t1[1] = 'new value'` --> tuple'lar değiştirilemez\
 `list(t2) == [5, 6]` --> tuple'dan list'e
 
 ### List (array)
@@ -123,26 +123,26 @@ month_numbers.get('key', 0)  # default value if key does not exist
 ```
 ### Set
 
-Setlerde tekrarlar yoktur.\
+Set'lerde tekrar yoktur.\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
-`myset.add('a')` --> değişiklik yok\
+`myset.add('a')` --> değişiklik olmaz\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> varsa kaldırır; yoksa hiçbir şey yapmaz\
-`myset.remove(10)` --> yoksa exception fırlatır\
+`myset.discard(10)` --> mevcutsa kaldırır; mevcut değilse hiçbir şey yapmaz\
+`myset.remove(10)` --> mevcut değilse istisna oluşturur\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
 `myset.difference(myset2)`\
 `myset.symmetric_difference(myset2)`\
-`myset.pop()` --> rastgele bir eleman alır ve kaldırır\
+`myset.pop()` --> rastgele bir öğe alır ve kaldırır\
 `myset.intersection_update(myset2)`\
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
 
 ### Classes
 
-`__lt__` içindeki method, `sort()` / `sorted()` tarafından objeleri karşılaştırmak için kullanılan method olacaktır.
+`__lt__` içindeki method, nesneleri karşılaştırmak için `sort()` / `sorted()` tarafından kullanılan method olacaktır.
 ```python
 import datetime
 
@@ -176,9 +176,9 @@ MITPerson.next_id_num += 1
 def __lt__(self, other):
 return self.id_num < other.id_num
 ```
-### map, zip, filter, lambda, sorted and one-liners
+### map, zip, filter, lambda, sorted ve tek satırlık ifadeler
 
-**Python 3**'te `map()` ve `filter()` iterator döndürür, bu yüzden tüm değerleri tek seferde yazdırmak istiyorsanız bunları `list()` ile dönüştürün.
+**Python 3**'te `map()` ve `filter()` iterator döndürür; bu nedenle tüm değerleri aynı anda yazdırmak istiyorsanız bunları `list()` ile dönüştürün.
 
 **Map**, `[f(x) for x in iterable]` gibidir:
 ```python
@@ -188,14 +188,14 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-**zip** daha kısa olan iterable sona erdiğinde durur:
+**zip**, daha kısa iterable sona erdiğinde durur:
 ```python
 for f, b in zip(foo, bar):
 print(f, b)
 ```
-**Lambda** bir fonksiyon tanımlamak için kullanılır:\
-`(lambda x, y: x + y)(5, 3) == 8` --> lambda’yı basit bir fonksiyon olarak kullan\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> sıralamak için lambda kullan\
+**Lambda** bir function tanımlamak için kullanılır:\
+`(lambda x, y: x + y)(5, 3) == 8` --> lambda'yı basit bir function olarak kullan\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> lambda'yı sıralama için kullan\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
 ```python
@@ -219,7 +219,7 @@ my_car.crash()  # Boom!
 ```
 `mult1 = [x for x in [1, 2, 3, 4, 5, 6, 7, 8, 9] if x % 3 == 0]`
 
-### Exceptions
+### İstisnalar
 ```python
 def divide(x, y):
 try:
@@ -235,16 +235,16 @@ print("executing finally clause in any case")
 ```
 ### Assert()
 
-Koşul false ise, string yazdırılacaktır.\
-`assert` ifadelerinin `python -O` ile devre dışı bırakılabileceğini unutmayın, bu yüzden bunları access control veya input validation için kullanmayın.
+Koşul yanlışsa dize yazdırılır.\
+`assert` ifadelerinin `python -O` ile devre dışı bırakılabileceğini unutmayın; bu nedenle bunları erişim kontrolü veya girdi doğrulama için kullanmayın.
 ```python
 def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
 assert len(grades) == len(weights), 'wrong number of grades'
 ```
-### Generator'lar, yield
+### Generators, yield
 
-Bir generator, her şeyi tek seferde döndürmek yerine değerleri teker teker **yield** eder. Bu, büyük wordlist'ler, bruteforcer'lar veya büyük response'lar için çok kullanışlıdır.
+Bir generator, her şeyi aynı anda döndürmek yerine değerleri birer birer **yield** eder. Bu, büyük wordlist'ler, bruteforce araçları veya büyük yanıtlar için çok kullanışlıdır.
 ```python
 def my_gen(n):
 yield n
@@ -255,7 +255,7 @@ yield n + 1
 `next(g) == 7`\
 `next(g)` --> `StopIteration`
 
-### Regular Expressions
+### Düzenli İfadeler
 ```python
 import re
 
@@ -264,7 +264,7 @@ re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
 re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 ```
 **Özel anlamlar:**\
-`.` --> yeni satır hariç herhangi bir karakter\
+`.` --> satır sonu dışındaki herhangi bir karakter\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> rakam\
 `\s` --> boşluk karakteri `[ \n\r\t\f]`\
@@ -273,12 +273,12 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 `$` --> ile biter\
 `+` --> bir veya daha fazla\
 `*` --> 0 veya daha fazla\
-`?` --> 0 veya 1 kez
+`?` --> 0 veya 1 oluşum
 
 **Seçenekler:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> noktanın yeni satırla eşleşmesine izin ver\
-`re.search(pat, string, re.MULTILINE)` --> `^` ve `$`'ın farklı satırlarda eşleşmesine izin ver
+`re.search(pat, string, re.DOTALL)` --> noktanın satır sonlarıyla eşleşmesine izin ver\
+`re.search(pat, string, re.MULTILINE)` --> `^` ve `$` işaretlerinin farklı satırlarda eşleşmesine izin ver
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -289,7 +289,7 @@ re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 ### IterTools
 
 **product**\
-`from itertools import product` --> 1 veya daha fazla iterable arasında cartesian product
+`from itertools import product` --> 1 veya daha fazla iterable arasındaki Kartezyen çarpım
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -298,13 +298,13 @@ list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
 **permutations**\
-`from itertools import permutations` --> mümkün olan her düzenleme
+`from itertools import permutations` --> tüm olası düzenlemeler
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
 ```
-**kombinasyonlar**\
-`from itertools import combinations` --> tekrarlama olmadan tüm olası kombinasyonlar
+**combinations**\
+`from itertools import combinations` --> tekrarsız tüm olası kombinasyonlar
 ```python
 list(combinations('123', 2))
 # [('1', '2'), ('1', '3'), ('2', '3')]
@@ -316,14 +316,14 @@ list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> Python 3.12+ sürümünde उपलब्ध, büyük bruteforce aday listelerini veya IOC dosyalarını parçalara ayırmak için kullanışlıdır
+`from itertools import batched` --> Python 3.12+ sürümlerinde kullanılabilir; büyük bruteforce aday listelerini veya IOC dosyalarını parçalara ayırmak için kullanışlıdır
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
-### Decorators
+### Dekoratörler
 
-Bir fonksiyonun çalıştırılması için gereken süreyi ölçen decorator:
+Bir fonksiyonun yürütülmesi için gereken süreyi ölçen dekoratör:
 ```python
 from functools import wraps
 import time
@@ -345,15 +345,15 @@ return wrapper
 def decorated_func():
 print("Decorated func!")
 ```
-Çalıştırırsanız, aşağıdakine benzer bir şey göreceksiniz:
+Çalıştırırsanız aşağıdakine benzer bir şey görürsünüz:
 ```text
 Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### pentesting için kullanışlı standart kütüphane yardımcıları
+### Pentesting için kullanışlı standart kütüphane yardımcıları
 
-**`pathlib` ile dosya sistemi gezintisi** (`Path.walk()` Python 3.12+ sürümünde kullanılabilir; daha eski interpreter'larda `os.walk()` kullanın):
+**`pathlib` ile dosya sistemi gezinme** (`Path.walk()` Python 3.12+ sürümlerinde kullanılabilir; daha eski yorumlayıcılarda `os.walk()` kullanın):
 ```python
 from pathlib import Path
 
@@ -364,7 +364,7 @@ for name in files:
 if name.endswith((".py", ".env", ".bak")):
 print(root / name)
 ```
-**Komutları güvenli şekilde çalıştırın** (`shell=False` varsayılan olarak genellikle istediğiniz şeydir):
+**Komutları güvenli bir şekilde çalıştırın** (`shell=False` varsayılan olarak genellikle istediğiniz şeydir):
 ```python
 import subprocess
 
@@ -376,12 +376,12 @@ check=True,
 )
 print(cp.stdout)
 ```
-Eğer bir shell command **oluşturmak zorundaysan**, önce saldırgan tarafından kontrol edilen her token’ı quote et:
+**Bir shell komutu oluşturmanız gerekiyorsa**, önce saldırgan tarafından kontrol edilen her token'ı tırnak içine alın:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
-**Geçici dosyalar / dizinler** (hardcoded `/tmp/foo` yollarından daha güvenli):
+**Geçici dosyalar / dizinler** (`/tmp/foo` gibi sabit kodlanmış yollardan daha güvenli):
 ```python
 import tempfile
 from pathlib import Path
@@ -391,11 +391,11 @@ out = Path(tmp) / "loot.txt"
 out.write_text("secret\n")
 print(out.read_text())
 ```
-HTTP otomasyonu için [Python web requests hakkında bu diğer sayfaya](web-requests.md) bakın.
+HTTP otomasyonu için [Python web requests hakkında bu diğer sayfaya](web-requests.md) göz atın.
 
-### Arşiv çıkarma tuzakları (araçlar ve dosya ayrıştırıcıları için önemli)
+### Arşiv çıkarma ile ilgili önemli noktalar (tooling ve file parser'lar için önemli)
 
-**Python 3.14** sürümünden başlayarak, `tarfile.extract()` / `extractall()` varsayılan olarak daha güvenli `data` filtresini kullanır. Daha eski Python sürümlerinde, saldırgan kontrolündeki arşivlerle çalışırken bunu açıkça ayarlamalısınız.
+**Python 3.14** sürümünden itibaren `tarfile.extract()` / `extractall()`, varsayılan olarak daha güvenli olan `data` filtresini kullanır. Daha eski Python sürümlerinde, saldırganlar tarafından kontrol edilen arşivleri işlerken bunu açıkça ayarlamalısınız.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 import tarfile
 import tempfile
@@ -404,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-`filter="data"` olsa bile, güvenilmeyen arşivleri yeni bir geçici dizine çıkarın ve dosyaları herhangi bir önemli yere taşımadan önce neyin yazıldığını doğrulayın.
+`filter="data"` kullanırken bile güvenilmeyen arşivleri yeni bir geçici dizine çıkarın ve dosyaları ilgi çekici herhangi bir yere taşımadan önce ne yazıldığını doğrulayın.
 
-`zipfile.Path` farklıdır: sizin için **dosya adlarını sanitize etmez**, bu yüzden saldırgan kontrollü ZIP üyelerini çıkarmadan önce yolları doğrulayın:
+`zipfile.Path` farklıdır: dosya adlarını sizin için **sanitize etmez**, bu nedenle saldırgan kontrollü ZIP üyelerini çıkarmadan önce yolları doğrulayın:
 ```python
 import os
 import zipfile
@@ -419,16 +419,16 @@ if os.path.commonpath([base, final_path]) != base:
 raise ValueError(f"Path traversal inside ZIP: {info.filename}")
 zf.extract(info, base)
 ```
-### Hatırlanması gereken dangerous primitives
+### Hatırlanması gereken tehlikeli primitive'ler
 
-- `eval()` / `exec()` **sandbox** değildir.
-- `ast.literal_eval()` Python code çalıştırmaz, ancak attacker-controlled input ile yine de memory / CPU denial of service için kötüye kullanılabilir.
-- `pickle.loads()` **secure** değildir; attacker-controlled bytes için asla unpickle etmeyin.
-- Daha derin offensive tricks için [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) ve [Python deserializations](../../pentesting-web/deserialization/README.md) kısımlarına bakın.
+- `eval()` / `exec()` **sandbox değildir**.
+- `ast.literal_eval()` Python kodu çalıştırmaz, ancak saldırgan kontrollü input ile memory / CPU denial of service için yine de abuse edilebilir.
+- `pickle.loads()` **secure değildir**; saldırgan kontrollü byte'ları asla unpickle etmeyin.
+- Daha derin offensive trick'ler için [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) ve [Python deserializations](../../pentesting-web/deserialization/README.md) sayfalarına bakın.
 
-## References
+## Referanslar
 
-- [Python tarfile docs](https://docs.python.org/3/library/tarfile.html)
-- [PEP 706 - Filter for tarfile.extractall](https://peps.python.org/pep-0706/)
+- [1] [Python tarfile docs](https://docs.python.org/3/library/tarfile.html)
+- [2] [PEP 706 – Filter for tarfile.extractall()](https://peps.python.org/pep-0706/)
 
 {{#include ../../banners/hacktricks-training.md}}
