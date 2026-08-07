@@ -1,11 +1,10 @@
-# Escalada de Privilégios do Containerd (ctr)
+# Containerd (ctr) Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Informações básicas
+## Basic information
 
 Acesse o link a seguir para saber **onde `containerd` e `ctr` se encaixam na stack de containers**:
-
 
 {{#ref}}
 container-security/runtimes-and-engines.md
@@ -31,13 +30,12 @@ ctr run --mount type=bind,src=/,dst=/,options=rbind -t registry:5000/ubuntu:late
 ```
 ## PE 2
 
-Execute um container privilegiado e escape dele.\
-Você pode executar um container privilegiado da seguinte forma:
+Execute um container com privilégios e escape dele.\
+Você pode executar um container privilegiado assim:
 ```bash
 ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu bash
 ```
-Então, você pode usar algumas das técnicas mencionadas na página a seguir para **escapar dele abusando de capabilities privilegiadas**:
-
+Então, você pode usar algumas das técnicas mencionadas na página a seguir para **escapar dele explorando capacidades privilegiadas**:
 
 {{#ref}}
 container-security/

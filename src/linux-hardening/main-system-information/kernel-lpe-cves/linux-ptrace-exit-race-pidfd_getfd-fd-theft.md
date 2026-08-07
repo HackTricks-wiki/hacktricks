@@ -2,41 +2,41 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Um padrão útil de **Linux kernel privesc** consiste em transformar um **bug de autorização do ptrace** em **file descriptor theft** de um processo privilegiado.
+Um padrão útil de **privesc no kernel Linux** é transformar um **bug de autorização do ptrace** em **file descriptor theft** de um processo privilegiado.
 
-No estudo de caso da Qualys sobre `__ptrace_may_access()` (CVE-2026-46333), o atacante cria uma race com um **processo privilegiado que está encerrando ou removendo credenciais** e usa `pidfd_getfd()` para duplicar um FD no processo do atacante.
+No estudo de caso da Qualys sobre `__ptrace_may_access()` (CVE-2026-46333), o atacante faz race com um **processo privilegiado que está encerrando ou removendo credenciais** e usa `pidfd_getfd()` para duplicar um FD no processo do atacante.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Ideia central
 
-`pidfd_getfd()` duplica um file descriptor de outro processo, mas primeiro verifica permissões no estilo do ptrace em relação ao alvo. Se essa autorização for concedida incorretamente durante uma **janela de teardown**, um atacante sem privilégios pode copiar:
+`pidfd_getfd()` duplica um file descriptor de outro processo, mas primeiro verifica permissões no estilo ptrace contra o alvo. Se essa autorização for concedida incorretamente durante uma **janela de teardown**, um atacante sem privilégios pode copiar:
 
 - FDs de **arquivos sensíveis** já abertos por um helper privilegiado
 - FDs de **canais IPC autenticados** já autorizados como root
 
-Isso transforma um bug de autorização no kernel em uma primitive de userspace muito prática.
+Isso transforma um bug de autorização no kernel em uma primitiva muito prática no userspace.<sup>[[1]](#references)</sup>
 
-## Por que a primitive é perigosa
+## Por que a primitiva é perigosa
 
-O ataque **não** precisa de um bug no próprio helper privilegiado. O helper só precisa manter temporariamente algo valioso:
+O ataque **não** precisa de um bug no próprio helper privilegiado. O helper só precisa manter temporariamente algo valioso aberto:
 
 - `/etc/shadow`
 - `/etc/ssh/*_key`
 - uma conexão privilegiada com D-Bus / systemd
-- qualquer outro secret já aberto ou canal autorizado
+- qualquer outro segredo já aberto ou canal autorizado
 
-Depois de ser duplicado no processo do atacante, o kernel aplica as operações ao **FD roubado**, e não ao pathname original nem a um novo fluxo de autenticação.
+Depois de duplicado no processo do atacante, o kernel aplica as operações sobre o **FD roubado**, e não sobre o pathname original ou sobre um novo fluxo de autenticação.<sup>[[1]](#references)</sup>
 
 ## Padrão de exploração
 
-1. Identifique um **setuid / setgid / binary com file-capability** ou um **root daemon** que abra arquivos sensíveis ou mantenha conexões IPC úteis.
-2. Obtenha uma relação que satisfaça as verificações relevantes da política do ptrace para o caminho do alvo (por exemplo, sendo o **parent** de um child privilegiado criado sob configurações permissivas do YAMA).
-3. Crie uma race com o processo enquanto ele está **encerrando**, **removendo credenciais** ou entrando de outra forma em um estado no qual o acesso via ptrace deveria ter sido revogado.
+1. Identifique um **binário setuid / setgid / com file-capability** ou um **daemon root** que abra arquivos sensíveis ou mantenha conexões IPC úteis.
+2. Obtenha uma relação que satisfaça as verificações relevantes da política do ptrace para o caminho até o alvo (por exemplo, sendo o **parent** de um processo filho privilegiado criado sob configurações permissivas do YAMA).
+3. Faça race com o processo enquanto ele está **encerrando**, **removendo credenciais** ou entrando de outra forma em um estado no qual o acesso via ptrace deveria ter sido desabilitado.
 4. Use `pidfd_open()` + `pidfd_getfd()` para duplicar o FD do alvo durante a estreita janela de autorização.
-5. Reutilize o FD roubado no contexto sem privilégios:
+5. Reutilize o FD roubado a partir do contexto sem privilégios:
 - `read()` secrets de um file descriptor privilegiado
-- envie requests por um canal IPC autenticado roubado para obter **ações do lado do root**
+- envie requests por um canal IPC autenticado roubado para obter **ações do lado root**<sup>[[1]](#references)</sup>
 
-Formato mínimo da primitive:
+Formato mínimo da primitiva:<sup>[[1]](#references)[[3]](#references)</sup>
 ```c
 int p = pidfd_open(victim_pid, 0);
 int stolen = pidfd_getfd(p, victim_fd, 0);
@@ -44,30 +44,30 @@ int stolen = pidfd_getfd(p, victim_fd, 0);
 ```
 ## Alvos práticos para auditar
 
-Priorize binários e daemons que, mesmo que brevemente, façam uma destas ações:
+Priorize binários e daemons que, mesmo que brevemente, façam uma destas coisas:<sup>[[1]](#references)</sup>
 
-- abram arquivos acessíveis apenas pelo root antes de concluir as transições de privilégios
-- conectem-se ao **system bus** e mantenham um canal já autorizado
-- passem FDs privilegiados entre helpers
-- realizem operações sensíveis à segurança durante a desmontagem adjacente a `do_exit()`
+- abrir arquivos exclusivos do root antes de concluir as transições de privilégios
+- conectar-se ao **system bus** e manter um canal já autorizado
+- passar FDs privilegiados entre helpers
+- realizar operações sensíveis à segurança durante a desmontagem adjacente a `do_exit()`
 
-Bons candidatos para hunting:
+Bons candidatos para investigação:<sup>[[1]](#references)</sup>
 
-- helpers de gerenciamento de senhas / contas
+- helpers de gerenciamento de contas / senhas
 - helpers de SSH
 - helpers mediados por PolicyKit / D-Bus
-- daemons de desktop executados como root que exponham métodos D-Bus
+- daemons de desktop executados como root que expõem métodos D-Bus
 
-## YAMA como gate de exploit
+## YAMA como barreira de exploit
 
-`kernel.yama.ptrace_scope` é um gate prático importante para abuso da família ptrace:
+`kernel.yama.ptrace_scope` é uma barreira prática importante contra abuso da família ptrace:<sup>[[4]](#references)</sup>
 
-- `0`: comportamento clássico de ptrace para o mesmo UID
-- `1`: normalmente permite tracing de pai -> filho, o que pode manter alguns caminhos públicos de exploit acessíveis
-- `2`: exige `CAP_SYS_PTRACE` para acesso no estilo attach e bloqueia o abuso não privilegiado de `pidfd_getfd()` neste caminho
-- `3`: desabilita completamente o ptrace attach até a reinicialização
+- `0`: comportamento clássico de ptrace com o mesmo UID
+- `1`: normalmente permite tracing do processo pai -> filho, o que pode manter alguns caminhos públicos de exploit acessíveis
+- `2`: requer `CAP_SYS_PTRACE` para acesso no estilo attach e bloqueia o abuso não privilegiado de `pidfd_getfd()` neste caminho
+- `3`: desativa completamente o ptrace attach até a reinicialização
 
-Para esta técnica, `ptrace_scope=2` é uma **mitigação temporária** forte, pois interrompe o caminho público de exploitation do `pidfd_getfd()` com `-EPERM` para usuários não privilegiados.
+Para esta técnica, `ptrace_scope=2` é uma **mitigação temporária** forte, pois interrompe o caminho público de exploração de `pidfd_getfd()` com `-EPERM` para usuários não privilegiados.<sup>[[1]](#references)</sup>
 
 ## Ideias de detecção / revisão
 
@@ -76,16 +76,16 @@ Ao auditar software Linux privilegiado, procure estas combinações:
 - **processo filho privilegiado** + **processo pai controlado pelo atacante**
 - acesso temporário a **arquivos abertos valiosos**
 - acesso temporário a **canais autenticados de D-Bus/systemd**
-- decisões de segurança que reutilizem **autorização no estilo ptrace** fora do `ptrace(2)` clássico
-- APIs do kernel que possam **duplicar, herdar ou reexportar** FDs privilegiados existentes
+- decisões de segurança que reutilizam **autorização no estilo ptrace** fora do `ptrace(2)` clássico
+- APIs do kernel que podem **duplicar, herdar ou reexportar** FDs privilegiados existentes
 
-Ao auditar o kernel, trate qualquer caminho que faça **autorização equivalente a ptrace** durante a **desmontagem de uma task** como de alto risco, especialmente se o sucesso fornecer acesso direto a `task->files` ou a outros recursos de processo já autorizados.
+Ao auditar o kernel, trate qualquer caminho que faça **autorização equivalente à do ptrace** durante a **desmontagem de uma task** como de alto risco, especialmente se o sucesso fornecer acesso direto a `task->files` ou a outros recursos de processo já autorizados.
 
-## Referências
+## References
 
-- [Qualys blog: CVE-2026-46333](https://blog.qualys.com/vulnerabilities-threat-research/2026/05/20/cve-2026-46333-local-root-privilege-escalation-and-credential-disclosure-in-the-linux-kernel-ptrace-path)
-- [Qualys advisory TXT](https://cdn2.qualys.com/advisory/2026/05/20/cve-2026-46333-ptrace.txt)
-- [pidfd_getfd(2) manual page](https://man7.org/linux/man-pages/man2/pidfd_getfd.2.html)
-- [Linux kernel Yama documentation](https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html)
+- [1] [CVE-2026-46333: Local Root Privilege Escalation and Credential Disclosure in the Linux Kernel ptrace Path (Qualys)](https://blog.qualys.com/vulnerabilities-threat-research/2026/05/20/cve-2026-46333-local-root-privilege-escalation-and-credential-disclosure-in-the-linux-kernel-ptrace-path)
+- [2] [Qualys advisory TXT](https://cdn2.qualys.com/advisory/2026/05/20/cve-2026-46333-ptrace.txt)
+- [3] [pidfd_getfd(2) manual page](https://man7.org/linux/man-pages/man2/pidfd_getfd.2.html)
+- [4] [Linux kernel Yama documentation](https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

