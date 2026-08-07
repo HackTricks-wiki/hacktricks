@@ -30,7 +30,7 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## Informations sur les objets chargés et principaux
+## Informations sur l’objet chargé et principal
 
 ### Données chargées
 ```python
@@ -121,9 +121,9 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ### Appel de fonctions
 
-- Vous pouvez transmettre une liste d'arguments via `args` et un dictionnaire de variables d'environnement via `env` à `entry_state` et `full_init_state`. Les valeurs de ces structures peuvent être des chaînes de caractères ou des bitvectors, et seront sérialisées dans l'état en tant qu'arguments et environnement de l'exécution simulée. `args` est par défaut une liste vide. Ainsi, si le programme que vous analysez s'attend à trouver au moins un `argv[0]`, vous devez toujours le fournir !
-- Si vous souhaitez que `argc` soit symbolic, vous pouvez transmettre un bitvector symbolic comme `argc` aux constructeurs `entry_state` et `full_init_state`. Soyez toutefois prudent : si vous faites cela, vous devez également ajouter à l'état résultant une contrainte stipulant que votre valeur de argc ne peut pas être supérieure au nombre d'arguments transmis via `args`.
-- Pour utiliser l'état d'appel, vous devez l'appeler avec `.call_state(addr, arg1, arg2, ...)`, où `addr` est l'adresse de la fonction que vous souhaitez appeler et `argN` est le Nième argument de cette fonction, sous forme d'entier Python, de chaîne de caractères, de tableau ou de bitvector. Si vous souhaitez allouer de la mémoire et transmettre effectivement un pointeur vers un objet, vous devez l'encapsuler dans un PointerWrapper, par exemple `angr.PointerWrapper("point to me!")`. Les résultats de cette API peuvent être quelque peu imprévisibles, mais nous travaillons à améliorer cela.
+- Vous pouvez transmettre une liste d'arguments via `args` et un dictionnaire de variables d'environnement via `env` à `entry_state` et `full_init_state`. Les valeurs de ces structures peuvent être des chaînes ou des bitvectors, et seront sérialisées dans l'état en tant qu'arguments et environnement de l'exécution simulée. La valeur par défaut de `args` est une liste vide. Ainsi, si le programme que vous analysez s'attend à trouver au moins un `argv[0]`, vous devez toujours le fournir !
+- Si vous souhaitez que `argc` soit symbolique, vous pouvez transmettre un bitvector symbolique comme `argc` aux constructeurs `entry_state` et `full_init_state`. Soyez toutefois prudent : si vous faites cela, vous devez également ajouter à l'état résultant une contrainte indiquant que votre valeur de `argc` ne peut pas être supérieure au nombre d'arguments transmis dans `args`.
+- Pour utiliser l'état d'appel, vous devez l'appeler avec `.call_state(addr, arg1, arg2, ...)`, où `addr` est l'adresse de la fonction que vous souhaitez appeler et `argN` est le Nième argument de cette fonction, sous forme d'entier Python, de chaîne, de tableau ou de bitvector. Si vous souhaitez faire allouer de la mémoire et transmettre effectivement un pointeur vers un objet, vous devez l'encapsuler dans un `PointerWrapper`, par exemple `angr.PointerWrapper("point to me!")`. Les résultats de cette API peuvent être quelque peu imprévisibles, mais nous travaillons à les améliorer.
 
 ### Bitvectors
 ```python
@@ -134,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### Vecteurs de bits symboliques et contraintes
+### BitVectors symboliques et contraintes
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)

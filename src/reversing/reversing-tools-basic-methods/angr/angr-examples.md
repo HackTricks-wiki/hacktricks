@@ -3,11 +3,11 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Si le programme utilise `scanf` pour obtenir **plusieurs valeurs à la fois depuis stdin**, vous devez générer un state qui démarre après le **`scanf`**.
+> Si le programme utilise `scanf` pour obtenir **plusieurs valeurs à la fois depuis stdin**, vous devez générer un état qui commence après **`scanf`**.
 
 Codes tirés de [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Entrée pour atteindre une adresse (en indiquant l’adresse)
+### Entrée pour atteindre une adresse (en indiquant l'adresse)
 ```python
 import angr
 import sys
@@ -139,7 +139,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Valeurs de la stack
+### Valeurs de la pile
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
 # have to reach a rogram flow
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-Dans ce scénario, l’entrée a été récupérée avec `scanf("%u %u")` et la valeur `"1 1"` a été fournie. Les valeurs **`0x00000001`** de la stack proviennent donc de **l’entrée utilisateur**. Vous pouvez voir que ces valeurs commencent à `$ebp - 8`. Par conséquent, dans le code, nous avons **soustrait 8 octets de `$esp` (à ce moment-là, `$ebp` et `$esp` avaient la même valeur)**, puis nous avons pushé le BVS.
+Dans ce scénario, l’entrée a été récupérée avec `scanf("%u %u")` et la valeur `"1 1"` a été fournie. Les valeurs **`0x00000001`** de la stack proviennent donc de **l’entrée utilisateur**. Vous pouvez voir que ces valeurs commencent à `$ebp - 8`. Par conséquent, dans le code, nous avons **soustrait 8 octets à `$esp` (à ce moment-là, `$ebp` et `$esp` avaient la même valeur)**, puis nous avons effectué un push du BVS.
 
-![Placer des vecteurs de bits dans la stack pour déterminer la valeur que cette position de la stack doit avoir afin d’atteindre un flux d’exécution : dans ce scénario, l’entrée a été récupérée avec scanf("%u %u") et la valeur "1...](<../../../images/image (136).png>)
+![Placez les vecteurs de bits dans la stack pour déterminer la valeur que cette position de la stack doit avoir afin d'atteindre un flux d'exécution du programme : dans ce scénario, l'entrée a été récupérée avec scanf("%u %u") et la valeur "1...](<../../../images/image (136).png>)
 
 ### Valeurs mémoire statiques (variables globales)
 ```python
@@ -266,7 +266,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Valeurs de mémoire dynamique (Malloc)
+### Valeurs de mémoire dynamiques (Malloc)
 ```python
 import angr
 import claripy
@@ -325,7 +325,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Simulation de fichier
+### Simulation de fichiers
 ```python
 #In this challenge a password is read from a file and we want to simulate its content
 
@@ -404,11 +404,11 @@ main(sys.argv)
 >  # (!)
 > ```
 
-### Application de contraintes
+### Application des contraintes
 
 > [!TIP]
-> Parfois, des opérations humaines simples comme comparer 2 mots de longueur 16 **caractère par caractère** (boucle) **coûtent** beaucoup à **angr**, car il doit générer des branches **exponentiellement**, puisqu'il génère 1 branche par if : `2^16`\
-> Il est donc plus simple de **demander à angr de revenir à un point précédent** (où la partie réellement difficile a déjà été effectuée) et de **définir ces contraintes manuellement**.
+> Parfois, de simples opérations humaines comme comparer 2 mots de longueur 16 **char by char** (boucle) **coûtent** beaucoup à **angr**, car il doit générer des branches **exponentiellement**, puisqu'il génère 1 branche par if : `2^16`\
+> Il est donc plus facile de **demander à angr de revenir à un point précédent** (où la partie réellement difficile a déjà été effectuée) et de **définir ces contraintes manuellement**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,14 +480,14 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> Dans certains scénarios, vous pouvez activer le **veritesting**, qui fusionnera les états similaires afin d'éviter les branches inutiles et de trouver la solution : `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> Dans certains scénarios, vous pouvez activer le **veritesting**, qui fusionnera les états similaires afin d’éviter les branches inutiles et de trouver la solution : `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Une autre chose que vous pouvez faire dans ces scénarios consiste à **hook la fonction afin de fournir à angr quelque chose qu'il peut comprendre** plus facilement.
+> Une autre chose que vous pouvez faire dans ces scénarios est de **hook la fonction afin de fournir à angr quelque chose qu’il peut comprendre** plus facilement.
 
 ### Gestionnaires de simulation
 
-Certains gestionnaires de simulation peuvent être plus utiles que d'autres. Dans l'exemple précédent, il y avait un problème, car de nombreuses branches utiles étaient créées. Ici, la technique **veritesting** les fusionnera et trouvera une solution.\
+Certains gestionnaires de simulation peuvent être plus utiles que d’autres. Dans l’exemple précédent, un problème se posait, car de nombreuses branches utiles étaient créées. Ici, la technique de **veritesting** les fusionnera et trouvera une solution.\
 Ce gestionnaire de simulation peut également être activé avec : `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Bypassing un appel à une fonction
+### Hooking/Contournement d'un appel à une fonction
 ```python
 # This level performs the following computations:
 #
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking d’une fonction / Simprocedure
+### Hooking d'une fonction / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -678,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Simuler `scanf` avec plusieurs paramètres
+### Simuler scanf avec plusieurs paramètres
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -809,6 +809,6 @@ main(sys.argv)
 ```
 ## Références
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - dépôt GitHub](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}
