@@ -1,14 +1,14 @@
-# Crypto
+# Kriptografi
 
 {{#include ../banners/hacktricks-training.md}}
 
-Bu bölüm **hacking/CTF'ler için pratik kriptografi** üzerine odaklanır: yaygın kalıpları hızlıca nasıl tanıyacağınız, doğru araçları nasıl seçeceğiniz ve bilinen saldırıları nasıl uygulayacağınız.
+Bu bölüm **hacking/CTF'ler için pratik kriptografiye** odaklanır: yaygın pattern'leri hızlıca tanımak, doğru tools'ları seçmek ve bilinen attack'leri uygulamak.
 
-If you're here for hiding data inside files, go to the **Stego** section.
+Verileri dosyaların içine gizlemek için buradaysanız **Stego** bölümüne gidin.
 
-## Bu bölümü nasıl kullanmalı
+## Bu bölüm nasıl kullanılır
 
-Crypto challenge'leri hıza ödül verir: primitive'i sınıflandırın, kontrol ettiğiniz şeyi belirleyin (oracle/leak/nonce reuse), sonra bilinen bir saldırı şablonunu uygulayın.
+Crypto challenge'ları hızı ödüllendirir: primitive'i sınıflandırın, neyi kontrol ettiğinizi (oracle/leak/nonce reuse) belirleyin, ardından bilinen bir attack template'i uygulayın.
 
 ### CTF workflow
 {{#ref}}
@@ -20,7 +20,7 @@ ctf-workflow/README.md
 symmetric/README.md
 {{#endref}}
 
-### Hashes, MACs, and KDFs
+### Hash'ler, MAC'ler ve KDF'ler
 {{#ref}}
 hashes/README.md
 {{#endref}}
@@ -30,12 +30,12 @@ hashes/README.md
 public-key/README.md
 {{#endref}}
 
-### TLS and certificates
+### TLS ve sertifikalar
 {{#ref}}
 tls-and-certificates/README.md
 {{#endref}}
 
-### Crypto in malware
+### Malware'da crypto
 {{#ref}}
 crypto-in-malware/README.md
 {{#endref}}
@@ -48,7 +48,7 @@ ctf-misc/README.md
 ## Hızlı kurulum
 
 - Python: `python3 -m venv .venv && source .venv/bin/activate`
-- Kütüphaneler: `pip install pycryptodome gmpy2 sympy pwntools`
-- SageMath (genellikle lattice/RSA/ECC için gerekli): https://www.sagemath.org/
+- Libraries: `pip install pycryptodome gmpy2 sympy pwntools`
+- SageMath (lattice/RSA/ECC için çoğu zaman gerekli): <https://www.sagemath.org/>
 
 {{#include ../banners/hacktricks-training.md}}

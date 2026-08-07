@@ -2,24 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Crypto challenge'larda sıkça ortaya çıkan, ama başka bir yere düzgün sığmayan karışık sayfalar.
+Crypto challenges'ta sıkça karşılaşılan ancak başka bir kategoriye tam olarak uymayan konuları ele alan derleme sayfaları.
 
-## Ezoterik diller
+## Esoteric languages
 
-### Teknik
+### Technique
 
-Bir crypto görevi aslında şunlarsa bunu kullanın: bir esolang programını çalıştırın ve sonra çıktısını çözün.
+Bunu, bir crypto görevi aslında bir esolang programını çalıştırmayı ve ardından çıktısını decode etmeyi gerektiriyorsa kullanın.
 
-Eğer bir challenge size standart bir dile benzemeyen kod veriyorsa:
+Bir challenge size standart bir dile benzemeyen bir code verirse:
 
-- Esolang'i belirleyin (ayırt edici bir token'i Google'da arayın).
-- Bir online interpreter veya bir Docker image kullanın.
-- Eğer output tuhafsa, çalıştırma sonrası katmanlı encoding/compression arayın.
+- Esolang'ı belirleyin (ayırt edici bir token için Google'da arama yapın).
+- Bir online interpreter veya Docker image kullanın.
+- Output anlamsızsa execution sonrasında katmanlı encoding/compression olup olmadığını araştırın.
 
-İyi bir başlangıç listesi:
+Başlangıç için iyi bir liste:<sup>[[1]](#references)</sup>
 
 {{#ref}}
 https://esolangs.org/wiki/Main_Page
 {{#endref}}
+
+## References
+
+- [1] [Esolang, the esoteric programming languages wiki](https://esolangs.org/wiki/Main_Page)
 
 {{#include ../../banners/hacktricks-training.md}}

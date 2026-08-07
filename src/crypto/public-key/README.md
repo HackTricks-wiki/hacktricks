@@ -1,18 +1,19 @@
-# Açık Anahtar Kriptografi
+# Public-Key Crypto
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Çoğu CTF zor kriptografi genellikle burada toplanır: RSA, ECC/ECDSA, lattices ve kötü rastgelelik.
+
+Çoğu CTF zor kripto görevi burada karşınıza çıkar: RSA, ECC/ECDSA, lattices ve kötü randomness.
 
 ## Önerilen araçlar
 
 - SageMath (LLL/lattices, modular arithmetic): https://www.sagemath.org/
-- RsaCtfTool (çok amaçlı araç): https://github.com/Ganapati/RsaCtfTool
-- factordb (hızlı çarpan kontrolleri): http://factordb.com/
+- RsaCtfTool (İsviçre çakısı): https://github.com/Ganapati/RsaCtfTool
+- factordb (hızlı factor kontrolleri): http://factordb.com/
 
 ## RSA
 
-Buradan başlayın: elinizde `n,e,c` ve bazı ek ipuçları (shared modulus, low exponent, partial bits, related messages) olduğunda.
+`n,e,c` ve bazı ek ipuçlarına (shared modulus, low exponent, partial bits, related messages) sahip olduğunuzda buradan başlayın.
 
 {{#ref}}
 rsa/README.md
@@ -20,36 +21,36 @@ rsa/README.md
 
 ## ECC / ECDSA
 
-İmzalar dahilse, zor matematiği varsaymadan önce nonce problemlerini test edin (reuse/bias/leaks).
+Signatures işin içindeyse, zor matematik varsayımında bulunmadan önce nonce problemlerini (reuse/bias/leaks) test edin.
 
 ### ECDSA nonce reuse / bias
 
-İki imza aynı nonce `k`'yı tekrar kullanırsa, özel anahtar geri alınabilir.
+İki signature aynı nonce `k` değerini yeniden kullanıyorsa private key kurtarılabilir.
 
-K `k` aynı olmasa bile, nonce bitlerinin imzalar arasında **bias/leakage** olması lattice yöntemiyle kurtarma için yeterli olabilir (yaygın CTF teması).
+`k` aynı olmasa bile signatures genelinde nonce bitlerindeki **bias/leakage**, lattice recovery için yeterli olabilir (yaygın CTF teması).
 
-Teknik kurtarma `k` tekrar kullanıldığında:
+`k` yeniden kullanıldığında teknik kurtarma:
 
-ECDSA imza denklemleri (grup mertebesi `n`):
+ECDSA signature denklemleri (group order `n`):
 
 - `r = (kG)_x mod n`
 - `s = k^{-1}(h(m) + r*d) mod n`
 
-Aynı `k` iki mesaj `m1, m2` için yeniden kullanılır ve imzalar `(r, s1)` ve `(r, s2)` üretilirse:
+Aynı `k`, signatures `(r, s1)` ve `(r, s2)` üreten iki mesaj `m1, m2` için yeniden kullanılıyorsa:
 
 - `k = (h(m1) - h(m2)) * (s1 - s2)^{-1} mod n`
 - `d = (s1*k - h(m1)) * r^{-1} mod n`
 
 ### Invalid-curve attacks
 
-Bir protokol noktaların beklenen eğride (veya altgrupta) olduğunu doğrulamazsa, saldırgan zayıf bir grupta işlemler yaptırıp sırları geri alabilir.
+Bir protokol, noktaların beklenen curve (veya subgroup) üzerinde olduğunu doğrulayamazsa attacker işlemleri weak bir group içinde zorlayabilir ve secrets kurtarabilir.
 
 Teknik not:
 
-- Noktaların curve üzerinde ve doğru altgrupta olduğunu doğrulayın.
-- Birçok CTF görevi bunu "server multiplies attacker-chosen point by secret scalar and returns something" şeklinde model eder.
+- Noktaların curve üzerinde ve doğru subgroup içinde olduğunu doğrulayın.
+- Birçok CTF görevi bunu, "server attacker tarafından seçilen point'i secret scalar ile çarpar ve bir şey döndürür" şeklinde modeller.
 
-### Tooling
+### Araçlar
 
 - SageMath for curve arithmetic / lattices
 - `ecdsa` Python library for parsing/verification

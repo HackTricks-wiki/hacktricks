@@ -1,22 +1,22 @@
-# Kripto CTF İş Akışı
+# Crypto CTF İş Akışı
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Triage kontrol listesi
 
-1. Elinizde olanı belirleyin: encoding vs encryption vs hash vs signature vs MAC.
-2. Kontrol edilenleri tespit edin: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
+1. Elinizde ne olduğunu belirleyin: encoding mi, encryption mı, hash mi, signature mı, MAC mi?
+2. Neyin kontrol edildiğini belirleyin: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), kısmi leak.
 3. Sınıflandırın: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Önce en yüksek olasılıkları kontrol edin: decode katmanları, known-plaintext XOR, nonce reuse, mode misuse, oracle davranışı.
-5. Gelişmiş yöntemleri yalnızca gerektiğinde kullanın: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+4. Önce en yüksek olasılıklı kontrolleri uygulayın: decode katmanları, known-plaintext XOR, nonce reuse, mode misuse, oracle davranışı.
+5. Yalnızca gerektiğinde gelişmiş yöntemlere geçin: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
-## Çevrimiçi kaynaklar & araçlar
+## Online kaynaklar ve yardımcı araçlar
 
-Bunlar, görevin tanımlama ve katman sökme olduğu durumlarda ya da bir hipotezi hızlıca doğrulamanız gerektiğinde faydalıdır.
+Bunlar, görevin identification ve katmanları ayıklama olduğu veya bir hipotezi hızlıca doğrulamanız gerektiği durumlarda kullanışlıdır.
 
-### Hash aramaları
+### Hash lookups
 
-- Hashi Google'da ara (şaşırtıcı derecede etkili).
+- Hash'i Google'da arayın (şaşırtıcı derecede etkilidir).
 - [https://crackstation.net/](https://crackstation.net/)
 - [https://md5decrypt.net/](https://md5decrypt.net/)
 - [https://hashes.org/search.php](https://hashes.org/search.php)
@@ -24,40 +24,40 @@ Bunlar, görevin tanımlama ve katman sökme olduğu durumlarda ya da bir hipote
 - [https://gpuhash.me/](https://gpuhash.me/)
 - [http://hashtoolkit.com/reverse-hash](http://hashtoolkit.com/reverse-hash)
 
-### Tanımlama yardımcıları
+### Identification yardımcıları
 
 - CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
 - dCode (ciphers/encodings playground): https://www.dcode.fr/tools-list
 - Boxentriq (substitution solvers): https://www.boxentriq.com/code-breaking
 
-### Pratik platformları / referanslar
+### Practice platformları / referanslar
 
 - CryptoHack (hands-on crypto challenges): https://cryptohack.org/
 - Cryptopals (classic modern crypto pitfalls): https://cryptopals.com/
 
-### Otomatik dekodlama
+### Otomatik decoding
 
 - Ciphey: https://github.com/Ciphey/Ciphey
-- python-codext (tries many bases/encodings): https://github.com/dhondta/python-codext
+- python-codext (birçok base/encoding dener): https://github.com/dhondta/python-codext
 
-## Encodings & klasik şifreler
+## Encodings ve classical ciphers
 
-### Yöntem
+### Teknik
 
-Birçok CTF kripto görevi katmanlı dönüşümlerdir: base encoding + simple substitution + compression. Amaç, katmanları tespit etmek ve güvenli biçimde soymaktır.
+Birçok CTF crypto görevi katmanlı transform'lar içerir: base encoding + simple substitution + compression. Amaç, katmanları belirlemek ve güvenli şekilde ayıklamaktır.
 
 ### Encodings: birçok base deneyin
 
-Katmanlı encoding (base64 → base32 → …) olduğunu düşünüyorsanız, deneyin:
+Katmanlı encoding'den şüpheleniyorsanız (base64 → base32 → …), şunları deneyin:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
 Yaygın göstergeler:
 
-- Base64: `A-Za-z0-9+/=` (padding `=` is common)
-- Base32: `A-Z2-7=` (often lots of `=` padding)
-- Ascii85/Base85: yoğun noktalama; bazen `<~ ~>` ile sarılır
+- Base64: `A-Za-z0-9+/=` (padding olarak `=` yaygındır)
+- Base32: `A-Z2-7=` (çoğunlukla çok sayıda `=` padding içerir)
+- Ascii85/Base85: yoğun punctuation; bazen `<~ ~>` içine sarılır
 
 ### Substitution / monoalphabetic
 
@@ -76,7 +76,7 @@ Yaygın göstergeler:
 
 ### Bacon cipher
 
-Genellikle 5 bitlik veya 5 harflik gruplar halinde görülür:
+Genellikle 5 bitlik veya 5 harflik gruplar olarak görünür:
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
@@ -85,22 +85,22 @@ AABBB ABBAB ABABA AAAAA ...
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
-### Rünler
+### Runes
 
-Rünler sık sık yerine koyma alfabeleridir; "futhark cipher" arayın ve eşleme tablolarını deneyin.
+Runes genellikle substitution alphabets'tir; "futhark cipher" için arama yapın ve mapping tablolarını deneyin.
 
-## Challenge'larda Sıkıştırma
+## Challenges'ta Compression
 
-### Teknik
+### Technique
 
-Sıkıştırma, sıkça ekstra bir katman olarak (zlib/deflate/gzip/xz/zstd) karşınıza çıkar; bazen iç içe olur. Çıktı neredeyse çözümleniyor ama anlamsız görünüyorsa, sıkıştırmayı şüpheleyin.
+Compression, ekstra bir katman olarak sürekli karşımıza çıkar (zlib/deflate/gzip/xz/zstd); bazen iç içe olabilir. Çıktı neredeyse parse edilebiliyor ancak anlamsız görünüyorsa compression'dan şüphelenin.
 
-### Hızlı tespit
+### Quick identification
 
 - `file <blob>`
-- Magic byte'lara bakın:
+- Magic byte'ları arayın:
 - gzip: `1f 8b`
-- zlib: çoğunlukla `78 01/9c/da`
+- zlib: genellikle `78 01/9c/da`
 - zip: `50 4b 03 04`
 - bzip2: `42 5a 68` (`BZh`)
 - xz: `fd 37 7a 58 5a 00`
@@ -108,9 +108,9 @@ Sıkıştırma, sıkça ekstra bir katman olarak (zlib/deflate/gzip/xz/zstd) kar
 
 ### Raw DEFLATE
 
-CyberChef'te **Raw Deflate/Raw Inflate** bulunur; blob sıkıştırılmış gibi görünüp `zlib` başarısız olduğunda genellikle en hızlı yol budur.
+CyberChef'te **Raw Deflate/Raw Inflate** bulunur; blob compressed görünüyorsa ancak `zlib` başarısız oluyorsa genellikle en hızlı yoldur.
 
-### Faydalı CLI
+### Useful CLI
 ```bash
 python3 - <<'PY'
 import sys, zlib
@@ -124,47 +124,47 @@ PY
 ```
 ## Yaygın CTF crypto yapıları
 
-### Teknik
+### Technique
 
-Bunlar sıkça görülür çünkü gerçekçi developer hataları veya yanlış kullanılan common libraries'dir. Amaç genellikle tanıma ve bilinen bir extraction veya reconstruction workflow'unu uygulamaktır.
+Bunlar, gerçekçi developer hataları veya yaygın kütüphanelerin yanlış kullanılması nedeniyle sık görülür. Amaç genellikle bunları tanımak ve bilinen bir extraction veya reconstruction workflow uygulamaktır.
 
 ### Fernet
 
-Tipik ipucu: iki Base64 dizesi (token + key).
+Tipik ipucu: iki Base64 string'i (token + key).
 
-- Çözücü/notlar: https://asecuritysite.com/encryption/ferdecode
+- Decoder/notes: https://asecuritysite.com/encryption/ferdecode
 - Python'da: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-Birden fazla share görürseniz ve bir eşik `t` belirtilmişse, muhtemelen Shamir'dir.
+Birden fazla share görüyorsanız ve bir threshold `t` belirtilmişse, büyük olasılıkla Shamir kullanılıyordur.
 
-- Çevrimiçi yeniden oluşturucu (CTF'ler için kullanışlı): http://christian.gen.co/secrets/
+- Online reconstructor (CTF'ler için kullanışlı): http://christian.gen.co/secrets/
 
-### OpenSSL salted formats
+### OpenSSL salted formatları
 
-CTF'ler bazen `openssl enc` çıktıları verir (başlık genellikle `Salted__` ile başlar).
+CTF'lerde bazen `openssl enc` çıktıları verilir (header genellikle `Salted__` ile başlar).
 
-Bruteforce yardımcı araçları:
+Bruteforce yardımcıları:
 
 - [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
-### Genel araç seti
+### Genel toolset
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
 - featherduster: https://github.com/nccgroup/featherduster
 - cryptovenom: https://github.com/lockedbyte/cryptovenom
 
-## Önerilen yerel kurulum
+## Önerilen local setup
 
-Pratik CTF yığını:
+Pratik CTF stack'i:
 
-- Python + `pycryptodome` simetrik primitive'ler ve hızlı prototipleme için
-- SageMath modüler aritmetik, CRT, lattices ve RSA/ECC çalışmaları için
-- Z3 kısıt tabanlı zorluklar için (crypto kısıtlara indirgeniyorsa)
+- Simetrik primitive'ler ve hızlı prototyping için Python + `pycryptodome`
+- Modular arithmetic, CRT, lattices ve RSA/ECC çalışmaları için SageMath
+- Constraint tabanlı challenge'lar için Z3 (crypto, constraint'lere indirgenebildiğinde)
 
-Önerilen Python paketleri:
+Önerilen Python package'ları:
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
