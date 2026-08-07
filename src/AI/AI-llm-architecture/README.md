@@ -2,11 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**ये मेरे नोट्स हैं बहुत ही अनुशंसित पुस्तक से** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **कुछ अतिरिक्त जानकारी के साथ।**
+**ये मेरे बहुत recommended book** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **से लिए गए notes हैं, जिनमें कुछ अतिरिक्त जानकारी भी शामिल है।**<sup>[[1]](#references)</sup>
 
 ## Basic Information
 
-आपको कुछ बुनियादी अवधारणाओं के बारे में जानने के लिए इस पोस्ट को पढ़ना शुरू करना चाहिए:
+आपको कुछ basic concepts के लिए सबसे पहले यह post पढ़ना चाहिए, जिन्हें आपको जानना आवश्यक है:
 
 
 {{#ref}}
@@ -16,7 +16,7 @@
 ## 1. Tokenization
 
 > [!TIP]
-> इस प्रारंभिक चरण का लक्ष्य बहुत सरल है: **इनपुट को कुछ इस तरह से टोकन (ids) में विभाजित करें जो समझ में आए।**
+> इस initial phase का goal बहुत सरल है: **Input को किसी ऐसे तरीके से tokens (ids) में divide करना जो अर्थपूर्ण हो।**
 
 
 {{#ref}}
@@ -26,7 +26,7 @@
 ## 2. Data Sampling
 
 > [!TIP]
-> इस दूसरे चरण का लक्ष्य बहुत सरल है: **इनपुट डेटा का सैंपल लें और इसे प्रशिक्षण चरण के लिए तैयार करें, आमतौर पर डेटासेट को एक विशिष्ट लंबाई के वाक्यों में विभाजित करके और अपेक्षित प्रतिक्रिया भी उत्पन्न करके।**
+> इस second phase का goal बहुत सरल है: **Input data को sample करना और उसे training phase के लिए तैयार करना, आमतौर पर dataset को एक निश्चित length वाले sentences में अलग करके और expected response भी generate करके।**
 
 
 {{#ref}}
@@ -36,10 +36,10 @@
 ## 3. Token Embeddings
 
 > [!TIP]
-> इस तीसरे चरण का लक्ष्य बहुत सरल है: **शब्दकोश में पिछले टोकनों में से प्रत्येक को वांछित आयामों का एक वेक्टर सौंपें ताकि मॉडल को प्रशिक्षित किया जा सके।** शब्दकोश में प्रत्येक शब्द X आयामों के एक स्थान में एक बिंदु होगा।\
-> ध्यान दें कि प्रारंभ में प्रत्येक शब्द का स्थान "यादृच्छिक" रूप से प्रारंभ किया जाता है और ये स्थान प्रशिक्षित करने योग्य पैरामीटर होते हैं (प्रशिक्षण के दौरान सुधारित होंगे)।
+> इस third phase का goal बहुत सरल है: **Vocabulary में मौजूद पिछले प्रत्येक token को model की training के लिए इच्छित dimensions वाला एक vector assign करना।** Vocabulary में मौजूद प्रत्येक word, X dimensions वाले space में एक point होगा।\
+> ध्यान दें कि शुरुआत में space में प्रत्येक word की position केवल "randomly" initialize की जाती है और ये positions trainable parameters होती हैं (training के दौरान इनमें सुधार किया जाएगा)।
 >
-> इसके अलावा, टोकन एम्बेडिंग के दौरान **एक और एम्बेडिंग परत बनाई जाती है** जो (इस मामले में) **प्रशिक्षण वाक्य में शब्द की पूर्ण स्थिति का प्रतिनिधित्व करती है।** इस तरह वाक्य में विभिन्न स्थानों पर एक शब्द का अलग प्रतिनिधित्व (अर्थ) होगा।
+> इसके अलावा, token embedding के दौरान **embeddings की एक अन्य layer बनाई जाती है**, जो (इस case में) training sentence में **word की absolute position** को represent करती है। इस तरह sentence में अलग-अलग positions पर मौजूद word का representation (meaning) अलग होगा।
 
 
 {{#ref}}
@@ -49,8 +49,8 @@
 ## 4. Attention Mechanisms
 
 > [!TIP]
-> इस चौथे चरण का लक्ष्य बहुत सरल है: **कुछ ध्यान तंत्र लागू करें।** ये बहुत सारे **दोहराए गए परतें** होंगी जो **शब्दकोश में एक शब्द के पड़ोसियों के साथ वर्तमान वाक्य में संबंध को कैप्चर करेंगी जिसका उपयोग LLM को प्रशिक्षित करने के लिए किया जा रहा है।**\
-> इसके लिए बहुत सारी परतें उपयोग की जाती हैं, इसलिए बहुत सारे प्रशिक्षित करने योग्य पैरामीटर इस जानकारी को कैप्चर करने जा रहे हैं।
+> इस fourth phase का goal बहुत सरल है: **कुछ attention mechanisms apply करना।** ये बहुत-सी **repeated layers** होंगी, जो **वर्तमान sentence में मौजूद किसी word और उसके neighbours के बीच के relation को capture करेंगी, जिसका उपयोग LLM को train करने के लिए किया जा रहा है।**\
+> इसके लिए बहुत-सी layers का उपयोग किया जाता है, इसलिए बहुत-से trainable parameters इस information को capture करेंगे।
 
 
 {{#ref}}
@@ -60,9 +60,9 @@
 ## 5. LLM Architecture
 
 > [!TIP]
-> इस पांचवे चरण का लक्ष्य बहुत सरल है: **पूर्ण LLM की आर्किटेक्चर विकसित करें।** सब कुछ एक साथ रखें, सभी परतें लागू करें और पाठ उत्पन्न करने या पाठ को IDs में और इसके विपरीत परिवर्तित करने के लिए सभी कार्यों को बनाएं।
+> इस fifth phase का goal बहुत सरल है: **Full LLM की architecture develop करना।** हर चीज़ को एक साथ रखना, सभी layers apply करना और text generate करने या text को IDs में और IDs को वापस text में transform करने के लिए सभी functions create करना।
 >
-> यह आर्किटेक्चर दोनों के लिए उपयोग किया जाएगा, प्रशिक्षण और भविष्यवाणी पाठ के लिए जब इसे प्रशिक्षित किया गया हो।
+> इस architecture का उपयोग training और model के train होने के बाद text predict करने, दोनों के लिए किया जाएगा।
 
 
 {{#ref}}
@@ -72,7 +72,7 @@
 ## 6. Pre-training & Loading models
 
 > [!TIP]
-> इस छठे चरण का लक्ष्य बहुत सरल है: **मॉडल को शून्य से प्रशिक्षित करें।** इसके लिए पिछले LLM आर्किटेक्चर का उपयोग किया जाएगा जिसमें डेटा सेट पर परिभाषित हानि कार्यों और ऑप्टिमाइज़र का उपयोग करते हुए लूप होंगे ताकि मॉडल के सभी पैरामीटर को प्रशिक्षित किया जा सके।
+> इस sixth phase का goal बहुत सरल है: **Model को scratch से train करना।** इसके लिए previous LLM architecture का उपयोग किया जाएगा, जिसमें defined loss functions और optimizer का उपयोग करके model के सभी parameters को train करने के लिए data sets पर loops चलाए जाएंगे।
 
 
 {{#ref}}
@@ -82,7 +82,7 @@
 ## 7.0. LoRA Improvements in fine-tuning
 
 > [!TIP]
-> **LoRA का उपयोग बहुत अधिक गणना को कम करता है** जो पहले से प्रशिक्षित मॉडलों को **फाइन ट्यून** करने के लिए आवश्यक है।
+> **LoRA का उपयोग पहले से trained models को fine-tune करने के लिए आवश्यक computation को काफी कम करता है।**
 
 
 {{#ref}}
@@ -92,7 +92,8 @@
 ## 7.1. Fine-Tuning for Classification
 
 > [!TIP]
-> इस अनुभाग का लक्ष्य यह दिखाना है कि पहले से प्रशिक्षित मॉडल को कैसे फाइन-ट्यून किया जाए ताकि नए पाठ उत्पन्न करने के बजाय LLM **प्रत्येक दिए गए श्रेणी में वर्गीकृत किए जाने के लिए दिए गए पाठ की संभावनाएं** प्रदान करे (जैसे कि कोई पाठ स्पैम है या नहीं)।
+> इस section का goal यह दिखाना है कि पहले से pre-trained model को fine-tune कैसे किया जाए, ताकि नया text generate करने के बजाय LLM दिए गए **text के प्रत्येक category में categorized होने की probabilities** select करे (जैसे कि कोई text spam है या नहीं)।
+
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -101,11 +102,15 @@
 ## 7.2. Fine-Tuning to follow instructions
 
 > [!TIP]
-> इस अनुभाग का लक्ष्य यह दिखाना है कि पहले से प्रशिक्षित मॉडल को **निर्देशों का पालन करने के लिए कैसे फाइन-ट्यून किया जाए** न कि केवल पाठ उत्पन्न करने के लिए, उदाहरण के लिए, एक चैट बॉट के रूप में कार्यों का उत्तर देना।
+> इस section का goal यह दिखाना है कि पहले से pre-trained model को केवल text generate करने के बजाय **instructions follow करने के लिए fine-tune** कैसे किया जाए, उदाहरण के लिए, chat bot की तरह tasks का response देना।
 
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
+
+## References
+
+- [1] [Build a Large Language Model (From Scratch) - Manning](https://www.manning.com/books/build-a-large-language-model-from-scratch)
 
 {{#include ../../banners/hacktricks-training.md}}
