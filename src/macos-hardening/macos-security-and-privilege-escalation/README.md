@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Conceptos básicos de MacOS
+## Conceptos básicos de macOS
 
 Si no estás familiarizado con macOS, deberías empezar aprendiendo los conceptos básicos de macOS:
 
@@ -44,7 +44,7 @@ macos-protocols.md
 - macOS **Opensource**: [https://opensource.apple.com/](https://opensource.apple.com/)
 - Para descargar un `tar.gz`, cambia una URL como [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) por [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
-### MDM de MacOS
+### MDM de macOS
 
 En las empresas, es muy probable que los sistemas **macOS** estén **gestionados con un MDM**. Por lo tanto, desde la perspectiva de un atacante, es interesante saber **cómo funciona**:
 
@@ -53,14 +53,14 @@ En las empresas, es muy probable que los sistemas **macOS** estén **gestionados
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
-### MacOS: inspección, depuración y fuzzing
+### macOS: inspección, debugging y fuzzing
 
 
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
-## Protecciones de seguridad de MacOS
+## Protecciones de seguridad de macOS
 
 
 {{#ref}}
@@ -71,13 +71,13 @@ macos-security-protections/
 
 ### Permisos de archivos
 
-Si un **proceso ejecutándose como root escribe** en un archivo que puede ser controlado por un usuario, este podría aprovecharlo para **escalar privilegios**.\
+Si un **process ejecutándose como root escribe** un archivo que puede ser controlado por un usuario, este podría aprovecharlo para **escalar privilegios**.\
 Esto podría ocurrir en las siguientes situaciones:
 
 - El archivo utilizado ya fue creado por un usuario (pertenece al usuario)
 - El archivo utilizado puede ser escrito por el usuario debido a un grupo
-- El archivo utilizado está dentro de un directorio propiedad del usuario (el usuario podría crear el archivo)
-- El archivo utilizado está dentro de un directorio propiedad de root, pero el usuario tiene acceso de escritura debido a un grupo (el usuario podría crear el archivo)
+- El archivo utilizado está dentro de un directorio perteneciente al usuario (el usuario podría crear el archivo)
+- El archivo utilizado está dentro de un directorio perteneciente a root, pero el usuario tiene acceso de escritura debido a un grupo (el usuario podría crear el archivo)
 
 Poder **crear un archivo** que va a ser **utilizado por root** permite a un usuario **aprovechar su contenido** o incluso crear **symlinks/hardlinks** para apuntarlo a otro lugar.
 
@@ -90,7 +90,7 @@ macos-files-folders-and-binaries/macos-installers-abuse.md
 
 ### Extensión de archivo y handlers de esquemas URL
 
-Las aplicaciones extrañas registradas mediante extensiones de archivo podrían ser abusadas, y se pueden registrar distintas aplicaciones para abrir protocolos específicos.
+Las aplicaciones extrañas registradas mediante extensiones de archivo podrían ser abusadas, y se pueden registrar diferentes aplicaciones para abrir protocolos específicos
 
 
 {{#ref}}
@@ -101,22 +101,22 @@ macos-file-extension-apps.md
 
 En macOS, las **aplicaciones y los binarios pueden tener permisos** para acceder a carpetas o configuraciones que los hacen más privilegiados que otros.
 
-Por lo tanto, un atacante que quiera comprometer correctamente una máquina macOS tendrá que **escalar sus privilegios TCC** (o incluso **omitir SIP**, dependiendo de sus necesidades).
+Por lo tanto, un atacante que quiera comprometer con éxito una máquina macOS deberá **escalar sus privilegios de TCC** (o incluso **bypassear SIP**, dependiendo de sus necesidades).
 
-Estos privilegios suelen otorgarse en forma de **entitlements** con los que está firmada la aplicación, o la aplicación puede solicitar ciertos accesos y, después de que el **usuario los apruebe**, estos pueden encontrarse en las **bases de datos de TCC**. Otra forma en la que un proceso puede obtener estos privilegios es siendo **hijo de un proceso** con esos **privilegios**, ya que normalmente se **heredan**.
+Estos privilegios suelen otorgarse en forma de **entitlements** con los que está firmada la aplicación, o la aplicación puede solicitar determinados accesos y, después de que el **usuario los apruebe**, estos pueden encontrarse en las **bases de datos de TCC**. Otra forma en la que un process puede obtener estos privilegios es siendo **child de un process** con esos **privilegios**, ya que normalmente se **heredan**.<sup>[[5]](#references)</sup>
 
-Sigue estos enlaces para encontrar distintas formas de [**escalar privilegios en TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**omitir TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) y saber cómo en el pasado [**se ha omitido SIP**](macos-security-protections/macos-sip.md#sip-bypasses).
+Sigue estos enlaces para encontrar diferentes formas de [**escalar privilegios en TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**bypassear TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) y consultar cómo en el pasado se ha [**bypasseado SIP**](macos-security-protections/macos-sip.md#sip-bypasses).
 
 ## Escalada de privilegios tradicional en macOS
 
-Por supuesto, desde la perspectiva de un red team, también deberías estar interesado en escalar a root. Consulta la siguiente publicación para obtener algunas pistas:
+Por supuesto, desde la perspectiva de los red teams también deberías estar interesado en escalar a root. Consulta el siguiente post para obtener algunas pistas:
 
 
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
 
-## Cumplimiento de normativas en macOS
+## Cumplimiento normativo de macOS
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 

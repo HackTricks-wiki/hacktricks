@@ -4,64 +4,64 @@
 
 ## **Introducción a x64**
 
-x64, también conocido como x86-64, es una arquitectura de procesadores de 64 bits utilizada principalmente en equipos de escritorio y servidores. Originada a partir de la arquitectura x86 producida por Intel y adoptada posteriormente por AMD con el nombre AMD64, actualmente es la arquitectura predominante en ordenadores personales y servidores.
+x64, también conocido como x86-64, es una arquitectura de procesador de 64 bits utilizada principalmente en la informática de escritorio y de servidores. Originada a partir de la arquitectura x86 producida por Intel y adoptada posteriormente por AMD con el nombre AMD64, actualmente es la arquitectura predominante en ordenadores personales y servidores.
 
 ### **Registros**
 
-x64 amplía la arquitectura x86 e incluye **16 registros de propósito general** denominados `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` y desde `r8` hasta `r15`. Cada uno de ellos puede almacenar un valor de **64 bits** (8 bytes). Estos registros también tienen subregistros de 32, 16 y 8 bits para ofrecer compatibilidad y realizar tareas específicas.
+x64 amplía la arquitectura x86 e incluye **16 registros de propósito general** denominados `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` y desde `r8` hasta `r15`. Cada uno de ellos puede almacenar un valor de **64 bits** (8 bytes). Estos registros también tienen subregistros de 32, 16 y 8 bits para compatibilidad y tareas específicas.
 
-1. **`rax`** - Tradicionalmente utilizado para los **valores de retorno** de las funciones.
+1. **`rax`** - Utilizado tradicionalmente para los **valores de retorno** de las funciones.
 2. **`rbx`** - Utilizado habitualmente como **registro base** para operaciones de memoria.
 3. **`rcx`** - Utilizado comúnmente como **contador de bucles**.
 4. **`rdx`** - Utilizado en varias funciones, incluidas las operaciones aritméticas extendidas.
 5. **`rbp`** - **Puntero base** del stack frame.
-6. **`rsp`** - **Puntero de stack**, que mantiene la posición de la parte superior del stack.
-7. **`rsi`** y **`rdi`** - Utilizados como índices de **origen** y **destino** en operaciones con strings/memoria.
+6. **`rsp`** - **Puntero del stack**, que realiza un seguimiento de la parte superior del stack.
+7. **`rsi`** y **`rdi`** - Utilizados como índices de **origen** y **destino** en operaciones con cadenas/memoria.
 8. **`r8`** a **`r15`** - Registros adicionales de propósito general introducidos en x64.
 
 ### **Convención de llamada**
 
 La convención de llamada de x64 varía según el sistema operativo. Por ejemplo:
 
-- **Windows**: Los primeros **cuatro parámetros** se pasan en los registros **`rcx`**, **`rdx`**, **`r8`** y **`r9`**. Los parámetros adicionales se introducen en el stack. El valor de retorno se encuentra en **`rax`**.
-- **System V (utilizado habitualmente en sistemas similares a UNIX)**: Los primeros **seis parámetros enteros o de tipo puntero** se pasan en los registros **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** y **`r9`**. El valor de retorno también se encuentra en **`rax`**.
+- **Windows**: Los primeros **cuatro parámetros** se pasan en los registros **`rcx`**, **`rdx`**, **`r8`** y **`r9`**. Los parámetros adicionales se insertan en el stack. El valor de retorno se encuentra en **`rax`**.
+- **System V (utilizado habitualmente en sistemas similares a UNIX)**: Los primeros **seis parámetros enteros o punteros** se pasan en los registros **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** y **`r9`**. El valor de retorno también se encuentra en **`rax`**.
 
-Si la función tiene más de seis entradas, el **resto se pasará en el stack**. **RSP**, el puntero de stack, tiene que estar **alineado a 16 bytes**, lo que significa que la dirección a la que apunta debe ser divisible por 16 antes de que se produzca cualquier llamada. Esto significa que normalmente tendríamos que asegurarnos de que RSP esté correctamente alineado en nuestro shellcode antes de realizar una llamada a una función. Sin embargo, en la práctica, las llamadas al sistema funcionan muchas veces aunque no se cumpla este requisito.
+Si la función tiene más de seis entradas, el **resto se pasará en el stack**. **RSP**, el puntero del stack, debe estar **alineado a 16 bytes**, lo que significa que la dirección a la que apunta debe ser divisible por 16 antes de que se realice cualquier llamada. Esto significa que normalmente tendríamos que asegurarnos de que RSP esté correctamente alineado en nuestro shellcode antes de realizar una llamada a una función. Sin embargo, en la práctica, las llamadas al sistema funcionan muchas veces aunque no se cumpla este requisito.
 
 ### Convención de llamada en Swift
 
-Swift tiene su propia **convención de llamada**, que puede encontrarse en [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
+Swift tiene su propia **convención de llamada**, que se puede [**encontrar aquí**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
 
 ### **Instrucciones comunes**
 
-Las instrucciones x64 cuentan con un conjunto amplio, mantienen la compatibilidad con las instrucciones x86 anteriores e introducen otras nuevas.
+Las instrucciones x64 ofrecen un conjunto amplio, mantienen la compatibilidad con instrucciones x86 anteriores e introducen otras nuevas.
 
 - **`mov`**: **Mueve** un valor de un **registro** o una **ubicación de memoria** a otra.
 - Ejemplo: `mov rax, rbx` — Mueve el valor de `rbx` a `rax`.
-- **`push`** y **`pop`**: Introducen o extraen valores del **stack**.
-- Ejemplo: `push rax` — Introduce el valor de `rax` en el stack.
+- **`push`** y **`pop`**: Insertan o extraen valores del **stack**.
+- Ejemplo: `push rax` — Inserta el valor de `rax` en el stack.
 - Ejemplo: `pop rax` — Extrae el valor superior del stack y lo introduce en `rax`.
 - **`add`** y **`sub`**: Operaciones de **suma** y **resta**.
-- Ejemplo: `add rax, rcx` — Suma los valores de `rax` y `rcx`, y almacena el resultado en `rax`.
-- **`mul`** y **`div`**: Operaciones de **multiplicación** y **división**. Nota: tienen comportamientos específicos respecto al uso de los operandos.
+- Ejemplo: `add rax, rcx` — Suma los valores de `rax` y `rcx` y almacena el resultado en `rax`.
+- **`mul`** y **`div`**: Operaciones de **multiplicación** y **división**. Nota: tienen comportamientos específicos con respecto al uso de los operandos.
 - **`call`** y **`ret`**: Se utilizan para **llamar a funciones** y **retornar de ellas**.
 - **`int`**: Se utiliza para activar una **interrupción** de software. Por ejemplo, `int 0x80` se utilizaba para realizar llamadas al sistema en Linux x86 de 32 bits.
 - **`cmp`**: **Compara** dos valores y establece los flags de la CPU según el resultado.
 - Ejemplo: `cmp rax, rdx` — Compara `rax` con `rdx`.
-- **`je`, `jne`, `jl`, `jge`, ...**: Instrucciones de **salto condicional** que cambian el flujo de control según los resultados de un `cmp` o una prueba anterior.
+- **`je`, `jne`, `jl`, `jge`, ...**: Instrucciones de **salto condicional** que cambian el flujo de control según los resultados de un `cmp` o una prueba anteriores.
 - Ejemplo: Después de una instrucción `cmp rax, rdx`, `je label` — Salta a `label` si `rax` es igual a `rdx`.
 - **`syscall`**: Se utiliza para realizar **llamadas al sistema** en algunos sistemas x64 (como los Unix modernos).
 - **`sysenter`**: Una instrucción optimizada de **llamada al sistema** en algunas plataformas.
 
 ### **Prólogo de función**
 
-1. **Introducir el puntero base antiguo**: `push rbp` (guarda el puntero base del caller)
-2. **Mover el puntero de stack actual al puntero base**: `mov rbp, rsp` (configura el nuevo puntero base para la función actual)
+1. **Insertar el puntero base antiguo**: `push rbp` (guarda el puntero base del caller)
+2. **Mover el puntero actual del stack al puntero base**: `mov rbp, rsp` (configura el nuevo puntero base para la función actual)
 3. **Reservar espacio en el stack para las variables locales**: `sub rsp, <size>` (donde `<size>` es el número de bytes necesarios)
 
 ### **Epílogo de función**
 
-1. **Mover el puntero base actual al puntero de stack**: `mov rsp, rbp` (libera las variables locales)
+1. **Mover el puntero base actual al puntero del stack**: `mov rsp, rbp` (desasigna las variables locales)
 2. **Extraer el puntero base antiguo del stack**: `pop rbp` (restaura el puntero base del caller)
 3. **Retornar**: `ret` (devuelve el control al caller)
 
@@ -69,7 +69,7 @@ Las instrucciones x64 cuentan con un conjunto amplio, mantienen la compatibilida
 
 ### syscalls
 
-Existen diferentes clases de syscalls; puedes [**encontrarlas aquí**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
+Hay diferentes clases de syscalls; puedes [**encontrarlas aquí**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -95,7 +95,7 @@ Entonces, puedes encontrar cada número de syscall [**en esta URL**](https://ope
 12	AUE_CHDIR	ALL	{ int chdir(user_addr_t path); }
 [...]
 ```
-Por lo tanto, para llamar al syscall `open` (**5**) de la **clase Unix/BSD**, debes añadirlo: `0x2000000`
+Así que, para llamar al syscall `open` (**5**) de la **Unix/BSD class**, debes añadirlo: `0x2000000`
 
 Por lo tanto, el número de syscall para llamar a open sería `0x2000005`
 
@@ -118,7 +118,7 @@ otool -t shell.o | grep 00 | cut -f2 -d$'\t' | sed 's/ /\\x/g' | sed 's/^/\\x/g'
 ```
 <details>
 
-<summary>Código C para probar el shellcode</summary>
+<summary>Código en C para probar el shellcode</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -357,7 +357,7 @@ syscall
 ```
 #### Reverse Shell
 
-Reverse shell desde [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell hacia **127.0.0.1:4444**<sup>[[3]](#references)</sup>.
+Reverse shell de [https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html](https://packetstormsecurity.com/files/151727/macOS-127.0.0.1-4444-Reverse-Shell-Shellcode.html). Reverse shell hacia **127.0.0.1:4444**<sup>[[3]](#references)</sup>.
 ```armasm
 section .text
 global _main

