@@ -149,7 +149,7 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
-## grep
+## Greps
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -229,7 +229,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Find
+## 찾기
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -301,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF 텔레메트리 및 Rootkit Hunting
+## eBPF Telemetry 및 Rootkit Hunting
 
-Modern rootkit(TripleCross, BPFDoor variants 등)은 점점 더 hidden eBPF programs로 persist합니다. `bpftool`/`eBPFmon`으로 fleet의 baseline을 설정하여, detach하기 전에 unsigned programs, 예상치 못한 cgroup hooks 또는 malicious map contents를 식별할 수 있도록 하세요.
+Modern rootkit(TripleCross, BPFDoor variants 등)은 점점 더 hidden eBPF programs 형태로 persistence를 유지합니다. `bpftool`/`eBPFmon`을 사용해 fleet의 baseline을 설정하면, 이를 detach하기 전에 unsigned programs, 예상치 못한 cgroup hooks 또는 malicious map contents를 식별할 수 있습니다.<sup>[[1]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -323,9 +323,9 @@ sudo ebpfmon
 ```
 예상되는 NIC/cgroup attachment와 bpftool 출력을 대조하세요. 승인되지 않은 PID가 소유한 갑작스러운 `xdp` 또는 `kprobe` 프로그램은 주입된 eBPF payload의 강력한 징후입니다.
 
-## Journald Incident Triage
+## Journald 인시던트 트리아지
 
-systemd-journald는 구조화된 메타데이터를 유지하므로 `/var/log/*`에 접근하지 않고도 boot, severity, unit 또는 UID를 기준으로 pivot할 수 있습니다. 필터를 상대 타임스탬프와 결합하면 공격 window를 신속하게 격리하거나 로그 변조를 빠르게 입증할 수 있습니다.
+systemd-journald는 구조화된 메타데이터를 유지하므로 `/var/log/*`에 접근하지 않고도 boot, severity, unit 또는 UID를 기준으로 pivot할 수 있습니다. 필터를 상대 타임스탬프와 결합하면 공격 윈도우를 빠르게 격리하거나 로그 변조를 입증할 수 있습니다.<sup>[[2]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +336,11 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-더 엄격한 필터가 필요하면 `--grep 'Invalid user' --case-sensitive` 또는 `-k`(kernel ring buffer 전용)를 추가하고, 다중 테넌트 조사에서는 `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, `_TRANSPORT` selector가 함께 적용된다는 점을 기억하세요.
+더 엄격한 필터가 필요하면 `--grep 'Invalid user' --case-sensitive` 또는 `-k`(kernel ring buffer만 해당)를 추가하고, 다중 테넌트 탐색 시 `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, `_TRANSPORT` selector가 함께 적용된다는 점을 기억하세요.
 
-## References
+## 참고 자료
 
-- [eBPFmon: eBPF 애플리케이션을 탐색하고 상호작용하기 위한 새로운 도구](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [journalctl 명령어를 사용하여 Linux 로그를 확인하는 방법](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: eBPF 애플리케이션을 탐색하고 상호작용하기 위한 새로운 도구](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [journalctl 명령을 사용하여 Linux 로그를 확인하는 방법](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}

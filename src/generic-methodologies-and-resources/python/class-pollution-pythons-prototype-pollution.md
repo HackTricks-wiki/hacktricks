@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Example
+## 기본 예제
 
-문자열로 객체의 클래스를 오염시킬 수 있는 방법을 확인하세요:
+문자열을 사용하여 객체의 class를 오염시키는 방법을 확인하세요:<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -61,11 +61,11 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Gadget Examples
+## Gadget 예시
 
 <details>
 
-<summary>클래스 속성 기본값을 RCE로 만들기 (subprocess)</summary>
+<summary>class property의 default value를 생성하여 RCE (subprocess)</summary><sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary><code>globals</code>를 통해 다른 클래스와 전역 변수를 오염시키기</summary>
+<summary><code>globals</code>를 통한 다른 class 및 global vars 오염</summary><sup>[[1]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>임의 서브프로세스 실행</summary>
+<summary>임의의 subprocess 실행</summary><sup>[[1]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -180,9 +180,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Overwritting <strong><code>__kwdefaults__</code></strong></summary>
+<summary><strong><code>__kwdefaults__</code></strong> 덮어쓰기</summary>
 
-**`__kwdefaults__`**는 모든 함수의 특별한 속성으로, Python [documentation](https://docs.python.org/3/library/inspect.html)에 따르면, “**키워드 전용** 매개변수에 대한 기본값의 매핑”입니다. 이 속성을 오염시키면 함수의 키워드 전용 매개변수의 기본값을 제어할 수 있으며, 이는 \* 또는 \*args 뒤에 오는 함수의 매개변수입니다.
+**`__kwdefaults__`**는 모든 함수에 존재하는 특수 속성으로, Python [documentation](https://docs.python.org/3/library/inspect.html)에 따르면 “**keyword-only** 매개변수의 모든 기본값에 대한 매핑”입니다. 이 속성을 오염시키면 함수의 keyword-only 매개변수에 대한 기본값을 제어할 수 있습니다. 이는 \* 또는 \*args 뒤에 오는 함수의 매개변수입니다.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,25 +223,26 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>파일 간 Flask 비밀 덮어쓰기</summary>
+<summary>파일 전체에서 Flask secret 덮어쓰기</summary>
 
-따라서, 웹의 주요 파이썬 파일에 정의된 객체에 대해 클래스 오염을 수행할 수 있지만 **주요 파일과는 다른 파일에 정의된 클래스**인 경우입니다. 이전 페이로드에서 \_\_globals\_\_에 접근하려면 객체의 클래스나 클래스의 메서드에 접근해야 하므로, **주요 파일이 아닌 해당 파일의 globals에 접근할 수 있습니다**. \
-따라서, **주요 페이지에 정의된 비밀 키**를 가진 Flask 앱의 전역 객체에 접근할 수 없습니다:
+따라서 웹의 main python file에 정의된 객체에 대해 class pollution을 수행할 수 있지만, **해당 객체의 class가 main file과 다른 파일에 정의되어 있는 경우**를 생각해 보겠습니다. 이전 payload에서 \_\_globals\_\_에 액세스하려면 객체의 class 또는 해당 class의 methods에 액세스해야 하므로, **해당 파일의 globals에는 액세스할 수 있지만 main file의 globals에는 액세스할 수 없습니다**. \
+따라서 main page에서 **secret key**를 정의한 **Flask app global object에 액세스할 수 없습니다**:<sup>[[1]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-이 시나리오에서는 파일을 탐색하여 **전역 객체 `app.secret_key`에 접근**하여 Flask 비밀 키를 변경하고 이 키를 알고 [**권한 상승**을 할 수 있는]((../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)) 장치가 필요합니다.
+이 시나리오에서는 파일을 탐색하여 주요 파일에 도달하고, **전역 객체 `app.secret_key`에 액세스**하여 Flask secret key를 변경한 다음 이 키를 알고 [**권한을 상승**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)할 수 있도록 하는 gadget이 필요합니다.
 
-이와 같은 페이로드는 [이 작성물에서](https://ctftime.org/writeup/36082):
+[이 writeup](https://ctftime.org/writeup/36082)의 다음과 같은 payload:<sup>[[2]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-이 페이로드를 사용하여 **`app.secret_key`** (귀하의 앱에서 이름이 다를 수 있음)를 변경하여 새로운 더 많은 권한의 플라스크 쿠키에 서명할 수 있습니다.
+Use this payload to **`app.secret_key`를 변경**(앱에서 사용하는 이름은 다를 수 있음)하여 새롭고 더 높은 권한의 flask 쿠키에 서명할 수 있도록 하세요.
 
 </details>
 
-다음 페이지에서 읽기 전용 가젯도 확인하세요:
+더 많은 read only gadgets는 다음 페이지도 확인하세요:
+
 
 {{#ref}}
 python-internal-read-gadgets.md
@@ -249,6 +250,7 @@ python-internal-read-gadgets.md
 
 ## References
 
-- [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}

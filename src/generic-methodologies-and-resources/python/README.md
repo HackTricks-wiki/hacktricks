@@ -2,13 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**확인할 흥미로운 페이지:**
 
-- [**Pyscript 해킹 기법**](pyscript.md)
-- [**Python 역직렬화**](../../pentesting-web/deserialization/README.md)
-- [**Keras 모델 역직렬화 RCE 및 가젯 탐색**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Python 샌드박스를 우회하는 기법**](bypass-python-sandboxes/README.md)
-- [**기본 Python 웹 요청 구문**](web-requests.md)
-- [**기본 Python 구문 및 라이브러리**](basic-python.md)
+**확인해 볼 만한 페이지:**
+
+- [**Pyscript hacking tricks**](pyscript.md)
+- [**Python deserializations**](../../pentesting-web/deserialization/README.md)
+- [**Keras model deserialization RCE and gadget hunting**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Python sandbox를 우회하는 tricks**](bypass-python-sandboxes/README.md)
+- [**기본 Python web requests 문법**](web-requests.md)
+- [**기본 Python 문법 및 libraries**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}

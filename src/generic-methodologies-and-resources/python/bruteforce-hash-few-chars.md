@@ -1,3 +1,5 @@
+# 몇 개의 문자로 해시 무차별 대입
+
 {{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib
