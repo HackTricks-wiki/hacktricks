@@ -206,7 +206,6 @@
   - [macOS AppleFS](macos-hardening/macos-security-and-privilege-escalation/macos-applefs.md)
   - [macOS Bypassing Firewalls](macos-hardening/macos-security-and-privilege-escalation/macos-bypassing-firewalls.md)
   - [macOS Defensive Apps](macos-hardening/macos-security-and-privilege-escalation/macos-defensive-apps.md)
-  - [Macos Dyld Hijacking And Dyld Insert Libraries](macos-hardening/macos-security-and-privilege-escalation/macos-dyld-hijacking-and-dyld_insert_libraries.md)
   - [macOS GCD - Grand Central Dispatch](macos-hardening/macos-security-and-privilege-escalation/macos-gcd-grand-central-dispatch.md)
   - [macOS Kernel & System Extensions](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/README.md)
     - [macOS IOKit](macos-hardening/macos-security-and-privilege-escalation/mac-os-architecture/macos-iokit.md)

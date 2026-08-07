@@ -2,29 +2,33 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Apple 专有文件系统 (APFS)
+## Apple 专有文件系统（APFS）
 
-**Apple 文件系统 (APFS)** 是一种现代文件系统，旨在取代层次文件系统 Plus (HFS+)。其开发是为了满足 **提高性能、安全性和效率** 的需求。
+**Apple File System (APFS)** 是一种现代文件系统，旨在取代 Hierarchical File System Plus (HFS+)。其开发源于对**更高性能、更强安全性和更高效率**的需求。
 
-APFS 的一些显著特性包括：
+APFS 的一些显著特性包括：<sup>[[1]](#references)</sup>
 
-1. **空间共享**：APFS 允许多个卷 **共享同一物理设备上的底层可用存储**。这使得空间利用更加高效，因为卷可以动态增长和缩小，而无需手动调整大小或重新分区。
-1. 这意味着，与传统的文件磁盘分区相比，**在 APFS 中，不同的分区（卷）共享所有磁盘空间**，而常规分区通常具有固定大小。
-2. **快照**：APFS 支持 **创建快照**，这些快照是 **只读的**、时间点实例的文件系统。快照使得高效备份和轻松系统回滚成为可能，因为它们消耗的额外存储极少，并且可以快速创建或恢复。
-3. **克隆**：APFS 可以 **创建文件或目录克隆，这些克隆与原始文件共享相同的存储**，直到克隆或原始文件被修改。此功能提供了一种高效的方式来创建文件或目录的副本，而无需重复存储空间。
-4. **加密**：APFS **原生支持全盘加密**以及逐文件和逐目录加密，增强了不同使用场景下的数据安全性。
-5. **崩溃保护**：APFS 使用 **写时复制元数据方案，确保文件系统的一致性**，即使在突然断电或系统崩溃的情况下，也能减少数据损坏的风险。
+1. **空间共享**：APFS 允许多个卷在单个物理设备上**共享底层可用存储空间**。这使空间利用更加高效，因为这些卷可以动态扩展和缩小，无需手动调整大小或重新分区。
+1. 与磁盘文件中的传统分区相比，这意味着 **APFS 中的不同分区（卷）共享整个磁盘空间**，而常规分区通常具有固定大小。
+2. **快照**：APFS 支持**创建快照**，这些快照是文件系统在特定时间点的**只读**实例。快照能够实现高效备份和便捷的系统回滚，因为它们只占用极少的额外存储空间，并且可以快速创建或还原。
+3. **克隆**：APFS 可以**创建与原始文件或目录共享相同存储空间的文件或目录克隆**，直到克隆或原始文件被修改。此功能可以高效地创建文件或目录副本，而无需复制存储空间。
+4. **加密**：APFS **原生支持全磁盘加密**以及按文件和按目录加密，从而增强不同使用场景下的数据安全性。
+5. **崩溃保护**：APFS 使用**写时复制元数据机制，确保文件系统的一致性**，即使发生突然断电或系统崩溃，也能降低数据损坏的风险。
 
-总体而言，APFS 为 Apple 设备提供了一种更现代、更灵活和更高效的文件系统，重点在于提高性能、可靠性和安全性。
+总体而言，APFS 为 Apple 设备提供了更加现代、灵活和高效的文件系统，重点提升了性能、可靠性和安全性。
 ```bash
 diskutil list # Get overview of the APFS volumes
 ```
 ## Firmlinks
 
-`Data` 卷挂载在 **`/System/Volumes/Data`**（您可以使用 `diskutil apfs list` 检查这一点）。
+`Data` 卷挂载在 **`/System/Volumes/Data`**（可以使用 `diskutil apfs list` 检查）。
 
-firmlinks 的列表可以在 **`/usr/share/firmlinks`** 文件中找到。
+Firmlinks 列表可以在 **`/usr/share/firmlinks`** 文件中找到。
 ```bash
 
 ```
+## References
+
+- [1] [APFS Guide - Features - Apple Developer Documentation](https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/APFS_Guide/Features/Features.html)
+
 {{#include ../../banners/hacktricks-training.md}}
