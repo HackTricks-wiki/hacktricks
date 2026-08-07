@@ -1,8 +1,8 @@
-# macOS Default Sandbox Debug
+# Debug do Default Sandbox do macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Nesta página, você pode encontrar como criar um aplicativo para executar comandos arbitrários de dentro do sandbox padrão do macOS:
+Nesta página, você pode encontrar como criar um app para executar comandos arbitrários dentro do default sandbox do macOS:
 
 1. Compile o aplicativo:
 ```objectivec:main.m
@@ -36,7 +36,7 @@ return 0;
 ```
 Compile-o executando: `clang -framework Foundation -o SandboxedShellApp main.m`
 
-2. Construa o pacote `.app`
+2. Crie o bundle `.app`
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +58,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Defina as permissões
+3. Defina os entitlements
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Assine o aplicativo (você precisa criar um certificado no chaveiro)
+4. Assine o app (você precisa criar um certificado no keychain)
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp

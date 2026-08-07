@@ -1,14 +1,14 @@
-# Comandos úteis do macOS
+# Comandos Úteis do macOS
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Ferramentas de Enumeration automático do macOS
+### Ferramentas de Enumeração Automática do macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Comandos específicos do macOS
+### Comandos Específicos do macOS
 ```bash
 #System info
 date
@@ -115,7 +115,7 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Verificação rápida de anti-analysis / virtualização
+### Verificação rápida de anti-análise / virtualização
 
 Alguns stealers de macOS chamam `system_profiler` para detectar VMs e **abortam com um código de saída distinto (por exemplo, 100)** para evitar a detonação em sandbox<sup>[[1]](#references)</sup>:
 ```bash
@@ -125,14 +125,14 @@ fi
 ```
 ### Software e Serviços Instalados
 
-Verifique se há aplicações **suspeitas** instaladas e **privilégios** sobre os recursos instalados:
+Verifique se há aplicativos **suspeitos** instalados e **privilégios** sobre os recursos instalados:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Processos do Usuário
+### Processos do usuário
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
