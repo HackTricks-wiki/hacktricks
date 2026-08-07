@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Αυτή η σελίδα συγκεντρώνει πρακτικές τεχνικές για να απαριθμήσετε και να διαφύγετε από Lua "sandboxes" ενσωματωμένα σε εφαρμογές (ιδιαίτερα game clients, plugins ή in-app scripting engines). Πολλές engines εκθέτουν ένα περιορισμένο περιβάλλον Lua, αλλά αφήνουν ισχυρά globals προσβάσιμα που επιτρέπουν εκτέλεση αυθαίρετων εντολών ή ακόμη και native memory corruption όταν bytecode loaders είναι εκτεθειμένοι.
+Αυτή η σελίδα συγκεντρώνει πρακτικές τεχνικές για την απαρίθμηση και το breakout από Lua "sandboxes" που είναι ενσωματωμένα σε εφαρμογές (κυρίως game clients, plugins ή in-app scripting engines). Πολλά engines εκθέτουν ένα περιορισμένο περιβάλλον Lua, αλλά αφήνουν προσβάσιμα ισχυρά globals που επιτρέπουν arbitrary command execution ή ακόμη και native memory corruption όταν εκτίθενται bytecode loaders.
 
 Βασικές ιδέες:
-- Αντιμετωπίστε τη VM ως άγνωστο περιβάλλον: απαριθμήστε το _G και ανακαλύψτε ποιες επικίνδυνες primitives είναι προσβάσιμες.
-- Όταν stdout/print είναι μπλοκαρισμένα, εκμεταλλευτείτε οποιοδήποτε in-VM UI/IPC κανάλι ως output sink για να παρατηρήσετε τα αποτελέσματα.
-- Εάν io/os είναι εκτεθειμένα, συχνά έχετε άμεση εκτέλεση εντολών (io.popen, os.execute).
-- Εάν load/loadstring/loadfile είναι εκτεθειμένα, η εκτέλεση επιμελημένου Lua bytecode μπορεί να υπονομεύσει την ασφάλεια της μνήμης σε ορισμένες εκδόσεις (≤5.1 verifiers είναι bypassable· 5.2 αφαίρεσε τον verifier), επιτρέποντας προηγμένη εκμετάλλευση.
+- Αντιμετωπίστε το VM ως άγνωστο περιβάλλον: απαριθμήστε το _G και ανακαλύψτε ποια επικίνδυνα primitives είναι προσβάσιμα.
+- Όταν τα stdout/print είναι blocked, καταχραστείτε οποιοδήποτε in-VM UI/IPC channel ως output sink για να παρατηρείτε τα αποτελέσματα.
+- Αν τα io/os είναι exposed, συχνά έχετε direct command execution (io.popen, os.execute).
+- Αν τα load/loadstring/loadfile είναι exposed, η εκτέλεση crafted Lua bytecode μπορεί να υπονομεύσει την memory safety σε ορισμένες versions (οι verifiers των ≤5.1 μπορούν να παρακαμφθούν· ο 5.2 αφαίρεσε τον verifier), επιτρέποντας advanced exploitation.
 
 ## Enumerate the sandboxed environment
 
-- Dump the global environment to inventory reachable tables/functions:
+- Κάντε dump το global environment για να καταγράψετε τα προσβάσιμα tables/functions:
 ```lua
 -- Minimal _G dumper for any Lua sandbox with some output primitive `out`
 local function dump_globals(out)
@@ -22,7 +22,7 @@ out(tostring(k) .. " = " .. tostring(v))
 end
 end
 ```
-- Αν δεν υπάρχει διαθέσιμο print(), επαναχρησιμοποίησε in-VM κανάλια. Παράδειγμα από ένα MMO housing script VM όπου η έξοδος του chat λειτουργεί μόνο μετά από μια sound call· το ακόλουθο δημιουργεί μια αξιόπιστη συνάρτηση εξόδου:
+- Αν δεν είναι διαθέσιμη η print(), αξιοποιήστε εκ νέου τα κανάλια εντός του VM. Παράδειγμα από ένα script VM διαχείρισης κατοικιών MMO, όπου η έξοδος συνομιλίας λειτουργεί μόνο μετά από μια κλήση ήχου· το παρακάτω δημιουργεί μια αξιόπιστη συνάρτηση εξόδου:<sup>[[1]](#references)</sup>
 ```lua
 -- Build an output channel using in-game primitives
 local function ButlerOut(label)
@@ -39,11 +39,11 @@ local out = ButlerOut(1)
 dump_globals(out)
 end
 ```
-Γενικεύστε αυτό το pattern για τον στόχο σας: οποιοδήποτε textbox, toast, logger, ή UI callback που δέχεται strings μπορεί να λειτουργήσει ως stdout για reconnaissance.
+Γενικεύστε αυτό το pattern για τον στόχο σας: οποιοδήποτε textbox, toast, logger ή UI callback που δέχεται strings μπορεί να λειτουργήσει ως stdout για reconnaissance.
 
-## Άμεση εκτέλεση εντολών εάν io/os είναι εκτεθειμένα
+## Direct command execution if io/os is exposed
 
-Αν το sandbox εξακολουθεί να εκθέτει τις standard libraries io ή os, πιθανότατα έχετε άμεση command execution:
+Αν το sandbox εξακολουθεί να εκθέτει τις standard libraries io ή os, πιθανότατα έχετε άμεσο command execution:
 ```lua
 -- Windows example
 io.popen("calc.exe")
@@ -52,30 +52,31 @@ io.popen("calc.exe")
 os.execute("/usr/bin/id")
 io.popen("/bin/sh -c 'id'")
 ```
-Notes:
-- Η εκτέλεση γίνεται μέσα στην client process; πολλά anti-cheat/antidebug layers που μπλοκάρουν external debuggers δεν θα αποτρέψουν in-VM process creation.
-- Επίσης ελέγξτε: package.loadlib (arbitrary DLL/.so loading), require with native modules, LuaJIT's ffi (if present), and the debug library (can raise privileges inside the VM).
+Σημειώσεις:
 
-## Zero-click triggers via auto-run callbacks
+- Η εκτέλεση πραγματοποιείται μέσα στο client process· πολλά επίπεδα anti-cheat/antidebug που αποκλείουν external debuggers δεν εμποδίζουν τη δημιουργία process μέσα στο VM.
+- Ελέγξτε επίσης: package.loadlib (arbitrary DLL/.so loading), require με native modules, το ffi του LuaJIT (εφόσον υπάρχει) και τη debug library (μπορεί να αυξήσει τα privileges μέσα στο VM).
 
-Αν η host application προωθεί scripts σε clients και το VM εκθέτει auto-run hooks (π.χ. OnInit/OnLoad/OnEnter), τοποθετήστε το payload σας εκεί για drive-by compromise αμέσως μόλις φορτωθεί το script:
+## Triggers χωρίς κλικ μέσω auto-run callbacks
+
+Αν η host application προωθεί scripts στους clients και το VM εκθέτει auto-run hooks (π.χ. OnInit/OnLoad/OnEnter), τοποθετήστε εκεί το payload σας για drive-by compromise μόλις φορτωθεί το script:<sup>[[1]](#references)</sup>
 ```lua
 function OnInit()
 io.popen("calc.exe") -- or any command
 end
 ```
-Κάθε αντίστοιχο callback (OnLoad, OnEnter, etc.) γενικεύει αυτή την τεχνική όταν scripts μεταδίδονται και εκτελούνται στον client αυτόματα.
+Οποιοδήποτε αντίστοιχο callback (OnLoad, OnEnter κ.λπ.) γενικεύει αυτή την τεχνική όταν τα scripts μεταδίδονται και εκτελούνται αυτόματα στον client.
 
-## Επικίνδυνα primitives για να εντοπίσετε κατά την recon
+## Επικίνδυνες primitives που πρέπει να αναζητούνται κατά το recon
 
-Κατά την enumeration του _G, ψάξτε ειδικά για:
-- io, os: io.popen, os.execute, file I/O, env access.
-- load, loadstring, loadfile, dofile: εκτελεί source ή bytecode; υποστηρίζει φόρτωση μη αξιόπιστου bytecode.
-- package, package.loadlib, require: φόρτωση δυναμικών βιβλιοθηκών και επιφάνεια module.
-- debug: setfenv/getfenv (≤5.1), getupvalue/setupvalue, getinfo, και hooks.
-- LuaJIT-only: ffi.cdef, ffi.load για άμεση κλήση native code.
+Κατά την απαρίθμηση του _G, αναζητήστε συγκεκριμένα:
+- io, os: io.popen, os.execute, file I/O, πρόσβαση σε env.
+- load, loadstring, loadfile, dofile: εκτέλεση source ή bytecode· υποστηρίζει τη φόρτωση μη αξιόπιστου bytecode.
+- package, package.loadlib, require: φόρτωση dynamic libraries και επιφάνεια modules.
+- debug: setfenv/getfenv (≤5.1), getupvalue/setupvalue, getinfo και hooks.
+- Μόνο στο LuaJIT: ffi.cdef, ffi.load για απευθείας κλήση native code.
 
-Minimal usage examples (if reachable):
+Ελάχιστα παραδείγματα χρήσης (αν είναι προσβάσιμα):
 ```lua
 -- Execute source/bytecode
 local f = load("return 1+1")
@@ -90,26 +91,26 @@ print(g())
 local mylib = package.loadlib("./libfoo.so", "luaopen_foo")
 local foo = mylib()
 ```
-## Προαιρετική κλιμάκωση: κατάχρηση των Lua bytecode loaders
+## Προαιρετική κλιμάκωση: abuse των Lua bytecode loaders
 
-Όταν τα load/loadstring/loadfile είναι προσβάσιμα αλλά io/os είναι περιορισμένα, η εκτέλεση χειροποίητου Lua bytecode μπορεί να οδηγήσει σε memory disclosure και corruption primitives. Κύρια σημεία:
-- Το Lua ≤ 5.1 περιελάμβανε έναν bytecode verifier με γνωστές παρακάμψεις.
-- Το Lua 5.2 αφαίρεσε πλήρως τον verifier (επίσημη θέση: οι εφαρμογές θα πρέπει απλά να απορρίπτουν precompiled chunks), διευρύνοντας την attack surface αν το bytecode loading δεν απαγορεύεται.
-- Τυπικά workflows: leak pointers μέσω in-VM output, δημιουργία bytecode που προκαλεί type confusions (π.χ. γύρω από FORLOOP ή άλλα opcodes), και στη συνέχεια pivot σε arbitrary read/write ή native code execution.
+Όταν τα load/loadstring/loadfile είναι προσβάσιμα, αλλά τα io/os είναι περιορισμένα, η εκτέλεση crafted Lua bytecode μπορεί να οδηγήσει σε αποκάλυψη μνήμης και primitives καταστροφής. Βασικά facts:
+- Το Lua ≤ 5.1 περιλάμβανε bytecode verifier με γνωστά bypasses.<sup>[[4]](#references)</sup>
+- Το Lua 5.2 αφαίρεσε εντελώς τον verifier (επίσημη θέση: οι εφαρμογές θα πρέπει απλώς να απορρίπτουν precompiled chunks), διευρύνοντας το attack surface όταν η φόρτωση bytecode δεν απαγορεύεται.<sup>[[2]](#references)[[3]](#references)</sup>
+- Τα workflows συνήθως περιλαμβάνουν: leak pointers μέσω in-VM output, δημιουργία bytecode που προκαλεί type confusions (π.χ. γύρω από το FORLOOP ή άλλα opcodes) και, στη συνέχεια, pivot σε arbitrary read/write ή native code execution.<sup>[[2]](#references)[[4]](#references)</sup>
 
-Αυτή η διαδρομή εξαρτάται από το engine/version και απαιτεί RE. Δείτε τις αναφορές για σε βάθος αναλύσεις, exploitation primitives και παραδείγματα gadgetry σε games.
+Αυτή η διαδρομή εξαρτάται από το engine/version και απαιτεί RE. Δείτε τα references για αναλυτικές deep dives, exploitation primitives και παραδείγματα gadgetry σε games.
 
-## Σημειώσεις ανίχνευσης και ενίσχυσης (για defenders)
+## Σημειώσεις detection και hardening (για defenders)
 
-- Server side: reject ή επαναγράψτε τα user scripts; allowlist ασφαλή APIs; αφαιρέστε ή bind-empty τα io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi.
-- Client side: τρέξτε το Lua με ένα ελάχιστο _ENV, απαγορεύστε το bytecode loading, επανεισάγετε έναν strict bytecode verifier ή signature checks, και μπλοκάρετε τη δημιουργία process από τη διαδικασία του client.
-- Telemetry: ειδοποίηση σε gameclient → child process creation λίγο μετά το script load; συσχετίστε με UI/chat/script events.
+- Server side: απορρίπτετε ή ξαναγράφετε user scripts· επιτρέπετε safe APIs μέσω allowlist· αφαιρείτε ή συνδέετε με κενές υλοποιήσεις τα io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi.
+- Client side: εκτελείτε το Lua με minimal _ENV, απαγορεύετε τη φόρτωση bytecode, επαναφέρετε έναν strict bytecode verifier ή signature checks και αποκλείετε τη δημιουργία processes από το client process.
+- Telemetry: δημιουργήστε alert για δημιουργία child process από το gameclient λίγο μετά τη φόρτωση script· συσχετίστε το με UI/chat/script events.
 
 ## References
 
-- [This House is Haunted: a decade old RCE in the AION client (housing Lua VM)](https://appsec.space/posts/aion-housing-exploit/)
-- [Bytecode Breakdown: Unraveling Factorio's Lua Security Flaws](https://memorycorruption.net/posts/rce-lua-factorio/)
-- [lua-l (2009): Discussion on dropping the bytecode verifier](https://web.archive.org/web/20230308193701/https://lua-users.org/lists/lua-l/2009-03/msg00039.html)
-- [Exploiting Lua 5.1 bytecode (gist with verifier bypasses/notes)](https://gist.github.com/ulidtko/51b8671260db79da64d193e41d7e7d16)
+- [1] [Αυτό το σπίτι είναι στοιχειωμένο: ένα RCE δεκαετίας στον AION client (housing Lua VM)](https://appsec.space/posts/aion-housing-exploit/)
+- [2] [Ανάλυση Bytecode: Αποκωδικοποίηση των Lua Security Flaws του Factorio](https://memorycorruption.net/posts/rce-lua-factorio/)
+- [3] [lua-l (2009): Συζήτηση για την κατάργηση του bytecode verifier](https://web.archive.org/web/20230308193701/https://lua-users.org/lists/lua-l/2009-03/msg00039.html)
+- [4] [Exploiting Lua 5.1 bytecode (gist με verifier bypasses/notes)](https://gist.github.com/ulidtko/51b8671260db79da64d193e41d7e7d16)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,21 +1,26 @@
+# Κλωνοποίηση ενός Website
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Για μια αξιολόγηση phishing, μερικές φορές μπορεί να είναι χρήσιμο να **κλωνοποιήσετε μια ιστοσελίδα**.
 
-Σημειώστε ότι μπορείτε επίσης να προσθέσετε μερικά payloads στην κλωνοποιημένη ιστοσελίδα, όπως ένα BeEF hook για να "ελέγξετε" την καρτέλα του χρήστη.
+Σε μια αξιολόγηση phishing, μερικές φορές μπορεί να είναι χρήσιμο να **κλωνοποιήσετε/κάνετε dump ενός website** πλήρως.
+
+Σημειώστε ότι μπορείτε επίσης να προσθέσετε payloads στο cloned website, όπως ένα BeEF hook, για να "ελέγχετε" το tab του χρήστη.
 
 Υπάρχουν διάφορα εργαλεία που μπορείτε να χρησιμοποιήσετε για αυτόν τον σκοπό:
 
 ## wget
-```text
-wget -mk -nH
+```bash
+wget --mirror --page-requisites --convert-links --adjust-extension <URL>
+cd <URL>
+python3 -m http.server 8000
 ```
 ## goclone
 ```bash
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
-## Εργαλειοθήκη Κοινωνικής Μηχανικής
+## Εργαλειοθήκη Social Engineering
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit
 ```
