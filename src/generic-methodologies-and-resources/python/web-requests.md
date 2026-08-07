@@ -1,4 +1,4 @@
-# Web Requests
+# Żądania sieciowe
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -71,7 +71,7 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python cmd do wykorzystania RCE
+## Polecenie Python do wykorzystania RCE
 ```python
 import requests
 import re

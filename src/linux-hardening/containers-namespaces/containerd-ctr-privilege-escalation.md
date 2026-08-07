@@ -1,11 +1,10 @@
-# Eskalacja uprawnień Containerd (ctr)
+# Eskalacja uprawnień w containerd (ctr)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Podstawowe informacje
 
 Przejdź do poniższego linku, aby dowiedzieć się, **gdzie `containerd` i `ctr` znajdują się w stosie kontenerów**:
-
 
 {{#ref}}
 container-security/runtimes-and-engines.md
@@ -31,13 +30,12 @@ ctr run --mount type=bind,src=/,dst=/,options=rbind -t registry:5000/ubuntu:late
 ```
 ## PE 2
 
-Uruchom kontener z uprawnieniami i wydostań się z niego.\
-Możesz uruchomić kontener z uprawnieniami w następujący sposób:
+Uruchom uprzywilejowany container i wydostań się z niego.\
+Uprzywilejowany container możesz uruchomić za pomocą:
 ```bash
 ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu bash
 ```
-Następnie możesz użyć niektórych technik wymienionych na poniższej stronie, aby **wydostać się z niego, wykorzystując uprzywilejowane capabilities**:
-
+Następnie możesz użyć niektórych technik opisanych na poniższej stronie, aby **uciec z niego, wykorzystując uprzywilejowane capabilities**:
 
 {{#ref}}
 container-security/

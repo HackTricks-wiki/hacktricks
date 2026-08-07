@@ -1,14 +1,15 @@
-# Ucieczka z piaskownicy Pythona i Pyscript
+# Ucieczka z Python Sandbox i Pyscript
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 **Interesujące strony do sprawdzenia:**
 
-- [**Sztuczki hackingowe Pyscript**](pyscript.md)
-- [**Deserializacje Pythona**](../../pentesting-web/deserialization/README.md)
-- [**Deserializacja modelu Keras RCE i polowanie na gadżety**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Sztuczki do omijania piaskownic Pythona**](bypass-python-sandboxes/README.md)
+- [**Triki hackingowe Pyscript**](pyscript.md)
+- [**Deserializacja w Pythonie**](../../pentesting-web/deserialization/README.md)
+- [**RCE podczas deserializacji modeli Keras i wyszukiwanie gadgetów**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Triki omijania Python Sandbox**](bypass-python-sandboxes/README.md)
 - [**Podstawowa składnia żądań webowych w Pythonie**](web-requests.md)
-- [**Podstawowa składnia Pythona i biblioteki**](basic-python.md)
+- [**Podstawy składni i bibliotek Pythona**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}

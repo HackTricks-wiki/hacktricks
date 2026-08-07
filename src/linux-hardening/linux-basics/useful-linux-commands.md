@@ -1,4 +1,4 @@
-# Przydatne polecenia Linuksa
+# Przydatne polecenia systemu Linux
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -149,7 +149,7 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
-## Grep
+## Greps
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -229,7 +229,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Znajdź
+## Find
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -258,7 +258,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Pomoc wyszukiwania w Nmap
+## Pomoc dotycząca wyszukiwania Nmap
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -301,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## Telemetria eBPF i polowanie na rootkity
+## Telemetria eBPF i wykrywanie rootkitów
 
-Współczesne rootkity (TripleCross, warianty BPFDoor itd.) coraz częściej utrzymują się jako ukryte programy eBPF. Ustal punkt odniesienia dla swojego środowiska za pomocą `bpftool`/`eBPFmon`, aby wykrywać niepodpisane programy, nieoczekiwane hooki cgroup lub złośliwą zawartość map, zanim je odłączysz.
+Nowoczesne rootkity (TripleCross, warianty BPFDoor itd.) coraz częściej utrzymują się jako ukryte programy eBPF. Ustal punkt odniesienia dla całej floty za pomocą `bpftool`/`eBPFmon`, aby wykrywać niepodpisane programy, nieoczekiwane hooki cgroup lub złośliwą zawartość map, zanim je odłączysz.<sup>[[1]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Skoreluj wynik `bpftool` z oczekiwanymi załącznikami NIC/cgroup; nagle pojawiający się program `xdp` lub `kprobe`, którego właścicielem jest niezatwierdzony PID, stanowi silny wskaźnik wstrzykniętego payloadu eBPF.
+Skoreluj dane wyjściowe `bpftool` z oczekiwanymi załącznikami NIC/cgroup; nagle pojawiający się program `xdp` lub `kprobe`, którego właścicielem jest niezatwierdzony PID, stanowi silny wskaźnik wstrzykniętego payloadu eBPF.
 
-## Analiza incydentów za pomocą Journald
+## Triage incydentów Journald
 
-systemd-journald przechowuje ustrukturyzowane metadane, dzięki czemu możesz filtrować według uruchomienia systemu, poziomu ważności, jednostki lub UID bez dotykania `/var/log/*`. Łącz filtry ze względnymi znacznikami czasu, aby szybko wyizolować okresy ataku lub potwierdzić manipulowanie logami.
+systemd-journald przechowuje ustrukturyzowane metadane, dzięki czemu możesz filtrować dane według uruchomienia systemu, poziomu ważności, jednostki lub UID bez uzyskiwania dostępu do `/var/log/*`. Połącz filtry ze względnymi znacznikami czasu, aby szybko wyizolować okna czasowe ataku lub potwierdzić manipulowanie logami.<sup>[[2]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +336,11 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Dodaj `--grep 'Invalid user' --case-sensitive` lub `-k` (tylko bufor pierścieniowy kernela), gdy potrzebujesz bardziej precyzyjnych filtrów, i pamiętaj, że selektory `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` oraz `_TRANSPORT` łączą się ze sobą podczas wyszukiwania w środowiskach multi-tenant.
+Dodaj `--grep 'Invalid user' --case-sensitive` lub `-k` (tylko kernel ring buffer), gdy potrzebujesz dokładniejszych filtrów, i pamiętaj, że selektory `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` oraz `_TRANSPORT` łączą się ze sobą podczas wyszukiwania w środowiskach multi-tenant.
 
-## Referencje
+## Odnośniki
 
-- [eBPFmon: Nowe narzędzie do badania aplikacji eBPF i interakcji z nimi](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [Jak używać polecenia journalctl do wyświetlania logów systemu Linux](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: nowe narzędzie do badania aplikacji eBPF i interakcji z nimi](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Jak używać polecenia journalctl do wyświetlania logów Linux](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}

