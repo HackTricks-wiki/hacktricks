@@ -11,7 +11,7 @@ In the previous image it's possible to observe **how the sandbox will be loaded*
 The compiler will link `/usr/lib/libSystem.B.dylib` to the binary.
 
 Then, **`libSystem.B`** will be calling other several functions until the **`xpc_pipe_routine`** sends the entitlements of the app to **`securityd`**. Securityd checks if the process should be quarantine inside the Sandbox, and if so, it will be quarentine.\
-Finally, the sandbox will be activated will a call to **`__sandbox_ms`** which will call **`__mac_syscall`**.<sup>[[1]](#references)</sup>
+Finally, the sandbox will be activated will a call to **`__sandbox_ms`** which will call **`__mac_syscall`**.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## Possible Bypasses
 

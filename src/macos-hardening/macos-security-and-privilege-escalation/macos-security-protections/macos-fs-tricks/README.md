@@ -383,7 +383,7 @@ A very common privesc primitive is making a **privileged process create a file f
 1. A directory you own (or where you can set an **inheritable ACL**), so anything created inside inherits your permissions.
 2. A privileged/`suid` process that can be told **where** to create a file — typically through a debug/logging environment variable, a config file, or a helper's XPC API.
 
-The **inheritable ACL** part is what makes the created file writable by you even though it is owned by another user. The `file_inherit` / `directory_inherit` inheritance flags are documented in [`chmod(1)`](https://keith.github.io/xcode-man-pages/chmod.1.html):
+The **inheritable ACL** part is what makes the created file writable by you even though it is owned by another user. The `file_inherit` / `directory_inherit` inheritance flags are documented in [`chmod(1)`](https://keith.github.io/xcode-man-pages/chmod.1.html):<sup>[[2]](#references)</sup>
 
 ```bash
 DIRNAME=/tmp/inherit_test
@@ -521,5 +521,3 @@ This feature is particularly useful for preventing certain classes of security v
 - [8] [Kandji - Uncovering Apple Vulnerabilities: The diskarbitrationd and storagekitd Audit Story Part 1](https://www.kandji.io/blog/macos-audit-story-part1)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
-

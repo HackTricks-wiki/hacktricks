@@ -9,7 +9,7 @@
 #### Configuration Files
 
 - **Solaris and UNIX-based systems** typically utilize a central configuration file located at `/etc/pam.conf`.
-- **Linux systems** prefer a directory approach, storing service-specific configurations within `/etc/pam.d`. For instance, the configuration file for the login service is found at `/etc/pam.d/login`.
+- **Linux systems** prefer a directory approach, storing service-specific configurations within `/etc/pam.d`. For instance, the configuration file for the login service is found at `/etc/pam.d/login`.<sup>[[1]](#references)</sup>
 
 An example of a PAM configuration for the login service might look like this:
 
@@ -28,7 +28,7 @@ session required /lib/security/pam_unix_session.so
 
 #### **PAM Management Realms**
 
-These realms, or management groups, include **auth**, **account**, **password**, and **session**, each responsible for different aspects of the authentication and session management process:
+These realms, or management groups, include **auth**, **account**, **password**, and **session**, each responsible for different aspects of the authentication and session management process:<sup>[[1]](#references)</sup>
 
 - **Auth**: Validates user identity, often by prompting for a password.
 - **Account**: Handles account verification, checking for conditions like group membership or time-of-day restrictions.
@@ -37,7 +37,7 @@ These realms, or management groups, include **auth**, **account**, **password**,
 
 #### **PAM Module Controls**
 
-Controls dictate the module's response to success or failure, influencing the overall authentication process. These include:
+Controls dictate the module's response to success or failure, influencing the overall authentication process. These include:<sup>[[1]](#references)</sup>
 
 - **Required**: Failure of a required module results in eventual failure, but only after all subsequent modules are checked.
 - **Requisite**: Immediate termination of the process upon failure.
@@ -61,7 +61,7 @@ In a setup with multiple auth modules, the process follows a strict order. If th
 
 ## Backdooring PAM – Hooking `pam_unix.so`
 
-A classic persistence trick in high-value Linux environments is to **swap the legitimate PAM library with a trojanised drop-in**.  Because every SSH / console login ends up calling `pam_unix.so:pam_sm_authenticate()`, a few lines of C are enough to capture credentials or implement a *magic* password bypass.
+A classic persistence trick in high-value Linux environments is to **swap the legitimate PAM library with a trojanised drop-in**.  Because every SSH / console login ends up calling `pam_unix.so:pam_sm_authenticate()`, a few lines of C are enough to capture credentials or implement a *magic* password bypass.<sup>[[2]](#references)</sup>
 
 ### Compilation Cheatsheet
 <details>
@@ -174,12 +174,13 @@ This matters for both offense and triage: if `/etc/pam.d/system-auth` contains t
 
 ### Recent tradecraft seen in the wild
 
-Recent 2025 reporting on the **Plague** Linux backdoor showed the same core idea taken further: a malicious PAM component with a **static bypass password**, plus cleanup of SSH-related environment variables and shell history (`HISTFILE=/dev/null`) to reduce session traces after login.<sup>[[2]](#references)</sup> That is a useful hunting pattern because the backdoor logic may live in PAM while the stealth artifacts only appear **after** authentication succeeds.
+Recent 2025 reporting on the **Plague** Linux backdoor showed the same core idea taken further: a malicious PAM component with a **static bypass password**, plus cleanup of SSH-related environment variables and shell history (`HISTFILE=/dev/null`) to reduce session traces after login.<sup>[[3]](#references)</sup> That is a useful hunting pattern because the backdoor logic may live in PAM while the stealth artifacts only appear **after** authentication succeeds.
 
 
 ## References
 
 - [1] [pam.conf(5) / pam.d(5) - Linux-PAM Manual](https://man7.org/linux/man-pages/man5/pam.d.5.html)
-- [2] [Nextron Systems - Plague: A Newly Discovered PAM-Based Backdoor for Linux](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
+- [2] [The Covert Operator's Playbook: Infiltration of Global Telecom Networks - Unit 42](https://unit42.paloaltonetworks.com/infiltration-of-global-telecom-networks/)
+- [3] [Nextron Systems - Plague: A Newly Discovered PAM-Based Backdoor for Linux](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
 
 {{#include ../../banners/hacktricks-training.md}}

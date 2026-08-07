@@ -8,7 +8,7 @@ PyScript is a new framework developed for integrating Python into HTML so, it ca
 
 ### Dumping / Retrieving files from the Emscripten virtual memory filesystem:
 
-`CVE ID: CVE-2022-30286`\
+`CVE ID: CVE-2022-30286`<sup>[[3]](#references)</sup>\
 \
 Code:
 
@@ -25,7 +25,7 @@ Result:
 
 ### [OOB Data Exfiltration of the Emscripten virtual memory filesystem (console monitoring)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
 
-`CVE ID: CVE-2022-30286`\
+`CVE ID: CVE-2022-30286`<sup>[[3]](#references)</sup>\
 \
 Code:
 
@@ -243,5 +243,6 @@ This behaviour was introduced in 2023 and is documented in the official Built-in
 
 - [1] [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
 - [2] [PyScript Built-ins documentation – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
+- [3] [Cyber Guy - The Art of Vulnerability Chaining (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
 
 {{#include ../../banners/hacktricks-training.md}}

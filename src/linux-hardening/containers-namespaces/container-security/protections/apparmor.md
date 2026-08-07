@@ -208,7 +208,7 @@ The impact depends on what exactly is mounted and whether the alternate path als
 
 ### Full Example: Shebang Bypass
 
-AppArmor policy sometimes targets an interpreter path in a way that does not fully account for script execution through shebang handling. A historical example involved using a script whose first line points at a confined interpreter:
+AppArmor policy sometimes targets an interpreter path in a way that does not fully account for script execution through shebang handling. A historical example involved using a script whose first line points at a confined interpreter:<sup>[[3]](#references)</sup>
 
 ```bash
 cat <<'EOF' > /tmp/test.pl
@@ -261,5 +261,6 @@ For AppArmor, the most important variable is often the **host**, not only the ru
 
 - [1] [Kubernetes security context: AppArmor profile fields and node-support behavior](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
 - [2] [Ubuntu 24.04 `apparmor.d(5)` manpage: exec transitions, `change_profile`, `userns`, and profile flags](https://manpages.ubuntu.com/manpages/noble/en/man5/apparmor.d.5.html)
+- [3] [HTB: Nunchucks - AppArmor shebang bypass with a Perl script](https://0xdf.gitlab.io/2021/11/02/htb-nunchucks.html)
 
 {{#include ../../../../banners/hacktricks-training.md}}

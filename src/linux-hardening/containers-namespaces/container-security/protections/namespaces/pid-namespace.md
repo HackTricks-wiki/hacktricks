@@ -112,7 +112,7 @@ Some PID-namespace-relevant attacks are not traditional `hostPID: true` misconfi
 
 #### `maskedPaths` race to host procfs
 
-In vulnerable `runc` versions, attackers able to control the container image or `runc exec` workload could race the masking phase by replacing container-side `/dev/null` with a symlink to a sensitive procfs path such as `/proc/sys/kernel/core_pattern`. If the race succeeded, the masked-path bind mount could land on the wrong target and expose host-global procfs knobs to the new container.
+In vulnerable `runc` versions, attackers able to control the container image or `runc exec` workload could race the masking phase by replacing container-side `/dev/null` with a symlink to a sensitive procfs path such as `/proc/sys/kernel/core_pattern`. If the race succeeded, the masked-path bind mount could land on the wrong target and expose host-global procfs knobs to the new container.<sup>[[1]](#references)</sup>
 
 Useful review command:
 
@@ -124,7 +124,7 @@ This is important because the eventual impact may be the same as a direct procfs
 
 #### Namespace injection with `insject`
 
-Namespace injection tools such as `insject` show that PID-namespace interaction does not always require pre-entering the target namespace before process creation. A helper can attach later, use `setns()`, and execute while preserving visibility into the target PID space:
+Namespace injection tools such as `insject` show that PID-namespace interaction does not always require pre-entering the target namespace before process creation. A helper can attach later, use `setns()`, and execute while preserving visibility into the target PID space:<sup>[[2]](#references)</sup>
 
 ```bash
 sudo insject -S -p $(pidof containerd-shim) -- bash -lc 'readlink /proc/self/ns/pid && ps -ef'
@@ -155,4 +155,10 @@ What is interesting here:
 - Once host PIDs are visible, even read-only process information becomes useful reconnaissance.
 
 If you discover a container running with host PID sharing, do not treat it as a cosmetic difference. It is a major change in what the workload can observe and potentially affect.
+
+## References
+
+- [1] [runc security advisory: container escape via "masked path" abuse due to mount race conditions (CVE-2025-31133)](https://github.com/opencontainers/runc/security/advisories/GHSA-9493-h29p-rfm2)
+- [2] [Tool Release – insject: A Linux Namespace Injector](https://www.nccgroup.com/research-blog/tool-release-insject-a-linux-namespace-injector/)
+
 {{#include ../../../../../banners/hacktricks-training.md}}

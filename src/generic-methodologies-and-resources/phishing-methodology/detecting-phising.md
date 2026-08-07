@@ -24,10 +24,10 @@ Tip: If you generate a candidate list, also feed it into your DNS resolver logs 
 
 ### Bitflipping
 
-**You can find a short the explanation of this technique in the parent page. Or read the original research in** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+**You can find a short the explanation of this technique in the parent page. Or read the original research in** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)<sup>[[1]](#references)</sup>
 
 For example, a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._\
-**Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.
+**Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.<sup>[[1]](#references)</sup>
 
 **All possible bit-flipping domain names should be also monitored.**
 
@@ -74,7 +74,7 @@ Notes
 
 ### URL telemetry hunting (urlscan.io)
 
-`urlscan.io` stores historical screenshots, DOM, requests and TLS metadata of submitted URLs. You can hunt for brand abuse and clones:<sup>[[1]](#references)</sup>
+`urlscan.io` stores historical screenshots, DOM, requests and TLS metadata of submitted URLs. You can hunt for brand abuse and clones:<sup>[[2]](#references)</sup>
 
 Example queries (UI or API):
 - Find lookalikes excluding your legit domains: `page.domain:(/.*yourbrand.*/ AND NOT yourbrand.com AND NOT www.yourbrand.com)`
@@ -112,7 +112,7 @@ Enrich your pipeline by tagging domains with registration age buckets (e.g., <7 
 
 Modern credential-phishing increasingly uses **Adversary-in-the-Middle (AiTM)** reverse proxies (e.g., Evilginx) to steal session tokens. You can add network-side detections:
 
-- Log TLS/HTTP fingerprints (JA3/JA4/JA4S/JA4H) at egress. Some Evilginx builds have been observed with stable JA4 client/server values. Alert on known-bad fingerprints only as a weak signal and always confirm with content and domain intel.<sup>[[2]](#references)</sup>
+- Log TLS/HTTP fingerprints (JA3/JA4/JA4S/JA4H) at egress. Some Evilginx builds have been observed with stable JA4 client/server values. Alert on known-bad fingerprints only as a weak signal and always confirm with content and domain intel.<sup>[[3]](#references)</sup>
 - Proactively record TLS certificate metadata (issuer, SAN count, wildcard use, validity) for lookalike hosts discovered via CT or urlscan and correlate with DNS age and geolocation.
 
 > Note: Treat fingerprints as enrichment, not as sole blockers; frameworks evolve and may randomise or obfuscate.
@@ -125,7 +125,7 @@ The parent page also mentions a domain name variation technique that consists of
 
 It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover such phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that by reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside its name** For example, if an attacker generates a certificate of [https://paypal-financial.com](https://paypal-financial.com), seeing the certificate it's possible to find the keyword "paypal" and know that suspicious email is being used.
 
-The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
+The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":<sup>[[4]](#references)</sup>
 
 ![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
 
@@ -147,7 +147,9 @@ Additional heuristic: treat certain **file-extension TLDs** (e.g., `.zip`, `.mov
 
 ## References
 
-- [1] [urlscan.io – Search API Reference](https://urlscan.io/docs/search/)
-- [2] [APNIC Blog – JA4+ network fingerprinting](https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/)
+- [1] [Hijacking traffic to Microsoft's windows.com with bitflipping](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+- [2] [urlscan.io – Search API Reference](https://urlscan.io/docs/search/)
+- [3] [APNIC Blog – JA4+ network fingerprinting](https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/)
+- [4] [Finding Phishing: Tools and Techniques](https://0xpatrik.com/phishing-domains/)
 
 {{#include ../../banners/hacktricks-training.md}}

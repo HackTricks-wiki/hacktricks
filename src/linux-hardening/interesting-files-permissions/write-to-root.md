@@ -315,7 +315,7 @@ This kind of mitigation is worth remembering for other kernel LPEs too: if explo
 - [3] [Tenable: Copy Fail (CVE-2026-31431) FAQ](https://www.tenable.com/blog/copy-fail-cve-2026-31431-frequently-asked-questions-about-linux-kernel-privilege-escalation)
 - [4] [Openwall oss-security disclosure for CVE-2026-31431](https://www.openwall.com/lists/oss-security/2026/04/29/23)
 - [5] [Linux stable fix: crypto: algif_aead - Revert to operating out-of-place](https://git.kernel.org/stable/c/a664bf3d603dc3bdcf9ae47cc21e0daec706d7a5)
-- [6] [Copy Fail advisory](https://copy.fail/)
+- [6] [Copy Fail — CVE-2026-31431 advisory](https://copy.fail/)
 - [7] [Theori / Xint technical writeup](https://xint.io/blog/copy-fail-linux-distributions)
 - [8] [DirtyClone repository / README](https://github.com/rafaeldtinoco/security/tree/main/exploits/dirtyclone)
 - [9] [JFrog: Dissecting and Exploiting Linux LPE Variant DirtyClone (CVE-2026-43503)](https://research.jfrog.com/post/dissecting-and-exploiting-linux-lpe-variant-dirtyclone-cve-2026-43503/)

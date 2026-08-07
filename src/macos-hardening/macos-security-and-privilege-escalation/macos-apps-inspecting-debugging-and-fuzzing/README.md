@@ -199,7 +199,7 @@ LC 01: LC_SEGMENT_64              Mem: 0x100000000-0x100028000    __TEXT
     [...]
 ```
 
-You can find further information about the [**information stored in these section in this blog post**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
+You can find further information about the [**information stored in these section in this blog post**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).<sup>[[5]](#references)</sup>
 
 Moreover, **Swift binaries might have symbols** (for example libraries need to store symbols so its functions can be called). The **symbols usually have the info about the function name** and attr in a ugly way, so they are very useful and there are "**demanglers"** that can get the original name:
 
@@ -274,7 +274,7 @@ In the right panel you can see interesting information such as the **navigation 
 
 It allows users access to applications at an extremely **low level** and provides a way for users to **trace** **programs** and even change their execution flow. Dtrace uses **probes** which are **placed throughout the kernel** and are at locations such as the beginning and end of system calls.
 
-DTrace uses the **`dtrace_probe_create`** function to create a probe for each system call. These probes can be fired in the **entry and exit point of each system call**. The interaction with DTrace occur through /dev/dtrace which is only available for the root user.
+DTrace uses the **`dtrace_probe_create`** function to create a probe for each system call. These probes can be fired in the **entry and exit point of each system call**. The interaction with DTrace occur through /dev/dtrace which is only available for the root user.<sup>[[1]](#references)</sup>
 
 > [!TIP]
 > To enable Dtrace without fully disabling SIP protection you could execute on recovery mode: `csrutil enable --without dtrace`
@@ -444,7 +444,7 @@ It also checks the binary processes against **virustotal** and show information 
 
 ## PT_DENY_ATTACH <a href="#page-title" id="page-title"></a>
 
-In [**this blog post**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) you can find an example about how to **debug a running daemon** that used **`PT_DENY_ATTACH`** to prevent debugging even if SIP was disabled.
+In [**this blog post**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) you can find an example about how to **debug a running daemon** that used **`PT_DENY_ATTACH`** to prevent debugging even if SIP was disabled.<sup>[[6]](#references)</sup>
 
 ### lldb
 
@@ -482,14 +482,14 @@ settings set target.x86-disassembly-flavor intel
 
 #### VM detection
 
-- The command **`sysctl hw.model`** returns "Mac" when the **host is a MacOS** but something different when it's a VM.
-- Playing with the values of **`hw.logicalcpu`** and **`hw.physicalcpu`** some malwares try to detect if it's a VM.
+- The command **`sysctl hw.model`** returns "Mac" when the **host is a MacOS** but something different when it's a VM.<sup>[[3]](#references)</sup>
+- Playing with the values of **`hw.logicalcpu`** and **`hw.physicalcpu`** some malwares try to detect if it's a VM.<sup>[[4]](#references)</sup>
 - Some malwares can also **detect** if the machine is **VMware** based on the MAC address (00:50:56).
 - It's also possible to find **if a process is being debugged** with a simple code such us:
   - `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //process being debugged }`
 - It can also invoke the **`ptrace`** system call with the **`PT_DENY_ATTACH`** flag. This **prevents** a deb**u**gger from attaching and tracing.
   - You can check if the **`sysctl`** or **`ptrace`** function is being **imported** (but the malware could import it dynamically)
-  - As noted in this writeup, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
+  - As noted in this writeup, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :<sup>[[7]](#references)</sup>\
     “_The message Process # exited with **status = 45 (0x0000002d)** is usually a tell-tale sign that the debug target is using **PT_DENY_ATTACH**_”
 
 ## Core Dumps
@@ -611,7 +611,7 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 
 ### More Fuzzing MacOS Info
 
-- [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44)
+- [https://www.youtube.com/watch?v=T5xfL9tEg44](https://www.youtube.com/watch?v=T5xfL9tEg44) <sup>[[2]](#references)</sup>
 - [https://github.com/bnagy/slides/blob/master/OSXScale.pdf](https://github.com/bnagy/slides/blob/master/OSXScale.pdf)
 - [https://github.com/bnagy/francis/tree/master/exploitaben](https://github.com/bnagy/francis/tree/master/exploitaben)
 - [https://github.com/ant4g0nist/crashwrangler](https://github.com/ant4g0nist/crashwrangler)
@@ -622,7 +622,8 @@ litefuzz -s -a tcp://localhost:5900 -i input/screenshared-session --reportcrash 
 - [2] [Jeremy Brown - Summer of Fuzz: MacOS - DEF CON 29 AppSec Village](https://www.youtube.com/watch?v=T5xfL9tEg44)
 - [3] [The Art of Mac Malware, Volume I: Analysis](https://taomm.org/vol1/analysis.html)
 - [4] [The Art of Mac Malware: The Guide to Analyzing Malicious Software](https://taomm.org/)
+- [5] [knight.sc - information stored in these section in this blog post](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html)
+- [6] [knight.sc - Debugging Apple Binaries That Use Pt Deny Attach](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html)
+- [7] [alexomara.com - Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-

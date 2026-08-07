@@ -111,7 +111,7 @@ open "http://attacker%2Ecom%2F./"   # should be blocked by Screen Time
 
 ### Packet Filter (PF) rule-ordering bug in early macOS 14 “Sonoma”
 During the macOS 14 beta cycle Apple introduced a regression in the userspace wrapper around **`pfctl`**.
-Rules that were added with the `quick` keyword (used by many VPN kill-switches) were silently ignored, causing traffic leaks even when a VPN/firewall GUI reported *blocked*. The bug was confirmed by several VPN vendors and fixed in RC 2 (build 23A344).
+Rules that were added with the `quick` keyword (used by many VPN kill-switches) were silently ignored, causing traffic leaks even when a VPN/firewall GUI reported *blocked*. The bug was confirmed by several VPN vendors and fixed in RC 2 (build 23A344).<sup>[[6]](#references)</sup>
 
 Quick leak-check:
 
@@ -193,5 +193,6 @@ log stream --predicate 'subsystem == "com.apple.networkextension"' --style syslo
 - [3] [Apple Removes macOS Feature That Allowed Apps to Bypass Firewall Security - The Hacker News](https://thehackernews.com/2021/01/apple-removes-macos-feature-that.html)
 - [4] [Cybersecurity Products Conking Out After macOS Sequoia Update - SecurityWeek](https://www.securityweek.com/cybersecurity-products-conking-out-after-macos-sequoia-update/)
 - [5] [Use network protection to help prevent macOS connections to bad sites - Microsoft Defender for Endpoint | Microsoft Learn](https://learn.microsoft.com/en-us/defender-endpoint/network-protection-macos)
+- [6] [macOS 14 Sonoma firewall bug fixed! - Mullvad VPN Blog](https://mullvad.net/en/blog/2023/9/22/macos-14-sonoma-firewall-bug-fixed)
 
 {{#include ../../banners/hacktricks-training.md}}

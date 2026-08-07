@@ -35,7 +35,7 @@ Important artifacts:
 
 ## Splunk Universal Forwarder Agent Exploit Summary
 
-For further details check [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). This is just a summary:<sup>[[3]](#references)</sup>
+For further details check [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). This is just a summary:<sup>[[1]](#references)</sup>
 
 **Exploit overview:**
 An exploit targeting the Splunk Universal Forwarder (UF) allows attackers with the **agent password** to execute arbitrary code on systems running the agent, potentially compromising a large portion of the environment.
@@ -147,7 +147,7 @@ In those cases, planting a `HASHED_PASSWORD` generated with `splunk hash-passwd`
 
 ## Abusing Splunk Queries
 
-For further details check [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis).<sup>[[1]](#references)[[4]](#references)</sup>
+For further details check [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis).<sup>[[3]](#references)[[4]](#references)</sup>
 
 A useful recent technique is abusing **user-supplied XSLT** in vulnerable Splunk Enterprise versions to turn a low-privileged authenticated account into **OS command execution** as the `splunk` user.
 
@@ -170,9 +170,9 @@ If Splunk is running with too many privileges, or if the `splunk` user has acces
 
 ## References
 
-- [1] [Splunk Security Advisory SVD-2023-1104 – XSLT Injection RCE (CVE-2023-46214)](https://advisory.splunk.com/advisories/SVD-2023-1104)
+- [1] [Abusing Splunk Forwarders For RCE And Persistence](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)
 - [2] [Beware of TraitorWare: Using Splunk for Persistence](https://www.huntress.com/blog/beware-of-traitorware-using-splunk-for-persistence)
-- [3] [Abusing Splunk Forwarders For RCE And Persistence](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)
+- [3] [Splunk Security Advisory SVD-2023-1104 – XSLT Injection RCE (CVE-2023-46214)](https://advisory.splunk.com/advisories/SVD-2023-1104)
 - [4] [CVE-2023-46214 Analysis: Splunk XSLT Injection RCE](https://blog.hrncirik.net/cve-2023-46214-analysis)
 
 {{#include ../../banners/hacktricks-training.md}}

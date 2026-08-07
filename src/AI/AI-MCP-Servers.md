@@ -536,3 +536,4 @@ Another suspicious primitive is **native-code preloading**. A skill that sets `L
 - [32] [Anatomy of a Deception: Uncovering the 'omnicogg' Dropper in ClawHub](https://research.jfrog.com/post/omnicogg-malicious-skill/)
 
 {{#include ../banners/hacktricks-training.md}}
+

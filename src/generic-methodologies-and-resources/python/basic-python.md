@@ -479,6 +479,6 @@ with zipfile.ZipFile("sample.zip") as zf:
 ## References
 
 - [1] [Python tarfile docs](https://docs.python.org/3/library/tarfile.html)
-- [2] [PEP 706 - Filter for tarfile.extractall](https://peps.python.org/pep-0706/)
+- [2] [PEP 706 – Filter for tarfile.extractall()](https://peps.python.org/pep-0706/)
 
 {{#include ../../banners/hacktricks-training.md}}
