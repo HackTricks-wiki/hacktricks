@@ -1,45 +1,45 @@
-# Burp MCP: LLM-asistirana revizija saobraćaja
+# Burp MCP: pregled saobraćaja uz pomoć LLM-a
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Overview
+## Pregled
 
-Burp's **MCP Server** extension može izložiti presretnuti HTTP(S) saobraćaj MCP-kompatibilnim LLM klijentima kako bi mogli **da rezoniraju preko stvarnih zahteva/odgovora** za pasivno otkrivanje ranjivosti i sastavljanje izveštaja. Cilj je revizija zasnovana na dokazima (ne fuzzing ni blind scanning), pri čemu Burp ostaje izvor istine.
+Burp-ova ekstenzija **MCP Server** može da izloži presretnuti HTTP(S) saobraćaj MCP-capable LLM klijentima, kako bi mogli da **analiziraju stvarne zahteve/odgovore** radi pasivnog otkrivanja ranjivosti i izrade nacrta izveštaja. Cilj je pregled zasnovan na dokazima (bez fuzzing-a ili slepog skeniranja), pri čemu Burp ostaje izvor istine.
 
-## Architecture
+## Arhitektura
 
-- **Burp MCP Server (BApp)** osluškuje na `127.0.0.1:9876` i izlaže presretnuti saobraćaj putem MCP.
-- **MCP proxy JAR** povezuje stdio (klijentska strana) sa Burp-ovim MCP SSE endpointom.
-- **Optional local reverse proxy** (Caddy) normalizuje header-e radi strožih provera MCP handshake-a.
-- **Clients/backends**: Codex CLI (cloud), Gemini CLI (cloud), or Ollama (local).
+- **Burp MCP Server (BApp)** osluškuje na `127.0.0.1:9876` i izlaže presretnuti saobraćaj putem MCP-a.<sup>[[1]](#references)[[2]](#references)</sup>
+- **MCP proxy JAR** povezuje stdio (na strani klijenta) sa Burp-ovom MCP SSE krajnjom tačkom.
+- **Opcioni lokalni reverse proxy** (Caddy) normalizuje zaglavlja za stroge provere MCP handshake-a.
+- **Klijenti/backend-i**: Codex CLI (cloud), Gemini CLI (cloud) ili Ollama (lokalno).
 
-## Setup
+## Podešavanje
 
-### 1) Install Burp MCP Server
+### 1) Instalirajte Burp MCP Server
 
-Instalirajte **MCP Server** iz Burp BApp Store i proverite da li osluškuje na `127.0.0.1:9876`.
+Instalirajte **MCP Server** iz Burp BApp Store-a i proverite da osluškuje na `127.0.0.1:9876`.<sup>[[1]](#references)[[2]](#references)</sup>
 
-### 2) Extract the proxy JAR
+### 2) Izdvojite proxy JAR
 
-U kartici MCP Server kliknite **Extract server proxy jar** i sačuvajte `mcp-proxy.jar`.
+Na kartici MCP Server kliknite na **Extract server proxy jar** i sačuvajte `mcp-proxy.jar`.
 
-### 3) Configure an MCP client (Codex example)
+### 3) Konfigurišite MCP klijent (primer sa Codex-om)
 
-Podesite klijenta da koristi proxy JAR i Burp-ov SSE endpoint:
+Usmerite klijent na proxy JAR i Burp-ovu SSE krajnju tačku:
 ```toml
 # ~/.codex/config.toml
 [mcp_servers.burp]
 command = "java"
 args = ["-jar", "/absolute/path/to/mcp-proxy.jar", "--sse-url", "http://127.0.0.1:19876"]
 ```
-Ne mogu da pokrenem Codex niti da izvršavam spoljne alate. Pošaljite sadržaj fajla src/AI/AI-Burp-MCP.md koji želite da prevedem, pa ću ga prevesti na srpski zadržavajući tačno istu markdown i html sintaksu. Ako umesto toga želite samo da navedem poznate MCP alate iz opšteg znanja, potvrdite i ja ću ih navesti.
+Zatim pokrenite Codex i izlistajte MCP alate:
 ```bash
 codex
 # inside Codex: /mcp
 ```
-### 4) Ispravi strogu Origin/header validaciju sa Caddy (po potrebi)
+### 4) Popravite strogu Origin/header validaciju pomoću Caddy-ja (ako je potrebno)
 
-Ako MCP handshake ne uspe zbog strogih `Origin` provera ili dodatnih headers, koristi lokalni reverse proxy da normalizuje headers (ovo odgovara zaobilaznom rešenju za problem stroge validacije Burp MCP-a).
+Ako MCP handshake ne uspe zbog strogih `Origin` provera ili dodatnih header-a, koristite lokalni reverse proxy da normalizujete header-e (ovo odgovara workaround-u za problem sa strogom Burp MCP validacijom).<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 brew install caddy
 mkdir -p ~/burp-mcp
@@ -59,7 +59,7 @@ header_up -Connection
 }
 EOF
 ```
-Pokrenite proxy i client:
+Pokrenite proxy i klijent:
 ```bash
 caddy run --config ~/burp-mcp/Caddyfile &
 codex
@@ -68,24 +68,24 @@ codex
 
 ### Codex CLI
 
-- Konfigurišite `~/.codex/config.toml` kao gore.
+- Konfigurišite `~/.codex/config.toml` kao što je navedeno iznad.
 - Pokrenite `codex`, zatim `/mcp` da proverite listu Burp alata.
 
 ### Gemini CLI
 
-Repo **burp-mcp-agents** pruža skripte za pokretanje:
+Repozitorijum **burp-mcp-agents** pruža pomoćne launchere:<sup>[[4]](#references)</sup>
 ```bash
 source /path/to/burp-mcp-agents/gemini-cli/burpgemini.sh
 burpgemini
 ```
-### Ollama (lokalno)
+### Ollama (local)
 
-Koristite priloženi pomoćnik za pokretanje i izaberite lokalni model:
+Koristite obezbeđeni launcher helper i izaberite lokalni model:
 ```bash
 source /path/to/burp-mcp-agents/ollama/burpollama.sh
 burpollama deepseek-r1:14b
 ```
-Example lokalnih modela i približne potrebe za VRAM-om:
+Primeri lokalnih modela i približne potrebe za VRAM-om:
 
 - `deepseek-r1:14b` (~16GB VRAM)
 - `gpt-oss:20b` (~20GB VRAM)
@@ -93,58 +93,58 @@ Example lokalnih modela i približne potrebe za VRAM-om:
 
 ## Paket promptova za pasivni pregled
 
-Repo **burp-mcp-agents** sadrži prompt template-e za analizu Burp saobraćaja zasnovanu na dokazima:
+Repo **burp-mcp-agents** uključuje šablone promptova za analizu Burp saobraćaja zasnovanu na dokazima:<sup>[[4]](#references)</sup>
 
-- `passive_hunter.md`: široko pasivno otkrivanje ranjivosti.
-- `idor_hunter.md`: IDOR/BOLA/object/tenant drift i neslaganja u autentifikaciji.
-- `auth_flow_mapper.md`: uporedi autentifikovane i neautentifikovane puteve.
-- `ssrf_redirect_hunter.md`: SSRF/open-redirect kandidati iz URL fetch parametara/lanaca redirekcija.
-- `logic_flaw_hunter.md`: višestepeni logički propusti.
-- `session_scope_hunter.md`: zloupotreba audience/scope tokena.
-- `rate_limit_abuse_hunter.md`: propusti u throttling-u/ograničenju brzine i zloupotrebe.
+- `passive_hunter.md`: široko otkrivanje pasivnih ranjivosti.
+- `idor_hunter.md`: IDOR/BOLA/object/tenant drift i nepodudarnosti u autorizaciji.
+- `auth_flow_mapper.md`: poređenje autentifikovanih i neautentifikovanih putanja.
+- `ssrf_redirect_hunter.md`: kandidati za SSRF/open-redirect na osnovu parametara za preuzimanje URL-ova i lanaca redirekcija.
+- `logic_flaw_hunter.md`: logičke greške u više koraka.
+- `session_scope_hunter.md`: zloupotreba audience/scope vrednosti tokena.
+- `rate_limit_abuse_hunter.md`: propusti u throttling-u i sprečavanju zloupotrebe.
 - `report_writer.md`: izveštavanje fokusirano na dokaze.
 
-## Opcionalno označavanje atribucije
+## Opciono označavanje atribucije
 
-Da biste označili Burp/LLM saobraćaj u logovima, dodajte prepravku zaglavlja (proxy ili Burp Match/Replace):
+Da biste označili Burp/LLM saobraćaj u logovima, dodajte header rewrite (proxy ili Burp Match/Replace):<sup>[[1]](#references)</sup>
 ```text
 Match:   ^User-Agent: (.*)$
 Replace: User-Agent: $1 BugBounty-Username
 ```
-## Napomene o bezbednosti
+## Bezbednosne napomene
 
-- Prioritet dajte **lokalnim modelima** kada saobraćaj sadrži osetljive podatke.
-- Delite samo minimum dokaza potrebnih za nalaz.
-- Zadržite Burp kao izvor istine; koristite model za **analizu i izveštavanje**, a ne za skeniranje.
+- Prednost dajte **lokalnim modelima** kada saobraćaj sadrži osetljive podatke.
+- Delite samo minimalne dokaze potrebne za nalaz.
+- Neka Burp bude izvor istine; koristite model za **analizu i izveštavanje**, a ne za skeniranje.
 
-## Burp AI Agent (AI-asistirana trijaža + MCP alati)
+## Burp AI Agent (AI-potpomognuti triage + MCP alati)
 
-**Burp AI Agent** je Burp ekstenzija koja povezuje lokalne/cloud LLMs sa pasivnom/aktivnom analizom (62 klase ranjivosti) i izlaže 53+ MCP alata tako da eksterni MCP klijenti mogu orkestrirati Burp. Istaknuto:
+**Burp AI Agent** je Burp ekstenzija koja povezuje lokalne/cloud LLM-ove sa pasivnom/aktivnom analizom (62 klase ranjivosti) i izlaže više od 53 MCP alata, tako da eksterni MCP klijenti mogu da orkestriraju Burp.<sup>[[5]](#references)</sup> Najvažnije funkcije:
 
-- **Trijaža iz kontekstnog menija**: snimite saobraćaj putem Proxy, otvorite **Proxy > HTTP History**, kliknite desnim tasterom na zahtev → **Extensions > Burp AI Agent > Analyze this request** da otvorite AI chat vezan za taj zahtev/odgovor.
-- **Backends** (izbor po profilu):
-  - Local HTTP: **Ollama**, **LM Studio**.
-  - Remote HTTP: **OpenAI-compatible** endpoint (base URL + model name).
-  - Cloud CLIs: **Gemini CLI** (`gemini auth login`), **Claude CLI** (`export ANTHROPIC_API_KEY=...` or `claude login`), **Codex CLI** (`export OPENAI_API_KEY=...`), **OpenCode CLI** (provider-specific login).
-- **Agent profiles**: prompt templates se automatski instaliraju pod `~/.burp-ai-agent/AGENTS/`; ubacite dodatne `*.md` fajlove tamo da dodate prilagođena ponašanja za analizu/skeniranje.
-- **MCP server**: omogućite preko **Settings > MCP Server** da izložite Burp operacije bilo kom MCP klijentu (53+ alata). Claude Desktop se može usmeriti na server uređivanjem `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) ili `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
-- **Privacy controls**: STRICT / BALANCED / OFF maskiraju osetljive podatke iz zahteva pre slanja udaljenim modelima; prioritet dajte lokalnim backend-ovima kada rukujete tajnama.
-- **Audit logging**: JSONL logovi sa per-entry SHA-256 heširanjem za integritet, radi otkrivanja neovlašćenih izmena i trasabilnosti AI/MCP akcija.
-- **Build/load**: preuzmite release JAR ili build-ujte sa Java 21:
+- **Triage putem kontekstnog menija**: uhvatite saobraćaj preko Proxy-ja, otvorite **Proxy > HTTP History**, kliknite desnim tasterom na zahtev → **Extensions > Burp AI Agent > Analyze this request** da biste pokrenuli AI chat povezan sa tim zahtevom/odgovorom.
+- **Backendi** (mogu se izabrati po profilu):
+- Lokalni HTTP: **Ollama**, **LM Studio**.
+- Udaljeni HTTP: endpoint kompatibilan sa **OpenAI** (base URL + naziv modela).
+- Cloud CLI-jevi: **Gemini CLI** (`gemini auth login`), **Claude CLI** (`export ANTHROPIC_API_KEY=...` ili `claude login`), **Codex CLI** (`export OPENAI_API_KEY=...`), **OpenCode CLI** (prijavljivanje specifično za provider).
+- **Agent profili**: prompt šabloni se automatski instaliraju u `~/.burp-ai-agent/AGENTS/`; dodajte dodatne `*.md` datoteke tamo da biste dodali prilagođena ponašanja za analizu/skeniranje.
+- **MCP server**: omogućite ga preko **Settings > MCP Server** da biste izložili Burp operacije bilo kom MCP klijentu (više od 53 alata). Claude Desktop se može usmeriti na server uređivanjem datoteke `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) ili `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
+- **Kontrole privatnosti**: STRICT / BALANCED / OFF uklanjaju osetljive podatke iz zahteva pre njihovog slanja udaljenim modelima; prednost dajte lokalnim backendima pri radu sa tajnama.
+- **Audit logging**: JSONL logovi sa SHA-256 hashiranjem integriteta za svaki unos, što obezbeđuje sledljivost AI/MCP radnji uz evidentiranje neovlašćenih izmena.
+- **Build/load**: preuzmite release JAR ili ga izgradite pomoću Java 21:
 ```bash
 git clone https://github.com/six2dez/burp-ai-agent.git
 cd burp-ai-agent
 JAVA_HOME=/path/to/jdk-21 ./gradlew clean shadowJar
 # load build/libs/Burp-AI-Agent-<version>.jar via Burp Extensions > Add (Java)
 ```
-Operativna upozorenja: cloud backends mogu eksfiltrirati session cookies/PII osim ako nije omogućen privacy mode; izlaganje MCP-a omogućava udaljnu orkestraciju Burp-a, zato ograničite pristup samo pouzdanim agentima i pratite audit log zaštićen integritetnim hash-om.
+Operativne mere opreza: cloud backends mogu eksfiltrirati session cookies/PII osim ako je privacy mode nametnut; MCP exposure omogućava remote orchestration Burp-a, zato ograničite pristup trusted agents i nadzirite audit log sa integrity hash-om.
 
 ## Reference
 
-- [Burp MCP + Codex CLI integration and Caddy handshake fix](https://pentestbook.six2dez.com/others/burp)
-- [Burp MCP Agents (workflows, launchers, prompt pack)](https://github.com/six2dez/burp-mcp-agents)
-- [Burp MCP Server BApp](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
-- [PortSwigger MCP server strict Origin/header validation issue](https://github.com/PortSwigger/mcp-server/issues/34)
-- [Burp AI Agent](https://github.com/six2dez/burp-ai-agent)
+- [1] [Integracija Burp MCP + Codex CLI i ispravka Caddy handshake-a](https://pentestbook.six2dez.com/others/burp)
+- [2] [Burp MCP Server BApp](https://portswigger.net/bappstore/9952290f04ed4f628e624d0aa9dccebc)
+- [3] [Problem sa strict Origin/header validation u PortSwigger MCP serveru](https://github.com/PortSwigger/mcp-server/issues/34)
+- [4] [Burp MCP Agents (workflows, launchers, prompt pack)](https://github.com/six2dez/burp-mcp-agents)
+- [5] [Burp AI Agent](https://github.com/six2dez/burp-ai-agent)
 
 {{#include ../banners/hacktricks-training.md}}
