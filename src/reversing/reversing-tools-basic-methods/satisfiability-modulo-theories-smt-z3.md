@@ -1,4 +1,4 @@
-# Kwa msingi kabisa, tool hii itatusaidia kupata values za variables zinazohitaji kutimiza conditions fulani, kwa kuwa kuzikokotoa kwa mkono kutakuwa kero sana. Kwa hiyo, unaweza kuonyesha Z3 conditions ambazo variables zinahitaji kutimiza, nayo itapata values fulani (ikiwezekana).
+# Kwa ufupi sana, tool hii itatusaidia kupata thamani za variables zinazohitaji kutimiza masharti fulani, ambapo kuzihesabu kwa mkono kutakuwa kero sana. Kwa hiyo, unaweza kuieleza Z3 masharti ambayo variables zinahitaji kutimiza, nayo itapata thamani fulani (ikiwa inawezekana).
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -44,7 +44,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-## Kuchapisha Modelu
+## Modeli ya Uchapishaji
 ```python
 from z3 import *
 
@@ -58,9 +58,9 @@ print("x = %s" % m[x])
 for d in m.decls():
 print("%s = %s" % (d.name(), m[d]))
 ```
-# Arithmetiki ya Mashine
+# Hesabu za Mashine
 
-CPU za kisasa na lugha maarufu za programming hutumia arithmetiki juu ya bit-vectors zenye ukubwa maalum. Arithmetiki ya mashine inapatikana katika Z3Py kama Bit-Vectors.<sup>[[1]](#references)</sup>
+CPU za kisasa na lugha kuu za programming hutumia hesabu kwenye bit-vectors zenye ukubwa usiobadilika. Machine arithmetic inapatikana katika Z3Py kama Bit-Vectors.
 ```python
 from z3 import *
 
@@ -77,7 +77,7 @@ print(simplify(a == b)) # This is False
 ```
 ## Nambari za Signed/Unsigned
 
-Z3 hutoa matoleo maalum ya signed ya shughuli za kihesabu ambapo ni muhimu kujua ikiwa bit-vector inachukuliwa kuwa signed au unsigned. Katika Z3Py, waendeshaji `<`, `<=`, `>`, `>=`, `/`, `%` na `>>` hulingana na matoleo ya signed. Waendeshaji wa unsigned wanaolingana ni `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` na `LShR`.<sup>[[1]](#references)</sup>
+Z3 hutoa matoleo maalum ya Signed ya operesheni za hesabu ambapo ni muhimu kujua ikiwa bit-vector inachukuliwa kuwa Signed au Unsigned. Katika Z3Py, waendeshaji `<`, `<=`, `>`, `>=`, `/`, `%` na `>>` wanalingana na matoleo ya Signed. Waendeshaji wa Unsigned wanaolingana ni `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` na `LShR`.<sup>[[1]](#references)</sup>
 ```python
 from z3 import *
 
@@ -97,9 +97,9 @@ solve(ULT(x, 0))
 ```
 ## Functions
 
-Functions zilizotafsiriwa kama arithmetic zina tafsiri ya kawaida isiyobadilika. Functions na constants ambazo hazijatafsiriwa zina unyumbufu wa kiwango cha juu; zinaruhusu tafsiri yoyote inayolingana na constraints zinazohusu function au constant.<sup>[[1]](#references)</sup>
+Functions zenye maana iliyowekwa, kama arithmetic, zina tafsiri ya kawaida isiyobadilika. Functions na constants zisizo na maana iliyowekwa zina unyumbufu wa kiwango cha juu; zinaruhusu tafsiri yoyote inayolingana na constraints zilizowekwa juu ya function au constant.<sup>[[1]](#references)</sup>
 
-Mfano: `f` ikitumika mara mbili kwa `x`, matokeo huwa `x` tena, lakini `f` ikitumika mara moja kwa `x`, matokeo huwa tofauti na `x`.
+Mfano: `f` ikitumika mara mbili kwa `x`, matokeo yake huwa `x` tena, lakini `f` ikitumika mara moja kwa `x`, matokeo yake ni tofauti na `x`.
 ```python
 from z3 import *
 
@@ -118,13 +118,13 @@ s.add(f(x) == 4) # Find the value that generates 4 as response
 s.check()
 print(s.model())
 ```
-# Mifumo Inayolenga Reversing
+# Patterns Zinazolenga Reversing
 
-Ikiwa unahitaji symbolic execution kamili kwenye binary badala ya kuinua manually checks chache tu, angalia [Angr - Examples](angr/angr-examples.md). Kwa kawaida, workflow inayotumika sana ni kurejesha predicates zinazohusika kutoka kwenye decompiler/assembly na kujenga upya arithmetic au memory constraints zinazovutia pekee katika Z3.
+Ikiwa unahitaji symbolic execution kamili kwenye binary badala ya kufanya lifting manually kwa checks chache tu, angalia [Angr - Examples](angr/angr-examples.md). Kwa kawaida, workflow inayotumika sana ni kurejesha predicates husika kutoka kwenye decompiler/assembly na kujenga upya katika Z3 arithmetic au memory constraints zinazovutia pekee.
 
 ## Model data inayodhibitiwa na user kama bytes kwanza
 
-Kwa reversing, kwa kawaida ni bora kuanza na `BitVec(..., 8)` kwa kila input byte, kisha kujenga upya words hasa jinsi target inavyofanya. Hii huhifadhi wrap-around, signedness bugs, shifts, rotates, na masuala ya byte-order.
+Kwa reversing, kwa kawaida ni bora kuanza na `BitVec(..., 8)` kwa kila input byte, kisha kujenga upya words kwa usahihi kama target inavyofanya. Hii huhifadhi wrap-around, bugs za signedness, shifts, rotates, na matatizo ya byte-order.<sup>[[2]](#references)</sup>
 ```python
 from z3 import *
 
@@ -139,16 +139,16 @@ s.add(RotateRight(dword, 8) == 0x41444342)
 print(s.check())
 print(hex(s.model().eval(dword).as_long()))
 ```
-Vihisishi muhimu unapotafsiri assembly au decompiler code:
+Wasaidizi muhimu unapotafsiri assembly au decompiler code:
 
-- `Concat`: jenga upya values za biti 16/32/64 kutoka kwa bytes
+- `Concat`: unda upya thamani za biti 16/32/64 kutoka kwa bytes
 - `Extract`: linganisha words za juu/chini au iga masks/shifts
-- `ZeroExt` / `SignExt`: model bugs za zero/sign extension kwa usahihi
-- `LShR` / `RotateLeft` / `RotateRight`: hutumika sana katika crackmes, hashes, na obfuscators
+- `ZeroExt` / `SignExt`: modelisha kwa usahihi bugs za zero/sign extension
+- `LShR` / `RotateLeft` / `RotateRight`: hutumika kwa kawaida katika crackmes, hashes, na obfuscators
 
-## Model memory/register tables with arrays
+## Modelisha jedwali za memory/register kwa arrays
 
-Wakati check inategemea `buf[i]`, lookup tables, au emulated memory, `Array` inaweza kuwa safi zaidi kuliko kuunda variables nyingi tofauti.
+Wakati check inategemea `buf[i]`, lookup tables, au memory iliyoigwa, `Array` inaweza kuwa safi zaidi kuliko kuunda variables nyingi tofauti.<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -165,11 +165,11 @@ s = Solver()
 s.add(word == 0x4241)
 print(s.check())
 ```
-Hii ni muhimu hasa wakati binary inakopi values kwenye memory kabla ya kuzivalidate, au unapotaka ku-model athari ya operations chache za `mov`/`xor`/`add` bila ku-run program nzima.
+Hii ni muhimu hasa wakati binary inahamisha values ndani ya memory kabla ya kuzihakiki, au unapotaka ku-model athari za operations chache za `mov`/`xor`/`add` bila kuendesha program nzima.
 
-## Incremental solving ni nzuri kwa branch triage
+## Incremental solving ni bora kwa branch triage
 
-Baada ya kutoa constraints za msingi, tumia `push()` / `pop()` (au assumptions) ku-test branches mbadala bila kuunda upya solver kila wakati:
+Unapokuwa tayari umetoa base constraints, tumia `push()` / `pop()` (au assumptions) kujaribu branches mbadala bila kujenga upya solver kila wakati:<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -187,11 +187,11 @@ s.add(x < 0x100)
 print("branch 2:", s.check())
 s.pop()
 ```
-Hii ni muhimu unapocheza tena path conditions zilizorejeshwa kutoka kwa decompiler, au unapotaka kutambua haraka ni comparison gani inayofanya model kuwa `unsat`.
+Hii ni muhimu unapocheza tena masharti ya njia yaliyopatikana kutoka kwa decompiler, au unapotaka kutambua haraka ni comparison gani inayofanya model kuwa `unsat`.
 
-## Optimize kwa payloads zinazofaa zaidi
+## Optimize kwa payloads zinazotumika zaidi
 
-Mara tu model inapokuwa satisfiable, `Optimize()` inaweza kukusaidia kupata solution inayotumika zaidi: kwa mfano, kupendelea bytes zinazoweza kuchapishwa, kupunguza checksum component, au kuongeza muundo unaorahisisha password iliyorejeshwa kuandika au kunakili.
+Mara tu model inapokuwa satisfiable, `Optimize()` inaweza kukusaidia kupata solution inayoweza kutumika zaidi: kwa mfano, kupendelea bytes zinazoweza kuchapishwa, kupunguza sehemu ya checksum, au kuongeza muundo fulani unaorahisisha password iliyopatikana tena kuandika au kunakili.<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -206,7 +206,7 @@ print(bytes(o.model()[c].as_long() for c in key))
 ```
 ## Strings/sequences kwa serials zenye format nyingi
 
-Ikiwa target hukagua hasa prefixes, suffixes, substrings, au muundo unaofanana na regex, constraints za `String`/`Seq` zinaweza kuwa rahisi kuliko bit-vectors zinazochakata byte moja baada ya nyingine:
+Ikiwa target hukagua hasa prefixes, suffixes, substrings, au muundo unaofanana na regex, constraints za `String`/`Seq` zinaweza kuwa rahisi kuliko bit-vectors za byte-by-byte:<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -221,7 +221,7 @@ Hata hivyo, binary inapoanza kufanya arithmetic, rotations, checksums, au casts 
 
 # Mifano
 
-## Sudoku solver
+## Kisuluhishi cha Sudoku
 ```python
 # 9x9 matrix of integer variables
 X = [[Int("x_%s_%s" % (i+1, j+1)) for j in range(9)]
@@ -269,10 +269,10 @@ print_matrix(r)
 else:
 print("failed to solve")
 ```
-## References
+## Marejeo
 
-- [1] [Z3Py Guide - Examples (ericpony)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-- [2] [Z3 Guide (Microsoft)](https://microsoft.github.io/z3guide/)
-- [3] [Programming Z3 (Stanford)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+- [1] [Mwongozo wa Z3Py wenye Mifano (ericpony z3py-tutorial)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Mwongozo wa Z3 - Nadharia ya Bit-Vectors (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
+- [3] [Kuprogramu Z3 (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 
 {{#include ../../banners/hacktricks-training.md}}

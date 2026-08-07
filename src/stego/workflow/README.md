@@ -1,24 +1,24 @@
-# Stego Mtiririko
+# Stego Workflow
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Matatizo mengi ya stego yanatatuliwa haraka zaidi kwa triage ya kimfumo kuliko kwa kujaribu zana za nasibu.
+Matatizo mengi ya stego hutatuliwa haraka zaidi kwa triage ya kimfumo kuliko kujaribu tools za kubahatisha.
 
-## Mtiririko wa Msingi
+## Mtiririko mkuu
 
-### Orodha ya haraka ya triage
+### Orodha ya ukaguzi wa triage ya haraka
 
 Lengo ni kujibu maswali mawili kwa ufanisi:
 
 1. Container/format halisi ni ipi?
-2. Je, payload iko katika metadata, appended bytes, embedded files, au content-level stego?
+2. Je, payload iko kwenye metadata, bytes zilizoongezwa mwishoni, files zilizopachikwa, au stego ya kiwango cha maudhui?
 
 #### 1) Tambua container
 ```bash
 file target
 ls -lah target
 ```
-Ikiwa `file` na kiendelezo havikubaliani, amini `file`. Chukulia fomati za kawaida kama containers inapofaa (kwa mfano, nyaraka za OOXML ni ZIP files).
+Ikiwa `file` na kiendelezi havikubaliani, amini `file`. Chukulia miundo ya kawaida kama containers inapofaa (kwa mfano, hati za OOXML ni faili za ZIP).
 
 #### 2) Tafuta metadata na strings zilizo wazi
 ```bash
@@ -26,34 +26,34 @@ exiftool target
 strings -n 6 target | head
 strings -n 6 target | tail
 ```
-Jaribu aina mbalimbali za encoding:
+Jaribu encoding nyingi:
 ```bash
 strings -e l -n 6 target | head
 strings -e b -n 6 target | head
 ```
-#### 3) Angalia data zilizoongezwa / mafaili yaliyowekwa ndani
+#### 3) Kagua data iliyoongezwa / files zilizopachikwa
 ```bash
 binwalk target
 binwalk -e target
 ```
-Ikiwa uondoaji unashindwa lakini saini zinaripotiwa, chonga offsets kwa mikono kwa kutumia `dd` na endesha tena `file` kwenye eneo lililochongwa.
+Ikiwa uchimbaji hautafaulu lakini signatures zimeripotiwa, kata offsets mwenyewe kwa `dd` na uendeshe tena `file` kwenye eneo lililokatwa.
 
 #### 4) Ikiwa ni picha
 
-- Chunguza mambo yasiyo ya kawaida: `magick identify -verbose file`
-- Kama PNG/BMP, orodhesha bit-planes/LSB: `zsteg -a file.png`
+- Kagua anomalies: `magick identify -verbose file`
+- Ikiwa ni PNG/BMP, orodhesha bit-planes/LSB: `zsteg -a file.png`
 - Thibitisha muundo wa PNG: `pngcheck -v file.png`
-- Tumia vichungi vya kuona (Stegsolve / StegoVeritas) wakati yaliyomo yanaweza kufichuliwa kwa mabadiliko ya channel/plane
+- Tumia visual filters (Stegsolve / StegoVeritas) wakati maudhui yanaweza kufichuliwa kupitia mabadiliko ya channel/plane
 
 #### 5) Ikiwa ni sauti
 
 - Anza na spectrogram (Sonic Visualiser)
-- Dekoda/chunguza streams: `ffmpeg -v info -i file -f null -`
-- Ikiwa sauti inaonekana kama tones zenye muundo, jaribu DTMF decoding
+- Decode/kagua streams: `ffmpeg -v info -i file -f null -`
+- Ikiwa sauti inafanana na tones zilizopangiliwa, jaribu DTMF decoding
 
 ### Zana za msingi
 
-Hizi hunasa matukio ya ngazi ya container ambayo hutokea mara kwa mara: metadata, bytes zilizoongezwa, na faili zilizofichwa kwa kutumia extension.
+Hizi hugundua hali za kawaida za kiwango cha container: metadata payloads, bytes zilizoongezwa, na files zilizopachikwa zilizofichwa kwa extension.<sup>[[1]](#references)</sup>
 
 #### Binwalk
 ```bash
@@ -61,16 +61,20 @@ binwalk file
 binwalk -e file
 binwalk --dd '.*' file
 ```
-I don’t have access to the repo contents. Please paste the contents of src/stego/workflow/README.md (or the part you want translated). I will translate it to Swahili, preserving markdown, tags, links, code, paths and the other constraints you specified.
+Repo: https://github.com/ReFirmLabs/binwalk
+
+#### Foremost
 ```bash
 foremost -i file
 ```
-I don't have access to that repository. Please paste the contents of src/stego/workflow/README.md here (or the portion you want translated). I will translate the English text to Swahili and keep all markdown, tags, links and code unchanged.
+Repo: https://github.com/korczis/foremost
+
+#### Exiftool / Exiv2
 ```bash
 exiftool file
 exiv2 file
 ```
-#### faili / strings
+#### file / strings
 ```bash
 file file
 strings -n 6 file
@@ -79,49 +83,49 @@ strings -n 6 file
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-### Makontena, data zilizoongezwa, na mbinu za polyglot
+### Containers, data iliyoongezwa, na mbinu za polyglot
 
-Changamoto nyingi za steganography ni baiti za ziada baada ya faili halali, au archives zilizowekwa ndani zilizofichwa kwa extension.
+Changamoto nyingi za steganography huwa na bytes za ziada baada ya faili halali, au archives zilizopachikwa zikifichwa kwa extension.
 
-#### Appended payloads
+#### Payloads zilizoongezwa
 
-Mifumo mingi hupuuzia baiti za mwisho. ZIP/PDF/script zinaweza kuongezwa kwenye image/audio container.
+Formats nyingi hupuuza bytes za mwisho. ZIP/PDF/script inaweza kuongezwa kwenye container ya image/audio.
 
-Uhakiki wa haraka:
+Ukaguzi wa haraka:
 ```bash
 binwalk file
 tail -c 200 file | xxd
 ```
-Ikiwa unajua offset, carve kwa `dd`:
+Ikiwa unajua offset, tumia `dd` kufanya carving:
 ```bash
 dd if=file of=carved.bin bs=1 skip=<offset>
 file carved.bin
 ```
 #### Magic bytes
 
-Wakati `file` inapoonekana imechanganyikiwa, tafuta magic bytes kwa kutumia `xxd` na linganisha na signatures zinazojulikana:
+Wakati `file` inapochanganyikiwa, tafuta magic bytes kwa `xxd` na uzilinganishe na signatures zinazojulikana:
 ```bash
 xxd -g 1 -l 32 file
 ```
 #### Zip-in-disguise
 
-Jaribu `7z` na `unzip` hata kama ugani hauonyeshi zip:
+Jaribu `7z` na `unzip` hata kama extension haionyeshi kuwa ni zip:
 ```bash
 7z l file
 unzip -l file
 ```
-### Mambo ya kushangaza karibu na stego
+### Mambo ya ajabu yaliyo karibu na stego
 
-Viungo vya haraka kwa mifumo zinazojitokeza mara kwa mara karibu na stego (QR-from-binary, braille, etc).
+Viungo vya haraka vya mifumo inayojitokeza mara kwa mara karibu na stego (QR-from-binary, braille, n.k.).
 
-#### QR codes from binary
+#### QR codes kutoka binary
 
-Ikiwa urefu wa blob ni mraba kamili, inaweza kuwa pikseli mbichi za picha/QR.
+Ikiwa urefu wa blob ni square kamili, huenda ikawa pixels ghafi za image/QR.
 ```python
 import math
 math.isqrt(2500)  # 50
 ```
-Msaidizi wa Binary-to-image:
+Msaidizi wa binary-kwa-picha:
 
 - [https://www.dcode.fr/binary-image](https://www.dcode.fr/binary-image)
 
@@ -129,9 +133,8 @@ Msaidizi wa Binary-to-image:
 
 - [https://www.branah.com/braille-translator](https://www.branah.com/braille-translator)
 
-## Orodha za marejeleo
+## Marejeo
 
-- [https://0xrick.github.io/lists/stego/](https://0xrick.github.io/lists/stego/)
-- [https://github.com/DominicBreuker/stego-toolkit](https://github.com/DominicBreuker/stego-toolkit)
+- [1] [DominicBreuker/stego-toolkit - Docker image yenye zana maarufu zaidi za steganography zilizokusanywa pamoja](https://github.com/DominicBreuker/stego-toolkit)
 
 {{#include ../../banners/hacktricks-training.md}}

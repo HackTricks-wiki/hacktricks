@@ -1,17 +1,17 @@
-# Audio Steganography
+# Steganography ya Sauti
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Mifumo ya kawaida:
+Miundo ya kawaida:
 
-- Ujumbe kwenye Spectrogram
+- Ujumbe wa Spectrogram
 - Uingizaji wa WAV LSB
 - Usimbaji wa DTMF / dial tones
-- Payloads za metadata
+- Payloads za Metadata
 
-## Ukaguzi wa haraka
+## Triage ya haraka
 
-Kabla ya kutumia zana maalum:
+Kabla ya kutumia tools maalum:
 
 - Thibitisha maelezo ya codec/container na anomalies:
 - `file audio`
@@ -22,26 +22,26 @@ ffmpeg -v info -i stego.mp3 -f null -
 ```
 ## Spectrogram steganography
 
-### Mbinu
+### Technique
 
-Spectrogram stego huficha data kwa kupanga nishati kulingana na muda/marudio ili ionekane tu katika mchoro wa muda-marudio (mara nyingi haisikiki au hutambuliwa kama kelele).
+Spectrogram stego huficha data kwa kuunda umbo la nishati katika muda/marudio ili ionekane tu kwenye mchoro wa muda-marudio (mara nyingi haisikiki au hutambulika kama kelele).
 
 ### Sonic Visualiser
 
-Zana kuu ya kukagua spectrogram:
+Chombo kikuu cha kukagua spectrogram:
 
 - [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
-### Mibadala
+### Alternatives
 
-- Audacity (mwonekano wa spectrogram, vichujio): https://www.audacityteam.org/
-- `sox` inaweza kutengeneza spectrogram kutoka CLI:
+- Audacity (mwonekano wa spectrogram, filters): https://www.audacityteam.org/
+- `sox` inaweza kutengeneza spectrograms kutoka CLI:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
-## Decoding ya FSK / modem
+## Usimbuaji wa FSK / modem
 
-Sauti yenye frequency-shift keying mara nyingi huonekana kama toni moja zinazopishana kwenye spectrogram.<sup>[[1]](#references)</sup> Ukishapata makadirio ya awali ya center/shift na baud, tumia `minimodem` kwa brute force:
+Sauti ya frequency-shift keyed mara nyingi huonekana kama toni moja zinazobadilishana katika spectrogram. Baada ya kupata makadirio ya awali ya center/shift na baud, tumia brute force kwa `minimodem`:<sup>[[1]](#references)</sup>
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,16 +52,16 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` autogains na autodetects mark/space tones; rekebisha `--rx-invert` au `--samplerate` ikiwa output imevurugika.
+`minimodem` autogains na hugundua kiotomatiki toni za mark/space; rekebisha `--rx-invert` au `--samplerate` ikiwa matokeo yamevurugika.
 
 ## WAV LSB
 
-### Technique
+### Mbinu
 
-Kwa PCM isiyobanwa (WAV), kila sample ni integer. Kubadilisha bits za chini hubadilisha waveform kwa kiwango kidogo sana, hivyo attackers wanaweza kuficha:
+Kwa PCM isiyobanwa (WAV), kila sampuli ni integer. Kubadilisha biti za chini hubadilisha waveform kwa kiwango kidogo sana, hivyo attackers wanaweza kuficha:
 
-- bit 1 kwa kila sample (au zaidi)
-- Zikiwa zimeingiliana kwenye channels
+- biti 1 kwa kila sampuli (au zaidi)
+- Zikiwa zimeingiliana katika channels
 - Kwa kutumia stride/permutation
 
 Familia nyingine za audio-hiding unazoweza kukutana nazo:
@@ -73,7 +73,7 @@ Familia nyingine za audio-hiding unazoweza kukutana nazo:
 
 ### WavSteg
 
-From: https://github.com/ragibson/Steganography#WavSteg
+Kutoka: https://github.com/ragibson/Steganography#WavSteg<sup>[[2]](#references)</sup>
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
@@ -84,17 +84,18 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 ## DTMF / dial tones
 
-### Mbinu
+### Technique
 
-DTMF husimba herufi kama jozi za frequencies zilizowekwa (keypad ya simu). Ikiwa audio inafanana na keypad tones au beep za dual-frequency zenye mpangilio wa kawaida, jaribu DTMF decoding mapema.
+DTMF husimba herufi kama jozi za masafa yaliyowekwa (keypad ya simu). Ikiwa sauti inafanana na milio ya keypad au milio ya kawaida ya masafa mawili, jaribu DTMF decoding mapema.
 
-Decoders za mtandaoni:
+Online decoders:
 
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
-## Marejeleo
+## References
 
 - [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [2] [ragibson/Steganography](https://github.com/ragibson/Steganography#WavSteg)
 
 {{#include ../../banners/hacktricks-training.md}}

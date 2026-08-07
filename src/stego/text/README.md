@@ -8,22 +8,22 @@ Tafuta:
 - Zero-width characters
 - Miundo ya whitespace (spaces dhidi ya tabs)
 
-## Njia ya vitendo
+## Njia ya kiutendaji
 
-Ikiwa plain text inatenda bila kutarajiwa, kagua codepoints na ufanye normalize kwa uangalifu (usiharibu ushahidi).
+Ikiwa maandishi ya kawaida yanafanya kazi bila kutarajiwa, kagua codepoints na ufanye normalize kwa uangalifu (usiharibu ushahidi).
 
-### Mbinu
+### Technique
 
 Text stego mara nyingi hutegemea characters zinazoonekana sawa (au zisizoonekana):
 
-- Homoglyphs: codepoints tofauti za Unicode zinazoonekana sawa (Latin `a` dhidi ya Cyrillic `а`)
+- Homoglyphs: Unicode codepoints tofauti zinazoonekana sawa (Latin `a` dhidi ya Cyrillic `а`)
 - Zero-width characters: joiners, non-joiners, zero-width spaces
-- Usimbaji wa whitespace: spaces dhidi ya tabs, trailing spaces, patterns za urefu wa mistari<sup>[[1]](#references)</sup>
+- Whitespace encodings: spaces dhidi ya tabs, trailing spaces, mifumo ya urefu wa mistari<sup>[[1]](#references)</sup>
 
-Mifano ya ziada yenye signal kubwa:
+Hali za ziada zenye signal kubwa:
 
-- Bidirectional override/control characters (zinaweza kupanga upya maandishi kwa mwonekano)
-- Variation selectors na combining characters zinazotumika kama covert channel
+- Bidirectional override/control characters (zinaweza kupanga upya maandishi kwa kuonekana)
+- Variation selectors na combining characters zinazotumiwa kama covert channel
 
 ### Decode helpers
 
@@ -39,15 +39,15 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## Vituo vya CSS `unicode-range`
+## Njia za CSS `unicode-range`
 
-Sheria za `@font-face` zinaweza kusimba baiti katika maingizo ya `unicode-range: U+..`. Toa codepoint, unganisha thamani za hex, kisha decode:
+Sheria za `@font-face` zinaweza kusimba bytes katika maingizo ya `unicode-range: U+..`. Toa codepoints, unganisha hex, kisha decode:
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Ikiwa ranges zina bytes nyingi kwa kila declaration, zigawanye kwanza kwa koma na uzinormalize (`tr ',+' '\n'`). Python hurahisisha kuchanganua na kutoa bytes ikiwa formatting haiendani.
+Ikiwa ranges zina bytes nyingi kwa kila tamko, zigawanye kwa koma kwanza na uzirekebishe (`tr ',+' '\n'`). Python hurahisisha kuchanganua na kutoa bytes ikiwa uumbizaji hautofautiani.<sup>[[1]](#references)</sup>
 
-## References
+## Marejeleo
 
 - [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 

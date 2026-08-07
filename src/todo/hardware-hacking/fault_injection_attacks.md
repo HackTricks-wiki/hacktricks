@@ -1,9 +1,9 @@
-# Fault Injection Attacks
+# Mashambulizi ya Fault Injection
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Shambulio la kuingiza makosa linajumuisha kuanzisha usumbufu wa nje katika mizunguko ya kielektroniki ili kuathiri tabia yake, na kusababisha kufichua taarifa au hata kupita vizuizi fulani katika mzunguko. Shambulio hili linafungua nafasi nyingi za kushambulia mizunguko ya kielektroniki. Shambulio hili pia linajulikana kama glitching ya mizunguko ya kielektroniki.
+Mashambulizi ya fault injection yanahusisha kuingiza usumbufu wa nje katika saketi za kielektroniki ili kuathiri tabia yake, na hivyo kusababisha kufichuliwa kwa taarifa au hata kuvukwa kwa vizuizi fulani kwenye saketi. Mashambulizi haya yanafungua uwezekano mwingi wa kushambulia saketi za kielektroniki. Mashambulizi haya pia huitwa glitching ya saketi za kielektroniki.
 
-Kuna mbinu nyingi na njia za kuingiza makosa katika mzunguko wa kielektroniki.
+Kuna mbinu na njia nyingi za kuingiza fault kwenye saketi ya kielektroniki.
 
 {{#include ../../banners/hacktricks-training.md}}

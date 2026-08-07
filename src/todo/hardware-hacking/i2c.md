@@ -4,7 +4,7 @@
 
 ## Bus Pirate
 
-Ili kujaribu kama Bus Pirate inafanya kazi, ung'anisha +5V na VPU na 3.3V na ADC na upate bus pirate (Kwa kutumia Tera Term kwa mfano) na tumia amri `~`:
+Ili kujaribu ikiwa Bus Pirate inafanya kazi, unganisha +5V na VPU na 3.3V na ADC, kisha ufikie Bus Pirate (kwa mfano, ukitumia Tera Term) na utumie command `~`:
 ```bash
 # Use command
 HiZ>~
@@ -43,18 +43,18 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-Kama unavyoona katika mstari wa amri uliopita, ilisema kwamba ilipata makosa 0. Hii ni muhimu kujua inafanya kazi baada ya kuununua au baada ya kubadilisha firmware.
+Kama unavyoona katika mstari wa amri uliotangulia, ilisema kuwa ilipata makosa 0. Hii ni muhimu sana kuthibitisha kuwa inafanya kazi baada ya kuinunua au baada ya ku-flash firmware.
 
-Ili kuungana na bus pirate unaweza kufuata nyaraka:
+Ili kuunganisha na bus pirate unaweza kufuata docs:
 
-![](<../../images/image (484).png>)
+![Tumia amri - Bonyeza space: Ili kuunganisha na bus pirate unaweza kufuata docs](<../../images/image (484).png>)
 
-Katika kesi hii, nitaungana na EPROM: ATMEL901 24C256 PU27:
+Katika hali hii nitaunganisha kwenye EPROM: ATMEL901 24C256 PU27:
 
-![](<../../images/image (964).png>)
+![Tumia amri - Bonyeza space: Katika hali hii nitaunganisha kwenye EPROM: ATMEL901 24C256 PU27](<../../images/image (964).png>)
 
-Ili kuzungumza na bus pirate nilitumia Tera Term iliyounganishwa na bandari ya COM ya pirate bus na Mipangilio --> Bandari ya Serial --> Kasi ya 115200.\
-Katika mawasiliano yafuatayo unaweza kupata jinsi ya kuandaa bus pirate kuzungumza I2C na jinsi ya kuandika na kusoma kutoka kwenye kumbukumbu (Maoni yanaonekana kwa kutumia "#", usitarajie sehemu hiyo katika mawasiliano):
+Ili kuwasiliana na bus pirate nilitumia Tera Term iliyounganishwa kwenye COM port ya bus pirate, nikiwa na Setup --> Serial Port --> Speed ya 115200.\
+Katika mawasiliano yafuatayo unaweza kuona jinsi ya kuandaa bus pirate ili kuwasiliana kwa I2C na jinsi ya kuandika na kusoma kutoka kwenye memory (Maoni yanaonekana kwa kutumia "#", usitarajie sehemu hiyo katika mawasiliano):
 ```bash
 # Check communication with buspirate
 i
@@ -155,9 +155,9 @@ NACK
 ```
 ### Sniffer
 
-Katika hali hii tutakuwa tunanusa mawasiliano ya I2C kati ya arduino na EPROM ya awali, unahitaji tu kuwasiliana na vifaa vyote viwili kisha uunganishe bus pirate kwenye pini za SCL, SDA na GND:
+Katika hali hii tutanasa mawasiliano ya I2C kati ya arduino na EPROM ya awali; unahitaji tu kuwasiliana na vifaa vyote viwili kisha uunganishe bus pirate kwenye pini za SCL, SDA na GND:
 
-![](<../../images/image (166).png>)
+![Soma 20B kutoka anwani 0x69 iliyosanidiwa awali - Sniffer: Katika hali hii tutanasa mawasiliano ya I2C kati ya arduino na EPROM ya awali; unahitaji tu...](<../../images/image (166).png>)
 ```bash
 I2C>m
 1. HiZ

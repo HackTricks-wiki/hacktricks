@@ -2,20 +2,20 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**BlobRunner**](https://github.com/OALabs/BlobRunner) ni **shellcode loader ndogo ya Windows kwa ajili ya debugging**: hutenga memory ya RWX, hunakili blob, huchapisha base address / entry point, kisha kuhamishia execution huko. Hii ni muhimu wakati sample ni **raw shellcode**, **decrypted stage iliyotolewa kutoka kwenye malware**, au **position-independent blob** isiyo na PE header.
+[**BlobRunner**](https://github.com/OALabs/BlobRunner) ni **shellcode loader for debugging** ndogo ya Windows: hutenga memory ya RWX, kunakili blob, kuchapisha base address / entry point, kisha kuhamishia execution huko. Hii ni muhimu wakati sample ni **raw shellcode**, **decrypted stage extracted from malware**, au **position-independent blob** ambayo haina PE header.
 
-Snippet iliyo hapa chini inadumisha wazo la awali, lakini inatumia **`%p` kwa pointers zinazochapishwa** ili build ya x64 isikate addresses wakati unajaribu kuambatisha debugger au kuweka upya blob katika RE tool yako.
+Snippet iliyo hapa chini inadumisha wazo la awali, lakini inatumia **`%p` kwa pointers zinazochapishwa** ili x64 build isikate addresses wakati unajaribu ku-attach debugger au kurebase blob katika RE tool yako.
 
 ## Build
 
-Njia rahisi zaidi ya kujenga project ya awali ni kutumia **Visual Studio Developer Command Prompt**:
+Njia rahisi zaidi ya ku-build project ya awali ni kutumia **Visual Studio Developer Command Prompt**:
 ```bash
 cl blobrunner.c
 cl /Feblobrunner64.exe /Foblobrunner64.out blobrunner.c
 ```
-Unaweza pia kubandika code kwenye C project ndogo ya Visual Studio / VS Code na kuikompile hapo.
+Unaweza pia kubandika code hiyo kwenye project ndogo ya C ya Visual Studio / VS Code na kuikompile huko.
 
-## Patterns za matumizi muhimu
+## Mifumo muhimu ya matumizi
 ```bash
 # Execute from the beginning of the blob
 BlobRunner.exe shellcode.bin
@@ -29,58 +29,58 @@ BlobRunner.exe shellcode.bin --nopause
 # Force an access violation and let the configured JIT debugger catch it
 BlobRunner.exe shellcode.bin --jit
 ```
-- Katika **x86**, BlobRunner husitisha kwa muda kisha hufanya direct jump kwenda kwenye blob entry point.
+- Katika **x86**, BlobRunner husitisha kwa muda kisha hufanya direct jump hadi blob entry point.
 - Katika **x64**, huunda **suspended thread**, hivyo unaweza kuweka breakpoint kwenye thread start address kabla ya kuendelea na execution.
 - `--offset` ni muhimu hasa wakati blob iliyodumpiwa inaanza na **decoder / unpacking stub** na tayari unajua entry point halisi.
 
-## Vidokezo vya matumizi
+## Vidokezo vya kiutendaji
 
-### Rekebisha anwani zilizochapishwa kwenye x64 labs
+### Rekebisha anwani zinazoonyeshwa kwenye x64 labs
 
-Code ya zamani ya BlobRunner huchapisha anwani kwa kutumia casts kama `(int)(size_t)lpvBase` na `%08x` / `%016x`. Katika workflows za 64-bit, hii inaweza kukata nusu ya juu ya pointer na kufanya rebasing / breakpoint placement kuwa ngumu. Snippet iliyo hapa chini tayari inarekebisha hilo kwa kuchapisha thamani za **`%p`** moja kwa moja.
+Msimbo wa zamani wa BlobRunner huonyesha anwani kupitia casts kama `(int)(size_t)lpvBase` na `%08x` / `%016x`. Katika workflows za 64-bit, hii inaweza kukata nusu ya juu ya pointer na kufanya rebasing / breakpoint placement kuwa ngumu. Snippet iliyo hapa chini tayari hurekebisha hilo kwa kuonyesha thamani za **`%p`** moja kwa moja.
 
 ### `--jit` ni muhimu kwa breakpoints za first-instruction
 
-`--jit` huondoa execute access kwenye byte ya kwanza ya shellcode na kuruhusu Windows kuibua **access violation** wakati blob inaanza kufanya execution. Hii ni muhimu unapotaka **JIT debugger** iliyosanidiwa (kwa mfano x64dbg) inase first execution attempt badala ya kujaribu ku-attach manually kwa wakati sahihi. Baada ya debugger kusimama, rejesha execute rights kisha endelea.
+`--jit` huondoa execute access kutoka byte ya kwanza ya shellcode na kuiruhusu Windows izalishe **access violation** blob inapoanza kufanya execution. Hii ni muhimu unapotaka **JIT debugger** iliyosanidiwa (kwa mfano x64dbg) inase first execution attempt badala ya kujaribu ku-attach manually kwa wakati unaofaa. Baada ya debugger kusimama, rejesha execute rights kisha endelea.
 
-Mtiririko wa vitendo wa **x64dbg** ni:
+Mtiririko wa kiutendaji wa **x64dbg** ni:
 ```text
 setjit
 setjitauto on
 BlobRunner.exe shellcode.bin --jit
 setpagerights <region>, ExecuteReadWrite
 ```
-Amri mbili za kwanza husajili x64dbg kama JIT debugger, na `setpagerights` hurejesha haki za utekelezaji kwenye eneo lililochapishwa na BlobRunner baada ya debugger kunasa access violation.
+Amri mbili za kwanza zinasajili x64dbg kama JIT debugger, na `setpagerights` inarejesha haki za utekelezaji kwenye eneo lililochapishwa na BlobRunner baada ya debugger kunasa access violation.
 
-### Tumia time-travel kwenye shellcode badala ya kuiendesha hatua kwa hatua moja kwa moja
+### Tumia time-travel kwenye shellcode badala ya kui-single-step moja kwa moja
 
-Workflow ya hivi karibuni na yenye manufaa makubwa ni kurekodi BlobRunner chini ya **TTD**, kisha kukagua trace katika **Binary Ninja** / **WinDbg**. Hii ni nzuri wakati blob inajisimbua, inasolve APIs dynamically, au inatekeleza stages kadhaa za muda mfupi. Tangu **Binary Ninja 4.1**, TTD support si ya kiwango cha beta tu: inaweza kuendesha reverse-debugging na kurahisisha workflow ya WinDbg / TTD moja kwa moja kutoka Binary Ninja.<sup>[[1]](#references)</sup>
+Workflow ya hivi karibuni na yenye vitendo ni kurekodi BlobRunner chini ya **TTD**, kisha kukagua trace katika **Binary Ninja** / **WinDbg**. Hii ni muhimu sana wakati blob inajidecrypt yenyewe, inaresolve APIs dynamically, au inatekeleza stages kadhaa za muda mfupi. Tangu **Binary Ninja 4.1**, msaada wa TTD si wa kiwango cha beta tena: unaweza kuendesha reverse-debugging na kurahisisha workflow ya WinDbg / TTD moja kwa moja kutoka Binary Ninja.<sup>[[1]](#references)</sup>
 ```bash
 TTD.exe .\blobrunner.exe .\shellcode.bin
 ```
-Sehemu muhimu ni **kuandika chini anwani ya msingi iliyotengwa iliyoonyeshwa na BlobRunner** kisha **ku-rebase** mwonekano wa shellcode kwenye anwani hiyo kabla ya kucheza tena trace. Pia zingatia kwamba Microsoft inaandika TTD recording kama **invasive**: iendeshe kutoka kwenye prompt yenye **elevated** privileges, tarajia slowdown inayoonekana, na fupisha dirisha la recording ili kuepuka trace files kubwa kupita kiasi.
+Sehemu muhimu ni **kuandika anwani ya msingi iliyotengewa** iliyoonyeshwa na BlobRunner, kisha **ku-rebase** mwonekano wa shellcode kwenye anwani hiyo kabla ya kucheza tena trace. Pia kumbuka kwamba Microsoft inaeleza TTD recording kuwa **invasive**: iendeshe kutoka kwenye prompt iliyo na **elevated privileges**, tarajia slowdown inayoonekana, na weka muda wa recording kuwa mfupi ili kuepuka trace files kubwa kupita kiasi.<sup>[[1]](#references)</sup>
 
-### Ikiwa blob inahitaji data inayoambatana nayo, tumia PE wrapper badala yake
+### Ikiwa blob inahitaji data ya ziada, tumia PE wrapper badala yake
 
-Baadhi ya shellcode hutegemea kuwepo kwa **blob ya pili**, **file iliyomapishwa**, au **structured content** nyingine kwenye memory. BlobRunner imeundwa kwa unyenyekevu kimakusudi, kwa hivyo katika hali hizi runner kama **SCLauncher** inaweza kuwa rahisi zaidi kwa sababu inaweza:<sup>[[2]](#references)</sup>
+Baadhi ya shellcode hutegemea **blob ya pili**, **mapped file**, au **structured content** nyingine kuwepo kwenye memory. BlobRunner imeundwa kimakusudi kuwa minimal, hivyo katika hali hizi runner kama **SCLauncher** inaweza kuwa rahisi zaidi kwa sababu inaweza:<sup>[[2]](#references)</sup>
 
 - kusitisha kabla ya execution,
 - kuingiza breakpoint ya `INT3`,
-- kupakia **content ya ziada** kwenye memory,
-- kumapisha hiyo content ya ziada kwenye memory, au
-- kufunga shellcode ndani ya **PE** ya muda kwa ajili ya analysis rahisi kwenye tools zinazopendelea executables za kawaida.
+- kupakia **additional content** kwenye memory,
+- kuweka hiyo content ya ziada kwenye memory-map, au
+- kufunga shellcode ndani ya **PE** ya muda kwa ajili ya analysis rahisi zaidi kwenye tools zinazopendelea executables za kawaida.
 
 Mfano:
 ```bash
 SCLauncher.exe -f=shellcode.bin -pause -d=config.bin -mm
 SCLauncher.exe -f=shellcode.bin -pe -64 -ep=0x120
 ```
-Kwa workflows za ziada kama **jmp2it**, emulation ya **Cutter**, au shellcode tracing inayotumia **scdbg**, angalia [ukurasa mkuu wa shellcode reversing](README.md).
+Kwa workflows za ziada kama **jmp2it**, emulation ya **Cutter**, au ufuatiliaji wa shellcode unaotegemea **scdbg**, angalia [ukurasa mkuu wa shellcode reversing](README.md).
 
-## Msimbo wa chanzo
+## Source code
 
-Mistari pekee iliyorekebishwa kutoka [msimbo wa awali](https://github.com/OALabs/BlobRunner) ni mistari ya kuchapisha pointer, inayotumika kuepuka truncation ya address za x64.  
-Ili kuikompile, **unda tu project ya C/C++ katika Visual Studio Code, copy na paste msimbo huo, kisha uibuild**.
+Mistari pekee iliyorekebishwa kutoka kwenye [code ya awali](https://github.com/OALabs/BlobRunner) ni mistari ya kuchapisha pointer, inayotumika kuzuia truncation ya anwani za x64.  
+Ili kuicompile, **unda tu project ya C/C++ katika Visual Studio Code, copy na paste code hiyo, kisha build**.
 ```c
 #include <stdio.h>
 #include <windows.h>
@@ -284,8 +284,9 @@ getchar();
 return 0;
 }
 ```
-## Marejeo
+## Marejeleo
 
-- [1] [Kudebug Shellcode kwa kutumia Time Travel Debugging na Binary Ninja](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
-- [2] [Kuchanganua Shellcode kwa kutumia SCLauncher](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
+- [1] [Time Travel Debugging Shellcode with Binary Ninja](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
+- [2] [Analyzing Shellcode with SCLauncher](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
+
 {{#include ../../banners/hacktricks-training.md}}

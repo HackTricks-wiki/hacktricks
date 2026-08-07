@@ -2,52 +2,58 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Sehemu hii inaangazia **kutafuta na kutoa data iliyofichwa** kutoka kwa files (images/audio/video/documents/archives) na kutoka kwa text-based steganography.
+Sehemu hii inalenga **kutafuta na kutoa data iliyofichwa** kutoka kwenye files (images/audio/video/documents/archives) na kutoka kwenye steganography ya msingi wa maandishi.
 
-Ikiwa umekuja kwa ajili ya mashambulizi ya kriptografia, nenda kwenye sehemu ya **Crypto**.
+Ikiwa uko hapa kwa ajili ya mashambulizi ya cryptographic, nenda kwenye sehemu ya **Crypto**.
 
-## Sehemu ya Kuingia
+## Sehemu ya kuanzia
 
-Karibia steganography kama tatizo la forensics: tambua container halisi, orodhesha maeneo yenye ishara kubwa (metadata, appended data, embedded files), na kisha tumia mbinu za content-level extraction.
+Shughulikia steganography kama tatizo la forensics: tambua container halisi, kagua maeneo yenye uwezekano mkubwa wa kutoa taarifa (metadata, data iliyoongezwa mwishoni, files zilizopachikwa), kisha tumia mbinu za extraction za kiwango cha maudhui.
 
-### Mfumo wa kazi & triage
+### Workflow na triage
 
-Mfumo uliopangwa unaoweka kipaumbele kwenye utambuzi wa container, ukaguzi wa metadata/string, carving, na matawi maalum kwa format.
+Workflow iliyopangwa inayoweka kipaumbele kwenye utambuzi wa container, ukaguzi wa metadata/strings, carving, na branching mahususi kwa format.
+
 {{#ref}}
 workflow/README.md
 {{#endref}}
 
-### Picha
+### Images
 
-Ambapo sehemu kubwa ya CTF stego inapatikana: LSB/bit-planes (PNG/BMP), chunk/file-format weirdness, JPEG tooling, na multi-frame GIF tricks.
+Hapa ndipo stego nyingi za CTF hupatikana: LSB/bit-planes (PNG/BMP), mambo yasiyo ya kawaida kwenye chunks/file-format, zana za JPEG, na mbinu za GIF zenye frames nyingi.
+
 {{#ref}}
 images/README.md
 {{#endref}}
 
-### Sauti
+### Audio
 
-Ujumbe katika spectrogram, sample LSB embedding, na telephone keypad tones (DTMF) ni mifumo inayorudiwa.
+Ujumbe wa spectrogram, embedding ya sample LSB, na sauti za vitufe vya simu (DTMF) ni mifumo inayojirudia.
+
 {{#ref}}
 audio/README.md
 {{#endref}}
 
-### Maandishi
+### Text
 
-Ikiwa text inaonekana kawaida lakini inatenda kwa njia isiyotegemewa, tazama Unicode homoglyphs, zero-width characters, au whitespace-based encoding.
+Ikiwa text inaonekana kawaida lakini inatenda kwa njia isiyotarajiwa, zingatia Unicode homoglyphs, zero-width characters, au encoding inayotumia whitespace.
+
 {{#ref}}
 text/README.md
 {{#endref}}
 
 ### Documents
 
-PDFs na Office files ni containers kwanza; mashambulizi kwa kawaida yanazunguka embedded files/streams, object/relationship graphs, na ZIP extraction.
+PDFs na Office files ni containers kwanza; mashambulizi kwa kawaida huhusu files/streams zilizopachikwa, object/relationship graphs, na ZIP extraction.
+
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Malware and delivery-style steganography
+### Steganography ya malware na delivery
 
-Delivery ya payload mara nyingi inatumia files zinazoonekana halali (e.g., GIF/PNG) ambazo zinabeba marker-delimited text payloads, badala ya kuficha kwa ngazi ya pikseli.
+Uwasilishaji wa payload mara nyingi hutumia files zinazoonekana kuwa halali (kwa mfano, GIF/PNG) zinazobeba payloads za text zilizotenganishwa kwa markers, badala ya kuficha data katika kiwango cha pixels.
+
 {{#ref}}
 malware-and-network/README.md
 {{#endref}}

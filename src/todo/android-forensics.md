@@ -2,26 +2,31 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Locked Device
+## Kifaa Kilichofungwa
 
-Ili kuanza kutoa data kutoka kwa kifaa cha Android, lazima kiwe kimefunguliwa. Ikiwa kimefungwa unaweza:
+Ili kuanza kutoa data kutoka kwenye kifaa cha Android, lazima kifunguliwe. Ikiwa kimefungwa, unaweza:
 
-- Kuangalia ikiwa kifaa kina ufuatiliaji kupitia USB umewezeshwa.
-- Kuangalia kwa shambulio la [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
-- Jaribu na [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
+- Kukagua ikiwa kifaa kina debugging kupitia USB iliyowashwa.
+- Kukagua uwezekano wa [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)<sup>[[1]](#references)</sup>
+- Kujaribu kutumia [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)<sup>[[2]](#references)</sup>
 
-## Data Adquisition
+## Upatikanaji wa Data
 
-Unda [android backup using adb](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) na uitoe kwa kutumia [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
+Tengeneza [android backup using adb](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) na uitowe kwa kutumia [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
 
-### If root access or physical connection to JTAG interface
+### Ikiwa kuna root access au muunganisho wa kimwili kwenye interface ya JTAG
 
-- `cat /proc/partitions` (tafuta njia ya kumbukumbu ya flash, kwa kawaida ingizo la kwanza ni _mmcblk0_ na linahusiana na kumbukumbu yote ya flash).
-- `df /data` (Gundua ukubwa wa block wa mfumo).
-- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (itekeleze kwa kutumia taarifa zilizokusanywa kutoka kwa ukubwa wa block).
+- `cat /proc/partitions` (tafuta path ya flash memory; kwa ujumla ingizo la kwanza ni _mmcblk0_ na linalingana na flash memory yote).
+- `df /data` (gundua ukubwa wa block wa mfumo).
+- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (itekeleze kwa kutumia maelezo yaliyokusanywa kuhusu ukubwa wa block).
 
 ### Memory
 
-Tumia Linux Memory Extractor (LiME) kutoa taarifa za RAM. Ni nyongeza ya kernel ambayo inapaswa kupakiwa kupitia adb.
+Tumia Linux Memory Extractor (LiME) kutoa maelezo ya RAM. Ni kernel extension inayopaswa kupakiwa kupitia adb.
+
+## Marejeo
+
+- [1] [Smudge Attacks on Smartphone Touch Screens](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
+- [2] [This brute force device can crack any iPhone's PIN code](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
 
 {{#include ../banners/hacktricks-training.md}}
