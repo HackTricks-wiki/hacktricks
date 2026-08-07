@@ -1,83 +1,83 @@
-# Detecting Phishing
+# Otkrivanje Phishing-a
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Uvod
 
-Da biste otkrili phishing pokušaj važno je **razumeti phishing tehnike koje se danas koriste**. Na roditeljskoj stranici ovog posta možete pronaći te informacije, pa ako niste upoznati koje se tehnike danas koriste preporučujem da odete na roditeljsku stranicu i pročitate barem taj deo.
+Da biste otkrili phishing pokušaj, važno je **razumeti phishing tehnike koje se danas koriste**. Na nadređenoj stranici ovog posta možete pronaći ove informacije, pa ako niste upoznati sa tehnikama koje se danas koriste, preporučujem vam da odete na nadređenu stranicu i pročitate bar taj odeljak.
 
-Ovaj post se zasniva na ideji da će **napadači pokušati na neki način imitirati ili koristiti domen žrtve**. Ako se vaš domen zove `example.com` i budete phished koristeći potpuno drugačiji domen iz nekog razloga poput `youwonthelottery.com`, ove tehnike to neće otkriti.
+Ovaj post se zasniva na ideji da će **napadači pokušati da na neki način oponašaju ili koriste naziv domena žrtve**. Ako se vaš domen zove `example.com`, a phishing napad koristi potpuno drugačiji naziv domena, iz nekog razloga kao što je `youwonthelottery.com`, ove tehnike ga neće otkriti.
 
-## Domain name variations
+## Varijacije naziva domena
 
-Prilično je **lako** **otkriti** one **phishing** pokušaje koji će koristiti **sličan domen** unutar emaila.\
-Dovoljno je **generisati listu najverovatnijih phishing imena** koja bi napadač mogao koristiti i **proveriti** da li je **registrovan** ili samo proveriti da li bilo koji **IP** koristi taj domen.
+Prilično je **lako** **otkriti** one **phishing** pokušaje koji će koristiti **sličan naziv domena** unutar email-a.\
+Dovoljno je **generisati listu najverovatnijih phishing naziva** koje bi napadač mogao da koristi i **proveriti** da li su **registrovani**, ili jednostavno proveriti da li ih koristi neka **IP** adresa.
 
-### Finding suspicious domains
+### Pronalaženje sumnjivih domena
 
-Za ovu svrhu možete koristiti bilo koji od sledećih alata. Imajte na umu da će ovi alati takođe automatski izvršavati DNS zahteve da provere da li domen ima dodeljen neki IP:
+U tu svrhu možete koristiti bilo koji od sledećih alata. Imajte na umu da će ovi alati takođe automatski izvršavati DNS zahteve kako bi proverili da li domen ima dodeljenu IP adresu:
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-Savet: Ako generišete listu kandidata, ubacite je i u logove vašeg DNS resolvera kako biste otkrili **NXDOMAIN upite iz vaše organizacije** (korisnici koji pokušavaju da dosegnu tipfeler pre nego što napadač zapravo registruje domen). Sinkholujte ili preblokirajte ove domene ako politika dozvoljava.
+Savet: Ako generišete listu kandidata, prosledite je i svojim DNS resolver logovima kako biste otkrili **NXDOMAIN lookups iz vaše organizacije** (korisnici pokušavaju da pristupe typo domenu pre nego što ga napadač zapravo registruje). Preusmerite ove domene u sinkhole ili ih unapred blokirajte ako politika to dozvoljava.
 
 ### Bitflipping
 
-**Kratko objašnjenje ove tehnike možete naći na roditeljskoj stranici. Ili pročitajte originalno istraživanje na** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+**Kratko objašnjenje ove tehnike možete pronaći na nadređenoj stranici. Ili pročitajte originalno istraživanje na** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)<sup>[[1]](#references)</sup>
 
-Na primer, 1-bitna izmena u domenu microsoft.com može ga transformisati u _windnws.com._\
-**Napadači mogu registrovati što više bit-flipping domena povezanih sa žrtvom kako bi preusmerili legitimne korisnike na svoju infrastrukturu**.
+Na primer, izmena jednog bita u domenu microsoft.com može da ga pretvori u _windnws.com._\
+**Napadači mogu registrovati što je moguće više bit-flipping domena povezanih sa žrtvom kako bi legitimne korisnike preusmerili na svoju infrastrukturu**.<sup>[[1]](#references)</sup>
 
-**Svi mogući bit-flipping nazivi domena takođe bi trebalo da budu praćeni.**
+**Takođe treba nadgledati sve moguće bit-flipping nazive domena.**
 
-Ako takođe treba da uzmete u obzir homoglyph/IDN lookalikes (npr. mešanje Latin/Cyrillic karaktera), proverite:
+Ako takođe morate da uzmete u obzir homoglyph/IDN lookalikes (npr. mešanje latiničnih i ćiriličnih znakova), proverite:
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
 
-### Basic checks
+### Osnovne provere
 
-Kada imate listu potencijalno sumnjivih imena domena treba da ih **proverite** (uglavnom portove HTTP i HTTPS) da biste videli da li koriste neki login form sličan nekom iz domena žrtve.\
-Takođe možete proveriti port 3333 da vidite da li je otvoren i pokreće instancu `gophish`.\
-Zanimljivo je znati **koliko je stara svaki otkriveni sumnjiv domen** — što je mlađi, to je rizičniji.\
-Takođe možete dobiti **snimke ekrana** HTTP i/ili HTTPS sumnjive web stranice da vidite da li je sumnjiva i u tom slučaju **pristupiti joj radi dublje analize**.
+Kada imate listu potencijalno sumnjivih naziva domena, trebalo bi da ih **proverite** (uglavnom portove HTTP i HTTPS) kako biste **utvrdili da li koriste neki login formular sličan** formularu sa domena žrtve.\
+Možete takođe proveriti port 3333 da biste videli da li je otvoren i da li na njemu radi instanca alata `gophish`.\
+Takođe je korisno znati **koliko je star svaki otkriveni sumnjivi domen**; što je mlađi, to je rizičniji.\
+Možete dobiti i **screenshots** sumnjive HTTP i/ili HTTPS web stranice kako biste videli da li je sumnjiva i, u tom slučaju, **pristupiti joj radi detaljnije analize**.
 
-### Advanced checks
+### Napredne provere
 
-Ako želite da odete korak dalje preporučio bih da **nadgledate te sumnjive domene i povremeno tražite nove** (svakog dana? to traje samo nekoliko sekundi/minuta). Takođe bi trebalo da **proverite** otvorene **portove** povezanih IP-ova i **tražite instance `gophish` ili sličnih alata** (da, napadači takođe greše) i **nadgledate HTTP i HTTPS web stranice sumnjivih domena i poddomena** da biste videli da li su kopirali neki login form sa stranica žrtve.\
-Da biste to **automatizovali** preporučujem da imate listu login formi domena žrtve, da pokrenete spider nad sumnjivim web stranicama i upoređujete svaki login form pronađen na sumnjivim domenima sa svakim login formom žrtvinog domena koristeći nešto poput `ssdeep`.\
-Ako ste locirali login forme sumnjivih domena, možete pokušati da **pošaljete lažne kredencijale** i **proverite da li vas preusmerava na domen žrtve**.
+Ako želite da odete korak dalje, preporučujem vam da **nadgledate te sumnjive domene i povremeno pretražujete nove** (svakog dana? potrebno je samo nekoliko sekundi/minuta). Takođe bi trebalo da **proverite** otvorene **portove** povezanih IP adresa i **potražite instance alata `gophish` ili sličnih alata** (da, i napadači prave greške), kao i da **nadgledate HTTP i HTTPS web stranice sumnjivih domena i poddomena** kako biste videli da li su kopirali neki login formular sa web stranica žrtve.\
+Da biste **automatizovali ovo**, preporučujem da imate listu login formulara domena žrtve, da spider-ujete sumnjive web stranice i uporedite svaki pronađeni login formular unutar sumnjivih domena sa svakim login formularom domena žrtve, koristeći nešto poput alata `ssdeep`.\
+Ako ste pronašli login formulare sumnjivih domena, možete pokušati da **pošaljete nasumične kredencijale** i **proverite da li vas preusmeravaju na domen žrtve**.
 
 ---
 
-### Hunting by favicon and web fingerprints (Shodan/ZoomEye/Censys)
+### Lov pomoću favicon-a i web fingerprint-a (Shodan/ZoomEye/Censys)
 
-Mnogi phishing kitovi ponovo koriste favicon-e iz brenda koji impersoniraju. Internet-wide skeneri izračunavaju MurmurHash3 od base64-encoded favicon-a. Možete generisati hash i pivotirati na njega:
+Mnogi phishing kit-ovi ponovo koriste favicon-e brenda koji oponašaju. Internet-wide skeneri izračunavaju MurmurHash3 vrednost base64-encoded favicon-a. Možete generisati hash i koristiti ga za pivotiranje:
 
-Primer u Pythonu (mmh3):
+Primer za Python (mmh3):
 ```python
 import base64, requests, mmh3
 url = "https://www.paypal.com/favicon.ico"  # change to your brand icon
 b64 = base64.encodebytes(requests.get(url, timeout=10).content)
 print(mmh3.hash(b64))  # e.g., 309020573
 ```
-- Upit na Shodan: `http.favicon.hash:309020573`
-- Sa alatima: pogledajte community tools poput favfreak za generisanje hashes i dorks za Shodan/ZoomEye/Censys.
+- Upit za Shodan: `http.favicon.hash:309020573`
+- Korišćenjem alata: pogledajte community alate kao što je favfreak za generisanje hash vrednosti i dorkova za Shodan/ZoomEye/Censys.
 
 Napomene
-- Favicons se ponovo koriste; tretirajte podudaranja kao tragove i verifikujte sadržaj i certs pre nego što reagujete.
-- Kombinujte sa domain-age i heuristikom ključnih reči za veću preciznost.
+- Favicon ikone se ponovo koriste; podudaranja tretirajte kao potencijalne tragove i proverite sadržaj i sertifikate pre preduzimanja bilo kakvih radnji.
+- Kombinujte heuristike starosti domena i ključnih reči radi bolje preciznosti.
 
 ### Lov na URL telemetriju (urlscan.io)
 
-`urlscan.io` čuva istorijske snimke ekrana, DOM, requests i TLS meta-podatke poslatih URL-ova. Možete tražiti zloupotrebu brenda i klonove:
+`urlscan.io` čuva istorijske snimke ekrana, DOM, zahteve i TLS metapodatke poslatih URL-ova. Možete tragati za zloupotrebom brenda i klonovima:<sup>[[2]](#references)</sup>
 
 Primeri upita (UI ili API):
-- Find lookalikes excluding your legit domains: `page.domain:(/.*yourbrand.*/ AND NOT yourbrand.com AND NOT www.yourbrand.com)`
-- Find sites hotlinking your assets: `domain:yourbrand.com AND NOT page.domain:yourbrand.com`
-- Restrict to recent results: append `AND date:>now-7d`
+- Pronalaženje sličnih domena uz izuzimanje legitimnih domena: `page.domain:(/.*yourbrand.*/ AND NOT yourbrand.com AND NOT www.yourbrand.com)`
+- Pronalaženje sajtova koji direktno učitavaju vaše resurse: `domain:yourbrand.com AND NOT page.domain:yourbrand.com`
+- Ograničavanje na nedavne rezultate: dodajte `AND date:>now-7d`
 
 Primer API-ja:
 ```bash
@@ -85,13 +85,13 @@ Primer API-ja:
 curl -s 'https://urlscan.io/api/v1/search/?q=page.domain:(/.*yourbrand.*/%20AND%20NOT%20yourbrand.com)%20AND%20date:>now-7d' \
 -H 'API-Key: <YOUR_URLSCAN_KEY>' | jq '.results[].page.url'
 ```
-Iz JSON-a, pivot on:
-- `page.tlsIssuer`, `page.tlsValidFrom`, `page.tlsAgeDays` da otkriješ veoma nove certs za lookalikes
-- `task.source` values like `certstream-suspicious` da povežeš nalaze sa CT monitoringom
+Iz JSON-a izdvojite:
+- `page.tlsIssuer`, `page.tlsValidFrom`, `page.tlsAgeDays` da biste uočili veoma nove sertifikate kod lookalike domena
+- Vrednosti `task.source`, kao što je `certstream-suspicious`, da biste povezali nalaze sa CT monitoringom
 
-### Starost domena preko RDAP-a (scriptable)
+### Starost domena putem RDAP-a (pogodno za skriptovanje)
 
-RDAP vraća mašinski čitljive događaje o kreiranju. Korisno za označavanje **novoregistrovanih domena (NRDs)**.
+RDAP vraća mašinski čitljive događaje kreiranja. Korisno je za označavanje **novo registrovanih domena (NRD-ova)**.
 ```bash
 # .com/.net RDAP (Verisign)
 curl -s https://rdap.verisign.com/com/v1/domain/suspicious-example.com | \
@@ -100,48 +100,50 @@ jq -r '.events[] | select(.eventAction=="registration") | .eventDate'
 # Generic helper using rdap.net redirector
 curl -s https://www.rdap.net/domain/suspicious-example.com | jq
 ```
-Obogatite svoj pipeline označavanjem domena prema starosti registracije (npr. <7 dana, <30 dana) i prioritizujte trijažu u skladu s tim.
+Obogatite svoj pipeline označavanjem domena prema kategorijama starosti registracije (npr. <7 dana, <30 dana) i odredite prioritet trijaže u skladu s tim.
 
-### TLS/JAx otisci prstiju za otkrivanje AiTM infrastrukture
+### TLS/JAx fingerprints za otkrivanje AiTM infrastrukture
 
-Savremeni credential-phishing sve češće koristi **Adversary-in-the-Middle (AiTM)** reverse proxy-e (npr. Evilginx) za krađu session tokena. Možete dodati detekcije na mrežnoj strani:
+Savremeni phishing za krađu akreditiva sve češće koristi **Adversary-in-the-Middle (AiTM)** reverse proxy-je (npr. Evilginx) za krađu session tokena. Možete dodati detekcije na mrežnoj strani:
 
-- Zabeležite TLS/HTTP otiske (JA3/JA4/JA4S/JA4H) na egressu. Neki Evilginx buildovi su primećeni sa stabilnim JA4 vrednostima klijent/server. Alarmirajte na poznato-loše otiske samo kao slab signal i uvek potvrdite sa sadržajem i domain intel-om.
-- Proaktivno beležite TLS certificate metadata (issuer, SAN count, wildcard use, validity) za lookalike hostove otkrivene putem CT ili urlscan i korelirajte sa starošću DNS-a i geolokacijom.
+- Beležite TLS/HTTP fingerprints (JA3/JA4/JA4S/JA4H) na izlaznom saobraćaju. Primećeno je da neke Evilginx verzije imaju stabilne JA4 vrednosti klijenta/servera. Upozoravajte samo na poznate zlonamerne fingerprints kao slab signal i uvek potvrdite nalaz analizom sadržaja i intelligence podacima o domenu.<sup>[[3]](#references)</sup>
+- Proaktivno beležite metapodatke TLS sertifikata (izdavalac, broj SAN zapisa, korišćenje wildcard-a, validnost) za lookalike hostove otkrivene putem CT-a ili urlscan-a i korelirajte ih sa starošću DNS-a i geolokacijom.
 
-> Napomena: tretirajte otiske kao enrichment, ne kao jedine blokere; frameworks se razvijaju i mogu randomizovati ili obfuskovati.
+> Napomena: Tretirajte fingerprints kao obogaćivanje podataka, a ne kao jedine blokade; framework-i se razvijaju i mogu randomizovati ili sakriti fingerprints.
 
-### Domain names using keywords
+### Nazivi domena koji koriste ključne reči
 
-Roditeljska stranica takođe pominje tehniku varijacije naziva domena koja se sastoji od ubacivanja **domena žrtve u veći domen** (npr. paypal-financial.com za paypal.com).
+Nadređena stranica takođe pominje tehniku varijacije naziva domena koja se sastoji od stavljanja **naziva domena žrtve unutar većeg domena** (npr. paypal-financial.com za paypal.com).
 
 #### Certificate Transparency
 
-Nije moguće primeniti prethodni "Brute-Force" pristup, ali je zapravo **moguće otkriti takve phishing pokušaje** zahvaljujući certificate transparency. Svaki put kada CA izda sertifikat, detalji postaju javni. To znači da čitanjem certificate transparency ili čak praćenjem istog, **moguće je pronaći domene koji koriste ključnu reč u svom imenu**. Na primer, ako napadač generiše sertifikat za [https://paypal-financial.com](https://paypal-financial.com), pregledajući sertifikat moguće je naći ključnu reč "paypal" i znati da se koristi sumnjiv e-mail.
+Nije moguće primeniti prethodni pristup „Brute-Force“, ali je zapravo **moguće otkriti takve phishing pokušaje** i zahvaljujući certificate transparency. Svaki put kada CA izda sertifikat, detalji postaju javni. To znači da je čitanjem ili čak nadgledanjem certificate transparency zapisa **moguće pronaći domene koji koriste ključnu reč u svom nazivu**. Na primer, ako napadač generiše sertifikat za [https://paypal-financial.com](https://paypal-financial.com), pregledom sertifikata moguće je pronaći ključnu reč „paypal“ i saznati da se koristi sumnjiv email.
 
-The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
+Objava [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) sugeriše da možete koristiti Censys za pretragu sertifikata koji se odnose na određenu ključnu reč i filtrirati ih po datumu (samo „nove“ sertifikate) i po CA izdavaocu „Let's Encrypt“:<sup>[[4]](#references)</sup>
 
 ![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
 
-Međutim, isto možete uraditi koristeći besplatni web [**crt.sh**](https://crt.sh). Možete **pretražiti ključnu reč** i **filtrirati** rezultate **po datumu i CA** ako želite.
+Međutim, „isto“ možete uraditi koristeći besplatni web [**crt.sh**](https://crt.sh). Možete **pretraživati ključnu reč** i po želji **filtrirati** rezultate **po datumu i CA-u**.
 
-![](<../../images/image (519).png>)
+![Nazivi domena koji koriste ključne reči - Certificate Transparency: Međutim, „isto“ možete uraditi koristeći besplatni web crt.sh. Možete pretraživati ključnu reč i filtrirati rezultate po datumu i...](<../../images/image (519).png>)
 
-Koristeći ovu poslednju opciju možete čak koristiti polje Matching Identities da vidite da li neka identitet iz pravog domena odgovara nekom od sumnjivih domena (imajte na umu da sumnjiv domen može biti false positive).
+Korišćenjem ove poslednje opcije možete čak upotrebiti polje Matching Identities da proverite da li se neki identitet iz stvarnog domena podudara sa nekim od sumnjivih domena (imajte na umu da sumnjiv domen može biti false positive).
 
-**Još jedna alternativa** je fantastičan projekat pod nazivom [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream obezbeđuje real-time stream novo-generisanih sertifikata koji možete koristiti za detekciju određenih ključnih reči u (near) real-time. Zapravo, postoji projekat [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) koji radi upravo to.
+**Još jedna alternativa** je odličan projekat pod nazivom [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream pruža stream novogenerisanih sertifikata u realnom vremenu, koji možete koristiti za otkrivanje navedenih ključnih reči u (skoro) realnom vremenu. Zapravo, postoji projekat pod nazivom [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) koji upravo to radi.
 
-Praktičan savet: pri trijaži CT hitova, prioritizujte NRD-ove, nepoverljive/unknown registrare, privacy-proxy WHOIS, i certs sa vrlo nedavnim `NotBefore` vremenima. Održavajte allowlistu vaših owned domena/brandova da smanjite šum.
+Praktičan savet: prilikom trijaže CT pogodaka dajte prioritet NRD-ovima, nepouzdanim/nepoznatim registrarima, WHOIS zapisima sa privacy-proxy zaštitom i sertifikatima sa veoma skorim vremenom `NotBefore`. Održavajte allowlist-u svojih domena/brendova kako biste smanjili šum.
 
-#### **New domains**
+#### **Novi domeni**
 
-**Jedna poslednja alternativa** je da prikupite listu **newly registered domains** za neke TLD-ove ([Whoxy](https://www.whoxy.com/newly-registered-domains/) provides such service) i **proverite ključne reči u tim domenima**. Međutim, dugi domeni obično koriste jedan ili više subdomena, stoga ključna reč neće biti u FLD-u i nećete moći da pronađete phishing subdomen.
+**Poslednja alternativa** je prikupljanje liste **skoro registrovanih domena** za neke TLD-ove ([Whoxy](https://www.whoxy.com/newly-registered-domains/) pruža takvu uslugu) i **provera ključnih reči u tim domenima**. Međutim, dugi domeni obično koriste jedan ili više subdomena, pa se ključna reč neće pojaviti unutar FLD-a i nećete moći da pronađete phishing subdomen.
 
-Dodatna heuristika: tretirajte određene **file-extension TLDs** (npr. `.zip`, `.mov`) sa dodatnim stepenom sumnje pri alertovanju. Oni se često mešaju sa imenima fajlova u mamcima; kombinujte TLD signal sa brand ključnim rečima i NRD age za bolju preciznost.
+Dodatna heuristika: određenim **TLD-ovima koji izgledaju kao ekstenzije fajlova** (npr. `.zip`, `.mov`) dodelite viši nivo sumnje prilikom generisanja upozorenja. Oni se često mogu zameniti sa nazivima fajlova u phishing porukama; kombinujte signal TLD-a sa ključnim rečima brenda i starošću NRD-a radi veće preciznosti.
 
-## References
+## Reference
 
-- urlscan.io – Search API reference: https://urlscan.io/docs/search/
-- APNIC Blog – JA4+ network fingerprinting (includes Evilginx example): https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/
+- [1] [Preotimanje saobraćaja ka Microsoft-ovom windows.com pomoću bitflipping-a](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+- [2] [urlscan.io – Referenca Search API-ja](https://urlscan.io/docs/search/)
+- [3] [APNIC Blog – JA4+ network fingerprinting](https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/)
+- [4] [Otkrivanje phishinga: alati i tehnike](https://0xpatrik.com/phishing-domains/)
 
 {{#include ../../banners/hacktricks-training.md}}

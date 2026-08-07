@@ -1,21 +1,26 @@
+# Kloniranje veb-sajta
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Za phishing procenu ponekad može biti korisno potpuno **klonirati veb sajt**.
 
-Imajte na umu da možete dodati i neke payload-ove na klonirani veb sajt, poput BeEF hook-a da "kontrolišete" karticu korisnika.
+Tokom phishing procene ponekad može biti korisno potpuno **klonirati/izbaciti sadržaj veb-sajta**.
 
-Postoje različiti alati koje možete koristiti u tu svrhu:
+Imajte na umu da kloniranom veb-sajtu možete dodati i neke payload-e, kao što je BeEF hook, da biste „kontrolisali“ korisnički tab.
+
+U tu svrhu možete koristiti različite alate:
 
 ## wget
-```text
-wget -mk -nH
+```bash
+wget --mirror --page-requisites --convert-links --adjust-extension <URL>
+cd <URL>
+python3 -m http.server 8000
 ```
 ## goclone
 ```bash
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
-## Alat za socijalni inženjering
+## Komplet alata za društveni inženjering
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit
 ```

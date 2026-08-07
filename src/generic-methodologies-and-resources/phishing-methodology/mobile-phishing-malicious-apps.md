@@ -3,36 +3,36 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!INFO]
-> Ova stranica pokriva tehnike koje koriste threat actors za distribuciju **malicious Android APKs** i **iOS mobile-configuration profiles** kroz phishing (SEO, social engineering, fake stores, dating apps, itd.).
-> Materijal je prilagođen iz SarangTrap kampanje koju je otkrio Zimperium zLabs (2025) i drugih javnih istraživanja.
+> Ova stranica obuhvata tehnike koje threat actors koriste za distribuciju **malicious Android APK-ova** i **iOS mobile-configuration profila** putem phishinga (SEO, social engineering, lažne prodavnice, dating aplikacije itd.).
+> Materijal je prilagođen kampanji SarangTrap koju je otkrio Zimperium zLabs (2025), kao i drugim javno dostupnim istraživanjima.<sup>[[1]](#references)</sup>
 
-## Attack Flow
+## Tok napada
 
-1. **SEO/Phishing Infrastructure**
-* Register dozens of look-alike domains (dating, cloud share, car service…).
-– Koristite lokalne ključne reči i emoji-je u `<title>` elementu da se rangira u Google.
-– Host *both* Android (`.apk`) i iOS install instructions na istoj landing page.
-2. **First Stage Download**
-* Android: direct link to an *unsigned* or “third-party store” APK.
-* iOS: `itms-services://` or plain HTTPS link to a malicious **mobileconfig** profile (see below).
-3. **Android Post-install Behaviour**
-* C2-gated execution, permission abuse, dropper bypasses, background collection, and other post-install malware behaviour are covered in the dedicated Android Malware Post-Exploitation page below.
-4. **iOS Delivery Technique**
-* A single **mobile-configuration profile** can request `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` etc. to enroll the device in “MDM”-like supervision.
-* Social-engineering instructions:
-1. Open Settings ➜ *Profile downloaded*.
-2. Tap *Install* three times (screenshots on the phishing page).
-3. Trust the unsigned profile ➜ attacker gains *Contacts* & *Photo* entitlement without App Store review.
-5. **iOS Web Clip Payload (phishing app icon)**
-* `com.apple.webClip.managed` payloads can **pin a phishing URL to the Home Screen** with a branded icon/label.
-* Web Clips can run **full‑screen** (hides the browser UI) and be marked **non‑removable**, forcing the victim to delete the profile to remove the icon.
-6. **Network Layer**
-* Plain HTTP, often on port 80 with HOST header like `api.<phishingdomain>.com`.
-* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (no TLS → easy to spot).
+1. **SEO/Phishing infrastruktura**
+* Registrovati desetine look-alike domena (dating, cloud share, car service…).
+– Koristiti ključne reči na lokalnom jeziku i emoji-je u elementu `<title>` radi boljeg rangiranja na Google-u.
+– Hostovati uputstva za instalaciju i za Android (`.apk`) i za iOS na istoj landing stranici.
+2. **Preuzimanje prve faze**
+* Android: direktan link ka *unsigned* APK-u ili APK-u sa “third-party store”-a.
+* iOS: `itms-services://` ili običan HTTPS link ka malicioznom **mobileconfig** profilu (vidi ispod).
+3. **Ponašanje Android malware-a nakon instalacije**
+* Izvršavanje kontrolisano putem C2, zloupotreba dozvola, zaobilaženje dropper-a, prikupljanje podataka u pozadini i druga post-install malware ponašanja obrađeni su na posebnoj stranici Android Malware Post-Exploitation u nastavku.
+4. **iOS tehnika distribucije**
+* Jedan **mobile-configuration profil** može zahtevati `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` itd. radi upisivanja uređaja u nadzor sličan “MDM”-u.
+* Uputstva za social engineering:
+1. Otvoriti Settings ➜ *Profile downloaded*.
+2. Tri puta dodirnuti *Install* (snimci ekrana nalaze se na phishing stranici).
+3. Verovati unsigned profilu ➜ attacker dobija entitlements za *Contacts* i *Photo* bez App Store provere.
+5. **iOS Web Clip payload (phishing ikonica aplikacije)**
+* `com.apple.webClip.managed` payload-i mogu **zakačiti phishing URL na Home Screen** sa brendiranim nazivom/ikonom.
+* Web Clips mogu raditi **preko celog ekrana** (sakrivajući interfejs browser-a) i biti označeni kao **neuklonjivi**, čime se žrtva primorava da obriše profil kako bi uklonila ikonu.<sup>[[3]](#references)</sup>
+6. **Mrežni sloj**
+* Običan HTTP, često na portu 80 sa HOST zaglavljem kao što je `api.<phishingdomain>.com`.
+* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (bez TLS-a → lako uočljivo).
 
 ## Android Malware Post-Exploitation
 
-For post-install Android malware tradecraft such as C2, Accessibility abuse, overlays, ATS automation, staged DEX loading, premium SMS, and persistence, see:
+Za post-install Android malware tradecraft, kao što su C2, zloupotreba Accessibility funkcija, overlays, ATS automation, staged DEX loading, premium SMS i persistence, pogledajte:
 
 {{#ref}}
 ../basic-forensic-methodology/android-malware-post-exploitation.md
@@ -40,9 +40,9 @@ For post-install Android malware tradecraft such as C2, Accessibility abuse, ove
 
 ## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
 
-Attackers increasingly replace static APK links with a Socket.IO/WebSocket channel embedded in Google Play–looking lures. This conceals the payload URL, bypasses URL/extension filters, and preserves a realistic install UX.
+Attackers sve češće zamenjuju statične APK linkove Socket.IO/WebSocket kanalom ugrađenim u lure-ove koji izgledaju kao Google Play stranice. Ovo prikriva URL payload-a, zaobilazi URL/extension filtere i zadržava realističan UX instalacije.<sup>[[2]](#references)[[4]](#references)</sup>
 
-Typical client flow observed in the wild:
+Tipičan client flow uočen u praksi:
 
 <details>
 <summary>Socket.IO fake Play downloader (JavaScript)</summary>
@@ -68,22 +68,22 @@ document.body.appendChild(a); a.click();
 </details>
 
 Zašto izbegava jednostavne kontrole:
-- Nema statički izloženog APK URL-a; payload se ponovo gradi u memoriji iz WebSocket frame-ova.
-- URL/MIME/ekstenzija filteri koji blokiraju direktne .apk odgovore mogu propustiti binarne podatke tunelovane kroz WebSockets/Socket.IO.
-- Crawler-i i URL sandboxovi koji ne izvršavaju WebSockets neće preuzeti payload.
+- Nijedan statički APK URL nije izložen; payload se rekonstruiše u memoriji iz WebSocket frejmova.
+- Filteri za URL/MIME/ekstenzije koji blokiraju direktne .apk odgovore mogu propustiti binarne podatke tunelovane putem WebSockets/Socket.IO.
+- Crawleri i URL sandbox okruženja koja ne izvršavaju WebSockets neće preuzeti payload.
 
-Pogledajte i WebSocket tradecraft i alatke:
+Pogledajte takođe WebSocket tradecraft i alate:
 
 {{#ref}}
 ../../pentesting-web/websocket-attacks.md
 {{#endref}}
 
 
-## References
+## Reference
 
-
-- [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
-- [Socket.IO](https://socket.io)
-- [Web Clips payload settings for Apple devices](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
+- [1] [Mračna strana romantike: SarangTrap iznuđivačka kampanja](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
+- [2] [Socket.IO](https://socket.io)
+- [3] [Podešavanja Web Clips payloada za Apple uređaje](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
+- [4] [Bankarski trojanac usmeren na korisnike Androida u Indoneziji i Vijetnamu](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 
 {{#include ../../banners/hacktricks-training.md}}

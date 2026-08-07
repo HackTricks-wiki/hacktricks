@@ -2,65 +2,65 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-`no_new_privs` je kernel hardening funkcija koja sprečava proces da stekne veće privilegije kroz `execve()`. Praktično, kada je flag postavljen, izvršavanje setuid binary-ja, setgid binary-ja ili fajla sa Linux file capabilities ne dodeljuje dodatne privilegije izvan onoga što je proces već imao. U containerized okruženjima ovo je važno zato što se mnogi privilege-escalation chain-ovi oslanjaju na pronalaženje executable-a unutar image-a koji menja privilegije prilikom pokretanja.
+`no_new_privs` je kernel hardening funkcija koja sprečava proces da dobije veće privilegije tokom `execve()`. Praktično, kada se flag postavi, izvršavanje setuid binary-ja, setgid binary-ja ili fajla sa Linux file capabilities ne daje dodatne privilegije iznad onih koje je proces već imao. U containerized okruženjima ovo je važno zato što se mnogi privilege-escalation lanci oslanjaju na pronalaženje izvršnog fajla unutar image-a koji menja privilegije prilikom pokretanja.
 
-Sa defensive stanovišta, `no_new_privs` nije zamena za namespaces, seccomp ili capability dropping. To je dodatni zaštitni sloj. Blokira specifičnu klasu naknadne eskalacije nakon što je code execution već dobijen. Zbog toga je posebno vredan u okruženjima čiji image-i sadrže helper binary-je, package-manager artefakte ili legacy alate koji bi inače bili opasni u kombinaciji sa delimičnim kompromitovanjem.
+Iz defensive perspektive, `no_new_privs` nije zamena za namespaces, seccomp ili uklanjanje capabilities. To je reinforcement layer. Blokira konkretnu klasu naknadnih escalation pokušaja nakon što je code execution već dobijen. Zbog toga je posebno vredan u okruženjima čiji image-i sadrže helper binary-je, artifacts package manager-a ili legacy tools koji bi inače bili opasni u kombinaciji sa delimičnim compromise-om.
 
-## Operation
+## Operacija
 
-Kernel flag iza ovog ponašanja je `PR_SET_NO_NEW_PRIVS`. Kada se postavi za proces, kasniji `execve()` pozivi ne mogu povećati privilegije. Važan detalj je da proces i dalje može da pokreće binary-je; jednostavno ne može da ih koristi za prelazak granice privilegija koju bi kernel inače poštovao.
+Kernel flag iza ovog ponašanja je `PR_SET_NO_NEW_PRIVS`. Kada se postavi za proces, kasniji `execve()` pozivi ne mogu povećati privilegije. Važan detalj je da proces i dalje može da pokreće binary-je; jednostavno ne može da ih koristi za prelazak granice privilegija koju bi kernel inače odobrio.<sup>[[1]](#references)</sup>
 
-Kernel ponašanje je takođe **nasleđeno i nepovratno**: kada task postavi `no_new_privs`, bit se nasleđuje kroz `fork()`, `clone()` i `execve()`, i kasnije ne može biti uklonjen. Ovo je korisno tokom assessment-a zato što jedan `NoNewPrivs: 1` na container procesu obično znači da bi potomci takođe trebalo da ostanu u tom režimu, osim ako posmatrate potpuno drugo stablo procesa.
+Kernel ponašanje je takođe **nasleđeno i nepovratno**: kada task postavi `no_new_privs`, bit se nasleđuje kroz `fork()`, `clone()` i `execve()`, i kasnije ne može da se ukloni.<sup>[[1]](#references)</sup> Ovo je korisno tokom assessment-a zato što jedan `NoNewPrivs: 1` na container procesu obično znači da bi descendants takođe trebalo da ostanu u tom mode-u, osim ako posmatrate potpuno drugačije process tree.
 
-U Kubernetes-oriented okruženjima, `allowPrivilegeEscalation: false` preslikava se na ovo ponašanje za container proces. U Docker i Podman style runtime-ovima, ekvivalent se obično eksplicitno omogućava kroz security option. Na OCI nivou, isti koncept se pojavljuje kao `process.noNewPrivileges`.
+U Kubernetes-oriented okruženjima, `allowPrivilegeEscalation: false` mapira se na ovo ponašanje za container proces.<sup>[[2]](#references)</sup> U Docker i Podman style runtime-ovima ekvivalent se obično eksplicitno omogućava kroz security option. Na OCI layer-u isti koncept se pojavljuje kao `process.noNewPrivileges`.
 
-## Important Nuances
+## Važne nijanse
 
-`no_new_privs` blokira **dobijanje privilegija tokom exec-a**, ali ne svaku promenu privilegija. Konkretno:
+`no_new_privs` blokira **privilege gain tokom exec-a**, ali ne svaku promenu privilegija.<sup>[[1]](#references)</sup> Konkretno:
 
-- setuid i setgid tranzicije prestaju da rade kroz `execve()`
-- file capabilities ne dodaju privilegije u permitted set pri `execve()`
+- setuid i setgid transitions prestaju da rade kroz `execve()`
+- file capabilities se ne dodaju u permitted set tokom `execve()`
 - LSM-ovi kao što su AppArmor ili SELinux ne ublažavaju ograničenja nakon `execve()`
-- privilegija koja je već posedovana i dalje ostaje posedovana
+- privilegija koju proces već poseduje i dalje ostaje već posedovana privilegija
 
-Ova poslednja tačka je operativno važna. Ako proces već radi kao root, već poseduje opasnu capability ili već ima pristup moćnom runtime API-ju ili writable host mount-u, postavljanje `no_new_privs` ne neutralizuje te exposure-e. Ono samo uklanja jedan uobičajeni **sledeći korak** u privilege-escalation chain-u.
+Poslednja tačka je operativno važna. Ako proces već radi kao root, već ima opasnu capability ili već ima pristup moćnom runtime API-ju ili writable host mount-u, postavljanje `no_new_privs` ne neutrališe te exposure-e. Ono samo uklanja jedan uobičajeni **sledeći korak** u privilege-escalation lancu.
 
-Takođe imajte u vidu da flag ne blokira promene privilegija koje ne zavise od `execve()`. Na primer, task koji već ima dovoljno privilegija i dalje može direktno pozvati `setuid(2)` ili primiti privilegovani file descriptor preko Unix socket-a. Zato `no_new_privs` treba posmatrati zajedno sa [seccomp](seccomp.md), capability set-ovima i izloženošću namespace-ova, a ne kao samostalno rešenje.
+Takođe imajte na umu da flag ne blokira promene privilegija koje ne zavise od `execve()`.<sup>[[1]](#references)</sup> Na primer, task koji već ima dovoljno privilegija i dalje može direktno da pozove `setuid(2)` ili da primi privileged file descriptor preko Unix socket-a. Zbog toga `no_new_privs` treba posmatrati zajedno sa [seccomp](seccomp.md), capability set-ovima i namespace exposure-om, a ne kao samostalno rešenje.
 
 ## Lab
 
-Proverite trenutno stanje procesa:
+Inspect-ujte trenutno stanje procesa:
 ```bash
 grep NoNewPrivs /proc/self/status
 ```
-Uporedite to sa kontejnerom u kojem runtime omogućava zastavicu:
+Uporedite to sa kontejnerom u kojem runtime omogućava flag:
 ```bash
 docker run --rm --security-opt no-new-privileges:true debian:stable-slim sh -c 'grep NoNewPrivs /proc/self/status'
 ```
-Na hardenovanom workload-u, rezultat treba da prikaže `NoNewPrivs: 1`.
+Na hardened workload-u, rezultat treba da prikaže `NoNewPrivs: 1`.
 
-Stvarni efekat možete demonstrirati i nad setuid binary-jem:
+Stvarni efekat možete demonstrirati i pomoću setuid binary-ja:
 ```bash
 docker run --rm debian:stable-slim sh -c 'apt-get update >/dev/null 2>&1 && apt-get install -y passwd >/dev/null 2>&1 && grep NoNewPrivs /proc/self/status && /bin/su -c id 2>/dev/null'
 docker run --rm --security-opt no-new-privileges:true debian:stable-slim sh -c 'apt-get update >/dev/null 2>&1 && apt-get install -y passwd >/dev/null 2>&1 && grep NoNewPrivs /proc/self/status && /bin/su -c id 2>/dev/null'
 ```
 Poenta poređenja nije u tome da je `su` univerzalno exploitable. Poenta je da se ista image može ponašati veoma različito u zavisnosti od toga da li je `execve()` i dalje dozvoljen da pređe granicu privilegija.
 
-## Bezbednosni uticaj
+## Uticaj na bezbednost
 
-Ako `no_new_privs` nije postavljen, foothold unutar containera i dalje može biti unapređen pomoću setuid helpera ili binarnih fajlova sa file capabilities. Ako je postavljen, te promene privilegija nakon exec-a su onemogućene. Efekat je naročito relevantan kod širokih base image-ova koji sadrže mnoge utilities-e koje aplikaciji uopšte nisu bile potrebne.
+Ako `no_new_privs` nije prisutan, foothold unutar containera se i dalje može unaprediti pomoću setuid helpera ili binarnih fajlova sa file capabilities. Ako je prisutan, te promene privilegija nakon exec-a su onemogućene. Efekat je naročito relevantan kod širokih base image-a koji sadrže brojne utilities koje aplikaciji uopšte nisu bile potrebne.
 
-Postoji i važna interakcija sa seccomp-om. Unprivileged tasks uglavnom moraju imati podešen `no_new_privs` pre nego što mogu da instaliraju seccomp filter u filter mode-u. To je jedan od razloga zbog kojih hardened containers često istovremeno imaju omogućene `Seccomp` i `NoNewPrivs`. Iz perspektive napadača, prisustvo oba obično znači da je okruženje namerno konfigurisano, a ne slučajno.
+Postoji i važna interakcija sa seccomp-om. Unprivileged task-ovi uglavnom moraju imati podešen `no_new_privs` pre nego što mogu da instaliraju seccomp filter u filter modu.<sup>[[1]](#references)</sup> To je jedan od razloga zbog kojih hardened container-i često istovremeno imaju omogućene i `Seccomp` i `NoNewPrivs`. Iz perspektive napadača, prisustvo oba podešavanja obično znači da je okruženje namerno konfigurisano, a ne slučajno.
 
 ## Pogrešne konfiguracije
 
-Najčešći problem je jednostavno neomogućavanje ove kontrole u okruženjima u kojima bi bila kompatibilna. U Kubernetes-u, ostavljanje opcije `allowPrivilegeEscalation` omogućene često predstavlja podrazumevanu operativnu grešku. U Docker-u i Podman-u, izostavljanje relevantne security opcije ima isti efekat. Još jedan čest način nastanka problema jeste pretpostavka da su, zato što container nije "privileged", promene privilegija tokom exec-a automatski irelevantne.
+Najčešći problem je jednostavno neomogućavanje ove kontrole u okruženjima u kojima bi bila kompatibilna. U Kubernetes-u, ostavljanje opcije `allowPrivilegeEscalation` omogućene često je podrazumevana operativna greška. U Docker-u i Podman-u, izostavljanje relevantne security opcije ima isti efekat. Drugi čest problem je pretpostavka da su, zato što container nije "privileged", promene privilegija tokom exec-a automatski nebitne.
 
-Suptilniji Kubernetes problem je to što se `allowPrivilegeEscalation: false` **ne poštuje na način koji ljudi očekuju** kada je container `privileged` ili kada ima `CAP_SYS_ADMIN`. Kubernetes API navodi da je `allowPrivilegeEscalation` u tim slučajevima efektivno uvek true. U praksi, to znači da ovo polje treba posmatrati kao jedan signal u konačnom stanju, a ne kao garanciju da je runtime završio sa `NoNewPrivs: 1`.
+Suptilniji Kubernetes problem je to što se `allowPrivilegeEscalation: false` **ne primenjuje** na način koji ljudi očekuju kada je container `privileged` ili kada ima `CAP_SYS_ADMIN`. Kubernetes API dokumentuje da je `allowPrivilegeEscalation` u tim slučajevima efektivno uvek true.<sup>[[2]](#references)</sup> U praksi, to znači da ovo polje treba posmatrati kao jedan signal u konačnom stanju, a ne kao garanciju da je runtime završio sa `NoNewPrivs: 1`.
 
-## Zloupotreba
+## Abuse
 
-Ako `no_new_privs` nije postavljen, prvo pitanje je da li image sadrži binarne fajlove koji i dalje mogu da podignu nivo privilegija:
+Ako `no_new_privs` nije podešen, prvo pitanje je da li image sadrži binarne fajlove koji i dalje mogu da podignu nivo privilegija:
 ```bash
 grep NoNewPrivs /proc/self/status
 find / -perm -4000 -type f 2>/dev/null | head -n 50
@@ -69,41 +69,41 @@ getcap -r / 2>/dev/null | head -n 50
 Zanimljivi rezultati obuhvataju:
 
 - `NoNewPrivs: 0`
-- setuid helpers kao što su `su`, `mount`, `passwd` ili administrativni alati specifični za distribuciju
-- binaries sa file capabilities koje dodeljuju network ili filesystem privileges
+- setuid pomoćne alate kao što su `su`, `mount`, `passwd` ili administrativne alate specifične za distribuciju
+- binarne datoteke sa file capabilities koje dodeljuju mrežne privilegije ili privilegije nad filesystem-om
 
-U realnoj proceni, ovi nalazi sami po sebi ne dokazuju funkcionalnu eskalaciju, ali precizno identifikuju binaries koje vredi sledeće testirati.
+U stvarnoj proceni, ovi nalazi sami po sebi ne dokazuju funkcionalnu eskalaciju, ali precizno identifikuju binarne datoteke koje vredi sledeće testirati.
 
-U Kubernetes-u takođe proverite da li se YAML namera poklapa sa stvarnim stanjem kernela:
+U Kubernetes-u takođe proverite da li se namera izražena u YAML-u podudara sa stvarnim stanjem kernel-a:
 ```bash
 NS=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace 2>/dev/null)
 kubectl get pod "$HOSTNAME" -n "$NS" -o jsonpath='{.spec.containers[*].securityContext.allowPrivilegeEscalation}{"\n"}{.spec.containers[*].securityContext.privileged}{"\n"}{.spec.containers[*].securityContext.capabilities.add}{"\n"}' 2>/dev/null
 grep -E 'NoNewPrivs|Seccomp' /proc/self/status
 capsh --print 2>/dev/null | grep cap_sys_admin
 ```
-Interesting kombinacije uključuju:
+Zanimljive kombinacije uključuju:
 
 - `allowPrivilegeEscalation: false` u Pod spec-u, ali `NoNewPrivs: 0` u container-u
-- prisutan `cap_sys_admin`, zbog čega je Kubernetes polje znatno manje pouzdano
-- `Seccomp: 0` i `NoNewPrivs: 0`, što obično ukazuje na široko oslabljenu runtime konfiguraciju, a ne na jednu izolovanu grešku
+- prisutan `cap_sys_admin`, zbog čega je Kubernetes polju mnogo teže verovati
+- `Seccomp: 0` i `NoNewPrivs: 0`, što obično ukazuje na široko oslabljenu runtime posture, a ne na jednu izolovanu grešku
 
 ### Kompletan primer: In-Container Privilege Escalation Through setuid
 
-Ova kontrola obično sprečava **in-container privilege escalation**, a ne direktan host escape. Ako je `NoNewPrivs` `0` i postoji setuid helper, eksplicitno ga testirajte:
+Ova kontrola obično sprečava **in-container privilege escalation**, a ne direktno host escape. Ako je `NoNewPrivs` `0` i postoji setuid helper, testirajte ga eksplicitno:
 ```bash
 grep NoNewPrivs /proc/self/status
 find / -perm -4000 -type f 2>/dev/null | head -n 20
 /usr/bin/passwd -S root 2>/dev/null
 ```
-Ako je poznata setuid binarna datoteka prisutna i funkcionalna, pokušajte da je pokrenete na način koji očuvava prelazak privilegija:
+Ako je poznati setuid binarni fajl prisutan i funkcionalan, pokušajte da ga pokrenete na način koji očuvava prelazak privilegija:
 ```bash
 /bin/su -c id 2>/dev/null
 ```
-Ovo samo po sebi ne omogućava escape iz containera, ali može pretvoriti foothold sa niskim privilegijama unutar containera u container-root, što često postaje preduslov za kasniji escape na host kroz mount-ove, runtime sockets ili interfejse koji komuniciraju sa kernelom.
+Ovo samo po sebi ne omogućava escape iz containera, ali može pretvoriti foothold sa niskim privilegijama unutar containera u container-root, što često postaje preduslov za kasniji host escape kroz mountove, runtime socket-e ili interfejse koji komuniciraju sa kernelom.
 
 ## Provere
 
-Cilj ovih provera jeste da se utvrdi da li je sticanje privilegija tokom izvršavanja blokirano i da li image i dalje sadrži pomoćne alate koji bi bili relevantni ako nije.
+Cilj ovih provera jeste da se utvrdi da li je dobijanje privilegija tokom izvršavanja blokirano i da li image i dalje sadrži pomoćne alate koji bi bili važni ako nije.
 ```bash
 grep NoNewPrivs /proc/self/status      # Whether exec-time privilege gain is blocked
 grep -E 'Seccomp|NoNewPrivs' /proc/self/status   # Whether seccomp and no_new_privs are both active
@@ -113,27 +113,28 @@ getcap -r / 2>/dev/null | head -n 50   # files with Linux capabilities
 docker inspect <container> | jq '.[0].HostConfig.SecurityOpt' 2>/dev/null   # Docker runtime options
 kubectl get pod <pod> -n <ns> -o jsonpath='{.spec.containers[*].securityContext.allowPrivilegeEscalation}{"\n"}' 2>/dev/null
 ```
-Šta je ovde interesantno:
+Šta je ovde zanimljivo:
 
 - `NoNewPrivs: 1` je obično bezbedniji rezultat.
-- `NoNewPrivs: 0` znači da setuid i file-cap putanje za escalation i dalje ostaju relevantne.
-- `NoNewPrivs: 1` zajedno sa `Seccomp: 2` čest je znak namernije hardening konfiguracije.
-- Kubernetes manifest koji navodi `allowPrivilegeEscalation: false` je koristan, ali status kernela predstavlja stvarno stanje.
-- Minimalni image sa malo ili nimalo setuid/file-cap binarnih datoteka napadaču daje manje post-exploitation opcija, čak i kada `no_new_privs` nedostaje.
+- `NoNewPrivs: 0` znači da setuid i file-cap zasnovani escalation paths ostaju relevantni.
+- `NoNewPrivs: 1` zajedno sa `Seccomp: 2` čest je znak namernije hardening postavke.
+- Kubernetes manifest koji navodi `allowPrivilegeEscalation: false` je koristan, ali status kernela predstavlja izvor istine.
+- Minimalni image sa malo ili nimalo setuid/file-cap binaries daje attackeru manje post-exploitation opcija čak i kada `no_new_privs` nedostaje.
 
-## Podrazumevane postavke runtime-a
+## Podrazumevane runtime postavke
 
 | Runtime / platforma | Podrazumevano stanje | Podrazumevano ponašanje | Uobičajeno ručno slabljenje |
 | --- | --- | --- | --- |
-| Docker Engine | Podrazumevano nije omogućen | Eksplicitno se omogućava pomoću `--security-opt no-new-privileges=true`; podrazumevana postavka na nivou daemon-a takođe postoji preko `dockerd --no-new-privileges` | izostavljanje flag-a, `--privileged` |
-| Podman | Podrazumevano nije omogućen | Eksplicitno se omogućava pomoću `--security-opt no-new-privileges` ili ekvivalentne security konfiguracije | izostavljanje opcije, `--privileged` |
-| Kubernetes | Kontroliše ga workload policy | `allowPrivilegeEscalation: false` zahteva ovaj efekat, ali `privileged: true` i `CAP_SYS_ADMIN` ga efektivno zadržavaju uključenim | `allowPrivilegeEscalation: true`, `privileged: true`, dodavanje `CAP_SYS_ADMIN` |
-| containerd / CRI-O pod Kubernetes-om | Prati Kubernetes workload postavke / OCI `process.noNewPrivileges` | Obično se nasleđuje iz Pod security context-a i prevodi u OCI runtime konfiguraciju | isto kao u Kubernetes redu |
+| Docker Engine | Podrazumevano nije omogućeno | Eksplicitno se omogućava pomoću `--security-opt no-new-privileges=true`; podrazumevana postavka na nivou daemon-a takođe postoji putem `dockerd --no-new-privileges` | izostavljanje flag-a, `--privileged` |
+| Podman | Podrazumevano nije omogućeno | Eksplicitno se omogućava pomoću `--security-opt no-new-privileges` ili ekvivalentne security konfiguracije | izostavljanje opcije, `--privileged` |
+| Kubernetes | Kontroliše ga workload policy | `allowPrivilegeEscalation: false` zahteva ovaj efekat, ali `privileged: true` i `CAP_SYS_ADMIN` održavaju njegovo efektivno važenje | `allowPrivilegeEscalation: true`, `privileged: true`, dodavanje `CAP_SYS_ADMIN` |
+| containerd / CRI-O under Kubernetes | Prati Kubernetes workload postavke / OCI `process.noNewPrivileges` | Obično se nasleđuje iz Pod security context-a i prevodi u OCI runtime konfiguraciju | isto kao u Kubernetes redu |
 
-Ova zaštita često nedostaje jednostavno zato što je niko nije uključio, a ne zato što je runtime ne podržava.
+Ova zaštita često nije prisutna jednostavno zato što je niko nije uključio, a ne zato što je runtime ne podržava.
 
 ## Reference
 
-- [Linux kernel documentation: No New Privileges Flag](https://docs.kernel.org/userspace-api/no_new_privs.html)
-- [Kubernetes: Configure a Security Context for a Pod or Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [1] [Dokumentacija Linux kernela: No New Privileges Flag](https://docs.kernel.org/userspace-api/no_new_privs.html)
+- [2] [Kubernetes: Konfigurisanje Security Context-a za Pod ili Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+
 {{#include ../../../../banners/hacktricks-training.md}}

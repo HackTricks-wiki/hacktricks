@@ -1,43 +1,43 @@
-# Procena i ojačavanje
+# Procena i hardening
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-Dobra procena containera treba da odgovori na dva paralelna pitanja. Prvo, šta napadač može da uradi iz trenutnog workload-a? Drugo, koje odluke operatora su to omogućile? Alati za enumeraciju pomažu kod prvog pitanja, a smernice za ojačavanje kod drugog. Držanje oba aspekta na jednoj stranici čini ovaj odeljak korisnijim kao terensku referencu, a ne samo kao katalog escape trikova.
+Dobra procena kontejnera treba da pruži odgovor na dva paralelna pitanja. Prvo, šta attacker može da uradi iz trenutno pokrenutog workload-a? Drugo, koje odluke operatora su to omogućile? Enumeration alati pomažu pri odgovoru na prvo pitanje, a smernice za hardening pri odgovoru na drugo. Držanje oba aspekta na jednoj stranici čini ovu sekciju korisnijom kao terensku referencu, a ne samo kao katalog escape trikova.
 
-Jedna praktična dopuna za moderna okruženja jeste da mnogi stariji container tekstovi prećutno pretpostavljaju **rootful runtime**, **bez izolacije user namespace-a** i često **cgroup v1**. Te pretpostavke više nisu bezbedne. Pre nego što utrošite vreme na stare escape primitive, prvo proverite da li je workload rootless ili userns-remapped, da li host koristi cgroup v2 i da li Kubernetes ili runtime sada primenjuju podrazumevane seccomp i AppArmor profile. Ovi detalji često odlučuju da li je poznati breakout i dalje primenljiv.
+Jedno praktično ažuriranje za moderna okruženja jeste to što mnogi stariji tekstovi o kontejnerima podrazumevaju **rootful runtime**, **bez izolacije user namespace-a**, a često i **cgroup v1**. Te pretpostavke više nisu bezbedne. Pre nego što utrošite vreme na stare escape primitive, prvo proverite da li je workload rootless ili userns-remapped, da li host koristi cgroup v2 i da li Kubernetes ili runtime sada primenjuje podrazumevane seccomp i AppArmor profile. Ovi detalji često određuju da li je poznati breakout i dalje moguć.
 
-## Alati za enumeraciju
+## Enumeration alati
 
-Brojni alati su i dalje korisni za brzo karakterisanje container okruženja:
+Brojni alati su i dalje korisni za brzo određivanje karakteristika container okruženja:
 
-- `linpeas` može da otkrije mnoge indikatore containera, montirane sockete, skupove capability-ja, opasne filesystem-e i naznake breakout-a.
-- `CDK` je posebno usmeren na container okruženja i obuhvata enumeraciju, kao i neke automatizovane provere escape-a.
-- `amicontained` je lagan i koristan za identifikovanje ograničenja containera, capability-ja, izloženosti namespace-a i verovatnih klasa breakout-a.
-- `deepce` je još jedan enumerator usmeren na containere, sa proverama usmerenim na breakout.
-- `grype` je koristan kada procena obuhvata pregled ranjivosti paketa u image-ima, a ne samo analizu runtime escape-a.
-- `Tracee` je koristan kada su vam potrebni **runtime dokazi**, a ne samo statička procena stanja, naročito za sumnjivo pokretanje procesa, pristup fajlovima i prikupljanje događaja svesno containera.
-- `Inspektor Gadget` je koristan u Kubernetes i Linux-host istragama kada vam je potrebna eBPF vidljivost povezana sa podovima, containerima, namespace-ima i drugim konceptima višeg nivoa.
+- `linpeas` može da identifikuje mnoge indikatore kontejnera, montirane socket-e, skupove capabilities, opasne filesystem-e i nagoveštaje breakout-a.
+- `CDK` je posebno fokusiran na container okruženja i uključuje enumeration, kao i neke automatizovane escape provere.
+- `amicontained` je lagan i koristan za identifikovanje ograničenja kontejnera, capabilities, izloženosti namespace-a i verovatnih klasa breakout-a.
+- `deepce` je još jedan enumerator fokusiran na kontejnere, sa proverama usmerenim na breakout.
+- `grype` je koristan kada procena uključuje pregled ranjivosti paketa u image-u, a ne samo analizu runtime escape-a.
+- `Tracee` je koristan kada su vam potrebni **runtime dokazi**, a ne samo statički prikaz posture-a, posebno za sumnjivo izvršavanje procesa, pristup fajlovima i prikupljanje događaja uz razumevanje kontejnera.
+- `Inspektor Gadget` je koristan u Kubernetes i Linux-host istragama kada vam je potrebna vidljivost zasnovana na eBPF-u, povezana sa podovima, kontejnerima, namespace-ovima i drugim konceptima višeg nivoa.
 
-Vrednost ovih alata leži u brzini i obuhvatu, a ne u izvesnosti. Oni pomažu da se brzo otkrije približno stanje, ali zanimljivi nalazi i dalje zahtevaju ručno tumačenje u odnosu na stvarni runtime, namespace, capability i mount model.
+Vrednost ovih alata ogleda se u brzini i obuhvatu, a ne u izvesnosti. Oni pomažu da se brzo otkrije približna postura, ali zanimljivi nalazi i dalje zahtevaju ručno tumačenje u odnosu na stvarni runtime, namespace, capabilities i model mount-ova.
 
-## Prioriteti ojačavanja
+## Prioriteti hardening-a
 
-Najvažniji principi ojačavanja su konceptualno jednostavni, iako se njihova implementacija razlikuje u zavisnosti od platforme. Izbegavajte privileged containere. Izbegavajte montirane runtime sockete. Nemojte containerima davati writable host putanje osim ako za to ne postoji veoma konkretan razlog. Koristite user namespace-e ili rootless izvršavanje gde je izvodljivo. Uklonite sve capability-je i vratite samo one koje su workload-u zaista potrebne. Ostavite seccomp, AppArmor i SELinux uključene umesto da ih isključujete radi rešavanja problema kompatibilnosti aplikacije. Ograničite resurse kako kompromitovani container ne bi mogao trivijalno da uskrati uslugu hostu.
+Najvažniji principi hardening-a su konceptualno jednostavni, iako se njihova implementacija razlikuje u zavisnosti od platforme. Izbegavajte privileged kontejnere. Izbegavajte montirane runtime socket-e. Nemojte kontejnerima davati writable host putanje osim ako za to postoji veoma konkretan razlog. Koristite user namespace-ove ili rootless izvršavanje gde je to izvodljivo. Uklonite sve capabilities i vratite samo one koje su workload-u zaista potrebne. Ostavite seccomp, AppArmor i SELinux omogućene umesto da ih isključujete radi rešavanja problema kompatibilnosti aplikacije. Ograničite resurse kako kompromitovani kontejner ne bi mogao trivijalno da izazove uskraćivanje usluge hostu.
 
-Higijena image-a i build procesa jednako je važna kao i runtime stanje. Koristite minimalne image-e, često ih ponovo build-ujte, skenirajte ih, zahtevajte provenance gde je to praktično i držite secrets van layer-a. Container koji radi kao non-root, koristi mali image i ima ograničenu syscall i capability površinu mnogo je lakše braniti nego veliki convenience image koji radi kao root ekvivalentan hostu i unapred sadrži debugging alate.
+Higijena image-a i build procesa podjednako je važna kao i runtime postura. Koristite minimalne image-e, često ih ponovo build-ujte, skenirajte ih, zahtevajte provenance gde je to praktično i držite secrets van layer-a. Kontejner koji radi kao non-root, sa malim image-om i uskom syscall i capability površinom, mnogo je lakše braniti nego veliki convenience image koji radi kao root ekvivalentan hostu i unapred ima instalirane debugging alate.
 
-Za Kubernetes su aktuelne osnove ojačavanja preciznije nego što mnogi operatori i dalje pretpostavljaju. Ugrađeni **Pod Security Standards** tretiraju `restricted` kao profil "trenutne najbolje prakse": `allowPrivilegeEscalation` treba da bude `false`, workload-i treba da rade kao non-root, seccomp treba eksplicitno postaviti na `RuntimeDefault` ili `Localhost`, a skupove capability-ja treba agresivno ukloniti. Tokom procene ovo je važno zato što cluster koji koristi samo `warn` ili `audit` labele može na papiru izgledati ojačano, dok u praksi i dalje prihvata rizične podove.
+Za Kubernetes, savremene hardening baseline smernice su preciznije nego što mnogi operatori i dalje pretpostavljaju. Ugrađeni **Pod Security Standards** tretiraju `restricted` kao profil koji predstavlja „trenutnu najbolju praksu“: `allowPrivilegeEscalation` treba da bude `false`, workload-i treba da rade kao non-root, seccomp treba eksplicitno podesiti na `RuntimeDefault` ili `Localhost`, a skupove capabilities treba agresivno ukloniti. Tokom procene ovo je važno zato što klaster koji koristi samo `warn` ili `audit` label-e može na papiru izgledati hardenizovano, dok u praksi i dalje prihvata rizične podove.<sup>[[1]](#references)</sup>
 
-## Pitanja za moderni triage
+## Moderna triage pitanja
 
 Pre nego što pređete na stranice posvećene escape-u, odgovorite na sledeća kratka pitanja:
 
 1. Da li je workload **rootful**, **rootless** ili **userns-remapped**?
 2. Da li node koristi **cgroup v1** ili **cgroup v2**?
 3. Da li su **seccomp** i **AppArmor/SELinux** eksplicitno konfigurisani ili se samo nasleđuju kada su dostupni?
-4. U Kubernetes-u, da li namespace zaista **enforcing** primenjuje `baseline` ili `restricted`, ili samo izdaje upozorenja/vrši audit?
+4. U Kubernetes-u, da li namespace zaista **enforcing** `baseline` ili `restricted`, ili samo izdaje upozorenja/vrši auditing?
 
 Korisne provere:
 ```bash
@@ -56,15 +56,15 @@ kubectl get pod "$HOSTNAME" -n "$NS" -o jsonpath='{.spec.securityContext.seccomp
 ```
 Šta je ovde zanimljivo:
 
-- Ako `/proc/self/uid_map` prikazuje da je container root mapiran na **visok opseg UID-ova na hostu**, mnogi stariji writeup-i o upisivanju sa host-root privilegijama postaju manje relevantni, jer root u container-u više nije ekvivalentan host-root-u.
-- Ako je `/sys/fs/cgroup` `cgroup2fs`, stari writeup-i specifični za **cgroup v1**, kao što je zloupotreba `release_agent` mehanizma, više ne bi trebalo da budu vaša prva pretpostavka.
-- Ako se seccomp i AppArmor samo implicitno nasleđuju, portability može biti slabiji nego što defenders očekuju. U Kubernetes-u je eksplicitno podešavanje `RuntimeDefault` često bezbednije od neprimetnog oslanjanja na podrazumevana podešavanja node-a.
-- Ako je `supplementalGroupsPolicy` podešen na `Strict`, pod bi trebalo da izbegne neprimetno nasleđivanje dodatnih članstava u grupama iz `/etc/group` unutar image-a, čime ponašanje pristupa volume-ima i fajlovima zasnovano na grupama postaje predvidljivije.
-- Vredi direktno proveriti namespace labels kao što je `pod-security.kubernetes.io/enforce=restricted`. `warn` i `audit` su korisni, ali ne sprečavaju kreiranje rizičnog pod-a.
+- Ako `/proc/self/uid_map` prikazuje da je root u containeru mapiran na **visoki opseg UID-ova na hostu**, mnogi stariji writeup-ovi o host-root pristupu postaju manje relevantni jer root u containeru više nije ekvivalentan root-u na hostu.
+- Ako je `/sys/fs/cgroup` `cgroup2fs`, stari writeup-ovi specifični za **cgroup v1**, kao što je zloupotreba `release_agent` mehanizma, više ne bi trebalo da budu vaša prva pretpostavka.
+- Ako se seccomp i AppArmor nasleđuju samo implicitno, portability može biti slabiji nego što defenderi očekuju. U Kubernetes-u je eksplicitno podešavanje `RuntimeDefault` često jače od tihog oslanjanja na podrazumevana podešavanja node-a.
+- Ako je `supplementalGroupsPolicy` postavljen na `Strict`, pod bi trebalo da izbegne tiho nasleđivanje dodatnih članstava u grupama iz `/etc/group` unutar image-a, što ponašanje pristupa volume-ima i fajlovima zasnovano na grupama čini predvidljivijim.
+- Vredi direktno proveriti namespace labele kao što je `pod-security.kubernetes.io/enforce=restricted`. `warn` i `audit` su korisni, ali ne sprečavaju kreiranje rizičnog poda.
 
-## Trijaža osnovnog stanja runtime-a
+## Početna procena runtime okruženja
 
-Osnovno stanje runtime-a predstavlja brzu proveru koja pokazuje da li container izgleda kao uobičajen izolovani workload ili kao foothold u control plane-u koji može da utiče na host. Trebalo bi prikupiti dovoljno činjenica da bi se odredilo šta sledeće treba pročitati: zloupotreba runtime socket-a, host mounts, namespace-ovi, cgroups, capabilities ili provera image secrets-a.
+Početna procena runtime okruženja je brza provera koja pokazuje da li container izgleda kao uobičajen izolovan workload ili kao foothold kontrolne ravni sa uticajem na host. Trebalo bi prikupiti dovoljno činjenica da bi se odredilo šta sledeće treba pročitati: zloupotreba runtime socket-a, mount-ovi hosta, namespace-ovi, cgroup-ovi, capabilities ili provera image secret-a.
 
 Korisne provere iz workload-a:
 ```bash
@@ -82,14 +82,14 @@ find /run /var/run -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o 
 ```
 Tumačenje:
 
-- Nedostajući ili neograničeni `memory.max` / `pids.max` ukazuju na slabe kontrole blast radius-a čak i bez potpunog escape-a.
-- root shell sa `NoNewPrivs: 0`, širokim capabilities i permissive seccomp-om mnogo je zanimljiviji od uskog non-root workload-a.
-- Runtime socket-i i writable host mount-ovi obično imaju veći prioritet od kernel exploit-a, jer već izlažu management ili filesystem control path.
-- Deljeni PID, network, IPC ili cgroup namespace-i nisu uvek potpuni escape sami po sebi, ali olakšavaju pronalaženje sledećeg koraka.
+- Nedostatak ili neograničeni `memory.max` / `pids.max` ukazuje na slabe kontrole blast radius-a čak i bez potpunog escape-a.
+- Root shell sa `NoNewPrivs: 0`, širokim capabilities i permissive seccomp-om mnogo je zanimljiviji od uskog non-root workload-a.
+- Runtime sockets i writable host mounts obično imaju prednost nad kernel exploit-ima jer već otkrivaju management ili filesystem control path.
+- Shared PID, network, IPC ili cgroup namespaces nisu uvek potpuni escape sami po sebi, ali olakšavaju pronalaženje sledećeg koraka.
 
 ## Primeri iscrpljivanja resursa
 
-Resource controls nisu glamurozni, ali su deo container security-ja jer ograničavaju blast radius kompromitacije. Bez memory, CPU ili PID limit-a, jednostavan shell može biti dovoljan za degradaciju host-a ili susednih workload-a.
+Kontrole resursa nisu glamurozne, ali su deo container security-a jer ograničavaju blast radius kompromitovanja. Bez ograničenja za memory, CPU ili PID, jednostavan shell može biti dovoljan za degradaciju host-a ili susednih workload-a.
 
 Primeri testova koji utiču na host:
 ```bash
@@ -97,33 +97,33 @@ stress-ng --vm 1 --vm-bytes 1G --verify -t 5m
 docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :; done'
 nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target_ip> 4444; done
 ```
-Ovi primeri su korisni jer pokazuju da se svaki opasan ishod u containeru ne završava čistim „escape“-om. Slaba cgroup ograničenja i dalje mogu pretvoriti code execution u stvarni operativni uticaj.
+Ovi primeri su korisni jer pokazuju da svaki opasan ishod kontejnera nije čisto „escape“. Slaba cgroup ograničenja i dalje mogu pretvoriti izvršavanje koda u stvarni operativni uticaj.
 
-U okruženjima zasnovanim na Kubernetes-u, takođe proverite da li kontrole resursa uopšte postoje pre nego što DoS smatrate samo teorijskim:
+U okruženjima zasnovanim na Kubernetes-u, takođe proverite da li kontrole resursa uopšte postoje pre nego što DoS smatrate teorijskim slučajem:
 ```bash
 kubectl get pod "$HOSTNAME" -n "$NS" -o jsonpath='{range .spec.containers[*]}{.name}{" cpu="}{.resources.limits.cpu}{" mem="}{.resources.limits.memory}{"\n"}{end}' 2>/dev/null
 cat /sys/fs/cgroup/pids.max 2>/dev/null
 cat /sys/fs/cgroup/memory.max 2>/dev/null
 cat /sys/fs/cgroup/cpu.max 2>/dev/null
 ```
-## Alati za hardening
+## Hardening alati
 
-Za okruženja usmerena na Docker, `docker-bench-security` i dalje predstavlja korisnu osnovu za audit na strani hosta, jer proverava uobičajene probleme sa konfiguracijom u odnosu na široko priznate smernice benchmarka:
+Za okruženja usmerena na Docker, `docker-bench-security` i dalje predstavlja korisnu osnovu za audit na hostu, jer proverava uobičajene probleme u konfiguraciji u odnosu na široko prihvaćene smernice benchmarka:
 ```bash
 git clone https://github.com/docker/docker-bench-security.git
 cd docker-bench-security
 sudo sh docker-bench-security.sh
 ```
-Alat nije zamena za threat modeling, ali je i dalje koristan za pronalaženje nemarno podešenih podrazumevanih vrednosti za daemon, mount, mrežu i runtime, koje se vremenom nagomilavaju.
+Alat nije zamena za threat modeling, ali je i dalje koristan za pronalaženje nemarnih podrazumevanih podešavanja za daemon, mount, mrežu i runtime koja se vremenom nagomilavaju.
 
-Za Kubernetes i okruženja sa intenzivnim korišćenjem runtime-a, uparite statičke provere sa runtime vidljivošću:
+Za Kubernetes i okruženja koja se intenzivno oslanjaju na runtime, uparite statičke provere sa runtime vidljivošću:
 
-- `Tracee` je koristan za runtime detekciju prilagođenu kontejnerima i brzu forenziku kada treba da potvrdite čemu je kompromitovani workload zaista pristupio.
-- `Inspektor Gadget` je koristan kada assessment zahteva telemetry na nivou kernela, mapiranu nazad na podove, kontejnere, DNS activity, izvršavanje fajlova ili mrežno ponašanje.
+- `Tracee` je koristan za runtime detekciju prilagođenu kontejnerima i brzu forenziku kada treba da potvrdite čemu je kompromitovani workload zapravo pristupao.
+- `Inspektor Gadget` je koristan kada procena zahteva telemetriju na nivou kernela mapiranu nazad na podove, kontejnere, DNS aktivnost, izvršavanje fajlova ili ponašanje mreže.
 
 ## Provere
 
-Koristite ih kao brze komande za početnu proveru tokom assessment-a:
+Koristite ih kao komande za prvu proveru tokom procene:
 ```bash
 id
 capsh --print 2>/dev/null
@@ -135,14 +135,15 @@ find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.s
 ```
 Šta je ovde zanimljivo:
 
-- root proces sa širokim capabilities i `Seccomp: 0` zahteva hitnu pažnju.
+- root proces sa širokim capabilities i `Seccomp: 0` zaslužuje hitnu pažnju.
 - root proces koji takođe ima **1:1 UID map** mnogo je zanimljiviji od "root" procesa unutar pravilno izolovanog user namespace-a.
-- `cgroup2fs` obično znači da mnogi stariji lanci za escape iz **cgroup v1** nisu najbolja početna tačka, dok odsustvo `memory.max` ili `pids.max` i dalje ukazuje na slabe kontrole blast radius-a.
-- Sumnjivi mount-ovi i runtime socket-i često omogućavaju brži put do uticaja nego bilo koji kernel exploit.
-- Kombinacija slabe runtime konfiguracije i slabih ograničenja resursa obično ukazuje na generalno permisivno container okruženje, a ne na jednu izolovanu grešku.
+- `cgroup2fs` obično znači da mnogi stariji **cgroup v1** escape lanci nisu najbolja početna tačka, dok odsustvo `memory.max` ili `pids.max` i dalje ukazuje na slabe kontrole blast radius-a.
+- Sumnjivi mount-ovi i runtime socket-i često pružaju brži put do uticaja nego bilo koji kernel exploit.
+- Kombinacija slabe runtime posture i slabih ograničenja resursa obično ukazuje na generalno permisivno container okruženje, a ne na jednu izolovanu grešku.
 
 ## Reference
 
-- [Kubernetes Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
-- [Docker Security Advisory: Multiple Vulnerabilities in runc, BuildKit, and Moby](https://docs.docker.com/security/security-announcements/)
+- [1] [Kubernetes standardi bezbednosti podova](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+- [2] [Docker bezbednosno upozorenje: Višestruke ranjivosti u runc, BuildKit i Moby](https://docs.docker.com/security/security-announcements/)
+
 {{#include ../../../banners/hacktricks-training.md}}

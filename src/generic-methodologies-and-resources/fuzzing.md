@@ -1,31 +1,31 @@
-# Fuzzing Metodologija
+# Metodologija fuzzing-a
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Mutational Grammar Fuzzing: Coverage vs. Semantics
+## Mutational Grammar Fuzzing: Coverage naspram semantike
 
-U **mutational grammar fuzzing**, ulazi se menjaju dok ostaju **grammar-valid**. U coverage-guided režimu, čuvaju se samo uzorci koji aktiviraju **new coverage** kao corpus seeds. Za **language targets** (parsers, interpreters, engines), ovo može da propusti bugove koji zahtevaju **semantic/dataflow chains** gde izlaz jedne konstrukcije postaje ulaz druge.
+Kod **mutational grammar fuzzing**, ulazi se menjaju tako da ostanu **grammar-valid**. U režimu vođenom coverage-om, samo uzorci koji pokrenu **novi coverage** čuvaju se kao seeds korpusa. Kod **language targets** (parseri, interpreteri, engine-i), ovim se mogu propustiti bug-ovi koji zahtevaju **semantic/dataflow chains**, gde izlaz jedne konstrukcije postaje ulaz druge.
 
-**Failure mode:** fuzzer pronalazi seeds koji pojedinačno koriste `document()` i `generate-id()` (ili slične primitive), ali **ne čuva povezani dataflow**, pa se sample bliži bugu odbacuje jer ne dodaje coverage. Sa **3+ dependent steps**, nasumično recombination postaje skupo i coverage feedback ne usmerava pretragu.
+**Failure mode:** fuzzer pronalazi seed-ove koji pojedinačno izvršavaju `document()` i `generate-id()` (ili slične primitive), ali **ne čuva ulančani dataflow**, pa se uzorak „bliži bug-u“ odbacuje zato što ne dodaje coverage. Sa **3+ dependent steps**, nasumična rekombinacija postaje skupa, a feedback zasnovan na coverage-u ne usmerava pretragu.
 
-**Implikacija:** za grammars sa mnogo zavisnosti, razmotrite **hybridizing mutational and generative phases** ili pristrasivanje generisanja ka obrascima **function chaining** (ne samo coverage).
+**Implikacija:** kod grammar-ja sa mnogo dependency-ja razmotrite **hybridizing mutational and generative phases** ili usmeravanje generisanja ka obrascima **function chaining** (ne samo ka coverage-u).<sup>[[1]](#references)</sup>
 
-## Corpus Diversity Pitfalls
+## Zamke raznovrsnosti korpusa
 
-Coverage-guided mutation je **greedy**: sample sa new-coverage se odmah čuva, često uz zadržavanje velikih nepromenjenih regiona. Vremenom, corpora postaju **near-duplicates** sa niskom strukturnom raznolikošću. Agresivna minimizacija može ukloniti koristan kontekst, pa je praktičan kompromis **grammar-aware minimization** koja **staje nakon minimalnog token threshold-a** (smanjiti noise, ali zadržati dovoljno okolne strukture da ostane pogodna za mutacije).
+Mutation vođen coverage-om je **greedy**: uzorak sa novim coverage-om čuva se odmah, često zadržavajući velike nepromenjene delove. Vremenom korpusi postaju **near-duplicates** sa niskom strukturnom raznovrsnošću. Agresivna minimizacija može ukloniti koristan kontekst, pa je praktičan kompromis **grammar-aware minimization** koja se **zaustavlja nakon dostizanja minimalnog praga tokena** (smanjuje šum, a zadržava dovoljno okolne strukture da ostane pogodna za mutacije).<sup>[[1]](#references)</sup>
 
-Praktično pravilo za corpus kod mutational fuzzing je: **preferirajte mali skup strukturno različitih seeds koji maksimizuju coverage** umesto velike gomile near-duplicates. U praksi, to obično znači:
+Praktično pravilo za korpus kod mutational fuzzing-a je: **dajte prednost malom skupu strukturalno različitih seed-ova koji maksimizuju coverage** u odnosu na veliku količinu near-duplicates. U praksi to obično znači:<sup>[[1]](#references)</sup>
 
-- Počnite od **real-world samples** (public corpora, crawling, captured traffic, file sets iz target ecosystem).
-- Destilujte ih pomoću **coverage-based corpus minimization** umesto da čuvate svaki validan sample.
-- Držite seeds dovoljno **male** da mutacije padaju na značajna polja, a ne da većinu ciklusa troše na nebitne bajtove.
-- Ponovo pokrenite corpus minimization posle većih harness/instrumentation promena, jer se “najbolji” corpus menja kada se promeni reachability.
+- Počnite od **real-world samples** (javni korpusi, crawling, captured traffic, skupovi fajlova iz ekosistema target-a).
+- Svedite ih pomoću **coverage-based corpus minimization**, umesto da zadržite svaki validan uzorak.
+- Seed-ovi treba da budu **dovoljno mali** da mutacije pogode smislena polja, umesto da se većina ciklusa troši na irelevantne bajtove.
+- Ponovo pokrenite corpus minimization nakon većih izmena harness-a/instrumentacije, jer se „najbolji“ korpus menja kada se promeni reachability.
 
 ## Comparison-Aware Mutation For Magic Values
 
-Uobičajen razlog zašto fuzzer zastane nije sintaksa već **hard comparisons**: magic bytes, length checks, enum strings, checksums, ili parser dispatch values zaštićeni `memcmp`, switch tabelama ili kaskadnim poređenjima. Čista nasumična mutacija troši cikluse pokušavajući da pogodi te vrednosti bajt po bajt.
+Čest razlog zbog kog fuzzer-i dostignu plato nisu syntax već **hard comparisons**: magic bytes, provere dužine, enum string-ovi, checksum-ovi ili parser dispatch vrednosti zaštićene pomoću `memcmp`, switch tabela ili lančanih poređenja. Čiste nasumične mutacije troše cikluse pokušavajući da pogode ove vrednosti bajt po bajt.
 
-Za ove ciljeve koristite **comparison tracing** (na primer AFL++ `CMPLOG` / Redqueen-style workflows) tako da fuzzer može da posmatra operande iz neuspelih poređenja i pristrasi mutacije ka vrednostima koje ih zadovoljavaju.
+Za ove target-e koristite **comparison tracing** (na primer AFL++ `CMPLOG` / Redqueen-style workflows), kako bi fuzzer mogao da posmatra operande iz neuspešnih poređenja i usmeri mutacije ka vrednostima koje ih zadovoljavaju.<sup>[[3]](#references)</sup>
 ```bash
 ./configure --cc=afl-clang-fast
 make
@@ -40,35 +40,35 @@ afl-fuzz -i in -o out -c ./target.cmplog -- ./target.afl @@
 ```
 **Praktične napomene:**
 
-- Ovo je posebno korisno kada cilj skriva duboku logiku iza **file signatures**, **protocol verbs**, **type tags**, ili **version-dependent feature bits**.
-- Uparite to sa **dictionaries** izdvojenim iz stvarnih uzoraka, protocol specs, ili debug logs. Mala dictionary sa grammar tokens, chunk names, verbs, i delimiters je često vrednija od ogromne generičke wordlist.
-- Ako cilj izvršava mnogo sekvencijalnih provera, prvo rešite najranija “magic” poređenja, a zatim ponovo minimizujte dobijeni corpus tako da kasnije faze krenu od već važećih prefiksa.
+- Ovo je naročito korisno kada cilj skriva duboku logiku iza **file signatures**, **protocol verbs**, **type tags** ili **version-dependent feature bits**.
+- Uparite ga sa **dictionaries** izdvojenim iz stvarnih primera, specifikacija protokola ili debug logova. Mali dictionary sa gramatičkim tokenima, imenima chunk-ova, glagolima i delimiterima često je vredniji od ogromnog generičkog wordlist-a.
+- Ako cilj izvršava mnogo sekvencijalnih provera, prvo rešite najranija „magic“ poređenja, a zatim ponovo minimizujte dobijeni corpus kako bi kasnije faze počele sa već validnim prefiksima.
 
-## Stateful Fuzzing: Sekvence su Seeds
+## Stateful Fuzzing: Sekvence su seed-ovi
 
-Za **protocols**, **authenticated workflows**, i **multi-stage parsers**, zanimljiva jedinica često nije jedan blob već **message sequence**. Spajanje celog transcript-a u jedan fajl i njegovo nasumično menjanje je obično neefikasno zato što fuzzer podjednako menja svaki korak, čak i kada samo kasnija poruka dostiže krhko stanje.
+Kod **protokola**, **authenticated workflows** i **multi-stage parser-a**, zanimljiva jedinica često nije jedan blob, već **sekvenca poruka**. Spajanje celog transkripta u jedan fajl i njegovo nasumično mutiranje obično je neefikasno, jer fuzzer podjednako menja svaki korak, čak i kada samo kasnija poruka doseže ranjivo stanje.
 
-Efikasniji obrazac je da se **sekvenca sama tretira kao seed** i da se **observable state** (response codes, protocol states, parser phases, returned object types) koristi kao dodatna povratna informacija:
+Efikasniji obrazac je tretirati **samu sekvencu kao seed** i koristiti **observable state** (response codes, stanja protokola, faze parser-a, tipove vraćenih objekata) kao dodatni feedback:<sup>[[4]](#references)</sup>
 
-- Zadržite **valid prefix messages** stabilnim i fokusirajte promene na poruku koja pokreće **transition**.
-- Keširajte identifikatore i vrednosti koje generiše server iz ranijih odgovora kada naredni korak zavisi od njih.
-- Dajte prednost mutaciji/spajanju po poruci umesto mutiranja celog serijalizovanog transcript-a kao neprozirnog bloba.
-- Ako protocol izlaže smislenе response codes, koristite ih kao **jeftin state oracle** da biste prioritet dali sekvencama koje napreduju dublje.
+- Održavajte **valid prefix messages** stabilnim i usmerite mutacije na poruku koja **pokreće tranziciju**.
+- Keširajte identifikatore i vrednosti koje generiše server iz prethodnih odgovora kada sledeći korak zavisi od njih.
+- Dajte prednost mutiranju/spajanju po poruci u odnosu na mutiranje celog serijalizovanog transkripta kao opaque blob-a.
+- Ako protokol izlaže smislene response codes, koristite ih kao **jeftin oracle stanja** za davanje prioriteta sekvencama koje napreduju dublje.
 
-To je isti razlog zbog kog se authenticated bugs, skrivene transitions, ili parser bugs “samo-posle-handshake” često propuštaju običnim file-style fuzzing-om: fuzzer mora da očuva **redosled, stanje, i zavisnosti**, a ne samo strukturu.
+To je isti razlog zbog kog authenticated bug-ovi, skrivene tranzicije ili parser bug-ovi koji se javljaju „tek nakon handshake-a“ često promaknu vanilla file-style fuzzing-u: fuzzer mora da očuva **redosled, stanje i zavisnosti**, a ne samo strukturu.
 
-## Trik sa raznolikošću na jednoj mašini (Jackalope-Style)
+## Trik za raznovrsnost na jednoj mašini (u stilu Jackalope-a)
 
-Praktičan način da se hibridizuju **generative novelty** i **coverage reuse** jeste da se **restartuju kratkotrajni workers** prema persistent serveru. Svaki worker kreće od praznog corpus-a, sinhronizuje se nakon `T` sekundi, radi još `T` sekundi nad kombinovanim corpus-om, ponovo se sinhronizuje, a zatim izlazi. Ovo daje **sveže strukture pri svakoj generaciji** dok i dalje koristi akumuliranu coverage.
+Praktičan način za hibridizaciju **generative novelty** sa **coverage reuse** jeste **restartovanje kratkotrajnih worker-a** nad persistent serverom. Svaki worker počinje sa praznim corpus-om, sinhronizuje se nakon `T` sekundi, radi još `T` sekundi nad kombinovanim corpus-om, ponovo se sinhronizuje, a zatim se gasi. Tako se u svakoj generaciji dobijaju **sveže strukture**, uz istovremeno korišćenje akumuliranog coverage-a.<sup>[[2]](#references)</sup>
 
 **Server:**
 ```bash
 /path/to/fuzzer -start_server 127.0.0.1:8337 -out serverout
 ```
-**Sekvencijalni radnici (primer petlje):**
+**Sekvencijalni worker-i (primer petlje):**
 
 <details>
-<summary>Jackalope worker restart petlja</summary>
+<summary>Jackalope petlja ponovnog pokretanja worker-a</summary>
 ```python
 import subprocess
 import time
@@ -99,87 +99,87 @@ p.kill()
 
 **Napomene:**
 
-- `-in empty` forsira **fresh corpus** pri svakoj generaciji.
-- `-server_update_interval T` aproksimira **delayed sync** (novelty first, reuse later).
-- U grammar fuzzing režimu, **initial server sync se podrazumevano preskače** (nema potrebe za `-skip_initial_server_sync`).
-- Optimalni `T` je **zavisan od target-a**; prebacivanje nakon što worker pronađe većinu “easy” coverage obično radi najbolje.
+- `-in empty` primorava **novi corpus** pri svakoj generaciji.
+- `-server_update_interval T` približno simulira **odloženu sinhronizaciju** (noviteti prvo, ponovna upotreba kasnije).
+- U grammar fuzzing režimu, **početna server sinhronizacija se podrazumevano preskače** (nije potreban `-skip_initial_server_sync`).
+- Optimalni `T` zavisi od **target-a**; prebacivanje nakon što worker pronađe većinu „lake“ coverage obično daje najbolje rezultate.
 
-## Snapshot Fuzzing Za Teške Za Harnessovanje Target-e
+## Snapshot Fuzzing Za Target-e Koje Je Teško Harness-ovati
 
-Kada kod koji želite da testirate postaje dostupan tek **nakon velikog setup troška** (bootovanje VM-a, završavanje login-a, primanje paketa, parsiranje kontejnera, inicijalizacija servisa), korisna alternativa je **snapshot fuzzing**:
+Kada kod koji želite da testirate postaje dostupan tek **nakon velikog troška inicijalnog podešavanja** (pokretanje VM-a, završavanje prijavljivanja, prijem paketa, parsiranje container-a, inicijalizacija servisa), korisna alternativa je **snapshot fuzzing**:
 
-1. Pokrenite target dok interesantno stanje ne bude spremno.
-2. Napravite snapshot **memory + registers** u tom trenutku.
-3. Za svaki test case, upišite mutirani input direktno u odgovarajući guest/process buffer.
-4. Izvršavajte do crash/timeout/reset.
-5. Vratite samo **dirty pages** i ponovite.
+1. Pokrenite target dok zanimljivo stanje ne bude spremno.
+2. Napravite snapshot **memorije + registara** u toj tački.
+3. Za svaki test case, upišite mutirani input direktno u relevantni guest/process buffer.
+4. Izvršavajte dok ne dođe do crash-a/timeout-a/reset-a.
+5. Vratite samo **dirty pages** i ponovite postupak.
 
-Ovo izbegava plaćanje punog setup troška pri svakoj iteraciji i posebno je korisno za **network services**, **firmware**, **post-auth attack surfaces**, i **binary-only targets** koje je teško refaktorisati u klasični in-process harness.
+Ovim se izbegava plaćanje punog troška inicijalnog podešavanja u svakoj iteraciji i naročito je korisno za **network services**, **firmware**, **post-auth attack surfaces** i **binary-only target-e** koje je teško refaktorisati u klasičan in-process harness.
 
-Praktičan trik je da se odmah prekine nakon `recv`/`read`/packet-deserialization tačke, zabeleži adresa input buffera, napravi snapshot tu, a zatim da se taj buffer direktno mutira u svakoj iteraciji. Ovo vam omogućava da fuzzing-ujete duboku parsing logiku bez ponovnog građenja celog handshake-a svaki put.
+Praktičan trik je da se odmah zaustavite nakon tačke `recv`/`read`/deserializacije paketa, zabeležite adresu input buffer-a, napravite snapshot na tom mestu, a zatim direktno mutirate taj buffer u svakoj iteraciji. Ovo vam omogućava da fuzz-ujete duboku logiku parsiranja bez ponovne izgradnje celog handshake-a svaki put.
 
-## Harness Introspection: Pronađite Shallow Fuzzers Rano
+## Harness Introspection: Rano Pronalaženje Shallow Fuzzer-a
 
-Kada campaign zastane, problem često nije mutator već **harness**. Koristite **reachability/coverage introspection** da pronađete funkcije koje su statički dostižne iz vašeg fuzz target-a, ali retko ili nikad dinamički pokrivene. Te funkcije obično ukazuju na jedan od tri problema:
+Kada campaign zastane, problem često nije u mutator-u već u **harness-u**. Koristite **reachability/coverage introspection** da pronađete funkcije koje su statički dostupne iz vašeg fuzz target-a, ali su retko ili nikada dinamički pokrivene. Te funkcije obično ukazuju na jedan od tri problema:
 
 - Harness ulazi u target prekasno ili prerano.
-- Seed corpus nema celu porodicu feature-a.
-- Targetu stvarno treba **second harness** umesto jednog prevelikog “do everything” harness-a.
+- Seed corpus-u nedostaje cela familija funkcionalnosti.
+- Target-u je zaista potreban **drugi harness**, umesto jednog prevelikog harness-a koji „radi sve“.
 
-Ako koristite OSS-Fuzz / ClusterFuzz-style workflow-e, Fuzz Introspector je koristan za ovu trijažu:
+Ako koristite OSS-Fuzz / ClusterFuzz stil workflow-a, Fuzz Introspector je koristan za ovu trijažu:
 ```bash
 python3 infra/helper.py introspector libdwarf --seconds=30
 python3 infra/helper.py introspector libdwarf --public-corpora
 ```
-Use the report to decide whether to add a new harness for an untested parser path, expand the corpus for a specific feature, or split a monolithic harness into smaller entry points.
+Koristite izveštaj da odlučite da li treba dodati novi harness za netestiranu putanju parsera, proširiti corpus za određenu funkcionalnost ili podeliti monolitni harness na manje entry point-e.
 
-## Graph-First Fuzz Target Selection And Mutation Triage
+## Graph-First odabir fuzz meta i trijaža mutation rezultata
 
-Ako već imate **static-analysis findings**, **mutation-testing survivors** i **coverage reports**, nemojte ih tretirati kao nezavisne liste. Prvo napravite **call graph**, anotirajte čvorove sa **cyclomatic complexity**, **entrypoint/untrusted-input reachability** i bilo kojim spoljnim nalazima, pa onda postavite graf pitanja:
+Ako već imate **static-analysis findings**, **mutation-testing survivors** i **coverage reports**, nemojte ih trijažirati kao nezavisne liste. Najpre izgradite **call graph**, označite čvorove pomoću **cyclomatic complexity**, **entrypoint/untrusted-input reachability** i svih eksternih nalaza, a zatim postavite pitanja o grafu:<sup>[[5]](#references)[[6]](#references)</sup>
 
-- Koje funkcije visoke kompleksnosti su dostupne iz untrusted input?
+- Koje funkcije visoke složenosti su dostupne preko untrusted input-a?
 - Koji mutation survivors se nalaze na putanjama od parsera/handlera do security-critical koda?
-- Koje funkcije su arhitekturne choke point tačke sa neobično visokim **blast radius**?
+- Koje funkcije predstavljaju arhitektonske choke point-e sa neuobičajeno velikim **blast radius**?
 
-Ovo obično otkriva bolje fuzz targete nego samo "najniža coverage". Parser/decoder sa **visokom kompleksnošću** i potvrđenom **external reachability** je jači kandidat za harness nego izolovani interni helper sa slabom coverage, ali bez attacker-controlled puta.
+Ovim se obično pronalaze bolji fuzz target-i nego oslanjanjem samo na „najniži coverage“. Parser/decoder sa **high complexity** i potvrđenom **external reachability** jači je kandidat za harness od izolovanog internog helper-a sa slabim coverage-om, ali bez putanje pod kontrolom napadača.
 
-### Practical triage workflow
+### Praktičan workflow trijaže
 
-1. Napravite **code graph** iz codebase-a i izdvojite metrics za kompleksnost/grananje po funkciji.
-2. Nabrojite **entrypoints** koji prihvataju attacker-controlled input: request handlers, decoders, importers, protocol parsers, CLI/file readers.
-3. Pokrenite **path queries** od tih entrypoints do kandidat funkcija da biste odvojili reachable attack surface od dead/internal-only koda.
-4. Prioritizujte čvorove koji kombinuju:
+1. Izgradite **code graph** iz codebase-a i izdvojite metrike složenosti/grana za svaku funkciju.
+2. Nabrojte **entrypoints** koji prihvataju input pod kontrolom napadača: request handler-e, decoder-e, importer-e, protocol parser-e, CLI/file reader-e.
+3. Pokrenite **path queries** od tih entrypoint-a do kandidatskih funkcija kako biste odvojili dostižnu attack surface od neaktivnog ili samo internog koda.
+4. Dajte prioritet čvorovima koji kombinuju:
 - visoku **cyclomatic complexity**
 - potvrđenu **reachability from untrusted input**
-- visok **blast radius** ili mnogo downstream dependents
-- potvrđene dokaze kao što su **SARIF** findings, audit notes ili mutation survivors
-5. Pišite fokusirane harnesses za najbolje ocenjene čvorove prve, posebno **parsers/codecs** kao što su hex/Base64/IP/message decoders.
+- veliki **blast radius** ili veliki broj downstream dependents
+- dodatne dokaze, kao što su **SARIF** findings, audit beleške ili mutation survivors
+5. Najpre napišite fokusirane harness-e za čvorove sa najboljim rezultatom, naročito za **parser/codecs** kao što su hex/Base64/IP/message decoder-i.
 
-### Mutation survivors: equivalent vs actionable
+### Mutation survivors: equivalent naspram actionable
 
-Mutation testing često proizvodi bučnu listu survivors. Pre nego što svakog survivora tretirate kao security gap, koristite graf da biste pitali:
+Mutation testing često proizvodi bučnu listu survivor-a. Pre nego što svakog survivor-a proglasite security gap-om, pomoću grafa postavite sledeća pitanja:
 
-- Da li je mutirana funkcija dostupna iz attacker-controlled entrypoint?
-- Da li su sve call paths ograničene jačim invariantima nego što je mutirana provera?
-- Da li se čvor nalazi u dead code, formatting-only logici ili u visokoučinkovitoj arithmetic/parser putanji?
+- Da li je mutated function dostupna preko attacker-controlled entrypoint-a?
+- Da li su sve call path-e ograničene jačim invariant-ima od onog koji je mutated?
+- Da li se čvor nalazi u dead code-u, logici koja služi samo za formatiranje ili u arithmetic/parser path-u sa velikim uticajem?
 
-Survivors koji ostaju unreachable ili su strukturno ograničeni često su **equivalent mutants**. Survivors koji ostaju **reachable** i dodiruju **boundary conditions**, **overflow/carry paths** ili **security-critical arithmetic/parsing** treba da se promovišu u:
+Survivors koji ostaju nedostižni ili su strukturno ograničeni često su **equivalent mutants**. Survivors koji ostaju **reachable** i dotiču **boundary conditions**, **overflow/carry paths** ili **security-critical arithmetic/parsing** treba promovisati u:
 
-- new fuzz harnesses
-- direct property/invariant tests
-- targeted edge-case vectors
+- nove fuzz harness-e
+- direktne property/invariant tests
+- ciljane edge-case vectors
 
-### Correlate external findings onto the graph
+### Korelacija eksternih nalaza sa grafom
 
-Ako vaš SAST pipeline izvozi **SARIF**, projicirajte findings na graf čvorove po **file + line range** i koristite graf da proširite uticaj:
+Ako vaš SAST pipeline eksportuje **SARIF**, projektujte nalaze na čvorove grafa prema **file + line range** i koristite graf za proširivanje procene uticaja:
 
 - izračunajte **blast radius** označene funkcije
-- proverite da li je nalaz na bilo kojoj putanji od entrypoint-a
-- grupišite bliske nalaze koji se slivaju u isti choke point
+- proverite da li se nalaz nalazi na bilo kojoj putanji od entrypoint-a
+- grupišite obližnje nalaze koji se svode na isti choke point
 
-Ovo je korisno kada odlučujete da li da potrošite fuzzing vreme na određenu funkciju: čvor koji je **reachable**, **complex**, i već ima **SAST hits** je često bolji target nego samo kompleksan čvor bez attacker puta.
+Ovo je korisno pri odlučivanju da li vreme za fuzzing treba potrošiti na određenu funkciju: čvor koji je **reachable**, složen i već ima **SAST hits** često je bolja meta od samo složenog čvora bez attacker path-a.
 
-Example workflow with Trailmark:
+Primer workflow-a sa Trailmark:<sup>[[6]](#references)</sup>
 ```bash
 uv pip install trailmark
 trailmark analyze --complexity 10 path/to/project
@@ -193,35 +193,35 @@ engine.preanalysis()
 engine.complexity_hotspots(10)
 engine.paths_between("handle_request", "parse_ipv6")
 ```
-Važna metodologija je presek: **kompleksnost x izloženost x uticaj**. Koristi graf da izabereš fuzz ciljeve sa najvećom očekivanom bezbednosnom vrednošću, a zatim koristi mutacione preživele da odlučiš koje granice i invariants tvoj harness mora da stresira.
+Važna metodologija je presek: **složenost x izloženost x uticaj**. Koristite graf da izaberete fuzz ciljeve sa najvećom očekivanom bezbednosnom vrednošću, a zatim koristite preživele mutacije da odlučite koje granice i invarijante vaš harness mora da testira.
 
-## Go Fuzzing With gosentry: Jači engine, Typed Inputs, I Differential Checks
+## Go Fuzzing sa gosentry: Snažniji engine, tipizirani ulazi i diferencijalne provere
 
-Ako Go target već ima native `testing.F` harness, praktičan put nadogradnje je da se isti harness pokrene sa [gosentry](https://github.com/trailofbits/gosentry), forkovanim Go toolchain-om koji zadržava `go test -fuzz` ali menja backend na **LibAFL**.
+Ako Go cilj već ima native `testing.F` harness, praktičan put nadogradnje je pokretanje istog harness-a pomoću [gosentry](https://github.com/trailofbits/gosentry), forkovanog Go toolchain-a koji zadržava `go test -fuzz`, ali menja backend u **LibAFL**.<sup>[[7]](#references)[[8]](#references)</sup>
 ```bash
 ./bin/go test -fuzz=FuzzHarness --focus-on-new-code=false --catch-races=true --catch-leaks=true
 ```
-Ovo je korisno kada native Go fuzzer zastane na **hard comparisons**, **typed inputs** ili formatima sa mnogo parser logike. Metodologija ostaje ista:
+Ovo je korisno kada native Go fuzzer zastane na **složenim poređenjima**, **tipiziranim ulazima** ili **formatima sa intenzivnim parsiranjem**. Metodologija ostaje ista:
 
-- Nastavi da koristiš `f.Add(...)` za seeds i `f.Fuzz(...)` za callback.
-- Ponovo koristi isti harness, ali ga pokreni sa gosentry `go` binary umesto standardnog toolchain-a.
-- Tretiraj dobijenu kampanju kao normalan coverage-guided run, ali sa LibAFL scheduling/mutation i boljim okolnim detector-ima.
+- Nastavite da koristite `f.Add(...)` za seedove i `f.Fuzz(...)` za callback.
+- Ponovo koristite isti harness, ali ga pokrenite gosentry `go` binarnim fajlom umesto standardnog toolchain-a.
+- Tretirajte rezultujuću kampanju kao uobičajeno coverage-guided pokretanje, ali sa LibAFL scheduling/mutation mehanizmima i boljim pratećim detektorima.
 
-### Pretvori tihe failure-e u fuzz findings
+### Pretvaranje tihih grešaka u fuzz nalaze
 
-Ponavljajući problem u Go procenama je to što opasno ponašanje često ne dovodi do crash-a po default-u. Sa gosentry, možeš nekoliko klasa “loših ali tihih” stanja da pretvoriš u findings:
+Čest problem u Go procenama jeste to što se opasno ponašanje često **podrazumevano ne završava crash-om**. Uz gosentry, nekoliko klasa „loših, ali tihih“ stanja možete pretvoriti u nalaze:
 
-- `--panic-on=pkg.Func,...` da izabrani logging/error path-ovi ponašaju se kao crash-evi (korisno za `log.Fatal`-style code path-ove koji bi inače samo logovali i nastavili).
-- `--catch-races=true` da ponovo izvrši newly discovered queue entries sa Go race detector-om.
-- `--catch-leaks=true` da ponovo izvrši nove queue entries sa `goleak` i zaustavi se na goroutine leak-ovima.
-- LibAFL hang handling da zadrži **infinite loops / very slow inputs** kao fuzz findings umesto da nestanu kao timeout-i.
-- Ugrađene arithmetic overflow provere po default-u, plus opciono truncation provere kroz go-panikint-style instrumentation.
+- `--panic-on=pkg.Func,...` kako bi odabrane logging/error putanje funkcionisale kao crash-ovi (korisno za putanje koda u stilu `log.Fatal`, koje bi inače samo evidentirale grešku i nastavile izvršavanje).
+- `--catch-races=true` kako bi se novootkriveni unosi iz queue-a ponovo pokrenuli sa Go race detector-om.
+- `--catch-leaks=true` kako bi se novi unosi iz queue-a ponovo pokrenuli pomoću `goleak` i izvršavanje zaustavilo pri otkrivanju curenja goroutine-a.
+- LibAFL hang handling kako bi **beskonačne petlje / veoma spori ulazi** ostali fuzz nalazi umesto da nestanu kao timeout-i.
+- Ugrađene provere arithmetic overflow-a su podrazumevano uključene, uz opcione provere truncation-a kroz instrumentation u stilu go-panikint-a.
 
-Ovo je posebno vredno za ciljeve gde je security impact **panicless parser failure**, **concurrency bug**, ili **DoS-only hang**, a ne memory corruption.
+Ovo je naročito vredno za targete kod kojih je bezbednosni uticaj **parser failure bez panic-a**, **concurrency bug** ili hang koji izaziva samo **DoS**, a ne memory corruption.
 
-### Struct-aware fuzzing za typed Go API-je
+### Fuzzing prilagođen struct tipovima za tipizirane Go API-je
 
-Native Go fuzzing uglavnom očekuje skalare kao što su `[]byte`, `string` i brojevi. Ako kod koji se testira prima typed objects, gosentry može direktno da fuzz-uje **composite values** (structs, slices, arrays, pointers), dok i dalje mutira bytes ispod toga.
+Native Go fuzzing uglavnom očekuje skalare kao što su `[]byte`, `string` i brojevi. Ako kod koji se testira koristi tipizirane objekte, gosentry može direktno da fuzz-uje **složene vrednosti** (struct-ove, slice-ove, array-e, pointer-e), uz istovremeno mutiranje bajtova u pozadini.
 ```go
 type Input struct {
 Data []byte
@@ -236,24 +236,24 @@ Process(in)
 })
 }
 ```
-Koristite ovo kada gradite fake wire format samo za fuzzing, jer biste time sakrili logičke bugove iza harness-only parsing koda. Za differential ili grammar-based kampanje, umesto toga držite harness input kao jedan `[]byte` ili `string` i parse-ujte unutar callback-a.
+Koristite ovo kada pravite lažni wire format samo za fuzzing, jer bi parsing kod koji postoji samo u harness-u sakrio logičke greške. Za differential ili grammar-based kampanje, zadržite ulaz u harness-u kao jednu vrednost tipa `[]byte` ili `string` i izvršite parsing unutar callback-a.
 
-### Grammar-based fuzzing za parsers i protocol inputs
+### Grammar-based fuzzing za parsere i protokolarne ulaze
 
-Za parsers, formate i input languages, gosentry može da pokrene **Nautilus grammar fuzzing** na vrhu LibAFL. Grammar je JSON array production rules, a harness bi obično trebalo da prima jedan `[]byte` ili `string` argument.
+Za parsere, formate i ulazne jezike, gosentry može da pokrene **Nautilus grammar fuzzing** povrh LibAFL-a. Gramatika je JSON niz production rules, a harness obično treba da prihvata jedan argument tipa `[]byte` ili `string`.
 ```bash
 ./bin/go test -fuzz=FuzzGrammarJSON --use-grammar --grammar=./testdata/JSON.json --focus-on-new-code=false
 ```
-Napomene o metodologiji:
+Beleške o metodologiji:
 
-- Koristi grammar mode kada byte-level mutacije uglavnom umiru u ranim syntax proverama.
-- Drži grammar fokusiran na **security-relevant subset** jezika/protokola umesto da modeluješ punu specifikaciju.
-- Koristi velike boundary vrednosti u terminalima/nonterminalima da opteretiš integer, length i state-machine granice.
-- Grammar mode održava inputs grammar-valid, ali target i dalje prima **bytes/strings**, tako da parsing i semantic checks ostaju unutar harnessed koda.
+- Koristite grammar mode kada mutacije na nivou bajtova uglavnom ne prolaze rane provere sintakse.
+- Ograničite gramatiku na **security-relevant podskup** jezika/protokola umesto modelovanja cele specifikacije.
+- Koristite velike granične vrednosti u terminalima/nonterminalima da biste opteretili ivice celih brojeva, dužina i state machine-a.
+- Grammar mode održava ulaze validnim prema gramatici, ali target i dalje prima **bajtove/stringove**, tako da parsiranje i semantičke provere ostaju unutar harnessed koda.
 
-### Differential fuzzing: poredi implementations, ne samo crashes
+### Differential fuzzing: upoređujte implementacije, ne samo crash-eve
 
-Jak obrazac za Go ecosystems je **grammar-based differential fuzzing**: generiši valid structured inputs i prosledi ih dvema parsers, clients ili state-transition engines.
+Snažan obrazac za Go ekosisteme je **grammar-based differential fuzzing**: generišite validne strukturisane ulaze i prosledite ih dvama parserima, klijentima ili engine-ima za prelazak između stanja.
 ```go
 f.Fuzz(func(t *testing.T, data []byte) {
 gotA, errA := ParseA(data)
@@ -265,32 +265,32 @@ _ = gotA
 _ = gotB
 })
 ```
-Tretirajte sledeće kao findings:
+Tretirajte sledeće kao nalaze:
 
-- jedna implementacija panic-uje dok druga odbija cleanly
-- accepted/rejected input mismatches
-- različita parse trees ili dekodirani objects
-- divergent state transitions, nonces, balances ili state roots
+- jedna implementacija izaziva panic, dok druga uredno odbija unos
+- nepodudaranja između prihvaćenih/odbijenih unosa
+- različita stabla parsiranja ili dekodirani objekti
+- različite tranzicije stanja, nonce vrednosti, bilansi ili koreni stanja
 
-Ovo je praktičan način da se pronađu **consensus mismatches**, **parser ambiguity** i **spec-vs-implementation drift** koje čisti crash fuzzing često promašuje.
+Ovo je praktičan način za pronalaženje **nepodudaranja u konsenzusu**, **dvosmislenosti parsera** i **odstupanja implementacije od specifikacije**, koja klasični fuzzing usmeren samo na crash često ne otkriva.
 
-### Ponovo iskoristite campaign corpus za coverage reporting
+### Ponovna upotreba corpus-a kampanje za izveštavanje o pokrivenosti
 
-Nakon campaign, replayujte sačuvani queue corpus da biste generisali Go coverage report bez ručnog exportovanja posebnog corpus-a:
+Nakon kampanje, ponovo reprodukujte sačuvani queue corpus da biste generisali Go izveštaj o pokrivenosti bez ručnog izvoza zasebnog corpus-a:
 ```bash
 ./bin/go test -fuzz=FuzzHarness --generate-coverage .
 ```
-Pokrenite komandu iz **istog package** i sa istim `-fuzz` targetom kako bi gosentry rešio ispravno keširano stanje kampanje.
+Pokrenite komandu iz **istog package-a** i sa istim `-fuzz` targetom, kako bi gosentry razrešio odgovarajuće stanje keširane kampanje.
 
-## References
+## Reference
 
-- [Mutational grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
-- [Jackalope](https://github.com/googleprojectzero/Jackalope)
-- [AFL++ Fuzzing in Depth](https://aflplus.plus/docs/fuzzing_in_depth/)
-- [AFLNet Five Years Later: On Coverage-Guided Protocol Fuzzing](https://arxiv.org/abs/2412.20324)
-- [Trailmark turns code into graphs](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
-- [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
-- [Go fuzzing was missing half the toolkit. We forked the toolchain to fix it.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
-- [trailofbits/gosentry](https://github.com/trailofbits/gosentry)
+- [1] [Mutational grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
+- [2] [Jackalope](https://github.com/googleprojectzero/Jackalope)
+- [3] [AFL++ Fuzzing in Depth](https://aflplus.plus/docs/fuzzing_in_depth/)
+- [4] [AFLNet Five Years Later: On Coverage-Guided Protocol Fuzzing](https://arxiv.org/abs/2412.20324)
+- [5] [Trailmark turns code into graphs](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
+- [6] [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
+- [7] [Go fuzzing was missing half the toolkit. We forked the toolchain to fix it.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
+- [8] [trailofbits/gosentry](https://github.com/trailofbits/gosentry)
 
 {{#include ../banners/hacktricks-training.md}}
