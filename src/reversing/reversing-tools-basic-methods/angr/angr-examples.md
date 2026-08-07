@@ -1,13 +1,13 @@
-# Angr - Examples
+# Angr - Örnekler
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Program, **stdin'den aynı anda birkaç değer** almak için `scanf` kullanıyorsa **`scanf`** sonrasında başlayan bir state oluşturmanız gerekir.
+> Program **stdin'den aynı anda birkaç değer** almak için `scanf` kullanıyorsa, **`scanf` sonrasında** başlayan bir state oluşturmanız gerekir.
 
 Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Adrese ulaşmak için input (adresi belirterek)
+### Adrese ulaşmak için girdi (adresi belirterek)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Adrese ulaşmak için girdi (print ifadelerini belirterek)
+### Adrese ulaşmak için girdi (print'leri belirterek)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -75,7 +75,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Registry değerleri
+### Kayıt defteri değerleri
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-Bu senaryoda input `scanf("%u %u")` ile alındı ve `"1 1"` değeri verildi; bu nedenle stack'teki **`0x00000001`** değerleri **user input**'tan gelir. Bu değerlerin `$ebp - 8` konumunda nasıl başladığını görebilirsiniz. Dolayısıyla kodda **`$esp` değerinden 8 byte çıkardık** (**o anda `$ebp` ve `$esp` aynı değere sahipti**) ve ardından BVS'yi push ettik.
+Bu senaryoda input, `scanf("%u %u")` kullanılarak alındı ve `"1 1"` değeri verildi; bu nedenle stack'teki **`0x00000001`** değerleri **user input**'tan gelir. Bu değerlerin `$ebp - 8` konumunda başladığını görebilirsiniz. Bu nedenle kodda `$esp` değerinden **8 byte çıkardık** (**o anda `$ebp` ve `$esp` aynı değere sahipti**) ve ardından BVS'yi push ettik.
 
-![Stack'e bit vektörlerini yerleştirerek bir program akışına ulaşmak için stack konumunun sahip olması gereken değeri bulma: Bu senaryoda input scanf("%u %u") ile alındı ve "1...](<../../../images/image (136).png>)
+![Bir program akışına ulaşmak için stack'teki bit vektörlerini, stack konumunun sahip olması gereken değeri bulmak üzere yerleştirme: Bu senaryoda input, scanf("%u %u") kullanılarak alındı ve "1...](<../../../images/image (136).png>)
 
 ### Static Memory values (Global variables)
 ```python
@@ -402,13 +402,13 @@ main(sys.argv)
 >  # the string from the file, except four symbolic bytes where the name would be
 >  # stored.
 >  # (!)
-> ```
+>  ```
 
 ### Kısıtlamaları Uygulama
 
 > [!TIP]
-> Bazen 16 karakter uzunluğundaki 2 kelimeyi **karakter karakter** (döngüyle) karşılaştırmak gibi basit işlemler **angr** için çok fazla **maliyete** neden olur; çünkü her `if` için 1 branch oluşturduğundan, branch'leri **üstel olarak** üretmesi gerekir: `2^16`\
-> Bu nedenle, **angr**'dan **önceki bir noktaya ulaşmasını istemek** (gerçekten zor kısmın zaten tamamlandığı bir nokta) ve bu **kısıtlamaları manuel olarak ayarlamak** daha kolaydır.
+> Bazen 16 karakter uzunluğundaki 2 kelimeyi **karakter karakter** (döngüyle) karşılaştırmak gibi basit insan işlemleri **angr** için çok fazla **maliyete** neden olur; çünkü her `if` için 1 branch oluşturduğundan **üstel** olarak branch'ler üretmesi gerekir: `2^16`\
+> Bu nedenle, **angr'dan daha önceki bir noktaya gitmesini istemek** (gerçekten zor kısım zaten tamamlanmış olur) ve bu **kısıtlamaları manuel olarak ayarlamak** daha kolaydır.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,14 +480,14 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> Bazı senaryolarda, gereksiz branch'leri ortadan kaldırmak ve çözümü bulmak için benzer status'ları birleştiren **veritesting** özelliğini etkinleştirebilirsiniz: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> Bazı senaryolarda **veritesting** özelliğini etkinleştirebilirsiniz; bu özellik, gereksiz branch'leri kaydetmek ve çözümü bulmak için benzer durumları birleştirir: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Bu senaryolarda yapabileceğiniz başka bir şey de **fonksiyonu hook'layarak angr'a daha kolay anlayabileceği bir şey vermektir**.
+> Bu senaryolarda yapabileceğiniz başka bir şey de **angr'a daha kolay anlayabileceği bir şey sağlayan function'ı hook etmektir**.
 
 ### Simulation Managers
 
-Bazı simulation manager'lar diğerlerinden daha kullanışlı olabilir. Önceki örnekte, çok sayıda kullanışlı branch oluşturulduğu için bir sorun vardı. Burada **veritesting** tekniği bu branch'leri birleştirerek bir çözüm bulacaktır.\
+Bazı simulation manager'lar diğerlerinden daha kullanışlı olabilir. Önceki örnekte, çok sayıda kullanışlı branch oluşturulduğu için bir sorun vardı. Burada **veritesting** tekniği bunları birleştirerek bir çözüm bulacaktır.\
 Bu simulation manager şu şekilde de etkinleştirilebilir: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Bir fonksiyonu hook'lama / Simprocedure
+### Bir function'ı hook'lamak / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -809,6 +809,6 @@ main(sys.argv)
 ```
 ## Referanslar
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}

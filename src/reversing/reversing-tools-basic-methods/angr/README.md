@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Bu cheatsheet'in bir kısmı [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/) temel alınarak hazırlanmıştır.<sup>[[1]](#references)</sup>
+Bu cheatsheet'in bir bölümü [angr belgelerine](https://docs.angr.io/_/downloads/en/stable/pdf/)<sup>[[1]](#references)</sup> dayanmaktadır.
 
 ## Kurulum
 ```bash
@@ -69,7 +69,7 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
-### Semboller ve Relokasyonlar
+### Semboller ve Relocation'lar
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -119,13 +119,13 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
-### Fonksiyon çağırma
+### Fonksiyonları çağırma
 
-- `args` aracılığıyla bir argüman listesi ve `env` aracılığıyla bir environment variables dictionary'sini `entry_state` ve `full_init_state` içine aktarabilirsiniz. Bu yapılardaki değerler string veya bitvector olabilir ve argümanlar ile simulated execution ortamı olarak state içine serialize edilir. Varsayılan `args`, boş bir listedir; bu nedenle analiz ettiğiniz program en az bir `argv[0]` bulmayı bekliyorsa bunu her zaman sağlamalısınız!
-- `argc` değerinin symbolic olmasını istiyorsanız `entry_state` ve `full_init_state` constructor'larına `argc` olarak symbolic bir bitvector aktarabilirsiniz. Ancak dikkatli olun: bunu yaparsanız, sonuçta oluşan state'e `argc` değerinizin `args` içine aktardığınız argüman sayısından büyük olamayacağını belirten bir constraint de eklemelisiniz.
-- Call state'i kullanmak için onu `.call_state(addr, arg1, arg2, ...)` ile çağırmalısınız. Burada `addr`, çağırmak istediğiniz fonksiyonun adresi; `argN` ise bu fonksiyona verilen N'inci argümandır ve python integer, string, array veya bitvector olabilir. Bellek allocate etmek ve bir nesneye pointer aktarmak istiyorsanız onu bir PointerWrapper içine sarmalısınız; örneğin `angr.PointerWrapper("point to me!")`. Bu API'nin sonuçları biraz öngörülemez olabilir, ancak bunun üzerinde çalışıyoruz.
+- `args` aracılığıyla bir argüman listesi ve `env` aracılığıyla bir ortam değişkenleri sözlüğünü `entry_state` ve `full_init_state` içine aktarabilirsiniz. Bu yapılardaki değerler string veya bitvector olabilir ve durum içine simüle edilen çalıştırmanın argümanları ve ortamı olarak serileştirilir. Varsayılan `args` değeri boş bir listedir; bu nedenle analiz ettiğiniz program en az bir `argv[0]` bulmayı bekliyorsa bunu her zaman sağlamalısınız!
+- `argc` değerinin symbolic olmasını istiyorsanız `entry_state` ve `full_init_state` constructor'larına `argc` olarak symbolic bir bitvector aktarabilirsiniz. Ancak dikkatli olun: bunu yaparsanız, elde edilen duruma `argc` değerinizin `args` içine aktardığınız argüman sayısından büyük olamayacağını belirten bir constraint de eklemelisiniz.
+- Call state'i kullanmak için `.call_state(addr, arg1, arg2, ...)` ile çağırmalısınız; burada `addr`, çağırmak istediğiniz fonksiyonun adresi, `argN` ise bu fonksiyonun N'inci argümanıdır ve Python integer'ı, string, array veya bitvector olabilir. Bellek ayırmak ve bir nesneye işaretçiyi gerçekten aktarmak istiyorsanız nesneyi bir PointerWrapper içine sarmalamalısınız; örneğin `angr.PointerWrapper("point to me!")`. Bu API'nin sonuçları biraz öngörülemez olabilir, ancak üzerinde çalışıyoruz.
 
-### BitVectors
+### BitVector'ler
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -134,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### Sembolik BitVector'lar ve Kısıtlamalar
+### Sembolik BitVector'ler ve Kısıtlamalar
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -186,11 +186,11 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Ayrıca, ilk argüman olarak bir symbol adı ve hook sağlayarak, symbol'ün bulunduğu adresi hook'lamak için `proj.hook_symbol(name, hook)` kullanabilirsiniz<sup>[[1]](#references)</sup>
+Ayrıca, ilk argüman olarak bir symbol adı sağlayarak, symbol'ün bulunduğu adresi hook'lamak için `proj.hook_symbol(name, hook)` kullanabilirsiniz<sup>[[1]](#references)</sup>
 
 ## Örnekler
 
-## Referanslar
+## Kaynaklar
 
 - [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
