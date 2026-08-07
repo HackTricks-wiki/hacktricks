@@ -30,7 +30,7 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## Πληροφορίες φορτωμένων και κύριων αντικειμένων
+## Πληροφορίες για τα φορτωμένα και κύρια αντικείμενα
 
 ### Φορτωμένα δεδομένα
 ```python
@@ -55,7 +55,7 @@ proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
-### Κύριο Αντικείμενο
+### Κύριο αντικείμενο
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -86,7 +86,7 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
-### Blocks
+### Μπλοκ
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -94,9 +94,9 @@ block.pp() #Print disassembly of the block
 block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
-## Δυναμική Ανάλυση
+## Δυναμική ανάλυση
 
-### Simulation Manager, Καταστάσεις
+### Διαχειριστής προσομοίωσης, καταστάσεις
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -122,8 +122,8 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ### Κλήση συναρτήσεων
 
 - Μπορείτε να περάσετε μια λίστα ορισμάτων μέσω του `args` και ένα dictionary μεταβλητών περιβάλλοντος μέσω του `env` στα `entry_state` και `full_init_state`. Οι τιμές σε αυτές τις δομές μπορούν να είναι strings ή bitvectors και θα γίνουν serialize στην κατάσταση ως τα ορίσματα και το περιβάλλον για την προσομοιωμένη εκτέλεση. Το προεπιλεγμένο `args` είναι μια κενή λίστα, επομένως, αν το πρόγραμμα που αναλύετε αναμένει να βρει τουλάχιστον ένα `argv[0]`, θα πρέπει πάντα να το παρέχετε!
-- Αν θέλετε το `argc` να είναι symbolic, μπορείτε να περάσετε ένα symbolic bitvector ως `argc` στους constructors `entry_state` και `full_init_state`. Ωστόσο, χρειάζεται προσοχή: αν το κάνετε αυτό, θα πρέπει επίσης να προσθέσετε έναν περιορισμό στην resulting κατάσταση, ώστε η τιμή σας για το argc να μην μπορεί να είναι μεγαλύτερη από τον αριθμό των args που περάσατε στο `args`.
-- Για να χρησιμοποιήσετε το call state, θα πρέπει να το καλέσετε με `.call_state(addr, arg1, arg2, ...)`, όπου το `addr` είναι η διεύθυνση της συνάρτησης που θέλετε να καλέσετε και το `argN` είναι το Nth όρισμα αυτής της συνάρτησης, είτε ως python integer, string ή array είτε ως bitvector. Αν θέλετε να έχει γίνει allocation μνήμης και να περάσετε πραγματικά έναν pointer σε ένα object, θα πρέπει να το τυλίξετε σε ένα PointerWrapper, δηλαδή `angr.PointerWrapper("point to me!")`. Τα αποτελέσματα αυτού του API μπορεί να είναι λίγο απρόβλεπτα, αλλά εργαζόμαστε πάνω σε αυτό.
+- Αν θέλετε το `argc` να είναι symbolic, μπορείτε να περάσετε ένα symbolic bitvector ως `argc` στους constructors `entry_state` και `full_init_state`. Ωστόσο, χρειάζεται προσοχή: αν το κάνετε αυτό, θα πρέπει επίσης να προσθέσετε έναν περιορισμό στην resulting state, ώστε η τιμή σας για το argc να μην μπορεί να είναι μεγαλύτερη από τον αριθμό των args που περάσατε στο `args`.
+- Για να χρησιμοποιήσετε το call state, θα πρέπει να το καλέσετε με `.call_state(addr, arg1, arg2, ...)`, όπου το `addr` είναι η διεύθυνση της συνάρτησης που θέλετε να καλέσετε και το `argN` είναι το Nοστό όρισμα αυτής της συνάρτησης, είτε ως python integer, string ή array είτε ως bitvector. Αν θέλετε να έχει γίνει allocation μνήμης και να περάσετε πράγματι έναν pointer σε ένα object, θα πρέπει να το τυλίξετε σε ένα PointerWrapper, δηλαδή `angr.PointerWrapper("point to me!")`. Τα αποτελέσματα αυτού του API μπορεί να είναι κάπως απρόβλεπτα, αλλά εργαζόμαστε πάνω σε αυτό.
 
 ### BitVectors
 ```python
@@ -190,7 +190,7 @@ True
 
 ## Παραδείγματα
 
-## Παραπομπές
+## Αναφορές
 
 - [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
