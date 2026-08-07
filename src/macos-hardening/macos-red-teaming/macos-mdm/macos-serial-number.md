@@ -1,21 +1,21 @@
-# macOS Seriennummer
+# macOS-Seriennummer
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Grundinformationen
+## Grundlegende Informationen
 
-Apple-Geräte nach 2010 haben Seriennummern, die aus **12 alphanumerischen Zeichen** bestehen, wobei jedes Segment spezifische Informationen vermittelt:
+Apple-Geräte ab 2010 haben Seriennummern, die aus **12 alphanumerischen Zeichen** bestehen, wobei jedes Segment spezifische Informationen vermittelt:
 
 - **Erste 3 Zeichen**: Geben den **Herstellungsort** an.
-- **Zeichen 4 & 5**: Bezeichnen das **Jahr und die Woche der Herstellung**.
+- **Zeichen 4 und 5**: Bezeichnen das **Herstellungsjahr und die Herstellungswoche**.
 - **Zeichen 6 bis 8**: Dienen als **eindeutige Kennung** für jedes Gerät.
 - **Letzte 4 Zeichen**: Geben die **Modellnummer** an.
 
-Zum Beispiel folgt die Seriennummer **C02L13ECF8J2** dieser Struktur.
+Die Seriennummer **C02L13ECF8J2** folgt beispielsweise dieser Struktur.
 
-### **Herstellungsorte (Erste 3 Zeichen)**
+### **Herstellungsorte (erste 3 Zeichen)**
 
-Bestimmte Codes repräsentieren spezifische Fabriken:
+Bestimmte Codes stehen für bestimmte Fabriken:
 
 - **FC, F, XA/XB/QP/G8**: Verschiedene Standorte in den USA.
 - **RN**: Mexiko.
@@ -27,14 +27,14 @@ Bestimmte Codes repräsentieren spezifische Fabriken:
 - **EE/QT/UV**: Taiwan.
 - **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Verschiedene Standorte in China.
 - **C0, C3, C7**: Bestimmte Städte in China.
-- **RM**: Überholte Geräte.
+- **RM**: Generalüberholte Geräte.
 
-### **Jahr der Herstellung (4. Zeichen)**
+### **Herstellungsjahr (4. Zeichen)**
 
-Dieses Zeichen variiert von 'C' (repräsentiert die erste Hälfte von 2010) bis 'Z' (zweite Hälfte von 2019), wobei verschiedene Buchstaben unterschiedliche Halbjahresperioden anzeigen.
+Dieses Zeichen reicht von „C“ (steht für die erste Hälfte des Jahres 2010) bis „Z“ (zweite Hälfte des Jahres 2019), wobei verschiedene Buchstaben unterschiedliche Halbjahreszeiträume angeben.
 
-### **Woche der Herstellung (5. Zeichen)**
+### **Herstellungswoche (5. Zeichen)**
 
-Ziffern 1-9 entsprechen den Wochen 1-9. Buchstaben C-Y (ohne Vokale und 'S') repräsentieren die Wochen 10-27. Für die zweite Hälfte des Jahres wird 26 zu dieser Zahl addiert.
+Die Ziffern 1–9 entsprechen den Wochen 1–9. Die Buchstaben C–Y (ohne Vokale und „S“) stehen für die Wochen 10–27. Für die zweite Jahreshälfte wird zu dieser Zahl 26 addiert.
 
 {{#include ../../../banners/hacktricks-training.md}}

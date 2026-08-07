@@ -4,47 +4,47 @@
 
 ## Grundlegende Informationen
 
-**Grand Central Dispatch (GCD),** auch bekannt als **libdispatch** (`libdispatch.dyld`), ist sowohl in macOS als auch in iOS verfügbar. Es handelt sich um eine von Apple entwickelte Technologie zur Optimierung der Anwendungsunterstützung für die gleichzeitige (multithreaded) Ausführung auf Hardware mit mehreren Kernen.
+**Grand Central Dispatch (GCD),** auch bekannt als **libdispatch** (`libdispatch.dyld`), ist sowohl in macOS als auch in iOS verfügbar. Dabei handelt es sich um eine von Apple entwickelte Technologie zur Optimierung der Anwendungsunterstützung für die gleichzeitige (Multithread-)Ausführung auf Hardware mit mehreren Kernen.<sup>[[4]](#references)</sup>
 
-**GCD** stellt **FIFO queues** bereit und verwaltet diese. In ihnen kann deine Anwendung **tasks** in Form von **block objects** einreihen. An dispatch queues übergebene Blocks werden **in einem vom System vollständig verwalteten Thread-Pool ausgeführt**. GCD erstellt automatisch Threads zur Ausführung der tasks in den dispatch queues und plant diese tasks auf den verfügbaren Kernen ein.
+**GCD** stellt **FIFO-Warteschlangen** bereit und verwaltet diese. An diese kann deine Anwendung **Aufgaben übermitteln**, und zwar in Form von **Block-Objekten**. An Dispatch-Warteschlangen übermittelte Blöcke werden **in einem Thread-Pool ausgeführt**, der vollständig vom System verwaltet wird. GCD erstellt automatisch Threads zur Ausführung der Aufgaben in den Dispatch-Warteschlangen und plant diese Aufgaben auf den verfügbaren Kernen ein.<sup>[[1]](#references)</sup>
 
 > [!TIP]
-> Zusammengefasst können Prozesse zur Ausführung von Code **parallel** **code blocks an GCD senden**, das sich um deren Ausführung kümmert. Prozesse erstellen daher keine neuen Threads; **GCD führt den übergebenen Code mit seinem eigenen Thread-Pool aus** (dessen Größe je nach Bedarf erhöht oder verringert werden kann).
+> Zusammengefasst können Prozesse zum Ausführen von Code **parallel** **Code-Blöcke an GCD senden**, das sich um deren Ausführung kümmert. Prozesse erstellen daher keine neuen Threads; **GCD führt den angegebenen Code mit seinem eigenen Thread-Pool aus** (dessen Größe je nach Bedarf erhöht oder verringert werden kann).
 
-Dies ist sehr hilfreich, um die parallele Ausführung zuverlässig zu verwalten. Dabei wird die Anzahl der von Prozessen erstellten Threads erheblich reduziert und die parallele Ausführung optimiert. Dies ist ideal für tasks, die **starke Parallelisierung** erfordern (Brute-Forcing?), oder für tasks, die den Main Thread nicht blockieren sollten: Der Main Thread unter iOS verarbeitet beispielsweise UI-Interaktionen. Daher werden alle anderen Funktionen, die die App zum Hängen bringen könnten (Suchen, Zugriff auf das Web, Lesen einer Datei...), auf diese Weise verwaltet.
+Dies ist sehr hilfreich, um die parallele Ausführung erfolgreich zu verwalten, da dadurch die Anzahl der von Prozessen erstellten Threads erheblich reduziert und die parallele Ausführung optimiert wird. Dies ist ideal für Aufgaben, die **starke Parallelität** erfordern (Brute-Forcing?), oder für Aufgaben, die den Hauptthread nicht blockieren sollten: Beispielsweise verarbeitet der Hauptthread unter iOS UI-Interaktionen, sodass alle anderen Funktionen, die die App zum Hängen bringen könnten (Suchen, Zugriff auf das Web, Lesen einer Datei ...), auf diese Weise verwaltet werden.
 
 ### Blocks
 
-Ein Block ist ein **in sich geschlossener Codeabschnitt** (wie eine Funktion mit Argumenten, die einen Wert zurückgibt) und kann außerdem gebundene Variablen angeben.\
-Auf Compiler-Ebene existieren Blocks jedoch nicht, sondern sie sind `os_object`s. Jedes dieser Objekte besteht aus zwei Strukturen:
+Ein Block ist ein **in sich geschlossener Codeabschnitt** (ähnlich einer Funktion mit Argumenten, die einen Wert zurückgibt) und kann außerdem gebundene Variablen angeben.\
+Auf Compilerebene existieren Blocks jedoch nicht, sondern sie sind `os_object`s. Jedes dieser Objekte besteht aus zwei Strukturen:
 
 - **block literal**:
-- Es beginnt mit dem Feld **`isa`**, das auf die Klasse des Blocks zeigt:
-- `NSConcreteGlobalBlock` (Blocks aus `__DATA.__const`)
-- `NSConcreteMallocBlock` (Blocks auf dem Heap)
-- `NSConcreateStackBlock` (Blocks auf dem Stack)
-- Es enthält **`flags`** (die angeben, welche Felder im Block-Deskriptor vorhanden sind) sowie einige reservierte Bytes
-- Der Function Pointer, der aufgerufen werden soll
-- Einen Pointer auf den Block-Deskriptor
+- Er beginnt mit dem Feld **`isa`**, das auf die Klasse des Blocks zeigt:
+- `NSConcreteGlobalBlock` (Blöcke aus `__DATA.__const`)
+- `NSConcreteMallocBlock` (Blöcke auf dem Heap)
+- `NSConcreateStackBlock` (Blöcke auf dem Stack)
+- Er enthält **`flags`** (die angeben, welche Felder im Block-Deskriptor vorhanden sind) sowie einige reservierte Bytes
+- Der aufzurufende Funktionszeiger
+- Ein Zeiger auf den Block-Deskriptor
 - Vom Block importierte Variablen (falls vorhanden)
-- **block descriptor**: Seine Größe hängt von den vorhandenen Daten ab (wie durch die vorherigen Flags angegeben)
+- **block descriptor**: Seine Größe hängt von den vorhandenen Daten ab (wie durch die zuvor genannten Flags angegeben)
 - Er enthält einige reservierte Bytes
 - Seine Größe
-- Normalerweise enthält er einen Pointer auf eine Signatur im Objective-C-Stil, um zu bestimmen, wie viel Speicher für die Parameter benötigt wird (Flag `BLOCK_HAS_SIGNATURE`)
-- Wenn Variablen referenziert werden, enthält dieser Block außerdem Pointer auf einen Copy Helper (der den Wert am Anfang kopiert) und einen Dispose Helper (der ihn freigibt).
+- Er enthält normalerweise einen Zeiger auf eine Signatur im Objective-C-Stil, um zu bestimmen, wie viel Speicher für die Parameter benötigt wird (Flag `BLOCK_HAS_SIGNATURE`)
+- Wenn Variablen referenziert werden, enthält dieser Block außerdem Zeiger auf einen Copy-Helper (der den Wert am Anfang kopiert) und einen Dispose-Helper (der ihn freigibt).
 
 ### Queues
 
-Eine Dispatch Queue ist ein benanntes Objekt, das die FIFO-Reihenfolge der auszuführenden Blocks bereitstellt.
+Eine Dispatch-Warteschlange ist ein benanntes Objekt, das eine FIFO-Reihenfolge für die Ausführung von Blöcken bereitstellt.<sup>[[3]](#references)</sup>
 
-Blocks werden zur Ausführung in Queues eingereiht. Diese unterstützen zwei Modi: `DISPATCH_QUEUE_SERIAL` und `DISPATCH_QUEUE_CONCURRENT`. Die **serielle** Queue hat natürlich **keine Race-Condition**-Probleme, da ein Block erst ausgeführt wird, wenn der vorherige beendet wurde. Der **andere Queue-Typ kann jedoch davon betroffen sein**.
+Blöcke werden zur Ausführung in Warteschlangen gesetzt, die zwei Modi unterstützen: `DISPATCH_QUEUE_SERIAL` und `DISPATCH_QUEUE_CONCURRENT`. Die **serielle** Warteschlange hat natürlich keine Probleme mit **Race Conditions**, da ein Block erst ausgeführt wird, wenn der vorherige abgeschlossen ist. Der **andere Warteschlangentyp kann jedoch davon betroffen sein**.
 
-Standard-Queues:
+Standardwarteschlangen:
 
 - `.main-thread`: Von `dispatch_get_main_queue()`
-- `.libdispatch-manager`: Queue-Manager von GCD
-- `.root.libdispatch-manager`: Queue-Manager von GCD
-- `.root.maintenance-qos`: Tasks mit der niedrigsten Priorität
+- `.libdispatch-manager`: Warteschlangenmanager von GCD
+- `.root.libdispatch-manager`: Warteschlangenmanager von GCD
+- `.root.maintenance-qos`: Aufgaben mit niedrigster Priorität
 - `.root.maintenance-qos.overcommit`
 - `.root.background-qos`: Verfügbar als `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
 - `.root.background-qos.overcommit`
@@ -57,35 +57,35 @@ Standard-Queues:
 - `.root.user-interactive-qos`: Höchste Priorität
 - `.root.background-qos.overcommit`
 
-Beachte, dass das System entscheidet, **welche Threads zu welchem Zeitpunkt welche Queues verarbeiten** (mehrere Threads können in derselben Queue arbeiten, oder derselbe Thread kann zu einem bestimmten Zeitpunkt in verschiedenen Queues arbeiten).
+Beachte, dass das System entscheidet, **welche Threads zu welchem Zeitpunkt welche Warteschlangen bearbeiten** (mehrere Threads können in derselben Warteschlange arbeiten, oder derselbe Thread kann zu einem bestimmten Zeitpunkt in verschiedenen Warteschlangen arbeiten).
 
-#### Attribute
+#### Attributte
 
-Beim Erstellen einer Queue mit **`dispatch_queue_create`** ist das dritte Argument ein `dispatch_queue_attr_t`, das normalerweise entweder `DISPATCH_QUEUE_SERIAL` (tatsächlich NULL) oder `DISPATCH_QUEUE_CONCURRENT` ist. Letzteres ist ein Pointer auf eine `dispatch_queue_attr_t`-Struktur, mit der sich einige Parameter der Queue steuern lassen.
+Beim Erstellen einer Warteschlange mit **`dispatch_queue_create`** ist das dritte Argument ein `dispatch_queue_attr_t`, das normalerweise entweder `DISPATCH_QUEUE_SERIAL` (tatsächlich NULL) oder `DISPATCH_QUEUE_CONCURRENT` ist. Letzteres ist ein Zeiger auf eine `dispatch_queue_attr_t`-Struktur, mit der sich einige Parameter der Warteschlange steuern lassen.
 
 ### Dispatch objects
 
-libdispatch verwendet mehrere Objekte; Queues und Blocks sind nur zwei davon. Diese Objekte können mit `dispatch_object_create` erstellt werden:
+Es gibt mehrere Objekte, die libdispatch verwendet; Queues und Blocks sind nur zwei davon. Diese Objekte können mit `dispatch_object_create` erstellt werden:<sup>[[1]](#references)[[2]](#references)</sup>
 
 - `block`
-- `data`: Data Blocks
-- `group`: Gruppe von Blocks
-- `io`: Asynchrone I/O-Anforderungen
-- `mach`: Mach Ports
-- `mach_msg`: Mach Messages
-- `pthread_root_queue`: Eine Queue mit einem pthread Thread-Pool und ohne Workqueues
+- `data`: Datenblöcke
+- `group`: Gruppe von Blöcken
+- `io`: Asynchrone I/O-Anfragen
+- `mach`: Mach-Ports
+- `mach_msg`: Mach-Nachrichten
+- `pthread_root_queue`: Eine Queue mit einem pthread-Thread-Pool und ohne Workqueues
 - `queue`
 - `semaphore`
-- `source`: Event Source
+- `source`: Ereignisquelle
 
 ## Objective-C
 
 In Objective-C gibt es verschiedene Funktionen, um einen Block zur parallelen Ausführung zu senden:
 
-- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Übermittelt einen Block zur asynchronen Ausführung an eine Dispatch Queue und kehrt sofort zurück.
-- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Übermittelt ein Block-Objekt zur Ausführung und kehrt zurück, nachdem die Ausführung dieses Blocks beendet ist.
+- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Übermittelt einen Block zur asynchronen Ausführung an eine Dispatch-Warteschlange und kehrt sofort zurück.
+- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Übermittelt ein Block-Objekt zur Ausführung und kehrt zurück, nachdem die Ausführung dieses Blocks abgeschlossen ist.
 - [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Führt ein Block-Objekt während der gesamten Lebensdauer einer Anwendung nur einmal aus.
-- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Übermittelt ein Work Item zur Ausführung und kehrt erst zurück, nachdem dessen Ausführung beendet ist. Anders als [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync) berücksichtigt diese Funktion bei der Ausführung des Blocks alle Attribute der Queue.
+- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Übermittelt ein Arbeitselement zur Ausführung und kehrt erst zurück, nachdem dessen Ausführung abgeschlossen ist. Anders als [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync) berücksichtigt diese Funktion bei der Ausführung des Blocks alle Attribute der Warteschlange.
 
 Diese Funktionen erwarten folgende Parameter: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
 
@@ -100,7 +100,7 @@ struct BlockDescriptor *descriptor;
 // captured variables go here
 };
 ```
-Und dies ist ein Beispiel für **Parallelität** mit **`dispatch_async`**:
+Und dies ist ein Beispiel für die Verwendung von **Parallelität** mit **`dispatch_async`**:
 ```objectivec
 #import <Foundation/Foundation.h>
 
@@ -133,7 +133,7 @@ return 0;
 ## Swift
 
 **`libswiftDispatch`** ist eine Bibliothek, die **Swift-Bindings** für das ursprünglich in C geschriebene Grand Central Dispatch (GCD)-Framework bereitstellt.\
-Die **`libswiftDispatch`**-Bibliothek kapselt die C-GCD-APIs in einer stärker an Swift orientierten Schnittstelle und erleichtert Swift-Entwicklern dadurch die Arbeit mit GCD und macht sie intuitiver.
+Die Bibliothek **`libswiftDispatch`** kapselt die C-GCD-APIs in einer Swift-freundlicheren Schnittstelle und erleichtert Swift-Entwicklern dadurch die Arbeit mit GCD.
 
 - **`DispatchQueue.global().sync{ ... }`**
 - **`DispatchQueue.global().async{ ... }`**
@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-Das folgende Frida-Script kann verwendet werden, um sich in mehrere **dispatch**-Funktionen einzuhaken und den Queue-Namen, den Backtrace sowie den Block zu extrahieren: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js).
+Das folgende Frida-Script kann verwendet werden, um in mehrere **`dispatch`**-Funktionen zu **hooken** und den Namen der Queue, den Backtrace und den Block zu extrahieren: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js).
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -187,7 +187,7 @@ Backtrace:
 
 Derzeit versteht Ghidra weder die ObjectiveC-**`dispatch_block_t`**-Struktur noch die **`swift_dispatch_block`**-Struktur.
 
-Wenn Ghidra sie verstehen soll, könntest du sie einfach **deklarieren**:
+Wenn Ghidra sie verstehen soll, kannst du sie einfach **deklarieren**:
 
 <figure><img src="../../images/image (1160).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -198,11 +198,11 @@ Wenn Ghidra sie verstehen soll, könntest du sie einfach **deklarieren**:
 Suche anschließend eine Stelle im Code, an der sie **verwendet** werden:
 
 > [!TIP]
-> Beachte alle Referenzen auf „block“, um zu verstehen, wie du feststellen kannst, dass die Struktur verwendet wird.
+> Beachte alle Verweise auf "block", um zu verstehen, wie du erkennen kannst, dass die Struktur verwendet wird.
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Klicke mit der rechten Maustaste auf die Variable -> Retype Variable und wähle in diesem Fall **`swift_dispatch_block`**:
+Klicke mit der rechten Maustaste auf die Variable -> Retype Variable und wähle in diesem Fall **`swift_dispatch_block`** aus:
 
 <figure><img src="../../images/image (1165).png" alt="" width="563"><figcaption></figcaption></figure>
 

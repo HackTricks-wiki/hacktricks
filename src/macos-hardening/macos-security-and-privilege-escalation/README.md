@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Grundlagen von macOS
+## Grundlagen von MacOS
 
-Wenn du mit macOS nicht vertraut bist, solltest du mit den Grundlagen von macOS beginnen:
+Wenn du mit macOS nicht vertraut bist, solltest du zunächst die Grundlagen von macOS lernen:
 
 - Spezielle macOS-**Dateien & Berechtigungen:**
 
@@ -13,7 +13,7 @@ Wenn du mit macOS nicht vertraut bist, solltest du mit den Grundlagen von macOS 
 macos-files-folders-and-binaries/
 {{#endref}}
 
-- Allgemeine macOS-**Benutzer**
+- Häufige macOS-**Benutzer**
 
 
 {{#ref}}
@@ -34,19 +34,19 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- Allgemeine macOS-N**etzwerkdienste & Protokolle**
+- Häufige macOS-N**etzwerkdienste & Protokolle**
 
 
 {{#ref}}
 macos-protocols.md
 {{#endref}}
 
-- **Open-Source**-macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- Um ein `tar.gz` herunterzuladen, ändere eine URL wie [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) zu [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+- **Opensource**-macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
+- Um ein `tar.gz` herunterzuladen, ändere eine URL wie [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) in [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MacOS MDM
 
-In Unternehmen werden **macOS**-Systeme sehr wahrscheinlich **mit einem MDM verwaltet**. Daher ist es aus der Perspektive eines Angreifers interessant zu wissen, **wie das funktioniert**:
+In Unternehmen werden **macOS**-Systeme höchstwahrscheinlich **mit einem MDM verwaltet**. Daher ist es aus der Perspektive eines Angreifers interessant zu wissen, **wie das funktioniert**:
 
 
 {{#ref}}
@@ -71,26 +71,26 @@ macos-security-protections/
 
 ### Dateiberechtigungen
 
-Wenn ein **als root laufender Prozess** eine Datei schreibt, die von einem Benutzer kontrolliert werden kann, könnte der Benutzer dies zur **Privilege Escalation** missbrauchen.\
+Wenn ein **als root laufender Prozess** eine Datei schreibt, die von einem Benutzer kontrolliert werden kann, könnte der Benutzer dies missbrauchen, um **seine Privilegien zu erhöhen**.\
 Dies kann in den folgenden Situationen auftreten:
 
 - Die verwendete Datei wurde bereits von einem Benutzer erstellt (im Besitz des Benutzers)
 - Die verwendete Datei ist aufgrund einer Gruppe für den Benutzer beschreibbar
 - Die verwendete Datei befindet sich in einem Verzeichnis, das dem Benutzer gehört (der Benutzer könnte die Datei erstellen)
-- Die verwendete Datei befindet sich in einem Verzeichnis, das root gehört, aber der Benutzer hat aufgrund einer Gruppe Schreibzugriff darauf (der Benutzer könnte die Datei erstellen)
+- Die verwendete Datei befindet sich in einem root gehörenden Verzeichnis, aber der Benutzer hat aufgrund einer Gruppe Schreibzugriff darauf (der Benutzer könnte die Datei erstellen)
 
-Eine **Datei erstellen** zu können, die von **root verwendet** werden soll, ermöglicht es einem Benutzer, deren **Inhalt auszunutzen** oder sogar **symlinks/hardlinks** zu erstellen, um auf einen anderen Ort zu verweisen.
+Eine **Datei erstellen** zu können, die von **root verwendet** werden soll, ermöglicht es einem Benutzer, ihren **Inhalt auszunutzen** oder sogar **Symlinks/Hardlinks** zu erstellen, die auf einen anderen Ort verweisen.
 
-Bei dieser Art von Schwachstellen darfst du nicht vergessen, **verwundbare `.pkg`-Installer zu prüfen**:
+Bei dieser Art von Sicherheitslücken solltest du nicht vergessen, **verwundbare `.pkg`-Installer zu überprüfen**:
 
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Handler für Dateierweiterungen und URL-Schemas
+### Handler für Dateierweiterungen und URL-Schemata
 
-Ungewöhnliche, über Dateierweiterungen registrierte Apps könnten missbraucht werden, und verschiedene Anwendungen können so registriert werden, dass sie bestimmte Protokolle öffnen
+Merkwürdige, über Dateierweiterungen registrierte Apps könnten missbraucht werden, und verschiedene Anwendungen können registriert werden, um bestimmte Protokolle zu öffnen.
 
 
 {{#ref}}
@@ -99,17 +99,17 @@ macos-file-extension-apps.md
 
 ## macOS TCC / SIP Privilege Escalation
 
-Unter macOS können **Anwendungen und Binaries über Berechtigungen** verfügen, um auf Ordner oder Einstellungen zuzugreifen, wodurch sie privilegierter als andere sind.
+In macOS können **Anwendungen und Binaries über Berechtigungen verfügen**, mit denen sie auf Ordner oder Einstellungen zugreifen können, wodurch sie privilegierter als andere sind.
 
-Daher muss ein Angreifer, der einen macOS-Rechner erfolgreich kompromittieren möchte, seine **TCC-Berechtigungen eskalieren** (oder je nach Bedarf sogar **SIP umgehen**).
+Daher muss ein Angreifer, der eine macOS-Maschine erfolgreich kompromittieren möchte, seine **TCC-Privilegien erhöhen** (oder je nach Bedarf sogar **SIP umgehen**).
 
-Diese Berechtigungen werden gewöhnlich in Form von **Entitlements** vergeben, mit denen die Anwendung signiert ist. Alternativ kann die Anwendung bestimmte Zugriffe anfordern; nachdem der **Benutzer sie genehmigt hat**, sind sie in den **TCC-Datenbanken** zu finden. Eine weitere Möglichkeit, wie ein Prozess diese Berechtigungen erhalten kann, besteht darin, ein **Kindprozess eines Prozesses** mit diesen **Berechtigungen** zu sein, da sie gewöhnlich **vererbt** werden.
+Diese Privilegien werden gewöhnlich in Form von **Entitlements** vergeben, mit denen die Anwendung signiert ist, oder die Anwendung kann bestimmte Zugriffe anfordern. Nachdem der **Benutzer diese genehmigt hat**, sind sie in den **TCC-Datenbanken** zu finden. Eine weitere Möglichkeit, wie ein Prozess diese Privilegien erhalten kann, besteht darin, dass er ein **Kindprozess eines Prozesses** mit diesen **Privilegien** ist, da sie normalerweise **vererbt** werden.<sup>[[5]](#references)</sup>
 
-Folge diesen Links, um verschiedene Möglichkeiten zu finden, [**Berechtigungen in TCC zu eskalieren**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses), [**TCC zu umgehen**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) und zu erfahren, wie [**SIP in der Vergangenheit umgangen wurde**](macos-security-protections/macos-sip.md#sip-bypasses).
+Folge diesen Links, um verschiedene Möglichkeiten zu finden, **Privilegien in TCC zu erhöhen** ( [**escalate privileges in TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses) ), **TCC zu umgehen** ( [**bypass TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) ) und zu erfahren, wie in der Vergangenheit **SIP umgangen wurde** ( [**SIP has been bypassed**](macos-security-protections/macos-sip.md#sip-bypasses) ).
 
-## macOS herkömmliche Privilege Escalation
+## Traditionelle macOS-Privilege-Escalation
 
-Aus der Perspektive eines Red Teams solltest du natürlich ebenfalls daran interessiert sein, zu root zu eskalieren. Im folgenden Beitrag findest du einige Hinweise:
+Aus Sicht eines Red Teams solltest du natürlich ebenfalls daran interessiert sein, zu root zu gelangen. Im folgenden Beitrag findest du einige Hinweise:
 
 
 {{#ref}}
