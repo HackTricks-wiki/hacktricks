@@ -2,51 +2,51 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Overview
+## अवलोकन
 
-कई Synology उपकरण (DSM/BSM NAS, BeeStation, …) अपने फर्मवेयर और एप्लिकेशन पैकेज को **encrypted PAT / SPK archives** में वितरित करते हैं। ये आर्काइव *ऑफलाइन* केवल सार्वजनिक डाउनलोड फ़ाइलों के साथ डिक्रिप्ट किए जा सकते हैं, धन्यवाद हार्ड-कोडेड कुंजी जो आधिकारिक निष्कर्षण पुस्तकालयों के अंदर एम्बेडेड हैं।
+कई Synology devices (DSM/BSM NAS, BeeStation, …) अपने firmware और application packages को **encrypted PAT / SPK archives** में वितरित करते हैं। इन archives को केवल public download files की सहायता से *offline* decrypt किया जा सकता है, क्योंकि official extraction libraries के अंदर hard-coded keys embedded होती हैं।
 
-यह पृष्ठ चरण-दर-चरण दस्तावेज करता है कि एन्क्रिप्टेड प्रारूप कैसे काम करता है और प्रत्येक पैकेज के अंदर स्थित स्पष्ट-टेक्स्ट **TAR** को पूरी तरह से कैसे पुनर्प्राप्त किया जाए। यह प्रक्रिया Synacktiv द्वारा Pwn2Own Ireland 2024 के दौरान किए गए शोध पर आधारित है और ओपन-सोर्स टूल [`synodecrypt`](https://github.com/synacktiv/synodecrypt) में लागू की गई है।
+यह पेज step-by-step दस्तावेज़ करता है कि encrypted format कैसे काम करता है और प्रत्येक package के अंदर मौजूद clear-text **TAR** को पूरी तरह कैसे recover किया जाए। यह procedure Pwn2Own Ireland 2024 के दौरान किए गए Synacktiv research पर आधारित है और open-source tool [`synodecrypt`](https://github.com/synacktiv/synodecrypt) में implemented है।<sup>[[1]](#references)[[2]](#references)</sup>
 
-> ⚠️  प्रारूप `*.pat` (सिस्टम अपडेट) और `*.spk` (एप्लिकेशन) आर्काइव के लिए बिल्कुल समान है - वे केवल चयनित हार्ड-कोडेड कुंजियों के जोड़े में भिन्न होते हैं।
+> ⚠️  Format दोनों `*.pat` (system update) और `*.spk` (application) archives के लिए बिल्कुल समान है – इनमें केवल selected hard-coded keys की pair अलग होती है।
 
 ---
 
-## 1. Grab the archive
+## 1. Archive प्राप्त करें
 
-फर्मवेयर/एप्लिकेशन अपडेट सामान्यतः Synology के सार्वजनिक पोर्टल से डाउनलोड किया जा सकता है:
+Firmware/application update सामान्यतः Synology के public portal से download किया जा सकता है:
 ```bash
 $ wget https://archive.synology.com/download/Os/BSM/BSM_BST150-4T_65374.pat
 ```
-## 2. PAT संरचना को डंप करें (वैकल्पिक)
+## 2. PAT structure Dump करें (वैकल्पिक)
 
-`*.pat` इमेज स्वयं एक **cpio बंडल** हैं जो कई फ़ाइलों (बूट लोडर, कर्नेल, rootfs, पैकेज…) को एम्बेड करती हैं। मुफ्त उपयोगिता [`patology`](https://github.com/sud0woodo/patology) उस लपेटने की जांच करने के लिए सुविधाजनक है:
+`*.pat` images स्वयं एक **cpio bundle** हैं, जिसमें कई files (boot loader, kernel, rootfs, packages…) embedded होती हैं। इस wrapper को inspect करने के लिए free utility [`patology`](https://github.com/sud0woodo/patology) सुविधाजनक है:<sup>[[3]](#references)</sup>
 ```bash
 $ python3 patology.py --dump -i BSM_BST150-4T_65374.pat
 […]
 $ ls
 DiskCompatibilityDB.tar  hda1.tgz  rd.bin  packages/  …
 ```
-For `*.spk` आप सीधे चरण 3 पर जा सकते हैं।
+`*.spk` के लिए आप सीधे चरण 3 पर जा सकते हैं।
 
-## 3. Synology निष्कर्षण पुस्तकालयों को निकालें
+## 3. Synology extraction libraries निकालें
 
-वास्तविक डिक्रिप्शन लॉजिक यहाँ है:
+वास्तविक decryption logic यहां मौजूद है:
 
-* `/usr/syno/sbin/synoarchive`               → मुख्य CLI रैपर
-* `/usr/lib/libsynopkg.so.1`                 → DSM UI से रैपर को कॉल करता है
-* `libsynocodesign.so`                       → **क्रिप्टोग्राफिक कार्यान्वयन शामिल है**
+* `/usr/syno/sbin/synoarchive`               → मुख्य CLI wrapper
+* `/usr/lib/libsynopkg.so.1`                 → DSM UI से wrapper को call करता है
+* `libsynocodesign.so`                       → **cryptographic implementation शामिल है**
 
-दोनों बाइनरी सिस्टम रूटफाइल सिस्टम (`hda1.tgz`) **और** संकुचित init-rd (`rd.bin`) में मौजूद हैं। यदि आपके पास केवल PAT है, तो आप उन्हें इस तरह प्राप्त कर सकते हैं:
+दोनों binaries system rootfs (`hda1.tgz`) **और** compressed init-rd (`rd.bin`) में मौजूद हैं। यदि आपके पास केवल PAT है, तो आप इन्हें इस तरह प्राप्त कर सकते हैं:
 ```bash
 # rd.bin is LZMA-compressed CPIO
 $ lzcat rd.bin | cpio -id 2>/dev/null
 $ file usr/lib/libsynocodesign.so
 usr/lib/libsynocodesign.so: ELF 64-bit LSB shared object, ARM aarch64, …
 ```
-## 4. हार्ड-कोडेड कुंजियों को पुनर्प्राप्त करें (`get_keys`)
+## 4. hard-coded keys recover करना (`get_keys`)
 
-`libsynocodesign.so` के अंदर `get_keys(int keytype)` फ़ंक्शन बस अनुरोधित आर्काइव परिवार के लिए दो 128-बिट वैश्विक चर लौटाता है:
+`libsynocodesign.so` के अंदर `get_keys(int keytype)` function अनुरोधित archive family के लिए दो 128-bit global variables को सीधे return करता है:<sup>[[1]](#references)</sup>
 ```c
 case 0:            // PAT (system)
 case 10:
@@ -60,20 +60,20 @@ signature_key = qword_23AE0;
 master_key    = qword_23B08;
 break;
 ```
-* **signature_key** → Ed25519 सार्वजनिक कुंजी जो संग्रह हेडर को सत्यापित करने के लिए उपयोग की जाती है।
-* **master_key**    → रूट कुंजी जो प्रति-संग्रह एन्क्रिप्शन कुंजी निकालने के लिए उपयोग की जाती है।
+* **signature_key** → archive header को verify करने के लिए उपयोग की जाने वाली Ed25519 public key।
+* **master_key**    → प्रति-archive encryption key derive करने के लिए उपयोग की जाने वाली root key।
 
-आपको प्रत्येक DSM प्रमुख संस्करण के लिए केवल एक बार इन दो स्थिरांक को डंप करना है।
+आपको प्रत्येक DSM major version के लिए इन दोनों constants को केवल एक बार dump करना होगा।
 
-## 5. हेडर संरचना और हस्ताक्षर सत्यापन
+## 5. Header structure और signature verification
 
-`synoarchive_open()` → `support_format_synoarchive()` → `archive_read_support_format_synoarchive()` निम्नलिखित कार्य करता है:
+`synoarchive_open()` → `support_format_synoarchive()` → `archive_read_support_format_synoarchive()` निम्नलिखित कार्य करता है:<sup>[[1]](#references)</sup>
 
-1. मैजिक पढ़ें (3 बाइट) `0xBFBAAD` **या** `0xADBEEF`।
-2. लिटिल-एंडियन 32-बिट `header_len` पढ़ें।
-3. `header_len` बाइट्स + अगली **0x40-बाइट Ed25519 हस्ताक्षर** पढ़ें।
-4. सभी एम्बेडेड सार्वजनिक कुंजियों पर दोहराएं जब तक `crypto_sign_verify_detached()` सफल न हो जाए।
-5. **MessagePack** के साथ हेडर को डिकोड करें, yielding:
+1. magic (3 bytes) `0xBFBAAD` **या** `0xADBEEF` पढ़ता है।
+2. little-endian 32-bit `header_len` पढ़ता है।
+3. `header_len` bytes + अगले **0x40-byte Ed25519 signature** को पढ़ता है।
+4. सभी embedded public keys पर iterate करता है, जब तक कि `crypto_sign_verify_detached()` सफल न हो जाए।
+5. Header को **MessagePack** के साथ decode करता है, जिससे प्राप्त होता है:
 ```python
 [
 data: bytes,
@@ -83,22 +83,22 @@ serial_number: [bytes],
 not_valid_before: int
 ]
 ```
-`entries` बाद में libarchive को प्रत्येक फ़ाइल की सत्यता की जांच करने की अनुमति देता है जब इसे डिक्रिप्ट किया जाता है।
+`entries` बाद में libarchive को decrypted होने पर प्रत्येक file की integrity-check करने की अनुमति देता है।
 
-## 6. प्रति-आर्काइव उप-कुंजी निकालें
+## 6. प्रत्येक archive की sub-key derive करें
 
-MessagePack हेडर में निहित `data` ब्लॉब से:
+MessagePack header में मौजूद `data` blob से:
 
-* `subkey_id`  = little-endian `uint64` ऑफ़सेट 0x10 पर
-* `ctx`        = ऑफ़सेट 0x18 पर 7 बाइट्स
+* `subkey_id`  = offset 0x10 पर little-endian `uint64`
+* `ctx`        = offset 0x18 पर 7 bytes
 
-32-बाइट **स्ट्रीम कुंजी** libsodium के साथ प्राप्त की जाती है:
+32-byte **stream key** libsodium से प्राप्त की जाती है:
 ```c
 crypto_kdf_derive_from_key(kdf_subkey, 32, subkey_id, ctx, master_key);
 ```
-## 7. Synology का कस्टम **libarchive** बैकएंड
+## 7. Synology का custom **libarchive** backend
 
-Synology एक पैच किया हुआ libarchive बंडल करता है जो एक नकली "tar" फॉर्मेट को रजिस्टर करता है जब भी मैजिक `0xADBEEF` होता है:
+Synology एक patched libarchive को bundle करता है, जो magic के `0xADBEEF` होने पर एक fake "tar" format register करता है:<sup>[[1]](#references)</sup>
 ```c
 register_format(
 "tar", spk_bid, spk_options,
@@ -113,7 +113,7 @@ NULL, spk_cleanup, NULL, NULL);
 - crypto_secretstream_xchacha20poly1305_init_pull(state, nonce, kdf_subkey)
 - crypto_secretstream_xchacha20poly1305_pull(state, tar_hdr, …, cipher, 0x193)
 ```
-डिक्रिप्ट किया गया `tar_hdr` एक **क्लासिकल POSIX TAR हेडर** है।
+डिक्रिप्ट किया गया `tar_hdr` एक **classical POSIX TAR header** है।
 
 ### spk_read_data()
 ```
@@ -123,11 +123,11 @@ buf   = archive_read_ahead(chunk_len)
 crypto_secretstream_xchacha20poly1305_pull(state, out, …, buf, chunk_len)
 remaining -= chunk_len - 0x11
 ```
-प्रत्येक **0x18-byte nonce** को एन्क्रिप्टेड भाग के पहले जोड़ा जाता है।
+प्रत्येक **0x18-byte nonce** को encrypted chunk के आगे जोड़ा जाता है।
 
-एक बार जब सभी प्रविष्टियाँ संसाधित हो जाती हैं, तो libarchive एक पूरी तरह से मान्य **`.tar`** उत्पन्न करता है जिसे किसी भी मानक उपकरण के साथ अनपैक किया जा सकता है।
+सभी entries को process करने के बाद libarchive एक पूरी तरह मान्य **`.tar`** बनाता है, जिसे किसी भी standard tool से unpack किया जा सकता है।
 
-## 8. सब कुछ synodecrypt के साथ डिक्रिप्ट करें
+## 8. synodecrypt से सब कुछ decrypt करें
 ```bash
 $ python3 synodecrypt.py SynologyPhotos-rtd1619b-1.7.0-0794.spk
 [+] found matching keys (SPK)
@@ -137,26 +137,26 @@ $ python3 synodecrypt.py SynologyPhotos-rtd1619b-1.7.0-0794.spk
 
 $ tar xf SynologyPhotos-rtd1619b-1.7.0-0794.tar
 ```
-`synodecrypt` स्वचालित रूप से PAT/SPK का पता लगाता है, सही कुंजियाँ लोड करता है और ऊपर वर्णित पूर्ण श्रृंखला लागू करता है।
+`synodecrypt` स्वचालित रूप से PAT/SPK का पता लगाता है, सही keys लोड करता है और ऊपर वर्णित पूरी chain लागू करता है।<sup>[[2]](#references)</sup>
 
-## 9. सामान्य pitfalls
+## 9. सामान्य समस्याएँ
 
-* `signature_key` और `master_key` को **स्वैप** न करें - वे विभिन्न उद्देश्यों के लिए काम करते हैं।
-* **nonce** हर ब्लॉक (हेडर और डेटा) के लिए ciphertext से *पहले* आता है।
-* अधिकतम एन्क्रिप्टेड चंक आकार **0x400000 + 0x11** है (libsodium टैग)।
-* एक DSM पीढ़ी के लिए बनाए गए आर्काइव अगले रिलीज़ में विभिन्न हार्ड-कोडेड कुंजियों पर स्विच कर सकते हैं।
+* `signature_key` और `master_key` को **आपस में न बदलें** – इनके उद्देश्य अलग-अलग हैं।
+* प्रत्येक block (header और data) के लिए **nonce**, ciphertext से *पहले* आता है।
+* maximum encrypted chunk size **0x400000 + 0x11** (libsodium tag) है।
+* एक DSM generation के लिए बनाए गए archives अगले release में अलग hard-coded keys पर switch कर सकते हैं।
 
-## 10. अतिरिक्त उपकरण
+## 10. अतिरिक्त tooling
 
-* [`patology`](https://github.com/sud0woodo/patology) – PAT आर्काइव को पार्स/डंप करें।
-* [`synodecrypt`](https://github.com/synacktiv/synodecrypt) – PAT/SPK/अन्य को डिक्रिप्ट करें।
-* [`libsodium`](https://github.com/jedisct1/libsodium) – XChaCha20-Poly1305 सीक्रेटस्ट्रीम का संदर्भ कार्यान्वयन।
-* [`msgpack`](https://msgpack.org/) – हेडर सीरियलाइजेशन।
+* [`patology`](https://github.com/sud0woodo/patology) – PAT archives को parse/dump करता है।<sup>[[3]](#references)</sup>
+* [`synodecrypt`](https://github.com/synacktiv/synodecrypt) – PAT/SPK/others को decrypt करता है।<sup>[[2]](#references)</sup>
+* [`libsodium`](https://github.com/jedisct1/libsodium) – XChaCha20-Poly1305 secretstream का reference implementation।
+* [`msgpack`](https://msgpack.org/) – header serialisation।
 
-## संदर्भ
+## References
 
-- [Extraction of Synology encrypted archives – Synacktiv (Pwn2Own IE 2024)](https://www.synacktiv.com/publications/extraction-des-archives-chiffrees-synology-pwn2own-irlande-2024.html)
-- [synodecrypt on GitHub](https://github.com/synacktiv/synodecrypt)
-- [patology on GitHub](https://github.com/sud0woodo/patology)
+- [1] [Synology encrypted archives का Extraction – Synacktiv (Pwn2Own IE 2024)](https://www.synacktiv.com/publications/extraction-des-archives-chiffrees-synology-pwn2own-irlande-2024.html)
+- [2] [GitHub पर synodecrypt](https://github.com/synacktiv/synodecrypt)
+- [3] [GitHub पर patology](https://github.com/sud0woodo/patology)
 
 {{#include ../../banners/hacktricks-training.md}}

