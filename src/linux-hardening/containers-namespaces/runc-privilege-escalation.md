@@ -1,11 +1,10 @@
-# Kuongezeka kwa Privilege kwa RunC
+# RunC Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Maelezo ya msingi
+## Basic information
 
 Ikiwa ungependa kujifunza zaidi kuhusu **runc**, angalia ukurasa ufuatao:
-
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -13,7 +12,7 @@ Ikiwa ungependa kujifunza zaidi kuhusu **runc**, angalia ukurasa ufuatao:
 
 ## PE
 
-Ukigundua kuwa `runc` imewekwa kwenye host, huenda ukaweza **kuendesha container inayomount folder ya root / ya host**.
+Ukigundua kuwa `runc` imesakinishwa kwenye host, huenda ukaweza **kuendesha container inayomount root / folder ya host**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -38,6 +37,6 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Hii haitafanya kazi kila wakati kwa sababu operesheni ya default ya runc ni kuendesha kama root, hivyo kuiendesha kama mtumiaji asiye na privileges haiwezi kufanya kazi (isipokuwa uwe na rootless configuration). Kufanya rootless configuration iwe default kwa ujumla si wazo zuri kwa sababu kuna restrictions kadhaa ndani ya rootless containers ambazo hazitumiki nje ya rootless containers.
+> Hii haitafanya kazi kila mara kwa kuwa operesheni chaguo-msingi ya runc ni kuendesha kama root, hivyo kuiendesha kama mtumiaji asiye na privileges hakuwezi kufanya kazi (isipokuwa uwe na rootless configuration). Kuweka rootless configuration kuwa chaguo-msingi kwa ujumla si wazo zuri kwa sababu kuna vikwazo kadhaa ndani ya rootless containers ambavyo havitumiki nje ya rootless containers.
 
 {{#include ../../banners/hacktricks-training.md}}

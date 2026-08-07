@@ -1,9 +1,9 @@
-# Maombi ya Mtandao
+# Maombi ya Wavuti
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Maombi ya Python
+## Python Requests
 ```python
 import requests
 
@@ -71,7 +71,7 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python cmd kutumia kutekeleza RCE
+## Python cmd ya ku-exploit RCE
 ```python
 import requests
 import re

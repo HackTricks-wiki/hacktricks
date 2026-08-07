@@ -1,14 +1,14 @@
-# Filesystem, Inodes na Recovery
+# Mfumo wa Faili, Inodes na Urejeshaji
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Abuse ya Filesystem mara nyingi huhusu kuchanganya uhusiano kati ya path inayoonekana na object iliyo nyuma yake. Disk images zinaweza kuficha filesystem nyingine, mounts zinazoweza kuandikwa zinaweza kutumiwa na kazi zenye privileges, hardlinks zinaweza kufichua inode ileile kupitia jina tofauti, na files zilizofutwa zinaweza bado kusomeka kupitia open file descriptor.
+Abuse ya mfumo wa faili mara nyingi huhusu kuchanganya uhusiano kati ya path inayoonekana na object iliyo nyuma yake. Disk images zinaweza kuficha filesystem nyingine, mounts zinazoweza kuandikwa zinaweza kutumiwa na kazi zenye privileged, hardlinks zinaweza kufichua inode ileile kupitia jina tofauti, na files zilizofutwa bado zinaweza kusomeka kupitia file descriptor iliyo wazi.
 
 Ukurasa huu unalenga technique yenyewe, si lab au target maalum.
 
 ## Disk Images na Loop Mounts
 
-File ya kawaida inaweza kuwa na filesystem kamili. Hivyo, backup images, block devices zilizonakiliwa, VM artifacts, au blobs zilizopewa majina mengine zinaweza kuwa na credentials, scripts, SSH keys, configuration files, au flags hata kama hazionekani kuwa na manufaa kwa nje.
+File ya kawaida inaweza kuwa na filesystem kamili. Kwa hiyo, backup images, block devices zilizonakiliwa, VM artifacts, au blobs zilizopewa majina mapya zinaweza kuwa na credentials, scripts, SSH keys, configuration files, au flags hata kama hazionekani kuwa na manufaa kwa nje.
 
 Tambua images zinazowezekana:
 ```bash
@@ -17,25 +17,25 @@ ls -lh ./candidate
 blkid ./candidate 2>/dev/null
 strings -a ./candidate | head -n 50
 ```
-Ikiwa mounting inaruhusiwa, mount images zisizojulikana katika hali ya read-only kwanza:
+Ikiwa mounting inaruhusiwa, mount images zisizojulikana kwa read-only kwanza:
 ```bash
 mkdir -p /tmp/imgmnt
 sudo mount -o loop,ro ./candidate /tmp/imgmnt
 find /tmp/imgmnt -maxdepth 3 -type f -ls 2>/dev/null
 sudo umount /tmp/imgmnt
 ```
-Ikiwa mounting haipatikani, kagua metadata ya mfumo wa faili moja kwa moja:
+Ikiwa mounting haipatikani, kagua metadata ya filesystem moja kwa moja:
 ```bash
 debugfs -R 'ls -l /' ./candidate 2>/dev/null
 debugfs -R 'stat /' ./candidate 2>/dev/null
 ```
-Mbinu hii ni muhimu kwa sababu hubadilisha faili inayoonekana kuwa ya kawaida kuwa mti wa pili wa filesystem. Ichukulie kama njia ya kurejesha data iliyofichwa, si kama privilege escalation yenyewe.
+The technique ni muhimu kwa sababu hugeuza file inayoonekana ya kawaida kuwa filesystem tree ya pili. Ichukulie kama njia ya kurecover data iliyofichwa, si kama privilege escalation yenyewe.
 
 ## Writable Mount Abuse
 
-Mount inayoweza kuandikwa huwa hatari wakati context yenye privileges zaidi baadaye inapoamini kitu kilicho ndani yake. Swali muhimu si tu "naweza kuandika hapa?", bali "ni nani baadaye atasoma, kutekeleza, ku-import, au kupakia kutoka hapa?".
+Writable mount huwa hatari wakati context yenye privileges zaidi baadaye inaamini kitu kilicho ndani yake. Swali muhimu si tu "naweza kuandika hapa?", bali "ni nani baadaye anayesoma, ana-execute, ana-import, au ana-load kutoka hapa?".
 
-Tafuta mounts zinazoweza kuandikwa na watumiaji wanaotiliwa shaka:
+Tafuta writable mounts na consumers wanaotiliwa shaka:
 ```bash
 findmnt -o TARGET,SOURCE,FSTYPE,OPTIONS
 find /mnt /media /srv /opt -xdev -type d -writable -ls 2>/dev/null
@@ -44,46 +44,46 @@ grep -RniE 'cron|systemd|ExecStart|backup|hook|plugin|sh |bash |python' /mnt /me
 ```
 Mifumo ya kawaida ya matumizi mabaya:
 
-- Cron au systemd unit yenye mapendeleo huendesha script inayoweza kuandikwa kutoka kwenye mount.
-- Huduma yenye mapendeleo hupakia plugins, config, templates, au helper binaries kutoka kwenye mount.
-- Mount ina faili za SUID na inaruhusu kurekebishwa, kubadilishwa, au kufanyiwa path manipulation.
-- Container au chroot hufichua path inayoungwa mkono na host na inayoweza kuandikwa kutoka kwenye mazingira yenye vizuizi.
+- cron au systemd unit yenye privileged huendesha script inayoweza kuandikwa kutoka kwenye mount.
+- service yenye privileged hupakia plugins, config, templates, au helper binaries kutoka kwenye mount.
+- mount ina faili za SUID na inaruhusu kubadilishwa, kubadilishwa na nyingine, au kufanyiwa path manipulation.
+- container au chroot hufichua path inayoungwa mkono na host ambayo inaweza kuandikwa kutoka kwenye restricted environment.
 
 Muundo wa jumla wa validation:
 ```bash
 find /mnt /media /srv /opt -xdev -perm -4000 -type f -ls 2>/dev/null
 find /mnt /media /srv /opt -xdev -type f -writable -ls 2>/dev/null | head -n 50
 ```
-Unapothibitisha athari katika labu iliyoidhinishwa, fanya payload ionekane na iwe ndogo, kwa mfano kwa kuandika matokeo ya `id` kwenye faili la muda. Mbinu kuu ni utekelezaji uliocheleweshwa kupitia eneo linaloaminika na linaloweza kuandikwa.
+Unapothibitisha athari katika maabara iliyoidhinishwa, weka payload ionekane na iwe ndogo, kwa mfano kwa kuandika matokeo ya `id` kwenye faili la muda. Mbinu kuu ni utekelezaji uliocheleweshwa kupitia eneo linaloaminika na linaloweza kuandikwa.
 
 ## Inode na Mkanganyiko wa Njia
 
-Inode ni object ya filesystem; path ni jina linaloielekeza tu. Hili ni muhimu kwa sababu paths mbili tofauti zinaweza kuelekeza kwenye inode ileile, na pathname iliyofutwa haimaanishi kila mara kwamba data imeondoka.
+Inode ni object ya filesystem; path ni jina linaloielekeza tu. Hili ni muhimu kwa sababu paths mbili tofauti zinaweza kuelekeza kwenye inode moja, na pathname iliyofutwa haimaanishi kila mara kwamba data imeondoka.
 
 Linganisha files kwa kutumia inode na device:
 ```bash
 ls -li /path/a /path/b
 stat -c 'dev=%d inode=%i links=%h mode=%A owner=%U:%G path=%n' /path/a /path/b
 ```
-Tafuta kila pathname inayoonekana ya inode ileile:
+Tafuta kila pathname inayoonekana ya inode hiyo hiyo:
 ```bash
 find / -xdev -samefile /path/to/file -ls 2>/dev/null
 ```
-Tafuta moja kwa moja kwa nambari ya inode unapokuwa na metadata pekee:
+Tafuta moja kwa moja kwa nambari ya inode ukiwa na metadata pekee:
 ```bash
 find / -xdev -inum <inode_number> -ls 2>/dev/null
 ```
-Mbinu hii ni muhimu wakati faili inaonekana chini ya jina lisilotarajiwa, wakati application inathibitisha path moja lakini inatumia nyingine, au wakati wrapper yenye privileged inashirikiana na inode ambayo pia inaweza kufikiwa mahali pengine.
+Mbinu hii ni muhimu wakati faili inaonekana chini ya jina lisilotarajiwa, wakati application inathibitisha path moja lakini inatumia nyingine, au wakati wrapper yenye privileges inaingiliana na inode ambayo pia inaweza kufikiwa kutoka mahali pengine.
 
 ## Hardlink Abuse
 
-Hardlinks huunda majina mengi kwa inode moja. Hazielekezi kwenye target path kama symlinks; ni majina yaliyo sawa ya file object hiyo hiyo.
+Hardlinks huunda majina mengi kwa inode moja. Hazielekezi kwenye target path kama symlinks; ni majina yanayolingana ya file object hiyo hiyo.
 
 Tafuta faili za SUID zilizo na hardlinks nyingi:
 ```bash
 find / -xdev -perm -4000 -type f -links +1 -ls 2>/dev/null
 ```
-Chunguza faili moja linalotiliwa shaka:
+Kagua faili moja lenye shaka:
 ```bash
 stat /path/to/suspicious
 find / -xdev -samefile /path/to/suspicious -ls 2>/dev/null
@@ -91,14 +91,14 @@ find / -xdev -samefile /path/to/suspicious -ls 2>/dev/null
 Kwa nini ni muhimu:
 
 - Faili nyeti inaweza kufikiwa kupitia njia isiyo dhahiri.
-- SUID wrapper inaweza kufichwa nyuma ya jina lisiloonekana kuwa na ruhusa za juu.
+- SUID wrapper inaweza kufichwa nyuma ya jina lisiloonekana kuwa na privileges.
 - Usafishaji unaoondoa pathname moja unaweza kuacha hardlink nyingine ikiwa hai.
 
-Kernels za kisasa na mount options zinaweza kuzuia uundaji wa hardlink ili kupunguza aina hii ya matumizi mabaya, lakini hardlink zilizopo bado zinafaa kuchunguzwa.
+Kernel za kisasa na mount options zinaweza kuzuia uundaji wa hardlink ili kupunguza aina hii ya abuse, lakini hardlink zilizopo bado zinafaa kukaguliwa.
 
-## Recovery ya Faili Zilizofutwa Kupitia Open FDs
+## Deleted File Recovery Through Open FDs
 
-Mchakato unapoweka faili ikiwa imefunguliwa, data ya faili inaweza kuendelea kupatikana hata baada ya pathname kufutwa. Linux huonyesha descriptors hizo zilizo wazi chini ya `/proc/<pid>/fd/`.
+Mchakato unapoweka faili ikiwa wazi, data ya faili inaweza kuendelea kupatikana hata baada ya pathname kufutwa. Linux huweka descriptors hizo zilizo wazi chini ya `/proc/<pid>/fd/`.
 
 Tafuta faili zilizofutwa zilizo wazi:
 ```bash
@@ -111,11 +111,11 @@ readlink /proc/<pid>/fd/<fd>
 cp /proc/<pid>/fd/<fd> /tmp/recovered-file
 file /tmp/recovered-file
 ```
-Hii ni mbinu ya kiutendaji ya kurejesha logs zilizofutwa, secrets za muda, binaries zilizoachwa, files zilizozungushwa, au scripts zilizoondolewa baada ya kutekelezwa.
+Hii ni technique ya vitendo ya kurejesha logs zilizofutwa, secrets za muda, binaries zilizowekwa, files zilizozungushwa, au scripts zilizoondolewa baada ya kutekelezwa.
 
-## Urejeshaji wa ext Kwa kutumia debugfs
+## Urejeshaji wa ext Kwa debugfs
 
-Kwenye filesystems za ext, `debugfs` inaweza kukagua metadata ya inode na wakati mwingine kutoa maudhui ya file kutoka kwenye filesystem image. Fanya kazi kwenye copy au image ya kusomeka pekee inapowezekana.
+Kwenye filesystems za ext, `debugfs` inaweza kukagua metadata ya inode na wakati mwingine kutoa maudhui ya file kutoka kwenye filesystem image. Fanyia kazi nakala au image ya kusomeka tu inapowezekana.
 
 Orodhesha entries na kagua inodes:
 ```bash
@@ -128,11 +128,11 @@ Dump inode inayojulikana:
 debugfs -R 'dump <inode_number> /tmp/recovered.bin' ./disk.img
 file /tmp/recovered.bin
 ```
-Hii si ahadi ya kurejesha data. Inategemea hali ya filesystem, ikiwa blocks zilitumiwa tena, na ikiwa metadata bado ipo. Mbinu hii bado ni muhimu kwa sababu hukuwezesha kukagua hali ya kiwango cha inode bila kutegemea path traversal ya kawaida.
+Hii si recovery iliyohakikishwa. Inategemea hali ya filesystem, ikiwa blocks zilitumika tena, na ikiwa metadata bado ipo. Technique hii bado ina thamani kwa sababu inakuruhusu kukagua hali ya kiwango cha inode bila kutegemea path traversal ya kawaida.
 
-## Kuishiwa kwa Inode na Mpangilio
+## Kuishiwa Inode na Mpangilio
 
-Kuishiwa kwa inode hutokea filesystem inapoishiwa na file objects hata kama bado kuna nafasi ya kutosha kwenye diski. Kwa kawaida husababisha hitilafu za reliability, lakini pia kunaweza kueleza tabia zisizo za kawaida wakati wa incident response au lab triage.
+Kuishiwa inode hutokea wakati filesystem inaishiwa na file objects hata kama nafasi ya diski bado ipo. Kwa kawaida husababisha kushindwa kwa reliability, lakini pia inaweza kueleza tabia zisizo za kawaida wakati wa incident response au lab triage.
 
 Kagua shinikizo la inode:
 ```bash
@@ -140,18 +140,19 @@ df -h
 df -i
 find /var /tmp /home -xdev -printf '%h\n' 2>/dev/null | sort | uniq -c | sort -n | tail
 ```
-Nambari za inode na mihuri ya muda zinaweza pia kusaidia kuunda upya shughuli katika mazingira rahisi ya maabara:
+Nambari za inode na mihuri ya muda pia zinaweza kusaidia kujenga upya shughuli katika mazingira rahisi ya maabara:
 ```bash
 find /path -xdev -printf '%i %TY-%Tm-%Td %TH:%TM %p\n' 2>/dev/null | sort -n | tail -n 50
 find /path -xdev -newermt '2026-01-01' -ls 2>/dev/null
 ```
-Chukulia mpangilio kama kidokezo, si uthibitisho. Operesheni za kunakili, uchimbaji wa archive, aina ya mfumo wa faili, urejeshaji, na uandishi wa wakati mmoja vinaweza kubadilisha mifumo ya ugawaji.
+Chukulia mpangilio kama kidokezo, si uthibitisho. Operesheni za kunakili, uchanganuzi wa archive, aina ya filesystem, urejeshaji, na writes zinazoendelea kwa wakati mmoja zinaweza kubadilisha mifumo ya ugawaji.
 
-## Vidokezo vya Ulinzi
+## Maelezo ya Kihimili
 
-- Fanya mount ya images zisizojulikana katika hali ya kusoma pekee wakati wa uchanganuzi.
-- Weka scripts zenye privileged access, service units, plugins, na njia za wasaidizi nje ya mounts zinazoweza kuandikwa na watumiaji.
-- Tumia `nosuid`, `nodev`, na `noexec` pale inapofaa kiutendaji, lakini usizichukulie kama mpaka kamili.
-- Zuia ufikiaji wa `/proc/<pid>/fd`, metadata ya michakato, na ukaguzi wa michakato ya watumiaji wengine inapowezekana.
-- Fuatilia mount points zinazoweza kuandikwa, hardlinks zisizotarajiwa zinazoelekeza kwenye faili za privileged, na faili nyeti zilizofutwa lakini bado ziko wazi.
+- Mount images zisizojulikana kwa hali ya read-only wakati wa analysis.
+- Weka scripts zenye privileged access, service units, plugins, na helper paths nje ya mounts zinazoandikika na users.
+- Tumia `nosuid`, `nodev`, na `noexec` inapofaa kiutendaji, lakini usizichukulie kama boundary kamili.
+- Zuia access kwa `/proc/<pid>/fd`, process metadata, na ukaguzi wa processes za users wengine inapowezekana.
+- Fuatilia mount points zinazoandikika, hardlinks zisizotarajiwa zinazoelekeza kwenye privileged files, na sensitive files zilizofutwa lakini bado zikiwa wazi.
+
 {{#include ../../banners/hacktricks-training.md}}

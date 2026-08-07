@@ -1,60 +1,33 @@
-# Mbinu za Forensiki za Msingi
+# Mbinu ya Msingi ya Forensic
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Kuunda na Kupakia Image
+## Kuunda na Kuweka Image
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Uchambuzi wa Malware
+## Malware Analysis
 
-Hii **si lazima iwe hatua ya kwanza mara tu unapopata image**. Lakini unaweza kutumia malware analysis techniques hizi kivyake ikiwa una file, file-system image, memory image, pcap... hivyo ni vyema **kukumbuka hatua hizi**:
-
-
-{{#ref}}
-malware-analysis.md
-{{#endref}}
-
-## Kukagua Image
-
-ikiwa umetolewa **image ya forensiki** ya kifaa unaweza kuanza **kuchambua partitions, file-system** iliyotumika na **kurejesha** files zinazoweza kuwa **zeneza kuvutia** (hata zile zilizofutwa). Jifunze jinsi katika:
-
-
-{{#ref}}
-partitions-file-systems-carving/
-{{#endref}}# Mbinu za Forensiki za Msingi
-
-
-
-## Kuunda na Kupakia Image
-
-
-{{#ref}}
-../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
-{{#endref}}
-
-## Uchambuzi wa Malware
-
-Hii **si lazima iwe hatua ya kwanza mara tu unapopata image**. Lakini unaweza kutumia malware analysis techniques hizi kivyake ikiwa una file, file-system image, memory image, pcap... hivyo ni vyema **kukumbuka hatua hizi**:
+Hii **si lazima iwe hatua ya kwanza ya kufanya baada ya kupata image**. Lakini unaweza kutumia mbinu hizi za malware analysis kwa kujitegemea ikiwa una faili, image ya file-system, memory image, pcap... kwa hiyo ni vizuri **kuzingatia hatua hizi**:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Kukagua Image
+## Kuchunguza Image
 
-ikiwa umetolewa **image ya forensiki** ya kifaa unaweza kuanza **kuchambua partitions, file-system** iliyotumika na **kurejesha** files zinazoweza kuwa **zeneza kuvutia** (hata zile zilizofutwa). Jifunze jinsi katika:
+ukipewa **forensic image** ya kifaa, unaweza kuanza **kuchanganua partitions na file-system** iliyotumika, na **kurejesha** **faili zinazoweza kuwa za kuvutia** (hata zilizofutwa). Jifunze jinsi ya kufanya hivyo katika:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Kulingana na OS zilizotumika na hata platform tofauti artifacts zenye kuvutia zinapaswa kutafutwa:
+Kulingana na OSs zilizotumika na hata platform, artifacts tofauti za kuvutia zinapaswa kutafutwa:
 
 
 {{#ref}}
@@ -76,17 +49,17 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Uchunguzi wa kina wa aina za faili maalum na Software
+## Uchunguzi wa Kina wa Aina Maalum za Faili na Software
 
-Ikiwa una file yenye **shaka sana**, basi **kulingana na file-type na software** iliyoiunda tricks kadhaa zinaweza kuwa muhimu.\
-Soma ukurasa ufuatao kujifunza tricks zenye kuvutia:
+Ikiwa una **faili** yenye **mashaka makubwa**, basi **kulingana na aina ya faili na software** iliyoiunda, **tricks** kadhaa zinaweza kuwa muhimu.\
+Soma ukurasa ufuatao ili ujifunze tricks zinazovutia:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Ninataka kutoa kumbukumbu maalum kwa ukurasa huu:
+Ningependa kutaja hasa ukurasa huu:
 
 
 {{#ref}}
@@ -109,63 +82,14 @@ pcap-inspection/
 
 ## **Mbinu za Anti-Forensic**
 
-Kumbuka matumizi ya uwezekano wa anti-forensic techniques:
+Kumbuka uwezekano wa kutumika kwa mbinu za anti-forensic:
 
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Uwindaji wa Vitisho
-
-
-{{#ref}}
-file-integrity-monitoring.md
-{{#endref}}
-
-
-
-## Uchunguzi wa kina wa aina za faili maalum na Software
-
-Ikiwa una file yenye **shaka sana**, basi **kulingana na file-type na software** iliyoiunda tricks kadhaa zinaweza kuwa muhimu.\
-Soma ukurasa ufuatao kujifunza tricks zenye kuvutia:
-
-
-{{#ref}}
-specific-software-file-type-tricks/
-{{#endref}}
-
-Ninataka kutoa kumbukumbu maalum kwa ukurasa huu:
-
-
-{{#ref}}
-specific-software-file-type-tricks/browser-artifacts.md
-{{#endref}}
-
-## Uchunguzi wa Memory Dump
-
-
-{{#ref}}
-memory-dump-analysis/
-{{#endref}}
-
-## Uchunguzi wa Pcap
-
-
-{{#ref}}
-pcap-inspection/
-{{#endref}}
-
-## **Mbinu za Anti-Forensic**
-
-Kumbuka matumizi ya uwezekano wa anti-forensic techniques:
-
-
-{{#ref}}
-anti-forensic-techniques.md
-{{#endref}}
-
-## Uwindaji wa Vitisho
+## Threat Hunting
 
 
 {{#ref}}

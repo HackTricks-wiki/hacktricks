@@ -1,3 +1,5 @@
+# Bruteforce Hash Herufi Chache
+
 {{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib

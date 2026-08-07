@@ -1,41 +1,41 @@
-# Triage ya Mtandao wa Ndani na Socket
+# Uchunguzi wa Mtandao wa Ndani na Socket
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Baada ya kupata shell kwenye host ya Linux, targets muhimu zaidi za network mara nyingi hazionekani externally. Services za loopback-only, veth networks, Unix sockets, temporary listeners, packet captures, na local firewall rules zinaweza kufichua credentials au attack surfaces zinazopatikana locally pekee.
+Baada ya kupata shell kwenye Linux host, targets muhimu zaidi za network mara nyingi hazijawekwa wazi externally. Services za loopback-only, networks za veth, Unix sockets, temporary listeners, packet captures, na local firewall rules zinaweza kufichua credentials au attack surfaces zinazopatikana locally pekee.
 
-Ukurasa huu unaangazia practical local post-exploitation techniques, si general remote network pentesting.
+Ukurasa huu unaangazia mbinu za vitendo za local post-exploitation, si general remote network pentesting.
 
-## Enumeration ya Loopback na Local Services
+## Kuhesabu Loopback na Local Services
 
-Anza kwa kutambua services zinazosikiliza, bind addresses zake, na process inayomiliki, pale permissions zinaporuhusu:
+Anza kwa kutambua services zinazosikiliza, bind addresses zake, na process inayoziendesha pale permissions zinaporuhusu:
 ```bash
 ss -lntup
 ss -lnx
 ip addr
 ip route
 ```
-Mifumo muhimu:
+Miundo muhimu:
 
-- `127.0.0.1:<port>` au `[::1]:<port>`: kwa kawaida inaweza kufikiwa tu kutoka kwenye host.
-- `0.0.0.0:<port>`: inaweza kufikiwa kwenye interfaces zote za IPv4 isipokuwa ikiwa imezuiwa.
-- `172.x`, `10.x`, au `192.168.x` kwenye `veth*`, `docker*`, `br-*`, `cni*`: huenda ni container au mitandao ya local lab.
-- Unix sockets chini ya `/run`, `/var/run`, `/tmp`, au directories za application: local IPC surfaces.
+- `127.0.0.1:<port>` au `[::1]:<port>`: inaweza kufikiwa tu kutoka kwa host kwa kawaida.
+- `0.0.0.0:<port>`: inaweza kufikiwa kwenye interfaces zote za IPv4 isipokuwa ikiwa imechujwa.
+- `172.x`, `10.x`, au `192.168.x` kwenye `veth*`, `docker*`, `br-*`, `cni*`: huenda ni mitandao ya container au maabara ya ndani.
+- Unix sockets zilizo chini ya `/run`, `/var/run`, `/tmp`, au directories za application: IPC surfaces za ndani.
 
-Tengeneza ramani ya local ports kwa kutumia lightweight probes:
+Map local ports kwa lightweight probes:
 ```bash
 for p in 80 443 8000 8080 8081 9000 5000; do
 timeout 1 bash -c "echo >/dev/tcp/127.0.0.1/$p" 2>/dev/null && echo "open: $p"
 done
 ```
-Tumia `nmap` ndani ya mfumo inapopatikana:
+Tumia `nmap` kwenye mfumo wa ndani inapopatikana:
 ```bash
 nmap -sT -Pn -p- 127.0.0.1
 nmap -sT -Pn --open 127.0.0.1
 ```
-## veth Zilizofichwa na Subnet za Container
+## veth Zilizofichwa na Subneti za Container
 
-Mazingira ya container au lab mara nyingi huonyesha services kwenye bridge au subnet ya veth pekee. Orodhesha interfaces na routes kabla ya kudhani kuwa service haipatikani:
+Mazingira ya container mara nyingi huweka services wazi kwenye bridge au subnet ya veth pekee. Orodhesha interfaces na routes kabla ya kudhani kuwa service haipatikani:
 ```bash
 ip -br addr
 ip route
@@ -45,36 +45,36 @@ Tafuta subnets za ndani zinazowezekana:
 ```bash
 ip -o -4 addr show | awk '{print $2, $4}'
 ```
-Chunguza kwa makini subnet iliyogunduliwa:
+Chunguza subnet iliyogunduliwa kwa uangalifu:
 ```bash
 nmap -sT -Pn --open 172.17.0.0/24
 nmap -sT -Pn -p 80,443,8000,8080,9000 172.17.0.0/24
 ```
-Mbinu hii ni muhimu wakati web panel, debug endpoint, au helper service imefichwa dhidi ya scans za nje lakini inapatikana kutoka kwenye host iliyoathiriwa au mtandao wa container.
+Mbinu hii ni muhimu wakati web panel, debug endpoint, au helper service imefichwa dhidi ya scans za nje lakini inafikika kutoka kwenye host iliyoathiriwa au network ya container.
 
 ## Local Pivot With socat or SSH
 
-Ikiwa service imefungwa kwenye loopback, iwasilishe kupitia channel inayoruhusiwa badala ya kubadilisha service yenyewe.
+Ikiwa service imefungwa kwenye loopback, i-expose kupitia channel iliyoruhusiwa badala ya kubadilisha service yenyewe.
 
-Fanya forwarding ya HTTP service ya ndani pekee kwa kutumia SSH:
+Forward service ya HTTP ya local-only kwa SSH:
 ```bash
 ssh -L 8080:127.0.0.1:8080 user@target
 ```
-Unganisha port ya ndani kwa `socat` ikiwa tayari una ufikiaji wa shell:
+Bridge port ya ndani kwa kutumia `socat` wakati tayari una ufikiaji wa shell:
 ```bash
 socat TCP-LISTEN:18080,fork,reuseaddr TCP:127.0.0.1:8080
 ```
-Elekeza Unix socket kwenye TCP kwa ajili ya majaribio ya ndani:
+Elekeza Unix socket hadi TCP kwa ajili ya majaribio ya ndani:
 ```bash
 socat TCP-LISTEN:18081,fork,reuseaddr UNIX-CONNECT:/run/app/app.sock
 ```
-Hii haitumii exploit yoyote yenyewe. Inafanya surface inayopatikana local pekee ifikike kutoka kwenye tools zako ili uweze kuingiliana nayo kama service ya kawaida.
+Hii haiexploit chochote yenyewe. Inafanya surface inayopatikana locally pekee ifikike kutoka kwenye tooling yako ili uweze kuingiliana nayo kama service ya kawaida.
 
-## Banner Grabbing and Simple Protocols
+## Banner Grabbing na Simple Protocols
 
-Si kila service ni HTTP. Services nyingi za local huleakisha taarifa za kutosha kupitia banner au protocol ya mstari mmoja.
+Si kila service ni HTTP. Services nyingi za local hu-leak taarifa za kutosha kupitia banner au protocol ya mstari mmoja.
 
-Probes za msingi:
+Basic probes:
 ```bash
 nc -nv 127.0.0.1 9000
 printf 'help\n' | nc -nv 127.0.0.1 9000
@@ -90,17 +90,17 @@ Kwa TLS:
 openssl s_client -connect 127.0.0.1:8443 -servername localhost
 curl -k -i https://127.0.0.1:8443/
 ```
-Lengo ni kutambua itifaki, mpango wa uthibitishaji, toleo, na iwapo service inaamini clients wa ndani.
+Lengo ni kutambua protocol, authentication scheme, version, na ikiwa service inaamini local clients.
 
-## Kunasa Trafiki ya Loopback
+## Kukusanya Loopback Traffic
 
-Trafiki ya ndani inaweza kufichua headers, bearer tokens, credentials za Basic Auth, au secrets mahususi za application. Nasa tu katika mazingira yaliyoidhinishwa.
+Local traffic inaweza kufichua headers, bearer tokens, credentials za Basic Auth, au siri maalum za application. Nasa traffic pekee katika mazingira yaliyoidhinishwa.
 
-Nasa trafiki ya HTTP ya loopback:
+Nasa loopback HTTP traffic:
 ```bash
 sudo tcpdump -i lo -A -s0 'tcp port 80 or tcp port 8080'
 ```
-Nasa huduma mahususi ya ndani:
+Nasa huduma maalum ya ndani:
 ```bash
 sudo tcpdump -i lo -w /tmp/loopback.pcap 'tcp port 8080'
 ```
@@ -108,29 +108,29 @@ Decode Basic Auth kutoka kwenye header iliyonaswa au iliyorekodiwa:
 ```bash
 printf '%s' 'dXNlcjpwYXNz' | base64 -d
 ```
-Strings muhimu za kutafuta katika text captures:
+Mishororo muhimu ya kutafuta katika text captures:
 ```bash
 grep -Ei 'Authorization:|Cookie:|Bearer|Basic|token|api[_-]?key|password' /tmp/capture.txt
 ```
 ## TLS Key Logging
 
-Ikiwa unaweza kudhibiti mazingira ya mchakato wa client katika lab, `SSLKEYLOGFILE` inaweza kufanya TLS sessions ziweze kusimbuliwa katika Wireshark au tooling inayooana. Hii ni muhimu kwa kuelewa traffic ya HTTPS ya ndani bila kushambulia TLS yenyewe.
+Ikiwa unaweza kudhibiti mazingira ya client process katika lab, `SSLKEYLOGFILE` inaweza kufanya TLS sessions ziweze kufanyiwa decryption katika Wireshark au tooling inayooana. Hii ni muhimu kwa kuelewa traffic ya HTTPS ya ndani bila kushambulia TLS yenyewe.
 
-Endesha client ukiwa umewezesha key logging:
+Endesha client ikiwa key logging imewezeshwa:
 ```bash
 export SSLKEYLOGFILE=/tmp/sslkeys.log
 curl -k https://127.0.0.1:8443/
 ls -l /tmp/sslkeys.log
 ```
-Nasa traffic wakati huohuo:
+Nasa traffic kwa wakati mmoja:
 ```bash
 sudo tcpdump -i lo -w /tmp/tls.pcap 'tcp port 8443'
 ```
-Kisha pakia `/tmp/tls.pcap` na `/tmp/sslkeys.log` kwenye Wireshark. Hii hufanya kazi tu wakati client library inatumia NSS-style key logging na unaweza kuweka environment kabla ya connection kufanywa.
+Kisha pakia `/tmp/tls.pcap` na `/tmp/sslkeys.log` kwenye Wireshark. Hii hufanya kazi tu wakati client library inaunga mkono key logging ya mtindo wa NSS na unaweza kuweka environment kabla connection haijaanzishwa.
 
-## Unix Socket Interaction na Command Injection
+## Mwingiliano wa Unix Socket na Command Injection
 
-Unix sockets ni local IPC endpoints. Zinaweza kufichua HTTP APIs, custom protocols, au command handlers zisizo salama.
+Unix sockets ni endpoints za ndani za IPC. Zinaweza kufichua HTTP APIs, custom protocols, au command handlers zisizo salama.
 
 Tafuta sockets:
 ```bash
@@ -142,18 +142,18 @@ Wasiliana na HTTP kupitia Unix socket:
 curl --unix-socket /run/app/app.sock http://localhost/
 curl --unix-socket /run/app/app.sock -i http://localhost/admin
 ```
-Wasiliana na raw socket:
+Kuingiliana na raw socket:
 ```bash
 printf 'status\n' | socat - UNIX-CONNECT:/run/app/app.sock
 printf 'help\n' | nc -U /run/app/app.sock
 ```
-Ikiwa input ya socket inayodhibitiwa na mtumiaji itapitishwa kwa shell au privileged helper, inaweza kusababisha command injection. Kwa mfano maalum, angalia [Socket Command Injection](socket-command-injection.md).
+Ikiwa socket input inayodhibitiwa na mtumiaji itapitishwa kwa shell au helper yenye privileges, inaweza kusababisha command injection. Kwa mfano unaolenga jambo hili, tazama [Socket Command Injection](socket-command-injection.md).
 
-## Mapitio ya nftables na Mabadiliko ya Kanuni yaliyoidhinishwa
+## Mapitio ya nftables na Mabadiliko ya Sheria Yaliyoidhinishwa
 
-Kanuni za local firewall zinaweza kueleza kwa nini service inaonekana locally lakini imezuiwa remotely, au kwa nini high port inaonekana haifikiwi kutoka kwa interface moja.
+Sheria za local firewall zinaweza kueleza kwa nini service inaonekana locally lakini imezuiwa remotely, au kwa nini high port inaonekana haifikiwi kupitia interface moja.
 
-Kagua kanuni:
+Kagua sheria:
 ```bash
 sudo nft list ruleset
 sudo nft list tables
@@ -163,12 +163,12 @@ Tafuta drops zinazoathiri port lengwa:
 ```bash
 sudo nft list ruleset | grep -Ei 'drop|reject|dport|tcp|udp'
 ```
-Katika maabara iliyoidhinishwa, ondoa sheria maalum ya kuzuia kwa kutumia handle:
+Katika maabara iliyoidhinishwa, ondoa rule maalum ya kuzuia kwa kutumia handle:
 ```bash
 sudo nft -a list chain inet filter input
 sudo nft delete rule inet filter input handle <handle>
 ```
-Pendelea kufuta handle husika badala ya kufuta jedwali zima. Mbinu ni kutambua filter mahususi inayosababisha tabia hiyo na kubadilisha rule hiyo pekee.
+Pendelea kufuta handle halisi badala ya kuondoa jedwali zima. Mbinu ni kutambua filter mahususi inayosababisha tabia hiyo na kubadilisha rule hiyo pekee.
 
 ## Mtiririko wa Haraka
 ```bash
@@ -180,5 +180,6 @@ nmap -sT -Pn --open 127.0.0.1
 find /run /var/run /tmp -type s -ls 2>/dev/null
 sudo nft list ruleset 2>/dev/null | head -n 80
 ```
-Tanguliza services ambazo ni za ndani pekee, zinaendeshwa na mtumiaji mwenye mamlaka zaidi, zinafichua functions za admin/debug, au zinaamini loopback/container-network clients.
+Zipa kipaumbele huduma ambazo ni local-only, zinaendeshwa na mtumiaji mwenye haki za juu zaidi, zinafichua functions za admin/debug, au zinaamini clients wa loopback/container-network.
+
 {{#include ../../banners/hacktricks-training.md}}

