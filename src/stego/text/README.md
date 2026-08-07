@@ -6,30 +6,30 @@ Procure por:
 
 - Homoglyphs Unicode
 - Caracteres de largura zero
-- Padrões de whitespace (espaços vs tabs)
+- Padrões de espaços em branco (espaços vs tabs)
 
-## Caminho prático
+## Abordagem prática
 
-Se o texto simples se comportar de forma inesperada, inspecione os codepoints e normalize-o cuidadosamente (não destrua as evidências).
+Se o texto simples se comportar de forma inesperada, inspecione os codepoints e normalize cuidadosamente (não destrua as evidências).
 
 ### Técnica
 
-A esteganografia de texto frequentemente depende de caracteres que são renderizados de forma idêntica (ou invisível):
+A esteganografia em texto frequentemente depende de caracteres que são renderizados de forma idêntica (ou invisível):
 
 - Homoglyphs: diferentes codepoints Unicode que parecem iguais (`a` latino vs `а` cirílico)
 - Caracteres de largura zero: joiners, non-joiners e espaços de largura zero
-- Codificações de whitespace: espaços vs tabs, espaços no final e padrões de comprimento de linha<sup>[[1]](#references)</sup>
+- Codificações por espaços em branco: espaços vs tabs, espaços no final das linhas e padrões de comprimento de linha<sup>[[1]](#references)</sup>
 
 Casos adicionais de alto sinal:
 
-- Caracteres de controle/override bidirecionais (podem reordenar visualmente o texto)
-- Selectors de variação e caracteres combinantes usados como um canal encoberto
+- Caracteres de controle/sobrescrita bidirecional (podem reordenar visualmente o texto)
+- Seletores de variação e caracteres combinantes usados como um canal secreto
 
 ### Auxiliares de decodificação
 
-- Ambiente de testes de Homoglyphs Unicode/caracteres de largura zero: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- Playground de homoglyphs Unicode/caracteres de largura zero: https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
 
-### Inspecione os codepoints
+### Inspecionar codepoints
 ```bash
 python3 - <<'PY'
 import sys
@@ -39,13 +39,13 @@ if ord(ch) > 127 or ch.isspace():
 print(i, hex(ord(ch)), repr(ch))
 PY
 ```
-## Canais `unicode-range` do CSS
+## Canais `unicode-range` de CSS
 
-As regras `@font-face` podem codificar bytes em entradas `unicode-range: U+..`. Extraia os codepoints, concatene o hexadecimal e decodifique:
+As regras `@font-face` podem codificar bytes em entradas `unicode-range: U+..`. Extraia os codepoints, concatene os valores hexadecimais e decodifique:
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Se os intervalos contiverem vários bytes por declaração, divida primeiro nas vírgulas e normalize (`tr ',+' '\n'`). O Python facilita a análise e a emissão de bytes quando a formatação é inconsistente.
+Se os ranges contiverem múltiplos bytes por declaração, divida primeiro nas vírgulas e normalize (`tr ',+' '\n'`). Python facilita a análise e a emissão de bytes quando a formatação é inconsistente.<sup>[[1]](#references)</sup>
 
 ## Referências
 

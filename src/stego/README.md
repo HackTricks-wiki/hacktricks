@@ -2,52 +2,58 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Esta seção foca em **encontrar e extrair dados ocultos** de arquivos (imagens/áudio/vídeo/documentos/arquivos) e de esteganografia baseada em texto.
+Esta seção se concentra em **encontrar e extrair dados ocultos** de arquivos (imagens/áudio/vídeo/documentos/arquivos compactados) e em esteganografia baseada em texto.
 
-Se você está aqui por ataques criptográficos, vá para a seção **Crypto**.
+Se você está aqui em busca de ataques criptográficos, vá para a seção **Crypto**.
 
-## Ponto de entrada
+## Entry Point
 
-Aborde steganography como um problema forense: identifique o container real, enumere locais de alta informação (metadados, dados anexados, arquivos embutidos) e só então aplique técnicas de extração a nível de conteúdo.
+Aborde a esteganografia como um problema forense: identifique o container real, enumere locais de alto sinal (metadados, dados anexados, arquivos incorporados) e só então aplique técnicas de extração no nível do conteúdo.
 
-### Fluxo de trabalho & triagem
+### Workflow & triage
 
-Um fluxo de trabalho estruturado que prioriza identificação do container, inspeção de metadata/strings, carving, e ramificações específicas por formato.
+Um workflow estruturado que prioriza a identificação do container, a inspeção de metadados/strings, o carving e a análise específica do formato.
+
 {{#ref}}
 workflow/README.md
 {{#endref}}
 
-### Imagens
+### Images
 
-Onde a maior parte do stego de CTF aparece: LSB/bit-planes (PNG/BMP), estranhezas de chunk/file-format, tooling para JPEG, e truques com GIF multi-frame.
+Onde a maior parte do CTF stego aparece: LSB/bit-planes (PNG/BMP), peculiaridades de chunks/formatos de arquivo, ferramentas para JPEG e técnicas com GIFs multi-frame.
+
 {{#ref}}
 images/README.md
 {{#endref}}
 
-### Áudio
+### Audio
 
-Mensagens em spectrogram, sample LSB embedding, e tons de teclado telefônico (DTMF) são padrões recorrentes.
+Mensagens em spectrogramas, embedding de LSB em samples e tons de teclas telefônicas (DTMF) são padrões recorrentes.
+
 {{#ref}}
 audio/README.md
 {{#endref}}
 
-### Texto
+### Text
 
-Se o texto é renderizado normalmente mas se comporta de forma inesperada, considere Unicode homoglyphs, caracteres zero-width, ou codificação baseada em espaços em branco.
+Se o texto é renderizado normalmente, mas se comporta de forma inesperada, considere homoglyphs Unicode, caracteres de largura zero ou encoding baseado em whitespace.
+
 {{#ref}}
 text/README.md
 {{#endref}}
 
-### Documentos
+### Documents
 
-PDFs e Office files são containers antes de mais nada; ataques geralmente giram em torno de arquivos/streams embutidos, grafos de objetos/relacionamentos, e extração de ZIP.
+PDFs e arquivos do Office são, antes de tudo, containers; os ataques geralmente envolvem arquivos/streams incorporados, grafos de objetos/relacionamentos e extração de ZIP.
+
 {{#ref}}
 documents/README.md
 {{#endref}}
 
 ### Malware and delivery-style steganography
 
-Payload delivery frequentemente usa arquivos com aparência válida (ex.: GIF/PNG) que carregam payloads de texto delimitados por marcadores, em vez de esconder em nível de pixel.
+A entrega de payloads frequentemente usa arquivos aparentemente válidos (por exemplo, GIF/PNG) que carregam payloads de texto delimitados por marcadores, em vez de ocultação no nível dos pixels.
+
 {{#ref}}
 malware-and-network/README.md
 {{#endref}}
