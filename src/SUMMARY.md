@@ -798,7 +798,6 @@
 - [WebSocket Attacks](pentesting-web/websocket-attacks.md)
 - [Web Tool - WFuzz](pentesting-web/web-tool-wfuzz.md)
 - [XPATH injection](pentesting-web/xpath-injection.md)
-- [XS Search](pentesting-web/xs-search.md)
 - [XSLT Server Side Injection (Extensible Stylesheet Language Transformations)](pentesting-web/xslt-server-side-injection-extensible-stylesheet-language-transformations.md)
 - [XXE - XEE - XML External Entity](pentesting-web/xxe-xee-xml-external-entity.md)
 - [XSS (Cross Site Scripting)](pentesting-web/xss-cross-site-scripting/README.md)

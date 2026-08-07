@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Parte di questo cheatsheet si basa sulla [documentazione di angr](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
+Parte di questa cheatsheet si basa sulla [documentazione di angr](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
 ## Installazione
 ```bash
@@ -30,7 +30,7 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## Informazioni sull'oggetto caricato e principale
+## Informazioni sugli oggetti caricati e principali
 
 ### Dati caricati
 ```python
@@ -119,11 +119,11 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
-### Chiamata di funzioni
+### Chiamata alle funzioni
 
-- Puoi passare un elenco di argomenti tramite `args` e un dizionario di variabili d'ambiente tramite `env` a `entry_state` e `full_init_state`. I valori in queste strutture possono essere stringhe o bitvector e verranno serializzati nello stato come argomenti e ambiente per l'esecuzione simulata. `args` è vuoto per impostazione predefinita, quindi, se il programma che stai analizzando si aspetta di trovare almeno un `argv[0]`, dovresti sempre fornirlo!
-- Se vuoi che `argc` sia symbolic, puoi passare un bitvector symbolic come `argc` ai costruttori `entry_state` e `full_init_state`. Fai però attenzione: se lo fai, dovresti anche aggiungere allo stato risultante un vincolo che impedisca al valore di argc di essere maggiore del numero di args passati a `args`.
-- Per usare il call state, dovresti chiamarlo con `.call_state(addr, arg1, arg2, ...)`, dove `addr` è l'indirizzo della funzione che vuoi chiamare e `argN` è l'N-esimo argomento di quella funzione, come intero, stringa o array Python, oppure come bitvector. Se vuoi che venga allocata della memoria e passare effettivamente un puntatore a un oggetto, dovresti racchiuderlo in un `PointerWrapper`, ad esempio `angr.PointerWrapper("point to me!")`. I risultati di questa API possono essere leggermente imprevedibili, ma ci stiamo lavorando.
+- Puoi passare una lista di argomenti tramite `args` e un dizionario di variabili d'ambiente tramite `env` a `entry_state` e `full_init_state`. I valori in queste strutture possono essere stringhe o bitvector e verranno serializzati nello stato come argomenti e ambiente dell'esecuzione simulata. Il valore predefinito di `args` è una lista vuota, quindi, se il programma che stai analizzando prevede di trovare almeno un `argv[0]`, dovresti sempre fornirlo!
+- Se vuoi che `argc` sia simbolico, puoi passare un bitvector simbolico come `argc` ai costruttori `entry_state` e `full_init_state`. Fai però attenzione: in questo caso dovresti anche aggiungere allo stato risultante un vincolo che impedisca al valore di argc di essere maggiore del numero di argomenti passati a `args`.
+- Per usare il call state, dovresti chiamarlo con `.call_state(addr, arg1, arg2, ...)`, dove `addr` è l'indirizzo della funzione che vuoi chiamare e `argN` è l'N-esimo argomento di quella funzione, espresso come intero Python, stringa o array, oppure come bitvector. Se vuoi allocare memoria e passare effettivamente un puntatore a un oggetto, dovresti racchiuderlo in un PointerWrapper, ad esempio `angr.PointerWrapper("point to me!")`. I risultati di questa API possono essere un po' imprevedibili, ma ci stiamo lavorando.
 
 ### BitVectors
 ```python
@@ -186,7 +186,7 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Inoltre, puoi usare `proj.hook_symbol(name, hook)`, fornendo il nome di un symbol come primo argomento, per fare hook sull'indirizzo in cui risiede il symbol<sup>[[1]](#references)</sup>
+Inoltre, puoi usare `proj.hook_symbol(name, hook)`, fornendo il nome di un simbolo come primo argomento, per effettuare l'hook dell'indirizzo in cui risiede<sup>[[1]](#references)</sup>
 
 ## Esempi
 

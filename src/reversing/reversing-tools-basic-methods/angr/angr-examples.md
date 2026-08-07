@@ -3,11 +3,11 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Se il programma usa `scanf` per ottenere **più valori contemporaneamente da stdin**, devi generare uno stato che inizi dopo **`scanf`**.
+> Se il programma utilizza `scanf` per ottenere **diversi valori contemporaneamente da stdin**, è necessario generare uno state che inizi dopo la **`scanf`**.
 
 Codici tratti da [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Input per raggiungere l'indirizzo (indicando l'indirizzo)
+### Input per raggiungere un indirizzo (indicando l'indirizzo)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Input per raggiungere l'indirizzo (indicando le stampe)
+### Input per raggiungere l'indirizzo (indicando le istruzioni di stampa)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -75,7 +75,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Valori del Registro
+### Valori del registro
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-In questo scenario, l'input è stato acquisito con `scanf("%u %u")` ed è stato fornito il valore `"1 1"`, quindi i valori **`0x00000001`** dello stack provengono dall'**user input**. Puoi vedere come questi valori iniziano in `$ebp - 8`. Pertanto, nel codice abbiamo **sottratto 8 byte a `$esp` (poiché in quel momento `$ebp` e `$esp` avevano lo stesso valore)** e poi abbiamo effettuato il push del BVS.
+In questo scenario, l'input è stato acquisito con `scanf("%u %u")` ed è stato fornito il valore `"1 1"`, quindi i valori **`0x00000001`** dello stack provengono dall'**input dell'utente**. Puoi vedere come questi valori iniziano in `$ebp - 8`. Pertanto, nel codice abbiamo **sottratto 8 byte a `$esp` (poiché in quel momento `$ebp` e `$esp` avevano lo stesso valore)** e quindi abbiamo eseguito il push del BVS.
 
-![Inserire bit vector nello stack per scoprire il valore che quella posizione dello stack deve avere per raggiungere un determinato flusso del programma: In questo scenario, l'input è stato acquisito con scanf("%u %u") ed è stato fornito il valore "1...](<../../../images/image (136).png>)
+![Inserimento dei bit vector nello stack per determinare il valore che una posizione dello stack deve avere per raggiungere un determinato flusso di programma: In questo scenario, l'input è stato acquisito con scanf("%u %u") e il valore "1...](<../../../images/image (136).png>)
 
 ### Valori statici della memoria (variabili globali)
 ```python
@@ -325,7 +325,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Simulazione dei file
+### Simulazione di file
 ```python
 #In this challenge a password is read from a file and we want to simulate its content
 
@@ -381,34 +381,34 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> Nota che il file simbolico potrebbe contenere anche dati costanti uniti a dati simbolici:
+> Nota che il file simbolico potrebbe contenere anche dati costanti combinati con dati simbolici:
 >
 > ```python
 >  # Hello world, my name is John.
 >  # ^                       ^
->  # ^ address 0             ^ address 24 (count the number of characters)
->  # In order to represent this in memory, we would want to write the string to
->  # the beginning of the file:
+>  # ^ address 0             ^ address 24 (conta il numero di caratteri)
+>  # Per rappresentare questo in memoria, vorremmo scrivere la stringa
+>  # all'inizio del file:
 >  #
 >  # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
 >  #
->  # Perhaps, then, we would want to replace John with a
->  # symbolic variable. We would call:
+>  # Potremmo quindi voler sostituire John con una
+>  # variabile simbolica. Chiameremmo:
 >  #
 >  # name_bitvector = claripy.BVS('symbolic_name', 4*8)
 >  #
->  # Then, after the program calls fopen('hello.txt', 'r') and then
->  # fread(buffer, sizeof(char), 30, hello_txt_file), the buffer would contain
->  # the string from the file, except four symbolic bytes where the name would be
->  # stored.
+>  # Poi, dopo che il programma chiama fopen('hello.txt', 'r') e quindi
+>  # fread(buffer, sizeof(char), 30, hello_txt_file), il buffer conterrebbe
+>  # la stringa del file, ad eccezione di quattro byte simbolici dove sarebbe
+>  # memorizzato il nome.
 >  # (!)
 > ```
 
-### Applicare i vincoli
+### Applicazione dei vincoli
 
 > [!TIP]
-> A volte semplici operazioni umane, come confrontare 2 parole di lunghezza 16 **char by char** (loop), **costano** molto ad **angr** perché deve generare rami **esponenzialmente**, dato che genera 1 ramo per ogni if: `2^16`\
-> Pertanto, è più semplice **chiedere ad angr di tornare a un punto precedente** (dove la parte realmente difficile è già stata completata) e **impostare manualmente quei vincoli**.
+> A volte semplici operazioni umane, come confrontare 2 parole di lunghezza 16 **char by char** (loop), **costano** molto ad **angr** perché deve generare branch **esponenzialmente**, dato che genera 1 branch per ogni if: `2^16`\
+> Pertanto, è più semplice **chiedere ad angr di raggiungere un punto precedente** (dove la parte realmente difficile è già stata completata) e **impostare manualmente quei vincoli**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> In alcuni scenari puoi attivare **veritesting**, che unirà gli stati simili, in modo da evitare rami inutili e trovare la soluzione: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> In alcuni scenari puoi attivare **veritesting**, che unirà gli stati simili, così da evitare rami inutili e trovare la soluzione: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Un'altra cosa che puoi fare in questi scenari è **fare hook della funzione fornendo ad angr qualcosa che possa comprendere** più facilmente.
+> Un'altra cosa che puoi fare in questi scenari è **hookare la funzione fornendo ad angr qualcosa che possa comprendere** più facilmente.
 
-### Simulation Managers
+### Gestori di simulazione
 
-Alcuni simulation manager possono essere più utili di altri. Nell'esempio precedente c'era un problema, poiché venivano creati molti rami utili. Qui, la tecnica **veritesting** li unirà e troverà una soluzione.\
-Questo simulation manager può essere attivato anche con: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Alcuni gestori di simulazione possono essere più utili di altri. Nell'esempio precedente c'era un problema, poiché venivano creati molti rami utili. Qui, la tecnica **veritesting** li unirà e troverà una soluzione.\
+Questo gestore di simulazione può essere attivato anche con: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Bypassing di una chiamata a una funzione
+### Hooking/Bypassing una chiamata a una funzione
 ```python
 # This level performs the following computations:
 #
@@ -809,6 +809,6 @@ main(sys.argv)
 ```
 ## Riferimenti
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - Repository GitHub](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}
