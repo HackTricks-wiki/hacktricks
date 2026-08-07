@@ -1,53 +1,53 @@
-# macOS Office Sandbox Bypass'leri
+# macOS Office Sandbox Bypasses
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-### Launch Agents üzerinden Word Sandbox bypass'i
+### Word Sandbox bypass via Launch Agents
 
-Uygulama, **`com.apple.security.temporary-exception.sbpl`** entitlement'ini kullanarak **custom Sandbox** uygular ve bu custom sandbox, dosya adı `~$` ile başladığı sürece herhangi bir yere dosya yazılmasına izin verir: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
+Uygulama, **`com.apple.security.temporary-exception.sbpl`** entitlement'ını kullanan **özel bir Sandbox** kullanır ve bu özel sandbox, dosya adı `~$` ile başladığı sürece dosyaların herhangi bir yere yazılmasına izin verir: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
 
-Bu nedenle escape işlemi, `~/Library/LaunchAgents/~$escape.plist` konumuna bir **`plist`** LaunchAgent **yazmak** kadar kolaydı.
+Bu nedenle, `~/Library/LaunchAgents/~$escape.plist` konumuna bir **`plist`** LaunchAgent yazmak yeterliydi.
 
-[**Orijinal rapora buradan**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/) göz atın.<sup>[[1]](#references)</sup>
+[**Orijinal rapora buradan**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/) bakın.<sup>[[1]](#references)</sup>
 
-### Login Items ve zip üzerinden Word Sandbox bypass'i
+### Word Sandbox bypass via Login Items and zip
 
-İlk escape işleminden, Word'ün adı `~$` ile başlayan rastgele dosyalar yazabildiğini; ancak önceki vuln için yayımlanan patch sonrasında `/Library/Application Scripts` veya `/Library/LaunchAgents` konumlarına yazmanın mümkün olmadığını hatırlayın.
+İlk bypass'tan sonra Word'ün, adı `~$` ile başlayan rastgele dosyaları yazabildiğini; ancak önceki vuln'un patch'lenmesinden sonra `/Library/Application Scripts` veya `/Library/LaunchAgents` içine yazmanın mümkün olmadığını hatırlayın.
 
-Sandbox içinden bir **Login Item** (kullanıcı login olduğunda çalıştırılacak uygulamalar) oluşturmanın mümkün olduğu keşfedildi. Ancak bu uygulamalar **notarized** olmadıkları sürece **çalışmaz** ve **argüman eklemek mümkün değildir** (dolayısıyla **`bash`** kullanarak doğrudan bir reverse shell çalıştıramazsınız).
+Sandbox içinden bir **Login Item** (kullanıcı giriş yaptığında çalıştırılacak uygulamalar) oluşturulabileceği keşfedildi. Ancak bu uygulamalar **notarized** olmadıkça çalışmaz ve **argüman eklemek mümkün değildir** (bu nedenle **`bash`** kullanarak doğrudan bir reverse shell çalıştırılamaz).
 
-Önceki Sandbox bypass'inden sonra Microsoft, `~/Library/LaunchAgents` konumuna dosya yazma seçeneğini devre dışı bıraktı. Ancak bir **zip dosyasını Login Item** olarak koyarsanız `Archive Utility` dosyayı bulunduğu konumda doğrudan **unzip** eder. Bu nedenle, varsayılan olarak `~/Library` altındaki `LaunchAgents` klasörü oluşturulmadığından, bir **plist'i `LaunchAgents/~$escape.plist` konumunda zip'lemek** ve zip dosyasını **`~/Library`** içine **yerleştirmek** mümkün oldu; böylece dosya açıldığında persistence hedefine ulaşacaktı.
+Önceki Sandbox bypass'tan sonra Microsoft, `~/Library/LaunchAgents` içine dosya yazma seçeneğini devre dışı bıraktı. Ancak, bir **zip file**'ı **Login Item** olarak eklediğinizde `Archive Utility`'nin dosyayı bulunduğu konuma **unzip** ettiği keşfedildi. Bu nedenle, `~/Library` içindeki `LaunchAgents` klasörü varsayılan olarak oluşturulmadığından, `LaunchAgents/~$escape.plist` konumundaki bir **plist**'i **zip**'lemek ve zip dosyasını **`~/Library`** içine yerleştirmek mümkün oldu; böylece dosya decompress edildiğinde persistence hedefine ulaşıyordu.
 
-[**Orijinal rapora buradan**](https://objective-see.org/blog/blog_0x4B.html) göz atın.<sup>[[2]](#references)</sup>
+[**Orijinal rapora buradan**](https://objective-see.org/blog/blog_0x4B.html) bakın.<sup>[[2]](#references)</sup>
 
-### Login Items ve .zshenv üzerinden Word Sandbox bypass'i
+### Word Sandbox bypass via Login Items and .zshenv
 
-(İlk escape işleminden Word'ün adı `~$` ile başlayan rastgele dosyalar yazabildiğini hatırlayın.)
+(İlk escape'ten sonra Word'ün, adı `~$` ile başlayan rastgele dosyaları yazabildiğini hatırlayın.)
 
-Ancak önceki tekniğin bir sınırlaması vardı: **`~/Library/LaunchAgents`** klasörü başka bir software tarafından oluşturulmuşsa teknik başarısız oluyordu. Bu nedenle bunun için farklı bir Login Items zinciri keşfedildi.
+Ancak önceki tekniğin bir sınırlaması vardı: **`~/Library/LaunchAgents`** klasörü başka bir yazılım tarafından oluşturulmuşsa teknik başarısız oluyordu. Bu nedenle bunun için farklı bir Login Items chain keşfedildi.
 
-Bir attacker, çalıştırılacak payload'u içeren **`.bash_profile`** ve **`.zshenv`** dosyalarını oluşturabilir, ardından bunları zip'leyerek zip dosyasını kurban kullanıcının klasörüne **`~/~$escape.zip`** olarak **yazabilirdi**.
+Bir attacker, çalıştırılacak payload'u içeren **`.bash_profile`** ve **`.zshenv`** dosyalarını oluşturabilir, ardından bunları zip'leyip zip dosyasını victim'ın user klasörüne yazabilirdi: **`~/~$escape.zip`**.
 
-Daha sonra zip dosyası **Login Items**'a ve ardından **`Terminal`** uygulaması eklenirdi. Kullanıcı yeniden login olduğunda zip dosyası kullanıcının klasöründe açılır, **`.bash_profile`** ve **`.zshenv`** dosyalarının üzerine yazılır ve bu nedenle terminal, kullanılan shell'in bash veya zsh olmasına bağlı olarak bu dosyalardan birini çalıştırırdı.
+Daha sonra zip dosyası **Login Items**'a ve ardından **`Terminal`** uygulamasına eklenirdi. User yeniden login olduğunda zip dosyası user'ın home klasöründe açılır, **`.bash_profile`** ve **`.zshenv`** dosyalarının üzerine yazılır ve böylece terminal, kullanılan shell'e (bash veya zsh) bağlı olarak bu dosyalardan birini çalıştırırdı.
 
-[**Orijinal rapora buradan**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) göz atın.<sup>[[3]](#references)</sup>
+[**Orijinal rapora buradan**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) bakın.<sup>[[3]](#references)</sup>
 
-### Open ve env değişkenleri ile Word Sandbox Bypass
+### Word Sandbox Bypass with Open and env variables
 
-Sandboxed process'lerden **`open`** utility'sini kullanarak başka process'ler invoke etmek hâlâ mümkündür. Ayrıca bu process'ler kendi sandbox'ları içinde çalışır.
+Sandbox'lanmış process'lerden **`open`** utility'si kullanılarak başka process'ler hâlâ çağrılabilir. Ayrıca bu process'ler **kendi sandbox'ları içinde** çalışır.
 
-`open` utility'sinin bir uygulamayı **specific env** değişkenleriyle çalıştırmak için **`--env`** seçeneğine sahip olduğu keşfedildi. Bu nedenle, **sandbox** içindeki bir klasörde **`.zshenv` dosyası** oluşturmak ve `Terminal` uygulamasını açarken **`HOME`** değişkenini bu klasöre ayarlayarak `open` kullanmak mümkün oldu; `Terminal` uygulaması da `.zshenv` dosyasını çalıştıracaktı (nedense **`__OSINSTALL_ENVIROMENT`** değişkenini ayarlamak da gerekliydi).
+`open` utility'sinin bir uygulamayı **belirli env** variables ile çalıştırmak için **`--env`** seçeneğine sahip olduğu keşfedildi. Bu nedenle, **sandbox** içindeki bir klasörde **`.zshenv` dosyası** oluşturmak ve `Terminal` uygulamasını açarken `--env` ile **`HOME` variable**'ını bu klasöre ayarlamak mümkün oldu; böylece `Terminal` uygulaması `.zshenv` dosyasını çalıştırıyordu (bir nedenden dolayı `__OSINSTALL_ENVIROMENT` variable'ını ayarlamak da gerekiyordu).
 
-[**Orijinal rapora buradan**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/) göz atın.<sup>[[4]](#references)</sup>
+[**Orijinal rapora buradan**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/) bakın.<sup>[[4]](#references)</sup>
 
-### Open ve stdin ile Word Sandbox Bypass
+### Word Sandbox Bypass with Open and stdin
 
-**`open`** utility'si ayrıca **`--stdin`** parametresini destekliyordu (önceki bypass sonrasında **`--env`** kullanmak artık mümkün değildi).
+**`open`** utility'si ayrıca **`--stdin`** parametresini destekliyordu (önceki bypass'tan sonra artık `--env` kullanılamıyordu).
 
-Sorun şu ki **`python`** Apple tarafından imzalanmış olsa bile **`quarantine`** attribute'una sahip bir script'i **çalıştırmaz**. Ancak bir script'i stdin üzerinden geçirmek mümkündü; böylece dosyanın quarantine edilip edilmediğini kontrol etmezdi:
+Sorun şu ki, **`python`** Apple tarafından imzalanmış olsa bile **`quarantine`** attribute'una sahip bir script'i **çalıştırmaz**. Ancak bir script'i stdin üzerinden geçirmek mümkündü; bu durumda script'in quarantine edilip edilmediği kontrol edilmezdi:
 
 1. Rastgele Python komutları içeren bir **`~$exploit.py`** dosyası bırakın.
-2. _open_ **`–stdin='~$exploit.py' -a Python`** komutunu çalıştırın. Bu komut, bıraktığımız dosyayı standard input olarak kullanarak Python uygulamasını çalıştırır. Python kodumuzu sorunsuzca çalıştırır ve bu process'in parent'ı **_launchd_** olduğu için Word'ün sandbox kurallarına tabi değildir.
+2. _open_ **`–stdin='~$exploit.py' -a Python`** komutunu çalıştırın; bu komut, bıraktığımız dosyayı standard input olarak kullanarak Python uygulamasını çalıştırır. Python kodumuzu sorunsuzca çalıştırır ve _launchd_'nin child process'i olduğundan Word'ün sandbox kurallarına bağlı değildir.<sup>[[5]](#references)</sup>
 
 ## References
 
@@ -55,5 +55,6 @@ Sorun şu ki **`python`** Apple tarafından imzalanmış olsa bile **`quarantine
 - [2] [Office Drama on macOS](https://objective-see.org/blog/blog_0x4B.html)
 - [3] [Office365 MacOS Sandbox Escape](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)
 - [4] [Technical Analysis of CVE-2021-30864](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/)
+- [5] [Uncovering a macOS App Sandbox escape vulnerability: A deep dive into CVE-2022-26706 - Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2022/07/13/uncovering-a-macos-app-sandbox-escape-vulnerability-a-deep-dive-into-cve-2022-26706/)
 
 {{#include ../../../../../banners/hacktricks-training.md}}

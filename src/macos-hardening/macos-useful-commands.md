@@ -117,15 +117,15 @@ sudo killall -HUP mDNSResponder
 ```
 ### Hızlı anti-analysis / virtualization kontrolü
 
-Bazı macOS stealer'ları VM'leri tespit etmek için `system_profiler` çağırır ve sandbox detonation'ı önlemek amacıyla **belirgin bir exit code (ör. 100)** ile işlemi sonlandırır<sup>[[1]](#references)</sup>:
+Bazı macOS stealers, VM'leri tespit etmek ve sandbox detonation'dan kaçınmak için `system_profiler` çağırarak **belirgin bir exit code (ör. 100)** ile sonlanır<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Kurulu Yazılımlar ve Servisler
+### Yüklü Yazılımlar ve Servisler
 
-Kurulu **şüpheli** uygulamaları ve kurulu kaynaklar üzerindeki **yetkileri** kontrol edin:
+Yüklü **şüpheli** uygulamaları ve yüklü kaynaklar üzerindeki **yetkileri** kontrol edin:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -145,7 +145,7 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### Kullanıcı oluşturma
 
-İstem olmadan
+İstemler olmadan
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 

@@ -4,28 +4,28 @@
 
 ## Apple Scripts
 
-**remote processes** ile etkileşime girerek görev otomasyonu için kullanılan bir scripting dilidir. Diğer process'lerden bazı eylemleri gerçekleştirmelerini **istemeyi** oldukça kolaylaştırır. **Malware**, diğer process'ler tarafından export edilen işlevleri kötüye kullanmak için bu özelliklerden yararlanabilir.\
-Örneğin bir malware, browser'da açılmış sayfalara **rastgele JS kodu enjekte edebilir**. Ya da kullanıcıdan istenen bazı izinleri onaylamak için **otomatik tıklama** gerçekleştirebilir;<sup>[[3]](#references)</sup>
+Görev otomasyonu için **remote processes ile etkileşim kuran** bir scripting language'dir. Diğer process'lerden **bazı işlemleri gerçekleştirmelerini istemeyi** oldukça kolaylaştırır. **Malware**, diğer process'ler tarafından export edilen function'ları abuse etmek için bu özellikleri kötüye kullanabilir.\
+Örneğin bir malware, **browser'da açılmış sayfalara arbitrary JS code inject edebilir**. Veya kullanıcıdan istenen bazı allow permission'larını **auto click** ile onaylayabilir;<sup>[[3]](#references)</sup>
 ```applescript
 tell window 1 of process "SecurityAgent"
 click button "Always Allow" of group 1
 end tell
 ```
 İşte bazı örnekler: [https://github.com/abbeycode/AppleScripts](https://github.com/abbeycode/AppleScripts)\
-AppleScripts kullanan malware hakkında daha fazla bilgiyi [**burada**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/) bulabilirsiniz.
+applescripts kullanan malware hakkında daha fazla bilgiyi [**burada**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).<sup>[[3]](#references)</sup>
 
-### Automation / TCC quirks
+### Automation / TCC tuhaflıkları
 
-Apple Events onayları **yönlüdür**: istem, bir **source process -> target process** çifti içindir. Kullanıcı **Allow** düğmesine tıkladığında, aynı source process'ten aynı target process'e gönderilen sonraki istekler, kayıt sıfırlanana kadar onaylanır. Test sırasında `Terminal -> Finder` veya `Terminal -> System Events` erişimine bir kez izin vermek, daha sonra başka bir popup görüntülenmeden iznin yeniden kullanılabilmesi için yeterlidir.<sup>[[1]](#references)</sup>
+Apple Events onayları **yönlüdür**: istem, bir **kaynak işlem -> hedef işlem** çifti içindir. Kullanıcı **Allow** düğmesine tıkladığında, aynı kaynaktan aynı hedefe yapılan sonraki istekler, giriş sıfırlanana kadar izinli olur. Test sırasında `Terminal -> Finder` veya `Terminal -> System Events` izninin bir kez verilmesi, daha sonra başka bir açılır pencere gösterilmeden bu iznin yeniden kullanılmasına yeterlidir.<sup>[[1]](#references)</sup>
 ```bash
 # Remove previously granted Automation permissions from Terminal
 tccutil reset AppleEvents com.apple.Terminal
 ```
-Bu, özellikle **hedef** **Finder** olduğunda önemlidir; çünkü Finder, FDA UI'da görünmese bile her zaman **Full Disk Access** yetkisine sahiptir. Bu nedenle, Finder üzerinde zaten **Automation** yetkisi bulunan herhangi bir host, TCC-korumalı dosyalara erişmek için AppleScript/JXA proxy'si olarak kullanılabilir.<sup>[[1]](#references)</sup> Generic Finder ve System Events payload'ları [the main TCC page](../README.md) ve [the Apple Events page](../macos-apple-events.md) içinde zaten belgelenmiştir.
+Bu, **target** **Finder** olduğunda özellikle önemlidir; çünkü Finder, FDA UI'da görünmese bile her zaman **Full Disk Access** yetkisine sahiptir. Bu nedenle, Finder üzerinde zaten Automation yetkisi bulunan herhangi bir host, TCC tarafından korunan dosyalara erişmek için AppleScript/JXA proxy'si olarak kullanılabilir.<sup>[[1]](#references)</sup> Generic Finder ve System Events payload'ları zaten [ana TCC sayfasında](../README.md) ve [Apple Events sayfasında](../macos-apple-events.md) belgelenmiştir.
 
 ### Modern offensive tradecraft
 
-`/usr/bin/osascript` yalnızca en görünür entry point'tir. AppleScript ve JXA, **`NSAppleScript`** / **`OSAScript`** aracılığıyla **Mach-O binaries** üzerinden de çalıştırılabilir; bu, hem evasion hem de ilgi çekici TCC izinlerine zaten sahip bir host içinde çalışmak için kullanışlıdır.<sup>[[2]](#references)</sup>
+`/usr/bin/osascript` yalnızca en görünür giriş noktasıdır. AppleScript ve JXA, **`NSAppleScript`** / **`OSAScript`** aracılığıyla **Mach-O binaries** üzerinden de çalıştırılabilir; bu, hem evasion hem de hâlihazırda ilgi çekici TCC izinlerine sahip bir host içinde çalışmak için kullanışlıdır.<sup>[[2]](#references)</sup>
 ```bash
 osascript -l JavaScript <<'EOF'
 const app = Application.currentApplication();
@@ -33,11 +33,11 @@ app.includeStandardAdditions = true;
 app.doShellScript("id > /tmp/jxa_id");
 EOF
 ```
-Özel bir helper oluşturup Apple Events'ı doğrudan gönderiyorsanız, ona **gerçek bir uygulama kimliği** vermek testleri ve işlemleri çok daha güvenilir hale getirir. Pratikte bu; `CFBundleIdentifier` ve `NSAppleEventsUsageDescription` içeren bir `Info.plist` gömmek, binary'yi imzalamak ve `com.apple.security.automation.apple-events` entitlement'ını vermek anlamına gelir. Aksi takdirde Apple Events prompt'u çoğunlukla **parent host**'a (örneğin `Terminal`) atfedilir veya `NSAppleScript` çalıştırması kafa karıştırıcı `-1750` / `errOSASystemError` hatalarıyla başarısız olur.<sup>[[2]](#references)</sup>
+Özel bir helper oluşturup Apple Events'ı doğrudan gönderiyorsanız, ona **gerçek bir uygulama kimliği** vermek testleri ve operasyonları çok daha güvenilir hâle getirir. Uygulamada bu; `CFBundleIdentifier` ve `NSAppleEventsUsageDescription` içeren bir `Info.plist` gömmek, binary'yi imzalamak ve `com.apple.security.automation.apple-events` entitlement'ını vermek anlamına gelir. Aksi hâlde Apple Events istemi çoğunlukla **parent host**'a (örneğin `Terminal`) atfedilir veya `NSAppleScript` execution, kafa karıştırıcı `-1750` / `errOSASystemError` hatalarıyla başarısız olur.<sup>[[2]](#references)</sup>
 
-Apple script'ler kolayca "**compiled**" edilebilir. Bu sürümler `osadecompile` ile kolayca "**decompiled**" edilebilir.
+Apple scripts kolayca "**compiled**" hâle getirilebilir. Bu sürümler `osadecompile` ile kolayca "**decompiled**" hâle getirilebilir.
 
-Ancak bu script'ler **"Read only"** olarak da export edilebilir ("Export..." seçeneği aracılığıyla):
+Ancak bu script'ler **"Read only"** olarak da export edilebilir ("Export..." seçeneğiyle):
 
 <figure><img src="https://github.com/carlospolop/hacktricks/raw/master/images/image%20(556).png" alt=""><figcaption></figcaption></figure>
 ```
@@ -50,8 +50,8 @@ Ancak bu tür executable'ları anlamak için kullanılabilecek bazı araçlar h�
 
 ## Referanslar
 
-- [1] [macOS TCC User Privacy Protections'ı Yanlışlıkla ve Tasarım Yoluyla Bypass Etme](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
-- [2] [macOS CLI Tools'ta AppleScript'i Çalıştırma: Belgelenmemiş Kısımlar](https://steipete.me/posts/2025/applescript-cli-macos-complete-guide)
+- [1] [macOS TCC Kullanıcı Gizliliği Korumalarını Kazara ve Tasarım Yoluyla Atlatma](https://www.sentinelone.com/labs/bypassing-macos-tcc-user-privacy-protections-by-accident-and-design/)
+- [2] [AppleScript'i macOS CLI Araçlarında Çalıştırmak: Belgelenmemiş Kısımlar](https://steipete.me/posts/2025/applescript-cli-macos-complete-guide)
 - [3] [Offensive Actor'lar macOS'a Saldırmak İçin AppleScript'i Nasıl Kullanıyor](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/)
 - [4] [FADE DEAD | Kötücül Run-Only AppleScript'leri Reverse Etme Maceraları](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)
 

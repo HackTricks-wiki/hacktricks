@@ -1,4 +1,4 @@
-# macOS xattr-acls ekstra şeyler
+# macOS xattr-acls ek bilgiler
 
 {{#include ../../../../banners/hacktricks-training.md}}
 ```bash
@@ -65,7 +65,7 @@ echo something > start/protected/something
 ```
 <details>
 
-<summary>set_xattr Kodu</summary>
+<summary>set_xattr kodu</summary>
 ```c
 // gcc -o set_xattr set_xattr.c
 #include <stdio.h>

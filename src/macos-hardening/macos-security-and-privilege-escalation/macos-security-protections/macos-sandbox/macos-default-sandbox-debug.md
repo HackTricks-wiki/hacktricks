@@ -1,8 +1,8 @@
-# macOS Varsayılan Sandbox Hatası Ayıklama
+# macOS Default Sandbox Debug
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Bu sayfada, varsayılan macOS sandbox'ından içeriye rastgele komutlar gönderen bir uygulama nasıl oluşturulacağını bulabilirsiniz:
+Bu sayfada, varsayılan macOS sandbox içinden arbitrary commands başlatmak için bir uygulamanın nasıl oluşturulacağını bulabilirsiniz:
 
 1. Uygulamayı derleyin:
 ```objectivec:main.m
@@ -34,9 +34,9 @@ system(input);
 return 0;
 }
 ```
-`clang -framework Foundation -o SandboxedShellApp main.m` komutunu çalıştırarak derleyin.
+Şu komutu çalıştırarak derleyin: `clang -framework Foundation -o SandboxedShellApp main.m`
 
-2. `.app` paketini oluşturun.
+2. `.app` bundle'ını oluşturun
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +58,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Yetkilileri tanımlayın
+3. Entitlements'ları tanımlayın
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Uygulamayı imzalayın (anahtar zincirinde bir sertifika oluşturmanız gerekiyor)
+4. Uygulamayı imzalayın (keychain'de bir sertifika oluşturmanız gerekir)
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp

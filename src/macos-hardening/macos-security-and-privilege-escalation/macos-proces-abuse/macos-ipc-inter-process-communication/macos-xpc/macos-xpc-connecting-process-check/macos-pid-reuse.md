@@ -4,24 +4,24 @@
 
 ## PID Reuse
 
-Bir macOS **XPC service**, çağrılan process'i **audit token** yerine **PID** temelinde kontrol ettiğinde, PID reuse attack'e karşı vulnerable olur. Bu attack, bir **exploit**'in **abuse** ederek **XPC** service'e mesajlar göndermesi ve hemen **sonra**, **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** ile **allowed** binary'yi çalıştırması üzerine kurulu bir **race condition**'dır.
+Bir macOS **XPC service**, çağrılan process'i **audit token** yerine **PID** temelinde kontrol ettiğinde, PID reuse attack'e karşı vulnerable olur. Bu attack, bir **exploit**'in **XPC** service'e işlevselliği **abusing** ederek **message** göndermesine ve hemen **sonrasında**, **allowed** binary ile **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** çalıştırmasına dayanan bir **race condition**'dır.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Bu function, **allowed** binary'nin PID'nin sahibi olmasını sağlar; ancak **malicious XPC message** hemen öncesinde gönderilmiş olur. Bu nedenle, **XPC** service göndereni authenticate etmek için **PID** kullanıyor ve kontrolü **`posix_spawn`** execution'ından **AFTER** yapıyorsa, mesajın **authorized** bir process'ten geldiğini düşünür.
+Bu function, **allowed binary**'nin **PID'nin sahibi** olmasını sağlar; ancak **malicious XPC message** hemen önce gönderilmiş olur. Bu nedenle **XPC** service, göndericiyi **authenticate** etmek için **PID** kullanıyor ve kontrolü **`posix_spawn`** çalıştırıldıktan **SONRA** yapıyorsa, message'ın **authorized** bir process'ten geldiğini düşünür.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Exploit örneği
 
-**`shouldAcceptNewConnection`** function'ını veya onun çağırdığı bir function'ı bulur ve bu function'ın **`processIdentifier`** çağırdığını, ancak **`auditToken`** çağırmadığını görürseniz, bu büyük olasılıkla process PID'sini, audit token'ı değil, **verify** ettiği anlamına gelir.\
-Örneğin, reference'tan alınan bu image'da olduğu gibi:<sup>[[1]](#references)</sup>
+**`shouldAcceptNewConnection`** function'ını veya onun tarafından çağrılan ve **`processIdentifier`** çağıran, ancak **`auditToken`** çağırmayan bir function bulursanız, büyük olasılıkla **audit token** yerine process PID'sini **verify** ettiği anlamına gelir.\
+Örneğin bu image'da olduğu gibi (reference'tan alınmıştır):<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-Exploit'in 2 part'ını görmek için bu example exploit'i (yine reference'tan alınmıştır) inceleyin:<sup>[[1]](#references)</sup>
+Exploit'in 2 bölümünü görmek için bu example exploit'i inceleyin (yine reference'tan alınmıştır):<sup>[[1]](#references)</sup>
 
-- Birden fazla fork **generate** eden bir part
-- **Her fork**, message'ı gönderdikten hemen sonra **`posix_spawn`** çalıştırırken **payload**'ı XPC service'e **send** eder.
+- Birden fazla fork **oluşturan** bölüm
+- **Her fork**, message'ı gönderdikten hemen sonra **`posix_spawn`** çalıştırırken **payload**'ı XPC service'e **gönderecektir**.
 
 > [!CAUTION]
-> Exploit'in çalışması için ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** değerini **set** etmek veya exploit'in içine şunu eklemek önemlidir:
+> Exploit'in çalışması için ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** değerini ayarlamak veya exploit'in içine şunu eklemek önemlidir:
 >
 > ```objectivec
 > asm(".section __DATA,__objc_fork_ok\n"
@@ -31,7 +31,7 @@ Exploit'in 2 part'ını görmek için bu example exploit'i (yine reference'tan a
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-**NSTasks** kullanan ve children'ı RC exploit etmek üzere launch eden argument'i kullanan ilk option
+**NSTasks** ve children'ı RC'i exploit etmek üzere başlatmak için argument kullanan ilk option
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -140,7 +140,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="fork"}}
-Bu örnek, **`fork`** kullanarak **PID race condition'dan yararlanacak child process'leri** başlatır ve ardından **Hard link üzerinden başka bir race condition'dan** yararlanır:
+Bu örnek, **`fork`** kullanarak **PID race condition'ı istismar edecek child process'ler** başlatır ve ardından **Hard link üzerinden başka bir race condition'ı** istismar eder:
 ```objectivec
 // export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 // gcc -framework Foundation expl.m -o expl
@@ -278,16 +278,16 @@ return 0;
 
 ## Diğer örnekler
 
-- [**Intego X9: macOS antivirus yazılımınız neden PID'lere güvenmemeli**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - PID ile client'ların kimliğini doğrulayan bir AV'nin privileged helper'ına karşı LPE.<sup>[[3]](#references)</sup>
-- [**macOS'ta privilege escalation için GOG Galaxy XPC service'ini exploit etme**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)<sup>[[4]](#references)</sup>
+- [**Intego X9: macOS antivirus yazılımınız neden PID'lere güvenmemeli**](https://blog.quarkslab.com/intego_lpe_macos_2.html) - İstemcileri PID ile doğrulayan bir antivirus'ün ayrıcalıklı helper'ına karşı LPE.<sup>[[3]](#references)</sup>
+- [**macOS'ta GOG Galaxy XPC service'ini privilege escalation için exploit etme**](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)<sup>[[4]](#references)</sup>
 - [**Rootpipe Reborn (Part II)**](https://objective-see.org/blog/blog_0x41.html)<sup>[[5]](#references)</sup>
 
-## References
+## Referanslar
 
-- [1] [XPC exploitation öğrenin - Part 2: PID'e hayır deyin!](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
-- [2] [PID'e güvenmeyin! Basit bir logic bug hikayeleri ve onu nerede bulacağınız - Samuel Groß (WarCon 2018)](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
+- [1] [Learn XPC exploitation - Part 2: PID'e hayır deyin!](https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/)
+- [2] [PID'e Güvenmeyin! Basit bir logic bug hikayeleri ve onu nerede bulabileceğiniz - Samuel Groß (WarCon 2018)](https://saelo.github.io/presentations/warcon18_dont_trust_the_pid.pdf)
 - [3] [Intego X9: macOS antivirus yazılımınız neden PID'lere güvenmemeli](https://blog.quarkslab.com/intego_lpe_macos_2.html)
-- [4] [macOS'ta privilege escalation için GOG Galaxy XPC service'ini exploit etme](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
+- [4] [macOS'ta GOG Galaxy XPC service'ini privilege escalation için exploit etme](https://www.ibm.com/think/x-force/exploiting-gog-galaxy-xpc-service-privilege-escalation-macos)
 - [5] [Rootpipe Reborn (Part II)](https://objective-see.org/blog/blog_0x41.html)
 
 {{#include ../../../../../../banners/hacktricks-training.md}}

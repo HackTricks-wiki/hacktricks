@@ -2,33 +2,33 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## POSIX permission combinations
+## POSIX izin kombinasyonları
 
-Bir **directory** için üç permission biti, normal bir dosyadakinden farklı bir anlam taşır. `chmod(1)`, bir directory üzerinde kullanıldığında execute bitini "**search**" olarak adlandırır:<sup>[[2]](#references)</sup>
+Bir **directory** için üç izin biti, normal bir dosyada ifade ettiklerinden farklı bir anlama gelir. `chmod(1)`, bir directory'ye uygulandığında execute bitini "**search**" olarak adlandırır:<sup>[[2]](#references)</sup>
 
-> `0100` Dosyalar için owner tarafından execution yapılmasına izin verir. Directory'ler için owner'ın directory içinde **search** yapmasına izin verir.
+> `0100` Dosyalar için owner tarafından çalıştırmaya izin verir. Directory'ler için owner'ın directory içinde **search** yapmasına izin verir.
 
-- **read** - directory entry'lerini (isimleri) **enumerate** edebilirsiniz.
-- **write** - directory içinde entry'ler **create, rename ve delete** edebilirsiniz. Bunun *containing* directory'nin bir özelliği olduğunu, dosyanın özelliği olmadığını unutmayın: parent directory'sine write edebildiğiniz sürece, okuyamadığınız veya write edemediğiniz bir dosyayı silebilirsiniz.
+- **read** - directory girişlerini (isimleri) **enumerate** edebilirsiniz.
+- **write** - directory içinde girişler **oluşturabilir, yeniden adlandırabilir ve silebilirsiniz**. Bunun dosyanın değil, *içeren* directory'nin bir özelliği olduğunu unutmayın: Parent directory'ye write izniniz olduğu sürece, okuyamadığınız veya yazamadığınız bir dosyayı silebilirsiniz.
 - Bir **subdirectory**'yi silmek için boş olması gerekir; bu da içindeki her şeyi kaldırmak için yeterli haklara sahip olmayı gerektirir.
-- Directory'de **sticky bit** (`S_ISVTX`, `/tmp` gibi) varsa bu işlem kısıtlanır — POSIX, bir process'in yalnızca dosyanın sahibi olması, directory'nin sahibi olması veya uygun privileges'a sahip olması durumunda dosyaları silebileceğini ya da yeniden adlandırabileceğini belirtir.<sup>[[1]](#references)</sup>
-- **execute / search** - directory içinde **traverse** yapmanıza izin verilir. Pathname resolution her component'i "predecessor'ı tarafından belirtilen directory içinde" bulur; bu nedenle path prefix'in herhangi bir component'i üzerindeki **search** haklarının kaybedilmesi, leaf file'ın kendisi world-readable olsa bile altındaki her şeyi path üzerinden erişilemez hale getirir.<sup>[[1]](#references)</sup>
+- Directory'de **sticky bit** (`S_ISVTX`, `/tmp` gibi) varsa bu işlem kısıtlanır — POSIX'e göre bir process, yalnızca dosyanın sahibi, directory'nin sahibi veya uygun yetkilere sahip olması durumunda bu directory içindeki dosyaları silebilir ya da yeniden adlandırabilir.<sup>[[1]](#references)</sup>
+- **execute / search** - directory'yi **traverse** etmenize izin verilir. Pathname çözümleme, her bir bileşeni "kendinden önceki tarafından belirtilen directory içinde" bulur; bu nedenle path prefix'in herhangi bir bileşeninde search haklarını **kaybetmek**, leaf file'ın kendisi world-readable olsa bile altındaki her şeyi path üzerinden erişilemez hale getirir.<sup>[[1]](#references)</sup>
 
 ### Dangerous Combinations
 
-**root tarafından sahip olunan bir file/folder'ın nasıl overwrite edileceği**, ancak:
+**root tarafından sahip olunan bir file/folder'ın üzerine yazmak** için:
 
 - Path içindeki bir parent **directory owner** user'dır
 - Path içindeki bir parent **directory owner**, **write access** sahibi bir **users group**'udur
-- Bir users **group**'unda **file** için **write** access vardır
+- Bir users **group**, **file** üzerinde **write** access'e sahiptir
 
-Önceki kombinasyonlardan herhangi biriyle attacker, privileged arbitrary write elde etmek için beklenen path'e bir **sym/hard link** **inject** edebilir.
+Önceki kombinasyonlardan herhangi birinde attacker, ayrıcalıklı bir arbitrary write elde etmek için beklenen path'e bir **sym/hard link** **inject** edebilir.
 
-### Folder root R+X özel durumu
+### Folder root R+X special case
 
-Bu durum, yukarıdaki pathname-resolution kuralından doğrudan ortaya çıkar. Bir **directory** yalnızca root'a R+X veriyorsa, içindeki dosyalara diğer herkes *path üzerinden* erişemez — ancak **files'ların kendi permission bit'leri yine de permissive olabilir**. Aradaki tek engel directory'dir.
+Bu durum doğrudan yukarıdaki pathname-resolution kuralından kaynaklanır. Bir **directory** yalnızca root'a R+X veriyorsa, içindeki dosyalar herkes için *path üzerinden* erişilemez hale gelir — ancak **dosyaların kendi permission bitleri yine de permissive olabilir**. Engeli oluşturan tek şey directory'dir.
 
-Bu nedenle, dosyayı o directory'den **out** etmenizi sağlayan herhangi bir primitive — attacker tarafından seçilen bir path'i sizin **traverse** edebileceğiniz bir konuma **move/rename/copy** eden privileged bir process — dosyanın kendi mode'unu aşmaya hiç gerek kalmadan arbitrary read'e dönüşür:
+Dolayısıyla dosyayı bu directory dışına çıkarmanızı sağlayan herhangi bir primitive — attacker tarafından seçilen bir path'i sizin traverse edebildiğiniz bir konuma **move/rename/copy** eden ayrıcalıklı bir process — dosyanın kendi mode'unu aşmaya hiç gerek kalmadan arbitrary read'e dönüşür:
 ```bash
 # Reproduce the primitive locally
 sudo mkdir -p /tmp/locked && sudo chmod 700 /tmp/locked
@@ -40,30 +40,30 @@ cat /tmp/locked/data.txt     # Permission denied
 # The file itself is mode 644 - only the parent directory's search bit blocks you.
 sudo ls -l /tmp/locked/
 ```
-Ayrıcalıklı file movers'ları (installer'lar, log rotator'ları, crash/diagnostic collector'ları, backup ve "export" özellikleri) arayın; bunlar daha düşük ayrıcalıklı bir user'dan source path kabul eder.
+Ayrıcalıklı dosya taşıyıcılarını (installer'lar, log rotator'ları, crash/diagnostic collector'lar, backup ve "export" özellikleri) arayın; bunlar daha düşük ayrıcalıklı bir kullanıcıdan kaynak yolu kabul eder.
 
 ## Symbolic Link / Hard Link
 
-### İzinleri geniş file/folder
+### İzin verilen dosya/klasör
 
-Ayrıcalıklı bir process, **daha düşük ayrıcalıklı bir user** tarafından **kontrol edilebilen** veya daha düşük ayrıcalıklı bir user tarafından **önceden oluşturulabilen** bir **file** içine data yazıyorsa. User, Symbolic veya Hard link kullanarak dosyayı **başka bir file'a yönlendirebilir** ve ayrıcalıklı process bu file'a yazabilir.
+Ayrıcalıklı bir işlem, **daha düşük ayrıcalıklı bir kullanıcı tarafından kontrol edilebilecek** veya daha düşük ayrıcalıklı bir kullanıcı tarafından **önceden oluşturulmuş olabilecek** bir **dosyaya** veri yazıyorsa. Kullanıcı, Symbolic veya Hard link aracılığıyla **dosyayı başka bir dosyaya yönlendirebilir** ve ayrıcalıklı işlem bu dosyaya yazacaktır.
 
-Bir attacker'ın **privilege escalation için arbitrary write'ı abuse edebileceği** diğer bölümleri kontrol edin.
+Bir saldırganın **ayrıcalıkları yükseltmek için rastgele bir yazma işlemini kötüye kullanabileceği** diğer bölümleri kontrol edin.
 
-### Open `O_NOFOLLOW`
+### `O_NOFOLLOW` ile açma
 
-[`open(2)`](https://keith.github.io/xcode-man-pages/open.2.html)'e göre: *"`O_NOFOLLOW` mask içinde kullanılırsa ve `open()`'a geçirilen target file bir symbolic link ise `open()` başarısız olur."* Yalnızca **son** component kontrol edilir — tüm **ara** component'ler yine de resolve edilir ve takip edilir. Bu nedenle `O_NOFOLLOW` ile write işlemini "koruyan" bir developer, target path'in herhangi bir **parent directory**'sine symlink yerleştirilerek yine de attack edilebilir.<sup>[[3]](#references)</sup>
+[`open(2)`](https://keith.github.io/xcode-man-pages/open.2.html) başına: *"`O_NOFOLLOW` maskede kullanılırsa ve `open()`'a geçirilen hedef dosya bir symbolic link ise `open()` başarısız olur."* Yalnızca **son** bileşen kontrol edilir — tüm **ara** bileşenler yine çözümlenir ve takip edilir. Bu nedenle bir geliştirici yazma işlemini `O_NOFOLLOW` ile "korumuş" olsa bile saldırgan, hedef yolun herhangi bir **üst dizinine** bir symlink yerleştirerek saldırabilir.<sup>[[3]](#references)</sup>
 
-Aynı man page, bu açığı gerçekten kapatan flag'leri belgeler:<sup>[[3]](#references)</sup>
+Aynı man sayfası, bu açığı gerçekten kapatan flag'leri belgeler:<sup>[[3]](#references)</sup>
 
-- **`O_NOFOLLOW_ANY`** — *"`open()`'a geçirilen path'in ... herhangi bir component'i symbolic link ise `open()` başarısız olur."*
-- **`O_RESOLVE_BENEATH`** — *"belirtilen path resolution, fd ile ilişkilendirilmiş directory'den çıkarsa `openat()` başarısız olur."*
+- **`O_NOFOLLOW_ANY`** — *"`open()`'a geçirilen yolun ... herhangi bir bileşeni symbolic link ise `open()` başarısız olur."*
+- **`O_RESOLVE_BENEATH`** — *"belirtilen yol çözümlemesi fd ile ilişkilendirilmiş dizinin dışına çıkarsa `openat()` başarısız olur."*
 
-Aksi halde, önceden validate ettiğiniz bir directory FD'ye göre relative `openat()` kullanmak veya `realpath()` + yeniden validation yapmak, path'in ortasındaki symlink swap'lerini durdurmanın kalan yollarıdır.
+Bunun dışında, önceden doğruladığınız bir dizin FD'sine göre `openat()` kullanmak veya `realpath()` + yeniden doğrulama yapmak, yolun ortasındaki symlink değişimlerini durdurmanın kalan yollarıdır.
 
 ## .fileloc
 
-**`.fileloc`** extension'ına sahip file'lar, diğer application'lara veya binary'lere işaret edebilir; böylece açıldıklarında application/binary çalıştırılır.\
+**`.fileloc`** uzantılı dosyalar diğer uygulamalara veya binary'lere işaret edebilir; böylece açıldıklarında uygulama/binary çalıştırılır.\
 Örnek:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -81,25 +81,25 @@ Aksi halde, önceden validate ettiğiniz bir directory FD'ye göre relative `ope
 
 ### Leak FD (no `O_CLOEXEC`)
 
-`open` çağrısında `O_CLOEXEC` flag'i yoksa file descriptor child process tarafından miras alınır. Dolayısıyla privileged bir process privileged bir file açar ve attacker tarafından kontrol edilen bir process çalıştırırsa attacker **privileged file üzerindeki FD'yi miras alır**.
+Bir `open` çağrısında `O_CLOEXEC` flag'i yoksa file descriptor child process tarafından devralınır. Bu nedenle privileged bir process privileged bir file açar ve attacker tarafından kontrol edilen bir process çalıştırırsa attacker, **privileged file üzerindeki FD'yi devralır**.
 
-Canonical örnek, **OS X 10.10'daki `DYLD_PRINT_TO_FILE` LPE**'dir ([SektionEins](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html)):<sup>[[4]](#references)</sup>
+Bunun canonical örneği **OS X 10.10'daki `DYLD_PRINT_TO_FILE` LPE'sidir** ([SektionEins](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html)):<sup>[[4]](#references)</sup>
 
-- `dyld`, ilgili variable `processDyldEnvironmentVariable()` dışında parse edildiği için **restricted (suid root) binary'lerde** bile `DYLD_PRINT_TO_FILE=/path` değerini kabul ediyordu.
-- `open(loggingPath, O_WRONLY | O_CREAT | O_APPEND, 0644)` çağrısını yapıyor ve böylece **keyfi bir path'te root-owned file oluşturuyordu**.
-- FD **hiçbir zaman kapatılmıyor ve close-on-exec flag'ine sahip değildi**; bu nedenle suid binary'nin her child process'i **root-owned bir file'a yazılabilir FD'yi miras alıyordu**.
-- Örneğin `DYLD_PRINT_TO_FILE=/etc/target suid_binary` çalıştırıp ardından child'da miras alınan FD numarasını okumak, keyfi root-owned write işlemlerine izin veriyordu; `fcntl(fd, F_SETFL, 0)` ise `O_APPEND`'i temizleyerek append yerine overwrite yapılmasına bile olanak sağlıyordu.
+- `dyld`, bu particular variable `processDyldEnvironmentVariable()` dışında parse edildiği için **restricted (suid root) binary'lerde** bile `DYLD_PRINT_TO_FILE=/path` değerini dikkate alıyordu.
+- `open(loggingPath, O_WRONLY | O_CREAT | O_APPEND, 0644)` çağrısını yapıyordu; böylece **herhangi bir path'te root-owned bir file oluşturuyordu**.
+- FD **asla kapatılmıyor ve close-on-exec flag'ine sahip değildi**; bu nedenle suid binary'nin her child process'i **root-owned bir file'a writable FD** devralıyordu.
+- Örneğin `DYLD_PRINT_TO_FILE=/etc/target suid_binary` çalıştırıp ardından child process'te devralınan FD number'ını okumak, root-owned file'lara arbitrary write yapılmasını sağlıyordu; `fcntl(fd, F_SETFL, 0)` ile `O_APPEND` bile temizlenerek append yerine overwrite yapılabiliyordu.
 
-Aynı yapı, privileged bir process `exec` ile kontrol ettiğiniz bir şeyi çalıştırmadan **önce** bir file açtığında ortaya çıkar (helper tools, `$EDITOR` üzerinden çağrılan `crontab` tarzı editor'ler, bir env-var path'inden açılan log/debug files...). Miras aldığınız FD'leri şu komutla enumerate edin:
+Aynı durum, privileged bir process `exec` ile kontrol ettiğiniz bir şeyi çalıştırmadan **önce** bir file açtığında da ortaya çıkar (helper tools, `$EDITOR` üzerinden çağrılan `crontab`-style editors, env-var path'inden açılan log/debug files...). Devraldığınız FD'leri şu şekilde enumerate edin:
 ```bash
 # From inside the child process
 ls -l /dev/fd/
 # or
 lsof -p $$
 ```
-`2` üzerindeki ve kendinizin açamadığı bir dosyaya işaret eden her şey, arbitrary-write (veya arbitrary-read) primitive'idir.
+`2` üzerindeki ve kendiniz açamadığınız bir dosyaya işaret eden her şey, bir arbitrary-write (veya arbitrary-read) primitive'idir.
 
-## quarantine xattrs hilelerinden kaçının
+## quarantine xattrs tricks'ten kaçının
 
 ### Kaldırın
 ```bash
@@ -107,7 +107,7 @@ xattr -d com.apple.quarantine /path/to/file_or_app
 ```
 ### uchg / uchange / uimmutable flag
 
-Bir dosya/klasör bu değiştirilemez özniteliğine sahipse üzerine bir xattr eklemek mümkün olmaz
+Bir dosya/klasör bu immutable özniteliğine sahipse, üzerine xattr eklemek mümkün olmaz.
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -119,16 +119,16 @@ ls -lO /tmp/asd
 ```
 ### xattr desteği olmayan dosya sistemleri
 
-macOS'un bağlayabildiği her dosya sistemi **extended attributes**'ı yerel olarak depolamaz. HFS+ ve APFS bunu yapar; **FAT32, exFAT ve (çoğu) NFS mount'u bunu yapmaz** — macOS bunları `._<filename>` adlı bir **AppleDouble** yan dosyasına yazarak taklit eder ([The Eclectic Light Company](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)).<sup>[[5]](#references)</sup>
+macOS'un mount edebildiği her dosya sistemi **extended attributes**'ı yerel olarak depolamaz. HFS+ ve APFS bunu destekler; **FAT32, exFAT ve (çoğu) NFS mount'ı desteklemez** — macOS bunları `._<filename>` adında bir **AppleDouble** yan dosyası yazarak emüle eder ([The Eclectic Light Company](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)).<sup>[[5]](#references)</sup>
 
-Bu, quarantine açısından önemlidir; çünkü xattr yalnızca aynı volume'dan gerçekten yazılabilir **ve tekrar okunabilirse** kalıcı olur:
+Bu, quarantine açısından önemlidir; çünkü xattr yalnızca aynı volume üzerinden gerçekten yazılabiliyor **ve tekrar okunabiliyorsa** hayatta kalır:
 ```bash
 # Check whether a mount point round-trips xattrs at all
 xattr -w com.apple.quarantine "0081;00000000;test;" /Volumes/SOMEUSB/file
 xattr -p com.apple.quarantine /Volumes/SOMEUSB/file
 ls -a /Volumes/SOMEUSB/          # look for the ._file AppleDouble companion
 ```
-Volume daha sonra `._` companion'ı yok sayan bir path üzerinden okunursa (veya companion kaldırılır/silinirse), dosya **quarantine flag olmadan** gelir — ve unquarantined bir `.app`, [macOS Sandbox Debug & Bypass](../macos-sandbox/macos-sandbox-debug-and-bypass/README.md#bypassing-quarantine-attribute) bölümünde ele alındığı üzere App Sandbox'tan kaçmak için yeterlidir.
+Birimin daha sonra `._` eşlikçi dosyasını yok sayan bir yol üzerinden okunması (veya eşlikçi dosyanın kaldırılması/silinmesi) durumunda dosya **quarantine flag olmadan** gelir — ve quarantine uygulanmamış bir `.app`, [macOS Sandbox Debug & Bypass](../macos-sandbox/macos-sandbox-debug-and-bypass/README.md#bypassing-quarantine-attribute) bölümünde ele alındığı üzere App Sandbox'tan kaçmak için yeterlidir.
 
 ### writeextattr ACL
 
@@ -157,11 +157,11 @@ ls -le /tmp/test
 
 **AppleDouble** file format, bir dosyayı ACE'leriyle birlikte kopyalar.
 
-[**Kaynak kodunda**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html), **`com.apple.acl.text`** adlı xattr içinde depolanan ACL metin gösteriminin sıkıştırması açılan dosyada ACL olarak ayarlanacağını görmek mümkündür. Bu nedenle, bir uygulamayı diğer xattr'ların yazılmasını engelleyen bir ACL ile **AppleDouble** file format kullanarak bir zip file içine sıkıştırırsanız... quarantine xattr uygulamaya ayarlanmaz:
+[**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) içinde, **`com.apple.acl.text`** adlı xattr içinde depolanan ACL metin gösteriminin sıkıştırılmış dosyada ACL olarak ayarlandığını görmek mümkündür. Bu nedenle, bir uygulamayı, diğer xattr'ların dosyaya yazılmasını engelleyen bir ACL ile **AppleDouble** file format kullanarak bir zip file içine sıkıştırırsanız... quarantine xattr uygulamaya ayarlanmaz:
 
-Daha fazla bilgi için [**orijinal rapora**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) bakın.<sup>[[6]](#references)</sup>
+Daha fazla bilgi için [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) inceleyin.<sup>[[6]](#references)</sup>
 
-Bunu tekrarlamak için önce doğru acl string'i elde etmemiz gerekir:
+Bunu yeniden oluşturmak için öncelikle doğru acl string'i elde etmemiz gerekir:
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -179,7 +179,7 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-(Not: Bu çalışsa bile sandbox quarantine xattr'ını önceden yazar)
+(Not: Bu çalışsa bile sandbox daha önce quarantine xattr'ını yazar)
 
 Gerçekten gerekli değil ama her ihtimale karşı burada bırakıyorum:
 
@@ -188,15 +188,15 @@ Gerçekten gerekli değil ama her ihtimale karşı burada bırakıyorum:
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## İmza kontrollerini bypass etme
+## Signature checks bypass
 
-### Platform binaries kontrollerini bypass etme
+### Platform binaries checks bypass
 
-Bazı security check'ler binary'nin **platform binary** olup olmadığını kontrol eder; örneğin bir XPC service'e bağlanmaya izin vermek için. Ancak https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ adresinde açıklanan bypass yönteminde gösterildiği gibi, bir platform binary'si (örneğin /bin/ls) alıp exploit'i `DYLD_INSERT_LIBRARIES` env variable'ı aracılığıyla dyld kullanarak inject etmek mümkündür.<sup>[[7]](#references)</sup>
+Bazı security checks, örneğin bir XPC service'e bağlanmaya izin vermek için binary'nin bir **platform binary** olup olmadığını kontrol eder. Ancak https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ adresindeki bypass'ta gösterildiği üzere, bir platform binary (örneğin /bin/ls) edinip exploit'i `DYLD_INSERT_LIBRARIES` environment variable'ı aracılığıyla dyld kullanarak inject ederek bu check'i bypass etmek mümkündür.<sup>[[7]](#references)</sup>
 
 ### `CS_REQUIRE_LV` ve `CS_FORCED_LV` flag'lerini bypass etme
 
-Çalışan bir binary'nin, aşağıdaki gibi bir kod kullanarak kendi flag'lerini değiştirmesi ve kontrolleri bypass etmesi mümkündür:<sup>[[7]](#references)</sup>
+Çalışan bir binary'nin, aşağıdaki gibi bir code ile kendi flag'lerini değiştirerek check'leri bypass etmesi mümkündür:<sup>[[7]](#references)</sup>
 ```c
 // Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
 int pid = getpid();
@@ -211,9 +211,9 @@ NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, statu
 ```
 ## Code Signatures Bypass
 
-Bundle'lar, **bundle** içindeki her bir **file**'ın **hash** değerini içeren **`_CodeSignature/CodeResources`** dosyasını barındırır. CodeResources'ın hash değerinin de **executable** içine gömülü olduğunu unutmayın; bu nedenle onunla da oynayamayız.
+Bundle'lar, **bundle** içindeki her bir **file**'ın **hash** değerini içeren **`_CodeSignature/CodeResources`** dosyasını barındırır. CodeResources'ın hash değerinin de **executable** içine gömülü olduğunu unutmayın; dolayısıyla bununla da oynayamayız.
 
-Ancak bazı dosyaların signature'ı kontrol edilmez; bunlar plist içinde `omit` anahtarına sahip olan dosyalardır, örneğin:
+Ancak bazı file'ların signature değeri kontrol edilmez. Bunlar plist içinde `omit` anahtarına sahip olan file'lardır; örneğin:
 ```xml
 <dict>
 ...
@@ -257,13 +257,13 @@ Ancak bazı dosyaların signature'ı kontrol edilmez; bunlar plist içinde `omit
 ...
 </dict>
 ```
-Bir kaynağın imzasını cli üzerinden hesaplamak mümkündür:
+Bir kaynağın signature değerini CLI üzerinden hesaplamak mümkündür:
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
-## DMG'leri Mount Etme
+## DMG'leri mount etme
 
-Bir kullanıcı, mevcut bazı klasörlerin üzerine bile oluşturulmuş özel bir dmg mount edebilir. Özel içerik içeren bir dmg paketi şu şekilde oluşturulabilir:
+Bir kullanıcı, özel olarak oluşturulmuş bir DMG'yi mevcut bazı klasörlerin üzerine bile mount edebilir. Özel içerik içeren bir DMG paketi şu şekilde oluşturulabilir:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -287,17 +287,17 @@ hdiutil create -srcfolder justsome.app justsome.dmg
 Genellikle macOS, `/usr/libexec/diskarbitrationd` tarafından sağlanan `com.apple.DiskArbitrarion.diskarbitrariond` Mach service ile iletişim kurarak diskleri mount eder. LaunchDaemons plist dosyasına `-d` parametresi eklenip yeniden başlatılırsa, logları `/var/log/diskarbitrationd.log` dosyasına kaydeder.\
 Ancak `com.apple.driver.DiskImages` kext ile doğrudan iletişim kurmak için `hdik` ve `hdiutil` gibi araçları kullanmak mümkündür.
 
-## Arbitrary Writes
+## Keyfi Yazmalar
 
-### Periodic sh scripts
+### Periodic sh script'leri
 
-Script'iniz bir **shell script** olarak yorumlanabiliyorsa, her gün tetiklenecek olan **`/etc/periodic/daily/999.local`** shell script'inin üzerine yazabilirsiniz.
+Script'iniz **shell script** olarak yorumlanabiliyorsa, her gün tetiklenecek olan **`/etc/periodic/daily/999.local`** shell script'inin üzerine yazabilirsiniz.
 
-Bu script'in çalıştırılmasını şu komutla **taklit edebilirsiniz**: **`sudo periodic daily`**
+Bu script'in çalıştırılmasını şu komutla **taklit** edebilirsiniz: **`sudo periodic daily`**
 
 ### Daemons
 
-**`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** gibi bir **LaunchDaemon** oluşturarak, arbitrary bir script çalıştıran plist yazın:
+**`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** gibi, keyfi bir script çalıştıran plist içeren keyfi bir **LaunchDaemon** yazın:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -318,42 +318,42 @@ Sadece root olarak çalıştırmak istediğiniz **komutlarla** `/Applications/Sc
 
 ### Sudoers Dosyası
 
-**Arbitrary write** yetkiniz varsa, kendinize **sudo** ayrıcalıkları vermek için **`/etc/sudoers.d/`** klasörü içinde bir dosya oluşturabilirsiniz.
+**Keyfi yazma yetkiniz** varsa, kendinize **sudo** ayrıcalıkları tanıyan bir dosyayı **`/etc/sudoers.d/`** klasörü içinde oluşturabilirsiniz.
 
 ### PATH Dosyaları
 
-**`/etc/paths`** dosyası, PATH env değişkenini oluşturan ana konumlardan biridir. Üzerine yazmak için root olmanız gerekir; ancak **privileged process** tam yol belirtmeden bir **command** çalıştırıyorsa, bu dosyayı değiştirerek söz konusu **command**'i **hijack** edebilirsiniz.
+**`/etc/paths`** dosyası, PATH env değişkenini oluşturan ana konumlardan biridir. Üzerine yazmak için root olmanız gerekir; ancak **privileged process** tam yol belirtmeden bir **komut** çalıştırıyorsa, bu dosyayı değiştirerek komutu **hijack** edebilirsiniz.
 
-Ayrıca **`/etc/paths.d`** içinde dosyalar oluşturarak **PATH** env değişkenine yeni klasörler yükleyebilirsiniz.
+Ayrıca, PATH env değişkenine yeni klasörler yüklemek için **`/etc/paths.d`** içinde dosyalar yazabilirsiniz.
 
 ### cups-files.conf
 
 Bu teknik [this writeup](https://www.kandji.io/blog/macos-audit-story-part1) içinde kullanılmıştır.<sup>[[8]](#references)</sup>
 
-Aşağıdaki içeriğe sahip **`/etc/cups/cups-files.conf`** dosyasını oluşturun:
+Aşağıdaki içeriğe sahip `/etc/cups/cups-files.conf` dosyasını oluşturun:
 ```
 ErrorLog /etc/sudoers.d/lpe
 LogFilePerm 777
 <some junk>
 ```
-Bu, `/etc/sudoers.d/lpe` dosyasını 777 izinleriyle oluşturur. Sondaki fazladan gereksiz içerik, error log oluşturulmasını tetiklemek içindir.
+Bu, `/etc/sudoers.d/lpe` dosyasını 777 izinleriyle oluşturur. Sondaki fazladan içerik, error log oluşturulmasını tetiklemek içindir.
 
-Ardından, `/etc/sudoers.d/lpe` dosyasına `%staff ALL=(ALL) NOPASSWD:ALL` gibi privilege escalation için gereken config'i yazın.
+Ardından, `%staff ALL=(ALL) NOPASSWD:ALL` gibi privilege escalation için gereken yapılandırmayı `/etc/sudoers.d/lpe` içine yazın.
 
-Sonra `/etc/cups/cups-files.conf` dosyasını tekrar düzenleyerek `LogFilePerm 700` belirtin; böylece yeni sudoers dosyası `cupsctl` çağrıldığında geçerli hale gelir.
+Sonra, `LogFilePerm 700` belirterek `/etc/cups/cups-files.conf` dosyasını tekrar değiştirin; böylece yeni sudoers dosyası `cupsctl` çağrıldığında geçerli hale gelir.
 
 ### Sandbox Escape
 
-Bir FS arbitrary write ile macOS sandbox'ından kaçmak mümkündür. Bazı örnekler için [macOS Auto Start](../../../../macos-auto-start-locations.md) sayfasına bakabilirsiniz; ancak yaygın yöntemlerden biri, başlangıçta bir command çalıştıran Terminal preferences dosyasını `~/Library/Preferences/com.apple.Terminal.plist` konumuna yazmak ve bunu `open` kullanarak çağırmaktır.
+FS arbitrary write ile macOS sandbox'ından escape etmek mümkündür. Bazı örnekler için [macOS Auto Start](../../../../macos-auto-start-locations.md) sayfasına bakın; ancak yaygın bir yöntem, başlangıçta bir command çalıştıran Terminal preferences dosyasını `~/Library/Preferences/com.apple.Terminal.plist` konumuna yazmak ve bunu `open` kullanarak çağırmaktır.
 
-## Diğer kullanıcılar olarak writable dosyalar oluşturma
+## Diğer kullanıcılar olarak writable files oluşturma
 
-Çok yaygın bir privesc primitive'i, **privileged process'in sizin için kontrol ettiğiniz bir directory içinde bir file oluşturmasını** sağlamak ve ardından bu file üzerindeki **write access**'i korumaktır. Bunun için iki bileşen gerekir:
+Çok yaygın bir privesc primitive, **privileged bir process'in sizin için kontrol ettiğiniz bir directory içinde file oluşturmasını** sağlamak ve ardından bu file üzerinde **write access**'i korumaktır. İki bileşen gereklidir:
 
-1. Sahip olduğunuz bir directory (veya **inheritable ACL** ayarlayabildiğiniz bir directory); böylece içinde oluşturulan her şey permissions'ınızı devralır.
-2. Bir debug/logging environment variable, config file veya helper'ın XPC API'si aracılığıyla **nerede** file oluşturacağının belirtilebildiği privileged/`suid` bir process.
+1. Sahip olduğunuz bir directory (veya **inheritable ACL** ayarlayabildiğiniz bir directory); böylece içinde oluşturulan her şey permissions'larınızı devralır.
+2. Bir file'ın **nerede** oluşturulacağını belirtebileceğiniz privileged/`suid` bir process — genellikle bir debug/logging environment variable, config file veya helper'ın XPC API'si aracılığıyla.
 
-Oluşturulan file'ın başka bir kullanıcıya ait olmasına rağmen sizin tarafınızdan writable olmasını sağlayan şey **inheritable ACL** kısmıdır. `file_inherit` / `directory_inherit` inheritance flag'leri [`chmod(1)`](https://keith.github.io/xcode-man-pages/chmod.1.html) içinde belgelenmiştir:
+**Inheritable ACL** kısmı, oluşturulan file başka bir user'a ait olsa bile sizin tarafınızdan writable olmasını sağlar. `file_inherit` / `directory_inherit` inheritance flag'leri [`chmod(1)`](https://keith.github.io/xcode-man-pages/chmod.1.html) içinde belgelenmiştir:<sup>[[2]](#references)</sup>
 ```bash
 DIRNAME=/tmp/inherit_test
 mkdir -p "$DIRNAME"
@@ -363,13 +363,13 @@ chmod +a "$(whoami) allow read,write,append,execute,readattr,writeattr,readextat
 
 ls -lde "$DIRNAME"   # confirm the ACE is present
 ```
-Artık ayrıcalıklı bir process’in `$DIRNAME` içinde oluşturduğu herhangi bir dosya **sizin tarafınızdan yazılabilir**. Bu dizin daha sonra **root olarak çalıştırılan** bir konumsa (`/etc/periodic/*`, `/etc/cron.d`, `/etc/sudoers.d`, bir LaunchDaemon dizini...), bu doğrudan root escalation sağlar. Dosyayı elde ettikten sonra içine ne yazmanız gerektiği için yukarıdaki [Sudoers File](#sudoers-file) ve [cups-files.conf](#cups-filesconf) bölümlerine bakın.
+Artık ayrıcalıklı bir process’in `$DIRNAME` içinde oluşturduğu tüm dosyalar **sizin tarafınızdan yazılabilir**. Bu dizin daha sonra **root olarak çalıştırılan** bir konumsa (`/etc/periodic/*`, `/etc/cron.d`, `/etc/sudoers.d`, bir LaunchDaemon dizini...), bu doğrudan root escalation sağlar. Dosyayı elde ettikten sonra ne yazmanız gerektiği için yukarıdaki [Sudoers File](#sudoers-file) ve [cups-files.conf](#cups-filesconf) bölümlerine bakın.
 
-"env variable bir root process’inin dosya oluşturmasına neden olur ve FD size leak olur" zincirinin tam uygulamalı bir örneği için yukarıdaki [Leak FD (no `O_CLOEXEC`)](#leak-fd-no-o_cloexec) bölümüne bakın.
+"env variable bir root process’inin dosya oluşturmasını sağlar ve FD size leak olur" zincirinin eksiksiz bir örneği için yukarıdaki [Leak FD (no `O_CLOEXEC`)](#leak-fd-no-o_cloexec) bölümüne bakın.
 
 ## POSIX Shared Memory
 
-**POSIX shared memory**, POSIX uyumlu işletim sistemlerindeki process’lerin ortak bir bellek alanına erişmesini sağlayarak diğer inter-process communication yöntemlerine kıyasla daha hızlı iletişim kurulmasını sağlar. Bu işlem, `shm_open()` ile bir shared memory object oluşturmayı veya açmayı, `ftruncate()` ile boyutunu ayarlamayı ve `mmap()` kullanarak process’in adres alanına map etmeyi içerir. Process’ler daha sonra bu bellek alanından doğrudan okuma ve bu alana doğrudan yazma yapabilir. Eşzamanlı erişimi yönetmek ve data corruption’ı önlemek için mutex veya semaphore gibi synchronization mekanizmaları sıklıkla kullanılır. Son olarak process’ler `munmap()` ve `close()` ile shared memory’nin mapping’ini kaldırır ve bağlantısını kapatır; isteğe bağlı olarak `shm_unlink()` ile memory object’i kaldırır. Bu sistem, birden fazla process’in paylaşılan dataya hızlı ve verimli şekilde erişmesi gereken ortamlarda etkili bir IPC yöntemidir.
+**POSIX shared memory**, POSIX uyumlu işletim sistemlerindeki process’lerin ortak bir memory alanına erişmesini sağlayarak, diğer process’ler arası iletişim yöntemlerine kıyasla daha hızlı iletişim kurulmasını sağlar. Bu işlem, `shm_open()` ile bir shared memory object oluşturmayı veya açmayı, boyutunu `ftruncate()` ile ayarlamayı ve `mmap()` kullanarak process’in address space’ine map etmeyi içerir. Process’ler daha sonra bu memory alanını doğrudan okuyabilir ve buraya yazabilir. Eşzamanlı erişimi yönetmek ve data corruption’ı önlemek için genellikle mutex veya semaphore gibi synchronization mechanism’leri kullanılır. Son olarak process’ler `munmap()` ve `close()` ile shared memory’nin map’ini kaldırır ve bağlantısını kapatır; isteğe bağlı olarak memory object’i `shm_unlink()` ile kaldırır. Bu sistem, birden fazla process’in shared data’ya hızlı bir şekilde erişmesi gereken ortamlarda verimli ve hızlı IPC için özellikle etkilidir.
 
 <details>
 
@@ -465,20 +465,20 @@ return 0;
 
 ## macOS Guarded Descriptors
 
-**macOS Guarded descriptors**, kullanıcı uygulamalarındaki **file descriptor işlemlerinin** güvenliğini ve güvenilirliğini artırmak için macOS'ta sunulan bir güvenlik özelliğidir. Bu guarded descriptor'lar, file descriptor'lar ile kernel tarafından uygulanan belirli kısıtlamaları veya "guard"ları ilişkilendirmek için bir yol sağlar.
+**macOSCguarded descriptors**, kullanıcı uygulamalarında güvenliği ve güvenilirliği artırmak amacıyla macOS'ta sunulan bir güvenlik özelliğidir. Bu guarded descriptor'lar, dosya descriptor'larıyla kernel tarafından uygulanan belirli kısıtlamaları veya "guard"ları ilişkilendirmek için bir yöntem sağlar.
 
-Bu özellik, **yetkisiz file access** veya **race condition** gibi belirli güvenlik açığı sınıflarını önlemek için özellikle kullanışlıdır. Bu güvenlik açıkları, örneğin bir thread'in bir file description'a erişerek **başka bir vulnerable thread'e erişim sağlaması** veya bir file descriptor'ın **vulnerable bir child process** tarafından devralınması durumlarında ortaya çıkar. Bu işlevle ilgili bazı fonksiyonlar şunlardır:
+Bu özellik, **yetkisiz dosya erişimi** veya **race condition** gibi belirli güvenlik açıkları sınıflarını önlemek için özellikle kullanışlıdır. Bu açıklar, örneğin bir thread'in bir dosya açıklamasına erişerek **başka bir güvenlik açığı bulunan thread'e erişim sağlaması** veya bir file descriptor'ın **güvenlik açığı bulunan bir child process** tarafından devralınması durumunda ortaya çıkar. Bu işlevle ilişkili bazı fonksiyonlar şunlardır:
 
-- `guarded_open_np`: Guard ile bir FD açar
+- `guarded_open_np`: Bir FD'yi guard ile açar
 - `guarded_close_np`: Kapatır
-- `change_fdguard_np`: Bir descriptor üzerindeki guard flag'lerini değiştirir (guard protection'ı kaldırmak dahil)
+- `change_fdguard_np`: Bir descriptor üzerindeki guard flag'lerini değiştirir (guard korumasını kaldırmak dahil)
 
 ## References
 
 - [1] [POSIX.1-2024 — Base Definitions, Ch. 4 (File Access Permissions, Directory Protection, Pathname Resolution)](https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html)
 - [2] [`chmod(1)` man page](https://keith.github.io/xcode-man-pages/chmod.1.html) (directory search/execute bit, ACL inheritance flags)
 - [3] [`open(2)` man page](https://keith.github.io/xcode-man-pages/open.2.html) (`O_NOFOLLOW`, `O_NOFOLLOW_ANY`, `O_RESOLVE_BENEATH`)
-- [4] [SektionEins - OS X 10.10 DYLD_PRINT_TO_FILE Local Privilege Escalation](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html) (leaked FD without close-on-exec)
+- [4] [SektionEins - OS X 10.10 DYLD_PRINT_TO_FILE Local Privilege Escalation](https://www.sektioneins.de/en/blog/15-07-07-dyld_print_to_file_lpe.html) (close-on-exec olmadan leak edilen FD)
 - [5] [The Eclectic Light Company - Which file systems and cloud services preserve extended attributes?](https://eclecticlight.co/2018/01/12/which-file-systems-and-cloud-services-preserve-extended-attributes/)
 - [6] [Microsoft - Gatekeeper's Achilles heel: unearthing a macOS vulnerability](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
 - [7] [Mickey (Jhftss) - A New Era of macOS Sandbox Escapes](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)
