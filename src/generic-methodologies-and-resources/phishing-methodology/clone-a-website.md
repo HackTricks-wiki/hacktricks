@@ -1,21 +1,26 @@
+# Klonowanie strony internetowej
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Aby przeprowadzić ocenę phishingową, czasami może być przydatne całkowite **sklonowanie strony internetowej**.
 
-Zauważ, że możesz również dodać do sklonowanej strony pewne ładunki, takie jak hak BeEF, aby "kontrolować" kartę użytkownika.
+Podczas oceny phishingowej czasami przydatne może być całkowite **sklonowanie/zrzucenie strony internetowej**.
 
-Istnieją różne narzędzia, które możesz wykorzystać do tego celu:
+Pamiętaj, że do sklonowanej strony możesz również dodać payloady, takie jak BeEF hook, aby „kontrolować” kartę użytkownika.
+
+Do tego celu możesz użyć różnych narzędzi:
 
 ## wget
-```text
-wget -mk -nH
+```bash
+wget --mirror --page-requisites --convert-links --adjust-extension <URL>
+cd <URL>
+python3 -m http.server 8000
 ```
 ## goclone
 ```bash
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
-## Narzędzie inżynierii społecznej
+## Narzędzia inżynierii społecznej
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit
 ```
