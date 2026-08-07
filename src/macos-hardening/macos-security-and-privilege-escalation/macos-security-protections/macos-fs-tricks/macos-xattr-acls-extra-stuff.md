@@ -1,4 +1,4 @@
-# macOS xattr-acls extra stuff
+# Extra stuff sugli xattr e sulle ACL di macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 ```bash

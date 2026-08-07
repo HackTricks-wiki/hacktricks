@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Strumenti di enumerazione automatica per macOS
+### Strumenti di enumerazione automatica di macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Controllo rapido anti-analysis / virtualization
+### Rapido controllo anti-analisi / virtualizzazione
 
-Alcuni stealer per macOS chiamano `system_profiler` per rilevare le VM e **abortiscono con un codice di uscita distinto (ad es., 100)** per evitare la sandbox detonation<sup>[[1]](#references)</sup>:
+Alcuni stealers per macOS chiamano `system_profiler` per rilevare le VM e **terminano con un codice di uscita distinto (ad es., 100)** per evitare la detonazione nella sandbox<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -151,6 +151,6 @@ Senza prompt
 
 ## Riferimenti
 
-- [1] [2025, l'anno dell'Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}
