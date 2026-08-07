@@ -2,22 +2,22 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-अधिकांश CTF image stego इन buckets में से किसी एक तक सीमित होते हैं:
+अधिकांश CTF image stego इन buckets में से किसी एक तक सीमित होता है:
 
 - LSB/bit-planes (PNG/BMP)
 - Metadata/comment payloads
-- PNG chunk की असामान्यताएं / corruption repair
-- JPEG DCT-domain tools (OutGuess, आदि)
+- PNG chunk की असामान्यताएँ / corruption repair
+- JPEG DCT-domain tools (OutGuess आदि)
 - Frame-based (GIF/APNG)
 
-## Quick triage
+## त्वरित triage
 
-गहन content analysis से पहले container-level evidence को प्राथमिकता दें:
+Deep content analysis से पहले container-level evidence को प्राथमिकता दें:
 
 - File को validate करें और structure का निरीक्षण करें: `file`, `magick identify -verbose`, format validators (जैसे, `pngcheck`)।
-- Metadata और visible strings extract करें: `exiftool -a -u -g1`, `strings`।
-- Embedded/appended content की जांच करें: `binwalk` और end-of-file inspection (`tail | xxd`)।
-- Container के आधार पर आगे बढ़ें:
+- Metadata और दिखाई देने वाले strings extract करें: `exiftool -a -u -g1`, `strings`।
+- Embedded/appended content की जाँच करें: `binwalk` और end-of-file inspection (`tail | xxd`)।
+- Container के अनुसार आगे बढ़ें:
 - PNG/BMP: bit-planes/LSB और chunk-level anomalies।
 - JPEG: metadata + DCT-domain tooling (OutGuess/F5-style families)।
 - GIF/APNG: frame extraction, frame differencing, palette tricks।
@@ -26,23 +26,23 @@
 
 ### Technique
 
-PNG/BMP CTFs में लोकप्रिय हैं क्योंकि वे pixels को इस तरह store करते हैं कि **bit-level manipulation** आसान हो जाती है। छिपाने/extract करने का classic mechanism यह है:
+PNG/BMP CTFs में लोकप्रिय हैं क्योंकि वे pixels को इस तरह store करते हैं, जिससे **bit-level manipulation** आसान हो जाता है। सामान्य hide/extract mechanism यह है:
 
 - प्रत्येक pixel channel (R/G/B/A) में कई bits होते हैं।
 - प्रत्येक channel का **least significant bit** (LSB) image में बहुत कम बदलाव करता है।
 - Attackers इन low-order bits में data छिपाते हैं, कभी-कभी stride, permutation या per-channel choice के साथ।
 
-Challenges में अपेक्षा रखें:
+Challenges में अपेक्षित चीज़ें:
 
-- Payload केवल एक channel में हो (जैसे, `R` LSB)।
-- Payload alpha channel में हो।
-- Extraction के बाद payload compressed/encoded हो।
-- Message planes में फैला हो या planes के बीच XOR के माध्यम से छिपाया गया हो।
+- Payload केवल एक channel में होता है (जैसे, `R` LSB)।
+- Payload alpha channel में होता है।
+- Extraction के बाद payload compressed/encoded होता है।
+- Message planes में फैला होता है या planes के बीच XOR के माध्यम से छिपाया जाता है।
 
 अन्य families जिनका आपको सामना हो सकता है (implementation-dependent):
 
-- **LSB matching** (सिर्फ bit flip करने के बजाय target bit से match करने के लिए +/-1 adjustments)
-- **Palette/index-based hiding** (indexed PNG/GIF: raw RGB के बजाय color indices में payload)
+- **LSB matching** (केवल bit flip नहीं, बल्कि target bit से match करने के लिए +/-1 adjustments)
+- **Palette/index-based hiding** (indexed PNG/GIF: payload raw RGB के बजाय color indices में)
 - **Alpha-only payloads** (RGB view में पूरी तरह invisible)
 
 ### Tooling
@@ -62,22 +62,22 @@ Repo: https://github.com/zed-0xff/zsteg
 
 Stegsolve download: https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve
 
-#### FFT-based visibility tricks
+#### FFT-आधारित visibility tricks
 
-FFT LSB extraction नहीं है; इसका उपयोग उन मामलों में होता है जहाँ content को frequency space या subtle patterns में जानबूझकर छिपाया गया हो।
+FFT, LSB extraction नहीं है; यह उन मामलों के लिए है जहाँ content को frequency space या subtle patterns में जानबूझकर छिपाया गया हो।
 
 - EPFL demo: http://bigwww.epfl.ch/demo/ip/demos/FFT/
 - Fourifier: https://www.ejectamenta.com/Fourifier-fullscreen/
 - FFTStegPic: https://github.com/0xcomposure/FFTStegPic
 
-CTF में अक्सर Web-based triage के लिए उपयोग किए जाने वाले tools:
+Web-based triage का उपयोग अक्सर CTFs में किया जाता है:
 
 - Aperi’Solve: https://aperisolve.com/
 - StegOnline: https://stegonline.georgeom.net/
 
-## PNG internals: chunks, corruption, और hidden data
+## PNG internals: chunks, corruption और hidden data
 
-### तकनीक
+### Technique
 
 PNG एक chunked format है। कई challenges में payload pixel values के बजाय container/chunk level पर stored होता है:
 
@@ -99,10 +99,10 @@ pngcheck -v file.png
 क्या देखें:
 
 - अजीब width/height/bit-depth/colour-type combinations
-- CRC/chunk errors (pngcheck आमतौर पर सटीक offset बताता है)
-- `IEND` के बाद अतिरिक्त data के बारे में warnings
+- CRC/chunk errors (`pngcheck` आमतौर पर सटीक offset बताता है)
+- `IEND` के बाद additional data के बारे में warnings
 
-यदि आपको chunks का अधिक गहन view चाहिए:
+यदि आपको अधिक गहरा chunk view चाहिए:
 ```bash
 pngcheck -vp file.png
 exiftool -a -u -g1 file.png
@@ -119,26 +119,26 @@ exiftool -a -u -g1 file.png
 JPEG को raw pixels के रूप में store नहीं किया जाता; इसे DCT domain में compress किया जाता है। इसी कारण JPEG stego tools, PNG LSB tools से अलग होते हैं:
 
 - Metadata/comment payloads file-level होते हैं (high-signal और जल्दी inspect किए जा सकते हैं)
-- DCT-domain stego tools, frequency coefficients में bits embed करते हैं
+- DCT-domain stego tools frequency coefficients में bits embed करते हैं
 
-Operationally, JPEG को इस रूप में देखें:
+Operationally, JPEG को इस तरह समझें:
 
 - Metadata segments का एक container (high-signal, जल्दी inspect किया जा सकता है)
-- एक compressed signal domain (DCT coefficients), जहाँ specialized stego tools operate करते हैं
+- एक compressed signal domain (DCT coefficients), जिसमें specialized stego tools काम करते हैं
 
-### Quick checks
+### त्वरित जाँच
 ```bash
 exiftool file.jpg
 strings -n 6 file.jpg | head
 binwalk file.jpg
 ```
-High-signal locations:
+उच्च-सिग्नल स्थान:
 
 - EXIF/XMP/IPTC metadata
 - JPEG comment segment (`COM`)
 - Application segments (`APP1` for EXIF, `APPn` for vendor data)
 
-### Common tools
+### सामान्य tools
 
 - OutGuess: https://github.com/resurrecting-open-source-projects/outguess
 - OpenStego: https://www.openstego.com/
@@ -159,11 +159,11 @@ ELA अलग-अलग recompression artifacts को highlight करता �
 
 Animated images के लिए मान लें कि message:
 
-- एक single frame में है (आसान), या
+- किसी single frame में है (आसान), या
 - frames में फैला हुआ है (ordering महत्वपूर्ण है), या
 - केवल consecutive frames का diff करने पर दिखाई देता है
 
-### Extract frames
+### Frames extract करें
 ```bash
 ffmpeg -i anim.gif frame_%04d.png
 ```
@@ -171,8 +171,8 @@ ffmpeg -i anim.gif frame_%04d.png
 
 वैकल्पिक tooling:
 
-- `gifsicle --explode anim.gif` (तेज़ frame extraction)
-- प्रति-frame transforms के लिए `imagemagick`/`magick`
+- तेज़ frame extraction के लिए `gifsicle --explode anim.gif`
+- per-frame transforms के लिए `imagemagick`/`magick`
 
 Frame differencing अक्सर निर्णायक होता है:
 ```bash
@@ -180,9 +180,9 @@ magick frame_0001.png frame_0002.png -compose difference -composite diff.png
 ```
 ### APNG pixel-count encoding
 
-- APNG containers का पता लगाएँ: `exiftool -a -G1 file.png | grep -i animation` या `file`।
-- बिना re-timing के frames extract करें: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`।
-- प्रति-frame pixel counts के रूप में encoded payloads recover करें:
+- APNG containers detect करें: `exiftool -a -G1 file.png | grep -i animation` या `file`।
+- Re-timing के बिना frames extract करें: `ffmpeg -i file.png -vsync 0 frames/frame_%03d.png`।
+- Per-frame pixel counts के रूप में encoded payloads recover करें:
 ```python
 from PIL import Image
 import glob
@@ -193,11 +193,11 @@ target = dict(counts).get((255, 0, 255, 255))  # adjust the target color
 out.append(target or 0)
 print(bytes(out).decode('latin1'))
 ```
-Animated challenges प्रत्येक frame में किसी specific color की count के रूप में प्रत्येक byte को encode कर सकते हैं; counts को concatenate करने पर message reconstruct होता है।<sup>[[1]](#references)</sup>
+Animated challenges में प्रत्येक frame में किसी विशिष्ट color की संख्या के रूप में प्रत्येक byte को encode किया जा सकता है; इन counts को जोड़ने पर message पुनर्निर्मित हो जाता है।<sup>[[1]](#references)</sup>
 
 ## Password-protected embedding
 
-यदि आपको संदेह है कि embedding pixel-level manipulation के बजाय किसी passphrase से protected है, तो यह आमतौर पर सबसे तेज़ तरीका है।
+यदि आपको संदेह है कि embedding pixel-level manipulation के बजाय किसी passphrase द्वारा protected है, तो यह आमतौर पर सबसे तेज़ तरीका है।
 
 ### steghide
 
@@ -206,7 +206,7 @@ Animated challenges प्रत्येक frame में किसी specif
 steghide info file
 steghide extract -sf file --passphrase 'password'
 ```
-Repo: https://github.com/StefanoDeVuono/steghide
+रिपॉजिटरी: https://github.com/StefanoDeVuono/steghide
 
 ### StegCracker
 ```bash

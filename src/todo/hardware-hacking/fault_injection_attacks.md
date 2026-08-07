@@ -2,8 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Fault injections attacks में इलेक्ट्रॉनिक सर्किट में बाहरी व्यवधान डालना शामिल है ताकि इसके व्यवहार को प्रभावित किया जा सके, जिसके परिणामस्वरूप जानकारी का खुलासा या सर्किट में कुछ प्रतिबंधों को बायपास किया जा सके। ये हमले इलेक्ट्रॉनिक सर्किट पर हमले के लिए कई संभावनाएँ खोलते हैं। इस हमले को इलेक्ट्रॉनिक सर्किट के ग्लिचिंग के रूप में भी जाना जाता है।
+Fault injections attacks में electronic circuits में बाहरी disturbance शामिल की जाती है ताकि इसके व्यवहार को प्रभावित किया जा सके, जिसके परिणामस्वरूप information disclose हो सकती है या circuit में मौजूद कुछ restrictions को bypass भी किया जा सकता है। यह attack electronic circuits पर हमला करने की कई संभावनाएं खोलता है। इस attack को electronic circuits की glitching भी कहा जाता है।
 
-इलेक्ट्रॉनिक सर्किट में दोष डालने के लिए कई तरीके और माध्यम हैं।
+किसी electronic circuit में fault inject करने के लिए कई methods और mediums उपलब्ध हैं।
 
 {{#include ../../banners/hacktricks-training.md}}

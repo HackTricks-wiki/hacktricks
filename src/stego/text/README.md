@@ -6,24 +6,24 @@
 
 - Unicode homoglyphs
 - Zero-width characters
-- Whitespace patterns (spaces बनाम tabs)
+- Whitespace patterns (spaces vs tabs)
 
 ## Practical path
 
-यदि plain text अप्रत्याशित तरीके से व्यवहार करे, तो codepoints का निरीक्षण करें और सावधानी से normalize करें (evidence नष्ट न करें)।
+यदि plain text अप्रत्याशित रूप से व्यवहार करता है, तो codepoints का निरीक्षण करें और सावधानी से normalize करें (evidence को नष्ट न करें)।
 
 ### Technique
 
 Text stego अक्सर ऐसे characters पर निर्भर करता है जो एक जैसे (या अदृश्य) दिखाई देते हैं:
 
-- Homoglyphs: अलग-अलग Unicode codepoints जो एक जैसे दिखते हैं (Latin `a` बनाम Cyrillic `а`)
+- Homoglyphs: अलग-अलग Unicode codepoints जो एक जैसे दिखाई देते हैं (Latin `a` और Cyrillic `а`)
 - Zero-width characters: joiners, non-joiners, zero-width spaces
-- Whitespace encodings: spaces बनाम tabs, trailing spaces, line-length patterns<sup>[[1]](#references)</sup>
+- Whitespace encodings: spaces और tabs, trailing spaces, line-length patterns<sup>[[1]](#references)</sup>
 
 अतिरिक्त high-signal cases:
 
-- Bidirectional override/control characters (जो text को दृश्य रूप से पुनःक्रमित कर सकते हैं)
-- Variation selectors और combining characters, जिनका उपयोग covert channel के रूप में किया जाता है
+- Bidirectional override/control characters (जो text को दृश्य रूप से पुनर्व्यवस्थित कर सकते हैं)
+- Variation selectors और combining characters का covert channel के रूप में उपयोग
 
 ### Decode helpers
 
@@ -41,13 +41,13 @@ PY
 ```
 ## CSS `unicode-range` चैनल
 
-`@font-face` rules `unicode-range: U+..` entries में bytes encode कर सकते हैं। Codepoints extract करें, hex को concatenate करें और decode करें:
+`@font-face` rules `unicode-range: U+..` प्रविष्टियों में bytes encode कर सकते हैं। codepoints निकालें, hex को concatenate करें और decode करें:
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-यदि ranges में प्रति declaration कई bytes हों, तो पहले commas पर split करें और normalize करें (`tr ',+' '\n'`)। Formatting असंगत होने पर Python bytes को parse और emit करना आसान बनाता है।
+यदि ranges में प्रत्येक declaration में multiple bytes हों, तो पहले commas पर split करें और normalize करें (`tr ',+' '\n'`)। Formatting inconsistent होने पर Python bytes को parse और emit करना आसान बनाता है।<sup>[[1]](#references)</sup>
 
-## References
+## संदर्भ
 
 - [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 

@@ -13,10 +13,10 @@
 
 विशेषized tooling से पहले:
 
-- codec/container विवरण और anomalies की पुष्टि करें:
+- codec/container details और anomalies की पुष्टि करें:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- यदि audio में noise-जैसा content या tonal structure हो, तो शुरुआती चरण में spectrogram का निरीक्षण करें।
+- यदि audio में noise-like content या tonal structure है, तो जल्दी spectrogram का निरीक्षण करें।
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
@@ -24,7 +24,7 @@ ffmpeg -v info -i stego.mp3 -f null -
 
 ### Technique
 
-Spectrogram stego समय/frequency पर energy को इस तरह shape करता है कि यह केवल time-frequency plot में दिखाई दे (अक्सर inaudible होता है या noise के रूप में perceived होता है)।
+Spectrogram stego समय/फ्रीक्वेंसी पर energy को इस तरह shape करता है कि यह केवल time-frequency plot में दिखाई दे (अक्सर सुनाई नहीं देता या noise जैसा महसूस होता है)।
 
 ### Sonic Visualiser
 
@@ -41,7 +41,7 @@ sox input.wav -n spectrogram -o spectrogram.png
 ```
 ## FSK / modem decoding
 
-Frequency-shift keyed ऑडियो अक्सर spectrogram में alternating single tones जैसा दिखता है।<sup>[[1]](#references)</sup> एक बार आपके पास rough center/shift और baud estimate हो, तो `minimodem` के साथ brute force करें:
+Frequency-shift keyed audio अक्सर spectrogram में बारी-बारी से आने वाले single tones जैसा दिखाई देता है। एक अनुमानित center/shift और baud estimate प्राप्त हो जाने पर `minimodem` के साथ brute force करें:<sup>[[1]](#references)</sup>
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,19 +52,19 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` mark/space tones को अपने-आप gain और detect करता है; यदि output garbled हो, तो `--rx-invert` या `--samplerate` समायोजित करें।
+`minimodem` mark/space tones को स्वतः gain करता है और autodetect करता है; यदि output garbled हो, तो `--rx-invert` या `--samplerate` समायोजित करें।
 
 ## WAV LSB
 
 ### Technique
 
-Uncompressed PCM (WAV) में प्रत्येक sample एक integer होता है। Low bits को बदलने से waveform में बहुत मामूली परिवर्तन होता है, इसलिए attackers छिपा सकते हैं:
+Uncompressed PCM (WAV) में प्रत्येक sample एक integer होता है। Low bits को modify करने से waveform में बहुत थोड़ा बदलाव आता है, इसलिए attackers छिपा सकते हैं:
 
 - प्रति sample 1 bit (या अधिक)
-- Channels में interleaved रूप से
-- किसी stride/permutation के साथ
+- Channels के बीच interleaved
+- एक stride/permutation के साथ
 
-Audio-hiding की अन्य families जिनका आपको सामना हो सकता है:
+अन्य audio-hiding families जिनका आपको सामना हो सकता है:
 
 - Phase coding
 - Echo hiding
@@ -73,7 +73,7 @@ Audio-hiding की अन्य families जिनका आपको साम
 
 ### WavSteg
 
-यहाँ से: https://github.com/ragibson/Steganography#WavSteg
+स्रोत: https://github.com/ragibson/Steganography#WavSteg<sup>[[2]](#references)</sup>
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
@@ -82,19 +82,20 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 - [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
 
-## DTMF / डायल टोन
+## DTMF / dial tones
 
-### तकनीक
+### Technique
 
-DTMF वर्णों को स्थिर frequencies के युग्मों के रूप में encode करता है (telephone keypad)। यदि audio keypad tones या नियमित dual-frequency beeps जैसी लगे, तो DTMF decoding का प्रारंभ में ही परीक्षण करें।
+DTMF characters को fixed frequencies के pairs (telephone keypad) के रूप में encode करता है। यदि audio keypad tones या नियमित dual-frequency beeps जैसी लगती है, तो शुरुआत में ही DTMF decoding को test करें।
 
 Online decoders:
 
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
 
-## संदर्भ
+## References
 
 - [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [2] [ragibson/Steganography](https://github.com/ragibson/Steganography#WavSteg)
 
 {{#include ../../banners/hacktricks-training.md}}

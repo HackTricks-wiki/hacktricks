@@ -4,13 +4,13 @@
 
 ## Basic Payloads
 
-- **Simple List:** बस एक सूची जिसमें प्रत्येक पंक्ति में एक प्रविष्टि होती है
-- **Runtime File:** एक सूची जो रनटाइम में पढ़ी जाती है (मेमोरी में लोड नहीं होती)। बड़ी सूचियों का समर्थन करने के लिए।
-- **Case Modification:** स्ट्रिंग्स की एक सूची में कुछ परिवर्तन लागू करें (कोई परिवर्तन नहीं, लोअर में, अपर में, प्रॉपर नाम - पहले अक्षर को बड़ा और बाकी को लोअर में-, प्रॉपर नाम - पहले अक्षर को बड़ा और बाकी वही रहे-)।
-- **Numbers:** X से Y तक Z स्टेप का उपयोग करके या यादृच्छिक रूप से नंबर उत्पन्न करें।
-- **Brute Forcer:** कैरेक्टर सेट, न्यूनतम और अधिकतम लंबाई।
+- **Simple List:** हर पंक्ति में एक entry वाली list
+- **Runtime File:** Runtime में पढ़ी जाने वाली list (memory में load नहीं होती)। बड़ी lists को support करने के लिए।
+- **Case Modification:** strings की list पर कुछ changes लागू करें (No change, to lower, to UPPER, to Proper name - First capitalized and the rest to lower-, to Proper Name -First capitalized an the rest remains the same-.
+- **Numbers:** Z step या randomly का उपयोग करके X से Y तक numbers generate करें।
+- **Brute Forcer:** Character set, min & max length।
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : कमांड निष्पादित करने और burpcollab के माध्यम से DNS अनुरोधों के माध्यम से आउटपुट प्राप्त करने के लिए पेलोड।
+[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : commands execute करने और output को burpcollab पर DNS requests के माध्यम से grab करने के लिए Payload।
 
 {{#ref}}
 https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e

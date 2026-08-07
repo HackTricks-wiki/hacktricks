@@ -1,45 +1,45 @@
 # Cookies Policy
 
-Last updated: 02/04/2023
+अंतिम अपडेट: 02/04/2023
 
-### Introduction
+### परिचय
 
-यह Cookies Policy HackTricks टीम ("HackTricks", "हम", "हमें" या "हमारा") द्वारा स्वामित्व और संचालित निम्नलिखित वेबसाइटों पर लागू होती है:
+यह Cookies Policy HackTricks team ("HackTricks", "हम", "हमें" या "हमारा") द्वारा owned और operated निम्नलिखित websites पर लागू होती है:
 
 * hacktricks.wiki
 * [www.hacktricks.wiki](https://www.hacktricks.wiki/)
 * book.hacktricks.wiki
 * cloud.hacktricks.wiki
 
-इनमें से किसी भी वेबसाइट का उपयोग करके, आप इस Cookies Policy के अनुसार कुकीज़ के उपयोग के लिए सहमति देते हैं। यदि आप सहमत नहीं हैं, तो कृपया अपने ब्राउज़र सेटिंग्स में कुकीज़ को बंद करें या हमारी वेबसाइटों का उपयोग करने से बचें।
+इनमें से किसी भी website का उपयोग करके, आप इस Cookies Policy के अनुसार cookies के उपयोग के लिए सहमत होते हैं। यदि आप सहमत नहीं हैं, तो कृपया अपने browser settings में cookies disable करें या हमारी websites का उपयोग न करें।
 
-### What are cookies?
+### Cookies क्या हैं?
 
-कुकीज़ छोटे टेक्स्ट फ़ाइलें हैं जो आपकी कंप्यूटर या मोबाइल डिवाइस पर तब स्टोर होती हैं जब आप किसी वेबसाइट पर जाते हैं। इन्हें वेबसाइटों को कार्य करने, उनकी कार्यक्षमता में सुधार करने और एक अधिक व्यक्तिगत उपयोगकर्ता अनुभव प्रदान करने के लिए व्यापक रूप से उपयोग किया जाता है।
+Cookies छोटी text files होती हैं, जो किसी website पर जाने के दौरान आपके computer या mobile device पर store होती हैं। इनका व्यापक रूप से websites को कार्यशील बनाने, उनकी functionality में सुधार करने और अधिक personalized user experience प्रदान करने के लिए उपयोग किया जाता है।
 
-### How we use cookies
+### हम cookies का उपयोग कैसे करते हैं
 
-हम अपनी वेबसाइटों पर निम्नलिखित उद्देश्यों के लिए कुकीज़ का उपयोग करते हैं:
+हम अपनी websites पर cookies का उपयोग निम्नलिखित उद्देश्यों के लिए करते हैं:
 
-1. आवश्यक कुकीज़: ये कुकीज़ हमारी वेबसाइटों की मूल कार्यक्षमता के लिए आवश्यक हैं, जैसे उपयोगकर्ता प्रमाणीकरण सक्षम करना, सुरक्षा बनाए रखना, और आपकी प्राथमिकताओं को याद रखना।
-2. प्रदर्शन कुकीज़: ये कुकीज़ हमें समझने में मदद करती हैं कि आगंतुक हमारी वेबसाइटों के साथ कैसे इंटरैक्ट करते हैं, जानकारी को गुमनाम रूप से एकत्रित और रिपोर्ट करके। इससे हमें अपनी वेबसाइट के प्रदर्शन और उपयोगकर्ता अनुभव में सुधार करने की अनुमति मिलती है।
-3. कार्यक्षमता कुकीज़: ये कुकीज़ हमारी वेबसाइटों को आपके द्वारा किए गए विकल्पों को याद रखने में सक्षम बनाती हैं, जैसे आपकी भाषा या क्षेत्र, ताकि एक अधिक व्यक्तिगत अनुभव प्रदान किया जा सके।
-4. लक्षित/विज्ञापन कुकीज़: ये कुकीज़ आपके रुचियों, ब्राउज़िंग इतिहास, और हमारी वेबसाइटों के साथ इंटरैक्शन के आधार पर प्रासंगिक विज्ञापन और मार्केटिंग संचार प्रदान करने के लिए उपयोग की जाती हैं।
+1. Essential cookies: ये cookies हमारी websites की basic functionality के लिए आवश्यक होती हैं, जैसे user authentication enable करना, security बनाए रखना और आपकी preferences याद रखना।
+2. Performance cookies: ये cookies हमें यह समझने में सहायता करती हैं कि visitors हमारी websites के साथ कैसे interact करते हैं, इसके लिए information को anonymously collect और report किया जाता है। इससे हम अपनी website performance और user experience में सुधार कर सकते हैं।
+3. Functionality cookies: ये cookies हमारी websites को आपके द्वारा किए गए choices, जैसे आपकी language या region, याद रखने में enable करती हैं, ताकि अधिक personalized experience प्रदान किया जा सके।
+4. Targeting/advertising cookies: इन cookies का उपयोग आपकी interests, browsing history और हमारी websites के साथ interactions के आधार पर relevant ads और marketing communications प्रदान करने के लिए किया जाता है।
 
-इसके अलावा, पृष्ठ book.hacktricks.wiki और cloud.hacktricks.wiki Gitbook में होस्ट किए गए हैं। आप Gitbooks कुकीज़ के बारे में अधिक जानकारी [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy) पर पा सकते हैं।
+इसके अलावा, book.hacktricks.wiki और cloud.hacktricks.wiki pages Gitbook पर hosted हैं। आप Gitbook cookies के बारे में अधिक information [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy) पर प्राप्त कर सकते हैं।
 
 ### Third-party cookies
 
-हमारी अपनी कुकीज़ के अलावा, हम वेबसाइट उपयोग सांख्यिकी की रिपोर्ट करने, विज्ञापन देने, और सोशल मीडिया शेयरिंग बटन सक्षम करने के लिए तीसरे पक्ष की कुकीज़ का भी उपयोग कर सकते हैं। तीसरे पक्ष की कुकीज़ का उपयोग उनके संबंधित गोपनीयता नीतियों के अधीन है।
+हमारी अपनी cookies के अतिरिक्त, हम website usage statistics report करने, advertisements deliver करने और social media sharing buttons enable करने के लिए third-party cookies का भी उपयोग कर सकते हैं। Third-party cookies का उपयोग उनकी संबंधित privacy policies के अधीन होता है।
 
-Managing cookies
+Cookies manage करना
 
-अधिकांश वेब ब्राउज़र आपको अपनी सेटिंग्स के माध्यम से कुकीज़ को प्रबंधित करने की अनुमति देते हैं। आप अपने डिवाइस पर कुकीज़ के उपयोग को ब्लॉक, हटाने, या सीमित करने का विकल्प चुन सकते हैं। हालाँकि, कृपया ध्यान दें कि कुकीज़ को बंद करने से हमारी वेबसाइटों की कार्यक्षमता और प्रदर्शन पर प्रभाव पड़ सकता है।
+अधिकांश web browsers आपको अपनी settings के माध्यम से cookies manage करने की अनुमति देते हैं। आप अपने device पर cookies को block, delete या उनके उपयोग को limit कर सकते हैं। हालांकि, कृपया ध्यान दें कि cookies disable करने से हमारी websites की functionality और performance प्रभावित हो सकती है।
 
-Changes to this Cookies Policy
+इस Cookies Policy में परिवर्तन
 
-हम समय-समय पर इस Cookies Policy को अपडेट कर सकते हैं ताकि हमारे प्रथाओं या संबंधित कानूनों में बदलाव को दर्शाया जा सके। हम आपको इस पृष्ठ की समय-समय पर समीक्षा करने के लिए प्रोत्साहित करते हैं ताकि हमारी कुकी प्रथाओं पर नवीनतम जानकारी प्राप्त की जा सके।
+हम अपनी practices या relevant laws में हुए परिवर्तनों को दर्शाने के लिए समय-समय पर इस Cookies Policy को update कर सकते हैं। हम आपको अपनी cookie practices की latest information के लिए समय-समय पर इस page की review करने के लिए प्रोत्साहित करते हैं।
 
-### Contact us
+### हमसे संपर्क करें
 
-यदि आपके पास इस Cookies Policy के बारे में कोई प्रश्न या चिंता है, तो कृपया हमसे [support@hacktricks.xyz](mailto:support@hacktricks.xyz) पर संपर्क करें।
+यदि इस Cookies Policy के बारे में आपके कोई questions या concerns हैं, तो कृपया [support@hacktricks.xyz](mailto:support@hacktricks.xyz) पर हमसे contact करें।
