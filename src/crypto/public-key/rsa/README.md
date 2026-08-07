@@ -1,85 +1,85 @@
-# RSA Attacks
+# RSA-aanvalle
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Fast triage
+## Vinnige triage
 
 Versamel:
 
-- `n`, `e`, `c` (en enige addisionele ciphertexts)
-- Enige verwantskappe tussen messages (selfde plaintext? gedeelde modulus? structured plaintext?)
-- Enige leaks (gedeeltelike `p/q`, bits van `d`, `dp/dq`, bekende padding)
+- `n`, `e`, `c` (en enige bykomende ciphertexts)
+- Enige verhoudings tussen boodskappe (dieselfde plaintext? gedeelde modulus? gestruktureerde plaintext?)
+- Enige leaks (gedeeltelike `p/q`, bisse van `d`, `dp/dq`, bekende padding)
 
 Probeer dan:
 
-- Factorization check (Factordb / `sage: factor(n)` vir klein-ish)
-- Low exponent patterns (`e=3`, broadcast)
-- Common modulus / repeated primes
-- Lattice methods (Coppersmith/LLL) when something is almost known
+- Faktoriseringstoets (Factordb / `sage: factor(n)` vir redelike klein waardes)
+- Lae eksponent-patrone (`e=3`, broadcast)
+- Common modulus / herhaalde primes
+- Lattice-metodes (Coppersmith/LLL) wanneer iets byna bekend is
 
-## Common RSA attacks
+## Algemene RSA-aanvalle
 
 ### Common modulus
 
-As twee ciphertexts `c1, c2` dieselfde message onder dieselfde modulus `n` en met verskillende exponents `e1, e2` en `gcd(e1,e2)=1` encrypt, kan jy `m` recover met die extended Euclidean algorithm:
+As twee ciphertexts `c1, c2` dieselfde **boodskap** onder dieselfde **modulus** `n`, maar met verskillende eksponente `e1, e2` (en `gcd(e1,e2)=1`), enkripteer, kan jy `m` met die uitgebreide Euklidiese algoritme herwin:
 
-`m = c1^a * c2^b mod n` where `a*e1 + b*e2 = 1`.
+`m = c1^a * c2^b mod n` waar `a*e1 + b*e2 = 1`.
 
 Voorbeeld-oorsig:
 
-1. Compute `(a, b) = xgcd(e1, e2)` so `a*e1 + b*e2 = 1`
-2. If `a < 0`, interpreteer `c1^a` as `inv(c1)^{-a} mod n` (selfde vir `b`)
-3. Vermenigvuldig en reduce modulo `n`
+1. Bereken `(a, b) = xgcd(e1, e2)` sodat `a*e1 + b*e2 = 1`
+2. As `a < 0`, interpreteer `c1^a` as `inv(c1)^{-a} mod n` (dieselfde vir `b`)
+3. Vermenigvuldig en verminder modulo `n`
 
-### Shared primes across moduli
+### Gedeelde primes oor moduli
 
-As jy multiple RSA moduli van dieselfde challenge het, check of hulle 'n prime deel:
+As jy veelvuldige RSA-moduli uit dieselfde uitdaging het, kyk of hulle 'n prime deel:
 
-- `gcd(n1, n2) != 1` implies 'n catastrophic key-generation failure.
+- `gcd(n1, n2) != 1` impliseer 'n katastrofiese sleutelgenereringsfout.
 
-Dit kom gereeld voor in CTFs as "we generated many keys quickly" of "bad randomness".
+Dit kom gereeld in CTFs voor as "ons het baie sleutels vinnig gegenereer" of "slegte randomness".
 
-### Sparse / short-sleeve moduli
+### Sparse / short-sleeve-moduli
 
-Sommige broken big-integer generators leak struktuur direk in die public modulus: elke limb bevat slegs 'n klein random subfield en die res van die bits is `0`. In practice verskyn dit as **regularly spaced zero blocks** oor `n`, dikwels aligned tot 32-bit of 128-bit limbs.
+Sommige gebroke big-integer generators lek struktuur direk in die publieke modulus: elke limb bevat slegs 'n klein random subveld en die res van die bisse is `0`. In die praktyk verskyn dit as **gereeld gespasieerde zero blocks** oor `n`, dikwels in lyn met 32-bis- of 128-bis-limbs.<sup>[[1]](#references)</sup>
 
-Quick checks:
+Vinnige toetse:
 
-- Dump `n` in hex en kyk vir repeated zero windows by 'n fixed stride.
-- Re-slice `n` as limbs (`2^32`, `2^64`, `2^128`) en inspecteer of elke limb unusually small is.
-- Audit public SSH/TLS keys met tooling soos **badkeys** wanneer jy weak host-key generation vermoed.
+- Dump `n` in hex en soek na herhaalde zero windows met 'n vaste stride.
+- Sny `n` weer in limbs (`2^32`, `2^64`, `2^128`) en inspekteer of elke limb buitengewoon klein is.
+- Oudit publieke SSH/TLS-sleutels met tooling soos **badkeys** wanneer jy swak host-key generation vermoed.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Dit is ernstiger as 'n statistical bias: as albei private factors `p` en `q` short-sleeved is, kan die modulus **easy to factor** word.
+Dit is ernstiger as 'n statistiese bias: as beide private faktore `p` en `q` short-sleeved is, kan die modulus **maklik wees om te factor**.<sup>[[1]](#references)</sup>
 
-### Polynomial factorization of structured RSA keys
+### Polynomial factorization van gestruktureerde RSA-sleutels
 
-Vir 'n suspected limb width `w`, skryf die modulus in base `B = 2^w`:
+Vir 'n vermoedelike limb width `w`, skryf die modulus in basis `B = 2^w`:
 
 - `n = Σ_i n_i B^i`
 - `f_n(x) = Σ_i n_i x^i`
 
-Omdat evaluation multiplicative is, `f_a(B) * f_c(B) = (f_a * f_c)(B)`. As die factors ook sparse limb coefficients het, dan:
+Omdat evaluering multiplicatief is, is `f_a(B) * f_c(B) = (f_a * f_c)(B)`. As die faktore ook sparse limb coefficients het, dan:
 
 - `n = p*q`
 - `f_n(x) = f_p(x) * f_q(x)`
 
-Attack outline:
+Aanvalsoorsig:
 
 1. Raai die limb width `w`.
-2. Convert die public modulus `n` na `f_n(x)` using base `2^w`.
-3. Factor `f_n(x)` oor die integers.
-4. Evaluate candidate factors terug by `B = 2^w`.
-5. Verify watter candidates vermenigvuldig tot `n`.
+2. Skakel die publieke modulus `n` om na `f_n(x)` met basis `2^w`.
+3. Factor `f_n(x)` oor die heelgetalle.
+4. Evalueer kandidaatfaktore weer by `B = 2^w`.
+5. Verifieer watter kandidate tot `n` vermenigvuldig.
 
-Dit **breek nie normal RSA** nie. Dit werk slegs wanneer die prime factors self baie small, highly structured limb coefficients het.
+Hierdie **breek nie normale RSA nie**. Dit werk slegs wanneer die prime-faktore self baie klein, hoogs gestruktureerde limb coefficients het.<sup>[[1]](#references)</sup>
 
 ### Shifted limb leakage
 
-Die sparse bytes is nie altyd aligned by die low end van elke limb nie. As direkte base-`2^w` conversion groot coefficients produseer, search vir shifts `i,j` sodat `2^i p` en `2^j q` sparse word in daardie limb basis. Die product polynomial kan steeds uit die public modulus derived word, gefactoriseer word, en recombined word in die original integer factors.
+Die sparse bytes is nie altyd aan die lae kant van elke limb belyn nie. As direkte basis-`2^w`-omskakeling groot coefficients oplewer, soek na shifts `i,j` sodat `2^i p` en `2^j q` sparse in daardie limb-basis word. Die produkpolinoom kan steeds uit die publieke modulus afgelei, gefactor en weer saamgestel word in die oorspronklike heelgetalfaktore.<sup>[[1]](#references)</sup>
 
 ### Implementation smell: byte-to-limb RNG bug
 
-'n Dangerous pattern is om die aantal **32-bit limbs** te bereken, slegs soveel **bytes** te allokeer, en hulle in die limb array te kopieer:
+'n Gevaarlike patroon is om die aantal **32-bit limbs** te bereken, slegs soveel **bytes** toe te ken, en hulle na die limb-array te kopieer:
 ```csharp
 int numLimbs = bits / 32;
 byte[] array = new byte[numLimbs];
@@ -87,62 +87,62 @@ rngProvider.GetNonZeroBytes(array);
 Array.Copy(array, 0, bignumLimbs, 0, numLimbs);
 bignumLimbs[numLimbs - 1] |= 0x80000000;
 ```
-Dit gee elke 32-bis limb slegs **8 bis van entropie** plus ’n geforseerde boonste bit in die laaste limb. Die resulterende RSA-prime kan dikwels net aan die publieke sleutel herken en gefaktoriseer word.
+Dit gee elke 32-bit limb slegs **8 bits of entropy**, plus ’n geforseerde boonste bit in die laaste limb. Die gevolglike RSA-priemgetalle kan dikwels uit die publieke sleutel alleen herken en gefaktoriseer word.<sup>[[1]](#references)</sup>
 
-### Related DSA failure mode
+### Verwante DSA-failure mode
 
-As dieselfde stukkende big-integer-routine hergebruik word vir DSA private exponent generation, kan die publieke sleutel `y = g^x` ’n **dramaties verminderde en gestruktureerde** search space vir `x` verraai. Sodra die limb-patroon bekend is, kan discrete-log attacks soos **baby-step giant-step** prakties word teen die publieke parameters.
+As dieselfde gebroke big-integer-roetine hergebruik word vir DSA-private eksponentgenerering, kan die publieke sleutel `y = g^x` ’n **dramaties verkleinde en gestruktureerde** soekruimte vir `x` uitlek. Sodra die limb-patroon bekend is, kan discrete-log-aanvalle soos **baby-step giant-step** prakties word teen die publieke parameters.<sup>[[1]](#references)</sup>
 
 ### Håstad broadcast / low exponent
 
-As dieselfde plaintext na verskeie ontvangers gestuur word met klein `e` (dikwels `e=3`) en geen behoorlike padding nie, kan jy `m` via CRT en integer root herstel.
+As dieselfde plaintext na verskeie ontvangers gestuur word met ’n klein `e` (dikwels `e=3`) en sonder behoorlike padding, kan jy `m` via CRT en ’n heelgetalwortel herwin.
 
-Technical condition:
+Tegniese voorwaarde:
 
-As jy `e` ciphertexts van dieselfde boodskap onder paarwyse-koprime moduli `n_i` het:
+As jy `e` ciphertexts van dieselfde boodskap onder paargewys onderling priem moduli `n_i` het:
 
-- Gebruik CRT om `M = m^e` oor die produk `N = Π n_i` te herstel
-- As `m^e < N`, dan is `M` die ware integer power, en `m = integer_root(M, e)`
+- Gebruik CRT om `M = m^e` oor die produk `N = Π n_i` te herwin
+- As `m^e < N`, dan is `M` die ware heelgetalverheffing, en `m = integer_root(M, e)`
 
-### Wiener attack: small private exponent
+### Wiener attack: klein private eksponent
 
-As `d` te klein is, kan continued fractions dit uit `e/n` herstel.
+As `d` te klein is, kan continued fractions dit uit `e/n` herwin.
 
-### Textbook RSA pitfalls
+### Textbook RSA-slaggate
 
-As jy sien:
+As jy die volgende sien:
 
-- No OAEP/PSS, raw modular exponentiation
-- Deterministic encryption
+- Geen OAEP/PSS nie, raw modular exponentiation
+- Deterministiese encryption
 
-dan word algebraic attacks en oracle abuse baie meer waarskynlik.
+dan word algebraïese aanvalle en oracle abuse baie waarskynliker.
 
 ### Tools
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
 - SageMath (CRT, roots, CF): https://www.sagemath.org/
 
-## Related-message patterns
+## Verwante-message-patrone
 
-As jy twee ciphertexts onder dieselfde modulus sien met boodskappe wat algebraïes verwant is (bv. `m2 = a*m1 + b`), soek vir "related-message" attacks soos Franklin–Reiter. Dit vereis tipies:
+As jy twee ciphertexts onder dieselfde modulus sien met boodskappe wat algebraïes verwant is (bv. `m2 = a*m1 + b`), soek na "related-message"-aanvalle soos Franklin–Reiter. Dit vereis tipies:
 
-- same modulus `n`
-- same exponent `e`
-- known relationship between plaintexts
+- dieselfde modulus `n`
+- dieselfde eksponent `e`
+- ’n bekende verhouding tussen plaintexts
 
-In practice word dit dikwels met Sage opgelos deur polinome modulo `n` op te stel en ’n GCD te bereken.
+In die praktyk word dit dikwels met Sage opgelos deur polinome modulo `n` op te stel en ’n GCD te bereken.
 
 ## Lattices / Coppersmith
 
-Gebruik dit wanneer jy partial bits, structured plaintext, of close relations het wat die onbekende klein maak.
+Gebruik dit wanneer jy gedeeltelike bits, gestruktureerde plaintext of nabye verhoudings het wat die onbekende klein maak.
 
-Lattice methods (LLL/Coppersmith) verskyn wanneer jy partial information het:
+Lattice-metodes (LLL/Coppersmith) verskyn wanneer jy gedeeltelike inligting het:
 
-- Partially known plaintext (structured message with unknown tail)
-- Partially known `p`/`q` (high bits leaked)
-- Small unknown differences between related values
+- Gedeeltelik bekende plaintext (gestruktureerde boodskap met ’n onbekende stert)
+- Gedeeltelik bekende `p`/`q` (boonste bits geleak)
+- Klein onbekende verskille tussen verwante waardes
 
-### What to recognize
+### Wat om te herken
 
 Tipiese leidrade in challenges:
 
@@ -152,17 +152,17 @@ Tipiese leidrade in challenges:
 
 ### Tooling
 
-In practice sal jy Sage gebruik vir LLL en ’n bekende template vir die spesifieke instance.
+In die praktyk sal jy Sage vir LLL en ’n bekende template vir die spesifieke geval gebruik.
 
 Goeie beginpunte:
 
 - Sage CTF crypto templates: https://github.com/defund/coppersmith
-- A survey-style reference: https://martinralbrecht.wordpress.com/2013/05/06/coppersmiths-method/
+- ’n Oorsigstyl-verwysing: https://martinralbrecht.wordpress.com/2013/05/06/coppersmiths-method/
 
-## References
+## Verwysings
 
-- [Trail of Bits - Factoring "short-sleeve" RSA keys with polynomials](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
-- [badkeys](https://badkeys.info/)
-- [badkeys standalone tool](https://github.com/badkeys/badkeys)
+- [1] [Trail of Bits - Factoring "short-sleeve" RSA keys with polynomials](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
+- [2] [badkeys](https://badkeys.info/)
+- [3] [badkeys standalone tool](https://github.com/badkeys/badkeys)
 
 {{#include ../../../banners/hacktricks-training.md}}

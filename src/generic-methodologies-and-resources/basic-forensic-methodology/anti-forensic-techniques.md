@@ -4,72 +4,72 @@
 
 ## Timestamps
 
-'n Aanvaller mag belangstel in **die verandering van die tydstempels van lêers** om nie opgespoor te word nie.\
-Dit is moontlik om die tydstempels binne die MFT in die eienskappe `$STANDARD_INFORMATION` \_\_ en \_\_ `$FILE_NAME` te vind.
+'n Aanvaller kan belangstel om **die timestamps van lêers te verander** om te voorkom dat dit opgespoor word.\
+Dit is moontlik om die timestamps binne die MFT in die attribute `$STANDARD_INFORMATION` \_\_ en \_\_ `$FILE_NAME` te vind.
 
-Albei eienskappe het 4 tydstempels: **Wysiging**, **toegang**, **skepping**, en **MFT registrasie wysiging** (MACE of MACB).
+Albei attribute het 4 timestamps: **Modification**, **access**, **creation**, en **MFT registry modification** (MACE of MACB).
 
-**Windows verkenner** en ander gereedskap wys die inligting van **`$STANDARD_INFORMATION`**.
+**Windows explorer** en ander tools wys die information vanaf **`$STANDARD_INFORMATION`**.
 
 ### TimeStomp - Anti-forensic Tool
 
-Hierdie gereedskap **wysig** die tydstempel inligting binne **`$STANDARD_INFORMATION`** **maar** **nie** die inligting binne **`$FILE_NAME`** nie. Daarom is dit moontlik om **verdagte** **aktiwiteit** te **identifiseer**.
+Hierdie tool **verander** die timestamp-information binne **`$STANDARD_INFORMATION`**, maar **nie** die information binne **`$FILE_NAME`** nie. Daarom is dit moontlik om **suspicious** **activity** te **identifiseer**.
 
 ### Usnjrnl
 
-Die **USN Journal** (Update Sequence Number Journal) is 'n kenmerk van die NTFS (Windows NT lêerstelsel) wat volume veranderinge opneem. Die [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) gereedskap maak dit moontlik om hierdie veranderinge te ondersoek.
+Die **USN Journal** (Update Sequence Number Journal) is 'n feature van NTFS (Windows NT file system) wat rekord hou van volume-veranderinge. Die [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv)-tool laat die ondersoek van hierdie veranderinge toe.
 
-![](<../../images/image (801).png>)
+![TimeStomp - Anti-forensic Tool - Usnjrnl: The USN Journal (Update Sequence Number Journal) is a feature of the NTFS (Windows NT file system) that keeps track of volume changes. The...](<../../images/image (801).png>)
 
-Die vorige beeld is die **uitset** wat deur die **gereedskap** gewys word waar dit waargeneem kan word dat sommige **veranderinge gemaak is** aan die lêer.
+Die vorige image is die **output** wat deur die **tool** gewys word, waar gesien kan word dat sommige **veranderinge aangebring is** aan die file.
 
 ### $LogFile
 
-**Alle metadata veranderinge aan 'n lêerstelsel word gelog** in 'n proses bekend as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Die gelogde metadata word in 'n lêer genaamd `**$LogFile**` gehou, geleë in die wortelgids van 'n NTFS lêerstelsel. Gereedskap soos [LogFileParser](https://github.com/jschicht/LogFileParser) kan gebruik word om hierdie lêer te ontleed en veranderinge te identifiseer.
+**Alle metadata-veranderinge aan 'n file system word aangeteken** in 'n proses bekend as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Die aangetekende metadata word gehou in 'n file genaamd `**$LogFile**`, geleë in die root directory van 'n NTFS file system. Tools soos [LogFileParser](https://github.com/jschicht/LogFileParser) kan gebruik word om hierdie file te parse en veranderinge te identifiseer.
 
-![](<../../images/image (137).png>)
+![Usnjrnl - $LogFile: All metadata changes to a file system are logged in a process known as write-ahead logging. The logged metadata is kept in a file named $LogFile , located in the root...](<../../images/image (137).png>)
 
-Weer eens, in die uitset van die gereedskap is dit moontlik om te sien dat **sommige veranderinge gemaak is**.
+Weereens is dit in die output van die tool moontlik om te sien dat **sommige veranderinge aangebring is**.
 
-Met dieselfde gereedskap is dit moontlik om te identifiseer **tot watter tyd die tydstempels gewysig is**:
+Deur dieselfde tool te gebruik, is dit moontlik om te identifiseer **na watter tyd die timestamps verander is**:
 
-![](<../../images/image (1089).png>)
+![Usnjrnl - $LogFile: Using the same tool it's possible to identify to which time the timestamps were modified](<../../images/image (1089).png>)
 
-- CTIME: Lêer se skeppingstyd
-- ATIME: Lêer se wysigingstyd
-- MTIME: Lêer se MFT registrasie wysiging
-- RTIME: Lêer se toegangstyd
+- CTIME: File se creation time
+- ATIME: File se modification time
+- MTIME: File se MFT registry modification
+- RTIME: File se access time
 
-### `$STANDARD_INFORMATION` en `$FILE_NAME` vergelyking
+### `$STANDARD_INFORMATION` and `$FILE_NAME` comparison
 
-'n Ander manier om verdagte gewysigde lêers te identifiseer, sou wees om die tyd op albei eienskappe te vergelyk op soek na **ongelykhede**.
+'n Ander manier om suspicious modified files te identifiseer, is om die tyd op albei attribute te vergelyk en na **mismatches** te soek.
 
 ### Nanoseconds
 
-**NTFS** tydstempels het 'n **presisie** van **100 nanosekondes**. Dan, om lêers met tydstempels soos 2010-10-10 10:10:**00.000:0000 te vind, is baie verdag**.
+**NTFS** timestamps het 'n **precision** van **100 nanoseconds**. Daarom is dit baie suspicious om files met timestamps soos 2010-10-10 10:10:**00.000:0000 te vind**.
 
 ### SetMace - Anti-forensic Tool
 
-Hierdie gereedskap kan albei eienskappe `$STARNDAR_INFORMATION` en `$FILE_NAME` wysig. egter, vanaf Windows Vista, is dit nodig vir 'n lewende OS om hierdie inligting te wysig.
+Hierdie tool kan albei attribute, `$STARNDAR_INFORMATION` en `$FILE_NAME`, verander. Vanaf Windows Vista is dit egter nodig dat 'n live OS hierdie information verander.
 
 ## Data Hiding
 
-NFTS gebruik 'n kluster en die minimum inligting grootte. Dit beteken dat as 'n lêer 'n kluster en 'n half gebruik, die **oorblywende half nooit gebruik gaan word** totdat die lêer verwyder word. Dan is dit moontlik om **data in hierdie slack ruimte te verberg**.
+NFTS gebruik 'n cluster en die minimum information size. Dit beteken dat indien 'n file een en 'n half cluster gebruik, die **oorblywende helfte nooit gebruik gaan word** totdat die file deleted is nie. Daarom is dit moontlik om **data in hierdie slack space te versteek**.
 
-Daar is gereedskap soos slacker wat toelaat om data in hierdie "verborge" ruimte te verberg. egter, 'n ontleding van die `$logfile` en `$usnjrnl` kan wys dat sommige data bygevoeg is:
+Daar is tools soos slacker wat dit moontlik maak om data in hierdie "hidden" space te versteek. 'n Analise van die `$logfile` en `$usnjrnl` kan egter wys dat data bygevoeg is:
 
-![](<../../images/image (1060).png>)
+![SetMace - Anti-forensic Tool - Data Hiding: There are tools like slacker that allow hiding data in this "hidden" space. However, an analysis of the $logfile and $usnjrnl can show that...](<../../images/image (1060).png>)
 
-Dan is dit moontlik om die slack ruimte te herstel met gereedskap soos FTK Imager. Let daarop dat hierdie tipe gereedskap die inhoud obfuskeer of selfs versleuteld kan stoor.
+Daarna is dit moontlik om die slack space met tools soos FTK Imager te retrieve. Let daarop dat hierdie soort tool die content obfuscated of selfs encrypted kan stoor.
 
 ## UsbKill
 
-Dit is 'n gereedskap wat die **rekenaar sal afskakel as enige verandering in die USB** poorte opgespoor word.\
-'n Manier om dit te ontdek, sou wees om die lopende prosesse te inspekteer en **elke python skrip wat loop te hersien**.
+Dit is 'n tool wat die **computer sal afskakel indien enige verandering in die USB**-poorte bespeur word.\
+'n Manier om dit te ontdek, is om die lopende prosesse te inspekteer en **elke python script wat loop te hersien**.
 
 ## Live Linux Distributions
 
-Hierdie distros word **binne die RAM** geheue uitgevoer. Die enigste manier om hulle te ontdek, is **as die NTFS lêerstelsel met skryf toestemmings gemonteer is**. As dit net met lees toestemmings gemonteer is, sal dit nie moontlik wees om die indringing te ontdek nie.
+Hierdie distros word **binne die RAM**-memory **uitgevoer**. Die enigste manier om hulle te detect, is **indien die NTFS file-system met write permissions gemount is**. Indien dit slegs met read permissions gemount is, sal dit nie moontlik wees om die intrusion te detect nie.
 
 ## Secure Deletion
 
@@ -77,73 +77,73 @@ Hierdie distros word **binne die RAM** geheue uitgevoer. Die enigste manier om h
 
 ## Windows Configuration
 
-Dit is moontlik om verskeie Windows logging metodes te deaktiveer om die forensiese ondersoek baie moeiliker te maak.
+Dit is moontlik om verskeie Windows logging methods te disable om die forensics-ondersoek baie moeiliker te maak.
 
 ### Disable Timestamps - UserAssist
 
-Dit is 'n registriesleutel wat datums en ure behou wanneer elke uitvoerbare lêer deur die gebruiker uitgevoer is.
+Dit is 'n registry key wat datums en tye byhou van wanneer elke executable deur die user uitgevoer is.
 
-Om UserAssist te deaktiveer, is twee stappe nodig:
+Om UserAssist te disable, vereis twee stappe:
 
-1. Stel twee registriesleutels in, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` en `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, albei op nul om aan te dui dat ons wil hê UserAssist moet gedeaktiveer word.
-2. Maak jou registriesubbome skoon wat lyk soos `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
+1. Stel twee registry keys, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` en `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, albei op zero om aan te dui dat ons UserAssist disabled wil hê.
+2. Clear jou registry-subtrees wat lyk soos `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
 
 ### Disable Timestamps - Prefetch
 
-Dit sal inligting oor die toepassings wat uitgevoer is, stoor met die doel om die prestasie van die Windows stelsel te verbeter. egter, dit kan ook nuttig wees vir forensiese praktyke.
+Dit stoor information oor die applications wat uitgevoer is met die doel om die performance van die Windows system te verbeter. Dit kan egter ook nuttig wees vir forensics-praktyke.
 
-- Voer `regedit` uit
-- Kies die lêer pad `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
+- Execute `regedit`
+- Select die file path `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
 - Regsklik op beide `EnablePrefetcher` en `EnableSuperfetch`
-- Kies Wysig op elkeen van hierdie om die waarde van 1 (of 3) na 0 te verander
-- Herbegin
+- Select Modify op elk hiervan om die value van 1 (of 3) na 0 te verander
+- Restart
 
 ### Disable Timestamps - Last Access Time
 
-Wanneer 'n gids vanaf 'n NTFS volume op 'n Windows NT bediener geopen word, neem die stelsel die tyd om **'n tydstempel veld op elke gelysde gids op te dateer**, wat die laaste toegangstyd genoem word. Op 'n swaar gebruikte NTFS volume kan dit die prestasie beïnvloed.
+Wanneer 'n folder vanaf 'n NTFS-volume op 'n Windows NT-server oopgemaak word, neem die system die tyd om 'n **timestamp field op elke gelyste folder te update**, genaamd die last access time. Op 'n intensief gebruikte NTFS-volume kan dit performance beïnvloed.
 
-1. Maak die Registrie Redigeerder (Regedit.exe) oop.
-2. Blaai na `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Soek na `NtfsDisableLastAccessUpdate`. As dit nie bestaan nie, voeg hierdie DWORD by en stel die waarde op 1, wat die proses sal deaktiveer.
-4. Sluit die Registrie Redigeerder, en herbegin die bediener.
+1. Open die Registry Editor (Regedit.exe).
+2. Browse na `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
+3. Soek `NtfsDisableLastAccessUpdate`. Indien dit nie bestaan nie, voeg hierdie DWORD by en stel sy value op 1, wat die proses sal disable.
+4. Close die Registry Editor en reboot die server.
 
 ### Delete USB History
 
-Alle **USB Device Entries** word in die Windows Registrie onder die **USBSTOR** registriesleutel gestoor wat sub sleutels bevat wat geskep word wanneer jy 'n USB toestel in jou rekenaar of skootrekenaar inprop. Jy kan hierdie sleutel hier vind `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deletie hiervan** sal die USB geskiedenis verwyder.\
-Jy kan ook die gereedskap [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) gebruik om seker te maak jy het hulle verwyder (en om hulle te verwyder).
+Al die **USB Device Entries** word in die Windows Registry gestoor onder die **USBSTOR** registry key, wat sub keys bevat wat geskep word wanneer jy 'n USB Device by jou PC of Laptop inprop. Jy kan hierdie key hier vind: H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. Deur **dit te delete**, sal jy die USB history delete.\
+Jy kan ook die tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) gebruik om seker te maak dat jy hulle deleted het (en om hulle te delete).
 
-'n Ander lêer wat inligting oor die USB's stoor, is die lêer `setupapi.dev.log` binne `C:\Windows\INF`. Dit moet ook verwyder word.
+'n Ander file wat information oor die USBs stoor, is die file `setupapi.dev.log` binne `C:\Windows\INF`. Dit behoort ook deleted te word.
 
 ### Disable Shadow Copies
 
-**Lys** skaduwe copies met `vssadmin list shadowstorage`\
-**Verwyder** hulle deur `vssadmin delete shadow` te loop
+**List** shadow copies met `vssadmin list shadowstorage`\
+**Delete** hulle deur `vssadmin delete shadow` uit te voer
 
-Jy kan hulle ook via GUI verwyder deur die stappe voor te stel in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+Jy kan hulle ook via die GUI delete deur die stappe te volg wat voorgestel word in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
-Om skaduwe copies te deaktiveer [stappe van hier](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Om shadow copies te disable, [steps from here](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Maak die Dienste program oop deur "dienste" in die teks soekboks te tik nadat jy op die Windows begin knoppie geklik het.
-2. Vind "Volume Shadow Copy" in die lys, kies dit, en toegang eienskappe deur regsklik.
-3. Kies Gedeaktiveer van die "Opstart tipe" keuselys, en bevestig die verandering deur Toepas en OK te klik.
+1. Open die Services-program deur "services" in die text search box te tik nadat jy die Windows start button geklik het.
+2. Vind "Volume Shadow Copy" in die lys, select dit en open dan Properties deur regs te klik.
+3. Kies Disabled uit die "Startup type"-drop-down menu en bevestig dan die verandering deur Apply en OK te klik.
 
-Dit is ook moontlik om die konfigurasie van watter lêers in die skaduwee kopie gaan wees, in die registrie `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot` te wysig.
+Dit is ook moontlik om die configuration van watter files in die shadow copy gekopieer gaan word in die registry `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot` te verander.
 
 ### Overwrite deleted files
 
-- Jy kan 'n **Windows gereedskap** gebruik: `cipher /w:C` Dit sal cipher aanwys om enige data uit die beskikbare ongebruikte skyf ruimte binne die C skyf te verwyder.
-- Jy kan ook gereedskap soos [**Eraser**](https://eraser.heidi.ie) gebruik.
+- Jy kan 'n **Windows tool** gebruik: `cipher /w:C`. Dit sal cipher aandui om enige data uit die beskikbare ongebruikte disk space binne die C-drive te remove.
+- Jy kan ook tools soos [**Eraser**](https://eraser.heidi.ie) gebruik.
 
 ### Delete Windows event logs
 
-- Windows + R --> eventvwr.msc --> Brei "Windows Logs" uit --> Regsklik op elke kategorie en kies "Clear Log"
+- Windows + R --> eventvwr.msc --> Expand "Windows Logs" --> Regsklik op elke category en select "Clear Log"
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
 ### Disable Windows event logs
 
 - `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Binne die dienste afdeling deaktiveer die diens "Windows Event Log"
+- Disable die service "Windows Event Log" binne die services-afdeling
 - `WEvtUtil.exec clear-log` of `WEvtUtil.exe cl`
 
 ### Disable $UsnJrnl
@@ -156,9 +156,9 @@ Dit is ook moontlik om die konfigurasie van watter lêers in die skaduwee kopie 
 
 ### PowerShell ScriptBlock/Module Logging
 
-Onlangs weergawes van Windows 10/11 en Windows Server hou **ryke PowerShell forensiese artefakte** onder
-`Microsoft-Windows-PowerShell/Operational` (geleenthede 4104/4105/4106).
-Aanvallers kan dit deaktiveer of op die vlug verwyder:
+Onlangse weergawes van Windows 10/11 en Windows Server hou **uitgebreide PowerShell-forensics artifacts** onder
+`Microsoft-Windows-PowerShell/Operational` (events 4104/4105/4106).
+Aanvallers kan dit on-the-fly disable of wipe:
 ```powershell
 # Turn OFF ScriptBlock & Module logging (registry persistence)
 New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
@@ -170,11 +170,11 @@ New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShel
 Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
 Remove-WinEvent               # requires admin & Win11 23H2+
 ```
-Verdedigers moet toesig hou oor veranderinge aan daardie registriesleutels en hoë-volume verwydering van PowerShell-gebeurtenisse.
+Defenders should monitor for changes to those registry keys and high-volume removal of PowerShell events.
 
 ### ETW (Event Tracing for Windows) Patch
 
-Eindpunt-sekuriteitsprodukte staat baie op ETW. 'n Gewilde ontwykingsmetode in 2024 is om `ntdll!EtwEventWrite`/`EtwEventWriteFull` in geheue te patch sodat elke ETW-oproep `STATUS_SUCCESS` teruggee sonder om die gebeurtenis uit te stuur:
+Endpoint-sekuriteitsprodukte maak sterk staat op ETW. ’n Gewilde ontduikingsmetode in 2024 is om `ntdll!EtwEventWrite`/`EtwEventWriteFull` in die geheue te patch sodat elke ETW-oproep `STATUS_SUCCESS` terugstuur sonder om die gebeurtenis uit te stuur:
 ```c
 // 0xC3 = RET on x64
 unsigned char patch[1] = { 0xC3 };
@@ -182,44 +182,50 @@ WriteProcessMemory(GetCurrentProcess(),
 GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
 patch, sizeof(patch), NULL);
 ```
-Publieke PoCs (bv. `EtwTiSwallow`) implementeer dieselfde primitiewe in PowerShell of C++.
-Omdat die patch **proses-lokaal** is, mag EDR's wat binne ander prosesse loop dit misloop.
-Detectie: vergelyk `ntdll` in geheue teenoor op skyf, of hook voor gebruikersmodus.
+Publieke PoCs (bv. `EtwTiSwallow`) implementeer dieselfde primitive in PowerShell of C++.
+Omdat die patch **process-local** is, kan EDRs wat binne ander prosesse loop dit mis.
+Detection: vergelyk `ntdll` in memory met die een op disk, of hook voor user-mode.
 
-### Alternatiewe Gegevensstrome (ADS) Herlewing
+### Herlewing van Alternate Data Streams (ADS)
 
-Malwareveldtogte in 2023 (bv. **FIN12** loaders) is gesien wat tweede-fase binêre binne ADS stoor om buite sig van tradisionele skanners te bly:
+Malware campaigns in 2023 (bv. **FIN12** loaders) is al gesien waar hulle second-stage binaries
+binne ADS stage om buite die sig van tradisionele scanners te bly:
 ```cmd
 rem Hide cobalt.bin inside an ADS of a PDF
 type cobalt.bin > report.pdf:win32res.dll
 rem Execute directly
 wmic process call create "cmd /c report.pdf:win32res.dll"
 ```
-Enumerate streams with `dir /R`, `Get-Item -Stream *`, or Sysinternals `streams64.exe`. Copying the host file to FAT/exFAT or via SMB will strip the hidden stream and can be used by investigators to recover the payload.
+Enumerate streams with `dir /R`, `Get-Item -Stream *`, or Sysinternals `streams64.exe`.
+Copying the host-lêer na FAT/exFAT of via SMB sal die hidden stream verwyder en kan deur
+ondersoekers gebruik word om die payload te herwin.
 
 ### BYOVD & “AuKill” (2023)
 
-Bring-Your-Own-Vulnerable-Driver is now routinely used for **anti-forensics** in ransomware intrusions. The open-source tool **AuKill** loads a signed but vulnerable driver (`procexp152.sys`) to suspend or terminate EDR and forensic sensors **before encryption & log destruction**:
+Bring-Your-Own-Vulnerable-Driver word nou gereeld vir **anti-forensics** in ransomware-
+indringings gebruik.
+Die open-source tool **AuKill** laai ’n ondertekende maar kwesbare driver (`procexp152.sys`) om
+EDR- en forensiese sensors **voor encryption & log destruction** op te skort of te beëindig:<sup>[[1]](#references)</sup>
 ```cmd
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
-Die bestuurder word daarna verwyder, wat minimale artefakte agterlaat.  
-Mitigasies: aktiveer die Microsoft kwesbare-bestuurder blokkelys (HVCI/SAC),  
-en waarsku oor kern-diens skepping vanaf gebruikers-skryfbare paaie.  
+Die driver word daarna verwyder, wat minimale artefakte agterlaat.<sup>[[1]](#references)</sup>
+Versagtings: enable the Microsoft vulnerable-driver blocklist (HVCI/SAC),
+en genereer alerts oor kernel-service creation vanaf user-writable paths.
 
----  
+---
 
-## Linux Anti-Forensics: Self-Patching en Cloud C2 (2023–2025)  
+## Linux Anti-Forensics: Self-Patching en Cloud C2 (2023–2025)
 
-### Self‑patching gecompromitteerde dienste om opsporing te verminder (Linux)  
-Teenstanders "self‑patch" toenemend 'n diens reg na die uitbuiting daarvan om beide her-uitbuiting te voorkom en kwesbaarheid-gebaseerde opsporings te onderdruk. Die idee is om kwesbare komponente te vervang met die nuutste wettige opwaartse binêre/JARs, sodat skandeerders die gasheer as gepatchte rapporteer terwyl volharding en C2 bly.  
+### Self-patching van compromised services om detection te verminder (Linux)
+Adversaries doen toenemend “self-patch” aan ’n service onmiddellik nadat hulle dit geëksploiteer het, om sowel her-eksploitasie te voorkom as vulnerability-based detections te onderdruk. Die idee is om vulnerable components met die nuutste legitimate upstream binaries/JARs te vervang, sodat scanners die host as patched rapporteer terwyl persistence en C2 voortduur.<sup>[[3]](#references)</sup>
 
-Voorbeeld: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
-- Na die uitbuiting het aanvallers wettige JARs van Maven Central (repo1.maven.org) afgelaai, kwesbare JARs in die ActiveMQ installasie verwyder, en die broker herbegin.  
-- Dit het die aanvanklike RCE gesluit terwyl ander voetstukke (cron, SSH konfigurasiewijzigings, aparte C2 implante) gehandhaaf is.  
+Voorbeeld: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)<sup>[[3]](#references)[[4]](#references)</sup>
+- Ná post-exploitation het attackers legitimate JARs vanaf Maven Central (repo1.maven.org) afgelaai, vulnerable JARs in die ActiveMQ-installation uitgevee en die broker herbegin.
+- Dit het die aanvanklike RCE gesluit terwyl ander footholds (cron, SSH config changes, afsonderlike C2 implants) behoue gebly het.
 
-Operasionele voorbeeld (illustreer)
+Operational example (illustrative)
 ```bash
 # ActiveMQ install root (adjust as needed)
 AMQ_DIR=/opt/activemq
@@ -237,61 +243,58 @@ ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
 # Apply changes without removing persistence
 systemctl restart activemq || service activemq restart
 ```
-Forensiese/jag wenke
-- Hersien diensgidsen vir ongeskeduleerde binêre/JAR vervangings:
-- Debian/Ubuntu: `dpkg -V activemq` en vergelyk lêer hashes/paaie met repo spieëls.
+Forensiese/hunting-wenke
+- Hersien diensgidse vir ongeskeduleerde vervangings van binaries/JARs:
+- Debian/Ubuntu: `dpkg -V activemq` en vergelyk lêer-hashes/-paaie met repo-spieëls.
 - RHEL/CentOS: `rpm -Va 'activemq*'`
-- Soek na JAR weergawes wat op skyf teenwoordig is wat nie deur die pakketbestuurder besit word nie, of simboliese skakels wat buite band opgedateer is.
-- Tydlyn: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` om ctime/mtime met kompromie venster te korreleer.
-- Shell geskiedenis/proses telemetrie: bewys van `curl`/`wget` na `repo1.maven.org` of ander artefak CDN's onmiddellik na die aanvanklike eksploitatie.
-- Veranderingsbestuur: valideer wie die “patch” toegepas het en hoekom, nie net dat 'n gepatchte weergawe teenwoordig is nie.
+- Soek na JAR-weergawes wat op die skyf voorkom maar nie deur die package manager besit word nie, of simboliese skakels wat buite die normale proses opgedateer is.
+- Tydlyn: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` om ctime/mtime met die kompromitteringsvenster te korreleer.
+- Shell history/proses-telemetrie: bewyse van `curl`/`wget` na `repo1.maven.org` of ander artifact-CDNs onmiddellik ná aanvanklike exploitasie.
+- Change management: valideer wie die “patch” toegepas het en waarom, nie slegs dat ’n patched weergawe teenwoordig is nie.
 
-### Wolkdiens C2 met draer tokens en anti-analise stagers
-Geobserveerde handelsvaardighede gekombineer verskeie langafstand C2 paaie en anti-analise verpakking:
-- Wagwoord-beskermde PyInstaller ELF laders om sandboks en statiese analise te hinder (bv., versleutelde PYZ, tydelike onttrekking onder `/_MEI*`).
-- Aanwysers: `strings` treffers soos `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
-- Tydren artefakte: onttrekking na `/tmp/_MEI*` of pasgemaakte `--runtime-tmpdir` paaie.
-- Dropbox-ondersteunde C2 wat hardgecodeerde OAuth Draer tokens gebruik
-- Netwerkmerkers: `api.dropboxapi.com` / `content.dropboxapi.com` met `Authorization: Bearer <token>`.
-- Jag in proxy/NetFlow/Zeek/Suricata vir uitgaande HTTPS na Dropbox domeine van bediener werklas wat normaalweg nie lêers sinkroniseer nie.
-- Parallel/backup C2 via tonneling (bv., Cloudflare Tunnel `cloudflared`), hou beheer as een kanaal geblokkeer is.
-- Gasheer IOCs: `cloudflared` prosesse/eenhede, konfigurasie by `~/.cloudflared/*.json`, uitgaande 443 na Cloudflare kante.
+### Cloud-diens C2 met bearer tokens en anti-analysis stagers
+Waargenome tradecraft het verskeie langafstand-C2-paaie en anti-analysis-packaging gekombineer:<sup>[[3]](#references)</sup>
+- Wagwoordbeskermde PyInstaller ELF-loaders om sandboxing en static analysis te bemoeilik (bv. encrypted PYZ, tydelike ekstraksie onder `/_MEI*`).
+- Indicators: `strings`-treffers soos `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
+- Runtime artifacts: ekstraksie na `/tmp/_MEI*` of pasgemaakte `--runtime-tmpdir`-paaie.
+- Dropbox-backed C2 met hardcoded OAuth Bearer tokens
+- Network markers: `api.dropboxapi.com` / `content.dropboxapi.com` met `Authorization: Bearer <token>`.
+- Hunt in proxy/NetFlow/Zeek/Suricata vir uitgaande HTTPS na Dropbox-domains vanaf server-workloads wat normaalweg nie lêers sync nie.
+- Parallelle/backup-C2 via tunneling (bv. Cloudflare Tunnel `cloudflared`), om beheer te behou indien een kanaal geblokkeer word.
+- Host IOCs: `cloudflared`-prosesse/-units, config by `~/.cloudflared/*.json`, uitgaande 443 na Cloudflare-edges.
 
-### Volharding en “hardening rollback” om toegang te behou (Linux voorbeelde)
-Aanvallers paar dikwels self-patching met duursame toegangspaaie:
-- Cron/Anacron: wysigings aan die `0anacron` stub in elke `/etc/cron.*/` gids vir periodieke uitvoering.
-- Jag:
+### Persistence en “hardening rollback” om toegang te behou (Linux-voorbeelde)
+Aanvallers kombineer self-patching gereeld met volhoubare toegangspaaie:<sup>[[3]](#references)</sup>
+- Cron/Anacron: wysigings aan die `0anacron`-stub in elke `/etc/cron.*/`-gids vir periodieke uitvoering.
+- Hunt:
 ```bash
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
 grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
 ```
-- SSH konfigurasie hardening rollback: aktivering van wortel aanmeldings en verandering van standaard skale vir laag-geprivilegieerde rekeninge.
-- Jag vir wortel aanmeldings aktivering:
+- SSH configuration hardening rollback: aktivering van root-logins en wysiging van default shells vir accounts met lae privileges.
+- Hunt vir root-login-aktivering:
 ```bash
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
-# vlag waardes soos "yes" of oormatig toelaatbare instellings
+# flag values like "yes" or overly permissive settings
 ```
-- Jag vir verdagte interaktiewe skale op stelsels rekeninge (bv., `games`):
+- Hunt vir verdagte interactive shells op system accounts (bv. `games`):
 ```bash
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
-- Willekeurige, kort-gemerk beacon artefakte (8 alfabetiese karakters) wat na skyf gelaat word wat ook met wolk C2 kontak maak:
-- Jag:
+- Ewekansige beacon-artifacts met kort name (8 alfabetiese karakters) wat op die skyf neergesit word en ook met cloud C2 kommunikeer:
+- Hunt:
 ```bash
 find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
 -exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
 ```
 
-Verdedigers moet hierdie artefakte korreleer met eksterne blootstelling en diens patching gebeurtenisse om anti-forensiese self-remediëring wat gebruik word om aanvanklike eksploitatie te verberg, te ontdek.
+Defenders behoort hierdie artifacts met eksterne blootstelling en service-patching events te korreleer om anti-forensic self-remediation te onthul wat gebruik word om aanvanklike exploitasie te verberg.
 
-## Verwysings
+## References
 
-- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (Maart 2023)
-https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
-- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (Junie 2024)
-https://redcanary.com/blog/etw-patching-detection
-
-- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
-- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
+- [1] [Sophos X-Ops – AuKill: A Weaponized Vulnerable Driver for Disabling EDR (March 2023)](https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr)
+- [2] [Red Canary – Patching EtwEventWrite for Stealth: Detection & Hunting (June 2024)](https://redcanary.com/blog/etw-patching-detection)
+- [3] [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [4] [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}

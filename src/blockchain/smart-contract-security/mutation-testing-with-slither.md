@@ -1,14 +1,14 @@
-# Mutation Testing for Smart Contracts (slither-mutate, mewt, MuTON)
+# Mutation Testing vir Smart Contracts (slither-mutate, mewt, MuTON)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Mutation testing "toets jou toetse" deur sistematies klein veranderinge (mutants) in contract code in te voer en die test suite weer uit te voer. As 'n test faal, is die mutant doodgemaak. As die tests steeds slaag, oorleef die mutant, wat 'n blindekol openbaar wat line/branch coverage nie kan opspoor nie.
+Mutation testing "toets jou tests" deur stelselmatig klein veranderinge (mutante) aan kontrakkode aan te bring en die testsuite weer uit te voer. As 'n test misluk, word die mutant vernietig. As die tests steeds slaag, oorleef die mutant, wat 'n blinde kol onthul wat lyn-/takdekking nie kan opspoor nie.
 
-Key idea: Coverage wys code is uitgevoer; mutation testing wys of gedrag werklik geasserteer is.
+Kernidee: Dekking wys dat kode uitgevoer is; mutation testing wys of gedrag werklik geasserteer word.<sup>[[2]](#references)</sup>
 
-## Why coverage can deceive
+## Waarom dekking jou kan mislei
 
-Oorweeg hierdie eenvoudige threshold check:
+Beskou hierdie eenvoudige drumpelkontrole:
 ```solidity
 function verifyMinimumDeposit(uint256 deposit) public returns (bool) {
 if (deposit >= 1 ether) {
@@ -18,154 +18,154 @@ return false;
 }
 }
 ```
-Eenheidstoetse wat net ’n waarde onder en ’n waarde bo die drempel toets, kan 100% line/branch coverage bereik terwyl hulle nalaat om die gelykheidsgrens (`==`) te bevestig. ’n Refactor na `deposit >= 2 ether` sou steeds sulke toetse slaag, en die protokol-logika stilweg breek.
+Eenheidstoetse wat slegs ’n waarde onder en ’n waarde bo die drempel toets, kan 100% lyn-/branch-dekking bereik sonder om die gelykheidsgrens (`==`) te bevestig. ’n Herfaktorering na `deposit >= 2 ether` sou steeds deur sulke toetse slaag en protokollogika stilweg breek.<sup>[[2]](#references)</sup>
 
-Mutation testing ontbloot hierdie gaping deur die voorwaarde te muteer en te verifieer dat toetse faal.
+Mutation testing stel hierdie gaping bloot deur die voorwaarde te muteer en te verifieer dat toetse misluk.
 
-Vir smart contracts korreleer oorlewende mutants dikwels met ontbrekende kontroles rondom:
-- Authorization and role boundaries
-- Rekeningkunde/waarde-oordrag invariants
-- Revert conditions and failure paths
-- Grensvoorwaardes (`==`, nulwaardes, leë arrays, max/min values)
+Vir smart contracts dui mutants wat oorleef dikwels op ontbrekende kontroles rondom:
+- Magtiging en rolgrense
+- Rekeningkundige-/waardeoordrag-invariante
+- `revert`-voorwaardes en failure paths
+- Grensvoorwaardes (`==`, nulwaardes, leë skikkings, maksimum-/minimumwaardes)
 
-## Mutation operators with the highest security signal
+## Mutation operators met die hoogste sekuriteitsein
 
-Nuttige mutation classes vir contract auditing:
-- **High severity**: vervang statements met `revert()` om ongekonsulteerde paaie bloot te stel
-- **Medium severity**: kommentaar uit lyne / verwyder logika om onbevestigde newe-effekte te onthul
-- **Low severity**: subtiele operator- of konstante-ruilings soos `>=` -> `>` of `+` -> `-`
-- Ander algemene edits: assignment replacement, boolean flips, condition negation, en type changes
+Nuttige mutation-klasse vir contract auditing:<sup>[[1]](#references)[[2]](#references)</sup>
+- **Hoë erns**: vervang statements met `revert()` om onuitgevoerde paths bloot te lê
+- **Medium erns**: kommentarieer lyne uit / verwyder logika om ongeverifieerde side effects te onthul
+- **Lae erns**: subtiele operator- of konstantewisselings soos `>=` -> `>` of `+` -> `-`
+- Ander algemene wysigings: assignment-vervanging, boolean flips, condition negation en type changes
 
-Praktiese doel: doodmaak alle betekenisvolle mutants, en motiveer oorlewendes eksplisiet wat irrelevant of semanties ekwivalent is.
+Praktiese doel: elimineer alle betekenisvolle mutants en motiveer uitdruklik waarom survivors irrelevant of semanties ekwivalent is.
 
-## Why syntax-aware mutation is better than regex
+## Waarom syntax-aware mutation beter as regex is
 
-Ouer mutation engines het op regex of line-oriented rewrites gesteun. Dit werk, maar het belangrike beperkings:
+Ouer mutation engines het op regex- of lyngeoriënteerde herskrywings staatgemaak. Dit werk, maar het belangrike beperkings:<sup>[[1]](#references)</sup>
 - Multi-line statements is moeilik om veilig te muteer
-- Language structure word nie verstaan nie, so comments/tokens kan swak geteiken word
-- Om elke moontlike variant op ’n swak line te genereer, mors groot hoeveelhede runtime
+- Die taalstruktuur word nie verstaan nie, sodat comments/tokens verkeerd geteiken kan word
+- Die generering van elke moontlike variant op ’n swak lyn mors groot hoeveelhede runtime
 
-AST- of Tree-sitter-gebaseerde tooling verbeter dit deur gestruktureerde nodes te teiken in plaas van rou lyne:
-- **slither-mutate** uses Slither's Solidity AST
-- **mewt** uses Tree-sitter as a language-agnostic core
-- **MuTON** builds on `mewt` and adds first-class support for TON languages such as FunC, Tolk, and Tact
+AST- of Tree-sitter-gebaseerde tooling verbeter dit deur gestruktureerde nodes eerder as rou lyne te teiken:<sup>[[1]](#references)</sup>
+- **slither-mutate** gebruik Slither se Solidity AST
+- **mewt** gebruik Tree-sitter as ’n language-agnostic core
+- **MuTON** bou op `mewt` en voeg first-class support by vir TON-tale soos FunC, Tolk en Tact
 
-Dit maak multi-line constructs en expression-level mutations baie meer betroubaar as regex-only approaches.
+Dit maak multi-line constructs en expression-level mutations baie meer betroubaar as regex-only benaderings.
 
-## Running mutation testing with slither-mutate
+## Mutation testing met slither-mutate uitvoer
 
-Requirements: Slither v0.10.2+.
+Vereistes: Slither v0.10.2+.
 
-- List options and mutators:
+- Lys opsies en mutators:
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Foundry-voorbeeld (vang resultate vas en hou ’n volledige log):
+- Foundry example (vang resultate vas en hou 'n volledige logboek):<sup>[[2]](#references)</sup>
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
 - As jy nie Foundry gebruik nie, vervang `--test-cmd` met hoe jy toetse uitvoer (bv. `npx hardhat test`, `npm test`).
 
-Artifacts word by verstek in `./mutation_campaign` gestoor. Ongevange (oorlewende) mutants word daarheen gekopieer vir inspeksie.
+Artifacts word by verstek in `./mutation_campaign` gestoor. Ongevange (oorlewende) mutants word daarheen gekopieer vir inspeksie.<sup>[[5]](#references)</sup>
 
-### Verstaan die uitset
+### Verstaan die uitvoer
 
-Verslaglyne lyk soos:
+Verslagreëls lyk soos:
 ```text
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
-- The tag in brackets is the mutator alias (e.g., `CR` = Comment Replacement).
-- `UNCAUGHT` means tests passed under the mutated behavior → missing assertion.
+- Die tag tussen hakies is die mutator-alias (bv. `CR` = Comment Replacement).
+- `UNCAUGHT` beteken dat tests onder die gemuteerde gedrag geslaag het → ontbrekende assertion.
 
-## Vermindering van looptyd: prioritiseer impakvolle mutants
+## Verminder runtime: prioritiseer mutants met impak
 
-Mutation campaigns kan ure of dae neem. Wenke om koste te verminder:
-- Scope: Begin eers met slegs kritieke contracts/directories, en brei dan uit.
-- Prioritiseer mutators: As ’n hoë-prioriteit mutant op ’n reël oorleef (byvoorbeeld `revert()` of comment-out), slaan laer-prioriteit variante vir daardie reël oor.
-- Gebruik twee-fase campaigns: voer eers gefokusde/vinnige tests uit, en toets daarna net uncaught mutants weer met die volle suite.
-- Map mutation targets na spesifieke test commands waar moontlik (byvoorbeeld auth code -> auth tests).
-- Beperk campaigns tot high/medium severity mutants wanneer tyd min is.
-- Parallelize tests as jou runner dit toelaat; cache dependencies/builds.
-- Fail-fast: stop vroeg as ’n verandering duidelik ’n assertion gap toon.
+Mutation campaigns kan ure of dae neem. Wenke om koste te verminder:<sup>[[1]](#references)[[2]](#references)</sup>
+- Omvang: Begin slegs met kritieke contracts/directories en brei daarna uit.
+- Prioritiseer mutators: Indien ’n hoëprioriteit-mutant op ’n reël oorleef (byvoorbeeld `revert()` of comment-out), slaan laerprioriteit-variante vir daardie reël oor.
+- Gebruik twee-fase campaigns: Laat eers gefokusde/vinnige tests loop, en toets daarna slegs ongeoorloofde mutants weer met die volledige suite.
+- Koppel mutation targets waar moontlik aan spesifieke test commands (byvoorbeeld auth-kode -> auth tests).
+- Beperk campaigns tot mutants met hoë/medium severity wanneer tyd beperk is.
+- Paralleliseer tests indien jou runner dit toelaat; cache dependencies/builds.
+- Fail-fast: stop vroeg wanneer ’n verandering duidelik ’n assertion-gap toon.
 
-Die runtime wiskunde is brutaal: `1000 mutants x 5-minute tests ~= 83 hours`, so campaign design matters as much as the mutator itself.
+Die runtime-wiskunde is brutaal: `1000 mutants x 5-minute tests ~= 83 hours`, dus is campaign-ontwerp net so belangrik soos die mutator self.
 
-## Persisterende campaigns en triage op skaal
+## Volgehoue campaigns en triage op skaal
 
-Een swakpunt van ouer workflows is om resultate net na `stdout` te dump. Vir lang campaigns maak dit pause/resume, filtering, en review moeiliker.
+Een swakheid van ouer workflows is dat resultate slegs na `stdout` geskryf word. Vir lang campaigns maak dit pause/resume, filtering en review moeiliker.<sup>[[1]](#references)</sup>
 
-`mewt`/`MuTON` verbeter dit deur mutants en uitkomste in SQLite-backed campaigns te stoor. Voordele:
+`mewt`/`MuTON` verbeter dit deur mutants en uitkomste in SQLite-backed campaigns te stoor. Voordele:<sup>[[1]](#references)</sup>
 - Pause en resume lang runs sonder om vordering te verloor
-- Filter net uncaught mutants in ’n spesifieke file of mutation class
-- Export/translate results to SARIF vir review tooling
-- Gee AI-assisted triage kleiner, gefiltreerde result sets in plaas van rou terminal logs
+- Filter slegs ongeoorloofde mutants in ’n spesifieke file of mutation class
+- Export/translate resultate na SARIF vir review tooling
+- Gee AI-assisted triage kleiner, gefiltreerde resultate in plaas van rou terminal logs
 
-Persisterende resultate is veral nuttig wanneer mutation testing deel word van ’n audit pipeline in plaas van ’n eenmalige handmatige review.
+Volgehoue resultate is veral nuttig wanneer mutation testing deel van ’n audit-pipeline word, eerder as ’n eenmalige handmatige review.
 
-## Triage workflow for surviving mutants
+## Triage-workflow vir mutants wat oorleef
 
 1) Inspekteer die gemuteerde reël en gedrag.
-- Reproduce locally deur die gemuteerde reël toe te pas en ’n gefokusde test uit te voer.
+- Reproduseer dit plaaslik deur die gemuteerde reël toe te pas en ’n gefokusde test te laat loop.
 
-2) Versterk tests om state te assert, nie net return values nie.
+2) Versterk tests om state te assert, nie slegs return values nie.
 - Voeg equality-boundary checks by (bv. toets threshold `==`).
-- Assert post-conditions: balances, total supply, authorization effects, and emitted events.
+- Assert post-conditions: balances, total supply, authorization effects en emitted events.
 
-3) Vervang te permissive mocks met realistic behavior.
-- Maak seker mocks enforce transfers, failure paths, en event emissions wat on-chain plaasvind.
+3) Vervang té permissiewe mocks met realistiese gedrag.
+- Maak seker mocks dwing transfers, failure paths en event emissions af wat on-chain plaasvind.
 
-4) Voeg invariants by vir fuzz tests.
-- Bv. conservation of value, non-negative balances, authorization invariants, monotonic supply where applicable.
+4) Voeg invariants vir fuzz tests by.
+- Bv. conservation of value, non-negative balances, authorization invariants en monotonic supply waar toepaslik.
 
 5) Skei true positives van semantic no-ops.
-- Example: `x > 0` -> `x != 0` is meaningless when `x` is unsigned.
+- Voorbeeld: `x > 0` -> `x != 0` is betekenisloos wanneer `x` unsigned is.
 
-6) Voer die campaign weer uit totdat survivors gekill is of eksplisiet geregverdig word.
+6) Laat die campaign weer loop totdat survivors gekill word of uitdruklik geregverdig is.
 
-## Case study: revealing missing state assertions (Arkis protocol)
+## Case study: onthulling van ontbrekende state assertions (Arkis protocol)
 
-A mutation campaign during an audit of the Arkis DeFi protocol surfaced survivors like:
+’n Mutation campaign tydens ’n audit van die Arkis DeFi protocol het survivors soos die volgende na vore gebring:<sup>[[2]](#references)[[3]](#references)</sup>
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Die uitkommentering van die toewysing het nie die toetse gebreek nie, wat ontbrekende post-state-asserties bewys. Grondoorsaak: die kode het ’n gebruiker-beheerde `_cmd.value` vertrou in plaas daarvan om die werklike token-oordragte te valideer. ’n Aanvaller kon verwagte vs. werklike oordragte desinkroniseer om fondse te dreineer. Gevolg: hoë-severiteit risiko vir protokol-solvensie.
+Deur die assignment uit te kommentarieer, het die tests steeds geslaag, wat ontbrekende post-state assertions bewys. Die hoofoorsaak: die code het ’n user-controlled `_cmd.value` vertrou in plaas daarvan om werklike token transfers te valideer. ’n Aanvaller kon verwagte en werklike transfers uit sinchronisasie bring om fondse te dreineer. Resultaat: hoë-severity-risiko vir protocol-solvensie.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Riglyn: Behandel survivors wat waarde-oordragte, rekeningkunde, of access control beïnvloed as hoë-risiko totdat hulle killed is.
+Guidance: Behandel survivors wat value transfers, accounting of access control beïnvloed as hoë risiko totdat hulle gekill is.
 
-## Moenie tests blindelings genereer om elke mutant te kill nie
+## Moenie blindelings tests genereer om elke mutant te kill nie
 
-Mutation-driven test generation kan terugskiet as die huidige implementering verkeerd is. Voorbeeld: die mutering van `priority >= 2` na `priority > 2` verander gedrag, maar die regte fix is nie altyd “skryf ’n test vir `priority == 2`” nie. Daardie gedrag kan self die bug wees.
+Mutation-driven test generation kan terugvuur as die huidige implementasie verkeerd is. Voorbeeld: om `priority >= 2` na `priority > 2` te muteer, verander gedrag, maar die regte fix is nie altyd om "’n test vir `priority == 2` te skryf" nie. Daardie gedrag kan self die bug wees.<sup>[[1]](#references)</sup>
 
-Veiliger werkvloei:
-- Gebruik surviving mutants om dubbelsinnige vereistes te identifiseer
-- Valideer verwagte gedrag uit specs, protocol docs, of reviewers
-- Eers dan enkodeer jy die gedrag as ’n test/invariant
+Veiliger workflow:
+- Gebruik surviving mutants om ambiguous requirements te identifiseer
+- Valideer verwagte gedrag vanuit specs, protocol docs of reviewers
+- Kodeer eers daarna die gedrag as ’n test/invariant
 
-Anders loop jy die risiko om implementasie-ongelukke in die testsuite vas te hardkodeer en vals selfvertroue te kry.
+Anders loop jy die risiko om implementation accidents in die test suite hard te kodeer en vals vertroue te kry.
 
 ## Praktiese checklist
 
-- Run ’n geteikende kampanje:
+- Run ’n targeted campaign:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
-- Verkies syntax-aware mutators (AST/Tree-sitter) bo regex-only mutation wanneer beskikbaar.
-- Triage survivors en skryf tests/invariants wat sou faal onder die gemuteerde gedrag.
-- Assert balances, supply, authorizations, en events.
+- Verkies syntax-aware mutators (AST/Tree-sitter) bo regex-only mutation waar beskikbaar.
+- Triage survivors en skryf tests/invariants wat onder die gemuteerde gedrag sou faal.
+- Assert balances, supply, authorizations en events.
 - Voeg boundary tests by (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
 - Vervang onrealistiese mocks; simuleer failure modes.
-- Bewaar resultate wanneer die tooling dit ondersteun, en filter uncaught mutants uit voor triage.
-- Gebruik twee-fase of per-target kampanjes om runtime hanteerbaar te hou.
-- Itereer totdat al die mutants gekill is of met kommentaar en rasionaal geregverdig is.
+- Persist results wanneer die tooling dit ondersteun, en filter uncaught mutants voordat jy triage doen.
+- Gebruik two-phase of per-target campaigns om runtime hanteerbaar te hou.
+- Iterateer totdat alle mutants gekill of met comments en rationale geregverdig is.
 
-## Verwysings
+## References
 
-- [Mutation testing for the agentic era](https://blog.trailofbits.com/2026/04/01/mutation-testing-for-the-agentic-era/)
-- [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
-- [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
-- [Slither (GitHub)](https://github.com/crytic/slither)
-- [Slither Mutator documentation](https://github.com/crytic/slither/blob/master/docs/src/tools/Mutator.md)
-- [mewt](https://github.com/trailofbits/mewt)
-- [MuTON](https://github.com/trailofbits/muton)
+- [1] [Mutation testing for the agentic era](https://blog.trailofbits.com/2026/04/01/mutation-testing-for-the-agentic-era/)
+- [2] [Use mutation testing to find the bugs your tests don't catch (Trail of Bits)](https://blog.trailofbits.com/2025/09/18/use-mutation-testing-to-find-the-bugs-your-tests-dont-catch/)
+- [3] [Arkis DeFi Prime Brokerage Security Review (Appendix C)](https://github.com/trailofbits/publications/blob/master/reviews/2024-12-arkis-defi-prime-brokerage-securityreview.pdf)
+- [4] [Slither (GitHub)](https://github.com/crytic/slither)
+- [5] [Slither Mutator documentation](https://github.com/crytic/slither/blob/master/docs/src/tools/Mutator.md)
+- [6] [mewt](https://github.com/trailofbits/mewt)
+- [7] [MuTON](https://github.com/trailofbits/muton)
 
 {{#include ../../banners/hacktricks-training.md}}

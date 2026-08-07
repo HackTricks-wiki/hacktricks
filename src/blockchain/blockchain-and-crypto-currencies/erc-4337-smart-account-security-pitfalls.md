@@ -1,18 +1,18 @@
-# ERC-4337 Smart Account Security Pitfalls
+# ERC-4337-sekuriteitsvalstrikke vir Smart Accounts
 
 {{#include ../../banners/hacktricks-training.md}}
 
-ERC-4337 account abstraction verander wallets in programmeerbare stelsels. Die kernvloei is **validate-then-execute** oor 'n hele bundle: die `EntryPoint` valideer elke `UserOperation` voordat enige van hulle uitgevoer word. Hierdie ordening skep nie-ooglopende aanvaloppervlak wanneer validation permissief, stateful, of inkonsekwent met bundler simulation rules is.
+ERC-4337-account abstraction verander wallets in programmeerbare stelsels. Die kernvloei is **validate-then-execute** oor ’n hele bundle: die `EntryPoint` valideer elke `UserOperation` voordat enige daarvan uitgevoer word. Hierdie volgorde skep ’n nie-ooglopende attack surface wanneer validation permissief, stateful of inkonsekwent met bundler-simulasie-reëls is.
 
-## 1) Direct-call bypass of privileged functions
-Enige externally callable `execute` (of fund-moving) function wat nie beperk is tot `EntryPoint` nie (of 'n vetted executor module) kan direk geroep word om die account leeg te dreineer.
+## 1) Direct-call-bypass van bevoorregte funksies
+Enige ekstern oproepbare `execute`- (of fondsverskuiwende) funksie wat nie tot `EntryPoint` (of ’n gekeurde executor module) beperk is nie, kan direk opgeroep word om die account te dreineer.<sup>[[1]](#references)</sup>
 ```solidity
 function execute(address target, uint256 value, bytes calldata data) external {
 (bool ok,) = target.call{value: value}(data);
 require(ok, "exec failed");
 }
 ```
-Veilige patroon: beperk tot `EntryPoint`, en gebruik `msg.sender == address(this)` vir admin/self-management-vloei (module install, validator changes, upgrades).
+Veilige patroon: beperk tot `EntryPoint`, en gebruik `msg.sender == address(this)` vir admin/self-management-vloeie (module-installering, validator-veranderinge, upgrades).
 ```solidity
 address public immutable entryPoint;
 
@@ -22,8 +22,8 @@ require(msg.sender == entryPoint, "not entryPoint");
 require(ok, "exec failed");
 }
 ```
-## 2) Ongesigne of ongekontroleerde gas-velde -> fooi-uitputting
-As signature validation slegs intent (`callData`) dek maar nie gas-verwante velde nie, kan ’n bundler of frontrunner fooie opblaas en ETH dreineer. Die gesigneerde payload moet ten minste bind:
+## 2) Ongesignede of ongekontroleerde gas fields -> fee drain
+Indien signature validation slegs intent (`callData`) dek, maar nie gas-related fields nie, kan ’n bundler of frontrunner fees opjaag en ETH dreineer. Die signed payload moet ten minste die volgende bind:<sup>[[1]](#references)</sup>
 
 - `preVerificationGas`
 - `verificationGasLimit`
@@ -31,7 +31,7 @@ As signature validation slegs intent (`callData`) dek maar nie gas-verwante veld
 - `maxFeePerGas`
 - `maxPriorityFeePerGas`
 
-Defensive pattern: gebruik die `EntryPoint`-verskafde `userOpHash` (wat gas-velde insluit) en/of beperk elke veld streng.
+Defensive pattern: gebruik die `EntryPoint`-verskafde `userOpHash` (wat gas fields insluit) en/of stel streng limiete vir elke field.<sup>[[1]](#references)</sup>
 ```solidity
 function validateUserOp(UserOperation calldata op, bytes32 userOpHash, uint256)
 external
@@ -41,42 +41,42 @@ require(_isApprovedCall(userOpHash, op.signature), "bad sig");
 return 0;
 }
 ```
-## 3) Stateful validation clobbering (bundle semantics)
-Omdat alle validations voor enige execution loop, is die stoor van validation results in contract state onveilig. Nog `n op in dieselfde bundle kan dit oorskryf, wat veroorsaak dat jou execution staat gebruik wat deur die attacker beïnvloed is.
+## 3) Stateful validation clobbering (bundle-semantiek)
+Omdat alle validasies voor enige uitvoering plaasvind, is dit onveilig om validasieresultate in contractstaat te stoor. Nog ’n op in dieselfde bundle kan dit oorskryf, wat veroorsaak dat jou uitvoering aanvaller-beïnvloede staat gebruik.<sup>[[1]](#references)</sup>
 
-Vermy om storage in `validateUserOp` te skryf. As dit onvermydelik is, key tydelike data by `userOpHash` en delete dit deterministies na gebruik (verkies stateless validation).
+Vermy die skryf van storage in `validateUserOp`. Indien dit onvermydelik is, sleutel tydelike data volgens `userOpHash` en verwyder dit deterministies ná gebruik (verkies stateless validation).<sup>[[1]](#references)</sup>
 
-## 4) ERC-1271 replay across accounts/chains (missing domain separation)
-`isValidSignature(bytes32 hash, bytes sig)` moet signatures bind aan **hierdie contract** en **hierdie chain**. Recovering oor `n rou hash laat signatures replay across accounts of chains.
+## 4) ERC-1271 replay across accounts/chains (ontbrekende domeinskeiding)
+`isValidSignature(bytes32 hash, bytes sig)` moet handtekeninge aan **hierdie kontrak** en **hierdie chain** bind. As oor ’n raw hash herstel word, kan handtekeninge oor accounts of chains heen hergebruik word.<sup>[[1]](#references)</sup>
 
-Gebruik EIP-712 typed data (domain sluit `verifyingContract` en `chainId` in) en return die presiese ERC-1271 magic value `0x1626ba7e` by sukses.
+Gebruik EIP-712 typed data (die domain sluit `verifyingContract` en `chainId` in) en gee die presiese ERC-1271 magic value `0x1626ba7e` terug by sukses.<sup>[[1]](#references)</sup>
 
 ## 5) Reverts do not refund after validation
-Sodra `validateUserOp` slaag, is fees committed selfs al revert execution later. Attackers kan herhaaldelik ops submit wat sal fail en steeds fees van die account collect.
+Sodra `validateUserOp` slaag, is fooie verbind, selfs al revert uitvoering later. Aanvallers kan herhaaldelik ops indien wat sal misluk en steeds fooie uit die account invorder.<sup>[[1]](#references)</sup>
 
-Vir paymasters, om from `n shared pool in `validateUserOp` te betaal en users in `postOp` te charge is fragiel omdat `postOp` kan revert sonder om die payment undo. Secure funds during validation (per-user escrow/deposit), keep `postOp` minimal en non-reverting, en budget `paymasterPostOpGasLimit` vir die worst-case reimbursement path.
+Vir paymasters is dit broos om tydens `validateUserOp` uit ’n shared pool te betaal en gebruikers in `postOp` te hef, omdat `postOp` kan revert sonder om die betaling ongedaan te maak. Beveilig fondse tydens validasie (per-user escrow/deposit), hou `postOp` minimaal en nie-reverterend, en begroot `paymasterPostOpGasLimit` vir die worst-case reimbursement path.<sup>[[1]](#references)</sup>
 
-## 6) Counterfactual deployment / factory assumptions
-Die eerste `UserOperation` dra dikwels `initCode`, wat veroorsaak dat die account deur `n **factory** during validation gedeploy word. Hierdie path is maklik om under-audit te wees omdat dit slegs op eerste gebruik loop.
+## 6) Counterfactual deployment / factory-aannames
+Die eerste `UserOperation` bevat dikwels `initCode`, wat veroorsaak dat die account tydens validasie deur ’n **factory** gedeploy word. Hierdie pad word maklik onvoldoende geoudit omdat dit slegs tydens die eerste gebruik loop.<sup>[[2]](#references)</sup>
 
-Common failures:
+Algemene foute:
 
-- Die factory/initializer trust `msg.sender == entryPoint`, maar die ERC-4337 deployment path roep nie `initCode` direk van `EntryPoint` af nie.
-- Die salt, owner, validator, of module configuration is nie volledig gebind aan signed intent nie, so `n frontrunner kan die eerste deployment race en die counterfactual address met attacker-controlled settings burn.
-- Die factory is non-idempotent, so `n herhaalde first-use flow bricked die wallet in plaas daarvan om die reeds-created address terug te gee.
+- Die factory/initializer vertrou `msg.sender == entryPoint`, maar die ERC-4337 deployment path roep **nie** `initCode` direk vanaf `EntryPoint` aan nie.
+- Die salt, owner, validator of module-konfigurasie is nie volledig aan signed intent gebind nie, sodat ’n frontrunner die eerste deployment kan jaag en die counterfactual address met aanvaller-beheerde settings kan beset.
+- Die factory is nie-idempotent, sodat ’n herhaalde first-use flow die wallet blokkeer in plaas daarvan om die reeds-geskepte address terug te gee.
 
-Safe pattern: recompute the expected sender from signed deployment parameters, maak deployment deterministic (tipies `CREATE2`), en maak initialization one-shot.
+Veilige patroon: bereken die verwagte sender weer uit signed deployment parameters, maak deployment deterministies (tipies `CREATE2`), en maak initialisering eenmalig.<sup>[[2]](#references)</sup>
 ```solidity
 bytes32 salt = keccak256(abi.encode(owner, validator, saltNonce));
 address predicted = Create2.computeAddress(salt, keccak256(initCode));
 require(predicted == sender, "bad sender");
 ```
-## 7) Validation logic that bundlers reject
-Validasielogika kan korrek wees in plaaslike toetse en steeds onbruikbaar wees in werklike bundlers. Publieke bundlers simuleer `validateUserOp()` / `validatePaymasterUserOp()` off-chain en voer gewoonlik `debug_traceCall(handleOps)` volledig uit voordat dit ingesluit word.
+## 7) Validation-logika wat bundlers reject
+Validation-kode kan korrek wees in plaaslike toetse en steeds onbruikbaar wees in werklike bundlers. Publieke bundlers simuleer `validateUserOp()` / `validatePaymasterUserOp()` off-chain en voer gewoonlik ’n volledige `debug_traceCall(handleOps)` uit voordat dit ingesluit word.
 
-Dit maak hierdie patrone gevaarlik binne validasie:
+Dit maak hierdie patrone binne validation gevaarlik:
 
-- Block-afhanklike opcodes soos `TIMESTAMP`, `NUMBER`, of `BLOCKHASH`
+- Blokafhanklike opcodes soos `TIMESTAMP`, `NUMBER` of `BLOCKHASH`
 - State writes soos `SSTORE`
 - Onbeperkte iterasie oor storage
 - Arbitrêre eksterne calls of oracle reads wat tussen simulasie en insluiting kan verander
@@ -93,12 +93,12 @@ require(oracle.isAllowed(op.sender), "oracle changed");
 return 0;
 }
 ```
-Behandel validation as ’n deterministiese, begrensde preflight-funksie. As jy werklik shared state of external lookups nodig het, stoot daardie kompleksiteit na staked/reputation-tracked entities en toets die presiese bundler simulation path, nie net unit tests nie.
+Behandel validation as ’n deterministiese, begrensde preflight-funksie. Indien jy werklik gedeelde toestand of eksterne lookups benodig, skuif daardie kompleksiteit na entities wat gestake en reputasie-nagespoor word, en toets die presiese bundler-simulasiepad, nie net unit tests nie.
 
 ## 8) ERC-7702 initialization frontrun
-ERC-7702 laat ’n EOA toe om smart-account code vir ’n enkele tx te laat loop. As initialization extern callable is, kan ’n frontrunner hulself as owner stel.
+ERC-7702 laat ’n EOA toe om smart-account-kode vir ’n enkele tx uit te voer. Indien initialization externally callable is, kan ’n frontrunner hulself as owner instel.<sup>[[1]](#references)</sup>
 
-Mitigation: laat initialization net toe op **self-call** en net een keer.
+Mitigation: laat initialization slegs op **self-call** en slegs een keer toe.<sup>[[1]](#references)</sup>
 ```solidity
 function initialize(address newOwner) external {
 require(msg.sender == address(this), "init: only self");
@@ -106,20 +106,21 @@ require(owner == address(0), "already inited");
 owner = newOwner;
 }
 ```
-## Quick pre-merge checks
-- Valideer signatures using `EntryPoint`'s `userOpHash` (binds gas fields).
-- Beperk privileged functions to `EntryPoint` and/or `address(this)` as appropriate.
-- Hou `validateUserOp` stateless, deterministic, and compatible with bundler simulation rules.
-- Enforce EIP-712 domain separation for ERC-1271 and return `0x1626ba7e` on success.
-- Hou `postOp` minimaal, bounded, and non-reverting; secure fees during validation.
-- Test die first `initCode` path separately: deterministic deployment, idempotent factory behavior, and one-shot initialization.
-- Run full bundler simulation (`simulateValidation` plus a traced `handleOps`) before shipping.
-- For ERC-7702, allow init only on self-call and only once.
+## Vinnige pre-merge-kontroles
+- Valideer handtekeninge met `EntryPoint` se `userOpHash` (bind gas-velde).
+- Beperk bevoorregte funksies tot `EntryPoint` en/of `address(this)` soos toepaslik.
+- Hou `validateUserOp` stateless, deterministies en versoenbaar met bundler-simulasie-reëls.
+- Dwing EIP-712-domeinskeiding vir ERC-1271 af en gee `0x1626ba7e` terug by sukses.
+- Hou `postOp` minimaal, begrens en nie-reverterend; beveilig fooie tydens validasie.
+- Toets die eerste `initCode`-pad afsonderlik: deterministiese deployment, idempotente factory-gedrag en eenmalige initialisering.
+- Voer volledige bundler-simulasie uit (`simulateValidation` plus ’n traced `handleOps`) voordat dit vrygestel word.
+- Vir ERC-7702, laat init slegs op self-call en slegs een keer toe.
 
 
 
-## References
+## Verwysings
 
-- [https://blog.trailofbits.com/2026/03/11/six-mistakes-in-erc-4337-smart-accounts/](https://blog.trailofbits.com/2026/03/11/six-mistakes-in-erc-4337-smart-accounts/)
-- [https://eips.ethereum.org/EIPS/eip-4337](https://eips.ethereum.org/EIPS/eip-4337)
+- [1] [Ses foute in ERC-4337 smart accounts (Trail of Bits)](https://blog.trailofbits.com/2026/03/11/six-mistakes-in-erc-4337-smart-accounts/)
+- [2] [ERC-4337: Rekeningabstraksie met Alt Mempool](https://eips.ethereum.org/EIPS/eip-4337)
+
 {{#include ../../banners/hacktricks-training.md}}
