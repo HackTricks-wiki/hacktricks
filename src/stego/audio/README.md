@@ -1,47 +1,47 @@
-# Audio-Steganografie
+# Audiosteganografie
 
 {{#include ../../banners/hacktricks-training.md}}
 
 Häufige Muster:
 
-- Nachrichten in Spektrogrammen
-- WAV-LSB-Einbettung
-- DTMF- / Wähltöne-Codierung
-- Metadaten-Payloads
+- Spectrogram messages
+- WAV LSB embedding
+- DTMF / dial tones encoding
+- Metadata payloads
 
 ## Schnelle Triage
 
 Vor dem Einsatz spezialisierter Tools:
 
-- Codec-/Container-Details und Anomalien bestätigen:
+- Codec-/Containerdetails und Anomalien bestätigen:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Wenn das Audio rauschartige Inhalte oder tonale Strukturen enthält, frühzeitig ein Spektrogramm untersuchen.
+- Wenn das Audio rauschähnliche Inhalte oder eine tonale Struktur enthält, frühzeitig ein Spectrogramm untersuchen.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-## Spektrogramm-Steganografie
+## Spectrogram steganography
 
-### Technik
+### Technique
 
-Spectrogram stego verbirgt Daten, indem Energie über Zeit/Frequenz geformt wird, sodass sie nur in einer Zeit-Frequenz-Darstellung sichtbar wird (oft unhörbar oder als Rauschen wahrgenommen).
+Spectrogram stego versteckt Daten, indem Energie über Zeit/Frequenz geformt wird, sodass sie nur in einer Zeit-Frequenz-Darstellung sichtbar wird (oft unhörbar oder als Rauschen wahrgenommen).
 
 ### Sonic Visualiser
 
-Primäres Tool zur Spektrogramm-Inspektion:
+Primäres Tool zur Untersuchung von Spektrogrammen:
 
 - [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
 
-### Alternativen
+### Alternatives
 
 - Audacity (Spektrogramm-Ansicht, Filter): https://www.audacityteam.org/
-- `sox` kann Spektrogramme über die CLI erzeugen:
+- `sox` kann über die CLI Spektrogramme erzeugen:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
-## FSK-/Modem-Decodierung
+## FSK / Modem-Dekodierung
 
-Frequenzumtastete Audiosignale sehen in einem Spektrogramm oft wie abwechselnde einzelne Töne aus.<sup>[[1]](#references)</sup> Sobald du eine grobe Schätzung für Center/Shift und Baudrate hast, kannst du mit `minimodem` einen Brute-Force-Versuch starten:
+Frequency-shift keyed Audio sieht in einem Spektrogramm häufig wie abwechselnde einzelne Töne aus. Sobald du eine ungefähre Mittenfrequenz, Shift- und Baudraten-Schätzung hast, kannst du mit `minimodem` einen Brute-Force-Versuch durchführen:<sup>[[1]](#references)</sup>
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,28 +52,28 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` führt automatisch eine Verstärkungsanpassung durch und erkennt Mark-/Space-Töne automatisch. Passe `--rx-invert` oder `--samplerate` an, wenn die Ausgabe unleserlich ist.
+`minimodem` führt automatisch die Verstärkung aus und erkennt Mark-/Space-Töne automatisch; passe `--rx-invert` oder `--samplerate` an, wenn die Ausgabe unverständlich ist.
 
 ## WAV LSB
 
-### Technique
+### Technik
 
-Bei unkomprimiertem PCM (WAV) ist jedes Sample eine Ganzzahl. Das Ändern der niederwertigen Bits verändert die Wellenform nur sehr geringfügig, sodass Angreifer Folgendes verstecken können:
+Bei unkomprimiertem PCM (WAV) ist jedes Sample eine Ganzzahl. Das Ändern niedriger Bits verändert die Wellenform nur sehr geringfügig, sodass Angreifer Folgendes verstecken können:
 
 - 1 Bit pro Sample (oder mehr)
 - Über mehrere Kanäle verschachtelt
-- Mit einem Stride/einer Permutation
+- Mit einer Schrittweite/Permutation
 
-Weitere Audio-Hiding-Familien, auf die du stoßen kannst:
+Weitere Audio-Hiding-Familien, denen du begegnen kannst:
 
-- Phase coding
-- Echo hiding
-- Spread-spectrum embedding
-- Codec-side channels (formatabhängig und vom Tool abhängig)
+- Phasencodierung
+- Echo-Hiding
+- Spread-Spectrum-Embedding
+- Codec-seitige Channels (format- und toolabhängig)
 
 ### WavSteg
 
-From: https://github.com/ragibson/Steganography#WavSteg
+Von: https://github.com/ragibson/Steganography#WavSteg<sup>[[2]](#references)</sup>
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
@@ -86,9 +86,9 @@ python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 
 ### Technik
 
-DTMF kodiert Zeichen als Paare fester Frequenzen (Telefontastatur). Wenn das Audio wie Tastentöne oder regelmäßige Zweifrequenz-Pieptöne klingt, sollte frühzeitig eine DTMF-Dekodierung getestet werden.
+DTMF codiert Zeichen als Paare fester Frequenzen (Telefontastatur). Wenn das Audio wie Tastentöne oder regelmäßige Doppelfrequenz-Pieptöne klingt, sollte die DTMF-Dekodierung früh getestet werden.
 
-Online-Dekoder:
+Online-Dekodierer:
 
 - [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
 - [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
@@ -96,5 +96,6 @@ Online-Dekoder:
 ## Referenzen
 
 - [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [2] [ragibson/Steganography](https://github.com/ragibson/Steganography#WavSteg)
 
 {{#include ../../banners/hacktricks-training.md}}

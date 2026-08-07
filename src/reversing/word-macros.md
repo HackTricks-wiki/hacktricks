@@ -2,17 +2,17 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Junk-Code
+### Junk Code
 
-Es ist sehr häufig, **Junk-Code, der nie verwendet wird**, zu finden, um das Reverse Engineering des Makros zu erschweren.\
-Zum Beispiel sieht man im folgenden Bild, dass eine If-Bedingung, die niemals wahr sein wird, verwendet wird, um etwas Junk- und nutzlosen Code auszuführen.
+Es ist sehr üblich, **Junk Code zu finden, der nie verwendet wird**, um das Reversing des Makros zu erschweren.\
+Im folgenden Bild können Sie beispielsweise sehen, dass ein `If`, das niemals wahr sein wird, verwendet wird, um etwas Junk Code und nutzlosen Code auszuführen.
 
-![](<../images/image (369).png>)
+![Word-Makros - Junk Code: Im folgenden Bild können Sie beispielsweise sehen, dass ein If, das niemals wahr sein wird, verwendet wird, um etwas Junk Code und nutzlosen Code auszuführen](<../images/image (369).png>)
 
-### Makroformulare
+### Makro-Formulare
 
-Mit der **GetObject**-Funktion ist es möglich, Daten aus Formularen des Makros zu erhalten. Dies kann verwendet werden, um die Analyse zu erschweren. Das folgende Bild zeigt ein Makroformular, das verwendet wird, um **Daten in Textfeldern zu verbergen** (ein Textfeld kann andere Textfelder verbergen):
+Mit der Funktion **GetObject** ist es möglich, Daten aus Formularen des Makros abzurufen. Dies kann verwendet werden, um die Analyse zu erschweren. Das folgende Bild zeigt ein Makro-Formular, das verwendet wird, um **Daten in Textfeldern zu verbergen** (ein Textfeld kann weitere Textfelder verbergen):
 
-![](<../images/image (344).png>)
+![Junk Code - Makro-Formulare: Mit der Funktion GetObject ist es möglich, Daten aus Formularen des Makros abzurufen. Dies kann verwendet werden, um die Analyse zu erschweren. Das folgende Bild zeigt ein...](<../images/image (344).png>)
 
 {{#include ../banners/hacktricks-training.md}}

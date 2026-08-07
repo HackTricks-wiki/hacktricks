@@ -2,52 +2,58 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Dieser Abschnitt konzentriert sich auf das Auffinden und Extrahieren versteckter Daten aus Dateien (Bilder/Audio/Video/Dokumente/Archive) und aus textbasierter Steganographie.
+Dieser Abschnitt konzentriert sich auf das **Auffinden und Extrahieren versteckter Daten** aus Dateien (Bildern/Audio/Video/Dokumenten/Archiven) sowie auf textbasierte Steganografie.
 
-Wenn du wegen kryptographischer Angriffe hier bist, gehe zum Abschnitt **Crypto**.
+Wenn du nach kryptografischen Angriffen suchst, gehe zum Abschnitt **Crypto**.
 
 ## Einstiegspunkt
 
-Betrachte Steganographie als ein forensisches Problem: identifiziere den realen Container, zähle relevante Stellen auf (Metadaten, angehängte Daten, eingebettete Dateien) und wende erst dann inhaltliche Extraktionstechniken an.
+Betrachte Steganografie als Forensikproblem: Identifiziere den tatsächlichen Container, untersuche Orte mit hoher Signalwirkung (Metadaten, angehängte Daten, eingebettete Dateien) und wende erst danach Techniken zur inhaltlichen Extraktion an.
 
-### Workflow & triage
+### Workflow & Triage
 
-Ein strukturierter Workflow, der die Container-Identifikation, Metadaten/String-Inspektion, Carving und format-spezifische Verzweigungen priorisiert.
+Ein strukturierter Workflow, der die Identifizierung des Containers, die Untersuchung von Metadaten/Strings, Carving und formatspezifische Verzweigungen priorisiert.
+
 {{#ref}}
 workflow/README.md
 {{#endref}}
 
 ### Bilder
 
-Wo die meiste CTF stego zu finden ist: LSB/bit-planes (PNG/BMP), Chunk-/Dateiformat-Anomalien, JPEG-Tools und Tricks mit animierten GIFs.
+Hier findet sich der größte Teil der CTF-Stego-Aufgaben: LSB/Bit-Ebenen (PNG/BMP), Besonderheiten von Chunks/Dateiformaten, JPEG-Tools und Tricks mit mehrteiligen GIFs.
+
 {{#ref}}
 images/README.md
 {{#endref}}
 
 ### Audio
 
-Spectrogram-Nachrichten, sample LSB embedding und Telefon-Tastenton-Signale (DTMF) sind wiederkehrende Muster.
+Spektrogramm-Nachrichten, LSB-Einbettung in Samples und Töne von Telefontastaturen (DTMF) sind wiederkehrende Muster.
+
 {{#ref}}
 audio/README.md
 {{#endref}}
 
 ### Text
 
-Wenn Text normal dargestellt wird, sich aber unerwartet verhält, denke an Unicode-Homoglyphen, Zero-Width-Zeichen oder whitespace-basierte Kodierung.
+Wenn Text normal dargestellt wird, sich aber unerwartet verhält, solltest du Unicode-Homoglyphen, Zero-Width-Zeichen oder auf Whitespace basierende Codierung in Betracht ziehen.
+
 {{#ref}}
 text/README.md
 {{#endref}}
 
 ### Dokumente
 
-PDFs und Office-Dateien sind in erster Linie Container; Angriffe drehen sich meist um eingebettete Dateien/Streams, Objekt-/Beziehungsgraphen und ZIP-Extraktion.
+PDFs und Office-Dateien sind in erster Linie Container; Angriffe drehen sich normalerweise um eingebettete Dateien/Streams, Objekt-/Beziehungsgraphen und die ZIP-Extraktion.
+
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Malware und delivery-orientierte Steganographie
+### Malware- und auslieferungsbezogene Steganografie
 
-Die Zustellung von Payloads nutzt häufig legitim aussehende Dateien (z. B. GIF/PNG), die marker-abgegrenzte Text-Payloads enthalten, statt Pixel-Level-Verstecken.
+Die Payload-Auslieferung verwendet häufig echt wirkende Dateien (z. B. GIF/PNG), die durch Marker begrenzte Text-Payloads enthalten, anstatt Daten auf Pixelebene zu verstecken.
+
 {{#ref}}
 malware-and-network/README.md
 {{#endref}}

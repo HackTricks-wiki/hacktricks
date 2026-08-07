@@ -2,8 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Fault Injection Angriffe beinhalten das Einführen externer Störungen in elektronische Schaltungen, um deren Verhalten zu beeinflussen, was zur Offenlegung von Informationen oder sogar zum Umgehen bestimmter Einschränkungen in der Schaltung führt. Diese Angriffe eröffnen viele Möglichkeiten, elektronische Schaltungen anzugreifen. Dieser Angriff wird auch als Glitching von elektronischen Schaltungen bezeichnet.
+Fault Injection umfasst das Einbringen externer Störungen in elektronische Schaltungen, um deren Verhalten zu beeinflussen. Dies kann zur Offenlegung von Informationen oder sogar zum Umgehen bestimmter Einschränkungen in der Schaltung führen. Diese Angriffe eröffnen zahlreiche Möglichkeiten zum Angriff auf elektronische Schaltungen. Dieser Angriff wird auch als Glitching elektronischer Schaltungen bezeichnet.
 
-Es gibt viele Methoden und Mittel, um Fehler in eine elektronische Schaltung einzuspeisen.
+Es gibt viele Methoden und Mittel, um Fehler in eine elektronische Schaltung einzubringen.
 
 {{#include ../../banners/hacktricks-training.md}}

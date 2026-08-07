@@ -1,10 +1,10 @@
-# Ganz grundlegend hilft uns dieses Tool dabei, Werte für Variablen zu finden, die bestimmte Bedingungen erfüllen müssen. Diese von Hand zu berechnen, wäre sehr aufwendig. Daher können Sie Z3 die Bedingungen angeben, die die Variablen erfüllen müssen, und es wird einige Werte finden (falls möglich).
+# Im Grunde hilft uns dieses Tool dabei, Werte für Variablen zu finden, die bestimmte Bedingungen erfüllen müssen, wobei die Berechnung von Hand sehr mühsam wäre. Daher können Sie Z3 die Bedingungen angeben, die die Variablen erfüllen müssen, und es wird einige Werte finden (falls möglich).
 
 {{#include ../../banners/hacktricks-training.md}}
 
 # Grundlegende Operationen
 
-## Boolesche Werte/Und/Oder/Nicht
+## Booleans/And/Or/Not
 ```python
 # pip3 install z3-solver
 from z3 import *
@@ -60,7 +60,7 @@ print("%s = %s" % (d.name(), m[d]))
 ```
 # Maschinenarithmetik
 
-Moderne CPUs und gängige Programmiersprachen verwenden Arithmetik über Bit-Vektoren fester Größe. Maschinenarithmetik ist in Z3Py als Bit-Vectors verfügbar.<sup>[[1]](#references)</sup>
+Moderne CPUs und Mainstream-Programmiersprachen verwenden Arithmetik über Bit-Vektoren fester Größe. Maschinenarithmetik ist in Z3Py als Bit-Vectors verfügbar.
 ```python
 from z3 import *
 
@@ -75,9 +75,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) # This is False
 ```
-## Signierte/unsignierte Zahlen
+## Vorzeichenbehaftete/Vorzeichenlose Zahlen
 
-Z3 stellt spezielle signierte Versionen arithmetischer Operationen bereit, bei denen es einen Unterschied macht, ob der Bit-Vektor als signiert oder unsigniert behandelt wird. In Z3Py entsprechen die Operatoren `<`, `<=`, `>`, `>=`, `/`, `%` und `>>` den signierten Versionen. Die entsprechenden unsignierten Operatoren sind `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` und `LShR`.<sup>[[1]](#references)</sup>
+Z3 stellt spezielle vorzeichenbehaftete Varianten arithmetischer Operationen bereit, bei denen es einen Unterschied macht, ob der Bit-Vektor als vorzeichenbehaftet oder vorzeichenlos behandelt wird. In Z3Py entsprechen die Operatoren `<`, `<=`, `>`, `>=`, `/`, `%` und `>>` den vorzeichenbehafteten Varianten. Die entsprechenden vorzeichenlosen Operatoren sind `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` und `LShR`.<sup>[[1]](#references)</sup>
 ```python
 from z3 import *
 
@@ -97,9 +97,9 @@ solve(ULT(x, 0))
 ```
 ## Funktionen
 
-Interpretierte Funktionen wie arithmetische Funktionen haben eine festgelegte Standardinterpretation. Nicht interpretierte Funktionen und Konstanten sind maximal flexibel; sie erlauben jede Interpretation, die mit den Einschränkungen für die Funktion oder Konstante konsistent ist.<sup>[[1]](#references)</sup>
+Interpretierte Funktionen wie arithmetische Funktionen haben eine festgelegte Standardinterpretation. Nicht interpretierte Funktionen und Konstanten sind maximal flexibel; sie erlauben jede Interpretation, die mit den Einschränkungen für die Funktion oder Konstante vereinbar ist.<sup>[[1]](#references)</sup>
 
-Beispiel: `f`, zweimal auf `x` angewendet, ergibt wieder `x`, aber `f`, einmal auf `x` angewendet, unterscheidet sich von `x`.
+Beispiel: Wenn `f` zweimal auf `x` angewendet wird, ergibt sich wieder `x`, aber wenn `f` einmal auf `x` angewendet wird, ist das Ergebnis von `x` verschieden.
 ```python
 from z3 import *
 
@@ -120,11 +120,11 @@ print(s.model())
 ```
 # Reversing-orientierte Muster
 
-Wenn du eine vollständige symbolische Ausführung über ein Binary anstelle des manuellen Liftings nur einiger weniger Checks benötigst, sieh dir [Angr - Examples](angr/angr-examples.md) an. In der Praxis besteht ein sehr verbreiteter Workflow darin, die relevanten Prädikate aus dem Decompiler/Assembly zu extrahieren und in Z3 nur die interessanten arithmetischen oder speicherbezogenen Constraints nachzubilden.
+Wenn du für eine Binärdatei eine vollständige symbolische Ausführung statt des manuellen Liftens nur weniger Checks benötigst, siehe [Angr - Examples](angr/angr-examples.md). In der Praxis besteht ein sehr häufiger Workflow darin, die relevanten Prädikate aus dem Decompiler bzw. der Assembly zu rekonstruieren und nur die interessanten arithmetischen oder speicherbezogenen Constraints in Z3 nachzubilden.
 
-## Benutzergesteuerte Daten zunächst als Bytes modellieren
+## Benutzerkontrollierte Daten zunächst als Bytes modellieren
 
-Beim Reversing ist es normalerweise besser, für jedes Eingabebyte mit `BitVec(..., 8)` zu beginnen und anschließend Words exakt so nachzubilden, wie es das Target tut. Dadurch bleiben Wrap-around, Signedness-Bugs, Shifts, Rotationen und Probleme mit der Byte-Reihenfolge erhalten.
+Beim Reversing ist es normalerweise besser, für jedes Eingabe-Byte mit `BitVec(..., 8)` zu beginnen und anschließend Wörter exakt so nachzubilden, wie es das Zielsystem tut. Dadurch bleiben Überläufe, Bugs bei der Vorzeichenbehandlung, Shifts, Rotationen und Probleme mit der Byte-Reihenfolge erhalten.<sup>[[2]](#references)</sup>
 ```python
 from z3 import *
 
@@ -142,13 +142,13 @@ print(hex(s.model().eval(dword).as_long()))
 Nützliche Helfer beim Übersetzen von Assembly- oder Decompiler-Code:
 
 - `Concat`: 16-/32-/64-Bit-Werte aus Bytes wiederherstellen
-- `Extract`: High-/Low-Wörter vergleichen oder Masks/Shifts emulieren
+- `Extract`: High-/Low-Wörter vergleichen oder Masks/Shifts nachbilden
 - `ZeroExt` / `SignExt`: Fehler bei Zero-/Sign-Extension korrekt modellieren
-- `LShR` / `RotateLeft` / `RotateRight`: häufig in crackmes, Hashes und Obfuscators
+- `LShR` / `RotateLeft` / `RotateRight`: häufig in Crackmes, Hashes und Obfuscatoren
 
 ## Speicher-/Registertabellen mit Arrays modellieren
 
-Wenn eine Prüfung von `buf[i]`, Lookup-Tabellen oder emuliertem Speicher abhängt, kann `Array` übersichtlicher sein, als Dutzende separate Variablen zu erstellen.
+Wenn eine Prüfung von `buf[i]`, Lookup-Tabellen oder emuliertem Speicher abhängt, kann `Array` übersichtlicher sein, als Dutzende separate Variablen zu erstellen.<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -165,11 +165,11 @@ s = Solver()
 s.add(word == 0x4241)
 print(s.check())
 ```
-Das ist besonders praktisch, wenn das Binary Werte vor ihrer Validierung im Speicher kopiert oder wenn du die Auswirkungen einiger `mov`-/`xor`-/`add`-Operationen modellieren möchtest, ohne das gesamte Programm auszuführen.
+Das ist besonders praktisch, wenn das Binary Werte vor ihrer Validierung im Speicher kopiert oder wenn du den Effekt einiger `mov`-/`xor`-/`add`-Operationen modellieren möchtest, ohne das gesamte Programm auszuführen.
 
-## Incremental Solving eignet sich hervorragend für die Branch-Triage
+## Incremental solving eignet sich hervorragend für branch triage
 
-Wenn du die grundlegenden Constraints bereits extrahiert hast, verwende `push()` / `pop()` (oder Assumptions), um alternative Branches zu testen, ohne den Solver jedes Mal neu aufzubauen:
+Wenn du die grundlegenden Constraints bereits extrahiert hast, verwende `push()` / `pop()` (oder assumptions), um alternative branches zu testen, ohne den Solver jedes Mal neu aufzubauen:<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -189,9 +189,9 @@ s.pop()
 ```
 Dies ist nützlich, wenn du aus einem Decompiler wiederhergestellte Pfadbedingungen erneut abspielst oder schnell ermitteln möchtest, welcher Vergleich das Modell `unsat` macht.
 
-## Für angenehmere Payloads optimieren
+## Für bessere payloads optimieren
 
-Sobald ein Modell erfüllbar ist, kann dir `Optimize()` dabei helfen, eine besser nutzbare Lösung zu erhalten: Du kannst beispielsweise druckbare Bytes bevorzugen, eine Checksum-Komponente minimieren oder eine Struktur maximieren, die das Eingeben oder Kopieren des wiederhergestellten Passworts erleichtert.
+Sobald ein Modell erfüllbar ist, kann `Optimize()` dabei helfen, eine besser nutzbare Lösung zu erhalten: Bevorzuge beispielsweise druckbare Bytes, minimiere eine Prüfsummenkomponente oder maximiere eine bestimmte Struktur, die das Eingeben oder Kopieren des wiederhergestellten Passworts erleichtert.<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -206,7 +206,7 @@ print(bytes(o.model()[c].as_long() for c in key))
 ```
 ## Strings/Sequenzen für formatlastige Seriennummern
 
-Wenn das Ziel hauptsächlich Präfixe, Suffixe, Teilstrings oder eine regex-ähnliche Struktur prüft, können `String`-/`Seq`-Constraints einfacher sein als Bitvektoren Byte für Byte:
+Wenn das Ziel hauptsächlich Präfixe, Suffixe, Teilstrings oder eine regex-ähnliche Struktur prüft, können `String`-/`Seq`-Constraints einfacher sein als Bit-Vektoren auf Byte-für-Byte-Ebene:<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -271,8 +271,8 @@ print("failed to solve")
 ```
 ## Referenzen
 
-- [1] [Z3Py-Leitfaden - Beispiele (ericpony)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-- [2] [Z3-Leitfaden (Microsoft)](https://microsoft.github.io/z3guide/)
-- [3] [Z3 programmieren (Stanford)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+- [1] [Z3Py-Leitfaden mit Beispielen (ericpony z3py-tutorial)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Z3-Leitfaden – Theorie der Bit-Vektoren (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
+- [3] [Programmierung von Z3 (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 
 {{#include ../../banners/hacktricks-training.md}}
