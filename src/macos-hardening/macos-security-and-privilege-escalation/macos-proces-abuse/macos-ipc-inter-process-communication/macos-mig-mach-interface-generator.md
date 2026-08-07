@@ -4,28 +4,28 @@
 
 ## 基本信息
 
-MIG 的创建旨在**简化 Mach IPC** 代码的创建过程。它基本上会根据给定的定义，**生成服务器和客户端进行通信所需的代码**。即使生成的代码不够美观，开发者也只需导入它，其代码就会比之前简单得多。
+MIG 的创建旨在**简化 Mach IPC** 代码的创建过程。它基本上会根据给定的定义，**生成服务器和客户端进行通信所需的代码**。即使生成的代码很难看，开发者也只需将其导入，其代码就会比以前简单得多。<sup>[[1]](#references)</sup>
 
-该定义使用 Interface Definition Language (IDL) 指定，并采用 `.defs` 扩展名。
+该定义使用 Interface Definition Language (IDL) 指定，并使用 `.defs` 扩展名。
 
 这些定义包含 5 个部分：
 
-- **Subsystem 声明**：使用关键字 subsystem 来指示其**名称**和**id**。如果服务器应在 kernel 中运行，也可以将其标记为 **`KernelServer`**。
-- **包含和导入**：MIG 使用 C-prepocessor，因此可以使用 imports。此外，还可以使用 `uimport` 和 `simport` 来导入 user 或 server 生成的代码。
-- **类型声明**：可以定义数据类型，但通常会导入 `mach_types.defs` 和 `std_types.defs`。对于自定义类型，可以使用以下语法：
-- \[i`n/out]tran`：需要从传入消息中或向传出消息中进行转换的 Function
+- **Subsystem 声明**：使用 subsystem 关键字指示**名称**和**id**。如果服务器应在内核中运行，也可以将其标记为 **`KernelServer`**。<sup>[[4]](#references)</sup>
+- **包含和导入**：MIG 使用 C-prepocessor，因此可以使用导入。此外，还可以使用 `uimport` 和 `simport` 来导入用户或服务器生成的代码。
+- **类型声明**：可以定义数据类型，不过通常会导入 `mach_types.defs` 和 `std_types.defs`。对于自定义类型，可以使用以下语法：
+- \[i`n/out]tran`：需要从传入消息中或向传出消息中进行转换的函数
 - `c[user/server]type`：映射到另一个 C 类型。
-- `destructor`：类型释放时调用此 Function。
-- **Operations**：这些是 RPC methods 的定义，共有 5 种不同类型：
-- `routine`：需要 reply
-- `simpleroutine`：不需要 reply
-- `procedure`：需要 reply
-- `simpleprocedure`：不需要 reply
-- `function`：需要 reply
+- `destructor`：类型被释放时调用此函数。
+- **操作**：这些是 RPC 方法的定义。共有 5 种不同类型：
+- `routine`：需要回复
+- `simpleroutine`：不需要回复
+- `procedure`：需要回复
+- `simpleprocedure`：不需要回复
+- `function`：需要回复
 
 ### 示例
 
-创建一个 definition file，本例中使用一个非常简单的 function：
+创建一个定义文件，此处使用一个非常简单的函数：
 ```cpp:myipc.defs
 subsystem myipc 500; // Arbitrary name and id
 
@@ -40,19 +40,19 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-请注意，第一个 **argument 是要绑定的端口**，MIG 将**自动处理 reply port**（除非在 client code 中调用 `mig_get_reply_port()`）。此外，操作的 **ID** 将从指定的 subsystem ID 开始**按顺序递增**（因此，如果某个操作已弃用，则将其删除，并使用 `skip` 继续使用其 ID）。
+注意，第一个 **参数是要绑定的端口**，MIG 将**自动处理回复端口**（除非在客户端代码中调用 `mig_get_reply_port()`）。此外，**操作的 ID** 将从指定的 subsystem ID 开始**按顺序递增**（因此，如果某个操作已弃用，则会将其删除，并使用 `skip` 继续使用其 ID）。
 
-现在使用 MIG 生成 server 和 client code，使它们能够相互通信以调用 Subtract function：
+现在使用 MIG 生成 server 和 client 代码，使它们能够相互通信以调用 Subtract 函数：
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
 当前目录中将创建几个新文件。
 
 > [!TIP]
-> 你可以在系统中通过以下命令找到一个更复杂的示例：`mdfind mach_port.defs`\
-> 并且可以在文件所在的同一目录中通过以下命令进行编译：`mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
+> 你可以使用以下命令在系统中找到一个更复杂的示例：`mdfind mach_port.defs`\
+> 你可以在该文件所在的同一目录中使用以下命令进行编译：`mig -DLIBSYSCALL_INTERFACE mach_ports.defs`<sup>[[2]](#references)</sup>
 
-在 **`myipcServer.c`** 和 **`myipcServer.h`** 文件中，你可以找到结构体 **`SERVERPREFmyipc_subsystem`** 的声明和定义。该结构体基本上根据接收到的消息 ID 定义要调用的函数（我们指定了从 500 开始的编号）：
+在文件 **`myipcServer.c`** 和 **`myipcServer.h`** 中，你可以找到结构体 **`SERVERPREFmyipc_subsystem`** 的声明和定义。该结构体基本上根据接收到的消息 ID 定义要调用的函数（我们指定了从 500 开始的编号）：
 
 {{#tabs}}
 {{#tab name="myipcServer.c"}}
@@ -89,7 +89,7 @@ routine[1];
 {{#endtab}}
 {{#endtabs}}
 
-基于前面的 struct，函数 **`myipc_server_routine`** 将获取 **message ID**，并返回要调用的相应函数：
+基于前面的结构体，函数 **`myipc_server_routine`** 将获取 **message ID**，并返回要调用的正确函数：
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -104,18 +104,18 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-在这个示例中，我们只在 definitions 中定义了 1 个 function，但如果定义了更多 functions，它们将位于 **`SERVERPREFmyipc_subsystem`** 的 array 中，第一个会被分配 ID **500**，第二个会被分配 ID **501**……
+在此示例中，我们只在 definitions 中定义了 1 个函数，但如果定义了更多函数，它们会位于 **`SERVERPREFmyipc_subsystem`** 的数组中，第一个函数会被分配 ID **500**，第二个函数分配 ID **501`**……
 
-如果该 function 预期发送 **reply**，还会存在 function `mig_internal kern_return_t __MIG_check__Reply__<name>`。
+如果该函数预期发送 **reply**，则函数 `mig_internal kern_return_t __MIG_check__Reply__<name>` 也会存在。
 
-实际上，可以在 **`myipcServer.h`** 中的 struct **`subsystem_to_name_map_myipc`**（其他文件中的 **`subsystem*to_name_map*\***）里识别这种对应关系：
+实际上，可以在 **`myipcServer.h`** 中的结构体 **`subsystem_to_name_map_myipc`**（其他文件中的 **`subsystem*to_name_map*\***`）中识别这种对应关系：
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
 { "Subtract", 500 }
 #endif
 ```
-最后，另一个让 server 正常工作的关键函数是 **`myipc_server`**，它将实际**调用**与接收到的 ID 相关的**函数**：
+最后，另一个使 server 正常工作的关键函数是 **`myipc_server`**，它将实际**调用**与接收到的 id 相关的函数：<sup>[[3]](#references)</sup>
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -149,9 +149,9 @@ return FALSE;
 }
 </code></pre>
 
-检查前面突出显示的、根据 ID 访问要调用函数的代码行。
+检查前面突出显示的、通过 ID 访问待调用函数的代码行。
 
-下面是用于创建简单 **server** 和 **client** 的代码，其中 client 可以调用 server 中的 Subtract 函数：
+以下是用于创建简单 **server** 和 **client** 的代码，其中 client 可以调用 server 中的 Subtract 函数：
 
 {{#tabs}}
 {{#tab name="myipc_server.c"}}
@@ -217,11 +217,11 @@ USERPREFSubtract(port, 40, 2);
 
 ### The NDR_record
 
-NDR_record 由 `libsystem_kernel.dylib` 导出，它是一个 struct，允许 MIG **转换数据，使其与系统无关**；因为 MIG 最初设计用于不同系统之间（而不仅仅是同一台机器内）的通信。
+NDR_record 由 `libsystem_kernel.dylib` 导出，它是一个允许 MIG **转换数据，使其与所使用的系统无关**的 struct，因为 MIG 的设计初衷是在不同系统之间使用（而不仅仅是在同一台机器上）。
 
-这很有意思，因为如果在某个 binary 中发现 `_NDR_record` 作为 dependency（`jtool2 -S <binary> | grep NDR` 或 `nm`），则意味着该 binary 是 MIG client 或 Server。
+这很有意思，因为如果在 binary 中发现 `_NDR_record` 作为 dependency（`jtool2 -S <binary> | grep NDR` 或 `nm`），则意味着该 binary 是 MIG client 或 Server。
 
-此外，**MIG servers** 的 dispatch table 位于 `__DATA.__const`（在 macOS kernel 中为 `__CONST.__constdata`，在其他 \*OS kernels 中为 `__DATA_CONST.__const`）。可以使用 **`jtool2`** 将其 dump 出来。
+此外，**MIG servers** 会将 dispatch table 放在 `__DATA.__const` 中（macOS kernel 中为 `__CONST.__constdata`，其他 \*OS kernels 中为 `__DATA_CONST.__const`）。可以使用 **`jtool2`** 将其 dump 出来。
 
 而 **MIG clients** 会使用 `__NDR_record`，并通过 `__mach_msg` 将其发送给 servers。
 
@@ -229,19 +229,19 @@ NDR_record 由 `libsystem_kernel.dylib` 导出，它是一个 struct，允许 MI
 
 ### jtool
 
-由于现在许多 binaries 使用 MIG 来暴露 mach ports，因此了解如何**识别是否使用了 MIG**，以及 MIG 针对每个 message ID 执行的**函数**，很有意义。
+由于现在许多 binaries 使用 MIG 来 expose mach ports，因此了解如何**识别是否使用了 MIG**以及 MIG 针对每个 message ID 执行的**函数**很有意义。
 
 [**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) 可以从 Mach-O binary 中解析 MIG 信息，指出 message ID 并识别要执行的函数：
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-此外，MIG functions 只是实际被调用 function 的 wrappers，这意味着获取其 disassembly 并 grep BL，你可能能够找到实际被调用的 function：
+此外，MIG 函数只是实际被调用函数的 wrapper，这意味着获取其反汇编并 grep 查找 BL，可能就能找到实际被调用的函数：
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
-### 汇编
+### Assembly
 
-前面提到过，负责根据**收到的消息 ID 调用正确函数**的函数是 `myipc_server`。不过，你通常不会拥有 binary 的符号（没有函数名称），因此了解它反编译后的样子很有意义，因为它通常会非常相似（该函数的代码独立于所暴露的函数）：
+之前提到过，负责**根据收到的 message ID 调用正确函数**的函数是 `myipc_server`。但是，通常情况下你不会拥有 binary 的符号（没有函数名称），因此了解它反编译后的样子很有意义，因为它通常会非常相似（该函数的代码独立于所暴露的函数）：
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-这是使用不同 Hopper free 版本反编译出的同一个函数：
+这是使用不同 Hopper free 版本反编译出的相同函数：
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -365,7 +365,7 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-实际上，如果你转到函数**`0x100004000`**，就会找到 **`routine_descriptor`** 结构体数组。结构体的第一个元素是 **function** 的实现**地址**，并且该**结构体占用 0x28 字节**，因此从第 0 个字节开始，每隔 0x28 字节读取 8 个字节，就能得到将要调用的 **function** 的**地址**：
+实际上，如果你跳转到函数**`0x100004000`**，就会找到 **`routine_descriptor`** structs 的 array。该 struct 的第一个元素是实现**函数**的**地址**，并且每个 **struct 占用 0x28 bytes**，因此从 byte 0 开始，每隔 0x28 bytes 读取 8 bytes，就可以获得将被调用的**函数地址**：
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
@@ -373,15 +373,15 @@ return r0;
 
 可以[**使用此 Hopper script**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py)提取这些数据。
 
-### 调试
+### Debug
 
-MIG 生成的代码还会调用 `kernel_debug`，以生成有关进入和退出操作的日志。可以使用 **`trace`** 或 **`kdv`** 检查这些日志：`kdv all | grep MIG`
+MIG 生成的代码还会调用 `kernel_debug`，以便生成有关操作进入和退出的日志。可以使用 **`trace`** 或 **`kdv`** 检查这些日志：`kdv all | grep MIG`
 
-## 参考资料
+## References
 
-- [1] [bootstrap_cmds — `migcom.tproj`（MIG compiler 本身）](https://github.com/apple-oss-distributions/bootstrap_cmds/tree/main/migcom.tproj)
-- [2] [XNU — `osfmk/mach/mach_port.defs`（MIG subsystem definition 示例）](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
-- [3] [XNU — `osfmk/mach/task.defs`（task subsystem MIG definition）](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
-- [4] [XNU — `osfmk/mach/message.h`（Mach message header layout）](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
+- [1] [bootstrap_cmds — `migcom.tproj` (the MIG compiler itself)](https://github.com/apple-oss-distributions/bootstrap_cmds/tree/main/migcom.tproj)
+- [2] [XNU — `osfmk/mach/mach_port.defs` (example MIG subsystem definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
+- [3] [XNU — `osfmk/mach/message.h` (Mach message header layout)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
+- [4] [XNU — `osfmk/mach/task.defs` (task subsystem MIG definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
 
 {{#include ../../../../banners/hacktricks-training.md}}

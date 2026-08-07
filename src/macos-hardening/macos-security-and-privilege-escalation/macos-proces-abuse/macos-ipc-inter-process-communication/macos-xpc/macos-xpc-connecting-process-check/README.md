@@ -4,23 +4,23 @@
 
 ## XPC 连接进程检查
 
-当与 XPC service 建立连接时，server 会检查该连接是否被允许。通常会执行以下检查：
+当与 XPC service 建立连接时，服务器会检查该连接是否被允许。通常会执行以下检查：
 
-1. 检查连接的 **process 是否使用 Apple-signed** certificate 签名（该证书仅由 Apple 颁发）。
-- 如果**未验证此项**，攻击者就可以创建一个**伪造 certificate**，以匹配其他任意检查。
+1. 检查连接的 **process 是否使用 Apple-signed** certificate 签名（仅由 Apple 颁发）。
+- 如果**未验证此项**，攻击者可以创建一个**伪造 certificate**，以匹配其他任意检查。
 2. 检查连接的 process 是否使用**组织的 certificate**签名（team ID verification）。
-- 如果**未验证此项**，就可以使用 Apple 的**任意 developer certificate**进行签名，并连接到该 service。
+- 如果**未验证此项**，可以使用任意来自 Apple 的 **developer certificate** 进行签名，并连接到该 service。
 3. 检查连接的 process 是否包含**正确的 bundle ID**。
-- 如果**未验证此项**，任何**由同一组织签名**的工具都可以用于与 XPC service 交互。
+- 如果**未验证此项**，任何由**同一组织**签名的 tool 都可以用于与 XPC service 交互。
 4. （4 或 5）检查连接的 process 是否具有**正确的软件版本号**。
-- 如果**未验证此项**，就可能使用旧的、不安全的 client 连接到 XPC service，即使其他检查均已到位；这类 client 可能容易受到 process injection。
-5. （4 或 5）检查连接的 process 是否启用了 hardened runtime，且不包含危险的 entitlements（例如允许加载任意 libraries 或使用 DYLD 环境变量的 entitlements）。
-1. 如果**未验证此项**，client 可能**容易受到 code injection**。
+- 如果**未验证此项**，可以使用旧的、不安全的 client 连接到 XPC service，即使其他检查已经到位；这类 client 可能容易受到 process injection 攻击。
+5. （4 或 5）检查连接的 process 是否启用了 hardened runtime，且没有危险的 entitlements（例如允许加载任意 libraries 或使用 DYLD env vars 的 entitlements）
+1. 如果**未验证此项**，client 可能**容易受到 code injection 攻击**
 6. 检查连接的 process 是否具有允许其连接到该 service 的 **entitlement**。这适用于 Apple binaries。
 7. **verification** 必须基于连接的 **client 的 audit token**，而不是其 process ID（**PID**），因为前者可以防止 **PID reuse attacks**。
-- Developers **很少使用 audit token** API call，因为它是**private** API，Apple 可能随时对其进行**更改**。此外，Mac App Store apps 不允许使用 private API。
-- 如果使用 **`processIdentifier`** method，则可能存在漏洞。
-- 应使用 **`xpc_dictionary_get_audit_token`**，而不是 **`xpc_connection_get_audit_token`**，因为后者在某些情况下也可能存在 [漏洞](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)。<sup>[[5]](#references)</sup>
+- Developers **很少使用 audit token** API call，因为它是**私有 API**，因此 Apple 可能随时进行更改。此外，Mac App Store apps 不允许使用 private API。
+- 如果使用了 **`processIdentifier`** method，则可能存在漏洞
+- 应使用 **`xpc_dictionary_get_audit_token`**，而不是 **`xpc_connection_get_audit_token`**，因为后者在某些情况下也可能存在漏洞，详见 [链接](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)。<sup>[[5]](#references)</sup>
 
 ### Communication Attacks
 
@@ -40,18 +40,18 @@ macos-xpc_connection_get_audit_token-attack.md
 
 ### Trustcache - Downgrade Attacks Prevention
 
-Trustcache 是 Apple Silicon machines 中引入的一种防御方法，它存储 Apple binaries 的 CDHSAH database，因此只有允许的、未被修改的 binaries 才能执行，从而防止执行 downgrade versions。
+Trustcache 是 Apple Silicon machines 引入的一种防御方法，它存储 Apple binaries 的 CDHSAH database，因此只有获准且未经修改的 binaries 才能被执行。这可以防止执行 downgrade versions。
 
 ### Code Examples
 
-server 会在名为 **`shouldAcceptNewConnection`** 的 function 中实现此 **verification**。
+服务器会在名为 **`shouldAcceptNewConnection`** 的 function 中实现此 **verification**。
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
 //Check connection
 return YES;
 }
 ```
-对象 NSXPCConnection 有一个**私有**属性 **`auditToken`**（应该使用该属性，但它可能会发生变化），以及一个**公开**属性 **`processIdentifier`**（不应使用该属性）。
+对象 NSXPCConnection 具有一个 **private** 属性 **`auditToken`**（应该使用该属性，但它可能会发生变化），以及一个 **public** 属性 **`processIdentifier`**（不应使用该属性）。
 
 可以通过类似以下方式验证连接进程：<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```objectivec
@@ -73,7 +73,7 @@ SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
 SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
-如果开发者不想检查 client 的版本，至少可以检查 client 是否容易受到 process injection 的攻击：
+如果开发者不想检查客户端的版本，至少可以检查客户端不存在 process injection 漏洞：
 ```objectivec
 [...]
 CFDictionaryRef csInfo = NULL;

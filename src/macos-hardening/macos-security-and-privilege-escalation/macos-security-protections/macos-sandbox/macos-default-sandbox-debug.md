@@ -1,8 +1,8 @@
-# macOS 默认沙箱调试
+# macOS Default Sandbox 调试
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-在此页面中，您可以找到如何创建一个应用程序，以便从默认的 macOS 沙箱内部启动任意命令：
+在本页中，你可以了解如何创建一个应用程序，以便从 macOS 默认 Sandbox 内部启动任意命令：
 
 1. 编译应用程序：
 ```objectivec:main.m
@@ -34,9 +34,9 @@ system(input);
 return 0;
 }
 ```
-编译运行： `clang -framework Foundation -o SandboxedShellApp main.m`
+使用以下命令进行编译：`clang -framework Foundation -o SandboxedShellApp main.m`
 
-2. 构建 `.app` 包
+2. 构建 `.app` bundle
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +58,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. 定义权限
+3. 定义 entitlements
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. 签署应用程序（您需要在钥匙串中创建一个证书）
+4. 对 app 进行签名（你需要在 keychain 中创建一个证书）
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
