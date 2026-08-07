@@ -66,7 +66,7 @@ A very practical recent workflow is to record BlobRunner under **TTD** and then 
 TTD.exe .\blobrunner.exe .\shellcode.bin
 ```
 
-The important part is to **note the allocated base address printed by BlobRunner** and then **rebase** the shellcode view to that address before replaying the trace. Also note that Microsoft documents TTD recording as **invasive**: run it from an **elevated** prompt, expect noticeable slowdown, and keep the recording window short to avoid massive trace files.
+The important part is to **note the allocated base address printed by BlobRunner** and then **rebase** the shellcode view to that address before replaying the trace. Also note that Microsoft documents TTD recording as **invasive**: run it from an **elevated** prompt, expect noticeable slowdown, and keep the recording window short to avoid massive trace files.<sup>[[1]](#references)</sup>
 
 ### If the blob needs companion data, use a PE wrapper instead
 
@@ -302,4 +302,5 @@ int main(int argc, char* argv[])
 
 - [1] [Time Travel Debugging Shellcode with Binary Ninja](https://www.lrqa.com/en/cyber-labs/time-travel-debugging-shellcode-with-binary-ninja/)
 - [2] [Analyzing Shellcode with SCLauncher](https://www.thecyberyeti.com/post/analyzing-shellcode-with-sclauncher)
+
 {{#include ../../banners/hacktricks-training.md}}

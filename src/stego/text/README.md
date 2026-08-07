@@ -49,11 +49,10 @@ PY
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
 
-If ranges contain multiple bytes per declaration, split on commas first and normalize (`tr ',+' '\n'`). Python makes it easy to parse and emit bytes if formatting is inconsistent.
+If ranges contain multiple bytes per declaration, split on commas first and normalize (`tr ',+' '\n'`). Python makes it easy to parse and emit bytes if formatting is inconsistent.<sup>[[1]](#references)</sup>
 
 ## References
 
 - [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
 
 {{#include ../../banners/hacktricks-training.md}}
-

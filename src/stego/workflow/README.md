@@ -61,7 +61,7 @@ If extraction fails but signatures are reported, manually carve offsets with `dd
 
 ### Bread-and-butter tools
 
-These catch the high-frequency container-level cases: metadata payloads, appended bytes, and embedded files disguised by extension.
+These catch the high-frequency container-level cases: metadata payloads, appended bytes, and embedded files disguised by extension.<sup>[[1]](#references)</sup>
 
 #### Binwalk
 
@@ -161,9 +161,8 @@ Binary-to-image helper:
 
 - [https://www.branah.com/braille-translator](https://www.branah.com/braille-translator)
 
-## Reference lists
+## References
 
-- [https://0xrick.github.io/lists/stego/](https://0xrick.github.io/lists/stego/)
-- [https://github.com/DominicBreuker/stego-toolkit](https://github.com/DominicBreuker/stego-toolkit)
+- [1] [DominicBreuker/stego-toolkit - Docker image with the most popular steganography tools bundled together](https://github.com/DominicBreuker/stego-toolkit)
 
 {{#include ../../banners/hacktricks-training.md}}
