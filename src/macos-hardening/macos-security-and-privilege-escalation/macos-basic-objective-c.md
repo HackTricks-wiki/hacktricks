@@ -5,21 +5,21 @@
 ## Objective-C
 
 > [!CAUTION]
-> Let op dat programme wat in Objective-C geskryf is **behou** hul klasverklarings **wanneer** **gecompileer** word in [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Sulke klasverklarings **sluit** die naam en tipe van in:
+> Let daarop dat programme wat in Objective-C geskryf is, hul klasdekl arasies **behou** wanneer hulle in [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) **gekompileer** word. Sulke klasdekl arasies **sluit** die naam en tipe van die volgende in:
 
 - Die klas
 - Die klasmetodes
-- Die klasinstansie veranderlikes
+- Die klasinstansieveranderlikes
 
-Jy kan hierdie inligting verkry met behulp van [**class-dump**](https://github.com/nygard/class-dump):
+Jy kan hierdie inligting met [**class-dump**](https://github.com/nygard/class-dump) verkry:
 ```bash
 class-dump Kindle.app
 ```
-Let wel, hierdie name kan obfuskeer word om die omkering van die binêre meer moeilik te maak.
+Let daarop dat hierdie name geobfiskeer kan word om die reverse engineering van die binary moeiliker te maak.
 
 ## Klasse, Metodes & Objekte
 
-### Koppelvlak, Eienskappe & Metodes
+### Interface, Eienskappe & Metodes
 ```objectivec
 // Declare the interface of the class
 @interface MyVehicle : NSObject
@@ -50,9 +50,9 @@ self.numberOfWheels += value;
 
 @end
 ```
-### **Objek & Roep Metode**
+### **Objek- en oproepmetode**
 
-Om 'n instansie van 'n klas te skep, word die **`alloc`** metode aangeroep wat **geheue toewys** vir elke **eienskap** en **maak** daardie toewysings nul. Dan word **`init`** aangeroep, wat die **eienskappe** tot die **vereiste waardes** **initaliseer**.
+Om ’n instansie van ’n klas te skep, word die **`alloc`**-metode geroep, wat **geheue allokeer** vir elke **eienskap** en daardie allokasies **nul stel**. Daarna word **`init`** geroep, wat die **eienskappe initialiseer** na die **vereiste waardes**.
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -64,15 +64,15 @@ MyVehicle *newVehicle = [MyVehicle new];
 // [myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]
 [newVehicle addWheels:4];
 ```
-### **Klas Metodes**
+### **Klasmetodes**
 
-Klas metodes word gedefinieer met die **plusteken** (+) en nie die koppelteken (-) wat met instansiemetodes gebruik word nie. Soos die **NSString** klas metode **`stringWithString`**:
+Klasmetodes word met die **plusteken** (+) gedefinieer, nie die koppelteken (-) wat met instansiemetodes gebruik word nie. Soos die **NSString**-klasmetode **`stringWithString`**:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
 ### Setter & Getter
 
-Om **te stel** & **te kry** eienskappe, kan jy dit doen met 'n **puntnotasie** of soos asof jy 'n **metode aanroep**:
+Om eienskappe te **set** & **get**, kan jy dit met **dot notation** doen of asof jy ’n **method** **call**:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -82,9 +82,9 @@ newVehicle.numberOfWheels = 2;
 NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
-### **Instansveranderlikes**
+### **Instance Variables**
 
-Alternatiewelik vir setter- en getter-metodes kan jy instansveranderlikes gebruik. Hierdie veranderlikes het dieselfde naam as die eienskappe, maar begin met 'n "\_":
+As alternatief tot setter- en getter-metodes kan jy instance variables gebruik. Hierdie veranderlikes het dieselfde naam as die properties, maar begin met ’n "\_":
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
@@ -93,9 +93,9 @@ NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 ```
 ### Protokolle
 
-Protokolle is 'n stel metodeverklarings (sonder eienskappe). 'n Klas wat 'n protokol implementeer, implementeer die verklaarde metodes.
+Protokolle is stelle metode-deklarasies (sonder properties). ’n Klas wat ’n protokol implementeer, implementeer die verklaarde metodes.
 
-Daar is 2 tipes metodes: **verpligtend** en **opsioneel**. Deur **default** is 'n metode **verpligtend** (maar jy kan dit ook met 'n **`@required`** etiket aandui). Om aan te dui dat 'n metode opsioneel is, gebruik **`@optional`**.
+Daar is 2 tipes metodes: **verpligtend** en **opsioneel**. By **verstek** is ’n metode **verpligtend** (maar jy kan dit ook met ’n **`@required`**-tag aandui). Om aan te dui dat ’n metode opsioneel is, gebruik **`@optional`**.
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -164,11 +164,11 @@ NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-Basisklasse is **onveranderlik**, so om 'n string aan 'n bestaande een toe te voeg, moet 'n **nuwe NSString geskep word**.
+Basiese klasse is **onveranderlik**, dus moet ’n **nuwe NSString geskep word** om ’n string by ’n bestaande een te voeg.
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
-Of jy kan ook 'n **mutable** string klas gebruik:
+Of jy kan ook 'n **mutable** string-klas gebruik:
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
 [mutableString appendString:bookTitle];
@@ -196,7 +196,7 @@ NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:
 NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
-#### Array, Sets & Dictionary
+#### Skikkings, versamelings en woordeboek
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -244,7 +244,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 ```
 ### Blokke
 
-Blokke is **funksies wat as objekte optree** sodat hulle aan funksies oorgedra kan word of **gestoor** kan word in **reeks** of **woordeboeke**. Ook, hulle kan **'n waarde verteenwoordig as hulle waardes gegee word** so dit is soortgelyk aan lambdas.
+Blokke is **funksies wat soos objekte optree** sodat hulle aan funksies deurgegee of in **skikkings** of **woordeboeke** **gestoor** kan word. Hulle kan ook **'n waarde verteenwoordig indien waardes aan hulle gegee word**, dus is dit soortgelyk aan lambdas.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -257,7 +257,7 @@ return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-Dit is ook moontlik om **'n bloktipe te definieer om as 'n parameter** in funksies gebruik te word:
+Dit is ook moontlik om **'n bloktipe te definieer wat as 'n parameter** in funksies gebruik kan word:
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);
@@ -304,7 +304,7 @@ if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
 NSLog(@"Removed successfully");
 }
 ```
-Dit is ook moontlik om lêers te bestuur **met `NSURL`-objekte in plaas van `NSString`-objekte**. Die metode name is soortgelyk, maar **met `URL` in plaas van `Path`**.
+Dit is ook moontlik om lêers te bestuur **deur `NSURL`-objekte in plaas van `NSString`-objekte te gebruik**. Die metodename is soortgelyk, maar **met `URL` in plaas van `Path`**.
 ```objectivec
 
 

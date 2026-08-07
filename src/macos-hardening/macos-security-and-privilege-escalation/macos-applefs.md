@@ -2,29 +2,33 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Apple Eienaarskap Lêerstelsel (APFS)
+## Apple se Proprietêre Lêerstelsel (APFS)
 
-**Apple Lêerstelsel (APFS)** is 'n moderne lêerstelsel wat ontwerp is om die Hiërargiese Lêerstelsel Plus (HFS+) te vervang. Die ontwikkeling daarvan is gedryf deur die behoefte aan **verbeterde prestasie, sekuriteit en doeltreffendheid**.
+**Apple File System (APFS)** is 'n moderne lêerstelsel wat ontwerp is om die Hierarchical File System Plus (HFS+) te vervang. Die ontwikkeling daarvan is gedryf deur die behoefte aan **verbeterde werkverrigting, sekuriteit en doeltreffendheid**.
 
-Sommige noemenswaardige kenmerke van APFS sluit in:
+Sommige noemenswaardige kenmerke van APFS sluit in:<sup>[[1]](#references)</sup>
 
-1. **Ruimte Deel**: APFS laat verskeie volumes toe om **diezelfde onderliggende vrye stoorplek** op 'n enkele fisiese toestel te deel. Dit stel meer doeltreffende ruimte benutting in staat, aangesien die volumes dinamies kan groei en krimp sonder die behoefte aan handmatige hergroting of herpartitionering.
-1. Dit beteken, in vergelyking met tradisionele partities in lêer skywe, **dat in APFS verskillende partities (volumes) al die skyfspasie deel**, terwyl 'n gewone partisie gewoonlik 'n vaste grootte gehad het.
-2. **Snapshots**: APFS ondersteun **die skep van snapshots**, wat **lees-slegs**, punt-in-tyd voorbeelde van die lêerstelsel is. Snapshots stel doeltreffende rugsteun en maklike stelsels terugrol in staat, aangesien hulle minimale addisionele stoorplek verbruik en vinnig geskep of teruggedraai kan word.
-3. **Klone**: APFS kan **lêer of gids klone skep wat diezelfde stoorplek** as die oorspronklike deel totdat of die kloon of die oorspronklike lêer gewysig word. Hierdie kenmerk bied 'n doeltreffende manier om kopieë van lêers of gidse te skep sonder om die stoorplek te dupliceer.
-4. **Enkripsie**: APFS **ondersteun van nature volle skyf enkripsie** sowel as per-lêer en per-gids enkripsie, wat datasekuriteit oor verskillende gebruiksgevalle verbeter.
-5. **Crash Beskerming**: APFS gebruik 'n **kopie-op-skryf metadata skema wat lêerstelsel konsekwentheid verseker** selfs in gevalle van skielike kragverlies of stelsels wat ineenstort, wat die risiko van datakorruptie verminder.
+1. **Ruimte-deling**: APFS laat verskeie volumes toe om **dieselfde onderliggende vrye berging** op 'n enkele fisiese toestel te **deel**. Dit maak doeltreffender ruimtebenutting moontlik, aangesien die volumes dinamies kan groei en krimp sonder dat handmatige grootteverandering of herpartisionering nodig is.
+1. Dit beteken dat, vergeleke met tradisionele partisies op skywe, **verskillende partisies (volumes) in APFS al die skyfspasie deel**, terwyl 'n gewone partisie gewoonlik 'n vaste grootte gehad het.
+2. **Snapshots**: APFS ondersteun die **skep van snapshots**, wat **leesalleen-**instansies van die lêerstelsel op 'n spesifieke tydstip is. Snapshots maak doeltreffende rugsteune en maklike stelselterugstellings moontlik, aangesien hulle minimale bykomende berging gebruik en vinnig geskep of teruggestel kan word.
+3. **Clones**: APFS kan **lêer- of gids-clones skep wat dieselfde berging as die oorspronklike deel** totdat óf die clone óf die oorspronklike lêer gewysig word. Hierdie kenmerk bied 'n doeltreffende manier om kopieë van lêers of gidse te skep sonder om die bergingspasie te dupliseer.
+4. **Enkripsie**: APFS **ondersteun oorspronklik volledige skyf-enkripsie**, sowel as enkripsie per lêer en per gids, wat datasekuriteit oor verskillende gebruiksgevalle heen verbeter.
+5. **Beskerming teen ineenstortings**: APFS gebruik 'n **copy-on-write-metadataskema wat lêerstelselkonsekwentheid verseker** selfs in gevalle van skielike kragverlies of stelselongelukke, wat die risiko van datakorrupsie verminder.
 
-Algeheel bied APFS 'n meer moderne, buigsame en doeltreffende lêerstelsel vir Apple-toestelle, met 'n fokus op verbeterde prestasie, betroubaarheid en sekuriteit.
+Oor die algemeen bied APFS 'n meer moderne, buigsame en doeltreffende lêerstelsel vir Apple-toestelle, met 'n fokus op verbeterde werkverrigting, betroubaarheid en sekuriteit.
 ```bash
 diskutil list # Get overview of the APFS volumes
 ```
 ## Firmlinks
 
-Die `Data` volume is gemonteer in **`/System/Volumes/Data`** (jy kan dit nagaan met `diskutil apfs list`).
+Die `Data`-volume word in **`/System/Volumes/Data`** gemonteer (jy kan dit met `diskutil apfs list` nagaan).
 
-Die lys van firmlinks kan gevind word in die **`/usr/share/firmlinks`** lêer.
+Die lys van firmlinks kan in die **`/usr/share/firmlinks`**-lêer gevind word.
 ```bash
 
 ```
+## Verwysings
+
+- [1] [APFS Guide - Kenmerke - Apple-ontwikkelaardokumentasie](https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/APFS_Guide/Features/Features.html)
+
 {{#include ../../banners/hacktricks-training.md}}

