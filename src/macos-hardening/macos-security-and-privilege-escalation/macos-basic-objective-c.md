@@ -5,21 +5,21 @@
 ## Objective-C
 
 > [!CAUTION]
-> Objective-C로 작성된 프로그램은 [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)로 **컴파일**될 때 **클래스 선언**을 **유지**합니다. 이러한 클래스 선언에는 다음의 이름과 유형이 **포함**됩니다:
+> Objective-C로 작성된 프로그램은 [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)로 **컴파일**된 후에도 클래스 선언을 **유지**합니다. 이러한 클래스 선언에는 다음 항목의 이름과 유형이 **포함**됩니다:
 
 - 클래스
 - 클래스 메서드
 - 클래스 인스턴스 변수
 
-이 정보를 [**class-dump**](https://github.com/nygard/class-dump)를 사용하여 얻을 수 있습니다:
+이 정보는 [**class-dump**](https://github.com/nygard/class-dump)를 사용하여 가져올 수 있습니다:
 ```bash
 class-dump Kindle.app
 ```
-이 이름들은 이진 파일의 리버싱을 더 어렵게 만들기 위해 난독화될 수 있습니다.
+이러한 이름은 바이너리의 reversing을 더 어렵게 만들기 위해 obfuscate될 수 있습니다.
 
-## 클래스, 메서드 및 객체
+## Classes, Methods & Objects
 
-### 인터페이스, 속성 및 메서드
+### Interface, Properties & Methods
 ```objectivec
 // Declare the interface of the class
 @interface MyVehicle : NSObject
@@ -50,9 +50,9 @@ self.numberOfWheels += value;
 
 @end
 ```
-### **객체 및 메서드 호출**
+### **객체 및 호출 메서드**
 
-클래스의 인스턴스를 생성하기 위해 **`alloc`** 메서드가 호출되어 각 **속성**에 대한 **메모리**를 **할당**하고 해당 할당을 **제로**로 설정합니다. 그런 다음 **`init`**이 호출되어 **속성**을 **필요한 값**으로 **초기화**합니다.
+클래스의 인스턴스를 생성하려면 **`alloc`** 메서드를 호출합니다. 이 메서드는 각 **속성**에 대해 **메모리를 할당**하고 해당 할당 영역을 **0으로 초기화**합니다. 그런 다음 **`init`**을 호출하여 **속성을 필요한 값으로 초기화**합니다.
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -66,13 +66,13 @@ MyVehicle *newVehicle = [MyVehicle new];
 ```
 ### **클래스 메서드**
 
-클래스 메서드는 인스턴스 메서드에 사용되는 하이픈 (-) 대신 **플러스 기호** (+)로 정의됩니다. **NSString** 클래스 메서드 **`stringWithString`**와 같이:
+클래스 메서드는 인스턴스 메서드에 사용되는 하이픈(-)이 아니라 **플러스 기호**(+)로 정의됩니다. **NSString** 클래스 메서드 **`stringWithString`**과 같습니다.
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
 ### Setter & Getter
 
-속성을 **설정**하고 **가져오기** 위해, **점 표기법**을 사용하거나 **메서드를 호출**하는 것처럼 할 수 있습니다:
+**속성**을 **설정**하고 **가져오려면**, **점 표기법**을 사용하거나 **method를 호출**하는 것처럼 수행할 수 있습니다:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -82,9 +82,9 @@ newVehicle.numberOfWheels = 2;
 NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
-### **인스턴스 변수**
+### **Instance Variables**
 
-setter 및 getter 메서드 대신 인스턴스 변수를 사용할 수 있습니다. 이러한 변수는 속성과 동일한 이름을 가지지만 "\_"로 시작합니다:
+setter 및 getter methods 대신 instance variables를 사용할 수 있습니다. 이러한 variables는 properties와 동일한 이름을 가지지만 "\_"로 시작합니다:
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
@@ -93,9 +93,9 @@ NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 ```
 ### 프로토콜
 
-프로토콜은 메서드 선언의 집합입니다(속성 없이). 프로토콜을 구현하는 클래스는 선언된 메서드를 구현합니다.
+프로토콜은 메서드 선언으로 구성됩니다(프로퍼티 제외). 프로토콜을 구현하는 클래스는 선언된 메서드를 구현합니다.
 
-메서드는 **필수**와 **선택적**의 2가지 유형이 있습니다. **기본적으로** 메서드는 **필수**입니다(하지만 **`@required`** 태그로도 표시할 수 있습니다). 메서드가 선택적임을 나타내려면 **`@optional`**을 사용하십시오.
+메서드에는 **mandatory**와 **optional** 두 가지 유형이 있습니다. **기본적으로** 메서드는 **mandatory**입니다(하지만 **`@required`** 태그를 사용해 이를 명시할 수도 있습니다). 메서드를 optional로 지정하려면 **`@optional`**을 사용합니다.
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -155,16 +155,16 @@ NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
 [mySuperCar makeLongTruck];
 }
 ```
-### 기본 클래스
+### Basic Classes
 
-#### 문자열
+#### String
 ```objectivec
 // NSString
 NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-기본 클래스는 **불변**하므로 기존 문자열에 문자열을 추가하려면 **새 NSString을 생성해야 합니다**.
+기본 클래스는 **immutable**이므로 기존 문자열에 문자열을 추가하려면 **새로운 NSString을 생성해야 합니다**.
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
@@ -177,7 +177,7 @@ NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "]
 [mutableString appendString:@" and published in "];
 [mutableString appendString:bookPublicationYear];
 ```
-#### 번호
+#### Number
 ```objectivec
 // character literals.
 NSNumber *theLetterZ = @'Z'; // equivalent to [NSNumber numberWithChar:'Z']
@@ -196,7 +196,7 @@ NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:
 NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
-#### 배열, 집합 및 사전
+#### 배열, 집합 및 딕셔너리
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -242,9 +242,9 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 [mutFruitColorsDictionary setObject:@"green" forKey:@"apple"];
 [mutFruitColorsDictionary removeObjectForKey:@"grape"];
 ```
-### 블록
+### Blocks
 
-블록은 **객체처럼 동작하는 함수**로, 함수에 전달되거나 **배열**이나 **사전**에 **저장**될 수 있습니다. 또한, 값이 주어지면 **값을 나타낼 수** 있어 람다와 유사합니다.
+Blocks는 **객체처럼 동작하는 함수**이므로 함수에 전달하거나 **배열** 또는 **딕셔너리**에 **저장**할 수 있습니다. 또한 **값이 전달되면 값을 나타낼 수** 있으므로 lambda와 유사합니다.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -257,7 +257,7 @@ return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-함수에서 **매개변수로 사용될 블록 유형을 정의하는** 것도 가능합니다:
+함수에서 매개변수로 사용할 **block type을 정의하는 것도** 가능합니다:
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);
@@ -304,7 +304,7 @@ if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
 NSLog(@"Removed successfully");
 }
 ```
-파일을 **`NSString`** 객체 대신 **`NSURL`** 객체를 사용하여 관리하는 것도 가능합니다. 메서드 이름은 비슷하지만 **`Path`** 대신 **`URL`**을 사용합니다.
+파일은 **`NSString`** 객체 대신 **`NSURL` 객체를 사용하여** 관리할 수도 있습니다. 메서드 이름은 비슷하지만, **`Path` 대신 `URL`**을 사용합니다.
 ```objectivec
 
 
