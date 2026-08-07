@@ -1,12 +1,13 @@
-# TLS & Certificates
+# TLS e Certificados
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Esta área trata de **X.509 parsing, formatos, conversões e erros comuns**.
 
-## X.509: parsing, formatos & erros comuns
+Esta área trata de **análise, formatos, conversões e erros comuns de X.509**.
 
-### Parsing rápido
+## X.509: análise, formatos e erros comuns
+
+### Análise rápida
 ```bash
 openssl x509 -in cert.pem -noout -text
 openssl asn1parse -in cert.pem
@@ -19,7 +20,7 @@ Campos úteis para inspecionar:
 - Janela de validade (NotBefore/NotAfter)
 - Algoritmo de assinatura (MD5? SHA1?)
 
-### Formatos & conversão
+### Formatos e conversão
 
 - PEM (Base64 com cabeçalhos BEGIN/END)
 - DER (binário)
@@ -32,14 +33,14 @@ openssl x509 -in cert.cer -outform PEM -out cert.pem
 openssl x509 -in cert.pem -outform der -out cert.der
 openssl pkcs12 -in file.pfx -out out.pem
 ```
-### Ângulos ofensivos comuns
+### Vetores ofensivos comuns
 
-- Confiar em certificados raiz fornecidos pelo usuário / validação de cadeia ausente
-- Algoritmos de assinatura fracos (legado)
-- Restrições de nome / falhas na análise de SAN (específico da implementação)
-- Problemas de confused deputy com misbinding na autenticação client-certificate
+- Confiar em raízes fornecidas pelo usuário / ausência de validação da cadeia
+- Algoritmos de assinatura fracos (legados)
+- Restrições de nome / bugs de análise de SAN (específicos da implementação)
+- Problemas de confused deputy com vinculação incorreta da autenticação por certificado de cliente
 
-### Registros CT
+### Logs de CT
 
 - [https://crt.sh/](https://crt.sh/)
 
