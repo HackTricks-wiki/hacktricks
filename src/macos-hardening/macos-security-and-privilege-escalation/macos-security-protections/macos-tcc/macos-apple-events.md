@@ -4,16 +4,16 @@
 
 ## Podstawowe informacje
 
-**Apple Events** to funkcja w macOS firmy Apple, która umożliwia aplikacjom komunikację ze sobą. Są częścią **Apple Event Manager**, który jest komponentem systemu operacyjnego macOS odpowiedzialnym za obsługę komunikacji międzyprocesowej. System ten umożliwia jednej aplikacji wysłanie wiadomości do innej aplikacji w celu zażądania wykonania określonej operacji, takiej jak otwieranie pliku, pobieranie danych lub wykonywanie polecenia.
+**Apple Events** to funkcja systemu macOS firmy Apple, która umożliwia aplikacjom komunikowanie się ze sobą. Są one częścią **Apple Event Manager**, komponentu systemu operacyjnego macOS odpowiedzialnego za obsługę komunikacji międzyprocesowej. System ten umożliwia jednej aplikacji wysłanie do innej aplikacji wiadomości z żądaniem wykonania określonej operacji, takiej jak otwarcie pliku, pobranie danych lub wykonanie polecenia.
 
-Demon mina to `/System/Library/CoreServices/appleeventsd`, który rejestruje usługę `com.apple.coreservices.appleevents`.
+Głównym daemonem jest `/System/Library/CoreServices/appleeventsd`, który rejestruje usługę `com.apple.coreservices.appleevents`.
 
-Każda aplikacja, która może odbierać zdarzenia, będzie sprawdzać z tym demonem, podając swój Apple Event Mach Port. A gdy aplikacja chce wysłać zdarzenie do niego, aplikacja poprosi ten port od demona.
+Każda aplikacja, która może odbierać events, rejestruje się w tym daemonie, przekazując swój Apple Event Mach Port. Gdy aplikacja chce wysłać do niej event, żąda tego portu od daemona.
 
-Aplikacje w piaskownicy wymagają uprawnień, takich jak `allow appleevent-send` i `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))`, aby mogły wysyłać zdarzenia. Należy zauważyć, że uprawnienia takie jak `com.apple.security.temporary-exception.apple-events` mogą ograniczać dostęp do wysyłania zdarzeń, co będzie wymagało uprawnień takich jak `com.apple.private.appleevents`.
+Aplikacje działające w sandboxie wymagają uprawnień takich jak `allow appleevent-send` oraz `(allow mach-lookup (global-name "com.apple.coreservices.appleevents"))`, aby móc wysyłać events. Należy pamiętać, że entitlements takie jak `com.apple.security.temporary-exception.apple-events` mogą ograniczać, kto ma dostęp do wysyłania events, co może wymagać entitlements takich jak `com.apple.private.appleevents`.
 
 > [!TIP]
-> Możliwe jest użycie zmiennej env **`AEDebugSends`** w celu rejestrowania informacji o wysłanej wiadomości:
+> Możliwe jest użycie zmiennej środowiskowej **`AEDebugSends`** w celu logowania informacji o wysyłanej wiadomości:
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
