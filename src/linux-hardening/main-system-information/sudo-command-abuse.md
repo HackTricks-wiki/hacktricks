@@ -4,7 +4,7 @@
 
 ## Sudo-toegelate interpreters
 
-As `sudo -l` ’n gebruiker toelaat om ’n interpreter as root uit te voer, behandel dit as direkte code execution. Interpreters is ontwerp om arbitrêre code uit te voer, dus is ’n reël wat `python3`, `perl`, `ruby`, `lua`, `node`, of soortgelyke binaries toelaat, gewoonlik gelykstaande aan root command execution, tensy die argumente streng beperk en gevalideer word.
+As `sudo -l` ’n gebruiker toelaat om ’n interpreter as root uit te voer, moet dit as direkte code execution hanteer word. Interpreters is ontwerp om arbitrary code uit te voer, dus is ’n reël wat `python3`, `perl`, `ruby`, `lua`, `node` of soortgelyke binaries toelaat, gewoonlik gelykstaande aan root command execution, tensy die arguments streng beperk en gevalideer word.
 
 Algemene hersieningsvloei:
 ```bash
@@ -22,9 +22,9 @@ Die presiese pad is belangrik. Indien die sudo-reël `/usr/bin/python3` toelaat,
 ```bash
 sudo /usr/bin/python3 -c 'import os; os.setuid(0); os.setgid(0); os.system("/bin/sh")'
 ```
-## Sudo-toegelate editors
+## Redigeerders wat deur Sudo toegelaat word
 
-As `sudo -l` ’n gebruiker toelaat om ’n interaktiewe editor as root uit te voer, hanteer dit as ’n command-execution-oppervlak, nie as ’n onskadelike lêerwysigingsreg nie. Editors kan dikwels shell commands uitvoer, arbitrêre lêers lees, arbitrêre lêers skryf, of eksterne helpers vanuit die editor aanroep.
+As `sudo -l` ’n gebruiker toelaat om ’n interaktiewe redigeerder as root uit te voer, behandel dit as ’n opdrag-uitvoeringsoppervlak, nie as ’n onskadelike lêerredigeringsmagtiging nie. Redigeerders kan dikwels dopopdragte uitvoer, arbitrêre lêers lees, arbitrêre lêers skryf of eksterne helpers vanuit die redigeerder aanroep.
 
 Algemene hersieningsvloei:
 ```bash
@@ -40,32 +40,33 @@ Wanneer `nano` deur sudo toegelaat word, kan opdraguitvoering vanaf die redigeer
 Ctrl+R
 Ctrl+X
 ```
-Verskaf dan 'n opdrag soos:
+Verskaf dan ’n opdrag soos:
 ```bash
 id
 /bin/sh
 ```
-Op sommige terminale mag ’n interaktiewe shell vereis dat standaardstrome herlei word:
+Op sommige terminale moet ’n interaktiewe shell se standaardstrome herlei word:
 ```bash
 reset; /bin/sh 1>&0 2>&0
 ```
-Die presiese sleutelvolgorde kan volgens die nano-weergawe en bou-opsies verskil, maar die sekuriteitskwessie bly dieselfde: die redigeerder loop as root en kan eksterne opdragte uitvoer.
+Die presiese sleutelvolgorde kan wissel na gelang van die nano-weergawe en bouopsies, maar die sekuriteitskwessie bly dieselfde: die redigeerder loop as root en kan eksterne opdragte uitvoer.
 
 ### Ander algemene redigeerder-ontsnappings
 
-Vim-styl-redigeerders stel gewoonlik opdraguitvoering deur middel van `:!` beskikbaar:
+Vim-style-redigeerders stel gewoonlik opdraguitvoering deur middel van `:!` bloot:
 ```text
 :!/bin/sh
 ```
-Pagers soos `less` kan ook shell-uitvoering blootstel:
+Pagers soos `less` kan ook shell execution blootstel:
 ```text
 !/bin/sh
 ```
 ## Verdedigingsaantekeninge
 
-- Vermy die toekenning van interpreters of interaktiewe editors deur sudo.
+- Vermy die toekenning van tolke of interaktiewe editors deur sudo.
 - Verkies vaste wrappers wat deur root besit word en een beperkte administratiewe handeling uitvoer.
-- Indien ’n interpreter onvermydelik is, beperk die presiese script-pad en voorkom gebruikerbeheerde argumente, skryfbare imports, `PYTHONPATH` en onveilige omgewingsbewaring.
-- Indien lêerredigering vereis word, beperk die presiese lêerpad en oorweeg `sudoedit` met gepatchde sudo-weergawes en streng omgewingshantering.
+- Indien ’n tolk onvermydelik is, beperk die presiese script-pad en voorkom gebruikerbeheerde argumente, skryfbare imports, `PYTHONPATH` en onveilige omgewingsbewaring.
+- Indien lêerredigering vereis word, beperk die presiese lêerpad en oorweeg `sudoedit` met gepatchte sudo-weergawes en streng omgewingshantering.
 - Hersien `SETENV`, `env_keep`, skryfbare werkgidse, skryfbare module-/import-paaie, `NOEXEC`, `use_pty` en logging, maar moenie dit as ’n volledige sandbox beskou nie.
+
 {{#include ../../banners/hacktricks-training.md}}

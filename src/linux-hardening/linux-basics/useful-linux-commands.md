@@ -229,7 +229,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Find
+## Vind
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -301,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF Telemetrie & Rootkit Hunting
+## eBPF Telemetrie & Rootkit-jag
 
-Moderne rootkits (TripleCross, BPFDoor-variante, ensovoorts) bly toenemend as versteekte eBPF-programme voortbestaan. Stel ’n baseline vir jou vloot op met `bpftool`/`eBPFmon` sodat jy ongetekende programme, onverwagte cgroup-hooks of kwaadwillige map-inhoud kan opspoor voordat jy dit detach.
+Moderne rootkits (TripleCross, BPFDoor-variante, ens.) bly toenemend as versteekte eBPF-programme voortbestaan. Stel ’n baseline vir jou vloot op met `bpftool`/`eBPFmon` sodat jy ongetekende programme, onverwagte cgroup-hooks of kwaadwillige map-inhoud kan identifiseer voordat jy hulle losmaak.<sup>[[1]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Korrelleer die bpftool-output met verwagte NIC/cgroup-attachments; ’n skielike `xdp`- of `kprobe`-program wat deur ’n niegoedgekeurde PID besit word, is ’n sterk aanduiding van ’n ingespuite eBPF-payload.
+Vergelyk die bpftool-uitset met verwagte NIC/cgroup-aanhegsels; ’n skielike `xdp`- of `kprobe`-program wat deur ’n ongekeurde PID besit word, is ’n sterk aanduiding van ’n ingespuitte eBPF-payload.
 
-## Journald-insidenttriage
+## Journald-voorvalondersoek
 
-systemd-journald hou gestruktureerde metadata, sodat jy volgens boot, erns, unit of UID kan pivot sonder om aan `/var/log/*` te raak. Kombineer filters met relatiewe tydstempels om aanvalvensters te isoleer of log-tampering vinnig te bewys.
+systemd-journald hou gestruktureerde metadata, sodat jy volgens boot, erns, eenheid of UID kan pivot sonder om aan `/var/log/*` te raak. Kombineer filters met relatiewe tydstempels om aanvalvensters te isoleer of logmanipulasie vinnig te bewys.<sup>[[2]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +336,11 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Voeg `--grep 'Invalid user' --case-sensitive` of `-k` (slegs kernel-ringbuffer) by wanneer jy strenger filters benodig, en onthou dat `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` en `_TRANSPORT`-keurders saamgestapel word vir multi-tenant-ondersoeke.
+Voeg `--grep 'Invalid user' --case-sensitive` of `-k` (slegs kernel ring buffer) by wanneer jy strenger filters nodig het, en onthou dat `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` en `_TRANSPORT`-selektors saamgestapel word vir multi-tenant-ondersoeke.
 
 ## Verwysings
 
-- [eBPFmon: 'n nuwe hulpmiddel om eBPF-toepassings te verken en daarmee te kommunikeer](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [Hoe om die journalctl-opdrag te gebruik om Linux-logs te sien](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: ’n Nuwe hulpmiddel om eBPF-toepassings te verken en daarmee te interaksieer](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Hoe om die journalctl-opdrag te gebruik om Linux-logs te bekyk](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}

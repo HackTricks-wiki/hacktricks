@@ -23,55 +23,55 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 mediatek-xflash-carbonara-da2-hash-bypass.md
 {{#endref}}
 
-Firmware is noodsaaklike sagteware wat toestelle in staat stel om korrek te werk deur kommunikasie tussen die hardewarekomponente en die sagteware waarmee gebruikers interaksie het, te bestuur en te fasiliteer. Dit word in permanente geheue gestoor, wat verseker dat die toestel toegang het tot belangrike instruksies vanaf die oomblik dat dit aangeskakel word, wat lei tot die laai van die bedryfstelsel. Die ondersoek en moontlike wysiging van firmware is 'n kritieke stap om sekuriteitskwesbaarhede te identifiseer.
+Firmware is noodsaaklike sagteware wat toestelle in staat stel om korrek te werk deur kommunikasie tussen die hardewarekomponente en die sagteware waarmee gebruikers interaksie het, te bestuur en te fasiliteer. Dit word in permanente geheue gestoor, wat verseker dat die toestel toegang het tot belangrike instruksies vanaf die oomblik dat dit aangeskakel word, wat lei tot die laai van die bedryfstelsel. Die ondersoek en moontlike wysiging van firmware is ’n kritieke stap in die identifisering van sekuriteitskwesbaarhede.<sup>[[2]](#references)[[3]](#references)</sup>
 
-## **Insameling van inligting**
+## **Inligting-insameling**
 
-**Die insameling van inligting** is 'n kritieke aanvanklike stap om 'n toestel se samestelling en die tegnologieë wat dit gebruik, te verstaan. Hierdie proses behels die insameling van data oor:
+**Inligting-insameling** is ’n kritieke aanvanklike stap om ’n toestel se samestelling en die tegnologieë wat dit gebruik, te verstaan. Hierdie proses behels die insameling van data oor:
 
 - Die CPU-argitektuur en bedryfstelsel waarop dit loop
 - Besonderhede oor die bootloader
 - Hardeware-uitleg en datasheets
 - Kodebasis-metrieke en bronliggings
-- Eksterne biblioteke en lisensietipes
-- Opdateringsgeskiedenis en regulatoriese sertifiserings
+- Eksterne libraries en lisensietipes
+- Opdateringsgeskiedenis en regulatoriese sertifisering
 - Argitektuur- en vloeidiagramme
-- Sekuriteitsbeoordelings en geïdentifiseerde kwesbaarhede
+- Sekuriteitsevaluerings en geïdentifiseerde kwesbaarhede
 
-Vir hierdie doel is **open-source intelligence (OSINT)**-nutsmiddels van onskatbare waarde, net soos die ontleding van enige beskikbare open-source-sagtewarekomponente deur middel van handmatige en geoutomatiseerde hersieningsprosesse. Nutsmiddels soos [Coverity Scan](https://scan.coverity.com) en [Semmle’s LGTM](https://lgtm.com/#explore) bied gratis statiese analise wat gebruik kan word om potensiële probleme te vind.
+Vir hierdie doel is **open-source intelligence (OSINT)**-tools van onskatbare waarde, net soos die ontleding van enige beskikbare open-source-sagtewarekomponente deur middel van handmatige en geoutomatiseerde hersieningsprosesse. Tools soos [Coverity Scan](https://scan.coverity.com) en [Semmle’s LGTM](https://lgtm.com/#explore) bied gratis statiese ontleding wat gebruik kan word om moontlike probleme te vind.
 
-## **Verkryging van die firmware**
+## **Verkryging van die Firmware**
 
-Firmware kan op verskeie maniere verkry word, elk met sy eie kompleksiteitsvlak:
+Firmware kan op verskeie maniere verkry word, elk met sy eie vlak van kompleksiteit:
 
 - **Direk** vanaf die bron (ontwikkelaars, vervaardigers)
-- Deur dit te **bou** volgens verskafte instruksies
-- Deur dit vanaf amptelike ondersteuningswerwe af te **laai**
-- Deur **Google dork**-navrae te gebruik om gehuisvesde firmware-lêers te vind
-- Deur direk toegang tot **wolkberging** te verkry, met nutsmiddels soos [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Deur **opdaterings** met man-in-the-middle-tegnieke te onderskep
-- Deur dit uit die toestel te **onttrek** deur verbindings soos **UART**, **JTAG**, of **PICit**
-- Deur binne toestेलkommunikasie vir opdateringsversoeke te **snuffel**
+- Deur dit te **bou** volgens verskafde instruksies
+- Deur dit van amptelike ondersteuningswebwerwe af te **laai**
+- Deur **Google dork**-navrae te gebruik om gehuisveste firmware-lêers te vind
+- Deur direk toegang tot **cloud storage** te verkry, met tools soos [S3Scanner](https://github.com/sa7mon/S3Scanner)
+- Deur **updates** met man-in-the-middle-tegnieke te onderskep
+- Deur dit uit die toestel te **ekstraheer** deur verbindings soos **UART**, **JTAG**, of **PICit**
+- Deur binne toestelkommunikasie vir opdateringsversoeke te **sniff**
 - Deur **hardcoded update endpoints** te identifiseer en te gebruik
 - Deur dit vanaf die bootloader of netwerk te **dump**
-- Deur die stoorskyfie te **verwyder en te lees** wanneer alles anders misluk, met toepaslike hardeware-nutsmiddels
+- Deur die storage-chip te **verwyder en lees** wanneer alles anders misluk, met toepaslike hardeware-tools
 
-### Slegs UART-logboeke: dwing 'n root shell af via U-Boot env in flash
+### UART-only logs: forseer ’n root shell via U-Boot env in flash
 
-As UART RX geïgnoreer word (slegs logboeke), kan jy steeds 'n init shell afdwing deur die U-Boot-omgewingsblob vanlyn te **wysig**:
+As UART RX geïgnoreer word (slegs logs), kan jy steeds ’n init shell forseer deur die **U-Boot environment blob** vanlyn te **wysig**:<sup>[[6]](#references)</sup>
 
-1. Dump die SPI-flash met 'n SOIC-8-clip + programmer (3.3V):
+1. Dump SPI flash met ’n SOIC-8-clip + programmer (3.3V):
 ```bash
 flashrom -p ch341a_spi -r flash.bin
 ```
-2. Lokaliseer die U-Boot-env-partisie, wysig `bootargs` om `init=/bin/sh` in te sluit, en **bereken die U-Boot-env CRC32** vir die blob opnuut.
-3. Reflash slegs die env-partisie en herlaai; 'n shell behoort op UART te verskyn.
+2. Vind die U-Boot env-partisie, wysig `bootargs` om `init=/bin/sh` in te sluit, en **bereken die U-Boot env CRC32** vir die blob opnuut.
+3. Flash slegs die env-partisie oor en herlaai; ’n shell behoort op UART te verskyn.
 
-Dit is nuttig op ingebedde toestelle waar die bootloader-shell gedeaktiveer is, maar die env-partisie deur eksterne flash-toegang skryfbaar is.
+Dit is nuttig op embedded toestelle waar die bootloader-shell gedeaktiveer is, maar die env-partisie deur eksterne flash-toegang geskryf kan word.
 
 ## Ontleding van die firmware
 
-Noudat jy **die firmware het**, moet jy inligting daaroor onttrek om te weet hoe om dit te hanteer. Verskillende nutsmiddels wat jy daarvoor kan gebruik:
+Noudat jy die **firmware het**, moet jy inligting daaroor ekstraheer om te weet hoe om dit te hanteer. Daar is verskillende tools wat jy daarvoor kan gebruik:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -80,25 +80,25 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-As jy nie veel met daardie tools vind nie, kontroleer die **entropy** van die image met `binwalk -E <bin>`. As die entropy laag is, is dit waarskynlik nie encrypted nie. As die entropy hoog is, is dit waarskynlik encrypted (of op een of ander manier compressed).
+As jy nie veel met daardie tools vind nie, kontroleer die **entropie** van die image met `binwalk -E <bin>`. As die entropie laag is, is dit waarskynlik nie encrypted nie. As die entropie hoog is, is dit waarskynlik encrypted (of op een of ander manier compressed).
 
-Verder kan jy hierdie tools gebruik om **files wat binne die firmware ingebed is** te extract:
+Verder kan jy hierdie tools gebruik om **files embedded inside the firmware** te extract:
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-Of [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) om die file te inspekteer.
+Of [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) om die file te inspect.
 
-### Kry die lêerstelsel
+### Verkryging van die Filesystem
 
-Met die vorige tools, soos `binwalk -ev <bin>`, behoort jy die **lêerstelsel te kon extract** het.\
-Binwalk extract dit gewoonlik binne ’n **folder wat na die lêerstelseltipe vernoem is**, wat gewoonlik een van die volgende is: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Met die vorige genoemde tools soos `binwalk -ev <bin>` behoort jy die **filesystem te kon extract** het.\
+Binwalk extract dit gewoonlik binne ’n **folder wat na die filesystem-tipe vernoem is**, wat gewoonlik een van die volgende is: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
-#### Handmatige lêerstelsel-ekstraksie
+#### Manual Filesystem Extraction
 
-Soms sal binwalk **nie die magic byte van die lêerstelsel in sy signatures hê nie**. In hierdie gevalle, gebruik binwalk om die **offset van die lêerstelsel te vind en die compressed lêerstelsel** uit die binary te **carve**, en **extract** die lêerstelsel dan handmatig volgens sy tipe deur die stappe hieronder te gebruik.
+Soms sal binwalk **nie die magic byte van die filesystem in sy signatures hê nie**. In hierdie gevalle, gebruik binwalk om die offset van die filesystem te **vind en die compressed filesystem** uit die binary te carve, en **extract** die filesystem manual volgens sy tipe deur die stappe hieronder te gebruik.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -110,7 +110,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-Voer die volgende **dd command** uit om die Squashfs-lêerstelsel te carve.
+Voer die volgende **dd-opdrag** uit om die Squashfs-lêerstelsel te carve.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -124,7 +124,7 @@ Alternatiewelik kan die volgende opdrag ook uitgevoer word.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- Vir squashfs (in die voorbeeld hierbo gebruik)
+- Vir squashfs (gebruik in die voorbeeld hierbo)
 
 `$ unsquashfs dir.squashfs`
 
@@ -144,13 +144,13 @@ Lêers sal daarna in die "`squashfs-root`"-gids wees.
 
 `$ ubidump.py <bin>`
 
-## Firmware ontleed
+## Ontleding van Firmware
 
-Sodra die firmware verkry is, is dit noodsaaklik om dit te dissekteer om die struktuur en potensiële kwesbaarhede daarvan te verstaan. Hierdie proses behels die gebruik van verskeie nutsgoed om waardevolle data uit die firmwarebeeld te ontleed en te onttrek.
+Sodra die firmware verkry is, is dit noodsaaklik om dit te ontleed om die struktuur en moontlike kwesbaarhede daarvan te verstaan. Hierdie proses behels die gebruik van verskeie tools om waardevolle data uit die firmwarebeeld te ontleed en te onttrek.
 
-### Aanvanklike analise-nutsgoed
+### Aanvanklike Ontledingstools
 
-'n Stel opdragte word verskaf vir aanvanklike inspeksie van die binêre lêer (waarna as `<bin>` verwys word). Hierdie opdragte help om lêertipes te identifiseer, stringe te onttrek, binêre data te ontleed en die partisie- en lêerstelselbesonderhede te verstaan:
+'n Stel opdragte word verskaf vir aanvanklike inspeksie van die binêre lêer (waarna verwys word as `<bin>`). Hierdie opdragte help om lêertipes te identifiseer, strings te onttrek, binêre data te ontleed, en die partisie- en lêerstelselbesonderhede te verstaan:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -159,80 +159,80 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Om die enkripsiestatus van die image te bepaal, word die **entropy** met `binwalk -E <bin>` nagegaan. Lae entropy dui op ’n gebrek aan enkripsie, terwyl hoë entropy moontlike enkripsie of kompressie aandui.
+Om die enkripsiestatus van die image te bepaal, word die **entropy** nagegaan met `binwalk -E <bin>`. Lae entropy dui op ’n gebrek aan enkripsie, terwyl hoë entropy moontlike enkripsie of kompressie aandui.
 
-Vir die onttrekking van **embedded files** word tools en hulpbronne soos die **file-data-carving-recovery-tools**-dokumentasie en **binvis.io** vir lêerinspeksie aanbeveel.
+Vir die onttrekking van **embedded files** word hulpmiddels en hulpbronne soos die **file-data-carving-recovery-tools**-dokumentasie en **binvis.io** vir lêerinspeksie aanbeveel.
 
-### Onttrekking van die Lêerstelsel
+### Onttrekking van die lêerstelsel
 
-Deur `binwalk -ev <bin>` te gebruik, kan ’n mens gewoonlik die lêerstelsel onttrek, dikwels na ’n gids wat na die lêerstelseltipe vernoem is (byvoorbeeld squashfs, ubifs). Wanneer **binwalk** egter nie die lêerstelseltipe herken nie weens ontbrekende magic bytes, is handmatige onttrekking nodig. Dit behels die gebruik van `binwalk` om die lêerstelsel se offset te bepaal, gevolg deur die `dd`-opdrag om die lêerstelsel uit te sny:
+Deur `binwalk -ev <bin>` te gebruik, kan ’n mens gewoonlik die lêerstelsel onttrek, dikwels na ’n gids wat na die lêerstelseltipe vernoem is (bv. squashfs, ubifs). Wanneer **binwalk** egter nie die lêerstelseltipe herken nie weens ontbrekende magic bytes, is handmatige onttrekking nodig. Dit behels die gebruik van `binwalk` om die lêerstelsel se offset te bepaal, gevolg deur die `dd`-opdrag om die lêerstelsel uit te kerf:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
-Daarna, afhangend van die lêerstelseltipe (bv. squashfs, cpio, jffs2, ubifs), word verskillende opdragte gebruik om die inhoud handmatig uit te pak.
+Daarna, afhangend van die lêerstelseltipe (bv. squashfs, cpio, jffs2, ubifs), word verskillende commands gebruik om die inhoud handmatig te onttrek.
 
 ### Lêerstelselontleding
 
-Wanneer die lêerstelsel uitgepak is, begin die soektog na sekuriteitsfoute. Aandag word gegee aan onveilige netwerkdaemons, hardgekodeerde geloofsbriewe, API-endpunte, opdateringsbedienerfunksionaliteit, ongekompileerde kode, opstartskripte en gekompileerde binaries vir offline-ontleding.
+Nadat die lêerstelsel onttrek is, begin die soektog na sekuriteitskwesbaarhede. Aandag word gegee aan onveilige netwerkdaemons, hardcoded credentials, API endpoints, update-serverfunksionaliteit, ongekompileerde code, startup-skripte en compiled binaries vir offline analysis.
 
-**Belangrike liggings** en **items** om te inspekteer, sluit in:
+**Belangrike liggings** en **items** wat geïnspekteer moet word, sluit in:
 
-- **etc/shadow** en **etc/passwd** vir gebruikersgeloofsbriewe
-- SSL-sertifikate en sleutels in **etc/ssl**
-- Konfigurasie- en skriplêers vir moontlike kwesbaarhede
-- Ingebedde binaries vir verdere ontleding
-- Algemene IoT-toestel-webbedieners en binaries
+- **etc/shadow** en **etc/passwd** vir gebruikerscredentials
+- SSL-sertifikate en -sleutels in **etc/ssl**
+- Konfigurasie- en skriplêers vir potensiële kwesbaarhede
+- Embedded binaries vir verdere analysis
+- Algemene IoT-device-webservers en binaries
 
-Verskeie tools help om sensitiewe inligting en kwesbaarhede binne die lêerstelsel op te spoor:
+Verskeie tools help om sensitiewe inligting en kwesbaarhede binne die lêerstelsel te ontbloot:
 
 - [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) en [**Firmwalker**](https://github.com/craigz28/firmwalker) vir die soektog na sensitiewe inligting
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) vir omvattende firmware-ontleding
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) en [**EMBA**](https://github.com/e-m-b-a/emba) vir statiese en dinamiese ontleding
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) vir omvattende firmware-analysis
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) en [**EMBA**](https://github.com/e-m-b-a/emba) vir static en dynamic analysis
 
-### Sekuriteitskontroles op gekompileerde binaries
+### Sekuriteitskontroles op Compiled Binaries
 
-Beide bronkode en gekompileerde binaries wat in die lêerstelsel gevind word, moet noukeurig vir kwesbaarhede ondersoek word. Tools soos **checksec.sh** vir Unix-binaries en **PESecurity** vir Windows-binaries help om onbeskermde binaries te identifiseer wat uitgebuit kan word.
+Beide source code en compiled binaries wat in die lêerstelsel gevind word, moet noukeurig vir kwesbaarhede ondersoek word. Tools soos **checksec.sh** vir Unix-binaries en **PESecurity** vir Windows-binaries help om onbeskermde binaries te identifiseer wat uitgebuit kan word.
 
-## Insameling van cloud-konfigurasie en MQTT-geloofsbriewe via afgeleide URL-tokens
+## Oes van cloud-konfigurasie en MQTT-credentials via afgeleide URL-tokens
 
-Baie IoT-hubs haal hul toestelspesifieke konfigurasie van ’n cloud-endpunt af wat soos volg lyk:
+Baie IoT-hubs haal hul per-device-konfigurasie van ’n cloud-endpoint wat soos volg lyk:<sup>[[5]](#references)</sup>
 
 - `https://<api-host>/pf/<deviceId>/<token>`
 
-Tydens firmware-ontleding kan jy vind dat `<token>` plaaslik van die toestel-ID afgelei word deur ’n hardgekodeerde geheim te gebruik, byvoorbeeld:
+Tydens firmware-analysis kan jy vind dat `<token>` plaaslik van die device ID afgelei word deur ’n hardcoded secret te gebruik, byvoorbeeld:
 
 - token = MD5( deviceId || STATIC_KEY ) and represented as uppercase hex
 
-Hierdie ontwerp stel enigiemand wat ’n deviceId en die STATIC_KEY te wete kom, in staat om die URL te rekonstrueer en die cloud-konfigurasie af te laai, wat dikwels gewone teks-MQTT-geloofsbriewe en topic-voorvoegsels openbaar.
+Hierdie ontwerp stel enigiemand wat ’n deviceId en die STATIC_KEY bekom, in staat om die URL te rekonstrueer en die cloud-konfigurasie op te haal, wat dikwels plaintext MQTT-credentials en topic-prefixes openbaar.
 
-Praktiese werkvloei:
+Praktiese workflow:
 
-1) Onttrek deviceId uit UART-opstartlogs
+1) Onttrek deviceId uit UART boot logs
 
-- Koppel ’n 3.3V UART-adapter (TX/RX/GND) en neem logs vas:
+- Koppel ’n 3.3V UART-adapter (TX/RX/GND) en versamel logs:
 ```bash
 picocom -b 115200 /dev/ttyUSB0
 ```
-- Soek na lyne wat die cloud config URL-patroon en broker-adres druk, byvoorbeeld:
+- Soek na reëls wat die cloud config URL pattern en broker address druk, byvoorbeeld:
 ```
 Online Config URL https://api.vendor.tld/pf/<deviceId>/<token>
 MQTT: mqtt://mq-gw.vendor.tld:8001
 ```
-2) Herwin STATIC_KEY en token-algoritme vanaf firmware
+2) Herwin STATIC_KEY en token-algoritme uit firmware
 
-- Laai binaries in Ghidra/radare2 en soek die config path ("/pf/") of MD5-gebruik.
+- Laai binaries in Ghidra/radare2 en soek na die config path ("/pf/") of MD5-gebruik.
 - Bevestig die algoritme (bv. MD5(deviceId||STATIC_KEY)).
-- Lei die token in Bash af en skakel die digest om na hoofletters:
+- Lei die token in Bash af en skryf die digest in hoofletters:
 ```bash
 DEVICE_ID="d88b00112233"
 STATIC_KEY="cf50deadbeefcafebabe"
 printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}'
 ```
-3) Versamel cloud-konfigurasie en MQTT-geloofsbriewe
+3) Oes cloud-konfigurasie en MQTT-bewyse
 
-- Stel die URL saam en haal JSON met curl op; ontleed dit met jq om geheime te onttrek:
+- Stel die URL saam en trek JSON met curl; ontleed dit met jq om geheime uit te trek:
 ```bash
 API_HOST="https://api.vendor.tld"
 TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}')
@@ -241,16 +241,16 @@ curl -sS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq .
 ```
 4) Misbruik plaintext MQTT en swak topic ACLs (indien teenwoordig)
 
-- Gebruik herwonne credentials om op maintenance topics in te teken en soek na sensitiewe gebeurtenisse:
+- Gebruik herstelde credentials om op maintenance topics in te teken en soek na sensitiewe gebeurtenisse:
 ```bash
 mosquitto_sub -h <broker> -p <port> -V mqttv311 \
 -i <client_id> -u <username> -P <password> \
 -t "<topic_prefix>/<deviceId>/admin" -v
 ```
-5) Enumerateer voorspelbare toestel-ID's (op skaal, met magtiging)
+5) Enumereer voorspelbare device IDs (op skaal, met magtiging)
 
-- Baie ekosisteme sluit verkoper-OUI/produk/tipe-grepe in, gevolg deur 'n opeenvolgende agtervoegsel.
-- Jy kan kandidaat-ID's iteratief deurloop, tokens aflei en konfigurasies programmaties ophaal:
+- Baie ekosisteme sluit vendor OUI/product/type-bytes in, gevolg deur ’n opeenvolgende agtervoegsel.
+- Jy kan kandidaat-ID’s herhaal, tokens aflei en configs programmaties ophaal:
 ```bash
 API_HOST="https://api.vendor.tld"; STATIC_KEY="cf50deadbeef"; PREFIX="d88b1603" # OUI+type
 for SUF in $(seq -w 000000 0000FF); do
@@ -261,44 +261,44 @@ done
 ```
 Notas
 - Verkry altyd uitdruklike magtiging voordat jy mass enumeration probeer.
-- Verkies emulasie of statiese analise om secrets te herwin sonder om die teikenhardeware te wysig, waar moontlik.
+- Verkies emulation of static analysis om secrets te herwin sonder om target hardware te wysig, waar moontlik.
 
 
-Die proses om firmware te emuleer maak **dynamic analysis** moontlik, hetsy van ’n toestel se werking of van ’n individuele program. Hierdie benadering kan uitdagings met hardeware- of argitektuurafhanklikhede teëkom, maar die oordrag van die root filesystem of spesifieke binaries na ’n toestel met ’n ooreenstemmende argitektuur en endianness, soos ’n Raspberry Pi, of na ’n voorafgeboude virtual machine, kan verdere toetsing vergemaklik.
+Die proses om firmware te emuleer, maak **dynamic analysis** van óf ’n device se werking óf ’n individuele program moontlik. Hierdie benadering kan uitdagings met hardware- of argitektuurafhanklikhede teëkom, maar die oordrag van die root filesystem of spesifieke binaries na ’n device met ’n ooreenstemmende argitektuur en endianness, soos ’n Raspberry Pi, of na ’n voorafgeboude virtuele masjien, kan verdere testing vergemaklik.
 
-### Emulering van Individuele Binaries
+### Emulation van Individuele Binaries
 
 Vir die ondersoek van enkele programme is dit noodsaaklik om die program se endianness en CPU-argitektuur te identifiseer.
 
-#### Voorbeeld met MIPS Architecture
+#### Voorbeeld met MIPS-argitektuur
 
-Om ’n MIPS architecture-binary te emuleer, kan die volgende command gebruik word:
+Om ’n MIPS-argitektuur binary te emuleer, kan ’n mens die volgende command gebruik:
 ```bash
 file ./squashfs-root/bin/busybox
 ```
-En om die nodige emulasiehulpmiddels te installeer:
+En om die nodige emulasienutsgoed te installeer:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-Vir MIPS (big-endian) word `qemu-mips` gebruik, en vir little-endian binaries sal `qemu-mipsel` die keuse wees.
+Vir MIPS (big-endian) word `qemu-mips` gebruik, en vir little-endian binaries sou `qemu-mipsel` die keuse wees.
 
-#### ARM-argitektuuremulering
+#### ARM-argitektuur-emulasie
 
 Vir ARM-binaries is die proses soortgelyk, met die `qemu-arm`-emulator wat vir emulasie gebruik word.
 
-### Volstelsel-emulasie
+### Volledige stelsel-emulasie
 
-Tools soos [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), en ander, fasiliteer volledige firmware-emulasie, outomatiseer die proses en help met dinamiese ontleding.
+Tools soos [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) en ander maak volledige firmware-emulasie moontlik, outomatiseer die proses en help met dinamiese analise.
 
-## Dinamiese ontleding in die praktyk
+## Dinamiese analise in die praktyk
 
-Op hierdie stadium word óf ’n werklike óf ’n geëmuleerde toest omgewing vir ontleding gebruik. Dit is noodsaaklik om shell-toegang tot die OS en lêerstelsel te behou. Emulasie boots moontlik nie hardeware-interaksies perfek na nie, wat soms vereis dat die emulasie herbegin word. Ontleding moet die lêerstelsel weer ondersoek, blootgestelde webblaaie en netwerkdienste exploit, en bootloader-kwesbaarhede verken. Firmware-integriteitstoetse is krities om potensiële backdoor-kwesbaarhede te identifiseer.
+Op hierdie stadium word óf ’n werklike óf ’n geëmuleerde toestelomgewing vir analise gebruik. Dit is noodsaaklik om shell access tot die OS en lêerstelsel te behou. Emulasie boots hardeware-interaksies moontlik nie perfek na nie, wat beteken dat emulasies soms herbegin moet word. Die analise behoort die lêerstelsel weer te ondersoek, blootgestelde webblaaie en netwerkdienste te exploit, en bootloader-kwesbaarhede te ondersoek. Firmware-integriteitstoetse is krities om potensiële backdoor-kwesbaarhede te identifiseer.
 
-## Runtime-ontledingstegnieke
+## Runtime-analise-tegnieke
 
-Runtime-ontleding behels interaksie met ’n proses of binary in sy bedryfsomgewing, met tools soos gdb-multiarch, Frida en Ghidra om breekpunte te stel en kwesbaarhede deur fuzzing en ander tegnieke te identifiseer.
+Runtime-analise behels interaksie met ’n proses of binary in sy bedryfsomgewing, met tools soos gdb-multiarch, Frida en Ghidra om breekpunte te stel en kwesbaarhede deur fuzzing en ander tegnieke te identifiseer.
 
-Vir embedded targets sonder ’n volledige debugger, **kopieer ’n staties-gekoppelde `gdbserver`** na die toestel en heg dit op afstand aan:
+Vir ingebedde teikens sonder ’n volledige debugger, **copy a statically-linked `gdbserver`** na die toestel en attach remotely:<sup>[[6]](#references)</sup>
 ```bash
 # On device
 gdbserver :1234 /usr/bin/targetd
@@ -309,99 +309,99 @@ gdbserver :1234 /usr/bin/targetd
 gdb-multiarch /path/to/targetd
 target remote <device-ip>:1234
 ```
-### Zigbee / radio-co-processor-boodskapmapping
+### Zigbee / radio-co-processor-boodskapkartering
 
-Op IoT-hubs word die RF-stack dikwels tussen ’n **radio MCU** en ’n Linux-userland-proses verdeel. ’n Nuttige workflow is om die pad te karteer:
+Op IoT-hubs word die RF-stack dikwels tussen ’n **radio-MCU** en ’n Linux-userland-proses verdeel. ’n Nuttige workflow is om die pad te karteer:<sup>[[8]](#references)</sup>
 
-1. **RF-frame** in die lug
-2. **controller-side parser** op die radio MCU
+1. **RF-frame** oor die lug
+2. **controller-side parser** op die radio-MCU
 3. **serial/UART text or TLV protocol** wat na Linux aangestuur word (byvoorbeeld `/dev/tty*`)
 4. **application dispatcher** in die hoofdemon
 5. **protocol-specific handler / state machine**
 
-Hierdie argitektuur skep twee reversing-teikens in plaas van een. As die controller binêre radioframes na ’n tekstuele protocol soos `Group,Command,arg1,arg2,...` omskakel, herwin:
+Hierdie argitektuur skep twee reversing-teikens in plaas van een. Indien die controller binêre radioframes na ’n tekstuele protokol soos `Group,Command,arg1,arg2,...` omskakel, herstel:
 
 - Die **message groups** en dispatch-tabelle
-- Watter messages van die **network** af kan kom versus van die controller self
-- Die presiese **manufacturer-specific discriminator fields** (byvoorbeeld Zigbee `manufacturer_code` en custom `cluster_command`)
+- Watter boodskappe vanaf die **network** versus die controller self kan kom
+- Die presiese **manufacturer-specific discriminator fields** (byvoorbeeld Zigbee se `manufacturer_code` en custom `cluster_command`)
 - Watter handlers slegs tydens **commissioning**, discovery of firmware/model-downloadfases bereikbaar is
 
-Vir Zigbee, capture pairing traffic en kyk of die teiken steeds die default **Link Key** `ZigBeeAlliance09` gebruik. Indien wel, kan sniffing van commissioning traffic die **Network Key** blootlê. Zigbee 3.0 install codes verminder hierdie blootstelling, dus moet jy aanteken of die getoetste device dit werklik afdwing.
+Vir Zigbee, vang pairing-verkeer vas en kontroleer of die teiken steeds op die verstek-**Link Key** `ZigBeeAlliance09` staatmaak. Indien wel, kan sniffing van commissioning-verkeer die **Network Key** blootlê. Zigbee 3.0-install codes verminder hierdie blootstelling, dus moet jy aanteken of die getoetste toestel dit werklik afdwing.
 
 ### Manufacturer-specific protocol handlers en FSM-gated reachability
 
-Vendor-specific Zigbee/ZCL-commands is dikwels ’n beter teiken as gestandaardiseerde clusters omdat hulle **custom parsing code** en interne **FSMs** voed met minder battle-tested validation.
+Vendor-specific Zigbee/ZCL-opdragte is dikwels ’n beter teiken as gestandaardiseerde clusters omdat hulle **custom parsing code** en interne **FSMs** voed met minder battle-tested validation.<sup>[[8]](#references)</sup>
 
 Praktiese workflow:
 
 - Reverse die command dispatcher totdat jy die **vendor-only handler** vind.
-- Herwin die **FSM state**, **event**, **check**, **action** en **next-state**-tabelle.
-- Identifiseer **transitional states** wat outomaties voortgaan, asook retry/error-vertakkings wat uiteindelik attacker-controlled state reset of vrylaat.
-- Bevestig watter legitimate protocol exchanges nodig is om die daemon in die vulnerable state te plaas, eerder as om aan te neem dat die buggy handler altyd bereikbaar is.
+- Herstel die **FSM state**, **event**, **check**, **action**, en **next-state**-tabelle.
+- Identifiseer **transitional states** wat outomaties voortgaan, asook retry/error-takke wat uiteindelik attacker-controlled state reset of vrylaat.
+- Bevestig watter wettige protokoluitruilings vereis word om die daemon in die kwesbare toestand te plaas, eerder as om aan te neem dat die foutiewe handler altyd bereikbaar is.
 
-Vir timing-sensitive protocols kan packet replay vanaf ’n Python-framework te stadig wees. ’n Meer betroubare benadering is om ’n legitimate device op real hardware (byvoorbeeld ’n **nRF52840**) te emuleer met ’n vendor-grade stack, sodat jy die korrekte **endpoints**, **attributes** en commissioning timing kan blootstel.
+Vir timing-sensitive protokolle kan packet replay vanuit ’n Python-framework te stadig wees. ’n Meer betroubare benadering is om ’n wettige toestel op werklike hardware (byvoorbeeld ’n **nRF52840**) met ’n vendor-grade stack te emuleer sodat jy die korrekte **endpoints**, **attributes**, en commissioning-tydsberekening kan blootlê.
 
-### Fragmented-download bug class in embedded daemons
+### Fragmented-download-bugklas in embedded daemons
 
-’n Herhalende firmware-bug class kom voor in **fragmented blob/model/configuration downloads**:
+’n Herhalende firmware-bugklas kom voor in **fragmented blob/model/configuration downloads**:<sup>[[8]](#references)</sup>
 
 1. Die **first fragment** (`offset == 0`) stoor `ctx->total_size` en allokeer `malloc(total_size)`.
-2. Latere fragments valideer slegs die attacker-controlled **packet-local** fields soos `packet_total_size >= offset + chunk_len`.
-3. Die copy gebruik `memcpy(&ctx->buffer[offset], chunk, chunk_len)` sonder om teen die **original allocated size** te toets.
+2. Latere fragmente valideer slegs die attacker-controlled **packet-local**-velde soos `packet_total_size >= offset + chunk_len`.
+3. Die copy gebruik `memcpy(&ctx->buffer[offset], chunk, chunk_len)` sonder om dit teen die **oorspronklik geallokeerde grootte** te kontroleer.
 
-Dit stel ’n attacker in staat om:
+Dit laat ’n aanvaller toe om:
 
-- ’n Eerste geldige fragment met ’n **small** declared total size te stuur om ’n klein heap-allocation af te dwing.
-- ’n Latere fragment met die **expected offset**, maar ’n groter `chunk_len`, te stuur.
-- ’n Forged packet-local size te stuur wat aan die vars checks voldoen, terwyl dit steeds die oorspronklik geallokeerde buffer overflow.
+- ’n Eerste geldige fragment met ’n **klein** verklaarde totale grootte te stuur om ’n klein heap-allokasie af te dwing.
+- ’n Latere fragment met die **verwagte offset**, maar ’n groter `chunk_len`, te stuur.
+- ’n Vervalste packet-local-grootte te stuur wat aan die vars checks voldoen, terwyl dit steeds die oorspronklik geallokeerde buffer oorloop.
 
-Wanneer die vulnerable path agter commissioning logic sit, moet exploitation genoeg **device emulation** insluit om die teiken in die verwagte model-download- of blob-download-state te dryf voordat die malformed fragments gestuur word.
+Wanneer die kwesbare pad agter commissioning-logika sit, moet exploitation genoeg **device emulation** insluit om die teiken in die verwagte model-download- of blob-download-toestand te dryf voordat die malformed fragments gestuur word.
 
-### Protocol-driven `free()` triggers
+### Protocol-driven `free()`-triggers
 
-In embedded daemons is die maklikste manier om heap metadata exploitation te trigger dikwels nie om “vir cleanup te wag” nie, maar om die protocol se eie error handling af te dwing:
+In embedded daemons is die maklikste manier om heap metadata exploitation te trigger dikwels nie om te “wag vir cleanup” nie, maar om die protokol se eie error handling af te dwing:<sup>[[8]](#references)</sup>
 
-- Stuur malformed follow-up fragments om die FSM na **retry**- of **error**-states te stoot.
-- Oorskry die retry threshold sodat die daemon **reset context** en die corrupted buffer vrylaat.
-- Gebruik hierdie voorspelbare `free()` om allocator-side primitives te trigger voordat die process om onverwante redes crash.
+- Stuur malformed follow-up fragments om die FSM in **retry**- of **error**-state te stoot.
+- Oorskry die retry-drempel sodat die daemon **reset context** en die gekorrupte buffer vrylaat.
+- Gebruik hierdie voorspelbare `free()` om allocator-side primitives te trigger voordat die proses om onverwante redes crash.
 
-Dit is veral nuttig teen **musl/uClibc/dlmalloc-like** allocators in embedded Linux, waar die korrupsie van chunk metadata unlink/unbin-logika in ’n write primitive kan omskakel. ’n Stabiele patroon is om ’n **size field** te korrupteer om allocator traversal na **fake chunks** te herlei wat binne die overflowed buffer gestage is, eerder as om onmiddellik werklike bin pointers te oorskryf en die process te laat crash.
+Dit is veral nuttig teen **musl/uClibc/dlmalloc-like** allocators in embedded Linux, waar die korrupsie van chunk metadata unlink/unbin-logika in ’n write primitive kan omskep. ’n Stabiele patroon is om ’n **size field** te korrupteer om allocator traversal na **fake chunks wat binne die overflowed buffer gestage is** te herlei, eerder as om onmiddellik werklike bin pointers te oorskryf en die proses te laat crash.
 
 ## Binary Exploitation en Proof-of-Concept
 
-Die ontwikkeling van ’n PoC vir geïdentifiseerde vulnerabilities vereis ’n diep begrip van die teikenargitektuur en programming in lower-level languages. Binary runtime protections in embedded systems is skaars, maar wanneer dit teenwoordig is, kan techniques soos Return Oriented Programming (ROP) nodig wees.
+Die ontwikkeling van ’n PoC vir geïdentifiseerde kwesbaarhede vereis ’n diep begrip van die teikenargitektuur en programmering in laervlak-tale. Binary runtime protections in embedded systems is skaars, maar wanneer dit teenwoordig is, kan tegnieke soos Return Oriented Programming (ROP) nodig wees.
 
-### uClibc fastbin exploitation notes (embedded Linux)
+### uClibc fastbin exploitation-notas (embedded Linux)
 
-- **Fastbins + consolidation:** uClibc gebruik fastbins soortgelyk aan glibc. ’n Latere groot allocation kan `__malloc_consolidate()` trigger, dus moet enige fake chunk checks oorleef (sane size, `fd = 0`, en omliggende chunks wat as "in use" gesien word).
-- **Non-PIE binaries under ASLR:** indien ASLR enabled is, maar die hoofbinary **non-PIE** is, is in-binary `.data/.bss`-addresses stable. Jy kan ’n region teiken wat reeds soos ’n geldige heap chunk header lyk om ’n fastbin allocation op ’n **function pointer table** te laat land.
-- **Parser-stopping NUL:** wanneer JSON geparse word, kan ’n `\x00` in die payload parsing stop terwyl trailing attacker-controlled bytes vir ’n stack pivot/ROP-chain behoue bly.
-- **Shellcode via `/proc/self/mem`:** ’n ROP-chain wat `open("/proc/self/mem")`, `lseek()` en `write()` call, kan executable shellcode in ’n bekende mapping plaas en daarheen jump.
+- **Fastbins + consolidation:** uClibc gebruik fastbins soortgelyk aan glibc. ’n Latere groot allokasie kan `__malloc_consolidate()` trigger, dus moet enige fake chunk checks oorleef (sane size, `fd = 0`, en omliggende chunks wat as "in use" gesien word).<sup>[[6]](#references)</sup>
+- **Non-PIE binaries under ASLR:** indien ASLR geaktiveer is maar die hoofbinary **non-PIE** is, is adresse in die binary se `.data/.bss` stabiel. Jy kan ’n area teiken wat reeds soos ’n geldige heap chunk header lyk om ’n fastbin-allokasie op ’n **function pointer table** te laat land.
+- **Parser-stopping NUL:** wanneer JSON geparse word, kan ’n `\x00` in die payload parsing stop terwyl daaropvolgende attacker-controlled bytes vir ’n stack pivot/ROP-chain behoue bly.
+- **Shellcode via `/proc/self/mem`:** ’n ROP-chain wat `open("/proc/self/mem")`, `lseek()`, en `write()` oproep, kan executable shellcode in ’n bekende mapping plant en daarheen spring.
 
 ## Prepared Operating Systems for Firmware Analysis
 
-Operating systems soos [AttifyOS](https://github.com/adi0x90/attifyos) en [EmbedOS](https://github.com/scriptingxss/EmbedOS) verskaf pre-configured environments vir firmware security testing, toegerus met die nodige tools.
+Operating systems soos [AttifyOS](https://github.com/adi0x90/attifyos) en [EmbedOS](https://github.com/scriptingxss/EmbedOS) verskaf voorafgekonfigureerde omgewings vir firmware security testing, toegerus met die nodige tools.
 
 ## Prepared OSs to analyze Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS is ’n distro wat bedoel is om jou te help met security assessment en penetration testing van Internet of Things (IoT)-devices. Dit spaar jou baie tyd deur ’n pre-configured environment met al die nodige tools wat gelaai is, te verskaf.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system gebaseer op Ubuntu 18.04, vooraf gelaai met firmware security testing tools.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS is ’n distro wat bedoel is om jou te help met security assessment en penetration testing van Internet of Things (IoT)-toestelle. Dit spaar jou baie tyd deur ’n voorafgekonfigureerde omgewing met al die nodige tools te verskaf.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Embedded security testing operating system gebaseer op Ubuntu 18.04, vooraf gelaai met firmware security testing-tools.
 
 ## Firmware Downgrade Attacks & Insecure Update Mechanisms
 
-Selfs wanneer ’n vendor cryptographic signature checks vir firmware images implementeer, word **version rollback (downgrade) protection** dikwels weggelaat. Wanneer die boot- of recovery-loader slegs die signature met ’n embedded public key verifieer, maar nie die *version* (of ’n monotonic counter) van die image wat geflash word vergelyk nie, kan ’n attacker wettiglik ’n **ouer, vulnerable firmware wat steeds ’n geldige signature dra** installeer en sodoende gepatchte vulnerabilities weer bekendstel.
+Selfs wanneer ’n vendor cryptographic signature checks vir firmware images implementeer, word **version rollback (downgrade)-beskerming dikwels uitgelaat**. Wanneer die boot- of recovery-loader slegs die signature met ’n ingebedde publieke sleutel verifieer, maar nie die *version* (of ’n monotonic counter) van die image wat geflash word vergelyk nie, kan ’n aanvaller wettiglik ’n **ouer, kwesbare firmware wat steeds ’n geldige signature dra** installeer en sodoende gepatchte kwesbaarhede herinvoer.<sup>[[4]](#references)</sup>
 
-Tipiese attack workflow:
+Tipiese aanval-workflow:
 
-1. **Obtain an older signed image**
-* Kry dit vanaf die vendor se public download portal, CDN of support site.
-* Extract dit uit companion mobile/desktop applications (bv. binne ’n Android APK onder `assets/firmware/`).
-* Retrieve dit uit third-party repositories soos VirusTotal, Internet archives, forums, ens.
-2. **Upload or serve the image to the device** via enige exposed update channel:
+1. **Verkry ’n ouer signed image**
+* Kry dit vanaf die vendor se publieke download portal, CDN of support site.
+* Extraheer dit uit companion mobile/desktop applications (bv. binne ’n Android APK onder `assets/firmware/`).
+* Kry dit vanaf third-party repositories soos VirusTotal, Internet archives, forums, ens.
+2. **Upload of serve die image aan die toestel** via enige blootgestelde update channel:
 * Web UI, mobile-app API, USB, TFTP, MQTT, ens.
-* Baie consumer IoT-devices stel *unauthenticated* HTTP(S)-endpoints bloot wat Base64-encoded firmware blobs aanvaar, dit server-side decode en recovery/upgrade trigger.
-3. Na die downgrade, exploit ’n vulnerability wat in die nuwer release gepatch is (byvoorbeeld ’n command-injection filter wat later bygevoeg is).
-4. Flash opsioneel die latest image terug of disable updates om detection te vermy sodra persistence verkry is.
+* Baie consumer IoT-toestelle stel *unauthenticated* HTTP(S)-endpoints bloot wat Base64-encoded firmware blobs aanvaar, dit server-side decodeer en recovery/upgrade trigger.
+3. Na die downgrade, exploit ’n kwesbaarheid wat in die nuwer release gepatch is (byvoorbeeld ’n command-injection-filter wat later bygevoeg is).
+4. Flash opsioneel die nuutste image terug of disable updates om detection te vermy sodra persistence verkry is.
 
 ### Example: Command Injection After Downgrade
 ```http
@@ -410,62 +410,62 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-In die kwesbare (afgegradeerde) firmware word die `md5`-parameter direk in ’n shell-opdrag aaneengeskakel sonder sanitering, wat inspuiting van arbitrêre opdragte moontlik maak (hier – om root-toegang gebaseer op SSH-sleutels te aktiveer). Latere firmware-weergawes het ’n basiese karakterfilter ingestel, maar die afwesigheid van downgrade-beskerming maak die regstelling nutteloos.
+In die kwesbare (afgegradeerde) firmware word die `md5`-parameter direk in ’n shell-opdrag saamgevoeg sonder sanitisering, wat die inspuiting van arbitrere opdragte moontlik maak (hier – om SSH-sleutelgebaseerde root-toegang te aktiveer). Latere firmware-weergawes het ’n basiese karakterfilter ingestel, maar die afwesigheid van downgrade-beskerming maak die regstelling nutteloos.<sup>[[4]](#references)</sup>
 
-### Onttrekking van Firmware Uit Mobiele Toepassings
+### Onttrekking van Firmware uit Mobiele Toepassings
 
-Baie verskaffers bundel volledige firmware-beelde binne hul metgesel-mobiele toepassings sodat die toepassing die toestel oor Bluetooth/Wi-Fi kan opdateer. Hierdie pakkette word gewoonlik ongeënkripteer in die APK/APEX gestoor onder paaie soos `assets/fw/` of `res/raw/`. Tools soos `apktool`, `ghidra`, of selfs gewone `unzip` laat jou toe om getekende beelde te onttrek sonder om aan die fisiese hardeware te raak.
+Baie verskaffers bundel volledige firmware-beelde binne hul gepaardgaande mobiele toepassings sodat die toepassing die toestel oor Bluetooth/Wi-Fi kan opdateer. Hierdie pakkette word gewoonlik ongeënkripteer in die APK/APEX gestoor, onder paaie soos `assets/fw/` of `res/raw/`. Gereedskap soos `apktool`, `ghidra`, of selfs gewone `unzip` laat jou toe om ondertekende beelde te onttrek sonder om aan die fisiese hardeware te raak.<sup>[[4]](#references)</sup>
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
 firmware_v1.3.11.490_signed.bin
 ```
-### Anti-rollback-bypass wat slegs updater vereis in A/B-slotontwerpe
+### Anti-rollback-omseiling wat slegs die updater in A/B-slotontwerpe raak
 
-Sommige vendors implementeer wel ’n anti-downgrade **ratchet**, maar slegs binne die *updater*-logika (byvoorbeeld ’n UDS-roetine oor CAN, ’n recovery command, of ’n userspace OTA-agent). As die **bootloader** later slegs die image se signature/CRC nagaan en die partition table of slot-metadata vertrou, kan rollback-beskerming steeds omseil word.
+Sommige vendors implementeer wel ’n anti-downgrade **ratchet**, maar slegs binne die *updater*-logika (byvoorbeeld ’n UDS-roetine oor CAN, ’n recovery-opdrag, of ’n userspace OTA-agent). As die **bootloader** later slegs die image se signature/CRC nagaan en die partition table of slot-metadata vertrou, kan rollback-beskerming steeds omseil word.<sup>[[7]](#references)</sup>
 
 Tipiese swak ontwerp:
 
 - Firmware-metadata bevat beide ’n weergawebeskrywing en ’n **security ratchet** / monotone teller.
 - Die updater vergelyk die image se ratchet met ’n waarde wat in persistente storage gestoor word en verwerp ouer signed images.
-- Die bootloader **parse** nie daardie ratchet nie en verifieer slegs die header, CRC en signature voordat dit die gekose slot boot.
-- Slotaktivering word afsonderlik in ’n partition table of per-slot generation counter gestoor en is **nie kriptografies gebind** aan die presiese firmware digest wat gevalideer is nie.
+- Die bootloader **parse** nie daardie ratchet nie en verifieer slegs die header, CRC en signature voordat dit die geselekteerde slot boot.
+- Slot-aktivering word afsonderlik in ’n partition table of per-slot generation counter gestoor en is nie kriptografies gebind aan die presiese firmware digest wat gevalideer is nie.
 
-Dit skep ’n **validate-one-image / boot-another-image**-primitive in dual-slot-stelsels. As die aanvaller die updater kan laat merk dat slot B die volgende boot-teiken is deur ’n huidige signed image te gebruik, en slot B later voor reboot kan oorskryf, kan die bootloader steeds die downgraded image boot omdat dit slegs die reeds-gecommitte slot-metadata vertrou.
+Dit skep ’n **validate-one-image / boot-another-image** primitive in dual-slot-stelsels. As die attacker die updater kan laat merk dat slot B die volgende boot-teiken is deur ’n huidige signed image te gebruik, en slot B later voor reboot kan oorskryf, kan die bootloader steeds die downgraded image boot omdat dit slegs die reeds-gecommitteerde slot-metadata vertrou.
 
 Algemene abuse-patroon:
 
-1. Upload ’n **huidige signed** firmware na die passiewe slot en voer die normale validation/switch-roetine uit sodat die layout daardie slot as volgende aktief merk.
-2. **Moenie nog reboot nie**. Gaan die slot-preparation/erase-roetine in dieselfde sessie weer binne.
-3. Abuse verouderde boot-state of verouderde slot-selection-logika sodat die updater die **dieselfde fisiese slot** wat pas bevorder is, uitvee.
+1. Upload ’n **current signed** firmware na die passiewe slot en voer die normale validation/switch-roetine uit sodat die layout daardie slot as die volgende aktiewe slot merk.
+2. **Moenie nog reboot nie**. Gaan weer die slot-preparation/erase-roetine binne tydens dieselfde sessie.
+3. Misbruik stale boot-state- of stale slot-selection-logika sodat die updater die **dieselfde fisiese slot** uitvee wat pas promoted is.
 4. Skryf ’n **ouer maar steeds signed** firmware na daardie slot.
 5. Slaan die validation-roetine wat die ratchet afdwing oor en reboot direk.
-6. Die bootloader kies die bevorderde slot, verifieer slegs signature/integrity, en boot die ou image.
+6. Die bootloader kies die promoted slot, verifieer slegs signature/integrity, en boot die ou image.
 
 Dinge waarna gekyk moet word wanneer A/B-update-implementerings gereverse word:
 
 - Slotkeuse wat afgelei word van **boot-time flags** wat nie ná ’n suksesvolle switch verfris word nie.
-- ’n `prepare_passive_slot()`-styl roetine wat ’n slot op grond van verouderde state uitvee in plaas van die **huidige gecommitte layout**.
-- ’n `part_write_layout()`-styl funksie wat slegs ’n **generation counter** / active flag verhoog en nie die gevalideerde image hash stoor nie.
+- ’n `prepare_passive_slot()`-agtige roetine wat ’n slot op grond van stale state uitvee in plaas van die **huidige gecommitteerde layout**.
+- ’n `part_write_layout()`-agtige funksie wat slegs ’n **generation counter** / active flag verhoog en nie die gevalideerde image hash stoor nie.
 - Ratchet-checks wat in userspace- of updater-code geïmplementeer is, maar **nie** in ROM / bootloader / secure boot-stadia nie.
-- Erase- of recovery-roetines wat die slot as bootable gemerk laat selfs nadat die inhoud verwyder en herskryf is.
+- Erase- of recovery-roetines wat die slot as bootable gemerk laat, selfs nadat die inhoud verwyder en herskryf is.
 
-### Kontrolelys vir die assessering van Update-logika
+### Kontrolelys vir die assessering van update-logika
 
 * Is die transport/authentication van die *update endpoint* voldoende beskerm (TLS + authentication)?
 * Vergelyk die device **version numbers** of ’n **monotone anti-rollback counter** voordat dit flash?
 * Word die image binne ’n secure boot chain geverifieer (bv. signatures wat deur ROM-code nagegaan word)?
-* **Dwing die bootloader dieselfde ratchet af** as die updater, in plaas daarvan om slegs signature/CRC na te gaan?
-* Is slotaktivering se metadata **gebind aan die gevalideerde firmware digest/version**, of kan ’n slot ná promotion gewysig word?
-* Word die device ná ’n suksesvolle slot-switch gedwing om te reboot, of is latere update/erase-roetines steeds in dieselfde sessie bereikbaar?
+* Dwing die **bootloader dieselfde ratchet** as die updater af, eerder as om slegs signature/CRC na te gaan?
+* Is slot-aktiveringsmetadata **gebind aan die gevalideerde firmware digest/version**, of kan ’n slot ná promotion gewysig word?
+* Word die device ná ’n suksesvolle slot-switch gedwing om te reboot, of is latere update/erase-roetines steeds tydens dieselfde sessie bereikbaar?
 * Voer userland-code addisionele sanity checks uit (bv. toegelate partition map, model number)?
-* Hergebruik *partial* of *backup* update-flows dieselfde validation-logika?
+* Hergebruik *partial* of *backup* update-vloeie dieselfde validation-logika?
 
-> 💡  As enige van die bogenoemde ontbreek, is die platform waarskynlik kwesbaar vir rollback attacks.
+> 💡  Indien enige van die bogenoemde ontbreek, is die platform waarskynlik kwesbaar vir rollback-attacks.
 
-## Kwesbare firmware om mee te oefen
+## Kwesbare firmware vir oefening
 
-Om te oefen met die ontdekking van vulnerabilities in firmware, gebruik die volgende kwesbare firmware-projekte as ’n beginpunt.
+Om te oefen met die ontdekking van kwesbaarhede in firmware, gebruik die volgende kwesbare firmware-projekte as ’n beginpunt.
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -482,20 +482,20 @@ Om te oefen met die ontdekking van vulnerabilities in firmware, gebruik die volg
 
 ## Herwinning van firmware-decryption keys uit ingebedde KMS/Vault-state
 
-Wanneer ’n update image klein plaintext-metadata met ’n groot hoë-entropieblob meng, doen eers container-triage voordat enigiets brute-forced word:
+Wanneer ’n update image klein plaintext-metadata met ’n groot hoë-entropie-blob meng, doen container triage voordat enigiets brute-forced word:<sup>[[1]](#references)</sup>
 
-- Dump headers, offsets en lyngrense met `hexdump`, `xxd`, `strings -tx`, `base64 -d`, en `binwalk -E`.
+- Dump headers, offsets en lyngrense met `hexdump`, `xxd`, `strings -tx`, `base64 -d` en `binwalk -E`.
 - `Salted__` beteken gewoonlik OpenSSL `enc`-formaat: die volgende 8 bytes is die salt en die oorblywende bytes is ciphertext.
-- ’n Base64-veld wat na presies `256` bytes decode, is ’n sterk aanduiding dat jy na ’n RSA-2048-ciphertext kyk wat ’n ewekansige firmware password/session key wrap.
-- Detached PGP-materiaal in dieselfde file beskerm dikwels slegs authenticity; moenie aanvaar dat dit die confidentiality-meganisme is nie.
+- ’n Base64-veld wat na presies `256` bytes decode, is ’n sterk aanduiding dat jy na ’n RSA-2048 ciphertext kyk wat ’n ewekansige firmware-wagwoord/session key omvou.
+- Detached PGP-materiaal in dieselfde lêer beskerm dikwels slegs authenticity; moenie aanvaar dat dit die confidentiality-meganisme is nie.
 
-As statiese key hunting (`grep`, `strings`, PEM/PGP-soektogte) misluk, reverse eerder die **operasionele decrypt-path** as om slegs vir private keys te soek:
+As static key hunting (`grep`, `strings`, PEM/PGP-soektogte) misluk, reverse eerder die **operational decrypt path** as om slegs na private keys te soek:
 
-- Decompile die updater- / management-binary en trace wie die encrypted blob lees, watter helper/API dit unwrap, en die logiese key name wat dit versoek.
-- Soek die extracted root filesystem vir KMS-state (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`) plus unit files en init scripts.
-- Behandel plaintext `vault operator unseal ...`, recovery keys, bootstrap tokens, of plaaslike KMS auto-unseal scripts as ekwivalent aan private-key-materiaal.
+- Decompile die updater- / management-binary en trace wie die encrypted blob lees, watter helper/API dit unwrap, en die logiese key name waarvoor dit vra.
+- Soek in die extracted root filesystem vir KMS-state (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`), sowel as unit files en init scripts.
+- Behandel plaintext `vault operator unseal ...`, recovery keys, bootstrap tokens, of plaaslike KMS auto-unseal scripts as gelykstaande aan private-key-materiaal.
 
-As die appliance die oorspronklike Vault-binary en storage backend insluit, is dit gewoonlik makliker om daardie environment te replay as om Vault-internals te herimplementeer:
+As die appliance die oorspronklike Vault-binary en storage backend bevat, is dit gewoonlik makliker om daardie omgewing te replay as om Vault-internals te herimplementeer:
 ```bash
 vault server -config=/tmp/vault.hcl
 vault operator unseal <share1>
@@ -512,12 +512,12 @@ TOKEN=$(vault operator generate-root -decode="$(printf '%s\n' "$FINAL" | awk '/R
 ```
 Met root op die gekloonde KMS:
 
-- Maak transit-sleutels slegs binne die geïsoleerde kloon uitvoerbaar: `vault write transit/keys/<name>/config exportable=true`
-- Voer die unwrap-sleutel uit: `vault read transit/export/encryption-key/<name>`
-- Probeer die herstelde RSA-sleutel met die presiese padding/hash-paar wat deur die KMS gebruik word. ’n Mislukte PKCS#1 v1.5-dekripsie en ’n mislukte verstek-OAEP-dekripsie bewys **nie** dat die sleutel verkeerd is nie; baie Vault-gesteunde vloei gebruik OAEP met SHA-256, terwyl algemene libraries SHA-1 as verstek gebruik.
-- As die payload met `Salted__` begin, reproduseer die vendor se OpenSSL KDF presies (`EVP_BytesToKey`, dikwels MD5 op legacy-apparate) voordat AES-CBC-dekripsie probeer word.
+- Maak transit keys slegs binne die geïsoleerde kloon uitvoerbaar: `vault write transit/keys/<name>/config exportable=true`
+- Voer die unwrap key uit: `vault read transit/export/encryption-key/<name>`
+- Probeer die herwonne RSA key met die presiese padding/hash-paar wat deur die KMS gebruik word. ’n Mislukte PKCS#1 v1.5-dekripsie en ’n mislukte verstek-OAEP-dekripsie bewys **nie** dat die key verkeerd is nie; baie Vault-backed-vloeie gebruik OAEP met SHA-256, terwyl algemene libraries standaard SHA-1 gebruik.
+- As die payload met `Salted__` begin, reproduseer die vendor se OpenSSL KDF presies (`EVP_BytesToKey`, dikwels MD5 op legacy-appliances) voordat AES-CBC-dekripsie probeer word.
 
-Dit verander "encrypted firmware" in ’n meer algemene probleem: **herwin die appliance-kant se operasionele sleutels, en reproduseer dan die presiese unwrap + KDF-parameters offline**.
+Dit verander "geënkripteerde firmware" in ’n meer algemene probleem: **herwin die appliance-kant se operasionele keys, en reproduseer dan die presiese unwrap + KDF-parameters offline**.
 
 ## Opleiding en Sertifisering
 
@@ -525,13 +525,13 @@ Dit verander "encrypted firmware" in ’n meer algemene probleem: **herwin die a
 
 ## Verwysings
 
-- [Cracking Firmware with Claude: Senior-Level Skill, Junior-Level Autonomy](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
-- [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-- [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
-- [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
-- [Synacktiv - Exploiting the Tesla Wall Connector from its charge port connector - Part 2: bypassing the anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
-- [Make it Blink: Over-the-Air Exploitation of the Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
+- [1] [Firmware kraak met Claude: Vaardigheid op senior-vlak, outonomie op junior-vlak](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
+- [2] [Metodologie vir Firmware Security Testing](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+- [3] [Praktiese IoT Hacking: Die definitiewe gids tot die aanval van die Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [4] [Ontginning van zero days in verlate hardware – Trail of Bits-blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [5] [Hoe ’n Smart Device van $20 my toegang tot jou huis gegee het](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
+- [6] [Nou sien jy my: Nou is jy Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
+- [7] [Synacktiv - Ontginning van die Tesla Wall Connector vanaf sy charge port connector - Deel 2: omseiling van die anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
+- [8] [Laat dit flikker: Over-the-Air-ontginning van die Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
 
 {{#include ../../banners/hacktricks-training.md}}

