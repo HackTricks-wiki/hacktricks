@@ -1,73 +1,76 @@
-# macOS ファイル、フォルダー、バイナリおよびメモリ
+# macOS のファイル、フォルダ、バイナリ、メモリ
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## ファイル階層レイアウト
+## ファイル階層のレイアウト
 
-- **/Applications**: インストールされたアプリがここにあります。すべてのユーザーがアクセスできます。
+- **/Applications**: インストールされたアプリはここに配置されます。すべてのユーザーがアクセスできます。
 - **/bin**: コマンドラインバイナリ
-- **/cores**: 存在する場合、コアダンプを保存するために使用されます。
-- **/dev**: すべてがファイルとして扱われるため、ここにハードウェアデバイスが保存されているのを見ることができます。
+- **/cores**: 存在する場合、core dump の保存に使用されます。
+- **/dev**: すべてがファイルとして扱われるため、ハードウェアデバイスがここに保存されていることがあります。
 - **/etc**: 設定ファイル
-- **/Library**: 設定、キャッシュ、ログに関連する多くのサブディレクトリとファイルがここにあります。Libraryフォルダーはルートと各ユーザーのディレクトリに存在します。
-- **/private**: 文書化されていませんが、前述の多くのフォルダーはプライベートディレクトリへのシンボリックリンクです。
-- **/sbin**: 必要なシステムバイナリ（管理に関連）
-- **/System**: OS Xを実行するためのファイルです。ここには主にApple特有のファイル（サードパーティではない）があります。
-- **/tmp**: ファイルは3日後に削除されます（これは/private/tmpへのソフトリンクです）。
-- **/Users**: ユーザーのホームディレクトリ。
+- **/Library**: 環境設定、キャッシュ、ログに関連する多数のサブディレクトリとファイルがあります。Library フォルダはルートと各ユーザーのディレクトリに存在します。
+- **/private**: 文書化されていませんが、前述したフォルダの多くは private ディレクトリへの symbolic link です。
+- **/sbin**: 重要なシステムバイナリ（管理関連）
+- **/System**: OS X の実行に必要なファイル。ここには主に Apple 固有のファイルがあり、third-party のファイルはほとんどありません。
+- **/tmp**: ファイルは3日後に削除されます（`/private/tmp` への soft link です）。
+- **/Users**: ユーザーのホームディレクトリ
 - **/usr**: 設定およびシステムバイナリ
 - **/var**: ログファイル
 - **/Volumes**: マウントされたドライブがここに表示されます。
-- **/.vol**: `stat a.txt`を実行すると、`16777223 7545753 -rw-r--r-- 1 username wheel ...`のような出力が得られます。最初の数字はファイルが存在するボリュームのID番号で、2番目の数字はinode番号です。この情報を使って`cat /.vol/16777223/7545753`を実行することで、このファイルの内容にアクセスできます。
+- **/.vol**: `stat a.txt` を実行すると、`16777223 7545753 -rw-r--r-- 1 username wheel ...` のような結果が得られます。最初の数字はファイルが存在する volume の ID 番号で、2番目の数字は inode 番号です。`cat /.vol/16777223/7545753` を実行すると、`/.vol/` とそれらの情報を使ってこのファイルの内容にアクセスできます。
 
-### アプリケーションフォルダー
+### Applications フォルダ
 
-- **システムアプリケーション**は`/System/Applications`にあります。
-- **インストールされた**アプリケーションは通常`/Applications`または`~/Applications`にインストールされます。
-- **アプリケーションデータ**は、rootとして実行されるアプリケーションのために`/Library/Application Support`に、ユーザーとして実行されるアプリケーションのために`~/Library/Application Support`にあります。
-- サードパーティアプリケーションの**デーモン**は、通常`/Library/PrivilegedHelperTools/`にあります。
-- **サンドボックス化された**アプリは`~/Library/Containers`フォルダーにマッピングされます。各アプリにはアプリケーションのバンドルID（`com.apple.Safari`）に基づいた名前のフォルダーがあります。
-- **カーネル**は`/System/Library/Kernels/kernel`にあります。
-- **Appleのカーネル拡張**は`/System/Library/Extensions`にあります。
-- **サードパーティのカーネル拡張**は`/Library/Extensions`に保存されています。
+- **System applications** は `/System/Applications` にあります。
+- **Installed** applications は通常、`/Applications` または `~/Applications` にインストールされます。
+- **Application data** は、root として実行されるアプリケーションの場合は `/Library/Application Support`、ユーザーとして実行されるアプリケーションの場合は `~/Library/Application Support` にあります。
+- **root として実行する必要がある** third-party applications の **daemons** は通常、`/Library/PrivilegedHelperTools/` にあります。
+- **Sandboxed** apps は `~/Library/Containers` フォルダにマッピングされます。各 app には、application の bundle ID（`com.apple.Safari`）に従って名前が付けられたフォルダがあります。
+- **kernel** は `/System/Library/Kernels/kernel` にあります。
+- **Apple's kernel extensions** は `/System/Library/Extensions` にあります。
+- **Third-party kernel extensions** は `/Library/Extensions` に保存されます。
 
 ### 機密情報を含むファイル
 
-MacOSはパスワードなどの情報をいくつかの場所に保存します：
+MacOS は、パスワードなどの情報を複数の場所に保存します。
+
 
 {{#ref}}
 macos-sensitive-locations.md
 {{#endref}}
 
-### 脆弱なpkgインストーラー
+### 脆弱な pkg installers
+
 
 {{#ref}}
 macos-installers-abuse.md
 {{#endref}}
 
-## OS X特有の拡張子
+## OS X 固有の拡張子
 
-- **`.dmg`**: Apple Disk Imageファイルはインストーラーに非常に頻繁に使用されます。
-- **`.kext`**: 特定の構造に従う必要があり、OS Xバージョンのドライバーです。（バンドルです）
-- **`.plist`**: プロパティリストとも呼ばれ、XMLまたはバイナリ形式で情報を保存します。
-- XMLまたはバイナリのいずれかです。バイナリのものは次のコマンドで読み取れます：
+- **`.dmg`**: Apple Disk Image ファイルで、installers によく使用されます。
+- **`.kext`**: 特定の構造に従う必要があり、OS X 版の driver です（bundle です）。
+- **`.plist`**: property list とも呼ばれ、XML または binary 形式で情報を保存します。
+- XML または binary にできます。Binary のものは次のコマンドで読み取れます。
 - `defaults read config.plist`
-- `/usr/libexec/PlistBuddy -c print config.plist`
+- `/usr/libexec/PlistBuddy -c print config.plsit`
 - `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
 - `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
 - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
-- **`.app`**: ディレクトリ構造に従うAppleアプリケーション（バンドルです）。
-- **`.dylib`**: 動的ライブラリ（Windows DLLファイルのようなもの）
-- **`.pkg`**: xar（eXtensible Archive format）と同じです。インストーラーコマンドを使用してこれらのファイルの内容をインストールできます。
-- **`.DS_Store`**: このファイルは各ディレクトリにあり、ディレクトリの属性とカスタマイズを保存します。
-- **`.Spotlight-V100`**: このフォルダーはシステムのすべてのボリュームのルートディレクトリに表示されます。
-- **`.metadata_never_index`**: このファイルがボリュームのルートにある場合、Spotlightはそのボリュームをインデックスしません。
-- **`.noindex`**: この拡張子を持つファイルとフォルダーはSpotlightによってインデックスされません。
-- **`.sdef`**: バンドル内のファイルで、AppleScriptからアプリケーションとどのように対話できるかを指定します。
+- **`.app`**: directory structure に従う Apple applications です（bundle です）。
+- **`.dylib`**: Dynamic libraries（Windows の DLL files に相当）
+- **`.pkg`**: xar（eXtensible Archive format）と同じです。installer command を使用して、これらのファイルの内容をインストールできます。
+- **`.DS_Store`**: 各 directory に存在するファイルで、directory の属性とカスタマイズを保存します。
+- **`.Spotlight-V100`**: この folder は、システム上のすべての volume の root directory に表示されます。
+- **`.metadata_never_index`**: このファイルが volume の root にある場合、Spotlight はその volume を index しません。
+- **`.noindex`**: この extension を持つ files と folders は Spotlight によって index されません。
+- **`.sdef`**: bundle 内にあるファイルで、AppleScript から application と対話する方法を指定します。
 
-### macOSバンドル
+### macOS Bundles
 
-バンドルは**Finder内のオブジェクトのように見えるディレクトリ**です（バンドルの例は`*.app`ファイルです）。
+bundle は、**Finder で object のように見える** **directory** です（bundle の例として `*.app` files があります）。
+
 
 {{#ref}}
 macos-bundles.md
@@ -75,14 +78,14 @@ macos-bundles.md
 
 ## Dyld Shared Library Cache (SLC)
 
-macOS（およびiOS）では、すべてのシステム共有ライブラリ、フレームワークやdylibが**単一のファイル**に**結合されて**おり、これを**dyld共有キャッシュ**と呼びます。これにより、コードをより速く読み込むことができ、パフォーマンスが向上します。
+macOS（および iOS）では、frameworks や dylibs などのすべての system shared libraries が、**dyld shared cache** と呼ばれる **単一のファイルに結合**されています。これにより、code をより高速にロードできるため、パフォーマンスが向上しました。
 
-これはmacOSの`/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/`にあり、古いバージョンでは**`/System/Library/dyld/`**に**共有キャッシュ**が見つかるかもしれません。\
-iOSでは**`/System/Library/Caches/com.apple.dyld/`**にあります。
+macOS では `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` にあります。古いバージョンでは **`/System/Library/dyld/`** に **shared cache** がある場合があります。\
+iOS では、`/System/Library/Caches/com.apple.dyld/` にあります。
 
-dyld共有キャッシュと同様に、カーネルとカーネル拡張もカーネルキャッシュにコンパイルされ、ブート時にロードされます。
+dyld shared cache と同様に、kernel と kernel extensions も kernel cache にコンパイルされ、boot 時にロードされます。
 
-単一ファイルのdylib共有キャッシュからライブラリを抽出するために、バイナリの[dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip)を使用することが可能でしたが、現在は機能しないかもしれませんが、[**dyldextractor**](https://github.com/arandomdev/dyldextractor)を使用することもできます。
+単一ファイルの dylib shared cache から libraries を抽出するには、以前は binary [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) を使用できました。現在は動作しない可能性がありますが、[**dyldextractor**](https://github.com/arandomdev/dyldextractor) も使用できます。
 ```bash
 # dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -93,110 +96,110 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 # More options inside the readme
 ```
 > [!TIP]
-> `dyld_shared_cache_util` ツールが機能しなくても、**共有された dyld バイナリを Hopper に渡す**ことで、Hopper はすべてのライブラリを特定し、**調査したいものを選択**できるようになります：
+> `dyld_shared_cache_util` toolが動作しない場合でも、**shared dyld binaryをHopperに渡す**ことができます。Hopperはすべてのlibraryを識別し、調査したいものを**選択できる**ようにします。
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-一部のエクストラクターは、dylibs がハードコーディングされたアドレスでプリリンクされているため、未知のアドレスにジャンプする可能性があるため、機能しないことがあります。
+一部のextractorは動作しません。これは、dylibがハードコードされたアドレスでprelinkされているため、未知のアドレスへjumpする可能性があるためです。
 
 > [!TIP]
-> エミュレーターを使用して Xcode で他の \*OS デバイスの共有ライブラリキャッシュをダウンロードすることも可能です。これらは次の場所にダウンロードされます： ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`、例：`$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
+> Xcodeのemulatorを使用すれば、macos上で他の\*OSデバイスのShared Library Cacheをdownloadすることもできます。これらは次の場所にdownloadされます: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`、例:`$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
 
-### SLC のマッピング
+### SLCのMapping
 
-**`dyld`** は、SLC がマッピングされているかどうかを知るためにシステムコール **`shared_region_check_np`** を使用し（アドレスを返します）、**`shared_region_map_and_slide_np`** を使用して SLC をマッピングします。
+**`dyld`**はsyscall **`shared_region_check_np`**を使用してSLCがmappingされているか確認し（アドレスを返します）、**`shared_region_map_and_slide_np`**を使用してSLCをmappingします。
 
-SLC が最初の使用時にスライドしても、すべての **プロセス** は **同じコピー** を使用するため、攻撃者がシステムでプロセスを実行できる場合、**ASLR** 保護が **排除されます**。これは過去に実際に悪用され、共有領域ページャーで修正されました。
+SLCは初回使用時にslideされますが、すべての**process**は**同じcopy**を使用するため、攻撃者がsystem上でprocessを実行できた場合、**ASLR**のprotectionは**排除される**ことに注意してください。これは過去に実際にexploitされ、shared region pagerによって修正されました。
 
-ブランチプールは、画像マッピングの間に小さなスペースを作成する小さな Mach-O dylibs であり、関数を介入させることを不可能にします。
+Branch poolsは小さなMach-O dylibであり、image mappingの間に小さなspaceを作ることで、functionのinterposeを不可能にします。
 
-### SLC のオーバーライド
+### SLCのOverride
 
-環境変数を使用して：
+次のenv variableを使用します:
 
-- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> これにより、新しい共有ライブラリキャッシュをロードできます。
-- **`DYLD_SHARED_CACHE_DIR=avoid`** として、ライブラリを共有キャッシュの実際のものへのシンボリックリンクで手動で置き換えます（それらを抽出する必要があります）。
+- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> 新しいshared library cacheをloadできるようになります
+- **`DYLD_SHARED_CACHE_DIR=avoid`**およびlibraryをshared cacheへのsymlinkで手動replaceします。realなlibraryが必要です（extractする必要があります）
 
-## 特殊ファイル権限
+## Special File Permissions
 
-### フォルダの権限
+### Folder permissions
 
-**フォルダ**内の **読み取り** は **リスト** を許可し、**書き込み** はその中のファイルを **削除** および **書き込む** ことを許可し、**実行** はディレクトリを **横断** することを許可します。したがって、たとえば、**実行権限を持たない**ディレクトリ内のファイルに対して **読み取り権限を持つ**ユーザーは、そのファイルを **読み取ることができません**。
+**folder**では、**read**によって**list**が可能になり、**write**によってそのfolder上のfileを**delete**および**write**でき、**execute**によってdirectoryを**traverse**できます。したがって、例えばdirectory内の**fileに対するread permission**を持つuserでも、そのdirectoryに対する**execute**permissionを持って**いない**場合、そのfileを**readできません**。
 
-### フラグ修飾子
+### Flag modifiers
 
-ファイルに設定できるフラグがいくつかあり、ファイルの動作を異なるものにします。ディレクトリ内のファイルの **フラグを確認する**には `ls -lO /path/directory` を使用します。
+fileに設定できるflagには、fileの動作を変えるものがあります。directory内のfileの**flagは**`ls -lO /path/directory`で**確認できます**。
 
-- **`uchg`**: **uchange** フラグとして知られ、**ファイル**の変更や削除を **防止します**。設定するには： `chflags uchg file.txt`
-- ルートユーザーは **フラグを削除**し、ファイルを変更できます。
-- **`restricted`**: このフラグはファイルを **SIP によって保護**します（このフラグをファイルに追加することはできません）。
-- **`Sticky bit`**: スティッキービットを持つディレクトリでは、**所有者またはルートのみがファイルを名前変更または削除**できます。通常、これは /tmp ディレクトリに設定され、通常のユーザーが他のユーザーのファイルを削除または移動するのを防ぎます。
+- **`uchg`**: **uchange** flagとして知られ、**file**を変更またはdeleteする**あらゆるactionを防止**します。設定するには: `chflags uchg file.txt`
+- root userは**flagをremove**してfileを変更できます
+- **`restricted`**: このflagによりfileは**SIPによってprotected**されます（このflagをfileに追加することはできません）。
+- **`Sticky bit`**: sticky bitが設定されたdirectoryでは、**directoryのownerまたはrootのみが**fileを**renameまたはdelete**できます。通常、これは/tmp directoryに設定され、一般userが他のuserのfileをdeleteまたはmoveするのを防ぎます。
 
-すべてのフラグはファイル `sys/stat.h` に見つけることができ（`mdfind stat.h | grep stat.h` を使用して見つけます）、次のようになります：
+すべてのflagは`sys/stat.h` fileにあります（`mdfind stat.h | grep stat.h`で検索できます）。その内容は次のとおりです:
 
-- `UF_SETTABLE` 0x0000ffff: 所有者変更可能フラグのマスク。
-- `UF_NODUMP` 0x00000001: ファイルをダンプしない。
-- `UF_IMMUTABLE` 0x00000002: ファイルは変更できません。
-- `UF_APPEND` 0x00000004: ファイルへの書き込みは追加のみ可能。
-- `UF_OPAQUE` 0x00000008: ディレクトリはユニオンに対して不透明です。
-- `UF_COMPRESSED` 0x00000020: ファイルは圧縮されています（いくつかのファイルシステム）。
-- `UF_TRACKED` 0x00000040: この設定があるファイルの削除/名前変更に対する通知はありません。
-- `UF_DATAVAULT` 0x00000080: 読み取りおよび書き込みには権限が必要です。
-- `UF_HIDDEN` 0x00008000: このアイテムは GUI に表示されるべきではないというヒント。
-- `SF_SUPPORTED` 0x009f0000: スーパーユーザーサポートフラグのマスク。
-- `SF_SETTABLE` 0x3fff0000: スーパーユーザー変更可能フラグのマスク。
-- `SF_SYNTHETIC` 0xc0000000: システム読み取り専用合成フラグのマスク。
-- `SF_ARCHIVED` 0x00010000: ファイルはアーカイブされています。
-- `SF_IMMUTABLE` 0x00020000: ファイルは変更できません。
-- `SF_APPEND` 0x00040000: ファイルへの書き込みは追加のみ可能。
-- `SF_RESTRICTED` 0x00080000: 書き込みには権限が必要です。
-- `SF_NOUNLINK` 0x00100000: アイテムは削除、名前変更、またはマウントできません。
-- `SF_FIRMLINK` 0x00800000: ファイルはファームリンクです。
-- `SF_DATALESS` 0x40000000: ファイルはデータレスオブジェクトです。
+- `UF_SETTABLE` 0x0000ffff: ownerが変更可能なflagのmask。
+- `UF_NODUMP` 0x00000001: fileをdumpしない。
+- `UF_IMMUTABLE` 0x00000002: fileを変更できない。
+- `UF_APPEND` 0x00000004: fileへのwriteはappendのみ可能。
+- `UF_OPAQUE` 0x00000008: unionに関してdirectoryがopaque。
+- `UF_COMPRESSED` 0x00000020: fileがcompressed（いくつかのfile-system）。
+- `UF_TRACKED` 0x00000040: このflagが設定されたfileについて、delete/renameのnotificationを行わない。
+- `UF_DATAVAULT` 0x00000080: readおよびwriteにEntitlementが必要。
+- `UF_HIDDEN` 0x00008000: GUIにこのitemを表示しないようにするhint。
+- `SF_SUPPORTED` 0x009f0000: superuserがsupportするflagのmask。
+- `SF_SETTABLE` 0x3fff0000: superuserが変更可能なflagのmask。
+- `SF_SYNTHETIC` 0xc0000000: system read-only synthetic flagのmask。
+- `SF_ARCHIVED` 0x00010000: fileがarchived。
+- `SF_IMMUTABLE` 0x00020000: fileを変更できない。
+- `SF_APPEND` 0x00040000: fileへのwriteはappendのみ可能。
+- `SF_RESTRICTED` 0x00080000: writeにEntitlementが必要。
+- `SF_NOUNLINK` 0x00100000: itemをremove、rename、またはmountできない。
+- `SF_FIRMLINK` 0x00800000: fileがfirmlink。
+- `SF_DATALESS` 0x40000000: fileがdataless object。
 
-### **ファイル ACLs**
+### **File ACLs**
 
-ファイル **ACLs** には **ACE** (アクセス制御エントリ) が含まれており、異なるユーザーに対してより **詳細な権限** を割り当てることができます。
+File **ACLs**には**ACE**（Access Control Entries）が含まれており、異なるuserに対してより**granularなpermission**を割り当てることができます。
 
-**ディレクトリ** に次の権限を付与することが可能です： `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`。\
-ファイルに対しては： `read`, `write`, `append`, `execute`。
+**directory**には次のpermissionをgrantできます: `list`、`search`、`add_file`、`add_subdirectory`、`delete_child`、`delete_child`。\
+また、**file**には: `read`、`write`、`append`、`execute`。
 
-ファイルに ACLs が含まれている場合、権限をリスト表示すると **"+" が表示されます**：
+fileにACLsが含まれている場合、permissionをlistすると**「+」が表示されます**。例:
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
 ```
-ファイルの**ACLを読む**には、次のコマンドを使用します:
+次のコマンドで、ファイルの ACL を**読み取る**ことができます：
 ```bash
 ls -lde Movies
 drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
 0: group:everyone deny delete
 ```
-すべてのACLを持つファイルを見つけるには（これは非常に遅いです）：
+**ACLを持つすべてのファイル**は、次のコマンドで見つけられます（非常に遅いです）。
 ```bash
 ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
 ### 拡張属性
 
-拡張属性には名前と任意の値があり、`ls -@`を使用して表示し、`xattr`コマンドを使用して操作できます。一般的な拡張属性には以下があります：
+拡張属性には名前と任意の値があり、`ls -@` を使用して確認し、`xattr` コマンドで操作できます。一般的な拡張属性には以下があります。
 
-- `com.apple.resourceFork`: リソースフォークの互換性。`filename/..namedfork/rsrc`としても表示されます
-- `com.apple.quarantine`: MacOS: Gatekeeperの隔離メカニズム (III/6)
-- `metadata:*`: MacOS: `_backup_excludeItem`や`kMD*`などのさまざまなメタデータ
-- `com.apple.lastuseddate` (#PS): 最後のファイル使用日
-- `com.apple.FinderInfo`: MacOS: Finder情報（例：カラータグ）
-- `com.apple.TextEncoding`: ASCIIテキストファイルのテキストエンコーディングを指定
-- `com.apple.logd.metadata`: `/var/db/diagnostics`内のファイルでlogdによって使用される
-- `com.apple.genstore.*`: 世代ストレージ（ファイルシステムのルートにある`/.DocumentRevisions-V100`）
-- `com.apple.rootless`: MacOS: システム整合性保護によってファイルにラベル付けされる (III/10)
-- `com.apple.uuidb.boot-uuid`: 一意のUUIDを持つブートエポックのlogdマーク
-- `com.apple.decmpfs`: MacOS: 透過的ファイル圧縮 (II/7)
-- `com.apple.cprotect`: \*OS: ファイルごとの暗号化データ (III/11)
-- `com.apple.installd.*`: \*OS: installdによって使用されるメタデータ（例：`installType`、`uniqueInstallID`）
+- `com.apple.resourceFork`: Resource fork の互換性。`filename/..namedfork/rsrc` としても確認できます
+- `com.apple.quarantine`: macOS: Gatekeeper の quarantine メカニズム (III/6)
+- `metadata:*`: macOS: `_backup_excludeItem` や `kMD*` などの各種メタデータ
+- `com.apple.lastuseddate` (#PS): ファイルの最終使用日時
+- `com.apple.FinderInfo`: macOS: Finder 情報（色 Tags など）
+- `com.apple.TextEncoding`: ASCII テキストファイルのテキストエンコーディングを指定
+- `com.apple.logd.metadata`: `/var/db/diagnostics` 内のファイルで logd によって使用される
+- `com.apple.genstore.*`: Generational storage（ファイルシステムのルートにある `/.DocumentRevisions-V100`）
+- `com.apple.rootless`: macOS: System Integrity Protection がファイルにラベルを付けるために使用 (III/10)
+- `com.apple.uuidb.boot-uuid`: 一意の UUID を使用した boot epoch の logd マーキング
+- `com.apple.decmpfs`: macOS: 透過的なファイル圧縮 (II/7)
+- `com.apple.cprotect`: \*OS: ファイル単位の暗号化データ (III/11)
+- `com.apple.installd.*`: \*OS: installd が使用するメタデータ（`installType`、`uniqueInstallID` など）
 
-### リソースフォーク | macOS ADS
+### Resource Forks | macOS ADS
 
-これは**MacOS**マシンで**代替データストリーム**を取得する方法です。**file/..namedfork/rsrc**内の拡張属性**com.apple.ResourceFork**にコンテンツを保存することができます。
+これは **macOS** マシンで **Alternate Data Streams** を取得する方法です。ファイルを **file/..namedfork/rsrc** に保存することで、ファイル内の **com.apple.ResourceFork** という拡張属性にコンテンツを保存できます。
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -207,52 +210,71 @@ com.apple.ResourceFork: Hello Mac ADS
 ls -l a.txt #The file length is still q
 -rw-r--r--@ 1 username  wheel  6 17 Jul 01:15 a.txt
 ```
-この拡張属性を含むすべてのファイルは、次のコマンドで**見つけることができます**:
+次の方法で**この拡張属性を含むすべてのファイルを検索できます**：
 ```bash
 find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.ResourceFork"
 ```
 ### decmpfs
 
-拡張属性 `com.apple.decmpfs` は、ファイルが暗号化されて保存されていることを示します。`ls -l` は **サイズが 0** であると報告し、圧縮データはこの属性内にあります。ファイルにアクセスされるたびに、メモリ内で復号化されます。
+拡張属性 `com.apple.decmpfs` は、ファイルが暗号化されて保存されていることを示します。`ls -l` では **サイズが 0** と報告され、圧縮データはこの属性内に格納されます。ファイルにアクセスされるたびに、メモリ内で復号されます。
 
-この属性は `ls -lO` で確認でき、圧縮されたファイルはフラグ `UF_COMPRESSED` でタグ付けされているため、圧縮されていることが示されます。圧縮ファイルが `chflags nocompressed </path/to/file>` で削除されると、システムはそのファイルが圧縮されていたことを認識せず、したがってデータを復号化してアクセスすることができません（実際には空であると考えます）。
+この属性は `ls -lO` で確認でき、圧縮ファイルにはフラグ `UF_COMPRESSED` も付与されているため、compressed と表示されます。圧縮ファイルから `chflags nocompressed </path/to/file>` でこのフラグを削除すると、システムはファイルが圧縮されていたことを認識できなくなり、データを解凍してアクセスできなくなります（実際には空のファイルだと認識します）。
 
-ツール afscexpand を使用して、ファイルを強制的に復号化することができます。
+afscexpand ツールを使用すると、ファイルを強制的に解凍できます。
 
-## **ユニバーサルバイナリ &** Mach-o フォーマット
 
-Mac OS のバイナリは通常 **ユニバーサルバイナリ** としてコンパイルされます。**ユニバーサルバイナリ** は **同じファイル内で複数のアーキテクチャをサポート** できます。
+### 興味深い設定場所 (macOS)
+
+| Path / Location | Purpose / What it configures | Security / Attack-Potential |
+|---|---|---|
+| `/System/Library/FeatureFlags/Domain/` | system daemons / frameworks におけるオプションまたは実験的な動作を制御する、Apple の feature-flag plist ファイルを格納 | 攻撃者が SIP を bypass するか privilege を取得できる場合、これらを改ざんすることで隠れた code path を有効化したり、保護機能を無効化したりできる |
+| `/System/Library/CoreServices/systemVersion.plist` | アプリや installer が動作を制限する際に使用する macOS のバージョン metadata (ProductVersion、BuildVersion) を保持 | 改変により、アプリや installer に未サポートの OS version を受け入れさせたり、機能を unlock させたりできる |
+| `/Library/Preferences/com.apple.*.plist` & `~/Library/Preferences/*.plist` | アプリケーション / system-wide の preferences | 書き込み可能な場合、攻撃者は設定を injection してアプリの動作を誘導したり、保護機能を無効化したり、設定ミスを引き起こしたりできる |
+| `/Library/LaunchDaemons/` / `/Library/LaunchAgents/` | background daemons および agents の plist 定義 | 権限が許せば、悪意のある plist の挿入または操作により persistence や privilege escalations が可能になる |
+| `/etc/hosts` | system DNS resolver が使用する hostname ↔ IP の mapping | domain name の redirect、traffic の interception、ローカル管理下での service spoofing |
+| `/etc/sudoers` | `sudo` を使用してコマンドを実行できるユーザーと、その条件を定義 | sudoers ファイルが破損すると、攻撃者の account に root または不適切な privilege を付与できる |
+| `/private/var/db/dslocal/nodes/Default/users/` | ローカル user account の定義 plist | 改ざんにより、user account、password hash、user metadata の作成または変更が可能になる |
+| `/System/Library/Extensions/` / `/Library/Extensions/` | Kernel extensions / drivers | kext の install または変更により kernel-level control につながる可能性がある。SIP / signature policies により厳重に保護されている |
+| `/private/var/db/SystemPolicyConfiguration/` | system policy enforcement (Gatekeeper、notarization など) の設定を格納 | これらを改ざんすると、policy check や trust rule を circumvention できる可能性がある |
+| `/usr/libexec/ssh-keysign`, `/etc/ssh/ssh_config`, `/etc/ssh/sshd_config` | SSH helper binaries および config files | 設定ミスにより、SSH security の低下、unauthorized access、または insecure algorithms の使用につながる |
+| `/System/Library/Sandbox/Profiles` | process action の制限に使用される system sandbox profiles (SBPL) | profile の置換または変更により、sandbox escape vector を開いたり、containment を弱めたりできる |
+
+> **Note**: これらの Path の多くは SIP-protected directories (例: `/System`) 配下にあり、SIP が無効化または bypass されない限り、書き込みから保護されています。
+
+
+## **Universal binaries &** Mach-o Format
+
+Mac OS の binaries は通常、**universal binaries** として compile されます。**universal binary** は、**同じ file 内で複数の architecture を support できます**。
 
 {{#ref}}
 universal-binaries-and-mach-o-format.md
 {{#endref}}
 
-## macOS プロセスメモリ
 
-## macOS メモリダンプ
+## macOS memory dumping
 
 {{#ref}}
 macos-memory-dumping.md
 {{#endref}}
 
-## リスクカテゴリファイル Mac OS
+## Mac OS の Risk Category Files
 
-ディレクトリ `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` には、**異なるファイル拡張子に関連するリスクに関する情報が保存されています**。このディレクトリはファイルをさまざまなリスクレベルに分類し、Safari がこれらのファイルをダウンロード時にどのように扱うかに影響を与えます。カテゴリは次のとおりです：
+`/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` directory には、**さまざまな file extension に関連する risk の情報が格納されています**。この directory は files を複数の risk level に分類し、download 時に Safari がこれらの files をどのように扱うかに影響します。categories は次のとおりです。
 
-- **LSRiskCategorySafe**: このカテゴリのファイルは **完全に安全** と見なされます。Safari はこれらのファイルをダウンロード後に自動的に開きます。
-- **LSRiskCategoryNeutral**: これらのファイルには警告がなく、Safari によって **自動的に開かれません**。
-- **LSRiskCategoryUnsafeExecutable**: このカテゴリのファイルは **警告を引き起こします**。これはファイルがアプリケーションであることを示すセキュリティ対策です。
-- **LSRiskCategoryMayContainUnsafeExecutable**: このカテゴリは、実行可能ファイルを含む可能性のあるアーカイブなどのファイル用です。Safari は、すべての内容が安全または中立であることを確認できない限り、**警告を引き起こします**。
+- **LSRiskCategorySafe**: この category の files は **完全に safe** と見なされます。Safari は download 後、これらの files を自動的に open します。
+- **LSRiskCategoryNeutral**: これらの files には warning が表示されず、Safari によって **自動的に open されません**。
+- **LSRiskCategoryUnsafeExecutable**: この category の files では、その file が application であることを示す **warning が表示されます**。これは user に alert を出す security measure です。
+- **LSRiskCategoryMayContainUnsafeExecutable**: この category は、executable を含む可能性がある archive などの files 用です。Safari がすべての contents が safe または neutral であることを verify できない限り、**warning が表示されます**。
 
-## ログファイル
+## Log files
 
-- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: ダウンロードされたファイルに関する情報を含み、どこからダウンロードされたかのURLが含まれています。
-- **`/var/log/system.log`**: OSX システムのメインログ。com.apple.syslogd.plist は syslogging の実行を担当しています（`launchctl list` で "com.apple.syslogd" を探すことで無効になっているか確認できます）。
-- **`/private/var/log/asl/*.asl`**: これらは Apple システムログで、興味深い情報が含まれている可能性があります。
-- **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: "Finder" を通じて最近アクセスされたファイルとアプリケーションを保存します。
-- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: システム起動時に起動するアイテムを保存します。
-- **`$HOME/Library/Logs/DiskUtility.log`**: DiskUtility アプリのログファイル（ドライブに関する情報、USBを含む）。
-- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: ワイヤレスアクセスポイントに関するデータ。
-- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: 無効化されたデーモンのリスト。
+- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: download された files に関する情報（download 元の URL など）が含まれます。
+- **`/var/log/system.log`**: OSX systems の main log。com.apple.syslogd.plist が syslogging の実行を担当します。無効化されているかどうかは、`launchctl list` で "com.apple.syslogd" を検索して確認できます。
+- **`/private/var/log/asl/*.asl`**: Apple System Logs で、興味深い情報が含まれている可能性があります。
+- **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: "Finder" を介して最近 access された files と applications を格納します。
+- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: system startup 時に launch する items を格納します。
+- **`$HOME/Library/Logs/DiskUtility.log`**: DiskUtility App の log file（USB を含む drives に関する情報）。
+- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: wireless access points に関する data。
+- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: deactivate された daemons の list。
 
 {{#include ../../../banners/hacktricks-training.md}}

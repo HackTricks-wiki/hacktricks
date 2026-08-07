@@ -4,16 +4,16 @@
 
 ## Basic MacOS
 
-macOSに詳しくない場合は、まずmacOSの基本を学ぶことから始めてください。
+macOS に詳しくない場合は、まず macOS の基本を学ぶことから始めてください。
 
-- macOSの特殊な **ファイルと権限:**
+- 特殊な macOS **ファイルと権限:**
 
 
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
-- macOSで一般的な **ユーザー**
+- 一般的な macOS **ユーザー**
 
 
 {{#ref}}
@@ -34,7 +34,7 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- macOSで一般的な **ネットワークサービスとプロトコル**
+- 一般的な macOS **ネットワークサービスとプロトコル**
 
 
 {{#ref}}
@@ -42,11 +42,11 @@ macos-protocols.md
 {{#endref}}
 
 - **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-- `tar.gz` をダウンロードするには、[https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) のようなURLを [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) に変更します。
+- `tar.gz` をダウンロードするには、[https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) のような URL を [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) に変更します。
 
 ### MacOS MDM
 
-企業では **macOS** システムが **MDMで管理されている可能性が非常に高くなります**。したがって、攻撃者の観点からは、**その仕組みを理解すること**が重要です。
+企業では、**macOS** システムが **MDM で管理されている可能性が非常に高い**です。そのため、攻撃者の視点からは、**その仕組みを知ることが重要です**。
 
 
 {{#ref}}
@@ -71,17 +71,17 @@ macos-security-protections/
 
 ### File Permissions
 
-**rootとして実行されているプロセスが、ユーザーによって制御可能なファイルに書き込む**場合、ユーザーはこれを悪用して**権限を昇格**できる可能性があります。\
-これは、以下の状況で発生する可能性があります。
+**root として実行されるプロセスが、ユーザーによって制御可能なファイルに書き込む**場合、そのユーザーはこれを悪用して **privilege escalation** を行える可能性があります。\
+これは次のような状況で発生します。
 
-- 使用されるファイルがすでにユーザーによって作成されている（ユーザーが所有している）
-- グループにより、使用されるファイルに対してユーザーが書き込み可能である
-- 使用されるファイルがユーザー所有のディレクトリ内にある（ユーザーがファイルを作成できる）
-- 使用されるファイルがroot所有のディレクトリ内にあるが、グループによりユーザーがそのディレクトリへの書き込み権限を持っている（ユーザーがファイルを作成できる）
+- 使用されるファイルが、すでにユーザーによって作成されている（ユーザーが所有している）
+- 使用されるファイルが、グループ権限によってユーザーから書き込み可能になっている
+- 使用されるファイルが、ユーザー所有のディレクトリ内にある（ユーザーがファイルを作成できる）
+- 使用されるファイルが、root 所有のディレクトリ内にあるが、グループ権限によってユーザーがそのディレクトリへの書き込み権限を持っている（ユーザーがファイルを作成できる）
 
-**rootによって使用されるファイルを作成**できると、ユーザーはその**内容を悪用**したり、別の場所を指す**symlinks/hardlinks**を作成したりできます。
+**root によって使用されるファイルを作成**できる場合、ユーザーはその**内容を悪用**したり、さらにはそのファイルを別の場所に向ける **symlinks/hardlinks** を作成したりできます。
 
-この種の脆弱性については、**脆弱な `.pkg` installers**を忘れずに**確認**してください。
+この種の脆弱性については、**脆弱な `.pkg` installer** を忘れずに**確認**してください。
 
 
 {{#ref}}
@@ -90,7 +90,7 @@ macos-files-folders-and-binaries/macos-installers-abuse.md
 
 ### File Extension & URL scheme app handlers
 
-ファイル拡張子に登録された奇妙なアプリが悪用される可能性があり、特定のプロトコルを開くように別のアプリケーションを登録することもできます。
+ファイル拡張子に登録された不審なアプリが悪用される可能性があり、特定のプロトコルを開くように異なるアプリケーションを登録することもできます。
 
 
 {{#ref}}
@@ -99,17 +99,17 @@ macos-file-extension-apps.md
 
 ## macOS TCC / SIP Privilege Escalation
 
-macOSでは、**アプリケーションとバイナリがフォルダや設定にアクセスする権限を持つことができ**、他のものより高い権限を持つ場合があります。
+macOS では、**アプリケーションやバイナリに権限を付与**して、他のものよりも高い権限でフォルダーや設定にアクセスできるようにすることができます。
 
-したがって、macOSマシンの侵害を成功させたい攻撃者は、**TCC権限を昇格**させる必要があります（必要に応じて**SIPをバイパス**することもあります）。
+そのため、macOS マシンの侵害に成功したい攻撃者は、**TCC privileges を escalate**（必要に応じて **SIP を bypass**）する必要があります。
 
-これらの権限は通常、アプリケーションが署名される際の**entitlements**として付与されます。また、アプリケーションがアクセスを要求し、**ユーザーが承認した後**に、**TCC databases**で確認できる場合もあります。プロセスがこれらの権限を取得する別の方法は、それらの**権限**を持つプロセスの**child**になることです。通常、権限は**継承**されるためです。
+これらの権限は通常、アプリケーションに署名された **entitlements** として付与されます。また、アプリケーションがアクセスを要求し、**ユーザーが承認した後**に **TCC databases** で確認できる場合もあります。プロセスがこれらの権限を取得する別の方法は、通常、同じ **privileges** を持つプロセスの **child** になることです。これは権限が通常 **継承される**ためです。<sup>[[5]](#references)</sup>
 
-以下のリンクから、[**escalate privileges in TCC**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses)、[**bypass TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html)、および過去に[**SIP has been bypassed**](macos-security-protections/macos-sip.md#sip-bypasses)された方法を確認してください。
+以下のリンクから、[**TCC で privileges を escalate する方法**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses)、[**TCC を bypass する方法**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html)、および過去に [**SIP がどのように bypass されたか**](macos-security-protections/macos-sip.md#sip-bypasses) を確認できます。
 
 ## macOS Traditional Privilege Escalation
 
-もちろん、red teamsの観点ではrootへの昇格にも関心を持つべきです。ヒントについては、以下の投稿を確認してください。
+もちろん、red team の観点では root への privilege escalation にも関心があるはずです。ヒントについては、次の post を確認してください。
 
 
 {{#ref}}

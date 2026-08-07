@@ -4,9 +4,9 @@
 
 ## CFRuntimeClass
 
-CF* objects は CoreFoundation に由来し、`CFString`、`CFNumber`、`CFAllocator` など、50 種類を超えるオブジェクトのクラスを提供します。
+CF* オブジェクトは CoreFoundation に由来し、`CFString`、`CFNumber`、`CFAllocator` など、50 を超えるクラスのオブジェクトを提供します。
 
-これらすべてのクラスは `CFRuntimeClass` クラスのインスタンスです。`CFRuntimeClass` を呼び出すと、`__CFRuntimeClassTable` へのインデックスが返されます。CFRuntimeClass は [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html) で定義されています。
+これらすべてのクラスは `CFRuntimeClass` クラスのインスタンスです。これを呼び出すと、`__CFRuntimeClassTable` へのインデックスが返されます。CFRuntimeClass は [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html) で定義されています：
 ```objectivec
 // Some comments were added to the original code
 
@@ -57,7 +57,7 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 
 ### 使用される Memory sections
 
-Objective-C runtime が使用するデータの大部分は実行中に変更されるため、メモリ上の Mach-O `__DATA` ファミリーのセグメントに含まれる複数のセクションを使用します。従来、これらには以下が含まれていました。
+Objective-C runtimeで使用されるデータの大部分は実行中に変化するため、メモリ上のMach-O `__DATA` familyのsegmentに含まれる複数のsectionを使用します。従来、これらには次のものが含まれていました。
 
 - `__objc_msgrefs` (`message_ref_t`): Message references
 - `__objc_ivar` (`ivar`): Instance variables
@@ -66,26 +66,26 @@ Objective-C runtime が使用するデータの大部分は実行中に変更さ
 - `__objc_superrefs` (`Class`): Superclass references
 - `__objc_protorefs` (`protocol_t *`): Protocol references
 - `__objc_selrefs` (`SEL`): Selector references
-- `__objc_const` (`...`): Class r/o data およびその他の（期待される）constant data
-- `__objc_imageinfo` (`version, flags`): image load 中に使用されます。現在の Version は `0` です。Flags は preoptimized GC support などを指定します
+- `__objc_const` (`...`): Class r/o dataおよびその他の（期待される）constant data
+- `__objc_imageinfo` (`version, flags`): image load中に使用されます。現在のVersionは`0`です。Flagsはpreoptimized GC supportなどを指定します。
 - `__objc_protolist` (`protocol_t *`): Protocol list
-- `__objc_nlcatlist` (`category_t`): この binary で定義された Non-Lazy Categories への Pointer
-- `__objc_catlist` (`category_t`): この binary で定義された Categories への Pointer
-- `__objc_nlclslist` (`classref_t`): この binary で定義された Non-Lazy Objective-C classes への Pointer
-- `__objc_classlist` (`classref_t`): この binary で定義されたすべての Objective-C classes への Pointer
+- `__objc_nlcatlist` (`category_t`): このbinaryで定義されたNon-Lazy CategoriesへのPointer
+- `__objc_catlist` (`category_t`): このbinaryで定義されたCategoriesへのPointer
+- `__objc_nlclslist` (`classref_t`): このbinaryで定義されたNon-Lazy Objective-C classesへのPointer
+- `__objc_classlist` (`classref_t`): このbinaryで定義されたすべてのObjective-C classesへのPointer
 
-また、constants を格納するために `__TEXT` セグメント内のいくつかのセクションも使用します。
+また、constantsを格納するために、`__TEXT` segment内のいくつかのsectionも使用します。
 
-- `__objc_methname` (C-String): Method names
-- `__objc_classname` (C-String): Class names
-- `__objc_methtype` (C-String): Method types
+- `__objc_methname` (C‑String): Method names
+- `__objc_classname` (C‑String): Class names
+- `__objc_methtype` (C‑String): Method types
 
-Modern macOS/iOS（特に Apple Silicon）では、Objective-C/Swift metadata も以下に配置されます。
+Modern macOS/iOS（特にApple Silicon）では、Objective-C/Swift metadataも次の場所に配置されます。
 
-- `__DATA_CONST`: read-only で process 間共有できる immutable Objective-C metadata（たとえば、多くの `__objc_*` lists が現在ここに配置されています）。
-- `__AUTH` / `__AUTH_CONST`: arm64e で load 時または使用時に認証が必要な pointers（Pointer Authentication）を含むセグメント。legacy の `__la_symbol_ptr`/`__got` だけでなく、`__AUTH_CONST` 内の `__auth_got` も確認できます。modern binaries の instrumenting または hooking の際は、`__got` と `__auth_got` の両方の entries を考慮してください。
+- `__DATA_CONST`: immutableなObjective-C metadata。process間でread-onlyとして共有できます（たとえば、多くの`__objc_*` listsが現在ここに配置されています）。
+- `__AUTH` / `__AUTH_CONST`: arm64e上でload時またはuse-timeにauthenticationが必要なpointers（Pointer Authentication）を含むsegments。legacyの`__la_symbol_ptr`/`__got`だけでなく、`__AUTH_CONST`内の`__auth_got`も確認できます。instrumentingやhookingを行う場合は、modern binariesにおける`__got`と`__auth_got`の両方のentriesを考慮してください。
 
-dyld pre-optimization（selector uniquing や class/protocol precomputation など）の背景、および shared cache 由来の場合にこれらの多くの sections が「すでに fixed up」されている理由については、Apple の `objc-opt` sources と dyld shared cache notes を確認してください。これは runtime で metadata を patch できる場所と方法に影響します。
+dyld pre-optimization（selector uniquingやclass/protocol precomputationなど）の背景、およびshared cache由来の場合にこれらのsectionsの多くが「すでにfixed up」されている理由については、Appleの`objc-opt` sourcesとdyld shared cache notesを確認してください。これは、runtimeでmetadataをpatchできる場所と方法に影響します。
 
 {{#ref}}
 ../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md
@@ -93,41 +93,41 @@ dyld pre-optimization（selector uniquing や class/protocol precomputation な�
 
 ### Type Encoding
 
-Objective-C は、単純な type と複雑な type の selector および variable types を encode するために mangling を使用します。
+Objective-Cでは、simple typesとcomplex typesのselectorおよびvariable typesをencodeするために、manglingを使用します。
 
-- Primitive types は type の最初の letter を使用します。`int` には `i`、`char` には `c`、`long` には `l` などを使用し、unsigned の場合は capital letter を使用します（`unsigned long` には `L`）。
-- その他の data types には、`long long` を表す `q`、bitfields を表す `b`、booleans を表す `B`、classes を表す `#`、`id` を表す `@`、`char *` を表す `*`、generic pointers を表す `^`、undefined を表す `?` など、その他の letters または symbols を使用します。
-- Arrays、structures、unions には、それぞれ `[`, `{`、`(` を使用します。
+- Primitive typesはtypeの最初のletterを使用します。`int`には`i`、`char`には`c`、`long`には`l`などを使用し、unsignedの場合はcapital letterを使用します（`unsigned long`には`L`）。
+- その他のdata typesでは、`long long`を表す`q`、bitfieldsを表す`b`、booleansを表す`B`、classesを表す`#`、`id`を表す`@`、`char *`を表す`*`、generic pointersを表す`^`、undefinedを表す`?`など、その他のlettersまたはsymbolsを使用します。
+- Arrays、structures、unionsには、それぞれ`[`、`{`、`(`を使用します。
 
 #### Example Method Declaration
 ```objectivec
 - (NSString *)processString:(id)input withOptions:(char *)options andError:(id)error;
 ```
-selector は `processString:withOptions:andError:` になります。
+セレクタは `processString:withOptions:andError:` になります。
 
 #### Type Encoding
 
-- `id` は `@` として encode されます
-- `char *` は `*` として encode されます
+- `id` は `@` としてエンコードされます
+- `char *` は `*` としてエンコードされます
 
-この method の完全な type encoding は次のとおりです:
+このメソッドの完全な型エンコーディングは次のとおりです。
 ```less
 @24@0:8@16*20^@24
 ```
 #### 詳細な内訳
 
-1. Return Type (`NSString *`): 長さ 24 の `@` としてエンコード
-2. `self`（object instance）: `@` としてエンコード、offset 0
-3. `_cmd`（selector）: `:` としてエンコード、offset 8
-4. First argument（`char * input`）: `*` としてエンコード、offset 16
-5. Second argument（`NSDictionary * options`）: `@` としてエンコード、offset 20
-6. Third argument（`NSError ** error`）: `^@` としてエンコード、offset 24
+1. Return Type (`NSString *`): `@` としてエンコードされ、長さは 24
+2. `self`（object instance）: `@` としてエンコードされ、offset は 0
+3. `_cmd`（selector）: `:` としてエンコードされ、offset は 8
+4. First argument (`char * input`): `*` としてエンコードされ、offset は 16
+5. Second argument (`NSDictionary * options`): `@` としてエンコードされ、offset は 20
+6. Third argument (`NSError ** error`): `^@` としてエンコードされ、offset は 24
 
 selector と encoding を使用すると、method を再構築できます。
 
 ### Classes
 
-Objective‑C の Classes は、properties、method pointers などを持つ C structs です。`objc_class` struct は[**source code**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html)で確認できます。
+Objective-C の Classes は、properties、method pointers などを持つ C structs です。`objc_class` struct は、[**source code**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html) で確認できます：
 ```objectivec
 struct objc_class : objc_object {
 // Class ISA;
@@ -148,9 +148,9 @@ data()->setFlags(set);
 }
 [...]
 ```
-このクラスは、`isa` フィールドの一部を使用してクラスに関する情報を示します。
+この class は `isa` field の一部を使用して、class に関する情報を示します。
 
-さらに、この struct には、ディスク上に保存された `class_ro_t` struct へのポインタがあります。この struct には、クラス名、base methods、properties、instance variables などのクラス属性が含まれています。runtime では、methods、protocols、properties などの変更可能なポインタを含む追加の `class_rw_t` 構造体が使用されます。
+その後、struct にはディスク上に保存された struct `class_ro_t` への pointer があり、class の name、base methods、properties、instance variables などの属性が含まれています。runtime 中は、methods、protocols、properties など、変更可能な pointer を含む追加の structure `class_rw_t` が使用されます。
 
 {{#ref}}
 ../macos-basic-objective-c.md
@@ -158,15 +158,15 @@ data()->setFlags(set);
 
 ---
 
-## メモリ内の最新の object 表現（arm64e、tagged pointers、Swift）
+## メモリ上の Modern object representations（arm64e、tagged pointers、Swift）
 
-### Non‑pointer `isa` と Pointer Authentication（arm64e）
+### Non-pointer `isa` と Pointer Authentication（arm64e）
 
-Apple Silicon および最近の runtime では、Objective‑C の `isa` は必ずしも raw class pointer ではありません。arm64e では、Pointer Authentication Code（PAC）も保持できる packed structure です。platform によっては、`nonpointer`、`has_assoc`、`weakly_referenced`、`extra_rc`、および class pointer 自体（shift または signed 形式）などのフィールドを含む場合があります。つまり、Objective‑C object の先頭 8 bytes を無条件に dereference しても、常に有効な `Class` pointer が得られるとは限りません。<sup>[[2]](#references)</sup>
+Apple Silicon および recent runtimes では、Objective-C `isa` は常に raw class pointer であるとは限りません。arm64e では packed structure であり、Pointer Authentication Code（PAC）も保持する場合があります。platform によっては、`nonpointer`、`has_assoc`、`weakly_referenced`、`extra_rc`、および class pointer 自体（shift または signed されたもの）などの field が含まれます。そのため、Objective-C object の最初の 8 bytes を無条件に dereference しても、常に有効な `Class` pointer が得られるとは限りません。<sup>[[2]](#references)</sup>
 
-arm64e で debugging する際の実用的な注意事項：
+arm64e で debugging する際の実用的な注意点：
 
-- LLDB は通常、`po` で Objective‑C objects を表示する際に PAC bits を strip しますが、raw pointers を扱う場合は authentication を手動で strip する必要があります。
+- Objective-C objects を `po` で print すると、通常 LLDB が PAC bits を strip してくれます。ただし raw pointers を扱う場合は、authentication を手動で strip する必要があります：
 
 ```lldb
 (lldb) expr -l objc++ -- #include <ptrauth.h>
@@ -174,20 +174,20 @@ arm64e で debugging する際の実用的な注意事項：
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)raw)
 ```
 
-- Mach‑O 内の多くの function/data pointers は `__AUTH`/`__AUTH_CONST` に存在し、使用前に authentication が必要です。interposing または re-binding（fishhook-style など）を行う場合は、legacy の `__got` に加えて `__auth_got` も処理するようにしてください。
+- Mach-O 内の多くの function/data pointers は `__AUTH`/`__AUTH_CONST` に配置され、使用前に authentication が必要です。interposing または re-binding（fishhook-style など）を行う場合は、従来の `__got` に加えて `__auth_got` も処理するようにしてください。
 
-language/ABI の guarantees と、Clang/LLVM で利用可能な `<ptrauth.h>` intrinsics の詳細については、このページの末尾にある reference を参照してください。<sup>[[1]](#references)</sup>
+language/ABI の guarantees と、Clang/LLVM で利用可能な `<ptrauth.h>` intrinsics の詳細については、この page の末尾にある reference を参照してください。<sup>[[1]](#references)</sup>
 
 ### Tagged pointer objects
 
-一部の Foundation classes は、object の payload を pointer value に直接 encode する（tagged pointers）ことで、heap allocation を回避します。検出方法は platform によって異なります（例：arm64 では most-significant bit、x86_64 macOS では least-significant bit）。Tagged objects には、memory に保存された通常の `isa` がありません。runtime は tag bits から class を解決します。<sup>[[2]](#references)</sup> 任意の `id` values を inspecting する場合：
+一部の Foundation classes は、object の payload を pointer value に直接 encode することで、heap allocation を回避します（tagged pointers）。検出方法は platform によって異なります（例：arm64 では most-significant bit、x86_64 macOS では least-significant bit）。Tagged objects には通常の `isa` が memory に保存されておらず、runtime が tag bits から class を解決します。<sup>[[2]](#references)</sup> 任意の `id` values を inspect する場合：
 
 - `isa` field を直接調べるのではなく、runtime APIs を使用します：`object_getClass(obj)` / `[obj class]`。
-- LLDB では、`po (id)0xADDR` を実行するだけで tagged pointer instances が正しく表示されます。これは runtime が class の解決に使用されるためです。
+- LLDB では、`po (id)0xADDR` を実行するだけで tagged pointer instances が正しく print されます。これは runtime が class の解決に使用されるためです。
 
 ### Swift heap objects と metadata
 
-Pure Swift classes も、Swift metadata を指す header を持つ objects です（Objective‑C の `isa` ではありません）。process を変更せずに live Swift processes を introspect するには、Swift toolchain の `swift-inspect` を使用できます。これは Remote Mirror library を利用して runtime metadata を読み取ります：
+Pure Swift classes も objects であり、Objective-C `isa` ではなく Swift metadata を指す header を持ちます。process を変更せずに live Swift processes を introspect するには、Swift toolchain の `swift-inspect` を使用できます。これは Remote Mirror library を利用して runtime metadata を読み取ります：
 ```bash
 # Xcode toolchain (or Swift.org toolchain) provides swift-inspect
 swift-inspect dump-raw-metadata <pid-or-name>
@@ -195,7 +195,7 @@ swift-inspect dump-arrays <pid-or-name>
 # On Darwin additionally:
 swift-inspect dump-concurrency <pid-or-name>
 ```
-これは、Swift/ObjC 混在アプリを reverse engineering する際に、Swift heap objects と protocol conformances をマッピングするのに非常に役立ちます。
+Swift/ObjC 混在アプリを reverse する際に、Swift heap objects と protocol conformances を map するのに非常に役立ちます。
 
 ---
 
@@ -208,7 +208,7 @@ swift-inspect dump-concurrency <pid-or-name>
 (lldb) expr -l objc++ -O -- (id)0x0000000101234560
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)0x0000000101234560)
 ```
-- breakpoint で、object method の `self` へのポインターから Objective-C class を調べる：
+- ブレークポイントで、オブジェクトメソッドの `self` へのポインターから Objective-C class を調査する:
 ```lldb
 (lldb) br se -n '-[NSFileManager fileExistsAtPath:]'
 (lldb) r
@@ -216,22 +216,22 @@ swift-inspect dump-concurrency <pid-or-name>
 (lldb) po (id)$x0                 # self
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)$x0)
 ```
-- Objective-C metadataを保持するセクションをDumpする（注: 現在ではその多くが`__DATA_CONST` / `__AUTH_CONST`に存在します）：
+- Objective-C メタデータを含む section を Dump する（注: 現在は多くが `__DATA_CONST` / `__AUTH_CONST` に存在します）:
 ```lldb
 (lldb) image dump section --section __DATA_CONST.__objc_classlist
 (lldb) image dump section --section __DATA_CONST.__objc_selrefs
 (lldb) image dump section --section __AUTH_CONST.__auth_got
 ```
-- 既知のクラスオブジェクトのメモリを読み取り、メソッドリストを reverse する際に `class_ro_t` / `class_rw_t` へ pivot する:
+- 既知のクラスオブジェクトのメモリを読み取り、method listをreverseする際に`class_ro_t` / `class_rw_t`へpivotする：
 ```lldb
 (lldb) image lookup -r -n _OBJC_CLASS_$_NSFileManager
 (lldb) memory read -fx -s8 0xADDRESS_OF_CLASS_OBJECT
 ```
-### Frida（Objective-CおよびSwift）
+### Frida (Objective-C および Swift)
 
-Fridaは、シンボルなしで実行中のオブジェクトを発見・計測するのに非常に便利な、高レベルのruntime bridgeを提供します。
+Frida は、symbols なしで実行中のオブジェクトを発見・instrumentation するのに非常に便利な、高レベルの runtime bridge を提供します。
 
-- classとmethodを列挙し、実行時に実際のclass名を解決し、Objective-Cのselectorをinterceptします:
+- クラスとメソッドを列挙し、runtime で実際のクラス名を解決し、Objective-C selector を intercept します:
 ```js
 if (ObjC.available) {
 // List a class' methods
@@ -249,13 +249,14 @@ console.log('fileExistsAtPath:', this.path, '=>', retval);
 });
 }
 ```
-- Swift bridge: Swiftの型を列挙し、Swiftのインスタンスとやり取りする（新しいバージョンのFridaが必要。Apple Silicon targetsで非常に有用）。
+- Swift bridge: Swift types を列挙し、Swift instances と対話する（recent Frida が必要。Apple Silicon targets で非常に有用）。
 
 ---
 
-## 参考文献
+## References
 
-- [1] [Clang/LLVM: Pointer Authenticationとptrauth.h intrinsics（arm64e ABI）](https://clang.llvm.org/docs/PointerAuthentication.html)
-- [2] [Apple objc runtime headers - objc-object.h（tagged pointers、non-pointer isaなど）](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
+
+- [1] [Clang/LLVM: Pointer Authentication と ptrauth.h intrinsics（arm64e ABI）](https://clang.llvm.org/docs/PointerAuthentication.html)
+- [2] [Apple objc runtime headers - objc-object.h（tagged pointers、non-pointer isa など）](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
