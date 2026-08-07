@@ -2,84 +2,84 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Rooting frameworks kao što su KernelSU, APatch, SKRoot i Magisk često patch-uju Linux/Android kernel i izlažu privilegovanu funkcionalnost neprivilegovanom userspace „manager“ app-u putem hook-ovanog syscall-a. Ako je korak manager-authentication neispravan, bilo koja lokalna app može pristupiti ovom kanalu i eskalirati privilegije na već root-ovanim uređajima.
+Rooting frameworks kao što su KernelSU, APatch, SKRoot i Magisk često patch-uju Linux/Android kernel i izlažu privilegovanu funkcionalnost neprivilegovanom userspace „manager“ app-u putem hook-ovanog syscall-a. Ako je korak autentifikacije manager-a neispravan, bilo koja lokalna app može pristupiti ovom kanalu i eskalirati privilegije na uređajima koji su već root-ovani.
 
-Ova stranica apstrahuje tehnike i zamke otkrivene u javnim istraživanjima (naročito Zimperium-ovoj analizi KernelSU v0.5.7), kako bi red i blue teams mogli da razumeju attack surface, exploitation primitive i robusne mitigacije.
+Ova stranica predstavlja apstrakciju tehnika i propusta otkrivenih u javnim istraživanjima (naročito Zimperium-ovoj analizi KernelSU v0.5.7), kako bi red i blue timovi razumeli attack surface, exploitation primitive i robusne mitigacije.<sup>[[1]](#references)</sup>
 
 ---
 ## Arhitektonski obrazac: syscall-hooked manager kanal
 
-- Kernel module/patch hook-uje syscall (najčešće prctl) da bi primao "commands" iz userspace-a.
-- Protocol je obično: magic_value, command_id, arg_ptr/len ...
-- Userspace manager app se prvo authenticates (npr. CMD_BECOME_MANAGER). Kada kernel označi caller-a kao trusted manager, prihvataju se privilegovane commands:
-- Dodeli root caller-u (npr. CMD_GRANT_ROOT)
-- Upravljaj allowlists/deny-lists za su
+- Kernel modul/patch hook-uje syscall (najčešće prctl) kako bi primao „komande“ iz userspace-a.
+- Protokol je obično: magic_value, command_id, arg_ptr/len ...
+- Userspace manager app se prvo autentifikuje (npr. CMD_BECOME_MANAGER). Kada kernel označi pozivaoca kao trusted manager, privilegovane komande se prihvataju:
+- Dodeli root pozivaocu (npr. CMD_GRANT_ROOT)
+- Upravljaj allowlist/deny-list listama za su
 - Prilagodi SELinux policy (npr. CMD_SET_SEPOLICY)
-- Proveri version/configuration
-- Pošto bilo koja app može da pozove syscalls, ispravnost manager authentication-a je kritična.
+- Prikaži verziju/konfiguraciju
+- Pošto bilo koja app može pozivati syscall-ove, ispravnost autentifikacije manager-a je kritična.
 
 Primer (KernelSU dizajn):
-- Hooked syscall: prctl
-- Magic value za preusmeravanje ka KernelSU handler-u: 0xDEADBEEF
-- Commands uključuju: CMD_BECOME_MANAGER, CMD_GET_VERSION, CMD_ALLOW_SU, CMD_SET_SEPOLICY, CMD_GRANT_ROOT, itd.
+- Hook-ovani syscall: prctl
+- Magic vrednost za preusmeravanje ka KernelSU handler-u: 0xDEADBEEF
+- Komande uključuju: CMD_BECOME_MANAGER, CMD_GET_VERSION, CMD_ALLOW_SU, CMD_SET_SEPOLICY, CMD_GRANT_ROOT, itd.
 
 ---
-## KernelSU v0.5.7 authentication flow (kako je implementiran)
+## KernelSU v0.5.7 tok autentifikacije (kako je implementiran)
 
 Kada userspace pozove prctl(0xDEADBEEF, CMD_BECOME_MANAGER, data_dir_path, ...), KernelSU proverava:
 
-1) Provera path prefix-a
-- Prosleđeni path mora da počinje očekivanim prefix-om za caller UID, npr. /data/data/<pkg> ili /data/user/<id>/<pkg>.
-- Reference: core_hook.c (v0.5.7) path prefix logic.
+1) Provera prefiksa putanje
+- Prosleđena putanja mora počinjati očekivanim prefiksom za UID pozivaoca, npr. /data/data/<pkg> ili /data/user/<id>/<pkg>.
+- Referenca: core_hook.c (v0.5.7) logika provere prefiksa putanje.<sup>[[2]](#references)</sup>
 
 2) Provera vlasništva
-- Path mora biti u vlasništvu caller UID-a.
-- Reference: core_hook.c (v0.5.7) ownership logic.
+- Vlasnik putanje mora biti UID pozivaoca.
+- Referenca: core_hook.c (v0.5.7) logika vlasništva.<sup>[[2]](#references)</sup>
 
-3) APK signature check putem FD table scan-a
-- Iterira kroz open file descriptors (FDs) calling process-a.
-- Bira prvi file čiji path odgovara /data/app/*/base.apk.
-- Parsira APK v2 signature i proverava je u odnosu na official manager certificate.
-- References: manager.c (iterating FDs), apk_sign.c (APK v2 verification).
+3) Provera APK potpisa putem skeniranja FD tabele
+- Iterira se kroz otvorene file descriptor-e procesa koji poziva.
+- Bira se prvi file čija putanja odgovara /data/app/*/base.apk.
+- Parsira se APK v2 potpis i proverava u odnosu na zvanični sertifikat manager-a.
+- Reference: manager.c (iteriranje kroz FD-ove), apk_sign.c (APK v2 verification).<sup>[[3]](#references)[[4]](#references)</sup>
 
-Ako sve provere prođu, kernel privremeno kešira manager UID i prihvata privilegovane commands od tog UID-a dok se ne resetuje.
-
----
-## Klasa vulnerability-ja: verovanje u „prvi matching APK“ iz FD iteration-a
-
-Ako je signature check vezan za „prvi matching /data/app/*/base.apk“ pronađen u process FD table-i, on zapravo ne proverava package caller-a. Attacker može unapred postaviti legitimno signed APK (stvarni manager-ov) tako da se pojavi ranije u FD listi od njegovog sopstvenog base.apk.
-
-Ovo trust-by-indirection omogućava neprivileged app-u da impersonate-uje manager-a bez posedovanja manager signing key-a.
-
-Ključne exploited properties:
-- FD scan nije vezan za package identity caller-a; on samo pattern-match-uje path strings.
-- open() vraća najniži dostupan FD. Zatvaranjem lower-numbered FDs prvo, attacker može da kontroliše ordering.
-- Filter samo proverava da li path odgovara /data/app/*/base.apk – ne i da li odgovara installed package-u caller-a.
+Ako sve provere prođu, kernel privremeno kešira UID manager-a i prihvata privilegovane komande od tog UID-a do resetovanja.
 
 ---
-## Attack preconditions
+## Klasa ranjivosti: verovanje „prvom odgovarajućem APK-u“ iz FD iteracije
 
-- Uređaj je već root-ovan pomoću vulnerable rooting framework-a (npr. KernelSU v0.5.7).
-- Attacker može lokalno da pokrene proizvoljan unprivileged code (Android app process).
-- Pravi manager se još nije authenticat-ovao (npr. odmah nakon reboot-a). Neki framework-ovi keširaju manager UID nakon uspeha; potrebno je pobediti u race-u.
+Ako se provera potpisa vezuje za „prvi odgovarajući /data/app/*/base.apk“ pronađen u FD tabeli procesa, ona zapravo ne proverava sopstveni package pozivaoca. Attacker može unapred pozicionirati legitimno potpisan APK (pravi manager) tako da se u FD listi pojavi pre njegovog sopstvenog base.apk fajla.
+
+Ovo trust-by-indirection omogućava neprivilegovanoj app da impersonira manager bez posedovanja manager-ovog signing key-a.<sup>[[1]](#references)</sup>
+
+Ključna svojstva koja se iskorišćavaju:<sup>[[1]](#references)</sup>
+- FD scan nije povezan sa identitetom package-a pozivaoca; on samo proverava string pattern putanje.
+- open() vraća najniži dostupan FD. Zatvaranjem FD-ova sa manjim brojevima attacker može kontrolisati redosled.
+- Filter proverava samo da putanja odgovara /data/app/*/base.apk – ne proverava da li ona odgovara instaliranom package-u pozivaoca.
 
 ---
-## Exploitation outline (KernelSU v0.5.7)
+## Preduslovi za attack
 
-High-level koraci:
-1) Izgradi validan path do sopstvenog app data directory-ja da bi zadovoljio prefix i ownership checks.
-2) Obezbedi da genuine KernelSU Manager base.apk bude otvoren na lower-numbered FD-u od sopstvenog base.apk.
-3) Pozovi prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) da bi prošao provere.
-4) Izdaj privilegovane commands kao što su CMD_GRANT_ROOT, CMD_ALLOW_SU, CMD_SET_SEPOLICY da bi elevation ostao trajno aktivan.
+- Uređaj je već root-ovan pomoću ranjivog rooting framework-a (npr. KernelSU v0.5.7).
+- Attacker može lokalno izvršavati proizvoljan neprivilegovan kod (Android app proces).
+- Pravi manager se još nije autentifikovao (npr. neposredno nakon reboot-a). Neki framework-ovi keširaju UID manager-a nakon uspeha; potrebno je pobediti u race-u.<sup>[[1]](#references)</sup>
 
-Practical notes za step 2 (FD ordering):
-- Identifikuj FD svog process-a za sopstveni /data/app/*/base.apk prolaskom kroz /proc/self/fd symlinks.
-- Zatvori low FD (npr. stdin, fd 0) i prvo otvori legitimate manager APK tako da zauzme fd 0 (ili bilo koji index niži od FD-a sopstvenog base.apk).
-- Bundle-uj legitimate manager APK sa svojom app tako da njegov path zadovolji kernel-ov naive filter. Na primer, postavi ga pod subpath koji odgovara /data/app/*/base.apk.
+---
+## Pregled exploitation-a (KernelSU v0.5.7)
 
-Primer code snippets-a (Android/Linux, samo ilustrativno):
+Koraci visokog nivoa:<sup>[[1]](#references)[[9]](#references)</sup>
+1) Napravi validnu putanju do sopstvenog app data direktorijuma kako bi zadovoljio provere prefiksa i vlasništva.
+2) Obezbedi da se originalni KernelSU Manager base.apk otvori na FD-u sa manjim brojem od FD-a sopstvenog base.apk fajla.
+3) Pozovi prctl(0xDEADBEEF, CMD_BECOME_MANAGER, <your_data_dir>, ...) kako bi provere prošle.
+4) Pošalji privilegovane komande kao što su CMD_GRANT_ROOT, CMD_ALLOW_SU, CMD_SET_SEPOLICY da bi se elevation zadržao.
 
-Enumeriši open FDs da bi pronašao base.apk entries:
+Praktične napomene za korak 2 (FD ordering):<sup>[[1]](#references)</sup>
+- Identifikuj FD svog procesa za sopstveni /data/app/*/base.apk prolaskom kroz /proc/self/fd symlink-ove.
+- Zatvori FD sa malim brojem (npr. stdin, fd 0) i prvo otvori legitimni manager APK tako da zauzme fd 0 (ili bilo koji indeks manji od FD-a sopstvenog base.apk fajla).
+- Uključi legitimni manager APK u svoju app tako da njegova putanja zadovolji naivni filter kernela. Na primer, postavi ga pod subpath koji odgovara /data/app/*/base.apk.
+
+Primeri code snippet-a (Android/Linux, samo ilustrativno):
+
+Enumeriši otvorene FD-ove kako bi pronašao base.apk unose:
 ```c
 #include <dirent.h>
 #include <stdio.h>
@@ -107,7 +107,7 @@ closedir(d);
 return best_fd; // First (lowest) matching fd
 }
 ```
-Usmerite FD sa manjim brojem na legitimni manager APK:
+Prisilite FD sa manjim brojem da pokazuje na legitimni manager APK:
 ```c
 #include <fcntl.h>
 #include <unistd.h>
@@ -119,7 +119,7 @@ int fd = open(legit_apk_path, O_RDONLY);
 (void)fd; // fd should now be 0 if available
 }
 ```
-Autentikacija Managera putem prctl hook-a:
+Autentikacija managera putem prctl hook-a:
 ```c
 #include <sys/prctl.h>
 #include <stdint.h>
@@ -139,52 +139,52 @@ result = ksu_call(CMD_BECOME_MANAGER, (unsigned long)my_data_dir, 0, 0);
 return (int)result;
 }
 ```
-After uspeha, privilegovane komande (primeri):
-- CMD_GRANT_ROOT: promovisati trenutni proces u root
-- CMD_ALLOW_SU: dodati vaš package/UID na allowlist za persistent su
-- CMD_SET_SEPOLICY: prilagoditi SELinux policy kako framework podržava
+After success, privileged commands (examples):
+- CMD_GRANT_ROOT: unaprediti trenutni proces u root
+- CMD_ALLOW_SU: dodati svoj package/UID na allowlist za persistent su
+- CMD_SET_SEPOLICY: prilagoditi SELinux policy u meri u kojoj framework to podržava
 
-Savet za race/persistence:
-- Registrujte BOOT_COMPLETED receiver u AndroidManifest (RECEIVE_BOOT_COMPLETED) da se pokrene rano nakon reboot-a i pokuša authentication pre pravog manager-a.
+Race/persistence tip:
+- Registrovati BOOT_COMPLETED receiver u AndroidManifest (RECEIVE_BOOT_COMPLETED) kako bi se proces pokrenuo rano nakon reboot-a i pokušao authentication pre pravog manager-a.<sup>[[1]](#references)</sup>
 
 ---
 ## Smernice za detekciju i ublažavanje
 
 Za developere framework-a:
-- Vežite authentication za package/UID pozivaoca, a ne za proizvoljne FD-ove:
+- Povežite authentication sa package/UID-om pozivaoca, a ne sa proizvoljnim FD-ovima:
 - Razrešite package pozivaoca na osnovu njegovog UID-a i proverite ga u odnosu na signature instaliranog package-a (putem PackageManager-a), umesto skeniranja FD-ova.
-- Ako je rešenje kernel-only, koristite stabilni identitet pozivaoca (task creds) i validirajte ga na stabilnom source of truth-u kojim upravlja init/userspace helper, a ne na process FD-ovima.
-- Izbegavajte provere path-prefix-a kao identiteta; pozivalac ih trivijalno može zadovoljiti.
-- Koristite nonce-based challenge–response preko kanala i obrišite svaki keširani identitet manager-a pri boot-u ili tokom ključnih događaja.
+- Ako se koristi samo kernel, upotrebite stabilan identitet pozivaoca (task creds) i validirajte ga u odnosu na stabilan autoritativni izvor podataka kojim upravlja init/userspace helper, a ne u odnosu na FD-ove procesa.
+- Izbegavajte provere prefiksa putanje kao identiteta; pozivalac ih može trivijalno ispuniti.
+- Koristite challenge–response zasnovan na nonce-u preko kanala i obrišite svaki keširani identitet manager-a pri boot-u ili tokom ključnih događaja.
 - Razmotrite authenticated IPC zasnovan na binder-u umesto preopterećivanja generičkih syscall-ova kada je to izvodljivo.
 
 Za defendere/blue team:
-- Detektujte prisustvo rooting framework-a i manager procesa; nadgledajte prctl pozive sa sumnjivim magic constants (npr. 0xDEADBEEF) ako imate kernel telemetry.
-- Na managed fleet-ovima blokirajte ili alarmirajte na boot receiver-e iz nepouzdanih package-ova koji neposredno nakon boot-a ubrzano pokušavaju privilegovane manager komande.
-- Obezbedite da su uređaji ažurirani na patched verzije framework-a; invalidirajte keširane manager ID-jeve nakon update-a.
+- Detektujte prisustvo rooting framework-a i manager procesa; nadgledajte prctl pozive sa sumnjivim magic constants (npr. 0xDEADBEEF) ako imate kernel telemetriju.
+- Na upravljanim flotama blokirajte ili prijavite boot receiver-e iz nepouzdanih package-ova koji brzo nakon boot-a pokušavaju privilegovane manager komande.
+- Obezbedite da su uređaji ažurirani na zakrpljene verzije framework-a; poništite keširane ID-jeve manager-a nakon update-a.
 
 Ograničenja attack-a:
-- Utiče samo na uređaje koji su već rootovani pomoću ranjivog framework-a.
-- Obično zahteva reboot/race window pre nego što se legitimni manager authenticira (neki framework-ovi keširaju UID manager-a do reset-a).
+- Utiče samo na uređaje koji su već root-ovani ranjivim framework-om.
+- Obično zahteva reboot/race window pre nego što se legitimni manager autentifikuje (neki framework-ovi keširaju UID manager-a dok se ne izvrši reset).
 
 ---
-## Povezane beleške kroz framework-ove
+## Povezane napomene kroz framework-ove
 
-- Password-based auth (npr. istorijski APatch/SKRoot build-ovi) može biti slab ako su password-i lako pogodivi ili podložni bruteforce-u, odnosno ako su validacije neispravne.
-- Package/signature-based auth (npr. KernelSU) je u principu jači, ali mora biti vezan za stvarnog pozivaoca, a ne za indirektne artefakte poput FD scan-ova.
-- Magisk: CVE-2024-48336 (MagiskEoP) je pokazao da čak i zreli ekosistemi mogu biti podložni identity spoofing-u koji dovodi do izvršavanja koda sa root privilegijama unutar manager context-a.
+- Password-based auth (npr. istorijski APatch/SKRoot build-ovi) može biti slaba ako se password-i mogu pogoditi/bruteforce-ovati ili ako su validacije neispravne.<sup>[[1]](#references)[[6]](#references)[[7]](#references)</sup>
+- Package/signature-based auth (npr. KernelSU) je u principu jača, ali mora biti povezana sa stvarnim pozivaocem, a ne sa indirektnim artefaktima kao što je skeniranje FD-ova.<sup>[[1]](#references)[[5]](#references)</sup>
+- Magisk: CVE-2024-48336 (MagiskEoP) je pokazao da čak i zreli ekosistemi mogu biti podložni spoofing-u identiteta koji dovodi do izvršavanja koda sa root privilegijama unutar konteksta manager-a.<sup>[[1]](#references)[[8]](#references)</sup>
 
 ---
-## Reference
+## References
 
-- [Zimperium – The Rooting of All Evil: Security Holes That Could Compromise Your Mobile Device](https://zimperium.com/blog/the-rooting-of-all-evil-security-holes-that-could-compromise-your-mobile-device)
-- [KernelSU v0.5.7 – core_hook.c path checks (L193, L201)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/core_hook.c#L193)
-- [KernelSU v0.5.7 – manager.c FD iteration/signature check (L43+)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/manager.c#L43)
-- [KernelSU – apk_sign.c APK v2 verification (main)](https://github.com/tiann/KernelSU/blob/main/kernel/apk_sign.c#L319)
-- [KernelSU project](https://kernelsu.org/)
-- [APatch](https://github.com/bmax121/APatch)
-- [SKRoot](https://github.com/abcz316/SKRoot-linuxKernelRoot)
-- [MagiskEoP – CVE-2024-48336](https://github.com/canyie/MagiskEoP)
-- [KSU PoC demo video (Wistia)](https://zimperium-1.wistia.com/medias/ep1dg4t2qg?videoFoam=true)
+- [1] [Zimperium – The Rooting of All Evil: Security Holes That Could Compromise Your Mobile Device](https://zimperium.com/blog/the-rooting-of-all-evil-security-holes-that-could-compromise-your-mobile-device)
+- [2] [KernelSU v0.5.7 – core_hook.c path checks (L193, L201)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/core_hook.c#L193)
+- [3] [KernelSU v0.5.7 – manager.c FD iteration/signature check (L43+)](https://github.com/tiann/KernelSU/blob/v0.5.7/kernel/manager.c#L43)
+- [4] [KernelSU – apk_sign.c APK v2 verification (main)](https://github.com/tiann/KernelSU/blob/main/kernel/apk_sign.c#L319)
+- [5] [KernelSU project](https://kernelsu.org/)
+- [6] [APatch](https://github.com/bmax121/APatch)
+- [7] [SKRoot](https://github.com/abcz316/SKRoot-linuxKernelRoot)
+- [8] [MagiskEoP – CVE-2024-48336](https://github.com/canyie/MagiskEoP)
+- [9] [KSU PoC demo video (Wistia)](https://zimperium-1.wistia.com/medias/ep1dg4t2qg?videoFoam=true)
 
 {{#include ../../banners/hacktricks-training.md}}

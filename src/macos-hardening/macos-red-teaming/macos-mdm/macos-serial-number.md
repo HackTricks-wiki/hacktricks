@@ -1,40 +1,40 @@
-# macOS Serijski Broj
+# Serijski broj macOS-a
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Osnovne Informacije
+## Osnovne informacije
 
-Apple uređaji posle 2010. godine imaju serijske brojeve koji se sastoje od **12 alfanumeričkih karaktera**, pri čemu svaki segment prenosi specifične informacije:
+Apple uređaji proizvedeni nakon 2010. godine imaju serijske brojeve koji se sastoje od **12 alfanumeričkih znakova**, pri čemu svaki segment prenosi određene informacije:
 
-- **Prva 3 Karaktera**: Oznaka **mesta proizvodnje**.
-- **Karakteri 4 i 5**: Oznaka **godine i nedelje proizvodnje**.
-- **Karakteri 6 do 8**: Služe kao **jedinstveni identifikator** za svaki uređaj.
-- **Poslednja 4 Karaktera**: Oznaka **broja modela**.
+- **Prva 3 znaka**: Označavaju **mesto proizvodnje**.
+- **Znakovi 4 i 5**: Označavaju **godinu i nedelju proizvodnje**.
+- **Znakovi od 6 do 8**: Predstavljaju **jedinstveni identifikator** svakog uređaja.
+- **Poslednja 4 znaka**: Određuju **broj modela**.
 
 Na primer, serijski broj **C02L13ECF8J2** prati ovu strukturu.
 
-### **Mesta Proizvodnje (Prva 3 Karaktera)**
+### **Mesta proizvodnje (prva 3 znaka)**
 
-Određeni kodovi predstavljaju specifične fabrike:
+Određeni kodovi predstavljaju konkretne fabrike:
 
-- **FC, F, XA/XB/QP/G8**: Različite lokacije u SAD-u.
+- **FC, F, XA/XB/QP/G8**: Različite lokacije u SAD.
 - **RN**: Meksiko.
-- **CK**: Kork, Irska.
+- **CK**: Cork, Irska.
 - **VM**: Foxconn, Češka Republika.
 - **SG/E**: Singapur.
 - **MB**: Malezija.
 - **PT/CY**: Koreja.
 - **EE/QT/UV**: Tajvan.
 - **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Različite lokacije u Kini.
-- **C0, C3, C7**: Specifični gradovi u Kini.
-- **RM**: Obnovljeni uređaji.
+- **C0, C3, C7**: Određeni gradovi u Kini.
+- **RM**: Refurbished uređaji.
 
-### **Godina Proizvodnje (4. Karakter)**
+### **Godina proizvodnje (4. znak)**
 
-Ovaj karakter varira od 'C' (predstavlja prvu polovinu 2010. godine) do 'Z' (druga polovina 2019. godine), pri čemu različita slova označavaju različite polugodišnje periode.
+Ovaj znak se kreće od „C“ (koji predstavlja prvu polovinu 2010. godine) do „Z“ (druga polovina 2019. godine), pri čemu različita slova označavaju različite polugodišnje periode.
 
-### **Nedelja Proizvodnje (5. Karakter)**
+### **Nedelja proizvodnje (5. znak)**
 
-Brojevi 1-9 odgovaraju nedeljama 1-9. Slova C-Y (izuzev samoglasnika i 'S') predstavljaju nedelje 10-27. Za drugu polovinu godine, 26 se dodaje ovom broju.
+Cifre 1–9 odgovaraju nedeljama 1–9. Slova C–Y (isključujući samoglasnike i „S“) predstavljaju nedelje 10–27. Za drugu polovinu godine, ovom broju se dodaje 26.
 
 {{#include ../../../banners/hacktricks-training.md}}

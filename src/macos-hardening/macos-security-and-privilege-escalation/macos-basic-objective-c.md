@@ -5,21 +5,21 @@
 ## Objective-C
 
 > [!CAUTION]
-> Imajte na umu da programi napisani u Objective-C **zadržavaju** svoje deklaracije klasa **kada** su **kompilirani** u [Mach-O binarne datoteke](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Takve deklaracije klasa **uključuju** ime i tip:
+> Imajte na umu da programi napisani u jeziku Objective-C **zadržavaju** deklaracije svojih klasa **kada se** **kompajliraju** u [Mach-O binarne datoteke](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Takve deklaracije klasa **uključuju** naziv i tip:
 
 - Klase
-- Metode klase
-- Varijable instanci klase
+- Metoda klase
+- Instancnih promenljivih klase
 
-Možete dobiti ove informacije koristeći [**class-dump**](https://github.com/nygard/class-dump):
+Ove informacije možete dobiti pomoću alata [**class-dump**](https://github.com/nygard/class-dump):
 ```bash
 class-dump Kindle.app
 ```
-Napomena da bi ova imena mogla biti obfuskirana kako bi se otežalo obrnuto inženjerstvo binarnog fajla.
+Imajte na umu da ovi nazivi mogu biti obfuskovani kako bi reversing binarnog fajla bio otežan.
 
-## Klase, Metode i Objekti
+## Klase, metode i objekti
 
-### Interfejs, Svojstva i Metode
+### Interfejs, svojstva i metode
 ```objectivec
 // Declare the interface of the class
 @interface MyVehicle : NSObject
@@ -50,9 +50,9 @@ self.numberOfWheels += value;
 
 @end
 ```
-### **Objekat i pozivanje metode**
+### **Kreiranje objekta i pozivanje metode**
 
-Da biste kreirali instancu klase, poziva se metoda **`alloc`** koja **alokira memoriju** za svaku **svojstvo** i **postavlja** te alokacije na nulu. Zatim se poziva **`init`**, koja **inicijalizuje svojstva** na **potrebne vrednosti**.
+Da bi se kreirala instanca klase, poziva se metoda **`alloc`**, koja **alocira memoriju** za svako **svojstvo** i te alokacije postavlja na **nulu**. Zatim se poziva **`init`**, koji **inicijalizuje svojstva** na **zahtevane vrednosti**.
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -64,15 +64,15 @@ MyVehicle *newVehicle = [MyVehicle new];
 // [myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]
 [newVehicle addWheels:4];
 ```
-### **Klasa Metode**
+### **Metode klase**
 
-Klasa metode se definišu sa **plus znakom** (+) a ne sa crticom (-) koja se koristi sa instancama metoda. Kao što je **NSString** klasa metoda **`stringWithString`**:
+Metode klase definišu se **znakom plus** (+), a ne crticom (-) koja se koristi kod metoda instance. Kao kod metode klase **NSString** **`stringWithString`**:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
 ### Setter & Getter
 
-Da **postavite** i **dobijete** svojstva, možete to uraditi sa **tačkom** ili kao da **pozivate metodu**:
+Da biste **postavili** i **dohvatili** svojstva, to možete uraditi pomoću **tačkaste notacije** ili kao da **pozivate metod**:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -82,20 +82,20 @@ newVehicle.numberOfWheels = 2;
 NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
-### **Instancne Varijable**
+### **Promenljive instance**
 
-Alternativno setter i getter metodama možete koristiti instancne varijable. Ove varijable imaju isto ime kao svojstva, ali počinju sa "\_":
+Kao alternativu setter i getter metodama, možete koristiti promenljive instance. Ove promenljive imaju isti naziv kao properties, ali počinju znakom "\_":
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
 NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 }
 ```
-### Protokoli
+### Protocols
 
-Protokoli su skup deklaracija metoda (bez svojstava). Klasa koja implementira protokol implementira deklarisane metode.
+Protocols su skup deklaracija metoda (bez properties). Klasa koja implementira protocol implementira deklarisane metode.
 
-Postoje 2 tipa metoda: **obavezni** i **opcionalni**. Po **definiciji** metod je **obavezan** (ali to možete takođe naznačiti sa **`@required`** oznakom). Da biste naznačili da je metod opcionalan, koristite **`@optional`**.
+Postoje 2 tipa metoda: **mandatory** i **optional**. **Podrazumevano**, metoda je **mandatory** (ali to možete označiti i pomoću oznake **`@required`**). Da biste označili da je metoda optional, koristite **`@optional`**.
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -164,11 +164,11 @@ NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-Osnovne klase su **nepromenljive**, tako da da biste dodali string postojećem, potrebno je **napraviti novi NSString**.
+Osnovne klase su **nepromenljive**, tako da za dodavanje stringa na postojeći treba kreirati **novi NSString**.
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
-Ili možete koristiti i **mutable** klasu stringa:
+Ili biste mogli da koristite i **mutable** klasu stringova:
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
 [mutableString appendString:bookTitle];
@@ -196,7 +196,7 @@ NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:
 NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
-#### Nizovi, Skupovi i Rečnici
+#### Nizovi, skupovi i rečnici
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -242,9 +242,9 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 [mutFruitColorsDictionary setObject:@"green" forKey:@"apple"];
 [mutFruitColorsDictionary removeObjectForKey:@"grape"];
 ```
-### Blokovi
+### Blocks
 
-Blokovi su **funkcije koje se ponašaju kao objekti** tako da mogu biti prosleđeni funkcijama ili **smešteni** u **nizove** ili **rečnike**. Takođe, mogu **predstavljati vrednost ako im se dodele vrednosti** pa je to slično lambdama.
+Blocks su **funkcije koje se ponašaju kao objekti**, pa mogu biti prosleđene funkcijama ili **uskladištene** u **nizovima** ili **rečnicima**. Takođe, mogu **predstavljati vrednost ako im se proslede vrednosti**, pa su slične lambdama.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -279,7 +279,7 @@ genericLogger(^{
 NSLog(@"%@", @"This is my second block");
 });
 ```
-### Datoteke
+### Fajlovi
 ```objectivec
 // Manager to manage files
 NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -304,7 +304,7 @@ if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
 NSLog(@"Removed successfully");
 }
 ```
-Takođe je moguće upravljati datotekama **koristeći `NSURL` objekte umesto `NSString`** objekata. Imena metoda su slična, ali **sa `URL` umesto `Path`**.
+Takođe je moguće upravljati datotekama **korišćenjem `NSURL` objekata umesto `NSString`** objekata. Nazivi metoda su slični, ali **sa `URL` umesto `Path`**.
 ```objectivec
 
 

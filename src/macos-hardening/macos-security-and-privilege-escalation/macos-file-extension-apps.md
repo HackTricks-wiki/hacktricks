@@ -1,29 +1,29 @@
-# macOS rukovaoci ekstenzijama datoteka i URL scheme-ama
+# macOS ekstenzije datoteka i handleri URL scheme-ova
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## LaunchServices Database
+## LaunchServices baza podataka
 
-Ovo je baza podataka svih instaliranih aplikacija u macOS-u koja se može upitati da bi se dobile informacije o svakoj instaliranoj aplikaciji, kao što su podržane **URL schemes**, **document types**, **UTIs** i podrazumevani rukovaoci.
+Ovo je baza podataka svih instaliranih aplikacija u macOS-u koja se može upitati kako bi se dobile informacije o svakoj instaliranoj aplikaciji, kao što su podržani **URL scheme-ovi**, **tipovi dokumenata**, **UTI-jevi** i podrazumevani handleri.
 
-Ovu bazu podataka moguće je dump-ovati pomoću:
+Ovu bazu podataka moguće je izvući pomoću:
 ```
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump
 ```
-Ili korišćenjem alata [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+Ili koristeći alat [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/usr/libexec/lsd`** je mozak baze podataka. Obezbeđuje **nekoliko XPC servisa**, kao što su `.lsd.installation`, `.lsd.open`, `.lsd.openurl` i drugi. Međutim, takođe **zahteva određene entitlements** od aplikacija kako bi mogle da koriste izložene XPC funkcionalnosti, kao što su `.launchservices.changedefaulthandler` ili `.launchservices.changeurlschemehandler`, za promenu podrazumevanih aplikacija za MIME types ili URL schemes, kao i druge.
+**`/usr/libexec/lsd`** je mozak baze podataka. Obezbeđuje **nekoliko XPC servisa** kao što su `.lsd.installation`, `.lsd.open`, `.lsd.openurl` i drugi. Međutim, takođe **zahteva određene entitlements** od aplikacija kako bi mogle da koriste izložene XPC funkcionalnosti, kao što su `.launchservices.changedefaulthandler` ili `.launchservices.changeurlschemehandler` za promenu podrazumevanih aplikacija za MIME tipove ili URL scheme-ove, kao i druge.
 
-**`/System/Library/CoreServices/launchservicesd`** preuzima servis `com.apple.coreservices.launchservicesd` i može se upitati radi dobijanja informacija o pokrenutim aplikacijama. Može se upitati sistemskim alatom **`/usr/bin/lsappinfo`** ili pomoću alata [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+**`/System/Library/CoreServices/launchservicesd`** registruje servis `com.apple.coreservices.launchservicesd` i može se upititi radi dobijanja informacija o pokrenutim aplikacijama. Može se upitati sistemskim alatom **`/usr/bin/lsappinfo`** ili pomoću [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-Iz perspektive operatora, imajte na umu da obično postoje **dva korisna prikaza**:
+Iz perspektive operatera, imajte na umu da obično postoje **dva korisna prikaza**:
 
-- **registration database** kojom upravljaju LaunchServices / `lsd` (podržana `.csstore` datotekama).
-- **per-user effective defaults** sačuvani u `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`, unutar niza `LSHandlers`.
+- **Registration database** kojom upravljaju LaunchServices / `lsd` (uz podršku `.csstore` datoteka).
+- **Per-user effective defaults** sačuvane u `~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`, unutar niza `LSHandlers`.
 
-Ova razlika je važna: aplikacija može biti **registrovana** kao aplikacija koja može da obrađuje određeni tip ili scheme, ali **trenutna podrazumevana vrednost** i dalje može biti drugi bundle ID.
+Ova razlika je važna: aplikacija može biti **registrovana** kao aplikacija koja može da obrađuje određeni tip ili scheme, ali **trenutni podrazumevani izbor** i dalje može biti drugi bundle ID.
 
-## Handleri aplikacija za ekstenzije datoteka i URL schemes
+## Rukovaoci aplikacija za ekstenzije datoteka i URL scheme-ove
 
 Sledeća linija može biti korisna za pronalaženje aplikacija koje mogu da otvaraju datoteke u zavisnosti od ekstenzije:
 ```bash
@@ -36,7 +36,7 @@ Ili koristite nešto poput [**SwiftDefaultApps**](https://github.com/Lord-Kamina
 ./swda getUTIs #Get all the UTIs
 ./swda getHandler --URL ftp #Get ftp handler
 ```
-Takođe možete proveriti ekstenzije koje aplikacija podržava pomoću:
+Možete proveriti i ekstenzije koje aplikacija podržava pomoću:
 ```bash
 cd /Applications/Safari.app/Contents
 grep -A3 CFBundleTypeExtensions Info.plist  | grep string
@@ -68,29 +68,29 @@ grep -A3 CFBundleTypeExtensions Info.plist  | grep string
 <string>xbl</string>
 <string>svg</string>
 ```
-## Enumerisanje efektivnih handlera
+## Enumerisanje efektivnih handler-a
 
-Najkorisniji fajl za **podrazumevane vrednosti trenutnog korisnika** obično je:
+Najkorisnija datoteka za **podrazumevane postavke trenutnog korisnika** obično je:
 ```bash
 ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist
 ```
-Da iz njega izvučete handlere za **URL scheme**:
+Za izlistavanje rukovalaca za **URL scheme** iz njega:
 ```bash
 plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
 jq '.[] | select(.LSHandlerURLScheme != null) |
 {scheme: .LSHandlerURLScheme, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
 ```
-Za ispisivanje handlera za **content-type / UTI**:
+Za izlistavanje **content-type / UTI** handlera:
 ```bash
 plutil -extract LSHandlers json -o - ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist |
 jq '.[] | select(.LSHandlerContentType != null) |
 {uti: .LSHandlerContentType, handler: (.LSHandlerRoleAll // .LSHandlerRoleViewer // .LSHandlerRoleEditor)}'
 ```
-Da biste razrešili UTI stablo ogledne datoteke:
+Za razrešavanje UTI stabla uzorka datoteke:
 ```bash
 mdls -name kMDItemContentType -name kMDItemContentTypeTree ./sample.pdf
 ```
-Ako želite jednostavniji CLI za upite ili promenu podrazumevanih vrednosti:
+Ako želite prijatniji CLI za upite ili promenu podrazumevanih vrednosti:
 ```bash
 # Classic tool
 # https://github.com/moretension/duti
@@ -104,32 +104,32 @@ dutix targets show public.html
 dutix targets show ftp
 dutix apps show Safari
 ```
-## Zanimljivi Info.plist ključevi
+## Zanimljivi ključevi u Info.plist datoteci
 
-Prilikom analize application bundle-a, ovi ključevi su najvažniji:
+Prilikom triage-a application bundle-a, sledeći ključevi su najvažniji:
 
-- **`CFBundleDocumentTypes`**: grupe dokumenata za koje bundle navodi da može da ih otvara.
-- **`LSItemContentTypes`**: **moderan / preporučen** način povezivanja tipova dokumenata sa UTI-jima.
-- **`LSHandlerRank`**: rang koji koristi LaunchServices (`Owner`, `Default`, `Alternate`, `None`).
-- **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: prilagođene URI šeme koje aplikacija implementira.
-- **`UTExportedTypeDeclarations`**: UTI-ji čiji je aplikacija **vlasnik**.
-- **`UTImportedTypeDeclarations`**: UTI-ji čiji aplikacija nije vlasnik, ali želi da ih sistem prepoznaje.
+- **`CFBundleDocumentTypes`**: grupe dokumenata za koje bundle tvrdi da može da ih otvara.
+- **`LSItemContentTypes`**: **moderniji / preporučeni** način povezivanja tipova dokumenata sa UTI-jevima.
+- **`LSHandlerRank`**: rangiranje koje koristi LaunchServices (`Owner`, `Default`, `Alternate`, `None`).
+- **`CFBundleURLTypes`** / **`CFBundleURLSchemes`**: prilagođene URI scheme koje application implementira.
+- **`UTExportedTypeDeclarations`**: UTI-jevi koje application **poseduje**.
+- **`UTImportedTypeDeclarations`**: UTI-jevi koje application ne poseduje, ali želi da ih sistem prepoznaje.
 
-Korisna komanda za brzu analizu je:
+Korisna komanda za brzi triage je:
 ```bash
 plutil -p /Applications/Target.app/Contents/Info.plist | \
 rg 'CFBundleDocumentTypes|CFBundleURLTypes|LSItemContentTypes|LSHandlerRank|UTExportedTypeDeclarations|UTImportedTypeDeclarations'
 ```
-Suptilan, ali važan detalj: ako je **`LSItemContentTypes`** prisutan, stariji ključevi kao što su **`CFBundleTypeExtensions`**, **`CFBundleTypeMIMETypes`** i **`CFBundleTypeOSTypes`** praktično predstavljaju legacy compatibility podatke. Za stvarno određivanje handlera, najpre se fokusirajte na UTI putanju.
+Suptilan, ali važan detalj: ako je **`LSItemContentTypes`** prisutan, stariji ključevi kao što su **`CFBundleTypeExtensions`**, **`CFBundleTypeMIMETypes`** i **`CFBundleTypeOSTypes`** praktično predstavljaju legacy compatibility podatke. Za stvarno određivanje handlera, prvo se fokusirajte na UTI putanju.
 
 ## Offensive notes
 
-Aplikacije ne moraju da budu izvršene da bi postale interesantne. Odbačeni ili klonirani `.app` bundle može biti **automatski parsiran od strane `lsd` čim se upiše na disk**, a njegovi deklarisani tipovi dokumenata / URL schemes mogu biti registrovani čak i ako korisnik nikada ne pokrene bundle.
+Aplikacije ne moraju biti izvršene da bi postale interesantne. Ostavljen ili kloniran `.app` bundle može biti **automatski parsiran od strane `lsd` čim se upiše na disk**, a njegovi deklarisani tipovi dokumenata / URL scheme-ovi mogu biti registrovani bez toga da korisnik ikada pokrene bundle.
 
-Ovo je korisno i za **persistence / hijacking research** i za **initial-access chains**:
+Ovo je korisno kako za **persistence / hijacking research**, tako i za **initial-access chains**:
 
-- Malicious app može da preuzme **retku ekstenziju** ili **custom UTI** i sačeka da žrtva otvori lure fajl.
-- Malicious app može da registruje **custom URL scheme** kojem se može pristupiti iz browsera, Electron app-a, office dokumenta, chat klijenta ili druge helper aplikacije.<sup>[[1]](#references)</sup>
+- Malicious app može preuzeti **retku ekstenziju** ili **custom UTI** i čekati da žrtva otvori lure fajl.
+- Malicious app može registrovati **custom URL scheme** do kog se može doći iz browsera, Electron aplikacije, office dokumenta, chat klijenta ili druge helper aplikacije.<sup>[[1]](#references)</sup>
 - Ako izmenite app bundle nakon buildovanja, možete naterati LaunchServices da ga ponovo parsira pomoću:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -f /tmp/Evil.app
@@ -137,15 +137,16 @@ Ovo je korisno i za **persistence / hijacking research** i za **initial-access c
 Prilikom testiranja sumnjivih bundle-ova, obratite posebnu pažnju na:
 
 - **`LSHandlerRank=Owner`** kod neuobičajenih tipova.
-- Široke nizove **`CFBundleDocumentTypes`** koji navode mnoge ekstenzije.
+- Široke nizove **`CFBundleDocumentTypes`** koji tvrde da podržavaju mnoge ekstenzije.
 - **Helper / wrapper apps** čije se jedino zanimljivo ponašanje nalazi iza document ili URI handler-a.
-- Fajlove nalik prečicama (`.webloc`, `.inetloc`, `.fileloc`) koji se na kraju prosleđuju u LaunchServices. Za trikove u stilu `.fileloc` i povezane Gatekeeper uglove, pogledajte [ovu drugu stranicu](macos-security-protections/macos-fs-tricks/README.md).<sup>[[2]](#references)</sup>
+- Datoteke nalik prečicama (`.webloc`, `.inetloc`, `.fileloc`) koje na kraju prosleđuju izvršavanje u LaunchServices. Za trikove u stilu `.fileloc` i povezane Gatekeeper pristupe, pogledajte [ovu drugu stranicu](macos-security-protections/macos-fs-tricks/README.md).<sup>[[2]](#references)</sup>
 
-Ako je vaš cilj pasivno izvršavanje koda samo pregledanjem fascikle ili izborom fajla, pogledajte i posebnu stranicu o [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), pošto je to drugačija, ali blisko povezana površina za file-handler-e.
+Ako vam je cilj pasivno izvršavanje koda samim pregledanjem fascikle ili izborom datoteke, pogledajte i posebnu stranicu za [Quick Look generators](macos-proces-abuse/macos-quicklook-generators.md), pošto je to drugačija, ali blisko povezana površina za file handler-e.
 
 ## Reference
 
-- [1] [Objective-See - Daljinska eksploatacija Mac računara putem prilagođenih URL šema](https://objective-see.org/blog/blog_0x38.html)
-- [2] [Jamf Threat Labs - Zaobilaženje kapije: detaljniji pogled na propuste Gatekeeper-a u macOS-u](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
+
+- [1] [Objective-See - Udaljena eksploatacija Mac-a putem prilagođenih URL šema](https://objective-see.org/blog/blog_0x38.html)
+- [2] [Jamf Threat Labs - Zaobilaženje Gate-a: Detaljniji pregled propusta u Gatekeeper-u na macOS-u](https://www.jamf.com/blog/gatekeeper-flaws-on-macos/)
 
 {{#include ../../banners/hacktricks-training.md}}

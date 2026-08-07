@@ -4,7 +4,7 @@
 
 ## **Uvod u x64**
 
-x64, poznat i kao x86-64, jeste 64-bitna arhitektura procesora koja se pretežno koristi u desktop i serverskom računarstvu. Nastala je iz x86 arhitekture koju je proizveo Intel, a kasnije ju je AMD usvojio pod nazivom AMD64. Danas je to najzastupljenija arhitektura u personalnim računarima i serverima.
+x64, poznat i kao x86-64, jeste 64-bitna procesorska arhitektura koja se pretežno koristi u desktop i serverskom računarstvu. Nastala je iz x86 arhitekture koju je proizveo Intel, a kasnije ju je AMD usvojio pod nazivom AMD64. Danas je to najzastupljenija arhitektura u personalnim računarima i serverima.
 
 ### **Registri**
 
@@ -13,24 +13,24 @@ x64 proširuje x86 arhitekturu i poseduje **16 registara opšte namene** označe
 1. **`rax`** - Tradicionalno se koristi za **povratne vrednosti** funkcija.
 2. **`rbx`** - Često se koristi kao **bazni registar** za memorijske operacije.
 3. **`rcx`** - Uobičajeno se koristi za **brojače petlji**.
-4. **`rdx`** - Koristi se u različitim ulogama, uključujući proširene aritmetičke operacije.
+4. **`rdx`** - Koristi se za različite namene, uključujući proširene aritmetičke operacije.
 5. **`rbp`** - **Bazni pokazivač** stack frame-a.
 6. **`rsp`** - **Stack pointer**, koji prati vrh stack-a.
-7. **`rsi`** i **`rdi`** - Koriste se za **source** i **destination** indekse u string/memorijskim operacijama.
+7. **`rsi`** i **`rdi`** - Koriste se za indekse **izvora** i **odredišta** u string/memorijskim operacijama.
 8. **`r8`** do **`r15`** - Dodatni registri opšte namene uvedeni u x64.
 
-### **Pozivna konvencija**
+### **Calling Convention**
 
-Pozivna konvencija za x64 razlikuje se između operativnih sistema. Na primer:
+x64 calling convention se razlikuje između operativnih sistema. Na primer:
 
 - **Windows**: Prva **četiri parametra** prosleđuju se u registre **`rcx`**, **`rdx`**, **`r8`** i **`r9`**. Dodatni parametri se postavljaju na stack. Povratna vrednost nalazi se u **`rax`**.
-- **System V (koji se često koristi u UNIX-like sistemima)**: Prvih **šest celobrojnih parametara ili parametara pokazivača** prosleđuju se u registre **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** i **`r9`**. Povratna vrednost se takođe nalazi u **`rax`**.
+- **System V (koji se najčešće koristi u UNIX-like sistemima)**: Prvih **šest celobrojnih parametara ili parametara pokazivača** prosleđuju se u registre **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** i **`r9`**. Povratna vrednost se takođe nalazi u **`rax`**.
 
-Ako funkcija ima više od šest ulaznih parametara, **preostali će biti prosleđeni na stack**. **RSP**, stack pointer, mora biti **poravnat na 16 bajtova**, što znači da adresa na koju pokazuje mora biti deljiva sa 16 pre izvršavanja bilo kog poziva. To znači da bismo obično morali da obezbedimo da je RSP pravilno poravnat u našem shellcode-u pre nego što izvršimo poziv funkcije. Međutim, u praksi system calls često funkcionišu čak i kada ovaj zahtev nije ispunjen.
+Ako funkcija ima više od šest ulaza, **ostali će biti prosleđeni na stack**. **RSP**, stack pointer, mora biti **poravnat na 16 bajtova**, što znači da adresa na koju pokazuje mora biti deljiva sa 16 pre izvršavanja bilo kog poziva. To znači da bi obično trebalo da obezbedimo da je RSP pravilno poravnat u našem shellcode-u pre nego što izvršimo poziv funkcije. Međutim, u praksi system calls često rade čak i kada ovaj zahtev nije ispunjen.
 
-### Pozivna konvencija u Swift-u
+### Calling Convention u Swift-u
 
-Swift ima sopstvenu **pozivnu konvenciju**, koja se može pronaći na [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
+Swift ima sopstveni **calling convention**, koji možete pronaći na [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
 
 ### **Uobičajene instrukcije**
 
@@ -42,16 +42,16 @@ x64 instrukcije imaju bogat skup, uz očuvanje kompatibilnosti sa ranijim x86 in
 - Primer: `push rax` — Postavlja vrednost iz `rax` na stack.
 - Primer: `pop rax` — Učitava vrednost sa vrha stack-a u `rax`.
 - **`add`** i **`sub`**: Operacije **sabiranja** i **oduzimanja**.
-- Primer: `add rax, rcx` — Sabira vrednosti u `rax` i `rcx`, a rezultat smešta u `rax`.
-- **`mul`** i **`div`**: Operacije **množenja** i **deljenja**. Napomena: imaju specifično ponašanje u pogledu korišćenja operanada.
+- Primer: `add rax, rcx` — Sabira vrednosti u `rax` i `rcx`, čuvajući rezultat u `rax`.
+- **`mul`** i **`div`**: Operacije **množenja** i **deljenja**. Napomena: one imaju specifično ponašanje u vezi sa korišćenjem operanada.
 - **`call`** i **`ret`**: Koriste se za **pozivanje funkcija** i **povratak iz njih**.
-- **`int`**: Koristi se za pokretanje softverskog **prekida**. Npr., `int 0x80` se koristio za system calls u 32-bitnom x86 Linux-u.
+- **`int`**: Koristi se za pokretanje softverskog **prekida**. Na primer, `int 0x80` se koristio za system calls u 32-bitnom x86 Linux-u.
 - **`cmp`**: **Upoređuje** dve vrednosti i postavlja CPU zastavice na osnovu rezultata.
 - Primer: `cmp rax, rdx` — Upoređuje `rax` sa `rdx`.
-- **`je`, `jne`, `jl`, `jge`, ...**: Instrukcije za **uslovni skok** koje menjaju tok izvršavanja na osnovu rezultata prethodnog `cmp` ili testiranja.
+- **`je`, `jne`, `jl`, `jge`, ...**: Instrukcije **uslovnog skoka** koje menjaju tok izvršavanja na osnovu rezultata prethodnog `cmp`-a ili testiranja.
 - Primer: Nakon instrukcije `cmp rax, rdx`, `je label` — Skače na `label` ako je `rax` jednak `rdx`.
-- **`syscall`**: Koristi se za **system calls** na nekim x64 sistemima (kao što je savremeni Unix).
-- **`sysenter`**: Optimizovana instrukcija za **system calls** na nekim platformama.
+- **`syscall`**: Koristi se za **system calls** u nekim x64 sistemima (kao što je moderni Unix).
+- **`sysenter`**: Optimizovana instrukcija za **system call** na nekim platformama.
 
 ### **Prolog funkcije**
 
@@ -69,7 +69,7 @@ x64 instrukcije imaju bogat skup, uz očuvanje kompatibilnosti sa ranijim x86 in
 
 ### syscalls
 
-Postoje različite klase syscalls, a [**možete ih pronaći ovde**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
+Postoje različite klase syscalls-a, a možete ih [**pronaći ovde**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/osfmk/mach/i386/syscall_sw.h)**:**
 ```c
 #define SYSCALL_CLASS_NONE	0	/* Invalid */
 #define SYSCALL_CLASS_MACH	1	/* Mach */
@@ -78,7 +78,7 @@ Postoje različite klase syscalls, a [**možete ih pronaći ovde**](https://open
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-Zatim, možete pronaći broj svakog syscall-a [**na ovom URL-u**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
+Zatim, broj svakog syscall-a možete pronaći [**na ovom URL-u**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -168,7 +168,7 @@ return 0;
 
 #### Shell
 
-Preuzeto [**odavde**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) i objašnjeno.<sup>[[1]](#references)</sup>
+Preuzeto [**ovde**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) i objašnjeno.<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -207,9 +207,9 @@ syscall
 {{#endtab}}
 {{#endtabs}}
 
-#### Čitanje pomoću cat-a
+#### Čitanje pomoću cat
 
-Cilj je izvršiti `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, tako da je drugi argument (x1) niz parametara (što u memoriji predstavlja stek adresa).
+Cilj je izvršiti `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, tako da je drugi argument (x1) niz parametara (što u memoriji znači stek adresa).
 ```armasm
 bits 64
 section .text

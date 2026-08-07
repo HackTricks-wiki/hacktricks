@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Linux mašina se takođe može nalaziti u Active Directory okruženju.
+Linux mašina takođe može biti prisutna u Active Directory okruženju.
 
-Linux mašina unutar AD-a može **lokalno čuvati Kerberos materijal**: korisničke ccaches, keytab-ove mašina/servisa i tajne kojima upravlja SSSD. Ovi artefakti se obično mogu ponovo koristiti kao bilo koji drugi Kerberos credential. Da biste pročitali većinu njih, morate biti korisnik-vlasnik ticketa ili **root** na mašini.
+Linux mašina unutar AD-a može **lokalno čuvati Kerberos materijal**: korisničke ccaches, keytab-ove mašina/servisa i tajne kojima upravlja SSSD. Ovi artefakti se obično mogu ponovo koristiti kao bilo koji drugi Kerberos credential. Da biste pročitali većinu njih, moraćete biti vlasnik ticket-a ili **root** na mašini.
 
 ## Enumeracija
 
-### Enumeracija AD-a iz Linux-a
+### AD enumeracija iz Linuxa
 
-Ako imate pristup AD-u iz Linux-a (ili bash-u u Windows-u), možete pokušati da koristite [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) za enumeraciju AD-a.
+Ako imate pristup AD-u iz Linuxa (ili bash-u u Windowsu), možete pokušati sa [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) da izvršite enumeraciju AD-a.
 
-Takođe možete pogledati sledeću stranicu da biste saznali **druge načine za enumeraciju AD-a iz Linux-a**:
+Takođe možete pogledati sledeću stranicu da biste saznali **druge načine za enumeraciju AD-a iz Linuxa**:
 
 
 {{#ref}}
@@ -21,7 +21,7 @@ Takođe možete pogledati sledeću stranicu da biste saznali **druge načine za 
 
 ### FreeIPA
 
-FreeIPA je open-source **alternativa** Microsoft Windows **Active Directory-ju**, prvenstveno namenjena **Unix** okruženjima. Kombinuje kompletan **LDAP direktorijum** sa MIT **Kerberos** Key Distribution Center-om za upravljanje slično Active Directory-ju. Koristeći Dogtag **Certificate System** za upravljanje CA i RA sertifikatima, podržava **multi-factor** autentifikaciju, uključujući smartcard-ove. SSSD je integrisan za Unix procese autentifikacije. Saznajte više na:
+FreeIPA je open-source **alternativa** za Microsoft Windows **Active Directory**, prvenstveno namenjena **Unix** okruženjima. Kombinuje kompletan **LDAP directory** sa MIT **Kerberos** Key Distribution Center-om za upravljanje slično Active Directory-ju. Korišćenjem Dogtag **Certificate System**-a za upravljanje CA i RA sertifikatima, podržava **multi-factor** autentifikaciju, uključujući smartcards. SSSD je integrisan za Unix procese autentifikacije. Saznajte više o tome na:
 
 
 {{#ref}}
@@ -30,7 +30,7 @@ FreeIPA je open-source **alternativa** Microsoft Windows **Active Directory-ju**
 
 ### Artefakti hosta pridruženog domenu
 
-Pre rada sa ticketima, utvrdite **kako je host pridružen AD-u** i **gde se Kerberos materijal zaista čuva**. Na modernim Linux hostovima ovim se obično upravlja pomoću `realmd` + `adcli` + `sssd`, a ne samo pomoću običnih fajlova u `/tmp`:
+Pre nego što počnete da radite sa ticket-ima, utvrdite **kako je host pridružen AD-u** i **gde se Kerberos materijal zaista čuva**. Na modernim Linux hostovima ovim se obično upravlja pomoću `realmd` + `adcli` + `sssd`, a ne samo pomoću običnih fajlova u `/tmp`:
 ```bash
 # Is the host joined to a realm/domain?
 realm list 2>/dev/null
@@ -45,28 +45,28 @@ klist -k /etc/krb5.keytab 2>/dev/null
 find /var/lib/sss -maxdepth 3 \( -name '*.ldb' -o -name '.secrets.mkey' -o -name 'ccache_*' \) -ls 2>/dev/null
 find /tmp /run/user -maxdepth 2 -name 'krb5cc*' -ls 2>/dev/null
 ```
-Ovo vam brzo govori da li host veruje AD-u, da li SSSD kešira identitete ili tickete i da li su **machine/service keytabs** ili **KCM secrets** dostupni za zloupotrebu.
+Ovo vam brzo govori da li host veruje AD-u, da li SSSD kešira identitete ili ticket-e i da li su **machine/service keytab** ili **KCM secrets** dostupni za zloupotrebu.
 
-## Playing with tickets
+## Rad sa ticket-ima
 
 ### Pass The Ticket
 
-Na ovoj stranici pronaći ćete različita mesta na kojima možete **find kerberos tickets inside a linux host**; na sledećoj stranici možete naučiti kako da transformišete ove CCache formate ticketa u Kirbi (format koji treba da koristite u Windows-u), kao i kako da izvedete PTT napad:
+Na ovoj stranici pronaći ćete različita mesta na kojima možete **pronaći Kerberos ticket-e unutar Linux hosta**. Na sledećoj stranici možete naučiti kako da transformišete ove CCache formate ticket-a u Kirbi (format koji je potreban za korišćenje u Windows-u), kao i kako da izvršite PTT napad:
 
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
 {{#endref}}
 
-Ako želite **Linux-specific ticket harvesting workflows** (`FILE`, `DIR`, `KEYRING`, `KCM`, `/proc`, itd.), pogledajte posvećenu stranicu:
+Ako želite **Linux-specifične workflow-e za prikupljanje ticket-a** (`FILE`, `DIR`, `KEYRING`, `KCM`, `/proc`, itd.), pogledajte posebnu stranicu:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md
 {{#endref}}
 
-### CCACHE ticket reuse from /tmp
+### Ponovna upotreba CCACHE ticket-a iz /tmp
 
-CCACHE fajlovi su binarni formati za **storing Kerberos credentials**. `FILE:/tmp/krb5cc_%{uid}` je i dalje uobičajen, ali moderne Linux deployment konfiguracije takođe koriste `DIR:/run/user/%{uid}/krb5cc*`, `KEYRING:persistent:%{uid}` ili `KCM:%{uid}`. Proverite promenljivu okruženja **`KRB5CCNAME`** i podešavanje `default_ccache_name` pre nego što pretpostavite da se ticketi nalaze u `/tmp`.
+CCACHE datoteke su binarni formati za **čuvanje Kerberos kredencijala**. `FILE:/tmp/krb5cc_%{uid}` je i dalje uobičajen, ali moderne Linux implementacije takođe koriste `DIR:/run/user/%{uid}/krb5cc*`, `KEYRING:persistent:%{uid}` ili `KCM:%{uid}`. Proverite promenljivu okruženja **`KRB5CCNAME`** i podešavanje `default_ccache_name` pre nego što pretpostavite da se ticket-i nalaze u `/tmp`.<sup>[[1]](#references)</sup>
 ```bash
 # Where is the current process reading credentials from?
 env | grep KRB5CCNAME
@@ -82,27 +82,27 @@ klist
 ```
 ### Ponovna upotreba CCACHE ticket-a iz keyring-a
 
-**Kerberos ticket-i sačuvani u memoriji procesa mogu biti ekstraktovani**, naročito kada je ptrace zaštita mašine onemogućena (`/proc/sys/kernel/yama/ptrace_scope`). Koristan alat za ovu namenu dostupan je na adresi [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), koji omogućava ekstrakciju ubacivanjem u sesije i dump-ovanjem ticket-a u `/tmp`.
+**Kerberos ticket-i sačuvani u memoriji procesa mogu biti izvučeni**, naročito kada je ptrace zaštita mašine onemogućena (`/proc/sys/kernel/yama/ptrace_scope`). Koristan tool za ovu svrhu nalazi se na [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), koji olakšava ekstrakciju ubacivanjem u sesije i dump-ovanjem ticket-a u `/tmp`.
 
-Za konfiguraciju i korišćenje ovog alata, prate se koraci u nastavku:
+Za konfiguraciju i korišćenje ovog tool-a prate se sledeći koraci:
 ```bash
 git clone https://github.com/TarlogicSecurity/tickey
 cd tickey/tickey
 make CONF=Release
 /tmp/tickey -i
 ```
-Ova procedura će pokušati da izvrši injection u različite sesije, pri čemu će uspeh biti označen čuvanjem izdvojenih ticket-a u `/tmp`, uz konvenciju imenovanja `__krb_UID.ccache`.
+Ova procedura će pokušati da izvrši injekciju u različite sesije, što će označiti kao uspešno čuvanjem ekstrahovanih ticket-a u `/tmp`, uz konvenciju imenovanja `__krb_UID.ccache`.<sup>[[1]](#references)</sup>
 
 ### Ponovna upotreba CCACHE ticket-a iz SSSD KCM-a
 
-SSSD održava kopiju baze podataka na putanji `/var/lib/sss/secrets/secrets.ldb`. Odgovarajući ključ se čuva kao skrivena datoteka na putanji `/var/lib/sss/secrets/.secrets.mkey`. Podrazumevano, ključ je čitljiv samo ako imate **root** privilegije.
+SSSD održava kopiju baze podataka na putanji `/var/lib/sss/secrets/secrets.ldb`. Odgovarajući ključ je sačuvan kao skrivena datoteka na putanji `/var/lib/sss/secrets/.secrets.mkey`. Podrazumevano, ključ je čitljiv samo ako imate **root** privilegije.
 
-Pozivanje **`SSSDKCMExtractor`** sa parametrima --database i --key parsiraće bazu podataka i **dekriptovati secrets**.
+Pozivanje **`SSSDKCMExtractor`** sa parametrima --database i --key će analizirati bazu podataka i **dešifrovati tajne**.
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-**Kerberos credential cache blob može se konvertovati u upotrebljiv Kerberos CCache fajl koji se može proslediti alatima Mimikatz/Rubeus.**
+**Kerberos blob keša akreditiva može se konvertovati u upotrebljivu Kerberos CCache** datoteku koja se može proslediti alatima Mimikatz/Rubeus.
 
 ### Brza analiza keytab-a
 ```bash
@@ -115,14 +115,14 @@ klist
 ```
 ### Izdvajanje naloga iz /etc/krb5.keytab
 
-Ključevi servisnih naloga, neophodni za servise koji rade sa root privilegijama, bezbedno su sačuvani u datotekama **`/etc/krb5.keytab`**. Ovi ključevi, slični lozinkama za servise, zahtevaju strogu poverljivost.
+Ključevi servisnih naloga, neophodni za servise koji rade sa root privilegijama, bezbedno se čuvaju u datotekama **`/etc/krb5.keytab`**. Ovi ključevi, slični lozinkama za servise, zahtevaju strogu poverljivost.
 
-Za pregled sadržaja keytab datoteke može se koristiti **`klist`**. Na Linuxu, `klist -k -K -e` prikazuje principale, brojeve verzija ključeva, tipove enkripcije i sirovi materijal ključa. Ako je tip ključa **23 / RC4-HMAC**, vrednost ključa je takođe **NT hash** tog principala.
+Za pregled sadržaja keytab datoteke može se koristiti **`klist`**. Na Linuxu, `klist -k -K -e` prikazuje principal imena, brojeve verzija ključeva, tipove enkripcije i sirovi materijal ključa. Ako je tip ključa **23 / RC4-HMAC**, vrednost ključa je takođe **NT hash** tog principala.
 ```bash
 klist -k -K -e /etc/krb5.keytab
 # RC4-HMAC entries expose reusable NTLM material; AES entries do not
 ```
-Za Linux korisnike, **`KeyTabExtract`** pruža funkcionalnost za izdvajanje RC4 HMAC hash-a, koji se može iskoristiti za ponovnu upotrebu NTLM hash-a. Imajte na umu da ovo pomaže samo kada keytab i dalje sadrži materijal **etype 23 / RC4-HMAC**. U okruženjima koja koriste samo **AES**, možda nećete dobiti NT hash koji se može ponovo koristiti, ali se i dalje možete direktno autentifikovati pomoću keytab-a preko Kerberosa.
+Za korisnike Linuxa, **`KeyTabExtract`** pruža funkcionalnost za izdvajanje RC4 HMAC hash-a, koji se može iskoristiti za ponovnu upotrebu NTLM hash-a. Imajte na umu da ovo pomaže samo kada keytab i dalje sadrži materijal **etype 23 / RC4-HMAC**. U okruženjima koja koriste samo **AES** možda nećete dobiti NT hash koji može da se ponovo koristi, ali se i dalje možete direktno autentifikovati pomoću keytab-a putem Kerberos-a.
 ```bash
 python3 keytabextract.py krb5.keytab
 # Expected output varies based on hash availability
@@ -131,7 +131,7 @@ Na macOS-u, **`bifrost`** služi kao alat za analizu keytab datoteka.
 ```bash
 ./bifrost -action dump -source keytab -path /path/to/your/file
 ```
-Korišćenjem izdvojenih informacija o nalozima i hash vrednostima, moguće je uspostaviti veze sa serverima pomoću alata kao što je **`NetExec`**.
+Korišćenjem izvučenih informacija o nalozima i hash vrednostima, veze sa serverima mogu se uspostaviti pomoću alata kao što je **`NetExec`**.
 ```bash
 # NTLM/RC4 material recovered from etype 23 entries
 nxc smb 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
@@ -139,9 +139,9 @@ nxc smb 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
 # Or reuse a Kerberos cache directly
 KRB5CCNAME=owned.ccache netexec smb <DC_FQDN> --use-kcache
 ```
-### Ponovna upotreba machine account-a iz `/etc/krb5.keytab`
+### Ponovna upotreba naloga računara iz `/etc/krb5.keytab`
 
-Na sistemima pridruženim pomoću `realmd`/`adcli`/`sssd`, `/etc/krb5.keytab` obično sadrži **computer account** i jedan ili više **host/service principals**. Ako imate **root**, nemojte ga samo izlistati: upotrebite jedan od principal-a navedenih pomoću `klist -k` da zatražite TGT i radite kao sam Linux host.
+Na sistemima pridruženim pomoću `realmd`/`adcli`/`sssd`, `/etc/krb5.keytab` obično sadrži **nalog računara** i jedan ili više **host/service principals**. Ako imate **root**, nemojte ga samo dump-ovati: upotrebite jedan od principal-a koje navodi `klist -k` da zatražite TGT i radite kao sam Linux host.
 ```bash
 # Identify usable principals first
 klist -k /etc/krb5.keytab
@@ -154,11 +154,11 @@ klist
 ldapwhoami -Y GSSAPI -H ldap://dc.domain.local
 kvno ldap/dc.domain.local
 ```
-Ovo je naročito korisno kada sam **computer object** ima delegirana prava u AD-u ili kada je hostu dozvoljeno da preuzme druge secrets, kao što je **gMSA**.
+Ovo je posebno korisno kada sam **objekat računara** ima delegirana prava u AD-u ili kada je hostu dozvoljeno da preuzme druge secrets, kao što je **gMSA**.
 
-### Ponovna upotreba ukradenog Kerberos materijala pomoću Linux-first AD alata
+### Ponovna upotreba ukradenog Kerberos materijala sa Linux-first AD alatima
 
-Kada imate validan `ccache` ili upotrebljiv keytab, možete raditi sa AD-om **direktno iz Linuxa** bez prethodnog konvertovanja svega u Windows formate. Mnogi moderni alati izvorno prihvataju `KRB5CCNAME` / Kerberos auth:
+Kada imate validan `ccache` ili upotrebljiv keytab, možete raditi sa AD-om **direktno iz Linux-a**, bez prethodnog konvertovanja svega u Windows formate. Mnogi moderni alati nativno prihvataju `KRB5CCNAME` / Kerberos autentikaciju:
 ```bash
 # Reuse a stolen cache with bloodyAD for LDAP-side actions
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local get object 'CN=Domain Admins,CN=Users,DC=corp,DC=local'
@@ -167,7 +167,7 @@ KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local get objec
 KRB5CCNAME=owned.ccache python3 pywhisker.py -d corp.local -k --dc-ip dc.corp.local \
 --target 'WEB01$' --action list
 ```
-Ovo je dobra veza između **Linux post-exploitation** i **zloupotrebe AD objekata**. Za same putanje zloupotrebe na nivou objekata pogledajte:
+Ovo je dobra veza između **Linux post-exploitation** i zloupotrebe AD objekata. Za same načine zloupotrebe na nivou objekata pogledajte:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -177,9 +177,9 @@ Ovo je dobra veza između **Linux post-exploitation** i **zloupotrebe AD objekat
 ../../windows-hardening/active-directory-methodology/acl-persistence-abuse/shadow-credentials.md
 {{#endref}}
 
-### gMSA / Managed Service Account artefakti na Linuxu
+### Linux gMSA / Managed Service Account artefakti
 
-Novije Linux implementacije mogu direktno da koriste **Managed Service Accounts** iz AD-a. U praksi to znači da nakon kompromitovanja Linux servera možete pronaći ne samo host keytab već i **service-specific keytabs** generisane iz gMSA naloga. Uobičajena mesta za proveru su `/etc/gmsad.conf`, konfiguracioni fajlovi specifični za deployment i dodatni `*.keytab` fajlovi u okviru `/etc`.
+Novije Linux implementacije mogu direktno da koriste **Managed Service Accounts** iz AD-a. U praksi to znači da, nakon kompromitovanja Linux servera, možete pronaći ne samo host keytab već i **service-specific keytabs** generisane iz gMSA-a. Uobičajena mesta za proveru su `/etc/gmsad.conf`, konfiguracioni fajlovi specifični za implementaciju i dodatni `*.keytab` fajlovi u okviru direktorijuma `/etc`.<sup>[[2]](#references)</sup>
 ```bash
 # Look for gMSA-related configuration and extra keytabs
 grep -R "gMSA_\|principal =\|keytab =" /etc/gmsad.conf /etc/gmsad.d 2>/dev/null
@@ -193,7 +193,7 @@ klist -kt /etc/service.keytab
 kinit -kt /etc/service.keytab 'svc_web$@DOMAIN.LOCAL'
 klist
 ```
-Ovo vam daje ponovo upotrebljiv Kerberos identitet za SPN-ove povezane sa tim gMSA, **bez pristupanja bilo kojoj Windows krajnjoj tački**. Za zloupotrebu gMSA/dMSA na strani domena nakon sticanja viših privilegija u AD-u pogledajte:
+Ovo vam daje ponovo upotrebljiv Kerberos identitet za SPN-ove povezane sa tim gMSA, **bez pristupanja bilo kojoj Windows endpoint tački**. Za **domain-side** zloupotrebu gMSA/dMSA nakon sticanja viših privilegija u AD-u pogledajte:
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/golden-dmsa-gmsa.md
@@ -201,7 +201,7 @@ Ovo vam daje ponovo upotrebljiv Kerberos identitet za SPN-ove povezane sa tim gM
 
 ## Reference
 
-- [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-- [https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/integrating_rhel_systems_directly_with_windows_active_directory/assembly_accessing-ad-with-a-managed-service-account_integrating-rhel-systems-directly-with-active-directory](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/integrating_rhel_systems_directly_with_windows_active_directory/assembly_accessing-ad-with-a-managed-service-account_integrating-rhel-systems-directly-with-active-directory)
+- [1] [Kerberos (II): Kako napasti Kerberos?](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
+- [2] [Pristup AD-u pomoću managed service account-a – Direktna integracija RHEL sistema sa Active Directory-jem](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html/integrating_rhel_systems_directly_with_windows_active_directory/assembly_accessing-ad-with-a-managed-service-account_integrating-rhel-systems-directly-with-active-directory)
 
 {{#include ../../banners/hacktricks-training.md}}
