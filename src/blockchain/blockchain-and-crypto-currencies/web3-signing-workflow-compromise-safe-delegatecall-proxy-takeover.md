@@ -1,17 +1,17 @@
-# Kompromittierung des Web3-Signing-Workflows und Übernahme eines Safe Delegatecall Proxy
+# Kompromittierung des Web3-Signing-Workflows & Übernahme eines Safe-Delegatecall-Proxys
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Überblick
 
-Eine cold-wallet theft chain kombinierte eine **supply-chain compromise der Safe{Wallet}-Weboberfläche** mit einem **on-chain delegatecall primitive, das den implementation pointer eines Proxys (slot 0) überschreibt**. Die wichtigsten Erkenntnisse sind:
+Eine Diebstahlkette aus einer Cold-Wallet kombinierte eine **Supply-Chain-Kompromittierung der Safe{Wallet}-Web-UI** mit einem **On-Chain-Delegatecall-Primitive, das den Implementation Pointer eines Proxys (Slot 0) überschrieb**. Die wichtigsten Erkenntnisse sind:
 
-- Wenn ein dApp Code in den Signing-Pfad einschleusen kann, kann es einen Signer dazu bringen, eine gültige **EIP-712-Signatur über vom Angreifer gewählte Felder** zu erzeugen, während die ursprünglichen UI-Daten wiederhergestellt werden, sodass andere Signer nichts davon bemerken.
-- Safe-Proxys speichern `masterCopy` (implementation) in **storage slot 0**. Ein delegatecall an einen Contract, der in slot 0 schreibt, „upgradet“ den Safe effektiv auf die Logik des Angreifers und verschafft diesem vollständige Kontrolle über die Wallet.
+- Wenn eine dApp Code in den Signing-Pfad einschleusen kann, kann sie einen Signer dazu bringen, eine gültige **EIP-712-Signatur über vom Angreifer gewählte Felder**<sup>[[4]](#references)</sup> zu erzeugen, während sie die ursprünglichen UI-Daten wiederherstellt, sodass andere Signer nichts bemerken.
+- Safe-Proxys speichern `masterCopy` (die Implementation) in **Storage-Slot 0**. Ein Delegatecall an einen Contract, der in Slot 0 schreibt, „upgradet“ den Safe effektiv auf die Logik des Angreifers und verschafft ihm vollständige Kontrolle über die Wallet.
 
-## Off-chain: Gezielte Signing-Mutation in Safe{Wallet}
+## Off-chain: Gezielte Signing-Manipulation in Safe{Wallet}
 
-Ein manipuliertes Safe-Bundle (`_app-*.js`) griff gezielt bestimmte Safe- und Signer-Adressen an. Die injizierte Logik wurde unmittelbar vor dem Signing-Aufruf ausgeführt:<sup>[[1]](#references)[[3]](#references)</sup>
+Ein manipuliertes Safe-Bundle (`_app-*.js`) griff selektiv bestimmte Safe- und Signer-Adressen an. Die eingeschleuste Logik wurde unmittelbar vor dem Signing-Call ausgeführt:<sup>[[1]](#references)[[3]](#references)</sup>
 ```javascript
 // Pseudocode of the malicious flow
 orig = structuredClone(tx.data);
@@ -28,17 +28,17 @@ return sig;
 }
 ```
 ### Angriffseigenschaften
-- **Kontextgesteuert**: Hart codierte Allowlists für die Safe-/Signer der Opfer verhinderten Rauschen und senkten die Erkennung.<sup>[[1]](#references)[[3]](#references)</sup>
-- **Mutation im letzten Moment**: Die Felder (`to`, `data`, `operation`, Gas) wurden unmittelbar vor `signTransaction` überschrieben und anschließend zurückgesetzt, sodass Proposal-Payloads in der UI harmlos aussahen, während die Signaturen mit der Payload des Angreifers übereinstimmten.
-- **EIP-712-Intransparenz**: Wallets zeigten strukturierte Daten an, dekodierten jedoch keine verschachtelten Calldata und wiesen nicht auf `operation = delegatecall` hin, wodurch die mutierte Nachricht effektiv blind signiert wurde.
+- **Kontextabhängig**: Fest codierte Allowlists für die betroffenen Safes/Signer verhinderten Rauschen und senkten die Erkennungswahrscheinlichkeit.<sup>[[1]](#references)[[3]](#references)</sup>
+- **Mutation im letzten Moment**: Felder (`to`, `data`, `operation`, gas) wurden unmittelbar vor `signTransaction` überschrieben und anschließend zurückgesetzt, sodass Proposal-Payloads in der UI harmlos aussahen, während die Signaturen mit dem Payload des Angreifers übereinstimmten.
+- **EIP-712-Intransparenz**: Wallets zeigten strukturierte Daten an, dekodierten jedoch keine verschachtelten Calldata und hoben `operation = delegatecall` nicht hervor, wodurch die mutierte Nachricht effektiv blind signiert wurde.
 
 ### Relevanz der Gateway-Validierung
-Safe-Proposals werden an das **Safe Client Gateway** übermittelt. Vor den gehärteten Prüfungen konnte das Gateway eine Proposal akzeptieren, bei der `safeTxHash`/Signatur anderen Feldern entsprachen als dem JSON-Body, wenn die UI diese nach dem Signieren neu schrieb. Nach dem Vorfall weist das Gateway nun Proposals zurück, deren Hash/Signatur nicht mit der übermittelten Transaktion übereinstimmen. Eine vergleichbare serverseitige Hash-Verifizierung sollte für jede Signing-Orchestration-API durchgesetzt werden.
+Safe-Proposals werden an das **Safe Client Gateway** übermittelt.<sup>[[5]](#references)</sup> Vor der Einführung härterer Checks konnte das Gateway ein Proposal akzeptieren, bei dem `safeTxHash`/Signatur anderen Feldern entsprachen als denen im JSON-Body, wenn die UI diese nach dem Signieren umschrieb. Nach dem Incident weist das Gateway nun Proposals zurück, deren Hash/Signatur nicht mit der übermittelten Transaktion übereinstimmt. Eine vergleichbare serverseitige Hash-Verifizierung sollte für jede Signing-Orchestration-API erzwungen werden.
 
-### Höhepunkte des Bybit/Safe-Vorfalls von 2025
-- Der Drain der Bybit-Cold-Wallet vom 21. Februar 2025 (~401.000 ETH) verwendete dasselbe Muster: Ein kompromittiertes Safe-S3-Bundle wurde nur für Bybit-Signer ausgelöst und änderte `operation=0` → `1`, wobei `to` auf einen vorab bereitgestellten Angreifer-Contract zeigte, der Slot 0 beschrieb.<sup>[[1]](#references)[[3]](#references)</sup>
-- Der aus dem Wayback-Cache stammende `_app-52c9031bfa03da47.js` zeigt, dass die Logik anhand von Bybits Safe (`0x1db9…cf4`) und Signer-Adressen aktiviert wurde und anschließend zwei Minuten nach der Ausführung sofort auf ein unverändertes Bundle zurückgesetzt wurde, entsprechend dem Trick „mutieren → signieren → wiederherstellen“.<sup>[[1]](#references)[[2]](#references)</sup>
-- Der bösartige Contract (z. B. `0x9622…c7242`) enthielt einfache Funktionen `sweepETH/sweepERC20` sowie ein `transfer(address,uint256)`, das den Implementation-Slot beschrieb. Die Ausführung von `execTransaction(..., operation=1, to=contract, data=transfer(newImpl,0))` änderte die Proxy-Implementierung und gewährte vollständige Kontrolle.<sup>[[1]](#references)[[3]](#references)</sup>
+### Die wichtigsten Punkte zum Bybit/Safe-Incident von 2025
+- Der Drain der Bybit-Cold-Wallet am 21. Februar 2025 (~401k ETH) verwendete dasselbe Muster: Ein kompromittiertes Safe-S3-Bundle wurde nur für Bybit-Signer ausgelöst und änderte `operation=0` → `1`; anschließend zeigte `to` auf einen vorab bereitgestellten Angreifer-Contract, der Slot 0 beschreibt.<sup>[[1]](#references)[[3]](#references)</sup>
+- Das aus dem Wayback-Cache stammende `_app-52c9031bfa03da47.js` zeigt, dass die Logik anhand von Bybits Safe (`0x1db9…cf4`) und den Signer-Adressen aktiviert wurde und unmittelbar zwei Minuten nach der Ausführung auf ein sauberes Bundle zurückgesetzt wurde, was den Trick „mutate → sign → restore“ widerspiegelt.<sup>[[1]](#references)[[2]](#references)</sup>
+- Der bösartige Contract (z. B. `0x9622…c7242`) enthielt einfache Funktionen `sweepETH/sweepERC20` sowie eine `transfer(address,uint256)`-Funktion, die in den Implementation-Slot schreibt. Die Ausführung von `execTransaction(..., operation=1, to=contract, data=transfer(newImpl,0))` änderte die Proxy-Implementation und gewährte vollständige Kontrolle.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## On-chain: Delegatecall-Proxy-Takeover durch Slot-Kollision
 
@@ -53,24 +53,24 @@ stor0 = uint256(uint160(_to));
 }
 ```
 Ausführungspfad:<sup>[[1]](#references)[[3]](#references)</sup>
-1. Victims sign `execTransaction` with `operation = delegatecall`, `to = attackerContract`, `data = transfer(newImpl, 0)`.
-2. Safe masterCopy validates signatures over these parameters.
-3. Proxy delegatecalls into `attackerContract`; the `transfer` body schreibt slot 0.
-4. Slot 0 (`masterCopy`) zeigt nun auf attacker-controlled logic → **full wallet takeover und fund drain**.
+1. Opfer signieren `execTransaction` mit `operation = delegatecall`, `to = attackerContract`, `data = transfer(newImpl, 0)`.
+2. Safe masterCopy validiert Signaturen über diese Parameter.
+3. Proxy führt einen delegatecall in `attackerContract` aus; der `transfer`-Body schreibt in Slot 0.
+4. Slot 0 (`masterCopy`) zeigt nun auf eine vom Angreifer kontrollierte Logik → **vollständige wallet takeover und fund drain**.
 
-### Guard- und Versionshinweise (post-incident hardening)
-- Safes >= v1.3.0 können einen **Guard** installieren, um `delegatecall` abzulehnen oder ACLs für `to`/Selectoren durchzusetzen; Bybit lief mit v1.1.1, daher war kein Guard hook vorhanden. Das Upgraden der Contracts (und das erneute Hinzufügen der Owners) ist erforderlich, um diese control plane zu erhalten.
+### Guard- und Versionshinweise (Hardening nach dem Vorfall)
+- Safes >= v1.3.0 können einen **Guard** installieren, um `delegatecall` abzulehnen oder ACLs für `to`/Selectoren durchzusetzen; Bybit verwendete v1.1.1, daher war kein Guard-Hook vorhanden. Ein Upgrade der Contracts (und das erneute Hinzufügen der Owner) ist erforderlich, um diese Kontrollinstanz zu erhalten.
 
-## Detection- und hardening-checklist
+## Checkliste für Detection und Hardening
 
-- **UI integrity**: JS assets / SRI pinnen; Bundle-Diffs überwachen; die Signing UI als Teil der trust boundary behandeln.
-- **Sign-time validation**: Hardware wallets mit **EIP-712 clear-signing**; `operation` explizit darstellen und verschachtelte Calldata decodieren. Das Signieren ablehnen, wenn `operation = 1`, sofern die Policy dies nicht erlaubt.
-- **Server-side hash checks**: Gateways/Services, die Proposals relayen, müssen `safeTxHash` neu berechnen und validieren, dass die Signatures mit den übermittelten Feldern übereinstimmen.
-- **Policies/Allowlists**: Preflight-Regeln für `to`, Selectoren und Asset-Typen; `delegatecall` außer bei geprüften Flows untersagen. Vor dem Broadcasting vollständig signierter Transactions einen internen Policy-Service voraussetzen.
-- **Contract design**: Das Offenlegen eines beliebigen `delegatecall` in Multisig-/Treasury-Wallets vermeiden, sofern es nicht unbedingt erforderlich ist. Upgrade-Pointer außerhalb von slot 0 platzieren oder mit expliziter Upgrade-Logik und Access Control absichern.
-- **Monitoring**: Bei `delegatecall`-Executions aus Wallets, die Treasury-Funds halten, sowie bei Proposals, die `operation` aus typischen `call`-Patterns ändern, einen Alert auslösen.
+- **UI-Integrität**: JS-Assets / SRI festschreiben; Bundle-Diffs überwachen; die Signing-UI als Teil der Vertrauensgrenze behandeln.
+- **Validierung zum Signierzeitpunkt**: Hardware-Wallets mit **EIP-712 clear-signing**; `operation` explizit anzeigen und verschachtelte Calldata decodieren. Das Signieren ablehnen, wenn `operation = 1` ist, sofern die Policy dies nicht erlaubt.
+- **Hash-Prüfungen auf der Serverseite**: Gateways/Services, die Proposals weiterleiten, müssen `safeTxHash` neu berechnen und validieren, dass die Signaturen mit den übermittelten Feldern übereinstimmen.
+- **Policies/Allowlists**: Preflight-Regeln für `to`, Selectoren und Asset-Typen; delegatecall nur bei überprüften Flows erlauben. Vor dem Broadcasting vollständig signierter Transaktionen einen internen Policy-Service verlangen.
+- **Contract-Design**: Das Bereitstellen beliebiger delegatecall-Funktionen in Multisig-/Treasury-Wallets vermeiden, sofern dies nicht unbedingt erforderlich ist. Upgrade-Pointer außerhalb von Slot 0 platzieren oder mit expliziter Upgrade-Logik und Access Control absichern.
+- **Monitoring**: Bei delegatecall-Ausführungen aus Wallets mit Treasury-Funds sowie bei Proposals, die `operation` gegenüber üblichen `call`-Mustern ändern, einen Alert auslösen.
 
-## References
+## Referenzen
 
 - [1] [Forensische Analyse des Bybit-Safe-Exploits von AnChain.AI](https://www.anchain.ai/blog/bybit)
 - [2] [Analyse des Safe-Bundle-Compromises von Zero Hour Technology](https://www.panewslab.com/en/articles/7r34t0qk9a15)

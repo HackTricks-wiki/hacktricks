@@ -1,18 +1,19 @@
-# Public-Key-Kryptographie
+# Kryptografie mit öffentlichen Schlüsseln
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Die meisten schweren CTF-Crypto-Aufgaben landen hier: RSA, ECC/ECDSA, lattices und schlechte Zufallswerte.
+
+Die meiste schwierige CTF-Kryptografie läuft darauf hinaus: RSA, ECC/ECDSA, Lattices und schlechte Zufallszahlen.
 
 ## Empfohlene Tools
 
-- SageMath (LLL/lattices, modulare Arithmetik): https://www.sagemath.org/
+- SageMath (LLL/Lattices, modulare Arithmetik): https://www.sagemath.org/
 - RsaCtfTool (Schweizer Taschenmesser): https://github.com/Ganapati/RsaCtfTool
 - factordb (schnelle Faktorisierungsprüfungen): http://factordb.com/
 
 ## RSA
 
-Beginne hier, wenn du `n,e,c` und einen zusätzlichen Hinweis hast (gemeinsamer Modulus, kleiner Exponent, partielle Bits, verwandte Nachrichten).
+Beginne hier, wenn du `n,e,c` und einen zusätzlichen Hinweis hast (gemeinsamer Modulus, niedriger Exponent, partielle Bits, verwandte Nachrichten).
 
 {{#ref}}
 rsa/README.md
@@ -20,38 +21,38 @@ rsa/README.md
 
 ## ECC / ECDSA
 
-Wenn Signaturen involviert sind, teste zuerst Nonce-Probleme (reuse/bias/leaks), bevor du von harter Mathematik ausgehst.
+Wenn Signaturen beteiligt sind, teste zuerst auf Nonce-Probleme (Wiederverwendung/Bias/leaks), bevor du von schwieriger Mathematik ausgehst.
 
-### ECDSA nonce reuse / bias
+### Wiederverwendung / Bias der ECDSA-Nonce
 
-Wenn zwei Signaturen denselben Nonce `k` wiederverwenden, kann der private Schlüssel zurückgewonnen werden.
+Wenn zwei Signaturen dieselbe Nonce `k` wiederverwenden, kann der private Schlüssel wiederhergestellt werden.
 
-Selbst wenn `k` nicht identisch ist, kann **bias/leakage** von Nonce-Bits über Signaturen hinweg für lattice recovery ausreichen (häufiges CTF-Thema).
+Auch wenn `k` nicht identisch ist, kann **Bias/Leakage** von Nonce-Bits über mehrere Signaturen hinweg für eine Wiederherstellung mithilfe von Lattices ausreichen (ein häufiges CTF-Thema).
 
-Technische Rekonstruktion, wenn `k` wiederverwendet wird:
+Technische Wiederherstellung bei wiederverwendetem `k`:
 
-ECDSA Signaturgleichungen (Gruppenordnung `n`):
+ECDSA-Signaturgleichungen (Gruppenordnung `n`):
 
 - `r = (kG)_x mod n`
 - `s = k^{-1}(h(m) + r*d) mod n`
 
-Wenn derselbe `k` für zwei Nachrichten `m1, m2` wiederverwendet wird und Signaturen `(r, s1)` und `(r, s2)` erzeugt:
+Wenn dasselbe `k` für zwei Nachrichten `m1, m2` wiederverwendet wird und die Signaturen `(r, s1)` und `(r, s2)` entstehen:
 
 - `k = (h(m1) - h(m2)) * (s1 - s2)^{-1} mod n`
 - `d = (s1*k - h(m1)) * r^{-1} mod n`
 
-### Invalid-curve attacks
+### Invalid-Curve-Angriffe
 
-Wenn ein Protokoll nicht validiert, dass Punkte auf der erwarteten Kurve (oder Untergruppe) liegen, kann ein Angreifer Operationen in einer schwachen Gruppe erzwingen und Geheimnisse zurückgewinnen.
+Wenn ein Protokoll nicht überprüft, ob Punkte auf der erwarteten Kurve (oder in der erwarteten Untergruppe) liegen, kann ein Angreifer Operationen in einer schwachen Gruppe erzwingen und Geheimnisse wiederherstellen.
 
 Technischer Hinweis:
 
-- Validieren, dass Punkte auf der Kurve liegen und in der korrekten Untergruppe sind.
-- Viele CTF-Aufgaben modellieren dies als "server multiplies attacker-chosen point by secret scalar and returns something."
+- Überprüfe, dass Punkte auf der Kurve liegen und sich in der korrekten Untergruppe befinden.
+- Viele CTF-Aufgaben modellieren dies als „Der Server multipliziert einen vom Angreifer gewählten Punkt mit einem geheimen Skalar und gibt etwas zurück.“
 
 ### Tools
 
-- SageMath für Kurvenarithmetik / lattices
-- `ecdsa` Python-Bibliothek zum Parsen/Verifizieren
+- SageMath für Kurvenarithmetik / Lattices
+- Python-Bibliothek `ecdsa` zum Parsen und Verifizieren
 
 {{#include ../../banners/hacktricks-training.md}}

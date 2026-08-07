@@ -2,11 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Dieser Bereich behandelt **X.509-Parsing, Formate, Konvertierungen und häufige Fehler**.
 
-## X.509: Parsing, Formate & häufige Fehler
+In diesem Bereich geht es um **X.509-Parsing, Formate, Konvertierungen und häufige Fehler**.
 
-### Schnelles Parsing
+## X.509: Parsing, Formate und häufige Fehler
+
+### Schnelles Parsen
 ```bash
 openssl x509 -in cert.pem -noout -text
 openssl asn1parse -in cert.pem
@@ -14,17 +15,17 @@ openssl asn1parse -in cert.pem
 Nützliche Felder zur Überprüfung:
 
 - Subject / Issuer / SAN
-- Schlüsselverwendung / EKU
+- Key Usage / EKU
 - Basic Constraints (ist es eine CA?)
 - Gültigkeitszeitraum (NotBefore/NotAfter)
 - Signaturalgorithmus (MD5? SHA1?)
 
-### Formate & Konvertierung
+### Formate und Konvertierung
 
 - PEM (Base64 mit BEGIN/END-Headern)
 - DER (binär)
 - PKCS#7 (`.p7b`) (Zertifikatskette, kein privater Schlüssel)
-- PKCS#12 (`.pfx/.p12`) (Zertifikat + privater Schlüssel + Zertifikatskette)
+- PKCS#12 (`.pfx/.p12`) (Zertifikat + privater Schlüssel + Kette)
 
 Konvertierungen:
 ```bash
@@ -32,12 +33,12 @@ openssl x509 -in cert.cer -outform PEM -out cert.pem
 openssl x509 -in cert.pem -outform der -out cert.der
 openssl pkcs12 -in file.pfx -out out.pem
 ```
-### Häufige offensive Angriffsvektoren
+### Häufige offensive Ansatzpunkte
 
-- Vertrauen auf vom Benutzer bereitgestellte Root-Zertifikate / fehlende Kettenvalidierung
+- Vertrauen in vom Benutzer bereitgestellte Roots / fehlende Kettenvalidierung
 - Schwache Signaturalgorithmen (veraltet)
-- Name-Constraints / SAN-Parsing-Fehler (implementierungsspezifisch)
-- Confused-deputy-Probleme durch Fehlbindung der Client-Zertifikat-Authentifizierung
+- Fehler beim Parsen von Name Constraints / SAN (implementierungsspezifisch)
+- Confused-Deputy-Probleme durch fehlerhafte Zuordnung bei der Authentifizierung mit Client-Zertifikaten
 
 ### CT-Logs
 

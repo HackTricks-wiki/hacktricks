@@ -2,24 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Sammelseiten, die häufig in Crypto-Challenges auftauchen, aber nirgendwo sonst sauber hineinpassen.
+Sammlungen von Seiten, die häufig in Crypto-Challenges auftauchen, aber sonst nirgendwo genau hineinpassen.
 
-## Esoterische Programmiersprachen
+## Esoterische Sprachen
 
 ### Technik
 
-Verwende dies, wenn eine Crypto-Aufgabe tatsächlich darin besteht: ein esolang-Programm auszuführen und dann dessen Ausgabe zu dekodieren.
+Verwende dies, wenn eine Crypto-Aufgabe eigentlich darin besteht: ein esolang-Programm auszuführen und anschließend dessen Ausgabe zu decodieren.
 
-Wenn dir eine Challenge Code gibt, der nicht wie eine Standardsprache aussieht:
+Wenn eine Challenge Code liefert, der nicht wie eine Standardsprache aussieht:
 
-- Identifiziere das esolang (Google einen charakteristischen Token).
-- Nutze einen Online-Interpreter oder ein Docker-Image.
-- Wenn die Ausgabe seltsam ist, suche nach gestapelter Kodierung/Kompression nach der Ausführung.
+- Identifiziere das esolang (Google nach einem charakteristischen Token).
+- Verwende einen Online-Interpreter oder ein Docker-Image.
+- Wenn die Ausgabe ungewöhnlich ist, suche nach einer mehrschichtigen Kodierung/Kompression nach der Ausführung.
 
-Gute Ausgangsliste:
+Gute Ausgangsliste:<sup>[[1]](#references)</sup>
 
 {{#ref}}
 https://esolangs.org/wiki/Main_Page
 {{#endref}}
+
+## Referenzen
+
+- [1] [Esolang, das Wiki der esoterischen Programmiersprachen](https://esolangs.org/wiki/Main_Page)
 
 {{#include ../../banners/hacktricks-training.md}}

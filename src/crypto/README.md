@@ -1,46 +1,46 @@
-# Crypto
+# Kryptografie
 
 {{#include ../banners/hacktricks-training.md}}
 
-Dieser Abschnitt konzentriert sich auf **praktische Kryptographie für hacking/CTFs**: wie man schnell gängige Muster erkennt, die richtigen Tools auswählt und bekannte Angriffe anwendet.
+Dieser Abschnitt konzentriert sich auf **praktische Kryptografie für Hacking/CTFs**: wie man gängige Muster schnell erkennt, die richtigen Tools auswählt und bekannte Angriffe anwendet.
 
-Wenn du hier bist, um Daten in Dateien zu verstecken, gehe zum **Stego**-Abschnitt.
+Wenn du hier bist, um Daten in Dateien zu verstecken, gehe zum Abschnitt **Stego**.
 
-## Wie man diesen Abschnitt nutzt
+## Verwendung dieses Abschnitts
 
-Crypto challenges belohnen Schnelligkeit: klassifiziere das Primitive, identifiziere, was du kontrollierst (oracle/leak/nonce reuse), und wende dann eine bekannte Angriffsvorlage an.
+Crypto-Challenges belohnen Schnelligkeit: Primitive klassifizieren, identifizieren, was du kontrollierst (Oracle/Leak/Nonce-Reuse), und anschließend eine bekannte Angriffsvorlage anwenden.
 
-### CTF workflow
+### CTF-Workflow
 {{#ref}}
 ctf-workflow/README.md
 {{#endref}}
 
-### Symmetric crypto
+### Symmetrische Kryptografie
 {{#ref}}
 symmetric/README.md
 {{#endref}}
 
-### Hashes, MACs, and KDFs
+### Hashes, MACs und KDFs
 {{#ref}}
 hashes/README.md
 {{#endref}}
 
-### Public-key crypto
+### Kryptografie mit öffentlichen Schlüsseln
 {{#ref}}
 public-key/README.md
 {{#endref}}
 
-### TLS and certificates
+### TLS und Zertifikate
 {{#ref}}
 tls-and-certificates/README.md
 {{#endref}}
 
-### Crypto in malware
+### Kryptografie in Malware
 {{#ref}}
 crypto-in-malware/README.md
 {{#endref}}
 
-### Misc
+### Verschiedenes
 {{#ref}}
 ctf-misc/README.md
 {{#endref}}
@@ -48,7 +48,7 @@ ctf-misc/README.md
 ## Schnelle Einrichtung
 
 - Python: `python3 -m venv .venv && source .venv/bin/activate`
-- Libraries: `pip install pycryptodome gmpy2 sympy pwntools`
-- SageMath (often essential for lattice/RSA/ECC): https://www.sagemath.org/
+- Bibliotheken: `pip install pycryptodome gmpy2 sympy pwntools`
+- SageMath (oft unverzichtbar für Lattice/RSA/ECC): <https://www.sagemath.org/>
 
 {{#include ../banners/hacktricks-training.md}}
