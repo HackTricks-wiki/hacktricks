@@ -258,7 +258,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Ricerca nella guida di Nmap
+## Guida alla ricerca di Nmap
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -301,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## Telemetria eBPF e ricerca di rootkit
+## Telemetria e ricerca di rootkit eBPF
 
-I rootkit moderni (TripleCross, varianti di BPFDoor, ecc.) persistono sempre più spesso come programmi eBPF nascosti. Crea una baseline della tua infrastruttura con `bpftool`/`eBPFmon` per individuare programmi non firmati, hook cgroup imprevisti o contenuti malevoli nelle mappe prima di scollegarli.
+I rootkit moderni (TripleCross, varianti di BPFDoor, ecc.) persistono sempre più spesso come programmi eBPF nascosti. Crea una baseline della tua flotta con `bpftool`/`eBPFmon` per individuare programmi non firmati, hook cgroup imprevisti o contenuti malevoli nelle mappe prima di scollegarli.<sup>[[1]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Correla l'output di bpftool con gli attachment NIC/cgroup previsti; un programma `xdp` o `kprobe` improvviso, appartenente a un PID non approvato, è un forte indicatore di un payload eBPF iniettato.
+Correla l'output di bpftool con gli attachment previsti di NIC/cgroup; un programma `xdp` o `kprobe` improvviso, gestito da un PID non approvato, è un forte indicatore di un payload eBPF iniettato.
 
 ## Triage degli incidenti con Journald
 
-systemd-journald conserva metadati strutturati, quindi puoi effettuare pivot per boot, gravità, unità o UID senza toccare `/var/log/*`. Combina i filtri con timestamp relativi per isolare rapidamente le finestre di attacco o dimostrare la manomissione dei log.
+systemd-journald conserva metadati strutturati, quindi puoi eseguire il pivot per boot, gravità, unità o UID senza accedere a `/var/log/*`. Combina i filtri con timestamp relativi per isolare rapidamente le finestre temporali degli attacchi o dimostrare la manomissione dei log.<sup>[[2]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +336,11 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Aggiungi `--grep 'Invalid user' --case-sensitive` o `-k` (solo kernel ring buffer) quando ti servono filtri più restrittivi e ricorda che i selector `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` e `_TRANSPORT` si combinano per le ricerche multi-tenant.
+Aggiungi `--grep 'Invalid user' --case-sensitive` o `-k` (solo kernel ring buffer) quando ti servono filtri più restrittivi, e ricorda che i selector `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` e `_TRANSPORT` si combinano per le attività di ricerca multi-tenant.
 
-## References
+## Riferimenti
 
-- [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}

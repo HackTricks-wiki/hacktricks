@@ -1,4 +1,4 @@
-# RunC Privilege Escalation
+# Privilege Escalation con RunC
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,14 +6,13 @@
 
 Se vuoi saperne di più su **runc**, consulta la seguente pagina:
 
-
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
 {{#endref}}
 
 ## PE
 
-Se scopri che `runc` è installato nell'host, potresti riuscire a **eseguire un container montando la cartella root / dell'host**.
+Se scopri che `runc` è installato sull'host, potresti essere in grado di **eseguire un container montando la cartella root / dell'host**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -38,6 +37,6 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Questo non funzionerà sempre, poiché l'operazione predefinita di runc consiste nell'esecuzione come root; pertanto, eseguirlo come utente non privilegiato semplicemente non può funzionare (a meno che non si disponga di una configurazione rootless). Impostare una configurazione rootless come predefinita generalmente non è una buona idea, perché all'interno dei container rootless esistono diverse restrizioni che non si applicano al di fuori di essi.
+> Questo non funzionerà sempre, poiché l'operazione predefinita di runc consiste nell'esecuzione come root; pertanto, eseguirlo come utente non privilegiato semplicemente non può funzionare (a meno che non si disponga di una configurazione rootless). Impostare una configurazione rootless come predefinita non è generalmente una buona idea, perché all'interno dei container rootless sono presenti diverse restrizioni che non si applicano al di fuori dei container rootless.
 
 {{#include ../../banners/hacktricks-training.md}}

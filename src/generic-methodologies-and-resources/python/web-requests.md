@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Richieste Python
+## Python Requests
 ```python
 import requests
 
@@ -71,7 +71,7 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Comando Python per sfruttare un RCE
+## Comando Python per sfruttare una RCE
 ```python
 import requests
 import re

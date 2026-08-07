@@ -1,16 +1,16 @@
-# Abuso dei Kernel Modules e di modprobe
+# Moduli del kernel e abuso di modprobe
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Misconfigurazioni dei Kernel modules e del caricamento dei moduli
+## Errate configurazioni dei moduli del kernel e del caricamento dei moduli
 
-Il supporto ai Kernel modules è un'area ad alto impatto durante la review di privilege escalation su Linux. Non considerare ogni messaggio relativo a un modulo non firmato come sfruttabile di per sé, ma usalo per rispondere a domande pratiche:
+Il supporto ai moduli del kernel è un'area ad alto impatto durante la revisione dell'escalation dei privilegi su Linux. Non considerare ogni messaggio relativo a un modulo non firmato come sfruttabile di per sé, ma usalo per rispondere a domande pratiche:
 
-- L'utente corrente può caricare moduli tramite `sudo`, capabilities o un helper path scrivibile?
+- L'utente corrente può caricare moduli tramite `sudo`, capabilities o un percorso helper scrivibile?
 - Il caricamento dei moduli è ancora abilitato?
-- L'enforcement della firma dei moduli è disabilitato?
+- L'enforcement delle firme dei moduli è disabilitato?
 - Le directory dei moduli o i file dei moduli sono scrivibili?
-- È possibile leggere i kernel logs per confermare cosa è successo?
+- È possibile leggere i log del kernel per confermare ciò che è successo?
 
 Triage rapido:
 ```bash
@@ -25,7 +25,7 @@ find /lib/modules/$(uname -r) -type f -name '*.ko*' -writable -ls 2>/dev/null
 ```
 Interpretazione:
 
-- `modules_disabled=1` significa che non è possibile caricare nuovi moduli fino al riavvio.
+- `modules_disabled=1` significa che non è possibile caricare nuovi moduli fino al reboot.
 - `module_sig_enforce=1` di solito blocca i moduli non firmati.
 - `dmesg_restrict=0` consente agli utenti non privilegiati di leggere i log del kernel su molti sistemi.
 - I percorsi scrivibili sotto `/lib/modules/$(uname -r)/` sono pericolosi perché la ricerca e il caricamento automatico dei moduli possono considerare attendibile quella struttura.
@@ -34,7 +34,7 @@ Interpretazione:
 
 Se disponi dell'autorizzazione legittima per caricare un modulo locale, `insmod` inserisce l'esatto file `.ko` fornito. La funzione init del modulo viene eseguita immediatamente e i messaggi scritti con `printk()` vengono visualizzati nei log del kernel.
 
-Workflow minimo per ambienti di revisione o laboratorio:
+Workflow minimo per revisioni o ambienti di laboratorio:
 ```bash
 ls -l ./example.ko
 modinfo ./example.ko 2>/dev/null
@@ -44,14 +44,14 @@ dmesg | tail -n 30
 sudo rmmod example
 dmesg | tail -n 30
 ```
-Se `sudo -l` consente di eseguire `insmod`, `modprobe` o un wrapper che li utilizza, consideralo critico:
+Se `sudo -l` consente `insmod`, `modprobe` o un wrapper che li utilizza, consideralo critico:
 ```bash
 sudo -l
 sudo /sbin/insmod ./example.ko
 ```
-### `insmod` consentito da sudo
+### `insmod` consentito da Sudo
 
-Una regola sudo che consente a un utente di eseguire `insmod` non è paragonabile alla possibilità di eseguire un normale helper amministrativo. Il codice di inizializzazione del modulo viene eseguito nel contesto del kernel non appena il file `.ko` viene inserito, quindi la domanda pratica durante la revisione è: "questo utente può scegliere o modificare il modulo che viene caricato?"
+Una regola di Sudo che consente a un utente di eseguire `insmod` non è paragonabile al consentire un normale helper amministrativo. Il codice di inizializzazione del modulo viene eseguito nel contesto del kernel non appena il file `.ko` viene inserito, quindi la domanda pratica durante la revisione è: "questo utente può scegliere o modificare il modulo da caricare?"
 
 Flusso di revisione generico:
 ```bash
@@ -63,9 +63,9 @@ lsmod | grep -i candidate
 dmesg | tail -n 30
 sudo /sbin/rmmod candidate
 ```
-Se l'utente può fornire un file `.ko` arbitrario, in un assessment autorizzato la regola dovrebbe essere considerata come una compromissione completa del sistema. Un approccio operativo più sicuro consiste nell'evitare di delegare il caricamento dei moduli tramite sudo; se è inevitabile, limitare il percorso esatto, la proprietà, i permessi, la policy di firma e il workflow di rimozione.
+Se l'utente può fornire un file `.ko` arbitrario, la regola dovrebbe essere considerata come una compromissione completa del sistema durante una valutazione autorizzata. Un approccio operativo più sicuro consiste nell'evitare di delegare il caricamento dei moduli tramite sudo; se è inevitabile, limitare il percorso esatto, la proprietà, i permessi, la signing policy e il workflow di rimozione.
 
-Per un pattern innocuo di compilazione dei moduli in un laboratorio controllato, un sorgente minimo e un Makefile possono essere strutturati come segue:
+Per un pattern innocuo di compilazione dei moduli in un laboratorio controllato, un source e un Makefile minimi hanno questo aspetto:
 ```c
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -102,9 +102,9 @@ sudo rmmod demo
 ```
 ### Controlli sull'abuso di `kernel.modprobe` / `modprobe_path`
 
-`kernel.modprobe` controlla l'helper userspace invocato dal kernel quando necessita di assistenza per il caricamento dei moduli. Se un attacker può modificarlo impostandolo su un percorso di un eseguibile scrivibile e attivare un formato binario sconosciuto o un altro percorso di richiesta di moduli, può diventare una modalità per ottenere code execution come root.
+`kernel.modprobe` controlla l'helper userspace invocato dal kernel quando necessita di assistenza per il caricamento dei moduli. Se un attacker può modificarlo impostandolo su un percorso di un eseguibile scrivibile e attivare un formato binario sconosciuto o un altro percorso di richiesta di un modulo, può diventare root code execution.
 
-Controlla l'helper corrente:
+Controlla l'helper attuale:
 ```bash
 cat /proc/sys/kernel/modprobe 2>/dev/null
 sysctl kernel.modprobe 2>/dev/null
@@ -116,7 +116,7 @@ ls -l /proc/sys/kernel/modprobe
 sudo -l | grep -E 'sysctl|tee|bash|sh|modprobe'
 getcap -r / 2>/dev/null | grep -E 'cap_sys_admin|cap_sys_module'
 ```
-Pattern generico esclusivamente per laboratorio:
+Pattern generico solo per lab:
 ```bash
 # Example only: requires permission to write kernel.modprobe
 printf '#!/bin/sh\nid > /tmp/modprobe-helper-ran\n' > /tmp/helper
@@ -129,13 +129,13 @@ chmod +x /tmp/unknown
 /tmp/unknown 2>/dev/null || true
 cat /tmp/modprobe-helper-ran 2>/dev/null
 ```
-Sui sistemi hardened, questo dovrebbe fallire perché gli utenti non privilegiati non possono scrivere in `kernel.modprobe`, il percorso dell'helper non è scrivibile oppure i percorsi di caricamento dei moduli sono bloccati.
+Sui sistemi hardened, questa operazione dovrebbe fallire perché gli utenti non privilegiati non possono scrivere in `kernel.modprobe`, il percorso dell’helper non è scrivibile oppure i percorsi per il caricamento dei moduli sono bloccati.
 
-### Verifica di `/lib/modules` scrivibile
+### Analisi di `/lib/modules` scrivibile
 
-Le directory dei moduli scrivibili possono consentire la sostituzione dei moduli, il posizionamento di moduli malevoli o l'abuso dell'auto-load, a seconda di come viene successivamente invocato `modprobe`.
+Le directory dei moduli scrivibili possono consentire la sostituzione dei moduli, il posizionamento di moduli malevoli o l’abuso del caricamento automatico, a seconda di come viene successivamente invocato `modprobe`.
 
-Esamina le posizioni scrivibili:
+Verifica le posizioni scrivibili:
 ```bash
 KREL="$(uname -r)"
 find "/lib/modules/$KREL" -type d -writable -ls 2>/dev/null
@@ -151,7 +151,8 @@ grep -R "<module_name>" /lib/modules/$(uname -r)/modules.* 2>/dev/null
 Note difensive:
 
 - Mantieni `/lib/modules` di proprietà di `root:root` e non scrivibile dagli utenti.
-- Imposta `kernel.modules_disabled=1` dopo l'avvio, quando possibile dal punto di vista operativo.
-- Imposta la verifica delle firme dei moduli sui sistemi che richiedono moduli caricabili.
+- Imposta `kernel.modules_disabled=1` dopo l'avvio, ove possibile dal punto di vista operativo.
+- Applica la firma dei moduli sui sistemi che richiedono moduli caricabili.
 - Monitora le scritture su `/proc/sys/kernel/modprobe`, `/lib/modules` e l'esecuzione imprevista di `insmod`/`modprobe`.
+
 {{#include ../../banners/hacktricks-training.md}}
