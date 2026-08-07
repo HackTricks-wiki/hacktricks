@@ -4,8 +4,7 @@
 
 ## Βασικές πληροφορίες
 
-Αν θέλετε να μάθετε περισσότερα για το **runc**, ελέγξτε την ακόλουθη σελίδα:
-
+Αν θέλετε να μάθετε περισσότερα για το **runc**, δείτε την ακόλουθη σελίδα:
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -13,7 +12,7 @@
 
 ## PE
 
-Αν διαπιστώσετε ότι το `runc` είναι εγκατεστημένο στον host, ενδέχεται να μπορείτε να **εκτελέσετε ένα container κάνοντας mount τον root / φάκελο του host**.
+Αν διαπιστώσετε ότι το `runc` είναι εγκατεστημένο στο host, ενδέχεται να μπορείτε να **εκτελέσετε ένα container κάνοντας mount τον root / φάκελο του host**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -38,6 +37,6 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Αυτό δεν θα λειτουργεί πάντα, καθώς η προεπιλεγμένη λειτουργία του runc είναι η εκτέλεση ως root, επομένως η εκτέλεσή του από έναν unprivileged user απλώς δεν μπορεί να λειτουργήσει (εκτός αν έχετε rootless configuration). Η ρύθμιση ενός rootless configuration ως προεπιλογής δεν είναι γενικά καλή ιδέα, επειδή υπάρχουν αρκετοί περιορισμοί μέσα στα rootless containers που δεν ισχύουν εκτός rootless containers.
+> Αυτό δεν θα λειτουργεί πάντα, καθώς η προεπιλεγμένη λειτουργία του runc είναι η εκτέλεση ως root, επομένως η εκτέλεσή του από unprivileged user απλώς δεν μπορεί να λειτουργήσει (εκτός αν υπάρχει rootless configuration). Η καθιέρωση ενός rootless configuration ως προεπιλογής γενικά δεν είναι καλή ιδέα, επειδή υπάρχουν αρκετοί περιορισμοί μέσα σε rootless containers που δεν ισχύουν εκτός rootless containers.
 
 {{#include ../../banners/hacktricks-training.md}}

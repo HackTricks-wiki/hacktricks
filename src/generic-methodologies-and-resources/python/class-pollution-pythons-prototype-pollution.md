@@ -1,10 +1,10 @@
-# Ρύπανση Κλάσεων (Ρύπανση Πρωτοτύπων της Python)
+# Class Pollution (Python's Prototype Pollution)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Βασικό Παράδειγμα
 
-Δείτε πώς είναι δυνατόν να ρυπαίνουμε κλάσεις αντικειμένων με συμβολοσειρές:
+Δείτε πώς είναι δυνατό να γίνει pollute στις κλάσεις αντικειμένων με strings:<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -61,11 +61,11 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Παραδείγματα Gadget
+## Παραδείγματα Gadgets
 
 <details>
 
-<summary>Δημιουργία προεπιλεγμένης τιμής ιδιότητας κλάσης για RCE (subprocess)</summary>
+<summary>Δημιουργία προεπιλεγμένης τιμής ιδιότητας κλάσης για RCE (subprocess)</summary><sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Μολύνοντας άλλες κλάσεις και παγκόσμιες μεταβλητές μέσω <code>globals</code></summary>
+<summary>Μόλυνση άλλων κλάσεων και global μεταβλητών μέσω του <code>globals</code></summary><sup>[[1]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Αυθαίρετη εκτέλεση υποδιεργασίας</summary>
+<summary>Αυθαίρετη εκτέλεση subprocess</summary><sup>[[1]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -180,9 +180,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Επικαλύπτοντας <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Αντικατάσταση του <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** είναι ένα ειδικό χαρακτηριστικό όλων των συναρτήσεων, βασισμένο στην τεκμηρίωση της Python [documentation](https://docs.python.org/3/library/inspect.html), είναι μια “χαρτογράφηση οποιωνδήποτε προεπιλεγμένων τιμών για **μόνο-λέξεις-κλειδιά** παραμέτρους”. Η ρύπανση αυτού του χαρακτηριστικού μας επιτρέπει να ελέγχουμε τις προεπιλεγμένες τιμές των παραμέτρων μόνο-λέξεων-κλειδιών μιας συνάρτησης, αυτές είναι οι παράμετροι της συνάρτησης που έρχονται μετά το \* ή \*args.
+Το **`__kwdefaults__`** είναι ένα ειδικό attribute όλων των functions· σύμφωνα με την [τεκμηρίωση της Python](https://docs.python.org/3/library/inspect.html), είναι ένα «mapping οποιωνδήποτε default values για παραμέτρους **keyword-only**». Η μόλυνση αυτού του attribute μάς επιτρέπει να ελέγχουμε τα default values των keyword-only παραμέτρων μιας function· πρόκειται για τις παραμέτρους της function που έπονται των \* ή \*args.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,25 +223,26 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Επικαλύπτοντας το μυστικό του Flask σε διάφορα αρχεία</summary>
+<summary>Overwriting Flask secret across files</summary>
 
-Έτσι, αν μπορείτε να κάνετε class pollution σε ένα αντικείμενο που ορίζεται στο κύριο αρχείο python του ιστότοπου αλλά **η κλάση του ορίζεται σε διαφορετικό αρχείο** από το κύριο. Επειδή για να αποκτήσετε πρόσβαση στο \_\_globals\_\_ στις προηγούμενες payloads χρειάζεται να αποκτήσετε πρόσβαση στην κλάση του αντικειμένου ή στις μεθόδους της κλάσης, θα μπορείτε να **έχετε πρόσβαση στα globals σε εκείνο το αρχείο, αλλά όχι στο κύριο**. \
-Επομένως, **δεν θα μπορείτε να αποκτήσετε πρόσβαση στο παγκόσμιο αντικείμενο της εφαρμογής Flask** που ορίζει το **μυστικό κλειδί** στην κύρια σελίδα:
+Έτσι, αν μπορείς να κάνεις class pollution σε ένα object που ορίζεται στο main python file του web, αλλά **του οποίου η class ορίζεται σε διαφορετικό file** από το main. Επειδή, για να αποκτήσεις πρόσβαση στο \_\_globals\_\_ στα προηγούμενα payloads, χρειάζεται να αποκτήσεις πρόσβαση στην class του object ή σε methods της class, θα μπορείς να **αποκτήσεις πρόσβαση στα globals αυτού του file, αλλά όχι σε εκείνα του main file**. \
+Επομένως, **δεν θα μπορείς να αποκτήσεις πρόσβαση στο global object του Flask app** που όρισε το **secret key** στην main page:<sup>[[1]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Σε αυτό το σενάριο χρειάζεστε μια συσκευή για να διασχίσετε αρχεία ώστε να φτάσετε στο κύριο για να **πρόσβαση στο παγκόσμιο αντικείμενο `app.secret_key`** για να αλλάξετε το μυστικό κλειδί του Flask και να μπορείτε να [**κλιμακώσετε δικαιώματα** γνωρίζοντας αυτό το κλειδί](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Σε αυτό το σενάριο χρειάζεστε ένα gadget για την περιήγηση σε αρχεία, ώστε να φτάσετε στο κύριο αρχείο και να **αποκτήσετε πρόσβαση στο global object `app.secret_key`**, να αλλάξετε το secret key του Flask και να μπορέσετε να [**escalate privileges** γνωρίζοντας αυτό το key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-Ένα payload όπως αυτό [από αυτή τη γραφή](https://ctftime.org/writeup/36082):
+Ένα payload όπως αυτό [από αυτό το writeup](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Χρησιμοποιήστε αυτό το payload για να **αλλάξετε το `app.secret_key`** (το όνομα στην εφαρμογή σας μπορεί να είναι διαφορετικό) ώστε να μπορείτε να υπογράφετε νέα και πιο προνόμια flask cookies.
+Χρησιμοποιήστε αυτό το **payload** για να **αλλάξετε το `app.secret_key`** (το όνομα στην εφαρμογή σας μπορεί να είναι διαφορετικό), ώστε να μπορείτε να υπογράφετε νέα Flask cookies με περισσότερα προνόμια.
 
 </details>
 
-Ελέγξτε επίσης την παρακάτω σελίδα για περισσότερα gadgets μόνο για ανάγνωση:
+Δείτε επίσης την ακόλουθη σελίδα για περισσότερα read-only gadgets:
+
 
 {{#ref}}
 python-internal-read-gadgets.md
@@ -249,6 +250,7 @@ python-internal-read-gadgets.md
 
 ## Αναφορές
 
-- [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}

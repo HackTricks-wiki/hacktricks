@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Συνηθισμένο Bash
+## Συνηθισμένα Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -229,7 +229,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Εύρεση
+## Εντολή find
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -258,7 +258,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Αναζήτηση βοήθειας στο Nmap
+## Βοήθεια αναζήτησης Nmap
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -301,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## Τηλεμετρία eBPF & Rootkit Hunting
+## Τηλεμετρία eBPF και Ανίχνευση Rootkit
 
-Τα σύγχρονα rootkits (TripleCross, παραλλαγές του BPFDoor κ.λπ.) διατηρούνται όλο και συχνότερα ως κρυφά προγράμματα eBPF. Δημιουργήστε baseline για το fleet σας με τα `bpftool`/`eBPFmon`, ώστε να εντοπίζετε unsigned προγράμματα, μη αναμενόμενα cgroup hooks ή κακόβουλα περιεχόμενα map πριν τα αποσυνδέσετε.
+Τα σύγχρονα rootkit (TripleCross, παραλλαγές του BPFDoor κ.λπ.) εγκαθίστανται όλο και συχνότερα ως κρυφά προγράμματα eBPF. Δημιουργήστε baseline για το περιβάλλον σας με τα `bpftool`/`eBPFmon`, ώστε να εντοπίζετε unsigned προγράμματα, μη αναμενόμενα cgroup hooks ή κακόβουλα περιεχόμενα map πριν τα αποσυνδέσετε.<sup>[[1]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Συσχετίστε το output του bpftool με τις αναμενόμενες συνδέσεις NIC/cgroup· ένα ξαφνικό πρόγραμμα `xdp` ή `kprobe` που ανήκει σε μη εγκεκριμένο PID αποτελεί ισχυρή ένδειξη injected eBPF payload.
+Συσχετίστε το output του bpftool με τα αναμενόμενα NIC/cgroup attachments· ένα ξαφνικό πρόγραμμα `xdp` ή `kprobe` που ανήκει σε μη εγκεκριμένο PID αποτελεί ισχυρή ένδειξη για injected eBPF payload.
 
 ## Διαλογή Συμβάντων Journald
 
-Το systemd-journald διατηρεί structured metadata, επομένως μπορείτε να κάνετε pivot ανά boot, severity, unit ή UID χωρίς να αγγίξετε το `/var/log/*`. Συνδυάστε filters με relative timestamps για να απομονώσετε γρήγορα τα attack windows ή να αποδείξετε log tampering.
+Το systemd-journald διατηρεί structured metadata, επομένως μπορείτε να κάνετε pivot ανά boot, severity, unit ή UID χωρίς να αγγίξετε το `/var/log/*`. Συνδυάστε φίλτρα με relative timestamps για να απομονώσετε γρήγορα τα attack windows ή να αποδείξετε παραποίηση logs.<sup>[[2]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +336,11 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Πρόσθεσε `--grep 'Invalid user' --case-sensitive` ή `-k` (μόνο kernel ring buffer) όταν χρειάζεσαι πιο αυστηρά φίλτρα και θυμήσου ότι οι selectors `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` και `_TRANSPORT` συνδυάζονται για hunts σε περιβάλλοντα με πολλούς tenants.
+Προσθέστε `--grep 'Invalid user' --case-sensitive` ή `-k` (μόνο για το kernel ring buffer) όταν χρειάζεστε πιο αυστηρά φίλτρα και θυμηθείτε ότι οι selectors `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` και `_TRANSPORT` συνδυάζονται για αναζητήσεις σε περιβάλλοντα multi-tenant.
 
-## References
+## Αναφορές
 
-- [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: Ένα νέο εργαλείο για την εξερεύνηση και την αλληλεπίδραση με εφαρμογές eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Πώς να χρησιμοποιήσετε την εντολή journalctl για την προβολή Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}

