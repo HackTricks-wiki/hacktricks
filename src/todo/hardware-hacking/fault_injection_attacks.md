@@ -2,8 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Foutinjektie-aanvalle sluit die bekendstelling van eksterne verstorings in elektroniese kringe in om die gedrag daarvan te beïnvloed, wat lei tot die bekendmaking van inligting of selfs die omseiling van sekere beperkings in die kring. Hierdie aanvalle bied 'n baie moontlikhede vir die aanval op elektroniese kringe. Hierdie aanval word ook verwys as die glitching van elektroniese kringe.
+Fault Injection-aanvalle behels die invoer van eksterne steurings in elektroniese stroombane om hul gedrag te beïnvloed, wat daartoe kan lei dat inligting bekend gemaak word of selfs sekere beperkings in die stroombaan omseil word. Hierdie aanvalle bied baie moontlikhede om elektroniese stroombane aan te val. Daar word ook na hierdie aanval verwys as glitching van elektroniese stroombane.
 
-Daar is baie metodes en media vir die inspuiting van fout in 'n elektroniese kring.
+Daar is baie metodes en middele om foute in 'n elektroniese stroombaan in te spuit.
 
 {{#include ../../banners/hacktricks-training.md}}

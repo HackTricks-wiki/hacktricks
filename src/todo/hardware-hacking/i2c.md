@@ -4,7 +4,7 @@
 
 ## Bus Pirate
 
-Om te toets of 'n Bus Pirate werk, koppel +5V met VPU en 3.3V met ADC en toegang die bus pirate (gebruik Tera Term byvoorbeeld) en gebruik die opdrag `~`:
+Om te toets of ’n Bus Pirate werk, koppel +5V aan VPU en 3.3V aan ADC, kry toegang tot die bus pirate (byvoorbeeld deur Tera Term te gebruik) en gebruik die opdrag `~`:
 ```bash
 # Use command
 HiZ>~
@@ -43,18 +43,18 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-Soos jy in die vorige opdraglyn kan sien, het dit gesê dat dit 0 foute gevind het. Dit is baie nuttig om te weet dit werk na aankoop of na die flits van 'n firmware.
+Soos jy in die vorige opdragreël kan sien, het dit aangedui dat dit 0 foute gevind het. Dit is baie nuttig om te weet dat dit werk nadat jy dit gekoop het of nadat jy ’n firmware geflits het.
 
-Om met die bus pirate te verbind, kan jy die dokumentasie volg:
+Om met die bus pirate te koppel, kan jy die dokumentasie volg:
 
-![](<../../images/image (484).png>)
+![Gebruik opdrag - Druk spasie: Om met die bus pirate te koppel, kan jy die dokumentasie volg](<../../images/image (484).png>)
 
-In hierdie geval gaan ek met 'n EPROM verbind: ATMEL901 24C256 PU27:
+In hierdie geval gaan ek aan ’n EPROM koppel: ATMEL901 24C256 PU27:
 
-![](<../../images/image (964).png>)
+![Gebruik opdrag - Druk spasie: In hierdie geval gaan ek aan ’n EPROM koppel: ATMEL901 24C256 PU27](<../../images/image (964).png>)
 
-Om met die bus pirate te praat, het ek Tera Term gebruik wat aan die pirate bus COM-poort gekoppel is met 'n Setup --> Serial Port --> Speed van 115200.\
-In die volgende kommunikasie kan jy vind hoe om die bus pirate voor te berei om I2C te praat en hoe om van die geheue te skryf en te lees (Kommentaar verskyn met "#", verwag nie daardie deel in die kommunikasie nie):
+Om met bus pirate te kommunikeer, het ek Tera Term gebruik wat aan die pirate bus se COM-poort gekoppel is, met ’n Setup --> Serial Port --> Speed van 115200.\
+In die volgende kommunikasie kan jy sien hoe om die bus pirate voor te berei om met I2C te kommunikeer en hoe om data uit die geheue te skryf en te lees (Kommentaar verskyn deur "#" te gebruik; moenie daardie deel in die kommunikasie verwag nie):
 ```bash
 # Check communication with buspirate
 i
@@ -155,9 +155,9 @@ NACK
 ```
 ### Sniffer
 
-In hierdie scenario gaan ons die I2C kommunikasie tussen die arduino en die vorige EPROM snuffel, jy moet net albei toestelle kommunikeer en dan die bus pirate aan die SCL, SDA en GND panele koppel:
+In hierdie scenario gaan ons die I2C-kommunikasie tussen die arduino en die vorige EPROM sniff; jy hoef net met albei toestelle te kommunikeer en dan die bus pirate aan die SCL-, SDA- en GND-penne te koppel:
 
-![](<../../images/image (166).png>)
+![Lees 20B vanaf adres 0x69 wat voorheen gekonfigureer is - Sniffer: In hierdie scenario gaan ons die I2C-kommunikasie tussen die arduino en die vorige EPROM sniff; jy hoef net...](<../../images/image (166).png>)
 ```bash
 I2C>m
 1. HiZ

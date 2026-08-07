@@ -1,8 +1,8 @@
-# Stego Workflow
+# Stego-werksvloei
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Die meeste stego-probleme word vinniger opgelos deur sistematiese triage as deur lukraak gereedskap te probeer.
+Die meeste stego-probleme word vinniger opgelos deur sistematiese triage as deur lukrake tools te probeer.
 
 ## Kernvloei
 
@@ -10,50 +10,50 @@ Die meeste stego-probleme word vinniger opgelos deur sistematiese triage as deur
 
 Die doel is om twee vrae doeltreffend te beantwoord:
 
-1. Wat is die werklike houer/indeling?
-2. Is die payload in metadata, appended bytes, embedded files, of content-level stego?
+1. Wat is die werklike houer/formaat?
+2. Is die payload in metadata, aangehegte grepe, embedded files, of content-level stego?
 
 #### 1) Identifiseer die houer
 ```bash
 file target
 ls -lah target
 ```
-As `file` en die extensie verskil, vertrou `file`. Behandel algemene formate as houers waar toepaslik (bv., OOXML-dokumente is ZIP-lêers).
+As `file` en die uitbreiding nie ooreenstem nie, vertrou `file`. Behandel algemene formate as houers waar toepaslik (bv. OOXML-dokumente is ZIP-lêers).
 
-#### 2) Soek na metadata en voor die hand liggende strings
+#### 2) Soek metadata en ooglopende stringe
 ```bash
 exiftool target
 strings -n 6 target | head
 strings -n 6 target | tail
 ```
-Probeer verskeie koderinge:
+Probeer verskeie enkoderings:
 ```bash
 strings -e l -n 6 target | head
 strings -e b -n 6 target | head
 ```
-#### 3) Kontroleer vir aangehegte data / ingeslote lêers
+#### 3) Kontroleer vir aangehegte data / ingebedde lêers
 ```bash
 binwalk target
 binwalk -e target
 ```
-As ekstraksie misluk maar handtekeninge gerapporteer word, kerf handmatig offsets met `dd` en voer `file` weer op die gekerfde gebied uit.
+As extraction misluk maar signatures gerapporteer word, carve offsets handmatig met `dd` en voer `file` weer op die gecarvde streek uit.
 
-#### 4) As dit 'n beeld is
+#### 4) As beeld
 
 - Inspekteer anomalieë: `magick identify -verbose file`
-- As dit PNG/BMP is, enumereer bit-vlakke/LSB: `zsteg -a file.png`
+- As PNG/BMP, enumereer bit-planes/LSB: `zsteg -a file.png`
 - Valideer PNG-struktuur: `pngcheck -v file.png`
-- Gebruik visuele filters (Stegsolve / StegoVeritas) wanneer inhoud deur kanaal-/vlaktransformasies onthul kan word
+- Gebruik visuele filters (Stegsolve / StegoVeritas) wanneer inhoud deur kanaal/vlak-transformasies onthul kan word
 
-#### 5) As dit audio is
+#### 5) As audio
 
-- Eerstens: spektrogram (Sonic Visualiser)
-- Dekodeer/inspekteer strome: `ffmpeg -v info -i file -f null -`
-- As die audio na gestruktureerde tone lyk, toets DTMF-dekoding
+- Spektrogram eerste (Sonic Visualiser)
+- Dekodeer/inspekteer streams: `ffmpeg -v info -i file -f null -`
+- As die audio soos gestruktureerde tone klink, toets DTMF-dekodering
 
 ### Basiese gereedskap
 
-Hierdie vang die hoëfrekwensie houer‑vlak‑gevalle: metadata payloads, aangehegte bytes en ingeslote lêers wat deur die uitbreiding vermom is.
+Hierdie vang die algemene container-vlak-gevalle vas: metadata-payloads, aangehegte grepe en ingebedde lêers wat deur hul uitbreiding vermom word.<sup>[[1]](#references)</sup>
 
 #### Binwalk
 ```bash
@@ -61,16 +61,20 @@ binwalk file
 binwalk -e file
 binwalk --dd '.*' file
 ```
+Repo: https://github.com/ReFirmLabs/binwalk
+
 #### Foremost
 ```bash
 foremost -i file
 ```
-I don't have the contents of src/stego/workflow/README.md. Please paste the file contents here (including the markdown) or confirm you want me to fetch from the repo. Once you provide it I'll translate the English text to Afrikaans, preserving all markdown/html tags, links, paths and code exactly as requested.
+Repo: https://github.com/korczis/foremost
+
+#### Exiftool / Exiv2
 ```bash
 exiftool file
 exiv2 file
 ```
-I don't have the contents of src/stego/workflow/README.md. Please paste the file text (or the specific strings you want translated) and I will translate them to Afrikaans, preserving the markdown/HTML structure and the tags/paths as you requested.
+#### lêer / strings
 ```bash
 file file
 strings -n 6 file
@@ -79,49 +83,49 @@ strings -n 6 file
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-### Kontainers, aangehegte data, en polyglot tricks
+### Houers, appended data en polyglot-truuks
 
-Baie steganografie-uitdagings is ekstra bytes ná 'n geldige lêer, of ingebedde argiewe wat deur die uitbreiding vermom is.
+Baie steganography-uitdagings behels ekstra grepe ná ’n geldige lêer, of embedded archives wat deur hul uitbreiding vermom word.
 
-#### Aangehegte payloads
+#### Appended payloads
 
-Baie formate ignoreer bytes wat aan die einde van die lêer aangeheg is. ’n ZIP/PDF/script kan by 'n beeld-/klankkontainer aangeheg word.
+Baie formate ignoreer trailing bytes. ’n ZIP/PDF/script kan aan ’n image/audio-container appended word.
 
 Vinnige kontroles:
 ```bash
 binwalk file
 tail -c 200 file | xxd
 ```
-As jy 'n offset ken, carve met `dd`:
+As jy ’n offset ken, carve met `dd`:
 ```bash
 dd if=file of=carved.bin bs=1 skip=<offset>
 file carved.bin
 ```
-#### Magiese bytes
+#### Magic bytes
 
-Wanneer `file` verward is, soek na magiese bytes met `xxd` en vergelyk dit met bekende handtekeninge:
+Wanneer `file` onseker is, soek met `xxd` na magic bytes en vergelyk dit met bekende handtekeninge:
 ```bash
 xxd -g 1 -l 32 file
 ```
 #### Zip-in-disguise
 
-Probeer `7z` en `unzip` selfs al dui die lêeruitbreiding nie op zip nie:
+Probeer `7z` en `unzip` selfs al dui die uitbreiding nie op zip nie:
 ```bash
 7z l file
 unzip -l file
 ```
-### Naby-stego anomalieë
+### Naby-stego-afwykings
 
-Vinnige skakels na patrone wat gereeld langs stego voorkom (QR-from-binary, braille, ens.).
+Vinnige skakels vir patrone wat gereeld langs stego voorkom (QR-from-binary, braille, ens.).
 
-#### QR codes from binary
+#### QR-kodes from binary
 
-As 'n blob-lengte 'n perfekte vierkant is, kan dit rou pixels vir 'n beeld/QR wees.
+As ’n blob-lengte ’n volmaakte vierkant is, kan dit rou pixels vir ’n beeld/QR wees.
 ```python
 import math
 math.isqrt(2500)  # 50
 ```
-Binêr-na-beeld hulpmiddel:
+Binêr-na-beeld-helper:
 
 - [https://www.dcode.fr/binary-image](https://www.dcode.fr/binary-image)
 
@@ -129,9 +133,8 @@ Binêr-na-beeld hulpmiddel:
 
 - [https://www.branah.com/braille-translator](https://www.branah.com/braille-translator)
 
-## Verwysingslyste
+## Verwysings
 
-- [https://0xrick.github.io/lists/stego/](https://0xrick.github.io/lists/stego/)
-- [https://github.com/DominicBreuker/stego-toolkit](https://github.com/DominicBreuker/stego-toolkit)
+- [1] [DominicBreuker/stego-toolkit - Docker image met die gewildste steganography-tools saamgebundel](https://github.com/DominicBreuker/stego-toolkit)
 
 {{#include ../../banners/hacktricks-training.md}}

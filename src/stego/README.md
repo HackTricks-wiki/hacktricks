@@ -2,52 +2,58 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Hierdie afdeling fokus op **die opspoor en uittrekking van verborge data** uit lêers (beelde/klank/video/dokumente/argiewe) en uit teksgebaseerde steganography.
+Hierdie afdeling fokus op **die vind en onttrekking van versteekte data** uit lêers (beelde/klank/video/dokumente/argiewe) en uit teksgebaseerde steganografie.
 
-As jy hier is vir kriptografiese aanvalle, gaan na die **Crypto** afdeling.
+As jy hier is vir kriptografiese aanvalle, gaan na die **Crypto**-afdeling.
 
-## Ingangspunt
+## Beginpunt
 
-Behandel steganography as 'n forensics-probleem: identifiseer die werklike container, tel hoë-signaal lokasies op (metadata, appended data, embedded files), en eers dan pas content-level uittrektegnieke toe.
+Benader steganografie as 'n forensiese probleem: identifiseer die werklike container, lys hoë-sein-liggings (metadata, aangehegte data, ingebedde lêers), en pas eers daarna inhoudsvlak-onttrekkingstegnieke toe.
 
-### Werksvloei & triage
+### Werkvloei en triage
 
-'n Gestruktureerde werksvloei wat container-identifikasie, metadata/string-inspeksie, carving, en formaat-spesifieke takke prioritiseer.
+'n Gestruktureerde werkvloei wat prioriteit gee aan container-identifikasie, metadata/string-inspeksie, carving en formaatspesifieke vertakking.
+
 {{#ref}}
 workflow/README.md
 {{#endref}}
 
 ### Beelde
 
-Waar meeste CTF stego voorkom: LSB/bit-planes (PNG/BMP), chunk/file-format vreemdhede, JPEG tooling, en multi-frame GIF-truuks.
+Waar die meeste CTF-stego voorkom: LSB/bit-planes (PNG/BMP), eienaardighede in chunks/lêerformate, JPEG-tools en multi-frame GIF-truuks.
+
 {{#ref}}
 images/README.md
 {{#endref}}
 
 ### Klank
 
-Spectrogram-boodskappe, sample LSB embedding, en telefoon-kieser-tone (DTMF) is herhalende patrone.
+Spektrogramboodskappe, sample-LSB-inbedding en telefoonsleutelbordtone (DTMF) is algemene patrone.
+
 {{#ref}}
 audio/README.md
 {{#endref}}
 
 ### Teks
 
-As teks normaal vertoon maar onverwags optree, oorweeg Unicode-homoglyphs, zero-width characters, of whitespace-gebaseerde kodering.
+As teks normaal vertoon, maar onverwags optree, oorweeg Unicode-homogliewe, zero-width-karakters of whitespace-gebaseerde enkodering.
+
 {{#ref}}
 text/README.md
 {{#endref}}
 
 ### Dokumente
 
-PDFs en Office-lêers is eerstens houers; aanvalle draai gewoonlik om embedded files/streams, object/relationship graphs, en ZIP-uittrekking.
+PDF's en Office-lêers is eerstens containers; aanvalle wentel gewoonlik om ingebedde lêers/streams, objek-/verhoudingsgrafieke en ZIP-onttrekking.
+
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Malware en delivery-style steganography
+### Malware- en afleweringstyl-steganografie
 
-Payload-aflewering gebruik dikwels geldig-voorkomende lêers (bv. GIF/PNG) wat marker-delimited teks payloads dra, eerder as pixel-level verberging.
+Payload-aflewering gebruik dikwels lêers wat geldig lyk (bv. GIF/PNG) en teks-payloads bevat wat deur merkers afgebaken word, eerder as om data op pixelvlak te versteek.
+
 {{#ref}}
 malware-and-network/README.md
 {{#endref}}
