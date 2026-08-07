@@ -2,15 +2,15 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Chargements de base
+## Payloads de base
 
-- **Liste simple :** Juste une liste contenant une entrée par ligne
-- **Fichier d'exécution :** Une liste lue en temps d'exécution (non chargée en mémoire). Pour supporter de grandes listes.
-- **Modification de cas :** Appliquer des changements à une liste de chaînes (Pas de changement, en minuscules, en MAJUSCULES, en nom propre - Première lettre en majuscule et le reste en minuscules -, en Nom Propre - Première lettre en majuscule et le reste reste le même-).
-- **Nombres :** Générer des nombres de X à Y en utilisant un pas de Z ou aléatoirement.
-- **Brute Forcer :** Ensemble de caractères, longueur min & max.
+- **Simple List :** Une simple liste contenant une entrée par ligne
+- **Runtime File :** Une liste lue au runtime (non chargée en mémoire). Pour prendre en charge les grandes listes.
+- **Case Modification :** Appliquer certaines modifications à une liste de chaînes (aucune modification, en minuscules, en MAJUSCULES, en nom propre - première lettre en majuscule et le reste en minuscules -, en Nom Propre - première lettre en majuscule et le reste inchangé -).
+- **Numbers :** Générer des nombres de X à Y avec un pas de Z ou aléatoirement.
+- **Brute Forcer :** Jeu de caractères, longueur minimale et maximale.
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Chargement pour exécuter des commandes et récupérer la sortie via des requêtes DNS à burpcollab.
+[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Payload permettant d'exécuter des commandes et d'en récupérer la sortie via des requêtes DNS vers burpcollab.
 
 {{#ref}}
 https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e

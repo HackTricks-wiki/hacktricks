@@ -6,7 +6,7 @@ Recherchez :
 
 - Homoglyphes Unicode
 - Caractères de largeur nulle
-- Motifs d'espaces (espaces vs tabulations)
+- Motifs d'espaces (espaces contre tabulations)
 
 ## Approche pratique
 
@@ -14,20 +14,20 @@ Si du texte brut se comporte de manière inattendue, inspectez les points de cod
 
 ### Technique
 
-La stéganographie textuelle s'appuie fréquemment sur des caractères qui s'affichent de manière identique (ou qui sont invisibles) :
+La stéganographie textuelle repose fréquemment sur des caractères qui s'affichent de manière identique (ou qui sont invisibles) :
 
 - Homoglyphes : différents points de code Unicode qui se ressemblent (le `a` latin contre le `а` cyrillique)
-- Caractères de largeur nulle : assembleurs, non-assembleurs, espaces de largeur nulle
-- Encodages par espaces : espaces contre tabulations, espaces en fin de ligne, motifs de longueur de ligne<sup>[[1]](#references)</sup>
+- Caractères de largeur nulle : jointures, non-jointures et espaces de largeur nulle
+- Encodages par espaces blancs : espaces contre tabulations, espaces en fin de ligne, motifs de longueur de ligne<sup>[[1]](#references)</sup>
 
-Cas supplémentaires à fort signal :
+Autres cas à haut signal :
 
-- Caractères de contrôle/de réécriture bidirectionnelle (peuvent réordonner visuellement le texte)
-- Sélecteurs de variantes et caractères combinatoires utilisés comme canal covert
+- Caractères de contrôle/de remplacement bidirectionnels (peuvent réordonner visuellement le texte)
+- Sélecteurs de variation et caractères combinatoires utilisés comme covert channel
 
-### Aides au décodage
+### Outils de décodage
 
-- Terrain de jeu pour les homoglyphes Unicode et les caractères de largeur nulle : https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
+- Terrain d'expérimentation pour les homoglyphes Unicode et les caractères de largeur nulle : https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder
 
 ### Inspecter les points de code
 ```bash
@@ -41,11 +41,11 @@ PY
 ```
 ## Canaux CSS `unicode-range`
 
-Les règles `@font-face` peuvent encoder des octets dans les entrées `unicode-range: U+..`. Extrayez les points de code, concaténez les valeurs hexadécimales, puis décodez-les :
+Les règles `@font-face` peuvent encoder des octets dans les entrées `unicode-range: U+..`. Extrayez les codepoints, concaténez les valeurs hexadécimales, puis décodez-les :
 ```bash
 grep -o "U+[0-9A-Fa-f]\+" styles.css | tr -d 'U+\n' | xxd -r -p
 ```
-Si les plages contiennent plusieurs octets par déclaration, séparez-les d'abord sur les virgules et normalisez-les (`tr ',+' '\n'`). Python facilite l'analyse et l'émission des octets lorsque le formatage est incohérent.
+Si les plages contiennent plusieurs octets par déclaration, séparez-les d’abord sur les virgules et normalisez-les (`tr ',+' '\n'`). Python facilite l’analyse et l’émission des octets lorsque le formatage est incohérent.<sup>[[1]](#references)</sup>
 
 ## Références
 

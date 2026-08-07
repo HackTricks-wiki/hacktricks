@@ -4,7 +4,7 @@
 
 ## Bus Pirate
 
-Pour tester si un Bus Pirate fonctionne, connectez +5V avec VPU et 3.3V avec ADC et accédez au bus pirate (en utilisant Tera Term par exemple) et utilisez la commande `~`:
+Pour vérifier que le Bus Pirate fonctionne, connectez +5 V à VPU et 3,3 V à ADC, puis accédez au bus pirate (en utilisant Tera Term, par exemple) et utilisez la commande `~` :
 ```bash
 # Use command
 HiZ>~
@@ -43,18 +43,18 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-Comme vous pouvez le voir dans la ligne de commande précédente, il a été dit qu'il n'a trouvé aucune erreur. C'est très utile de savoir que cela fonctionne après l'avoir acheté ou après avoir flashé un firmware.
+Comme vous pouvez le voir dans la ligne de commande précédente, 0 erreur a été détectée. Il est très utile de le savoir pour vérifier que tout fonctionne après l'achat ou après le flashage d'un firmware.
 
-Pour se connecter avec le bus pirate, vous pouvez suivre la documentation :
+Pour vous connecter au Bus Pirate, vous pouvez suivre la documentation :
 
-![](<../../images/image (484).png>)
+![Utiliser la commande - Appuyer sur espace : Pour vous connecter au Bus Pirate, vous pouvez suivre la documentation](<../../images/image (484).png>)
 
-Dans ce cas, je vais me connecter à un EPROM : ATMEL901 24C256 PU27 :
+Dans ce cas, je vais me connecter à une EPROM : ATMEL901 24C256 PU27 :
 
-![](<../../images/image (964).png>)
+![Utiliser la commande - Appuyer sur espace : Dans ce cas, je vais me connecter à une EPROM : ATMEL901 24C256 PU27](<../../images/image (964).png>)
 
-Pour communiquer avec le bus pirate, j'ai utilisé Tera Term connecté au port COM du bus pirate avec un Setup --> Serial Port --> Speed de 115200.\
-Dans la communication suivante, vous pouvez trouver comment préparer le bus pirate pour parler I2C et comment écrire et lire à partir de la mémoire (Les commentaires apparaissent en utilisant "#", ne vous attendez pas à cette partie dans la communication) :
+Pour communiquer avec le Bus Pirate, j'ai utilisé Tera Term, connecté au port COM du Bus Pirate avec Setup --> Serial Port --> Speed réglé sur 115200.\
+Dans la communication suivante, vous pouvez voir comment préparer le Bus Pirate pour communiquer avec I2C, ainsi que comment écrire et lire depuis la mémoire (les commentaires apparaissent avec « # » ; ne vous attendez pas à trouver cette partie dans la communication) :
 ```bash
 # Check communication with buspirate
 i
@@ -155,9 +155,9 @@ NACK
 ```
 ### Sniffer
 
-Dans ce scénario, nous allons intercepter la communication I2C entre l'arduino et l'EPROM précédent, vous devez simplement communiquer entre les deux appareils, puis connecter le bus pirate aux broches SCL, SDA et GND :
+Dans ce scénario, nous allons sniffer la communication I2C entre l’arduino et l’EPROM précédente. Il vous suffit de faire communiquer les deux appareils, puis de connecter le bus pirate aux broches SCL, SDA et GND :
 
-![](<../../images/image (166).png>)
+![Read 20B from address 0x69 configured before - Sniffer: Dans ce scénario, nous allons sniffer la communication I2C entre l’arduino et l’EPROM précédente. Il vous suffit de...](<../../images/image (166).png>)
 ```bash
 I2C>m
 1. HiZ
