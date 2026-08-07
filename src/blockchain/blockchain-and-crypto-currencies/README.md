@@ -1,190 +1,190 @@
-# Blockchain and Crypto-Currencies
+# Blockchain και Κρυπτονομίσματα
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Βασικές Έννοιες
 
-- **Smart Contracts** ορίζονται ως προγράμματα που εκτελούνται σε ένα blockchain όταν πληρούνται ορισμένες συνθήκες, αυτοματοποιώντας την εκτέλεση συμφωνιών χωρίς ενδιάμεσους.
-- **Decentralized Applications (dApps)** βασίζονται σε smart contracts, με ένα φιλικό προς τον χρήστη front-end και ένα διαφανές, ελέγξιμο back-end.
-- **Tokens & Coins** διαφοροποιούν το πού τα coins λειτουργούν ως ψηφιακό χρήμα, ενώ τα tokens αντιπροσωπεύουν αξία ή ιδιοκτησία σε συγκεκριμένα πλαίσια.
-- Οι **Utility Tokens** δίνουν πρόσβαση σε υπηρεσίες, και οι **Security Tokens** υποδηλώνουν ιδιοκτησία περιουσιακού στοιχείου.
-- Το **DeFi** σημαίνει Decentralized Finance, προσφέροντας χρηματοοικονομικές υπηρεσίες χωρίς κεντρικές αρχές.
-- Οι **DEX** και οι **DAOs** αναφέρονται αντίστοιχα σε Decentralized Exchange Platforms και Decentralized Autonomous Organizations.
+- Τα **Smart Contracts** ορίζονται ως προγράμματα που εκτελούνται σε ένα blockchain όταν πληρούνται συγκεκριμένες προϋποθέσεις, αυτοματοποιώντας την εκτέλεση συμφωνιών χωρίς μεσάζοντες.
+- Οι **Decentralized Applications (dApps)** βασίζονται σε smart contracts και διαθέτουν ένα φιλικό προς τον χρήστη front-end και ένα διαφανές, ελέγξιμο back-end.
+- Τα **Tokens & Coins** διαφέρουν ως προς το ότι τα coins λειτουργούν ως ψηφιακό χρήμα, ενώ τα tokens αντιπροσωπεύουν αξία ή ιδιοκτησία σε συγκεκριμένα πλαίσια.
+- Τα **Utility Tokens** παρέχουν πρόσβαση σε υπηρεσίες, ενώ τα **Security Tokens** υποδηλώνουν ιδιοκτησία περιουσιακών στοιχείων.
+- Το **DeFi** σημαίνει Decentralized Finance και προσφέρει χρηματοοικονομικές υπηρεσίες χωρίς κεντρικές αρχές.
+- Τα **DEX** και **DAOs** αναφέρονται αντίστοιχα σε Decentralized Exchange Platforms και Decentralized Autonomous Organizations.
 
 ## Μηχανισμοί Συναίνεσης
 
-Οι μηχανισμοί συναίνεσης διασφαλίζουν ασφαλείς και συμφωνημένες επικυρώσεις συναλλαγών στο blockchain:
+Οι μηχανισμοί συναίνεσης διασφαλίζουν την ασφαλή και συμφωνημένη επικύρωση συναλλαγών στο blockchain:
 
-- Το **Proof of Work (PoW)** βασίζεται σε υπολογιστική ισχύ για την επαλήθευση συναλλαγών.
-- Το **Proof of Stake (PoS)** απαιτεί από τους validators να διατηρούν μια ορισμένη ποσότητα tokens, μειώνοντας την κατανάλωση ενέργειας σε σύγκριση με το PoW.
+- Το **Proof of Work (PoW)** βασίζεται στην υπολογιστική ισχύ για την επαλήθευση συναλλαγών.
+- Το **Proof of Stake (PoS)** απαιτεί από τους validators να διατηρούν μια συγκεκριμένη ποσότητα tokens, μειώνοντας την κατανάλωση ενέργειας σε σύγκριση με το PoW.<sup>[[1]](#references)</sup>
 
-## Bitcoin Essentials
+## Βασικά στοιχεία του Bitcoin
 
 ### Συναλλαγές
 
-Οι συναλλαγές Bitcoin περιλαμβάνουν μεταφορά κεφαλαίων μεταξύ διευθύνσεων. Οι συναλλαγές επικυρώνονται μέσω ψηφιακών signatures, διασφαλίζοντας ότι μόνο ο κάτοχος του private key μπορεί να ξεκινήσει μεταφορές.
+Οι συναλλαγές Bitcoin περιλαμβάνουν τη μεταφορά κεφαλαίων μεταξύ διευθύνσεων. Οι συναλλαγές επικυρώνονται μέσω digital signatures, διασφαλίζοντας ότι μόνο ο κάτοχος του private key μπορεί να ξεκινήσει μεταφορές.<sup>[[2]](#references)</sup>
 
-#### Key Components:
+#### Βασικά στοιχεία:
 
-- Οι **Multisignature Transactions** απαιτούν πολλαπλά signatures για να εγκριθεί μια συναλλαγή.
-- Οι συναλλαγές αποτελούνται από **inputs** (πηγή κεφαλαίων), **outputs** (προορισμός), **fees** (πληρώνονται στους miners) και **scripts** (κανόνες συναλλαγής).
+- Οι **Multisignature Transactions** απαιτούν πολλαπλές υπογραφές για την εξουσιοδότηση μιας συναλλαγής.<sup>[[3]](#references)</sup>
+- Οι συναλλαγές αποτελούνται από **inputs** (πηγή κεφαλαίων), **outputs** (προορισμός), **fees** (καταβάλλονται στους miners) και **scripts** (κανόνες συναλλαγής).
 
 ### Lightning Network
 
-Στόχος είναι η βελτίωση της κλιμακωσιμότητας του Bitcoin επιτρέποντας πολλαπλές συναλλαγές μέσα σε ένα channel, μεταδίδοντας στο blockchain μόνο την τελική κατάσταση.
+Στοχεύει στη βελτίωση της scalability του Bitcoin, επιτρέποντας πολλαπλές συναλλαγές μέσα σε ένα channel και μεταδίδοντας στο blockchain μόνο την τελική κατάσταση.
 
-## Θέματα Απορρήτου Bitcoin
+## Ανησυχίες για το Privacy του Bitcoin
 
-Επιθέσεις απορρήτου, όπως οι **Common Input Ownership** και **UTXO Change Address Detection**, εκμεταλλεύονται μοτίβα συναλλαγών. Στρατηγικές όπως οι **Mixers** και το **CoinJoin** βελτιώνουν την ανωνυμία αποκρύπτοντας τα links συναλλαγών μεταξύ χρηστών.
+Επιθέσεις privacy, όπως οι **Common Input Ownership** και **UTXO Change Address Detection**, εκμεταλλεύονται μοτίβα συναλλαγών. Στρατηγικές όπως τα **Mixers** και το **CoinJoin** βελτιώνουν το anonymity αποκρύπτοντας τις συνδέσεις συναλλαγών μεταξύ χρηστών.
 
-## Απόκτηση Bitcoins Ανώνυμα
+## Ανώνυμη απόκτηση Bitcoins
 
-Οι μέθοδοι περιλαμβάνουν συναλλαγές με μετρητά, mining και χρήση mixers. Το **CoinJoin** αναμειγνύει πολλαπλές συναλλαγές για να δυσκολέψει την ιχνηλασιμότητα, ενώ το **PayJoin** μεταμφιέζει τα CoinJoins ως κανονικές συναλλαγές για αυξημένο απόρρητο.
+Οι μέθοδοι περιλαμβάνουν συναλλαγές με μετρητά, mining και χρήση mixers. Το **CoinJoin** αναμειγνύει πολλαπλές συναλλαγές για να δυσκολέψει την ιχνηλασιμότητα, ενώ το **PayJoin** συγκαλύπτει τα CoinJoins ως κανονικές συναλλαγές για αυξημένο privacy.
 
-# Bitcoin Privacy Atacks
+# Επιθέσεις Privacy του Bitcoin
 
-# Summary of Bitcoin Privacy Attacks
+# Περίληψη των Επιθέσεων Privacy του Bitcoin
 
-Στον κόσμο του Bitcoin, το απόρρητο των συναλλαγών και η ανωνυμία των χρηστών συχνά αποτελούν θέματα ανησυχίας. Ακολουθεί μια απλοποιημένη επισκόπηση αρκετών συνηθισμένων μεθόδων μέσω των οποίων οι attackers μπορούν να παραβιάσουν το απόρρητο του Bitcoin.
+Στον κόσμο του Bitcoin, το privacy των συναλλαγών και το anonymity των χρηστών αποτελούν συχνά αντικείμενα ανησυχίας. Ακολουθεί μια απλοποιημένη επισκόπηση αρκετών συνηθισμένων μεθόδων μέσω των οποίων οι attackers μπορούν να παραβιάσουν το privacy του Bitcoin.<sup>[[6]](#references)</sup>
 
 ## **Common Input Ownership Assumption**
 
-Γενικά είναι σπάνιο inputs από διαφορετικούς χρήστες να συνδυάζονται σε μια ενιαία συναλλαγή λόγω της πολυπλοκότητας που απαιτείται. Έτσι, **two input addresses in the same transaction are often assumed to belong to the same owner**.
+Γενικά, είναι σπάνιο να συνδυάζονται inputs από διαφορετικούς χρήστες σε μία συναλλαγή λόγω της πολυπλοκότητας που απαιτείται. Επομένως, **δύο input addresses στην ίδια συναλλαγή θεωρείται συχνά ότι ανήκουν στον ίδιο κάτοχο**.
 
 ## **UTXO Change Address Detection**
 
-Ένα UTXO, ή **Unspent Transaction Output**, πρέπει να δαπανηθεί εξ ολοκλήρου σε μια συναλλαγή. Αν μόνο ένα μέρος του σταλεί σε άλλη διεύθυνση, το υπόλοιπο πηγαίνει σε μια νέα change address. Οι παρατηρητές μπορούν να υποθέσουν ότι αυτή η νέα διεύθυνση ανήκει στον αποστολέα, θέτοντας σε κίνδυνο το απόρρητο.
+Ένα UTXO, ή **Unspent Transaction Output**, πρέπει να δαπανηθεί εξ ολοκλήρου σε μια συναλλαγή. Αν σταλεί μόνο ένα μέρος του σε άλλη διεύθυνση, το υπόλοιπο μεταφέρεται σε μια νέα change address. Οι παρατηρητές μπορούν να υποθέσουν ότι αυτή η νέα διεύθυνση ανήκει στον αποστολέα, θέτοντας σε κίνδυνο το privacy.
 
-### Example
+### Παράδειγμα
 
-Για να μετριαστεί αυτό, τα mixing services ή η χρήση πολλαπλών διευθύνσεων μπορούν να βοηθήσουν στην απόκρυψη της ιδιοκτησίας.
+Για τον περιορισμό αυτού του κινδύνου, οι υπηρεσίες mixing ή η χρήση πολλαπλών διευθύνσεων μπορούν να βοηθήσουν στην απόκρυψη της ιδιοκτησίας.
 
 ## **Social Networks & Forums Exposure**
 
-Οι χρήστες μερικές φορές μοιράζονται δημόσια τις διευθύνσεις Bitcoin τους, καθιστώντας το **easy to link the address to its owner**.
+Οι χρήστες μερικές φορές κοινοποιούν τις Bitcoin addresses τους online, καθιστώντας **εύκολη τη σύνδεση της διεύθυνσης με τον κάτοχό της**.
 
 ## **Transaction Graph Analysis**
 
-Οι συναλλαγές μπορούν να οπτικοποιηθούν ως graphs, αποκαλύπτοντας πιθανές συνδέσεις μεταξύ χρηστών βάσει της ροής των κεφαλαίων.
+Οι συναλλαγές μπορούν να οπτικοποιηθούν ως γραφήματα, αποκαλύπτοντας πιθανές συνδέσεις μεταξύ χρηστών με βάση τη ροή κεφαλαίων.
 
 ## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
 
-Αυτό το heuristic βασίζεται στην ανάλυση συναλλαγών με πολλαπλά inputs και outputs για να μαντέψει ποιο output είναι το change που επιστρέφει στον αποστολέα.
+Αυτό το heuristic βασίζεται στην ανάλυση συναλλαγών με πολλαπλά inputs και outputs, ώστε να γίνει πρόβλεψη για το ποιο output αποτελεί τα ρέστα που επιστρέφουν στον αποστολέα.
 
-### Example
+### Παράδειγμα
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
-Αν η προσθήκη περισσότερων inputs κάνει το change output μεγαλύτερο από οποιοδήποτε μεμονωμένο input, μπορεί να μπερδέψει το heuristic.
+Εάν η προσθήκη περισσότερων inputs κάνει το change output μεγαλύτερο από οποιοδήποτε μεμονωμένο input, μπορεί να μπερδέψει το heuristic.
 
 ## **Forced Address Reuse**
 
-Οι attackers μπορεί να στείλουν μικρά ποσά σε addresses που έχουν χρησιμοποιηθεί πριν, ελπίζοντας ότι ο recipient θα τα συνδυάσει με άλλα inputs σε μελλοντικές transactions, συνδέοντας έτσι τα addresses μεταξύ τους.
+Οι attackers μπορεί να στέλνουν μικρά ποσά σε διευθύνσεις που έχουν ήδη χρησιμοποιηθεί, ελπίζοντας ότι ο παραλήπτης θα τα συνδυάσει με άλλα inputs σε μελλοντικές συναλλαγές, συνδέοντας έτσι τις διευθύνσεις μεταξύ τους.
 
-### Correct Wallet Behavior
+### Σωστή συμπεριφορά Wallet
 
-Τα wallets θα πρέπει να αποφεύγουν τη χρήση coins που ελήφθησαν σε ήδη χρησιμοποιημένες, κενές addresses για να αποτρέψουν αυτό το privacy leak.
+Τα Wallets θα πρέπει να αποφεύγουν τη χρήση coins που λαμβάνονται σε ήδη χρησιμοποιημένες, κενές διευθύνσεις, ώστε να αποτρέπεται αυτό το privacy leak.
 
-## **Other Blockchain Analysis Techniques**
+## **Άλλες τεχνικές Blockchain Analysis**
 
-- **Exact Payment Amounts:** Transactions χωρίς change είναι πιθανό να γίνονται μεταξύ δύο addresses που ανήκουν στον ίδιο user.
-- **Round Numbers:** Ένας round number σε μια transaction υποδηλώνει ότι πρόκειται για payment, με το μη round output πιθανότατα να είναι το change.
-- **Wallet Fingerprinting:** Διαφορετικά wallets έχουν μοναδικά patterns δημιουργίας transactions, επιτρέποντας στους analysts να εντοπίσουν το software που χρησιμοποιήθηκε και πιθανόν τη change address.
-- **Amount & Timing Correlations:** Η αποκάλυψη χρόνων ή ποσών transactions μπορεί να τις καταστήσει traceable.
+- **Ακριβή ποσά πληρωμής:** Οι συναλλαγές χωρίς change είναι πιθανό να πραγματοποιούνται μεταξύ δύο διευθύνσεων που ανήκουν στον ίδιο χρήστη.
+- **Στρογγυλοί αριθμοί:** Ένας στρογγυλός αριθμός σε μια συναλλαγή υποδηλώνει ότι πρόκειται για πληρωμή, ενώ το output που δεν είναι στρογγυλό πιθανότατα είναι το change.
+- **Wallet Fingerprinting:** Διαφορετικά wallets έχουν μοναδικά μοτίβα δημιουργίας συναλλαγών, επιτρέποντας στους analysts να αναγνωρίζουν το software που χρησιμοποιείται και, ενδεχομένως, τη διεύθυνση change.
+- **Συσχετίσεις ποσού και χρόνου:** Η αποκάλυψη των χρόνων ή των ποσών των συναλλαγών μπορεί να κάνει τις συναλλαγές ανιχνεύσιμες.
 
 ## **Traffic Analysis**
 
-Παρακολουθώντας network traffic, οι attackers μπορούν δυνητικά να συνδέσουν transactions ή blocks με IP addresses, θέτοντας σε κίνδυνο το user privacy. Αυτό ισχύει ιδιαίτερα αν μια οντότητα λειτουργεί πολλούς Bitcoin nodes, ενισχύοντας την ικανότητά της να παρακολουθεί transactions.
+Με την παρακολούθηση της κίνησης του δικτύου, οι attackers μπορούν ενδεχομένως να συνδέσουν συναλλαγές ή blocks με IP addresses, θέτοντας σε κίνδυνο το privacy των χρηστών. Αυτό ισχύει ιδιαίτερα όταν μια οντότητα λειτουργεί πολλά Bitcoin nodes, ενισχύοντας την ικανότητά της να παρακολουθεί συναλλαγές.
 
-## More
+## Περισσότερα
 
-Για μια πλήρη λίστα από privacy attacks και defenses, επισκεφθείτε το [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
+Για μια ολοκληρωμένη λίστα privacy attacks και defenses, επισκεφθείτε το [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy).
 
 # Anonymous Bitcoin Transactions
 
-## Ways to Get Bitcoins Anonymously
+## Τρόποι απόκτησης Bitcoins Anonymous
 
-- **Cash Transactions**: Απόκτηση bitcoin μέσω μετρητών.
-- **Cash Alternatives**: Αγορά gift cards και ανταλλαγή τους online για bitcoin.
-- **Mining**: Ο πιο private τρόπος να κερδίσει κανείς bitcoins είναι μέσω mining, ειδικά όταν γίνεται μόνος του επειδή τα mining pools μπορεί να γνωρίζουν το IP address του miner. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: Θεωρητικά, η κλοπή bitcoin θα μπορούσε να είναι ένας ακόμη τρόπος για να τα αποκτήσει κανείς anonymously, αν και είναι παράνομο και δεν συνιστάται.
+- **Cash Transactions:** Απόκτηση bitcoin μέσω μετρητών.
+- **Cash Alternatives:** Αγορά gift cards και online ανταλλαγή τους με bitcoin.
+- **Mining:** Η πιο privacy-friendly μέθοδος απόκτησης bitcoins είναι το mining, ιδιαίτερα όταν πραγματοποιείται μεμονωμένα, επειδή τα mining pools μπορεί να γνωρίζουν την IP address του miner. [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
+- **Theft:** Θεωρητικά, η κλοπή bitcoin θα μπορούσε να είναι ένας ακόμη τρόπος anonymous απόκτησής του, αν και είναι παράνομη και δεν συνιστάται.
 
 ## Mixing Services
 
-Χρησιμοποιώντας ένα mixing service, ένας user μπορεί να **στείλει bitcoins** και να λάβει **διαφορετικά bitcoins σε αντάλλαγμα**, κάτι που δυσκολεύει το tracing του αρχικού owner. Ωστόσο, αυτό απαιτεί εμπιστοσύνη ότι το service δεν θα κρατήσει logs και ότι θα επιστρέψει πράγματι τα bitcoins. Εναλλακτικές επιλογές mixing περιλαμβάνουν Bitcoin casinos.
+Με τη χρήση ενός mixing service, ένας χρήστης μπορεί να **στείλει bitcoins** και να λάβει **διαφορετικά bitcoins ως αντάλλαγμα**, γεγονός που δυσκολεύει την ανίχνευση του αρχικού κατόχου. Ωστόσο, αυτό απαιτεί εμπιστοσύνη ότι το service δεν θα κρατήσει logs και ότι πράγματι θα επιστρέψει τα bitcoins. Εναλλακτικές επιλογές mixing περιλαμβάνουν τα Bitcoin casinos.
 
 ## CoinJoin
 
-Το **CoinJoin** συγχωνεύει πολλαπλές transactions από διαφορετικούς users σε μία, περιπλέκοντας τη διαδικασία για όποιον προσπαθεί να αντιστοιχίσει inputs με outputs. Παρά την αποτελεσματικότητά του, transactions με μοναδικά input και output sizes μπορούν ακόμα δυνητικά να εντοπιστούν.
+Το **CoinJoin** συγχωνεύει πολλές συναλλαγές από διαφορετικούς χρήστες σε μία, περιπλέκοντας τη διαδικασία για όποιον προσπαθεί να αντιστοιχίσει inputs με outputs. Παρά την αποτελεσματικότητά του, συναλλαγές με μοναδικά μεγέθη input και output μπορούν ακόμη να ανιχνευθούν.
 
-Παραδείγματα transactions που μπορεί να χρησιμοποίησαν CoinJoin περιλαμβάνουν τα `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` και `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
+Παραδείγματα συναλλαγών που μπορεί να έχουν χρησιμοποιήσει CoinJoin περιλαμβάνουν τα `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` και `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238`.
 
-Για περισσότερες πληροφορίες, επισκεφθείτε το [CoinJoin](https://coinjoin.io/en). Για μια παρόμοια υπηρεσία στο Ethereum, δείτε το [Tornado Cash](https://tornado.cash), το οποίο anonymizes transactions με funds από miners.
+Για περισσότερες πληροφορίες, επισκεφθείτε το [CoinJoin](https://coinjoin.io/en). Για παρόμοιο service στο Ethereum, δείτε το [Tornado Cash](https://tornado.cash), το οποίο anonymizes συναλλαγές με funds από miners.
 
 ## PayJoin
 
-Μια παραλλαγή του CoinJoin, το **PayJoin** (ή P2EP), μεταμφιέζει τη transaction ανάμεσα σε δύο parties (π.χ. έναν customer και έναν merchant) ως κανονική transaction, χωρίς τα χαρακτηριστικά ίσα outputs του CoinJoin. Αυτό το καθιστά εξαιρετικά δύσκολο να εντοπιστεί και θα μπορούσε να ακυρώσει το common-input-ownership heuristic που χρησιμοποιούν οι transaction surveillance entities.
+Μια παραλλαγή του CoinJoin, το **PayJoin** (ή P2EP), μεταμφιέζει τη συναλλαγή μεταξύ δύο μερών (π.χ. ενός πελάτη και ενός merchant) ως κανονική συναλλαγή, χωρίς το χαρακτηριστικό των ίσων outputs του CoinJoin. Αυτό το καθιστά εξαιρετικά δύσκολο να ανιχνευθεί και θα μπορούσε να καταστήσει άκυρο το common-input-ownership heuristic που χρησιμοποιείται από entities επιτήρησης συναλλαγών.
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
-Transactions like the above could be PayJoin, ενισχύοντας το απόρρητο ενώ παραμένουν αδιάκριτες από τις standard bitcoin transactions.
+Συναλλαγές όπως η παραπάνω θα μπορούσαν να είναι PayJoin, ενισχύοντας το privacy ενώ παραμένουν δυσδιάκριτες από τις τυπικές bitcoin συναλλαγές.
 
-**Η αξιοποίηση του PayJoin θα μπορούσε να διαταράξει σημαντικά τις παραδοσιακές μεθόδους παρακολούθησης**, καθιστώντας το μια πολλά υποσχόμενη εξέλιξη στην επιδίωξη του transactional privacy.
+**Η αξιοποίηση του PayJoin θα μπορούσε να διαταράξει σημαντικά τις παραδοσιακές μεθόδους surveillance**, καθιστώντας την μια πολλά υποσχόμενη εξέλιξη στην προσπάθεια για transactional privacy.
 
-# Best Practices for Privacy in Cryptocurrencies
+# Βέλτιστες πρακτικές για privacy στα cryptocurrencies
 
-## **Wallet Synchronization Techniques**
+## **Τεχνικές συγχρονισμού wallet**
 
-Για να διατηρηθούν το privacy και η security, ο συγχρονισμός των wallets με το blockchain είναι κρίσιμος. Δύο μέθοδοι ξεχωρίζουν:
+Για τη διατήρηση του privacy και της ασφάλειας, ο συγχρονισμός των wallet με το blockchain είναι κρίσιμος. Ξεχωρίζουν δύο μέθοδοι:
 
-- **Full node**: Με τη λήψη ολόκληρου του blockchain, ένα full node διασφαλίζει μέγιστο privacy. Όλες οι συναλλαγές που έχουν γίνει ποτέ αποθηκεύονται τοπικά, καθιστώντας αδύνατο για adversaries να εντοπίσουν ποιες συναλλαγές ή addresses ενδιαφέρουν τον χρήστη.
-- **Client-side block filtering**: Αυτή η μέθοδος περιλαμβάνει τη δημιουργία filters για κάθε block στο blockchain, επιτρέποντας στα wallets να εντοπίζουν σχετικές συναλλαγές χωρίς να αποκαλύπτουν συγκεκριμένα ενδιαφέροντα σε network observers. Τα lightweight wallets κατεβάζουν αυτά τα filters, ανακτώντας πλήρη blocks μόνο όταν βρεθεί match με τις addresses του χρήστη.
+- **Full node**: Με τη λήψη ολόκληρου του blockchain, ένα full node εξασφαλίζει μέγιστο privacy. Όλες οι συναλλαγές που έχουν πραγματοποιηθεί αποθηκεύονται τοπικά, καθιστώντας αδύνατο για τους adversaries να αναγνωρίσουν ποιες συναλλαγές ή διευθύνσεις ενδιαφέρουν τον χρήστη.
+- **Client-side block filtering**: Αυτή η μέθοδος περιλαμβάνει τη δημιουργία filters για κάθε block του blockchain, επιτρέποντας στα wallet να εντοπίζουν σχετικές συναλλαγές χωρίς να αποκαλύπτουν συγκεκριμένα ενδιαφέροντα σε network observers. Τα lightweight wallet κατεβάζουν αυτά τα filters και ανακτούν ολόκληρα blocks μόνο όταν εντοπιστεί αντιστοίχιση με τις διευθύνσεις του χρήστη.
 
-## **Utilizing Tor for Anonymity**
+## **Χρήση του Tor για ανωνυμία**
 
-Δεδομένου ότι το Bitcoin λειτουργεί σε ένα peer-to-peer network, η χρήση του Tor συνιστάται για να κρύψει το IP address σας, ενισχύοντας το privacy κατά την αλληλεπίδραση με το network.
+Δεδομένου ότι το Bitcoin λειτουργεί σε peer-to-peer network, συνιστάται η χρήση του Tor για την απόκρυψη της IP address σας, ενισχύοντας το privacy κατά την αλληλεπίδραση με το network.
 
-## **Preventing Address Reuse**
+## **Αποτροπή επαναχρησιμοποίησης διευθύνσεων**
 
-Για να προστατευτεί το privacy, είναι ζωτικής σημασίας να χρησιμοποιείται μια νέα address για κάθε transaction. Η επαναχρησιμοποίηση addresses μπορεί να θέσει σε κίνδυνο το privacy συνδέοντας συναλλαγές με την ίδια οντότητα. Τα σύγχρονα wallets αποθαρρύνουν την επαναχρησιμοποίηση addresses μέσω του σχεδιασμού τους.
+Για την προστασία του privacy, είναι ζωτικής σημασίας να χρησιμοποιείται μια νέα διεύθυνση για κάθε συναλλαγή. Η επαναχρησιμοποίηση διευθύνσεων μπορεί να θέσει σε κίνδυνο το privacy, συνδέοντας συναλλαγές με την ίδια οντότητα. Τα σύγχρονα wallet αποθαρρύνουν την επαναχρησιμοποίηση διευθύνσεων μέσω του σχεδιασμού τους.
 
-## **Strategies for Transaction Privacy**
+## **Στρατηγικές για transactional privacy**
 
-- **Multiple transactions**: Η διαίρεση μιας πληρωμής σε several transactions μπορεί να αποκρύψει το transaction amount, ματαιώνοντας privacy attacks.
-- **Change avoidance**: Η επιλογή transactions που δεν απαιτούν change outputs ενισχύει το privacy διαταράσσοντας τις change detection methods.
-- **Multiple change outputs**: Αν η αποφυγή του change δεν είναι εφικτή, η δημιουργία multiple change outputs μπορεί να βελτιώσει το privacy.
+- **Multiple transactions**: Ο διαχωρισμός μιας πληρωμής σε πολλές συναλλαγές μπορεί να αποκρύψει το ποσό της συναλλαγής, αποτρέποντας privacy attacks.
+- **Change avoidance**: Η επιλογή συναλλαγών που δεν απαιτούν change outputs ενισχύει το privacy, διαταράσσοντας τις μεθόδους ανίχνευσης change.
+- **Multiple change outputs**: Αν η αποφυγή change δεν είναι εφικτή, η δημιουργία πολλών change outputs μπορεί και πάλι να βελτιώσει το privacy.
 
-# **Monero: A Beacon of Anonymity**
+# **Monero: Φάρος ανωνυμίας**
 
-Το Monero αντιμετωπίζει την ανάγκη για απόλυτο anonymity στις ψηφιακές συναλλαγές, θέτοντας υψηλό standard για το privacy.
+Το Monero ανταποκρίνεται στην ανάγκη για απόλυτη ανωνυμία στις digital συναλλαγές, θέτοντας υψηλά standards για το privacy.
 
-# **Ethereum: Gas and Transactions**
+# **Ethereum: Gas και συναλλαγές**
 
-## **Understanding Gas**
+## **Κατανόηση του Gas**
 
-Το Gas μετρά την υπολογιστική προσπάθεια που απαιτείται για την εκτέλεση operations στο Ethereum, με τιμολόγηση σε **gwei**. Για παράδειγμα, μια transaction με κόστος 2,310,000 gwei (ή 0.00231 ETH) περιλαμβάνει ένα gas limit και ένα base fee, με ένα tip για να δοθεί κίνητρο στους miners. Οι users μπορούν να ορίσουν ένα max fee ώστε να μην πληρώσουν υπερβολικά, με το επιπλέον ποσό να επιστρέφεται.
+Το Gas μετρά την υπολογιστική προσπάθεια που απαιτείται για την εκτέλεση operations στο Ethereum και τιμολογείται σε **gwei**. Για παράδειγμα, μια συναλλαγή που κοστίζει 2,310,000 gwei (ή 0.00231 ETH) περιλαμβάνει ένα gas limit και ένα base fee, καθώς και ένα tip για την παροχή κινήτρου στους miners. Οι χρήστες μπορούν να ορίσουν ένα max fee ώστε να διασφαλίσουν ότι δεν θα πληρώσουν υπερβολικά, με το πλεόνασμα να επιστρέφεται.<sup>[[5]](#references)</sup>
 
-## **Executing Transactions**
+## **Εκτέλεση συναλλαγών**
 
-Οι transactions στο Ethereum περιλαμβάνουν έναν sender και έναν recipient, οι οποίοι μπορεί να είναι είτε user είτε smart contract addresses. Απαιτούν ένα fee και πρέπει να mined. Οι βασικές πληροφορίες σε μια transaction περιλαμβάνουν τον recipient, το sender's signature, το value, προαιρετικό data, gas limit και fees. Αξίζει να σημειωθεί ότι το sender's address προκύπτει από την signature, εξαλείφοντας την ανάγκη να περιλαμβάνεται στα transaction data.
+Οι συναλλαγές στο Ethereum περιλαμβάνουν έναν sender και έναν recipient, οι οποίοι μπορεί να είναι είτε user είτε smart contract addresses. Απαιτούν fee και πρέπει να γίνουν mined. Οι βασικές πληροφορίες μιας συναλλαγής περιλαμβάνουν τον recipient, την υπογραφή του sender, την αξία, προαιρετικά data, το gas limit και τα fees. Αξίζει να σημειωθεί ότι η address του sender συνάγεται από την υπογραφή, εξαλείφοντας την ανάγκη να περιλαμβάνεται στα transaction data.<sup>[[4]](#references)</sup>
 
-Αυτές οι πρακτικές και μηχανισμοί αποτελούν τη βάση για όποιον θέλει να ασχοληθεί με cryptocurrencies δίνοντας προτεραιότητα στο privacy και το security.
+Αυτές οι πρακτικές και οι μηχανισμοί αποτελούν τη βάση για όποιον επιθυμεί να ασχοληθεί με cryptocurrencies, δίνοντας προτεραιότητα στο privacy και την ασφάλεια.
 
-## Value-Centric Web3 Red Teaming
+## Red Teaming στο Web3 με επίκεντρο την αξία
 
-- Inventory τα value-bearing components (signers, oracles, bridges, automation) για να κατανοήσετε ποιος μπορεί να μετακινήσει funds και πώς.
-- Χαρτογραφήστε κάθε component στις σχετικές MITRE AADAPT tactics για να αποκαλύψετε privilege escalation paths.
-- Εξασκηθείτε σε flash-loan/oracle/credential/cross-chain attack chains για να επαληθεύσετε το impact και να τεκμηριώσετε exploitable preconditions.
+- Καταγράψτε τα components που μεταφέρουν αξία (signers, oracles, bridges, automation), ώστε να κατανοήσετε ποιος μπορεί να μετακινήσει funds και με ποιον τρόπο.
+- Αντιστοιχίστε κάθε component με τα σχετικά MITRE AADAPT tactics, ώστε να αποκαλύψετε paths για privilege escalation.
+- Κάντε rehearse flash-loan/oracle/credential/cross-chain attack chains για να επικυρώσετε τον αντίκτυπο και να τεκμηριώσετε τις exploitable προϋποθέσεις.
 
 {{#ref}}
 value-centric-web3-red-teaming.md
 {{#endref}}
 
-## Web3 Signing Workflow Compromise
+## Compromise του Web3 Signing Workflow
 
-- Supply-chain tampering of wallet UIs can mutate EIP-712 payloads right before signing, harvesting valid signatures for delegatecall-based proxy takeovers (e.g., slot-0 overwrite of Safe masterCopy).
+- Η παραποίηση στο supply chain των wallet UIs μπορεί να μεταβάλει τα EIP-712 payloads ακριβώς πριν από το signing, συλλέγοντας valid signatures για delegatecall-based proxy takeovers (π.χ. slot-0 overwrite του Safe masterCopy).
 
 {{#ref}}
 web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
@@ -192,107 +192,107 @@ web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
 
 ## Account Abstraction (ERC-4337)
 
-- Common smart-account failure modes include bypassing `EntryPoint` access control, unsigned gas fields, stateful validation, ERC-1271 replay, and fee-drain via revert-after-validation.
+- Οι συνήθεις smart-account failure modes περιλαμβάνουν bypass του access control του `EntryPoint`, unsigned gas fields, stateful validation, ERC-1271 replay και fee-drain μέσω revert-after-validation.
 
 {{#ref}}
 erc-4337-smart-account-security-pitfalls.md
 {{#endref}}
 
-## Smart Contract Security
+## Ασφάλεια Smart Contract
 
-- Mutation testing to find blind spots in test suites:
+- Mutation testing για την εύρεση blind spots στις test suites:
 
 {{#ref}}
 ../smart-contract-security/mutation-testing-with-slither.md
 {{#endref}}
 
-## ZK Proof / zkVM Guest Integrity
+## Ακεραιότητα ZK Proof / zkVM Guest
 
-Όταν ένας prover χρησιμοποιεί ένα **zkVM** ή ένα application-specific proof circuit για να επιβεβαιώσει ένα claim, ο verifier μαθαίνει μόνο ότι το **guest program εκτελέστηκε όπως γράφτηκε**. Αν το guest περιέχει **unsafe deserialization**, **undefined behavior**, ή **missing semantic constraints**, ένας malicious prover μπορεί να δημιουργήσει ένα proof που επαληθεύεται ενώ τα **public metrics ή το claimed invariant είναι false**.
+Όταν ένας prover χρησιμοποιεί ένα **zkVM** ή ένα application-specific proof circuit για να επιβεβαιώσει έναν ισχυρισμό, ο verifier μαθαίνει μόνο ότι το **guest program εκτελέστηκε όπως έχει γραφτεί**. Αν το guest περιέχει **unsafe deserialization**, **undefined behavior** ή **missing semantic constraints**, ένας κακόβουλος prover μπορεί να δημιουργήσει ένα proof που επαληθεύεται, ενώ τα **public metrics ή το claimed invariant είναι false**.<sup>[[7]](#references)</sup>
 
-### Unsafe deserialization inside proof guests
+### Unsafe deserialization μέσα σε proof guests
 
-- Αντιμετωπίστε τα private witness/circuit bytes ως **untrusted attacker input** ακόμη κι αν είναι κρυμμένα από το proof.
-- Αποφύγετε το deserializing τους με unchecked helpers όπως `rkyv::access_unchecked` εκτός αν τα bytes έχουν ήδη validated out-of-band.
-- Enum discriminants, relative pointers, lengths, και indexes που φορτώνονται από untrusted serialized data πρέπει να validated πριν επηρεάσουν control flow ή memory access.
+- Αντιμετωπίζετε τα private witness/circuit bytes ως **untrusted attacker input**, ακόμη και αν κρύβονται από το proof.
+- Αποφύγετε την αποσειριοποίησή τους με unchecked helpers όπως το `rkyv::access_unchecked`, εκτός αν τα bytes έχουν ήδη επικυρωθεί out-of-band.
+- Τα enum discriminants, relative pointers, lengths και indexes που φορτώνονται από untrusted serialized data πρέπει να επικυρώνονται πριν επηρεάσουν το control flow ή την πρόσβαση στη μνήμη.
 
-Practical audit pattern:
+Πρακτικό audit pattern:
 ```rust
 let private_circuit_bytes = sp1_zkvm::io::read_vec();
 let ops = unsafe {
 rkyv::access_unchecked::<rkyv::Archived<Vec<Op>>>(&private_circuit_bytes)
 };
 ```
-Εάν ένα πεδίο όπως το `op.kind` είναι enum και ένας επιτιθέμενος μπορεί να εισάγει ένα **discriminant εκτός εύρους**, κάθε downstream `match` πάνω σε αυτή την τιμή γίνεται ύποπτο.
+Αν ένα πεδίο όπως το `op.kind` είναι enum και ένας attacker μπορεί να εισαγάγει έναν **out-of-range discriminant**, κάθε downstream `match` πάνω σε αυτή την τιμή γίνεται ύποπτο.
 
-### Jump-table / UB counter bypass
+### Παράκαμψη counter μέσω Jump-table / UB
 
-Αν το Rust μεταγλωττίσει ένα μεγάλο `match` σε **jump table**, ένα άκυρο enum discriminant μπορεί να προκαλέσει **undefined control flow**. Ένα επικίνδυνο pattern είναι:
+Αν η Rust μετατρέπει ένα μεγάλο `match` σε **jump table**, ένα μη έγκυρο enum discriminant μπορεί να προκαλέσει **undefined control flow**. Ένα επικίνδυνο μοτίβο είναι το εξής:<sup>[[7]](#references)[[9]](#references)</sup>
 
 1. Ένα `match` ενημερώνει **security-critical counters/constraints**.
-2. Ένα δεύτερο `match` εκτελεί τη **real instruction semantics**.
-3. Ένα out-of-range discriminant κάνει index πέρα από την πρώτη jump table και καταλήγει σε code που σχετίζεται με τη δεύτερη.
+2. Ένα δεύτερο `match` εκτελεί τα **πραγματικά semantics της instruction**.
+3. Ένας out-of-range discriminant προσπελαύνει θέση μετά το πρώτο jump table και καταλήγει σε κώδικα που σχετίζεται με το δεύτερο.
 
-Αποτέλεσμα: η operation εξακολουθεί να εκτελείται, αλλά το accounting path παραλείπεται. Σε ένα zkVM αυτό μπορεί να forge proofs που αναφέρουν αδύνατες μετρικές, όπως λιγότερα gates, λιγότερες expensive operations ή άλλους falsified bounded resources.
+Αποτέλεσμα: η operation εξακολουθεί να εκτελείται, αλλά το accounting path παρακάμπτεται. Σε ένα zkVM, αυτό μπορεί να forge proofs που αναφέρουν αδύνατες μετρικές, όπως λιγότερα gates, λιγότερες expensive operations ή άλλους falsified bounded resources.
 
-Review checklist:
+Checklist ελέγχου:
 
-- Ψάξτε για attacker-controlled enums που deserialized από witness/private input.
-- Εξετάστε επαναλαμβανόμενα `match` statements πάνω στο ίδιο opcode/kind field.
-- Θεωρήστε τον συνδυασμό `unsafe` + unchecked deserialization + μεγάλο opcode dispatch ως υψηλού κινδύνου.
-- Reverse engineer το emitted binary όταν χρειάζεται· το jump-table layout μπορεί να έχει μεγαλύτερη σημασία από το source.
+- Αναζητήστε attacker-controlled enums που γίνονται deserialize από witness/private input.
+- Ελέγξτε επαναλαμβανόμενες εντολές `match` πάνω στο ίδιο opcode/kind field.
+- Θεωρήστε τον συνδυασμό `unsafe` + unchecked deserialization + large opcode dispatch υψηλού ρίσκου.
+- Κάντε reverse engineer το emitted binary όταν χρειάζεται· η διάταξη του jump table μπορεί να είναι σημαντικότερη από τον source code.
 
-### Missing semantic constraints in reversible/specialized interpreters
+### Missing semantic constraints σε reversible/specialized interpreters
 
-Μην περιορίζεστε στην επαλήθευση της memory safety· επαληθεύστε επίσης τους **semantic rules** που το proof προορίζεται να επιβάλει.
+Μην επικυρώνετε μόνο την ασφάλεια μνήμης· επικυρώστε επίσης τους **semantic rules** που υποτίθεται ότι επιβάλλει το proof.
 
-Για reversible/quantum-like instruction sets, βεβαιωθείτε ότι operands που πρέπει να είναι distinct είναι πράγματι constrained ώστε να είναι distinct. Μια Toffoli/CCX-like operation υλοποιημένη ως:
+Για reversible/quantum-like instruction sets, βεβαιωθείτε ότι τα operands που πρέπει να είναι distinct πράγματι constrained ώστε να είναι distinct. Μια operation τύπου Toffoli/CCX που υλοποιείται ως:<sup>[[7]](#references)[[8]](#references)</sup>
 ```rust
 let v = cond & self.qubit(op.q_control1) & self.qubit(op.q_control2);
 *self.qubit_mut(op.q_target) ^= v;
 ```
-γίνεται μη ασφαλές αν το guest δεν απορρίπτει:
+γίνεται μη ασφαλές αν το guest δεν απορρίψει:
 ```text
 op.q_control1 == op.q_control2 == op.q_target
 ```
-Σε αυτήν την περίπτωση η μετάβαση καταρρέει σε:
+Σε αυτή την περίπτωση, η μετάβαση συμπτύσσεται σε:
 ```text
 q = q ^ (q & q) = 0
 ```
-Αυτό δημιουργεί ένα **deterministic reset primitive**, σπάζοντας τις υποθέσεις αναστρεψιμότητας και επιτρέποντας φθηνότερους μη επιδιωκόμενους υπολογισμούς. Σε proof systems που πιστοποιούν τη χρήση πόρων, αυτό μπορεί να επιτρέψει σε attackers να ικανοποιούν functional checks ενώ παρακάμπτουν το cost model που ο verifier πιστεύει ότι επιβάλλεται.
+Αυτό δημιουργεί ένα **ντετερμινιστικό primitive επαναφοράς**, παραβιάζοντας τις παραδοχές αντιστρεψιμότητας και επιτρέποντας φθηνότερους μη προβλεπόμενους υπολογισμούς. Σε proof systems που πιστοποιούν τη χρήση πόρων, αυτό μπορεί να επιτρέψει στους επιτιθέμενους να ικανοποιούν τους λειτουργικούς ελέγχους, παρακάμπτοντας παράλληλα το μοντέλο κόστους που ο verifier θεωρεί ότι επιβάλλεται.
 
 ### Τι να δοκιμάσετε σε ZK systems
 
-- Κάντε fuzz όλους τους guest parsers με malformed witness/private-input encodings.
-- Επαληθεύστε το enum range validation πριν από το opcode dispatch.
-- Προσθέστε semantic checks για operand aliasing και άλλες invalid instruction forms.
-- Συγκρίνετε reported/public counters με ένα ανεξάρτητο reference implementation.
-- Να θυμάστε ότι ένα valid proof μπορεί ακόμα να αποδεικνύει τη **λάθος δήλωση** αν το guest program είναι buggy.
+- Εφαρμόστε fuzzing σε όλους τους guest parsers με κακοσχηματισμένες κωδικοποιήσεις witness/private-input.
+- Επιβεβαιώστε το enum range validation πριν από το opcode dispatch.
+- Προσθέστε semantic checks για operand aliasing και άλλες μη έγκυρες μορφές instructions.
+- Συγκρίνετε τους reported/public counters με μια ανεξάρτητη reference implementation.
+- Να θυμάστε ότι ένα valid proof μπορεί και πάλι να αποδεικνύει τη **λάθος statement** αν το guest program έχει σφάλματα.
 
 ## DeFi/AMM Exploitation
 
-Αν ερευνάτε πρακτικό exploitation των DEXes και AMMs (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), δείτε:
+Αν ερευνάτε πρακτική exploitation των DEXes και των AMMs (Uniswap v4 hooks, rounding/precision abuse, flash-loan amplified threshold-crossing swaps), ελέγξτε:
 
 {{#ref}}
 defi-amm-hook-precision.md
 {{#endref}}
 
-Για multi-asset weighted pools που cache virtual balances και μπορούν να poisoned όταν `supply == 0`, μελετήστε:
+Για multi-asset weighted pools που αποθηκεύουν virtual balances σε cache και μπορούν να δηλητηριαστούν όταν `supply == 0`, μελετήστε:
 
 {{#ref}}
 defi-amm-virtual-balance-cache-exploitation.md
 {{#endref}}
 
-## References
+## Αναφορές
 
-- [https://en.wikipedia.org/wiki/Proof_of_stake](https://en.wikipedia.org/wiki/Proof_of_stake)
-- [https://www.mycryptopedia.com/public-key-private-key-explained/](https://www.mycryptopedia.com/public-key-private-key-explained/)
-- [https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
-- [https://ethereum.org/en/developers/docs/transactions/](https://ethereum.org/en/developers/docs/transactions/)
-- [https://ethereum.org/en/developers/docs/gas/](https://ethereum.org/en/developers/docs/gas/)
-- [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
-- [Trail of Bits - We beat Google's zero-knowledge proof of quantum cryptanalysis](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
-- [Google patched paper version](https://arxiv.org/abs/2603.28846v2)
-- [Trail of Bits proof-of-concept repository](https://github.com/trailofbits/quantum-zk-proof-poc)
+- [1] [Proof of stake - Wikipedia](https://en.wikipedia.org/wiki/Proof_of_stake)
+- [2] [Επεξήγηση Public Key και Private Key - Mycryptopedia](https://www.mycryptopedia.com/public-key-private-key-explained/)
+- [3] [Τι είναι οι multi-signature transactions; - Bitcoin Stack Exchange](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
+- [4] [Transactions | ethereum.org](https://ethereum.org/en/developers/docs/transactions/)
+- [5] [Gas και fees | ethereum.org](https://ethereum.org/en/developers/docs/gas/)
+- [6] [Privacy - Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
+- [7] [Trail of Bits - Νικήσαμε το zero-knowledge proof της Google για την κβαντική cryptanalysis](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
+- [8] [Ασφάλιση των Elliptic Curve Cryptocurrencies απέναντι σε Quantum Vulnerabilities: Resource Estimates and Mitigations (patched version)](https://arxiv.org/abs/2603.28846v2)
+- [9] [Trail of Bits proof-of-concept repository](https://github.com/trailofbits/quantum-zk-proof-poc)
 
 {{#include ../../banners/hacktricks-training.md}}

