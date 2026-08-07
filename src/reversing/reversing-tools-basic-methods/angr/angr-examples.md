@@ -1,13 +1,13 @@
-# Angr - Examples
+# Angr - Ejemplos
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Si el programa utiliza `scanf` para obtener **varios valores a la vez desde stdin**, debes generar un estado que comience después de **`scanf`**.
+> Si el programa utiliza `scanf` para obtener **varios valores a la vez desde stdin**, necesitas generar un estado que comience después de `scanf`.
 
 Códigos tomados de [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Entrada para alcanzar una dirección (indicando la dirección)
+### Input para alcanzar una dirección (indicando la dirección)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Input para alcanzar la dirección (indicando prints)
+### Entrada para alcanzar la dirección (indicando prints)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -75,7 +75,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Valores del Registry
+### Valores del Registro
 ```python
 # Angr doesn't currently support reading multiple things with scanf (Ex:
 # scanf("%u %u).) You will have to tell the simulation engine to begin the
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-En este escenario, la entrada se obtuvo con `scanf("%u %u")` y se proporcionó el valor `"1 1"`, por lo que los valores **`0x00000001`** de la stack provienen de la **entrada del usuario**. Puedes ver cómo estos valores comienzan en `$ebp - 8`. Por lo tanto, en el código hemos **restado 8 bytes a `$esp` (ya que en ese momento `$ebp` y `$esp` tenían el mismo valor)** y después hemos hecho push del BVS.
+En este escenario, la entrada se obtuvo con `scanf("%u %u")` y se proporcionó el valor `"1 1"`, por lo que los valores **`0x00000001`** de la pila provienen de la **entrada del usuario**. Puedes ver cómo estos valores comienzan en `$ebp - 8`. Por lo tanto, en el código hemos **restado 8 bytes a `$esp` (ya que en ese momento `$ebp` y `$esp` tenían el mismo valor)** y después hemos hecho push del BVS.
 
-![Colocar bit vectors en la stack para averiguar el valor que esa posición de la stack necesita tener para alcanzar un flujo del programa: En este escenario, la entrada se obtuvo con scanf("%u %u") y se proporcionó el valor "1...](<../../../images/image (136).png>)
+![Colocar vectores de bits en la pila para averiguar el valor que necesita esa posición de la pila para alcanzar un flujo del programa: En este escenario, la entrada se obtuvo con scanf("%u %u") y se proporcionó el valor "1...](<../../../images/image (136).png>)
 
-### Valores de memoria estáticos (variables globales)
+### Valores de memoria estática (variables globales)
 ```python
 import angr
 import claripy
@@ -404,7 +404,7 @@ main(sys.argv)
 >  # (!)
 > ```
 
-### Aplicación de restricciones
+### Aplicar Restricciones
 
 > [!TIP]
 > A veces, operaciones humanas sencillas, como comparar 2 palabras de 16 caracteres **carácter por carácter** (en un bucle), **cuestan** mucho a **angr** porque necesita generar ramas **exponencialmente**, ya que genera 1 rama por cada if: `2^16`\
@@ -485,10 +485,10 @@ main(sys.argv)
 > [!TIP]
 > Otra cosa que puedes hacer en estos escenarios es **hookear la función para proporcionar a angr algo que pueda entender** más fácilmente.
 
-### Gestores de simulación
+### Simulation Managers
 
-Algunos gestores de simulación pueden ser más útiles que otros. En el ejemplo anterior había un problema, ya que se crearon muchas ramas útiles. Aquí, la técnica **veritesting** las fusionará y encontrará una solución.\
-Este gestor de simulación también puede activarse con: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Algunos simulation managers pueden ser más útiles que otros. En el ejemplo anterior había un problema, ya que se creaban muchas ramas útiles. Aquí, la técnica **veritesting** las fusionará y encontrará una solución.\
+Este simulation manager también puede activarse con: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Bypassing una llamada a una función
+### Hooking/BYPASSING una llamada a una función
 ```python
 # This level performs the following computations:
 #
@@ -809,6 +809,6 @@ main(sys.argv)
 ```
 ## Referencias
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - repositorio de GitHub](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}

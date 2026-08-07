@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Parte de esta hoja de trucos se basa en la [documentación de angr](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
+Parte de esta guía se basa en la [documentación de angr](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
 ## Instalación
 ```bash
@@ -69,7 +69,7 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
-### Símbolos y Reubicaciones
+### Símbolos y reubicaciones
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -121,9 +121,9 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ### Llamar a funciones
 
-- Puedes pasar una lista de argumentos mediante `args` y un diccionario de variables de entorno mediante `env` a `entry_state` y `full_init_state`. Los valores de estas estructuras pueden ser strings o bitvectors, y se serializarán en el estado como los argumentos y el entorno de la ejecución simulada. El valor predeterminado de `args` es una lista vacía, así que, si el programa que estás analizando espera encontrar al menos un `argv[0]`, ¡debes proporcionarlo siempre!
-- Si quieres que `argc` sea simbólico, puedes pasar un bitvector simbólico como `argc` a los constructores `entry_state` y `full_init_state`. Sin embargo, ten cuidado: si haces esto, también deberías añadir una restricción al estado resultante para que tu valor de argc no pueda ser mayor que el número de argumentos que pasaste a `args`.
-- Para usar el call state, debes llamarlo con `.call_state(addr, arg1, arg2, ...)`, donde `addr` es la dirección de la función que quieres llamar y `argN` es el argumento N de esa función, ya sea un entero, string o array de Python, o un bitvector. Si quieres tener memoria asignada y pasar realmente un puntero a un objeto, debes envolverlo en un PointerWrapper, es decir, `angr.PointerWrapper("point to me!")`. Los resultados de esta API pueden ser un poco impredecibles, pero estamos trabajando en ello.
+- Puedes pasar una lista de argumentos mediante `args` y un diccionario de variables de entorno mediante `env` a `entry_state` y `full_init_state`. Los valores de estas estructuras pueden ser strings o bitvectors, y se serializarán en el estado como los argumentos y el entorno de la ejecución simulada. El valor predeterminado de `args` es una lista vacía, por lo que, si el programa que estás analizando espera encontrar al menos un `argv[0]`, ¡siempre deberías proporcionarlo!
+- Si quieres que `argc` sea simbólico, puedes pasar un bitvector simbólico como `argc` a los constructores `entry_state` y `full_init_state`. Sin embargo, ten cuidado: si haces esto, también deberías añadir al estado resultante una constraint para que tu valor de argc no pueda ser mayor que el número de argumentos que pasaste a `args`.
+- Para usar el call state, debes llamarlo con `.call_state(addr, arg1, arg2, ...)`, donde `addr` es la dirección de la función que quieres llamar y `argN` es el argumento Nth de esa función, ya sea como un entero de python, string o array, o como un bitvector. Si quieres que se asigne memoria y pasar realmente un puntero a un objeto, debes envolverlo en un PointerWrapper, es decir, `angr.PointerWrapper("point to me!")`. Los resultados de esta API pueden ser un poco impredecibles, pero estamos trabajando en ello.
 
 ### BitVectors
 ```python
@@ -134,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### BitVectors simbólicos y restricciones
+### Vectores de bits simbólicos y restricciones
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
