@@ -1,18 +1,18 @@
-# Image Security, Signing, And Secrets
+# 镜像安全、签名与 Secrets
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Overview
+## 镜像注册表与信任
 
-Container security 在 workload 启动之前就已经开始。image 决定哪些 binaries、interpreters、libraries、startup scripts 和 embedded configuration 会进入 production。如果 image 被植入 backdoor、过时，或在构建时将 secrets 直接 baked into image，后续的 runtime hardening 实际上已经是在一个被 compromise 的 artifact 上运行。
+容器安全在 workload 启动之前就已经开始。镜像决定了哪些二进制文件、解释器、库、启动脚本和嵌入式配置会进入 production。如果镜像被植入后门、过时，或在构建时将 Secrets 烘焙其中，那么后续的运行时加固实际上已经是在处理一个受 compromise 的 artifact。
 
-因此，image provenance、vulnerability scanning、signature verification 和 secret handling 应与 namespaces 和 seccomp 放在同一讨论中。它们保护 lifecycle 中的不同阶段，但这里的 failures 往往会定义 runtime 随后必须限制的 attack surface。
+因此，镜像来源、漏洞扫描、签名验证和 Secret 处理应当与 namespaces 和 seccomp 放在同一场讨论中。它们保护的是生命周期中的不同阶段，但这些环节中的失败往往会决定运行时之后必须遏制的攻击面。
 
-## Image Registries And Trust
+## 镜像注册表与信任
 
-Images 可能来自 Docker Hub 等 public registries，也可能来自组织运营的 private registries。安全问题并不只是 image 存放在哪里，而是团队能否确认其 provenance 和 integrity。从 public sources 拉取 unsigned 或 tracking 不完善的 images，会增加 malicious 或被 tamper 的 content 进入 production 的风险。即使是内部托管的 registries，也需要明确的 ownership、review 和 trust policy。
+镜像可能来自 Docker Hub 等公共注册表，也可能来自组织运营的私有注册表。安全问题不只是镜像存放在哪里，而是团队能否确认其来源和完整性。从公共来源拉取未签名或跟踪不完善的镜像，会增加恶意或被篡改内容进入 production 的风险。即使是内部托管的注册表，也需要明确的所有权、审查流程和信任策略。
 
-Docker Content Trust 历来使用 Notary 和 TUF concepts 来要求 signed images。具体 ecosystem 已经发生变化，但这一长期有效的经验仍然有用：image identity 和 integrity 应当能够被验证，而不是被默认信任。
+Docker Content Trust 历史上使用 Notary 和 TUF 的概念来要求镜像经过签名。具体生态已经发生变化，但其长期有效的经验仍然值得借鉴：镜像的身份和完整性应当能够被验证，而不是被默认信任。
 
 Example historical Docker Content Trust workflow:
 ```bash
@@ -20,35 +20,35 @@ export DOCKER_CONTENT_TRUST=1
 docker pull nginx:latest
 tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 ```
-这个示例的重点并不是每个团队都必须继续使用相同的工具链，而是说明签名和密钥管理属于运维任务，而非抽象理论。
+这个示例的重点并不是每个团队都必须继续使用相同的 tooling，而是说明 signing 和 key management 属于运维任务，而不是抽象理论。
 
 ## Vulnerability Scanning
 
-镜像扫描有助于回答两个不同的问题。第一，镜像是否包含已知存在漏洞的软件包或库？第二，镜像是否携带了会扩大 attack surface 的不必要软件？充满调试工具、shell、解释器和过时软件包的镜像不仅更容易被利用，也更难进行分析。
+Image scanning 有助于回答两个不同的问题。第一，image 是否包含已知存在漏洞的软件包或 library？第二，image 是否携带了会扩大攻击面的不必要软件？充满 debugging tools、shell、interpreter 和过时软件包的 image，既更容易被 exploit，也更难进行分析。
 
-常用的扫描器示例包括：
+常用 scanner 的示例包括：
 ```bash
 docker scan hello-world
 trivy -q -f json alpine:3.19
 snyk container test nginx:latest --severity-threshold=high
 clair-scanner -w example-alpine.yaml --ip YOUR_LOCAL_IP alpine:3.5
 ```
-应谨慎解读这些工具的结果。未使用 package 中的 vulnerability，其 risk 并不等同于暴露的 RCE 路径，但两者仍都与 hardening 决策相关。
+应谨慎解读这些工具的结果。未使用 package 中的 vulnerability 与暴露的 RCE path，其 risk 并不相同，但二者仍都与 hardening 决策相关。
 
 ## Build-Time Secrets
 
-container build pipeline 中最常见、历史最久的错误之一，是将 secrets 直接嵌入 image，或通过 environment variables 传递，而这些 secrets 随后可能通过 `docker inspect`、build logs 或恢复的 layers 暴露出来。Build-time secrets 应在 build 期间以临时方式挂载，而不是复制到 image filesystem 中。
+container build pipeline 中最古老的错误之一，是直接将 secrets 嵌入 image，或通过之后可从 `docker inspect`、build logs 或恢复的 layers 中看到的 environment variables 传递 secrets。Build-time secrets 应在 build 期间以临时方式挂载，而不是复制到 image filesystem 中。
 
-BuildKit 通过支持专用的 build-time secret 处理机制改进了这一模型。无需将 secret 写入 layer，build step 可以临时使用它：
+BuildKit 通过支持专用的 build-time secret 处理机制改进了这一模型。build step 无需将 secret 写入 layer，而是可以临时使用它：
 ```bash
 export DOCKER_BUILDKIT=1
 docker build --secret id=my_key,src=path/to/my_secret_file .
 ```
-这很重要，因为 image layers 是持久存在的 artifacts。一旦 secret 进入已提交的 layer，之后在另一个 layer 中删除该文件，并不能真正从 image history 中移除最初的 disclosure。
+这很重要，因为 image layers 是持久存在的 artifacts。一旦 secret 进入某个已提交的 layer，之后在另一个 layer 中删除该文件，并不能真正从 image history 中移除原始 disclosure。
 
 ## Runtime Secrets
 
-运行中的 workload 所需的 secrets 也应尽可能避免使用 plain environment variables 等临时做法。Volumes、专用的 secret-management integrations、Docker secrets 和 Kubernetes Secrets 都是常见机制。即使 attacker 已经在 workload 中获得了 code execution，这些机制也无法消除所有风险，但相比于将 credentials 永久存储在 image 中，或通过 inspection tooling 随意暴露它们，它们仍然是更好的选择。
+运行中 workload 所需的 secrets 也应尽可能避免使用 plain environment variables 等临时做法。Volumes、专用的 secret-management integrations、Docker secrets 和 Kubernetes Secrets 都是常见机制。即使 attacker 已经在 workload 中取得 code execution，这些机制也无法消除所有 risk，但相比于将 credentials 永久存储在 image 中，或通过 inspection tooling 随意暴露它们，仍然更加可取。
 
 一个简单的 Docker Compose 风格 secret 声明如下：
 ```yaml
@@ -63,59 +63,60 @@ secrets:
 my_secret:
 file: ./my_secret_file.txt
 ```
-在 Kubernetes 中，Secret objects、projected volumes、service-account tokens 和 cloud workload identities 构成了更广泛、更强大的模型，但也通过 host mounts、宽泛的 RBAC 或设计薄弱的 Pod，带来了更多意外暴露的机会。
+在 Kubernetes 中，Secret objects、projected volumes、service-account tokens 和 cloud workload identities 构成了更广泛且更强大的模型，但也通过 host mounts、宽泛的 RBAC 或不安全的 Pod 设计，增加了意外暴露的机会。
 
-## Abuse
+## 滥用
 
-检查目标时，目的是确定 secrets 是否被 baked into image、leaked into layers，或被挂载到可预测的 runtime locations：
+审查目标时，目的是发现 secrets 是否被 baked into image、泄露到 layers 中，或被挂载到可预测的 runtime locations：
 ```bash
 env | grep -iE 'secret|token|key|passwd|password'
 find / -maxdepth 4 \( -iname '*.env' -o -iname '*secret*' -o -iname '*token*' \) 2>/dev/null | head -n 100
 grep -RniE 'secret|token|apikey|password' /app /srv /usr/src 2>/dev/null | head -n 100
 ```
-这些命令有助于区分三种不同的问题：application configuration leaks、image-layer leaks 和 runtime-injected secret files。如果某个 secret 出现在 `/run/secrets`、projected volume 或 cloud identity token path 下，下一步需要确定它是否仅授予对当前 workload 的访问权限，还是能够访问规模大得多的 control plane。
+这些命令有助于区分三种不同的问题：application configuration leaks、image-layer leaks，以及 runtime-injected secret files。如果某个 secret 出现在 `/run/secrets`、projected volume 或 cloud identity token path 下，下一步就是确定它仅授予当前 workload 访问权限，还是授予对更大 control plane 的访问权限。
 
 ### Full Example: Embedded Secret In Image Filesystem
 
-如果 build pipeline 将 `.env` 文件或 credentials 复制到最终 image 中，post-exploitation 就会变得很简单：
+如果 build pipeline 将 `.env` 文件或 credentials 复制到了最终 image 中，post-exploitation 就会变得很简单：
 ```bash
 find / -type f -iname '*.env*' 2>/dev/null
 cat /usr/src/app/.env 2>/dev/null
 grep -iE 'secret|token|jwt|password' /usr/src/app/.env 2>/dev/null
 ```
-影响取决于应用程序，但嵌入的签名密钥、JWT secrets 或云凭据很容易将 container compromise 变成 API compromise、横向移动，或伪造受信任的应用程序令牌。
+影响取决于应用，但嵌入式 signing keys、JWT secrets 或 cloud credentials 很容易将 container compromise 转变为 API compromise、lateral movement，或伪造受信任的应用 token。
 
 ### 完整示例：构建时 Secret leak 检查
 
-如果担心镜像历史记录捕获了包含 secret 的层：
+如果担心 image history 捕获了包含 secret 的 layer：
 ```bash
 docker history --no-trunc <image>
 docker save <image> -o /tmp/image.tar
 tar -tf /tmp/image.tar | head
 ```
-这种 review 很有用，因为某个 secret 可能已从最终 filesystem 视图中删除，但仍保留在较早的 layer 或 build metadata 中。
+这种审查很有用，因为某个 secret 可能已从最终的 filesystem 视图中删除，但仍保留在较早的 layer 或 build metadata 中。
 
-## Checks
+## 检查
 
-这些检查旨在确定 image 和 secret-handling pipeline 是否可能在 runtime 前扩大了 attack surface。
+这些检查旨在确定 image 和 secret-handling pipeline 是否可能在运行时之前扩大了 attack surface。
 ```bash
 docker history --no-trunc <image> 2>/dev/null
 env | grep -iE 'secret|token|key|passwd|password'
 find /run /var/run /var/lib/kubelet -type f -iname '*token*' 2>/dev/null | head -n 50
 grep -RniE 'secret|token|apikey|password' /etc /app /srv /usr/src 2>/dev/null | head -n 100
 ```
-这里有哪些值得关注的地方：
+这里有哪些值得关注的内容：
 
-- 可疑的构建历史可能会暴露被复制的凭据、SSH 材料或不安全的构建步骤。
-- projected volume 路径下的 Secrets 可能导致获得 cluster 或 cloud 访问权限，而不仅仅是本地应用访问权限。
-- 大量包含明文凭据的配置文件通常表明，该 image 或 deployment 模型携带了超出必要范围的信任材料。
+- 可疑的 build history 可能暴露被复制的 credentials、SSH material 或不安全的 build steps。
+- projected volume paths 下的 Secrets 可能导致 cluster 或 cloud access，而不仅仅是本地 application access。
+- 大量包含 plaintext credentials 的 configuration files 通常表明该 image 或 deployment model 携带了超出必要范围的 trust material。
 
-## 运行时默认设置
+## Runtime Defaults
 
-| Runtime / platform | 默认状态 | 默认行为 | 常见的手动弱化方式 |
+| Runtime / platform | Default state | Default behavior | Common manual weakening |
 | --- | --- | --- | --- |
-| Docker / BuildKit | 支持安全的构建时 secret mount，但不会自动启用 | Secrets 可以在 `build` 期间以临时方式挂载；image signing 和 scanning 需要显式选择工作流 | 将 secrets 复制到 image 中，通过 `ARG` 或 `ENV` 传递 secrets，禁用 provenance checks |
-| Podman / Buildah | 支持 OCI-native builds 和具备 secret 感知能力的工作流 | 可以使用强安全性的构建工作流，但 operators 仍必须有意识地选择它们 | 将 secrets 嵌入 Containerfiles，在构建期间使用范围过宽的 build contexts 或宽松的 bind mounts |
-| Kubernetes | 原生 Secret objects 和 projected volumes | Runtime secret delivery 是一等能力，但暴露风险取决于 RBAC、pod 设计和 host mounts | 过度开放的 Secret mounts、滥用 service-account token、通过 `hostPath` 访问 kubelet 管理的 volumes |
-| Registries | 除非强制执行，否则完整性检查是可选的 | Public 和 private registries 都依赖 policy、signing 和 admission 决策 | 随意拉取 unsigned images、admission control 薄弱、key management 不完善 |
+| Docker / BuildKit | 支持 secure build-time secret mounts，但不会自动启用 | Secrets 可以在 `build` 期间以临时方式挂载；image signing 和 scanning 需要显式的 workflow 选择 | 将 secrets 复制到 image 中，通过 `ARG` 或 `ENV` 传递 secrets，禁用 provenance checks |
+| Podman / Buildah | 支持 OCI-native builds 和 secret-aware workflows | 可使用强安全性的 build workflows，但 operators 仍必须有意选择这些 workflows | 将 secrets 嵌入 Containerfiles，在 builds 期间使用范围过宽的 build contexts 和宽松的 bind mounts |
+| Kubernetes | 原生 Secret objects 和 projected volumes | Runtime secret delivery 是一等功能，但暴露程度取决于 RBAC、pod design 和 host mounts | 过度开放的 Secret mounts、service-account token misuse、通过 `hostPath` 访问 kubelet-managed volumes |
+| Registries | 除非强制执行，否则 integrity 是可选的 | Public 和 private registries 都依赖 policy、signing 和 admission decisions | 随意拉取 unsigned images、薄弱的 admission control、糟糕的 key management |
+
 {{#include ../../../banners/hacktricks-training.md}}
