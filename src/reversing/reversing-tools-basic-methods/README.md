@@ -1,22 +1,22 @@
-# Reversing ツールと基本的な手法
+# Reversing Tools & Basic Methods
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## ImGui ベースの Reversing ツール
+## ImGui ベースの Reversing tools
 
-ソフトウェア:
+Software:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
 ## Wasm decompiler / Wat compiler
 
-オンライン:
+Online:
 
-- [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) を使用して、wasm（バイナリ）から wat（テキスト）へ **decompile** できます
-- [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) を使用して、wat から wasm へ **compile** できます
-- [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) を使用して decompile することもできます
+- [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) を使用して、wasm（バイナリ）からwat（テキスト）へ **decompile** する
+- [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) を使用して、watからwasmへ **compile** する
+- [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) を使用してdecompileすることもできる
 
-ソフトウェア:
+Software:
 
 - [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 - [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
@@ -25,41 +25,41 @@
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek は、**ライブラリ**（.dll）、**Windows メタデータファイル**（.winmd）、**実行ファイル**（.exe）など、複数の形式を **decompile して調査**する decompiler です。decompile した後、アセンブリを Visual Studio プロジェクト（.csproj）として保存できます。
+dotPeekは、**libraries**（.dll）、**Windows metadata file**（.winmd）、**executables**（.exe）など、複数の形式を**decompileして調査する**decompilerです。decompile後は、assemblyをVisual Studio project（.csproj）として保存できます。
 
-ここでの利点は、失われたソースコードをレガシーアセンブリから復元する必要がある場合に、この作業によって時間を節約できることです。さらに、dotPeek は decompile されたコード内を便利に移動できるため、**Xamarin のアルゴリズム解析**に最適なツールのひとつです。
+ここでの利点は、失われたsource codeをlegacy assemblyから復元する必要がある場合、この作業によって時間を節約できることです。さらに、dotPeekはdecompiled code全体を便利にナビゲートできるため、**Xamarin algorithm analysis**に最適なtoolsの1つです。
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-包括的な add-in model と、ツールを正確なニーズに合わせて拡張できる API により、.NET Reflector は時間を節約し、開発を簡素化します。このツールが提供する数多くの reverse engineering サービスを見てみましょう。
+包括的なadd-in modelと、正確なニーズに合わせてtoolを拡張できるAPIを備えた.NET reflectorは、時間を節約し、developmentを簡素化します。このtoolが提供する多数のreverse engineering servicesを見てみましょう。
 
-- ライブラリまたはコンポーネント内でデータがどのように流れるかを把握できます
-- .NET 言語および framework の実装と使用方法を把握できます
-- 使用中の API やテクノロジーをさらに活用するため、ドキュメント化されていない、公開されていない機能を見つけられます
-- 依存関係と異なるアセンブリを見つけられます
-- コード、third-party コンポーネント、ライブラリ内のエラーの正確な場所を追跡できます
-- 使用しているすべての .NET コードの source に対して debug できます
+- libraryまたはcomponentを通過するdataのflowを把握できる
+- .NET languagesおよびframeworksのimplementationとusageを把握できる
+- 使用されているAPIとtechnologiesをさらに活用するため、document化されていない、または公開されていないfunctionalityを見つけられる
+- dependenciesと異なるassembliesを見つけられる
+- code、third-party components、libraries内のerrorsの正確なlocationを追跡できる
+- 使用するすべての.NET codeのsourceに対してdebugできる
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[Visual Studio Code 用 ILSpy plugin](https://github.com/icsharpcode/ilspy-vscode): 任意の OS で使用できます（VSCode から直接インストールできるため、git をダウンロードする必要はありません。**Extensions** をクリックして **ILSpy** を検索してください）。\
-**decompile**、**modify**、さらに再度 **recompile** する必要がある場合は、[**dnSpy**](https://github.com/dnSpy/dnSpy/releases) または現在も保守されている fork である [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases) を使用できます。（関数内を変更するには **Right Click -> Modify Method** を使用します）。
+[Visual Studio Code用ILSpy plugin](https://github.com/icsharpcode/ilspy-vscode)：あらゆるOSで利用できます（VSCodeから直接installでき、gitをdownloadする必要はありません。**Extensions**をクリックして**search ILSpy**を実行してください）。\
+**decompile**、**modify**、再度**recompile**する必要がある場合は、[**dnSpy**](https://github.com/dnSpy/dnSpy/releases)またはそのactively maintained forkである[**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases)を使用できます。（関数内の何かを変更するには、**Right Click -> Modify Method**を実行します）。
 
 ### DNSpy Logging
 
-**DNSpy にファイル内の情報を log させる**には、次の snippet を使用できます。
+**DNSpyにfile内の情報をlogさせる**には、次のsnippetを使用できます。
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
-### DNSpy Debugging
+### DNSpy デバッグ
 
-DNSpyを使用してコードをdebugするには、次の操作が必要です。
+DNSpyを使用してコードをデバッグするには、以下を行う必要があります。
 
-まず、**debugging**に関連する**Assembly attributes**を変更します。
+まず、**デバッグ**に関連する**Assembly attributes**を変更します。
 
-![DNSpy Logging - DNSpy Debugging: まず、debuggingに関連するAssembly attributesを変更します](<../../images/image (973).png>)
+![DNSpy Logging - DNSpy Debugging: まず、デバッグに関連するAssembly attributesを変更します](<../../images/image (973).png>)
 
 変更前:
 ```aspnet
@@ -72,89 +72,90 @@ DebuggableAttribute.DebuggingModes.DisableOptimizations |
 DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
-そして **compile** をクリックします：
+そして **compile** をクリックします:
 
 ![DNSpy Logging - DNSpy Debugging: compile をクリック](<../../images/image (314) (1).png>)
 
-次に、_**File >> Save module...**_ から新しいファイルを保存します：
+次に、_**File >> Save module...**_ から新しいファイルを保存します:
 
 ![DNSpy Logging - DNSpy Debugging: File Save module から新しいファイルを保存](<../../images/image (602).png>)
 
-これは、これを行わないと **runtime** にコードへ複数の **optimisations** が適用され、デバッグ中に **ブレークポイントがヒットしない**、または一部の **変数が存在しない** 可能性があるため必要です。
+これは、これを行わない場合、**runtime** にコードへ複数の **optimisations** が適用され、debugging 中に **break-point が一度も hit しない**、または一部の **variables が存在しない** 可能性があるため必要です。
 
-次に、.NET アプリケーションが **IIS** によって **実行** されている場合は、次の方法で **再起動** できます：
+次に、.NET application が **IIS** によって **run** されている場合は、次の方法で **restart** できます:
 ```
 iisreset /noforce
 ```
-Then, debuggingを開始するには、開いているすべてのファイルを閉じ、**Debug Tab** 内で **Attach to Process...** を選択します:
+Then、debugging を開始するには、開いているすべてのファイルを閉じ、**Debug Tab** で **Attach to Process...** を選択します：
 
-![DNSpy Logging - DNSpy Debugging: その後、debuggingを開始するには、開いているすべてのファイルを閉じ、Debug Tab 内で Attach to Process を選択します](<../../images/image (318).png>)
+![DNSpy Logging - DNSpy Debugging：debugging を開始するには、開いているすべてのファイルを閉じ、Debug Tab で Attach to Process を選択します](<../../images/image (318).png>)
 
-次に、**IIS server** にattachするため **w3wp.exe** を選択し、**attach** をクリックします:
+次に、**IIS server** に attach するため **w3wp.exe** を選択し、**attach** をクリックします：
 
-![DNSpy Logging - DNSpy Debugging: 次に、IIS server にattachするため w3wp.exe を選択し、attach をクリックします](<../../images/image (113).png>)
+![DNSpy Logging - DNSpy Debugging：次に、IIS server に attach するため w3wp.exe を選択し、attach をクリックします](<../../images/image (113).png>)
 
-これでprocessをdebuggingしているので、processを停止してすべてのmoduleをloadします。まず _Debug >> Break All_ をクリックし、次に _**Debug >> Windows >> Modules**_ をクリックします:
+これで process の debugging が開始されたので、process を停止してすべての modules を load します。まず _Debug >> Break All_ をクリックし、次に _**Debug >> Windows >> Modules**_ をクリックします：
 
-![DNSpy Logging - DNSpy Debugging: これでprocessをdebuggingしているので、processを停止してすべてのmoduleをloadします。まず Debug Break All をクリックし、次に Debug Windows Modules をクリックします](<../../images/image (132).png>)
+![DNSpy Logging - DNSpy Debugging：process の debugging が開始されたので、process を停止してすべての modules を load します。まず Debug Break All をクリックし、次に Debug Windows Modules をクリックします](<../../images/image (132).png>)
 
-![DNSpy Logging - DNSpy Debugging: これでprocessをdebuggingしているので、processを停止してすべてのmoduleをloadします。まず Debug Break All をクリックし、次に Debug Windows Modules をクリックします](<../../images/image (834).png>)
+![DNSpy Logging - DNSpy Debugging：process の debugging が開始されたので、process を停止してすべての modules を load します。まず Debug Break All をクリックし、次に Debug Windows Modules をクリックします](<../../images/image (834).png>)
 
-**Modules** 内の任意のmoduleをクリックし、**Open All Modules** を選択します:
+**Modules** 内の任意の module をクリックし、**Open All Modules** を選択します：
 
-![DNSpy Logging - DNSpy Debugging: Modules 内の任意のmoduleをクリックし、Open All Modules を選択します](<../../images/image (922).png>)
+![DNSpy Logging - DNSpy Debugging：Modules 内の任意の module をクリックし、Open All Modules を選択します](<../../images/image (922).png>)
 
-**Assembly Explorer** 内の任意のmoduleを右クリックし、**Sort Assemblies** をクリックします:
+**Assembly Explorer** 内の任意の module を右クリックし、**Sort Assemblies** をクリックします：
 
-![DNSpy Logging - DNSpy Debugging: Assembly Explorer 内の任意のmoduleを右クリックし、Sort Assemblies をクリックします](<../../images/image (339).png>)
+![DNSpy Logging - DNSpy Debugging：Assembly Explorer 内の任意の module を右クリックし、Sort Assemblies をクリックします](<../../images/image (339).png>)
 
 ## Java decompiler
 
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## DLLs のdebugging
+## Debugging DLLs
 
-### IDA の使用
+### Using IDA
 
-- **rundll32 をload** (64bits版は C:\Windows\System32\rundll32.exe、32bits版は C:\Windows\SysWOW64\rundll32.exe)
-- **Windbg** debuggerを選択
-- "**Suspend on library load/unload**" を選択
+- **Load rundll32** (64bits は C:\Windows\System32\rundll32.exe、32 bits は C:\Windows\SysWOW64\rundll32.exe)
+- **Windbg** debugger を選択します
+- "**Suspend on library load/unload**" を選択します
 
-![Debugging DLLs - Using IDA: " Suspend on library load/unload " を選択](<../../images/image (868).png>)
+![Debugging DLLs - Using IDA："Suspend on library load/unload" を選択します](<../../images/image (868).png>)
 
-- **parameters** of the executionを設定し、**path to the DLL** と呼び出したいfunctionを指定します:
+- 実行の **parameters** を設定し、**path to the DLL** と呼び出したい function を入力します：
 
-![Debugging DLLs - Using IDA: executionのparametersを設定し、DLLへのpathと呼び出したいfunctionを指定します](<../../images/image (704).png>)
+![Debugging DLLs - Using IDA：実行の parameters を設定し、path to the DLL と呼び出したい function を入力します](<../../images/image (704).png>)
 
-debuggingを開始すると、**各DLLがloadされるたびにexecutionが停止**します。そのため、rundll32がDLLをloadするとexecutionが停止します。
+その後、debugging を開始すると、**各 DLL が load されるたびに execution が停止します**。したがって、rundll32 が DLL を load すると execution が停止します。
 
-しかし、loadされたDLLのcodeにはどうやって到達できるのでしょうか? この方法でそれを実現する方法はわかりません。
+しかし、load された DLL の code に移動するにはどうすればよいでしょうか？この方法では、その方法がわかりません。
 
-### x64dbg/x32dbg の使用
+### Using x64dbg/x32dbg
 
-- **rundll32 をload** (64bits版は C:\Windows\System32\rundll32.exe、32bits版は C:\Windows\SysWOW64\rundll32.exe)
-- **Command Line を変更** ( _File --> Change Command Line_ ) し、dllのpathと呼び出したいfunctionを設定します。例: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- **Load rundll32** (64bits は C:\Windows\System32\rundll32.exe、32 bits は C:\Windows\SysWOW64\rundll32.exe)
+- **Command Line を変更**します ( _File --> Change Command Line_ )。dll の path と呼び出したい function を設定します。例："C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - _Options --> Settings_ を変更し、"**DLL Entry**" を選択します。
-- その後、**executionを開始**します。debuggerは各dll mainで停止し、しばらくすると**対象DLLのdll Entryで停止**します。そこから、breakpointを設定したい箇所を探すだけです。
+- その後、**execution を開始**します。debugger は各 dll main で停止し、最終的に **自分の dll の dll Entry で停止します**。そこから、breakpoint を設定したい箇所を探すだけです。
 
-win64dbgで何らかの理由によりexecutionが停止した場合、**win64dbg windowの上部**を見ると、**どのcodeにいるか**を確認できます:
+win64dbg で何らかの理由により execution が停止した場合、**win64dbg window の上部**を見ることで、**現在どの code にいるか**を確認できます：
 
-![Using IDA - Using x64dbg/x32dbg: win64dbgで何らかの理由によりexecutionが停止した場合、win64dbg windowの上部を見ると、どのcodeにいるかを確認できます](<../../images/image (842).png>)
+![Using IDA - Using x64dbg/x32dbg：execution が何らかの理由で停止した場合、win64dbg window の上部を見ることで、現在どの code にいるかを確認できます](<../../images/image (842).png>)
 
-これを見ると、debugしたいdllでexecutionが停止したタイミングを確認できます。
+これを見ることで、debug したい dll で execution が停止したことを確認できます。
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) は、実行中のgameのmemory内で重要なvalueが保存されている場所を見つけ、それらを変更するための便利なprogramです。詳細については:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) は、実行中の game の memory 内で重要な values が保存されている場所を見つけ、それらを変更するために便利な program です。詳細は以下を参照してください：
+
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) は、GNU Project Debugger (GDB) 用のfront-end/reverse engineering toolで、gameに重点を置いています。ただし、reverse-engineeringに関連するあらゆる用途に使用できます。
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) は、game に重点を置いた GNU Project Debugger (GDB) 用の front-end/reverse engineering tool です。ただし、reverse-engineering に関連するあらゆる用途に使用できます。
 
-[**Decompiler Explorer**](https://dogbolt.org/) は、複数のdecompiler用のweb front-endです。このweb serviceでは、小さなexecutableに対する異なるdecompilerのoutputを比較できます。
+[**Decompiler Explorer**](https://dogbolt.org/) は、複数の decompiler 用の web front-end です。この web service を使用すると、小規模な executables に対する異なる decompiler の output を比較できます。
 
 ## ARM & MIPS
 
@@ -165,49 +166,49 @@ https://github.com/nongiach/arm_now
 
 ## Shellcodes
 
-### blobrunnerを使用したshellcodeのdebugging
+### Debugging a shellcode with blobrunner
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) は、memory領域内に**shellcodeをallocate**し、shellcodeがallocateされた**memory addressを通知**してから、executionを**停止**します。\
-次に、processに**debuggerをattach**し (Idaまたはx64dbg)、通知されたmemory addressに**breakpointを設定**して、executionを**resume**します。これによりshellcodeをdebuggingできます。
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) は、memory 内の領域に **shellcode** を **allocate** し、shellcode が allocate された **memory address** を **indicate** して、execution を **stop** します。\
+次に、process に **attach a debugger** (Ida または x64dbg) し、指定された memory address に **breakpoint** を設定して、execution を **resume** する必要があります。これにより shellcode を debugging できます。
 
-releases github pageには、compiled releasesを含むzipがあります: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-次のlinkには、少し変更されたBlobrunnerのversionがあります。compileするには、**Visual Studio CodeでC/C++ projectを作成し、codeをcopy and pasteしてbuild**するだけです。
+releases github page には、compiled releases を含む zip が置かれています：[https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+次の link には、少し変更された Blobrunner version があります。compile するには、**Visual Studio Code で C/C++ project を作成し、code を copy and paste して build** するだけです。
 
 
 {{#ref}}
 blobrunner.md
 {{#endref}}
 
-### jmp2itを使用したshellcodeのdebugging
+### Debugging a shellcode with jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) はblobrunnerと非常によく似ています。memory領域内に**shellcodeをallocate**し、**eternal loop**を開始します。次にprocessに**debuggerをattach**し、**play start、2～5秒待ってからstopを押す**と、**eternal loop** 内にいることが確認できます。eternal loopの次のinstructionへjumpすると、それがshellcodeへのcallになっているため、最終的にshellcodeを実行している状態になります。
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) は blobrunner と非常によく似ています。memory 内の領域に **shellcode** を **allocate** し、**eternal loop** を開始します。次に process に **attach the debugger** し、**play start wait 2-5 secs and press stop** すると、**eternal loop** 内にいることがわかります。eternal loop の次の instruction に jump してください。そこから shellcode への call になっているため、最終的に shellcode を実行している状態になります。
 
-![Debugging a shellcode with blobrunner - Debugging a shellcode with jmp2it: jmp2it はblobrunnerと非常によく似ています。memory領域内にshellcodeをallocateし、...](<../../images/image (509).png>)
+![Debugging a shellcode with blobrunner - Debugging a shellcode with jmp2it：jmp2it は blobrunner と非常によく似ています。memory 内の領域に shellcode を allocate し、...](<../../images/image (509).png>)
 
-compiled version of [jmp2it inside the releases page](https://github.com/adamkramer/jmp2it/releases/) をdownloadできます。
+compiled version の [jmp2it は releases page から download できます](https://github.com/adamkramer/jmp2it/releases/)。
 
-### Cutterを使用したshellcodeのdebugging
+### Debugging shellcode using Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) はradareのGUIです。Cutterを使用すると、shellcodeをemulateして動的に調査できます。
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) は radare の GUI です。Cutter を使用すると shellcode を emulate し、動的に inspect できます。
 
-Cutterでは "Open File" と "Open Shellcode" を使用できることに注意してください。私の場合、shellcodeをfileとして開くと正しくdecompileされましたが、shellcodeとして開くと正しくdecompileされませんでした:
+Cutter では "Open File" と "Open Shellcode" を使用できることに注意してください。私の場合、shellcode を file として open すると正しく decompile されましたが、shellcode として open すると正しく decompile されませんでした：
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Cutterでは "Open File" と "Open Shellcode" を使用できます。私の場合、shellcodeをfileとして開くと...](<../../images/image (562).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter：Cutter では "Open File" と "Open Shellcode" を使用できます。私の場合、shellcode を file として open すると...](<../../images/image (562).png>)
 
-指定した場所からemulationを開始するには、そこにbpを設定します。すると、Cutterがそこから自動的にemulationを開始するようです:
+指定した場所から emulation を開始するには、そこに bp を設定します。すると、Cutter はそこから自動的に emulation を開始するようです：
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: 指定した場所からemulationを開始するには、そこにbpを設定します。すると、Cutterがそこから自動的にemulationを開始するようです](<../../images/image (589).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter：指定した場所から emulation を開始するには、そこに bp を設定します。すると、Cutter はそこから自動的に emulation を開始するようです](<../../images/image (589).png>)
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: 指定した場所からemulationを開始するには、そこにbpを設定します。すると、Cutterがそこから自動的にemulationを開始するようです](<../../images/image (387).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter：指定した場所から emulation を開始するには、そこに bp を設定します。すると、Cutter はそこから自動的に emulation を開始するようです](<../../images/image (387).png>)
 
-例えば、hex dump内でstackを確認できます:
+例えば、hex dump 内で stack を確認できます：
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: 例えば、hex dump内でstackを確認できます](<../../images/image (186).png>)
+![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter：例えば、hex dump 内で stack を確認できます](<../../images/image (186).png>)
 
-### shellcodeをDeobfuscatingして実行されたfunctionsを取得する
+### Deobfuscating shellcode and getting executed functions
 
 [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152) を試してください。\
-shellcodeが使用している**functions**や、shellcodeがmemory内で自身を**decoding**しているかどうかなどを確認できます。
+shellcode が使用している **functions** や、shellcode が memory 内で自分自身を **decoding** しているかどうかなどを確認できます。
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -218,37 +219,37 @@ scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
 scDbg には、必要なオプションを選択して shellcode を実行できる graphical launcher もあります
 
-![Cutter を使用した shellcode の Debugging - shellcode の Deobfuscating と実行された functions の取得: scDbg には、必要なオプションを選択して shellcode を実行できる graphical launcher もあります](<../../images/image (258).png>)
+![Cutter を使用した shellcode の debugging - shellcode の deobfuscation と実行された functions の取得：scDbg には、必要なオプションを選択して shellcode を実行できる graphical launcher もあります](<../../images/image (258).png>)
 
-**Create Dump** オプションを使用すると、shellcode がメモリ上で動的に変更された場合に、最終的な shellcode を dump できます（decoded shellcode のダウンロードに便利です）。**start offset** は、特定の offset から shellcode を開始する場合に便利です。**Debug Shell** オプションを使用すると、scDbg の terminal で shellcode を debug できます（ただし、この目的では前述したいずれかのオプションの方が優れていると思います。Ida や x64dbg を使用できるためです）。
+**Create Dump** オプションは、メモリ上で shellcode が動的に変更された場合、最終的な shellcode を dump します（decoded shellcode の download に便利です）。**start offset** は、特定の offset から shellcode を開始する場合に便利です。**Debug Shell** オプションは、scDbg terminal を使用して shellcode を debug する場合に便利です（ただし、この用途では、前述したいずれかのオプションの方が優れていると思います。Ida や x64dbg を使用できるためです）。
 
 ### CyberChef を使用した Disassembling
 
-shellcode ファイルを input として upload し、以下の recipe を使用して decompile します: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+shellcode file を input として upload し、以下の recipe を使用して decompile します：[https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/index.html#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## MBA obfuscation の deobfuscation
 
-**Mixed Boolean-Arithmetic (MBA)** obfuscation は、arithmetic (`+`, `-`, `*`) と bitwise operators (`&`, `|`, `^`, `~`, shifts) を組み合わせた formula によって、`x + y` のような単純な expression を隠します。重要なのは、これらの identity が通常、**fixed-width modular arithmetic** の下でのみ正しいという点です。そのため、carry と overflow が重要になります:
+**Mixed Boolean-Arithmetic (MBA)** obfuscation は、arithmetic（`+`、`-`、`*`）と bitwise operators（`&`、`|`、`^`、`~`、shift）を組み合わせた formula によって、`x + y` のような単純な expression を隠します。重要なのは、これらの恒等式が通常、**固定幅の modular arithmetic** の下でのみ正しいという点です。そのため、carry と overflow が重要になります。
 ```c
 (x ^ y) + 2 * (x & y) == x + y
 ```
-この種の式を generic algebra tooling で簡略化すると、bit-width のセマンティクスが無視されるため、簡単に誤った結果を得てしまいます。
+この種の式を汎用的な代数ツールで単純化すると、ビット幅のセマンティクスが無視されるため、簡単に誤った結果を得る可能性があります。<sup>[[1]](#references)</sup>
 
-### Practical workflow
+### 実践的なワークフロー
 
-1. **元の bit-width を維持する**。lifted code/IR/decompiler output から取得した `8/16/32/64` ビットを使用します。
-2. **簡略化を試みる前に式を分類する**。
-- **Linear**: bitwise atom の加重和
-- **Semilinear**: `x & 0xFF` のような constant mask を含む linear
-- **Polynomial**: 積が含まれる
-- **Mixed**: 積と bitwise logic が交互に現れ、多くの場合 repeated subexpression を含む
-3. **すべての候補 rewrite を random testing または SMT proof で検証する**。等価性を証明できない場合は、推測で書き換えず元の式を維持します。
+1. リフトされた code/IR/decompiler output から、**元のビット幅**（`8/16/32/64` bits）を維持する。
+2. 単純化を試みる前に、**式を分類する**：
+- **Linear**：bitwise atom の重み付き和
+- **Semilinear**：`x & 0xFF` のような定数マスクを含む linear
+- **Polynomial**：積が現れる
+- **Mixed**：積と bitwise logic が入り交じり、しばしば部分式が繰り返される
+3. random testing または SMT proof によって、候補となる書き換えをすべて**検証する**。等価性を証明できない場合は、推測で置き換えず、元の式を維持する。
 
 ### CoBRA
 
-[**CoBRA**](https://github.com/trailofbits/CoBRA) は、malware analysis と protected-binary reversing のための実用的な MBA simplifier です。式を分類し、すべてに対して1つの generic rewrite pass を適用するのではなく、specialized pipeline に振り分けます。<sup>[[1]](#references)[[2]](#references)</sup>
+[**CoBRA**](https://github.com/trailofbits/CoBRA) は、malware analysis や protected-binary reversing のための実用的な MBA simplifier です。式を分類し、すべてに対して単一の汎用 rewrite pass を適用するのではなく、専用の pipeline に振り分けます。<sup>[[2]](#references)</sup>
 
-Quick usage:
+簡単な使い方：
 ```bash
 # Recover arithmetic from a logic-heavy MBA
 cobra-cli --mba "(x&y)+(x|y)"
@@ -263,11 +264,11 @@ cobra-cli --mba "(a^b)+(a&b)+(a&b)" --verify
 ```
 有用なケース:
 
-- **Linear MBA**: CoBRA は Boolean inputs 上で式を評価し、signature を導出してから、pattern matching、ANF conversion、coefficient interpolation など複数の recovery methods を競合させます。
-- **Semilinear MBA**: constant-masked atoms は bit-partitioned reconstruction によって再構築されるため、masked regions も正しく維持されます。
-- **Polynomial/Mixed MBA**: products は cores に分解され、simplifying the outer relation の前に、repeated subexpressions を temporaries に持ち上げることができます。
+- **Linear MBA**: CoBRA は Boolean inputs 上で式を評価し、signature を導出したうえで、pattern matching、ANF conversion、coefficient interpolation など複数の recovery methods を競合させます。
+- **Semilinear MBA**: constant-masked atoms は bit-partitioned reconstruction によって再構築されるため、masked regions は正確な状態に保たれます。
+- **Polynomial/Mixed MBA**: products は cores に分解され、simplifying the outer relation の前に、繰り返し現れる subexpressions を temporaries に移せます。
 
-よく recovery を試す価値がある mixed identity の例:
+一般的に復元を試す価値のある mixed identity の例:
 ```c
 (x & y) * (x | y) + (x & ~y) * (~x & y)
 ```
@@ -277,9 +278,9 @@ x * y
 ```
 ### Reversing notes
 
-- **lifted IR expressions** または decompiler の出力に対して CoBRA を実行することを優先してください。実行前に、正確な computation を分離しておきます。
+- **lifted IR expressions** または decompiler の出力に対して、正確な計算を分離した後に CoBRA を実行することを推奨します。
 - 式が masked arithmetic または narrow registers に由来する場合は、`--bitwidth` を明示的に指定してください。
-- より強力な proof step が必要な場合は、こちらのローカルな Z3 notes を確認してください:
+- より強力な proof step が必要な場合は、こちらのローカル Z3 notes を確認してください:
 
 
 {{#ref}}
@@ -291,50 +292,50 @@ satisfiability-modulo-theories-smt-z3.md
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-この obfuscator は **すべての `mov` 命令を変更します**（本当にすごいです）。また、interruptions を使用して execution flows を変更します。仕組みの詳細については、以下を参照してください:
+この obfuscator は **`mov` のすべての instructions を変更します**（そう、本当にすごいです）。また、interruptions を使用して execution flows を変更します。動作の詳細については、以下を参照してください:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-運が良ければ、[demovfuscator](https://github.com/kirschju/demovfuscator) が binary を deobfuscate してくれます。いくつかの dependencies があります。
+運が良ければ、[demovfuscator](https://github.com/kirschju/demovfuscator) が binary を deofuscate してくれます。いくつかの dependencies があります。
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
-そして [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
+そして [keystoneをインストール](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-**CTF をプレイしている場合、この **flag を見つけるための workaround** は非常に役立つ可能性があります: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+**CTFをプレイしている場合、このworkaroundでflagを見つけられる**可能性があります: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
-**entry point** を見つけるには、次のように `::main` で functions を検索します:
+**entry point**を見つけるには、次のように`::main`で関数を検索します:
 
-![Movfuscator - Rust: ::main で functions を検索して entry point を見つける](<../../images/image (1080).png>)
+![Movfuscator - Rust: `::main`で関数を検索してentry pointを見つける](<../../images/image (1080).png>)
 
-この場合、binary の名前は authenticator だったため、これが興味深い main function であることは明らかです。\
-呼び出されている **functions** の **name** を使って **Internet** で検索し、それらの **inputs** と **outputs** について学びましょう。
+この場合、バイナリの名前はauthenticatorだったため、これが興味深いmain関数であることは明らかです。\
+呼び出されている**関数**の**名前**を使って**Internet**で検索し、それらの**入力**と**出力**について学習します。
 
-### ELF firmware から Rust strings を復元する
+### ELF firmwareからRust stringsを復元する
 
-**Rust ELF** binaries では、多くの static strings が C-style の NUL-terminated pointers として参照されていません。一般的な `rustc` の layout では、実際の string blob が格納されている **`.rodata`** を指す **pointer/length tuple** が **`.data.rel.ro`** 内にあります:<sup>[[3]](#references)</sup>
+**Rust ELF**バイナリでは、多くのstatic stringsがC-styleのNUL終端ポインタとして参照されていません。一般的な`rustc`のlayoutでは、実際のstring blobを格納する**`.rodata`**を指す**pointer/length tuple**が**`.data.rel.ro`**内に存在します:
 ```text
 [8-byte little-endian pointer][8-byte little-endian length]
 ```
-これは、`strings` または Ghidra のデフォルト解析によって、隣接する文字列が結合されたり、cross-references が完全に見落とされたりする可能性があることを意味します。
+これは、`strings` または Ghidra のデフォルト解析では、隣接する文字列が結合されたり、cross-references が完全に見落とされたりする可能性があることを意味します。<sup>[[3]](#references)</sup>
 
 簡単なワークフロー:
 ```bash
 readelf -S <bin>
 objdump -h <bin>
 ```
-1. **`.rodata`** の virtual address と size を取得する。
-2. **`.data.rel.ro`** を 1 word ずつ列挙する。
-3. `.rodata` の address range 内にある値を、candidate string pointer として扱う。
-4. 次の word を candidate length として扱う。
-5. sanity filters を適用する（例: **4**〜**100** bytes の length のみ保持する）。
-6. `0x00` まで scan する代わりに、`.rodata` から正確に `length` bytes を読み取る。
+1. **`.rodata`** の仮想アドレスとサイズを取得する。
+2. **`.data.rel.ro`** を1ワードずつ列挙する。
+3. `.rodata` のアドレス範囲内にある値を、文字列ポインタの候補として扱う。
+4. 次のワードを候補の長さとして扱う。
+5. サニティフィルターを適用する（例：長さを **4**〜**100** バイトに限定する）。
+6. `0x00` までスキャンするのではなく、`.rodata` から正確に `length` バイトを読み取る。
 
-Minimal extractor logic:
+最小限の抽出ロジック：
 ```python
 for off in range(0, len(data_rel_ro), 8):
 ptr = u64(data_rel_ro[off:off+8])
@@ -343,33 +344,33 @@ if rodata_start <= ptr < rodata_end and 4 <= length <= 100:
 start = ptr - rodata_start
 print(rodata[start:start+length])
 ```
-これは、復元された Rust の文字列から **HTTP routes、RPC names、log messages、assertions、filenames、config keys、command handlers、auth-related logic** が明らかになることが多いため、firmware reversing で特に役立ちます。
+これは、復元された Rust strings から **HTTP routes、RPC names、log messages、assertions、filenames、config keys、command handlers、auth-related logic** が明らかになることが多いため、firmware reversing で特に有用です。
 
-Ghidra がこれらの文字列を見逃す場合は、同じ heuristic を適用し、参照先の `.rodata` offsets に string data を作成する custom script/plugin を実行してください。Pen Test Partners が公開している `rust-strings` と `RustStrings.py` tools は、このアイデアを他の **word sizes、endianness、section layouts** に適応するための優れた参考資料です。<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+Ghidra がこれらの strings を見逃す場合は、同じ heuristic を適用し、参照された `.rodata` offsets に string data を作成する custom script/plugin を実行してください。Pen Test Partners が公開している `rust-strings` と `RustStrings.py` tools は、このアイデアを他の **word sizes、endianness、section layouts** に適応する際の優れた参考資料です。<sup>[[4]](#references)[[5]](#references)</sup>
 
 ## **Delphi**
 
 Delphi compiled binaries には [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR) を使用できます。
 
-Delphi binary を reverse する必要がある場合は、IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi) の使用をおすすめします。
+Delphi binary を reverse する必要がある場合は、IDA plugin の [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi) の使用をお勧めします。
 
-**ATL+f7**（IDA に python plugin を import）を押して、python plugin を選択します。
+**ATL+f7**（IDA に python plugin を import）を押し、python plugin を選択してください。
 
-この plugin は binary を実行し、debugging の開始時に function names を動的に resolve します。debugging を開始した後、もう一度 Start button（緑色のもの、または f9）を押すと、real code の先頭で breakpoint に到達します。
+この plugin は binary を実行し、debugging の開始時に function names を動的に resolve します。debugging を開始した後、もう一度 Start button（緑色のボタン、または f9）を押すと、real code の先頭で breakpoint が hit します。
 
-また、graphic application で button を押すと、debugger がその button によって実行された function で停止するため、非常に興味深い機能です。
+また、graphic application の button を押すと、debugger がその button によって実行された function で停止するため、非常に興味深い機能です。
 
 ## Golang
 
-Golang binary を reverse する必要がある場合は、IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) の使用をおすすめします。
+Golang binary を reverse する必要がある場合は、IDA plugin の [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) の使用をお勧めします。
 
-**ATL+f7**（IDA に python plugin を import）を押して、python plugin を選択します。
+**ATL+f7**（IDA に python plugin を import）を押し、python plugin を選択してください。
 
 これにより function names が resolve されます。
 
 ## Compiled Python
 
-このページでは、ELF/EXE python compiled binary から python code を取得する方法を確認できます。
+このページでは、ELF/EXE python compiled binary から python code を取得する方法を説明しています:
 
 
 {{#ref}}
@@ -378,9 +379,9 @@ Golang binary を reverse する必要がある場合は、IDA plugin [https://g
 
 ## GBA - Game Body Advance
 
-GBA game の **binary** を取得した場合、さまざまな tools を使用して **emulate** および **debug** できます。
+GBA game の **binary** を取得した場合は、これを **emulate** および **debug** するためのさまざまな tools を使用できます:
 
-- [**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - interface を備えた debugger
+- [**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - interface 付きの debugger
 - [**mgba** ](https://mgba.io)- CLI debugger
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
@@ -389,7 +390,7 @@ GBA game の **binary** を取得した場合、さまざまな tools を使用�
 
 ![Game Boy Advance の button mappings を示す no$gba controls configuration](<../../images/image (581).png>)
 
-押すと、各 **key には値が設定され**、識別に使用されます。
+押すと、各 **key has a value** が割り当てられ、それによって識別できます:
 ```
 A = 1
 B = 2
@@ -402,13 +403,13 @@ DOWN = 128
 R = 256
 L = 256
 ```
-したがって、この種類のプログラムでは、重要なのは**プログラムがユーザー入力をどのように処理するか**です。アドレス **0x4000130** には、よく見られる関数 **KEYINPUT** があります。
+この種のプログラムでは、興味深い部分は**プログラムがユーザー入力をどのように処理するか**です。アドレス **0x4000130** には、よく見られる関数 **KEYINPUT** があります。
 
-![Ghidra view of a GBA binary referencing KEYINPUT at address 0x4000130](<../../images/image (447).png>)
+![アドレス 0x4000130 の KEYINPUT を参照している GBA バイナリの Ghidra ビュー](<../../images/image (447).png>)
 
-前の画像から、この関数が **FUN_080015a8**（アドレス: _0x080015fa_ および _0x080017ac_）から呼び出されていることがわかります。
+前の画像では、この関数が **FUN_080015a8**（アドレス: _0x080015fa_ および _0x080017ac_）から呼び出されていることがわかります。
 
-この関数では、いくつかの init 操作（重要ではありません）の後に、次の処理が行われます。
+その関数では、いくつかの初期化処理（重要ではありません）の後に:
 ```c
 void FUN_080015a8(void)
 
@@ -429,7 +430,7 @@ FUN_08000dd0(&DAT_02009584,0x6000000,&DAT_030000dc);
 FUN_08000354(&DAT_030000dc,0x3c);
 uVar4 = DAT_030004d8;
 ```
-以下のコードが見つかりました:
+このコードが見つかりました:
 ```c
 do {
 DAT_030004da = uVar4; //This is the last key pressed
@@ -441,7 +442,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-最後の if は、**`uVar4`** が **last Keys** に含まれており、現在のキーではないことを確認しています。これはボタンを離した状態とも呼ばれます（現在のキーは **`uVar1`** に格納されています）。
+最後の if は、**`uVar4`** が **最後の Keys** に含まれており、現在のキーではないことを確認しています（現在のキーは **`uVar1`** に格納されています）。これは、ボタンを離す操作とも呼ばれます。
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -471,33 +472,33 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
 前のコードでは、**uVar1**（**押されたボタンの値**が格納されている場所）をいくつかの値と比較していることがわかります。
 
-- まず、**値 4**（**SELECT** ボタン）と比較されます。この challenge では、このボタンによって画面がクリアされます。
-- 次に、**値 8**（**START** ボタン）と比較されます。この challenge では、コードが有効かどうかを確認して flag を取得します。
-- この場合、変数 **`DAT_030000d8`** は 0xf3 と比較され、値が同じ場合は一部のコードが実行されます。
-- それ以外の場合は、別の cont（**`DAT_030000d4`**）がチェックされます。コードの入力直後に 1 が加算されるため、これは cont です。\
-**I**f 8 未満の場合、**`DAT_030000d8`** に値を**加算**する処理が行われます（基本的には、cont が 8 未満である限り、押されたキーの値がこの変数に加算されます）。
+- 最初に、**値 4**（**SELECT**ボタン）と比較されます。このchallengeでは、このボタンによって画面がクリアされます。
+- 次に、**値 8**（**START**ボタン）と比較されます。このchallengeでは、コードが有効かどうかを確認してflagを取得します。
+- この場合、var **`DAT_030000d8`** は0xf3と比較され、値が同じ場合は何らかのコードが実行されます。
+- それ以外の場合は、何らかのcont（**`DAT_030000d4`**）がチェックされます。コードに入った直後に1を加算しているため、これはcontです。\
+**8 未満なら**、**`DAT_030000d8`** に値を**加算**する処理が実行されます（基本的には、contが8未満である限り、押されたキーの値をこの変数に加算します）。
 
-したがって、この challenge ではボタンの値がわかっているため、**長さが 8 未満で、加算結果が 0xf3 になる組み合わせを入力する必要がありました。**<sup>[[6]](#references)</sup>
+したがって、このchallengeではボタンの値がわかっていれば、**長さが8未満で、合計が0xf3になる組み合わせを押す必要がありました。**
 
-**このチュートリアルの Reference:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
+**このチュートリアルのReference:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)<sup>[[6]](#references)</sup>
 
-## ゲームボーイ
+## Game Boy
 
 
 {{#ref}}
 https://www.youtube.com/watch?v=VVbRe7wr3G4
 {{#endref}}
 
-## コース
+## Courses
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD)（バイナリ難読化解除）
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD)（バイナリのdeobfuscation）
 
-## 参考文献
+## References
 
-- [1] [CoBRA による MBA obfuscation の簡略化](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
+- [1] [CoBRAによるMBA obfuscationの簡略化](https://blog.trailofbits.com/2026/04/03/simplifying-mba-obfuscation-with-cobra/)
 - [2] [Trail of Bits CoBRA repository](https://github.com/trailofbits/CoBRA)
-- [3] [Rust strings のデコード - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
+- [3] [Rust stringsのdecoding - Pen Test Partners](https://www.pentestpartners.com/security-blog/decoding-rust-strings/)
 - [4] [pentestpartners/reverse-engineering - rust-strings](https://github.com/pentestpartners/reverse-engineering/blob/main/rust-strings)
 - [5] [pentestpartners/reverse-engineering - RustStrings.py](https://github.com/pentestpartners/reverse-engineering/blob/main/RustStrings.py)
 - [6] [Nostalgia - GBA reversing tutorial (exp.codes)](https://exp.codes/Nostalgia/)

@@ -4,7 +4,7 @@
 
 ## Bus Pirate
 
-Bus Pirateが動作しているかテストするには、+5VをVPUに、3.3VをADCに接続し、バスパイレートにアクセスします（例えばTera Termを使用）し、コマンド`~`を使用します:
+Bus Pirate が動作していることをテストするには、+5V を VPU に、3.3V を ADC に接続し、Bus Pirate にアクセスします（例: Tera Term を使用）。そして、コマンド `~` を使用します：
 ```bash
 # Use command
 HiZ>~
@@ -43,18 +43,18 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-前のコマンドラインに表示されたように、0エラーが見つかったと記載されています。これは、購入後やファームウェアをフラッシュした後に動作していることを確認するのに非常に便利です。
+前のコマンドラインから分かるように、エラーが0件見つかったと表示されています。これは、購入後やfirmwareをflashした後に、正常に動作していることを確認するうえで非常に役立ちます。
 
-バスパイレートに接続するには、ドキュメントに従ってください：
+Bus Pirateに接続するには、docsに従ってください：
 
-![](<../../images/image (484).png>)
+![コマンドを使用 - スペースを押す：Bus Pirateに接続するには、docsに従ってください](<../../images/image (484).png>)
 
-この場合、EPROM: ATMEL901 24C256 PU27に接続します：
+この場合、EPROM（ATMEL901 24C256 PU27）に接続します：
 
-![](<../../images/image (964).png>)
+![コマンドを使用 - スペースを押す：この場合、EPROM（ATMEL901 24C256 PU27）に接続します](<../../images/image (964).png>)
 
-バスパイレートと通信するために、Tera Termを使用してパイレートバスのCOMポートに接続し、Setup --> Serial Port --> Speedを115200に設定しました。\
-次の通信では、バスパイレートをI2Cで通信するために準備する方法と、メモリからの読み書き方法を見つけることができます（コメントは"#"を使用して表示されますので、その部分は通信には期待しないでください）：
+Bus Pirateと通信するために、Tera TermをBus PirateのCOMポートに接続し、Setup --> Serial Port --> Speedを115200に設定しました。\
+以下の通信では、I2Cで通信できるようにBus Pirateを準備する方法と、memoryへのwriteおよびreadの方法を確認できます（コメントは「#」を使用して記述されています。通信内容にその部分が含まれるとは限りません）：
 ```bash
 # Check communication with buspirate
 i
@@ -155,9 +155,9 @@ NACK
 ```
 ### Sniffer
 
-このシナリオでは、arduinoと前のEPROM間のI2C通信をスニッフィングします。両方のデバイスを通信させ、その後バスパイレートをSCL、SDA、GNDピンに接続するだけです：
+このシナリオでは、Arduinoと先ほどのEPROM間のI2C通信をsniffします。両方のデバイスを通信させてから、Bus PirateをSCL、SDA、GNDの各ピンに接続するだけです:
 
-![](<../../images/image (166).png>)
+![事前に設定したアドレス0x69から20Bを読み取り - Sniffer: このシナリオでは、Arduinoと先ほどのEPROM間のI2C通信をsniffします。両方のデバイスを通信させてから、Bus PirateをSCL、SDA、GNDの各ピンに接続するだけです](<../../images/image (166).png>)
 ```bash
 I2C>m
 1. HiZ

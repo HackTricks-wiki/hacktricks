@@ -1,10 +1,10 @@
-# 非常に基本的には、このツールを使うと、いくつかの条件を満たす必要がある変数の値を見つけられます。手計算で求めるのは非常に面倒です。そのため、変数が満たす必要のある条件を Z3 に指定すれば、可能な場合にはいくつかの値を見つけてくれます。
+# 非常に基本的には、このツールを使うと、いくつかの条件を満たす必要がある変数の値を見つけられます。手計算では非常に面倒な計算も、Z3 に変数が満たすべき条件を指定すれば、可能な場合にいくつかの値を見つけてくれます。
 
 {{#include ../../banners/hacktricks-training.md}}
 
 # 基本操作
 
-## ブール値/And/Or/Not
+## Boolean/And/Or/Not
 ```python
 # pip3 install z3-solver
 from z3 import *
@@ -20,7 +20,7 @@ s.add(And(Or(x, y, Not(z)), y))
 s.check() # If response is "sat" then the model is satisfiable, if "unsat" something is wrong
 print(s.model()) # Print valid values to satisfy the model
 ```
-## 整数/簡約/実数
+## Ints/Simplify/Reals
 ```python
 from z3 import *
 
@@ -44,7 +44,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-## モデルの出力
+## 印刷モデル
 ```python
 from z3 import *
 
@@ -58,9 +58,9 @@ print("x = %s" % m[x])
 for d in m.decls():
 print("%s = %s" % (d.name(), m[d]))
 ```
-# マシン算術
+# Machine Arithmetic
 
-現代のCPUと主流のプログラミング言語は、固定サイズのビットベクトル上で算術演算を行います。マシン算術は、Z3PyではBit-Vectorsとして利用できます。<sup>[[1]](#references)</sup>
+現代のCPUと主流のプログラミング言語では、固定サイズのビットベクター上で算術演算を行います。Machine arithmeticは、Z3PyではBit-Vectorsとして利用できます。
 ```python
 from z3 import *
 
@@ -75,9 +75,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) # This is False
 ```
-## 符号付き/符号なし数値
+## Signed/Unsigned Numbers
 
-Z3 は、ビットベクトルを符号付きまたは符号なしとして扱うかによって結果が異なる算術演算について、専用の符号付きバージョンを提供します。Z3Py では、演算子 `<`、`<=`、`>`、`>=`、`/`、`%`、`>>` が符号付きバージョンに対応します。対応する符号なし演算子は `ULT`、`ULE`、`UGT`、`UGE`、`UDiv`、`URem`、`LShR` です。<sup>[[1]](#references)</sup>
+Z3 は、bit-vector を signed または unsigned のどちらとして扱うかによって結果が異なる、算術演算の特別な signed 版を提供します。Z3Py では、演算子 `<`、`<=`、`>`、`>=`、`/`、`%`、`>>` が signed 版に対応します。対応する unsigned 演算子は `ULT`、`ULE`、`UGT`、`UGE`、`UDiv`、`URem`、`LShR` です。<sup>[[1]](#references)</sup>
 ```python
 from z3 import *
 
@@ -97,7 +97,7 @@ solve(ULT(x, 0))
 ```
 ## Functions
 
-算術などの解釈付き関数には、固定された標準的な解釈があります。未解釈関数と定数は最大限に柔軟であり、その関数または定数に対する制約と整合する任意の解釈を許容します。<sup>[[1]](#references)</sup>
+算術などの解釈済み関数には、固定された標準的な解釈があります。未解釈関数と定数は最大限に柔軟であり、その関数または定数に対する制約と矛盾しない任意の解釈を許容します。<sup>[[1]](#references)</sup>
 
 例: `f` を `x` に2回適用すると再び `x` になりますが、`f` を `x` に1回適用した結果は `x` とは異なります。
 ```python
@@ -120,11 +120,11 @@ print(s.model())
 ```
 # Reversing向けパターン
 
-手動で少数のチェックだけをliftingするのではなく、binary全体に対してfull symbolic executionが必要な場合は、[Angr - Examples](angr/angr-examples.md)を確認してください。実際には、decompiler/assemblyから関連するpredicateを復元し、興味のある算術またはmemoryのconstraintだけをZ3で再構築するワークフローが非常によく使われます。
+バイナリ全体に対する full symbolic execution が必要で、手動で少数のチェックだけを lift するのでは不十分な場合は、[Angr - Examples](angr/angr-examples.md) を確認してください。実際には、decompiler/assembly から関連する predicates を復元し、興味深い算術またはメモリ制約だけを Z3 で再構築するワークフローが非常によく使われます。
 
-## user-controlled dataはまずbytesとしてモデル化する
+## ユーザー制御データをまず bytes としてモデル化する
 
-Reversingでは、通常、各入力byteに対して`BitVec(..., 8)`から始め、その後、targetが行うとおりにwordを正確に再構築する方が適切です。これにより、wrap-around、signedness bug、shift、rotate、byte-orderの問題を維持できます。
+Reversing では、通常、各入力バイトに対して `BitVec(..., 8)` から始め、その後、target が実行するのと正確に同じ方法で words を再構築するのが適切です。これにより、wrap-around、signedness bugs、shifts、rotates、byte-order の問題を維持できます。<sup>[[2]](#references)</sup>
 ```python
 from z3 import *
 
@@ -139,16 +139,16 @@ s.add(RotateRight(dword, 8) == 0x41444342)
 print(s.check())
 print(hex(s.model().eval(dword).as_long()))
 ```
-assembly または decompiler code の翻訳時に役立つ便利なヘルパー:
+アセンブリやデコンパイラのコードを翻訳する際に役立つヘルパー:
 
 - `Concat`: バイトから 16/32/64-bit 値を再構築
-- `Extract`: 上位/下位ワードの比較、またはマスク/シフトをエミュレート
+- `Extract`: 上位/下位ワードの比較やマスク/シフトのエミュレーション
 - `ZeroExt` / `SignExt`: zero/sign extension のバグを正確にモデル化
-- `LShR` / `RotateLeft` / `RotateRight`: crackmes、hashes、obfuscators で一般的
+- `LShR` / `RotateLeft` / `RotateRight`: crackmes、ハッシュ、obfuscator で一般的
 
-## arrays を使用して memory/register tables をモデル化
+## arrays でメモリ/レジスタテーブルをモデル化
 
-チェックが `buf[i]`、lookup tables、または emulated memory に依存する場合、多数の個別変数を作成するよりも `Array` の方が簡潔です。
+チェックが `buf[i]`、lookup table、またはエミュレートされたメモリに依存する場合、多数の個別変数を作成するよりも `Array` の方が簡潔になることがあります。<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -165,11 +165,11 @@ s = Solver()
 s.add(word == 0x4241)
 print(s.check())
 ```
-これは、binary が値を検証する前に memory 上でコピーする場合や、プログラム全体を実行せずに、いくつかの `mov`/`xor`/`add` 操作の効果を model 化したい場合に特に便利です。
+これは、バイナリが値を検証する前にメモリ内でコピーする場合や、プログラム全体を実行せずに、いくつかの `mov`/`xor`/`add` 操作の効果をモデル化したい場合に特に便利です。
 
 ## Incremental solving は branch triage に最適
 
-base constraints をすでに抽出している場合は、毎回 solver を再構築せずに、`push()` / `pop()`（または assumptions）を使って別の branch をテストできます。
+ベースとなる制約をすでに抽出している場合は、毎回 solver を再構築せずに、`push()` / `pop()`（または assumptions）を使って別の branch をテストできます:<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -187,11 +187,11 @@ s.add(x < 0x100)
 print("branch 2:", s.check())
 s.pop()
 ```
-これは、decompilerから復元した path conditions を再現するときや、モデルを `unsat` にしている比較をすばやく特定したいときに役立ちます。
+これは、デコンパイラから復元したパス条件を replay するときや、モデルを `unsat` にしている比較を素早く特定したいときに便利です。
 
-## より扱いやすい payload に最適化する
+## より扱いやすい payload を最適化する
 
-モデルが satisfiable になったら、`Optimize()` を使ってより扱いやすい解を取得できます。たとえば、printable bytes を優先したり、checksum component を最小化したり、復元したパスワードを入力またはコピーしやすくする構造を最大化したりできます。
+モデルが充足可能になったら、`Optimize()` を使うことで、より扱いやすい解を取得できます。たとえば、印字可能なバイトを優先したり、checksum の構成要素を最小化したり、復元したパスワードを入力またはコピーしやすくする構造を最大化したりできます。<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -204,9 +204,9 @@ o.add_soft(And(c >= 0x20, c <= 0x7e))
 print(o.check())
 print(bytes(o.model()[c].as_long() for c in key))
 ```
-## フォーマット依存のシリアル向け文字列/シーケンス
+## 形式に依存するシリアル値向けの文字列/シーケンス
 
-対象が主にプレフィックス、サフィックス、部分文字列、または正規表現に似た構造をチェックする場合、バイトごとのビットベクターよりも `String`/`Seq` 制約の方が扱いやすくなります。
+対象が主にプレフィックス、サフィックス、部分文字列、または正規表現に似た構造をチェックする場合、`String`/`Seq` 制約はバイト単位のビットベクトルよりも扱いやすくなります:<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -217,7 +217,7 @@ s.add(PrefixOf(StringVal("HTB{"), serial))
 s.add(SuffixOf(StringVal("}"), serial))
 s.add(Contains(serial, StringVal("_")))
 ```
-しかし、バイナリが文字に対して算術演算、ローテーション、チェックサム、またはキャストを行い始めたら、通常は8-bit bit-vectorsに戻したほうがよいでしょう。
+ただし、バイナリが文字に対して算術演算、ローテーション、チェックサム、キャストを行い始めると、通常は8ビットのビットベクターに戻す方がよいです。
 
 # 例
 
@@ -269,10 +269,10 @@ print_matrix(r)
 else:
 print("failed to solve")
 ```
-## 参考資料
+## 参考文献
 
-- [1] [Z3Py Guide - Examples (ericpony)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-- [2] [Z3 Guide (Microsoft)](https://microsoft.github.io/z3guide/)
-- [3] [Programming Z3 (Stanford)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+- [1] [Examples付きZ3Py Guide (ericpony z3py-tutorial)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Z3 Guide - Bit-Vectors theory (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
+- [3] [Programming Z3 (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 
 {{#include ../../banners/hacktricks-training.md}}

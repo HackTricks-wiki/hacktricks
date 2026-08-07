@@ -2,15 +2,15 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 基本ペイロード
+## Basic Payloads
 
-- **シンプルリスト:** 各行にエントリが含まれるリスト
-- **ランタイムファイル:** ランタイムで読み込まれるリスト（メモリにロードされない）。大きなリストをサポートするため。
-- **ケース変更:** 文字列のリストにいくつかの変更を適用する（変更なし、小文字、大文字、適切な名前 - 最初の文字を大文字にし、残りを小文字に -、適切な名前 - 最初の文字を大文字にし、残りはそのまま -）。
-- **数字:** XからYまでの数字をZステップで生成するか、ランダムに生成する。
-- **ブルートフォース:** 文字セット、最小および最大長。
+- **Simple List:** 各行に1つのエントリを含む単純なリスト
+- **Runtime File:** runtimeで読み込むリスト（メモリにはロードされない）。大規模なリストをサポートするために使用。
+- **Case Modification:** 文字列のリストに変更を適用（変更なし、小文字、UPPERCASE、Proper name - 先頭を大文字にして残りを小文字にする-、Proper Name - 先頭を大文字にして残りはそのままにする-）。
+- **Numbers:** XからYまでの数値を、Zのステップまたはランダムで生成。
+- **Brute Forcer:** 文字セット、最小および最大の長さ。
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : コマンドを実行し、DNSリクエストを介してburpcollabに出力を取得するためのペイロード。
+[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : burpcollabへのDNS requestsを介してcommandsを実行し、outputを取得するPayload。
 
 {{#ref}}
 https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e
