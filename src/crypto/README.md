@@ -2,15 +2,15 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Sehemu hii inalenga kwenye **kriptografia ya vitendo kwa hacking/CTFs**: jinsi ya kutambua haraka mifumo ya kawaida, kuchagua zana sahihi, na kutumia mashambulizi yaliyojulikana.
+Sehemu hii inalenga **practical cryptography for hacking/CTFs**: jinsi ya kutambua kwa haraka mifumo ya kawaida, kuchagua tools zinazofaa, na kutumia mashambulizi yanayojulikana.
 
-Ikiwa uko hapa kwa kuficha data ndani ya faili, nenda kwenye sehemu ya **Stego**.
+Ikiwa uko hapa kwa ajili ya kuficha data ndani ya files, nenda kwenye sehemu ya **Stego**.
 
 ## Jinsi ya kutumia sehemu hii
 
-Changamoto za Crypto zinathamini kasi: ainisha primitive, tambua unachodhibiti (oracle/leak/nonce reuse), kisha tumia kiolezo cha shambulio kilichojulikana.
+Crypto challenges hulipa kasi: ainisha primitive, tambua unachodhibiti (oracle/leak/nonce reuse), kisha tumia template ya shambulizi inayojulikana.
 
-### Mtiririko wa CTF
+### CTF workflow
 {{#ref}}
 ctf-workflow/README.md
 {{#endref}}
@@ -40,7 +40,7 @@ tls-and-certificates/README.md
 crypto-in-malware/README.md
 {{#endref}}
 
-### Mengine
+### Mengineyo
 {{#ref}}
 ctf-misc/README.md
 {{#endref}}
@@ -48,7 +48,7 @@ ctf-misc/README.md
 ## Usanidi wa haraka
 
 - Python: `python3 -m venv .venv && source .venv/bin/activate`
-- Maktaba: `pip install pycryptodome gmpy2 sympy pwntools`
-- SageMath (mara nyingi muhimu kwa lattice/RSA/ECC): https://www.sagemath.org/
+- Libraries: `pip install pycryptodome gmpy2 sympy pwntools`
+- SageMath (mara nyingi ni muhimu kwa lattice/RSA/ECC): <https://www.sagemath.org/>
 
 {{#include ../banners/hacktricks-training.md}}

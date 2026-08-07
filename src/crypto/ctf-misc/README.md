@@ -2,24 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Kurasa mbalimbali zinazojitokeza mara nyingi katika crypto challenges, lakini hazilingani vizuri mahali pengine.
+Kurasa za aina mbalimbali zinazoonekana mara nyingi kwenye crypto challenges, lakini hazitoshei vizuri mahali pengine.
 
-## Lugha zisizo za kawaida
+## Lugha za esoteric
 
-### Mbinu
+### Technique
 
-Tumia hii wakati kazi ya crypto kwa kweli ni: endesha programu ya esolang, kisha decode kile inachotoa.
+Tumia hii wakati crypto task kwa kweli ni: endesha esolang program kisha decode kile inachotoa.
 
-If a challenge gives you code that does not look like a standard language:
+Ikiwa challenge inakupa code ambayo haionekani kama lugha ya kawaida:
 
-- Tambua esolang (tumia Google kutafuta token ya kipekee).
+- Tambua esolang (Google token inayotofautika).
 - Tumia online interpreter au Docker image.
-- Kama output ni ya kushangaza, angalia encoding/compression iliyo kwenye tabaka baada ya execution.
+- Ikiwa output ni ya ajabu, tafuta layered encoding/compression baada ya execution.
 
-Orodha nzuri ya kuanzia:
+Orodha nzuri ya kuanzia:<sup>[[1]](#references)</sup>
 
 {{#ref}}
 https://esolangs.org/wiki/Main_Page
 {{#endref}}
+
+## Marejeleo
+
+- [1] [Esolang, wiki ya lugha za programming za esoteric](https://esolangs.org/wiki/Main_Page)
 
 {{#include ../../banners/hacktricks-training.md}}
