@@ -3,11 +3,11 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Ako program koristi `scanf` za dobijanje **nekoliko vrednosti odjednom sa stdin-a**, potrebno je da generišete stanje koje počinje nakon funkcije **`scanf`**.
+> Ako program koristi `scanf` za dobijanje **nekoliko vrednosti odjednom sa stdin-a**, potrebno je da generišete stanje koje počinje nakon **`scanf`**.
 
-Kodovi su preuzeti sa [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Kodovi preuzeti sa [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Input za dostizanje adrese (navođenjem adrese)
+### Ulaz za dostizanje adrese (navođenjem adrese)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Ulaz za dostizanje adrese (označava ispise)
+### Ulaz za dostizanje adrese (uz indikaciju ispisa)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-U ovom scenariju, unos je preuzet pomoću `scanf("%u %u")`, a vrednost `"1 1"` je prosleđena, tako da vrednosti **`0x00000001`** na steku potiču od **korisničkog unosa**. Možete videti da ove vrednosti počinju na adresi `$ebp - 8`. Zbog toga smo u kodu **oduzeli 8 bajtova od `$esp` (pošto su u tom trenutku `$ebp` i `$esp` imali istu vrednost)**, a zatim smo postavili BVS.
+U ovom scenariju, unos je uzet pomoću `scanf("%u %u")` i zadata je vrednost `"1 1"`, tako da vrednosti **`0x00000001`** na steku potiču od **korisničkog unosa**. Možete videti kako ove vrednosti počinju na `$ebp - 8`. Zbog toga smo u kodu **oduzeli 8 bajtova od `$esp` (pošto su u tom trenutku `$ebp` i `$esp` imali istu vrednost)**, a zatim smo postavili BVS na stek.
 
-![Postavljanje vektora bitova na stek da bismo utvrdili vrednost do koje ta pozicija na steku treba da dođe kako bi se dostigao tok programa: U ovom scenariju, unos je preuzet pomoću scanf("%u %u"), a vrednost "1...](<../../../images/image (136).png>)
+![Postavite bit vektore na stek da biste saznali vrednost koju ta pozicija na steku mora da ima kako bi se dostigao tok programa: U ovom scenariju, unos je uzet pomoću scanf("%u %u") i zadata je vrednost "1...](<../../../images/image (136).png>)
 
 ### Statičke vrednosti memorije (globalne promenljive)
 ```python
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> Imajte na umu da symbolic file može sadržati i konstantne podatke spojene sa symbolic podacima:
+> Imajte na umu da simbolička datoteka takođe može da sadrži konstantne podatke spojene sa simboličkim podacima:
 >
 > ```python
 >  # Hello world, my name is John.
@@ -402,13 +402,13 @@ main(sys.argv)
 >  # the string from the file, except four symbolic bytes where the name would be
 >  # stored.
 >  # (!)
-> ```
+>  ```
 
-### Primena ograničenja
+### Primena Constrains
 
 > [!TIP]
-> Ponekad jednostavne radnje koje obavlja čovek, kao što je poređenje 2 reči dužine 16 **char by char** (petlja), **koštaju** mnogo **angr**, jer mora da generiše grane **eksponencijalno**, pošto generiše 1 granu za svaki if: `2^16`\
-> Zato je lakše **zatražiti od angr da dođe do prethodne tačke** (gde je stvarno težak deo već obavljen) i **ručno postaviti ta ograničenja**.
+> Ponekad jednostavne ljudske operacije, kao što je poređenje 2 reči dužine 16 **char by char** (petlja), **cost** mnogo **angr**-u jer mora da generiše grane **eksponencijalno**, pošto generiše 1 granu za svaki if: `2^16`\
+> Zato je jednostavnije **zatražiti od angr-a da se vrati na prethodnu tačku** (gde je stvarno težak deo već obavljen) i **ručno postaviti ta ograničenja**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -485,10 +485,10 @@ main(sys.argv)
 > [!TIP]
 > Još nešto što možete uraditi u ovim scenarijima jeste da **hook-ujete funkciju tako da angr-u prosledite nešto što može lakše da razume**.
 
-### Upravljači simulacije
+### Simulation Managers
 
-Neki upravljači simulacije mogu biti korisniji od drugih. U prethodnom primeru postojao je problem jer je kreirano mnogo korisnih grana. Ovde će tehnika **veritesting** spojiti te grane i pronaći rešenje.\
-Ovaj upravljač simulacije takođe možete aktivirati pomoću: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Neki simulation managers mogu biti korisniji od drugih. U prethodnom primeru postojao je problem, jer je kreirano mnogo korisnih grana. Ovde će tehnika **veritesting** spojiti te grane i pronaći rešenje.\
+Ovaj simulation manager takođe možete aktivirati pomoću: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Zaobilaženje jednog poziva funkcije
+### Hooking/Bypassing jednog poziva funkcije
 ```python
 # This level performs the following computations:
 #
@@ -678,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Simulacija scanf-a sa više parametara
+### Simulacija scanf funkcije sa nekoliko parametara
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -740,7 +740,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Statičke binarne datoteke
+### Statički binarni fajlovi
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -809,6 +809,6 @@ main(sys.argv)
 ```
 ## Reference
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}

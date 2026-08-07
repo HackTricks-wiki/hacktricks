@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Deo ovog cheatsheet-a zasnovan je na [angr dokumentaciji](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
+Ovaj deo cheatsheet-a zasnovan je na [angr dokumentaciji](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
 ## Instalacija
 ```bash
@@ -30,7 +30,7 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## Informacije o učitanim i glavnim objektima
+## Informacije o učitanom i glavnom objektu
 
 ### Učitani podaci
 ```python
@@ -121,9 +121,9 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ### Pozivanje funkcija
 
-- Možete proslediti listu argumenata kroz `args` i rečnik promenljivih okruženja kroz `env` u `entry_state` i `full_init_state`. Vrednosti u ovim strukturama mogu biti stringovi ili bitvektori i biće serijalizovane u stanje kao argumenti i okruženje simuliranog izvršavanja. Podrazumevani `args` je prazna lista, pa ako program koji analizirate očekuje da pronađe barem `argv[0]`, uvek treba da ga navedete!
-- Ako želite da `argc` bude simbolički, možete proslediti simbolički bitvektor kao `argc` konstruktorima `entry_state` i `full_init_state`. Ipak, budite pažljivi: ako to uradite, trebalo bi da dodate i ograničenje rezultujućem stanju da vaša vrednost za argc ne može biti veća od broja argumenata prosleđenih kroz `args`.
-- Da biste koristili stanje poziva, treba da ga pozovete pomoću `.call_state(addr, arg1, arg2, ...)`, gde je `addr` adresa funkcije koju želite da pozovete, a `argN` je N-ti argument te funkcije, bilo kao python ceo broj, string ili niz, bilo kao bitvektor. Ako želite da se alocira memorija i da se pokazivač na objekat zaista prosledi, treba da ga obuhvatite pomoću `PointerWrapper`, odnosno `angr.PointerWrapper("point to me!")`. Rezultati ovog API-ja mogu biti pomalo nepredvidivi, ali radimo na tome.
+- Možete proslediti listu argumenata kroz `args` i rečnik environment variables kroz `env` u `entry_state` i `full_init_state`. Vrednosti u ovim strukturama mogu biti stringovi ili bitvectors i biće serijalizovane u stanje kao argumenti i environment simuliranog izvršavanja. Podrazumevani `args` je prazna lista, pa ako program koji analizirate očekuje da pronađe makar `argv[0]`, uvek bi trebalo da ga navedete!
+- Ako želite da `argc` bude simboličan, možete proslediti simbolički bitvector kao `argc` konstruktorima `entry_state` i `full_init_state`. Ipak, budite pažljivi: ako to uradite, trebalo bi da dodate i constraint dobijenom stanju, tako da vrednost za argc ne može biti veća od broja argumenata prosleđenih kroz `args`.
+- Da biste koristili call state, trebalo bi da ga pozovete sa `.call_state(addr, arg1, arg2, ...)`, gde je `addr` adresa funkcije koju želite da pozovete, a `argN` je N-ti argument te funkcije, bilo kao Python integer, string ili array, ili bitvector. Ako želite da memorija bude alocirana i da zaista prosledite pointer na objekat, trebalo bi da ga umotate u PointerWrapper, npr. `angr.PointerWrapper("point to me!")`. Rezultati ovog API-ja mogu biti pomalo nepredvidivi, ali radimo na tome.
 
 ### BitVectors
 ```python
@@ -134,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### Simbolički vektori bitova i ograničenja
+### Simbolički BitVectors i ograničenja
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -186,12 +186,12 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Nadalje, možete koristiti `proj.hook_symbol(name, hook)`, tako što ćete kao prvi argument proslediti ime simbola, kako biste postavili hook na adresu na kojoj se simbol nalazi<sup>[[1]](#references)</sup>
+Nadalje, možete koristiti `proj.hook_symbol(name, hook)`, prosleđujući ime simbola kao prvi argument, kako biste postavili hook na adresu na kojoj se simbol nalazi<sup>[[1]](#references)</sup>
 
 ## Primeri
 
 ## Reference
 
-- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
+- [1] [angr dokumentacija](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
 {{#include ../../../banners/hacktricks-training.md}}
