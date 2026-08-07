@@ -80,7 +80,7 @@ MCP (Model Context Protocol) is a protocol that allows AI agent clients to conne
 
 {{#ref}}
 AI-MCP-Servers.md
-{{#endref}} 
+{{#endref}}
 
 ### AI-Assisted Fuzzing & Automated Vulnerability Discovery
 

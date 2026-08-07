@@ -14,8 +14,6 @@ Since Industrial Control Systems are installed following set standards, knowing 
 
 Industrial Control Systems can be complicated at times and hence require a lot of patience to do anything. It's all about probing and reconnaissance before planning attacks and developing any exploits. 
 
-These techniques can also be used to protect against attacks and blue teaming for industrial control systems. 
-
-
+These techniques can also be used to protect against attacks and blue teaming for industrial control systems.
 
 {{#include ../../banners/hacktricks-training.md}}

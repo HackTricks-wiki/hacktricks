@@ -22,7 +22,7 @@ olevba -c /path/to/document #Extract macros
 
 ## OLE Compound File exploitation: Autodesk Revit RFA – ECC recomputation and controlled gzip
 
-Revit RFA models are stored as an [OLE Compound File](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation) (aka CFBF). The serialized model is under storage/stream:<sup>[[1]](#references)</sup>
+Revit RFA models are stored as an [OLE Compound File](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation) (aka CFBF). The serialized model is under storage/stream:<sup>[[1]](#references)[[3]](#references)</sup>
 
 - Storage: `Global`
 - Stream: `Latest` → `Global\Latest`
@@ -94,7 +94,7 @@ and general ROP guidance here:
 
 Tooling:<sup>[[1]](#references)</sup>
 
-- CompoundFileTool (OSS) to expand/rebuild OLE compound files: https://github.com/thezdi/CompoundFileTool
+- CompoundFileTool (OSS) to expand/rebuild OLE compound files: https://github.com/thezdi/CompoundFileTool<sup>[[2]](#references)</sup>
 - IDA Pro + WinDBG TTD for reverse/taint; disable page heap with TTD to keep traces compact.
 - A local proxy (e.g., Fiddler) can simulate supply-chain delivery by swapping RFAs in plugin traffic for testing.
 

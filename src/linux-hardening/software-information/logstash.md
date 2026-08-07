@@ -134,7 +134,7 @@ journalctl -u logstash --no-pager 2>/dev/null | tail -n 200
 ls -lah /var/log/logstash 2>/dev/null
 ```
 
-This is also worth checking because **CVE-2023-46672** showed that Logstash could record sensitive information in logs under specific circumstances. On a post-exploitation host, old Logstash logs and `journald` entries may therefore disclose credentials even if the current config references the keystore instead of storing secrets inline.
+This is also worth checking because **CVE-2023-46672** showed that Logstash could record sensitive information in logs under specific circumstances. On a post-exploitation host, old Logstash logs and `journald` entries may therefore disclose credentials even if the current config references the keystore instead of storing secrets inline.<sup>[[3]](#references)</sup>
 
 ### Centralized Pipeline Management Abuse
 
@@ -166,5 +166,6 @@ This is especially useful when local files are read-only but Logstash is already
 
 - [1] [Elastic Docs: Reloading the Config File](https://www.elastic.co/guide/en/logstash/8.19/reloading-config.html)
 - [2] [Elastic Docs: Configure Centralized Pipeline Management](https://www.elastic.co/guide/en/logstash/8.19/configuring-centralized-pipelines.html)
+- [3] [Logstash 8.11.1 Security Update (ESA-2023-26) - CVE-2023-46672](https://discuss.elastic.co/t/logstash-8-11-1-security-update-esa-2023-26/347191)
 
 {{#include ../../banners/hacktricks-training.md}}

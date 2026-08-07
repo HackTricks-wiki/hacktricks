@@ -233,7 +233,7 @@ If a field such as `op.kind` is an enum and an attacker can inject an **out-of-r
 
 ### Jump-table / UB counter bypass
 
-If Rust lowers a large `match` into a **jump table**, an invalid enum discriminant may produce **undefined control flow**. A dangerous pattern is:
+If Rust lowers a large `match` into a **jump table**, an invalid enum discriminant may produce **undefined control flow**. A dangerous pattern is:<sup>[[7]](#references)[[9]](#references)</sup>
 
 1. One `match` updates **security-critical counters/constraints**.
 2. A second `match` performs the **real instruction semantics**.
@@ -252,7 +252,7 @@ Review checklist:
 
 Do not just validate memory safety; also validate the **semantic rules** that the proof is meant to enforce.
 
-For reversible/quantum-like instruction sets, ensure operands that must be distinct are actually constrained to be distinct. A Toffoli/CCX-like operation implemented as:
+For reversible/quantum-like instruction sets, ensure operands that must be distinct are actually constrained to be distinct. A Toffoli/CCX-like operation implemented as:<sup>[[7]](#references)[[8]](#references)</sup>
 
 ```rust
 let v = cond & self.qubit(op.q_control1) & self.qubit(op.q_control2);
@@ -304,7 +304,8 @@ defi-amm-virtual-balance-cache-exploitation.md
 - [5] [Gas and fees | ethereum.org](https://ethereum.org/en/developers/docs/gas/)
 - [6] [Privacy - Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
 - [7] [Trail of Bits - We beat Google's zero-knowledge proof of quantum cryptanalysis](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
-- [8] [Google patched paper version](https://arxiv.org/abs/2603.28846v2)
+- [8] [Securing Elliptic Curve Cryptocurrencies against Quantum Vulnerabilities: Resource Estimates and Mitigations (patched version)](https://arxiv.org/abs/2603.28846v2)
 - [9] [Trail of Bits proof-of-concept repository](https://github.com/trailofbits/quantum-zk-proof-poc)
 
 {{#include ../../banners/hacktricks-training.md}}
+

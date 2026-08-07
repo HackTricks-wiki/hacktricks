@@ -180,6 +180,3 @@ xattr -l protected
 ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
-
-

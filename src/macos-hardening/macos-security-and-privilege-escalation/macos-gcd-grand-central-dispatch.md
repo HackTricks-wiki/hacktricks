@@ -4,9 +4,9 @@
 
 ## Basic Information
 
-**Grand Central Dispatch (GCD),** also known as **libdispatch** (`libdispatch.dyld`), is available in both macOS and iOS. It's a technology developed by Apple to optimize application support for concurrent (multithreaded) execution on multicore hardware.
+**Grand Central Dispatch (GCD),** also known as **libdispatch** (`libdispatch.dyld`), is available in both macOS and iOS. It's a technology developed by Apple to optimize application support for concurrent (multithreaded) execution on multicore hardware.<sup>[[4]](#references)</sup>
 
-**GCD** provides and manages **FIFO queues** to which your application can **submit tasks** in the form of **block objects**. Blocks submitted to dispatch queues are **executed on a pool of threads** fully managed by the system. GCD automatically creates threads for executing the tasks in the dispatch queues and schedules those tasks to run on the available cores.
+**GCD** provides and manages **FIFO queues** to which your application can **submit tasks** in the form of **block objects**. Blocks submitted to dispatch queues are **executed on a pool of threads** fully managed by the system. GCD automatically creates threads for executing the tasks in the dispatch queues and schedules those tasks to run on the available cores.<sup>[[1]](#references)</sup>
 
 > [!TIP]
 > In summary, to execute code in **parallel**, processes can send **blocks of code to GCD**, which will take care of their execution. Therefore, processes don't create new threads; **GCD executes the given code with its own pool of threads** (which might increase or decrease as necessary).
@@ -35,7 +35,7 @@ However, at compiler level blocks doesn't exist, they are `os_object`s. Each of 
 
 ### Queues
 
-A dispatch queue is a named object providing FIFO ordering of blocks for executions.
+A dispatch queue is a named object providing FIFO ordering of blocks for executions.<sup>[[3]](#references)</sup>
 
 Blocks a set in queues to be executed, and these support 2 modes: `DISPATCH_QUEUE_SERIAL` and `DISPATCH_QUEUE_CONCURRENT`. Of course the **serial** one **won't have race condition** problems as a block won't be executed until the previous one has finished. But **the other type of queue might have it**.
 
@@ -65,7 +65,7 @@ When creating a queue with **`dispatch_queue_create`** the third argument is a `
 
 ### Dispatch objects
 
-There are several objects that libdispatch uses and queues and blocks are just 2 of them. It's possible to create these objects with `dispatch_object_create`:
+There are several objects that libdispatch uses and queues and blocks are just 2 of them. It's possible to create these objects with `dispatch_object_create`:<sup>[[1]](#references)[[2]](#references)</sup>
 
 - `block`
 - `data`: Data blocks
@@ -226,6 +226,3 @@ Ghidra will automatically rewrite everything:
 - [4] [Apple Developer — Dispatch](https://developer.apple.com/documentation/dispatch)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

@@ -187,8 +187,8 @@ sqlite3 "$HOME/Library/Group Containers/group.com.apple.usernoted/db2/db"   "sel
 
 #### Recent privacy issues (NotificationCenter DB)
 
-- In macOS **14.7–15.1** Apple stored banner content in the `db2/db` SQLite without proper redaction. CVEs **CVE-2024-44292/44293/40838/54504** allowed any local user to read other users' notification text just by opening the DB (no TCC prompt).
-- Apple mitigated this by moving the DB into `group.com.apple.usernoted` and protecting it with TCC on newer Sequoia builds, so on current systems you normally need the right user context or a TCC bypass to read it.<sup>[[3]](#references)</sup>
+- In macOS **14.7–15.1** Apple stored banner content in the `db2/db` SQLite without proper redaction. CVEs **CVE-2024-44292/44293/40838/54504** allowed any local user to read other users' notification text just by opening the DB (no TCC prompt).<sup>[[3]](#references)</sup>
+- Apple mitigated this by moving the DB into `group.com.apple.usernoted` and protecting it with TCC on newer Sequoia builds, so on current systems you normally need the right user context or a TCC bypass to read it.<sup>[[4]](#references)</sup>
 - On legacy endpoints, copy the `db`, `db-wal`, and `db-shm` files together before updating or rebooting if you want to preserve the artefacts.
 
 ### Notes
@@ -324,7 +324,8 @@ These are notifications that the user should see in the screen:
 
 - [1] [HelpNetSecurity – macOS gcore entitlement allowed Keychain master key extraction (CVE-2025-24204)](https://www.helpnetsecurity.com/2025/09/04/macos-gcore-vulnerability-cve-2025-24204/)
 - [2] [Apple Platform Security – Keychain data protection](https://support.apple.com/guide/security/keychain-data-protection-secb0694df1a/web)
-- [3] [9to5Mac – Apple addresses privacy concerns around Notification Center database in macOS Sequoia](https://9to5mac.com/2024/09/01/security-bite-apple-addresses-privacy-concerns-around-notification-center-database-in-macos-sequoia/)
+- [3] [Rapid7 – Notification Center SQLite disclosure (CVE-2024-44292 et al.)](https://www.rapid7.com/db/vulnerabilities/apple-osx-notificationcenter-cve-2024-44292/)
+- [4] [9to5Mac – Apple addresses privacy concerns around Notification Center database in macOS Sequoia](https://9to5mac.com/2024/09/01/security-bite-apple-addresses-privacy-concerns-around-notification-center-database-in-macos-sequoia/)
 
 {{#include ../../../banners/hacktricks-training.md}}
 

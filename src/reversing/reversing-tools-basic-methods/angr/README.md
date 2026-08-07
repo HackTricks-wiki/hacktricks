@@ -215,6 +215,3 @@ Furthermore, you can use `proj.hook_symbol(name, hook)`, providing the name of a
 - [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-

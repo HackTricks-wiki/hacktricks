@@ -24,5 +24,3 @@ inside the virtual environment
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
-

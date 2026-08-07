@@ -12,7 +12,7 @@ It has **16 sectors**, each of them has **4 blocks** and each block contains **1
 To access each sector you need **2 keys** (**A** and **B**) which are stored in **block 3 of each sector** (sector trailer). The sector trailer also stores the **access bits** that give the **read and write** permissions on **each block** using the 2 keys.\
 2 keys are useful to give permissions to read if you know the first one and write if you know the second one (for example).
 
-Several attacks can be performed<sup>[[1]](#references)</sup>
+Several attacks can be performed
 
 ```bash
 proxmark3> hf mf #List attacks
@@ -55,9 +55,9 @@ proxmark3> hf mf csetuid -u <original_uid>
 
 Notes
 
-- `hf mf autopwn` orchestrates nested/darkside/HardNested-style attacks, recovers keys, and creates dumps in the client dumps folder.
+- `hf mf autopwn` orchestrates nested/darkside/HardNested-style attacks, recovers keys, and creates dumps in the client dumps folder.<sup>[[1]](#references)</sup>
 - Writing block 0/UID only works on magic gen1a/gen2 cards. Normal Classic cards have read-only UID.<sup>[[2]](#references)</sup>
-- Many deployments use Classic "value blocks" or simple checksums. Ensure all duplicated/complemented fields and checksums are consistent after editing.
+- Many deployments use Classic "value blocks" or simple checksums. Ensure all duplicated/complemented fields and checksums are consistent after editing.<sup>[[4]](#references)</sup>
 
 See a higher-level methodology and mitigations in:
 

@@ -110,7 +110,7 @@ Container FIM frequently misses the real write path. With Docker `overlay2`, cha
 
 - [AIDE](https://aide.github.io/)
 - [osquery](https://osquery.io/)
-- [Wazuh FIM / Syscheck](https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html)
+- [Wazuh FIM / Syscheck](https://documentation.wazuh.com/current/user-manual/capabilities/file-integrity/index.html)<sup>[[3]](#references)</sup>
 - [Elastic Auditbeat File Integrity Module](https://www.elastic.co/docs/reference/beats/auditbeat/auditbeat-module-file_integrity)
 - [Sysmon](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
 

@@ -195,11 +195,11 @@ Notes on DB portability (if you implement your own indexer):<sup>[[1]](#referenc
 
 ## Open-source tooling and references for entitlement hunting
 
-- Firmware mount/download: https://github.com/blacktop/ipsw
+- Firmware mount/download: https://github.com/blacktop/ipsw<sup>[[3]](#references)</sup>
 - Entitlement databases and references:
-  - Jonathan Levin’s entitlement DB: https://newosxbook.com/ent.php
-  - entdb: https://github.com/ChiChou/entdb
-- Large-scale indexer (Rust, self-hosted Web UI + OpenAPI): https://github.com/synacktiv/appledb_rs
+  - Jonathan Levin’s entitlement DB: https://newosxbook.com/ent.php<sup>[[4]](#references)</sup>
+  - entdb: https://github.com/ChiChou/entdb<sup>[[5]](#references)</sup>
+- Large-scale indexer (Rust, self-hosted Web UI + OpenAPI): https://github.com/synacktiv/appledb_rs<sup>[[2]](#references)</sup>
 - Apple headers for structures and constants:
   - loader.h (Mach-O headers, load commands)
   - cs_blobs.h (SuperBlob, GenericBlob, CodeDirectory)

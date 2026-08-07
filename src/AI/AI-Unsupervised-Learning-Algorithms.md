@@ -550,6 +550,4 @@ evaluate_print("Ensemble", y_test, anomaly_scores)
 - [1] [HDBSCAN – Hierarchical density-based clustering](https://github.com/scikit-learn-contrib/hdbscan)
 - [2] Chen, X. *et al.* “On the Vulnerability of Unsupervised Anomaly Detection to Data Poisoning.” *IEEE Symposium on Security and Privacy*, 2024.
 
-
-
 {{#include ../banners/hacktricks-training.md}}

@@ -13,6 +13,3 @@
 - [**Basic python syntax and libraries**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

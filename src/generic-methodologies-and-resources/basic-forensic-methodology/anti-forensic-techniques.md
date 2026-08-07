@@ -309,6 +309,3 @@ Defenders should correlate these artifacts with external exposure and service pa
 - [4] [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-
-

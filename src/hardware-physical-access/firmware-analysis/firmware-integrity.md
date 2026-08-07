@@ -125,3 +125,4 @@ Use this to:
 - [1] [Pwnd Blaster: Hacking your PC using your speaker without ever touching it](https://blog.nns.ee/2026/06/03/katana-badusb/)
 
 {{#include ../../banners/hacktricks-training.md}}
+
