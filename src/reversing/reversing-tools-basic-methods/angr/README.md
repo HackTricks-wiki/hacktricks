@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-इस cheatsheet का कुछ भाग [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)<sup>[[1]](#references)</sup> पर आधारित है।
+इस cheatsheet का कुछ भाग [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/) पर आधारित है।<sup>[[1]](#references)</sup>
 
 ## इंस्टॉलेशन
 ```bash
@@ -12,7 +12,7 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
-## बुनियादी क्रियाएँ
+## बुनियादी कार्रवाइयाँ
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -30,9 +30,9 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## लोड किए गए और मुख्य object की जानकारी
+## लोडेड और मुख्य ऑब्जेक्ट की जानकारी
 
-### लोड किया गया Data
+### लोडेड डेटा
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -119,11 +119,11 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
-### Functions call करना
+### functions को call करना
 
-- आप `args` के माध्यम से arguments की एक list और `env` के माध्यम से environment variables की एक dictionary `entry_state` और `full_init_state` में पास कर सकते हैं। इन structures में मौजूद values strings या bitvectors हो सकती हैं, और इन्हें simulated execution के arguments और environment के रूप में state में serialize किया जाएगा। डिफ़ॉल्ट `args` एक empty list है, इसलिए यदि आप जिस program का analysis कर रहे हैं उसे कम-से-कम एक `argv[0]` मिलने की अपेक्षा है, तो आपको इसे हमेशा provide करना चाहिए!
-- यदि आप `argc` को symbolic रखना चाहते हैं, तो आप `entry_state` और `full_init_state` constructors में `argc` के रूप में एक symbolic bitvector पास कर सकते हैं। हालांकि, सावधान रहें: ऐसा करने पर आपको resulting state में एक constraint भी जोड़ना चाहिए कि आपका `argc` value, `args` में पास किए गए arguments की संख्या से बड़ी नहीं हो सकती।
-- call state का उपयोग करने के लिए, आपको इसे `.call_state(addr, arg1, arg2, ...)` के साथ call करना चाहिए, जहां `addr` उस function का address है जिसे आप call करना चाहते हैं और `argN` उस function का Nth argument है, जो python integer, string या array, अथवा bitvector हो सकता है। यदि आप memory allocate करके किसी object का pointer वास्तव में पास करना चाहते हैं, तो आपको उसे एक PointerWrapper में wrap करना चाहिए, यानी `angr.PointerWrapper("point to me!")`। इस API के results थोड़े unpredictable हो सकते हैं, लेकिन हम इस पर काम कर रहे हैं।
+- आप `args` के माध्यम से arguments की एक list और `env` के माध्यम से environment variables की एक dictionary `entry_state` और `full_init_state` में भेज सकते हैं। इन structures में मौजूद values strings या bitvectors हो सकती हैं, और इन्हें simulated execution के arguments और environment के रूप में state में serialize किया जाएगा। डिफ़ॉल्ट `args` एक empty list है, इसलिए यदि आप जिस program का analysis कर रहे हैं वह कम-से-कम एक `argv[0]` मिलने की अपेक्षा करता है, तो आपको इसे हमेशा provide करना चाहिए!
+- यदि आप `argc` को symbolic रखना चाहते हैं, तो `entry_state` और `full_init_state` constructors में `argc` के रूप में एक symbolic bitvector भेज सकते हैं। हालांकि सावधान रहें: ऐसा करने पर आपको resulting state में एक constraint भी जोड़ना चाहिए कि आपका `argc` value, `args` में भेजे गए args की संख्या से बड़ा नहीं हो सकता।
+- call state का उपयोग करने के लिए, आपको इसे `.call_state(addr, arg1, arg2, ...)` के साथ call करना चाहिए, जहां `addr` उस function का address है जिसे आप call करना चाहते हैं और `argN` उस function का Nth argument है, जो python integer, string या array, अथवा bitvector हो सकता है। यदि आप memory allocate करके किसी object का pointer वास्तव में pass करना चाहते हैं, तो आपको उसे PointerWrapper में wrap करना चाहिए, जैसे `angr.PointerWrapper("point to me!")`। इस API के results थोड़े unpredictable हो सकते हैं, लेकिन हम इस पर काम कर रहे हैं।
 
 ### BitVectors
 ```python
@@ -134,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### प्रतीकात्मक BitVectors और Constraints
+### Symbolic BitVectors और Constraints
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -186,11 +186,11 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-इसके अलावा, आप `proj.hook_symbol(name, hook)` का उपयोग कर सकते हैं, जिसमें पहले argument के रूप में किसी symbol का नाम देकर उस address पर hook किया जा सकता है जहाँ symbol मौजूद है<sup>[[1]](#references)</sup>
+इसके अलावा, आप `proj.hook_symbol(name, hook)` का उपयोग कर सकते हैं, जिसमें पहले argument के रूप में किसी symbol का नाम प्रदान करके उस address पर hook लगाया जाता है जहाँ वह symbol मौजूद है<sup>[[1]](#references)</sup>
 
 ## उदाहरण
 
-## References
+## संदर्भ
 
 - [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
 

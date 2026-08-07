@@ -3,7 +3,7 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> यदि program stdin से **एक साथ कई values प्राप्त करने के लिए** `scanf` का उपयोग कर रहा है, तो आपको ऐसा state generate करना होगा जो **`scanf`** के बाद से शुरू हो।
+> यदि program **stdin से एक साथ कई values प्राप्त करने** के लिए `scanf` का उपयोग कर रहा है, तो आपको ऐसी state generate करनी होगी जो **`scanf`** के बाद से शुरू हो।
 
 Codes [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup> से लिए गए हैं।
 
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### पते तक पहुँचने वाला इनपुट (प्रिंट दर्शाते हुए)
+### address तक पहुंचने के लिए Input (prints को दर्शाते हुए)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -139,7 +139,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Stack के मान
+### Stack मान
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
 # have to reach a rogram flow
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-इस scenario में, input `scanf("%u %u")` के साथ लिया गया था और value `"1 1"` दी गई थी, इसलिए stack की **`0x00000001`** values **user input** से आती हैं। आप देख सकते हैं कि ये values `$ebp - 8` से शुरू होती हैं। इसलिए, code में हमने **`$esp` से 8 bytes घटाए** (क्योंकि उस समय `$ebp` और `$esp` की value समान थी) और फिर हमने BVS को push किया।
+इस scenario में input `scanf("%u %u")` के साथ लिया गया था और `"1 1"` value दी गई थी, इसलिए stack की **`0x00000001`** values **user input** से आती हैं। आप देख सकते हैं कि ये values `$ebp - 8` से शुरू होती हैं। इसलिए, code में हमने **`$esp` से 8 bytes घटाए हैं (क्योंकि उस समय `$ebp` और `$esp` की value समान थी)** और फिर हमने BVS को push किया है।
 
-![Stack में bit vectors डालकर यह पता लगाएँ कि किसी stack position की value को कितना घटाना होगा ताकि program flow तक पहुँचा जा सके: इस scenario में, input scanf("%u %u") के साथ लिया गया था और value "1...](<../../../images/image (136).png>)
+![Stack में bit vectors रखें, ताकि पता चल सके कि program flow तक पहुँचने के लिए उस stack position की value क्या होनी चाहिए: इस scenario में, input scanf("%u %u") के साथ लिया गया था और value "1...](<../../../images/image (136).png>)
 
 ### Static Memory values (Global variables)
 ```python
@@ -266,7 +266,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### डायनेमिक मेमोरी वैल्यूज़ (Malloc)
+### Dynamic Memory Values (Malloc)
 ```python
 import angr
 import claripy
@@ -325,7 +325,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### फ़ाइल Simulation
+### फ़ाइल सिमुलेशन
 ```python
 #In this challenge a password is read from a file and we want to simulate its content
 
@@ -407,8 +407,8 @@ main(sys.argv)
 ### Constraints लागू करना
 
 > [!TIP]
-> कभी-कभी 16 अक्षरों वाले 2 words की तुलना **char by char** (loop) जैसे सरल human operations भी **angr** के लिए बहुत **costly** होते हैं, क्योंकि उसे **exponentially** branches generate करने पड़ते हैं; हर `if` के लिए 1 branch generate होती है: `2^16`\
-> इसलिए, **angr से पिछले point पर वापस जाने के लिए कहना** अधिक आसान है (जहाँ वास्तविक कठिन भाग पहले ही पूरा हो चुका था) और उन **constraints को manually set करना**।
+> कभी-कभी 16 characters की लंबाई वाले 2 words को **char by char** (loop) compare करने जैसे सरल human operations **angr** के लिए बहुत **costly** होते हैं, क्योंकि उसे branches को **exponentially** generate करना पड़ता है; हर if के लिए 1 branch generate होती है: `2^16`\
+> इसलिए, **angr से किसी पिछले point पर पहुँचने के लिए कहना** (जहाँ वास्तविक difficult part पहले ही पूरा हो चुका हो) और उन **constraints को manually set करना** अधिक आसान होता है।
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -483,11 +483,11 @@ main(sys.argv)
 > कुछ scenarios में आप **veritesting** activate कर सकते हैं, जो similar status को merge करेगा, ताकि बेकार branches को बचाया जा सके और solution खोजा जा सके: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> इन scenarios में आप एक और काम यह कर सकते हैं कि **function को hook करें और angr को ऐसा कुछ दें जिसे वह** अधिक आसानी से समझ सके।
+> इन scenarios में आप एक और काम यह कर सकते हैं कि **function को hook करें और angr को ऐसा कुछ दें जिसे वह** आसानी से समझ सके।
 
 ### Simulation Managers
 
-कुछ simulation managers दूसरों की तुलना में अधिक उपयोगी हो सकते हैं। पिछले example में एक समस्या थी, क्योंकि बहुत-सी useful branches create हो गई थीं। यहाँ, **veritesting** technique उन branches को merge करेगी और एक solution खोजेगी।\
+कुछ simulation managers दूसरों की तुलना में अधिक उपयोगी हो सकते हैं। पिछले example में समस्या यह थी कि बहुत-सी useful branches create हो गई थीं। यहाँ, **veritesting** technique उन branches को merge करेगी और एक solution खोजेगी।\
 इस simulation manager को इस तरह भी activate किया जा सकता है: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### एक function call को Hooking/Bypassing करना
+### किसी function के एक call को Hooking/Bypassing
 ```python
 # This level performs the following computations:
 #
@@ -809,6 +809,6 @@ main(sys.argv)
 ```
 ## संदर्भ
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}
