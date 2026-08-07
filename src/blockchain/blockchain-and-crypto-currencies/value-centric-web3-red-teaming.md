@@ -1,23 +1,23 @@
-# मूल्य-केंद्रित Web3 Red Teaming (MITRE AADAPT)
+# Value-Centric Web3 Red Teaming (MITRE AADAPT)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) matrix उन हमलावर व्यवहारों को कैप्चर करता है जो सिर्फ इन्फ्रास्ट्रक्चर नहीं बल्कि डिजिटल वैल्यू को प्रभावित करते हैं। इसे एक खतरा-मॉडलिंग backbone की तरह मानें: उन सभी घटकों की सूची बनाएं जो assets को mint, price, authorize, या route कर सकते हैं, उन टचपॉइंट्स को AADAPT techniques से मैप करें, और फिर ऐसे red-team परिदृश्य चलाएं जो मापें कि क्या environment अपरिवर्तनीय आर्थिक नुकसान से बच सकता है।
+MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) matrix ऐसे attacker behaviors को कैप्चर करता है जो केवल infrastructure के बजाय digital value को manipulate करते हैं। इसे **threat-modeling backbone** मानें: ऐसे हर component की सूची बनाएं जो assets को mint, price, authorize या route कर सकता है, उन touchpoints को AADAPT techniques से map करें, और फिर ऐसे red-team scenarios चलाएं जो यह मापें कि environment irreversible economic loss का सामना कर सकता है या नहीं।
 
-## 1. मूल्य-वाहक घटकों की सूची
-वो सब कुछ मानचित्रित करें जो value state को प्रभावित कर सकता है, भले ही वह off-chain क्यों न हो।
+## 1. Value-bearing components की inventory बनाएं
+हर उस चीज़ का map बनाएं जो value state को प्रभावित कर सकती है, भले ही वह off-chain हो।<sup>[[1]](#references)</sup>
 
-- **Custodial signing services** (HSM/KMS clusters, Vault/KMaaS, signing APIs used by bots or back-office jobs). Capture key IDs, policies, automation identities, and approval workflows.
-- **Admin & upgrade paths** for contracts (proxy admins, governance timelocks, emergency pause keys, parameter registries). शामिल करें कि कौन/क्या उन्हें कॉल कर सकता है और किस quorum या delay के तहत।
-- **On-chain protocol logic** handling lending, AMMs, vaults, staking, bridges, or settlement rails. उन invariants को डोक्युमेंट करें जिन पर ये निर्भर करते हैं (oracle prices, collateral ratios, rebalance cadence…).
-- **Off-chain automation** that builds transactions (market-making bots, CI/CD pipelines, cron jobs, serverless functions). अक्सर इनमें API keys या service principals होते हैं जो signatures request कर सकते हैं।
-- **Oracles & data feeds** (aggregator composition, quorum, deviation thresholds, update cadence). हर upstream नोट करें जिस पर automated risk logic निर्भर करती है।
-- **Bridges and cross-chain routers** (lock/mint contracts, relayers, settlement jobs) जो chains या custodial stacks को जोड़ते हैं।
+- **Custodial signing services** (HSM/KMS clusters, Vault/KMaaS, bots या back-office jobs द्वारा उपयोग की जाने वाली signing APIs)। Key IDs, policies, automation identities और approval workflows दर्ज करें।
+- Contracts के लिए **Admin & upgrade paths** (proxy admins, governance timelocks, emergency pause keys, parameter registries)। इसमें यह भी शामिल करें कि इन्हें कौन/क्या call कर सकता है और किस quorum या delay के तहत।
+- **On-chain protocol logic**, जो lending, AMMs, vaults, staking, bridges या settlement rails संभालता है। इनके द्वारा माने गए invariants को document करें (oracle prices, collateral ratios, rebalance cadence…)।
+- Transactions बनाने वाला **Off-chain automation** (market-making bots, CI/CD pipelines, cron jobs, serverless functions)। इनमें अक्सर API keys या service principals होते हैं जो signatures का अनुरोध कर सकते हैं।
+- **Oracles & data feeds** (aggregator composition, quorum, deviation thresholds, update cadence)। Automated risk logic द्वारा उपयोग किए जाने वाले हर upstream को नोट करें।
+- **Bridges और cross-chain routers** (lock/mint contracts, relayers, settlement jobs), जो chains या custodial stacks को जोड़ते हैं।
 
-Deliverable: एक value-flow diagram जो दर्शाए कि assets कैसे मूव करते हैं, किसने मूवमेंट authorize किया, और कौन से external signals business logic को प्रभावित करते हैं।
+Deliverable: एक value-flow diagram, जिसमें दिखाया गया हो कि assets कैसे move होते हैं, movement को कौन authorize करता है, और कौन-से external signals business logic को प्रभावित करते हैं।
 
-## 2. घटकों को AADAPT व्यवहारों से मैप करें
-AADAPT टैक्सोनॉमी को हर घटक के लिए ठोस attack candidates में अनुवाद करें।
+## 2. Components को AADAPT behaviors से map करें
+AADAPT taxonomy को प्रत्येक component के लिए concrete attack candidates में translate करें।<sup>[[1]](#references)</sup>
 
 | Component | Primary AADAPT focus |
 | --- | --- |
@@ -27,82 +27,82 @@ AADAPT टैक्सोनॉमी को हर घटक के लिए �
 | Automation pipelines | Compromised bot/CI identities, batch replay, unauthorized deployment |
 | Bridges/routers | Cross-chain evasion, rapid hop laundering, settlement desynchronization |
 
-यह मैपिंग सुनिश्चित करती है कि आप सिर्फ contracts को ही नहीं बल्कि हर identity/automation का परीक्षण कर रहे हैं जो अप्रत्यक्ष रूप से value को steer कर सकता है।
+यह mapping सुनिश्चित करती है कि आप केवल contracts ही नहीं, बल्कि हर उस identity/automation को भी test करें जो अप्रत्यक्ष रूप से value को steer कर सकती है।
 
-## 3. attacker feasibility बनाम business impact के आधार पर प्राथमिकता तय करें
+## 3. Attacker feasibility बनाम business impact के आधार पर प्राथमिकता तय करें
 
-1. **Operational weaknesses**: exposed CI credentials, over-privileged IAM roles, misconfigured KMS policies, automation accounts that can request arbitrary signatures, public buckets with bridge configs, आदि।
-2. **Value-specific weaknesses**: fragile oracle parameters, upgradable contracts बिना multi-party approvals के, flash-loan sensitive liquidity, governance actions जो timelocks को bypass कर देते हैं।
+1. **Operational weaknesses**: exposed CI credentials, over-privileged IAM roles, misconfigured KMS policies, ऐसे automation accounts जो arbitrary signatures का अनुरोध कर सकते हैं, bridge configs वाले public buckets आदि।
+2. **Value-specific weaknesses**: fragile oracle parameters, multi-party approvals के बिना upgradable contracts, flash-loan sensitive liquidity, ऐसे governance actions जो timelocks को bypass करते हैं।
 
-क्यू को एक adversary की तरह काम करें: पहले उन operational footholds से शुरू करें जो आज सफल हो सकते हैं, फिर गहरे protocol/economic manipulation पथों की ओर बढ़ें।
+Queue को adversary की तरह handle करें: उन operational footholds से शुरू करें जो आज ही सफल हो सकते हैं, फिर deep protocol/economic manipulation paths की ओर बढ़ें।<sup>[[1]](#references)</sup>
 
-## 4. Controlled, production-realistic environments में Execute करें
-- **Forked mainnets / isolated testnets**: bytecode, storage, और liquidity को replicate करें ताकि flash-loan paths, oracle drifts, और bridge flows end-to-end चलें बिना असली फंड छुए।
-- **Blast-radius planning**: circuit breakers, pausable modules, rollback runbooks, और test-only admin keys को परिभाषित करें पहले किसी scenario को detonate करने से पहले।
-- **Stakeholder coordination**: custodians, oracle operators, bridge partners, और compliance को notify करें ताकि उनके monitoring teams उस ट्रैफ़िक की उम्मीद करें।
-- **Legal sign-off**: scope, authorization, और stop conditions document करें जब simulations regulated rails को पार कर सकते हैं।
+## 4. Controlled, production-realistic environments में execute करें
+- **Forked mainnets / isolated testnets**: bytecode, storage और liquidity को replicate करें, ताकि flash-loan paths, oracle drifts और bridge flows real funds को छुए बिना end-to-end चल सकें।<sup>[[1]](#references)</sup>
+- **Blast-radius planning**: scenario detonate करने से पहले circuit breakers, pausable modules, rollback runbooks और test-only admin keys निर्धारित करें।
+- **Stakeholder coordination**: custodians, oracle operators, bridge partners और compliance को सूचित करें, ताकि उनकी monitoring teams इस traffic की अपेक्षा कर सकें।
+- **Legal sign-off**: जब simulations regulated rails को cross कर सकती हों, तब scope, authorization और stop conditions document करें।
 
-## 5. AADAPT techniques के अनुरूप Telemetry
-Telemetry streams को instrument करें ताकि हर scenario actionable detection डेटा उत्पन्न करे।
+## 5. AADAPT techniques के अनुरूप telemetry
+Telemetry streams को इस तरह instrument करें कि हर scenario actionable detection data उत्पन्न करे।<sup>[[1]](#references)</sup>
 
-- **Chain-level traces**: full call graphs, gas usage, transaction nonces, block timestamps— ताकि flash-loan bundles, reentrancy-like structures, और cross-contract hops को reconstruct किया जा सके।
-- **Application/API logs**: हर on-chain tx को एक human या automation identity (session ID, OAuth client, API key, CI job ID) के साथ tie करें, IPs और auth methods सहित।
-- **KMS/HSM logs**: key ID, caller principal, policy result, destination address, और हर signature के लिए reason codes। change windows और high-risk operations के baselines रखें।
-- **Oracle/feed metadata**: प्रति-update data source composition, reported value, rolling averages से deviation, triggered thresholds, और exercised failover paths।
-- **Bridge/swap traces**: lock/mint/unlock events को chains के across correlate करें correlation IDs, chain IDs, relayer identity, और hop timing के साथ।
-- **Anomaly markers**: derived metrics जैसे slippage spikes, abnormal collateralization ratios, unusual gas density, या cross-chain velocity।
+- **Chain-level traces**: full call graphs, gas usage, transaction nonces, block timestamps—ताकि flash-loan bundles, reentrancy-like structures और cross-contract hops को reconstruct किया जा सके।
+- **Application/API logs**: प्रत्येक on-chain tx को किसी human या automation identity (session ID, OAuth client, API key, CI job ID) से IPs और auth methods सहित जोड़ें।
+- **KMS/HSM logs**: हर signature के लिए key ID, caller principal, policy result, destination address और reason codes। Change windows और high-risk operations का baseline बनाएं।
+- **Oracle/feed metadata**: प्रत्येक update के लिए data source composition, reported value, rolling averages से deviation, triggered thresholds और exercised failover paths।
+- **Bridge/swap traces**: correlation IDs, chain IDs, relayer identity और hop timing के साथ chains के बीच lock/mint/unlock events को correlate करें।
+- **Anomaly markers**: derived metrics जैसे slippage spikes, abnormal collateralization ratios, unusual gas density या cross-chain velocity।
 
-हर चीज़ को scenario IDs या synthetic user IDs के साथ tag करें ताकि analysts observables को उस AADAPT technique के साथ align कर सकें जिसे exercise किया जा रहा है।
+हर चीज़ को scenario IDs या synthetic user IDs से tag करें, ताकि analysts observables को exercise की जा रही AADAPT technique के साथ align कर सकें।
 
 ## 6. Purple-team loop & maturity metrics
-1. Controlled environment में scenario चलाएं और detections capture करें (alerts, dashboards, responders paged)।
-2. हर स्टेप को specific AADAPT techniques और chain/app/KMS/oracle/bridge planes में उत्पन्न observables के साथ मैप करें।
-3. Detection hypotheses (threshold rules, correlation searches, invariant checks) तैयार करें और deploy करें।
-4. तब तक re-run करें जब तक mean time to detect (MTTD) और mean time to contain (MTTC) business tolerances को पूरा न कर लें और playbooks reliably value loss को रोक दें।
+1. Controlled environment में scenario चलाएं और detections (alerts, dashboards, responders paged) capture करें।<sup>[[1]](#references)</sup>
+2. प्रत्येक step को specific AADAPT techniques और chain/app/KMS/oracle/bridge planes में उत्पन्न observables से map करें।
+3. Detection hypotheses (threshold rules, correlation searches, invariant checks) तैयार करके deploy करें।
+4. तब तक re-run करें जब तक mean time to detect (MTTD) और mean time to contain (MTTC) business tolerances को पूरा न करें और playbooks value loss को विश्वसनीय रूप से रोक न दें।
 
-प्रोग्राम परिपक्वता को तीन अक्षों पर ट्रैक करें:
+Program maturity को तीन axes पर track करें:<sup>[[1]](#references)</sup>
 - **Visibility**: हर critical value path में प्रत्येक plane के लिए telemetry मौजूद हो।
-- **Coverage**: प्राथमिक AADAPT techniques में से कितने end-to-end exercise किए गए।
-- **Response**: contracts को pause करने, keys revoke करने, या flows freeze करने की क्षमता इससे पहले कि irreversible loss हो।
+- **Coverage**: end-to-end exercise की गई prioritized AADAPT techniques का proportion।
+- **Response**: irreversible loss से पहले contracts को pause करने, keys revoke करने या flows freeze करने की क्षमता।
 
-Typical milestones: (1) पूरा किया गया value inventory + AADAPT mapping, (2) पहला end-to-end scenario जिसमें detections लागू हों, (3) तिमाही purple-team cycles जो coverage बढ़ाएँ और MTTD/MTTC घटाएँ।
+Typical milestones: (1) completed value inventory + AADAPT mapping, (2) implemented detections वाला पहला end-to-end scenario, (3) coverage बढ़ाने और MTTD/MTTC घटाने वाले quarterly purple-team cycles।<sup>[[1]](#references)</sup>
 
 ## 7. Scenario templates
-इन repeatable blueprints का उपयोग करें ताकि simulations सीधे AADAPT व्यवहारों से map कर सकें।
+इन repeatable blueprints का उपयोग ऐसे simulations design करने के लिए करें जो सीधे AADAPT behaviors से map हों।<sup>[[1]](#references)</sup>
 
 ### Scenario A – Flash-loan economic manipulation
-- **Objective**: एक transaction के अंदर transient capital उधार लेकर AMM prices/liquidity को distort करना और mispriced borrows, liquidations, या mints ट्रिगर करना फिर repay करने से पहले।
+- **Objective**: एक ही transaction के भीतर transient capital borrow करके AMM prices/liquidity को distort करना और repay करने से पहले mispriced borrows, liquidations या mints trigger करना।
 - **Execution**:
-1. Target chain को fork करें और production-जैसी liquidity के साथ pools seed करें।
-2. बड़ी notional flash loan के माध्यम से borrow करें।
-3. Calibrated swaps करें ताकि lending, vault, या derivative logic पर निर्भर price/threshold boundaries cross हों।
-4. distortion के तुरंत बाद victim contract को invoke करें (borrow, liquidate, mint) और flash loan repay करें।
-- **Measurement**: क्या invariant violation सफल हुआ? क्या slippage/price-deviation monitors, circuit breakers, या governance pause hooks triggered हुए? analytics ने abnormal gas/call graph pattern को flag करने में कितना समय लिया?
+1. Target chain को fork करें और pools में production-like liquidity seed करें।
+2. Flash loan के माध्यम से बड़ा notional borrow करें।
+3. Lending, vault या derivative logic द्वारा उपयोग की जाने वाली price/threshold boundaries को cross करने के लिए calibrated swaps करें।
+4. Distortion के तुरंत बाद victim contract को invoke करें (borrow, liquidate, mint) और flash loan repay करें।
+- **Measurement**: क्या invariant violation सफल हुआ? क्या slippage/price-deviation monitors, circuit breakers या governance pause hooks trigger हुए? Analytics द्वारा abnormal gas/call graph pattern flag किए जाने में कितना समय लगा?
 
 ### Scenario B – Oracle/data-feed poisoning
-- **Objective**: यह निर्धारित करना कि क्या manipulated feeds destructive automated actions (mass liquidations, incorrect settlements) ट्रिगर कर सकती हैं।
+- **Objective**: यह निर्धारित करना कि manipulated feeds destructive automated actions (mass liquidations, incorrect settlements) trigger कर सकती हैं या नहीं।
 - **Execution**:
-1. Fork/testnet में malicious feed deploy करें या aggregator weights/quorum/update cadence को tolerated deviation से बाहर adjust करें।
+1. Fork/testnet में malicious feed deploy करें या aggregator weights/quorum/update cadence को tolerated deviation से आगे adjust करें।
 2. Dependent contracts को poisoned values consume करने दें और उनका standard logic execute होने दें।
-- **Measurement**: Feed-level out-of-band alerts, fallback oracle activation, min/max bound enforcement, और anomaly onset और operator response के बीच latency।
+- **Measurement**: Feed-level out-of-band alerts, fallback oracle activation, min/max bound enforcement और anomaly onset से operator response तक की latency।
 
 ### Scenario C – Credential/signing abuse
-- **Objective**: परीक्षण करें कि क्या एक single signer या automation identity के compromise से unauthorized upgrades, parameter changes, या treasury drains संभव हैं।
+- **Objective**: यह test करना कि किसी single signer या automation identity के compromise से unauthorized upgrades, parameter changes या treasury drains संभव होते हैं या नहीं।
 - **Execution**:
-1. Sensitive signing rights वाले identities की enumeration करें (operators, CI tokens, service accounts invoking KMS/HSM, multisig participants)।
-2. Lab scope में compromise का simulation करें (उनके credentials/keys का reuse)।
-3. Privileged actions की कोशिश करें: upgrade proxies, change risk parameters, mint/pause assets, या governance proposals trigger करना।
-- **Measurement**: क्या KMS/HSM logs anomaly alerts उठाते हैं (time-of-day, destination drift, burst of high-risk operations)? क्या policies या multisig thresholds unilateral abuse रोक सकते हैं? क्या throttles/rate limits या अतिरिक्त approvals लागू हैं?
+1. Sensitive signing rights वाली identities की enumeration करें (operators, CI tokens, KMS/HSM invoke करने वाले service accounts, multisig participants)।
+2. Compromise simulate करें (lab scope के भीतर उनके credentials/keys का re-use करें)।
+3. Privileged actions का प्रयास करें: proxies upgrade करना, risk parameters बदलना, assets mint/pause करना या governance proposals trigger करना।
+- **Measurement**: क्या KMS/HSM logs anomaly alerts raise करते हैं (time-of-day, destination drift, high-risk operations का burst)? क्या policies या multisig thresholds unilateral abuse को रोक सकते हैं? क्या throttles/rate limits या additional approvals enforced हैं?
 
 ### Scenario D – Cross-chain evasion & traceability gaps
-- **Objective**: आंकें कि defenders कितनी अच्छी तरह assets को rapidly bridges, DEX routers, और privacy hops के across trace और interdict कर सकते हैं।
+- **Objective**: यह evaluate करना कि defenders bridges, DEX routers और privacy hops के माध्यम से तेजी से launder किए गए assets को कितनी अच्छी तरह trace और interdict कर सकते हैं।
 - **Execution**:
-1. सामान्य bridges के across lock/mint operations को chain together करें, हर hop पर swaps/mixers interleave करें, और per-hop correlation IDs रखें।
-2. Monitoring latency को stress करने के लिए transfers accelerate करें (multi-hop within minutes/blocks)।
-- **Measurement**: Telemetry + commercial chain analytics के across events को correlate करने का समय, reconstructed path की completeness, real incident में freezing के लिए choke points की पहचान करने की क्षमता, और abnormal cross-chain velocity/value के लिए alert fidelity।
+1. Common bridges के across lock/mint operations को chain करें, प्रत्येक hop पर swaps/mixers interleave करें और per-hop correlation IDs बनाए रखें।
+2. Monitoring latency को stress करने के लिए transfers को accelerate करें (minutes/blocks के भीतर multi-hop)।
+- **Measurement**: telemetry + commercial chain analytics में events correlate करने का समय, reconstructed path की completeness, real incident में freezing के लिए choke points पहचानने की क्षमता, और abnormal cross-chain velocity/value के लिए alert fidelity।
 
 ## References
 
-- [MITRE AADAPT Framework as a Red Team Roadmap (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
+- [1] [MITRE AADAPT Framework as a Red Team Roadmap (Bishop Fox)](https://bishopfox.com/blog/mitre-aadapt-framework-as-a-red-team-roadmap)
 
 {{#include ../../banners/hacktricks-training.md}}

