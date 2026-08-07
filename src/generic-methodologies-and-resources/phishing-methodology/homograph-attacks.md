@@ -1,50 +1,50 @@
-# Homograph / Homoglyph Attacks in Phishing
+# Phishing에서의 Homograph / Homoglyph Attacks
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 개요
 
-하모그래프(또는 호모글리프) 공격은 많은 **비라틴 스크립트의 유니코드 코드 포인트가 ASCII 문자와 시각적으로 동일하거나 매우 유사하다는 사실을 악용합니다**. 하나 이상의 라틴 문자를 그들의 유사한 문자로 대체함으로써 공격자는 다음을 만들 수 있습니다:
+Homograph(일명 homoglyph) attack은 많은 **Latin이 아닌 script의 Unicode code point가 ASCII 문자와 시각적으로 동일하거나 매우 유사하다**는 점을 악용합니다. 하나 이상의 Latin 문자를 비슷하게 생긴 문자로 대체하면 공격자는 다음과 같은 것을 만들 수 있습니다.
 
-* 인간의 눈에는 합법적으로 보이지만 키워드 기반 탐지를 우회하는 표시 이름, 주제 또는 메시지 본문.
-* 피해자가 신뢰할 수 있는 사이트를 방문하고 있다고 믿게 만드는 도메인, 서브 도메인 또는 URL 경로.
+* 사람의 눈에는 정상적으로 보이지만 keyword 기반 탐지를 우회하는 표시 이름, 제목 또는 메시지 본문
+* 피해자가 신뢰할 수 있는 사이트를 방문한다고 믿게 만드는 도메인, 서브도메인 또는 URL 경로
 
-모든 글리프는 **유니코드 코드 포인트**로 내부적으로 식별되기 때문에, 단일 대체 문자가 순진한 문자열 비교를 무너뜨리기에 충분합니다 (예: `"Παypal.com"` vs. `"Paypal.com"`).
+각 glyph는 내부적으로 **Unicode code point**로 식별되므로, 문자 하나만 치환해도 단순한 문자열 비교를 무력화할 수 있습니다(예: `"Παypal.com"` vs. `"Paypal.com"`).
 
-## 전형적인 피싱 워크플로우
+## 일반적인 Phishing Workflow
 
-1. **메시지 내용 작성** – impersonated 브랜드 / 키워드의 특정 라틴 문자를 다른 스크립트(그리스어, 키릴 문자, 아르메니아어, 체로키어 등)에서 시각적으로 구별할 수 없는 문자로 대체합니다.
-2. **지원 인프라 등록** – 선택적으로 호모글리프 도메인을 등록하고 TLS 인증서를 얻습니다(대부분의 CA는 시각적 유사성 검사를 수행하지 않습니다).
-3. **이메일 / SMS 전송** – 메시지에는 다음 위치 중 하나 이상에 호모글리프가 포함되어 있습니다:
-* 발신자 표시 이름 (예: `Ηеlрdеѕk`)
-* 제목 줄 (`Urgеnt Аctіon Rеquіrеd`)
-* 하이퍼링크 텍스트 또는 완전한 도메인 이름
-4. **리디렉션 체인** – 피해자는 자격 증명을 수집하거나 악성 코드를 전달하는 악성 호스트에 도착하기 전에 겉보기에는 무해한 웹사이트나 URL 단축기를 통해 이동합니다.
+1. **메시지 콘텐츠 구성** – 사칭하는 브랜드 / keyword의 특정 Latin 문자를 다른 script( Greek, Cyrillic, Armenian, Cherokee 등)의 시각적으로 구별하기 어려운 문자로 대체합니다.
+2. **지원 인프라 등록** – 선택적으로 homoglyph 도메인을 등록하고 TLS certificate를 발급받습니다(대부분의 CA는 시각적 유사성 검사를 수행하지 않습니다).
+3. **이메일 / SMS 전송** – 메시지의 다음 위치 중 하나 이상에 homoglyph가 포함됩니다.
+* 발신자 표시 이름(예: `Ηеlрdеѕk`)
+* 제목(`Urgеnt Аctіon Rеquіrеd`)
+* Hyperlink 텍스트 또는 fully qualified domain name
+4. **Redirect chain** – 피해자는 자격 증명을 수집하거나 malware를 전달하는 악성 host에 도달하기 전에 겉보기에는 무해한 웹사이트 또는 URL shortener를 거칩니다.
 
-## 일반적으로 악용되는 유니코드 범위
+## 일반적으로 악용되는 Unicode 범위
 
-| 스크립트 | 범위 | 예시 글리프 | 유사 문자 |
+| Script | Range | Example glyph | Looks like |
 |--------|-------|---------------|------------|
-| 그리스어  | U+0370-03FF | `Η` (U+0397) | 라틴 `H` |
-| 그리스어  | U+0370-03FF | `ρ` (U+03C1) | 라틴 `p` |
-| 키릴 문자 | U+0400-04FF | `а` (U+0430) | 라틴 `a` |
-| 키릴 문자 | U+0400-04FF | `е` (U+0435) | 라틴 `e` |
-| 아르메니아어 | U+0530-058F | `օ` (U+0585) | 라틴 `o` |
-| 체로키어 | U+13A0-13FF | `Ꭲ` (U+13A2) | 라틴 `T` |
+| Greek  | U+0370-03FF | `Η` (U+0397) | Latin `H` |
+| Greek  | U+0370-03FF | `ρ` (U+03C1) | Latin `p` |
+| Cyrillic | U+0400-04FF | `а` (U+0430) | Latin `a` |
+| Cyrillic | U+0400-04FF | `е` (U+0435) | Latin `e` |
+| Armenian | U+0530-058F | `օ` (U+0585) | Latin `o` |
+| Cherokee | U+13A0-13FF | `Ꭲ` (U+13A2) | Latin `T` |
 
-> 팁: 전체 유니코드 차트는 [unicode.org](https://home.unicode.org/)에서 확인할 수 있습니다.
+> Tip: 전체 Unicode chart는 [unicode.org](https://home.unicode.org/).<sup>[[2]](#references)</sup>에서 확인할 수 있습니다.
 
-## 탐지 기술
+## 탐지 기법
 
-### 1. 혼합 스크립트 검사
+### 1. Mixed-Script 검사
 
-영어를 사용하는 조직을 목표로 하는 피싱 이메일은 여러 스크립트의 문자를 혼합하는 경우가 드뭅니다. 간단하지만 효과적인 휴리스틱은 다음과 같습니다:
+English-speaking organisation을 대상으로 하는 Phishing 이메일에서 여러 script의 문자가 혼합되는 경우는 드뭅니다. 간단하면서도 효과적인 heuristic은 다음과 같습니다.
 
-1. 검사하는 문자열의 각 문자를 반복합니다.
-2. 코드 포인트를 해당 유니코드 블록에 매핑합니다.
-3. 하나 이상의 스크립트가 존재하거나 비라틴 스크립트가 예상치 못한 곳(표시 이름, 도메인, 주제, URL 등)에 나타나면 경고를 발생시킵니다.
+1. 검사할 문자열의 각 문자를 순회합니다.
+2. code point를 해당 Unicode block에 매핑합니다.
+3. 둘 이상의 script가 존재하거나 **또는** 예상되지 않은 위치(표시 이름, 도메인, 제목, URL 등)에 non-Latin script가 나타나면 alert를 발생시킵니다.
 
-Python 개념 증명:
+Python proof-of-concept:
 ```python
 import unicodedata as ud
 from collections import defaultdict
@@ -67,38 +67,38 @@ blocks[block] += 1
 if len(blocks) > 1:
 print(f"[!] Mixed scripts in {field}: {dict(blocks)} -> {value}")
 ```
-### 2. Punycode 정규화 (도메인)
+### 2. Punycode 정규화 (Domains)
 
-국제화 도메인 이름 (IDN)은 **punycode** (`xn--`)로 인코딩됩니다. 모든 호스트 이름을 punycode로 변환한 다음 다시 유니코드로 변환하면 화이트리스트와 일치시키거나 유사성 검사를 수행할 수 있습니다 (예: Levenshtein 거리) **문자열이 정규화된 후**.
+국제화 도메인 이름(IDN)은 **punycode** (`xn--`)로 인코딩됩니다. 모든 hostname을 punycode로 변환한 다음 다시 Unicode로 변환하면, 문자열이 정규화된 **후** whitelist와 대조하거나 유사성 검사(예: Levenshtein distance)를 수행할 수 있습니다.
 ```python
 import idna
 hostname = "Ρаypal.com"   # Greek Rho + Cyrillic a
 puny = idna.encode(hostname).decode()
 print(puny)  # xn--yl8hpyal.com
 ```
-### 3. 동형 문자 사전 / 알고리즘
+### 3. Homoglyph Dictionaries / Algorithms
 
-**dnstwist** (`--homoglyph`) 또는 **urlcrazy**와 같은 도구는 시각적으로 유사한 도메인 변형을 나열할 수 있으며, 사전적 차단 / 모니터링에 유용합니다.
+**dnstwist** (`--homoglyph`) 또는 **urlcrazy**와 같은 도구는 시각적으로 유사한 도메인 변형을 열거할 수 있으며, 사전 예방적 takedown / monitoring에 유용합니다.<sup>[[3]](#references)</sup>
 
-## 예방 및 완화
+## Prevention & Mitigation
 
-* 엄격한 DMARC/DKIM/SPF 정책을 시행하여 무단 도메인에서의 스푸핑을 방지합니다.
-* **Secure Email Gateways** 및 **SIEM/XSOAR** 플레이북에 위의 탐지 로직을 구현합니다.
-* 표시 이름 도메인 ≠ 발신자 도메인인 메시지를 플래그하거나 격리합니다.
-* 사용자 교육: 의심스러운 텍스트를 유니코드 검사기에 복사-붙여넣기하고, 링크에 마우스를 올리며, URL 단축기를 절대 신뢰하지 마십시오.
+* 엄격한 DMARC/DKIM/SPF 정책을 적용하여 인증되지 않은 도메인에서의 spoofing을 방지합니다.
+* 위의 detection logic을 **Secure Email Gateways** 및 **SIEM/XSOAR** playbooks에 구현합니다.
+* display name domain ≠ sender domain인 메시지를 flag하거나 quarantine합니다.
+* 사용자를 교육합니다. 의심스러운 텍스트를 Unicode inspector에 copy-paste하고, 링크 위에 마우스를 올려 확인하며, URL shortener를 절대 신뢰하지 않도록 합니다.
 
-## 실제 사례
+## Real-World Examples
 
-* 표시 이름: `Сonfidеntiаl Ꭲiꮯkеt` (키릴 문자 `С`, `е`, `а`; 체로키 `Ꭲ`; 라틴 소문자 대문자 `ꮯ`).
-* 도메인 체인: `bestseoservices.com` ➜ municipal `/templates` 디렉토리 ➜ `kig.skyvaulyt.ru` ➜ 커스텀 OTP CAPTCHA로 보호된 가짜 Microsoft 로그인 `mlcorsftpsswddprotcct.approaches.it.com`.
-* Spotify 사칭: 링크가 `redirects.ca` 뒤에 숨겨진 `Sρօtifŭ` 발신자.
+* Display name: `Сonfidеntiаl Ꭲiꮯkеt` (Cyrillic `С`, `е`, `а`; Cherokee `Ꭲ`; Latin small capital `ꮯ`).
+* Domain chain: `bestseoservices.com` ➜ municipal `/templates` directory ➜ `kig.skyvaulyt.ru` ➜ custom OTP CAPTCHA로 보호되는 `mlcorsftpsswddprotcct.approaches.it.com`의 가짜 Microsoft login.
+* Spotify impersonation: `redirects.ca` 뒤에 링크를 숨긴 `Sρօtifս` sender.
 
-이 샘플은 Unit 42 연구(2025년 7월)에서 유래되었으며, 동형 문자 남용이 URL 리디렉션 및 CAPTCHA 회피와 결합되어 자동 분석을 우회하는 방법을 보여줍니다.
+이 샘플들은 Unit 42 research (July 2025)에서 비롯되었으며, homograph abuse가 URL redirection 및 CAPTCHA evasion과 결합되어 automated analysis를 우회하는 방식을 보여줍니다.<sup>[[1]](#references)</sup>
 
-## 참고 문헌
+## References
 
-- [The Homograph Illusion: Not Everything Is As It Seems](https://unit42.paloaltonetworks.com/homograph-attacks/)
-- [Unicode Character Database](https://home.unicode.org/)
-- [dnstwist – domain permutation engine](https://github.com/elceef/dnstwist)
+- [1] [The Homograph Illusion: Not Everything Is As It Seems](https://unit42.paloaltonetworks.com/homograph-attacks/)
+- [2] [Unicode Character Database](https://home.unicode.org/)
+- [3] [dnstwist – domain permutation engine](https://github.com/elceef/dnstwist)
 
 {{#include ../../banners/hacktricks-training.md}}

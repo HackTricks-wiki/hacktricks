@@ -4,21 +4,21 @@
 
 ## Summary
 
-"Carbonara"는 MediaTek의 XFlash 다운로드 경로를 악용해 DA1의 무결성 검사를 우회하고 수정된 Download Agent stage 2(DA2)를 실행합니다. DA1은 DA2의 기대되는 SHA-256 값을 RAM에 저장하고 분기하기 전에 이를 비교합니다. 많은 로더에서는 호스트가 DA2의 로드 주소/크기를 완전히 제어할 수 있어, 검증되지 않은 메모리 쓰기가 그 메모리 내 해시를 덮어쓰고 임의 페이로드로 실행을 리디렉션할 수 있습니다(OS 이전 컨텍스트이며 캐시 무효화는 DA가 처리함).
+"Carbonara"는 MediaTek의 XFlash 다운로드 경로를 악용하여 DA1 무결성 검사를 우회하고 수정된 Download Agent stage 2 (DA2)를 실행합니다. DA1은 DA2에 대해 예상되는 SHA-256을 RAM에 저장한 후 분기 전에 비교합니다. 많은 loader에서는 host가 DA2의 load address/size를 완전히 제어할 수 있으므로, 메모리에 기록된 hash를 덮어쓰고 임의의 payload로 실행을 redirect할 수 있는 검증되지 않은 memory write가 발생합니다(DA가 cache invalidation을 처리하는 pre-OS context).<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Trust boundary in XFlash (DA1 → DA2)
 
-- **DA1**은 BootROM/Preloader에 의해 서명되어 로드됩니다. Download Agent Authorization(DAA)이 활성화되어 있으면, 서명된 DA1만 실행되어야 합니다.
-- **DA2**는 USB를 통해 전송됩니다. DA1은 **size**, **load address**, 그리고 **SHA-256**을 수신하고 수신한 DA2를 해시한 뒤 **DA1에 내장된(그리고 RAM으로 복사된) 기대 해시**와 비교합니다.
-- **약점:** 패치되지 않은 로더에서는 DA1이 DA2의 로드 주소/크기를 검사(sanitize)하지 않고 기대 해시를 메모리에서 쓰기 가능 상태로 유지하여, 호스트가 이 검사를 조작할 수 있습니다.
+- **DA1**은 BootROM/Preloader에 의해 서명되고 load됩니다. Download Agent Authorization (DAA)이 활성화되어 있으면 서명된 DA1만 실행되어야 합니다.
+- **DA2**는 USB를 통해 전송됩니다. DA1은 **size**, **load address**, **SHA-256**을 수신하고, 수신한 DA2를 hash한 뒤 DA1에 포함되어 RAM으로 복사된 **expected hash**와 비교합니다.
+- **Weakness:** 패치되지 않은 loader에서 DA1은 DA2 load address/size를 sanitize하지 않으며, expected hash를 메모리에서 writable 상태로 유지하므로 host가 해당 check를 변조할 수 있습니다.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Carbonara flow ("two BOOT_TO" trick)
 
-1. **First `BOOT_TO`:** DA1→DA2 스테이징 플로우에 진입합니다(DA1이 DRAM을 할당·준비하고 RAM에 있는 기대 해시 버퍼를 노출시킵니다).
-2. **Hash-slot overwrite:** 작은 페이로드를 보내 DA1 메모리에서 저장된 DA2 기대 해시를 스캔하고, 공격자가 수정한 DA2의 SHA-256으로 이를 덮어씁니다. 이는 사용자 제어 로드를 이용해 페이로드를 해시가 존재하는 위치에 착지시키는 방식입니다.
-3. **Second `BOOT_TO` + digest:** 패치된 DA2 메타데이터로 또 다른 `BOOT_TO`를 트리거하고 수정된 DA2와 일치하는 raw 32-byte 다이제스트를 전송합니다. DA1은 수신한 DA2에 대해 SHA-256을 재계산하고, 이제 패치된 기대 해시와 비교하여 점프가 공격자 코드로 성공합니다.
+1. **First `BOOT_TO`:** DA1→DA2 staging flow에 진입합니다(DA1이 메모리를 할당하고 DRAM을 준비하며 RAM에 있는 expected-hash buffer를 노출합니다).
+2. **Hash-slot overwrite:** DA1 memory를 scan하여 저장된 DA2-expected hash를 찾고, 이를 attacker가 수정한 DA2의 SHA-256으로 덮어쓰는 작은 payload를 전송합니다. 이는 user-controlled load를 활용하여 hash가 위치한 곳에 payload를 배치합니다.
+3. **Second `BOOT_TO` + digest:** 패치된 DA2 metadata로 또 다른 `BOOT_TO`을 trigger하고, 수정된 DA2와 일치하는 raw 32-byte digest를 전송합니다. DA1은 수신한 DA2에 대해 SHA-256을 다시 계산하고 현재 패치된 expected hash와 비교한 뒤, jump가 성공하여 attacker code로 진입합니다.
 
-로드 주소/크기가 공격자가 제어 가능하므로, 동일한 원시(prmitive)는 해시 버퍼뿐 아니라 메모리의 임의 위치에 쓰기가 가능하여 초기 부트 임플란트, secure-boot 우회 보조, 또는 악성 루트킷 등을 구현할 수 있습니다.
+load address/size를 attacker가 제어할 수 있으므로 동일한 primitive으로 메모리 어디든 write할 수 있습니다(hash buffer에만 국한되지 않음). 이를 통해 early-boot implant, secure-boot bypass helper 또는 malicious rootkits를 구현할 수 있습니다.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Minimal PoC pattern (mtkclient-style)
 ```python
@@ -31,30 +31,30 @@ if self.xsend(da_hash):
 self.status()
 self.info("All good!")
 ```
-- `payload`는 DA1 내부의 expected-hash 버퍼를 패치하는 유료 툴 블랍(blob)을 복제합니다.
-- `sha256(...).digest()`는 raw bytes(헥스가 아님)를 전송하므로 DA1이 패치된 버퍼와 비교합니다.
-- DA2는 공격자가 만든 어떤 이미지라도 될 수 있으며; 로드 주소/크기를 선택하면 임의의 메모리 배치가 가능하고 캐시 무효화는 DA가 처리합니다.
+- `payload`는 DA1 내부의 expected-hash buffer를 패치하는 유료 도구의 blob을 재현합니다.
+- `sha256(...).digest()`는 hex가 아닌 raw bytes를 전송하므로 DA1은 패치된 buffer와 비교합니다.
+- DA2는 공격자가 빌드한 이미지라면 무엇이든 될 수 있으며, load address/size를 선택하면 DA가 cache invalidation을 처리하면서 임의의 메모리 배치가 가능합니다.<sup>[[3]](#references)</sup>
 
-## 패치 현황 (hardened loaders)
+## 패치 환경 (강화된 loaders)
 
-- **완화**: 업데이트된 DA들은 DA2 로드 주소를 `0x40000000`로 하드코딩하고 호스트가 제공한 주소를 무시하여 쓰기가 DA1 해시 슬롯(~0x200000 영역)에 도달할 수 없습니다. 해시는 여전히 계산되지만 더 이상 공격자가 쓸 수 없습니다.
-- **패치된 DA 감지**: mtkclient/penumbra는 주소 하드닝을 나타내는 패턴을 DA1에서 검사합니다; 발견되면 Carbonara는 건너뜁니다. 오래된 DA는 쓰기 가능한 해시 슬롯(보통 V5 DA1의 `0x22dea4` 같은 오프셋 주변)을 노출하며 계속 악용 가능합니다.
-- **V5 vs V6**: 일부 V6 (XML) 로더는 여전히 사용자 제공 주소를 허용합니다; 최신 V6 바이너리는 보통 고정 주소를 강제하여 다운그레이드되지 않는 한 Carbonara에 면역입니다.
+- **Mitigation**: 업데이트된 DA는 DA2 load address를 `0x40000000`으로 하드코딩하고 host가 제공하는 address를 무시하므로, write가 DA1 hash slot(약 `0x200000` 영역)에 도달할 수 없습니다. hash는 계속 계산되지만 더 이상 공격자가 write할 수 없습니다.
+- **패치된 DA 감지**: mtkclient/penumbra는 address-hardening을 나타내는 패턴을 찾기 위해 DA1을 scan하며, 발견되면 Carbonara를 건너뜁니다. 구형 DA는 write 가능한 hash slot(일반적으로 V5 DA1의 `0x22dea4`와 같은 offset 주변)을 노출하므로 여전히 exploit이 가능합니다.
+- **V5 vs V6**: 일부 V6 (XML) loaders는 여전히 사용자가 제공한 address를 허용하며, 최신 V6 binaries는 일반적으로 fixed address를 적용하므로 downgrade하지 않는 한 Carbonara에 면역입니다.<sup>[[2]](#references)[[3]](#references)</sup>
 
-## Post-Carbonara (heapb8) 메모
+## Post-Carbonara (heapb8) 참고 사항
 
-MediaTek는 Carbonara를 패치했습니다; 더 새로운 취약점인 **heapb8**은 패치된 V6 로더의 DA2 USB 파일 다운로드 핸들러를 겨냥하며, `boot_to`가 하드닝되어 있어도 코드 실행을 제공합니다. 이 취약점은 청크 단위 파일 전송 중 발생하는 힙 오버플로를 악용하여 DA2의 제어 흐름을 탈취합니다. 익스플로잇은 Penumbra/mtk-payloads에 공개되어 있으며 Carbonara 수정만으로는 모든 DA 공격 표면이 봉인되지 않음을 보여줍니다.
+MediaTek은 Carbonara를 패치했으며, 더 최신 vulnerability인 **heapb8**은 패치된 V6 loaders의 DA2 USB file download handler를 대상으로 하여 `boot_to`가 harden된 경우에도 code execution을 제공합니다. 이는 chunked file transfer 중 발생하는 heap overflow를 악용해 DA2의 control flow를 장악합니다. 이 exploit은 Penumbra/mtk-payloads에 공개되어 있으며 Carbonara 수정만으로는 모든 DA attack surface가 차단되지 않는다는 점을 보여줍니다.<sup>[[4]](#references)</sup>
 
-## 분류 및 하드닝을 위한 참고사항
+## Triage 및 hardening 참고 사항
 
-- DA2 주소/크기가 검증되지 않고 DA1이 expected-hash를 쓰기 가능 상태로 유지하는 장치는 취약합니다. 이후 Preloader/DA가 주소 경계(또는 해시를 불변으로 유지)를 강제하면 Carbonara는 완화됩니다.
-- DAA를 활성화하고 DA1/Preloader가 BOOT_TO 매개변수(경계 + DA2의 진위)를 검증하도록 하면 이 프리미티브를 차단합니다. 로드 범위를 제한하지 않고 해시 패치만 차단하면 여전히 임의 쓰기 위험이 남습니다.
+- DA2 address/size가 검증되지 않고 DA1이 expected hash를 write 가능한 상태로 유지하는 device는 취약합니다. 이후 Preloader/DA가 address bounds를 적용하거나 hash를 immutable 상태로 유지하면 Carbonara가 완화됩니다.
+- DAA를 활성화하고 DA1/Preloader가 BOOT_TO parameters(bounds + DA2의 authenticity)를 검증하도록 하면 이 primitive이 차단됩니다. hash patch만 차단하고 load를 제한하지 않으면 arbitrary write risk가 여전히 남습니다.
 
-## 참고자료
+## References
 
-- [Carbonara: The MediaTek exploit nobody served](https://shomy.is-a.dev/blog/article/serving-carbonara)
-- [Carbonara exploit documentation](https://shomy.is-a.dev/penumbra/Mediatek/Exploits/Carbonara)
-- [Penumbra Carbonara source code](https://github.com/shomykohai/penumbra/blob/main/core/src/exploit/carbonara.rs)
-- [heapb8: exploiting patched V6 Download Agents](https://blog.r0rt1z2.com/posts/exploiting-mediatek-datwo/)
+- [1] [Carbonara: The MediaTek exploit nobody served](https://shomy.is-a.dev/blog/article/serving-carbonara)
+- [2] [Carbonara exploit documentation](https://shomy.is-a.dev/penumbra/Mediatek/Exploits/Carbonara)
+- [3] [Penumbra Carbonara source code](https://github.com/shomykohai/penumbra/blob/main/core/src/exploit/carbonara.rs)
+- [4] [heapb8: exploiting patched V6 Download Agents](https://blog.r0rt1z2.com/posts/exploiting-mediatek-datwo/)
 
 {{#include ../../banners/hacktricks-training.md}}

