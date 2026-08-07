@@ -2,24 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-crypto challenges に頻繁に現れるが、他にうまく分類できない寄せ集めページ。
+Crypto challenges でよく登場するものの、他の項目にはうまく分類できない、さまざまなページをまとめたものです。
 
-## エソテリック言語
+## Esoteric languages
 
-### 技法
+### Technique
 
-crypto の課題が実際には次のような場合に使う: esolang program を実行し、その出力をデコードする。
+Crypto task の実態が、esolang のプログラムを実行してから、その出力を decode することである場合に使用します。
 
-If a challenge gives you code that does not look like a standard language:
+Challenge で、標準的な言語に見えないコードが提示された場合:
 
-- Identify the esolang (Google a distinctive token).
-- Use an online interpreter or a Docker image.
-- If the output is weird, look for layered encoding/compression after execution.
+- esolang を特定する（特徴的な token を Google で検索する）。
+- オンライン interpreter または Docker image を使用する。
+- 出力が奇妙な場合は、実行後に複数段階の encoding/compression が行われていないか確認する。
 
-Good starting list:
+最初に参照するリスト:<sup>[[1]](#references)</sup>
 
 {{#ref}}
 https://esolangs.org/wiki/Main_Page
 {{#endref}}
+
+## References
+
+- [1] [Esolang、esoteric programming languages の wiki](https://esolangs.org/wiki/Main_Page)
 
 {{#include ../../banners/hacktricks-training.md}}

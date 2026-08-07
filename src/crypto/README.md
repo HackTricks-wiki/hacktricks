@@ -1,46 +1,46 @@
-# Crypto
+# 暗号
 
 {{#include ../banners/hacktricks-training.md}}
 
-このセクションは、hacking/CTFs 向けの実践的暗号学に焦点を当てています：一般的なパターンを素早く認識し、適切なツールを選び、既知の攻撃を適用する方法を解説します。
+このセクションでは、**hacking/CTF向けの実践的な暗号技術**について扱います。一般的なパターンを素早く見分け、適切なツールを選び、既知の攻撃手法を適用する方法を学びます。
 
-If you're here for hiding data inside files, go to the **Stego** section.
+ファイル内にデータを隠す方法を探している場合は、**Stego**セクションに進んでください。
 
 ## このセクションの使い方
 
-Crypto チャレンジでは速度が重要です：プリミティブを分類し、制御できるもの（oracle/leak/nonce reuse）を特定し、既知の攻撃テンプレートを適用します。
+Crypto challengeでは速度が重要です。暗号プリミティブを分類し、自分が制御できるもの（oracle/leak/nonce reuse）を特定してから、既知の攻撃テンプレートを適用します。
 
-### CTF workflow
+### CTFワークフロー
 {{#ref}}
 ctf-workflow/README.md
 {{#endref}}
 
-### Symmetric crypto
+### 対称暗号
 {{#ref}}
 symmetric/README.md
 {{#endref}}
 
-### Hashes, MACs, and KDFs
+### ハッシュ、MAC、KDF
 {{#ref}}
 hashes/README.md
 {{#endref}}
 
-### Public-key crypto
+### 公開鍵暗号
 {{#ref}}
 public-key/README.md
 {{#endref}}
 
-### TLS and certificates
+### TLSと証明書
 {{#ref}}
 tls-and-certificates/README.md
 {{#endref}}
 
-### Crypto in malware
+### マルウェアにおける暗号
 {{#ref}}
 crypto-in-malware/README.md
 {{#endref}}
 
-### Misc
+### その他
 {{#ref}}
 ctf-misc/README.md
 {{#endref}}
@@ -48,7 +48,7 @@ ctf-misc/README.md
 ## クイックセットアップ
 
 - Python: `python3 -m venv .venv && source .venv/bin/activate`
-- Libraries: `pip install pycryptodome gmpy2 sympy pwntools`
-- SageMath（lattice/RSA/ECC に対してしばしば必須）: https://www.sagemath.org/
+- ライブラリ: `pip install pycryptodome gmpy2 sympy pwntools`
+- SageMath（lattice/RSA/ECCでは必須になることが多い）: <https://www.sagemath.org/>
 
 {{#include ../banners/hacktricks-training.md}}

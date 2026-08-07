@@ -1,22 +1,22 @@
-# Crypto CTF ワークフロー
+# Crypto CTF Workflow
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## トリアージチェックリスト
+## Triage checklist
 
-1. 所持しているものを識別する: encoding vs encryption vs hash vs signature vs MAC.
-2. 制御されているものを特定する: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
-3. 分類する: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. 高確率のチェックを最初に行う: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
-5. 必要な場合にのみ高度な手法にエスカレートする: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+1. 保有しているものを特定する: encoding、encryption、hash、signature、MAC のどれか。
+2. 何が制御可能かを判断する: plaintext/ciphertext、IV/nonce、key、oracle (padding/error/timing)、部分的な漏洩。
+3. 分類する: symmetric (AES/CTR/GCM)、public-key (RSA/ECC)、hash/MAC (SHA/MD5/HMAC)、classical (Vigenere/XOR)。
+4. 可能性の高いチェックから適用する: decode layers、known-plaintext XOR、nonce reuse、mode misuse、oracle behavior。
+5. 必要な場合にのみ advanced methods へ進む: lattices (LLL/Coppersmith)、SMT/Z3、side-channels。
 
-## オンラインリソース & ユーティリティ
+## Online resources & utilities
 
-これは、タスクが識別やレイヤー剥離の場合、または仮説の迅速な確認が必要なときに有用です。
+task が identification と layer peeling の場合、または仮説を素早く確認する必要がある場合に役立つ。
 
 ### Hash lookups
 
-- Googleでhashを検索する（意外と有効）。
+- hash を Google で検索する (意外に効果的)。
 - [https://crackstation.net/](https://crackstation.net/)
 - [https://md5decrypt.net/](https://md5decrypt.net/)
 - [https://hashes.org/search.php](https://hashes.org/search.php)
@@ -26,7 +26,7 @@
 
 ### Identification helpers
 
-- CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
+- CyberChef (magic、decode、convert): https://gchq.github.io/CyberChef/
 - dCode (ciphers/encodings playground): https://www.dcode.fr/tools-list
 - Boxentriq (substitution solvers): https://www.boxentriq.com/code-breaking
 
@@ -38,26 +38,26 @@
 ### Automated decoding
 
 - Ciphey: https://github.com/Ciphey/Ciphey
-- python-codext (tries many bases/encodings): https://github.com/dhondta/python-codext
+- python-codext (many bases/encodings を試行): https://github.com/dhondta/python-codext
 
 ## Encodings & classical ciphers
 
 ### Technique
 
-多くのCTFのcryptoタスクはレイヤー化された変換です: base encoding + simple substitution + compression。目的はレイヤーを識別し、安全に剥がすことです。
+多くの CTF crypto task は、base encoding + simple substitution + compression のような layered transforms である。目的は layer を特定し、安全に peel すること。
 
 ### Encodings: try many bases
 
-レイヤードなエンコーディング（base64 → base32 → …）が疑われる場合は、次を試してください:
+layered encoding (base64 → base32 → …) が疑われる場合は、以下を試す:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
-一般的な特徴:
+Common tells:
 
-- Base64: `A-Za-z0-9+/=` （パディング `=` がよく見られる）
-- Base32: `A-Z2-7=` （しばしば大量の `=` パディング）
-- Ascii85/Base85: 句読点が密集；時に `<~ ~>` でラップされる
+- Base64: `A-Za-z0-9+/=` (padding `=` が一般的)
+- Base32: `A-Z2-7=` (大量の `=` padding が含まれることが多い)
+- Ascii85/Base85: punctuation が密集している。`<~ ~>` で囲まれる場合もある
 
 ### Substitution / monoalphabetic
 
@@ -76,7 +76,7 @@
 
 ### Bacon cipher
 
-Often appears as groups of 5 bits or 5 letters:
+5 bits または 5 letters のグループとして現れることが多い:
 ```
 00111 01101 01010 00000 ...
 AABBB ABBAB ABABA AAAAA ...
@@ -87,20 +87,20 @@ AABBB ABBAB ABABA AAAAA ...
 ```
 ### ルーン
 
-ルーンはしばしば置換アルファベットです; search for "futhark cipher" and try mapping tables.
+Runes は頻繁に substitution alphabets です。「futhark cipher」を検索し、mapping tables を試してください。
 
-## チャレンジでの圧縮
+## Challenges における圧縮
 
-### 手法
+### Technique
 
-圧縮はしばしば追加レイヤーとして現れます（zlib/deflate/gzip/xz/zstd）、時にネストしています。出力がほぼ解析できるがゴミに見える場合は、圧縮を疑ってください。
+Compression は追加レイヤーとして常に登場します（zlib/deflate/gzip/xz/zstd）。場合によっては nested になっています。出力がほぼ parse できるものの garbage のように見える場合は、compression を疑ってください。
 
-### 簡易判別
+### Quick identification
 
 - `file <blob>`
-- Look for magic bytes:
+- magic bytes を探します：
 - gzip: `1f 8b`
-- zlib: often `78 01/9c/da`
+- zlib: 多くの場合 `78 01/9c/da`
 - zip: `50 4b 03 04`
 - bzip2: `42 5a 68` (`BZh`)
 - xz: `fd 37 7a 58 5a 00`
@@ -108,9 +108,9 @@ AABBB ABBAB ABABA AAAAA ...
 
 ### Raw DEFLATE
 
-CyberChef has **Raw Deflate/Raw Inflate**, which is often the fastest path when the blob looks compressed but `zlib` fails.
+CyberChef には **Raw Deflate/Raw Inflate** があり、blob が compressed に見えるものの `zlib` が失敗する場合に、多くの場合最短の方法です。
 
-### 便利なCLI
+### Useful CLI
 ```bash
 python3 - <<'PY'
 import sys, zlib
@@ -122,49 +122,49 @@ except Exception:
 pass
 PY
 ```
-## 一般的なCTFの暗号構成
+## 一般的な CTF crypto constructs
 
-### 手法
+### Technique
 
-これらは現実的な開発者のミスや一般的なライブラリの誤用で頻出します。目的は通常、認識して既知の抽出や再構築のワークフローを適用することです。
+これらは、現実的な開発者のミスや、一般的な library の誤った使用に起因するため、頻繁に登場します。通常の目的は、これらを認識し、既知の抽出または再構築 workflow を適用することです。
 
 ### Fernet
 
-典型的なヒント：二つのBase64文字列（token + key）。
+典型的なヒント: 2 つの Base64 strings（token + key）。
 
 - Decoder/notes: https://asecuritysite.com/encryption/ferdecode
-- In Python: `from cryptography.fernet import Fernet`
+- Python では: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-複数のsharesを見て、threshold `t` が言及されている場合、Shamirである可能性が高い。
+複数の share があり、threshold `t` が言及されている場合は、Shamir である可能性が高いです。
 
-- Online reconstructor (handy for CTFs): http://christian.gen.co/secrets/
+- Online reconstructor（CTF に便利）: http://christian.gen.co/secrets/
 
 ### OpenSSL salted formats
 
-CTFでは `openssl enc` の出力（ヘッダがしばしば `Salted__` で始まる）が与えられることがある。
+CTF では、`openssl enc` の出力（header は通常 `Salted__` で始まる）が与えられることがあります。
 
 Bruteforce helpers:
 
 - [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
-### 一般的なツールセット
+### General toolset
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
 - featherduster: https://github.com/nccgroup/featherduster
 - cryptovenom: https://github.com/lockedbyte/cryptovenom
 
-## 推奨ローカルセットアップ
+## 推奨される local setup
 
-実践的なCTFスタック：
+実用的な CTF stack:
 
-- Python + `pycryptodome`：対称プリミティブと迅速なプロトタイピング用
-- SageMath：剰余演算、CRT、格子、RSA/ECC に関する作業に
-- Z3：制約ベースのチャレンジ向け（cryptoが制約に帰着する場合）
+- Python + `pycryptodome`: symmetric primitives と高速な prototyping 用
+- SageMath: modular arithmetic、CRT、lattices、RSA/ECC work 用
+- Z3: constraint-based challenges 用（crypto が constraints に帰着する場合）
 
-推奨Pythonパッケージ：
+Suggested Python packages:
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
