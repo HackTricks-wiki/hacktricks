@@ -3,11 +3,11 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Ikiwa program inatumia `scanf` kupata **thamani kadhaa kwa wakati mmoja kutoka stdin**, unahitaji kutengeneza state inayoanzia baada ya **`scanf`**.
+> Ikiwa program inatumia `scanf` kupata **thamani kadhaa kwa wakati mmoja kutoka stdin**, unahitaji kutengeneza state inayoanza baada ya **`scanf`**.
 
-Codes zimechukuliwa kutoka [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Misimbo imechukuliwa kutoka [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Input ya kufikia anwani (ikiashiria anwani)
+### Input ya kufikia address (ikionyesha address)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Ingizo la kufikia anwani (linaloonyesha prints)
+### Ingizo la kufikia address (linaloonyesha print)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-Katika hali hii, input ilichukuliwa kwa kutumia `scanf("%u %u")` na thamani `"1 1"` ilitolewa, hivyo thamani **`0x00000001`** za stack zimetokana na **user input**. Unaweza kuona jinsi thamani hizi zinavyoanza kwenye `$ebp - 8`. Kwa hiyo, kwenye code tulitoa **baiti 8 kutoka kwa `$esp` (kwa kuwa wakati huo `$ebp` na `$esp` zilikuwa na thamani ileile)**, kisha tukasukuma BVS.
+Katika scenario hii, input ilichukuliwa kwa kutumia `scanf("%u %u")` na thamani `"1 1"` ilitolewa, hivyo thamani **`0x00000001`** za stack zimetoka kwenye **user input**. Unaweza kuona jinsi thamani hizi zinavyoanza kwenye `$ebp - 8`. Kwa hiyo, kwenye code tulitoa bytes 8 kutoka kwa `$esp` (kwa kuwa wakati huo `$ebp` na `$esp` zilikuwa na thamani sawa), kisha tuka-push BVS.
 
-![Weka bit vectors kwenye stack ili kubaini thamani ambayo stack position inahitaji kufikia ili kufikia mtiririko fulani wa program: Katika hali hii, input ilichukuliwa kwa kutumia scanf("%u %u") na thamani "1...](<../../../images/image (136).png>)
+![Weka bit vectors kwenye stack ili kubaini thamani ambayo stack position inahitaji kuwa nayo ili kufikia program flow: Katika scenario hii, input ilichukuliwa kwa kutumia scanf("%u %u") na thamani "1...](<../../../images/image (136).png>)
 
 ### Thamani za Static Memory (Global variables)
 ```python
@@ -404,11 +404,11 @@ main(sys.argv)
 >  # (!)
 > ```
 
-### Kuweka Constraints
+### Kutumia Constraints
 
 > [!TIP]
-> Wakati mwingine operations rahisi za kibinadamu kama kulinganisha maneno 2 yenye urefu wa 16 **char by char** (loop), **hugharimu** sana kwa **angr** kwa sababu inahitaji kutengeneza branches **exponentially**, kwa kuwa inatengeneza branch 1 kwa kila if: `2^16`\
-> Kwa hiyo, ni rahisi zaidi **kuomba angr ifikie pointi ya awali** (ambapo sehemu halisi ngumu ilikuwa tayari imekamilika) na **kuweka hizo constraints manually**.
+> Wakati mwingine operations rahisi za kibinadamu, kama vile kulinganisha maneno 2 yenye urefu wa 16 **character by character** (loop), **hugharimu** sana kwenye **angr** kwa sababu inahitaji kutengeneza branches **exponentially**, kwani hutengeneza branch 1 kwa kila if: `2^16`\
+> Kwa hiyo, ni rahisi zaidi **kuomba angr irudi kwenye point ya awali** (ambapo sehemu halisi ngumu ilikuwa tayari imekamilika) na **kuweka hizo constraints manually**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> Katika baadhi ya hali unaweza ku-activate **veritesting**, ambayo itaunganisha status zinazofanana, ili kuokoa branches zisizo na umuhimu na kupata solution: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> Katika baadhi ya scenarios unaweza kuactivate **veritesting**, ambayo itaunganisha status zinazofanana, ili kuokoa branches zisizo na manufaa na kupata solution: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Jambo lingine unaloweza kufanya katika hali hizi ni **hook function inayompa angr kitu anachoweza kuelewa** kwa urahisi zaidi.
+> Jambo lingine unaloweza kufanya katika scenarios hizi ni **ku-hook function ili kuipa angr kitu inachoweza kuelewa** kwa urahisi zaidi.
 
 ### Wasimamizi wa Simulation
 
-Baadhi ya simulation managers wanaweza kuwa na manufaa zaidi kuliko wengine. Katika mfano uliotangulia kulikuwa na tatizo kwa sababu branches nyingi zenye manufaa ziliundwa. Hapa, technique ya **veritesting** itaunganisha hizo na kupata solution.\
-Simulation manager hii pia inaweza ku-activate kwa kutumia: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Baadhi ya simulation managers wanaweza kuwa na manufaa zaidi kuliko wengine. Katika mfano uliotangulia kulikuwa na tatizo kwa sababu branches nyingi zenye manufaa ziliundwa. Hapa, technique ya **veritesting** itaunganisha hizo branches na kupata solution.\
+Simulation manager hii pia inaweza kuactivate kwa kutumia: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Bypassing mwito mmoja wa function
+### Hooking/Bypassing call moja ya function
 ```python
 # This level performs the following computations:
 #
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking a function / Simprocedure
+### Kuhook function / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -740,7 +740,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Static Binaries
+### Binaries Tuli
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -809,6 +809,6 @@ main(sys.argv)
 ```
 ## Marejeo
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}

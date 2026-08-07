@@ -4,7 +4,7 @@
 
 Sehemu ya cheatsheet hii inategemea [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
-## Usakinishaji
+## Installation
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
 python3 -m pip install --user virtualenv
@@ -30,9 +30,9 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## Taarifa za Loaded na Main object
+## Taarifa za objekti iliyopakiwa na kuu
 
-### Loaded Data
+### Data Iliyopakiwa
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -86,7 +86,7 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
-### Vizuizi
+### Vitalu
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -121,9 +121,9 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ### Kuita functions
 
-- Unaweza kupitisha orodha ya arguments kupitia `args` na dictionary ya environment variables kupitia `env` kwenda kwenye `entry_state` na `full_init_state`. Thamani zilizo katika miundo hii zinaweza kuwa strings au bitvectors, na zitaserialishwa katika state kama arguments na environment ya execution iliyo-simulated. `args` ya default ni orodha tupu, kwa hiyo ikiwa program unayochanganua inatarajia kupata angalau `argv[0]`, unapaswa kuiweka kila wakati!
-- Ikiwa ungependa `argc` iwe symbolic, unaweza kupitisha bitvector ya kiishara kama `argc` kwa constructors za `entry_state` na `full_init_state`. Kuwa mwangalifu, hata hivyo: ukifanya hivi, unapaswa pia kuongeza constraint kwenye state inayotokana kwamba thamani yako ya argc haiwezi kuwa kubwa kuliko idadi ya args ulizopitisha kwenye `args`.
-- Ili kutumia call state, unapaswa kuiita kwa `.call_state(addr, arg1, arg2, ...)`, ambapo `addr` ni address ya function unayotaka kuita na `argN` ni argument ya Nth ya function hiyo, ikiwa ni Python integer, string, au array, au bitvector. Ikiwa unataka memory itengewe na kwa kweli upitishe pointer kwa object, unapaswa kuifunga katika PointerWrapper, yaani `angr.PointerWrapper("point to me!")`. Matokeo ya API hii yanaweza kuwa yasiyotabirika kidogo, lakini tunaifanyia kazi.
+- Unaweza kupitisha orodha ya arguments kupitia `args` na dictionary ya environment variables kupitia `env` ndani ya `entry_state` na `full_init_state`. Thamani katika miundo hii zinaweza kuwa strings au bitvectors, na zitaserializwa kwenye state kama arguments na environment ya execution inayo-simulate. `args` ya default ni orodha tupu, kwa hiyo ikiwa program unayoichanganua inatarajia kupata angalau `argv[0]`, unapaswa kuiweka kila wakati!
+- Ikiwa ungependa `argc` iwe symbolic, unaweza kupitisha bitvector ya symbolic kama `argc` kwa constructors za `entry_state` na `full_init_state`. Kuwa mwangalifu, hata hivyo: ukifanya hivi, unapaswa pia kuongeza constraint kwenye state inayotokana kwamba thamani yako ya argc haiwezi kuwa kubwa kuliko idadi ya args ulizopitisha kwenye `args`.
+- Ili kutumia call state, unapaswa kuiita kwa `.call_state(addr, arg1, arg2, ...)`, ambapo `addr` ni address ya function unayotaka kuita na `argN` ni argument ya N ya function hiyo, ikiwa ni python integer, string, au array, au bitvector. Ikiwa unataka memory itengewe na upitishe pointer kwa object, unapaswa kuiweka ndani ya PointerWrapper, yaani `angr.PointerWrapper("point to me!")`. Matokeo ya API hii yanaweza kuwa yasiyotabirika kwa kiasi fulani, lakini tunaifanyia kazi.
 
 ### BitVectors
 ```python
@@ -134,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### BitVector za Kisimboli na Vikwazo
+### Symbolic BitVectors na Constraints
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -186,11 +186,11 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Zaidi ya hayo, unaweza kutumia `proj.hook_symbol(name, hook)`, ukitoa jina la `symbol` kama hoja ya kwanza, ili kuweka `hook` kwenye anwani ambayo `symbol` hiyo ipo<sup>[[1]](#references)</sup>
+Zaidi ya hayo, unaweza kutumia `proj.hook_symbol(name, hook)`, ukitoa jina la symbol kama argument ya kwanza, ili kuweka hook kwenye address ambako symbol hiyo iko<sup>[[1]](#references)</sup>
 
 ## Mifano
 
-## Marejeo
+## Marejeleo
 
 - [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
