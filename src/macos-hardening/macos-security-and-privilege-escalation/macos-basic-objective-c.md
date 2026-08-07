@@ -5,21 +5,21 @@
 ## Objective-C
 
 > [!CAUTION]
-> Kumbuka kwamba programu zilizoandikwa kwa Objective-C **zinashikilia** matangazo yao ya darasa **wakati** **zinapokewa** katika [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Matangazo kama hayo ya darasa **yanajumuisha** jina na aina ya:
+> Kumbuka kwamba programu zilizoandikwa kwa Objective-C **huhifadhi** matamko ya class **zinap** **compile** kuwa [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Matamko hayo ya class **yanajumuisha** jina na aina ya:
 
-- Darasa
-- Mbinu za darasa
-- Vigezo vya mfano wa darasa
+- Class
+- Class methods
+- Class instance variables
 
-Unaweza kupata habari hii kwa kutumia [**class-dump**](https://github.com/nygard/class-dump):
+Unaweza kupata taarifa hii kwa kutumia [**class-dump**](https://github.com/nygard/class-dump):
 ```bash
 class-dump Kindle.app
 ```
-Kumbuka kwamba majina haya yanaweza kufichwa ili kufanya kurudi nyuma kwa binary kuwa ngumu zaidi.
+Kumbuka kuwa majina haya yanaweza kufichwa ili kufanya reversing ya binary kuwa ngumu zaidi.
 
-## Madarasa, Mbinu & Vitu
+## Classes, Methods na Objects
 
-### Kiolesura, Mali & Mbinu
+### Interface, Properties na Methods
 ```objectivec
 // Declare the interface of the class
 @interface MyVehicle : NSObject
@@ -34,7 +34,7 @@ Kumbuka kwamba majina haya yanaweza kufichwa ili kufanya kurudi nyuma kwa binary
 
 @end
 ```
-### **Darasa**
+### **Class**
 ```objectivec
 @implementation MyVehicle : NSObject
 
@@ -50,9 +50,9 @@ self.numberOfWheels += value;
 
 @end
 ```
-### **Kitu & Wito wa Njia**
+### **Object na Call Method**
 
-Ili kuunda mfano wa darasa, njia ya **`alloc`** inaitwa ambayo **inagawanya kumbukumbu** kwa kila **sifa** na **inazifanya sifuri** hizo ugawanyiko. Kisha **`init`** inaitwa, ambayo **inaanzisha sifa** kwa **thamani zinazohitajika**.
+Ili kuunda instance ya class, method ya **`alloc`** huitwa; method hii **hutenga kumbukumbu** kwa kila **property** na **huweka allocations hizo kuwa sifuri**. Kisha **`init`** huitwa, ambayo **huanzisha properties** kwa **thamani zinazohitajika**.
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -64,15 +64,15 @@ MyVehicle *newVehicle = [MyVehicle new];
 // [myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]
 [newVehicle addWheels:4];
 ```
-### **Mbinu za Darasa**
+### **Class Methods**
 
-Mbinu za darasa zinaelezewa kwa kutumia **ishara ya kuongeza** (+) si alama ya kuunganisha (-) inayotumiwa na mbinu za mfano. Kama mbinu ya darasa ya **NSString** **`stringWithString`**:
+Class methods hufafanuliwa kwa kutumia **plus sign** (+), si hyphen (-) inayotumiwa na instance methods. Mfano ni class method ya **NSString** **`stringWithString`**:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
 ### Setter & Getter
 
-Ili **kuweka** na **kupata** mali, unaweza kufanya hivyo kwa **alama ya nukta** au kama ungekuwa **ukitaja njia**:
+Ili **set** na **get** properties, unaweza kufanya hivyo kwa kutumia **dot notation** au kana kwamba **unaita method**:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -82,20 +82,20 @@ newVehicle.numberOfWheels = 2;
 NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
-### **Mabadiliko ya Kihusishi**
+### **Instance Variables**
 
-Badala ya mbinu za setter & getter unaweza kutumia mabadiliko ya kihusishi. Mabadiliko haya yana jina sawa na mali lakini yanaanza na "\_":
+Badala ya setter & getter methods, unaweza kutumia instance variables. Variables hizi zina jina sawa na properties lakini zinaanza na "\_":
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
 NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 }
 ```
-### Mikataba
+### Protocols
 
-Mikataba ni seti ya matamko ya mbinu (bila mali). Darasa linalotekeleza mikataba linafanya kazi za kutangazwa.
+Protocols ni seti ya declarations za methods (bila properties). Class inayotekeleza protocol hutekeleza methods zilizotangazwa.
 
-Kuna aina 2 za mbinu: **lazima** na **hiari**. Kwa **kawaida** mbinu ni **lazima** (lakini unaweza pia kuonyesha hivyo kwa lebo ya **`@required`**). Kuonyesha kwamba mbinu ni hiari tumia **`@optional`**.
+Kuna aina 2 za methods: **mandatory** na **optional**. Kwa **default**, method ni **mandatory** (lakini unaweza pia kuionyesha kwa tag ya **`@required`**). Ili kuonyesha kwamba method ni optional, tumia **`@optional`**.
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -105,7 +105,7 @@ Kuna aina 2 za mbinu: **lazima** na **hiari**. Kwa **kawaida** mbinu ni **lazima
 - (void) method3; //optional
 @end
 ```
-### Pamoja yote
+### Yote pamoja
 ```objectivec
 // gcc -framework Foundation test_obj.m -o test_obj
 #import <Foundation/Foundation.h>
@@ -155,20 +155,20 @@ NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
 [mySuperCar makeLongTruck];
 }
 ```
-### Makundi Msingi
+### Madarasa ya Msingi
 
-#### Msimbo
+#### String
 ```objectivec
 // NSString
 NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-Darasa la msingi ni **lisiloweza kubadilishwa**, hivyo ili kuongeza mfuatano wa herufi kwenye mfuatano uliopo **NSString mpya inahitaji kuundwa**.
+Basic classes ni **immutable**, kwa hiyo ili kuambatanisha string kwenye iliyopo, **NSString mpya inahitaji kuundwa**.
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
-Au unaweza pia kutumia darasa la **mutable** la string:
+Au unaweza pia kutumia class ya string ya **mutable**:
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
 [mutableString appendString:bookTitle];
@@ -196,7 +196,7 @@ NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:
 NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
-#### Array, Sets & Dictionary
+#### Array, Sets na Dictionary
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -244,7 +244,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 ```
 ### Blocks
 
-Blocks ni **kazi zinazofanya kama vitu** hivyo zinaweza kupitishwa kwa kazi au **kuhifadhiwa** katika **mifumo** au **kamusi**. Pia, zinaweza **kuwakilisha thamani ikiwa zitatolewa thamani** hivyo ni sawa na lambdas.
+Blocks ni **functions zinazofanya kazi kama objects**, hivyo zinaweza kupitishwa kwenye functions au **kuhifadhiwa** kwenye **arrays** au **dictionaries**. Pia, zinaweza **kuwakilisha value zinapopewa values**, hivyo zinafanana na lambdas.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -257,7 +257,7 @@ return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-Inawezekana pia **kufafanua aina ya block kutumika kama parameter** katika kazi:
+Pia inawezekana **kufafanua aina ya block itakayotumika kama parameter** katika functions:
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);
@@ -304,7 +304,7 @@ if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
 NSLog(@"Removed successfully");
 }
 ```
-Inawezekana pia kusimamia faili **ukitumia vitu vya `NSURL` badala ya vitu vya `NSString`**. Majina ya mbinu ni sawa, lakini **pamoja na `URL` badala ya `Path`**.
+Pia inawezekana kudhibiti faili **kwa kutumia objects za `NSURL` badala ya objects za `NSString`**. Majina ya methods yanafanana, lakini **zikiwa na `URL` badala ya `Path`**.
 ```objectivec
 
 

