@@ -2,24 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Zbiór stron, które często pojawiają się w crypto challenges, ale nie pasują nigdzie indziej.
+Zbiór stron, które często pojawiają się w wyzwaniach kryptograficznych, ale nie pasują dokładnie do żadnej innej kategorii.
 
-## Języki esoteryczne
+## Języki ezoteryczne
 
 ### Technika
 
-Użyj tego, gdy zadanie crypto tak naprawdę polega na: uruchomieniu programu w esolang i następnie zdekodowaniu tego, co wypisuje.
+Użyj tego, gdy zadanie kryptograficzne w rzeczywistości polega na: uruchomieniu programu w esolang i zdekodowaniu jego wyniku.
 
-Jeśli challenge daje ci kod, który nie wygląda jak standardowy język:
+Jeśli wyzwanie zawiera kod, który nie wygląda jak kod w standardowym języku:
 
-- Zidentyfikuj esolang (wygoogluj charakterystyczny token).
+- Zidentyfikuj esolang (wyszukaj w Google charakterystyczny token).
 - Użyj interpretera online lub obrazu Docker.
-- Jeśli wynik jest dziwny, poszukaj wielowarstwowego kodowania/kompresji po wykonaniu.
+- Jeśli wynik wygląda dziwnie, po wykonaniu programu poszukaj wielowarstwowego kodowania lub kompresji.
 
-Dobry punkt startowy:
+Dobra lista na początek:<sup>[[1]](#references)</sup>
 
 {{#ref}}
 https://esolangs.org/wiki/Main_Page
 {{#endref}}
+
+## Referencje
+
+- [1] [Esolang, wiki poświęcone ezoterycznym językom programowania](https://esolangs.org/wiki/Main_Page)
 
 {{#include ../../banners/hacktricks-training.md}}

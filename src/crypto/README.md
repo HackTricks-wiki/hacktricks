@@ -2,45 +2,45 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Ta sekcja skupia się na **praktycznej kryptografii dla hacking/CTFs**: jak szybko rozpoznawać typowe wzorce, wybrać odpowiednie narzędzia i zastosować znane ataki.
+Ta sekcja koncentruje się na **praktycznej kryptografii dla hacking/CTF**: jak szybko rozpoznawać typowe wzorce, wybierać właściwe narzędzia i stosować znane ataki.
 
 Jeśli szukasz informacji o ukrywaniu danych w plikach, przejdź do sekcji **Stego**.
 
 ## Jak korzystać z tej sekcji
 
-Crypto challenges reward speed: classify the primitive, identify what you control (oracle/leak/nonce reuse), then apply a known attack template.
+Wyzwania Crypto nagradzają szybkość: sklasyfikuj prymityw, ustal, nad czym masz kontrolę (oracle/leak/ponowne użycie nonce), a następnie zastosuj znany szablon ataku.
 
-### CTF workflow
+### Workflow CTF
 {{#ref}}
 ctf-workflow/README.md
 {{#endref}}
 
-### Symmetric crypto
+### Kryptografia symetryczna
 {{#ref}}
 symmetric/README.md
 {{#endref}}
 
-### Hashes, MACs, and KDFs
+### Hashes, MACs i KDFs
 {{#ref}}
 hashes/README.md
 {{#endref}}
 
-### Public-key crypto
+### Kryptografia klucza publicznego
 {{#ref}}
 public-key/README.md
 {{#endref}}
 
-### TLS and certificates
+### TLS i certyfikaty
 {{#ref}}
 tls-and-certificates/README.md
 {{#endref}}
 
-### Crypto in malware
+### Crypto w malware
 {{#ref}}
 crypto-in-malware/README.md
 {{#endref}}
 
-### Misc
+### Różne
 {{#ref}}
 ctf-misc/README.md
 {{#endref}}
@@ -49,6 +49,6 @@ ctf-misc/README.md
 
 - Python: `python3 -m venv .venv && source .venv/bin/activate`
 - Biblioteki: `pip install pycryptodome gmpy2 sympy pwntools`
-- SageMath (często niezbędny do lattice/RSA/ECC): https://www.sagemath.org/
+- SageMath (często niezbędny do lattice/RSA/ECC): <https://www.sagemath.org/>
 
 {{#include ../banners/hacktricks-training.md}}

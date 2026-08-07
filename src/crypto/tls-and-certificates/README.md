@@ -2,7 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ta sekcja dotyczy **X.509: parsowanie, formaty, konwersje i typowe błędy**.
+
+Ten obszar dotyczy **parsowania X.509, formatów, konwersji i typowych błędów**.
 
 ## X.509: parsowanie, formaty i typowe błędy
 
@@ -15,7 +16,7 @@ Przydatne pola do sprawdzenia:
 
 - Subject / Issuer / SAN
 - Key Usage / EKU
-- Basic Constraints (czy to CA?)
+- Basic Constraints (czy jest CA?)
 - Okres ważności (NotBefore/NotAfter)
 - Algorytm podpisu (MD5? SHA1?)
 
@@ -32,14 +33,14 @@ openssl x509 -in cert.cer -outform PEM -out cert.pem
 openssl x509 -in cert.pem -outform der -out cert.der
 openssl pkcs12 -in file.pfx -out out.pem
 ```
-### Powszechne wektory ataku
+### Typowe kąty ataku
 
-- Ufanie rootom dostarczonym przez użytkownika / brak walidacji łańcucha
-- Słabe algorytmy podpisu (przestarzałe)
-- Ograniczenia nazw / błędy parsowania SAN (specyficzne dla implementacji)
-- Problemy typu Confused deputy związane z błędnym powiązaniem uwierzytelniania client-certificate
+- Zaufanie do rootów dostarczonych przez użytkownika / brak walidacji łańcucha
+- Słabe algorytmy podpisu (legacy)
+- Ograniczenia nazw / błędy parsowania SAN (zależne od implementacji)
+- Problemy typu confused deputy związane z nieprawidłowym powiązaniem uwierzytelniania za pomocą certyfikatu klienta
 
-### CT logs
+### Logi CT
 
 - [https://crt.sh/](https://crt.sh/)
 
