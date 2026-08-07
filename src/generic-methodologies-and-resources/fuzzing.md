@@ -1,31 +1,31 @@
-# Fuzzing Metodolojisi
+# Fuzzing Methodology
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Mutational Grammar Fuzzing: Kapsama vs. Semantik
+## Mutational Grammar Fuzzing: Coverage vs. Semantics
 
-**Mutational grammar fuzzing** içinde girdiler, **grammar-valid** kalacak şekilde mutate edilir. Coverage-guided modda, yalnızca **yeni coverage** tetikleyen örnekler corpus seed olarak kaydedilir. **Language targets** (parsers, interpreters, engines) için bu, bir yapının çıktısının başka bir yapının girdisi olduğu **semantic/dataflow chains** gerektiren bug’ları kaçırabilir.
+**Mutational grammar fuzzing** işleminde input'lar **grammar-valid** kalacak şekilde mutate edilir. Coverage-guided modda yalnızca **new coverage** tetikleyen örnekler corpus seed olarak kaydedilir. **Language target'ları** (parser'lar, interpreter'lar, engine'ler) için bu yaklaşım, bir construct'ın çıktısının diğerinin input'u haline geldiği ve **semantic/dataflow chain** gerektiren bug'ları kaçırabilir.
 
-**Failure mode:** fuzzer, tek tek `document()` ve `generate-id()` (veya benzer primitives) işleyen seed’leri bulur, ancak **zincirlenmiş dataflow’u korumaz**; bu yüzden “bug’a daha yakın” örnek coverage eklemediği için elenir. **3+ bağımlı adım** olduğunda, rastgele yeniden birleştirme pahalı hale gelir ve coverage feedback aramayı yönlendirmez.
+**Failure mode:** fuzzer, `document()` ve `generate-id()` (veya benzer primitive'ler) fonksiyonlarını ayrı ayrı çalıştıran seed'ler bulur; ancak **chained dataflow** yapısını korumaz. Bu nedenle “bug'a daha yakın” örnek coverage eklemediği için silinir. **3+ bağımlı adım** olduğunda random recombination pahalı hale gelir ve coverage feedback aramayı yönlendiremez.
 
-**Implication:** dependency-heavy grammar’lar için, **mutational ve generative phases**’i hibritleştirmeyi veya üretimi **function chaining** pattern’lerine doğru önyargılı hale getirmeyi düşünün (sadece coverage değil).
+**Implication:** dependency-heavy grammar'lar için **mutational ve generative phase'leri hybridize etmeyi** veya generation'ı yalnızca coverage'a değil, **function chaining** pattern'lerine de yönlendirmeyi düşünün.<sup>[[1]](#references)</sup>
 
-## Corpus Diversity Tuzakları
+## Corpus Diversity Pitfalls
 
-Coverage-guided mutation **greedy**’dir: yeni coverage veren bir örnek hemen kaydedilir ve çoğu zaman büyük ölçüde değişmeden kalan bölgeler korunur. Zamanla corpus’lar, düşük yapısal çeşitliliğe sahip **near-duplicates** haline gelir. Aşırı minimization faydalı bağlamı kaldırabilir; bu yüzden pratik bir uzlaşım, **minimum token threshold** sonrasında duran **grammar-aware minimization** kullanmaktır (çevresel yapıyı mutasyon-dostu kalacak kadar korurken gürültüyü azaltmak).
+Coverage-guided mutation **greedy** çalışır: new coverage sağlayan bir örnek hemen kaydedilir ve çoğu zaman büyük, değişmeden kalan bölgeleri korur. Zamanla corpus'lar, düşük structural diversity'ye sahip **near-duplicate** örneklerle dolar. Aggressive minimization faydalı context'i kaldırabilir; bu nedenle pratik bir çözüm, **minimum token threshold** sonrasında duran **grammar-aware minimization** kullanmaktır (noise'u azaltırken mutation-friendly kalmak için yeterli çevre yapısını korur).<sup>[[1]](#references)</sup>
 
-Mutational fuzzing için pratik bir corpus kuralı şudur: **çok sayıda near-duplicate yerine coverage’ı maksimize eden, yapısal olarak farklı küçük bir seed seti** tercih edin. Pratikte bu genelde şunları ifade eder:
+Mutational fuzzing için pratik bir corpus kuralı şudur: çok sayıda near-duplicate yerine, **coverage'ı maksimize eden ve birbirinden yapısal olarak farklı küçük bir seed setini tercih edin**. Uygulamada bu genellikle şu anlama gelir:<sup>[[1]](#references)</sup>
 
-- **Gerçek dünya örnekleriyle** başlayın (public corpora, crawling, captured traffic, target ecosystem’den dosya setleri).
-- Her valid örneği tutmak yerine bunları **coverage-based corpus minimization** ile damıtın.
-- Seed’leri, mutasyonların çoğu çevrimi ilgisiz byte’larda harcamak yerine anlamlı alanlara düşeceği kadar **küçük** tutun.
-- Büyük harness/instrumentation değişikliklerinden sonra corpus minimization’ı yeniden çalıştırın, çünkü reachability değiştiğinde “en iyi” corpus da değişir.
+- **Real-world sample'lar** ile başlayın (public corpus'lar, crawling, captured traffic, target ecosystem'dan file set'leri).
+- Her valid sample'ı saklamak yerine bunları **coverage-based corpus minimization** ile distill edin.
+- Mutation'ların irrelevant byte'lar üzerinde çoğu cycle'ı harcamak yerine anlamlı field'lara denk gelmesi için seed'leri **yeterince küçük** tutun.
+- Major harness/instrumentation değişikliklerinden sonra corpus minimization'ı yeniden çalıştırın; çünkü reachability değiştiğinde “en iyi” corpus da değişir.
 
-## Magic Values İçin Comparison-Aware Mutation
+## Comparison-Aware Mutation For Magic Values
 
-Fuzzer’ların tıkanmasının yaygın nedenlerinden biri syntax değil, **hard comparisons**’dır: magic bytes, length checks, enum strings, checksums veya `memcmp`, switch tables ya da kademeli comparisons tarafından korunan parser dispatch values. Saf rastgele mutation, bu değerleri byte byte tahmin etmeye çalışırken çevrimi boşa harcar.
+Fuzzer'ların plateau yaşamasının yaygın bir nedeni syntax değil, **hard comparison** kontrolleridir: magic byte'lar, length check'leri, enum string'leri, checksum'lar veya `memcmp`, switch table'ları ya da cascaded comparison'lar tarafından korunan parser dispatch value'ları. Pure random mutation, bu değerleri byte-by-byte tahmin etmeye çalışırken cycle'ları boşa harcar.
 
-Bu hedefler için, fuzzer’ın başarısız comparisons’tan operand’ları gözlemleyip mutasyonları onları karşılayacak değerlere doğru eğebilmesi için **comparison tracing** kullanın (örneğin AFL++ `CMPLOG` / Redqueen-style workflows).
+Bu target'lar için **comparison tracing** (örneğin AFL++ `CMPLOG` / Redqueen-style workflow'ları) kullanın. Böylece fuzzer, başarısız comparison'larda kullanılan operand'ları gözlemleyebilir ve mutation'ları bu comparison'ları karşılayan değerlere yönlendirebilir.<sup>[[3]](#references)</sup>
 ```bash
 ./configure --cc=afl-clang-fast
 make
@@ -40,32 +40,32 @@ afl-fuzz -i in -o out -c ./target.cmplog -- ./target.afl @@
 ```
 **Pratik notlar:**
 
-- Bu özellikle hedef derin mantığı **file signatures**, **protocol verbs**, **type tags** veya **version-dependent feature bits** arkasına gizlediğinde çok faydalıdır.
-- Bunu gerçek örneklerden, protocol specs’ten veya debug logs’tan çıkarılan **dictionaries** ile eşleştirin. Grammar token’ları, chunk adları, verb’ler ve ayırıcılar içeren küçük bir dictionary, çoğu zaman devasa bir genel wordlist’ten daha değerlidir.
-- Hedef birçok ardışık kontrol yapıyorsa, önce en erken “magic” karşılaştırmaları çözün ve sonra oluşan corpus’u yeniden minimize edin; böylece sonraki aşamalar zaten geçerli prefix’lerle başlar.
+- Bu, özellikle hedef; derin mantığı **file signatures**, **protocol verbs**, **type tags** veya **version-dependent feature bits** arkasında gated ettiğinde oldukça kullanışlıdır.
+- Gerçek örneklerden, protocol spec'lerinden veya debug log'larından çıkarılan **dictionaries** ile birlikte kullanın. Grammar token'ları, chunk adları, verb'ler ve delimiter'lar içeren küçük bir dictionary, çoğu zaman devasa bir generic wordlist'ten daha değerlidir.
+- Hedef birçok ardışık check gerçekleştiriyorsa, en erken “magic” comparison'ları önce çözün ve ardından ortaya çıkan corpus'u tekrar minimize edin; böylece sonraki aşamalar zaten geçerli prefix'lerle başlar.
 
 ## Stateful Fuzzing: Sequences Are Seeds
 
-**protocols**, **authenticated workflows** ve **multi-stage parsers** için ilginç birim çoğu zaman tek bir blob değil, bir **message sequence**’tir. Tüm transcript’i tek bir file’a birleştirip körlemesine mutate etmek genelde verimsizdir; çünkü fuzzer her adımı eşit şekilde mutate eder, oysa kırılgan state’e çoğu zaman yalnızca sonraki message ulaşır.
+**Protocols**, **authenticated workflows** ve **multi-stage parsers** için ilginç birim çoğu zaman tek bir blob değil, bir **message sequence**'tir. Tüm transcript'i tek bir file'a birleştirip körlemesine mutate etmek genellikle verimsizdir; çünkü fuzzer, yalnızca sonraki message fragile state'e ulaşsa bile her step'i eşit şekilde mutate eder.
 
-Daha etkili bir yaklaşım, **sequence**’in kendisini seed olarak ele almak ve **observable state**’i (response codes, protocol states, parser phases, returned object types) ek feedback olarak kullanmaktır:
+Daha etkili bir pattern, **sequence'in kendisini seed** olarak ele almak ve **observable state**'i (response code'ları, protocol state'leri, parser phase'leri, döndürülen object type'ları) ek feedback olarak kullanmaktır:<sup>[[4]](#references)</sup>
 
-- **valid prefix messages**’leri sabit tutun ve mutasyonları **transition-driving** message’a odaklayın.
-- Sonraki adım bunlara bağlıysa, önceki response’lardan identifier’ları ve server-generated değerleri önbelleğe alın.
-- Tüm serialize transcript’i opak bir blob olarak mutate etmek yerine, message başına mutation/splicing tercih edin.
-- Protocol anlamlı response codes sunuyorsa, bunları daha derinlere ilerleyen sequence’leri önceliklendirmek için ucuz bir state oracle olarak kullanın.
+- **Valid prefix message**'larını sabit tutun ve mutation'ları **transition-driving** message üzerinde yoğunlaştırın.
+- Sonraki step bunlara bağlı olduğunda, önceki response'larda dönen identifier'ları ve server-generated value'ları cache'leyin.
+- Tüm serialized transcript'i opaque bir blob olarak mutate etmek yerine per-message mutation/splicing kullanmayı tercih edin.
+- Protocol anlamlı response code'ları açığa çıkarıyorsa, daha derine ilerleyen sequence'leri önceliklendirmek için bunları **cheap state oracle** olarak kullanın.
 
-Vanilla file-style fuzzing’in authenticated bugs, hidden transitions veya “only-after-handshake” parser bugs’ları sık sık kaçırmasının nedeni de budur: fuzzer yalnızca yapıyı değil, **sıra, state ve dependencies**’i de korumalıdır.
+Authenticated bug'ların, hidden transition'ların veya “only-after-handshake” parser bug'larının vanilla file-style fuzzing tarafından sıklıkla gözden kaçırılmasının nedeni de budur: fuzzer yalnızca structure'ı değil, **order, state ve dependencies**'i de korumalıdır.
 
 ## Single-Machine Diversity Trick (Jackalope-Style)
 
-**generative novelty** ile **coverage reuse**’u hibritleştirmenin pratik bir yolu, **short-lived workers**’ı persistent bir server’a karşı yeniden başlatmaktır. Her worker boş bir corpus ile başlar, `T` saniye sonra sync olur, birleşik corpus üzerinde bir `T` saniye daha çalışır, tekrar sync olur, sonra çıkar. Bu, birikmiş coverage’dan yararlanırken aynı zamanda **her generation’da fresh structures** üretir.
+**Generative novelty** ile **coverage reuse**'u hybrid hale getirmenin pratik bir yolu, kısa ömürlü worker'ları persistent server'a karşı **restart etmektir**. Her worker boş bir corpus ile başlar, `T` saniye sonra sync yapar, birleşik corpus üzerinde bir `T` saniye daha çalışır, tekrar sync yapar ve ardından çıkar. Bu, birikmiş coverage'dan yararlanmaya devam ederken her generation'da **fresh structure**'lar üretir.<sup>[[2]](#references)</sup>
 
 **Server:**
 ```bash
 /path/to/fuzzer -start_server 127.0.0.1:8337 -out serverout
 ```
-**Sıralı workers (örnek döngü):**
+**Sequential workers (örnek döngü):**
 
 <details>
 <summary>Jackalope worker yeniden başlatma döngüsü</summary>
@@ -99,87 +99,87 @@ p.kill()
 
 **Notlar:**
 
-- `-in empty` her oluşturma için **yeni bir corpus** zorlar.
-- `-server_update_interval T` **gecikmeli sync**'i yaklaşıklar (önce novelty, sonra reuse).
-- Grammar fuzzing modunda, **ilk server sync varsayılan olarak atlanır** (`-skip_initial_server_sync` gerekmez).
-- En uygun `T` **target'a bağlıdır**; worker çoğu “easy” coverage'ı bulduktan sonra geçiş yapmak genelde en iyi sonucu verir.
+- `-in empty`, her generation işleminde **fresh corpus** kullanılmasını zorlar.
+- `-server_update_interval T`, **delayed sync** davranışını yaklaşık olarak simüle eder (önce yenilik, sonra yeniden kullanım).
+- Grammar fuzzing modunda, **initial server sync** varsayılan olarak atlanır (`-skip_initial_server_sync` kullanmaya gerek yoktur).
+- En uygun `T` değeri **target-dependent**'dır; worker çoğu “kolay” coverage'ı bulduktan sonra geçiş yapmak genellikle en iyi sonucu verir.
 
-## Snapshot Fuzzing For Hard-To-Harness Targets
+## Hard-To-Harness Targets İçin Snapshot Fuzzing
 
-Test etmek istediğiniz code yalnızca **büyük bir setup cost** sonrasında erişilebilir hale geliyorsa (bir VM boot etmek, bir login'i tamamlamak, bir packet almak, bir container'ı parse etmek, bir service'i initialize etmek), kullanışlı bir alternatif **snapshot fuzzing**'dir:
+Test etmek istediğiniz code yalnızca **yüksek bir setup maliyetinden** sonra erişilebilir hâle geliyorsa (bir VM boot etmek, login işlemini tamamlamak, bir packet almak, bir container parse etmek veya bir service initialize etmek), kullanışlı bir alternatif **snapshot fuzzing**'dir:
 
-1. Target'ı ilginç state hazır olana kadar çalıştırın.
-2. O noktada **memory + registers** snapshot'ını alın.
-3. Her test case için, mutated input'u doğrudan ilgili guest/process buffer'ına yazın.
-4. Crash/timeout/reset olana kadar execute edin.
+1. Target'ı ilgi çekici state hazır olana kadar çalıştırın.
+2. Bu noktada **memory + registers** için snapshot alın.
+3. Her test case için mutated input'u doğrudan ilgili guest/process buffer'ına yazın.
+4. Crash/timeout/reset gerçekleşene kadar çalıştırın.
 5. Yalnızca **dirty pages**'i restore edin ve tekrarlayın.
 
-Bu, her iterasyonda tam setup cost'u ödemeyi önler ve özellikle **network services**, **firmware**, **post-auth attack surfaces** ve klasik in-process harness'e refactor edilmesi zahmetli **binary-only targets** için çok kullanışlıdır.
+Bu yöntem, her iteration'da tam setup maliyetini ödemeyi önler ve özellikle **network services**, **firmware**, **post-auth attack surfaces** ve klasik in-process harness'a dönüştürülmesi zahmetli olan **binary-only targets** için oldukça kullanışlıdır.
 
-Pratik bir trick, `recv`/`read`/packet-deserialization noktasının hemen ardından break etmek, input buffer address'ini not etmek, orada snapshot almak ve sonra her iterasyonda o buffer'ı doğrudan mutate etmektir. Bu, tüm handshake'i her seferinde yeniden oluşturmeden derin parsing logic'i fuzz etmenizi sağlar.
+Pratik bir yöntem, bir `recv`/`read`/packet-deserialization noktasından hemen sonra durmak, input buffer adresini not etmek, o noktada snapshot almak ve ardından her iteration'da bu buffer'ı doğrudan mutate etmektir. Böylece her seferinde tüm handshake'i yeniden oluşturmadan deep parsing logic'i fuzz edebilirsiniz.
 
-## Harness Introspection: Find Shallow Fuzzers Early
+## Harness Introspection: Shallow Fuzzer'ları Erken Bulma
 
-Bir campaign takılıp kaldığında, problem çoğu zaman mutator değil **harness**'tır. Fuzz target'ınıza statik olarak reachable olan ama dinamik olarak nadiren ya da hiç covered edilmeyen functions'ları bulmak için **reachability/coverage introspection** kullanın. Bu functions genellikle üç sorundan birine işaret eder:
+Bir campaign durduğunda sorun çoğu zaman mutator değil, **harness**'tır. Fuzz target'ınızdan statik olarak erişilebilir olan ancak dinamik olarak nadiren veya hiçbir zaman coverage almayan function'ları bulmak için **reachability/coverage introspection** kullanın. Bu function'lar genellikle şu üç sorundan birine işaret eder:
 
-- Harness target'a çok geç ya da çok erken giriyordur.
-- Seed corpus, bütün bir feature family'sini eksik bırakıyordur.
-- Target'ın gerçekten tek bir büyük “her şeyi yap” harness yerine **ikinci bir harness**'e ihtiyacı vardır.
+- Harness target'a çok geç veya çok erken giriyor.
+- Seed corpus'ta bütün bir feature family eksik.
+- Target'ın gerçekten tek ve aşırı büyük bir “do everything” harness yerine **second harness**'a ihtiyacı var.
 
-OSS-Fuzz / ClusterFuzz tarzı workflows kullanıyorsanız, Fuzz Introspector bu triage için kullanışlıdır:
+OSS-Fuzz / ClusterFuzz tarzı workflow'lar kullanıyorsanız, Fuzz Introspector bu triage işlemi için kullanışlıdır:
 ```bash
 python3 infra/helper.py introspector libdwarf --seconds=30
 python3 infra/helper.py introspector libdwarf --public-corpora
 ```
-Raporu, test edilmemiş bir parser path için yeni bir harness ekleyip eklememeye, belirli bir özellik için corpus’u genişletmeye ya da monolithic bir harness’i daha küçük entry point’lere bölmeye karar vermek için kullanın.
+Raporu kullanarak test edilmemiş bir parser yoluna yeni bir harness ekleyip eklemeyeceğinize, belirli bir özellik için corpus'u genişletip genişletmeyeceğinize veya monolitik bir harness'i daha küçük giriş noktalarına bölüp bölmeyeceğinize karar verin.
 
 ## Graph-First Fuzz Target Selection And Mutation Triage
 
-Eğer zaten **static-analysis findings**, **mutation-testing survivors** ve **coverage reports** varsa, bunları bağımsız listeler olarak triage etmeyin. Önce bir **call graph** oluşturun, node’ları **cyclomatic complexity**, **entrypoint/untrusted-input reachability** ve herhangi bir external finding ile annotate edin, sonra graph soruları sorun:
+Elinizde zaten **static-analysis findings**, **mutation-testing survivors** ve **coverage reports** varsa bunları birbirinden bağımsız listeler olarak triage etmeyin. Önce bir **call graph** oluşturun; düğümleri **cyclomatic complexity**, **entrypoint/untrusted-input reachability** ve harici bulgularla açıklayın, ardından graph üzerinde şu soruları sorun:<sup>[[5]](#references)[[6]](#references)</sup>
 
-- Hangi high-complexity fonksiyonlar untrusted input’tan reachable?
-- Hangi mutation survivors parser/handler’lardan security-critical code’a giden path’lerde yer alıyor?
-- Hangi fonksiyonlar unusually high **blast radius** olan architectural choke point’ler?
+- Hangi yüksek karmaşıklıktaki fonksiyonlara untrusted input üzerinden erişilebiliyor?
+- Hangi mutation survivors, parser/handler'lar ile security-critical code arasındaki yollarda bulunuyor?
+- Hangi fonksiyonlar, alışılmadık derecede yüksek **blast radius** değerine sahip architectural choke point'ler?
 
-Bu yaklaşım genellikle yalnızca "lowest coverage" olmaktan daha iyi fuzz target’lar ortaya çıkarır. **High complexity** ve doğrulanmış **external reachability** içeren bir parser/decoder, zayıf coverage’a sahip ama attacker-controlled path’i olmayan izole bir internal helper’dan daha güçlü bir harness adayıdır.
+Bu yaklaşım genellikle yalnızca "en düşük coverage" değerine bakmaktan daha iyi fuzz target'ları ortaya çıkarır. **High complexity** değerine sahip ve **external reachability** doğrulanmış bir parser/decoder, coverage'ı zayıf ancak attacker-controlled path'i olmayan izole bir internal helper'dan daha güçlü bir harness adayıdır.
 
-### Pratik triage workflow
+### Practical triage workflow
 
-1. Codebase’den bir **code graph** oluşturun ve her fonksiyon için complexity/branch metrics çıkarın.
-2. Attacker-controlled input kabul eden **entrypoints**’leri listeleyin: request handlers, decoders, importers, protocol parsers, CLI/file readers.
-3. Bu entrypoints’lerden candidate fonksiyonlara **path queries** çalıştırarak reachable attack surface ile dead/internal-only code’u ayırın.
-4. Şu özellikleri birleştiren node’ları önceliklendirin:
+1. Codebase'den bir **code graph** oluşturun ve fonksiyon başına complexity/branch metriklerini çıkarın.
+2. Attacker-controlled input kabul eden **entrypoint**'leri listeleyin: request handler'lar, decoder'lar, importer'lar, protocol parser'ları, CLI/file reader'lar.
+3. Reachable attack surface'i dead/internal-only code'dan ayırmak için bu entrypoint'lerden candidate function'lara **path queries** çalıştırın.
+4. Şu özellikleri bir arada taşıyan düğümlere öncelik verin:
 - yüksek **cyclomatic complexity**
-- untrusted input’tan doğrulanmış **reachability**
+- **untrusted input** üzerinden doğrulanmış **reachability**
 - yüksek **blast radius** veya çok sayıda downstream dependent
-- **SARIF** findings, audit notları veya mutation survivors gibi destekleyici kanıtlar
-5. Önce en yüksek skorlu node’lar için odaklı harness’ler yazın, özellikle hex/Base64/IP/message decoders gibi **parsers/codecs** için.
+- **SARIF** bulguları, audit notları veya mutation survivor'ları gibi destekleyici kanıtlar
+5. Önce en yüksek puanlı düğümler için odaklanmış harness'ler yazın; özellikle hex/Base64/IP/message decoder'lar gibi **parser/codec**'lere öncelik verin.
 
 ### Mutation survivors: equivalent vs actionable
 
-Mutation testing çoğu zaman gürültülü bir survivor listesi üretir. Her survivor’ı security gap olarak ele almadan önce graph’i kullanarak şunları sorun:
+Mutation testing çoğu zaman gürültülü bir survivor listesi üretir. Her survivor'ı bir security gap olarak değerlendirmeden önce graph'ı kullanarak şu soruları sorun:
 
-- Mutated fonksiyon attacker-controlled bir entrypoint’ten reachable mı?
-- Tüm call path’ler mutated check’ten daha güçlü invariant’lar tarafından kısıtlanıyor mu?
-- Node dead code, formatting-only logic ya da yüksek etkili bir arithmetic/parser path üzerinde mi?
+- Mutasyona uğratılan fonksiyona attacker-controlled bir entrypoint üzerinden erişilebiliyor mu?
+- Tüm call path'ler, mutasyona uğratılan check'ten daha güçlü invariant'lar tarafından kısıtlanıyor mu?
+- Düğüm dead code, yalnızca formatting yapan logic veya high-impact arithmetic/parser path içinde mi bulunuyor?
 
-Reachable olmayan veya yapısal olarak kısıtlı kalan survivors çoğu zaman **equivalent mutants**’tır. **Reachable** kalan ve **boundary conditions**, **overflow/carry paths** veya **security-critical arithmetic/parsing** ile temas eden survivors ise şuralara yükseltilmelidir:
+Erişilemez kalan veya yapısal olarak kısıtlanan survivor'lar çoğunlukla **equivalent mutants**'tır. **Reachable** kalmaya devam eden ve **boundary conditions**, **overflow/carry paths** veya **security-critical arithmetic/parsing** alanlarına dokunan survivor'lar şu çıktılara dönüştürülmelidir:
 
-- new fuzz harnesses
-- direct property/invariant tests
-- targeted edge-case vectors
+- yeni fuzz harness'leri
+- doğrudan property/invariant test'leri
+- hedefli edge-case vector'leri
 
-### External findings’i graph üzerine correlate edin
+### Correlate external findings onto the graph
 
-Eğer SAST pipeline’ınız **SARIF** dışa aktarıyorsa, findings’i **file + line range** ile graph node’larına projekte edin ve graph’i kullanarak etki alanını genişletin:
+SAST pipeline'ınız **SARIF** export ediyorsa bulguları **file + line range** üzerinden graph düğümlerine yansıtın ve impact'i genişletmek için graph'ı kullanın:
 
-- flagged function’ın **blast radius**’unu hesaplayın
-- finding’in herhangi bir entrypoint path’i üzerinde olup olmadığını kontrol edin
-- aynı choke point’e düşen yakın findings’leri cluster edin
+- işaretlenen fonksiyonun **blast radius** değerini hesaplayın
+- bulgunun bir entrypoint'ten başlayan herhangi bir path üzerinde olup olmadığını kontrol edin
+- aynı choke point'te birleşen yakındaki bulguları cluster'layın
 
-Bu, belirli bir fonksiyon üzerinde fuzzing zamanı harcayıp harcamamaya karar verirken faydalıdır: **reachable**, **complex** ve zaten **SAST hits** içeren bir node, attacker path’i olmayan sadece complex bir node’dan genellikle daha iyi bir hedeftir.
+Bu, belirli bir fonksiyon üzerinde fuzzing zamanı harcayıp harcamamaya karar verirken faydalıdır: **reachable**, **complex** olan ve zaten **SAST hits** içeren bir düğüm, attacker path'i olmayan yalnızca complex bir düğümden çoğu zaman daha iyi bir target'tır.
 
-Trailmark ile örnek workflow:
+Trailmark ile örnek workflow:<sup>[[6]](#references)</sup>
 ```bash
 uv pip install trailmark
 trailmark analyze --complexity 10 path/to/project
@@ -193,35 +193,35 @@ engine.preanalysis()
 engine.complexity_hotspots(10)
 engine.paths_between("handle_request", "parse_ipv6")
 ```
-Önemli metodoloji kesişimdir: **karmaşıklık x maruziyet x etki**. En yüksek beklenen güvenlik değerine sahip fuzz hedeflerini seçmek için grafiği kullanın, ardından mutation survivor'ları hangi sınırları ve invariants'ları harness'inizin zorlaması gerektiğine karar vermek için kullanın.
+Önemli metodoloji kesişimdir: **karmaşıklık x maruz kalma x etki**. Beklenen güvenlik değeri en yüksek fuzz hedeflerini seçmek için grafiği kullanın; ardından harness'inizin hangi sınırları ve invariant'ları zorlaması gerektiğine karar vermek için mutation survivor'larını kullanın.
 
-## Go Fuzzing With gosentry: Stronger Engine, Typed Inputs, And Differential Checks
+## gosentry ile Go Fuzzing: Daha Güçlü Engine, Typed Input'lar ve Differential Check'ler
 
-Bir Go hedefi zaten yerel bir `testing.F` harness'ine sahipse, pratik bir yükseltme yolu aynı harness'i [gosentry](https://github.com/trailofbits/gosentry) ile çalıştırmaktır; bu, `go test -fuzz`'i koruyan ancak backend'i **LibAFL** ile değiştiren fork edilmiş bir Go toolchain'dir.
+Bir Go hedefinde zaten yerel bir `testing.F` harness'i varsa, pratik bir yükseltme yolu aynı harness'i [gosentry](https://github.com/trailofbits/gosentry) ile çalıştırmaktır. gosentry, `go test -fuzz` özelliğini koruyan, ancak backend'i **LibAFL** ile değiştiren fork'lanmış bir Go toolchain'idir.<sup>[[7]](#references)[[8]](#references)</sup>
 ```bash
 ./bin/go test -fuzz=FuzzHarness --focus-on-new-code=false --catch-races=true --catch-leaks=true
 ```
-Bu, yerel Go fuzzer **hard comparisons**, **typed inputs** veya **parser-heavy formats** üzerinde takıldığında faydalıdır. Metodoloji aynı kalır:
+Bu, native Go fuzzer **hard comparisons**, **typed inputs** veya **parser-heavy formats** karşısında takıldığında kullanışlıdır. Methodology aynı kalır:
 
-- Seed'ler için `f.Add(...)` ve callback için `f.Fuzz(...)` kullanmaya devam et.
-- Aynı harness'i yeniden kullan, ancak stock toolchain yerine gosentry'nin `go` binary'si ile çalıştır.
-- Ortaya çıkan kampanyayı normal bir coverage-guided run olarak ele al, fakat LibAFL scheduling/mutation ve daha iyi çevresel detector'larla.
+- Seed'ler için `f.Add(...)`, callback için `f.Fuzz(...)` kullanmaya devam edin.
+- Aynı harness'i yeniden kullanın, ancak stock toolchain yerine gosentry'nin `go` binary'si ile çalıştırın.
+- Ortaya çıkan campaign'i normal bir coverage-guided run olarak değerlendirin; ancak bu kez LibAFL scheduling/mutation ve daha iyi çevresel detector'lar kullanılır.
 
-### Silent failure'ları fuzz finding'lere dönüştür
+### Sessiz hataları fuzz finding'lerine dönüştürme
 
-Go değerlendirmelerinde tekrar eden bir sorun, tehlikeli davranışların varsayılan olarak çoğu zaman **crash** etmemesidir. gosentry ile, birkaç “bad ama silent” durumu finding'e dönüştürebilirsin:
+Go assessment'larında tekrarlanan bir sorun, tehlikeli davranışların çoğu zaman varsayılan olarak **crash** oluşturmamasıdır. gosentry ile birkaç “kötü ama sessiz” durumu finding'e dönüştürebilirsiniz:
 
-- Seçili logging/error path'lerini crash gibi davranacak şekilde yapmak için `--panic-on=pkg.Func,...` kullan (`log.Fatal` tarzı, aksi halde sadece loglayıp devam eden code path'ler için faydalı).
-- Yeni keşfedilen queue entry'lerini Go race detector ile yeniden oynatmak için `--catch-races=true` kullan.
-- Yeni queue entry'lerini `goleak` ile yeniden oynatmak ve goroutine leak'lerinde durmak için `--catch-leaks=true` kullan.
-- Timeout olarak kaybolmalarına izin vermek yerine **infinite loops / very slow inputs**'ları fuzz finding olarak tutmak için LibAFL hang handling kullan.
-- Varsayılan olarak built-in arithmetic overflow checks, ayrıca go-panikint-style instrumentation üzerinden opsiyonel truncation checks.
+- `--panic-on=pkg.Func,...`, seçilen logging/error path'lerini crash gibi davranacak şekilde ayarlar. Bu, aksi hâlde yalnızca log yazıp devam eden `log.Fatal` tarzı code path'leri için kullanışlıdır.
+- `--catch-races=true`, yeni keşfedilen queue entry'lerini Go race detector ile yeniden çalıştırır.
+- `--catch-leaks=true`, yeni queue entry'lerini `goleak` ile yeniden çalıştırır ve goroutine leak'lerinde durur.
+- LibAFL hang handling, **infinite loop / çok yavaş input** değerlerini timeout olarak kaybolmalarına izin vermek yerine fuzz finding'leri olarak korur.
+- Varsayılan olarak yerleşik arithmetic overflow kontrolleri ve go-panikint tarzı instrumentation aracılığıyla isteğe bağlı truncation kontrolleri sunulur.
 
-Bu, özellikle security impact'in memory corruption yerine **panicless parser failure**, **concurrency bug** veya yalnızca **DoS-only hang** olduğu hedefler için çok değerlidir.
+Bu, security impact'in memory corruption yerine **panicsiz parser hatası**, **concurrency bug** veya yalnızca **DoS oluşturan hang** olduğu target'lar için özellikle değerlidir.
 
 ### Typed Go API'leri için struct-aware fuzzing
 
-Native Go fuzzing çoğunlukla `[]byte`, `string` ve sayılar gibi scalar'lar bekler. Test edilen kod typed objects tüketiyorsa, gosentry alttaki bytes'ları mutate etmeye devam ederken doğrudan **composite values** (structs, slices, arrays, pointers) fuzz edebilir.
+Native Go fuzzing çoğunlukla `[]byte`, `string` ve sayılar gibi scalar değerleri bekler. Test edilen code typed object'ler tüketiyorsa gosentry, alttaki byte değerlerini değiştirmeye devam ederken composite value'ları (struct, slice, array, pointer) doğrudan fuzz edebilir.
 ```go
 type Input struct {
 Data []byte
@@ -236,24 +236,24 @@ Process(in)
 })
 }
 ```
-Bunu, sadece fuzzing için sahte bir wire format oluştururken kullanmak, logic bug’ları harness-only parsing code arkasında gizlerdi. Differential veya grammar-based campaigns için, harness input’unu tek bir `[]byte` veya `string` olarak tutun ve bunun yerine parse işlemini callback içinde yapın.
+Bunu yalnızca fuzzing için sahte bir wire format oluştururken kullanın; aksi hâlde mantık hataları yalnızca harness'e özgü parsing kodunun arkasında gizlenebilir. Differential veya grammar-based campaign'ler için harness girdisini tek bir `[]byte` veya `string` olarak tutun ve bunun yerine callback içinde parse edin.
 
-### Parser’lar ve protocol input’ları için grammar-based fuzzing
+### Parser'lar ve protocol input'ları için grammar-based fuzzing
 
-Parser’lar, formatlar ve input dilleri için, gosentry, LibAFL üzerinde **Nautilus grammar fuzzing** çalıştırabilir. Grammar, production rule’lardan oluşan bir JSON array’idir ve harness genellikle tek bir `[]byte` veya `string` argümanı almalıdır.
+Parser'lar, formatlar ve input language'leri için gosentry, LibAFL üzerine **Nautilus grammar fuzzing** çalıştırabilir. Grammar, production rule'ların JSON array'idir ve harness genellikle tek bir `[]byte` veya `string` argümanı almalıdır.
 ```bash
 ./bin/go test -fuzz=FuzzGrammarJSON --use-grammar --grammar=./testdata/JSON.json --focus-on-new-code=false
 ```
-Metodoloji notları:
+Methodology notes:
 
-- Byte-level mutasyonlar erken syntax kontrollerinde çoğunlukla ölüyorsa grammar mode kullanın.
-- Grammar’ı tam spesifikasyonu modellemek yerine dilin/protokolün **security-relevant subset**’ine odaklı tutun.
-- Integer, length ve state-machine sınırlarını zorlamak için terminal/nonterminal’larda büyük boundary değerleri kullanın.
-- Grammar mode girdileri grammar-valid tutar, ancak target yine de **bytes/strings** alır; bu yüzden parsing ve semantic kontroller harnessed code içinde kalır.
+- Byte-level mutations çoğunlukla erken syntax kontrollerinde başarısız oluyorsa grammar mode kullanın.
+- Grammar'ı, dilin/protokolün tüm spesifikasyonunu modellemek yerine **security-relevant subset** üzerinde odaklı tutun.
+- Integer, length ve state-machine sınırlarını zorlamak için terminal'lerde/nonterminal'lerde büyük boundary değerleri kullanın.
+- Grammar mode girdileri grammar açısından geçerli tutar; ancak target hâlâ **bytes/strings** alır, dolayısıyla parsing ve semantic kontroller harness edilmiş kodun içinde kalır.
 
-### Differential fuzzing: sadece crash’leri değil, implementations’ı karşılaştırın
+### Differential fuzzing: yalnızca crash'leri değil, implementasyonları da karşılaştırın
 
-Go ecosystem’leri için güçlü bir pattern **grammar-based differential fuzzing**’dir: geçerli structured inputs üretin ve bunları iki parser’a, client’a veya state-transition engine’ine verin.
+Go ecosystems için güçlü bir yaklaşım **grammar-based differential fuzzing**'dir: geçerli yapılandırılmış girdiler üretin ve bunları iki parser'a, client'a veya state-transition engine'e gönderin.
 ```go
 f.Fuzz(func(t *testing.T, data []byte) {
 gotA, errA := ParseA(data)
@@ -265,32 +265,32 @@ _ = gotA
 _ = gotB
 })
 ```
-Şunları findings olarak değerlendirin:
+Bunları bulgu olarak değerlendirin:
 
-- bir implementation panics while the other rejects cleanly
-- accepted/rejected input mismatches
-- farklı parse tree’ler veya decoded object’ler
-- divergent state transitions, nonces, balances veya state roots
+- bir implementasyon panic verirken diğerinin temiz şekilde reddetmesi
+- kabul edilen/reddedilen girdilerdeki uyumsuzluklar
+- farklı parse tree'leri veya decode edilmiş nesneler
+- farklı state geçişleri, nonce'lar, bakiyeler veya state root'ları
 
-Bu, saf crash fuzzing’in çoğu zaman kaçırdığı **consensus mismatches**, **parser ambiguity** ve **spec-vs-implementation drift** bulmak için pratik bir yoldur.
+Bu, yalnızca crash fuzzing'in sıklıkla gözden kaçırdığı **consensus mismatches**, **parser ambiguity** ve **spec-vs-implementation drift** durumlarını bulmanın pratik bir yoludur.
 
-### Coverage reporting için campaign corpus’unu yeniden kullanın
+### Coverage raporlaması için campaign corpus'u yeniden kullanın
 
-Bir campaign’den sonra, ayrı bir corpus’u manuel olarak export etmeden bir Go coverage report üretmek için kaydedilmiş queue corpus’unu replay edin:
+Bir campaign'den sonra, ayrı bir corpus'u manuel olarak dışa aktarmadan Go coverage report oluşturmak için kaydedilmiş queue corpus'u yeniden oynatın:
 ```bash
 ./bin/go test -fuzz=FuzzHarness --generate-coverage .
 ```
-Komutu **aynı package** içinden ve aynı `-fuzz` target ile çalıştırın; böylece gosentry doğru cached campaign state’i çözer.
+Komutu **aynı package** içinden ve **aynı `-fuzz` target** ile çalıştırın; böylece gosentry doğru önbelleğe alınmış campaign state'i çözer.
 
-## References
+## Referanslar
 
-- [Mutational grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
-- [Jackalope](https://github.com/googleprojectzero/Jackalope)
-- [AFL++ Fuzzing in Depth](https://aflplus.plus/docs/fuzzing_in_depth/)
-- [AFLNet Five Years Later: On Coverage-Guided Protocol Fuzzing](https://arxiv.org/abs/2412.20324)
-- [Trailmark turns code into graphs](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
-- [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
-- [Go fuzzing was missing half the toolkit. We forked the toolchain to fix it.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
-- [trailofbits/gosentry](https://github.com/trailofbits/gosentry)
+- [1] [Mutational grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
+- [2] [Jackalope](https://github.com/googleprojectzero/Jackalope)
+- [3] [AFL++ Fuzzing in Depth](https://aflplus.plus/docs/fuzzing_in_depth/)
+- [4] [AFLNet Five Years Later: On Coverage-Guided Protocol Fuzzing](https://arxiv.org/abs/2412.20324)
+- [5] [Trailmark turns code into graphs](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
+- [6] [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
+- [7] [Go fuzzing was missing half the toolkit. We forked the toolchain to fix it.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
+- [8] [trailofbits/gosentry](https://github.com/trailofbits/gosentry)
 
 {{#include ../banners/hacktricks-training.md}}

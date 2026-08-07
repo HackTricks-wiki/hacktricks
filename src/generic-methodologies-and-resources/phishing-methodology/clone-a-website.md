@@ -1,14 +1,19 @@
+# Bir Web Sitesini Klonlama
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Phishing değerlendirmesi için bazen bir **web sitesini** tamamen kopyalamak faydalı olabilir.
 
-Kopyalanan web sitesine, kullanıcının sekmesini "kontrol" etmek için bir BeEF hook'u gibi bazı payload'lar da ekleyebilirsiniz.
+Bir phishing değerlendirmesi sırasında bazen bir web sitesini tamamen **clone/dump** etmek faydalı olabilir.
+
+Klonlanan web sitesine, kullanıcının sekmesini "kontrol etmek" için BeEF hook gibi bazı payload'lar da ekleyebileceğinizi unutmayın.
 
 Bu amaçla kullanabileceğiniz farklı araçlar vardır:
 
 ## wget
-```text
-wget -mk -nH
+```bash
+wget --mirror --page-requisites --convert-links --adjust-extension <URL>
+cd <URL>
+python3 -m http.server 8000
 ```
 ## goclone
 ```bash

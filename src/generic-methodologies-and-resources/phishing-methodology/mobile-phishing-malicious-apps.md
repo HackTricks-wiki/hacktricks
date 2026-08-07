@@ -3,36 +3,36 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 > [!INFO]
-> This page covers techniques used by threat actors to distribute **malicious Android APKs** and **iOS mobile-configuration profiles** through phishing (SEO, social engineering, fake stores, dating apps, etc.).
-> The material is adapted from the SarangTrap campaign exposed by Zimperium zLabs (2025) and other public research.
+> Bu sayfa, tehdit aktörlerinin phishing (SEO, social engineering, sahte mağazalar, dating uygulamaları vb.) yoluyla **malicious Android APKs** ve **iOS mobile-configuration profiles** dağıtmak için kullandığı teknikleri ele alır.
+> Materyal, Zimperium zLabs (2025) tarafından ortaya çıkarılan SarangTrap campaign ve diğer public research çalışmalarından uyarlanmıştır.<sup>[[1]](#references)</sup>
 
 ## Attack Flow
 
 1. **SEO/Phishing Infrastructure**
-* Register dozens of look-alike domains (dating, cloud share, car service…).
-– Use local language keywords and emojis in the `<title>` element to rank in Google.
-– Host *both* Android (`.apk`) and iOS install instructions on the same landing page.
+* Birbirine benzeyen onlarca domain kaydedin (dating, cloud share, car service…).
+– Google'da sıralamaya girmek için `<title>` elementinde yerel dilde keywords ve emojis kullanın.
+– Aynı landing page üzerinde hem Android (`.apk`) hem de iOS install instructions barındırın.
 2. **First Stage Download**
-* Android: direct link to an *unsigned* or “third-party store” APK.
-* iOS: `itms-services://` or plain HTTPS link to a malicious **mobileconfig** profile (see below).
+* Android: *unsigned* veya “third-party store” APK'ya direct link.
+* iOS: malicious **mobileconfig** profile yönlendiren `itms-services://` veya düz HTTPS link (aşağıya bakın).
 3. **Android Post-install Behaviour**
-* C2-gated execution, permission abuse, dropper bypasses, background collection, and other post-install malware behaviour are covered in the dedicated Android Malware Post-Exploitation page below.
+* C2-gated execution, permission abuse, dropper bypasses, background collection ve diğer post-install malware davranışları, aşağıdaki özel Android Malware Post-Exploitation sayfasında ele alınmaktadır.
 4. **iOS Delivery Technique**
-* A single **mobile-configuration profile** can request `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` etc. to enroll the device in “MDM”-like supervision.
+* Tek bir **mobile-configuration profile**, cihazı “MDM” benzeri supervision işlemine kaydetmek için `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration` vb. isteyebilir.
 * Social-engineering instructions:
-1. Open Settings ➜ *Profile downloaded*.
-2. Tap *Install* three times (screenshots on the phishing page).
-3. Trust the unsigned profile ➜ attacker gains *Contacts* & *Photo* entitlement without App Store review.
+1. Settings'i açın ➜ *Profile downloaded*.
+2. *Install* seçeneğine üç kez dokunun (phishing page üzerinde screenshots).
+3. Unsigned profile'a güvenin ➜ attacker, App Store review olmadan *Contacts* ve *Photo* entitlement'larına erişim kazanır.
 5. **iOS Web Clip Payload (phishing app icon)**
-* `com.apple.webClip.managed` payloads can **pin a phishing URL to the Home Screen** with a branded icon/label.
-* Web Clips can run **full‑screen** (hides the browser UI) and be marked **non‑removable**, forcing the victim to delete the profile to remove the icon.
+* `com.apple.webClip.managed` payload'ları, branded bir icon/label ile **phishing URL'sini Home Screen'e sabitleyebilir**.
+* Web Clips **full-screen** çalışabilir (browser UI'ını gizler) ve **non-removable** olarak işaretlenebilir; böylece icon'u kaldırmak için victim'ın profile'ı silmesi gerekir.<sup>[[3]](#references)</sup>
 6. **Network Layer**
-* Plain HTTP, often on port 80 with HOST header like `api.<phishingdomain>.com`.
-* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (no TLS → easy to spot).
+* Düz HTTP; genellikle `api.<phishingdomain>.com` gibi bir HOST header ile port 80 üzerinde.
+* `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (TLS yok → tespit edilmesi kolay).
 
 ## Android Malware Post-Exploitation
 
-For post-install Android malware tradecraft such as C2, Accessibility abuse, overlays, ATS automation, staged DEX loading, premium SMS, and persistence, see:
+C2, Accessibility abuse, overlays, ATS automation, staged DEX loading, premium SMS ve persistence gibi post-install Android malware tradecraft örnekleri için aşağıdaki sayfaya bakın:
 
 {{#ref}}
 ../basic-forensic-methodology/android-malware-post-exploitation.md
@@ -40,7 +40,7 @@ For post-install Android malware tradecraft such as C2, Accessibility abuse, ove
 
 ## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
 
-Attackers increasingly replace static APK links with a Socket.IO/WebSocket channel embedded in Google Play–looking lures. This conceals the payload URL, bypasses URL/extension filters, and preserves a realistic install UX.
+Attackers, static APK link'lerini giderek daha fazla Google Play'e benzeyen lures içine gömülü bir Socket.IO/WebSocket channel ile değiştiriyor. Bu yöntem payload URL'sini gizler, URL/extension filters'larını bypass eder ve gerçekçi bir install UX'i korur.<sup>[[2]](#references)[[4]](#references)</sup>
 
 Typical client flow observed in the wild:
 
@@ -67,10 +67,10 @@ document.body.appendChild(a); a.click();
 ```
 </details>
 
-Neden basit kontrolleri atlatır:
-- Statik bir APK URL’si açığa çıkmaz; payload, WebSocket frame’lerinden bellek içinde yeniden oluşturulur.
-- Doğrudan .apk yanıtlarını engelleyen URL/MIME/extension filtreleri, WebSockets/Socket.IO üzerinden taşınan binary data’yı kaçırabilir.
-- WebSockets çalıştırmayan crawler’lar ve URL sandbox’ları payload’ı alamaz.
+Basit kontrollerden neden kaçabildiği:
+- Statik bir APK URL'si açığa çıkmaz; payload, WebSocket frame'lerinden bellekte yeniden oluşturulur.
+- Doğrudan `.apk` yanıtlarını engelleyen URL/MIME/extension filtreleri, WebSockets/Socket.IO üzerinden tünellenen binary verileri gözden kaçırabilir.
+- WebSockets çalıştırmayan crawler'lar ve URL sandbox'ları payload'ı almaz.
 
 Ayrıca WebSocket tradecraft ve tooling için:
 
@@ -79,11 +79,11 @@ Ayrıca WebSocket tradecraft ve tooling için:
 {{#endref}}
 
 
-## References
+## Referanslar
 
-
-- [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
-- [Socket.IO](https://socket.io)
-- [Web Clips payload settings for Apple devices](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
+- [1] [Romantizmin Karanlık Yüzü: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
+- [2] [Socket.IO](https://socket.io)
+- [3] [Apple cihazları için Web Clips payload ayarları](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
+- [4] [Endonezya ve Vietnam Android Kullanıcılarını Hedefleyen Banker Trojan](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 
 {{#include ../../banners/hacktricks-training.md}}

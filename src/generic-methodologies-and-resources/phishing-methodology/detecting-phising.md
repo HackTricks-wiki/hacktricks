@@ -4,34 +4,34 @@
 
 ## Giriş
 
-Bir phishing denemesini tespit etmek için günümüzde kullanılan phishing tekniklerini **anlamak** önemlidir. Bu yazının üst sayfasında bu bilgiyi bulabilirsiniz; bugün hangi tekniklerin kullanıldığından haberdar değilseniz, üst sayfaya gidip en azından o bölümü okumanızı öneririm.
+Bir phishing girişimini tespit etmek için **günümüzde kullanılan phishing tekniklerini anlamak** önemlidir. Bu gönderinin üst sayfasında bu bilgileri bulabilirsiniz; bu nedenle günümüzde hangi tekniklerin kullanıldığından haberdar değilseniz üst sayfaya gitmenizi ve en azından ilgili bölümü okumanızı öneririm.
 
-Bu yazı, **saldırganların bir şekilde hedefin domain adını taklit etmeye ya da kullanmaya çalışacağı** fikrine dayanır. Eğer domaininiz `example.com` ise ve farklı bir domain (ör. `youwonthelottery.com`) kullanılarak hedeflenmişseniz, bu teknikler bunu ortaya çıkaramayacaktır.
+Bu gönderi, **saldırganların bir şekilde kurbanın domain adını taklit etmeye veya kullanmaya çalışacağı** fikrine dayanır. Domain'inizin adı `example.com` ise ve herhangi bir nedenle `youwonthelottery.com` gibi tamamen farklı bir domain adı kullanılarak phish edildiyseniz, bu teknikler bunu ortaya çıkaramaz.
 
-## Domain name varyasyonları
+## Domain adı varyasyonları
 
-E-posta içinde benzer bir domain adı kullanacak phishing girişimlerini ortaya çıkarmak bir hayli **kolaydır**.\
-Saldırganın kullanabileceği en olası phishing isimlerinin bir listesini **oluşturmak** ve bunların **kayıtlı** olup olmadığını ya da herhangi bir **IP**'nin bunları kullanıp kullanmadığını **kontrol etmek** yeterlidir.
+E-posta içinde **benzer bir domain** adı kullanacak **phishing** girişimlerini **ortaya çıkarmak** oldukça **kolaydır**.\
+Bir saldırganın kullanabileceği **en olası phishing adlarının bir listesini oluşturmak** ve bunların **kayıtlı olup olmadığını kontrol etmek** veya yalnızca bunlardan herhangi birini kullanan bir **IP** olup olmadığını kontrol etmek yeterlidir.
 
-### Finding suspicious domains
+### Şüpheli domain'leri bulma
 
-Bu amaç için aşağıdaki araçlardan herhangi birini kullanabilirsiniz. Bu araçların domainin herhangi bir IP'ye atanmış olup olmadığını kontrol etmek için otomatik olarak DNS istekleri de yapacağını unutmayın:
+Bu amaçla aşağıdaki araçlardan herhangi birini kullanabilirsiniz. Bu araçların, domain'e herhangi bir IP atanıp atanmadığını kontrol etmek için otomatik olarak DNS istekleri de gerçekleştireceğini unutmayın:
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-Tip: Eğer aday bir liste oluşturursanız, bunu DNS resolver loglarınıza da göndererek **kuruluş içinden gelen NXDOMAIN sorgularını** tespit edin (kullanıcıların saldırgan gerçekten kaydını yapmadan önce bir yazım hatasına ulaşmayı denemesi). Politika izin veriyorsa bu domainleri sinkhole'layın veya önceden engelleyin.
+İpucu: Bir aday listesi oluşturursanız, bunu DNS resolver log'larınıza da aktararak **kurumunuz içinden gelen NXDOMAIN sorgularını** (kullanıcıların, saldırgan gerçekten kaydetmeden önce bir typo'ya erişmeye çalışmasını) tespit edin. Politika izin veriyorsa bu domain'leri sinkhole'a yönlendirin veya önceden engelleyin.
 
 ### Bitflipping
 
-**Bu tekniğin kısa bir açıklamasını üst sayfada bulabilirsiniz. Veya özgün araştırmayı şu adreste okuyun** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+**Bu tekniğin kısa bir açıklamasını üst sayfada bulabilirsiniz. Ya da orijinal araştırmayı** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)<sup>[[1]](#references)</sup> **adresinde okuyabilirsiniz.**
 
-Örneğin, microsoft.com domainindeki 1 bit'lik bir değişiklik onu _windnws.com_ şeklinde dönüştürebilir.\
-**Saldırganlar hedefle ilgili mümkün olduğunca çok bit-flipping domain kaydı yapabilirler ve meşru kullanıcıları kendi altyapılarına yönlendirebilirler.**
+Örneğin, microsoft.com domain'inde 1 bitlik bir değişiklik, domain'i _windnws.com._ haline dönüştürebilir.\
+**Saldırganlar, meşru kullanıcıları kendi altyapılarına yönlendirmek için kurbanla ilişkili mümkün olduğunca çok bit-flipping domain'i kaydedebilir**.<sup>[[1]](#references)</sup>
 
-**Tüm olası bit-flipping domain isimleri de izlenmelidir.**
+**Olası tüm bit-flipping domain adları da izlenmelidir.**
 
-Eğer homoglyph/IDN lookalikes'ları da göz önüne almanız gerekiyorsa (ör. Latin/Kiril karakterlerin karıştırılması), bakınız:
+Homoglyph/IDN benzerlerini de (ör. Latin/Kiril karakterlerinin karıştırılması) dikkate almanız gerekiyorsa şuraya bakın:
 
 {{#ref}}
 homograph-attacks.md
@@ -39,22 +39,22 @@ homograph-attacks.md
 
 ### Temel kontroller
 
-Potansiyel şüpheli domain isimleri listesini elde ettikten sonra, bunları (özellikle HTTP ve HTTPS portlarında) **kontrol ederek hedef domainin kullandığına benzer bir login formu kullanıp kullanmadıklarını görmelisiniz**.\
-Port 3333'ü de kontrol ederek açık olup `gophish` çalıştırıp çalıştırmadığını görebilirsiniz.\
-Ayrıca keşfedilen her şüpheli domainin **ne kadar eski olduğunu** bilmek ilginçtir; ne kadar yeni ise o kadar risklidir.\
-Şüpheli web sayfalarının HTTP ve/veya HTTPS ekran görüntülerini alarak şüpheli olup olmadıklarını görebilir ve gerekirse **daha derinlemesine incelemek için erişebilirsiniz**.
+Olası şüpheli domain adlarının bir listesine sahip olduğunuzda, bunları (özellikle HTTP ve HTTPS portlarını) **kurbanın domain'indekilere benzer bir login formu kullanıp kullanmadıklarını görmek için kontrol etmelisiniz**.\
+Açık olup olmadığını ve bir `gophish` instance'ı çalıştırıp çalıştırmadığını görmek için 3333 portunu da kontrol edebilirsiniz.\
+**Keşfedilen her şüpheli domain'in ne kadar eski olduğunu** bilmek de ilginçtir; domain ne kadar yeniyse risk de o kadar yüksektir.\
+Şüpheli HTTP ve/veya HTTPS web sayfasının **ekran görüntülerini** alarak şüpheli olup olmadığını görebilir ve bu durumda **daha ayrıntılı incelemek için erişebilirsiniz**.
 
 ### İleri düzey kontroller
 
-Eğer bir adım daha ileri gitmek isterseniz, bu şüpheli domainleri düzenli olarak **izlemenizi ve zaman zaman yeni aramalar yapmanızı** öneririm (her gün mü? sadece birkaç saniye/dakika sürer). İlgili IP'lerin açık portlarını da **kontrol etmeli** ve `gophish` veya benzeri araç örneklerini **aramalısınız** (evet, saldırganlar da hata yapar) ve şüpheli domainlerin ve subdomainlerin HTTP ve HTTPS sayfalarını **izleyerek** hedefin web sayfalarından herhangi bir login formunu kopyalayıp kopyalamadıklarını kontrol edin.\
-Bunu **otomatikleştirmek** için, hedef domainlerin login formlarının bir listesini tutmanızı, şüpheli web sayfalarını taramanızı ve şüpheli domainlerde bulunan her login formunu hedef domainin her login formuyla `ssdeep` gibi bir şeyle karşılaştırmanızı öneririm.\
-Şüpheli domainlerin login formlarını bulduysanız, **sahte kimlik bilgileri gönderip** bunun sizi hedefin domainine **yönlendirip yönlendirmediğini kontrol edebilirsiniz**.
+Bir adım daha ileri gitmek istiyorsanız **bu şüpheli domain'leri izlemenizi ve zaman zaman daha fazlasını aramanızı** (her gün mü? yalnızca birkaç saniye/dakika sürer) öneririm. Ayrıca ilgili IP'lerin açık **port'larını kontrol etmeli**, **`gophish` instance'larını veya benzer araçları aramalı** (evet, saldırganlar da hata yapar) ve kurbanın web sayfalarındaki herhangi bir login formunu kopyalayıp kopyalamadıklarını görmek için **şüpheli domain'lerin ve subdomain'lerin HTTP ve HTTPS web sayfalarını izlemelisiniz**.\
+Bunu **otomatikleştirmek** için kurbanın domain'lerindeki login formlarının bir listesini oluşturmanızı, şüpheli web sayfalarını spider'lamanızı ve şüpheli domain'lerde bulunan her login formunu `ssdeep` gibi bir araç kullanarak kurbanın domain'indeki her login formuyla karşılaştırmanızı öneririm.\
+Şüpheli domain'lerin login formlarını tespit ettiyseniz, **sahte kimlik bilgileri göndermeyi** ve **sizi kurbanın domain'ine yönlendirip yönlendirmediğini kontrol etmeyi** deneyebilirsiniz.
 
 ---
 
-### Hunting by favicon and web fingerprints (Shodan/ZoomEye/Censys)
+### Favicon ve web fingerprint'leriyle avcılık (Shodan/ZoomEye/Censys)
 
-Birçok phishing kit'i taklit ettikleri markanın favicon'larını yeniden kullanır. Internet çapındaki tarayıcılar base64 ile kodlanmış favicon'un MurmurHash3'ünü hesaplar. Bu hash'i üretebilir ve bunun üzerinden pivot yapabilirsiniz:
+Birçok phishing kiti, taklit ettikleri markaların favicon'larını yeniden kullanır. Internet genelindeki scanner'lar, base64 ile kodlanmış favicon'un MurmurHash3'ünü hesaplar. Hash'i oluşturabilir ve bunun üzerinden pivot edebilirsiniz:
 
 Python örneği (mmh3):
 ```python
@@ -63,21 +63,21 @@ url = "https://www.paypal.com/favicon.ico"  # change to your brand icon
 b64 = base64.encodebytes(requests.get(url, timeout=10).content)
 print(mmh3.hash(b64))  # e.g., 309020573
 ```
-- Shodan'da sorgu: `http.favicon.hash:309020573`
-- Araçlarla: favfreak gibi topluluk araçlarına bakarak Shodan/ZoomEye/Censys için hash ve dork oluşturun.
+- Shodan'da sorgulayın: `http.favicon.hash:309020573`
+- Tooling ile: Shodan/ZoomEye/Censys için hash'ler ve dork'lar oluşturmak üzere favfreak gibi community tool'larına göz atın.
 
 Notlar
-- Favicons yeniden kullanılır; eşleşmeleri lead olarak değerlendirin ve işlem yapmadan önce içeriği ve certs'i doğrulayın.
-- Daha yüksek doğruluk için domain-age ve keyword heuristics ile birleştirin.
+- Favicon'lar yeniden kullanılır; eşleşmeleri ipucu olarak değerlendirin ve harekete geçmeden önce içeriği ve sertifikaları doğrulayın.
+- Daha iyi hassasiyet için domain-age ve keyword heuristics'i birleştirin.
 
-### URL telemetri araştırması (urlscan.io)
+### URL telemetry hunting (urlscan.io)
 
-`urlscan.io` gönderilen URL'lerin geçmiş ekran görüntülerini, DOM'unu, isteklerini ve TLS meta verilerini saklar. Marka kötüye kullanımı ve klonlar için arama yapabilirsiniz:
+`urlscan.io`, gönderilen URL'lerin geçmiş ekran görüntülerini, DOM'unu, isteklerini ve TLS metadata'sını depolar. Brand abuse ve clone'ları arayabilirsiniz:<sup>[[2]](#references)</sup>
 
 Örnek sorgular (UI veya API):
-- Meşru domainlerinizi hariç tutarak benzer siteleri bulun: `page.domain:(/.*yourbrand.*/ AND NOT yourbrand.com AND NOT www.yourbrand.com)`
-- Varlıklarınıza hotlinking yapan siteleri bulun: `domain:yourbrand.com AND NOT page.domain:yourbrand.com`
-- Sonuçları yakın zamanla kısıtlamak için ekleyin: `AND date:>now-7d`
+- Meşru domain'leriniz hariç lookalike'ları bulun: `page.domain:(/.*yourbrand.*/ AND NOT yourbrand.com AND NOT www.yourbrand.com)`
+- Asset'lerinize hotlink veren siteleri bulun: `domain:yourbrand.com AND NOT page.domain:yourbrand.com`
+- Sonuçları yenilerle sınırlayın: `AND date:>now-7d` ekleyin
 
 API örneği:
 ```bash
@@ -85,13 +85,13 @@ API örneği:
 curl -s 'https://urlscan.io/api/v1/search/?q=page.domain:(/.*yourbrand.*/%20AND%20NOT%20yourbrand.com)%20AND%20date:>now-7d' \
 -H 'API-Key: <YOUR_URLSCAN_KEY>' | jq '.results[].page.url'
 ```
-JSON'dan pivot on:
-- `page.tlsIssuer`, `page.tlsValidFrom`, `page.tlsAgeDays` — lookalikes için çok yeni cert'leri tespit etmek
-- `task.source` değerleri, örn. `certstream-suspicious` — bulguları CT monitoring'e bağlamak için
+JSON'dan şu alanlara göre pivot edin:
+- `page.tlsIssuer`, `page.tlsValidFrom`, `page.tlsAgeDays`: lookalike'lar için çok yeni sertifikaları tespit etmek üzere
+- `task.source` değerleri (ör. `certstream-suspicious`): bulguları CT monitoring ile ilişkilendirmek üzere
 
-### RDAP üzerinden alan adı yaşı (scriptable)
+### RDAP ile domain yaşı (betiklenebilir)
 
-RDAP makine-okunabilir oluşturma olayları döndürür. **Yeni kayıtlı alan adlarını (NRDs)** işaretlemek için kullanışlı.
+RDAP, makine tarafından okunabilir oluşturma olayları döndürür. **Yeni kaydedilmiş domain'leri (NRD'ler)** işaretlemek için kullanışlıdır.
 ```bash
 # .com/.net RDAP (Verisign)
 curl -s https://rdap.verisign.com/com/v1/domain/suspicious-example.com | \
@@ -100,48 +100,50 @@ jq -r '.events[] | select(.eventAction=="registration") | .eventDate'
 # Generic helper using rdap.net redirector
 curl -s https://www.rdap.net/domain/suspicious-example.com | jq
 ```
-Pipeline'inizi alan adlarını kayıt yaşı kovalarına (ör., <7 days, <30 days) göre etiketleyerek zenginleştirin ve triajı buna göre önceliklendirin.
+Pipeline'ınızı domain'leri kayıt yaşı aralıklarıyla (ör. <7 gün, <30 gün) etiketleyerek zenginleştirin ve triage işlemlerini buna göre önceliklendirin.
 
-### TLS/JAx fingerprints to spot AiTM infrastructure
+### AiTM infrastructure'ını tespit etmek için TLS/JAx parmak izleri
 
-Modern credential-phishing giderek daha fazla **Adversary-in-the-Middle (AiTM)** reverse proxy'leri (ör., Evilginx) kullanarak oturum token'larını çalıyor. Ağ tarafı tespitleri ekleyebilirsiniz:
+Modern credential-phishing saldırıları, session token'larını çalmak için giderek daha fazla **Adversary-in-the-Middle (AiTM)** reverse proxy'leri (ör. Evilginx) kullanıyor. Network tarafında aşağıdaki detections'ları ekleyebilirsiniz:
 
-- Egress'te TLS/HTTP fingerprint'lerini (JA3/JA4/JA4S/JA4H) kaydedin. Bazı Evilginx yapılarında stabil JA4 istemci/sunucu değerleri gözlemlenmiştir. Bilinen-kötü fingerprint'lerde yalnızca zayıf bir gösterge olarak alarm oluşturun ve her zaman içerik ile domain istihbaratıyla teyit edin.
-- CT veya urlscan üzerinden keşfedilen lookalike hostlar için TLS sertifika meta verilerini (issuer, SAN sayısı, wildcard kullanımı, geçerlilik) proaktif olarak kaydedin ve bunları DNS yaşı ve coğrafi konumla korelasyonlayın.
+- Egress noktasında TLS/HTTP parmak izlerini (JA3/JA4/JA4S/JA4H) loglayın. Bazı Evilginx build'lerinde kararlı JA4 client/server değerleri gözlemlenmiştir. Bilinen kötü parmak izleri için yalnızca zayıf bir sinyal olarak alert üretin ve her zaman content ile domain intel üzerinden doğrulayın.<sup>[[3]](#references)</sup>
+- CT veya urlscan üzerinden keşfedilen lookalike host'lar için TLS certificate metadata'sını (issuer, SAN sayısı, wildcard kullanımı, geçerlilik) proaktif olarak kaydedin ve DNS yaşı ile geolocation bilgileriyle ilişkilendirin.
 
-> Not: Fingerprint'leri zenginleştirme olarak değerlendirin, tek başına engelleyici olarak kullanmayın; framework'ler evrilebilir ve rastgeleleştirme/obfuscation yapabilir.
+> Not: Parmak izlerini tek başına blocker olarak değil, enrichment olarak değerlendirin; framework'ler gelişir ve parmak izlerini randomise edebilir veya obfuscate edebilir.
 
-### Domain names using keywords
+### Keyword kullanan domain isimleri
 
-Ana sayfa ayrıca **kurbanın domain adını daha büyük bir domainin içine koyma** tekniğinden de bahsediyor (ör., paypal-financial.com, paypal.com için).
+Parent page ayrıca, **victim'ın domain adını daha büyük bir domain'in içine yerleştirmekten** oluşan bir domain name variation tekniğinden bahsediyor (ör. paypal.com için paypal-financial.com).
 
 #### Certificate Transparency
 
-Önceki "Brute-Force" yaklaşımını kullanmak her zaman mümkün olmayabilir ama sertifika şeffaflığı sayesinde bu tür phishing girişimlerini ortaya çıkarmak **mümkündür**. Her seferinde bir CA tarafından bir sertifika verildiğinde, detaylar kamuya açılır. Bu, certificate transparency'i okuyarak veya izleyerek, bir ismin içinde anahtar kelime kullanan domainleri **bulmanın mümkün olduğu** anlamına gelir. Örneğin, bir saldırgan [https://paypal-financial.com](https://paypal-financial.com) için bir sertifika oluşturduğunda, sertifikayı görerek "paypal" anahtar kelimesini bulmak ve şüpheli e-postanın kullanıldığını bilmek mümkündür.
+Önceki "Brute-Force" yaklaşımını uygulamak mümkün değildir; ancak certificate transparency sayesinde bu tür **phishing girişimlerini ortaya çıkarmak mümkündür**. Bir CA tarafından certificate emit edildiğinde, ayrıntıları public hale gelir. Bu, certificate transparency'yi okuyarak veya izleyerek **adında bir keyword kullanan domain'leri bulmanın mümkün olduğu** anlamına gelir. Örneğin bir attacker [https://paypal-financial.com](https://paypal-financial.com) için bir certificate oluşturursa, certificate'i inceleyerek "paypal" keyword'ünü bulmak ve suspicious email'in kullanıldığını anlamak mümkündür.
 
-Post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) Censys kullanarak belirli bir anahtar kelimeyi etkileyen sertifikaları tarih (sadece "yeni" sertifikalar) ve CA issuer "Let's Encrypt" ile filtreleyerek arayabileceğinizi öneriyor:
+[https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) post'u, belirli bir keyword'ü etkileyen certificate'leri aramak ve sonuçları tarihe göre (yalnızca "new" certificate'ler) ve CA issuer'ı "Let's Encrypt" olacak şekilde filtrelemek için Censys kullanabileceğinizi öne sürüyor:<sup>[[4]](#references)</sup>
 
 ![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
 
-Bununla birlikte, ücretsiz web [**crt.sh**](https://crt.sh) ile de "aynı" işi yapabilirsiniz. Anahtar kelimeyi **arama** ve sonuçları isterseniz **tarih ve CA'ya göre filtreleme** imkanınız var.
+Ancak ücretsiz web sitesi [**crt.sh**](https://crt.sh) üzerinden "aynı şeyi" yapabilirsiniz. **Keyword'ü arayabilir** ve isterseniz sonuçları **tarihe ve CA'ya göre filtreleyebilirsiniz**.
 
-![](<../../images/image (519).png>)
+![Domain names using keywords - Certificate Transparency: However, you can do "the same" using the free web crt.sh . You can search for the keyword and the filter the results by date and...](<../../images/image (519).png>)
 
-Bu son seçenekle Matching Identities alanını kullanarak gerçek domain'den herhangi bir identity'nin şüpheli domainlerle eşleşip eşleşmediğini bile görebilirsiniz (şüpheli bir domainin false positive olabileceğini unutmayın).
+Bu son seçeneği kullanarak, gerçek domain'deki herhangi bir identity'nin suspicious domain'lerden biriyle eşleşip eşleşmediğini görmek için Matching Identities alanını da kullanabilirsiniz (suspicious bir domain'in false positive olabileceğini unutmayın).
 
-**Bir diğer alternatif** harika proje [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream, yeni oluşturulan sertifikaların gerçek zamanlı akışını sağlar; belirli anahtar kelimeleri (neredeyse) gerçek zamanlı olarak tespit etmek için kullanabilirsiniz. Aslında, bunu yapan [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) adında bir proje var.
+**Bir başka alternatif**, [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067) adlı harika project'tir. CertStream, belirli keyword'leri (neredeyse) real-time olarak tespit etmek için kullanabileceğiniz, yeni oluşturulan certificate'lerin real-time stream'ini sağlar. Hatta tam olarak bunu yapan [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) adlı bir project vardır.
 
-Pratik ipucu: CT bulgularını triajlarken NRD'leri, güvensiz/bilinmeyen registrar'ları, privacy-proxy WHOIS kayıtlarını ve çok yeni `NotBefore` zamanlarına sahip sertifikaları önceliklendirin. Gürültüyü azaltmak için sahip olduğunuz domain/markaların bir allowlist'ini tutun.
+Practical tip: CT hit'lerini triage ederken NRD'lere, güvenilmeyen/bilinmeyen registrar'lara, privacy-proxy WHOIS bilgilerine ve `NotBefore` zamanları çok yakın olan cert'lere öncelik verin. Gürültüyü azaltmak için sahip olduğunuz domain'ler ve brand'ler için bir allowlist tutun.
 
-#### **New domains**
+#### **New domain'ler**
 
-**Son bir alternatif** bazı TLD'ler için **yeni kaydedilmiş domain** listeleri toplmaktır (Whoxy bu hizmeti sağlar: https://www.whoxy.com/newly-registered-domains/) ve bu domainlerde anahtar kelimeleri **kontrol etmektir**. Ancak, uzun domainler genellikle bir veya daha fazla subdomain kullanır; dolayısıyla anahtar kelime FLD'nin içinde görünmeyebilir ve phishing alt domain'ini bulamayabilirsiniz.
+**Son bir alternatif**, bazı TLD'ler için **newly registered domain'lerin** listesini toplamak ([Whoxy](https://www.whoxy.com/newly-registered-domains/) böyle bir service sağlar) ve bu domain'lerdeki **keyword'leri kontrol etmektir**. Ancak uzun domain'ler genellikle bir veya daha fazla subdomain kullanır; bu nedenle keyword FLD'nin içinde görünmez ve phishing subdomain'ini bulamazsınız.
 
-Ek heuristik: belirli **file-extension TLD'leri** (ör., `.zip`, `.mov`) uyarılarında ekstra şüpheyle ele alın. Bunlar lure'larda dosya isimleriyle karıştırılmaya eğilimlidir; daha iyi doğruluk için TLD sinyalini marka anahtar kelimeleri ve NRD yaşı ile birleştirin.
+Additional heuristic: belirli **file-extension TLD'lerini** (ör. `.zip`, `.mov`) alerting sırasında ekstra şüpheli olarak değerlendirin. Bunlar lure'larda genellikle filename'lerle karıştırılır; daha iyi precision için TLD sinyalini brand keyword'leri ve NRD yaşıyla birleştirin.
 
-## Referanslar
+## References
 
-- urlscan.io – Search API reference: https://urlscan.io/docs/search/
-- APNIC Blog – JA4+ network fingerprinting (includes Evilginx example): https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/
+- [1] [Bitflipping ile Microsoft'un windows.com trafiğini hijack etmek](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+- [2] [urlscan.io – Search API Reference](https://urlscan.io/docs/search/)
+- [3] [APNIC Blog – JA4+ network fingerprinting](https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/)
+- [4] [Phishing'i bulma: Tools and Techniques](https://0xpatrik.com/phishing-domains/)
 
 {{#include ../../banners/hacktricks-training.md}}
