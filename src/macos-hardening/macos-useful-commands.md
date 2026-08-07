@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Інструменти автоматичного Enumeration для MacOS
+### Інструменти автоматичного перерахування macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Спеціальні команди MacOS
+### Специфічні команди macOS
 ```bash
 #System info
 date
@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Швидка перевірка на anti-analysis / virtualization
+### Швидка anti-analysis / virtualization check
 
-Деякі macOS stealers викликають `system_profiler`, щоб виявити VM, і **переривають виконання з окремим кодом виходу (наприклад, 100)**, щоб уникнути sandbox detonation<sup>[[1]](#references)</sup>:
+Деякі macOS stealers викликають `system_profiler`, щоб виявити ВМ і **припиняють роботу з окремим кодом виходу (наприклад, 100)**, щоб уникнути sandbox detonation<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,7 +125,7 @@ fi
 ```
 ### Встановлене програмне забезпечення та служби
 
-Перевірте наявність **підозрілих** застосунків і **привілеїв** щодо встановлених ресурсів:
+Перевірте наявність **підозрілих** встановлених застосунків і **привілеїв** щодо встановлених ресурсів:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -145,12 +145,12 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### Створення користувача
 
-Без запитів
+Без підказок
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
 ## Посилання
 
-- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, рік Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -1,10 +1,10 @@
-# macOS Default Sandbox Debug
+# Налагодження стандартної Sandbox у macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-На цій сторінці ви можете знайти, як створити додаток для запуску довільних команд зсередини стандартного пісочниці macOS:
+На цій сторінці описано, як створити застосунок для запуску довільних команд усередині стандартної Sandbox у macOS:
 
-1. Скомпілюйте додаток:
+1. Скомпілюйте застосунок:
 ```objectivec:main.m
 #include <Foundation/Foundation.h>
 
@@ -34,7 +34,7 @@ system(input);
 return 0;
 }
 ```
-Скомпілюйте, запустивши: `clang -framework Foundation -o SandboxedShellApp main.m`
+Скомпілюйте його, виконавши: `clang -framework Foundation -o SandboxedShellApp main.m`
 
 2. Створіть пакет `.app`
 ```bash
@@ -58,7 +58,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Визначте права доступу
+3. Визначте entitlements
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -76,7 +76,7 @@ EOF
 ```
 {{#endtab}}
 
-{{#tab name="пісочниця + завантаження"}}
+{{#tab name="sandbox + downloads"}}
 ```bash
 cat << EOF > entitlements.plist
 <?xml version="1.0" encoding="UTF-8"?>
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Підпишіть додаток (вам потрібно створити сертифікат у ключниці)
+4. Підпишіть застосунок (потрібно створити сертифікат у keychain)
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
