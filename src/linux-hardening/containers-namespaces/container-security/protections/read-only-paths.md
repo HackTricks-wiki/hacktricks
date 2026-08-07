@@ -15,7 +15,7 @@ Runtimes frequently mark parts of the proc/sys view as read-only. Depending on t
 - `/proc/irq`
 - `/proc/bus`
 
-The actual list varies, but the model is the same: allow visibility where needed, deny mutation by default.
+The actual list varies, but the model is the same: allow visibility where needed, deny mutation by default.<sup>[[1]](#references)</sup>
 
 ## Lab
 
@@ -39,7 +39,7 @@ Read-only system paths narrow a large class of host-impacting abuse. Even when a
 
 ## Misconfigurations
 
-The main mistakes are unmasking or remounting sensitive paths read-write, exposing host proc/sys content directly with writable bind mounts, or using privileged modes that effectively bypass the safer runtime defaults. In Kubernetes, `procMount: Unmasked` and privileged workloads often travel together with weaker proc protection. Another common operational mistake is assuming that because the runtime usually mounts these paths read-only, all workloads are still inheriting that default.
+The main mistakes are unmasking or remounting sensitive paths read-write, exposing host proc/sys content directly with writable bind mounts, or using privileged modes that effectively bypass the safer runtime defaults. In Kubernetes, `procMount: Unmasked` and privileged workloads often travel together with weaker proc protection.<sup>[[2]](#references)</sup> Another common operational mistake is assuming that because the runtime usually mounts these paths read-only, all workloads are still inheriting that default.
 
 ## Abuse
 
@@ -164,4 +164,10 @@ What is interesting here:
 | containerd / CRI-O under Kubernetes | Runtime default | Usually relies on OCI/runtime defaults | same as Kubernetes row; direct runtime config changes can weaken the behavior |
 
 The key point is that read-only system paths are usually present as a runtime default, but they are easy to undermine with privileged modes or host bind mounts.
+
+## References
+
+- [1] [OCI Runtime Specification: Linux Container Configuration (maskedPaths / readonlyPaths)](https://github.com/opencontainers/runtime-spec/blob/main/config-linux.md)
+- [2] [Kubernetes API Reference: Pod v1 (SecurityContext.procMount)](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/)
+
 {{#include ../../../../banners/hacktricks-training.md}}
