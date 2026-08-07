@@ -1,8 +1,8 @@
-# macOS Default Sandbox Debug
+# Debug podrazumevanog macOS Sandbox-a
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Na ovoj stranici možete pronaći kako da kreirate aplikaciju za pokretanje proizvoljnih komandi iz unutrašnjosti podrazumevanog macOS sandboxes:
+Na ovoj stranici možete pronaći kako da kreirate aplikaciju za pokretanje proizvoljnih komandi iz podrazumevanog macOS Sandbox-a:
 
 1. Kompajlirajte aplikaciju:
 ```objectivec:main.m
@@ -36,7 +36,7 @@ return 0;
 ```
 Kompajlirajte ga pokretanjem: `clang -framework Foundation -o SandboxedShellApp main.m`
 
-2. Izgradite `.app` paket
+2. Izgradite `.app` bundle
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +58,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Definišite ovlašćenja
+3. Definišite entitlements
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Potpišite aplikaciju (treba da kreirate sertifikat u ključanici)
+4. Potpišite aplikaciju (potrebno je da kreirate sertifikat u keychain-u)
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp
