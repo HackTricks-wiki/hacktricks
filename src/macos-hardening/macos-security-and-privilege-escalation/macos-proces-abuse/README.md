@@ -267,11 +267,11 @@ Note that executables compiled with **`pyinstaller`** won't use these environmen
 
 ### Shield
 
-[**Shield**](https://github.com/theevilbit/Shield) is an open source **EndpointSecurity**-based application that detects and blocks process injection. It is a good reference for which signals are actually observable from ES, since it alerts on:<sup>[[1]](#references)</sup>
+[**Shield**](https://github.com/theevilbit/Shield) is an open source **EndpointSecurity**-based application that detects and blocks process injection. It is a good reference for which signals are actually observable from ES, since it alerts on:<sup>[[1]](#references)[[2]](#references)</sup>
 
 - **Injection environment variables** on process exec: `DYLD_INSERT_LIBRARIES`, `CFNETWORK_LIBRARY_PATH`, `RAWCAMERA_BUNDLE_PATH` and `ELECTRON_RUN_AS_NODE`.
 - **`task_for_pid`** calls — one process asking for another's task port, which is the prerequisite for injecting into it.
-- **Electron debugging arguments** — `--inspect`, `--inspect-brk` and `--remote-debugging-port`, which start an Electron app in debug mode and let anyone attach and run code in it.
+- **Electron debugging arguments** — `--inspect`, `--inspect-brk` and `--remote-debugging-port`, which start an Electron app in debug mode and let anyone attach and run code in it.<sup>[[3]](#references)</sup>
 - **Symlink/hardlink creation across privilege levels** — the classic "plant a link as a normal user, point it at a privileged location" primitive. Note that **symlinks can be alerted on but not blocked**: EndpointSecurity does not expose the link destination before creation.
 
 ### Calls made by other processes
@@ -288,4 +288,3 @@ Note that to call that function you need to be **the same uid** as the one runni
 - [4] [Scott Knight - Detecting task modifications](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
