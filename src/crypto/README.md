@@ -1,46 +1,46 @@
-# Crypto
+# Kriptografie
 
 {{#include ../banners/hacktricks-training.md}}
 
-This section focuses on **praktiese kriptografie vir hacking/CTFs**: hoe om vinnig algemene patrone te herken, die regte gereedskap te kies, en bekende aanvalle toe te pas.
+Hierdie afdeling fokus op **praktiese kriptografie vir hacking/CTFs**: hoe om algemene patrone vinnig te herken, die regte tools te kies en bekende aanvalle toe te pas.
 
-If you're here for hiding data inside files, go to the **Stego** section.
+As jy hier is om data binne lêers weg te steek, gaan na die **Stego**-afdeling.
 
 ## Hoe om hierdie afdeling te gebruik
 
-Crypto-uitdagings beloon spoed: klassifiseer die primitief, identifiseer wat jy beheer (oracle/leak/nonce reuse), en pas dan 'n bekende aanvalspatroon toe.
+Crypto challenges beloon spoed: klassifiseer die primitive, identifiseer waaroor jy beheer het (oracle/leak/nonce reuse), en pas dan ’n bekende aanvaltemplate toe.
 
-### CTF workflow
+### CTF-werkvloei
 {{#ref}}
 ctf-workflow/README.md
 {{#endref}}
 
-### Symmetric crypto
+### Simmetriese kriptografie
 {{#ref}}
 symmetric/README.md
 {{#endref}}
 
-### Hashes, MACs, and KDFs
+### Hashes, MACs en KDFs
 {{#ref}}
 hashes/README.md
 {{#endref}}
 
-### Public-key crypto
+### Publieksleutel-kriptografie
 {{#ref}}
 public-key/README.md
 {{#endref}}
 
-### TLS and certificates
+### TLS en sertifikate
 {{#ref}}
 tls-and-certificates/README.md
 {{#endref}}
 
-### Crypto in malware
+### Kriptografie in malware
 {{#ref}}
 crypto-in-malware/README.md
 {{#endref}}
 
-### Misc
+### Diverse
 {{#ref}}
 ctf-misc/README.md
 {{#endref}}
@@ -49,6 +49,6 @@ ctf-misc/README.md
 
 - Python: `python3 -m venv .venv && source .venv/bin/activate`
 - Biblioteke: `pip install pycryptodome gmpy2 sympy pwntools`
-- SageMath (dikwels noodsaaklik vir lattice/RSA/ECC): https://www.sagemath.org/
+- SageMath (dikwels noodsaaklik vir lattice/RSA/ECC): <https://www.sagemath.org/>
 
 {{#include ../banners/hacktricks-training.md}}

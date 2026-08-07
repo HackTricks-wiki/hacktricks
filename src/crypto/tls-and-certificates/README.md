@@ -2,29 +2,30 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Hierdie area gaan oor **X.509 ontleding, formate, omskakelings, en algemene foute**.
 
-## X.509: ontleding, formate & algemene foute
+Hierdie afdeling handel oor **X.509-ontleding, formate, omskakelings en algemene foute**.
+
+## X.509: ontleding, formate en algemene foute
 
 ### Vinnige ontleding
 ```bash
 openssl x509 -in cert.pem -noout -text
 openssl asn1parse -in cert.pem
 ```
-Nuttige velde om te ondersoek:
+Nuttige velde om te inspekteer:
 
 - Subject / Issuer / SAN
 - Key Usage / EKU
-- Basic Constraints (is dit 'n CA?)
-- Geldigheidsvenster (NotBefore/NotAfter)
-- Handtekeningalgoritme (MD5? SHA1?)
+- Basic Constraints (is dit ’n CA?)
+- Geldigheidsperiode (NotBefore/NotAfter)
+- Signature algorithm (MD5? SHA1?)
 
-### Formate & omskakeling
+### Formate en omskakeling
 
 - PEM (Base64 met BEGIN/END headers)
 - DER (binêr)
-- PKCS#7 (`.p7b`) (sertifikaatketting, geen privaat sleutel)
-- PKCS#12 (`.pfx/.p12`) (cert + privaat sleutel + sertifikaatketting)
+- PKCS#7 (`.p7b`) (cert chain, geen private key nie)
+- PKCS#12 (`.pfx/.p12`) (cert + private key + chain)
 
 Omskakelings:
 ```bash
@@ -32,14 +33,14 @@ openssl x509 -in cert.cer -outform PEM -out cert.pem
 openssl x509 -in cert.pem -outform der -out cert.der
 openssl pkcs12 -in file.pfx -out out.pem
 ```
-### Algemene offensiewe hoeke
+### Algemene offensiewe benaderings
 
-- Vertroue in deur gebruiker verskafde root-sertifikate / ontbrekende kettingvalidasie
-- Swak handtekeningalgoritmes (verouderd)
-- Naambeperkings / SAN-ontledingsfoute (implementasiespesifiek)
-- Confused deputy-kwessies met verkeerde binding van kliënt-sertifikaatverifikasie
+- Vertroue op user-provided roots / ontbrekende chain validation
+- Swak signature algorithms (legacy)
+- Name constraints / SAN parsing bugs (implementation-specific)
+- Confused deputy-kwessies met client-certificate authentication misbinding
 
-### CT-logs
+### CT logs
 
 - [https://crt.sh/](https://crt.sh/)
 

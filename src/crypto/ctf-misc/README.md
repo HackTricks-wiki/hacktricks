@@ -2,24 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Versameling bladsye wat gereeld in crypto-uitdagings voorkom, maar nie elders netjies inpas nie.
+Versamelbladsye wat gereeld in crypto-uitdagings voorkom, maar nie netjies elders pas nie.
 
 ## Esoteric languages
 
 ### Tegniek
 
-Gebruik dit wanneer 'n crypto-taak eintlik vereis dat jy 'n esolang-program uitvoer en dan dekodeer wat dit uitset.
+Gebruik dit wanneer ’n crypto-taak eintlik behels dat jy ’n esolang-program uitvoer en dan die uitvoer daarvan decodeer.
 
-As 'n challenge jou code gee wat nie soos 'n standaardtaal lyk nie:
+As ’n uitdaging vir jou kode gee wat nie soos ’n standaardtaal lyk nie:
 
-- Identifiseer die esolang (Google 'n kenmerkende token).
-- Gebruik 'n aanlyn interpreter of 'n Docker image.
-- As die output vreemd is, kyk na gelaagde enkodering/kompressie na uitvoering.
+- Identifiseer die esolang (Google ’n kenmerkende token).
+- Gebruik ’n aanlyn interpreter of ’n Docker image.
+- As die uitvoer vreemd lyk, kyk ná uitvoering vir gelaagde encoding/compression.
 
-Goeie beginlys:
+Goeie beginlys:<sup>[[1]](#references)</sup>
 
 {{#ref}}
 https://esolangs.org/wiki/Main_Page
 {{#endref}}
+
+## Verwysings
+
+- [1] [Esolang, the esoteric programming languages wiki](https://esolangs.org/wiki/Main_Page)
 
 {{#include ../../banners/hacktricks-training.md}}

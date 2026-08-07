@@ -1,20 +1,20 @@
-# Crypto CTF-werksvloei
+# Crypto CTF Workflow
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Triage-kontrolelys
 
-1. Identifiseer wat jy het: encoding vs encryption vs hash vs signature vs MAC.
-2. Bepaal wat beheer word: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
+1. Identifiseer wat jy het: encoding teenoor encryption teenoor hash teenoor signature teenoor MAC.
+2. Bepaal wat beheer word: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), gedeeltelike leakage.
 3. Klassifiseer: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Voer eers die kansrykste kontroles uit: dekodeer lae, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
-5. Skakel slegs na gevorderde metodes as dit nodig is: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+4. Pas eers die kontroles met die hoogste waarskynlikheid toe: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
+5. Eskaleer slegs wanneer nodig na gevorderde metodes: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
-## Aanlyn hulpbronne & nutsprogramme
+## Online resources & utilities
 
-Hierdie is nuttig wanneer die taak identifikasie en laagverwydering is, of wanneer jy vinnige bevestiging van 'n hipotese nodig het.
+Dit is nuttig wanneer die taak identification en layer peeling behels, of wanneer jy vinnig 'n hypothesis moet bevestig.
 
-### Hash-opsoeke
+### Hash lookups
 
 - Google die hash (verbasend effektief).
 - [https://crackstation.net/](https://crackstation.net/)
@@ -24,42 +24,42 @@ Hierdie is nuttig wanneer die taak identifikasie en laagverwydering is, of wanne
 - [https://gpuhash.me/](https://gpuhash.me/)
 - [http://hashtoolkit.com/reverse-hash](http://hashtoolkit.com/reverse-hash)
 
-### Identifikasie-hulpmiddels
+### Identification helpers
 
-- CyberChef (magie, dekodeer, omskakel): https://gchq.github.io/CyberChef/
+- CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
 - dCode (ciphers/encodings playground): https://www.dcode.fr/tools-list
-- Boxentriq (substitusie-oplossers): https://www.boxentriq.com/code-breaking
+- Boxentriq (substitution solvers): https://www.boxentriq.com/code-breaking
 
-### Oefenplatforms / verwysings
+### Practice platforms / references
 
 - CryptoHack (hands-on crypto challenges): https://cryptohack.org/
 - Cryptopals (classic modern crypto pitfalls): https://cryptopals.com/
 
-### Outomatiese dekodering
+### Automated decoding
 
 - Ciphey: https://github.com/Ciphey/Ciphey
 - python-codext (tries many bases/encodings): https://github.com/dhondta/python-codext
 
-## Enkoderinge & klassieke sifferings
+## Encodings & classical ciphers
 
-### Tegniek
+### Technique
 
-Baie CTF-crypto-take is gelaagde transformasies: base encoding + simple substitution + compression. Die doel is om lae te identifiseer en dit veilig af te pel.
+Baie CTF crypto-take is gelaagde transforms: base encoding + eenvoudige substitution + compression. Die doel is om layers te identifiseer en dit veilig af te skil.
 
-### Enkoderinge: probeer verskeie basisse
+### Encodings: try many bases
 
-As jy vermoed daar is gelaagde enkodering (base64 → base32 → …), probeer:
+As jy layered encoding vermoed (base64 → base32 → …), probeer:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
-Algemene tekens:
+Common tells:
 
 - Base64: `A-Za-z0-9+/=` (padding `=` is algemeen)
 - Base32: `A-Z2-7=` (dikwels baie `=` padding)
-- Ascii85/Base85: digte leestekens; soms omhul met `<~ ~>`
+- Ascii85/Base85: dense punctuation; soms omvou in `<~ ~>`
 
-### Substitusie / monoalfabeties
+### Substitution / monoalphabetic
 
 - Boxentriq cryptogram solver: https://www.boxentriq.com/code-breaking/cryptogram
 - quipqiup: https://quipqiup.com/
@@ -85,22 +85,22 @@ AABBB ABBAB ABABA AAAAA ...
 ```
 .... --- .-.. -.-. .- .-. .- -.-. --- .-.. .-
 ```
-### Runetekens
+### Runes
 
-Runetekens is dikwels substitusie-alfabette; soek na "futhark cipher" en probeer toewysingstabellen.
+Runes is dikwels substitusie-alfabette; soek na "futhark cipher" en probeer karteringstabelle.
 
-## Kompressie in uitdagings
+## Kompressie in challenges
 
 ### Tegniek
 
-Kompressie verskyn gereeld as 'n ekstra laag (zlib/deflate/gzip/xz/zstd), soms geneste. As die uitvoer amper parsbaar is maar na rommel lyk, vermoed kompressie.
+Kompressie kom voortdurend voor as ’n ekstra laag (zlib/deflate/gzip/xz/zstd), soms genestel. As die uitvoer amper parse, maar soos gemors lyk, vermoed kompressie.
 
 ### Vinnige identifikasie
 
 - `file <blob>`
 - Soek na magic bytes:
 - gzip: `1f 8b`
-- zlib: often `78 01/9c/da`
+- zlib: dikwels `78 01/9c/da`
 - zip: `50 4b 03 04`
 - bzip2: `42 5a 68` (`BZh`)
 - xz: `fd 37 7a 58 5a 00`
@@ -108,7 +108,7 @@ Kompressie verskyn gereeld as 'n ekstra laag (zlib/deflate/gzip/xz/zstd), soms g
 
 ### Raw DEFLATE
 
-CyberChef het **Raw Deflate/Raw Inflate**, wat dikwels die vinnigste pad is wanneer die blob na gekomprimeer lyk maar `zlib` faal.
+CyberChef het **Raw Deflate/Raw Inflate**, wat dikwels die vinnigste pad is wanneer die blob soos kompressie lyk, maar `zlib` faal.
 
 ### Nuttige CLI
 ```bash
@@ -122,49 +122,49 @@ except Exception:
 pass
 PY
 ```
-## Algemene CTF-kripto-konstruksies
+## Algemene CTF-crypto-konstrukte
 
 ### Tegniek
 
-Hierdie kom gereeld voor omdat dit realistiese ontwikkelaarfoute of algemene biblioteke is wat verkeerd gebruik word. Die doel is gewoonlik om dit te herken en 'n bekende ekstraheer- of herbou-werkstroom toe te pas.
+Hierdie kom gereeld voor omdat hulle realistiese ontwikkelaarsfoute of algemene libraries is wat verkeerd gebruik word. Die doel is gewoonlik herkenning en die toepassing van ’n bekende extraction- of reconstruction-workflow.
 
 ### Fernet
 
-Tipies: twee Base64-strings (token + sleutel).
+Tipiese hint: twee Base64-strings (token + key).
 
-- Dekoder/notas: https://asecuritysite.com/encryption/ferdecode
+- Decoder/notes: https://asecuritysite.com/encryption/ferdecode
 - In Python: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-As jy meerdere shares sien en 'n drempel `t` genoem word, is dit waarskynlik Shamir.
+As jy meerdere shares sien en ’n threshold `t` genoem word, is dit waarskynlik Shamir.
 
-- Aanlyn-rekonstrukteur (handig vir CTFs): http://christian.gen.co/secrets/
+- Online reconstructor (handig vir CTFs): http://christian.gen.co/secrets/
 
 ### OpenSSL salted formats
 
-CTFs gee soms `openssl enc`-uitsette (header begin dikwels met `Salted__`).
+CTFs verskaf soms `openssl enc`-uitsette (die header begin dikwels met `Salted__`).
 
 Bruteforce helpers:
 
 - [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
 - [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
 
-### Algemene gereedskapstel
+### Algemene toolset
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
 - featherduster: https://github.com/nccgroup/featherduster
 - cryptovenom: https://github.com/lockedbyte/cryptovenom
 
-## Aanbevole plaaslike opstelling
+## Aanbevole plaaslike setup
 
-Praktiese CTF-stapel:
+Praktiese CTF-stack:
 
-- Python + `pycryptodome` vir symmetriese primitives en vinnige prototipering
-- SageMath vir modulêre rekenkunde, CRT, roosters, en RSA/ECC-werk
-- Z3 vir beperkingsgebaseerde uitdagings (wanneer die crypto tot beperkings herlei word)
+- Python + `pycryptodome` vir symmetric primitives en vinnige prototyping
+- SageMath vir modular arithmetic, CRT, lattices en RSA/ECC-werk
+- Z3 vir constraint-based challenges (wanneer die crypto tot constraints gereduseer word)
 
-Voorgestelde Python-pakkette:
+Voorgestelde Python-packages:
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
