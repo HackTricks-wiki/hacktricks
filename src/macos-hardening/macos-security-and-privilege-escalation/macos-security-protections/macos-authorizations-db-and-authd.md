@@ -2,31 +2,31 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **DB ya Authorizations**
+## **Database ya Authorizations**
 
-Database iliyo katika `/var/db/auth.db` ni database inayotumika kuhifadhi permissions za kutekeleza operations nyeti. Operations hizi hutekelezwa kikamilifu kwenye **user space** na kwa kawaida hutumiwa na **XPC services** zinazohitaji kuangalia **ikiwa client anayeita ana authorization** ya kutekeleza action fulani kwa kukagua database hii.
+Database iliyoko kwenye `/var/db/auth.db` hutumika kuhifadhi permissions za kutekeleza operations nyeti. Operations hizi hutekelezwa kabisa katika **user space** na kwa kawaida hutumiwa na **XPC services** zinazohitaji kuangalia **ikiwa client anayepiga simu ameidhinishwa** kutekeleza action fulani kwa kuangalia database hii.
 
-Mwanzoni, database hii huundwa kutokana na maudhui ya `/System/Library/Security/authorization.plist`. Kisha, baadhi ya services zinaweza kuongeza au kurekebisha database hii ili kuongeza permissions nyingine.
+Mwanzoni database hii huundwa kutokana na maudhui ya `/System/Library/Security/authorization.plist`. Kisha, baadhi ya services zinaweza kuongeza au kurekebisha database hii ili kuongeza permissions nyingine.
 
-Rules huhifadhiwa kwenye table ya `rules` ndani ya database na huwa na columns zifuatazo:
+Rules huhifadhiwa kwenye table ya `rules` ndani ya database na ina columns zifuatazo:
 
-- **id**: Kitambulisho cha kipekee kwa kila rule, kinachoongezwa kiotomatiki na kutumika kama primary key.
+- **id**: Kitambulisho cha kipekee kwa kila rule, huongezwa automatically na hutumika kama primary key.
 - **name**: Jina la kipekee la rule linalotumika kuitambua na kuirejelea ndani ya authorization system.
-- **type**: Hubainisha aina ya rule, ikiwa na thamani 1 au 2 pekee za kufafanua authorization logic yake.
-- **class**: Huainisha rule kwenye class maalum, huku ikihakikisha kuwa ni integer chanya.
-- "allow" kwa allow, "deny" kwa deny, "user" ikiwa property ya group inaonyesha group ambayo membership yake inaruhusu access, "rule" inaonyesha kwenye array rule inayopaswa kutimizwa, "evaluate-mechanisms" ikifuatiwa na array ya `mechanisms` ambazo zinaweza kuwa builtins au jina la bundle ndani ya `/System/Library/CoreServices/SecurityAgentPlugins/` au `/Library/Security//SecurityAgentPlugins`
+- **type**: Hubainisha aina ya rule, ikiwa imewekewa mipaka ya values 1 au 2 za kufafanua authorization logic yake.
+- **class**: Huainisha rule katika class maalum, kuhakikisha kuwa ni positive integer.
+- "allow" kwa kuruhusu, "deny" kwa kukataa, "user" ikiwa property ya group inaonyesha group ambayo uanachama wake unaruhusu access, "rule" huonyesha kwenye array rule inayopaswa kutimizwa, "evaluate-mechanisms" ikifuatiwa na `mechanisms` array ambayo huwa builtins au jina la bundle ndani ya `/System/Library/CoreServices/SecurityAgentPlugins/` au `/Library/Security//SecurityAgentPlugins`
 - **group**: Huonyesha user group inayohusishwa na rule kwa ajili ya group-based authorization.
-- **kofn**: Huonyesha parameter ya "k-of-n", inayoamua ni subrules ngapi zinapaswa kutimizwa kati ya jumla iliyopo.
-- **timeout**: Hufafanua muda kwa sekunde kabla ya authorization iliyotolewa na rule ku-expire.
-- **flags**: Huwa na flags mbalimbali zinazorekebisha tabia na sifa za rule.
-- **tries**: Hupunguza idadi ya authorization attempts zinazoruhusiwa ili kuongeza security.
+- **kofn**: Inawakilisha parameter ya "k-of-n", inayoamua ni subrules ngapi lazima zitimizwe kati ya jumla fulani.
+- **timeout**: Hufafanua muda kwa sekunde kabla ya authorization iliyotolewa na rule kuisha.
+- **flags**: Ina flags mbalimbali zinazorekebisha tabia na sifa za rule.
+- **tries**: Huweka kikomo cha idadi ya authorization attempts zinazoruhusiwa ili kuimarisha security.
 - **version**: Hufuatilia version ya rule kwa ajili ya version control na updates.
-- **created**: Huhifadhi timestamp ya rule ilipoundwa kwa ajili ya auditing.
-- **modified**: Huhifadhi timestamp ya marekebisho ya mwisho yaliyofanywa kwenye rule.
+- **created**: Huhifadhi timestamp ya wakati rule iliundwa kwa madhumuni ya auditing.
+- **modified**: Huhifadhi timestamp ya modification ya mwisho iliyofanywa kwenye rule.
 - **hash**: Huhifadhi hash value ya rule ili kuhakikisha integrity yake na kugundua tampering.
 - **identifier**: Hutoa string identifier ya kipekee, kama UUID, kwa ajili ya external references za rule.
-- **requirement**: Huwa na serialized data inayofafanua authorization requirements na mechanisms maalum za rule.
-- **comment**: Hutoa maelezo au comment inayoweza kusomwa na binadamu kuhusu rule kwa ajili ya documentation na ufafanuzi.
+- **requirement**: Ina serialized data inayofafanua authorization requirements na mechanisms maalum za rule.
+- **comment**: Hutoa maelezo au comment inayoweza kusomwa na binadamu kuhusu rule kwa ajili ya documentation na uwazi.
 
 ### Mfano
 ```bash
@@ -73,16 +73,17 @@ Zaidi ya hayo, katika [https://www.dssw.co.uk/reference/authorization-rights/aut
 ```
 ## Authd
 
-Ni daemon inayopokea maombi ya kuidhinisha clients kutekeleza vitendo nyeti. Hufanya kazi kama huduma ya XPC iliyofafanuliwa ndani ya folda ya `XPCServices/` na hutumika kuandika logs zake katika `/var/log/authd.log`.
+Ni daemon ambayo itapokea maombi ya kuidhinisha clients kutekeleza vitendo nyeti. Inafanya kazi kama huduma ya XPC iliyofafanuliwa ndani ya folda ya `XPCServices/` na hutumia kuandika logs zake kwenye `/var/log/authd.log`.
 
-Zaidi ya hayo, kwa kutumia security tool inawezekana kujaribu APIs nyingi za `Security.framework`. Kwa mfano, kuendesha `AuthorizationExecuteWithPrivileges`: `security execute-with-privileges /bin/ls`
+Zaidi ya hayo, kwa kutumia security tool inawezekana kujaribu API nyingi za `Security.framework`. Kwa mfano, kuendesha `AuthorizationExecuteWithPrivileges`: `security execute-with-privileges /bin/ls`
 
-Hilo litafanya fork na exec `/usr/libexec/security_authtrampoline /bin/ls` kama root, ambayo itaomba ruhusa kupitia prompt ili kutekeleza ls kama root:
+Hii itafanya fork na exec ya `/usr/libexec/security_authtrampoline /bin/ls` ikiwa root, ambayo itaomba ruhusa kupitia prompt ili kutekeleza ls kama root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 
 - [1] [authenticate-admin-nonshared - Overview of the macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
+
 
 {{#include ../../../banners/hacktricks-training.md}}
