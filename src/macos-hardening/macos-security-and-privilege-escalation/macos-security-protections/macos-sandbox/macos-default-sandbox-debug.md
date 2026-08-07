@@ -1,10 +1,10 @@
-# macOS Default Sandbox Debug
+# Debug του Default Sandbox στο macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Σε αυτή τη σελίδα μπορείτε να βρείτε πώς να δημιουργήσετε μια εφαρμογή για να εκτελείτε αυθαίρετες εντολές από μέσα από το προεπιλεγμένο sandbox του macOS:
+Σε αυτή τη σελίδα μπορείτε να δείτε πώς να δημιουργήσετε μια app για την εκτέλεση arbitrary commands μέσα από το default macOS sandbox:
 
-1. Συγκεντρώστε την εφαρμογή:
+1. Κάντε compile την εφαρμογή:
 ```objectivec:main.m
 #include <Foundation/Foundation.h>
 
@@ -34,9 +34,9 @@ system(input);
 return 0;
 }
 ```
-Συγκεντρώστε το εκτελώντας: `clang -framework Foundation -o SandboxedShellApp main.m`
+Κάντε compile εκτελώντας: `clang -framework Foundation -o SandboxedShellApp main.m`
 
-2. Δημιουργήστε το πακέτο `.app`
+2. Δημιουργήστε το bundle `.app`
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +58,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Ορίστε τα δικαιώματα
+3. Ορίστε τα entitlements
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Υπογράψτε την εφαρμογή (πρέπει να δημιουργήσετε ένα πιστοποιητικό στο keychain)
+4. Κάνε sign την εφαρμογή (χρειάζεται να δημιουργήσεις ένα certificate στο keychain)
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp

