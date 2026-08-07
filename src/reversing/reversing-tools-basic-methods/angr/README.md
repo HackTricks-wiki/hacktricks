@@ -12,7 +12,7 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
-## Ações Básicas
+## Ações básicas
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -30,7 +30,7 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## Informações sobre objetos carregados e principal
+## Informações sobre os objetos carregados e principal
 
 ### Dados carregados
 ```python
@@ -121,9 +121,9 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ### Chamando funções
 
-- Você pode passar uma lista de argumentos por meio de `args` e um dicionário de variáveis de ambiente por meio de `env` para `entry_state` e `full_init_state`. Os valores nessas estruturas podem ser strings ou bitvectors e serão serializados no estado como os argumentos e o ambiente da execução simulada. O `args` padrão é uma lista vazia; portanto, se o programa que você está analisando espera encontrar pelo menos um `argv[0]`, sempre forneça esse valor!
-- Se quiser que `argc` seja symbolic, você pode passar um bitvector symbolic como `argc` para os construtores `entry_state` e `full_init_state`. Porém, tenha cuidado: se fizer isso, também deverá adicionar ao estado resultante uma constraint determinando que o valor de `argc` não pode ser maior que o número de argumentos passados em `args`.
-- Para usar o call state, você deve chamá-lo com `.call_state(addr, arg1, arg2, ...)`, onde `addr` é o endereço da função que deseja chamar e `argN` é o N-ésimo argumento dessa função, seja como um inteiro, string ou array de Python, seja como um bitvector. Se quiser alocar memória e realmente passar um ponteiro para um objeto, deverá envolvê-lo em um PointerWrapper, ou seja, `angr.PointerWrapper("point to me!")`. Os resultados dessa API podem ser um pouco imprevisíveis, mas estamos trabalhando nisso.
+- Você pode passar uma lista de argumentos por meio de `args` e um dicionário de variáveis de ambiente por meio de `env` para `entry_state` e `full_init_state`. Os valores nessas estruturas podem ser strings ou bitvectors e serão serializados no estado como os argumentos e o ambiente para a execução simulada. O `args` padrão é uma lista vazia; portanto, se o programa que você está analisando espera encontrar pelo menos um `argv[0]`, sempre forneça esse valor!
+- Se quiser que `argc` seja simbólico, você pode passar um bitvector simbólico como `argc` para os construtores `entry_state` e `full_init_state`. Porém, tenha cuidado: se fizer isso, você também deverá adicionar ao estado resultante uma constraint determinando que o valor de `argc` não pode ser maior que o número de argumentos passados em `args`.
+- Para usar o call state, você deve chamá-lo com `.call_state(addr, arg1, arg2, ...)`, em que `addr` é o endereço da função que deseja chamar e `argN` é o N-ésimo argumento dessa função, podendo ser um inteiro, uma string ou um array Python, ou um bitvector. Se quiser alocar memória e realmente passar um ponteiro para um objeto, deverá envolvê-lo em um PointerWrapper, como em `angr.PointerWrapper("point to me!")`. Os resultados dessa API podem ser um pouco imprevisíveis, mas estamos trabalhando nisso.
 
 ### BitVectors
 ```python
@@ -134,7 +134,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-### BitVectors Simbólicos e Restrições
+### BitVectors Simbólicos e Constraints
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -186,12 +186,12 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Além disso, você pode usar `proj.hook_symbol(name, hook)`, fornecendo o nome de um símbolo como primeiro argumento, para fazer hook no endereço onde o símbolo está localizado<sup>[[1]](#references)</sup>
+Além disso, você pode usar `proj.hook_symbol(name, hook)`, fornecendo o nome de um símbolo como primeiro argumento, para fazer hook do endereço onde o símbolo está localizado<sup>[[1]](#references)</sup>
 
 ## Exemplos
 
 ## Referências
 
-- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
+- [1] [documentação do angr](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -3,11 +3,11 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Se o programa estiver usando `scanf` para obter **vários valores de uma vez a partir de stdin**, você precisa gerar um estado que comece depois do **`scanf`**.
+> Se o programa estiver usando `scanf` para obter **vários valores de uma só vez de stdin**, você precisará gerar um estado que comece após o **`scanf`**.
 
 Códigos obtidos de [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Input para alcançar um endereço (indicando o endereço)
+### Entrada para alcançar um endereço (indicando o endereço)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Entrada para alcançar o endereço (indicando os prints)
+### Entrada para alcançar o endereço (indicando prints)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-Neste cenário, a entrada foi obtida com `scanf("%u %u")` e o valor `"1 1"` foi fornecido, portanto, os valores **`0x00000001`** da stack vêm da **entrada do usuário**. Você pode ver como esses valores começam em `$ebp - 8`. Portanto, no código, **subtraímos 8 bytes de `$esp` (naquele momento, `$ebp` e `$esp` tinham o mesmo valor)** e, em seguida, fizemos o push do BVS.
+Neste cenário, a entrada foi obtida com `scanf("%u %u")` e o valor `"1 1"` foi fornecido, portanto, os valores **`0x00000001`** da stack vêm da **entrada do usuário**. É possível ver como esses valores começam em `$ebp - 8`. Portanto, no código, **subtraímos 8 bytes de `$esp` (como, naquele momento, `$ebp` e `$esp` tinham o mesmo valor)** e, em seguida, fizemos push do BVS.
 
-![Coloque bit vectors na stack para descobrir o valor que aquela posição da stack precisa ter para alcançar um fluxo do programa: Neste cenário, a entrada foi obtida com scanf("%u %u") e o valor "1...](<../../../images/image (136).png>)
+![Coloque bit vectors na stack para descobrir o valor que essa posição da stack precisa alcançar para atingir um fluxo do programa: Neste cenário, a entrada foi obtida com scanf("%u %u") e o valor "1...](<../../../images/image (136).png>)
 
 ### Valores de memória estática (variáveis globais)
 ```python
@@ -407,8 +407,8 @@ main(sys.argv)
 ### Aplicando Restrições
 
 > [!TIP]
-> Às vezes, operações humanas simples, como comparar 2 palavras de 16 **char by char** (loop), **custam** muito ao **angr**, porque ele precisa gerar branches **exponencialmente**, pois gera 1 branch por if: `2^16`\
-> Portanto, é mais fácil **pedir ao angr para retornar a um ponto anterior** (onde a parte realmente difícil já foi concluída) e **definir essas restrições manualmente**.
+> Às vezes, operações humanas simples, como comparar 2 palavras de 16 caracteres **caractere por caractere** (loop), **custam** muito ao **angr**, porque ele precisa gerar branches **exponencialmente**, já que gera 1 branch por if: `2^16`\
+> Portanto, é mais fácil **pedir ao angr para voltar a um ponto anterior** (onde a parte realmente difícil já foi concluída) e **definir essas restrições manualmente**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> Em alguns cenários, você pode ativar o **veritesting**, que mesclará estados semelhantes para evitar branches inúteis e encontrar a solução: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> Em alguns cenários, você pode ativar o **veritesting**, que mesclará estados semelhantes para economizar branches inúteis e encontrar a solução: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Outra coisa que você pode fazer nesses cenários é fazer **hook na função, fornecendo ao angr algo que ele possa entender** com mais facilidade.
+> Outra coisa que você pode fazer nesses cenários é fazer **hook da função, fornecendo ao angr algo que ele consiga entender** com mais facilidade.
 
-### Gerenciadores de Simulação
+### Simulation Managers
 
-Alguns gerenciadores de simulação podem ser mais úteis do que outros. No exemplo anterior, havia um problema, pois muitos branches úteis eram criados. Aqui, a técnica **veritesting** mesclará esses branches e encontrará uma solução.\
-Esse gerenciador de simulação também pode ser ativado com: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Alguns simulation managers podem ser mais úteis do que outros. No exemplo anterior, havia um problema, pois muitos branches úteis eram criados. Aqui, a técnica **veritesting** mesclará esses branches e encontrará uma solução.\
+Este simulation manager também pode ser ativado com: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Bypass de uma chamada a uma função
+### Hooking/Contornando uma chamada a uma função
 ```python
 # This level performs the following computations:
 #
@@ -740,7 +740,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Binários estáticos
+### Binários Estáticos
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -809,6 +809,6 @@ main(sys.argv)
 ```
 ## Referências
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - repositório do GitHub](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}
