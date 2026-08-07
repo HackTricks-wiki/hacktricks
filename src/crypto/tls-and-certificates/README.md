@@ -2,7 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Esta área trata sobre **análisis de X.509, formatos, conversiones y errores comunes**.
+
+Esta sección trata sobre el **análisis, los formatos, las conversiones y los errores comunes de X.509**.
 
 ## X.509: análisis, formatos y errores comunes
 
@@ -15,16 +16,16 @@ Campos útiles para inspeccionar:
 
 - Subject / Issuer / SAN
 - Key Usage / EKU
-- Basic Constraints (¿es un CA?)
+- Basic Constraints (¿es una CA?)
 - Ventana de validez (NotBefore/NotAfter)
-- Algoritmo de firma (MD5? SHA1?)
+- Algoritmo de firma (¿MD5? ¿SHA1?)
 
-### Formatos & conversión
+### Formatos y conversión
 
 - PEM (Base64 con encabezados BEGIN/END)
 - DER (binario)
-- PKCS#7 (`.p7b`) (cadena de certificados, sin clave privada)
-- PKCS#12 (`.pfx/.p12`) (certificado + clave privada + cadena)
+- PKCS#7 (`.p7b`) (cadena de certificados, sin private key)
+- PKCS#12 (`.pfx/.p12`) (certificado + private key + cadena)
 
 Conversiones:
 ```bash
@@ -32,14 +33,14 @@ openssl x509 -in cert.cer -outform PEM -out cert.pem
 openssl x509 -in cert.pem -outform der -out cert.der
 openssl pkcs12 -in file.pfx -out out.pem
 ```
-### Vectores ofensivos comunes
+### Ángulos ofensivos comunes
 
-- Confiar en raíces proporcionadas por el usuario / falta de validación de la cadena
-- Algoritmos de firma débiles (obsoletos)
-- Restricciones de nombre / bugs en el parsing de SAN (específicos de la implementación)
-- Problemas de Confused deputy con client-certificate authentication misbinding
+- Confiar en roots proporcionadas por el usuario / falta de validación de la cadena
+- Algoritmos de firma débiles (legacy)
+- Restricciones de nombres / errores de parsing de SAN (específicos de la implementación)
+- Problemas de confused deputy con un misbinding de la autenticación mediante certificados de cliente
 
-### CT logs
+### Registros CT
 
 - [https://crt.sh/](https://crt.sh/)
 
