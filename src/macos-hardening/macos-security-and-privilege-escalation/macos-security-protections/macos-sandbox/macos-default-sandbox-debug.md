@@ -1,10 +1,10 @@
-# macOS デフォルトサンドボックスデバッグ
+# macOS Default Sandbox Debug
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-このページでは、デフォルトの macOS サンドボックス内から任意のコマンドを実行するアプリを作成する方法を見つけることができます。
+このページでは、macOS の default sandbox 内から任意のコマンドを起動するアプリを作成する方法を説明します。
 
-1. アプリケーションをコンパイルします:
+1. アプリケーションをコンパイルします。
 ```objectivec:main.m
 #include <Foundation/Foundation.h>
 
@@ -34,9 +34,9 @@ system(input);
 return 0;
 }
 ```
-コンパイルするには、次のコマンドを実行します: `clang -framework Foundation -o SandboxedShellApp main.m`
+次のコマンドを実行してコンパイルします: `clang -framework Foundation -o SandboxedShellApp main.m`
 
-2. `.app` バンドルをビルドします
+2. `.app` bundleをビルドします
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +58,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. 権限を定義する
+3. Entitlementsを定義する
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. アプリに署名する（キーチェーンに証明書を作成する必要があります）
+4. Appに署名する（Keychainで証明書を作成する必要があります）
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp

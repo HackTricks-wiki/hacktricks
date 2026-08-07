@@ -1,14 +1,14 @@
-# macOS Useful Commands
+# macOS便利なコマンド
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS Automatic Enumeration Tools
+### MacOS自動Enumerationツール
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Specific MacOS Commands
+### MacOS固有のコマンド
 ```bash
 #System info
 date
@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### 簡易な anti-analysis / virtualization check
+### 簡易 anti-analysis / virtualization check
 
-一部の macOS stealer は、VM を検出するために `system_profiler` を呼び出し、sandbox detonation を回避する目的で **固有の終了コード（例: 100）を返して abort します**<sup>[[1]](#references)</sup>:
+一部の macOS stealers は、VM を検出するために `system_profiler` を呼び出し、sandbox detonation を回避する目的で**特定の exit code（例: 100）を返して abort します**<sup>[[1]](#references)</sup>：
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,7 +125,7 @@ fi
 ```
 ### インストールされているソフトウェアとサービス
 
-インストールされている**不審な**アプリケーションと、インストールされているリソースに対する**権限**を確認します。
+インストールされている**疑わしい**アプリケーションと、インストールされているリソースに対する**権限**を確認します:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -145,12 +145,12 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### ユーザーを作成
 
-プロンプトなしで
+プロンプトなし
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
 ## 参考資料
 
-- [1] [2025年、Infostealerの年](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

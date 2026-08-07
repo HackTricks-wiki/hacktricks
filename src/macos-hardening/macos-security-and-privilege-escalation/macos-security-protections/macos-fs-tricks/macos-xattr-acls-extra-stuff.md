@@ -65,7 +65,7 @@ echo something > start/protected/something
 ```
 <details>
 
-<summary>set_xattrのコード</summary>
+<summary>set_xattr のコード</summary>
 ```c
 // gcc -o set_xattr set_xattr.c
 #include <stdio.h>

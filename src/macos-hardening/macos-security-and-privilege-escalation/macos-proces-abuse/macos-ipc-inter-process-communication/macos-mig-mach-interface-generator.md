@@ -4,28 +4,28 @@
 
 ## 基本情報
 
-MIG は **Mach IPC** コード作成のプロセスを**簡略化**するために作られました。基本的には、指定された定義に基づいて、server と client が通信するために必要なコードを**生成**します。生成されたコードが扱いにくいものであっても、開発者はそれを import するだけでよく、コードは以前よりはるかにシンプルになります。
+MIG は **Mach IPC のコード作成プロセスを簡略化する**ために作られました。基本的には、指定された定義に基づいて、server と client が通信するために必要なコードを **生成**します。生成されたコードがたとえ見づらいものであっても、開発者はそれを import するだけでよく、コードは以前よりはるかにシンプルになります。<sup>[[1]](#references)</sup>
 
-定義は、`.defs` 拡張子を使用する Interface Definition Language（IDL）で指定します。
+定義は、`.defs` 拡張子を使用する Interface Definition Language (IDL) で指定します。
 
 これらの定義には 5 つのセクションがあります。
 
-- **Subsystem declaration**: `subsystem` キーワードを使用して **name** と **id** を指定します。server を kernel で実行する場合は、**`KernelServer`** として指定することもできます。
-- **Inclusions and imports**: MIG は C-prepocessor を使用するため、import を利用できます。さらに、user または server が生成するコード用に `uimport` と `simport` を使用できます。
-- **Type declarations**: data type を定義できますが、通常は `mach_types.defs` と `std_types.defs` を import します。custom type には、次の構文を使用できます。
+- **Subsystem declaration**: `subsystem` キーワードを使用して **name** と **id** を指定します。server を kernel で実行する場合は、**`KernelServer`** としてマークすることもできます。<sup>[[4]](#references)</sup>
+- **Inclusions and imports**: MIG は C preprocessor を使用するため、import を利用できます。さらに、user または server 用に生成されるコードに対して `uimport` と `simport` を使用できます。
+- **Type declarations**: data type を定義することもできますが、通常は `mach_types.defs` と `std_types.defs` を import します。カスタム type には、次の構文を使用できます。
 - \[i`n/out]tran`: incoming message から、または outgoing message へ変換する必要がある Function
 - `c[user/server]type`: 別の C type への Mapping。
-- `destructor`: type が解放されたときに、この Function を呼び出します。
-- **Operations**: RPC methods の定義です。5 種類あります。
-- `routine`: reply を返す
-- `simpleroutine`: reply を返さない
-- `procedure`: reply を返す
-- `simpleprocedure`: reply を返さない
-- `function`: reply を返す
+- `destructor`: type が解放されたときにこの Function を呼び出します。
+- **Operations**: RPC method の定義です。5 種類あります。
+- `routine`: reply を期待する
+- `simpleroutine`: reply を期待しない
+- `procedure`: reply を期待する
+- `simpleprocedure`: reply を期待しない
+- `function`: reply を期待する
 
-### 例
+### Example
 
-この例では、非常にシンプルな Function を含む definition file を作成します。
+この場合は非常に単純な Function を含む definition file を作成します。
 ```cpp:myipc.defs
 subsystem myipc 500; // Arbitrary name and id
 
@@ -40,19 +40,19 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-最初の **argument は bind する port** であり、MIG は **reply port を自動的に処理**することに注意してください（クライアントコードで `mig_get_reply_port()` を呼び出す場合を除く）。さらに、**operations の ID** は、指定された subsystem ID から始まる **連番**になります（そのため、ある operation が deprecated になった場合は削除され、`skip` を使用してその ID を引き続き使用します）。
+最初の **argument は bind する port であり**、MIG は **reply port を自動的に処理します**（client code で `mig_get_reply_port()` を呼び出す場合を除く）。さらに、**operations の ID は**指定された subsystem ID から始まる**連番になります**（そのため、operation が deprecated になると削除され、ID を引き続き使用するために `skip` が使われます）。
 
-ここで MIG を使用して、相互に通信し、Subtract function を呼び出せる server code と client code を生成します。
+次に、MIG を使用して、互いに通信して Subtract function を呼び出せる server code と client code を生成します：
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
-現在のディレクトリに複数の新しいファイルが作成されます。
+いくつかの新しいファイルが現在のディレクトリに作成されます。
 
 > [!TIP]
-> システム内で、より複雑な例を `mdfind mach_port.defs` で確認できます。\
-> また、ファイルと同じフォルダーから `mig -DLIBSYSCALL_INTERFACE mach_ports.defs` を実行してコンパイルできます。
+> システム上で、`mdfind mach_port.defs` を実行すると、より複雑な例を確認できます。\
+> また、ファイルと同じフォルダから、`mig -DLIBSYSCALL_INTERFACE mach_ports.defs` を実行してコンパイルできます<sup>[[2]](#references)</sup>
 
-**`myipcServer.c`** および **`myipcServer.h`** では、**`SERVERPREFmyipc_subsystem`** 構造体の宣言と定義を確認できます。この構造体は基本的に、受信したメッセージ ID に基づいて呼び出す関数を定義します（開始番号として 500 を指定しました）。
+**`myipcServer.c`** と **`myipcServer.h`** のファイルには、基本的に受信したメッセージ ID に基づいて呼び出す関数を定義する、**`SERVERPREFmyipc_subsystem`** 構造体の宣言と定義があります（開始番号として 500 を指定しました）。
 
 {{#tabs}}
 {{#tab name="myipcServer.c"}}
@@ -89,7 +89,7 @@ routine[1];
 {{#endtab}}
 {{#endtabs}}
 
-前の struct に基づき、関数 **`myipc_server_routine`** は **message ID** を取得し、呼び出す適切な関数を返します:
+前述の struct に基づき、関数 **`myipc_server_routine`** は **message ID** を取得し、呼び出す適切な関数を返します。
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -104,18 +104,18 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-この例では definitions 内に 1 つの function だけを定義していますが、複数の function を定義していた場合、それらは **`SERVERPREFmyipc_subsystem`** の array 内に格納され、最初の function には ID **500**、2 番目の function には ID **501** が割り当てられます...
+この例では definitions 内に 1 つの function のみ定義していますが、複数の function を定義した場合、それらは **`SERVERPREFmyipc_subsystem`** の array 内に配置され、最初のものには **500**、2 番目のものには **501** の ID が割り当てられます...
 
-function が **reply** を送信することを想定されていた場合、`mig_internal kern_return_t __MIG_check__Reply__<name>` という function も存在します。
+function が **reply** を送信することを想定されていた場合、`mig_internal kern_return_t __MIG_check__Reply__<name>` function も存在します。
 
-実際には、**`myipcServer.h`** の struct **`subsystem_to_name_map_myipc`**（他のファイルでは **`subsystem*to_name_map*\***`）から、この関係を特定できます。
+実際には、**`myipcServer.h`** の struct **`subsystem_to_name_map_myipc`**（他のファイルでは **`subsystem*to_name_map*\***`）で、この関係を特定できます：
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
 { "Subtract", 500 }
 #endif
 ```
-最後に、サーバーを動作させるためのもう1つの重要な関数が **`myipc_server`** です。この関数が、受信した id に関連付けられた **function を実際に呼び出します**。
+最後に、サーバーを動作させるためのもう1つの重要な関数が **`myipc_server`** です。この関数が、受信した id に関連付けられた **関数を実際に呼び出します**:<sup>[[3]](#references)</sup>
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -149,9 +149,9 @@ return FALSE;
 }
 </code></pre>
 
-先ほど強調表示した、ID によって呼び出す function にアクセスしている行を確認してください。
+先ほど強調した、ID によって呼び出す関数へアクセスしている行を確認してください。
 
-以下は、クライアントがサーバーから Subtract functions を呼び出せる、シンプルな **server** と **client** を作成するコードです。
+以下は、client からサーバーの Subtract 関数を呼び出せる、シンプルな **server** と **client** を作成するコードです:
 
 {{#tabs}}
 {{#tab name="myipc_server.c"}}
@@ -217,31 +217,31 @@ USERPREFSubtract(port, 40, 2);
 
 ### The NDR_record
 
-NDR_record は `libsystem_kernel.dylib` によって export される struct であり、MIG が使用されるシステムに依存せずに **data を変換**できるようにします。MIG は同一マシン内だけでなく、異なるシステム間で使用されることを想定して設計されました。
+NDR_record は `libsystem_kernel.dylib` によって export される struct であり、MIG が使用されるシステムに依存しないように **data を変換**できます。MIG は同一マシン内だけでなく、異なるシステム間で使用されることを想定して設計されているためです。
 
-これは、バイナリ内で `_NDR_record` が dependency として見つかった場合（`jtool2 -S <binary> | grep NDR` または `nm`）、そのバイナリが MIG client または Server であることを意味するため興味深い点です。
+これは興味深い点です。バイナリ内で `_NDR_record` が dependency として見つかった場合（`jtool2 -S <binary> | grep NDR` または `nm`）、そのバイナリが MIG client または Server であることを意味します。
 
-さらに、**MIG servers** は `__DATA.__const`（macOS kernel では `__CONST.__constdata`、その他の \*OS kernels では `__DATA_CONST.__const`）に dispatch table を持ちます。これは **`jtool2`** で dump できます。
+さらに **MIG servers** は、`__DATA.__const`（macOS kernel では `__CONST.__constdata`、その他の \*OS kernels では `__DATA_CONST.__const`）に dispatch table を持っています。これは **`jtool2`** で dump できます。
 
-また、**MIG clients** は `__NDR_record` を使用して、`__mach_msg` とともに servers へ送信します。
+また **MIG clients** は、`__mach_msg` を使用して servers に送信する際に `__NDR_record` を使用します。
 
-## バイナリ解析
+## Binary Analysis
 
 ### jtool
 
-現在、多くのバイナリが mach ports を expose するために MIG を使用しているため、**MIG が使用されていること**と、各 message ID で MIG が実行する **functions** を特定する方法を知っておくと有用です。
+現在、多くのバイナリが mach ports を公開するために MIG を使用しているため、**MIG が使用されていること**と、各 message ID で MIG が実行する**関数を特定する方法**を知っておくことは興味深いです。
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) は Mach-O binary から MIG information を parse し、message ID を示すとともに、実行する function を特定できます:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) は Mach-O バイナリから MIG information を parse し、message ID を示すとともに、実行する関数を特定できます。
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-さらに、MIG functionsは実際に呼び出される関数の単なるwrappersであるため、そのdisassemblyを取得してBLをgrepすれば、実際に呼び出されている関数を見つけられる可能性があります。
+さらに、MIG functions は実際に呼び出される function の単なる wrapper です。そのため、disassembly を取得して BL を grep すれば、実際に呼び出されている function を見つけられる可能性があります。
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### アセンブリ
 
-前述のとおり、**受信したメッセージ ID に応じて正しい関数を呼び出す**役割を担う関数は `myipc_server` です。しかし通常、バイナリのシンボル（関数名）は存在しないため、**逆コンパイルするとどのように見えるか**を確認することは有用です。この関数のコードは公開されている関数から独立しているため、常に非常によく似たものになります。
+前述のとおり、**受信した message ID に応じて正しい関数の呼び出しを担当する関数**は `myipc_server` です。ただし通常、binary の symbols（関数名）は存在しないため、**decompiled ではどのように見えるかを確認することが重要です**。この関数のコードは公開されている関数とは独立しているため、常に非常によく似た形になります。
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-これは、別の Hopper free version で逆コンパイルした同じ関数です。
+これは、別の Hopper free version で decompiled された同じ関数です。
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -365,7 +365,7 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-実際に **`0x100004000`** の関数へ移動すると、**`routine_descriptor`** 構造体の配列を確認できます。構造体の最初の要素は **関数**が実装されている**アドレス**であり、**構造体のサイズは 0x28 bytes** です。そのため、byte 0 から開始して 0x28 bytes ごとに 8 bytes を取得すると、呼び出される**関数のアドレス**になります。
+実際に **`0x100004000`** の関数へ移動すると、**`routine_descriptor`** structs の array を確認できます。struct の最初の要素は **function** が実装されている **address** であり、**struct は 0x28 bytes** です。そのため、byte 0 から 0x28 bytes ごとに 8 bytes を取得すると、呼び出される **function の address** を得られます。
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
@@ -375,13 +375,13 @@ return r0;
 
 ### デバッグ
 
-MIG によって生成されたコードは、entry と exit での操作に関するログを生成するために `kernel_debug` も呼び出します。これらは **`trace`** または **`kdv`** を使用して確認できます: `kdv all | grep MIG`
+MIG によって生成された code は、entry と exit の操作に関する logs を生成するために `kernel_debug` も呼び出します。これらは **`trace`** または **`kdv`** を使用して確認できます：`kdv all | grep MIG`
 
 ## 参考資料
 
 - [1] [bootstrap_cmds — `migcom.tproj` (the MIG compiler itself)](https://github.com/apple-oss-distributions/bootstrap_cmds/tree/main/migcom.tproj)
 - [2] [XNU — `osfmk/mach/mach_port.defs` (example MIG subsystem definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
-- [3] [XNU — `osfmk/mach/task.defs` (task subsystem MIG definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
-- [4] [XNU — `osfmk/mach/message.h` (Mach message header layout)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
+- [3] [XNU — `osfmk/mach/message.h` (Mach message header layout)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
+- [4] [XNU — `osfmk/mach/task.defs` (task subsystem MIG definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
 
 {{#include ../../../../banners/hacktricks-training.md}}
