@@ -2,11 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**이것은 매우 추천하는 책** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **에서의 내 노트와 추가 정보입니다.**
+**다음은 매우 추천하는 책** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **에서 정리한 노트에 추가 정보를 더한 것입니다.**<sup>[[1]](#references)</sup>
 
-## Basic Information
+## 기본 정보
 
-이 포스트를 읽는 것으로 시작해야 합니다. 알아야 할 기본 개념에 대해:
+먼저 다음 글을 읽고 알아 두어야 할 기본 개념을 학습하세요:
+
 
 {{#ref}}
 0.-basic-llm-concepts.md
@@ -15,7 +16,7 @@
 ## 1. Tokenization
 
 > [!TIP]
-> 이 초기 단계의 목표는 매우 간단합니다: **입력을 의미 있는 방식으로 토큰(아이디)으로 나누는 것입니다.**
+> 이 초기 단계의 목표는 매우 간단합니다. **입력을 적절한 방식으로 토큰(ids)으로 나누는 것입니다.**
 
 
 {{#ref}}
@@ -25,7 +26,7 @@
 ## 2. Data Sampling
 
 > [!TIP]
-> 이 두 번째 단계의 목표는 매우 간단합니다: **입력 데이터를 샘플링하고 훈련 단계에 맞게 준비하는 것입니다. 일반적으로 데이터셋을 특정 길이의 문장으로 나누고 예상 응답도 생성합니다.**
+> 이 두 번째 단계의 목표는 매우 간단합니다. **입력 데이터를 샘플링하고 training 단계에 사용할 수 있도록 준비하는 것입니다. 일반적으로 데이터셋을 특정 길이의 문장으로 나누고 예상 응답도 생성합니다.**
 
 
 {{#ref}}
@@ -35,10 +36,10 @@
 ## 3. Token Embeddings
 
 > [!TIP]
-> 이 세 번째 단계의 목표는 매우 간단합니다: **어휘의 각 이전 토큰에 원하는 차원의 벡터를 할당하여 모델을 훈련하는 것입니다.** 어휘의 각 단어는 X 차원의 공간에서 한 점이 됩니다.\
-> 각 단어의 초기 위치는 "무작위로" 초기화되며, 이 위치는 훈련 가능한 매개변수입니다(훈련 중 개선됩니다).
+> 이 세 번째 단계의 목표는 매우 간단합니다. **앞서 정의한 vocabulary의 각 토큰에 원하는 차원의 vector를 할당하여 model을 training하는 것입니다.** vocabulary의 각 단어는 X차원 공간의 한 점이 됩니다.\
+> 처음에는 공간에서 각 단어의 위치가 단순히 "무작위"로 초기화되며, 이러한 위치는 trainable parameter입니다(training 중에 개선됩니다).
 >
-> 게다가, 토큰 임베딩 동안 **또 다른 임베딩 레이어가 생성됩니다**. 이는 (이 경우) **훈련 문장에서 단어의 절대 위치를 나타냅니다.** 이렇게 하면 문장에서 서로 다른 위치에 있는 단어는 서로 다른 표현(의미)을 갖게 됩니다.
+> 또한 token embedding 중에 **또 다른 embedding layer가 생성됩니다.** 이 layer는 (이 경우) training 문장에서 **단어의 절대 위치**를 나타냅니다. 따라서 문장에서 서로 다른 위치에 있는 단어는 서로 다른 representation(의미)을 갖게 됩니다.
 
 
 {{#ref}}
@@ -48,8 +49,8 @@
 ## 4. Attention Mechanisms
 
 > [!TIP]
-> 이 네 번째 단계의 목표는 매우 간단합니다: **일부 주의 메커니즘을 적용하는 것입니다.** 이는 **어휘의 단어와 현재 LLM 훈련에 사용되는 문장에서의 이웃 간의 관계를 포착하는 많은 반복 레이어**가 될 것입니다.\
-> 이를 위해 많은 레이어가 사용되며, 많은 훈련 가능한 매개변수가 이 정보를 포착하게 됩니다.
+> 이 네 번째 단계의 목표는 매우 간단합니다. **일부 attention mechanism을 적용하는 것입니다.** 이 mechanism은 **현재 LLM training에 사용되는 문장에서 vocabulary의 단어와 그 주변 단어 사이의 관계를 포착하는 여러 개의 반복 layer**로 구성됩니다.\
+> 이를 위해 많은 layer가 사용되므로, 많은 trainable parameter가 이 정보를 포착하게 됩니다.
 
 
 {{#ref}}
@@ -59,9 +60,9 @@
 ## 5. LLM Architecture
 
 > [!TIP]
-> 이 다섯 번째 단계의 목표는 매우 간단합니다: **전체 LLM의 아키텍처를 개발하는 것입니다.** 모든 것을 통합하고, 모든 레이어를 적용하며, 텍스트를 생성하거나 텍스트를 ID로 변환하고 그 반대로 변환하는 모든 기능을 생성합니다.
+> 이 다섯 번째 단계의 목표는 매우 간단합니다. **전체 LLM의 architecture를 개발하는 것입니다.** 모든 요소를 결합하고, 모든 layer를 적용하며, text를 생성하거나 text를 ID로 변환하고 그 반대 작업을 수행하는 모든 function을 만듭니다.
 >
-> 이 아키텍처는 훈련 후 텍스트를 예측하는 데에도 사용됩니다.
+> 이 architecture는 training과 training이 완료된 후 text를 예측하는 데 모두 사용됩니다.
 
 
 {{#ref}}
@@ -71,7 +72,7 @@
 ## 6. Pre-training & Loading models
 
 > [!TIP]
-> 이 여섯 번째 단계의 목표는 매우 간단합니다: **모델을 처음부터 훈련하는 것입니다.** 이를 위해 이전 LLM 아키텍처를 사용하여 정의된 손실 함수와 최적화를 사용하여 데이터 세트를 반복하며 모델의 모든 매개변수를 훈련합니다.
+> 이 여섯 번째 단계의 목표는 매우 간단합니다. **model을 처음부터 training하는 것입니다.** 이를 위해 앞서 만든 LLM architecture를 사용하고, 정의된 loss function과 optimizer를 사용하여 model의 모든 parameter를 training하도록 데이터셋을 순회하는 loop를 실행합니다.
 
 
 {{#ref}}
@@ -81,7 +82,7 @@
 ## 7.0. LoRA Improvements in fine-tuning
 
 > [!TIP]
-> **LoRA의 사용은 이미 훈련된 모델을 미세 조정하는 데 필요한 계산을 많이 줄입니다.**
+> **LoRA를 사용하면** 이미 training된 model을 **fine-tuning하는 데 필요한 computation을 크게 줄일 수 있습니다.**
 
 
 {{#ref}}
@@ -91,7 +92,7 @@
 ## 7.1. Fine-Tuning for Classification
 
 > [!TIP]
-> 이 섹션의 목표는 이미 사전 훈련된 모델을 미세 조정하는 방법을 보여주는 것입니다. 따라서 새로운 텍스트를 생성하는 대신 LLM은 **주어진 텍스트가 각 주어진 카테고리에 분류될 확률을 선택합니다** (예: 텍스트가 스팸인지 아닌지).
+> 이 section의 목표는 이미 pre-trained된 model을 fine-tuning하여 새로운 text를 생성하는 대신, LLM이 **주어진 text가 각 category에 속할 확률을 제공하도록 하는 방법을 보여주는 것입니다.** (예: text가 spam인지 아닌지 분류)
 
 
 {{#ref}}
@@ -101,11 +102,15 @@
 ## 7.2. Fine-Tuning to follow instructions
 
 > [!TIP]
-> 이 섹션의 목표는 **텍스트를 생성하는 대신 지침을 따르도록 이미 사전 훈련된 모델을 미세 조정하는 방법을 보여주는 것입니다.** 예를 들어, 챗봇으로서 작업에 응답하는 것입니다.
+> 이 section의 목표는 단순히 text를 생성하는 것이 아니라 **이미 pre-trained된 model이 instructions를 따르도록 fine-tuning하는 방법을 보여주는 것입니다.** 예를 들어 chat bot처럼 task에 응답하도록 만드는 것입니다.
 
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
+
+## 참고 자료
+
+- [1] [Build a Large Language Model (From Scratch) - Manning](https://www.manning.com/books/build-a-large-language-model-from-scratch)
 
 {{#include ../../banners/hacktricks-training.md}}
