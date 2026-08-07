@@ -2,31 +2,31 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Βάση δεδομένων Authorizations**
+## **Βάση Δεδομένων Authorizations**
 
-Η βάση δεδομένων που βρίσκεται στο `/var/db/auth.db` χρησιμοποιείται για την αποθήκευση δικαιωμάτων εκτέλεσης ευαίσθητων ενεργειών. Αυτές οι ενέργειες εκτελούνται πλήρως σε **user space** και συνήθως χρησιμοποιούνται από **XPC services**, τα οποία πρέπει να ελέγξουν **αν ο client που καλεί είναι εξουσιοδοτημένος** να εκτελέσει μια συγκεκριμένη ενέργεια, ελέγχοντας αυτήν τη βάση δεδομένων.
+Η βάση δεδομένων που βρίσκεται στο `/var/db/auth.db` χρησιμοποιείται για την αποθήκευση δικαιωμάτων εκτέλεσης ευαίσθητων λειτουργιών. Αυτές οι λειτουργίες εκτελούνται εξ ολοκλήρου σε **user space** και συνήθως χρησιμοποιούνται από **XPC services**, τα οποία πρέπει να ελέγξουν **αν ο client που πραγματοποιεί την κλήση έχει εξουσιοδότηση** να εκτελέσει μια συγκεκριμένη ενέργεια, ελέγχοντας αυτήν τη βάση δεδομένων.
 
-Αρχικά, αυτή η βάση δεδομένων δημιουργείται από το περιεχόμενο του `/System/Library/Security/authorization.plist`. Στη συνέχεια, ορισμένα services ενδέχεται να προσθέσουν ή να τροποποιήσουν αυτήν τη βάση δεδομένων, ώστε να προσθέσουν και άλλα permissions σε αυτήν.
+Αρχικά, αυτή η βάση δεδομένων δημιουργείται από το περιεχόμενο του `/System/Library/Security/authorization.plist`. Στη συνέχεια, ορισμένες services ενδέχεται να προσθέσουν ή να τροποποιήσουν αυτήν τη βάση δεδομένων, ώστε να προσθέσουν επιπλέον δικαιώματα.
 
 Οι κανόνες αποθηκεύονται στον πίνακα `rules` μέσα στη βάση δεδομένων και περιέχουν τις ακόλουθες στήλες:
 
-- **id**: Ένα μοναδικό αναγνωριστικό για κάθε κανόνα, το οποίο αυξάνεται αυτόματα και λειτουργεί ως primary key.
-- **name**: Το μοναδικό όνομα του κανόνα, το οποίο χρησιμοποιείται για την αναγνώριση και την αναφορά σε αυτόν μέσα στο authorization system.
-- **type**: Καθορίζει τον τύπο του κανόνα και περιορίζεται στις τιμές 1 ή 2, ώστε να ορίζει τη λογική του authorization.
+- **id**: Ένα μοναδικό αναγνωριστικό για κάθε κανόνα, το οποίο αυξάνεται αυτόματα και χρησιμοποιείται ως primary key.
+- **name**: Το μοναδικό όνομα του κανόνα, που χρησιμοποιείται για την αναγνώριση και την αναφορά σε αυτόν μέσα στο authorization system.
+- **type**: Καθορίζει τον τύπο του κανόνα, περιοριζόμενο στις τιμές 1 ή 2, για τον ορισμό της λογικής authorization.
 - **class**: Κατηγοριοποιεί τον κανόνα σε μια συγκεκριμένη κλάση, διασφαλίζοντας ότι είναι θετικός ακέραιος.
-- "allow" για allow, "deny" για deny, "user" αν η ιδιότητα group υποδεικνύει μια ομάδα, η συμμετοχή στην οποία επιτρέπει την πρόσβαση, "rule" υποδεικνύει σε έναν πίνακα έναν κανόνα που πρέπει να ικανοποιηθεί, "evaluate-mechanisms" ακολουθούμενο από έναν πίνακα `mechanisms`, τα στοιχεία του οποίου είναι είτε builtins είτε ένα όνομα bundle μέσα στο `/System/Library/CoreServices/SecurityAgentPlugins/` ή στο `/Library/Security//SecurityAgentPlugins`
+- "allow" για allow, "deny" για deny, "user" αν η ιδιότητα group υποδεικνύει μια ομάδα, η συμμετοχή στην οποία επιτρέπει την πρόσβαση, "rule" υποδεικνύει έναν πίνακα κανόνων που πρέπει να ικανοποιηθούν, "evaluate-mechanisms" ακολουθούμενο από έναν πίνακα `mechanisms`, τα οποία είναι είτε builtins είτε το όνομα ενός bundle μέσα στο `/System/Library/CoreServices/SecurityAgentPlugins/` ή στο `/Library/Security//SecurityAgentPlugins`
 - **group**: Υποδεικνύει την ομάδα χρηστών που σχετίζεται με τον κανόνα για authorization βάσει ομάδας.
-- **kofn**: Αντιπροσωπεύει την παράμετρο "k-of-n", καθορίζοντας πόσοι subrules πρέπει να ικανοποιούνται από ένα συνολικό πλήθος.
-- **timeout**: Καθορίζει τη διάρκεια σε δευτερόλεπτα πριν λήξει το authorization που χορηγήθηκε από τον κανόνα.
-- **flags**: Περιέχει διάφορες σημαίες που τροποποιούν τη συμπεριφορά και τα χαρακτηριστικά του κανόνα.
-- **tries**: Περιορίζει τον αριθμό των επιτρεπόμενων προσπαθειών authorization για ενίσχυση της ασφάλειας.
-- **version**: Παρακολουθεί την έκδοση του κανόνα για version control και updates.
+- **kofn**: Αντιπροσωπεύει την παράμετρο "k-of-n", καθορίζοντας πόσοι subrules πρέπει να ικανοποιούνται από το συνολικό πλήθος τους.
+- **timeout**: Καθορίζει τη διάρκεια σε δευτερόλεπτα πριν λήξει η authorization που παρέχεται από τον κανόνα.
+- **flags**: Περιέχει διάφορα flags που τροποποιούν τη συμπεριφορά και τα χαρακτηριστικά του κανόνα.
+- **tries**: Περιορίζει τον αριθμό των επιτρεπόμενων προσπαθειών authorization, για ενίσχυση της ασφάλειας.
+- **version**: Παρακολουθεί την έκδοση του κανόνα για version control και ενημερώσεις.
 - **created**: Καταγράφει το timestamp δημιουργίας του κανόνα για σκοπούς auditing.
 - **modified**: Αποθηκεύει το timestamp της τελευταίας τροποποίησης του κανόνα.
-- **hash**: Περιέχει μια τιμή hash του κανόνα, ώστε να διασφαλίζεται η ακεραιότητά του και να εντοπίζεται tampering.
+- **hash**: Περιέχει μια τιμή hash του κανόνα, ώστε να διασφαλίζεται η ακεραιότητά του και να εντοπίζεται πιθανή παραποίηση.
 - **identifier**: Παρέχει ένα μοναδικό string identifier, όπως ένα UUID, για εξωτερικές αναφορές στον κανόνα.
 - **requirement**: Περιέχει serialized δεδομένα που ορίζουν τις συγκεκριμένες απαιτήσεις και τους μηχανισμούς authorization του κανόνα.
-- **comment**: Παρέχει μια περιγραφή ή ένα σχόλιο σε μορφή κατανοητή από τον άνθρωπο σχετικά με τον κανόνα, για documentation και σαφήνεια.
+- **comment**: Παρέχει μια περιγραφή ή ένα σχόλιο σε μορφή κατανοητή από τον άνθρωπο σχετικά με τον κανόνα, για σκοπούς τεκμηρίωσης και σαφήνειας.
 
 ### Παράδειγμα
 ```bash
@@ -56,7 +56,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </dict>
 </plist>
 ```
-Επιπλέον, στο [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) είναι δυνατό να δει κανείς τη σημασία του `authenticate-admin-nonshared`:<sup>[[1]](#references)</sup>
+Επιπλέον, στο [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) μπορεί κανείς να δει τη σημασία του `authenticate-admin-nonshared`:<sup>[[1]](#references)</sup>
 ```json
 {
 "allow-root": "false",
@@ -73,16 +73,17 @@ security authorizationdb read com.apple.tcc.util.admin
 ```
 ## Authd
 
-Είναι ένα daemon που λαμβάνει αιτήματα για την εξουσιοδότηση clients ώστε να εκτελούν ευαίσθητες ενέργειες. Λειτουργεί ως υπηρεσία XPC που ορίζεται μέσα στον φάκελο `XPCServices/` και χρησιμοποιεί το `/var/log/authd.log` για την καταγραφή των logs του.
+Είναι ένας daemon που λαμβάνει αιτήματα για την εξουσιοδότηση clients ώστε να εκτελούν ευαίσθητες ενέργειες. Λειτουργεί ως υπηρεσία XPC που ορίζεται μέσα στον φάκελο `XPCServices/` και χρησιμοποιεί το `/var/log/authd.log` για την καταγραφή των logs του.
 
-Επιπλέον, χρησιμοποιώντας το security tool, είναι δυνατή η δοκιμή πολλών APIs του `Security.framework`. Για παράδειγμα, η εκτέλεση του `AuthorizationExecuteWithPrivileges`: `security execute-with-privileges /bin/ls`
+Επιπλέον, χρησιμοποιώντας το security tool, είναι δυνατό να δοκιμαστούν πολλά APIs του `Security.framework`. Για παράδειγμα, η εκτέλεση του `AuthorizationExecuteWithPrivileges`: `security execute-with-privileges /bin/ls`
 
-Αυτό θα κάνει fork και exec το `/usr/libexec/security_authtrampoline /bin/ls` ως root, το οποίο θα ζητήσει δικαιώματα μέσω prompt για την εκτέλεση του ls ως root:
+Αυτό θα κάνει fork και exec το `/usr/libexec/security_authtrampoline /bin/ls` ως root, το οποίο θα ζητήσει δικαιώματα σε ένα prompt για να εκτελέσει το ls ως root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 
 - [1] [authenticate-admin-nonshared - Overview of the macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
+
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,12 +4,12 @@
 
 ## Βασικές πληροφορίες
 
-Το **XPC** (Cross-Process Communication) είναι ο κύριος μηχανισμός IPC στο macOS. Τα system daemons εκθέτουν **Mach services** — named ports που καταχωρίζονται με το `launchd` — στα οποία μπορούν να συνδεθούν άλλες διεργασίες μέσω του `NSXPCConnection`.
+Το **XPC** (Cross-Process Communication) είναι ο κύριος μηχανισμός IPC στο macOS. Τα system daemons εκθέτουν **Mach services** — ονομασμένες θύρες που καταχωρίζονται στο `launchd` — στις οποίες μπορούν να συνδεθούν άλλες διεργασίες μέσω του `NSXPCConnection`.<sup>[[1]](#references)</sup>
 
-Κάθε plist **LaunchDaemon** και **LaunchAgent** με ένα key `MachServices` καταχωρίζει ένα ή περισσότερα named Mach ports. Αυτά είναι system-wide XPC endpoints, στα οποία οποιαδήποτε διεργασία μπορεί να επιχειρήσει να συνδεθεί.
+Κάθε αρχείο plist **LaunchDaemon** και **LaunchAgent** με ένα key `MachServices` καταχωρίζει μία ή περισσότερες ονομασμένες Mach ports. Αυτά είναι XPC endpoints σε επίπεδο ολόκληρου του συστήματος, στα οποία μπορεί να επιχειρήσει να συνδεθεί οποιαδήποτε διεργασία.<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> Τα XPC Mach services αποτελούν τη **μεγαλύτερη επιφάνεια local privilege escalation** στο macOS. Τα περισσότερα local root exploits των τελευταίων ετών εκμεταλλεύτηκαν ευάλωτα XPC services σε LaunchDaemons. Κάθε exposed method σε ένα root daemon αποτελεί πιθανό escalation vector.
+> Τα XPC Mach services αποτελούν τη **μεγαλύτερη επιφάνεια επίθεσης για local privilege escalation** στο macOS. Τα περισσότερα local root exploits των τελευταίων ετών εκμεταλλεύονταν ευάλωτα XPC services σε LaunchDaemons. Κάθε exposed method σε ένα root daemon αποτελεί πιθανό escalation vector.
 
 ### Αρχιτεκτονική
 ```
@@ -49,7 +49,7 @@ LIMIT 50;"
 ```
 ### Enumerating XPC Interfaces
 
-Μόλις εντοπίσετε ένα daemon, κάντε reverse-engineer τη διεπαφή XPC του:
+Μόλις εντοπίσετε ένα daemon, κάντε reverse-engineer το XPC interface του:
 ```bash
 # Find the protocol definition in the binary
 strings /path/to/daemon | grep -i "protocol\|interface\|xpc\|method"
@@ -60,13 +60,13 @@ class-dump /path/to/daemon | grep -A20 "@protocol"
 # Check for XPC service bundles inside app bundles
 find /Applications -path "*/XPCServices/*.xpc" 2>/dev/null
 ```
-## Vulnerabilities επαλήθευσης XPC Client
+## Vulnerabilities in XPC Client Verification
 
-Η πιο συνηθισμένη κατηγορία vulnerabilities στις XPC services είναι η **ανεπαρκής επαλήθευση client**. Το daemon θα πρέπει να επαληθεύει:
+Η πιο συνηθισμένη κατηγορία ευπαθειών στις υπηρεσίες XPC είναι η **ανεπαρκής επαλήθευση client**. Ο daemon θα πρέπει να επαληθεύει:
 
-1. Το **code signature** της connecting process
-2. Τα **entitlements** της connecting process
-3. Το **audit token** (όχι το PID, το οποίο μπορεί να επαναχρησιμοποιηθεί)
+1. **Code signature** της συνδεόμενης διεργασίας
+2. **Entitlements** της συνδεόμενης διεργασίας
+3. **Audit token** (όχι το PID, το οποίο μπορεί να επαναχρησιμοποιηθεί)
 
 ### Ευάλωτο μοτίβο: Χωρίς επαλήθευση
 ```objc
@@ -79,7 +79,7 @@ newConnection.exportedObject = self;
 return YES; // No verification!
 }
 ```
-### Ευάλωτο Μοτίβο: Επαλήθευση βάσει PID (Race Condition)
+### Ευάλωτο μοτίβο: Επαλήθευση βάσει PID (Συνθήκη ανταγωνισμού)
 ```objc
 // VULNERABLE — PID can be reused between check and use
 - (BOOL)listener:(NSXPCListener *)listener
@@ -93,7 +93,7 @@ return YES;
 return NO;
 }
 ```
-### Ασφαλές Pattern: Επαλήθευση Audit Token
+### Ασφαλές Μοτίβο: Επαλήθευση Audit Token
 ```objc
 // SECURE — Uses audit token which cannot be spoofed
 - (BOOL)listener:(NSXPCListener *)listener
@@ -157,7 +157,7 @@ NSLog(@"Result: %@", result);
 ```
 ## Attack: XPC Object Deserialization
 
-Οι XPC services που δέχονται σύνθετα objects (συμβατά με `NSSecureCoding`) μπορεί να είναι ευάλωτα σε **deserialization attacks**:
+Οι υπηρεσίες XPC που αποδέχονται σύνθετα αντικείμενα (συμβατά με το `NSSecureCoding`) μπορεί να είναι ευάλωτες σε **deserialization attacks**:
 ```objc
 // If the daemon accepts NSObject subclasses via XPC:
 // An attacker can send a crafted object that triggers:
@@ -166,11 +166,11 @@ NSLog(@"Result: %@", result);
 // 3. Format string bugs (string objects as format arguments)
 // 4. Integer overflow (large numeric values)
 ```
-## Εξαιρέσεις Mach-Lookup του Sandbox
+## Εξαιρέσεις Mach-Lookup Sandbox
 
-### Πώς οι εξαιρέσεις επιτρέπουν την έξοδο από το Sandbox
+### Πώς οι εξαιρέσεις επιτρέπουν το Sandbox escape
 
-Οι εφαρμογές στο Sandbox μπορούν κανονικά να επικοινωνούν μόνο με τις δικές τους υπηρεσίες XPC. Ωστόσο, οι **mach-lookup exceptions** επιτρέπουν την πρόσβαση σε υπηρεσίες σε επίπεδο ολόκληρου του συστήματος:
+Οι εφαρμογές σε Sandbox μπορούν κανονικά να επικοινωνούν μόνο με τις δικές τους XPC services. Ωστόσο, οι **mach-lookup exceptions** επιτρέπουν την πρόσβαση σε services σε επίπεδο συστήματος:
 ```xml
 <!-- Entitlement granting mach-lookup exception -->
 <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
@@ -203,11 +203,11 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 5. Exploit a daemon bug → code execution outside the sandbox
 6. Escalate from daemon's privilege level (often root)
 ```
-## Privileged Helper Tools (SMJobBless)
+## Προνομιούχα Helper Tools (SMJobBless)
 
 ### Πώς λειτουργούν
 
-Το `SMJobBless` εγκαθιστά έναν privileged helper που εκτελείται ως root μέσω του launchd. Ο helper επικοινωνεί με το parent app μέσω XPC:
+Το `SMJobBless` εγκαθιστά ένα προνομιούχο helper που εκτελείται ως root μέσω του launchd. Το helper επικοινωνεί με τη γονική εφαρμογή του μέσω XPC:
 ```
 App (user context) ←→ XPC ←→ Helper (root via launchd)
 ```
@@ -273,17 +273,17 @@ class-dump /path/to/daemon
 # 3. Monitor for crashes
 log stream --predicate 'process == "daemon-name" AND (eventMessage CONTAINS "crash" OR eventMessage CONTAINS "fault")'
 ```
-## CVEs στον πραγματικό κόσμο
+## CVE σε πραγματικές συνθήκες
 
 | CVE | Περιγραφή |
 |---|---|
-| CVE-2023-41993 | Ευπάθεια deserialization σε XPC service |
-| CVE-2022-22616 | Παράκαμψη του Gatekeeper μέσω abuse XPC service |
-| CVE-2021-30657 | Κλιμάκωση προνομίων μέσω Sysmond XPC |
-| CVE-2020-9839 | Race condition σε system daemon μέσω XPC |
-| CVE-2019-8802 | Privileged helper tool χωρίς επαλήθευση client |
-| CVE-2023-32369 | Migraine — Παράκαμψη του SIP μέσω XPC του `systemmigrationd` |
-| CVE-2022-26712 | Κλιμάκωση σε root μέσω PackageKit XPC |
+| CVE-2023-41993 | Ευπάθεια αποσειριοποίησης υπηρεσίας XPC |
+| CVE-2022-22616 | Παράκαμψη του Gatekeeper μέσω abuse υπηρεσίας XPC |
+| CVE-2021-30657 | Κλιμάκωση προνομίων XPC του Sysmond |
+| CVE-2020-9839 | Συνθήκη ανταγωνισμού XPC σε system daemon |
+| CVE-2019-8802 | Το privileged helper tool δεν πραγματοποιεί επαλήθευση client |
+| CVE-2023-32369 | Migraine — παράκαμψη του SIP μέσω XPC του `systemmigrationd`<sup>[[3]](#references)</sup> |
+| CVE-2022-26712 | Κλιμάκωση σε root μέσω XPC του PackageKit<sup>[[4]](#references)</sup> |
 
 ## Script απαρίθμησης
 ```bash
@@ -313,11 +313,13 @@ plutil -p "$plist" | grep -A5 "MachServices" | sed 's/^/    /'
 }
 done
 ```
-## Παραπομπές
+## Αναφορές
 
 - [1] [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
 - [2] [Apple Developer — Οδηγός προγραμματισμού Daemons και Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
-- [3] [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
-- [4] [OBTS — Ομιλίες για το XPC Attack Surface](https://objectivebythesea.org/)
+- [3] [Νέα ευπάθεια στο macOS, Migraine, θα μπορούσε να παρακάμψει το System Integrity Protection — Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [4] [CVE-2022-26712: Το POC για το SIP-Bypass μπορεί ακόμη και να δημοσιευτεί σε Tweet](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
+- [5] [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
+- [6] [OBTS — Ομιλίες για το XPC Attack Surface](https://objectivebythesea.org/)
 
 {{#include ../../../banners/hacktricks-training.md}}
