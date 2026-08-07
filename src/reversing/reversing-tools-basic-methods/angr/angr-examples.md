@@ -3,11 +3,11 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> As die program `scanf` gebruik om **verskeie waardes tegelyk vanaf stdin te verkry**, moet jy ’n toestand genereer wat ná die **`scanf`** begin.
+> As die program `scanf` gebruik om **verskeie waardes gelyktydig vanaf stdin te verkry**, moet jy 'n toestand genereer wat ná die **`scanf`** begin.
 
-Kode afkomstig van [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Kodes geneem van [https://github.com/jakespringer/angr_ctf]<sup>[[1]](#references)</sup>
 
-### Invoer om ’n adres te bereik (wat die adres aandui)
+### Invoer om adres te bereik (wat die adres aandui)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Invoer om adres te bereik (wat uitvoer aandui)
+### Invoer om adres te bereik (wat prints aandui)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-In hierdie scenario is die invoer met `scanf("%u %u")` verkry en die waarde `"1 1"` is gegee, dus kom die **`0x00000001`**-waardes op die **stack** van die **gebruikersinvoer**. Jy kan sien hoe hierdie waardes by `$ebp - 8` begin. Daarom het ons in die kode **8 grepe van `$esp` afgetrek (omdat `$ebp` en `$esp` op daardie oomblik dieselfde waarde gehad het)** en daarna die BVS gepush.
+In hierdie scenario is die input met `scanf("%u %u")` geneem en die waarde `"1 1"` is gegee, dus kom die waardes **`0x00000001`** van die stack uit die **user input**. Jy kan sien hoe hierdie waardes by `$ebp - 8` begin. Daarom het ons in die kode **8 bytes van `$esp` afgetrek (aangesien `$ebp` en `$esp` op daardie oomblik dieselfde waarde gehad het)** en daarna die BVS gepush.
 
-![Plaas bit vectors op die stack om uit te vind watter waarde daardie stack-posisie moet hê om 'n programvloei te bereik: In hierdie scenario is die invoer met scanf("%u %u") verkry en die waarde "1...](<../../../images/image (136).png>)
+![Plaas bit vectors in die stack om uit te vind watter waarde daardie stack-posisie moet hê om 'n program flow te bereik: In hierdie scenario is die input met scanf("%u %u") geneem en die waarde "1...](<../../../images/image (136).png>)
 
-### Statiese geheuewaardes (globale veranderlikes)
+### Statiese Memory-waardes (Global variables)
 ```python
 import angr
 import claripy
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> Let daarop dat die symbolic file ook konstante data kan bevat wat met symbolic data saamgevoeg is:
+> Let daarop dat die symbolic file ook konstante data gemeng met symbolic data kan bevat:
 >
 > ```python
 >  # Hello world, my name is John.
@@ -402,13 +402,13 @@ main(sys.argv)
 >  # the string from the file, except four symbolic bytes where the name would be
 >  # stored.
 >  # (!)
-> ```
+>  ```
 
 ### Beperkings toepas
 
 > [!TIP]
-> Soms kos eenvoudige menslike bewerkings, soos om 2 woorde van lengte 16 **character vir character** (loop) te vergelyk, **angr** baie omdat dit vertakkings **eksponensieel** moet genereer, aangesien dit 1 vertakking per if genereer: `2^16`\
-> Daarom is dit makliker om vir **angr** te **vra om by 'n vorige punt uit te kom** (waar die werklik moeilike deel reeds afgehandel is) en daardie beperkings **handmatig te stel**.
+> Soms kos eenvoudige menslike bewerkings, soos om 2 woorde van lengte 16 **char by char** (lus) te vergelyk, **angr** baie omdat dit **branches** eksponensieel moet genereer, aangesien dit 1 branch per if genereer: `2^16`\
+> Daarom is dit makliker om **angr te vra om by ’n vorige punt uit te kom** (waar die werklik moeilike deel reeds voltooi is) en **daardie beperkings handmatig te stel**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,14 +480,14 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> In sommige scenario's kan jy **veritesting** aktiveer, wat soortgelyke statusse sal saamsmelt om onnodige branches te vermy en die oplossing te vind: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> In sommige scenario's kan jy **veritesting** aktiveer, wat soortgelyke statusse sal saamvoeg om onnodige branches te bespaar en die oplossing te vind: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Nog iets wat jy in hierdie scenario's kan doen, is om die **function te hook wat angr iets gee wat dit makliker kan verstaan**.
+> Nog iets wat jy in hierdie scenario's kan doen, is om die **function te hook sodat angr iets kry wat dit** makliker kan verstaan.
 
 ### Simulasiebestuurders
 
-Sommige simulasiebestuurders kan nuttiger as ander wees. In die vorige voorbeeld was daar 'n probleem omdat baie nuttige branches geskep is. Hier sal die **veritesting**-tegniek hulle saamsmelt en 'n oplossing vind.\
+Sommige simulasiebestuurders kan nuttiger as ander wees. In die vorige voorbeeld was daar 'n probleem, aangesien baie nuttige branches geskep is. Hier sal die **veritesting**-tegniek hulle saamvoeg en 'n oplossing vind.\
 Hierdie simulasiebestuurder kan ook geaktiveer word met: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
@@ -809,6 +809,6 @@ main(sys.argv)
 ```
 ## Verwysings
 
-- [1] [jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
+- [1] [jakespringer/angr_ctf - GitHub-bewaarplek](https://github.com/jakespringer/angr_ctf)
 
 {{#include ../../../banners/hacktricks-training.md}}

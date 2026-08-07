@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Deel van hierdie cheatsheet is gebaseer op die [angr-dokumentasie](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
+'n Deel van hierdie cheatsheet is gebaseer op die [angr-dokumentasie](https://docs.angr.io/_/downloads/en/stable/pdf/).<sup>[[1]](#references)</sup>
 
 ## Installasie
 ```bash
@@ -12,7 +12,7 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
-## Basiese aksies
+## Basiese Aksies
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -30,7 +30,7 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-## Inligting oor gelaaide en hoofobjekte
+## Inligting oor gelaaide en hoofobjek
 
 ### Gelaaide data
 ```python
@@ -121,9 +121,9 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ### Funksies oproep
 
-- Jy kan ’n lys argumente deur `args` en ’n woordeboek van omgewingsveranderlikes deur `env` aan `entry_state` en `full_init_state` deurgee. Die waardes in hierdie strukture kan strings of bitvektore wees, en sal in die toestand as die argumente en omgewing vir die gesimuleerde uitvoering geserialiseer word. Die verstekwaarde van `args` is ’n leë lys, dus, as die program wat jy ontleed verwag om ten minste ’n `argv[0]` te vind, moet jy dit altyd verskaf!
-- As jy wil hê dat `argc` simbolies moet wees, kan jy ’n simboliese bitvektor as `argc` aan die `entry_state`- en `full_init_state`-konstruktors deurgee. Wees egter versigtig: as jy dit doen, moet jy ook ’n beperking by die resulterende toestand voeg wat verseker dat jou waarde vir argc nie groter kan wees as die aantal args wat jy aan `args` deurgegee het nie.
-- Om die call state te gebruik, moet jy dit met `.call_state(addr, arg1, arg2, ...)` oproep, waar `addr` die adres is van die funksie wat jy wil oproep en `argN` die Nde argument aan daardie funksie is, hetsy as ’n Python-heelgetal, string of skikking, of as ’n bitvektor. As jy geheue wil laat allokeer en werklik ’n pointer na ’n objek wil deurgee, moet jy dit in ’n PointerWrapper verpak, byvoorbeeld `angr.PointerWrapper("point to me!")`. Die resultate van hierdie API kan ’n bietjie onvoorspelbaar wees, maar ons werk daaraan.
+- Jy kan 'n lys argumente deur `args` en 'n woordeboek van omgewingsveranderlikes deur `env` aan `entry_state` en `full_init_state` deurgee. Die waardes in hierdie strukture kan strings of bitvektore wees, en sal in die toestand as die argumente en omgewing vir die gesimuleerde uitvoering geserialiseer word. Die verstekwaarde van `args` is 'n leë lys, dus, as die program wat jy ontleed verwag om ten minste 'n `argv[0]` te vind, moet jy dit altyd verskaf!
+- As jy wil hê dat `argc` simbolies moet wees, kan jy 'n simboliese bitvektor as `argc` aan die `entry_state`- en `full_init_state`-konstruktors deurgee. Wees egter versigtig: as jy dit doen, moet jy ook 'n beperking by die resulterende toestand voeg dat jou waarde vir argc nie groter kan wees as die aantal args wat jy aan `args` deurgegee het nie.
+- Om die call state te gebruik, moet jy dit met `.call_state(addr, arg1, arg2, ...)` oproep, waar `addr` die adres is van die funksie wat jy wil oproep en `argN` die N-de argument aan daardie funksie is, hetsy as 'n Python-heelgetal, string of skikking, of as 'n bitvektor. As jy geheue wil allokeer en werklik 'n pointer na 'n objek wil deurgee, moet jy dit in 'n PointerWrapper verpak, byvoorbeeld `angr.PointerWrapper("point to me!")`. Die resultate van hierdie API kan 'n bietjie onvoorspelbaar wees, maar ons werk daaraan.
 
 ### BitVectors
 ```python
@@ -192,6 +192,6 @@ Verder kan jy `proj.hook_symbol(name, hook)` gebruik, deur die naam van ’n sim
 
 ## Verwysings
 
-- [1] [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)
+- [1] [angr-dokumentasie](https://docs.angr.io/_/downloads/en/stable/pdf/)
 
 {{#include ../../../banners/hacktricks-training.md}}
