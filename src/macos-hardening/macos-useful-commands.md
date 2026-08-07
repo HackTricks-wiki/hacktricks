@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS 자동 Enumeration 도구
+### MacOS 자동 열거 도구
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -117,7 +117,7 @@ sudo killall -HUP mDNSResponder
 ```
 ### 빠른 anti-analysis / virtualization 확인
 
-일부 macOS stealer는 VM을 탐지하기 위해 `system_profiler`를 호출하고, sandbox detonation을 피하기 위해 **구별되는 종료 코드(예: 100)**로 중단합니다<sup>[[1]](#references)</sup>:
+일부 macOS stealer는 VM을 탐지하기 위해 `system_profiler`를 호출하고, sandbox detonation을 피하기 위해 **고유한 exit code(예: 100)** 로 중단합니다<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,7 +125,7 @@ fi
 ```
 ### 설치된 Software 및 Services
 
-설치된 **suspicious** 애플리케이션과 설치된 리소스에 대한 **privileges**를 확인합니다:
+설치된 **suspicious** 애플리케이션과 설치된 리소스에 대한 **privileges**을 확인합니다:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework

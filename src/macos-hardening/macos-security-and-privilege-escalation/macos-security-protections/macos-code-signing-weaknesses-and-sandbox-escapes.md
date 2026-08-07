@@ -2,20 +2,20 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Ad-Hoc 서명 바이너리
+## Ad-Hoc Signed Binaries
 
-### 기본 정보
+### Basic Information
 
-**Ad-hoc signing** (`CS_ADHOC`)은 **certificate chain이 없는** code signature를 생성합니다. 즉, developer identity verification 없이 code의 hash만 포함합니다. 따라서 해당 바이너리의 origin을 특정 developer나 organization까지 추적할 수 없습니다.
+**Ad-hoc signing** (`CS_ADHOC`)은 **certificate chain이 없는** code signature를 생성합니다. 즉, developer identity verification 없이 code의 hash만 포함합니다. 따라서 해당 binary의 origin을 어떤 developer나 organization으로도 추적할 수 없습니다.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Apple Silicon Mac에서는 모든 executable에 최소한 ad-hoc signature가 필요합니다. 따라서 다양한 development tool, Homebrew package 및 third-party utility에서 ad-hoc signature를 발견할 수 있습니다.
+Apple Silicon Mac에서는 모든 executable에 최소한 ad-hoc signature가 필요합니다. 따라서 많은 development tool, Homebrew package 및 third-party utility에서 ad-hoc signature를 확인할 수 있습니다.
 
-### 중요한 이유
+### Why This Matters
 
-- **검증 가능한 identity가 없음** — identity-based check에서 탐지되지 않고 바이너리를 교체할 수 있음
-- **privileged position** (FDA, daemon, helper)에 있는 third-party ad-hoc binary는 우선순위가 높은 target임
+- **검증 가능한 identity 없음** — identity 기반 검사를 우회한 채 binary를 감지되지 않도록 교체할 수 있음
+- **권한이 높은 위치**(FDA, daemon, helper)에 있는 third-party ad-hoc binary는 우선순위가 높은 target임
 - 일부 configuration에서는 ad-hoc signature가 developer-signed code만큼 엄격하게 **검증되지 않을 수 있음**
-- **TCC grant**가 있는 ad-hoc signed binary는 특히 가치가 높음 — 바이너리 content가 변경되어도 grant가 유지됨 (TCC가 grant를 어떤 방식으로 keying했는지에 따라 다름)
+- **TCC grant**가 있는 ad-hoc signed binary는 특히 가치가 높음 — binary content가 변경되어도 grant가 유지됨(TCC가 grant를 key로 지정한 방식에 따라 다름)
 
 ### Discovery
 ```bash
@@ -29,7 +29,7 @@ echo "$flags" | grep -q "adhoc" && echo "AD-HOC: {}"
 codesign -dv --verbose=4 /path/to/binary 2>&1 | grep -E "Signature|flags|Authority"
 # Ad-hoc shows: "Signature=adhoc" and no Authority lines
 ```
-### Attack: Binary Replacement
+### 공격: Binary Replacement
 ```bash
 # If an ad-hoc signed daemon binary is in a writable location:
 # 1. Check the binary's current capabilities
@@ -50,18 +50,18 @@ codesign -s - /path/to/target
 ```
 ---
 
-## 디버깅 가능한 프로세스 (get-task-allow)
+## Debuggable Processes (get-task-allow)
 
 ### 기본 정보
 
-**`com.apple.security.get-task-allow`** entitlement(또는 `CS_GET_TASK_ALLOW` flag)은 **모든 프로세스가 debugger로 attach**하여 memory를 읽고, register를 수정하고, code를 inject하며, execution을 제어할 수 있도록 합니다.
+**`com.apple.security.get-task-allow`** entitlement(또는 `CS_GET_TASK_ALLOW` flag)은 **모든 process가 debugger로 attach**하여 memory를 읽고, register를 수정하고, code를 inject하고, execution을 제어할 수 있도록 합니다.<sup>[[3]](#references)</sup>
 
-이는 **개발 빌드에서만** 사용하도록 설계되었습니다. 그러나 일부 third-party binary는 production 환경에서도 이 entitlement를 포함한 채 배포됩니다.
+이는 **개발용 build에만** 사용하도록 의도되었습니다. 그러나 일부 third-party binary는 production에서도 이 entitlement를 포함한 채 배포됩니다.
 
 > [!CAUTION]
-> `get-task-allow`가 설정된 production binary는 **즉시 exploitation primitive**입니다. 모든 local process는 `task_for_pid()`를 호출하여 대상의 Mach task port를 획득하고, 대상의 entitlement, TCC grants 및 security context로 실행되는 arbitrary code를 inject할 수 있습니다.
+> `get-task-allow`가 설정된 production binary는 **즉시 악용 가능한 primitive**입니다. 모든 local process는 `task_for_pid()`를 호출하여 target의 Mach task port를 얻고, target의 entitlement, TCC grants 및 security context로 실행되는 arbitrary code를 inject할 수 있습니다.
 
-### 탐색
+### Discovery
 ```bash
 # Find debuggable binaries
 find /Applications /usr/local -type f -perm +111 -exec sh -c '
@@ -103,17 +103,17 @@ VM_PROT_READ | VM_PROT_EXECUTE);
 ```
 ---
 
-## No Library Validation + DYLD Environment
+## Library Validation 없음 + DYLD Environment
 
 ### 치명적인 조합
 
-바이너리에 **둘 다** 있는 경우:
+Binary에 **다음 두 항목이 모두 있는 경우**:<sup>[[3]](#references)</sup>
 - `com.apple.security.cs.disable-library-validation` (모든 dylib 로드)
-- `com.apple.security.cs.allow-dyld-environment-variables` (DYLD 환경 변수 허용)
+- `com.apple.security.cs.allow-dyld-environment-variables` (DYLD env vars 허용)
 
 이는 **보장된 code injection primitive**입니다 — `DYLD_INSERT_LIBRARIES`가 완벽하게 작동합니다.
 
-### 발견ેશન
+### Discovery
 ```bash
 # Find binaries with the deadly combo
 find /Applications -type f -perm +111 -exec sh -c '
@@ -129,7 +129,7 @@ SELECT path, privileged, tccPermsStr FROM executables
 WHERE noLibVal = 1 AND allowDyldEnv = 1
 ORDER BY privileged DESC;"
 ```
-### Attack: DYLD_INSERT_LIBRARIES Injection
+### 공격: DYLD_INSERT_LIBRARIES Injection
 ```bash
 # 1. Create the injection dylib
 cat > /tmp/inject.c << 'EOF'
@@ -166,23 +166,23 @@ cat /tmp/injected_proof.txt
 ```
 ---
 
-## Sandbox 임시 예외
+## Sandbox Temporary Exceptions
 
 ### Sandbox를 약화시키는 방식
 
-Sandbox 임시 예외(`com.apple.security.temporary-exception.*`)는 App Sandbox에 허점을 만듭니다:
+Sandbox temporary exceptions (`com.apple.security.temporary-exception.*`)은 App Sandbox에 허점을 만든다:<sup>[[2]](#references)</sup>
 
-| 예외 | 허용되는 작업 |
+| Exception | 허용하는 작업 |
 |---|---|
-| `temporary-exception.mach-lookup.global-name` | 시스템 전역 XPC/Mach 서비스에 연결 |
+| `temporary-exception.mach-lookup.global-name` | 시스템 전체의 XPC/Mach 서비스에 연결 |
 | `temporary-exception.files.absolute-path.read-write` | 앱 컨테이너 외부의 파일 읽기/쓰기 |
 | `temporary-exception.iokit-user-client-class` | IOKit user-client 연결 열기 |
 | `temporary-exception.shared-preference.read-only` | 다른 앱의 preference 읽기 |
-| `temporary-exception.files.home-relative-path.read-write` | `~` 기준 경로에 액세스 |
+| `temporary-exception.files.home-relative-path.read-write` | `~` 기준 상대 경로에 접근 |
 
-### Mach-Lookup 예외 = Sandbox Escape Primitive
+### Mach-Lookup Exceptions = Sandbox Escape Primitive
 
-가장 위험한 예외는 **mach-lookup**입니다. 이를 통해 Sandbox된 앱이 권한이 높은 데몬과 통신할 수 있습니다:
+가장 위험한 exception은 **mach-lookup**이다. 이를 통해 sandbox된 앱이 privileged daemon과 통신할 수 있다:
 ```bash
 # Find apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -196,7 +196,7 @@ echo "[$count exceptions] $(basename "$1")"
 }
 ' _ {} \; 2>/dev/null | sort -rn
 ```
-### Attack: Mach-Lookup을 통한 Sandbox Escape
+### 공격: Mach-Lookup을 통한 Sandbox Escape
 ```
 1. Compromise sandboxed app (renderer exploit, malicious document, etc.)
 2. Read entitlements to discover mach-lookup exceptions
@@ -213,19 +213,19 @@ c. Fuzz each exposed method
 
 ### 정의
 
-`com.apple.private.*` 접두사가 붙은 Entitlement는 서드파티 개발자에게 문서화되거나 제공되지 않는 **Apple 내부 API**에 대한 액세스를 제공합니다. Private Entitlement를 포함한 서드파티 바이너리는 enterprise cert, MDM 또는 non-App-Store distribution을 통해 이를 획득했습니다.
+`com.apple.private.*` 접두사가 붙은 Entitlements는 서드파티 개발자에게 문서화되거나 제공되지 않는 **Apple 내부 API**에 대한 액세스를 제공합니다. Private Entitlements를 보유한 서드파티 바이너리는 enterprise cert, MDM 또는 Non-App-Store 배포를 통해 이를 획득했습니다.
 
-### 위험한 Private Entitlement
+### 위험한 Private Entitlements
 
 | Entitlement | Capability |
 |---|---|
-| `com.apple.private.tcc.manager` | 전체 TCC database 읽기/쓰기 |
-| `com.apple.private.tcc.allow` | 특정 TCC service에 대한 액세스 |
+| `com.apple.private.tcc.manager` | 전체 TCC database read/write |
+| `com.apple.private.tcc.allow` | 특정 TCC services에 대한 액세스 |
 | `com.apple.private.security.no-sandbox` | sandbox 없이 실행 |
 | `com.apple.private.iokit` | IOKit driver에 대한 직접 액세스 |
 | `com.apple.private.kernel.\*` | Kernel interface 액세스 |
-| `com.apple.private.xpc.launchd.job-label` | launchd job 등록/관리 |
-| `com.apple.rootless.install` | SIP-protected path에 쓰기 |
+| `com.apple.private.xpc.launchd.job-label` | launchd jobs 등록/관리 |
+| `com.apple.rootless.install` | SIP로 보호된 paths에 쓰기 |
 
 ### Discovery
 ```bash
@@ -248,11 +248,11 @@ ORDER BY privileged DESC;"
 
 ## Custom Sandbox Profiles (SBPL)
 
-### 정의
+### 개요
 
-바이너리는 SBPL(Seatbelt Profile Language)로 작성된 **Custom Sandbox Profile**과 함께 제공될 수 있습니다. 이러한 Profile은 기본 App Sandbox보다 더 제한적일 수도 있고, OR **더 permissive**할 수도 있습니다.
+바이너리는 SBPL(Seatbelt Profile Language)로 작성된 **custom sandbox profiles**와 함께 제공될 수 있습니다. 이러한 프로필은 기본 App Sandbox보다 더 제한적일 수도 있고 **더 허용적**일 수도 있습니다.
 
-### Custom Profile 감사
+### Custom Profiles 감사
 ```bash
 # Find custom sandbox profiles
 find /Applications /System -name "*.sb" -o -name "*.sbpl" 2>/dev/null
@@ -272,11 +272,11 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 
 ## 쓰기 가능한 Library 경로
 
-### 개요
+### 이것이 무엇인가
 
-바이너리가 현재 사용자가 **write**할 수 있는 경로에서 dynamic library를 로드하면, 해당 library를 악성 코드로 교체할 수 있습니다.
+binary가 현재 사용자가 **write할 수 있는** 경로에서 dynamic library를 로드하면, 해당 library를 악성 코드로 교체할 수 있습니다.
 
-### 탐색
+### 발견
 ```bash
 # Using the scanner — find privileged binaries loading from writable paths
 sqlite3 /tmp/executables.db "
@@ -293,7 +293,7 @@ otool -L /path/to/binary | awk '{print $1}' | while read lib; do
 [ -f "$lib" ] && [ -w "$lib" ] && echo "WRITABLE: $lib"
 done
 ```
-### 공격: Dylib Replacement
+### Attack: Dylib 교체
 ```bash
 # 1. Find the writable library
 otool -L /path/to/target-daemon | grep "/usr/local\|/opt\|Library"
@@ -317,12 +317,12 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 
 # 5. When the daemon restarts, it loads the evil dylib with daemon privileges
 ```
-## 참고 자료
+## 참고 문헌
 
 - [1] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
 - [2] [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
 - [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
+- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` 작업 및 `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` 처리기)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
 
 {{#include ../../../banners/hacktricks-training.md}}

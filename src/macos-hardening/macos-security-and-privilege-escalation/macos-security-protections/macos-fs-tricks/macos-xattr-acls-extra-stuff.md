@@ -1,4 +1,4 @@
-# macOS xattr-acls 추가 정보
+# macOS xattr-acls 기타 내용
 
 {{#include ../../../../banners/hacktricks-training.md}}
 ```bash
@@ -14,7 +14,7 @@ ACL in hex: \x21\x23\x61\x63\x6c\x20\x31\x0a\x67\x72\x6f\x75\x70\x3a\x41\x42\x43
 ```
 <details>
 
-<summary>get_acls의 코드</summary>
+<summary>get_acls 코드</summary>
 ```c
 // gcc -o get_acls get_acls
 #include <stdio.h>
@@ -65,7 +65,7 @@ echo something > start/protected/something
 ```
 <details>
 
-<summary>set_xattr의 코드</summary>
+<summary>set_xattr 코드</summary>
 ```c
 // gcc -o set_xattr set_xattr.c
 #include <stdio.h>
