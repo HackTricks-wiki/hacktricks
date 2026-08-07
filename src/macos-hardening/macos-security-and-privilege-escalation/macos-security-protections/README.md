@@ -13,7 +13,7 @@ Mais informações em:
 macos-gatekeeper.md
 {{#endref}}
 
-## Limitações de Processos
+## Limitadores de Processos
 
 ### MACF
 
@@ -26,7 +26,7 @@ macos-sip.md
 
 ### Sandbox
 
-O Sandbox do macOS **limita os aplicativos** executados dentro do sandbox às **ações permitidas especificadas no perfil do Sandbox** com o qual o app está sendo executado. Isso ajuda a garantir que **o aplicativo acesse apenas os recursos esperados**.
+O Sandbox do MacOS **limita os aplicativos** executados dentro do sandbox às **ações permitidas especificadas no perfil do Sandbox** com o qual o app está sendo executado. Isso ajuda a garantir que **o aplicativo acessará apenas os recursos esperados**.
 
 
 {{#ref}}
@@ -35,7 +35,7 @@ macos-sandbox/
 
 ### TCC - **Transparency, Consent, and Control**
 
-**TCC (Transparency, Consent, and Control)** é um framework de segurança. Ele foi desenvolvido para **gerenciar as permissões** dos aplicativos, regulando especificamente o acesso deles a recursos sensíveis. Isso inclui elementos como **serviços de localização, contatos, fotos, microfone, câmera, acessibilidade e acesso total ao disco**. O TCC garante que os apps só possam acessar esses recursos após obter o consentimento explícito do usuário, reforçando a privacidade e o controle sobre os dados pessoais.
+**TCC (Transparency, Consent, and Control)** é um framework de segurança. Ele foi projetado para **gerenciar as permissões** dos aplicativos, regulando especificamente o acesso deles a recursos sensíveis. Isso inclui elementos como **serviços de localização, contatos, fotos, microfone, câmera, acessibilidade e acesso total ao disco**. O TCC garante que os apps só possam acessar esses recursos após obter o consentimento explícito do usuário, reforçando assim a privacidade e o controle sobre os dados pessoais.
 
 
 {{#ref}}
@@ -44,7 +44,7 @@ macos-tcc/
 
 ### Launch/Environment Constraints & Trust Cache
 
-As restrições de inicialização no macOS são um recurso de segurança para **regular a inicialização de processos**, definindo **quem pode iniciar** um processo, **como** e **de onde**. Introduzidas no macOS Ventura, elas categorizam os binários do sistema em categorias de restrições dentro de um **trust cache**. Cada binário executável possui um conjunto de **regras** para sua **inicialização**, incluindo restrições **self**, **parent** e **responsible**. Estendidos para apps de terceiros como restrições de **Environment** no macOS Sonoma, esses recursos ajudam a mitigar possíveis explorações do sistema ao controlar as condições de inicialização dos processos.
+As launch constraints no macOS são um recurso de segurança para **regular a inicialização de processos**, definindo **quem pode iniciar** um processo, **como** e **de onde**. Introduzidas no macOS Ventura, elas categorizam os binários do sistema em categorias de restrições dentro de um **trust cache**. Cada binário executável possui **regras** definidas para seu **lançamento**, incluindo restrições **self**, **parent** e **responsible**. Estendidas a apps de terceiros como restrições de **Environment** no macOS Sonoma, esses recursos ajudam a mitigar possíveis explorações do sistema ao controlar as condições de inicialização dos processos.
 
 
 {{#ref}}
@@ -59,22 +59,22 @@ Depois que um malware é detectado em um Mac (pelo XProtect ou por algum outro m
 
 Embora o XProtect e o MRT façam parte das medidas de segurança do macOS, eles desempenham funções diferentes:
 
-- **XProtect** é uma ferramenta preventiva. Ele **verifica os arquivos à medida que são baixados** (por determinados aplicativos) e, se detectar algum tipo conhecido de malware, **impede que o arquivo seja aberto**, evitando que o malware infecte o sistema desde o início.
-- O **MRT**, por outro lado, é uma **ferramenta reativa**. Ele opera depois que um malware foi detectado no sistema, com o objetivo de remover o software malicioso e limpar o sistema.
+- **XProtect** é uma ferramenta preventiva. Ele **verifica os arquivos durante o download** (por meio de determinados aplicativos) e, se detectar algum tipo conhecido de malware, **impede a abertura do arquivo**, evitando assim que o malware infecte o sistema desde o início.
+- O **MRT**, por outro lado, é uma **ferramenta reativa**. Ele opera depois que um malware foi detectado em um sistema, com o objetivo de remover o software malicioso e limpar o sistema.
 
 O aplicativo MRT está localizado em **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
 ## Gerenciamento de Tarefas em Segundo Plano
 
-O **macOS** agora **emite um alerta** sempre que uma ferramenta usa uma **técnica conhecida para persistir a execução de código** (como Login Items, Daemons...), para que o usuário saiba melhor **qual software está obtendo persistência**.<sup>[[3]](#references)</sup>
+O **macOS** agora **alerta** sempre que uma ferramenta usa uma **técnica conhecida para persistir a execução de código** (como Login Items, Daemons...), para que o usuário saiba melhor **qual software está persistindo**.<sup>[[3]](#references)</sup>
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
 Isso é executado com um **daemon** localizado em `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` e o **agent** em `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`<sup>[[1]](#references)</sup>
 
-A maneira como o **`backgroundtaskmanagementd`** sabe que algo está instalado em uma pasta persistente é **obtendo os FSEvents** e criando alguns **handlers** para eles.<sup>[[1]](#references)</sup>
+A forma como o **`backgroundtaskmanagementd`** sabe que algo está instalado em uma pasta persistente é **obtendo os FSEvents** e criando alguns **handlers** para eles.<sup>[[1]](#references)</sup>
 
-Além disso, existe um arquivo plist que contém **aplicativos conhecidos** que frequentemente obtêm persistência, mantido pela Apple e localizado em: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[[3]](#references)</sup>
+Além disso, há um arquivo plist que contém **aplicativos conhecidos** que persistem com frequência, mantido pela Apple e localizado em: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[[3]](#references)</sup>
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -104,19 +104,19 @@ chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-Essas informações são armazenadas em **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** e o Terminal precisa de FDA.<sup>[[2]](#references)</sup>
+Estas informações são armazenadas em **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** e o Terminal precisa de FDA.<sup>[[2]](#references)</sup>
 
 ### Interferindo no BTM
 
-Quando uma nova persistência é encontrada, um evento do tipo **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** é gerado. Portanto, qualquer forma de **impedir** que esse **evento** seja enviado ou que o **agent alerte** o usuário ajudará um atacante a _**bypassar**_ o BTM.<sup>[[1]](#references)</sup>
+Quando uma nova persistência é encontrada, um evento do tipo **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** é gerado. Portanto, qualquer forma de **impedir** que esse **evento** seja enviado ou de **impedir que o agent alerte** o usuário ajudará um atacante a _**bypassar**_ o BTM.<sup>[[1]](#references)</sup>
 
-- **Redefinindo o banco de dados**: Executar o comando a seguir redefinirá o banco de dados (ele deverá ser reconstruído do zero); no entanto, por algum motivo, depois disso, **nenhuma nova persistência será alertada até que o sistema seja reinicializado**.<sup>[[1]](#references)</sup>
+- **Redefinindo o database**: executar o comando a seguir redefinirá o database (ele deve ser reconstruído do zero); no entanto, por algum motivo, depois disso, **nenhuma nova persistência será alertada até que o sistema seja reinicializado**.<sup>[[1]](#references)</sup>
 - **root** é necessário.
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
-- **Parar o Agent**: É possível enviar um sinal de parada para o Agent para que ele **não alerte o usuário** quando novas detecções forem encontradas.<sup>[[1]](#references)</sup>
+- **Parar o Agent**: É possível enviar um sinal de parada ao Agent para que ele **não alerte o usuário** quando novas detecções forem encontradas.<sup>[[1]](#references)</sup>
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent
@@ -129,7 +129,7 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Bug**: Se o **processo que criou a persistence sair imediatamente depois**, o daemon tentará **obter informações** sobre ele, **falhará** e **não conseguirá enviar o evento** indicando que algo novo está persistindo.<sup>[[1]](#references)</sup>
+- **Bug**: Se o **processo que criou a persistence terminar imediatamente depois dela**, o daemon tentará **obter informações** sobre ele, **falhará** e **não conseguirá enviar o evento** indicando que algo novo está mantendo a persistence.<sup>[[1]](#references)</sup>
 
 ## Referências
 
