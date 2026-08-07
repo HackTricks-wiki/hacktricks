@@ -1,60 +1,60 @@
-# Erkennen von Phishing
+# Phishing erkennen
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Einleitung
+## Einführung
 
-Um einen Phishing-Versuch zu erkennen, ist es wichtig, die **Phishing-Techniken zu verstehen, die heutzutage verwendet werden**. Auf der übergeordneten Seite dieses Beitrags findest du diese Informationen; wenn du nicht weißt, welche Techniken heute verwendet werden, empfehle ich, die übergeordnete Seite zu lesen und zumindest diesen Abschnitt zu prüfen.
+Um einen Phishing-Versuch zu erkennen, ist es wichtig, **die heutzutage verwendeten Phishing-Techniken zu verstehen**. Auf der übergeordneten Seite dieses Beitrags findest du diese Informationen. Wenn dir nicht bewusst ist, welche Techniken heute verwendet werden, empfehle ich dir, zur übergeordneten Seite zu gehen und mindestens diesen Abschnitt zu lesen.
 
-Dieser Beitrag basiert auf der Idee, dass die **Angreifer versuchen werden, irgendwie den Domainnamen des Opfers zu imitieren oder zu nutzen**. Wenn deine Domain `example.com` heißt und du mit einer völlig anderen Domain wie `youwonthelottery.com` gephisht wirst, werden diese Techniken das nicht aufdecken.
+Dieser Beitrag basiert auf der Annahme, dass **die Angreifer versuchen werden, den Domainnamen des Opfers irgendwie nachzuahmen oder zu verwenden**. Wenn deine Domain `example.com` heißt und du aus irgendeinem Grund mit einem völlig anderen Domainnamen wie `youwonthelottery.com` gephisht wirst, werden diese Techniken dies nicht aufdecken.
 
-## Domain name variations
+## Variationen von Domainnamen
 
-Es ist recht **einfach**, diese **Phishing**-Versuche aufzudecken, die einen **ähnlichen Domain**-Namen in der E-Mail verwenden.\
-Es reicht aus, eine Liste der wahrscheinlichsten Phishing-Namen zu **generieren**, die ein Angreifer verwenden könnte, und zu **prüfen**, ob sie **registriert** sind oder ob irgendeine **IP** sie verwendet.
+Es ist relativ **einfach**, Phishing-Versuche **aufzudecken**, bei denen innerhalb der E-Mail ein **ähnlicher Domainname** verwendet wird.\
+Es reicht aus, **eine Liste der wahrscheinlichsten Phishing-Namen zu erstellen**, die ein Angreifer verwenden könnte, und zu **prüfen**, ob sie **registriert** sind, oder einfach zu prüfen, ob eine **IP** sie verwendet.
 
-### Finding suspicious domains
+### Verdächtige Domains finden
 
-Für diesen Zweck kannst du eines der folgenden Tools verwenden. Beachte, dass diese Tools automatisch DNS-Anfragen durchführen, um zu prüfen, ob der Domain eine IP zugewiesen ist:
+Hierfür kannst du eines der folgenden Tools verwenden. Beachte, dass diese Tools automatisch DNS-Anfragen ausführen, um zu prüfen, ob der Domain eine IP zugewiesen ist:
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
-Tipp: Wenn du eine Kandidatenliste erzeugst, füttere sie auch in deine DNS-Resolver-Logs, um **NXDOMAIN-Abfragen aus deinem Unternehmen** zu erkennen (Benutzer, die versuchen, einen Tippfehler aufzurufen, bevor der Angreifer ihn tatsächlich registriert). Sinkhole oder blockiere diese Domains vorab, wenn die Richtlinie das erlaubt.
+Tipp: Wenn du eine Kandidatenliste erstellst, speise sie auch in deine DNS-Resolver-Logs ein, um **NXDOMAIN-Abfragen aus deinem Unternehmen** zu erkennen (Benutzer versuchen, einen Tippfehler aufzurufen, bevor der Angreifer ihn tatsächlich registriert). Leite diese Domains in ein Sinkhole um oder blockiere sie vorab, sofern dies laut Richtlinie zulässig ist.
 
 ### Bitflipping
 
-**Einer kurzen Erklärung dieser Technik findest du auf der übergeordneten Seite. Oder lies die Originalforschung unter** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+**Eine kurze Erklärung dieser Technik findest du auf der übergeordneten Seite. Alternativ kannst du die ursprüngliche Untersuchung unter** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)<sup>[[1]](#references)</sup> **lesen.**
 
-Zum Beispiel kann eine 1-Bit-Änderung in der Domain microsoft.com sie in _windnws.com._ verwandeln.\
-**Angreifer können so viele bit-flipping-Domains wie möglich im Zusammenhang mit dem Opfer registrieren, um legitime Benutzer auf ihre Infrastruktur umzuleiten.**
+Beispielsweise kann eine Änderung von 1 Bit in der Domain microsoft.com diese in _windnws.com_ umwandeln.\
+**Angreifer können so viele Bit-Flipping-Domains wie möglich registrieren, die mit dem Opfer in Zusammenhang stehen, um legitime Benutzer auf ihre Infrastruktur umzuleiten**.<sup>[[1]](#references)</sup>
 
-**Alle möglichen bit-flipping-Domainnamen sollten ebenfalls überwacht werden.**
+**Alle möglichen Bit-Flipping-Domainnamen sollten ebenfalls überwacht werden.**
 
-Wenn du auch Homoglyph/IDN-Lookalikes (z. B. Mischung aus lateinischen/kyrillischen Zeichen) berücksichtigen musst, schau nach:
+Wenn du auch Homoglyph-/IDN-Nachahmungen berücksichtigen musst (z. B. die Mischung lateinischer und kyrillischer Zeichen), siehe:
 
 {{#ref}}
 homograph-attacks.md
 {{#endref}}
 
-### Basic checks
+### Grundlegende Prüfungen
 
-Sobald du eine Liste potenziell verdächtiger Domainnamen hast, solltest du sie **prüfen** (hauptsächlich die Ports HTTP und HTTPS), um **zu sehen, ob sie ein Login-Formular verwenden, das dem einer Domain des Opfers ähnelt**.\
-Du könntest auch Port 3333 prüfen, um zu sehen, ob er offen ist und eine Instanz von `gophish` läuft.\
-Es ist außerdem interessant zu wissen, **wie alt jede entdeckte verdächtige Domain ist** — je jünger, desto riskanter.\
-Du kannst auch **Screenshots** der HTTP- und/oder HTTPS-Seite der verdächtigen Domain erstellen, um zu prüfen, ob sie verdächtig ist, und in diesem Fall **diese Seite aufrufen, um sie genauer zu untersuchen**.
+Sobald du eine Liste potenziell verdächtiger Domainnamen hast, solltest du sie **prüfen** (hauptsächlich die Ports HTTP und HTTPS), um **zu sehen, ob sie ein Login-Formular verwenden, das einem Formular der Domain des Opfers ähnelt**.\
+Du könntest auch Port 3333 prüfen, um zu sehen, ob er geöffnet ist und eine Instanz von `gophish` ausgeführt wird.\
+Es ist außerdem interessant zu wissen, **wie alt jede entdeckte verdächtige Domain ist**: Je jünger sie ist, desto höher ist das Risiko.\
+Du kannst auch **Screenshots** der verdächtigen HTTP- und/oder HTTPS-Webseite erstellen, um zu sehen, ob sie verdächtig ist, und sie in diesem Fall **aufrufen, um sie genauer zu untersuchen**.
 
-### Advanced checks
+### Erweiterte Prüfungen
 
-Wenn du einen Schritt weiter gehen willst, empfehle ich, diese verdächtigen Domains zu **überwachen und gelegentlich nach weiteren zu suchen** (täglich? es dauert nur ein paar Sekunden/Minuten). Du solltest auch die offenen **Ports** der zugehörigen IPs prüfen und **nach Instanzen von `gophish` oder ähnlichen Tools suchen** (ja, Angreifer machen auch Fehler) und die HTTP- und HTTPS-Webseiten der verdächtigen Domains und Subdomains **überwachen**, um zu sehen, ob sie ein Login-Formular von den Seiten des Opfers kopiert haben.\
-Um dies zu **automatisieren**, empfehle ich, eine Liste der Login-Formulare der Domains des Opfers zu haben, die verdächtigen Webseiten zu crawlen und jedes gefundene Login-Formular auf den verdächtigen Domains mit jedem Login-Formular der Opfer-Domain mittels etwas wie `ssdeep` zu vergleichen.\
-Wenn du die Login-Formulare der verdächtigen Domains gefunden hast, kannst du versuchen, **verfälschte Zugangsdaten zu senden** und **zu prüfen, ob sie dich auf die Domain des Opfers umleiten**.
+Wenn du noch einen Schritt weitergehen möchtest, empfehle ich dir, **diese verdächtigen Domains zu überwachen und gelegentlich nach weiteren zu suchen** (jeden Tag? Das dauert nur wenige Sekunden/Minuten). Du solltest außerdem die offenen **Ports** der zugehörigen IPs **prüfen** und nach **Instanzen von `gophish` oder ähnlichen Tools suchen** (ja, auch Angreifer machen Fehler) sowie **die HTTP- und HTTPS-Webseiten der verdächtigen Domains und Subdomains überwachen**, um zu sehen, ob sie Login-Formulare von den Webseiten des Opfers kopiert haben.\
+Um dies zu **automatisieren**, empfehle ich, eine Liste der Login-Formulare der Domains des Opfers zu erstellen, die verdächtigen Webseiten zu durchsuchen und jedes in den verdächtigen Domains gefundene Login-Formular mit jedem Login-Formular der Domain des Opfers zu vergleichen, beispielsweise mit `ssdeep`.\
+Wenn du die Login-Formulare der verdächtigen Domains gefunden hast, kannst du versuchen, **Dummy-Zugangsdaten zu senden** und **zu prüfen, ob du zur Domain des Opfers weitergeleitet wirst**.
 
 ---
 
-### Hunting by favicon and web fingerprints (Shodan/ZoomEye/Censys)
+### Suche anhand von Favicon und Web-Fingerprints (Shodan/ZoomEye/Censys)
 
-Viele Phishing-Kits verwenden Favicons der Marke, die sie imitieren, wieder. Internetweite Scanner berechnen einen MurmurHash3 des base64-encodierten Favicons. Du kannst den Hash erzeugen und darauf pivotieren:
+Viele Phishing-Kits verwenden Favicons der Marke, die sie imitieren, erneut. Scanner für das gesamte Internet berechnen einen MurmurHash3 des base64-codierten Favicons. Du kannst den Hash erstellen und darauf aufbauen:
 
 Python-Beispiel (mmh3):
 ```python
@@ -64,20 +64,20 @@ b64 = base64.encodebytes(requests.get(url, timeout=10).content)
 print(mmh3.hash(b64))  # e.g., 309020573
 ```
 - Shodan abfragen: `http.favicon.hash:309020573`
-- Mit Tools: Schau dir Community-Tools wie favfreak an, um Hashes und Dorks für Shodan/ZoomEye/Censys zu generieren.
+- Mit Tools: Sieh dir Community-Tools wie favfreak an, um Hashes und Dorks für Shodan/ZoomEye/Censys zu generieren.
 
 Hinweise
-- Favicons werden wiederverwendet; behandle Treffer als Leads und validiere Inhalt und Zertifikate, bevor du handelst.
-- Kombiniere mit domain-age und Keyword-Heuristiken für bessere Präzision.
+- Favicons werden wiederverwendet; betrachte Treffer als Anhaltspunkte und validiere Inhalte und Zertifikate, bevor du aktiv wirst.
+- Kombiniere dies mit Heuristiken zu Domain-Alter und Schlüsselwörtern, um die Präzision zu verbessern.
 
 ### URL-Telemetrie-Suche (urlscan.io)
 
-`urlscan.io` speichert historische Screenshots, DOM, Requests und TLS-Metadaten von übermittelten URLs. Du kannst nach Markenmissbrauch und Kopien suchen:
+`urlscan.io` speichert historische Screenshots, DOM, Requests und TLS-Metadaten von übermittelten URLs. Du kannst nach Markenmissbrauch und Klonen suchen:<sup>[[2]](#references)</sup>
 
 Beispielabfragen (UI oder API):
-- Finde Lookalikes unter Ausschluss deiner legitimen Domains: `page.domain:(/.*yourbrand.*/ AND NOT yourbrand.com AND NOT www.yourbrand.com)`
-- Finde Seiten, die deine Assets hotlinken: `domain:yourbrand.com AND NOT page.domain:yourbrand.com`
-- Auf jüngste Ergebnisse beschränken: füge `AND date:>now-7d` hinzu
+- Finde Lookalikes und schließe deine legitimen Domains aus: `page.domain:(/.*yourbrand.*/ AND NOT yourbrand.com AND NOT www.yourbrand.com)`
+- Finde Websites, die deine Assets per Hotlink einbinden: `domain:yourbrand.com AND NOT page.domain:yourbrand.com`
+- Beschränke die Ergebnisse auf aktuelle Treffer: Hänge `AND date:>now-7d` an
 
 API-Beispiel:
 ```bash
@@ -85,13 +85,13 @@ API-Beispiel:
 curl -s 'https://urlscan.io/api/v1/search/?q=page.domain:(/.*yourbrand.*/%20AND%20NOT%20yourbrand.com)%20AND%20date:>now-7d' \
 -H 'API-Key: <YOUR_URLSCAN_KEY>' | jq '.results[].page.url'
 ```
-Aus dem JSON, pivot auf:
-- `page.tlsIssuer`, `page.tlsValidFrom`, `page.tlsAgeDays` um sehr neue certs bei Lookalikes zu erkennen
-- `task.source` Werte wie `certstream-suspicious` um Funde mit CT-Überwachung zu verknüpfen
+Aus dem JSON heraus solltest du nach folgenden Feldern suchen:
+- `page.tlsIssuer`, `page.tlsValidFrom`, `page.tlsAgeDays`, um sehr neue Zertifikate für Lookalike-Domains zu erkennen
+- `task.source`-Werte wie `certstream-suspicious`, um Findings mit dem CT Monitoring zu verknüpfen
 
-### Domainalter via RDAP (skriptbar)
+### Domain-Alter via RDAP (skriptfähig)
 
-RDAP liefert maschinenlesbare Erstellungsereignisse. Nützlich, um **neu registrierte Domains (NRDs)** zu kennzeichnen.
+RDAP gibt maschinenlesbare Erstellungsereignisse zurück. Dies ist nützlich, um **neu registrierte Domains (NRDs)** zu erkennen.
 ```bash
 # .com/.net RDAP (Verisign)
 curl -s https://rdap.verisign.com/com/v1/domain/suspicious-example.com | \
@@ -100,48 +100,50 @@ jq -r '.events[] | select(.eventAction=="registration") | .eventDate'
 # Generic helper using rdap.net redirector
 curl -s https://www.rdap.net/domain/suspicious-example.com | jq
 ```
-Ergänzen Sie Ihre Pipeline, indem Sie Domains nach Registrierungsalter gruppieren (z. B. <7 days, <30 days) und die Triage entsprechend priorisieren.
+Enrichern Sie Ihre Pipeline, indem Sie Domains mit Altersgruppen für die Registrierung taggen (z. B. <7 Tage, <30 Tage), und priorisieren Sie die Triage entsprechend.
 
-### TLS/JAx fingerprints to spot AiTM infrastructure
+### TLS/JAx-Fingerprints zur Erkennung von AiTM-Infrastruktur
 
-Moderne Credential-Phishing-Kampagnen nutzen zunehmend **Adversary-in-the-Middle (AiTM)** Reverse-Proxies (z. B. Evilginx), um Session-Tokens zu stehlen. Sie können netzwerkseitige Erkennungen hinzufügen:
+Moderne Credential-Phishing-Angriffe verwenden zunehmend **Adversary-in-the-Middle (AiTM)**-Reverse-Proxies (z. B. Evilginx), um Session-Tokens zu stehlen. Sie können Erkennungen auf Netzwerkebene hinzufügen:
 
-- Protokollieren Sie TLS/HTTP-Fingerprints (JA3/JA4/JA4S/JA4H) am Egress. Einige Evilginx-Builds wurden mit stabilen JA4-Client/Server-Werten beobachtet. Generieren Sie Alarme nur bei bekannten bösartigen Fingerprints als schwaches Signal und bestätigen Sie immer mit Content- und Domain-Intel.
-- Zeichnen Sie proaktiv TLS-Zertifikat-Metadaten auf (Issuer, SAN-Anzahl, Wildcard-Nutzung, Gültigkeit) für Lookalike-Hosts, die über CT oder urlscan entdeckt wurden, und korrelieren Sie diese mit DNS-Alter und Geolocation.
+- Protokollieren Sie TLS/HTTP-Fingerprints (JA3/JA4/JA4S/JA4H) am Egress. Bei einigen Evilginx-Builds wurden stabile JA4-Client-/Server-Werte beobachtet. Lösen Sie nur bei bekannten bösartigen Fingerprints einen Alert aus, und verwenden Sie dies ausschließlich als schwaches Signal. Bestätigen Sie die Ergebnisse immer anhand von Content- und Domain-Intelligence.<sup>[[3]](#references)</sup>
+- Erfassen Sie proaktiv TLS-Zertifikatsmetadaten (Aussteller, SAN-Anzahl, Verwendung von Wildcards, Gültigkeit) für Lookalike-Hosts, die über CT oder urlscan entdeckt wurden, und korrelieren Sie diese mit dem DNS-Alter und der Geolokalisierung.
 
-> Hinweis: Behandeln Sie Fingerprints als Enrichment, nicht als alleinige Blocker; Frameworks entwickeln sich weiter und können randomisieren oder verschleiern.
+> Hinweis: Behandeln Sie Fingerprints als Enrichment und nicht als alleinige Blockierungsgrundlage; Frameworks entwickeln sich weiter und können Fingerprints randomisieren oder verschleiern.
 
-### Domain names using keywords
+### Domainnamen mit Keywords
 
-Die übergeordnete Seite erwähnt außerdem eine Domain-Name-Variationstechnik, die darin besteht, den **Domainnamen des Opfers in eine größere Domain einzubetten** (z. B. paypal-financial.com statt paypal.com).
+Die übergeordnete Seite erwähnt außerdem eine Domainnamen-Variationstechnik, bei der der **Domainname des Opfers in eine größere Domain eingefügt wird** (z. B. paypal-financial.com für paypal.com).
 
 #### Certificate Transparency
 
-Der vorherige "Brute-Force"-Ansatz ist nicht möglich, aber es ist tatsächlich **möglich, solche Phishing-Versuche aufzudecken**, und zwar dank Certificate Transparency. Jedes Mal, wenn ein Zertifikat von einer CA ausgestellt wird, werden die Details öffentlich gemacht. Das bedeutet, dass man durch das Lesen der Certificate Transparency oder sogar durch deren Überwachung **Domains finden kann, die ein Schlüsselwort in ihrem Namen verwenden**. Wenn ein Angreifer beispielsweise ein Zertifikat für [https://paypal-financial.com](https://paypal-financial.com) erzeugt, kann man beim Sichtbarmachen des Zertifikats das Schlüsselwort "paypal" erkennen und wissen, dass eine verdächtige E-Mail verwendet wird.
+Der vorherige „Brute-Force“-Ansatz ist nicht möglich, aber dank Certificate Transparency ist es tatsächlich **möglich, solche Phishing-Versuche aufzudecken**. Jedes Mal, wenn eine CA ein Zertifikat ausstellt, werden dessen Details öffentlich gemacht. Das bedeutet, dass es durch das Auslesen oder sogar Überwachen von Certificate Transparency **möglich ist, Domains zu finden, die ein Keyword in ihrem Namen verwenden**. Wenn ein Angreifer beispielsweise ein Zertifikat für [https://paypal-financial.com](https://paypal-financial.com) erstellt, kann man durch das Betrachten des Zertifikats das Keyword „paypal“ finden und erkennen, dass eine verdächtige E-Mail verwendet wird.
 
-Der Beitrag [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) schlägt vor, Censys zu verwenden, um nach Zertifikaten mit einem bestimmten Schlüsselwort zu suchen und nach Datum (nur "neue" Zertifikate) und nach dem CA-Issuer "Let's Encrypt" zu filtern:
+Der Beitrag [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) schlägt vor, Censys zu verwenden, um nach Zertifikaten zu suchen, die ein bestimmtes Keyword betreffen, und nach Datum (nur „neue“ Zertifikate) sowie nach dem CA-Aussteller „Let's Encrypt“ zu filtern:<sup>[[4]](#references)</sup>
 
 ![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
 
-Sie können das Gleiche jedoch mit dem kostenlosen Webdienst [**crt.sh**](https://crt.sh) tun. Sie können **nach dem Schlüsselwort suchen** und die **Ergebnisse bei Bedarf nach Datum und CA filtern**.
+Sie können dies jedoch „auf dieselbe Weise“ mit der kostenlosen Website [**crt.sh**](https://crt.sh) tun. Sie können nach dem **Keyword suchen** und die Ergebnisse bei Bedarf **nach Datum und CA filtern**.
 
-![](<../../images/image (519).png>)
+![Domainnamen mit Keywords - Certificate Transparency: Sie können dies jedoch „auf dieselbe Weise“ mit der kostenlosen Website crt.sh tun. Sie können nach dem Keyword suchen und die Ergebnisse nach Datum und ... filtern.](<../../images/image (519).png>)
 
-Mit dieser letzten Option können Sie sogar das Feld Matching Identities verwenden, um zu prüfen, ob eine Identity der echten Domain mit einer der verdächtigen Domains übereinstimmt (beachten Sie, dass eine verdächtige Domain ein False Positive sein kann).
+Mit dieser letzten Option können Sie sogar das Feld „Matching Identities“ verwenden, um zu prüfen, ob eine Identität der echten Domain mit einer der verdächtigen Domains übereinstimmt (beachten Sie, dass eine verdächtige Domain ein False Positive sein kann).
 
-**Eine weitere Alternative** ist das großartige Projekt [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream liefert einen Echtzeit-Stream neu erzeugter Zertifikate, den Sie verwenden können, um bestimmte Schlüsselwörter in (nahezu) Echtzeit zu erkennen. Tatsächlich gibt es ein Projekt namens [**phishing_catcher**](https://github.com/x0rz/phishing_catcher), das genau das tut.
+**Eine weitere Alternative** ist das hervorragende Projekt [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream stellt einen Echtzeit-Stream neu generierter Zertifikate bereit, den Sie verwenden können, um darin (nahezu) in Echtzeit nach bestimmten Keywords zu suchen. Tatsächlich gibt es ein Projekt namens [**phishing_catcher**](https://github.com/x0rz/phishing_catcher), das genau dies tut.
 
-Praktischer Tipp: Wenn Sie CT-Treffer triagieren, priorisieren Sie NRDs, untrusted/unknown Registrare, privacy-proxy WHOIS und Zertifikate mit sehr aktuellen NotBefore-Zeiten. Führen Sie eine Allowlist Ihrer eigenen Domains/Marken, um Rauschen zu reduzieren.
+Praktischer Tipp: Priorisieren Sie bei der Triage von CT-Treffern NRDs, nicht vertrauenswürdige/unbekannte Registrare, WHOIS-Datensätze mit Privacy-Proxy und Zertifikate mit sehr aktuellen `NotBefore`-Zeitpunkten. Führen Sie eine Allowlist Ihrer eigenen Domains/Marken, um das Rauschen zu reduzieren.
 
-#### **New domains**
+#### **Neue Domains**
 
-**Eine letzte Alternative** ist, eine Liste neu registrierter Domains für einige TLDs zu sammeln ([Whoxy](https://www.whoxy.com/newly-registered-domains/) bietet einen solchen Service) und **die Schlüsselwörter in diesen Domains zu prüfen**. Lange Domains verwenden jedoch oft ein oder mehrere Subdomains, daher erscheint das Schlüsselwort nicht im FLD und Sie können die Phishing-Subdomain nicht finden.
+**Eine letzte Alternative** besteht darin, eine Liste **neu registrierter Domains** für einige TLDs zu sammeln ([Whoxy](https://www.whoxy.com/newly-registered-domains/) bietet einen solchen Dienst an) und die **Keywords in diesen Domains zu überprüfen**. Lange Domains verwenden jedoch häufig eine oder mehrere Subdomains. Daher erscheint das Keyword möglicherweise nicht innerhalb der FLD, und Sie können die Phishing-Subdomain nicht finden.
 
-Zusätzliche Heuristik: Behandeln Sie bestimmte **file-extension TLDs** (z. B. `.zip`, `.mov`) bei Alarmierung mit zusätzlicher Vorsicht. Diese werden in Lures häufig mit Dateinamen verwechselt; kombinieren Sie das TLD-Signal mit Marken-Keywords und NRD-Alter für bessere Präzision.
+Zusätzliche Heuristik: Behandeln Sie bestimmte **Dateiendungs-TLDs** (z. B. `.zip`, `.mov`) bei Alerts mit besonderem Misstrauen. Diese werden in Lures häufig mit Dateinamen verwechselt. Kombinieren Sie das TLD-Signal mit Marken-Keywords und dem NRD-Alter, um eine höhere Präzision zu erreichen.
 
 ## References
 
-- urlscan.io – Search API reference: https://urlscan.io/docs/search/
-- APNIC Blog – JA4+ network fingerprinting (includes Evilginx example): https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/
+- [1] [Hijacking traffic to Microsoft's windows.com with bitflipping](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+- [2] [urlscan.io – Search API Reference](https://urlscan.io/docs/search/)
+- [3] [APNIC Blog – JA4+ network fingerprinting](https://blog.apnic.net/2023/11/22/ja4-network-fingerprinting/)
+- [4] [Finding Phishing: Tools and Techniques](https://0xpatrik.com/phishing-domains/)
 
 {{#include ../../banners/hacktricks-training.md}}

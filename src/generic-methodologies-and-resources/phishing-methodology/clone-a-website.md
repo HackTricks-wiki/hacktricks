@@ -1,21 +1,26 @@
+# Eine Website klonen
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Für eine Phishing-Bewertung kann es manchmal nützlich sein, eine **Website vollständig zu klonen**.
 
-Beachten Sie, dass Sie auch einige Payloads zur geklonten Website hinzufügen können, wie einen BeEF-Hook, um den Tab des Benutzers zu "steuern".
+Bei einem Phishing-Assessment kann es manchmal hilfreich sein, eine Website vollständig zu **klonen/zu dumpen**.
 
-Es gibt verschiedene Tools, die Sie zu diesem Zweck verwenden können:
+Beachte, dass du der geklonten Website auch einige Payloads hinzufügen kannst, beispielsweise einen BeEF-Hook, um den Tab des Benutzers zu „kontrollieren“.
+
+Für diesen Zweck kannst du verschiedene Tools verwenden:
 
 ## wget
-```text
-wget -mk -nH
+```bash
+wget --mirror --page-requisites --convert-links --adjust-extension <URL>
+cd <URL>
+python3 -m http.server 8000
 ```
 ## goclone
 ```bash
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
-## Social Engineering Toolit
+## Social Engineering Toolkit
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit
 ```
