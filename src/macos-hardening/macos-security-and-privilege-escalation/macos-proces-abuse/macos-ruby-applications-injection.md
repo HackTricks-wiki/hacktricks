@@ -4,13 +4,13 @@
 
 ## RUBYOPT
 
-Używając tej zmiennej środowiskowej, można **dodać nowe parametry** do **ruby** za każdym razem, gdy jest uruchamiane. Chociaż parametr **`-e`** nie może być użyty do określenia kodu ruby do wykonania, możliwe jest użycie parametrów **`-I`** i **`-r`** do dodania nowego folderu do ścieżki ładowania bibliotek, a następnie **określenie biblioteki do załadowania**.
+Using this env variable it's possible to **add new params** to **ruby** whenever it gets executed. Although the param **`-e`** cannot be used to specify ruby code to execute, it's possible to use the params **`-I`** and **`-r`** to add a new folder to the libraries to load path and then **specify a library to load**.
 
 Utwórz bibliotekę **`inject.rb`** w **`/tmp`**:
 ```ruby:inject.rb
 puts `whoami`
 ```
-Utwórz gdziekolwiek skrypt ruby, taki jak:
+Utwórz gdziekolwiek skrypt Ruby, taki jak:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
@@ -18,7 +18,7 @@ Następnie załaduj go za pomocą dowolnego skryptu ruby:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-Ciekawostka, działa nawet z parametrem **`--disable-rubyopt`**:
+Ciekawostka: działa nawet z parametrem **`--disable-rubyopt`**:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 ```

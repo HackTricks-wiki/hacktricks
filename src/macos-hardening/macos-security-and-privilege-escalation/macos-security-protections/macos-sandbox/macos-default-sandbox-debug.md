@@ -1,8 +1,8 @@
-# macOS Default Sandbox Debug
+# Debugowanie domyślnego Sandboxa macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Na tej stronie znajdziesz, jak stworzyć aplikację do uruchamiania dowolnych poleceń z wnętrza domyślnego sandboxa macOS:
+Na tej stronie znajdziesz informacje, jak utworzyć aplikację uruchamiającą dowolne polecenia wewnątrz domyślnego Sandboxa macOS:
 
 1. Skompiluj aplikację:
 ```objectivec:main.m
@@ -34,7 +34,7 @@ system(input);
 return 0;
 }
 ```
-Kompiluj, uruchamiając: `clang -framework Foundation -o SandboxedShellApp main.m`
+Skompiluj, uruchamiając: `clang -framework Foundation -o SandboxedShellApp main.m`
 
 2. Zbuduj pakiet `.app`
 ```bash
@@ -58,7 +58,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Zdefiniuj uprawnienia
+3. Zdefiniuj entitlements
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Podpisz aplikację (musisz utworzyć certyfikat w pęku kluczy)
+4. Podpisz aplikację (musisz utworzyć certyfikat w Keychain)
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp

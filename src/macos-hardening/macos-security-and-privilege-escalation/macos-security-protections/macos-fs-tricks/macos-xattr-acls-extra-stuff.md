@@ -1,4 +1,4 @@
-# macOS xattr-acls dodatkowe informacje
+# Dodatkowe informacje o xattr-acls
 
 {{#include ../../../../banners/hacktricks-training.md}}
 ```bash
