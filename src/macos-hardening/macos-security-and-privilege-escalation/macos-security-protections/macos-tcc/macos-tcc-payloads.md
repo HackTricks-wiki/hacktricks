@@ -3,16 +3,16 @@
 {{#include ../../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> TCC-besluite is gekoppel aan die **identiteit van die proses** wat die hulpbron aanvra. In post-exploitation is die gewone doel om hierdie payloads in ’n reeds-goedgekeurde app te **inject** (of dit andersins binne die app se bundle / signature context uit te voer), eerder as om ’n nuwe helper uit te voer wat sy eie prompt sal aktiveer.
+> TCC-besluite is gekoppel aan die **identiteit van die proses** wat die hulpbron aanvra. In post-exploitation is die gewone doel om hierdie payloads in 'n reeds-goedgekeurde app te **inject** (of dit andersins binne daardie app se bundle / signature-konteks uit te voer) eerder as om 'n nuwe helper te laat loop wat sy eie prompt sal aktiveer.
 >
-> Vir **Screen Recording**, **Input Monitoring** en **synthetic input** bied moderne macOS ook eksplisiete preflight- / request-API’s soos `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess` en `CGRequestPostEventAccess`.
+> Vir **Screen Recording**, **Input Monitoring** en **synthetic input** stel moderne macOS ook eksplisiete preflight- / request-API's bloot, soos `CGPreflightScreenCaptureAccess`, `CGRequestScreenCaptureAccess`, `CGRequestListenEventAccess` en `CGRequestPostEventAccess`.
 
 > [!WARNING]
-> Dit is steeds ’n baie realistiese aanvalspad: onlangse navorsing oor permission theft teen Microsoft macOS-apps het getoon dat **swak library validation / plugin loading** ’n aanvaller kan toelaat om die slagoffer-app se reeds-toegestane **camera**-, **microphone**- en ander TCC-permissies te hergebruik sonder ’n tweede prompt.
+> Dit bly 'n baie realistiese aanvalspad: onlangse navorsing oor permission theft teen Microsoft macOS-apps het getoon dat **swak library validation / plugin loading** 'n aanvaller kan toelaat om die slagoffer-app se reeds-toegestane **camera-, microphone-** en ander TCC-toestemmings te hergebruik sonder 'n tweede prompt.<sup>[[1]](#references)</sup>
 
-## Vinnige triage voordat ’n payload gebruik word
+## Vinnige triage voordat 'n payload gebruik word
 
-Onlangse navorsing oor permission theft bevestig telkens dieselfde workflow: vind eers ’n app wat reeds die TCC-grant het wat jy wil hê, en verifieer dan dat dit ’n realistiese injection target is.<sup>[[1]](#references)</sup>
+Onlangse navorsing oor permission theft versterk dieselfde werkvloei: vind eers 'n app wat reeds die TCC-toestemming het wat jy wil hê, en verifieer dan dat dit 'n realistiese injection-teiken is.<sup>[[1]](#references)</sup>
 ```bash
 sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
 "select service, client from access where auth_value=2 and service in ('kTCCServiceCamera','kTCCServiceMicrophone','kTCCServiceScreenCapture','kTCCServiceAccessibility') order by service, client;"
@@ -20,16 +20,16 @@ sqlite3 "$HOME/Library/Application Support/com.apple.TCC/TCC.db" \
 codesign -d --entitlements :- /Applications/Target.app 2>/dev/null | \
 egrep 'disable-library-validation|allow-dyld-environment-variables'
 ```
-As die teiken ook aanvaller-beheerde plug-ins / frameworks laai, word hierdie payloads baie interessanter. Vir breër post-exploitation-idees nadat jy binne ’n reeds-goedgekeurde proses beland het, kyk na [hierdie verwante bladsy](macos-tcc-credential-and-data-theft.md).
+As die teiken ook aanvaller-beheerde plug-ins / frameworks laai, word hierdie payloads baie interessanter. Vir breër post-exploitation-idees nadat jy binne 'n reeds-goedgekeurde proses beland het, kyk na [hierdie verwante bladsy](macos-tcc-credential-and-data-theft.md).
 
-### Desktop
+### Werkskerm
 
 - **Entitlement**: Geen
 - **TCC**: kTCCServiceSystemPolicyDesktopFolder
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Copy `$HOME/Desktop` to `/tmp/desktop`.
+Kopieer `$HOME/Desktop` na `/tmp/desktop`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -73,12 +73,12 @@ cp -r "$HOME/Desktop" "/tmp/desktop"
 
 ### Dokumente
 
-- **Toestemming**: Geen
+- **Entitlement**: None
 - **TCC**: `kTCCServiceSystemPolicyDocumentsFolder`
 
 {{#tabs}}
 {{#tab name="ObjetiveC"}}
-Kopieer `$HOME/Documents` na `/tmp/documents`.
+Copy `$HOME/Documents` na `/tmp/documents`.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -169,7 +169,7 @@ cp -r "$HOME/Downloads" "/tmp/downloads"
 {{#endtab}}
 {{#endtabs}}
 
-### Photos Library
+### Foto's-biblioteek
 
 - **Entitlement**: `com.apple.security.personal-information.photos-library`
 - **TCC**: `kTCCServicePhotos`
@@ -269,7 +269,7 @@ cp -r "$HOME/Library/Application Support/AddressBook" "/tmp/contacts"
 
 ### Kalender
 
-- **Toestemming**: `com.apple.security.personal-information.calendars`
+- **Entitlement**: `com.apple.security.personal-information.calendars`
 - **TCC**: `kTCCServiceCalendar`
 
 {{#tabs}}
@@ -323,7 +323,7 @@ cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Neem 'n 3s-video op en stoor dit in **`/tmp/recording.mov`**<sup>[[5]](#references)</sup>.
+Neem ’n video van 3 sekondes op en stoor dit in **`/tmp/recording.mov`**<sup>[[5]](#references)</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -435,7 +435,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Prompt"}}
-Aktiveer die kameraprompt indien die huidige proses steeds `NotDetermined` is.
+Aktiveer die kameravraag indien die huidige proses steeds `NotDetermined` is.<sup>[[3]](#references)</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -468,7 +468,7 @@ ffmpeg -framerate 30 -f avfoundation -i "0" -frames:v 1 /tmp/capture.jpg
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Record"}}
-Neem 5 s oudio op en stoor dit in `/tmp/recording.m4a`<sup>[[6]](#references)</sup>.
+Neem 5 sekondes oudio op en stoor dit in `/tmp/recording.m4a`<sup>[[6]](#references)</sup>.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -599,7 +599,7 @@ static void telegram(int argc, const char **argv) {
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Prompt"}}
-Aktiveer die mikrofoonprompt indien die huidige proses steeds `NotDetermined` is.
+Aktiveer die mikrofoonprompt indien die huidige proses steeds `NotDetermined` is.<sup>[[3]](#references)</sup>
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -618,7 +618,7 @@ dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Neem 5 sekondes se oudio op en stoor dit in `/tmp/recording.wav`
+Neem 'n 5s-klank op en stoor dit in `/tmp/recording.wav`
 ```bash
 # Check the microphones
 ffmpeg -f avfoundation -list_devices true -i ""
@@ -631,7 +631,7 @@ ffmpeg -f avfoundation -i ":1" -t 5 /tmp/recording.wav
 ### Ligging
 
 > [!TIP]
-> Vir 'n app om die ligging te verkry, **moet Location Services** (van Privacy & Security) **geaktiveer wees,** anders sal dit nie toegang daartoe hê nie.
+> Vir ’n app om die ligging te verkry, **Location Services** (onder Privacy & Security) **moet geaktiveer wees;** anders sal dit nie toegang daartoe hê nie.
 
 - **Entitlement**: `com.apple.security.personal-information.location`
 - **TCC**: Toegestaan in `/var/db/locationd/clients.plist`
@@ -688,7 +688,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="Shell"}}
-Kry die huidige ligging vanaf shell.<sup>[[2]](#references)</sup>
+Kry die huidige ligging vanaf die shell.<sup>[[2]](#references)</sup>
 ```bash
 # Fast option: use a dedicated CoreLocation CLI helper
 brew install --cask corelocationcli
@@ -698,7 +698,7 @@ CoreLocationCLI --json
 CoreLocationCLI --watch --format '%latitude %longitude %speed %time'
 ```
 > [!TIP]
-> Dit hang steeds daarvan af dat **Location Services** geaktiveer is en dat die tool / terminal TCC-goedkeuring kry. `CoreLocationCLI` maak ook op die meeste Macs staat op Wi-Fi-assisted positioning, dus lei gedeaktiveerde Wi-Fi dikwels tot `kCLErrorDomain error 0`.
+> Dit hang steeds daarvan af dat **Location Services** geaktiveer is en dat die tool / terminal TCC-goedkeuring kry. `CoreLocationCLI` maak ook op die meeste Macs staat op Wi-Fi-ondersteunde posisionering, dus lei gedeaktiveerde Wi-Fi dikwels tot `kCLErrorDomain error 0`.
 
 {{#endtab}}
 {{#endtabs}}
@@ -768,7 +768,7 @@ freopen("/tmp/logs.txt", "w", stderr); // Redirect stderr to /tmp/logs.txt
 {{#endtab}}
 
 {{#tab name="ObjectiveC - Check / Prompt"}}
-Kontroleer of die huidige proses die skerm kan vaslê en die TCC-prompt kan aktiveer indien nodig.
+Kontroleer of die huidige proses die skerm kan vaslê en die TCC prompt indien nodig kan aktiveer.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
@@ -797,14 +797,14 @@ screencapture -V 5 /tmp/screen.mov
 {{#endtabs}}
 
 > [!TIP]
-> Op **macOS 12.3+** is `ScreenCaptureKit` gewoonlik die beter post-exploitation primitive as `AVCaptureScreenInput`: dit kan hoëprestasie-streaming, enkelraam-opnames met `SCScreenshotManager`, en **stelselklank** doen. Onlangse `ScreenCaptureKit`-opdaterings het ook `captureMicrophone` / `microphoneCaptureDeviceID` op `SCStreamConfiguration` plus `SCRecordingOutput` vir direkte-na-lêer-opname bygevoeg, sodat een gekaapte skermopname-kliënt die skerm + stelselklank direk kan stoor en mikrofoonklank kan byvoeg wanneer die proses ook `kTCCServiceMicrophone` besit. Vir meer desktop-sessie-abuse primitives, sien [hierdie verwante bladsy](../macos-input-monitoring-screen-capture-accessibility.md).
+> Op **macOS 12.3+** is `ScreenCaptureKit` gewoonlik ’n beter post-exploitation primitive as `AVCaptureScreenInput`: dit kan hoëwerkverrigting-streaming, enkelraam-kapsele met `SCScreenshotManager` en streaming van **stelselklank** uitvoer. Onlangse `ScreenCaptureKit`-opdaterings het ook `captureMicrophone` / `microphoneCaptureDeviceID` by `SCStreamConfiguration` gevoeg, sowel as `SCRecordingOutput` vir direkte-na-lêer-opname. Dus kan een gekaapte screen-capture-kliënt die skerm + stelselklank direk stoor en mikrofoonklank byvoeg wanneer die proses ook `kTCCServiceMicrophone` besit.<sup>[[4]](#references)</sup> Vir meer primitives vir desktop-session abuse, sien [hierdie verwante bladsy](../macos-input-monitoring-screen-capture-accessibility.md).
 
 ### Toeganklikheid
 
 - **Entitlement**: Geen
 - **TCC**: `kTCCServiceAccessibility`
 
-Gebruik die TCC-voorreg om Finder te beheer en Enter te druk, en om TCC op dié manier te omseil.
+Gebruik die TCC-privilege om Finder te beheer en Enter te druk, en om TCC op dié manier te omseil.
 
 {{#tabs}}
 {{#tab name="Accept TCC"}}
@@ -861,7 +861,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="Check / Prompt"}}
-Toets of die huidige proses reeds vir Accessibility vertrou word en vra macOS om die toestemmings-UI te wys indien dit nie die geval is nie.
+Kontroleer of die huidige proses reeds vertrou word vir Accessibility en vra macOS om die toestemmings-UI te vertoon indien dit nie die geval is nie.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -875,7 +875,7 @@ NSLog(@"Accessibility access: %@", trusted ? @"granted" : @"pending/denied");
 {{#endtab}}
 
 {{#tab name="Keylogger"}}
-Stoor die gedrukte sleutels in **`/tmp/keystrokes.txt`**
+Stoor die gedrukte sleutels in **`/tmp/keystrokes.txt`**.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <ApplicationServices/ApplicationServices.h>
@@ -982,21 +982,18 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Toeganklikheid is 'n baie kragtige toestemming**, jy kan dit op ander maniere misbruik; jy kan byvoorbeeld die **keystrokes attack** uitvoer sonder om System Events te hoef aan te roep.
+> [!CAUTION] > **Toeganklikheid is 'n baie kragtige permission**, jy kan dit op ander maniere misbruik; jy kan byvoorbeeld die **keystrokes attack** uitvoer sonder om System Events te hoef aan te roep.
 
 > [!TIP]
-> Nuwer macOS-weergawes verdeel desktop-session abuse ook oor **Input Monitoring** (`kTCCServiceListenEvent`) en **synthetic input** (`kTCCServicePostEvent`). As jy keylogging, screen grabs of raw event injection in plaas van AXUIElement automation benodig, kyk na [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md).
-
-
+> Nuwer macOS-weergawes verdeel desktop-session abuse ook oor **Input Monitoring** (`kTCCServiceListenEvent`) en **synthetic input** (`kTCCServicePostEvent`). As jy keylogging, screen grabs of raw event injection in plaas van AXUIElement automation benodig, raadpleeg [macOS Input Monitoring, Screen Capture & Accessibility Abuse](../macos-input-monitoring-screen-capture-accessibility.md).
 
 ## Verwysings
 
-- [1] [Cisco Talos - How multiple vulnerabilities in Microsoft apps for macOS pave the way to stealing permissions](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
+- [1] [Cisco Talos - Hoe multiple vulnerabilities in Microsoft apps vir macOS die weg baan om permissions te steel](https://blog.talosintelligence.com/how-multiple-vulnerabilities-in-microsoft-apps-for-macos-pave-the-way-to-stealing-permissions/)
 - [2] [CoreLocationCLI](https://github.com/fulldecent/corelocationcli)
-- [3] [Apple Developer - Requesting Authorization for Media Capture on macOS](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
-- [4] [Apple Developer - Capture HDR content with ScreenCaptureKit (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
-- [5] [vsociety - CVE-2023-26818: MacOS TCC Bypass with Telegram using DyLib Injection Part1](https://vsociety.medium.com/cve-2023-26818-macos-tcc-bypass-with-telegram-using-dylib-injection-part1-768b34efd8c4)
+- [3] [Apple Developer - Magtiging vir media capture op macOS versoek](https://developer.apple.com/documentation/bundleresources/requesting-authorization-for-media-capture-on-macos?language=objc)
+- [4] [Apple Developer - Capture HDR content met ScreenCaptureKit (WWDC24)](https://developer.apple.com/videos/play/wwdc2024/10088/)
+- [5] [vsociety - CVE-2023-26818: MacOS TCC Bypass met Telegram deur DyLib Injection Part1](https://vsociety.medium.com/cve-2023-26818-macos-tcc-bypass-with-telegram-using-dylib-injection-part1-768b34efd8c4)
 - [6] [Vicarius vsociety - CVE-2023-26818: Exploit macOS TCC Bypass w/ Telegram (Part 1)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-exploit-macos-tcc-bypass-w-telegram-part-1-2)
-
 
 {{#include ../../../../banners/hacktricks-training.md}}

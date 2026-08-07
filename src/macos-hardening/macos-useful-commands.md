@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### macOS-outomatiese Enumeration Tools
+### macOS-outomatiese enumerasie-nutsgoed
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Vinnige anti-analise / virtualiseringstoets
+### Vinnige anti-analise / virtualiseringskontrole
 
-Sommige macOS-stealers roep `system_profiler` aan om VMs op te spoor en **staak met ’n kenmerkende exit code (bv. 100)** om sandbox-detonasie te vermy<sup>[[1]](#references)</sup>:
+Sommige macOS stealers roep `system_profiler` aan om VMs op te spoor en **staak met ’n onderskeibare exit code (bv. 100)** om sandbox detonation te vermy<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,7 +125,7 @@ fi
 ```
 ### Geïnstalleerde sagteware en dienste
 
-Kyk na **verdagte** toepassings wat geïnstalleer is en **toegangsregte** oor die geïnstalleerde hulpbronne:
+Kyk na **verdagte** toepassings wat geïnstalleer is en **voorregte** oor die geïnstalleerde hulpbronne:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
@@ -151,6 +151,6 @@ Sonder prompts
 
 ## Verwysings
 
-- [1] [2025, die jaar van die Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 
 {{#include ../banners/hacktricks-training.md}}

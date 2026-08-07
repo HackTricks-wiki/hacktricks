@@ -1,10 +1,10 @@
-# macOS Standaard Sandbox Foutopsporing
+# macOS Default Sandbox Ontfouting
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-Op hierdie bladsy kan jy vind hoe om 'n toepassing te skep om arbitrêre opdragte vanuit die standaard macOS sandbox te begin:
+Op hierdie bladsy kan jy leer hoe om 'n app te skep wat arbitrêre commands vanuit die standaard macOS sandbox kan launch:
 
-1. Compileer die toepassing:
+1. Compile die toepassing:
 ```objectivec:main.m
 #include <Foundation/Foundation.h>
 
@@ -34,9 +34,9 @@ system(input);
 return 0;
 }
 ```
-Kompileer dit deur te loop: `clang -framework Foundation -o SandboxedShellApp main.m`
+Kompileer dit deur die volgende uit te voer: `clang -framework Foundation -o SandboxedShellApp main.m`
 
-2. Bou die `.app` bundel
+2. Bou die `.app`-bundel
 ```bash
 mkdir -p SandboxedShellApp.app/Contents/MacOS
 mv SandboxedShellApp SandboxedShellApp.app/Contents/MacOS/
@@ -58,7 +58,7 @@ cat << EOF > SandboxedShellApp.app/Contents/Info.plist
 </plist>
 EOF
 ```
-3. Definieer die regte
+3. Definieer die entitlements
 
 {{#tabs}}
 {{#tab name="sandbox"}}
@@ -94,7 +94,7 @@ EOF
 {{#endtab}}
 {{#endtabs}}
 
-4. Teken die app (jy moet 'n sertifikaat in die sleutelkettie skep)
+4. Onderteken die app (jy moet 'n sertifikaat in die keychain skep)
 ```bash
 codesign --entitlements entitlements.plist -s "YourIdentity" SandboxedShellApp.app
 ./SandboxedShellApp.app/Contents/MacOS/SandboxedShellApp

@@ -2,22 +2,22 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Ad-Hoc Signed Binaries
+## Ad-Hoc-ondertekende Binaries
 
-### Basic Information
+### Basiese Inligting
 
-**Ad-hoc signing** (`CS_ADHOC`) skep 'n code signature met **geen sertifikaatketting nie** — dit is 'n hash van die code sonder ontwikkelaar-identiteitsverifikasie. Die binary se oorsprong kan nie na enige ontwikkelaar of organisasie teruggespoor word nie.
+**Ad-hoc signing** (`CS_ADHOC`) skep 'n code signature met **geen sertifikaatketting nie** — dit is 'n hash van die code sonder verifikasie van 'n developer se identiteit. Die binary se oorsprong kan nie na enige developer of organisasie teruggespoor word nie.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Op Apple Silicon Macs vereis alle executables ten minste 'n ad-hoc signature. Dit beteken dat jy ad-hoc signatures op baie development tools, Homebrew packages en third-party utilities sal vind.
+Op Apple Silicon Macs vereis alle uitvoerbare lêers ten minste 'n ad-hoc signature. Dit beteken dat jy ad-hoc signatures op baie development tools, Homebrew-pakkette en third-party utilities sal vind.
 
-### Why This Matters
+### Waarom Dit Belangrik Is
 
-- **Geen verifieerbare identiteit nie** — die binary kan vervang word sonder opsporing deur identity-based checks
-- Third-party ad-hoc binaries in **bevoorregte posisies** (FDA, daemons, helpers) is hoëprioriteit-teikens
-- Op sommige configurations word ad-hoc signatures moontlik **nie so streng geverifieer** soos developer-signed code nie
-- Ad-hoc signed binaries wat **TCC grants** het, is besonder waardevol — die grants bly voortbestaan selfs al verander die binary se inhoud (hang af van hoe TCC die grant gekey het)
+- **Geen verifieerbare identiteit nie** — die binary kan vervang word sonder dat identity-based checks dit opspoor
+- Third-party ad-hoc binaries in **bevoorregte posisies** (FDA, daemon, helpers) is hoëprioriteit-teikens
+- In sommige konfigurasies word ad-hoc signatures moontlik **nie so streng geverifieer nie** as developer-signed code
+- Ad-hoc signed binaries met **TCC grants** is besonder waardevol — die grants bly voortbestaan selfs indien die binary se inhoud verander (hang af van hoe TCC die grant gesleutel het)
 
-### Discovery
+### Ontdekking
 ```bash
 # Find ad-hoc signed binaries
 find /usr/local /opt /Applications -type f -perm +111 -exec sh -c '
@@ -54,12 +54,12 @@ codesign -s - /path/to/target
 
 ### Basiese Inligting
 
-Die **`com.apple.security.get-task-allow`** entitlement (of **`CS_GET_TASK_ALLOW`**-flag) laat **enige proses toe om as ’n debugger te koppel**, geheue te lees, registers te wysig, code in te spuit en uitvoering te beheer.
+Die **`com.apple.security.get-task-allow`** entitlement (of **`CS_GET_TASK_ALLOW`**-flag) laat **enige proses toe om as ’n debugger aan te heg**, geheue te lees, registers te wysig, code te inject en uitvoering te beheer.<sup>[[3]](#references)</sup>
 
 Dit is **slegs vir development builds** bedoel. Sommige third-party binaries word egter met hierdie entitlement in production verskeep.
 
 > [!CAUTION]
-> ’n Production binary met `get-task-allow` is ’n **onmiddellike exploitation primitive**. Enige plaaslike proses kan `task_for_pid()` aanroep, die teiken se Mach task port verkry en arbitrêre code inspuit wat met die teiken se entitlements, TCC grants en security context uitgevoer word.
+> ’n Production binary met `get-task-allow` is ’n **instant exploitation primitive**. Enige plaaslike proses kan `task_for_pid()` aanroep, die teiken se Mach task port verkry, en arbitrêre code inject wat met die teiken se entitlements, TCC grants en security context uitgevoer word.
 
 ### Ontdekking
 ```bash
@@ -103,13 +103,13 @@ VM_PROT_READ | VM_PROT_EXECUTE);
 ```
 ---
 
-## Geen Library Validation + DYLD Environment
+## Geen Library Validation + DYLD-omgewing
 
 ### Die Dodelike Kombinasie
 
-Wanneer 'n binary **beide** het:
+Wanneer 'n binary **albei** het:<sup>[[3]](#references)</sup>
 - `com.apple.security.cs.disable-library-validation` (laai enige dylib)
-- `com.apple.security.cs.allow-dyld-environment-variables` (aanvaar DYLD environment variables)
+- `com.apple.security.cs.allow-dyld-environment-variables` (aanvaar DYLD env vars)
 
 Dit is 'n **gewaarborgde code injection primitive** — `DYLD_INSERT_LIBRARIES` werk perfek.
 
@@ -129,7 +129,7 @@ SELECT path, privileged, tccPermsStr FROM executables
 WHERE noLibVal = 1 AND allowDyldEnv = 1
 ORDER BY privileged DESC;"
 ```
-### Aanval: DYLD_INSERT_LIBRARIES Injection
+### Aanval: DYLD_INSERT_LIBRARIES-inspuiting
 ```bash
 # 1. Create the injection dylib
 cat > /tmp/inject.c << 'EOF'
@@ -166,11 +166,11 @@ cat /tmp/injected_proof.txt
 ```
 ---
 
-## Tydelike Sandbox-uitsonderings
+## Sandbox Tydelike Uitsonderings
 
 ### Hoe Hulle die Sandbox Verswak
 
-Tydelike Sandbox-uitsonderings (`com.apple.security.temporary-exception.*`) skep gate in die App Sandbox:
+Sandbox tydelike uitsonderings (`com.apple.security.temporary-exception.*`) skep gate in die App Sandbox:<sup>[[2]](#references)</sup>
 
 | Uitsondering | Wat Dit Toelaat |
 |---|---|
@@ -213,17 +213,17 @@ c. Fuzz each exposed method
 
 ### Wat Hulle Is
 
-Entitlements met die voorvoegsel `com.apple.private.*` bied toegang tot **Apple-interne APIs** wat nie gedokumenteer is of vir derdeparty-ontwikkelaars beskikbaar is nie. Derdeparty-binaries met private entitlements het dit deur middel van enterprise cert, MDM of nie-App-Store-verspreiding verkry.
+Entitlements met die voorvoegsel `com.apple.private.*` bied toegang tot **Apple-interne API's** wat nie gedokumenteer is of vir derdeparty-ontwikkelaars beskikbaar is nie. Derdeparty-binaries met private entitlements het dit deur enterprise-certifikate, MDM of verspreiding buite die App Store verkry.
 
 ### Gevaarlike Private Entitlements
 
 | Entitlement | Vermoë |
 |---|---|
-| `com.apple.private.tcc.manager` | Volledige lees/skryf-toegang tot die TCC-databasis |
+| `com.apple.private.tcc.manager` | Volledige lees-/skryftoegang tot die TCC-databasis |
 | `com.apple.private.tcc.allow` | Toegang tot spesifieke TCC-dienste |
 | `com.apple.private.security.no-sandbox` | Loop sonder sandbox |
 | `com.apple.private.iokit` | Direkte toegang tot IOKit-drivers |
-| `com.apple.private.kernel.\*` | Toegang tot kernel-koppelvlakke |
+| `com.apple.private.kernel.\*` | Toegang tot die kernel-koppelvlak |
 | `com.apple.private.xpc.launchd.job-label` | Registreer/bestuur launchd-jobs |
 | `com.apple.rootless.install` | Skryf na SIP-beskermde paaie |
 
@@ -246,13 +246,13 @@ ORDER BY privileged DESC;"
 ```
 ---
 
-## Pasgemaakte Sandbox-profiele
+## Pasgemaakte Sandbox-profiele (SBPL)
 
-### Wat Dit Is
+### Wat Hulle Is
 
-Binaries kan met **pasgemaakte sandbox-profiele** wat in SBPL (Seatbelt Profile Language) geskryf is, versprei word. Hierdie profiele kan meer beperkend OF **meer permissief** as die verstek App Sandbox wees.
+Binaries kan met **pasgemaakte sandbox-profiele** wat in SBPL (Seatbelt Profile Language) geskryf is, verskaf word. Hierdie profiele kan meer beperkend OF **meer permissief** as die verstek App Sandbox wees.
 
-### Oudit van pasgemaakte profiele
+### Oudit van Pasgemaakte Profiele
 ```bash
 # Find custom sandbox profiles
 find /Applications /System -name "*.sb" -o -name "*.sbpl" 2>/dev/null
@@ -274,7 +274,7 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 
 ### Wat Dit Is
 
-Wanneer ’n binêre lêer ’n dinamiese biblioteek laai vanaf ’n pad waartoe die huidige gebruiker **skryftoegang** het, kan die biblioteek met kwaadwillige kode vervang word.
+Wanneer ’n binary ’n dinamiese biblioteek laai vanaf ’n pad waartoe die huidige gebruiker **kan skryf**, kan die biblioteek met kwaadwillige code vervang word.
 
 ### Ontdekking
 ```bash
@@ -293,7 +293,7 @@ otool -L /path/to/binary | awk '{print $1}' | while read lib; do
 [ -f "$lib" ] && [ -w "$lib" ] && echo "WRITABLE: $lib"
 done
 ```
-### Attack: Dylib Replacement
+### Aanval: Dylib-vervanging
 ```bash
 # 1. Find the writable library
 otool -L /path/to/target-daemon | grep "/usr/local\|/opt\|Library"
@@ -319,7 +319,7 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 ```
 ## Verwysings
 
-- [1] [Apple Developer — Gids vir Code Signing](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
+- [1] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
 - [2] [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
 - [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
 - [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*`-bewerkings en `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
