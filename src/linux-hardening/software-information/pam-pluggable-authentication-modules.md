@@ -4,12 +4,12 @@
 
 ### Podstawowe informacje
 
-**PAM (Pluggable Authentication Modules)** pełni funkcję mechanizmu bezpieczeństwa, który **weryfikuje tożsamość użytkowników próbujących uzyskać dostęp do usług komputerowych**, kontrolując ich dostęp na podstawie różnych kryteriów. Działa podobnie do cyfrowego strażnika, zapewniając, że tylko autoryzowani użytkownicy mogą korzystać z określonych usług, a jednocześnie może ograniczać ich użycie, aby zapobiegać przeciążeniu systemu.
+**PAM (Pluggable Authentication Modules)** działa jako mechanizm bezpieczeństwa, który **weryfikuje tożsamość użytkowników próbujących uzyskać dostęp do usług komputerowych**, kontrolując ich dostęp na podstawie różnych kryteriów. Można go porównać do cyfrowego strażnika, który zapewnia, że tylko autoryzowani użytkownicy mogą korzystać z określonych usług, jednocześnie potencjalnie ograniczając ich użycie w celu zapobiegania przeciążeniu systemu.
 
 #### Pliki konfiguracyjne
 
-- Systemy **Solaris i systemy oparte na UNIX** zazwyczaj korzystają z centralnego pliku konfiguracyjnego znajdującego się w `/etc/pam.conf`.
-- **Systemy Linux** preferują podejście oparte na katalogu, przechowując konfiguracje poszczególnych usług w `/etc/pam.d`. Na przykład plik konfiguracyjny usługi login znajduje się w `/etc/pam.d/login`.
+- **Systemy Solaris i systemy oparte na UNIX** zazwyczaj korzystają z centralnego pliku konfiguracyjnego znajdującego się w `/etc/pam.conf`.
+- **Systemy Linux** preferują podejście oparte na katalogu, przechowując konfiguracje poszczególnych usług w `/etc/pam.d`. Na przykład plik konfiguracyjny usługi login znajduje się w `/etc/pam.d/login`.<sup>[[1]](#references)</sup>
 
 Przykładowa konfiguracja PAM dla usługi login może wyglądać następująco:
 ```
@@ -26,40 +26,40 @@ session required /lib/security/pam_unix_session.so
 ```
 #### **Obszary zarządzania PAM**
 
-Te obszary, czyli grupy zarządzania, obejmują **auth**, **account**, **password** i **session**, z których każdy odpowiada za inne aspekty procesu uwierzytelniania i zarządzania sesją:
+Te obszary lub grupy zarządzania obejmują **auth**, **account**, **password** i **session**, z których każdy odpowiada za inny aspekt procesu uwierzytelniania i zarządzania sesją:<sup>[[1]](#references)</sup>
 
 - **Auth**: Weryfikuje tożsamość użytkownika, często prosząc o hasło.
-- **Account**: Obsługuje weryfikację konta, sprawdzając warunki takie jak członkostwo w grupie lub ograniczenia dotyczące pory dnia.
+- **Account**: Obsługuje weryfikację konta, sprawdzając warunki takie jak członkostwo w grupie lub ograniczenia zależne od pory dnia.
 - **Password**: Zarządza aktualizacjami haseł, w tym sprawdzaniem złożoności i zapobieganiem atakom słownikowym.
 - **Session**: Zarządza działaniami podczas rozpoczynania lub kończenia sesji usługi, takimi jak montowanie katalogów lub ustawianie limitów zasobów.
 
-#### **Elementy sterujące modułów PAM**
+#### **Kontrole modułów PAM**
 
-Elementy sterujące określają reakcję modułu na powodzenie lub niepowodzenie, wpływając na cały proces uwierzytelniania. Obejmują one:
+Kontrole określają reakcję modułu na powodzenie lub niepowodzenie, wpływając na cały proces uwierzytelniania. Obejmują one:<sup>[[1]](#references)</sup>
 
-- **Required**: Niepowodzenie wymaganego modułu ostatecznie powoduje niepowodzenie, ale dopiero po sprawdzeniu wszystkich kolejnych modułów.
+- **Required**: Niepowodzenie wymaganego modułu prowadzi ostatecznie do niepowodzenia, ale dopiero po sprawdzeniu wszystkich kolejnych modułów.
 - **Requisite**: Natychmiastowe zakończenie procesu po niepowodzeniu.
 - **Sufficient**: Powodzenie pomija pozostałe kontrole tego samego obszaru, chyba że kolejny moduł zakończy się niepowodzeniem.
 - **Optional**: Powoduje niepowodzenie tylko wtedy, gdy jest jedynym modułem w stosie.
 
 #### Semantyka ofensywna, która ma znaczenie
 
-Podczas Backdooring PAM **lokalizacja wstawionej reguły** jest często ważniejsza niż sam payload:
+Podczas tworzenia backdoora w PAM **lokalizacja wstawionej reguły** jest często ważniejsza niż sam payload:
 
-- `include` i `substack` pobierają reguły z innych plików, więc edycja `sshd` może wpływać tylko na SSH, podczas gdy edycja `system-auth`, `common-auth` lub innego współdzielonego stosu wpływa jednocześnie na kilka usług.
-- PAM obsługuje również elementy sterujące w nawiasach kwadratowych, takie jak `[success=1 default=ignore]`. Można je wykorzystać do **pomijania jednego lub większej liczby modułów** po pomyślnym przejściu niestandardowego sprawdzenia, zamiast jawnego zastępowania `pam_unix.so`.
-- `module-path` może być **absolutną ścieżką** (`/usr/lib/security/pam_custom.so`) lub ścieżką **względną** względem domyślnego katalogu modułów PAM. We współczesnych systemach Linux rzeczywiste katalogi to często `/lib/security`, `/lib64/security`, `/usr/lib/security` lub ścieżki multiarch, takie jak `/usr/lib/x86_64-linux-gnu/security`.
+- `include` i `substack` pobierają reguły z innych plików, dlatego edycja `sshd` może wpływać tylko na SSH, podczas gdy edycja `system-auth`, `common-auth` lub innego współdzielonego stosu może jednocześnie wpływać na wiele usług.
+- PAM obsługuje również kontrole w nawiasach, takie jak `[success=1 default=ignore]`. Można je wykorzystać do **pomijania jednego lub większej liczby modułów** po pomyślnym przejściu niestandardowego sprawdzenia, zamiast jawnie zastępować `pam_unix.so`.
+- `module-path` może być **bezwzględna** (`/usr/lib/security/pam_custom.so`) lub **względna** względem domyślnego katalogu modułów PAM. We współczesnych systemach Linux rzeczywiste katalogi to często `/lib/security`, `/lib64/security`, `/usr/lib/security` lub ścieżki multiarch, takie jak `/usr/lib/x86_64-linux-gnu/security`.
 
-Szybka wskazówka dla operatora: przed wprowadzeniem zmian zawsze odwzoruj **pełny graf usług**. Na przykład `sshd -> password-auth -> system-auth` w niektórych dystrybucjach lub `sshd -> system-remote-login -> system-login -> system-auth` w innych oznacza, że ten sam jednolinijkowy implant może mieć znacznie szerszy zasięg, niż zamierzano.
+Najważniejszy wniosek dla operatora: przed wprowadzeniem zmian zawsze odwzoruj **pełny graf usług**. Na przykład `sshd -> password-auth -> system-auth` w niektórych dystrybucjach lub `sshd -> system-remote-login -> system-login -> system-auth` w innych oznacza, że ten sam jednolinijkowy implant może objąć znacznie szerszy zakres, niż zamierzano.
 
 #### Przykładowy scenariusz
 
-W konfiguracji z wieloma modułami auth proces przebiega w ścisłej kolejności. Jeśli moduł `pam_securetty` uzna terminal logowania za nieautoryzowany, logowania roota zostają zablokowane, jednak wszystkie moduły nadal są przetwarzane z powodu jego statusu "required". Moduł `pam_env` ustawia zmienne środowiskowe, potencjalnie poprawiając wygodę użytkownika. Moduły `pam_ldap` i `pam_unix` współpracują w celu uwierzytelnienia użytkownika, przy czym `pam_unix` próbuje użyć wcześniej podanego hasła, zwiększając wydajność i elastyczność metod uwierzytelniania.
+W konfiguracji z wieloma modułami auth proces przebiega w ścisłej kolejności. Jeśli moduł `pam_securetty` stwierdzi, że terminal logowania jest nieautoryzowany, logowania roota zostają zablokowane, jednak wszystkie moduły nadal są przetwarzane ze względu na status "required". Moduł `pam_env` ustawia zmienne środowiskowe, potencjalnie poprawiając komfort użytkownika. Moduły `pam_ldap` i `pam_unix` współpracują przy uwierzytelnianiu użytkownika, przy czym `pam_unix` próbuje użyć wcześniej podanego hasła, zwiększając wydajność i elastyczność metod uwierzytelniania.
 
 
 ## Backdooring PAM – Hooking `pam_unix.so`
 
-Klasycznym sposobem uzyskania persistence w środowiskach Linux o wysokiej wartości jest **zastąpienie legalnej biblioteki PAM trojanizowanym drop-inem**. Ponieważ każde logowanie przez SSH / konsolę ostatecznie wywołuje `pam_unix.so:pam_sm_authenticate()`, kilka linii kodu C wystarczy do przechwytywania danych uwierzytelniających lub zaimplementowania obejścia uwierzytelniania za pomocą *magic* hasła.
+Klasyczną metodą persistence w środowiskach Linux o wysokiej wartości jest **zastąpienie legalnej biblioteki PAM trojanizowanym drop-inem**. Ponieważ każde logowanie przez SSH lub konsolę kończy się wywołaniem `pam_unix.so:pam_sm_authenticate()`, kilka wierszy kodu C wystarczy do przechwytywania danych uwierzytelniających lub zaimplementowania obejścia uwierzytelniania za pomocą *magicznego* hasła.<sup>[[2]](#references)</sup>
 
 ### Ściągawka kompilacji
 <details>
@@ -97,7 +97,7 @@ return orig(pamh, flags, argc, argv);
 ```
 </details>
 
-Skompiluj i potajemnie zastąp:
+Skompiluj i potajemnie podmień:
 ```bash
 gcc -fPIC -shared -o pam_unix.so trojan_pam.c -ldl -lpam
 mv /lib/security/pam_unix.so /lib/security/pam_unix.so.bak
@@ -106,18 +106,18 @@ chmod 644 /lib/security/pam_unix.so     # keep original perms
 touch -r /bin/ls /lib/security/pam_unix.so  # timestomp
 ```
 ### Wskazówki OpSec
-1. **Atomic overwrite** – zapisz dane do pliku tymczasowego, a następnie użyj `mv`, aby umieścić go we właściwym miejscu i uniknąć częściowo zapisanych bibliotek, które mogłyby zablokować SSH.
-2. Umieszczenie pliku logów, np. `/usr/bin/.dbus.log`, pozwala mu wtapiać się w legalne artefakty pulpitu.
+1. **Atomowe nadpisanie** – zapisz dane do pliku tymczasowego, a następnie użyj `mv`, aby umieścić go we właściwym miejscu i uniknąć częściowo zapisanych bibliotek, które mogłyby zablokować SSH.
+2. Umieszczenie pliku logów, na przykład `/usr/bin/.dbus.log`, pozwala mu wtapiać się w legalne artefakty środowiska desktopowego.
 3. Zachowaj identyczne eksporty symboli (`pam_sm_setcred` itd.), aby uniknąć nieprawidłowego działania PAM.
 
 ### Wykrywanie
-* Porównaj MD5/SHA256 `pam_unix.so` z pakietem dystrybucji.
-* `rpm -V pam` lub `debsums -s libpam-modules` pozwala wykryć podmienione biblioteki bez ręcznego obliczania hashy.
-* Sprawdź, czy w `/lib/security/` nie ma plików zapisywalnych przez wszystkich użytkowników ani nietypowych właścicieli.
+* Porównaj sumę MD5/SHA256 `pam_unix.so` z pakietem dystrybucji.
+* `rpm -V pam` lub `debsums -s libpam-modules` pozwala wykryć podmienione biblioteki bez ręcznego obliczania sum.
+* Sprawdź, czy w `/lib/security/` nie występują pliki zapisywalne przez wszystkich użytkowników lub nietypowe ustawienia właściciela.
 * Reguła `auditd`: `-w /lib/security/pam_unix.so -p wa -k pam-backdoor`.
 * Przeszukaj konfiguracje PAM pod kątem nieoczekiwanych modułów: `grep -R "pam_[a-z].*\.so" /etc/pam.d/ | grep -v pam_unix`.
 
-### Szybkie polecenia triage (po kompromitacji lub podczas threat huntingu)
+### Szybkie polecenia triage (po przejęciu lub podczas threat hunting)
 ```bash
 # 1) Spot alien PAM objects
 find /{lib,usr/lib,usr/local/lib}{,64}/security -type f -printf '%p %s %M %u:%g %TY-%Tm-%Td\n' | grep -E 'pam_|libselinux'
@@ -133,23 +133,23 @@ done
 # 4) Look for stealth config edits
 grep -R "pam_.*\.so" /etc/pam.d/ | grep -E 'plg|selinux|custom|exec'
 ```
-### Nadużywanie `pam_exec` w celu utrzymania dostępu
-Zamiast zastępować `pam_unix.so`, mniej inwazyjnym rozwiązaniem jest dodanie linii `pam_exec` w `/etc/pam.d/sshd`, aby każde logowanie SSH uruchamiało implant, zachowując jednocześnie standardowy stack:
+### Wykorzystanie `pam_exec` do persistence
+Zamiast zastępować `pam_unix.so`, mniej inwazyjnym podejściem jest dodanie linii `pam_exec` w `/etc/pam.d/sshd`, aby każde logowanie przez SSH uruchamiało implant, pozostawiając normalny stack bez zmian:
 ```bash
 # Run on successful auth and receive the typed password on stdin
 auth optional pam_exec.so quiet expose_authtok /usr/local/bin/.ssh_hook.sh
 ```
-`pam_exec` otrzymuje metadane PAM w zmiennych środowiskowych, takich jak `PAM_USER`, `PAM_RHOST`, `PAM_SERVICE`, `PAM_TTY` i `PAM_TYPE`. Po użyciu `expose_authtok` helper może również odczytać hasło ze `stdin` podczas faz `auth` lub `password`. Jeśli chcesz, aby helper działał z efektywnym UID zamiast rzeczywistego UID, dodaj `seteuid`.
+`pam_exec` otrzymuje metadane PAM w zmiennych środowiskowych, takich jak `PAM_USER`, `PAM_RHOST`, `PAM_SERVICE`, `PAM_TTY` i `PAM_TYPE`. Z opcją `expose_authtok` helper może również odczytywać hasło ze `stdin` podczas faz `auth` lub `password`. Jeśli chcesz, aby helper działał z effective UID zamiast real UID, dodaj `seteuid`.
 
-Uwagi praktyczne:
+Praktyczne uwagi:
 
-- `session optional pam_exec.so ...` lepiej nadaje się do **działań po zalogowaniu**, takich jak ponowne otwieranie socketów lub uruchamianie odłączonego daemona.
-- `auth optional pam_exec.so quiet expose_authtok ...` to typowy wybór do **przechwytywania danych uwierzytelniających**, ponieważ działa przed otwarciem sesji.
-- `type=session` lub `type=auth` można użyć do ograniczenia wykonania do konkretnej fazy PAM i uniknięcia głośnego podwójnego wykonania.
+- `session optional pam_exec.so ...` lepiej sprawdza się w przypadku **post-login actions**, takich jak ponowne otwieranie socketów lub uruchamianie odłączonego daemona.
+- `auth optional pam_exec.so quiet expose_authtok ...` to typowy wybór dla **credential capture**, ponieważ wykonuje się przed otwarciem sesji.
+- `type=session` lub `type=auth` można użyć do ograniczenia wykonywania do określonej fazy PAM i uniknięcia głośnego podwójnego wykonania.
 
-### Przetrwanie działania narzędzi dystrybucyjnych: `authselect`
+### Przetrwanie działania narzędzi distro: `authselect`
 
-W systemach RHEL, CentOS Stream, Fedora i systemach pochodnych bezpośrednie zmiany w generowanych plikach, takich jak `/etc/pam.d/system-auth` lub `/etc/pam.d/password-auth`, mogą zostać **nadpisane przez `authselect`**. Aby zapewnić trwałość zmian, operatorzy często modyfikują aktywny custom profile w `/etc/authselect/custom/<profile>/`, a następnie ponownie go wybierają lub stosują.
+W RHEL, CentOS Stream, Fedora i systemach pochodnych bezpośrednie edycje generowanych plików, takich jak `/etc/pam.d/system-auth` lub `/etc/pam.d/password-auth`, mogą zostać **nadpisane przez `authselect`**. Aby zapewnić persistence, operatorzy często modyfikują aktywny custom profile w `/etc/authselect/custom/<profile>/`, a następnie ponownie go wybierają lub stosują.
 
 Typowy workflow, gdy masz root:
 ```bash
@@ -166,12 +166,13 @@ Ma to znaczenie zarówno dla działań ofensywnych, jak i triage: jeśli `/etc/p
 
 ### Recent tradecraft seen in the wild
 
-Najnowsze raporty z 2025 roku dotyczące backdoora **Plague** dla Linuxa pokazały tę samą podstawową ideę posuniętą jeszcze dalej: złośliwy komponent PAM ze **static bypass password**, a także czyszczenie zmiennych środowiskowych związanych z SSH i historii powłoki (`HISTFILE=/dev/null`) w celu ograniczenia śladów sesji po zalogowaniu. Jest to użyteczny hunting pattern, ponieważ logika backdoora może znajdować się w PAM, podczas gdy artefakty stealth pojawiają się dopiero **po** pomyślnym uwierzytelnieniu.
+Najnowsze raporty z 2025 roku dotyczące linuxowego backdoora **Plague** pokazały dalszy rozwój tej samej podstawowej idei: malicious PAM component ze **static bypass password**, a także czyszczenie zmiennych środowiskowych związanych z SSH i historii powłoki (`HISTFILE=/dev/null)` w celu ograniczenia śladów sesji po zalogowaniu.<sup>[[3]](#references)</sup> To użyteczny hunting pattern, ponieważ logika backdoora może znajdować się w PAM, podczas gdy artefakty stealth pojawiają się dopiero **after** pomyślnym uwierzytelnieniu.
 
 
-## Referencje
+## References
 
-- [pam.conf(5) / pam.d(5) - Linux-PAM Manual](https://man7.org/linux/man-pages/man5/pam.d.5.html)
-- [Nextron Systems - Plague: A Newly Discovered PAM-Based Backdoor for Linux](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
+- [1] [pam.conf(5) / pam.d(5) - Linux-PAM Manual](https://man7.org/linux/man-pages/man5/pam.d.5.html)
+- [2] [The Covert Operator's Playbook: Infiltration of Global Telecom Networks - Unit 42](https://unit42.paloaltonetworks.com/infiltration-of-global-telecom-networks/)
+- [3] [Nextron Systems - Plague: A Newly Discovered PAM-Based Backdoor for Linux](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
 
 {{#include ../../banners/hacktricks-training.md}}

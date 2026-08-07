@@ -2,209 +2,209 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Aby dowiedzieć się więcej o macOS MDM, sprawdź:**
+**To learn about macOS MDMs check:**
 
-- [https://www.youtube.com/watch?v=ku8jZe-MHUU](https://www.youtube.com/watch?v=ku8jZe-MHUU)
-- [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)
+- [https://www.youtube.com/watch?v=ku8jZe-MHUU](https://www.youtube.com/watch?v=ku8jZe-MHUU)<sup>[[1]](#references)</sup>
+- [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)<sup>[[2]](#references)</sup>
 
-## Podstawy
+## Basics
 
-### **Przegląd MDM (Mobile Device Management)**
+### **MDM (Mobile Device Management) Overview**
 
-[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) służy do nadzorowania różnych urządzeń użytkowników końcowych, takich jak smartfony, laptopy i tablety. W szczególności w przypadku platform Apple (iOS, macOS, tvOS) obejmuje zestaw wyspecjalizowanych funkcji, API i praktyk. Działanie MDM opiera się na kompatybilnym serwerze MDM, który jest dostępny komercyjnie lub jako open source i musi obsługiwać [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Najważniejsze kwestie:
+[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) is utilized for overseeing various end-user devices like smartphones, laptops, and tablets. Particularly for Apple's platforms (iOS, macOS, tvOS), it involves a set of specialized features, APIs, and practices. The operation of MDM hinges on a compatible MDM server, which is either commercially available or open-source, and must support the [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Key points include:
 
-- Scentralizowana kontrola nad urządzeniami.
-- Zależność od serwera MDM zgodnego z protokołem MDM.
-- Możliwość wysyłania przez serwer MDM różnych poleceń do urządzeń, na przykład zdalnego usuwania danych lub instalowania konfiguracji.
+- Centralized control over devices.
+- Dependence on an MDM server that adheres to the MDM protocol.
+- Capability of the MDM server to dispatch various commands to devices, for instance, remote data erasure or configuration installation.
 
-### **Podstawy DEP (Device Enrollment Program)**
+### **Basics of DEP (Device Enrollment Program)**
 
-Oferowany przez Apple [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) usprawnia integrację Mobile Device Management (MDM), umożliwiając bezdotykową konfigurację urządzeń iOS, macOS oraz tvOS. DEP automatyzuje proces enrolmentu, dzięki czemu urządzenia mogą działać od razu po wyjęciu z pudełka, przy minimalnej interwencji użytkownika lub administratora. Najważniejsze aspekty:
+The [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) offered by Apple streamlines the integration of Mobile Device Management (MDM) by facilitating zero-touch configuration for iOS, macOS, and tvOS devices. DEP automates the enrollment process, allowing devices to be operational right out of the box, with minimal user or administrative intervention. Essential aspects include:
 
-- Umożliwia urządzeniom automatyczną rejestrację na wstępnie zdefiniowanym serwerze MDM podczas pierwszej aktywacji.
-- Jest przede wszystkim korzystny dla zupełnie nowych urządzeń, ale można go również stosować w przypadku urządzeń poddawanych rekonfiguracji.
-- Ułatwia prostą konfigurację, dzięki czemu urządzenia szybko stają się gotowe do użytku w organizacji.
+- Enables devices to autonomously register with a pre-defined MDM server upon initial activation.
+- Primarily beneficial for brand-new devices, but also applicable for devices undergoing reconfiguration.
+- Facilitates a straightforward setup, making devices ready for organizational use swiftly.
 
-### **Kwestie bezpieczeństwa**
+### **Security Consideration**
 
-Należy pamiętać, że łatwość enrolmentu zapewniana przez DEP, choć korzystna, może również stwarzać zagrożenia bezpieczeństwa. Jeśli mechanizmy ochronne nie są odpowiednio egzekwowane podczas enrolmentu MDM, atakujący mogą wykorzystać ten uproszczony proces do zarejestrowania własnego urządzenia na serwerze MDM organizacji, podszywając się pod urządzenie firmowe.<sup>[[2]](#references)</sup>
+It's crucial to note that the ease of enrollment provided by DEP, while beneficial, can also pose security risks. If protective measures are not adequately enforced for MDM enrollment, attackers might exploit this streamlined process to register their device on the organization's MDM server, masquerading as a corporate device.<sup>[[2]](#references)</sup>
 
 > [!CAUTION]
-> **Alert bezpieczeństwa**: Uproszczony enrolment DEP może potencjalnie umożliwić nieautoryzowaną rejestrację urządzenia na serwerze MDM organizacji, jeśli nie zostaną wdrożone odpowiednie zabezpieczenia.
+> **Security Alert**: Simplified DEP enrollment could potentially allow unauthorized device registration on the organization's MDM server if proper safeguards are not in place.
 
-### Podstawy: czym jest SCEP (Simple Certificate Enrolment Protocol)?
+### Basics What is SCEP (Simple Certificate Enrolment Protocol)?
 
-- Stosunkowo stary protokół, utworzony zanim TLS i HTTPS stały się powszechne.
-- Zapewnia klientom ustandaryzowany sposób wysyłania **Certificate Signing Request** (CSR) w celu uzyskania certyfikatu. Klient prosi serwer o wydanie podpisanego certyfikatu.
+- A relatively old protocol, created before TLS and HTTPS were widespread.
+- Gives clients a standardized way of sending a **Certificate Signing Request** (CSR) for the purpose of being granted a certificate. The client will ask the server to give him a signed certificate.
 
-### Czym są Configuration Profiles (czyli mobileconfigs)?
+### What are Configuration Profiles (aka mobileconfigs)?
 
-- Oficjalny sposób Apple na **ustawianie/wymuszanie konfiguracji systemu.**
-- Format pliku, który może zawierać wiele payloadów.
-- Oparty na property lists (w formacie XML).
-- „can be signed and encrypted to validate their origin, ensure their integrity, and protect their contents.” Basics — Page 70, iOS Security Guide, January 2018.
+- Apple’s official way of **setting/enforcing system configuration.**
+- File format that can contain multiple payloads.
+- Based on property lists (the XML kind).
+- “can be signed and encrypted to validate their origin, ensure their integrity, and protect their contents.” Basics — Page 70, iOS Security Guide, January 2018.
 
-## Protokoły
+## Protocols
 
 ### MDM
 
-- Połączenie APNs (**serwery Apple**) + RESTful API (**serwery dostawców** MDM)
-- **Komunikacja** odbywa się między **urządzeniem** a serwerem powiązanym z produktem do **zarządzania** **urządzeniami**
-- **Polecenia** są dostarczane z MDM do urządzenia w postaci słowników zakodowanych jako **plist**
-- Wszystko odbywa się przez **HTTPS**. Serwery MDM mogą korzystać z pinningu (i zazwyczaj z niego korzystają).
-- Apple przyznaje dostawcy MDM **certyfikat APNs** do uwierzytelniania
+- Combination of APNs (**Apple server**s) + RESTful API (**MDM** **vendor** servers)
+- **Communication** occurs between a **device** and a server associated with a **device** **management** **product**
+- **Commands** delivered from the MDM to the device in **plist-encoded dictionaries**
+- All over **HTTPS**. MDM servers can be (and are usually) pinned.
+- Apple grants the MDM vendor an **APNs certificate** for authentication
 
 ### DEP
 
-- **3 API**: 1 dla resellerów, 1 dla dostawców MDM i 1 dla tożsamości urządzenia (nieudokumentowane):
-- Tak zwane [DEP "cloud service" API](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Jest ono używane przez serwery MDM do kojarzenia profili DEP z konkretnymi urządzeniami.
-- [DEP API używane przez Apple Authorized Resellers](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) do enrolowania urządzeń, sprawdzania statusu enrolmentu i sprawdzania statusu transakcji.
-- Nieudokumentowane prywatne DEP API. Jest ono używane przez Apple Devices do żądania ich profilu DEP. W systemie macOS za komunikację przez to API odpowiada plik binarny `cloudconfigurationd`.
-- Bardziej nowoczesne i oparte na **JSON** (w przeciwieństwie do plist)
-- Apple przyznaje dostawcy MDM **token OAuth**
+- **3 APIs**: 1 for resellers, 1 for MDM vendors, 1 for device identity (undocumented):
+- The so-called [DEP "cloud service" API](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). This is used by MDM servers to associate DEP profiles with specific devices.
+- The [DEP API used by Apple Authorized Resellers](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) to enroll devices, check enrollment status, and check transaction status.
+- The undocumented private DEP API. This is used by Apple Devices to request their DEP profile. On macOS, the `cloudconfigurationd` binary is responsible for communicating over this API.
+- More modern and **JSON** based (vs. plist)
+- Apple grants an **OAuth token** to the MDM vendor
 
 **DEP "cloud service" API**
 
 - RESTful
-- synchronizuje rekordy urządzeń z Apple do serwera MDM
-- synchronizuje „profile DEP” z serwera MDM do Apple (później są one dostarczane przez Apple do urządzenia)
-- „Profil” DEP zawiera:
-- URL serwera dostawcy MDM
-- Dodatkowe zaufane certyfikaty dla URL serwera (opcjonalny pinning)
-- Dodatkowe ustawienia (np. które ekrany pominąć w Setup Assistant)
+- sync device records from Apple to the MDM server
+- sync “DEP profiles” to Apple from the MDM server (delivered by Apple to the device later on)
+- A DEP “profile” contains:
+- MDM vendor server URL
+- Additional trusted certificates for server URL (optional pinning)
+- Extra settings (e.g. which screens to skip in Setup Assistant)
 
-## Numer seryjny
+## Serial Number
 
-Urządzenia Apple wyprodukowane po 2010 roku mają zazwyczaj **12-znakowe alfanumeryczne** numery seryjne, przy czym **pierwsze trzy cyfry oznaczają miejsce produkcji**, kolejne **dwie** wskazują **rok** i **tydzień** produkcji, następne **trzy** cyfry zapewniają **unikalny** **identyfikator**, a **ostatnie** **cztery** cyfry oznaczają **numer modelu**.
+Apple devices manufactured after 2010 generally have **12-character alphanumeric** serial numbers, with the **first three digits representing the manufacturing location**, the following **two** indicating the **year** and **week** of manufacture, the next **three** digits providing a **unique** **identifier**, and the **last** **four** digits representing the **model number**.
 
 
 {{#ref}}
 macos-serial-number.md
 {{#endref}}
 
-## Etapy enrolmentu i zarządzania
+## Steps for enrolment and management
 
-1. Utworzenie rekordu urządzenia (Reseller, Apple): Tworzony jest rekord nowego urządzenia
-2. Przypisanie rekordu urządzenia (Customer): Urządzenie zostaje przypisane do serwera MDM
-3. Synchronizacja rekordu urządzenia (dostawca MDM): MDM synchronizuje rekordy urządzeń i przesyła profile DEP do Apple
-4. DEP check-in (urządzenie): Urządzenie pobiera swój profil DEP
-5. Pobranie profilu (urządzenie)
-6. Instalacja profilu (urządzenie), a. w tym payloadów MDM, SCEP i głównego CA
-7. Wydawanie poleceń MDM (urządzenie)
+1. Device record creation (Reseller, Apple): The record for the new device is created
+2. Device record assignment (Customer): The device is assigned to a MDM server
+3. Device record sync (MDM vendor): MDM sync the device records and push the DEP profiles to Apple
+4. DEP check-in (Device): Device gets his DEP profile
+5. Profile retrieval (Device)
+6. Profile installation (Device) a. incl. MDM, SCEP and root CA payloads
+7. MDM command issuance (Device)
 
-![Numer seryjny — etapy enrolmentu i zarządzania: 7. Wydawanie poleceń MDM (urządzenie)](<../../../images/image (694).png>)
+![Serial Number - Steps for enrolment and management: 7. MDM command issuance (Device)](<../../../images/image (694).png>)
 
-Plik `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` eksportuje funkcje, które można uznać za **wysokopoziomowe „etapy”** procesu enrolmentu.
+The file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` exports functions that can be considered **high-level "steps"** of the enrolment process.
 
-### Etap 4: DEP check-in — pobieranie Activation Record
+### Step 4: DEP check-in - Getting the Activation Record
 
-Ta część procesu ma miejsce, gdy **użytkownik uruchamia Maca po raz pierwszy** (lub po całkowitym wymazaniu)
+This part of the process occurs when a **user boots a Mac for the first time** (or after a complete wipe)
 
-![Etapy enrolmentu i zarządzania — Etap 4: DEP check-in — pobieranie Activation Record: Ta część procesu ma miejsce, gdy użytkownik uruchamia Maca po raz pierwszy lub po całkowitym...](<../../../images/image (1044).png>)
+![Steps for enrolment and management - Step 4: DEP check-in - Getting the Activation Record: This part of the process occurs when a user boots a Mac for the first time (or after a complete...](<../../../images/image (1044).png>)
 
-lub podczas wykonywania `sudo profiles show -type enrollment`
+or when executing `sudo profiles show -type enrollment`
 
-- Ustalenie, **czy urządzenie ma włączony DEP**
-- Activation Record to wewnętrzna nazwa **„profilu” DEP**
-- Rozpoczyna się natychmiast po połączeniu urządzenia z Internetem
-- Obsługiwany przez **`CPFetchActivationRecord`**
-- Implementowany przez **`cloudconfigurationd`** za pośrednictwem XPC. **„Setup Assistant”** (przy pierwszym uruchomieniu urządzenia) lub polecenie **`profiles`** skontaktuje się z **tym daemonem**, aby pobrać activation record.
-- LaunchDaemon (zawsze uruchomiony jako root)
+- Determine **whether device is DEP enabled**
+- Activation Record is the internal name for **DEP “profile”**
+- Begins as soon as the device is connected to Internet
+- Driven by **`CPFetchActivationRecord`**
+- Implemented by **`cloudconfigurationd`** via XPC. The **"Setup Assistant**" (when the device is firstly booted) or the **`profiles`** command will **contact this daemon** to retrieve the activation record.
+- LaunchDaemon (always runs as root)
 
-Pobranie Activation Record obejmuje kilka etapów wykonywanych przez **`MCTeslaConfigurationFetcher`**. Proces ten wykorzystuje szyfrowanie o nazwie **Absinthe**<sup>[[1]](#references)</sup>
+It follows a few steps to get the Activation Record performed by **`MCTeslaConfigurationFetcher`**. This process uses an encryption called **Absinthe**<sup>[[1]](#references)</sup>
 
-1. Pobranie **certyfikatu**
+1. Retrieve **certificate**
 1. GET [https://iprofiles.apple.com/resource/certificate.cer](https://iprofiles.apple.com/resource/certificate.cer)
-2. **Inicjalizacja** stanu na podstawie certyfikatu (**`NACInit`**)
-1. Wykorzystuje różne dane charakterystyczne dla urządzenia (np. **numer seryjny za pośrednictwem `IOKit`**)
-3. Pobranie **klucza sesji**
+2. **Initialize** state from certificate (**`NACInit`**)
+1. Uses various device-specific data (i.e. **Serial Number via `IOKit`**)
+3. Retrieve **session key**
 1. POST [https://iprofiles.apple.com/session](https://iprofiles.apple.com/session)
-4. Ustanowienie sesji (**`NACKeyEstablishment`**)
-5. Wykonanie żądania
-1. POST do [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) z wysłanymi danymi `{ "action": "RequestProfileConfiguration", "sn": "" }`
-2. Payload JSON jest szyfrowany przy użyciu Absinthe (**`NACSign`**)
-3. Wszystkie żądania odbywają się przez HTTPs, używane są wbudowane certyfikaty główne
+4. Establish the session (**`NACKeyEstablishment`**)
+5. Make the request
+1. POST to [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) sending the data `{ "action": "RequestProfileConfiguration", "sn": "" }`
+2. The JSON payload is encrypted using Absinthe (**`NACSign`**)
+3. All requests over HTTPs, built-in root certificates are used
 
-![Etapy enrolmentu i zarządzania — Etap 4: DEP check-in — pobieranie Activation Record: 3. Wszystkie żądania odbywają się przez HTTPs, używane są wbudowane certyfikaty główne](<../../../images/image (566) (1).png>)
+![Steps for enrolment and management - Step 4: DEP check-in - Getting the Activation Record: 3. All requests over HTTPs, built-in root certificates are used](<../../../images/image (566) (1).png>)
 
-Odpowiedź jest słownikiem JSON zawierającym kilka ważnych danych, takich jak:
+The response is a JSON dictionary with some important data like:
 
-- **url**: URL hosta dostawcy MDM dla profilu aktywacji
-- **anchor-certs**: Tablica certyfikatów DER używanych jako zaufane anchory
+- **url**: URL of the MDM vendor host for the activation profile
+- **anchor-certs**: Array of DER certificates used as trusted anchors
 
-### **Etap 5: pobranie profilu**
+### **Step 5: Profile Retrieval**
 
-![Etap 4: DEP check-in — pobieranie Activation Record — Etap 5: pobranie profilu: Etap 5: pobranie profilu](<../../../images/image (444).png>)
+![Step 4: DEP check-in - Getting the Activation Record - Step 5: Profile Retrieval: Step 5: Profile Retrieval](<../../../images/image (444).png>)
 
-- Żądanie jest wysyłane do **URL podanego w profilu DEP**.
-- **Certyfikaty anchor** są używane do **oceny zaufania**, jeśli zostały podane.
-- Przypomnienie: właściwość **anchor_certs** profilu DEP
-- **Żądanie jest prostym plikiem .plist** zawierającym identyfikację urządzenia
-- Przykłady: **UDID, wersja systemu operacyjnego**.
-- Podpisane przez CMS, zakodowane w DER
-- Podpisane przy użyciu **certyfikatu tożsamości urządzenia (z APNS)**
-- **Łańcuch certyfikatów** zawiera wygasły **Apple iPhone Device CA**
+- Request sent to **url provided in DEP profile**.
+- **Anchor certificates** are used to **evaluate trust** if provided.
+- Reminder: the **anchor_certs** property of the DEP profile
+- **Request is a simple .plist** with device identification
+- Examples: **UDID, OS version**.
+- CMS-signed, DER-encoded
+- Signed using the **device identity certificate (from APNS)**
+- **Certificate chain** includes expired **Apple iPhone Device CA**
 
-![Etap 4: DEP check-in — pobieranie Activation Record — Etap 5: pobranie profilu: Podpisane przy użyciu certyfikatu tożsamości urządzenia (z APNS)](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
+![Step 4: DEP check-in - Getting the Activation Record - Step 5: Profile Retrieval: Signed using the device identity certificate (from APNS)](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
 
-### Etap 6: instalacja profilu
+### Step 6: Profile Installation
 
-- Po pobraniu **profil jest przechowywany w systemie**
-- Ten etap rozpoczyna się automatycznie (jeśli uruchomiony jest **Setup Assistant**)
-- Obsługiwany przez **`CPInstallActivationProfile`**
-- Implementowany przez mdmclient za pośrednictwem XPC
-- LaunchDaemon (jako root) lub LaunchAgent (jako użytkownik), zależnie od kontekstu
-- Profile konfiguracji mają wiele payloadów do zainstalowania
-- Framework ma architekturę opartą na pluginach do instalowania profili
-- Każdy typ payloadu jest powiązany z pluginem
-- Może używać XPC (w frameworku) lub klasycznego Cocoa (w ManagedClient.app)
-- Przykład:
-- Payloady certyfikatów używają CertificateService.xpc
+- Once retrieved, **profile is stored on the system**
+- This step begins automatically (if in **setup assistant**)
+- Driven by **`CPInstallActivationProfile`**
+- Implemented by mdmclient over XPC
+- LaunchDaemon (as root) or LaunchAgent (as user), depending on context
+- Configuration profiles have multiple payloads to install
+- Framework has a plugin-based architecture for installing profiles
+- Each payload type is associated with a plugin
+- Can be XPC (in framework) or classic Cocoa (in ManagedClient.app)
+- Example:
+- Certificate Payloads use CertificateService.xpc
 
-Zazwyczaj **profil aktywacji** dostarczany przez dostawcę MDM będzie zawierał następujące payloady:
+Typically, **activation profile** provided by an MDM vendor will **include the following payloads**:
 
-- `com.apple.mdm`: do **enrolowania** urządzenia w MDM
-- `com.apple.security.scep`: do bezpiecznego dostarczenia urządzeniu **certyfikatu klienta**.
-- `com.apple.security.pem`: do **zainstalowania zaufanych certyfikatów CA** w System Keychain urządzenia.
-- Instalowanie payloadu MDM jest odpowiednikiem **MDM check-in w dokumentacji**
-- Payload **zawiera kluczowe właściwości**:
-- - URL MDM Check-In (**`CheckInURL`**)
-- URL odpytywania poleceń MDM (**`ServerURL`**) + topic APNs do jego wyzwalania
-- Aby zainstalować payload MDM, żądanie jest wysyłane do **`CheckInURL`**
-- Implementowane w **`mdmclient`**
-- Payload MDM może zależeć od innych payloadów
-- Umożliwia **przypinanie żądań do określonych certyfikatów**:
-- Właściwość: **`CheckInURLPinningCertificateUUIDs`**
-- Właściwość: **`ServerURLPinningCertificateUUIDs`**
-- Dostarczane za pośrednictwem payloadu PEM
-- Umożliwia przypisanie urządzeniu certyfikatu tożsamości:
-- Właściwość: IdentityCertificateUUID
-- Dostarczane za pośrednictwem payloadu SCEP
+- `com.apple.mdm`: to **enroll** the device in MDM
+- `com.apple.security.scep`: to securely provide a **client certificate** to the device.
+- `com.apple.security.pem`: to **install trusted CA certificates** to the device’s System Keychain.
+- Installing the MDM payload equivalent to **MDM check-in in the documentation**
+- Payload **contains key properties**:
+- - MDM Check-In URL (**`CheckInURL`**)
+- MDM Command Polling URL (**`ServerURL`**) + APNs topic to trigger it
+- To install MDM payload, request is sent to **`CheckInURL`**
+- Implemented in **`mdmclient`**
+- MDM payload can depend on other payloads
+- Allows **requests to be pinned to specific certificates**:
+- Property: **`CheckInURLPinningCertificateUUIDs`**
+- Property: **`ServerURLPinningCertificateUUIDs`**
+- Delivered via PEM payload
+- Allows device to be attributed with an identity certificate:
+- Property: IdentityCertificateUUID
+- Delivered via SCEP payload
 
-### **Etap 7: nasłuchiwanie poleceń MDM**
+### **Step 7: Listening for MDM commands**
 
-- Po zakończeniu MDM check-in dostawca może **wysyłać powiadomienia push za pomocą APNs**
-- Po odebraniu są obsługiwane przez **`mdmclient`**
-- Aby odpytwać o polecenia MDM, żądanie jest wysyłane do ServerURL
-- Wykorzystuje wcześniej zainstalowany payload MDM:
-- **`ServerURLPinningCertificateUUIDs`** do pinningu żądania
-- **`IdentityCertificateUUID`** jako certyfikat klienta TLS
+- After MDM check-in is complete, vendor can **issue push notifications using APNs**
+- Upon receipt, handled by **`mdmclient`**
+- To poll for MDM commands, request is sent to ServerURL
+- Makes use of previously installed MDM payload:
+- **`ServerURLPinningCertificateUUIDs`** for pinning request
+- **`IdentityCertificateUUID`** for TLS client certificate
 
-## Ataki
+## Attacks
 
-### Enrolowanie urządzeń w innych organizacjach
+### Enrolling Devices in Other Organisations
 
-Jak wspomniano wcześniej, aby spróbować enrolować urządzenie w organizacji, potrzebny jest **wyłącznie numer seryjny należący do tej organizacji**. Po enrolowaniu urządzenia kilka organizacji zainstaluje na nowym urządzeniu wrażliwe dane: certyfikaty, aplikacje, hasła WiFi, konfiguracje VPN [i tak dalej](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Dlatego może to być niebezpieczny punkt wejścia dla atakujących, jeśli proces enrolmentu nie jest odpowiednio chroniony:<sup>[[2]](#references)</sup>
+As previously commented, in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected:<sup>[[2]](#references)</sup>
 
 
 {{#ref}}
 enrolling-devices-in-other-organisations.md
 {{#endref}}
 
-## Odnośniki
+## References
 
-- [1] [Dogłębna analiza macOS MDM (i jak może zostać skompromitowany)](https://www.youtube.com/watch?v=ku8jZe-MHUU)
-- [2] [Duo Labs — „MDM Me Maybe?” (badania nad bezpieczeństwem enrolmentu DEP/MDM)](https://duo.com/labs/research/mdm-me-maybe)
+- [1] [A Deep Dive into macOS MDM (and How it can be Compromised)](https://www.youtube.com/watch?v=ku8jZe-MHUU)
+- [2] [Duo Labs — "MDM Me Maybe?" (DEP/MDM enrollment security research)](https://duo.com/labs/research/mdm-me-maybe)
 
 {{#include ../../../banners/hacktricks-training.md}}
