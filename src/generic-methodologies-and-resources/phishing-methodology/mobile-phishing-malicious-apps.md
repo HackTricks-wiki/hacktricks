@@ -40,7 +40,7 @@ For post-install Android malware tradecraft such as C2, Accessibility abuse, ove
 
 ## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
 
-Attackers increasingly replace static APK links with a Socket.IO/WebSocket channel embedded in Google Play–looking lures. This conceals the payload URL, bypasses URL/extension filters, and preserves a realistic install UX.
+Attackers increasingly replace static APK links with a Socket.IO/WebSocket channel embedded in Google Play–looking lures. This conceals the payload URL, bypasses URL/extension filters, and preserves a realistic install UX.<sup>[[2]](#references)[[4]](#references)</sup>
 
 Typical client flow observed in the wild:
 
@@ -86,5 +86,6 @@ See also WebSocket tradecraft and tooling:
 - [1] [The Dark Side of Romance: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
 - [2] [Socket.IO](https://socket.io)
 - [3] [Web Clips payload settings for Apple devices](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
+- [4] [Banker Trojan Targeting Indonesian and Vietnamese Android Users](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 
 {{#include ../../banners/hacktricks-training.md}}

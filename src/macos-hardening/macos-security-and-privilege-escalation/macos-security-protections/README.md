@@ -149,4 +149,3 @@ T
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-

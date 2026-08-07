@@ -178,3 +178,4 @@ uint256 newBalance = balance - balance.mulDivUp(shares, currentTotalSupply);
 - [8] [Uniswap v4 Core Whitepaper](https://app.uniswap.org/whitepaper-v4.pdf)
 
 {{#include ../../banners/hacktricks-training.md}}
+

@@ -219,7 +219,7 @@ sudo -l 2>/dev/null
 grep -R "ROLE=\|TYPE=" /etc/sudoers /etc/sudoers.d 2>/dev/null
 ```
 
-On many mainstream systems, users are mapped to `unconfined_u`, which reduces the practical impact of user confinement. On hardened deployments, however, confined users can make `sudo`, `su`, `newrole`, and `runcon` much more interesting because **the escalation path may depend on entering a better SELinux role/type, not only on becoming UID 0**. Also remember that some confined users cannot invoke `sudo`/`su` at all unless policy explicitly allows the underlying setuid transition, so a host using `staff_u` + `sysadm_r` can turn a seemingly minor `sudo ROLE=` / `TYPE=` rule into the real privilege boundary.
+On many mainstream systems, users are mapped to `unconfined_u`, which reduces the practical impact of user confinement. On hardened deployments, however, confined users can make `sudo`, `su`, `newrole`, and `runcon` much more interesting because **the escalation path may depend on entering a better SELinux role/type, not only on becoming UID 0**. Also remember that some confined users cannot invoke `sudo`/`su` at all unless policy explicitly allows the underlying setuid transition, so a host using `staff_u` + `sysadm_r` can turn a seemingly minor `sudo ROLE=` / `TYPE=` rule into the real privilege boundary.<sup>[[3]](#references)</sup>
 
 ## SELinux in Containers
 

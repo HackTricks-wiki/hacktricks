@@ -69,7 +69,7 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>Creating class property default value to RCE (subprocess)</summary>
+<summary>Creating class property default value to RCE (subprocess)</summary><sup>[[1]](#references)</sup>
 
 ```python
 from os import popen
@@ -122,7 +122,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Polluting other classes and global vars through <code>globals</code></summary>
+<summary>Polluting other classes and global vars through <code>globals</code></summary><sup>[[1]](#references)</sup>
 
 ```python
 def merge(src, dst):
@@ -156,7 +156,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Arbitrary subprocess execution</summary>
+<summary>Arbitrary subprocess execution</summary><sup>[[1]](#references)</sup>
 
 ```python
 import subprocess, json
@@ -270,5 +270,3 @@ python-internal-read-gadgets.md
 - [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-

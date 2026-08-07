@@ -128,3 +128,4 @@ ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached
 - [5] [ESET Research – Update WinRAR tools now: RomCom and others exploiting zero-day vulnerability (CVE-2025-8088)](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
 
 {{#include ../banners/hacktricks-training.md}}
+

@@ -330,13 +330,11 @@ ln /f*
 
 If you are inside a filesystem with the **read-only and noexec protections** or even in a distroless container, there are still ways to **execute arbitrary binaries, even a shell!:**
 
-
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
 ## Chroot & other Jails Bypass
-
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md

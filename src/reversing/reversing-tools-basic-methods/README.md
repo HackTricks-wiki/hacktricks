@@ -245,7 +245,7 @@ Upload your shellcode file as input and use the following recipe to decompile it
 (x ^ y) + 2 * (x & y) == x + y
 ```
 
-If you simplify this kind of expression with generic algebra tooling you can easily get a wrong result because the bit-width semantics were ignored.
+If you simplify this kind of expression with generic algebra tooling you can easily get a wrong result because the bit-width semantics were ignored.<sup>[[1]](#references)</sup>
 
 ### Practical workflow
 
@@ -259,7 +259,7 @@ If you simplify this kind of expression with generic algebra tooling you can eas
 
 ### CoBRA
 
-[**CoBRA**](https://github.com/trailofbits/CoBRA) is a practical MBA simplifier for malware analysis and protected-binary reversing. It classifies the expression and routes it through specialized pipelines instead of applying one generic rewrite pass to everything.<sup>[[1]](#references)[[2]](#references)</sup>
+[**CoBRA**](https://github.com/trailofbits/CoBRA) is a practical MBA simplifier for malware analysis and protected-binary reversing. It classifies the expression and routes it through specialized pipelines instead of applying one generic rewrite pass to everything.<sup>[[2]](#references)</sup>
 
 Quick usage:
 
@@ -337,13 +337,13 @@ Having the **name** of the **functions** being called, search for them on the **
 
 ### Recovering Rust strings from ELF firmware
 
-In **Rust ELF** binaries, many static strings are not referenced as C-style NUL-terminated pointers. A common `rustc` layout is a **pointer/length tuple** inside **`.data.rel.ro`** pointing into the real string blob stored in **`.rodata`**:<sup>[[3]](#references)</sup>
+In **Rust ELF** binaries, many static strings are not referenced as C-style NUL-terminated pointers. A common `rustc` layout is a **pointer/length tuple** inside **`.data.rel.ro`** pointing into the real string blob stored in **`.rodata`**:
 
 ```text
 [8-byte little-endian pointer][8-byte little-endian length]
 ```
 
-This means `strings` or default Ghidra analysis may merge adjacent strings or miss cross-references entirely.
+This means `strings` or default Ghidra analysis may merge adjacent strings or miss cross-references entirely.<sup>[[3]](#references)</sup>
 
 Quick workflow:
 
@@ -372,7 +372,7 @@ for off in range(0, len(data_rel_ro), 8):
 
 This is especially useful in firmware reversing because recovered Rust strings often reveal **HTTP routes, RPC names, log messages, assertions, filenames, config keys, command handlers, and auth-related logic**.
 
-If Ghidra misses those strings, run a custom script/plugin that applies the same heuristic and creates string data at the referenced `.rodata` offsets. The published `rust-strings` and `RustStrings.py` tools from Pen Test Partners are good references for adapting the idea to other **word sizes, endianness, and section layouts**.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup>
+If Ghidra misses those strings, run a custom script/plugin that applies the same heuristic and creates string data at the referenced `.rodata` offsets. The published `rust-strings` and `RustStrings.py` tools from Pen Test Partners are good references for adapting the idea to other **word sizes, endianness, and section layouts**.<sup>[[4]](#references)[[5]](#references)</sup>
 
 ## **Delphi**
 
@@ -512,9 +512,9 @@ In the previous code you can see that we are comparing **uVar1** (the place wher
 - In any other cases, some cont (`DAT_030000d4`) is checked. It's a cont because it's adding 1 right after entering in the code.\
   **I**f less than 8 something that involves **adding** values to **`DAT_030000d8`** is done (basically it's adding the values of the keys pressed in this variable as long as the cont is less than 8).
 
-So, in this challenge, knowing the values of the buttons, you needed to **press a combination with a length smaller than 8 that the resulting addition is 0xf3.**<sup>[[6]](#references)</sup>
+So, in this challenge, knowing the values of the buttons, you needed to **press a combination with a length smaller than 8 that the resulting addition is 0xf3.**
 
-**Reference for this tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
+**Reference for this tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)<sup>[[6]](#references)</sup>
 
 ## Game Boy
 

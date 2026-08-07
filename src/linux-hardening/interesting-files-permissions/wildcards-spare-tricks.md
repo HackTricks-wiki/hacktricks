@@ -25,7 +25,7 @@ chmod -R 644 *.php
 `--reference=/root/secret``file` is injected, causing *all* matching files to inherit the ownership/permissions of `/root/secret``file`.
 
 *PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (combined attack).  
-See also the classic DefenseCode paper for details.
+See also the classic DefenseCode paper for details.<sup>[[6]](#references)</sup>
 
 ---
 
@@ -143,7 +143,7 @@ These primitives are less common than the *tar/rsync/zip* classics but worth che
 
 ## Hunting vulnerable wrappers and jobs
 
-Recent case studies have shown that wildcard/argv injection is no longer just a **cron + tar** problem. The same bug class keeps appearing in:
+Recent case studies have shown that wildcard/argv injection is no longer just a **cron + tar** problem.<sup>[[5]](#references)</sup> The same bug class keeps appearing in:
 
 - web features that "download everything as zip/tar" from attacker-controlled upload directories
 - vendor/appliance debug shells that expose a **tcpdump** wrapper with attacker-controlled filename/filter fields
@@ -287,5 +287,6 @@ sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
 - [3] [0xdf - HTB Dump: Zip arg injection to RCE + tcpdump sudo misconfig privesc](https://0xdf.gitlab.io/2025/11/04/htb-dump.html)
 - [4] [FiberGateway GR241AG - Full Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
 - [5] [Elastic - Potential Shell via Wildcard Injection Detected](https://www.elastic.co/guide/en/security/current/prebuilt-rule-8-19-20-potential-shell-via-wildcard-injection-detected.html)
+- [6] [Back To The Future: Unix Wildcards Gone Wild (DefenseCode)](https://www.exploit-db.com/papers/33930)
 
 {{#include ../../banners/hacktricks-training.md}}

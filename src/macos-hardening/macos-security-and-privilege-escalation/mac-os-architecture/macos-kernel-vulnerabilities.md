@@ -21,7 +21,7 @@ In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/
 
 ## 2024: In-the-wild kernel protection bypass chain (CVE-2024-23225 & CVE-2024-23296)
 
-Apple's [**March 2024 macOS security releases**](https://support.apple.com/en-us/120895) fixed two issues that were **actively exploited**:
+Apple's [**March 2024 macOS security releases**](https://support.apple.com/en-us/120895) fixed two issues that were **actively exploited**:<sup>[[6]](#references)</sup>
 
 - **CVE-2024-23225 – Kernel**: a memory-corruption bug where an attacker with arbitrary kernel read/write could bypass kernel memory protections.
 - **CVE-2024-23296 – RTKit**: a second memory-corruption bug with the same public impact statement.
@@ -129,5 +129,6 @@ spctl --status                    # Confirm Gatekeeper state
 - [3] [Mickey Jin - The Nightmare of Apple's OTA Update: Bypassing the Signature Verification and Pwning the Kernel](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
 - [4] [Tingting Yin et al. - KextFuzz: Fuzzing macOS Kernel EXTensions on Apple Silicon via Exploiting Mitigations (USENIX Security '23)](https://www.usenix.org/conference/usenixsecurity23/presentation/yin)
 - [5] [Ivan Fratric (Project Zero) - Simple macOS kernel extension fuzzing in userspace with IDA and TinyInst](https://projectzero.google/2024/11/simple-macos-kernel-extension-fuzzing.html)
+- [6] [About the security content of macOS Sonoma 14.4 - Apple Support](https://support.apple.com/en-us/120895)
 
 {{#include ../../../banners/hacktricks-training.md}}

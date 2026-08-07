@@ -114,4 +114,3 @@ The `cs_*` constants above are the code-signing flags defined in XNU's `osfmk/ke
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-

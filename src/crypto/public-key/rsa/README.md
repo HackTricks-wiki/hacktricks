@@ -168,3 +168,4 @@ Good starting points:
 - [3] [badkeys standalone tool](https://github.com/badkeys/badkeys)
 
 {{#include ../../../banners/hacktricks-training.md}}
+
