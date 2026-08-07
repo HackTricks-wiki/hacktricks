@@ -163,6 +163,3 @@ In iOS and jailbreak research you'll still find the traditional model of **loada
 - [6] [Apple Platform Security Guide — Trust caches](https://support.apple.com/guide/security/trust-caches-sec7d38fbf97/web)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-
-
