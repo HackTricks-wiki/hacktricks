@@ -1,19 +1,19 @@
-# Basic Python
+# Osnove Pythona
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Python Basics
+## Osnove Pythona
 
-### Useful information
+### Korisne informacije
 
-Svi primeri ispod pretpostavljaju **Python 3** osim ako nije izričito navedeno.\
-`range()` vraća iterable objekat u Python 3 (slično kao `xrange()` u Python 2).\
-Razlika između **tuple** i **list** je u tome što **pozicija** vrednosti u tuple obično daje značenje, dok je list obično samo uređena sekvenca vrednosti.
+Svi primeri u nastavku podrazumevaju **Python 3**, osim ako nije izričito navedeno drugačije.\
+`range()` vraća iterabilni objekat u Pythonu 3 (slično funkciji `xrange()` u Pythonu 2).\
+Razlika između **tuple** i **list** je u tome što **pozicija** vrednosti u tuple-u obično daje značenje toj vrednosti, dok je lista obično samo uređeni niz vrednosti.
 
-### Main operations
+### Glavne operacije
 
-Za podizanje broja na stepen koristiš: `3**2` (ne `3^2`)\
-`2/3 == 0.666666...` u Python 3, dok `2//3 == 0` izvodi celobrojno deljenje.\
+Za stepenovanje broja koristite: `3**2` (ne `3^2`)\
+`2/3 == 0.666666...` u Pythonu 3, dok `2//3 == 0` vrši celobrojno deljenje.\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -35,7 +35,7 @@ Za podizanje broja na stepen koristiš: `3**2` (ne `3^2`)\
 `"abc" in "abcdef"`\
 `"abc\n".strip() == "abc"`\
 `"apbc".replace("p", "") == "abc"`\
-`dir(str)` = lista dostupnih metoda\
+`dir(str)` = navodi dostupne metode\
 `help(str)` = definicija klase `str`\
 `"a".upper() == "A"`\
 `"A".lower() == "a"`\
@@ -43,23 +43,23 @@ Za podizanje broja na stepen koristiš: `3**2` (ne `3^2`)\
 `sum([1, 2, 3]) == 6`\
 `sorted([1, 43, 5, 3, 21, 4]) == [1, 3, 4, 5, 21, 43]`
 
-**Join chars**\
+**Spajanje znakova**\
 `3 * 'a' == 'aaa'`\
 `'a' + 'b' == 'ab'`\
 `'a' + str(3) == 'a3'`\
 `[1, 2, 3] + [4, 5] == [1, 2, 3, 4, 5]`
 
-**Parts of a list / string**\
+**Delovi liste / stringa**\
 `'abc'[0] == 'a'`\
 `'abc'[-1] == 'c'`\
 `'abc'[1:3] == 'bc'`\
 `"qwertyuiop"[:-1] == 'qwertyuio'`
 
-**Comments**\
+**Komentari**\
 `# One line comment`\
 `""" Several lines comment """`
 
-**Loops**
+**Petlje**
 ```python
 if a:
 # something
@@ -77,9 +77,9 @@ for i in range(0, 100):
 for letter in "hola":
 # something with each letter
 ```
-### Bajtovi, heks i enkodiranja
+### Bajtovi, hex i kodiranja
 
-Ovo je vrlo često u exploit-dev, reversing i CTFs:
+Ovo je veoma često u exploit-dev, reversing i CTF-ovima:
 ```python
 b"ABC".hex() == "414243"
 bytes.fromhex("414243") == b"ABC"
@@ -88,27 +88,27 @@ int.from_bytes(b"\x41\x42\x43", "big") == 0x414243
 "admin".encode() == b"admin"
 b"admin".decode() == "admin"
 ```
-### Tuple
+### Torke
 
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
 `(4,)` = singleton\
-`d = ()` prazan tuple\
-`d += (4,)` --> dodavanje u tuple\
-`# t1[1] = 'new value'` --> tuple su immutable\
-`list(t2) == [5, 6]` --> iz tuple u list
+`d = ()` prazna torka\
+`d += (4,)` --> dodavanje u torku\
+`# t1[1] = 'new value'` --> torke su nepromenljive\
+`list(t2) == [5, 6]` --> iz torke u listu
 
-### List (array)
+### Lista (niz)
 
-`d = []` prazno\
+`d = []` prazna\
 `a = [1, 2, 3]`\
 `b = [4, 5]`\
 `a + b == [1, 2, 3, 4, 5]`\
 `b.append(6)` --> `b == [4, 5, 6]`\
-`tuple(a) == (1, 2, 3)` --> iz liste u tuple
+`tuple(a) == (1, 2, 3)` --> iz liste u torku
 
-### Dictionary
+### Rečnik
 ```python
 month_numbers = {1: 'Jan', 2: 'Feb', 'Feb': 2}
 month_numbers[1] == 'Jan'
@@ -121,28 +121,28 @@ month_numbers.update(a)
 mn = month_numbers.copy()  # independent copy
 month_numbers.get('key', 0)  # default value if key does not exist
 ```
-### Set
+### Skupovi
 
-U set-ovima nema ponavljanja.\
+U skupovima nema ponavljanja.\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
-`myset.add('a')` --> bez promene\
+`myset.add('a')` --> no change\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> ako je prisutan, ukloni ga; ako nije, ništa\
-`myset.remove(10)` --> ako nije prisutan, baca izuzetak\
+`myset.discard(10)` --> if present, remove it; if not, nothing\
+`myset.remove(10)` --> if not present, raises exception\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
 `myset.difference(myset2)`\
 `myset.symmetric_difference(myset2)`\
-`myset.pop()` --> uzima proizvoljan element i uklanja ga\
+`myset.pop()` --> get an arbitrary element and remove it\
 `myset.intersection_update(myset2)`\
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
 
-### Classes
+### Klase
 
-Metod u `__lt__` će biti onaj koji `sort()` / `sorted()` koriste za poređenje objekata.
+Metoda u `__lt__` biće ona koju `sort()` / `sorted()` koriste za poređenje objekata.
 ```python
 import datetime
 
@@ -176,11 +176,11 @@ MITPerson.next_id_num += 1
 def __lt__(self, other):
 return self.id_num < other.id_num
 ```
-### map, zip, filter, lambda, sorted and one-liners
+### map, zip, filter, lambda, sorted i jednolinijske naredbe
 
-U **Python 3**, `map()` i `filter()` vraćaju iteratore, pa ih konvertujte pomoću `list()` ako želite da odjednom ispišete sve vrednosti.
+U **Python 3**, `map()` i `filter()` vraćaju iteratore, pa ih konvertujte pomoću `list()` ako želite da odštampate sve vrednosti odjednom.
 
-**Map** je kao `[f(x) for x in iterable]`:
+**Map** je poput `[f(x) for x in iterable]`:
 ```python
 list(map(tuple, [[1, 2, 3], [4, 5]]))
 # [(1, 2, 3), (4, 5)]
@@ -188,14 +188,14 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-**zip** se zaustavlja kada se kraći iterable zaustavi:
+**zip** se zaustavlja kada se kraća iterabilna struktura zaustavi:
 ```python
 for f, b in zip(foo, bar):
 print(f, b)
 ```
 **Lambda** se koristi za definisanje funkcije:\
-`(lambda x, y: x + y)(5, 3) == 8` --> use lambda as a simple function\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> use lambda to sort\
+`(lambda x, y: x + y)(5, 3) == 8` --> koristite lambda kao jednostavnu funkciju\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> koristite lambda za sortiranje\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
 ```python
@@ -236,15 +236,15 @@ print("executing finally clause in any case")
 ### Assert()
 
 Ako je uslov netačan, string će biti ispisan.\
-Zapamti da se `assert` iskazi mogu onemogućiti sa `python -O`, pa ih nemoj koristiti za kontrolu pristupa ili validaciju ulaza.
+Imajte na umu da se `assert` naredbe mogu onemogućiti pomoću `python -O`, zato ih nemojte koristiti za kontrolu pristupa ili validaciju unosa.
 ```python
 def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
 assert len(grades) == len(weights), 'wrong number of grades'
 ```
-### Generatori, yield
+### Generators, yield
 
-Generator, umesto da vrati sve odjednom, **izbacuje** vrednosti jednu po jednu. Ovo je veoma korisno za ogromne wordliste, bruteforcers ili velike odgovore.
+Generator, umesto da odmah vrati sve vrednosti, **yield**-uje ih jednu po jednu. Ovo je veoma korisno za ogromne wordlists, bruteforcers ili velike odgovore.
 ```python
 def my_gen(n):
 yield n
@@ -255,7 +255,7 @@ yield n + 1
 `next(g) == 7`\
 `next(g)` --> `StopIteration`
 
-### Regular Expressions
+### Regularni izrazi
 ```python
 import re
 
@@ -263,22 +263,22 @@ re.search(r"\w", "hola").group() == "h"
 re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
 re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 ```
-**Specijalna značenja:**\
-`.` --> bilo koji znak osim novog reda\
+**Posebna značenja:**\
+`.` --> bilo koji znak osim znaka za novi red\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> cifra\
-`\s` --> whitespace znak `[ \n\r\t\f]`\
-`\S` --> ne-whitespace znak\
+`\s` --> znak razmaka `[ \n\r\t\f]`\
+`\S` --> znak koji nije razmak\
 `^` --> počinje sa\
 `$` --> završava se sa\
 `+` --> jedan ili više\
 `*` --> 0 ili više\
-`?` --> 0 ili 1 pojavljivanje
+`?` --> 0 ili 1 pojavljivanja
 
 **Opcije:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> dozvoli da tačka odgovara novom redu\
-`re.search(pat, string, re.MULTILINE)` --> dozvoli `^` i `$` da odgovaraju u različitim linijama
+`re.search(pat, string, re.DOTALL)` --> omogućava da tačka odgovara znaku za novi red\
+`re.search(pat, string, re.MULTILINE)` --> omogućava da `^` i `$` odgovaraju u različitim redovima
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -289,7 +289,7 @@ re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 ### IterTools
 
 **product**\
-`from itertools import product` --> kartezijanski proizvod između 1 ili više iterables
+`from itertools import product` --> Dekartov proizvod između 1 ili više iterabilnih objekata
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -298,7 +298,7 @@ list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
 **permutations**\
-`from itertools import permutations` --> svaka moguća rasporedba
+`from itertools import permutations` --> svaki moguci raspored
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
@@ -309,21 +309,21 @@ list(permutations('123', 2))
 list(combinations('123', 2))
 # [('1', '2'), ('1', '3'), ('2', '3')]
 ```
-**kombinacije_sa_ponavljanjem**\
+**combinations_with_replacement**\
 `from itertools import combinations_with_replacement`
 ```python
 list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> dostupan u Python 3.12+, koristan za deljenje velikih lista kandidata za bruteforce ili IOC fajlova u manje delove
+`from itertools import batched` --> dostupno u Python 3.12+, korisno za deljenje velikih lista kandidata za bruteforce ili IOC datoteka na grupe
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
-### Decorators
+### Dekoratori
 
-Decorator koji meri vreme koje je potrebno da se funkcija izvrši:
+Dekorator koji meri vreme potrebno za izvršavanje funkcije:
 ```python
 from functools import wraps
 import time
@@ -351,9 +351,9 @@ Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### Korisni standardni library helperi za pentesting
+### Korisni pomoćnici standardne biblioteke za pentesting
 
-**Traversiranje filesystema sa `pathlib`** (`Path.walk()` je dostupan u Python 3.12+; koristite `os.walk()` na starijim interpreterima):
+**Pretraga sistema datoteka pomoću `pathlib`** (`Path.walk()` je dostupan u Python 3.12+; na starijim interpreterima koristite `os.walk()`):
 ```python
 from pathlib import Path
 
@@ -364,7 +364,7 @@ for name in files:
 if name.endswith((".py", ".env", ".bak")):
 print(root / name)
 ```
-**Sigurno pokretanje komandi** (`shell=False` je po difoltu obično ono što želite):
+**Bezbedno pokretanje komandi** (`shell=False` je podrazumevano uglavnom ono što želite):
 ```python
 import subprocess
 
@@ -376,12 +376,12 @@ check=True,
 )
 print(cp.stdout)
 ```
-Ako **morate** da napravite shell komandu, prvo navodite svaku token koju kontroliše napadač:
+Ako **morate** da sastavite shell command, prvo stavite svaki token koji kontroliše napadač u navodnike:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
-**Privremene datoteke / direktorijumi** (bezbednije od hardcodovanih `/tmp/foo` path-ova):
+**Privremene datoteke / direktorijumi** (bezbednije od hardkodovanih putanja `/tmp/foo`):
 ```python
 import tempfile
 from pathlib import Path
@@ -391,11 +391,11 @@ out = Path(tmp) / "loot.txt"
 out.write_text("secret\n")
 print(out.read_text())
 ```
-Za HTTP automatizaciju, pogledajte [ovu drugu stranicu o Python web requests](web-requests.md).
+Za HTTP automatizaciju pogledajte [ovu drugu stranicu o Python web zahtevima](web-requests.md).
 
-### Zamke pri ekstrakciji arhiva (važno za tooling i parsere fajlova)
+### Važne napomene pri ekstrakciji arhiva (važno za alate i parsere datoteka)
 
-Počevši od **Python 3.14**, `tarfile.extract()` / `extractall()` koriste sigurniji `data` filter podrazumevano. U starijim Python verzijama trebalo bi da ga postavite eksplicitno kada rukujete arhivama pod kontrolom napadača.
+Počevši od **Python 3.14**, `tarfile.extract()` / `extractall()` podrazumevano koriste bezbedniji `data` filter. U starijim verzijama Pythona trebalo bi da ga eksplicitno podesite pri obradi arhiva pod kontrolom napadača.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 import tarfile
 import tempfile
@@ -404,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-Čak i sa `filter="data"`, izdvajajte nepouzdane arhive u svež privremeni direktorijum i proverite šta je upisano pre nego što premestite fajlove bilo gde interesantno.
+Čak i uz `filter="data"`, raspakujte nepouzdane arhive u nov, privremeni direktorijum i proverite šta je zapisano pre premeštanja fajlova bilo gde gde su značajni.
 
-`zipfile.Path` je drugačiji: on **ne sanitizuje nazive fajlova** umesto vas, zato validirajte putanje pre nego što izdvojite ZIP članove pod kontrolom napadača:
+`zipfile.Path` je drugačiji: **ne sanitizuje nazive fajlova** umesto vas, zato proverite putanje pre raspakivanja ZIP stavki koje kontroliše napadač:
 ```python
 import os
 import zipfile
@@ -421,14 +421,14 @@ zf.extract(info, base)
 ```
 ### Opasne primitive koje treba zapamtiti
 
-- `eval()` / `exec()` **nisu** sandboxovi.
-- `ast.literal_eval()` **ne** izvršava Python kod, ali i dalje može biti zloupotrebljen za denial of service nad memorijom / CPU-om uz input kojim upravlja napadač.
-- `pickle.loads()` **nije bezbedan**; nikad ne unpickle-uj bytes kojima upravlja napadač.
-- Za dublje ofanzivne trikove, pogledaj [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) i [Python deserializations](../../pentesting-web/deserialization/README.md).
+- `eval()` / `exec()` **nisu** sandboxes.
+- `ast.literal_eval()` **ne izvršava** Python kod, ali se i dalje može zloupotrebiti za uskraćivanje usluge zbog memorije / CPU-a korišćenjem ulaza pod kontrolom napadača.
+- `pickle.loads()` **nije bezbedan**; nikada nemojte deserijalizovati bajtove pod kontrolom napadača pomoću `unpickle`.
+- Za naprednije ofanzivne trikove pogledajte [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) i [Python deserializations](../../pentesting-web/deserialization/README.md).
 
-## References
+## Reference
 
-- [Python tarfile docs](https://docs.python.org/3/library/tarfile.html)
-- [PEP 706 - Filter for tarfile.extractall](https://peps.python.org/pep-0706/)
+- [1] [Python tarfile dokumentacija](https://docs.python.org/3/library/tarfile.html)
+- [2] [PEP 706 – Filter za tarfile.extractall()](https://peps.python.org/pep-0706/)
 
 {{#include ../../banners/hacktricks-training.md}}

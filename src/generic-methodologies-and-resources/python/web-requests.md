@@ -1,4 +1,4 @@
-# Web Requests
+# Web zahtevi
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -71,7 +71,7 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python cmd za iskorišćavanje RCE-a
+## Python komanda za iskorišćavanje RCE-a
 ```python
 import requests
 import re

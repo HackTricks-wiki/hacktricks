@@ -229,7 +229,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Pronalaženje
+## Pronađi
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -258,7 +258,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Nmap pomoć pri pretrazi
+## Nmap pomoć za pretragu
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -301,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF telemetrija i lov na rootkit
+## eBPF telemetrija i lov na rootkitove
 
-Moderni rootkit-i (TripleCross, BPFDoor varijante itd.) sve češće opstaju kao skriveni eBPF programi. Uspostavite osnovnu liniju za svoju flotu pomoću `bpftool`/`eBPFmon` kako biste mogli da uočite nepotpisane programe, neočekivane cgroup hook-ove ili zlonameran sadržaj mapa pre nego što ih odvojite.
+Moderni rootkitovi (TripleCross, BPFDoor varijante itd.) sve češće opstaju kao skriveni eBPF programi. Uspostavite osnovnu liniju za svoju flotu pomoću `bpftool`/`eBPFmon` kako biste mogli da uočite nepotpisane programe, neočekivane cgroup hook-ove ili zlonameran sadržaj mapa pre nego što ih odvojite.<sup>[[1]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Povežite bpftool output sa očekivanim NIC/cgroup priključcima; iznenadni `xdp` ili `kprobe` program čiji je vlasnik neodobreni PID predstavlja snažan indikator ubačenog eBPF payload-a.
+Povežite bpftool izlaz sa očekivanim NIC/cgroup povezivanjima; iznenadni `xdp` ili `kprobe` program čiji je vlasnik neodobreni PID snažan je pokazatelj ubačenog eBPF payload-a.
 
 ## Journald trijaža incidenata
 
-systemd-journald čuva strukturirane metapodatke, pa možete vršiti pivotiranje po boot-u, severity-ju, unit-u ili UID-u bez pristupanja putanji `/var/log/*`. Kombinujte filtere sa relativnim vremenskim oznakama da biste izolovali prozore napada ili brzo dokazali neovlašćeno menjanje logova.
+systemd-journald čuva strukturirane metapodatke, pa možete suziti pretragu prema boot-u, ozbiljnosti, unit-u ili UID-u bez pristupanja direktorijumu `/var/log/*`. Kombinujte filtere sa relativnim vremenskim oznakama da biste izolovali vremenske intervale napada ili brzo dokazali neovlašćeno menjanje logova.<sup>[[2]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +336,11 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Dodajte `--grep 'Invalid user' --case-sensitive` ili `-k` (samo kernel ring buffer) kada su vam potrebni precizniji filteri i imajte na umu da se selektori `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` i `_TRANSPORT` kombinuju za pretrage u okruženjima sa više tenant-a.
+Dodajte `--grep 'Invalid user' --case-sensitive` ili `-k` (samo kernel ring buffer) kada su vam potrebni precizniji filteri i imajte na umu da se selektori `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` i `_TRANSPORT` mogu kombinovati za multi-tenant huntove.
 
 ## Reference
 
-- [eBPFmon: Novi alat za istraživanje eBPF aplikacija i interakciju sa njima](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [Kako koristiti komandu journalctl za pregled Linux logova](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: Novi alat za istraživanje eBPF aplikacija i interakciju sa njima](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Kako koristiti komandu journalctl za pregled Linux logova](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}

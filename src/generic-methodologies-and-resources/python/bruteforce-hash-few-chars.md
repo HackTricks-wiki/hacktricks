@@ -1,3 +1,5 @@
+# Brute-force hash-a sa nekoliko karaktera
+
 {{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib

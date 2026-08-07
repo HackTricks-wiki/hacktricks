@@ -2,41 +2,41 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Korisni **Linux kernel privesc obrazac** jeste pretvaranje **ptrace autorizacione greške** u **krađu deskriptora datoteka** iz privilegovanog procesa.
+Koristan **Linux kernel privesc obrazac** jeste pretvaranje **ptrace authorization bug-a** u **krađu file descriptor-a** iz privilegovanog procesa.
 
-U Qualys `__ptrace_may_access()` case study-ju (CVE-2026-46333), napadač se utrkuje sa **privilegovanim procesom koji se gasi ili odbacuje credentials** i koristi `pidfd_getfd()` da duplicira FD u napadačev proces.
+U Qualys studiji slučaja `__ptrace_may_access()` (CVE-2026-46333), napadač vrši race nad **privilegovanim procesom koji se gasi ili odbacuje credentials** i koristi `pidfd_getfd()` da duplicira FD u napadačev proces.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Osnovna ideja
 
-`pidfd_getfd()` duplicira file descriptor iz drugog procesa, ali prethodno proverava ptrace-style dozvole nad targetom. Ako je ta autorizacija pogrešno odobrena tokom **teardown prozora**, neprivilegovani napadač može da kopira:
+`pidfd_getfd()` duplicira file descriptor iz drugog procesa, ali prethodno proverava ptrace-style permissions nad targetom. Ako se ta authorization pogrešno odobri tokom **teardown window-a**, unprivileged attacker može da kopira:
 
-- FD-ove za **osetljive datoteke** koje je privilegovani helper već otvorio
-- FD-ove za **autentifikovane IPC kanale** koji su već autorizovani kao root
+- FD-ove za **sensitive files** koje je privileged helper već otvorio
+- FD-ove za **authenticated IPC channels** koji su već autorizovani kao root
 
-Ovim se kernel-side autorizaciona greška pretvara u veoma praktičan userspace primitive.
+Ovo pretvara kernel-side authorization bug u veoma praktičan userspace primitive.<sup>[[1]](#references)</sup>
 
 ## Zašto je primitive opasan
 
-Za napad nije potrebna greška u samom privilegovanom helperu. Helper samo treba privremeno da drži nešto vredno:
+Za napad nije potreban bug u samom privileged helper-u. Helper samo treba da privremeno drži nešto vredno:
 
 - `/etc/shadow`
 - `/etc/ssh/*_key`
 - privilegovanu D-Bus / systemd konekciju
-- bilo koju drugu već otvorenu tajnu ili autorizovani kanal
+- bilo koji drugi već otvoren secret ili authorized channel
 
-Kada se duplicira u napadačev proces, kernel primenjuje operacije nad **ukradenim FD-om**, a ne nad originalnom putanjom ili kroz novi authentication flow.
+Kada se duplicira u attacker process, kernel sprovodi operacije nad **stolen FD-om**, a ne nad originalnom putanjom ili kroz novi authentication flow.<sup>[[1]](#references)</sup>
 
-## Obrazac eksploatacije
+## Exploitation pattern
 
-1. Identifikujte **setuid / setgid / file-capability binary** ili **root daemon** koji otvara osetljive datoteke ili održava korisne IPC konekcije.
-2. Uspostavite relationship koji zadovoljava relevantne ptrace policy provere za target path (na primer, budite **parent** spawned privileged child procesa uz permissive YAMA settings).
-3. Utrkujte se sa procesom dok se **gasi**, **odbacuje credentials** ili na drugi način ulazi u stanje u kojem je ptrace pristup trebalo da postane nedostupan.
+1. Identifikujte **setuid / setgid / file-capability binary** ili **root daemon** koji otvara sensitive files ili održava korisne IPC konekcije.
+2. Uspostavite odnos koji zadovoljava relevantne ptrace policy checks za target path (na primer, budite **parent** spawn-ovanog privileged child-a uz permissive YAMA settings).
+3. Izvršite race nad procesom dok se **gasi**, **odbacuje credentials** ili na drugi način ulazi u stanje u kojem je ptrace access trebalo da postane nedostupan.
 4. Koristite `pidfd_open()` + `pidfd_getfd()` da duplicirate target FD tokom uskog authorization window-a.
-5. Ponovo koristite ukradeni FD iz unprivileged konteksta:
-- `read()` tajne iz privilegovanog file descriptor-a
-- šaljite zahteve preko ukradenog autentifikovanog IPC kanala da biste dobili **root-side actions**
+5. Ponovo upotrebite stolen FD iz unprivileged context-a:
+- `read()` secrets iz privileged file descriptor-a
+- šaljite requests preko stolen authenticated IPC channel-a da biste dobili **root-side actions**<sup>[[1]](#references)</sup>
 
-Minimalni oblik primitiva:
+Minimalni oblik primitive-a:<sup>[[1]](#references)[[3]](#references)</sup>
 ```c
 int p = pidfd_open(victim_pid, 0);
 int stolen = pidfd_getfd(p, victim_fd, 0);
@@ -44,48 +44,48 @@ int stolen = pidfd_getfd(p, victim_fd, 0);
 ```
 ## Praktične mete za audit
 
-Prioritet dajte binarnim datotekama i daemonima koji, čak i nakratko, rade nešto od sledećeg:
+Prioritetno proverite binarne fajlove i daemone koji, čak i nakratko, rade nešto od sledećeg:<sup>[[1]](#references)</sup>
 
-- otvaraju datoteke dostupne samo root korisniku pre završetka tranzicije privilegija
+- otvaraju fajlove dostupne samo root korisniku pre završetka tranzicije privilegija
 - povezuju se na **system bus** i zadržavaju već autorizovani kanal
-- prosleđuju privilegovane FD-ove između pomoćnih procesa
-- obavljaju bezbednosno osetljiv posao tokom teardown-a povezanog sa `do_exit()`
+- prosleđuju privilegovane FD-ove preko helper procesa
+- obavljaju bezbednosno osetljive operacije tokom teardown-a bliskog funkciji `do_exit()`
 
-Dobri kandidati za pretragu:
+Dobri kandidati za proveru:<sup>[[1]](#references)</sup>
 
-- pomoćni programi za upravljanje lozinkama / nalozima
-- SSH pomoćni programi
-- pomoćni programi posredovani preko PolicyKit / D-Bus-a
+- helperi za upravljanje lozinkama / nalozima
+- SSH helperi
+- PolicyKit / D-Bus posredovani helperi
 - root desktop daemoni koji izlažu D-Bus metode
 
-## YAMA kao exploit gate
+## YAMA kao prepreka za exploit
 
-`kernel.yama.ptrace_scope` predstavlja glavnu praktičnu prepreku za abuse ptrace porodice:
+`kernel.yama.ptrace_scope` predstavlja glavnu praktičnu prepreku za abuse ptrace porodice mehanizama:<sup>[[4]](#references)</sup>
 
 - `0`: klasično ptrace ponašanje za isti UID
-- `1`: obično dozvoljava praćenje parent -> child procesa, čime neki javno dostupni exploit putevi mogu ostati dostupni
-- `2`: zahteva `CAP_SYS_PTRACE` za attach pristup i blokira abuse neprivilegovanog `pidfd_getfd()` u ovom putu
+- `1`: obično dozvoljava praćenje parent -> child procesa, što može održati neke javno dostupne exploit putanje dostupnim
+- `2`: zahteva `CAP_SYS_PTRACE` za attach pristup i blokira neprivilegovani `pidfd_getfd()` abuse u ovoj putanji
 - `3`: u potpunosti onemogućava ptrace attach do reboot-a
 
-Za ovu tehniku, `ptrace_scope=2` predstavlja snažnu **privremenu mitigaciju**, jer za neprivilegovane korisnike prekida javno dostupni exploit put za `pidfd_getfd()` sa greškom `-EPERM`.
+Za ovu tehniku, `ptrace_scope=2` predstavlja snažnu **privremenu mitigaciju** jer prekida javno dostupnu `pidfd_getfd()` exploitation putanju sa greškom `-EPERM` za neprivilegovane korisnike.<sup>[[1]](#references)</sup>
 
 ## Ideje za detekciju / pregled
 
 Prilikom audita privilegovanog Linux software-a, tražite sledeće kombinacije:
 
-- **privileged child process** + **attacker-controlled parent**
-- privremeni pristup **vrednim otvorenim datotekama**
+- **privilegovani child proces** + **parent kojim upravlja attacker**
+- privremeni pristup **vrednim otvorenim fajlovima**
 - privremeni pristup **autentifikovanim D-Bus/systemd kanalima**
-- bezbednosne odluke koje ponovo koriste autorizaciju u stilu **ptrace-a** izvan klasičnog `ptrace(2)`
-- kernel API-je koji mogu da **dupliraju, nasleđuju ili ponovo izlože** postojeće privilegovane FD-ove
+- bezbednosne odluke koje ponovo koriste **ptrace-style autorizaciju** izvan klasičnog `ptrace(2)`
+- kernel API-je koji mogu da **dupliraju, nasleđuju ili ponovo izvezu** postojeće privilegovane FD-ove
 
-Prilikom audita kernela, svaki put koji obavlja **autorizaciju ekvivalentnu ptrace-u** tokom **task teardown-a** tretirajte kao visokorizičan, naročito ako uspeh omogućava direktan pristup `task->files` ili drugim već autorizovanim resursima procesa.
+Prilikom audita kernela, svaku putanju koja obavlja **ptrace-ekvivalentnu autorizaciju** tokom **gašenja task-a** tretirajte kao visokorizičnu, posebno ako uspeh omogućava direktan pristup `task->files` ili drugim već autorizovanim resursima procesa.
 
 ## Reference
 
-- [Qualys blog: CVE-2026-46333](https://blog.qualys.com/vulnerabilities-threat-research/2026/05/20/cve-2026-46333-local-root-privilege-escalation-and-credential-disclosure-in-the-linux-kernel-ptrace-path)
-- [Qualys advisory TXT](https://cdn2.qualys.com/advisory/2026/05/20/cve-2026-46333-ptrace.txt)
-- [pidfd_getfd(2) stranica priručnika](https://man7.org/linux/man-pages/man2/pidfd_getfd.2.html)
-- [Linux kernel Yama dokumentacija](https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html)
+- [1] [CVE-2026-46333: Local Root Privilege Escalation and Credential Disclosure in the Linux Kernel ptrace Path (Qualys)](https://blog.qualys.com/vulnerabilities-threat-research/2026/05/20/cve-2026-46333-local-root-privilege-escalation-and-credential-disclosure-in-the-linux-kernel-ptrace-path)
+- [2] [Qualys advisory TXT](https://cdn2.qualys.com/advisory/2026/05/20/cve-2026-46333-ptrace.txt)
+- [3] [pidfd_getfd(2) manual page](https://man7.org/linux/man-pages/man2/pidfd_getfd.2.html)
+- [4] [Linux kernel Yama documentation](https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

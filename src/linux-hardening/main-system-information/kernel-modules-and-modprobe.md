@@ -1,18 +1,18 @@
-# Zloupotreba kernel modula i modprobe-a
+# Zloupotreba Kernel modula i modprobe-a
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Pogrešne konfiguracije kernel modula i učitavanja modula
+## Pogrešne konfiguracije Kernel modula i učitavanja modula
 
-Podrška za kernel module je oblast sa velikim uticajem tokom analize eskalacije privilegija na Linux-u. Nemojte svaku poruku o nepotpisanom modulu smatrati izvodljivom za exploit samu po sebi, već je koristite za dobijanje odgovora na praktična pitanja:
+Podrška za Kernel module je oblast sa velikim uticajem tokom provere eskalacije privilegija na Linux-u. Nemojte svaku poruku o nepotpisanom modulu automatski smatrati ranjivom, već je koristite za odgovore na praktična pitanja:
 
-- Da li trenutni korisnik može da učitava module putem `sudo`, capabilities ili putanje pomoćnog programa sa dozvolom upisivanja?
+- Da li trenutni korisnik može da učitava module putem `sudo`-a, capabilities ili putanje pomoćnog programa sa dozvolom upisivanja?
 - Da li je učitavanje modula i dalje omogućeno?
 - Da li je enforcement potpisa modula onemogućen?
 - Da li direktorijumi modula ili datoteke modula imaju dozvolu upisivanja?
-- Da li se kernel logovi mogu čitati kako bi se potvrdilo šta se dogodilo?
+- Da li se mogu čitati Kernel logovi kako bi se potvrdilo šta se dogodilo?
 
-Brza trijaža:
+Brza procena:
 ```bash
 uname -a
 uname -r
@@ -28,13 +28,13 @@ Tumačenje:
 - `modules_disabled=1` znači da se novi moduli ne mogu učitati do ponovnog pokretanja sistema.
 - `module_sig_enforce=1` obično blokira nepotpisane module.
 - `dmesg_restrict=0` omogućava neprivilegovanim korisnicima da čitaju kernel logove na mnogim sistemima.
-- Putanje sa dozvolom upisivanja unutar `/lib/modules/$(uname -r)/` su opasne jer otkrivanje modula i automatsko učitavanje mogu verovati tom stablu direktorijuma.
+- Putanje sa dozvolom upisa unutar `/lib/modules/$(uname -r)/` su opasne jer otkrivanje modula i automatsko učitavanje mogu verovati tom stablu.
 
-### Učitavanje modula i čitanje izlaza kernela
+### Učitavanje modula i čitanje kernel izlaza
 
-Ako imate legitimnu dozvolu za učitavanje lokalnog modula, `insmod` ubacuje tačnu `.ko` datoteku koju navedete. Init funkcija modula se odmah izvršava, a poruke zapisane pomoću `printk()` pojavljuju se u kernel logovima.
+Ako imate legitimnu dozvolu da učitate lokalni modul, `insmod` ubacuje tačnu `.ko` datoteku koju navedete. Init funkcija modula se odmah izvršava, a poruke zapisane pomoću `printk()` pojavljuju se u kernel logovima.
 
-Minimalni tok rada za okruženja za pregled ili laboratorijska okruženja:
+Minimalni tok rada za potrebe provere ili laboratorijska okruženja:
 ```bash
 ls -l ./example.ko
 modinfo ./example.ko 2>/dev/null
@@ -44,16 +44,16 @@ dmesg | tail -n 30
 sudo rmmod example
 dmesg | tail -n 30
 ```
-Ako `sudo -l` dozvoljava `insmod`, `modprobe` ili wrapper oko njih, tretirajte to kao kritično:
+Ako `sudo -l` dozvoljava `insmod`, `modprobe` ili wrapper oko njih, smatrajte to kritičnim:
 ```bash
 sudo -l
 sudo /sbin/insmod ./example.ko
 ```
-### `insmod` dozvoljen putem sudo-a
+### Sudo-allowed `insmod`
 
-sudo pravilo koje korisniku dozvoljava pokretanje komande `insmod` nije uporedivo sa dozvolom za pokretanje uobičajenog administrativnog pomoćnog programa. Inicijalizacioni kod modula izvršava se u kontekstu kernela čim se `.ko` ubaci, pa je praktično pitanje tokom provere: „da li ovaj korisnik može da izabere ili izmeni modul koji se učitava?“
+Sudo pravilo koje korisniku omogućava da pokrene `insmod` nije uporedivo sa omogućavanjem pokretanja običnog administrativnog pomoćnog programa. Inicijalizacioni kod modula izvršava se u kontekstu kernela čim se `.ko` ubaci, pa je praktično pitanje pri proveri: „da li ovaj korisnik može da izabere ili izmeni modul koji se učitava?“
 
-Opšti tok provere:
+Generički tok provere:
 ```bash
 sudo -l
 ls -l ./candidate.ko
@@ -63,7 +63,7 @@ lsmod | grep -i candidate
 dmesg | tail -n 30
 sudo /sbin/rmmod candidate
 ```
-Ako korisnik može da obezbedi proizvoljan `.ko`, pravilo u okviru ovlašćene procene treba tretirati kao potpunu kompromitaciju sistema. Bezbedniji operativni obrazac je izbegavanje delegiranja učitavanja modula putem sudo-a; ako je to neizbežno, ograničite tačnu putanju, vlasništvo, dozvole, politiku potpisivanja i proceduru uklanjanja.
+Ako korisnik može da obezbedi proizvoljan `.ko`, to pravilo treba tretirati kao potpunu kompromitaciju sistema tokom ovlašćene procene. Bezbedniji operativni obrazac jeste izbegavanje delegiranja učitavanja modula kroz sudo; ako je to neizbežno, ograničite tačnu putanju, vlasništvo, dozvole, politiku potpisivanja i proceduru uklanjanja.
 
 Za bezopasan obrazac izgradnje modula u kontrolisanoj laboratoriji, minimalni izvorni kod i Makefile izgledaju ovako:
 ```c
@@ -102,21 +102,21 @@ sudo rmmod demo
 ```
 ### Provere zloupotrebe `kernel.modprobe` / `modprobe_path`
 
-`kernel.modprobe` kontroliše pomoćni program u korisničkom prostoru koji kernel poziva kada mu je potrebna pomoć pri učitavanju modula. Ako napadač može da ga promeni tako da pokazuje na izvršnu datoteku sa mogućnošću upisivanja i izazove nepoznat format binarne datoteke ili drugi put za zahtev učitavanja modula, to može dovesti do izvršavanja koda sa root privilegijama.
+`kernel.modprobe` kontroliše userspace helper koji kernel poziva kada mu je potrebna pomoć pri učitavanju modula. Ako napadač može da ga promeni tako da pokazuje na izvršnu datoteku sa mogućnošću upisivanja i izazove nepoznat binarni format ili drugi mehanizam za zahtev učitavanja modula, to može dovesti do izvršavanja koda kao root.
 
-Proverite trenutni pomoćni program:
+Proverite trenutni helper:
 ```bash
 cat /proc/sys/kernel/modprobe 2>/dev/null
 sysctl kernel.modprobe 2>/dev/null
 ls -l "$(cat /proc/sys/kernel/modprobe 2>/dev/null)" 2>/dev/null
 ```
-Proverite da li možete da utičete na njega:
+Proverite da li možete da utičete na to:
 ```bash
 ls -l /proc/sys/kernel/modprobe
 sudo -l | grep -E 'sysctl|tee|bash|sh|modprobe'
 getcap -r / 2>/dev/null | grep -E 'cap_sys_admin|cap_sys_module'
 ```
-Opšti obrazac namenjen samo laboratoriji:
+Generički obrazac namenjen isključivo laboratoriji:
 ```bash
 # Example only: requires permission to write kernel.modprobe
 printf '#!/bin/sh\nid > /tmp/modprobe-helper-ran\n' > /tmp/helper
@@ -129,11 +129,11 @@ chmod +x /tmp/unknown
 /tmp/unknown 2>/dev/null || true
 cat /tmp/modprobe-helper-ran 2>/dev/null
 ```
-Na očvrsnutim sistemima, ovo bi trebalo da ne uspe jer neprivilegovani korisnici ne mogu da upisuju u `kernel.modprobe`, putanja pomoćnog programa nije upisiva ili su putanje za učitavanje modula blokirane.
+Na hardened sistemima, ovo bi trebalo da ne uspe jer neprivilegovani korisnici ne mogu da upisuju u `kernel.modprobe`, putanja pomoćnog programa nije upisiva ili su putanje za učitavanje modula blokirane.
 
 ### Provera upisivog direktorijuma `/lib/modules`
 
-Upisivi direktorijumi modula mogu omogućiti zamenu modula, ubacivanje zlonamernih modula ili zloupotrebu automatskog učitavanja, u zavisnosti od toga kako se `modprobe` kasnije pozove.
+Upisivi direktorijumi modula mogu omogućiti zamenu modula, postavljanje zlonamernih modula ili zloupotrebu automatskog učitavanja, u zavisnosti od toga kako se `modprobe` kasnije poziva.
 
 Proverite upisive lokacije:
 ```bash
@@ -142,16 +142,17 @@ find "/lib/modules/$KREL" -type d -writable -ls 2>/dev/null
 find "/lib/modules/$KREL" -type f -name '*.ko*' -writable -ls 2>/dev/null
 find "/lib/modules/$KREL" -type f \( -name 'modules.dep' -o -name 'modules.alias' -o -name 'modules.order' \) -writable -ls 2>/dev/null
 ```
-Ako pronađete sadržaj modula u koji je moguće upisivati, proverite kako se moduli otkrivaju:
+Ako pronađete sadržaj modula koji je moguće menjati, proverite kako se moduli otkrivaju:
 ```bash
 modprobe --show-depends <module_name> 2>/dev/null
 modinfo <module_name> 2>/dev/null
 grep -R "<module_name>" /lib/modules/$(uname -r)/modules.* 2>/dev/null
 ```
-Napomene za odbranu:
+Odbrambene napomene:
 
-- Održavajte da `/lib/modules` bude u vlasništvu `root:root` i da korisnici nemaju dozvolu za pisanje.
-- Postavite `kernel.modules_disabled=1` nakon pokretanja sistema, gde je to operativno moguće.
-- Zahtevajte potpisivanje modula na sistemima koji zahtevaju module koji se mogu učitati.
-- Pratite upisivanje u `/proc/sys/kernel/modprobe` i `/lib/modules`, kao i neočekivano izvršavanje `insmod`/`modprobe`.
+- Održavajte da `/lib/modules` bude u vlasništvu `root:root` i da korisnici nemaju dozvolu za upis.
+- Postavite `kernel.modules_disabled=1` nakon boot-a gde je to operativno moguće.
+- Primenite potpisivanje modula na sistemima koji zahtevaju module koji se mogu učitavati.
+- Nadzirite upise u `/proc/sys/kernel/modprobe`, `/lib/modules` i neočekivano izvršavanje `insmod`/`modprobe`.
+
 {{#include ../../banners/hacktricks-training.md}}
