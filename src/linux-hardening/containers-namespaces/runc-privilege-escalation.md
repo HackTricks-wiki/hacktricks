@@ -2,10 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic information
+## 基本情報
 
-**runc** について詳しく知りたい場合は、以下のページを確認してください。
-
+**runc** について詳しく学びたい場合は、次のページを確認してください。
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -13,7 +12,7 @@
 
 ## PE
 
-ホストに `runc` がインストールされている場合、**ホストの root / フォルダを mount した container を実行できる**可能性があります。
+ホストに `runc` がインストールされていることがわかった場合、ホストの `root /` フォルダをマウントした **container** を実行できる可能性があります。
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -38,6 +37,6 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> これは常に機能するとは限りません。runc のデフォルトの動作は root として実行することなので、非特権ユーザーとして実行しても単純には機能しないためです（rootless configuration がある場合を除きます）。rootless configuration をデフォルトにするのは、一般的には良い考えではありません。rootless containers 内には、rootless containers の外部には適用されない制限がかなりあるためです。
+> これは常に機能するとは限りません。runc のデフォルト動作は root として実行することであるため、非特権ユーザーとして実行しても、単純には機能しません（rootless configuration がある場合を除きます）。rootless configuration をデフォルトにすることは、一般的には良い考えではありません。rootless containers 内には、rootless containers の外部には適用されない制限がかなり多く存在するためです。
 
 {{#include ../../banners/hacktricks-training.md}}

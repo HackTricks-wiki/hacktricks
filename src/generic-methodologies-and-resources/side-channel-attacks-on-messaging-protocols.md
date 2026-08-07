@@ -1,59 +1,59 @@
-# E2EE MessengerにおけるDelivery Receiptのサイドチャネル攻撃
+# E2EE Messenger における Delivery Receipt Side-Channel Attacks
 
 {{#include ../banners/hacktricks-training.md}}
 
-Delivery receipts は、現代の end-to-end encrypted (E2EE) messenger では必須です。クライアントは ciphertext がいつ復号されたかを知る必要があり、そうしないと ratcheting state や ephemeral keys を破棄できないためです。サーバーは opaque blobs を転送するだけなので、device acknowledgements (double checkmarks) は受信側が復号成功後に送信します。攻撃者が引き起こした動作と対応する delivery receipt の間の round-trip time (RTT) を測定すると、高解像度のタイミングチャネルが露出し、device state、online presence が漏洩し、covert DoS に悪用できます。multi-device の "client-fanout" デプロイでは、登録済みの各 device が probe を復号してそれぞれの receipt を返すため、漏洩が増幅されます。
+現代の end-to-end encrypted (E2EE) messenger では、client が ciphertext の decrypt 完了時点を把握し、ratcheting state と ephemeral keys を破棄できるように、delivery receipts が必須となっている。server は opaque blobs を転送するだけなので、device acknowledgements（double checkmarks）は recipient が正常に decrypt した後に発行される。attacker が誘発した action と、それに対応する delivery receipt の間の round-trip time (RTT) を測定すると、高解像度の timing channel が生じ、device state や online presence が leak するほか、covert DoS に悪用できる。Multi-device の "client-fanout" deployment では、登録されているすべての device が probe を decrypt して自身の receipt を返すため、leak がさらに増幅される。<sup>[[1]](#references)</sup>
 
-## Delivery receipt の送信源 vs. ユーザー可視シグナル
+## Delivery receipt sources vs. user-visible signals
 
-被害者の UI にアーティファクトを出さず、かつ必ず delivery receipt を送る message type を選びます。下表は実測で確認された挙動を要約したものです。
+常に delivery receipt を発行する一方で、victim の UI に artifact を表示しない message type を選択する。以下の table は、実測で確認された挙動をまとめたものである。<sup>[[1]](#references)</sup>
 
 | Messenger | Action | Delivery receipt | Victim notification | Notes |
 |-----------|--------|------------------|---------------------|-------|
-| **WhatsApp** | Text message | ● | ● | 常にノイズが出る → state の初期化にのみ有用。 |
-| | Reaction | ● | ◐ (victim message に対する reaction の場合のみ) | self-reactions と removals は静かなまま。 |
-| | Edit | ● | Platform-dependent silent push | Edit window は約20分; 期限後も ack は返る。 |
-| | Delete for everyone | ● | ○ | UI 上は約60 h までだが、後続 packet も ack される。 |
-| **Signal** | Text message | ● | ● | WhatsApp と同じ制約。 |
-| | Reaction | ● | ◐ | self-reactions は被害者に見えない。 |
-| | Edit/Delete | ● | ○ | Server は約48 h window を強制し、最大10回の edit を許可するが、遅延 packet も ack される。 |
-| **Threema** | Text message | ● | ● | multi-device receipt は集約されるため、probe ごとに見える RTT は1つだけ。 |
+| **WhatsApp** | Text message | ● | ● | 常に noisy → state の bootstrap にのみ有用。 |
+| | Reaction | ● | ◐ (victim の message に反応した場合のみ) | Self-reaction と removal は silent のまま。 |
+| | Edit | ● | Platform-dependent silent push | Edit window ≈20 min。期限切れ後も ack される。 |
+| | Delete for everyone | ● | ○ | UI では約 60 h だが、その後の packet も ack される。 |
+| **Signal** | Text message | ● | ● | WhatsApp と同じ制限。 |
+| | Reaction | ● | ◐ | Self-reaction は victim から見えない。 |
+| | Edit/Delete | ● | ○ | server は約 48 h の window を適用し、最大 10 回の edit を許可するが、遅れて届いた packet も ack される。 |
+| **Threema** | Text message | ● | ● | Multi-device の receipt は集約されるため、probe ごとに見える RTT は 1 つだけ。 |
 
-凡例: ● = 常に, ◐ = 条件付き, ○ = なし。Platform-dependent な UI 挙動は本文中で補足しています。必要なら read receipts を無効化できますが、delivery receipts は WhatsApp や Signal ではオフにできません。
+Legend: ● = 常時、◐ = 条件付き、○ = なし。Platform-dependent な UI の挙動は inline で示している。必要に応じて read receipts を無効化できるが、WhatsApp や Signal では delivery receipts を無効化できない。<sup>[[1]](#references)</sup>
 
-## 攻撃者の目標とモデル
+## Attacker goals and models
 
-* **G1 – Device fingerprinting:** probe ごとに何個の receipt が届くかを数え、RTT をクラスタリングして OS/client (Android vs iOS vs desktop) を推定し、online/offline の遷移を監視する。
-* **G2 – 行動監視:** 高頻度の RTT series (≈1 Hz で安定) を time-series として扱い、screen on/off、app foreground/background、通勤時間 vs 就業時間などを推定する。
-* **G3 – Resource exhaustion:** 終わりのない silent probes を送って被害者 device の radio/CPU を起こし続け、battery/data を消費させ、VoIP/RTC の品質を劣化させる。
+* **G1 – Device fingerprinting:** probe ごとに到着する receipt 数を数え、RTT を cluster 化して OS/client（Android、iOS、desktop）を推測し、online/offline の遷移を監視する。
+* **G2 – Behavioural monitoring:** 高頻度の RTT series（≈1 Hz が安定）を time-series として扱い、screen の on/off、app の foreground/background、通勤時間と勤務時間の違いなどを推測する。
+* **G3 – Resource exhaustion:** 終わりのない silent probe を送信して、すべての victim device の radio/CPU を起動状態に保ち、battery/data を消費させ、VoIP/RTC の品質を低下させる。<sup>[[1]](#references)</sup>
 
-悪用面を説明するには、2種類の threat actor で十分です。
+abuse surface を説明するには、2 つの threat actor で十分である。<sup>[[1]](#references)</sup>
 
-1. **Creepy companion:** すでに被害者と chat を共有しており、既存 message ID に紐づく self-reactions、reaction removals、または repeated edits/deletes を悪用する。
-2. **Spooky stranger:** burner account を登録し、ローカルの会話には存在しなかった message ID を参照する reaction を送る。WhatsApp と Signal は UI が state change を破棄しても復号して acknowledgement を返すため、事前の会話は不要です。
+1. **Creepy companion:** すでに victim と chat を共有しており、self-reaction、reaction removal、または既存の message ID に紐付いた反復的な edit/delete を悪用する。
+2. **Spooky stranger:** burner account を登録し、local conversation に存在しない message ID を参照する reaction を送信する。WhatsApp と Signal は、UI が state change を破棄する場合でも decrypt と acknowledge を行うため、prior conversation は不要である。
 
-## 生の protocol access のための tooling
+## Tooling for raw protocol access
 
-基盤となる E2EE protocol を公開する client を使えば、UI 制約の外で packet を作成し、任意の `message_id` を指定し、正確な timestamp を記録できます。
+基盤となる E2EE protocol を公開している client を使用すると、UI の制約外で packet を作成し、任意の `message_id` を指定し、正確な timestamp を記録できる。
 
-* **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web protocol) または [Cobalt](https://github.com/Auties00/Cobalt) (mobile-oriented) を使うと、double-ratchet state を同期したまま raw な `ReactionMessage`、`ProtocolMessage` (edit/delete)、`Receipt` frame を送れます。
-* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) と [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) を組み合わせると、CLI/API 経由で全 message type にアクセスできます。現在の `signal-cli` の syntax は `sendReaction RECIPIENT --target-author --target-timestamp` を使います。delivery receipts が実際に収集されるように `receive` または `daemon` を動かし続けてください。self-reaction の toggle 例:
+* **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web protocol) または [Cobalt](https://github.com/Auties00/Cobalt) (mobile-oriented) により、double-ratchet state を同期したまま、raw の `ReactionMessage`、`ProtocolMessage` (edit/delete)、`Receipt` frame を送信できる。<sup>[[3]](#references)[[4]](#references)</sup>
+* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) と [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) を組み合わせると、CLI/API 経由ですべての message type を利用できる。<sup>[[5]](#references)[[7]](#references)</sup> 現在の `signal-cli` syntax では `sendReaction RECIPIENT --target-author --target-timestamp` を使用する。delivery receipt を確実に収集するには、`receive` または `daemon` を実行し続ける。<sup>[[6]](#references)</sup> Self-reaction toggle の例:
 ```bash
 signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
 --target-timestamp 1712345678901 --emoji "👍"
 signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
 --target-timestamp 1712345678901 --remove
 ```
-* **Threema:** Android client のソースには、delivery receipts が device を離れる前に集約される方法が文書化されており、この side channel の bandwidth がほぼ無視できる理由を説明しています。
-* **Turnkey PoCs:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) は WhatsApp/Signal backend を搭載し、既定で silent delete probes を使い、rolling-median threshold (`RTT < 0.9 * median`) で `active` と `standby` を分類します。[careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) はより軽量な WhatsApp-first CLI で、`--delay`、`--concurrent`、CSV/Prometheus exporter、Grafana 向け出力を備えています。どちらも protocol reference というより recon helper として扱ってください。重要なのは、生の client access があれば必要な code が非常に少ないことです。
+* **Threema:** Android client の source には、device 外部へ送信される前に delivery receipt がどのように統合されるかが記載されており、ここでの side channel の bandwidth が negligible である理由を説明している。<sup>[[1]](#references)</sup>
+* **Turnkey PoCs:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) には WhatsApp/Signal backend が含まれ、silent delete probe を default とし、rolling-median threshold (`RTT < 0.9 * median`) により `active` と `standby` を分類する。<sup>[[8]](#references)</sup> [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) は、`--delay`、`--concurrent`、CSV/Prometheus exporter、Grafana に適した output を備えた、より軽量な WhatsApp-first CLI である。<sup>[[9]](#references)</sup> どちらも protocol reference ではなく reconnaissance helper として扱うべきである。重要な点は、raw client access が存在すれば必要な code がいかに少ないかということである。
 
-専用 tooling が使えない場合でも、WhatsApp Web や Signal Desktop から silent action を発火させ、暗号化された websocket/WebRTC channel を sniff できます。ただし raw API を使えば UI 遅延を取り除け、無効な操作も可能になります。
+custom tooling を利用できない場合でも、WhatsApp Web または Signal Desktop から silent action を trigger し、暗号化された websocket/WebRTC channel を sniff できる。ただし raw API により、UI delay を除去し、invalid operation を実行できる。
 
 ## Creepy companion: silent sampling loop
 
-1. 被害者に "reaction" の balloon 変化を見せないよう、チャット内で自分が過去に送った message を任意に選びます。
-2. 可視 emoji と空の reaction payload (`WhatsApp protobufs` では `""`、`signal-cli` では `--remove`) を交互に送ります。各 transmission は、被害者側に UI 差分がなくても device ack を返します。
-3. 送信時刻と各 delivery receipt の到着時刻を記録します。次のような 1 Hz ループで、device ごとの RTT trace を無期限に取得できます:
+1. chat 内で自分が作成した過去の message を選ぶ。これにより、victim には "reaction" balloon の変更が表示されない。
+2. visible emoji と空の reaction payload（WhatsApp protobuf では `""`、signal-cli では `--remove` として encode）を交互に送信する。victim 側に UI delta がないにもかかわらず、各 transmission は device ack を生成する。
+3. send time と、すべての delivery receipt の到着時刻を timestamp 化する。以下のような 1 Hz loop により、device ごとの RTT trace を無期限に取得できる。
 ```python
 while True:
 send_reaction(msg_id, "👍")
@@ -62,81 +62,81 @@ send_reaction(msg_id, "")  # removal
 log_receipts()
 time.sleep(0.5)
 ```
-4. WhatsApp/Signal は unlimited な reaction updates を受け付けるため、攻撃者は新しい chat content を投稿する必要も、edit window を気にする必要もありません。
+4. WhatsApp/Signal は reaction update を無制限に受け付けるため、attacker は新しい chat content を投稿する必要も、edit window を気にする必要もない。<sup>[[1]](#references)</sup>
 
-## Spooky stranger: 任意の電話番号への probe
+## Spooky stranger: probing arbitrary phone numbers
 
-1. 新規の WhatsApp/Signal account を登録し、target number の public identity keys を取得します (session setup 中に自動実行されます)。
-2. 当事者のどちらからも見たことのない random な `message_id` を参照する reaction/edit/delete packet を作成します (WhatsApp は任意の `key.id` GUID を受け入れ、Signal は millisecond timestamps を使います)。
-3. thread が存在しなくても packet を送ります。被害者 device はそれを復号し、base message に一致しないため state change を破棄しますが、それでも incoming ciphertext を acknowledge し、device receipts を攻撃者に返します。
-4. これを継続して繰り返し、被害者の chat list に一切現れずに RTT series を構築します。
+1. 新しい WhatsApp/Signal account を登録し、target number の public identity keys を取得する（session setup 中に自動的に実行される）。
+2. どちらの party も見たことのない random な `message_id` を参照する reaction/edit/delete packet を作成する（WhatsApp は任意の `key.id` GUID を受け付け、Signal は millisecond timestamp を使用する）。
+3. thread が存在しなくても packet を送信する。victim device は packet を decrypt し、base message との match に失敗して state change を破棄するが、incoming ciphertext は acknowledge し、device receipt を attacker に返す。
+4. victim の chat list に一度も表示されることなく、これを継続的に繰り返して RTT series を構築する。<sup>[[1]](#references)</sup>
 
-もし先に登録済み番号の発見や、device inventory の大規模な事前投入が必要なら、手作業で random な E.164 range を当てるのではなく、[contact-discovery / registration oracles](../pentesting-web/registration-vulnerabilities.md) を連鎖させてください。
+登録済みの number を先に発見する必要がある場合、または大規模に device inventory を事前作成したい場合は、E.164 range を手作業でランダムに推測するのではなく、[contact-discovery / registration oracles](../pentesting-web/registration-vulnerabilities.md) と chain する。
 
-公開された contact-discovery の研究は、これが運用上なぜ重要かを示しています。正確な phone-prefix table と少量の資源があれば、研究者は WhatsApp で米国の mobile numbers の約 `10%`、Signal で `100%` を問い合わせ、その後 targeted probing に移れました。実際には、最初に live account を pre-filter しておくと、silent-probe の予算を実際に packet を復号する番号に集中できます。
+公開された contact-discovery research は、これが operational に重要な理由を示している。正確な phone-prefix table と適度な resource により、researcher は targeted probing に移る前に、WhatsApp では米国 mobile number の約 `10%`、Signal では `100%` を query できた。<sup>[[11]](#references)</sup> 実際には、まず live account を pre-filter しておくことで、silent-probe budget を実際に packet を decrypt する number に集中できる。
 
-最近の WhatsApp build では `Settings -> Privacy -> Advanced -> Block unknown account messages` も公開されています。これは修正ではなく throughput limiter と考えてください。主に継続的な stranger-only flooding に効くだけで、すでに known contact であれば無関係です。
+最近の WhatsApp build では、`Settings -> Privacy -> Advanced -> Block unknown account messages` も公開されている。<sup>[[10]](#references)</sup> これは fix ではなく throughput limiter として扱うべきである。主に stranger-only の sustained flooding に影響するだけで、すでに known contact である場合は関係ない。
 
-## Edit と delete を covert trigger として再利用する
+## Recycling edits and deletes as covert triggers
 
-* **Repeated deletes:** message が一度 delete-for-everyone されると、同じ `message_id` を参照する後続の delete packet は UI に影響しませんが、各 device は依然として復号して acknowledge します。
-* **Out-of-window operations:** WhatsApp は UI 上で約60 h の delete / 約20 min の edit window を強制し、Signal は約48 h を強制します。これらの window 外で作成された protocol message は被害者 device では静かに無視されますが receipt は送信されるため、会話終了後どれだけ時間が経っても攻撃者は probe し続けられます。
-* **Invalid payloads:** 壊れた edit body や、すでに消去された message を参照する delete は同じ挙動を引き起こします。つまり、復号 + receipt、ユーザー可視アーティファクトはゼロです。
+* **Repeated deletes:** message が一度 Delete for everyone された後も、同じ `message_id` を参照する delete packet を追加送信すると UI effect はないが、すべての device が decrypt して acknowledge する。
+* **Out-of-window operations:** WhatsApp は UI で約 60 h の delete window / 約 20 min の edit window を適用し、Signal は約 48 h を適用する。これらの window 外の crafted protocol message は victim device 上で silent に無視されるが、receipt は送信されるため、conversation 終了後も長期間 probe できる。
+* **Invalid payloads:** malformed edit body や、すでに purge された message を参照する delete でも同じ挙動（decryption と receipt、user-visible artefact はゼロ）が発生する。<sup>[[1]](#references)</sup>
 
-## Multi-device の増幅と fingerprinting
+## Multi-device amplification & fingerprinting
 
-* 各関連 device (phone、desktop app、browser companion) は probe を独立に復号し、それぞれ独自の ack を返します。probe ごとの receipt 数を数えると、正確な device 数が分かります。
-* device が offline だと receipt はキューされ、再接続時に送信されます。したがって、欠損は online/offline cycle、さらには通勤スケジュールまでも漏洩します (例: 移動中は desktop receipt が止まる)。
-* RTT distribution は、OS の power management と push wakeup の違いにより platform ごとに異なります。RTT をクラスタリングし (例: median/variance feature に対する k-means)、"Android handset"、"iOS handset"、"Electron desktop" などにラベル付けします。
-* sender は暗号化前に受信者の key inventory を取得する必要があるため、攻撃者は新しい device が pair されたタイミングも監視できます。device 数の急増や新しい RTT cluster は強い指標です。
+* 関連付けられた各 device（phone、desktop app、browser companion）は probe を独立して decrypt し、それぞれ自身の ack を返す。probe ごとの receipt 数を数えることで、正確な device 数を把握できる。
+* device が offline の場合、その receipt は queue され、reconnection 時に発行される。そのため gap から online/offline cycle や commuting schedule まで leak する（例: desktop receipt は移動中に停止する）。
+* RTT distribution は OS power management と push wakeup の違いにより platform ごとに異なる。RTT を cluster 化し（例: median/variance feature に対する k-means）、“Android handset”、“iOS handset”、“Electron desktop” などの label を付ける。
+* sender は encrypt 前に recipient の key inventory を取得する必要があるため、attacker は新しい device が pair された時点も監視できる。device 数の突然の増加や新しい RTT cluster は強い indicator となる。<sup>[[1]](#references)</sup>
 
-## サンプリング cadence、queueing、stacked receipts
+## Sampling cadence, queueing, and stacked receipts
 
-* **WhatsApp の burst 耐性:** 公開された計測では、WhatsApp は server-side queueing が目立たないまま、1 probe あたり `50 ms` という速さの silent-reaction burst を受け付けました。これは短い calibration burst、素早い device 数の把握、または drain attack の急速な立ち上げに有用です。
-* **Signal の長期 queueing:** Signal は短い burst に耐えましたが、継続的な毎秒複数 probe の traffic では queueing を始めました。長時間の monitoring では、各 receipt が backlog の排出ではなく現在の device state を反映するよう、cadence を約 `1 Hz` (またはそれ以下) に保ってください。
-* **Reconnect artefacts:** device が online に戻ると、いくつかの client は遅延した複数の receipt をまとめて、または素早く flush します。これらの receipt burst は独立した RTT sample ではなく state-transition の marker として扱ってください。そうしないと、クラスタリングや `active` vs `idle` classifier が reconnect ノイズに過学習します。
+* **WhatsApp burst tolerance:** 公開された measurement では、WhatsApp が明らかな server-side queueing なしに、最短で 1 probe / `50 ms` の silent-reaction burst を受け付けたと報告されている。これは短い calibration burst、素早い device count、または drain attack の迅速な ramp-up に有用である。
+* **Signal long-run queueing:** Signal は短い burst には耐えたが、sustained な multi-probe-per-second traffic では queueing が始まった。long-lived monitoring では cadence を約 `1 Hz`（またはそれ以下）に保ち、各 receipt が backlog drain ではなく現在の device state を反映するようにする。
+* **Reconnect artefacts:** device が online に戻ると、一部の client は遅延した receipt を batch 処理するか、急速に flush する。これらの receipt burst は独立した RTT sample ではなく state-transition marker として扱う。そうしないと、clustering / `active` vs `idle` classifier が reconnect noise に overfit する。<sup>[[1]](#references)</sup>
 
-## RTT trace からの行動推定
+## Behaviour inference from RTT traces
 
-1. OS の scheduling 効果を捉えるため、≥1 Hz でサンプルします。WhatsApp on iOS では、<1 s の RTT は screen-on/foreground と強く相関し、>1 s は screen-off/background throttling と相関します。
-2. 各 RTT を "active" または "idle" に分類する単純な classifier (thresholding や 2-cluster k-means) を構築します。ラベルを streak に集約して、就寝時刻、通勤、勤務時間、desktop companion が active になる時間を導きます。
-3. 全 device への同時 probe を相関させ、ユーザーが mobile から desktop に切り替えるタイミング、companion が offline になるタイミング、app が push か persistent socket のどちらで rate limit されているかを見ます。
-4. 実ネットワークでは、単一の固定 `1 s` threshold を避けます。短い warm-up window で各 device を bootstrap し、rolling baseline (たとえば `threshold = 0.9 * median RTT`) を維持して、Wi-Fi/cellular の変動で classifier が崩れないようにします。
+1. OS scheduling effect を取得するため、≥1 Hz で sample する。iOS 上の WhatsApp では、<1 s の RTT は screen-on/foreground と強く相関し、>1 s は screen-off/background throttling と相関する。
+2. 単純な classifier（thresholding または 2-cluster k-means）を構築し、各 RTT を "active" または "idle" と label する。label を streak として集約し、就寝時間、通勤時間、勤務時間、desktop companion が active な時間などを導出する。
+3. すべての device に対する同時 probe を correlate し、user が mobile から desktop に切り替えるタイミング、companion が offline になるタイミング、app が push と persistent socket のどちらによって rate limit されているかを確認する。
+4. 実 network では、単一の hardcoded な `1 s` threshold を避ける。各 device を短い warm-up window で bootstrap し、rolling baseline（例: `threshold = 0.9 * median RTT`）を維持することで、Wi-Fi/cellular drift により classifier が機能しなくなるのを防ぐ。<sup>[[1]](#references)</sup>
 
-## Delivery RTT からの位置推定
+## Location inference from delivery RTT
 
-同じタイミング原始を使って、相手が active かどうかだけでなく、どこにいるかも推定できます。`Hope of Delivery` の研究は、既知の受信者ロケーションにおける RTT distribution で学習すると、後から delivery confirmation だけで被害者の location を分類できることを示しました。
+同じ timing primitive を、recipient が active かどうかだけでなく、recipient の location を推測するためにも転用できる。`Hope of Delivery` research は、既知の receiver location における RTT distribution で training すると、delivery confirmation だけから後に victim の location を分類できることを示した。<sup>[[2]](#references)</sup>
 
-* 対象が複数の既知の場所にいる間 (home、office、campus、country A vs country B など) に baseline を作ります。
-* 各 location について、多数の通常メッセージ RTT を収集し、median、variance、percentile bucket などの単純な feature を抽出します。
-* 実際の攻撃時には、新しい probe series を学習済み cluster と比較します。論文では、同一都市内の location でさえしばしば分離でき、3-location の設定で `>80%` の精度が報告されています。
-* これは、攻撃者が sender 環境を制御し、類似した network condition で probe する場合に特に有効です。測定 path には受信者の access network、wake-up latency、messenger infrastructure が含まれるためです。
+* target が複数の既知の場所（home、office、campus、country A と country B など）にいる間、同じ target の baseline を構築する。
+* 各 location について、多数の通常 message RTT を収集し、median、variance、percentile bucket などの単純な feature を抽出する。
+* 実際の attack では、新しい probe series を training 済みの cluster と比較する。paper では、同じ city 内の location であっても分離できることが多く、3-location setting で `>80%` の accuracy が得られたと報告している。
+* 測定された path には recipient の access network、wake-up latency、messenger infrastructure が含まれるため、attacker が sender environment を control し、同様の network condition で probe する場合に最も効果的である。<sup>[[2]](#references)</sup>
 
-上記の silent reaction/edit/delete 攻撃とは異なり、位置推定に invalid な message ID や stealthy な state-changing packet は必要ありません。通常の delivery confirmation を伴う通常の message で十分なので、stealth は下がりますが、より多くの messenger に適用できます。
+上記の silent reaction/edit/delete attack とは異なり、location inference では invalid message ID や stealthy な state-changing packet は必要ない。通常の delivery confirmation を伴う plain message だけで十分である。そのため stealth は低下するが、messenger をまたいだ applicability は広くなる。
 
 ## Stealthy resource exhaustion
 
-各 silent probe は必ず復号され、acknowledge されるため、reaction toggle、invalid edit、delete-for-everyone packet を継続送信すると application-layer DoS になります。
+すべての silent probe は decrypt と acknowledge が必要であるため、reaction toggle、invalid edit、Delete for everyone packet を継続的に送信すると application-layer DoS が発生する。<sup>[[1]](#references)</sup>
 
-* 毎秒 radio/modem を送受信させる → 特に待機中の handset では顕著な battery drain。
-* 上り/下り traffic を発生させ、mobile data plan を消費しつつ TLS/WebSocket noise に紛れ込む。
-* crypto thread を占有し、遅延に敏感な機能 (VoIP、video call) に jitter を生じさせるが、ユーザーには通知が一切見えない。
-* WhatsApp では、無効な reaction は通常の emoji からは想像できないほど多くの data を受け入れます。公開計測では、server-side の受理は reaction あたりおよそ `1 MB` まで確認されました。
-* oversized な reaction は body が約 `30 bytes` を超えると reliable な delivery receipt を出さなくなりますが、それでも転送され、破棄前に処理されます。ACK が必要なときは reaction body を小さく保ってください。純粋な drain や covert な一方向 transport が目的のときだけ大きくします。
-* 公開計測では、このモードで被害者 traffic が約 `3.7 MB/s` (`~13.3 GB/h`) に達しました。
+* radio/modem に毎秒 transmit/receive を強制する → 特に idle handset で、目立つ battery drain が発生する。
+* unmetered な upstream/downstream traffic を生成し、TLS/WebSocket noise に紛れながら mobile data plan を消費する。
+* crypto thread を占有し、user に notification が表示されない場合でも、latency-sensitive feature（VoIP、video call）に jitter を発生させる。
+* WhatsApp では、invalid reaction は通常の emoji から想像されるよりはるかに多くの data を受け付ける。公開された measurement では、reaction あたり約 `1 MB` まで server-side で受け付けられた。
+* reaction body が約 `30 bytes` を超えると oversized reaction は reliable な delivery receipt を生成しなくなるが、discard 前に転送・処理はされる。ACK が必要な場合は reaction body を小さく保ち、純粋な drain または covert one-way transport が目的の場合のみ inflate する。
+* 公開 measurement では、この mode で victim traffic が約 `3.7 MB/s`（`~13.3 GB/h`）に達した。
 
 ## References
 
-- [Careless Whisper: Exploiting Silent Delivery Receipts to Monitor Users on Mobile Instant Messengers](https://arxiv.org/html/2411.11194v4)
-- [Hope of Delivery: Extracting User Locations From Mobile Instant Messengers](https://www.ndss-symposium.org/wp-content/uploads/2023-188-paper.pdf)
-- [whatsmeow](https://github.com/tulir/whatsmeow)
-- [Cobalt](https://github.com/Auties00/Cobalt)
-- [signal-cli](https://github.com/AsamK/signal-cli)
-- [signal-cli manpage](https://github.com/AsamK/signal-cli/blob/master/man/signal-cli.1.adoc)
-- [libsignal-service-java](https://github.com/signalapp/libsignal-service-java)
-- [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker)
-- [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python)
-- [How to block high volumes of unknown messages | WhatsApp Help Center](https://faq.whatsapp.com/3379690015658337)
-- [All the Numbers are US: Large-scale Abuse of Contact Discovery in Mobile Messengers](https://www.ndss-symposium.org/ndss-paper/all-the-numbers-are-us-large-scale-abuse-of-contact-discovery-in-mobile-messengers/)
+- [1] [Careless Whisper: Exploiting Silent Delivery Receipts to Monitor Users on Mobile Instant Messengers](https://arxiv.org/html/2411.11194v4)
+- [2] [Hope of Delivery: Extracting User Locations From Mobile Instant Messengers](https://www.ndss-symposium.org/wp-content/uploads/2023-188-paper.pdf)
+- [3] [whatsmeow](https://github.com/tulir/whatsmeow)
+- [4] [Cobalt](https://github.com/Auties00/Cobalt)
+- [5] [signal-cli](https://github.com/AsamK/signal-cli)
+- [6] [signal-cli manpage](https://github.com/AsamK/signal-cli/blob/master/man/signal-cli.1.adoc)
+- [7] [libsignal-service-java](https://github.com/signalapp/libsignal-service-java)
+- [8] [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker)
+- [9] [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python)
+- [10] [How to block high volumes of unknown messages | WhatsApp Help Center](https://faq.whatsapp.com/3379690015658337)
+- [11] [All the Numbers are US: Large-scale Abuse of Contact Discovery in Mobile Messengers](https://www.ndss-symposium.org/ndss-paper/all-the-numbers-are-us-large-scale-abuse-of-contact-discovery-in-mobile-messengers/)
 
 {{#include ../banners/hacktricks-training.md}}

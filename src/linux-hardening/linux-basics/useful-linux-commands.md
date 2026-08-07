@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## よく使う Bash
+## 一般的な Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -229,7 +229,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Find
+## 検索
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -258,7 +258,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Nmap検索ヘルプ
+## Nmap 検索ヘルプ
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -301,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF テレメトリと Rootkit ハンティング
+## eBPF Telemetry と Rootkit Hunting
 
-Modern rootkits（TripleCross、BPFDoor variants など）は、hidden eBPF programs として永続化するケースが増えています。`bpftool`/`eBPFmon` を使って fleet のベースラインを作成し、detaching する前に unsigned programs、予期しない cgroup hooks、または malicious map contents を検出できるようにします。
+Modern Rootkit（TripleCross、BPFDoor variants など）は、hidden eBPF programs として persist するケースが増えています。`bpftool`/`eBPFmon` を使って fleet の baseline を作成し、detach する前に unsigned programs、想定外の cgroup hooks、または malicious map contents を検出できるようにしましょう。<sup>[[1]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-bpftool の出力を、想定される NIC/cgroup attachments と照合します。未承認の PID が所有する突然の `xdp` または `kprobe` program は、注入された eBPF payload を示す強い兆候です。
+bpftool の出力を、想定される NIC/cgroup のアタッチメントと照合します。承認されていない PID が所有する突然の `xdp` または `kprobe` プログラムは、注入された eBPF payload の強力な兆候です。
 
-## Journald のインシデントトリアージ
+## Journald インシデントトリアージ
 
-systemd-journald は構造化メタデータを保持するため、`/var/log/*` に触れることなく、boot、severity、unit、UID を基準に調査できます。filter と相対 timestamp を組み合わせることで、攻撃期間を特定したり、ログ改ざんを迅速に証明したりできます。
+systemd-journald は構造化されたメタデータを保持しているため、`/var/log/*` に触れることなく、boot、severity、unit、UID を基準に調査対象を切り替えられます。フィルターと相対タイムスタンプを組み合わせることで、攻撃ウィンドウを特定したり、ログ改ざんを迅速に立証したりできます。<sup>[[2]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +336,11 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-`--grep 'Invalid user' --case-sensitive` または `-k`（kernel ring buffer のみ）を追加すると、より厳密なフィルターを適用できます。また、`_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME`、`_TRANSPORT` のセレクタは組み合わせて使用できるため、multi-tenant の調査に役立ちます。
+より厳密にフィルタリングする必要がある場合は、`--grep 'Invalid user' --case-sensitive` または `-k`（kernel ring buffer のみ）を追加し、複数テナントの調査では `_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME`、`_TRANSPORT` のセレクターが組み合わせて適用されることを覚えておいてください。
 
 ## 参考資料
 
-- [eBPFmon: eBPF アプリケーションを探索・操作するための新しいツール](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [journalctl コマンドを使用して Linux ログを表示する方法](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: eBPF applications を探索および操作するための新しいツール](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [journalctl コマンドを使用して Linux logs を表示する方法](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}
