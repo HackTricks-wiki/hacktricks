@@ -80,7 +80,7 @@ require(predicted == sender, "bad sender");
 ```
 
 ## 7) Validation logic that bundlers reject
-Validation code can be correct in local tests and still be unusable in real bundlers. Public bundlers simulate `validateUserOp()` / `validatePaymasterUserOp()` off-chain and commonly run a full `debug_traceCall(handleOps)` before inclusion.
+Validation code can be correct in local tests and still be unusable in real bundlers. Public bundlers simulate `validateUserOp()` / `validatePaymasterUserOp()` off-chain and commonly run a full `debug_traceCall(handleOps)` before inclusion.<sup>[[3]](#references)</sup>
 
 That makes these patterns dangerous inside validation:
 
@@ -128,12 +128,11 @@ function initialize(address newOwner) external {
 - Run full bundler simulation (`simulateValidation` plus a traced `handleOps`) before shipping.
 - For ERC-7702, allow init only on self-call and only once.
 
-
-
 ## References
 
 - [1] [Six mistakes in ERC-4337 smart accounts (Trail of Bits)](https://blog.trailofbits.com/2026/03/11/six-mistakes-in-erc-4337-smart-accounts/)
 - [2] [ERC-4337: Account Abstraction Using Alt Mempool](https://eips.ethereum.org/EIPS/eip-4337)
+- [3] [ERC-7562: Account Abstraction Validation Scope Rules](https://eips.ethereum.org/EIPS/eip-7562)
 
 {{#include ../../banners/hacktricks-training.md}}
 

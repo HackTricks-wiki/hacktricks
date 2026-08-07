@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 This area is about **X.509 parsing, formats, conversions, and common mistakes**.
 
 ## X.509: parsing, formats & common mistakes

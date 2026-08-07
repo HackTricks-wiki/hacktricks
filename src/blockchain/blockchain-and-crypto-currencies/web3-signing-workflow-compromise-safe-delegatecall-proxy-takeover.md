@@ -6,7 +6,7 @@
 
 A cold-wallet theft chain combined a **supply-chain compromise of the Safe{Wallet} web UI** with an **on-chain delegatecall primitive that overwrote a proxy’s implementation pointer (slot 0)**. The key takeaways are:
 
-- If a dApp can inject code into the signing path, it can make a signer produce a valid **EIP-712 signature over attacker-chosen fields** while restoring the original UI data so other signers remain unaware.
+- If a dApp can inject code into the signing path, it can make a signer produce a valid **EIP-712 signature over attacker-chosen fields**<sup>[[4]](#references)</sup> while restoring the original UI data so other signers remain unaware.
 - Safe proxies store `masterCopy` (implementation) at **storage slot 0**. A delegatecall to a contract that writes to slot 0 effectively “upgrades” the Safe to attacker logic, yielding full control of the wallet.
 
 ## Off-chain: Targeted signing mutation in Safe{Wallet}
@@ -35,7 +35,7 @@ if (isVictimSafe && isVictimSigner && tx.data.operation === 0) {
 - **EIP-712 opacity**: wallets showed structured data but did not decode nested calldata or highlight `operation = delegatecall`, making the mutated message effectively blind-signed.
 
 ### Gateway validation relevance
-Safe proposals are submitted to the **Safe Client Gateway**. Prior to hardened checks, the gateway could accept a proposal where `safeTxHash`/signature corresponded to different fields than the JSON body if the UI rewrote them post-signing. After the incident, the gateway now rejects proposals whose hash/signature do not match the submitted transaction. Similar server-side hash verification should be enforced on any signing-orchestration API.
+Safe proposals are submitted to the **Safe Client Gateway**.<sup>[[5]](#references)</sup> Prior to hardened checks, the gateway could accept a proposal where `safeTxHash`/signature corresponded to different fields than the JSON body if the UI rewrote them post-signing. After the incident, the gateway now rejects proposals whose hash/signature do not match the submitted transaction. Similar server-side hash verification should be enforced on any signing-orchestration API.
 
 ### 2025 Bybit/Safe incident highlights
 - The February 21, 2025 Bybit cold-wallet drain (~401k ETH) reused the same pattern: a compromised Safe S3 bundle only triggered for Bybit signers and swapped `operation=0` → `1`, pointing `to` at a pre-deployed attacker contract that writes slot 0.<sup>[[1]](#references)[[3]](#references)</sup>
