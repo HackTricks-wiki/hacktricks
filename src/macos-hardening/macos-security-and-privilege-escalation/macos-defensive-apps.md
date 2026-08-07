@@ -4,27 +4,27 @@
 
 ## Firewalls
 
-- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): Παρακολουθεί κάθε σύνδεση που πραγματοποιείται από κάθε process. Ανάλογα με το mode (silent allow connections, silent deny connection και alert), θα **εμφανίζει μια ειδοποίηση** κάθε φορά που δημιουργείται μια νέα σύνδεση. Διαθέτει επίσης ένα πολύ καλό GUI για την προβολή όλων αυτών των πληροφοριών.
-- [**LuLu**](https://objective-see.org/products/lulu.html): Firewall της Objective-See. Πρόκειται για ένα βασικό firewall που θα σας ειδοποιεί για ύποπτες συνδέσεις (διαθέτει GUI, αλλά δεν είναι τόσο εντυπωσιακό όσο εκείνο του Little Snitch).
+- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): Παρακολουθεί κάθε σύνδεση που πραγματοποιείται από κάθε process. Ανάλογα με το mode (silent allow connections, silent deny connection and alert), θα **σας εμφανίζει ένα alert** κάθε φορά που πραγματοποιείται μια νέα σύνδεση. Διαθέτει επίσης ένα πολύ καλό GUI για την προβολή όλων αυτών των πληροφοριών.
+- [**LuLu**](https://objective-see.org/products/lulu.html): Firewall της Objective-See. Πρόκειται για ένα basic firewall που θα σας ειδοποιεί για ύποπτες συνδέσεις (διαθέτει GUI, αλλά δεν είναι τόσο εντυπωσιακό όσο εκείνο του Little Snitch).
 
-## Ανίχνευση Persistence
+## Εντοπισμός persistence
 
-- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Εφαρμογή της Objective-See που αναζητά σε διάφορες τοποθεσίες όπου **θα μπορούσε να παραμένει malware** (είναι one-shot tool και όχι monitoring service).
-- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Όπως το KnockKnock, παρακολουθεί processes που δημιουργούν persistence.
+- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Εφαρμογή της Objective-See που αναζητά σε διάφορες τοποθεσίες όπου **θα μπορούσε να έχει εγκατασταθεί malware για persistence** (είναι one-shot tool, όχι monitoring service).
+- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Όπως το KnockKnock, μέσω της παρακολούθησης processes που δημιουργούν persistence.
 
-## Ανίχνευση Keyloggers
+## Εντοπισμός keyloggers
 
 - [**ReiKey**](https://objective-see.org/products/reikey.html): Εφαρμογή της Objective-See για την εύρεση **keyloggers** που εγκαθιστούν keyboard "event taps"
 
 ## Endpoint telemetry / execution control
 
-- [**Santa**](https://santa.dev/): Σύστημα binary authorization και monitoring για macOS. Χρησιμοποιεί έναν client **Endpoint Security** για να εξουσιοδοτεί events **`exec`** πριν εκτελεστεί ο κώδικας, επομένως είναι συνηθισμένο σε enterprise fleets που εστιάζουν σε **allowlisting/denylisting** αντί για αποκλειστικά post-execution detection.
-- [**Mac Monitor**](https://github.com/redcanaryco/mac-monitor): Εργαλείο dynamic analysis για macOS, παρόμοιο με το Procmon. Συλλέγει **Endpoint Security telemetry** (events που σχετίζονται με processes, files, interprocess επικοινωνία, login και XProtect) και είναι χρήσιμο για την κατανόηση του τι μπορεί πραγματικά να παρατηρήσει ένας ώριμος sensor που βασίζεται στο ES.<sup>[[2]](#references)</sup>
-- [**ProcessMonitor / FileMonitor / DNSMonitor**](https://objective-see.org/products/utilities.html): Lightweight εργαλεία της Objective-See για **process**, **file** και **DNS** telemetry. Σε σύγχρονα macOS έχουν επιπλέον prerequisites, όπως **root**, **Terminal Full Disk Access** ή έγκριση **System/Network Extension**. Για περισσότερες ιδέες instrumentation, δείτε [αυτή την άλλη σελίδα σχετικά με macOS app inspection/debugging](macos-apps-inspecting-debugging-and-fuzzing/README.md).
+- [**Santa**](https://santa.dev/): Σύστημα binary authorization και monitoring για macOS. Χρησιμοποιεί έναν client **Endpoint Security** για την εξουσιοδότηση events **`exec`** πριν εκτελεστεί ο κώδικας, επομένως είναι συνηθισμένο σε enterprise fleets που επικεντρώνονται σε **allowlisting/denylisting**, αντί για αποκλειστικά post-execution detection.
+- [**Mac Monitor**](https://github.com/redcanaryco/mac-monitor): Εργαλείο dynamic analysis για macOS, παρόμοιο με το Procmon. Συλλέγει **Endpoint Security telemetry** (events σχετικά με processes, files, interprocess επικοινωνία, login και XProtect) και είναι χρήσιμο για την κατανόηση του τι μπορεί πραγματικά να παρατηρήσει ένας ώριμος sensor που βασίζεται στο ES.<sup>[[2]](#references)</sup>
+- [**ProcessMonitor / FileMonitor / DNSMonitor**](https://objective-see.org/products/utilities.html): Lightweight εργαλεία της Objective-See για telemetry από **processes**, **files** και **DNS**. Σε σύγχρονα macOS διαθέτουν επιπλέον prerequisites, όπως **root**, **Terminal Full Disk Access** ή έγκριση **System/Network Extension**. Για περισσότερες ιδέες instrumentation, δείτε [αυτή την άλλη σελίδα σχετικά με macOS app inspection/debugging](macos-apps-inspecting-debugging-and-fuzzing/README.md).
 
 ## Γρήγορο triage αμυντικών εργαλείων
 
-Τα περισσότερα σύγχρονα security products για macOS εκτελούνται ως κάποιος συνδυασμός από **System Extensions / Endpoint Security clients**, **launchd agents/daemons** και applications με **Full Disk Access**. Μια σύντομη checklist για operators:
+Τα περισσότερα σύγχρονα προϊόντα security για macOS εκτελούνται ως κάποιος συνδυασμός από **System Extensions / Endpoint Security clients**, **launchd agents/daemons** και εφαρμογές με **Full Disk Access**. Μια γρήγορη checklist για τον operator:
 ```bash
 # System / network extensions (EDRs, DNS filters, firewalls, VPNs)
 systemextensionsctl list
@@ -48,14 +48,14 @@ echo "== $db =="
 sqlite3 "$db" 'SELECT service,client,auth_value,last_modified FROM access WHERE service IN ("kTCCServiceSystemPolicyAllFiles","kTCCServiceEndpointSecurityClient") ORDER BY last_modified DESC;'
 done
 ```
-Αν το `systemextensionsctl list` εμφανίζει έναν sensor ως **`[activated enabled]`**, αυτό είναι συνήθως η ταχύτερη ένδειξη ότι το extension είναι πράγματι ενεργό. Στο **macOS 15 Sequoia και νεότερα**, το MDM μπορεί επίσης να oznaρίσει συγκεκριμένα security extensions ως **μη αφαιρούμενα από το UI**, επομένως η υπόθεση ότι «απενεργοποιείται από το System Settings» δεν είναι πλέον ασφαλής. Για τα internals, δείτε το [macOS System Extensions](mac-os-architecture/macos-system-extensions.md).
+Αν το `systemextensionsctl list` εμφανίζει έναν αισθητήρα ως **`[activated enabled]`**, είναι συνήθως η ταχύτερη ένδειξη ότι το extension είναι όντως ενεργό. Στο **macOS 15 Sequoia και νεότερα**, το MDM μπορεί επίσης να oznaρίσει συγκεκριμένα security extensions ως **μη αφαιρούμενα από το UI**, επομένως η υπόθεση «απενεργοποίησέ το από το System Settings» δεν είναι πλέον ασφαλής. Για τα internals, δείτε το [macOS System Extensions](mac-os-architecture/macos-system-extensions.md).
 
 ## Πρόσφατα native telemetry που μπορούν να αξιοποιήσουν οι defenders
 
-Οι πρόσφατες εκδόσεις του macOS έκαναν ορισμένα user-driven bypasses που προηγουμένως ήταν δύσκολο να εντοπιστούν πολύ πιο θορυβώδη για τις blue teams:
+Οι πρόσφατες εκδόσεις του macOS έκαναν ορισμένα user-driven bypasses, που προηγουμένως ήταν δύσκολο να ανιχνευθούν, πολύ πιο θορυβώδη για τα blue teams:
 
-- **macOS 15+**: Οι Endpoint Security clients μπορούν να λαμβάνουν events **`gatekeeper_user_override`**, επομένως τα manual Gatekeeper bypasses μπορούν να καταγράφονται κεντρικά.
-- Τα **current macOS Endpoint Security tooling** μπορούν επίσης να λαμβάνουν events ανίχνευσης malware από το **XProtect**, διευκολύνοντας την επιβεβαίωση του τι έχει ήδη εντοπίσει η Apple στο endpoint.
+- **macOS 15+**: Οι Endpoint Security clients μπορούν να λαμβάνουν **`gatekeeper_user_override`** events, επομένως τα manual Gatekeeper bypasses μπορούν να καταγράφονται κεντρικά.
+- Τα **τρέχοντα macOS Endpoint Security tooling** μπορούν επίσης να λαμβάνουν **XProtect malware detection** events, διευκολύνοντας την επιβεβαίωση του τι έχει ήδη ανιχνεύσει η Apple στο endpoint.
 - **macOS 15.4+**: Το Endpoint Security προσθέτει το **`tcc_modify`**, παρέχοντας επιτέλους στους defenders έναν υποστηριζόμενο τρόπο παρακολούθησης των **TCC grants/revokes**, αντί για scraping των TCC debug logs.<sup>[[1]](#references)</sup>
 ```bash
 # Gatekeeper user overrides
@@ -67,11 +67,12 @@ sudo eslogger xp_malware_detected
 # macOS 15.4+
 sudo eslogger tcc_modify
 ```
-Αυτό είναι χρήσιμο τόσο για defenders όσο και για red teamers που κάνουν self-assessment: αν ο στόχος διαθέτει ένα ώριμο ES-based stack, **οι user-approved αλυσίδες παράκαμψης των Gatekeeper / TCC ενδέχεται να είναι πολύ πιο ορατές από ό,τι παλαιότερα**. Για πληροφορίες σχετικά με αυτές τις προστασίες, δείτε τα [Gatekeeper / Quarantine / XProtect](macos-security-protections/macos-gatekeeper.md) και [TCC](macos-security-protections/macos-tcc/README.md).
+Αυτό είναι χρήσιμο τόσο για defenders όσο και για red teamers που κάνουν self-assessment: αν ο στόχος διαθέτει ένα ώριμο ES-based stack, **οι user-approved Gatekeeper / TCC bypass chains μπορεί να είναι πολύ πιο ορατές απ' ό,τι παλαιότερα**. Για background σχετικά με αυτές τις προστασίες, δείτε τα [Gatekeeper / Quarantine / XProtect](macos-security-protections/macos-gatekeeper.md) και το [TCC](macos-security-protections/macos-tcc/README.md).
 
-## References
+## Αναφορές
 
-- [1] [Objective-See - Το TCCing σημαίνει Believing! Η Apple προσθέτει επιτέλους TCC events στο Endpoint Security!](https://objective-see.org/blog/blog_0x7F.html)
-- [2] [Red Canary - Παρουσίαση: Mac Monitor](https://redcanary.com/blog/threat-detection/mac-monitor/)
+
+- [1] [Objective-See - TCCing is Believing! Η Apple προσθέτει επιτέλους TCC events στο Endpoint Security!](https://objective-see.org/blog/blog_0x7F.html)
+- [2] [Red Canary - Παρουσιάζουμε: Mac Monitor](https://redcanary.com/blog/threat-detection/mac-monitor/)
 
 {{#include ../../banners/hacktricks-training.md}}

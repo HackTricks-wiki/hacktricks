@@ -4,14 +4,14 @@
 
 ## Εισαγωγή
 
-Όπως [**έχει σχολιαστεί προηγουμένως**](#what-is-mdm-mobile-device-management)**,** προκειμένου να επιχειρηθεί η εγγραφή μιας συσκευής σε έναν οργανισμό **χρειάζεται μόνο ένας Serial Number που ανήκει σε αυτόν τον οργανισμό**. Μόλις εγγραφεί η συσκευή, αρκετοί οργανισμοί εγκαθιστούν ευαίσθητα δεδομένα στη νέα συσκευή: certificates, applications, κωδικούς WiFi, VPN configurations [και ούτω καθεξής](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Επομένως, αυτό θα μπορούσε να αποτελέσει ένα επικίνδυνο entrypoint για attackers, εάν η διαδικασία εγγραφής δεν προστατεύεται σωστά.
+Όπως [**αναφέρθηκε προηγουμένως**](#what-is-mdm-mobile-device-management)**,** προκειμένου να επιχειρηθεί η εγγραφή μιας συσκευής σε έναν οργανισμό **απαιτείται μόνο ένας Serial Number που ανήκει σε αυτόν τον οργανισμό**. Μόλις εγγραφεί η συσκευή, αρκετοί οργανισμοί θα εγκαταστήσουν ευαίσθητα δεδομένα στη νέα συσκευή: certificates, applications, κωδικούς WiFi, VPN configurations [και ούτω καθεξής](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Επομένως, αυτό θα μπορούσε να αποτελέσει επικίνδυνο entrypoint για attackers, εάν η διαδικασία εγγραφής δεν προστατεύεται σωστά.
 
-**Το παρακάτω αποτελεί σύνοψη της έρευνας [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Ανατρέξτε σε αυτή για περισσότερες τεχνικές λεπτομέρειες!**<sup>[[1]](#references)</sup>
+**Ακολουθεί μια περίληψη της έρευνας [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Ανατρέξτε σε αυτή για περισσότερες τεχνικές λεπτομέρειες!**<sup>[[1]](#references)</sup>
 
-## Επισκόπηση της ανάλυσης των DEP και MDM Binaries
+## Επισκόπηση της Binary Analysis των DEP και MDM
 
-Η έρευνα εξετάζει διεξοδικά τα binaries που σχετίζονται με τα Device Enrollment Program (DEP) και Mobile Device Management (MDM) στο macOS. Τα βασικά components περιλαμβάνουν:
+Η έρευνα εξετάζει τα binaries που σχετίζονται με το Device Enrollment Program (DEP) και το Mobile Device Management (MDM) στο macOS. Τα βασικά components περιλαμβάνουν:
 
 - **`mdmclient`**: Επικοινωνεί με MDM servers και ενεργοποιεί DEP check-ins σε εκδόσεις macOS πριν από την 10.13.4.
 - **`profiles`**: Διαχειρίζεται Configuration Profiles και ενεργοποιεί DEP check-ins σε εκδόσεις macOS 10.13.4 και νεότερες.
@@ -21,34 +21,34 @@
 
 ## Reverse Engineering του Tesla Protocol και του Absinthe Scheme
 
-Το DEP check-in περιλαμβάνει την αποστολή από το `cloudconfigurationd` ενός encrypted, signed JSON payload στο _iprofiles.apple.com/macProfile_. Το payload περιλαμβάνει το serial number της συσκευής και την ενέργεια "RequestProfileConfiguration". Το encryption scheme που χρησιμοποιείται αναφέρεται εσωτερικά ως "Absinthe". Η αποκρυπτογράφηση αυτού του scheme είναι σύνθετη και περιλαμβάνει πολλά βήματα, γεγονός που οδήγησε στη διερεύνηση εναλλακτικών μεθόδων για την εισαγωγή αυθαίρετων serial numbers στο Activation Record request.<sup>[[1]](#references)</sup>
+Στο DEP check-in, το `cloudconfigurationd` στέλνει ένα encrypted, signed JSON payload στο _iprofiles.apple.com/macProfile_. Το payload περιλαμβάνει το serial number της συσκευής και την action "RequestProfileConfiguration". Το encryption scheme που χρησιμοποιείται αναφέρεται εσωτερικά ως "Absinthe". Η αποκάλυψη του τρόπου λειτουργίας αυτού του scheme είναι σύνθετη και περιλαμβάνει πολλά βήματα, γεγονός που οδήγησε στην εξερεύνηση εναλλακτικών μεθόδων για την εισαγωγή αυθαίρετων serial numbers στο αίτημα Activation Record.<sup>[[1]](#references)</sup>
 
 ## Proxying DEP Requests
 
-Οι προσπάθειες intercept και τροποποίησης των DEP requests προς το _iprofiles.apple.com_ με τη χρήση tools όπως το Charles Proxy παρεμποδίστηκαν από την κρυπτογράφηση του payload και τα μέτρα ασφαλείας SSL/TLS. Ωστόσο, η ενεργοποίηση του `MCCloudConfigAcceptAnyHTTPSCertificate` configuration επιτρέπει την παράκαμψη του server certificate validation, αν και η encrypted φύση του payload εξακολουθεί να εμποδίζει την τροποποίηση του serial number χωρίς το decryption key.<sup>[[1]](#references)</sup>
+Οι προσπάθειες interception και τροποποίησης των DEP requests προς το _iprofiles.apple.com_ με εργαλεία όπως το Charles Proxy παρεμποδίστηκαν από το payload encryption και τα μέτρα ασφάλειας SSL/TLS. Ωστόσο, η ενεργοποίηση του configuration `MCCloudConfigAcceptAnyHTTPSCertificate` επιτρέπει την παράκαμψη της επικύρωσης του server certificate, αν και η encrypted φύση του payload εξακολουθεί να αποτρέπει την τροποποίηση του serial number χωρίς το decryption key.<sup>[[1]](#references)</sup>
 
 ## Instrumenting System Binaries που αλληλεπιδρούν με το DEP
 
-Το Instrumenting system binaries όπως το `cloudconfigurationd` απαιτεί την απενεργοποίηση του System Integrity Protection (SIP) στο macOS. Με απενεργοποιημένο το SIP, tools όπως το LLDB μπορούν να χρησιμοποιηθούν για attach σε system processes και για πιθανή τροποποίηση του serial number που χρησιμοποιείται στις DEP API interactions. Αυτή η μέθοδος είναι προτιμότερη, καθώς αποφεύγει τις πολυπλοκότητες των entitlements και του code signing.
+Το Instrumenting system binaries όπως το `cloudconfigurationd` απαιτεί την απενεργοποίηση του System Integrity Protection (SIP) στο macOS. Με απενεργοποιημένο το SIP, εργαλεία όπως το LLDB μπορούν να χρησιμοποιηθούν για attach σε system processes και πιθανή τροποποίηση του serial number που χρησιμοποιείται στις αλληλεπιδράσεις με το DEP API. Αυτή η μέθοδος είναι προτιμητέα, καθώς αποφεύγει τις πολυπλοκότητες των entitlements και του code signing.<sup>[[1]](#references)</sup>
 
 **Exploiting Binary Instrumentation:**
 Η τροποποίηση του DEP request payload πριν από το JSON serialization στο `cloudconfigurationd` αποδείχθηκε αποτελεσματική. Η διαδικασία περιλάμβανε:
 
-1. Attach στο `cloudconfigurationd` με το LLDB.
-2. Εντοπισμό του σημείου όπου ανακτάται το system serial number.
-3. Injection ενός αυθαίρετου serial number στη μνήμη, πριν από την κρυπτογράφηση και την αποστολή του payload.
+1. Attach με LLDB στο `cloudconfigurationd`.
+2. Εντοπισμό του σημείου όπου γίνεται η ανάκτηση του system serial number.
+3. Inject ενός αυθαίρετου serial number στη μνήμη, πριν από το encryption και την αποστολή του payload.
 
 Αυτή η μέθοδος επέτρεψε την ανάκτηση πλήρων DEP profiles για αυθαίρετα serial numbers, αποδεικνύοντας μια πιθανή ευπάθεια.<sup>[[1]](#references)</sup>
 
 ### Αυτοματοποίηση του Instrumentation με Python
 
-Η διαδικασία exploitation αυτοματοποιήθηκε με τη χρήση Python και του LLDB API, καθιστώντας εφικτό το programmatic injection αυθαίρετων serial numbers και την ανάκτηση των αντίστοιχων DEP profiles.<sup>[[1]](#references)</sup>
+Η διαδικασία exploitation αυτοματοποιήθηκε με τη χρήση Python και του LLDB API, καθιστώντας εφικτό το programmatic inject αυθαίρετων serial numbers και την ανάκτηση των αντίστοιχων DEP profiles.<sup>[[1]](#references)</sup>
 
-### Πιθανές επιπτώσεις των DEP και MDM Vulnerabilities
+### Πιθανές επιπτώσεις των ευπαθειών DEP και MDM
 
-Η έρευνα ανέδειξε σημαντικές ανησυχίες ασφαλείας:
+Η έρευνα ανέδειξε σημαντικές ανησυχίες ασφάλειας:
 
-1. **Information Disclosure**: Με την παροχή ενός DEP-registered serial number, μπορούν να ανακτηθούν ευαίσθητες πληροφορίες του οργανισμού που περιέχονται στο DEP profile.<sup>[[1]](#references)</sup>
+1. **Αποκάλυψη πληροφοριών**: Με την παροχή ενός DEP-registered serial number, μπορούν να ανακτηθούν ευαίσθητες πληροφορίες του οργανισμού που περιέχονται στο DEP profile.<sup>[[1]](#references)</sup>
 
 ## Αναφορές
 

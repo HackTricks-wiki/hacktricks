@@ -4,14 +4,14 @@
 
 ## Βασικές πληροφορίες
 
-Το **Grand Central Dispatch (GCD),** γνωστό επίσης ως **libdispatch** (`libdispatch.dyld`), είναι διαθέσιμο τόσο σε macOS όσο και σε iOS. Πρόκειται για τεχνολογία που αναπτύχθηκε από την Apple για τη βελτιστοποίηση της υποστήριξης εφαρμογών για ταυτόχρονη (multithreaded) εκτέλεση σε hardware με πολλαπλούς πυρήνες.
+Το **Grand Central Dispatch (GCD),** γνωστό επίσης ως **libdispatch** (`libdispatch.dyld`), είναι διαθέσιμο τόσο στο macOS όσο και στο iOS. Πρόκειται για τεχνολογία που αναπτύχθηκε από την Apple για τη βελτιστοποίηση της υποστήριξης εφαρμογών για ταυτόχρονη (multithreaded) εκτέλεση σε hardware με πολλαπλούς πυρήνες.<sup>[[4]](#references)</sup>
 
-Το **GCD** παρέχει και διαχειρίζεται **FIFO queues**, στις οποίες η εφαρμογή σας μπορεί να **υποβάλλει tasks** με τη μορφή **block objects**. Τα blocks που υποβάλλονται σε dispatch queues **εκτελούνται σε ένα pool threads** που διαχειρίζεται πλήρως το σύστημα. Το GCD δημιουργεί αυτόματα threads για την εκτέλεση των tasks στις dispatch queues και προγραμματίζει αυτά τα tasks να εκτελεστούν στους διαθέσιμους πυρήνες.
+Το **GCD** παρέχει και διαχειρίζεται **FIFO queues**, στις οποίες η εφαρμογή σας μπορεί να **υποβάλλει tasks** με τη μορφή **block objects**. Τα blocks που υποβάλλονται σε dispatch queues **εκτελούνται σε ένα pool από threads**, το οποίο διαχειρίζεται πλήρως το σύστημα. Το GCD δημιουργεί αυτόματα threads για την εκτέλεση των tasks στις dispatch queues και προγραμματίζει αυτά τα tasks να εκτελεστούν στους διαθέσιμους πυρήνες.<sup>[[1]](#references)</sup>
 
 > [!TIP]
-> Συνοπτικά, για την εκτέλεση κώδικα **παράλληλα**, οι διεργασίες μπορούν να στέλνουν **blocks κώδικα στο GCD**, το οποίο αναλαμβάνει την εκτέλεσή τους. Επομένως, οι διεργασίες δεν δημιουργούν νέα threads· το **GCD εκτελεί τον δεδομένο κώδικα με το δικό του pool threads** (το οποίο μπορεί να αυξάνεται ή να μειώνεται όπως απαιτείται).
+> Συνοπτικά, για την εκτέλεση κώδικα **παράλληλα**, οι διεργασίες μπορούν να στέλνουν **blocks κώδικα στο GCD**, το οποίο αναλαμβάνει την εκτέλεσή τους. Επομένως, οι διεργασίες δεν δημιουργούν νέα threads· **το GCD εκτελεί τον δεδομένο κώδικα με το δικό του pool από threads** (το οποίο μπορεί να αυξάνεται ή να μειώνεται ανάλογα με τις ανάγκες).
 
-Αυτό είναι ιδιαίτερα χρήσιμο για την επιτυχή διαχείριση της παράλληλης εκτέλεσης, μειώνοντας σημαντικά τον αριθμό των threads που δημιουργούν οι διεργασίες και βελτιστοποιώντας την παράλληλη εκτέλεση. Είναι ιδανικό για tasks που απαιτούν **μεγάλο βαθμό παραλληλισμού** (brute-forcing;) ή για tasks που δεν πρέπει να μπλοκάρουν το main thread: Για παράδειγμα, το main thread στο iOS διαχειρίζεται τις αλληλεπιδράσεις με το UI, επομένως κάθε άλλη λειτουργικότητα που θα μπορούσε να κάνει την εφαρμογή να «κολλήσει» (αναζήτηση, πρόσβαση σε web, ανάγνωση αρχείου...) διαχειρίζεται με αυτόν τον τρόπο.
+Αυτό είναι πολύ χρήσιμο για την επιτυχή διαχείριση της παράλληλης εκτέλεσης, μειώνοντας σημαντικά τον αριθμό των threads που δημιουργούν οι διεργασίες και βελτιστοποιώντας την παράλληλη εκτέλεση. Είναι ιδανικό για tasks που απαιτούν **μεγάλο παραλληλισμό** (brute-forcing;) ή για tasks που δεν θα πρέπει να μπλοκάρουν το main thread: Για παράδειγμα, το main thread στο iOS διαχειρίζεται τις αλληλεπιδράσεις του UI, επομένως κάθε άλλη λειτουργικότητα που θα μπορούσε να κάνει την εφαρμογή να «κολλήσει» (αναζήτηση, πρόσβαση σε web, ανάγνωση αρχείου...) διαχειρίζεται με αυτόν τον τρόπο.
 
 ### Blocks
 
@@ -20,28 +20,28 @@
 
 - **block literal**:
 - Ξεκινά με το πεδίο **`isa`**, το οποίο δείχνει στην class του block:
-- `NSConcreteGlobalBlock` (blocks από `__DATA.__const`)
+- `NSConcreteGlobalBlock` (blocks από το `__DATA.__const`)
 - `NSConcreteMallocBlock` (blocks στο heap)
 - `NSConcreateStackBlock` (blocks στο stack)
-- Περιέχει **`flags`** (που υποδεικνύουν τα πεδία που υπάρχουν στο block descriptor) και ορισμένα reserved bytes
-- Ο function pointer που θα κληθεί
+- Διαθέτει **`flags`** (που υποδεικνύουν τα πεδία τα οποία υπάρχουν στο block descriptor) και ορισμένα reserved bytes
+- Ο function pointer που καλείται
 - Έναν pointer στο block descriptor
-- Block imported variables (αν υπάρχουν)
+- Block imported variables (εάν υπάρχουν)
 - **block descriptor**: Το μέγεθός του εξαρτάται από τα δεδομένα που υπάρχουν (όπως υποδεικνύεται από τα προηγούμενα flags)
-- Περιέχει ορισμένα reserved bytes
+- Διαθέτει ορισμένα reserved bytes
 - Το μέγεθός του
-- Συνήθως περιέχει έναν pointer σε signature τύπου Objective-C, ώστε να γνωρίζει πόσος χώρος απαιτείται για τα params (flag `BLOCK_HAS_SIGNATURE`)
-- Αν γίνεται αναφορά σε variables, αυτό το block θα περιέχει επίσης pointers σε έναν copy helper (που αντιγράφει την τιμή στην αρχή) και έναν dispose helper (που την απελευθερώνει).
+- Συνήθως διαθέτει έναν pointer σε signature τύπου Objective-C, ώστε να γνωρίζει πόσος χώρος απαιτείται για τα params (flag `BLOCK_HAS_SIGNATURE`)
+- Εάν γίνεται αναφορά σε variables, αυτό το block θα διαθέτει επίσης pointers σε έναν copy helper (που αντιγράφει την τιμή στην αρχή) και έναν dispose helper (που την αποδεσμεύει).
 
 ### Queues
 
-Μια dispatch queue είναι ένα named object που παρέχει FIFO ordering για την εκτέλεση blocks.
+Μια dispatch queue είναι ένα named object που παρέχει FIFO ordering των blocks προς εκτέλεση.<sup>[[3]](#references)</sup>
 
-Τα blocks τοποθετούνται σε queues για να εκτελεστούν, και αυτές υποστηρίζουν 2 modes: `DISPATCH_QUEUE_SERIAL` και `DISPATCH_QUEUE_CONCURRENT`. Φυσικά, η **serial** queue **δεν θα έχει** προβλήματα race condition, καθώς ένα block δεν θα εκτελεστεί μέχρι να ολοκληρωθεί το προηγούμενο. Ωστόσο, **ο άλλος τύπος queue μπορεί να έχει** τέτοια προβλήματα.
+Τα blocks τοποθετούνται σε queues για να εκτελεστούν, και αυτές υποστηρίζουν 2 modes: `DISPATCH_QUEUE_SERIAL` και `DISPATCH_QUEUE_CONCURRENT`. Φυσικά, η **serial** queue **δεν θα έχει** προβλήματα race condition, καθώς ένα block δεν θα εκτελεστεί μέχρι να ολοκληρωθεί το προηγούμενο. Όμως **ο άλλος τύπος queue μπορεί να έχει** τέτοια προβλήματα.
 
 Default queues:
 
-- `.main-thread`: Από τη `dispatch_get_main_queue()`
+- `.main-thread`: Από το `dispatch_get_main_queue()`
 - `.libdispatch-manager`: Ο queue manager του GCD
 - `.root.libdispatch-manager`: Ο queue manager του GCD
 - `.root.maintenance-qos`: Tasks με τη χαμηλότερη προτεραιότητα
@@ -57,15 +57,15 @@ Default queues:
 - `.root.user-interactive-qos`: Υψηλότερη προτεραιότητα
 - `.root.background-qos.overcommit`
 
-Σημειώστε ότι το σύστημα αποφασίζει **ποια threads θα χειρίζονται ποιες queues κάθε στιγμή** (πολλά threads μπορεί να εργάζονται στην ίδια queue ή το ίδιο thread μπορεί κάποια στιγμή να εργάζεται σε διαφορετικές queues).
+Σημειώστε ότι το σύστημα αποφασίζει **ποια threads χειρίζονται ποιες queues κάθε χρονική στιγμή** (πολλά threads μπορεί να εργάζονται στην ίδια queue ή το ίδιο thread μπορεί κάποια στιγμή να εργάζεται σε διαφορετικές queues).
 
 #### Attributtes
 
-Κατά τη δημιουργία μιας queue με **`dispatch_queue_create`**, το τρίτο argument είναι ένα `dispatch_queue_attr_t`, το οποίο συνήθως είναι είτε `DISPATCH_QUEUE_SERIAL` (που στην πραγματικότητα είναι NULL) είτε `DISPATCH_QUEUE_CONCURRENT`, το οποίο είναι pointer σε ένα struct `dispatch_queue_attr_t` που επιτρέπει τον έλεγχο ορισμένων παραμέτρων της queue.
+Κατά τη δημιουργία μιας queue με το **`dispatch_queue_create`**, το τρίτο argument είναι ένα `dispatch_queue_attr_t`, το οποίο συνήθως είναι είτε `DISPATCH_QUEUE_SERIAL` (το οποίο στην πραγματικότητα είναι NULL) είτε `DISPATCH_QUEUE_CONCURRENT`, που είναι ένας pointer σε ένα struct `dispatch_queue_attr_t`, το οποίο επιτρέπει τον έλεγχο ορισμένων παραμέτρων της queue.
 
 ### Dispatch objects
 
-Υπάρχουν αρκετά objects που χρησιμοποιεί το libdispatch και οι queues και τα blocks είναι μόνο 2 από αυτά. Είναι δυνατή η δημιουργία αυτών των objects με `dispatch_object_create`:
+Υπάρχουν διάφορα objects που χρησιμοποιεί το libdispatch και οι queues και τα blocks είναι μόνο 2 από αυτά. Είναι δυνατή η δημιουργία αυτών των objects με το `dispatch_object_create`:<sup>[[1]](#references)[[2]](#references)</sup>
 
 - `block`
 - `data`: Data blocks
@@ -73,7 +73,7 @@ Default queues:
 - `io`: Async I/O requests
 - `mach`: Mach ports
 - `mach_msg`: Mach messages
-- `pthread_root_queue`: Μια queue με pool από pthread threads και όχι workqueues
+- `pthread_root_queue`:Μια queue με pthread thread pool και όχι workqueues
 - `queue`
 - `semaphore`
 - `source`: Event source
@@ -85,9 +85,9 @@ Default queues:
 - [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Υποβάλλει ένα block για asynchronous εκτέλεση σε μια dispatch queue και επιστρέφει αμέσως.
 - [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Υποβάλλει ένα block object για εκτέλεση και επιστρέφει αφού ολοκληρωθεί η εκτέλεση αυτού του block.
 - [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Εκτελεί ένα block object μόνο μία φορά κατά τη διάρκεια ζωής μιας εφαρμογής.
-- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Υποβάλλει ένα work item για εκτέλεση και επιστρέφει μόνο αφού ολοκληρωθεί η εκτέλεσή του. Σε αντίθεση με τη [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), αυτή η function σέβεται όλα τα attributes της queue κατά την εκτέλεση του block.
+- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Υποβάλλει ένα work item για εκτέλεση και επιστρέφει μόνο αφού ολοκληρωθεί η εκτέλεσή του. Σε αντίθεση με το [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), αυτή η function σέβεται όλα τα attributes της queue όταν εκτελεί το block.
 
-Αυτές οι functions αναμένουν αυτές τις παραμέτρους: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
+Αυτές οι functions αναμένουν τις εξής παραμέτρους: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
 
 Αυτό είναι το **struct ενός Block**:
 ```c
@@ -100,7 +100,7 @@ struct BlockDescriptor *descriptor;
 // captured variables go here
 };
 ```
-Και αυτό είναι ένα παράδειγμα χρήσης **παραλληλισμού** με το **`dispatch_async`**:
+Και αυτό είναι ένα παράδειγμα χρήσης **parallelism** με το **`dispatch_async`**:
 ```objectivec
 #import <Foundation/Foundation.h>
 
@@ -133,7 +133,7 @@ return 0;
 ## Swift
 
 **`libswiftDispatch`** είναι μια βιβλιοθήκη που παρέχει **Swift bindings** για το framework Grand Central Dispatch (GCD), το οποίο έχει γραφτεί αρχικά σε C.\
-Η βιβλιοθήκη **`libswiftDispatch`** περιτυλίγει τα C GCD APIs σε ένα interface πιο φιλικό προς τη Swift, διευκολύνοντας τους Swift developers να εργάζονται με το GCD με πιο εύκολο και διαισθητικό τρόπο.
+Η βιβλιοθήκη **`libswiftDispatch`** περιτυλίγει τα C GCD APIs σε ένα πιο φιλικό προς τη Swift interface, διευκολύνοντας τους Swift developers να εργάζονται με το GCD με πιο εύκολο και διαισθητικό τρόπο.
 
 - **`DispatchQueue.global().sync{ ... }`**
 - **`DispatchQueue.global().async{ ... }`**
@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-Το ακόλουθο Frida script μπορεί να χρησιμοποιηθεί για **hook σε διάφορες συναρτήσεις `dispatch`** και εξαγωγή του ονόματος του queue, του backtrace και του block: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js).
+Το ακόλουθο Frida script μπορεί να χρησιμοποιηθεί για να κάνει **hook σε διάφορες συναρτήσεις `dispatch`** και να εξάγει το όνομα της queue, το backtrace και το block: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js).
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -185,7 +185,7 @@ Backtrace:
 ```
 ## Ghidra
 
-Προς το παρόν, το Ghidra δεν κατανοεί ούτε τη δομή ObjectiveC **`dispatch_block_t`**, ούτε τη δομή **`swift_dispatch_block`**.
+Επί του παρόντος, το Ghidra δεν κατανοεί ούτε τη δομή ObjectiveC **`dispatch_block_t`**, ούτε τη δομή **`swift_dispatch_block`**.
 
 Επομένως, αν θέλετε να τις κατανοεί, μπορείτε απλώς να τις **δηλώσετε**:
 
@@ -198,11 +198,11 @@ Backtrace:
 Στη συνέχεια, βρείτε ένα σημείο στον κώδικα όπου **χρησιμοποιούνται**:
 
 > [!TIP]
-> Σημειώστε όλες τις αναφορές στο "block" για να κατανοήσετε πώς μπορείτε να συμπεράνετε ότι χρησιμοποιείται η δομή.
+> Σημειώστε όλες τις αναφορές που γίνονται στο "block", ώστε να κατανοήσετε πώς μπορείτε να συμπεράνετε ότι χρησιμοποιείται η δομή.
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Κάντε δεξί κλικ στη μεταβλητή -> Retype Variable και επιλέξτε, σε αυτή την περίπτωση, το **`swift_dispatch_block`**:
+Κάντε δεξί κλικ στη μεταβλητή -> Retype Variable και επιλέξτε σε αυτήν την περίπτωση **`swift_dispatch_block`**:
 
 <figure><img src="../../images/image (1165).png" alt="" width="563"><figcaption></figcaption></figure>
 

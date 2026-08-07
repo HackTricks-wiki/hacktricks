@@ -4,7 +4,7 @@
 
 ## CFRuntimeClass
 
-Τα αντικείμενα CF* προέρχονται από το CoreFoundation, το οποίο παρέχει περισσότερες από 50 κλάσεις αντικειμένων, όπως `CFString`, `CFNumber` ή `CFAllocator`.
+Τα αντικείμενα `CF*` προέρχονται από το CoreFoundation, το οποίο παρέχει περισσότερες από 50 κλάσεις αντικειμένων, όπως `CFString`, `CFNumber` ή `CFAllocator`.
 
 Όλες αυτές οι κλάσεις είναι instances της κλάσης `CFRuntimeClass`, η οποία, όταν καλείται, επιστρέφει ένα index στον `__CFRuntimeClassTable`. Το CFRuntimeClass ορίζεται στο [**CFRuntime.h**](https://opensource.apple.com/source/CF/CF-1153.18/CFRuntime.h.auto.html):
 ```objectivec
@@ -64,28 +64,28 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 - `__objc_data` (`...`): Mutable δεδομένα
 - `__objc_classrefs` (`Class`): Αναφορές κλάσεων
 - `__objc_superrefs` (`Class`): Αναφορές superclass
-- `__objc_protorefs` (`protocol_t *`): Αναφορές πρωτοκόλλων
+- `__objc_protorefs` (`protocol_t *`): Αναφορές protocols
 - `__objc_selrefs` (`SEL`): Αναφορές selectors
-- `__objc_const` (`...`): Read-only δεδομένα κλάσεων και άλλα (ελπίζουμε) constant δεδομένα
-- `__objc_imageinfo` (`version, flags`): Χρησιμοποιείται κατά τη φόρτωση του image: Η τρέχουσα έκδοση είναι `0`. Τα flags καθορίζουν την υποστήριξη preoptimized GC κ.λπ.
-- `__objc_protolist` (`protocol_t *`): Λίστα πρωτοκόλλων
-- `__objc_nlcatlist` (`category_t`): Pointer σε Non-Lazy Categories που ορίζονται σε αυτό το binary
-- `__objc_catlist` (`category_t`): Pointer σε Categories που ορίζονται σε αυτό το binary
-- `__objc_nlclslist` (`classref_t`): Pointer σε Non-Lazy Objective‑C classes που ορίζονται σε αυτό το binary
-- `__objc_classlist` (`classref_t`): Pointers σε όλες τις Objective‑C classes που ορίζονται σε αυτό το binary
+- `__objc_const` (`...`): Class r/o δεδομένα και άλλα (ελπίζουμε) constant δεδομένα
+- `__objc_imageinfo` (`version, flags`): Χρησιμοποιείται κατά το image load: Η τρέχουσα Version είναι `0`; τα Flags καθορίζουν υποστήριξη preoptimized GC κ.λπ.
+- `__objc_protolist` (`protocol_t *`): Λίστα protocols
+- `__objc_nlcatlist` (`category_t`): Pointer προς Non-Lazy Categories που ορίζονται σε αυτό το binary
+- `__objc_catlist` (`category_t`): Pointer προς Categories που ορίζονται σε αυτό το binary
+- `__objc_nlclslist` (`classref_t`): Pointer προς Non-Lazy Objective‑C classes που ορίζονται σε αυτό το binary
+- `__objc_classlist` (`classref_t`): Pointers προς όλες τις Objective‑C classes που ορίζονται σε αυτό το binary
 
 Χρησιμοποιεί επίσης μερικές sections στο segment `__TEXT` για την αποθήκευση constants:
 
-- `__objc_methname` (C‑String): Ονόματα μεθόδων
-- `__objc_classname` (C‑String): Ονόματα κλάσεων
-- `__objc_methtype` (C‑String): Τύποι μεθόδων
+- `__objc_methname` (C‑String): Ονόματα methods
+- `__objc_classname` (C‑String): Ονόματα classes
+- `__objc_methtype` (C‑String): Τύποι methods
 
-Τα σύγχρονα macOS/iOS (ιδιαίτερα στο Apple Silicon) τοποθετούν επίσης Objective‑C/Swift metadata στα:
+Τα σύγχρονα macOS/iOS (ειδικά σε Apple Silicon) τοποθετούν επίσης metadata του Objective‑C/Swift στα:
 
-- `__DATA_CONST`: Immutable Objective‑C metadata που μπορεί να γίνει shared read-only μεταξύ processes (για παράδειγμα, πολλές λίστες `__objc_*` βρίσκονται πλέον εδώ).
-- `__AUTH` / `__AUTH_CONST`: Segments που περιέχουν pointers τα οποία πρέπει να authenticated κατά το load ή κατά τη χρήση σε arm64e (Pointer Authentication). Θα δείτε επίσης το `__auth_got` στο `__AUTH_CONST` αντί για τα legacy `__la_symbol_ptr`/`__got` μόνο. Κατά το instrumenting ή το hooking, θυμηθείτε να λαμβάνετε υπόψη τόσο τα entries του `__got` όσο και του `__auth_got` σε σύγχρονα binaries.
+- `__DATA_CONST`: Immutable metadata του Objective‑C, τα οποία μπορούν να γίνουν shared read-only μεταξύ processes (για παράδειγμα, πολλές λίστες `__objc_*` βρίσκονται πλέον εδώ).
+- `__AUTH` / `__AUTH_CONST`: Segments που περιέχουν pointers οι οποίοι πρέπει να γίνουν authenticated κατά το load ή κατά τη χρήση σε arm64e (Pointer Authentication). Θα δείτε επίσης το `__auth_got` στο `__AUTH_CONST` αντί για τα legacy `__la_symbol_ptr`/`__got`. Κατά το instrumenting ή το hooking, θυμηθείτε να λαμβάνετε υπόψη τόσο τα entries του `__got` όσο και του `__auth_got` στα σύγχρονα binaries.
 
-Για background σχετικά με το dyld pre-optimization (π.χ. selector uniquing και class/protocol precomputation) και για το γιατί πολλές από αυτές τις sections είναι «ήδη fixed up» όταν προέρχονται από το shared cache, ελέγξτε τα Apple `objc-opt` sources και τις σημειώσεις για το dyld shared cache. Αυτό επηρεάζει το πού και το πώς μπορείτε να κάνετε patch metadata κατά το runtime.
+Για background σχετικά με το dyld pre‑optimization (π.χ. selector uniquing και class/protocol precomputation), καθώς και για το γιατί πολλές από αυτές τις sections είναι «ήδη fixed up» όταν προέρχονται από το shared cache, ελέγξτε τα Apple `objc-opt` sources και τις σημειώσεις για το dyld shared cache. Αυτό επηρεάζει το πού και το πώς μπορείτε να κάνετε patch metadata κατά το runtime.
 
 {{#ref}}
 ../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md
@@ -93,13 +93,13 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 
 ### Type Encoding
 
-Το Objective‑C χρησιμοποιεί mangling για την κωδικοποίηση των τύπων selectors και variables, τόσο απλών όσο και σύνθετων:
+Το Objective‑C χρησιμοποιεί mangling για να κωδικοποιεί τους τύπους των selectors και των variables, τόσο απλών όσο και σύνθετων:
 
 - Οι primitive types χρησιμοποιούν το πρώτο γράμμα του τύπου: `i` για `int`, `c` για `char`, `l` για `long`... και χρησιμοποιούν το κεφαλαίο γράμμα όταν είναι unsigned (`L` για `unsigned long`).
-- Άλλοι τύποι δεδομένων χρησιμοποιούν άλλα γράμματα ή σύμβολα, όπως `q` για `long long`, `b` για bitfields, `B` για booleans, `#` για classes, `@` για `id`, `*` για `char *`, `^` για generic pointers και `?` για undefined.
+- Άλλοι data types χρησιμοποιούν διαφορετικά γράμματα ή σύμβολα, όπως `q` για `long long`, `b` για bitfields, `B` για booleans, `#` για classes, `@` για `id`, `*` για `char *`, `^` για generic pointers και `?` για undefined.
 - Τα arrays, structures και unions χρησιμοποιούν αντίστοιχα τα `[`, `{` και `(`.
 
-#### Παράδειγμα Δήλωσης Μεθόδου
+#### Example Method Declaration
 ```objectivec
 - (NSString *)processString:(id)input withOptions:(char *)options andError:(id)error;
 ```
@@ -110,24 +110,24 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 - Το `id` κωδικοποιείται ως `@`
 - Το `char *` κωδικοποιείται ως `*`
 
-Η πλήρης κωδικοποίηση τύπων για τη μέθοδο είναι:
+Η πλήρης κωδικοποίηση τύπων για τη method είναι:
 ```less
 @24@0:8@16*20^@24
 ```
-#### Λεπτομερής Ανάλυση
+#### Λεπτομερής ανάλυση
 
 1. Τύπος επιστροφής (`NSString *`): Κωδικοποιείται ως `@` με μήκος 24
 2. `self` (instance του object): Κωδικοποιείται ως `@`, στο offset 0
 3. `_cmd` (selector): Κωδικοποιείται ως `:`, στο offset 8
-4. Πρώτο όρισμα (`char * input`): Κωδικοποιείται ως `*`, στο offset 16
-5. Δεύτερο όρισμα (`NSDictionary * options`): Κωδικοποιείται ως `@`, στο offset 20
-6. Τρίτο όρισμα (`NSError ** error`): Κωδικοποιείται ως `^@`, στο offset 24
+4. Πρώτο argument (`char * input`): Κωδικοποιείται ως `*`, στο offset 16
+5. Δεύτερο argument (`NSDictionary * options`): Κωδικοποιείται ως `@`, στο offset 20
+6. Τρίτο argument (`NSError ** error`): Κωδικοποιείται ως `^@`, στο offset 24
 
 Με το selector και το encoding μπορείτε να ανακατασκευάσετε τη μέθοδο.
 
 ### Κλάσεις
 
-Οι κλάσεις στο Objective‑C είναι C structs με properties, method pointers κ.λπ. Είναι δυνατό να βρείτε το struct `objc_class` στον [**πηγαίο κώδικα**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html):
+Οι κλάσεις στο Objective-C είναι C structs με properties, method pointers κ.λπ. Είναι δυνατό να βρείτε το struct `objc_class` στον [**πηγαίο κώδικα**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html):
 ```objectivec
 struct objc_class : objc_object {
 // Class ISA;
@@ -150,7 +150,7 @@ data()->setFlags(set);
 ```
 Αυτή η class χρησιμοποιεί ορισμένα bits του πεδίου `isa` για να υποδεικνύει πληροφορίες σχετικά με την class.
 
-Στη συνέχεια, το struct διαθέτει έναν pointer προς το struct `class_ro_t`, αποθηκευμένο στον δίσκο, το οποίο περιέχει attributes της class, όπως το όνομά της, base methods, properties και instance variables. Κατά το runtime χρησιμοποιείται μια πρόσθετη δομή `class_rw_t`, η οποία περιέχει pointers που μπορούν να τροποποιηθούν, όπως methods, protocols και properties.
+Στη συνέχεια, το struct διαθέτει έναν pointer προς το struct `class_ro_t`, αποθηκευμένο στον δίσκο, το οποίο περιέχει attributes της class, όπως το όνομά της, base methods, properties και instance variables. Κατά το runtime χρησιμοποιείται μια επιπλέον δομή `class_rw_t`, η οποία περιέχει pointers που μπορούν να τροποποιηθούν, όπως methods, protocols και properties.
 
 {{#ref}}
 ../macos-basic-objective-c.md
@@ -160,13 +160,13 @@ data()->setFlags(set);
 
 ## Σύγχρονες αναπαραστάσεις objects στη μνήμη (arm64e, tagged pointers, Swift)
 
-### Non‑pointer `isa` και Pointer Authentication (arm64e)
+### Non-pointer `isa` και Pointer Authentication (arm64e)
 
-Στο Apple Silicon και στα πρόσφατα runtimes, το Objective‑C `isa` δεν είναι πάντα ένας raw class pointer. Στο arm64e είναι μια packed δομή, η οποία μπορεί επίσης να περιέχει έναν Pointer Authentication Code (PAC). Ανάλογα με την πλατφόρμα, μπορεί να περιλαμβάνει πεδία όπως `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc` και τον ίδιο τον class pointer (με μετατόπιση ή υπογεγραμμένο). Αυτό σημαίνει ότι η τυφλή αποαναφορά των πρώτων 8 bytes ενός Objective‑C object δεν θα επιστρέφει πάντα έναν έγκυρο `Class` pointer.<sup>[[2]](#references)</sup>
+Στο Apple Silicon και στα πρόσφατα runtimes, το Objective-C `isa` δεν είναι πάντα ένας raw class pointer. Στο arm64e είναι μια packed structure που μπορεί επίσης να περιέχει έναν Pointer Authentication Code (PAC). Ανάλογα με την πλατφόρμα, μπορεί να περιλαμβάνει πεδία όπως `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc` και τον ίδιο τον class pointer (με shift ή signed). Αυτό σημαίνει ότι η τυφλή αποαναφορά των πρώτων 8 bytes ενός Objective-C object δεν θα επιστρέφει πάντα έναν έγκυρο `Class` pointer.<sup>[[2]](#references)</sup>
 
 Πρακτικές σημειώσεις κατά το debugging σε arm64e:
 
-- Το LLDB συνήθως αφαιρεί τα PAC bits για εσάς όταν εκτυπώνετε Objective‑C objects με `po`, αλλά όταν εργάζεστε με raw pointers μπορεί να χρειαστεί να αφαιρέσετε χειροκίνητα το authentication:
+- Το LLDB συνήθως αφαιρεί για εσάς τα PAC bits όταν εκτυπώνει Objective-C objects με `po`, αλλά όταν εργάζεστε με raw pointers μπορεί να χρειαστεί να αφαιρέσετε χειροκίνητα το authentication:
 
 ```lldb
 (lldb) expr -l objc++ -- #include <ptrauth.h>
@@ -174,20 +174,20 @@ data()->setFlags(set);
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)raw)
 ```
 
-- Πολλά function/data pointers στο Mach‑O βρίσκονται στα `__AUTH`/`__AUTH_CONST` και απαιτούν authentication πριν από τη χρήση τους. Αν κάνετε interposing ή re-binding (π.χ. με fishhook-style), βεβαιωθείτε ότι χειρίζεστε επίσης το `__auth_got`, εκτός από το legacy `__got`.
+- Πολλοί function/data pointers στο Mach-O βρίσκονται στα `__AUTH`/`__AUTH_CONST` και απαιτούν authentication πριν από τη χρήση τους. Αν κάνετε interposing ή re-binding (π.χ. σε στυλ fishhook), βεβαιωθείτε ότι χειρίζεστε επίσης το `__auth_got` πέρα από το legacy `__got`.
 
 Για μια λεπτομερή ανάλυση των εγγυήσεων της γλώσσας/ABI και των intrinsics του `<ptrauth.h>` που είναι διαθέσιμα από το Clang/LLVM, δείτε το reference στο τέλος αυτής της σελίδας.<sup>[[1]](#references)</sup>
 
 ### Tagged pointer objects
 
-Ορισμένες Foundation classes αποφεύγουν την allocation στο heap, κωδικοποιώντας απευθείας το payload του object στην τιμή του pointer (tagged pointers). Η ανίχνευση διαφέρει ανά πλατφόρμα (π.χ. το most-significant bit στο arm64 και το least-significant bit στο x86_64 macOS). Τα tagged objects δεν διαθέτουν κανονικό `isa` αποθηκευμένο στη μνήμη· το runtime επιλύει την class από τα tag bits.<sup>[[2]](#references)</sup> Κατά την επιθεώρηση αυθαίρετων τιμών `id`:
+Ορισμένες Foundation classes αποφεύγουν την allocation στο heap, κωδικοποιώντας απευθείας το payload του object στην τιμή του pointer (tagged pointers). Η ανίχνευση διαφέρει ανά πλατφόρμα (π.χ. το most-significant bit στο arm64 και το least-significant bit στο x86_64 macOS). Τα tagged objects δεν διαθέτουν ένα κανονικό `isa` αποθηκευμένο στη μνήμη· το runtime επιλύει την class από τα tag bits.<sup>[[2]](#references)</sup> Κατά την επιθεώρηση αυθαίρετων τιμών `id`:
 
 - Χρησιμοποιήστε runtime APIs αντί να εξετάζετε απευθείας το πεδίο `isa`: `object_getClass(obj)` / `[obj class]`.
-- Στο LLDB, το `po (id)0xADDR` θα εκτυπώσει σωστά τα tagged pointer instances, επειδή γίνεται χρήση του runtime για την επίλυση της class.
+- Στο LLDB, το `po (id)0xADDR` θα εκτυπώσει σωστά tagged pointer instances, επειδή γίνεται consulta στο runtime για την επίλυση της class.
 
 ### Swift heap objects και metadata
 
-Οι pure Swift classes είναι επίσης objects με header που δείχνει σε Swift metadata (όχι σε Objective‑C `isa`). Για να κάνετε introspection σε live Swift processes χωρίς να τα τροποποιήσετε, μπορείτε να χρησιμοποιήσετε το `swift-inspect` του Swift toolchain, το οποίο αξιοποιεί τη Remote Mirror library για να διαβάζει runtime metadata:
+Οι pure Swift classes είναι επίσης objects με header που δείχνει σε Swift metadata (και όχι σε Objective-C `isa`). Για να κάνετε introspection σε live Swift processes χωρίς να τα τροποποιήσετε, μπορείτε να χρησιμοποιήσετε το `swift-inspect` του Swift toolchain, το οποίο αξιοποιεί τη βιβλιοθήκη Remote Mirror για να διαβάσει runtime metadata:
 ```bash
 # Xcode toolchain (or Swift.org toolchain) provides swift-inspect
 swift-inspect dump-raw-metadata <pid-or-name>
@@ -195,7 +195,7 @@ swift-inspect dump-arrays <pid-or-name>
 # On Darwin additionally:
 swift-inspect dump-concurrency <pid-or-name>
 ```
-Αυτό είναι πολύ χρήσιμο για τη χαρτογράφηση αντικειμένων στο Swift heap και των protocol conformances κατά το reversing εφαρμογών με μικτό Swift/ObjC.
+Αυτό είναι πολύ χρήσιμο για τη χαρτογράφηση Swift heap objects και protocol conformances κατά το reversing μικτών εφαρμογών Swift/ObjC.
 
 ---
 
@@ -203,12 +203,12 @@ swift-inspect dump-concurrency <pid-or-name>
 
 ### LLDB
 
-- Εκτύπωση αντικειμένου ή class από raw pointer:
+- Εκτύπωση object ή class από raw pointer:
 ```lldb
 (lldb) expr -l objc++ -O -- (id)0x0000000101234560
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)0x0000000101234560)
 ```
-- Επιθεώρηση της κλάσης Objective-C από έναν pointer στο `self` μιας object method σε breakpoint:
+- Inspect την κλάση Objective-C από έναν pointer προς το `self` μιας μεθόδου αντικειμένου σε ένα breakpoint:
 ```lldb
 (lldb) br se -n '-[NSFileManager fileExistsAtPath:]'
 (lldb) r
@@ -216,22 +216,22 @@ swift-inspect dump-concurrency <pid-or-name>
 (lldb) po (id)$x0                 # self
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)$x0)
 ```
-- Dump sections που περιέχουν Objective-C metadata (σημείωση: πολλά βρίσκονται πλέον στα `__DATA_CONST` / `__AUTH_CONST`):
+- Κάντε dump τα sections που περιέχουν Objective-C metadata (σημείωση: πολλά βρίσκονται πλέον στα `__DATA_CONST` / `__AUTH_CONST`):
 ```lldb
 (lldb) image dump section --section __DATA_CONST.__objc_classlist
 (lldb) image dump section --section __DATA_CONST.__objc_selrefs
 (lldb) image dump section --section __AUTH_CONST.__auth_got
 ```
-- Διαβάστε τη μνήμη για ένα γνωστό `class object`, ώστε να κάνετε pivot σε `class_ro_t` / `class_rw_t` κατά το reverse engineering των method lists:
+- Διαβάστε τη μνήμη για ένα γνωστό `class object`, ώστε να κάνετε pivot σε `class_ro_t` / `class_rw_t` κατά το reversing των λιστών μεθόδων:
 ```lldb
 (lldb) image lookup -r -n _OBJC_CLASS_$_NSFileManager
 (lldb) memory read -fx -s8 0xADDRESS_OF_CLASS_OBJECT
 ```
 ### Frida (Objective-C και Swift)
 
-Το Frida παρέχει bridges υψηλού επιπέδου για το runtime, τα οποία είναι ιδιαίτερα χρήσιμα για την ανακάλυψη και το instrumentation ενεργών objects χωρίς symbols:
+Το Frida παρέχει high-level runtime bridges, τα οποία είναι ιδιαίτερα χρήσιμα για την ανακάλυψη και την instrumenting live objects χωρίς symbols:
 
-- Enumerate classes και methods, resolve των πραγματικών ονομάτων των classes στο runtime και intercept των Objective-C selectors:
+- Enumerate classes και methods, resolve τα πραγματικά class names στο runtime και intercept Objective-C selectors:
 ```js
 if (ObjC.available) {
 // List a class' methods
@@ -249,13 +249,14 @@ console.log('fileExistsAtPath:', this.path, '=>', retval);
 });
 }
 ```
-- Swift bridge: απαρίθμηση Swift types και αλληλεπίδραση με Swift instances (απαιτεί πρόσφατο Frida· πολύ χρήσιμο σε Apple Silicon targets).
+- Swift bridge: απαρίθμηση τύπων Swift και αλληλεπίδραση με instances Swift (απαιτεί πρόσφατη έκδοση του Frida· πολύ χρήσιμο σε targets με Apple Silicon).
 
 ---
 
 ## Αναφορές
 
+
 - [1] [Clang/LLVM: Pointer Authentication και τα intrinsics του ptrauth.h (arm64e ABI)](https://clang.llvm.org/docs/PointerAuthentication.html)
-- [2] [Apple objc runtime headers - objc-object.h (tagged pointers, non‑pointer isa κ.λπ.)](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
+- [2] [Apple objc runtime headers - objc-object.h (tagged pointers, non-pointer isa κ.λπ.)](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

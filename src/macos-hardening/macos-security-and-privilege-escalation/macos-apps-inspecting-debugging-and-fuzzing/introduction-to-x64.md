@@ -4,66 +4,66 @@
 
 ## **Εισαγωγή στο x64**
 
-Το x64, γνωστό και ως x86-64, είναι μια αρχιτεκτονική επεξεργαστών 64-bit που χρησιμοποιείται κυρίως σε υπολογιστικά συστήματα desktop και server. Προερχόμενο από την αρχιτεκτονική x86 που κατασκευάστηκε από την Intel και αργότερα υιοθετήθηκε από την AMD με την ονομασία AMD64, αποτελεί σήμερα την κυρίαρχη αρχιτεκτονική σε προσωπικούς υπολογιστές και servers.
+Το x64, γνωστό και ως x86-64, είναι μια αρχιτεκτονική επεξεργαστών 64-bit που χρησιμοποιείται κυρίως σε υπολογιστικά συστήματα desktop και server. Προερχόμενη από την αρχιτεκτονική x86 που παρήγαγε η Intel και αργότερα υιοθετήθηκε από την AMD με την ονομασία AMD64, αποτελεί σήμερα την επικρατέστερη αρχιτεκτονική σε προσωπικούς υπολογιστές και servers.
 
 ### **Registers**
 
-Το x64 επεκτείνει την αρχιτεκτονική x86, διαθέτοντας **16 registers γενικού σκοπού** με τις ονομασίες `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` και `r8` έως `r15`. Καθένα από αυτά μπορεί να αποθηκεύσει μια τιμή **64-bit** (8-byte). Αυτά τα registers διαθέτουν επίσης sub-registers 32-bit, 16-bit και 8-bit για συμβατότητα και συγκεκριμένες εργασίες.
+Το x64 επεκτείνει την αρχιτεκτονική x86, διαθέτοντας **16 registers γενικού σκοπού** με τις ονομασίες `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` και `r8` έως `r15`. Καθένα από αυτά μπορεί να αποθηκεύσει μια τιμή **64-bit** (8 byte). Αυτά τα registers διαθέτουν επίσης sub-registers των 32-bit, 16-bit και 8-bit για συμβατότητα και συγκεκριμένες εργασίες.
 
 1. **`rax`** - Χρησιμοποιείται παραδοσιακά για **τιμές επιστροφής** από functions.
 2. **`rbx`** - Χρησιμοποιείται συχνά ως **base register** για λειτουργίες μνήμης.
-3. **`rcx`** - Χρησιμοποιείται συνήθως για **μετρητές βρόχων**.
-4. **`rdx`** - Χρησιμοποιείται σε διάφορους ρόλους, συμπεριλαμβανομένων εκτεταμένων αριθμητικών λειτουργιών.
+3. **`rcx`** - Χρησιμοποιείται συνήθως για **loop counters**.
+4. **`rdx`** - Χρησιμοποιείται σε διάφορους ρόλους, συμπεριλαμβανομένων extended arithmetic operations.
 5. **`rbp`** - **Base pointer** για το stack frame.
 6. **`rsp`** - **Stack pointer**, που παρακολουθεί την κορυφή του stack.
-7. **`rsi`** και **`rdi`** - Χρησιμοποιούνται ως indexes **source** και **destination** σε λειτουργίες string/μνήμης.
+7. **`rsi`** και **`rdi`** - Χρησιμοποιούνται ως indexes **source** και **destination** σε string/memory operations.
 8. **`r8`** έως **`r15`** - Πρόσθετα registers γενικού σκοπού που εισήχθησαν στο x64.
 
 ### **Calling Convention**
 
-Το calling convention του x64 διαφέρει ανάλογα με το λειτουργικό σύστημα. Για παράδειγμα:
+Το calling convention του x64 διαφέρει ανάλογα με το operating system. Για παράδειγμα:
 
-- **Windows**: Οι πρώτες **τέσσερις παράμετροι** περνούν στα registers **`rcx`**, **`rdx`**, **`r8`** και **`r9`**. Οι επιπλέον παράμετροι γίνονται push στο stack. Η τιμή επιστροφής βρίσκεται στο **`rax`**.
-- **System V (χρησιμοποιείται συνήθως σε UNIX-like συστήματα)**: Οι πρώτες **έξι παράμετροι integer ή pointer** περνούν στα registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** και **`r9`**. Η τιμή επιστροφής βρίσκεται επίσης στο **`rax`**.
+- **Windows**: Οι πρώτες **τέσσερις παράμετροι** περνούν στα registers **`rcx`**, **`rdx`**, **`r8`** και **`r9`**. Οι επιπλέον παράμετροι τοποθετούνται στο stack. Η τιμή επιστροφής βρίσκεται στο **`rax`**.
+- **System V (χρησιμοποιείται συνήθως σε UNIX-like systems)**: Οι πρώτες **έξι παράμετροι integer ή pointer** περνούν στα registers **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** και **`r9`**. Η τιμή επιστροφής βρίσκεται επίσης στο **`rax`**.
 
-Αν η function έχει περισσότερες από έξι εισόδους, οι **υπόλοιπες θα περάσουν στο stack**. Το **RSP**, δηλαδή το stack pointer, πρέπει να είναι **ευθυγραμμισμένο σε 16 bytes**, πράγμα που σημαίνει ότι η διεύθυνση στην οποία δείχνει πρέπει να διαιρείται με το 16 πριν πραγματοποιηθεί οποιοδήποτε call. Αυτό σημαίνει ότι κανονικά πρέπει να διασφαλίσουμε πως το RSP είναι σωστά ευθυγραμμισμένο στο shellcode μας πριν πραγματοποιήσουμε ένα function call. Ωστόσο, στην πράξη, τα system calls λειτουργούν πολλές φορές ακόμη και όταν αυτή η απαίτηση δεν ικανοποιείται.
+Αν η function έχει περισσότερες από έξι εισόδους, οι **υπόλοιπες θα περάσουν στο stack**. Το **RSP**, δηλαδή το stack pointer, πρέπει να είναι **ευθυγραμμισμένο στα 16 bytes**, πράγμα που σημαίνει ότι η διεύθυνση στην οποία δείχνει πρέπει να διαιρείται ακριβώς με το 16 πριν πραγματοποιηθεί οποιοδήποτε call. Αυτό σημαίνει ότι κανονικά θα πρέπει να διασφαλίσουμε πως το RSP είναι σωστά ευθυγραμμισμένο στο shellcode μας πριν καλέσουμε μια function. Ωστόσο, στην πράξη, τα system calls λειτουργούν πολλές φορές ακόμη και όταν αυτή η απαίτηση δεν πληρείται.
 
 ### Calling Convention in Swift
 
-Το Swift έχει το δικό του **calling convention**, το οποίο μπορείτε να [**βρείτε εδώ**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)
+Η Swift έχει το δικό της **calling convention**, το οποίο μπορείτε να [**βρείτε εδώ**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64)**:**
 
 ### **Common Instructions**
 
 Οι x64 instructions διαθέτουν ένα πλούσιο σύνολο, διατηρώντας τη συμβατότητα με παλαιότερες x86 instructions και εισάγοντας νέες.
 
-- **`mov`**: **Μετακινεί** μια τιμή από ένα **register** ή μια **θέση μνήμης** σε ένα άλλο.
+- **`mov`**: **Μετακινεί** μια τιμή από ένα **register** ή μια **τοποθεσία μνήμης** σε ένα άλλο.
 - Παράδειγμα: `mov rax, rbx` — Μετακινεί την τιμή από το `rbx` στο `rax`.
 - **`push`** και **`pop`**: Κάνουν push ή pop τιμών προς/από το **stack**.
-- Παράδειγμα: `push rax` — Κάνει push την τιμή του `rax` στο stack.
-- Παράδειγμα: `pop rax` — Κάνει pop την κορυφαία τιμή του stack στο `rax`.
-- **`add`** και **`sub`**: Λειτουργίες **πρόσθεσης** και **αφαίρεσης**.
-- Παράδειγμα: `add rax, rcx` — Προσθέτει τις τιμές των `rax` και `rcx`, αποθηκεύοντας το αποτέλεσμα στο `rax`.
-- **`mul`** και **`div`**: Λειτουργίες **πολλαπλασιασμού** και **διαίρεσης**. Σημείωση: έχουν συγκεκριμένη συμπεριφορά ως προς τη χρήση των operands.
+- Παράδειγμα: `push rax` — Κάνει push την τιμή στο `rax` στο stack.
+- Παράδειγμα: `pop rax` — Κάνει pop την κορυφαία τιμή από το stack στο `rax`.
+- **`add`** και **`sub`**: **Πρόσθεση** και **αφαίρεση**.
+- Παράδειγμα: `add rax, rcx` — Προσθέτει τις τιμές στα `rax` και `rcx`, αποθηκεύοντας το αποτέλεσμα στο `rax`.
+- **`mul`** και **`div`**: **Πολλαπλασιασμός** και **διαίρεση**. Σημείωση: έχουν συγκεκριμένες συμπεριφορές σχετικά με τη χρήση των operands.
 - **`call`** και **`ret`**: Χρησιμοποιούνται για **κλήση** και **επιστροφή από functions**.
-- **`int`**: Χρησιμοποιείται για την ενεργοποίηση ενός software **interrupt**. Για παράδειγμα, το `int 0x80` χρησιμοποιούνταν για system calls σε 32-bit x86 Linux.
-- **`cmp`**: **Συγκρίνει** δύο τιμές και ορίζει τα flags της CPU με βάση το αποτέλεσμα.
+- **`int`**: Χρησιμοποιείται για την ενεργοποίηση ενός software **interrupt**. Π.χ., το `int 0x80` χρησιμοποιούνταν για system calls σε 32-bit x86 Linux.
+- **`cmp`**: Κάνει **σύγκριση** δύο τιμών και ορίζει τα flags του CPU με βάση το αποτέλεσμα.
 - Παράδειγμα: `cmp rax, rdx` — Συγκρίνει το `rax` με το `rdx`.
-- **`je`, `jne`, `jl`, `jge`, ...**: Instructions **conditional jump** που αλλάζουν τη ροή ελέγχου με βάση τα αποτελέσματα ενός προηγούμενου `cmp` ή test.
+- **`je`, `jne`, `jl`, `jge`, ...**: **Conditional jump** instructions που αλλάζουν τη ροή ελέγχου με βάση τα αποτελέσματα ενός προηγούμενου `cmp` ή test.
 - Παράδειγμα: Μετά από μια instruction `cmp rax, rdx`, η `je label` — Μεταβαίνει στο `label` αν το `rax` είναι ίσο με το `rdx`.
-- **`syscall`**: Χρησιμοποιείται για **system calls** σε ορισμένα x64 συστήματα (όπως τα σύγχρονα Unix).
-- **`sysenter`**: Μια βελτιστοποιημένη instruction **system call** σε ορισμένες πλατφόρμες.
+- **`syscall`**: Χρησιμοποιείται για **system calls** σε ορισμένα x64 systems (όπως τα σύγχρονα Unix).
+- **`sysenter`**: Μια βελτιστοποιημένη instruction για **system calls** σε ορισμένες platforms.
 
 ### **Function Prologue**
 
-1. **Κάνει push το παλιό base pointer**: `push rbp` (αποθηκεύει το base pointer του caller)
-2. **Μετακινεί το τρέχον stack pointer στο base pointer**: `mov rbp, rsp` (ρυθμίζει το νέο base pointer για την τρέχουσα function)
-3. **Δεσμεύει χώρο στο stack για local variables**: `sub rsp, <size>` (όπου το `<size>` είναι ο αριθμός των απαιτούμενων bytes)
+1. **Κάνε push το παλιό base pointer**: `push rbp` (αποθηκεύει το base pointer του caller)
+2. **Μετακίνησε το τρέχον stack pointer στο base pointer**: `mov rbp, rsp` (ρυθμίζει το νέο base pointer για την τρέχουσα function)
+3. **Δέσμευσε χώρο στο stack για local variables**: `sub rsp, <size>` (όπου το `<size>` είναι ο αριθμός των απαιτούμενων bytes)
 
 ### **Function Epilogue**
 
-1. **Μετακινεί το τρέχον base pointer στο stack pointer**: `mov rsp, rbp` (αποδεσμεύει τα local variables)
-2. **Κάνει pop το παλιό base pointer από το stack**: `pop rbp` (επαναφέρει το base pointer του caller)
-3. **Επιστρέφει**: `ret` (επιστρέφει τον έλεγχο στον caller)
+1. **Μετακίνησε το τρέχον base pointer στο stack pointer**: `mov rsp, rbp` (αποδεσμεύει τα local variables)
+2. **Κάνε pop το παλιό base pointer από το stack**: `pop rbp` (επαναφέρει το base pointer του caller)
+3. **Επέστρεψε**: `ret` (επιστρέφει τον έλεγχο στον caller)
 
 ## macOS
 
@@ -78,7 +78,7 @@
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-Στη συνέχεια, μπορείτε να βρείτε τον αριθμό κάθε syscall [**σε αυτό το URL**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
+Στη συνέχεια, μπορείτε να βρείτε τον αριθμό κάθε syscall [**σε αυτό το url**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -95,9 +95,9 @@
 12	AUE_CHDIR	ALL	{ int chdir(user_addr_t path); }
 [...]
 ```
-Επομένως, για να καλέσετε το syscall `open` (**5**) από την **Unix/BSD class**, πρέπει να προσθέσετε το: `0x2000000`
+Επομένως, για να καλέσετε το syscall `open` (**5**) από την κλάση **Unix/BSD**, πρέπει να προσθέσετε το `0x2000000`
 
-Επομένως, ο αριθμός syscall για την κλήση του open θα ήταν `0x2000005`
+Άρα, ο αριθμός syscall για την κλήση του open θα ήταν `0x2000005`
 
 ### Shellcodes
 
@@ -106,7 +106,7 @@
 nasm -f macho64 shell.asm -o shell.o
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
 ```
-Για την εξαγωγή των bytes:
+Για να εξαγάγετε τα bytes:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
 for c in $(objdump -d "shell.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
@@ -118,7 +118,7 @@ otool -t shell.o | grep 00 | cut -f2 -d$'\t' | sed 's/ /\\x/g' | sed 's/^/\\x/g'
 ```
 <details>
 
-<summary>Κώδικας C για τη δοκιμή του shellcode</summary>
+<summary>Κώδικας C για δοκιμή του shellcode</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -168,7 +168,7 @@ return 0;
 
 #### Shell
 
-Λήφθηκε από [**εδώ**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) και επεξηγείται.<sup>[[1]](#references)</sup>
+Πάρθηκε από [**εδώ**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) και επεξηγείται.<sup>[[1]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="with adr"}}
@@ -209,7 +209,7 @@ syscall
 
 #### Ανάγνωση με cat
 
-Ο στόχος είναι να εκτελέσουμε `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, επομένως το δεύτερο όρισμα (x1) είναι ένας πίνακας παραμέτρων (ο οποίος στη μνήμη αντιστοιχεί σε μια στοίβα διευθύνσεων).
+Ο στόχος είναι να εκτελεστεί το `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, επομένως το δεύτερο όρισμα (x1) είναι ένας πίνακας παραμέτρων (ο οποίος στη μνήμη αντιστοιχεί σε μια στοίβα διευθύνσεων).
 ```armasm
 bits 64
 section .text

