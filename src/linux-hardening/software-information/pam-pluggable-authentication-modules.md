@@ -4,14 +4,14 @@
 
 ### Основна інформація
 
-**PAM (Pluggable Authentication Modules)** — це механізм безпеки, який **перевіряє особу користувачів, що намагаються отримати доступ до комп'ютерних сервісів**, і контролює їхній доступ на основі різних критеріїв. Його можна порівняти з цифровим охоронцем, який гарантує, що лише авторизовані користувачі можуть взаємодіяти з певними сервісами, водночас потенційно обмежуючи їхнє використання для запобігання перевантаженню системи.
+**PAM (Pluggable Authentication Modules)** діє як механізм безпеки, який **перевіряє особу користувачів, що намагаються отримати доступ до комп'ютерних сервісів**, контролюючи їхній доступ на основі різних критеріїв. Це можна порівняти з цифровим охоронцем, який гарантує, що лише авторизовані користувачі можуть взаємодіяти з певними сервісами, водночас потенційно обмежуючи їхнє використання для запобігання перевантаженню системи.
 
 #### Файли конфігурації
 
-- **Solaris і UNIX-based systems** зазвичай використовують центральний файл конфігурації, розташований у `/etc/pam.conf`.
-- **Linux systems** надають перевагу підходу з каталогом, зберігаючи конфігурації для окремих сервісів у `/etc/pam.d`. Наприклад, файл конфігурації для сервісу login знаходиться в `/etc/pam.d/login`.
+- **Solaris та UNIX-based systems** зазвичай використовують центральний файл конфігурації, розташований у `/etc/pam.conf`.
+- **Linux systems** надають перевагу підходу з каталогом, зберігаючи конфігурації для окремих сервісів у `/etc/pam.d`. Наприклад, файл конфігурації для login service розташований у `/etc/pam.d/login`.<sup>[[1]](#references)</sup>
 
-Приклад конфігурації PAM для сервісу login може мати такий вигляд:
+Приклад конфігурації PAM для login service може мати такий вигляд:
 ```
 auth required /lib/security/pam_securetty.so
 auth required /lib/security/pam_nologin.so
@@ -24,46 +24,46 @@ password required /lib/security/pam_ldap.so
 password required /lib/security/pam_pwdb.so use_first_pass
 session required /lib/security/pam_unix_session.so
 ```
-#### **Області керування PAM**
+#### **PAM Management Realms**
 
-Ці області, або групи керування, включають **auth**, **account**, **password** і **session**, кожна з яких відповідає за різні аспекти процесу автентифікації та керування сесією:
+Ці realms, або management groups, включають **auth**, **account**, **password** і **session**, кожен з яких відповідає за різні аспекти процесу authentication і session management:<sup>[[1]](#references)</sup>
 
-- **Auth**: Перевіряє особу користувача, часто запитуючи пароль.
-- **Account**: Обробляє перевірку облікового запису, перевіряючи такі умови, як членство в групі або обмеження за часом доби.
-- **Password**: Керує оновленням паролів, зокрема перевірками складності або запобіганням dictionary attacks.
-- **Session**: Керує діями під час початку або завершення service session, наприклад монтуванням директорій або встановленням обмежень ресурсів.
+- **Auth**: Перевіряє identity користувача, часто запитуючи password.
+- **Account**: Обробляє перевірку account, перевіряючи такі умови, як membership у group або обмеження за часом доби.
+- **Password**: Керує оновленням password, зокрема перевірками complexity або запобіганням dictionary attacks.
+- **Session**: Керує діями під час початку або завершення service session, наприклад монтуванням директорій або встановленням resource limits.
 
-#### **Керування модулями PAM**
+#### **PAM Module Controls**
 
-Керування визначають реакцію модуля на успіх або помилку, впливаючи на загальний процес автентифікації. До них належать:
+Controls визначають реакцію module на success або failure, впливаючи на загальний процес authentication. До них належать:<sup>[[1]](#references)</sup>
 
-- **Required**: Помилка required-модуля зрештою призводить до помилки, але лише після перевірки всіх наступних модулів.
-- **Requisite**: Негайно припиняє процес у разі помилки.
-- **Sufficient**: Успішне виконання пропускає решту перевірок тієї самої області, якщо наступний модуль не завершується помилкою.
-- **Optional**: Спричиняє помилку лише тоді, коли це єдиний модуль у стеку.
+- **Required**: Failure required module зрештою призводить до failure, але лише після перевірки всіх наступних modules.
+- **Requisite**: Негайне завершення процесу в разі failure.
+- **Sufficient**: Success пропускає решту перевірок того самого realm, якщо наступний module не завершується з failure.
+- **Optional**: Спричиняє failure лише тоді, коли є єдиним module у stack.
 
-#### Семантика, важлива для Offensive
+#### Offensive Semantics That Matter
 
-Під час backdooring PAM **розташування вставленого правила** часто важливіше за сам payload:
+Під час backdooring PAM **location of the inserted rule** часто важливіший за сам payload:
 
-- `include` і `substack` підтягують правила з інших файлів, тому редагування `sshd` може вплинути лише на SSH, тоді як редагування `system-auth`, `common-auth` або іншого спільного стека впливає одразу на кілька сервісів.
-- PAM також підтримує керування у квадратних дужках, наприклад `[success=1 default=ignore]`. Їх можна використати для **пропуску одного або кількох модулів** після успішної custom-перевірки замість очевидної заміни `pam_unix.so`.
-- `module-path` може бути **абсолютним** (`/usr/lib/security/pam_custom.so`) або **відносним** до стандартної директорії модулів PAM. У сучасних Linux-системах фактичними директоріями часто є `/lib/security`, `/lib64/security`, `/usr/lib/security` або multiarch-шляхи на кшталт `/usr/lib/x86_64-linux-gnu/security`.
+- `include` і `substack` підтягують rules з інших files, тому редагування `sshd` може вплинути лише на SSH, тоді як редагування `system-auth`, `common-auth` або іншого shared stack впливає одразу на кілька services.
+- PAM також підтримує bracketed controls, такі як `[success=1 default=ignore]`. Їх можна використати для **skip one or more modules** після успішної custom check замість помітної заміни `pam_unix.so`.
+- `module-path` може бути **absolute** (`/usr/lib/security/pam_custom.so`) або **relative** до default PAM module directory. У сучасних Linux systems реальними directories часто є `/lib/security`, `/lib64/security`, `/usr/lib/security` або multiarch paths на кшталт `/usr/lib/x86_64-linux-gnu/security`.
 
-Короткий висновок для оператора: завжди відображайте **повний граф сервісів** перед внесенням змін. Наприклад, `sshd -> password-auth -> system-auth` у деяких дистрибутивах або `sshd -> system-remote-login -> system-login -> system-auth` в інших означає, що той самий однорядковий implant може поширитися набагато ширше, ніж планувалося.
+Quick operator takeaway: завжди визначайте **full service graph** перед patching. Наприклад, `sshd -> password-auth -> system-auth` у деяких distros або `sshd -> system-remote-login -> system-login -> system-auth` в інших означає, що той самий one-line implant може поширитися значно ширше, ніж передбачалося.
 
-#### Приклад сценарію
+#### Example Scenario
 
-У конфігурації з кількома auth-модулями процес виконується у визначеному порядку. Якщо модуль `pam_securetty` виявляє, що термінал входу не авторизований, входи root блокуються, але всі модулі все одно обробляються через його статус "required". Модуль `pam_env` встановлює змінні середовища, потенційно покращуючи взаємодію з користувачем. Модулі `pam_ldap` і `pam_unix` спільно автентифікують користувача, причому `pam_unix` намагається використати раніше наданий пароль, підвищуючи ефективність і гнучкість методів автентифікації.
+У setup з кількома auth modules процес виконується у суворому порядку. Якщо module `pam_securetty` визначає login terminal як unauthorized, root logins блокуються, однак усі modules все одно обробляються через його статус "required". `pam_env` встановлює environment variables, потенційно покращуючи user experience. Modules `pam_ldap` і `pam_unix` працюють разом для authentication користувача, причому `pam_unix` намагається використати раніше наданий password, підвищуючи efficiency та flexibility методів authentication.
 
 
 ## Backdooring PAM – Hooking `pam_unix.so`
 
-Класичний трюк persistence у важливих Linux-середовищах полягає в **заміні легітимної PAM-бібліотеки на trojanised drop-in**. Оскільки кожен SSH / консольний login зрештою викликає `pam_unix.so:pam_sm_authenticate()`, кількох рядків C достатньо, щоб перехоплювати credentials або реалізувати bypass автентифікації за допомогою *magic*-пароля.
+Класичний persistence trick у high-value Linux environments — **swap legitimate PAM library with a trojanised drop-in**. Оскільки кожен SSH / console login зрештою викликає `pam_unix.so:pam_sm_authenticate()`, кількох рядків C достатньо, щоб capture credentials або реалізувати *magic* password bypass.<sup>[[2]](#references)</sup>
 
-### Шпаргалка з компіляції
+### Compilation Cheatsheet
 <details>
-<summary>Зразок trojan для `pam_unix.so`</summary>
+<summary>Sample `pam_unix.so` trojan</summary>
 ```c
 #define _GNU_SOURCE
 #include <security/pam_modules.h>
@@ -106,16 +106,16 @@ chmod 644 /lib/security/pam_unix.so     # keep original perms
 touch -r /bin/ls /lib/security/pam_unix.so  # timestomp
 ```
 ### Поради з OpSec
-1. **Atomic overwrite** – записуйте у тимчасовий файл, а потім виконуйте `mv`, щоб уникнути частково записаних бібліотек, які можуть заблокувати SSH.
-2. Розміщення log-файлу, наприклад `/usr/bin/.dbus.log`, маскується під легітимні артефакти робочого середовища.
-3. Зберігайте експорти символів без змін (`pam_sm_setcred` тощо), щоб уникнути некоректної роботи PAM.
+1. **Атомарний перезапис** – записуйте у тимчасовий файл, а потім виконуйте `mv`, щоб уникнути напівзаписаних бібліотек, які можуть заблокувати SSH.
+2. Розміщення log-файлу, наприклад `/usr/bin/.dbus.log`, дозволяє йому злитися з легітимними артефактами desktop.
+3. Зберігайте експорти символів ідентичними (`pam_sm_setcred` тощо), щоб уникнути некоректної роботи PAM.
 
 ### Виявлення
-* Порівняйте MD5/SHA256 `pam_unix.so` з версією з пакета дистрибутива.
+* Порівнюйте MD5/SHA256 `pam_unix.so` з файлом із пакета дистрибутива.
 * `rpm -V pam` або `debsums -s libpam-modules` допоможуть виявити замінені бібліотеки без ручного хешування.
-* Перевірте наявність дозволу на запис для всіх користувачів або нетипового власника в `/lib/security/`.
+* Перевіряйте наявність world-writable або нетипового власника в `/lib/security/`.
 * Правило `auditd`: `-w /lib/security/pam_unix.so -p wa -k pam-backdoor`.
-* Виконайте пошук у конфігураціях PAM неочікуваних модулів: `grep -R "pam_[a-z].*\.so" /etc/pam.d/ | grep -v pam_unix`.
+* Виконайте Grep конфігурацій PAM для пошуку неочікуваних модулів: `grep -R "pam_[a-z].*\.so" /etc/pam.d/ | grep -v pam_unix`.
 
 ### Команди для швидкого triage (після компрометації або під час threat hunting)
 ```bash
@@ -134,23 +134,22 @@ done
 grep -R "pam_.*\.so" /etc/pam.d/ | grep -E 'plg|selinux|custom|exec'
 ```
 ### Зловживання `pam_exec` для persistence
-
-Замість заміни `pam_unix.so` менш помітним підходом є додати рядок `pam_exec` до `/etc/pam.d/sshd`, щоб кожен SSH-вхід запускав implant, залишаючи звичайний стек незмінним:
+Замість заміни `pam_unix.so`, менш інвазивний підхід — додати рядок `pam_exec` до `/etc/pam.d/sshd`, щоб кожен SSH login запускав implant, залишаючи звичайний stack без змін:
 ```bash
 # Run on successful auth and receive the typed password on stdin
 auth optional pam_exec.so quiet expose_authtok /usr/local/bin/.ssh_hook.sh
 ```
-`pam_exec` отримує метадані PAM у змінних середовища, таких як `PAM_USER`, `PAM_RHOST`, `PAM_SERVICE`, `PAM_TTY` і `PAM_TYPE`. З параметром `expose_authtok` допоміжна програма також може зчитувати пароль із `stdin` під час фаз `auth` або `password`. Якщо потрібно, щоб допоміжна програма запускалася з effective UID, а не з real UID, додайте `seteuid`.
+`pam_exec` отримує метадані PAM у змінних середовища, таких як `PAM_USER`, `PAM_RHOST`, `PAM_SERVICE`, `PAM_TTY` і `PAM_TYPE`. За допомогою `expose_authtok` helper також може прочитати пароль зі `stdin` під час фаз `auth` або `password`. Якщо потрібно, щоб helper запускався з effective UID замість real UID, додайте `seteuid`.
 
 Практичні примітки:
 
-- `session optional pam_exec.so ...` краще використовувати для **post-login actions**, таких як повторне відкриття сокетів або запуск detached daemon.
-- `auth optional pam_exec.so quiet expose_authtok ...` зазвичай використовують для **credential capture**, оскільки цей рядок виконується до відкриття сесії.
+- `session optional pam_exec.so ...` краще підходить для **дій після входу**, таких як повторне відкриття сокетів або запуск від'єднаного daemon.
+- `auth optional pam_exec.so quiet expose_authtok ...` зазвичай використовується для **захоплення облікових даних**, оскільки виконується до відкриття session.
 - `type=session` або `type=auth` можна використовувати, щоб обмежити виконання певною фазою PAM і уникнути зайвого подвійного виконання.
 
-### Забезпечення стійкості до distro tooling: `authselect`
+### Робота з інструментами дистрибутива: `authselect`
 
-У RHEL, CentOS Stream, Fedora та похідних системах прямі зміни згенерованих файлів, таких як `/etc/pam.d/system-auth` або `/etc/pam.d/password-auth`, можуть бути **перезаписані `authselect`**. Для забезпечення persistence оператори часто вносять зміни до активного custom profile у `/etc/authselect/custom/<profile>/`, а потім повторно вибирають або застосовують його.
+У RHEL, CentOS Stream, Fedora та похідних системах прямі зміни до згенерованих файлів, таких як `/etc/pam.d/system-auth` або `/etc/pam.d/password-auth`, можуть бути **перезаписані `authselect`**. Для збереження змін operators часто редагують активний custom profile у `/etc/authselect/custom/<profile>/`, а потім повторно обирають або застосовують його.
 
 Типовий workflow, якщо у вас є root:
 ```bash
@@ -163,16 +162,17 @@ find /etc/authselect/custom -maxdepth 2 -type f \( -name 'system-auth' -o -name 
 # Re-apply the profile after modifying the template files
 authselect select custom/<profile>
 ```
-Це важливо як для offensive operations, так і для triage: якщо `/etc/pam.d/system-auth` містить банер `Generated by authselect` і `Do not modify this file manually`, справжня точка persistence може розташовуватися в `/etc/authselect/custom/`, а не в `/etc/pam.d/`.
+Це важливо як для offense, так і для triage: якщо `/etc/pam.d/system-auth` містить banner `Generated by authselect` і `Do not modify this file manually`, тоді справжня persistence point може знаходитися в `/etc/authselect/custom/`, а не в `/etc/pam.d/`.
 
 ### Recent tradecraft seen in the wild
 
-Нещодавні звіти за 2025 рік про **Plague** Linux backdoor показали подальший розвиток тієї самої основної ідеї: шкідливий PAM-компонент зі **static bypass password**, а також очищення змінних середовища, пов’язаних із SSH, і shell history (`HISTFILE=/dev/null)` для зменшення слідів сесії після входу. Це корисний hunting pattern, оскільки логіка backdoor може міститися в PAM, тоді як stealth-артефакти з’являються лише **після** успішної автентифікації.
+Нещодавні звіти за 2025 рік про Linux backdoor **Plague** показали подальший розвиток тієї самої основної ідеї: malicious PAM component зі **static bypass password**, а також очищення SSH-related environment variables і shell history (`HISTFILE=/dev/null)` для зменшення слідів сесії після login.<sup>[[3]](#references)</sup> Це корисний hunting pattern, оскільки логіка backdoor може знаходитися в PAM, тоді як stealth artifacts з'являються лише **після** успішного authentication.
 
 
-## References
+## Посилання
 
-- [pam.conf(5) / pam.d(5) - Linux-PAM Manual](https://man7.org/linux/man-pages/man5/pam.d.5.html)
-- [Nextron Systems - Plague: A Newly Discovered PAM-Based Backdoor for Linux](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
+- [1] [pam.conf(5) / pam.d(5) - Linux-PAM Manual](https://man7.org/linux/man-pages/man5/pam.d.5.html)
+- [2] [The Covert Operator's Playbook: Infiltration of Global Telecom Networks - Unit 42](https://unit42.paloaltonetworks.com/infiltration-of-global-telecom-networks/)
+- [3] [Nextron Systems - Plague: A Newly Discovered PAM-Based Backdoor for Linux](https://www.nextron-systems.com/2025/08/01/plague-a-newly-discovered-pam-based-backdoor-for-linux/)
 
 {{#include ../../banners/hacktricks-training.md}}

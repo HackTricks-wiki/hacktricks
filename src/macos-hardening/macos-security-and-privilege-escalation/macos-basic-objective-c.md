@@ -5,21 +5,21 @@
 ## Objective-C
 
 > [!CAUTION]
-> Зверніть увагу, що програми, написані на Objective-C, **зберігають** свої оголошення класів **коли** **компілюються** в [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Такі оголошення класів **включають** ім'я та тип:
+> Зверніть увагу, що програми, написані мовою Objective-C, **зберігають** оголошення своїх класів **під час** **компіляції** у [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Такі оголошення класів **містять** назви та типи:
 
 - Класу
 - Методи класу
-- Змінні екземпляра класу
+- Змінних екземпляра класу
 
-Ви можете отримати цю інформацію, використовуючи [**class-dump**](https://github.com/nygard/class-dump):
+Цю інформацію можна отримати за допомогою [**class-dump**](https://github.com/nygard/class-dump):
 ```bash
 class-dump Kindle.app
 ```
-Зверніть увагу, що ці імена можуть бути обфусковані, щоб ускладнити реверсування бінарного файлу.
+Зверніть увагу, що ці назви можна обфускувати, щоб ускладнити реверсинг бінарного файла.
 
-## Класи, Методи та Об'єкти
+## Класи, методи та об'єкти
 
-### Інтерфейс, Властивості та Методи
+### Інтерфейс, властивості та методи
 ```objectivec
 // Declare the interface of the class
 @interface MyVehicle : NSObject
@@ -50,9 +50,9 @@ self.numberOfWheels += value;
 
 @end
 ```
-### **Об'єкт та виклик методу**
+### **Метод створення об'єкта та виклику**
 
-Щоб створити екземпляр класу, викликається метод **`alloc`**, який **виділяє пам'ять** для кожної **властивості** та **обнуляє** ці виділення. Потім викликається **`init`**, який **ініціалізує властивості** до **необхідних значень**.
+Щоб створити екземпляр класу, викликається метод **`alloc`**, який **виділяє пам'ять** для кожної **властивості** та **обнуляє** ці області пам'яті. Потім викликається **`init`**, який **ініціалізує властивості** **необхідними значеннями**.
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -66,13 +66,13 @@ MyVehicle *newVehicle = [MyVehicle new];
 ```
 ### **Методи класу**
 
-Методи класу визначаються з **плюсом** (+), а не з дефісом (-), який використовується з методами екземпляра. Як метод класу **NSString** **`stringWithString`**:
+Методи класу визначаються за допомогою **знака плюс** (+), а не дефіса (-), який використовується з методами екземпляра. Наприклад, метод класу **`stringWithString`** класу **NSString**:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
 ### Setter & Getter
 
-Щоб **встановити** та **отримати** властивості, ви можете зробити це за допомогою **нотації з крапкою** або так, ніби ви **викликаєте метод**:
+Щоб **set** і **get** properties, це можна зробити за допомогою **dot notation** або так, ніби ви **викликаєте метод**:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -84,18 +84,18 @@ NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
 ### **Змінні екземпляра**
 
-Альтернативно методам встановлення та отримання ви можете використовувати змінні екземпляра. Ці змінні мають таку ж назву, як і властивості, але починаються з "\_":
+Як альтернативу методам setter і getter можна використовувати змінні екземпляра. Ці змінні мають ті самі назви, що й властивості, але починаються з "\_":
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
 NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 }
 ```
-### Протоколи
+### Protocols
 
-Протоколи - це набір декларацій методів (без властивостей). Клас, який реалізує протокол, реалізує оголошені методи.
+Protocols are a set of method declarations (without properties). A class that implements a protocol implements the declared methods.
 
-Існує 2 типи методів: **обов'язкові** та **додаткові**. За **замовчуванням** метод є **обов'язковим** (але ви також можете вказати це за допомогою тегу **`@required`**). Щоб вказати, що метод є додатковим, використовуйте **`@optional`**.
+There are 2 types of methods: **mandatory** and **optional**. By **default**, a method is **mandatory** (but you can also indicate it with a **`@required`** tag). To indicate that a method is optional, use **`@optional`**.
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -105,7 +105,7 @@ NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 - (void) method3; //optional
 @end
 ```
-### Всі разом
+### Усе разом
 ```objectivec
 // gcc -framework Foundation test_obj.m -o test_obj
 #import <Foundation/Foundation.h>
@@ -155,20 +155,20 @@ NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
 [mySuperCar makeLongTruck];
 }
 ```
-### Основні класи
+### Базові класи
 
-#### Рядок
+#### String
 ```objectivec
 // NSString
 NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-Базові класи є **незмінними**, тому для додавання рядка до існуючого потрібно **створити новий NSString**.
+Базові класи є **незмінними**, тому для додавання рядка до наявного потрібно створити **новий NSString**.
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
-Або ви також можете використовувати клас **mutable** рядка:
+Або ви також можете використати клас **змінюваних** рядків:
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
 [mutableString appendString:bookTitle];
@@ -196,7 +196,7 @@ NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:
 NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
-#### Масиви, Набори та Словники
+#### Масиви, множини та словники
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -242,9 +242,9 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 [mutFruitColorsDictionary setObject:@"green" forKey:@"apple"];
 [mutFruitColorsDictionary removeObjectForKey:@"grape"];
 ```
-### Blocks
+### Блоки
 
-Блоки — це **функції, які поводяться як об'єкти**, тому їх можна передавати функціям або **зберігати** в **масивах** або **словниках**. Крім того, вони можуть **представляти значення, якщо їм надано значення**, тому це схоже на лямбди.
+Блоки — це **функції, які поводяться як об’єкти**, тому їх можна передавати функціям або **зберігати** в **масивах** чи **словниках**. Також вони можуть **представляти значення, якщо їм передано значення**, тому вони подібні до lambda-функцій.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -257,7 +257,7 @@ return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-Також можливо **визначити тип блоку, який буде використовуватися як параметр** у функціях:
+Також можна **визначити тип блоку, який використовуватиметься як параметр** у функціях:
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);
@@ -304,7 +304,7 @@ if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
 NSLog(@"Removed successfully");
 }
 ```
-Також можливо керувати файлами **використовуючи об'єкти `NSURL` замість об'єктів `NSString`**. Імена методів подібні, але **з `URL` замість `Path`**.
+Також можна працювати з файлами **за допомогою об'єктів `NSURL`, а не об'єктів `NSString`**. Назви методів подібні, але **з `URL` замість `Path`**.
 ```objectivec
 
 

@@ -1,18 +1,18 @@
-# Ін’єкція в .Net-застосунки macOS
+# macOS .Net Applications Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Це стислий виклад допису [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Перегляньте його для отримання додаткової інформації!**<sup>[[1]](#references)</sup>
+**Це короткий виклад публікації [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Перегляньте її для отримання додаткових відомостей!**<sup>[[1]](#references)</sup>
 
 ## Налагодження .NET Core <a href="#net-core-debugging" id="net-core-debugging"></a>
 
 ### **Встановлення сеансу налагодження** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-Обробкою обміну даними між debugger і debuggee у .NET керує [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Цей компонент налаштовує два іменовані канали для кожного .NET-процесу, як показано в [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127). Ініціалізація каналів виконується через [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). До назв цих каналів додаються суфікси **`-in`** і **`-out`**.
+Обробкою зв'язку між debugger і debuggee у .NET керує [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Цей компонент налаштовує два іменовані канали для кожного .NET процесу, як показано в [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), які ініціалізуються через [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Ці канали мають суфікси **`-in`** і **`-out`**.
 
-Перейшовши до **`$TMPDIR`** користувача, можна знайти FIFO для налагодження .Net-застосунків.
+Перейшовши до **`$TMPDIR`** користувача, можна знайти FIFO для налагодження, доступні для налагодження .Net applications.
 
-[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) відповідає за керування обміном даними з debugger. Щоб ініціювати новий сеанс налагодження, debugger має надіслати повідомлення через канал `out`, яке починається зі структури `MessageHeader`, описаної у вихідному коді .NET:
+[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) відповідає за керування зв'язком із debugger. Щоб ініціювати новий сеанс налагодження, debugger має надіслати повідомлення через канал `out`, яке починається зі структури `MessageHeader`, описаної у вихідному коді .NET:
 ```c
 struct MessageHeader {
 MessageType   m_eType;        // Message type
@@ -31,7 +31,7 @@ DWORD         m_dwMinorVersion;
 BYTE          m_sMustBeZero[8];
 }
 ```
-Щоб запросити нову сесію, цю структуру заповнюють так, встановлюючи тип повідомлення `MT_SessionRequest` і версію протоколу на поточну:
+Для запиту нового сеансу цю структуру заповнюють так, встановлюючи тип повідомлення `MT_SessionRequest` і поточну версію протоколу:
 ```c
 static const DWORD kCurrentMajorVersion = 2;
 static const DWORD kCurrentMinorVersion = 0;
@@ -42,19 +42,19 @@ sSendHeader.TypeSpecificData.VersionInfo.m_dwMajorVersion = kCurrentMajorVersion
 sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion;
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
-Потім цей заголовок надсилається цільовій системі за допомогою системного виклику `write`, після чого передається структура `sessionRequestData`, що містить GUID сеансу:
+Цей заголовок потім надсилається до цілі за допомогою syscall `write`, після чого передається структура `sessionRequestData`, що містить GUID сесії:
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
 write(wr, &sDataBlock, sizeof(SessionRequestData));
 ```
-Операція читання з каналу `out` підтверджує успішне або невдале встановлення сеансу налагодження:
+Операція читання з каналу `out` підтверджує успішне або невдале встановлення debugging session:
 ```c
 read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
 ## Читання пам'яті
 
-Після встановлення сеансу налагодження пам'ять можна читати за допомогою типу повідомлення [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896). Функція readMemory детально описує виконання необхідних кроків для надсилання запиту на читання та отримання відповіді:
+Після встановлення debugging session пам'ять можна читати за допомогою типу повідомлення [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896). Функція readMemory описує необхідні кроки для надсилання запиту на читання та отримання відповіді:
 ```c
 bool readMemory(void *addr, int len, unsigned char **output) {
 // Allocation and initialization
@@ -68,9 +68,9 @@ return true;
 ```
 Повний proof of concept (POC) доступний [тут](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
 
-## Запис у пам’ять
+## Запис у пам'ять
 
-Так само пам’ять можна записувати за допомогою функції `writeMemory`. Процес передбачає встановлення типу повідомлення в `MT_WriteMemory`, зазначення адреси та довжини даних, а потім надсилання даних:
+Так само пам'ять можна записувати за допомогою функції `writeMemory`. Процес передбачає встановлення типу повідомлення в `MT_WriteMemory`, визначення адреси та довжини даних, а потім надсилання даних:
 ```c
 bool writeMemory(void *addr, int len, unsigned char *input) {
 // Increment IDs, set message type, and specify memory location
@@ -84,20 +84,20 @@ return true;
 ```
 Пов’язаний POC доступний [тут](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
 
-## .NET Core Виконання коду <a href="#net-core-code-execution" id="net-core-code-execution"></a>
+## Виконання коду .NET Core <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
-Для виконання коду потрібно визначити область пам’яті з дозволами rwx, що можна зробити за допомогою vmmap -pages:
+Для виконання коду потрібно ідентифікувати область пам’яті з дозволами rwx. Це можна зробити за допомогою vmmap -pages:
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
-Пошук місця для перезапису вказівника на функцію є необхідним, і в .NET Core це можна зробити, націлившись на **Dynamic Function Table (DFT)**. Ця таблиця, описана в [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), використовується runtime для helper-функцій JIT-компіляції.
+Пошук місця для перезапису function pointer є необхідним, і в .NET Core це можна зробити, націлившись на **Dynamic Function Table (DFT)**. Ця таблиця, детально описана в [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), використовується runtime для helper-функцій JIT-компіляції.
 
-Для систем x64 за допомогою signature hunting можна знайти посилання на символ `_hlpDynamicFuncTable` у `libcorclr.dll`.
+У x64-системах для пошуку посилання на символ `_hlpDynamicFuncTable` у `libcorclr.dll` можна використовувати signature hunting.
 
-Debugger-функція `MT_GetDCB` надає корисну інформацію, зокрема адресу helper-функції `m_helperRemoteStartAddr`, яка вказує на розташування `libcorclr.dll` у пам’яті процесу. Потім ця адреса використовується для початку пошуку DFT і перезапису вказівника на функцію адресою shellcode.
+Debugger-функція `MT_GetDCB` надає корисну інформацію, зокрема адресу helper-функції `m_helperRemoteStartAddr`, яка вказує на розташування `libcorclr.dll` у пам'яті процесу. Потім ця адреса використовується для початку пошуку DFT і перезапису function pointer адресою shellcode.
 
-Повний код POC для ін’єкції в PowerShell доступний [тут](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
+Повний код POC для ін'єкції в PowerShell доступний [тут](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
 ## Посилання
 

