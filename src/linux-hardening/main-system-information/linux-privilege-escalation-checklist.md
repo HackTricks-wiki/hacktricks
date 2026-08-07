@@ -16,17 +16,17 @@
 - [ ] Rechercher des [**kernel exploits**](../linux-basics/linux-privilege-escalation/index.html#kernel-exploits) **à l'aide de scripts** (DirtyCow ?)
 - [ ] **Vérifier** si la [**version de sudo** est vulnérable](../linux-basics/linux-privilege-escalation/index.html#sudo-version)
 - [ ] Échec de la vérification de signature de [**Dmesg**](../linux-basics/linux-privilege-escalation/index.html#dmesg-signature-verification-failed)
-- [ ] Examiner les [**mauvaises configurations des kernel modules et du chargement des modules**](kernel-modules-and-modprobe.md#kernel-module-and-module-loading-misconfigurations) : `insmod`, `modinfo`, `lsmod`, `dmesg`, application des signatures et `modules_disabled`.
-- [ ] Vérifier les [**chemins d'abus de kernel.modprobe / modprobe_path**](kernel-modules-and-modprobe.md#kernelmodprobe--modprobe_path-abuse-checks) si le chemin de l'helper peut être modifié ou déclenché.
+- [ ] Examiner les [**mauvaises configurations des kernel modules et du chargement des modules**](kernel-modules-and-modprobe.md#kernel-module-and-module-loading-misconfigurations) : `insmod`, `modinfo`, `lsmod`, `dmesg`, l'application des signatures et `modules_disabled`.
+- [ ] Vérifier les [**chemins d'abus de kernel.modprobe / modprobe_path**](kernel-modules-and-modprobe.md#kernelmodprobe--modprobe_path-abuse-checks) si le chemin du helper peut être modifié ou déclenché.
 - [ ] Vérifier les [**chemins /lib/modules accessibles en écriture**](kernel-modules-and-modprobe.md#writable-libmodules-review), notamment les fichiers `.ko*` et les métadonnées `modules.*` accessibles en écriture.
-- [ ] Enumération système supplémentaire ([date, statistiques système, informations CPU, imprimantes](../linux-basics/linux-privilege-escalation/index.html#more-system-enumeration))
+- [ ] Énumération supplémentaire du système ([date, statistiques système, informations CPU, imprimantes](../linux-basics/linux-privilege-escalation/index.html#more-system-enumeration))
 - [ ] [Énumérer davantage de défenses](../linux-basics/linux-privilege-escalation/index.html#enumerate-possible-defenses)
 
 ### [Disques](../linux-basics/linux-privilege-escalation/index.html#drives)
 
-- [ ] **Lister** les disques montés
+- [ ] **Lister les** disques montés
 - [ ] **Un disque non monté ?**
-- [ ] **Des credentials dans fstab ?**
+- [ ] **Des identifiants dans fstab ?**
 
 ### [**Logiciels installés**](../linux-basics/linux-privilege-escalation/index.html#installed-software)
 
@@ -36,16 +36,16 @@
 ### [Processus](../linux-basics/linux-privilege-escalation/index.html#processes)
 
 - [ ] Un **logiciel inconnu est-il en cours d'exécution** ?
-- [ ] Un logiciel s'exécute-t-il avec **plus de privilèges qu'il ne devrait** ?
-- [ ] Rechercher des **exploits de processus en cours d'exécution** (notamment de la version utilisée).
+- [ ] Un logiciel s'exécute-t-il avec **davantage de privilèges qu'il ne devrait** ?
+- [ ] Rechercher des **exploits visant les processus en cours d'exécution** (en particulier la version utilisée).
 - [ ] Pouvez-vous **modifier le binaire** d'un processus en cours d'exécution ?
 - [ ] **Surveiller les processus** et vérifier si un processus intéressant s'exécute fréquemment.
-- [ ] Pouvez-vous **lire** la **mémoire d'un processus** intéressant (où des mots de passe pourraient être enregistrés) ?
+- [ ] Pouvez-vous **lire** la mémoire d'un **processus intéressant** (des mots de passe pourraient y être stockés) ?
 
 ### [Tâches planifiées/Cron ?](../linux-basics/linux-privilege-escalation/index.html#scheduled-jobs)
 
-- [ ] Le [**PATH** ](../linux-basics/linux-privilege-escalation/index.html#cron-path)est-il modifié par un cron dans lequel vous pouvez **écrire** ?
-- [ ] Y a-t-il un [**wildcard** ](../linux-basics/linux-privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)dans une tâche cron ?
+- [ ] Le [**PATH** ](../linux-basics/linux-privilege-escalation/index.html#cron-path)est-il modifié par un cron et pouvez-vous y **écrire** ?
+- [ ] Y a-t-il un [**joker** ](../linux-basics/linux-privilege-escalation/index.html#cron-using-a-script-with-a-wildcard-wildcard-injection)dans une tâche cron ?
 - [ ] Un [**script modifiable** ](../linux-basics/linux-privilege-escalation/index.html#cron-script-overwriting-and-symlink)est-il **exécuté** ou situé dans un **dossier modifiable** ?
 - [ ] Avez-vous détecté qu'un **script** pourrait être ou est [**exécuté** très **fréquemment**](../linux-basics/linux-privilege-escalation/index.html#frequent-cron-jobs) ? (toutes les 1, 2 ou 5 minutes)
 
@@ -54,7 +54,7 @@
 - [ ] Un fichier **.service accessible en écriture** ?
 - [ ] Un **binaire accessible en écriture** est-il exécuté par un **service** ?
 - [ ] Un **dossier accessible en écriture dans le PATH de systemd** ?
-- [ ] Un **drop-in d'unité systemd accessible en écriture** dans `/etc/systemd/system/<unit>.d/*.conf` pouvant remplacer `ExecStart`/`User` ?
+- [ ] Un **drop-in d'unité systemd accessible en écriture** dans `/etc/systemd/system/<unit>.d/*.conf` peut-il remplacer `ExecStart`/`User` ?<sup>[[2]](#references)</sup>
 
 ### [Timers](../linux-basics/linux-privilege-escalation/index.html#timers)
 
@@ -81,26 +81,26 @@
 - [ ] **Énumération** générique des utilisateurs/groupes
 - [ ] Avez-vous un **UID très élevé** ? La **machine** est-elle **vulnérable** ?
 - [ ] Pouvez-vous [**escalader vos privilèges grâce à un groupe**](../user-information/interesting-groups-linux-pe/index.html) auquel vous appartenez ?
-- [ ] Données du **presse-papiers** ?
+- [ ] Des données dans le **presse-papiers** ?
 - [ ] Politique de mots de passe ?
-- [ ] Essayer d'**utiliser** chaque **mot de passe connu** découvert précédemment pour se connecter **avec chaque** **utilisateur** possible. Essayer également de se connecter sans mot de passe.
+- [ ] Essayez d'**utiliser** chaque **mot de passe connu** découvert précédemment pour vous connecter **avec chaque** **utilisateur** possible. Essayez également de vous connecter sans mot de passe.
 
 ### [PATH accessible en écriture](../linux-basics/linux-privilege-escalation/index.html#writable-path-abuses)
 
-- [ ] Si vous avez des **privilèges d'écriture sur un dossier du PATH**, vous pourriez être en mesure d'escalader vos privilèges
+- [ ] Si vous avez des **privilèges d'écriture sur un dossier du PATH**, vous pourrez peut-être escalader vos privilèges
 
 ### [Commandes SUDO et SUID](../linux-basics/linux-privilege-escalation/index.html#sudo-and-suid)
 
-- [ ] Pouvez-vous exécuter **n'importe quelle commande avec sudo** ? Pouvez-vous l'utiliser pour LIRE, ÉCRIRE ou EXÉCUTER quoi que ce soit en tant que root ? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Si `sudo -l` autorise `sudoedit`, vérifier la [**sudoedit argument injection**](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths) (CVE-2023-22809) via `SUDO_EDITOR`/`VISUAL`/`EDITOR` pour modifier des fichiers arbitraires sur les versions vulnérables (`sudo -V` < 1.9.12p2). Exemple : `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`
+- [ ] Pouvez-vous exécuter **une commande avec sudo** ? Pouvez-vous l'utiliser pour LIRE, ÉCRIRE ou EXÉCUTER quoi que ce soit en tant que root ? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Si `sudo -l` autorise `sudoedit`, vérifier l'**injection d'arguments sudoedit** (CVE-2023-22809) via `SUDO_EDITOR`/`VISUAL`/`EDITOR` pour modifier des fichiers arbitraires sur les versions vulnérables (`sudo -V` < 1.9.12p2). Exemple : `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`<sup>[[1]](#references)</sup>
 - [ ] Existe-t-il un **binaire SUID exploitable** ? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Les commandes [**sudo** sont-elles **limitées** par le **PATH** ? Pouvez-vous **contourner** les restrictions](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths) ?
+- [ ] Les commandes [**sudo** sont-elles **limitées** par le **chemin** ? Pouvez-vous [**contourner les restrictions**](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths) ?
 - [ ] [**Binaire Sudo/SUID sans chemin indiqué**](../linux-basics/linux-privilege-escalation/index.html#sudo-command-suid-binary-without-command-path) ?
 - [ ] [**Binaire SUID spécifiant un chemin**](../linux-basics/linux-privilege-escalation/index.html#suid-binary-with-command-path) ? Contournement
 - [ ] [**Vulnérabilité LD_PRELOAD**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#ld_preload-ld_library_path-and-suid)
-- [ ] [**Absence de bibliothèque .so dans un binaire SUID**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#missing-shared-object-injection) depuis un dossier accessible en écriture ?
+- [ ] [**Bibliothèque .so manquante dans un binaire SUID**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#missing-shared-object-injection) depuis un dossier accessible en écriture ?
 - [ ] [**SUID RPATH/RUNPATH ou chemin de bibliothèque accessible en écriture**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#rpath-and-runpath) ?
-- [ ] [**Tokens SUDO disponibles**](../linux-basics/linux-privilege-escalation/index.html#reusing-sudo-tokens) ? [**Pouvez-vous créer un token SUDO**](../linux-basics/linux-privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than) ?
+- [ ] Des [**tokens SUDO disponibles**](../linux-basics/linux-privilege-escalation/index.html#reusing-sudo-tokens) ? [**Pouvez-vous créer un token SUDO**](../linux-basics/linux-privilege-escalation/index.html#var-run-sudo-ts-less-than-username-greater-than) ?
 - [ ] Pouvez-vous [**lire ou modifier les fichiers sudoers**](../linux-basics/linux-privilege-escalation/index.html#etc-sudoers-etc-sudoers-d) ?
 - [ ] Pouvez-vous [**modifier /etc/ld.so.conf.d/**](../interesting-files-permissions/suid-shared-library-and-linker-abuse.md#linker-configuration) ?
 - [ ] Commande [**OpenBSD DOAS**](../linux-basics/linux-privilege-escalation/index.html#doas)
@@ -125,35 +125,33 @@
 
 ### [Fichiers intéressants](../linux-basics/linux-privilege-escalation/index.html#interesting-files)
 
-- [ ] **Fichiers de profil** - Lire des données sensibles ? Écrire pour l'escalade de privilèges ?
+- [ ] **Fichiers Profile** - Lire des données sensibles ? Écrire pour l'escalade de privilèges ?
 - [ ] **Fichiers passwd/shadow** - Lire des données sensibles ? Écrire pour l'escalade de privilèges ?
 - [ ] **Vérifier les dossiers couramment intéressants** à la recherche de données sensibles
-- [ ] **Fichiers situés dans des emplacements étranges ou appartenant à des utilisateurs particuliers,** auxquels vous pouvez accéder ou dont vous pouvez modifier les fichiers exécutables
+- [ ] **Fichiers situés dans des emplacements inhabituels/appartenant à des utilisateurs,** auxquels vous pouvez accéder ou dont vous pouvez modifier les fichiers exécutables
 - [ ] **Modifiés** au cours des dernières minutes
 - [ ] **Fichiers de bases de données Sqlite**
 - [ ] **Fichiers cachés**
-- [ ] **Scripts/Binaires dans le PATH**
-- [ ] **Fichiers web** (mots de passe ?)
-- [ ] **Backups** ?
+- [ ] **Scripts/binaires dans le PATH**
+- [ ] **Fichiers Web** (mots de passe ?)
+- [ ] Des **sauvegardes** ?
 - [ ] **Fichiers connus contenant des mots de passe** : utiliser **Linpeas** et **LaZagne**
 - [ ] **Recherche générique**
 
 ### [**Fichiers accessibles en écriture**](../linux-basics/linux-privilege-escalation/index.html#writable-files)
 
 - [ ] **Modifier une bibliothèque Python** pour exécuter des commandes arbitraires ?
-- [ ] Pouvez-vous **modifier des fichiers de log** ? Exploit **Logtotten**
+- [ ] Pouvez-vous **modifier les fichiers journaux** ? Exploit **Logtotten**
 - [ ] Pouvez-vous **modifier /etc/sysconfig/network-scripts/** ? Exploit Centos/Redhat
-- [ ] Pouvez-vous [**écrire dans des fichiers ini, int.d, systemd ou rc.d**](../linux-basics/linux-privilege-escalation/index.html#init-init-d-systemd-and-rc-d) ?
+- [ ] Pouvez-vous [**écrire dans les fichiers ini, int.d, systemd ou rc.d**](../linux-basics/linux-privilege-escalation/index.html#init-init-d-systemd-and-rc-d) ?
 
-### [**Autres astuces**](../linux-basics/linux-privilege-escalation/index.html#other-tricks)
+### [**Autres techniques**](../linux-basics/linux-privilege-escalation/index.html#other-tricks)
 
 - [ ] Pouvez-vous [**abuser de NFS pour escalader vos privilèges**](../linux-basics/linux-privilege-escalation/index.html#nfs-privilege-escalation) ?
-- [ ] Avez-vous besoin de [**sortir d'un shell restrictif**](../linux-basics/linux-privilege-escalation/index.html#escaping-from-restricted-shells) ?
-
-
+- [ ] Devez-vous [**vous échapper d'un shell restrictif**](../linux-basics/linux-privilege-escalation/index.html#escaping-from-restricted-shells) ?
 
 ## Références
 
-- [Avis Sudo : modification arbitraire de fichier avec sudoedit](https://www.sudo.ws/security/advisories/sudoedit_any/)
-- [Documentation Oracle Linux : configuration des drop-ins systemd](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
+- [1] [Avis Sudo : modification arbitraire de fichiers avec sudoedit](https://www.sudo.ws/security/advisories/sudoedit_any/)
+- [2] [Documentation Oracle Linux : configuration des drop-ins systemd](https://docs.oracle.com/en/operating-systems/oracle-linux/8/systemd/ModifyingsystemdConfigurationFiles.html)
 {{#include ../../banners/hacktricks-training.md}}

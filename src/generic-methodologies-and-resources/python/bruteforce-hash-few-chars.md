@@ -1,3 +1,5 @@
+# Bruteforce d'un Hash sur Quelques Caractères
+
 {{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib
