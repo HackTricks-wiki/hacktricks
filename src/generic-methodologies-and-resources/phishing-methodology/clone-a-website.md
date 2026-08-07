@@ -1,14 +1,19 @@
+# Websiteのクローン作成
+
 {{#include ../../banners/hacktricks-training.md}}
 
-フィッシング評価のために、時にはウェブサイトを完全に**クローン**することが有用です。
 
-クローンしたウェブサイトに、ユーザーのタブを「制御」するためのBeEFフックなどのペイロードを追加することもできます。
+phishing assessmentでは、**websiteを完全にclone/dump**すると便利な場合があります。
 
-この目的のために使用できるさまざまなツールがあります：
+cloned websiteにBeEF hookなどのpayloadsを追加して、ユーザーのtabを「control」することもできます。
+
+この目的には、さまざまなtoolsを使用できます。
 
 ## wget
-```text
-wget -mk -nH
+```bash
+wget --mirror --page-requisites --convert-links --adjust-extension <URL>
+cd <URL>
+python3 -m http.server 8000
 ```
 ## goclone
 ```bash

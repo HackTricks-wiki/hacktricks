@@ -1,52 +1,52 @@
-# Synology PAT/SPK 暗号化アーカイブの復号
+# Synology PAT/SPK Encrypted Archive Decryption
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## 概要
 
-いくつかのSynologyデバイス（DSM/BSM NAS、BeeStationなど）は、**暗号化されたPAT / SPKアーカイブ**でファームウェアとアプリケーションパッケージを配布しています。これらのアーカイブは、公式の抽出ライブラリに埋め込まれたハードコーディングされたキーのおかげで、公開ダウンロードファイルだけで*オフライン*で復号できます。
+複数の Synology デバイス（DSM/BSM NAS、BeeStation、…）は、firmware および application package を **encrypted PAT / SPK archives** として配布しています。これらの archive は、official extraction libraries 内に埋め込まれた hard-coded keys のおかげで、public download files だけを使って *offline* で復号できます。
 
-このページでは、暗号化形式の動作と、各パッケージ内にあるクリアテキストの**TAR**を完全に復元する方法をステップバイステップで文書化しています。この手順は、Pwn2Own Ireland 2024中に行われたSynacktivの研究に基づいており、オープンソースツール[`synodecrypt`](https://github.com/synacktiv/synodecrypt)に実装されています。
+このページでは、encrypted format の仕組みと、各 package 内に格納された clear-text **TAR** を完全に復元する方法を step-by-step で説明します。この手順は、Pwn2Own Ireland 2024 中に Synacktiv が実施した research に基づいており、open-source tool [`synodecrypt`](https://github.com/synacktiv/synodecrypt) に実装されています。<sup>[[1]](#references)[[2]](#references)</sup>
 
-> ⚠️  フォーマットは`*.pat`（システム更新）と`*.spk`（アプリケーション）アーカイブの両方で全く同じです – 選択されるハードコーディングされたキーのペアだけが異なります。
+> ⚠️ 形式は `*.pat`（system update）と `*.spk`（application）archive の両方でまったく同じです。異なるのは、選択される hard-coded keys の pair だけです。
 
 ---
 
-## 1. アーカイブを取得する
+## 1. archive を取得する
 
-ファームウェア/アプリケーションの更新は、通常、Synologyの公開ポータルからダウンロードできます:
+firmware/application update は通常、Synology の public portal から download できます。
 ```bash
 $ wget https://archive.synology.com/download/Os/BSM/BSM_BST150-4T_65374.pat
 ```
-## 2. PAT構造をダンプする（オプション）
+## 2. PAT構造をdumpする（任意）
 
-`*.pat`イメージは、いくつかのファイル（ブートローダー、カーネル、rootfs、パッケージなど）を埋め込んだ**cpioバンドル**です。無料のユーティリティ[`patology`](https://github.com/sud0woodo/patology)は、そのラッパーを検査するのに便利です：
+`*.pat` images自体が、複数のファイル（boot loader、kernel、rootfs、packagesなど）を内包する**cpio bundle**です。無償のutility [`patology`](https://github.com/sud0woodo/patology)を使うと、このwrapperを簡単に調査できます:<sup>[[3]](#references)</sup>
 ```bash
 $ python3 patology.py --dump -i BSM_BST150-4T_65374.pat
 […]
 $ ls
 DiskCompatibilityDB.tar  hda1.tgz  rd.bin  packages/  …
 ```
-`*.spk`の場合、直接ステップ3に進むことができます。
+For `*.spk` の場合は、直接 step 3 に進めます。
 
-## 3. Synologyの抽出ライブラリを抽出する
+## 3. Synology の extraction libraries を抽出する
 
-実際の復号化ロジックは以下にあります：
+実際の decryption logic は以下にあります。
 
-* `/usr/syno/sbin/synoarchive`               → メインCLIラッパー
-* `/usr/lib/libsynopkg.so.1`                 → DSM UIからラッパーを呼び出す
-* `libsynocodesign.so`                       → **暗号実装を含む**
+* `/usr/syno/sbin/synoarchive`               → main CLI wrapper
+* `/usr/lib/libsynopkg.so.1`                 → DSM UI から wrapper を呼び出す
+* `libsynocodesign.so`                       → **cryptographic implementation を含む**
 
-両方のバイナリはシステムのrootfs（`hda1.tgz`）**および**圧縮されたinit-rd（`rd.bin`）に存在します。PATのみを持っている場合は、次の方法で取得できます：
+両方の binary は system rootfs（`hda1.tgz`）**と** compressed init-rd（`rd.bin`）に存在します。PAT しかない場合は、次の方法で取得できます。
 ```bash
 # rd.bin is LZMA-compressed CPIO
 $ lzcat rd.bin | cpio -id 2>/dev/null
 $ file usr/lib/libsynocodesign.so
 usr/lib/libsynocodesign.so: ELF 64-bit LSB shared object, ARM aarch64, …
 ```
-## 4. ハードコーディングされたキーの回復 (`get_keys`)
+## 4. ハードコードされたキーの復元（`get_keys`）
 
-`libsynocodesign.so` 内の関数 `get_keys(int keytype)` は、要求されたアーカイブファミリーのために単に2つの128ビットのグローバル変数を返します:
+`libsynocodesign.so` 内の関数 `get_keys(int keytype)` は、要求されたアーカイブファミリに対応する2つの128ビットのグローバル変数を単に返します。<sup>[[1]](#references)</sup>
 ```c
 case 0:            // PAT (system)
 case 10:
@@ -60,20 +60,20 @@ signature_key = qword_23AE0;
 master_key    = qword_23B08;
 break;
 ```
-* **signature_key** → アーカイブヘッダーを検証するために使用されるEd25519公開鍵。
-* **master_key**    → アーカイブごとの暗号化キーを導出するために使用されるルートキー。
+* **signature_key** → archive header の検証に使用する Ed25519 public key。
+* **master_key**    → archive ごとの encryption key の導出に使用する root key。
 
-各DSMメジャーバージョンごとに、これらの2つの定数を一度だけダンプする必要があります。
+DSM の major version ごとに、これら 2 つの constants を一度だけ dump すればよい。
 
-## 5. ヘッダー構造と署名検証
+## 5. Header structure と signature verification
 
-`synoarchive_open()` → `support_format_synoarchive()` → `archive_read_support_format_synoarchive()` は以下を実行します：
+`synoarchive_open()` → `support_format_synoarchive()` → `archive_read_support_format_synoarchive()` は、以下を実行する:<sup>[[1]](#references)</sup>
 
-1. マジックを読み取る (3バイト) `0xBFBAAD` **または** `0xADBEEF`。
-2. リトルエンディアン32ビット `header_len` を読み取る。
-3. `header_len` バイト + 次の **0x40バイトのEd25519署名** を読み取る。
-4. `crypto_sign_verify_detached()` が成功するまで、すべての埋め込まれた公開鍵を反復処理する。
-5. **MessagePack** でヘッダーをデコードし、次の結果を得る：
+1. magic (3 bytes) `0xBFBAAD` **または** `0xADBEEF` を読み取る。
+2. little-endian 32-bit の `header_len` を読み取る。
+3. `header_len` bytes と、その直後の **0x40-byte Ed25519 signature** を読み取る。
+4. `crypto_sign_verify_detached()` が成功するまで、埋め込まれたすべての public keys を順に処理する。
+5. **MessagePack** で header を decode し、以下を取得する:
 ```python
 [
 data: bytes,
@@ -83,22 +83,22 @@ serial_number: [bytes],
 not_valid_before: int
 ]
 ```
-`entries` は、libarchive が各ファイルの整合性をチェックできるようにします。
+`entries`により、後で復号中の各ファイルのintegrity-checkをlibarchiveで実行できます。
 
-## 6. アーカイブごとのサブキーを導出する
+## 6. archiveごとのsub-keyを導出する
 
-MessagePack ヘッダーに含まれる `data` ブロブから:
+MessagePackヘッダーに含まれる`data` blobから:
 
-* `subkey_id`  = オフセット 0x10 のリトルエンディアン `uint64`
-* `ctx`        = オフセット 0x18 の 7 バイト
+* `subkey_id`  = オフセット0x10にあるlittle-endianの`uint64`
+* `ctx`        = オフセット0x18にある7バイト
 
-32 バイトの **ストリームキー** は libsodium を使用して取得されます:
+32バイトの**stream key**はlibsodiumで取得します:
 ```c
 crypto_kdf_derive_from_key(kdf_subkey, 32, subkey_id, ctx, master_key);
 ```
-## 7. Synologyのカスタム **libarchive** バックエンド
+## 7. Synology独自の **libarchive** backend
 
-Synologyは、マジックが `0xADBEEF` の場合に偽の "tar" フォーマットを登録するパッチを当てたlibarchiveをバンドルしています:
+Synologyは、magicが`0xADBEEF`の場合に偽の「tar」formatを登録する、パッチ適用済みのlibarchiveをバンドルしています。<sup>[[1]](#references)</sup>
 ```c
 register_format(
 "tar", spk_bid, spk_options,
@@ -113,7 +113,7 @@ NULL, spk_cleanup, NULL, NULL);
 - crypto_secretstream_xchacha20poly1305_init_pull(state, nonce, kdf_subkey)
 - crypto_secretstream_xchacha20poly1305_pull(state, tar_hdr, …, cipher, 0x193)
 ```
-復号化された `tar_hdr` は **古典的なPOSIX TARヘッダー** です。
+復号された `tar_hdr` は**標準的な POSIX TAR ヘッダ**です。
 
 ### spk_read_data()
 ```
@@ -123,11 +123,11 @@ buf   = archive_read_ahead(chunk_len)
 crypto_secretstream_xchacha20poly1305_pull(state, out, …, buf, chunk_len)
 remaining -= chunk_len - 0x11
 ```
-各 **0x18バイトのノンス** は暗号化されたチャンクの前に追加されます。
+各 **0x18-byte nonce** は暗号化されたチャンクの前に付加されます。
 
-すべてのエントリが処理されると、libarchiveは任意の標準ツールで解凍できる完全に有効な **`.tar`** を生成します。
+すべてのエントリが処理されると、libarchive は完全に有効な **`.tar`** を生成し、標準的なツールで展開できます。
 
-## 8. synodecryptを使用してすべてを復号化する
+## 8. synodecryptですべてを復号する
 ```bash
 $ python3 synodecrypt.py SynologyPhotos-rtd1619b-1.7.0-0794.spk
 [+] found matching keys (SPK)
@@ -137,26 +137,26 @@ $ python3 synodecrypt.py SynologyPhotos-rtd1619b-1.7.0-0794.spk
 
 $ tar xf SynologyPhotos-rtd1619b-1.7.0-0794.tar
 ```
-`synodecrypt` は自動的に PAT/SPK を検出し、正しいキーをロードして、上記で説明したフルチェーンを適用します。
+`synodecrypt` は PAT/SPK を自動的に検出し、正しい keys を読み込み、上記で説明した完全な chain を適用します。<sup>[[2]](#references)</sup>
 
-## 9. 一般的な落とし穴
+## 9. よくある落とし穴
 
-* `signature_key` と `master_key` を入れ替えないでください – それぞれ異なる目的があります。
-* **nonce** はすべてのブロック（ヘッダーとデータ）の暗号文の *前* に来ます。
-* 最大暗号化チャンクサイズは **0x400000 + 0x11** （libsodium タグ）です。
-* 一つの DSM 世代のために作成されたアーカイブは、次のリリースで異なるハードコーディングされたキーに切り替わる可能性があります。
+* `signature_key` と `master_key` を **入れ替えない** でください。これらは異なる目的で使用されます。
+* **nonce** は、すべての block（header と data）の ciphertext より *前* に置かれます。
+* 暗号化された chunk の最大サイズは **0x400000 + 0x11**（libsodium tag）です。
+* ある DSM generation 用に作成された archives では、次の release で別の hard-coded keys に切り替わる場合があります。
 
-## 10. 追加ツール
+## 10. 追加の tooling
 
-* [`patology`](https://github.com/sud0woodo/patology) – PAT アーカイブを解析/ダンプします。
-* [`synodecrypt`](https://github.com/synacktiv/synodecrypt) – PAT/SPK/その他を復号化します。
-* [`libsodium`](https://github.com/jedisct1/libsodium) – XChaCha20-Poly1305 secretstream のリファレンス実装です。
-* [`msgpack`](https://msgpack.org/) – ヘッダーのシリアライゼーション。
+* [`patology`](https://github.com/sud0woodo/patology) – PAT archives を parse/dump します。<sup>[[3]](#references)</sup>
+* [`synodecrypt`](https://github.com/synacktiv/synodecrypt) – PAT/SPK/その他を decrypt します。<sup>[[2]](#references)</sup>
+* [`libsodium`](https://github.com/jedisct1/libsodium) – XChaCha20-Poly1305 secretstream の reference implementation です。
+* [`msgpack`](https://msgpack.org/) – header serialisation に使用します。
 
-## 参考文献
+## References
 
-- [Extraction of Synology encrypted archives – Synacktiv (Pwn2Own IE 2024)](https://www.synacktiv.com/publications/extraction-des-archives-chiffrees-synology-pwn2own-irlande-2024.html)
-- [synodecrypt on GitHub](https://github.com/synacktiv/synodecrypt)
-- [patology on GitHub](https://github.com/sud0woodo/patology)
+- [1] [Extraction of Synology encrypted archives – Synacktiv (Pwn2Own IE 2024)](https://www.synacktiv.com/publications/extraction-des-archives-chiffrees-synology-pwn2own-irlande-2024.html)
+- [2] [synodecrypt on GitHub](https://github.com/synacktiv/synodecrypt)
+- [3] [patology on GitHub](https://github.com/sud0woodo/patology)
 
 {{#include ../../banners/hacktricks-training.md}}
