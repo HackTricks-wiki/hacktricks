@@ -4,42 +4,42 @@
 
 ## Muhtasari
 
-Tathmini nzuri ya container inapaswa kujibu maswali mawili yanayofanyika sambamba. Kwanza, attacker anaweza kufanya nini kutoka kwenye workload ya sasa? Pili, ni chaguo zipi za operator zilizowezesha hilo? Zana za enumeration husaidia kujibu swali la kwanza, na mwongozo wa hardening husaidia kujibu la pili. Kuziweka zote kwenye ukurasa mmoja hufanya sehemu hii iwe na manufaa zaidi kama marejeo ya field badala ya kuwa katalogi tu ya mbinu za escape.
+Tathmini nzuri ya container inapaswa kujibu maswali mawili kwa wakati mmoja. Kwanza, attacker anaweza kufanya nini kutoka kwenye workload ya sasa? Pili, ni chaguo zipi za operator zilizowezesha hilo? Zana za enumeration husaidia kujibu swali la kwanza, na mwongozo wa hardening husaidia kujibu la pili. Kuyaweka yote kwenye ukurasa mmoja hufanya sehemu hii iwe muhimu zaidi kama marejeo ya uwanjani badala ya kuwa katalogi tu ya mbinu za escape.
 
-Mabadiliko moja ya muhimu kwa mazingira ya kisasa ni kwamba maandishi mengi ya zamani kuhusu containers huchukulia bila kutaja kuwa kuna **rootful runtime**, **hakuna user namespace isolation**, na mara nyingi **cgroup v1**. Mawazo hayo si salama tena. Kabla ya kutumia muda kwenye escape primitives za zamani, thibitisha kwanza ikiwa workload ni rootless au userns-remapped, ikiwa host inatumia cgroup v2, na ikiwa Kubernetes au runtime sasa inatumia default seccomp na AppArmor profiles. Maelezo haya mara nyingi huamua ikiwa breakout maarufu bado inatumika.
+Sasisho moja la muhimu kwa mazingira ya kisasa ni kwamba maandishi mengi ya zamani kuhusu containers hudhani kwa siri matumizi ya **rootful runtime**, **hakuna user namespace isolation**, na mara nyingi **cgroup v1**. Mawazo hayo si salama tena. Kabla ya kutumia muda kwenye escape primitives za zamani, thibitisha kwanza ikiwa workload ni rootless au userns-remapped, ikiwa host inatumia cgroup v2, na ikiwa Kubernetes au runtime sasa inatumia seccomp na AppArmor profiles za msingi. Maelezo haya mara nyingi huamua ikiwa breakout maarufu bado inatumika.
 
 ## Zana za Enumeration
 
-Zana kadhaa bado zinafaa kwa kubainisha kwa haraka mazingira ya container:
+Zana kadhaa bado zinafaa kwa kutambua kwa haraka sifa za container environment:
 
-- `linpeas` inaweza kutambua viashiria vingi vya container, sockets zilizomountiwa, capability sets, filesystems hatari, na vidokezo vya breakout.
-- `CDK` inalenga hasa mazingira ya container na inajumuisha enumeration pamoja na ukaguzi fulani wa escape unaofanywa kiotomatiki.
-- `amicontained` ni nyepesi na inafaa kwa kutambua vikwazo vya container, capabilities, namespace exposure, na aina zinazowezekana za breakout.
+- `linpeas` inaweza kutambua viashiria vingi vya container, sockets zilizomountiwa, capability sets, filesystems hatari, na dalili za breakout.
+- `CDK` inalenga hasa container environments na inajumuisha enumeration pamoja na baadhi ya ukaguzi wa escape unaoendeshwa kiotomatiki.
+- `amicontained` ni nyepesi na inafaa kwa kutambua vizuizi vya container, capabilities, namespace exposure, na aina zinazowezekana za breakout.
 - `deepce` ni enumerator nyingine inayolenga containers yenye ukaguzi unaohusiana na breakout.
-- `grype` inafaa wakati assessment inajumuisha ukaguzi wa vulnerabilities za image packages badala ya uchambuzi wa runtime escape pekee.
-- `Tracee` inafaa unapohitaji **runtime evidence** badala ya static posture pekee, hasa kwa process execution yenye shaka, file access, na ukusanyaji wa events unaotambua containers.
-- `Inspektor Gadget` inafaa katika uchunguzi wa Kubernetes na Linux-host unapohitaji mwonekano unaotegemea eBPF unaohusishwa na pods, containers, namespaces, na dhana nyingine za kiwango cha juu.
+- `grype` inafaa wakati tathmini inajumuisha ukaguzi wa vulnerabilities za packages kwenye image badala ya uchanganuzi wa runtime escape pekee.
+- `Tracee` inafaa unapohitaji **ushahidi wa runtime** badala ya static posture pekee, hasa kwa process execution zinazotiliwa shaka, file access, na ukusanyaji wa events unaotambua containers.
+- `Inspektor Gadget` inafaa katika uchunguzi wa Kubernetes na Linux-host unapohitaji visibility inayotumia eBPF na inayohusishwa na pods, containers, namespaces, na concepts nyingine za kiwango cha juu.
 
-Thamani ya zana hizi ni kasi na coverage, si uhakika. Husaidia kufichua posture ya jumla kwa haraka, lakini findings zenye umuhimu bado zinahitaji kutafsiriwa manually kulingana na runtime, namespace, capability, na mount model halisi.
+Thamani ya zana hizi iko kwenye kasi na coverage, si uhakika. Zinasaidia kufichua posture ya jumla kwa haraka, lakini findings muhimu bado zinahitaji tafsiri ya manual kulingana na runtime, namespace, capability, na mount model halisi.
 
 ## Vipaumbele vya Hardening
 
-Kanuni muhimu zaidi za hardening ni rahisi kimawazo, ingawa utekelezaji wake hutofautiana kulingana na platform. Epuka privileged containers. Epuka runtime sockets zilizomountiwa. Usipe containers host paths zinazoweza kuandikwa isipokuwa kuna sababu maalum sana. Tumia user namespaces au rootless execution inapowezekana. Ondoa capabilities zote na ongeza tu zile ambazo workload inahitaji kwa kweli. Weka seccomp, AppArmor, na SELinux ikiwa enabled badala ya kuzizima ili kutatua matatizo ya application compatibility. Punguza resources ili container iliyo compromised isiweze kwa urahisi kusababisha denial of service kwa host.
+Kanuni muhimu zaidi za hardening ni rahisi kimawazo ingawa utekelezaji wake hutofautiana kulingana na platform. Epuka privileged containers. Epuka runtime sockets zilizomountiwa. Usizipe containers host paths zenye writable access isipokuwa kuna sababu mahususi sana. Tumia user namespaces au rootless execution inapowezekana. Ondoa capabilities zote na urudishe tu zile ambazo workload inahitaji kweli. Weka seccomp, AppArmor, na SELinux zikiwa zimewezeshwa badala ya kuzizima ili kutatua matatizo ya application compatibility. Weka mipaka ya resources ili container iliyo-compromise isiweze kwa urahisi kusababisha denial of service kwa host.
 
-Usafi wa image na build ni muhimu sawa na runtime posture. Tumia images ndogo, zijenge upya mara kwa mara, zichanganue, hitaji provenance inapowezekana, na usiweke secrets kwenye layers. Container inayoendesha kama non-root yenye image ndogo na syscall na capability surface finyu ni rahisi zaidi kuilinda kuliko convenience image kubwa inayoendesha kama root yenye privileges sawa na host na debugging tools zilizowekwa mapema.
+Usafi wa image na build ni muhimu sawa na runtime posture. Tumia images ndogo, zijenge upya mara kwa mara, zifanyie scan, hitaji provenance inapowezekana, na usihifadhi secrets kwenye layers. Container inayoendesha kama non-root yenye image ndogo na syscall na capability surface finyu ni rahisi zaidi kuilinda kuliko convenience image kubwa inayoendesha kama host-equivalent root ikiwa na debugging tools zilizosakinishwa mapema.
 
-Kwa Kubernetes, misingi ya sasa ya hardening ina masharti zaidi kuliko operators wengi wanavyodhani bado. **Pod Security Standards** zilizojengwa ndani huchukulia `restricted` kuwa profile ya "current best practice": `allowPrivilegeEscalation` inapaswa kuwa `false`, workloads zinapaswa kuendesha kama non-root, seccomp inapaswa kuwekwa wazi kuwa `RuntimeDefault` au `Localhost`, na capability sets zinapaswa kuondolewa kwa kiwango kikubwa. Wakati wa assessment, jambo hili ni muhimu kwa sababu cluster inayotumia labels za `warn` au `audit` pekee inaweza kuonekana kuwa hardened kwenye karatasi huku ikiendelea kuruhusu risky pods kwa vitendo.
+Kwa Kubernetes, misingi ya sasa ya hardening ina masharti makali zaidi kuliko operators wengi bado wanavyodhani. **Pod Security Standards** zilizojengwa ndani zinachukulia `restricted` kuwa profile ya "best practice ya sasa": `allowPrivilegeEscalation` inapaswa kuwa `false`, workloads zinapaswa kuendeshwa kama non-root, seccomp inapaswa kuwekwa wazi kuwa `RuntimeDefault` au `Localhost`, na capability sets zinapaswa kuondolewa kwa kiwango kikubwa. Wakati wa assessment, jambo hili ni muhimu kwa sababu cluster inayotumia labels za `warn` au `audit` pekee inaweza kuonekana kuwa ime-hardening kwenye nyaraka huku bado ikiruhusu pods hatari kwa vitendo.<sup>[[1]](#references)</sup>
 
 ## Maswali ya Kisasa ya Triage
 
-Kabla ya kuingia kwenye kurasa zinazohusu escape pekee, jibu maswali haya ya haraka:
+Kabla ya kuingia kwenye kurasa zinazohusu escape mahususi, jibu maswali haya ya haraka:
 
 1. Je, workload ni **rootful**, **rootless**, au **userns-remapped**?
 2. Je, node inatumia **cgroup v1** au **cgroup v2**?
-3. Je, **seccomp** na **AppArmor/SELinux** zimesanidiwa wazi, au zimerithiwa tu zinapopatikana?
-4. Katika Kubernetes, je, namespace inatekeleza kweli `baseline` au `restricted`, au inaonya/kukagua tu?
+3. Je, **seccomp** na **AppArmor/SELinux** zimewekwa wazi, au zinarithiwa tu zinapopatikana?
+4. Katika Kubernetes, je, namespace kweli ina-**enforce** `baseline` au `restricted`, au ina-warning/audit pekee?
 
-Ukaguzi unaofaa:
+Ukaguzi muhimu:
 ```bash
 id
 cat /proc/self/uid_map 2>/dev/null
@@ -56,15 +56,15 @@ kubectl get pod "$HOSTNAME" -n "$NS" -o jsonpath='{.spec.securityContext.seccomp
 ```
 Kinachovutia hapa:
 
-- Ikiwa `/proc/self/uid_map` inaonyesha kuwa container root imepangwa kwenye **high host UID range**, maelezo mengi ya zamani kuhusu uandishi wa host-root yanakuwa na umuhimu mdogo, kwa sababu root ndani ya container si sawa tena na host-root.
-- Ikiwa `/sys/fs/cgroup` ni `cgroup2fs`, maelezo ya zamani yanayohusu **cgroup v1**, kama vile matumizi mabaya ya `release_agent`, hayapaswi kuwa dhana yako ya kwanza tena.
-- Ikiwa seccomp na AppArmor zinarithiwa kwa njia isiyo wazi pekee, portability inaweza kuwa dhaifu kuliko defenders wanavyotarajia. Katika Kubernetes, kuweka `RuntimeDefault` wazi mara nyingi huwa na nguvu zaidi kuliko kutegemea kimya kimya defaults za node.
-- Ikiwa `supplementalGroupsPolicy` imewekwa kuwa `Strict`, pod inapaswa kuepuka kurithi kimya kimya memberships za ziada za groups kutoka `/etc/group` ndani ya image, jambo linalofanya tabia ya access ya volumes na files kulingana na groups itabirike zaidi.
-- Labels za namespace kama `pod-security.kubernetes.io/enforce=restricted` zinafaa kuchunguzwa moja kwa moja. `warn` na `audit` zinafaa, lakini hazizuii pod hatari kuundwa.
+- Ikiwa `/proc/self/uid_map` inaonyesha container root ikiwa imepangwa kwenye **high host UID range**, writeup nyingi za zamani kuhusu host-root huwa na umuhimu mdogo kwa sababu root ndani ya container si sawa tena na host-root.
+- Ikiwa `/sys/fs/cgroup` ni `cgroup2fs`, writeup za zamani zinazohusiana mahususi na **cgroup v1**, kama matumizi mabaya ya `release_agent`, hazipaswi kuwa dhana yako ya kwanza tena.
+- Ikiwa seccomp na AppArmor zinarithiwa tu bila kuwekwa wazi, portability inaweza kuwa dhaifu kuliko defenders wanavyotarajia. Katika Kubernetes, kuweka wazi `RuntimeDefault` mara nyingi huwa salama zaidi kuliko kutegemea kimya kimya defaults za node.
+- Ikiwa `supplementalGroupsPolicy` imewekwa kuwa `Strict`, pod inapaswa kuepuka kurithi kimya kimya memberships za ziada za groups kutoka `/etc/group` ndani ya image, jambo linalofanya tabia ya ufikiaji wa volumes na files kwa kutumia groups iwe rahisi kutabirika.
+- Labels za namespace kama `pod-security.kubernetes.io/enforce=restricted` zinafaa kuangaliwa moja kwa moja. `warn` na `audit` zinafaa, lakini hazizuii pod hatari kuundwa.
 
-## Upimaji wa Haraka wa Msingi wa Runtime
+## Triage ya Msingi wa Runtime
 
-Msingi wa runtime ni ukaguzi wa haraka unaokuambia ikiwa container inaonekana kama workload ya kawaida iliyotengwa au kama foothold ya control plane inayoweza kuathiri host. Unapaswa kukusanya facts za kutosha ili kupanga kipaumbele cha ukurasa unaofuata wa kusoma: matumizi mabaya ya runtime socket, mounts za host, namespaces, cgroups, capabilities, au ukaguzi wa image secrets.
+Msingi wa runtime ni ukaguzi wa haraka unaokuonyesha ikiwa container inaonekana kama workload ya kawaida iliyotengwa au kama foothold ya control plane inayoweza kuathiri host. Inapaswa kukusanya facts za kutosha ili kupanga kipaumbele cha ukurasa unaofuata wa kusoma: matumizi mabaya ya runtime socket, host mounts, namespaces, cgroups, capabilities, au ukaguzi wa image-secrets.
 
 Ukaguzi muhimu kutoka ndani ya workload:
 ```bash
@@ -80,26 +80,26 @@ readlink /proc/self/ns/{pid,mnt,net,ipc,cgroup,user} 2>/dev/null
 mount
 find /run /var/run -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock \) 2>/dev/null
 ```
-Ufafanuzi:
+Tafsiri:
 
-- `memory.max` / `pids.max` zinazokosekana au zisizo na kikomo zinaonyesha udhibiti dhaifu wa blast radius hata bila escape salama.
-- root shell yenye `NoNewPrivs: 0`, capabilities pana, na seccomp yenye ruhusa nyingi inavutia zaidi kuliko workload finyu isiyo ya root.
-- Runtime sockets na mounts za host zinazoweza kuandikwa kwa kawaida huwa muhimu zaidi kuliko kernel exploits kwa sababu tayari zinaonyesha njia ya udhibiti wa usimamizi au filesystem.
-- Shared PID, network, IPC, au cgroup namespaces si lazima ziwe full escapes zenyewe, lakini hurahisisha kupata hatua inayofuata.
+- `memory.max` / `pids.max` zilizokosekana au zisizo na kikomo zinaonyesha udhibiti dhaifu wa blast radius hata bila escape safi.
+- Root shell yenye `NoNewPrivs: 0`, capabilities pana, na seccomp yenye ruhusa nyingi inavutia zaidi kuliko workload finyu isiyo ya root.
+- Runtime sockets na host mounts zinazoweza kuandikwa kwa kawaida huwa muhimu zaidi kuliko kernel exploits kwa sababu tayari zinaonyesha njia ya udhibiti wa management au filesystem.
+- Shared PID, network, IPC, au cgroup namespaces si full escapes kila mara zikiwa peke yake, lakini hurahisisha kupata hatua inayofuata.
 
 ## Mifano ya Resource-Exhaustion
 
-Vidhibiti vya rasilimali si vya kuvutia sana, lakini ni sehemu ya container security kwa sababu hupunguza blast radius ya compromise. Bila mipaka ya memory, CPU, au PID, shell rahisi inaweza kutosha kudhoofisha host au workloads zilizo jirani.
+Resource controls si za kuvutia, lakini ni sehemu ya container security kwa sababu hupunguza blast radius ya compromise. Bila memory, CPU, au PID limits, shell rahisi inaweza kutosha kudhoofisha host au workloads zilizo jirani.
 
-Majaribio ya kuathiri host:
+Mifano ya majaribio yanayoathiri host:
 ```bash
 stress-ng --vm 1 --vm-bytes 1G --verify -t 5m
 docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :; done'
 nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target_ip> 4444; done
 ```
-Mifano hii ni muhimu kwa sababu inaonyesha kwamba si kila matokeo hatari ya container huwa ni "escape" safi. Vikomo dhaifu vya cgroup bado vinaweza kubadilisha code execution kuwa athari halisi ya kiutendaji.
+Mifano hii ni muhimu kwa sababu inaonyesha kwamba si kila matokeo hatari ya container huwa "escape" iliyo wazi. Vikomo dhaifu vya cgroup bado vinaweza kubadilisha code execution kuwa athari halisi za kiutendaji.
 
-Katika mazingira yanayotumia Kubernetes, pia hakikisha kama resource controls zipo kabisa kabla ya kuchukulia DoS kuwa ya kinadharia:
+Katika mazingira yanayotegemea Kubernetes, pia kagua kama resource controls zipo kabisa kabla ya kuchukulia DoS kuwa ya kinadharia:
 ```bash
 kubectl get pod "$HOSTNAME" -n "$NS" -o jsonpath='{range .spec.containers[*]}{.name}{" cpu="}{.resources.limits.cpu}{" mem="}{.resources.limits.memory}{"\n"}{end}' 2>/dev/null
 cat /sys/fs/cgroup/pids.max 2>/dev/null
@@ -108,22 +108,22 @@ cat /sys/fs/cgroup/cpu.max 2>/dev/null
 ```
 ## Zana za Hardening
 
-Kwa mazingira yanayolenga Docker, `docker-bench-security` bado ni msingi muhimu wa ukaguzi wa upande wa host kwa sababu hukagua masuala ya kawaida ya usanidi dhidi ya mwongozo wa benchmark unaotambuliwa kwa upana:
+Kwa mazingira yanayolenga Docker, `docker-bench-security` bado ni msingi muhimu wa audit upande wa host kwa sababu hukagua matatizo ya kawaida ya usanidi dhidi ya mwongozo wa benchmark unaotambulika kwa upana:
 ```bash
 git clone https://github.com/docker/docker-bench-security.git
 cd docker-bench-security
 sudo sh docker-bench-security.sh
 ```
-Zana hii si mbadala wa threat modeling, lakini bado ni muhimu kwa kugundua daemon, mount, network, na runtime defaults zisizozingatia usalama ambazo hujikusanya baada ya muda.
+Zana hii si mbadala wa threat modeling, lakini bado ni muhimu kwa kugundua mipangilio ya msingi ya daemon, mount, network, na runtime ambayo hujilimbikiza bila uangalifu baada ya muda.
 
-Kwa Kubernetes na mazingira yanayotegemea runtime sana, changanya ukaguzi tuli na mwonekano wa runtime:
+Kwa mazingira ya Kubernetes na yenye utegemezi mkubwa wa runtime, unganisha ukaguzi tuli na uonekano wa runtime:
 
-- `Tracee` ni muhimu kwa runtime detection inayotambua container na forensics ya haraka unapohitaji kuthibitisha kile ambacho workload iliyoathiriwa iligusa.
-- `Inspektor Gadget` ni muhimu wakati assessment inahitaji kernel-level telemetry inayohusishwa na pods, containers, shughuli za DNS, utekelezaji wa faili, au tabia ya network.
+- `Tracee` ni muhimu kwa utambuzi wa runtime unaotambua containers na kwa forensics za haraka unapohitaji kuthibitisha kile ambacho workload iliyoathirika ilifikia.
+- `Inspektor Gadget` ni muhimu wakati assessment inahitaji telemetry ya kiwango cha kernel iliyohusishwa na pods, containers, shughuli za DNS, utekelezaji wa faili, au tabia ya network.
 
 ## Ukaguzi
 
-Tumia hizi kama amri za awamu ya kwanza wakati wa assessment:
+Tumia hizi kama commands za haraka za awamu ya kwanza wakati wa assessment:
 ```bash
 id
 capsh --print 2>/dev/null
@@ -133,16 +133,17 @@ stat -fc %T /sys/fs/cgroup 2>/dev/null
 mount
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock \) 2>/dev/null
 ```
-Ni nini kinachovutia hapa:
+Kinachovutia hapa:
 
-- Mchakato wa `root` wenye capabilities pana na `Seccomp: 0` unastahili kupewa kipaumbele mara moja.
-- Mchakato wa `root` ambao pia una **1:1 UID map** unavutia zaidi kuliko "root" ndani ya user namespace iliyotengwa ipasavyo.
-- `cgroup2fs` kwa kawaida humaanisha kwamba chain nyingi za zamani za kutoroka kwenye **cgroup v1** si sehemu bora ya kuanzia, huku kutokuwepo kwa `memory.max` au `pids.max` bado kukionyesha udhibiti dhaifu wa blast radius.
-- Mounts zinazotiliwa shaka na runtime sockets mara nyingi hutoa njia ya haraka zaidi ya kupata impact kuliko kernel exploit yoyote.
-- Mchanganyiko wa runtime posture dhaifu na resource limits dhaifu kwa kawaida huashiria container environment inayoruhusu mambo kwa ujumla, badala ya kosa moja lililotengwa.
+- Mchakato wa root wenye capabilities pana na `Seccomp: 0` unastahili kuangaliwa mara moja.
+- Mchakato wa root ambao pia una **1:1 UID map** unavutia zaidi kuliko "root" ndani ya user namespace iliyotengwa ipasavyo.
+- `cgroup2fs` kwa kawaida humaanisha kuwa **cgroup v1** escape chains nyingi za zamani si sehemu bora ya kuanzia, huku kukosekana kwa `memory.max` au `pids.max` bado kukionyesha udhibiti dhaifu wa blast radius.
+- Mounts zenye kutiliwa shaka na runtime sockets mara nyingi hutoa njia ya haraka zaidi ya kupata impact kuliko kernel exploit yoyote.
+- Mchanganyiko wa runtime posture dhaifu na resource limits dhaifu kwa kawaida huonyesha container environment yenye ruhusa kwa ujumla, badala ya kosa moja lililotengwa.
 
 ## Marejeo
 
-- [Kubernetes Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
-- [Docker Security Advisory: Multiple Vulnerabilities in runc, BuildKit, and Moby](https://docs.docker.com/security/security-announcements/)
+- [1] [Kubernetes Pod Security Standards](https://kubernetes.io/docs/concepts/security/pod-security-standards/)
+- [2] [Docker Security Advisory: Multiple Vulnerabilities in runc, BuildKit, and Moby](https://docs.docker.com/security/security-announcements/)
+
 {{#include ../../../banners/hacktricks-training.md}}

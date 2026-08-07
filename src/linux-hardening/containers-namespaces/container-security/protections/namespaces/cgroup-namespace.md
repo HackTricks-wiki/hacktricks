@@ -1,18 +1,18 @@
-# cgroup Namespace
+# Namespace ya cgroup
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
 ## Muhtasari
 
-cgroup namespace haibadilishi cgroups wala haiweki yenyewe mipaka ya rasilimali. Badala yake, hubadilisha **jinsi hierarchy ya cgroup inavyoonekana** kwa process. Kwa maneno mengine, hu-virtualize taarifa za njia za cgroup zinazoonekana, ili workload ione mwonekano unaohusishwa na container badala ya hierarchy kamili ya host.
+Namespace ya cgroup haibadilishi cgroups wala haiweki vikomo vya rasilimali yenyewe. Badala yake, hubadilisha **jinsi hierarchy ya cgroup inavyoonekana** kwa process. Kwa maneno mengine, huvirtualize taarifa ya path ya cgroup inayoonekana ili workload ione mwonekano uliowekewa container badala ya hierarchy kamili ya host.
 
-Hiki hasa ni kipengele cha kupunguza mwonekano na taarifa. Husaidia kufanya mazingira yaonekane kuwa yamejitenga na kufichua machache kuhusu mpangilio wa cgroup wa host. Huenda hilo likaonekana kuwa jambo dogo, lakini bado ni muhimu kwa sababu mwonekano usio wa lazima wa muundo wa host unaweza kusaidia reconnaissance na kurahisisha exploit chains zinazotegemea mazingira.
+Hiki hasa ni kipengele cha kupunguza mwonekano na taarifa. Husaidia kufanya mazingira yaonekane yamejitegemea na kufichua kidogo kuhusu mpangilio wa cgroup wa host. Hilo linaweza kuonekana kuwa dogo, lakini bado ni muhimu kwa sababu mwonekano usio wa lazima wa muundo wa host unaweza kusaidia reconnaissance na kurahisisha exploit chains zinazotegemea mazingira.
 
 ## Uendeshaji
 
-Bila cgroup namespace ya kibinafsi, process inaweza kuona njia za cgroup zinazohusiana na host, ambazo hufichua sehemu kubwa ya hierarchy ya mashine kuliko inavyohitajika. Ikiwa kuna cgroup namespace ya kibinafsi, `/proc/self/cgroup` na taarifa nyingine zinazohusiana huwa zimewekewa mipaka zaidi kwa mwonekano wa container yenyewe. Hii husaidia hasa katika runtime stacks za kisasa zinazotaka workload ione mazingira safi zaidi na yasiyofichua sana taarifa za host.
+Bila private cgroup namespace, process inaweza kuona paths za cgroup zinazohusiana na host na kufichua sehemu kubwa ya hierarchy ya mashine kuliko inavyohitajika. Kwa private cgroup namespace, `/proc/self/cgroup` na observations zinazohusiana huwa zimewekewa mipaka zaidi kwenye mwonekano wa container yenyewe. Hii husaidia hasa kwenye modern runtime stacks zinazotaka workload ione mazingira safi zaidi na yanayofichua machache kuhusu host.
 
-Virtualization hii pia huathiri `/proc/<pid>/mountinfo`, na si `/proc/<pid>/cgroup` pekee. Unaposoma process nyingine kutoka kwenye mtazamo tofauti wa cgroup namespace, njia zilizo nje ya namespace root yako huonyeshwa zikiwa na vipengele vya mwanzo vya `../`, ambavyo ni kidokezo muhimu kwamba unaangalia juu ya subtree uliyopewa. Jambo muhimu kwa labs na post-exploitation ni kwamba cgroup namespace iliyoundwa hivi karibuni mara nyingi huhitaji **cgroupfs remount kutoka ndani ya namespace hiyo** kabla `mountinfo` haijaonyesha root mpya kwa usahihi. Vinginevyo, bado unaweza kuona mount root kama `/..`, jambo linalomaanisha kuwa mount iliyorithiwa bado inaonyesha mwonekano wenye root kwenye ancestor, ingawa namespace yenyewe tayari imebadilika.
+Virtualization hii pia huathiri `/proc/<pid>/mountinfo`, si `/proc/<pid>/cgroup` pekee. Unaposoma process nyingine kutoka kwenye mtazamo tofauti wa cgroup-namespace, paths zilizo nje ya namespace root yako huonyeshwa zikiwa na components za mwanzo za `../`, jambo linalotoa clue muhimu kwamba unaangalia juu ya delegated subtree yako. Nuance muhimu kwa labs na post-exploitation ni kwamba cgroup namespace mpya iliyoundwa mara nyingi huhitaji **cgroupfs remount kutoka ndani ya namespace hiyo** kabla ya `mountinfo` kuonyesha root mpya kwa usahihi. Vinginevyo, bado unaweza kuona mount root kama `/..`, ikimaanisha kuwa mount iliyorithiwa bado inafichua mwonekano wenye root kwenye ancestor hata ingawa namespace yenyewe tayari imebadilika.<sup>[[1]](#references)</sup>
 
 ## Lab
 
@@ -23,7 +23,7 @@ cat /proc/self/cgroup
 cat /proc/self/mountinfo | grep cgroup
 ls -l /proc/self/ns/cgroup
 ```
-Ikiwa unataka `mountinfo` ionyeshe root mpya ya cgroup-namespace kwa uwazi zaidi, fanya remount ya cgroup filesystem kutoka ndani ya namespace mpya kisha linganisha tena:
+Ikiwa unataka `mountinfo` ionyeshe root mpya ya cgroup-namespace kwa uwazi zaidi, fanya remount ya cgroup filesystem ukiwa ndani ya namespace mpya kisha ulinganishe tena:
 ```bash
 mount --make-rslave /
 umount /sys/fs/cgroup 2>/dev/null
@@ -35,37 +35,37 @@ Na linganisha tabia ya runtime na:
 docker run --rm debian:stable-slim cat /proc/self/cgroup
 docker run --rm --cgroupns=host debian:stable-slim cat /proc/self/cgroup
 ```
-Mabadiliko yanahusu zaidi kile ambacho process inaweza kuona, si kuhusu kama cgroup enforcement ipo.
+Mabadiliko yanahusu zaidi kile ambacho process inaweza kuona, si kama cgroup enforcement ipo.
 
 ## Athari za Usalama
 
-cgroup namespace inaeleweka vyema kama **visibility-hardening layer**. Yenyewe haiwezi kuzuia breakout ikiwa container ina writable cgroup mounts, broad capabilities, au mazingira hatari ya cgroup v1. Hata hivyo, ikiwa host cgroup namespace imeshirikiwa, process hujifunza zaidi kuhusu jinsi mfumo ulivyopangwa na inaweza kupata urahisi zaidi wa kuoanisha cgroup paths zinazohusiana na host na observations nyingine.
+cgroup namespace inaeleweka vyema zaidi kama **visibility-hardening layer**. Kwa yenyewe, haitazuia breakout ikiwa container ina cgroup mounts zinazoandikika, capabilities pana, au mazingira hatari ya cgroup v1. Hata hivyo, ikiwa host cgroup namespace imeshirikiwa, process hujifunza zaidi kuhusu jinsi mfumo ulivyopangwa na inaweza kupata urahisi zaidi wa kuoanisha cgroup paths zinazohusiana na host na observations nyingine.
 
-Kwenye **cgroup v2**, namespace huanza kuwa muhimu zaidi kwa kiasi fulani kwa sababu delegation rules ni kali zaidi. Ikiwa hierarchy ime-mountiwa kwa `nsdelegate`, kernel huchukulia cgroup namespaces kama mipaka ya delegation: ancestor control files zinapaswa kubaki nje ya uwezo wa delegatee, na writes kwenye namespace root zinazuiwa isipokuwa kwa files salama kwa delegation kama vile `cgroup.procs`, `cgroup.threads`, na `cgroup.subtree_control`. Hii bado haifanyi namespace kuwa escape primitive yenyewe, lakini hubadilisha kile ambacho compromised workload inaweza kukagua na mahali inapoweza kuunda sub-cgroups kwa usalama.
+Kwenye **cgroup v2**, namespace huanza kuwa muhimu zaidi kidogo kwa sababu delegation rules ni kali zaidi. Ikiwa hierarchy ime-mountiwa kwa `nsdelegate`, kernel huchukulia cgroup namespaces kama mipaka ya delegation: control files za ancestor zinapaswa kubaki nje ya uwezo wa kufikiwa na delegatee, na writes kwenye namespace root huzuiwa kwenye files salama kwa delegation kama `cgroup.procs`, `cgroup.threads`, na `cgroup.subtree_control`.<sup>[[2]](#references)</sup> Hii bado haifanyi namespace kuwa escape primitive yenyewe, lakini hubadilisha kile ambacho workload iliyo-compromise inaweza kukagua na mahali ambapo inaweza kuunda sub-cgroups kwa usalama.
 
-Kwa hiyo, ingawa namespace hii kwa kawaida si mhusika mkuu katika container breakout writeups, bado huchangia katika lengo pana la kupunguza host information leakage na kuzuia cgroup delegation.
+Kwa hiyo, ingawa namespace hii kwa kawaida si nyota kuu katika writeups za container breakout, bado inachangia lengo pana la kupunguza host information leakage na kuzuia cgroup delegation.
 
 ## Abuse
 
-Thamani ya moja kwa moja ya abuse inahusu zaidi reconnaissance. Ikiwa host cgroup namespace imeshirikiwa, linganisha paths zinazoonekana na utafute maelezo ya hierarchy yanayofichua host:
+Thamani ya abuse ya haraka ni reconnaissance. Ikiwa host cgroup namespace imeshirikiwa, linganisha paths zinazoonekana na utafute maelezo ya hierarchy yanayofichua host:
 ```bash
 readlink /proc/self/ns/cgroup
 cat /proc/self/cgroup
 cat /proc/1/cgroup 2>/dev/null
 cat /proc/self/mountinfo | grep cgroup
 ```
-Ikiwa cgroup paths zinazoweza kuandikwa pia zimefichuliwa, changanya mwonekano huo na utafutaji wa interfaces hatari za legacy:
+Ikiwa paths za cgroup zenye ruhusa ya kuandikwa pia zimefichuliwa, changanya mwonekano huo na utafutaji wa legacy interfaces hatari:
 ```bash
 find /sys/fs/cgroup -maxdepth 3 -name release_agent 2>/dev/null -exec ls -l {} \;
 find /sys/fs/cgroup -maxdepth 3 -writable 2>/dev/null | head -n 50
 ```
-Namespace yenyewe mara chache husababisha escape ya papo kwa papo, lakini mara nyingi hurahisisha kuchora ramani ya mazingira kabla ya kujaribu primitives za matumizi mabaya yanayotegemea cgroup.
+Namespace yenyewe mara chache hutoa escape ya papo hapo, lakini mara nyingi hufanya mazingira yawe rahisi zaidi kuchora ramani kabla ya kujaribu primitives za abuse zinazotegemea cgroup.
 
-Ukaguzi wa haraka wa hali halisi ya runtime pia husaidia kuweka kipaumbele kwenye njia ya attack. Docker hufichua `--cgroupns=host|private`, huku Podman ikiunga mkono `host`, `private`, `container:<id>`, na `ns:<path>`. Kwenye Podman hasa, chaguo-msingi kwa kawaida ni **`host` kwenye cgroup v1** na **`private` kwenye cgroup v2**, hivyo kutambua tu toleo la cgroup tayari kunakuambia ni posture ipi ya namespace inayowezekana zaidi kabla hata hujakagua OCI config yote.
+Ukaguzi wa haraka wa uhalisia wa runtime pia husaidia kuweka kipaumbele kwenye njia ya attack. Docker hutoa `--cgroupns=host|private`, huku Podman ikiunga mkono `host`, `private`, `container:<id>`, na `ns:<path>`. Kwenye Podman hasa, default kwa kawaida ni **`host` kwenye cgroup v1** na **`private` kwenye cgroup v2**, kwa hivyo kutambua tu toleo la cgroup tayari hukuambia ni mkao gani wa namespace unaowezekana zaidi kabla hata hujakagua OCI config kamili.
 
-### Modern v2 Recon: Je, Hii Ni Delegated Subtree?
+### Modern v2 Recon: Je Hii Ni Subtree Iliyodelegiwa?
 
-Kwenye hosts za kisasa, swali muhimu mara nyingi si `release_agent`, bali ikiwa process ya sasa iko ndani ya subtree ya **cgroup v2** iliyokabidhiwa, yenye visibility au write access ya kutosha kujenga nested groups:
+Kwenye hosts za kisasa, swali la kuvutia mara nyingi si `release_agent`, bali ni ikiwa process ya sasa iko ndani ya subtree ya **cgroup v2** iliyodelegiwa yenye visibility au write access ya kutosha kujenga groups zilizowekwa ndani yake:
 ```bash
 stat -fc %T /sys/fs/cgroup
 cat /sys/fs/cgroup/cgroup.controllers 2>/dev/null
@@ -74,12 +74,12 @@ cat /sys/fs/cgroup/cgroup.events 2>/dev/null
 ```
 Tafsiri muhimu:
 
-- `cgroup2fs` inamaanisha uko kwenye hierarchy ya v2 iliyounganishwa, kwa hivyo chains za kawaida za `release_agent` za v1 pekee hazipaswi kuwa makadirio yako ya kwanza.
-- `cgroup.controllers` huonyesha controllers zinazopatikana kutoka kwa parent, na hivyo ni controllers zipi subtree ya sasa inaweza kusambaza kwa children.
+- `cgroup2fs` inamaanisha uko kwenye unified v2 hierarchy, kwa hivyo classic v1-only `release_agent` chains hazipaswi kuwa dhana yako ya kwanza.
+- `cgroup.controllers` huonyesha controllers zinazopatikana kutoka kwa parent, na hivyo kile ambacho current subtree inaweza potential kueneza kwa children.
 - `cgroup.subtree_control` huonyesha controllers ambazo zimewezeshwa kwa descendants.
-- `cgroup.events` hufichua `populated=0/1`, jambo linalofaa kufuatilia ikiwa subtree imekuwa tupu, lakini **si primitive ya host-code-execution** kama `release_agent` ya v1.
+- `cgroup.events` hufichua `populated=0/1`, ambayo ni muhimu kwa kufuatilia ikiwa subtree imekuwa tupu, lakini **si** host-code-execution primitive kama v1 `release_agent`.
 
-Ikiwa tayari una privilege ya kutosha kukagua process namespace nyingine moja kwa moja, linganisha views kwa kutumia:
+Ikiwa tayari una privileges za kutosha za kukagua process namespace nyingine moja kwa moja, linganisha views kwa kutumia:
 ```bash
 nsenter -t <pid> -C -- bash
 readlink /proc/self/ns/cgroup
@@ -87,17 +87,17 @@ cat /proc/self/cgroup
 ```
 ### Mfano Kamili: Shared cgroup Namespace + Writable cgroup v1
 
-cgroup namespace pekee kwa kawaida haitoshi kwa escape. escalation ya kiutendaji hutokea wakati paths za cgroup zinazoonyesha host zinapounganishwa na interfaces za cgroup v1 zinazoweza kuandikwa:
+cgroup namespace pekee kwa kawaida haitoshi kufanya escape. Escalation ya kivitendo hutokea wakati cgroup paths zinazoonyesha host zinapounganishwa na interfaces za cgroup v1 zinazoandikika:
 ```bash
 cat /proc/self/cgroup
 find /sys/fs/cgroup -maxdepth 3 -name release_agent 2>/dev/null
 find /sys/fs/cgroup -maxdepth 3 -name notify_on_release 2>/dev/null | head
 ```
-Ikiwa hizo files zinaweza kufikiwa na kuandikwa, pivot mara moja kwenye mtiririko kamili wa exploitation wa `release_agent` kutoka [cgroups.md](../cgroups.md). Athari ni host code execution kutoka ndani ya container.
+Ikiwa faili hizo zinaweza kufikiwa na kuandikwa, pivot mara moja kwenye mtiririko kamili wa exploitation wa `release_agent` kutoka [cgroups.md](../cgroups.md). Athari yake ni host code execution kutoka ndani ya container.
 
-Bila cgroup interfaces zinazoandikika, athari kwa kawaida huwa limited kwenye reconnaissance.
+Bila cgroup interfaces zinazoweza kuandikwa, athari kwa kawaida huwa ni reconnaissance pekee.
 
-## Ukaguzi
+## Checks
 
 Lengo la commands hizi ni kubaini ikiwa process ina private cgroup namespace view au inajifunza zaidi kuhusu host hierarchy kuliko inavyohitaji.
 ```bash
@@ -108,18 +108,18 @@ stat -fc %T /sys/fs/cgroup          # cgroup2fs -> v2 unified hierarchy
 cat /sys/fs/cgroup/cgroup.controllers 2>/dev/null
 mount | grep cgroup
 ```
-Kinachovutia hapa:
+Ni nini cha kuvutia hapa:
 
-- Ikiwa kitambulisho cha namespace kinalingana na host process unayoihitaji, cgroup namespace inaweza kuwa shared.
-- Njia zinazoonyesha host katika `/proc/self/cgroup` au entries zenye mizizi kwa ancestor katika `mountinfo` ni muhimu kwa reconnaissance hata wakati hazitumiki moja kwa moja.
-- Ikiwa `cgroup2fs` inatumika, lenga delegation, controllers zinazoonekana, na subtrees zinazoweza kuandikwa badala ya kudhani kuwa primitives za zamani za v1 bado zipo.
-- Ikiwa cgroup mounts pia zinaweza kuandikwa, swali la visibility linakuwa muhimu zaidi.
+- Ikiwa kitambulishi cha namespace kinalingana na host process unayoihitaji, cgroup namespace inaweza kuwa imeshirikiwa.
+- Njia zinazoonyesha host katika `/proc/self/cgroup` au entries za `mountinfo` zilizo na mizizi kwenye ancestor ni muhimu kwa reconnaissance hata wakati haziwezi kutumiwa moja kwa moja.
+- Ikiwa `cgroup2fs` inatumika, lenga delegation, controllers zinazoonekana, na subtrees zinazoweza kuandikwa badala ya kudhani kuwa vijenzi vya zamani vya v1 bado vipo.
+- Ikiwa cgroup mounts pia zinaweza kuandikwa, suala la visibility huwa muhimu zaidi.
 
-Cgroup namespace inapaswa kuchukuliwa kama layer ya visibility-hardening badala ya mechanism kuu ya kuzuia escape. Kuonyesha muundo wa host cgroup bila sababu huongeza thamani ya reconnaissance kwa attacker.
+Cgroup namespace inapaswa kuchukuliwa kama layer ya kuimarisha visibility badala ya kuwa mechanism kuu ya kuzuia escape. Kufichua muundo wa host cgroup bila ulazima huongeza thamani ya reconnaissance kwa attacker.
 
 ## Marejeleo
 
-- [Linux cgroup_namespaces(7)](https://man7.org/linux/man-pages/man7/cgroup_namespaces.7.html)
-- [Linux kernel cgroup v2 documentation](https://docs.kernel.org/admin-guide/cgroup-v2.html)
+- [1] [cgroup_namespaces(7) — ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man7/cgroup_namespaces.7.html)
+- [2] [Control Group v2 — nyaraka za Linux Kernel](https://docs.kernel.org/admin-guide/cgroup-v2.html)
 
 {{#include ../../../../../banners/hacktricks-training.md}}

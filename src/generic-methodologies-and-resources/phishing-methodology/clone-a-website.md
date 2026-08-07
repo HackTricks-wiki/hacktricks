@@ -1,21 +1,26 @@
+# Ku-clone Website
+
 {{#include ../../banners/hacktricks-training.md}}
 
-Kwa tathmini ya phishing, wakati mwingine inaweza kuwa na manufaa **kuiga tovuti** kabisa.
 
-Kumbuka kwamba unaweza pia kuongeza baadhi ya payloads kwenye tovuti iliyogawanywa kama BeEF hook ili "kudhibiti" kichupo cha mtumiaji.
+Kwa ajili ya phishing assessment, wakati mwingine inaweza kuwa muhimu **ku-clone/dump website** kabisa.
 
-Kuna zana tofauti ambazo unaweza kutumia kwa kusudi hili:
+Kumbuka kwamba unaweza pia kuongeza payloads kwenye website iliyo-clone kama vile BeEF hook ili "kudhibiti" tab ya mtumiaji.
+
+Kuna tools tofauti unazoweza kutumia kwa madhumuni haya:
 
 ## wget
-```text
-wget -mk -nH
+```bash
+wget --mirror --page-requisites --convert-links --adjust-extension <URL>
+cd <URL>
+python3 -m http.server 8000
 ```
 ## goclone
 ```bash
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
-## Chombo cha Uhandisi wa Kijamii
+## Social Engineering Toolit
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit
 ```

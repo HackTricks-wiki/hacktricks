@@ -1,25 +1,25 @@
-# Homograph / Homoglyph Attacks in Phishing
+# Homograph / Homoglyph Attacks katika Phishing
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Overview
+## Muhtasari
 
-Shambulio la homograph (pia inajulikana kama homoglyph) linatumia ukweli kwamba **mifumo mingi ya Unicode kutoka kwa maandiko yasiyo ya Kilatini ni sawa kabisa au yanafanana sana na wahusika wa ASCII**. Kwa kubadilisha wahusika mmoja au zaidi wa Kilatini na wenzao wanaofanana, mshambuliaji anaweza kuunda:
+Shambulio la homograph (pia huitwa homoglyph) hutumia ukweli kwamba **Unicode code points nyingi kutoka kwenye script zisizo za Kilatini zinaonekana sawa au karibu kabisa na characters za ASCII**. Kwa kubadilisha character moja au zaidi za Kilatini na zinazofanana nazo, mshambuliaji anaweza kuunda:
 
-* Majina ya kuonyesha, mada au maudhui ya ujumbe yanayoonekana kuwa halali kwa jicho la binadamu lakini yanapita kwenye ugunduzi wa msingi wa maneno muhimu.
-* Majina ya kikoa, sub-kikoa au njia za URL ambazo zinawadanganya waathirika kuamini wanatembelea tovuti ya kuaminika.
+* Majina ya kuonyeshwa, mada au miili ya ujumbe zinazoonekana halali kwa jicho la binadamu lakini zinapita detections zinazotegemea keywords.
+* Domains, sub-domains au URL paths zinazowafanya victims waamini kuwa wanatembelea site inayoaminika.
 
-Kwa sababu kila glyph inatambulika ndani kwa **nambari ya Unicode**, wahusika mmoja tu aliyebadilishwa inatosha kushinda kulinganisha nyuzi zisizo na busara (mfano, `"Παypal.com"` dhidi ya `"Paypal.com"`).
+Kwa sababu kila glyph hutambuliwa internally kwa kutumia **Unicode code point**, character moja iliyobadilishwa inatosha kushinda string comparisons za kawaida (mfano, `"Παypal.com"` dhidi ya `"Paypal.com"`).
 
 ## Typical Phishing Workflow
 
-1. **Craft message content** – Badilisha herufi maalum za Kilatini katika chapa / neno muhimu linalojulikana na wahusika wasioonekana kutoka kwa maandiko mengine (Kigiriki, Kirusi, Kiarumeni, Cherokee, nk.).
-2. **Register supporting infrastructure** – Kurekebisha kikoa cha homoglyph na kupata cheti cha TLS (zaidi ya CAs hazifanyi ukaguzi wa kufanana kwa kuona).
-3. **Send email / SMS** – Ujumbe unajumuisha homoglyphs katika moja au zaidi ya maeneo yafuatayo:
-* Jina la kuonyesha la mtumaji (mfano, `Ηеlрdеѕk`)
-* Mstari wa mada (`Urgеnt Аctіon Rеquіrеd`)
-* Maandishi ya kiungo au jina kamili la kikoa
-4. **Redirect chain** – Mwathirika anarudishwa kupitia tovuti zinazonekana kuwa salama au wafupishaji wa URL kabla ya kutua kwenye mwenyeji mbaya anayekusanya akidi / kupeleka malware.
+1. **Craft message content** – Badilisha herufi mahususi za Kilatini katika brand / keyword inayodhaniwa kuwa ya mtu au kampuni nyingine, kwa kutumia characters zinazoonekana kutotofautiana kutoka script nyingine (Greek, Cyrillic, Armenian, Cherokee, n.k.).
+2. **Register supporting infrastructure** – Kwa hiari, sajili homoglyph domain na pata TLS certificate (CAs nyingi hazifanyi visual similarity checks).
+3. **Send email / SMS** – Ujumbe huwa na homoglyphs katika moja au zaidi ya maeneo yafuatayo:
+* Sender display name (mfano, `Ηеlрdеѕk`)
+* Subject line (`Urgеnt Аctіon Rеquіrеd`)
+* Hyperlink text au fully qualified domain name
+4. **Redirect chain** – Victim hupitishwa kupitia websites zinazoonekana kuwa salama au URL shorteners kabla ya kufikishwa kwenye malicious host inayovuna credentials / kuwasilisha malware.
 
 ## Unicode Ranges Commonly Abused
 
@@ -32,17 +32,17 @@ Kwa sababu kila glyph inatambulika ndani kwa **nambari ya Unicode**, wahusika mm
 | Armenian | U+0530-058F | `օ` (U+0585) | Latin `o` |
 | Cherokee | U+13A0-13FF | `Ꭲ` (U+13A2) | Latin `T` |
 
-> Tip: Full Unicode charts are available at [unicode.org](https://home.unicode.org/).
+> Tip: Chati kamili za Unicode zinapatikana kwenye [unicode.org](https://home.unicode.org/).<sup>[[2]](#references)</sup>
 
 ## Detection Techniques
 
 ### 1. Mixed-Script Inspection
 
-Barua pepe za phishing zinazolenga shirika linalozungumza Kiingereza zinapaswa nadra kuchanganya wahusika kutoka kwa mifumo mingi. Heuristics rahisi lakini yenye ufanisi ni:
+Phishing emails zinazolenga organisation inayozungumza Kiingereza kwa kawaida hazipaswi kuchanganya characters kutoka kwenye scripts nyingi. Heuristic rahisi lakini yenye ufanisi ni:
 
-1. Pitia kila wahusika wa nyuzi inayokaguliwa.
-2. Ramani ya nambari ya nambari kwa kizuizi chake cha Unicode.
-3. Pandisha arifa ikiwa mifumo zaidi ya mmoja ipo **au** ikiwa mifumo isiyo ya Kilatini inaonekana mahali ambapo haitarajiwi (jina la kuonyesha, kikoa, mada, URL, nk.).
+1. Pitia kila character ya string inayokaguliwa.
+2. Mape code point kwenye Unicode block yake.
+3. Toa alert ikiwa kuna script zaidi ya moja **au** ikiwa non-Latin scripts zinaonekana mahali ambapo hazitarajiwi (display name, domain, subject, URL, n.k.).
 
 Python proof-of-concept:
 ```python
@@ -67,38 +67,38 @@ blocks[block] += 1
 if len(blocks) > 1:
 print(f"[!] Mixed scripts in {field}: {dict(blocks)} -> {value}")
 ```
-### 2. Punycode Normalisation (Domains)
+### 2. Urekebishaji wa Punycode (Domains)
 
-Majina ya Kikoa ya Kimataifa (IDNs) yanakodishwa kwa **punycode** (`xn--`). Kubadilisha kila jina la mwenyeji kuwa punycode na kisha kurudi kwenye Unicode kunaruhusu kulinganisha dhidi ya orodha ya kibali au kufanya ukaguzi wa kufanana (kwa mfano, umbali wa Levenshtein) **baada ya** mfuatano kuwa wa kawaida.
+Internationalised Domain Names (IDNs) husimbwa kwa **punycode** (`xn--`). Kubadilisha kila hostname kuwa punycode na kisha kuirudisha kuwa Unicode huruhusu kulinganisha dhidi ya whitelist au kufanya ukaguzi wa ufanano (kwa mfano, umbali wa Levenshtein) **baada ya** mfuatano huo kusanifishwa.
 ```python
 import idna
 hostname = "Ρаypal.com"   # Greek Rho + Cyrillic a
 puny = idna.encode(hostname).decode()
 print(puny)  # xn--yl8hpyal.com
 ```
-### 3. Kamusi za Homoglyph / Algorithms
+### 3. Kamusi / Algorithms za Homoglyph
 
-Tools such as **dnstwist** (`--homoglyph`) or **urlcrazy** can enumerate visually-similar domain permutations and are useful for proactive takedown / monitoring.
+Tools kama **dnstwist** (`--homoglyph`) au **urlcrazy** zinaweza kuorodhesha mabadiliko ya domain yanayofanana kimwonekano na ni muhimu kwa kuondoa au kufuatilia vitisho kwa njia ya kiutendaji.<sup>[[3]](#references)</sup>
 
-## Kuzuia & Kupunguza
+## Kuzuia na Kupunguza Athari
 
-* Tekeleza sera kali za DMARC/DKIM/SPF – zuia uongo kutoka kwa maeneo yasiyoidhinishwa.
-* Tekeleza mantiki ya kugundua hapo juu katika **Secure Email Gateways** na **SIEM/XSOAR** playbooks.
-* Flag au karantini ujumbe ambapo jina la kuonyesha domain ≠ domain ya mtumaji.
-* Elimisha watumiaji: nakala-paste maandiko ya shaka kwenye mkaguzi wa Unicode, piga juu ya viungo, kamwe usiamini URL shorteners.
+* Tekeleza sera kali za DMARC/DKIM/SPF – zuia spoofing kutoka kwenye domain zisizoidhinishwa.
+* Tekeleza mantiki ya utambuzi iliyo hapo juu katika **Secure Email Gateways** na playbooks za **SIEM/XSOAR**.
+* Weka alama au hamishia quarantine ujumbe ambao domain ya display name ≠ domain ya mtumaji.
+* Waelimisha watumiaji: nakili na ubandike maandishi ya kutiliwa shaka kwenye Unicode inspector, elekeza mshale juu ya links, na usiwahi kuamini URL shorteners.
 
-## Mifano ya Uhalisia
+## Mifano Halisi
 
-* Jina la kuonyesha: `Сonfidеntiаl Ꭲiꮯkеt` (Cyrillic `С`, `е`, `а`; Cherokee `Ꭲ`; Latin small capital `ꮯ`).
-* Mnyororo wa domain: `bestseoservices.com` ➜ municipal `/templates` directory ➜ `kig.skyvaulyt.ru` ➜ fake Microsoft login at `mlcorsftpsswddprotcct.approaches.it.com` protected by custom OTP CAPTCHA.
-* Spotify impersonation: `Sρօtifւ` sender with link hidden behind `redirects.ca`.
+* Display name: `Сonfidеntiаl Ꭲiꮯkеt` (Cyrillic `С`, `е`, `а`; Cherokee `Ꭲ`; Latin small capital `ꮯ`).
+* Msururu wa domain: `bestseoservices.com` ➜ directory ya municipal `/templates` ➜ `kig.skyvaulyt.ru` ➜ Microsoft login bandia katika `mlcorsftpsswddprotcct.approaches.it.com` iliyolindwa na custom OTP CAPTCHA.
+* Uigaji wa Spotify: mtumaji `Sρօtifս` mwenye link iliyofichwa nyuma ya `redirects.ca`.
 
-These samples originate from Unit 42 research (July 2025) and illustrate how homograph abuse is combined with URL redirection and CAPTCHA evasion to bypass automated analysis.
+Sampuli hizi zilitokana na utafiti wa Unit 42 (Julai 2025) na zinaonyesha jinsi matumizi mabaya ya homograph yanavyounganishwa na URL redirection na CAPTCHA evasion ili kukwepa uchanganuzi wa kiotomatiki.<sup>[[1]](#references)</sup>
 
-## Marejeo
+## Marejeleo
 
-- [The Homograph Illusion: Not Everything Is As It Seems](https://unit42.paloaltonetworks.com/homograph-attacks/)
-- [Unicode Character Database](https://home.unicode.org/)
-- [dnstwist – domain permutation engine](https://github.com/elceef/dnstwist)
+- [1] [The Homograph Illusion: Not Everything Is As It Seems](https://unit42.paloaltonetworks.com/homograph-attacks/)
+- [2] [Unicode Character Database](https://home.unicode.org/)
+- [3] [dnstwist – domain permutation engine](https://github.com/elceef/dnstwist)
 
 {{#include ../../banners/hacktricks-training.md}}

