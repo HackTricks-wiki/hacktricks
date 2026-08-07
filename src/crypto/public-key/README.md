@@ -2,17 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Most CTF hard crypto ends up here: RSA, ECC/ECDSA, lattices, and bad randomness.
 
-## अनुशंसित टूलिंग
+अधिकांश CTF का कठिन crypto आखिरकार यहीं आकर रुकता है: RSA, ECC/ECDSA, lattices और खराब randomness।
+
+## Recommended tooling
 
 - SageMath (LLL/lattices, modular arithmetic): https://www.sagemath.org/
 - RsaCtfTool (Swiss-army knife): https://github.com/Ganapati/RsaCtfTool
-- factordb (quick factor checks): http://factordb.com/
+- factordb (त्वरित factor checks): http://factordb.com/
 
 ## RSA
 
-Start here when you have `n,e,c` and some extra hint (shared modulus, low exponent, partial bits, related messages).
+जब आपके पास `n,e,c` और कोई अतिरिक्त hint हो (shared modulus, low exponent, partial bits, related messages), तो यहां से शुरू करें।
 
 {{#ref}}
 rsa/README.md
@@ -20,38 +21,38 @@ rsa/README.md
 
 ## ECC / ECDSA
 
-If signatures are involved, test nonce problems first (reuse/bias/leaks) before assuming hard math.
+यदि signatures शामिल हों, तो कठिन mathematics मानने से पहले nonce problems (reuse/bias/leaks) की जांच करें।
 
 ### ECDSA nonce reuse / bias
 
-If two signatures reuse the same nonce `k`, the private key can be recovered.
+यदि दो signatures में एक ही nonce `k` का reuse हो, तो private key recover की जा सकती है।
 
-Even if `k` isn’t identical, **bias/leakage** of nonce bits across signatures can be enough for lattice recovery (common CTF theme).
+भले ही `k` बिल्कुल समान न हो, signatures में nonce bits का **bias/leakage** lattice recovery के लिए पर्याप्त हो सकता है (यह एक सामान्य CTF theme है)।
 
-Technical recovery when `k` is reused:
+जब `k` का reuse हो, तब technical recovery:
 
 ECDSA signature equations (group order `n`):
 
 - `r = (kG)_x mod n`
 - `s = k^{-1}(h(m) + r*d) mod n`
 
-If the same `k` is reused for two messages `m1, m2` producing signatures `(r, s1)` and `(r, s2)`:
+यदि एक ही `k` को दो messages `m1, m2` के लिए reuse किया जाए और signatures `(r, s1)` तथा `(r, s2)` प्राप्त हों:
 
 - `k = (h(m1) - h(m2)) * (s1 - s2)^{-1} mod n`
 - `d = (s1*k - h(m1)) * r^{-1} mod n`
 
 ### Invalid-curve attacks
 
-यदि कोई protocol यह सत्यापित करने में विफल रहता है कि points अपेक्षित curve (या subgroup) पर हैं, तो एक attacker कमजोर group में operations को मजबूर कर सकता है और secrets recover कर सकता है।
+यदि कोई protocol यह validate करने में विफल रहता है कि points अपेक्षित curve (या subgroup) पर हैं, तो attacker operations को किसी weak group में कराने और secrets recover करने के लिए मजबूर कर सकता है।
 
 Technical note:
 
-- Validate points are on-curve and in the correct subgroup.
-- Many CTF tasks model this as "server multiplies attacker-chosen point by secret scalar and returns something."
+- Validate करें कि points on-curve और correct subgroup में हैं।
+- कई CTF tasks इसे इस रूप में model करते हैं: "server attacker-chosen point को secret scalar से multiply करता है और कुछ return करता है।"
 
 ### Tooling
 
-- SageMath — curve arithmetic / lattices के लिए
-- `ecdsa` Python library for parsing/verification
+- Curve arithmetic / lattices के लिए SageMath
+- Parsing/verification के लिए `ecdsa` Python library
 
 {{#include ../../banners/hacktricks-training.md}}

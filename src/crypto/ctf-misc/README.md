@@ -1,25 +1,29 @@
-# क्रिप्टो CTF विविध
+# Crypto CTF Misc
 
 {{#include ../../banners/hacktricks-training.md}}
 
-ऐसे पृष्ठ जिनका फिट कहीं और ठीक से नहीं होता लेकिन क्रिप्टो challenges में अक्सर दिखाई देते हैं।
+ऐसे पृष्ठों का संग्रह जो crypto challenges में अक्सर दिखाई देते हैं, लेकिन अन्य जगहों में आसानी से फिट नहीं होते।
 
-## एसोटेरिक भाषाएँ
+## Esoteric languages
 
-### तकनीक
+### Technique
 
-इसे तब उपयोग करें जब एक क्रिप्टो टास्क असल में यह हो: एक esolang प्रोग्राम चलाना और फिर उसके आउटपुट को डिकोड करना।
+इसका उपयोग तब करें जब crypto task वास्तव में यह हो: किसी esolang program को run करना और फिर उसके output को decode करना।
 
-यदि कोई challenge आपको ऐसा code दे जो किसी मानक भाषा जैसा नहीं दिखता:
+यदि कोई challenge आपको ऐसा code देता है जो किसी standard language जैसा नहीं दिखता:
 
-- esolang की पहचान करें (किसी विशिष्ट token को Google करें)।
-- एक online interpreter या Docker image का उपयोग करें।
-- यदि output अजीब है, तो execution के बाद परत-दर-परत encoding/compression की तलाश करें।
+- esolang की पहचान करें (किसी विशिष्ट token को Google पर खोजें)।
+- किसी online interpreter या Docker image का उपयोग करें।
+- यदि output अजीब हो, तो execution के बाद layered encoding/compression देखें।
 
-शुरुआत के लिए अच्छी सूची:
+शुरुआत करने के लिए अच्छी सूची:<sup>[[1]](#references)</sup>
 
 {{#ref}}
 https://esolangs.org/wiki/Main_Page
 {{#endref}}
+
+## References
+
+- [1] [Esolang, the esoteric programming languages wiki](https://esolangs.org/wiki/Main_Page)
 
 {{#include ../../banners/hacktricks-training.md}}
