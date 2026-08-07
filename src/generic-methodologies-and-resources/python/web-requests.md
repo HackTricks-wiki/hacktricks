@@ -1,9 +1,9 @@
-# Webanfragen
+# Web-Anfragen
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Python-Anfragen
+## Python Requests
 ```python
 import requests
 
@@ -71,7 +71,7 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python-Befehle zum Ausnutzen einer RCE
+## Python-Befehl zur Ausnutzung einer RCE
 ```python
 import requests
 import re

@@ -1,115 +1,115 @@
-# Bedrohungsmodellierung
+# Threat Modeling
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Bedrohungsmodellierung
+## Threat Modeling
 
-Willkommen zu HackTricks' umfassendem Leitfaden zur Bedrohungsmodellierung! Beginnen Sie eine Erkundung dieses kritischen Aspekts der Cybersicherheit, bei dem wir potenzielle Schwachstellen in einem System identifizieren, verstehen und Strategien dagegen entwickeln. Dieser Thread dient als schrittweise Anleitung, die mit realen Beispielen, hilfreicher Software und leicht verständlichen Erklärungen gefüllt ist. Ideal für sowohl Anfänger als auch erfahrene Praktiker, die ihre Cybersicherheitsverteidigung stärken möchten.
+Willkommen bei HackTricks' umfassendem Leitfaden zu Threat Modeling! Erkunde diesen kritischen Aspekt der Cybersicherheit, bei dem wir potenzielle Schwachstellen in einem System identifizieren, verstehen und Strategien gegen sie entwickeln. Dieser Thread dient als schrittweise Anleitung mit realen Beispielen, hilfreicher Software und leicht verständlichen Erklärungen. Ideal sowohl für Anfänger als auch für erfahrene Praktiker, die ihre Cybersicherheitsmaßnahmen stärken möchten.
 
-### Häufig Verwendete Szenarien
+### Häufig verwendete Szenarien
 
-1. **Softwareentwicklung**: Im Rahmen des Secure Software Development Life Cycle (SSDLC) hilft die Bedrohungsmodellierung, **potenzielle Quellen von Schwachstellen** in den frühen Phasen der Entwicklung zu identifizieren.
-2. **Penetrationstests**: Der Penetration Testing Execution Standard (PTES) erfordert **Bedrohungsmodellierung, um die Schwachstellen des Systems** vor der Durchführung des Tests zu verstehen.
+1. **Softwareentwicklung**: Als Teil des Secure Software Development Life Cycle (SSDLC) hilft Threat Modeling dabei, **potenzielle Quellen von Schwachstellen** bereits in den frühen Entwicklungsphasen zu identifizieren.
+2. **Penetration Testing**: Das Penetration Testing Execution Standard (PTES)-Framework erfordert **Threat Modeling, um die Schwachstellen des Systems zu verstehen**, bevor der Test durchgeführt wird.
 
-### Bedrohungsmodell in Kürze
+### Threat Model in aller Kürze
 
-Ein Bedrohungsmodell wird typischerweise als Diagramm, Bild oder in einer anderen Form visueller Darstellung dargestellt, die die geplante Architektur oder den bestehenden Aufbau einer Anwendung zeigt. Es ähnelt einem **Datenflussdiagramm**, aber der entscheidende Unterschied liegt im sicherheitsorientierten Design.
+Ein Threat Model wird typischerweise als Diagramm, Bild oder eine andere Form visueller Darstellung präsentiert, die die geplante Architektur oder den bestehenden Aufbau einer Anwendung abbildet. Es ähnelt einem **Data-Flow-Diagramm**, der entscheidende Unterschied liegt jedoch in der sicherheitsorientierten Gestaltung.
 
-Bedrohungsmodelle enthalten oft Elemente, die in Rot markiert sind und potenzielle Schwachstellen, Risiken oder Barrieren symbolisieren. Um den Prozess der Risikoidentifikation zu vereinfachen, wird das CIA (Vertraulichkeit, Integrität, Verfügbarkeit) Triad verwendet, das die Grundlage vieler Bedrohungsmodellierungsmethodologien bildet, wobei STRIDE eine der häufigsten ist. Die gewählte Methodologie kann jedoch je nach spezifischem Kontext und Anforderungen variieren.
+Threat Models enthalten häufig rot markierte Elemente, die potenzielle Schwachstellen, Risiken oder Barrieren symbolisieren. Um den Prozess der Risikoidentifizierung zu vereinfachen, wird die CIA-Triade (Confidentiality, Integrity, Availability) eingesetzt. Sie bildet die Grundlage vieler Threat-Modeling-Methoden, wobei STRIDE eine der häufigsten ist. Die gewählte Methode kann jedoch je nach spezifischem Kontext und Anforderungen variieren.
 
-### Das CIA-Triad
+### Die CIA-Triade
 
-Das CIA-Triad ist ein weithin anerkanntes Modell im Bereich der Informationssicherheit, das für Vertraulichkeit, Integrität und Verfügbarkeit steht. Diese drei Säulen bilden die Grundlage, auf der viele Sicherheitsmaßnahmen und -richtlinien basieren, einschließlich der Bedrohungsmodellierungsmethodologien.
+Die CIA-Triade ist ein weithin anerkanntes Modell im Bereich der Informationssicherheit und steht für Confidentiality, Integrity und Availability. Diese drei Säulen bilden die Grundlage, auf der viele Sicherheitsmaßnahmen und Richtlinien aufbauen, darunter auch Threat-Modeling-Methoden.
 
-1. **Vertraulichkeit**: Sicherstellen, dass die Daten oder das System nicht von unbefugten Personen zugegriffen werden. Dies ist ein zentraler Aspekt der Sicherheit, der angemessene Zugriffskontrollen, Verschlüsselung und andere Maßnahmen erfordert, um Datenverletzungen zu verhindern.
-2. **Integrität**: Die Genauigkeit, Konsistenz und Vertrauenswürdigkeit der Daten über ihren Lebenszyklus. Dieses Prinzip stellt sicher, dass die Daten nicht von unbefugten Parteien verändert oder manipuliert werden. Es umfasst oft Prüfziffern, Hashing und andere Datenverifizierungsmethoden.
-3. **Verfügbarkeit**: Dies stellt sicher, dass Daten und Dienste für autorisierte Benutzer bei Bedarf zugänglich sind. Dies umfasst oft Redundanz, Fehlertoleranz und Hochverfügbarkeitskonfigurationen, um Systeme auch bei Störungen am Laufen zu halten.
+1. **Confidentiality**: Sicherstellen, dass nicht autorisierte Personen auf die Daten oder das System zugreifen. Dies ist ein zentraler Sicherheitsaspekt und erfordert geeignete Zugriffskontrollen, Verschlüsselung und weitere Maßnahmen, um Datenleaks zu verhindern.
+2. **Integrity**: Die Genauigkeit, Konsistenz und Vertrauenswürdigkeit der Daten während ihres gesamten Lebenszyklus. Dieses Prinzip stellt sicher, dass die Daten nicht von nicht autorisierten Parteien verändert oder manipuliert werden. Häufig kommen dabei Prüfsummen, Hashing und andere Methoden zur Datenüberprüfung zum Einsatz.
+3. **Availability**: Sicherstellen, dass Daten und Services autorisierten Benutzern bei Bedarf zur Verfügung stehen. Dies umfasst häufig Redundanz, Fehlertoleranz und Hochverfügbarkeitskonfigurationen, damit Systeme auch bei Störungen weiterlaufen.
 
-### Bedrohungsmodellierungsmethodologien
+### Threat-Modeling-Methoden
 
-1. **STRIDE**: Entwickelt von Microsoft, ist STRIDE ein Akronym für **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service und Elevation of Privilege**. Jede Kategorie stellt eine Art von Bedrohung dar, und diese Methodologie wird häufig in der Entwurfsphase eines Programms oder Systems verwendet, um potenzielle Bedrohungen zu identifizieren.
-2. **DREAD**: Dies ist eine weitere Methodologie von Microsoft, die zur Risikobewertung identifizierter Bedrohungen verwendet wird. DREAD steht für **Damage potential, Reproducibility, Exploitability, Affected users und Discoverability**. Jeder dieser Faktoren wird bewertet, und das Ergebnis wird verwendet, um identifizierte Bedrohungen zu priorisieren.
-3. **PASTA** (Process for Attack Simulation and Threat Analysis): Dies ist eine siebenstufige, **risikozentrierte** Methodologie. Sie umfasst die Definition und Identifizierung von Sicherheitszielen, die Erstellung eines technischen Umfangs, die Anwendung von Zerlegung, Bedrohungsanalyse, Schwachstellenanalyse und Risiko-/Triagebewertung.
-4. **Trike**: Dies ist eine risikobasierte Methodologie, die sich auf den Schutz von Vermögenswerten konzentriert. Sie beginnt aus einer **Risikomanagement**-Perspektive und betrachtet Bedrohungen und Schwachstellen in diesem Kontext.
-5. **VAST** (Visual, Agile, and Simple Threat modeling): Dieser Ansatz zielt darauf ab, zugänglicher zu sein und in agile Entwicklungsumgebungen integriert zu werden. Er kombiniert Elemente aus den anderen Methodologien und konzentriert sich auf **visuelle Darstellungen von Bedrohungen**.
-6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Entwickelt vom CERT Coordination Center, ist dieses Framework auf **organisatorische Risikobewertung und nicht auf spezifische Systeme oder Software** ausgerichtet.
+1. **STRIDE**: STRIDE wurde von Microsoft entwickelt und ist ein Akronym für **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service und Elevation of Privilege**. Jede Kategorie stellt eine Art von Bedrohung dar. Diese Methode wird häufig in der Designphase eines Programms oder Systems eingesetzt, um potenzielle Bedrohungen zu identifizieren.
+2. **DREAD**: Dies ist eine weitere von Microsoft stammende Methode zur Risikobewertung identifizierter Bedrohungen. DREAD steht für **Damage potential, Reproducibility, Exploitability, Affected users und Discoverability**. Jeder dieser Faktoren wird bewertet, und das Ergebnis wird verwendet, um identifizierte Bedrohungen zu priorisieren.
+3. **PASTA** (Process for Attack Simulation and Threat Analysis): Dies ist eine siebenstufige, **risikozentrierte** Methode. Sie umfasst die Definition und Identifizierung von Sicherheitszielen, die Erstellung eines technischen Umfangs, die Zerlegung der Anwendung, die Bedrohungsanalyse, die Schwachstellenanalyse sowie die Risiko- und Triage-Bewertung.
+4. **Trike**: Dies ist eine risikobasierte Methode, die sich auf den Schutz von Assets konzentriert. Sie beginnt aus der Perspektive des **Risikomanagements** und betrachtet Bedrohungen und Schwachstellen in diesem Kontext.
+5. **VAST** (Visual, Agile, and Simple Threat modeling): Dieser Ansatz soll leichter zugänglich sein und sich in Agile-Entwicklungsumgebungen integrieren lassen. Er kombiniert Elemente der anderen Methoden und konzentriert sich auf **visuelle Darstellungen von Bedrohungen**.
+6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Dieses vom CERT Coordination Center entwickelte Framework ist auf die **Bewertung organisatorischer Risiken statt spezifischer Systeme oder Software** ausgerichtet.
 
-## Werkzeuge
+## Tools
 
-Es gibt mehrere Werkzeuge und Softwarelösungen, die bei der **Erstellung** und Verwaltung von Bedrohungsmodellen helfen können. Hier sind einige, die Sie in Betracht ziehen könnten.
+Es gibt verschiedene Tools und Softwarelösungen, die bei der **Erstellung** und Verwaltung von Threat Models **unterstützen** können. Hier sind einige, die du in Betracht ziehen könntest.
 
 ### [SpiderSuite](https://github.com/3nock/SpiderSuite)
 
-Ein fortschrittlicher plattformübergreifender und multifunktionaler GUI-Webspider/Crawler für Cybersicherheitsprofis. Spider Suite kann zur Kartierung und Analyse der Angriffsfläche verwendet werden.
+Ein fortschrittlicher, plattformübergreifender GUI-Web-Spider/Crawler mit zahlreichen Funktionen für Cybersicherheitsprofis. Spider Suite kann zum Mapping und zur Analyse der Angriffsfläche verwendet werden.
 
 **Verwendung**
 
-1. Wählen Sie eine URL und crawlen
+1. Wähle eine URL aus und starte den Crawl
 
 <figure><img src="../images/threatmodel_spidersuite_1.png" alt=""><figcaption></figcaption></figure>
 
-2. Graph anzeigen
+2. Zeige den Graphen an
 
 <figure><img src="../images/threatmodel_spidersuite_2.png" alt=""><figcaption></figcaption></figure>
 
 ### [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon/releases)
 
-Ein Open-Source-Projekt von OWASP, Threat Dragon ist sowohl eine Web- als auch eine Desktop-Anwendung, die Systemdiagrammierung sowie eine Regel-Engine zur automatischen Generierung von Bedrohungen/Minderungen umfasst.
+OWASP Threat Dragon ist ein Open-Source-Projekt von OWASP. Es handelt sich sowohl um eine Web- als auch um eine Desktop-Anwendung, die Systemdiagramme sowie eine Rule Engine zur automatischen Generierung von Bedrohungen/Mitigations umfasst.
 
 **Verwendung**
 
-1. Neues Projekt erstellen
+1. Erstelle ein neues Projekt
 
 <figure><img src="../images/create_new_project_1.jpg" alt=""><figcaption></figcaption></figure>
 
-Manchmal könnte es so aussehen:
+Manchmal kann es so aussehen:
 
 <figure><img src="../images/1_threatmodel_create_project.jpg" alt=""><figcaption></figcaption></figure>
 
-2. Neues Projekt starten
+2. Starte ein neues Projekt
 
 <figure><img src="../images/launch_new_project_2.jpg" alt=""><figcaption></figcaption></figure>
 
-3. Das neue Projekt speichern
+3. Speichere das neue Projekt
 
 <figure><img src="../images/save_new_project.jpg" alt=""><figcaption></figcaption></figure>
 
-4. Erstellen Sie Ihr Modell
+4. Erstelle dein Model
 
-Sie können Werkzeuge wie SpiderSuite Crawler verwenden, um Inspiration zu erhalten, ein einfaches Modell könnte so aussehen
+Du kannst Tools wie SpiderSuite Crawler verwenden, um Inspiration zu erhalten. Ein grundlegendes Model könnte etwa so aussehen:
 
 <figure><img src="../images/0_basic_threat_model.jpg" alt=""><figcaption></figcaption></figure>
 
-Nur eine kleine Erklärung zu den Entitäten:
+Hier eine kurze Erklärung der Entitäten:
 
-- Prozess (Die Entität selbst, wie Webserver oder Webfunktionalität)
-- Akteur (Eine Person wie ein Webseitenbesucher, Benutzer oder Administrator)
-- Datenflusslinie (Indikator für Interaktion)
-- Vertrauensgrenze (Verschiedene Netzwerksegmente oder Bereiche.)
-- Speicher (Dinge, in denen Daten gespeichert sind, wie Datenbanken)
+- Process (Die Entität selbst, z. B. Webserver oder Webfunktionalität)
+- Actor (Eine Person, z. B. ein Website-Besucher, Benutzer oder Administrator)
+- Data Flow Line (Indikator einer Interaktion)
+- Trust Boundary (Unterschiedliche Netzwerksegmente oder Bereiche.)
+- Store (Orte, an denen Daten gespeichert werden, z. B. Datenbanken)
 
-5. Eine Bedrohung erstellen (Schritt 1)
+5. Erstelle eine Threat (Schritt 1)
 
-Zuerst müssen Sie die Schicht auswählen, zu der Sie eine Bedrohung hinzufügen möchten
+Zuerst musst du die Ebene auswählen, der du eine Threat hinzufügen möchtest.
 
 <figure><img src="../images/3_threatmodel_chose-threat-layer.jpg" alt=""><figcaption></figcaption></figure>
 
-Jetzt können Sie die Bedrohung erstellen
+Nun kannst du die Threat erstellen.
 
 <figure><img src="../images/4_threatmodel_create-threat.jpg" alt=""><figcaption></figcaption></figure>
 
-Beachten Sie, dass es einen Unterschied zwischen Akteur-Bedrohungen und Prozess-Bedrohungen gibt. Wenn Sie eine Bedrohung zu einem Akteur hinzufügen, können Sie nur "Spoofing" und "Repudiation" auswählen. In unserem Beispiel fügen wir jedoch eine Bedrohung zu einer Prozesseinheit hinzu, sodass wir dies im Bedrohungserstellungsfeld sehen werden:
+Beachte, dass es einen Unterschied zwischen Actor Threats und Process Threats gibt. Wenn du einem Actor eine Threat hinzufügen würdest, könntest du nur „Spoofing“ und „Repudiation“ auswählen. Da wir in unserem Beispiel jedoch einem Process eine Threat hinzufügen, sehen wir dies im Fenster zur Erstellung der Threat:
 
 <figure><img src="../images/2_threatmodel_type-option.jpg" alt=""><figcaption></figcaption></figure>
 
 6. Fertig
 
-Jetzt sollte Ihr fertiges Modell so aussehen. Und so erstellen Sie ein einfaches Bedrohungsmodell mit OWASP Threat Dragon.
+Dein fertiges Model sollte nun ungefähr so aussehen. So erstellst du ein einfaches Threat Model mit OWASP Threat Dragon.
 
 <figure><img src="../images/threat_model_finished.jpg" alt=""><figcaption></figcaption></figure>
 
 ### [Microsoft Threat Modeling Tool](https://aka.ms/threatmodelingtool)
 
-Dies ist ein kostenloses Tool von Microsoft, das hilft, Bedrohungen in der Entwurfsphase von Softwareprojekten zu finden. Es verwendet die STRIDE-Methodologie und ist besonders geeignet für diejenigen, die auf Microsofts Stack entwickeln.
+Dies ist ein kostenloses Tool von Microsoft, das dabei hilft, Bedrohungen in der Designphase von Softwareprojekten zu finden. Es verwendet die STRIDE-Methode und eignet sich besonders für Entwickler, die auf Microsofts Stack entwickeln.
 
 {{#include ../banners/hacktricks-training.md}}

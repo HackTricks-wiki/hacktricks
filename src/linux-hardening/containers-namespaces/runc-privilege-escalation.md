@@ -4,8 +4,7 @@
 
 ## Grundlegende Informationen
 
-Wenn du mehr über **runc** erfahren möchtest, sieh dir die folgende Seite an:
-
+Wenn du mehr über **runc** erfahren möchtest, siehe die folgende Seite:
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -13,7 +12,7 @@ Wenn du mehr über **runc** erfahren möchtest, sieh dir die folgende Seite an:
 
 ## PE
 
-Wenn du feststellst, dass `runc` auf dem Host installiert ist, kannst du möglicherweise **einen Container ausführen, der den Root-Ordner `/` des Hosts mountet**.
+Wenn du feststellst, dass `runc` auf dem Host installiert ist, kannst du möglicherweise **einen Container starten, der den root-/Ordner des Hosts mountet**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -38,6 +37,6 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Das wird nicht immer funktionieren, da die Standardoperation von runc darin besteht, als root ausgeführt zu werden. Daher kann die Ausführung als unprivilegierter Benutzer einfach nicht funktionieren (es sei denn, du verwendest eine rootless-Konfiguration). Eine rootless-Konfiguration standardmäßig zu verwenden, ist im Allgemeinen keine gute Idee, da es innerhalb von rootless-Containern einige Einschränkungen gibt, die außerhalb von rootless-Containern nicht gelten.
+> Dies wird nicht immer funktionieren, da die Standardoperation von runc darin besteht, als root ausgeführt zu werden. Daher kann die Ausführung als unprivilegierter Benutzer einfach nicht funktionieren (es sei denn, es ist eine rootless-Konfiguration vorhanden). Eine rootless-Konfiguration zum Standard zu machen, ist generell keine gute Idee, da es innerhalb rootless-Container einige Einschränkungen gibt, die außerhalb rootless-Container nicht gelten.
 
 {{#include ../../banners/hacktricks-training.md}}

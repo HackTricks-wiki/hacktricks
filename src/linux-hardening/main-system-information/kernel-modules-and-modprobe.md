@@ -1,18 +1,18 @@
-# Missbrauch von Kernelmodulen und modprobe
+# Missbrauch von Kernel-Modulen und modprobe
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Fehlkonfigurationen von Kernelmodulen und dem Laden von Modulen
+## Fehlkonfigurationen bei Kernel-Modulen und dem Laden von Modulen
 
-Die Unterstützung für Kernelmodule ist ein wichtiger Bereich bei der Überprüfung auf Linux privilege escalation. Behandle nicht jede Meldung zu unsignierten Modulen automatisch als ausnutzbar, sondern nutze sie, um praktische Fragen zu beantworten:
+Die Unterstützung für Kernel-Module ist ein wichtiger Bereich bei der Überprüfung auf Linux privilege escalation. Behandle nicht jede Meldung zu unsignierten Modulen automatisch als ausnutzbar, sondern nutze sie, um praktische Fragen zu beantworten:
 
-- Kann der aktuelle Benutzer Module über `sudo`, Capabilities oder einen beschreibbaren Helper-Pfad laden?
-- Ist das Laden von Modulen weiterhin aktiviert?
-- Ist die Durchsetzung von Modulsignaturen deaktiviert?
+- Kann der aktuelle Benutzer Module über `sudo`, capabilities oder einen beschreibbaren Helper-Pfad laden?
+- Ist das Laden von Modulen noch aktiviert?
+- Ist die Erzwingung von Modul-Signaturen deaktiviert?
 - Sind Modulverzeichnisse oder Moduldateien beschreibbar?
 - Können Kernel-Logs gelesen werden, um zu bestätigen, was passiert ist?
 
-Schnellprüfung:
+Schnelle Triage:
 ```bash
 uname -a
 uname -r
@@ -25,16 +25,16 @@ find /lib/modules/$(uname -r) -type f -name '*.ko*' -writable -ls 2>/dev/null
 ```
 Interpretation:
 
-- `modules_disabled=1` bedeutet, dass neue Module bis zum Neustart nicht geladen werden können.
-- `module_sig_enforce=1` blockiert normalerweise unsignierte Module.
+- `modules_disabled=1` bedeutet, dass bis zum Neustart keine neuen Module geladen werden können.
+- `module_sig_enforce=1` blockiert normalerweise nicht signierte Module.
 - `dmesg_restrict=0` ermöglicht es nicht privilegierten Benutzern auf vielen Systemen, Kernel-Logs zu lesen.
-- Schreibbare Pfade unter `/lib/modules/$(uname -r)/` sind gefährlich, da die Modulsuche und das automatische Laden diesem Verzeichnisbaum vertrauen können.
+- Schreibbare Pfade unter `/lib/modules/$(uname -r)/` sind gefährlich, da die Modulerkennung und das automatische Laden diesem Verzeichnis vertrauen können.
 
-### Laden eines Moduls und Lesen der Kernel-Ausgabe
+### Ein Modul laden und Kernel-Ausgaben lesen
 
-Wenn du die entsprechende Berechtigung zum Laden eines lokalen Moduls hast, fügt `insmod` die von dir angegebene `.ko`-Datei exakt ein. Die Init-Funktion des Moduls wird sofort ausgeführt, und mit `printk()` geschriebene Nachrichten erscheinen in den Kernel-Logs.
+Wenn du die legitime Berechtigung hast, ein lokales Modul zu laden, fügt `insmod` genau die von dir angegebene `.ko`-Datei ein. Die Init-Funktion des Moduls wird sofort ausgeführt, und mit `printk()` geschriebene Nachrichten erscheinen in den Kernel-Logs.
 
-Minimaler Ablauf für Review- oder Laborumgebungen:
+Minimaler Workflow für Review- oder Laborumgebungen:
 ```bash
 ls -l ./example.ko
 modinfo ./example.ko 2>/dev/null
@@ -49,11 +49,11 @@ Wenn `sudo -l` `insmod`, `modprobe` oder einen Wrapper darum erlaubt, ist dies a
 sudo -l
 sudo /sbin/insmod ./example.ko
 ```
-### Sudo-allowed `insmod`
+### Sudo-erlaubtes `insmod`
 
-Eine sudo-Regel, die einem Benutzer die Ausführung von `insmod` erlaubt, ist nicht mit der Erlaubnis zur Ausführung eines gewöhnlichen administrativen Hilfsprogramms vergleichbar. Der Initialisierungscode des Moduls wird sofort im Kernel-Kontext ausgeführt, sobald die `.ko`-Datei eingefügt wurde. Die entscheidende Frage bei der praktischen Überprüfung lautet daher: „Kann dieser Benutzer das zu ladende Modul auswählen oder verändern?“
+Eine sudo-Regel, die einem Benutzer erlaubt, `insmod` auszuführen, ist nicht damit vergleichbar, einen normalen administrativen Helfer zu erlauben. Der Initialisierungscode des Moduls wird sofort im Kernel-Kontext ausgeführt, sobald die `.ko` eingefügt wurde. Daher lautet die praktische Prüfungsfrage: „Kann dieser Benutzer das zu ladende Modul auswählen oder verändern?“
 
-Allgemeiner Prüfungsablauf:
+Generischer Prüfungsablauf:
 ```bash
 sudo -l
 ls -l ./candidate.ko
@@ -63,9 +63,9 @@ lsmod | grep -i candidate
 dmesg | tail -n 30
 sudo /sbin/rmmod candidate
 ```
-Wenn der Benutzer ein beliebiges `.ko` bereitstellen kann, sollte dies bei einer autorisierten Prüfung als vollständige Kompromittierung des Systems eingestuft werden. Ein sichereres Vorgehensmuster besteht darin, das Laden von Modulen nicht über sudo zu delegieren. Falls dies unvermeidbar ist, sollten der genaue Pfad, Eigentümer, Berechtigungen, die Signaturrichtlinie und der Ablauf zur Entfernung eingeschränkt beziehungsweise festgelegt werden.
+Wenn der Benutzer ein beliebiges `.ko` bereitstellen kann, sollte dies bei einem autorisierten Assessment als vollständige Systemkompromittierung behandelt werden. Ein sichereres Vorgehen besteht darin, das Laden von Modulen nicht über sudo zu delegieren. Falls dies unvermeidbar ist, sollten der exakte Pfad, Eigentümer, Berechtigungen, die Signing policy und der Workflow zur Entfernung eingeschränkt werden.
 
-Für ein harmloses Muster zum Erstellen eines Moduls in einer kontrollierten Laborumgebung sehen eine minimale Quelldatei und ein Makefile wie folgt aus:
+Für ein harmloses Muster zum Erstellen von Modulen in einem kontrollierten Lab sehen ein minimaler Quellcode und ein Makefile wie folgt aus:
 ```c
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -93,18 +93,18 @@ make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 clean:
 make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 ```
-Nur in einem autorisierten Labor erstellen und laden:
+Nur in einem autorisierten Labor kompilieren und laden:
 ```bash
 make
 sudo insmod demo.ko
 dmesg | tail -n 20
 sudo rmmod demo
 ```
-### `kernel.modprobe` / `modprobe_path` abuse checks
+### Prüfungen auf Missbrauch von `kernel.modprobe` / `modprobe_path`
 
-`kernel.modprobe` steuert den Userspace-Helfer, den der Kernel aufruft, wenn er Unterstützung beim Laden von Modulen benötigt. Wenn ein Angreifer den Wert in einen Pfad zu einer beschreibbaren ausführbaren Datei ändern und ein unbekanntes Binärformat oder einen anderen Pfad für Modulanforderungen auslösen kann, kann dies zu Root-Codeausführung führen.
+`kernel.modprobe` steuert das Userspace-Hilfsprogramm, das der Kernel aufruft, wenn er Unterstützung beim Laden von Modulen benötigt. Wenn ein Angreifer den Wert auf den Pfad eines beschreibbaren Executables ändern und ein unbekanntes Binärformat oder einen anderen Pfad zur Modulanforderung auslösen kann, kann dies zu Codeausführung als root führen.
 
-Überprüfe den aktuellen Helfer:
+Prüfe das aktuelle Hilfsprogramm:
 ```bash
 cat /proc/sys/kernel/modprobe 2>/dev/null
 sysctl kernel.modprobe 2>/dev/null
@@ -116,7 +116,7 @@ ls -l /proc/sys/kernel/modprobe
 sudo -l | grep -E 'sysctl|tee|bash|sh|modprobe'
 getcap -r / 2>/dev/null | grep -E 'cap_sys_admin|cap_sys_module'
 ```
-Generisches, nur für Labore bestimmtes Muster:
+Generisches Muster nur für Labore:
 ```bash
 # Example only: requires permission to write kernel.modprobe
 printf '#!/bin/sh\nid > /tmp/modprobe-helper-ran\n' > /tmp/helper
@@ -129,11 +129,11 @@ chmod +x /tmp/unknown
 /tmp/unknown 2>/dev/null || true
 cat /tmp/modprobe-helper-ran 2>/dev/null
 ```
-Auf gehärteten Systemen sollte dies fehlschlagen, da unprivilegierte Benutzer nicht in `kernel.modprobe` schreiben können, der Pfad zum Helper nicht beschreibbar ist oder das Laden von Modulen blockiert wird.
+Auf gehärteten Systemen sollte dies fehlschlagen, da unprivilegierte Benutzer nicht in `kernel.modprobe` schreiben können, der Pfad zum Hilfsprogramm nicht beschreibbar ist oder das Laden von Modulen blockiert wird.
 
-### Überprüfung beschreibbarer `/lib/modules`-Verzeichnisse
+### Überprüfung von beschreibbaren `/lib/modules`-Verzeichnissen
 
-Beschreibbare Modulverzeichnisse können je nach späterem Aufruf von `modprobe` den Austausch von Modulen, das Platzieren schädlicher Module oder den Missbrauch des Auto-Loads ermöglichen.
+Beschreibbare Modulverzeichnisse können je nach späterem Aufruf von `modprobe` den Austausch von Modulen, das Platzieren schädlicher Module oder den Missbrauch des automatischen Ladens ermöglichen.
 
 Überprüfe beschreibbare Speicherorte:
 ```bash
@@ -142,7 +142,7 @@ find "/lib/modules/$KREL" -type d -writable -ls 2>/dev/null
 find "/lib/modules/$KREL" -type f -name '*.ko*' -writable -ls 2>/dev/null
 find "/lib/modules/$KREL" -type f \( -name 'modules.dep' -o -name 'modules.alias' -o -name 'modules.order' \) -writable -ls 2>/dev/null
 ```
-Wenn du beschreibbare Modulinhalte findest, überprüfe, wie Module entdeckt werden:
+Wenn du beschreibbare Modulinhalte findest, prüfe, wie Module entdeckt werden:
 ```bash
 modprobe --show-depends <module_name> 2>/dev/null
 modinfo <module_name> 2>/dev/null
@@ -150,8 +150,9 @@ grep -R "<module_name>" /lib/modules/$(uname -r)/modules.* 2>/dev/null
 ```
 Defensive Hinweise:
 
-- `/lib/modules` im Besitz von `root:root` belassen und für Benutzer nicht beschreibbar machen.
-- `kernel.modules_disabled=1` nach dem Booten setzen, sofern dies betrieblich möglich ist.
-- Auf Systemen, die ladbare Module benötigen, das Signieren von Modulen erzwingen.
-- Schreibzugriffe auf `/proc/sys/kernel/modprobe` und `/lib/modules` sowie unerwartete Ausführungen von `insmod`/`modprobe` überwachen.
+- Halte `/lib/modules` im Besitz von `root:root` und für Benutzer nicht beschreibbar.
+- Setze `kernel.modules_disabled=1` nach dem Booten, sofern dies betrieblich möglich ist.
+- Erzwinge die Signierung von Modulen auf Systemen, die ladbare Module benötigen.
+- Überwache Schreibvorgänge nach `/proc/sys/kernel/modprobe` und `/lib/modules` sowie unerwartete Ausführungen von `insmod`/`modprobe`.
+
 {{#include ../../banners/hacktricks-training.md}}

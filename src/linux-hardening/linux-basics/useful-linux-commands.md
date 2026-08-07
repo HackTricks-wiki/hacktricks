@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Häufige Bash-Befehle
+## Allgemeine Bash-Befehle
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -149,7 +149,7 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
-## Grep-Befehle
+## Greps
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -258,7 +258,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Nmap-Hilfesuche
+## Nmap-Suchhilfe
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -303,7 +303,7 @@ iptables -P OUTPUT ACCEPT
 ```
 ## eBPF-Telemetrie & Rootkit-Jagd
 
-Moderne Rootkits (TripleCross, BPFDoor-Varianten usw.) persistieren zunehmend als verborgene eBPF-Programme. Erstelle mit `bpftool`/`eBPFmon` eine Baseline deiner Systeme, damit du unsignierte Programme, unerwartete cgroup-Hooks oder bösartige Map-Inhalte erkennen kannst, bevor du sie entfernst.
+Moderne Rootkits (TripleCross, BPFDoor-Varianten usw.) persistieren zunehmend als versteckte eBPF-Programme. Erstelle mit `bpftool`/`eBPFmon` eine Baseline deiner Flotte, damit du nicht signierte Programme, unerwartete cgroup-Hooks oder bösartige Map-Inhalte erkennen kannst, bevor du sie abtrennst.<sup>[[1]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Korreliere die bpftool-Ausgabe mit den erwarteten NIC-/cgroup-Anbindungen; ein plötzlich auftretendes `xdp`- oder `kprobe`-Programm, das einem nicht genehmigten PID gehört, ist ein starkes Indiz für einen injizierten eBPF-Payload.
+Korrelieren Sie die `bpftool`-Ausgabe mit den erwarteten NIC-/cgroup-Anbindungen; ein plötzlich auftretendes `xdp`- oder `kprobe`-Programm, das einem nicht genehmigten PID gehört, ist ein starkes Indiz für einen injizierten eBPF-Payload.
 
-## Journald-Incident-Triage
+## Journald-Untersuchung bei Sicherheitsvorfällen
 
-systemd-journald speichert strukturierte Metadaten, sodass du nach Boot, Schweregrad, Unit oder UID pivotieren kannst, ohne `/var/log/*` anzufassen. Kombiniere Filter mit relativen Zeitstempeln, um Angriffszeiträume einzugrenzen oder Log-Manipulationen schnell nachzuweisen.
+systemd-journald speichert strukturierte Metadaten, sodass Sie nach Boot, Schweregrad, Unit oder UID suchen können, ohne `/var/log/*` anzufassen. Kombinieren Sie Filter mit relativen Zeitstempeln, um Angriffszeiträume einzugrenzen oder eine Manipulation der Logs schnell nachzuweisen.<sup>[[2]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +336,11 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Füge `--grep 'Invalid user' --case-sensitive` oder `-k` (nur Kernel-Ringpuffer) hinzu, wenn du präzisere Filter benötigst. Denke außerdem daran, dass die Selektoren `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` und `_TRANSPORT` für Multi-Tenant-Suchen miteinander kombiniert werden.
+Füge `--grep 'Invalid user' --case-sensitive` oder `-k` (nur Kernel-Ringpuffer) hinzu, wenn du präzisere Filter benötigst, und denke daran, dass sich die Selektoren `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` und `_TRANSPORT` für Multi-Tenant-Hunts kombinieren lassen.
 
 ## Referenzen
 
-- [eBPFmon: Ein neues Tool zum Erkunden und Interagieren mit eBPF-Anwendungen](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [So verwendest du den Befehl journalctl zum Anzeigen von Linux-Logs](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: Ein neues Tool zum Erkunden und Interagieren mit eBPF-Anwendungen](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [So verwendest du den journalctl-Befehl zum Anzeigen von Linux-Logs](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}

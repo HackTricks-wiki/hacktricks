@@ -1,4 +1,4 @@
-# Escaping from KIOSKs
+# Aus KIOSKs ausbrechen
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -6,16 +6,16 @@
 
 ## Physisches Gerät überprüfen
 
-| Komponente   | Aktion                                                              |
-| ------------ | ------------------------------------------------------------------- |
-| Ein-/Ausschalter | Das Gerät aus- und wieder einschalten kann den Startbildschirm sichtbar machen |
-| Netzkabel    | Prüfe, ob das Gerät neu startet, wenn kurz die Stromversorgung getrennt wird |
-| USB-Ports    | Schließe eine physische Tastatur an, um mehr Tastenkombinationen zu nutzen |
-| Ethernet     | Netzwerkscan oder Sniffing kann weitere Ausnutzungen ermöglichen     |
+| Komponente    | Aktion                                                               |
+| ------------- | -------------------------------------------------------------------- |
+| Power button  | Das Aus- und Einschalten des Geräts kann den Startbildschirm anzeigen |
+| Power cable   | Prüfen, ob das Gerät neu startet, wenn die Stromversorgung kurz unterbrochen wird |
+| USB ports     | Physische Tastatur mit weiteren Shortcuts anschließen                |
+| Ethernet      | Ein Network scan oder Sniffing kann weitere Exploitation ermöglichen  |
 
-## Prüfe mögliche Aktionen innerhalb der GUI-Anwendung
+## Auf mögliche Aktionen innerhalb der GUI-Anwendung prüfen
 
-**Common Dialogs** sind jene Optionen wie **Speichern einer Datei**, **Öffnen einer Datei**, Schriftart auswählen, Farbe... Die meisten bieten eine **volle Explorer-Funktionalität**. Das bedeutet, dass du auf Explorer-Funktionen zugreifen kannst, wenn du diese Optionen erreichst:
+**Common Dialogs** sind Optionen zum **Speichern einer Datei**, **Öffnen einer Datei**, Auswählen einer Schriftart, einer Farbe usw. Die meisten davon **bieten eine vollständige Explorer-Funktionalität**. Das bedeutet, dass du auf Explorer-Funktionen zugreifen kannst, wenn du diese Optionen erreichen kannst:
 
 - Close/Close as
 - Open/Open with
@@ -24,20 +24,20 @@
 - Search
 - Scan
 
-Du solltest prüfen, ob du:
+Du solltest prüfen, ob du Folgendes kannst:
 
-- Neue Dateien ändern oder erstellen kannst
-- Symbolische Links erstellen kannst
-- Zugriff auf eingeschränkte Bereiche erhältst
-- Andere Apps ausführen kannst
+- Dateien ändern oder neue Dateien erstellen
+- Symbolic links erstellen
+- Zugriff auf eingeschränkte Bereiche erhalten
+- Andere Apps ausführen
 
-### Befehlsausführung
+### Command Execution
 
-Vielleicht **using a `Open with`** option\*\* kannst du eine Art Shell öffnen/ausführen.
+Vielleicht kannst du über die Option **`Open with`**\*\* eine Shell öffnen/ausführen.
 
 #### Windows
 
-Zum Beispiel _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ Weitere Binaries, die zum Ausführen von Befehlen (und zum Ausführen unerwarteter Aktionen) verwendet werden können, findest du hier: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+Zum Beispiel _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ weitere Binaries, die zum Ausführen von Commands (und für unerwartete Aktionen) verwendet werden können, findest du hier: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 #### \*NIX \_\_
 
@@ -45,22 +45,22 @@ _bash, sh, zsh..._ Mehr hier: [https://gtfobins.github.io/](https://gtfobins.git
 
 ## Windows
 
-### Umgehung von Pfadbeschränkungen
+### Pfadbeschränkungen umgehen
 
-- **Umgebungsvariablen**: Es gibt viele Umgebungsvariablen, die auf einen Pfad zeigen
-- **Andere Protokolle**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
-- **Symbolische Links**
-- **Tastenkombinationen**: CTRL+N (open new session), CTRL+R (Execute Commands), CTRL+SHIFT+ESC (Task Manager), Windows+E (open explorer), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
-- Verstecktes Administrationsmenü: CTRL-ALT-F8, CTRL-ESC-F9
+- **Environment variables**: Es gibt zahlreiche Environment variables, die auf bestimmte Pfade verweisen
+- **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+- **Symbolic links**
+- **Shortcuts**: CTRL+N (neue Sitzung öffnen), CTRL+R (Commands ausführen), CTRL+SHIFT+ESC (Task Manager), Windows+E (Explorer öffnen), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
+- Verstecktes Administrative menu: CTRL-ALT-F8, CTRL-ESC-F9
 - **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **UNC paths**: Pfade, um sich mit freigegebenen Ordnern zu verbinden. Du solltest versuchen, dich mit dem C$ der lokalen Maschine zu verbinden ("\\\127.0.0.1\c$\Windows\System32")
+- **UNC paths**: Pfade zum Verbinden mit freigegebenen Ordnern. Du solltest versuchen, eine Verbindung mit C$ des lokalen Rechners herzustellen ("\\\127.0.0.1\c$\Windows\System32")
 - **More UNC paths:**
 
 | UNC                       | UNC            | UNC                  |
 | ------------------------- | -------------- | -------------------- |
 | %ALLUSERSPROFILE%         | %APPDATA%      | %CommonProgramFiles% |
 | %COMMONPROGRAMFILES(x86)% | %COMPUTERNAME% | %COMSPEC%            |
-| %HOMEDRIVE%               | %HOMEPATH%     | %LOCALAPPDATA%       |
+| %HOMEDRIVE%              | %HOMEPATH%     | %LOCALAPPDATA%       |
 | %LOGONSERVER%             | %PATH%         | %PATHEXT%            |
 | %ProgramData%             | %ProgramFiles% | %ProgramFiles(x86)%  |
 | %PROMPT%                  | %PSModulePath% | %Public%             |
@@ -70,31 +70,31 @@ _bash, sh, zsh..._ Mehr hier: [https://gtfobins.github.io/](https://gtfobins.git
 
 ### Restricted Desktop Breakouts (Citrix/RDS/VDI)
 
-- **Dialog-box pivoting**: Nutze *Open/Save/Print-to-file* Dialoge als abgespeckten Explorer. Versuche `*.*` / `*.exe` im Dateinamenfeld, Rechtsklick auf Ordner für **Open in new window**, und benutze **Properties → Open file location**, um die Navigation zu erweitern.
-- **Create execution paths from dialogs**: Erstelle eine neue Datei und benenne sie in `.CMD` oder `.BAT` um, oder erstelle eine Verknüpfung, die auf `%WINDIR%\System32` zeigt (oder auf ein spezifisches Binary wie `%WINDIR%\System32\cmd.exe`).
-- **Shell launch pivots**: Wenn du zu `cmd.exe` navigieren kannst, versuche, jede Datei per **drag-and-drop** darauf zu ziehen, um eine Eingabeaufforderung zu starten. Wenn der Task Manager erreichbar ist (`CTRL+SHIFT+ESC`), benutze **Run new task**.
-- **Task Scheduler bypass**: Wenn interaktive Shells blockiert sind, Scheduling aber erlaubt ist, erstelle eine Aufgabe, die `cmd.exe` ausführt (GUI `taskschd.msc` oder `schtasks.exe`).
-- **Weak allowlists**: Wenn Ausführung durch **filename/extension** erlaubt ist, benenne dein Payload in einen erlaubten Namen um. Wenn es nach **directory** erlaubt ist, kopiere das Payload in einen erlaubten Programmordner und führe es dort aus.
-- **Find writable staging paths**: Beginne mit `%TEMP%` und enumeriere beschreibbare Ordner mit Sysinternals AccessChk.
+- **Dialog-box pivoting**: Verwende *Open/Save/Print-to-file*-Dialoge als Explorer-lite. Versuche `*.*` / `*.exe` im Dateinamenfeld, klicke mit der rechten Maustaste auf Ordner, um **Open in new window** auszuwählen, und verwende **Properties → Open file location**, um die Navigation zu erweitern.<sup>[[1]](#references)</sup>
+- **Create execution paths from dialogs**: Erstelle eine neue Datei und benenne sie in `.CMD` oder `.BAT` um, oder erstelle einen Shortcut, der auf `%WINDIR%\System32` (oder ein bestimmtes Binary wie `%WINDIR%\System32\cmd.exe`) zeigt.
+- **Shell launch pivots**: Wenn du zu `cmd.exe` navigieren kannst, versuche, eine beliebige Datei per **drag-and-drop** darauf zu ziehen, um eine Eingabeaufforderung zu starten. Wenn der Task Manager erreichbar ist (`CTRL+SHIFT+ESC`), verwende **Run new task**.
+- **Task Scheduler bypass**: Wenn interaktive Shells blockiert sind, Scheduling aber erlaubt ist, erstelle eine Task, die `cmd.exe` ausführt (GUI `taskschd.msc` oder `schtasks.exe`).
+- **Weak allowlists**: Wenn die Ausführung anhand von **filename/extension** erlaubt ist, benenne deinen Payload in einen zulässigen Namen um. Wenn sie anhand eines **directory** erlaubt ist, kopiere den Payload in einen zulässigen Programmordner und führe ihn dort aus.
+- **Find writable staging paths**: Beginne mit `%TEMP%` und ermittle mit Sysinternals AccessChk beschreibbare Ordner.
 ```cmd
 echo %TEMP%
 accesschk.exe -uwdqs Users c:\
 accesschk.exe -uwdqs "Authenticated Users" c:\
 ```
-- **Nächster Schritt**: Wenn du eine shell erhältst, wechsle zur Windows LPE-Checkliste:
+- **Nächster Schritt**: Wenn du eine Shell erhältst, fahre mit der Windows-LPE-Checkliste fort:
 {{#ref}}
 ../windows-hardening/checklist-windows-privilege-escalation.md
 {{#endref}}
 
-### Binaries herunterladen
+### Deine Binaries herunterladen
 
 Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
 Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
-Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+Registry-Editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-### Zugriff aufs Dateisystem vom Browser
+### Zugriff auf das Dateisystem über den Browser
 
-| PATH                | PATH              | PATH               | PATH                |
+| PATH                | PATH              | PATH               | PATH               |
 | ------------------- | ----------------- | ------------------ | ------------------- |
 | File:/C:/windows    | File:/C:/windows/ | File:/C:/windows\\ | File:/C:\windows    |
 | File:/C:\windows\\  | File:/C:\windows/ | File://C:/windows  | File://C:/windows/  |
@@ -106,41 +106,41 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 
 ### Tastenkombinationen
 
-- Sticky Keys – Drücke SHIFT 5-mal
+- Sticky Keys – SHIFT 5-mal drücken
 - Mouse Keys – SHIFT+ALT+NUMLOCK
-- High Contrast – SHIFT+ALT+PRINTSCN
-- Toggle Keys – Halte NUMLOCK für 5 Sekunden
-- Filter Keys – Halte die rechte SHIFT-Taste für 12 Sekunden
-- WINDOWS+F1 – Windows Search
+- Hoher Kontrast – SHIFT+ALT+PRINTSCN
+- Toggle Keys – NUMLOCK 5 Sekunden gedrückt halten
+- Filter Keys – rechte SHIFT-Taste 12 Sekunden gedrückt halten
+- WINDOWS+F1 – Windows-Suche
 - WINDOWS+D – Desktop anzeigen
 - WINDOWS+E – Windows Explorer starten
 - WINDOWS+R – Ausführen
-- WINDOWS+U – Ease of Access Centre
+- WINDOWS+U – Center für erleichterte Bedienung
 - WINDOWS+F – Suchen
 - SHIFT+F10 – Kontextmenü
 - CTRL+SHIFT+ESC – Task-Manager
-- CTRL+ALT+DEL – Splash-Screen bei neueren Windows-Versionen
+- CTRL+ALT+DEL – Startbildschirm bei neueren Windows-Versionen
 - F1 – Hilfe F3 – Suchen
 - F6 – Adressleiste
-- F11 – Vollbild umschalten in Internet Explorer
-- CTRL+H – Internet Explorer Verlauf
+- F11 – Vollbild im Internet Explorer ein-/ausschalten
+- CTRL+H – Internet Explorer-Verlauf
 - CTRL+T – Internet Explorer – Neuer Tab
 - CTRL+N – Internet Explorer – Neue Seite
 - CTRL+O – Datei öffnen
-- CTRL+S – Speichern CTRL+N – Neuer RDP / Citrix
+- CTRL+S – Speichern CTRL+N – Neues RDP / Citrix
 
 ### Wischgesten
 
-- Wische von der linken Seite nach rechts, um alle offenen Windows zu sehen, wodurch die KIOSK-App minimiert wird und direkter Zugriff auf das gesamte OS möglich ist;
-- Wische von der rechten Seite nach links, um das Action Center zu öffnen, wodurch die KIOSK-App minimiert wird und direkter Zugriff auf das gesamte OS möglich ist;
-- Wische vom oberen Rand nach innen, um die Titelleiste für eine App im Vollbildmodus sichtbar zu machen;
-- Wische vom unteren Rand nach oben, um in einer Vollbild-App die Taskleiste anzuzeigen.
+- Von der linken Seite nach rechts wischen, um alle geöffneten Windows anzuzeigen, die KIOSK-App zu minimieren und direkt auf das gesamte OS zuzugreifen;
+- Von der rechten Seite nach links wischen, um das Action Center zu öffnen, die KIOSK-App zu minimieren und direkt auf das gesamte OS zuzugreifen;
+- Vom oberen Rand nach innen wischen, um die Titelleiste einer im Vollbildmodus geöffneten App sichtbar zu machen;
+- Vom unteren Rand nach oben wischen, um die Taskleiste in einer Vollbild-App anzuzeigen.
 
-### Internet Explorer Tricks
+### Internet-Explorer-Tricks
 
-#### 'Image Toolbar'
+#### „Image Toolbar“
 
-Das ist eine Toolbar, die oben links über einem Bild erscheint, wenn es angeklickt wird. Du kannst Save, Print, Mailto, "My Pictures" in Explorer öffnen. Der Kiosk muss Internet Explorer verwenden.
+Dies ist eine Toolbar, die oben links am Bild erscheint, wenn darauf geklickt wird. Du kannst damit in Explorer speichern, drucken, per Mail versenden und „Meine Bilder“ öffnen. Der Kiosk muss Internet Explorer verwenden.
 
 #### Shell Protocol
 
@@ -168,39 +168,39 @@ Gib diese URLs ein, um eine Explorer-Ansicht zu erhalten:
 - `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> My Network Places
 - `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
-### Dateiendungen anzeigen
+### Dateierweiterungen anzeigen
 
-Weitere Informationen: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+Auf dieser Seite findest du weitere Informationen: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)<sup>[[7]](#references)</sup>
 
 ## Browser-Tricks
 
-Backup iKat versions:
+Backup-Versionen von iKat:
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)
 
-Erstelle einen common dialog mit JavaScript und greife auf den Datei-Explorer zu: `document.write('<input/type=file>')`\
-Source: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+Erstelle mit JavaScript einen allgemeinen Dialog und greife auf den File Explorer zu: `document.write('<input/type=file>')`<sup>[[2]](#references)</sup>\
+Quelle: https://medium.com/@Rend\_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 ## iPad
 
-### Gesten und Tasten
+### Gesten und Schaltflächen
 
-- Wische mit vier (oder fünf) Fingern nach oben / Doppeltippe auf die Home-Taste: Öffnet die Multitasking-Ansicht und wechselt die App
-- Wische mit vier oder fünf Fingern in eine Richtung: Wechselt zur nächsten/vorherigen App
-- Kneife den Bildschirm mit fünf Fingern / Drücke die Home-Taste / Wische schnell mit 1 Finger von unten nach oben: Geht zum Home-Bildschirm
-- Wische mit einem Finger von unten nur 1–2 Zoll (langsam): Das Dock erscheint
-- Wische mit 1 Finger von der oberen Anzeige nach unten: Zeigt Benachrichtigungen an
-- Wische mit 1 Finger in die obere rechte Ecke des Bildschirms nach unten: Zeigt das Kontrollzentrum des iPad Pro
-- Wische mit 1 Finger von links des Bildschirms 1–2 Zoll: Zeigt die Today-Ansicht
-- Wische schnell mit 1 Finger von der Mitte des Bildschirms nach rechts oder links: Wechsel zur nächsten/vorherigen App
-- Drücke und halte die On/**Off**/Sleep-Taste oben rechts am **iPad +** und bewege den Slider Slide to **power off** ganz nach rechts: Ausschalten
-- Drücke die On/**Off**/Sleep-Taste oben rechts am **iPad und die Home-Taste für ein paar Sekunden**: Erzwingt einen Hard Power Off
-- Drücke die On/**Off**/Sleep-Taste oben rechts am **iPad und die Home-Taste kurz**: Macht einen Screenshot, der unten links im Display erscheint. Drückst du beide Tasten sehr kurz gleichzeitig, wird ein Hard Power Off ausgeführt, wenn du sie länger hältst.
+- Mit vier (oder fünf) Fingern nach oben wischen / zweimal die Home-Taste drücken: Multitasking-Ansicht anzeigen und App wechseln
+- Mit vier oder fünf Fingern in eine beliebige Richtung wischen: Zur nächsten/vorherigen App wechseln
+- Mit fünf Fingern auf dem Bildschirm zusammenziehen / die Home-Taste berühren / mit einem Finger in einer schnellen Bewegung vom unteren Bildschirmrand nach oben wischen: Home aufrufen
+- Mit einem Finger 1–2 Zoll vom unteren Bildschirmrand nach oben wischen (langsam): Das Dock wird angezeigt
+- Mit einem Finger vom oberen Rand des Displays nach unten wischen: Benachrichtigungen anzeigen
+- Mit einem Finger von der oberen rechten Ecke des Bildschirms nach unten wischen: Kontrollzentrum des iPad Pro anzeigen
+- Mit einem Finger 1–2 Zoll vom linken Bildschirmrand nach rechts wischen: Heute-Ansicht anzeigen
+- Mit einem Finger schnell von der Mitte des Bildschirms nach rechts oder links wischen: Zur nächsten/vorherigen App wechseln
+- Die Ein-/**Aus**-/Sleep-Taste oben rechts am **iPad gedrückt halten +** den Schieberegler **Ausschalten** ganz nach rechts bewegen: Ausschalten
+- Die Ein-/**Aus**-/Sleep-Taste oben rechts am **iPad und die Home-Taste einige Sekunden gedrückt halten**: Ein erzwungenes vollständiges Ausschalten durchführen
+- Die Ein-/**Aus**-/Sleep-Taste oben rechts am **iPad und die Home-Taste kurz drücken**: Einen Screenshot aufnehmen, der unten links im Display eingeblendet wird. Drücke beide Tasten gleichzeitig nur sehr kurz, da ein mehrere Sekunden langes Gedrückthalten ein vollständiges Ausschalten erzwingt.<sup>[[3]](#references)</sup>
 
-### Tastenkürzel
+### Tastenkombinationen
 
-Du solltest eine iPad-Tastatur oder einen USB-Tastatur-Adapter haben. Nur Kürzel, die beim Verlassen der Anwendung helfen, werden hier angezeigt.
+Du benötigst eine iPad-Tastatur oder einen USB-Tastaturadapter. Hier werden nur Tastenkombinationen angezeigt, die beim Verlassen der App helfen können.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 
 | Key | Name         |
 | --- | ------------ |
@@ -215,84 +215,86 @@ Du solltest eine iPad-Tastatur oder einen USB-Tastatur-Adapter haben. Nur Kürze
 | ↑   | Up Arrow     |
 | ↓   | Down Arrow   |
 
-#### Systemkürzel
+#### System-Tastenkombinationen
 
-Diese Kürzel betreffen die Anzeige- und Toneinstellungen, je nach Verwendung des iPad.
+Diese Tastenkombinationen gelten je nach Verwendung des iPad für Anzeige- und Soundeinstellungen.
 
-| Shortcut | Aktion                                                                          |
-| -------- | ------------------------------------------------------------------------------- |
-| F1       | Bildschirm dimmen                                                               |
-| F2       | Bildschirm aufhellen                                                            |
-| F7       | Einen Song zurück                                                               |
-| F8       | Play/Pause                                                                      |
-| F9       | Song überspringen                                                               |
-| F10      | Stummschalten                                                                   |
-| F11      | Lautstärke verringern                                                           |
-| F12      | Lautstärke erhöhen                                                              |
-| ⌘ Space  | Zeigt eine Liste verfügbarer Sprachen; zum Auswählen erneut die Leertaste drücken. |
+| Shortcut | Action                                                                         |
+| -------- | ------------------------------------------------------------------------------ |
+| F1       | Bildschirm abdunkeln                                                           |
+| F2       | Bildschirm aufhellen                                                           |
+| F7       | Einen Song zurück                                                              |
+| F8       | Wiedergabe/Pause                                                               |
+| F9       | Song überspringen                                                              |
+| F10      | Stummschalten                                                                  |
+| F11      | Lautstärke verringern                                                          |
+| F12      | Lautstärke erhöhen                                                             |
+| ⌘ Space  | Eine Liste der verfügbaren Sprachen anzeigen; zur Auswahl erneut die Leertaste drücken. |
 
 #### iPad-Navigation
 
-| Shortcut                                           | Aktion                                                  |
+| Shortcut                                           | Action                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | Gehe zum Home                                           |
-| ⌘⇧H (Command-Shift-H)                              | Gehe zum Home                                           |
+| ⌘H                                                 | Zu Home wechseln                                        |
+| ⌘⇧H (Command-Shift-H)                              | Zu Home wechseln                                        |
 | ⌘ (Space)                                          | Spotlight öffnen                                        |
-| ⌘⇥ (Command-Tab)                                   | Liste der letzten zehn verwendeten Apps                 |
+| ⌘⇥ (Command-Tab)                                   | Die zehn zuletzt verwendeten Apps auflisten             |
 | ⌘\~                                                | Zur letzten App wechseln                                |
-| ⌘⇧3 (Command-Shift-3)                              | Screenshot (erscheint unten links zum Speichern oder Aktionen) |
-| ⌘⇧4                                                | Screenshot und öffne ihn im Editor                      |
-| Press and hold ⌘                                   | Liste der verfügbaren Kürzel für die App                |
-| ⌘⌥D (Command-Option/Alt-D)                         | Dock einblenden                                         |
-| ^⌥H (Control-Option-H)                             | Home-Button                                             |
+| ⌘⇧3 (Command-Shift-3)                              | Screenshot (wird unten links eingeblendet, um ihn zu speichern oder zu bearbeiten) |
+| ⌘⇧4                                                | Screenshot aufnehmen und im Editor öffnen               |
+| ⌘ gedrückt halten                                  | Liste der für die App verfügbaren Tastenkombinationen anzeigen |
+| ⌘⌥D (Command-Option/Alt-D)                         | Dock anzeigen                                           |
+| ^⌥H (Control-Option-H)                             | Home-Taste                                              |
 | ^⌥H H (Control-Option-H-H)                         | Multitasking-Leiste anzeigen                            |
-| ^⌥I (Control-Option-i)                             | Item-Auswahl                                            |
-| Escape                                             | Zurück                                                  |
+| ^⌥I (Control-Option-i)                             | Elementauswahl                                          |
+| Escape                                             | Zurück-Taste                                            |
 | → (Right arrow)                                    | Nächstes Element                                        |
 | ← (Left arrow)                                     | Vorheriges Element                                      |
 | ↑↓ (Up arrow, Down arrow)                          | Ausgewähltes Element gleichzeitig antippen              |
 | ⌥ ↓ (Option-Down arrow)                            | Nach unten scrollen                                     |
 | ⌥↑ (Option-Up arrow)                               | Nach oben scrollen                                      |
 | ⌥← or ⌥→ (Option-Left arrow or Option-Right arrow) | Nach links oder rechts scrollen                         |
-| ^⌥S (Control-Option-S)                             | VoiceOver-Sprachausgabe an/aus                          |
+| ^⌥S (Control-Option-S)                             | VoiceOver-Sprachausgabe ein- oder ausschalten           |
 | ⌘⇧⇥ (Command-Shift-Tab)                            | Zur vorherigen App wechseln                             |
-| ⌘⇥ (Command-Tab)                                   | Zur ursprünglichen App zurückwechseln                   |
+| ⌘⇥ (Command-Tab)                                   | Zur ursprünglichen App zurückwechseln                  |
 | ←+→, then Option + ← or Option+→                   | Durch das Dock navigieren                               |
 
-#### Safari-Tastenkürzel
+#### Safari-Tastenkombinationen
 
-| Shortcut                | Aktion                                           |
+| Shortcut                | Action                                           |
 | ----------------------- | ------------------------------------------------ |
-| ⌘L (Command-L)          | Location öffnen                                  |
-| ⌘T                      | Neuen Tab öffnen                                 |
-| ⌘W                      | Aktuellen Tab schließen                          |
-| ⌘R                      | Aktuellen Tab neu laden                          |
-| ⌘.                      | Laden des aktuellen Tabs stoppen                 |
-| ^⇥                      | Zum nächsten Tab wechseln                        |
-| ^⇧⇥ (Control-Shift-Tab) | Zum vorherigen Tab wechseln                      |
-| ⌘L                      | Textfeld/URL-Feld auswählen, um es zu bearbeiten |
+| ⌘L (Command-L)          | Ort öffnen                                       |
+| ⌘T                      | Einen neuen Tab öffnen                            |
+| ⌘W                      | Aktuellen Tab schließen                           |
+| ⌘R                      | Aktuellen Tab aktualisieren                       |
+| ⌘.                      | Laden des aktuellen Tabs stoppen                  |
+| ^⇥                      | Zum nächsten Tab wechseln                         |
+| ^⇧⇥ (Control-Shift-Tab) | Zum vorherigen Tab wechseln                       |
+| ⌘L                      | Texteingabe-/URL-Feld zur Bearbeitung auswählen  |
 | ⌘⇧T (Command-Shift-T)   | Zuletzt geschlossenen Tab öffnen (mehrfach möglich) |
-| ⌘\[                     | Geht eine Seite in der Historie zurück           |
-| ⌘]                      | Geht eine Seite in der Historie vorwärts         |
-| ⌘⇧R                     | Reader Mode aktivieren                           |
+| ⌘\[                     | Eine Seite im Browserverlauf zurückgehen          |
+| ⌘]                      | Eine Seite im Browserverlauf vorgehen             |
+| ⌘⇧R                     | Reader-Modus aktivieren                           |
 
-#### Mail-Tastenkürzel
+#### Mail-Tastenkombinationen
 
-| Shortcut                   | Aktion                       |
+| Shortcut                   | Action                       |
 | -------------------------- | ---------------------------- |
-| ⌘L                         | Location öffnen              |
-| ⌘T                         | Neuen Tab öffnen             |
+| ⌘L                         | Ort öffnen                   |
+| ⌘T                         | Einen neuen Tab öffnen       |
 | ⌘W                         | Aktuellen Tab schließen      |
-| ⌘R                         | Aktuellen Tab neu laden      |
+| ⌘R                         | Aktuellen Tab aktualisieren  |
 | ⌘.                         | Laden des aktuellen Tabs stoppen |
-| ⌘⌥F (Command-Option/Alt-F) | In deinem Postfach suchen     |
+| ⌘⌥F (Command-Option/Alt-F) | Im Postfach suchen           |
 
-## Quellen
+## Referenzen
 
-- [https://www.pentestpartners.com/security-blog/breaking-out-of-citrix-and-other-restricted-desktop-environments/](https://www.pentestpartners.com/security-blog/breaking-out-of-citrix-and-other-restricted-desktop-environments/)
-- [https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
-- [https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)
-- [https://thesweetsetup.com/best-ipad-keyboard-shortcuts/](https://thesweetsetup.com/best-ipad-keyboard-shortcuts/)
-- [http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html](http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html)
+- [1] [Breaking Out of Citrix and other Restricted Desktop Environments](https://www.pentestpartners.com/security-blog/breaking-out-of-citrix-and-other-restricted-desktop-environments/)
+- [2] [Give me a browser, I'll give you a shell](https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0)
+- [3] [6 only-for-iPad gestures you need to know](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
+- [4] [iPad shortcuts guide](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)
+- [5] [Best iPad Keyboard Shortcuts](https://thesweetsetup.com/best-ipad-keyboard-shortcuts/)
+- [6] [iPad Keyboard Shortcuts](http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html)
+- [7] [howtohaven.com - Show File Extensions In Windows Explorer](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
 {{#include ../banners/hacktricks-training.md}}

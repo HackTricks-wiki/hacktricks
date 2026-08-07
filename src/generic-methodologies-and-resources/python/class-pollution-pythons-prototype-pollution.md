@@ -1,10 +1,10 @@
-# Klassenverschmutzung (Python's Prototype Pollution)
+# Class Pollution (Python's Prototype Pollution)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Grundlegendes Beispiel
 
-Überprüfen Sie, wie es möglich ist, Klassen von Objekten mit Zeichenfolgen zu verschmutzen:
+Prüfe, wie es möglich ist, Klassen von Objekten mit Strings zu verschmutzen:<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +28,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## Grundlegendes Schwachstellenbeispiel
+## Grundlegendes Beispiel für eine Schwachstelle
 ```python
 # Initial state
 class Employee: pass
@@ -65,7 +65,7 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>Erstellen eines Standardwerts für Klassenattribute für RCE (subprocess)</summary>
+<summary>Erstellen eines Standardwerts für eine Klasseneigenschaft zur Ausführung von RCE (subprocess)</summary><sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Verschmutzung anderer Klassen und globaler Variablen durch <code>globals</code></summary>
+<summary>Andere Klassen und globale Variablen über <code>globals</code> vergiften</summary><sup>[[1]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Willkürliche Unterprozessausführung</summary>
+<summary>Beliebige Ausführung von Subprozessen</summary><sup>[[1]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -182,7 +182,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Überschreiben von <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** ist ein spezielles Attribut aller Funktionen, basierend auf der Python [Dokumentation](https://docs.python.org/3/library/inspect.html), es ist eine „Zuordnung von Standardwerten für **nur-Schlüsselwort**-Parameter“. Das Verunreinigen dieses Attributs ermöglicht es uns, die Standardwerte der nur-Schlüsselwort-Parameter einer Funktion zu steuern, dies sind die Parameter der Funktion, die nach \* oder \*args kommen.
+**`__kwdefaults__`** ist laut der [Python-Dokumentation](https://docs.python.org/3/library/inspect.html) ein spezielles Attribut aller Funktionen und eine „Zuordnung beliebiger Standardwerte für **keyword-only**-Parameter“. Durch die Pollution dieses Attributs können wir die Standardwerte der **keyword-only**-Parameter einer Funktion kontrollieren. Dabei handelt es sich um die Parameter der Funktion, die nach \* oder \*args kommen.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,32 +223,34 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Überschreiben des Flask-Geheimnisses über Dateien hinweg</summary>
+<summary>Flask secret über mehrere Dateien hinweg überschreiben</summary>
 
-Wenn Sie also eine Klassenverschmutzung über ein Objekt durchführen können, das in der Haupt-Python-Datei des Webs definiert ist, aber **dessen Klasse in einer anderen Datei** als der Hauptdatei definiert ist. Denn um auf \_\_globals\_\_ in den vorherigen Payloads zuzugreifen, müssen Sie auf die Klasse des Objekts oder die Methoden der Klasse zugreifen, werden Sie in der Lage sein, **auf die Globals in dieser Datei zuzugreifen, aber nicht in der Hauptdatei**. \
-Daher **werden Sie nicht auf das globale Flask-App-Objekt zugreifen können**, das den **Geheimschlüssel** auf der Hauptseite definiert:
+Wenn du also eine class pollution über einem Objekt durchführen kannst, das in der Hauptdatei der Webanwendung definiert ist, **dessen Klasse jedoch in einer anderen Datei als der Hauptdatei definiert ist**, kannst du auf die vorherigen Payloads zugreifen. Da du auf `__globals__` zugreifen musst, indem du auf die Klasse des Objekts oder auf Methoden der Klasse zugreifst, wirst du **auf die globals in dieser Datei, jedoch nicht in der Hauptdatei, zugreifen können**. \
+Daher wirst du **nicht auf das globale Flask-App-Objekt zugreifen können**, das den **secret key** auf der Hauptseite definiert hat:<sup>[[1]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-In diesem Szenario benötigen Sie ein Gadget, um Dateien zu durchlaufen, um auf das Hauptobjekt zuzugreifen, um **auf das globale Objekt `app.secret_key`** zuzugreifen, um den Flask-Geheimschlüssel zu ändern und in der Lage zu sein, [**Privilegien zu eskalieren**, wenn Sie diesen Schlüssel kennen](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+In diesem Szenario benötigst du ein Gadget, das Dateien durchläuft, um zur Hauptdatei zu gelangen und auf das globale Objekt `app.secret_key` **zuzugreifen**, den Flask Secret Key zu ändern und mithilfe dieses Keys [**Berechtigungen zu eskalieren**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-Eine Payload wie diese [aus diesem Bericht](https://ctftime.org/writeup/36082):
+Ein Payload wie dieser [aus diesem Writeup](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Verwenden Sie diese Payload, um **`app.secret_key`** zu ändern (der Name in Ihrer App könnte anders sein), um neue und privilegierte Flask-Cookies signieren zu können.
+Verwende diesen **payload**, um `app.secret_key` (der Name kann in deiner App anders lauten) zu **ändern**, damit du neue Flask-Cookies mit mehr Privilegien signieren kannst.
 
 </details>
 
-Überprüfen Sie auch die folgende Seite für weitere schreibgeschützte Gadgets:
+Siehe auch die folgende Seite für weitere Read-only-Gadgets:
+
 
 {{#ref}}
 python-internal-read-gadgets.md
 {{#endref}}
 
-## Referenzen
+## Quellen
 
-- [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}
