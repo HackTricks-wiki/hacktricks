@@ -2,13 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**जांचने के लिए दिलचस्प पृष्ठ:**
 
-- [**Pyscript हैकिंग ट्रिक्स**](pyscript.md)
-- [**Python डीसिरियलाइजेशन**](../../pentesting-web/deserialization/README.md)
-- [**Keras मॉडल डीसिरियलाइजेशन RCE और गैजेट शिकार**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Python सैंडबॉक्स को बायपास करने के ट्रिक्स**](bypass-python-sandboxes/README.md)
-- [**बुनियादी Python वेब अनुरोध सिंटैक्स**](web-requests.md)
-- [**बुनियादी Python सिंटैक्स और पुस्तकालय**](basic-python.md)
+**देखने के लिए दिलचस्प pages:**
+
+- [**Pyscript hacking tricks**](pyscript.md)
+- [**Python deserializations**](../../pentesting-web/deserialization/README.md)
+- [**Keras model deserialization RCE और gadget hunting**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Python sandboxes को bypass करने की tricks**](bypass-python-sandboxes/README.md)
+- [**Basic Python web requests syntax**](web-requests.md)
+- [**Basic Python syntax और libraries**](basic-python.md)
 
 {{#include ../../banners/hacktricks-training.md}}

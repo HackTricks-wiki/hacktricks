@@ -1,9 +1,9 @@
-# वेब अनुरोध
+# Web Requests
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## पायथन अनुरोध
+## Python Requests
 ```python
 import requests
 
@@ -71,7 +71,7 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## RCE का शोषण करने के लिए Python cmd
+## RCE exploit करने के लिए Python cmd
 ```python
 import requests
 import re

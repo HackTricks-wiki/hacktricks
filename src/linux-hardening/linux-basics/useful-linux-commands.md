@@ -258,7 +258,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Nmap खोज सहायता
+## Nmap सहायता खोजें
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -301,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF टेलीमेट्री और Rootkit Hunting
+## eBPF Telemetry & Rootkit Hunting
 
-आधुनिक rootkit (TripleCross, BPFDoor variants आदि) तेजी से छिपे हुए eBPF programs के रूप में persist कर रहे हैं। अपने fleet के लिए `bpftool`/`eBPFmon` का उपयोग करके baseline तैयार करें, ताकि उन्हें detach करने से पहले unsigned programs, अप्रत्याशित cgroup hooks या malicious map contents का पता लगाया जा सके।
+Modern rootkits (TripleCross, BPFDoor variants, आदि) increasingly hidden eBPF programs के रूप में persist करते हैं। अपने fleet का `bpftool`/`eBPFmon` के साथ baseline तैयार करें, ताकि उन्हें detach करने से पहले unsigned programs, unexpected cgroup hooks या malicious map contents का पता लगाया जा सके।<sup>[[1]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-अपेक्षित NIC/cgroup attachments के साथ `bpftool` output का मिलान करें; किसी unapproved PID के स्वामित्व वाला अचानक दिखाई देने वाला `xdp` या `kprobe` program, inject किए गए eBPF payload का मजबूत संकेत है।
+अपेक्षित NIC/cgroup attachments के साथ bpftool output का correlation करें; किसी unapproved PID के स्वामित्व वाला अचानक दिखाई देने वाला `xdp` या `kprobe` program injected eBPF payload का मजबूत संकेत है।
 
 ## Journald Incident Triage
 
-`systemd-journald` structured metadata रखता है, इसलिए `/var/log/*` को छुए बिना boot, severity, unit या UID के आधार पर pivot कर सकते हैं। Relative timestamps के साथ filters को combine करके attack windows को अलग करें या log tampering को तुरंत साबित करें।
+systemd-journald संरचित metadata रखता है, इसलिए `/var/log/*` को छुए बिना boot, severity, unit या UID के आधार पर pivot कर सकते हैं। Relative timestamps के साथ filters को combine करके attack windows को isolate करें या log tampering को जल्दी साबित करें।<sup>[[2]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +336,11 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-जब आपको अधिक सटीक फ़िल्टर की आवश्यकता हो, तो `--grep 'Invalid user' --case-sensitive` या `-k` (केवल kernel ring buffer) जोड़ें, और याद रखें कि `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, और `_TRANSPORT` selectors multi-tenant hunts के लिए एक साथ काम करते हैं।
+जब आपको अधिक सख्त filters की आवश्यकता हो, तो `--grep 'Invalid user' --case-sensitive` या `-k` (केवल kernel ring buffer) जोड़ें, और याद रखें कि `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, और `_TRANSPORT` selectors multi-tenant hunts के लिए एक साथ काम करते हैं।
 
 ## संदर्भ
 
-- [eBPFmon: eBPF applications को explore और interact करने के लिए एक नया tool](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [Linux logs देखने के लिए journalctl command का उपयोग कैसे करें](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: eBPF applications को explore और interact करने के लिए एक नया tool](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Linux logs देखने के लिए journalctl command का उपयोग कैसे करें](https://www.hostinger.com/tutorials/journalctl-command)
 
 {{#include ../../banners/hacktricks-training.md}}

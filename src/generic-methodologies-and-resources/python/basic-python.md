@@ -1,19 +1,19 @@
-# Basic Python
+# बेसिक Python
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Python Basics
+## Python की मूल बातें
 
 ### उपयोगी जानकारी
 
-नीचे दिए गए सभी उदाहरण, explicitly noted होने पर छोड़कर, **Python 3** मानते हैं।\
-`range()` Python 3 में एक iterable object लौटाता है (Python 2 में `xrange()` जैसा)।\
-**tuple** और **list** के बीच अंतर यह है कि tuple में किसी value की **position** आमतौर पर उसे meaning देती है, जबकि list आमतौर पर values का सिर्फ एक ordered sequence होती है।
+नीचे दिए गए सभी उदाहरणों में, जब तक स्पष्ट रूप से न बताया गया हो, **Python 3** माना गया है।\
+Python 3 में `range()` एक iterable object लौटाता है (Python 2 में `xrange()` के समान)।\
+**tuple** और **list** के बीच अंतर यह है कि tuple में किसी value की **position** आमतौर पर उसका अर्थ बताती है, जबकि list आमतौर पर values का केवल एक ordered sequence होता है।
 
-### Main operations
+### मुख्य operations
 
-किसी number को raise करने के लिए आप use करते हैं: `3**2` (not `3^2`)\
-`2/3 == 0.666666...` Python 3 में, जबकि `2//3 == 0` integer division करता है।\
+किसी number को power में raise करने के लिए उपयोग करें: `3**2` (`3^2` नहीं)\
+Python 3 में `2/3 == 0.666666...`, जबकि `2//3 == 0` integer division करता है।\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -43,13 +43,13 @@
 `sum([1, 2, 3]) == 6`\
 `sorted([1, 43, 5, 3, 21, 4]) == [1, 3, 4, 5, 21, 43]`
 
-**Join chars**\
+**Characters को join करना**\
 `3 * 'a' == 'aaa'`\
 `'a' + 'b' == 'ab'`\
 `'a' + str(3) == 'a3'`\
 `[1, 2, 3] + [4, 5] == [1, 2, 3, 4, 5]`
 
-**Parts of a list / string**\
+**list / string के parts**\
 `'abc'[0] == 'a'`\
 `'abc'[-1] == 'c'`\
 `'abc'[1:3] == 'bc'`\
@@ -88,7 +88,7 @@ int.from_bytes(b"\x41\x42\x43", "big") == 0x414243
 "admin".encode() == b"admin"
 b"admin".decode() == "admin"
 ```
-### Tuple
+### Tuples
 
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
@@ -121,28 +121,28 @@ month_numbers.update(a)
 mn = month_numbers.copy()  # independent copy
 month_numbers.get('key', 0)  # default value if key does not exist
 ```
-### Set
+### सेट
 
-Sets में कोई repetition नहीं होती।\
+सेट में कोई दोहराव नहीं होता।\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
-`myset.add('a')` --> no change\
+`myset.add('a')` --> कोई बदलाव नहीं\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> if present, remove it; if not, nothing\
-`myset.remove(10)` --> if not present, raises exception\
+`myset.discard(10)` --> यदि मौजूद हो, तो उसे हटाता है; यदि न हो, तो कुछ नहीं करता\
+`myset.remove(10)` --> यदि मौजूद न हो, तो exception उत्पन्न करता है\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
 `myset.difference(myset2)`\
 `myset.symmetric_difference(myset2)`\
-`myset.pop()` --> get an arbitrary element and remove it\
+`myset.pop()` --> कोई भी element प्राप्त करके उसे हटाता है\
 `myset.intersection_update(myset2)`\
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
 
-### Classes
+### क्लासेस
 
-`__lt__` में मौजूद method का उपयोग `sort()` / `sorted()` objects की तुलना करने के लिए करेंगे।
+`__lt__` में मौजूद method का उपयोग `sort()` / `sorted()` द्वारा objects की तुलना करने के लिए किया जाएगा।
 ```python
 import datetime
 
@@ -176,9 +176,9 @@ MITPerson.next_id_num += 1
 def __lt__(self, other):
 return self.id_num < other.id_num
 ```
-### map, zip, filter, lambda, sorted and one-liners
+### map, zip, filter, lambda, sorted और one-liners
 
-**Python 3** में, `map()` और `filter()` iterators लौटाते हैं, इसलिए अगर आप सभी values को एक साथ print करना चाहते हैं तो उन्हें `list()` से convert करें।
+**Python 3** में, `map()` और `filter()` iterators return करते हैं, इसलिए यदि आप सभी values को एक साथ print करना चाहते हैं, तो उन्हें `list()` से convert करें।
 
 **Map** `[f(x) for x in iterable]` जैसा है:
 ```python
@@ -188,14 +188,14 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-**zip** तब रुकता है जब छोटा iterable रुकता है:
+**zip** छोटी iterable के समाप्त होते ही रुक जाता है:
 ```python
 for f, b in zip(foo, bar):
 print(f, b)
 ```
-**Lambda** का उपयोग एक function define करने के लिए किया जाता है:\
-`(lambda x, y: x + y)(5, 3) == 8` --> lambda का उपयोग एक simple function के रूप में करें\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> sort करने के लिए lambda का उपयोग करें\
+**Lambda** का उपयोग function को define करने के लिए किया जाता है:\
+`(lambda x, y: x + y)(5, 3) == 8` --> use lambda as a simple function\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> use lambda to sort\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
 ```python
@@ -219,7 +219,7 @@ my_car.crash()  # Boom!
 ```
 `mult1 = [x for x in [1, 2, 3, 4, 5, 6, 7, 8, 9] if x % 3 == 0]`
 
-### Exceptions
+### अपवाद
 ```python
 def divide(x, y):
 try:
@@ -235,16 +235,16 @@ print("executing finally clause in any case")
 ```
 ### Assert()
 
-यदि शर्त false है, तो string print होगी।\
-ध्यान रखें कि `assert` statements को `python -O` के साथ disable किया जा सकता है, इसलिए उन्हें access control या input validation के लिए use न करें।
+यदि condition false है, तो string print की जाएगी।\
+ध्यान रखें कि `assert` statements को `python -O` से disable किया जा सकता है, इसलिए इन्हें access control या input validation के लिए उपयोग न करें।
 ```python
 def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
 assert len(grades) == len(weights), 'wrong number of grades'
 ```
-### जनरेटर, yield
+### Generators, yield
 
-एक generator, सब कुछ एक साथ return करने के बजाय, values को एक-एक करके **yields** करता है। यह huge wordlists, bruteforcers या large responses के लिए बहुत उपयोगी है।
+एक generator, सब कुछ एक साथ return करने के बजाय, values को एक-एक करके **yields** करता है। यह बहुत बड़ी wordlists, bruteforcers या बड़ी responses के लिए बहुत उपयोगी है।
 ```python
 def my_gen(n):
 yield n
@@ -255,7 +255,7 @@ yield n + 1
 `next(g) == 7`\
 `next(g)` --> `StopIteration`
 
-### Regular Expressions
+### रेगुलर एक्सप्रेशन
 ```python
 import re
 
@@ -277,8 +277,8 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 
 **Options:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> dot को newline से match करने की अनुमति दें\
-`re.search(pat, string, re.MULTILINE)` --> `^` और `$` को अलग-अलग lines में match करने की अनुमति दें
+`re.search(pat, string, re.DOTALL)` --> dot को newline से match करने की अनुमति देता है\
+`re.search(pat, string, re.MULTILINE)` --> `^` और `$` को अलग-अलग lines में match करने की अनुमति देता है
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -297,14 +297,14 @@ list(product([1, 2, 3], [3, 4]))
 list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
-**परमुटेशन्स**\
-`from itertools import permutations` --> हर संभव arrangement
+**permutations**\
+`from itertools import permutations` --> हर संभव क्रम व्यवस्था
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
 ```
-**संयोजन**\
-`from itertools import combinations` --> बिना पुनरावृत्ति के सभी संभव संयोजन
+**combinations**\
+`from itertools import combinations` --> बिना पुनरावृत्ति के सभी संभावित combinations
 ```python
 list(combinations('123', 2))
 # [('1', '2'), ('1', '3'), ('2', '3')]
@@ -316,14 +316,14 @@ list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> Python 3.12+ में उपलब्ध, बड़े bruteforce candidate lists या IOC files को chunk करने के लिए उपयोगी
+`from itertools import batched` --> Python 3.12+ में उपलब्ध, बड़ी bruteforce candidate lists या IOC files को chunks में बाँटने के लिए उपयोगी
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
-### डेकोरेटर्स
+### Decorators
 
-ऐसा डेकोरेटर जो किसी function को execute होने में लगने वाले समय को मापता है:
+Decorator जो किसी function को execute होने में लगने वाले समय को मापता है:
 ```python
 from functools import wraps
 import time
@@ -345,7 +345,7 @@ return wrapper
 def decorated_func():
 print("Decorated func!")
 ```
-यदि आप इसे चलाते हैं, तो आप कुछ इस तरह देखेंगे:
+यदि आप इसे चलाते हैं, तो आपको निम्न जैसा कुछ दिखाई देगा:
 ```text
 Let's call our decorated function
 Decorated func!
@@ -364,7 +364,7 @@ for name in files:
 if name.endswith((".py", ".env", ".bak")):
 print(root / name)
 ```
-**कमांड्स को सुरक्षित रूप से Spawn करें** (`shell=False` by default आमतौर पर वही होता है जो आप चाहते हैं):
+**कमांड्स को सुरक्षित रूप से Spawn करें** (`shell=False` डिफ़ॉल्ट रूप से आमतौर पर वही है जो आपको चाहिए):
 ```python
 import subprocess
 
@@ -376,12 +376,12 @@ check=True,
 )
 print(cp.stdout)
 ```
-यदि आपको **ज़रूर** एक shell command बनानी हो, तो पहले attacker-controlled प्रत्येक token को quote करें:
+यदि आपको **अनिवार्य रूप से** shell command बनानी पड़े, तो पहले attacker-controlled प्रत्येक token को quote करें:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
-**टेम्पररी फाइल्स / dirs** (hardcoded `/tmp/foo` paths से ज़्यादा सुरक्षित):
+**Temporary files / dirs** (hardcoded `/tmp/foo` paths से अधिक सुरक्षित):
 ```python
 import tempfile
 from pathlib import Path
@@ -391,11 +391,11 @@ out = Path(tmp) / "loot.txt"
 out.write_text("secret\n")
 print(out.read_text())
 ```
-HTTP automation के लिए, [this other page about Python web requests](web-requests.md) देखें।
+HTTP automation के लिए, [Python web requests के बारे में यह अन्य पेज](web-requests.md) देखें।
 
-### Archive extraction gotchas (important for tooling and file parsers)
+### Archive extraction से जुड़ी महत्वपूर्ण समस्याएं (tooling और file parsers के लिए)
 
-**Python 3.14** से शुरू होकर, `tarfile.extract()` / `extractall()` डिफ़ॉल्ट रूप से अधिक सुरक्षित `data` filter का उपयोग करते हैं। पुराने Python versions में, attacker-controlled archives को handle करते समय आपको इसे explicitly set करना चाहिए।
+**Python 3.14** से शुरू होकर, `tarfile.extract()` / `extractall()` default रूप से अधिक सुरक्षित `data` filter का उपयोग करते हैं। पुराने Python versions में attacker-controlled archives को संभालते समय इसे स्पष्ट रूप से set करना चाहिए।<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 import tarfile
 import tempfile
@@ -404,7 +404,7 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-`filter="data"` के साथ भी, untrusted archives को एक fresh temporary directory में extract करें और यह validate करें कि क्या लिखा गया है, उससे पहले कि किसी भी interesting जगह files move की जाएँ।
+`filter="data"` के साथ भी, untrusted archives को एक नई temporary directory में extract करें और फ़ाइलों को किसी महत्वपूर्ण स्थान पर ले जाने से पहले लिखी गई सामग्री को validate करें।
 
 `zipfile.Path` अलग है: यह आपके लिए **filenames को sanitize नहीं करता**, इसलिए attacker-controlled ZIP members को extract करने से पहले paths को validate करें:
 ```python
@@ -421,14 +421,14 @@ zf.extract(info, base)
 ```
 ### याद रखने योग्य Dangerous primitives
 
-- `eval()` / `exec()` **sandbox** नहीं हैं।
-- `ast.literal_eval()` Python code execute नहीं करता, लेकिन attacker-controlled input के साथ इसे memory / CPU denial of service के लिए फिर भी abuse किया जा सकता है।
-- `pickle.loads()` **secure** नहीं है; कभी भी attacker-controlled bytes को unpickle न करें।
-- और गहरे offensive tricks के लिए, [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) और [Python deserializations](../../pentesting-web/deserialization/README.md) देखें।
+- `eval()` / `exec()` **sandboxes** नहीं हैं।
+- `ast.literal_eval()` Python code execute नहीं करता, लेकिन attacker-controlled input के साथ memory / CPU denial of service के लिए इसका दुरुपयोग किया जा सकता है।
+- `pickle.loads()` **secure नहीं है**; attacker-controlled bytes को कभी भी unpickle न करें।
+- अधिक गहरी offensive tricks के लिए [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) और [Python deserializations](../../pentesting-web/deserialization/README.md) देखें।
 
 ## References
 
-- [Python tarfile docs](https://docs.python.org/3/library/tarfile.html)
-- [PEP 706 - Filter for tarfile.extractall](https://peps.python.org/pep-0706/)
+- [1] [Python tarfile docs](https://docs.python.org/3/library/tarfile.html)
+- [2] [PEP 706 – Filter for tarfile.extractall()](https://peps.python.org/pep-0706/)
 
 {{#include ../../banners/hacktricks-training.md}}

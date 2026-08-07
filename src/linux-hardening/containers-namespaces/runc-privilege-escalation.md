@@ -2,10 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic information
+## मूल जानकारी
 
-यदि आप **runc** के बारे में अधिक जानना चाहते हैं, तो निम्नलिखित page देखें:
-
+यदि आप **runc** के बारे में अधिक जानना चाहते हैं, तो निम्नलिखित पेज देखें:
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -13,7 +12,7 @@
 
 ## PE
 
-यदि आपको पता चलता है कि host में `runc` installed है, तो आप **host के root / folder को mount करके एक container run** करने में सक्षम हो सकते हैं।
+यदि आपको पता चलता है कि host में `runc` installed है, तो आप **host के root / folder को mount करके एक container run कर सकते हैं**।
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -38,6 +37,6 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> यह हमेशा काम नहीं करेगा क्योंकि runc का default operation root के रूप में चलना है, इसलिए इसे unprivileged user के रूप में चलाना काम नहीं कर सकता (जब तक आपके पास rootless configuration न हो)। rootless configuration को default बनाना सामान्यतः अच्छा विचार नहीं है, क्योंकि rootless containers के अंदर काफी ऐसी restrictions होती हैं जो rootless containers के बाहर लागू नहीं होतीं।
+> यह हमेशा काम नहीं करेगा, क्योंकि runc का default operation root के रूप में चलना है। इसलिए इसे unprivileged user के रूप में चलाना संभव नहीं है (जब तक आपके पास rootless configuration न हो)। rootless configuration को default बनाना आम तौर पर अच्छा विचार नहीं है, क्योंकि rootless containers के अंदर कुछ काफी restrictions होती हैं, जो rootless containers के बाहर लागू नहीं होतीं।
 
 {{#include ../../banners/hacktricks-training.md}}
