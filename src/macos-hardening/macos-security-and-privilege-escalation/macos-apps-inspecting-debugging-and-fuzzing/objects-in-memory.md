@@ -57,7 +57,7 @@ uintptr_t requiredAlignment; // Or in _kCFRuntimeRequiresAlignment in the .versi
 
 ### Sezioni di memoria utilizzate
 
-La maggior parte dei dati utilizzati dal runtime Objective-C cambierà durante l'esecuzione; pertanto, utilizza un certo numero di sezioni della famiglia di segmenti Mach-O `__DATA` in memoria. Storicamente, queste includevano:
+La maggior parte dei dati utilizzati dal runtime di Objective-C cambia durante l'esecuzione; pertanto, utilizza diverse sezioni della famiglia di segmenti Mach-O `__DATA` in memoria. Storicamente queste includevano:
 
 - `__objc_msgrefs` (`message_ref_t`): Riferimenti ai messaggi
 - `__objc_ivar` (`ivar`): Variabili di istanza
@@ -76,16 +76,16 @@ La maggior parte dei dati utilizzati dal runtime Objective-C cambierà durante l
 
 Utilizza inoltre alcune sezioni del segmento `__TEXT` per memorizzare costanti:
 
-- `__objc_methname` (C‑String): Nomi dei metodi
-- `__objc_classname` (C‑String): Nomi delle classi
-- `__objc_methtype` (C‑String): Tipi dei metodi
+- `__objc_methname` (C-String): Nomi dei metodi
+- `__objc_classname` (C-String): Nomi delle classi
+- `__objc_methtype` (C-String): Tipi dei metodi
 
-Le versioni moderne di macOS/iOS (soprattutto su Apple Silicon) collocano inoltre i metadata Objective-C/Swift in:
+Le versioni moderne di macOS/iOS (specialmente su Apple Silicon) collocano inoltre i metadata di Objective-C/Swift in:
 
-- `__DATA_CONST`: metadata Objective-C immutabili che possono essere condivisi in sola lettura tra i processi (ad esempio, molti elenchi `__objc_*` ora si trovano qui).
-- `__AUTH` / `__AUTH_CONST`: segmenti contenenti puntatori che devono essere autenticati al caricamento o al momento dell'utilizzo su arm64e (Pointer Authentication). In `__AUTH_CONST` sarà inoltre possibile trovare `__auth_got` invece dei soli `__la_symbol_ptr`/`__got` legacy. Quando si esegue instrumentation o hooking, è necessario considerare sia le entry `__got` sia quelle `__auth_got` nei binary moderni.
+- `__DATA_CONST`: metadata Objective-C immutabili che possono essere condivisi in sola lettura tra i processi (ad esempio, molti elenchi `__objc_*` si trovano ora qui).
+- `__AUTH` / `__AUTH_CONST`: segmenti contenenti puntatori che devono essere autenticati al caricamento o durante l'utilizzo su arm64e (Pointer Authentication). In `__AUTH_CONST` si troverà anche `__auth_got`, invece dei soli `__la_symbol_ptr`/`__got` legacy. Quando si esegue strumentazione o hooking, è necessario considerare sia le entry `__got` sia quelle `__auth_got` nei binary moderni.
 
-Per informazioni di base sulla pre-ottimizzazione di dyld (ad esempio, l'unificazione dei selector e la precomputazione di classi/protocolli) e sul motivo per cui molte di queste sezioni sono "già corrette" quando provengono dalla shared cache, consultare i sorgenti Apple di `objc-opt` e le note sulla dyld shared cache. Ciò influisce su dove e come è possibile patchare i metadata a runtime.
+Per informazioni di base sulla pre-ottimizzazione di dyld (ad esempio, l'unificazione dei selector e la precomputazione di classi/protocolli) e sul motivo per cui molte di queste sezioni sono "già corrette" quando provengono dalla shared cache, consulta i sorgenti Apple di `objc-opt` e le note sulla shared cache di dyld. Questo influisce su dove e come è possibile patchare i metadata durante il runtime.
 
 {{#ref}}
 ../macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md
@@ -93,7 +93,7 @@ Per informazioni di base sulla pre-ottimizzazione di dyld (ad esempio, l'unifica
 
 ### Codifica dei tipi
 
-Objective-C utilizza il name mangling per codificare i tipi dei selector e delle variabili, sia semplici sia complessi:
+Objective-C utilizza il mangling per codificare i tipi dei selector e delle variabili, sia semplici sia complessi:
 
 - I tipi primitivi utilizzano la prima lettera del tipo: `i` per `int`, `c` per `char`, `l` per `long`... e utilizzano la lettera maiuscola quando il tipo è unsigned (`L` per `unsigned long`).
 - Gli altri tipi di dati utilizzano altre lettere o simboli, come `q` per `long long`, `b` per i bitfield, `B` per i booleani, `#` per le classi, `@` per `id`, `*` per `char *`, `^` per i puntatori generici e `?` per i tipi non definiti.
@@ -105,7 +105,7 @@ Objective-C utilizza il name mangling per codificare i tipi dei selector e delle
 ```
 Il selector sarebbe `processString:withOptions:andError:`
 
-#### Type Encoding
+#### Codifica dei tipi
 
 - `id` è codificato come `@`
 - `char *` è codificato come `*`
@@ -116,18 +116,18 @@ La codifica completa del tipo per il metodo è:
 ```
 #### Analisi dettagliata
 
-1. Return Type (`NSString *`): Codificato come `@` con lunghezza 24
-2. `self` (istanza dell'oggetto): Codificato come `@`, all'offset 0
-3. `_cmd` (selector): Codificato come `:`, all'offset 8
-4. Primo argomento (`char * input`): Codificato come `*`, all'offset 16
-5. Secondo argomento (`NSDictionary * options`): Codificato come `@`, all'offset 20
-6. Terzo argomento (`NSError ** error`): Codificato come `^@`, all'offset 24
+1. Tipo restituito (`NSString *`): codificato come `@` con lunghezza 24
+2. `self` (istanza dell'oggetto): codificato come `@`, all'offset 0
+3. `_cmd` (selector): codificato come `:`, all'offset 8
+4. Primo argomento (`char * input`): codificato come `*`, all'offset 16
+5. Secondo argomento (`NSDictionary * options`): codificato come `@`, all'offset 20
+6. Terzo argomento (`NSError ** error`): codificato come `^@`, all'offset 24
 
-Con lo selector e l'encoding puoi ricostruire il metodo.
+Con il selector e l'encoding è possibile ricostruire il metodo.
 
 ### Classi
 
-Le classi in Objective‑C sono struct C con proprietà, puntatori ai metodi, ecc. È possibile trovare la struct `objc_class` nel [**codice sorgente**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html):
+Le classi in Objective‑C sono strutture C con proprietà, puntatori ai metodi, ecc. È possibile trovare la struttura `objc_class` nel [**codice sorgente**](https://opensource.apple.com/source/objc4/objc4-756.2/runtime/objc-runtime-new.h.auto.html):
 ```objectivec
 struct objc_class : objc_object {
 // Class ISA;
@@ -150,7 +150,7 @@ data()->setFlags(set);
 ```
 Questa classe usa alcuni bit del campo `isa` per indicare informazioni sulla classe.
 
-Inoltre, la struct contiene un puntatore alla struct `class_ro_t` memorizzata su disco, che contiene attributi della classe come il suo nome, i base methods, le properties e le instance variables. Durante il runtime viene utilizzata un'ulteriore struttura, `class_rw_t`, contenente puntatori che possono essere modificati, come methods, protocols e properties.
+Inoltre, la struct contiene un puntatore alla struct `class_ro_t` memorizzata su disco, che contiene attributi della classe come il suo nome, i metodi di base, le proprietà e le variabili di istanza. Durante il runtime viene utilizzata un'ulteriore struttura, `class_rw_t`, contenente puntatori che possono essere modificati, come metodi, protocolli e proprietà.
 
 {{#ref}}
 ../macos-basic-objective-c.md
@@ -162,11 +162,11 @@ Inoltre, la struct contiene un puntatore alla struct `class_ro_t` memorizzata su
 
 ### `isa` non-pointer e Pointer Authentication (arm64e)
 
-Sui dispositivi Apple Silicon e nei runtime recenti, l'`isa` di Objective-C non è sempre un raw class pointer. Su arm64e è una struttura packed che può contenere anche un Pointer Authentication Code (PAC). A seconda della piattaforma, può includere campi come `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc` e il class pointer stesso (shifted o signed). Questo significa che il dereferencing diretto dei primi 8 byte di un oggetto Objective-C non restituirà sempre un `Class` pointer valido.<sup>[[2]](#references)</sup>
+Sui dispositivi Apple Silicon e nei runtime recenti, `isa` di Objective-C non è sempre un puntatore raw a una classe. Su arm64e è una struttura packed che può contenere anche un Pointer Authentication Code (PAC). A seconda della piattaforma, può includere campi come `nonpointer`, `has_assoc`, `weakly_referenced`, `extra_rc` e il puntatore alla classe stesso (shifted o signed). Di conseguenza, il dereferencing diretto dei primi 8 byte di un oggetto Objective-C non restituirà sempre un puntatore `Class` valido.<sup>[[2]](#references)</sup>
 
 Note pratiche durante il debugging su arm64e:
 
-- LLDB di solito rimuove per te i bit PAC quando stampa oggetti Objective-C con `po`, ma quando lavori con raw pointers potrebbe essere necessario rimuovere manualmente l'autenticazione:
+- LLDB normalmente rimuove per te i bit PAC quando stampa oggetti Objective-C con `po`, ma quando lavori con puntatori raw potresti dover rimuovere manualmente l'autenticazione:
 
 ```lldb
 (lldb) expr -l objc++ -- #include <ptrauth.h>
@@ -174,20 +174,20 @@ Note pratiche durante il debugging su arm64e:
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)raw)
 ```
 
-- Molti function/data pointers in Mach-O si trovano in `__AUTH`/`__AUTH_CONST` e richiedono l'autenticazione prima dell'uso. Se stai facendo interposing o re-binding (ad esempio in stile fishhook), assicurati di gestire anche `__auth_got` oltre al legacy `__got`.
+- Molti puntatori a funzioni/dati in Mach-O si trovano in `__AUTH`/`__AUTH_CONST` e richiedono l'autenticazione prima dell'uso. Se stai eseguendo interposing o re-binding (ad esempio in stile fishhook), assicurati di gestire anche `__auth_got` oltre al legacy `__got`.
 
-Per un approfondimento sulle garanzie del linguaggio/ABI e sugli intrinsics `<ptrauth.h>` disponibili da Clang/LLVM, consulta il riferimento alla fine di questa pagina.<sup>[[1]](#references)</sup>
+Per un'analisi approfondita delle garanzie del linguaggio/ABI e degli intrinsic `<ptrauth.h>` disponibili da Clang/LLVM, consulta il riferimento alla fine di questa pagina.<sup>[[1]](#references)</sup>
 
 ### Oggetti tagged pointer
 
-Alcune classi Foundation evitano l'heap allocation codificando il payload dell'oggetto direttamente nel valore del pointer (tagged pointers). Il rilevamento varia in base alla piattaforma (ad esempio, il most-significant bit su arm64 e il least-significant bit su macOS x86_64). Gli oggetti tagged non hanno un'`isa` regolare memorizzata in memoria; il runtime risolve la classe a partire dai tag bits.<sup>[[2]](#references)</sup> Quando ispezioni valori `id` arbitrari:
+Alcune classi Foundation evitano l'allocazione sull'heap codificando direttamente il payload dell'oggetto nel valore del puntatore (tagged pointers). Il rilevamento varia in base alla piattaforma (ad esempio, il bit più significativo su arm64 e quello meno significativo su macOS x86_64). Gli oggetti tagged non hanno un `isa` regolare memorizzato in memoria; il runtime risolve la classe a partire dai tag bit.<sup>[[2]](#references)</sup> Quando esamini valori `id` arbitrari:
 
-- Usa le runtime APIs invece di accedere direttamente al campo `isa`: `object_getClass(obj)` / `[obj class]`.
-- In LLDB, `po (id)0xADDR` stamperà correttamente le tagged pointer instances perché il runtime viene consultato per risolvere la classe.
+- Usa le API del runtime invece di accedere direttamente al campo `isa`: `object_getClass(obj)` / `[obj class]`.
+- In LLDB, `po (id)0xADDR` stamperà correttamente le istanze tagged pointer perché il runtime viene consultato per risolvere la classe.
 
-### Swift heap objects e metadata
+### Oggetti Swift nell'heap e metadata
 
-Le pure Swift classes sono anch'esse oggetti con un header che punta ai metadata di Swift (non all'`isa` di Objective-C). Per fare introspection su processi Swift attivi senza modificarli puoi usare `swift-inspect` della Swift toolchain, che sfrutta la Remote Mirror library per leggere i runtime metadata:
+Le classi Swift pure sono anch'esse oggetti con un header che punta ai metadata Swift (non a `isa` di Objective-C). Per effettuare l'introspection di processi Swift attivi senza modificarli puoi usare `swift-inspect` della toolchain Swift, che sfrutta la libreria Remote Mirror per leggere i metadata del runtime:
 ```bash
 # Xcode toolchain (or Swift.org toolchain) provides swift-inspect
 swift-inspect dump-raw-metadata <pid-or-name>
@@ -195,20 +195,20 @@ swift-inspect dump-arrays <pid-or-name>
 # On Darwin additionally:
 swift-inspect dump-concurrency <pid-or-name>
 ```
-Questo è molto utile per mappare gli oggetti nell'heap Swift e le conformità ai protocolli durante il reversing di app miste Swift/ObjC.
+Questo è molto utile per mappare gli oggetti Swift nell'heap e le conformità ai protocolli durante il reverse engineering di app miste Swift/ObjC.
 
 ---
 
-## Cheatsheet per l'ispezione del runtime (LLDB / Frida)
+## Cheat sheet per l'ispezione del runtime (LLDB / Frida)
 
 ### LLDB
 
-- Stampa l'oggetto o la classe da un raw pointer:
+- Stampa l'oggetto o la classe a partire da un raw pointer:
 ```lldb
 (lldb) expr -l objc++ -O -- (id)0x0000000101234560
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)0x0000000101234560)
 ```
-- Ispeziona la classe Objective-C da un puntatore a `self` del metodo di un oggetto in un breakpoint:
+- Ispeziona la classe Objective-C da un puntatore al `self` del metodo di un oggetto in un breakpoint:
 ```lldb
 (lldb) br se -n '-[NSFileManager fileExistsAtPath:]'
 (lldb) r
@@ -216,22 +216,22 @@ Questo è molto utile per mappare gli oggetti nell'heap Swift e le conformità a
 (lldb) po (id)$x0                 # self
 (lldb) expr -l objc++ -O -- (Class)object_getClass((id)$x0)
 ```
-- Esegui il dump delle sezioni che contengono metadati Objective-C (nota: molte si trovano ora in `__DATA_CONST` / `__AUTH_CONST`):
+- Dump delle sezioni che contengono metadati Objective-C (nota: molte si trovano ora in `__DATA_CONST` / `__AUTH_CONST`):
 ```lldb
 (lldb) image dump section --section __DATA_CONST.__objc_classlist
 (lldb) image dump section --section __DATA_CONST.__objc_selrefs
 (lldb) image dump section --section __AUTH_CONST.__auth_got
 ```
-- Leggi la memoria di un oggetto di una classe nota per passare a `class_ro_t` / `class_rw_t` durante il reverse engineering degli elenchi di metodi:
+- Leggi la memoria di un oggetto di una classe nota per passare a `class_ro_t` / `class_rw_t` durante il reversing delle method lists:
 ```lldb
 (lldb) image lookup -r -n _OBJC_CLASS_$_NSFileManager
 (lldb) memory read -fx -s8 0xADDRESS_OF_CLASS_OBJECT
 ```
-### Frida (Objective-C e Swift)
+### Frida (Objective‑C e Swift)
 
-Frida fornisce bridge runtime di alto livello, molto utili per scoprire e strumentare oggetti live senza simboli:
+Frida fornisce bridge runtime di alto livello, molto utili per individuare e strumentare oggetti attivi senza simboli:
 
-- Enumerare classi e metodi, risolvere i nomi effettivi delle classi a runtime e intercettare i selettori Objective-C:
+- Enumerare classi e metodi, risolvere i nomi effettivi delle classi a runtime e intercettare i selector Objective‑C:
 ```js
 if (ObjC.available) {
 // List a class' methods
@@ -249,13 +249,14 @@ console.log('fileExistsAtPath:', this.path, '=>', retval);
 });
 }
 ```
-- Swift bridge: enumerare i tipi Swift e interagire con le istanze Swift (richiede una versione recente di Frida; molto utile sui target Apple Silicon).
+- Swift bridge: enumera i tipi Swift e interagisci con le istanze Swift (richiede una versione recente di Frida; molto utile sui target Apple Silicon).
 
 ---
 
 ## Riferimenti
 
-- [1] [Clang/LLVM: Pointer Authentication and the ptrauth.h intrinsics (arm64e ABI)](https://clang.llvm.org/docs/PointerAuthentication.html)
+
+- [1] [Clang/LLVM: Pointer Authentication e gli intrinsic ptrauth.h (ABI arm64e)](https://clang.llvm.org/docs/PointerAuthentication.html)
 - [2] [Header del runtime objc di Apple - objc-object.h (tagged pointers, non-pointer isa, ecc.)](https://opensource.apple.com/source/objc4/objc4-818.2/runtime/objc-object.h.auto.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

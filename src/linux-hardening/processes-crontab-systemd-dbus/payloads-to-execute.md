@@ -49,9 +49,9 @@ return 0;
 ### File comuni
 
 - Aggiungere un utente con password a _/etc/passwd_
-- Cambiare la password in _/etc/shadow_
+- Cambiare la password all'interno di _/etc/shadow_
 - Aggiungere un utente ai sudoers in _/etc/sudoers_
-- Abusare di docker tramite il docker socket, solitamente in _/run/docker.sock_ o _/var/run/docker.sock_
+- Sfruttare Docker tramite il docker socket, solitamente in _/run/docker.sock_ o _/var/run/docker.sock_
 
 ### Sovrascrivere una libreria
 
@@ -104,11 +104,11 @@ Ora, chiamando semplicemente **`/bin/su`**, otterrai una shell come root.
 
 Puoi fare in modo che root esegua qualcosa?
 
-### **www-data to sudoers**
+### **www-data in sudoers**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
-### **Cambia la password di root**
+### **Modifica la password di root**
 ```bash
 echo "root:hacked" | chpasswd
 ```
