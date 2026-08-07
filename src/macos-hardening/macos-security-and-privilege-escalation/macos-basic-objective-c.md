@@ -5,21 +5,21 @@
 ## Objective-C
 
 > [!CAUTION]
-> Objective-C ile yazılmış programların, [Mach-O ikili dosyalarına](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) **derlendiğinde** sınıf bildirimlerini **koruduğunu** unutmayın. Bu tür sınıf bildirimleri **şunları içerir**:
+> Objective-C ile yazılmış programların, [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) içine **derlendiğinde** sınıf bildirimlerini **koruduğunu** unutmayın. Bu sınıf bildirimleri şunların adını ve türünü **içerir**:
 
-- Sınıf adı
+- Sınıf
 - Sınıf yöntemleri
-- Sınıf örnek değişkenleri
+- Sınıf instance değişkenleri
 
-Bu bilgileri [**class-dump**](https://github.com/nygard/class-dump) kullanarak alabilirsiniz:
+Bu bilgileri [**class-dump**](https://github.com/nygard/class-dump) kullanarak elde edebilirsiniz:
 ```bash
 class-dump Kindle.app
 ```
-Bu isimlerin, ikili dosyanın tersine mühendisliğini daha zor hale getirmek için obfuscate edilebileceğini unutmayın.
+Bu isimlerin, binary dosyanın reverse işlemini zorlaştırmak için obfuscate edilebileceğini unutmayın.
 
-## Sınıflar, Yöntemler & Nesneler
+## Class'lar, Method'lar ve Object'ler
 
-### Arayüz, Özellikler & Yöntemler
+### Interface, Property'ler ve Method'lar
 ```objectivec
 // Declare the interface of the class
 @interface MyVehicle : NSObject
@@ -50,9 +50,9 @@ self.numberOfWheels += value;
 
 @end
 ```
-### **Nesne & Metod Çağrısı**
+### **Object & Call Method**
 
-Bir sınıfın örneğini oluşturmak için **`alloc`** metodu çağrılır, bu **her bir özellik için bellek ayırır** ve bu tahsisatları **sıfırlar**. Ardından **`init`** çağrılır, bu da **özellikleri gerekli değerlere** **başlatır**.
+Bir class instance'ı oluşturmak için, her **property** için **memory allocate eden** ve bu allocation'ları **zero**'layan **`alloc`** method'u çağrılır. Ardından, **property**'leri **gerekli değerlerle initialize eden** **`init`** çağrılır.
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -64,15 +64,15 @@ MyVehicle *newVehicle = [MyVehicle new];
 // [myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]
 [newVehicle addWheels:4];
 ```
-### **Sınıf Yöntemleri**
+### **Sınıf Metotları**
 
-Sınıf yöntemleri, örnek yöntemleriyle kullanılan **eksi işareti** (-) yerine **artı işareti** (+) ile tanımlanır. **NSString** sınıf yöntemi **`stringWithString`** gibi:
+Sınıf metotları, instance metotlarıyla kullanılan kısa çizgi (-) yerine **artı işareti** (+) ile tanımlanır. Örneğin **NSString** sınıf metodu **`stringWithString`**:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
 ### Setter & Getter
 
-Özellikleri **ayarlamak** ve **almak** için, bunu **nokta notasyonu** ile veya bir **metodu çağırıyormuş** gibi yapabilirsiniz:
+**properties** değerlerini **set** etmek ve **get** etmek için bunu **dot notation** ile veya **method çağırıyormuşsunuz** gibi yapabilirsiniz:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -82,20 +82,20 @@ newVehicle.numberOfWheels = 2;
 NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
-### **Örnek Değişkenler**
+### **Instance Variables**
 
-Setter ve getter yöntemlerine alternatif olarak, örnek değişkenleri kullanabilirsiniz. Bu değişkenler, özelliklerle aynı isme sahiptir ancak "\_" ile başlar:
+Setter & getter methodları yerine instance variables kullanabilirsiniz. Bu değişkenler, başlarında "\_" olması dışında property'lerle aynı ada sahiptir:
 ```objectivec
 - (void)makeLongTruck {
 _numberOfWheels = +10000;
 NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 }
 ```
-### Protokoller
+### Protocols
 
-Protokoller, (özellikler olmadan) yöntem bildirimleri kümesidir. Bir protokolü uygulayan bir sınıf, bildirilen yöntemleri uygular.
+Protocols, method bildirimlerinden oluşan yapılardır (property'ler içermez). Bir protocol'ü implement eden class, bildirilen method'ları implement eder.
 
-2 tür yöntem vardır: **zorunlu** ve **isteğe bağlı**. **Varsayılan** olarak bir yöntem **zorunludur** (ancak bunu **`@required`** etiketiyle de belirtebilirsiniz). Bir yöntemin isteğe bağlı olduğunu belirtmek için **`@optional`** kullanın.
+2 tür method vardır: **mandatory** ve **optional**. **Varsayılan olarak** bir method **mandatory**'dir (ancak bunu **`@required`** tag'iyle de belirtebilirsiniz). Bir method'un optional olduğunu belirtmek için **`@optional`** kullanın.
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -105,7 +105,7 @@ Protokoller, (özellikler olmadan) yöntem bildirimleri kümesidir. Bir protokol
 - (void) method3; //optional
 @end
 ```
-### Hepsi Bir Arada
+### Hepsi bir arada
 ```objectivec
 // gcc -framework Foundation test_obj.m -o test_obj
 #import <Foundation/Foundation.h>
@@ -157,18 +157,18 @@ NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
 ```
 ### Temel Sınıflar
 
-#### Dize
+#### String
 ```objectivec
 // NSString
 NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-Temel sınıflar **değişmezdir**, bu nedenle mevcut bir dizeye bir dize eklemek için **yeni bir NSString oluşturulması gerekir**.
+Temel sınıflar **değiştirilemez** olduğundan, mevcut bir string'e ekleme yapmak için **yeni bir NSString oluşturulması gerekir**.
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
-Ya da **mutable** bir dize sınıfı da kullanabilirsiniz:
+Ya da **mutable** bir string sınıfı da kullanabilirsiniz:
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
 [mutableString appendString:bookTitle];
@@ -196,7 +196,7 @@ NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:
 NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
-#### Dizi, Küme ve Sözlük
+#### Array, Set'ler ve Dictionary
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -244,7 +244,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 ```
 ### Blocks
 
-Blocks, **nesne gibi davranan fonksiyonlardır** bu nedenle fonksiyonlara geçirilebilir veya **dizilerde** ya da **sözlüklerde** **saklanabilirler**. Ayrıca, **değerler verildiğinde bir değeri temsil edebilirler** bu nedenle lambdalara benzerdir.
+**object gibi davranan function'lardır**; bu nedenle function'lara geçirilebilir veya **array** ya da **dictionary** içinde **saklanabilirler**. Ayrıca, **kendilerine değerler verildiğinde bir değeri temsil edebilirler**; bu yönüyle lambdas'a benzerler.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -257,7 +257,7 @@ return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-Ayrıca, **fonksiyonlarda parametre olarak kullanılacak bir blok türü tanımlamak** da mümkündür:
+Fonksiyonlarda parametre olarak kullanılacak bir **block type** tanımlamak da mümkündür:
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);
@@ -304,7 +304,7 @@ if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
 NSLog(@"Removed successfully");
 }
 ```
-Ayrıca dosyaları **`NSString`** nesneleri yerine **`NSURL`** nesneleri kullanarak yönetmek de mümkündür. Metot adları benzerdir, ancak **`Path`** yerine **`URL`** ile birlikte kullanılır.
+Dosyaları **`NSString`** nesneleri yerine **`NSURL` nesnelerini kullanarak** yönetmek de mümkündür. Method adları benzerdir, ancak **`Path` yerine `URL`** kullanılır.
 ```objectivec
 
 

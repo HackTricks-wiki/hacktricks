@@ -1,23 +1,23 @@
-# macOS Seri Numarası
+# macOS Serial Number
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Temel Bilgiler
 
-2010 sonrası Apple cihazları, her biri belirli bilgileri ileten **12 alfanümerik karakterden** oluşan seri numaralarına sahiptir:
+2010 sonrası Apple cihazlarının seri numaraları, her bölümü belirli bilgiler içeren **12 alfanümerik karakterden** oluşur:
 
-- **İlk 3 Karakter**: **üretim yerini** gösterir.
-- **Karakterler 4 & 5**: **üretim yılı ve haftasını** belirtir.
-- **Karakterler 6'dan 8'e**: Her cihaz için **benzersiz bir tanımlayıcı** olarak hizmet eder.
-- **Son 4 Karakter**: **model numarasını** belirtir.
+- **İlk 3 Karakter**: **Üretim konumunu** belirtir.
+- **4. ve 5. Karakterler**: **Üretim yılını ve haftasını** belirtir.
+- **6. ila 8. Karakterler**: Her cihaz için **benzersiz tanımlayıcı** görevi görür.
+- **Son 4 Karakter**: **Model numarasını** belirtir.
 
-Örneğin, seri numarası **C02L13ECF8J2** bu yapıyı takip eder.
+Örneğin, **C02L13ECF8J2** seri numarası bu yapıyı izler.
 
-### **Üretim Yerleri (İlk 3 Karakter)**
+### **Üretim Konumları (İlk 3 Karakter)**
 
-Belirli kodlar, belirli fabrikaları temsil eder:
+Bazı kodlar belirli fabrikaları temsil eder:
 
-- **FC, F, XA/XB/QP/G8**: ABD'deki çeşitli yerler.
+- **FC, F, XA/XB/QP/G8**: ABD'deki çeşitli konumlar.
 - **RN**: Meksika.
 - **CK**: Cork, İrlanda.
 - **VM**: Foxconn, Çek Cumhuriyeti.
@@ -25,16 +25,16 @@ Belirli kodlar, belirli fabrikaları temsil eder:
 - **MB**: Malezya.
 - **PT/CY**: Kore.
 - **EE/QT/UV**: Tayvan.
-- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Çin'deki farklı yerler.
+- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Çin'deki farklı konumlar.
 - **C0, C3, C7**: Çin'deki belirli şehirler.
-- **RM**: Yenilenmiş cihazlar.
+- **RM**: Refurbished cihazlar.
 
 ### **Üretim Yılı (4. Karakter)**
 
-Bu karakter 'C' (2010'un ilk yarısını temsil eder) ile 'Z' (2019'un ikinci yarısını temsil eder) arasında değişir; farklı harfler farklı yarı yıl dönemlerini gösterir.
+Bu karakter, 'C' (2010'un ilk yarısını temsil eder) ile 'Z' (2019'un ikinci yarısı) arasında değişir; farklı harfler farklı altı aylık dönemleri belirtir.
 
 ### **Üretim Haftası (5. Karakter)**
 
-1-9 rakamları 1-9 haftalarına karşılık gelir. C-Y harfleri (sesli harfler ve 'S' hariç) 10-27 haftalarını temsil eder. Yılın ikinci yarısı için bu sayıya 26 eklenir.
+1-9 rakamları 1-9. haftalara karşılık gelir. Sesli harfler ve 'S' hariç C-Y harfleri 10-27. haftaları temsil eder. Yılın ikinci yarısı için bu sayıya 26 eklenir.
 
 {{#include ../../../banners/hacktricks-training.md}}

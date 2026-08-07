@@ -1,10 +1,10 @@
-# macOS Güvenliği ve Privilege Escalation
+# macOS Security & Privilege Escalation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Temel MacOS
+## Basic MacOS
 
-macOS hakkında bilgi sahibi değilseniz macOS'un temellerini öğrenerek başlamalısınız:
+macOS'a aşina değilseniz macOS'un temellerini öğrenerek başlamalısınız:
 
 - Özel macOS **dosyaları ve izinleri:**
 
@@ -27,14 +27,14 @@ macos-users.md
 macos-applefs.md
 {{#endref}}
 
-- k**ernel** mimarisi
+- **kernel**'ın **mimarisi**
 
 
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- Yaygın macOS **network servisleri ve protokolleri**
+- Yaygın macOS **ağ hizmetleri ve protokolleri**
 
 
 {{#ref}}
@@ -46,7 +46,7 @@ macos-protocols.md
 
 ### MacOS MDM
 
-Şirketlerde **macOS** sistemlerinin bir **MDM ile yönetilmesi** oldukça muhtemeldir. Bu nedenle, saldırganın bakış açısından **bunun nasıl çalıştığını** bilmek ilgi çekicidir:
+Şirketlerde **macOS** sistemleri büyük olasılıkla bir MDM ile **yönetilecektir**. Bu nedenle, saldırgan açısından **bunun nasıl çalıştığını** bilmek ilgi çekicidir:
 
 
 {{#ref}}
@@ -60,7 +60,7 @@ macos-protocols.md
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
-## MacOS Güvenlik Korumaları
+## MacOS Security Protections
 
 
 {{#ref}}
@@ -69,17 +69,17 @@ macos-security-protections/
 
 ## Attack Surface
 
-### Dosya İzinleri
+### File Permissions
 
-**root olarak çalışan bir process**, bir kullanıcı tarafından kontrol edilebilen bir dosyaya **yazarsa**, kullanıcı bunu **privilege escalation** için kötüye kullanabilir.\
+**root olarak çalışan bir process**, bir kullanıcının kontrol edebildiği bir dosyaya **yazarsa**, kullanıcı bunu **privilege escalation** için kötüye kullanabilir.\
 Bu, aşağıdaki durumlarda gerçekleşebilir:
 
 - Kullanılan dosya daha önce bir kullanıcı tarafından oluşturulmuştur (dosyanın sahibi kullanıcıdır)
-- Kullanılan dosya bir grup nedeniyle kullanıcı tarafından yazılabilirdir
-- Kullanılan dosya kullanıcının sahip olduğu bir dizinin içindedir (kullanıcı dosyayı oluşturabilir)
-- Kullanılan dosya root'un sahip olduğu bir dizinin içindedir ancak kullanıcı bir grup nedeniyle bu dizine yazma erişimine sahiptir (kullanıcı dosyayı oluşturabilir)
+- Kullanılan dosya, bir grup nedeniyle kullanıcı tarafından yazılabilirdir
+- Kullanılan dosya, kullanıcıya ait bir dizinin içindedir (kullanıcı dosyayı oluşturabilir)
+- Kullanılan dosya root'a ait bir dizinin içindedir, ancak kullanıcı bir grup nedeniyle üzerinde yazma erişimine sahiptir (kullanıcı dosyayı oluşturabilir)
 
-**root tarafından kullanılacak bir dosya oluşturabilmek**, kullanıcının **içeriğinden yararlanmasına** veya dosyayı başka bir konuma gösterecek **symlink/hardlink**'ler oluşturmasına olanak tanır.
+**root tarafından kullanılacak** bir **dosya oluşturabilmek**, kullanıcının dosyanın **içeriğinden yararlanmasına** veya dosyayı başka bir konuma yönlendirmek için **symlink/hardlink** oluşturmasına olanak tanır.
 
 Bu tür zafiyetler için **zafiyetli `.pkg` installer'larını** kontrol etmeyi unutmayın:
 
@@ -88,9 +88,9 @@ Bu tür zafiyetler için **zafiyetli `.pkg` installer'larını** kontrol etmeyi 
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### Dosya Uzantısı ve URL scheme app handler'ları
+### File Extension & URL scheme app handlers
 
-Dosya uzantıları tarafından kaydedilmiş şüpheli uygulamalar kötüye kullanılabilir ve farklı uygulamalar belirli protokolleri açmak üzere kaydedilebilir.
+Dosya uzantıları tarafından kaydedilen garip uygulamalar kötüye kullanılabilir ve belirli protokolleri açmak için farklı uygulamalar kaydedilebilir.
 
 
 {{#ref}}
@@ -99,17 +99,17 @@ macos-file-extension-apps.md
 
 ## macOS TCC / SIP Privilege Escalation
 
-macOS'ta **uygulamalar ve binary'ler, klasörlere veya ayarlara erişim izinlerine sahip olabilir**; bu da onları diğerlerinden daha ayrıcalıklı hale getirir.
+macOS'ta **uygulamalar ve binary'ler**, kendilerini diğerlerinden daha ayrıcalıklı hâle getiren klasörlere veya ayarlara erişim izinlerine sahip olabilir.
 
-Bu nedenle, bir macOS makinesini başarıyla ele geçirmek isteyen bir saldırganın **TCC ayrıcalıklarını yükseltmesi** (veya ihtiyaçlarına bağlı olarak **SIP'i bypass etmesi**) gerekir.
+Bu nedenle, bir macOS makinesini başarıyla compromise etmek isteyen bir saldırganın **TCC ayrıcalıklarını yükseltmesi** (veya ihtiyaçlarına bağlı olarak **SIP'i bypass etmesi**) gerekir.
 
-Bu ayrıcalıklar genellikle uygulamanın imzalandığı **entitlement**'lar aracılığıyla verilir veya uygulama bazı erişimler talep edebilir; **kullanıcı bunları onayladıktan** sonra bu erişimler **TCC database**'lerinde bulunabilir. Bir process'in bu ayrıcalıkları elde etmesinin başka bir yolu da bu **ayrıcalıklara** sahip bir process'in **child process'i** olmasıdır; çünkü bu ayrıcalıklar genellikle **inherit** edilir.
+Bu ayrıcalıklar genellikle uygulamanın imzalandığı **entitlement'lar** biçiminde verilir veya uygulama bazı erişimler talep etmiş olabilir; **kullanıcı bunları onayladıktan** sonra bu izinler **TCC veritabanlarında** bulunabilir. Bir process'in bu ayrıcalıkları elde etmesinin başka bir yolu da bu **ayrıcalıklara** sahip bir process'in **child process'i** olmasıdır; çünkü bu ayrıcalıklar genellikle **miras alınır**.<sup>[[5]](#references)</sup>
 
-Farklı yöntemlerle [**TCC'de privilege escalation**](macos-security-protections/macos-tcc/index.html#tcc-privesc-and-bypasses) yapmayı, [**TCC'yi bypass etmeyi**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) ve geçmişte [**SIP'in nasıl bypass edildiğini**](macos-security-protections/macos-sip.md#sip-bypasses) öğrenmek için bu bağlantıları takip edin.
+Farklı **TCC'de privilege escalation** yöntemlerini, [**TCC'yi bypass etme**](macos-security-protections/macos-tcc/macos-tcc-bypasses/index.html) yöntemlerini ve geçmişte [**SIP'in nasıl bypass edildiğini**](macos-security-protections/macos-sip.md#sip-bypasses) öğrenmek için bu bağlantıları takip edin.
 
-## macOS Geleneksel Privilege Escalation
+## macOS Traditional Privilege Escalation
 
-Elbette bir red team perspektifinden root'a yükselmeyle de ilgilenmelisiniz. Bazı ipuçları için aşağıdaki gönderiye göz atın:
+Elbette bir red team perspektifinden root'a yükselmekle de ilgilenmelisiniz. Bazı ipuçları için aşağıdaki gönderiyi inceleyin:
 
 
 {{#ref}}
@@ -120,7 +120,7 @@ macos-privilege-escalation.md
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 
-## Referanslar
+## References
 
 - [1] [OS X Incident Response: Scripting and Analysis](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 - [2] [The Art of Mac Malware, Vol. 1 — Analysis (Patrick Wardle)](https://taomm.org/vol1/analysis.html)

