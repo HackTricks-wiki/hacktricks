@@ -1,10 +1,10 @@
-# Πολύ βασικά, αυτό το εργαλείο θα μας βοηθήσει να βρούμε τιμές για μεταβλητές που πρέπει να ικανοποιούν ορισμένες συνθήκες, καθώς ο υπολογισμός τους με το χέρι θα ήταν πολύ ενοχλητικός. Επομένως, μπορείτε να υποδείξετε στο Z3 τις συνθήκες που πρέπει να ικανοποιούν οι μεταβλητές και αυτό θα βρει κάποιες τιμές (αν είναι δυνατό).
+# Πολύ βασικά, αυτό το εργαλείο θα μας βοηθήσει να βρούμε τιμές για μεταβλητές που πρέπει να ικανοποιούν κάποιες συνθήκες, καθώς ο υπολογισμός τους με το χέρι θα ήταν πολύ ενοχλητικός. Επομένως, μπορείτε να υποδείξετε στο Z3 τις συνθήκες που πρέπει να ικανοποιούν οι μεταβλητές και αυτό θα βρει κάποιες τιμές (αν είναι δυνατό).
 
 {{#include ../../banners/hacktricks-training.md}}
 
 # Βασικές λειτουργίες
 
-## Booleans/And/Or/Not
+## Boolean/And/Or/Not
 ```python
 # pip3 install z3-solver
 from z3 import *
@@ -20,7 +20,7 @@ s.add(And(Or(x, y, Not(z)), y))
 s.check() # If response is "sat" then the model is satisfiable, if "unsat" something is wrong
 print(s.model()) # Print valid values to satisfy the model
 ```
-## Ακέραιοι/Απλοποίηση/Πραγματικοί
+## Ints/Simplify/Reals
 ```python
 from z3 import *
 
@@ -44,7 +44,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-## Μοντέλο εκτύπωσης
+## Μοντέλο Εκτύπωσης
 ```python
 from z3 import *
 
@@ -58,9 +58,9 @@ print("x = %s" % m[x])
 for d in m.decls():
 print("%s = %s" % (d.name(), m[d]))
 ```
-# Αριθμητική Μηχανών
+# Αριθμητική Μηχανής
 
-Οι σύγχρονες CPU και οι mainstream γλώσσες προγραμματισμού χρησιμοποιούν αριθμητική σε διανύσματα bit σταθερού μεγέθους. Η αριθμητική μηχανών είναι διαθέσιμη στο Z3Py ως Bit-Vectors.<sup>[[1]](#references)</sup>
+Οι σύγχρονοι CPU και οι mainstream γλώσσες προγραμματισμού χρησιμοποιούν αριθμητική πάνω σε bit-vectors σταθερού μεγέθους. Η αριθμητική μηχανής είναι διαθέσιμη στο Z3Py ως Bit-Vectors.
 ```python
 from z3 import *
 
@@ -75,9 +75,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) # This is False
 ```
-## Signed/Unsigned Αριθμοί
+## Προσημασμένοι/Μη προσημασμένοι Αριθμοί
 
-Το Z3 παρέχει ειδικές signed εκδόσεις των αριθμητικών πράξεων, όταν έχει σημασία αν το bit-vector αντιμετωπίζεται ως signed ή unsigned. Στο Z3Py, οι τελεστές `<`, `<=`, `>`, `>=`, `/`, `%` και `>>` αντιστοιχούν στις signed εκδόσεις. Οι αντίστοιχοι unsigned τελεστές είναι οι `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` και `LShR`.<sup>[[1]](#references)</sup>
+Το Z3 παρέχει ειδικές signed εκδόσεις των αριθμητικών πράξεων, στις οποίες έχει σημασία αν το bit-vector αντιμετωπίζεται ως signed ή unsigned. Στο Z3Py, οι τελεστές `<`, `<=`, `>`, `>=`, `/`, `%` και `>>` αντιστοιχούν στις signed εκδόσεις. Οι αντίστοιχοι unsigned τελεστές είναι οι `ULT`, `ULE`, `UGT`, `UGE`, `UDiv`, `URem` και `LShR`.<sup>[[1]](#references)</sup>
 ```python
 from z3 import *
 
@@ -97,9 +97,9 @@ solve(ULT(x, 0))
 ```
 ## Συναρτήσεις
 
-Οι ερμηνευμένες συναρτήσεις, όπως οι αριθμητικές, έχουν μια προκαθορισμένη τυπική ερμηνεία. Οι μη ερμηνευμένες συναρτήσεις και σταθερές είναι εξαιρετικά ευέλικτες· επιτρέπουν οποιαδήποτε ερμηνεία που είναι συνεπής με τους περιορισμούς πάνω στη συνάρτηση ή τη σταθερά.<sup>[[1]](#references)</sup>
+Οι interpreted συναρτήσεις, όπως οι αριθμητικές, έχουν μια σταθερή τυπική ερμηνεία. Οι uninterpreted συναρτήσεις και σταθερές είναι εξαιρετικά ευέλικτες· επιτρέπουν οποιαδήποτε ερμηνεία που είναι συνεπής με τους περιορισμούς της συνάρτησης ή της σταθεράς.<sup>[[1]](#references)</sup>
 
-Παράδειγμα: η εφαρμογή της `f` δύο φορές στο `x` έχει ως αποτέλεσμα ξανά το `x`, αλλά η εφαρμογή της `f` μία φορά στο `x` είναι διαφορετική από το `x`.
+Παράδειγμα: η εφαρμογή της `f` δύο φορές στο `x` έχει ξανά ως αποτέλεσμα το `x`, αλλά η εφαρμογή της `f` μία φορά στο `x` διαφέρει από το `x`.
 ```python
 from z3 import *
 
@@ -120,11 +120,11 @@ print(s.model())
 ```
 # Μοτίβα προσανατολισμένα στο Reversing
 
-Αν χρειάζεστε πλήρες symbolic execution σε ένα binary αντί να κάνετε χειροκίνητο lifting μόνο λίγων ελέγχων, δείτε το [Angr - Examples](angr/angr-examples.md). Στην πράξη, μια πολύ συνηθισμένη ροή εργασίας είναι η ανάκτηση των σχετικών predicates από τον decompiler/assembly και η ανακατασκευή μόνο των ενδιαφερόντων αριθμητικών ή memory constraints στο Z3.
+Αν χρειάζεστε πλήρες symbolic execution σε ένα binary αντί να κάνετε χειροκίνητο lifting μόνο σε μερικούς ελέγχους, δείτε το [Angr - Examples](angr/angr-examples.md). Στην πράξη, μια πολύ συνηθισμένη ροή εργασίας είναι να ανακτήσετε τα σχετικά predicates από τον decompiler/assembly και να αναδημιουργήσετε στο Z3 μόνο τους ενδιαφέροντες αριθμητικούς ή memory constraints.
 
-## Μοντελοποιήστε αρχικά τα δεδομένα που ελέγχει ο χρήστης ως bytes
+## Μοντελοποιήστε πρώτα τα δεδομένα που ελέγχει ο χρήστης ως bytes
 
-Για reversing, συνήθως είναι προτιμότερο να ξεκινάτε με `BitVec(..., 8)` για κάθε byte εισόδου και, στη συνέχεια, να ανακατασκευάζετε τα words ακριβώς όπως τα δημιουργεί ο στόχος. Αυτό διατηρεί τα wrap-around, τα προβλήματα signedness, τα shifts, τα rotates και τα ζητήματα byte order.
+Για reversing, συνήθως είναι καλύτερο να ξεκινήσετε με `BitVec(..., 8)` για κάθε input byte και στη συνέχεια να αναδημιουργήσετε τα words ακριβώς όπως το κάνει ο στόχος. Αυτό διατηρεί το wrap-around, τα signedness bugs, τα shifts, τα rotates και τα ζητήματα byte-order.<sup>[[2]](#references)</sup>
 ```python
 from z3 import *
 
@@ -142,13 +142,13 @@ print(hex(s.model().eval(dword).as_long()))
 Χρήσιμα helpers κατά τη μετάφραση κώδικα assembly ή decompiler:
 
 - `Concat`: ανακατασκευή τιμών 16/32/64-bit από bytes
-- `Extract`: σύγκριση high/low words ή εξομοίωση masks/shifts
+- `Extract`: σύγκριση των high/low words ή προσομοίωση masks/shifts
 - `ZeroExt` / `SignExt`: σωστή μοντελοποίηση σφαλμάτων zero/sign extension
 - `LShR` / `RotateLeft` / `RotateRight`: συνηθισμένα σε crackmes, hashes και obfuscators
 
-## Μοντελοποίηση πινάκων μνήμης/registers με arrays
+## Μοντελοποιήστε πίνακες μνήμης/registers με arrays
 
-Όταν ένας έλεγχος εξαρτάται από το `buf[i]`, lookup tables ή emulated memory, το `Array` μπορεί να είναι πιο καθαρό από τη δημιουργία δεκάδων ξεχωριστών μεταβλητών.
+Όταν ένας έλεγχος εξαρτάται από το `buf[i]`, lookup tables ή emulated memory, το `Array` μπορεί να είναι πιο καθαρό από τη δημιουργία δεκάδων ξεχωριστών μεταβλητών.<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -165,11 +165,11 @@ s = Solver()
 s.add(word == 0x4241)
 print(s.check())
 ```
-Αυτό είναι ιδιαίτερα χρήσιμο όταν το binary αντιγράφει τιμές στη μνήμη πριν τις επικυρώσει ή όταν θέλετε να μοντελοποιήσετε την επίδραση μερικών operations `mov`/`xor`/`add` χωρίς να εκτελέσετε ολόκληρο το πρόγραμμα.
+Αυτό είναι ιδιαίτερα χρήσιμο όταν το binary αντιγράφει τιμές σε διαφορετικές θέσεις της μνήμης πριν από την επικύρωσή τους ή όταν θέλετε να μοντελοποιήσετε την επίδραση μερικών λειτουργιών `mov`/`xor`/`add` χωρίς να εκτελέσετε ολόκληρο το πρόγραμμα.
 
-## Το incremental solving είναι ιδανικό για branch triage
+## Το incremental solving είναι εξαιρετικό για τη διαλογή διακλαδώσεων
 
-Όταν έχετε ήδη εξαγάγει τους βασικούς περιορισμούς, χρησιμοποιήστε `push()` / `pop()` (ή assumptions) για να ελέγξετε εναλλακτικά branches χωρίς να δημιουργείτε ξανά τον solver κάθε φορά:
+Όταν έχετε ήδη εξαγάγει τους βασικούς περιορισμούς, χρησιμοποιήστε `push()` / `pop()` (ή assumptions) για να δοκιμάσετε εναλλακτικές διακλαδώσεις χωρίς να δημιουργείτε ξανά τον solver κάθε φορά:<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -189,9 +189,9 @@ s.pop()
 ```
 Αυτό είναι χρήσιμο όταν επαναλαμβάνετε path conditions που ανακτήθηκαν από έναν decompiler ή όταν θέλετε να εντοπίσετε γρήγορα ποια σύγκριση κάνει το model `unsat`.
 
-## Βελτιστοποίηση για πιο εύχρηστα payloads
+## Βελτιστοποίηση για καλύτερα payloads
 
-Μόλις ένα model είναι satisfiable, το `Optimize()` μπορεί να σας βοηθήσει να λάβετε μια πιο εύχρηστη λύση: για παράδειγμα, να προτιμάτε printable bytes, να ελαχιστοποιείτε ένα στοιχείο checksum ή να μεγιστοποιείτε κάποια δομή που κάνει το ανακτημένο password ευκολότερο στην πληκτρολόγηση ή την αντιγραφή.
+Μόλις ένα model γίνει satisfiable, το `Optimize()` μπορεί να σας βοηθήσει να λάβετε μια πιο αξιοποιήσιμη λύση: για παράδειγμα, να προτιμά printable bytes, να ελαχιστοποιεί ένα στοιχείο checksum ή να μεγιστοποιεί κάποια δομή που κάνει τον ανακτημένο κωδικό πρόσβασης ευκολότερο στην πληκτρολόγηση ή την αντιγραφή.<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -204,9 +204,9 @@ o.add_soft(And(c >= 0x20, c <= 0x7e))
 print(o.check())
 print(bytes(o.model()[c].as_long() for c in key))
 ```
-## Συμβολοσειρές/ακολουθίες για serials με έντονη μορφοποίηση
+## Strings/sequences για serials με έντονη μορφοποίηση
 
-Αν ο στόχος ελέγχει κυρίως prefixes, suffixes, substrings ή regex-like δομή, οι περιορισμοί `String`/`Seq` μπορεί να είναι ευκολότεροι από τα bit-vectors byte προς byte:
+Αν ο στόχος ελέγχει κυρίως prefixes, suffixes, substrings ή regex-like δομή, οι constraints `String`/`Seq` μπορεί να είναι ευκολότερες από bit-vectors byte-by-byte:<sup>[[3]](#references)</sup>
 ```python
 from z3 import *
 
@@ -217,11 +217,11 @@ s.add(PrefixOf(StringVal("HTB{"), serial))
 s.add(SuffixOf(StringVal("}"), serial))
 s.add(Contains(serial, StringVal("_")))
 ```
-Ωστόσο, μόλις το binary αρχίσει να εκτελεί αριθμητικές πράξεις, rotations, checksums ή casts πάνω σε χαρακτήρες, συνήθως είναι καλύτερο να επιστρέψετε σε 8-bit bit-vectors.
+Ωστόσο, μόλις το binary αρχίσει να εκτελεί αριθμητικές πράξεις, περιστροφές, checksums ή casts σε χαρακτήρες, συνήθως είναι προτιμότερο να επιστρέψετε σε 8-bit bit-vectors.
 
 # Παραδείγματα
 
-## Sudoku solver
+## Επίλυση Sudoku
 ```python
 # 9x9 matrix of integer variables
 X = [[Int("x_%s_%s" % (i+1, j+1)) for j in range(9)]
@@ -271,8 +271,8 @@ print("failed to solve")
 ```
 ## Αναφορές
 
-- [1] [Οδηγός Z3Py - Παραδείγματα (ericpony)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
-- [2] [Οδηγός Z3 (Microsoft)](https://microsoft.github.io/z3guide/)
-- [3] [Προγραμματισμός του Z3 (Stanford)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
+- [1] [Οδηγός Z3Py με Παραδείγματα (ericpony z3py-tutorial)](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
+- [2] [Οδηγός Z3 - Θεωρία Bit-Vectors (Microsoft z3guide)](https://microsoft.github.io/z3guide/)
+- [3] [Προγραμματισμός του Z3 (Nikolaj Bjørner, Leonardo de Moura, Lev Nachmanson, Christoph Wintersteiger)](https://theory.stanford.edu/~nikolaj/programmingz3.html)
 
 {{#include ../../banners/hacktricks-training.md}}

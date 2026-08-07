@@ -2,15 +2,15 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Βασικοί Φορτωτές
+## Basic Payloads
 
-- **Απλή Λίστα:** Απλώς μια λίστα που περιέχει μια καταχώρηση σε κάθε γραμμή
-- **Αρχείο Εκτέλεσης:** Μια λίστα που διαβάζεται κατά την εκτέλεση (δεν φορτώνεται στη μνήμη). Για υποστήριξη μεγάλων λιστών.
-- **Τροποποίηση Περίπτωσης:** Εφαρμόστε κάποιες αλλαγές σε μια λίστα από συμβολοσειρές (Καμία αλλαγή, σε μικρά, σε ΚΕΦΑΛΑΙΑ, σε Κανονικό όνομα - Πρώτο κεφαλαίο και τα υπόλοιπα σε μικρά-, σε Κανονικό Όνομα - Πρώτο κεφαλαίο και τα υπόλοιπα παραμένουν τα ίδια-).
-- **Αριθμοί:** Δημιουργία αριθμών από X έως Y χρησιμοποιώντας βήμα Z ή τυχαία.
-- **Brute Forcer:** Σύνολο χαρακτήρων, ελάχιστο & μέγιστο μήκος.
+- **Simple List:** Απλώς μια λίστα που περιέχει μία καταχώρηση σε κάθε γραμμή
+- **Runtime File:** Μια λίστα που διαβάζεται κατά το runtime (δεν φορτώνεται στη μνήμη). Για υποστήριξη μεγάλων λιστών.
+- **Case Modification:** Εφαρμογή ορισμένων αλλαγών σε μια λίστα από strings (No change, to lower, to UPPER, to Proper name - First capitalized and the rest to lower-, to Proper Name -First capitalized an the rest remains the same-.
+- **Numbers:** Δημιουργία αριθμών από το X έως το Y χρησιμοποιώντας βήμα Z ή τυχαία.
+- **Brute Forcer:** Character set, ελάχιστο και μέγιστο μήκος.
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Φορτωτής για εκτέλεση εντολών και λήψη της εξόδου μέσω DNS αιτημάτων στο burpcollab.
+[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Payload για την εκτέλεση commands και τη λήψη του output μέσω DNS requests προς το burpcollab.
 
 {{#ref}}
 https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e
