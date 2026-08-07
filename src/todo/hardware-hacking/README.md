@@ -1,52 +1,52 @@
-# Donanım Hackleme
+# Hardware Hacking
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## JTAG
 
-JTAG, bir sınır taraması gerçekleştirmeyi sağlar. Sınır taraması, gömülü sınır tarama hücreleri ve her pin için kayıtlar da dahil olmak üzere belirli devreleri analiz eder.
+JTAG, boundary scan gerçekleştirmeye olanak tanır. Boundary scan, her pin için gömülü boundary-scan hücreleri ve register'lar dahil olmak üzere belirli devreleri analiz eder.
 
-JTAG standardı, **sınır taramaları gerçekleştirmek için belirli komutlar** tanımlar, bunlar arasında şunlar bulunur:
+JTAG standardı, **boundary scan gerçekleştirmek için belirli komutlar** tanımlar. Bunlar arasında şunlar bulunur:
 
-- **BYPASS**, belirli bir çipi diğer çiplerden geçmeden test etmenizi sağlar.
-- **SAMPLE/PRELOAD**, cihaz normal çalışma modundayken giren ve çıkan verilerin bir örneğini alır.
+- **BYPASS**, diğer chip'lerden geçme yükü olmadan belirli bir chip'i test etmenize olanak tanır.
+- **SAMPLE/PRELOAD**, cihaz normal çalışma modundayken cihaza giren ve çıkan verilerin bir örneğini alır.
 - **EXTEST**, pin durumlarını ayarlar ve okur.
 
-Ayrıca aşağıdaki gibi diğer komutları da destekleyebilir:
+Ayrıca şu komutlar gibi diğer komutları da destekleyebilir:
 
-- **IDCODE**, bir cihazı tanımlamak için
-- **INTEST**, cihazın iç testleri için
+- Bir cihazı tanımlamak için **IDCODE**
+- Cihazın dahili testi için **INTEST**
 
 JTAGulator gibi bir araç kullandığınızda bu talimatlarla karşılaşabilirsiniz.
 
-### Test Erişim Noktası
+### Test Access Port
 
-Sınır taramaları, dört telli **Test Erişim Noktası (TAP)** testlerini içerir; bu, bir bileşene entegre edilmiş **JTAG test destek** işlevlerine erişim sağlayan genel amaçlı bir porttur. TAP, aşağıdaki beş sinyali kullanır:
+Boundary scan, genel amaçlı bir port olan dört telli **Test Access Port (TAP)** testlerini içerir. Bu port, bir bileşene yerleşik **JTAG test desteği** işlevlerine erişim sağlar. TAP aşağıdaki beş sinyali kullanır:
 
-- Test saat girişi (**TCK**) TCK, TAP denetleyicisinin tek bir eylem gerçekleştireceği sıklığı tanımlayan **saat**tir (diğer bir deyişle, durum makinesinde bir sonraki duruma geçiş).
-- Test modu seçimi (**TMS**) girişi TMS, **sonlu durum makinesini** kontrol eder. Saatin her vuruşunda, cihazın JTAG TAP denetleyicisi TMS pinindeki voltajı kontrol eder. Voltaj belirli bir eşik değerinin altındaysa, sinyal düşük kabul edilir ve 0 olarak yorumlanır; voltaj belirli bir eşik değerinin üzerindeyse, sinyal yüksek kabul edilir ve 1 olarak yorumlanır.
-- Test veri girişi (**TDI**) TDI, **veriyi çipe tarama hücreleri aracılığıyla gönderen** pindir. Her satıcı, bu pin üzerinden iletişim protokolünü tanımlamaktan sorumludur, çünkü JTAG bunu tanımlamaz.
-- Test veri çıkışı (**TDO**) TDO, **veriyi çipten dışarı gönderen** pindir.
-- Test sıfırlama (**TRST**) girişi Opsiyonel TRST, sonlu durum makinesini **bilinen iyi bir duruma** sıfırlar. Alternatif olarak, TMS beş ardışık saat döngüsü boyunca 1'de tutulursa, TRST pininin yaptığı gibi bir sıfırlama tetikler; bu nedenle TRST opsiyoneldir.
+- Test clock input (**TCK**) TCK, TAP controller'ın tek bir eylemi ne sıklıkla gerçekleştireceğini, yani state machine'de bir sonraki duruma ne zaman geçeceğini tanımlayan **clock** sinyalidir.
+- Test mode select (**TMS**) input TMS, **finite state machine**'i kontrol eder. Her clock vuruşunda cihazın JTAG TAP controller'ı TMS pinindeki voltajı kontrol eder. Voltaj belirli bir eşik değerinin altındaysa sinyal low kabul edilir ve 0 olarak yorumlanır; voltaj belirli bir eşik değerinin üzerindeyse sinyal high kabul edilir ve 1 olarak yorumlanır.
+- Test data input (**TDI**) TDI, **scan cells üzerinden chip'e veri gönderen** pindir. JTAG bunu tanımlamadığından her vendor bu pin üzerinden iletişim protokolünü tanımlamaktan sorumludur.
+- Test data output (**TDO**) TDO, **chip'ten veri gönderen** pindir.
+- Test reset (**TRST**) input İsteğe bağlı TRST, finite state machine'i **bilinen ve düzgün bir duruma** sıfırlar. Alternatif olarak TMS beş ardışık clock cycle boyunca 1 seviyesinde tutulursa, TRST pininin yapacağı şekilde reset işlemini başlatır; TRST'nin isteğe bağlı olmasının nedeni budur.
 
-Bazen bu pinlerin PCB'de işaretlendiğini bulabilirsiniz. Diğer durumlarda, **bulmanız** gerekebilir.
+Bazen bu pinleri PCB üzerinde işaretlenmiş olarak bulabilirsiniz. Diğer durumlarda ise bunları **bulmanız** gerekebilir.
 
-### JTAG pinlerini tanımlama
+### Identifying JTAG pins
 
-JTAG portlarını tespit etmenin en hızlı ama en pahalı yolu, bu amaç için özel olarak oluşturulmuş bir cihaz olan **JTAGulator** kullanmaktır (bununla birlikte **UART pinout'larını da tespit edebilir**).
+JTAG portlarını tespit etmenin en hızlı, ancak en pahalı yolu, özellikle bu amaç için oluşturulmuş bir cihaz olan **JTAGulator** kullanmaktır (ancak **UART pinout'larını da tespit edebilir**).
 
-**24 kanala** sahiptir ve bu kanalları kartın pinlerine bağlayabilirsiniz. Ardından, **IDCODE** ve **BYPASS** sınır tarama komutlarını göndererek tüm olası kombinasyonların **BF saldırısını** gerçekleştirir. Bir yanıt alırsa, her JTAG sinyaline karşılık gelen kanalı görüntüler.
+Cihazda, board pinlerine bağlayabileceğiniz **24 kanal** bulunur. Ardından **IDCODE** ve **BYPASS** boundary scan komutlarını göndererek tüm olası kombinasyonlar üzerinde bir **BF attack** gerçekleştirir. Bir yanıt alırsa her JTAG sinyaline karşılık gelen kanalı görüntüler.
 
-JTAG pinout'larını tanımlamanın daha ucuz ama çok daha yavaş bir yolu, bir Arduino uyumlu mikrodenetleyiciye yüklenmiş [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) kullanmaktır.
+JTAG pinout'larını belirlemenin daha ucuz ancak çok daha yavaş bir yolu, Arduino uyumlu bir microcontroller üzerine yüklenen [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) kullanmaktır.
 
-**JTAGenum** kullanarak, önce **kullanacağınız prob cihazının pinlerini tanımlarsınız**. Cihazın pinout diyagramına atıfta bulunmanız ve ardından bu pinleri hedef cihazınızdaki test noktalarıyla bağlamanız gerekir.
+**JTAGenum** kullanırken öncelikle enumeration için kullanacağınız **probing** cihazının pinlerini tanımlamanız gerekir. Cihazın pinout şemasına başvurmanız ve ardından bu pinleri hedef cihazınızdaki test noktalarına bağlamanız gerekir.
 
-JTAG pinlerini tanımlamanın **üçüncü yolu**, PCB'yi bir pinout için **incelemektir**. Bazı durumlarda, PCB'ler **Tag-Connect arayüzünü** sağlama kolaylığı gösterebilir; bu, kartın bir JTAG konektörüne sahip olduğunun açık bir göstergesidir. O arayüzün nasıl göründüğünü [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/) adresinde görebilirsiniz. Ayrıca, PCB'deki çipsetlerin **veri sayfalarını** incelemek, JTAG arayüzlerine işaret eden pinout diyagramlarını ortaya çıkarabilir.
+JTAG pinlerini belirlemenin **üçüncü yolu**, pinout'lardan birini bulmak için **PCB'yi incelemektir**. Bazı durumlarda PCB'ler, board'un bir JTAG connector'ına da sahip olduğunun açık bir göstergesi olan **Tag-Connect interface**'ini uygun şekilde sunabilir. Bu interface'in nasıl göründüğünü [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/) adresinde görebilirsiniz. Ayrıca, **PCB üzerindeki chipset'lerin datasheet'lerini incelemek**, JTAG interface'lerine işaret eden pinout şemalarını ortaya çıkarabilir.
 
 ## SDW
 
-SWD, hata ayıklama için tasarlanmış ARM'a özgü bir protokoldür.
+SWD, debugging için tasarlanmış ARM'e özgü bir protokoldür.
 
-SWD arayüzü, **iki pin** gerektirir: JTAG’ın **TDI ve TDO pinlerine** eşdeğer olan iki yönlü **SWDIO** sinyali ve **SWCLK**, JTAG'daki **TCK**'ye eşdeğerdir. Birçok cihaz, hedefe ya bir SWD ya da JTAG probu bağlamanızı sağlayan birleştirilmiş JTAG ve SWD arayüzü olan **Seri Tel veya JTAG Hata Ayıklama Portu (SWJ-DP)**'yi destekler.
+SWD interface'i **iki pin** gerektirir: JTAG'in **TDI ve TDO pinleri ile bir clock** sinyaline eşdeğer olan çift yönlü **SWDIO** sinyali ve JTAG'deki **TCK**'ye eşdeğer olan **SWCLK**. Birçok cihaz, hedefe SWD veya JTAG probe'larından birini bağlamanızı sağlayan, JTAG ve SWD'yi birleştiren **Serial Wire or JTAG Debug Port (SWJ-DP)**'yi destekler.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ## Bus Pirate
 
-Bir Bus Pirate'ın çalıştığını test etmek için +5V'u VPU'ya ve 3.3V'u ADC'ye bağlayın ve bus pirate'a erişin (örneğin Tera Term kullanarak) ve `~` komutunu kullanın:
+Bir Bus Pirate'ın çalıştığını test etmek için +5V'u VPU'ya, 3.3V'u ADC'ye bağlayın ve Bus Pirate'a erişin (örneğin Tera Term kullanarak); ardından `~` komutunu kullanın:
 ```bash
 # Use command
 HiZ>~
@@ -43,18 +43,18 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-Önceki komut satırında 0 hata bulunduğu yazıyordu. Bu, satın aldıktan sonra veya bir firmware yükledikten sonra çalıştığını bilmek için çok faydalıdır.
+Gördüğünüz gibi önceki komut satırında 0 hata bulunduğu yazıyordu. Bu, satın aldıktan veya bir firmware flashladıktan sonra cihazın çalıştığını doğrulamak için çok yararlıdır.
 
-Bus pirate ile bağlantı kurmak için belgeleri takip edebilirsiniz:
+Bus Pirate'a bağlanmak için belgeleri takip edebilirsiniz:
 
-![](<../../images/image (484).png>)
+![Use command - Press space: Bus Pirate'a bağlanmak için belgeleri takip edebilirsiniz](<../../images/image (484).png>)
 
 Bu durumda bir EPROM'a bağlanacağım: ATMEL901 24C256 PU27:
 
-![](<../../images/image (964).png>)
+![Use command - Press space: Bu durumda bir EPROM'a bağlanacağım: ATMEL901 24C256 PU27](<../../images/image (964).png>)
 
-Bus pirate ile konuşmak için Tera Term kullandım ve pirate bus COM portuna 115200 hızında bir Setup --> Serial Port ile bağlandım.\
-Aşağıdaki iletişimde bus pirate'ı I2C ile konuşacak şekilde nasıl hazırlayacağınızı ve bellekten nasıl yazıp okuyacağınızı bulabilirsiniz (Yorumlar "#" ile görünür, bu kısmı iletişimde beklemeyin):
+Bus Pirate ile iletişim kurmak için Tera Term'ü, Setup --> Serial Port --> Speed ayarı 115200 olacak şekilde Bus Pirate'ın COM portuna bağlayarak kullandım.\
+Aşağıdaki iletişimde Bus Pirate'ı I2C ile iletişim kuracak şekilde nasıl hazırlayacağınızı ve bellekten nasıl yazıp okuyacağınızı görebilirsiniz (Yorumlar "#" kullanılarak görünür; iletişimde bu kısmı görmeyi beklemeyin):
 ```bash
 # Check communication with buspirate
 i
@@ -155,9 +155,9 @@ NACK
 ```
 ### Sniffer
 
-Bu senaryoda, arduino ile önceki EPROM arasındaki I2C iletişimini dinleyeceğiz, sadece her iki cihazla iletişim kurmanız ve ardından bus pirate'ı SCL, SDA ve GND pinlerine bağlamanız gerekiyor:
+Bu senaryoda Arduino ile önceki EPROM arasındaki I2C iletişimini sniff edeceğiz; yalnızca her iki cihazı iletişim kuracak şekilde bağlamanız ve ardından Bus Pirate'ı SCL, SDA ve GND pinlerine bağlamanız yeterlidir:
 
-![](<../../images/image (166).png>)
+![Önceden yapılandırılmış 0x69 adresinden 20B okuma - Sniffer: Bu senaryoda Arduino ile önceki EPROM arasındaki I2C iletişimini sniff edeceğiz; yalnızca...](<../../images/image (166).png>)
 ```bash
 I2C>m
 1. HiZ

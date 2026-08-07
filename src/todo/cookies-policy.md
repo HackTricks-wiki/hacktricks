@@ -4,42 +4,42 @@ Son güncelleme: 02/04/2023
 
 ### Giriş
 
-Bu Çerez Politikası, HackTricks ekibi ("HackTricks", "biz", "bize" veya "bizim") tarafından sahip olunan ve işletilen aşağıdaki web sitelerine uygulanır:
+Bu Çerez Politikası, HackTricks ekibinin ("HackTricks", "biz", "bize" veya "bizim") sahip olduğu ve işlettiği aşağıdaki web siteleri için geçerlidir:
 
 * hacktricks.wiki
 * [www.hacktricks.wiki](https://www.hacktricks.wiki/)
 * book.hacktricks.wiki
 * cloud.hacktricks.wiki
 
-Bu web sitelerinden herhangi birini kullanarak, bu Çerez Politikasına uygun olarak çerezlerin kullanımını kabul edersiniz. Kabul etmiyorsanız, lütfen tarayıcı ayarlarınızdan çerezleri devre dışı bırakın veya web sitelerimizi kullanmaktan kaçının.
+Bu web sitelerinden herhangi birini kullanarak, bu Çerez Politikası doğrultusunda çerezlerin kullanılmasını kabul etmiş olursunuz. Kabul etmiyorsanız lütfen tarayıcı ayarlarınızdan çerezleri devre dışı bırakın veya web sitelerimizi kullanmayın.
 
 ### Çerezler nedir?
 
-Çerezler, bir web sitesini ziyaret ettiğinizde bilgisayarınızda veya mobil cihazınızda saklanan küçük metin dosyalarıdır. Web sitelerinin çalışmasını sağlamak, işlevselliğini artırmak ve daha kişiselleştirilmiş bir kullanıcı deneyimi sunmak için yaygın olarak kullanılır.
+Çerezler, bir web sitesini ziyaret ettiğinizde bilgisayarınızda veya mobil cihazınızda depolanan küçük metin dosyalarıdır. Web sitelerinin çalışmasını sağlamak, işlevselliğini geliştirmek ve daha kişiselleştirilmiş bir kullanıcı deneyimi sunmak için yaygın olarak kullanılırlar.
 
 ### Çerezleri nasıl kullanıyoruz
 
-Web sitelerimizde çerezleri aşağıdaki amaçlar için kullanıyoruz:
+Web sitelerimizde çerezleri aşağıdaki amaçlarla kullanıyoruz:
 
-1. Temel çerezler: Bu çerezler, kullanıcı kimlik doğrulamasını sağlamak, güvenliği korumak ve tercihlerinizi hatırlamak gibi web sitelerimizin temel işlevselliği için gereklidir.
-2. Performans çerezleri: Bu çerezler, ziyaretçilerin web sitelerimizle nasıl etkileşimde bulunduğunu anlamamıza yardımcı olur ve bilgileri anonim olarak toplar ve raporlar. Bu, web sitesi performansımızı ve kullanıcı deneyimimizi geliştirmemizi sağlar.
-3. İşlevsellik çerezleri: Bu çerezler, web sitelerimizin diliniz veya bölgeniz gibi yaptığınız seçimleri hatırlamasını sağlar ve daha kişiselleştirilmiş bir deneyim sunar.
-4. Hedefleme/reklam çerezleri: Bu çerezler, ilgi alanlarınıza, tarayıcı geçmişinize ve web sitelerimizle etkileşimlerinize dayalı olarak ilgili reklamlar ve pazarlama iletişimleri sunmak için kullanılır.
+1. Zorunlu çerezler: Bu çerezler; kullanıcı kimlik doğrulamasını etkinleştirmek, güvenliği sürdürmek ve tercihlerinizi hatırlamak gibi web sitelerimizin temel işlevleri için gereklidir.
+2. Performans çerezleri: Bu çerezler, bilgileri anonim olarak toplayıp raporlayarak ziyaretçilerin web sitelerimizle nasıl etkileşim kurduğunu anlamamıza yardımcı olur. Bu, web sitesi performansımızı ve kullanıcı deneyimini geliştirmemizi sağlar.
+3. İşlevsellik çerezleri: Bu çerezler, daha kişiselleştirilmiş bir deneyim sunmak amacıyla web sitelerimizin diliniz veya bölgeniz gibi yaptığınız seçimleri hatırlamasını sağlar.
+4. Hedefleme/reklam çerezleri: Bu çerezler; ilgi alanlarınıza, tarama geçmişinize ve web sitelerimizle olan etkileşimlerinize dayalı olarak ilgili reklamları ve pazarlama iletişimlerini sunmak için kullanılır.
 
-Ayrıca, book.hacktricks.wiki ve cloud.hacktricks.wiki sayfaları Gitbook'ta barındırılmaktadır. Gitbook çerezleri hakkında daha fazla bilgiye [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy) adresinden ulaşabilirsiniz.
+Ayrıca book.hacktricks.wiki ve cloud.hacktricks.wiki sayfaları Gitbook üzerinde barındırılmaktadır. Gitbook çerezleri hakkında daha fazla bilgiyi [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy) adresinde bulabilirsiniz.
 
 ### Üçüncü taraf çerezleri
 
-Kendi çerezlerimizin yanı sıra, web sitesi kullanım istatistiklerini raporlamak, reklamlar sunmak ve sosyal medya paylaşım butonlarını etkinleştirmek için üçüncü taraf çerezlerini de kullanabiliriz. Üçüncü taraf çerezlerinin kullanımı, ilgili gizlilik politikalarına tabidir.
+Kendi çerezlerimize ek olarak web sitesi kullanım istatistiklerini raporlamak, reklamlar sunmak ve sosyal medya paylaşım düğmelerini etkinleştirmek için üçüncü taraf çerezleri de kullanabiliriz. Üçüncü taraf çerezlerinin kullanımı, ilgili tarafların kendi gizlilik politikalarına tabidir.
 
 Çerezleri yönetme
 
-Çoğu web tarayıcısı, çerezleri ayarları aracılığıyla yönetmenize olanak tanır. Cihazınızdaki çerezlerin kullanımını engellemeyi, silmeyi veya sınırlamayı seçebilirsiniz. Ancak, çerezleri devre dışı bırakmanın web sitelerimizin işlevselliği ve performansı üzerinde etkisi olabileceğini lütfen unutmayın.
+Çoğu web tarayıcısı, ayarları üzerinden çerezleri yönetmenize izin verir. Cihazınızdaki çerezleri engellemeyi, silmeyi veya kullanımını sınırlandırmayı seçebilirsiniz. Ancak çerezleri devre dışı bırakmanın web sitelerimizin işlevselliğini ve performansını etkileyebileceğini lütfen unutmayın.
 
 Bu Çerez Politikasındaki değişiklikler
 
-Bu Çerez Politikasını, uygulamalarımızdaki veya ilgili yasalarındaki değişiklikleri yansıtmak için zaman zaman güncelleyebiliriz. Çerez uygulamalarımızla ilgili en son bilgileri almak için bu sayfayı periyodik olarak gözden geçirmenizi öneririz.
+Uygulamalarımızdaki veya ilgili yasalardaki değişiklikleri yansıtmak için bu Çerez Politikasını zaman zaman güncelleyebiliriz. Çerez uygulamalarımızla ilgili en güncel bilgiler için bu sayfayı düzenli olarak incelemenizi öneririz.
 
-### Bizimle iletişime geçin
+### Bize ulaşın
 
-Bu Çerez Politikası hakkında herhangi bir sorunuz veya endişeniz varsa, lütfen [support@hacktricks.xyz](mailto:support@hacktricks.xyz) adresinden bizimle iletişime geçin.
+Bu Çerez Politikası hakkında sorularınız veya endişeleriniz varsa [support@hacktricks.xyz](mailto:support@hacktricks.xyz) adresinden bizimle iletişime geçebilirsiniz.

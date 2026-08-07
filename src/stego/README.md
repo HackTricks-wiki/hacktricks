@@ -2,52 +2,58 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Bu bölüm, dosyalardan (images/audio/video/documents/archives) ve metin tabanlı steganografiden gizli verilerin bulunması ve çıkarılmasına odaklanır.
+Bu bölüm, dosyalardan (görüntüler/ses/video/belgeler/arşivler) ve metin tabanlı steganografiden **gizli verileri bulmaya ve çıkarmaya** odaklanır.
 
-If you're here for cryptographic attacks, go to the **Crypto** section.
+Kriptografik saldırılarla ilgileniyorsanız **Crypto** bölümüne gidin.
 
-## Giriş
+## Başlangıç Noktası
 
-Steganografiye adli bilişim problemi olarak yaklaşın: gerçek konteyneri tespit edin, yüksek-sinyalli konumları (metadata, appended data, embedded files) listeleyin ve ancak o zaman içerik düzeyinde çıkarma tekniklerini uygulayın.
+Steganografiye bir adli bilişim problemi olarak yaklaşın: gerçek container'ı belirleyin, yüksek sinyalli konumları (metadata, eklenmiş veriler, gömülü dosyalar) tarayın ve ancak bundan sonra içerik düzeyinde extraction tekniklerini uygulayın.
 
-### İş Akışı & triage
+### Workflow ve triage
 
-Konteyner tespitini, metadata/string incelemesini, carving'i ve formata özgü dallanmayı önceliklendiren yapılandırılmış bir iş akışı.
+Container identification, metadata/string inspection, carving ve formata özgü dallanmayı önceliklendiren yapılandırılmış bir workflow.
+
 {{#ref}}
 workflow/README.md
 {{#endref}}
 
-### Images
+### Görüntüler
 
-CTF stego'nun çoğunun bulunduğu yer: LSB/bit-planes (PNG/BMP), chunk/file-format weirdness, JPEG tooling ve multi-frame GIF tricks.
+CTF stego çalışmalarının çoğu burada yer alır: LSB/bit-planes (PNG/BMP), chunk/file-format anormallikleri, JPEG araçları ve çok kareli GIF hileleri.
+
 {{#ref}}
 images/README.md
 {{#endref}}
 
-### Audio
+### Ses
 
-Spektrogram mesajları, sample LSB embedding ve telephone keypad tones (DTMF) tekrar eden kalıplardır.
+Spectrogram mesajları, sample LSB embedding ve telefon tuş takımı tonları (DTMF) tekrarlanan kalıplardır.
+
 {{#ref}}
 audio/README.md
 {{#endref}}
 
-### Text
+### Metin
 
-Metin normal görünüyorsa ama beklenmedik şekilde davranıyorsa, Unicode homoglyphs, zero-width characters veya whitespace-based encoding'i göz önünde bulundurun.
+Metin normal şekilde görüntüleniyor ancak beklenmedik davranıyorsa Unicode homoglyph'lerini, zero-width karakterleri veya whitespace tabanlı encoding'i değerlendirin.
+
 {{#ref}}
 text/README.md
 {{#endref}}
 
-### Documents
+### Belgeler
 
-PDF'ler ve Office dosyaları öncelikle konteynerdir; saldırılar genellikle embedded files/streams, object/relationship graphs ve ZIP extraction etrafında döner.
+PDF'ler ve Office dosyaları öncelikle container'lardır; saldırılar genellikle gömülü dosyalar/stream'ler, object/relationship graph'ları ve ZIP extraction etrafında şekillenir.
+
 {{#ref}}
 documents/README.md
 {{#endref}}
 
-### Malware and delivery-style steganography
+### Malware ve delivery tarzı steganografi
 
-Payload delivery çoğunlukla pixel-level hiding yerine, marker-delimited text payloads taşıyan geçerli görünen dosyaları (ör. GIF/PNG) kullanır.
+Payload delivery sıklıkla pixel-level hiding yerine marker-delimited text payload'ları taşıyan, geçerli görünen dosyaları (ör. GIF/PNG) kullanır.
+
 {{#ref}}
 malware-and-network/README.md
 {{#endref}}

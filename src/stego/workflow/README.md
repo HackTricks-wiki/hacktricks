@@ -2,58 +2,58 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Çoğu stego problemi rastgele araçlar denemektense sistematik triage ile daha hızlı çözülür.
+Çoğu stego problemi, rastgele araçlar denemek yerine sistematik triage ile daha hızlı çözülür.
 
 ## Temel akış
 
 ### Hızlı triage kontrol listesi
 
-Amaç, iki soruyu verimli şekilde cevaplamaktır:
+Amaç, iki soruyu verimli şekilde yanıtlamaktır:
 
 1. Gerçek container/format nedir?
-2. Payload metadata'da mı, appended bytes içinde mi, embedded files içinde mi yoksa content-level stego içinde mi?
+2. Payload metadata'da, eklenmiş byte'larda, gömülü dosyalarda veya content-level stego'da mı?
 
-#### 1) Container/format'ı belirleyin
+#### 1) Container'ı belirleyin
 ```bash
 file target
 ls -lah target
 ```
-Eğer `file` ile uzantı uyuşmuyorsa, `file`'a güven. Uygunsa yaygın formatları kapsayıcı olarak ele alın (e.g., OOXML documents are ZIP files).
+`file` ve uzantı birbiriyle uyuşmuyorsa `file` komutuna güvenin. Uygun olduğunda yaygın formatları container olarak değerlendirin (ör. OOXML belgeleri ZIP dosyalarıdır).
 
-#### 2) metadata ve bariz strings'e bakın
+#### 2) Metadata ve bariz string'leri arayın
 ```bash
 exiftool target
 strings -n 6 target | head
 strings -n 6 target | tail
 ```
-Birden fazla kodlama deneyin:
+Birden fazla encoding deneyin:
 ```bash
 strings -e l -n 6 target | head
 strings -e b -n 6 target | head
 ```
-#### 3) Eklenmiş veriler / gömülü dosyalar için kontrol edin
+#### 3) Sona eklenmiş verileri / gömülü dosyaları kontrol edin
 ```bash
 binwalk target
 binwalk -e target
 ```
-If extraction başarısız olursa ama imzalar rapor ediliyorsa, offsetleri elle `dd` ile carve edin ve carve edilmiş bölge üzerinde `file`'ı yeniden çalıştırın.
+Çıkarma başarısız olur ancak imzalar raporlanırsa offset'leri `dd` ile manuel olarak carve edin ve carve edilen bölge üzerinde `file` komutunu yeniden çalıştırın.
 
-#### 4) Eğer görüntü ise
+#### 4) Görüntü ise
 
 - Anomalileri inceleyin: `magick identify -verbose file`
-- PNG/BMP ise, bit-düzlemleri/LSB'leri listeleyin: `zsteg -a file.png`
+- PNG/BMP ise bit-plane/LSB'leri enumerate edin: `zsteg -a file.png`
 - PNG yapısını doğrulayın: `pngcheck -v file.png`
-- İçerik kanal/düzlem dönüşümleriyle ortaya çıkabiliyorsa görsel filtreler kullanın (Stegsolve / StegoVeritas)
+- İçerik channel/plane dönüşümleriyle ortaya çıkabilecekse görsel filtreler (Stegsolve / StegoVeritas) kullanın
 
-#### 5) Eğer ses ise
+#### 5) Ses ise
 
-- Önce spektrograma bakın (Sonic Visualiser)
-- Akışları dekode/inceleyin: `ffmpeg -v info -i file -f null -`
-- Ses yapısal tonlara benziyorsa, DTMF dekodlamasını test edin
+- Önce spectrogram oluşturun (Sonic Visualiser)
+- Stream'leri decode/inceleyin: `ffmpeg -v info -i file -f null -`
+- Ses yapılandırılmış tonlara benziyorsa DTMF decoding'i test edin
 
 ### Temel araçlar
 
-Bunlar container-seviyesi sık karşılaşılan durumları yakalar: metadata payload'lar, eklenmiş byte'lar ve uzantıyla gizlenmiş embedded dosyalar.
+Bunlar yüksek sıklıkta karşılaşılan container-level durumları yakalar: metadata payload'ları, sona eklenmiş byte'lar ve uzantısıyla gizlenmiş embedded file'lar.<sup>[[1]](#references)</sup>
 
 #### Binwalk
 ```bash
@@ -61,16 +61,20 @@ binwalk file
 binwalk -e file
 binwalk --dd '.*' file
 ```
-I don't have access to the repository files. Please paste the contents of src/stego/workflow/README.md here (or the part you want translated). I will translate the English text to Turkish while keeping all markdown, tags, links, code, paths and specified tokens unchanged.
+Repo: https://github.com/ReFirmLabs/binwalk
+
+#### Foremost
 ```bash
 foremost -i file
 ```
-src/stego/workflow/README.md dosyasının içeriğini gönderir misiniz? Verilen içerik olmadan çeviri yapamam.
+Repo: https://github.com/korczis/foremost
+
+#### Exiftool / Exiv2
 ```bash
 exiftool file
 exiv2 file
 ```
-#### file / strings
+#### dosya / strings
 ```bash
 file file
 strings -n 6 file
@@ -79,13 +83,13 @@ strings -n 6 file
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-### Kapsayıcılar, eklenmiş veriler ve polyglot tricks
+### Konteynerler, eklenmiş veriler ve polyglot teknikleri
 
-Birçok steganografi görevi, geçerli bir dosyadan sonra gelen ek baytlardır veya uzantıyla gizlenen gömülü arşivlerdir.
+Birçok steganography challenge'ı, geçerli bir dosyanın sonuna eklenmiş ekstra byte'lardan veya uzantıyla gizlenmiş embedded archive'lar içerir.
 
 #### Eklenmiş payload'lar
 
-Birçok format sonundaki baytları yok sayar. Bir ZIP/PDF/script bir image/audio container'ın sonuna eklenebilir.
+Birçok format sondaki byte'ları yok sayar. Bir ZIP/PDF/script, bir image/audio container'ının sonuna eklenebilir.
 
 Hızlı kontroller:
 ```bash
@@ -99,38 +103,38 @@ file carved.bin
 ```
 #### Magic bytes
 
-`file` kararsız kaldığında, `xxd` ile magic bytes'ları kontrol edin ve bilinen imzalarla karşılaştırın:
+`file` kafası karıştığında, `xxd` ile magic bytes değerlerini arayın ve bilinen signature'larla karşılaştırın:
 ```bash
 xxd -g 1 -l 32 file
 ```
 #### Zip-in-disguise
 
-Uzantı zip demese bile `7z` ve `unzip`'i dene:
+Uzantı zip olduğunu belirtmese bile `7z` ve `unzip` kullanmayı deneyin:
 ```bash
 7z l file
 unzip -l file
 ```
-### Near-stego tuhaflıkları
+### Near-stego oddities
 
-Stego'ya bitişik olarak sıkça ortaya çıkan desenler için hızlı bağlantılar (QR-from-binary, braille, etc).
+stego ile bitişik olarak düzenli şekilde ortaya çıkan pattern'ler için hızlı bağlantılar (binary'den QR, braille vb.).
 
 #### QR codes from binary
 
-Eğer bir blob uzunluğu tam kare ise, image/QR için raw pixels olabilir.
+Bir blob uzunluğu perfect square ise, bu değer bir image/QR için raw pixel'lar olabilir.
 ```python
 import math
 math.isqrt(2500)  # 50
 ```
-- Binary-to-image yardımcı aracı:
+Binary-to-image helper:
+
 - [https://www.dcode.fr/binary-image](https://www.dcode.fr/binary-image)
 
 #### Braille
 
 - [https://www.branah.com/braille-translator](https://www.branah.com/braille-translator)
 
-## Referans listeleri
+## Referanslar
 
-- [https://0xrick.github.io/lists/stego/](https://0xrick.github.io/lists/stego/)
-- [https://github.com/DominicBreuker/stego-toolkit](https://github.com/DominicBreuker/stego-toolkit)
+- [1] [DominicBreuker/stego-toolkit - En popüler steganography araçlarının bir arada bulunduğu Docker image](https://github.com/DominicBreuker/stego-toolkit)
 
 {{#include ../../banners/hacktricks-training.md}}
