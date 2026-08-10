@@ -1,13 +1,14 @@
 # Yazar hakkında
 
-{{#include ../banners/hacktricks-training.md}}
-
 ### Merhaba!!
 
-Diğer araştırmacılardan alınan tekniklerin kredisi orijinal yazarlara aittir (referanslara bakın). İnternet güvenliğini geliştirmek için bilgilerini paylaşan herkese teşekkürler.
+Diğer araştırmacıların katkıda bulunduğu teknikler, orijinal yazarlarına atfedilmeye devam eder. İnternet güvenliğini geliştirmek için bilgi paylaşan herkese teşekkürler.
 
-HackTricks, Carlos tarafından yönetilen ve yüzlerce katkıcının yer aldığı **siber güvenlik** hakkında eğitsel bir wiki'dir. Topluluk tarafından mümkün olduğunca güncel tutulan **devasa bir hacking hileleri koleksiyonudur**. Eksik veya güncelliğini yitirmiş bir şey bulursanız lütfen [**Hacktricks GitHub**](https://github.com/hacktricks-wiki/hacktricks)'a bir **Pull Request** gönderin!
+Carlos, HackTricks'i yönetir. Proje, pratik güvenlik tekniklerini toplayan ve katkıları kabul eden, topluluk tarafından sürdürülen bir siber güvenlik wiki'sidir; eksik veya güncelliğini yitirmiş bir şey bulursanız lütfen proje repository'sinde bir pull request açın.<sup>[[1]](#references)</sup>
 
-HackTricks aynı zamanda **araştırmacıların en son bulgularını paylaştığı** bir wiki'dir; bu nedenle en yeni hacking tekniklerini takip etmek için harika bir yerdir.
+HackTricks ayrıca araştırmacılara yeni bulguları paylaşabilecekleri bir alan sunarak okuyucuların güncel güvenlik tekniklerini takip etmesine yardımcı olur.
 
+## References
+
+- [1] [HackTricks-wiki/hacktricks — GitHub repository](https://github.com/HackTricks-wiki/hacktricks)
 {{#include ../banners/hacktricks-training.md}}

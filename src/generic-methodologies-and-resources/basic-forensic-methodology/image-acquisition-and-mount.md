@@ -1,11 +1,8 @@
-# Image Acquisition & Mount
-
-{{#include ../../banners/hacktricks-training.md}}
-
+# Disk İmajı Edinme ve Bağlama
 
 ## Edinme
 
-> Her zaman **salt okunur** şekilde edinin ve **kopyalama sırasında hash hesaplayın**. Orijinal cihazı **yazma engelli** tutun ve yalnızca doğrulanmış kopyalar üzerinde çalışın.
+> Her zaman **salt okunur** olarak edinin ve **kopyalama sırasında hash hesaplayın**. Orijinal cihazı **yazmaya karşı engelli** tutun ve yalnızca doğrulanmış kopyalar üzerinde çalışın.
 
 ### DD
 ```bash
@@ -31,7 +28,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-AFF4, *çok* büyük kanıtlar için tasarlanmış Google'ın modern görüntüleme formatıdır (seyrek, devam ettirilebilir, cloud-native).<sup>[[1]](#references)</sup>
+Bradley L. Schatz ve Michael I. Cohen tarafından kaleme alınan AFF4 v1.0 specification, sanallaştırılmış depolama, rastgele metadata, genişletilebilir compression ve hashing ile yüksek throughput sağlayan bir forensic container tanımlar.<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -51,14 +48,14 @@ ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
-### Cloud Disk'lerinin İmajını Alma
+### Cloud Disk Görüntüleme
 
-*AWS* – instance'ı kapatmadan **forensic snapshot** oluşturun:
+*AWS* – instance'ı kapatmadan bir **forensic snapshot** oluşturun:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – `az snapshot create` kullanın ve bir SAS URL'sine dışa aktarın.
+*Azure* – `az snapshot create` kullanın ve bir SAS URL'ye aktarın.
 
 
 ## Bağlama
@@ -66,8 +63,8 @@ aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web
 ### Doğru yaklaşımı seçme
 
 1. Orijinal bölümleme tablosunu (MBR/GPT) istediğinizde **tüm diski** bağlayın.
-2. Yalnızca bir birime ihtiyacınız olduğunda **tek bir bölüm dosyasını** bağlayın.
-3. Her zaman **salt okunur** (`-o ro,norecovery`) olarak bağlayın ve kopyalar üzerinde çalışın.<sup>[[2]](#references)</sup>
+2. Yalnızca bir volume gerektiğinde **tek bir bölüm dosyasını** bağlayın.
+3. Image eklerini salt okunur tutun (örneğin, qemu-nbd'nin `--read-only` seçeneğiyle).<sup>[[2]](#references)</sup> Filesystem'leri salt okunur olarak bağlayın (`-o ro`).<sup>[[3]](#references)</sup> **Kopyalar** üzerinde çalışın.
 
 ### Raw images (dd, AFF4-extracted)
 ```bash
@@ -84,7 +81,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-Bittiğinde ayır:
+Çevrilecek metni paylaşın.
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -97,9 +94,11 @@ ewfmount evidence.E01 /mnt/ewf
 # 2. Attach the exposed raw file via qemu-nbd (safer than loop)
 sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 
-# 3. Mount the desired partition
+# 3. Mount the desired partition (XFS example; use the filesystem-specific option)
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
+Dosya sistemi özel no-replay mount'ları için ext3/ext4 `noload` kullanırken XFS `norecovery` kullanır ve salt okunur mod gerektirir.<sup>[[3]](#references)[[4]](#references)</sup>
+
 Alternatif olarak **xmount** ile anında dönüştürün:
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
@@ -107,7 +106,7 @@ mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
 ### LVM / BitLocker / VeraCrypt birimleri
 
-Blok aygıtını (loop veya nbd) bağladıktan sonra:
+Block device'i (loop veya nbd) bağladıktan sonra:
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -126,22 +125,25 @@ mount -o ro /dev/mapper/loop0p2 /mnt
 ```
 ### Yaygın mount hataları ve düzeltmeleri
 
-| Hata | Tipik Neden | Düzeltme |
+Dirty bir ext3/ext4 filesystem için journal replay işleminin engellenmesi gerektiğinde `ro,noload` kullanın.<sup>[[3]](#references)</sup>
+
+| Hata | Yaygın Neden | Düzeltme |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | Journaled FS (ext4) düzgün şekilde unmount edilmemiş | `-o ro,norecovery` kullanın |
-| `bad superblock …` | Yanlış offset veya hasarlı FS | offset'i (`sector*size`) hesaplayın veya bir kopya üzerinde `fsck -n` çalıştırın |
-| `mount: unknown filesystem type 'LVM2_member'` | LVM container'ı | `vgchange -ay` ile volume group'u etkinleştirin |
+| `cannot mount /dev/loop0 read-only` | Journal kullanan FS (ext4) düzgün şekilde unmount edilmemiş | `-o ro,noload` kullanın |
+| `bad superblock …` | Yanlış offset veya hasarlı FS | offset'i hesaplayın (`sector*size`) veya bir kopya üzerinde `fsck -n` çalıştırın |
+| `mount: unknown filesystem type 'LVM2_member'` | LVM container | `vgchange -ay` ile volume group'u etkinleştirin |
 
-### Temizlik
+### Temizleme
 
-Daha sonraki çalışmaları bozabilecek dangling mapping'ler bırakmamak için **umount** işlemi yapmayı ve loop/nbd cihazlarının bağlantısını kesmeyi unutmayın:
+Daha sonraki çalışmaları bozabilecek dangling mapping'ler bırakmamak için **umount** işlemini gerçekleştirmeyi ve loop/nbd device'larını **disconnect** etmeyi unutmayın:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ```
-## Referanslar
+## References
 
 - [1] [AFF4 Standard Specification (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
-- [2] [qemu-nbd manual page (disk imajlarını güvenli şekilde bağlama)](https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html)
-
+- [2] [QEMU qemu-nbd documentation](https://www.qemu.org/docs/master/tools/qemu-nbd.html)
+- [3] [mount(8) Linux manual page](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [4] [The SGI XFS filesystem (Linux kernel documentation)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
 {{#include ../../banners/hacktricks-training.md}}

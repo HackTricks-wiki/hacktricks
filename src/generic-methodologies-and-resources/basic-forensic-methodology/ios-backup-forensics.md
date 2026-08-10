@@ -1,71 +1,72 @@
 # iOS Backup Forensics (Messaging‑centric triage)
 
-{{#include ../../banners/hacktricks-training.md}}
-
-Bu sayfa, messaging app ekleri üzerinden 0‑click exploit iletimi belirtilerini tespit etmek amacıyla iOS backup'larını yeniden oluşturup analiz etmeye yönelik pratik adımları açıklar. Apple'ın hash'lenmiş backup düzenini okunabilir yollara dönüştürmeye, ardından yaygın uygulamalardaki ekleri listeleyip taramaya odaklanır.
+Bu sayfa, messaging app ekleri üzerinden 0‑click exploit teslimatına dair belirtileri yeniden oluşturmak ve analiz etmek için iOS backup'larını pratik olarak inceleme adımlarını açıklar. Apple'ın hash'lenmiş backup düzenini okunabilir yollara dönüştürmeye, ardından yaygın uygulamalardaki ekleri listeleyip taramaya odaklanır.
 
 Hedefler:
-- Manifest.db üzerinden okunabilir yolları yeniden oluşturmak
+- Manifest.db'den okunabilir yolları yeniden oluşturmak
 - Messaging database'lerini listelemek (iMessage, WhatsApp, Signal, Telegram, Viber)
-- Ek yollarını çözümlemek, gömülü nesneleri (PDF/Images/Fonts) çıkarmak ve bunları structural detector'lara aktarmak
+- Ek yollarını çözümlemek, desteklenen yerlerde gömülü nesneleri (PDF/Images/Fonts) çıkarmak ve bunları structural detector'lara aktarmak
 
 
-## iOS backup'ını yeniden oluşturma
+## Bir iOS backup'ını yeniden oluşturma
 
-MobileSync altında depolanan backup'lar, insanlar tarafından okunabilir olmayan hash'lenmiş dosya adlarını kullanır. Manifest.db SQLite database'i, depolanan her nesneyi mantıksal yoluyla eşleştirir.
+MobileSync altında depolanan backup'lar, insanlar tarafından okunabilir olmayan hash'lenmiş dosya adlarını kullanır. Manifest.db SQLite database'i, depolanan her nesneyi mantıksal yoluyla eşleştirir.<sup>[[1]](#references)[[2]](#references)</sup>
 
 Üst düzey prosedür:
 1) Manifest.db'yi açın ve dosya kayıtlarını okuyun (domain, relativePath, flags, fileID/hash)
 2) domain + relativePath temelinde özgün klasör hiyerarşisini yeniden oluşturun
-3) Depolanan her nesneyi yeniden oluşturulan yoluna kopyalayın veya hardlink oluşturun
+3) Her depolanan nesneyi yeniden oluşturulan yoluna kopyalayın veya hardlink oluşturun
 
-Bu işlemi uçtan uca uygulayan bir tool ile örnek workflow (ElegantBouncer):<sup>[[1]](#references)[[2]](#references)</sup>
+Bunu uçtan uca uygulayan bir tool ile örnek workflow (ElegantBouncer):<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 # Rebuild the backup into a readable folder tree
 $ elegant-bouncer --ios-extract /path/to/backup --output /tmp/reconstructed
 [+] Reading Manifest.db ...
 ✓ iOS backup extraction completed successfully!
 ```
-Notlar:
-- Şifreli yedekleri, extractor’a yedek parolasını sağlayarak işleyin
-- Delil değerini korumak için mümkün olduğunda orijinal zaman damgalarını/ACL’leri koruyun
+- Şifrelenmiş yedekleri bir reconstruction tool'a aktarmadan önce decrypt edin; ElegantBouncer decrypt edilmiş bir yedek bekler.<sup>[[2]](#references)[[3]](#references)</sup>
+- Delil değeri açısından mümkün olduğunda orijinal zaman damgalarını/ACL'leri koruyun
 
-### Yedeği edinme ve şifresini çözme (USB / Finder / libimobiledevice)
+### Yedeği edinme ve decrypt etme (USB / Finder / libimobiledevice)
 
-- macOS/Finder’da "Encrypt local backup" seçeneğini etkinleştirin ve Keychain öğelerinin mevcut olması için *yeni* bir şifreli yedek oluşturun.
-- Cross-platform: `idevicebackup2` (libimobiledevice ≥1.4.0), iOS 17/18 yedekleme protokolü değişikliklerini anlar ve önceki restore/backup handshake hatalarını düzeltir.<sup>[[4]](#references)</sup>
+- Finder/Apple Devices/iTunes'ta "Encrypt local backup" seçeneğini etkinleştirin ve yeni bir yedek oluşturun; şifrelenmiş yedekler, şifrelenmemiş yedeklerin içermediği kayıtlı parolaları ve Sağlık verilerini içerebilir.<sup>[[8]](#references)</sup>
+- Cross-platform: libimobiledevice 1.4.0, `idevicebackup2` için düzeltmeler içerir.<sup>[[4]](#references)</sup> Şifrelemeyi etkileşimli olarak etkinleştirin, ardından belgelenmiş komut sıralamasını kullanarak tam bir yedeği zorlayın; hedef dizin en sonda olmalıdır.<sup>[[6]](#references)</sup>
 ```bash
-# Pair then create a full encrypted backup over USB
+# Pair, then enable encrypted backups (prompts for the password); keep the target directory last
 $ idevicepair pair
-$ idevicebackup2 backup --full --encrypt --password '<pwd>' ~/backups/iphone17
-```
-### IOC odaklı triage with MVT
+$ idevicebackup2 -i encryption on ~/backups/iphone17
 
-Amnesty’nin Mobile Verification Toolkit’i (mvt-ios) artık şifrelenmiş iTunes/Finder yedekleri üzerinde doğrudan çalışarak şifre çözme ve IOC eşleştirme işlemlerini paralı casus yazılım vakaları için otomatikleştiriyor.<sup>[[3]](#references)</sup>
+# Create a full encrypted backup over USB
+$ idevicebackup2 backup --full ~/backups/iphone17
+```
+### MVT ile IOC odaklı triage
+
+Amnesty’s Mobile Verification Toolkit, şifrelenmiş iTunes/Finder backup’larından bir anahtar çıkarıp bunların şifresini çözebilir, ardından şifresi çözülmüş backup’ı bir STIX2 IOC dosyasıyla tarayabilir.<sup>[[3]](#references)</sup>
 ```bash
 # Optionally extract a reusable key file
 $ mvt-ios extract-key -k /tmp/keyfile ~/backups/iphone17
 
-# Decrypt in-place copy of the backup
+# Decrypt to a separate destination
 $ mvt-ios decrypt-backup -p '<pwd>' -d /tmp/dec-backup ~/backups/iphone17
 
-# Run IOC scanning on the decrypted tree
-$ mvt-ios check-backup -i indicators.csv /tmp/dec-backup
+# Run IOC scanning on the decrypted tree with a STIX2 indicator file
+$ mvt-ios check-backup -i indicators.stix2.json -o /tmp/mvt-results /tmp/dec-backup
 ```
-Çıktılar `mvt-results/` altında oluşturulur (ör. `analytics_detected.json`, `safari_history_detected.json`) ve aşağıda kurtarılan attachment path'leriyle ilişkilendirilebilir.
+`-o` ile JSON sonuçları `/tmp/mvt-results/` altında yazılır; IOC eşleşmeleri `_detected` son ekini kullanır ve aşağıda kurtarılan ek yollarıyla ilişkilendirilebilir.<sup>[[3]](#references)</sup>
 
-### Genel artifact parsing (iLEAPP)
+### Genel artefakt ayrıştırma (iLEAPP)
 
-Mesajlaşmanın ötesindeki timeline/metadata için iLEAPP'i doğrudan backup folder üzerinde çalıştırın (iOS 11‑17 şemalarını destekler):
+Mesajlaşmanın ötesindeki zaman çizelgesi/metadata için iLEAPP'ı ham backup klasöründe çalıştırın; `itunes` giriş türü iTunes/Finder backup'larını kabul eder ve güncel sürümler iOS/iPadOS 11'den mevcut sürümlere kadar olan sürümleri destekler.<sup>[[7]](#references)</sup>
 ```bash
-$ python3 ileapp.py -b /tmp/dec-backup -o /tmp/ileapp-report
+$ mkdir -p /tmp/ileapp-report
+$ python3 ileapp.py -t itunes -i /tmp/dec-backup -o /tmp/ileapp-report
 ```
-## Mesajlaşma uygulaması eklerini listeleme
+## Mesajlaşma uygulamalarında ekleri listeleme
 
-Yeniden oluşturma işleminden sonra popüler uygulamalardaki ekleri listeleyin. Kesin şema uygulamaya/sürüme göre değişir, ancak yaklaşım benzerdir: messaging database'i sorgulayın, mesajları eklere join edin ve disk üzerindeki yolları çözümleyin.<sup>[[1]](#references)[[2]](#references)</sup>
+Reconstruction işleminden sonra popüler uygulamalardaki ekleri listeleyin. Kesin schema uygulamaya/sürüme göre değişir, ancak yaklaşım benzerdir: messaging database'i sorgulayın, mesajları eklerle birleştirin ve disk üzerindeki path'leri çözümleyin.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### iMessage (sms.db)
-Temel tablolar: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ)
+Temel tablolar: message, attachment, message_attachment_join (MAJ), chat, chat_message_join (CMJ).<sup>[[2]](#references)</sup>
 
 Örnek sorgular:
 ```sql
@@ -94,34 +95,34 @@ JOIN message_attachment_join maj ON maj.message_id = m.ROWID
 JOIN attachment a ON a.ROWID = maj.attachment_id
 ORDER BY m.date DESC;
 ```
-Ek dosya yolları mutlak olabilir veya Library/SMS/Attachments/ altındaki yeniden oluşturulan ağaca göreli olabilir.
+Ek dosya yolları, mutlak olabilir veya Library/SMS/Attachments altındaki yeniden oluşturulmuş ağaca göreli olabilir.<sup>[[2]](#references)</sup>
 
 ### WhatsApp (ChatStorage.sqlite)
-Yaygın ilişkilendirme: message tablosu ↔ media/attachment tablosu (adlandırma sürüme göre değişir). Disk üzerindeki yolları elde etmek için media satırlarını sorgulayın. Güncel iOS derlemeleri hâlâ `ZWAMEDIAITEM` içinde `ZMEDIALOCALPATH` değerini sunar.
+Yaygın ilişkilendirme: message table ↔ media/attachment table (adlandırma sürüme göre değişir). Disk üzerindeki yolları elde etmek için media satırlarını sorgulayın. Belkasoft, `ZWAMEDIAITEM` içindeki `ZMEDIALOCALPATH` alanını media-file konumu olarak tanımlar; ElegantBouncer’ın mevcut implementation’ı, `ZWAMEDIAITEM.ZMESSAGE` ile `ZWAMESSAGE.Z_PK` alanlarını birleştirir ve `Media/` ile başlayan bir path’i çözümlerken başına `Message/` ekler.<sup>[[9]](#references)[[10]](#references)</sup>
 ```sql
 SELECT
 m.Z_PK                 AS message_pk,
 mi.ZMEDIALOCALPATH     AS media_path,
 datetime(m.ZMESSAGEDATE + 978307200, 'unixepoch') AS message_date,
 CASE m.ZISFROMME WHEN 1 THEN 'outgoing' ELSE 'incoming' END AS direction
-FROM ZWAMESSAGE m
-LEFT JOIN ZWAMEDIAITEM mi ON mi.Z_PK = m.ZMEDIAITEM
+FROM ZWAMEDIAITEM mi
+JOIN ZWAMESSAGE m ON mi.ZMESSAGE = m.Z_PK
 WHERE mi.ZMEDIALOCALPATH IS NOT NULL
 ORDER BY m.ZMESSAGEDATE DESC;
 ```
-Yollar genellikle yeniden oluşturulan yedek içinde `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/` altında çözülür.
+For that ElegantBouncer reconstruction path, `Media/` ile başlayan bir media path, `AppDomainGroup-group.net.whatsapp.WhatsApp.shared/Message/Media/` altında çözümlenir; ancak Belkasoft’un guide’ı bunun yerine `Messages/Media/` path’ini belgeler, bu nedenle spelling’lerden herhangi birini varsaymadan önce backup’ı inceleyin.<sup>[[9]](#references)[[10]](#references)</sup>
 
 ### Signal / Telegram / Viber
-- Signal: mesaj DB'si şifrelenmiştir; ancak diskte önbelleğe alınan ekler (ve küçük resimler) genellikle taranabilir durumdadır
-- Telegram: önbellek sandbox içinde `Library/Caches/` altında kalır; iOS 18 sürümlerinde önbellek temizleme hataları görülür, bu nedenle büyük kalıntı medya önbellekleri yaygın kanıt kaynaklarıdır<sup>[[5]](#references)</sup>
-- Viber: Viber.sqlite, disk üzerindeki referansları içeren mesaj/ek tablolarına sahiptir
+- Signal: message DB encrypted durumdadır; ancak disk üzerinde cache’lenen attachment’lar (ve thumbnail’ler) genellikle taranabilir.<sup>[[2]](#references)</sup>
+- Telegram: app’in media/cache directory’lerini inceleyin; Telegram, iOS 18.0.1 üzerindeki iOS app 11.2’de bir cache-cleanup bug’ı belgeledi ve bunun 11.3’te düzeltildiğini belirtti; bu nedenle residual file’ları kontrol edin.<sup>[[2]](#references)[[5]](#references)</sup>
+- Viber: Viber.sqlite, disk üzerindeki reference’larla birlikte message/attachment table’larını içerir.<sup>[[2]](#references)</sup>
 
-İpucu: metadata şifrelenmiş olsa bile medya/önbellek dizinlerini taramak kötü amaçlı nesneleri yine de ortaya çıkarır.
+İpucu: metadata encrypted olsa bile media/cache directory’lerini taramak malicious object’leri yine de ortaya çıkarır.<sup>[[2]](#references)</sup>
 
 
-## Ekleri yapısal exploit'ler açısından tarama
+## Structural exploit’ler için attachment’ları tarama
 
-Ek yollarına sahip olduktan sonra bunları imzalar yerine dosya biçimi değişmezlerini doğrulayan yapısal algılayıcılara iletin. ElegantBouncer ile örnek:<sup>[[1]](#references)[[2]](#references)</sup>
+Attachment path’lerine sahip olduğunuzda, bunları signature’lar yerine file-format invariant’larını doğrulayan structural detector’lara verin. ElegantBouncer ile örnek:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 # Recursively scan only messaging attachments under the reconstructed tree
 $ elegant-bouncer --scan --messaging /tmp/reconstructed
@@ -131,25 +132,29 @@ $ elegant-bouncer --scan --messaging /tmp/reconstructed
 ```
 Yapısal kuralların kapsadığı tespitler şunlardır:<sup>[[1]](#references)[[2]](#references)</sup>
 - PDF/JBIG2 FORCEDENTRY (CVE‑2021‑30860): imkânsız JBIG2 dictionary durumları
-- WebP/VP8L BLASTPASS (CVE‑2023‑4863): aşırı büyük Huffman table yapıları
+- WebP/VP8L BLASTPASS (CVE‑2023‑4863): aşırı büyük Huffman table oluşturma işlemleri
 - TrueType TRIANGULATION (CVE‑2023‑41990): belgelenmemiş bytecode opcode'ları
-- DNG/TIFF CVE‑2025‑43300: metadata ve stream component uyumsuzlukları
+- DNG/TIFF CVE‑2025‑43300: metadata ve stream component uyuşmazlıkları
 
 
 ## Validation, caveats, and false positives
 
-- Time conversions: iMessage bazı sürümlerde tarihleri Apple epoch'ları/birimleriyle depolar; reporting sırasında uygun şekilde dönüştürün
-- Schema drift: app SQLite şemaları zaman içinde değişir; table/column adlarını her device build'i için doğrulayın
-- Recursive extraction: PDF'ler JBIG2 stream'leri ve font'lar gömebilir; iç nesneleri çıkarıp tarayın
-- False positives: structural heuristic'ler conservative olsa da nadir görülen bozuk ancak zararsız media'yı işaretleyebilir<sup>[[1]](#references)[[2]](#references)</sup>
+- Zaman dönüşümleri: iMessage bazı sürümlerde tarihleri Apple epoch/unit formatlarında saklar; reporting sırasında uygun dönüşümü gerçekleştirin.<sup>[[2]](#references)</sup>
+- Schema drift: app SQLite schema'ları zaman içinde değişir; table/column adlarını her device build için doğrulayın
+- Recursive extraction: PDF'ler JBIG2 stream'leri ve font'lar gömebilir; inner object'leri çıkarıp tarayabilen bir parser kullanın
+- False positives: yapısal heuristic'ler temkinlidir, ancak nadir görülen bozuk fakat zararsız media'ları işaretleyebilir.<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 ## References
 
-- [1] [ELEGANTBOUNCER: When You Can't Get the Samples but Still Need to Catch the Threat](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
-- [2] [ElegantBouncer project (GitHub)](https://github.com/msuiche/elegant-bouncer)
-- [3] [MVT iOS backup workflow](https://docs.mvt.re/en/latest/ios/backup/check/)
-- [4] [libimobiledevice 1.4.0 release notes](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
-- [5] [Update 11.2 has broken cache cleanup on iOS 18.0.1 (Telegram Bug Tracker)](https://bugs.telegram.org/c/44361)
-
+- [1] [ELEGANTBOUNCER: Örnekleri Alamıyor Olsanız Bile Tehdidi Yakalamanız Gerektiğinde](https://www.msuiche.com/posts/elegantbouncer-when-you-cant-get-the-samples-but-still-need-to-catch-the-threat/)
+- [2] [ElegantBouncer projesi (GitHub)](https://github.com/msuiche/elegant-bouncer)
+- [3] [MVT iOS backup workflow'u](https://docs.mvt.re/en/latest/ios/backup/check/)
+- [4] [libimobiledevice 1.4.0 sürüm notları](https://libimobiledevice.org/news/2025/10/10/libimobiledevice-1.4.0-release/)
+- [5] [Update 11.2, iOS 18.0.1 üzerinde cache cleanup'ı bozdu (Telegram Bug Tracker)](https://bugs.telegram.org/c/44361)
+- [6] [idevicebackup2 manual'i](https://github.com/libimobiledevice/libimobiledevice/blob/master/docs/idevicebackup2.1)
+- [7] [iLEAPP projesi (GitHub)](https://github.com/abrignoni/iLEAPP)
+- [8] [iPhone, iPad veya iPod touch cihazınızdaki encrypted backup'lar hakkında (Apple Support)](https://support.apple.com/en-ie/108353)
+- [9] [Belkasoft X ile iOS WhatsApp Forensics](https://belkasoft.com/ios-whatsapp-forensics-with-belkasoft-x)
+- [10] [ElegantBouncer WhatsApp scanner'ı ve path resolver'ı](https://github.com/msuiche/elegant-bouncer/blob/main/src/messaging.rs)
 {{#include ../../banners/hacktricks-training.md}}
