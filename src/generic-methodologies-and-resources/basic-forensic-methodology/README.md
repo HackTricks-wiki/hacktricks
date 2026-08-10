@@ -1,7 +1,5 @@
 # Grundlegende forensische Methodik
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Erstellen und Mounten eines Images
 
 
@@ -11,7 +9,7 @@
 
 ## Malware-Analyse
 
-Dies **ist nicht unbedingt der erste Schritt, der nach dem Erhalt des Images durchgeführt werden muss**. Diese Malware-Analyse-Techniken können jedoch unabhängig davon verwendet werden, ob eine Datei, ein Datei-System-Image, ein Speicherabbild, ein pcap ... vorliegt. Daher ist es sinnvoll, **diese Maßnahmen im Hinterkopf zu behalten**:
+Dies **ist nicht unbedingt der erste Schritt, den man nach dem Erhalt des Images durchführen muss**. Diese Malware-Analyse-Techniken können jedoch unabhängig davon eingesetzt werden, wenn eine Datei, ein Dateisystem-Image, ein Speicherabbild, ein pcap usw. vorliegt. Daher ist es sinnvoll, **diese Maßnahmen im Hinterkopf zu behalten**:
 
 
 {{#ref}}
@@ -20,14 +18,14 @@ malware-analysis.md
 
 ## Untersuchung eines Images
 
-Wenn dir ein **forensisches Image** eines Geräts vorliegt, kannst du mit der **Analyse der Partitionen und des verwendeten Datei-Systems** sowie der **Wiederherstellung** potenziell **interessanter Dateien** beginnen, einschließlich gelöschter Dateien. Erfahre hier, wie:
+Wenn dir ein **forensisches Image** eines Geräts vorliegt, kannst du mit der **Analyse der Partitionen und des verwendeten Dateisystems** sowie der **Wiederherstellung** potenziell **interessanter Dateien** beginnen, einschließlich gelöschter Dateien. Erfahre hier, wie:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Abhängig von den verwendeten Betriebssystemen und sogar der Plattform sollte nach unterschiedlichen interessanten Artefakten gesucht werden:
+Abhängig von den verwendeten Betriebssystemen und sogar der Plattform sollten nach unterschiedlichen interessanten Artefakten gesucht werden:
 
 
 {{#ref}}
@@ -49,9 +47,9 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Tiefgehende Untersuchung spezifischer Datei-Typen und Software
+## Tiefgehende Untersuchung spezifischer Dateitypen und Software
 
-Wenn du eine sehr **verdächtige** **Datei** hast, können abhängig vom **Datei-Typ und der Software**, mit der sie erstellt wurde, verschiedene **Tricks** nützlich sein.\
+Wenn du eine sehr **verdächtige** **Datei** hast, können je nach **Dateityp und der Software**, mit der sie erstellt wurde, verschiedene **Tricks** hilfreich sein.\
 Lies die folgende Seite, um einige interessante Tricks kennenzulernen:
 
 
@@ -59,7 +57,7 @@ Lies die folgende Seite, um einige interessante Tricks kennenzulernen:
 specific-software-file-type-tricks/
 {{#endref}}
 
-Ich möchte besonders auf folgende Seite hinweisen:
+Besonders erwähnen möchte ich die folgende Seite:
 
 
 {{#ref}}
@@ -73,16 +71,16 @@ specific-software-file-type-tricks/browser-artifacts.md
 memory-dump-analysis/
 {{#endref}}
 
-## Untersuchung von Pcaps
+## Pcap-Untersuchung
 
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forensic-Techniken**
+## **Anti-Forensik-Techniken**
 
-Behalte den möglichen Einsatz von Anti-Forensic-Techniken im Hinterkopf:
+Behalte die mögliche Verwendung von Anti-Forensik-Techniken im Hinterkopf:
 
 
 {{#ref}}
@@ -95,5 +93,7 @@ anti-forensic-techniques.md
 {{#ref}}
 file-integrity-monitoring.md
 {{#endref}}
+
+## References
 
 {{#include ../../banners/hacktricks-training.md}}

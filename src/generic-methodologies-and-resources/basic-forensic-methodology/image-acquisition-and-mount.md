@@ -1,11 +1,8 @@
-# Image-Erfassung & Mounten
+# Image-Akquisition & Mount
 
-{{#include ../../banners/hacktricks-training.md}}
+## Akquisition
 
-
-## Erfassung
-
-> Erfasse immer **nur lesend** und **hashe während des Kopierens**. Halte das Originalgerät **schreibgeschützt** und arbeite ausschließlich mit verifizierten Kopien.
+> Erfasse immer **schreibgeschützt** und **berechne den Hash während des Kopierens**. Halte das Originalgerät **schreibgeschützt** und arbeite ausschließlich mit verifizierten Kopien.
 
 ### DD
 ```bash
@@ -31,7 +28,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-AFF4 ist Googles modernes Abbildformat, das für *sehr* große Beweismaterialien entwickelt wurde (sparse, fortsetzbar, cloud-native).<sup>[[1]](#references)</sup>
+Die AFF4 v1.0-Spezifikation, verfasst von Bradley L. Schatz und Michael I. Cohen, definiert einen forensischen Container mit virtualisiertem Speicher, beliebigen Metadaten, erweiterbarer Komprimierung und Hashing sowie einem hohen Datendurchsatz.<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -42,7 +39,7 @@ velociraptor --config server.yaml frontend collect --artifact Windows.Disk.Acqui
 ```
 ### FTK Imager (Windows & Linux)
 
-Sie können [FTK Imager herunterladen](https://accessdata.com/product-download) und **raw-, E01- oder AFF4-Images** erstellen:
+Du kannst [FTK Imager herunterladen](https://accessdata.com/product-download) und **raw-, E01- oder AFF4-Images** erstellen:
 ```bash
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 --description 'Laptop seizure 2025-07-22' --examiner 'AnalystName' --compress 6
@@ -51,25 +48,25 @@ ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
-### Forensische Abbilder von Cloud-Datenträgern
+### Cloud-Datenträger abbilden
 
-*AWS* – Erstelle einen **forensischen Snapshot**, ohne die Instanz herunterzufahren:
+*AWS* – Erstelle einen **forensic snapshot**, ohne die **Instance** herunterzufahren:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – verwende `az snapshot create` und exportiere zu einer SAS-URL.
+*Azure* – verwende `az snapshot create` und exportiere zu einer SAS URL.
 
 
-## Einbinden
+## Mounten
 
-### Den richtigen Ansatz auswählen
+### Den richtigen Ansatz wählen
 
-1. Binde die **gesamte Festplatte** ein, wenn du die ursprüngliche Partitionstabelle (MBR/GPT) benötigst.
-2. Binde eine **einzelne Partitionsdatei** ein, wenn du nur ein Volume benötigst.
-3. Binde immer **schreibgeschützt** ein (`-o ro,norecovery`) und arbeite mit **Kopien**.<sup>[[2]](#references)</sup>
+1. Mounten Sie die **gesamte Festplatte**, wenn Sie die ursprüngliche Partitionstabelle (MBR/GPT) benötigen.
+2. Mounten Sie eine **einzelne Partitionsdatei**, wenn Sie nur ein Volume benötigen.
+3. Halten Sie Image-Anbindungen schreibgeschützt (zum Beispiel mit `--read-only` von qemu-nbd).<sup>[[2]](#references)</sup> Mounten Sie Dateisysteme schreibgeschützt (`-o ro`).<sup>[[3]](#references)</sup> Arbeiten Sie mit **Kopien**.
 
-### Raw-Images (dd, AFF4-extracted)
+### Raw-Images (dd, AFF4-extrahiert)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -84,7 +81,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-Nach Abschluss aushängen:
+Nach Abschluss trennen:
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -97,17 +94,19 @@ ewfmount evidence.E01 /mnt/ewf
 # 2. Attach the exposed raw file via qemu-nbd (safer than loop)
 sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 
-# 3. Mount the desired partition
+# 3. Mount the desired partition (XFS example; use the filesystem-specific option)
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-Alternativ kannst du es mit **xmount** spontan konvertieren:
+Für Dateisystem-spezifische no-replay-Mounts verwenden ext3/ext4 `noload`, während XFS `norecovery` nutzt und den schreibgeschützten Modus erfordert.<sup>[[3]](#references)[[4]](#references)</sup>
+
+Alternativ kann die Konvertierung on the fly mit **xmount** erfolgen:
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
 mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
 ### LVM / BitLocker / VeraCrypt-Volumes
 
-Nach dem Anhängen des Blockgeräts (loop oder nbd):
+Nachdem das Blockgerät (loop oder nbd) eingebunden wurde:
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -124,24 +123,27 @@ sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
 ```
-### Häufige mount-Fehler und Lösungen
+### Häufige Mount-Fehler und Behebungen
 
-| Fehler | Typische Ursache | Lösung |
+Verwende bei einem nicht sauber ausgehängten ext3/ext4-Dateisystem `ro,noload`, wenn die Wiedergabe des Journals verhindert werden muss.<sup>[[3]](#references)</sup>
+
+| Fehler | Typische Ursache | Behebung |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | Journaling-FS (ext4) nicht sauber ausgehängt | `-o ro,norecovery` verwenden |
+| `cannot mount /dev/loop0 read-only` | Journaling-FS (ext4) wurde nicht sauber ausgehängt | `-o ro,noload` verwenden |
 | `bad superblock …` | Falscher Offset oder beschädigtes FS | Offset berechnen (`sector*size`) oder `fsck -n` auf einer Kopie ausführen |
-| `mount: unknown filesystem type 'LVM2_member'` | LVM-Container | Volume Group mit `vgchange -ay` aktivieren |
+| `mount: unknown filesystem type 'LVM2_member'` | LVM-Container | Volume group mit `vgchange -ay` aktivieren |
 
 ### Bereinigung
 
-Denke daran, **umount** auszuführen und Loop-/nbd-Geräte zu **disconnecten**, damit keine verwaisten Mappings zurückbleiben, die weitere Arbeiten beschädigen können:
+Denke daran, Loop-/nbd-Geräte zu **umount**-en und zu **disconnect**-en, damit keine verwaisten Zuordnungen zurückbleiben, die weitere Arbeiten beschädigen können:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ```
-## Referenzen
+## References
 
-- [1] [AFF4 Standard Specification (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
-- [2] [qemu-nbd manual page (mounting disk images safely)](https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html)
-
+- [1] [AFF4-Standardspezifikation (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
+- [2] [QEMU qemu-nbd-Dokumentation](https://www.qemu.org/docs/master/tools/qemu-nbd.html)
+- [3] [Linux-Handbuchseite mount(8)](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [4] [Das SGI-XFS-Dateisystem (Linux-Kernel-Dokumentation)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
 {{#include ../../banners/hacktricks-training.md}}
