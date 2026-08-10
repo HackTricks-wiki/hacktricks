@@ -1,14 +1,12 @@
 # PNG trikovi
 
-{{#include ../../../banners/hacktricks-training.md}}
+**PNG datoteke** su veoma česte u **CTF-ovima**, **incident response-u** i **malware staging-u** jer su **lossless**, zasnovane na **chunk-ovima**, a mnogi alati će ih bez problema prikazati čak i kada sadrže **dodatne metadata podatke**, **payload-e dodate na kraj datoteke** ili **delimično oštećene chunk-ove**.
 
-**PNG datoteke** su veoma česte u **CTF-ovima**, **incident response-u** i **malware staging-u** zato što su **bez gubitka**, **zasnovane na chunk-ovima**, a mnogi alati će ih bez problema prikazati čak i kada sadrže **dodatne metapodatke**, **dodatne payload-e** ili **delimično oštećene chunk-ove**.
-
-Posmatrajte PNG kao **kontejner**, a ne samo kao sliku.
+Posmatrajte PNG kao **container**, a ne samo kao sliku.
 
 ## Brza trijaža
 
-Počnite proverama na nivou kontejnera pre nego što pređete na LSB stego. Za workflow sa bit-plane/LSB tehnikom pogledajte [posebnu stranicu o image stego](../../../stego/images/README.md).
+Počnite proverama na nivou container-a pre nego što pređete na LSB stego. Za workflow sa bit-plane/LSB proverite [posvećenu stranicu o image stego tehnikama](../../../stego/images/README.md).
 ```bash
 file suspect.png
 pngcheck -vp suspect.png
@@ -16,15 +14,15 @@ exiftool -a -u -g1 suspect.png
 strings -n 6 suspect.png | head
 binwalk -eM suspect.png
 ```
-Korisne stvari koje treba tražiti:
+Korisne stvari na koje treba obratiti pažnju:
 
 - **Neočekivani pomoćni chunk-ovi** kao što su `tEXt`, `zTXt`, `iTXt`, `eXIf` ili `iCCP`
 - **CRC greške** ili neispravne dužine chunk-ova
 - **Dodatni podaci nakon `IEND`**
-- **Višestruke oznake `IEND`** ili fragmenti `IDAT` koji mogu da se oporave nakon formalnog kraja datoteke
-- Datoteka koja je validan PNG **i** istovremeno izgleda kao ZIP/PDF/script kada se izvrši carving
+- **Višestruki `IEND` markeri** ili fragmenti `IDAT` koji mogu da se oporave nakon formalnog kraja datoteke
+- Datoteka koja je validan PNG **i** istovremeno izgleda kao ZIP/PDF/script kada se izdvoji
 
-Imajte na umu da je minimalna validna struktura obično:
+Zapamtite da je minimalna validna struktura obično:
 
 - `IHDR` (mora biti prvi)
 - `IDAT` (jedan ili više uzastopnih chunk-ova)
@@ -32,9 +30,9 @@ Imajte na umu da je minimalna validna struktura obično:
 
 ## Podaci nakon `IEND`
 
-Jedan od artefakata PNG-a sa najviše indikatora je **dodavanje podataka nakon poslednjeg `IEND` chunk-a**. Mnogi decoder-i ih ignorišu, što ih čini korisnim za:
+Jedan od artefakata PNG-a sa najviše indikatora je **dodavanje podataka nakon poslednjeg `IEND` chunk-a**. Mnogi dekoderi ih ignorišu, što ih čini korisnim za:
 
-- **Jednostavan stego / skrivene payload-e**
+- **Simple stego / skrivene payload-e**
 - **PNG polyglots**
 - **Malware staging**
 - **Oporavak starijih podataka slike** iz neispravnih editora
@@ -57,18 +55,18 @@ dd if=suspect.png of=png-trailer.bin bs=1 skip=$((IEND_OFF+8))
 file png-trailer.bin
 binwalk -eM png-trailer.bin
 ```
-Takođe direktno isprobajte generičke parsere arhiva na PNG datoteci ili izdvojenom traileru:
+Takođe direktno testirajte generičke parserе arhiva na PNG-u ili izdvojenom završnom delu:
 ```bash
 7z l suspect.png
 unzip -l suspect.png
 ```
-## Oporavak u stilu Acropalypse-a isečenih/redigovanih screenshotova
+## Oporavak u stilu Acropalypse iz isečenih/cenzurisanih snimaka ekrana
 
-Veoma praktičan noviji PNG forenzički trik jeste provera da li je editor screenshotova **prepisao** PNG bez prethodnog **skraćivanja** starog fajla. U tim slučajevima, bajtovi iz **prethodne slike** mogu ostati nakon `IEND`, a ponekad se dodatni `IDAT` podaci mogu delimično rekonstruisati.
+Veoma praktičan noviji PNG forenzički trik jeste provera da li je editor snimaka ekrana **prepisao** PNG bez prethodnog **skraćivanja** stare datoteke. U tim slučajevima bajtovi iz **prethodne slike** mogu ostati nakon `IEND`, a ponekad se dodatni `IDAT` podaci mogu delimično rekonstruisati.
 
-Ovo je postalo poznato zahvaljujući **aCropalypse** (Google Pixel Markup) i povezanom problemu u alatu **Windows Snipping Tool**. U praksi, ako "isečeni" ili "redigovani" PNG i dalje sadrži stare podatke na kraju, možda ćete moći da oporavite deo originalnog screenshota.<sup>[[1]](#references)</sup>
+Ovo je postalo dobro poznato kroz **aCropalypse** (Google Pixel Markup) i povezani problem sa **Windows Snipping Tool**.<sup>[[3]](#references)</sup> U praksi, ako "isečeni" ili "cenzurisani" PNG i dalje sadrži stare podatke na kraju datoteke, možda ćete moći da oporavite deo originalnog snimka ekrana.<sup>[[1]](#references)</sup>
 
-Praktičan tok rada:
+Praktični tok rada:
 ```bash
 pngcheck -v screenshot.png
 exiftool screenshot.png | grep -i trailer
@@ -79,26 +77,26 @@ Znakovi koji snažno opravdavaju dublju analizu:
 
 - `pngcheck` prijavljuje **additional data after `IEND`**
 - Pronađete **više od jednog `IEND`**
-- Pronađete **dodatne `IDAT` chunk-ove** nakon prividnog kraja slike
-- Screenshot potiče sa uređaja/editora za koji je poznato da je bio pogođen
+- Pronađete **dodatne `IDAT` chunks** nakon prividnog kraja slike
+- Screenshot potiče sa uređaja/editor-a za koji se zna da je bio pogođen
 
-Ako se ovo desi, prosledite fajl **aCropalypse recovery tool** alatu pre nego što redakciju smatrate pouzdanom.
+Ako se to dogodi, prosledite fajl **aCropalypse recovery tool-u** pre nego što zamagljivanje smatrate pouzdanim.
 
-## Zloupotreba chunk-ova koja je važna u praksi
+## Zloupotreba chunk-ova koja je praktično važna
 
-Najzanimljiviji PNG chunk-ovi za istrage obično nisu očigledni image chunk-ovi, već chunk-ovi koji mogu sadržati **tekst**, **metadata** ili **payload bytes**:
+Najzanimljiviji PNG chunks za istrage obično nisu očigledni image chunks, već chunks koji mogu sadržati **text**, **metadata** ili **payload bytes**:
 
 - `tEXt` / `zTXt` / `iTXt` – text metadata i compressed text
 - `eXIf` – EXIF data unutar PNG-a
 - `iCCP` – embedded ICC profile
-- `PLTE` – palette data u indexed image-ovima, ali i korisno u scenarijima payload-smuggling-a<sup>[[2]](#references)</sup>
+- `PLTE` – palette data u indexed images, ali i korisno u payload-smuggling scenarijima.<sup>[[2]](#references)</sup>
 
-Ispišite ih pomoću:
+Izdvojite ih pomoću:
 ```bash
 pngcheck -vp suspect.png
 exiftool -a -u -g1 suspect.png
 ```
-Za persistence offensive payload-a unutar PNG chunk-ova (na primer trikovi sa **PLTE**, **IDAT** ili **tEXt** koji opstaju nakon nekih PHP transformacija slika), pogledajte detaljnije beleške usmerene na upload ovde<sup>[[2]](#references)</sup>:
+Za persistence ofanzivnog payload-a unutar PNG chunks (na primer trikovi sa **PLTE**, **IDAT** ili **tEXt** koji opstaju nakon nekih PHP transformacija slika), pogledajte detaljnije beleške usmerene na upload ovde:<sup>[[2]](#references)</sup>
 
 {{#ref}}
 ../../../pentesting-web/file-upload/README.md
@@ -106,21 +104,21 @@ Za persistence offensive payload-a unutar PNG chunk-ova (na primer trikovi sa **
 
 ## Popravka oštećenog PNG-a
 
-Za proveru integriteta i pronalaženje tačne oštećene oblasti, **pngcheck** je i dalje jedan od najboljih prvih alata:
+Za proveru integriteta i pronalaženje tačne oštećene oblasti, **pngcheck** je i dalje jedan od najboljih alata za početnu proveru:
 
 - [pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)
 
-Ako je fajl oštećen, a ne namerno zlonameran, **PCRT** može biti koristan u CTF-ovima i laboratorijskom radu za popravljanje uobičajenih problema, kao što su neispravni header-i, pogrešne IHDR vrednosti, CRC problemi ili neispravni rasporedi chunk-ova.
+Ako je fajl oštećen, a ne namerno zlonameran, **PCRT** može biti koristan u CTF-ovima i laboratorijskom radu za popravljanje uobičajenih problema, kao što su neispravna zaglavlja, pogrešne IHDR vrednosti, CRC problemi ili neispravno formatirani chunk-ovi.
 
-Ako je vaš cilj da **sanitizujete** PNG koji sadrži sumnjive trailer podatke uz očuvanje vidljive slike, ExifTool može eksplicitno ukloniti trailer:
+Ako je vaš cilj da **sanitizujete** PNG koji sadrži sumnjive trailer podatke, uz očuvanje vidljive slike, ExifTool može eksplicitno ukloniti trailer:
 ```bash
 exiftool -Trailer:All= -overwrite_original suspect.png
 ```
 Za osetljive dokaze uvek radite na **kopiji** i sačuvajte hash vrednosti originala pre pokušaja popravke.
 
-## Reference
+## References
 
-- [1] [Exploiting aCropalypse: Recovering Truncated PNGs](https://www.da.vidbuchanan.co.uk/blog/exploiting-acropalypse.html)
-- [2] [Persistent PHP payloads in PNGs: How to inject PHP code in an image – and keep it there](https://www.synacktiv.com/en/publications/persistent-php-payloads-in-pngs-how-to-inject-php-code-in-an-image-and-keep-it-there)
-
+- [1] [Exploiting aCropalypse: Oporavak skraćenih PNG-ova](https://www.da.vidbuchanan.co.uk/blog/exploiting-acropalypse.html)
+- [2] [Persistent PHP payloads in PNGs: Kako ubaciti PHP kod u sliku – i zadržati ga u njoj](https://www.synacktiv.com/en/publications/persistent-php-payloads-in-pngs-how-to-inject-php-code-in-an-image-and-keep-it-there)
+- [3] [NVD - CVE-2023-28303](https://nvd.nist.gov/vuln/detail/CVE-2023-28303)
 {{#include ../../../banners/hacktricks-training.md}}

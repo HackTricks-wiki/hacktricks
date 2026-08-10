@@ -1,10 +1,13 @@
 # Web zahtevi
 
-{{#include ../../banners/hacktricks-training.md}}
-
-
 ## Python Requests
+
+Ovi primeri koriste dokumentovane argumente zahteva, svojstva odgovora, tuple-ove multipart datoteka i sesije biblioteke Requests.<sup>[[1]](#references)</sup> Primeri sa `verify=False` onemogućavaju verifikaciju TLS sertifikata i treba ih ograničiti na kontrolisano testiranje.<sup>[[1]](#references)</sup>
 ```python
+import random
+import re
+import string
+
 import requests
 
 url = "http://example.com:80/some/path.php"
@@ -23,7 +26,7 @@ body_text = gr.text
 ret_cookies = gr.cookies
 is_redirect = gr.is_redirect
 is_permanent_redirect = gr.is_permanent_redirect
-float_seconds = gr.elapsed.total_seconds() 10.231
+float_seconds = gr.elapsed.total_seconds()
 
 #Regular Post requests sending parameters (data)
 pr = requests.post(url, data=params, headers=headers, cookies=cookies, verify=False, allow_redirects=True, proxies=proxies)
@@ -71,7 +74,9 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python komanda za iskorišćavanje RCE-a
+## Python cmd za iskorišćavanje RCE-a
+
+Petlja komandi nasleđuje Python-ov `Cmd`; njen metod `default` obrađuje neprepoznate prefikse komandi, `cmdloop` prosleđuje ulazne redove, a `re.DOTALL` omogućava da obrazac za izdvajanje obuhvati više redova.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -98,4 +103,9 @@ return 1
 term = Terminal()
 term.cmdloop()
 ```
+## References
+
+- [1] [Razvojni interfejs za Requests](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Podrška za linijski orijentisane interpretere komandi](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Operacije regularnih izraza](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

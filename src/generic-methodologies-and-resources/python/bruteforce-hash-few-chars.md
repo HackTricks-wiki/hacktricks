@@ -1,6 +1,4 @@
-# Brute-force hash-a sa nekoliko karaktera
-
-{{#include ../../banners/hacktricks-training.md}}
+# Bruteforce Hash Nekoliko Znakova
 ```python
 import hashlib
 
@@ -51,4 +49,6 @@ return 0
 
 main()
 ```
+## References
+
 {{#include ../../banners/hacktricks-training.md}}

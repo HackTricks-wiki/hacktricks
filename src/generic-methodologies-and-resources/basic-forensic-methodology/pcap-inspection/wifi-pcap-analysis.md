@@ -1,41 +1,48 @@
-# Wifi Pcap analiza
-
-{{#include ../../../banners/hacktricks-training.md}}
+# Wifi Pcap Analysis
 
 ## Provera BSSID-ova
 
-Kada primite capture čiji je glavni saobraćaj Wifi i koristite WireShark, možete početi da istražujete sve SSID-ove iz capture-a pomoću opcije _Wireless --> WLAN Traffic_:
+Kada je Wi-Fi capture otvoren u Wireshark-u, izaberite _Wireless → WLAN Traffic_ da biste saželi bežične mreže uočene u capture-u; svaki red predstavlja jednu bežičnu mrežu.<sup>[[1]](#references)</sup>
 
-![Wifi Pcap analiza - Provera BSSID-ova: Kada primite capture čiji je glavni saobraćaj Wifi i koristite WireShark, možete početi da istražujete sve SSID-ove iz capture-a pomoću opcije Wireless --...](<../../../images/image (106).png>)
+![Wifi Pcap Analysis - Provera BSSID-ova: Kada dobijete capture čiji je glavni saobraćaj Wifi i koristite WireShark, možete početi da istražujete sve SSID-ove iz capture-a pomoću opcije Wireless --...](<../../../images/image (106).png>)
 
-![Wifi Pcap analiza - Provera BSSID-ova: Kada primite capture čiji je glavni saobraćaj Wifi i koristite WireShark, možete početi da istražujete sve SSID-ove iz capture-a pomoću opcije Wireless --...](<../../../images/image (492).png>)
+![Wifi Pcap Analysis - Provera BSSID-ova: Kada dobijete capture čiji je glavni saobraćaj Wifi i koristite WireShark, možete početi da istražujete sve SSID-ove iz capture-a pomoću opcije Wireless --...](<../../../images/image (492).png>)
 
 ### Brute Force
 
-Jedna od kolona na tom ekranu pokazuje da li je **bilo koja autentikacija pronađena unutar pcap-a**. Ako jeste, možete pokušati da izvršite Brute force pomoću `aircrack-ng`:
+Za WPA/WPA2-PSK capture-e, `aircrack-ng` zahteva upotrebljiv four-way EAPOL handshake i testira kandidatne lozinke pomoću rečnika. Koristite `-w` da navedete wordlist, a `-b` da odredite BSSID pristupne tačke:<sup>[[2]](#references)</sup>
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
-Na primer, preuzeće WPA passphrase koji štiti PSK (pre-shared key), a koji će kasnije biti potreban za dešifrovanje saobraćaja.
+Ako se kandidat podudara, Aircrack-ng oporavlja unapred deljeni ključ; odgovarajuća lozinka i SSID se zatim mogu podesiti u Wireshark-ovim postavkama za dešifrovanje 802.11 saobraćaja kada capture i bezbednosni režim to podržavaju.<sup>[[2]](#references)[[5]](#references)</sup>
 
 ## Podaci u Beacon-ima / Side Channel
 
-Ako sumnjate da se **podaci leak-uju unutar beacon-a WiFi mreže**, možete proveriti beacon-e mreže koristeći filter poput sledećeg: `wlan contains <NAMEofNETWORK>`, ili `wlan.ssid == "NAMEofNETWORK"` i pretražiti filtrirane pakete u potrazi za sumnjivim stringovima.
+Ako sumnjate da **podaci cure kroz beacon-side-channel saobraćaj**, počnite sa display filter-om kao što je `wlan contains "NAMEofNETWORK"` ili `wlan.ssid == "NAMEofNETWORK"`, a zatim pregledajte odgovarajuće frame-ove u potrazi za sumnjivim stringovima. Prvi oblik je široka pretraga bajtova; drugi se podudara sa SSID poljem.<sup>[[3]](#references)[[4]](#references)</sup>
 
-## Pronalaženje nepoznatih MAC adresa u WiFi mreži
+## Pronalaženje nepoznatih MAC adresa u Wi-Fi mreži
 
-Sledeća veza će biti korisna za pronalaženje **mašina koje šalju podatke unutar WiFi mreže**:
+Wireshark izlaže `wlan.ta` kao adresu transmitera, a `wlan.addr` kao hardversku/MAC adresu; display filter-i mogu kombinovati ova polja sa logičkim operatorima:<sup>[[3]](#references)[[4]](#references)</sup>
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-Ako već znate **MAC adrese, možete ih ukloniti iz izlaza** dodavanjem provera poput ove: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+Ako već znate **MAC adrese, uklonite ih iz izlaza** dodavanjem provera kao što je `&& !(wlan.addr == 5c:51:88:31:a0:3b)`.
 
-Kada detektujete **nepoznate MAC** adrese koje komuniciraju unutar mreže, možete koristiti **filtere** poput sledećeg: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` da filtrirate njihov saobraćaj. Imajte na umu da su ftp/http/ssh/telnet filteri korisni ako ste dešifrovali saobraćaj.
+Kada otkrijete **nepoznate MAC** adrese koje komuniciraju unutar mreže, koristite filter kao što je `wlan.addr == <MAC address> && (ftp || http || ssh || telnet)` da biste suzili njihov saobraćaj. FTP, HTTP, SSH i Telnet filter-i korisni su samo kada Wireshark može da disektuje odgovarajući dešifrovani payload.<sup>[[3]](#references)[[5]](#references)</sup>
 
 ## Dešifrovanje saobraćaja
 
-Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
+Da biste dodali 802.11 ključ za dešifrovanje u Wireshark-u, otvorite _Edit → Preferences → Protocols → IEEE 802.11_ i kliknite na _Edit_ pored opcije _Decryption Keys_.<sup>[[5]](#references)</sup>
 
-![Pronalaženje nepoznatih MAC adresa u WiFi mreži - Dešifrovanje saobraćaja: Kada detektujete nepoznate MAC adrese koje komuniciraju unutar mreže, možete koristiti filtere poput sledećeg:...](<../../../images/image (499).png>)
+![Pronalaženje nepoznatih MAC adresa u Wi-Fi mreži - Dešifrovanje saobraćaja: Kada otkrijete nepoznate MAC adrese koje komuniciraju unutar mreže, možete koristiti filter-e kao što je sledeći:](<../../../images/image (499).png>)
 
+Za WPA/WPA2, Wireshark-u je obično potreban EAPOL four-way handshake i odgovarajuća lozinka/SSID; prosleđivanje transient key-a može ukloniti zahtev za handshake-om. WPA3 dešifrovanje po konekciji zahteva PMK te konekcije.<sup>[[5]](#references)</sup>
+
+## References
+
+- [1] [Wireshark User's Guide: WLAN saobraćaj](https://www.wireshark.org/docs/wsug_html_chunked/ChWirelessWLANTraffic.html)
+- [2] [Aircrack-ng](https://www.aircrack-ng.org/doku.php?id=aircrack-ng)
+- [3] [Wireshark User's Guide: Building Display Filter Expressions](https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html)
+- [4] [Wireshark Display Filter Reference: IEEE 802.11 wireless LAN](https://www.wireshark.org/docs/dfref/w/wlan.html)
+- [5] [Wireshark User's Guide: IEEE 802.11 WLAN Decryption Keys](https://www.wireshark.org/docs/wsug_html_chunked/Ch80211Keys.html)
 {{#include ../../../banners/hacktricks-training.md}}

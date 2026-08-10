@@ -1,10 +1,8 @@
 # DNSCat pcap analiza
 
-{{#include ../../../banners/hacktricks-training.md}}
+Ako imate PCAP sa podacima koje **DNSCat eksfiltrira** (bez korišćenja encryption-a), možda ćete moći da povratite eksfiltrirani sadržaj.
 
-Ako imate pcap sa podacima koji su **ekfiltrirani pomoću DNSCat-a** (bez korišćenja enkripcije), možete pronaći ekfiltrirani sadržaj.
-
-Potrebno je samo da znate da prvih **9 bajtova** nisu stvarni podaci, već su povezani sa **C\&C komunikacijom**:<sup>[[1]](#references)</sup>
+Za capture sa BSidesSF 2017 naveden ispod, u analizi je zaključeno da je svaki dekodirani upit počinjao sa 9 bajtova dnscat-specifičnih podataka pre prenetog sadržaja. Pošto dnscat2 definiše različite tipove paketa i layout-e zaglavlja, proverite relevantni framing pre nego što taj offset primenite na drugi traffic.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -23,15 +21,15 @@ last = qry
 
 #print(f)
 ```
-Za više informacija: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)<sup>[[1]](#references)</sup>\
-[https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
+Za više informacija pogledajte [BSidesSF 2017 write-up](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap) i [dnscat2 protocol documentation](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md).
 
-Postoji script koji radi sa Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
+Repozitorijum [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder) pruža decoder za Python 3 koji izdvaja stream-ove iz PCAP-a filtriranjem DNS upita za navedeni domen.<sup>[[3]](#references)</sup>
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
-## Reference
+## References
 
-- [1] [DNSCat2 pcap forenzički izveštaj – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
-
+- [1] [dokumentacija dnscat2 protokola](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
+- [2] [forenzički writeup DNSCat2 pcap-a – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
+- [3] [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 {{#include ../../../banners/hacktricks-training.md}}

