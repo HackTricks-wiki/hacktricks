@@ -1,32 +1,45 @@
 # Databasis leaks
 
-{{#include ../../banners/hacktricks-training.md}}
+## Data Breach-soekenjins
 
-## Soekenjins vir data-oortredings
+- [GreyNoise Visualizer](https://viz.greynoise.io/) - Soek IP's en CIDR's na, en doen navrae oor scanner-aktiwiteit volgens tags, CVE's en metadata.<sup>[[1]](#references)</sup>
+- [DeHashed](https://www.dehashed.com/) - Soek blootgestelde data volgens gebruikersname, e-posadresse, IP-adresse en ander selectors; monitoring en 'n API is ook beskikbaar.<sup>[[2]](#references)</sup>
+- [Have I Been Pwned?](https://haveibeenpwned.com/) - Kontroleer of 'n e-posadres in bekende data breaches of paste-rekords voorkom; kennisgewings en 'n API is ook beskikbaar.<sup>[[3]](#references)</sup>
+- [ScamSearch](https://scamsearch.io/) - Soek gerapporteerde scammer-rekords volgens profielfoto, e-pos, gebruikersnaam, telefoonnommer, crypto-adres of webwerf.<sup>[[4]](#references)</sup>
+- [Intelligence X](https://intelx.io/) - Soek selectors soos e-posadresse, domeine, URL's, IP's en CIDR's oor geïndekseerde bronne.<sup>[[5]](#references)</sup>
+- [SpyCloud](https://spycloud.com/check-your-exposure/) - Kontroleer 'n besigheids-e-pos of domein vir blootgestelde credentials, infostealer-geïnfekteerde identiteite en gesteelde session cookies.<sup>[[6]](#references)</sup>
+- [WeLeakInfo](https://weleakinfo.io/) - Soek leaked databases deur domeine, name, e-posse, ID's, fone, IP's, URL's of hashes te gebruik.<sup>[[7]](#references)</sup>
+- [BreachDirectory](https://breachdirectory.org/) - Kontroleer of jou e-pos of gebruikersnaam gekompromitteer is.
+- [LeakCheck](https://leakcheck.io/) - Soek na blootgestelde e-pos-, gebruikersnaam-, telefoon-, hash- of domeindata en monitor vir nuwe inskrywings.<sup>[[8]](#references)</sup>
+- [Findemail.io](https://findemail.io/) - Vind e-posadresse vir 'n gegewe maatskappy.
+- [Library of Leaks](https://search.libraryofleaks.org/) - Soek openbare dokumente, maatskappye en mense, insluitend leak-datasets.<sup>[[9]](#references)</sup>
+- [LeakRadar](https://leakradar.io/) - Soek leaked credentials volgens e-pos, domein of rou string en monitor vir nuwe blootstellings.<sup>[[10]](#references)</sup>
+- [InfoStealers](https://infostealers.info/en/info) - Soek infostealer-logs vanaf geïnfekteerde toestelle en monitor nuwe data.<sup>[[11]](#references)</sup>
+- [Leak-Lookup](https://leak-lookup.com/) - Soek oor data breaches heen en monitor credential-blootstelling.<sup>[[12]](#references)</sup>
+- [Scylla.so](https://scylla.so/) - Gemeenskapgedrewe database breach-soekenjin.
+- [Leaked.domains](https://leaked.domains/) - Soek leaked credentials en verwante rekords volgens domein, e-pos, gebruikersnaam, wagwoord, IP en ander selectors.<sup>[[13]](#references)</sup>
+- [WhiteIntel](https://whiteintel.io/) - Monitor dark-web-aktiwiteit, credential leaks, infostealer-data en handelsmerkvermeldings.<sup>[[14]](#references)</sup>
+- [PSBDMP](https://psbdmp.ws/) - Pastebin-dump-soek- en monitoringplatform.
 
-- [greynoise](https://viz.greynoise.io/) - Soek vir IPs, Tags, CVEs, vpn, dns...
-- [Dehashed](https://www.dehashed.com/) - Jy kan vir jou email soek om te kyk of dit in enige databases geleak is..
-- [HaveIbeenPwned?](https://haveibeenpwned.com/) - kyk of jou email-adres in ’n data-oortreding is
-- [ScamSearch](https://scamsearch.io/) - soek om ’n foonnommer, email of profiel te vind indien dit aan ’n scammer behoort.
-- [Intelligence X](https://intelx.io/) - Intelligence X is ’n search engine en data-argief. · Die soektog werk met selectors, dit wil sê spesifieke soekterme soos email-adresse, domeine, URLs, IPs...
-- [spycloud](https://portal.spycloud.com/endpoint/enriched-stats/[YOUR-MAIL]) - plaas jou email in YOUR-MAIL.
-- [weleakinfo](https://weleakinfo.io/) - We Leak Info - Leaked Dehashed Databases, soek vir leaks.
-- [breachdirectory](https://breachdirectory.org/) - KONTROLEER OF JOU EMAIL OF GEBRUIKERSNAAM GESKEND IS
-- [leakcheck](https://leakcheck.io/) - Vind uit of jou credentials gekompromitteer is
-- [Findemail.io](https://findemail.io/) - Vind email-adresse vir ’n gegewe maatskappy.
-- [LibraryOfLeaks](https://search.libraryofleaks.org) - Soek vir leak-dokumente, maatskappye, mense, databases en meer
-- [LeakRadar](https://leakradar.io/) - Onmiddellike soektog oor 2 B+ plain-text info-stealer credentials; email-, domein- en metadata-navrae, monitering en API
-- [InfoStealers](https://infostealers.info/en/info) - Indekseer infostealer-logs wat op die darknet blootgestel is en maak hulle soekbaar en bruikbaar vir security-spanne, ondersoekers, navorsers en digital forensics-professionals.
-- [Leak-Lookup](https://leak-lookup.com/) - Search engine vir data-oortredings met meer as 3 miljard rekords uit meer as 3000 databases.
-- [BreachDirectory](https://breachdirectory.org/) - Kyk of jou credentials in data-oortredings gekompromitteer is.
-- [Scylla.so](https://scylla.so/) - Community-driven database breach search engine.
-- [Leaked.domains](https://leaked.domains/) - Soek vir domeinverwante leaked credentials en data.
-- [WhiteIntel](https://whiteintel.io/) - Dark web data leak search engine vir threat intelligence.
-- [PSBDMP](https://psbdmp.ws/) - Pastebin dump-soek- en moniteringsplatform.
+## Gereedskap om data leaks te enumereer
 
+- [Leaker](https://github.com/vflame6/leaker) - Passiewe leak discovery CLI wat verskeie aanlynbronne volgens e-pos, gebruikersnaam, domein, sleutelwoord of telefoon deursoek.<sup>[[15]](#references)</sup>
 
-## Tools om data leaks te enumeriseer
+## References
 
-- [Leaker](https://github.com/vflame6/leaker) - Passiewe leak-enumeration CLI tool wat gelyktydig oor 10 breach-databases soek.
-
+- [1] [Gebruik van die GreyNoise Visualizer](https://docs.greynoise.io/docs/using-the-greynoise-visualizer)
+- [2] [DeHashed](https://www.dehashed.com/)
+- [3] [Have I Been Pwned](https://haveibeenpwned.com/)
+- [4] [Globale Scammer-databasis - ScamSearch](https://scamsearch.io/)
+- [5] [Intelligence X](https://intelx.io/)
+- [6] [Kontroleer jou blootstelling - SpyCloud](https://spycloud.com/check-your-exposure/)
+- [7] [WeLeakInfo](https://weleakinfo.io/)
+- [8] [Data Breach-soekenjin - LeakCheck](https://leakcheck.io/)
+- [9] [Library of Leaks](https://search.libraryofleaks.org/)
+- [10] [LeakRadar](https://leakradar.io/)
+- [11] [OSINT InfoStealers.Info](https://infostealers.info/en/info)
+- [12] [Leak-Lookup - Data Breach-soekenjin](https://leak-lookup.com/)
+- [13] [Leaked.Domains - Universele soektog](https://leaked.domains/)
+- [14] [WhiteIntel - Dark Web-intelligensie- en monitoringplatform](https://whiteintel.io/)
+- [15] [vflame6/leaker](https://github.com/vflame6/leaker)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,31 +1,29 @@
-# Fuzzing Methodologie
+# Fuzzing-metodologie
 
-{{#include ../banners/hacktricks-training.md}}
+## Mutational Grammar Fuzzing: Coverage teenoor Semantiek
 
-## Mutational Grammar Fuzzing: Coverage vs. Semantiek
+In **mutational grammar fuzzing** word invoere gemuteer terwyl hulle **grammar-valid** bly. In coverage-guided-modus word slegs samples wat **new coverage** aktiveer, as corpus seeds gestoor. Vir **language targets** (parsers, interpreters, engines) kan dit bugs mis wat **semantic/dataflow chains** vereis, waar die uitvoer van een konstruk die invoer van ’n ander word.<sup>[[1]](#references)</sup>
 
-In **mutational grammar fuzzing** word inputs gemuteer terwyl hulle **grammar-valid** bly. In coverage-guided mode word slegs samples wat **nuwe coverage** aktiveer, as corpus seeds gestoor. Vir **language targets** (parsers, interpreters, engines) kan dit bugs miskyk wat **semantiese/dataflow-kettings** vereis, waar die uitvoer van een konstruk die invoer van 'n ander word.
+**Failure mode:** die fuzzer vind seeds wat individueel `document()` en `generate-id()` (of soortgelyke primitiewe) uitvoer, maar **nie die chained dataflow behou nie**, sodat die sample wat “closer-to-bug” is, weggegooi word omdat dit nie coverage byvoeg nie. Met **3+ dependent steps** word random recombination duur, en coverage-feedback lei nie die search nie.<sup>[[1]](#references)</sup>
 
-**Failure mode:** die fuzzer vind seeds wat individueel `document()` en `generate-id()` (of soortgelyke primitives) uitvoer, maar **bewaar nie die gekoppelde dataflow nie**, sodat die sample wat “nader aan die bug” is, weggegooi word omdat dit nie coverage byvoeg nie. Met **3+ afhanklike stappe** word random recombination duur en coverage-feedback lei nie die soektog nie.
+**Implication:** vir grammars met baie dependencies, oorweeg dit om **mutational en generative phases te hybridize** of generation te bias na **function chaining**-patrone (nie net coverage nie).<sup>[[1]](#references)</sup>
 
-**Implikasie:** vir grammars met baie afhanklikhede, oorweeg dit om **mutational en generative fases te hybridiseer** of generation te bevoordeel wat op **function chaining**-patrone fokus (nie net coverage nie).<sup>[[1]](#references)</sup>
+## Corpus Diversity Pitfalls
 
-## Slaggate met Corpus Diversity
+Coverage-guided mutation is **greedy**: ’n sample met new coverage word onmiddellik gestoor, en behou dikwels groot onveranderde areas. Met verloop van tyd word corpora **near-duplicates** met lae strukturele diversity. Aggressive minimization kan nuttige konteks verwyder, dus is ’n praktiese kompromie **grammar-aware minimization** wat **stop ná ’n minimum token threshold** (verminder noise terwyl genoeg omliggende struktuur behou word om mutation-friendly te bly).<sup>[[1]](#references)</sup>
 
-Coverage-guided mutation is **gulsig**: 'n sample met nuwe coverage word onmiddellik gestoor en behou dikwels groot onveranderde areas. Met verloop van tyd word corpora **byna-duplikate** met lae strukturele diversiteit. Aggressiewe minimization kan nuttige konteks verwyder, dus is 'n praktiese kompromie **grammar-aware minimization** wat **stop ná 'n minimum token-drempel** (verminder geraas terwyl genoeg omliggende struktuur behoue bly om mutation-friendly te wees).<sup>[[1]](#references)</sup>
-
-'n Praktiese corpus-reël vir mutational fuzzing is: **verkies 'n klein stel struktureel verskillende seeds wat coverage maksimeer** bo 'n groot versameling byna-duplikate. In die praktyk beteken dit gewoonlik:<sup>[[1]](#references)</sup>
+’n Praktiese corpus-reël vir mutational fuzzing is: **verkies ’n klein stel seeds wat struktureel van mekaar verskil en coverage maksimeer** bo ’n groot versameling near-duplicates. In die praktyk beteken dit gewoonlik die volgende.<sup>[[1]](#references)[[3]](#references)</sup>
 
 - Begin met **real-world samples** (public corpora, crawling, captured traffic, file sets uit die target-ekosisteem).
-- Distilleer hulle met **coverage-based corpus minimization** eerder as om elke geldige sample te behou.
-- Hou seeds **klein genoeg** sodat mutations op betekenisvolle velde land, eerder as om die meeste cycles aan irrelevante bytes te spandeer.
-- Voer corpus minimization weer uit ná groot harness/instrumentation-veranderings, omdat die “beste” corpus verander wanneer reachability verander.
+- Distill hulle met **coverage-based corpus minimization** in plaas daarvan om elke valid sample te behou.
+- Hou seeds **klein genoeg** sodat mutations op betekenisvolle fields land, eerder as om die meeste cycles aan irrelevante bytes te spandeer.
+- Voer corpus minimization weer uit ná groot harness/instrumentation-veranderinge, omdat die “beste” corpus verander wanneer reachability verander.
 
-## Comparison-Aware Mutation Vir Magic Values
+## Comparison-Aware Mutation For Magic Values
 
-'n Algemene rede waarom fuzzers 'n plato bereik, is nie syntax nie, maar **hard comparisons**: magic bytes, length checks, enum strings, checksums of parser dispatch values wat deur `memcmp`, switch tables of cascaded comparisons beskerm word. Pure random mutation mors cycles deur hierdie waardes byte vir byte te probeer raai.
+’n Algemene rede waarom fuzzers plateau, is nie syntax nie, maar **hard comparisons**: magic bytes, length checks, enum strings, checksums of parser dispatch values wat deur `memcmp`, switch tables of cascaded comparisons beskerm word. Pure random mutation mors cycles deur hierdie values byte vir byte te probeer raai.
 
-Vir hierdie targets, gebruik **comparison tracing** (byvoorbeeld AFL++ `CMPLOG` / Redqueen-style workflows) sodat die fuzzer operands van mislukte comparisons kan waarneem en mutations kan bevoordeel wat daarop gemik is om daaraan te voldoen.<sup>[[3]](#references)</sup>
+Vir hierdie targets, gebruik **comparison tracing** (byvoorbeeld AFL++ `CMPLOG` / Redqueen-style workflows) sodat die fuzzer operands van failed comparisons kan waarneem en mutations kan bias na values wat daaraan voldoen.<sup>[[3]](#references)</sup>
 ```bash
 ./configure --cc=afl-clang-fast
 make
@@ -40,32 +38,32 @@ afl-fuzz -i in -o out -c ./target.cmplog -- ./target.afl @@
 ```
 **Praktiese notas:**
 
-- Dit is veral nuttig wanneer die target diep logika agter **file signatures**, **protocol verbs**, **type tags**, of **version-dependent feature bits** versteek.
-- Kombineer dit met **dictionaries** wat uit werklike voorbeelde, protocol-spesifikasies, of debug logs onttrek is. ’n Klein dictionary met grammar-tokens, chunk-name, verbs, en delimiters is dikwels waardevoller as ’n massiewe generiese wordlist.
-- As die target baie opeenvolgende checks uitvoer, los eers die vroegste “magic”-vergelykings op en minimizeer dan die resulterende corpus weer sodat latere fases vanaf reeds-geldige prefixes begin.
+- Dit is veral nuttig wanneer die teiken diep logika agter **file signatures**, **protocol verbs**, **type tags**, of **version-dependent feature bits** verberg.
+- Kombineer dit met **dictionaries** wat uit werklike voorbeelde, protokolspesifikasies of debug logs onttrek is. ’n Klein dictionary met grammar tokens, chunk names, verbs en delimiters is dikwels meer waardevol as ’n massiewe generiese wordlist.
+- As die teiken baie opeenvolgende checks uitvoer, los eers die vroegste “magic”-vergelykings op en minimaliseer dan die resulterende corpus weer, sodat latere fases met reeds-geldige prefixes begin.
 
-## Stateful Fuzzing: Sequences Are Seeds
+## Stateful Fuzzing: Sequences is Seeds
 
-Vir **protocols**, **authenticated workflows**, en **multi-stage parsers**, is die interessante eenheid dikwels nie ’n enkele blob nie, maar ’n **message sequence**. Om die hele transcript in een file saam te voeg en dit blindelings te mutate, is gewoonlik ondoeltreffend omdat die fuzzer elke stap ewe veel mutateer, selfs wanneer slegs die latere boodskap die fragile state bereik.
+Vir **protocols**, **authenticated workflows** en **multi-stage parsers** is die interessante eenheid dikwels nie ’n enkele blob nie, maar ’n **message sequence**. Om die hele transcript in een file saam te voeg en dit blindelings te muteer, is gewoonlik ondoeltreffend omdat die fuzzer elke stap ewe veel muteer, selfs wanneer slegs die latere message die brose state bereik.<sup>[[4]](#references)</sup>
 
-’n Meer doeltreffende patroon is om die **sequence self as die seed** te behandel en **observable state** (response codes, protocol states, parser phases, returned object types) as bykomende feedback te gebruik:<sup>[[4]](#references)</sup>
+’n Meer effektiewe patroon is om die **sequence self as die seed** te behandel en **observable state** (response codes, protocol states, parser phases, returned object types) as addisionele feedback te gebruik.<sup>[[4]](#references)</sup>
 
 - Hou **valid prefix messages** stabiel en fokus mutations op die **transition-driving** message.
 - Cache identifiers en server-generated values uit vorige responses wanneer die volgende stap daarvan afhanklik is.
-- Verkies per-message mutation/splicing bo mutation van die hele serialized transcript as ’n opaque blob.
-- As die protocol betekenisvolle response codes blootstel, gebruik dit as ’n **cheap state oracle** om sequences te prioritiseer wat dieper vorder.
+- Verkies per-message mutation/splicing bo die mutering van die hele serialized transcript as ’n opaque blob.
+- As die protocol betekenisvolle response codes blootstel, gebruik dit as ’n **goedkoop state oracle** om sequences te prioritiseer wat dieper vorder.
 
-Dit is dieselfde rede waarom authenticated bugs, hidden transitions, of parser bugs wat “only-after-handshake” voorkom, dikwels deur vanilla file-style fuzzing gemis word: die fuzzer moet **order, state, en dependencies** behou, nie slegs structure nie.
+Dit is dieselfde rede waarom authenticated bugs, hidden transitions, of parser bugs wat “only-after-handshake” voorkom, dikwels deur vanilla file-style fuzzing gemis word: die fuzzer moet **order, state en dependencies** behou, nie net struktuur nie.<sup>[[4]](#references)</sup>
 
 ## Single-Machine Diversity Trick (Jackalope-Style)
 
-’n Praktiese manier om **generative novelty** met **coverage reuse** te hybridiseer, is om **short-lived workers** teen ’n persistente server te restart. Elke worker begin met ’n leë corpus, sync na `T` sekondes, loop nog `T` sekondes op die gekombineerde corpus, sync weer, en exit dan. Dit lewer **fresh structures each generation** terwyl dit steeds opgehoopte coverage benut.<sup>[[2]](#references)</sup>
+’n Praktiese manier om **generative novelty** met **coverage reuse** te hybridiseer, is om **short-lived workers** teen ’n persistente server te herbegin. Elke worker begin met ’n leë corpus, sync na `T` sekondes, loop nog `T` sekondes op die gekombineerde corpus, sync weer, en exit dan. Dit lewer **fresh structures each generation** terwyl dit steeds opgehoopte coverage benut.<sup>[[1]](#references)[[2]](#references)</sup>
 
-**Server:**
+**Bediener:**
 ```bash
 /path/to/fuzzer -start_server 127.0.0.1:8337 -out serverout
 ```
-**Opeenvolgende werkers (voorbeeldlus):**
+**Opeenvolgende workers (voorbeeldlus):**
 
 <details>
 <summary>Jackalope worker-herbeginlus</summary>
@@ -99,87 +97,85 @@ p.kill()
 
 **Notas:**
 
-- `-in empty` forseer ’n **vars corpus** met elke generering.
-- `-server_update_interval T` benader **vertraagde sync** (novelty eerste, hergebruik later).
-- In grammar fuzzing mode word **initial server sync** by verstek oorgeslaan (geen behoefte aan `-skip_initial_server_sync` nie).
-- Optimale `T` is **target-dependent**; om te skakel nadat die worker die meeste “maklike” coverage gevind het, werk gewoonlik die beste.
+- `-in empty` dwing ’n **vars corpus** met elke generasie af.
+- `-server_update_interval T` benader **vertraagde sinkronisering** (nuutheid eerste, hergebruik later).
+- In grammar fuzzing mode word **aanvanklike server-sinkronisering** by verstek oorgeslaan (geen behoefte aan `-skip_initial_server_sync` nie).
+- Optimale `T` is **teikengebonden**; oorskakeling nadat die worker die meeste “maklike” coverage gevind het, werk gewoonlik die beste.
 
-## Snapshot Fuzzing Vir Moeilik-Om-Te-Harness Teikens
+## Snapshot Fuzzing Vir Teikens Wat Moeilik Ge-Harness Kan Word
 
-Wanneer die kode wat jy wil toets eers bereikbaar word **nadat ’n groot opstellingskoste aangegaan is** (’n VM begin, ’n login voltooi, ’n packet ontvang, ’n container ontleed of ’n diens geïnisialiseer is), is **snapshot fuzzing** ’n nuttige alternatief:
+Wanneer die code wat jy wil toets slegs bereikbaar word **na ’n groot opstellingskoste** (’n VM begin, ’n login voltooi, ’n packet ontvang, ’n container parse, of ’n service initialiseer), is **snapshot fuzzing** ’n nuttige alternatief: neem die gereed proses- of VM-toestand vas, injecteer elke test case in die target se input-pad, voer dit uit totdat ’n crash/timeout plaasvind, en herstel die snapshot. Dit vermy die herhaling van initialisering of protocol-prefixes en is nuttig vir **network services**, **firmware**, **post-auth attack surfaces** en **binary-only targets**.<sup>[[9]](#references)[[10]](#references)</sup>
 
 1. Laat die target loop totdat die interessante toestand gereed is.
-2. Maak op daardie punt ’n snapshot van **geheue + registers**.
-3. Skryf die gemuteerde input vir elke test case direk na die relevante guest/process buffer.
+2. Neem **memory + registers** op daardie punt as ’n snapshot.
+3. Skryf vir elke test case die gemuteerde input direk na die relevante guest/process-buffer.
 4. Voer dit uit totdat ’n crash/timeout/reset plaasvind.
-5. Herstel slegs die **dirty pages** en herhaal.
+5. Herstel die snapshot; vir VM-teikens, herstel slegs die **dirty pages** wanneer dit ondersteun word, en herhaal dan.
 
-Dit voorkom dat die volle opstellingskoste in elke iterasie betaal word en is veral nuttig vir **network services**, **firmware**, **post-auth attack surfaces** en **binary-only targets** wat moeilik is om in ’n klassieke in-process harness te herstruktureer.
+Plaas die snapshot so na as prakties moontlik aan die eerste duur parse/dispatch-stap, soos ná ’n `recv`/`read`- of packet-deserialization-punt, en teken die input-buffer aan wat deur die target gebruik word. Dit volg die beginsel van adaptive placement: beweeg die snapshot dieper in input-verwerking om te voorkom dat werk herhaal word.<sup>[[11]](#references)</sup>
 
-’n Praktiese truuk is om onmiddellik ná ’n `recv`/`read`/packet-deserialization-punt te breek, die input buffer se adres aan te teken, en daar ’n snapshot te maak; daarna muteer jy daardie buffer direk in elke iterasie. Dit laat jou toe om die diep parsing-logika te fuzz sonder om elke keer die volledige handshake te herbou.
+## Harness-introspeksie: Vind Vlak Fuzzers Vroeg
 
-## Harness Introspection: Vind Shallow Fuzzers Vroeg
-
-Wanneer ’n campaign vashaak, is die probleem dikwels nie die mutator nie, maar die **harness**. Gebruik **reachability/coverage introspection** om funksies te vind wat staties vanaf jou fuzz target bereikbaar is, maar dinamies selde of nooit gedek word nie. Daardie funksies dui gewoonlik op een van drie probleme:
+Wanneer ’n campaign vashaak, is die probleem dikwels nie die mutator nie, maar die **harness**. Gebruik **reachability/coverage-introspeksie** om funksies te vind wat staties bereikbaar is vanaf jou fuzz target, maar dinamies selde of nooit gedek word nie. Hierdie funksies dui gewoonlik op een van drie probleme.<sup>[[12]](#references)</sup>
 
 - Die harness betree die target te laat of te vroeg.
-- Die seed corpus ontbreek ’n volledige feature family.
+- Die seed corpus ontbreek ’n volledige feature-familie.
 - Die target benodig werklik ’n **tweede harness** in plaas van een oorgroot “doen alles”-harness.
 
-As jy OSS-Fuzz / ClusterFuzz-styl workflows gebruik, is Fuzz Introspector nuttig vir hierdie triage:
+As jy OSS-Fuzz / ClusterFuzz-styl workflows gebruik, kan Fuzz Introspector statiese bereikbaarheid met runtime-coverage vergelyk en reports uit ’n timed run of openbare corpus genereer.<sup>[[12]](#references)</sup>
 ```bash
 python3 infra/helper.py introspector libdwarf --seconds=30
 python3 infra/helper.py introspector libdwarf --public-corpora
 ```
-Gebruik die verslag om te besluit of 'n nuwe harness vir 'n ongetoetste parser-pad bygevoeg moet word, die corpus vir 'n spesifieke kenmerk uitgebrei moet word, of 'n monolitiese harness in kleiner entry points opgesplit moet word.
+Gebruik die verslag om te besluit of jy 'n nuwe harness vir 'n ongetoetste parser-pad moet byvoeg, die corpus vir 'n spesifieke kenmerk moet uitbrei, of 'n monolitiese harness in kleiner entry points moet verdeel.
 
-## Grafiek-eerste Fuzz-teikenkeuse en Mutation-triage
+## Grafiek-eerste seleksie van fuzz-teikens en mutation-triage
 
-As jy reeds **static-analysis findings**, **mutation-testing survivors** en **coverage reports** het, moenie hulle as onafhanklike lyste triage nie. Bou eers 'n **call graph**, annoteer nodes met **cyclomatic complexity**, **entrypoint/untrusted-input reachability** en enige eksterne bevindings, en vra dan grafiekvrae:<sup>[[5]](#references)[[6]](#references)</sup>
+As jy reeds **static-analysis findings**, **mutation-testing survivors** en **coverage reports** het, moenie hulle as onafhanklike lyste triage nie. Bou eers 'n **call graph**, annoteer nodes met **cyclomatic complexity**, **entrypoint/untrusted-input reachability** en enige eksterne bevindings, en vra dan grafiekvrae.<sup>[[5]](#references)[[6]](#references)</sup>
 
 - Watter funksies met hoë kompleksiteit is vanaf untrusted input bereikbaar?
 - Watter mutation survivors lê op paaie vanaf parsers/handlers na security-critical code?
-- Watter funksies is argitektoniese choke points met 'n buitengewoon groot **blast radius**?
+- Watter funksies is argitektoniese choke points met 'n buitengewoon hoë **blast radius**?
 
-Dit bring gewoonlik beter fuzz-teikens na vore as net "lowest coverage". 'n Parser/decoder met **high complexity** en bevestigde **external reachability** is 'n sterker harness-kandidaat as 'n geïsoleerde interne helper met swak coverage maar sonder 'n attacker-controlled path.
+Dit bring gewoonlik beter fuzz-teikens na vore as slegs "laagste coverage". 'n Parser/decoder met **hoë kompleksiteit** en bevestigde **eksterne bereikbaarheid** is 'n sterker harness-kandidaat as 'n geïsoleerde interne helper met swak coverage maar sonder 'n aanvaller-beheerde pad.
 
 ### Praktiese triage-werkvloei
 
-1. Bou 'n **code graph** uit die codebase en onttrek kompleksiteit/branch-metrieke per funksie.
-2. Lys **entrypoints** wat attacker-controlled input aanvaar: request handlers, decoders, importers, protocol parsers, CLI/file readers.
-3. Voer **path queries** vanaf daardie entrypoints na kandidaatfunksies uit om reachable attack surface van dooie/interne kode te onderskei.
+1. Bou 'n **code graph** vanaf die codebase en onttrek kompleksiteit-/branch-metrieke per funksie.
+2. Lys **entrypoints** wat aanvaller-beheerde input aanvaar: request handlers, decoders, importers, protocol parsers, CLI/file readers.
+3. Voer **path queries** vanaf daardie entrypoints na kandidaatfunksies uit om bereikbare attack surface van dooie/slegs-interne code te skei.
 4. Prioritiseer nodes wat die volgende kombineer:
 - hoë **cyclomatic complexity**
-- bevestigde **reachability from untrusted input**
-- groot **blast radius** of baie downstream dependents
-- ondersteunende bewyse soos **SARIF**-findings, ouditnotas of mutation survivors
-5. Skryf eers gefokusde harnesses vir die nodes met die hoogste telling, veral **parsers/codecs** soos hex/Base64/IP/message decoders.
+- bevestigde **bereikbaarheid vanaf untrusted input**
+- hoë **blast radius** of baie downstream dependents
+- ondersteunende bewyse soos **SARIF**-findings, audit notes of mutation survivors
+5. Skryf eers gefokusde harnesses vir die nodes met die hoogste tellings, veral **parsers/codecs** soos hex/Base64/IP/message decoders.
 
-### Mutation survivors: equivalent vs actionable
+### Mutation survivors: equivalent teenoor actionable
 
-Mutation testing lewer dikwels 'n raserige lys survivors op. Voordat jy elke survivor as 'n security gap beskou, gebruik die grafiek om te vra:
+Mutation testing lewer dikwels 'n raserige survivor-lys. Voordat jy elke survivor as 'n security gap hanteer, gebruik die grafiek om te vra:
 
-- Is die gemuteerde funksie vanaf 'n attacker-controlled entrypoint bereikbaar?
+- Is die gemuteerde funksie vanaf 'n aanvaller-beheerde entrypoint bereikbaar?
 - Word alle call paths deur sterker invariants as die gemuteerde check beperk?
-- Lê die node in dooie kode, formatting-only logic, of in 'n high-impact arithmetic/parser path?
+- Lê die node in dooie code, formatting-only logic, of in 'n high-impact arithmetic/parser path?
 
-Survivors wat onbereikbaar bly of struktureel beperk is, is dikwels **equivalent mutants**. Survivors wat **reachable** bly en aan **boundary conditions**, **overflow/carry paths**, of **security-critical arithmetic/parsing** raak, moet bevorder word tot:
+Survivors wat onbereikbaar of struktureel beperk bly, is dikwels **equivalent mutants**. Survivors wat **bereikbaar** bly en **boundary conditions**, **overflow/carry paths** of **security-critical arithmetic/parsing** raak, moet bevorder word tot:
 
 - nuwe fuzz harnesses
 - direkte property/invariant tests
 - geteikende edge-case vectors
 
-### Korrelleer eksterne bevindings met die grafiek
+### Korreleer eksterne bevindings met die grafiek
 
-As jou SAST-pipeline **SARIF** uitvoer, projekteer bevindings op graph nodes volgens **file + line range** en gebruik die grafiek om die impak uit te brei:
+As jou SAST-pipeline **SARIF** uitvoer, projekteer bevindings op graph nodes volgens **file + line range** en gebruik die grafiek om die impak uit te brei.<sup>[[6]](#references)</sup>
 
 - bereken die **blast radius** van die gemerkte funksie
-- kontroleer of die bevinding op enige pad vanaf 'n entrypoint voorkom
+- kontroleer of die bevinding op enige pad vanaf 'n entrypoint is
 - groepeer nabygeleë bevindings wat by dieselfde choke point aansluit
 
-Dit is nuttig wanneer jy besluit of jy fuzzing-tyd aan 'n spesifieke funksie moet bestee: 'n node wat **reachable**, kompleks is en reeds **SAST hits** het, is dikwels 'n beter teiken as 'n bloot komplekse node sonder 'n attacker path.
+Dit is nuttig wanneer jy besluit of jy fuzzing-tyd aan 'n spesifieke funksie moet bestee: 'n node wat **bereikbaar**, **kompleks** is en reeds **SAST hits** het, is dikwels 'n beter teiken as 'n bloot komplekse node sonder 'n aanvaller-pad.
 
-Voorbeeld-werkvloei met Trailmark:<sup>[[6]](#references)</sup>
+Voorbeeld-werkvloei met Trailmark.<sup>[[6]](#references)</sup>
 ```bash
 uv pip install trailmark
 trailmark analyze --complexity 10 path/to/project
@@ -193,35 +189,35 @@ engine.preanalysis()
 engine.complexity_hotspots(10)
 engine.paths_between("handle_request", "parse_ipv6")
 ```
-Die belangrike metodologie is die kruising: **kompleksiteit x blootstelling x impak**. Gebruik die grafiek om fuzz-teikens met die hoogste verwagte sekuriteitswaarde te kies, en gebruik dan mutasie-oorlewendes om te bepaal watter grense en invariants jou harness moet stres.
+Die belangrike metodologie is die kruising: **kompleksiteit x blootstelling x impak**. Gebruik die grafiek om fuzz-teikens met die hoogste verwagte sekuriteitswaarde te kies, en gebruik dan mutasie-oorlewendes om te bepaal watter grense en invariants jou harness moet stres.<sup>[[5]](#references)</sup>
 
-## Go Fuzzing met gosentry: Kragtiger enjin, getikte insette en differensiële kontroles
+## Go Fuzzing met gosentry: Sterker enjin, getikte invoere en differensiële kontroles
 
-As ’n Go-teiken reeds ’n native `testing.F`-harness het, is ’n praktiese opgraderingspad om dieselfde harness met [gosentry](https://github.com/trailofbits/gosentry) uit te voer — ’n geforkte Go-toolchain wat `go test -fuzz` behou, maar die backend na **LibAFL** vervang.<sup>[[7]](#references)[[8]](#references)</sup>
+As ’n Go-teiken reeds ’n native `testing.F`-harness het, is ’n praktiese opgraderingspad om dieselfde harness met [gosentry](https://github.com/trailofbits/gosentry) te laat loop — ’n geforkte Go-toolchain wat `go test -fuzz` behou, maar die backend na **LibAFL** omruil.<sup>[[7]](#references)[[8]](#references)</sup>
 ```bash
 ./bin/go test -fuzz=FuzzHarness --focus-on-new-code=false --catch-races=true --catch-leaks=true
 ```
-Dit is nuttig wanneer die native Go fuzzer op **hard comparisons**, **typed inputs** of **parser-heavy formats** vasloop. Die metodologie bly dieselfde:
+Dit is nuttig wanneer die native Go fuzzer vashaak op **moeilike vergelykings**, **getikte insette**, of **parser-swaar formate**. Die metodologie bly dieselfde:
 
 - Hou aan om `f.Add(...)` vir seeds en `f.Fuzz(...)` vir die callback te gebruik.
 - Hergebruik dieselfde harness, maar voer dit met gosentry se `go`-binary in plaas van die standaard toolchain uit.
-- Behandel die resulterende campaign as ’n normale coverage-guided run, maar met LibAFL-scheduling/mutation en beter omliggende detectors.
+- Behandel die gevolglike campaign as ’n normale coverage-guided-lopie, maar met LibAFL-skedulering/mutasie en beter omliggende detectors.
 
-### Verander stil mislukkings in fuzz findings
+### Verander stille mislukkings in fuzz-bevindings
 
-’n Herhalende probleem in Go-assessments is dat gevaarlike gedrag dikwels by verstek **nie** crash nie. Met gosentry kan jy verskeie klasse van “sleg maar stil” toestande in findings omskep:
+’n Herhalende probleem in Go-assesseringe is dat gevaarlike gedrag dikwels **nie** by verstek crash nie. Met gosentry kan jy verskeie klasse van “sleg maar stil” toestande in findings omskep.<sup>[[7]](#references)[[8]](#references)</sup>
 
-- `--panic-on=pkg.Func,...` om geselekteerde logging/error paths soos crashes te laat optree (nuttig vir `log.Fatal`-style code paths wat andersins net log en voortgaan).
-- `--catch-races=true` om nuut ontdekte queue entries weer met die Go race detector uit te voer.
-- `--catch-leaks=true` om nuwe queue entries weer met `goleak` uit te voer en by goroutine leaks te stop.
-- LibAFL-hang handling om **infinite loops / very slow inputs** as fuzz findings te behou, in plaas daarvan om hulle as timeouts te laat verdwyn.
-- Ingeboude arithmetic overflow checks by verstek, plus opsionele truncation checks deur go-panikint-style instrumentation.
+- `--panic-on=pkg.Func,...` om geselekteerde logging/error-paaie soos crashes te laat optree (nuttig vir `log.Fatal`-agtige kodepaaie wat andersins net log en voortgaan).
+- `--catch-races=true` om nuut ontdekte queue entries met die Go race detector te herspeel.
+- `--catch-leaks=true` om nuwe queue entries met `goleak` te herspeel en op goroutine-leaks te stop.
+- LibAFL-hanghantering om **oneindige lusse / baie stadige insette** as fuzz-findings te behou, in plaas daarvan om dit as timeouts te laat verdwyn.
+- Ingeboude rekenkundige overflow-kontroles by verstek, plus opsionele truncation-kontroles deur middel van go-panikint-styl instrumentering.
 
-Dit is veral waardevol vir targets waar die security impact ’n **panicless parser failure**, ’n **concurrency bug** of ’n **DoS-only hang** eerder as memory corruption is.
+Dit is veral waardevol vir teikens waar die sekuriteitsimpak ’n **panicless parser failure**, ’n **concurrency bug**, of ’n **DoS-only hang** eerder as geheuekorrupsie is.
 
-### Struct-aware fuzzing vir getikte Go-API’s
+### Struct-aware fuzzing vir getikte Go-API's
 
-Native Go fuzzing verwag hoofsaaklik scalars soos `[]byte`, `string` en numbers. As die kode onder toets typed objects verbruik, kan gosentry **composite values** direk fuzz (structs, slices, arrays, pointers) terwyl dit steeds bytes onderliggend muteer.
+Native Go fuzzing verwag hoofsaaklik scalars soos `[]byte`, `string`, en getalle. As die kode onder toets getikte objekte verbruik, kan gosentry **saamgestelde waardes** direk fuzz (structs, slices, arrays, pointers), terwyl dit steeds die onderliggende bytes muteer.<sup>[[7]](#references)[[8]](#references)</sup>
 ```go
 type Input struct {
 Data []byte
@@ -236,24 +232,24 @@ Process(in)
 })
 }
 ```
-Gebruik dit wanneer die bou van ’n fake wire format slegs vir fuzzing logikafoute agter harness-only parsing code sou verberg. Vir differential- of grammar-based campaigns, hou die harness-invoer as ’n enkele `[]byte` of `string` en parseer dit eerder binne die callback.
+Gebruik dit wanneer die bou van ’n fake wire format slegs vir fuzzing logikafoute agter harness-only parsing code sou versteek. Vir differential- of grammar-based campaigns, hou die harness-invoer as ’n enkele `[]byte` of `string` en parse dit eerder binne die callback.
 
 ### Grammar-based fuzzing vir parsers en protokol-insette
 
-Vir parsers, formate en invoertale kan gosentry **Nautilus grammar fuzzing** bo-op LibAFL uitvoer. Die grammar is ’n JSON-array van produksie-reëls, en die harness behoort gewoonlik ’n enkele `[]byte`- of `string`-argument te aanvaar.
+Vir parsers, formate en invoertale kan gosentry **Nautilus grammar fuzzing** bo-op LibAFL uitvoer. Die grammar is ’n JSON-array van production rules, en die harness behoort gewoonlik ’n enkele `[]byte`- of `string`-argument te aanvaar.<sup>[[7]](#references)[[8]](#references)</sup>
 ```bash
 ./bin/go test -fuzz=FuzzGrammarJSON --use-grammar --grammar=./testdata/JSON.json --focus-on-new-code=false
 ```
-Metodologienotas:
+Metodologie-aantekeninge:
 
-- Gebruik grammar mode wanneer byte-vlak-mutasies meestal tydens vroeë sintaksiskontroles misluk.
-- Hou die grammar gefokus op die **sekuriteitsrelevante subset** van die taal/protokol eerder as om die volledige spesifikasie te modelleer.
-- Gebruik groot grenswaardes in terminals/nonterminals om heelgetal-, lengte- en toestandsmasjiengrense te stres.
-- Grammar mode hou invoere grammar-geldig, maar die teiken ontvang steeds **bytes/strings**, dus bly ontleding en semantiese kontroles binne die geharnaste kode.
+- Gebruik grammar mode wanneer byte-level mutations meestal tydens vroeë syntax checks beëindig word.
+- Hou die grammar gefokus op die **sekuriteitsrelevante subset** van die taal/protokol, eerder as om die volledige spesifikasie te modelleer.
+- Gebruik groot grenswaardes in terminals/nonterminals om integer-, lengte- en state-machine-grense te stres.
+- Grammar mode hou inputs grammar-valid, maar die teiken ontvang steeds **bytes/strings**, dus bly parsing en semantic checks binne die geharnessde kode.
 
-### Differential fuzzing: vergelyk implementerings, nie net crashes nie
+### Differential fuzzing: vergelyk implementasies, nie net crashes nie
 
-'n Sterk patroon vir Go-ekosisteme is **grammar-based differential fuzzing**: genereer geldige gestruktureerde invoere en voer dit aan twee parsers, kliënte of toestands- oorgangsenjins.
+'n Sterk patroon vir Go-ekosisteme is **grammar-based differential fuzzing**: genereer geldige gestruktureerde inputs en voer dit aan twee parsers, clients of state-transition engines.<sup>[[7]](#references)[[8]](#references)</sup>
 ```go
 f.Fuzz(func(t *testing.T, data []byte) {
 gotA, errA := ParseA(data)
@@ -265,32 +261,35 @@ _ = gotA
 _ = gotB
 })
 ```
-Beskou die volgende as bevindinge:
+Behandel die volgende as bevindinge:
 
-- een implementasie paniek, terwyl die ander een dit netjies verwerp
-- verskille tussen aanvaar en verwerpte invoer
+- een implementering panieker terwyl die ander dit netjies verwerp
+- nie-ooreenstemmende aanvaar/verwerp-insette
 - verskillende parse-bome of gedekodeerde objekte
-- uiteenlopende toestandsoorgange, nonces, balances of state roots
+- uiteenlopende toestandsoorgange, nonces, saldo's of toestand- roots
 
-Dit is ’n praktiese manier om **consensus mismatches**, **parser ambiguity** en **spec-vs-implementation drift** te vind wat pure crash fuzzing dikwels mis.
+Dit is 'n praktiese manier om **konsensus-wanpassings**, **parser-ambiguïteit** en **spesifikasie-teenoor-implementering-afwyking** te vind wat suiwer crash fuzzing dikwels mis.
 
-### Hergebruik die campaign corpus vir coverage reporting
+### Hergebruik die campaign corpus vir dekkingverslagdoening
 
-Ná ’n campaign, speel die gestoorde queue corpus weer af om ’n Go coverage report te genereer sonder om handmatig ’n aparte corpus uit te voer:
+Ná 'n campaign, speel die gestoorde queue corpus weer af om 'n Go-dekkingsverslag te genereer sonder om 'n aparte corpus handmatig uit te voer.<sup>[[7]](#references)[[8]](#references)</sup>
 ```bash
 ./bin/go test -fuzz=FuzzHarness --generate-coverage .
 ```
-Voer die opdrag uit vanaf dieselfde **package** en met dieselfde `-fuzz`-teiken sodat gosentry die korrekte gekaste veldtogtoestand oplos.
+Voer die opdrag vanuit die **same package** en met dieselfde `-fuzz`-teiken uit sodat gosentry die korrekte gekasde veldtogtoestand oplos.
 
-## Verwysings
+## References
 
 - [1] [Mutational grammar fuzzing](https://projectzero.google/2026/03/mutational-grammar-fuzzing.html)
 - [2] [Jackalope](https://github.com/googleprojectzero/Jackalope)
-- [3] [AFL++ Fuzzing in Depth](https://aflplus.plus/docs/fuzzing_in_depth/)
-- [4] [AFLNet Vyf Jaar Later: Oor Coverage-Guided Protocol Fuzzing](https://arxiv.org/abs/2412.20324)
+- [3] [AFL++ Fuzzing in diepte](https://aflplus.plus/docs/fuzzing_in_depth/)
+- [4] [AFLNet Vyf jaar later: Oor dekking-geleide protokol-fuzzing](https://arxiv.org/abs/2412.20324)
 - [5] [Trailmark verander kode in grafieke](https://blog.trailofbits.com/2026/04/23/trailmark-turns-code-into-graphs/)
 - [6] [trailofbits/trailmark](https://github.com/trailofbits/trailmark)
-- [7] [Go fuzzing het die helfte van die toolkit ontbreek. Ons het die toolchain gefork om dit reg te stel.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
+- [7] [Go-fuzzing het die helfte van die gereedskapstel ontbreek. Ons het die toolchain gevurk om dit reg te stel.](https://blog.trailofbits.com/2026/05/12/go-fuzzing-was-missing-half-the-toolkit.-we-forked-the-toolchain-to-fix-it./)
 - [8] [trailofbits/gosentry](https://github.com/trailofbits/gosentry)
-
+- [9] [SNPSFuzzer: 'n Vinnige greybox-fuzzer vir stateful netwerkprotokolle wat snapshots gebruik](https://arxiv.org/abs/2202.03643)
+- [10] [Geen grammatika, geen probleem: Op pad na fuzzing van die Linux-kern sonder stelseloproepbeskrywings](https://seclab.bu.edu/papers/FuzzNG-ndss2023.pdf)
+- [11] [Snappy: Doeltreffende fuzzing met adaptiewe en veranderbare snapshots](https://project-theseus.nl/publication/2022/snappy/)
+- [12] [Fuzz Introspector](https://google.github.io/oss-fuzz/advanced-topics/fuzz-introspector/)
 {{#include ../banners/hacktricks-training.md}}

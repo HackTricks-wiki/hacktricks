@@ -2,9 +2,9 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks-logo's en bewegingsontwerp deur_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks-logo's en motion design deur_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### Laat HackTricks plaaslik loop
+### Run HackTricks Plaaslik
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,13 +31,13 @@ export HT_LANG="master" # Leave master for English
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $HT_LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Jou plaaslike kopie van HackTricks sal **beskikbaar wees by [http://localhost:3337](http://localhost:3337)** binne <5 minute (dit moet die boek bou; wees geduldig).
+Jou plaaslike kopie van HackTricks sal **beskikbaar wees by [http://localhost:3337](http://localhost:3337)** na <5 minutes (dit moet die boek bou, wees geduldig).
 
-Alternatiewelik, indien jy Docker Compose het, kan jy eenvoudig die volgende vanaf die repo-wortel uitvoer:
+Alternatiewelik, indien jy Docker Compose het, kan jy eenvoudig die volgende vanaf die repo-hoofgids uitvoer:
 ```bash
 docker compose up
 ```
-Hierdie gebruik die ingeslote `docker-compose.yml` om die tans op die host uitgeklokte branch by [http://localhost:3337](http://localhost:3337) met live reload te bedien. Om tale te verander wanneer Compose gebruik word, klok die verlangde taal-branch uit voordat die diens begin word.
+Dit gebruik die gebundelde `docker-compose.yml` om die branch wat tans op die host uitgecheck is, by [http://localhost:3337](http://localhost:3337) met live reload te bedien. Om tale te verander wanneer Compose gebruik word, check die verlangde taalbranch uit voordat jy die diens begin.
 
 ## HackTricks-vennote
 
@@ -49,9 +49,9 @@ Hierdie gebruik die ingeslote `docker-compose.yml` om die tans op die host uitge
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) is ’n uitstekende cybersecurity-maatskappy met die slagspreuk **HACK THE UNHACKABLE**. Hulle doen hul eie navorsing en ontwikkel hul eie hacking tools om **verskeie waardevolle cybersecurity-dienste** soos pentesting, Red teams en opleiding **te lewer**.
+STM Cyber verskaf penetration testing, security audits, exploit- en navorsingswerk, tools en security-awareness-dienste. Die webwerf beskryf ’n span penetration testers, programmeerders en security researchers met meer as ’n dekade se ervaring.<sup>[[1]](#references)</sup>
 
-Jy kan hul **blog** by [**https://blog.stmcyber.com**](https://blog.stmcyber.com) lees.
+Jy kan hul **blog** by [**https://blog.stmcyber.com**](https://blog.stmcyber.com) besoek.
 
 **STM Cyber** ondersteun ook cybersecurity open source-projekte soos HackTricks :)
 
@@ -61,13 +61,9 @@ Jy kan hul **blog** by [**https://blog.stmcyber.com**](https://blog.stmcyber.com
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** is **Europa se nommer 1** ethical hacking- en **bug bounty-platform.**
+Intigriti is ’n crowdsourced security-verskaffer wat bug bounty- en penetration-testing-dienste deur ’n wêreldwye researcher-gemeenskap aanbied. Sy platform kombineer deurlopende bug bounty-dekking met on-demand PTaaS en bestuurde vulnerability disclosure-programme.<sup>[[2]](#references)</sup>
 
-**Bug bounty-wenk**: **registreer** by **Intigriti**, ’n premium **bug bounty-platform wat deur hackers, vir hackers geskep is**! Sluit vandag by ons aan by [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks), en begin bounties van tot **$100,000** verdien!
-
-{{#ref}}
-https://go.intigriti.com/hacktricks
-{{#endref}}
+**Bug bounty-wenk**: Sluit by Intigriti aan deur [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) en verken sy bug bounty-programme.
 
 ---
 
@@ -75,23 +71,10 @@ https://go.intigriti.com/hacktricks
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security lewer **praktiese AI Security-opleiding** met ’n **engineering-first, hands-on lab-benadering**. Ons kursusse is ontwerp vir security engineers, AppSec-professionele persone en developers wat **werklike AI/LLM-aangedrewe toepassings wil bou, breek en beveilig**.
-
-Die **AI Security Certification** fokus op werklike vaardighede, insluitend:
-- Beveiliging van LLM- en AI-aangedrewe toepassings
-- Threat modeling vir AI-stelsels
-- Embeddings, vector databases en RAG-sekuriteit
-- LLM attacks, misbruikscenario’s en praktiese verdediging
-- Veilige ontwerppatrone en ontplooiingsoorwegings
-
-Alle kursusse is **on-demand**, **lab-gedrewe** en ontwerp rondom **werklike security-afwegings**, nie net teorie nie.
+Modern Security bied self-paced, praktiese AI security-training vir security engineers, AppSec-professionele persone en developers. Sy AI Security Certification dek LLM- en agent-grondbeginsels, RAG en vector databases, threat modeling, prompt-injection- en MCP-attacks, asook defensive architecture.<sup>[[3]](#references)</sup>
 
 👉 Meer besonderhede oor die AI Security-kursus:
 https://www.modernsecurity.io/courses/ai-security-certification
-
-{{#ref}}
-https://modernsecurity.io/
-{{#endref}}
 
 ---
 
@@ -99,14 +82,9 @@ https://modernsecurity.io/
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** bied vinnige en maklike intydse APIs om **toegang tot search engine-resultate** te verkry. Hulle scrape search engines, hanteer proxies, los captchas op en parse al die ryk gestruktureerde data vir jou.
+**SerpApi** verskaf APIs vir Google en ander search engines, en lewer gestruktureerde SERP-data met funksies soos liggingbewuste resultate, Maps, Shopping en Knowledge Graph-resultate.<sup>[[4]](#references)</sup>
 
-’n Intekening op een van SerpApi se planne sluit toegang tot meer as 50 verskillende APIs in om verskillende search engines te scrape, insluitend Google, Bing, Baidu, Yahoo, Yandex en meer.\
-Anders as ander verskaffers, **scrape SerpApi nie net organiese resultate nie**. SerpApi se responses sluit konsekwent alle advertensies, inline-beelde en -video’s, knowledge graphs en ander elemente en funksies in wat in die search results voorkom.
-
-Huidige SerpApi-klante sluit **Apple, Shopify en GrubHub** in.\
-Vir meer inligting, besoek hul [**blog**](https://serpapi.com/blog/)**,** of probeer ’n voorbeeld in hul [**playground**](https://serpapi.com/playground)**.**\
-Jy kan [**hier**](https://serpapi.com/users/sign_up)** ’n gratis account skep.**
+Vir meer inligting, besoek hul [**blog**](https://serpapi.com/blog/), probeer ’n voorbeeld in hul [**playground**](https://serpapi.com/playground), of [**skep ’n gratis rekening**](https://serpapi.com/users/sign_up).
 
 ---
 
@@ -114,33 +92,19 @@ Jy kan [**hier**](https://serpapi.com/users/sign_up)** ’n gratis account skep.
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-**8kSec Academy** lei jou op in offensive mobile en AI security, aangebied deur aktiewe navorsers – dieselfde span agter die CVE-writeups en talks by Black Hat, HITB en Zer0con. Kursusse is selfgedrewe, rondom labs op werklike teikens gebou en word deur ’n hands-on certification ondersteun.
+**8kSec Academy** bied self-paced mobile- en AI-security-kursusse aan. Sy katalogus dek mobile application auditing en reversing met tools soos Ghidra, Frida en LLDB, tesame met AI/LLM attack- en defense-labs.<sup>[[5]](#references)[[6]](#references)</sup>
 
-Die katalogus bevat twee rigtings:
-
-**Mobile Security** – iOS en Android vanaf die app-laag afwaarts: reverse engineering met Ghidra en LLDB, ARM64 exploitation, kernel internals en moderne mitigations (PAC, MTE, SELinux), jailbreak- en rooting-meganismes.
-
-**AI Security** – twee volledige kursusse wat die veld dek. Practical AI Security verduidelik hoe LLMs, RAG pipelines, AI agents en MCP werk, asook hoe om hulle aan te val en te verdedig. Advanced AI Security fokus sterk op bouwerk aan die voorpunt: red teaming van AI-stelsels op skaal met Garak en PyRIT, exploitation van MCP servers, die plant en opsporing van model backdoors, asook fine-tuning attacks en defenses op Apple Silicon.
-
-Kursusse en certifications:
-
-{{#ref}}
-https://academy.8ksec.io/
-{{#endref}}
+Blaai deur die [8kSec Academy-kursuskatalogus](https://academy.8ksec.io/).
 
 ---
 
-### [NaxusAI – AI Powered Security Scanner](https://academy.8ksec.io/)
+### [NaxusAI – AI Powered Security Scanner](https://www.naxusai.com/)
 
 <figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
 
-**NaxusAI** is ’n AI-aangedrewe security-platform om exploitable vulnerabilities te vind voordat aanvallers dit doen.
+**Naxus** bemark ’n offensive-AI-platform wat code en infrastructure karteer, en dan static en dynamic agents gebruik om exploitable weaknesses met proof-of-concept-bewyse en remediation guidance te vind en te valideer.<sup>[[7]](#references)</sup>
 
-**Code security-wenk**: registreer by NaxusAI, ’n slim vulnerability-monitoring-platform wat vir developers en security-spanne gebou is! Sluit vandag by ons aan en begin AI gebruik om **werklike security risks op te spoor, te valideer en reg te stel voordat hulle production bereik**!
-
-{{#ref}}
-https://naxusai.com
-{{#endref}}
+**Code security-wenk**: Verken Naxus vir code- en infrastructure-gefokusde vulnerability discovery.
 
 ---
 
@@ -148,17 +112,11 @@ https://naxusai.com
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) is ’n professionele cybersecurity-maatskappy gebaseer in **Amsterdam** wat help om besighede **oor die hele wêreld** teen die nuutste cybersecurity-bedreigings te **beskerm** deur **offensive-security services** met ’n **moderne** benadering te lewer.
+WebSec verskaf penetration testing, security subscriptions, staffing en vulnerability-assessment-dienste. Die webwerf sê dat dit internasionaal werk en offensive security, defensive security, asook governance-, risk- en compliance-werk dek.<sup>[[8]](#references)</sup>
 
-WebSec is ’n internasionale security-maatskappy met kantore in Amsterdam en Wyoming. Hulle bied **all-in-one security services**, wat beteken dat hulle alles doen: Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing en nog baie meer.
-
-Nog ’n besondere aspek van WebSec is dat WebSec, anders as die bedryfsgemiddeld, **baie seker van hul vaardighede** is, tot so ’n mate dat hulle **die beste gehalte resultate waarborg**. Dit staan op hul website: "**If we can't hack it, You don't pay it!**". Vir meer inligting, besoek hul [**website**](https://websec.net/en/) en [**blog**](https://websec.net/blog/)!
+Vir meer inligting, besoek hul [**webwerf**](https://websec.net/en/) of [**blog**](https://websec.net/blog/).
 
 Benewens bogenoemde is WebSec ook ’n **toegewyde ondersteuner van HackTricks.**
-
-{{#ref}}
-https://www.youtube.com/watch?v=Zq2JycGDCPM
-{{#endref}}
 
 ---
 
@@ -168,19 +126,12 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 
 
 **Gebou vir die veld. Gebou rondom jou.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) ontwikkel en lewer effektiewe cybersecurity-opleiding wat deur
-bedryfskenners gebou en aangebied word. Hul programme gaan verder as teorie om spanne met diep
-begrip en uitvoerbare vaardighede toe te rus, deur custom environments te gebruik wat werklike
-bedreigings weerspieël. Vir navrae oor custom training, kontak ons [**hier**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) verskaf cybersecurity-training onder leiding van kundiges, met pasgemaakte inhoud en labs wat op werklike infrastructures gegrond is. Sy programme word volgens organisatoriese behoeftes aangepas en strek van assessment tot implementation.<sup>[[9]](#references)</sup> Vir navrae oor pasgemaakte training, kontak hulle [**hier**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
-**Wat hul opleiding onderskei:**
+**Wat hul training onderskei:**
 * Pasgemaakte inhoud en labs
-* Ondersteun deur topklas-tools en -platforms
+* Ondersteun deur topvlak-tools en platforms
 * Ontwerp en aangebied deur praktisyns
-
-{{#ref}}
-https://cyberhelmets.com/courses/?ref=hacktricks
-{{#endref}}
 
 ---
 
@@ -188,20 +139,9 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions lewer gespesialiseerde cybersecurity-dienste aan **Education**- en **FinTech**-instellings, met ’n fokus op **penetration testing, cloud security assessments** en
-**compliance readiness** (SOC 2, PCI-DSS, NIST). Ons span sluit **OSCP- en CISSP-gesertifiseerde professionele persone** in, wat diep tegniese kundigheid en insig volgens bedryfstandaarde na
-elke opdrag bring.
+Last Tower Solutions fokus op cybersecurity-consulting vir **Onderwys** en **FinTech**, insluitend cloud assessments, interne en eksterne penetration tests, vulnerability assessments en compliance-ondersteuning.<sup>[[10]](#references)</sup>
 
-Ons gaan verder as geoutomatiseerde scans met **manual, intelligence-driven testing** wat by
-hoërisiko-omgewings aangepas is. Van die beveiliging van studenterekords tot die beskerming van finansiële transaksies help ons organisasies om dit wat die belangrikste is, te verdedig.
-
-_“’n Kwaliteitverdediging vereis kennis van die aanval; ons bied security deur begrip.”_
-
-Bly ingelig en op datum met die nuutste in cybersecurity deur ons [**blog**](https://www.lasttowersolutions.com/blog) te besoek.
-
-{{#ref}}
-https://www.lasttowersolutions.com/
-{{#endref}}
+Bly ingelig en op hoogte van die jongste ontwikkelingen in cybersecurity deur ons [**blog**](https://www.lasttowersolutions.com/blog) te besoek.
 
 ---
 
@@ -209,23 +149,34 @@ https://www.lasttowersolutions.com/
 
 <figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE stel DevOps-, DevSecOps- en ontwikkelingspanne in staat om Kubernetes-clusters doeltreffend te bestuur, monitor en beveilig. Gebruik ons AI-aangedrewe insigte, gevorderde security framework en intuïtiewe CloudMaps GUI om jou clusters te visualiseer, hul toestand te verstaan en met vertroue op te tree.
-
-Verder is K8Studio **versoenbaar met alle belangrike Kubernetes-distributions** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift en meer).
-
-{{#ref}}
-https://k8studio.io/
-{{#endref}}
+K8Studio is ’n desktop Kubernetes IDE met CloudMaps-visualisering, multi-cluster-navigasie, RBAC, Helm, logs, YAML- en terminal views. Die vendor sê dit verbind deur kubeconfig sonder om agents te installeer en ondersteun macOS, Windows, Linux en air-gapped clusters.<sup>[[11]](#references)</sup>
 
 ---
+
 ## Lisensie en vrywaring
 
-Lees dit hier:
+Sien die HackTricks Values & FAQ-inskrywing in References hieronder.
 
-{{#ref}}
-welcome/hacktricks-values-and-faq.md
-{{#endref}}
-
-## GitHub-statistieke
+## Github-statistieke
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+
+## References
+
+- [1] [STM Cyber](https://www.stmcyber.com/)
+- [2] [Intigriti](https://www.intigriti.com/)
+- [3] [AI Security Certification – Modern Security](https://www.modernsecurity.io/courses/ai-security-certification)
+- [4] [SerpApi](https://serpapi.com/)
+- [5] [8kSec Academy](https://academy.8ksec.io/)
+- [6] [Praktiese AI Security: Attacks, Defenses, and Applications](https://academy.8ksec.io/course/practical-ai-security)
+- [7] [Naxus](https://www.naxusai.com/)
+- [8] [WebSec](https://websec.net/)
+- [9] [Cyber Helmets](https://cyberhelmets.com/)
+- [10] [Last Tower Solutions](https://www.lasttowersolutions.com/)
+- [11] [K8Studio](https://k8studio.io/)
+- [12] [Intigriti HackTricks-verwysing](https://go.intigriti.com/hacktricks)
+- [13] [Modern Security](https://modernsecurity.io/)
+- [14] [WebSec-borgskapvideo](https://www.youtube.com/watch?v=Zq2JycGDCPM)
+- [15] [Cyber Helmets-kursusse](https://cyberhelmets.com/courses/?ref=hacktricks)
+- [16] [HackTricks Values & FAQ](welcome/hacktricks-values-and-faq.md)
+{{#include banners/hacktricks-training.md}}

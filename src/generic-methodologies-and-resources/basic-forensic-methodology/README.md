@@ -1,7 +1,5 @@
 # Basiese Forensiese Metodologie
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Skep en Monteer van 'n Image
 
 
@@ -11,7 +9,7 @@
 
 ## Malware-analise
 
-Dit **is nie noodwendig die eerste stap om uit te voer sodra jy die image het nie**. Maar jy kan hierdie malware-analisetegnieke onafhanklik gebruik as jy 'n lêer, 'n lêerstelsel-image, memory image, pcap... het, dus is dit goed om **hierdie aksies in gedagte te hou**:
+Dit **is nie noodwendig die eerste stap om uit te voer nadat jy die image het nie**. Jy kan egter hierdie malware-analise-tegnieke onafhanklik gebruik as jy 'n lêer, 'n lêerstelsel-image, memory image, pcap... het, dus is dit goed om **hierdie aksies in gedagte te hou**:
 
 
 {{#ref}}
@@ -20,14 +18,14 @@ malware-analysis.md
 
 ## Inspeksie van 'n Image
 
-As jy 'n **forensiese image** van 'n toestel ontvang, kan jy begin om die gebruikte **partisies en lêerstelsel** te **ontleed** en moontlik **interessante lêers te herstel** (selfs geskrapte lêers). Leer hoe by:
+As jy 'n **forensiese image** van 'n toestel ontvang, kan jy begin om die gebruikte **partisies en lêerstelsel** te **analiseer** en moontlik **interessante lêers** te **herwin** (selfs geskrapte lêers). Leer hoe by:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Afhangend van die gebruikte OS'e en selfs platform, moet verskillende interessante artefakte gesoek word:
+Afhangend van die gebruikte OS'e en selfs platform, moet daar na verskillende interessante artefakte gesoek word:
 
 
 {{#ref}}
@@ -51,15 +49,15 @@ ios-backup-forensics.md
 
 ## Diepgaande inspeksie van spesifieke lêertipes en Software
 
-As jy 'n baie **verdagte** **lêer** het, kan verskeie **truuks**, **afhangend van die lêertipe en Software** wat dit geskep het, nuttig wees.\
-Lees die volgende bladsy om van die interessante truuks te leer:
+As jy 'n baie **verdagte** **lêer** het, kan verskeie **tricks**, **afhangend van die lêertipe en Software** wat dit geskep het, nuttig wees.\
+Lees die volgende bladsy om van interessante tricks te leer:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Ek wil spesiale melding maak van die bladsy:
+Ek wil spesifiek die volgende bladsy noem:
 
 
 {{#ref}}
@@ -80,7 +78,7 @@ memory-dump-analysis/
 pcap-inspection/
 {{#endref}}
 
-## **Anti-forensiese tegnieke**
+## **Anti-Forensiese Tegnieke**
 
 Hou die moontlike gebruik van anti-forensiese tegnieke in gedagte:
 
@@ -95,5 +93,7 @@ anti-forensic-techniques.md
 {{#ref}}
 file-integrity-monitoring.md
 {{#endref}}
+
+## References
 
 {{#include ../../banners/hacktricks-training.md}}

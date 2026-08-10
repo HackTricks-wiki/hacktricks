@@ -1,13 +1,14 @@
 # Oor die outeur
 
-{{#include ../banners/hacktricks-training.md}}
-
 ### Hallo!!
 
-Erkenning vir techniques van ander researchers behoort aan die oorspronklike outeurs (sien verwysings). Dankie aan almal wat kennis deel om internetsekuriteit te verbeter.
+Tegnieke wat deur ander navorsers bygedra is, bly aan hul oorspronklike outeurs toegeskryf. Dankie aan almal wat kennis deel om internetsekuriteit te verbeter.
 
-HackTricks is ’n opvoedkundige wiki oor **kuberveiligheid** wat deur Carlos gelei word, met honderde medewerkers. Dit is ’n **omvangryke versameling hacking tricks** wat so veel as moontlik deur die community opgedateer word. As jy iets ontbrekend of verouderd vind, stuur asseblief ’n **Pull Request** na die [**Hacktricks GitHub**](https://github.com/hacktricks-wiki/hacktricks)!
+Carlos lei HackTricks. Die projek is 'n gemeenskapsinstandgehoude kuberveiligheidswiki wat praktiese sekuriteitstegnieke versamel en bydraes verwelkom; indien jy iets vind wat ontbreek of verouderd is, maak asseblief 'n pull request in die projekbewaarplek oop.<sup>[[1]](#references)</sup>
 
-HackTricks is ook ’n wiki waar **researchers hul jongste bevindings deel**, dus is dit ’n uitstekende plek om op hoogte te bly van die nuutste hacking techniques.
+HackTricks bied navorsers ook 'n plek om nuwe bevindings te deel, wat lesers help om op hoogte te bly van huidige sekuriteitstegnieke.
 
+## References
+
+- [1] [HackTricks-wiki/hacktricks — GitHub-bewaarplek](https://github.com/HackTricks-wiki/hacktricks)
 {{#include ../banners/hacktricks-training.md}}
