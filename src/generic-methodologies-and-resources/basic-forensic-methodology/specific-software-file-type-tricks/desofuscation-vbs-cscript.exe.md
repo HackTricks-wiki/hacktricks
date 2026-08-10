@@ -1,22 +1,28 @@
 # Τεχνικές Αποσυσκότισης για Αρχεία VBS
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-Μερικά πράγματα που θα μπορούσαν να φανούν χρήσιμα για το debugging/deobfuscation ενός κακόβουλου αρχείου VBS:
+Μερικά πράγματα που θα μπορούσαν να φανούν χρήσιμα για τον εντοπισμό σφαλμάτων/την αποσυσκότιση ενός κακόβουλου αρχείου VBS:
 
 ## echo
+
+Το `WScript.Echo` μπορεί να χρησιμοποιηθεί για διαγνωστική έξοδο· υπό το `cscript.exe`, η έξοδος εγγράφεται στην κονσόλα.<sup>[[1]](#references)</sup>
 ```bash
 Wscript.Echo "Like this?"
 ```
 ## Σχόλια
+
+Μια μονή απόστροφος ξεκινά ένα σχόλιο VBScript.<sup>[[2]](#references)</sup>
 ```bash
 ' this is a comment
 ```
 ## Δοκιμή
+
+Εκτελέστε το αρχείο VBS στο command-line host με:<sup>[[3]](#references)</sup>
 ```bash
 cscript.exe file.vbs
 ```
 ## Εγγραφή δεδομένων σε αρχείο
+
+Αυτό το βοηθητικό πρόγραμμα είναι προσαρμοσμένο από μια απάντηση στο Stack Overflow και χρησιμοποιεί μια ροή κειμένου `FileSystemObject`. Η `CreateTextFile` επιστρέφει ένα `TextStream`, ενώ οι `Write`/`Close` λειτουργούν με δεδομένα κειμένου· θεωρήστε το παράδειγμα ως παράδειγμα εγγραφής κειμένου και όχι ως γενικό writer ασφαλή για δυαδικά δεδομένα.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```js
 Function writeBinary(strBinary, strPath)
 
@@ -41,4 +47,12 @@ End With
 
 End Function
 ```
+## References
+
+- [1] [Εκτέλεση ερωτήματος Visual Basic Scripting Edition (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/indexsrv/running-a-visual-basic-scripting-edition-query)
+- [2] [Εργασία με scripting languages (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525153%28v%3Dvs.90%29)
+- [3] [cscript (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cscript)
+- [4] [Ανάγνωση και εγγραφή binary file σε VBScript (Stack Overflow)](https://stackoverflow.com/questions/6060529/read-and-write-binary-file-in-vbscript/6087783)
+- [5] [Μέθοδος CreateTextFile (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/createtextfile-method)
+- [6] [Αντικείμενο TextStream (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/textstream-object)
 {{#include ../../../banners/hacktricks-training.md}}

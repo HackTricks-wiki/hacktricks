@@ -1,10 +1,13 @@
-# Αιτήματα Web
-
-{{#include ../../banners/hacktricks-training.md}}
-
+# Web Requests
 
 ## Python Requests
+
+Αυτά τα παραδείγματα χρησιμοποιούν τα τεκμηριωμένα ορίσματα αιτημάτων, τις ιδιότητες αποκρίσεων, τα tuples αρχείων multipart και τα sessions του Requests.<sup>[[1]](#references)</sup> Τα παραδείγματα με `verify=False` απενεργοποιούν την επαλήθευση πιστοποιητικών TLS και θα πρέπει να περιορίζονται σε ελεγχόμενες δοκιμές.<sup>[[1]](#references)</sup>
 ```python
+import random
+import re
+import string
+
 import requests
 
 url = "http://example.com:80/some/path.php"
@@ -23,7 +26,7 @@ body_text = gr.text
 ret_cookies = gr.cookies
 is_redirect = gr.is_redirect
 is_permanent_redirect = gr.is_permanent_redirect
-float_seconds = gr.elapsed.total_seconds() 10.231
+float_seconds = gr.elapsed.total_seconds()
 
 #Regular Post requests sending parameters (data)
 pr = requests.post(url, data=params, headers=headers, cookies=cookies, verify=False, allow_redirects=True, proxies=proxies)
@@ -71,7 +74,9 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Εντολή Python για exploit ενός RCE
+## Εντολή Python για εκμετάλλευση ενός RCE
+
+Ο βρόχος εντολών υποκλάση του `Cmd` της Python· η μέθοδος `default` χειρίζεται μη αναγνωρισμένα προθέματα εντολών, η `cmdloop` δρομολογεί τις γραμμές εισόδου και το `re.DOTALL` επιτρέπει στο μοτίβο εξαγωγής να εκτείνεται σε πολλές γραμμές.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -98,4 +103,9 @@ return 1
 term = Terminal()
 term.cmdloop()
 ```
+## References
+
+- [1] [Διεπαφή προγραμματιστών Requests](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Υποστήριξη για διερμηνείς εντολών προσανατολισμένους σε γραμμές](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Λειτουργίες κανονικών εκφράσεων](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

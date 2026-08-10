@@ -1,6 +1,4 @@
-# Bruteforce Hash Λίγων Χαρακτήρων
-
-{{#include ../../banners/hacktricks-training.md}}
+# Bruteforce Hash με λίγους χαρακτήρες
 ```python
 import hashlib
 
@@ -51,4 +49,6 @@ return 0
 
 main()
 ```
+## References
+
 {{#include ../../banners/hacktricks-training.md}}

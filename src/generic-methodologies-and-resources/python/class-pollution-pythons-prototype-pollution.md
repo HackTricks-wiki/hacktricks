@@ -1,10 +1,8 @@
 # Class Pollution (Python's Prototype Pollution)
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Βασικό Παράδειγμα
 
-Δείτε πώς είναι δυνατό να γίνει pollute στις κλάσεις αντικειμένων με strings:<sup>[[1]](#references)</sup>
+Η αλλαγή του `__qualname__` μέσω της αναφοράς στην κλάση ενός instance ενημερώνει την κλάση και τις mutable base classes της.<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -29,6 +27,8 @@ print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
 ## Βασικό Παράδειγμα Ευπάθειας
+
+Ένα recursive merge μπορεί να αποδεχτεί attacker-controlled κλειδιά mapping και να εγγράψει ένθετες τιμές μέσω πρόσβασης είτε σε items είτε σε attributes.<sup>[[1]](#references)</sup>
 ```python
 # Initial state
 class Employee: pass
@@ -61,11 +61,13 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Παραδείγματα Gadgets
+## Παραδείγματα Gadget
 
 <details>
 
-<summary>Δημιουργία προεπιλεγμένης τιμής ιδιότητας κλάσης για RCE (subprocess)</summary><sup>[[1]](#references)</sup>
+<summary>Δημιουργία προεπιλεγμένης τιμής ιδιότητας κλάσης για RCE (subprocess)</summary>
+
+Μια κοινόχρηστη base class μπορεί να παρέχει ένα προεπιλεγμένο attribute που καταναλώνεται από ένα command gadget μιας sibling class.<sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +118,9 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Μόλυνση άλλων κλάσεων και global μεταβλητών μέσω του <code>globals</code></summary><sup>[[1]](#references)</sup>
+<summary>Polluting άλλων κλάσεων και global vars μέσω του <code>globals</code></summary>
+
+Το mapping `__globals__` μιας συνάρτησης εκθέτει το namespace του module που είναι προσβάσιμο από μια μέθοδο ορισμένη σε αυτό το module.<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +152,9 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Αυθαίρετη εκτέλεση subprocess</summary><sup>[[1]](#references)</sup>
+<summary>Αυθαίρετη εκτέλεση subprocess</summary>
+
+Στα Windows, το `Popen(..., shell=True)` χρησιμοποιεί τη μεταβλητή περιβάλλοντος `COMSPEC` ως προεπιλεγμένο shell, επομένως αυτό το gadget επιδεικνύει ανακατεύθυνση command μέσω environment.<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -180,9 +186,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Αντικατάσταση του <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Παράκαμψη του <strong><code>__kwdefaults__</code></strong></summary>
 
-Το **`__kwdefaults__`** είναι ένα ειδικό attribute όλων των functions· σύμφωνα με την [τεκμηρίωση της Python](https://docs.python.org/3/library/inspect.html), είναι ένα «mapping οποιωνδήποτε default values για παραμέτρους **keyword-only**». Η μόλυνση αυτού του attribute μάς επιτρέπει να ελέγχουμε τα default values των keyword-only παραμέτρων μιας function· πρόκειται για τις παραμέτρους της function που έπονται των \* ή \*args.<sup>[[1]](#references)</sup>
+Η Python τεκμηριώνει το `__kwdefaults__` ως την αντιστοίχιση των προεπιλεγμένων τιμών για παραμέτρους που δέχονται μόνο keyword arguments και ακολουθούν τα `*` ή `*args` σε έναν ορισμό συνάρτησης.<sup>[[4]](#references)</sup> Το ακόλουθο gadget αντικαθιστά αυτή την αντιστοίχιση μέσω ενός polluted function path.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,34 +229,36 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Overwriting Flask secret across files</summary>
+<summary>Αντικατάσταση του Flask secret μεταξύ αρχείων</summary>
 
-Έτσι, αν μπορείς να κάνεις class pollution σε ένα object που ορίζεται στο main python file του web, αλλά **του οποίου η class ορίζεται σε διαφορετικό file** από το main. Επειδή, για να αποκτήσεις πρόσβαση στο \_\_globals\_\_ στα προηγούμενα payloads, χρειάζεται να αποκτήσεις πρόσβαση στην class του object ή σε methods της class, θα μπορείς να **αποκτήσεις πρόσβαση στα globals αυτού του file, αλλά όχι σε εκείνα του main file**. \
-Επομένως, **δεν θα μπορείς να αποκτήσεις πρόσβαση στο global object του Flask app** που όρισε το **secret key** στην main page:<sup>[[1]](#references)</sup>
+Αν η κλάση του polluted object βρίσκεται σε διαφορετικό module από το module του entry point της εφαρμογής, τα methods της `__globals__` εκθέτουν αρχικά το namespace του module της κλάσης. Στη συνέχεια, μια traversal μέσω του loader και του `sys.modules.__main__` μπορεί να φτάσει στο module του entry point και στο Flask `app` object.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Σε αυτό το σενάριο χρειάζεστε ένα gadget για την περιήγηση σε αρχεία, ώστε να φτάσετε στο κύριο αρχείο και να **αποκτήσετε πρόσβαση στο global object `app.secret_key`**, να αλλάξετε το secret key του Flask και να μπορέσετε να [**escalate privileges** γνωρίζοντας αυτό το key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Το Flask χρησιμοποιεί το `app.secret_key` για να υπογράφει το session cookie· η γνώση του key επιτρέπει σε έναν attacker να δημιουργήσει έγκυρα session data.<sup>[[6]](#references)</sup>
 
-Ένα payload όπως αυτό [από αυτό το writeup](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup>
+Το αρχικό writeup παρουσιάζει την ακόλουθη διαδρομή για την πρόσβαση στο `app.secret_key`· το CTFtime φιλοξενεί επίσης ένα αντίγραφο του writeup.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Χρησιμοποιήστε αυτό το **payload** για να **αλλάξετε το `app.secret_key`** (το όνομα στην εφαρμογή σας μπορεί να είναι διαφορετικό), ώστε να μπορείτε να υπογράφετε νέα Flask cookies με περισσότερα προνόμια.
+Η αλλαγή του key μπορεί να επιτρέψει την υπογραφή replacement session cookies και ενδέχεται να επιτρέψει privilege escalation· δείτε τη [σελίδα εργαλείων Flask session](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
 
 </details>
 
-Δείτε επίσης την ακόλουθη σελίδα για περισσότερα read-only gadgets:
+Ελέγξτε επίσης την ακόλουθη σελίδα για περισσότερα read-only gadgets:
 
 
 {{#ref}}
 python-internal-read-gadgets.md
 {{#endref}}
 
-## Αναφορές
+## References
 
-- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
-- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
-
+- [1] [Prototype Pollution στην Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [idekCTF 2022 writeup του task manager (αρχικό)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
+- [3] [CTFtime - idekCTF 2022: writeup του task manager](https://ctftime.org/writeup/36082)
+- [4] [inspect — Επιθεώρηση live objects](https://docs.python.org/3/library/inspect.html)
+- [5] [subprocess — Διαχείριση subprocess](https://docs.python.org/3/library/subprocess.html)
+- [6] [Quickstart — Τεκμηρίωση Flask](https://flask.palletsprojects.com/en/stable/quickstart/)
 {{#include ../../banners/hacktricks-training.md}}

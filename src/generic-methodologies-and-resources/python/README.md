@@ -1,15 +1,14 @@
-# Διαφυγή από Python Sandbox & Pyscript
-
-{{#include ../../banners/hacktricks-training.md}}
-
+# Python Sandbox Escape & Pyscript
 
 **Ενδιαφέρουσες σελίδες για έλεγχο:**
 
 - [**Pyscript hacking tricks**](pyscript.md)
 - [**Python deserializations**](../../pentesting-web/deserialization/README.md)
-- [**Keras model deserialization RCE και gadget hunting**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Tricks για παράκαμψη Python sandboxes**](bypass-python-sandboxes/README.md)
-- [**Βασική σύνταξη Python για web requests**](web-requests.md)
-- [**Βασική σύνταξη και βιβλιοθήκες Python**](basic-python.md)
+- [**Keras model deserialization RCE and gadget hunting**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/README.md)
+- [**Basic python web requests syntax**](web-requests.md)
+- [**Basic python syntax and libraries**](basic-python.md)
+
+## References
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,12 +1,10 @@
 # Mutation Testing για Smart Contracts (slither-mutate, mewt, MuTON)
 
-{{#include ../../banners/hacktricks-training.md}}
+Το Mutation testing "δοκιμάζει τα tests σας" εισάγοντας συστηματικά μικρές αλλαγές (mutants) στον κώδικα του contract και εκτελώντας ξανά τη test suite. Αν ένα test αποτύχει, ο mutant εξουδετερώνεται. Αν τα tests συνεχίσουν να περνούν, ο mutant επιβιώνει, αποκαλύπτοντας ένα blind spot που δεν μπορεί να εντοπίσει το line/branch coverage.
 
-Το Mutation testing «δοκιμάζει τα tests σας», εισάγοντας συστηματικά μικρές αλλαγές (mutants) στον κώδικα του contract και εκτελώντας ξανά τη test suite. Αν ένα test αποτύχει, ο mutant σκοτώνεται. Αν τα tests συνεχίσουν να περνούν, ο mutant επιβιώνει, αποκαλύπτοντας ένα blind spot που δεν μπορεί να εντοπίσει το line/branch coverage.
+Βασική ιδέα: Το coverage δείχνει ότι ο κώδικας εκτελέστηκε· το mutation testing δείχνει αν η συμπεριφορά ελέγχεται πραγματικά.<sup>[[2]](#references)</sup>
 
-Βασική ιδέα: Το coverage δείχνει ότι ο κώδικας εκτελέστηκε· το mutation testing δείχνει αν η συμπεριφορά ελέγχεται πράγματι από assertions.<sup>[[2]](#references)</sup>
-
-## Γιατί το coverage μπορεί να είναι παραπλανητικό
+## Γιατί το coverage μπορεί να παραπλανήσει
 
 Εξετάστε αυτόν τον απλό έλεγχο threshold:
 ```solidity
@@ -18,91 +16,91 @@ return false;
 }
 }
 ```
-Τα unit tests που ελέγχουν μόνο μια τιμή κάτω και μια τιμή πάνω από το threshold μπορούν να επιτύχουν 100% line/branch coverage, χωρίς να ελέγχουν το boundary της ισότητας (`==`). Ένα refactor σε `deposit >= 2 ether` θα περνούσε και πάλι αυτά τα tests, παραβιάζοντας σιωπηρά τη λογική του protocol.<sup>[[2]](#references)</sup>
+Unit tests που ελέγχουν μόνο μια τιμή κάτω και μια τιμή πάνω από το threshold μπορούν να επιτύχουν 100% κάλυψη γραμμών/κλάδων, ενώ δεν ελέγχουν το όριο ισότητας (==). Ένα refactor σε `deposit >= 2 ether` θα περνούσε και πάλι αυτά τα tests, σπάζοντας σιωπηρά τη λογική του protocol.<sup>[[2]](#references)</sup>
 
-Το mutation testing αποκαλύπτει αυτό το κενό, μεταλλάσσοντας τη συνθήκη και επαληθεύοντας ότι τα tests αποτυγχάνουν.
+Το Mutation testing αποκαλύπτει αυτό το κενό μεταλλάσσοντας τη συνθήκη και επαληθεύοντας ότι τα tests αποτυγχάνουν.
 
-Για τα smart contracts, οι mutants που επιβιώνουν αντιστοιχούν συχνά σε ελλιπείς ελέγχους σχετικά με:
+Για τα smart contracts, οι mutants που επιβιώνουν συχνά αντιστοιχούν σε ελλιπείς ελέγχους γύρω από:
 - Authorization και όρια ρόλων
-- Invariants λογιστικής/μεταφοράς αξίας
+- Invariants λογιστικής και μεταφοράς value
 - Συνθήκες revert και failure paths
-- Boundary conditions (`==`, μηδενικές τιμές, κενά arrays, μέγιστες/ελάχιστες τιμές)
+- Συνθήκες ορίων (`==`, μηδενικές τιμές, κενά arrays, μέγιστες/ελάχιστες τιμές)
 
 ## Mutation operators με το υψηλότερο security signal
 
 Χρήσιμες κατηγορίες mutations για contract auditing:<sup>[[1]](#references)[[2]](#references)</sup>
 - **Υψηλή σοβαρότητα**: αντικατάσταση statements με `revert()` για την αποκάλυψη paths που δεν εκτελούνται
-- **Μεσαία σοβαρότητα**: σχολιασμός γραμμών / αφαίρεση logic για την αποκάλυψη side effects που δεν επαληθεύονται
-- **Χαμηλή σοβαρότητα**: subtle swaps τελεστών ή constants, όπως `>=` -> `>` ή `+` -> `-`
-- Άλλες συνηθισμένες τροποποιήσεις: αντικατάσταση assignments, boolean flips, negation συνθηκών και αλλαγές τύπων
+- **Μεσαία σοβαρότητα**: σχολιασμός γραμμών / αφαίρεση logic για την αποκάλυψη μη επαληθευμένων side effects
+- **Χαμηλή σοβαρότητα**: διακριτικές αντικαταστάσεις operators ή constants, όπως `>=` -> `>` ή `+` -> `-`
+- Άλλες συνηθισμένες αλλαγές: αντικατάσταση assignments, αντιστροφές boolean, άρνηση συνθηκών και αλλαγές τύπων
 
-Πρακτικός στόχος: να εξουδετερωθούν όλοι οι meaningful mutants και να αιτιολογηθούν ρητά όσοι επιβιώνουν επειδή είναι irrelevant ή semantically equivalent.
+Πρακτικός στόχος: να εξοντωθούν όλοι οι meaningful mutants και να αιτιολογηθούν ρητά όσοι επιβιώνουν επειδή είναι irrelevant ή semantically equivalent.
 
-## Γιατί το syntax-aware mutation είναι καλύτερο από το regex
+## Γιατί το syntax-aware mutation είναι καλύτερο από τα regex
 
-Οι παλαιότεροι mutation engines βασίζονταν σε regex ή σε line-oriented rewrites. Αυτό λειτουργεί, αλλά έχει σημαντικούς περιορισμούς:<sup>[[1]](#references)</sup>
+Οι παλαιότερες mutation engines βασίζονταν σε regex ή line-oriented rewrites. Αυτό λειτουργεί, αλλά έχει σημαντικούς περιορισμούς:<sup>[[1]](#references)</sup>
 - Οι multi-line statements είναι δύσκολο να μεταλλαχθούν με ασφάλεια
-- Δεν γίνεται κατανοητή η δομή της γλώσσας, επομένως τα comments/tokens μπορεί να στοχοποιηθούν λανθασμένα
-- Η δημιουργία κάθε πιθανού variant σε μια weak line σπαταλά μεγάλες ποσότητες runtime
+- Δεν γίνεται κατανόηση της δομής της γλώσσας, επομένως τα comments/tokens μπορεί να στοχοποιηθούν λανθασμένα
+- Η δημιουργία κάθε πιθανού variant σε μια αδύναμη γραμμή σπαταλά μεγάλες ποσότητες runtime
 
 Τα εργαλεία που βασίζονται σε AST ή Tree-sitter το βελτιώνουν αυτό, στοχεύοντας structured nodes αντί για raw lines:<sup>[[1]](#references)</sup>
-- **slither-mutate** χρησιμοποιεί το Solidity AST του Slither<sup>[[4]](#references)</sup>
-- **mewt** χρησιμοποιεί το Tree-sitter ως language-agnostic core<sup>[[6]](#references)</sup>
-- **MuTON** βασίζεται στο `mewt` και προσθέτει first-class support για TON languages, όπως FunC, Tolk και Tact<sup>[[7]](#references)</sup>
+- **slither-mutate** χρησιμοποιεί το Solidity AST του Slither.<sup>[[4]](#references)</sup>
+- **mewt** χρησιμοποιεί το Tree-sitter ως language-agnostic core.<sup>[[6]](#references)</sup>
+- Το **MuTON** βασίζεται στο `mewt` και προσθέτει first-class support για TON languages όπως FunC, Tolk και Tact.<sup>[[7]](#references)</sup>
 
-Αυτό καθιστά τα multi-line constructs και τα expression-level mutations πολύ πιο αξιόπιστα από προσεγγίσεις που βασίζονται αποκλειστικά σε regex.
+Αυτό καθιστά τα multi-line constructs και τα expression-level mutations πολύ πιο αξιόπιστα από approaches που βασίζονται αποκλειστικά σε regex.
 
 ## Εκτέλεση mutation testing με slither-mutate
 
-Requirements: Slither v0.10.2+.
+Απαιτήσεις: Slither v0.10.2+.
 
-- Εμφάνιση options και mutators:
+- Λίστα options και mutators:
 ```bash
 slither-mutate --help
 slither-mutate --list-mutators
 ```
-- Παράδειγμα Foundry (καταγραφή των αποτελεσμάτων και διατήρηση πλήρους log):<sup>[[2]](#references)</sup>
+- Παράδειγμα Foundry (καταγραφή αποτελεσμάτων και διατήρηση πλήρους log):<sup>[[2]](#references)</sup>
 ```bash
 slither-mutate ./src/contracts --test-cmd="forge test" &> >(tee mutation.results)
 ```
 - Αν δεν χρησιμοποιείτε Foundry, αντικαταστήστε το `--test-cmd` με τον τρόπο που εκτελείτε τα tests (π.χ. `npx hardhat test`, `npm test`).
 
-Τα artifacts αποθηκεύονται από προεπιλογή στο `./mutation_campaign`. Οι mutants που δεν ανιχνεύτηκαν (surviving) αντιγράφονται εκεί για επιθεώρηση.<sup>[[5]](#references)</sup>
+Τα artifacts αποθηκεύονται από προεπιλογή στο `./mutation_campaign`. Οι mutants που δεν εντοπίστηκαν (surviving) αντιγράφονται εκεί για επιθεώρηση.<sup>[[5]](#references)</sup>
 
-### Κατανόηση των αποτελεσμάτων
+### Κατανόηση του output
 
 Οι γραμμές της αναφοράς έχουν την εξής μορφή:
 ```text
 INFO:Slither-Mutate:Mutating contract ContractName
 INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNCAUGHT
 ```
-- Το tag σε αγκύλες είναι το alias του mutator (π.χ. `CR` = Comment Replacement).
-- `UNCAUGHT` σημαίνει ότι τα tests πέρασαν με τη mutated συμπεριφορά → λείπει assertion.
+- Η ετικέτα σε αγκύλες είναι το alias του mutator (π.χ. `CR` = Comment Replacement).
+- Το `UNCAUGHT` σημαίνει ότι τα tests πέρασαν υπό τη mutated συμπεριφορά → λείπει assertion.
 
 ## Μείωση του runtime: δώστε προτεραιότητα στους impactful mutants
 
-Οι mutation campaigns μπορεί να διαρκέσουν ώρες ή ημέρες. Συμβουλές για τη μείωση του κόστους:<sup>[[1]](#references)[[2]](#references)</sup>
+Οι mutation campaigns μπορεί να διαρκέσουν ώρες ή ημέρες. Συμβουλές για μείωση του κόστους:<sup>[[1]](#references)[[2]](#references)</sup>
 - Scope: Ξεκινήστε μόνο με τα critical contracts/directories και, στη συνέχεια, επεκταθείτε.
-- Δώστε προτεραιότητα στους mutators: Αν ένας high-priority mutant σε μια γραμμή επιβιώσει (για παράδειγμα `revert()` ή comment-out), παραλείψτε τις lower-priority παραλλαγές για αυτήν τη γραμμή.
-- Χρησιμοποιήστε two-phase campaigns: εκτελέστε πρώτα focused/fast tests και, στη συνέχεια, επαναλάβετε τα tests μόνο για τους uncaught mutants με ολόκληρο το suite.
-- Αντιστοιχίστε τα mutation targets σε συγκεκριμένες test commands όπου είναι δυνατόν (για παράδειγμα auth code -> auth tests).
-- Περιορίστε τις campaigns σε high/medium severity mutants όταν ο χρόνος είναι περιορισμένος.
-- Εκτελέστε τα tests παράλληλα, αν το runner σας το επιτρέπει· κάντε cache τα dependencies/builds.
+- Δώστε προτεραιότητα στους mutators: Αν ένας mutant υψηλής προτεραιότητας σε μια γραμμή επιβιώσει (για παράδειγμα `revert()` ή comment-out), παραλείψτε τις variants χαμηλότερης προτεραιότητας για τη συγκεκριμένη γραμμή.
+- Χρησιμοποιήστε campaigns δύο φάσεων: εκτελέστε πρώτα focused/fast tests και, στη συνέχεια, επαναλάβετε τα tests μόνο για τους uncaught mutants με ολόκληρο το suite.
+- Αντιστοιχίστε τους mutation targets σε συγκεκριμένες εντολές test όπου είναι δυνατό (για παράδειγμα auth code -> auth tests).
+- Περιορίστε τις campaigns σε mutants υψηλής/μεσαίας σοβαρότητας όταν ο χρόνος είναι περιορισμένος.
+- Εκτελέστε τα tests παράλληλα αν το runner σας το επιτρέπει· κάντε cache τα dependencies/builds.
 - Fail-fast: σταματήστε νωρίς όταν μια αλλαγή αποδεικνύει ξεκάθαρα ένα assertion gap.
 
-Τα μαθηματικά του runtime είναι σκληρά: `1000 mutants x 5-minute tests ~= 83 hours`, επομένως ο σχεδιασμός της campaign έχει εξίσου μεγάλη σημασία με τον ίδιο τον mutator.<sup>[[1]](#references)</sup>
+Τα μαθηματικά του runtime είναι αμείλικτα: `1000 mutants x 5-minute tests ~= 83 hours`, επομένως ο σχεδιασμός της campaign είναι εξίσου σημαντικός με τον ίδιο τον mutator.<sup>[[1]](#references)</sup>
 
 ## Persistent campaigns και triage σε μεγάλη κλίμακα
 
-Μία αδυναμία των παλαιότερων workflows είναι η καταγραφή των αποτελεσμάτων μόνο στο `stdout`. Σε long campaigns, αυτό δυσκολεύει το pause/resume, το filtering και το review.<sup>[[1]](#references)</sup>
+Μία αδυναμία των παλαιότερων workflows είναι η καταγραφή των αποτελεσμάτων μόνο στο `stdout`. Για μεγάλες campaigns, αυτό δυσκολεύει το pause/resume, το filtering και το review.<sup>[[1]](#references)</sup>
 
-Τα `mewt`/`MuTON` το βελτιώνουν αποθηκεύοντας τους mutants και τα outcomes σε SQLite-backed campaigns. Οφέλη:<sup>[[1]](#references)</sup>
-- Pause και resume long runs χωρίς απώλεια προόδου
-- Filter μόνο τους uncaught mutants σε συγκεκριμένο file ή mutation class
-- Export/translate των results σε SARIF για review tooling
-- Παροχή μικρότερων, filtered result sets για AI-assisted triage αντί για raw terminal logs
+Τα `mewt`/`MuTON` το βελτιώνουν αποθηκεύοντας τους mutants και τα outcomes σε campaigns που βασίζονται σε SQLite. Οφέλη:<sup>[[1]](#references)</sup>
+- Pause και resume μεγάλων runs χωρίς απώλεια προόδου
+- Φιλτράρισμα μόνο των uncaught mutants σε συγκεκριμένο file ή mutation class
+- Export/μετάφραση των αποτελεσμάτων σε SARIF για review tooling
+- Παροχή μικρότερων, φιλτραρισμένων result sets σε AI-assisted triage αντί για raw terminal logs
 
-Τα persistent results είναι ιδιαίτερα χρήσιμα όταν το mutation testing γίνεται μέρος ενός audit pipeline αντί για ένα one-off manual review.
+Τα persistent results είναι ιδιαίτερα χρήσιμα όταν το mutation testing γίνεται μέρος ενός audit pipeline αντί για μια μεμονωμένη manual review.
 
 ## Triage workflow για surviving mutants
 
@@ -110,53 +108,53 @@ INFO:Slither-Mutate:[CR] Line 123: 'original line' ==> '//original line' --> UNC
 - Κάντε local reproduce εφαρμόζοντας τη mutated γραμμή και εκτελώντας ένα focused test.
 
 2) Ενισχύστε τα tests ώστε να κάνουν assert το state και όχι μόνο τις return values.
-- Προσθέστε equality-boundary checks (π.χ. test για threshold `==`).
+- Προσθέστε equality-boundary checks (π.χ. test το threshold `==`).
 - Κάντε assert τα post-conditions: balances, total supply, authorization effects και emitted events.
 
 3) Αντικαταστήστε τα υπερβολικά permissive mocks με realistic behavior.
 - Βεβαιωθείτε ότι τα mocks επιβάλλουν transfers, failure paths και event emissions που συμβαίνουν on-chain.
 
 4) Προσθέστε invariants για fuzz tests.
-- Π.χ. conservation of value, non-negative balances, authorization invariants και monotonic supply όπου εφαρμόζεται.
+- Π.χ. conservation of value, non-negative balances, authorization invariants, monotonic supply όπου εφαρμόζεται.
 
 5) Διαχωρίστε τα true positives από τα semantic no-ops.
 - Παράδειγμα: `x > 0` -> `x != 0` δεν έχει νόημα όταν το `x` είναι unsigned.
 
-6) Εκτελέστε ξανά την campaign μέχρι οι survivors να killed ή να δικαιολογηθούν ρητά.
+6) Εκτελέστε ξανά την campaign μέχρι οι survivors να killed ή να αιτιολογηθούν ρητά.
 
 ## Case study: αποκάλυψη missing state assertions (Arkis protocol)
 
-Μια mutation campaign κατά τη διάρκεια audit του Arkis DeFi protocol αποκάλυψε survivors όπως:<sup>[[2]](#references)[[3]](#references)</sup>
+Μια mutation campaign κατά τη διάρκεια audit του Arkis DeFi protocol εντόπισε survivors όπως:<sup>[[2]](#references)[[3]](#references)</sup>
 ```text
 INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> '//cmdsToExecute.last().value = _cmd.value' --> UNCAUGHT
 ```
-Το σχολιασμό της ανάθεσης δεν διέκοψε τα tests, αποδεικνύοντας την απουσία assertions για το post-state. Βασική αιτία: ο κώδικας εμπιστευόταν ένα ελεγχόμενο από τον χρήστη `_cmd.value` αντί να επικυρώνει τις πραγματικές μεταφορές token. Ένας attacker θα μπορούσε να αποσυγχρονίσει τις αναμενόμενες από τις πραγματικές μεταφορές και να αποστραγγίσει κεφάλαια. Αποτέλεσμα: υψηλής σοβαρότητας κίνδυνος για τη φερεγγυότητα του protocol.<sup>[[2]](#references)[[3]](#references)</sup>
+Η αφαίρεση της ανάθεσης μέσω σχολίων δεν απέτυχε στα tests, αποδεικνύοντας την απουσία post-state assertions. Root cause: ο κώδικας εμπιστευόταν ένα user-controlled `_cmd.value` αντί να επικυρώνει τις πραγματικές μεταφορές token. Ένας attacker θα μπορούσε να αποσυγχρονίσει τις αναμενόμενες από τις πραγματικές μεταφορές και να αποστραγγίσει κεφάλαια. Result: risk υψηλής σοβαρότητας για τη solvency του protocol.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Οδηγία: Αντιμετωπίζετε τους survivors που επηρεάζουν μεταφορές αξίας, accounting ή access control ως υψηλού κινδύνου μέχρι να εξουδετερωθούν.
+Guidance: Αντιμετωπίστε τα survivors που επηρεάζουν μεταφορές αξίας, accounting ή access control ως υψηλού κινδύνου μέχρι να killed.
 
-## Μην δημιουργείτε τυφλά tests για να εξουδετερώσετε κάθε mutant
+## Μην δημιουργείτε tests blindly για να σκοτώσετε κάθε mutant
 
-Η δημιουργία tests με βάση τα mutations μπορεί να αποτύχει αν η τρέχουσα υλοποίηση είναι λανθασμένη. Παράδειγμα: η μετάλλαξη του `priority >= 2` σε `priority > 2` αλλάζει τη συμπεριφορά, όμως η σωστή διόρθωση δεν είναι πάντα «γράψε ένα test για `priority == 2`». Αυτή η συμπεριφορά μπορεί να είναι η ίδια το bug.<sup>[[1]](#references)</sup>
+Η δημιουργία tests με βάση το mutation μπορεί να έχει το αντίθετο αποτέλεσμα, αν η τρέχουσα υλοποίηση είναι λανθασμένη. Παράδειγμα: η μετάλλαξη του `priority >= 2` σε `priority > 2` αλλάζει τη συμπεριφορά, όμως η σωστή διόρθωση δεν είναι πάντα «γράψτε ένα test για `priority == 2`». Η ίδια η συμπεριφορά μπορεί να είναι το bug.<sup>[[1]](#references)</sup>
 
-Ασφαλέστερη ροή εργασίας:
-- Χρησιμοποιήστε τους surviving mutants για να εντοπίσετε ασαφείς απαιτήσεις
-- Επικυρώστε την αναμενόμενη συμπεριφορά από τα specs, τα protocol docs ή τους reviewers
+Ασφαλέστερο workflow:
+- Χρησιμοποιήστε τα surviving mutants για να εντοπίσετε ασαφείς απαιτήσεις
+- Επικυρώστε την αναμενόμενη συμπεριφορά από specs, protocol docs ή reviewers
 - Μόνο τότε κωδικοποιήστε τη συμπεριφορά ως test/invariant
 
-Διαφορετικά, υπάρχει κίνδυνος να hard-code-άρετε τυχαίες λεπτομέρειες της υλοποίησης στη test suite και να αποκτήσετε false confidence.
+Διαφορετικά, κινδυνεύετε να hard-code accidents της υλοποίησης στη test suite και να αποκτήσετε false confidence.
 
 ## Πρακτικό checklist
 
 - Εκτελέστε μια στοχευμένη campaign:
 - `slither-mutate ./src/contracts --test-cmd="forge test"`
 - Προτιμήστε syntax-aware mutators (AST/Tree-sitter) αντί για mutation που βασίζεται αποκλειστικά σε regex, όταν είναι διαθέσιμα.
-- Κάντε triage στους survivors και γράψτε tests/invariants που θα αποτύγχαναν με τη mutated συμπεριφορά.
-- Κάντε assertions για balances, supply, authorizations και events.
+- Κάντε triage στα survivors και γράψτε tests/invariants που θα αποτύγχαναν υπό τη mutated συμπεριφορά.
+- Κάντε assert σε balances, supply, authorizations και events.
 - Προσθέστε boundary tests (`==`, overflows/underflows, zero-address, zero-amount, empty arrays).
-- Αντικαταστήστε τα μη ρεαλιστικά mocks· προσομοιώστε failure modes.
-- Αποθηκεύστε τα αποτελέσματα όταν το tooling το υποστηρίζει και φιλτράρετε τους uncaught mutants πριν από το triage.
-- Χρησιμοποιήστε two-phase ή per-target campaigns για να διατηρήσετε τον χρόνο εκτέλεσης διαχειρίσιμο.
-- Επαναλάβετε μέχρι να εξουδετερωθούν όλοι οι mutants ή να δικαιολογηθούν με comments και rationale.
+- Αντικαταστήστε τα unrealistic mocks· προσομοιώστε failure modes.
+- Διατηρήστε τα αποτελέσματα όταν το tooling το υποστηρίζει και φιλτράρετε τα uncaught mutants πριν από το triage.
+- Χρησιμοποιήστε two-phase ή per-target campaigns, ώστε το runtime να παραμένει διαχειρίσιμο.
+- Επαναλάβετε μέχρι να killed όλοι οι mutants ή να δικαιολογηθούν με σχόλια και rationale.
 
 ## References
 
@@ -167,5 +165,4 @@ INFO:Slither-Mutate:[CR] Line 33: 'cmdsToExecute.last().value = _cmd.value' ==> 
 - [5] [Slither Mutator documentation](https://github.com/crytic/slither/blob/master/docs/src/tools/Mutator.md)
 - [6] [mewt](https://github.com/trailofbits/mewt)
 - [7] [MuTON](https://github.com/trailofbits/muton)
-
 {{#include ../../banners/hacktricks-training.md}}

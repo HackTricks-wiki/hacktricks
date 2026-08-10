@@ -1,59 +1,57 @@
-# Side-Channel Attacks μέσω Delivery Receipts σε E2EE Messengers
+# Delivery Receipt Side-Channel Attacks in E2EE Messengers
 
-{{#include ../banners/hacktricks-training.md}}
+Delivery receipts are mandatory in modern end-to-end encrypted (E2EE) messengers because clients need to know when a ciphertext was decrypted so they can discard ratcheting state and ephemeral keys. The server forwards opaque blobs, so device acknowledgements (double checkmarks) are emitted by the recipient after successful decryption. Measuring the round-trip time (RTT) between an attacker-triggered action and the corresponding delivery receipt exposes a high-resolution timing channel that leaks device state, online presence, and can be abused for covert DoS. Multi-device "client-fanout" deployments amplify the leakage because every registered device decrypts the probe and returns its own receipt.<sup>[[1]](#references)</sup>
 
-Τα delivery receipts είναι υποχρεωτικά στα σύγχρονα end-to-end encrypted (E2EE) messengers, επειδή οι clients πρέπει να γνωρίζουν πότε έγινε decrypt ένα ciphertext, ώστε να μπορούν να απορρίψουν την κατάσταση του ratchet και τα ephemeral keys. Ο server προωθεί opaque blobs, επομένως τα acknowledgements των συσκευών (διπλά checkmarks) αποστέλλονται από τον recipient μετά από επιτυχημένο decryption. Η μέτρηση του round-trip time (RTT) μεταξύ μιας ενέργειας που προκαλεί ο attacker και του αντίστοιχου delivery receipt αποκαλύπτει ένα timing channel υψηλής ανάλυσης που κάνει leak την κατάσταση της συσκευής και την online παρουσία, ενώ μπορεί να χρησιμοποιηθεί για covert DoS. Οι deployments πολλαπλών συσκευών με "client-fanout" ενισχύουν το leak, επειδή κάθε registered device κάνει decrypt το probe και επιστρέφει το δικό του receipt.<sup>[[1]](#references)</sup>
+## Delivery receipt sources vs. user-visible signals
 
-## Πηγές delivery receipts έναντι signals που βλέπει ο user
-
-Επίλεξε message types που εκδίδουν πάντα delivery receipt, αλλά δεν εμφανίζουν UI artifacts στο victim. Ο παρακάτω πίνακας συνοψίζει τη συμπεριφορά που επιβεβαιώθηκε εμπειρικά:<sup>[[1]](#references)</sup>
+Choose message types that always emit a delivery receipt but do not surface UI artifacts on the victim. The table below summarises the empirically confirmed behaviour:<sup>[[1]](#references)</sup>
 
 | Messenger | Action | Delivery receipt | Victim notification | Notes |
 |-----------|--------|------------------|---------------------|-------|
-| **WhatsApp** | Text message | ● | ● | Πάντα noisy → χρήσιμο μόνο για bootstrap του state. |
-| | Reaction | ● | ◐ (μόνο αν γίνεται reaction σε μήνυμα του victim) | Τα self-reactions και οι removals παραμένουν silent. |
-| | Edit | ● | Silent push, ανάλογα με την πλατφόρμα | Edit window ≈20 min· εξακολουθεί να γίνεται ack μετά τη λήξη. |
-| | Delete for everyone | ● | ○ | Το UI επιτρέπει περίπου ~60 h, αλλά τα μεταγενέστερα packets εξακολουθούν να λαμβάνουν ack. |
-| **Signal** | Text message | ● | ● | Ίδιοι περιορισμοί με το WhatsApp. |
-| | Reaction | ● | ◐ | Τα self-reactions είναι αόρατα στον victim. |
-| | Edit/Delete | ● | ○ | Ο server επιβάλλει window ~48 h και επιτρέπει έως 10 edits, αλλά τα late packets εξακολουθούν να λαμβάνουν ack. |
-| **Threema** | Text message | ● | ● | Τα multi-device receipts γίνονται aggregate, επομένως είναι ορατό μόνο ένα RTT ανά probe. |
+| **WhatsApp** | Text message | ● | ● | Always noisy → only useful to bootstrap state. |
+| | Reaction | ● | ◐ (only if reacting to victim message) | Self-reactions and removals stay silent. |
+| | Edit | ● | Platform-dependent silent push | Edit window ≈20 min; still ack’d after expiry. |
+| | Delete for everyone | ● | ○ | UI allows ~60 h, but later packets still ack’d. |
+| **Signal** | Text message | ● | ● | Same limitations as WhatsApp. |
+| | Reaction | ● | ◐ | Self-reactions invisible to victim. |
+| | Edit/Delete | ● | ○ | Server enforces ~48 h window, allows up to 10 edits, but late packets still ack’d. |
+| **Threema** | Text message | ● | ● | Multi-device receipts are aggregated, so only one RTT per probe becomes visible. |
 
-Legend: ● = πάντα, ◐ = υπό προϋποθέσεις, ○ = ποτέ. Η συμπεριφορά του UI που εξαρτάται από την πλατφόρμα σημειώνεται inline. Απενεργοποίησε τα read receipts αν χρειάζεται, αλλά τα delivery receipts δεν μπορούν να απενεργοποιηθούν στο WhatsApp ή στο Signal.<sup>[[1]](#references)</sup>
+Legend: ● = always, ◐ = conditional, ○ = never. Platform-dependent UI behaviour is noted inline. Disable read receipts if needed, but delivery receipts cannot be turned off in WhatsApp or Signal.<sup>[[1]](#references)</sup>
 
-## Στόχοι και μοντέλα του attacker
+## Attacker goals and models
 
-* **G1 – Device fingerprinting:** Μέτρησε πόσα receipts φτάνουν ανά probe, ομαδοποίησε τα RTTs για να συμπεράνεις OS/client (Android έναντι iOS ή desktop) και παρακολούθησε τις μεταβάσεις online/offline.
-* **G2 – Behavioural monitoring:** Αντιμετώπισε τη high-frequency σειρά RTT (≈1 Hz είναι σταθερό) ως time-series και συμπέρανε screen on/off, app foreground/background, ώρες μετακίνησης έναντι εργασίας κ.λπ.
-* **G3 – Resource exhaustion:** Διατήρησε τα radios/CPUs κάθε victim device ενεργά στέλνοντας endless silent probes, εξαντλώντας battery/data και υποβαθμίζοντας την ποιότητα VoIP/RTC.<sup>[[1]](#references)</sup>
+* **G1 – Device fingerprinting:** Count how many receipts arrive per probe, cluster RTTs to infer OS/client (Android vs iOS vs desktop), and watch online/offline transitions.
+* **G2 – Behavioural monitoring:** Treat the high-frequency RTT series (≈1 Hz is stable) as a time-series and infer screen on/off, app foreground/background, commuting vs working hours, etc.
+* **G3 – Resource exhaustion:** Keep radios/CPUs of every victim device awake by sending never-ending silent probes, draining battery/data and degrading video-call quality.<sup>[[1]](#references)</sup>
 
-Δύο threat actors αρκούν για την περιγραφή του abuse surface:<sup>[[1]](#references)</sup>
+Two threat actors are sufficient to describe the abuse surface:<sup>[[1]](#references)</sup>
 
-1. **Creepy companion:** Ήδη μοιράζεται ένα chat με τον victim και κάνει abuse σε self-reactions, reaction removals ή repeated edits/deletes που συνδέονται με υπάρχοντα message IDs.
-2. **Spooky stranger:** Κάνει register έναν burner account και στέλνει reactions που αναφέρονται σε message IDs τα οποία δεν υπήρξαν ποτέ στην τοπική συνομιλία. Το WhatsApp και το Signal εξακολουθούν να κάνουν decrypt και acknowledge, παρότι το UI απορρίπτει την αλλαγή του state, επομένως δεν απαιτείται προηγούμενη συνομιλία.
+1. **Creepy companion:** already shares a chat with the victim and abuses self-reactions, reaction removals, or repeated edits/deletes tied to existing message IDs.
+2. **Spooky stranger:** registers a burner account and sends reactions referencing message IDs that never existed in the local conversation; WhatsApp and Signal still decrypt and acknowledge them even though the UI discards the state change, so no prior conversation is required.
 
-## Tooling για raw protocol access
+## Tooling for raw protocol access
 
-Βασίσου σε clients που εκθέτουν το underlying E2EE protocol, ώστε να μπορείς να δημιουργείς packets εκτός των περιορισμών του UI, να καθορίζεις αυθαίρετα `message_id`s και να καταγράφεις ακριβή timestamps:
+Rely on clients that expose enough of the underlying E2EE protocol to craft supported packets outside UI constraints and log precise timestamps; arbitrary message IDs require checking each implementation:
 
-* **WhatsApp:** Τα [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web protocol) ή [Cobalt](https://github.com/Auties00/Cobalt) (mobile-oriented) επιτρέπουν την αποστολή raw `ReactionMessage`, `ProtocolMessage` (edit/delete) και `Receipt` frames, διατηρώντας συγχρονισμένο το double-ratchet state.<sup>[[3]](#references)[[4]](#references)</sup>
-* **Signal:** Το [signal-cli](https://github.com/AsamK/signal-cli), σε συνδυασμό με το [libsignal-service-java](https://github.com/signalapp/libsignal-service-java), εκθέτει κάθε message type μέσω CLI/API.<sup>[[5]](#references)[[7]](#references)</sup> Η τρέχουσα σύνταξη του `signal-cli` χρησιμοποιεί `sendReaction RECIPIENT --target-author --target-timestamp`· διατήρησε το `receive` ή το `daemon` σε λειτουργία, ώστε να συλλέγονται πράγματι τα delivery receipts.<sup>[[6]](#references)</sup> Παράδειγμα self-reaction toggle:
+* **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web multidevice API) documents sending and receiving delivery receipts; [Cobalt](https://github.com/Auties00/Cobalt) (unofficial Java/Kotlin Web and mobile API) documents message operations such as reacting, editing, and deleting. Use their documented APIs rather than assuming every internal frame is exposed.<sup>[[3]](#references)[[4]](#references)</sup>
+* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) exposes CLI, JSON-RPC, and D-Bus interfaces, while [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) is a Java library for communicating with Signal.<sup>[[5]](#references)[[7]](#references)</sup> Current `signal-cli` syntax uses `sendReaction RECIPIENT --target-author --target-timestamp`; keep `receive` or `daemon` running so protocol updates continue to be processed.<sup>[[6]](#references)</sup> Example self-reaction toggle:
 ```bash
 signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
 --target-timestamp 1712345678901 --emoji "👍"
 signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
 --target-timestamp 1712345678901 --remove
 ```
-* **Threema:** Ο source code του Android client τεκμηριώνει τον τρόπο με τον οποίο τα delivery receipts ενοποιούνται πριν φύγουν από τη συσκευή, εξηγώντας γιατί το side channel έχει negligible bandwidth εκεί.<sup>[[1]](#references)</sup>
-* **Turnkey PoCs:** Το [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) περιλαμβάνει WhatsApp/Signal backends, χρησιμοποιεί ως default silent delete probes και χαρακτηρίζει τις καταστάσεις `active` έναντι `standby` με rolling-median threshold (`RTT < 0.9 * median`). Το [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) είναι ένα ελαφρύτερο WhatsApp-first CLI με `--delay`, `--concurrent`, CSV/Prometheus exporters και Grafana-friendly output.<sup>[[8]](#references)</sup> Αντιμετώπισε και τα δύο ως reconnaissance helpers και όχι ως protocol references· το σημαντικό συμπέρασμα είναι πόσο λίγος code απαιτείται όταν υπάρχει raw client access.
+* **Threema:** Measurements in the Careless Whisper paper found that delivery receipts are synchronized across devices, so only one receipt per message is exposed even in a multi-device setup.<sup>[[1]](#references)</sup>
+* **Turnkey PoCs:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) ships WhatsApp/Signal backends, defaults to silent delete probes, and labels `active` vs `standby` with a rolling-median threshold (`RTT < 0.9 * median`).<sup>[[8]](#references)</sup> [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) is a lighter WhatsApp-first CLI with `--delay`, `--concurrent`, CSV/Prometheus exporters, and Grafana-friendly output.<sup>[[9]](#references)</sup> Treat both as reconnaissance helpers rather than protocol references; the important takeaway is how little code is needed once raw client access exists.
 
-Όταν δεν είναι διαθέσιμο custom tooling, μπορείς ακόμη να προκαλέσεις silent actions από το WhatsApp Web ή το Signal Desktop και να κάνεις sniff το encrypted websocket/WebRTC channel, αλλά τα raw APIs αφαιρούν τις καθυστερήσεις του UI και επιτρέπουν invalid operations.
+When custom tooling is unavailable, official clients or browser developer tools can still trigger silent actions and expose encrypted traffic timing; raw APIs remove UI delays and allow invalid operations.<sup>[[1]](#references)</sup>
 
 ## Creepy companion: silent sampling loop
 
-1. Επίλεξε οποιοδήποτε historical message που έχεις γράψει εσύ στο chat, ώστε ο victim να μη δει ποτέ να αλλάζουν τα "reaction" balloons.
-2. Κάνε εναλλαγή μεταξύ ενός visible emoji και ενός empty reaction payload (κωδικοποιημένου ως `""` στα WhatsApp protobufs ή ως `--remove` στο signal-cli). Κάθε transmission αποδίδει device ack, παρότι δεν υπάρχει UI delta για τον victim.
-3. Κατέγραψε timestamp για τον χρόνο αποστολής και για κάθε άφιξη delivery receipt. Ένα loop 1 Hz όπως το παρακάτω παρέχει per-device RTT traces επ' αόριστον:
+1. Pick any historical message you authored in the chat so the victim never sees "reaction" balloons change.
+2. Alternate between a visible emoji and an empty reaction payload (encoded as `""` in WhatsApp protobufs or `--remove` in signal-cli). Each transmission yields a device ack despite no UI delta for the victim.
+3. Timestamp the send time and every delivery receipt arrival. A 1 Hz loop such as the following gives per-device RTT traces indefinitely:
 ```python
 while True:
 send_reaction(msg_id, "👍")
@@ -62,68 +60,68 @@ send_reaction(msg_id, "")  # removal
 log_receipts()
 time.sleep(0.5)
 ```
-4. Επειδή τα WhatsApp/Signal δέχονται unlimited reaction updates, ο attacker δεν χρειάζεται ποτέ να δημοσιεύσει νέο chat content ούτε να ανησυχεί για edit windows.<sup>[[1]](#references)</sup>
+4. Because WhatsApp/Signal accept unlimited reaction updates, the attacker never needs to post new chat content or worry about edit windows.<sup>[[1]](#references)</sup>
 
-## Spooky stranger: probing αυθαίρετων phone numbers
+## Spooky stranger: probing arbitrary phone numbers
 
-1. Κάνε register έναν νέο WhatsApp/Signal account και ανάκτησε τα public identity keys για τον target number (αυτό γίνεται αυτόματα κατά το session setup).
-2. Δημιούργησε ένα reaction/edit/delete packet που αναφέρεται σε ένα τυχαίο `message_id` το οποίο δεν έχει δει κανένα από τα δύο μέρη (το WhatsApp δέχεται αυθαίρετα `key.id` GUIDs· το Signal χρησιμοποιεί timestamps σε milliseconds).
-3. Στείλε το packet παρότι δεν υπάρχει thread. Οι victim devices κάνουν decrypt, αποτυγχάνουν να αντιστοιχίσουν το base message, απορρίπτουν την αλλαγή του state, αλλά εξακολουθούν να κάνουν acknowledge το incoming ciphertext, στέλνοντας device receipts πίσω στον attacker.
-4. Επανάλαβε συνεχώς για να δημιουργήσεις RTT series χωρίς να εμφανιστείς ποτέ στη chat list του victim.<sup>[[1]](#references)</sup>
+1. Register a fresh WhatsApp/Signal account and fetch the public identity keys for the target number (done automatically during session setup).
+2. Craft a reaction packet that references a random `message_id` never seen by either party; the paper reports that both WhatsApp and Signal accept such reactions and still generate delivery receipts.<sup>[[1]](#references)</sup>
+3. Send the packet even though no thread exists. The victim devices decrypt it, fail to match the base message, discard the state change, but still acknowledge the incoming ciphertext, sending device receipts back to the attacker.
+4. Repeat continuously to build RTT series without a prior conversation or visible notification.<sup>[[1]](#references)</sup>
 
-Αν πρώτα χρειάζεται να ανακαλύψεις ποιοι αριθμοί είναι registered ή θέλεις να κάνεις pre-seed inventories συσκευών σε scale, σύνδεσέ το με [contact-discovery / registration oracles](../pentesting-web/registration-vulnerabilities.md), αντί να μαντεύεις χειροκίνητα τυχαίες περιοχές E.164.
+If you first need to discover which numbers are registered or want to pre-seed device inventories at scale, chain this with [contact-discovery / registration oracles](../pentesting-web/registration-vulnerabilities.md) rather than guessing random E.164 ranges by hand.
 
-Δημοσιευμένη εργασία contact-discovery έδειξε γιατί αυτό έχει επιχειρησιακή σημασία: με ακριβείς phone-prefix tables και μέτριους πόρους, οι researchers μπόρεσαν να query περίπου το `10%` των US mobile numbers στο WhatsApp και το `100%` στο Signal, πριν προχωρήσουν σε targeted probing.<sup>[[11]](#references)</sup> Στην πράξη, το pre-filtering των live accounts διατηρεί το budget των silent probes εστιασμένο σε αριθμούς που πράγματι θα κάνουν decrypt τα packets.
+Published contact-discovery work showed why this matters operationally: with accurate phone-prefix tables and modest resources, researchers were able to query roughly `10%` of US mobile numbers on WhatsApp and `100%` on Signal before moving on to targeted probing.<sup>[[11]](#references)</sup> In practice, pre-filtering live accounts first keeps your silent-probe budget focused on numbers that will actually decrypt packets.
 
-Τα πρόσφατα WhatsApp builds εκθέτουν επίσης το `Settings -> Privacy -> Advanced -> Block unknown account messages`.<sup>[[10]](#references)</sup> Αντιμετώπισέ το ως throughput limiter και όχι ως fix: επηρεάζει κυρίως το sustained stranger-only flooding και είναι irrelevant όταν είσαι ήδη known contact.
+Recent WhatsApp builds also expose `Settings -> Privacy -> Advanced -> Block unknown account messages`.<sup>[[10]](#references)</sup> Treat it as a throughput limiter: the tracker documentation says WhatsApp blocks high-volume messages from unknown accounts but does not disclose the threshold, so it does not fully prevent probe reactions.<sup>[[8]](#references)</sup>
 
-## Recycling edits και deletes ως covert triggers
+## Recycling edits and deletes as covert triggers
 
-* **Repeated deletes:** Αφού ένα message διαγραφεί μία φορά με delete-for-everyone, επιπλέον delete packets που αναφέρονται στο ίδιο `message_id` δεν έχουν UI effect, αλλά κάθε device εξακολουθεί να κάνει decrypt και acknowledge.
-* **Out-of-window operations:** Το WhatsApp επιβάλλει windows ~60 h για delete και ~20 min για edit στο UI· το Signal επιβάλλει ~48 h. Crafted protocol messages εκτός αυτών των windows αγνοούνται silent στη συσκευή του victim, όμως τα receipts μεταδίδονται, επομένως οι attackers μπορούν να κάνουν probe επ' αόριστον, πολύ μετά το τέλος της συνομιλίας.
-* **Invalid payloads:** Malformed edit bodies ή deletes που αναφέρονται σε ήδη purged messages προκαλούν την ίδια συμπεριφορά—decryption συν receipt, χωρίς user-visible artefacts.<sup>[[1]](#references)</sup>
+* **Repeated deletes:** After a message is deleted-for-everyone once, further delete packets referencing the same `message_id` have no UI effect but every device still decrypts and acknowledges them.
+* **Out-of-window operations:** WhatsApp enforces ~60 h delete / ~20 min edit windows in the UI; Signal enforces ~48 h. Crafted protocol messages outside these windows are silently ignored on the victim device yet receipts are transmitted, so attackers can probe indefinitely long after the conversation ended.
+* **Invalid payloads:** The paper reports that invalid messages can still be acknowledged; exact behaviour for malformed bodies or purged IDs is implementation-dependent, so test before relying on it.<sup>[[1]](#references)</sup>
 
-## Multi-device amplification και fingerprinting
+## Multi-device amplification & fingerprinting
 
-* Κάθε associated device (phone, desktop app, browser companion) κάνει decrypt το probe ανεξάρτητα και επιστρέφει το δικό του ack. Η καταμέτρηση των receipts ανά probe αποκαλύπτει τον ακριβή αριθμό συσκευών.
-* Αν ένα device είναι offline, το receipt του μπαίνει σε queue και αποστέλλεται κατά την επανασύνδεση. Επομένως, τα κενά κάνουν leak τους online/offline κύκλους και ακόμη και τα commuting schedules (π.χ. τα desktop receipts σταματούν κατά τη διάρκεια μετακίνησης).
-* Οι κατανομές RTT διαφέρουν ανά platform λόγω του OS power management και των push wakeups. Κάνε cluster τα RTTs (π.χ. k-means σε median/variance features) για να χαρακτηρίσεις “Android handset", “iOS handset", “Electron desktop" κ.λπ.
-* Επειδή ο sender πρέπει να ανακτήσει το key inventory του recipient πριν από το encryption, ο attacker μπορεί επίσης να παρακολουθεί πότε γίνεται pair νέων συσκευών· μια απότομη αύξηση στον αριθμό συσκευών ή ένα νέο RTT cluster αποτελεί ισχυρή ένδειξη.<sup>[[1]](#references)</sup>
+* On WhatsApp and Signal, each associated device (phone, desktop app, browser companion) decrypts the probe independently and returns its own ack. Counting receipts per probe reveals the exact device count.<sup>[[1]](#references)</sup>
+* If a device is offline, its receipt is queued and emitted upon reconnection. Gaps therefore leak online/offline cycles and even commuting schedules (e.g., desktop receipts stop during travel).
+* RTT distributions differ by platform and environment because OS, model, client, and network conditions affect timing. Cluster RTTs (e.g., k-means on median/variance features) to label “Android handset", “iOS handset", “Electron desktop", etc.
+* Because the sender must retrieve the recipient’s key inventory before encrypting, the attacker can also watch when new devices are paired; a sudden increase in device count or new RTT cluster is a strong indicator.<sup>[[1]](#references)</sup>
 
-## Sampling cadence, queueing και stacked receipts
+## Sampling cadence, queueing, and stacked receipts
 
-* **WhatsApp burst tolerance:** Δημοσιευμένες μετρήσεις ανέφεραν ότι το WhatsApp δεχόταν silent-reaction bursts με ρυθμό έως και ένα probe κάθε `50 ms`, χωρίς εμφανές server-side queueing. Αυτό είναι χρήσιμο για σύντομα calibration bursts, γρήγορο device counting ή γρήγορη αύξηση ενός drain attack.
-* **Signal long-run queueing:** Το Signal ανεχόταν σύντομα bursts, αλλά άρχιζε να κάνει queue sustained traffic πολλαπλών probes ανά δευτερόλεπτο. Για long-lived monitoring, διατήρησε το cadence περίπου στο `1 Hz` (ή χαμηλότερα), ώστε κάθε receipt να εξακολουθεί να αντικατοπτρίζει το τρέχον device state και όχι την εκκένωση backlog.
-* **Reconnect artefacts:** Όταν ένα device επανέρχεται online, ορισμένοι clients κάνουν batch ή rapidly flush πολλαπλά delayed receipts. Αντιμετώπισε αυτά τα receipt bursts ως marker μετάβασης state και όχι ως ανεξάρτητα RTT samples, διαφορετικά ο classifier σου για clustering / `active` έναντι `idle` θα κάνει overfit στον θόρυβο της επανασύνδεσης.<sup>[[1]](#references)</sup>
+* **WhatsApp burst tolerance:** Published measurements reported that WhatsApp accepted silent-reaction bursts as fast as one probe every `50 ms` without obvious server-side queueing. That is useful for short calibration bursts, fast device counting, or quickly ramping a drain attack.
+* **Signal long-run queueing:** Signal tolerated short bursts but began queueing sustained multi-probe-per-second traffic. For long-lived monitoring, keep the cadence around `1 Hz` (or lower) so each receipt still reflects the current device state instead of backlog drain.
+* **Reconnect artefacts:** When a device comes back online, some clients batch or rapidly flush multiple delayed receipts. Treat those receipt bursts as a state-transition marker rather than as independent RTT samples, or your clustering / `active` vs `idle` classifier will overfit reconnect noise.<sup>[[1]](#references)</sup>
 
-## Behaviour inference από RTT traces
+## Behaviour inference from RTT traces
 
-1. Κάνε sampling σε ≥1 Hz για να καταγράψεις τις επιδράσεις του OS scheduling. Στο WhatsApp σε iOS, RTTs <1 s συσχετίζονται έντονα με screen-on/foreground, ενώ RTTs >1 s με screen-off/background throttling.
-2. Δημιούργησε απλούς classifiers (thresholding ή two-cluster k-means) που χαρακτηρίζουν κάθε RTT ως "active" ή "idle". Κάνε aggregate τα labels σε streaks για να εξαγάγεις ώρες ύπνου, μετακινήσεις, ώρες εργασίας ή πότε είναι active το desktop companion.
-3. Συσχέτισε ταυτόχρονα probes προς κάθε device για να δεις πότε οι users μεταβαίνουν από mobile σε desktop, πότε τα companions πηγαίνουν offline και αν το app περιορίζεται από rate limiting μέσω push ή persistent socket.
-4. Σε πραγματικά networks, απόφυγε ένα μοναδικό hardcoded threshold `1 s`. Κάνε bootstrap κάθε device με ένα σύντομο warm-up window και διατήρησε rolling baseline (για παράδειγμα, `threshold = 0.9 * median RTT`), ώστε το Wi-Fi/cellular drift να μην καταρρεύσει τον classifier σου.<sup>[[1]](#references)</sup>
+1. Sample at ≥1 Hz to capture OS scheduling effects. With WhatsApp on iOS, <1 s RTTs strongly correlate with screen-on/foreground, >1 s with screen-off/background throttling.
+2. Build simple classifiers (thresholding or two-cluster k-means) that label each RTT as "active" or "idle". Aggregate labels into streaks to derive bedtimes, commutes, work hours, or when the desktop companion is active.
+3. Correlate simultaneous probes towards every device to see when users switch from mobile to desktop, when companions go offline, and whether the app is rate limited by push vs persistent socket.
+4. In real networks, avoid a single hardcoded `1 s` threshold. Bootstrap each device with a short warm-up window and keep a rolling baseline (for example, the device-activity-tracker PoC uses `threshold = 0.9 * median RTT`) so Wi-Fi/cellular drift does not collapse your classifier.<sup>[[1]](#references)[[8]](#references)</sup>
 
-## Location inference από delivery RTT
+## Location inference from delivery RTT
 
-Το ίδιο timing primitive μπορεί να επαναχρησιμοποιηθεί για να εξαχθεί η τοποθεσία του recipient και όχι μόνο αν είναι active. Η εργασία `Hope of Delivery` έδειξε ότι η εκπαίδευση σε RTT distributions για γνωστές τοποθεσίες του receiver επιτρέπει στον attacker να ταξινομήσει αργότερα την τοποθεσία του victim μόνο από delivery confirmations:<sup>[[2]](#references)</sup>
+The same timing primitive can be repurposed to infer where the recipient is, not just whether they are active. The `Hope of Delivery` work showed that training on RTT distributions for known receiver locations lets an attacker later classify the victim's location from delivery confirmations alone:<sup>[[2]](#references)</sup>
 
-* Δημιούργησε baseline για τον ίδιο target ενώ βρίσκεται σε αρκετές γνωστές τοποθεσίες (home, office, campus, country A έναντι country B κ.λπ.).
-* Για κάθε τοποθεσία, συνέλεξε πολλά normal message RTTs και εξήγαγε απλά features, όπως median, variance ή percentile buckets.
-* Κατά τη διάρκεια του πραγματικού attack, σύγκρινε τη νέα probe series με τα trained clusters. Το paper αναφέρει ότι ακόμη και τοποθεσίες μέσα στην ίδια πόλη μπορούν συχνά να διαχωριστούν, με accuracy `>80%` σε setting 3 τοποθεσιών.
-* Αυτό λειτουργεί καλύτερα όταν ο attacker ελέγχει το sender environment και κάνει probes υπό παρόμοιες network conditions, επειδή η measured path περιλαμβάνει το access network του recipient, το wake-up latency και το messenger infrastructure.<sup>[[2]](#references)</sup>
+* Build a baseline for the same target while they are in several known places (home, office, campus, country A vs country B, etc.).
+* For each location, collect many normal message RTTs and extract simple features such as median, variance, or percentile buckets.
+* During the real attack, compare the new probe series against the trained clusters. The paper reports that even locations within the same city can often be separated, with `>80%` accuracy in a 3-location setting.
+* This works best when the attacker controls the sender environment and probes under similar network conditions, because the measured path includes the recipient access network, wake-up latency, and messenger infrastructure.<sup>[[2]](#references)</sup>
 
-Σε αντίθεση με τα παραπάνω silent reaction/edit/delete attacks, το location inference δεν απαιτεί invalid message IDs ή stealthy state-changing packets. Αρκούν plain messages με normal delivery confirmations, επομένως το tradeoff είναι χαμηλότερο stealth αλλά ευρύτερη applicability σε messengers.
+Unlike the silent reaction/edit/delete attacks above, location inference does not require invalid message IDs or stealthy state-changing packets. Plain messages with normal delivery confirmations are enough, so the tradeoff is lower stealth but wider applicability across messengers.
 
 ## Stealthy resource exhaustion
 
-Επειδή κάθε silent probe πρέπει να γίνει decrypt και acknowledge, η συνεχής αποστολή reaction toggles, invalid edits ή delete-for-everyone packets δημιουργεί application-layer DoS:<sup>[[1]](#references)</sup>
+Because every silent probe must be decrypted and acknowledged, continuously sending reaction toggles, invalid edits, or delete-for-everyone packets creates an application-layer DoS:<sup>[[1]](#references)</sup>
 
-* Αναγκάζει το radio/modem να κάνει transmit/receive κάθε δευτερόλεπτο → noticeable battery drain, ειδικά σε idle handsets.
-* Δημιουργεί unmetered upstream/downstream traffic που καταναλώνει mobile data plans, ενώ αναμειγνύεται με TLS/WebSocket noise.
-* Απασχολεί crypto threads και εισάγει jitter σε latency-sensitive features (VoIP, video calls), παρότι ο user δεν βλέπει notifications.
-* Στο WhatsApp, τα invalid reactions δέχονται πολύ περισσότερα data από όσα υποδηλώνει ένα normal emoji: δημοσιευμένες μετρήσεις βρήκαν server-side acceptance έως περίπου `1 MB` ανά reaction.
-* Τα oversized reactions παύουν να παράγουν αξιόπιστα delivery receipts όταν το body ξεπεράσει περίπου τα `30 bytes`, αλλά εξακολουθούν να προωθούνται και να υποβάλλονται σε processing πριν απορριφθούν. Διατήρησε τα reaction bodies μικρά όταν χρειάζεσαι ACKs· κάνε τα μεγαλύτερα μόνο όταν ο στόχος είναι καθαρό drain ή covert one-way transport.
-* Δημόσιες μετρήσεις έφτασαν περίπου τα `3.7 MB/s` (`~13.3 GB/h`) traffic του victim σε αυτό το mode.
+* Forces the radio/modem to transmit/receive every second → noticeable battery drain, especially on idle handsets.
+* Generates upstream/downstream traffic that consumes mobile data plans and can contend with latency-sensitive features such as video calls.<sup>[[1]](#references)</sup>
+* Large invalid payloads add processing work, but the paper reports that cryptography itself is a negligible part of battery cost.<sup>[[1]](#references)</sup>
+* On WhatsApp, invalid reactions accept far more data than a normal emoji suggests: published measurements found server-side acceptance up to roughly `1 MB` per reaction.
+* Oversized reactions stop producing reliable delivery receipts once the body grows beyond roughly `30 bytes`, but they are still forwarded and processed before discard. Keep reaction bodies tiny when you need ACKs; inflate them only when the goal is pure drain or covert one-way transport.
+* Public measurements reached about `3.7 MB/s` (`~13.3 GB/h`) of victim traffic in this mode.
 
 ## References
 
