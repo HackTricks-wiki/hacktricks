@@ -393,6 +393,7 @@
 
 # 📱 Mobile Pentesting
 
+- [AI-Assisted Mobile Application Analysis](mobile-pentesting/ai-assisted-mobile-application-analysis.md)
 - [Android APK Checklist](mobile-pentesting/android-checklist.md)
 - [Android Applications Pentesting](mobile-pentesting/android-app-pentesting/README.md)
   - [Abusing Android Media Pipelines Image Parsers](mobile-pentesting/android-app-pentesting/abusing-android-media-pipelines-image-parsers.md)
