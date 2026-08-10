@@ -1,7 +1,5 @@
 # Volatility - CheatSheet
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 Αν χρειάζεστε ένα εργαλείο που αυτοματοποιεί την ανάλυση μνήμης με διαφορετικά επίπεδα σάρωσης και εκτελεί πολλαπλά Volatility3 plugins παράλληλα, μπορείτε να χρησιμοποιήσετε το autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 ```bash
 # Full scan (runs all plugins)
@@ -14,7 +12,7 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-Αν θέλετε κάτι **γρήγορο και τρελό** που θα εκτελέσει πολλά Volatility plugins παράλληλα, μπορείτε να χρησιμοποιήσετε: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+Αν θέλετε κάτι **γρήγορο και τρελό** που θα εκκινεί πολλά Volatility plugins παράλληλα, μπορείτε να χρησιμοποιήσετε το: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -51,20 +49,15 @@ python setup.py install
 
 ### Σημείωση σχετικά με τα plugins “list” και “scan”
 
-Το Volatility έχει δύο κύριες προσεγγίσεις για τα plugins, οι οποίες μερικές φορές αντικατοπτρίζονται στα ονόματά τους. Τα plugins “list” προσπαθούν να περιηγηθούν στις δομές του Windows Kernel για να ανακτήσουν πληροφορίες, όπως διεργασίες (εντοπίζουν και διασχίζουν τη linked list των δομών `_EPROCESS` στη μνήμη), handles του OS (εντοπίζουν και εμφανίζουν τον πίνακα handles, κάνουν dereference σε τυχόν pointers που βρίσκουν κ.λπ.). Σε γενικές γραμμές, συμπεριφέρονται όπως το Windows API όταν του ζητείται, για παράδειγμα, να εμφανίσει τις διεργασίες.
+Τα plugins `list` διατρέχουν δομές που διατηρεί ο kernel, επομένως είναι γρήγορα, αλλά ενδέχεται να παραλείψουν αντικείμενα τα οποία το malware αποσυνδέει. Τα plugins `scan`, όπως το `psscan`, αναζητούν signatures αντικειμένων στη μνήμη· μπορούν να ανακτήσουν τερματισμένες ή αποσυνδεδεμένες διεργασίες, αλλά είναι πιο αργά και μπορούν να παράγουν false positives όταν οι υπολειπόμενες δομές έχουν υποστεί ζημιά.<sup>[[8]](#references)</sup>
 
-Αυτό καθιστά τα plugins “list” αρκετά γρήγορα, αλλά εξίσου ευάλωτα με το Windows API σε manipulation από malware. Για παράδειγμα, αν το malware χρησιμοποιήσει DKOM για να αποσυνδέσει μια διεργασία από τη linked list του `_EPROCESS`, δεν θα εμφανιστεί στο Task Manager και ούτε στο pslist.
-
-Τα plugins “scan”, από την άλλη πλευρά, ακολουθούν μια προσέγγιση παρόμοια με το carving της μνήμης για αντικείμενα που μπορεί να έχουν νόημα όταν γίνει dereference ως συγκεκριμένες δομές. Το `psscan`, για παράδειγμα, διαβάζει τη μνήμη και προσπαθεί να δημιουργήσει αντικείμενα `_EPROCESS` από αυτήν (χρησιμοποιεί pool-tag scanning, δηλαδή αναζητά strings 4 byte που υποδεικνύουν την παρουσία μιας δομής ενδιαφέροντος). Το πλεονέκτημα είναι ότι μπορεί να εντοπίσει διεργασίες που έχουν τερματιστεί και, ακόμη κι αν το malware παραποιήσει τη linked list του `_EPROCESS`, το plugin θα συνεχίσει να βρίσκει τη δομή που βρίσκεται στη μνήμη (καθώς πρέπει να υπάρχει για να εκτελείται η διεργασία). Το μειονέκτημα είναι ότι τα plugins “scan” είναι λίγο πιο αργά από τα plugins “list” και μερικές φορές μπορεί να δώσουν false positives (μια διεργασία που τερματίστηκε πολύ παλιά και τμήματα της δομής της αντικαταστάθηκαν από άλλες λειτουργίες).
-
-Από: [http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)<sup>[[6]](#references)</sup>
-
-## Προφίλ OS
+## Προφίλ λειτουργικών συστημάτων
 
 ### Volatility3
 
-Όπως εξηγείται στο readme, πρέπει να τοποθετήσετε τον **πίνακα συμβόλων του OS** που θέλετε να υποστηρίξετε μέσα στο _volatility3/volatility/symbols_.\
-Πακέτα πινάκων συμβόλων για τα διάφορα λειτουργικά συστήματα είναι διαθέσιμα για **download** στη διεύθυνση:
+Το Volatility 3 απαιτεί symbol tables για το λειτουργικό σύστημα-στόχο. Το README του project παραθέτει packs για Windows, Mac και Linux· τοποθετήστε τα στο `volatility3/symbols` ή σε έναν κατάλογο `symbols` δίπλα στο executable. Τα Windows symbols που λείπουν μπορούν να ληφθούν και να δημιουργηθούν αυτόματα, ενώ οι πίνακες για Mac και Linux ενδέχεται να πρέπει να παραχθούν ξεχωριστά.<sup>[[9]](#references)</sup>
+
+Symbol table packs για τα διάφορα λειτουργικά συστήματα είναι διαθέσιμα για **download** στη διεύθυνση:
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -72,13 +65,13 @@ python setup.py install
 
 ### Volatility2
 
-#### Εξωτερικό Profile
+#### External Profile
 
 Μπορείτε να λάβετε τη λίστα των υποστηριζόμενων profiles εκτελώντας:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-Αν θέλετε να χρησιμοποιήσετε ένα **νέο profile που έχετε κατεβάσει** (για παράδειγμα ένα linux profile), πρέπει να δημιουργήσετε κάπου την ακόλουθη δομή φακέλων: _plugins/overlays/linux_ και να τοποθετήσετε μέσα σε αυτόν τον φάκελο το αρχείο zip που περιέχει το profile. Στη συνέχεια, λάβετε τον αριθμό των profiles χρησιμοποιώντας:
+Αν θέλετε να χρησιμοποιήσετε ένα **νέο προφίλ που έχετε κατεβάσει** (για παράδειγμα ένα linux), πρέπει να δημιουργήσετε κάπου την ακόλουθη δομή φακέλων: _plugins/overlays/linux_ και να τοποθετήσετε μέσα σε αυτόν τον φάκελο το zip αρχείο που περιέχει το προφίλ. Στη συνέχεια, λάβετε τον αριθμό των προφίλ χρησιμοποιώντας:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -101,11 +94,11 @@ VistaSP0x86                                   - A Profile for Windows Vista SP0 
 volatility imageinfo -f file.dmp
 volatility kdbgscan -f file.dmp
 ```
-#### **Διαφορές μεταξύ imageinfo και kdbgscan**
+#### **Διαφορές μεταξύ των imageinfo και kdbgscan**
 
-[**Από εδώ**](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/): Σε αντίθεση με το imageinfo, το οποίο παρέχει απλώς προτάσεις για profile, το **kdbgscan** έχει σχεδιαστεί για να αναγνωρίζει με βεβαιότητα το σωστό profile και τη σωστή διεύθυνση KDBG (σε περίπτωση που υπάρχουν περισσότερες από μία). Αυτό το plugin αναζητά τις υπογραφές KDBGHeader που συνδέονται με τα Volatility profiles και εφαρμόζει ελέγχους εγκυρότητας για να μειώσει τα false positives. Η λεπτομέρεια της εξόδου και ο αριθμός των ελέγχων εγκυρότητας που μπορούν να πραγματοποιηθούν εξαρτώνται από το αν το Volatility μπορεί να βρει ένα DTB. Επομένως, αν γνωρίζετε ήδη το σωστό profile (ή αν έχετε μια πρόταση profile από το imageinfo), βεβαιωθείτε ότι το χρησιμοποιείτε από .<sup>[[1]](#references)</sup>
+Οι [σημειώσεις αναγνώρισης image της Andrea Fortuna](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/) εξηγούν ότι το `imageinfo` δημιουργεί προτάσεις προφίλ, ενώ το `kdbgscan` πραγματοποιεί σάρωση για υπογραφές KDBG και εφαρμόζει ελέγχους λογικής για να εντοπίσει υποψήφια προφίλ και διευθύνσεις KDBG. Η έξοδός του εξαρτάται εν μέρει από το αν το Volatility μπορεί να εντοπίσει ένα DTB, επομένως περάστε ένα γνωστό ή προτεινόμενο προφίλ κατά την εκτέλεσή του.<sup>[[1]](#references)</sup>
 
-Να ελέγχετε πάντα το **πλήθος των processes που έχει εντοπίσει το kdbgscan**. Μερικές φορές τα imageinfo και kdbgscan μπορούν να εντοπίσουν **περισσότερα από ένα** κατάλληλα **profiles**, αλλά μόνο το **έγκυρο θα έχει κάποια processes που σχετίζονται** (αυτό συμβαίνει επειδή για την εξαγωγή των processes απαιτείται η σωστή διεύθυνση KDBG)<sup>[[1]](#references)</sup>
+Όταν επιστρέφονται πολλαπλοί υποψήφιοι, συγκρίνετε τον αριθμό των διεργασιών και των modules: ένας υποψήφιος με μηδενικές διεργασίες ή modules είναι λιγότερο αξιόπιστος από έναν με συμπληρωμένες λίστες. Θεωρήστε το αυτό έλεγχο λογικής και όχι απόδειξη ότι ένα προφίλ είναι σωστό.<sup>[[1]](#references)</sup>
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -119,18 +112,18 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-Το **kernel debugger block**, που αναφέρεται ως **KDBG** από το Volatility, είναι κρίσιμο για τις forensic εργασίες που εκτελούνται από το Volatility και διάφορους debuggers. Αναγνωρίζεται ως `KdDebuggerDataBlock` και είναι τύπου `_KDDEBUGGER_DATA64`. Περιέχει βασικές αναφορές, όπως το `PsActiveProcessHead`. Η συγκεκριμένη αναφορά δείχνει στην κεφαλή της λίστας διεργασιών, επιτρέποντας την καταγραφή όλων των διεργασιών, κάτι θεμελιώδες για την ολοκληρωμένη ανάλυση μνήμης.<sup>[[2]](#references)</sup>
+Το `KdDebuggerDataBlock`, γνωστό στο Volatility ως KDBG, είναι μια δομή `_KDDEBUGGER_DATA64` που περιλαμβάνει το `PsActiveProcessHead`, την κεφαλή της λίστας διεργασιών που χρησιμοποιείται για την απαρίθμηση διεργασιών.<sup>[[2]](#references)</sup>
 
-## Πληροφορίες OS
+## Πληροφορίες λειτουργικού συστήματος
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-Το plugin `banners.Banners` μπορεί να χρησιμοποιηθεί στο **vol3 για την προσπάθεια εύρεσης linux banners** στο dump.
+Το plugin `banners.Banners` μπορεί να χρησιμοποιηθεί στο **vol3 για την αναζήτηση linux banners** στο dump.
 
-## Hashes/Passwords
+## Hashes/Κωδικοί πρόσβασης
 
-Εξαγάγετε SAM hashes, [domain cached credentials](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) και [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
+Εξαγάγετε τα SAM hashes, τα [domain cached credentials](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) και τα [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -150,9 +143,9 @@ volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 {{#endtab}}
 {{#endtabs}}
 
-## Dump Μνήμης
+## Memory Dump
 
-Το memory dump μιας διεργασίας θα **εξαγάγει τα πάντα** σχετικά με την τρέχουσα κατάσταση της διεργασίας. Το module **procdump** θα **εξαγάγει** μόνο τον **κώδικα**.
+Το memory dump μιας διεργασίας θα **εξαγάγει τα πάντα** από την τρέχουσα κατάσταση της διεργασίας. Το module **procdump** θα **εξαγάγει** μόνο τον **κώδικα**.
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
@@ -160,8 +153,8 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 
 ### Λίστα διεργασιών
 
-Προσπαθήστε να βρείτε **ύποπτες** διεργασίες (με βάση το όνομα) ή **μη αναμενόμενες θυγατρικές διεργασίες** (για παράδειγμα, ένα cmd.exe ως child του iexplorer.exe).\
-Μπορεί να είναι ενδιαφέρον να **συγκρίνετε** το αποτέλεσμα του pslist με εκείνο του psscan, για να εντοπίσετε κρυφές διεργασίες.
+Προσπαθήστε να εντοπίσετε **ύποπτες** διεργασίες (βάσει ονόματος) ή **μη αναμενόμενες** θυγατρικές **διεργασίες** (για παράδειγμα, ένα cmd.exe ως θυγατρική του iexplorer.exe).\
+Θα μπορούσε να είναι χρήσιμη η **σύγκριση** του αποτελέσματος του pslist με εκείνο του psscan, για τον εντοπισμό κρυφών διεργασιών.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -182,7 +175,7 @@ volatility --profile=PROFILE psxview -f file.dmp # Get hidden process list
 {{#endtab}}
 {{#endtabs}}
 
-### Απόρριψη proc
+### Dump proc
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -217,7 +210,7 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-Οι εντολές που εκτελούνται στο `cmd.exe` διαχειρίζονται από το **`conhost.exe`** (ή το **`csrss.exe`** σε συστήματα πριν από τα Windows 7). Αυτό σημαίνει ότι, αν το **`cmd.exe`** τερματιστεί από έναν attacker πριν από τη λήψη ενός memory dump, εξακολουθεί να είναι δυνατή η ανάκτηση του command history της συνεδρίας από τη μνήμη του **`conhost.exe`**. Για να γίνει αυτό, αν εντοπιστεί ασυνήθιστη δραστηριότητα στις λειτουργικές μονάδες της κονσόλας, θα πρέπει να ληφθεί memory dump της σχετιζόμενης διεργασίας **`conhost.exe`**. Στη συνέχεια, με αναζήτηση για **strings** μέσα σε αυτό το dump, μπορούν ενδεχομένως να εξαχθούν οι γραμμές εντολών που χρησιμοποιήθηκαν στη συνεδρία.
+Οι εντολές που εκτελούνται στο `cmd.exe` διαχειρίζονται από το **`conhost.exe`** (ή το **`csrss.exe`** σε συστήματα πριν από τα Windows 7). Αυτό σημαίνει ότι, αν το **`cmd.exe`** τερματιστεί από έναν attacker πριν από τη λήψη ενός memory dump, εξακολουθεί να είναι δυνατή η ανάκτηση του command history της συνεδρίας από τη μνήμη του **`conhost.exe`**. Για να γίνει αυτό, αν εντοπιστεί ασυνήθιστη δραστηριότητα στα modules της κονσόλας, θα πρέπει να γίνει dump της μνήμης της σχετικής διεργασίας **`conhost.exe`**. Στη συνέχεια, με αναζήτηση για **strings** μέσα σε αυτό το dump, μπορούν ενδεχομένως να εξαχθούν οι γραμμές εντολών που χρησιμοποιήθηκαν στη συνεδρία.
 
 ### Περιβάλλον
 
@@ -239,10 +232,10 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 {{#endtab}}
 {{#endtabs}}
 
-### Token privileges
+### Προνόμια Token
 
-Ελέγξτε για tokens προνομίων σε μη αναμενόμενες υπηρεσίες.\
-Ίσως είναι ενδιαφέρον να καταγράψετε τις διεργασίες που χρησιμοποιούν κάποιο προνομιούχο token.
+Ελέγξτε για tokens με privileges σε μη αναμενόμενες υπηρεσίες.\
+Μπορεί να είναι ενδιαφέρον να καταγράψετε τις διεργασίες που χρησιμοποιούν κάποιο privileged token.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -267,7 +260,7 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePri
 ### SIDs
 
 Ελέγξτε κάθε SSID που ανήκει σε μια διεργασία.\
-Μπορεί να είναι ενδιαφέρον να καταγράψετε τις διεργασίες που χρησιμοποιούν ένα προνομιακό SID (και τις διεργασίες που χρησιμοποιούν κάποιο service SID).
+Θα μπορούσε να είναι ενδιαφέρον να καταγράψετε τις διεργασίες που χρησιμοποιούν ένα privileges SID (και τις διεργασίες που χρησιμοποιούν κάποιο service SID).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -287,7 +280,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### Handles
 
-Χρήσιμο είναι να γνωρίζετε για ποια άλλα αρχεία, κλειδιά, threads, processes... ένα **process έχει ένα handle** (έχει ανοίξει)
+Χρήσιμο να γνωρίζετε για ποια άλλα αρχεία, κλειδιά, threads, processes... ένα **process έχει ένα handle** (έχει ανοίξει)
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -363,7 +356,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-Τα **Windows** παρακολουθούν τα προγράμματα που εκτελείτε χρησιμοποιώντας μια λειτουργία στο registry που ονομάζεται **UserAssist keys**. Αυτά τα keys καταγράφουν πόσες φορές εκτελείται κάθε πρόγραμμα και πότε εκτελέστηκε τελευταία φορά.<sup>[[3]](#references)</sup>
+Οι τιμές μητρώου `UserAssist` καταγράφουν τα προγράμματα που εκκινούνται μέσω του Windows Explorer, συμπεριλαμβανομένων των μετρήσεων εκτέλεσης και των χρονικών σημάνσεων τελευταίας εκτέλεσης· οι εκκινήσεις μέσω γραμμής εντολών δεν καταγράφονται σε αυτά τα κλειδιά.<sup>[[3]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -427,9 +420,9 @@ volatility --profile=SomeLinux -f file.dmp linux_route_cache
 {{#endtab}}
 {{#endtabs}}
 
-## Κυψέλη Registry
+## Hive μητρώου
 
-### Εμφάνιση διαθέσιμων κυψελών
+### Εμφάνιση διαθέσιμων hives
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -491,7 +484,7 @@ volatility --profile=SomeLinux -f file.dmp linux_recover_filesystem #Dump the en
 {{#endtab}}
 {{#endtabs}}
 
-### Σάρωση/απόρριψη
+### Σάρωση/λήψη dump
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -514,7 +507,7 @@ volatility --profile=SomeLinux -f file.dmp linux_find_file -i 0xINODENUMBER -O /
 {{#endtab}}
 {{#endtabs}}
 
-### Κύριος Πίνακας Αρχείων
+### Πίνακας Master File
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -530,9 +523,9 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-Το **σύστημα αρχείων NTFS** χρησιμοποιεί ένα κρίσιμο στοιχείο γνωστό ως _κύριος πίνακας αρχείων_ (MFT). Αυτός ο πίνακας περιλαμβάνει τουλάχιστον μία καταχώριση για κάθε αρχείο σε έναν τόμο, συμπεριλαμβανομένου και του ίδιου του MFT. Σημαντικές λεπτομέρειες για κάθε αρχείο, όπως **το μέγεθος, οι χρονικές σημάνσεις, τα δικαιώματα και τα πραγματικά δεδομένα**, είναι ενσωματωμένες στις καταχωρίσεις του MFT ή βρίσκονται σε περιοχές εκτός του MFT, στις οποίες γίνεται αναφορά από αυτές τις καταχωρίσεις. Περισσότερες λεπτομέρειες μπορείτε να βρείτε στην [επίσημη τεκμηρίωση](https://docs.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
+Στο NTFS, το MFT έχει τουλάχιστον μία καταχώριση για κάθε αρχείο στον τόμο, συμπεριλαμβανομένου του ίδιου. Τα μεταδεδομένα και τα περιεχόμενα των αρχείων αποθηκεύονται στις καταχωρίσεις του MFT ή σε τοποθεσίες που περιγράφονται από αυτές τις καταχωρίσεις· δείτε την [τεκμηρίωση της Microsoft](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
 
-### Κλειδιά/Πιστοποιητικά SSL
+### SSL Keys/Certs
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -592,7 +585,7 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 ### Σάρωση με yara
 
 Χρησιμοποιήστε αυτό το script για να κατεβάσετε και να συγχωνεύσετε όλους τους κανόνες malware του yara από το github: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-Δημιουργήστε τον κατάλογο _**rules**_ και εκτελέστε το. Αυτό θα δημιουργήσει ένα αρχείο με το όνομα _**malware_rules.yar**_, το οποίο περιέχει όλους τους κανόνες yara για malware.
+Δημιουργήστε τον κατάλογο _**rules**_ και εκτελέστε το. Αυτό θα δημιουργήσει ένα αρχείο με όνομα _**malware_rules.yar**_, το οποίο περιέχει όλους τους κανόνες yara για malware.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -660,7 +653,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp handles -p <PID> -t mutant
 {{#endtab}}
 {{#endtabs}}
 
-### Συμβολικοί σύνδεσμοι
+### Symlinks
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -678,7 +671,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-Είναι δυνατό να **διαβάσεις από τη μνήμη το bash history.** Θα μπορούσες επίσης να κάνεις dump το αρχείο _.bash_history_, αλλά αν ήταν απενεργοποιημένο, θα χαρείς που μπορείς να χρησιμοποιήσεις αυτό το volatility module
+Είναι δυνατό να **διαβάσετε από τη μνήμη το ιστορικό του bash.** Θα μπορούσατε επίσης να κάνετε dump το _.bash_history_ file, αλλά αν ήταν απενεργοποιημένο, θα χαρείτε που μπορείτε να χρησιμοποιήσετε αυτό το volatility module
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -710,7 +703,7 @@ volatility --profile=Win7SP1x86_23418 -f timeliner
 {{#endtab}}
 {{#endtabs}}
 
-### Οδηγοί
+### Προγράμματα οδήγησης
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -736,12 +729,12 @@ volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp
 #Just vol2
 volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
 ```
-### Λήψη κειμένου από το Notepad
+### Λήψη κειμένου από το notepad
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 ```
-Δεν εμφανίζεται screenshot ή κείμενο προς μετάφραση.
+Δεν εμφανίζεται screenshot. Παρακαλώ ανεβάστε την εικόνα ή επικολλήστε το κείμενο προς μετάφραση.
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
@@ -750,15 +743,17 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-Ο **Master Boot Record (MBR)** διαδραματίζει κρίσιμο ρόλο στη διαχείριση των λογικών διαμερισμάτων ενός μέσου αποθήκευσης, τα οποία είναι δομημένα με διαφορετικά [file systems](https://en.wikipedia.org/wiki/File_system). Δεν περιέχει μόνο πληροφορίες σχετικά με τη διάταξη των διαμερισμάτων, αλλά και εκτελέσιμο κώδικα που λειτουργεί ως boot loader. Αυτός ο boot loader είτε ξεκινά απευθείας τη διαδικασία φόρτωσης δεύτερου σταδίου του OS (δείτε το [second-stage boot loader](https://en.wikipedia.org/wiki/Second-stage_boot_loader)) είτε συνεργάζεται με το [volume boot record](https://en.wikipedia.org/wiki/Volume_boot_record) (VBR) κάθε διαμερίσματος. Για λεπτομερείς πληροφορίες, ανατρέξτε στη [MBR Wikipedia page](https://en.wikipedia.org/wiki/Master_boot_record).<sup>[[5]](#references)</sup>
+Σε συστήματα που βασίζονται σε BIOS, το MBR στον τομέα 0 περιέχει τον κύριο κώδικα εκκίνησης και τον πίνακα διαμερισμάτων. Η Microsoft τεκμηριώνει ότι η εντολή `bootsect /mbr` ενημερώνει τον κώδικα χωρίς να αλλάζει τον συγκεκριμένο πίνακα.<sup>[[7]](#references)</sup>
 
-## Αναφορές
+## References
 
-- [1] [Volatility, my own cheatsheet (Part 1): Image Identification](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
-- [2] [Finding the Kernel Debugger Block](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
-- [3] [Windows UserAssist Keys](https://www.aldeid.com/wiki/Windows-userassist-keys)
-- [4] [Master File Table (Local File Systems) - Win32 apps](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
-- [5] [UEFI-based PC, protective MBR: what is it? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
-- [6] [Tutorial: Volatility plugins for malware analysis](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
-
+- [1] [Volatility, το δικό μου cheatsheet (Μέρος 1): Αναγνώριση image](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
+- [2] [Εντοπισμός του Kernel Debugger Block](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
+- [3] [Κλειδιά Windows UserAssist](https://www.aldeid.com/wiki/Windows-userassist-keys)
+- [4] [Master File Table (Τοπικά συστήματα αρχείων) - Win32 apps](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
+- [5] [PC που βασίζεται σε UEFI, protective MBR: τι είναι; - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
+- [6] [Tutorial: Volatility plugins για ανάλυση malware](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
+- [7] [Επιλογές γραμμής εντολών Bootsect](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/bootsect-command-line-options?view=windows-11)
+- [8] [Tutorial - Volatility plugins και ανάλυση malware](https://tomchop.me/posts/volatility-plugin-malware-analysis/)
+- [9] [README του Volatility 3](https://github.com/volatilityfoundation/volatility3/blob/develop/README.md)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,29 +1,29 @@
-# Επιθέσεις Homograph / Homoglyph στο Phishing
-
-{{#include ../../banners/hacktricks-training.md}}
+# Homograph / Homoglyph Attacks in Phishing
 
 ## Επισκόπηση
 
-Μια επίθεση homograph (γνωστή και ως homoglyph) εκμεταλλεύεται το γεγονός ότι πολλά **Unicode code points από non-Latin scripts είναι οπτικά πανομοιότυπα ή εξαιρετικά παρόμοια με ASCII characters**. Αντικαθιστώντας έναν ή περισσότερους Latin χαρακτήρες με τα οπτικά παρόμοια αντίστοιχά τους, ένας attacker μπορεί να δημιουργήσει:
+Μια επίθεση homograph (γνωστή και ως επίθεση homoglyph) εκμεταλλεύεται το γεγονός ότι πολλά **Unicode code points από μη λατινικά αλφάβητα είναι οπτικά πανομοιότυπα ή εξαιρετικά παρόμοια με χαρακτήρες ASCII**. Αντικαθιστώντας έναν ή περισσότερους λατινικούς χαρακτήρες με τα αντίστοιχα οπτικά παρόμοια στοιχεία, ένας attacker μπορεί να δημιουργήσει:
 
 * Display names, subjects ή message bodies που φαίνονται νόμιμα στο ανθρώπινο μάτι, αλλά παρακάμπτουν detections που βασίζονται σε keywords.
-* Domains, sub-domains ή URL paths που παραπλανούν τα victims, κάνοντάς τα να πιστεύουν ότι επισκέπτονται ένα trusted site.
+* Domains, sub-domains ή URL paths που κάνουν τα victims να πιστεύουν ότι επισκέπτονται ένα trusted site.<sup>[[1]](#references)</sup>
 
-Επειδή κάθε glyph αναγνωρίζεται εσωτερικά από το **Unicode code point** του, ένας μόνο αντικατασταθείς χαρακτήρας αρκεί για να νικήσει naïve string comparisons (π.χ., `"Παypal.com"` έναντι `"Paypal.com"`).
+Επειδή κάθε glyph αναγνωρίζεται εσωτερικά από το **Unicode code point** του, ένας μόνο αντικατασταθείς χαρακτήρας αρκεί για να παρακάμψει naïve string comparisons (π.χ. `"Παypal.com"` έναντι `"Paypal.com"`).<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Τυπικό Phishing Workflow
+## Συνήθης Ροή Phishing
 
-1. **Δημιουργία message content** – Αντικαταστήστε συγκεκριμένα Latin γράμματα στο impersonated brand / keyword με οπτικά δυσδιάκριτους χαρακτήρες από άλλο script (Greek, Cyrillic, Armenian, Cherokee κ.λπ.).
-2. **Καταχώριση supporting infrastructure** – Προαιρετικά καταχωρίστε ένα homoglyph domain και αποκτήστε ένα TLS certificate (οι περισσότερες CAs δεν πραγματοποιούν visual similarity checks).
-3. **Αποστολή email / SMS** – Το message περιέχει homoglyphs σε μία ή περισσότερες από τις ακόλουθες τοποθεσίες:
-* Sender display name (π.χ., `Ηеlрdеѕk`)
+1. **Craft message content** – Αντικατάσταση συγκεκριμένων λατινικών γραμμάτων στο impersonated brand / keyword με οπτικά μη διακριτούς χαρακτήρες από άλλο script (Greek, Cyrillic, Armenian, Cherokee κ.λπ.).
+2. **Register supporting infrastructure** – Προαιρετική καταχώριση ενός homoglyph domain και απόκτηση TLS certificate (οι περισσότερες CAs δεν πραγματοποιούν visual similarity checks).
+3. **Send email / SMS** – Το message περιέχει homoglyphs σε μία ή περισσότερες από τις ακόλουθες τοποθεσίες:
+* Sender display name (π.χ. `Ηеlрdеѕk`)
 * Subject line (`Urgеnt Аctіon Rеquіrеd`)
 * Hyperlink text ή fully qualified domain name
-4. **Redirect chain** – Το victim περνά μέσω φαινομενικά benign websites ή URL shorteners πριν καταλήξει στον malicious host που πραγματοποιεί credential harvesting / delivers malware.
+4. **Redirect chain** – Το victim ανακατευθύνεται μέσω φαινομενικά benign websites ή URL shorteners, πριν καταλήξει στον malicious host που συλλέγει credentials / παραδίδει malware.<sup>[[1]](#references)</sup>
 
-## Unicode Ranges που Συχνά Γίνονται Abuse
+## Unicode Ranges που Χρησιμοποιούνται Συχνά
 
-| Script | Range | Example glyph | Μοιάζει με |
+Τα ακόλουθα παραδείγματα είναι Unicode blocks που περιέχουν χαρακτήρες οι οποίοι χρησιμοποιούνται συχνά για τη δημιουργία cross-script look-alikes.<sup>[[2]](#references)[[3]](#references)</sup>
+
+| Script | Range | Example glyph | Looks like |
 |--------|-------|---------------|------------|
 | Greek  | U+0370-03FF | `Η` (U+0397) | Latin `H` |
 | Greek  | U+0370-03FF | `ρ` (U+03C1) | Latin `p` |
@@ -32,17 +32,17 @@
 | Armenian | U+0530-058F | `օ` (U+0585) | Latin `o` |
 | Cherokee | U+13A0-13FF | `Ꭲ` (U+13A2) | Latin `T` |
 
-> Συμβουλή: Πλήρη Unicode charts είναι διαθέσιμα στο [unicode.org](https://home.unicode.org/).<sup>[[2]](#references)</sup>
+> Συμβουλή: Χρησιμοποιήστε τα Unicode code charts για να εντοπίσετε blocks και code points.
 
 ## Τεχνικές Detection
 
 ### 1. Mixed-Script Inspection
 
-Τα Phishing emails που στοχεύουν έναν English-speaking organisation σπάνια θα πρέπει να αναμειγνύουν characters από multiple scripts. Ένα απλό αλλά αποτελεσματικό heuristic είναι:
+Τα phishing emails που στοχεύουν έναν αγγλόφωνο οργανισμό σπάνια θα πρέπει να αναμειγνύουν χαρακτήρες από πολλά scripts. Ένα απλό αλλά αποτελεσματικό heuristic είναι να:
 
-1. Επαναλάβετε κάθε character του inspected string.
-2. Αντιστοιχίστε το code point στο Unicode block του.
-3. Δημιουργήστε alert αν υπάρχει περισσότερα από ένα scripts **ή** αν εμφανίζονται non-Latin scripts σε σημεία όπου δεν αναμένονται (display name, domain, subject, URL κ.λπ.).
+1. Επαναλάβετε κάθε χαρακτήρα του inspected string.
+2. Αντιστοιχίσετε το code point στο όνομα του script ή στο Unicode block.
+3. Ενεργοποιήσετε alert αν υπάρχει περισσότερα από ένα scripts **ή** αν εμφανίζονται μη λατινικά scripts σε σημεία όπου δεν αναμένονται (display name, domain, subject, URL κ.λπ.).<sup>[[3]](#references)</sup>
 
 Python proof-of-concept:
 ```python
@@ -69,36 +69,38 @@ print(f"[!] Mixed scripts in {field}: {dict(blocks)} -> {value}")
 ```
 ### 2. Κανονικοποίηση Punycode (Domains)
 
-Τα Διεθνοποιημένα Domain Names (IDNs) κωδικοποιούνται με **punycode** (`xn--`). Η μετατροπή κάθε hostname σε punycode και, στη συνέχεια, ξανά σε Unicode επιτρέπει την αντιστοίχιση με μια whitelist ή την εκτέλεση ελέγχων ομοιότητας (π.χ. απόσταση Levenshtein) **αφού** η συμβολοσειρά έχει κανονικοποιηθεί.
+Τα Internationalised Domain Names (IDNs) έχουν μορφή Unicode και μορφή **Punycode** συμβατή με ASCII, με πρόθεμα `xn--`. Μετατρέψτε τα hostnames στη μορφή IDNA/Punycode πριν από την προσθήκη τους σε allow-list ή τη σύγκρισή τους, διατηρώντας τη μορφή Unicode για εμφάνιση.<sup>[[6]](#references)</sup>
 ```python
 import idna
-hostname = "Ρаypal.com"   # Greek Rho + Cyrillic a
+hostname = "ρаypal.com"   # Greek small rho + Cyrillic small a
 puny = idna.encode(hostname).decode()
-print(puny)  # xn--yl8hpyal.com
+print(puny)  # xn--ypal-9nd08d.com
 ```
-### 3. Homoglyph Dictionaries / Algorithms
+### 3. Λεξικά / Αλγόριθμοι Homoglyph
 
-Tools such as **dnstwist** (`--homoglyph`) or **urlcrazy** can enumerate visually-similar domain permutations and are useful for proactive takedown / monitoring.<sup>[[3]](#references)</sup>
+Tools όπως το **dnstwist** (`--fuzzers homoglyph`) ή το **urlcrazy** μπορούν να απαριθμήσουν οπτικά παρόμοιες παραλλαγές domain και είναι χρήσιμα για προληπτικό takedown / monitoring.<sup>[[4]](#references)[[5]](#references)</sup>
 
-## Prevention & Mitigation
+## Πρόληψη & Μετριασμός
 
-* Εφαρμόστε αυστηρές πολιτικές DMARC/DKIM/SPF – αποτρέψτε το spoofing από μη εξουσιοδοτημένα domains.
-* Υλοποιήστε την παραπάνω λογική detection σε **Secure Email Gateways** και playbooks SIEM/XSOAR.
+* Επιβάλετε αυστηρές πολιτικές DMARC/DKIM/SPF – αποτρέψτε το spoofing από μη εξουσιοδοτημένα domains.
+* Υλοποιήστε την παραπάνω λογική detection σε **Secure Email Gateways** και playbooks του **SIEM/XSOAR**.
 * Επισημάνετε ή θέστε σε καραντίνα μηνύματα όπου το domain του display name ≠ το domain του sender.
-* Εκπαιδεύστε τους χρήστες: να κάνουν copy-paste ύποπτο κείμενο σε έναν Unicode inspector, να περνούν τον δείκτη πάνω από τα links και να μην εμπιστεύονται ποτέ URL shorteners.
+* Εκπαιδεύστε τους χρήστες: να κάνουν copy-paste ύποπτο κείμενο σε έναν Unicode inspector, να κάνουν hover πάνω από links και να μην εμπιστεύονται ποτέ URL shorteners.
 
-## Real-World Examples
+## Παραδείγματα από τον Πραγματικό Κόσμο
 
 * Display name: `Сonfidеntiаl Ꭲiꮯkеt` (Cyrillic `С`, `е`, `а`; Cherokee `Ꭲ`; Latin small capital `ꮯ`).
-* Domain chain: `bestseoservices.com` ➜ municipal `/templates` directory ➜ `kig.skyvaulyt.ru` ➜ fake Microsoft login at `mlcorsftpsswddprotcct.approaches.it.com` protected by custom OTP CAPTCHA.
-* Spotify impersonation: `Sρօtifս` sender with link hidden behind `redirects.ca`.
+* Αλυσίδα domain: `bestseoservices.com` ➜ δημοτικός κατάλογος `/templates` ➜ `kig.skyvaulyt.ru` ➜ fake Microsoft login στο `mlcorsftpsswddprotcct.approaches.it.com`, προστατευμένο από custom OTP CAPTCHA.
+* Impersonation του Spotify: sender `Sρօtifս` με link κρυμμένο πίσω από το `redirects.ca`.
 
-Αυτά τα δείγματα προέρχονται από έρευνα της Unit 42 (Ιούλιος 2025) και δείχνουν πώς η κατάχρηση homograph συνδυάζεται με URL redirection και CAPTCHA evasion για την παράκαμψη της αυτοματοποιημένης ανάλυσης.<sup>[[1]](#references)</sup>
+Αυτά τα δείγματα προέρχονται από έρευνα της Unit 42 (Ιούλιος 2025) και δείχνουν πώς η κατάχρηση homograph συνδυάζεται με URL redirection και CAPTCHA evasion για την παράκαμψη αυτοματοποιημένης ανάλυσης.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [The Homograph Illusion: Not Everything Is As It Seems](https://unit42.paloaltonetworks.com/homograph-attacks/)
-- [2] [Unicode Character Database](https://home.unicode.org/)
-- [3] [dnstwist – domain permutation engine](https://github.com/elceef/dnstwist)
-
+- [1] [Η ψευδαίσθηση Homograph: Δεν είναι όλα όπως φαίνονται](https://unit42.paloaltonetworks.com/homograph-attacks/)
+- [2] [Πίνακες κωδικών χαρακτήρων Unicode](https://www.unicode.org/charts/)
+- [3] [Unicode Technical Standard #39: Μηχανισμοί ασφάλειας Unicode](https://unicode.org/reports/tr39/)
+- [4] [dnstwist – μηχανή παραλλαγών domain](https://github.com/elceef/dnstwist)
+- [5] [URLCrazy – generator για domain typo και παραλλαγές](https://github.com/urbanadventurer/urlcrazy)
+- [6] [RFC 5890: Internationalized Domain Names for Applications (IDNA): Ορισμοί και πλαίσιο εγγράφου](https://www.rfc-editor.org/rfc/rfc5890)
 {{#include ../../banners/hacktricks-training.md}}

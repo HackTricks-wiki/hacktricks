@@ -1,11 +1,8 @@
-# Απόκτηση και Προσάρτηση Image
-
-{{#include ../../banners/hacktricks-training.md}}
-
+# Απόκτηση και Προσάρτηση Εικόνας
 
 ## Απόκτηση
 
-> Πάντα να πραγματοποιείτε την απόκτηση σε **read-only** λειτουργία και να υπολογίζετε το **hash κατά την αντιγραφή**. Διατηρείτε την αρχική συσκευή **write-blocked** και εργάζεστε μόνο με επαληθευμένα αντίγραφα.
+> Να πραγματοποιείτε πάντα την απόκτηση σε **μόνο για ανάγνωση** και να υπολογίζετε το **hash κατά την αντιγραφή**. Διατηρείτε την αρχική συσκευή **προστατευμένη από εγγραφή** και εργάζεστε μόνο με επαληθευμένα αντίγραφα.
 
 ### DD
 ```bash
@@ -22,7 +19,7 @@ sha256sum disk.img > disk.img.sha256
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-Γραφικό, multithreaded εργαλείο δημιουργίας image που υποστηρίζει έξοδο **raw (dd)**, **EWF (E01/EWFX)** και **AFF4**, με παράλληλη επαλήθευση. Διαθέσιμο στα περισσότερα Linux repos (`apt install guymager`).
+Γραφικό εργαλείο imaging με υποστήριξη πολλαπλών threads, που υποστηρίζει έξοδο σε **raw (dd)**, **EWF (E01/EWFX)** και **AFF4**, με παράλληλη επαλήθευση. Διαθέσιμο στα περισσότερα Linux repos (`apt install guymager`).
 ```bash
 # Start in GUI mode
 sudo guymager
@@ -31,7 +28,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-Το AFF4 είναι η σύγχρονη μορφή απεικόνισης της Google, σχεδιασμένη για *πολύ* μεγάλα evidence (sparse, resumable, cloud-native).<sup>[[1]](#references)</sup>
+Η προδιαγραφή AFF4 v1.0, που συντάχθηκε από τους Bradley L. Schatz και Michael I. Cohen, ορίζει ένα forensic container με εικονικοποιημένο storage, αυθαίρετα metadata, επεκτάσιμη συμπίεση και hashing, καθώς και λειτουργία υψηλής απόδοσης.<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -51,7 +48,7 @@ ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
-### Imaging Cloud Disks
+### Λήψη εικόνων από Cloud Disks
 
 *AWS* – δημιουργήστε ένα **forensic snapshot** χωρίς να τερματίσετε το instance:
 ```bash
@@ -65,11 +62,11 @@ aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web
 
 ### Επιλογή της σωστής προσέγγισης
 
-1. Προσαρτήστε **ολόκληρο τον δίσκο** όταν θέλετε τον αρχικό πίνακα κατατμήσεων (MBR/GPT).
-2. Προσαρτήστε ένα **αρχείο μίας κατάτμησης** όταν χρειάζεστε μόνο έναν τόμο.
-3. Κάντε πάντα προσάρτηση **μόνο για ανάγνωση** (`-o ro,norecovery`) και εργαστείτε σε **αντίγραφα**.<sup>[[2]](#references)</sup>
+1. Προσαρτήστε τον **ολόκληρο δίσκο** όταν χρειάζεστε τον αρχικό πίνακα διαμερισμάτων (MBR/GPT).
+2. Προσαρτήστε ένα **αρχείο μεμονωμένου διαμερίσματος** όταν χρειάζεστε μόνο έναν τόμο.
+3. Διατηρήστε τα image attachments μόνο για ανάγνωση (για παράδειγμα, χρησιμοποιώντας το `--read-only` του qemu-nbd).<sup>[[2]](#references)</sup> Προσαρτήστε τα filesystems μόνο για ανάγνωση (`-o ro`).<sup>[[3]](#references)</sup> Εργαστείτε σε **αντίγραφα**.
 
-### Raw images (εξαγόμενα με dd, AFF4)
+### Raw images (dd, AFF4-extracted)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -84,7 +81,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-Αποσυνδέστε όταν ολοκληρωθεί:
+Αποσύνδεση όταν ολοκληρωθεί:
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -97,17 +94,19 @@ ewfmount evidence.E01 /mnt/ewf
 # 2. Attach the exposed raw file via qemu-nbd (safer than loop)
 sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 
-# 3. Mount the desired partition
+# 3. Mount the desired partition (XFS example; use the filesystem-specific option)
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-Εναλλακτικά, μετατρέψτε δυναμικά με το **xmount**:
+Για filesystem-specific no-replay mounts, τα ext3/ext4 χρησιμοποιούν `noload`, ενώ το XFS χρησιμοποιεί `norecovery` και απαιτεί read-only mode.<sup>[[3]](#references)[[4]](#references)</sup>
+
+Εναλλακτικά, κάντε on-the-fly μετατροπή με το **xmount**:
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
 mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
-### LVM / BitLocker / VeraCrypt volumes
+### Volumes LVM / BitLocker / VeraCrypt
 
-Μετά τη σύνδεση της block device (loop ή nbd):
+Αφού συνδέσετε τη block device (loop ή nbd):
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -117,7 +116,7 @@ sudo lvscan | grep "/dev/nbd0"
 sudo dislocker -V /dev/nbd0p3 -u -- /mnt/bitlocker
 sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 ```
-### βοηθητικά εργαλεία kpartx
+### Βοηθητικά εργαλεία kpartx
 
 Το `kpartx` αντιστοιχίζει αυτόματα τα partitions από ένα image στο `/dev/mapper/`:
 ```bash
@@ -126,22 +125,25 @@ mount -o ro /dev/mapper/loop0p2 /mnt
 ```
 ### Συνηθισμένα σφάλματα mount και διορθώσεις
 
+Για ένα μη καθαρό σύστημα αρχείων ext3/ext4, χρησιμοποιήστε `ro,noload` όταν πρέπει να αποτραπεί η αναπαραγωγή του journal.<sup>[[3]](#references)</sup>
+
 | Σφάλμα | Συνήθης αιτία | Διόρθωση |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | Το Journaled FS (ext4) δεν αποπροσαρτήθηκε σωστά | χρήση του `-o ro,norecovery` |
+| `cannot mount /dev/loop0 read-only` | Journaled FS (ext4) που δεν έγινε καθαρό unmount | χρησιμοποιήστε `-o ro,noload` |
 | `bad superblock …` | Λανθασμένο offset ή κατεστραμμένο FS | υπολογίστε το offset (`sector*size`) ή εκτελέστε `fsck -n` σε αντίγραφο |
 | `mount: unknown filesystem type 'LVM2_member'` | LVM container | ενεργοποιήστε το volume group με `vgchange -ay` |
 
-### Καθαρισμός
+### Εκκαθάριση
 
 Θυμηθείτε να κάνετε **umount** και να αποσυνδέσετε τις συσκευές loop/nbd, ώστε να μην παραμείνουν dangling mappings που μπορούν να καταστρέψουν περαιτέρω την εργασία:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ```
-## Αναφορές
+## References
 
 - [1] [Προδιαγραφή προτύπου AFF4 (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
-- [2] [Σελίδα εγχειριδίου qemu-nbd (ασφαλής προσάρτηση disk images)](https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html)
-
+- [2] [Τεκμηρίωση του QEMU qemu-nbd](https://www.qemu.org/docs/master/tools/qemu-nbd.html)
+- [3] [Σελίδα εγχειριδίου Linux για το mount(8)](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [4] [Το σύστημα αρχείων SGI XFS (τεκμηρίωση πυρήνα Linux)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
 {{#include ../../banners/hacktricks-training.md}}
