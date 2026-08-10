@@ -1,6 +1,4 @@
-# Bruteforce di Hash con Pochi Caratteri
-
-{{#include ../../banners/hacktricks-training.md}}
+# Bruteforce Hash Few Chars
 ```python
 import hashlib
 
@@ -51,4 +49,6 @@ return 0
 
 main()
 ```
+## References
+
 {{#include ../../banners/hacktricks-training.md}}

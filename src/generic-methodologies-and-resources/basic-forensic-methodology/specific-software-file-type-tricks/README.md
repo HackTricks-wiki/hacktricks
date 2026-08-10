@@ -1,7 +1,5 @@
 # Trucchi specifici per software/tipi di file
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 Qui puoi trovare trucchi interessanti per tipi di file e/o software specifici:
 
 
@@ -63,5 +61,7 @@ zips-tricks.md
 {{#ref}}
 mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
+
+## References
 
 {{#include ../../../banners/hacktricks-training.md}}
