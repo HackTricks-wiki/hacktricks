@@ -1,8 +1,6 @@
 # Specific Software/File Type Tricks
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-यहाँ आप specific file-types और/या software के लिए interesting tricks पा सकते हैं:
+यहाँ आपको विशिष्ट file-types और/या software के लिए उपयोगी tricks मिलेंगी:
 
 
 {{#ref}}
@@ -63,5 +61,7 @@ zips-tricks.md
 {{#ref}}
 mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
+
+## References
 
 {{#include ../../../banners/hacktricks-training.md}}

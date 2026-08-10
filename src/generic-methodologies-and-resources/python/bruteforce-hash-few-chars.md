@@ -1,6 +1,4 @@
 # कुछ Characters वाले Hash को Bruteforce करना
-
-{{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib
 
@@ -51,4 +49,6 @@ return 0
 
 main()
 ```
+## References
+
 {{#include ../../banners/hacktricks-training.md}}
