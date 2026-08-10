@@ -1,6 +1,4 @@
-# 몇 개의 문자로 해시 무차별 대입
-
-{{#include ../../banners/hacktricks-training.md}}
+# 몇 글자 Hash 무차별 대입
 ```python
 import hashlib
 
@@ -51,4 +49,6 @@ return 0
 
 main()
 ```
+## References
+
 {{#include ../../banners/hacktricks-training.md}}

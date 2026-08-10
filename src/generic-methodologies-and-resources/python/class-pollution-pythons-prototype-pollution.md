@@ -1,10 +1,8 @@
 # Class Pollution (Python's Prototype Pollution)
 
-{{#include ../../banners/hacktricks-training.md}}
+## 기본 예시
 
-## 기본 예제
-
-문자열을 사용하여 객체의 class를 오염시키는 방법을 확인하세요:<sup>[[1]](#references)</sup>
+인스턴스의 클래스 참조를 통해 `__qualname__`을 변경하면 해당 클래스와 변경 가능한 상위 클래스가 업데이트됩니다.<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +26,9 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## 기본 취약점 예시
+## 기본 취약점 예제
+
+재귀적 병합은 공격자가 제어하는 매핑 키를 허용하고, item 또는 attribute access를 통해 중첩된 값을 기록할 수 있습니다.<sup>[[1]](#references)</sup>
 ```python
 # Initial state
 class Employee: pass
@@ -61,11 +61,13 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Gadget 예시
+## Gadget Examples
 
 <details>
 
-<summary>class property의 default value를 생성하여 RCE (subprocess)</summary><sup>[[1]](#references)</sup>
+<summary>RCE를 위한 class property 기본값 생성 (subprocess)</summary>
+
+공유 base class는 sibling-class command gadget이 사용하는 기본 attribute를 제공할 수 있습니다.<sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +118,9 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary><code>globals</code>를 통한 다른 class 및 global vars 오염</summary><sup>[[1]](#references)</sup>
+<summary><code>globals</code>를 통한 다른 클래스 및 전역 변수 오염</summary>
+
+함수의 `__globals__` 매핑은 해당 모듈에서 정의된 메서드가 접근할 수 있는 모듈 네임스페이스를 노출합니다.<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +152,9 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>임의의 subprocess 실행</summary><sup>[[1]](#references)</sup>
+<summary>임의의 subprocess 실행</summary>
+
+Windows에서 `Popen(..., shell=True)`은 기본 shell로 `COMSPEC` 환경 변수를 사용하므로, 이 gadget은 환경 변수를 통한 명령 리디렉션을 보여 줍니다.<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -182,7 +188,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary><strong><code>__kwdefaults__</code></strong> 덮어쓰기</summary>
 
-**`__kwdefaults__`**는 모든 함수에 존재하는 특수 속성으로, Python [documentation](https://docs.python.org/3/library/inspect.html)에 따르면 “**keyword-only** 매개변수의 모든 기본값에 대한 매핑”입니다. 이 속성을 오염시키면 함수의 keyword-only 매개변수에 대한 기본값을 제어할 수 있습니다. 이는 \* 또는 \*args 뒤에 오는 함수의 매개변수입니다.<sup>[[1]](#references)</sup>
+Python은 `__kwdefaults__`를 함수 정의에서 `*` 또는 `*args` 뒤에 오는 keyword-only 매개변수의 기본값 매핑으로 문서화합니다.<sup>[[4]](#references)</sup> 다음 gadget은 오염된 함수 경로를 통해 해당 매핑을 덮어씁니다.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,25 +229,24 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>파일 전체에서 Flask secret 덮어쓰기</summary>
+<summary>파일 간 Flask secret 덮어쓰기</summary>
 
-따라서 웹의 main python file에 정의된 객체에 대해 class pollution을 수행할 수 있지만, **해당 객체의 class가 main file과 다른 파일에 정의되어 있는 경우**를 생각해 보겠습니다. 이전 payload에서 \_\_globals\_\_에 액세스하려면 객체의 class 또는 해당 class의 methods에 액세스해야 하므로, **해당 파일의 globals에는 액세스할 수 있지만 main file의 globals에는 액세스할 수 없습니다**. \
-따라서 main page에서 **secret key**를 정의한 **Flask app global object에 액세스할 수 없습니다**:<sup>[[1]](#references)</sup>
+오염된 객체의 class가 애플리케이션의 entry-point module과 다른 module에 있으면, 해당 메서드의 `__globals__`는 처음에 class module의 namespace를 노출합니다. 그런 다음 loader와 `sys.modules.__main__`을 통한 traversal로 entry-point module과 그 안의 Flask `app` 객체에 도달할 수 있습니다.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-이 시나리오에서는 파일을 탐색하여 주요 파일에 도달하고, **전역 객체 `app.secret_key`에 액세스**하여 Flask secret key를 변경한 다음 이 키를 알고 [**권한을 상승**](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)할 수 있도록 하는 gadget이 필요합니다.
+Flask는 session cookie에 서명하기 위해 `app.secret_key`를 사용합니다. 이 키를 알고 있으면 공격자가 유효한 session data를 생성할 수 있습니다.<sup>[[6]](#references)</sup>
 
-[이 writeup](https://ctftime.org/writeup/36082)의 다음과 같은 payload:<sup>[[2]](#references)</sup>
+원본 writeup에서는 `app.secret_key`에 도달하는 다음 경로를 보여 줍니다. CTFtime에서도 해당 writeup의 사본을 제공합니다.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Use this payload to **`app.secret_key`를 변경**(앱에서 사용하는 이름은 다를 수 있음)하여 새롭고 더 높은 권한의 flask 쿠키에 서명할 수 있도록 하세요.
+키를 변경하면 대체 session cookie에 서명할 수 있으며 privilege escalation이 가능해질 수 있습니다. [Flask session tooling 페이지](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)를 참조하세요.<sup>[[6]](#references)</sup>
 
 </details>
 
-더 많은 read only gadgets는 다음 페이지도 확인하세요:
+더 많은 read-only gadget은 다음 페이지도 확인하세요:
 
 
 {{#ref}}
@@ -250,7 +255,10 @@ python-internal-read-gadgets.md
 
 ## References
 
-- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
-- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
-
+- [1] [Python의 Prototype Pollution](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [idekCTF 2022 task manager writeup (original)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
+- [3] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
+- [4] [inspect — 실행 중인 객체 검사](https://docs.python.org/3/library/inspect.html)
+- [5] [subprocess — Subprocess 관리](https://docs.python.org/3/library/subprocess.html)
+- [6] [Quickstart — Flask Documentation](https://flask.palletsprojects.com/en/stable/quickstart/)
 {{#include ../../banners/hacktricks-training.md}}

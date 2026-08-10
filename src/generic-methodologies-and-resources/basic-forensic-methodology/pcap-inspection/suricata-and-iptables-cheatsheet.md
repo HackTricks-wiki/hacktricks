@@ -1,18 +1,18 @@
 # Suricata & Iptables 치트시트
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 ## Iptables
 
-### 체인
+### Chains
 
-iptables에서는 체인으로 알려진 규칙 목록이 순차적으로 처리됩니다. 이 중 세 가지 기본 체인은 항상 존재하며, NAT와 같은 추가 체인은 시스템의 기능에 따라 지원될 수 있습니다.
+iptables에서 각 chain은 packet-matching rule의 순차 목록입니다. 기본 `filter` table에는 기본 제공되는 `INPUT`, `FORWARD`, `OUTPUT` chain이 있으며, `nat`과 같은 다른 table은 kernel configuration 및 로드된 module에 따라 사용 가능할 수 있습니다.<sup>[[1]](#references)</sup>
 
-- **Input Chain**: 들어오는 연결의 동작을 관리하는 데 사용됩니다.
-- **Forward Chain**: 로컬 시스템을 대상으로 하지 않는 들어오는 연결을 처리하는 데 사용됩니다. 이는 수신된 데이터가 다른 대상으로 전달되는 라우터 역할을 하는 장치에서 일반적입니다. 이 체인은 주로 시스템이 라우팅, NAT 또는 이와 유사한 작업에 관여할 때 사용됩니다.
-- **Output Chain**: 나가는 연결을 제어하는 데 사용됩니다.
+- **Input Chain**: 들어오는 connection의 동작을 관리하는 데 사용됩니다.
+- **Forward Chain**: 로컬 system을 대상으로 하지 않는 들어오는 connection을 처리하는 데 사용됩니다. 이는 수신한 data를 다른 destination으로 전달해야 하는 router 역할의 device에서 일반적입니다. 이 chain은 주로 system이 routing, NATing 또는 이와 유사한 작업에 관여할 때 관련됩니다.
+- **Output Chain**: 나가는 connection을 제어하는 데 사용됩니다.
 
-이러한 체인은 네트워크 트래픽이 질서 있게 처리되도록 하며, 시스템으로 들어오고 시스템을 통과하며 시스템에서 나가는 데이터의 흐름을 제어하는 세부 규칙을 지정할 수 있게 합니다.
+이러한 chain은 network traffic을 질서 있게 처리하며, system 내부로 들어오고, system을 통과하고, system 밖으로 나가는 data의 흐름을 제어하는 세부 rule을 지정할 수 있게 합니다.
+
+string-match 예제에서는 표준 `string` match를 사용합니다. `--icase`가 제공되지 않는 한 matching은 대소문자를 구분하며, `--algo`는 BM 또는 KMP search strategy를 선택합니다.<sup>[[2]](#references)</sup>
 ```bash
 # Delete all rules
 iptables -F
@@ -51,9 +51,11 @@ iptables-restore < /etc/sysconfig/iptables
 ```
 ## Suricata
 
-### 설치 및 구성
+### 설치 및 설정
+
+아래 패키지 명령은 배포판과 릴리스에 따라 다릅니다. 공식 설치 가이드에는 Ubuntu PPA, Debian backports, RPM 패키지 및 systemd 서비스 관리 방법이 설명되어 있습니다.<sup>[[3]](#references)</sup>
 ```bash
-# Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
+# Package installation details vary by distribution and release; see References.
 # Ubuntu
 add-apt-repository ppa:oisf/suricata-stable
 apt-get update
@@ -70,7 +72,7 @@ yum install epel-release
 yum install suricata
 
 # Get rules
-suricata-update
+suricata-update update-sources
 suricata-update list-sources #List sources of the rules
 suricata-update enable-source et/open #Add et/open rulesets
 suricata-update
@@ -81,20 +83,17 @@ rule-files:
 
 # Run
 ## Add rules in /etc/suricata/rules/suricata.rules
-systemctl suricata start
+systemctl start suricata
 suricata -c /etc/suricata/suricata.yaml -i eth0
 
 
 # Reload rules
 suricatasc -c ruleset-reload-nonblocking
-## or set the follogin in /etc/suricata/suricata.yaml
-detect-engine:
-- rule-reload: true
 
 # Validate suricata config
 suricata -T -c /etc/suricata/suricata.yaml -v
 
-# Configure suricata as IPs
+# Configure Suricata as an IPS
 ## Config drop to generate alerts
 ## Search for the following lines in /etc/suricata/suricata.yaml and remove comments:
 - drop:
@@ -117,23 +116,25 @@ Type=simple
 
 systemctl daemon-reload
 ```
-### 규칙 정의
+`suricata-update` 시퀀스는 rule source를 가져오고, 나열하고, 활성화하고, 로드하기 위한 Suricata의 문서화된 workflow를 따릅니다.<sup>[[4]](#references)</sup> 위의 `suricatasc` command는 문서화된 non-blocking Unix-socket rule-reload 방법입니다.<sup>[[8]](#references)</sup> NFQUEUE rules는 로컬 input/output traffic을 Suricata로 전송하며, `-q 0`은 inline processing을 위해 queue 0을 선택합니다.<sup>[[7]](#references)</sup>
 
-[문서에서:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) 규칙/시그니처는 다음으로 구성됩니다:
+### Rules Definitions
 
-- **action**은 시그니처가 일치할 때 발생하는 동작을 결정합니다.
-- **header**는 규칙의 프로토콜, IP 주소, 포트 및 방향을 정의합니다.
-- **rule options**는 규칙의 세부 사항을 정의합니다.
+Suricata rule/signature는 세 부분으로 구성됩니다.<sup>[[5]](#references)</sup>
+
+- **action**은 signature가 match될 때 발생하는 동작을 지정합니다.
+- **header**는 protocol, IP addresses, ports 및 direction을 선택합니다.
+- **rule options**는 match별 세부 사항을 정의합니다.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
-#### **유효한 action은**
+#### **유효한 actions은 다음과 같습니다**
 
 - alert - alert 생성
-- pass - packet의 추가 inspection 중지
+- pass - packet에 대한 추가 inspection 중지
 - **drop** - packet을 drop하고 alert 생성
 - **reject** - 일치하는 packet의 sender에게 RST/ICMP unreachable error 전송
-- rejectsrc - _reject_와 동일
+- rejectsrc - 단순히 _reject_와 동일
 - rejectdst - 일치하는 packet의 receiver에게 RST/ICMP error packet 전송
 - rejectboth - conversation의 양쪽에 RST/ICMP error packet 전송
 
@@ -143,11 +144,11 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 - udp
 - icmp
 - ip (ip는 ‘all’ 또는 ‘any’를 의미)
-- _layer7 protocols_: http, ftp, tls, smb, dns, ssh... ([**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html)에 더 있음)
+- _layer7 protocols_: http, ftp, tls, smb, dns, ssh 및 기타 프로토콜.<sup>[[5]](#references)</sup>
 
 #### Source 및 Destination Addresses
 
-IP ranges, negations 및 address 목록을 지원합니다:
+Suricata는 IP ranges, negation 및 grouped address lists를 지원합니다.<sup>[[5]](#references)</sup>
 
 | Example                       | Meaning                                  |
 | ----------------------------- | ---------------------------------------- |
@@ -159,7 +160,7 @@ IP ranges, negations 및 address 목록을 지원합니다:
 
 #### Source 및 Destination Ports
 
-port ranges, negations 및 port 목록을 지원합니다.
+Suricata는 port ranges, negation 및 lists of ports를 지원합니다.<sup>[[5]](#references)</sup>
 
 | Example         | Meaning                                |
 | --------------- | -------------------------------------- |
@@ -169,18 +170,18 @@ port ranges, negations 및 port 목록을 지원합니다.
 | \[1024: ]       | 1024부터 가장 높은 port-number까지 |
 | !80             | 80을 제외한 모든 port                      |
 | \[80:100,!99]   | 80부터 100까지의 range에서 99는 제외 |
-| \[1:80,!\[2,4]] | 1-80 range에서 port 2 및 4 제외  |
+| \[1:80,!\[2,4]] | 1-80 range에서 port 2 및 4를 제외  |
 
 #### Direction
 
-적용되는 communication rule의 direction을 지정할 수 있습니다:
+Suricata rules는 평가할 communication direction을 지정할 수 있습니다.<sup>[[5]](#references)</sup>
 ```
 source -> destination
 source <> destination  (both directions)
 ```
-#### Keywords
+#### 키워드
 
-Suricata에는 찾고 있는 **특정 packet**을 검색할 수 있는 **수백 가지 옵션**이 있으며, 여기서는 흥미로운 항목이 발견되면 언급합니다. 자세한 내용은 [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)을 확인하세요!
+아래 예제에서는 metadata, IP, ICMP, payload 및 application-layer 옵션을 포함한 Suricata의 rule keywords를 사용합니다. 공식 rule documentation에는 이러한 family와 해당 syntax가 정리되어 있습니다.<sup>[[6]](#references)[[9]](#references)</sup>
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -207,6 +208,7 @@ reject tcp any any -> any any (msg: "php-rce"; content: "eval"; nocase; metadata
 
 # Replaces string
 ## Content and replace string must have the same length
+## The replace modifier is IPS-only and operates on individual packets
 content:"abc"; replace: "def"
 alert tcp any any -> any any (msg: "flag replace"; content: "CTF{a6st"; replace: "CTF{u798"; nocase; sid:100; rev: 1;)
 ## The replace works in both input and output packets
@@ -221,4 +223,15 @@ drop tcp any any -> any any (msg:"regex"; pcre:"/CTF\{[\w]{3}/i"; sid:10001;)
 ## Drop by port
 drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
+## References
+
+- [1] [iptables(8) — Linux 매뉴얼 페이지](https://man7.org/linux/man-pages/man8/iptables.8.html)
+- [2] [iptables-extensions(8) — Linux 매뉴얼 페이지](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
+- [3] [3. 설치 — Suricata 7.0.14 문서](https://docs.suricata.io/en/suricata-7.0.14/install.html)
+- [4] [9.1. Suricata-Update를 사용한 규칙 관리 — Suricata 8.0.1 문서](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
+- [5] [8.1. 규칙 형식 — Suricata 8.0.3 문서](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
+- [6] [8.7. Payload 키워드 — Suricata 8.0.3 문서](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
+- [7] [15. Linux에서 IPS/inline 설정 — Suricata 7.0.15 문서](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
+- [8] [9.3. 규칙 다시 로드 — Suricata 7.0.14 문서](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
+- [9] [8. Suricata 규칙 — Suricata 8.0.3 문서](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
 {{#include ../../../banners/hacktricks-training.md}}

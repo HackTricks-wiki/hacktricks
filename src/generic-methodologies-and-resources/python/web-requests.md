@@ -1,10 +1,13 @@
-# Web Requests
-
-{{#include ../../banners/hacktricks-training.md}}
-
+# 웹 요청
 
 ## Python Requests
+
+이 예제는 Requests의 문서화된 request 인자, response 속성, multipart 파일 튜플 및 세션을 사용합니다.<sup>[[1]](#references)</sup> `verify=False` 예제는 TLS 인증서 검증을 비활성화하므로, 통제된 테스트로 제한해야 합니다.<sup>[[1]](#references)</sup>
 ```python
+import random
+import re
+import string
+
 import requests
 
 url = "http://example.com:80/some/path.php"
@@ -23,7 +26,7 @@ body_text = gr.text
 ret_cookies = gr.cookies
 is_redirect = gr.is_redirect
 is_permanent_redirect = gr.is_permanent_redirect
-float_seconds = gr.elapsed.total_seconds() 10.231
+float_seconds = gr.elapsed.total_seconds()
 
 #Regular Post requests sending parameters (data)
 pr = requests.post(url, data=params, headers=headers, cookies=cookies, verify=False, allow_redirects=True, proxies=proxies)
@@ -71,7 +74,9 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## RCE를 악용하는 Python 명령어
+## RCE exploit을 위한 Python cmd
+
+명령 루프는 Python의 `Cmd`를 subclass하며, 해당 `default` method는 인식되지 않은 command prefix를 처리하고, `cmdloop`는 input line을 dispatch하며, `re.DOTALL`은 extraction pattern이 여러 줄에 걸쳐 일치하도록 합니다.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -98,4 +103,9 @@ return 1
 term = Terminal()
 term.cmdloop()
 ```
+## References
+
+- [1] [Requests 개발자 인터페이스](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — 줄 단위 명령 인터프리터 지원](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — 정규 표현식 연산](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

