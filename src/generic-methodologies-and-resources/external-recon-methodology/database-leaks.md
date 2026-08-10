@@ -1,32 +1,45 @@
 # Database leak
 
-{{#include ../../banners/hacktricks-training.md}}
+## Data Breach Search Engines
 
-## Data Breach 검색 엔진
+- [GreyNoise Visualizer](https://viz.greynoise.io/) - IP와 CIDR을 조회하고, 태그, CVE 및 메타데이터로 scanner 활동을 검색합니다.<sup>[[1]](#references)</sup>
+- [DeHashed](https://www.dehashed.com/) - username, email 주소, IP 주소 및 기타 selector로 노출된 데이터를 검색하며, monitoring 및 API도 제공합니다.<sup>[[2]](#references)</sup>
+- [Have I Been Pwned?](https://haveibeenpwned.com/) - email 주소가 알려진 data breach 또는 paste 기록에 포함되어 있는지 확인하며, 알림 및 API도 제공합니다.<sup>[[3]](#references)</sup>
+- [ScamSearch](https://scamsearch.io/) - 프로필 사진, email, username, 전화번호, crypto 주소 또는 website로 신고된 사기꾼 기록을 검색합니다.<sup>[[4]](#references)</sup>
+- [Intelligence X](https://intelx.io/) - 색인된 source에서 email 주소, domain, URL, IP 및 CIDR과 같은 selector를 검색합니다.<sup>[[5]](#references)</sup>
+- [SpyCloud](https://spycloud.com/check-your-exposure/) - business email 또는 domain에서 노출된 credential, infostealer에 감염된 identity 및 탈취된 session cookie를 확인합니다.<sup>[[6]](#references)</sup>
+- [WeLeakInfo](https://weleakinfo.io/) - domain, name, email, ID, phone, IP, URL 또는 hash를 사용해 leaked database를 검색합니다.<sup>[[7]](#references)</sup>
+- [BreachDirectory](https://breachdirectory.org/) - email 또는 username이 compromised되었는지 확인합니다.
+- [LeakCheck](https://leakcheck.io/) - 노출된 email, username, phone, hash 또는 domain 데이터를 검색하고 새로운 항목을 monitoring합니다.<sup>[[8]](#references)</sup>
+- [Findemail.io](https://findemail.io/) - 특정 회사의 email 주소를 찾습니다.
+- [Library of Leaks](https://search.libraryofleaks.org/) - leak dataset을 포함한 public document, company 및 사람을 검색합니다.<sup>[[9]](#references)</sup>
+- [LeakRadar](https://leakradar.io/) - email, domain 또는 raw string으로 leaked credential을 검색하고 새로운 노출을 monitoring합니다.<sup>[[10]](#references)</sup>
+- [InfoStealers](https://infostealers.info/en/info) - 감염된 device의 infostealer log를 검색하고 새로운 데이터를 monitoring합니다.<sup>[[11]](#references)</sup>
+- [Leak-Lookup](https://leak-lookup.com/) - data breach를 검색하고 credential 노출을 monitoring합니다.<sup>[[12]](#references)</sup>
+- [Scylla.so](https://scylla.so/) - community 주도로 운영되는 database breach search engine입니다.
+- [Leaked.domains](https://leaked.domains/) - domain, email, username, password, IP 및 기타 selector로 leaked credential과 관련 기록을 검색합니다.<sup>[[13]](#references)</sup>
+- [WhiteIntel](https://whiteintel.io/) - dark web 활동, credential leak, infostealer 데이터 및 brand mention을 monitoring합니다.<sup>[[14]](#references)</sup>
+- [PSBDMP](https://psbdmp.ws/) - Pastebin dump 검색 및 monitoring platform입니다.
 
-- [greynoise](https://viz.greynoise.io/) - IP, 태그, CVE, vpn, dns 등을 검색합니다.
-- [Dehashed](https://www.dehashed.com/) - 이메일이 어떤 데이터베이스에서 leak되었는지 검색할 수 있습니다.
-- [HaveIbeenPwned?](https://haveibeenpwned.com/) - 이메일 주소가 data breach에 포함되어 있는지 확인합니다.
-- [ScamSearch](https://scamsearch.io/) - 사기꾼으로 의심되는 전화번호, 이메일, 프로필을 검색합니다.
-- [Intelligence X](https://intelx.io/) - Intelligence X는 검색 엔진이자 데이터 아카이브입니다. · 검색은 selector를 사용하여 수행되며, 이메일 주소, 도메인, URL, IP와 같은 특정 검색어를 사용합니다...
-- [spycloud](https://portal.spycloud.com/endpoint/enriched-stats/[YOUR-MAIL]) - YOUR-MAIL에 이메일을 입력합니다.
-- [weleakinfo](https://weleakinfo.io/) - We Leak Info - Leaked Dehashed Databases를 제공하며, leak을 검색합니다.
-- [breachdirectory](https://breachdirectory.org/) - 이메일 또는 사용자 이름이 유출되었는지 확인합니다.
-- [leakcheck](https://leakcheck.io/) - credential이 유출되었는지 확인합니다.
-- [Findemail.io](https://findemail.io/) - 특정 회사의 이메일 주소를 찾습니다.
-- [LibraryOfLeaks](https://search.libraryofleaks.org) - leak 문서, 회사, 사람, 데이터베이스 등을 검색합니다.
-- [LeakRadar](https://leakradar.io/) - 20억 개 이상의 plain-text info-stealer credential을 즉시 검색하며, 이메일 및 도메인 검색, metadata 쿼리, 모니터링 및 API를 지원합니다.
-- [InfoStealers](https://infostealers.info/en/info) - darknet에 노출된 infostealer 로그를 색인화하고, security team, investigator, researcher 및 digital forensics 전문가가 검색하고 활용할 수 있도록 합니다.
-- [Leak-Lookup](https://leak-lookup.com/) - 3,000개 이상의 데이터베이스에서 30억 개가 넘는 record를 제공하는 data breach 검색 엔진입니다.
-- [BreachDirectory](https://breachdirectory.org/) - credential이 data breach로 유출되었는지 확인합니다.
-- [Scylla.so](https://scylla.so/) - community-driven database breach 검색 엔진입니다.
-- [Leaked.domains](https://leaked.domains/) - 도메인 관련 leaked credential 및 데이터를 검색합니다.
-- [WhiteIntel](https://whiteintel.io/) - threat intelligence를 위한 dark web data leak 검색 엔진입니다.
-- [PSBDMP](https://psbdmp.ws/) - Pastebin dump 검색 및 모니터링 플랫폼입니다.
+## Tools to enumerate data leaks
 
+- [Leaker](https://github.com/vflame6/leaker) - email, username, domain, keyword 또는 phone으로 여러 online source를 검색하는 passive leak discovery CLI입니다.<sup>[[15]](#references)</sup>
 
-## Data leak을 열거하기 위한 Tools
+## References
 
-- [Leaker](https://github.com/vflame6/leaker) - 10개의 breach 데이터베이스를 동시에 검색하는 passive leak enumeration CLI tool입니다.
-
+- [1] [GreyNoise Visualizer 사용하기](https://docs.greynoise.io/docs/using-the-greynoise-visualizer)
+- [2] [DeHashed](https://www.dehashed.com/)
+- [3] [Have I Been Pwned](https://haveibeenpwned.com/)
+- [4] [Global Scammer Database - ScamSearch](https://scamsearch.io/)
+- [5] [Intelligence X](https://intelx.io/)
+- [6] [노출 확인 - SpyCloud](https://spycloud.com/check-your-exposure/)
+- [7] [WeLeakInfo](https://weleakinfo.io/)
+- [8] [Data Breach Search Engine - LeakCheck](https://leakcheck.io/)
+- [9] [Library of Leaks](https://search.libraryofleaks.org/)
+- [10] [LeakRadar](https://leakradar.io/)
+- [11] [OSINT InfoStealers.Info](https://infostealers.info/en/info)
+- [12] [Leak-Lookup - Data Breach Search Engine](https://leak-lookup.com/)
+- [13] [Leaked.Domains - Universal Search](https://leaked.domains/)
+- [14] [WhiteIntel - Dark Web Intelligence & Monitoring Platform](https://whiteintel.io/)
+- [15] [vflame6/leaker](https://github.com/vflame6/leaker)
 {{#include ../../banners/hacktricks-training.md}}

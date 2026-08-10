@@ -1,7 +1,5 @@
 # 기본 포렌식 방법론
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## 이미지 생성 및 마운트
 
 
@@ -11,7 +9,7 @@
 
 ## Malware Analysis
 
-이미지를 확보한 후 수행해야 하는 **첫 번째 단계일 필요는 없습니다**. 하지만 파일, 파일 시스템 이미지, 메모리 이미지, pcap 등이 있다면 이러한 Malware Analysis 기법을 독립적으로 사용할 수 있으므로, 다음 작업을 **염두에 두는 것이 좋습니다**:
+**이미지를 확보한 후 수행할 첫 번째 단계로 반드시 필요한 것은 아닙니다**. 하지만 파일, 파일 시스템 이미지, 메모리 이미지, pcap 등이 있다면 이러한 malware analysis 기법을 독립적으로 사용할 수 있으므로 다음 작업을 **염두에 두는 것이 좋습니다**:
 
 
 {{#ref}}
@@ -20,14 +18,14 @@ malware-analysis.md
 
 ## 이미지 검사
 
-장치의 **포렌식 이미지**를 제공받았다면 **파티션과 파일 시스템**을 **분석**하고, 잠재적으로 **흥미로운 파일**(삭제된 파일도 포함)을 **복구**할 수 있습니다. 방법은 다음에서 알아보세요:
+장치의 **forensic image**를 받았다면 **파티션과 사용된 파일 시스템을 분석**하고, 잠재적으로 **흥미로운 파일**(삭제된 파일 포함)을 **복구**할 수 있습니다. 방법은 다음에서 확인할 수 있습니다:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-사용된 OS와 플랫폼에 따라 검색해야 할 다양한 흥미로운 아티팩트가 있습니다:
+사용된 OS와 플랫폼에 따라 검색해야 할 다양한 흥미로운 artifact가 있습니다:
 
 
 {{#ref}}
@@ -49,10 +47,10 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## 특정 파일 형식 및 Software 심층 검사
+## 특정 파일 유형 및 Software 심층 검사
 
-매우 **의심스러운** **파일**이 있다면, 해당 파일을 생성한 **파일 형식과 Software**에 따라 몇 가지 **트릭**이 유용할 수 있습니다.\
-다음 페이지를 읽고 몇 가지 흥미로운 트릭을 알아보세요:
+매우 **의심스러운** **파일**이 있다면, 해당 파일을 생성한 **파일 유형과 software에 따라** 여러 **trick**이 유용할 수 있습니다.\
+다음 페이지에서 몇 가지 흥미로운 trick을 확인해 보세요:
 
 
 {{#ref}}
@@ -80,9 +78,9 @@ memory-dump-analysis/
 pcap-inspection/
 {{#endref}}
 
-## **안티 포렌식 기법**
+## **Anti-Forensic Techniques**
 
-안티 포렌식 기법이 사용되었을 가능성을 염두에 두세요:
+anti-forensic techniques가 사용되었을 가능성을 염두에 두세요:
 
 
 {{#ref}}
@@ -95,5 +93,7 @@ anti-forensic-techniques.md
 {{#ref}}
 file-integrity-monitoring.md
 {{#endref}}
+
+## References
 
 {{#include ../../banners/hacktricks-training.md}}

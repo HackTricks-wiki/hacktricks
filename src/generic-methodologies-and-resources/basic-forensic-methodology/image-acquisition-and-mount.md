@@ -1,11 +1,8 @@
 # 이미지 획득 및 마운트
 
-{{#include ../../banners/hacktricks-training.md}}
-
-
 ## 획득
 
-> 항상 **읽기 전용**으로 획득하고, **복사하는 동안 해시를 계산**하세요. 원본 장치는 **쓰기 차단** 상태로 유지하고, 검증된 복사본만 사용하세요.
+> 항상 **읽기 전용**으로 획득하고 **복사하는 동안 hash를 계산**하세요. 원본 장치는 **쓰기 차단** 상태로 유지하고 검증된 복사본만 사용하세요.
 
 ### DD
 ```bash
@@ -16,13 +13,13 @@ sha256sum disk.img > disk.img.sha256
 ```
 ### dc3dd / dcfldd
 
-`dc3dd`는 dcfldd(DoD Computer Forensics Lab dd)의 actively maintained fork입니다.
+`dc3dd`는 dcfldd(DoD Computer Forensics Lab dd)의 활발히 유지 관리되는 fork입니다.
 ```bash
 # Create an image and calculate multiple hashes at acquisition time
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-**raw (dd)**, **EWF (E01/EWFX)** 및 **AFF4** 출력을 지원하고 병렬 검증이 가능한 그래픽 기반 멀티스레드 이미저입니다. 대부분의 Linux 저장소에서 사용할 수 있습니다 (`apt install guymager`).
+**raw (dd)**, **EWF (E01/EWFX)** 및 **AFF4** 출력을 지원하고 병렬 검증이 가능한 그래픽 멀티스레드 이미저입니다. 대부분의 Linux 저장소에서 사용할 수 있습니다 (`apt install guymager`).
 ```bash
 # Start in GUI mode
 sudo guymager
@@ -31,7 +28,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-AFF4는 *매우* 큰 증거를 위해 설계된 Google의 최신 imaging format입니다(sparse, resumable, cloud-native).<sup>[[1]](#references)</sup>
+Bradley L. Schatz와 Michael I. Cohen이 작성한 AFF4 v1.0 사양은 가상화된 스토리지, 임의 메타데이터, 확장 가능한 압축 및 해싱, 고처리량 작업을 지원하는 포렌식 컨테이너를 정의합니다.<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -65,11 +62,11 @@ aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web
 
 ### 적절한 접근 방식 선택
 
-1. 원본 partition table(MBR/GPT)이 필요하면 **whole disk**를 마운트합니다.
-2. 하나의 volume만 필요하면 **single partition file**을 마운트합니다.
-3. 항상 **read-only**(`-o ro,norecovery`)로 마운트하고 **copies**에서 작업합니다.<sup>[[2]](#references)</sup>
+1. 원래 파티션 테이블(MBR/GPT)이 필요하면 **전체 디스크**를 마운트합니다.
+2. 하나의 volume만 필요하면 **단일 파티션 파일**을 마운트합니다.
+3. 이미지 attachment는 read-only로 유지합니다(예: qemu-nbd의 `--read-only`).<sup>[[2]](#references)</sup> 파일시스템은 read-only로 마운트합니다(`-o ro`).<sup>[[3]](#references)</sup> **복사본**에서 작업합니다.
 
-### Raw 이미지(dd, AFF4-extracted)
+### Raw images (dd, AFF4-extracted)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -84,7 +81,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-완료되면 분리:
+번역할 원문이 제공되지 않았습니다.
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -97,17 +94,19 @@ ewfmount evidence.E01 /mnt/ewf
 # 2. Attach the exposed raw file via qemu-nbd (safer than loop)
 sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 
-# 3. Mount the desired partition
+# 3. Mount the desired partition (XFS example; use the filesystem-specific option)
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-또는 **xmount**를 사용해 즉석에서 변환합니다:
+파일시스템별 no-replay 마운트의 경우 ext3/ext4는 `noload`를 사용하고, XFS는 `norecovery`를 사용하며 읽기 전용 모드가 필요합니다.<sup>[[3]](#references)[[4]](#references)</sup>
+
+또는 **xmount**를 사용해 즉시 변환할 수 있습니다:
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
 mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
-### LVM / BitLocker / VeraCrypt volumes
+### LVM / BitLocker / VeraCrypt 볼륨
 
-block device (loop 또는 nbd)를 연결한 후:
+블록 디바이스(loop 또는 nbd)를 연결한 후:
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -117,31 +116,34 @@ sudo lvscan | grep "/dev/nbd0"
 sudo dislocker -V /dev/nbd0p3 -u -- /mnt/bitlocker
 sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 ```
-### kpartx helpers
+### kpartx 도우미
 
-`kpartx`는 image의 partition을 자동으로 `/dev/mapper/`에 매핑합니다:
+`kpartx`는 이미지의 파티션을 `/dev/mapper/`에 자동으로 매핑합니다:
 ```bash
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
 ```
 ### 일반적인 mount 오류 및 해결 방법
 
+dirty ext3/ext4 filesystem의 경우 journal replay를 방지해야 한다면 `ro,noload`를 사용합니다.<sup>[[3]](#references)</sup>
+
 | 오류 | 일반적인 원인 | 해결 방법 |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | 저널링 FS (ext4)가 정상적으로 unmount되지 않음 | `-o ro,norecovery` 사용 |
-| `bad superblock …` | 잘못된 offset 또는 손상된 FS | offset 계산 (`sector*size`) 또는 복사본에서 `fsck -n` 실행 |
-| `mount: unknown filesystem type 'LVM2_member'` | LVM 컨테이너 | `vgchange -ay`로 volume group 활성화 |
+| `cannot mount /dev/loop0 read-only` | journal이 있는 FS(ext4)가 정상적으로 unmount되지 않음 | `-o ro,noload` 사용 |
+| `bad superblock …` | 잘못된 offset 또는 손상된 FS | offset(`sector*size`)을 계산하거나 복사본에서 `fsck -n` 실행 |
+| `mount: unknown filesystem type 'LVM2_member'` | LVM container | `vgchange -ay`로 volume group 활성화 |
 
 ### 정리
 
-추가 작업을 손상시킬 수 있는 dangling mapping이 남지 않도록 loop/nbd devices를 **umount**하고 **disconnect**해야 합니다:
+추가 작업을 손상시킬 수 있는 dangling mapping이 남지 않도록 loop/nbd device를 **umount**하고 **disconnect**해야 합니다:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ```
-## 참조
+## References
 
 - [1] [AFF4 Standard Specification (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
-- [2] [qemu-nbd manual page (mounting disk images safely)](https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html)
-
+- [2] [QEMU qemu-nbd documentation](https://www.qemu.org/docs/master/tools/qemu-nbd.html)
+- [3] [mount(8) Linux manual page](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [4] [SGI XFS 파일시스템 (Linux 커널 문서)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
 {{#include ../../banners/hacktricks-training.md}}
