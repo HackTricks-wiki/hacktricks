@@ -1,38 +1,29 @@
 # Zana za File/Data Carving na Recovery
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 ## Zana za Carving na Recovery
 
 Zana zaidi zinapatikana kwenye [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
 ### Autopsy
 
-Zana inayotumika zaidi katika forensics kuchota files kutoka kwenye images ni [**Autopsy**](https://www.autopsy.com/download/). Ipakue, isakinishe, kisha ifanye iingest file ili itafute files "zilizofichwa". Kumbuka kuwa Autopsy imeundwa kusaidia disk images na aina nyingine za images, lakini si files rahisi.
+Zana inayotumika zaidi katika forensics kwa ajili ya kutoa files kutoka kwenye images ni [**Autopsy**](https://www.autopsy.com/download/). Ipakue, isakinishe na uifanye iingest file ili kutafuta files "zilizofichwa". Kumbuka kuwa Autopsy imeundwa kusaidia disk images na aina nyingine za images, lakini si files rahisi.
 
-> **Sasisho la 2024-2025** – Version **4.21** (iliyotolewa Februari 2025) iliongeza **carving module** iliyoundwa upya kulingana na **SleuthKit v4.13**, ambayo ni ya haraka zaidi inaposhughulikia images zenye ukubwa wa multi-terabyte na inasaidia parallel extraction kwenye mifumo yenye multi-core. CLI wrapper ndogo (`autopsycli ingest <case> <image>`) pia ilianzishwa, na kufanya iwezekane kuscript carving ndani ya CI/CD au mazingira makubwa ya maabara.<sup>[[1]](#references)</sup>
-```bash
-# Create a case and ingest an evidence image from the CLI (Autopsy ≥4.21)
-autopsycli case --create MyCase --base /cases
-# ingest with the default ingest profile (includes data-carve module)
-autopsycli ingest MyCase /evidence/disk01.E01 --threads 8
-```
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
-**Binwalk** ni tool ya kuchanganua binary files ili kupata maudhui yaliyopachikwa. Inaweza kusakinishwa kupitia `apt`, na source code yake inapatikana kwenye [GitHub](https://github.com/ReFirmLabs/binwalk).
+**Binwalk** ni tool ya kuchanganua binary files ili kutafuta content iliyopachikwa. Inaweza kusakinishwa kupitia `apt`, na source yake iko kwenye [GitHub](https://github.com/ReFirmLabs/binwalk).
 
-**Commands muhimu**:
+**Amri muhimu**:
 ```bash
 sudo apt install binwalk         # Installation
 binwalk firmware.bin             # Display embedded data
 binwalk -e firmware.bin          # Extract recognised objects (safe-default)
 binwalk --dd " .* " firmware.bin  # Extract *everything* (use with care)
 ```
-⚠️  **Dokezo la usalama** – Matoleo **≤2.3.3** yanaathiriwa na udhaifu wa **Path Traversal** (CVE-2022-4510). Fanya upgrade (au tenga kwa kutumia container/non-privileged UID) kabla ya kuchanganua samples zisizoaminika.<sup>[[2]](#references)</sup>
+⚠️  **Security note** – Versions **2.1.2b through 2.3.3** zimeathiriwa na vulnerability ya **Path Traversal** (CVE-2022-4510); advisory haijaorodhesha toleo la pip lililorekebishwa. Epuka kutoa samples zisizoaminika kwa kutumia releases zilizoathiriwa, au tenga tool hiyo kwa kutumia container/non-privileged UID.<sup>[[4]](#references)</sup>
 
 ### Foremost
 
-Zana nyingine ya kawaida ya kutafuta files zilizofichwa ni **foremost**. Unaweza kupata configuration file ya foremost katika `/etc/foremost.conf`. Ikiwa unataka tu kutafuta files mahususi, ziondoe alama ya maoni. Usipoondoa alama yoyote ya maoni, foremost itatafuta aina za files zilizosanidiwa kwa default.
+Tool nyingine ya kawaida ya kutafuta files zilizofichwa ni **foremost**. Unaweza kupata configuration file ya foremost katika `/etc/foremost.conf`. Ikiwa unataka tu kutafuta files maalum, ziondoe alama ya maoni. Usipoondoa alama yoyote ya maoni, foremost itatafuta file types zake za default zilizosanidiwa.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -40,37 +31,43 @@ foremost -v -i file.img -o output
 ```
 ### **Scalpel**
 
-**Scalpel** ni zana nyingine inayoweza kutumika kutafuta na kutoa **faili zilizopachikwa ndani ya faili**. Katika hali hii, utahitaji kuondoa alama za maoni kwenye aina za faili unazotaka zitoe kutoka kwenye faili ya usanidi (_/etc/scalpel/scalpel.conf_).
+**Scalpel** ni tool nyingine inayoweza kutumiwa kutafuta na kutoa **files zilizopachikwa ndani ya file**. Katika hali hii, utahitaji kuondoa alama za maoni kwenye file ya configuration (_/etc/scalpel/scalpel.conf_) kwa aina za files unazotaka itoe.
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
 ```
 ### Bulk Extractor 2.x
 
-Tool hii inapatikana ndani ya kali, lakini unaweza kuipata hapa: <https://github.com/simsong/bulk_extractor>
+Tool hii inakuja ndani ya kali lakini unaweza kuipata hapa: <https://github.com/simsong/bulk_extractor>
 
-Bulk Extractor inaweza kuchanganua picha ya ushahidi na ku-carve **pcap fragments**, **network artefacts (URLs, domains, IPs, MACs, e-mails)** pamoja na vitu vingine vingi **kwa wakati mmoja kwa kutumia scanners nyingi**.
+Bulk Extractor inaweza kuchanganua picha ya ushahidi na kuchopoa **pcap fragments**, **mabaki ya mtandao (URLs, domains, IPs, MACs, e-mails)** na vitu vingine vingi **kwa sambamba kwa kutumia scanners nyingi**.
+
+Toleo la v2.1.1 linaweka kumbukumbu ya build ya Autotools na mpangilio wa `-S jpeg_carve_mode=2` wa kuchopoa JPEG zote zilizo contiguous.<sup>[[2]](#references)</sup>
 ```bash
-# Build from source – v2.1.1 (April 2024) requires cmake ≥3.16
-git clone https://github.com/simsong/bulk_extractor.git && cd bulk_extractor
-mkdir build && cd build && cmake .. && make -j$(nproc) && sudo make install
+# Build from source – v2.1.1 (April 2024) requires C++17
+git clone --branch v2.1.1 --recurse-submodules https://github.com/simsong/bulk_extractor.git
+cd bulk_extractor
+./bootstrap.sh
+./configure
+make -j"$(nproc)"
+sudo make install
 
-# Run every scanner, carve JPEGs aggressively and generate a bodyfile
-bulk_extractor -o out_folder -S jpeg_carve_mode=2 -S write_bodyfile=y /evidence/disk.img
+# Scan an image and carve contiguous JPEGs
+bulk_extractor -o out_folder -S jpeg_carve_mode=2 /evidence/disk.img
 ```
-Useful post-processing scripts (`bulk_diff`, `bulk_extractor_reader.py`) zinaweza kuondoa artefacts zinazojirudia kati ya images mbili au kubadilisha matokeo kuwa JSON kwa ajili ya SIEM ingestion.
+The bundled `bulk_diff.py` compares two bulk_extractor runs, while `bulk_extractor_reader.py` reads the report and feature files.<sup>[[3]](#references)</sup>
 
 ### PhotoRec
 
 Unaweza kuipata kwenye <https://www.cgsecurity.org/wiki/TestDisk_Download>
 
-Inakuja na matoleo ya GUI na CLI. Unaweza kuchagua **aina za faili** unazotaka PhotoRec itafute.
+Inakuja na matoleo ya GUI na CLI. Unaweza kuchagua **file-types** unazotaka PhotoRec itafute.
 
-![Endesha scanners zote, carva JPEGs kwa ukali na utengeneze bodyfile - PhotoRec: Inakuja na matoleo ya GUI na CLI. Unaweza kuchagua aina za faili unazotaka PhotoRec itafute](<../../../images/image (242).png>)
+![Endesha scanner zote, carve JPEGs kwa ukali na tengeneza bodyfile - PhotoRec: Inakuja na matoleo ya GUI na CLI. Unaweza kuchagua file-types unazotaka itafute](<../../../images/image (242).png>)
 
-### ddrescue + ddrescueview (imaging drives zinazoshindwa)
+### ddrescue + ddrescueview (imaging failing drives)
 
-Drive ya kimwili inapokuwa unstable, best practice ni **kuifanya image kwanza** na kuendesha carving tools dhidi ya image pekee. `ddrescue` (GNU project) inalenga kunakili disks mbovu kwa uaminifu huku ikihifadhi log ya sectors zisizosomika.
+Wakati drive ya kimwili haijatulia, ni best practice **kuifanya image kwanza** na kuendesha carving tools dhidi ya image hiyo pekee. `ddrescue` (GNU project) inalenga kunakili disks mbovu kwa kutegemeka huku ikihifadhi logi ya sectors ambazo hazijasomeka.
 ```bash
 sudo apt install gddrescue ddrescueview   # On Debian-based systems
 # First pass – try to get as much data as possible without retries
@@ -81,65 +78,71 @@ sudo ddrescue -d -r3 /dev/sdX suspect.img suspect.log
 # Visualise the status map (green=good, red=bad)
 ddrescueview suspect.log
 ```
-Version **1.28** (Desemba 2024) ilianzisha **`--cluster-size`**, ambayo inaweza kuharakisha uundaji wa image wa SSD zenye uwezo mkubwa ambapo sector sizes za kawaida haziendani tena na flash blocks.
+Chaguo la **`--cluster-size`** hudhibiti idadi ya sectors zinazonakiliwa kwa wakati mmoja; thamani ndogo zinaweza kusaidia kwenye drives zenye kasi ndogo.<sup>[[7]](#references)</sup>
 
 ### Extundelete / Ext4magic (EXT 3/4 undelete)
 
-Ikiwa file system ya chanzo inategemea Linux EXT, unaweza kurejesha files zilizofutwa hivi karibuni **bila kufanya carving kamili**. Tools zote mbili hufanya kazi moja kwa moja kwenye image ya read-only:
+Ikiwa mfumo wa faili chanzo unatokana na Linux EXT, unaweza kurejesha files zilizofutwa hivi karibuni **bila full carving**; tools hizi za journal-based hufanya kazi kwenye mfumo wa faili ambao hauja-mountiwa au image ya kusoma-tu.<sup>[[8]](#references)[[9]](#references)</sup>
 ```bash
 # Attempt journal-based undelete (metadata must still be present)
 extundelete disk.img --restore-all
 
-# Fallback to full directory scan; supports extents and inline data
-ext4magic disk.img -M -f '*.jpg' -d ./recovered
+# Multi-stage recovery from an ext4 image
+ext4magic disk.img -M -d ./recovered
 ```
-> 🛈 Ikiwa mfumo wa faili uliwekwa (mounted) baada ya kufutwa, data blocks huenda tayari zimetumiwa tena – katika hali hiyo bado inahitajika carving sahihi (Foremost/Scalpel).
+> **Dokezo la uoanifu** – ext4magic imeachwa; ukurasa wa mradi wake unaonya kwamba mifumo ya sasa ya faili haiendani tena nayo.<sup>[[10]](#references)</sup>
+
+> 🛈 Ikiwa mfumo wa faili uliwekwa mount baada ya kufutwa, data blocks huenda tayari zilitumiwa tena – katika hali hiyo, data carving sahihi (Foremost/Scalpel) bado inahitajika.
 
 ### binvis
 
 Angalia [code](https://code.google.com/archive/p/binvis/) na [web page tool](https://binvis.io/#/).
 
-#### Features of BinVis
+#### Vipengele vya BinVis
 
-- **Muonyeshaji wa muundo** wa kuona na wa kiamilifu
-- Ploti nyingi kwa sehemu mbalimbali za kuzingatia
-- Kuzingatia sehemu za sample
-- **Kuona strings na resources**, kwa mfano katika executables za PE au ELF
+- **Muonekano wa muundo** wa kuona na unaotumika
+- Ploti nyingi kwa maeneo tofauti ya umakini
+- Kuelekeza umakini kwenye sehemu za sample
+- **Kuona strings na resources**, katika executable za PE au ELF, kwa mfano
 - Kupata **patterns** kwa cryptanalysis kwenye files
 - **Kutambua** algorithms za packer au encoder
 - **Kutambua** Steganography kupitia patterns
 - **Binary-diffing** ya kuona
 
-BinVis ni **start-point** nzuri ya kufahamiana na **target isiyojulikana** katika scenario ya black-boxing.
+BinVis ni **mwanzo mzuri wa kuufahamu target isiyojulikana** katika hali ya black-boxing.
 
-## Specific Data Carving Tools
+## Zana Mahususi za Data Carving
 
 ### FindAES
 
-Hutafuta AES keys kwa kutafuta key schedules zao. Inaweza kupata keys za biti 128, 192 na 256, kama zile zinazotumiwa na TrueCrypt na BitLocker.
+Hutafuta AES keys kwa kutafuta key schedules zake. Inaweza kupata keys za biti 128, 192 na 256, kama zile zinazotumiwa na TrueCrypt na BitLocker.
 
 Pakua [hapa](https://sourceforge.net/projects/findaes/).
 
-### YARA-X (triaging carved artefacts)
+### YARA-X (triaging artefacts zilizofanyiwa carving)
 
-[YARA-X](https://github.com/VirusTotal/yara-x) ni rewrite ya YARA katika Rust iliyotolewa mwaka wa 2024. Ni **mara 10-30× kwa kasi** kuliko YARA ya kawaida na inaweza kutumika kuainisha maelfu ya carved objects kwa haraka sana:<sup>[[3]](#references)</sup>.
+[YARA-X](https://github.com/VirusTotal/yara-x) ni uandishi upya wa YARA kwa Rust ulioanzishwa mwaka 2024; VirusTotal inaripoti kwamba baadhi ya regular-expression na complex-loop rules zinaweza kuendeshwa kwa kasi kubwa zaidi.<sup>[[5]](#references)</sup> CLI yake inaitwa `yr`, na command ya `scan` inasaidia scans za kujirudia, kuweka idadi ya threads, na kutoa metadata.<sup>[[6]](#references)</sup>
 ```bash
 # Scan every carved object produced by bulk_extractor
-yarax -r rules/index.yar out_folder/ --threads 8 --print-meta
+yr scan --recursive --threads 8 --print-meta rules/index.yar out_folder/
 ```
-Ongezeko la kasi hufanya iwezekane kwa uhalisia **auto-tag** faili zote zilizocarve katika uchunguzi wa kiwango kikubwa.
+## Zana za ziada
 
-## Zana saidizi
-
-Unaweza kutumia [**viu** ](https://github.com/atanunq/viu)kuona picha kutoka kwenye terminal.  \
-Unaweza kutumia zana ya linux ya command line **pdftotext** kubadilisha pdf kuwa maandishi na kuyasoma.
+Unaweza kutumia [**viu** ](https://github.com/atanunq/viu)kuona picha kutoka kwenye terminali.  \
+Unaweza kutumia zana ya mstari wa amri ya Linux **pdftotext** kubadilisha pdf kuwa maandishi na kuyasoma.
 
 
 
-## Marejeleo
+## References
 
-- [1] [Maelezo ya toleo la Autopsy 4.21](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21)
-- [2] [Path traversal in binwalk (CVE-2022-4510) - GitHub Advisory Database](https://github.com/advisories/GHSA-3cm8-v4mc-gppg)
-- [3] [YARA is dead, long live YARA-X - VirusTotal Blog](https://blog.virustotal.com/2024/05/yara-is-dead-long-live-yara-x.html)
-
+- [1] [Vidokezo vya toleo la Autopsy 4.21](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21.0)
+- [2] [README ya bulk_extractor v2.1.1](https://github.com/simsong/bulk_extractor/blob/v2.1.1/README.md)
+- [3] [README ya zana za Python za bulk_extractor](https://raw.githubusercontent.com/simsong/bulk_extractor/v2.1.1/python/README.txt)
+- [4] [Path traversal katika binwalk (CVE-2022-4510) - GitHub Advisory Database](https://github.com/advisories/GHSA-3cm8-v4mc-gppg)
+- [5] [YARA imekufa, iishi kwa muda mrefu YARA-X - Blogu ya VirusTotal](https://blog.virustotal.com/2024/05/yara-is-dead-long-live-yara-x.html)
+- [6] [Amri za CLI za YARA-X](https://virustotal.github.io/yara-x/docs/cli/commands/)
+- [7] [Mwongozo wa GNU ddrescue](https://www.gnu.org/software/ddrescue/manual/ddrescue_manual.html)
+- [8] [extundelete](https://extundelete.sourceforge.net/)
+- [9] [Mwongozo wa ext4magic](https://ext4magic.sourceforge.net/manpage_en.html)
+- [10] [Hali ya mradi wa ext4magic](https://sourceforge.net/projects/ext4magic/)
 {{#include ../../../banners/hacktricks-training.md}}

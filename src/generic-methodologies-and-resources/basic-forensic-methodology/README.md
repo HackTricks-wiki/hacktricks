@@ -1,33 +1,30 @@
-# Mbinu ya Msingi ya Forensic
-
-{{#include ../../banners/hacktricks-training.md}}
+# Mbinu Msingi ya Forensic
 
 ## Kuunda na Kuweka Image
-
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Malware Analysis
+## Uchambuzi wa Malware
 
-Hii **si lazima iwe hatua ya kwanza ya kufanya baada ya kupata image**. Lakini unaweza kutumia mbinu hizi za malware analysis kwa kujitegemea ikiwa una faili, image ya file-system, memory image, pcap... kwa hiyo ni vizuri **kuzingatia hatua hizi**:
+Hii **si lazima iwe hatua ya kwanza ya kutekeleza unapokuwa na image**. Lakini unaweza kutumia mbinu hizi za uchambuzi wa malware kwa kujitegemea ikiwa una file, file-system image, memory image, pcap... hivyo ni vizuri **kuzingatia vitendo hivi**:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Kuchunguza Image
+## Kukagua Image
 
-ukipewa **forensic image** ya kifaa, unaweza kuanza **kuchanganua partitions na file-system** iliyotumika, na **kurejesha** **faili zinazoweza kuwa za kuvutia** (hata zilizofutwa). Jifunze jinsi ya kufanya hivyo katika:
+ikiwa umepewa **forensic image** ya kifaa, unaweza kuanza **kuchanganua partitions na file-system** iliyotumika na **kurejesha** **files zinazoweza kuvutia** (hata zilizofutwa). Jifunze jinsi ya kufanya hivyo katika:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Kulingana na OSs zilizotumika na hata platform, artifacts tofauti za kuvutia zinapaswa kutafutwa:
+Kulingana na OSs zilizotumika na hata platform, artifacts tofauti zinazovutia zinapaswa kutafutwa:
 
 
 {{#ref}}
@@ -49,31 +46,31 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Uchunguzi wa Kina wa Aina Maalum za Faili na Software
+## Ukaguzi wa kina wa aina maalum za files na Software
 
-Ikiwa una **faili** yenye **mashaka makubwa**, basi **kulingana na aina ya faili na software** iliyoiunda, **tricks** kadhaa zinaweza kuwa muhimu.\
-Soma ukurasa ufuatao ili ujifunze tricks zinazovutia:
+Ikiwa una **file** yenye **mashaka makubwa**, basi **kulingana na aina ya file na software** iliyoiunda, **tricks** kadhaa zinaweza kuwa muhimu.\
+Soma ukurasa ufuatao ili ujifunze tricks kadhaa zinazovutia:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Ningependa kutaja hasa ukurasa huu:
+Ningependa kutaja ukurasa huu hasa:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Uchunguzi wa Memory Dump
+## Ukaguzi wa Memory Dump
 
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Uchunguzi wa Pcap
+## Ukaguzi wa Pcap
 
 
 {{#ref}}
@@ -82,18 +79,20 @@ pcap-inspection/
 
 ## **Mbinu za Anti-Forensic**
 
-Kumbuka uwezekano wa kutumika kwa mbinu za anti-forensic:
+Zingatia uwezekano wa kutumia mbinu za anti-forensic:
 
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## Uwindaji wa Threat
 
 
 {{#ref}}
 file-integrity-monitoring.md
 {{#endref}}
+
+## References
 
 {{#include ../../banners/hacktricks-training.md}}
