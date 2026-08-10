@@ -1,87 +1,85 @@
-# Keystrokes USB
-
-{{#include ../../../banners/hacktricks-training.md}}
+# Touches USB
 
 Si vous avez un pcap contenant la communication via USB d'un clavier comme celui présenté ci-dessous :
 
-![Keystrokes USB : Si vous avez un pcap contenant la communication via USB d'un clavier comme celui présenté ci-dessous](<../../../images/image (962).png>)
+![Touches USB : si vous avez un pcap contenant la communication via USB d'un clavier comme celui présenté ci-dessous](<../../../images/image (962).png>)
 
-Les claviers USB utilisent généralement le **boot protocol** HID. Ainsi, chaque transfert d'interruption vers l'hôte ne fait que 8 octets : un octet de bits de modification (Ctrl/Shift/Alt/Super), un octet réservé et jusqu'à six keycodes par rapport. Le décodage de ces octets suffit pour reconstituer tout ce qui a été saisi.
+Pour un clavier utilisant le **boot protocol** HID, chaque rapport Interrupt IN possède une structure fixe de 8 octets : un octet de modificateur, un octet réservé et six octets de keycode. L'hôte compare les rapports successifs et fait correspondre les keycodes aux usages HID afin de reconstituer les événements clavier.<sup>[[8]](#references)</sup>
 
-## Bases des rapports USB HID
+## Principes de base des rapports USB HID
 
-Le rapport IN typique ressemble à ceci :
+Le rapport d'entrée standard d'un clavier boot est structuré comme suit.<sup>[[8]](#references)[[9]](#references)</sup>
 
 | Octet | Signification |
 | --- | --- |
-| 0 | Bitmap des modificateurs (`0x02` = Left Shift, `0x20` = Right Alt, etc.). Plusieurs bits peuvent être définis simultanément. |
-| 1 | Réservé/remplissage, mais souvent réutilisé par les claviers gaming pour des données du fournisseur. |
+| 0 | Bitmap des modificateurs (`0x02` = Left Shift, `0x20` = Right Shift, `0x40` = Right Alt, etc.). Plusieurs bits peuvent être définis simultanément. |
+| 1 | Octet réservé ; les rapports inutilisés doivent normalement le définir à zéro. Une utilisation spécifique à un OEM ou à un système n'est pas portable. |
 | 2-7 | Jusqu'à six keycodes simultanés au format USB usage ID (`0x04 = a`, `0x1E = 1`). `0x00` signifie « aucune touche ». |
 
-Les claviers sans NKRO envoient généralement `0x01` dans l'octet 2 lorsque plus de six touches sont pressées afin de signaler un « rollover ». Comprendre cette structure est utile lorsque vous ne disposez que des octets `usb.capdata` bruts.
+Dans la structure boot, l'usage ID `0x01` (`Keyboard ErrorRollOver`) est signalé dans tous les emplacements de touche lorsque plus de six touches non-modificatrices sont pressées ; il peut également signaler une combinaison non reconnaissable.<sup>[[8]](#references)[[9]](#references)</sup> Comprendre cette structure est utile lorsque vous ne disposez que des octets bruts `usb.capdata`.
 
-## Extraction des données HID depuis un PCAP
+## Extraction des données HID à partir d'un PCAP
 
 ### Identifier d'abord l'interface du clavier
 
-Dans les captures chargées, identifiez le clavier HID avant de vider les rapports. Un bon point de départ fiable est la réponse du descripteur d'interface :<sup>[[2]](#references)</sup>
+Dans les captures chargées, identifiez le clavier HID avant d'extraire les rapports. Un point de départ fiable est la réponse du descripteur d'interface :<sup>[[3]](#references)[[8]](#references)</sup>
 ```text
 usb.transfer_type == 0x02 && usb.endpoint_address.direction == 1 && usb.bDescriptorType == 4 && usb.bInterfaceClass == 3
 ```
-Examinez `usb.bInterfaceSubClass` et `usb.bInterfaceProtocol` :
+La classe HID définit ces valeurs d’interface :<sup>[[8]](#references)</sup>
 
-- `subclass == 1` et `protocol == 1` signifient généralement un clavier boot
-- `protocol == 2` correspond généralement à une souris
-- `protocol == 0` signifie souvent une interface HID définie par le vendeur ou de type NKRO qui transporte tout de même des données de clavier, mais pas dans le format boot simple de 8 octets
+- `subclass == 1` correspond au Boot Interface Subclass ; avec `protocol == 1`, il identifie un boot keyboard
+- `protocol == 2` identifie une boot mouse
+- `protocol == 0` signifie qu’aucun boot protocol n’est utilisé ; inspectez plutôt le HID report descriptor au lieu de supposer une disposition de 8 octets
 
-Une fois l'interface identifiée, limitez vos filtres à `usb.bus_id`, `usb.device_address` et, si possible, `usb.interface_number` avant toute exportation.
+Une fois l’interface identifiée, limitez vos filtres à `usb.bus_id`, `usb.device_address` et, si possible, `usb.bInterfaceNumber` avant toute exportation.
 
 ### Flux de travail Wireshark
 
-1. **Isolez le périphérique** : filtrez le trafic interrupt IN provenant du clavier, par exemple `usb.transfer_type == 0x01 && usb.endpoint_address.direction == "IN" && usb.device_address == 3`.
-2. **Ajoutez des colonnes utiles** : faites un clic droit sur le champ `Leftover Capture Data` (`usb.capdata`) et sur les champs `usbhid.*` de votre choix (par exemple `usbhid.boot_report.keyboard.keycode_1`) afin de suivre les frappes sans ouvrir chaque trame.
-3. **Masquez les rapports vides** : appliquez `!(usb.capdata == 00:00:00:00:00:00:00:00)` pour supprimer les trames inactives.
-4. **Exportez pour le post-traitement** : `File -> Export Packet Dissections -> As CSV`, incluez `frame.number`, `usb.src`, `usb.capdata` et `usbhid.modifiers` afin de pouvoir automatiser la reconstruction ultérieurement.
+1. **Isoler le périphérique** : filtrez le trafic interrupt IN du clavier, par exemple `usb.transfer_type == 0x01 && usb.endpoint_address.direction == 1 && usb.device_address == 3`.
+2. **Ajouter des colonnes utiles** : cliquez avec le bouton droit sur le champ `Leftover Capture Data` (`usb.capdata`) et sur les champs `usbhid.*` de votre choix (par exemple `usbhid.boot_report.keyboard.keycode_1`) afin de suivre les frappes sans ouvrir chaque frame.<sup>[[11]](#references)</sup>
+3. **Masquer les reports vides** : appliquez `!(usb.capdata == 00:00:00:00:00:00:00:00)` pour supprimer les frames inactives.
+4. **Exporter pour le post-traitement** : `File -> Export Packet Dissections -> As CSV`, en incluant `frame.number`, `usb.src`, `usb.capdata` et les champs de modificateurs décodés tels que `usbhid.boot_report.keyboard.modifier.left_shift` et `usbhid.boot_report.keyboard.modifier.right_alt`, afin de pouvoir automatiser la reconstruction ultérieurement.<sup>[[10]](#references)[[11]](#references)</sup>
 
 ### Flux de travail en ligne de commande
 
-`ctf-usb-keyboard-parser` automatise déjà le pipeline classique tshark + sed :
+Le schéma d’extraction classique — extraire `usb.capdata`, supprimer les reports inactifs et mapper les usage IDs — apparaît dans l’analyse originale de 2017 et dans son walkthrough.<sup>[[1]](#references)[[2]](#references)</sup>
+
+Le dépôt `ctf-usb-keyboard-parser` automatise le pipeline classique tshark + sed :<sup>[[5]](#references)</sup>
 ```bash
 tshark -r ./usb.pcap -Y 'usb.capdata && usb.data_len == 8' -T fields -e usb.capdata | sed 's/../:&/g2' > keystrokes.txt
 python3 usbkeyboard.py ./keystrokes.txt
 ```
-Dans les captures plus récentes, vous pouvez conserver à la fois `usb.capdata` et le champ plus riche `usbhid.data` en regroupant les données par périphérique :
+Sur les captures plus récentes, privilégiez le champ décodé `usbhid.data` de Wireshark et utilisez `usb.capdata` en secours ; écrivez un payload par rapport dans un fichier par périphérique :<sup>[[7]](#references)[[10]](#references)[[11]](#references)</sup>
 ```bash
-tshark -r usb.pcapng -Y "usb.capdata || usbhid.data" -T fields -e usb.src -e usb.capdata -e usbhid.data | \
-sort -s -k1,1 | \
-awk '{ printf "%s", (NR==1 ? $1 : pre!=$1 ? "\n" $1 : "") " " $2; pre=$1 }' | \
-awk '{ for (i=2; i<=NF; i++) print $i > "usbdata-" $1 ".txt" }'
+tshark -r usb.pcapng -Y "usb.capdata || usbhid.data" -T fields -E separator=$'\t' -e usb.src -e usb.capdata -e usbhid.data | \
+awk -F '\t' '{ payload = ($3 != "" ? $3 : $2); if (payload != "") print payload > "usbdata-" $1 ".txt" }'
 ```
-Ces fichiers par périphérique peuvent être directement utilisés avec n’importe quel décodeur. Si la capture provient de claviers BLE tunnelisés via GATT, filtrez avec `btatt.value && frame.len == 20` et extrayez les payloads hexadécimaux avant le décodage.
+Ces fichiers par périphérique peuvent être transmis à un décodeur après normalisation du format hexadécimal attendu. Si la capture provient de claviers BLE encapsulés via GATT, filtrez avec `btatt.value && frame.len == 20` et exportez les payloads hexadécimaux avant le décodage.<sup>[[7]](#references)</sup>
 
-### Lorsque le report n’est pas le report boot classique de 8 octets
+### Lorsque le rapport n'est pas le rapport boot classique de 8 octets
 
-Les claviers gaming récents, les claviers séparés et les périphériques HID composites exposent souvent une interface clavier non boot, dont le payload ne correspond plus à `modifier,reserved,key1..key6`.
+Une interface non-boot ou un report ID peut modifier la disposition du payload ; ne supposez donc pas que chaque rapport de clavier correspond à `modifier,reserved,key1..key6`.<sup>[[8]](#references)[[11]](#references)</sup>
 
-- Préférez `usbhid.data` à `usb.capdata` lorsque Wireshark a déjà analysé la couche HID.
-- Si chaque ligne commence par un préfixe constant ou un report ID, retirez-le avec un décodeur prenant en compte l’offset au lieu de supposer que l’octet 0 est toujours le modificateur.
-- Certains exports USBPcap omettent l’octet réservé ; les décodeurs prenant en charge `--no-reserved` ou un offset personnalisé permettent de gagner du temps.
-- Si le descripteur de report HID ou la report map BLE HOGP est présent dans la capture, utilisez-le pour retrouver la structure réelle des champs avant d’écrire un parser.
+- Préférez `usbhid.data` à `usb.capdata` lorsque Wireshark a déjà parsé la couche HID.
+- Si chaque ligne commence par un préfixe constant ou un report ID, supprimez-le avec un décodeur prenant en compte l'offset, plutôt que de supposer que l'octet 0 est toujours le modifier.<sup>[[7]](#references)</sup>
+- Certains exports USBPcap omettent l'octet reserved ; les décodeurs prenant en charge `--no-reserved` ou un offset personnalisé permettent donc de gagner du temps.<sup>[[7]](#references)</sup>
+- Si le HID report descriptor ou la BLE HOGP report map est présent dans la capture, utilisez-le pour retrouver la disposition réelle des champs avant d'écrire un parser.
 
-## Automatisation du décodage
+## Automatiser le décodage
 
-- **ctf-usb-keyboard-parser** reste pratique pour les challenges CTF rapides et est déjà inclus dans le repository.<sup>[[3]](#references)</sup>
-- **CTF-Usb_Keyboard_Parser** (`main.py`) analyse nativement les fichiers `pcap` et `pcapng`, comprend `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap` et ne nécessite pas tshark ; il fonctionne donc très bien dans des sandbox isolées.<sup>[[4]](#references)</sup>
-- **USB-HID-decoders** ajoute des visualiseurs pour clavier, souris et tablette. Vous pouvez exécuter le helper `extract_hid_data.sh` (backend tshark) ou `extract_hid_data.py` (backend scapy), puis fournir le fichier texte obtenu au décodeur ou aux modules de replay pour observer les frappes se dérouler.<sup>[[5]](#references)</sup>
+- **ctf-usb-keyboard-parser** reste pratique pour les challenges CTF rapides et est déjà inclus dans le repository.<sup>[[5]](#references)</sup>
+- **CTF-Usb_Keyboard_Parser** (`main.py`) parse nativement les fichiers `pcap` et `pcapng`, comprend `LinkTypeUsbLinuxMmapped`/`LinkTypeUsbPcap` et ne nécessite ni tshark ni autre dépendance externe ; il convient donc aux sandboxes isolées.<sup>[[6]](#references)</sup>
+- **USB-HID-decoders** ajoute des visualiseurs pour clavier, souris et tablette. Vous pouvez soit exécuter l'helper `extract_hid_data.sh` (backend tshark), soit `extract_hid_data.py` (backend scapy), puis transmettre le fichier texte obtenu au décodeur ou aux modules de replay pour observer les frappes au clavier se dérouler.<sup>[[7]](#references)</sup>
 
 ### Le décodage stateful est important
 
-Les captures d’interruptions USB contiennent généralement à la fois l’appui sur la touche et une ou plusieurs copies répétées du même report avant l’arrivée de l’événement de relâchement. Un décodeur pratique devrait :<sup>[[2]](#references)</sup>
+Les claviers USB boot envoient des rapports au idle rate même lorsqu'aucun nouvel événement de touche ne se produit ; les captures peuvent donc contenir des rapports répétés avant l'événement de relâchement. Un décodeur pratique devrait :<sup>[[3]](#references)[[8]](#references)</sup>
 
-- n’émettre que les keycodes nouvellement pressés par rapport au report précédent
-- conserver l’état des modificateurs (`Shift`, `Ctrl`, `AltGr`) depuis l’octet 0 ou depuis le champ analysé `usbhid.boot_report.keyboard.modifier`
-- suivre les touches à bascule telles que `Caps Lock`, car la sortie en majuscules n’est pas contrôlée uniquement par Shift
-- se rappeler que les IDs d’utilisation HID sont indépendants de la disposition : `0x1d` correspond à la position physique de la touche `z`/`y` selon la disposition du clavier de l’hôte
+- émettre uniquement les keycodes nouvellement pressés par rapport au rapport précédent
+- conserver l'état des modifiers (`Shift`, `Ctrl`, `AltGr`) depuis l'octet 0 ou les champs parsés tels que `usbhid.boot_report.keyboard.modifier.left_shift` et `usbhid.boot_report.keyboard.modifier.right_alt`
+- suivre les touches à bascule telles que `Caps Lock`, car la sortie en majuscules n'est pas contrôlée uniquement par Shift
+- garder à l'esprit que les HID usage IDs sont indépendants de la disposition : `0x1d` correspond à la position physique de la touche `z`/`y` selon la disposition du clavier hôte.<sup>[[9]](#references)</sup>
 
 ## Décodeur Python rapide
 ```python
@@ -112,22 +110,27 @@ char = char.upper()
 sys.stdout.write(char)
 prev = current
 ```
-Utilisez les lignes hexadécimales brutes extraites précédemment pour obtenir instantanément une reconstruction approximative, sans intégrer un parser complet dans l’environnement. Pour les layouts non américains, cela reconstruit toujours la position physique de la touche, et pas nécessairement le caractère final affiché sur la machine victime.
+Alimentez-le avec les lignes hexadécimales brutes extraites précédemment pour obtenir instantanément une reconstruction approximative sans intégrer un parser complet dans l’environnement. Pour les layouts non américains, cela reconstruit toujours la position physique de la touche, pas nécessairement le caractère final affiché sur l’hôte victime.
 
 ## Conseils de dépannage
 
 - Si Wireshark ne renseigne pas les champs `usbhid.*`, le descripteur de rapport HID n’a probablement pas été capturé. Rebranchez le clavier pendant la capture ou utilisez `usb.capdata` brut.
-- Sous Linux, les captures logicielles utilisent généralement `usbmon` comme source ; sous Windows, Wireshark dépend de l’extcap **USBPcap** pour voir les URB USB brutes.<sup>[[1]](#references)</sup>
-- Si le clavier était connecté via un hub ou une station d’accueil, vérifiez d’abord le descripteur d’interface, puis ne décodez que cette paire périphérique/interface. Les captures HID composites mélangent fréquemment les rapports du clavier et de la souris.
-- Les captures Windows nécessitent l’interface extcap **USBPcap** ; assurez-vous qu’elle a été conservée après les mises à niveau de Wireshark, car l’absence d’extcaps laisse les listes de périphériques vides.<sup>[[1]](#references)</sup>
-- Corrélez toujours `usb.bus_id:device:interface` (par exemple `1.9.1`) avant de décoder quoi que ce soit — mélanger plusieurs claviers ou périphériques de stockage produit des frappes incohérentes.
+- Pour les captures logicielles sous Linux, `usbmon` est la source normale ; sous Windows, Wireshark dépend de l’extcap **USBPcap** pour voir les URB USB brutes.<sup>[[4]](#references)</sup>
+- Si le clavier était connecté via un hub ou une station d’accueil, vérifiez d’abord le descripteur d’interface, puis décodez uniquement cette paire périphérique/interface. Les captures HID composites mélangent fréquemment les rapports du clavier et de la souris.
+- Les captures Windows nécessitent l’interface extcap **USBPcap** ; assurez-vous qu’elle a été conservée après les mises à niveau de Wireshark, car l’absence d’extcap laisse les listes de périphériques vides.<sup>[[4]](#references)</sup>
+- Corrélez toujours le tuple bus, périphérique et interface (`usb.bus_id`, `usb.device_address`, `usb.bInterfaceNumber` ; par exemple `1.9.1`) avant tout décodage — mélanger plusieurs claviers ou périphériques de stockage produit des frappes incohérentes.<sup>[[10]](#references)</sup>
 
-## Références
+## References
 
-- [1] [Configuration des captures USB de Wireshark](https://wiki.wireshark.org/CaptureSetup/USB)
-- [2] [ACSC Quals 2023 - pcap 1, 2 write-up](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
-- [3] [ctf-usb-keyboard-parser](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser)
-- [4] [CTF-Usb_Keyboard_Parser](https://github.com/5h4rrk/CTF-Usb_Keyboard_Parser)
-- [5] [USB-HID-decoders](https://github.com/Nissen96/USB-HID-decoders)
-
+- [1] [Writeup du CTF HackIT 2017 : foren100](https://0xd13a.github.io/ctfs/hackit2017/foren100/)
+- [2] [Analyse d’une capture de paquets d’un clavier USB](https://naykisec.github.io/USB-Keyboard-packet-capture-analysis/)
+- [3] [ACSC Quals 2023 - write-up de pcap 1, 2](https://hackmd.io/@t510599/acsc-2023-quals-pcap)
+- [4] [Configuration de capture USB de Wireshark](https://wiki.wireshark.org/CaptureSetup/USB)
+- [5] [ctf-usb-keyboard-parser](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser)
+- [6] [CTF-Usb_Keyboard_Parser](https://github.com/5h4rrk/CTF-Usb_Keyboard_Parser)
+- [7] [Décodeurs USB-HID](https://github.com/Nissen96/USB-HID-decoders)
+- [8] [Définition de classe de périphérique pour les périphériques d’interface humaine (HID) 1.11](https://www.usb.org/sites/default/files/documents/hid1_11.pdf)
+- [9] [Tables d’utilisation HID 1.2](https://usb.org/sites/default/files/hut1_2.pdf)
+- [10] [Référence des filtres d’affichage Wireshark : USB](https://www.wireshark.org/docs/dfref/u/usb.html)
+- [11] [Référence des filtres d’affichage Wireshark : USB HID](https://www.wireshark.org/docs/dfref/u/usbhid.html)
 {{#include ../../../banners/hacktricks-training.md}}

