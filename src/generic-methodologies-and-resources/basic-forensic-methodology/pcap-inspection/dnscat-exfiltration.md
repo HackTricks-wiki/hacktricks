@@ -1,10 +1,8 @@
-# Аналіз pcap DNSCat
+# Аналіз DNSCat у pcap
 
-{{#include ../../../banners/hacktricks-training.md}}
+Якщо у вас є PCAP із даними, які **exfiltrated by DNSCat** (без використання шифрування), можливо, вам вдасться відновити exfiltrated content.
 
-Якщо у вас є pcap із даними, які **exfiltrated через DNSCat** (без використання шифрування), ви можете знайти exfiltrated вміст.
-
-Потрібно лише знати, що **перші 9 байтів** не є реальними даними, а пов’язані з **C\&C communication**:<sup>[[1]](#references)</sup>
+Для capture BSidesSF 2017, на який наведено посилання нижче, у write-up було зроблено висновок, що кожен decoded query починався з 9 байтів dnscat-specific data перед transferred content. Оскільки dnscat2 визначає різні типи пакетів і структури заголовків, перевірте відповідне framing, перш ніж застосовувати це зміщення до іншого traffic.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -23,15 +21,15 @@ last = qry
 
 #print(f)
 ```
-Для отримання додаткової інформації: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)<sup>[[1]](#references)</sup>\
-[https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
+Додаткову інформацію дивіться у [звіті BSidesSF 2017](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap) і [документації протоколу dnscat2](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md).
 
-Існує script, який працює з Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
+Репозиторій [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder) містить декодер для Python 3, який витягує потоки з PCAP, фільтруючи DNS-запити для вказаного домену.<sup>[[3]](#references)</sup>
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
-## Посилання
+## References
 
-- [1] [Звіт з pcap-форензіки DNSCat2 — BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
-
+- [1] [документація протоколу dnscat2](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
+- [2] [форензичний аналіз pcap DNSCat2 — CTF BSidesSF 2017](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
+- [3] [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 {{#include ../../../banners/hacktricks-training.md}}

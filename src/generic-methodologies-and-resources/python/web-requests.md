@@ -1,10 +1,13 @@
-# Вебзапити
-
-{{#include ../../banners/hacktricks-training.md}}
-
+# Веб-запити
 
 ## Python Requests
+
+У цих прикладах використовуються документовані аргументи запитів Requests, властивості відповідей, кортежі multipart-файлів і сесії.<sup>[[1]](#references)</sup> У прикладах із `verify=False` вимкнено перевірку TLS-сертифіката; їх слід використовувати лише під час контрольованого тестування.<sup>[[1]](#references)</sup>
 ```python
+import random
+import re
+import string
+
 import requests
 
 url = "http://example.com:80/some/path.php"
@@ -23,7 +26,7 @@ body_text = gr.text
 ret_cookies = gr.cookies
 is_redirect = gr.is_redirect
 is_permanent_redirect = gr.is_permanent_redirect
-float_seconds = gr.elapsed.total_seconds() 10.231
+float_seconds = gr.elapsed.total_seconds()
 
 #Regular Post requests sending parameters (data)
 pr = requests.post(url, data=params, headers=headers, cookies=cookies, verify=False, allow_redirects=True, proxies=proxies)
@@ -71,7 +74,9 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python cmd для exploit RCE
+## Python cmd для експлуатації RCE
+
+Цикл команд є підкласом Python's `Cmd`; його метод `default` обробляє нерозпізнані префікси команд, `cmdloop` розподіляє рядки вводу, а `re.DOTALL` дає змогу шаблону вилучення охоплювати кілька рядків.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -98,4 +103,9 @@ return 1
 term = Terminal()
 term.cmdloop()
 ```
+## References
+
+- [1] [Інтерфейс розробника Requests](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — підтримка інтерпретаторів команд, орієнтованих на рядки](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — операції з регулярними виразами](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

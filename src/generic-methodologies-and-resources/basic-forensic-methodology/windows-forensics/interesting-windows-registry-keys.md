@@ -1,54 +1,52 @@
-# Цікаві ключі реєстру Windows
+# Цікаві ключі Windows Registry
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-Кущі реєстру Windows — один із найшвидших способів перейти від _що сталося?_ до _який користувач, коли та звідки?_. Для live-аналізу надавайте перевагу `CurrentControlSet`; під час offline-аналізу куща спочатку визначте, який `ControlSet00x` був активним, замість жорстко задавати `ControlSet001`.
+Кущі Windows Registry є одним із найшвидших способів перейти від _що сталося?_ до _який користувач, коли і звідки?_. Для аналізу активної системи надавайте перевагу `CurrentControlSet`; під час аналізу offline-кущів спочатку визначте, який `ControlSet00x` був активним, замість жорсткого задання `ControlSet001`.
 
 ### Версія Windows та інформація про власника
 
 - `SOFTWARE\Microsoft\Windows NT\CurrentVersion`: редакція/збірка Windows, час встановлення, зареєстрований власник, назва продукту та інші метадані збірки.
-- `SYSTEM\Select`: зіставляє `Current`, `Default` і `LastKnownGood` із фактичними значеннями `ControlSet00x`, які використовувала система.
+- `SYSTEM\Select`: зіставляє `Current`, `Default` і `LastKnownGood` із фактичними значеннями `ControlSet00x`, які використовує система.
 
 ### Ім'я комп'ютера
 
-- `SYSTEM\CurrentControlSet\Control\ComputerName\ComputerName`: поточне hostname.
+- `SYSTEM\CurrentControlSet\Control\ComputerName\ComputerName`: поточне ім'я хоста.
 
 ### Налаштування часового поясу
 
-- `SYSTEM\CurrentControlSet\Control\TimeZoneInformation`: налаштований часовий пояс і значення, пов'язані з DST.
+- `SYSTEM\CurrentControlSet\Control\TimeZoneInformation`: налаштований часовий пояс і значення, пов'язані з переходом на літній час.
 
 ### Відстеження часу доступу
 
 - `SYSTEM\CurrentControlSet\Control\FileSystem`: `NtfsDisableLastAccessUpdate` вказує, чи оновлюються часові мітки останнього доступу NTFS.
-- Щоб увімкнути його, використайте: `fsutil behavior set disablelastaccess 0`
+- Щоб увімкнути цю функцію, використовуйте: `fsutil behavior set disablelastaccess 0`
 
-### Відомості про вимкнення
+### Відомості про завершення роботи
 
-- `SYSTEM\CurrentControlSet\Control\Windows`: час останнього вимкнення.
-- `SYSTEM\CurrentControlSet\Control\Watchdog\Display`: старіші системи також можуть містити лічильники вимкнень.
+- `SYSTEM\CurrentControlSet\Control\Windows`: час останнього завершення роботи.
+- `SYSTEM\CurrentControlSet\Control\Watchdog\Display`: старіші системи також можуть містити лічильники завершення роботи.
 
 ### Конфігурація мережі
 
-- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: IP-адреси інтерфейсу, DHCP leases, дані шлюзу та DNS.<sup>[[1]](#references)</sup>
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: назва мережевого профілю/SSID, а також час першого й останнього підключення.
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` і `...\Unmanaged\{GUID}`: дані для кореляції профілю, як-от MAC-адреса шлюзу та DNS-суфікс.
-- `SYSTEM\CurrentControlSet\Services\LanmanServer\Shares`: локальні спільні папки, опубліковані host.
+- `SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces\{GUID}`: IP-адреси інтерфейсів, DHCP-оренди, дані шлюзу та DNS.<sup>[[1]](#references)</sup>
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\{GUID}`: назва/SSID мережевого профілю, а також час першого й останнього підключення.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Managed\{GUID}` і `...\Unmanaged\{GUID}`: дані кореляції профілю, як-от MAC-адреса шлюзу та DNS-суфікс.
+- `SYSTEM\CurrentControlSet\Services\LanmanServer\Shares`: локальні спільні папки, опубліковані хостом.
 
-### Історія віддаленого доступу та мережевих share
+### Історія віддаленого доступу та мережевих спільних ресурсів
 
-- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: вихідний список RDP MRU (`MRU0`..`MRU9`).<sup>[[1]](#references)</sup>
-- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: історія вихідних RDP-підключень для окремих host. Підрозділи зазвичай містять `UsernameHint`, а час `LastWrite` ключа є корисною точкою для pivot.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: підключені мережеві диски, UNC shares і точки підключення змінних носіїв, пов'язані з конкретним користувачем.
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Default`: список MRU для вихідних RDP-підключень (`MRU0`..`MRU9`).<sup>[[1]](#references)</sup>
+- `NTUSER.DAT\Software\Microsoft\Terminal Server Client\Servers\<target>`: історія вихідних RDP-підключень для окремих хостів. Підрозділи зазвичай містять `UsernameHint`, а час `LastWrite` ключа є корисною точкою для подальшого аналізу.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: підключені мережеві диски, UNC-спільні ресурси та точки монтування змінних носіїв, пов'язані з конкретним користувачем.
 
-### Програми, які запускаються автоматично, та Scheduled Persistence
+### Програми, що запускаються автоматично, та Scheduled Persistence
 
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\RunOnce`
 - `SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
 - `SOFTWARE\Microsoft\Windows\CurrentVersion\RunOnce`
-- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` і `...\Tasks\{GUID}`: метадані scheduled task. Якщо task існує тут, але значення `SD` відсутнє в `Tree\<TaskName>`, підозрюйте приховане втручання в task за стилем Tarrask і зіставте його з `C:\Windows\System32\Tasks\<TaskName>`.
+- `SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\<TaskName>` і `...\Tasks\{GUID}`: метадані запланованих завдань. Якщо завдання існує тут, але значення `SD` відсутнє в `Tree\<TaskName>`, припускайте приховане втручання в завдання на кшталт Tarrask і зіставте це з `C:\Windows\System32\Tasks\<TaskName>`.
 
-### Пошукові запити, введені шляхи та MRU
+### Пошук, введені шляхи та MRU
 
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery`: пошукові запити File Explorer.<sup>[[1]](#references)</sup>
 - `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths`: шляхи Explorer, введені вручну.
@@ -60,33 +58,32 @@
 
 ### Відстеження активності користувача
 
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: історія запусків через GUI. Назви значень закодовані за допомогою ROT13, а бінарні дані містять лічильники запусків і час останнього запуску.<sup>[[1]](#references)</sup>
-- Розглядайте `UserAssist` як вагомий допоміжний доказ, а не як самостійний вердикт: він переважно відстежує програми або `.lnk`-файли, запущені через Explorer, і може пропускати виконання через командний рядок або service. У Windows 10+ деякі записи не обов'язково означають, що process повністю виконався.
-- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` і `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: traces виконання в сучасних Windows 10/11 із прив'язкою до SID і часом останнього виконання. Вони особливо корисні для локально виконаних бінарних файлів, але старі записи можуть швидко видалятися, а дані про виконання з мережевих shares/змінних носіїв є менш надійними.
-- Ширший огляд артефактів виконання, як-от Prefetch, Amcache, ShimCache і SRUM, наведено в основному [огляді Windows forensics](README.md#programs-executed).
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`: історія запуску через графічний інтерфейс. Імена значень закодовані за допомогою ROT13, а двійкові дані містять лічильники запусків і час останнього запуску.<sup>[[1]](#references)</sup>
+- Розглядайте `UserAssist` як вагомий допоміжний доказ, а не як самостійний вердикт: він переважно відстежує програми або `.lnk`-файли, запущені через Explorer, і може не фіксувати виконання з командного рядка або запуск службами. У Windows 10+ деякі записи не обов'язково означають, що процес повністю виконався.
+- `SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\{SID}` і `SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\{SID}`: сучасні traces виконання у Windows 10/11 із прив'язкою до SID і часом останнього виконання. Вони особливо корисні для бінарних файлів, запущених локально, але старі записи можуть швидко видалятися, а дані про виконання з мережевих спільних ресурсів/змінних носіїв є менш надійними.
+- Щодо ширшого набору артефактів виконання, зокрема Prefetch, Amcache, ShimCache і SRUM, див. основний [огляд Windows forensics](README.md#programs-executed).
 
 ### Shellbags
 
-- Shellbags зберігаються і в `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU` / `Bags`, і в `UsrClass.dat\Local Settings\Software\Microsoft\Windows\Shell\BagMRU` / `Bags`.<sup>[[1]](#references)</sup>
-- Записи `NTUSER.DAT` особливо корисні для перегляду UNC/мережевих шляхів, тоді як `UsrClass.dat` — це місце, де Windows Vista+ зазвичай зберігає Shellbags локальних папок і папок на змінних носіях.
-- Вони можуть показувати існування папки, навігацію та налаштування її вигляду навіть після видалення папки. Доступ до archive-файлів через Explorer-подібні засоби також може залишати traces Shellbags.<sup>[[1]](#references)</sup>
-- Не кожен Shellbag доводить успішний доступ до папки, тому підтверджуйте дані за допомогою LNK, Jump Lists, часових міток або зіставлення томів.
-- Використовуйте **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** або **SBECmd** для їхнього парсингу.
+- Shellbags зберігаються як у `NTUSER.DAT\Software\Microsoft\Windows\Shell\BagMRU` / `Bags`, так і в `UsrClass.dat\Local Settings\Software\Microsoft\Windows\Shell\BagMRU` / `Bags`.<sup>[[1]](#references)</sup>
+- Записи `NTUSER.DAT` особливо корисні для перегляду UNC/мережевих ресурсів, тоді як у `UsrClass.dat` Windows Vista+ зазвичай зберігає shellbags локальних/змінних папок.
+- Вони можуть показувати існування папки, перехід до неї та параметри її відображення навіть після видалення папки. Доступ до архівних файлів через Explorer-подібні засоби також може залишати traces shellbag.<sup>[[1]](#references)</sup>
+- Не кожен shellbag доводить успішний доступ до папки, тому підтверджуйте дані за допомогою LNK, Jump Lists, часових міток або зіставлення томів.
+- Використовуйте **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** або **SBECmd** для їхнього аналізу.
 
 ### Інформація про USB
 
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: основний inventory USB mass-storage devices (vendor, product, revision, serial/device instance).
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: ширший inventory USB-пристроїв, зокрема пристроїв, що не є storage-пристроями.
-- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: у сучасних збірках Windows 10/11 це цінне місце для часових міток життєвого циклу окремого пристрою, як-от встановлення, перше встановлення, остання поява та останнє вилучення.<sup>[[2]](#references)</sup>
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USBSTOR`: основний перелік USB-пристроїв mass-storage (виробник, продукт, ревізія, серійний номер/екземпляр пристрою).
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB`: ширший перелік USB-пристроїв, зокрема пристроїв, що не є накопичувачами.
+- `HKLM\SYSTEM\CurrentControlSet\Enum\USB\VID_*\PID_*\...\Properties\{83da6326-97a6-4088-9453-a1923f573b29}`: у нових збірках Windows 10/11 це важливе місце для часових міток життєвого циклу окремого пристрою, зокрема встановлення, першого встановлення, останньої появи та останнього вилучення.<sup>[[2]](#references)</sup>
 - `HKLM\SYSTEM\MountedDevices`: зіставляє томи та ідентифікатори пристроїв із літерами дисків / GUID томів. Для певної літери диска може зберегтися лише останнє зіставлення.
-- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: корисна точка для pivot до серійних номерів томів і попередніх метаданих носіїв.
-- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: історія взаємодії конкретного користувача з літерами дисків і shares.<sup>[[2]](#references)</sup>
+- `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\EMDMgmt`: корисна точка для пошуку серійних номерів томів і метаданих попередніх носіїв.
+- `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\MountPoints2`: історія взаємодії конкретного користувача з літерами дисків і спільними ресурсами.<sup>[[2]](#references)</sup>
 - Сучасні телефони та планшети, підключені через MTP/PTP, можуть **не** відображатися в `USBSTOR`. Також перевіряйте `HKLM\SYSTEM\CurrentControlSet\Enum\SWD\WPDBUSENUM` і `HKLM\SOFTWARE\Microsoft\Windows Portable Devices\Devices`.<sup>[[2]](#references)</sup>
-- Щоб пов'язати пристрій із користувачем, виконайте pivot від ідентифікаторів пристрою або тому до per-user артефактів, як-от Shellbags, LNK, Jump Lists, `RecentDocs` і `MountPoints2`.<sup>[[2]](#references)</sup>
+- Щоб пов'язати пристрій із користувачем, переходьте від ідентифікаторів пристрою або тому до артефактів конкретного користувача, таких як shellbags, LNK, Jump Lists, `RecentDocs` і `MountPoints2`.<sup>[[2]](#references)</sup>
 
 ## References
 
-- [1] [Windows Registry Forensics Cheat Sheet 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
-- [2] [USB Device Forensics on Windows 10 and 11 - ElcomSoft](https://blog.elcomsoft.com/2026/02/usb-device-forensics-on-windows-10-and-11/)
-
+- [1] [Шпаргалка з Windows Registry Forensics 2026 - Cyber Triage](https://www.cybertriage.com/blog/windows-registry-forensics-cheat-sheet-2026/)
+- [2] [Forensics USB-пристроїв у Windows 10 і 11 - ElcomSoft](https://blog.elcomsoft.com/2026/02/usb-device-forensics-on-windows-10-and-11/)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,6 +1,4 @@
-# Bruteforce хешу з кількома символами
-
-{{#include ../../banners/hacktricks-training.md}}
+# Bruteforce хешу кількох символів
 ```python
 import hashlib
 
@@ -51,4 +49,6 @@ return 0
 
 main()
 ```
+## References
+
 {{#include ../../banners/hacktricks-training.md}}

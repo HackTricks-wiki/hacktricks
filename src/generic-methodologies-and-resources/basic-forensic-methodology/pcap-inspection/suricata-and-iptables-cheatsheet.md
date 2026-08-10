@@ -1,18 +1,18 @@
 # Шпаргалка Suricata та Iptables
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 ## Iptables
 
-### Ланцюги
+### Ланцюжки
 
-В iptables списки правил, відомі як ланцюги, обробляються послідовно. Серед них три основні ланцюги присутні всюди, а додаткові, наприклад NAT, можуть підтримуватися залежно від можливостей системи.
+В iptables кожен ланцюжок є послідовним списком правил зіставлення пакетів. Таблиця `filter` за замовчуванням містить вбудовані ланцюжки `INPUT`, `FORWARD` і `OUTPUT`; інші таблиці, наприклад `nat`, можуть бути доступні залежно від конфігурації ядра та завантажених модулів.<sup>[[1]](#references)</sup>
 
-- **Input Chain**: Використовується для керування поведінкою вхідних з'єднань.
-- **Forward Chain**: Використовується для обробки вхідних з'єднань, призначених не для локальної системи. Це типово для пристроїв, що працюють як маршрутизатори, де отримані дані потрібно переспрямувати до іншого пункту призначення. Цей ланцюг має значення переважно тоді, коли система бере участь у маршрутизації, NAT або подібних операціях.
-- **Output Chain**: Призначений для регулювання вихідних з'єднань.
+- **Ланцюжок Input**: використовується для керування поведінкою вхідних з'єднань.
+- **Ланцюжок Forward**: використовується для обробки вхідних з'єднань, не призначених для локальної системи. Це типово для пристроїв, що виконують роль маршрутизаторів, коли отримані дані мають бути перенаправлені до іншого призначення. Цей ланцюжок має значення переважно тоді, коли система бере участь у маршрутизації, NATing або подібних операціях.
+- **Ланцюжок Output**: призначений для регулювання вихідних з'єднань.
 
-Ці ланцюги забезпечують упорядковану обробку мережевого трафіку, даючи змогу визначати детальні правила, що керують потоком даних у систему, через неї та з неї.
+Ці ланцюжки забезпечують впорядковану обробку мережевого трафіку, даючи змогу визначати детальні правила, що керують потоком даних у систему, через неї та з неї.
+
+У прикладах зіставлення рядків використовується стандартне зіставлення `string`; зіставлення чутливе до регістру, якщо не вказано `--icase`, а `--algo` вибирає стратегію пошуку BM або KMP.<sup>[[2]](#references)</sup>
 ```bash
 # Delete all rules
 iptables -F
@@ -52,8 +52,10 @@ iptables-restore < /etc/sysconfig/iptables
 ## Suricata
 
 ### Встановлення та налаштування
+
+Наведені нижче команди для роботи з пакетами залежать від дистрибутива та версії; в офіційному посібнику зі встановлення описано Ubuntu PPA, backports для Debian, RPM-пакети та керування службами systemd.<sup>[[3]](#references)</sup>
 ```bash
-# Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
+# Package installation details vary by distribution and release; see References.
 # Ubuntu
 add-apt-repository ppa:oisf/suricata-stable
 apt-get update
@@ -70,7 +72,7 @@ yum install epel-release
 yum install suricata
 
 # Get rules
-suricata-update
+suricata-update update-sources
 suricata-update list-sources #List sources of the rules
 suricata-update enable-source et/open #Add et/open rulesets
 suricata-update
@@ -81,20 +83,17 @@ rule-files:
 
 # Run
 ## Add rules in /etc/suricata/rules/suricata.rules
-systemctl suricata start
+systemctl start suricata
 suricata -c /etc/suricata/suricata.yaml -i eth0
 
 
 # Reload rules
 suricatasc -c ruleset-reload-nonblocking
-## or set the follogin in /etc/suricata/suricata.yaml
-detect-engine:
-- rule-reload: true
 
 # Validate suricata config
 suricata -T -c /etc/suricata/suricata.yaml -v
 
-# Configure suricata as IPs
+# Configure Suricata as an IPS
 ## Config drop to generate alerts
 ## Search for the following lines in /etc/suricata/suricata.yaml and remove comments:
 - drop:
@@ -117,70 +116,72 @@ Type=simple
 
 systemctl daemon-reload
 ```
+Послідовність `suricata-update` відповідає задокументованому робочому процесу Suricata для отримання, переліку, увімкнення та завантаження джерел правил.<sup>[[4]](#references)</sup> Наведена вище команда `suricatasc` є задокументованим неблокувальним методом перезавантаження правил через Unix-сокет.<sup>[[8]](#references)</sup> Правила NFQUEUE надсилають локальний вхідний і вихідний трафік до Suricata, а `-q 0` вибирає чергу 0 для inline-обробки.<sup>[[7]](#references)</sup>
+
 ### Визначення правил
 
-[З документації:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Правило/сигнатура складається з такого:
+Правило/сигнатура Suricata складається з трьох частин.<sup>[[5]](#references)</sup>
 
-- **дія** визначає, що відбувається, коли сигнатура спрацьовує.
-- **заголовок** визначає протокол, IP-адреси, порти та напрямок правила.
-- **опції правила** визначають його специфіку.
+- **Дія** визначає, що відбувається, коли сигнатура збігається.
+- **Заголовок** визначає протокол, IP-адреси, порти та напрямок.
+- **Параметри правила** визначають деталі, специфічні для збігу.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
 #### **Допустимі дії**
 
-- alert - згенерувати сповіщення
+- alert - згенерувати alert
 - pass - припинити подальшу перевірку пакета
-- **drop** - відкинути пакет і згенерувати сповіщення
-- **reject** - надіслати відправнику відповідного пакета помилку RST/ICMP unreachable.
+- **drop** - відкинути пакет і згенерувати alert
+- **reject** - надіслати помилку RST/ICMP unreachable відправнику відповідного пакета.
 - rejectsrc - те саме, що й _reject_
-- rejectdst - надіслати отримувачу відповідного пакета пакет із помилкою RST/ICMP.
-- rejectboth - надіслати пакети з помилкою RST/ICMP обом сторонам з'єднання.
+- rejectdst - надіслати пакет помилки RST/ICMP отримувачу відповідного пакета.
+- rejectboth - надіслати пакети помилки RST/ICMP обом сторонам з'єднання.
 
 #### **Протоколи**
 
-- tcp (для tcp-трафіку)
+- tcp (для tcp-traffic)
 - udp
 - icmp
-- ip (ip означає «all» або «any»)
-- _протоколи layer7_: http, ftp, tls, smb, dns, ssh... (більше в [**документації**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip означає «усі» або «будь-які»)
+- _протоколи рівня 7_: http, ftp, tls, smb, dns, ssh та інші.<sup>[[5]](#references)</sup>
 
 #### Адреси джерела та призначення
 
-Підтримуються діапазони IP-адрес, заперечення та список адрес:
+Suricata підтримує діапазони IP-адрес, заперечення та згруповані списки адрес.<sup>[[5]](#references)</sup>
 
-| Приклад                       | Значення                                  |
-| ----------------------------- | ----------------------------------------- |
-| ! 1.1.1.1                     | Кожна IP-адреса, крім 1.1.1.1             |
-| !\[1.1.1.1, 1.1.1.2]          | Кожна IP-адреса, крім 1.1.1.1 і 1.1.1.2   |
-| $HOME_NET                     | Ваше значення HOME_NET у yaml             |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET, але не HOME_NET             |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24, за винятком 10.0.0.5         |
+| Приклад                     | Значення                                  |
+| --------------------------- | ----------------------------------------- |
+| ! 1.1.1.1                   | Кожна IP-адреса, крім 1.1.1.1             |
+| !\[1.1.1.1, 1.1.1.2]        | Кожна IP-адреса, крім 1.1.1.1 та 1.1.1.2 |
+| $HOME_NET                   | Ваше значення HOME_NET у yaml             |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET, але не HOME_NET            |
+| \[10.0.0.0/24, !10.0.0.5]   | 10.0.0.0/24, за винятком 10.0.0.5         |
 
 #### Порти джерела та призначення
 
-Підтримуються діапазони портів, заперечення та списки портів
+Suricata підтримує діапазони портів, заперечення та списки портів.<sup>[[5]](#references)</sup>
 
-| Приклад         | Значення                              |
-| --------------- | ------------------------------------- |
-| any             | будь-яка адреса                       |
-| \[80, 81, 82]   | порти 80, 81 і 82                     |
-| \[80: 82]       | діапазон від 80 до 82                 |
-| \[1024: ]       | від 1024 до найбільшого номера порту  |
-| !80             | кожен порт, крім 80                  |
-| \[80:100,!99]   | діапазон від 80 до 100, крім 99       |
-| \[1:80,!\[2,4]] | діапазон від 1 до 80, крім портів 2 і 4 |
+| Приклад         | Значення                                  |
+| --------------- | ----------------------------------------- |
+| any             | будь-яка адреса                           |
+| \[80, 81, 82]   | порти 80, 81 та 82                        |
+| \[80: 82]       | діапазон від 80 до 82                     |
+| \[1024: ]       | від 1024 до найбільшого номера порту      |
+| !80             | кожен порт, крім 80                       |
+| \[80:100,!99]   | діапазон від 80 до 100, але без 99        |
+| \[1:80,!\[2,4]] | діапазон від 1 до 80, крім портів 2 та 4  |
 
 #### Напрямок
 
-Можна вказати напрямок з'єднання, до якого застосовується правило:
+Правила Suricata можуть визначати напрямок з'єднання, що перевіряється.<sup>[[5]](#references)</sup>
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### Ключові слова
 
-У Suricata доступні **сотні опцій** для пошуку **конкретного пакета**, який ви шукаєте; тут буде зазначено, якщо буде знайдено щось цікаве. Перегляньте [**документацію** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)для отримання додаткової інформації!
+У наведених нижче прикладах використовуються rule keywords Suricata, зокрема параметри metadata, IP, ICMP, payload і application-layer; в офіційній документації до правил описано ці групи та їхній синтаксис.<sup>[[6]](#references)[[9]](#references)</sup>
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -207,6 +208,7 @@ reject tcp any any -> any any (msg: "php-rce"; content: "eval"; nocase; metadata
 
 # Replaces string
 ## Content and replace string must have the same length
+## The replace modifier is IPS-only and operates on individual packets
 content:"abc"; replace: "def"
 alert tcp any any -> any any (msg: "flag replace"; content: "CTF{a6st"; replace: "CTF{u798"; nocase; sid:100; rev: 1;)
 ## The replace works in both input and output packets
@@ -221,4 +223,15 @@ drop tcp any any -> any any (msg:"regex"; pcre:"/CTF\{[\w]{3}/i"; sid:10001;)
 ## Drop by port
 drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
+## References
+
+- [1] [iptables(8) — сторінка посібника Linux](https://man7.org/linux/man-pages/man8/iptables.8.html)
+- [2] [iptables-extensions(8) — сторінка посібника Linux](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
+- [3] [3. Встановлення — документація Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/install.html)
+- [4] [9.1. Керування правилами за допомогою Suricata-Update — документація Suricata 8.0.1](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
+- [5] [8.1. Формат правил — документація Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
+- [6] [8.7. Ключові слова корисного навантаження — документація Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
+- [7] [15. Налаштування IPS/inline для Linux — документація Suricata 7.0.15](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
+- [8] [9.3. Перезавантаження правил — документація Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
+- [9] [8. Правила Suricata — документація Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
 {{#include ../../../banners/hacktricks-training.md}}
