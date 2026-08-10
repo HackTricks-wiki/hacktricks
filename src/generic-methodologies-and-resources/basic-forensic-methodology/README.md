@@ -1,7 +1,5 @@
 # Metodologia Básica de Forense
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Criando e Montando uma Imagem
 
 
@@ -11,7 +9,7 @@
 
 ## Análise de Malware
 
-Isso **não é necessariamente o primeiro passo a ser executado depois que você tiver a imagem**. Porém, você pode usar estas técnicas de análise de malware de forma independente se tiver um arquivo, uma imagem de sistema de arquivos, uma imagem de memória, um pcap... portanto, é bom **manter estas ações em mente**:
+Isso **não é necessariamente o primeiro passo a ser realizado depois que você obtém a imagem**. Mas você pode usar essas técnicas de análise de malware de forma independente se tiver um arquivo, uma imagem de sistema de arquivos, uma imagem de memória, um pcap... portanto, é bom **manter essas ações em mente**:
 
 
 {{#ref}}
@@ -20,7 +18,7 @@ malware-analysis.md
 
 ## Inspecionando uma Imagem
 
-se receber uma **imagem forense** de um dispositivo, você pode começar **analisando as partições e o sistema de arquivos** utilizado e **recuperando** possíveis **arquivos interessantes** (inclusive arquivos excluídos). Saiba como em:
+se receber uma **imagem forense** de um dispositivo, você pode começar a **analisar as partições e o sistema de arquivos** utilizado e **recuperar** possíveis **arquivos interessantes** (inclusive arquivos excluídos). Saiba como em:
 
 
 {{#ref}}
@@ -49,7 +47,7 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Inspeção detalhada de tipos de arquivo e Software específicos
+## Inspeção aprofundada de tipos de arquivos e Software específicos
 
 Se você tiver um **arquivo** muito **suspeito**, então, **dependendo do tipo de arquivo e do software** que o criou, vários **truques** podem ser úteis.\
 Leia a página a seguir para conhecer alguns truques interessantes:
@@ -95,5 +93,7 @@ anti-forensic-techniques.md
 {{#ref}}
 file-integrity-monitoring.md
 {{#endref}}
+
+## References
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,16 +1,14 @@
 # Inspeção de Pcap
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 > [!TIP]
-> Uma observação sobre **PCAP** vs **PCAPNG**: existem duas versões do formato de arquivo PCAP; **PCAPNG é mais recente e não é compatível com todas as ferramentas**. Talvez seja necessário converter um arquivo de PCAPNG para PCAP usando o Wireshark ou outra ferramenta compatível para trabalhar com ele em algumas outras ferramentas.
+> **PCAP** e **PCAPNG** são formatos de captura distintos; **PCAPNG é um sucessor flexível e extensível do PCAP**, mas o suporte varia entre as ferramentas. Se uma ferramenta não conseguir ler PCAPNG, converta-o para PCAP com o Wireshark ou outra ferramenta compatível.<sup>[[1]](#references)[[18]](#references)</sup>
 
 ## Ferramentas online para pcaps
 
-- Se o cabeçalho do seu pcap estiver **corrompido**, tente **corrigi-lo** usando: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
-- Extraia **informações** e procure por **malware** dentro de um pcap no [**PacketTotal**](https://packettotal.com)
-- Procure por **atividades maliciosas** usando [**www.virustotal.com**](https://www.virustotal.com) e [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
-- **Análise completa de pcap pelo navegador em** [**https://apackets.com/**](https://apackets.com/)
+- Se o cabeçalho do seu pcap estiver **corrompido**, tente **corrigi-lo** usando: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php).<sup>[[2]](#references)</sup>
+- Extraia **informações** e procure por **malware** dentro de um pcap no [**PacketTotal**](https://packettotal.com).<sup>[[19]](#references)</sup>
+- Procure por **atividade maliciosa** usando [**www.virustotal.com**](https://www.virustotal.com) e [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com).<sup>[[3]](#references)[[4]](#references)</sup>
+- **Análise completa de pcap pelo navegador em** [**https://apackets.com/**](https://apackets.com/).<sup>[[5]](#references)</sup>
 
 ## Extrair informações
 
@@ -19,7 +17,7 @@ As ferramentas a seguir são úteis para extrair estatísticas, arquivos etc.
 ### Wireshark
 
 > [!TIP]
-> **Se você pretende analisar um PCAP, basicamente precisa saber usar o Wireshark**
+> **Se você pretende analisar um PCAP, basicamente precisa saber como usar o Wireshark**
 
 Você pode encontrar alguns truques do Wireshark em:
 
@@ -30,11 +28,11 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-Análise de Pcap pelo navegador.
+Análise de pcap pelo navegador.<sup>[[5]](#references)</sup>
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(apenas linux)_ pode **analisar** um **pcap** e extrair informações dele. Por exemplo, a partir de um arquivo pcap, o Xplico extrai cada e-mail (protocolos POP, IMAP e SMTP), todo o conteúdo HTTP, cada chamada VoIP (SIP), FTP, TFTP e assim por diante.
+[**Xplico**](https://github.com/xplico/xplico) é uma ferramenta de network-forensics semelhante ao Unix que decodifica arquivos PCAP e pode extrair emails via POP/IMAP/SMTP, conteúdos HTTP, chamadas SIP VoIP, dados FTP e dados TFTP.<sup>[[6]](#references)</sup>
 
 **Instalação**
 ```bash
@@ -50,34 +48,30 @@ sudo apt-get install xplico
 ```
 Acesse _**127.0.0.1:9876**_ com as credenciais _**xplico:xplico**_
 
-Depois, crie um **novo case**, crie uma **nova session** dentro do case e **faça upload do arquivo pcap**.
+Depois, crie um **novo caso**, crie uma **nova sessão** dentro do caso e **faça upload do arquivo pcap**.
 
 ### NetworkMiner
 
-Assim como o Xplico, é uma ferramenta para **analisar e extrair objetos de pcaps**. Ela possui uma edição gratuita que você pode **baixar** [**aqui**](https://www.netresec.com/?page=NetworkMiner). Ela funciona no **Windows**.\
-Essa ferramenta também é útil para obter **outras informações analisadas** dos pacotes, a fim de descobrir o que estava acontecendo de uma forma **mais rápida**.
+Assim como o Xplico, o [**NetworkMiner**](https://www.netresec.com/?page=NetworkMiner) analisa o tráfego PCAP para extrair artefatos como arquivos, imagens, e-mails e senhas, além de agregar informações sobre hosts; sua edição gratuita é voltada principalmente para Windows.<sup>[[7]](#references)</sup>
 
 ### NetWitness Investigator
 
-Você pode baixar o [**NetWitness Investigator aqui**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(funciona no Windows)**.\
-Essa é outra ferramenta útil que **analisa os pacotes** e organiza as informações de uma forma útil para **saber o que está acontecendo internamente**.
+Você pode baixar o [**NetWitness Investigator daqui**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(ele funciona no Windows)**.\
+O fornecedor descreve o freeware como uma ferramenta interativa de análise de sessões de rede para a triagem de atividades maliciosas e atualmente disponibiliza o acesso por meio de um formulário de contato.<sup>[[8]](#references)</sup>
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- Extração e encoding de usernames e passwords (HTTP, FTP, Telnet, IMAP, SMTP...)
-- Extração de authentication hashes e cracking usando Hashcat (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
-- Construção de um diagrama visual da rede (nós e usuários da rede)
-- Extração de consultas DNS
-- Reconstrução de todas as sessions TCP e UDP
-- File Carving
+Os módulos documentados do BruteShark podem analisar credenciais de HTTP, FTP, Telnet, IMAP e SMTP, exportar hashes de autenticação Kerberos, NTLM, CRAM-MD5 e HTTP-Digest para o Hashcat, mapear nós e usuários da rede, extrair consultas DNS, reconstruir sessões TCP/UDP e extrair arquivos.<sup>[[9]](#references)</sup>
 
 ### Capinfos
+
+O `capinfos` do Wireshark imprime, por padrão, um relatório detalhado para um arquivo de captura.<sup>[[10]](#references)</sup>
 ```
 capinfos capture.pcap
 ```
 ### Ngrep
 
-Se você está **procurando** **algo** dentro do pcap, pode usar **ngrep**. Aqui está um exemplo usando os principais filtros:
+`ngrep` pesquisa payloads de pacotes com expressões regulares e aceita filtros BPF; `-I` lê um arquivo de captura compatível com pcap.<sup>[[11]](#references)</sup> O exemplo combina esses recursos para pesquisar uma solicitação HTTP no tráfego selecionado.
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
@@ -92,7 +86,7 @@ Usar técnicas comuns de carving pode ser útil para extrair arquivos e informa�
 
 ### Capturando credenciais
 
-Você pode usar ferramentas como [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) para analisar credenciais de um pcap ou de uma interface ativa.
+Você pode usar o [PCredz](https://github.com/lgandx/PCredz) para analisar credenciais de um arquivo PCAP armazenado ou de uma interface ativa.<sup>[[12]](#references)</sup>
 
 ## Verificar Exploits/Malware
 
@@ -106,22 +100,18 @@ echo "url = http://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz
 oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
 **Verificar pcap**
+
+A opção `-r` do Suricata reproduz um PCAP no modo offline; neste exemplo, `-k none` desativa as verificações de checksum, `-v` aumenta o nível de logging e `-l` seleciona o diretório de logs.<sup>[[13]](#references)</sup>
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) é uma ferramenta que
-
-- Lê um arquivo PCAP e extrai fluxos HTTP.
-- Descompacta com gzip quaisquer fluxos comprimidos
-- Analisa cada arquivo com yara
-- Cria um report.txt
-- Opcionalmente salva os arquivos correspondentes em um diretório
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) processa streams HTTP de arquivos PCAP, opcionalmente descompacta streams gzip, verifica os arquivos extraídos com YARA, grava `report.txt` e pode salvar os arquivos correspondentes em um diretório.<sup>[[14]](#references)</sup>
 
 ### Análise de Malware
 
-Verifique se é possível encontrar alguma assinatura de um malware conhecido:
+Verifique se consegue encontrar alguma fingerprint de um malware conhecido:
 
 
 {{#ref}}
@@ -130,11 +120,13 @@ Verifique se é possível encontrar alguma assinatura de um malware conhecido:
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) é um analisador passivo e open-source de tráfego de rede. Muitos operadores usam o Zeek como um Network Security Monitor (NSM) para auxiliar em investigações de atividades suspeitas ou maliciosas. O Zeek também oferece suporte a uma ampla variedade de tarefas de análise de tráfego além do domínio da segurança, incluindo medição de desempenho e troubleshooting.
+> [Zeek](https://docs.zeek.org/en/master/about.html) é um analisador passivo e open-source de tráfego de rede, usado como um Network Security Monitor (NSM) e para análises mais amplas de tráfego, incluindo medição de desempenho e troubleshooting.<sup>[[15]](#references)</sup>
 
-Basicamente, os logs criados pelo `zeek` não são **pcaps**. Portanto, você precisará usar **outras ferramentas** para analisar os logs onde estão as **informações** sobre os pcaps.
+O Zeek gera logs estruturados em vez de arquivos PCAP; portanto, use ferramentas de análise de logs, como `zeek-cut`, para inspecionar esses logs.<sup>[[15]](#references)[[16]](#references)</sup>
 
 ### Informações de Conexões
+
+Os exemplos abaixo usam `zeek-cut` para selecionar campos nomeados de logs TSV e, em seguida, ferramentas Unix padrão para classificar e contar conexões; o RITA também pode ingerir logs do Zeek para análises de conexões longas, beaconing e DNS tunneling.<sup>[[16]](#references)[[17]](#references)</sup>
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -218,4 +210,25 @@ wifi-pcap-analysis.md
 usb-keystrokes.md
 {{#endref}}
 
+## References
+
+- [1] [Guia do usuário do Wireshark: abrir arquivos de captura](https://www.wireshark.org/docs/wsug_html_chunked/ChIOOpenSection.html)
+- [2] [pcapfix - serviço online de reparo de pcap / pcapng](https://f00l.de/hacking/pcapfix.php)
+- [3] [Visão geral da API v3 do VirusTotal](https://docs.virustotal.com/reference/overview)
+- [4] [Hybrid Analysis](https://www.hybrid-analysis.com/)
+- [5] [Analisador de PCAP A-Packets](https://apackets.com/)
+- [6] [Xplico - Sobre](https://www.xplico.org/about)
+- [7] [NetworkMiner](https://www.netresec.com/?page=NetworkMiner)
+- [8] [Freeware NetWitness Investigator](https://www.netwitness.com/contact-us/netwitness-investigator-freeware/)
+- [9] [Repositório do BruteShark](https://github.com/odedshimon/BruteShark)
+- [10] [Manual do Wireshark `capinfos`](https://www.wireshark.org/docs/man-pages/capinfos.html)
+- [11] [Documentação do ngrep](https://ngrep.sourceforge.net/usage.html)
+- [12] [Repositório do PCredz](https://github.com/lgandx/PCredz)
+- [13] [Opções de linha de comando do Suricata](https://docs.suricata.io/en/latest/command-line-options.html)
+- [14] [Repositório do YaraPcap](https://github.com/kevthehermit/YaraPcap)
+- [15] [O que é o Zeek?](https://docs.zeek.org/en/master/about/what.html)
+- [16] [Tutorial de logs do Zeek](https://docs.zeek.org/en/master/tutorial/logs.html)
+- [17] [Repositório do RITA](https://github.com/activecm/rita)
+- [18] [Documentação do Wireshark `editcap`](https://www.wireshark.org/docs/wsug_html_chunked/AppToolseditcap.html)
+- [19] [Anúncio da API de upload do PacketTotal](https://medium.com/packettotal/the-packettotal-upload-api-26f48e53f0ee)
 {{#include ../../../banners/hacktricks-training.md}}

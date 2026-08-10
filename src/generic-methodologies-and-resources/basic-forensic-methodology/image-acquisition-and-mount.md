@@ -1,11 +1,8 @@
-# Aquisição e Montagem de Imagens
-
-{{#include ../../banners/hacktricks-training.md}}
-
+# Aquisição e montagem de imagem
 
 ## Aquisição
 
-> Sempre adquira em modo **somente leitura** e **calcule o hash enquanto copia**. Mantenha o dispositivo original **bloqueado contra escrita** e trabalhe apenas com cópias verificadas.
+> Sempre adquira em modo **somente leitura** e **calcule o hash enquanto copia**. Mantenha o dispositivo original **protegido contra gravação** e trabalhe apenas com cópias verificadas.
 
 ### DD
 ```bash
@@ -16,7 +13,7 @@ sha256sum disk.img > disk.img.sha256
 ```
 ### dc3dd / dcfldd
 
-`dc3dd` é o fork mantido ativamente do dcfldd (DoD Computer Forensics Lab dd).
+`dc3dd` é o fork ativamente mantido do dcfldd (DoD Computer Forensics Lab dd).
 ```bash
 # Create an image and calculate multiple hashes at acquisition time
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
@@ -31,7 +28,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-AFF4 é o formato moderno de imagem forense do Google, projetado para evidências *muito* grandes (esparsas, retomáveis, cloud-native).<sup>[[1]](#references)</sup>
+A especificação AFF4 v1.0, criada por Bradley L. Schatz e Michael I. Cohen, define um contêiner forense com armazenamento virtualizado, metadados arbitrários, compressão e hashing extensíveis e operação de alto desempenho.<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -51,9 +48,9 @@ ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
-### Criação de Imagens de Discos na Cloud
+### Criação de Imagens de Discos na Nuvem
 
-*AWS* – crie um **snapshot forense** sem desligar a instância:
+*AWS* – crie um **forensic snapshot** sem desligar a instância:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
@@ -61,15 +58,15 @@ aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web
 *Azure* – use `az snapshot create` and export to a SAS URL.
 
 
-## Montagem
+## Montar
 
 ### Escolhendo a abordagem correta
 
 1. Monte o **disco inteiro** quando quiser a tabela de partições original (MBR/GPT).
 2. Monte um **arquivo de partição individual** quando precisar apenas de um volume.
-3. Sempre monte como **somente leitura** (`-o ro,norecovery`) e trabalhe em **cópias**.<sup>[[2]](#references)</sup>
+3. Mantenha os anexos de imagem somente para leitura (por exemplo, `--read-only` do qemu-nbd).<sup>[[2]](#references)</sup> Monte os sistemas de arquivos somente para leitura (`-o ro`).<sup>[[3]](#references)</sup> Trabalhe em **cópias**.
 
-### Imagens raw (extraídas com dd, AFF4)
+### Imagens raw (dd, extraídas com AFF4)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -84,7 +81,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-Nenhum conteúdo foi fornecido para tradução.
+Desconecte quando terminar:
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -97,9 +94,11 @@ ewfmount evidence.E01 /mnt/ewf
 # 2. Attach the exposed raw file via qemu-nbd (safer than loop)
 sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 
-# 3. Mount the desired partition
+# 3. Mount the desired partition (XFS example; use the filesystem-specific option)
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
+Para mounts específicos do filesystem sem replay, ext3/ext4 usam `noload`, enquanto XFS usa `norecovery` e requer o modo somente leitura.<sup>[[3]](#references)[[4]](#references)</sup>
+
 Como alternativa, converta em tempo real com **xmount**:
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
@@ -126,22 +125,25 @@ mount -o ro /dev/mapper/loop0p2 /mnt
 ```
 ### Erros comuns de montagem e correções
 
+Para um sistema de arquivos ext3/ext4 sujo, use `ro,noload` quando for necessário impedir a reprodução do journal.<sup>[[3]](#references)</sup>
+
 | Erro | Causa típica | Correção |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | FS com journal (ext4) não foi desmontado corretamente | use `-o ro,norecovery` |
+| `cannot mount /dev/loop0 read-only` | FS com journal (ext4) não desmontado corretamente | use `-o ro,noload` |
 | `bad superblock …` | Offset incorreto ou FS danificado | calcule o offset (`sector*size`) ou execute `fsck -n` em uma cópia |
-| `mount: unknown filesystem type 'LVM2_member'` | Container LVM | ative o grupo de volumes com `vgchange -ay` |
+| `mount: unknown filesystem type 'LVM2_member'` | Container LVM | ative o volume group com `vgchange -ay` |
 
 ### Limpeza
 
-Lembre-se de executar **umount** e **disconnect** nos dispositivos loop/nbd para evitar deixar mapeamentos pendentes que possam corromper trabalhos futuros:
+Lembre-se de executar **umount** e **disconnect** nos dispositivos loop/nbd para evitar deixar mapeamentos pendentes que possam corromper trabalhos posteriores:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ```
-## Referências
+## References
 
-- [1] [Especificação do Padrão AFF4 (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
-- [2] [página de manual do qemu-nbd (montagem segura de imagens de disco)](https://manpages.debian.org/qemu-system-common/qemu-nbd.1.en.html)
-
+- [1] [Especificação do padrão AFF4 (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
+- [2] [Documentação do QEMU qemu-nbd](https://www.qemu.org/docs/master/tools/qemu-nbd.html)
+- [3] [Página do manual do Linux mount(8)](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [4] [O sistema de arquivos SGI XFS (documentação do kernel Linux)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
 {{#include ../../banners/hacktricks-training.md}}
