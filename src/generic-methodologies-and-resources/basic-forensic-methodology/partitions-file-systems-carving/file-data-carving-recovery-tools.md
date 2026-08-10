@@ -1,22 +1,13 @@
-# Інструменти для carving і відновлення файлів/даних
+# Інструменти карвінгу та відновлення файлів/даних
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-## Інструменти для carving і відновлення
+## Інструменти карвінгу та відновлення
 
 Більше інструментів у [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
 ### Autopsy
 
-Найпоширенішим інструментом, який використовується у forensic для вилучення файлів із образів, є [**Autopsy**](https://www.autopsy.com/download/). Завантажте його, встановіть і доручіть йому обробити файл, щоб знайти «приховані» файли. Зверніть увагу, що Autopsy створено для підтримки дискових образів та інших типів образів, але не простих файлів.
+Найпоширенішим інструментом, який використовується у forensic для вилучення файлів з образів, є [**Autopsy**](https://www.autopsy.com/download/). Завантажте його, встановіть і передайте йому файл для пошуку «прихованих» файлів. Зверніть увагу, що Autopsy розроблено для підтримки дискових образів та інших типів образів, але не звичайних файлів.
 
-> **Оновлення за 2024–2025 роки** – Версія **4.21** (випущена в лютому 2025 року) отримала перебудований **carving module на основі SleuthKit v4.13**, який помітно швидше працює з образами розміром у кілька терабайтів і підтримує паралельне вилучення в системах із кількома ядрами. Також було представлено невелику CLI-обгортку (`autopsycli ingest <case> <image>`), що дає змогу автоматизувати carving у CI/CD або великомасштабних лабораторних середовищах.<sup>[[1]](#references)</sup>
-```bash
-# Create a case and ingest an evidence image from the CLI (Autopsy ≥4.21)
-autopsycli case --create MyCase --base /cases
-# ingest with the default ingest profile (includes data-carve module)
-autopsycli ingest MyCase /evidence/disk01.E01 --threads 8
-```
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
 **Binwalk** — це інструмент для аналізу бінарних файлів з метою пошуку вбудованого вмісту. Його можна встановити через `apt`, а його вихідний код доступний на [GitHub](https://github.com/ReFirmLabs/binwalk).
@@ -28,11 +19,11 @@ binwalk firmware.bin             # Display embedded data
 binwalk -e firmware.bin          # Extract recognised objects (safe-default)
 binwalk --dd " .* " firmware.bin  # Extract *everything* (use with care)
 ```
-⚠️  **Примітка щодо безпеки** – Версії **≤2.3.3** уразливі до **Path Traversal** (CVE-2022-4510). Оновіть програму (або ізолюйте її за допомогою контейнера/непривілейованого UID), перш ніж виконувати carving ненадійних зразків.<sup>[[2]](#references)</sup>
+⚠️  **Примітка з безпеки** – Версії **2.1.2b до 2.3.3** уражені вразливістю **Path Traversal** (CVE-2022-4510); в advisory не вказано жодної виправленої версії pip. Уникайте розпакування ненадійних зразків за допомогою уражених релізів або ізолюйте інструмент за допомогою контейнера/непривілейованого UID.<sup>[[4]](#references)</sup>
 
 ### Foremost
 
-Ще одним поширеним інструментом для пошуку прихованих файлів є **foremost**. Файл конфігурації foremost можна знайти в `/etc/foremost.conf`. Якщо потрібно виконати пошук лише певних файлів, розкоментуйте їх. Якщо нічого не розкоментувати, foremost шукатиме файли типів, налаштованих за замовчуванням.
+Ще одним поширеним інструментом для пошуку прихованих файлів є **foremost**. Конфігураційний файл foremost можна знайти в `/etc/foremost.conf`. Якщо ви хочете шукати лише певні файли, розкоментуйте їх. Якщо нічого не розкоментувати, foremost шукатиме файли типів, налаштованих за замовчуванням.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -40,7 +31,7 @@ foremost -v -i file.img -o output
 ```
 ### **Scalpel**
 
-**Scalpel** — це ще один tool, який можна використовувати для пошуку та вилучення **файлів, вбудованих у файл**. У цьому випадку вам потрібно розкоментувати у файлі конфігурації (_/etc/scalpel/scalpel.conf_) типи файлів, які потрібно вилучити.
+**Scalpel** — ще один інструмент, який можна використовувати для пошуку та вилучення **файлів, вбудованих у файл**. У цьому випадку потрібно розкоментувати у файлі конфігурації (_/etc/scalpel/scalpel.conf_) типи файлів, які потрібно вилучити.
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
@@ -49,28 +40,34 @@ scalpel file.img -o output
 
 Цей інструмент входить до складу kali, але його можна знайти тут: <https://github.com/simsong/bulk_extractor>
 
-Bulk Extractor може сканувати образ доказів і виконувати carving **фрагментів pcap**, **мережевих артефактів (URL, доменів, IP-адрес, MAC-адрес, електронних адрес)** та багатьох інших об’єктів **паралельно, використовуючи кілька сканерів**.
-```bash
-# Build from source – v2.1.1 (April 2024) requires cmake ≥3.16
-git clone https://github.com/simsong/bulk_extractor.git && cd bulk_extractor
-mkdir build && cd build && cmake .. && make -j$(nproc) && sudo make install
+Bulk Extractor може сканувати образ доказів і виконувати carving **фрагментів pcap**, **мережевих артефактів (URL, доменів, IP-адрес, MAC-адрес, електронних адрес)** та багатьох інших об’єктів **паралельно за допомогою кількох сканерів**.
 
-# Run every scanner, carve JPEGs aggressively and generate a bodyfile
-bulk_extractor -o out_folder -S jpeg_carve_mode=2 -S write_bodyfile=y /evidence/disk.img
+У релізі v2.1.1 задокументовано збирання за допомогою Autotools і параметр `-S jpeg_carve_mode=2` для carving усіх суміжних JPEG-файлів.<sup>[[2]](#references)</sup>
+```bash
+# Build from source – v2.1.1 (April 2024) requires C++17
+git clone --branch v2.1.1 --recurse-submodules https://github.com/simsong/bulk_extractor.git
+cd bulk_extractor
+./bootstrap.sh
+./configure
+make -j"$(nproc)"
+sudo make install
+
+# Scan an image and carve contiguous JPEGs
+bulk_extractor -o out_folder -S jpeg_carve_mode=2 /evidence/disk.img
 ```
-Корисні скрипти постобробки (`bulk_diff`, `bulk_extractor_reader.py`) можуть усувати дублікати артефактів між двома образами або перетворювати результати на JSON для імпорту в SIEM.
+The bundled `bulk_diff.py` порівнює два результати запуску bulk_extractor, тоді як `bulk_extractor_reader.py` читає звіт і feature-файли.<sup>[[3]](#references)</sup>
 
 ### PhotoRec
 
-Його можна знайти на <https://www.cgsecurity.org/wiki/TestDisk_Download>
+Його можна знайти за адресою <https://www.cgsecurity.org/wiki/TestDisk_Download>
 
-Він має версії з GUI та CLI. Ви можете вибрати **типи файлів**, які PhotoRec має шукати.
+Він постачається у версіях із GUI та CLI. Ви можете вибрати **file-types**, які потрібно шукати за допомогою PhotoRec.
 
-![Запустити кожен сканер, агресивно виконати carving JPEG і створити bodyfile - PhotoRec: Він має версії з GUI та CLI. Ви можете вибрати типи файлів, які PhotoRec має шукати](<../../../images/image (242).png>)
+![Запустіть усі сканери, агресивно виконуйте carving JPEG і генеруйте bodyfile - PhotoRec: Він постачається у версіях із GUI та CLI. Ви можете вибрати file-types, які потрібно шукати за допомогою PhotoRec](<../../../images/image (242).png>)
 
-### ddrescue + ddrescueview (створення образу несправного диска)
+### ddrescue + ddrescueview (створення образу нестабільних дисків)
 
-Коли фізичний диск нестабільний, найкращою практикою є **спочатку створити його образ**, а вже потім запускати carving tools для цього образу. `ddrescue` (проєкт GNU) зосереджений на надійному копіюванні пошкоджених дисків зі збереженням журналу непрочитаних секторів.
+Коли фізичний диск працює нестабільно, найкращою практикою є **спочатку створити його образ**, а вже потім запускати carving tools для цього образу. `ddrescue` (проєкт GNU) зосереджений на надійному копіюванні пошкоджених дисків із веденням журналу секторів, які неможливо прочитати.
 ```bash
 sudo apt install gddrescue ddrescueview   # On Debian-based systems
 # First pass – try to get as much data as possible without retries
@@ -81,65 +78,71 @@ sudo ddrescue -d -r3 /dev/sdX suspect.img suspect.log
 # Visualise the status map (green=good, red=bad)
 ddrescueview suspect.log
 ```
-Версія **1.28** (грудень 2024 року) представила **`--cluster-size`**, що може пришвидшити створення образів SSD великої ємності, де традиційні розміри секторів більше не відповідають блокам flash-пам'яті.
+Опція **`--cluster-size`** визначає, скільки секторів копіюється за один раз; менші значення можуть допомогти під час роботи з повільними дисками.<sup>[[7]](#references)</sup>
 
-### Extundelete / Ext4magic (відновлення EXT 3/4)
+### Extundelete / Ext4magic (EXT 3/4 undelete)
 
-Якщо вихідна файлова система є Linux EXT-based, ви можете відновити нещодавно видалені файли **без повного carving**. Обидва інструменти працюють безпосередньо з образом, доступним лише для читання:
+Якщо вихідна файлова система є Linux EXT-based, ви можете відновити нещодавно видалені файли **без повного carving**; ці journal-based tools працюють із відмонтованою файловою системою або образом, доступним лише для читання.<sup>[[8]](#references)[[9]](#references)</sup>
 ```bash
 # Attempt journal-based undelete (metadata must still be present)
 extundelete disk.img --restore-all
 
-# Fallback to full directory scan; supports extents and inline data
-ext4magic disk.img -M -f '*.jpg' -d ./recovered
+# Multi-stage recovery from an ext4 image
+ext4magic disk.img -M -d ./recovered
 ```
-> 🛈 Якщо файлову систему було змонтовано після видалення, блоки даних могли вже бути повторно використані — у такому разі все одно потрібен належний carving (Foremost/Scalpel).
+> **Примітка щодо сумісності** – ext4magic покинутий; на сторінці проєкту попереджається, що сучасні файлові системи більше з ним несумісні.<sup>[[10]](#references)</sup>
+
+> 🛈 Якщо файлову систему було змонтовано після видалення, блоки даних могли вже бути повторно використані – у такому разі все ще потрібне належне carving (Foremost/Scalpel).
 
 ### binvis
 
-Перегляньте [code](https://code.google.com/archive/p/binvis/) і [web page tool](https://binvis.io/#/).
+Перегляньте [код](https://code.google.com/archive/p/binvis/) і [вебінструмент](https://binvis.io/#/).
 
-#### Features of BinVis
+#### Можливості BinVis
 
-- Візуальний та активний **переглядач структури**
+- Візуальний та інтерактивний **переглядач структури**
 - Кілька графіків для різних точок фокусування
 - Фокусування на частинах зразка
 - **Перегляд рядків і ресурсів**, наприклад у виконуваних файлах PE або ELF
-- Отримання **патернів** для cryptanalysis у файлах
-- **Виявлення** алгоритмів packer або encoder
+- Отримання **патернів** для криптоаналізу файлів
+- **Виявлення** алгоритмів пакування або кодування
 - **Ідентифікація** Steganography за патернами
-- **Візуальне** binary-diffing
+- **Візуальне** порівняння бінарних файлів
 
-BinVis — чудова **відправна точка для ознайомлення з невідомою ціллю** у сценарії black-boxing.
+BinVis є чудовою **відправною точкою для ознайомлення з невідомою ціллю** у сценарії black-boxing.
 
-## Specific Data Carving Tools
+## Спеціалізовані інструменти Data Carving
 
 ### FindAES
 
-Шукає AES-ключі, знаходячи їхні key schedules. Здатен знаходити ключі довжиною 128, 192 і 256 бітів, наприклад ті, що використовуються TrueCrypt і BitLocker.
+Шукає ключі AES шляхом пошуку їхніх розкладів ключів. Здатний знаходити ключі довжиною 128, 192 і 256 бітів, наприклад ті, що використовуються TrueCrypt і BitLocker.
 
 Завантажити [тут](https://sourceforge.net/projects/findaes/).
 
 ### YARA-X (triaging carved artefacts)
 
-[YARA-X](https://github.com/VirusTotal/yara-x) — це переписана на Rust версія YARA, випущена у 2024 році. Вона **у 10–30 разів швидша** за класичну YARA і може дуже швидко класифікувати тисячі carved objects:<sup>[[3]](#references)</sup>.
+[YARA-X](https://github.com/VirusTotal/yara-x) — це переписана на Rust версія YARA, представлена у 2024 році; VirusTotal повідомляє, що деякі правила з регулярними виразами та складними циклами можуть виконуватися значно швидше.<sup>[[5]](#references)</sup> Її CLI називається `yr`, а команда `scan` підтримує рекурсивне сканування, кількість потоків і виведення метаданих.<sup>[[6]](#references)</sup>
 ```bash
 # Scan every carved object produced by bulk_extractor
-yarax -r rules/index.yar out_folder/ --threads 8 --print-meta
+yr scan --recursive --threads 8 --print-meta rules/index.yar out_folder/
 ```
-Швидкодія робить реалістичним **автоматично позначати** всі carved-файли під час великомасштабних розслідувань.
-
 ## Додаткові інструменти
 
 Ви можете використовувати [**viu** ](https://github.com/atanunq/viu), щоб переглядати зображення з термінала.  \
-Ви можете використовувати інструмент командного рядка Linux **pdftotext**, щоб перетворити PDF на текст і прочитати його.
+Ви можете використовувати інструмент командного рядка Linux **pdftotext**, щоб перетворювати PDF на текст і читати його.
 
 
 
-## Посилання
+## References
 
-- [1] [Примітки до випуску Autopsy 4.21](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21)
-- [2] [Path traversal у binwalk (CVE-2022-4510) — GitHub Advisory Database](https://github.com/advisories/GHSA-3cm8-v4mc-gppg)
-- [3] [YARA is dead, long live YARA-X — VirusTotal Blog](https://blog.virustotal.com/2024/05/yara-is-dead-long-live-yara-x.html)
-
+- [1] [Примітки до випуску Autopsy 4.21](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21.0)
+- [2] [README bulk_extractor v2.1.1](https://github.com/simsong/bulk_extractor/blob/v2.1.1/README.md)
+- [3] [README Python-інструментів bulk_extractor](https://raw.githubusercontent.com/simsong/bulk_extractor/v2.1.1/python/README.txt)
+- [4] [Обхід шляху в binwalk (CVE-2022-4510) - база даних рекомендацій GitHub](https://github.com/advisories/GHSA-3cm8-v4mc-gppg)
+- [5] [YARA мертва, хай живе YARA-X - блог VirusTotal](https://blog.virustotal.com/2024/05/yara-is-dead-long-live-yara-x.html)
+- [6] [Команди CLI YARA-X](https://virustotal.github.io/yara-x/docs/cli/commands/)
+- [7] [Посібник GNU ddrescue](https://www.gnu.org/software/ddrescue/manual/ddrescue_manual.html)
+- [8] [extundelete](https://extundelete.sourceforge.net/)
+- [9] [Посібник ext4magic](https://ext4magic.sourceforge.net/manpage_en.html)
+- [10] [Стан проєкту ext4magic](https://sourceforge.net/projects/ext4magic/)
 {{#include ../../../banners/hacktricks-training.md}}

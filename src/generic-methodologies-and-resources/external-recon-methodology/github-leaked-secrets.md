@@ -1,77 +1,74 @@
-# Github Dorks & Leaks
-
-{{#include ../../banners/hacktricks-training.md}}
-
+# Github Dorks і Leaks
 
 ### Інструменти для пошуку секретів у git-репозиторіях і файловій системі
 
-- [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
-- [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
-- [https://github.com/praetorian-inc/noseyparker](https://github.com/praetorian-inc/noseyparker)
-- [https://github.com/GitGuardian/ggshield](https://github.com/GitGuardian/ggshield)
-- [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
-- [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
-- [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
-- https://github.com/eth0izzle/shhgit (не підтримується)
-- [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
-- https://github.com/michenriksen/gitrob (архівовано)
-- https://github.com/anshumanbh/git-all-secrets (архівовано)
-- [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
-- [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
-- [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
+- [TruffleHog](https://github.com/dxa4481/truffleHog)
+- [Gitleaks](https://github.com/gitleaks/gitleaks)
+- [Nosey Parker](https://github.com/praetorian-inc/noseyparker) (архівований; замінений на [Titus](https://github.com/praetorian-inc/titus))
+- [ggshield](https://github.com/GitGuardian/ggshield)
+- [RExpository](https://github.com/JaimePolop/RExpository)
+- [detect-secrets](https://github.com/Yelp/detect-secrets)
+- [gitGraber](https://github.com/hisxo/gitGraber)
+- [shhgit](https://github.com/eth0izzle/shhgit) (не підтримується)
+- [github-dorks](https://github.com/techgaun/github-dorks)
+- [gitrob](https://github.com/michenriksen/gitrob) (архівований)
+- [git-all-secrets](https://github.com/anshumanbh/git-all-secrets) (архівований)
+- [git-secrets](https://github.com/awslabs/git-secrets)
+- [gittyleaks](https://github.com/kootenpv/gittyleaks)
+- [GitDorker](https://github.com/obheda12/GitDorker)
 
 > Примітки
-> - TruffleHog v3 може перевіряти багато облікових даних у реальному часі та сканувати GitHub orgs, issues/PRs, gists і wikis. Приклад: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)</sup>
-> - Gitleaks v8 підтримує сканування git-історії, директорій і архівів: `gitleaks detect -v --source .` або `gitleaks detect --source <repo> --log-opts="--all"`.
-> - Nosey Parker зосереджений на високопродуктивному скануванні з підібраними правилами та має Explorer UI для тріажу. Приклад: `noseyparker scan --datastore np.db <path|repo>`, потім `noseyparker report --datastore np.db`.
-> - ggshield (GitGuardian CLI) надає хуки pre-commit/CI і сканування Docker-образів: `ggshield secret scan repo <path-or-url>`.
+> - TruffleHog v3 може перевіряти багато облікових даних у реальному часі та сканувати GitHub orgs, issues/PRs, gists і wikis. Приклад: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)[[13]](#references)</sup>
+> - Gitleaks сканує Git-репозиторії, директорії та архіви. Використовуйте `gitleaks git -v --log-opts="--all" <repo>` для історії, `gitleaks dir -v <path>` для директорій і `--max-archive-depth 1` для перевірки архівів.<sup>[[6]](#references)</sup>
+> - Nosey Parker архівований і замінений на Titus. Наявні інсталяції все ще підтримують `noseyparker scan --datastore np.db <path|repo>`, після чого слід виконати `noseyparker report --datastore np.db`.<sup>[[7]](#references)[[8]](#references)</sup>
+> - ggshield (GitGuardian CLI) сканує файли, репозиторії та Docker images і інтегрується з локальними або CI workflow: `ggshield secret scan repo <path-or-url>`.<sup>[[9]](#references)</sup>
 
-### Де секрети найчастіше потрапляють у leak на GitHub
+### Де секрети найчастіше leak у GitHub
 
-- Файли репозиторію у default і non-default branches (шукайте `repo:owner/name@branch` в UI).
-- Повна git-історія та інші branches/tags (клонуйте й скануйте за допомогою gitleaks/trufflehog; пошук GitHub зосереджений на проіндексованому вмісті).
-- Issues, pull requests, comments і описи (GitHub source TruffleHog підтримує їх за допомогою flags на кшталт `--issue-comments`, `--pr-comments`).
-- Logs і artifacts Actions у public repositories (маскування виконується за принципом best-effort; перевіряйте logs/artifacts, якщо вони видимі).
+- GitHub Code Search індексує лише default branch; перевіряйте non-default branches безпосередньо або клонуйте їх.<sup>[[4]](#references)</sup>
+- Повна git history та інші branches/tags (клонуйте їх і скануйте за допомогою gitleaks/trufflehog; GitHub search охоплює лише індексований вміст).<sup>[[4]](#references)[[6]](#references)</sup>
+- Issues, pull requests, comments і descriptions (GitHub source у TruffleHog підтримує їх за допомогою таких flags, як `--issue-comments` і `--pr-comments`).<sup>[[2]](#references)</sup>
+- Actions workflow logs і artifacts (доступ на читання дає змогу переглядати або завантажувати їх, а redaction секретів не гарантується).<sup>[[11]](#references)[[12]](#references)</sup>
 - Wikis і release assets.
-- Gists (шукайте за допомогою tooling або UI; деякі інструменти можуть включати gists).
+- Gists (шукайте за допомогою tooling або UI; деякі інструменти можуть включати gists).<sup>[[2]](#references)[[13]](#references)</sup>
 
-> Важливі нюанси
-> - REST code search API GitHub є legacy і не підтримує regex; для пошуку за regex краще використовувати Web UI. gh CLI використовує legacy API.
-> - Для пошуку індексуються лише файли, розмір яких менший за певне значення. Для повноти клонувати репозиторій і сканувати локально за допомогою secrets scanner.
+> Підводні камені
+> - GitHub's Code Search UI підтримує regex, тоді як REST/API path (включно з `gh search code`) використовує legacy engine і не надає функцій regex. Для regex-запитів краще використовувати UI.<sup>[[3]](#references)[[5]](#references)</sup>
+> - GitHub search виключає файли, розмір яких перевищує задокументований ліміт, і не є вичерпним. Для ретельної перевірки клонуйте репозиторій і скануйте його локально за допомогою secrets scanner.<sup>[[4]](#references)</sup>
 
 ### Програмне сканування всієї org
 
-- TruffleHog (GitHub source):<sup>[[2]](#references)</sup>
+- TruffleHog (GitHub source).<sup>[[2]](#references)[[13]](#references)</sup>
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
 --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- Gitleaks для всіх репозиторіїв організації (поверхнево клонувати та просканувати):
+- Gitleaks у всіх репозиторіях організації (виконайте поверхневе клонування та проскануйте за допомогою `gitleaks dir`).<sup>[[6]](#references)</sup>
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
 tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
-gitleaks detect --source "$tmp" -v || true; rm -rf "$tmp";
+gitleaks dir -v "$tmp" || true; rm -rf "$tmp";
 done
 ```
-- Nosey Parker у mono checkout:
+- Nosey Parker у mono checkout (для наявних інсталяцій).<sup>[[7]](#references)</sup>
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
 ```
-- швидкі сканування ggshield:
+- Швидке сканування ggshield.<sup>[[9]](#references)</sup>
 ```bash
 # current working tree
 ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> Порада: Для git history надавайте перевагу сканерам, які аналізують `git log -p --all`, щоб виявляти видалені secrets.
+> Порада: Для git history надавайте перевагу scanner'ам, які обробляють `git log -p --all`, щоб виявляти видалені secrets.<sup>[[6]](#references)</sup>
 
-### Оновлені dorks для сучасних токенів
+### Оновлені Dorks для сучасних токенів
 
-- GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`
+- GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`.<sup>[[10]](#references)</sup>
 - Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
 - Cloud і загальні:
 - `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
@@ -197,10 +194,6 @@ ggshield secret scan repo <path-or-url>
 "xoxb "
 "xoxp"
 [WFClient] Password= extension:ica
-access_key
-bucket_password
-dbpassword
-dbuser
 extension:avastlic "support.avast.com"
 extension:bat
 extension:cfg
@@ -334,13 +327,9 @@ org:Target "S3_ACCESS_KEY_ID"
 org:Target "S3_BUCKET"
 org:Target "S3_ENDPOINT"
 org:Target "S3_SECRET_ACCESS_KEY"
-password
 path:sites databases password
 private -language:java
 PT_TOKEN language:bash
-redis_password
-root_password
-secret_access_key
 SECRET_KEY_BASE=
 shodan_api_key language:python
 WORDPRESS_DB_PASSWORD=
@@ -360,13 +349,21 @@ GCP SECRET
 AWS SECRET
 "private" extension:pgp
 ```
-{{#ref}}
-wide-source-code-search.md
-{{#endref}}
+Для додаткових workflow пошуку коду див. [Wide Source Code Search](wide-source-code-search.md).
 
-## Посилання
+## References
 
-- [1] [Як не допустити потрапляння секретів до публічних репозиторіїв (GitHub Blog, 29 лютого 2024 р.)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
-- [2] [TruffleHog v3 — пошук, перевірка та аналіз leaked облікових даних](https://github.com/trufflesecurity/trufflehog)
-
+- [1] [Як не допустити потрапляння секретів до публічних репозиторіїв (GitHub Blog, 29 лютого 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – пошук, перевірка й аналіз leaked credentials](https://github.com/trufflesecurity/trufflehog)
+- [3] [Розуміння синтаксису GitHub Code Search](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
+- [4] [Пошук коду (legacy)](https://docs.github.com/en/search-github/searching-on-github/searching-code)
+- [5] [gh search code](https://cli.github.com/manual/gh_search_code)
+- [6] [Gitleaks README](https://github.com/gitleaks/gitleaks/blob/master/README.md)
+- [7] [Nosey Parker README](https://github.com/praetorian-inc/noseyparker#readme)
+- [8] [Titus README](https://github.com/praetorian-inc/titus#readme)
+- [9] [ggshield README](https://github.com/GitGuardian/ggshield#readme)
+- [10] [Довідник секретів (GitHub Actions)](https://docs.github.com/en/actions/reference/security/secrets)
+- [11] [Секрети (GitHub Actions)](https://docs.github.com/en/actions/concepts/security/secrets)
+- [12] [Використання журналів виконання workflow (GitHub Actions)](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
+- [13] [Вихідний код TruffleHog на GitHub](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
 {{#include ../../banners/hacktricks-training.md}}
