@@ -1,46 +1,42 @@
 # Modelagem de Ameaças
 
-{{#include ../banners/hacktricks-training.md}}
+Bem-vindo ao guia abrangente da HackTricks sobre Modelagem de Ameaças! Embarque em uma exploração deste aspecto crítico da cybersecurity, no qual identificamos, compreendemos e definimos estratégias contra possíveis vulnerabilidades em um sistema. Este tópico serve como um guia passo a passo, repleto de exemplos do mundo real, softwares úteis e explicações fáceis de entender. Ideal tanto para iniciantes quanto para profissionais experientes que desejam fortalecer suas defesas de cybersecurity.
 
-## Modelagem de Ameaças
+### Cenários Comumente Utilizados
 
-Boas-vindas ao guia completo do HackTricks sobre Modelagem de Ameaças! Embarque em uma exploração deste aspecto crítico da cibersegurança, no qual identificamos, entendemos e definimos estratégias contra possíveis vulnerabilidades em um sistema. Este tópico serve como um guia passo a passo repleto de exemplos do mundo real, softwares úteis e explicações fáceis de entender. Ideal tanto para iniciantes quanto para profissionais experientes que desejam fortalecer suas defesas de cibersegurança.
-
-### Cenários Comumente Usados
-
-1. **Desenvolvimento de Software**: Como parte do Secure Software Development Life Cycle (SSDLC), a modelagem de ameaças ajuda a **identificar possíveis fontes de vulnerabilidades** nos estágios iniciais do desenvolvimento.
-2. **Penetration Testing**: O framework Penetration Testing Execution Standard (PTES) exige a **modelagem de ameaças para entender as vulnerabilidades do sistema** antes da realização do teste.
+1. **Desenvolvimento de Software**: Como parte do Secure Software Development Life Cycle (SSDLC), a modelagem de ameaças ajuda a **identificar possíveis fontes de vulnerabilidades** nos estágios iniciais do desenvolvimento.<sup>[[1]](#references)[[4]](#references)</sup>
+2. **Penetration Testing**: O Penetration Testing Execution Standard (PTES) considera a modelagem de ameaças necessária para uma execução correta e exige a documentação de ativos comerciais, processos comerciais, comunidades de ameaças e suas capacidades.<sup>[[2]](#references)</sup>
 
 ### Modelo de Ameaças em Resumo
 
-Um modelo de ameaças normalmente é representado como um diagrama, imagem ou alguma outra forma de ilustração visual que retrata a arquitetura planejada ou a implementação existente de uma aplicação. Ele se assemelha a um **diagrama de fluxo de dados**, mas a principal diferença está em seu design orientado à segurança.
+Um modelo de ameaças normalmente é representado por um diagrama, imagem ou outra ilustração visual de uma arquitetura planejada ou de uma aplicação existente. Diagramas de fluxo de dados (DFDs) são uma forma comum de modelar um sistema e suas interações, enquanto a modelagem de ameaças adiciona uma análise com foco em segurança.<sup>[[1]](#references)</sup>
 
-Os modelos de ameaças geralmente apresentam elementos marcados em vermelho, simbolizando possíveis vulnerabilidades, riscos ou barreiras. Para simplificar o processo de identificação de riscos, utiliza-se a tríade CIA (Confidentiality, Integrity, Availability), que serve como base para muitas metodologias de modelagem de ameaças, sendo STRIDE uma das mais comuns. No entanto, a metodologia escolhida pode variar dependendo do contexto e dos requisitos específicos.
+Na Microsoft Threat Modeling Tool, linhas pontilhadas vermelhas indicam limites de confiança; outras ferramentas podem usar convenções visuais diferentes.<sup>[[4]](#references)</sup> Para simplificar a identificação de riscos, as equipes podem usar a tríade CIA (Confidentiality, Integrity, Availability) ou as categorias de ameaças STRIDE, mas a metodologia apropriada depende do contexto e dos requisitos do projeto.<sup>[[1]](#references)[[3]](#references)[[10]](#references)</sup>
 
 ### A Tríade CIA
 
-A Tríade CIA é um modelo amplamente reconhecido no campo da segurança da informação, representando Confidentiality, Integrity e Availability. Esses três pilares formam a base sobre a qual muitas medidas e políticas de segurança são construídas, incluindo metodologias de modelagem de ameaças.
+A Tríade CIA é um modelo de segurança da informação amplamente reconhecido, que significa Confidentiality, Integrity e Availability. Essas propriedades são comumente usadas para descrever objetivos de segurança para dados e sistemas.<sup>[[3]](#references)</sup>
 
-1. **Confidentiality**: Garantir que os dados ou o sistema não sejam acessados por indivíduos não autorizados. Este é um aspecto central da segurança, exigindo controles de acesso apropriados, criptografia e outras medidas para evitar vazamentos de dados.
-2. **Integrity**: A precisão, consistência e confiabilidade dos dados durante todo o seu ciclo de vida. Este princípio garante que os dados não sejam alterados ou adulterados por partes não autorizadas. Ele geralmente envolve checksums, hashing e outros métodos de verificação de dados.
-3. **Availability**: Garantir que os dados e serviços estejam acessíveis aos usuários autorizados quando necessário. Isso geralmente envolve redundância, tolerância a falhas e configurações de alta disponibilidade para manter os sistemas em funcionamento mesmo diante de interrupções.
+1. **Confidentiality**: Garantir que os dados ou o sistema não sejam acessados por indivíduos não autorizados. Este é um aspecto central da segurança, exigindo controles de acesso apropriados, encryption e outras medidas para evitar data breaches.
+2. **Integrity**: A precisão, consistência e confiabilidade dos dados durante todo o seu ciclo de vida. Este princípio garante que os dados não sejam alterados ou adulterados por partes não autorizadas. Frequentemente envolve checksums, hashing e outros métodos de verificação de dados.
+3. **Availability**: Garante que dados e serviços estejam acessíveis aos usuários autorizados quando necessário. Isso geralmente envolve redundância, tolerância a falhas e configurações de alta disponibilidade para manter os sistemas em funcionamento mesmo diante de interrupções.
 
-### Metodologias de Threat Modeling
+### Metodologias de Modelagem de Ameaças
 
-1. **STRIDE**: Desenvolvido pela Microsoft, STRIDE é um acrônimo para **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service e Elevation of Privilege**. Cada categoria representa um tipo de ameaça, e essa metodologia é comumente usada na fase de design de um programa ou sistema para identificar possíveis ameaças.
-2. **DREAD**: Esta é outra metodologia da Microsoft usada para avaliação de risco das ameaças identificadas. DREAD significa **Damage potential, Reproducibility, Exploitability, Affected users e Discoverability**. Cada um desses fatores recebe uma pontuação, e o resultado é usado para priorizar as ameaças identificadas.
-3. **PASTA** (Process for Attack Simulation and Threat Analysis): Esta é uma metodologia de sete etapas, **centrada em riscos**. Ela inclui a definição e identificação de objetivos de segurança, a criação de um escopo técnico, a decomposição da aplicação, a análise de ameaças, a análise de vulnerabilidades e a avaliação de riscos/triagem.
-4. **Trike**: Esta é uma metodologia baseada em riscos que se concentra na defesa de ativos. Ela começa sob uma perspectiva de **gerenciamento de riscos** e analisa ameaças e vulnerabilidades nesse contexto.
-5. **VAST** (Visual, Agile, and Simple Threat modeling): Esta abordagem busca ser mais acessível e se integra a ambientes de desenvolvimento Agile. Ela combina elementos das outras metodologias e concentra-se em **representações visuais de ameaças**.
-6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Desenvolvido pelo CERT Coordination Center, este framework é voltado para **avaliação de riscos organizacionais, em vez de sistemas ou softwares específicos**.
+1. **STRIDE**: A abordagem STRIDE da Microsoft categoriza as ameaças de software como **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service e Elevation of Privilege**. Essas categorias ajudam os analistas a identificar possíveis ameaças em cada ponto vulnerável de um design.<sup>[[5]](#references)</sup>
+2. **DREAD**: Esta abordagem de avaliação da Microsoft pontua as ameaças usando **Damage, Reproducibility, Exploitability, Affected users e Discoverability**. A pontuação resultante pode ajudar a priorizar ameaças para mitigação.<sup>[[5]](#references)</sup>
+3. **PASTA** (Process for Attack Simulation and Threat Analysis): Esta é uma metodologia **centrada em riscos**, composta por sete estágios, que abrange objetivos, escopo técnico, decomposição da aplicação, análise de ameaças, análise de vulnerabilidades e fraquezas, modelagem de ataques e análise de riscos/impactos.<sup>[[8]](#references)</sup>
+4. **Trike**: Este framework de security-audit aborda a modelagem de ameaças sob uma perspectiva de **risk-management** e defensiva.<sup>[[9]](#references)</sup>
+5. **VAST** (Visual, Agile, and Simple Threat modeling): Este método enfatiza modelos de ameaças escaláveis e utilizáveis para visões de aplicação e operacionais, podendo ser integrado aos ciclos de vida de desenvolvimento e DevOps.<sup>[[10]](#references)</sup>
+6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Criado pela CERT Division do Software Engineering Institute da Carnegie Mellon, o OCTAVE é um método estratégico de avaliação e planejamento baseado em riscos, com foco no risco organizacional, e não apenas na tecnologia.<sup>[[10]](#references)</sup>
 
 ## Ferramentas
 
-Existem diversas ferramentas e soluções de software disponíveis que podem **auxiliar** na criação e no gerenciamento de modelos de ameaças. Veja algumas que você pode considerar.
+Existem várias ferramentas e soluções de software disponíveis que podem **auxiliar** na criação e no gerenciamento de modelos de ameaças. Aqui estão algumas que você pode considerar.
 
 ### [SpiderSuite](https://github.com/3nock/SpiderSuite)
 
-Um spider/crawler web avançado, multiplataforma e com diversos recursos, voltado para profissionais de cibersegurança. O Spider Suite pode ser usado para mapeamento e análise da superfície de ataque.
+SpiderSuite é um web crawler multiplataforma para profissionais de segurança que oferece suporte a attack-surface mapping, endpoint discovery e web-application analysis.<sup>[[6]](#references)</sup>
 
 **Uso**
 
@@ -54,35 +50,35 @@ Um spider/crawler web avançado, multiplataforma e com diversos recursos, voltad
 
 ### [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon/releases)
 
-Um projeto open source da OWASP, o Threat Dragon é uma aplicação web e desktop que inclui criação de diagramas de sistemas, além de um mecanismo de regras para gerar ameaças/mitigações automaticamente.
+OWASP Threat Dragon é uma aplicação gratuita, open-source e multiplataforma de modelagem de ameaças para desenhar diagramas, sugerir ameaças e registrar mitigações. Está disponível como aplicação web e desktop.<sup>[[7]](#references)</sup>
 
 **Uso**
 
-1. Crie um New Project
+1. Crie um Novo Projeto
 
 <figure><img src="../images/create_new_project_1.jpg" alt=""><figcaption></figcaption></figure>
 
-Às vezes, ele pode aparecer assim:
+Às vezes, ele pode ser semelhante a isto:
 
 <figure><img src="../images/1_threatmodel_create_project.jpg" alt=""><figcaption></figcaption></figure>
 
-2. Inicie um New Project
+2. Inicie um Novo Projeto
 
 <figure><img src="../images/launch_new_project_2.jpg" alt=""><figcaption></figcaption></figure>
 
-3. Salve o New Project
+3. Salve o Novo Projeto
 
 <figure><img src="../images/save_new_project.jpg" alt=""><figcaption></figcaption></figure>
 
 4. Crie seu modelo
 
-Você pode usar ferramentas como o SpiderSuite Crawler para obter inspiração; um modelo básico seria parecido com isto
+Você pode usar ferramentas como o SpiderSuite Crawler para obter inspiração; um modelo básico seria semelhante a isto
 
 <figure><img src="../images/0_basic_threat_model.jpg" alt=""><figcaption></figcaption></figure>
 
 Apenas uma pequena explicação sobre as entidades:
 
-- Process (A própria entidade, como Webserver ou uma funcionalidade web)
+- Process (A própria entidade, como um Webserver ou uma funcionalidade web)
 - Actor (Uma pessoa, como um visitante do Website, usuário ou administrador)
 - Data Flow Line (Indicador de interação)
 - Trust Boundary (Diferentes segmentos ou escopos de rede.)
@@ -98,18 +94,30 @@ Agora você pode criar a ameaça
 
 <figure><img src="../images/4_threatmodel_create-threat.jpg" alt=""><figcaption></figcaption></figure>
 
-Tenha em mente que existe uma diferença entre Actor Threats e Process Threats. Se você adicionar uma ameaça a um Actor, só poderá escolher "Spoofing" e "Repudiation". No entanto, em nosso exemplo, adicionamos uma ameaça a uma entidade Process, então veremos isto na caixa de criação de ameaças:
+Lembre-se de que existe uma diferença entre Actor Threats e Process Threats. Se você adicionar uma ameaça a um Actor, só poderá escolher "Spoofing" e "Repudiation". No entanto, em nosso exemplo, adicionamos a ameaça a uma entidade Process, então veremos isto na caixa de criação de ameaças:
 
 <figure><img src="../images/2_threatmodel_type-option.jpg" alt=""><figcaption></figcaption></figure>
 
 6. Concluído
 
-Agora, seu modelo finalizado deve ser parecido com isto. É assim que você cria um modelo simples de ameaças com o OWASP Threat Dragon.
+Agora, seu modelo finalizado deverá ser semelhante a isto. E é assim que você cria um modelo simples de ameaças com o OWASP Threat Dragon.
 
 <figure><img src="../images/threat_model_finished.jpg" alt=""><figcaption></figcaption></figure>
 
 ### [Microsoft Threat Modeling Tool](https://aka.ms/threatmodelingtool)
 
-Esta é uma ferramenta gratuita da Microsoft que ajuda a encontrar ameaças na fase de design de projetos de software. Ela usa a metodologia STRIDE e é particularmente adequada para quem desenvolve na stack da Microsoft.
+A Threat Modeling Tool da Microsoft é uma ferramenta gratuita para download destinada à análise de design de software. Seu workflow cria um diagrama, identifica ameaças e oferece suporte à mitigação e validação usando a abordagem STRIDE.<sup>[[4]](#references)</sup>
 
+## References
+
+- [1] [Threat Modeling Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Threat_Modeling_Cheat_Sheet.html)
+- [2] [Threat Modeling - The Penetration Testing Execution Standard](https://www.pentest-standard.org/index.php/Threat_Modeling)
+- [3] [Security fundamentals - OWASP Developer Guide](https://devguide.owasp.org/en/02-foundations/01-security-fundamentals/)
+- [4] [Getting Started with the Microsoft Threat Modeling Tool](https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-getting-started)
+- [5] [Threat Modeling for Drivers - Windows drivers](https://learn.microsoft.com/en-us/windows-hardware/drivers/driversecurity/threat-modeling-for-drivers)
+- [6] [SpiderSuite](https://spidersuite.io/)
+- [7] [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon)
+- [8] [PASTA Threat Modeling: The 7 Stages Explained](https://versprite.com/cybersecurity-listings/devsecops/pasta-threat-modeling/)
+- [9] [Trike v1 Methodology Document](https://trike.sourceforge.net/papers/Trike_v1_Methodology_Document-draft.pdf)
+- [10] [Threat Modeling: A Summary of Available Methods](https://www.sei.cmu.edu/documents/569/2018_019_001_524597.pdf)
 {{#include ../banners/hacktricks-training.md}}

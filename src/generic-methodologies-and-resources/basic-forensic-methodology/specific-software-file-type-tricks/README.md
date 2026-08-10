@@ -1,8 +1,6 @@
-# Truques Específicos de Software/Tipos de Arquivo
+# Técnicas Específicas para Software/Tipos de Arquivo
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-Aqui você encontra truques interessantes para tipos específicos de arquivos e/ou software:
+Aqui você pode encontrar técnicas interessantes para tipos de arquivo e/ou software específicos:
 
 
 {{#ref}}
@@ -63,5 +61,7 @@ zips-tricks.md
 {{#ref}}
 mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
+
+## References
 
 {{#include ../../../banners/hacktricks-training.md}}
