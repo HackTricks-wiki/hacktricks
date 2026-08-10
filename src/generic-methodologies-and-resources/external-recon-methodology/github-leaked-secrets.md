@@ -1,77 +1,74 @@
 # Github Dorks & Leaks
 
-{{#include ../../banners/hacktricks-training.md}}
-
-
 ### git repos और file system में secrets खोजने के Tools
 
-- [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
-- [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
-- [https://github.com/praetorian-inc/noseyparker](https://github.com/praetorian-inc/noseyparker)
-- [https://github.com/GitGuardian/ggshield](https://github.com/GitGuardian/ggshield)
-- [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
-- [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
-- [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
-- https://github.com/eth0izzle/shhgit (maintained नहीं है)
-- [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
-- https://github.com/michenriksen/gitrob (archived)
-- https://github.com/anshumanbh/git-all-secrets (archived)
-- [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
-- [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
-- [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
+- [TruffleHog](https://github.com/dxa4481/truffleHog)
+- [Gitleaks](https://github.com/gitleaks/gitleaks)
+- [Nosey Parker](https://github.com/praetorian-inc/noseyparker) (archived; [Titus](https://github.com/praetorian-inc/titus) द्वारा replaced)
+- [ggshield](https://github.com/GitGuardian/ggshield)
+- [RExpository](https://github.com/JaimePolop/RExpository)
+- [detect-secrets](https://github.com/Yelp/detect-secrets)
+- [gitGraber](https://github.com/hisxo/gitGraber)
+- [shhgit](https://github.com/eth0izzle/shhgit) (unmaintained)
+- [github-dorks](https://github.com/techgaun/github-dorks)
+- [gitrob](https://github.com/michenriksen/gitrob) (archived)
+- [git-all-secrets](https://github.com/anshumanbh/git-all-secrets) (archived)
+- [git-secrets](https://github.com/awslabs/git-secrets)
+- [gittyleaks](https://github.com/kootenpv/gittyleaks)
+- [GitDorker](https://github.com/obheda12/GitDorker)
 
-> नोट्स
-> - TruffleHog v3 कई credentials को live verify कर सकता है और GitHub orgs, issues/PRs, gists और wikis को scan कर सकता है। उदाहरण: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)</sup>
-> - Gitleaks v8 git history, directories और archives को scan करने का समर्थन करता है: `gitleaks detect -v --source .` या `gitleaks detect --source <repo> --log-opts="--all"`.
-> - Nosey Parker curated rules के साथ high-throughput scanning पर केंद्रित है और triage के लिए Explorer UI प्रदान करता है। उदाहरण: पहले `noseyparker scan --datastore np.db <path|repo>` चलाएँ, फिर `noseyparker report --datastore np.db` चलाएँ।
-> - ggshield (GitGuardian CLI) pre-commit/CI hooks और Docker image scanning प्रदान करता है: `ggshield secret scan repo <path-or-url>`.
+> Notes
+> - TruffleHog v3 कई credentials को live verify कर सकता है और GitHub orgs, issues/PRs, gists और wikis को scan कर सकता है। उदाहरण: `trufflehog github --org <ORG> --results=verified`।<sup>[[2]](#references)[[13]](#references)</sup>
+> - Gitleaks Git repositories, directories और archives को scan करता है। History के लिए `gitleaks git -v --log-opts="--all" <repo>`, directories के लिए `gitleaks dir -v <path>` और archives को inspect करने के लिए `--max-archive-depth 1` का उपयोग करें।<sup>[[6]](#references)</sup>
+> - Nosey Parker archived है और Titus द्वारा replaced है। Existing installations अभी भी `noseyparker scan --datastore np.db <path|repo>` और उसके बाद `noseyparker report --datastore np.db` को support करती हैं।<sup>[[7]](#references)[[8]](#references)</sup>
+> - ggshield (GitGuardian CLI) files, repositories और Docker images को scan करता है और local या CI workflows के साथ integrate होता है: `ggshield secret scan repo <path-or-url>`।<sup>[[9]](#references)</sup>
 
 ### GitHub में secrets आमतौर पर कहाँ leak होते हैं
 
-- Default और non-default branches में repository files (UI में `repo:owner/name@branch` खोजें)।
-- पूरी git history और अन्य branches/tags (clone करें और gitleaks/trufflehog से scan करें; GitHub search indexed content पर केंद्रित है)।
-- Issues, pull requests, comments और descriptions (TruffleHog GitHub source `--issue-comments`, `--pr-comments` जैसे flags के माध्यम से इन्हें support करता है)।
-- Public repositories के Actions logs और artifacts (masking best-effort है; यदि logs/artifacts दिखाई दें तो उनकी समीक्षा करें)।
+- GitHub Code Search केवल default branch को index करता है; non-default branches को सीधे inspect करें या उन्हें clone करें।<sup>[[4]](#references)</sup>
+- Full git history और अन्य branches/tags (gitleaks/trufflehog से clone और scan करें; GitHub search केवल indexed content को cover करता है)।<sup>[[4]](#references)[[6]](#references)</sup>
+- Issues, pull requests, comments और descriptions (TruffleHog का GitHub source `--issue-comments` और `--pr-comments` जैसे flags के माध्यम से इन्हें support करता है)।<sup>[[2]](#references)</sup>
+- Actions workflow logs और artifacts (read access से इन्हें देखा या download किया जा सकता है और secret redaction की guarantee नहीं होती)।<sup>[[11]](#references)[[12]](#references)</sup>
 - Wikis और release assets।
-- Gists (tooling या UI से search करें; कुछ tools gists को शामिल कर सकते हैं)।
+- Gists (tooling या UI से search करें; कुछ Tools gists को include कर सकते हैं)।<sup>[[2]](#references)[[13]](#references)</sup>
 
-> सावधानियाँ
-> - GitHub का REST code search API legacy है और regex support नहीं करता; regex searches के लिए Web UI को प्राथमिकता दें। gh CLI legacy API का उपयोग करता है।
-> - Search के लिए केवल एक निश्चित size से छोटी files index की जाती हैं। पूरी तरह जाँच करने के लिए repository को clone करें और locally secrets scanner से scan करें।
+> Gotchas
+> - GitHub का Code Search UI regex को support करता है, जबकि REST/API path (`gh search code` सहित) legacy engine का उपयोग करता है और regex features expose नहीं करता। Regex queries के लिए UI को प्राथमिकता दें।<sup>[[3]](#references)[[5]](#references)</sup>
+> - GitHub search अपने documented size limit से बड़ी files को exclude करता है और exhaustive नहीं है। पूरी तरह जाँच करने के लिए locally clone करें और secrets scanner से scan करें।<sup>[[4]](#references)</sup>
 
 ### Programmatic org-wide scanning
 
-- TruffleHog (GitHub source):<sup>[[2]](#references)</sup>
+- TruffleHog (GitHub source)।<sup>[[2]](#references)[[13]](#references)</sup>
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
 --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- सभी org repos पर Gitleaks (shallow clone और scan):
+- सभी org repos पर Gitleaks चलाएँ (shallow clone करें और `gitleaks dir` से scan करें)।<sup>[[6]](#references)</sup>
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
 tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
-gitleaks detect --source "$tmp" -v || true; rm -rf "$tmp";
+gitleaks dir -v "$tmp" || true; rm -rf "$tmp";
 done
 ```
-- एक mono checkout पर Nosey Parker:
+- मौजूदा इंस्टॉलेशन के लिए mono checkout पर Nosey Parker।<sup>[[7]](#references)</sup>
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
 ```
-- ggshield त्वरित scans:
+- ggshield त्वरित scans.<sup>[[9]](#references)</sup>
 ```bash
 # current working tree
 ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> Tip: git history के लिए, हटाए गए secrets को पकड़ने हेतु `git log -p --all` को parse करने वाले scanners को प्राथमिकता दें।
+> Tip: git history के लिए, ऐसे scanners को प्राथमिकता दें जो हटाए गए secrets को पकड़ने के लिए `git log -p --all` को parse करते हैं।<sup>[[6]](#references)</sup>
 
 ### आधुनिक tokens के लिए Updated dorks
 
-- GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`
+- GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`।<sup>[[10]](#references)</sup>
 - Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
 - Cloud और general:
 - `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
@@ -197,10 +194,6 @@ ggshield secret scan repo <path-or-url>
 "xoxb "
 "xoxp"
 [WFClient] Password= extension:ica
-access_key
-bucket_password
-dbpassword
-dbuser
 extension:avastlic "support.avast.com"
 extension:bat
 extension:cfg
@@ -334,13 +327,9 @@ org:Target "S3_ACCESS_KEY_ID"
 org:Target "S3_BUCKET"
 org:Target "S3_ENDPOINT"
 org:Target "S3_SECRET_ACCESS_KEY"
-password
 path:sites databases password
 private -language:java
 PT_TOKEN language:bash
-redis_password
-root_password
-secret_access_key
 SECRET_KEY_BASE=
 shodan_api_key language:python
 WORDPRESS_DB_PASSWORD=
@@ -360,13 +349,21 @@ GCP SECRET
 AWS SECRET
 "private" extension:pgp
 ```
-{{#ref}}
-wide-source-code-search.md
-{{#endref}}
+अतिरिक्त code-search workflows के लिए [Wide Source Code Search](wide-source-code-search.md) देखें।
 
-## संदर्भ
+## References
 
 - [1] [public repositories से secrets को बाहर रखना (GitHub Blog, Feb 29, 2024)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
-- [2] [TruffleHog v3 – leaked credentials को ढूँढें, verify करें और analyze करें](https://github.com/trufflesecurity/trufflehog)
-
+- [2] [TruffleHog v3 – leaked credentials को ढूँढना, verify करना और analyze करना](https://github.com/trufflesecurity/trufflehog)
+- [3] [GitHub Code Search syntax को समझना](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
+- [4] [code खोजना (legacy)](https://docs.github.com/en/search-github/searching-on-github/searching-code)
+- [5] [gh search code](https://cli.github.com/manual/gh_search_code)
+- [6] [Gitleaks README](https://github.com/gitleaks/gitleaks/blob/master/README.md)
+- [7] [Nosey Parker README](https://github.com/praetorian-inc/noseyparker#readme)
+- [8] [Titus README](https://github.com/praetorian-inc/titus#readme)
+- [9] [ggshield README](https://github.com/GitGuardian/ggshield#readme)
+- [10] [Secrets reference (GitHub Actions)](https://docs.github.com/en/actions/reference/security/secrets)
+- [11] [Secrets (GitHub Actions)](https://docs.github.com/en/actions/concepts/security/secrets)
+- [12] [workflow run logs का उपयोग करना (GitHub Actions)](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
+- [13] [TruffleHog GitHub source](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
 {{#include ../../banners/hacktricks-training.md}}

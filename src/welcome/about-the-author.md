@@ -1,13 +1,14 @@
 # लेखक के बारे में
 
-{{#include ../banners/hacktricks-training.md}}
+### नमस्कार!!
 
-### नमस्ते!!
+अन्य शोधकर्ताओं द्वारा योगदान की गई Techniques का श्रेय उनके मूल लेखकों को ही दिया जाता है। इंटरनेट सुरक्षा को बेहतर बनाने के लिए ज्ञान साझा करने वाले सभी लोगों को धन्यवाद।
 
-अन्य researchers की techniques का श्रेय मूल authors को जाता है (references देखें)। Internet security को बेहतर बनाने के लिए knowledge साझा करने वाले सभी लोगों को धन्यवाद।
+Carlos HackTricks का नेतृत्व करते हैं। यह project community-maintained cybersecurity wiki है, जो practical security techniques एकत्र करता है और contributions का स्वागत करता है; यदि आपको कुछ missing या outdated मिले, तो कृपया project repository में pull request खोलें।<sup>[[1]](#references)</sup>
 
-HackTricks एक educational wiki है, जो Carlos के नेतृत्व में **cyber-security** पर केंद्रित है और इसमें सैकड़ों collaborators हैं। यह **hacking tricks का एक विशाल संग्रह** है, जिसे community यथासंभव अपडेट करती है। यदि आपको कुछ missing या outdated मिले, तो कृपया [**Hacktricks GitHub**](https://github.com/hacktricks-wiki/hacktricks) पर एक **Pull Request** भेजें!
+HackTricks शोधकर्ताओं को नई findings साझा करने का स्थान भी देता है, जिससे readers current security techniques से updated रह सकें।
 
-HackTricks एक ऐसी wiki भी है जहाँ **researchers अपनी latest findings साझा करते हैं**, इसलिए यह latest hacking techniques से updated रहने के लिए एक बेहतरीन स्थान है।
+## References
 
+- [1] [HackTricks-wiki/hacktricks — GitHub रिपॉजिटरी](https://github.com/HackTricks-wiki/hacktricks)
 {{#include ../banners/hacktricks-training.md}}
