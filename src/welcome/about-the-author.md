@@ -1,13 +1,14 @@
 # Sobre el autor
 
-{{#include ../banners/hacktricks-training.md}}
-
 ### ¡¡Hola!!
 
-Los créditos de las técnicas de otros investigadores pertenecen a los autores originales (consulta las referencias). Gracias a todos los que comparten conocimiento para mejorar la seguridad de Internet.
+Las técnicas aportadas por otros investigadores siguen estando acreditadas a sus autores originales. Gracias a todos los que comparten conocimientos para mejorar la seguridad en internet.
 
-HackTricks es una wiki educativa sobre **ciberseguridad** dirigida por Carlos con cientos de colaboradores. Es una **enorme colección de trucos de hacking** actualizada por la comunidad tanto como es posible. Si encuentras algo que falta o está desactualizado, ¡envía un **Pull Request** a [**Hacktricks GitHub**](https://github.com/hacktricks-wiki/hacktricks)!
+Carlos dirige HackTricks. El proyecto es una wiki de ciberseguridad mantenida por la comunidad que recopila técnicas prácticas de seguridad y acepta contribuciones; si encuentras algo que falte o esté desactualizado, abre un pull request en el repositorio del proyecto.<sup>[[1]](#references)</sup>
 
-HackTricks también es una wiki donde **los investigadores comparten sus últimos hallazgos**, por lo que es un lugar excelente para mantenerse al día con las últimas técnicas de hacking.
+HackTricks también ofrece a los investigadores un lugar para compartir nuevos hallazgos, ayudando a los lectores a mantenerse al día con las técnicas de seguridad actuales.
 
+## References
+
+- [1] [HackTricks-wiki/hacktricks — Repositorio de GitHub](https://github.com/HackTricks-wiki/hacktricks)
 {{#include ../banners/hacktricks-training.md}}

@@ -1,8 +1,6 @@
-# Metodología forense básica
+# Metodología Forense Básica
 
-{{#include ../../banners/hacktricks-training.md}}
-
-## Creación y montaje de una imagen
+## Creación y Montaje de una Imagen
 
 
 {{#ref}}
@@ -11,23 +9,23 @@
 
 ## Análisis de Malware
 
-Esto **no es necesariamente el primer paso que se debe realizar una vez que se tiene la imagen**. Pero puedes utilizar estas técnicas de análisis de Malware de forma independiente si tienes un archivo, una imagen del sistema de archivos, una imagen de memoria, un pcap... por lo que es recomendable **tener estas acciones en cuenta**:
+Esto **no es necesariamente el primer paso que se debe realizar una vez que tienes la imagen**. Pero puedes utilizar estas técnicas de análisis de malware de forma independiente si tienes un archivo, una imagen del sistema de archivos, una imagen de memoria, un pcap... por lo que es bueno **tener presentes estas acciones**:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspección de una imagen
+## Inspección de una Imagen
 
-si se te proporciona una **imagen forense** de un dispositivo, puedes empezar a **analizar las particiones y el sistema de archivos** utilizado, así como a **recuperar** posibles **archivos interesantes** (incluso archivos eliminados). Aprende cómo hacerlo en:
+si se te proporciona una **imagen forense** de un dispositivo, puedes comenzar a **analizar las particiones y el sistema de archivos** utilizado y **recuperar** potencialmente **archivos interesantes** (incluso archivos eliminados). Aprende cómo hacerlo en:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Según los sistemas operativos utilizados e incluso la plataforma, se deben buscar diferentes artefactos interesantes:
+Dependiendo de los OS utilizados e incluso de la plataforma, se deben buscar diferentes artefactos interesantes:
 
 
 {{#ref}}
@@ -49,9 +47,9 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Inspección profunda de tipos de archivos y Software específicos
+## Inspección Profunda de Tipos de Archivo y Software Específicos
 
-Si tienes un **archivo** muy **sospechoso**, entonces, **dependiendo del tipo de archivo y del software** que lo creó, pueden ser útiles varios **trucos**.\
+Si tienes un **archivo** muy **sospechoso**, entonces, **dependiendo del tipo de archivo y del software** que lo creó, varios **trucos** pueden resultar útiles.\
 Lee la siguiente página para aprender algunos trucos interesantes:
 
 
@@ -66,7 +64,7 @@ Quiero hacer una mención especial a la página:
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Inspección de volcados de memoria
+## Inspección de Volcado de Memoria
 
 
 {{#ref}}
@@ -80,7 +78,7 @@ memory-dump-analysis/
 pcap-inspection/
 {{#endref}}
 
-## **Técnicas anti-forenses**
+## **Técnicas Anti-Forenses**
 
 Ten en cuenta el posible uso de técnicas anti-forenses:
 
@@ -95,5 +93,7 @@ anti-forensic-techniques.md
 {{#ref}}
 file-integrity-monitoring.md
 {{#endref}}
+
+## References
 
 {{#include ../../banners/hacktricks-training.md}}
