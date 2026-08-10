@@ -1,8 +1,6 @@
-# Belirli Yazılım/Dosya Türü Teknikleri
+# Belirli Yazılım/Dosya Türü Trick'leri
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-Burada belirli dosya türleri ve/veya yazılımlar için ilginç teknikleri bulabilirsiniz:
+Burada belirli dosya türleri ve/veya yazılımlar için ilginç trick'ler bulabilirsiniz:
 
 
 {{#ref}}
@@ -63,5 +61,7 @@ zips-tricks.md
 {{#ref}}
 mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
+
+## References
 
 {{#include ../../../banners/hacktricks-training.md}}

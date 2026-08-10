@@ -1,10 +1,8 @@
 # DNSCat pcap analizi
 
-{{#include ../../../banners/hacktricks-training.md}}
+**DNSCat** tarafından (şifreleme kullanılmadan) **exfiltrated** edilen verileri içeren bir PCAP dosyanız varsa, exfiltrated içeriği kurtarmanız mümkün olabilir.
 
-DNSCat tarafından (şifreleme kullanılmadan) **exfiltrated** data içeren bir pcap dosyanız varsa, exfiltrated içeriği bulabilirsiniz.
-
-Bilmeniz gereken tek şey, **ilk 9 byte** gerçek data değildir; **C\&C communication** ile ilişkilidir:<sup>[[1]](#references)</sup>
+Aşağıda referans verilen BSidesSF 2017 capture için write-up, decode edilen her query'nin aktarılan içerikten önce dnscat'e özgü 9 byte veriyle başladığını ortaya koymuştur. dnscat2 farklı packet türleri ve header düzenleri tanımladığından, bu offset'i diğer traffic üzerinde uygulamadan önce ilgili framing'i doğrulayın.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -23,15 +21,15 @@ last = qry
 
 #print(f)
 ```
-Daha fazla bilgi için: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)<sup>[[1]](#references)</sup>\
-[https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
+Daha fazla bilgi için [BSidesSF 2017 write-up](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap) ve [dnscat2 protocol documentation](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md) sayfalarına bakın.
 
-Python3 ile çalışan bir script vardır: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
+[DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder) repository'si, belirtilen bir domain için DNS sorgularını filtreleyerek PCAP'ten akışları çıkaran bir Python 3 decoder sağlar.<sup>[[3]](#references)</sup>
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
-## Referanslar
+## References
 
-- [1] [DNSCat2 pcap forensics writeup – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
-
+- [1] [dnscat2 protokol dokümantasyonu](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
+- [2] [DNSCat2 pcap adli inceleme yazısı – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
+- [3] [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 {{#include ../../../banners/hacktricks-training.md}}

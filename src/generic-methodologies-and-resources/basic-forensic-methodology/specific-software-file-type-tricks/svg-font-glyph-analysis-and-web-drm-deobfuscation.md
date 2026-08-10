@@ -1,33 +1,31 @@
 # SVG/Font Glyph Analysis & Web DRM Deobfuscation (Raster Hashing + SSIM)
 
-{{#include ../../../banners/hacktricks-training.md}}
+Bu sayfa, konumlandırılmış glyph run'ları ve istek başına vector glyph tanımları (SVG paths) gönderen ve scraping'i önlemek için glyph ID'lerini her istekte randomize eden web reader'larda metni kurtarmaya yönelik pratik teknikleri belgeler. Temel fikir, istek kapsamındaki sayısal glyph ID'lerini göz ardı edip visual shapes'leri raster hashing ile fingerprint etmek, ardından shapes'leri bir reference font atlas'ına karşı SSIM kullanarak karakterlerle eşlemektir. Aynı yaklaşım, benzer korumalara sahip viewer'lara da uygulanabilir.<sup>[[1]](#references)</sup>
 
-Bu sayfada, konumlandırılmış glyph dizileriyle birlikte istek başına vector glyph tanımları (SVG paths) gönderen ve scraping'i önlemek için glyph ID'lerini istek başına randomize eden web okuyucularından metin kurtarmaya yönelik pratik teknikler belgelenmektedir. Temel fikir, request-scoped numeric glyph ID'lerini yok sayıp raster hashing aracılığıyla görsel şekilleri fingerprint'lemek ve ardından şekilleri bir reference font atlas'ına karşı SSIM kullanarak karakterlerle eşleştirmektir. Workflow, Kindle Cloud Reader dışındaki benzer korumalara sahip tüm viewer'lara uygulanabilir.<sup>[[1]](#references)</sup>
-
-Warning: Bu teknikleri yalnızca yasal olarak sahip olduğunuz content'i yedeklemek için ve yürürlükteki laws ve terms'a uygun şekilde kullanın.
+Warning: Bu teknikleri yalnızca yasal olarak sahip olduğunuz içeriği yedeklemek için ve geçerli yasalara ve koşullara uygun şekilde kullanın.
 
 ## Acquisition (example: Kindle Cloud Reader)
 
-Endpoint observed:<sup>[[1]](#references)</sup>
+Gözlemlenen endpoint:<sup>[[1]](#references)</sup>
 - [https://read.amazon.com/renderer/render](https://read.amazon.com/renderer/render)
 
-Required materials per session:
+Her session için gerekli materyaller:<sup>[[1]](#references)</sup>
 - Browser session cookies (normal Amazon login)
-- Rendering token from a startReading API call
-- Additional ADP session token used by the renderer
+- Bir startReading API call'ından alınan rendering token
+- Renderer tarafından kullanılan ek ADP session token'ı
 
-Behavior:
-- Her request, browser-equivalent headers ve cookies ile gönderildiğinde, 5 sayfayla sınırlı bir TAR archive döndürür.
-- Uzun bir book için çok sayıda batch gerekir; her batch glyph ID'lerinin farklı bir randomized mapping'ini kullanır.
+Davranış:<sup>[[1]](#references)</sup>
+- Browser ile eşdeğer headers ve cookies ile gönderilen her request, 5 sayfayla sınırlı bir TAR archive döndürür.
+- Uzun bir kitap için çok sayıda batch gerekir; her batch, glyph ID'lerinin farklı bir randomized mapping'ini kullanır.
 
-Typical TAR contents:
-- page_data_0_4.json — glyph ID dizileri olarak positioned text runs (Unicode değil)
-- glyphs.json — her glyph ve fontFamily için per-request SVG path definitions
+Tipik TAR içeriği:<sup>[[1]](#references)</sup>
+- page_data_0_4.json — glyph ID sequences olarak konumlandırılmış text run'ları (Unicode değil)
+- glyphs.json — her glyph ve fontFamily için istek başına SVG path tanımları
 - toc.json — table of contents
 - metadata.json — book metadata
 - location_map.json — logical→visual position mappings
 
-Example page run structure:
+Örnek page run yapısı:<sup>[[1]](#references)</sup>
 ```json
 {
 "type": "TextRun",
@@ -38,56 +36,56 @@ Example page run structure:
 "fontSize": 12.5
 }
 ```
-Örnek glyphs.json girdisi:
+Örnek glyphs.json girdisi:<sup>[[1]](#references)</sup>
 ```json
 {
 "24": {"path": "M 450 1480 L 820 1480 L 820 0 L 1050 0 L 1050 1480 ...", "fontFamily": "bookerly_normal"}
 }
 ```
-Notes on anti-scraping path tricks:
-- Paths, birçok vector parser'ı ve naïve path sampling'i şaşırtan mikro göreli hareketler (ör. `m3,1 m1,6 m-4,-7`) içerebilir.
-- Command/coordinate differencing yapmak yerine, filled complete paths'leri her zaman sağlam bir SVG engine (ör. CairoSVG) ile render edin.
+Anti-scraping path trick'leri hakkında notlar:<sup>[[1]](#references)</sup>
+- Path'ler, birçok vector parser'ını ve naif path örneklemesini şaşırtan mikro relative hareketler (ör. `m3,1 m1,6 m-4,-7`) içerebilir.
+- Komut/coordinate farklarını hesaplamak yerine, doldurulmuş complete path'leri her zaman güçlü bir SVG engine'i (ör. CairoSVG) ile render edin.
 
-## Naïve decoding neden başarısız olur
+## Naif decoding neden başarısız olur
 
-- İstek başına randomize glyph substitution: glyph ID→character mapping her batch'te değişir; ID'lerin global olarak anlamı yoktur.<sup>[[1]](#references)</sup>
-- Doğrudan SVG coordinate karşılaştırması kırılgandır: aynı shape'ler her request'te farklı numeric coordinate'lere veya command encoding'e sahip olabilir.
-- İzole glyph'ler üzerinde OCR performansı düşüktür (≈50%); punctuation ve birbirine benzeyen glyph'leri karıştırır ve ligature'ları yok sayar.
+- Her request'te randomized glyph substitution: glyph ID→character mapping her batch'te değişir; ID'ler global olarak anlamsızdır.<sup>[[1]](#references)</sup>
+- Doğrudan SVG coordinate karşılaştırması kırılgandır: aynı shape'ler, her request'te numeric coordinate'lerde veya command encoding'inde farklılık gösterebilir.<sup>[[1]](#references)</sup>
+- Isolated glyph'ler üzerinde OCR kötü performans gösterir (≈%50), punctuation ve birbirine benzeyen glyph'leri karıştırır ve ligature'ları göz ardı eder.<sup>[[1]](#references)</sup>
 
 ## Working pipeline: request-agnostic glyph normalization and mapping
 
-1) Per-request SVG glyph'lerini rasterize edin
-- Sağlanan `path` ile her glyph için minimal bir SVG document oluşturun ve CairoSVG veya zor path sequence'lerini işleyebilen eşdeğer bir engine kullanarak sabit bir canvas'a (ör. 512×512) render edin.<sup>[[1]](#references)[[2]](#references)</sup>
-- Filled black on white olarak render edin; renderer- ve AA-dependent artifact'leri ortadan kaldırmak için stroke kullanmayın.
+1) Her request'teki SVG glyph'lerini rasterize edin
+- Sağlanan `path` ile her glyph için minimal bir SVG document oluşturun ve CairoSVG veya tricky path sequence'lerini işleyebilen eşdeğer bir engine kullanarak sabit bir canvas'a (ör. 512×512) render edin.<sup>[[1]](#references)[[2]](#references)</sup>
+- Siyah dolguyu beyaz arka plan üzerinde render edin; renderer ve AA kaynaklı artifact'leri ortadan kaldırmak için stroke kullanmayın.
 
-2) Cross-request identity için perceptual hashing
-- Her glyph image için perceptual hash (ör. `imagehash.phash` üzerinden pHash) hesaplayın.<sup>[[3]](#references)</sup>
-- Hash'i stable ID olarak değerlendirin: request'ler arasındaki aynı visual shape aynı perceptual hash'e indirgenir ve randomized ID'leri etkisiz hâle getirir.
+2) Request'ler arası identity için perceptual hashing
+- Her glyph image için perceptual hash (ör. `imagehash.phash` aracılığıyla pHash) hesaplayın.<sup>[[3]](#references)</sup>
+- Hash'i stable ID olarak kabul edin: request'ler arasındaki aynı visual shape aynı perceptual hash altında birleşir ve randomized ID'leri etkisiz hâle getirir.
 
-3) Reference font atlas generation
-- Hedef TTF/OTF font'ları indirin (ör. Bookerly normal/italic/bold/bold-italic).
-- A–Z, a–z, 0–9, punctuation, special marks (em/en dashes, quotes) ve explicit ligature'lar için adaylar render edin: `ff`, `fi`, `fl`, `ffi`, `ffl`.
-- Her font variant için (normal/italic/bold/bold-italic) ayrı atlas'lar tutun.
-- Ligature'lar için glyph-level fidelity istiyorsanız proper text shaper (HarfBuzz) kullanın; ligature string'lerini doğrudan render eder ve shaping engine bunları çözerse, Pillow ImageFont ile yapılan basit rasterization yeterli olabilir.
+3) Reference font atlas oluşturma
+- Hedef TTF/OTF font'larını (ör. Bookerly normal/italic/bold/bold-italic) indirin.<sup>[[1]](#references)</sup>
+- A–Z, a–z, 0–9, punctuation, özel işaretler (em/en dashes, quotes) ve explicit ligature'lar için adaylar render edin: `ff`, `fi`, `fl`, `ffi`, `ffl`.
+- Her font variant (normal/italic/bold/bold-italic) için ayrı atlas'lar tutun.
+- Ligature'lar için glyph-level fidelity istiyorsanız uygun bir text shaper (HarfBuzz) kullanın; ligature string'lerini doğrudan render ederseniz ve shaping engine bunları çözerse, Pillow ImageFont ile basit rasterization yeterli olabilir.
 
 4) SSIM ile visual similarity matching
 - Her unknown glyph image için, tüm font variant atlas'larındaki tüm candidate image'lara karşı SSIM (Structural Similarity Index) hesaplayın.<sup>[[4]](#references)</sup>
-- En yüksek skorlu match'in character string'ini atayın. SSIM, pixel-exact comparison'lara kıyasla küçük antialiasing, scale ve coordinate farklılıklarını daha iyi tolere eder.
+- En yüksek skoru alan eşleşmenin character string'ini atayın. SSIM, pixel-exact comparison'lara kıyasla küçük antialiasing, scale ve coordinate farklılıklarını daha iyi tolere eder.<sup>[[1]](#references)[[4]](#references)</sup>
 
 5) Edge handling ve reconstruction
-- Bir glyph bir ligature'a (multi-char) eşleniyorsa decoding sırasında genişletin.
-- Paragraph break'lerini (Y deltas), alignment'ı (X patterns), style'ı ve size'ları çıkarsamak için run rectangle'larını (top/left/right/bottom) kullanın.
-- `fontStyle`, `fontWeight`, `fontSize` ve internal link'leri koruyarak HTML/EPUB olarak serialize edin.
+- Bir glyph bir ligature'a (birden fazla karakter) eşleniyorsa decoding sırasında bunu genişletin.<sup>[[1]](#references)</sup>
+- Paragraph break'lerini (Y delta'ları), alignment'ı (X pattern'leri), style'ı ve size'ları çıkarsamak için run rectangle'larını (top/left/right/bottom) kullanın.<sup>[[1]](#references)</sup>
+- `fontStyle`, `fontWeight`, `fontSize` ve internal link'leri koruyarak HTML/EPUB olarak serialize edin.<sup>[[1]](#references)</sup>
 
 ### Implementation tips
 
-- Hashing ve SSIM öncesinde tüm image'ları aynı size ve grayscale formatına normalize edin.
-- Batch'ler arasında tekrarlanan glyph'ler için SSIM'i yeniden hesaplamamak üzere perceptual hash ile cache kullanın.
-- Daha iyi discrimination için high-quality raster size (ör. 256–512 px) kullanın; SSIM'i hızlandırmak için gerektiğinde downscale edin.
-- TTF adaylarını render etmek için Pillow kullanıyorsanız aynı canvas size'ı ayarlayın ve glyph'i merkeze alın; ascender/descender'ların kırpılmasını önlemek için padding ekleyin.
+- Hashing ve SSIM'den önce tüm image'ları aynı size'a ve grayscale'e normalize edin.
+- Batch'ler arasında tekrarlanan glyph'ler için SSIM'i yeniden hesaplamamak amacıyla perceptual hash'e göre cache kullanın.
+- Daha iyi discrimination için yüksek kaliteli bir raster size (ör. 256–512 px) kullanın; SSIM'i hızlandırmak gerektiğinde öncesinde downscale edin.
+- TTF candidate'larını render etmek için Pillow kullanıyorsanız aynı canvas size'ını ayarlayın ve glyph'i ortalayın; ascender/descender'ların kırpılmasını önlemek için padding ekleyin.
 
 <details>
-<summary>Python: end-to-end glyph normalization and matching (raster hash + SSIM)</summary>
+<summary>Python: uçtan uca glyph normalization ve matching (raster hash + SSIM)</summary>
 ```python
 # pip install cairosvg pillow imagehash scikit-image uharfbuzz freetype-py
 import io, json, tarfile, base64, math
@@ -224,39 +222,41 @@ return out_runs
 
 ## Layout/EPUB reconstruction heuristics
 
-- Paragraph breaks: Sonraki run’ın üst Y değeri, önceki satırın baseline değerini font size’a göre belirlenen bir eşikten fazla aşarsa yeni bir paragraf başlatın.<sup>[[1]](#references)</sup>
-- Alignment: Sol hizalı paragrafları benzer sol X değerlerine göre gruplayın; simetrik kenar boşluklarıyla ortalanmış satırları tespit edin; sağ kenarlara göre sağ hizalamayı tespit edin.
-- Styling: `fontStyle`/`fontWeight` aracılığıyla italic/bold biçimlendirmesini koruyun; başlıkları gövdeden yaklaşık olarak ayırmak için `fontSize` aralıklarına göre CSS sınıflarını değiştirin.
-- Links: Run’lar link metadata’sı (ör. `positionId`) içeriyorsa anchor’lar ve dahili href’ler üretin.
+Kaynak rapor, yeniden oluşturulan belgenin biçimlendirmesini korumak için run geometrisini, stil alanlarını ve bağlantı metadata'sını kullandı.<sup>[[1]](#references)</sup>
 
-## SVG anti-scraping path tricks azaltma
+- Paragraph breaks: Sonraki run'ın üst Y değeri, önceki satırın baseline değerini font boyutuna göre belirlenen bir eşikten fazla aşıyorsa yeni bir paragraph başlatın.<sup>[[1]](#references)</sup>
+- Alignment: Sol hizalı paragraph'lar için benzer sol X değerlerine göre gruplandırın; simetrik kenar boşluklarıyla ortalanmış satırları algılayın; sağ kenarlara göre sağ hizalamayı algılayın.
+- Styling: `fontStyle`/`fontWeight` aracılığıyla italic/bold özelliklerini koruyun; heading'leri body metninden yaklaşık olarak ayırmak için `fontSize` aralıklarına göre CSS class'larını çeşitlendirin.
+- Links: Run'lar link metadata'sı (ör. `positionId`) içeriyorsa anchor'lar ve dahili href'ler oluşturun.
 
-- `fill-rule: nonzero` kullanan filled path’ler ve uygun bir renderer (CairoSVG, resvg) kullanın. Path token normalization’a güvenmeyin.<sup>[[1]](#references)</sup>
-- Stroke rendering kullanmaktan kaçının; micro relative move’ların neden olduğu hairline artifact’lerini atlamak için filled solid şekillere odaklanın.
-- Aynı şekillerin batch’ler arasında tutarlı şekilde rasterize edilmesi için her render işleminde sabit bir viewBox kullanın.
+## SVG anti-scraping path tricks etkisini azaltma
+
+- `fill-rule: nonzero` kullanan filled path'ler ve uygun bir renderer (CairoSVG, resvg) kullanın. Path token normalization'a güvenmeyin.<sup>[[1]](#references)[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+- Stroke rendering kullanmaktan kaçının; micro relative move'ların neden olduğu hairline artifact'lerini atlatmak için filled solid'lere odaklanın.
+- Aynı şekillerin batch'ler arasında tutarlı şekilde rasterize edilmesi için her render için sabit bir viewBox kullanın.
 
 ## Performance notes
 
-- Pratikte kitaplar birkaç yüz unique glyph’e yakınsar (ör. ligature’lar dahil yaklaşık 361). SSIM sonuçlarını perceptual hash ile cache’leyin.<sup>[[1]](#references)</sup>
-- İlk keşiften sonra sonraki batch’ler çoğunlukla bilinen hash’leri yeniden kullanır; decoding işlemi I/O-bound hâle gelir.
-- Ortalama SSIM ≈0.95 güçlü bir sinyaldir; düşük skorlu eşleşmeleri manual review için işaretlemeyi değerlendirin.
+- Uygulamada kitaplar birkaç yüz benzersiz glyph'e yakınsar (ligature'lar dahil yaklaşık 361). SSIM sonuçlarını perceptual hash ile cache'leyin.<sup>[[1]](#references)</sup>
+- İlk keşiften sonra gelecekteki batch'ler çoğunlukla bilinen hash'leri yeniden kullanır; decoding I/O-bound hale gelir.
+- Atıf yapılan rapor yaklaşık 0,95 ortalama SSIM gözlemledi; düşük skorlu eşleşmeleri manuel inceleme için işaretleyin.<sup>[[1]](#references)</sup>
 
 ## Generalization to other viewers
 
-Şunları yapan herhangi bir system:<sup>[[1]](#references)</sup>
-- Request-scoped numeric ID’lere sahip positioned glyph run’lar döndürür
-- Request başına vector glyph’ler (SVG path’leri veya subset font’lar) gönderir
-- Bulk export’u önlemek için request başına page sayısını sınırlar
+Kindle workflow'u, benzer viewer'ların aşağıdaki koşulları sağladıklarında aynı normalization işlemine uygun olabileceğini gösterir:<sup>[[1]](#references)</sup>
+- request-scoped numeric ID'lere sahip positioned glyph run'lar döndürmeleri
+- request başına vector glyph'ler (SVG path'leri veya subset font'lar) göndermeleri
+- request başına sayfa sayısını sınırlamaları
 
-…aynı normalization ile ele alınabilir:
-- Request başına shape’leri rasterize edin → perceptual hash → shape ID
-- Font variant başına candidate glyph/ligature atlas’ı
-- Character’ları atamak için SSIM (veya benzer bir perceptual metric)
-- Run rectangle/style’larından layout’u yeniden oluşturun
+…aynı normalization ile işlenebilir:
+- Request başına shape'leri rasterize et → perceptual hash → shape ID
+- Font variant'ı başına candidate glyph/ligature atlas'ı
+- Karakterleri atamak için SSIM (veya benzer bir perceptual metric)
+- Run rectangle/style bilgilerinden layout'u yeniden oluştur
 
 ## Minimal acquisition example (sketch)
 
-Reader `/renderer/render` isteğinde kullanırken tarayıcınızın DevTools’unu kullanarak exact header’ları, cookie’leri ve token’ları yakalayın. Ardından bunları bir script veya curl’dan replicate edin.<sup>[[1]](#references)</sup> Example outline:
+Reader `/renderer/render` isterken kullanılan tam header'ları, cookie'leri ve token'ları yakalamak için browser'ınızın DevTools'unu kullanın. Ardından bunları bir script veya curl ile yeniden gönderin.<sup>[[1]](#references)</sup> Example outline:
 ```bash
 curl 'https://read.amazon.com/renderer/render' \
 -H 'Cookie: session-id=...; at-main=...; sess-at-main=...' \
@@ -266,19 +266,20 @@ curl 'https://read.amazon.com/renderer/render' \
 -H 'Accept: application/x-tar' \
 --compressed --output batch_000.tar
 ```
-Parametreleri (book ASIN, page window, viewport) okuyucunun isteklerine uyacak şekilde ayarlayın. İstek başına 5 sayfa sınırı olduğunu varsayın.
+Parametreleri (kitap ASIN'i, sayfa aralığı, viewport) okuyucunun isteklerine uyacak şekilde ayarlayın. İstek başına 5 sayfa sınırı olduğunu varsayın.<sup>[[1]](#references)</sup>
 
 ## Elde edilebilecek sonuçlar
 
-- 100'den fazla randomized alphabet'i perceptual hashing<sup>[[1]](#references)</sup> ile tek bir glyph space'te birleştirme
-- Atlas'lar ligature ve varyantlar içerdiğinde ortalama SSIM ~0.95 ile unique glyph'lerin %100 eşleştirilmesi
-- Orijinalden görsel olarak ayırt edilemeyen EPUB/HTML'i yeniden oluşturma
+- 100'den fazla rastgeleleştirilmiş alfabeyi perceptual hashing ile tek bir glyph alanında birleştirme.<sup>[[1]](#references)</sup>
+- Atıfta bulunulan 920 sayfalık testte, ortalama 0.9527 SSIM ile 361 benzersiz glyph eşleştirildi (%100).<sup>[[1]](#references)</sup>
+- Kaynak rapor, yeniden oluşturulan EPUB'un orijinalinden neredeyse ayırt edilemez olduğunu belirtiyor.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Kindle Web DRM: Breaking Randomized SVG Glyph Obfuscation with Raster Hashing + SSIM (Pixelmelt blog)](https://blog.pixelmelt.dev/kindle-web-drm/)
-- [2] [CairoSVG – SVG to PNG renderer](https://cairosvg.org/)
+- [1] [Amazon'un Kindle Web Obfuscation'ını Uygulaması Berbat Olduğu İçin Nasıl Tersine Mühendislik Yaptım (Pixelmelt)](https://blog.pixelmelt.dev/kindle-web-drm/)
+- [2] [CairoSVG – SVG'den PNG'ye renderer](https://cairosvg.org/)
 - [3] [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
 - [4] [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
-
+- [5] [SVG 1.1 – Fill özellikleri](https://www.w3.org/TR/SVG11/painting.html#FillRuleProperty)
+- [6] [resvg – SVG rendering library](https://github.com/linebender/resvg)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,41 +1,48 @@
-# WiFi Pcap Analizi
-
-{{#include ../../../banners/hacktricks-training.md}}
+# Wifi Pcap Analysis
 
 ## BSSID'leri Kontrol Etme
 
-Ana trafiği WiFi olan bir capture'ı WireShark kullanarak aldığınızda, _Wireless --> WLAN Traffic_ ile capture içindeki tüm SSID'leri incelemeye başlayabilirsiniz:
+Wireshark'ta bir Wi-Fi capture açıkken, capture'da gözlemlenen wireless network'leri özetlemek için _Wireless → WLAN Traffic_ seçeneğini belirleyin; her satır bir wireless network'ü temsil eder.<sup>[[1]](#references)</sup>
 
-![WiFi Pcap Analizi - BSSID'leri Kontrol Etme: Ana trafiği WiFi olan bir capture'ı WireShark kullanarak aldığınızda, Wireless --...](<../../../images/image (106).png>)
+![Wifi Pcap Analysis - BSSID'leri Kontrol Etme: Ana trafiği Wifi olan bir capture'ı WireShark kullanarak aldığınızda, Wireless --... seçeneğiyle capture'daki tüm SSID'leri incelemeye başlayabilirsiniz](<../../../images/image (106).png>)
 
-![WiFi Pcap Analizi - BSSID'leri Kontrol Etme: Ana trafiği WiFi olan bir capture'ı WireShark kullanarak aldığınızda, Wireless --...](<../../../images/image (492).png>)
+![Wifi Pcap Analysis - BSSID'leri Kontrol Etme: Ana trafiği Wifi olan bir capture'ı WireShark kullanarak aldığınızda, Wireless --... seçeneğiyle capture'daki tüm SSID'leri incelemeye başlayabilirsiniz](<../../../images/image (492).png>)
 
 ### Brute Force
 
-Bu ekrandaki sütunlardan biri, **pcap içinde herhangi bir authentication bulunup bulunmadığını** gösterir. Durum buysa `aircrack-ng` kullanarak Brute force deneyebilirsiniz:
+WPA/WPA2-PSK capture'ları için `aircrack-ng`, kullanılabilir bir four-way EAPOL handshake gerektirir ve aday passphrase'leri bir dictionary ile test eder. Wordlist sağlamak için `-w`, access point'in BSSID'sini hedeflemek için `-b` kullanın:<sup>[[2]](#references)</sup>
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
-Örneğin, daha sonra trafiği çözmek için gerekecek olan bir PSK'yi (önceden paylaşılmış anahtar) koruyan WPA passphrase'ini alır.
+Bir aday eşleşirse Aircrack-ng pre-shared key değerini kurtarır; eşleşen password ve SSID, capture ve security mode desteklediğinde Wireshark'ın 802.11 decryption settings bölümünde yapılandırılabilir.<sup>[[2]](#references)[[5]](#references)</sup>
 
 ## Beacons / Side Channel İçindeki Veriler
 
-**Bir Wifi network'ünün beacon'ları içinde data leak edildiğinden şüpheleniyorsanız**, aşağıdaki gibi bir filter kullanarak network'ün beacon'larını kontrol edebilirsiniz: `wlan contains <NAMEofNETWORK>` veya `wlan.ssid == "NAMEofNETWORK"`; filtrelenmiş paketler içinde şüpheli string'leri arayın.
+**data'nın beacon-side-channel traffic içinde leak edildiğinden** şüpheleniyorsanız, `wlan contains "NAMEofNETWORK"` veya `wlan.ssid == "NAMEofNETWORK"` gibi bir display filter ile başlayın ve eşleşen frame'leri şüpheli string'ler açısından inceleyin. İlk form geniş kapsamlı bir byte search yapar; ikinci form SSID field ile eşleşir.<sup>[[3]](#references)[[4]](#references)</sup>
 
-## Bir Wifi Network'ündeki Bilinmeyen MAC Address'leri Bulma
+## Bir Wi-Fi Network'ündeki Bilinmeyen MAC Addresses'leri Bulma
 
-Aşağıdaki link, **bir Wifi Network'ü içinde data gönderen makineleri** bulmak için kullanışlı olacaktır:
+Wireshark, `wlan.ta` alanını transmitter address, `wlan.addr` alanını ise hardware/MAC address olarak sunar; display filter'lar bu alanları logical operator'lerle birleştirebilir:<sup>[[3]](#references)[[4]](#references)</sup>
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-Bilinen **MAC address'leriniz varsa**, şu tür kontroller ekleyerek bunları output'tan çıkarabilirsiniz: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+Bilinen **MAC addresses** değerlerini zaten biliyorsanız, `&& !(wlan.addr == 5c:51:88:31:a0:3b)` gibi kontroller ekleyerek bunları output'tan çıkarın.
 
-Network içinde iletişim kuran **bilinmeyen MAC** address'leri tespit ettikten sonra, trafiğini filtrelemek için şu tür **filter**'ları kullanabilirsiniz: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)`. ftp/http/ssh/telnet filter'larının, trafiğin şifresini çözmüşseniz kullanışlı olduğunu unutmayın.
+Network içinde iletişim kuran **unknown MAC** addresses değerlerini tespit ettikten sonra, traffic'ini daraltmak için `wlan.addr == <MAC address> && (ftp || http || ssh || telnet)` gibi bir filter kullanın. FTP, HTTP, SSH ve Telnet filter'ları yalnızca Wireshark ilgili decrypted payload'ı dissect edebildiğinde kullanışlıdır.<sup>[[3]](#references)[[5]](#references)</sup>
 
-## Trafiğin Şifresini Çözme
+## Traffic'i Decrypt Etme
 
-Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
+Wireshark'a bir 802.11 decryption key eklemek için _Edit → Preferences → Protocols → IEEE 802.11_ yolunu açın ve _Decryption Keys_ yanında bulunan _Edit_ seçeneğine tıklayın.<sup>[[5]](#references)</sup>
 
-![Bir Wifi Network'ündeki Bilinmeyen MAC Address'leri Bulma - Trafiğin Şifresini Çözme: Network içinde iletişim kuran bilinmeyen MAC address'leri tespit ettikten sonra, şu tür filter'ları kullanabilirsiniz:...](<../../../images/image (499).png>)
+![Bir Wi-Fi Network'ündeki Bilinmeyen MAC Addresses'leri Bulma - Traffic'i Decrypt Etme: Network içinde iletişim kuran bilinmeyen MAC addresses değerlerini tespit ettikten sonra aşağıdaki gibi filter'lar kullanabilirsiniz:...](<../../../images/image (499).png>)
 
+WPA/WPA2 için Wireshark normalde EAPOL four-way handshake ile eşleşen password/SSID değerlerine ihtiyaç duyar; transient key sağlamak handshake gereksinimini ortadan kaldırabilir. WPA3 için connection başına decryption işlemi connection'ın PMK değerini gerektirir.<sup>[[5]](#references)</sup>
+
+## References
+
+- [1] [Wireshark User's Guide: WLAN Traffic](https://www.wireshark.org/docs/wsug_html_chunked/ChWirelessWLANTraffic.html)
+- [2] [Aircrack-ng](https://www.aircrack-ng.org/doku.php?id=aircrack-ng)
+- [3] [Wireshark User's Guide: Display Filter Expressions Oluşturma](https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html)
+- [4] [Wireshark Display Filter Reference: IEEE 802.11 wireless LAN](https://www.wireshark.org/docs/dfref/w/wlan.html)
+- [5] [Wireshark User's Guide: IEEE 802.11 WLAN Decryption Keys](https://www.wireshark.org/docs/wsug_html_chunked/Ch80211Keys.html)
 {{#include ../../../banners/hacktricks-training.md}}

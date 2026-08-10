@@ -1,6 +1,4 @@
-# Birkaç Karakterli Hash Brute-force
-
-{{#include ../../banners/hacktricks-training.md}}
+# Bruteforce Hash Birkaç Karakter
 ```python
 import hashlib
 
@@ -51,4 +49,6 @@ return 0
 
 main()
 ```
+## References
+
 {{#include ../../banners/hacktricks-training.md}}

