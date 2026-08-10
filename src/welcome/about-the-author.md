@@ -1,13 +1,14 @@
 # O autoru
 
-{{#include ../banners/hacktricks-training.md}}
-
 ### Zdravo!!
 
-Zasluge za tehnike drugih istraživača pripadaju originalnim autorima (pogledajte reference). Svaka čast svima koji dele znanje kako bi unapredili bezbednost interneta.
+Tehnike koje su doprineli drugi istraživači ostaju pripisane svojim izvornim autorima. Svaka čast svima koji dele znanje radi unapređenja bezbednosti interneta.
 
-HackTricks je edukativni wiki o **sajber-bezbednosti** koji vodi Carlos, uz pomoć stotina saradnika. To je **ogromna zbirka hakerskih trikova** koju zajednica ažurira koliko god je moguće. Ako pronađete nešto što nedostaje ili je zastarelo, pošaljite **Pull Request** na [**Hacktricks GitHub**](https://github.com/hacktricks-wiki/hacktricks)!
+Carlos vodi HackTricks. Projekat je wiki o cybersecurityju koji održava zajednica, prikuplja praktične bezbednosne tehnike i prihvata doprinose; ako pronađete nešto što nedostaje ili je zastarelo, otvorite pull request u repozitorijumu projekta.<sup>[[1]](#references)</sup>
 
-HackTricks je takođe wiki na kom **istraživači dele svoja najnovija otkrića**, pa je odlično mesto za praćenje najnovijih hacking tehnika.
+HackTricks takođe pruža istraživačima mesto za deljenje novih otkrića, pomažući čitaocima da budu u toku sa aktuelnim bezbednosnim tehnikama.
 
+## References
+
+- [1] [HackTricks-wiki/hacktricks — GitHub repozitorijum](https://github.com/HackTricks-wiki/hacktricks)
 {{#include ../banners/hacktricks-training.md}}

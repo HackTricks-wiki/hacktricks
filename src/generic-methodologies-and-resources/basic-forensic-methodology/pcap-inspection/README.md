@@ -1,25 +1,23 @@
-# Inspekcija Pcap datoteka
-
-{{#include ../../../banners/hacktricks-training.md}}
+# Pregled Pcap-a
 
 > [!TIP]
-> Napomena o **PCAP** u odnosu na **PCAPNG**: postoje dve verzije formata PCAP datoteka; **PCAPNG je noviji i ne podržavaju ga svi alati**. Možda ćete morati da konvertujete datoteku iz PCAPNG u PCAP pomoću Wireshark-a ili drugog kompatibilnog alata kako biste mogli da je koristite u nekim drugim alatima.
+> **PCAP** i **PCAPNG** su različiti formati za snimanje; **PCAPNG je fleksibilni, proširivi naslednik formata PCAP**, ali podrška zavisi od alata. Ako alat ne može da pročita PCAPNG, konvertujte ga u PCAP pomoću Wireshark-a ili drugog kompatibilnog alata.<sup>[[1]](#references)[[18]](#references)</sup>
 
-## Online alati za pcap datoteke
+## Online alati za pcap-ove
 
-- Ako je zaglavlje vašeg pcap-a **oštećeno**, pokušajte da ga **popravite** pomoću: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
-- Izdvojite **informacije** i pretražite **malware** unutar pcap datoteke pomoću alata [**PacketTotal**](https://packettotal.com)
-- Pretražite **zlonamernu aktivnost** pomoću [**www.virustotal.com**](https://www.virustotal.com) i [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)
-- **Potpuna analiza pcap datoteke iz browser-a pomoću** [**https://apackets.com/**](https://apackets.com/)
+- Ako je zaglavlje vašeg pcap-a **oštećeno**, pokušajte da ga **popravite** pomoću: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php).<sup>[[2]](#references)</sup>
+- Izdvojite **informacije** i pretražite **malware** unutar pcap-a pomoću alata [**PacketTotal**](https://packettotal.com).<sup>[[19]](#references)</sup>
+- Pretražite **zlonamernu aktivnost** pomoću [**www.virustotal.com**](https://www.virustotal.com) i [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com).<sup>[[3]](#references)[[4]](#references)</sup>
+- **Potpuna analiza pcap-a iz browsera na** [**https://apackets.com/**](https://apackets.com/).<sup>[[5]](#references)</sup>
 
 ## Izdvajanje informacija
 
-Sledeći alati su korisni za izdvajanje statistika, datoteka itd.
+Sledeći alati su korisni za izdvajanje statistike, datoteka itd.
 
 ### Wireshark
 
 > [!TIP]
-> **Ako ćete analizirati PCAP, praktično morate znati da koristite Wireshark**
+> **Ako ćete analizirati PCAP, u osnovi morate znati kako se koristi Wireshark**
 
 Neke trikove za Wireshark možete pronaći na:
 
@@ -30,11 +28,11 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-Analiza pcap datoteka iz browser-a.
+Analiza pcap-a iz browsera.<sup>[[5]](#references)</sup>
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(samo linux)_ može da **analizira** **pcap** i iz njega izdvoji informacije. Na primer, iz pcap datoteke Xplico izdvaja svaku email poruku (POP, IMAP i SMTP protokole), kompletan HTTP sadržaj, svaki VoIP poziv (SIP), FTP, TFTP i tako dalje.
+[**Xplico**](https://github.com/xplico/xplico) je Unix-like alat za mrežnu forenziku koji dekodira PCAP datoteke i može da izdvoji email preko POP/IMAP/SMTP protokola, HTTP sadržaj, SIP VoIP pozive, FTP podatke i TFTP podatke.<sup>[[6]](#references)</sup>
 
 **Instalacija**
 ```bash
@@ -48,36 +46,32 @@ sudo apt-get install xplico
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
-Pristupite _**127.0.0.1:9876**_ sa kredencijalima _**xplico:xplico**_
+Pristupite _**127.0.0.1:9876**_ pomoću akreditiva _**xplico:xplico**_
 
 Zatim kreirajte **novi slučaj**, kreirajte **novu sesiju** unutar slučaja i **otpremite pcap** fajl.
 
 ### NetworkMiner
 
-Kao i Xplico, to je alat za **analizu i ekstrakciju objekata iz pcap fajlova**. Ima besplatno izdanje koje možete **preuzeti** [**ovde**](https://www.netresec.com/?page=NetworkMiner). Radi na sistemu **Windows**.\
-Ovaj alat je takođe koristan za dobijanje **drugih analiziranih informacija** iz paketa, kako biste mogli da saznate šta se dešavalo na **brži** način.
+Kao i Xplico, [**NetworkMiner**](https://www.netresec.com/?page=NetworkMiner) analizira PCAP saobraćaj kako bi izdvojio artefakte kao što su fajlovi, slike, e-pošta i lozinke, a objedinjuje i informacije o hostovima; njegovo besplatno izdanje prvenstveno je namenjeno Windows-u.<sup>[[7]](#references)</sup>
 
 ### NetWitness Investigator
 
-[**NetWitness Investigator možete preuzeti ovde**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(radi na sistemu Windows)**.\
-Ovo je još jedan koristan alat koji **analizira pakete** i sortira informacije na koristan način kako biste **saznali šta se dešava unutar** njih.
+[**NetWitness Investigator možete preuzeti ovde**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(radi na Windows-u)**.\
+Proizvođač opisuje freeware kao interaktivni alat za analizu mrežnih sesija, namenjen trijaži zlonamernih aktivnosti, a pristup trenutno omogućava putem kontakt-formulara.<sup>[[8]](#references)</sup>
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- Ekstrakcija i kodiranje korisničkih imena i lozinki (HTTP, FTP, Telnet, IMAP, SMTP...)
-- Ekstrakcija authentication hash-eva i njihovo razbijanje pomoću Hashcat-a (Kerberos, NTLM, CRAM-MD5, HTTP-Digest...)
-- Izrada vizuelnog mrežnog dijagrama (mrežni čvorovi i korisnici)
-- Ekstrakcija DNS upita
-- Rekonstrukcija svih TCP i UDP sesija
-- File Carving
+Dokumentovani moduli alata BruteShark mogu da analiziraju akreditive iz HTTP, FTP, Telnet, IMAP i SMTP protokola, izvezu Kerberos, NTLM, CRAM-MD5 i HTTP-Digest autentikacione hash-eve za Hashcat, mapiraju mrežne čvorove i korisnike, izdvoje DNS upite, ponovo sastave TCP/UDP sesije i izdvoje fajlove.<sup>[[9]](#references)</sup>
 
 ### Capinfos
+
+Wireshark-ov `capinfos` podrazumevano ispisuje opširan izveštaj za capture fajl.<sup>[[10]](#references)</sup>
 ```
 capinfos capture.pcap
 ```
 ### Ngrep
 
-Ako **tražite** **nešto** unutar pcap-a, možete koristiti **ngrep**. Evo primera koji koristi glavne filtere:
+`ngrep` pretražuje sadržaj paketa pomoću regularnih izraza i prihvata BPF filtere; `-I` čita pcap-kompatibilnu capture datoteku.<sup>[[11]](#references)</sup> Primer objedinjuje te funkcije radi pretrage HTTP zahteva u izabranom saobraćaju.
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
@@ -90,11 +84,11 @@ Korišćenje uobičajenih carving tehnika može biti korisno za izdvajanje fajlo
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Hvatanje credentials-a
+### Hvatanje kredencijala
 
-Možete koristiti alate kao što je [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) za parsiranje credentials-a iz pcap-a ili live interfejsa.
+Možete koristiti [PCredz](https://github.com/lgandx/PCredz) za parsiranje kredencijala iz sačuvanog PCAP fajla ili interfejsa uživo.<sup>[[12]](#references)</sup>
 
-## Provera Exploits/Malware-a
+## Provera Exploits/Malware
 
 ### Suricata
 
@@ -105,23 +99,19 @@ apt-get install oinkmaster
 echo "url = http://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz" >> /etc/oinkmaster.conf
 oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
-**Proveri pcap**
+**Provera pcap-a**
+
+Suricata-ina opcija `-r` reprodukuje PCAP u offline režimu; u ovom primeru, `-k none` onemogućava provere checksum-a, `-v` povećava logging, a `-l` bira log direktorijum.<sup>[[13]](#references)</sup>
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) je alat koji
-
-- Čita PCAP fajl i izdvaja HTTP streamove.
-- gzip dekompresuje sve kompresovane streamove
-- Skenira svaki fajl pomoću yara
-- Upisuje report.txt
-- Opciono čuva fajlove koji se podudaraju u direktorijum
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) obrađuje HTTP streamove iz PCAP fajlova, opciono dekompresuje gzip streamove, skenira izdvojene fajlove pomoću YARA alata, upisuje `report.txt` i može da sačuva fajlove koji odgovaraju kriterijumima u direktorijum.<sup>[[14]](#references)</sup>
 
 ### Analiza malvera
 
-Proverite da li možete da pronađete neki fingerprint poznatog malvera:
+Proverite da li možete da pronađete neki otisak poznatog malvera:
 
 
 {{#ref}}
@@ -130,11 +120,13 @@ Proverite da li možete da pronađete neki fingerprint poznatog malvera:
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) je pasivni, open-source analyzer mrežnog saobraćaja. Mnogi operateri koriste Zeek kao Network Security Monitor (NSM) za podršku istragama sumnjivih ili zlonamernih aktivnosti. Zeek takođe podržava širok raspon zadataka analize saobraćaja izvan domena bezbednosti, uključujući merenje performansi i rešavanje problema.
+> [Zeek](https://docs.zeek.org/en/master/about.html) je pasivni, open-source analizator mrežnog saobraćaja koji se koristi kao Network Security Monitor (NSM) i za širu analizu saobraćaja, uključujući merenje performansi i rešavanje problema.<sup>[[15]](#references)</sup>
 
-U osnovi, logovi koje kreira `zeek` nisu **pcaps**. Zato ćete morati da koristite **druge alate** za analizu logova u kojima se nalaze **informacije** o pcap fajlovima.
+Zeek generiše strukturisane logove umesto PCAP fajlova, zato za pregled tih logova koristite alate za analizu logova, kao što je `zeek-cut`.<sup>[[15]](#references)[[16]](#references)</sup>
 
 ### Informacije o konekcijama
+
+Primeri u nastavku koriste `zeek-cut` za izbor imenovanih polja iz TSV logova, a zatim standardne Unix alate za rangiranje i brojanje konekcija; RITA takođe može da učita Zeek logove radi analize dugotrajnih konekcija, beaconing-a i DNS-tunneling-a.<sup>[[16]](#references)[[17]](#references)</sup>
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -201,7 +193,7 @@ cat dns.log | zeek-cut qtype_name | sort | uniq -c | sort -nr
 #See top DNS domain requested with rita
 rita show-exploded-dns -H --limit 10 zeek_logs
 ```
-## Drugi trikovi za analizu pcap datoteka
+## Drugi trikovi za pcap analizu
 
 
 {{#ref}}
@@ -218,4 +210,25 @@ wifi-pcap-analysis.md
 usb-keystrokes.md
 {{#endref}}
 
+## References
+
+- [1] [Wireshark korisnički vodič: otvaranje capture datoteka](https://www.wireshark.org/docs/wsug_html_chunked/ChIOOpenSection.html)
+- [2] [pcapfix - online servis za popravku pcap / pcapng datoteka](https://f00l.de/hacking/pcapfix.php)
+- [3] [Pregled VirusTotal API-ja v3](https://docs.virustotal.com/reference/overview)
+- [4] [Hybrid Analysis](https://www.hybrid-analysis.com/)
+- [5] [A-Packets PCAP Analyzer](https://apackets.com/)
+- [6] [Xplico - O programu](https://www.xplico.org/about)
+- [7] [NetworkMiner](https://www.netresec.com/?page=NetworkMiner)
+- [8] [NetWitness Investigator Freeware](https://www.netwitness.com/contact-us/netwitness-investigator-freeware/)
+- [9] [BruteShark repozitorijum](https://github.com/odedshimon/BruteShark)
+- [10] [Wireshark `capinfos` priručnik](https://www.wireshark.org/docs/man-pages/capinfos.html)
+- [11] [ngrep dokumentacija](https://ngrep.sourceforge.net/usage.html)
+- [12] [PCredz repozitorijum](https://github.com/lgandx/PCredz)
+- [13] [Suricata opcije komandne linije](https://docs.suricata.io/en/latest/command-line-options.html)
+- [14] [YaraPcap repozitorijum](https://github.com/kevthehermit/YaraPcap)
+- [15] [Šta je Zeek?](https://docs.zeek.org/en/master/about/what.html)
+- [16] [Vodič kroz Zeek logs](https://docs.zeek.org/en/master/tutorial/logs.html)
+- [17] [RITA repozitorijum](https://github.com/activecm/rita)
+- [18] [Wireshark `editcap` dokumentacija](https://www.wireshark.org/docs/wsug_html_chunked/AppToolseditcap.html)
+- [19] [Najava PacketTotal Upload API-ja](https://medium.com/packettotal/the-packettotal-upload-api-26f48e53f0ee)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,25 +1,16 @@
-# Alati za carving i oporavak datoteka/podataka
+# Alati za carving i recovery podataka
 
-{{#include ../../../banners/hacktricks-training.md}}
+## Alati za carving i recovery
 
-## Alati za carving i oporavak
-
-Više alata na [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
+Više alata možete pronaći na [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
 ### Autopsy
 
-Najčešći alat koji se koristi u forenzici za izdvajanje datoteka iz image-a jeste [**Autopsy**](https://www.autopsy.com/download/). Preuzmite ga, instalirajte i omogućite mu da obradi datoteku kako bi pronašao „skrivene“ datoteke. Imajte na umu da je Autopsy napravljen za podršku disk image-a i drugih vrsta image-a, ali ne i jednostavnih datoteka.
+Najčešći alat koji se koristi u forenzici za izdvajanje fajlova iz image datoteka je [**Autopsy**](https://www.autopsy.com/download/). Preuzmite ga, instalirajte i učitajte fajl u njega kako biste pronašli „skrivene“ fajlove. Imajte na umu da je Autopsy napravljen za podršku disk image datotekama i drugim vrstama image datoteka, ali ne i običnim fajlovima.
 
-> **Ažuriranje za 2024–2025.** – Verzija **4.21** (objavljena u februaru 2025.) dodala je redizajnirani **carving modul zasnovan na SleuthKit v4.13**, koji je primetno brži pri radu sa image-ima veličine više terabajta i podržava paralelno izdvajanje na sistemima sa više jezgara. Takođe je uveden mali CLI omotač (`autopsycli ingest <case> <image>`), što omogućava automatizaciju carving-a unutar CI/CD ili laboratorijskih okruženja velikih razmera.<sup>[[1]](#references)</sup>
-```bash
-# Create a case and ingest an evidence image from the CLI (Autopsy ≥4.21)
-autopsycli case --create MyCase --base /cases
-# ingest with the default ingest profile (includes data-carve module)
-autopsycli ingest MyCase /evidence/disk01.E01 --threads 8
-```
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
-**Binwalk** je alat za analizu binarnih datoteka radi pronalaženja ugrađenog sadržaja. Može se instalirati putem `apt`-a, a njegov izvorni kod nalazi se na [GitHub-u](https://github.com/ReFirmLabs/binwalk).
+**Binwalk** je alat za analizu binarnih fajlova radi pronalaženja ugrađenog sadržaja. Može se instalirati pomoću `apt` komande, a njegov izvorni kod nalazi se na [GitHub](https://github.com/ReFirmLabs/binwalk).
 
 **Korisne komande**:
 ```bash
@@ -28,11 +19,11 @@ binwalk firmware.bin             # Display embedded data
 binwalk -e firmware.bin          # Extract recognised objects (safe-default)
 binwalk --dd " .* " firmware.bin  # Extract *everything* (use with care)
 ```
-⚠️  **Bezbednosna napomena** – Verzije **≤2.3.3** su pogođene ranjivošću **Path Traversal** (CVE-2022-4510). Nadogradite ih (ili ih izolujte pomoću container-a/neprivilegovanog UID-a) pre carving-a nepouzdanih uzoraka.<sup>[[2]](#references)</sup>
+⚠️  **Bezbednosna napomena** – Verzije **2.1.2b do 2.3.3** pogođene su ranjivošću **Path Traversal** (CVE-2022-4510); savet ne navodi nijednu zakrpljenu pip verziju. Izbegavajte raspakivanje nepouzdanih uzoraka pomoću pogođenih izdanja ili izolujte alat pomoću containera/neprivilegovanog UID-a.<sup>[[4]](#references)</sup>
 
 ### Foremost
 
-Još jedan čest alat za pronalaženje skrivenih fajlova je **foremost**. Konfiguracioni fajl programa foremost možete pronaći u `/etc/foremost.conf`. Ako želite da pretražujete samo određene fajlove, odkomentarišite ih. Ako ništa ne odkomentarišete, foremost će pretraživati podrazumevano konfigurisane tipove fajlova.
+Još jedan uobičajen alat za pronalaženje skrivenih datoteka je **foremost**. Konfiguracionu datoteku alata foremost možete pronaći u `/etc/foremost.conf`. Ako želite da pretražite samo određene datoteke, odkomentarišite ih. Ako ništa ne odkomentarišete, foremost će pretraživati podrazumevano konfigurisane tipove datoteka.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
@@ -40,37 +31,43 @@ foremost -v -i file.img -o output
 ```
 ### **Scalpel**
 
-**Scalpel** je još jedan alat koji se može koristiti za pronalaženje i izdvajanje **datoteka ugrađenih u datoteku**. U ovom slučaju, potrebno je da iz konfiguracione datoteke (_/etc/scalpel/scalpel.conf_) uklonite komentare za tipove datoteka koje želite da izdvojite.
+**Scalpel** je još jedan alat koji se može koristiti za pronalaženje i izdvajanje **fajlova ugrađenih u fajl**. U ovom slučaju, potrebno je da uklonite komentar iz konfiguracione datoteke (_/etc/scalpel/scalpel.conf_) za tipove fajlova koje želite da izdvojite.
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
 ```
 ### Bulk Extractor 2.x
 
-Ovaj alat dolazi uz Kali, ali ga možete pronaći ovde: <https://github.com/simsong/bulk_extractor>
+Ovaj alat dolazi uz kali, ali ga možete pronaći ovde: <https://github.com/simsong/bulk_extractor>
 
-Bulk Extractor može da skenira image dokaza i da carve-uje **pcap fragmente**, **mrežne artefakte (URL-ove, domene, IP adrese, MAC adrese, e-mail adrese)** i mnoge druge objekte **paralelno, koristeći više scanner-a**.
+Bulk Extractor može da skenira image dokaza i da **carve-uje pcap fragments**, **network artefacts (URLs, domains, IPs, MACs, e-mails)** i mnoge druge objekte **paralelno, koristeći više scanners**.
+
+Izdanje v2.1.1 dokumentuje Autotools build i podešavanje `-S jpeg_carve_mode=2` za carving svih uzastopnih JPEG-ova.<sup>[[2]](#references)</sup>
 ```bash
-# Build from source – v2.1.1 (April 2024) requires cmake ≥3.16
-git clone https://github.com/simsong/bulk_extractor.git && cd bulk_extractor
-mkdir build && cd build && cmake .. && make -j$(nproc) && sudo make install
+# Build from source – v2.1.1 (April 2024) requires C++17
+git clone --branch v2.1.1 --recurse-submodules https://github.com/simsong/bulk_extractor.git
+cd bulk_extractor
+./bootstrap.sh
+./configure
+make -j"$(nproc)"
+sudo make install
 
-# Run every scanner, carve JPEGs aggressively and generate a bodyfile
-bulk_extractor -o out_folder -S jpeg_carve_mode=2 -S write_bodyfile=y /evidence/disk.img
+# Scan an image and carve contiguous JPEGs
+bulk_extractor -o out_folder -S jpeg_carve_mode=2 /evidence/disk.img
 ```
-Korisne skripte za post-processing (`bulk_diff`, `bulk_extractor_reader.py`) mogu da uklone duplikate artefakata između dve slike ili da konvertuju rezultate u JSON za SIEM unos.
+Bundled `bulk_diff.py` poredi dva pokretanja alata bulk_extractor, dok `bulk_extractor_reader.py` čita izveštaj i feature datoteke.<sup>[[3]](#references)</sup>
 
 ### PhotoRec
 
 Možete ga pronaći na <https://www.cgsecurity.org/wiki/TestDisk_Download>
 
-Dolazi sa GUI i CLI verzijama. Možete da izaberete **tipove datoteka** koje želite da PhotoRec traži.
+Dolazi sa GUI i CLI verzijama. Možete izabrati **tipove datoteka** koje želite da PhotoRec pretraži.
 
-![Pokrenite svaki skener, agresivno izdvojite JPEG datoteke i generišite bodyfile - PhotoRec: Dolazi sa GUI i CLI verzijama. Možete da izaberete tipove datoteka koje želite da PhotoRec traži](<../../../images/image (242).png>)
+![Pokrenite svaki scanner, agresivno izdvojite JPEG datoteke i generišite bodyfile - PhotoRec: Dolazi sa GUI i CLI verzijama. Možete izabrati tipove datoteka koje želite da PhotoRec pretraži](<../../../images/image (242).png>)
 
-### ddrescue + ddrescueview (kreiranje image-a nestabilnih diskova)
+### ddrescue + ddrescueview (kreiranje image-a neispravnih diskova)
 
-Kada je fizički disk nestabilan, najbolja praksa je da ga prvo **image-ujete** i da alate za carving pokrećete samo nad image-om. `ddrescue` (GNU projekat) je fokusiran na pouzdano kopiranje oštećenih diskova uz čuvanje dnevnika nečitljivih sektora.
+Kada je fizički disk nestabilan, najbolja praksa je da ga prvo **snimite u image** i da alate za carving pokrećete samo nad tim image-om. `ddrescue` (GNU projekat) je usmeren na pouzdano kopiranje neispravnih diskova uz vođenje evidencije o nečitljivim sektorima.
 ```bash
 sudo apt install gddrescue ddrescueview   # On Debian-based systems
 # First pass – try to get as much data as possible without retries
@@ -81,65 +78,71 @@ sudo ddrescue -d -r3 /dev/sdX suspect.img suspect.log
 # Visualise the status map (green=good, red=bad)
 ddrescueview suspect.log
 ```
-Verzija **1.28** (decembar 2024) uvela je **`--cluster-size`**, što može ubrzati izradu image-a SSD diskova velikog kapaciteta, kod kojih tradicionalne veličine sektora više nisu usklađene sa flash blokovima.
+Opcija **`--cluster-size`** određuje koliko se sektora kopira odjednom; manje vrednosti mogu pomoći kod sporih diskova.<sup>[[7]](#references)</sup>
 
 ### Extundelete / Ext4magic (EXT 3/4 undelete)
 
-Ako je izvorni fajl sistem zasnovan na Linux EXT-u, možda ćete moći da oporavite nedavno obrisane fajlove **bez potpunog carving-a**. Oba alata rade direktno na read-only image-u:
+Ako je izvorni sistem datoteka zasnovan na Linux EXT-u, možda ćete moći da oporavite nedavno obrisane datoteke **bez potpunog carving-a**; ovi alati zasnovani na journaling-u rade na demontiranom sistemu datoteka ili image-u samo za čitanje.<sup>[[8]](#references)[[9]](#references)</sup>
 ```bash
 # Attempt journal-based undelete (metadata must still be present)
 extundelete disk.img --restore-all
 
-# Fallback to full directory scan; supports extents and inline data
-ext4magic disk.img -M -f '*.jpg' -d ./recovered
+# Multi-stage recovery from an ext4 image
+ext4magic disk.img -M -d ./recovered
 ```
-> 🛈 Ako je sistem datoteka montiran nakon brisanja, blokovi podataka su možda već ponovo iskorišćeni – u tom slučaju je i dalje potreban odgovarajući carving (Foremost/Scalpel).
+> **Napomena o kompatibilnosti** – ext4magic je napušten; stranica projekta upozorava da savremeni file systems više nisu kompatibilni s njim.<sup>[[10]](#references)</sup>
+
+> 🛈 Ako je file system montiran nakon brisanja, blokovi podataka su možda već ponovo iskorišćeni – u tom slučaju je i dalje potrebno pravilno carving izdvajanje (Foremost/Scalpel).
 
 ### binvis
 
-Pogledajte [kod](https://code.google.com/archive/p/binvis/) i [web alat](https://binvis.io/#/).
+Pogledajte [code](https://code.google.com/archive/p/binvis/) i [web page tool](https://binvis.io/#/).
 
 #### Funkcije alata BinVis
 
 - Vizuelni i aktivni **pregledač strukture**
-- Višestruki grafikoni za različite tačke fokusa
+- Više grafičkih prikaza za različite tačke fokusa
 - Fokusiranje na delove uzorka
-- **Prikaz stringova i resursa**, npr. u PE ili ELF izvršnim datotekama
+- **Uočavanje stringova i resursa**, npr. u PE ili ELF izvršnim datotekama
 - Dobijanje **obrazaca** za kriptoanalizu datoteka
-- **Otkrivanje** packer ili encoder algoritama
-- **Identifikovanje** Steganography na osnovu obrazaca
-- **Vizuelni** binary-diffing
+- **Uočavanje** packer ili encoder algoritama
+- **Identifikovanje** steganografije na osnovu obrazaca
+- **Vizuelno** binary-diffing poređenje
 
-BinVis je odlična **početna tačka za upoznavanje sa nepoznatim ciljem** u black-boxing scenariju.
+BinVis je odlična **polazna tačka za upoznavanje s nepoznatim targetom** u black-boxing scenariju.
 
-## Specifični alati za Data Carving
+## Specific Data Carving Tools
 
 ### FindAES
 
-Pretražuje AES ključeve traženjem njihovih key schedule vrednosti. Može da pronađe ključeve od 128, 192 i 256 bita, poput onih koje koriste TrueCrypt i BitLocker.
+Pretražuje AES ključeve tražeći njihove rasporede ključeva. Može da pronađe ključeve dužine 128, 192 i 256 bita, kakvi se koriste u alatima TrueCrypt i BitLocker.
 
 Preuzmite [ovde](https://sourceforge.net/projects/findaes/).
 
 ### YARA-X (trijaža izdvojenih artefakata)
 
-[YARA-X](https://github.com/VirusTotal/yara-x) je Rust rewrite alata YARA, objavljen 2024. godine. **10-30× je brži** od klasičnog alata YARA i može veoma brzo da klasifikuje hiljade izdvojenih objekata:<sup>[[3]](#references)</sup>.
+[YARA-X](https://github.com/VirusTotal/yara-x) je Rust rewrite alata YARA, predstavljen 2024. godine; VirusTotal navodi da neka pravila regularnih izraza i složenih petlji mogu da se izvršavaju znatno brže.<sup>[[5]](#references)</sup> Njegov CLI se zove `yr`, a komanda `scan` podržava rekurzivna skeniranja, broj thread-ova i izlaz metapodataka.<sup>[[6]](#references)</sup>
 ```bash
 # Scan every carved object produced by bulk_extractor
-yarax -r rules/index.yar out_folder/ --threads 8 --print-meta
+yr scan --recursive --threads 8 --print-meta rules/index.yar out_folder/
 ```
-Ubrzanje čini realnim **automatsko označavanje** svih izdvojenih datoteka u istragama velikih razmera.
-
 ## Dodatni alati
 
-Možete koristiti [**viu** ](https://github.com/atanunq/viu)da biste pregledali slike iz terminala.  \
-Možete koristiti alat Linux komandne linije **pdftotext** da biste PDF pretvorili u tekst i pročitali ga.
+Možete koristiti [**viu** ](https://github.com/atanunq/viu) da vidite slike iz terminala.  \
+Možete koristiti Linux alat komandne linije **pdftotext** da pretvorite PDF u tekst i pročitate ga.
 
 
 
-## Reference
+## References
 
-- [1] [Napomene o izdanju Autopsy 4.21](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21)
-- [2] [Path traversal u binwalk-u (CVE-2022-4510) - GitHub Advisory Database](https://github.com/advisories/GHSA-3cm8-v4mc-gppg)
-- [3] [YARA is dead, long live YARA-X - VirusTotal Blog](https://blog.virustotal.com/2024/05/yara-is-dead-long-live-yara-x.html)
-
+- [1] [Napomene o izdanju Autopsy 4.21](https://github.com/sleuthkit/autopsy/releases/tag/autopsy-4.21.0)
+- [2] [README za bulk_extractor v2.1.1](https://github.com/simsong/bulk_extractor/blob/v2.1.1/README.md)
+- [3] [README za Python alate bulk_extractor](https://raw.githubusercontent.com/simsong/bulk_extractor/v2.1.1/python/README.txt)
+- [4] [Path traversal u binwalk-u (CVE-2022-4510) - GitHub Advisory Database](https://github.com/advisories/GHSA-3cm8-v4mc-gppg)
+- [5] [YARA je mrtva, živela YARA-X - VirusTotal Blog](https://blog.virustotal.com/2024/05/yara-is-dead-long-live-yara-x.html)
+- [6] [CLI komande za YARA-X](https://virustotal.github.io/yara-x/docs/cli/commands/)
+- [7] [GNU ddrescue priručnik](https://www.gnu.org/software/ddrescue/manual/ddrescue_manual.html)
+- [8] [extundelete](https://extundelete.sourceforge.net/)
+- [9] [ext4magic priručnik](https://ext4magic.sourceforge.net/manpage_en.html)
+- [10] [Status projekta ext4magic](https://sourceforge.net/projects/ext4magic/)
 {{#include ../../../banners/hacktricks-training.md}}

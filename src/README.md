@@ -2,9 +2,9 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Logotipe i motion design za Hacktricks napravio je_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
+_Logotipi HackTricks-a i motion design:_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_._
 
-### Pokreni HackTricks lokalno
+### Pokrenite HackTricks lokalno
 ```bash
 # Download latest version of hacktricks
 git clone https://github.com/HackTricks-wiki/hacktricks
@@ -31,29 +31,29 @@ export HT_LANG="master" # Leave master for English
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $HT_LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-Vaša lokalna kopija HackTricks biće dostupna na **[http://localhost:3337](http://localhost:3337)** za manje od 5 minuta (potrebno je da se knjiga izgradi, budite strpljivi).
+Vaša lokalna kopija HackTricks biće dostupna na adresi [http://localhost:3337](http://localhost:3337) za manje od 5 minuta (potrebno je da se knjiga izgradi, budite strpljivi).
 
-Alternativno, ako imate Docker Compose, jednostavno pokrenite sledeće iz korena repozitorijuma:
+Ako imate Docker Compose, alternativno možete samo da pokrenete sledeće iz korena repozitorijuma:
 ```bash
 docker compose up
 ```
-Ovo koristi priloženi `docker-compose.yml` za posluživanje grane koja je trenutno checkout-ovana na hostu na adresi [http://localhost:3337](http://localhost:3337), uz live reload. Da biste promenili jezik pri korišćenju Compose-a, checkout-ujte željenu jezičku granu pre pokretanja servisa.
+Ovo koristi priloženi `docker-compose.yml` za posluživanje grane koja je trenutno checkout-ovana na hostu na adresi [http://localhost:3337](http://localhost:3337), uz live reload. Da biste promenili jezik prilikom korišćenja Compose-a, checkout-ujte željenu jezičku granu pre pokretanja servisa.
 
-## HackTricks partneri
+## HackTricks Partneri
 
 ---
 
-## HackTricks prijatelji
+## HackTricks Prijatelji
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) je odlična kompanija za cybersecurity čiji je slogan **HACK THE UNHACKABLE**. Sprovode sopstvena istraživanja i razvijaju sopstvene hacking alate kako bi **ponudili nekoliko vrednih cybersecurity usluga**, kao što su pentesting, Red team angažmani i obuke.
+STM Cyber pruža penetration testing, bezbednosne revizije, exploit i istraživačke usluge, alate i usluge podizanja bezbednosne svesti. Na njihovom sajtu je opisan tim penetration testera, programera i bezbednosnih istraživača sa više od deset godina iskustva.<sup>[[1]](#references)</sup>
 
-Njihov **blog** možete pogledati na adresi [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
+Njihov **blog** možete posetiti na adresi [**https://blog.stmcyber.com**](https://blog.stmcyber.com).
 
-**STM Cyber** takođe podržava open source cybersecurity projekte kao što je HackTricks :)
+**STM Cyber** takođe podržava open source projekte iz oblasti cybersecurity-ja, kao što je HackTricks :)
 
 ---
 
@@ -61,13 +61,9 @@ Njihov **blog** možete pogledati na adresi [**https://blog.stmcyber.com**](http
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** je **etičko hacking i bug bounty platforma broj 1 u Evropi.**
+Intigriti je crowdsourced security provajder koji putem globalne zajednice istraživača nudi bug bounty i penetration-testing usluge. Njihova platforma kombinuje kontinuiranu bug bounty pokrivenost sa PTaaS uslugama na zahtev i upravljanim programima za prijavljivanje ranjivosti.<sup>[[2]](#references)</sup>
 
-**Bug bounty savet**: **registrujte se** na **Intigriti**, premium **bug bounty platformu koju su napravili hakeri za hakere**! Pridružite nam se danas na adresi [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) i počnite da zarađujete bounty-je u vrednosti do **100.000 USD**!
-
-{{#ref}}
-https://go.intigriti.com/hacktricks
-{{#endref}}
+**Bug bounty savet**: Pridružite se Intigriti-ju putem adrese [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) i istražite njihove bug bounty programe.
 
 ---
 
@@ -75,23 +71,10 @@ https://go.intigriti.com/hacktricks
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security pruža **praktične AI Security obuke** uz **inženjerski, praktičan pristup zasnovan na laboratorijskim vežbama**. Naši kursevi su namenjeni security inženjerima, AppSec profesionalcima i developerima koji žele da **izgrade, razbiju i zaštite stvarne aplikacije pokretane AI/LLM tehnologijom**.
-
-**AI Security Certification** fokusira se na veštine iz stvarnog sveta, uključujući:
-- Zaštitu LLM i AI-powered aplikacija
-- Threat modeling za AI sisteme
-- Embeddings, vector baze podataka i RAG bezbednost
-- LLM napade, scenarije zloupotrebe i praktične odbrane
-- Obrasce bezbednog dizajna i aspekte deployment-a
-
-Svi kursevi su **on-demand**, **zasnovani na laboratorijskim vežbama** i osmišljeni oko **bezbednosnih kompromisa iz stvarnog sveta**, a ne samo teorije.
+Modern Security nudi praktičnu AI security obuku sopstvenim tempom za security inženjere, AppSec stručnjake i developere. Njihova AI Security Certification obuhvata osnove LLM-ova i agenata, RAG i vektorske baze podataka, threat modeling, prompt-injection i MCP napade, kao i defanzivnu arhitekturu.<sup>[[3]](#references)</sup>
 
 👉 Više detalja o AI Security kursu:
 https://www.modernsecurity.io/courses/ai-security-certification
-
-{{#ref}}
-https://modernsecurity.io/
-{{#endref}}
 
 ---
 
@@ -99,14 +82,9 @@ https://modernsecurity.io/
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** nudi brze i jednostavne real-time API-je za **pristup rezultatima pretraživača**. Oni scrape-uju pretraživače, upravljaju proxy-jima, rešavaju captcha izazove i parsiraju sve bogate strukturirane podatke umesto vas.
+**SerpApi** pruža API-je za Google i druge pretraživače, vraćajući strukturirane SERP podatke sa funkcijama kao što su rezultati prilagođeni lokaciji, Maps, Shopping i Knowledge Graph rezultati.<sup>[[4]](#references)</sup>
 
-Pretplata na neki od SerpApi planova uključuje pristup za više od 50 različitih API-ja za scraping različitih pretraživača, uključujući Google, Bing, Baidu, Yahoo, Yandex i druge.\
-Za razliku od drugih provajdera, **SerpApi ne scrape-uje samo organske rezultate**. SerpApi odgovori dosledno uključuju sve oglase, inline slike i video-snimke, knowledge graph-ove i druge elemente i funkcije prisutne u rezultatima pretrage.
-
-Trenutni SerpApi korisnici uključuju **Apple, Shopify i GrubHub**.\
-Za više informacija pogledajte njihov [**blog**](https://serpapi.com/blog/)**,** ili isprobajte primer u njihovom [**playground-u**](https://serpapi.com/playground)**.**\
-Možete **kreirati besplatan nalog** [**ovde**](https://serpapi.com/users/sign_up)**.**
+Za više informacija pogledajte njihov [**blog**](https://serpapi.com/blog/), isprobajte primer u njihovom [**playground-u**](https://serpapi.com/playground) ili [**kreirajte besplatan nalog**](https://serpapi.com/users/sign_up).
 
 ---
 
@@ -114,33 +92,19 @@ Možete **kreirati besplatan nalog** [**ovde**](https://serpapi.com/users/sign_u
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-**8kSec Academy** obučava vas za offensive mobile i AI security, uz predavanja aktivnih istraživača – istog tima koji stoji iza CVE writeup-ova i predavanja na konferencijama Black Hat, HITB i Zer0con. Kursevi se prate sopstvenim tempom, zasnovani su na laboratorijskim vežbama na stvarnim metama i podržani praktičnom sertifikacijom.
+**8kSec Academy** nudi mobile i AI-security kurseve koje možete pratiti sopstvenim tempom. Katalog obuhvata auditing i reverse engineering mobilnih aplikacija pomoću alata kao što su Ghidra, Frida i LLDB, kao i AI/LLM attack i defense laboratorije.<sup>[[5]](#references)[[6]](#references)</sup>
 
-Katalog obuhvata dva pravca:
-
-**Mobile Security** – iOS i Android, od nivoa aplikacije naniže: reverse engineering pomoću Ghidra-e i LLDB-a, ARM64 exploitation, kernel internals i moderne mitigacije (PAC, MTE, SELinux), mehanizmi jailbreak-a i root-ovanja.
-
-**AI Security** – dva kompletna kursa koja pokrivaju ovu oblast. Practical AI Security objašnjava kako rade LLM-ovi, RAG pipeline-ovi, AI agenti i MCP, kao i kako ih napadati i braniti. Advanced AI Security je izrazito praktičan i fokusiran na najnovije tehnike: red teaming AI sistema u velikom obimu pomoću alata Garak i PyRIT, exploitovanje MCP servera, postavljanje i detektovanje backdoor-a u modelima, kao i fine-tuning napade i odbrane na Apple Silicon platformi.
-
-Kursevi i sertifikacije:
-
-{{#ref}}
-https://academy.8ksec.io/
-{{#endref}}
+Pogledajte [katalog kurseva 8kSec Academy](https://academy.8ksec.io/).
 
 ---
 
-### [NaxusAI – AI Powered Security Scanner](https://academy.8ksec.io/)
+### [NaxusAI – AI Powered Security Scanner](https://www.naxusai.com/)
 
 <figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
 
-**NaxusAI** je AI-powered security platforma za pronalaženje exploitable ranjivosti pre nego što ih napadači otkriju.
+**Naxus** promoviše offensive-AI platformu koja mapira kod i infrastrukturu, a zatim koristi statičke i dinamičke agente za pronalaženje i validaciju iskoristivih slabosti, uz proof-of-concept dokaze i smernice za sanaciju.<sup>[[7]](#references)</sup>
 
-**Savet za code security**: registrujte se na NaxusAI, pametnu platformu za monitoring ranjivosti namenjenu developerima i security timovima! Pridružite nam se danas i počnite da koristite AI za **detektovanje, validaciju i otklanjanje stvarnih security rizika pre nego što dospeju u production**!
-
-{{#ref}}
-https://naxusai.com
-{{#endref}}
+**Savet za bezbednost koda**: Istražite Naxus za otkrivanje ranjivosti usmereno na kod i infrastrukturu.
 
 ---
 
@@ -148,17 +112,11 @@ https://naxusai.com
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) je profesionalna cybersecurity kompanija sa sedištem u **Amsterdamu** koja pomaže u **zaštiti** kompanija **širom sveta** od najnovijih cybersecurity pretnji pružanjem **offensive-security usluga** uz **moderan** pristup.
+WebSec pruža penetration testing, security subscriptions, staffing i usluge procene ranjivosti. Na njihovom sajtu piše da posluju međunarodno i da pokrivaju offensive security, defensive security, kao i poslove iz oblasti governance, risk i compliance.<sup>[[8]](#references)</sup>
 
-WebSec je internacionalna security kompanija sa kancelarijama u Amsterdamu i Wyomingu. Nude **all-in-one security usluge**, što znači da rade sve: Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing i još mnogo toga.
-
-Još jedna zanimljiva stvar u vezi sa WebSec-om jeste to što su, za razliku od proseka u industriji, **veoma sigurni u svoje veštine**, u toj meri da **garantuju rezultate najboljeg kvaliteta**. Na njihovom sajtu piše: "**If we can't hack it, You don't pay it!**". Za više informacija pogledajte njihov [**website**](https://websec.net/en/) i [**blog**](https://websec.net/blog/)!
+Za više informacija posetite njihov [**website**](https://websec.net/en/) ili [**blog**](https://websec.net/blog/).
 
 Pored navedenog, WebSec je i **posvećeni podržavalac HackTricks-a.**
-
-{{#ref}}
-https://www.youtube.com/watch?v=Zq2JycGDCPM
-{{#endref}}
 
 ---
 
@@ -167,20 +125,13 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 <figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
-**Napravljeno za teren. Prilagođeno vama.**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) razvija i pruža efikasne cybersecurity obuke koje osmišljavaju i vode
-stručnjaci iz industrije. Njihovi programi prevazilaze teoriju i opremaju timove detaljnim
-razumevanjem i praktičnim veštinama, koristeći prilagođena okruženja koja odražavaju pretnje
-iz stvarnog sveta. Za upite o prilagođenim obukama obratite nam se [**ovde**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
+**Napravljeno za teren. Kreirano prema vašim potrebama.**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) pruža cybersecurity obuku koju vode stručnjaci, sa prilagođenim sadržajem i laboratorijama zasnovanim na stvarnim infrastrukturama. Njihovi programi su prilagođeni potrebama organizacija i obuhvataju sve, od procene do implementacije.<sup>[[9]](#references)</sup> Za upite o prilagođenoj obuci obratite im se [**ovde**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks).
 
-**Po čemu se njihove obuke izdvajaju:**
-* Sadržaj i laboratorijske vežbe izrađeni po meri
+**Po čemu se njihova obuka izdvaja:**
+* Prilagođeni sadržaj i laboratorije
 * Podrška vrhunskih alata i platformi
-* Dizajnirali su ih i predaju ih praktičari
-
-{{#ref}}
-https://cyberhelmets.com/courses/?ref=hacktricks
-{{#endref}}
+* Kreiraju i predaju je praktičari
 
 ---
 
@@ -188,23 +139,9 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions pruža specijalizovane cybersecurity usluge obrazovnim i **FinTech**
-institucijama, sa fokusom na **penetration testing, cloud security assessments** i
-**compliance readiness** (SOC 2, PCI-DSS, NIST). Naš tim uključuje **OSCP i CISSP
-sertifikovane profesionalce**, koji svakom angažmanu donose duboku tehničku stručnost i uvid
-zasnovan na industrijskim standardima.
-
-Prevazilazimo automatizovane scan-ove pomoću **manualnog, intelligence-driven testiranja**, prilagođenog
-okruženjima visokog rizika. Od zaštite evidencija studenata do zaštite finansijskih transakcija,
-pomažemo organizacijama da zaštite ono što je najvažnije.
-
-_„Kvalitetna odbrana zahteva poznavanje napada; mi pružamo bezbednost kroz razumevanje.“_
+Last Tower Solutions se fokusira na cybersecurity konsalting za oblasti **obrazovanja** i **FinTech-a**, uključujući procene cloud okruženja, interne i eksterne penetration testove, procene ranjivosti i podršku za compliance.<sup>[[10]](#references)</sup>
 
 Budite informisani i u toku sa najnovijim dešavanjima u cybersecurity-ju tako što ćete posetiti naš [**blog**](https://www.lasttowersolutions.com/blog).
-
-{{#ref}}
-https://www.lasttowersolutions.com/
-{{#endref}}
 
 ---
 
@@ -212,23 +149,34 @@ https://www.lasttowersolutions.com/
 
 <figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE omogućava DevOps, DevSecOps timovima i developerima da efikasno upravljaju, nadgledaju i štite Kubernetes klastere. Iskoristite naše AI-driven uvide, napredni security framework i intuitivni CloudMaps GUI da vizuelizujete svoje klastere, razumete njihovo stanje i pouzdano preduzimate akcije.
-
-Pored toga, K8Studio je **kompatibilan sa svim glavnim Kubernetes distribucijama** (AWS, GCP, Azure, DO, Rancher, K3s, Openshift i drugim).
-
-{{#ref}}
-https://k8studio.io/
-{{#endref}}
+K8Studio je desktop Kubernetes IDE sa CloudMaps vizualizacijom, navigacijom kroz više klastera, RBAC-om, Helm-om, logovima, YAML-om i terminalskim prikazima. Vendor navodi da se povezuje putem kubeconfig-a bez instaliranja agenata i da podržava macOS, Windows, Linux i air-gapped klastere.<sup>[[11]](#references)</sup>
 
 ---
+
 ## Licenca i odricanje odgovornosti
 
-Pogledajte ih ovde:
+Pogledajte stavku HackTricks Values & FAQ u odeljku References ispod.
 
-{{#ref}}
-welcome/hacktricks-values-and-faq.md
-{{#endref}}
+## Github statistika
 
-## GitHub statistika
+![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
-![HackTricks GitHub statistika](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+## References
+
+- [1] [STM Cyber](https://www.stmcyber.com/)
+- [2] [Intigriti](https://www.intigriti.com/)
+- [3] [AI Security Certification – Modern Security](https://www.modernsecurity.io/courses/ai-security-certification)
+- [4] [SerpApi](https://serpapi.com/)
+- [5] [8kSec Academy](https://academy.8ksec.io/)
+- [6] [Praktična AI Security: napadi, odbrane i primene](https://academy.8ksec.io/course/practical-ai-security)
+- [7] [Naxus](https://www.naxusai.com/)
+- [8] [WebSec](https://websec.net/)
+- [9] [Cyber Helmets](https://cyberhelmets.com/)
+- [10] [Last Tower Solutions](https://www.lasttowersolutions.com/)
+- [11] [K8Studio](https://k8studio.io/)
+- [12] [Intigriti HackTricks referral](https://go.intigriti.com/hacktricks)
+- [13] [Modern Security](https://modernsecurity.io/)
+- [14] [WebSec sponsorship video](https://www.youtube.com/watch?v=Zq2JycGDCPM)
+- [15] [Cyber Helmets courses](https://cyberhelmets.com/courses/?ref=hacktricks)
+- [16] [HackTricks Values & FAQ](welcome/hacktricks-values-and-faq.md)
+{{#include banners/hacktricks-training.md}}

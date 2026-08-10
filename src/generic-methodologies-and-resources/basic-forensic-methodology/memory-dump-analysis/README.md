@@ -1,35 +1,39 @@
-# Analiza memory dump-a
-
-{{#include ../../../banners/hacktricks-training.md}}
+# Analiza memorijskog dump-a
 
 ## Početak
 
-Počnite da **pretražujete** pcap u potrazi za **malware-om**. Koristite **alate** navedene u [**Malware Analysis**](../malware-analysis.md).
+Počnite da **pretražujete** **malware** unutar pcap-a. Koristite **alate** navedene u odeljku [**Malware Analysis**](../malware-analysis.md).
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Volatility je glavni open-source framework za analizu memory dump-ova**. Ovaj Python alat analizira dump-ove iz eksternih izvora ili VMware VM-ova, identifikujući podatke kao što su procesi i lozinke na osnovu OS profila dump-a. Proširiv je pomoću plugin-ova, što ga čini veoma prilagodljivim za forenzičke istrage.
+**Volatility je open-source framework za analizu memorijskih dump-ova**. Ovaj Python alat analizira dump-ove iz eksternih izvora ili VMware VM-ova i identifikuje podatke kao što su procesi i lozinke na osnovu profila OS-a dump-a. Proširiv je pomoću pluginova, što ga čini veoma svestranim za forenzičke istrage.<sup>[[1]](#references)[[2]](#references)</sup>
 
 [**Cheatsheet pronađite ovde**](volatility-cheatsheet.md)
 
-## Izveštaj o padu mini dump-a
+## Izveštaj o padu u mini dump-u
 
-Kada je dump mali (samo nekoliko KB, možda nekoliko MB), onda je verovatno u pitanju izveštaj o padu mini dump-a, a ne memory dump.
+Kada je dump mali (samo nekoliko KB, možda nekoliko MB), moguće je da je u pitanju izveštaj o padu u mini dump-u, a ne kompletan memorijski dump.<sup>[[3]](#references)</sup>
 
-![Volatility - Izveštaj o padu mini dump-a: Kada je dump mali (samo nekoliko KB, možda nekoliko MB), onda je verovatno u pitanju izveštaj o padu mini dump-a, a ne memory dump](<../../../images/image (532).png>)
+![Volatility - Izveštaj o padu u mini dump-u: Mala dump datoteka identifikovana kao izveštaj o padu u Mini DuMP-u](<../../../images/image (532).png>)
 
-Ako imate instaliran Visual Studio, možete otvoriti ovaj fajl i prikupiti neke osnovne informacije, kao što su naziv procesa, arhitektura, informacije o izuzetku i moduli koji se izvršavaju:
+Ako imate instaliran Visual Studio, možete otvoriti ovu datoteku da biste pregledali osnovne informacije kao što su naziv procesa, arhitektura, detalji izuzetka i učitani moduli:<sup>[[4]](#references)</sup>
 
-![Volatility - Izveštaj o padu mini dump-a: Ako imate instaliran Visual Studio, možete otvoriti ovaj fajl i prikupiti neke osnovne informacije, kao što su naziv procesa, arhitektura, informacije o izuzetku i...](<../../../images/image (263).png>)
+![Volatility - Izveštaj o padu u mini dump-u: Ako imate instaliran Visual Studio, možete otvoriti ovu datoteku i prikazati osnovne informacije kao što su naziv procesa, arhitektura, informacije o izuzetku i...](<../../../images/image (263).png>)
 
-Takođe možete učitati izuzetak i videti dekompajlirane instrukcije
+Takođe možete pregledati izuzetak i prikazati disasemblirani kod modula.<sup>[[4]](#references)</sup>
 
-![Volatility - Izveštaj o padu mini dump-a: Takođe možete učitati izuzetak i videti dekompajlirane instrukcije](<../../../images/image (142).png>)
+![Visual Studio panel Actions za minidump sa opcijama za izvorno debagovanje i podešavanje putanja do simbola](<../../../images/image (142).png>)
 
-![Volatility - Izveštaj o padu mini dump-a: Takođe možete učitati izuzetak i videti dekompajlirane instrukcije](<../../../images/image (610).png>)
+![Visual Studio disasembliranje instrukcija iz izuzetka minidump-a](<../../../images/image (610).png>)
 
-U svakom slučaju, Visual Studio nije najbolji alat za detaljnu analizu dump-a.
+U svakom slučaju, Visual Studio nije najbolji alat za obavljanje detaljne analize dump-a.
 
-Trebalo bi da ga **otvorite** pomoću alata **IDA** ili **Radare** kako biste ga **detaljno** analizirali.
+Trebalo bi da ga **otvorite** pomoću alata **IDA** ili **Radare** kako biste ga pregledali **detaljno**.
 
+## References
+
+- [1] [Volatility Framework](https://github.com/volatilityfoundation/volatility)
+- [2] [Korišćenje alata Volatility](https://github.com/volatilityfoundation/volatility/wiki/volatility-usage)
+- [3] [Minidump datoteke](https://learn.microsoft.com/en-us/windows/win32/debug/minidump-files)
+- [4] [Korišćenje dump datoteka u Visual Studio debuggeru](https://learn.microsoft.com/en-us/visualstudio/debugger/using-dump-files?view=visualstudio)
 {{#include ../../../banners/hacktricks-training.md}}

