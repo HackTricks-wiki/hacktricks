@@ -1,7 +1,5 @@
 # Interesting Windows Registry Keys
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 Windows Registry hives are one of the fastest ways to pivot from _what happened?_ to _which user, when, and from where?_. For live analysis prefer `CurrentControlSet`; for offline hive analysis first resolve which `ControlSet00x` was active instead of hardcoding `ControlSet001`.
 
 ### Windows Version and Owner Info
