@@ -1,8 +1,6 @@
-# Tricks für bestimmte Software-/Dateitypen
+# Tricks für spezifische Software-/Dateitypen
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-Hier findest du interessante Tricks für bestimmte Dateitypen und/oder Software:
+Hier findest du interessante Tricks für spezifische Dateitypen und/oder Software:
 
 
 {{#ref}}
@@ -63,5 +61,7 @@ zips-tricks.md
 {{#ref}}
 mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
+
+## References
 
 {{#include ../../../banners/hacktricks-training.md}}

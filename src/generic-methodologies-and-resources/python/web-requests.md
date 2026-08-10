@@ -1,10 +1,13 @@
-# Web-Anfragen
-
-{{#include ../../banners/hacktricks-training.md}}
-
+# Webanfragen
 
 ## Python Requests
+
+Diese Beispiele verwenden die dokumentierten Anfrageargumente, Response-Eigenschaften, Multipart-Datei-Tupel und Sessions von Requests.<sup>[[1]](#references)</sup> Die Beispiele mit `verify=False` deaktivieren die TLS-Zertifikatsüberprüfung und sollten auf kontrollierte Tests beschränkt werden.<sup>[[1]](#references)</sup>
 ```python
+import random
+import re
+import string
+
 import requests
 
 url = "http://example.com:80/some/path.php"
@@ -23,7 +26,7 @@ body_text = gr.text
 ret_cookies = gr.cookies
 is_redirect = gr.is_redirect
 is_permanent_redirect = gr.is_permanent_redirect
-float_seconds = gr.elapsed.total_seconds() 10.231
+float_seconds = gr.elapsed.total_seconds()
 
 #Regular Post requests sending parameters (data)
 pr = requests.post(url, data=params, headers=headers, cookies=cookies, verify=False, allow_redirects=True, proxies=proxies)
@@ -71,7 +74,9 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Python-Befehl zur Ausnutzung einer RCE
+## Python-Befehl zum Ausnutzen einer RCE
+
+Die Befehls-Schleife erbt von Pythons `Cmd`; ihre `default`-Methode verarbeitet nicht erkannte Befehlspräfixe, `cmdloop` verteilt Eingabezeilen, und `re.DOTALL` ermöglicht es dem Extraktionsmuster, sich über mehrere Zeilen zu erstrecken.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -98,4 +103,9 @@ return 1
 term = Terminal()
 term.cmdloop()
 ```
+## References
+
+- [1] [Requests-Entwicklerschnittstelle](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Unterstützung für zeilenorientierte Befehlsinterpreter](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Operationen mit regulären Ausdrücken](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

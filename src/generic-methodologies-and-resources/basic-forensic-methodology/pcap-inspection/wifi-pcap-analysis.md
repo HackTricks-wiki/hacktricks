@@ -1,41 +1,48 @@
 # Wifi-Pcap-Analyse
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 ## BSSIDs überprüfen
 
-Wenn du eine Capture erhältst, deren Hauptdatenverkehr über Wifi läuft, kannst du mit WireShark beginnen, alle SSIDs der Capture über _Wireless --> WLAN Traffic_ zu untersuchen:
+Öffne einen Wi-Fi-Capture in Wireshark und wähle _Wireless → WLAN Traffic_, um die im Capture beobachteten Wireless-Netzwerke zusammenzufassen. Jede Zeile stellt ein Wireless-Netzwerk dar.<sup>[[1]](#references)</sup>
 
-![Wifi-Pcap-Analyse – BSSIDs überprüfen: Wenn du eine Capture erhältst, deren Hauptdatenverkehr über Wifi läuft, kannst du mit WireShark beginnen, alle SSIDs der Capture über Wireless --... zu untersuchen](<../../../images/image (106).png>)
+![Wifi-Pcap-Analyse – BSSIDs überprüfen: Wenn du einen Capture erhältst, dessen Hauptdatenverkehr über Wi-Fi läuft, kannst du mit Wireshark beginnen, alle SSIDs des Captures mit Wireless --... zu untersuchen](<../../../images/image (106).png>)
 
-![Wifi-Pcap-Analyse – BSSIDs überprüfen: Wenn du eine Capture erhältst, deren Hauptdatenverkehr über Wifi läuft, kannst du mit WireShark beginnen, alle SSIDs der Capture über Wireless --... zu untersuchen](<../../../images/image (492).png>)
+![Wifi-Pcap-Analyse – BSSIDs überprüfen: Wenn du einen Capture erhältst, dessen Hauptdatenverkehr über Wi-Fi läuft, kannst du mit Wireshark beginnen, alle SSIDs des Captures mit Wireless --... zu untersuchen](<../../../images/image (492).png>)
 
 ### Brute Force
 
-Eine der Spalten dieses Bildschirms zeigt an, ob **eine Authentifizierung innerhalb der pcap gefunden wurde**. Falls dies der Fall ist, kannst du versuchen, sie mit `aircrack-ng` per Brute Force zu knacken:
+Für WPA/WPA2-PSK-Captures benötigt `aircrack-ng` einen nutzbaren vierstufigen EAPOL-Handshake und testet mögliche Passphrasen mit einem Wörterbuch. Verwende `-w`, um die Wordlist anzugeben, und `-b`, um den BSSID des Access Points als Ziel festzulegen:<sup>[[2]](#references)</sup>
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
-Beispielsweise ruft es die WPA-Passphrase ab, die einen PSK (pre shared-key) schützt und später zum Entschlüsseln des Datenverkehrs erforderlich ist.
+Wenn ein Kandidat übereinstimmt, stellt Aircrack-ng den Pre-Shared Key wieder her; das passende Passwort und die SSID können anschließend in Wiresharks 802.11-Entschlüsselungseinstellungen konfiguriert werden, sofern Capture und Sicherheitsmodus dies unterstützen.<sup>[[2]](#references)[[5]](#references)</sup>
 
 ## Daten in Beacons / Side Channel
 
-Wenn du vermutest, dass **Daten innerhalb von Beacons eines Wifi-Netzwerks geleakt werden**, kannst du die Beacons des Netzwerks mit einem Filter wie dem folgenden überprüfen: `wlan contains <NAMEofNETWORK>` oder `wlan.ssid == "NAMEofNETWORK"` und innerhalb der gefilterten Pakete nach verdächtigen Zeichenfolgen suchen.
+Wenn du vermutest, dass **Daten in Beacon-Side-Channel-Traffic geleakt werden**, beginne mit einem Display-Filter wie `wlan contains "NAMEofNETWORK"` oder `wlan.ssid == "NAMEofNETWORK"` und untersuche anschließend passende Frames auf verdächtige Zeichenfolgen. Die erste Form ist eine breite Byte-Suche; die zweite stimmt mit dem SSID-Feld überein.<sup>[[3]](#references)[[4]](#references)</sup>
 
-## Unbekannte MAC-Adressen in einem Wifi-Netzwerk finden
+## Unbekannte MAC-Adressen in einem Wi-Fi-Netzwerk finden
 
-Der folgende Link ist nützlich, um die **Maschinen zu finden, die Daten innerhalb eines Wifi-Netzwerks senden**:
+Wireshark stellt `wlan.ta` als Senderadresse und `wlan.addr` als Hardware-/MAC-Adresse bereit; Display-Filter können diese Felder mit logischen Operatoren kombinieren:<sup>[[3]](#references)[[4]](#references)</sup>
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-Wenn du **MAC-Adressen bereits kennst, kannst du sie aus der Ausgabe entfernen**, indem du Prüfungen wie diese hinzufügst: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+Wenn du **MAC-Adressen bereits kennst, entferne sie aus der Ausgabe**, indem du Prüfungen wie `&& !(wlan.addr == 5c:51:88:31:a0:3b)` hinzufügst.
 
-Sobald du **unbekannte MAC-Adressen** erkannt hast, die innerhalb des Netzwerks kommunizieren, kannst du **Filter** wie den folgenden verwenden: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)`, um deren Datenverkehr zu filtern. Beachte, dass die ftp/http/ssh/telnet-Filter nützlich sind, wenn du den Datenverkehr entschlüsselt hast.
+Sobald du **unbekannte MAC-Adressen** erkannt hast, die innerhalb des Netzwerks kommunizieren, kannst du einen Filter wie `wlan.addr == <MAC address> && (ftp || http || ssh || telnet)` verwenden, um ihren Traffic einzugrenzen. Die FTP-, HTTP-, SSH- und Telnet-Filter sind nur nützlich, wenn Wireshark die entsprechende entschlüsselte Payload analysieren kann.<sup>[[3]](#references)[[5]](#references)</sup>
 
-## Datenverkehr entschlüsseln
+## Traffic entschlüsseln
 
-Bearbeiten --> Einstellungen --> Protokolle --> IEEE 802.11--> Bearbeiten
+Um einen 802.11-Entschlüsselungsschlüssel in Wireshark hinzuzufügen, öffne _Edit → Preferences → Protocols → IEEE 802.11_ und klicke neben _Decryption Keys_ auf _Edit_.<sup>[[5]](#references)</sup>
 
-![Unbekannte MAC-Adressen in einem Wifi-Netzwerk finden – Datenverkehr entschlüsseln: Sobald du unbekannte MAC-Adressen erkannt hast, die innerhalb des Netzwerks kommunizieren, kannst du Filter wie den folgenden verwenden:...](<../../../images/image (499).png>)
+![Unbekannte MAC-Adressen in einem Wi-Fi-Netzwerk finden – Traffic entschlüsseln: Sobald du unbekannte MAC-Adressen erkannt hast, die innerhalb des Netzwerks kommunizieren, kannst du Filter wie den folgenden verwenden:...](<../../../images/image (499).png>)
 
+Für WPA/WPA2 benötigt Wireshark normalerweise den EAPOL-Vier-Wege-Handshake und das passende Passwort/die passende SSID; die Angabe des transienten Schlüssels kann die Anforderung des Handshakes umgehen. Die Entschlüsselung von WPA3 pro Verbindung erfordert den PMK der Verbindung.<sup>[[5]](#references)</sup>
+
+## References
+
+- [1] [Wireshark-Benutzerhandbuch: WLAN-Traffic](https://www.wireshark.org/docs/wsug_html_chunked/ChWirelessWLANTraffic.html)
+- [2] [Aircrack-ng](https://www.aircrack-ng.org/doku.php?id=aircrack-ng)
+- [3] [Wireshark-Benutzerhandbuch: Display-Filter-Ausdrücke erstellen](https://www.wireshark.org/docs/wsug_html_chunked/ChWorkBuildDisplayFilterSection.html)
+- [4] [Wireshark-Referenz für Display-Filter: IEEE 802.11 Wireless LAN](https://www.wireshark.org/docs/dfref/w/wlan.html)
+- [5] [Wireshark-Benutzerhandbuch: IEEE-802.11-WLAN-Entschlüsselungsschlüssel](https://www.wireshark.org/docs/wsug_html_chunked/Ch80211Keys.html)
 {{#include ../../../banners/hacktricks-training.md}}
