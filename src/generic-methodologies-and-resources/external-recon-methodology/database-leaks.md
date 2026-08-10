@@ -1,32 +1,45 @@
 # Database leak
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Motori di ricerca per Data Breach
 
-- [greynoise](https://viz.greynoise.io/) - Cerca IP, tag, CVE, vpn, dns...
-- [Dehashed](https://www.dehashed.com/) - Puoi cercare la tua email per verificare se è presente in qualche database con dati ottenuti da un leak.
-- [HaveIbeenPwned?](https://haveibeenpwned.com/) - verifica se il tuo indirizzo email è presente in un data breach
-- [ScamSearch](https://scamsearch.io/) - cerca telefono, email e profilo per verificare se appartengono a uno scammer.
-- [Intelligence X](https://intelx.io/) - Intelligence X è un motore di ricerca e un archivio di dati. · La ricerca funziona con i selector, ovvero termini di ricerca specifici come indirizzi email, domini, URL, IP...
-- [spycloud](https://portal.spycloud.com/endpoint/enriched-stats/[YOUR-MAIL]) - inserisci la tua email al posto di YOUR-MAIL.
-- [weleakinfo](https://weleakinfo.io/) - We Leak Info - Database Dehashed ottenuti da leak, cerca i leak.
-- [breachdirectory](https://breachdirectory.org/) - VERIFICA SE LA TUA EMAIL O IL TUO USERNAME SONO STATI COMPROMESSI
-- [leakcheck](https://leakcheck.io/) - Scopri se le tue credenziali sono state compromesse
+- [GreyNoise Visualizer](https://viz.greynoise.io/) - Cerca IP e CIDR e interroga l'attività degli scanner tramite tag, CVE e metadati.<sup>[[1]](#references)</sup>
+- [DeHashed](https://www.dehashed.com/) - Cerca dati esposti tramite username, indirizzi email, indirizzi IP e altri selettori; sono disponibili anche il monitoring e un'API.<sup>[[2]](#references)</sup>
+- [Have I Been Pwned?](https://haveibeenpwned.com/) - Verifica se un indirizzo email compare in data breach noti o nei record di paste; sono disponibili anche notifiche e un'API.<sup>[[3]](#references)</sup>
+- [ScamSearch](https://scamsearch.io/) - Cerca i record di scammer segnalati tramite immagine del profilo, email, username, numero di telefono, indirizzo crypto o sito web.<sup>[[4]](#references)</sup>
+- [Intelligence X](https://intelx.io/) - Cerca selettori come indirizzi email, domini, URL, IP e CIDR tra le fonti indicizzate.<sup>[[5]](#references)</sup>
+- [SpyCloud](https://spycloud.com/check-your-exposure/) - Verifica un'email aziendale o un dominio alla ricerca di credenziali esposte, identità infettate da infostealer e session cookie rubati.<sup>[[6]](#references)</sup>
+- [WeLeakInfo](https://weleakinfo.io/) - Cerca database leak utilizzando domini, nomi, email, ID, numeri di telefono, IP, URL o hash.<sup>[[7]](#references)</sup>
+- [BreachDirectory](https://breachdirectory.org/) - Verifica se la tua email o il tuo username sono stati compromessi.
+- [LeakCheck](https://leakcheck.io/) - Cerca dati esposti relativi a email, username, numeri di telefono, hash o domini e monitora le nuove occorrenze.<sup>[[8]](#references)</sup>
 - [Findemail.io](https://findemail.io/) - Trova gli indirizzi email di una determinata azienda.
-- [LibraryOfLeaks](https://search.libraryofleaks.org) - Cerca documenti ottenuti da leak, aziende, persone, database e altro
-- [LeakRadar](https://leakradar.io/) - Ricerca istantanea su oltre 2 miliardi di credenziali info-stealer in testo semplice; query per email, dominio e metadati, monitoraggio e API
-- [InfoStealers](https://infostealers.info/en/info) - Indicizza i log di infostealer esposti nel darknet e li rende ricercabili e utilizzabili per security team, investigatori, ricercatori e professionisti della digital forensics.
-- [Leak-Lookup](https://leak-lookup.com/) - Motore di ricerca per data breach con oltre 3 miliardi di record provenienti da più di 3000 database.
-- [BreachDirectory](https://breachdirectory.org/) - Verifica se le tue credenziali sono state compromesse in data breach.
-- [Scylla.so](https://scylla.so/) - Motore di ricerca per data breach basato sulla community.
-- [Leaked.domains](https://leaked.domains/) - Cerca credenziali e dati relativi a domini ottenuti da leak.
-- [WhiteIntel](https://whiteintel.io/) - Motore di ricerca di data leak nel dark web per la threat intelligence.
-- [PSBDMP](https://psbdmp.ws/) - Piattaforma per la ricerca e il monitoraggio di dump di Pastebin.
+- [Library of Leaks](https://search.libraryofleaks.org/) - Cerca documenti pubblici, aziende e persone, inclusi dataset di leak.<sup>[[9]](#references)</sup>
+- [LeakRadar](https://leakradar.io/) - Cerca credenziali leak tramite email, dominio o stringa grezza e monitora le nuove esposizioni.<sup>[[10]](#references)</sup>
+- [InfoStealers](https://infostealers.info/en/info) - Cerca log di infostealer provenienti da dispositivi infetti e monitora i nuovi dati.<sup>[[11]](#references)</sup>
+- [Leak-Lookup](https://leak-lookup.com/) - Cerca tra i data breach e monitora l'esposizione delle credenziali.<sup>[[12]](#references)</sup>
+- [Scylla.so](https://scylla.so/) - Motore di ricerca per database breach gestito dalla community.
+- [Leaked.domains](https://leaked.domains/) - Cerca credenziali leak e record correlati tramite dominio, email, username, password, IP e altri selettori.<sup>[[13]](#references)</sup>
+- [WhiteIntel](https://whiteintel.io/) - Monitora l'attività del dark web, i credential leak, i dati degli infostealer e le menzioni del brand.<sup>[[14]](#references)</sup>
+- [PSBDMP](https://psbdmp.ws/) - Piattaforma per la ricerca e il monitoring dei dump di Pastebin.
 
+## Strumenti per enumerare i data leak
 
-## Tool per enumerare i data leak
+- [Leaker](https://github.com/vflame6/leaker) - CLI per la scoperta passiva di leak che cerca in diverse fonti online tramite email, username, dominio, keyword o numero di telefono.<sup>[[15]](#references)</sup>
 
-- [Leaker](https://github.com/vflame6/leaker) - Tool CLI per l'enumeration passiva dei leak, che effettua ricerche simultanee in 10 database di breach.
+## References
 
+- [1] [Utilizzo del GreyNoise Visualizer](https://docs.greynoise.io/docs/using-the-greynoise-visualizer)
+- [2] [DeHashed](https://www.dehashed.com/)
+- [3] [Have I Been Pwned](https://haveibeenpwned.com/)
+- [4] [Database globale degli scammer - ScamSearch](https://scamsearch.io/)
+- [5] [Intelligence X](https://intelx.io/)
+- [6] [Verifica la tua esposizione - SpyCloud](https://spycloud.com/check-your-exposure/)
+- [7] [WeLeakInfo](https://weleakinfo.io/)
+- [8] [Motore di ricerca per Data Breach - LeakCheck](https://leakcheck.io/)
+- [9] [Library of Leaks](https://search.libraryofleaks.org/)
+- [10] [LeakRadar](https://leakradar.io/)
+- [11] [OSINT InfoStealers.Info](https://infostealers.info/en/info)
+- [12] [Leak-Lookup - Motore di ricerca per Data Breach](https://leak-lookup.com/)
+- [13] [Leaked.Domains - Ricerca universale](https://leaked.domains/)
+- [14] [WhiteIntel - Piattaforma di intelligence e monitoring del dark web](https://whiteintel.io/)
+- [15] [vflame6/leaker](https://github.com/vflame6/leaker)
 {{#include ../../banners/hacktricks-training.md}}
