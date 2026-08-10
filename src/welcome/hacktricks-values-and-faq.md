@@ -1,5 +1,7 @@
 # HackTricks Values & FAQ
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## HackTricks Values
 
 > [!TIP]

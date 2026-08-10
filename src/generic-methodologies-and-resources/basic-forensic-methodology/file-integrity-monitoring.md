@@ -1,5 +1,7 @@
 # File Integrity Monitoring
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Baseline
 
 A baseline consists of taking a snapshot of certain parts of a system to **compare it with a future status to highlight changes**.

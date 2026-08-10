@@ -1,5 +1,7 @@
 # Cloning a Website
 
+{{#include ../../banners/hacktricks-training.md}}
+
 For a phishing assessment sometimes it might be useful to completely **clone/dump a website**.
 
 Note that you can add also some payloads to the cloned website like a BeEF hook to "control" the tab of the user.

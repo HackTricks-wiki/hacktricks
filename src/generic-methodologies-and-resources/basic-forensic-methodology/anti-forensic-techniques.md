@@ -1,5 +1,7 @@
 # Anti-Forensic Techniques
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Timestamps
 
 An attacker may be interested in **changing the timestamps of files** to avoid being detected.\

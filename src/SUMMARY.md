@@ -297,6 +297,7 @@
   - [COM Hijacking](windows-hardening/windows-local-privilege-escalation/com-hijacking.md)
   - [Dll Hijacking](windows-hardening/windows-local-privilege-escalation/dll-hijacking/README.md)
     - [Advanced Html Staged Dll Sideloading](windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md)
+    - [Windows CPython Build-Landmark and sys.path Hijacking](windows-hardening/windows-local-privilege-escalation/dll-hijacking/windows-cpython-build-landmark-sys-path-hijacking.md)
     - [Writable Sys Path +Dll Hijacking Privesc](windows-hardening/windows-local-privilege-escalation/dll-hijacking/writable-sys-path-dll-hijacking-privesc.md)
   - [DPAPI - Extracting Passwords](windows-hardening/windows-local-privilege-escalation/dpapi-extracting-passwords.md)
   - [From High Integrity to SYSTEM with Name Pipes](windows-hardening/windows-local-privilege-escalation/from-high-integrity-to-system-with-name-pipes.md)

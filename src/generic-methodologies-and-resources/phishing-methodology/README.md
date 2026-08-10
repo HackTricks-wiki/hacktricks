@@ -1,5 +1,7 @@
 # Phishing Methodology
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Methodology
 
 1. Recon the victim
