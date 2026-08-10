@@ -1,27 +1,27 @@
-# Homograph / Homoglyph Attacks in Phishing
+# Homograph / Homoglyph Attacks w phishingu
 
-{{#include ../../banners/hacktricks-training.md}}
+## Overview
 
-## Przegląd
+Atak homograph (znany również jako homoglyph) wykorzystuje fakt, że wiele **punktów kodowych Unicode z niełacińskich skryptów jest wizualnie identycznych lub bardzo podobnych do znaków ASCII**. Zastępując jeden lub więcej znaków łacińskich ich wizualnymi odpowiednikami, atakujący może utworzyć:
 
-Atak homograph (znany również jako homoglyph) wykorzystuje fakt, że wiele **punktów kodowych Unicode z alfabetów innych niż łaciński wygląda identycznie lub bardzo podobnie do znaków ASCII**. Zastępując jeden lub więcej znaków łacińskich ich odpowiednikami o podobnym wyglądzie, attacker może utworzyć:
+* Nazwy wyświetlane, tematy lub treści wiadomości, które wyglądają wiarygodnie dla ludzkiego oka, ale omijają detekcję opartą na słowach kluczowych.
+* Domeny, subdomeny lub ścieżki URL, które przekonują ofiary, że odwiedzają zaufaną stronę.<sup>[[1]](#references)</sup>
 
-* Nazwy wyświetlane, tematy lub treści wiadomości, które dla ludzkiego oka wyglądają wiarygodnie, ale omijają detekcję opartą na słowach kluczowych.
-* Domeny, subdomeny lub ścieżki URL, które sprawiają, że ofiary sądzą, iż odwiedzają zaufaną stronę.
+Ponieważ każdy glif jest wewnętrznie identyfikowany przez swój **punkt kodowy Unicode**, pojedynczy podstawiony znak wystarczy, aby pokonać naiwne porównania ciągów znaków (np. `"Παypal.com"` vs. `"Paypal.com"`).<sup>[[1]](#references)[[3]](#references)</sup>
 
-Ponieważ każdy glif jest wewnętrznie identyfikowany przez swój **punkt kodowy Unicode**, pojedynczy podmieniony znak wystarczy, aby pokonać naiwne porównania ciągów znaków (np. `"Παypal.com"` vs. `"Paypal.com"`).
+## Typowy przebieg phishingu
 
-## Typowy przebieg Phishingu
-
-1. **Utworzenie treści wiadomości** – Zastąpienie określonych liter łacińskich w podszywającej się marce / słowie kluczowym znakami z innego alfabetu, które są wizualnie nie do odróżnienia (greckiego, cyrylicy, ormiańskiego, czirokeskiego itd.).
-2. **Rejestracja infrastruktury pomocniczej** – Opcjonalna rejestracja domeny homoglyph oraz uzyskanie certyfikatu TLS (większość CA nie przeprowadza kontroli podobieństwa wizualnego).
-3. **Wysłanie emaila / SMS-a** – Wiadomość zawiera homoglyphs w jednym lub kilku z następujących miejsc:
-* Nazwa wyświetlana nadawcy (np. `Ηеlрdеѕk`)
+1. **Utworzenie treści wiadomości** – Zastąp określone litery łacińskie w podszywającej się marce / słowie kluczowym wizualnie nierozróżnialnymi znakami z innego skryptu (greckiego, cyrylicy, ormiańskiego, Cherokee itp.).
+2. **Rejestracja infrastruktury pomocniczej** – Opcjonalnie zarejestruj domenę homoglyph i uzyskaj certyfikat TLS (większość CA nie sprawdza podobieństwa wizualnego).
+3. **Wysłanie wiadomości e-mail / SMS** – Wiadomość zawiera znaki homoglyph w jednym lub kilku z następujących miejsc:
+* Wyświetlana nazwa nadawcy (np. `Ηеlрdеѕk`)
 * Temat wiadomości (`Urgеnt Аctіon Rеquіrеd`)
-* Tekst hyperlinku lub w pełni kwalifikowana nazwa domeny
-4. **Łańcuch przekierowań** – Ofiara jest przekierowywana przez pozornie nieszkodliwe strony internetowe lub skracacze URL, zanim trafi na złośliwy host, który wykrada dane uwierzytelniające / dostarcza malware.
+* Tekst hiperłącza lub w pełni kwalifikowana nazwa domeny
+4. **Łańcuch przekierowań** – Ofiara jest przekierowywana przez pozornie nieszkodliwe strony internetowe lub usługi skracania URL, zanim trafi na złośliwy host, który wykrada dane uwierzytelniające / dostarcza malware.<sup>[[1]](#references)</sup>
 
 ## Często nadużywane zakresy Unicode
+
+Poniższe przykłady przedstawiają bloki Unicode zawierające znaki często używane do tworzenia podobieństw między skryptami.<sup>[[2]](#references)[[3]](#references)</sup>
 
 | Skrypt | Zakres | Przykładowy glif | Wygląda jak |
 |--------|-------|---------------|------------|
@@ -30,21 +30,21 @@ Ponieważ każdy glif jest wewnętrznie identyfikowany przez swój **punkt kodow
 | Cyrylica | U+0400-04FF | `а` (U+0430) | Łacińskie `a` |
 | Cyrylica | U+0400-04FF | `е` (U+0435) | Łacińskie `e` |
 | Ormiański | U+0530-058F | `օ` (U+0585) | Łacińskie `o` |
-| Czirokeski | U+13A0-13FF | `Ꭲ` (U+13A2) | Łacińskie `T` |
+| Cherokee | U+13A0-13FF | `Ꭲ` (U+13A2) | Łacińskie `T` |
 
-> Wskazówka: Pełne tablice Unicode są dostępne pod adresem [unicode.org](https://home.unicode.org/).<sup>[[2]](#references)</sup>
+> Wskazówka: Użyj tablic kodów Unicode, aby sprawdzić bloki i punkty kodowe.
 
-## Techniki wykrywania
+## Techniki detekcji
 
 ### 1. Inspekcja mieszanych skryptów
 
-Email phishingowy skierowany do organizacji anglojęzycznej rzadko powinien zawierać znaki z wielu skryptów. Prostą, ale skuteczną heurystyką jest:
+Phishingowe wiadomości e-mail kierowane do organizacji anglojęzycznej rzadko powinny zawierać znaki z wielu skryptów. Prostą, ale skuteczną heurystyką jest:
 
-1. Iterowanie po każdym znaku sprawdzanego ciągu.
-2. Przypisanie punktu kodowego do jego bloku Unicode.
-3. Wygenerowanie alertu, jeśli obecny jest więcej niż jeden skrypt **lub** jeśli skrypty inne niż łaciński pojawiają się w miejscach, w których nie są oczekiwane (nazwa wyświetlana, domena, temat, URL itd.).
+1. Iterowanie po każdym znaku analizowanego ciągu.
+2. Zmapowanie punktu kodowego na nazwę skryptu lub blok Unicode.
+3. Wygenerowanie alertu, jeśli obecny jest więcej niż jeden skrypt **lub** jeśli skrypty niełacińskie pojawiają się tam, gdzie nie powinny (wyświetlana nazwa, domena, temat, URL itp.).<sup>[[3]](#references)</sup>
 
-Proof-of-concept w Pythonie:
+Python proof-of-concept:
 ```python
 import unicodedata as ud
 from collections import defaultdict
@@ -69,36 +69,38 @@ print(f"[!] Mixed scripts in {field}: {dict(blocks)} -> {value}")
 ```
 ### 2. Normalizacja Punycode (domeny)
 
-Internationalised Domain Names (IDN) są kodowane za pomocą **punycode** (`xn--`). Konwersja każdej nazwy hosta do punycode, a następnie z powrotem do Unicode, umożliwia dopasowanie do whitelisty lub przeprowadzanie testów podobieństwa (np. odległości Levenshteina) **po** normalizacji ciągu.
+Umiędzynarodowione nazwy domen (IDN) mają formę Unicode oraz zgodną z ASCII formę **Punycode**, poprzedzoną prefiksem `xn--`. Przed dodaniem nazw hostów do listy dozwolonych lub ich porównaniem konwertuj je do formatu IDNA/Punycode, zachowując formę Unicode do wyświetlania.<sup>[[6]](#references)</sup>
 ```python
 import idna
-hostname = "Ρаypal.com"   # Greek Rho + Cyrillic a
+hostname = "ρаypal.com"   # Greek small rho + Cyrillic small a
 puny = idna.encode(hostname).decode()
-print(puny)  # xn--yl8hpyal.com
+print(puny)  # xn--ypal-9nd08d.com
 ```
-### 3. Słowniki / algorytmy Homoglyph
+### 3. Homoglyph Dictionaries / Algorithms
 
-Narzędzia takie jak **dnstwist** (`--homoglyph`) lub **urlcrazy** mogą wyliczać wizualnie podobne permutacje domen i są przydatne do proaktywnego zgłaszania do usunięcia / monitorowania.<sup>[[3]](#references)</sup>
+Narzędzia takie jak **dnstwist** (`--fuzzers homoglyph`) lub **urlcrazy` mogą wyliczać wizualnie podobne permutacje domen i są przydatne do proaktywnego usuwania oraz monitorowania.<sup>[[4]](#references)[[5]](#references)</sup>
 
-## Zapobieganie i łagodzenie skutków
+## Prevention & Mitigation
 
-* Wymuś restrykcyjne zasady DMARC/DKIM/SPF – zapobiegaj spoofingowi z nieautoryzowanych domen.
+* Wymuszaj rygorystyczne zasady DMARC/DKIM/SPF – zapobiegaj spoofingowi z nieautoryzowanych domen.
 * Zaimplementuj powyższą logikę wykrywania w **Secure Email Gateways** oraz playbookach **SIEM/XSOAR**.
-* Oznaczaj lub poddawaj kwarantannie wiadomości, w których domena nazwy wyświetlanej ≠ domena nadawcy.
-* Edukuj użytkowników: wklejaj podejrzany tekst do inspektora Unicode, najeżdżaj kursorem na linki i nigdy nie ufaj skracaczom URL.
+* Oznaczaj lub poddawaj kwarantannie wiadomości, w których domena z nazwy wyświetlanej ≠ domena nadawcy.
+* Edukuj użytkowników: wklejaj podejrzany tekst do inspectora Unicode, sprawdzaj linki przez najechanie kursorem i nigdy nie ufaj skracaczom URL.
 
-## Przykłady z rzeczywistego świata
+## Real-World Examples
 
-* Nazwa wyświetlana: `Сonfidеntiаl Ꭲiꮯkеt` (cyrylica `С`, `е`, `а`; Cherokee `Ꭲ`; łacińska mała kapitalika `ꮯ`).
-* Łańcuch domen: `bestseoservices.com` ➜ katalog `/templates` należący do gminy ➜ `kig.skyvaulyt.ru` ➜ fałszywa strona logowania Microsoft pod adresem `mlcorsftpsswddprotcct.approaches.it.com`, zabezpieczona niestandardowym CAPTCHA OTP.
+* Nazwa wyświetlana: `Сonfidеntiаl Ꭲiꮯkеt` (cyrylickie `С`, `е`, `а`; Cherokee `Ꭲ`; łacińska mała kapitalika `ꮯ`).
+* Łańcuch domen: `bestseoservices.com` ➜ katalog municipal `/templates` ➜ `kig.skyvaulyt.ru` ➜ fałszywa strona logowania Microsoft pod adresem `mlcorsftpsswddprotcct.approaches.it.com`, chroniona przez niestandardowy CAPTCHA OTP.
 * Podszywanie się pod Spotify: nadawca `Sρօtifս` z linkiem ukrytym za `redirects.ca`.
 
-Przykłady te pochodzą z badań Unit 42 (lipiec 2025) i ilustrują, jak nadużycie Homoglyph jest łączone z przekierowywaniem URL i obchodzeniem CAPTCHA w celu ominięcia automatycznej analizy.<sup>[[1]](#references)</sup>
+Przykłady te pochodzą z badań Unit 42 (lipiec 2025) i pokazują, jak nadużycie homografów jest łączone z przekierowaniami URL oraz omijaniem CAPTCHA w celu obejścia automatycznej analizy.<sup>[[1]](#references)</sup>
 
-## Odnośniki
+## References
 
-- [1] [Iluzja Homoglyph: nie wszystko jest takie, na jakie wygląda](https://unit42.paloaltonetworks.com/homograph-attacks/)
-- [2] [Baza danych znaków Unicode](https://home.unicode.org/)
-- [3] [dnstwist – silnik permutacji domen](https://github.com/elceef/dnstwist)
-
+- [1] [Iluzja homografu: nie wszystko jest tym, czym się wydaje](https://unit42.paloaltonetworks.com/homograph-attacks/)
+- [2] [Tabele kodów znaków Unicode](https://www.unicode.org/charts/)
+- [3] [Standard techniczny Unicode nr 39: mechanizmy bezpieczeństwa Unicode](https://unicode.org/reports/tr39/)
+- [4] [dnstwist – silnik permutacji domen](https://github.com/elceef/dnstwist)
+- [5] [URLCrazy – generator literówek i wariantów domen](https://github.com/urbanadventurer/urlcrazy)
+- [6] [RFC 5890: Umiędzynarodowione nazwy domen dla aplikacji (IDNA): definicje i struktura dokumentu](https://www.rfc-editor.org/rfc/rfc5890)
 {{#include ../../banners/hacktricks-training.md}}

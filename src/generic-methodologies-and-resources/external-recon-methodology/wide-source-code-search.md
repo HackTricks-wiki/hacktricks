@@ -1,50 +1,48 @@
 # Szerokie wyszukiwanie kodu źródłowego
 
-{{#include ../../banners/hacktricks-training.md}}
-
 Celem tej strony jest wymienienie **platform umożliwiających wyszukiwanie kodu** (literalne, regex, uwzględniające symbole lub ograniczone do ścieżek) w **tysiącach/milionach repozytoriów**.
 
 Jest to przydatne do:
 
-- **Wyszukiwania wyciekłych informacji**
+- **Wyszukiwania wycieków informacji**
 - **Wyszukiwania podatnych wzorców**
-- **Mapowania technologii, wewnętrznych hostów, CI/CD i infrastruktury jako kodu**
-- **Przejścia od nazwy firmy/organizacji do repozytoriów, branchy i plików o wysokiej wartości rozpoznawczej**
+- **Mapowania technologii, hostów wewnętrznych, CI/CD i infrastruktury jako kodu**
+- **Przechodzenia od nazwy firmy/org do repozytoriów, branchy i plików o wysokiej wartości**
 
-- [**Sourcebot**](https://www.sourcebot.dev/): Open-source/self-hosted code search. Bardzo przydatne, gdy chcesz zindeksować **wiele repozytoriów** oraz, po odpowiedniej konfiguracji, dodatkowe branche/tagi, zachowując filtry regex, takie jak `repo:`, `file:`, `lang:`, `rev:` i `sym:`.
-- [**SourceGraph**](https://sourcegraph.com/search): Wyszukiwanie w milionach repozytoriów. Regex jest zazwyczaj najbezpieczniejszą opcją; structural search jest dostępne w niektórych wdrożeniach, ale ma ograniczenia wydajnościowe i nie zawsze jest włączone.
-- [**GitHub Code Search**](https://github.com/search): Obsługuje regex, logikę Boolean oraz kwalifikatory, takie jak `repo:`, `org:`, `user:`, `path:`, `language:`, `symbol:`, `content:` i `is:`.<sup>[[1]](#references)</sup>
-- [**GitLab Exact Code Search**](https://docs.gitlab.com/user/search/exact_code_search/): Nowoczesne wyszukiwanie kodu GitLab oparte na Zoekt. Obsługuje tryby exact i regex wraz z filtrami, takimi jak `file:`, `lang:`, `repo:` i `sym:`.<sup>[[2]](#references)</sup>
-- [**GitLab Advanced Search**](https://docs.gitlab.com/user/search/advanced_search/) nadal jest przydatne jako szerszy fallback, ponieważ umożliwia wyszukiwanie w kodzie, komentarzach, commitach, merge requestach i wiki.
-- [**SearchCode**](https://searchcode.com/): Wyszukiwanie kodu w milionach projektów.
-- [**Grep**](https://grep.app/): Szybkie publiczne wyszukiwanie w bardzo dużym korpusie GitHub. Przydatne, gdy chcesz uzyskać drugi widok indeksowania/rankingu dla pivotów **content**, **file** i **path**.
+- [**Sourcebot**](https://www.sourcebot.dev/): Open-source/self-hosted code search z obsługą regex, symboli i filtrowanego wyszukiwania w repozytoriach. Skonfiguruj dodatkowe branche/tagi i wyszukuj w nich za pomocą `rev:`, gdy istotne jest pokrycie branchy.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+- [**Sourcegraph**](https://sourcegraph.com/search): Code search z obsługą regex, logiki boolowskiej, symboli, repozytoriów/plików/języków, branchy/commitów, diffów i zapytań dotyczących wiadomości commitów.<sup>[[8]](#references)[[10]](#references)</sup> Structural search jest opcjonalne, ponieważ aktualna dokumentacja opisuje je jako domyślnie wyłączone i ograniczone wydajnościowo.<sup>[[9]](#references)</sup>
+- [**GitHub Code Search**](https://github.com/search): Obsługuje regex, logikę boolowską oraz kwalifikatory takie jak `repo:`, `org:`, `user:`, `path:`, `language:`, `symbol:`, `content:` i `is:`.<sup>[[1]](#references)</sup>
+- [**GitLab Exact Code Search**](https://docs.gitlab.com/user/search/exact_code_search/): Code search zasilane przez Zoekt, z trybami exact i regex oraz filtrami takimi jak `file:`, `lang:`, `repo:` i `sym:`.<sup>[[2]](#references)</sup>
+- [**GitLab Advanced Search**](https://docs.gitlab.com/user/search/advanced_search/) jest szerszym rozwiązaniem awaryjnym, ponieważ umożliwia wyszukiwanie w kodzie, komentarzach, commitach, merge requestach i wiki.<sup>[[11]](#references)</sup>
+- [**SearchCode**](https://searchcode.com/): Usługa code intelligence z boolowskim/regexowym/strukturalnym wyszukiwaniem kodu oraz pobieraniem plików i symboli.<sup>[[12]](#references)</sup>
+- [**Grep**](https://grep.app/): Publiczne wyszukiwanie kodu w milionie repozytoriów GitHub, obejmujące wyszukiwanie treści, plików i ścieżek.<sup>[[13]](#references)</sup>
 
 ## Przydatne możliwości wyszukiwania
 
-Podczas audytowania organizacji w kontekście bug bounty/red team najczęściej najbardziej przydatne są:
+Podczas audytowania org w kontekście bug bounty/red team najprzydatniejsze możliwości to zazwyczaj:
 
-- Obsługa **regex**, umożliwiająca wyszukiwanie formatów tokenów, schematów URL, nazw niebezpiecznych funkcji lub fragmentów wieloliniowych.
-- **Filtry ścieżek**, pozwalające przejść bezpośrednio do plików o wysokiej wartości, takich jak `.github/workflows/`, `terraform/`, `helm/`, `.env`, `values.yaml`, `secrets.*`, `credentials.*`, `Dockerfile`, `Jenkinsfile` lub `nginx.conf`.
-- **Filtry języków**, pozwalające oddzielić kod aplikacji od IaC i pipeline'ów.
-- **Wyszukiwanie uwzględniające symbole**, służące do enumerowania handlerów, middleware auth, konsumentów webhooków, niebezpiecznych funkcji pomocniczych lub określonych klas/metod.
-- **Operatory Boolean** ograniczające szum: `NOT path:test`, `NOT is:generated`, `NOT is:vendored`, `foo OR bar`.
-- **Wyszukiwanie rewizji/diffów**, gdy jest dostępne, dzięki czemu można odzyskać **usunięte ciągi znaków**, śledzić **zmiany związane z bezpieczeństwem** lub analizować **branche/tagi inne niż domyślne** bez wcześniejszego klonowania wszystkiego.
+- Obsługa **regex**, umożliwiająca wyszukiwanie formatów tokenów, schematów URL, nazw niebezpiecznych funkcji lub fragmentów wielowierszowych.
+- **Filtry ścieżek**, umożliwiające bezpośrednie przejście do plików o wysokiej wartości, takich jak `.github/workflows/`, `terraform/`, `helm/`, `.env`, `values.yaml`, `secrets.*`, `credentials.*`, `Dockerfile`, `Jenkinsfile` lub `nginx.conf`.
+- **Filtry języków**, umożliwiające oddzielenie kodu aplikacji od IaC i pipeline'ów.
+- **Wyszukiwanie uwzględniające symbole**, umożliwiające wyliczenie handlerów, middleware auth, konsumentów webhooków, niebezpiecznych funkcji pomocniczych lub konkretnych klas/metod.
+- **Operatory boolowskie** ograniczające szum: `NOT path:test`, `NOT is:generated`, `NOT is:vendored`, `foo OR bar`.
+- **Wyszukiwanie rewizji/diffów**, jeśli jest dostępne, dzięki któremu można odzyskać **usunięte ciągi znaków**, śledzić **zmiany istotne z punktu widzenia security** lub analizować **niedomyślne branche/tagi** bez konieczności wcześniejszego klonowania wszystkiego.
 
 ## Praktyczna metodologia
 
-1. **Rozpocznij od zindeksowanych platform**, aby szybko zidentyfikować repozytoria, właścicieli, ścieżki i rodziny kodu.
-2. **Przejdź do lokalizacji o wysokiej wartości rozpoznawczej**, zamiast wyszukiwać wyłącznie ogólne ciągi `password`/`secret`.
-3. **Szukaj attack surface, a nie tylko credentials**:
-- Workflow CI/CD, reusable workflows, composite actions i skrypty wdrożeniowe
-- Pliki startowe Dev Containers / Codespaces oraz custom features
+1. **Zacznij od indeksowanych platform**, aby szybko zidentyfikować repozytoria, właścicieli, ścieżki i rodziny kodu.
+2. **Przechodź do lokalizacji o wysokiej wartości**, zamiast wyszukiwać wyłącznie ogólne ciągi `password`/`secret`.
+3. **Szukaj powierzchni ataku, a nie tylko credentials**:
+- Workflow CI/CD, reusable workflows, composite actions i skrypty deploymentu
+- Pliki bootstrap Dev Containers / Codespaces oraz custom features
 - Manifesty Terraform/Helm/Kubernetes
 - Integracje SSO/OIDC/SAML
 - Wewnętrzne URL-e, hosty stagingowe, panele administracyjne, message brokery i endpointy callback
-- Niebezpieczne ścieżki kodu (`exec`, renderowanie template'ów, fetchery SSRF, deserializery, rozpakowywanie ZIP, loadery YAML itd.)
-4. **Sklonuj i przeszukaj lokalnie**, gdy potrzebujesz branchy innych niż domyślny, pełnej historii, lepszej obsługi regex lub automatyzacji zbiorczej.
-5. **Przejdź do dedykowanych skanerów**, gdy celem jest triage lub weryfikacja secrets (przykład znajdziesz na dedykowanej stronie poniżej).
+- Niebezpieczne ścieżki kodu (`exec`, renderowanie szablonów, fetchery SSRF, deserializery, rozpakowywanie ZIP, loadery YAML itd.)
+4. **Klonuj i wyszukuj lokalnie**, gdy potrzebujesz niedomyślnych branchy, pełnej historii, lepszej obsługi regex lub automatyzacji masowej.
+5. **Przejdź do dedykowanych skanerów**, gdy celem jest triage lub weryfikacja secrets (na przykład zobacz poniższą dedykowaną stronę).
 
-### Pomysły na zapytania o wysokiej wartości rozpoznawczej
+### Pomysły na zapytania o wysokiej wartości
 
 Są one celowo szerokie, aby można je było dostosować do składni GitHub, GitLab, Sourcegraph lub Sourcebot:
 ```text
@@ -58,11 +56,11 @@ org:target (path:.devcontainer OR path:devcontainer.json) ("remoteEnv" OR "conta
 org:target ("devcontainer-feature.json" OR "install.sh") ("curl " OR "wget " OR "docker.sock" OR "sudo ")
 org:target ("internal" OR "corp" OR "staging") ("https://" OR "ssh://") NOT path:test
 ```
-### Nowsze pliki o wysokiej wartości, które warto priorytetyzować
+### Nowsze pliki o wysokiej wartości sygnału, które warto traktować priorytetowo
 
-- **`.github/workflows/*.yml`**: Szukaj `pull_request_target`, `workflow_run`, `workflow_call`, `secrets: inherit`, `id-token: write`, `runs-on: self-hosted` oraz wierszy z zewnętrznym `uses:`, przypiętym wyłącznie do tagów/branchy zamiast pełnych commit SHA.<sup>[[3]](#references)</sup>
-- **`.devcontainer/devcontainer.json`**, **`.devcontainer/<variant>/devcontainer.json`** oraz **`.devcontainer.json`**: Wyszukuj `remoteEnv`, `containerEnv`, `initializeCommand`, `postCreateCommand`, `mounts` oraz wskazane Dockerfiles/skrypty. Często ujawniają one wewnętrzne rejestry pakietów, bootstrap URLs, mounty hosta oraz endpointy przeznaczone wyłącznie dla developerów.<sup>[[4]](#references)</sup>
-- **Dev Container Features** (`devcontainer-feature.json`, `install.sh`): Świetne źródło logiki instalatorów specyficznych dla organizacji, wykonywanej podczas tworzenia środowiska.
+- **`.github/workflows/*.yml`**: Przeanalizuj uprzywilejowane wyzwalacze `pull_request_target` i `workflow_run` oraz wiersze innych firm `uses:`, przypięte wyłącznie do tagów/branchy zamiast pełnych commit SHA.<sup>[[3]](#references)</sup> Wyszukaj również `workflow_call`, `secrets: inherit`, `id-token: write` oraz `runs-on: self-hosted`.
+- **`.devcontainer/devcontainer.json`**, **`.devcontainer/<variant>/devcontainer.json`** oraz **`.devcontainer.json`**: Wyszukaj `remoteEnv`, `containerEnv`, `initializeCommand`, `postCreateCommand`, `mounts` oraz wskazane Dockerfiles/skrypty, aby znaleźć wartości środowiskowe, polecenia bootstrapujące, mounty i powiązane pliki.<sup>[[4]](#references)</sup>
+- **Dev Container Features** (`devcontainer-feature.json`, `install.sh`): Przeanalizuj oba pliki, ponieważ minimalny układ Feature obejmuje metadane i skrypt wejściowy `install.sh`.<sup>[[14]](#references)</sup>
 - **Inne pliki CI/control-plane**: `.gitlab-ci.yml`, `azure-pipelines.yml`, `cloudbuild.yaml`, `Jenkinsfile`, `buildkite*`, `atlantis.yaml`, `terragrunt.hcl`, `helmfile.yaml`, `skaffold.yaml`, `argocd*`.
 
 ### Masowe wyszukiwanie lokalne, gdy wyszukiwanie indeksowane nie wystarcza
@@ -81,12 +79,12 @@ repos/
 ```
 Używaj lokalnego wyszukiwania, gdy potrzebujesz:
 
-- Przeszukiwać **non-default branches** lub **tags**
-- Przeszukiwać **git history**
-- Uruchamiać zapytania **PCRE2/multiline** z większą intensywnością
-- Wykonywać wstępny triage wielu repozytoriów bez ograniczeń UI
+- Przeszukiwać **gałęzie inne niż domyślna** lub **tagi**
+- Przeszukiwać **historię git**
+- Uruchamiać bardziej zaawansowane zapytania **PCRE2/multiline**
+- Wstępnie analizować wiele repozytoriów bez limitów interfejsu
 
-### Jawnie przeszukuj historię, branche i różnice zmian
+### Jawnie przeszukuj historię, gałęzie i różnice
 ```bash
 REPO_DIR=repos/some-repo
 git -C "$REPO_DIR" fetch --all --tags --prune
@@ -98,32 +96,28 @@ done
 
 git -C "$REPO_DIR" log --all -p -G 'gh[pousr]_|github_pat_|BEGIN [A-Z ]+PRIVATE KEY|internal.*https?://' -- .
 ```
-Jest to szczególnie przydatne, gdy interesujący ciąg znaków istniał wyłącznie w **release branch**, **tagu** lub **usuniętym commicie**. Jeśli Twoje wdrożenie Sourcegraph to obsługuje, wyszukiwania `type:diff` i `type:commit` są doskonałym sposobem na wykonanie pivotu bez klonowania w przypadku tego samego problemu.
+Jest to szczególnie przydatne, gdy interesujący ciąg znaków istniał wyłącznie w **release branch**, **tag** lub **deleted commit**. Jeśli Twoje wdrożenie Sourcegraph to obsługuje, wyszukiwania `type:diff` i `type:commit` są doskonałym podejściem no-clone do tego samego problemu.<sup>[[8]](#references)[[10]](#references)</sup>
 
-## Typowe ślepe punkty
+## Common blind spots
 
-- Często indeksowana jest wyłącznie **default branch**. Nie zakładaj, że code search obejmuje wszystkie branche, tagi i historię.
+- Często stosowane jest indeksowanie **wyłącznie domyślnej gałęzi**. Nie zakładaj, że code search obejmuje wszystkie gałęzie/tagi/historię.
 - **Duże pliki, vendored code, generated code lub archiwa** mogą być pomijane albo generować dużo szumu.
-- **Komentarze, issues, PR-y, gists i wiki** często znajdują się poza zakresem ogólnego code search i mogą wymagać narzędzi specyficznych dla danej platformy.
-- Konfiguracje **Codespaces / devcontainer** mogą być zależne od brancha i znajdować się w kilku ścieżkach `.devcontainer/<variant>/devcontainer.json`, dlatego czysty default branch nie oznacza, że środowisko deweloperskie jest wszędzie czyste.
-- **Reusable workflows/actions i devcontainer features** mogą znajdować się poza oczywistym plikiem. Szukaj w `.github/actions/`, `action.yml`, `action.yaml`, `devcontainer-feature.json` oraz `install.sh`, a nie tylko w pliku workflow znajdującym się w katalogu głównym.
-- **Składnia wyszukiwania różni się między platformami**. Dork działający w GitHub Code Search może wymagać niewielkich zmian w GitLab, Sourcegraph lub Sourcebot.
+- **Komentarze, issues, PR-y, gists i wiki** często wykraczają poza zakres ogólnego code search i mogą wymagać narzędzi charakterystycznych dla danej platformy.
+- **Konfiguracje Codespaces / devcontainer mogą być zależne od gałęzi**. Mogą znajdować się w kilku ścieżkach `.devcontainer/<variant>/devcontainer.json`, dlatego czysta domyślna gałąź nie oznacza, że środowisko deweloperskie jest wszędzie bezpieczne.<sup>[[4]](#references)</sup>
+- **Reusable workflows/actions i devcontainer features mogą znajdować się poza oczywistym plikiem**. Przeszukuj `.github/actions/`, `action.yml`, `action.yaml`, `devcontainer-feature.json` oraz `install.sh`, a nie tylko plik workflow znajdujący się w katalogu głównym.
+- **Składnia wyszukiwania różni się w zależności od platformy**. Dork działający w GitHub Code Search może wymagać niewielkich zmian w GitLab, Sourcegraph lub Sourcebot.
 
-### Pułapki specyficzne dla platform
+### Platform-specific gotchas
 
-- **GitHub Code Search** doskonale nadaje się do szybkiego recon, ale przeszukuje wyłącznie **default branch**. Jeśli potrzebujesz feature branchy, usuniętych sekretów lub historycznego kodu, sklonuj repozytorium i przeszukaj je lokalnie.
-- **GitLab Exact Code Search** również ma ograniczenie dotyczące **default branch** i indeksuje tylko mniejsze pliki, ale **Advanced Search** nadal może być przydatne do przeszukiwania komentarzy, commitów i wiki.<sup>[[2]](#references)</sup>
-- **Sourcebot** domyślnie indeksuje **default branch**, ale można go skonfigurować tak, aby indeksował dodatkowe branche i tagi, a następnie przeszukiwać je za pomocą filtrów `rev:`. Jest to bardzo wygodne podczas wewnętrznych audytów skoncentrowanych na konkretnym branchu lub tagu, gdy kontrolujesz indeks.
-- Wyszukiwanie regex w **Sourcegraph** jest zwykle najbardziej przewidywalną opcją podczas działań offensive; structural search traktuj jako opcjonalny bonus, a nie gwarantowaną funkcję. Jeśli wdrożenie to obsługuje, zapytania `type:diff` i `type:commit` bardzo dobrze nadają się do odzyskiwania usuniętych ciągów znaków lub wyszukiwania niedawnych zmian związanych z bezpieczeństwem.
+- **GitHub Code Search** jest przydatny do szybkiego recon, ale przeszukuje wyłącznie **domyślną gałąź**. Jeśli potrzebujesz feature branches, deleted secrets lub historical code, sklonuj repozytorium i przeszukaj je lokalnie.<sup>[[15]](#references)</sup>
+- **GitLab Exact Code Search** ma ograniczenie do **domyślnej gałęzi** i indeksuje wyłącznie pliki mniejsze niż 1 MB oraz zawierające mniej niż 20 000 trigramów.<sup>[[2]](#references)</sup> **Advanced Search** nadal może obejmować komentarze, commity i wiki.<sup>[[11]](#references)</sup>
+- **Sourcebot** domyślnie indeksuje **domyślną gałąź**, ale można go skonfigurować tak, aby indeksował dodatkowe gałęzie/tagi, a następnie przeszukiwać je za pomocą filtrów `rev:`, gdy kontrolujesz indeks.<sup>[[7]](#references)</sup>
+- **Sourcegraph** obsługuje zapytania regex, symbol, diff i commit; structural search stosuj wyłącznie tam, gdzie jest włączone, i uwzględniaj udokumentowane ograniczenia wydajności.<sup>[[8]](#references)[[9]](#references)[[10]](#references)</sup>
 
 > [!WARNING]
-> Gdy szukasz leaków w repozytorium i uruchamiasz coś takiego jak `git log -p`, nie zapominaj, że mogą istnieć **inne branche z innymi commitami**, które zawierają sekrety!
+> Gdy szukasz leaków w repozytorium i uruchamiasz coś takiego jak `git log -p`, nie zapominaj, że mogą istnieć **inne gałęzie z innymi commitami**, zawierającymi secrets!
 
-Informacje dotyczące wyszukiwania sekretów, GitHub dorks obejmujących całą organizację oraz narzędzi takich jak TruffleHog/Gitleaks znajdziesz tutaj:
-
-{{#ref}}
-github-leaked-secrets.md
-{{#endref}}
+W przypadku dedykowanego secret hunting, org-wide GitHub dorks oraz narzędzi takich jak TruffleHog/Gitleaks sprawdź [stronę o wyciekach secrets z GitHub](github-leaked-secrets.md).
 
 ## References
 
@@ -131,5 +125,15 @@ github-leaked-secrets.md
 - [2] [GitLab Exact Code Search](https://docs.gitlab.com/user/search/exact_code_search/)
 - [3] [Dokumentacja bezpiecznego użycia GitHub Actions](https://docs.github.com/en/actions/reference/security/secure-use)
 - [4] [Dokumentacja metadanych Dev Container](https://containers.dev/implementors/json_reference/)
-
+- [5] [Sourcebot](https://www.sourcebot.dev/)
+- [6] [API wyszukiwania Sourcebot](https://docs.sourcebot.dev/api-reference/search-%26-navigation/search-code)
+- [7] [Indeksowanie wielu gałęzi w Sourcebot](https://docs.sourcebot.dev/docs/features/search/multi-branch-indexing)
+- [8] [Sourcegraph Code Search](https://sourcegraph.com/docs/code-search)
+- [9] [Sourcegraph Structural Search](https://sourcegraph.com/docs/code-search/types/structural)
+- [10] [Składnia zapytań wyszukiwania Sourcegraph](https://sourcegraph.com/docs/code-search/queries)
+- [11] [GitLab Advanced Search](https://docs.gitlab.com/user/search/advanced_search/)
+- [12] [SearchCode](https://searchcode.com/)
+- [13] [Grep.app](https://grep.app/)
+- [14] [Tworzenie Dev Container Feature](https://containers.dev/guide/author-a-feature)
+- [15] [Narzędzia do badania incydentów bezpieczeństwa](https://docs.github.com/en/enterprise-cloud%40latest/code-security/reference/security-incident-response/investigation-tools)
 {{#include ../../banners/hacktricks-training.md}}

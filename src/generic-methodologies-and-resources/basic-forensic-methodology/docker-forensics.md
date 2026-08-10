@@ -1,6 +1,4 @@
-# Kryminalistyka Docker
-
-{{#include ../../banners/hacktricks-training.md}}
+# Analiza śledcza Docker
 
 ## Modyfikacja kontenera
 
@@ -10,7 +8,7 @@ docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
-Możesz łatwo **znaleźć modyfikacje wprowadzone w tym kontenerze względem obrazu**, używając:
+Możesz łatwo **znaleźć zmiany wprowadzone w systemie plików tego kontenera od momentu jego utworzenia** za pomocą:<sup>[[1]](#references)</sup>
 ```bash
 docker diff wordpress
 C /var
@@ -24,72 +22,91 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-W poprzednim poleceniu **C** oznacza **Changed**, a **A** — **Added**.\
-Jeśli znajdziesz interesujący zmodyfikowany plik, taki jak `/etc/shadow`, możesz pobrać go z kontenera, aby sprawdzić, czy nie doszło do złośliwej aktywności:
+W poprzednim poleceniu **C** oznacza **Changed**, a **A** oznacza **Added**.<sup>[[1]](#references)</sup>\
+Jeśli znajdziesz, że jakiś interesujący plik, taki jak `/etc/shadow`, został zmodyfikowany, możesz pobrać go z kontenera, aby sprawdzić, czy nie zachodzi złośliwa aktywność:<sup>[[2]](#references)</sup>
 ```bash
-docker cp wordpress:/etc/shadow.
+docker cp wordpress:/etc/shadow shadow
 ```
-Możesz również **porównać go z oryginalnym** plikiem, uruchamiając nowy kontener i wyodrębniając z niego plik:
+Możesz również **porównać go z oryginalnym**, uruchamiając nowy kontener i wyodrębniając z niego plik:<sup>[[2]](#references)[[3]](#references)</sup>
 ```bash
 docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
 diff original_shadow shadow
 ```
-Jeśli stwierdzisz, że **dodano jakiś podejrzany plik**, możesz uzyskać dostęp do kontenera i go sprawdzić:
+Jeśli stwierdzisz, że **dodano jakiś podejrzany plik**, możesz uzyskać dostęp do kontenera i go sprawdzić:<sup>[[4]](#references)</sup>
 ```bash
 docker exec -it wordpress bash
 ```
 ## Modyfikacje obrazów
 
-Gdy otrzymasz wyeksportowany obraz Docker (prawdopodobnie w formacie `.tar`), możesz użyć narzędzia [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases), aby **wyodrębnić podsumowanie modyfikacji**:
+Gdy otrzymasz wyeksportowany docker image (prawdopodobnie w formacie `.tar`), możesz użyć narzędzia [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases), aby **wyodrębnić podsumowanie modyfikacji**:<sup>[[5]](#references)[[6]](#references)</sup>
 ```bash
 docker save <image> > image.tar #Export the image to a .tar file
 container-diff analyze -t sizelayer image.tar
 container-diff analyze -t history image.tar
 container-diff analyze -t metadata image.tar
 ```
-Następnie możesz **zdekompresować** obraz i **uzyskać dostęp do blobów**, aby wyszukać podejrzane pliki, które mogłeś znaleźć w historii zmian:
+Następnie możesz **zdekompresować** obraz i **uzyskać dostęp do blobów**, aby wyszukać podejrzane pliki, które mogłeś znaleźć w historii zmian:<sup>[[7]](#references)</sup>
 ```bash
 tar -xf image.tar
 ```
 ### Podstawowa analiza
 
-Możesz uzyskać **podstawowe informacje** z obrazu, uruchamiając:
+Możesz uzyskać **podstawowe informacje** z obrazu, uruchamiając:<sup>[[8]](#references)</sup>
 ```bash
 docker inspect <image>
 ```
-Możesz również uzyskać podsumowanie **historii zmian** za pomocą:
+Możesz również uzyskać podsumowanie **historii zmian** za pomocą:<sup>[[9]](#references)</sup>
 ```bash
 docker history --no-trunc <image>
 ```
-Możesz także wygenerować **dockerfile z obrazu** za pomocą:
+Możesz również wygenerować **dockerfile z obrazu** za pomocą:<sup>[[10]](#references)</sup>
 ```bash
 alias dfimage="docker run -v /var/run/docker.sock:/var/run/docker.sock --rm alpine/dfimage"
-dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
+dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers
 ```
 ### Dive
 
-Aby znaleźć dodane/zmodyfikowane pliki w obrazach Docker, możesz również użyć narzędzia [**dive**](https://github.com/wagoodman/dive) (pobierz je z sekcji [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)):
+Aby znaleźć dodane/zmodyfikowane pliki w docker images, możesz również użyć narzędzia [**dive**](https://github.com/wagoodman/dive) (pobierz je z sekcji [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0):<sup>[[11]](#references)[[12]](#references)</sup>
+
+Przed otwarciem image tag za pomocą dive załaduj zapisane archiwum do Docker:<sup>[[11]](#references)[[13]](#references)</sup>
 ```bash
 #First you need to load the image in your docker repo
-sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
+sudo docker load < image.tar
 Loaded image: flask:latest
 
 #And then open it with dive:
 sudo dive flask:latest
 ```
-Umożliwia to **nawigowanie po różnych blobach obrazów docker** i sprawdzanie, które pliki zostały zmodyfikowane/dodane. **Czerwony** oznacza dodane, a **żółty** zmodyfikowane. Użyj klawisza **tab**, aby przejść do innego widoku, oraz **spacji**, aby zwinąć/rozwinąć foldery.
+Umożliwia to **nawigowanie po różnych blobach obrazów docker** oraz sprawdzanie, które pliki zostały zmodyfikowane/dodane/usunięte. Użyj **tab**, aby przejść do innego widoku, oraz **spacji**, aby zwijać/rozwijać foldery.<sup>[[11]](#references)</sup>
 
-Za pomocą die nie będziesz mieć dostępu do zawartości poszczególnych etapów obrazu. Aby to zrobić, musisz **rozpakować każdą warstwę i uzyskać do niej dostęp**.\
-Możesz rozpakować wszystkie warstwy obrazu z katalogu, w którym obraz został rozpakowany, wykonując:
+Za pomocą dive nie będzie można uzyskać dostępu do zawartości poszczególnych stages obrazu. Aby to zrobić, należy **zdekompresować każdą warstwę i uzyskać do niej dostęp**.\
+Możesz zdekompresować wszystkie warstwy obrazu z katalogu, w którym obraz został zdekompresowany, wykonując:
 ```bash
 tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
 ## Dane uwierzytelniające z pamięci
 
-Zauważ, że gdy uruchomisz kontener docker wewnątrz hosta, **możesz zobaczyć procesy działające w kontenerze z hosta**, uruchamiając po prostu `ps -ef`
+W systemie Linux nadrzędna przestrzeń nazw PID hosta może widzieć procesy w podrzędnej przestrzeni nazw PID kontenera, dlatego lista procesów hosta, taka jak `ps -ef`, może je wyświetlać.<sup>[[14]](#references)</sup>
 
-Dlatego (jako root) możesz **zrzucić pamięć procesów** z hosta i wyszukać w niej **dane uwierzytelniające**, dokładnie [**tak jak w poniższym przykładzie**](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#process-memory).
+Gdy dane uwierzytelniające hosta, capabilities oraz polityka LSM/ptrace na to pozwalają, odpowiednio uprzywilejowany investigator hosta może **zrzucić pamięć procesu** i wyszukać w niej **dane uwierzytelniające**, [**tak jak w poniższym przykładzie**](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#process-memory).<sup>[[15]](#references)</sup>
 
+## References
+
+- [1] [Różnice kontenera Docker](https://docs.docker.com/reference/cli/docker/container/diff/)
+- [2] [Kopiowanie kontenera Docker](https://docs.docker.com/reference/cli/docker/container/cp/)
+- [3] [Uruchamianie kontenera Docker](https://docs.docker.com/reference/cli/docker/container/run)
+- [4] [Wykonywanie poleceń w kontenerze Docker](https://docs.docker.com/reference/cli/docker/container/exec)
+- [5] [GoogleContainerTools/container-diff](https://github.com/GoogleContainerTools/container-diff)
+- [6] [Definicje analyzerów container-diff](https://github.com/GoogleContainerTools/container-diff/blob/master/differs/differs.go)
+- [7] [Zapisywanie obrazu Docker](https://docs.docker.com/reference/cli/docker/image/save/)
+- [8] [Inspekcja obrazu Docker](https://docs.docker.com/reference/cli/docker/image/inspect/)
+- [9] [Historia obrazu Docker](https://docs.docker.com/reference/cli/docker/image/history/)
+- [10] [alpine-docker/dfimage](https://github.com/alpine-docker/dfimage)
+- [11] [README Dive v0.10.0](https://github.com/wagoodman/dive/blob/v0.10.0/README.md)
+- [12] [Wydanie Dive v0.10.0](https://github.com/wagoodman/dive/releases/tag/v0.10.0)
+- [13] [Ładowanie obrazu Docker](https://docs.docker.com/reference/cli/docker/image/load/)
+- [14] [pid_namespaces(7)](https://man7.org/linux/man-pages/man7/pid_namespaces.7.html)
+- [15] [ptrace(2)](https://man7.org/linux/man-pages/man2/ptrace.2.html)
 {{#include ../../banners/hacktricks-training.md}}
