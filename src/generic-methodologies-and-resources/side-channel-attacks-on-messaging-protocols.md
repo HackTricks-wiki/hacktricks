@@ -1,59 +1,57 @@
-# Mashambulizi ya Side-Channel ya Delivery Receipt katika E2EE Messengers
+# Delivery Receipt Side-Channel Attacks in E2EE Messengers
 
-{{#include ../banners/hacktricks-training.md}}
+Delivery receipts are mandatory in modern end-to-end encrypted (E2EE) messengers because clients need to know when a ciphertext was decrypted so they can discard ratcheting state and ephemeral keys. The server forwards opaque blobs, so device acknowledgements (double checkmarks) are emitted by the recipient after successful decryption. Measuring the round-trip time (RTT) between an attacker-triggered action and the corresponding delivery receipt exposes a high-resolution timing channel that leaks device state, online presence, and can be abused for covert DoS. Multi-device "client-fanout" deployments amplify the leakage because every registered device decrypts the probe and returns its own receipt.<sup>[[1]](#references)</sup>
 
-Delivery receipts ni lazima katika E2EE messengers za kisasa kwa sababu clients zinahitaji kujua wakati ciphertext ilipodecryptiwa ili ziweze kutupa ratcheting state na ephemeral keys. Server inasambaza opaque blobs, kwa hiyo device acknowledgements (double checkmarks) hutumwa na recipient baada ya decryption kufanikiwa. Kupima round-trip time (RTT) kati ya action iliyoanzishwa na attacker na delivery receipt inayolingana hufichua timing channel yenye resolution ya juu inayoleak hali ya device, uwepo online, na inaweza kutumiwa kwa covert DoS. Deployments za multi-device za aina ya "client-fanout" huongeza leakage kwa sababu kila device iliyosajiliwa inadecrypt probe na kutuma receipt yake.<sup>[[1]](#references)</sup>
+## Delivery receipt sources vs. user-visible signals
 
-## Vyanzo vya delivery receipt dhidi ya signals zinazoonekana kwa mtumiaji
-
-Chagua aina za messages ambazo hutuma delivery receipt kila mara lakini hazionyeshi UI artifacts kwa victim. Jedwali lililo hapa chini linatoa muhtasari wa tabia iliyothibitishwa kwa majaribio:<sup>[[1]](#references)</sup>
+Choose message types that always emit a delivery receipt but do not surface UI artifacts on the victim. The table below summarises the empirically confirmed behaviour:<sup>[[1]](#references)</sup>
 
 | Messenger | Action | Delivery receipt | Victim notification | Notes |
 |-----------|--------|------------------|---------------------|-------|
-| **WhatsApp** | Text message | ● | ● | Huleta kelele kila mara → ni muhimu tu kwa kuanzisha state. |
-| | Reaction | ● | ◐ (ikiwa tu reacting to victim message) | Self-reactions na removals hubaki kimya. |
-| | Edit | ● | Silent push inayotegemea platform | Edit window ≈20 min; bado ina-ack baada ya expiry. |
-| | Delete for everyone | ● | ○ | UI inaruhusu ~60 h, lakini packets za baadaye bado zina-ack. |
-| **Signal** | Text message | ● | ● | Ina limitations sawa na WhatsApp. |
-| | Reaction | ● | ◐ | Self-reactions hazionekani kwa victim. |
-| | Edit/Delete | ● | ○ | Server inalazimisha window ya ~48 h, inaruhusu edits hadi 10, lakini packets zilizochelewa bado zina-ack. |
-| **Threema** | Text message | ● | ● | Multi-device receipts zina-aggregated, kwa hiyo RTT moja tu kwa kila probe huonekana. |
+| **WhatsApp** | Text message | ● | ● | Always noisy → only useful to bootstrap state. |
+| | Reaction | ● | ◐ (only if reacting to victim message) | Self-reactions and removals stay silent. |
+| | Edit | ● | Platform-dependent silent push | Edit window ≈20 min; still ack’d after expiry. |
+| | Delete for everyone | ● | ○ | UI allows ~60 h, but later packets still ack’d. |
+| **Signal** | Text message | ● | ● | Same limitations as WhatsApp. |
+| | Reaction | ● | ◐ | Self-reactions invisible to victim. |
+| | Edit/Delete | ● | ○ | Server enforces ~48 h window, allows up to 10 edits, but late packets still ack’d. |
+| **Threema** | Text message | ● | ● | Multi-device receipts are aggregated, so only one RTT per probe becomes visible. |
 
-Legend: ● = kila mara, ◐ = kwa masharti, ○ = kamwe. Tabia ya UI inayotegemea platform imeonyeshwa ndani ya jedwali. Zima read receipts ikihitajika, lakini delivery receipts haziwezi kuzimwa katika WhatsApp au Signal.<sup>[[1]](#references)</sup>
+Legend: ● = always, ◐ = conditional, ○ = never. Platform-dependent UI behaviour is noted inline. Disable read receipts if needed, but delivery receipts cannot be turned off in WhatsApp or Signal.<sup>[[1]](#references)</sup>
 
-## Malengo na models za attacker
+## Attacker goals and models
 
-* **G1 – Device fingerprinting:** Hesabu receipts ngapi zinawasili kwa kila probe, cluster RTTs ili kubaini OS/client (Android dhidi ya iOS au desktop), na fuatilia mabadiliko ya online/offline.
-* **G2 – Behavioural monitoring:** Chukulia mfululizo wa RTT wa frequency ya juu (≈1 Hz ni stable) kama time-series na infer screen on/off, app foreground/background, muda wa kusafiri dhidi ya muda wa kazi, n.k.
-* **G3 – Resource exhaustion:** Weka radios/CPUs za kila victim device zikiwa active kwa kutuma silent probes zisizoisha, ukimaliza battery/data na kushusha ubora wa VoIP/RTC.<sup>[[1]](#references)</sup>
+* **G1 – Device fingerprinting:** Count how many receipts arrive per probe, cluster RTTs to infer OS/client (Android vs iOS vs desktop), and watch online/offline transitions.
+* **G2 – Behavioural monitoring:** Treat the high-frequency RTT series (≈1 Hz is stable) as a time-series and infer screen on/off, app foreground/background, commuting vs working hours, etc.
+* **G3 – Resource exhaustion:** Keep radios/CPUs of every victim device awake by sending never-ending silent probes, draining battery/data and degrading video-call quality.<sup>[[1]](#references)</sup>
 
-Threat actors wawili wanatosha kueleza abuse surface:<sup>[[1]](#references)</sup>
+Two threat actors are sufficient to describe the abuse surface:<sup>[[1]](#references)</sup>
 
-1. **Creepy companion:** Tayari anashiriki chat na victim na anatumia vibaya self-reactions, reaction removals, au edits/deletes zinazorudiwa zinazohusishwa na message IDs zilizopo.
-2. **Spooky stranger:** Anasajili burner account na kutuma reactions zinazorejelea message IDs ambazo hazijawahi kuwepo katika local conversation; WhatsApp na Signal bado huzidecrypt na kuzikubali hata UI inapotupa state change, kwa hiyo conversation ya awali haihitajiki.
+1. **Creepy companion:** already shares a chat with the victim and abuses self-reactions, reaction removals, or repeated edits/deletes tied to existing message IDs.
+2. **Spooky stranger:** registers a burner account and sends reactions referencing message IDs that never existed in the local conversation; WhatsApp and Signal still decrypt and acknowledge them even though the UI discards the state change, so no prior conversation is required.
 
-## Tooling ya raw protocol access
+## Tooling for raw protocol access
 
-Tegemea clients zinazofichua E2EE protocol ya msingi ili uweze kutengeneza packets nje ya UI constraints, kubainisha `message_id`s za kiholela, na kurekodi timestamps sahihi:
+Rely on clients that expose enough of the underlying E2EE protocol to craft supported packets outside UI constraints and log precise timestamps; arbitrary message IDs require checking each implementation:
 
-* **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web protocol) au [Cobalt](https://github.com/Auties00/Cobalt) (mobile-oriented) hukuruhusu kutuma raw `ReactionMessage`, `ProtocolMessage` (edit/delete), na `Receipt` frames huku ukiweka double-ratchet state katika sync.<sup>[[3]](#references)[[4]](#references)</sup>
-* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) pamoja na [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) hufichua kila message type kupitia CLI/API.<sup>[[5]](#references)[[7]](#references)</sup> Syntax ya sasa ya `signal-cli` hutumia `sendReaction RECIPIENT --target-author --target-timestamp`; endelea kuendesha `receive` au `daemon` ili delivery receipts zikusanywe kwa kweli.<sup>[[6]](#references)</sup> Mfano wa self-reaction toggle:
+* **WhatsApp:** [whatsmeow](https://github.com/tulir/whatsmeow) (Go, WhatsApp Web multidevice API) documents sending and receiving delivery receipts; [Cobalt](https://github.com/Auties00/Cobalt) (unofficial Java/Kotlin Web and mobile API) documents message operations such as reacting, editing, and deleting. Use their documented APIs rather than assuming every internal frame is exposed.<sup>[[3]](#references)[[4]](#references)</sup>
+* **Signal:** [signal-cli](https://github.com/AsamK/signal-cli) exposes CLI, JSON-RPC, and D-Bus interfaces, while [libsignal-service-java](https://github.com/signalapp/libsignal-service-java) is a Java library for communicating with Signal.<sup>[[5]](#references)[[7]](#references)</sup> Current `signal-cli` syntax uses `sendReaction RECIPIENT --target-author --target-timestamp`; keep `receive` or `daemon` running so protocol updates continue to be processed.<sup>[[6]](#references)</sup> Example self-reaction toggle:
 ```bash
 signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
 --target-timestamp 1712345678901 --emoji "👍"
 signal-cli -a +12025550100 sendReaction +12025550123 --target-author +12025550100 \
 --target-timestamp 1712345678901 --remove
 ```
-* **Threema:** Source ya Android client inaeleza jinsi delivery receipts zinavyounganishwa kabla hazijaondoka kwenye device, ikifafanua kwa nini side channel ina bandwidth ndogo sana hapo.<sup>[[1]](#references)</sup>
-* **Turnkey PoCs:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) inakuja na WhatsApp/Signal backends, kwa default hutumia silent delete probes, na huweka labels za `active` dhidi ya `standby` kwa rolling-median threshold (`RTT < 0.9 * median`).<sup>[[8]](#references)</sup> [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) ni CLI nyepesi inayolenga WhatsApp, yenye `--delay`, `--concurrent`, CSV/Prometheus exporters, na output inayofaa Grafana.<sup>[[9]](#references)</sup> Zichukulie zote mbili kama reconnaissance helpers badala ya protocol references; jambo muhimu ni jinsi code kidogo inavyohitajika mara raw client access inapopatikana.
+* **Threema:** Measurements in the Careless Whisper paper found that delivery receipts are synchronized across devices, so only one receipt per message is exposed even in a multi-device setup.<sup>[[1]](#references)</sup>
+* **Turnkey PoCs:** [device-activity-tracker](https://github.com/gommzystudio/device-activity-tracker) ships WhatsApp/Signal backends, defaults to silent delete probes, and labels `active` vs `standby` with a rolling-median threshold (`RTT < 0.9 * median`).<sup>[[8]](#references)</sup> [careless-whisper-python](https://github.com/ctrlsam/careless-whisper-python) is a lighter WhatsApp-first CLI with `--delay`, `--concurrent`, CSV/Prometheus exporters, and Grafana-friendly output.<sup>[[9]](#references)</sup> Treat both as reconnaissance helpers rather than protocol references; the important takeaway is how little code is needed once raw client access exists.
 
-Custom tooling isipopatikana, bado unaweza kuanzisha silent actions kutoka WhatsApp Web au Signal Desktop na kusniff encrypted websocket/WebRTC channel, lakini raw APIs huondoa UI delays na kuruhusu operations zisizo valid.
+When custom tooling is unavailable, official clients or browser developer tools can still trigger silent actions and expose encrypted traffic timing; raw APIs remove UI delays and allow invalid operations.<sup>[[1]](#references)</sup>
 
 ## Creepy companion: silent sampling loop
 
-1. Chagua message yoyote ya zamani uliyoandika kwenye chat ili victim asione "reaction" balloons zikibadilika.
-2. Badilisha kati ya emoji inayoonekana na empty reaction payload (iliyoencode kama `""` katika WhatsApp protobufs au `--remove` katika signal-cli). Kila transmission hutoa device ack licha ya kutokuwepo kwa UI delta kwa victim.
-3. Weka timestamp ya muda wa kutuma na kila delivery receipt inayowasili. Loop ya 1 Hz kama iliyo hapa chini hutoa per-device RTT traces bila kikomo:
+1. Pick any historical message you authored in the chat so the victim never sees "reaction" balloons change.
+2. Alternate between a visible emoji and an empty reaction payload (encoded as `""` in WhatsApp protobufs or `--remove` in signal-cli). Each transmission yields a device ack despite no UI delta for the victim.
+3. Timestamp the send time and every delivery receipt arrival. A 1 Hz loop such as the following gives per-device RTT traces indefinitely:
 ```python
 while True:
 send_reaction(msg_id, "👍")
@@ -62,68 +60,68 @@ send_reaction(msg_id, "")  # removal
 log_receipts()
 time.sleep(0.5)
 ```
-4. Kwa sababu WhatsApp/Signal zinakubali reaction updates zisizo na kikomo, attacker hahitaji kutuma chat content mpya wala kuwa na wasiwasi kuhusu edit windows.<sup>[[1]](#references)</sup>
+4. Because WhatsApp/Signal accept unlimited reaction updates, the attacker never needs to post new chat content or worry about edit windows.<sup>[[1]](#references)</sup>
 
-## Spooky stranger: kuprobe phone numbers za kiholela
+## Spooky stranger: probing arbitrary phone numbers
 
-1. Sajili WhatsApp/Signal account mpya na upate public identity keys za target number (hufanyika automatically wakati wa session setup).
-2. Tengeneza reaction/edit/delete packet inayorejelea random `message_id` ambayo haijawahi kuonekana na upande wowote (WhatsApp inakubali GUID za kiholela za `key.id`; Signal hutumia millisecond timestamps).
-3. Tuma packet hata kama hakuna thread. Victim devices huidecrypt, hushindwa kupata base message, hutupa state change, lakini bado hu-ack incoming ciphertext na kutuma device receipts kwa attacker.
-4. Rudia continuously ili kujenga RTT series bila kamwe kuonekana kwenye chat list ya victim.<sup>[[1]](#references)</sup>
+1. Register a fresh WhatsApp/Signal account and fetch the public identity keys for the target number (done automatically during session setup).
+2. Craft a reaction packet that references a random `message_id` never seen by either party; the paper reports that both WhatsApp and Signal accept such reactions and still generate delivery receipts.<sup>[[1]](#references)</sup>
+3. Send the packet even though no thread exists. The victim devices decrypt it, fail to match the base message, discard the state change, but still acknowledge the incoming ciphertext, sending device receipts back to the attacker.
+4. Repeat continuously to build RTT series without a prior conversation or visible notification.<sup>[[1]](#references)</sup>
 
-Ikiwa kwanza unahitaji kugundua ni numbers zipi zimesajiliwa au unataka kuandaa device inventories kwa kiwango kikubwa, unganisha hii na [contact-discovery / registration oracles](../pentesting-web/registration-vulnerabilities.md) badala ya kukisia random E.164 ranges kwa mkono.
+If you first need to discover which numbers are registered or want to pre-seed device inventories at scale, chain this with [contact-discovery / registration oracles](../pentesting-web/registration-vulnerabilities.md) rather than guessing random E.164 ranges by hand.
 
-Kazi iliyochapishwa kuhusu contact-discovery ilionyesha kwa nini hili ni muhimu operationally: kwa kutumia accurate phone-prefix tables na resources za wastani, researchers waliweza kuquery takriban `10%` ya US mobile numbers kwenye WhatsApp na `100%` kwenye Signal kabla ya kuendelea na targeted probing.<sup>[[11]](#references)</sup> Kwa matumizi halisi, pre-filtering ya live accounts kwanza huweka silent-probe budget kwenye numbers ambazo zita-decrypt packets kwa kweli.
+Published contact-discovery work showed why this matters operationally: with accurate phone-prefix tables and modest resources, researchers were able to query roughly `10%` of US mobile numbers on WhatsApp and `100%` on Signal before moving on to targeted probing.<sup>[[11]](#references)</sup> In practice, pre-filtering live accounts first keeps your silent-probe budget focused on numbers that will actually decrypt packets.
 
-WhatsApp builds za hivi karibuni pia zinaonyesha `Settings -> Privacy -> Advanced -> Block unknown account messages`.<sup>[[10]](#references)</sup> Ichukulie kama throughput limiter, si fix: huathiri zaidi sustained stranger-only flooding na haina umuhimu pale ambapo tayari wewe ni known contact.
+Recent WhatsApp builds also expose `Settings -> Privacy -> Advanced -> Block unknown account messages`.<sup>[[10]](#references)</sup> Treat it as a throughput limiter: the tracker documentation says WhatsApp blocks high-volume messages from unknown accounts but does not disclose the threshold, so it does not fully prevent probe reactions.<sup>[[8]](#references)</sup>
 
-## Kutumia tena edits na deletes kama covert triggers
+## Recycling edits and deletes as covert triggers
 
-* **Repeated deletes:** Baada ya message kufutwa kwa kila mtu mara moja, delete packets zaidi zinazorejelea `message_id` hiyo hazina UI effect, lakini kila device bado hu-decrypt na kuzi-ack.
-* **Out-of-window operations:** WhatsApp inalazimisha takriban windows za delete za ~60 h na edit za ~20 min katika UI; Signal inalazimisha ~48 h. Crafted protocol messages zilizo nje ya windows hizi hupuzwa kimya kwenye victim device, lakini receipts hutumwa, hivyo attackers wanaweza kuprobe kwa muda usio na kikomo muda mrefu baada ya conversation kuisha.
-* **Invalid payloads:** Malformed edit bodies au deletes zinazorejelea messages ambazo tayari zimepurge hutoa tabia hiyo hiyo—decryption pamoja na receipt, bila artefacts zinazoonekana kwa mtumiaji.<sup>[[1]](#references)</sup>
+* **Repeated deletes:** After a message is deleted-for-everyone once, further delete packets referencing the same `message_id` have no UI effect but every device still decrypts and acknowledges them.
+* **Out-of-window operations:** WhatsApp enforces ~60 h delete / ~20 min edit windows in the UI; Signal enforces ~48 h. Crafted protocol messages outside these windows are silently ignored on the victim device yet receipts are transmitted, so attackers can probe indefinitely long after the conversation ended.
+* **Invalid payloads:** The paper reports that invalid messages can still be acknowledged; exact behaviour for malformed bodies or purged IDs is implementation-dependent, so test before relying on it.<sup>[[1]](#references)</sup>
 
 ## Multi-device amplification & fingerprinting
 
-* Kila associated device (phone, desktop app, browser companion) hu-decrypt probe independently na kutuma ack yake. Kuhesabu receipts kwa kila probe hufichua idadi kamili ya devices.
-* Device ikiwa offline, receipt yake huwekwa kwenye queue na kutumwa inapounganishwa tena. Kwa hiyo mapengo hu-leak mizunguko ya online/offline na hata ratiba za kusafiri (kwa mfano, desktop receipts huacha wakati wa safari).
-* RTT distributions hutofautiana kulingana na platform kwa sababu ya OS power management na push wakeups. Cluster RTTs (kwa mfano, k-means kwenye median/variance features) ili kuweka labels kama “Android handset", “iOS handset", “Electron desktop", n.k.
-* Kwa sababu sender lazima apate key inventory ya recipient kabla ya kuencrypt, attacker anaweza pia kufuatilia wakati devices mpya zinaunganishwa; ongezeko la ghafla la device count au RTT cluster mpya ni kiashiria madhubuti.<sup>[[1]](#references)</sup>
+* On WhatsApp and Signal, each associated device (phone, desktop app, browser companion) decrypts the probe independently and returns its own ack. Counting receipts per probe reveals the exact device count.<sup>[[1]](#references)</sup>
+* If a device is offline, its receipt is queued and emitted upon reconnection. Gaps therefore leak online/offline cycles and even commuting schedules (e.g., desktop receipts stop during travel).
+* RTT distributions differ by platform and environment because OS, model, client, and network conditions affect timing. Cluster RTTs (e.g., k-means on median/variance features) to label “Android handset", “iOS handset", “Electron desktop", etc.
+* Because the sender must retrieve the recipient’s key inventory before encrypting, the attacker can also watch when new devices are paired; a sudden increase in device count or new RTT cluster is a strong indicator.<sup>[[1]](#references)</sup>
 
-## Sampling cadence, queueing, na stacked receipts
+## Sampling cadence, queueing, and stacked receipts
 
-* **WhatsApp burst tolerance:** Vipimo vilivyochapishwa viliripoti kuwa WhatsApp ilikubali silent-reaction bursts kwa kasi ya probe moja kila `50 ms` bila queueing inayoonekana upande wa server. Hii ni muhimu kwa short calibration bursts, device counting ya haraka, au kuanzisha drain attack kwa kasi.
-* **Signal long-run queueing:** Signal ilivumilia bursts fupi lakini ilianza kuqueue sustained traffic yenye probes nyingi kwa sekunde. Kwa monitoring ya muda mrefu, weka cadence karibu na `1 Hz` (au chini) ili kila receipt bado iakisi current device state badala ya backlog drain.
-* **Reconnect artefacts:** Device inaporudi online, baadhi ya clients hu-batch au huflush kwa haraka delayed receipts nyingi. Zichukulie receipt bursts hizo kama state-transition marker badala ya RTT samples zinazojitegemea, la sivyo clustering / `active` dhidi ya `idle` classifier yako ita-overfit reconnect noise.<sup>[[1]](#references)</sup>
+* **WhatsApp burst tolerance:** Published measurements reported that WhatsApp accepted silent-reaction bursts as fast as one probe every `50 ms` without obvious server-side queueing. That is useful for short calibration bursts, fast device counting, or quickly ramping a drain attack.
+* **Signal long-run queueing:** Signal tolerated short bursts but began queueing sustained multi-probe-per-second traffic. For long-lived monitoring, keep the cadence around `1 Hz` (or lower) so each receipt still reflects the current device state instead of backlog drain.
+* **Reconnect artefacts:** When a device comes back online, some clients batch or rapidly flush multiple delayed receipts. Treat those receipt bursts as a state-transition marker rather than as independent RTT samples, or your clustering / `active` vs `idle` classifier will overfit reconnect noise.<sup>[[1]](#references)</sup>
 
-## Behaviour inference kutoka RTT traces
+## Behaviour inference from RTT traces
 
-1. Sample kwa ≥1 Hz ili kunasa OS scheduling effects. Kwa WhatsApp kwenye iOS, RTT za <1 s zinahusiana kwa nguvu na screen-on/foreground, huku >1 s zikihusiana na screen-off/background throttling.
-2. Tengeneza classifiers rahisi (thresholding au two-cluster k-means) zinazoweka kila RTT kama "active" au "idle". Kusanya labels katika streaks ili kupata muda wa kulala, safari, saa za kazi, au wakati desktop companion iko active.
-3. Linganisha probes zinazotumwa kwa wakati mmoja kuelekea kila device ili kuona wakati users wanapobadilika kutoka mobile kwenda desktop, companions zinapokuwa offline, na kama app ina-rate limitiwa na push dhidi ya persistent socket.
-4. Katika networks halisi, epuka threshold moja ya `1 s` iliyowekwa hardcoded. Bootstrap kila device kwa short warm-up window na tumia rolling baseline (kwa mfano, `threshold = 0.9 * median RTT`) ili Wi-Fi/cellular drift isivunje classifier yako.<sup>[[1]](#references)</sup>
+1. Sample at ≥1 Hz to capture OS scheduling effects. With WhatsApp on iOS, <1 s RTTs strongly correlate with screen-on/foreground, >1 s with screen-off/background throttling.
+2. Build simple classifiers (thresholding or two-cluster k-means) that label each RTT as "active" or "idle". Aggregate labels into streaks to derive bedtimes, commutes, work hours, or when the desktop companion is active.
+3. Correlate simultaneous probes towards every device to see when users switch from mobile to desktop, when companions go offline, and whether the app is rate limited by push vs persistent socket.
+4. In real networks, avoid a single hardcoded `1 s` threshold. Bootstrap each device with a short warm-up window and keep a rolling baseline (for example, the device-activity-tracker PoC uses `threshold = 0.9 * median RTT`) so Wi-Fi/cellular drift does not collapse your classifier.<sup>[[1]](#references)[[8]](#references)</sup>
 
-## Location inference kutoka delivery RTT
+## Location inference from delivery RTT
 
-Timing primitive hiyo hiyo inaweza kutumiwa tena ku-infer mahali recipient alipo, si tu kama yuko active. Kazi ya `Hope of Delivery` ilionyesha kuwa training kwenye RTT distributions za receiver locations zinazojulikana humruhusu attacker baadaye ku-classify location ya victim kutokana na delivery confirmations pekee:<sup>[[2]](#references)</sup>
+The same timing primitive can be repurposed to infer where the recipient is, not just whether they are active. The `Hope of Delivery` work showed that training on RTT distributions for known receiver locations lets an attacker later classify the victim's location from delivery confirmations alone:<sup>[[2]](#references)</sup>
 
-* Tengeneza baseline ya target huyo huyo akiwa katika maeneo kadhaa yanayojulikana (nyumbani, ofisini, campus, country A dhidi ya country B, n.k.).
-* Kwa kila location, kusanya normal message RTTs nyingi na utoe features rahisi kama median, variance, au percentile buckets.
-* Wakati wa attack halisi, linganisha probe series mpya na trained clusters. Paper inaripoti kuwa hata locations zilizo ndani ya jiji moja mara nyingi zinaweza kutenganishwa, kwa accuracy ya `>80%` katika mazingira yenye locations 3.
-* Hii hufanya kazi vizuri zaidi attacker anapodhibiti sender environment na kuprobe chini ya network conditions zinazofanana, kwa sababu measured path inajumuisha recipient access network, wake-up latency, na messenger infrastructure.<sup>[[2]](#references)</sup>
+* Build a baseline for the same target while they are in several known places (home, office, campus, country A vs country B, etc.).
+* For each location, collect many normal message RTTs and extract simple features such as median, variance, or percentile buckets.
+* During the real attack, compare the new probe series against the trained clusters. The paper reports that even locations within the same city can often be separated, with `>80%` accuracy in a 3-location setting.
+* This works best when the attacker controls the sender environment and probes under similar network conditions, because the measured path includes the recipient access network, wake-up latency, and messenger infrastructure.<sup>[[2]](#references)</sup>
 
-Tofauti na silent reaction/edit/delete attacks zilizo hapo juu, location inference haihitaji invalid message IDs au stealthy state-changing packets. Plain messages zenye normal delivery confirmations zinatosha, kwa hiyo tradeoff ni stealth ndogo lakini applicability pana zaidi katika messengers mbalimbali.
+Unlike the silent reaction/edit/delete attacks above, location inference does not require invalid message IDs or stealthy state-changing packets. Plain messages with normal delivery confirmations are enough, so the tradeoff is lower stealth but wider applicability across messengers.
 
 ## Stealthy resource exhaustion
 
-Kwa sababu kila silent probe lazima idecryptiwe na iacknowledgeiwe, kutuma reaction toggles, invalid edits, au delete-for-everyone packets continuously huunda application-layer DoS:<sup>[[1]](#references)</sup>
+Because every silent probe must be decrypted and acknowledged, continuously sending reaction toggles, invalid edits, or delete-for-everyone packets creates an application-layer DoS:<sup>[[1]](#references)</sup>
 
-* Hulazimisha radio/modem kutransmit/receive kila sekunde → battery drain inayoonekana, hasa kwenye idle handsets.
-* Hutengeneza upstream/downstream traffic isiyopimwa inayotumia mobile data plans huku ikichanganyika na TLS/WebSocket noise.
-* Hushughulisha crypto threads na kuleta jitter katika features zinazohitaji latency ndogo (VoIP, video calls) ingawa user haoni notifications.
-* Kwenye WhatsApp, invalid reactions hukubali data nyingi zaidi kuliko emoji ya kawaida inavyodokeza: vipimo vilivyochapishwa vilipata server-side acceptance ya hadi takriban `1 MB` kwa reaction.
-* Oversized reactions huacha kutoa delivery receipts zinazoaminika body inapozidi takriban `30 bytes`, lakini bado husambazwa na kuchakatwa kabla ya kutupwa. Weka reaction bodies ndogo unapohitaji ACKs; zikuze tu lengo linapokuwa pure drain au covert one-way transport.
-* Vipimo vya umma vilifikia takriban `3.7 MB/s` (`~13.3 GB/h`) ya victim traffic katika mode hii.
+* Forces the radio/modem to transmit/receive every second → noticeable battery drain, especially on idle handsets.
+* Generates upstream/downstream traffic that consumes mobile data plans and can contend with latency-sensitive features such as video calls.<sup>[[1]](#references)</sup>
+* Large invalid payloads add processing work, but the paper reports that cryptography itself is a negligible part of battery cost.<sup>[[1]](#references)</sup>
+* On WhatsApp, invalid reactions accept far more data than a normal emoji suggests: published measurements found server-side acceptance up to roughly `1 MB` per reaction.
+* Oversized reactions stop producing reliable delivery receipts once the body grows beyond roughly `30 bytes`, but they are still forwarded and processed before discard. Keep reaction bodies tiny when you need ACKs; inflate them only when the goal is pure drain or covert one-way transport.
+* Public measurements reached about `3.7 MB/s` (`~13.3 GB/h`) of victim traffic in this mode.
 
 ## References
 

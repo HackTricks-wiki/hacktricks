@@ -1,18 +1,16 @@
-# Hatari za Usalama za Smart Account za ERC-4337
+# Pitfalls za Usalama wa ERC-4337 Smart Account
 
-{{#include ../../banners/hacktricks-training.md}}
+ERC-4337 account abstraction hubadilisha wallets kuwa mifumo inayoweza kupangwa. Mtiririko mkuu ni **validate-then-execute** katika bundle nzima: `EntryPoint` huthibitisha kila `UserOperation` kabla ya kutekeleza yoyote kati yake.<sup>[[5]](#references)</sup> Mpangilio huu huunda attack surface isiyo dhahiri wakati validation ni yenye ruhusa nyingi, yenye kuhifadhi state, au haiendani na sheria za bundler simulation.
 
-ERC-4337 account abstraction hubadilisha wallets kuwa mifumo inayoweza kupangwa. Mtiririko mkuu ni **validate-then-execute** katika bundle nzima: `EntryPoint` huthibitisha kila `UserOperation` kabla ya kutekeleza yoyote kati yao. Mpangilio huu huunda attack surface isiyo dhahiri wakati uthibitishaji ni wa kuruhusu kupita kiasi, unaotegemea state, au haupatani na kanuni za bundler simulation.
-
-## 1) Direct-call bypass ya functions zenye privileges
-Function yoyote ya `execute` inayoweza kuitwa externally (au function inayohamisha funds) ambayo haijazuiwa kwa `EntryPoint` (au vetted executor module) inaweza kuitwa moja kwa moja ili ku-drain akaunti.<sup>[[1]](#references)</sup>
+## 1) Direct-call bypass ya privileged functions
+Kila function ya `execute` (au inayohamisha fedha) inayoweza kuitwa externally na ambayo haijazuiwa kwa `EntryPoint` (au vetted executor module) inaweza kuitwa moja kwa moja ili ku-drain account.<sup>[[2]](#references)</sup>
 ```solidity
 function execute(address target, uint256 value, bytes calldata data) external {
 (bool ok,) = target.call{value: value}(data);
 require(ok, "exec failed");
 }
 ```
-Muundo salama: zuia kwa `EntryPoint`, na tumia `msg.sender == address(this)` kwa mtiririko wa admin/usimamizi wa ndani (usakinishaji wa module, mabadiliko ya validator, upgrades).
+Muundo salama: zuia kwa `EntryPoint`, na tumia `msg.sender == address(this)` kwa mtiririko wa usimamizi wa admin/kujisimamia (usakinishaji wa module, mabadiliko ya validator, upgrades).<sup>[[2]](#references)[[5]](#references)</sup>
 ```solidity
 address public immutable entryPoint;
 
@@ -22,8 +20,8 @@ require(msg.sender == entryPoint, "not entryPoint");
 require(ok, "exec failed");
 }
 ```
-## 2) Sehemu za gas zisizosainiwa au zisizokaguliwa -> kuvuja kwa ada
-Ikiwa signature validation inahakiki intent (`callData`) pekee lakini si sehemu zinazohusiana na gas, bundler au frontrunner anaweza kuongeza ada na kuvuja ETH. Payload iliyosainiwa lazima ijumuishe angalau:<sup>[[1]](#references)</sup>
+## 2) Sehemu za gas zisizosainiwa au zisizokaguliwa -> kumaliza fee
+Ikiwa uthibitishaji wa signature unahakiki intent (`callData`) pekee, bundler au frontrunner anaweza kuongeza fees na kumaliza ETH. Payload iliyosainiwa lazima ihusishe angalau:<sup>[[2]](#references)</sup>
 
 - `preVerificationGas`
 - `verificationGasLimit`
@@ -31,7 +29,7 @@ Ikiwa signature validation inahakiki intent (`callData`) pekee lakini si sehemu 
 - `maxFeePerGas`
 - `maxPriorityFeePerGas`
 
-Muundo wa kujilinda: tumia `userOpHash` iliyotolewa na `EntryPoint` (inayojumuisha sehemu za gas) na/au weka kikomo madhubuti kwa kila sehemu.<sup>[[1]](#references)</sup>
+Defensive pattern: tumia `userOpHash` iliyotolewa na `EntryPoint` (ambayo inajumuisha sehemu za gas) na/au weka kikomo madhubuti kwa kila sehemu.<sup>[[2]](#references)[[5]](#references)</sup>
 ```solidity
 function validateUserOp(UserOperation calldata op, bytes32 userOpHash, uint256)
 external
@@ -42,84 +40,87 @@ return 0;
 }
 ```
 ## 3) Stateful validation clobbering (bundle semantics)
-Kwa sababu validations zote huendeshwa kabla ya execution yoyote, kuhifadhi matokeo ya validation katika contract state si salama. Op nyingine katika bundle inaweza kuyaandika upya, na kusababisha execution yako kutumia state iliyoathiriwa na attacker.<sup>[[1]](#references)</sup>
+Kwa sababu validations zote huendeshwa kabla ya execution yoyote, kuhifadhi matokeo ya validation katika contract state si salama. Op nyingine katika bundle inaweza kuyaandika upya, na kusababisha execution yako itumie state iliyoathiriwa na attacker.<sup>[[2]](#references)</sup>
 
-Epuka kuandika storage katika `validateUserOp`. Ikiwa haiwezi kuepukika, funga temporary data kwa `userOpHash` na uifute kwa utaratibu uliowekwa baada ya kutumiwa (pendelea stateless validation).<sup>[[1]](#references)</sup>
+Epuka kuandika storage katika `validateUserOp`. Ikiwa haiwezi kuepukika, fungamanisha data ya muda kwa `userOpHash` na uifute kwa njia ya deterministic baada ya matumizi (pendelea stateless validation).<sup>[[2]](#references)</sup>
 
 ## 4) ERC-1271 replay across accounts/chains (missing domain separation)
-`isValidSignature(bytes32 hash, bytes sig)` lazima ihusishe signatures na **contract hii** pamoja na **chain hii**. Kus recover juu ya raw hash kunaruhusu signatures kureplay across accounts au chains.<sup>[[1]](#references)</sup>
+`isValidSignature(bytes32 hash, bytes sig)` lazima ifungamanishe signatures na **contract hii** pamoja na **chain hii**. Kurecover juu ya raw hash huruhusu signatures replay kwenye accounts au chains nyingine.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Tumia EIP-712 typed data (domain inajumuisha `verifyingContract` na `chainId`) na urudishe exact ERC-1271 magic value `0x1626ba7e` ikiwa imefaulu.<sup>[[1]](#references)</sup>
+Tumia EIP-712 typed data (domain iwe na `verifyingContract` na `chainId`) na urudishe exact ERC-1271 magic value `0x1626ba7e` ikiwa imefaulu.<sup>[[3]](#references)[[4]](#references)</sup>
 
 ## 5) Reverts do not refund after validation
-Baada ya `validateUserOp` kufaulu, fees huwa zimecommitwa hata kama execution itarevert baadaye. Attackers wanaweza kuwasilisha ops zitakazofeli mara kwa mara na bado kukusanya fees kutoka kwenye account.<sup>[[1]](#references)</sup>
+Baada ya `validateUserOp` kufaulu, fees huwa committed hata execution ikirevert baadaye. Attackers wanaweza kuwasilisha ops zinazoshindikana mara kwa mara na bado kukusanya fees kutoka kwenye account.<sup>[[2]](#references)</sup>
 
-Kwa paymasters, kulipa kutoka shared pool katika `validateUserOp` na kuwacharge users katika `postOp` ni fragile kwa sababu `postOp` inaweza kurevert bila kurejesha malipo. Linda funds wakati wa validation (per-user escrow/deposit), weka `postOp` ikiwa minimal na isiyorevert, na utenge `paymasterPostOpGasLimit` kwa reimbursement path yenye worst-case.<sup>[[1]](#references)</sup>
+Kwa paymasters, kulipa kutoka shared pool katika `validateUserOp` na kuwatoza users katika `postOp` ni fragile kwa sababu `postOp` inaweza kurevert bila kubatilisha malipo. Linda funds wakati wa validation (per-user escrow/deposit), weka `postOp` ikiwa minimal na isiyorevert, na panga bajeti ya `paymasterPostOpGasLimit` kwa reimbursement path yenye gharama kubwa zaidi.<sup>[[2]](#references)[[5]](#references)</sup>
 
 ## 6) Counterfactual deployment / factory assumptions
-`UserOperation` ya kwanza mara nyingi hubeba `initCode`, ambayo husababisha account ideploy kupitia **factory** wakati wa validation. Njia hii ni rahisi kukaguliwa kwa kiwango kidogo kwa sababu huendeshwa tu wakati wa first use.<sup>[[2]](#references)</sup>
+`UserOperation` ya kwanza mara nyingi hubeba `initCode`, ambayo husababisha account ku-deploy kupitia **factory** wakati wa validation. Njia hii ni rahisi kutofanyiwa audit ya kutosha kwa sababu huendeshwa tu wakati wa matumizi ya kwanza.<sup>[[5]](#references)</sup>
 
-Common failures:
+Mifano ya failures za kawaida ni pamoja na:<sup>[[5]](#references)</sup>
 
 - Factory/initializer inaamini `msg.sender == entryPoint`, lakini ERC-4337 deployment path **haiiti** `initCode` moja kwa moja kutoka `EntryPoint`.
-- Salt, owner, validator, au module configuration haijafungwa kikamilifu kwenye signed intent, hivyo frontrunner anaweza kushindana kwenye first deployment na kuichoma counterfactual address kwa settings zinazodhibitiwa na attacker.
-- Factory si non-idempotent, hivyo first-use flow inayorudiwa inabrick wallet badala ya kurudisha address ambayo tayari imeundwa.
+- Salt, owner, validator, au module configuration haijafungamanishwa kikamilifu na signed intent, hivyo frontrunner anaweza kushindania deployment ya kwanza na kuchoma counterfactual address kwa settings zinazodhibitiwa na attacker.
+- Factory si idempotent, hivyo first-use flow inayorudiwa hu-brick wallet badala ya kurudisha address iliyokwisha creatiwa.
 
-Safe pattern: recompute sender anayetarajiwa kutoka kwenye signed deployment parameters, fanya deployment iwe deterministic (kwa kawaida `CREATE2`), na ufanye initialization iwe one-shot.<sup>[[2]](#references)</sup>
+Pattern salama: recompute sender anayetarajiwa kutoka kwenye signed deployment parameters, fanya deployment iwe deterministic (kwa kawaida `CREATE2`), na ufanye initialization mara moja tu.<sup>[[5]](#references)</sup>
 ```solidity
 bytes32 salt = keccak256(abi.encode(owner, validator, saltNonce));
 address predicted = Create2.computeAddress(salt, keccak256(initCode));
 require(predicted == sender, "bad sender");
 ```
-## 7) Validation logic that bundlers reject
-Validation code inaweza kuwa sahihi katika local tests na bado isiweze kutumika katika bundlers halisi. Public bundlers huiga `validateUserOp()` / `validatePaymasterUserOp()` off-chain na kwa kawaida huendesha `debug_traceCall(handleOps)` kamili kabla ya inclusion.<sup>[[3]](#references)</sup>
+## 7) Mantiki ya uthibitishaji ambayo bundlers hukataa
+Code ya uthibitishaji inaweza kuwa sahihi katika majaribio ya ndani na bado isiweze kutumika katika bundlers halisi. Bundlers huendesha uthibitishaji mara nyingi na zinapaswa kufanya uthibitishaji kamili wa bundle uliotrace kabla ya kuwasilisha.<sup>[[6]](#references)</sup>
 
-Hilo hufanya mifumo hii kuwa hatari ndani ya validation:
+Chini ya kanuni hizo za scope ya uthibitishaji, patterns hizi ni hatari:<sup>[[6]](#references)</sup>
 
-- Block-dependent opcodes kama vile `TIMESTAMP`, `NUMBER`, au `BLOCKHASH`
-- State writes kama vile `SSTORE`
-- Iteration isiyo na kikomo kwenye storage
-- External calls za kiholela au oracle reads zinazoweza kubadilika kati ya simulation na inclusion
+- Opcodes zinazotegemea block kama vile `TIMESTAMP`, `NUMBER`, au `BLOCKHASH`
+- Ufikiaji wa storage nje ya scope inayoruhusiwa ya account/entity, au iteration isiyo na kikomo juu ya storage
+- Calls za nje au usomaji wa oracle unaotegemea state inayoweza kubadilika nje ya scope inayoruhusiwa ya uthibitishaji
 
-Bad example:
+Mfano mbaya:
 ```solidity
 function validateUserOp(UserOperation calldata op, bytes32 userOpHash, uint256)
 external
 returns (uint256)
 {
 require(block.timestamp < expiry, "expired");
-seen[userOpHash] = true; // SSTORE in validation
+seen[userOpHash] = true; // stateful validation can be clobbered by another op
 require(oracle.isAllowed(op.sender), "oracle changed");
 return 0;
 }
 ```
-Chukulia validation kama preflight function yenye matokeo bainifu na mipaka. Ikiwa kwa kweli unahitaji shared state au external lookups, hamishia ugumu huo kwenye entities zenye staking/reputation tracking na test njia kamili ya bundler simulation, si unit tests pekee.
+Chukulia validation kama preflight function ya deterministic na yenye mipaka. Ikiwa shared state au external lookups ni muhimu, fuata sheria za staked-entity na test njia hiyo hiyo ya multi-pass bundler simulation, si unit tests pekee.<sup>[[6]](#references)</sup>
 
-## 8) ERC-7702 frontrun ya uanzishaji
-ERC-7702 inaruhusu EOA kuendesha smart-account code kwa tx moja. Ikiwa uanzishaji unaweza kuitwa kutoka nje, frontrunner anaweza kujiteua kuwa owner.<sup>[[1]](#references)</sup>
+## 8) ERC-7702 initialization frontrun
+ERC-7702 huipa EOA delegation ya kudumu kwa smart-account code; delegation hiyo haiendeshi initialization atomically. Ikiwa initialization inaweza kuitwa externally, observer anaweza kuifront-run na kujiteua kuwa owner.<sup>[[7]](#references)</sup>
 
-Hatua ya kuzuia: ruhusu uanzishaji pekee kupitia **self-call**, na uruhusu ufanyike mara moja tu.<sup>[[1]](#references)</sup>
+Mitigation: dai calldata ya initialization iidhinishwe na EOA na uruhusu initialization mara moja pekee. Katika ERC-4337 EIP-7702 flow, pia zuia caller awe `EntryPoint.senderCreator()` pekee.<sup>[[5]](#references)[[7]](#references)</sup>
 ```solidity
-function initialize(address newOwner) external {
-require(msg.sender == address(this), "init: only self");
+function initialize(address newOwner, bytes calldata initSig) external {
 require(owner == address(0), "already inited");
+// Verify the EOA's signature over the complete initialization calldata.
+require(_isAuthorizedByEOA(newOwner, initSig), "bad init auth");
 owner = newOwner;
 }
 ```
-## Ukaguzi wa haraka kabla ya kuunganisha
-- Thibitisha signatures kwa kutumia `userOpHash` ya `EntryPoint` (inayofunga gas fields).
-- Zuia functions zenye privileged access zitumike na `EntryPoint` na/au `address(this)` ipasavyo.
-- Weka `validateUserOp` ikiwa stateless, deterministic, na inayoendana na bundler simulation rules.
-- Tekeleza EIP-712 domain separation kwa ERC-1271 na urudishe `0x1626ba7e` wakati wa mafanikio.
-- Weka `postOp` ikiwa ndogo, yenye mipaka, na isiyofanya revert; linda fees wakati wa validation.
-- Test njia ya kwanza ya `initCode` kando: deterministic deployment, tabia ya factory ya idempotent, na initialization ya mara moja tu.
-- Endesha bundler simulation kamili (`simulateValidation` pamoja na `handleOps` iliyofuatiliwa) kabla ya ku-deploy.
-- Kwa ERC-7702, ruhusu init kupitia self-call pekee na mara moja tu.
+## Ukaguzi wa haraka kabla ya merge
+- Thibitisha signatures kwa kutumia `userOpHash` ya `EntryPoint` (inafunga sehemu za gas).
+- Zuia functions zenye privileges kwa `EntryPoint` na/au `address(this)` inapofaa.
+- Weka `validateUserOp` bila state, yenye matokeo yanayotabirika, na inayoendana na sheria za bundler simulation.
+- Tekeleza domain separation ya EIP-712 kwa ERC-1271 na urejeshe `0x1626ba7e` inapofaulu.
+- Weka `postOp` kuwa ndogo, yenye mipaka, na isiyorevert; linda fees wakati wa validation.
+- Test njia ya kwanza ya `initCode` kando: deterministic deployment, tabia ya factory ya idempotent, na one-shot initialization.
+- Endesha multi-pass validation ya bundler na ukaguzi wa full-bundle wenye trace kabla ya ku-deploy.
+- Kwa ERC-7702, funga init kwenye authorization ya EOA na iruhusu mara moja tu; katika flows za ERC-4337, zuia caller kwa `EntryPoint.senderCreator()`.
 
-## Marejeo
+## References
 
-- [1] [Makosa sita katika ERC-4337 smart accounts (Trail of Bits)](https://blog.trailofbits.com/2026/03/11/six-mistakes-in-erc-4337-smart-accounts/)
-- [2] [ERC-4337: Account Abstraction Using Alt Mempool](https://eips.ethereum.org/EIPS/eip-4337)
-- [3] [ERC-7562: Account Abstraction Validation Scope Rules](https://eips.ethereum.org/EIPS/eip-7562)
-
+- [1] [Replay ya ERC1271 - Timu zaidi ya 15 zimeathirika (curiousapple)](https://paragraph.com/@curiousapple/fwlBuaAuGsWwLRPTLKxB)
+- [2] [Makosa sita katika smart accounts za ERC-4337 (Trail of Bits)](https://blog.trailofbits.com/2026/03/11/six-mistakes-in-erc-4337-smart-accounts/)
+- [3] [ERC-1271: Standard Signature Validation Method for Contracts](https://eips.ethereum.org/EIPS/eip-1271)
+- [4] [EIP-712: Typed structured data hashing and signing](https://eips.ethereum.org/EIPS/eip-712)
+- [5] [ERC-4337: Account Abstraction Using Alt Mempool](https://eips.ethereum.org/EIPS/eip-4337)
+- [6] [ERC-7562: Account Abstraction Validation Scope Rules](https://eips.ethereum.org/EIPS/eip-7562)
+- [7] [EIP-7702: Set Code for EOAs](https://eips.ethereum.org/EIPS/eip-7702)
 {{#include ../../banners/hacktricks-training.md}}

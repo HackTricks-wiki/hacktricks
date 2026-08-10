@@ -1,19 +1,17 @@
-# Misingi ya Python
-
-{{#include ../../banners/hacktricks-training.md}}
+# Python ya Msingi
 
 ## Misingi ya Python
 
 ### Taarifa muhimu
 
 Mifano yote hapa chini inachukulia **Python 3** isipokuwa ikiwa imeelezwa waziwazi.\
-`range()` hurejesha kitu kinachoweza kuiritiwa katika Python 3 (sawa na `xrange()` katika Python 2).\
-Tofauti kati ya **tuple** na **list** ni kwamba **nafasi** ya thamani katika tuple kwa kawaida huipa maana, ilhali list kwa kawaida ni mfuatano wa thamani uliopangwa tu.
+`range()` hurudisha object inayoweza ku-iterate katika Python 3 (sawa na `xrange()` katika Python 2).\
+Tofauti kati ya **tuple** na **list** ni kwamba **nafasi** ya value katika tuple kwa kawaida huipa maana, huku list kwa kawaida ikiwa ni mfuatano wa values uliopangwa.
 
-### Operesheni kuu
+### Shughuli kuu
 
-Ili kuinua namba kwa nguvu fulani, tumia: `3**2` (si `3^2`)\
-`2/3 == 0.666666...` katika Python 3, huku `2//3 == 0` ikifanya mgawanyo wa namba kamili.\
+Ili kuinua nambari kwa power unatumia: `3**2` (si `3^2`)\
+`2/3 == 0.666666...` katika Python 3, huku `2//3 == 0` ikifanya integer division.\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -43,7 +41,7 @@ Ili kuinua namba kwa nguvu fulani, tumia: `3**2` (si `3^2`)\
 `sum([1, 2, 3]) == 6`\
 `sorted([1, 43, 5, 3, 21, 4]) == [1, 3, 4, 5, 21, 43]`
 
-**Kuunganisha vibambo**\
+**Kuunganisha chars**\
 `3 * 'a' == 'aaa'`\
 `'a' + 'b' == 'ab'`\
 `'a' + str(3) == 'a3'`\
@@ -59,7 +57,7 @@ Ili kuinua namba kwa nguvu fulani, tumia: `3**2` (si `3^2`)\
 `# One line comment`\
 `""" Several lines comment """`
 
-**Mizunguko**
+**Loops**
 ```python
 if a:
 # something
@@ -97,16 +95,16 @@ b"admin".decode() == "admin"
 `d = ()` tuple tupu\
 `d += (4,)` --> ongeza kwenye tuple\
 `# t1[1] = 'new value'` --> tuples haziwezi kubadilishwa\
-`list(t2) == [5, 6]` --> kutoka tuple hadi list
+`list(t2) == [5, 6]` --> kutoka tuple kwenda list
 
-### Orodha (array)
+### List (array)
 
 `d = []` tupu\
 `a = [1, 2, 3]`\
 `b = [4, 5]`\
 `a + b == [1, 2, 3, 4, 5]`\
 `b.append(6)` --> `b == [4, 5, 6]`\
-`tuple(a) == (1, 2, 3)` --> kutoka list hadi tuple
+`tuple(a) == (1, 2, 3)` --> kutoka list kwenda tuple
 
 ### Dictionary
 ```python
@@ -129,20 +127,20 @@ Katika seti hakuna marudio.\
 `myset.add('a')` --> hakuna mabadiliko\
 `myset.update([1, 2, 3])`\
 `myset.discard(10)` --> ikiwa ipo, iondoe; ikiwa haipo, hakuna kinachofanyika\
-`myset.remove(10)` --> ikiwa haipo, inaleta exception\
+`myset.remove(10)` --> ikiwa haipo, inazalisha exception\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
 `myset.difference(myset2)`\
 `myset.symmetric_difference(myset2)`\
-`myset.pop()` --> pata kipengele chochote na ukiondoe\
+`myset.pop()` --> pata element yoyote na uiondoe\
 `myset.intersection_update(myset2)`\
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
 
-### Madarasa
+### Classes
 
-Method katika `__lt__` ndiyo itakayotumiwa na `sort()` / `sorted()` kulinganisha objects.
+Methodi iliyo katika `__lt__` ndiyo itakayotumiwa na `sort()` / `sorted()` kulinganisha objects.
 ```python
 import datetime
 
@@ -176,11 +174,11 @@ MITPerson.next_id_num += 1
 def __lt__(self, other):
 return self.id_num < other.id_num
 ```
-### map, zip, filter, lambda, sorted na one-liners
+### map, zip, filter, lambda, sorted and one-liners
 
-Katika **Python 3**, `map()` na `filter()` hurudisha iterators, kwa hivyo zibadilishe kuwa `list()` ikiwa unataka kuchapisha thamani zote kwa wakati mmoja.
+Katika **Python 3**, `map()` na `filter()` hurejesha iterators, kwa hivyo zibadilishe kwa `list()` ikiwa unataka kuchapisha thamani zote kwa wakati mmoja.
 
-**Map** ni sawa na `[f(x) for x in iterable]`:
+**Map** ni kama `[f(x) for x in iterable]`:
 ```python
 list(map(tuple, [[1, 2, 3], [4, 5]]))
 # [(1, 2, 3), (4, 5)]
@@ -188,14 +186,14 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-**zip** husimama wakati iterable fupi zaidi inapoishia:
+**zip** husimama wakati iterable fupi zaidi inaposimama:
 ```python
 for f, b in zip(foo, bar):
 print(f, b)
 ```
-**Lambda** hutumiwa kufafanua function:\
-`(lambda x, y: x + y)(5, 3) == 8` --> use lambda as a simple function\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> use lambda to sort\
+**Lambda** hutumika kufafanua function:\
+`(lambda x, y: x + y)(5, 3) == 8` --> tumia lambda kama function rahisi\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> tumia lambda kupanga\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
 ```python
@@ -219,7 +217,7 @@ my_car.crash()  # Boom!
 ```
 `mult1 = [x for x in [1, 2, 3, 4, 5, 6, 7, 8, 9] if x % 3 == 0]`
 
-### Exceptions
+### Vighairi
 ```python
 def divide(x, y):
 try:
@@ -236,7 +234,7 @@ print("executing finally clause in any case")
 ### Assert()
 
 Ikiwa sharti ni false, string itachapishwa.\
-Kumbuka kwamba statements za `assert` zinaweza kuzimwa kwa `python -O`, kwa hivyo usizitumie kwa access control au input validation.
+Kumbuka kwamba statements za `assert` zinaweza kuzimwa kwa kutumia `python -O`, kwa hivyo usizitumie kwa access control au input validation.
 ```python
 def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
@@ -244,7 +242,7 @@ assert len(grades) == len(weights), 'wrong number of grades'
 ```
 ### Generators, yield
 
-A generator, badala ya kurudisha kila kitu kwa wakati mmoja, **yield** thamani moja baada ya nyingine. Hii ni muhimu sana kwa wordlists kubwa, bruteforcers au majibu makubwa.
+Generator, badala ya kurudisha kila kitu kwa wakati mmoja, **hutoa** thamani moja baada ya nyingine. Hii ni muhimu sana kwa wordlists kubwa, bruteforcers au majibu makubwa.
 ```python
 def my_gen(n):
 yield n
@@ -255,7 +253,7 @@ yield n + 1
 `next(g) == 7`\
 `next(g)` --> `StopIteration`
 
-### Misemo ya Kawaida
+### Regular Expressions
 ```python
 import re
 
@@ -264,21 +262,21 @@ re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
 re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 ```
 **Maana maalum:**\
-`.` --> herufi yoyote isipokuwa mstari mpya\
+`.` --> herufi yoyote isipokuwa newline\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> tarakimu\
-`\s` --> herufi ya nafasi nyeupe `[ \n\r\t\f]`\
-`\S` --> herufi isiyo ya nafasi nyeupe\
+`\s` --> herufi ya whitespace `[ \n\r\t\f]`\
+`\S` --> herufi isiyo ya whitespace\
 `^` --> huanza na\
 `$` --> huishia na\
-`+` --> tukio moja au zaidi\
-`*` --> matukio 0 au zaidi\
+`+` --> moja au zaidi\
+`*` --> mara 0 au zaidi\
 `?` --> matukio 0 au 1
 
 **Chaguo:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> ruhusu nukta ilingane na mstari mpya\
-`re.search(pat, string, re.MULTILINE)` --> ruhusu `^` na `$` ilingane katika mistari tofauti
+`re.search(pat, string, re.DOTALL)` --> ruhusu nukta ilingane na newline\
+`re.search(pat, string, re.MULTILINE)` --> ruhusu `^` na `$` zilingane kwenye mistari tofauti
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -289,7 +287,7 @@ re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 ### IterTools
 
 **product**\
-`from itertools import product` --> Cartesian product kati ya iterable 1 au zaidi
+`from itertools import product` --> product ya Cartesian kati ya iterables 1 au zaidi
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -304,7 +302,7 @@ list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
 ```
 **combinations**\
-`from itertools import combinations` --> michanganyiko yote inayowezekana bila marudio
+`from itertools import combinations` --> michanganyiko yote inayowezekana bila kurudia
 ```python
 list(combinations('123', 2))
 # [('1', '2'), ('1', '3'), ('2', '3')]
@@ -316,14 +314,14 @@ list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> inapatikana katika Python 3.12+, ni muhimu kugawa orodha kubwa za bruteforce candidate au faili za IOC kuwa vipande
+`from itertools import batched` --> inapatikana katika Python 3.12+, ni muhimu kugawanya orodha kubwa za wagombea wa bruteforce au faili za IOC kuwa vipande
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
 ### Decorators
 
-Decorator inayopima muda ambao function inahitaji kutekelezwa:
+Decorator inayopima muda unaohitajika kutekeleza function:
 ```python
 from functools import wraps
 import time
@@ -345,15 +343,15 @@ return wrapper
 def decorated_func():
 print("Decorated func!")
 ```
-Ukiendesha, utaona kitu kama hiki kifuatacho:
+Ukiendesha, utaona kitu kama hiki:
 ```text
 Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### Vifaa saidizi muhimu vya standard library kwa pentesting
+### Vifaa muhimu vya standard library kwa pentesting
 
-**Uvinjari wa mfumo wa faili kwa kutumia `pathlib`** (`Path.walk()` inapatikana katika Python 3.12+; tumia `os.walk()` kwenye interpreters za zamani):
+**Kusafiri kwenye mfumo wa faili kwa `pathlib`** (`Path.walk()` inapatikana katika Python 3.12+; tumia `os.walk()` kwenye interpreters za zamani):
 ```python
 from pathlib import Path
 
@@ -364,7 +362,7 @@ for name in files:
 if name.endswith((".py", ".env", ".bak")):
 print(root / name)
 ```
-**Endesha commands kwa usalama** (`shell=False` kwa chaguo-msingi ndicho unachohitaji kwa kawaida):
+**Zindua commands kwa usalama** (`shell=False` kwa chaguo-msingi kwa kawaida ndicho unachotaka):
 ```python
 import subprocess
 
@@ -376,12 +374,12 @@ check=True,
 )
 print(cp.stdout)
 ```
-Iwapo **ni lazima** uunde amri ya shell, weka kila token inayodhibitiwa na mshambulizi kwenye alama za kunukuu kwanza:
+Ikiwa **lazima** utengeneze shell command, kwanza weka kila tokeni inayodhibitiwa na mshambuliaji katika nukuu:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
-**Faili / saraka za muda** (salama zaidi kuliko njia zilizowekwa moja kwa moja za `/tmp/foo`):
+**Faili / saraka za muda** (salama zaidi kuliko njia za `/tmp/foo` zilizowekwa moja kwa moja):
 ```python
 import tempfile
 from pathlib import Path
@@ -391,9 +389,9 @@ out = Path(tmp) / "loot.txt"
 out.write_text("secret\n")
 print(out.read_text())
 ```
-Kwa automation ya HTTP, angalia [ukurasa huu mwingine kuhusu maombi ya wavuti ya Python](web-requests.md).
+Kwa ajili ya automation ya HTTP, angalia [ukurasa huu mwingine kuhusu web requests za Python](web-requests.md).
 
-### Mambo ya kuzingatia wakati wa kutoa archives (muhimu kwa tooling na file parsers)
+### Tahadhari za uchimbaji wa archive (muhimu kwa tooling na file parsers)
 
 Kuanzia **Python 3.14**, `tarfile.extract()` / `extractall()` hutumia filter salama zaidi ya `data` kwa chaguo-msingi. Katika matoleo ya zamani ya Python, unapaswa kuiweka wazi unaposhughulikia archives zinazodhibitiwa na attacker.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
@@ -404,9 +402,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-Hata ukiwa na `filter="data"`, toa archives zisizoaminika kwenye directory mpya ya muda na uthibitishe kilichoandikwa kabla ya kuhamisha faili kwenda sehemu yoyote muhimu.
+Hata ukiwa na `filter="data"`, toa archives zisizoaminika kwenye directory mpya ya muda na uhakiki yaliyoandikwa kabla ya kuhamisha files popote panapohusika.
 
-`zipfile.Path` ni tofauti: **haisafishi majina ya faili** kwa ajili yako, kwa hivyo thibitisha paths kabla ya kutoa washiriki wa ZIP wanaodhibitiwa na attacker:
+`zipfile.Path` ni tofauti: **haisafishi majina ya files** kwa ajili yako, kwa hivyo hakikisha paths kabla ya kutoa washiriki wa ZIP wanaodhibitiwa na mshambuliaji:
 ```python
 import os
 import zipfile
@@ -419,16 +417,15 @@ if os.path.commonpath([base, final_path]) != base:
 raise ValueError(f"Path traversal inside ZIP: {info.filename}")
 zf.extract(info, base)
 ```
-### Dangerous primitives to remember
+### Dangerous primitives za kukumbuka
 
-- `eval()` / `exec()` si sandboxes.
-- `ast.literal_eval()` haiendeshi Python code, lakini bado inaweza kutumiwa vibaya kusababisha memory / CPU denial of service kwa input inayodhibitiwa na attacker.
-- `pickle.loads()` si secure; usiwahi ku-unpickle bytes zinazodhibitiwa na attacker.
-- Kwa offensive tricks za kina, angalia [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) na [Python deserializations](../../pentesting-web/deserialization/README.md).
+- `eval()` / `exec()` **si sandboxes**.
+- `ast.literal_eval()` **haiendeshi code ya Python**, lakini bado inaweza kutumiwa vibaya kusababisha denial of service ya memory / CPU kupitia input inayodhibitiwa na attacker.
+- `pickle.loads()` **si salama**; usiwahi ku-unpickle bytes zinazodhibitiwa na attacker.
+- Kwa mbinu za kina zaidi za offensive, angalia [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) na [Python deserializations](../../pentesting-web/deserialization/README.md).
 
-## Marejeo
+## References
 
-- [1] [Nyaraka za Python tarfile](https://docs.python.org/3/library/tarfile.html)
+- [1] [Python tarfile docs](https://docs.python.org/3/library/tarfile.html)
 - [2] [PEP 706 – Filter for tarfile.extractall()](https://peps.python.org/pep-0706/)
-
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,26 +1,24 @@
 # Archive Extraction Path Traversal ("Zip-Slip" / WinRAR CVE-2025-8088)
 
-{{#include ../banners/hacktricks-training.md}}
-
 ## Muhtasari
 
-Miundo mingi ya archive (ZIP, RAR, TAR, 7-ZIP, n.k.) huruhusu kila entry kuwa na **internal path** yake. Extraction utility inapofuata path hiyo bila kuikagua, filename iliyoundwa ikiwa na `..` au **absolute path** (kwa mfano `C:\Windows\System32\`) itaandikwa nje ya directory iliyochaguliwa na mtumiaji.
+Miundo mingi ya archive (ZIP, RAR, TAR, 7-ZIP, n.k.) huruhusu kila entry kuwa na **internal path** yake. Extraction utility inapofuata path hiyo bila ukaguzi, filename iliyotengenezwa ikiwa na `..` au **absolute path** (kwa mfano `C:\Windows\System32\`) itaandikwa nje ya directory iliyochaguliwa na mtumiaji.
 Aina hii ya vulnerability inajulikana sana kama *Zip-Slip* au **archive extraction path traversal**.<sup>[[6]](#references)</sup>
 
-Madhara yanaweza kuanzia ku-overwrite mafaili yoyote hadi kupata moja kwa moja **remote code execution (RCE)** kwa kuweka payload katika eneo la **auto-run**, kama vile Windows *Startup* folder.
+Madhara yanaweza kuanzia overwriting ya files kiholela hadi kupata **remote code execution (RCE)** moja kwa moja kwa kuweka payload katika eneo la **auto-run**, kama vile Windows *Startup* folder.
 
 ## Chanzo Kikuu
 
-1. Attacker huunda archive ambayo file headers moja au zaidi zina:
+1. Attacker huunda archive ambamo file headers moja au zaidi zina:
 * Relative traversal sequences (`..\..\..\Users\\victim\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\payload.exe`)
 * Absolute paths (`C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp\\payload.exe`)
-* Au **symlinks** zilizoundwa mahsusi ambazo hutatuliwa nje ya target dir (jambo la kawaida katika ZIP/TAR kwenye *nix*).
-2. Victim hu-extract archive kwa kutumia tool iliyo vulnerable ambayo huamini path iliyowekwa ndani (au hufuata symlinks), badala ya kuisafisha au kulazimisha extraction ifanyike chini ya directory iliyochaguliwa.
-3. File huandikwa katika location inayodhibitiwa na attacker na hu-execute/loaded wakati mwingine system au user anapo-trigger path hiyo.
+* Au **symlinks** zilizotengenezwa ambazo hu-resolve nje ya target dir (jambo linalotokea mara nyingi katika ZIP/TAR kwenye *nix*).
+2. Victim hu-extract archive kwa kutumia tool yenye vulnerability inayotegemea embedded path (au kufuata symlinks), badala ya kuisanitize au kulazimisha extraction ifanyike chini ya directory iliyochaguliwa.
+3. File huandikwa katika location inayodhibitiwa na attacker na ku-execute/load mfumo au mtumiaji anapochochea path hiyo wakati unaofuata.
 
 ### .NET `Path.Combine` + `ZipArchive` traversal
 
-Anti-pattern ya kawaida katika .NET ni kuunganisha destination iliyokusudiwa na `ZipArchiveEntry.FullName` inayodhibitiwa na user, kisha kufanya extraction bila path normalisation:<sup>[[4]](#references)</sup>
+Anti-pattern ya kawaida katika .NET ni kuunganisha destination iliyokusudiwa na `ZipArchiveEntry.FullName` inayodhibitiwa na mtumiaji na kufanya extraction bila path normalisation:<sup>[[4]](#references)[[8]](#references)</sup>
 ```csharp
 using (var zip = ZipFile.OpenRead(zipPath))
 {
@@ -31,58 +29,51 @@ entry.ExtractToFile(dest);
 }
 }
 ```
-- Ikiwa `entry.FullName` inaanza na `..\\`, inafanya traversal; ikiwa ni **absolute path**, sehemu ya upande wa kushoto hutupiliwa mbali kabisa, na hivyo kusababisha **arbitrary file write** kama utambulisho wa extraction.
-- Archive ya proof-of-concept ya kuandika kwenye directory ya `app` iliyo jirani, inayofuatiliwa na scanner iliyoratibiwa:
+- Ikiwa `entry.FullName` inaanza na `..\\`, hupita nje ya saraka; ikiwa ni **absolute path**, sehemu ya upande wa kushoto huondolewa kabisa, na kusababisha **arbitrary file write** kama utambulisho wa extraction.
+- Archive ya proof-of-concept ya kuandika kwenye saraka ya `app` iliyo jirani, inayofuatiliwa na scanner iliyoratibiwa:
 ```python
 import zipfile
 with zipfile.ZipFile("slip.zip", "w") as z:
 z.writestr("../app/0xdf.txt", "ABCD")
 ```
-Kuweka ZIP hiyo kwenye inbox inayofuatiliwa husababisha `C:\samples\app\0xdf.txt`, ikithibitisha traversal nje ya `C:\samples\queue\` na kuwezesha follow-on primitives (kwa mfano, DLL hijacks).
+Kuweka ZIP hiyo kwenye inbox inayofuatiliwa husababisha `C:\samples\app\0xdf.txt`, kuthibitisha traversal nje ya `C:\samples\queue\` na kuwezesha primitives za ufuatiliaji (kwa mfano, DLL hijacks).
 
 ## Mfano wa Ulimwengu Halisi – WinRAR ≤ 7.12 (CVE-2025-8088)
 
-WinRAR ya Windows (ikiwemo CLI ya `rar` / `unrar`, DLL na source inayoweza kubebeka) ilishindwa kuthibitisha majina ya faili wakati wa extraction.
-RAR archive hasidi iliyo na entry kama:
+WinRAR for Windows na components zake za Windows RAR/UnRAR zilishindwa kuthibitisha majina ya mafaili wakati wa extraction. Flaw ilitumia NTFS alternate data streams (ADS) kupita njia ya extraction iliyochaguliwa na kuandika mafaili kwenye maeneo yasiyokusudiwa.<sup>[[5]](#references)</sup>
+RAR archive yenye madhara iliyokuwa na entry kama hii:
 ```text
-..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.exe
+..\..\..\Users\victim\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\payload.lnk
 ```
-ingeishia **nje** ya directory ya output iliyochaguliwa na ndani ya folder ya mtumiaji ya *Startup*. Baada ya logon, Windows huendesha kiotomatiki kila kitu kilichopo humo, hivyo kutoa *persistent* RCE.<sup>[[5]](#references)</sup>
+ingeishia **nje** ya saraka ya output iliyochaguliwa na ndani ya folda ya *Startup* ya user. ESET iliona faili hasidi za LNK zikifunguliwa humo na kutekelezwa user anapoingia, hivyo kutoa persistence na njia ya RCE.<sup>[[5]](#references)</sup>
 
-### Kuunda PoC Archive (Linux/Mac)
-```bash
-# Requires rar >= 6.x
-mkdir -p "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup"
-cp payload.exe "evil/../../../Users/Public/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/"
-rar a -ep evil.rar evil/*
-```
-Chaguo lililotumika:
-* `-ep`  – hifadhi file paths kama zilivyotolewa ( **usi**ondoe `./` ya mwanzo).
+### Kutengeneza PoC Archive (Linux/Mac)
 
-Mpelekee victim `evil.rar` na umwelekeze aitoe kwa kutumia WinRAR build iliyo vulnerable.
+Kwa sababu CVE-2025-8088 hutumia traversal path katika jina la ADS, tumia generator iliyoundwa mahsusi kuunda RAR, kisha fanya extraction katika lab iliyotengwa pekee, yenye WinRAR vulnerable build.<sup>[[5]](#references)</sup>
 
-### Exploitation Iliyoonekana Porini
+### Exploitation Iliyoonekana Hadharani
 
-ESET iliripoti spear-phishing campaigns za RomCom (Storm-0978/UNC2596) zilizoweka RAR archives zilizo abuse CVE-2025-8088 ili ku-deploy backdoors zilizobinafsishwa na kuwezesha ransomware operations.<sup>[[5]](#references)</sup>
+ESET iliripoti kampeni za spear-phishing za RomCom (Storm-0978/UNC2596) zilizoweka RAR archives zinazotumia vibaya CVE-2025-8088 ili kusambaza backdoors zilizobinafsishwa na kuwezesha shughuli za ransomware.<sup>[[5]](#references)</sup>
 
-## Cases Mpya (2024–2025)
+## Kesi Mpya zaidi (2024–2025)
 
 ### 7-Zip ZIP symlink traversal → RCE (CVE-2025-11001 / ZDI-25-949)
-* **Bug**: ZIP entries ambazo ni **symbolic links** zilifuatwa wakati wa extraction, hivyo attackers waliweza kutoka kwenye destination directory na ku-overwrite arbitrary paths. User interaction ni *kufungua/kutoa* archive tu.<sup>[[1]](#references)</sup>
-* **Affected**: 7-Zip 21.02–24.09 (Windows & Linux builds). Ilirekebishwa katika **25.00** (Julai 2025) na matoleo ya baadaye.
-* **Impact path**: Ku-overwrite `Start Menu/Programs/Startup` au service-run locations → code hu-run wakati wa logon inayofuata au service restart.
-* **Quick PoC (Linux)**:
+* **Bug**: ZIP entries ambazo ni **symbolic links** zilifuatwa wakati wa extraction, hivyo kuwawezesha attackers kutoka kwenye destination directory na kuandika paths holela. User interaction ni *kufungua/kufanya extraction* ya archive pekee.<sup>[[1]](#references)</sup>
+* **Affected**: 7-Zip builds za kabla ya **25.00**. Hitilafu ya kushughulikia symbolic links ilirekebishwa katika **25.00** (Julai 2025) na matoleo ya baadaye.<sup>[[1]](#references)[[10]](#references)</sup>
+* **Impact path**: Kuandika juu ya `Start Menu/Programs/Startup` au maeneo ya service-run → code huendeshwa user anapoingia tena au service inapoanzishwa upya.
+* **Quick symlink-handling fixture (Linux)**:
 ```bash
-mkdir -p out
-ln -s /etc/cron.d evil
+mkdir -p /tmp/archive-slip-test /tmp/archive-slip-outside
+ln -s /tmp/archive-slip-outside /tmp/archive-slip-test/evil
+cd /tmp/archive-slip-test
 zip -y exploit.zip evil   # -y preserves symlinks
-7z x exploit.zip -o/tmp/target   # vulnerable 7-Zip writes to /etc/cron.d
+7z x exploit.zip -o/tmp/archive-slip-target
 ```
-Kwenye build iliyopatched, `/etc/cron.d` haitaguswa; symlink hutolewa kama link ndani ya /tmp/target.
+Archive hii ina symlink entry inayoelekeza nje ya extraction directory; tumia target ya kutupwa na uhakikishe kuwa extractor haifuatilii symlink hiyo. Write-through test pia inahitaji regular-file entry iliyo chini ya symlink.
 
 ### Go mholt/archiver Unarchive() Zip-Slip (CVE-2025-3445)
-* **Bug**: `archiver.Unarchive()` hufuata `../` na symlinked ZIP entries, na kuandika nje ya `outputDir`.<sup>[[2]](#references)</sup>
-* **Affected**: `github.com/mholt/archiver` ≤ 3.5.1 (project sasa deprecated).
+* **Bug**: `archiver.Unarchive()` hufuata `../` na ZIP entries zilizo symlink, na kuandika nje ya `outputDir`.<sup>[[2]](#references)</sup>
+* **Affected**: `github.com/mholt/archiver` ≤ 3.5.1 (project sasa imepitwa na wakati).
 * **Fix**: Hamia kwenye `mholt/archives` ≥ 0.1.0 au implement canonical-path checks kabla ya write.
 * **Minimal reproduction**:
 ```go
@@ -91,35 +82,36 @@ archiver.Unarchive("exploit.zip", "/tmp/safe")
 // exploit.zip holds ../../../../home/user/.ssh/authorized_keys
 ```
 
-## Detection Tips
+## Vidokezo vya Detection
 
-* **Static inspection** – Orodhesha archive entries na uweke alama kwa name yoyote iliyo na `../`, `..\\`, *absolute paths* (`/`, `C:`) au entries za aina ya *symlink* ambazo target yake iko nje ya extraction dir.
-* **Canonicalisation** – Hakikisha `realpath(join(dest, name))` bado inaanza na `dest`. Kataa vinginevyo.<sup>[[3]](#references)</sup>
-* **Sandbox extraction** – Decompress kwenye disposable directory kwa kutumia safe extractor (k.m., `bsdtar --safe --xattrs --no-same-owner`, 7-Zip ≥ 25.00) na uhakikishe paths zinazotokea zinabaki ndani ya directory.
-* **Endpoint monitoring** – Toa alert kwa executables mpya zilizoandikwa kwenye `Startup`/`Run`/`cron` locations muda mfupi baada ya archive kufunguliwa na WinRAR/7-Zip/n.k.
+* **Static inspection** – Orodhesha archive entries na flag jina lolote lenye `../`, `..\\`, *absolute paths* (`/`, `C:`) au entries za aina ya *symlink* ambazo target yake iko nje ya extraction dir.
+* **Canonicalisation** – Hakikisha `realpath(join(dest, name))` inabaki ndani ya `realpath(dest)` (linganisha path components, si raw string prefix pekee). Kataa vinginevyo.<sup>[[3]](#references)</sup>
+* **Sandbox extraction** – Decompress kwenye directory ya kutupwa ukitumia extractor yenye path/symlink checks (kwa mfano secure checks za default za bsdtar au 7-Zip ≥ 25.00), kisha thibitisha kuwa paths zinazosalia ziko ndani ya directory hiyo.<sup>[[1]](#references)[[9]](#references)</sup>
+* **Endpoint monitoring** – Toa alert kuhusu executables mpya zinazoandikwa kwenye maeneo ya `Startup`/`Run`/`cron` muda mfupi baada ya archive kufunguliwa na WinRAR/7-Zip/etc.
 
 ## Mitigation & Hardening
 
-1. **Update extractor** – WinRAR 7.13+ na 7-Zip 25.00+ hutekeleza path/symlink sanitisation. Tools zote mbili bado hazina auto-update.
-2. Toa archives kwa kutumia “**Do not extract paths**” / “**Ignore paths**” inapowezekana.
-3. Kwenye Unix, punguza privileges & mount **chroot/namespace** kabla ya extraction; kwenye Windows, tumia **AppContainer** au sandbox.
+1. **Update extractor** – WinRAR 7.13+ na 7-Zip 25.00+ zina fixes za path/symlink issues zilizotajwa.<sup>[[1]](#references)[[5]](#references)</sup>
+2. Fanya extraction ya archives kwa “**Do not extract paths**” / “**Ignore paths**” inapowezekana.
+3. Kwenye Unix, punguza privileges na mount **chroot/namespace** kabla ya extraction; kwenye Windows, tumia **AppContainer** au sandbox.
 4. Ukiandika custom code, normalise kwa `realpath()`/`PathCanonicalize()` **kabla** ya create/write, na kataa entry yoyote inayotoka nje ya destination.
 
-## Additional Affected / Historical Cases
+## Kesi Nyingine Zilizoathirika / za Kihistoria
 
-* 2018 – Ushauri mkubwa wa *Zip-Slip* kutoka Snyk uliowaathiri Java/Go/JS libraries nyingi.<sup>[[6]](#references)</sup>
-* 2023 – 7-Zip CVE-2023-4011, traversal inayofanana wakati wa `-ao` merge.
-* 2025 – HashiCorp `go-slug` (CVE-2025-0377), TAR extraction traversal katika slugs (patch katika v1.2).<sup>[[7]](#references)</sup>
-* Custom extraction logic yoyote inayoshindwa kuita `PathCanonicalize` / `realpath` kabla ya write.
+* 2018 – Advisory kubwa ya *Zip-Slip* kutoka Snyk iliyoathiri Java/Go/JS libraries nyingi.<sup>[[6]](#references)</sup>
+* 2025 – HashiCorp `go-slug` (CVE-2025-0377) TAR extraction traversal katika slugs (imefanyiwa fix katika v0.16.3).<sup>[[7]](#references)</sup>
+* Logic yoyote ya custom extraction inayoshindwa kuita `PathCanonicalize` / `realpath` kabla ya write.
 
 ## References
 
 - [1] [Trend Micro ZDI-25-949 – 7-Zip symlink ZIP traversal (CVE-2025-11001)](https://www.zerodayinitiative.com/advisories/ZDI-25-949/)
-- [2] [JFrog Research – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
-- [3] [Meziantou – Prevent Zip Slip in .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
+- [2] [Utafiti wa JFrog – mholt/archiver Zip-Slip (CVE-2025-3445)](https://research.jfrog.com/vulnerabilities/archiver-zip-slip/)
+- [3] [Meziantou – Kuzuia Zip Slip katika .NET](https://www.meziantou.net/prevent-zip-slip-in-dotnet.htm)
 - [4] [0xdf – HTB Bruno ZipSlip → DLL hijack chain](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
-- [5] [ESET Research – Update WinRAR tools now: RomCom and others exploiting zero-day vulnerability (CVE-2025-8088)](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
-- [6] [Snyk – Public Disclosure of a Critical Arbitrary File Overwrite Vulnerability: Zip Slip](https://snyk.io/blog/zip-slip-vulnerability/)
+- [5] [Utafiti wa ESET – Update WinRAR tools now: RomCom and others exploiting zero-day vulnerability (CVE-2025-8088)](https://www.welivesecurity.com/en/eset-research/update-winrar-tools-now-romcom-and-others-exploiting-zero-day-vulnerability/)
+- [6] [Snyk – Ufichuaji wa Umma wa Critical Arbitrary File Overwrite Vulnerability: Zip Slip](https://snyk.io/blog/zip-slip-vulnerability/)
 - [7] [HashiCorp – HCSEC-2025-01: go-slug Vulnerable to Zip Slip Attack (CVE-2025-0377)](https://discuss.hashicorp.com/t/hcsec-2025-01-hashicorp-go-slug-vulnerable-to-zip-slip-attack/72719)
-
+- [8] [Microsoft Learn – Path.Combine Method](https://learn.microsoft.com/en-us/dotnet/api/system.io.path.combine?view=net-7.0)
+- [9] [libarchive – bsdtar secure extraction flags](https://github.com/libarchive/libarchive/blob/master/tar/bsdtar.c)
+- [10] [NHS England Digital – Proof-of-Concept Exploit Reported for CVE-2025-11001 in 7-Zip](https://digital.nhs.uk/cyber-alerts/2025/cc-4719)
 {{#include ../banners/hacktricks-training.md}}
