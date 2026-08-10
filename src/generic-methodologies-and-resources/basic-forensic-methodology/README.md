@@ -1,7 +1,5 @@
 # Basic Forensic Methodology
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Creating and Mounting an Image
 
 
@@ -95,5 +93,7 @@ anti-forensic-techniques.md
 {{#ref}}
 file-integrity-monitoring.md
 {{#endref}}
+
+## References
 
 {{#include ../../banners/hacktricks-training.md}}

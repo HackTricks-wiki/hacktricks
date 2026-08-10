@@ -1,7 +1,5 @@
 # Linux Forensics
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Initial Information Gathering
 
 ### Basic Information
