@@ -2,7 +2,7 @@
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks 徽标和动态设计由_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_完成_。
+_Hacktricks 标志与动态设计由_ [_@ppieranacho_](https://www.instagram.com/ppieranacho/)_完成。_
 
 ### 在本地运行 HackTricks
 ```bash
@@ -31,29 +31,29 @@ export HT_LANG="master" # Leave master for English
 # Run the docker container indicating the path to the hacktricks folder
 docker run -d --rm --platform linux/amd64 -p 3337:3000 --name hacktricks -v $(pwd)/hacktricks:/app ghcr.io/hacktricks-wiki/hacktricks-cloud/translator-image bash -c "mkdir -p ~/.ssh && ssh-keyscan -H github.com >> ~/.ssh/known_hosts && cd /app && git config --global --add safe.directory /app && git checkout $HT_LANG && git pull && MDBOOK_PREPROCESSOR__HACKTRICKS__ENV=dev mdbook serve --hostname 0.0.0.0"
 ```
-你的 HackTricks 本地副本将在 <5 分钟后通过 [http://localhost:3337](http://localhost:3337) 提供（需要构建书籍，请耐心等待）。
+在不到 5 分钟后，你本地的 HackTricks 副本将可通过 [http://localhost:3337](http://localhost:3337) 访问（需要构建书籍，请耐心等待）。
 
 或者，如果你有 Docker Compose，只需在仓库根目录运行以下命令：
 ```bash
 docker compose up
 ```
-这会使用捆绑的 `docker-compose.yml`，通过 [http://localhost:3337](http://localhost:3337) 提供主机上当前检出的分支，并支持 live reload。使用 Compose 时，如需切换语言，请在启动服务前检出所需的语言分支。
+此配置使用捆绑的 `docker-compose.yml`，通过 [http://localhost:3337](http://localhost:3337) 提供主机上当前检出的分支，并支持实时重新加载。使用 Compose 时，如需切换语言，请在启动服务前检出所需的语言分支。
 
 ## HackTricks 合作伙伴
 
 ---
 
-## HackTricks Friends
+## HackTricks 朋友
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure class="sponsor-logo"><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) 是一家优秀的 cybersecurity 公司，口号是 **HACK THE UNHACKABLE**。他们开展自主研究并开发自己的 hacking 工具，以**提供多种有价值的 cybersecurity 服务**，例如 pentesting、Red teams 和 training。
+STM Cyber 提供 penetration testing、安全审计、exploit 与研究工作、工具及安全意识服务。其网站介绍称，该团队由 penetration testers、程序员和安全研究人员组成，拥有十多年的经验。<sup>[[1]](#references)</sup>
 
-你可以在 [**https://blog.stmcyber.com**](https://blog.stmcyber.com) 查看他们的 **blog**
+你可以在此查看他们的 **blog**：[**https://blog.stmcyber.com**](https://blog.stmcyber.com)。
 
-**STM Cyber** 也支持 HackTricks 等 cybersecurity open source 项目 :)
+**STM Cyber** 也支持 HackTricks 等网络安全开源项目 :)
 
 ---
 
@@ -61,37 +61,20 @@ docker compose up
 
 <figure class="sponsor-logo"><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** 是**欧洲第一**的 ethical hacking 和 **bug bounty platform**。
+Intigriti 是一家众包安全服务提供商，通过全球研究人员社区提供 bug bounty 和 penetration-testing 服务。其平台将持续性的 bug bounty 覆盖与按需 PTaaS 及托管漏洞披露计划相结合。<sup>[[2]](#references)</sup>
 
-**Bug bounty tip**：**注册** **Intigriti**，这是一个**由 hackers 为 hackers 创建的高级 bug bounty platform**！立即通过 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) 加入我们，开始赚取最高 **$100,000** 的 bounty！
-
-{{#ref}}
-https://go.intigriti.com/hacktricks
-{{#endref}}
+**Bug bounty 提示**：通过 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) 加入 Intigriti，并探索其 bug bounty 计划。
 
 ---
 
-### [Modern Security – AI & Application Security Training Platform](https://modernsecurity.io/)
+### [Modern Security – AI 与应用安全培训平台](https://modernsecurity.io/)
 
 <figure class="sponsor-logo"><img src="images/modern_security_logo.png" alt="Modern Security"><figcaption></figcaption></figure>
 
-Modern Security 通过**以工程为先、实践为核心的实验室方式**，提供**实用的 AI Security training**。我们的课程面向 security engineers、AppSec professionals 和 developers，帮助他们**构建、攻破并保护真实的 AI/LLM-powered applications**。
+Modern Security 为 security engineers、AppSec 专业人员和开发者提供自主进度、实践型 AI security 培训。其 AI Security Certification 涵盖 LLM 和 agent 基础、RAG 与向量数据库、威胁建模、prompt-injection 和 MCP attacks，以及防御性架构。<sup>[[3]](#references)</sup>
 
-**AI Security Certification** 专注于真实世界技能，包括：
-- 保护 LLM 和 AI-powered applications
-- AI systems 的 threat modeling
-- Embeddings、vector databases 和 RAG security
-- LLM attacks、abuse scenarios 和 practical defenses
-- Secure design patterns 和 deployment considerations
-
-所有课程均为**按需提供**、**以实验室为驱动**，围绕**真实世界中的 security tradeoffs** 设计，而不仅仅是理论。
-
-👉 AI Security 课程的更多详情：
+👉 查看 AI Security 课程详情：
 https://www.modernsecurity.io/courses/ai-security-certification
-
-{{#ref}}
-https://modernsecurity.io/
-{{#endref}}
 
 ---
 
@@ -99,48 +82,29 @@ https://modernsecurity.io/
 
 <figure class="sponsor-logo"><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** 提供快速、便捷的实时 API，用于**访问 search engine results**。他们负责 scrape search engines、处理 proxies、解决 captchas，并为你解析所有丰富的 structured data。
+**SerpApi** 为 Google 及其他搜索引擎提供 API，返回结构化 SERP 数据，并支持位置感知结果、Maps、Shopping 和 Knowledge Graph 结果等功能。<sup>[[4]](#references)</sup>
 
-订阅 SerpApi 的任一 plan，即可访问 50 多种 API，用于 scrape 不同的 search engines，包括 Google、Bing、Baidu、Yahoo、Yandex 等。\
-与其他 providers 不同，**SerpApi 不仅 scrape organic results**。SerpApi 的响应始终包含所有 ads、inline images 和 videos、knowledge graphs，以及 search results 中存在的其他 elements 和 features。
-
-当前 SerpApi 客户包括 **Apple、Shopify 和 GrubHub**。\
-如需更多信息，请查看他们的 [**blog**](https://serpapi.com/blog/)**，**或在他们的 [**playground**](https://serpapi.com/playground)** 中尝试示例。**\
-你可以[**在此**](https://serpapi.com/users/sign_up)**创建免费账户。**
+如需了解更多信息，请查看他们的 [**blog**](https://serpapi.com/blog/)、在其 [**playground**](https://serpapi.com/playground) 中尝试示例，或[**创建免费账户**](https://serpapi.com/users/sign_up)。
 
 ---
 
-### [8kSec Academy – In-Depth Mobile & AI Security Courses](https://academy.8ksec.io/)
+### [8kSec Academy – 深入的移动与 AI Security 课程](https://academy.8ksec.io/)
 
 <figure class="sponsor-logo"><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-**8kSec Academy** 提供 offensive mobile 和 AI security training，由 active researchers 授课——他们也是 Black Hat、HITB 和 Zer0con 上 CVE writeups 和 talks 背后的团队。课程采用 self-paced 模式，以真实目标上的 labs 为核心，并配有 hands-on certification。
+**8kSec Academy** 提供自主进度的移动和 AI-security 课程。其课程目录涵盖使用 Ghidra、Frida 和 LLDB 等工具进行移动应用审计与逆向，以及 AI/LLM attack 和 defense labs。<sup>[[5]](#references)[[6]](#references)</sup>
 
-课程目录包含两个方向：
-
-**Mobile Security** – 覆盖从 app layer 到底层的 iOS 和 Android：使用 Ghidra 和 LLDB 进行 reverse engineering、ARM64 exploitation、kernel internals 和现代 mitigations（PAC、MTE、SELinux），以及 jailbreak 和 rooting mechanics。
-
-**AI Security** – 两门涵盖该领域的完整课程。Practical AI Security 介绍 LLMs、RAG pipelines、AI agents 和 MCP 的工作方式，以及如何攻击和防御它们。Advanced AI Security 则深入实践前沿内容：使用 Garak 和 PyRIT 对 AI systems 进行大规模 red teaming、利用 MCP servers、植入和检测 model backdoors，以及在 Apple Silicon 上进行 fine-tuning attacks 和 defenses。
-
-课程和 certifications：
-
-{{#ref}}
-https://academy.8ksec.io/
-{{#endref}}
+浏览 [8kSec Academy 课程目录](https://academy.8ksec.io/)。
 
 ---
 
-### [NaxusAI – AI Powered Security Scanner](https://academy.8ksec.io/)
+### [NaxusAI – AI 驱动的 Security Scanner](https://www.naxusai.com/)
 
 <figure class="sponsor-logo"><img src="images/logo-naxus.png" alt=""><figcaption></figcaption></figure>
 
-**NaxusAI** 是一个 AI-powered security platform，可在 attackers 之前发现可被利用的 vulnerabilities。
+**Naxus** 推出 offensive-AI 平台，可映射代码和基础设施，然后使用 static 和 dynamic agents 查找并验证可利用的弱点，同时提供 proof-of-concept 证据和修复指导。<sup>[[7]](#references)</sup>
 
-**Code security tip**：注册 NaxusAI，这是一个为 developers 和 security teams 打造的 smart vulnerability monitoring platform！立即加入我们，开始使用 AI 来**检测、验证并修复真实的 security risks，防止它们进入 production**！
-
-{{#ref}}
-https://naxusai.com
-{{#endref}}
+**代码安全提示**：试用 Naxus，探索其面向代码和基础设施的漏洞发现功能。
 
 ---
 
@@ -148,17 +112,11 @@ https://naxusai.com
 
 <figure class="sponsor-logo"><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.net) 是一家总部位于**阿姆斯特丹**的 professional cybersecurity company，通过采用**现代化**方式提供 **offensive-security services**，帮助**全球各地**的企业**防护**最新的 cybersecurity threats。
+WebSec 提供 penetration testing、安全订阅、人员配置和漏洞评估服务。其网站称，该公司在国际范围内运营，业务涵盖 offensive security、defensive security 以及 governance、risk 和 compliance 工作。<sup>[[8]](#references)</sup>
 
-WebSec 是一家国际 security company，在阿姆斯特丹和怀俄明设有办公室。他们提供**一站式 security services**，也就是说他们几乎无所不包：Pentesting、**Security** Audits、Awareness Trainings、Phishing Campagnes、Code Review、Exploit Development、Security Experts Outsourcing 等等。
+如需了解更多信息，请访问他们的 [**website**](https://websec.net/en/) 或 [**blog**](https://websec.net/blog/)。
 
-WebSec 的另一个亮点是，与行业平均水平不同，WebSec 对自身能力**非常有信心**，甚至**保证提供最高质量的结果**。他们的网站上写道：“**If we can't hack it, You don't pay it!**”。如需更多信息，请查看他们的 [**website**](https://websec.net/en/) 和 [**blog**](https://websec.net/blog/)！
-
-除此之外，WebSec 还是 HackTricks 的**坚定支持者**。
-
-{{#ref}}
-https://www.youtube.com/watch?v=Zq2JycGDCPM
-{{#endref}}
+除上述内容外，WebSec 还是 HackTricks 的**坚定支持者**。
 
 ---
 
@@ -167,17 +125,13 @@ https://www.youtube.com/watch?v=Zq2JycGDCPM
 <figure class="sponsor-logo"><img src="images/cyberhelmets-logo.png" alt="cyberhelmets logo"><figcaption></figcaption></figure>
 
 
-**为实战而生，以你为中心。**\
-[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) 由 industry experts 开发并提供高效的 cybersecurity training。其项目超越理论，通过反映真实世界 threats 的 custom environments，帮助团队深入理解并掌握可执行的 skills。如需定制 training，请[**联系我们**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks)。
+**为实战而建，以你为核心。**\
+[**Cyber Helmets**](https://cyberhelmets.com/?ref=hacktricks) 提供由专家授课的网络安全培训，内容和 labs 均为定制开发，并以真实基础设施为基础。其课程根据组织需求定制，覆盖从评估到实施的完整流程。<sup>[[9]](#references)</sup> 如需定制培训，请[**点击此处**](https://cyberhelmets.com/tailor-made-training/?ref=hacktricks)联系。
 
-**其 training 的优势：**
-* Custom-built content 和 labs
-* 由顶级 tools 和 platforms 提供支持
-* 由 practitioners 设计并授课
-
-{{#ref}}
-https://cyberhelmets.com/courses/?ref=hacktricks
-{{#endref}}
+**其培训的特色：**
+* 定制开发的内容和 labs
+* 由顶级工具和平台支持
+* 由实战从业者设计并授课
 
 ---
 
@@ -185,41 +139,44 @@ https://cyberhelmets.com/courses/?ref=hacktricks
 
 <figure class="sponsor-logo"><img src="images/lasttower.png" alt="lasttower logo"><figcaption></figcaption></figure>
 
-Last Tower Solutions 为**教育**和**金融科技**机构提供专业的 cybersecurity services，重点包括**penetration testing、cloud security assessments** 和**合规准备**（SOC 2、PCI-DSS、NIST）。我们的团队包括**持有 OSCP 和 CISSP 认证的专业人员**，为每次合作带来深厚的技术 expertise 和符合行业标准的洞察。
+Last Tower Solutions 专注于为 **Education** 和 **FinTech** 提供网络安全咨询，包括 cloud assessments、内部和外部 penetration tests、漏洞评估及合规支持。<sup>[[10]](#references)</sup>
 
-我们不止于 automated scans，还会针对高风险环境开展**手动、由情报驱动的 testing**。从保护学生记录到保护金融交易，我们帮助组织防御最重要的资产。
-
-_“高质量的防御需要了解攻击，我们通过理解来提供 security。”_
-
-访问我们的 [**blog**](https://www.lasttowersolutions.com/blog)，了解 cybersecurity 的最新信息并保持与时俱进。
-
-{{#ref}}
-https://www.lasttowersolutions.com/
-{{#endref}}
+访问我们的 [**blog**](https://www.lasttowersolutions.com/blog)，了解网络安全领域的最新资讯和动态。
 
 ---
 
-### [K8Studio - The Smarter GUI to Manage Kubernetes.](https://k8studio.io/)
+### [K8Studio - 管理 Kubernetes 的更智能 GUI。](https://k8studio.io/)
 
 <figure class="sponsor-logo"><img src="images/k8studio.png" alt="k8studio logo"><figcaption></figcaption></figure>
 
-K8Studio IDE 赋能 DevOps、DevSecOps 和 developers 高效地管理、监控并保护 Kubernetes clusters。借助 AI-driven insights、advanced security framework 和直观的 CloudMaps GUI，可视化你的 clusters、了解其状态并自信地采取行动。
-
-此外，K8Studio **兼容所有主要的 kubernetes distributions**（AWS、GCP、Azure、DO、Rancher、K3s、Openshift 等）。
-
-{{#ref}}
-https://k8studio.io/
-{{#endref}}
+K8Studio 是一款桌面 Kubernetes IDE，提供 CloudMaps 可视化、多集群导航、RBAC、Helm、日志、YAML 和终端视图。供应商称，它通过 kubeconfig 连接而无需安装 agents，并支持 macOS、Windows、Linux 和 air-gapped clusters。<sup>[[11]](#references)</sup>
 
 ---
-## License & Disclaimer
 
-请在以下位置查看：
+## 许可证与免责声明
 
-{{#ref}}
-welcome/hacktricks-values-and-faq.md
-{{#endref}}
+请参阅下方 References 中的 HackTricks Values & FAQ 条目。
 
 ## Github 统计
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+
+## References
+
+- [1] [STM Cyber](https://www.stmcyber.com/)
+- [2] [Intigriti](https://www.intigriti.com/)
+- [3] [AI Security Certification – Modern Security](https://www.modernsecurity.io/courses/ai-security-certification)
+- [4] [SerpApi](https://serpapi.com/)
+- [5] [8kSec Academy](https://academy.8ksec.io/)
+- [6] [实践型 AI Security：攻击、防御与应用](https://academy.8ksec.io/course/practical-ai-security)
+- [7] [Naxus](https://www.naxusai.com/)
+- [8] [WebSec](https://websec.net/)
+- [9] [Cyber Helmets](https://cyberhelmets.com/)
+- [10] [Last Tower Solutions](https://www.lasttowersolutions.com/)
+- [11] [K8Studio](https://k8studio.io/)
+- [12] [Intigriti HackTricks 推荐链接](https://go.intigriti.com/hacktricks)
+- [13] [Modern Security](https://modernsecurity.io/)
+- [14] [WebSec 赞助视频](https://www.youtube.com/watch?v=Zq2JycGDCPM)
+- [15] [Cyber Helmets 课程](https://cyberhelmets.com/courses/?ref=hacktricks)
+- [16] [HackTricks Values & FAQ](welcome/hacktricks-values-and-faq.md)
+{{#include banners/hacktricks-training.md}}

@@ -1,16 +1,14 @@
 # Pcap 检查
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 > [!TIP]
-> 关于 **PCAP** 与 **PCAPNG** 的说明：PCAP 文件格式有两个版本；**PCAPNG 更新，但并非所有工具都支持**。你可能需要使用 Wireshark 或其他兼容工具将文件从 PCAPNG 转换为 PCAP，才能在某些其他工具中处理它。
+> **PCAP** 和 **PCAPNG** 是两种不同的捕获格式；**PCAPNG 是 PCAP 的灵活且可扩展的后继格式**，但不同工具对其支持程度有所不同。如果某个工具无法读取 PCAPNG，可以使用 Wireshark 或其他兼容工具将其转换为 PCAP。<sup>[[1]](#references)[[18]](#references)</sup>
 
-## 用于 pcap 的在线工具
+## PCAP 在线工具
 
-- 如果你的 pcap 文件头**损坏**，应尝试使用以下工具**修复**： [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)
-- 在 [**PacketTotal**](https://packettotal.com) 中提取 pcap 内的**信息**并搜索**malware**
-- 使用 [**www.virustotal.com**](https://www.virustotal.com) 和 [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com) 搜索**恶意活动**
-- [**https://apackets.com/**](https://apackets.com/) 中的**浏览器内完整 pcap 分析**
+- 如果你的 pcap 文件头**损坏**，可以尝试使用以下工具进行**修复**：[http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php)。<sup>[[2]](#references)</sup>
+- 在 [**PacketTotal**](https://packettotal.com) 中从 pcap 内提取**信息**并搜索**malware**。<sup>[[19]](#references)</sup>
+- 使用 [**www.virustotal.com**](https://www.virustotal.com) 和 [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com) 搜索**恶意活动**。<sup>[[3]](#references)[[4]](#references)</sup>
+- 在浏览器中进行 [**https://apackets.com/**](https://apackets.com/) 的 **pcap 全面分析**。<sup>[[5]](#references)</sup>
 
 ## 提取信息
 
@@ -30,11 +28,11 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-在浏览器中进行 Pcap 分析。
+在浏览器中进行 Pcap 分析。<sup>[[5]](#references)</sup>
 
 ### Xplico Framework
 
-[**Xplico** ](https://github.com/xplico/xplico)_(仅限 linux)_ 可以**分析** **pcap** 并从中提取信息。例如，对于 pcap 文件，Xplico 可以提取每封电子邮件（POP、IMAP 和 SMTP 协议）、所有 HTTP 内容、每个 VoIP 通话（SIP）、FTP、TFTP 等。
+[**Xplico**](https://github.com/xplico/xplico) 是一个类 Unix 网络取证工具，可以解码 PCAP 文件，并提取通过 POP/IMAP/SMTP 传输的电子邮件、HTTP 内容、SIP VoIP 通话、FTP 数据和 TFTP 数据。<sup>[[6]](#references)</sup>
 
 **安装**
 ```bash
@@ -43,47 +41,43 @@ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE
 sudo apt-get update
 sudo apt-get install xplico
 ```
-**运行**
+运行
 ```
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
-访问 _**127.0.0.1:9876**_，使用凭据 _**xplico:xplico**_
+使用凭据 _**xplico:xplico**_ 访问 _**127.0.0.1:9876**_
 
 然后创建一个**新 case**，在该 case 中创建一个**新 session**，并**上传 pcap**文件。
 
 ### NetworkMiner
 
-与 Xplico 一样，它是一个用于**分析和从 pcap 中提取对象**的工具。它提供免费版本，可从[**此处下载**](https://www.netresec.com/?page=NetworkMiner)。它适用于 **Windows**。\
-该工具还可用于从数据包中获取经过**分析的其他信息**，从而以**更快的方式**了解发生了什么。
+与 Xplico 类似，[**NetworkMiner**](https://www.netresec.com/?page=NetworkMiner) 会解析 PCAP 流量，以提取文件、图像、电子邮件和密码等 artifacts，并汇总主机信息；其免费版本主要面向 Windows。<sup>[[7]](#references)</sup>
 
 ### NetWitness Investigator
 
-你可以[**从此处下载 NetWitness Investigator**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware)，**（适用于 Windows）**。\
-这是另一个有用的工具，可以**分析数据包**，并以有用的方式整理信息，从而**了解内部正在发生什么**。
+你可以[**从这里下载 NetWitness Investigator**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware)**（可在 Windows 中运行）**。\
+该厂商将此 freeware 描述为一种交互式 network-session analysis 工具，用于恶意活动 triage，目前通过联系表单提供访问权限。<sup>[[8]](#references)</sup>
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-- 提取并编码用户名和密码（HTTP、FTP、Telnet、IMAP、SMTP...）
-- 提取 authentication hashes，并使用 Hashcat 破解（Kerberos、NTLM、CRAM-MD5、HTTP-Digest...）
-- 构建可视化网络图（网络节点和用户）
-- 提取 DNS queries
-- 重建所有 TCP 和 UDP Sessions
-- File Carving
+BruteShark 的文档化模块可以从 HTTP、FTP、Telnet、IMAP 和 SMTP 中解析 credentials，为 Hashcat 导出 Kerberos、NTLM、CRAM-MD5 和 HTTP-Digest authentication hashes，映射 network nodes 和 users，提取 DNS queries，重建 TCP/UDP sessions，并 carve files。<sup>[[9]](#references)</sup>
 
 ### Capinfos
+
+Wireshark 的 `capinfos` 默认会为 capture file 打印一份详细报告。<sup>[[10]](#references)</sup>
 ```
 capinfos capture.pcap
 ```
 ### Ngrep
 
-如果你正在 **查找** pcap 中的 **某些内容**，可以使用 **ngrep**。以下是一个使用主要过滤器的示例：
+`ngrep` 使用正则表达式搜索数据包有效载荷，并接受 BPF 过滤器；`-I` 读取与 pcap 兼容的捕获文件。<sup>[[11]](#references)</sup> 以下示例结合这些功能，在选定的流量中搜索 HTTP 请求。
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
 ### 文件雕刻
 
-使用常见的 carving 技术可以从 pcap 中提取文件和信息：
+使用常见的文件雕刻技术有助于从 pcap 中提取文件和信息：
 
 
 {{#ref}}
@@ -92,7 +86,7 @@ ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.
 
 ### 捕获凭据
 
-你可以使用 [https://github.com/lgandx/PCredz](https://github.com/lgandx/PCredz) 等工具，从 pcap 或实时接口中解析凭据。
+你可以使用 [PCredz](https://github.com/lgandx/PCredz) 从存储的 PCAP 文件或实时接口中解析凭据。<sup>[[12]](#references)</sup>
 
 ## 检查 Exploits/Malware
 
@@ -106,22 +100,18 @@ echo "url = http://rules.emergingthreats.net/open/suricata/emerging.rules.tar.gz
 oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
 **检查 pcap**
+
+Suricata 的 `-r` 选项以离线模式重放 PCAP；在此示例中，`-k none` 禁用校验和检查，`-v` 增加日志详细程度，而 `-l` 选择日志目录。<sup>[[13]](#references)</sup>
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) 是一个工具，可以：
-
-- 读取 PCAP File 并提取 Http Streams。
-- 对任何压缩的 streams 进行 gzip 解压
-- 使用 yara 扫描每个文件
-- 写入 report.txt
-- 可选地将匹配的文件保存到一个 Dir
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) 处理 PCAP 文件中的 HTTP 流，可选择解压 gzip 流，使用 YARA 扫描提取的文件，写入 `report.txt`，并可将匹配的文件保存到指定目录。<sup>[[14]](#references)</sup>
 
 ### Malware Analysis
 
-检查是否可以找到任何已知 malware 的特征：
+检查是否能找到已知 malware 的任何指纹：
 
 
 {{#ref}}
@@ -130,11 +120,13 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) 是一个被动式、开源的网络流量分析器。许多 operator 使用 Zeek 作为 Network Security Monitor (NSM)，以支持对可疑或恶意活动的调查。Zeek 还支持 security domain 之外的广泛流量分析任务，包括性能测量和故障排除。
+> [Zeek](https://docs.zeek.org/en/master/about.html) 是一种被动的开源网络流量分析器，可用作 Network Security Monitor (NSM)，也可用于更广泛的流量分析，包括性能测量和故障排除。<sup>[[15]](#references)</sup>
 
-基本上，`zeek` 创建的日志并不是 **pcaps**。因此，你需要使用 **其他工具** 来分析包含有关 pcaps 的 **信息** 的日志。
+Zeek 生成结构化日志，而不是 PCAP 文件，因此应使用 `zeek-cut` 等日志分析工具检查这些日志。<sup>[[15]](#references)[[16]](#references)</sup>
 
 ### Connections Info
+
+下面的示例使用 `zeek-cut` 从 TSV 日志中选择指定字段，然后使用标准 Unix 工具对连接进行排序和计数；RITA 也可以导入 Zeek 日志，用于长连接、beaconing 和 DNS-tunneling 分析。<sup>[[16]](#references)[[17]](#references)</sup>
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -218,4 +210,25 @@ wifi-pcap-analysis.md
 usb-keystrokes.md
 {{#endref}}
 
+## References
+
+- [1] [Wireshark 用户指南：打开捕获文件](https://www.wireshark.org/docs/wsug_html_chunked/ChIOOpenSection.html)
+- [2] [pcapfix - 在线 pcap / pcapng 修复服务](https://f00l.de/hacking/pcapfix.php)
+- [3] [VirusTotal API v3 概览](https://docs.virustotal.com/reference/overview)
+- [4] [Hybrid Analysis](https://www.hybrid-analysis.com/)
+- [5] [A-Packets PCAP Analyzer](https://apackets.com/)
+- [6] [Xplico - 关于](https://www.xplico.org/about)
+- [7] [NetworkMiner](https://www.netresec.com/?page=NetworkMiner)
+- [8] [NetWitness Investigator 免费软件](https://www.netwitness.com/contact-us/netwitness-investigator-freeware/)
+- [9] [BruteShark 仓库](https://github.com/odedshimon/BruteShark)
+- [10] [Wireshark `capinfos` 手册](https://www.wireshark.org/docs/man-pages/capinfos.html)
+- [11] [ngrep 文档](https://ngrep.sourceforge.net/usage.html)
+- [12] [PCredz 仓库](https://github.com/lgandx/PCredz)
+- [13] [Suricata 命令行选项](https://docs.suricata.io/en/latest/command-line-options.html)
+- [14] [YaraPcap 仓库](https://github.com/kevthehermit/YaraPcap)
+- [15] [什么是 Zeek？](https://docs.zeek.org/en/master/about/what.html)
+- [16] [Zeek 日志教程](https://docs.zeek.org/en/master/tutorial/logs.html)
+- [17] [RITA 仓库](https://github.com/activecm/rita)
+- [18] [Wireshark `editcap` 文档](https://www.wireshark.org/docs/wsug_html_chunked/AppToolseditcap.html)
+- [19] [PacketTotal Upload API 公告](https://medium.com/packettotal/the-packettotal-upload-api-26f48e53f0ee)
 {{#include ../../../banners/hacktricks-training.md}}

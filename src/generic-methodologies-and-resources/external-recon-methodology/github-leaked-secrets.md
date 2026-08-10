@@ -1,79 +1,76 @@
 # Github Dorks & Leaks
 
-{{#include ../../banners/hacktricks-training.md}}
+### 在 git repos 和 file system 中查找 secrets 的 Tools
 
-
-### 在 git repos 和文件系统中查找 secrets 的工具
-
-- [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
-- [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
-- [https://github.com/praetorian-inc/noseyparker](https://github.com/praetorian-inc/noseyparker)
-- [https://github.com/GitGuardian/ggshield](https://github.com/GitGuardian/ggshield)
-- [https://github.com/JaimePolop/RExpository](https://github.com/JaimePolop/RExpository)
-- [https://github.com/Yelp/detect-secrets](https://github.com/Yelp/detect-secrets)
-- [https://github.com/hisxo/gitGraber](https://github.com/hisxo/gitGraber)
-- https://github.com/eth0izzle/shhgit (unmaintained)
-- [https://github.com/techgaun/github-dorks](https://github.com/techgaun/github-dorks)
-- https://github.com/michenriksen/gitrob (archived)
-- https://github.com/anshumanbh/git-all-secrets (archived)
-- [https://github.com/awslabs/git-secrets](https://github.com/awslabs/git-secrets)
-- [https://github.com/kootenpv/gittyleaks](https://github.com/kootenpv/gittyleaks)
-- [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
+- [TruffleHog](https://github.com/dxa4481/truffleHog)
+- [Gitleaks](https://github.com/gitleaks/gitleaks)
+- [Nosey Parker](https://github.com/praetorian-inc/noseyparker) (已 archived；由 [Titus](https://github.com/praetorian-inc/titus) 替代)
+- [ggshield](https://github.com/GitGuardian/ggshield)
+- [RExpository](https://github.com/JaimePolop/RExpository)
+- [detect-secrets](https://github.com/Yelp/detect-secrets)
+- [gitGraber](https://github.com/hisxo/gitGraber)
+- [shhgit](https://github.com/eth0izzle/shhgit) (unmaintained)
+- [github-dorks](https://github.com/techgaun/github-dorks)
+- [gitrob](https://github.com/michenriksen/gitrob) (已 archived)
+- [git-all-secrets](https://github.com/anshumanbh/git-all-secrets) (已 archived)
+- [git-secrets](https://github.com/awslabs/git-secrets)
+- [gittyleaks](https://github.com/kootenpv/gittyleaks)
+- [GitDorker](https://github.com/obheda12/GitDorker)
 
 > 注意
-> - TruffleHog v3 可以实时验证许多 credentials，并扫描 GitHub orgs、issues/PRs、gists 和 wikis。示例：`trufflehog github --org <ORG> --results=verified`。<sup>[[2]](#references)</sup>
-> - Gitleaks v8 支持扫描 git history、directories 和 archives：`gitleaks detect -v --source .` 或 `gitleaks detect --source <repo> --log-opts="--all"`。
-> - Nosey Parker 专注于使用经过整理的 rules 进行高吞吐量扫描，并提供用于 triage 的 Explorer UI。示例：先运行 `noseyparker scan --datastore np.db <path|repo>`，然后运行 `noseyparker report --datastore np.db`。
-> - ggshield (GitGuardian CLI) 提供 pre-commit/CI hooks 和 Docker image scanning：`ggshield secret scan repo <path-or-url>`。
+> - TruffleHog v3 可以实时验证许多 credentials，并扫描 GitHub orgs、issues/PRs、gists 和 wikis。示例：`trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)[[13]](#references)</sup>
+> - Gitleaks 扫描 Git repositories、directories 和 archives。使用 `gitleaks git -v --log-opts="--all" <repo>` 扫描 history，使用 `gitleaks dir -v <path>` 扫描 directories，并使用 `--max-archive-depth 1` 检查 archives.<sup>[[6]](#references)</sup>
+> - Nosey Parker 已 archived，并由 Titus 替代。现有安装仍支持使用 `noseyparker scan --datastore np.db <path|repo>`，随后执行 `noseyparker report --datastore np.db`.<sup>[[7]](#references)[[8]](#references)</sup>
+> - ggshield (GitGuardian CLI) 可扫描 files、repositories 和 Docker images，并集成到本地或 CI workflows 中：`ggshield secret scan repo <path-or-url>`.<sup>[[9]](#references)</sup>
 
 ### secrets 常见的 GitHub leak 位置
 
-- default 和 non-default branches 中的 Repository files（在 UI 中搜索 `repo:owner/name@branch`）。
-- 完整的 git history 以及其他 branches/tags（clone 后使用 gitleaks/trufflehog 扫描；GitHub search 主要针对已建立索引的内容）。
-- Issues、pull requests、comments 和 descriptions（TruffleHog GitHub source 通过 `--issue-comments`、`--pr-comments` 等 flags 支持这些内容）。
-- Public repositories 的 Actions logs 和 artifacts（masking 仅尽力而为；如果 logs/artifacts 可见，应进行 review）。
+- GitHub Code Search 只索引 default branch；应直接检查 non-default branches 或 clone 它们.<sup>[[4]](#references)</sup>
+- 完整的 git history 以及其他 branches/tags（使用 gitleaks/trufflehog clone 并扫描；GitHub search 只覆盖已索引的内容）.<sup>[[4]](#references)[[6]](#references)</sup>
+- Issues、pull requests、comments 和 descriptions（TruffleHog 的 GitHub source 通过 `--issue-comments` 和 `--pr-comments` 等 flags 支持这些内容）.<sup>[[2]](#references)</sup>
+- Actions workflow logs 和 artifacts（拥有 read access 即可查看或下载它们，并且不保证会进行 secret redaction）.<sup>[[11]](#references)[[12]](#references)</sup>
 - Wikis 和 release assets。
-- Gists（可使用 tooling 或 UI 进行搜索；某些 tools 可以包含 gists）。
+- Gists（使用 tooling 或 UI 搜索；某些 tools 可以包含 gists）.<sup>[[2]](#references)[[13]](#references)</sup>
 
 > 注意事项
-> - GitHub 的 REST code search API 已是 legacy API，且不支持 regex；进行 regex searches 时优先使用 Web UI。gh CLI 使用 legacy API。
-> - 只有低于特定大小的 files 才会被建立索引以供 search。为确保完整性，应 clone 后在本地使用 secrets scanner 进行扫描。
+> - GitHub 的 Code Search UI 支持 regex，而 REST/API 路径（包括 `gh search code`）使用 legacy engine，且不提供 regex 功能。对于 regex queries，优先使用 UI.<sup>[[3]](#references)[[5]](#references)</sup>
+> - GitHub search 会排除超过其文档规定大小限制的 files，且并不完整。为确保全面，应 clone 并使用 secrets scanner 在本地扫描.<sup>[[4]](#references)</sup>
 
-### Programmatic org-wide scanning
+### 以编程方式进行 org-wide scanning
 
-- TruffleHog (GitHub source)：<sup>[[2]](#references)</sup>
+- TruffleHog (GitHub source).<sup>[[2]](#references)[[13]](#references)</sup>
 ```bash
 export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
 --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- 对组织中的所有 repo 运行 Gitleaks（浅克隆并扫描）：
+- 使用 Gitleaks 扫描组织中的所有 repo（进行浅克隆，并使用 `gitleaks dir` 扫描）。<sup>[[6]](#references)</sup>
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
 tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
-gitleaks detect --source "$tmp" -v || true; rm -rf "$tmp";
+gitleaks dir -v "$tmp" || true; rm -rf "$tmp";
 done
 ```
-- Nosey Parker 扫描 mono checkout：
+- 针对现有安装的 mono checkout 使用 Nosey Parker。<sup>[[7]](#references)</sup>
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
 ```
-- ggshield 快速扫描：
+- ggshield 快速扫描。<sup>[[9]](#references)</sup>
 ```bash
 # current working tree
 ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> 提示：对于 git history，优先使用能够解析 `git log -p --all` 的 scanners，以捕获已删除的 secrets。
+> 提示：对于 git history，优先使用能解析 `git log -p --all` 的 scanners，以捕获已移除的 secrets。<sup>[[6]](#references)</sup>
 
-### 针对现代 tokens 更新的 dorks
+### 适用于现代 tokens 的更新 dorks
 
-- GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`
-- Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
-- Cloud 和通用：
+- GitHub tokens：`ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`。<sup>[[10]](#references)</sup>
+- Slack tokens：`xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
+- Cloud 和通用项：
 - `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` `aws_session_token`
 - `GOOGLE_API_KEY` `AZURE_TENANT_ID` `AZURE_CLIENT_SECRET`
 - `OPENAI_API_KEY` `ANTHROPIC_API_KEY`
@@ -197,10 +194,6 @@ ggshield secret scan repo <path-or-url>
 "xoxb "
 "xoxp"
 [WFClient] Password= extension:ica
-access_key
-bucket_password
-dbpassword
-dbuser
 extension:avastlic "support.avast.com"
 extension:bat
 extension:cfg
@@ -334,13 +327,9 @@ org:Target "S3_ACCESS_KEY_ID"
 org:Target "S3_BUCKET"
 org:Target "S3_ENDPOINT"
 org:Target "S3_SECRET_ACCESS_KEY"
-password
 path:sites databases password
 private -language:java
 PT_TOKEN language:bash
-redis_password
-root_password
-secret_access_key
 SECRET_KEY_BASE=
 shodan_api_key language:python
 WORDPRESS_DB_PASSWORD=
@@ -360,13 +349,21 @@ GCP SECRET
 AWS SECRET
 "private" extension:pgp
 ```
-{{#ref}}
-wide-source-code-search.md
-{{#endref}}
+如需了解其他 code-search 工作流，请参阅 [Wide Source Code Search](wide-source-code-search.md)。
 
-## 参考资料
+## References
 
-- [1] [避免将 secrets 放入 public repositories（GitHub Blog，2024 年 2 月 29 日）](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [1] [将 secrets 排除在 public repositories 之外（GitHub Blog，2024 年 2 月 29 日）](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
 - [2] [TruffleHog v3 – 查找、验证和分析 leaked credentials](https://github.com/trufflesecurity/trufflehog)
-
+- [3] [了解 GitHub Code Search 语法](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
+- [4] [搜索 code（legacy）](https://docs.github.com/en/search-github/searching-on-github/searching-code)
+- [5] [gh search code](https://cli.github.com/manual/gh_search_code)
+- [6] [Gitleaks README](https://github.com/gitleaks/gitleaks/blob/master/README.md)
+- [7] [Nosey Parker README](https://github.com/praetorian-inc/noseyparker#readme)
+- [8] [Titus README](https://github.com/praetorian-inc/titus#readme)
+- [9] [ggshield README](https://github.com/GitGuardian/ggshield#readme)
+- [10] [Secrets 参考（GitHub Actions）](https://docs.github.com/en/actions/reference/security/secrets)
+- [11] [Secrets（GitHub Actions）](https://docs.github.com/en/actions/concepts/security/secrets)
+- [12] [使用 workflow run logs（GitHub Actions）](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
+- [13] [TruffleHog GitHub source](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
 {{#include ../../banners/hacktricks-training.md}}
