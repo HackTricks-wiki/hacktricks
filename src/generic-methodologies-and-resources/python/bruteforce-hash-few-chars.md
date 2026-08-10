@@ -1,6 +1,4 @@
-# 少ない文字数の Hash の Bruteforce
-
-{{#include ../../banners/hacktricks-training.md}}
+# Bruteforce Hashの数文字
 ```python
 import hashlib
 
@@ -51,4 +49,6 @@ return 0
 
 main()
 ```
+## References
+
 {{#include ../../banners/hacktricks-training.md}}

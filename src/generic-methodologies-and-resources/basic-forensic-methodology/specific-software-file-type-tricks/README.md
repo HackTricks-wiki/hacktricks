@@ -1,8 +1,6 @@
-# 特定のSoftware/File Type Tricks
+# 特定のソフトウェア/ファイル形式のテクニック
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-ここでは、特定のfile-typesやsoftwareに関する興味深いtricksを紹介します:
+ここでは、特定のファイル形式やソフトウェアに関する興味深いテクニックを紹介します:
 
 
 {{#ref}}
@@ -63,5 +61,7 @@ zips-tricks.md
 {{#ref}}
 mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
+
+## References
 
 {{#include ../../../banners/hacktricks-training.md}}

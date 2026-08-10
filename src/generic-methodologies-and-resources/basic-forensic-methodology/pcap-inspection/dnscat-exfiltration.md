@@ -1,10 +1,8 @@
-# DNSCat pcap analysis
+# DNSCat pcap 分析
 
-{{#include ../../../banners/hacktricks-training.md}}
+暗号化を使用せずに **DNSCat によって exfiltration されたデータ**を含む PCAP がある場合、exfiltration された内容を復元できる可能性があります。
 
-暗号化を使用せずに **DNSCat によってデータが exfiltration されている** pcap がある場合、exfiltration されたコンテンツを見つけることができます。
-
-知っておく必要があるのは、**最初の 9 バイト**は実際のデータではなく、**C\&C 通信**に関連するものだということだけです。<sup>[[1]](#references)</sup>
+以下で参照している BSidesSF 2017 の capture について、write-up では、decode された各 query が転送された content の前に dnscat 固有のデータを 9 バイト含んでいると推測しています。dnscat2 では異なる packet type と header layout が定義されているため、他の traffic にその offset を適用する前に、該当する framing を確認してください。<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -23,15 +21,15 @@ last = qry
 
 #print(f)
 ```
-詳細については、[https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)<sup>[[1]](#references)</sup>\
-[https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
+詳細については、[BSidesSF 2017 write-up](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap) および [dnscat2 protocol documentation](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md) を参照してください。
 
-Python3で動作するscriptがあります: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
+[DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder) repository には、指定した domain の DNS queries を filter することで、PCAP から streams を抽出する Python 3 decoder が用意されています。<sup>[[3]](#references)</sup>
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
-## 参考文献
+## References
 
-- [1] [DNSCat2 pcapフォレンジック解析記事 – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
-
+- [1] [dnscat2 protocol documentation](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
+- [2] [DNSCat2 pcap forensics writeup – BSidesSF 2017 CTF](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
+- [3] [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 {{#include ../../../banners/hacktricks-training.md}}
