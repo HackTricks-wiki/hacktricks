@@ -1,10 +1,8 @@
 # Class Pollution (Python's Prototype Pollution)
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Basiese voorbeeld
 
-Kyk hoe dit moontlik is om klasse van objekte met strings te besoedel:<sup>[[1]](#references)</sup>
+Deur `__qualname__` via 'n instansie se klasverwysing te verander, word die klas en sy veranderbare basisklasse opgedateer.<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -29,6 +27,8 @@ print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
 ## Basiese Kwesbaarheidsvoorbeeld
+
+'n Rekursiewe samevoeging kan aanvallerbeheerde karteringsleutels aanvaar en geneste waardes deur item- of attribuuttoegang skryf.<sup>[[1]](#references)</sup>
 ```python
 # Initial state
 class Employee: pass
@@ -65,7 +65,9 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>Skep van 'n klas-eienskap se verstekwaarde vir RCE (subprocess)</summary><sup>[[1]](#references)</sup>
+<summary>Skep ’n verstekwaarde vir ’n klaseienskap vir RCE (subprocess)</summary>
+
+’n Gedeelde basisklas kan ’n verstekkenmerk verskaf wat deur ’n bevel-gadget in ’n sibling-klas gebruik word.<sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +118,9 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Besoedeling van ander klasse en globale veranderlikes deur <code>globals</code></summary><sup>[[1]](#references)</sup>
+<summary>Besmetting van ander klasse en globale veranderlikes deur <code>globals</code></summary>
+
+'n Funksie se `__globals__`-kartering stel die module-naamruimte bloot wat bereikbaar is vanaf 'n metode wat in daardie module gedefinieer is.<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +152,9 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Arbitrêre subprocess-uitvoering</summary><sup>[[1]](#references)</sup>
+<summary>Arbitrêre subprocess-uitvoering</summary>
+
+Op Windows gebruik `Popen(..., shell=True)` die `COMSPEC`-omgewingsveranderlike as die verstek-shell, dus demonstreer hierdie gadget command redirection wat deur die omgewing gesteun word.<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -182,7 +188,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Oorskryf van <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** is ’n spesiale attribute van alle functions. Volgens Python se [documentation](https://docs.python.org/3/library/inspect.html) is dit ’n “mapping of any default values for **keyword-only** parameters”. Deur hierdie attribute te pollute, kan ons die default values van keyword-only parameters van ’n function beheer. Dit is die function se parameters wat ná \* of \*args kom.<sup>[[1]](#references)</sup>
+Python dokumenteer `__kwdefaults__` as die mapping van verstekwaardes vir slegs-sleutelwoord-parameters, wat `*` of `*args` in ’n funksiedefinisie volg.<sup>[[4]](#references)</sup> Die volgende gadget oorskryf daardie mapping deur ’n besoedelde function path.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,35 +229,36 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Flask secret oor lêers heen oorskryf</summary>
+<summary>Oorskryf Flask-geheim oor lêers heen</summary>
 
-Dus, as jy class pollution kan uitvoer op ’n objek wat in die hoof-Python-lêer van die webtoepassing gedefinieer is, maar **waarvan die klas in ’n ander lêer as die hooflêer gedefinieer is**. Omdat jy toegang tot \_\_globals\_\_ in die vorige payloads moet verkry deur toegang tot die objek se klas of metodes van die klas te verkry, sal jy **toegang tot die globals in daardie lêer hê, maar nie in die hooflêer nie**. \
-Daarom sal jy **nie toegang tot die Flask app global object kan verkry nie**—dit is die objek wat die **secret key** in die hoofblad gedefinieer het:<sup>[[1]](#references)</sup> 
-</details>
+As die klas van die besoedelde objek in ’n ander module as die toepassing se toegangspuntmodule is, stel sy metodes se `__globals__` aanvanklik die klasmodule se naamruimte bloot. ’n Deurloop deur die loader en `sys.modules.__main__` kan dan die toegangspuntmodule en sy Flask-`app`-objek bereik.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-In hierdie scenario benodig jy 'n gadget om deur lêers te navigeer om by die hoofeen uit te kom en toegang tot die globale objek `app.secret_key` te verkry, sodat jy die Flask secret key kan verander en [**escalate privileges**] kan [**escalate privileges**] met kennis van hierdie sleutel](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Flask gebruik `app.secret_key` om die session cookie te onderteken; kennis van die sleutel laat 'n aanvaller toe om geldige session-data te skep.<sup>[[6]](#references)</sup>
 
-'n Payload soos hierdie een [uit hierdie writeup](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup>
+Die oorspronklike writeup demonstreer die volgende pad om `app.secret_key` te bereik; CTFtime huisves ook 'n kopie van die writeup.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Gebruik hierdie payload om **`app.secret_key`** (die naam in jou app kan anders wees) te **change** sodat jy nuwe en meer privileged flask cookies kan sign.
+Deur die sleutel te verander, kan dit moontlik wees om vervangende sessiekoekies te onderteken en moontlik privilegie-eskalasie moontlik te maak; sien [die Flask-sessiehulpmiddelbladsy](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
 
 </details>
 
-Kyk ook na die volgende bladsy vir meer read only gadgets:
+Kyk ook na die volgende bladsy vir meer leesalleen-gadgets:
 
 
 {{#ref}}
 python-internal-read-gadgets.md
 {{#endref}}
 
-## Verwysings
+## References
 
 - [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
-- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
-
+- [2] [idekCTF 2022-taakbestuurder writeup (oorspronklik)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
+- [3] [CTFtime - idekCTF 2022: taakbestuurder writeup](https://ctftime.org/writeup/36082)
+- [4] [inspect — Inspekteer lewendige objekte](https://docs.python.org/3/library/inspect.html)
+- [5] [subprocess — Subprosesbestuur](https://docs.python.org/3/library/subprocess.html)
+- [6] [Quickstart — Flask-dokumentasie](https://flask.palletsprojects.com/en/stable/quickstart/)
 {{#include ../../banners/hacktricks-training.md}}

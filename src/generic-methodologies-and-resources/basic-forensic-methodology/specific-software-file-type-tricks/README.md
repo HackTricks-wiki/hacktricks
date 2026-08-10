@@ -1,6 +1,4 @@
-# Spesifieke sagteware-/lêertipe-truuks
-
-{{#include ../../../banners/hacktricks-training.md}}
+# Spesifieke truuks vir sagteware/lêertipes
 
 Hier kan jy interessante truuks vir spesifieke lêertipes en/of sagteware vind:
 
@@ -63,5 +61,7 @@ zips-tricks.md
 {{#ref}}
 mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
+
+## References
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,14 +1,12 @@
 # PNG Tricks
 
-{{#include ../../../banners/hacktricks-training.md}}
+**PNG-lêers** is baie algemeen in **CTFs**, **insidentreaksie** en **malware staging**, omdat hulle **verliesloos**, **chunk-gebaseerd** en baie tools is wat hulle steeds maklik sal weergee, selfs wanneer hulle **ekstra metadata**, **aangehegte payloads** of **gedeeltelik korrupte chunks** bevat.
 
-**PNG-lêers** is baie algemeen in **CTFs**, **incident response**, en **malware staging** omdat hulle **verliesloos**, **chunk-gebaseerd** is, en baie tools hulle maklik sal render selfs wanneer hulle **ekstra metadata**, **aangehegte payloads**, of **gedeeltelik beskadigde chunks** bevat.
-
-Behandel ’n PNG as ’n **container**, nie net as ’n prent nie.
+Behandel 'n PNG as 'n **houer**, nie net as 'n prent nie.
 
 ## Vinnige triage
 
-Begin met checks op containervlak voordat jy met LSB stego begin. Vir die bit-plane/LSB-workflow, kyk na [die toegewyde beeld-stego-bladsy](../../../stego/images/README.md).
+Begin met kontrole op houervlak voordat jy met LSB stego begin. Vir die bit-plane/LSB-werkvloei, kyk na [the dedicated image stego page](../../../stego/images/README.md).
 ```bash
 file suspect.png
 pngcheck -vp suspect.png
@@ -16,13 +14,13 @@ exiftool -a -u -g1 suspect.png
 strings -n 6 suspect.png | head
 binwalk -eM suspect.png
 ```
-Nuttige dinge om na te soek:
+Nuttige dinge om na te kyk:
 
-- **Onverwagte ancillary chunks** soos `tEXt`, `zTXt`, `iTXt`, `eXIf`, of `iCCP`
+- **Onverwagte aanvullende chunks** soos `tEXt`, `zTXt`, `iTXt`, `eXIf` of `iCCP`
 - **CRC-foute** of verkeerd gevormde chunk-lengtes
 - **Bykomende data ná `IEND`**
 - **Veelvuldige `IEND`-merkers** of herstelbare `IDAT`-fragmente ná die formele einde van die lêer
-- ’n Lêer wat ’n geldige PNG is **en** ook soos ’n ZIP/PDF/script lyk wanneer dit ge-carve word
+- ’n Lêer wat ’n geldige PNG is **en** ook soos ’n ZIP/PDF/script lyk wanneer dit gecarve word
 
 Onthou, die minimum geldige struktuur is gewoonlik:
 
@@ -32,11 +30,11 @@ Onthou, die minimum geldige struktuur is gewoonlik:
 
 ## Data ná `IEND`
 
-Een van die duidelikste PNG-artefakte is **data wat ná die finale `IEND`-chunk aangeheg is**. Baie decoders ignoreer dit, wat dit nuttig maak vir:
+Een van die artefakte met die hoogste seinwaarde in PNG’s is **data wat ná die finale `IEND`-chunk aangeheg is**. Baie decoders ignoreer dit, wat dit nuttig maak vir:
 
 - **Eenvoudige stego / versteekte payloads**
 - **PNG-polyglots**
-- **Malware-staging**
+- **Malware staging**
 - **Herwinning van ouer beelddata** uit foutiewe editors
 
 Vinnige opsporing:
@@ -57,16 +55,16 @@ dd if=suspect.png of=png-trailer.bin bs=1 skip=$((IEND_OFF+8))
 file png-trailer.bin
 binwalk -eM png-trailer.bin
 ```
-Probeer ook generiese argiefparsers direk teen die PNG of die uitgekerfde sleepstuk:
+Probeer ook generiese argiefparsers direk teen die PNG of die uitgekerfde einddeel:
 ```bash
 7z l suspect.png
 unzip -l suspect.png
 ```
-## Herstel in die styl van Acropalypse van gesnyde/gemaskeerde skermskote
+## Herstel in die styl van Acropalypse van geknipte/gemaskerde skermkiekies
 
-’n Baie praktiese onlangse PNG-forensiese tegniek is om te kontroleer of ’n skermskootredigeerder ’n PNG **oorgeskryf** het sonder om eers die ou lêer te **truncaat**. In daardie gevalle kan grepe van die **vorige prent** ná `IEND` oorbly, en soms kan bykomende `IDAT`-data gedeeltelik gerekonstrueer word.
+’n Baie praktiese onlangse PNG-forensiese truuk is om te kontroleer of ’n skermkiekie-redigeerder ’n PNG **oorgeskryf** het sonder om eers die ou lêer af te **knip**. In sulke gevalle kan grepe van die **vorige prent** ná `IEND` oorbly, en soms kan ekstra `IDAT`-data gedeeltelik gerekonstrueer word.
 
-Dit het bekend geword met **aCropalypse** (Google Pixel Markup) en die verwante probleem met die **Windows Snipping Tool**. In die praktyk, indien ’n "gesnyde" of "gemaskeerde" PNG steeds ou data aan die einde bevat, kan jy moontlik ’n gedeelte van die oorspronklike skermskoot herstel.<sup>[[1]](#references)</sup>
+Dit het algemeen bekend geword met **aCropalypse** (Google Pixel Markup) en die verwante **Windows Snipping Tool**-kwessie.<sup>[[3]](#references)</sup> In die praktyk kan jy moontlik ’n deel van die oorspronklike skermkiekie herstel indien ’n "geknipte" of "gemaskerde" PNG steeds ou agterblywende data bevat.<sup>[[1]](#references)</sup>
 
 Praktiese werkvloei:
 ```bash
@@ -75,30 +73,30 @@ exiftool screenshot.png | grep -i trailer
 grep -aboa 'IDAT' screenshot.png
 grep -aboa $'IEND\xAE\x42\x60\x82' screenshot.png
 ```
-Tekens wat diepgaande ontleding sterk regverdig:
+Tekens wat verdere ontleding sterk regverdig:
 
-- `pngcheck` rapporteer **bykomende data ná `IEND`**
+- `pngcheck` rapporteer **additional data after `IEND`**
 - Jy vind **meer as een `IEND`**
-- Jy vind **ekstra `IDAT`-chunks** ná die skynbare einde van die image
-- Die screenshot kom van ’n device/editor waarvan bekend is dat dit geraak is
+- Jy vind **ekstra `IDAT` chunks** ná die oënskynlike einde van die image
+- Die screenshot kom van ’n device/editor wat bekend is daarvoor dat dit geraak is
 
-As dit gebeur, voer die file deur ’n **aCropalypse recovery tool** voordat jy die redaksie as betroubaar beskou.
+As dit gebeur, voer die file deur ’n **aCropalypse recovery tool** voordat jy die redaction as betroubaar beskou.
 
-## Chunk abuse wat in die praktyk belangrik is
+## Chunk abuse wat in die praktyk saak maak
 
-Die interessantste PNG-chunks vir ondersoeke is gewoonlik nie die ooglopende image-chunks nie, maar die chunks wat **teks**, **metadata** of **payload bytes** kan bevat:
+Die interessantste PNG chunks vir ondersoeke is gewoonlik nie die ooglopende image chunks nie, maar die chunks wat **text**, **metadata** of **payload bytes** kan bevat:
 
-- `tEXt` / `zTXt` / `iTXt` – teksmetadata en compressed text
-- `eXIf` – EXIF-data binne PNG
-- `iCCP` – ingebedde ICC-profile
-- `PLTE` – palette data in indexed images, maar ook nuttig in payload-smuggling scenarios<sup>[[2]](#references)</sup>
+- `tEXt` / `zTXt` / `iTXt` – text metadata en compressed text
+- `eXIf` – EXIF data binne PNG
+- `iCCP` – embedded ICC profile
+- `PLTE` – palette data in indexed images, maar ook nuttig in payload-smuggling-scenarios.<sup>[[2]](#references)</sup>
 
 Dump hulle met:
 ```bash
 pngcheck -vp suspect.png
 exiftool -a -u -g1 suspect.png
 ```
-Vir offensive payload persistence binne PNG chunks (byvoorbeeld **PLTE**, **IDAT** of **tEXt** tricks wat sommige PHP-beeldtransformasies oorleef), raadpleeg die meer gedetailleerde oplaaigerigte notas hier<sup>[[2]](#references)</sup>:
+Vir offensiewe payload-persistentie binne PNG-chunks (byvoorbeeld **PLTE**-, **IDAT**- of **tEXt**-tricks wat sommige PHP-beeldtransformasies oorleef), kyk na die meer gedetailleerde upload-gefokusde notas hier:<sup>[[2]](#references)</sup>
 
 {{#ref}}
 ../../../pentesting-web/file-upload/README.md
@@ -106,13 +104,13 @@ Vir offensive payload persistence binne PNG chunks (byvoorbeeld **PLTE**, **IDAT
 
 ## Herstel van korrupte PNG's
 
-Vir die nagaan van integriteit en die opspoor van die presiese beskadigde area bly **pngcheck** een van die beste eerste tools:
+Vir die kontrolering van integriteit en die opspoor van die presiese beskadigde area, bly **pngcheck** een van die beste eerste tools:
 
 - [pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)
 
-As die lêer beskadig eerder as opsetlik kwaadwillig is, kan **PCRT** nuttig wees in CTF's en laboratoriumwerk om algemene probleme reg te stel, soos foutiewe headers, verkeerde IHDR-waardes, CRC-probleme of verkeerd gevormde chunk-uitlegte.
+As die lêer beskadig eerder as opsetlik kwaadwillig is, kan **PCRT** nuttig wees in CTF's en laboratoriumwerk om algemene probleme soos verkeerde headers, verkeerde IHDR-waardes, CRC-probleme of misvormde chunk-uitlegte reg te stel.
 
-As jou doel is om 'n PNG wat verdagte trailer-data bevat te **suiwer** terwyl die sigbare beeld behoue bly, kan ExifTool die trailer uitdruklik verwyder:
+As jou doel is om 'n PNG wat verdagte trailer-data bevat te **sanitize** terwyl die sigbare beeld behoue bly, kan ExifTool die trailer uitdruklik verwyder:
 ```bash
 exiftool -Trailer:All= -overwrite_original suspect.png
 ```
@@ -120,7 +118,7 @@ Vir sensitiewe bewysmateriaal, werk altyd op ’n **kopie** en hou hashes van di
 
 ## References
 
-- [1] [Exploiting aCropalypse: Recovering Truncated PNGs](https://www.da.vidbuchanan.co.uk/blog/exploiting-acropalypse.html)
-- [2] [Persistent PHP payloads in PNGs: How to inject PHP code in an image – and keep it there](https://www.synacktiv.com/en/publications/persistent-php-payloads-in-pngs-how-to-inject-php-code-in-an-image-and-keep-it-there)
-
+- [1] [Ontginning van aCropalypse: Herstel van Afgekapte PNG's](https://www.da.vidbuchanan.co.uk/blog/exploiting-acropalypse.html)
+- [2] [Aanhoudende PHP-payloads in PNG's: Hoe om PHP-kode in ’n beeld in te voeg – en dit daar te behou](https://www.synacktiv.com/en/publications/persistent-php-payloads-in-pngs-how-to-inject-php-code-in-an-image-and-keep-it-there)
+- [3] [NVD - CVE-2023-28303](https://nvd.nist.gov/vuln/detail/CVE-2023-28303)
 {{#include ../../../banners/hacktricks-training.md}}

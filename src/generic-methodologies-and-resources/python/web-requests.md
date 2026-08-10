@@ -1,10 +1,13 @@
 # Webversoeke
 
-{{#include ../../banners/hacktricks-training.md}}
-
-
 ## Python Requests
+
+Hierdie voorbeelde gebruik Requests se gedokumenteerde versoek-argumente, respons-eienskappe, multipart-lêertupels en sessies.<sup>[[1]](#references)</sup> Die `verify=False`-voorbeelde deaktiveer TLS-sertifikaatverifikasie en moet tot beheerde toetsing beperk word.<sup>[[1]](#references)</sup>
 ```python
+import random
+import re
+import string
+
 import requests
 
 url = "http://example.com:80/some/path.php"
@@ -23,7 +26,7 @@ body_text = gr.text
 ret_cookies = gr.cookies
 is_redirect = gr.is_redirect
 is_permanent_redirect = gr.is_permanent_redirect
-float_seconds = gr.elapsed.total_seconds() 10.231
+float_seconds = gr.elapsed.total_seconds()
 
 #Regular Post requests sending parameters (data)
 pr = requests.post(url, data=params, headers=headers, cookies=cookies, verify=False, allow_redirects=True, proxies=proxies)
@@ -72,6 +75,8 @@ def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 ## Python cmd om 'n RCE te exploit
+
+Die command loop subclass Python se `Cmd`; sy `default`-metode hanteer onbekende command prefixes, `cmdloop` stuur input lines af, en `re.DOTALL` laat die extraction pattern oor newlines strek.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -98,4 +103,9 @@ return 1
 term = Terminal()
 term.cmdloop()
 ```
+## References
+
+- [1] [Requests-ontwikkelaarkoppelvlak](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Ondersteuning vir lyngeoriënteerde bevelinterpreteerders](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Bewerkings met gereelde uitdrukkings](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}
