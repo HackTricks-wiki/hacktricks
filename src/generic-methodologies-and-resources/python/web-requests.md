@@ -1,10 +1,13 @@
 # Web Requests
 
-{{#include ../../banners/hacktricks-training.md}}
-
-
 ## Python Requests
+
+这些示例使用 Requests 文档中说明的请求参数、响应属性、多部分文件元组和 sessions。<sup>[[1]](#references)</sup> `verify=False` 示例会禁用 TLS 证书验证，应仅限于受控测试。<sup>[[1]](#references)</sup>
 ```python
+import random
+import re
+import string
+
 import requests
 
 url = "http://example.com:80/some/path.php"
@@ -23,7 +26,7 @@ body_text = gr.text
 ret_cookies = gr.cookies
 is_redirect = gr.is_redirect
 is_permanent_redirect = gr.is_permanent_redirect
-float_seconds = gr.elapsed.total_seconds() 10.231
+float_seconds = gr.elapsed.total_seconds()
 
 #Regular Post requests sending parameters (data)
 pr = requests.post(url, data=params, headers=headers, cookies=cookies, verify=False, allow_redirects=True, proxies=proxies)
@@ -72,6 +75,8 @@ def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 ## 利用 RCE 的 Python 命令
+
+命令循环继承 Python 的 `Cmd`；其 `default` 方法处理无法识别的命令前缀，`cmdloop` 分发输入行，而 `re.DOTALL` 使提取模式可以跨越换行符。<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -98,4 +103,9 @@ return 1
 term = Terminal()
 term.cmdloop()
 ```
+## References
+
+- [1] [Requests Developer Interface](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — 面向行的命令解释器支持](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — 正则表达式操作](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

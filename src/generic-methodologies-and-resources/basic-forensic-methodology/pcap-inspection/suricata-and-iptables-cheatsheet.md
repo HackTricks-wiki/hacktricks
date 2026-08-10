@@ -1,18 +1,18 @@
 # Suricata & Iptables 速查表
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 ## Iptables
 
 ### 链
 
-在 iptables 中，称为链的规则列表会按顺序进行处理。其中，三个主要链始终存在；根据系统功能，可能还支持 NAT 等其他链。
+在 iptables 中，每条链都是由数据包匹配规则组成的有序列表。默认的 `filter` 表包含内置的 `INPUT`、`FORWARD` 和 `OUTPUT` 链；其他表（例如 `nat`）是否可用，取决于内核配置和已加载的模块。<sup>[[1]](#references)</sup>
 
-- **输入链**：用于管理传入连接的行为。
-- **转发链**：用于处理并非发往本地系统的传入连接。这通常适用于充当路由器的设备，因为接收到的数据需要转发到其他目标。此链主要在系统参与路由、NAT 或类似活动时发挥作用。
-- **输出链**：专用于管理传出连接。
+- **Input Chain**：用于管理传入连接的行为。
+- **Forward Chain**：用于处理并非发往本地系统的传入连接。这通常适用于充当路由器的设备，因为接收到的数据需要被转发到其他目标。此链主要与系统参与路由、NAT 或类似活动时相关。
+- **Output Chain**：专门用于调节传出连接。
 
-这些链确保网络流量得到有序处理，从而能够制定详细规则，控制数据流入、经过和流出系统的过程。
+这些链确保网络流量得到有序处理，从而可以制定详细规则来控制数据流入、经过和离开系统的过程。
+
+字符串匹配示例使用标准的 `string` match；除非提供 `--icase`，否则匹配区分大小写；`--algo` 用于选择 BM 或 KMP 搜索策略。<sup>[[2]](#references)</sup>
 ```bash
 # Delete all rules
 iptables -F
@@ -52,8 +52,10 @@ iptables-restore < /etc/sysconfig/iptables
 ## Suricata
 
 ### 安装与配置
+
+下面的 package commands 取决于 distribution 和 release；官方 installation guide 介绍了 Ubuntu PPA、Debian backports、RPM packages 以及 systemd service management。<sup>[[3]](#references)</sup>
 ```bash
-# Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
+# Package installation details vary by distribution and release; see References.
 # Ubuntu
 add-apt-repository ppa:oisf/suricata-stable
 apt-get update
@@ -70,7 +72,7 @@ yum install epel-release
 yum install suricata
 
 # Get rules
-suricata-update
+suricata-update update-sources
 suricata-update list-sources #List sources of the rules
 suricata-update enable-source et/open #Add et/open rulesets
 suricata-update
@@ -81,20 +83,17 @@ rule-files:
 
 # Run
 ## Add rules in /etc/suricata/rules/suricata.rules
-systemctl suricata start
+systemctl start suricata
 suricata -c /etc/suricata/suricata.yaml -i eth0
 
 
 # Reload rules
 suricatasc -c ruleset-reload-nonblocking
-## or set the follogin in /etc/suricata/suricata.yaml
-detect-engine:
-- rule-reload: true
 
 # Validate suricata config
 suricata -T -c /etc/suricata/suricata.yaml -v
 
-# Configure suricata as IPs
+# Configure Suricata as an IPS
 ## Config drop to generate alerts
 ## Search for the following lines in /etc/suricata/suricata.yaml and remove comments:
 - drop:
@@ -117,70 +116,72 @@ Type=simple
 
 systemctl daemon-reload
 ```
+`suricata-update` 序列遵循 Suricata 文档中规定的工作流程，用于获取、列出、启用和加载规则源。<sup>[[4]](#references)</sup> 上述 `suricatasc` 命令是一种有文档说明的非阻塞 Unix 套接字规则重新加载方法。<sup>[[8]](#references)</sup> NFQUEUE 规则将本地输入/输出流量发送到 Suricata，而 `-q 0` 选择队列 0 进行 inline 处理。<sup>[[7]](#references)</sup>
+
 ### 规则定义
 
-[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) 一条规则/签名由以下部分组成：
+Suricata 规则/签名由三个部分组成。<sup>[[5]](#references)</sup>
 
-- **操作**，决定签名匹配时会发生什么。
-- **标头**，定义规则的协议、IP 地址、端口和方向。
-- **规则选项**，定义规则的具体内容。
+- **action** 指定签名匹配时执行的操作。
+- **header** 选择协议、IP 地址、端口和方向。
+- **rule options** 定义与匹配相关的具体细节。
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
-#### **有效的 actions 包括**
+#### **有效操作包括**
 
-- alert - 生成 alert
+- alert - 生成警报
 - pass - 停止对数据包的进一步检查
-- **drop** - 丢弃数据包并生成 alert
-- **reject** - 向匹配数据包的发送方发送 RST/ICMP unreachable error。
+- **drop** - 丢弃数据包并生成警报
+- **reject** - 向匹配数据包的发送方发送 RST/ICMP unreachable 错误。
 - rejectsrc - 与 _reject_ 相同
-- rejectdst - 向匹配数据包的接收方发送 RST/ICMP error 数据包。
-- rejectboth - 向通信双方发送 RST/ICMP error 数据包。
+- rejectdst - 向匹配数据包的接收方发送 RST/ICMP 错误数据包。
+- rejectboth - 向通信双方发送 RST/ICMP 错误数据包。
 
-#### **Protocols**
+#### **协议**
 
-- tcp (用于 tcp-traffic)
+- tcp（用于 tcp-traffic）
 - udp
 - icmp
-- ip (ip 表示“全部”或“任意”)
-- _layer7 protocols_: http, ftp, tls, smb, dns, ssh...（更多内容请参阅[**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html)）
+- ip（ip 表示“全部”或“任意”）
+- _layer7 protocols_：http、ftp、tls、smb、dns、ssh 及其他协议。<sup>[[5]](#references)</sup>
 
 #### 源地址和目标地址
 
-它支持 IP 范围、否定和地址列表：
+Suricata 支持 IP 范围、否定和分组地址列表。<sup>[[5]](#references)</sup>
 
-| 示例                          | 含义                                  |
-| ----------------------------- | ------------------------------------- |
-| ! 1.1.1.1                     | 除 1.1.1.1 外的所有 IP 地址           |
-| !\[1.1.1.1, 1.1.1.2]          | 除 1.1.1.1 和 1.1.1.2 外的所有 IP 地址 |
-| $HOME_NET                     | yaml 中对 HOME_NET 的设置             |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET 而非 HOME_NET             |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24，但不包括 10.0.0.5        |
+| Example                       | Meaning                                  |
+| ----------------------------- | ---------------------------------------- |
+| ! 1.1.1.1                     | 除 1.1.1.1 之外的所有 IP 地址             |
+| !\[1.1.1.1, 1.1.1.2]          | 除 1.1.1.1 和 1.1.1.2 之外的所有 IP 地址 |
+| $HOME_NET                     | yaml 中对 HOME_NET 的设置                |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET 而非 HOME_NET               |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24，但不包括 10.0.0.5           |
 
 #### 源端口和目标端口
 
-它支持端口范围、否定和端口列表：
+Suricata 支持端口范围、否定和端口列表。<sup>[[5]](#references)</sup>
 
-| 示例            | 含义                              |
-| --------------- | --------------------------------- |
-| any             | 任意地址                          |
-| \[80, 81, 82]   | 端口 80、81 和 82                 |
-| \[80: 82]       | 从 80 到 82 的范围                |
-| \[1024: ]       | 从 1024 到最高端口号               |
-| !80             | 除 80 外的所有端口                |
-| \[80:100,!99]   | 从 80 到 100 的范围，但不包括 99   |
+| Example         | Meaning                                |
+| --------------- | -------------------------------------- |
+| any             | 任意地址                               |
+| \[80, 81, 82]   | 端口 80、81 和 82                       |
+| \[80: 82]       | 从 80 到 82 的范围                     |
+| \[1024: ]       | 从 1024 到最高端口号                   |
+| !80             | 除 80 之外的所有端口                   |
+| \[80:100,!99]   | 从 80 到 100 的范围，但不包括 99       |
 | \[1:80,!\[2,4]] | 从 1 到 80 的范围，但不包括端口 2 和 4 |
 
 #### 方向
 
-可以指示所应用通信规则的方向：
+Suricata 规则可以指定要评估的通信方向。<sup>[[5]](#references)</sup>
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### 关键词
 
-Suricata 中有**数百种选项**可用于搜索你正在寻找的**特定数据包**，如果发现有趣的内容，这里会对其进行说明。请查看[**文档** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)了解更多信息！
+下面的示例使用了 Suricata 的规则关键字，包括 metadata、IP、ICMP、payload 和应用层选项；官方规则文档列出了这些类别及其语法。<sup>[[6]](#references)[[9]](#references)</sup>
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -207,6 +208,7 @@ reject tcp any any -> any any (msg: "php-rce"; content: "eval"; nocase; metadata
 
 # Replaces string
 ## Content and replace string must have the same length
+## The replace modifier is IPS-only and operates on individual packets
 content:"abc"; replace: "def"
 alert tcp any any -> any any (msg: "flag replace"; content: "CTF{a6st"; replace: "CTF{u798"; nocase; sid:100; rev: 1;)
 ## The replace works in both input and output packets
@@ -221,4 +223,15 @@ drop tcp any any -> any any (msg:"regex"; pcre:"/CTF\{[\w]{3}/i"; sid:10001;)
 ## Drop by port
 drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
+## References
+
+- [1] [iptables(8) — Linux 手册页](https://man7.org/linux/man-pages/man8/iptables.8.html)
+- [2] [iptables-extensions(8) — Linux 手册页](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
+- [3] [3. 安装 — Suricata 7.0.14 文档](https://docs.suricata.io/en/suricata-7.0.14/install.html)
+- [4] [9.1. 使用 Suricata-Update 管理规则 — Suricata 8.0.1 文档](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
+- [5] [8.1. 规则格式 — Suricata 8.0.3 文档](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
+- [6] [8.7. Payload 关键字 — Suricata 8.0.3 文档](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
+- [7] [15. 为 Linux 设置 IPS/inline — Suricata 7.0.15 文档](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
+- [8] [9.3. 规则重新加载 — Suricata 7.0.14 文档](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
+- [9] [8. Suricata 规则 — Suricata 8.0.3 文档](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
 {{#include ../../../banners/hacktricks-training.md}}

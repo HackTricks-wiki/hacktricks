@@ -1,8 +1,6 @@
 # 特定软件/文件类型技巧
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-这里可以找到针对特定文件类型和/或软件的有趣技巧：
+你可以在这里找到针对特定文件类型和/或软件的有趣技巧：
 
 
 {{#ref}}
@@ -63,5 +61,7 @@ zips-tricks.md
 {{#ref}}
 mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
+
+## References
 
 {{#include ../../../banners/hacktricks-training.md}}

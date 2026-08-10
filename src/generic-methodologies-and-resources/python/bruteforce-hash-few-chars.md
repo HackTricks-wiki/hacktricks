@@ -1,6 +1,4 @@
-# 暴力破解少量字符的哈希
-
-{{#include ../../banners/hacktricks-training.md}}
+# 暴力破解少量字符的 Hash
 ```python
 import hashlib
 
@@ -51,4 +49,6 @@ return 0
 
 main()
 ```
+## References
+
 {{#include ../../banners/hacktricks-training.md}}
