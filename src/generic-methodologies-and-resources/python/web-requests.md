@@ -1,10 +1,13 @@
-# Solicitudes Web
+# Solicitudes web
 
-{{#include ../../banners/hacktricks-training.md}}
+## Requests de Python
 
-
-## Python Requests
+Estos ejemplos utilizan los argumentos de solicitud documentados de Requests, las propiedades de respuesta, las tuplas de archivos multipart y las sesiones.<sup>[[1]](#references)</sup> Los ejemplos con `verify=False` deshabilitan la verificación de certificados TLS y deben limitarse a pruebas controladas.<sup>[[1]](#references)</sup>
 ```python
+import random
+import re
+import string
+
 import requests
 
 url = "http://example.com:80/some/path.php"
@@ -23,7 +26,7 @@ body_text = gr.text
 ret_cookies = gr.cookies
 is_redirect = gr.is_redirect
 is_permanent_redirect = gr.is_permanent_redirect
-float_seconds = gr.elapsed.total_seconds() 10.231
+float_seconds = gr.elapsed.total_seconds()
 
 #Regular Post requests sending parameters (data)
 pr = requests.post(url, data=params, headers=headers, cookies=cookies, verify=False, allow_redirects=True, proxies=proxies)
@@ -72,6 +75,8 @@ def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 ## Comando de Python para explotar un RCE
+
+El bucle de comandos subclasifica `Cmd` de Python; su método `default` gestiona los prefijos de comandos no reconocidos, `cmdloop` procesa las líneas de entrada y `re.DOTALL` permite que el patrón de extracción abarque varias líneas.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -98,4 +103,9 @@ return 1
 term = Terminal()
 term.cmdloop()
 ```
+## References
+
+- [1] [Interfaz de desarrollo de Requests](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Compatibilidad con intérpretes de comandos orientados a líneas](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Operaciones con expresiones regulares](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

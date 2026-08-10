@@ -1,22 +1,28 @@
 # Técnicas de desofuscación para archivos VBS
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 Algunas cosas que pueden ser útiles para depurar/desofuscar un archivo VBS malicioso:
 
 ## echo
+
+`WScript.Echo` se puede utilizar para mostrar información de diagnóstico; con `cscript.exe`, se escribe en la consola.<sup>[[1]](#references)</sup>
 ```bash
 Wscript.Echo "Like this?"
 ```
 ## Comentarios
+
+Un solo apóstrofo inicia un comentario de VBScript.<sup>[[2]](#references)</sup>
 ```bash
 ' this is a comment
 ```
 ## Prueba
+
+Ejecuta el archivo VBS en el host de línea de comandos con:<sup>[[3]](#references)</sup>
 ```bash
 cscript.exe file.vbs
 ```
 ## Escribir datos en un archivo
+
+Este helper está adaptado de una respuesta de Stack Overflow y utiliza un flujo de texto `FileSystemObject`. `CreateTextFile` devuelve un `TextStream`, y `Write`/`Close` operan sobre datos de texto; considérelo un ejemplo de escritura de texto, no un escritor general seguro para datos binarios.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```js
 Function writeBinary(strBinary, strPath)
 
@@ -41,4 +47,12 @@ End With
 
 End Function
 ```
+## References
+
+- [1] [Ejecución de una consulta de Visual Basic Scripting Edition (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/indexsrv/running-a-visual-basic-scripting-edition-query)
+- [2] [Trabajo con lenguajes de scripting (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525153%28v%3Dvs.90%29)
+- [3] [cscript (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cscript)
+- [4] [Lectura y escritura de archivos binarios en VBScript (Stack Overflow)](https://stackoverflow.com/questions/6060529/read-and-write-binary-file-in-vbscript/6087783)
+- [5] [Método CreateTextFile (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/createtextfile-method)
+- [6] [Objeto TextStream (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/textstream-object)
 {{#include ../../../banners/hacktricks-training.md}}
