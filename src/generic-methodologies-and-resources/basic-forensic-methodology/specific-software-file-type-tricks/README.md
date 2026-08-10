@@ -1,8 +1,6 @@
 # Sztuczki dotyczące określonego oprogramowania/typu pliku
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-Tutaj znajdziesz interesujące sztuczki dotyczące określonych typów plików i/lub oprogramowania:
+Tutaj znajdziesz ciekawe sztuczki dotyczące określonych typów plików i/lub oprogramowania:
 
 
 {{#ref}}
@@ -63,5 +61,7 @@ zips-tricks.md
 {{#ref}}
 mach-o-entitlements-and-ipsw-indexing.md
 {{#endref}}
+
+## References
 
 {{#include ../../../banners/hacktricks-training.md}}

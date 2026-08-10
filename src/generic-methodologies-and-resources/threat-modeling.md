@@ -1,46 +1,42 @@
 # Modelowanie zagrożeń
 
-{{#include ../banners/hacktricks-training.md}}
+Witamy w kompleksowym przewodniku HackTricks po modelowaniu zagrożeń! Zapraszamy do zapoznania się z tym kluczowym aspektem cybersecurity, w ramach którego identyfikujemy potencjalne luki w systemie, rozumiemy je i opracowujemy strategie przeciwdziałania. Ten materiał stanowi przewodnik krok po kroku, zawierający przykłady z rzeczywistego świata, pomocne oprogramowanie oraz łatwe do zrozumienia wyjaśnienia. Jest przeznaczony zarówno dla początkujących, jak i doświadczonych praktyków, którzy chcą wzmocnić swoje zabezpieczenia cybersecurity.
 
-## Modelowanie zagrożeń
+### Często stosowane scenariusze
 
-Witamy w kompleksowym przewodniku HackTricks po modelowaniu zagrożeń! Rozpocznij eksplorację tego krytycznego aspektu cyberbezpieczeństwa, w ramach którego identyfikujemy potencjalne luki w systemie, poznajemy je i opracowujemy strategie przeciwdziałania. Ten wątek służy jako przewodnik krok po kroku, pełen przykładów z rzeczywistego świata, pomocnego oprogramowania i łatwych do zrozumienia wyjaśnień. Jest idealny zarówno dla początkujących, jak i doświadczonych praktyków, którzy chcą wzmocnić swoje zabezpieczenia cyberbezpieczeństwa.
-
-### Często używane scenariusze
-
-1. **Tworzenie oprogramowania**: W ramach Secure Software Development Life Cycle (SSDLC) modelowanie zagrożeń pomaga na wczesnych etapach tworzenia **identyfikować potencjalne źródła luk w zabezpieczeniach**.
-2. **Penetration Testing**: Framework Penetration Testing Execution Standard (PTES) wymaga **modelowania zagrożeń w celu zrozumienia luk w systemie** przed przeprowadzeniem testu.
+1. **Tworzenie oprogramowania**: Jako część Secure Software Development Life Cycle (SSDLC) modelowanie zagrożeń pomaga na wczesnych etapach tworzenia oprogramowania **identyfikować potencjalne źródła luk**.<sup>[[1]](#references)[[4]](#references)</sup>
+2. **Penetration Testing**: The Penetration Testing Execution Standard (PTES) uznaje modelowanie zagrożeń za wymagane do prawidłowego przeprowadzenia testów i wymaga udokumentowania zasobów biznesowych, procesów biznesowych, społeczności zagrożeń oraz ich możliwości.<sup>[[2]](#references)</sup>
 
 ### Model zagrożeń w skrócie
 
-Model zagrożeń jest zazwyczaj przedstawiany jako diagram, obraz lub inna forma wizualnej ilustracji przedstawiająca planowaną architekturę albo istniejącą strukturę aplikacji. Przypomina **diagram przepływu danych**, ale kluczowa różnica polega na jego projektowaniu zorientowanym na bezpieczeństwo.
+Model zagrożeń jest zazwyczaj przedstawiany jako diagram, obraz lub inna wizualna ilustracja planowanej architektury albo istniejącej aplikacji. Data-flow diagrams (DFDs) są powszechnym sposobem modelowania systemu i jego interakcji, natomiast modelowanie zagrożeń dodaje analizę ukierunkowaną na bezpieczeństwo.<sup>[[1]](#references)</sup>
 
-Modele zagrożeń często zawierają elementy oznaczone na czerwono, symbolizujące potencjalne luki, ryzyka lub bariery. Aby usprawnić proces identyfikacji ryzyka, stosuje się triadę CIA (Confidentiality, Integrity, Availability), która stanowi podstawę wielu metodologii modelowania zagrożeń, z których jedną z najczęściej używanych jest STRIDE. Wybrana metodologia może się jednak różnić w zależności od konkretnego kontekstu i wymagań.
+W Microsoft Threat Modeling Tool czerwone przerywane linie wskazują granice zaufania; inne narzędzia mogą stosować odmienne konwencje wizualne.<sup>[[4]](#references)</sup> Aby usprawnić identyfikację ryzyka, zespoły mogą korzystać z triady CIA (Confidentiality, Integrity, Availability) lub kategorii zagrożeń STRIDE, jednak właściwa metodologia zależy od kontekstu i wymagań projektu.<sup>[[1]](#references)[[3]](#references)[[10]](#references)</sup>
 
 ### Triada CIA
 
-Triada CIA to powszechnie uznawany model w dziedzinie bezpieczeństwa informacji, oznaczający Confidentiality, Integrity i Availability. Te trzy filary stanowią podstawę, na której opiera się wiele środków i zasad bezpieczeństwa, w tym metodologie modelowania zagrożeń.
+Triada CIA to powszechnie uznawany model bezpieczeństwa informacji, którego nazwa oznacza Confidentiality, Integrity i Availability. Właściwości te są powszechnie używane do opisywania celów bezpieczeństwa danych i systemów.<sup>[[3]](#references)</sup>
 
-1. **Confidentiality**: Zapewnienie, że dane lub system nie są dostępne dla nieupoważnionych osób. Jest to centralny aspekt bezpieczeństwa, wymagający odpowiednich mechanizmów kontroli dostępu, szyfrowania i innych środków zapobiegających naruszeniom danych.
+1. **Confidentiality**: Zapewnienie, że dane lub system nie są dostępne dla nieupoważnionych osób. Jest to centralny element bezpieczeństwa, wymagający odpowiednich mechanizmów kontroli dostępu, szyfrowania i innych środków zapobiegających naruszeniom danych.
 2. **Integrity**: Dokładność, spójność i wiarygodność danych w całym ich cyklu życia. Zasada ta zapewnia, że dane nie zostaną zmienione ani naruszone przez nieupoważnione strony. Często obejmuje sumy kontrolne, hashing i inne metody weryfikacji danych.
-3. **Availability**: Zapewnienie, że dane i usługi są dostępne dla upoważnionych użytkowników, gdy są potrzebne. Często wymaga to redundancji, odporności na awarie i konfiguracji high-availability, aby systemy działały nawet w obliczu zakłóceń.
+3. **Availability**: Zapewnienie, że dane i usługi są dostępne dla upoważnionych użytkowników, gdy są potrzebne. Często wymaga to nadmiarowości, fault tolerance i konfiguracji high-availability, aby systemy działały nawet w obliczu zakłóceń.
 
 ### Metodologie modelowania zagrożeń
 
-1. **STRIDE**: Opracowana przez Microsoft metodologia STRIDE to akronim oznaczający **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service i Elevation of Privilege**. Każda kategoria reprezentuje rodzaj zagrożenia, a metodologia ta jest powszechnie stosowana na etapie projektowania programu lub systemu w celu identyfikacji potencjalnych zagrożeń.
-2. **DREAD**: Jest to kolejna metodologia firmy Microsoft używana do oceny ryzyka zidentyfikowanych zagrożeń. DREAD oznacza **Damage potential, Reproducibility, Exploitability, Affected users i Discoverability**. Każdy z tych czynników jest oceniany, a wynik służy do ustalania priorytetów zidentyfikowanych zagrożeń.
-3. **PASTA** (Process for Attack Simulation and Threat Analysis): Jest to siedmioetapowa metodologia **risk-centric**. Obejmuje definiowanie i identyfikowanie celów bezpieczeństwa, tworzenie zakresu technicznego, dekompozycję aplikacji, analizę zagrożeń, analizę luk oraz ocenę ryzyka i triage.
-4. **Trike**: Jest to metodologia oparta na ryzyku, koncentrująca się na ochronie zasobów. Rozpoczyna się od perspektywy **risk management** i analizuje zagrożenia oraz luki w tym kontekście.
-5. **VAST** (Visual, Agile, and Simple Threat modeling): Podejście to ma być bardziej dostępne i integrować się ze środowiskami tworzenia Agile. Łączy elementy innych metodologii i koncentruje się na **wizualnych reprezentacjach zagrożeń**.
-6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Framework opracowany przez CERT Coordination Center, ukierunkowany na **organizacyjną ocenę ryzyka, a nie na konkretne systemy lub oprogramowanie**.
+1. **STRIDE**: Podejście STRIDE firmy Microsoft kategoryzuje zagrożenia oprogramowania jako **Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service i Elevation of Privilege**. Kategorie te pomagają analitykom identyfikować możliwe zagrożenia w każdym podatnym punkcie projektu.<sup>[[5]](#references)</sup>
+2. **DREAD**: To podejście firmy Microsoft do oceny zagrożeń wykorzystuje **Damage, Reproducibility, Exploitability, Affected users i Discoverability**. Uzyskany wynik może pomóc w ustalaniu priorytetów zagrożeń przeznaczonych do ograniczenia.<sup>[[5]](#references)</sup>
+3. **PASTA** (Process for Attack Simulation and Threat Analysis): Jest to siedmioetapowa metodologia **risk-centric**, obejmująca cele, zakres techniczny, dekompozycję aplikacji, analizę zagrożeń, analizę luk i słabości, modelowanie ataków oraz analizę ryzyka/wpływu.<sup>[[8]](#references)</sup>
+4. **Trike**: Ten framework audytu bezpieczeństwa podchodzi do modelowania zagrożeń z perspektywy **risk-management** i obrony.<sup>[[9]](#references)</sup>
+5. **VAST** (Visual, Agile, and Simple Threat modeling): Metoda ta kładzie nacisk na skalowalne i użyteczne modele zagrożeń dla widoków aplikacji i operacji oraz może integrować się z cyklami życia developmentu i DevOps.<sup>[[10]](#references)</sup>
+6. **OCTAVE** (Operationally Critical Threat, Asset, and Vulnerability Evaluation): Utworzona przez CERT Division należący do Software Engineering Institute firmy Carnegie Mellon, OCTAVE jest opartą na ryzyku strategiczną metodą oceny i planowania, skoncentrowaną na ryzyku organizacyjnym, a nie wyłącznie na technologii.<sup>[[10]](#references)</sup>
 
-## Narzędzia
+## Tools
 
-Dostępnych jest kilka narzędzi i rozwiązań programowych, które mogą **pomóc** w tworzeniu i zarządzaniu modelami zagrożeń. Oto kilka propozycji, które warto rozważyć.
+Dostępnych jest kilka tools i rozwiązań software'owych, które mogą **pomóc** w tworzeniu i zarządzaniu modelami zagrożeń. Oto kilka propozycji, które warto rozważyć.
 
 ### [SpiderSuite](https://github.com/3nock/SpiderSuite)
 
-Zaawansowany, wieloplatformowy i wielofunkcyjny web spider/crawler GUI dla profesjonalistów zajmujących się cyberbezpieczeństwem. Spider Suite może być używany do mapowania i analizy attack surface.
+SpiderSuite to wieloplatformowy crawler webowy dla security professionals, obsługujący mapowanie attack surface, wykrywanie endpointów i analizę web applications.<sup>[[6]](#references)</sup>
 
 **Użycie**
 
@@ -54,7 +50,7 @@ Zaawansowany, wieloplatformowy i wielofunkcyjny web spider/crawler GUI dla profe
 
 ### [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon/releases)
 
-Open-source'owy projekt OWASP. Threat Dragon jest zarówno aplikacją webową, jak i desktopową, która obejmuje tworzenie diagramów systemu oraz rule engine do automatycznego generowania zagrożeń i środków zaradczych.
+OWASP Threat Dragon to bezpłatna, open-source'owa, wieloplatformowa aplikacja do modelowania zagrożeń, służąca do rysowania diagramów, sugerowania zagrożeń i rejestrowania działań zaradczych. Jest dostępna jako aplikacja webowa i desktopowa.<sup>[[7]](#references)</sup>
 
 **Użycie**
 
@@ -76,29 +72,29 @@ Czasami może to wyglądać tak:
 
 4. Utwórz swój model
 
-Możesz użyć narzędzi takich jak SpiderSuite Crawler, aby uzyskać inspirację. Podstawowy model mógłby wyglądać mniej więcej tak:
+Możesz użyć tools takich jak SpiderSuite Crawler, aby uzyskać inspirację. Podstawowy model może wyglądać mniej więcej tak:
 
 <figure><img src="../images/0_basic_threat_model.jpg" alt=""><figcaption></figcaption></figure>
 
-Krótkie wyjaśnienie dotyczące encji:
+Krótkie wyjaśnienie dotyczące entities:
 
-- Process (Sama encja, np. Webserver lub funkcjonalność webowa)
-- Actor (Osoba, np. Website Visitor, User lub Administrator)
+- Process (Sama entity, taka jak Webserver lub funkcjonalność webowa)
+- Actor (Osoba, taka jak odwiedzający stronę, użytkownik lub administrator)
 - Data Flow Line (Wskaźnik interakcji)
 - Trust Boundary (Różne segmenty sieci lub zakresy.)
-- Store (Elementy, w których przechowywane są dane, np. Databases)
+- Store (Miejsca przechowywania danych, takie jak Databases)
 
-5. Utwórz Threat (krok 1)
+5. Utwórz Threat (Step 1)
 
-Najpierw musisz wybrać warstwę, do której chcesz dodać zagrożenie.
+Najpierw musisz wybrać layer, do którego chcesz dodać threat
 
 <figure><img src="../images/3_threatmodel_chose-threat-layer.jpg" alt=""><figcaption></figcaption></figure>
 
-Teraz możesz utworzyć zagrożenie.
+Teraz możesz utworzyć threat
 
 <figure><img src="../images/4_threatmodel_create-threat.jpg" alt=""><figcaption></figcaption></figure>
 
-Pamiętaj, że istnieje różnica między Actor Threats i Process Threats. Jeśli dodasz zagrożenie do elementu Actor, będziesz mieć możliwość wyboru wyłącznie opcji "Spoofing" i "Repudiation". Jeśli jednak w naszym przykładzie dodamy zagrożenie do encji Process, w polu tworzenia zagrożenia zobaczymy:
+Pamiętaj, że istnieje różnica między Actor Threats i Process Threats. Jeśli dodasz threat do Actor, będziesz mógł wybrać tylko „Spoofing” i „Repudiation”. Jednak w naszym przykładzie dodajemy threat do entity typu Process, więc w oknie tworzenia threat zobaczymy:
 
 <figure><img src="../images/2_threatmodel_type-option.jpg" alt=""><figcaption></figcaption></figure>
 
@@ -110,6 +106,18 @@ Ukończony model powinien wyglądać mniej więcej tak. W ten sposób tworzysz p
 
 ### [Microsoft Threat Modeling Tool](https://aka.ms/threatmodelingtool)
 
-Jest to bezpłatne narzędzie firmy Microsoft, które pomaga znajdować zagrożenia na etapie projektowania projektów programistycznych. Wykorzystuje metodologię STRIDE i szczególnie dobrze nadaje się dla osób tworzących oprogramowanie w stacku Microsoft.
+Microsoft Threat Modeling Tool to bezpłatne narzędzie do pobrania, służące do analizy projektu oprogramowania. Jego workflow tworzy diagram, identyfikuje zagrożenia oraz wspiera ich ograniczanie i walidację za pomocą podejścia STRIDE.<sup>[[4]](#references)</sup>
 
+## References
+
+- [1] [Ściągawka dotycząca modelowania zagrożeń](https://cheatsheetseries.owasp.org/cheatsheets/Threat_Modeling_Cheat_Sheet.html)
+- [2] [Modelowanie zagrożeń - The Penetration Testing Execution Standard](https://www.pentest-standard.org/index.php/Threat_Modeling)
+- [3] [Podstawy bezpieczeństwa - OWASP Developer Guide](https://devguide.owasp.org/en/02-foundations/01-security-fundamentals/)
+- [4] [Pierwsze kroki z Microsoft Threat Modeling Tool](https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-getting-started)
+- [5] [Modelowanie zagrożeń dla sterowników - Windows drivers](https://learn.microsoft.com/en-us/windows-hardware/drivers/driversecurity/threat-modeling-for-drivers)
+- [6] [SpiderSuite](https://spidersuite.io/)
+- [7] [OWASP Threat Dragon](https://github.com/OWASP/threat-dragon)
+- [8] [Modelowanie zagrożeń PASTA: wyjaśnienie 7 etapów](https://versprite.com/cybersecurity-listings/devsecops/pasta-threat-modeling/)
+- [9] [Dokument metodologii Trike v1](https://trike.sourceforge.net/papers/Trike_v1_Methodology_Document-draft.pdf)
+- [10] [Modelowanie zagrożeń: podsumowanie dostępnych metod](https://www.sei.cmu.edu/documents/569/2018_019_001_524597.pdf)
 {{#include ../banners/hacktricks-training.md}}

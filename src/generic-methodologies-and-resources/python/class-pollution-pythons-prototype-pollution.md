@@ -1,10 +1,8 @@
 # Class Pollution (Python's Prototype Pollution)
 
-{{#include ../../banners/hacktricks-training.md}}
+## Podstawowy przykład
 
-## Basic Example
-
-Sprawdź, jak można zanieczyszczać klasy obiektów za pomocą stringów:<sup>[[1]](#references)</sup>
+Zmiana `__qualname__` za pośrednictwem odwołania do klasy instancji aktualizuje klasę oraz jej zmienne klasy bazowe.<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -29,6 +27,8 @@ print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
 ## Podstawowy przykład podatności
+
+Rekurencyjne scalanie może akceptować kontrolowane przez atakującego klucze mapowania i zapisywać zagnieżdżone wartości za pomocą dostępu przez element lub atrybut.<sup>[[1]](#references)</sup>
 ```python
 # Initial state
 class Employee: pass
@@ -65,7 +65,9 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>Tworzenie domyślnej wartości właściwości klasy w celu RCE (subprocess)</summary><sup>[[1]](#references)</sup>
+<summary>Utworzenie domyślnej wartości właściwości klasy prowadzące do RCE (subprocess)</summary>
+
+Współdzielona klasa bazowa może dostarczyć domyślny atrybut używany przez command gadget w klasie siostrzanej.<sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -116,7 +118,9 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Zanieczyszczanie innych klas i globalnych zmiennych za pomocą <code>globals</code></summary><sup>[[1]](#references)</sup>
+<summary>Zanieczyszczanie innych klas i zmiennych globalnych przez <code>globals</code></summary>
+
+Mapowanie `__globals__` funkcji ujawnia przestrzeń nazw modułu dostępną z metody zdefiniowanej w tym module.<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -148,7 +152,9 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Dowolne wykonywanie procesów podrzędnych</summary><sup>[[1]](#references)</sup>
+<summary>Dowolne wykonywanie podprocesów</summary>
+
+W systemie Windows `Popen(..., shell=True)` używa zmiennej środowiskowej `COMSPEC` jako domyślnej powłoki, dlatego ten gadget demonstruje przekierowanie poleceń za pośrednictwem środowiska.<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -182,7 +188,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Nadpisywanie <strong><code>__kwdefaults__</code></strong></summary>
 
-**`__kwdefaults__`** to specjalny atrybut wszystkich funkcji. Zgodnie z [dokumentacją Pythona](https://docs.python.org/3/library/inspect.html) jest to „mapowanie wszelkich wartości domyślnych dla parametrów **tylko słów kluczowych**”. Zanieczyszczenie tego atrybutu pozwala nam kontrolować wartości domyślne parametrów tylko słów kluczowych funkcji, czyli parametrów funkcji występujących po \* lub \*args.<sup>[[1]](#references)</sup>
+Python opisuje `__kwdefaults__` jako mapowanie wartości domyślnych parametrów dostępnych wyłącznie jako keyword, które następują po `*` lub `*args` w definicji funkcji.<sup>[[4]](#references)</sup> Poniższy gadget nadpisuje to mapowanie za pośrednictwem skażonej ścieżki funkcji.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -223,34 +229,36 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Nadpisywanie secret Flask między plikami</summary>
+<summary>Nadpisywanie sekretu Flask w różnych plikach</summary>
 
-Jeśli więc możesz wykonać class pollution na obiekcie zdefiniowanym w głównym pliku python webowej aplikacji, ale **jego klasa jest zdefiniowana w innym pliku** niż plik główny. Ponieważ aby uzyskać dostęp do \_\_globals\_\_ w poprzednich payloadach, musisz uzyskać dostęp do klasy obiektu lub metod tej klasy, będziesz w stanie **uzyskać dostęp do globals w tym pliku, ale nie w pliku głównym**. \
-W związku z tym **nie będziesz w stanie uzyskać dostępu do globalnego obiektu aplikacji Flask**, który zdefiniował **secret key** na stronie głównej:<sup>[[1]](#references)</sup>
+Jeśli klasa skażonego obiektu znajduje się w module innym niż moduł entry-point aplikacji, metody tej klasy początkowo udostępniają przez `__globals__` przestrzeń nazw modułu klasy. Następnie traversal przez loader i `sys.modules.__main__` może dotrzeć do modułu entry-point oraz jego obiektu Flask `app`.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-W tym scenariuszu potrzebujesz gadgetu do przechodzenia przez pliki, aby dotrzeć do głównego pliku i **uzyskać dostęp do globalnego obiektu `app.secret_key`**, zmienić Flask secret key i móc [**escalate privileges** po poznaniu tego klucza](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
+Flask używa `app.secret_key` do podpisywania session cookie; znajomość tego klucza pozwala atakującemu tworzyć prawidłowe dane session.<sup>[[6]](#references)</sup>
 
-Payload taki jak ten [z tego writeupu](https://ctftime.org/writeup/36082):<sup>[[2]](#references)</sup>
+Oryginalny writeup przedstawia następującą ścieżkę prowadzącą do `app.secret_key`; CTFtime również hostuje kopię writeupu.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Użyj tego payloadu, aby **zmienić `app.secret_key`** (nazwa w Twojej aplikacji może być inna) i móc podpisywać nowe cookies Flask z większymi uprawnieniami.
+Zmiana klucza może umożliwić podpisywanie zastępczych session cookies i eskalację uprawnień; zobacz [stronę dotyczącą narzędzi Flask session](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
 
 </details>
 
-Sprawdź również następującą stronę, aby poznać więcej read-only gadgets:
+Sprawdź również poniższą stronę, aby znaleźć więcej gadżetów tylko do odczytu:
 
 
 {{#ref}}
 python-internal-read-gadgets.md
 {{#endref}}
 
-## Referencje
+## References
 
 - [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
-- [2] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
-
+- [2] [idekCTF 2022 task manager writeup (oryginalny)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
+- [3] [CTFtime - idekCTF 2022: writeup task managera](https://ctftime.org/writeup/36082)
+- [4] [inspect — inspekcja aktywnych obiektów](https://docs.python.org/3/library/inspect.html)
+- [5] [subprocess — zarządzanie procesami podrzędnymi](https://docs.python.org/3/library/subprocess.html)
+- [6] [Quickstart — dokumentacja Flask](https://flask.palletsprojects.com/en/stable/quickstart/)
 {{#include ../../banners/hacktricks-training.md}}

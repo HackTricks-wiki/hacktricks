@@ -1,22 +1,28 @@
-# Techniki deobfuskacji plików VBS
+# Techniki desobfuskacji plików VBS
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-Poniżej przedstawiono kilka rzeczy, które mogą być przydatne podczas debugowania/deobfuskacji złośliwego pliku VBS:
+Kilka rzeczy, które mogą być przydatne podczas debugowania/desobfuskacji złośliwego pliku VBS:
 
 ## echo
+
+`WScript.Echo` może być używane do wyświetlania danych diagnostycznych; w środowisku `cscript.exe` są one zapisywane w konsoli.<sup>[[1]](#references)</sup>
 ```bash
 Wscript.Echo "Like this?"
 ```
 ## Komentarze
+
+Pojedynczy apostrof rozpoczyna komentarz VBScript.<sup>[[2]](#references)</sup>
 ```bash
 ' this is a comment
 ```
-## Test
+## Testowanie
+
+Uruchom plik VBS w hoście wiersza poleceń za pomocą:<sup>[[3]](#references)</sup>
 ```bash
 cscript.exe file.vbs
 ```
-## Zapisywanie danych do pliku
+## Zapisz dane do pliku
+
+Ten helper jest zaadaptowany z odpowiedzi na Stack Overflow i używa strumienia tekstowego `FileSystemObject`. `CreateTextFile` zwraca `TextStream`, a `Write`/`Close` operują na danych tekstowych; należy traktować to jako przykład zapisu tekstowego, a nie ogólnie bezpiecznego zapisu danych binarnych.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```js
 Function writeBinary(strBinary, strPath)
 
@@ -41,4 +47,12 @@ End With
 
 End Function
 ```
+## References
+
+- [1] [Uruchamianie zapytania Visual Basic Scripting Edition (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/indexsrv/running-a-visual-basic-scripting-edition-query)
+- [2] [Praca z językami skryptowymi (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525153%28v%3Dvs.90%29)
+- [3] [cscript (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cscript)
+- [4] [Odczytywanie i zapisywanie pliku binarnego w VBScript (Stack Overflow)](https://stackoverflow.com/questions/6060529/read-and-write-binary-file-in-vbscript/6087783)
+- [5] [Metoda CreateTextFile (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/createtextfile-method)
+- [6] [Obiekt TextStream (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/textstream-object)
 {{#include ../../../banners/hacktricks-training.md}}

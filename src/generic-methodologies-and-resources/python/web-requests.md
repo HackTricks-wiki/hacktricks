@@ -1,10 +1,13 @@
 # Żądania sieciowe
 
-{{#include ../../banners/hacktricks-training.md}}
-
-
 ## Python Requests
+
+Te przykłady używają udokumentowanych argumentów żądań, właściwości odpowiedzi, krotek plików multipart oraz sesji w bibliotece Requests.<sup>[[1]](#references)</sup> Przykłady z `verify=False` wyłączają weryfikację certyfikatu TLS i powinny być ograniczone do kontrolowanych testów.<sup>[[1]](#references)</sup>
 ```python
+import random
+import re
+import string
+
 import requests
 
 url = "http://example.com:80/some/path.php"
@@ -23,7 +26,7 @@ body_text = gr.text
 ret_cookies = gr.cookies
 is_redirect = gr.is_redirect
 is_permanent_redirect = gr.is_permanent_redirect
-float_seconds = gr.elapsed.total_seconds() 10.231
+float_seconds = gr.elapsed.total_seconds()
 
 #Regular Post requests sending parameters (data)
 pr = requests.post(url, data=params, headers=headers, cookies=cookies, verify=False, allow_redirects=True, proxies=proxies)
@@ -71,7 +74,9 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Polecenie Python do wykorzystania RCE
+## Python cmd do wykorzystania RCE
+
+Pętla poleceń dziedziczy po Pythonowym `Cmd`; jej metoda `default` obsługuje nierozpoznane prefiksy poleceń, `cmdloop` rozdziela wiersze wejściowe, a `re.DOTALL` pozwala wzorcowi ekstrakcji obejmować znaki nowej linii.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -98,4 +103,9 @@ return 1
 term = Terminal()
 term.cmdloop()
 ```
+## References
+
+- [1] [Interfejs programistyczny Requests](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Obsługa interpreterów poleceń działających w trybie wiersza poleceń](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Operacje na wyrażeniach regularnych](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}
