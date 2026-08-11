@@ -1,10 +1,8 @@
 # RunC Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
+## Maelezo ya msingi
 
-## Basic information
-
-Ikiwa ungependa kujifunza zaidi kuhusu **runc**, angalia ukurasa ufuatao:
+Ikiwa unataka kujifunza zaidi kuhusu **runc**, angalia ukurasa ufuatao:
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -12,7 +10,7 @@ Ikiwa ungependa kujifunza zaidi kuhusu **runc**, angalia ukurasa ufuatao:
 
 ## PE
 
-Ukigundua kuwa `runc` imesakinishwa kwenye host, huenda ukaweza **kuendesha container inayomount root / folder ya host**.
+Ikiwa `runc` inapatikana kwa rootful process kwenye host, unaweza kutumia OCI bundle ambayo mount configuration yake hufanya recursively bind-mount ya `/` ya host kwenye `/` ndani ya container, na hivyo kufichua filesystem ya host katika mount namespace hiyo.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -37,6 +35,11 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Hii haitafanya kazi kila mara kwa kuwa operesheni chaguo-msingi ya runc ni kuendesha kama root, hivyo kuiendesha kama mtumiaji asiye na privileges hakuwezi kufanya kazi (isipokuwa uwe na rootless configuration). Kuweka rootless configuration kuwa chaguo-msingi kwa ujumla si wazo zuri kwa sababu kuna vikwazo kadhaa ndani ya rootless containers ambavyo havitumiki nje ya rootless containers.
+> Workflow iliyoandikwa ya `runc run` hutumia root: mifano ya runc yenyewe huiita "run as root." Mtumiaji asiye na privileges anahitaji configuration ya rootless kama `runc spec --rootless`, na runc inaeleza kwamba user namespaces lazima ziwezeshwe kwa mode hiyo.<sup>[[1]](#references)</sup>
 
+## References
+
+- [1] [runc: CLI tool ya kuanzisha na kuendesha containers](https://github.com/opencontainers/runc#using-runc)
+- [2] [OCI Runtime Specification: Mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
+- [3] [Shared Subtrees](https://docs.kernel.org/filesystems/sharedsubtree.html)
 {{#include ../../banners/hacktricks-training.md}}

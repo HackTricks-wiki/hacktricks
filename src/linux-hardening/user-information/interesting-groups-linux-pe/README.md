@@ -1,12 +1,10 @@
-# Makundi ya Kuvutia - Linux Privesc
+# Interesting Groups - Linux Privesc
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-## Vikundi vya Sudo/Admin
+## Sudo/Admin Groups
 
 ### **PE - Method 1**
 
-**Wakati mwingine**, **kwa default (au kwa sababu software fulani inaihitaji)** ndani ya faili ya **/etc/sudoers** unaweza kupata mistari hii:
+**Wakati mwingine**, policy ya mfumo ya **/etc/sudoers** (au faili iliyo-include kutoka humo) huwa na entries kama vile:<sup>[[3]](#references)</sup>
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -14,7 +12,7 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
-Hii inamaanisha kuwa **mtumiaji yeyote aliye katika group sudo au admin anaweza kutekeleza chochote kama sudo**.
+Hii inamaanisha kuwa mtumiaji yeyote anayelingana na ingizo lolote kati ya hayo anaweza kutekeleza amri yoyote kama mtumiaji yeyote lengwa kupitia `sudo` (kwa kuzingatia sehemu nyingine za sera).<sup>[[3]](#references)</sup>
 
 Ikiwa ndivyo ilivyo, ili **kuwa root unaweza kutekeleza tu**:
 ```
@@ -22,28 +20,29 @@ sudo su
 ```
 ### PE - Method 2
 
-Tafuta binary zote za suid na uangalie kama kuna binary **Pkexec**:
+Tafuta binaries zote za suid na uangalie kama kuna binary **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Ukigundua kuwa **pkexec ni SUID binary** na wewe ni mwanachama wa **sudo** au **admin**, huenda ukaweza kutekeleza binaries kama sudo ukitumia `pkexec`.\
-Hii ni kwa sababu kwa kawaida hayo ndiyo makundi yaliyo ndani ya **polkit policy**. Policy hii hutambua ni makundi gani yanaweza kutumia `pkexec`. Ikague kwa:
+Ikiwa **pkexec ni SUID binary**, inaweza kutekeleza programu kama mtumiaji mwingine tu wakati polkit imeidhinisha kitendo kilichoombwa; biti ya SUID pekee haihakikishi root. Kagua policy iliyosakinishwa na authorization ya session ya target badala ya kudhani kuwa uanachama katika **sudo** au **admin** unatosha.<sup>[[4]](#references)[[5]](#references)</sup>
+
+Kwenye distributions ambazo bado zinatumia Local Authority backend ya zamani, kagua sheria zake za groups kwa:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Hapo utapata vikundi vinavyoruhusiwa kutekeleza **pkexec** na **kwa chaguo-msingi**, katika baadhi ya distros za Linux, vikundi **sudo** na **admin** huonekana.
+Majina ya groups husika na defaults hutofautiana kulingana na distribution; group ni muhimu hapa tu ikiwa sera ya ndani inaitaja.<sup>[[5]](#references)</sup>
 
 Ili **kuwa root unaweza kutekeleza**:
 ```bash
-pkexec "/bin/sh" #You will be prompted for your user password
+pkexec "/bin/sh" #Authentication is required according to the local policy
 ```
-Ukijaribu kutekeleza **pkexec** na kupata **hitilafu** hii:
+Ukijaribu kutekeleza **pkexec** na kupata **error** hii:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Si kwa sababu huna ruhusa, bali kwa sababu hujaunganishwa bila GUI**. Na kuna suluhisho la tatizo hili hapa: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Unahitaji **vipindi 2 tofauti vya ssh**:<sup>[[1]](#references)</sup>
+Kwenye session ya SSH bila authentication agent iliyosajiliwa, `pkexec` inaweza kushindwa na kosa hili hata wakati policy ingeruhusu kitendo hicho; polkit inatambua `pkttyagent` kama text authentication agent kwa sessions zisizo za desktop. Tabia halisi hutegemea version na distribution, kwa hivyo thibitisha policy ya ndani na usanidi wa agent. Workaround moja iliyoripotiwa kwa versions zilizoathiriwa za NixOS hutumia **2 sessions tofauti za SSH**.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -54,13 +53,13 @@ pkexec "/bin/bash" #Step 3, execute pkexec
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
-## Kundi la Wheel
+## Wheel Group
 
-**Wakati mwingine**, **kwa chaguo-msingi** ndani ya faili ya **/etc/sudoers** unaweza kupata mstari huu:
+Wakati mwingine sera ya sudoers inaweza pia kuwa na ingizo hili:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
-Hii inamaanisha kwamba **mtumiaji yeyote aliye katika group wheel anaweza kutekeleza chochote kama sudo**.
+Hii inamaanisha kwamba mtumiaji yeyote anayelingana na ingizo hilo anaweza kuendesha command yoyote kama mtumiaji lengwa yeyote kupitia `sudo` (kwa kuzingatia sehemu nyingine za policy).<sup>[[3]](#references)</sup>
 
 Ikiwa ndivyo ilivyo, ili **kuwa root unaweza kutekeleza tu**:
 ```
@@ -68,23 +67,23 @@ sudo su
 ```
 ## Shadow Group
 
-Watumiaji wa **group shadow** wanaweza **kusoma** faili ya **/etc/shadow**:
+Kwenye mifumo ambayo ruhusa zake zinawapa uwezo huo, watumiaji walio katika kikundi cha **shadow** wanaweza **kusoma** **/etc/shadow**; thibitisha mode na ACLs halisi kwenye target:<sup>[[6]](#references)[[7]](#references)</sup>
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
 Kwa hiyo, soma faili na ujaribu **crack baadhi ya hashes**.
 
 Maelezo muhimu kuhusu hali ya lock unapochanganua hashes:
-- Entries zilizo na `!` au `*` kwa kawaida haziwezi kutumika kuingia kwa kutumia password kwa njia shirikishi.
-- `!hash` kwa kawaida humaanisha kuwa password iliwekwa kisha ikafungwa.
-- `*` kwa kawaida humaanisha kuwa hakuna valid password hash iliyowahi kuwekwa.
-Hii ni muhimu kwa kuainisha accounts hata wakati direct login imezuiwa.
+- Entries zilizo na `!` au `*` kwa ujumla haziwezi kutumiwa kuingia kwa njia shirikishi kwa kutumia password.
+- `!hash` inamaanisha password imefungwa; herufi zilizobaki zinawakilisha sehemu ya password kabla haijafungwa.
+- Sehemu iliyo na `*` si hash halali ya `crypt(3)` na huzuia kuingia kwa kutumia UNIX password; usihitimishe kutokana nayo ikiwa password iliwekwa hapo awali.
+Hii ni muhimu kwa kuainisha akaunti hata wakati direct login imezuiwa.<sup>[[6]](#references)</sup>
 
-## Staff Group
+## Kundi la Staff
 
-**staff**: Huwaruhusu users kuongeza marekebisho ya ndani kwenye mfumo (`/usr/local`) bila kuhitaji root privileges (kumbuka kwamba executables zilizo kwenye `/usr/local/bin` ziko kwenye PATH variable ya kila user, na zinaweza "override" executables zilizo kwenye `/bin` na `/usr/bin` zenye jina lilelile). Linganisha na group ya "adm", ambayo inahusiana zaidi na monitoring/security. [\[source\]](https://wiki.debian.org/SystemGroups)<sup>[[2]](#references)</sup>
+**staff**: Huwaruhusu watumiaji kuongeza marekebisho ya ndani kwenye mfumo (`/usr/local`) bila kuhitaji ruhusa za root (kumbuka kwamba executable zilizo ndani ya `/usr/local/bin` ziko kwenye PATH variable ya kila mtumiaji, na zinaweza kufanya **override** ya executable zilizo ndani ya `/bin` na `/usr/bin` zenye jina lilelile). Linganisha na kundi la "adm", ambalo linahusiana zaidi na ufuatiliaji/usalama.<sup>[[2]](#references)[[7]](#references)</sup>
 
-Kwenye Debian distributions, `$PATH` variable inaonyesha kwamba `/usr/local/` itaendeshwa kwa priority ya juu zaidi, iwe wewe ni privileged user au la.
+Kwenye configurations za Debian ambapo `/usr/local/bin` inatangulia `/usr/bin` ndani ya `PATH` (kama ilivyo kwenye mifano iliyo hapa chini), amri isiyo na path kamili hutumia kwanza nakala iliyo ndani ya `/usr/local/bin`; thibitisha `PATH` inayotumika kwa ufanisi kwenye target.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -92,9 +91,9 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
-Ikiwa tunaweza kuteka baadhi ya programu katika `/usr/local`, tunaweza kupata root kwa urahisi.
+Ikiwa privileged process itatatua command isiyo na qualification kupitia `/usr/local/bin` inayoweza kuandikwa, kubadilisha command hiyo kunaweza kuitekeleza kwa privileges za process; thibitisha path halisi na trigger kabla ya kufanya testing.
 
-Kuteka programu ya `run-parts` ni njia rahisi ya kupata root, kwa sababu programu nyingi zitaendesha `run-parts`, kama vile crontab na wakati wa kuingia kwa ssh.
+Kwenye mifumo ya Ubuntu, `pam_motd` huendesha executable scripts kupitia `run-parts --lsbsysinit` kama root wakati wa login; cron jobs pia zinaweza kutumia `run-parts`, lakini hili hutegemea distribution na configuration.<sup>[[10]](#references)[[11]](#references)</sup>
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -102,7 +101,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-au wakati session mpya ya SSH inapoingia.
+Kwenye kuingia SSH mpya, `pspy` inaweza kusaidia kuthibitisha ikiwa path hii inatumika kwenye target; inaweza kuona command lines za process bila root.<sup>[[10]](#references)[[12]](#references)</sup>
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -134,11 +133,11 @@ $ ls -la /bin/bash
 # 0x5 root it
 $ /bin/bash -p
 ```
-## Kundi la Diski
+## Disk Group
 
-Hii privilege ni karibu **sawa na root access** kwa sababu unaweza kufikia data yote iliyo ndani ya machine.
+Uanachama katika group ya **disk** unaweza kutoa ufikiaji wa moja kwa moja wa **block devices** na mara nyingi huwa **close to root access**; Debian inaeleza kuwa kwa kiasi kikubwa ni sawa na root, lakini thibitisha ruhusa halisi za device na mpangilio wa storage kwenye target.<sup>[[7]](#references)</sup>
 
-Files:`/dev/sd[a-z][1-9]`
+Njia za kawaida za device zinajumuisha `/dev/sd*`, lakini NVMe na mipangilio mingine ya storage hutumia majina tofauti.
 ```bash
 df -h #Find where "/" is mounted
 debugfs /dev/sda1
@@ -147,47 +146,50 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-Kumbuka kwamba ukitumia debugfs unaweza pia **kuandika faili**. Kwa mfano, ili kunakili `/tmp/asd1.txt` kwenda `/tmp/asd2.txt`, unaweza kufanya:
+`debugfs` hufanya kazi kwenye filesystems za ext2/ext3/ext4; paths kama `/root` na `/etc/shadow` hapo juu ni files zilizo ndani ya filesystem iliyofunguliwa, huku argument ya pili ya `dump` ikiwa ni output path kwenye native filesystem.<sup>[[8]](#references)</sup> Kwa mfano, hii hutoa `/tmp/asd1.txt` kutoka kwenye filesystem iliyofunguliwa na kuihifadhi kama `/tmp/asd2.txt` kwenye native filesystem:
 ```bash
-debugfs -w /dev/sda1
+debugfs /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Hata hivyo, ukijaribu **kuandika faili zinazomilikiwa na root** (kama `/etc/shadow` au `/etc/passwd`) utapata hitilafu ya "**Permission denied**".
+Chaguo la `-w` hufungua filesystem kwa ruhusa za kusoma na kuandika, na amri ya `write` hunakili faili asili ndani ya filesystem iliyofunguliwa. Epuka kuitumia kwenye filesystem iliyowekwa kama mounted na inayotumika kwa sasa, kwa sababu mabadiliko ya moja kwa moja yanaweza kuharibu filesystem; inapowezekana, fanya kazi kutoka kwenye image isiyotumika.<sup>[[8]](#references)</sup>
+```bash
+debugfs -w /dev/sda1
+debugfs:  write /tmp/asd1.txt /tmp/asd2.txt
+```
+## Kikundi cha Video
 
-## Video Group
-
-Kwa kutumia amri `w` unaweza kujua **nani ameingia kwenye mfumo** na itaonyesha matokeo kama yafuatayo:
+Kwa kutumia amri `w`, unaweza kujua **nani ameingia kwenye mfumo**, na itaonyesha matokeo kama yafuatayo.<sup>[[20]](#references)</sup>
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
-**tty1** inamaanisha kuwa mtumiaji **yossi ameingia kimwili** kwenye terminali iliyo kwenye mashine.
+Ingizo la **tty1** hutambulisha console ya kwanza ya Linux; lenyewe halithibitishi kwamba mtumiaji yupo kimwili kwenye mashine, hasa katika containers au mazingira mengine.<sup>[[21]](#references)</sup>
 
-Kundi la **video** linaweza kufikia na kutazama matokeo ya skrini. Kimsingi, unaweza kuchunguza skrini. Ili kufanya hivyo, unahitaji **kunasa picha ya sasa kwenye skrini** ikiwa katika data ghafi na kupata mwonekano unaotumiwa na skrini. Data ya skrini inaweza kuhifadhiwa katika `/dev/fb0`, na unaweza kupata mwonekano wa skrini hii kwenye `/sys/class/graphics/fb0/virtual_size`
+Kwenye mifumo inayowezesha kifaa cha framebuffer kusomeka, kuwa mwanachama wa group la **video** kunaweza kutoa access kwa kifaa hicho. Interface ya Linux framebuffer inaeleza `/dev/fb0` kama kifaa cha memory kinachoweza kusomeka na kunakiliwa kwa ajili ya screen snapshot; path ya `/sys/class/graphics/fb0/virtual_size` inapatikana tu pale ambapo fbdev sysfs attribute hiyo ipo, kwa hivyo kwanza kagua target.<sup>[[7]](#references)[[9]](#references)</sup>
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Ili **kufungua** **raw image** unaweza kutumia **GIMP**, chagua faili ya **`screen.raw`** na uchague **Raw image data** kama aina ya faili:
+Ikiwa toleo lililosakinishwa la **GIMP** linaonyesha raw-data importer, fungua **`screen.raw`** kwa kutumia importer hiyo; usaidizi na vidhibiti hutofautiana kulingana na toleo na plug-in.<sup>[[22]](#references)</sup>
 
-![Disk Group - Video Group: Ili kufungua raw image unaweza kutumia GIMP, chagua faili ya screen.raw na uchague Raw image data kama aina ya faili](<../../../images/image (463).png>)
+![Disk Group - Video Group: Ili kufungua picha raw unaweza kutumia GIMP, chagua faili ya screen.raw na uchague Raw image data kama aina ya faili](<../../../images/image (463).png>)
 
-Kisha badilisha **Width** na **Height** ziwe zile zinazotumiwa kwenye screen na ujaribu **Image Types** tofauti (kisha uchague ile inayoonyesha screen vizuri zaidi):
+Weka Width na Height za picha zilingane na framebuffer geometry; jaribu pixel formats/Image Types zinazopatikana hadi matokeo yaonekane kwa uwazi.<sup>[[9]](#references)</sup>
 
-![Disk Group - Video Group: Kisha badilisha Width na Height ziwe zile zinazotumiwa kwenye screen na ujaribu Image Types tofauti (kisha uchague ile inayoonyesha screen vizuri zaidi)](<../../../images/image (317).png>)
+![Disk Group - Video Group: Kisha badilisha Width na Height ziwe zile zinazotumiwa kwenye skrini na uchague Image Types tofauti (na uchague ile inayoonyesha skrini vizuri zaidi)](<../../../images/image (317).png>)
 
 ## Root Group
 
-Inaonekana kwamba kwa default **members of root group** wanaweza kupata ruhusa ya **modify** baadhi ya mafaili ya usanidi wa **service**, mafaili ya **libraries**, au **other interesting things** ambayo yanaweza kutumiwa ku-escalate privileges...
+Uanachama katika kikundi cha **root** hautoi UID ya root, lakini faili zinazoweza kuandikwa na kikundi na zinazomilikiwa na `root` bado zinaweza kuvutia wakati services au libraries zenye privileges zinapozitumia. Thibitisha permissions halisi za faili na jinsi linavyotumiwa kabla ya kulichukulia kama njia ya privilege escalation.
 
-**Kagua ni mafaili gani members wa root wanaweza ku-modify**:
+**Kagua ni faili zipi wanachama wa root wanaweza kurekebisha**:
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
 ## Docker Group
 
-Unaweza **ku-mount root filesystem ya host machine kwenye volume ya instance**, hivyo instance inapoanza hu-load `chroot` mara moja kwenye volume hiyo. Hii inakupa root kwenye machine hiyo.
+Uanachama katika kundi la `docker` hutoa ufikiaji wa kiwango cha root kwenye Docker daemon katika usakinishaji wa kawaida wa rootful. Kwa kuwa bind mounts huwa za kusoma na kuandika kwa chaguo-msingi, mtumiaji anayeweza kudhibiti daemon hiyo anaweza kuweka `/` ya host ndani ya container na kubadilisha faili za host; kwa ufanisi, hii hutoa root kwenye host.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
 ```bash
 docker image #Get images from the docker service
 
@@ -197,15 +199,15 @@ docker run -it --rm -v /:/mnt <imagename> chroot /mnt bash
 echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/passwd
 
 #Ifyou just want filesystem and network access you can startthe following container:
-docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
+docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bash
 ```
-Mwisho, ikiwa hupendi mapendekezo yoyote ya hapo awali, au hayafanyi kazi kwa sababu fulani (docker api firewall?), unaweza daima kujaribu **run a privileged container and escape from it** kama ilivyoelezwa hapa:
+Mwishowe, ikiwa hupendi mapendekezo yoyote ya awali, au hayafanyi kazi kwa sababu fulani (docker api firewall?), unaweza kujaribu kila mara **run a privileged container and escape from it** kama ilivyoelezwa hapa:
 
 {{#ref}}
 ../../containers-namespaces/container-security/
 {{#endref}}
 
-Ikiwa una ruhusa za kuandika kwenye docker socket, soma [**this post about how to escalate privileges abusing the docker socket**](../../1-linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**.**
+Ikiwa una ruhusa za kuandika kwenye docker socket, soma [**chapisho hili kuhusu jinsi ya kuongeza privileges kwa kutumia docker socket**](../../1-linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -215,35 +217,55 @@ https://github.com/KrustyHack/docker-privilege-escalation
 https://fosterelli.co/privilege-escalation-via-docker.html
 {{#endref}}
 
-## lxc/lxd Group
+## Kikundi cha lxc/lxd
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Adm Group
+## Kikundi cha Adm
 
-Kwa kawaida **members** wa kikundi cha **`adm`** huwa na ruhusa za **kusoma** faili za **log** zilizo ndani ya _/var/log/_.\
-Kwa hiyo, ikiwa umecompromise user aliye ndani ya kikundi hiki, hakikisha kabisa **unakagua logs**.
+Kwa kawaida **members** wa kikundi cha **`adm`** huwa na ruhusa za **kusoma log** files zilizo ndani ya _/var/log/_.\
+Kwa hivyo, ikiwa umecompromise user aliye ndani ya kikundi hiki, hakikisha kabisa **unaangalia logs**.<sup>[[7]](#references)</sup>
 
-## Backup / Operator / lp / Mail groups
+## Vikundi vya Backup / Operator / lp / Mail
 
-Vikundi hivi mara nyingi ni vectors za **credential-discovery** badala ya direct root vectors:
+Vikundi hivi vina maana zinazotegemea service na distribution. Debian inaeleza `backup` kwa backup/restore iliyokabidhiwa, `lp` kwa printer daemons, na `mail` kwa `/var/mail`, kwa hivyo kagua ruhusa za ndani kabla ya kuchukulia uanachama kama njia ya kupata privileges.<sup>[[7]](#references)</sup>
+
+Mara nyingi huwa **credential-discovery** vectors badala ya vectors za moja kwa moja za root:
 - **backup**: inaweza kufichua archives zenye configs, keys, DB dumps, au tokens.
-- **operator**: operational access inayotegemea platform, ambayo inaweza ku-leak runtime data nyeti.
-- **lp**: print queues/spools zinaweza kuwa na document contents.
-- **mail**: mail spools zinaweza kufichua reset links, OTPs, na internal credentials.
+- **operator**: operational access inayotegemea platform na inayoweza ku-leak runtime data nyeti.
+- **lp**: print queues/spools zinaweza kuwa na yaliyomo kwenye documents.
+- **mail**: mail spools zinaweza kufichua reset links, OTPs, na credentials za ndani.
 
-Chukulia membership katika vikundi hivi kama high-value data exposure finding, kisha fanya pivot kupitia password/token reuse.
+Chukulia uanachama katika vikundi hivi kama finding ya high-value data exposure, kisha pivot kupitia password/token reuse.
 
-## Auth group
+## Kikundi cha Auth
 
-Ndani ya OpenBSD, kikundi cha **auth** kwa kawaida kinaweza kuandika kwenye folders _**/etc/skey**_ na _**/var/db/yubikey**_ ikiwa zinatumika.\
-Ruhusa hizi zinaweza kutumiwa vibaya pamoja na exploit ifuatayo ili **ku-escalate privileges** hadi root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Kwenye OpenBSD, S/Key inapowekwa, `/etc/skey` inamilikiwa na `root:auth`, na kufikia records zake kunahitaji kikundi cha `auth`; YubiKey records huhifadhiwa katika `/var/db/yubikey`.<sup>[[16]](#references)[[17]](#references)</sup> Configuration yenye vulnerability ya OpenBSD 6.6 iliyokuwa na S/Key au YubiKey enabled iliwaruhusu local users wenye `auth` privileges kuwa root; Qualys inaandika prerequisite na exploit chain, na PoC iliyounganishwa inaiimplement.<sup>[[18]](#references)[[19]](#references)</sup>
 
-## Marejeleo
+## References
 
-- [1] [pkexec/pkttyagent authentication without a GUI session (NixOS issue #18012)](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
+- [1] [pkexec/pkttyagent authentication bila GUI session (NixOS issue #18012)](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
 - [2] [SystemGroups - Debian Wiki](https://wiki.debian.org/SystemGroups)
-
+- [3] [sudoers(5) — sudo — Debian Manpages](https://manpages.debian.org/bookworm/sudo/sudoers.5.en.html)
+- [4] [pkexec — polkit Reference Manual](https://polkit.pages.freedesktop.org/polkit/pkexec.1.html)
+- [5] [polkit — polkit Reference Manual](https://polkit.pages.freedesktop.org/polkit/polkit.8.html)
+- [6] [shadow(5) — Linux manual page](https://man7.org/linux/man-pages/man5/shadow.5.html)
+- [7] [Mwongozo wa Kulinda Debian](https://www.debian.org/doc/manuals/securing-debian-manual/securing-debian-manual.en.pdf)
+- [8] [debugfs(8) — Linux manual page](https://www.man7.org/linux/man-pages/man8/debugfs.8.html)
+- [9] [The Frame Buffer Device — Linux Kernel documentation](https://docs.kernel.org/fb/framebuffer.html)
+- [10] [update-motd(5) — Ubuntu Manpages](https://manpages.ubuntu.com/manpages/resolute/man5/update-motd.5.html)
+- [11] [run-parts(8) — Debian Manpages](https://manpages.debian.org/unstable/debianutils/run-parts.8.en.html)
+- [12] [pspy — unprivileged Linux process snooping](https://github.com/DominicBreuker/pspy)
+- [13] [Docker Engine security](https://docs.docker.com/engine/security/)
+- [14] [Manage Docker as a non-root user](https://docs.docker.com/engine/install/linux-postinstall)
+- [15] [Running containers — Docker Docs](https://docs.docker.com/engine/containers/run/)
+- [16] [skey(5) — OpenBSD manual pages](https://man.openbsd.org/skey.5)
+- [17] [login_yubikey(8) — OpenBSD manual pages](https://man.openbsd.org/login_yubikey.8)
+- [18] [Authentication vulnerabilities in OpenBSD — Qualys Security Advisory](https://www.openwall.com/lists/oss-security/2019/12/04/5)
+- [19] [openbsd-authroot — local exploit PoC](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+- [20] [w(1) — Linux manual page](https://man7.org/linux/man-pages/man1/w.1.html)
+- [21] [Linux allocated devices (4.x+ version)](https://docs.kernel.org/6.16/admin-guide/devices.html)
+- [22] [Image Import and Export — GIMP Documentation](https://docs.gimp.org/3.0/en/gimp-prefs-import-export.html)
 {{#include ../../../banners/hacktricks-training.md}}
