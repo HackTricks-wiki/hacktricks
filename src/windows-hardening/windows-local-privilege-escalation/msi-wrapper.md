@@ -2,21 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Pobierz darmową wersję aplikacji ze strony [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), uruchom ją i zapakuj w niej „złośliwy” binary.\
-Pamiętaj, że możesz zapakować plik "**.bat**", jeśli **chcesz tylko** **wykonywać** **wiersze poleceń (zamiast cmd.exe wybierz plik .bat)**
+MSI Wrapper może spakować plik wykonywalny lub skrypt jako plik Windows Installer (`.msi`). Pobierz i uruchom darmową edycję, a następnie wybierz plik wykonywalny do spakowania. Aby uruchomić sekwencję poleceń, wybierz plik `.bat` jako dane wejściowe zamiast pakowania `cmd.exe`.<sup>[[1]](#references)</sup>
 
-![MSI Wrapper: Pamiętaj, że możesz zapakować plik " .bat ", jeśli chcesz tylko wykonywać wiersze poleceń (zamiast cmd.exe wybierz plik .bat)](<../../images/image (417).png>)
+![Wybieranie pliku wykonywalnego lub skryptu wsadowego jako źródła w MSI Wrapper](<../../images/image (417).png>)
 
-A oto najważniejsza część konfiguracji:
+Ostrożnie skonfiguruj kontekst wykonywania i pozostałe właściwości instalatora:
 
-![MSI Wrapper: A oto najważniejsza część konfiguracji](<../../images/image (312).png>)
+![Konfigurowanie identyfikatora aplikacji i kontekstu zabezpieczeń w MSI Wrapper](<../../images/image (312).png>)
 
-![MSI Wrapper: A oto najważniejsza część konfiguracji](<../../images/image (346).png>)
+![Konfigurowanie właściwości instalatora w MSI Wrapper](<../../images/image (346).png>)
 
-![MSI Wrapper: A oto najważniejsza część konfiguracji](<../../images/image (1072).png>)
+![Przegląd ustawień kompilacji MSI Wrapper](<../../images/image (1072).png>)
 
-(Pamiętaj, że jeśli spróbujesz spakować własny binary, będziesz mieć możliwość modyfikowania tych wartości)
+Te wartości można zmienić podczas pakowania niestandardowego pliku binarnego.
 
-Następnie klikaj przyciski **next**, a na końcu kliknij **build button** — Twój installer/wrapper zostanie wygenerowany.
+Przejdź przez pozostałe strony kreatora i wybierz **Build**, aby wygenerować instalator.<sup>[[1]](#references)</sup>
 
+> [!WARNING]
+> Samo utworzenie pliku MSI nie nadaje uprawnień podwyższonych. To, czy instalacja będzie wykonywana z podwyższonymi uprawnieniami, zależy od zasad Windows Installer, kontekstu pakietu i autoryzacji użytkownika. Firma Microsoft ostrzega, że włączenie `AlwaysInstallElevated` zarówno dla użytkownika, jak i komputera pozwala użytkownikom niebędącym administratorami instalować pakiety z uprawnieniami systemowymi.<sup>[[2]](#references)</sup>
+
+## References
+
+- [1] [Dokumentacja MSI Wrapper - Pierwsze kroki](https://www.exemsi.com/documentation/getting-started/)
+- [2] [Microsoft Learn - Instalowanie pakietu z podwyższonymi uprawnieniami przez użytkownika niebędącego administratorem](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
 {{#include ../../banners/hacktricks-training.md}}

