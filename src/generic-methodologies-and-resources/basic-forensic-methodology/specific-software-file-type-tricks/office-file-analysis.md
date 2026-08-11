@@ -1,5 +1,7 @@
 # Office file analysis
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 For further information check [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). This is just a sumary:<sup>[[4]](#references)</sup>
 
 Microsoft Office documents commonly appear as legacy formats such as RTF and OLE/CFBF-based DOC, XLS, and PPT, or as newer **Office Open XML (OOXML)** formats such as DOCX, XLSX, and PPTX. Office documents may contain active content such as macros, making them common phishing and malware carriers. OOXML files are ZIP containers whose file hierarchy and XML contents can be inspected by unzipping them.<sup>[[3]](#references)[[4]](#references)</sup>

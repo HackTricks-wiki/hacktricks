@@ -1,5 +1,7 @@
 # Docker Forensics
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Container modification
 
 There are suspicions that some docker container was compromised:

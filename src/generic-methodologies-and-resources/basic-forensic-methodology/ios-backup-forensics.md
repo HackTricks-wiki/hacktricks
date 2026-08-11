@@ -1,5 +1,7 @@
 # iOS Backup Forensics (Messaging‑centric triage)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 This page describes practical steps to reconstruct and analyze iOS backups for signs of 0‑click exploit delivery via messaging app attachments. It focuses on turning Apple’s hashed backup layout into human‑readable paths, then enumerating and scanning attachments across common apps.
 
 Goals:

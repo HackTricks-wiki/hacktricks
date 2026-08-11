@@ -1,5 +1,7 @@
 # File/Data Carving & Recovery Tools
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Carving & Recovery tools
 
 More tools in [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)

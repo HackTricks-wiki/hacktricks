@@ -1,5 +1,7 @@
 # DNSCat pcap analysis
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 If you have a PCAP with data being **exfiltrated by DNSCat** (without using encryption), you may be able to recover the exfiltrated content.
 
 For the BSidesSF 2017 capture referenced below, the write-up inferred that each decoded query began with 9 bytes of dnscat-specific data before the transferred content. Because dnscat2 defines different packet types and header layouts, verify the relevant framing before applying that offset to other traffic.<sup>[[1]](#references)[[2]](#references)</sup>

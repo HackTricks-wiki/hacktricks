@@ -1,5 +1,7 @@
 # MSFVenom - CheatSheet
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ---
 
 ## Basic msfvenom

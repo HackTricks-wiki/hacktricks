@@ -1,5 +1,7 @@
 # Mobile Phishing & Malicious App Distribution (Android & iOS)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 > [!INFO]
 > This page covers techniques used by threat actors to distribute **malicious Android APKs** and **iOS mobile-configuration profiles** through phishing (SEO, social engineering, fake stores, dating apps, etc.).
 > The material is adapted from the SarangTrap campaign exposed by Zimperium zLabs (2025) and other public research.<sup>[[1]](#references)</sup>

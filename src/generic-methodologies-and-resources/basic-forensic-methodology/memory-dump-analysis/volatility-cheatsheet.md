@@ -1,5 +1,7 @@
 # Volatility - CheatSheet
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 If you need a tool that automates memory analysis with different scan levels and runs multiple Volatility3 plugins in parallel, you can use autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 
 ```bash

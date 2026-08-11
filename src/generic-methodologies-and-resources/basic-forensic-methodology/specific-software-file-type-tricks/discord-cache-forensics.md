@@ -1,5 +1,7 @@
 # Discord Cache Forensics (Chromium Disk Cache)
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 This page summarizes how to triage Discord Desktop cache artifacts for locally cached media, webhook endpoints, and activity correlation. Discord's desktop client uses Electron, and Electron stores session data such as the disk cache under `sessionData`.<sup>[[3]](#references)[[4]](#references)</sup>
 
 ## Where to look (Windows/macOS/Linux)

@@ -1,5 +1,7 @@
 # LOAD_NAME / LOAD_CONST opcode OOB Read
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 This page adapts Splitline's original HITCON CTF 2022 "V O I D" writeup and exploit chain.<sup>[[1]](#references)</sup>
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>

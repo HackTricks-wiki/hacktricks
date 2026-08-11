@@ -1,5 +1,7 @@
 # Wifi Pcap Analysis
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Check BSSIDs
 
 With a Wi-Fi capture open in Wireshark, select _Wireless → WLAN Traffic_ to summarize the wireless networks observed in the capture; each row represents one wireless network.<sup>[[1]](#references)</sup>

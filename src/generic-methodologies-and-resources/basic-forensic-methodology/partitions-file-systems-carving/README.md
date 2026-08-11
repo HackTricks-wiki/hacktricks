@@ -1,5 +1,7 @@
 # Partitions/File Systems/Carving
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Partitions
 
 A hard drive or an **SSD disk can contain different partitions** with the goal of separating data physically.\

@@ -1,5 +1,7 @@
 # Discord Invite Hijacking
 
+{{#include ../../banners/hacktricks-training.md}}
+
 Discord invite hijacking abuses the reuse rules for custom vanity links: an expired temporary invite code, or a deleted permanent code made only of lowercase letters and digits, may be registered as a vanity link on a Level 3 boosted server. A custom vanity link can likewise become available when its original server loses its Level 3 Boost; for an uppercase temporary invite, an attacker can pre-register the lowercase vanity form while the regular invite remains active, but redirection starts only after that invite expires.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Invite Types and Hijack Risk

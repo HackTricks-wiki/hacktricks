@@ -1,5 +1,7 @@
 # Image Acquisition & Mount
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Acquisition
 
 > Always acquire **read-only** and **hash while you copy**. Keep the original device **write-blocked** and work only on verified copies.

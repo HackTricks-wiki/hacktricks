@@ -1,5 +1,7 @@
 # Class Pollution (Python's Prototype Pollution)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Basic Example
 
 Changing `__qualname__` through an instance's class reference updates the class and its mutable base classes.<sup>[[1]](#references)</sup>

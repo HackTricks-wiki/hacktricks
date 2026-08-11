@@ -1,5 +1,7 @@
 # Detecting Phishing
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Introduction
 
 To detect a phishing attempt it's important to **understand the phishing techniques that are being used nowadays**. On the parent page of this post, you can find this information, so if you aren't aware of which techniques are being used today I recommend you to go to the parent page and read at least that section.

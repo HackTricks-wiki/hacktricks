@@ -1,5 +1,7 @@
 # Phishing Files & Documents
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Office Documents
 
 Microsoft Word performs file data validation before opening a file. Data validation is performed in the form of data structure identification, against the OfficeOpenXML standard. If any error occurs during the data structure identification, the file being analysed will not be opened.

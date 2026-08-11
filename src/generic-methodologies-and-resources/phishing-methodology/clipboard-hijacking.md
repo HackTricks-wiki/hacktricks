@@ -1,5 +1,7 @@
 # Clipboard Hijacking (Pastejacking) Attacks
 
+{{#include ../../banners/hacktricks-training.md}}
+
 > "Never paste anything you did not copy yourself." – old but still valid advice
 
 ## Overview

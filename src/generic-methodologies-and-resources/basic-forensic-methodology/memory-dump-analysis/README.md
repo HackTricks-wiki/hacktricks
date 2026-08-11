@@ -1,5 +1,7 @@
 # Memory dump analysis
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Start
 
 Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../malware-analysis.md).

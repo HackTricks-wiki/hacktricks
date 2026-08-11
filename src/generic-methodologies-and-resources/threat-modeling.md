@@ -1,5 +1,7 @@
 # Threat Modeling
 
+{{#include ../banners/hacktricks-training.md}}
+
 Welcome to HackTricks' comprehensive guide on Threat Modeling! Embark on an exploration of this critical aspect of cybersecurity, where we identify, understand, and strategize against potential vulnerabilities in a system. This thread serves as a step-by-step guide packed with real-world examples, helpful software, and easy-to-understand explanations. Ideal for both novices and experienced practitioners looking to fortify their cybersecurity defenses.
 
 ### Commonly Used Scenarios

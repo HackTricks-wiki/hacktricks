@@ -1,5 +1,7 @@
 # Value-Centric Web3 Red Teaming (MITRE AADAPT)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 The MITRE Adversarial Actions in Digital Asset Payment Techniques (AADAPT) framework categorizes adversarial actions and techniques targeting digital asset systems.<sup>[[1]](#references)</sup> Treat it as a **threat-modeling backbone**: enumerate every component that can mint, price, authorize, or route assets, map those touchpoints to AADAPT techniques, and then drive red-team scenarios that measure whether the environment can resist irreversible economic loss.
 
 ## 1. Inventory value-bearing components

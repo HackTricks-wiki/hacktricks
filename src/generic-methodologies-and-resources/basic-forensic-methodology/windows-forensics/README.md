@@ -1,5 +1,7 @@
 # Windows Artifacts
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Generic Windows Artifacts
 
 ### Windows 10 Notifications
