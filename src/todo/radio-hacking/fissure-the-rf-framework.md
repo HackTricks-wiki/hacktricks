@@ -6,9 +6,9 @@
 
 FISSURE is an open-source RF and reverse engineering framework designed for all skill levels with hooks for signal detection and classification, protocol discovery, attack execution, IQ manipulation, vulnerability analysis, automation, and AI/ML. The framework was built to promote the rapid integration of software modules, radios, protocols, signal data, scripts, flow graphs, reference material, and third-party tools. FISSURE is a workflow enabler that keeps software in one location and allows teams to effortlessly get up to speed while sharing the same proven baseline configuration for specific Linux distributions.<sup>[[1]](#references)[[2]](#references)</sup>
 
-The framework and tools included with FISSURE are designed to detect the presence of RF energy, understand the characteristics of a signal, collect and analyze samples, develop transmit and/or injection techniques, and craft custom payloads or messages. FISSURE contains a growing library of protocol and signal information to assist in identification, packet crafting, and fuzzing. Online archive capabilities exist to download signal files and build playlists to simulate traffic and test systems.
+The framework and tools included with FISSURE are designed to detect RF energy, characterize signals, collect and analyze samples, develop transmit or injection techniques, and craft custom payloads or messages. FISSURE also provides protocol and signal information for identification, packet crafting, and fuzzing, plus archives and playlists for traffic simulation and testing.<sup>[[1]](#references)[[2]](#references)</sup>
 
-The friendly Python codebase and user interface allows beginners to quickly learn about popular tools and techniques involving RF and reverse engineering. Educators in cybersecurity and engineering can take advantage of the built-in material or utilize the framework to demonstrate their own real-world applications. Developers and researchers can use FISSURE for their daily tasks or to expose their cutting-edge solutions to a wider audience. As awareness and usage of FISSURE grows in the community, so will the extent of its capabilities and the breadth of the technology it encompasses.
+The Python codebase and graphical interface help beginners learn RF and reverse-engineering tools. Educators can use the built-in lessons, while developers and researchers can integrate their own modules and workflows. Current releases also support distributed sensor nodes, TAK integration, geolocation workflows, and role-specific Apptainer deployments.<sup>[[1]](#references)[[3]](#references)</sup>
 
 **Additional Information**
 
@@ -22,35 +22,37 @@ The friendly Python codebase and user interface allows beginners to quickly lear
 
 **Supported**
 
-There are three branches within FISSURE to make file navigation easier and reduce code redundancy. The Python2\_maint-3.7 branch contains a codebase built around Python2, PyQt4, and GNU Radio 3.7; the Python3\_maint-3.8 branch is built around Python3, PyQt5, and GNU Radio 3.8; and the Python3\_maint-3.10 branch is built around Python3, PyQt5, and GNU Radio 3.10.
+Current FISSURE uses the **`Python3`** branch for active development with PyQt5 and GNU Radio 3.8 or 3.10. The deprecated **`Python2_maint-3.7`** branch remains available for older operating systems and third-party tools that require GNU Radio 3.7. The former `Python3_maint-3.8` and `Python3_maint-3.10` branch names are historical; GNU Radio maintenance selection is now handled from the `Python3` branch.<sup>[[1]](#references)[[3]](#references)</sup>
 
-|   Operating System   |   FISSURE Branch   |
-| :------------------: | :----------------: |
-|  Ubuntu 18.04 (x64)  | Python2\_maint-3.7 |
-| Ubuntu 18.04.5 (x64) | Python2\_maint-3.7 |
-| Ubuntu 18.04.6 (x64) | Python2\_maint-3.7 |
-| Ubuntu 20.04.1 (x64) | Python3\_maint-3.8 |
-| Ubuntu 20.04.4 (x64) | Python3\_maint-3.8 |
-|  KDE neon 5.25 (x64) | Python3\_maint-3.8 |
+| Operating System | FISSURE Branch | Default GNU Radio branch |
+| :--: | :--: | :--: |
+| DragonOS Noble (24.04) | Python3 | maint-3.10 |
+| Kali | Python3 | maint-3.10 |
+| Raspberry Pi OS | Python3 | maint-3.10 |
+| Ubuntu 18.04 | Python2\_maint-3.7 | maint-3.7 |
+| Ubuntu 20.04 | Python3 | maint-3.8 |
+| Ubuntu 22.04 | Python3 | maint-3.10 |
+| Ubuntu 24.04 / Ubuntu ARM | Python3 | maint-3.10 |
+| Windows 11 WSL2 | use a supported Linux version | use the matching version |
 
 **In-Progress (beta)**
 
 These operating systems are still in beta status. They are under development and several features are known to be missing. Items in the installer might conflict with existing programs or fail to install until the status is removed.
 
-|     Operating System     |    FISSURE Branch   |
-| :----------------------: | :-----------------: |
-| DragonOS Focal (x86\_64) |  Python3\_maint-3.8 |
-|    Ubuntu 22.04 (x64)    | Python3\_maint-3.10 |
+| Operating System | FISSURE Branch | Default GNU Radio branch |
+| :--: | :--: | :--: |
+| BackBox Linux | Python3 | maint-3.10 |
+| KDE neon | Python3 | maint-3.10 |
+| Parrot Security 6.1 | Python3 | maint-3.10 |
 
-Note: Certain software tools do not work for every OS. Refer to [Software And Conflicts](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Help/Markdown/SoftwareAndConflicts.md)
+Certain third-party tools do not work on every OS. Check the current [Known Conflicts and Third-Party Software](https://fissure.readthedocs.io/en/latest/pages/installation.html#known-conflicts) documentation before installing.<sup>[[3]](#references)</sup>
 
 **Installation**
 
 ```
 git clone https://github.com/ainfosec/FISSURE.git
 cd FISSURE
-git checkout <Python2_maint-3.7> or <Python3_maint-3.8> or <Python3_maint-3.10>
-git submodule update --init
+git checkout Python3  # optional; use Python2_maint-3.7 only for legacy requirements
 ./install
 ```
 
@@ -97,9 +99,9 @@ Refer to the FISSURE Help menu for more details on usage.
 
 **Hardware**
 
-The following is a list of "supported" hardware with varying levels of integration:
+The following hardware has varying levels of integration in FISSURE:<sup>[[1]](#references)[[3]](#references)</sup>
 
-* USRP: X3xx, B2xx, B20xmini, USRP2, N2xx
+* USRP: X3xx, B2xx, B20xmini, USRP2, N2xx, X410
 * HackRF
 * RTL2832U
 * 802.11 Adapters
@@ -107,6 +109,7 @@ The following is a list of "supported" hardware with varying levels of integrati
 * bladeRF, bladeRF 2.0 micro
 * Open Sniffer
 * PlutoSDR
+* SDRplay: RSPduo, RSPdx, RSPdx R2
 
 ## Lessons
 
@@ -123,6 +126,9 @@ FISSURE comes with several helpful guides to become familiar with different tech
 * [Lesson9: TPMS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson9\_TPMS.md)
 * [Lesson10: Ham Radio Exams](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson10\_Ham\_Radio\_Exams.md)
 * [Lesson11: Wi-Fi Tools](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson11\_WiFi\_Tools.md)
+* [Lesson12: Creating Bootable USBs](https://github.com/ainfosec/FISSURE/blob/Python3/docs/Lessons/Markdown/Lesson12_Creating_Bootable_USBs.md)
+* [Lesson13: Z-Wave](https://github.com/ainfosec/FISSURE/blob/Python3/docs/Lessons/Markdown/Lesson13_Z-Wave.md)
+* [Lesson14: Ceiling Fans](https://github.com/ainfosec/FISSURE/blob/Python3/docs/Lessons/Markdown/Lesson14_Ceiling_Fans.md)
 
 ## Roadmap
 
@@ -189,5 +195,6 @@ Special thanks to Dr. Samuel Mantravadi and Joseph Reith for their contributions
 
 - [1] [FISSURE - The RF Framework (GitHub)](https://github.com/ainfosec/FISSURE)
 - [2] [FISSURE Paper (GRCon22)](https://events.gnuradio.org/event/18/contributions/246/attachments/84/167/FISSURE_Paper_Poore_GRCon22.pdf)
+- [3] [FISSURE documentation - Installation](https://fissure.readthedocs.io/en/latest/pages/installation.html)
 
 {{#include ../../banners/hacktricks-training.md}}
