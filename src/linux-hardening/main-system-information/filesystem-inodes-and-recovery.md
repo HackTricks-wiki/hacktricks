@@ -1,27 +1,29 @@
 # Dateisysteme, Inodes und Wiederherstellung
 
-Beim Missbrauch von Dateisystemen geht es häufig darum, die Beziehung zwischen einem sichtbaren Pfad und dem dahinterliegenden Objekt zu verwirren.
+{{#include ../../banners/hacktricks-training.md}}
 
-Disk-Images können ein weiteres Dateisystem verbergen.<sup>[[1]](#references)</sup> Beschreibbare Mounts können von privilegierten Jobs verwendet werden.
+Der Missbrauch von Dateisystemen besteht oft darin, die Beziehung zwischen einem sichtbaren Pfad und dem dahinterliegenden Objekt zu verwirren.
 
-Hardlinks können denselben Inode über einen anderen Namen zugänglich machen.<sup>[[3]](#references)</sup> Gelöschte Dateien können über einen offenen File Descriptor weiterhin gelesen werden.<sup>[[5]](#references)[[6]](#references)</sup>
+Festplatten-Images können ein weiteres Dateisystem verbergen.<sup>[[1]](#references)</sup> Beschreibbare Mounts können von privilegierten Jobs verwendet werden.
+
+Hardlinks können denselben Inode unter einem anderen Namen zugänglich machen.<sup>[[3]](#references)</sup> Gelöschte Dateien können über einen offenen File Descriptor weiterhin lesbar sein.<sup>[[5]](#references)[[6]](#references)</sup>
 
 Diese Seite konzentriert sich auf die Technik und nicht auf ein bestimmtes Lab oder Ziel.
 
-## Disk-Images und Loop-Mounts
+## Festplatten-Images und Loop-Mounts
 
-Eine reguläre Datei kann ein vollständiges Dateisystem enthalten, sodass ein Disk-Image beim Mounten einen zweiten Dateisystembaum zugänglich machen kann.<sup>[[1]](#references)</sup>
+Eine reguläre Datei kann ein vollständiges Dateisystem enthalten, sodass ein Festplatten-Image beim Mounten einen zweiten Dateisystembaum zugänglich machen kann.<sup>[[1]](#references)</sup>
 
 Backup-Images, kopierte Blockgeräte, VM-Artefakte oder umbenannte Blobs können daher Zugangsdaten, Scripts, SSH-Keys, Konfigurationsdateien oder Flags enthalten, selbst wenn sie von außen nicht nützlich aussehen.
 
-Identifiziere wahrscheinliche Images mit `file`, um einen Kandidaten zu klassifizieren, mit `blkid`, um erkannte Dateisystem-Metadaten zu prüfen, und mit `strings -a`, um die gesamte Datei nach lesbaren Zeichenfolgen zu durchsuchen.<sup>[[10]](#references)[[11]](#references)[[12]](#references)</sup>
+Identifiziere wahrscheinliche Images mit `file`, um einen Kandidaten zu klassifizieren, mit `blkid`, um erkannte Dateisystem-Metadaten zu untersuchen, und mit `strings -a`, um die gesamte Datei nach druckbaren Zeichenfolgen zu durchsuchen.<sup>[[10]](#references)[[11]](#references)[[12]](#references)</sup>
 ```bash
 file ./candidate
 ls -lh ./candidate
 blkid ./candidate 2>/dev/null
 strings -a ./candidate | head -n 50
 ```
-Wenn das Einhängen erlaubt ist, verwenden Sie einen Loop-Mount mit `ro`, sodass das Image schreibgeschützt eingebunden wird. Der folgende `find`-Befehl begrenzt die Inspektionstiefe und den Dateityp.<sup>[[1]](#references)[[4]](#references)</sup>
+Wenn das Mounten erlaubt ist, verwende ein Loop-Mount mit `ro`, sodass das Image schreibgeschützt eingebunden wird; der unten stehende Befehl `find` begrenzt die Untersuchungstiefe und den Dateityp.<sup>[[1]](#references)[[4]](#references)</sup>
 ```bash
 mkdir -p /tmp/imgmnt
 sudo mount -o loop,ro ./candidate /tmp/imgmnt
@@ -33,15 +35,15 @@ Wenn das Einhängen nicht verfügbar ist und das Image ext2/ext3/ext4 verwendet,
 debugfs -R 'ls -l /' ./candidate 2>/dev/null
 debugfs -R 'stat /' ./candidate 2>/dev/null
 ```
-The technique is useful because it turns a normal-looking file into a second filesystem tree.<sup>[[1]](#references)</sup> Betrachte es als Möglichkeit, versteckte Daten wiederherzustellen, nicht als eigenständige privilege escalation.
+Die Technik ist nützlich, weil sie eine normal aussehende Datei in einen zweiten Dateisystembaum verwandelt.<sup>[[1]](#references)</sup> Betrachte sie als Möglichkeit, versteckte Daten wiederherzustellen, nicht als eigenständige Privilege Escalation.
 
 ## Writable Mount Abuse
 
-Ein writable mount wird gefährlich, wenn ein privilegierterer Kontext später etwas darin vertraut. Die wichtige Frage lautet nicht nur: „Kann ich hier schreiben?“, sondern: „Wer liest, führt aus, importiert oder lädt später von hier?“
+Ein beschreibbarer Mount wird gefährlich, wenn ein privilegierterer Kontext später etwas darin vertraut. Die wichtige Frage lautet nicht nur: „Kann ich hier schreiben?“, sondern auch: „Wer liest, führt später daraus aus, importiert daraus oder lädt daraus?“
 
-Verwende `findmnt`, um gemountete Dateisysteme und ihre Optionen zu untersuchen.<sup>[[9]](#references)</sup>
+Verwende `findmnt`, um gemountete Dateisysteme und deren Optionen zu untersuchen.<sup>[[9]](#references)</sup>
 
-Finde writable mounts und verdächtige Verbraucher mit den dokumentierten `find`-Prädikaten für Berechtigungen, Typen und Dateisystemgrenzen. Verwende anschließend rekursives `grep`, um nach wahrscheinlichen Consumer-Konfigurationen zu suchen.<sup>[[4]](#references)[[20]](#references)</sup>
+Finde beschreibbare Mounts und verdächtige Verbraucher mit den dokumentierten `find`-Prädikaten für Berechtigungen, Typen und Dateisystemgrenzen. Verwende anschließend rekursives `grep`, um nach wahrscheinlichen Konfigurationen der Verbraucher zu suchen.<sup>[[4]](#references)[[20]](#references)</sup>
 ```bash
 findmnt -o TARGET,SOURCE,FSTYPE,OPTIONS
 find /mnt /media /srv /opt -xdev -type d -writable -ls 2>/dev/null
@@ -50,25 +52,25 @@ grep -RniE 'cron|systemd|ExecStart|backup|hook|plugin|sh |bash |python' /mnt /me
 ```
 Häufige Missbrauchsmuster:
 
-- Ein Cron-Job oder systemd-Dienst führt ein beschreibbares Skript aus dem Mount aus.<sup>[[13]](#references)[[14]](#references)</sup>
-- Ein privilegierter Dienst lädt Plugins, Konfigurationen, Vorlagen oder Hilfs-Binaries aus dem Mount.
-- Ein Mount enthält SUID-Dateien und ermöglicht deren Änderung, Ersetzung oder Pfadmanipulation.
-- Ein Container oder chroot stellt einen host-gestützten Pfad bereit, der aus der eingeschränkten Umgebung beschreibbar ist. Mount-Namespaces stellen separate Mount-Hierarchien bereit, während `chroot()` nur die Pfadauflösung ändert und keine vollständige Sandbox darstellt.<sup>[[15]](#references)[[16]](#references)</sup>
+- Ein Cron-Job oder systemd-Service führt ein beschreibbares Skript aus dem Mount aus.<sup>[[13]](#references)[[14]](#references)</sup>
+- Ein privilegierter Service lädt Plugins, Konfigurationen, Templates oder Hilfs-Binaries aus dem Mount.
+- Ein Mount enthält SUID-Dateien und ermöglicht deren Änderung, Ersetzung oder die Manipulation von Pfaden.
+- Ein Container oder chroot stellt einen hostbasierten Pfad bereit, der aus der eingeschränkten Umgebung beschreibbar ist. Mount-Namespaces stellen separate Mount-Hierarchien bereit, während `chroot()` nur die Auflösung von Pfadnamen ändert und keine vollständige Sandbox darstellt.<sup>[[15]](#references)[[16]](#references)</sup>
 
 Generisches Validierungsmuster unter Verwendung derselben `find`-Prädikate.<sup>[[4]](#references)</sup>
 ```bash
 find /mnt /media /srv /opt -xdev -perm -4000 -type f -ls 2>/dev/null
 find /mnt /media /srv /opt -xdev -type f -writable -ls 2>/dev/null | head -n 50
 ```
-Wenn du die Auswirkungen in einem autorisierten Lab nachweist, halte den Payload beobachtbar und minimal, indem du beispielsweise die Ausgabe von `id` in eine temporäre Datei schreibst.<sup>[[23]](#references)</sup> Die grundlegende Technik ist die verzögerte Ausführung über einen vertrauenswürdigen, beschreibbaren Speicherort.
+Bei der Nachweisführung der Auswirkungen in einem autorisierten Lab sollte die Payload beobachtbar und minimal gehalten werden, beispielsweise indem die Ausgabe von `id` in eine temporäre Datei geschrieben wird.<sup>[[23]](#references)</sup> Die grundlegende Technik besteht in der verzögerten Ausführung über einen vertrauenswürdigen, beschreibbaren Speicherort.
 
 ## Inodes und Pfadverwechslung
 
-Ein Inode ist das Dateisystemobjekt; ein Pfad ist lediglich ein darauf verweisender Name. Geräte- und Inode-Metadaten ermöglichen es dir, Objekte dateisystemübergreifend zu unterscheiden, während Link-Zähler mehrere Hard Links sichtbar machen.<sup>[[3]](#references)</sup> Ein gelöschter Pfadname bedeutet nicht immer, dass die Daten verschwunden sind, solange ein Prozess die Datei noch geöffnet hat.<sup>[[5]](#references)</sup>
+Ein Inode ist das Dateisystemobjekt; ein Pfad ist lediglich ein Name, der auf dieses Objekt verweist. Geräte- und Inode-Metadaten ermöglichen es, Objekte über Dateisysteme hinweg zu unterscheiden, während Link-Zähler mehrere Hardlinks sichtbar machen.<sup>[[3]](#references)</sup> Ein gelöschter Pfadname bedeutet nicht immer, dass die Daten verschwunden sind, solange ein Prozess die Datei noch geöffnet hat.<sup>[[5]](#references)</sup>
 
 Die folgenden `find`-Prädikate vergleichen die Inode-Identität, Link-Zähler, Gerätegrenzen und Zeitstempel.<sup>[[4]](#references)</sup>
 
-Vergleiche Dateien anhand von Inode und Gerät mit `ls -i` sowie mit Metadatenformaten von `stat`.<sup>[[17]](#references)[[18]](#references)</sup>
+Vergleiche Dateien anhand von Inode und Gerät mit `ls -i` und Metadatenformaten von `stat`.<sup>[[17]](#references)[[18]](#references)</sup>
 ```bash
 ls -li /path/a /path/b
 stat -c 'dev=%d inode=%i links=%h mode=%A owner=%U:%G path=%n' /path/a /path/b
@@ -77,11 +79,11 @@ Finde jeden sichtbaren Pfadnamen für denselben Inode mit `find -samefile`.<sup>
 ```bash
 find / -xdev -samefile /path/to/file -ls 2>/dev/null
 ```
-Suche direkt anhand der Inode-Nummer mit `find -inum`, wenn du nur Metadaten hast.<sup>[[4]](#references)</sup>
+Suchen Sie direkt anhand der Inode-Nummer mit `find -inum`, wenn Sie nur Metadaten haben.<sup>[[4]](#references)</sup>
 ```bash
 find / -xdev -inum <inode_number> -ls 2>/dev/null
 ```
-Diese Technik ist nützlich, wenn eine Datei unter einem unerwarteten Namen erscheint, wenn eine Anwendung einen Pfad validiert, aber einen anderen verwendet, oder wenn ein privilegierter Wrapper mit einem Inode interagiert, der auch an anderer Stelle erreichbar ist.
+Diese Technik ist nützlich, wenn eine Datei unter einem unerwarteten Namen erscheint, wenn eine Anwendung einen Pfad validiert, aber einen anderen verwendet oder wenn ein privilegierter Wrapper mit einem Inode interagiert, der auch an anderer Stelle erreichbar ist.
 
 ## Hardlink Abuse
 
@@ -91,29 +93,29 @@ Finde SUID-Dateien mit mehreren Hardlinks mithilfe der Berechtigungs- und Linkan
 ```bash
 find / -xdev -perm -4000 -type f -links +1 -ls 2>/dev/null
 ```
-Untersuche eine verdächtige Datei mit `stat` und `find -samefile`.<sup>[[4]](#references)[[17]](#references)</sup>
+Untersuchen Sie eine verdächtige Datei mit `stat` und `find -samefile`.<sup>[[4]](#references)[[17]](#references)</sup>
 ```bash
 stat /path/to/suspicious
 find / -xdev -samefile /path/to/suspicious -ls 2>/dev/null
 ```
-Warum das wichtig ist:
+Warum es wichtig ist:
 
-- Eine vertrauliche Datei kann über einen weniger offensichtlichen Pfad erreichbar sein.
-- Ein SUID-Wrapper kann sich hinter einem Namen verbergen, der nicht privilegiert wirkt.
-- Eine Bereinigung, die einen Pfadnamen entfernt, kann einen anderen Hardlink weiterhin aktiv lassen.
+- Eine sensible Datei kann über einen weniger offensichtlichen Pfad erreichbar sein.
+- Ein SUID wrapper kann sich hinter einem Namen verbergen, der nicht privilegiert wirkt.
+- Eine Bereinigung, die einen Pfadnamen entfernt, kann einen anderen Hardlink bestehen lassen.
 
-Linux' `fs.protected_hardlinks`-sysctl kann die Erstellung von Hardlinks über Privileggrenzen hinweg einschränken.<sup>[[7]](#references)</sup> Vorhandene Hardlinks sollten dennoch überprüft werden.
+Linux' `fs.protected_hardlinks` sysctl kann die Erstellung von Hardlinks über Privilege-Grenzen hinweg einschränken.<sup>[[7]](#references)</sup> Vorhandene Hardlinks sollten dennoch überprüft werden.
 
 ## Wiederherstellung gelöschter Dateien über offene FDs
 
-Wenn ein Prozess eine Datei geöffnet hält, bleibt die Datei nach dem Entfernen ihres letzten Pfadnamens bestehen, bis der letzte Deskriptor geschlossen wird; Linux stellt diese Deskriptoren unter `/proc/<pid>/fd/` bereit.<sup>[[5]](#references)[[6]](#references)</sup>
+Wenn ein Prozess eine Datei geöffnet hält, bleibt die Datei nach dem Entfernen ihres letzten Pfadnamens bestehen, bis der letzte Descriptor geschlossen wird; Linux stellt diese Descriptors unter `/proc/<pid>/fd/` bereit.<sup>[[5]](#references)[[6]](#references)</sup>
 
-Finde gelöschte offene Dateien, indem du die `/proc`-Deskriptoren auflistest und die Ausgabe geöffneter Dateien filterst.<sup>[[5]](#references)[[6]](#references)[[18]](#references)[[19]](#references)[[20]](#references)</sup>
+Finde gelöschte offene Dateien, indem du die Descriptors unter `/proc` auflistest und die Ausgabe geöffneter Dateien filterst.<sup>[[5]](#references)[[6]](#references)[[18]](#references)[[19]](#references)[[20]](#references)</sup>
 ```bash
 ls -l /proc/*/fd/* 2>/dev/null | grep ' (deleted)' | head -n 50
 lsof 2>/dev/null | grep deleted | head -n 50
 ```
-Die Wiederherstellung über diese Links ist abhängig von den Berechtigungen, da das Dereferenzieren von `/proc/<pid>/fd` den `ptrace`-Zugriffsprüfungen und den Dateiberechtigungen unterliegt.<sup>[[6]](#references)</sup>
+Die Wiederherstellung über diese Links ist abhängig von den Berechtigungen, da das Dereferenzieren von `/proc/<pid>/fd` den ptrace-Zugriffskontrollen und Dateiberechtigungen unterliegt.<sup>[[6]](#references)</sup>
 
 Wenn dies erlaubt ist, zeigt `readlink` das Ziel des Deskriptors an, und `cp` kopiert dessen Inhalt.<sup>[[21]](#references)[[22]](#references)</sup>
 ```bash
@@ -121,30 +123,30 @@ readlink /proc/<pid>/fd/<fd>
 cp /proc/<pid>/fd/<fd> /tmp/recovered-file
 file /tmp/recovered-file
 ```
-Dies ist eine praktische Technik zur Wiederherstellung gelöschter Logs, temporärer Secrets, verworfener Binaries, rotierter Dateien oder nach der Ausführung entfernter Scripts.
+This is a practical technique for recovering deleted logs, temporary secrets, dropped binaries, rotated files, or scripts removed after execution.
 
 ## ext Recovery mit debugfs
 
-Auf ext2/ext3/ext4-Dateisystemen kann `debugfs` Inode-Metadaten untersuchen und Inode-Inhalte von einem Blockgerät oder Image ausgeben. Ohne `-w` öffnet es das Dateisystem schreibgeschützt.<sup>[[2]](#references)</sup> Arbeite nach Möglichkeit mit einer Kopie oder einem schreibgeschützten Image.
+Auf ext2/ext3/ext4-Dateisystemen kann `debugfs` inode metadata untersuchen und inode contents von einem Blockgerät oder Image ausgeben; ohne `-w` öffnet es das Dateisystem read-only.<sup>[[2]](#references)</sup> Arbeite nach Möglichkeit mit einer Kopie oder einem read-only Image.
 
-Liste Einträge auf und untersuche Inodes mit `debugfs`-Requests für Verzeichnisauflistungen, den Inode-Status und Prüfungen der Zuordnung von Inodes zu Pfaden.<sup>[[2]](#references)</sup>
+Liste Einträge auf und untersuche inodes mit `debugfs`-Anfragen für directory listings, den inode status und inode-to-path checks.<sup>[[2]](#references)</sup>
 ```bash
 debugfs -R 'ls -l /' ./disk.img
 debugfs -R 'stat <inode_number>' ./disk.img
 debugfs -R 'ncheck <inode_number>' ./disk.img
 ```
-Sichern Sie einen bekannten Inode mit dem Befehl `debugfs dump` und klassifizieren Sie die wiederhergestellte Ausgabe mit `file`.<sup>[[2]](#references)[[10]](#references)</sup>
+Dumpen Sie einen bekannten Inode mit dem Befehl `debugfs dump` und klassifizieren Sie die wiederhergestellte Ausgabe mit `file`.<sup>[[2]](#references)[[10]](#references)</sup>
 ```bash
 debugfs -R 'dump <inode_number> /tmp/recovered.bin' ./disk.img
 file /tmp/recovered.bin
 ```
-Dies ist keine garantierte Wiederherstellung. Sie hängt vom Zustand des Dateisystems, davon, ob Blöcke wiederverwendet wurden, und davon ab, ob die Metadaten noch vorhanden sind. Für ext3/ext4 weist das Handbuch von `debugfs` darauf hin, dass die Wiederherstellung gelöschter Inodes fehlschlagen kann, weil die freigegebenen Datenblöcke der Inodes nicht mehr verfügbar sind.<sup>[[2]](#references)</sup> Die Technik bleibt dennoch wertvoll, weil sie die Untersuchung des Zustands auf Inode-Ebene ermöglicht, ohne auf die normale Pfadauflösung angewiesen zu sein.
+Dies ist keine garantierte Wiederherstellung. Sie hängt vom Zustand des Dateisystems, davon, ob Blöcke wiederverwendet wurden, und davon ab, ob die Metadaten noch vorhanden sind. Für ext3/ext4 weist das Handbuch von `debugfs` darauf hin, dass die Wiederherstellung gelöschter Inodes fehlschlagen kann, weil freigegebene Inode-Datenblöcke nicht mehr verfügbar sind.<sup>[[2]](#references)</sup> Die Technik bleibt dennoch wertvoll, da sie die Untersuchung des Zustands auf Inode-Ebene ermöglicht, ohne auf die normale Pfaddurchquerung angewiesen zu sein.
 
 ## Inode-Erschöpfung und Reihenfolge
 
-Inode-Erschöpfung tritt auf, wenn einem Dateisystem die Dateiknoten ausgehen, obwohl noch freier Speicherplatz vorhanden ist.<sup>[[8]](#references)[[17]](#references)</sup> Dies führt normalerweise zu Zuverlässigkeitsproblemen, kann aber auch ungewöhnliches Verhalten während der Incident Response oder der Untersuchung in einer Laborumgebung erklären.
+Inode-Erschöpfung tritt auf, wenn einem Dateisystem die Dateiknoten ausgehen, obwohl weiterhin freier Speicherplatz vorhanden ist.<sup>[[8]](#references)[[17]](#references)</sup> Dies verursacht normalerweise Zuverlässigkeitsfehler, kann aber auch ungewöhnliches Verhalten während der Incident Response oder der Triage in einem Lab erklären.
 
-Verwende `df -i`, um Informationen zu Inodes statt zur Blocknutzung auszugeben.<sup>[[8]](#references)</sup>
+Verwende `df -i`, um Inode-Informationen statt der Blocknutzung auszugeben.<sup>[[8]](#references)</sup>
 
 Überprüfe den Inode-Druck mit `df` und einer `find`-Zählung der übergeordneten Verzeichnisse.<sup>[[4]](#references)[[8]](#references)</sup>
 ```bash
@@ -154,20 +156,20 @@ find /var /tmp /home -xdev -printf '%h\n' 2>/dev/null | sort | uniq -c | sort -n
 ```
 Inode-Nummern und Zeitstempel können ebenfalls dabei helfen, Aktivitäten in einfachen Laborumgebungen zu rekonstruieren.
 
-Die folgenden `find`-Formatdirektiven geben diese Felder aus.<sup>[[4]](#references)</sup>
+Die folgenden `find`-Formatdirektiven machen diese Felder sichtbar.<sup>[[4]](#references)</sup>
 ```bash
 find /path -xdev -printf '%i %TY-%Tm-%Td %TH:%TM %p\n' 2>/dev/null | sort -n | tail -n 50
 find /path -xdev -newermt '2026-01-01' -ls 2>/dev/null
 ```
-Behandle die Reihenfolge als Hinweis, nicht als Beweis. Kopiervorgänge, das Extrahieren von Archiven, der Dateisystemtyp, Wiederherstellungen und gleichzeitige Schreibvorgänge können die Belegungsmuster verändern.
+Behandle die Reihenfolge als Hinweis, nicht als Beweis. Kopiervorgänge, Archivextraktion, der Dateisystemtyp, Wiederherstellungen und gleichzeitige Schreibvorgänge können die Zuordnungsmuster verändern.
 
 ## Defensive Notes
 
 - Binde unbekannte Images während der Analyse schreibgeschützt ein.<sup>[[1]](#references)</sup>
-- Halte privilegierte Skripte, Service-Units, Plugins und Hilfspfad außerhalb von Mounts, die von Benutzern beschreibbar sind.
-- Verwende `nosuid`, `nodev` und `noexec`, wo dies betrieblich angemessen ist; diese Optionen deaktivieren die Ausführung von set-ID- und Capability-Dateien, die Interpretation von Geräten bzw. die direkte Ausführung von Binärdateien auf dem Mount.<sup>[[1]](#references)</sup> Betrachte sie nicht als vollständige Grenze.
-- Beschränke den Zugriff auf `/proc/<pid>/fd`; das Dereferenzieren dieser Links wird durch ptrace-Zugriffsprüfungen und Dateiberechtigungen kontrolliert.<sup>[[6]](#references)</sup> Beschränke, wo möglich, umfassendere Prozessmetadaten und die benutzerübergreifende Inspektion.
-- Überwache beschreibbare Mount-Punkte, unerwartete Hardlinks auf privilegierte Dateien und gelöschte, aber noch geöffnete sensible Dateien.
+- Bewahre privilegierte Scripts, Service-Units, Plugins und Hilfspfade außerhalb von Mounts auf, die von Benutzern beschrieben werden können.
+- Verwende `nosuid`, `nodev` und `noexec`, wo dies betrieblich angemessen ist; diese Optionen deaktivieren die Ausführung von Set-ID-/Capability-Programmen, die Interpretation von Geräten bzw. die direkte Ausführung von Binärdateien auf dem Mount.<sup>[[1]](#references)</sup> Betrachte sie nicht als vollständige Grenze.
+- Beschränke den Zugriff auf `/proc/<pid>/fd`; das Dereferenzieren dieser Links wird durch ptrace-Zugriffsprüfungen und Dateiberechtigungen kontrolliert.<sup>[[6]](#references)</sup> Beschränke, wo möglich, umfassendere Prozessmetadaten und die Inspektion über Benutzergrenzen hinweg.
+- Überwache beschreibbare Mountpoints, unerwartete Hardlinks auf privilegierte Dateien sowie gelöschte, aber noch geöffnete sensible Dateien.
 
 ## References
 
@@ -177,7 +179,7 @@ Behandle die Reihenfolge als Hinweis, nicht als Beweis. Kopiervorgänge, das Ext
 - [4] [find(1) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man1/find.1.html)
 - [5] [unlink(2) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man2/unlink.2.html)
 - [6] [proc_pid_fd(5) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man5/proc_pid_fd.5.html)
-- [7] [Dokumentation für /proc/sys/fs/ — Dokumentation des Linux-Kernels](https://www.kernel.org/doc/html/latest/admin-guide/sysctl/fs.html)
+- [7] [Dokumentation für /proc/sys/fs/ — Linux-Kernel-Dokumentation](https://www.kernel.org/doc/html/latest/admin-guide/sysctl/fs.html)
 - [8] [df(1) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man1/df.1.html)
 - [9] [findmnt(8) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man8/findmnt.8.html)
 - [10] [file(1) — Linux-Handbuchseite](https://man7.org/linux/man-pages/man1/file.1.html)

@@ -1,5 +1,7 @@
 # Nützliche Linux-Befehle
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Häufige Bash-Befehle
 ```bash
 #Exfiltration using Base64
@@ -227,7 +229,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Finden
+## Suchen
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -299,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF-Telemetrie und Rootkit-Suche
+## eBPF-Telemetrie und Rootkit-Jagd
 
-Rootkit-Forschung hat sowohl eBPF-basierte Implants wie TripleCross als auch BPF-basierte Backdoors wie BPFDoor-Varianten nachgewiesen. Behandle unerwartete BPF-Programme, Attachments oder Maps als Ansatzpunkte für Untersuchungen und nicht als Beweis für eine Kompromittierung.<sup>[[3]](#references)[[4]](#references)</sup> Erstelle mit `bpftool` oder `eBPFmon` eine Baseline für autorisierte Systeme: `bpftool` kann Programme und Maps auflisten, Programminstruktionen ausgeben und unterstützte Funktionen abfragen, während eBPFmon diese Informationen in einer TUI darstellt.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+Die Rootkit-Forschung hat sowohl eBPF-basierte Implants wie TripleCross als auch BPF-basierte Backdoors wie BPFDoor-Varianten nachgewiesen. Behandle unerwartete BPF-Programme, Attachments oder Maps als Anhaltspunkte für Untersuchungen und nicht als Beweis für eine Kompromittierung.<sup>[[3]](#references)[[4]](#references)</sup> Erstelle mit `bpftool` oder `eBPFmon` eine Baseline für autorisierte Systeme: `bpftool` kann Programme und Maps enumerieren, Programminstruktionen ausgeben und unterstützte Features abfragen, während eBPFmon diese Informationen in einer TUI darstellt.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -319,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Korrelieren Sie die Ausgabe von `bpftool` mit den erwarteten NIC-/cgroup-Anbindungen; ein plötzlich auftretendes `xdp`- oder `kprobe`-Programm, das einer nicht genehmigten PID gehört, ist ein Untersuchungsansatz, aber kein schlüssiger Beweis für ein injiziertes Payload.<sup>[[5]](#references)[[6]](#references)</sup>
+Korrelieren Sie die Ausgabe von `bpftool` mit den erwarteten NIC-/cgroup-Anbindungen; ein plötzlich auftretendes `xdp`- oder `kprobe`-Programm, das einem nicht genehmigten PID gehört, ist ein Ermittlungsansatz, jedoch kein schlüssiger Beweis für ein injiziertes Payload.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Journald-Triage bei Vorfällen
+## Journald-Incident-Triage
 
-`journalctl` liest strukturierte Einträge aus `systemd-journald` und unterstützt die Filterung nach Bootvorgang, Priorität, Unit, UID und relativer Zeit. Kombinieren Sie diese Filter mit der JSON-Ausgabe, wenn Sie Beweise bewahren oder vergleichen müssen; die Filterung allein beweist nicht, dass Logs nicht manipuliert wurden.<sup>[[2]](#references)[[7]](#references)</sup>
+`journalctl` liest strukturierte Einträge aus `systemd-journald` und unterstützt das Filtern nach Boot, Priorität, Unit, UID und relativer Zeit. Kombinieren Sie diese Filter mit der JSON-Ausgabe, wenn Sie Beweise bewahren oder vergleichen müssen; das Filtern allein beweist nicht, dass Logs nicht manipuliert wurden.<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -334,7 +336,7 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Füge `--grep 'Invalid user' --case-sensitive` oder `-k` (nur Kernel-Meldungen) hinzu, wenn du präzisere Filter benötigst. Denke daran, dass die Selektoren `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` und `_TRANSPORT` für gezielte Suchen kombiniert werden können.<sup>[[7]](#references)</sup>
+Füge `--grep 'Invalid user' --case-sensitive` oder `-k` (nur Kernel-Meldungen) hinzu, wenn du strengere Filter benötigst. Denke außerdem daran, dass die Selektoren `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` und `_TRANSPORT` für gezielte Suchen kombiniert werden können.<sup>[[7]](#references)</sup>
 
 ## References
 

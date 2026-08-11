@@ -1,8 +1,10 @@
 # RunC Privilege Escalation
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Grundlegende Informationen
 
-Wenn du mehr über **runc** erfahren möchtest, sieh dir die folgende Seite an:
+Wenn du mehr über **runc** erfahren möchtest, findest du auf der folgenden Seite weitere Informationen:
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -10,7 +12,7 @@ Wenn du mehr über **runc** erfahren möchtest, sieh dir die folgende Seite an:
 
 ## PE
 
-Wenn `runc` für einen rootful-Prozess auf dem Host verfügbar ist, kannst du ein OCI bundle verwenden, dessen mount configuration das `/` des Hosts rekursiv nach `/` innerhalb des Containers bind-mountet und dadurch das Host-Dateisystem in diesem mount namespace offenlegt.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+Wenn `runc` für einen Prozess mit Root-Rechten auf dem Host verfügbar ist, kannst du ein OCI bundle verwenden, dessen Mount-Konfiguration das `/` des Hosts rekursiv nach `/` innerhalb des Containers bind-mountet und dadurch das Host-Dateisystem in diesem Mount-Namespace freigibt.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -35,11 +37,11 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Der dokumentierte `runc run`-Workflow ist rootful: Die eigenen Beispiele von runc bezeichnen ihn als „run as root“. Ein nicht privilegierter Benutzer benötigt eine rootless-Konfiguration wie `runc spec --rootless`, und runc dokumentiert, dass User Namespaces für diesen Modus aktiviert sein müssen.<sup>[[1]](#references)</sup>
+> Der dokumentierte `runc run`-Workflow ist rootful: Die eigenen Beispiele von runc bezeichnen ihn als „run as root“. Ein unprivilegierter Benutzer benötigt eine rootless-Konfiguration wie `runc spec --rootless`, und runc dokumentiert, dass User namespaces für diesen Modus aktiviert sein müssen.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [runc: CLI-Tool zum Starten und Ausführen von Containern](https://github.com/opencontainers/runc#using-runc)
+- [1] [runc: CLI-Tool zum Erzeugen und Ausführen von Containern](https://github.com/opencontainers/runc#using-runc)
 - [2] [OCI Runtime Specification: Mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
 - [3] [Shared Subtrees](https://docs.kernel.org/filesystems/sharedsubtree.html)
 {{#include ../../banners/hacktricks-training.md}}

