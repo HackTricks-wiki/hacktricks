@@ -4,15 +4,15 @@
 
 ## Jinsi Inavyofanya Kazi
 
-Processes zinaweza kufunguliwa kwenye hosts ambapo username na password au hash vinajulikana kupitia matumizi ya WMI. Commands zinatekelezwa kwa kutumia WMI kupitia Wmiexec, na kutoa uzoefu wa semi-interactive shell.
+Processes zinaweza kufunguliwa kwenye hosts ambapo username na password au hash yake inajulikana, kwa kutumia WMI. Commands hutekelezwa kwa kutumia WMI kupitia Wmiexec, na kutoa uzoefu wa semi-interactive shell.
 
-**dcomexec.py:** Kwa kutumia DCOM endpoints tofauti, script hii hutoa semi-interactive shell inayofanana na wmiexec.py, huku ikitumia hasa ShellBrowserWindow DCOM object. Kwa sasa inatumia MMC20. Application, Shell Windows, na Shell Browser Window objects. (chanzo: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
+**dcomexec.py:** Kwa kutumia DCOM endpoints tofauti, script hii hutoa semi-interactive shell inayofanana na `wmiexec.py`. Thamani ya `-object` iliyochaguliwa huteua endpoint; objects zinazotumika ni pamoja na `MMC20.Application`, `ShellWindows`, na `ShellBrowserWindow`, ambapo ya mwisho hutoa mbinu ya Shell Browser Window iliyoangaziwa katika walkthrough ya awali.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## Misingi ya WMI
 
 ### Namespace
 
-Ikiwa imepangwa katika hierarchy ya mtindo wa directory, top-level container ya WMI ni \root, ambayo chini yake kuna directories za ziada zinazoitwa namespaces.<sup>[[1]](#references)</sup>
+Ikiwa imepangwa katika hierarchy ya mtindo wa directory, container ya kiwango cha juu ya WMI ni \root, ambapo chini yake directories za ziada, zinazoitwa namespaces, hupangwa.<sup>[[1]](#references)</sup>
 Commands za kuorodhesha namespaces:
 ```bash
 # Retrieval of Root namespaces
@@ -29,10 +29,10 @@ Classes ndani ya namespace zinaweza kuorodheshwa kwa kutumia:
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
-### **Classes**
+### **Madarasa**
 
-Kujua jina la WMI class, kama vile win32_process, na namespace ilimo ni muhimu kwa operesheni yoyote ya WMI.  
-Commands za kuorodhesha classes zinazoanza na `win32`:
+Kujua jina la WMI class, kama vile `win32_process`, pamoja na namespace ambayo inapatikana ni muhimu kwa operesheni yoyote ya WMI.  
+Commands za kuorodhesha madarasa yanayoanza na `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
@@ -45,7 +45,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### Mbinu
 
-Mbinu, ambazo ni function moja au zaidi zinazoweza kutekelezwa za WMI classes, zinaweza kutekelezwa.
+Methods, ambazo ni function moja au zaidi zinazoweza kutekelezwa za WMI classes, zinaweza kutekelezwa.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -59,9 +59,9 @@ Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Descrip
 ```
 ## WMI Enumeration
 
-### Hali ya WMI Service
+### WMI Service Status
 
-Commands za kuthibitisha ikiwa WMI service inafanya kazi:
+Amri za kuthibitisha kama huduma ya WMI inafanya kazi:
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -69,14 +69,14 @@ Get-Service Winmgmt
 # Via CMD
 net start | findstr "Instrumentation"
 ```
-### Maelezo ya Mfumo na Michakato
+### Taarifa za Mfumo na Michakato
 
-Kukusanya maelezo ya mfumo na michakato kupitia WMI:
+Kukusanya taarifa za mfumo na michakato kupitia WMI:
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-Kwa washambuliaji, WMI ni zana yenye nguvu ya kuhesabu data nyeti kuhusu mifumo au domains.<sup>[[1]](#references)</sup>
+Kwa washambuliaji, WMI ni zana yenye nguvu ya kuorodhesha data nyeti kuhusu mifumo au domains.<sup>[[1]](#references)</sup>
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -85,17 +85,17 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-Kuuliza WMI kwa mbali ili kupata taarifa maalum, kama vile local admins au watumiaji walioingia, kunawezekana kwa kuunda amri kwa uangalifu.
+Kuuliza WMI kwa mbali ili kupata taarifa maalum, kama vile local admins au watumiaji walioingia, kunawezekana kwa uundaji makini wa command.
 
-### **Kuuliza WMI kwa Mbali Manually**
+### **Manual Remote WMI Querying**
 
-Kutambua kwa usiri local admins kwenye mashine ya mbali na watumiaji walioingia kunaweza kufanywa kupitia WMI queries maalum. `wmic` pia inasaidia kusoma kutoka kwenye text file ili kutekeleza amri kwenye nodes nyingi kwa wakati mmoja.<sup>[[1]](#references)</sup>
+Utambuzi wa kisiri wa local admins kwenye mashine ya mbali na watumiaji walioingia unaweza kufanywa kupitia WMI queries maalum. `wmic` pia inasaidia kusoma kutoka kwenye text file ili kutekeleza commands kwenye nodes nyingi kwa wakati mmoja.<sup>[[1]](#references)</sup>
 
-Ili kutekeleza process kwa mbali kupitia WMI, kama vile kusambaza Empire agent, muundo wa amri ufuatao hutumika; utekelezaji uliofanikiwa huonyeshwa kwa return value ya "0":<sup>[[1]](#references)</sup>
+Ili kutekeleza process kwa mbali kupitia WMI, kama vile ku-deploy Empire agent, muundo wa command ufuatao hutumiwa; utekelezaji uliofanikiwa huonyeshwa na return value ya "0":<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Mchakato huu unaonyesha uwezo wa WMI wa remote execution na system enumeration, ukisisitiza manufaa yake kwa system administration na penetration testing.
+Mchakato huu unaonyesha uwezo wa WMI wa kutekeleza amri kwa mbali na kuorodhesha mifumo, ukisisitiza manufaa yake kwa usimamizi wa mfumo na pentesting.
 
 ## Zana za Kiotomatiki
 
@@ -115,13 +115,12 @@ SharpMove.exe action=query computername=remote.host.local query="select * from w
 SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
 SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
 ```
-- Unaweza pia kutumia **`wmiexec` ya Impacket**.
+- Unaweza pia kutumia **Impacket's `wmiexec`**.
 
 
-## Marejeleo
+## References
 
 - [1] [Kutumia Credentials Kumiliki Windows Boxes - Sehemu ya 3 (WMI na WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
-- [2] [Mwongozo wa Mwanzoni wa Impacket Tool Kit - Sehemu ya 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
-
-
+- [2] [Fortra Impacket – dcomexec.py](https://github.com/fortra/impacket/blob/master/examples/dcomexec.py)
+- [3] [Mwongozo wa Anayeanza wa Impacket Tool Kit, Sehemu ya 1 – Hacking Articles (Internet Archive)](https://web.archive.org/web/20190822180831/https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 {{#include ../../banners/hacktricks-training.md}}

