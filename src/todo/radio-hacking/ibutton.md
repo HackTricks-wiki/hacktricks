@@ -4,43 +4,43 @@
 
 ## परिचय
 
-iButton एक इलेक्ट्रॉनिक identification key के लिए generic name है, जिसे **सिक्के के आकार के metal container** में पैक किया जाता है। इसे **Dallas Touch** Memory या contact memory भी कहा जाता है। हालांकि इसे अक्सर गलत रूप से “magnetic” key कहा जाता है, इसमें **कुछ भी magnetic नहीं** होता। वास्तव में, इसके अंदर digital protocol पर काम करने वाली एक पूर्ण **microchip** छिपी होती है।<sup>[[1]](#references)</sup>
+iButton एक coin-shaped metal container में पैक की गई electronic identification key का generic name है। इसे **Dallas Touch** Memory या contact memory भी कहा जाता है। हालांकि इसे अक्सर गलत तरीके से “magnetic” key कहा जाता है, इसमें **कुछ भी magnetic नहीं** होता। वास्तव में, इसके अंदर digital protocol पर काम करने वाली एक पूर्ण **microchip** छिपी होती है।<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
 ### iButton क्या है? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-आमतौर पर, iButton से key और reader का physical form समझा जाता है - दो contacts वाला एक गोल coin। इसे घेरने वाले frame में सबसे सामान्य hole वाले plastic holder से लेकर rings, pendants आदि तक कई variations होते हैं।
+iButton नाम इसके टिकाऊ coin-shaped package और contact arrangement को दर्शाता है। इसके holders में plastic fobs, rings और pendants शामिल हैं।
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-जब key reader तक पहुंचती है, तो **contacts आपस में touch** होते हैं और key को अपना ID **transmit** करने के लिए power मिलती है। कभी-कभी key को तुरंत **read नहीं किया जाता**, क्योंकि intercom का **contact PSD अपेक्षा से बड़ा** होता है। इसलिए key और reader के बाहरी contours आपस में touch नहीं कर पाते। यदि ऐसा हो, तो आपको key को reader की किसी एक wall पर दबाना होगा।<sup>[[1]](#references)</sup>
+जब दोनों contacts reader से जुड़ते हैं, तो device को power मिलती है और data का आदान-प्रदान होता है। यदि recessed contact geometry के कारण बाहरी ground contacts आपस में नहीं जुड़ पाते, तो key को reader की wall के विरुद्ध झुकाने से contact फिर से स्थापित किया जा सकता है।<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
 ### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas keys, 1-wire protocol का उपयोग करके data exchange करती हैं। इसमें दोनों दिशाओं - master से slave और इसके विपरीत - data transfer के लिए केवल एक contact (!!) होता है। 1-wire protocol, Master-Slave model के अनुसार काम करता है। इस topology में Master हमेशा communication शुरू करता है और Slave उसके instructions का पालन करता है।
+Dallas/Maxim keys 1-Wire protocol का उपयोग करती हैं: एक data contact bidirectional traffic को वहन करता है और parasitic power भी प्रदान कर सकता है, जबकि metal can return contact का काम करता है। Controller transactions शुरू करता है और device response देता है।<sup>[[2]](#references)</sup>
 
-जब key (Slave), intercom (Master) को touch करती है, तो key के अंदर का chip intercom से मिलने वाली power से चालू हो जाता है और key initialize हो जाती है। इसके बाद intercom key से उसका ID request करता है। आगे, हम इस process को अधिक detail में देखेंगे।
+जब key (Slave), intercom (Master) से contact करती है, तो key के अंदर की chip intercom से power प्राप्त करके चालू हो जाती है और key initialize हो जाती है। इसके बाद intercom key ID का अनुरोध करता है। आगे, हम इस process को अधिक विस्तार से देखेंगे।
 
-Flipper, Master और Slave दोनों modes में काम कर सकता है। Key reading mode में Flipper एक reader की तरह काम करता है, यानी यह Master के रूप में काम करता है। वहीं key emulation mode में Flipper स्वयं को key की तरह प्रस्तुत करता है और Slave mode में होता है।<sup>[[1]](#references)</sup>
+Flipper key को पढ़ते समय controller के रूप में और reader के सामने stored identifier प्रस्तुत करते समय emulated device के रूप में काम कर सकता है।<sup>[[1]](#references)</sup>
 
-### Dallas, Cyfral & Metakom keys
+### Dallas, Cyfral और Metakom keys
 
 इन keys के काम करने के तरीके की जानकारी के लिए यह page देखें: [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)<sup>[[1]](#references)</sup>
 
-### हमले
+### Attacks
 
-iButtons पर Flipper Zero से हमला किया जा सकता है:
+iButtons पर Flipper Zero से attack किया जा सकता है:
 
 
 {{#ref}}
 flipper-zero/fz-ibutton.md
 {{#endref}}
 
-## संदर्भ
+## References
 
-- [1] [Taming iButton with Flipper Zero](https://blog.flipperzero.one/taming-ibutton/)
-
+- [1] [Flipper Zero के साथ iButton को नियंत्रित करना](https://blog.flipperzero.one/taming-ibutton/)
+- [2] [Analog Devices — software के माध्यम से 1-Wire communication](https://www.analog.com/en/resources/technical-articles/1wire-communication-through-software.html)
 {{#include ../../banners/hacktricks-training.md}}

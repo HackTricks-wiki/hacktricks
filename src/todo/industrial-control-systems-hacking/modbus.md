@@ -2,34 +2,39 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Modbus Protocol का परिचय
+## Modbus का परिचय
 
-Modbus protocol Industrial Automation और Control Systems में व्यापक रूप से उपयोग किया जाने वाला protocol है। Modbus programmable logic controllers (PLCs), sensors, actuators और अन्य industrial devices जैसे विभिन्न devices के बीच communication की अनुमति देता है। Modbus Protocol को समझना आवश्यक है, क्योंकि यह ICS में सबसे अधिक उपयोग किया जाने वाला communication protocol है और इसमें sniffing तथा PLCs में commands inject करने के लिए attack surface की काफी संभावना होती है।
+Modbus एक open application-layer protocol है, जिसे PLCs, sensors, actuators और अन्य industrial devices में व्यापक रूप से लागू किया गया है। इसका request/response model function codes के माध्यम से coils और registers को expose करता है। इसलिए security testing का ध्यान केवल TCP port 502 खोजने पर नहीं, बल्कि unauthorized reads/writes, traffic observation, replay और unsafe device behavior पर केंद्रित होता है।<sup>[[1]](#references)</sup>
 
-यहाँ concepts को point-wise बताया गया है, जिससे protocol और इसके operation की प्रकृति का context मिल सके। ICS system security में सबसे बड़ी चुनौती implementation और upgradation की लागत है। ये protocols और standards 80s और 90s के शुरुआती समय में design किए गए थे और आज भी व्यापक रूप से उपयोग किए जाते हैं। चूँकि किसी industry में बहुत सारे devices और connections होते हैं, इसलिए devices को upgrade करना बहुत कठिन होता है। इससे hackers को outdated protocols के साथ काम करने का लाभ मिलता है। Modbus पर attacks लगभग practically inevitable हैं, क्योंकि यदि इसका operation industry के लिए critical है, तो इसे बिना upgradation के उपयोग किया जाता रहेगा।
+कई deployments में legacy serial equipment अब भी रखा जाता है, क्योंकि upgrades के लिए downtime, recertification या field devices का replacement आवश्यक होता है। Traditional Modbus में confidentiality या peer authentication की कोई सुविधा नहीं होती; Modbus Security एक अलग TLS-based profile है, जो X.509 certificates और TCP port 802 का उपयोग करता है। Specification public और independently implementable होने के कारण vendor behavior और optional-function support अलग-अलग हो सकते हैं; इन्हें मान लेने के बजाय fingerprint किया जाना चाहिए।<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Client-Server Architecture
 
-Modbus Protocol का उपयोग आमतौर पर Client Server Architecture में किया जाता है, जहाँ एक master device (client) एक या अधिक slave devices (servers) के साथ communication शुरू करता है। इसे Master-Slave architecture भी कहा जाता है, जिसका electronics और IoT में SPI, I2C आदि के साथ व्यापक रूप से उपयोग होता है।
+वर्तमान terminology में, एक **client** transaction शुरू करता है और एक **server** response लौटाता है। पुराने documentation में **master/slave** शब्दों का उपयोग किया जाता है। इस application relationship को SPI या I2C के साथ भ्रमित न करें: वे अलग bus protocols हैं।<sup>[[1]](#references)</sup>
 
-## Serial और Etherent Versions
+## Serial और Ethernet transports
 
-Modbus Protocol को Serial Communication और Ethernet Communications, दोनों के लिए design किया गया है। Serial Communication का उपयोग legacy systems में व्यापक रूप से किया जाता है, जबकि modern devices Ethernet को support करते हैं, जो high data rates प्रदान करता है और modern industrial networks के लिए अधिक उपयुक्त है।
+एक ही Modbus application data को serial variants (RTU या ASCII framing) और Modbus TCP के माध्यम से ले जाया जा सकता है। Modbus TCP में MBAP header जुड़ता है और सामान्यतः TCP port 502 का उपयोग होता है; serial RTU compact binary framing और CRC का उपयोग करता है, जबकि serial ASCII bytes को hexadecimal characters के रूप में दर्शाता है और LRC का उपयोग करता है।<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Data Representation
+## Data representation
 
-Modbus protocol में data को ASCII या Binary के रूप में transmit किया जाता है, हालांकि older devices के साथ इसकी compactibility के कारण binary format का उपयोग किया जाता है।
+Data model में single-bit coils/discrete inputs और 16-bit input/holding registers शामिल होते हैं। Multi-register values, byte order, scaling और semantic meaning device-specific होते हैं और vendor के register map के आधार पर पुष्टि किए जाने चाहिए।<sup>[[1]](#references)</sup>
 
-## Function Codes
+## Function codes
 
-ModBus Protocol specific function codes के transmission के साथ काम करता है, जिनका उपयोग PLCs और विभिन्न control devices को operate करने के लिए किया जाता है। इस हिस्से को समझना महत्वपूर्ण है, क्योंकि function codes को retransmit करके replay attacks किए जा सकते हैं। Legacy devices data transmission के लिए encryption support नहीं करते और आमतौर पर इनमें लंबे wires का उपयोग होता है, जो devices को connect करते हैं। इसके परिणामस्वरूप इन wires के साथ tampering की जा सकती है और data को capture/inject किया जा सकता है।
+Function codes ऐसी operations का चयन करते हैं, जैसे coils (`0x01`) पढ़ना, holding registers (`0x03`) पढ़ना, single coil/register (`0x05`/`0x06`) लिखना और multiple coils/registers (`0x0F`/`0x10`) लिखना। जब deployment में compensating authentication या process-state checks नहीं होते, तो captured write request को replay किया जा सकता है। लंबे serial runs तक authorized physical access होने पर, electrical interface, termination और safe connection method की पहचान करने के बाद assessor wiring पर सीधे frames capture या inject भी कर सकता है। इनमें से कोई भी action physical process को प्रभावित कर सकता है, इसलिए lab या explicit operational authorization का उपयोग करें।<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Modbus का Addressing
+## Addressing
 
-Network में प्रत्येक device का एक unique address होता है, जो devices के बीच communication के लिए आवश्यक है। Modbus RTU, Modbus TCP आदि protocols का उपयोग addressing को implement करने के लिए किया जाता है और ये data transmission के लिए transport layer की तरह कार्य करते हैं। Transferred data Modbus protocol format में होता है, जिसमें message शामिल होता है।
+Serial devices में unit address का उपयोग होता है। Modbus TCP में IP addressing के साथ MBAP header में Unit Identifier का उपयोग होता है, जो विशेष रूप से तब relevant होता है जब TCP-to-serial gateway requests को downstream units तक route करता है। Product documentation में दिखाए गए register references one-based (`40001`) हो सकते हैं, जबकि protocol addresses zero-based होते हैं; यह off-by-one errors का सामान्य स्रोत है।<sup>[[1]](#references)[[3]](#references)</sup>
 
-इसके अतिरिक्त, Modbus transmitted data की integrity सुनिश्चित करने के लिए error checks भी implement करता है। लेकिन सबसे महत्वपूर्ण बात यह है कि Modbus एक Open Standard है और कोई भी इसे अपने devices में implement कर सकता है। इसके कारण यह protocol global standard बन गया और industrial automation industry में व्यापक रूप से फैल गया।
+Serial framing में transmission-error checks शामिल होते हैं (RTU के लिए CRC और ASCII के लिए LRC), जबकि TCP अपना सामान्य transport checksum प्रदान करता है। ये accidental corruption का पता लगाते हैं; ये cryptographic integrity या origin authentication प्रदान नहीं करते।<sup>[[3]](#references)</sup>
 
-इसके बड़े पैमाने पर उपयोग और upgradations की कमी के कारण, Modbus पर हमला करना इसके attack surface के कारण महत्वपूर्ण लाभ प्रदान करता है। ICS devices के बीच communication पर अत्यधिक निर्भर है और इन पर किए गए कोई भी attacks industrial systems के operation के लिए खतरनाक हो सकते हैं। यदि attacker transmission medium की पहचान कर ले, तो replay, data injection, data sniffing और leaking, Denial of Service, data forgery आदि attacks किए जा सकते हैं।
+Authorized assessment के दौरान exposure, permitted function codes, writable address ranges, exception handling, rate limits और यह जांचें कि network segmentation या Modbus-aware firewall clients को सीमित करता है या नहीं। Relevant threats में passive disclosure, unauthorized command injection, replay, data forgery और denial of service शामिल हैं। सभी active tests को process owners के साथ coordinate करें, क्योंकि register में apparently छोटे changes भी physical process को बदल सकते हैं।
 
+## References
+
+- [1] [Modbus Organization — Modbus Application Protocol Specification V1.1b3](https://www.modbus.org/file/secure/modbusprotocolspecification.pdf)
+- [2] [Modbus Organization — Modbus Security Protocol और implementation guides](https://www.modbus.org/modbus-specifications)
+- [3] [Modbus Organization — Modbus over Serial Line Specification और Implementation Guide V1.02](https://www.modbus.org/file/secure/modbusoverserial.pdf)
 {{#include ../../banners/hacktricks-training.md}}

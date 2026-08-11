@@ -1,43 +1,42 @@
-# अन्य Web Tricks
+# Other Web Tricks
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Host header
+## Host header
 
-कई बार back-end कुछ actions करने के लिए **Host header** पर trust करता है। उदाहरण के लिए, यह इसके value का उपयोग **password reset भेजने के domain** के रूप में कर सकता है। इसलिए जब आपको अपना password reset करने के लिए link वाला ईमेल मिलता है, तो उपयोग किया जा रहा domain वही होता है जिसे आपने Host header में डाला था। फिर, आप अन्य users का password reset request कर सकते हैं और domain को अपने control वाले domain में बदलकर उनके password reset codes चुरा सकते हैं। [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).<sup>[[1]](#references)</sup>
+Back ends कभी-कभी absolute links बनाते समय HTTP `Host` field पर भरोसा करते हैं। यदि password-reset email में attacker-supplied host का उपयोग होता है, तो किसी victim के लिए reset का अनुरोध करने पर token-bearing link attacker-controlled domain के माध्यम से भेजा जा सकता है। प्रत्येक proxy hop पर forwarded-host fields, duplicate Host handling और absolute-form request targets का भी परीक्षण करें।<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> ध्यान दें कि token प्राप्त करने के लिए आपको user के reset password link पर click करने का इंतजार भी नहीं करना पड़ सकता, क्योंकि संभव है कि **spam filters या अन्य intermediary devices/bots इसका analysis करने के लिए इस पर click कर दें**।
+> User का click आवश्यक नहीं हो सकता: **mail security scanners, preview services या अन्य intermediaries attacker-controlled link का अनुरोध स्वचालित रूप से कर सकते हैं**, जिससे reset token उजागर हो सकता है।
 
-### Session booleans
+## Session booleans
 
-कभी-कभी जब आप कोई verification सही तरीके से पूरा करते हैं, तो back-end **आपके session के किसी security attribute में केवल "True" value वाला boolean जोड़ देता है**। इसके बाद, कोई अलग endpoint यह जान लेगा कि आपने वह check successfully pass किया है।\
-हालांकि, यदि आप **check pass कर लेते हैं** और आपके session को security attribute में वह "True" value मिल जाती है, तो आप **अन्य resources को access करने** का प्रयास कर सकते हैं जो **उसी attribute पर depend करते हैं**, लेकिन जिन्हें access करने की **आपके पास permissions नहीं होनी चाहिए**। [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).<sup>[[2]](#references)</sup>
+कुछ applications completed verification को session में boolean के रूप में record करती हैं और फिर किसी अलग endpoint को उस flag पर निर्भर करने देती हैं। किसी resource की check को वैध रूप से pass करने के बाद जाँचें कि क्या वही flag गलती से किसी अलग user, object या workflow को authorize करता है। यह केवल IDOR नहीं, बल्कि second-order authorization/state-reuse flaw है।<sup>[[2]](#references)</sup>
 
-### Register functionality
+## Registration functionality
 
-किसी पहले से existent user के रूप में register करने का प्रयास करें। Equivalent characters (dots, बहुत सारे spaces और Unicode) का उपयोग करके भी प्रयास करें।
+किसी पहले से मौजूद user के रूप में register करने का प्रयास करें। Equivalent characters का उपयोग करके भी प्रयास करें (dots, बहुत सारे spaces और Unicode)।
 
-### Takeover emails
+## Email-change state confusion
 
-एक email register करें, उसे confirm करने से पहले email बदल दें। फिर, यदि नया confirmation email पहले registered email पर भेजा जाता है, तो आप किसी भी email का takeover कर सकते हैं। या यदि आप पहले email को confirm करके second email enable कर सकते हैं, तो आप किसी भी account का भी takeover कर सकते हैं।
+किसी email address को register करें और confirmation से पहले उसे बदलें। जाँचें कि क्या नए address का confirmation पुराने address पर भेजा जाता है, या पुराने token की पुष्टि करने से नया address activate हो जाता है। Confirmation tokens को exact account, pending address, purpose और current state से bound होना चाहिए।
 
-### atlassian का उपयोग करने वाली companies के Internal servicedesk को access करना
+## Exposed Atlassian service desks
 
 
 {{#ref}}
 https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 {{#endref}}
 
-### TRACE method
+## TRACE method
 
-Developers production environment में विभिन्न debugging options disable करना भूल सकते हैं। उदाहरण के लिए, HTTP `TRACE` method diagnostic purposes के लिए designed है। यदि यह enabled हो, तो web server `TRACE` method का उपयोग करने वाले requests का response देते समय received exact request को echo करेगा। यह behaviour अक्सर harmless होता है, लेकिन कभी-कभी information disclosure का कारण बनता है, जैसे internal authentication headers के नाम, जिन्हें reverse proxies द्वारा requests में append किया जा सकता है।![पोस्ट के लिए चित्र](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+HTTP `TRACE` method diagnostics के लिए प्राप्त request का loop-back अनुरोध करता है। RFC 9110 के अनुसार recipients को reflected content से credentials और cookies जैसे sensitive fields को हटाना आवश्यक है, लेकिन unsafe implementations या intermediary-added headers फिर भी internal request transformations उजागर कर सकते हैं। Browsers script-generated TRACE requests को रोकते हैं, इसलिए historical cross-site tracing attack protected fields inject करने के किसी अलग तरीके पर भी निर्भर करता है।<sup>[[3]](#references)</sup>![TRACE response दिखाती हुई image](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
-![पोस्ट के लिए चित्र](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
+![post के लिए image](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
 ## References
 
-- [1] [How I was able to take over any user's account with Host Header Injection](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
-- [2] [A less known attack vector: Second Order IDOR attacks](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
-
+- [1] [मैं Host Header Injection के माध्यम से किसी भी user का account takeover करने में सक्षम हुआ](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
+- [2] [एक कम ज्ञात attack vector: Second Order IDOR attacks](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
+- [3] [RFC 9110, section 9.3.8 — TRACE](https://www.rfc-editor.org/rfc/rfc9110.html#name-trace)
 {{#include ../banners/hacktricks-training.md}}

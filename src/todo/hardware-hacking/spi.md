@@ -2,62 +2,69 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## मूल जानकारी
+## Basic Information
 
-SPI (Serial Peripheral Interface) embedded systems में ICs (Integrated Circuits) के बीच कम दूरी के communication के लिए उपयोग किया जाने वाला Synchronous Serial Communication Protocol है। SPI Communication Protocol master-slave architecture का उपयोग करता है, जिसे Clock और Chip Select Signal द्वारा orchestrate किया जाता है। Master-slave architecture में एक master (आमतौर पर microprocessor) होता है, जो EEPROM, sensors, control devices आदि जैसे external peripherals को manage करता है; इन्हें slaves माना जाता है।
+SPI (Serial Peripheral Interface) एक synchronous serial bus है, जिसका उपयोग आमतौर पर integrated circuits के बीच short-distance communication के लिए किया जाता है। एक controller clock प्रदान करता है और chip-select signal का उपयोग करके किसी peripheral, जैसे EEPROM, sensor या control device को चुनता है।<sup>[[1]](#references)</sup>
 
-एक master से कई slaves connect किए जा सकते हैं, लेकिन slaves आपस में communicate नहीं कर सकते। Slaves को दो pins, clock और chip select, द्वारा administrate किया जाता है। SPI एक synchronous communication protocol है, इसलिए input और output pins clock signals का अनुसरण करते हैं। Chip select का उपयोग master द्वारा किसी slave को select करने और उसके साथ interact करने के लिए किया जाता है। जब chip select high होता है, तो slave device select नहीं होता, जबकि low होने पर chip select होता है और master slave के साथ interact करता है।
+कई peripherals clock और data lines साझा कर सकते हैं, सामान्यतः प्रत्येक peripheral के लिए अलग chip-select के साथ। Controller transfers को व्यवस्थित करता है; peripherals सामान्यतः SPI bus पर एक-दूसरे से सीधे communicate नहीं करते। Chip-select polarity और timing device-specific होते हैं; active-low selection सामान्य है, लेकिन सार्वभौमिक नहीं। SPI discovery, addressing, commands या single maximum transfer length को define नहीं करता, इसलिए हमेशा target datasheet देखें।<sup>[[1]](#references)</sup>
 
-MOSI (Master Out, Slave In) और MISO (Master In, Slave Out) data भेजने और प्राप्त करने के लिए जिम्मेदार होते हैं। जब chip select low रखा जाता है, तब MOSI pin के माध्यम से slave device को data भेजा जाता है। Input data में slave device vendor की datasheet के अनुसार instructions, memory addresses या data शामिल होते हैं। Valid input मिलने पर MISO pin master को data transmit करने के लिए जिम्मेदार होती है। Output data, input समाप्त होने के ठीक अगले clock cycle में भेजा जाता है। MISO pins तब तक data transmit करती हैं जब तक data पूरी तरह transmit न हो जाए या master chip select pin को high न कर दे (ऐसी स्थिति में slave transmit करना बंद कर देगा और master उस clock cycle के बाद listen नहीं करेगा)।
+MOSI/COPI controller-to-peripheral data ले जाता है और MISO/CIPO peripheral-to-controller data ले जाता है। दोनों दिशाओं में एक साथ shift किया जा सकता है। किसी command, address, dummy cycles और returned data के बीच संबंध peripheral द्वारा define किया जाता है, SPI द्वारा नहीं, और यह clock polarity तथा phase (modes 0–3) पर निर्भर करता है। यह न मानें कि input समाप्त होने के ठीक एक clock बाद output शुरू होता है।<sup>[[1]](#references)</sup>
 
 ## EEPROMs से Firmware Dump करना
 
-Firmware dump करना firmware का analysis करने और उसमें vulnerabilities खोजने के लिए उपयोगी हो सकता है। कई बार firmware internet पर उपलब्ध नहीं होता या model number, version आदि जैसे विभिन्न factors में variations के कारण अप्रासंगिक होता है। इसलिए, physical device से सीधे firmware extract करना threats की hunting के दौरान अधिक specific होने में सहायक हो सकता है।
+Firmware dump करना उसके analysis और vulnerabilities खोजने में उपयोगी हो सकता है। सही image online उपलब्ध नहीं हो सकती या model, hardware revision अथवा version के अनुसार अलग हो सकती है, इसलिए उसे physical device से सीधे extract करने पर exact assessment target मिलता है।
 
-Serial Console प्राप्त करना उपयोगी हो सकता है, लेकिन कई बार files read-only होती हैं। विभिन्न कारणों से यह analysis को सीमित करता है। उदाहरण के लिए, packages भेजने और प्राप्त करने के लिए आवश्यक tools firmware में मौजूद नहीं होंगे। इसलिए binaries को reverse engineer करने के लिए extract करना feasible नहीं होता। इस कारण, पूरे firmware को system पर dump करना और analysis के लिए binaries extract करना बहुत सहायक हो सकता है।
+Serial console सहायक हो सकता है, लेकिन उसका filesystem read-only हो सकता है और target में analysis tools मौजूद नहीं हो सकते, जिनमें test traffic भेजने/प्राप्त करने या binaries को सुविधाजनक रूप से extract करने के लिए आवश्यक utilities भी शामिल हैं। Offline image complete flash layout को सुरक्षित रखती है और running target को modify किए बिना filesystem extraction तथा reverse engineering की अनुमति देती है।
 
-इसके अलावा, red teaming और devices तक physical access प्राप्त करने के दौरान firmware dump करना files को modify करने या malicious files inject करने और फिर उन्हें memory में reflash करने में मदद कर सकता है, जिससे device में backdoor implant करना संभव हो सकता है। इसलिए, firmware dumping से कई संभावनाएं unlock की जा सकती हैं।
+Authorized physical assessment के दौरान verified dump controlled modification और reflashing tests में भी सहायक हो सकता है। इसमें files बदलना या firmware-level persistence प्रदर्शित करने के लिए test payload/backdoor inject करना शामिल है। किसी भी write से पहले कई matching reads और original image सुरक्षित रखें: गलत voltage, chip selection, layout या image device को brick कर सकती है।
 
 ### CH341A EEPROM Programmer और Reader
 
-यह device EEPROMs से firmwares dump करने और उन्हें firmware files के साथ reflash करने के लिए एक inexpensive tool है। Computer BIOS chips (जो केवल EEPROMs होते हैं) के साथ काम करने के लिए यह एक popular choice रहा है। यह device USB के माध्यम से connect होता है और शुरू करने के लिए minimal tools की आवश्यकता होती है। इसके अलावा, यह आमतौर पर task को जल्दी पूरा कर देता है, इसलिए physical device access में भी सहायक हो सकता है।
+यह कम लागत वाला USB tool compatible serial EEPROM और SPI flash devices को dump और reflash कर सकता है। इसका उपयोग आमतौर पर PC BIOS/UEFI firmware store करने वाली SPI NOR flash chips के साथ किया जाता है और time-limited physical access के दौरान यह सुविधाजनक होता है।
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-EEPROM memory को CH341a Programmer से connect करें और device को computer में plug करें। यदि device detect नहीं हो रहा है, तो computer में drivers install करने का प्रयास करें। यह भी सुनिश्चित करें कि EEPROM proper orientation में connected हो (आमतौर पर VCC Pin को USB connector के विपरीत orientation में रखें), अन्यथा software chip को detect नहीं कर पाएगा। आवश्यकता होने पर diagram देखें:
+Flash memory को CH341A से connect करें और फिर programmer को computer से connect करें। यदि programmer detect नहीं होता है, तो target chip की troubleshooting से पहले USB cable, OS permissions और उपयुक्त CH341A driver की जांच करें। Datasheets या meter की सहायता से chip का voltage, pin 1, adapter wiring और programmer output confirm करें—**VCC को USB connector के opposite रखने जैसे किसी rule पर निर्भर न रहें**। गलत orientation या 3.3/1.8 V part पर 5 V लागू करने से वह नष्ट हो सकता है। In-circuit reads भी fail हो सकते हैं, क्योंकि board का बाकी हिस्सा bus को load या power कर सकता है।<sup>[[2]](#references)</sup>
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-अंत में, firmware dump करने के लिए flashrom, G-Flash (GUI) आदि जैसे softwares का उपयोग करें। G-Flash एक minimal GUI tool है, जो fast है और EEPROM को automatically detect करता है। जब firmware को documentation के साथ अधिक tinkering किए बिना जल्दी extract करना हो, तब यह सहायक हो सकता है।
+Chip को read करने के लिए `flashrom` या G-Flash जैसे software का उपयोग करें। G-Flash एक minimal GUI है और compatible devices को auto-detect कर सकता है, जो quick acquisition के दौरान सुविधाजनक हो सकता है, लेकिन detected model और voltage को स्वयं confirm करें। Exact programmer और, आवश्यकता होने पर, exact chip model specify करें; dump को reliable मानने से पहले कम-से-कम दो reads करें और उनके hashes की तुलना करें।<sup>[[2]](#references)</sup>
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-Firmware dump करने के बाद binary files पर analysis किया जा सकता है। strings, hexdump, xxd, binwalk आदि जैसे tools का उपयोग firmware के बारे में और पूरे file system के बारे में भी बहुत-सी information extract करने के लिए किया जा सकता है।
+Firmware dump करने के बाद binary files पर analysis किया जा सकता है। Firmware के साथ-साथ पूरे file system से भी बहुत-सी information extract करने के लिए strings, hexdump, xxd, binwalk आदि जैसे tools का उपयोग किया जा सकता है।
 
-Firmware से contents extract करने के लिए binwalk का उपयोग किया जा सकता है। Binwalk hex signatures का analysis करता है और binary file में files की पहचान करता है तथा उन्हें extract करने में सक्षम है।
+Initial triage के लिए Binwalk known signatures को scan कर सकता है और supported embedded content को extract कर सकता है:
 ```
 binwalk -e <filename>
 ```
-यह उपयोग किए गए tools और configurations के अनुसार `.bin` या `.rom` हो सकता है।
+आउटपुट फ़ाइल में `.bin`, `.rom` या कोई अन्य extension हो सकता है; extension से format निर्धारित नहीं होता।
 
 > [!CAUTION]
-> ध्यान दें कि firmware extraction एक नाजुक प्रक्रिया है और इसमें काफी patience की आवश्यकता होती है। किसी भी गलत handling से firmware corrupt हो सकता है या पूरी तरह erase हो सकता है, जिससे device unusable हो सकता है। firmware extract करने का प्रयास करने से पहले specific device का अध्ययन करने की सलाह दी जाती है।
+> ध्यान दें कि firmware extraction एक नाज़ुक प्रक्रिया है और इसमें बहुत धैर्य की आवश्यकता होती है। किसी भी गलत handling से firmware संभावित रूप से corrupt हो सकता है या पूरी तरह erase हो सकता है, जिससे device unusable हो सकता है। Firmware extract करने का प्रयास करने से पहले specific device का अध्ययन करने की सलाह दी जाती है।
 
 ### Bus Pirate + flashrom
 
 ![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Bus Pirate + flashrom](<../../images/image (910).png>)
 
-ध्यान दें कि भले ही Pirate Bus का PINOUT SPI से connect करने के लिए **MOSI** और **MISO** के pins दर्शाता हो, कुछ SPIs pins को DI और DO के रूप में दर्शा सकते हैं। **MOSI -> DI, MISO -> DO**
+कुछ datasheets target pins को `DI` और `DO` के रूप में label करती हैं: conventional single-data-line flash connection के लिए, controller **MOSI/COPI को DI से connect करता है** और controller **MISO/CIPO को DO से connect करता है**। Target datasheet को verify करें, क्योंकि dual/quad I/O parts अन्य modes में इन pins का पुनः उपयोग करते हैं।
 
-![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: ध्यान दें कि भले ही Pirate Bus का PINOUT SPI से connect करने के लिए MOSI और MISO के pins दर्शाता हो, कुछ SPIs pins को...](<../../images/image (360).png>)
+![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: ध्यान दें कि Pirate Bus के PINOUT में MOSI और MISO को SPI से connect करने के लिए pins होने के बावजूद, कुछ SPIs...](<../../images/image (360).png>)
 
-Windows या Linux में flash memory का content dump करने के लिए आप [**`flashrom`**](https://www.flashrom.org/Flashrom) program का उपयोग करके कुछ इस तरह चला सकते हैं:
+Windows या Linux में आप flash memory का content dump करने के लिए [**`flashrom`**](https://www.flashrom.org/Flashrom) program का उपयोग कर सकते हैं, कुछ इस तरह:
 ```bash
 # In this command we are indicating:
 # -VV Verbose
-# -c <chip> The chip (if you know it better, if not, don'tindicate it and the program might be able to find it)
-# -p <programmer> In this case how to contact th chip via the Bus Pirate
+# -c <chip> Exact chip model (omit it to let flashrom probe candidates)
+# -p <programmer> Programmer configuration; here, the Bus Pirate connection
 # -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
+हालिया Bus Pirate documentation में वैकल्पिक `serialspeed` और `spispeed` parameters भी दिखाए गए हैं। यदि लंबे wires या in-circuit loading के कारण reads अस्थिर हों, तो conservatively शुरुआत करें।<sup>[[3]](#references)</sup>
+
+## References
+
+- [1] [Analog Devices — SPI Interface का परिचय](https://www.analog.com/en/resources/analog-dialogue/articles/introduction-to-spi-interface.html)
+- [2] [flashrom manual — CH341A SPI programmer और read/write options](https://flashrom.org/classic_cli_manpage.html)
+- [3] [Bus Pirate documentation — flashrom](https://docs.buspirate.com/docs/software/flashrom/)
 {{#include ../../banners/hacktricks-training.md}}

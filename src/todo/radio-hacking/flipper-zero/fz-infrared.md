@@ -1,4 +1,4 @@
-# FZ - Infrared
+# FZ - इन्फ्रारेड
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -13,29 +13,27 @@ Infrared कैसे काम करता है, इसके बारे �
 
 ## Flipper Zero में IR Signal Receiver <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper एक डिजिटल IR signal receiver TSOP का उपयोग करता है, जो **IR remotes से signals को intercept करने की अनुमति देता है**। Xiaomi जैसे कुछ **smartphones** में भी IR port होता है, लेकिन ध्यान रखें कि **इनमें से अधिकांश केवल signals transmit कर सकते हैं** और **उन्हें receive करने में सक्षम नहीं होते**।<sup>[[1]](#references)</sup>
+Flipper Zero सामान्य IR remotes से signals capture करने के लिए एक demodulating IR receiver का उपयोग करता है। कुछ phones, जिनमें कुछ Xiaomi models भी शामिल हैं, में IR transmitter होता है, लेकिन अधिकांश remote-control signals को receive और decode नहीं कर सकते।<sup>[[1]](#references)</sup>
 
-Flipper का infrared **receiver काफी sensitive है**। आप remote और TV के बीच **कहीं बीच में रहते हुए भी signal को catch कर सकते हैं**। Remote को सीधे Flipper के IR port की ओर point करना आवश्यक नहीं है। यह तब उपयोगी होता है जब कोई व्यक्ति TV के पास खड़े होकर channels बदल रहा हो और आप तथा Flipper दोनों कुछ दूरी पर हों।
+Flipper का infrared **receiver काफी sensitive है**। आप remote और TV के **बीच कहीं रहते हुए भी signal पकड़ सकते हैं**। Remote को सीधे Flipper के IR port की ओर point करना आवश्यक नहीं है। यह तब उपयोगी होता है जब कोई व्यक्ति TV के पास खड़े होकर channels बदल रहा हो और आप तथा Flipper दोनों कुछ दूरी पर हों।
 
-क्योंकि infrared signal का **decoding software side** पर होता है, Flipper Zero संभावित रूप से **किसी भी IR remote codes को receive और transmit कर सकता है**। ऐसे **unknown** protocols के मामले में जिन्हें पहचाना नहीं जा सका, यह raw signal को ठीक वैसे ही **record और playback करता है**, जैसे वह receive हुआ था।<sup>[[1]](#references)</sup>
+Protocol decoding software में होता है। Recognized protocols को decoded commands के रूप में store किया जा सकता है; unsupported protocols को raw timing data के रूप में capture और replay किया जा सकता है, जो hardware की carrier-frequency और timing limits के अधीन होता है।<sup>[[1]](#references)</sup>
 
 ## Actions
 
 ### Universal Remotes
 
-Flipper Zero का उपयोग **किसी भी TV, air conditioner या media center को control करने के लिए universal remote के रूप में** किया जा सकता है। इस mode में Flipper, **SD card की dictionary के अनुसार**, समर्थित सभी manufacturers के सभी **known codes को bruteforce** करता है। Restaurant के TV को बंद करने के लिए आपको किसी particular remote को चुनने की आवश्यकता नहीं है।<sup>[[1]](#references)</sup>
+Flipper Zero का universal-remote mode supported TVs, audio equipment, projectors और air conditioners के लिए अपने infrared database में मौजूद known commands को बारी-बारी से भेजता है। हर device को control करने की guarantee नहीं है, और इसका उपयोग केवल अपने या test करने की authorization वाले equipment पर किया जाना चाहिए।<sup>[[1]](#references)</sup>
 
-Universal Remote mode में power button दबाना पर्याप्त है और Flipper अपने knowledge में मौजूद सभी TVs के **"Power Off"** commands को **sequentially send** करेगा: Sony, Samsung, Panasonic... और इसी तरह। जब TV उसका signal receive करेगा, तो वह प्रतिक्रिया करके बंद हो जाएगा।
+Universal Remote mode में power button दबाना पर्याप्त है, और Flipper उन सभी TVs के **"Power Off"** commands को **क्रमिक रूप से भेजेगा** जिन्हें वह जानता है: Sony, Samsung, Panasonic... और इसी तरह। जब TV इसका signal receive करता है, तो वह प्रतिक्रिया करके बंद हो जाएगा।
 
-ऐसे brute-force में समय लगता है। Dictionary जितनी बड़ी होगी, इसे पूरा होने में उतना ही अधिक समय लगेगा। यह पता लगाना संभव नहीं है कि TV ने ठीक किस signal को recognize किया, क्योंकि TV की ओर से कोई feedback नहीं मिलता।
+ऐसे brute-force में समय लगता है। Dictionary जितना बड़ा होगा, इसे पूरा होने में उतना ही अधिक समय लगेगा। यह पता लगाना संभव नहीं है कि TV ने ठीक किस signal को recognize किया, क्योंकि TV की ओर से कोई feedback नहीं मिलता।
 
-### नया Remote सीखना
+### Learn New Remote
 
-Flipper Zero से **infrared signal capture करना** संभव है। यदि उसे database में **signal मिल जाता है**, तो Flipper अपने-आप **जान जाएगा कि यह कौन-सा device है** और आपको उसके साथ interact करने देगा।\
-यदि signal नहीं मिलता, तो Flipper **signal को store** कर सकता है और आपको उसे **replay करने की अनुमति देगा**।<sup>[[1]](#references)</sup>
+Flipper Zero **infrared signal capture** कर सकता है। यदि यह protocol और command को recognize करता है, तो decoded representation store करता है; अन्यथा, यह raw timing data को बाद में replay करने के लिए store कर सकता है।<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Flipper Zero Infrared Port से TVs को Take Over करना](https://blog.flipperzero.one/infrared/)
-
+- [1] [Taking over TVs with Flipper Zero Infrared Port](https://blog.flipperzero.one/infrared/)
 {{#include ../../../banners/hacktricks-training.md}}
