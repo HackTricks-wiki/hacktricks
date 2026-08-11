@@ -4,60 +4,67 @@
 
 ## Grundlegende Informationen
 
-SPI (Serial Peripheral Interface) ist ein synchrones serielles Kommunikationsprotokoll, das in eingebetteten Systemen für die Kommunikation über kurze Distanzen zwischen ICs (Integrated Circuits) verwendet wird. Das SPI-Kommunikationsprotokoll nutzt eine Master-Slave-Architektur, die durch das Clock- und Chip-Select-Signal gesteuert wird. Eine Master-Slave-Architektur besteht aus einem Master (normalerweise einem Mikroprozessor), der externe Peripheriegeräte wie EEPROMs, Sensoren, Steuergeräte usw. verwaltet, die als Slaves betrachtet werden.
+SPI (Serial Peripheral Interface) ist ein synchroner serieller Bus, der häufig für die Kommunikation über kurze Entfernungen zwischen integrierten Schaltkreisen verwendet wird. Ein Controller stellt den Takt bereit und wählt ein Peripheriegerät, beispielsweise ein EEPROM, einen Sensor oder ein Steuergerät, über ein Chip-Select-Signal aus.<sup>[[1]](#references)</sup>
 
-Mehrere Slaves können mit einem Master verbunden werden, aber Slaves können nicht miteinander kommunizieren. Slaves werden über zwei Pins verwaltet: Clock und Chip Select. Da SPI ein synchrones Kommunikationsprotokoll ist, folgen die Eingangs- und Ausgangspins den Clock-Signalen. Chip Select wird vom Master verwendet, um einen Slave auszuwählen und mit ihm zu interagieren. Wenn Chip Select high ist, ist das Slave-Gerät nicht ausgewählt, während der Chip bei einem Low-Signal ausgewählt ist und der Master mit dem Slave interagiert.
+Mehrere Peripheriegeräte können sich die Takt- und Datenleitungen teilen, normalerweise mit einem separaten Chip-Select pro Peripheriegerät. Der Controller koordiniert die Übertragungen; Peripheriegeräte kommunizieren normalerweise nicht direkt über den SPI-Bus miteinander. Chip-Select-Polarität und Timing sind gerätespezifisch; eine Active-Low-Auswahl ist üblich, aber nicht universell. SPI definiert weder Discovery noch Adressierung, Befehle oder eine einzelne maximale Übertragungslänge. Konsultiere daher immer das Datenblatt des Zielgeräts.<sup>[[1]](#references)</sup>
 
-MOSI (Master Out, Slave In) und MISO (Master In, Slave Out) sind für das Senden und Empfangen von Daten zuständig. Daten werden über den MOSI-Pin an das Slave-Gerät gesendet, während Chip Select auf Low gehalten wird. Die Eingangsdaten enthalten gemäß dem Datenblatt des Slave-Geräteherstellers Anweisungen, Speicheradressen oder Daten. Bei einer gültigen Eingabe ist der MISO-Pin für die Übertragung von Daten an den Master zuständig. Die Ausgabedaten werden genau im nächsten Clock-Zyklus nach dem Ende der Eingabe gesendet. Die MISO-Pins übertragen Daten, bis die Daten vollständig übertragen wurden oder der Master den Chip-Select-Pin auf High setzt (in diesem Fall würde der Slave die Übertragung stoppen und der Master würde nach diesem Clock-Zyklus nicht mehr zuhören).
+MOSI/COPI überträgt Daten vom Controller zum Peripheriegerät, während MISO/CIPO Daten vom Peripheriegerät zum Controller überträgt. Beide Richtungen können gleichzeitig verschoben werden. Die Beziehung zwischen einem Befehl, einer Adresse, Dummy-Zyklen und den zurückgegebenen Daten wird vom Peripheriegerät definiert – nicht von SPI – und hängt von der Taktpolarität und -phase (Modi 0–3) ab. Gehe nicht davon aus, dass die Ausgabe genau einen Takt nach dem Ende der Eingabe beginnt.<sup>[[1]](#references)</sup>
 
-## Firmware von EEPROMs dumpen
+## Firmware aus EEPROMs dumpen
 
-Das Dumpen von Firmware kann nützlich sein, um die Firmware zu analysieren und Schwachstellen darin zu finden. Häufig ist die Firmware nicht im Internet verfügbar oder aufgrund von Faktoren wie Modellnummer, Version usw. irrelevant. Daher kann das direkte Extrahieren der Firmware vom physischen Gerät hilfreich sein, um bei der Suche nach Bedrohungen spezifisch vorzugehen.
+Das Dumpen von Firmware kann für deren Analyse und die Suche nach Schwachstellen hilfreich sein. Das korrekte Image ist möglicherweise online nicht verfügbar oder unterscheidet sich je nach Modell, Hardware-Revision oder Version. Durch das direkte Extrahieren vom physischen Gerät erhältst du ein exaktes Untersuchungsziel.
 
-Eine serielle Konsole zu erhalten, kann hilfreich sein, aber häufig sind die Dateien schreibgeschützt. Dies schränkt die Analyse aus verschiedenen Gründen ein. Beispielsweise wären die Tools, die zum Senden und Empfangen von Paketen erforderlich sind, in der Firmware nicht vorhanden. Daher ist das Extrahieren der Binaries für das Reverse Engineering nicht praktikabel. Die vollständige Firmware auf dem System zu dumpen und die Binaries für die Analyse zu extrahieren, kann daher sehr hilfreich sein.
+Eine serielle Konsole kann hilfreich sein, aber ihr Dateisystem ist möglicherweise schreibgeschützt und auf dem Zielgerät fehlen eventuell Analyse-Tools, einschließlich der Dienstprogramme, die zum Senden und Empfangen von Testdaten oder zum bequemen Extrahieren von Binaries erforderlich sind. Ein Offline-Image bewahrt das vollständige Flash-Layout und ermöglicht die Extraktion des Dateisystems sowie Reverse Engineering, ohne das laufende Zielgerät zu verändern.
 
-Außerdem kann das Dumpen der Firmware während Red Teaming und beim Erlangen physischen Zugriffs auf Geräte dabei helfen, die Dateien zu modifizieren oder schädliche Dateien einzuschleusen und sie anschließend erneut in den Speicher zu flashen. Dies könnte hilfreich sein, um eine Backdoor in das Gerät einzuschleusen. Daher können durch das Dumpen von Firmware zahlreiche Möglichkeiten eröffnet werden.
+Während einer autorisierten physischen Untersuchung kann ein verifiziertes Dump auch kontrollierte Änderungen und Reflashing-Tests unterstützen. Dazu gehört das Ändern von Dateien oder das Injizieren eines Test-Payloads/einer backdoor, um Persistenz auf Firmware-Ebene zu demonstrieren. Bewahre mehrere übereinstimmende Reads und das ursprüngliche Image vor jedem Schreibvorgang auf: Eine falsche Spannung, Chipauswahl, Anordnung oder ein falsches Image kann das Gerät unbrauchbar machen.
 
 ### CH341A EEPROM Programmer und Reader
 
-Dieses Gerät ist ein kostengünstiges Tool zum Dumpen von Firmware aus EEPROMs und zum erneuten Flashen mit Firmware-Dateien. Es ist eine beliebte Wahl für die Arbeit mit Computer-BIOS-Chips (bei denen es sich lediglich um EEPROMs handelt). Das Gerät wird über USB angeschlossen und benötigt nur minimale Tools, um loszulegen. Außerdem erledigt es die Aufgabe in der Regel schnell, sodass es auch beim physischen Zugriff auf Geräte hilfreich sein kann.
+Dieses kostengünstige USB-Tool kann kompatible serielle EEPROM- und SPI-Flash-Geräte dumpen und reflashen. Es wird häufig mit SPI-NOR-Flash-Chips verwendet, die PC-BIOS/UEFI-Firmware speichern, und ist bei zeitlich begrenztem physischem Zugriff praktisch.
 
-![drawing](../../images/board_image_ch341a.jpg)
+![Zeichnung](../../images/board_image_ch341a.jpg)
 
-Verbinde den EEPROM-Speicher mit dem CH341A Programmer und schließe das Gerät an den Computer an. Falls das Gerät nicht erkannt wird, versuche, Treiber auf dem Computer zu installieren. Stelle außerdem sicher, dass der EEPROM richtig ausgerichtet angeschlossen ist (normalerweise wird der VCC-Pin entgegengesetzt zum USB-Anschluss platziert), da die Software den Chip andernfalls nicht erkennen kann. Siehe bei Bedarf das Diagramm:
+Verbinde den Flash-Speicher mit dem CH341A und anschließend den Programmer mit dem Computer. Wenn der Programmer selbst nicht erkannt wird, überprüfe vor der Fehlersuche am Zielchip das USB-Kabel, die Betriebssystemberechtigungen und den passenden CH341A-Treiber. Überprüfe die Spannung des Chips, Pin 1, die Adapterverdrahtung und den Ausgang des Programmers anhand der Datenblätter oder mit einem Messgerät – verlasse dich **nicht** auf eine Regel wie das Platzieren von VCC gegenüber dem USB-Anschluss. Eine falsche Ausrichtung oder eine an ein 3,3/1,8-V-Bauteil angelegte Spannung von 5 V kann es zerstören. In-Circuit-Reads können ebenfalls fehlschlagen, weil der Rest der Platine den Bus belastet oder mit Strom versorgt.<sup>[[2]](#references)</sup>
 
-![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
+![Zeichnung](../../images/connect_wires_ch341a.jpg) ![Zeichnung](../../images/eeprom_plugged_ch341a.jpg)
 
-Verwende schließlich Software wie flashrom, G-Flash (GUI) usw. zum Dumpen der Firmware. G-Flash ist ein minimalistisches GUI-Tool, das schnell ist und den EEPROM automatisch erkennt. Dies kann hilfreich sein, wenn die Firmware schnell und ohne umfangreiche Auseinandersetzung mit der Dokumentation extrahiert werden muss.
+Verwende Software wie `flashrom` oder G-Flash, um den Chip auszulesen. G-Flash ist eine minimale GUI und kann kompatible Geräte automatisch erkennen, was bei einer schnellen Akquisition praktisch sein kann. Überprüfe das erkannte Modell und die Spannung jedoch selbst. Gib den exakten Programmer und, falls erforderlich, das exakte Chipmodell an. Führe mindestens zwei Reads durch und vergleiche deren Hashes, bevor du einen Dump als zuverlässig betrachtest.<sup>[[2]](#references)</sup>
 
-![drawing](../../images/connected_status_ch341a.jpg)
+![Zeichnung](../../images/connected_status_ch341a.jpg)
 
-Nach dem Dumpen der Firmware kann die Analyse an den Binärdateien durchgeführt werden. Tools wie strings, hexdump, xxd, binwalk usw. können verwendet werden, um viele Informationen über die Firmware sowie das gesamte Dateisystem zu extrahieren.
+Nach dem Dumpen der Firmware kann die Analyse anhand der Binärdateien durchgeführt werden. Tools wie strings, hexdump, xxd, binwalk usw. können verwendet werden, um zahlreiche Informationen über die Firmware sowie über das gesamte Dateisystem zu extrahieren.
 
-Um die Inhalte aus der Firmware zu extrahieren, kann binwalk verwendet werden. Binwalk analysiert Hex-Signaturen, identifiziert die Dateien in der Binärdatei und kann sie extrahieren.
+Für eine erste Triage kann Binwalk nach bekannten Signaturen suchen und unterstützte eingebettete Inhalte extrahieren:
 ```
 binwalk -e <filename>
 ```
-The kann je nach verwendeten Tools und Konfigurationen `.bin` oder `.rom` sein.
+Die Ausgabedatei kann `.bin`, `.rom` oder eine andere Erweiterung verwenden; die Erweiterung legt das Format nicht fest.
 
 > [!CAUTION]
-> Beachte, dass die Firmware-Extraktion ein heikler Prozess ist und viel Geduld erfordert. Jede unsachgemäße Handhabung kann die Firmware möglicherweise beschädigen oder sie sogar vollständig löschen und das Gerät unbrauchbar machen. Es wird empfohlen, das spezifische Gerät zu untersuchen, bevor versucht wird, die Firmware zu extrahieren.
+> Beachte, dass die Firmware-Extraktion ein empfindlicher Prozess ist und viel Geduld erfordert. Jede unsachgemäße Handhabung kann die Firmware potenziell beschädigen oder sogar vollständig löschen und das Gerät unbrauchbar machen. Es wird empfohlen, das jeweilige Gerät zu untersuchen, bevor versucht wird, die Firmware zu extrahieren.
 
 ### Bus Pirate + flashrom
 
 ![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Bus Pirate + flashrom](<../../images/image (910).png>)
 
-Beachte, dass das PINOUT des Bus Pirate zwar Pins für **MOSI** und **MISO** zum Anschluss an SPI angibt, einige SPIs die Pins jedoch als DI und DO bezeichnen können. **MOSI -> DI, MISO -> DO**
+Einige Datenblätter beschriften die Zielpins mit `DI` und `DO`: Bei einer herkömmlichen Flash-Verbindung mit einer einzelnen Datenleitung verbindet sich der Controller **MOSI/COPI mit DI** und der Controller **MISO/CIPO mit DO**. Überprüfe das Datenblatt des Zielbausteins, da Dual-/Quad-I/O-Bausteine dieselben Pins in anderen Modi wiederverwenden.
 
-![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Beachte, dass das PINOUT des Bus Pirate zwar Pins für MOSI und MISO zum Anschluss an SPI angibt, einige SPIs die Pins jedoch als DI und DO bezeichnen können...](<../../images/image (360).png>)
+![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Beachte, dass selbst wenn das PINOUT des Pirate Bus Pins für MOSI und MISO zum Verbinden mit SPI angibt, einige SPIs möglicherweise...](<../../images/image (360).png>)
 
-Unter Windows oder Linux kannst du das Programm [**`flashrom`**](https://www.flashrom.org/Flashrom) verwenden, um den Inhalt des Flash-Speichers zu dumpen, indem du etwa Folgendes ausführst:
+Unter Windows oder Linux kannst du das Programm [**`flashrom`**](https://www.flashrom.org/Flashrom) verwenden, um den Inhalt des Flash-Speichers mit einem Befehl ähnlich dem folgenden zu dumpen:
 ```bash
 # In this command we are indicating:
 # -VV Verbose
-# -c <chip> The chip (if you know it better, if not, don'tindicate it and the program might be able to find it)
-# -p <programmer> In this case how to contact th chip via the Bus Pirate
+# -c <chip> Exact chip model (omit it to let flashrom probe candidates)
+# -p <programmer> Programmer configuration; here, the Bus Pirate connection
 # -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
+Die aktuelle Bus Pirate-Dokumentation zeigt außerdem die optionalen Parameter `serialspeed` und `spispeed`. Beginne vorsichtig, wenn lange Kabel oder die Belastung im eingebauten Schaltkreis die Lesevorgänge instabil machen.<sup>[[3]](#references)</sup>
+
+## References
+
+- [1] [Analog Devices — Einführung in die SPI-Schnittstelle](https://www.analog.com/en/resources/analog-dialogue/articles/introduction-to-spi-interface.html)
+- [2] [flashrom-Handbuch — CH341A-SPI-Programmierer und Optionen zum Lesen/Schreiben](https://flashrom.org/classic_cli_manpage.html)
+- [3] [Bus-Pirate-Dokumentation — flashrom](https://docs.buspirate.com/docs/software/flashrom/)
 {{#include ../../banners/hacktricks-training.md}}

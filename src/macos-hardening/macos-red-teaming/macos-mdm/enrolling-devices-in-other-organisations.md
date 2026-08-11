@@ -2,56 +2,55 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Einleitung
+## Einführung
 
-Wie [**zuvor kommentiert**](#what-is-mdm-mobile-device-management)**,** ist zum Versuch, ein Gerät in einer Organisation zu registrieren, **nur eine zu dieser Organisation gehörende Seriennummer erforderlich**. Sobald das Gerät registriert ist, installieren mehrere Organisationen vertrauliche Daten auf dem neuen Gerät: Zertifikate, Anwendungen, WiFi-Passwörter, VPN-Konfigurationen [und so weiter](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Daher könnte dies ein gefährlicher Einstiegspunkt für Angreifer sein, wenn der Registrierungsprozess nicht korrekt geschützt ist.
+Apple Automated Device Enrollment (früher DEP) beginnt mit der Identifizierung eines Geräts, das einer Organisation zugewiesen ist. Die hier zusammengefasste Untersuchung aus dem Jahr 2018 zeigte, dass die Kenntnis einer zugewiesenen Seriennummer ausreichte, um die Enrollment-Profile einiger Organisationen abzurufen, da diese Organisationen keine ausreichende zusätzliche Authentifizierung verlangten. Dies ist ein historischer Befund und keine Behauptung, dass jedem aktuellen MDM ausschließlich mit einer Seriennummer beigetreten werden kann. Profile können Zertifikate, Anwendungen, WLAN-Secrets, VPN-Einstellungen und andere sensible Konfigurationen enthalten.<sup>[[1]](#references)[[2]](#references)</sup>
 
-**Das Folgende ist eine Zusammenfassung der Untersuchung [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Weitere technische Details findest du dort!**<sup>[[1]](#references)</sup>
+**Das Folgende ist eine Zusammenfassung der Untersuchung [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Weitere technische Details finden Sie dort!**<sup>[[1]](#references)</sup>
 
-## Übersicht über die DEP- und MDM-Binäranalyse
+## Überblick über die Binary-Analyse von DEP und MDM
 
-Diese Untersuchung befasst sich mit den Binärdateien, die mit dem Device Enrollment Program (DEP) und Mobile Device Management (MDM) unter macOS verbunden sind. Zu den wichtigsten Komponenten gehören:
+Die Untersuchung analysierte Binaries, die mit DEP und MDM auf den zu diesem Zeitpunkt aktuellen macOS-Versionen verbunden waren. Komponentennamen und Zuständigkeiten können sich zwischen Releases ändern:
 
-- **`mdmclient`**: Kommuniziert mit MDM-Servern und löst DEP-Check-ins bei macOS-Versionen vor 10.13.4 aus.
-- **`profiles`**: Verwaltet Configuration Profiles und löst DEP-Check-ins bei macOS-Versionen ab 10.13.4 aus.
+- **`mdmclient`**: Kommuniziert mit MDM-Servern und löst DEP-Check-ins auf macOS-Versionen vor 10.13.4 aus.
+- **`profiles`**: Verwaltet Configuration Profiles und löst DEP-Check-ins auf macOS-Versionen ab 10.13.4 aus.
 - **`cloudconfigurationd`**: Verwaltet die DEP-API-Kommunikation und ruft Device Enrollment-Profile ab.
 
-DEP-Check-ins verwenden die Funktionen `CPFetchActivationRecord` und `CPGetActivationRecord` aus dem privaten Configuration Profiles-Framework, um den Activation Record abzurufen. Dabei koordiniert `CPFetchActivationRecord` die Kommunikation mit `cloudconfigurationd` über XPC.<sup>[[1]](#references)</sup>
+DEP-Check-ins verwenden die Funktionen `CPFetchActivationRecord` und `CPGetActivationRecord` des privaten Configuration Profiles Frameworks, um den Activation Record abzurufen. Dabei kommuniziert `CPFetchActivationRecord` über XPC mit `cloudconfigurationd`.<sup>[[1]](#references)</sup>
 
 ## Reverse Engineering des Tesla-Protokolls und des Absinthe-Schemas
 
-Beim DEP-Check-in sendet `cloudconfigurationd` eine verschlüsselte und signierte JSON-Nutzlast an _iprofiles.apple.com/macProfile_. Die Nutzlast enthält die Seriennummer des Geräts und die Aktion "RequestProfileConfiguration". Das verwendete Verschlüsselungsschema wird intern als "Absinthe" bezeichnet. Die Entschlüsselung dieses Schemas ist komplex und umfasst zahlreiche Schritte, was zur Untersuchung alternativer Methoden zum Einfügen beliebiger Seriennummern in die Activation-Record-Anfrage führte.<sup>[[1]](#references)</sup>
+Beim DEP-Check-in sendet `cloudconfigurationd` eine verschlüsselte und signierte JSON-Payload an _iprofiles.apple.com/macProfile_. Die Payload enthält die Seriennummer des Geräts und die Aktion "RequestProfileConfiguration". Das verwendete Verschlüsselungsschema wird intern als "Absinthe" bezeichnet. Die Entschlüsselung dieses Schemas ist komplex und umfasst zahlreiche Schritte, weshalb alternative Methoden untersucht wurden, um beliebige Seriennummern in die Activation-Record-Anfrage einzufügen.<sup>[[1]](#references)</sup>
 
 ## Proxying von DEP-Anfragen
 
-Versuche, DEP-Anfragen an _iprofiles.apple.com_ mit Tools wie Charles Proxy abzufangen und zu verändern, wurden durch die Verschlüsselung der Nutzlast sowie durch SSL/TLS-Sicherheitsmaßnahmen erschwert. Das Aktivieren der Konfiguration `MCCloudConfigAcceptAnyHTTPSCertificate` ermöglicht jedoch das Umgehen der Serverzertifikatsvalidierung. Die verschlüsselte Natur der Nutzlast verhindert weiterhin die Änderung der Seriennummer ohne den Entschlüsselungsschlüssel.<sup>[[1]](#references)</sup>
+Versuche, DEP-Anfragen an _iprofiles.apple.com_ mit Tools wie Charles Proxy abzufangen und zu verändern, wurden durch die Verschlüsselung der Payload sowie Sicherheitsmaßnahmen für SSL/TLS erschwert. Das Aktivieren der Konfiguration `MCCloudConfigAcceptAnyHTTPSCertificate` ermöglicht jedoch das Umgehen der Validierung des Serverzertifikats. Die verschlüsselte Natur der Payload verhindert weiterhin die Änderung der Seriennummer ohne den Entschlüsselungsschlüssel.<sup>[[1]](#references)</sup>
 
-## Instrumentierung von System-Binärdateien, die mit DEP interagieren
+## Instrumentierung von System-Binaries, die mit DEP interagieren
 
-Die Instrumentierung von System-Binärdateien wie `cloudconfigurationd` erfordert das Deaktivieren des System Integrity Protection (SIP) unter macOS. Bei deaktiviertem SIP können Tools wie LLDB verwendet werden, um sich an Systemprozesse anzuhängen und möglicherweise die bei DEP-API-Interaktionen verwendete Seriennummer zu ändern. Diese Methode ist vorzuziehen, da sie die Komplexität von Entitlements und Code Signing vermeidet.<sup>[[1]](#references)</sup>
+Die Instrumentierung von System-Binaries wie `cloudconfigurationd` erfordert das Deaktivieren von System Integrity Protection (SIP) unter macOS. Bei deaktiviertem SIP können Tools wie LLDB an Systemprozesse angehängt werden, um möglicherweise die bei DEP-API-Interaktionen verwendete Seriennummer zu ändern. Diese Methode ist vorzuziehen, da sie die Komplexität von Entitlements und Code Signing vermeidet.<sup>[[1]](#references)</sup>
 
-**Ausnutzen der Binärinstrumentierung:**
-Die Änderung der DEP-Anfragenutzlast vor der JSON-Serialisierung in `cloudconfigurationd` erwies sich als effektiv. Der Prozess umfasste:
+**Ausnutzung der Binary-Instrumentierung:**
+Die Änderung der DEP-Anfrage-Payload vor der JSON-Serialisierung in `cloudconfigurationd` erwies sich als effektiv. Der Prozess umfasste:
 
 1. LLDB an `cloudconfigurationd` anhängen.
 2. Die Stelle ermitteln, an der die Systemseriennummer abgerufen wird.
-3. Eine beliebige Seriennummer in den Speicher injizieren, bevor die Nutzlast verschlüsselt und gesendet wird.
+3. Eine beliebige Seriennummer in den Speicher einschleusen, bevor die Payload verschlüsselt und gesendet wird.
 
-Diese Methode ermöglichte das Abrufen vollständiger DEP-Profile für beliebige Seriennummern und zeigte eine potenzielle Schwachstelle.<sup>[[1]](#references)</sup>
+Mit dieser Methode konnten die Forscher DEP-Profile für angegebene, zugewiesene Seriennummern abrufen. Eine nicht zugewiesene beliebige Seriennummer wurde dadurch nicht gültig.<sup>[[1]](#references)</sup>
 
 ### Automatisierung der Instrumentierung mit Python
 
-Der Exploit-Prozess wurde mithilfe von Python und der LLDB-API automatisiert. Dadurch wurde es möglich, programmgesteuert beliebige Seriennummern zu injizieren und die entsprechenden DEP-Profile abzurufen.<sup>[[1]](#references)</sup>
+Der Ausnutzungsprozess wurde mit Python und der LLDB-API automatisiert. Dadurch war es möglich, beliebige Seriennummern programmgesteuert einzuschleusen und die entsprechenden DEP-Profile abzurufen.<sup>[[1]](#references)</sup>
 
 ### Potenzielle Auswirkungen von DEP- und MDM-Schwachstellen
 
-Die Untersuchung zeigte erhebliche Sicherheitsbedenken auf:
+Die Untersuchung wies auf erhebliche Sicherheitsbedenken hin:
 
-1. **Offenlegung von Informationen**: Durch die Angabe einer bei DEP registrierten Seriennummer können vertrauliche Organisationsinformationen aus dem DEP-Profil abgerufen werden.<sup>[[1]](#references)</sup>
+1. **Offenlegung von Informationen**: Durch die Angabe einer bei DEP registrierten Seriennummer können sensible Organisationsinformationen aus dem DEP-Profil abgerufen werden.<sup>[[1]](#references)</sup>
 
-## Referenzen
+## References
 
-- [1] [Duo Labs — MDM Me Maybe: Device Enrollment Program Security](https://duo.com/labs/research/mdm-me-maybe)
-
+- [1] [Duo Labs — MDM Me Maybe: Sicherheit des Device Enrollment Program](https://duo.com/labs/research/mdm-me-maybe)
+- [2] [Apple Platform Deployment — Automatisiertes Device Enrollment](https://support.apple.com/guide/deployment/automated-device-enrollment-and-mdm-dep73069dd57/web)
 {{#include ../../../banners/hacktricks-training.md}}
