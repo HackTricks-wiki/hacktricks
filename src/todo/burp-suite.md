@@ -2,20 +2,24 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Basic Payloads
+## Intruder payload types
 
-- **Simple List:** हर पंक्ति में एक entry वाली list
-- **Runtime File:** Runtime में पढ़ी जाने वाली list (memory में load नहीं होती)। बड़ी lists को support करने के लिए।
-- **Case Modification:** strings की list पर कुछ changes लागू करें (No change, to lower, to UPPER, to Proper name - First capitalized and the rest to lower-, to Proper Name -First capitalized an the rest remains the same-.
-- **Numbers:** Z step या randomly का उपयोग करके X से Y तक numbers generate करें।
-- **Brute Forcer:** Character set, min & max length।
+- **Simple list:** payload के रूप में strings की configured list का उपयोग करें।
+- **Runtime file:** runtime पर प्रत्येक line से एक payload पढ़ें। यह बड़ी lists के लिए उपयोगी है, क्योंकि Burp पूरी file को memory में load नहीं करता।
+- **Case modification:** किसी input string के capitalization को बदलें, जैसे lowercase, uppercase, sentence case या title case में।
+- **Numbers:** configured range के भीतर sequential या random numbers generate करें।
+- **Brute forcer:** चुने गए character set और minimum/maximum length के लिए हर permutation generate करें।<sup>[[1]](#references)</sup>
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : commands execute करने और output को burpcollab पर DNS requests के माध्यम से grab करने के लिए Payload।
+## Extensions and companion tools
 
-{{#ref}}
-https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e
-{{#endref}}
+- **Collabfiltrator** ऐसे payloads generate करता है जो commands execute करते हैं और उनके output को Burp Collaborator के DNS queries के माध्यम से exfiltrate करते हैं।<sup>[[2]](#references)</sup>
+- **Burp Suite Exporter** अन्य reporting workflows में उपयोग के लिए Burp findings export करता है।<sup>[[3]](#references)</sup>
+- **HTTP Script Generator** HTTP requests को कई languages में scripts में convert करता है।<sup>[[4]](#references)</sup>
 
-[https://github.com/h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
+## References
 
+- [1] [PortSwigger documentation - Burp Intruder payload types](https://portswigger.net/burp/documentation/desktop/tools/intruder/configure-attack/payload-types)
+- [2] [GitHub - 0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator)
+- [3] [ArtsSEC - Burp Suite Exporter](https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e)
+- [4] [GitHub - h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
 {{#include ../banners/hacktricks-training.md}}

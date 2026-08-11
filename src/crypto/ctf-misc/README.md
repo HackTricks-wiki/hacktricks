@@ -2,28 +2,23 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-ऐसे पृष्ठों का संग्रह जो crypto challenges में अक्सर दिखाई देते हैं, लेकिन अन्य जगहों में आसानी से फिट नहीं होते।
+यह section उन techniques को एकत्र करता है जो cryptography challenges में दिखाई देती हैं, लेकिन अन्य categories में आसानी से fit नहीं होतीं।
 
 ## Esoteric languages
 
 ### Technique
 
-इसका उपयोग तब करें जब crypto task वास्तव में यह हो: किसी esolang program को run करना और फिर उसके output को decode करना।
+जब किसी challenge में esoteric-language program चलाना और उसके output को decode करना आवश्यक हो, तब इस workflow का उपयोग करें।
 
-यदि कोई challenge आपको ऐसा code देता है जो किसी standard language जैसा नहीं दिखता:
+यदि किसी challenge में ऐसा code दिया गया है जो किसी standard language जैसा नहीं दिखता:
 
-- esolang की पहचान करें (किसी विशिष्ट token को Google पर खोजें)।
+- किसी विशिष्ट token या instruction sequence को search करके language की पहचान करें।
 - किसी online interpreter या Docker image का उपयोग करें।
-- यदि output अजीब हो, तो execution के बाद layered encoding/compression देखें।
+- यदि output अजीब है, तो execution के बाद layered encoding/compression खोजें।
 
-शुरुआत करने के लिए अच्छी सूची:<sup>[[1]](#references)</sup>
-
-{{#ref}}
-https://esolangs.org/wiki/Main_Page
-{{#endref}}
+एक उपयोगी language index Esolang wiki है।<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Esolang, the esoteric programming languages wiki](https://esolangs.org/wiki/Main_Page)
-
+- [1] [Esolang, esoteric programming languages की wiki](https://esolangs.org/wiki/Main_Page)
 {{#include ../../banners/hacktricks-training.md}}

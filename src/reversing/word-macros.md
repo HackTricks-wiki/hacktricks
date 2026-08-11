@@ -2,17 +2,19 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Junk Code
+## Junk Code
 
-Macro को reverse करना अधिक कठिन बनाने के लिए **कभी उपयोग न किया जाने वाला junk code** मिलना बहुत आम है।\
-उदाहरण के लिए, निम्नलिखित image में आप देख सकते हैं कि एक ऐसी `If` condition, जो कभी true नहीं होने वाली है, कुछ junk और बेकार code को execute करने के लिए उपयोग की गई है।
+Macros में analysis को धीमा करने के उद्देश्य से **unreachable या irrelevant code** हो सकता है। किसी branch को reverse करने में समय लगाने से पहले constant conditions पहचानें और reachable behavior को trace करें। नीचे दिए गए example में junk code को छिपाने के लिए ऐसी `If` condition का उपयोग किया गया है जो कभी true नहीं हो सकती।
 
-![Word Macros - Junk Code: उदाहरण के लिए, निम्नलिखित image में आप देख सकते हैं कि एक ऐसी If condition, जो कभी true नहीं होने वाली है, कुछ junk और बेकार code को execute करने के लिए उपयोग की गई है](<../images/image (369).png>)
+![Junk code वाली unreachable conditional branch वाला Word macro](<../images/image (369).png>)
 
-### Macro Forms
+## Macro Forms
 
-**GetObject** function का उपयोग करके macro के forms से data प्राप्त करना संभव है। इसका उपयोग analysis को कठिन बनाने के लिए किया जा सकता है। निम्नलिखित एक macro form का photo है, जिसका उपयोग **text boxes के अंदर data छिपाने** के लिए किया गया है (एक text box अन्य text boxes को छिपा सकता है):
+VBA UserForms text boxes जैसे controls में data store कर सकते हैं। क्योंकि forms, frames और pages प्रत्येक `Controls` collection expose कर सकते हैं, इसलिए analysts को केवल form पर दिखाई देने वाली चीज़ों पर निर्भर रहने के बजाय पूरी control hierarchy enumerate करनी चाहिए। नीचे दिया गया example overlapping text boxes में concealed data store करता है।<sup>[[1]](#references)</sup>
 
-![Junk Code - Macro Forms: GetObject function का उपयोग करके macro के forms से data प्राप्त करना संभव है। इसका उपयोग analysis को कठिन बनाने के लिए किया जा सकता है। निम्नलिखित एक macro form का photo है...](<../images/image (344).png>)
+![Overlapping text boxes में concealed data वाला macro UserForm](<../images/image (344).png>)
 
+## References
+
+- [1] [Microsoft Learn - Collections, controls, and objects (Microsoft Forms)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/objects-microsoft-forms)
 {{#include ../banners/hacktricks-training.md}}

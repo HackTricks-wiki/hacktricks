@@ -2,8 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Fault injections attacks में electronic circuits में बाहरी disturbance शामिल की जाती है ताकि इसके व्यवहार को प्रभावित किया जा सके, जिसके परिणामस्वरूप information disclose हो सकती है या circuit में मौजूद कुछ restrictions को bypass भी किया जा सकता है। यह attack electronic circuits पर हमला करने की कई संभावनाएं खोलता है। इस attack को electronic circuits की glitching भी कहा जाता है।
+Fault injection जानबूझकर किसी device को उसके operating के दौरान disturb करता है, ताकि वह गलत computation करे। उपयोगी fault किसी instruction को skip कर सकता है, data को corrupt कर सकता है, security check को bypass कर सकता है, या ऐसा faulty cryptographic output उत्पन्न कर सकता है जिससे secret information derive की जा सके।<sup>[[1]](#references)</sup>
 
-किसी electronic circuit में fault inject करने के लिए कई methods और mediums उपलब्ध हैं।
+आम techniques supply voltage या clock को manipulate करती हैं, electromagnetic interference inject करती हैं, या optical अथवा laser stimulation का उपयोग करती हैं।<sup>[[1]](#references)</sup> इनकी precision और invasiveness अलग-अलग होती है, लेकिन सफल testing के लिए सामान्यतः एक repeatable trigger और timing, pulse width तथा intensity पर systematic sweeps आवश्यक होते हैं। एक stable baseline से शुरू करें, resets और malformed outputs को अलग-अलग record करें, और एक समय में केवल एक parameter बदलें।<sup>[[2]](#references)</sup>
 
+## References
+
+- [1] [Hayashi et al. - Intentional Electromagnetic Interference पर आधारित Non-invasive Trigger-free Fault Injection Method](https://csrc.nist.gov/csrc/media/events/non-invasive-attack-testing-workshop/documents/04_hayashi.pdf)
+- [2] [ChipWhisperer Documentation - Capture Hardware Overview और Comparison](https://chipwhisperer.readthedocs.io/en/latest/Capture/overview.html)
 {{#include ../../banners/hacktricks-training.md}}

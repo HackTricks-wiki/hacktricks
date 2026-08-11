@@ -4,22 +4,27 @@
 
 ## RUBYOPT
 
-इस env variable का उपयोग करके **ruby** के execute होने पर हर बार उसमें **नए params** जोड़ना संभव है। हालांकि ruby code को execute करने के लिए param **`-e`** का उपयोग नहीं किया जा सकता, लेकिन libraries के load path में एक नया folder जोड़ने के लिए **`-I`** और **`-r`** params का उपयोग करना और फिर **load करने के लिए एक library specify करना** संभव है।
+Ruby किसी script को चलाने से पहले `RUBYOPT` environment variable से supported command-line switches को parse करता है। हालांकि Ruby वहाँ कुछ switches को अस्वीकार करता है, `-I` किसी library-search directory को prepend कर सकता है और `-r` किसी library को require कर सकता है। इसलिए, attacker-controlled environment variables के साथ Ruby launch करने वाली process को attacker-controlled Ruby code load करने के लिए बाध्य किया जा सकता है।<sup>[[1]](#references)</sup>
 
-**`/tmp`** में library **`inject.rb`** बनाएं:
+`/tmp/inject.rb` बनाएँ:
 ```ruby:inject.rb
 puts `whoami`
 ```
-कहीं भी इस तरह की ruby script बनाएं:
+`hello.rb` जैसी एक harmless Ruby script बनाएँ:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-फिर किसी मनमानी Ruby script से इसे load करें:
+इसे नियंत्रित `RUBYOPT` मान के साथ चलाएँ:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-मज़ेदार तथ्य, यह **`--disable-rubyopt`** param के साथ भी काम करता है:
+इस व्यवहार को disable करने के लिए, script name से **पहले** `--disable=rubyopt` (या `--disable-rubyopt`) पास करें:<sup>[[1]](#references)</sup>
 ```bash
-RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
+RUBYOPT="-I/tmp -rinject" ruby --disable=rubyopt hello.rb
 ```
+`hello.rb` के बाद लिखा गया कोई विकल्प script को `ARGV` में पास किया जाता है; यह Ruby द्वारा `RUBYOPT` की पहले की processing को disable नहीं करता।<sup>[[1]](#references)</sup>
+
+## References
+
+- [1] [Ruby documentation - Ruby command-line options](https://ruby-doc.org/3.4/ruby/options_md.html)
 {{#include ../../../banners/hacktricks-training.md}}

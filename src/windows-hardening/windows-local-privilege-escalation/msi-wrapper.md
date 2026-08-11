@@ -2,21 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/) से free version app download करें, इसे execute करें और इसमें "malicious" binary को wrap करें।\
-ध्यान दें कि यदि आप केवल **command lines execute** करना चाहते हैं, तो आप "**.bat**" को wrap कर सकते हैं (**cmd.exe** चुनने के बजाय .bat file चुनें)।
+MSI Wrapper किसी executable या script को Windows Installer (`.msi`) file के रूप में package कर सकता है। Free edition को download करके start करें, फिर package करने के लिए executable चुनें। Commands का sequence चलाने के लिए `cmd.exe` को package करने के बजाय input के रूप में `.bat` file चुनें।<sup>[[1]](#references)</sup>
 
-![MSI Wrapper: ध्यान दें कि यदि आप केवल command lines execute करना चाहते हैं, तो आप " .bat " को wrap कर सकते हैं (cmd.exe चुनने के बजाय .bat file चुनें)](<../../images/image (417).png>)
+![MSI Wrapper में source executable या batch script चुनना](<../../images/image (417).png>)
 
-और configuration का यह सबसे महत्वपूर्ण भाग है:
+Execution context और installer की अन्य properties को सावधानी से configure करें:
 
-![MSI Wrapper: और यह configuration का सबसे महत्वपूर्ण भाग है](<../../images/image (312).png>)
+![MSI Wrapper में application ID और security context configure करना](<../../images/image (312).png>)
 
-![MSI Wrapper: और यह configuration का सबसे महत्वपूर्ण भाग है](<../../images/image (346).png>)
+![MSI Wrapper में installer properties configure करना](<../../images/image (346).png>)
 
-![MSI Wrapper: और यह configuration का सबसे महत्वपूर्ण भाग है](<../../images/image (1072).png>)
+![MSI Wrapper की build settings की समीक्षा करना](<../../images/image (1072).png>)
 
-(कृपया ध्यान दें कि यदि आप अपनी स्वयं की binary को pack करने का प्रयास करते हैं, तो आप इन values को modify कर पाएंगे।)
+Custom binary को package करते समय इन values को बदला जा सकता है।
 
-अब केवल **next buttons** पर click करें और अंत में **build button** पर click करें; आपका installer/wrapper generate हो जाएगा।
+बाकी wizard pages पर आगे बढ़ें और installer generate करने के लिए **Build** चुनें।<sup>[[1]](#references)</sup>
 
+> [!WARNING]
+> MSI बनाने से अपने-आप elevated privileges प्राप्त नहीं होते। Installation elevated होगी या नहीं, यह Windows Installer policy, package context और user authorization पर निर्भर करता है। Microsoft चेतावनी देता है कि user और computer दोनों के लिए `AlwaysInstallElevated` enable करने से non-administrators system privileges के साथ packages install कर सकते हैं।<sup>[[2]](#references)</sup>
+
+## References
+
+- [1] [MSI Wrapper documentation - शुरुआत करना](https://www.exemsi.com/documentation/getting-started/)
+- [2] [Microsoft Learn - non-admin के लिए elevated privileges के साथ package install करना](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
 {{#include ../../banners/hacktricks-training.md}}
