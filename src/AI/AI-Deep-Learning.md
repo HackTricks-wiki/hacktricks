@@ -2,126 +2,127 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Deep Learning
+## Deep Learning <sup>[[1]](#references)</sup>
 
-Diep leer is 'n substel van masjienleer wat neurale netwerke met meerdere lae (diep neurale netwerke) gebruik om komplekse patrone in data te modelleer. Dit het merkwaardige sukses behaal in verskeie domeine, insluitend rekenaarvisie, natuurlike taalverwerking, en spraakherkenning.
+Deep learning is 'n subset van machine learning wat neural networks met veelvuldige lae (deep neural networks) gebruik om komplekse patrone in data te modelleer. Dit het merkwaardige sukses in verskeie domeine behaal, insluitend rekenaarvisie, natuurliketaalverwerking en spraakherkenning.
 
 ### Neural Networks
 
-Neurale netwerke is die boublokke van diep leer. Hulle bestaan uit onderling verbindde nodes (neurone) wat in lae georganiseer is. Elke neuron ontvang insette, pas 'n gewigte som toe, en stuur die resultaat deur 'n aktiveringsfunksie om 'n uitvoer te produseer. Die lae kan soos volg gekategoriseer word:
+Neural networks is die boustene van deep learning. Hulle bestaan uit onderling gekoppelde nodusse (neurone) wat in lae georganiseer is. Elke neuron ontvang insette, pas 'n geweegde som toe en stuur die resultaat deur 'n activation function om 'n uitset te produseer. Die lae kan soos volg gekategoriseer word:
 - **Input Layer**: Die eerste laag wat die insetdata ontvang.
-- **Hidden Layers**: Tussentydse lae wat transformasies op die insetdata uitvoer. Die aantal versteekte lae en neurone in elke laag kan verskil, wat lei tot verskillende argitekture.
-- **Output Layer**: Die finale laag wat die uitvoer van die netwerk produseer, soos klas waarskynlikhede in klassifikasietake.
+- **Hidden Layers**: Intermediêre lae wat transformasies op die insetdata uitvoer. Die aantal hidden layers en neurone in elke laag kan wissel, wat tot verskillende argitekture lei.
+- **Output Layer**: Die finale laag wat die uitset van die netwerk produseer, soos klaswaarskynlikhede in classification-take.
+
 
 ### Activation Functions
 
-Wanneer 'n laag neurone insetdata verwerk, pas elke neuron 'n gewig en 'n vooroordeel op die inset toe (`z = w * x + b`), waar `w` die gewig is, `x` die inset is, en `b` die vooroordeel is. Die uitvoer van die neuron word dan deur 'n **aktiveringsfunksie gestuur om nie-lineariteit** in die model in te voer. Hierdie aktiveringsfunksie dui basies aan of die volgende neuron "geaktiveer moet word en hoeveel". Dit stel die netwerk in staat om komplekse patrone en verhoudings in die data te leer, wat dit in staat stel om enige deurlopende funksie te benader.
+Wanneer 'n laag neurone insetdata verwerk, pas elke neuron 'n gewig en 'n bias op die inset toe (`z = w * x + b`), waar `w` die gewig is, `x` die inset is en `b` die bias is. Die uitset van die neuron word dan deur 'n **activation function gestuur om nie-lineariteit** in die model in te voer. Hierdie activation function dui basies aan of die volgende neuron "geaktiveer moet word en in watter mate". Dit laat die netwerk toe om komplekse patrone en verwantskappe in die data te leer, waardeur dit enige kontinue funksie kan benader.
 
-Daarom stel aktiveringsfunksies nie-lineariteit in die neurale netwerk in, wat dit toelaat om komplekse verhoudings in die data te leer. Algemene aktiveringsfunksies sluit in:
-- **Sigmoid**: Kaart insetwaardes na 'n reeks tussen 0 en 1, dikwels gebruik in binêre klassifikasie.
-- **ReLU (Rectified Linear Unit)**: Gee die inset direk uit as dit positief is; anders gee dit nul uit. Dit word wyd gebruik weens sy eenvoud en doeltreffendheid in die opleiding van diep netwerke.
-- **Tanh**: Kaart insetwaardes na 'n reeks tussen -1 en 1, dikwels gebruik in versteekte lae.
-- **Softmax**: Converteer rou tellings in waarskynlikhede, dikwels gebruik in die uitvoerlaag vir multi-klas klassifikasie.
+Activation functions voer dus nie-lineariteit in die neural network in, wat dit toelaat om komplekse verwantskappe in die data te leer. Algemene activation functions sluit in:
+- **Sigmoid**: Koppel insetwaardes aan 'n reeks tussen 0 en 1, en word dikwels in binary classification gebruik.
+- **ReLU (Rectified Linear Unit)**: Lewer die inset direk as dit positief is; anders lewer dit nul. Dit word wyd gebruik vanweë die eenvoud en doeltreffendheid daarvan tydens die training van deep networks.
+- **Tanh**: Koppel insetwaardes aan 'n reeks tussen -1 en 1, en word dikwels in hidden layers gebruik.
+- **Softmax**: Skakel rou tellings na waarskynlikhede om, en word dikwels in die output layer vir multi-class classification gebruik.
 
 ### Backpropagation
 
-Backpropagation is die algoritme wat gebruik word om neurale netwerke op te lei deur die gewigte van die verbindings tussen neurone aan te pas. Dit werk deur die gradiënt van die verliesfunksie ten opsigte van elke gewig te bereken en die gewigte in die teenoorgestelde rigting van die gradiënt op te dateer om die verlies te minimaliseer. Die stappe wat betrokke is by backpropagation is:
+Backpropagation is die algoritme wat gebruik word om neural networks te train deur die gewigte van die verbindings tussen neurone aan te pas. Dit werk deur die gradient van die loss function ten opsigte van elke gewig te bereken en die gewigte in die teenoorgestelde rigting van die gradient by te werk om die loss te minimaliseer. Die stappe betrokke by backpropagation is:
 
-1. **Forward Pass**: Bereken die uitvoer van die netwerk deur die inset deur die lae te stuur en aktiveringsfunksies toe te pas.
-2. **Loss Calculation**: Bereken die verlies (fout) tussen die voorspelde uitvoer en die werklike teiken met behulp van 'n verliesfunksie (bv. gemiddelde kwadraatfout vir regressie, kruis-entropie vir klassifikasie).
-3. **Backward Pass**: Bereken die gradiënte van die verlies ten opsigte van elke gewig met behulp van die kettingreël van calculus.
-4. **Weight Update**: Werk die gewigte op met behulp van 'n optimalisering algoritme (bv. stogastiese gradiënt afdaling, Adam) om die verlies te minimaliseer.
+1. **Forward Pass**: Bereken die uitset van die netwerk deur die inset deur die lae te stuur en activation functions toe te pas.
+2. **Loss Calculation**: Bereken die loss (fout) tussen die voorspelde uitset en die ware teiken deur 'n loss function te gebruik (bv. mean squared error vir regression, cross-entropy vir classification).
+3. **Backward Pass**: Bereken die gradients van die loss ten opsigte van elke gewig deur die kettingreël van calculus te gebruik.
+4. **Weight Update**: Werk die gewigte by deur 'n optimization algorithm te gebruik (bv. stochastic gradient descent, Adam) om die loss te minimaliseer.
 
-## Convolutional Neural Networks (CNNs)
+## Convolutional Neural Networks (CNNs) <sup>[[2]](#references)</sup>
 
-Convolutional Neural Networks (CNNs) is 'n gespesialiseerde tipe neurale netwerk wat ontwerp is vir die verwerking van roosteragtige data, soos beelde. Hulle is veral effektief in rekenaarvisietake weens hul vermoë om outomaties ruimtelike hiërargieë van kenmerke te leer.
+Convolutional Neural Networks (CNNs) is 'n gespesialiseerde tipe neural network wat ontwerp is vir die verwerking van roosteragtige data, soos beelde. Hulle is besonder doeltreffend in computer vision-take vanweë hul vermoë om ruimtelike hiërargieë van features outomaties aan te leer.
 
 Die hoofkomponente van CNNs sluit in:
-- **Convolutional Layers**: Pas konvolusie-operasies op die insetdata toe met behulp van leerbare filters (kernels) om plaaslike kenmerke te onttrek. Elke filter gly oor die inset en bereken 'n dotproduk, wat 'n kenmerkkaart produseer.
-- **Pooling Layers**: Verminder die kenmerkkaarte se ruimtelike dimensies terwyl belangrike kenmerke behou word. Algemene pooling operasies sluit maksimum pooling en gemiddelde pooling in.
-- **Fully Connected Layers**: Verbind elke neuron in een laag met elke neuron in die volgende laag, soortgelyk aan tradisionele neurale netwerke. Hierdie lae word tipies aan die einde van die netwerk vir klassifikasietake gebruik.
+- **Convolutional Layers**: Pas convolution-bewerkings op die insetdata toe deur learnable filters (kernels) te gebruik om plaaslike features te onttrek. Elke filter gly oor die inset en bereken 'n dot product, wat 'n feature map produseer.
+- **Pooling Layers**: Verminder die grootte van die feature maps om hul ruimtelike dimensies te verklein terwyl belangrike features behoue bly. Algemene pooling-bewerkings sluit max pooling en average pooling in.
+- **Fully Connected Layers**: Verbind elke neuron in een laag met elke neuron in die volgende laag, soortgelyk aan tradisionele neural networks. Hierdie lae word tipies aan die einde van die netwerk vir classification-take gebruik.
 
-Binne 'n CNN **`Convolutional Layers`**, kan ons ook onderskei tussen:
-- **Initial Convolutional Layer**: Die eerste konvolusielaag wat die rou insetdata (bv. 'n beeld) verwerk en nuttig is om basiese kenmerke soos kante en teksture te identifiseer.
-- **Intermediate Convolutional Layers**: Volgende konvolusielaag wat voortbou op die kenmerke wat deur die aanvanklike laag geleer is, wat die netwerk toelaat om meer komplekse patrone en verteenwoordigings te leer.
-- **Final Convolutional Layer**: Die laaste konvolusielaag voor die volledig verbind lae, wat hoëvlak kenmerke vasvang en die data voorberei vir klassifikasie.
+Binne 'n CNN se **`Convolutional Layers`** kan ons ook onderskei tussen:
+- **Initial Convolutional Layer**: Die eerste convolutional layer wat die rou insetdata (bv. 'n beeld) verwerk en nuttig is om basiese features soos rande en teksture te identifiseer.
+- **Intermediate Convolutional Layers**: Daaropvolgende convolutional layers wat voortbou op die features wat deur die aanvanklike laag geleer is, waardeur die netwerk meer komplekse patrone en representasies kan leer.
+- **Final Convolutional Layer**: Die laaste convolutional layers voor die fully connected layers, wat hoëvlak-features vaslê en die data vir classification voorberei.
 
 > [!TIP]
-> CNNs is veral effektief vir beeldklassifikasie, objekdetectie, en beeldsegmentasie take weens hul vermoë om ruimtelike hiërargieë van kenmerke in roosteragtige data te leer en die aantal parameters deur gewigdeling te verminder.
-> Boonop werk hulle beter met data wat die kenmerk lokaliteitsbeginsel ondersteun waar naburige data (pixels) meer waarskynlik verwant is as verre pixels, wat dalk nie die geval is vir ander tipes data soos teks nie.
-> Verder, let op hoe CNNs in staat sal wees om selfs komplekse kenmerke te identifiseer, maar nie enige ruimtelike konteks toe te pas nie, wat beteken dat dieselfde kenmerk wat in verskillende dele van die beeld gevind word, dieselfde sal wees.
+> CNNs is besonder doeltreffend vir image classification-, object detection- en image segmentation-take vanweë hul vermoë om ruimtelike hiërargieë van features in roosteragtige data aan te leer en die aantal parameters deur weight sharing te verminder.
+> Boonop werk hulle beter met data wat die feature locality-prinsipe ondersteun, waar naburige data (pixels) meer waarskynlik met mekaar verband hou as verafgeleë pixels, wat moontlik nie die geval is vir ander tipes data soos teks nie.
+> Let verder daarop dat CNNs selfs komplekse features sal kan identifiseer, maar nie enige ruimtelike konteks sal kan toepas nie; dit beteken dat dieselfde feature wat in verskillende dele van die beeld gevind word, dieselfde sal wees.
 
 ### Example defining a CNN
 
-*Hier sal jy 'n beskrywing vind oor hoe om 'n Convolutional Neural Network (CNN) in PyTorch te definieer wat begin met 'n bondel RGB-beelde as dataset van grootte 48x48 en konvolusielae en maxpool gebruik om kenmerke te onttrek, gevolg deur volledig verbind lae vir klassifikasie.*
+*Hier sal jy 'n beskrywing vind van hoe om 'n Convolutional Neural Network (CNN) in PyTorch te definieer wat met 'n batch RGB-beelde as dataset van grootte 48x48 begin en convolutional layers en maxpool gebruik om features te onttrek, gevolg deur fully connected layers vir classification.*
 
-Dit is hoe jy 1 konvolusielaag in PyTorch kan definieer: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`.
+So kan jy 1 convolutional layer in PyTorch definieer: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`.
 
-- `in_channels`: Aantal insetkanale. In die geval van RGB-beelde is dit 3 (een vir elke kleurkanaal). As jy met gryskaalbeelde werk, sal dit 1 wees.
+- `in_channels`: Aantal insetkanale. In die geval van RGB-beelde is dit 3 (een vir elke kleurkanaal). As jy met grayscale-beelde werk, sal dit 1 wees.
 
-- `out_channels`: Aantal uitvoerkanale (filters) wat die konvolusielaag sal leer. Dit is 'n hiperparameter wat jy kan aanpas op grond van jou modelargitektuur.
+- `out_channels`: Aantal uitsetkanale (filters) wat die convolutional layer sal leer. Dit is 'n hyperparameter wat jy volgens jou modelargitektuur kan aanpas.
 
-- `kernel_size`: Grootte van die konvolusiefilter. 'n Algemene keuse is 3x3, wat beteken dat die filter 'n 3x3 gebied van die insetbeeld sal dek. Dit is soos 'n 3×3×3 kleurstempel wat gebruik word om die out_channels van die in_channels te genereer:
-1. Plaas daardie 3×3×3 stempel op die boonste linkerhoek van die beeldkubus.
-2. Vermenigvuldig elke gewig met die pixel onder dit, voeg hulle almal by, voeg vooroordeel by → jy kry een nommer.
-3. Skryf daardie nommer in 'n leë kaart op posisie (0, 0).
-4. Gly die stempel een pixel na regs (stride = 1) en herhaal totdat jy 'n hele 48×48 rooster vul.
+- `kernel_size`: Grootte van die convolutional filter. 'n Algemene keuse is 3x3, wat beteken dat die filter 'n 3x3-area van die insetbeeld sal dek. Dit is soos 'n 3×3×3-kleurstempel wat gebruik word om die out_channels uit die in_channels te genereer:
+1. Plaas daardie 3×3×3-stempel op die boonste linkerhoek van die beeldkubus.
+2. Vermenigvuldig elke gewig met die pixel daaronder, tel hulle almal bymekaar, tel bias by → jy kry een getal.
+3. Skryf daardie getal by posisie (0, 0) in 'n leë kaart.
+4. Skuif die stempel een pixel na regs (stride = 1) en herhaal totdat jy 'n volledige 48×48-rooster gevul het.
 
-- `padding`: Aantal pixels wat aan elke kant van die inset bygevoeg word. Padding help om die ruimtelike dimensies van die inset te behou, wat meer beheer oor die uitvoergrootte toelaat. Byvoorbeeld, met 'n 3x3 kern en 'n 48x48 pixel inset, sal padding van 1 die uitvoergrootte dieselfde hou (48x48) na die konvolusie-operasie. Dit is omdat die padding 'n grens van 1 pixel rondom die insetbeeld byvoeg, wat die kern toelaat om oor die kante te gly sonder om die ruimtelike dimensies te verminder.
+- `padding`: Aantal pixels wat aan elke kant van die inset gevoeg word. Padding help om die ruimtelike dimensies van die inset te behou, wat meer beheer oor die uitsetgrootte moontlik maak. Byvoorbeeld, met 'n 3x3-kernel en 'n 48x48-pixel-inset sal padding van 1 die uitsetgrootte dieselfde hou (48x48) ná die convolution-bewerking. Dit is omdat die padding 'n rand van 1 pixel rondom die insetbeeld voeg, wat die kernel toelaat om oor die rande te gly sonder om die ruimtelike dimensies te verklein.
 
-Dan is die aantal leerbare parameters in hierdie laag:
-- (3x3x3 (kern grootte) + 1 (vooroordeel)) x 32 (out_channels) = 896 leerbare parameters.
+Die aantal trainable parameters in hierdie laag is dus:
+- (3x3x3 (kernel size) + 1 (bias)) x 32 (out_channels) = 896 trainable parameters.
 
-Let daarop dat 'n Vooroordeel (+1) per kern wat gebruik word, bygevoeg word omdat die funksie van elke konvolusielaag is om 'n lineêre transformasie van die inset te leer, wat verteenwoordig word deur die vergelyking:
+Let daarop dat 'n Bias (+1) per gebruikte kernel bygevoeg word, omdat die funksie van elke convolutional layer is om 'n lineêre transformasie van die inset te leer, wat deur die volgende vergelyking voorgestel word:
 ```plaintext
 Y = f(W * X + b)
 ```
-waar die `W` die gewig matriks is (die geleerde filters, 3x3x3 = 27 params), `b` is die vooroordeel vektor wat +1 is vir elke uitvoer kanaal.
+waar die `W` die gewigmatriks is (die geleerde filters, 3x3x3 = 27 parameters), `b` die bias-vektor is wat +1 vir elke output channel is.
 
-Let daarop dat die uitvoer van `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` 'n tensor van vorm `(batch_size, 32, 48, 48)` sal wees, omdat 32 die nuwe aantal gegenereerde kanale van grootte 48x48 pixels is.
+Let daarop dat die output van `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` ’n tensor van vorm `(batch_size, 32, 48, 48)` sal wees, omdat 32 die nuwe aantal gegenereerde channels van grootte 48x48 pixels is.
 
-Dan kan ons hierdie konvolusielaag aan 'n ander konvolusielaag koppel soos: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`.
+Daarna kan ons hierdie convolutional layer aan ’n ander convolutional layer koppel, soos volg: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`.
 
-Wat sal byvoeg: (32x3x3 (kern grootte) + 1 (vooroordeel)) x 64 (uitvoer kanale) = 18,496 leerbare parameters en 'n uitvoer van vorm `(batch_size, 64, 48, 48)`.
+Dit sal die volgende byvoeg: (32x3x3 (kernel size) + 1 (bias)) x 64 (out_channels) = 18,496 trainable parameters en ’n output van vorm `(batch_size, 64, 48, 48)`.
 
-Soos jy kan sien, **groei die aantal parameters vinnig met elke bykomende konvolusielaag**, veral namate die aantal uitvoer kanale toeneem.
+Soos jy kan sien, **groei die aantal parameters vinnig met elke bykomende convolutional layer**, veral namate die aantal output channels toeneem.
 
-Een opsie om die hoeveelheid data wat gebruik word te beheer, is om **max pooling** na elke konvolusielaag te gebruik. Max pooling verminder die ruimtelike dimensies van die kenmerkkaarte, wat help om die aantal parameters en rekenkundige kompleksiteit te verminder terwyl belangrike kenmerke behou word.
+Een opsie om die hoeveelheid data wat gebruik word te beheer, is om **max pooling** ná elke convolutional layer te gebruik. Max pooling verminder die ruimtelike dimensies van die feature maps, wat help om die aantal parameters en computational complexity te verminder terwyl belangrike features behou word.
 
-Dit kan verklaar word as: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`. Dit dui basies aan om 'n rooster van 2x2 pixels te gebruik en die maksimum waarde van elke rooster te neem om die grootte van die kenmerkkaart met die helfte te verminder. Verder beteken `stride=2` dat die pooling operasie 2 pixels op 'n slag sal beweeg, in hierdie geval, wat enige oorvleueling tussen die pooling areas voorkom.
+Dit kan verklaar word as: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`. Dit dui basies aan dat ’n rooster van 2x2 pixels gebruik moet word en dat die maksimum waarde uit elke rooster geneem moet word om die grootte van die feature map met die helfte te verminder. Verder beteken `stride=2` dat die pooling-operasie 2 pixels op ’n slag sal beweeg; in hierdie geval voorkom dit enige oorvleueling tussen die pooling-areas.
 
-Met hierdie pooling laag, sal die uitvoer vorm na die eerste konvolusielaag `(batch_size, 64, 24, 24)` wees nadat `self.pool1` op die uitvoer van `self.conv2` toegepas is, wat die grootte tot 1/4de van die vorige laag verminder.
+Met hierdie pooling layer sal die output-vorm ná die eerste convolutional layer `(batch_size, 64, 24, 24)` wees nadat `self.pool1` op die output van `self.conv2` toegepas is, wat die grootte tot 1/4 van die vorige layer verminder.
 
 > [!TIP]
-> Dit is belangrik om te pool na die konvolusielaag om die ruimtelike dimensies van die kenmerkkaarte te verminder, wat help om die aantal parameters en rekenkundige kompleksiteit te beheer terwyl die aanvanklike parameter belangrike kenmerke leer.
-> Jy kan die konvolusies voor 'n pooling laag sien as 'n manier om kenmerke uit die invoerdata te onttrek (soos lyne, kante), hierdie inligting sal steeds teenwoordig wees in die gepoolde uitvoer, maar die volgende konvolusielaag sal nie in staat wees om die oorspronklike invoerdata te sien nie, net die gepoolde uitvoer, wat 'n verminderde weergawe van die vorige laag met daardie inligting is.
-> In die gewone volgorde: `Conv → ReLU → Pool` elke 2×2 pooling venster stry nou met kenmerk aktiverings (“kant teenwoordig / nie”), nie rou pixel intensiteite nie. Om die sterkste aktivering te behou, hou regtig die mees opvallende bewys.
+> Dit is belangrik om ná die convolutional layers te pool om die ruimtelike dimensies van die feature maps te verminder. Dit help om die aantal parameters en computational complexity te beheer, terwyl dit die aanvanklike parameters laat leer om belangrike features te identifiseer.
+>You can see the convolutions before a pooling layer as ’n manier om features uit die input data te onttrek (soos lyne en rande). Hierdie inligting sal steeds in die pooled output teenwoordig wees, maar die volgende convolutional layer sal nie die oorspronklike input data kan sien nie, slegs die pooled output, wat ’n verkleinde weergawe van die vorige layer met daardie inligting is.
+>In die gewone volgorde: `Conv → ReLU → Pool` werk elke 2×2 pooling window nou met feature activations (“edge present / not”) eerder as met rou pixelintensiteite. Deur die sterkste activation te behou, word die mees opvallende bewyse inderdaad behou.
 
-Dan, nadat ons soveel konvolusie- en poolinglae bygevoeg het as wat nodig is, kan ons die uitvoer platmaak om dit in ten volle verbindingslae te voer. Dit word gedoen deur die tensor na 'n 1D vektor vir elke monster in die bondel te hervorm:
+Daarna, nadat ons soveel convolutional en pooling layers bygevoeg het as wat nodig is, kan ons die output flatten om dit aan fully connected layers te voer. Dit word gedoen deur die tensor na ’n 1D-vektor vir elke sample in die batch te reshape:
 ```python
 x = x.view(-1, 64*24*24)
 ```
-En met hierdie 1D-vektor met al die opleidingsparameters wat deur die vorige konvolusionele en poel-lae gegenereer is, kan ons 'n ten volle verbindingslaag soos volg definieer:
+En met hierdie 1D-vektor met al die opleidingsparameters wat deur die vorige konvolusie- en pooling-lae gegenereer is, kan ons ’n volledig gekoppelde laag soos volg definieer:
 ```python
 self.fc1 = nn.Linear(64 * 24 * 24, 512)
 ```
-Wat die platgemaakte uitvoer van die vorige laag sal neem en dit na 512 verborge eenhede sal kaart.
+Wat die afgeplatte uitvoer van die vorige laag sal neem en dit na 512 hidden units sal karteer.
 
-Let op hoe hierdie laag `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` leerbare parameters bygevoeg het, wat 'n beduidende toename is in vergelyking met die konvolusielae. Dit is omdat ten volle verbindingslae elke neuron in een laag aan elke neuron in die volgende laag verbind, wat lei tot 'n groot aantal parameters.
+Let daarop hoe hierdie laag `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` trainable parameters bygevoeg het, wat ’n beduidende toename teenoor die convolutional layers is. Dit is omdat fully connected layers elke neuron in een laag aan elke neuron in die volgende laag koppel, wat tot ’n groot aantal parameters lei.
 
-Laastens kan ons 'n uitvoerlaag byvoeg om die finale klas logits te produseer:
+Laastens kan ons ’n output layer byvoeg om die finale class logits te produseer:
 ```python
 self.fc2 = nn.Linear(512, num_classes)
 ```
-Dit sal `(512 + 1 (bias)) * num_classes` opleidingsparameters byvoeg, waar `num_classes` die aantal klasse in die klassifikasietaak is (bv. 43 vir die GTSRB-dataset).
+Dit sal `(512 + 1 (bias)) * num_classes` afrigbare parameters byvoeg, waar `num_classes` die aantal klasse in die klassifikasietaak is (bv. 43 vir die GTSRB-datastel).
 
-Een ander algemene praktyk is om 'n dropout-laag voor die ten volle verbindingslae by te voeg om oorpassing te voorkom. Dit kan gedoen word met:
+Een laaste algemene praktyk is om ’n dropout layer voor die fully connected layers by te voeg om overfitting te voorkom. Dit kan soos volg gedoen word:
 ```python
 self.dropout = nn.Dropout(0.5)
 ```
-Hierdie laag stel eweredig 'n fraksie van die invoereenhede op nul tydens opleiding, wat help om oorpassing te voorkom deur die afhanklikheid van spesifieke neurone te verminder.
+Hierdie laag stel tydens opleiding lukraak ’n fraksie van die inseteenhede op nul, wat help om oorpassing te voorkom deur die afhanklikheid van spesifieke neurone te verminder.
 
-### CNN Code voorbeeld
+### CNN Kodevoorbeeld
 ```python
 import torch
 import torch.nn as nn
@@ -222,23 +223,23 @@ x = self.fc2(x)
 # Note that the output is not passed through a softmax activation here, as it is typically done in the loss function (e.g., CrossEntropyLoss)
 return x
 ```
-### CNN Code opleidingsvoorbeeld
+### CNN Code-opleidingsvoorbeeld
 
-Die volgende kode sal 'n paar opleidingsdata genereer en die `MY_NET` model wat hierbo gedefinieer is, oplei. Sommige interessante waardes om op te let:
+Die volgende code sal sommige opleidingsdata skep en die `MY_NET`-model wat hierbo gedefinieer is, oplei. Sommige interessante waardes om op te let:
 
-- `EPOCHS` is die aantal kere wat die model die hele datastel tydens opleiding sal sien. As EPOCH te klein is, mag die model nie genoeg leer nie; as dit te groot is, mag dit oorpas.
-- `LEARNING_RATE` is die stapgrootte vir die optimizer. 'n Klein leerkoers mag lei tot stadige konvergensie, terwyl 'n groot een die optimale oplossing mag oorskiet en konvergensie mag voorkom.
-- `WEIGHT_DECAY` is 'n regulariseringsterm wat help om oorpassing te voorkom deur groot gewigte te straf.
+- `EPOCHS` is die aantal kere wat die model die volledige datastel tydens opleiding sal sien. As EPOCH te klein is, leer die model moontlik nie genoeg nie; as dit te groot is, kan dit oorfit.
+- `LEARNING_RATE` is die stapgrootte vir die optimizer. ’n Klein learning rate kan tot stadige konvergensie lei, terwyl ’n groot een die optimale oplossing kan oorskiet en konvergensie kan voorkom.
+- `WEIGHT_DECAY` is ’n regularization-term wat help om overfitting te voorkom deur groot gewigte te penaliseer.
 
-Ten opsigte van die opleidingslus is dit 'n paar interessante inligting om te weet:
-- Die `criterion = nn.CrossEntropyLoss()` is die verliesfunksie wat gebruik word vir multi-klas klassifikasietake. Dit kombineer softmax aktivering en kruis-entropie verlies in 'n enkele funksie, wat dit geskik maak vir die opleiding van modelle wat klas logits uitset.
-- As die model verwag is om ander tipes uitsette te lewer, soos binêre klassifikasie of regressie, sou ons verskillende verliesfunksies soos `nn.BCEWithLogitsLoss()` vir binêre klassifikasie of `nn.MSELoss()` vir regressie gebruik.
-- Die `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` inisieer die Adam optimizer, wat 'n gewilde keuse is vir die opleiding van diep leer modelle. Dit pas die leerkoers aan vir elke parameter gebaseer op die eerste en tweede oomblikke van die gradiënte.
-- Ander optimizers soos `optim.SGD` (Stogastiese Gradiënt Afdaling) of `optim.RMSprop` kan ook gebruik word, afhangende van die spesifieke vereistes van die opleidings taak.
-- Die `model.train()` metode stel die model in opleidingsmodus, wat lae soos dropout en batch normalisering in staat stel om anders te werk tydens opleiding in vergelyking met evaluasie.
-- `optimizer.zero_grad()` maak die gradiënte van alle geoptimaliseerde tensore skoon voor die agterwaartse pas, wat nodig is omdat gradiënte standaard in PyTorch ophoop. As dit nie skoongemaak word nie, sou gradiënte van vorige iterasies by die huidige gradiënte gevoeg word, wat tot onakkurate opdaterings lei.
-- `loss.backward()` bereken die gradiënte van die verlies ten opsigte van die modelparameters, wat dan deur die optimizer gebruik word om die gewigte op te dateer.
-- `optimizer.step()` werk die modelparameters op gebaseer op die berekende gradiënte en die leerkoers.
+Wat die training loop betref, is hier interessante inligting om te ken:
+- Die `criterion = nn.CrossEntropyLoss()` is die loss function wat vir multi-class classification-take gebruik word. Dit kombineer softmax-activation en cross-entropy-loss in ’n enkele funksie, wat dit geskik maak vir die opleiding van modelle wat class logits uitvoer.
+- As daar van die model verwag word om ander soorte outputs te lewer, soos binary classification of regression, sal ons ander loss functions gebruik, soos `nn.BCEWithLogitsLoss()` vir binary classification of `nn.MSELoss()` vir regression.
+- Die `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` initialiseer die Adam optimizer, wat ’n gewilde keuse vir die opleiding van deep learning-modelle is. Dit pas die learning rate vir elke parameter aan gebaseer op die eerste en tweede momente van die gradients.
+- Ander optimizers, soos `optim.SGD` (Stochastic Gradient Descent) of `optim.RMSprop`, kan ook gebruik word, afhangend van die spesifieke vereistes van die opleidingstaak.
+- Die `model.train()`-metode stel die model in training mode, sodat lae soos dropout en batch normalization tydens opleiding anders as tydens evaluering optree.
+- `optimizer.zero_grad()` verwyder die gradients van alle geoptimaliseerde tensors voordat die backward pass uitgevoer word. Dit is nodig omdat gradients by verstek in PyTorch ophoop. Indien dit nie verwyder word nie, sal gradients van vorige iterasies by die huidige gradients gevoeg word, wat tot verkeerde updates lei.
+- `loss.backward()` bereken die gradients van die loss ten opsigte van die modelparameters, wat vervolgens deur die optimizer gebruik word om die gewigte by te werk.
+- `optimizer.step()` werk die modelparameters by gebaseer op die berekende gradients en die learning rate.
 ```python
 import torch, torch.nn.functional as F
 from torch import nn, optim
@@ -375,46 +376,53 @@ print(classification_report(labels_all, preds_all, zero_division=0))
 print("Confusion matrix (rows = true, cols = pred):")
 print(confusion_matrix(labels_all, preds_all))
 ```
-## Herhalende Neurale Netwerke (RNNs)
+## Herhalende neurale netwerke (RNN's) <sup>[[3]](#references)</sup>
 
-Herhalende Neurale Netwerke (RNNs) is 'n klas neurale netwerke wat ontwerp is om opeenvolgende data te verwerk, soos tydreekse of natuurlike taal. Anders as tradisionele feedforward neurale netwerke, het RNNs verbindings wat op hulself terugloop, wat hulle in staat stel om 'n verborge toestand te handhaaf wat inligting oor vorige insette in die reeks vasvang.
+Herhalende neurale netwerke (RNN's) is 'n klas neurale netwerke wat ontwerp is vir die verwerking van opeenvolgende data, soos tydreekse of natuurlike taal. Anders as tradisionele feedforward-neurale netwerke, het RNN's verbindings wat na hulself teruglus, sodat hulle 'n versteekte toestand kan behou wat inligting oor vorige insette in die reeks vaslê.
 
-Die hoofkomponente van RNNs sluit in:
-- **Herhalende Lae**: Hierdie lae verwerk insetreekse een tydstap op 'n slag, en werk hul verborge toestand op grond van die huidige inset en die vorige verborge toestand by. Dit stel RNNs in staat om tydelike afhanklikhede in die data te leer.
-- **Verborge Toestand**: Die verborge toestand is 'n vektor wat die inligting van vorige tydstappe opsom. Dit word by elke tydstap opgedateer en word gebruik om voorspellings vir die huidige inset te maak.
-- **Uitsetlaag**: Die uitsetlaag produseer die finale voorspellings op grond van die verborge toestand. In baie gevalle word RNNs gebruik vir take soos taalmodellering, waar die uitset 'n waarskynlikheidsverdeling oor die volgende woord in 'n reeks is.
+Die hoofkomponente van RNN's sluit in:
+- **Herhalende lae**: Hierdie lae verwerk invoerreekse een tydstap op 'n slag en werk hul versteekte toestand by op grond van die huidige invoer en die vorige versteekte toestand. Dit stel RNN's in staat om temporele afhanklikhede in die data aan te leer.
+- **Versteekte toestand**: Die versteekte toestand is 'n vektor wat die inligting van vorige tydstappe opsom. Dit word by elke tydstap opgedateer en word gebruik om voorspellings vir die huidige invoer te maak.
+- **Uitsetlaag**: Die uitsetlaag lewer die finale voorspellings op grond van die versteekte toestand. In baie gevalle word RNN's gebruik vir take soos taalmodellering, waar die uitset 'n waarskynlikheidsverdeling oor die volgende woord in 'n reeks is.
 
-Byvoorbeeld, in 'n taalmodel verwerk die RNN 'n reeks woorde, byvoorbeeld, "Die kat het op die" en voorspel die volgende woord op grond van die konteks wat deur die vorige woorde verskaf word, in hierdie geval, "mat".
+Byvoorbeeld, in 'n taalmodel verwerk die RNN 'n reeks woorde, byvoorbeeld, "The cat sat on the", en voorspel die volgende woord op grond van die konteks wat deur die vorige woorde verskaf word, in hierdie geval, "mat".
 
-### Lang Korttermyn Geheue (LSTM) en Gated Recurrent Unit (GRU)
+### Long Short-Term Memory (LSTM) en Gated Recurrent Unit (GRU) <sup>[[3]](#references)</sup>
 
-RNNs is veral effektief vir take wat opeenvolgende data insluit, soos taalmodellering, masjienvertaling en spraakherkenning. Hulle kan egter sukkel met **langafstand afhanklikhede weens probleme soos vervagende gradiënte**.
+RNN's is besonder doeltreffend vir take wat opeenvolgende data behels, soos taalmodellering, masjienvertaling en spraakherkenning. Hulle kan egter sukkel met **langafstandafhanklikhede weens kwessies soos verdwynnende gradiënte**.
 
-Om dit aan te spreek, is gespesialiseerde argitekture soos Lang Korttermyn Geheue (LSTM) en Gated Recurrent Unit (GRU) ontwikkel. Hierdie argitekture stel poortmeganismes in wat die vloei van inligting beheer, wat hulle in staat stel om langafstand afhanklikhede meer effektief vas te vang.
+Om dit aan te spreek, is gespesialiseerde argitekture soos Long Short-Term Memory (LSTM) en Gated Recurrent Unit (GRU) ontwikkel. Hierdie argitekture stel hekmeganismes bekend wat die vloei van inligting beheer, sodat hulle langafstandafhanklikhede doeltreffender kan vaslê.
 
-- **LSTM**: LSTM-netwerke gebruik drie poorte (invoerpunt, vergeetpoorte, en uitsetpoorte) om die vloei van inligting in en uit die seltoestand te reguleer, wat hulle in staat stel om inligting oor lang reekse te onthou of te vergeet. Die invoerpunt beheer hoeveel nuwe inligting bygevoeg moet word op grond van die inset en die vorige verborge toestand, die vergeetpoorte beheer hoeveel inligting weggegooi moet word. Deur die invoerpunt en die vergeetpoorte te kombineer, kry ons die nuwe toestand. Laastens, deur die nuwe seltoestand, met die inset en die vorige verborge toestand te kombineer, kry ons ook die nuwe verborge toestand.
-- **GRU**: GRU-netwerke vereenvoudig die LSTM-argitektuur deur die invoer- en vergeetpoorte in 'n enkele opdateringspoort te kombineer, wat hulle rekenkundig meer doeltreffend maak terwyl hulle steeds langafstand afhanklikhede vasvang.
+- **LSTM**: LSTM-netwerke gebruik drie hekke (insethek, vergeethek en uitsethek) om die vloei van inligting in en uit die seltoestand te reguleer, wat hulle in staat stel om inligting oor lang reekse heen te onthou of te vergeet. Die insethek beheer hoeveel nuwe inligting bygevoeg moet word op grond van die invoer en die vorige versteekte toestand; die vergeethek beheer hoeveel inligting weggegooi moet word. Deur die insethek en die vergeethek te kombineer, kry ons die nuwe toestand. Laastens kry ons ook die nuwe versteekte toestand deur die nuwe seltoestand met die inset en die vorige versteekte toestand te kombineer.
+- **GRU**: GRU-netwerke vereenvoudig die LSTM-argitektuur deur die inset- en vergeethekke in 'n enkele opdateringshek te kombineer, wat hulle rekenaarmatig doeltreffender maak terwyl hulle steeds langafstandafhanklikhede vaslê.
 
-## LLMs (Groot Taalmodelle)
+## LLM's (Groottaalmodelle)
 
-Groot Taalmodelle (LLMs) is 'n tipe diep leer model wat spesifiek ontwerp is vir natuurlike taalverwerkings take. Hulle word op groot hoeveelhede teksdata opgelei en kan menslike-agtige teks genereer, vrae beantwoord, tale vertaal, en verskeie ander taalverwante take uitvoer. 
-LLMs is tipies gebaseer op transformator-argitekture, wat self-aandag meganismes gebruik om verhoudings tussen woorde in 'n reeks vas te vang, wat hulle in staat stel om konteks te verstaan en samehangende teks te genereer.
+Groottaalmodelle (LLM's) is 'n soort deep learning-model wat spesifiek ontwerp is vir natuurliketaalverwerkingstake. Hulle word op groot hoeveelhede teksdata opgelei en kan mensagtige teks genereer, vrae beantwoord, tale vertaal en verskeie ander taalverwante take uitvoer.
+LLM's is tipies gebaseer op transformer-argitekture, wat selfaandagmeganismes gebruik om verhoudings tussen woorde in 'n reeks vas te lê, sodat hulle konteks kan verstaan en samehangende teks kan genereer.
 
-### Transformator Argitektuur
-Die transformator argitektuur is die grondslag van baie LLMs. Dit bestaan uit 'n kodering-dekodering struktuur, waar die kodering die insetreeks verwerk en die dekodering die uitsetreeks genereer. Die sleutelkomponente van die transformator argitektuur sluit in:
-- **Self-Aandag Mekanisme**: Hierdie mekanisme stel die model in staat om die belangrikheid van verskillende woorde in 'n reeks te weeg wanneer dit voorstellings genereer. Dit bereken aandag punte op grond van die verhoudings tussen woorde, wat die model in staat stel om op relevante konteks te fokus.
-- **Multi-Kop Aandag**: Hierdie komponent stel die model in staat om verskeie verhoudings tussen woorde vas te vang deur verskeie aandagkoppe te gebruik, wat elk op verskillende aspekte van die inset fokus.
-- **Posisionele Kodering**: Aangesien transformators nie 'n ingeboude begrip van woordorde het nie, word posisionele kodering by die insetembeddings gevoeg om inligting oor die posisie van woorde in die reeks te verskaf.
+### Transformer-argitektuur <sup>[[4]](#references)</sup>
+Die transformer-argitektuur is die grondslag van baie LLM's. Dit bestaan uit 'n enkodeerder-dekodeerderstruktuur, waar die enkodeerder die invoerreeks verwerk en die dekodeerder die uitsetreeks genereer. Die belangrikste komponente van die transformer-argitektuur sluit in:
+- **Selfaandagmeganisme**: Hierdie meganisme stel die model in staat om die belangrikheid van verskillende woorde in 'n reeks te weeg wanneer representasies gegenereer word. Dit bereken aandagtellings op grond van die verhoudings tussen woorde, sodat die model op relevante konteks kan fokus.
+- **Multi-Head Attention**: Hierdie komponent stel die model in staat om veelvuldige verhoudings tussen woorde vas te lê deur verskeie aandagkoppe te gebruik, wat elkeen op verskillende aspekte van die invoer fokus.
+- **Posisionele enkodering**: Aangesien transformers nie 'n ingeboude begrip van woordorde het nie, word posisionele enkodering by die invoer-inbeddings gevoeg om inligting oor die posisie van woorde in die reeks te verskaf.
 
-## Diffusie Modelle
-Diffusie modelle is 'n klas generatiewe modelle wat leer om data te genereer deur 'n diffusieproses te simuleer. Hulle is veral effektief vir take soos beeldgenerasie en het in onlangse jare gewildheid verwerf. 
-Diffusie modelle werk deur geleidelik 'n eenvoudige ruisverdeling in 'n komplekse dataverdeling te transformeer deur 'n reeks diffusie stappe. Die sleutelkomponente van diffusie modelle sluit in:
-- **Voorwaartse Diffusie Proses**: Hierdie proses voeg geleidelik ruis by die data, wat dit in 'n eenvoudige ruisverdeling transformeer. Die voorwaartse diffusie proses word tipies gedefinieer deur 'n reeks ruisvlakke, waar elke vlak ooreenstem met 'n spesifieke hoeveelheid ruis wat by die data gevoeg word.
-- **Achterwaartse Diffusie Proses**: Hierdie proses leer om die voorwaartse diffusie proses te keer, wat die data geleidelik ontruis om monsters van die teikenverdeling te genereer. Die agterwaartse diffusie proses word opgelei met 'n verliesfunksie wat die model aanmoedig om die oorspronklike data uit ruismonsters te herkonstruer.
+## Diffusiemodelle <sup>[[5]](#references)</sup>
+Diffusiemodelle is 'n klas generatiewe modelle wat leer om data te genereer deur 'n diffusi proses te simuleer. Hulle is besonder doeltreffend vir take soos beeldgenerering en het die afgelope jare gewild geword.
+Diffusiemodelle werk deur 'n eenvoudige geraasverspreiding geleidelik in 'n komplekse dataverspreiding te omskep deur 'n reeks diffusiestappe. Die belangrikste komponente van diffusiemodelle sluit in:
+- **Voorwaartse diffusi proses**: Hierdie proses voeg geleidelik geraas by die data en omskep dit in 'n eenvoudige geraasverspreiding. Die voorwaartse diffusi proses word tipies deur 'n reeks geraasvlakke gedefinieer, waar elke vlak met 'n spesifieke hoeveelheid geraas ooreenstem wat by die data gevoeg word.
+- **Omgekeerde diffusi proses**: Hierdie proses leer om die voorwaartse diffusi proses om te keer en die data geleidelik van geraas te ontslae te raak om monsters uit die teikenverspreiding te genereer. Die omgekeerde diffusi proses word opgelei met behulp van 'n verliesfunksie wat die model aanmoedig om die oorspronklike data uit raserige monsters te rekonstrueer.
 
-Boonop, om 'n beeld uit 'n teksprompt te genereer, volg diffusie modelle tipies hierdie stappe:
-1. **Teks Kodering**: Die teksprompt word in 'n latente voorstelling gekodeer met behulp van 'n tekskodering (bv. 'n transformator-gebaseerde model). Hierdie voorstelling vang die semantiese betekenis van die teks vas.
-2. **Ruis Monsterneming**: 'n Willekeurige ruisvektor word uit 'n Gaussiese verdeling geneem.
-3. **Diffusie Stappe**: Die model pas 'n reeks diffusie stappe toe, wat die ruisvektor geleidelik in 'n beeld transformeer wat ooreenstem met die teksprompt. Elke stap behels die toepassing van geleerde transformasies om die beeld te ontruis.
+Daarbenewens volg diffusiemodelle tipies hierdie stappe om 'n beeld uit 'n teksaanwysing te genereer:
+1. **Teksenkodering**: Die teksaanwysing word met behulp van 'n teksenkodeerder (bv. 'n transformer-gebaseerde model) in 'n latente representasie geënkodeer. Hierdie representasie vang die semantiese betekenis van die teks vas.
+2. **Geraasmonsterneming**: 'n Ewekansige geraasvektor word uit 'n Gaussiese verspreiding gemonster.
+3. **Diffusiestappe**: Die model pas 'n reeks diffusiestappe toe en omskep die geraasvektor geleidelik in 'n beeld wat met die teksaanwysing ooreenstem. Elke stap behels die toepassing van aangeleerde transformasies om die geraas uit die beeld te verwyder.
 
+## References
+
+- [1] [PyTorch - Tutoriaal oor neurale netwerke](https://docs.pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html)
+- [2] [PyTorch - Conv2d](https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html)
+- [3] [PyTorch - LSTM](https://docs.pytorch.org/docs/stable/generated/torch.nn.LSTM.html)
+- [4] [PyTorch - Transformer](https://docs.pytorch.org/docs/stable/generated/torch.nn.Transformer.html)
+- [5] [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)
 {{#include ../banners/hacktricks-training.md}}

@@ -3,11 +3,11 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> As die program `scanf` gebruik om **verskeie waardes gelyktydig vanaf stdin te verkry**, moet jy 'n toestand genereer wat ná die **`scanf`** begin.
+> As die program `scanf` gebruik om **verskeie waardes tegelykertyd vanaf stdin te kry**, moet jy ’n toestand genereer wat ná die **`scanf`** begin.
 
-Kodes geneem van [https://github.com/jakespringer/angr_ctf]<sup>[[1]](#references)</sup>
+Kodes geneem van [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Invoer om adres te bereik (wat die adres aandui)
+### Invoer om ’n adres te bereik (wat die adres aandui)
 ```python
 import angr
 import sys
@@ -104,7 +104,7 @@ password1 = claripy.BVS('password1', password1_size_in_bits)
 password2_size_in_bits = 32  # :integer
 password2 = claripy.BVS('password2', password2_size_in_bits)
 
-# Relate it Vectors with the registriy values you are interested in to reach an address
+# Relate its vectors to the register values needed to reach an address
 initial_state.regs.eax = password0
 initial_state.regs.ebx = password1
 initial_state.regs.edx = password2
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-In hierdie scenario is die input met `scanf("%u %u")` geneem en die waarde `"1 1"` is gegee, dus kom die waardes **`0x00000001`** van die stack uit die **user input**. Jy kan sien hoe hierdie waardes by `$ebp - 8` begin. Daarom het ons in die kode **8 bytes van `$esp` afgetrek (aangesien `$ebp` en `$esp` op daardie oomblik dieselfde waarde gehad het)** en daarna die BVS gepush.
+In hierdie scenario is die invoer met `scanf("%u %u")` geneem en die waarde `"1 1"` is verskaf, dus kom die waardes **`0x00000001`** op die stack van die **gebruikerinvoer**. Jy kan sien hoe hierdie waardes by `$ebp - 8` begin. Daarom het ons in die kode **8 grepe van `$esp` afgetrek (aangesien `$ebp` en `$esp` op daardie oomblik dieselfde waarde gehad het)** en daarna die BVS gepush.
 
-![Plaas bit vectors in die stack om uit te vind watter waarde daardie stack-posisie moet hê om 'n program flow te bereik: In hierdie scenario is die input met scanf("%u %u") geneem en die waarde "1...](<../../../images/image (136).png>)
+![Plaas bitvektore in die stack om uit te vind watter waarde die stack-posisie moet hê om 'n programvloei te bereik: In hierdie scenario is die invoer met scanf("%u %u") geneem en die waarde "1...](<../../../images/image (136).png>)
 
-### Statiese Memory-waardes (Global variables)
+### Statiese geheuewaardes (Globale veranderlikes)
 ```python
 import angr
 import claripy
@@ -215,7 +215,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-#Get an address after the scanf. Once the input has already being saved in the memory positions
+# Get an address after scanf, once the input has been saved in memory
 start_address = 0x8048606
 initial_state = project.factory.blank_state(addr=start_address)
 
@@ -337,7 +337,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-# Get an address just before opening the file with th simbolic content
+# Get an address just before opening the file with the symbolic content
 # Or at least when the file is not going to suffer more changes before being read
 start_address = 0x80488db
 initial_state = project.factory.blank_state(addr=start_address)
@@ -347,10 +347,10 @@ initial_state = project.factory.blank_state(addr=start_address)
 filename = 'WCEXPXBW.txt'
 symbolic_file_size_bytes = 64
 
-# Create a BV which is going to be the content of the simbolic file
+# Create a bit-vector that will hold the symbolic file content
 password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-# Create the file simulation with the simbolic content
+# Create the simulated file with symbolic content
 password_file = angr.storage.SimFile(filename, content=password)
 
 # Add the symbolic file we created to the symbolic filesystem.
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> Let daarop dat die symbolic file ook konstante data gemeng met symbolic data kan bevat:
+> Let daarop dat die simboliese lêer ook konstante data kan bevat wat met simboliese data saamgevoeg is:
 >
 > ```python
 >  # Hello world, my name is John.
@@ -402,13 +402,13 @@ main(sys.argv)
 >  # the string from the file, except four symbolic bytes where the name would be
 >  # stored.
 >  # (!)
->  ```
+> ```
 
 ### Beperkings toepas
 
 > [!TIP]
-> Soms kos eenvoudige menslike bewerkings, soos om 2 woorde van lengte 16 **char by char** (lus) te vergelyk, **angr** baie omdat dit **branches** eksponensieel moet genereer, aangesien dit 1 branch per if genereer: `2^16`\
-> Daarom is dit makliker om **angr te vra om by ’n vorige punt uit te kom** (waar die werklik moeilike deel reeds voltooi is) en **daardie beperkings handmatig te stel**.
+> Soms kos eenvoudige menslike bewerkings, soos om 2 woorde met ’n lengte van 16 **char by char** (lus) te vergelyk, ’n **angr** baie hulpbronne omdat dit vertakkings **eksponensieel** moet genereer: dit genereer 1 vertakking per if: `2^16`\
+> Daarom is dit makliker om vir **angr** te **vra om by ’n vorige punt uit te kom** (waar die werklike moeilike deel reeds voltooi is) en **daardie beperkings handmatig te stel**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> In sommige scenario's kan jy **veritesting** aktiveer, wat soortgelyke statusse sal saamvoeg om onnodige branches te bespaar en die oplossing te vind: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> In sommige scenario's kan jy **veritesting** aktiveer, wat soortgelyke statusse sal saamvoeg om onnodige vertakkings te bespaar en die oplossing te vind: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Nog iets wat jy in hierdie scenario's kan doen, is om die **function te hook sodat angr iets kry wat dit** makliker kan verstaan.
+> Nog iets wat jy in hierdie scenario's kan doen, is om **die funksie te hook sodat angr iets kry wat dit** makliker kan verstaan.
 
-### Simulasiebestuurders
+### Simulation Managers
 
-Sommige simulasiebestuurders kan nuttiger as ander wees. In die vorige voorbeeld was daar 'n probleem, aangesien baie nuttige branches geskep is. Hier sal die **veritesting**-tegniek hulle saamvoeg en 'n oplossing vind.\
-Hierdie simulasiebestuurder kan ook geaktiveer word met: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Sommige simulation managers kan nuttiger as ander wees. In die vorige voorbeeld was daar 'n probleem omdat baie nuttige vertakkings geskep is. Hier sal die **veritesting**-tegniek hulle saamvoeg en 'n oplossing vind.\
+Hierdie simulation manager kan ook geaktiveer word met: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Bypassing van een oproep na 'n funksie
+### Hooking/Bypassing een oproep na 'n funksie
 ```python
 # This level performs the following computations:
 #
@@ -562,7 +562,7 @@ user_input_buffer_address,
 user_input_buffer_length
 )
 
-# Create a simbolic IF that if the loaded string frommemory is the expected
+# Create a symbolic If expression that checks the string loaded from memory
 # return True (1) if not returns False (0) in eax
 check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking a function / Simprocedure
+### Hooking van 'n funksie / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -807,8 +807,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-## Verwysings
+## References
 
 - [1] [jakespringer/angr_ctf - GitHub-bewaarplek](https://github.com/jakespringer/angr_ctf)
-
 {{#include ../../../banners/hacktricks-training.md}}
