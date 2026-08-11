@@ -1,8 +1,8 @@
-# Side-Channel-Analyse-Angriffe
+# Side-Channel-Analysis-Angriffe
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Side-channel attacks gewinnen Geheimnisse durch die Beobachtung physischer oder mikroarchitektonischer „leakage“, die mit dem internen Zustand *korreliert*, aber *nicht* Teil der logischen Schnittstelle des Geräts ist. Beispiele reichen von der Messung der momentan von einer Smartcard aufgenommenen Stromstärke bis zur Ausnutzung von CPU-Energieverwaltungseffekten über ein Netzwerk.
+Side-channel attacks gewinnen Geheimnisse durch die Beobachtung physischer oder mikroarchitektonischer „leakage“, die *mit* dem internen Zustand *korreliert*, aber *nicht* Teil der logischen Schnittstelle des Geräts ist. Beispiele reichen von der Messung des momentanen Stromverbrauchs einer Smartcard bis zur Ausnutzung von CPU-Power-Management-Effekten über ein Netzwerk.
 
 ---
 
@@ -10,99 +10,114 @@ Side-channel attacks gewinnen Geheimnisse durch die Beobachtung physischer oder 
 
 | Kanal | Typisches Ziel | Instrumentierung |
 |---------|---------------|-----------------|
-| Stromverbrauch | Smartcards, IoT-MCUs, FPGAs | Oszilloskop + Shunt-Widerstand/HS-Probe (z. B. CW503)
-| Elektromagnetisches Feld (EM) | CPUs, RFID, AES-Beschleuniger | H-Feld-Probe + LNA, ChipWhisperer/RTL-SDR
-| Ausführungszeit / Caches | Desktop- und Cloud-CPUs | Hochpräzise Timer (rdtsc/rdtscp), Remote-Time-of-Flight
-| Akustik / Mechanik | Tastaturen, 3D-Drucker, Relais | MEMS-Mikrofon, Laservibrometer
-| Optisch und thermisch | LEDs, Laserdrucker, DRAM | Photodiode / Hochgeschwindigkeitskamera, IR-Kamera
-| Fehlerinduziert | ASIC/MCU-Kryptografie | Clock-/Voltage-Glitch, EMFI, Laser-Injektion
+| Stromverbrauch | Smartcards, IoT-MCUs, FPGAs | Oszilloskop plus Shunt-Widerstand oder Differenzialsonde; der CW503 ist ein Netzteil für Sonden/LNAs und selbst keine Sonde<sup>[[11]](#references)</sup> |
+| Elektromagnetisches Feld (EM) | CPUs, RFID, AES-Beschleuniger | H-Feld-/Nahfeldsonde plus rauscharmen Verstärker und Oszilloskop oder SDR-Empfänger wie ein RTL-SDR<sup>[[13]](#references)</sup> |
+| Ausführungszeit / Caches | Desktop- und Cloud-CPUs | Hochpräzise Timer (`rdtsc`/`rdtscp`) oder Remote-Time-of-Flight |
+| Akustisch / mechanisch | Tastaturen, 3-D-Drucker, Drucker, Relais und CPU-Spannungsregler | MEMS-Mikrofon oder Laser-Vibrometer<sup>[[6]](#references)[[9]](#references)[[14]](#references)[[15]](#references)</sup> |
+| Optisch & thermisch | Status-LEDs, Displays, DRAM und thermisch gekoppelte Geräte | Fotodiode, Hochgeschwindigkeitskamera oder IR-Kamera<sup>[[7]](#references)[[16]](#references)</sup> |
+| Fault injection | ASIC-/MCU-Kryptografie | Clock-/Voltage-Glitch, EMFI oder Laser-Injektion |
 
 ---
 
 ## Power Analysis
 
 ### Simple Power Analysis (SPA)
-Eine *einzelne* Trace beobachten und Peaks/Valleys direkt mit Operationen verknüpfen (z. B. DES-S-Boxen).<sup>[[1]](#references)</sup>
+Beobachte einen *einzelnen* Trace und ordne sichtbare Merkmale Operationen wie Verzweigungen, modularer Multiplikation oder unterschiedlichen Instruktionssequenzen zu.<sup>[[1]](#references)</sup>
+
+Das genaue Setup ist zielspezifisch. Das folgende Beispiel verwendet die aktuelle High-Level-Capture-API von ChipWhisperer, nachdem Scope und Target verbunden und konfiguriert wurden:<sup>[[1]](#references)</sup>
 ```python
-# ChipWhisperer-husky example – capture one AES trace
-from chipwhisperer.capture.api.programmers import STMLink
-from chipwhisperer.capture import CWSession
-cw = CWSession(project='aes')
-trig = cw.scope.trig
-cw.connect(cw.capture.scopes[0])
-cw.capture.init()
-trace = cw.capture.capture_trace()
-print(trace.wave)  # numpy array of power samples
+import chipwhisperer as cw
+
+scope = cw.scope()
+scope.default_setup()
+target = cw.target(scope)
+ktp = cw.ktp.Basic()
+key, plaintext = ktp.next()
+trace = cw.capture_trace(scope, target, plaintext, key)
+if trace is not None:
+print(trace.wave)  # NumPy array of power samples
 ```
 ### Differential/Correlation Power Analysis (DPA/CPA)
-Erfasse *N > 1 000* Traces, stelle eine Hypothese für das Schlüsselbyte `k` auf, berechne das HW/HD-Modell und korreliere es mit der leakage.
+Erfasse mehrere Traces, stelle eine Hypothese für ein Schlüsselbyte `k` auf, berechne ein Hamming-Gewichts- (HW) oder Hamming-Distanz- (HD)-Leakage-Modell und korreliere es mit jedem Sample. Die erforderliche Anzahl an Traces wird durch das Ziel, das Rauschen, die Ausrichtung, Gegenmaßnahmen und das Leakage-Modell bestimmt; sie ist kein fester Schwellenwert.
 ```python
 import numpy as np
 corr = np.corrcoef(leakage_model(k), traces[:,sample])
 ```
-CPA bleibt state-of-the-art, aber Machine-Learning-Varianten (MLA, Deep-Learning-SCA) dominieren inzwischen Wettbewerbe wie ASCAD-v2 (2023).
+CPA ist eine standardmäßige Baseline. Template attacks, mutual-information analysis und Machine-Learning-Ansätze können nützlich sein, wenn der leak nichtlinear ist oder Traces schlecht ausgerichtet sind.
 
 ---
 
 ## Elektromagnetische Analyse (EMA)
-Nahfeld-EM-Sonden (500 MHz–3 GHz) leaken identische Informationen wie Power Analysis, *ohne* Shunts einzusetzen. Forschungsarbeiten aus dem Jahr 2024 zeigten die Wiederherstellung von Schlüsseln in einer Entfernung von **>10 cm** von einem STM32 mithilfe von Spectrum Correlation und kostengünstigen RTL-SDR-Frontends.
+Near-field-EM-Analyse kann datenabhängige Aktivität beobachten, ohne einen Shunt in den Versorgungspfad einzufügen. Sie legt nicht unbedingt dasselbe Signal offen wie ein Power-Trace: Sondenposition, Ausrichtung, Bandbreite, Frontend-Verstärkung, Trigger-Qualität und Abstand sind entscheidend.
 
 ---
 
 ## Timing- und mikroarchitektonische Angriffe
 Moderne CPUs leaken Geheimnisse über gemeinsam genutzte Ressourcen:
-* **Hertzbleed (2022)** – Die DVFS-Frequenzskalierung korreliert mit der Hamming Weight und ermöglicht die *remote* Extraktion von EdDSA-Schlüsseln.<sup>[[2]](#references)</sup>
-* **Downfall / Gather Data Sampling (Intel, 2023)** – Transient Execution zum Lesen von AVX-Gather-Daten über SMT-Threads hinweg.<sup>[[3]](#references)</sup>
-* **Zenbleed (AMD, 2023) & Inception (AMD, 2023)** – Spekulative Vector-Misprediction leakt Register domainübergreifend.<sup>[[4]](#references)</sup><sup>[[5]](#references)</sup>
+* **Hertzbleed (2022)** – Datenabhängige dynamische Spannungs- und Frequenzskalierung erzeugt einen Remote-Timing-Kanal. Die ursprüngliche End-to-End-Demonstration zur Schlüsselwiederherstellung zielte auf SIKE; Folgearbeiten behandeln weitere Primitive.<sup>[[2]](#references)</sup>
+* **Downfall / Gather Data Sampling (Intel, 2023)** – Transient execution kann Daten offenlegen, die von Vector-Gather-Instruktionen über Sicherheitsgrenzen hinweg verwendet werden.<sup>[[3]](#references)</sup>
+* **Zenbleed (AMD, 2023)** – Eine fehlerhafte Behandlung des spekulativen Zustands von Vector-Registern kann Daten vom selben physischen Core offenlegen.<sup>[[4]](#references)</sup>
+* **Inception (AMD, 2023)** – Ein Transient-Execution-Angriff kombiniert Phantom Execution mit Training in transient execution, um vom Angreifer kontrollierte Misprediction-Gadgets zu erzeugen.<sup>[[5]](#references)</sup>
 
 ---
 
 ## Akustische und optische Angriffe
-* 2024 zeigte "​iLeakKeys" eine Genauigkeit von 95 %, wenn Laptop-Tastatureingaben mithilfe eines **Smartphone-Mikrofons über Zoom** und eines CNN-Klassifikators wiederhergestellt wurden.
-* Hochgeschwindigkeits-Photodioden erfassen die Aktivitäts-LED von DDR4 und rekonstruieren AES-Rundenschlüssel innerhalb von <1 Minute (BlackHat 2023).
+Akustische Leaks wurden in einem kontrollierten Experiment verwendet, um RSA-Schlüssel aus Laptop-Geräuschen wiederherzustellen, auch mithilfe des Mikrofons eines nahegelegenen Mobiltelefons.<sup>[[6]](#references)</sup> Eine separate Keyboard-Studie aus dem Jahr 2023 klassifizierte Tastendrücke mit 95 % Genauigkeit, wenn sie mit Aufnahmen von einem nahegelegenen Telefon trainiert wurde, und mit 93 % bei Training mit Zoom-Audio; diese Werte beschreiben das Training-auf-dem-Gerät-Experiment dieser Studie, nicht beliebige Tastaturen oder Opfer.<sup>[[9]](#references)</sup> Optische Emissionen von Status-LEDs können ebenfalls mit verarbeiteten Daten korreliert werden. Diese Ergebnisse sind ziel- und setupspezifisch; ihre Reichweite oder Erfolgsrate sollte nicht auf andere Geräte verallgemeinert werden.<sup>[[7]](#references)</sup>
 
 ---
 
 ## Fault Injection und Differential Fault Analysis (DFA)
-Die Kombination von Faults mit Side-Channel-Leakage verkürzt die Schlüsselsuche (z. B. 1-trace AES DFA). Aktuelle Tools zu Hobbyistenpreisen:
-* **ChipSHOUTER & PicoEMP** – elektromagnetisches Pulse Glitching unter 1 ns.
-* **GlitchKit-R5 (2025)** – Open-Source-Plattform für Clock/Voltage Glitching mit Unterstützung für RISC-V-SoCs.
+Die Kombination kontrollierter Fehler mit Side-Channel-Beobachtungen kann die Schlüsselsuche für manche Algorithmen und Implementierungen verkürzen. Zu den üblichen Laborplattformen gehören die Voltage-/Clock-Glitching-Funktionen von ChipWhisperer sowie dedizierte EM-Fault-Injection-Tools wie ChipSHOUTER oder PicoEMP. Die Beschreibung „sub-1 ns“ aus dem früheren Entwurf sollte nicht als Spezifikation verwendet werden: Das veröffentlichte Handbuch von ChipSHOUTER nennt typische eingefügte Pulsbreiten von **15–80 ns** mit seiner 1-mm-Spitze und **24–480 ns** mit seiner 4-mm-Spitze (obwohl Trigger-/Puls-Jitter in Pikosekunden spezifiziert wird). Die erforderliche Timing-Auflösung, Sondenplatzierung und Anzahl fehlerhafter Ausgaben hängen vom Ziel und Fault Model ab.<sup>[[1]](#references)[[10]](#references)</sup>
+
+## Nicht verifizierte Forschungsansätze aus dem früheren Entwurf
+
+Der frühere Entwurf behauptete außerdem: ein **500 MHz–3 GHz**-EM-Setup, das mithilfe eines RTL-SDR einen STM32-Schlüssel aus mehr als **10 cm** Entfernung wiederherstellt; eine DDR4-Aktivitäts-LED, die bei „Black Hat 2023“ innerhalb von weniger als einer Minute einen AES-Rundenschlüssel offenlegt; sowie eine Open-Source-RISC-V-Glitching-Plattform namens **GlitchKit-R5** aus dem Jahr 2025. Während dieses Audits konnte keine passende Primärarbeit, kein Konferenzmaterial und kein Projekt-Repository gefunden werden. Diese exakten Details werden als Ansätze für Suche und Reproduktion beibehalten, nicht als etablierte Ergebnisse oder Tooling-Empfehlungen.
 
 ---
 
-## Typischer Attack-Workflow
-1. Leakage-Kanal und Mounting Point identifizieren (VCC-Pin, Decoupling-Kondensator, Nahfeld-Punkt).
-2. Trigger einfügen (GPIO oder patternbasiert).
-3. >1 k Traces mit geeigneter Abtastung und geeigneten Filtern sammeln.
-4. Vorverarbeiten (Alignment, Mean Removal, LP/HP-Filter, Wavelet, PCA).
-5. Statistische oder ML-Key-Recovery (CPA, MIA, DL-SCA).
-6. Validieren und bei Outliers iterieren.
+## Typischer Angriffs-Workflow
+1. Leak-Kanal und Mounting-Point identifizieren (VCC-Pin, Entkopplungskondensator, Near-Field-Punkt).
+2. Trigger einfügen (GPIO- oder pattern-basiert).
+3. Ausreichend viele Traces für den gewählten statistischen Test erfassen und dabei Plaintext/Ciphertext sowie weitere Metadaten aufzeichnen.
+4. Vorverarbeitung durchführen (Alignment, Mittelwertentfernung, LP-/HP-Filter, Wavelet, PCA).
+5. Statistische oder ML-Schlüsselwiederherstellung (CPA, MIA, DL-SCA).
+6. Ausreißer validieren und iterativ weiterarbeiten.
 
 ---
 
-## Defences und Hardening
+## Abwehrmaßnahmen und Hardening
 * **Constant-Time**-Implementierungen und Memory-Hard-Algorithmen.
-* **Masking/Shuffling** – Geheimnisse in zufällige Shares aufteilen; First-Order-Resistance durch TVLA zertifiziert.
-* **Hiding** – On-Chip-Spannungsregler, randomisierte Clock, Dual-Rail-Logik, EM-Schilde.
-* **Fault Detection** – redundante Berechnung, Threshold Signatures.
-* **Operational** – DVFS/Turbo in Crypto-Kernels deaktivieren, SMT isolieren, Co-Location in Multi-Tenant-Clouds verbieten.
+* **Masking/Shuffling** – Geheimnisse in zufällige Shares aufteilen; First-Order-Resistenz durch TVLA zertifiziert.
+* **Hiding** – On-Chip-Spannungsregler, randomisierter Takt, Dual-Rail-Logik, EM-Schilde.
+* **Fault Detection** – redundante Berechnung, Threshold-Signaturen.
+* **Betrieblich** – DVFS/Turbo in Crypto-Kernels deaktivieren, SMT isolieren, Co-Location in Multi-Tenant-Clouds untersagen.
 
 ---
 
 ## Tools und Frameworks
-* **ChipWhisperer-Husky** (2024) – 500-MS/s-Scope + Cortex-M-Trigger; Python-API wie oben.<sup>[[1]](#references)</sup>
-* **Riscure Inspector & FI** – kommerziell, unterstützt automatisierte Leakage-Bewertung (TVLA-2.0).
-* **scaaml** – TensorFlow-basierte Deep-Learning-SCA-Library (v1.2 – 2025).
-* **pyecsca** – ANSSI-Open-Source-ECC-SCA-Framework.
+* **ChipWhisperer-Husky** (2024) – 500-MS/s-Scope plus Cortex-M-Trigger; Python-API wie oben.<sup>[[1]](#references)</sup>
+* **Riscure Inspector und Fault-Injection-Produkte** – kommerzielle Analyse- und automatisierte Test-Tools.
+* **scaaml** – TensorFlow-basierte Deep-Learning-SCA-Tools und Datasets.<sup>[[12]](#references)</sup>
+* **pyecsca** – Open-Source-Toolkit für Reverse Engineering von Black-Box-ECC-Implementierungen durch Side-Channels.<sup>[[8]](#references)</sup>
 
 ---
 
-## Referenzen
+## References
 
 - [1] [ChipWhisperer-Dokumentation](https://chipwhisperer.readthedocs.io/en/latest/)
 - [2] [Hertzbleed-Angriffspapier](https://www.hertzbleed.com/)
 - [3] [Downfall: Ausnutzung spekulativer Datensammlung](https://downfall.page/)
 - [4] [Zenbleed](https://lock.cmpxchg8b.com/zenbleed.html)
-- [5] [Inception: Aufdeckung neuer Angriffsflächen durch Training bei transienter Ausführung](https://comsec.ethz.ch/research/microarch/inception/)
-
+- [5] [Inception: Neue Angriffsflächen durch Training in transient execution offenlegen](https://comsec.ethz.ch/research/microarch/inception/)
+- [6] [RSA-Schlüsselextraktion durch akustische Kryptanalyse mit niedriger Bandbreite](https://eprint.iacr.org/2013/857.pdf)
+- [7] [Informationsleck durch optische Emissionen](https://ora.ox.ac.uk/objects/uuid%3A4fe94cf8-052a-4025-a312-4a62f58fffac)
+- [8] [pyecsca-Artefaktdokumentation](https://artifacts.iacr.org/tches/2024/a26/readme.html)
+- [9] [Ein praktischer, auf Deep Learning basierender akustischer Side-Channel-Angriff auf Tastaturen](https://arxiv.org/abs/2308.01074)
+- [10] [NewAE – ChipSHOUTER-Benutzerhandbuch](https://media.newae.com/manuals/ChipSHOUTER_PRESS_1.3.pdf)
+- [11] [ChipWhisperer-Dokumentation – CW503-Sondenstromversorgung](https://chipwhisperer.readthedocs.io/en/latest/Tools/CW503%20Probe%20Power%20Supply.html)
+- [12] [Google-SCAAML-Dokumentation](https://google.github.io/scaaml/)
+- [13] [FOSDEM – Durchführung kostengünstiger elektromagnetischer Side-Channel-Angriffe mit RTL-SDR](https://archive.fosdem.org/2019/schedule/event/sdr_em_sidechannel_attacks/attachments/slides/2931/export/events/attachments/sdr_em_sidechannel_attacks/slides/2931/robyns2019fosdem.pdf)
+- [14] [Geistiges Eigentum entschlüsseln: Akustischer und magnetischer Side-Channel-Angriff auf einen 3D-Drucker](https://arxiv.org/abs/2411.10887)
+- [15] [USENIX Security – Akustische Side-Channel-Angriffe auf Drucker](https://www.usenix.org/conference/usenixsecurity10/acoustic-side-channel-attacks-printers)
+- [16] [Temperaturüberwachung mithilfe von DRAM](https://bearhw.ece.vt.edu/content/dam/bearhw_ece_vt_edu/publications/caslab/xiong2019spying.pdf)
 {{#include ../../banners/hacktricks-training.md}}
