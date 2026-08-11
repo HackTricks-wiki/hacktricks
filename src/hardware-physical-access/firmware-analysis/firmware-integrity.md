@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The **custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
+When an authorized assessment finds weak or missing firmware-signature verification, a modified firmware image can demonstrate the integrity impact. The following lab workflow adds a bind shell while retaining the original extraction, emulation, and repacking steps.<sup>[[2]](#references)[[3]](#references)</sup>
 
 1. The firmware can be extracted using firmware-mod-kit (FMK).
 2. The target firmware architecture and endianness should be identified.
@@ -16,7 +16,7 @@ The **custom firmware and/or compiled binaries can be uploaded to exploit integr
 10. The modified firmware can be repackaged using FMK.
 11. The backdoored firmware can be tested by emulating it with firmware analysis toolkit (FAT) and connecting to the target backdoor IP and port using netcat.
 
-If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled malicious binaries such as implants or reverse shells can be executed. Automated payload/implant tools like the Metasploit framework and 'msfvenom' can be leveraged using the following steps:
+If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled test binaries such as implants or reverse shells can be executed. Metasploit's `msfvenom` can generate an architecture-specific payload for this validation workflow:<sup>[[4]](#references)</sup>
 
 1. The target firmware architecture and endianness should be identified.
 2. Msfvenom can be used to specify the target payload, attacker host IP, listening port number, filetype, architecture, platform, and the output file.
@@ -123,6 +123,8 @@ Use this to:
 ## References
 
 - [1] [Pwnd Blaster: Hacking your PC using your speaker without ever touching it](https://blog.nns.ee/2026/06/03/katana-badusb/)
+- [2] [firmware-mod-kit](https://github.com/rampageX/firmware-mod-kit)
+- [3] [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit)
+- [4] [Metasploit - How to use `msfvenom`](https://docs.metasploit.com/docs/using-metasploit/basics/how-to-use-msfvenom.html)
 
 {{#include ../../banners/hacktricks-training.md}}
-
