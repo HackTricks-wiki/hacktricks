@@ -108,6 +108,8 @@ sftp -P 8888 127.0.0.1
 
 Run `penelope` to listen on `0.0.0.0:4444` by default; incoming Unix-like shells can then be auto-upgraded and logged.<sup>[[2]](#references)</sup>
 
+![Penelope handling and upgrading an incoming shell](https://github.com/user-attachments/assets/27ab4b3a-780c-4c07-a855-fd80a194c01e)
+
 ## No TTY
 
 If for some reason you cannot obtain a full TTY you **still can interact with programs** that expect user input. In the following example, Expect spawns `sudo`, waits for its password prompt, sends the password, and returns control with `interact`; `sudo -S` reads its password from standard input. Use it only in an authorized lab and avoid placing real credentials in shell history or source files.<sup>[[8]](#references)[[9]](#references)</sup>
