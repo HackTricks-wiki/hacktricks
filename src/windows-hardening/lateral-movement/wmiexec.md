@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 工作原理说明
+## 工作原理详解
 
-通过使用 WMI，可以在已知用户名以及密码或 hash 的主机上打开进程。Wmiexec 使用 WMI 执行命令，提供类似半交互式 shell 的体验。
+通过使用 WMI，可以在已知用户名以及密码或 hash 的主机上打开进程。Wmiexec 使用 WMI 执行命令，并提供半交互式 shell 体验。
 
-**dcomexec.py：** 此脚本利用不同的 DCOM endpoints，提供类似于 wmiexec.py 的半交互式 shell，具体使用 ShellBrowserWindow DCOM object。当前支持 MMC20。Application、Shell Windows 和 Shell Browser Window objects。（来源：[Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)）<sup>[[2]](#references)</sup>
+**dcomexec.py：** 此脚本使用不同的 DCOM endpoints，提供类似于 `wmiexec.py` 的半交互式 shell。所选的 `-object` 值用于选择 endpoint；支持的对象包括 `MMC20.Application`、`ShellWindows` 和 `ShellBrowserWindow`，后者提供原始 walkthrough 中重点介绍的 Shell Browser Window technique。<sup>[[2]](#references)[[3]](#references)</sup>
 
-## WMI 基础知识
+## WMI 基础
 
-### Namespace
+### 命名空间
 
-WMI 的顶级容器是 \root，采用目录式层级结构，其下组织着其他目录，这些目录称为 namespaces。<sup>[[1]](#references)</sup>
-列出 namespaces 的命令：
+WMI 的顶级容器采用目录式层级结构，即 \root，其下组织着其他称为命名空间的目录。<sup>[[1]](#references)</sup>
+列出命名空间的命令：
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -31,7 +31,7 @@ gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **Classes**
 
-了解 WMI 类名（例如 `win32_process`）及其所在的 namespace，对于任何 WMI 操作都至关重要。  
+了解 WMI 类名（例如 win32_process）及其所在的 namespace，对于执行任何 WMI 操作都至关重要。  
 列出以 `win32` 开头的类的命令：
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
@@ -45,7 +45,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### 方法
 
-WMI 类的一个或多个可执行函数（Methods）可以被执行。
+可以执行 WMI 类的 Methods，即一个或多个可执行函数。
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -76,7 +76,7 @@ net start | findstr "Instrumentation"
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-对于攻击者来说，WMI 是枚举系统或域敏感数据的强大工具。<sup>[[1]](#references)</sup>
+对于攻击者而言，WMI 是枚举有关系统或域的敏感数据的强大工具。<sup>[[1]](#references)</sup>
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -85,7 +85,7 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-通过精心构造命令，可以远程查询 WMI 以获取特定信息，例如本地管理员或已登录用户。
+远程查询 WMI 以获取特定信息（例如本地管理员或已登录用户）是可行的，但需要谨慎构造命令。
 
 ### **手动远程 WMI 查询**
 
@@ -120,8 +120,7 @@ SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug a
 
 ## References
 
-- [1] [使用凭据攻陷 Windows 主机 - 第 3 部分（WMI 和 WinRM）](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
-- [2] [Impacket Tool Kit 初学者指南 - 第 1 部分](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
-
-
+- [1] [使用凭据控制 Windows 主机 - 第 3 部分（WMI 和 WinRM）](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Fortra Impacket – dcomexec.py](https://github.com/fortra/impacket/blob/master/examples/dcomexec.py)
+- [3] [Impacket 工具包入门指南，第 1 部分 – Hacking Articles（Internet Archive）](https://web.archive.org/web/20190822180831/https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 {{#include ../../banners/hacktricks-training.md}}
