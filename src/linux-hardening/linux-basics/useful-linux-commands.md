@@ -1,7 +1,5 @@
 # Korisne Linux komande
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Uobičajene Bash komande
 ```bash
 #Exfiltration using Base64
@@ -149,7 +147,7 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
-## Greps
+## Grep komande
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -229,7 +227,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Pronađi
+## Find
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -258,7 +256,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Nmap pomoć za pretragu
+## Pomoć za pretragu u Nmap-u
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -301,9 +299,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF telemetrija i lov na rootkitove
+## eBPF Telemetrija i lov na Rootkit
 
-Moderni rootkitovi (TripleCross, BPFDoor varijante itd.) sve češće opstaju kao skriveni eBPF programi. Uspostavite osnovnu liniju za svoju flotu pomoću `bpftool`/`eBPFmon` kako biste mogli da uočite nepotpisane programe, neočekivane cgroup hook-ove ili zlonameran sadržaj mapa pre nego što ih odvojite.<sup>[[1]](#references)</sup>
+Istraživanja Rootkit-a pokazala su i implant-e zasnovane na eBPF-u, kao što je TripleCross, i backdoor-e zasnovane na BPF-u, kao što su varijante BPFDoor-a. Neočekivane BPF programe, priključivanja ili mape treba posmatrati kao tragove za istragu, a ne kao dokaz kompromitovanja.<sup>[[3]](#references)[[4]](#references)</sup> Autorizovane sisteme možete analizirati pomoću alata `bpftool` ili `eBPFmon`: `bpftool` može da izlista programe i mape, prikaže instrukcije programa i proveri podržane funkcionalnosti, dok eBPFmon te informacije prikazuje u TUI interfejsu.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +319,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Povežite bpftool izlaz sa očekivanim NIC/cgroup povezivanjima; iznenadni `xdp` ili `kprobe` program čiji je vlasnik neodobreni PID snažan je pokazatelj ubačenog eBPF payload-a.
+Povežite izlaz komande `bpftool` sa očekivanim NIC/cgroup priključcima; iznenadni `xdp` ili `kprobe` program u vlasništvu PID-a koji nije odobren predstavlja trag za istragu, a ne konačan dokaz da je ubačen payload.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Journald trijaža incidenata
+## Journald trijaža incidenta
 
-systemd-journald čuva strukturirane metapodatke, pa možete suziti pretragu prema boot-u, ozbiljnosti, unit-u ili UID-u bez pristupanja direktorijumu `/var/log/*`. Kombinujte filtere sa relativnim vremenskim oznakama da biste izolovali vremenske intervale napada ili brzo dokazali neovlašćeno menjanje logova.<sup>[[2]](#references)</sup>
+`journalctl` čita strukturirane unose iz `systemd-journald` i podržava filtriranje prema boot-u, prioritetu, jedinici, UID-u i relativnom vremenu. Kombinujte te filtere sa JSON izlazom kada je potrebno sačuvati ili uporediti dokaze; samo filtriranje ne dokazuje da logovi nisu menjani.<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +334,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Dodajte `--grep 'Invalid user' --case-sensitive` ili `-k` (samo kernel ring buffer) kada su vam potrebni precizniji filteri i imajte na umu da se selektori `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` i `_TRANSPORT` mogu kombinovati za multi-tenant huntove.
+Dodajte `--grep 'Invalid user' --case-sensitive` ili `-k` (samo kernel poruke) kada su vam potrebni precizniji filteri i imajte na umu da se `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` i `_TRANSPORT` selektori mogu kombinovati za ciljane pretrage.<sup>[[7]](#references)</sup>
 
-## Reference
+## References
 
-- [1] [eBPFmon: Novi alat za istraživanje eBPF aplikacija i interakciju sa njima](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [1] [eBPFmon: Novi alat za istraživanje i interakciju sa eBPF aplikacijama](https://redcanary.com/blog/linux-security/ebpfmon/)
 - [2] [Kako koristiti komandu journalctl za pregled Linux logova](https://www.hostinger.com/tutorials/journalctl-command)
-
+- [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
+- [4] [Rapid7 Labs: BPFdoor u telekomunikacionim mrežama](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [5] [BPF dokumentacija — dokumentacija Linux kernela](https://docs.kernel.org/bpf/)
+- [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
+- [7] [journalctl(1) — Linux priručnik](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}
