@@ -14,7 +14,7 @@ These functions also accept an optional **entropy parameter** used during encryp
 
 ### Users key generation
 
-DPAPI derives a user-specific value (often called a **pre-key**) from the user's credentials. The exact derivation depends on the account and operating-system version; for domain users, tooling can derive the needed value from the user's NTLM material.<sup>[[2]](#references)</sup>
+DPAPI derives a user-specific value (often called a **pre-key**) from the user's credentials. The exact derivation depends on the account and operating-system version. For example, Impacket tries an HMAC-SHA1 path based on the SHA-1 digest of the UTF-16LE password, another based on the password's MD4/NT hash, and a PBKDF2-SHA256-derived path for Protected Users. This is why offline tooling can often derive the required material from either the plaintext password or an available NT hash.<sup>[[2]](#references)[[10]](#references)</sup>
 
 This is specially interesting because if an attacker can obtain the user's password hash, they can:
 

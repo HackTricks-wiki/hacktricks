@@ -182,7 +182,7 @@ You might be able to **obtain** some challenge **hashes** to crack **poisoning**
 
 ### NTLM Relay
 
-Active Directory enumeration provides candidate accounts, hosts, and services that may be coerced into authenticating. Use that context to identify viable NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) and potential paths into the AD environment.
+Active Directory enumeration provides usernames, email identifiers and naming patterns, candidate hosts, and services that may be coerced into authenticating. Use that context to identify viable NTLM [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) and potential paths into the AD environment.
 
 ### NetExec workspace-driven recon & relay posture checks
 
