@@ -178,10 +178,10 @@ state.satisfiable() #False
 
 #Solver solutions
 solver.eval(expression) #one possible solution
-solver.eval_one(expression) #solution to the given expression, or throw an error if more than one solution is possible.
+solver.eval_one(expression) # One solution, or raise an error if more than one solution is possible.
 solver.eval_upto(expression, n) #n solutions to the given expression, returning fewer than n if fewer than n are possible.
-solver.eval_atleast(expression, n) #n solutions to the given expression, throwing an error if fewer than n are possible.
-solver.eval_exact(expression, n) #n solutions to the given expression, throwing an error if fewer or more than are possible.
+solver.eval_atleast(expression, n) # n solutions, raising an error if fewer than n are possible.
+solver.eval_exact(expression, n) # n solutions, raising an error unless exactly n are possible.
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
