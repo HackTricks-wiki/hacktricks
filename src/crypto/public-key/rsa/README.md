@@ -6,22 +6,22 @@
 
 Kusanya:
 
-- `n`, `e`, `c` (na ciphertext nyingine zozote za ziada)
+- `n`, `e`, `c` (na ciphertexts zozote za ziada)
 - Mahusiano yoyote kati ya messages (plaintext ileile? modulus iliyoshirikiwa? plaintext yenye muundo?)
-- Leaks zozote (`p/q` za sehemu, bits za `d`, `dp/dq`, padding inayojulikana)
+- leak zozote (`p/q` kwa sehemu, bits za `d`, `dp/dq`, padding inayojulikana)
 
 Kisha jaribu:
 
-- Ukaguzi wa factorization (Factordb / `sage: factor(n)` kwa namba ndogo kiasi)
+- Ukaguzi wa factorization (Factordb / `sage: factor(n)` kwa nambari ndogo kiasi)
 - Mifumo ya low exponent (`e=3`, broadcast)
 - Common modulus / repeated primes
-- Lattice methods (Coppersmith/LLL) wakati kitu kinakaribia kujulikana
+- Mbinu za lattice (Coppersmith/LLL) wakati kitu kinakaribia kujulikana
 
-## Mashambulizi ya kawaida ya RSA
+## Common RSA attacks
 
 ### Common modulus
 
-Ikiwa ciphertext mbili `c1, c2` zinasimba **message ileile** kwa kutumia **modulus ileile** `n` lakini zikiwa na exponents tofauti `e1, e2` (na `gcd(e1,e2)=1`), unaweza kurejesha `m` kwa kutumia extended Euclidean algorithm:
+Ikiwa ciphertexts mbili `c1, c2` zinasimba **ujumbe uleule** chini ya **modulus ileile** `n`, lakini zikiwa na exponents tofauti `e1, e2` (na `gcd(e1,e2)=1`), unaweza kurejesha `m` kwa kutumia extended Euclidean algorithm:
 
 `m = c1^a * c2^b mod n` ambapo `a*e1 + b*e2 = 1`.
 
@@ -33,23 +33,23 @@ Muhtasari wa mfano:
 
 ### Shared primes across moduli
 
-Ikiwa una RSA moduli nyingi kutoka challenge ileile, angalia kama zinashiriki prime:
+Ikiwa una RSA moduli nyingi kutoka kwenye challenge ileile, kagua kama zinashirikiana prime:
 
-- `gcd(n1, n2) != 1` inaashiria hitilafu kubwa katika utengenezaji wa key.
+- `gcd(n1, n2) != 1` inaashiria hitilafu kubwa ya key-generation.
 
-Hili hujitokeza mara kwa mara katika CTFs kama "tulitengeneza keys nyingi kwa haraka" au "randomness mbaya".
+Hii hujitokeza mara kwa mara katika CTFs kama "we generated many keys quickly" au "bad randomness".
 
 ### Sparse / short-sleeve moduli
 
-Baadhi ya big-integer generators zilizoharibika huvuja muundo moja kwa moja kwenye public modulus: kila limb huwa na subfield ndogo ya random na sehemu iliyobaki ya bits huwa `0`. Kwa vitendo, hii huonekana kama **blocks za zero zilizotengana kwa vipindi vya kawaida** ndani ya `n`, mara nyingi zikiwa zimepangwa kulingana na limbs za 32-bit au 128-bit.<sup>[[1]](#references)</sup>
+Baadhi ya big-integer generators zilizoharibika huvuja muundo moja kwa moja kwenye public modulus: kila limb huwa na subfield ndogo tu ya random, na bits zilizobaki huwa `0`. Kwa matumizi halisi, hii huonekana kama **blocks za zero zilizotenganishwa kwa mpangilio** kote kwenye `n`, mara nyingi zikiwa zimepangiliwa kwa limbs za 32-bit au 128-bit.<sup>[[1]](#references)</sup>
 
 Ukaguzi wa haraka:
 
-- Dump `n` katika hex na utafute zero windows zinazorudiwa kwa stride ileile.
-- Gawa tena `n` kuwa limbs (`2^32`, `2^64`, `2^128`) na ukague kama kila limb ni ndogo isivyo kawaida.
-- Kagua public SSH/TLS keys kwa tooling kama **badkeys** unaposhuku utengenezaji dhaifu wa host-key.<sup>[[2]](#references)[[3]](#references)</sup>
+- Dump `n` katika hex na utafute windows za zero zinazorudiwa kwa stride isiyobadilika.
+- Gawanya tena `n` kuwa limbs (`2^32`, `2^64`, `2^128`) na kagua kama kila limb ni ndogo isivyo kawaida.
+- Kagua public SSH/TLS keys kwa tooling kama **badkeys** unaposhuku weak host-key generation.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
-Hili ni kubwa zaidi kuliko statistical bias: ikiwa private factors `p` na `q` zote ni short-sleeved, modulus inaweza kuwa **rahisi kufactor**.<sup>[[1]](#references)</sup>
+Hili ni kubwa zaidi kuliko statistical bias: ikiwa private factors zote mbili `p` na `q` zina short-sleeves, modulus inaweza kuwa **rahisi kufactor**.<sup>[[1]](#references)</sup>
 
 ### Polynomial factorization of structured RSA keys
 
@@ -66,20 +66,20 @@ Kwa sababu evaluation ni multiplicative, `f_a(B) * f_c(B) = (f_a * f_c)(B)`. Iki
 Muhtasari wa attack:
 
 1. Kisia limb width `w`.
-2. Geuza public modulus `n` kuwa `f_n(x)` kwa kutumia base `2^w`.
-3. Factor `f_n(x)` over the integers.
-4. Evaluate candidate factors kurudi kwenye `B = 2^w`.
+2. Badilisha public modulus `n` kuwa `f_n(x)` kwa kutumia base `2^w`.
+3. Factor `f_n(x)` juu ya integers.
+4. Fanya evaluation ya candidate factors tena kwenye `B = 2^w`.
 5. Thibitisha ni candidates zipi zinazozidishwa kupata `n`.
 
-Hii **haivunji RSA ya kawaida**. Inafanya kazi tu wakati prime factors zenyewe zina limb coefficients ndogo sana na zenye muundo maalum.<sup>[[1]](#references)</sup>
+Hii **haivunji normal RSA**. Inafanya kazi tu wakati prime factors zenyewe zina limb coefficients ndogo sana na zenye muundo maalum.<sup>[[1]](#references)</sup>
 
 ### Shifted limb leakage
 
-Sparse bytes si mara zote hupangwa kwenye mwisho wa chini wa kila limb. Ikiwa direct base-`2^w` conversion inazalisha coefficients kubwa, tafuta shifts `i,j` ambapo `2^i p` na `2^j q` huwa sparse katika limb basis hiyo. Product polynomial bado inaweza kutolewa kutoka kwenye public modulus, kufactorishwa, na kuunganishwa tena kuwa integer factors za awali.<sup>[[1]](#references)</sup>
+Sparse bytes hazipangiliwi kila mara kwenye mwisho wa chini wa kila limb. Ikiwa conversion ya moja kwa moja ya base-`2^w` inazalisha coefficients kubwa, tafuta shifts `i,j` kiasi kwamba `2^i p` na `2^j q` ziwe sparse katika limb basis hiyo. Product polynomial bado inaweza kutolewa kutoka kwenye public modulus, kufactorishwa, na kuunganishwa tena kuwa original integer factors.<sup>[[1]](#references)</sup>
 
 ### Implementation smell: byte-to-limb RNG bug
 
-Muundo hatari ni kukokotoa idadi ya **32-bit limbs**, kutenga **bytes** chache tu za idadi hiyo, na kuzinakili kwenye limb array:
+Pattern hatari ni kuhesabu idadi ya **32-bit limbs**, kutenga **bytes** hizo pekee, na kuzinakili kwenye limb array:
 ```csharp
 int numLimbs = bits / 32;
 byte[] array = new byte[numLimbs];
@@ -87,64 +87,64 @@ rngProvider.GetNonZeroBytes(array);
 Array.Copy(array, 0, bignumLimbs, 0, numLimbs);
 bignumLimbs[numLimbs - 1] |= 0x80000000;
 ```
-This gives each 32-bit limb only **8 bits of entropy** plus a forced top bit in the last limb. The resulting RSA primes can often be recognized and factored from the public key alone.<sup>[[1]](#references)</sup>
+Hii huipa kila limb ya biti-32 **biti 8 za entropy** pamoja na biti ya juu iliyolazimishwa katika limb ya mwisho. RSA primes zinazotokana na hili mara nyingi zinaweza kutambuliwa na kufactor kutoka kwenye public key pekee.<sup>[[1]](#references)</sup>
 
-### Hali ya hitilafu inayohusiana na DSA
+### Related DSA failure mode
 
-If the same broken big-integer routine is reused for DSA private exponent generation, the public key `y = g^x` may leak a **dramatically reduced and structured** search space for `x`. Once the limb pattern is known, discrete-log attacks such as **baby-step giant-step** can become practical against the public parameters.<sup>[[1]](#references)</sup>
+Ikiwa routine hiyo hiyo iliyovunjika ya big-integer itatumika tena kuzalisha DSA private exponent, public key `y = g^x` inaweza ku-leak **search space iliyopunguzwa sana na yenye muundo** ya `x`. Mara tu pattern ya limb inapojulikana, mashambulizi ya discrete-log kama **baby-step giant-step** yanaweza kuwa practical dhidi ya public parameters.<sup>[[1]](#references)</sup>
 
 ### Håstad broadcast / low exponent
 
-If the same plaintext is sent to multiple recipients with small `e` (often `e=3`) and no proper padding, you can recover `m` via CRT and integer root.
+Ikiwa plaintext ile ile inatumwa kwa recipients wengi wenye `e` ndogo (mara nyingi `e=3`) na bila proper padding, unaweza kurecover `m` kupitia CRT na integer root.
 
 Technical condition:
 
-If you have `e` ciphertexts of the same message under pairwise-coprime moduli `n_i`:
+Ikiwa una ciphertexts `e` za message ile ile chini ya moduli zilizo pairwise-coprime `n_i`:
 
-- Use CRT to recover `M = m^e` over the product `N = Π n_i`
-- If `m^e < N`, then `M` is the true integer power, and `m = integer_root(M, e)`
+- Tumia CRT kurecover `M = m^e` juu ya product `N = Π n_i`
+- Ikiwa `m^e < N`, basi `M` ni true integer power, na `m = integer_root(M, e)`
 
 ### Wiener attack: small private exponent
 
-If `d` is too small, continued fractions can recover it from `e/n`.
+Ikiwa `d` ni ndogo sana, continued fractions zinaweza kuirecover kutoka `e/n`.
 
-### Pitfalls za Textbook RSA
+### Textbook RSA pitfalls
 
-If you see:
+Ukiona:
 
-- No OAEP/PSS, raw modular exponentiation
+- Hakuna OAEP/PSS, raw modular exponentiation
 - Deterministic encryption
 
-then algebraic attacks and oracle abuse become much more likely.
+basi algebraic attacks na oracle abuse huwa na uwezekano mkubwa zaidi.
 
-### Zana
+### Tools
 
 - RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
 - SageMath (CRT, roots, CF): https://www.sagemath.org/
 
-## Miundo ya Related-message
+## Related-message patterns
 
-If you see two ciphertexts under the same modulus with messages that are algebraically related (e.g., `m2 = a*m1 + b`), look for "related-message" attacks such as Franklin–Reiter. These typically require:
+Ukiona ciphertexts mbili chini ya modulus ile ile zenye messages zinazohusiana algebraically (kwa mfano, `m2 = a*m1 + b`), tafuta mashambulizi ya "related-message" kama Franklin–Reiter. Kwa kawaida haya yanahitaji:
 
-- same modulus `n`
-- same exponent `e`
-- known relationship between plaintexts
+- modulus `n` ile ile
+- exponent `e` ile ile
+- relationship inayojulikana kati ya plaintexts
 
-In practice this is often solved with Sage by setting up polynomials modulo `n` and computing a GCD.
+Kwa vitendo, hili mara nyingi hutatuliwa kwa Sage kwa kuunda polynomials modulo `n` na kukokotoa GCD.
 
 ## Lattices / Coppersmith
 
-Reach for this when you have partial bits, structured plaintext, or close relations that make the unknown small.
+Tumia hii unapokuwa na partial bits, structured plaintext, au close relations zinazofanya unknown iwe ndogo.
 
-Lattice methods (LLL/Coppersmith) show up whenever you have partial information:
+Lattice methods (LLL/Coppersmith) hujitokeza unapokuwa na partial information:
 
-- Partially known plaintext (structured message with unknown tail)
-- Partially known `p`/`q` (high bits leaked)
-- Small unknown differences between related values
+- Partially known plaintext (structured message yenye tail isiyojulikana)
+- Partially known `p`/`q` (high bits zime-leak)
+- Small unknown differences kati ya related values
 
-### Cha kutambua
+### What to recognize
 
-Typical hints in challenges:
+Dalili za kawaida katika challenges:
 
 - "We leaked the top/bottom bits of p"
 - "The flag is embedded like: `m = bytes_to_long(b\"HTB{\" + unknown + b\"}\")`"
@@ -152,17 +152,16 @@ Typical hints in challenges:
 
 ### Tooling
 
-In practice you’ll use Sage for LLL and a known template for the specific instance.
+Kwa vitendo utatumia Sage kwa LLL na known template kwa specific instance.
 
 Good starting points:
 
 - Sage CTF crypto templates: https://github.com/defund/coppersmith
 - A survey-style reference: https://martinralbrecht.wordpress.com/2013/05/06/coppersmiths-method/
 
-## Marejeo
+## References
 
-- [1] [Trail of Bits - Factoring "short-sleeve" RSA keys with polynomials](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
+- [1] [Trail of Bits - Kufactor "short-sleeve" RSA keys with polynomials](https://blog.trailofbits.com/2026/06/12/factoring-short-sleeve-rsa-keys-with-polynomials/)
 - [2] [badkeys](https://badkeys.info/)
 - [3] [badkeys standalone tool](https://github.com/badkeys/badkeys)
-
 {{#include ../../../banners/hacktricks-training.md}}

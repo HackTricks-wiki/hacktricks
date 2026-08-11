@@ -2,126 +2,127 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Deep Learning
+## Deep Learning <sup>[[1]](#references)</sup>
 
-Kujifunza kwa kina ni sehemu ya kujifunza mashine inayotumia mitandao ya neva yenye tabaka nyingi (mitandao ya neva ya kina) ili kuunda mifano ya mifumo tata katika data. Imefanikiwa kwa kiwango kikubwa katika maeneo mbalimbali, ikiwa ni pamoja na maono ya kompyuta, usindikaji wa lugha asilia, na utambuzi wa sauti.
+Deep learning ni sehemu ndogo ya machine learning inayotumia neural networks zenye layers nyingi (deep neural networks) kuiga mifumo changamano katika data. Imefanikiwa kwa kiwango kikubwa katika nyanja mbalimbali, zikiwemo computer vision, natural language processing, na speech recognition.
 
 ### Neural Networks
 
-Mitandao ya neva ndiyo vipengele vya msingi vya kujifunza kwa kina. Inajumuisha nodi zilizounganishwa (neva) zilizopangwa katika tabaka. Kila neva hupokea ingizo, inatumia jumla yenye uzito, na inapita matokeo kupitia kazi ya uhamasishaji ili kutoa matokeo. Tabaka zinaweza kugawanywa kama ifuatavyo:
-- **Input Layer**: Tabaka la kwanza linalopokea data ya ingizo.
-- **Hidden Layers**: Tabaka za kati zinazofanya mabadiliko kwenye data ya ingizo. Idadi ya tabaka zilizofichwa na neva katika kila tabaka inaweza kutofautiana, na kusababisha usanifu tofauti.
-- **Output Layer**: Tabaka ya mwisho inayozalisha matokeo ya mtandao, kama vile uwezekano wa darasa katika kazi za uainishaji.
+Neural networks ni vipengele vya msingi vya deep learning. Zinajumuisha nodes zilizounganishwa (neurons) zilizopangwa katika layers. Kila neuron hupokea inputs, hutumia weighted sum, kisha hupitisha matokeo kupitia activation function ili kutoa output. Layers zinaweza kugawanywa kama ifuatavyo:
+- **Input Layer**: Layer ya kwanza inayopokea input data.
+- **Hidden Layers**: Layers za kati zinazofanya transformations kwenye input data. Idadi ya hidden layers na neurons katika kila layer inaweza kutofautiana, na kusababisha architectures tofauti.
+- **Output Layer**: Layer ya mwisho inayotoa output ya network, kama vile class probabilities katika classification tasks.
+
 
 ### Activation Functions
 
-Wakati tabaka la neva linaposhughulikia data ya ingizo, kila neva inatumia uzito na bias kwa ingizo (`z = w * x + b`), ambapo `w` ni uzito, `x` ni ingizo, na `b` ni bias. Matokeo ya neva yanapitishwa kupitia **kazi ya uhamasishaji ili kuingiza usio wa moja kwa moja** katika mfano. Kazi hii ya uhamasishaji kimsingi inaonyesha kama neva inayofuata "inapaswa kuhamasishwa na kiasi gani". Hii inaruhusu mtandao kujifunza mifumo tata na uhusiano katika data, na kuuwezesha kukadiria kazi yoyote isiyo na kikomo.
+Layer ya neurons inapochakata input data, kila neuron hutumia weight na bias kwenye input (`z = w * x + b`), ambapo `w` ni weight, `x` ni input, na `b` ni bias. Output ya neuron kisha hupitishwa kupitia **activation function ili kuingiza non-linearity** kwenye model. Activation function hii huonyesha kimsingi ikiwa neuron inayofuata "inapaswa ku-activate na kwa kiwango gani". Hii huwezesha network kujifunza mifumo na mahusiano changamano katika data, na kuiwezesha kukadiria function yoyote continuous.
 
-Kwa hivyo, kazi za uhamasishaji zinaingiza usio wa moja kwa moja katika mtandao wa neva, na kuruhusu kujifunza uhusiano tata katika data. Kazi za kawaida za uhamasishaji ni pamoja na:
-- **Sigmoid**: Inachora thamani za ingizo kwenye anuwai kati ya 0 na 1, mara nyingi hutumiwa katika uainishaji wa binary.
-- **ReLU (Rectified Linear Unit)**: Inatoa ingizo moja kwa moja ikiwa ni chanya; vinginevyo, inatoa sifuri. Inatumika sana kutokana na urahisi wake na ufanisi katika kufundisha mitandao ya kina.
-- **Tanh**: Inachora thamani za ingizo kwenye anuwai kati ya -1 na 1, mara nyingi hutumiwa katika tabaka zilizofichwa.
-- **Softmax**: Inabadilisha alama za ghafi kuwa uwezekano, mara nyingi hutumiwa katika tabaka ya matokeo kwa uainishaji wa darasa nyingi.
+Kwa hiyo, activation functions huingiza non-linearity kwenye neural network, na kuiwezesha kujifunza mahusiano changamano katika data. Activation functions za kawaida ni pamoja na:
+- **Sigmoid**: Huweka input values katika range kati ya 0 na 1, na mara nyingi hutumika katika binary classification.
+- **ReLU (Rectified Linear Unit)**: Hutoa input moja kwa moja ikiwa ni positive; vinginevyo, hutoa zero. Hutumika sana kwa sababu ya urahisi na ufanisi wake katika training ya deep networks.
+- **Tanh**: Huweka input values katika range kati ya -1 na 1, na mara nyingi hutumika katika hidden layers.
+- **Softmax**: Hubadilisha raw scores kuwa probabilities, na mara nyingi hutumika katika output layer kwa multi-class classification.
 
 ### Backpropagation
 
-Backpropagation ni algorithimu inayotumiwa kufundisha mitandao ya neva kwa kubadilisha uzito wa uhusiano kati ya neva. Inafanya kazi kwa kuhesabu gradient ya kazi ya hasara kuhusiana na kila uzito na kuboresha uzito katika mwelekeo wa kinyume cha gradient ili kupunguza hasara. Hatua zinazohusika katika backpropagation ni:
+Backpropagation ni algorithm inayotumika kufundisha neural networks kwa kurekebisha weights za connections kati ya neurons. Hufanya kazi kwa kukokotoa gradient ya loss function kulingana na kila weight, kisha kusasisha weights katika mwelekeo kinyume na gradient ili kupunguza loss. Hatua zinazohusika katika backpropagation ni:
 
-1. **Forward Pass**: Hesabu matokeo ya mtandao kwa kupitisha ingizo kupitia tabaka na kutumia kazi za uhamasishaji.
-2. **Loss Calculation**: Hesabu hasara (kosa) kati ya matokeo yaliyokadiria na lengo halisi kwa kutumia kazi ya hasara (mfano, makosa ya wastani ya mraba kwa urudufu, cross-entropy kwa uainishaji).
-3. **Backward Pass**: Hesabu gradient za hasara kuhusiana na kila uzito kwa kutumia sheria ya mnyororo ya hesabu.
-4. **Weight Update**: Sasisha uzito kwa kutumia algorithimu ya kuboresha (mfano, stochastic gradient descent, Adam) ili kupunguza hasara.
+1. **Forward Pass**: Kokotoa output ya network kwa kupitisha input kupitia layers na kutumia activation functions.
+2. **Loss Calculation**: Kokotoa loss (error) kati ya predicted output na true target kwa kutumia loss function (kwa mfano, mean squared error kwa regression, cross-entropy kwa classification).
+3. **Backward Pass**: Kokotoa gradients za loss kulingana na kila weight kwa kutumia chain rule ya calculus.
+4. **Weight Update**: Sasisha weights kwa kutumia optimization algorithm (kwa mfano, stochastic gradient descent, Adam) ili kupunguza loss.
 
-## Convolutional Neural Networks (CNNs)
+## Convolutional Neural Networks (CNNs) <sup>[[2]](#references)</sup>
 
-Mitandao ya Neva ya Convolutional (CNNs) ni aina maalum ya mtandao wa neva iliyoundwa kwa ajili ya kushughulikia data kama gridi, kama picha. Zinatumika kwa ufanisi katika kazi za maono ya kompyuta kutokana na uwezo wao wa kujifunza hierarchies za nafasi za vipengele.
+Convolutional Neural Networks (CNNs) ni aina maalum ya neural network iliyoundwa kuchakata grid-like data, kama vile images. Zinafaa hasa katika computer vision tasks kutokana na uwezo wake wa kujifunza kiotomatiki spatial hierarchies za features.
 
 Vipengele vikuu vya CNNs ni pamoja na:
-- **Convolutional Layers**: Zinatumia operesheni za convolution kwenye data ya ingizo kwa kutumia filters zinazoweza kujifunza (kernels) ili kutoa vipengele vya ndani. Kila filter inateleza juu ya ingizo na kuhesabu bidhaa ya dot, ikizalisha ramani ya kipengele.
-- **Pooling Layers**: Zinaondoa saizi za ramani za kipengele ili kupunguza vipimo vyao vya nafasi huku zikihifadhi vipengele muhimu. Operesheni za kawaida za pooling ni pamoja na max pooling na average pooling.
-- **Fully Connected Layers**: Zinunganisha kila neva katika tabaka moja na kila neva katika tabaka inayofuata, kama mitandao ya neva ya jadi. Tabaka hizi kwa kawaida hutumiwa mwishoni mwa mtandao kwa kazi za uainishaji.
+- **Convolutional Layers**: Hutumia convolution operations kwenye input data kwa kutumia learnable filters (kernels) ili kutoa local features. Kila filter huteleza juu ya input na kukokotoa dot product, na kutoa feature map.
+- **Pooling Layers**: Hupunguza ukubwa wa feature maps ili kupunguza spatial dimensions zake huku zikihifadhi features muhimu. Pooling operations za kawaida ni pamoja na max pooling na average pooling.
+- **Fully Connected Layers**: Huunganisha kila neuron katika layer moja na kila neuron katika layer inayofuata, sawa na traditional neural networks. Layers hizi kwa kawaida hutumika mwishoni mwa network kwa classification tasks.
 
-Ndani ya CNN **`Convolutional Layers`**, tunaweza pia kutofautisha kati ya:
-- **Initial Convolutional Layer**: Tabaka la kwanza la convolution linaloshughulikia data ya ingizo ghafi (mfano, picha) na ni muhimu kutambua vipengele vya msingi kama vile mipaka na muundo.
-- **Intermediate Convolutional Layers**: Tabaka za convolution zinazofuata ambazo zinajenga juu ya vipengele vilivyofundishwa na tabaka ya awali, kuruhusu mtandao kujifunza mifumo na uwakilishi tata zaidi.
-- **Final Convolutional Layer**: Tabaka za mwisho za convolution kabla ya tabaka zilizounganishwa kabisa, ambazo zinakamata vipengele vya kiwango cha juu na kuandaa data kwa ajili ya uainishaji.
+Ndani ya **`Convolutional Layers`** za CNN, tunaweza pia kutofautisha kati ya:
+- **Initial Convolutional Layer**: Convolutional layer ya kwanza inayochakata raw input data (kwa mfano, image) na ni muhimu kwa kutambua features za msingi kama edges na textures.
+- **Intermediate Convolutional Layers**: Convolutional layers zinazofuata zinazojenga juu ya features zilizojifunzwa na initial layer, na kuiwezesha network kujifunza mifumo na representations changamano zaidi.
+- **Final Convolutional Layer**: Convolutional layers za mwisho kabla ya fully connected layers, zinazokusanya high-level features na kuandaa data kwa classification.
 
 > [!TIP]
-> CNNs ni za ufanisi hasa kwa uainishaji wa picha, ugunduzi wa vitu, na kazi za kugawanya picha kutokana na uwezo wao wa kujifunza hierarchies za nafasi za vipengele katika data kama gridi na kupunguza idadi ya vigezo kupitia kushiriki uzito.
-> Aidha, zinafanya kazi vizuri zaidi na data inayounga mkono kanuni ya eneo la kipengele ambapo data jirani (pikseli) zina uwezekano mkubwa wa kuwa na uhusiano kuliko pikseli za mbali, ambayo huenda isiwe hivyo kwa aina nyingine za data kama maandiko.
-> Zaidi ya hayo, kumbuka jinsi CNNs zitakuwa na uwezo wa kutambua hata vipengele tata lakini hazitaweza kutumia muktadha wowote wa nafasi, ikimaanisha kwamba kipengele kile kile kilichopatikana katika sehemu tofauti za picha kitakuwa sawa.
+> CNNs zinafaa hasa kwa image classification, object detection, na image segmentation tasks kutokana na uwezo wake wa kujifunza spatial hierarchies za features katika grid-like data na kupunguza idadi ya parameters kupitia weight sharing.
+> Zaidi ya hayo, hufanya kazi vizuri zaidi na data inayounga mkono feature locality principle, ambapo data zinazopakana (pixels) zina uwezekano mkubwa wa kuhusiana kuliko pixels zilizo mbali, jambo ambalo huenda lisiwe hivyo kwa aina nyingine za data kama text.
+> Pia, kumbuka kuwa CNNs zitaweza kutambua hata features changamano, lakini hazitaweza kutumia spatial context yoyote; hii inamaanisha kuwa feature ileile inayopatikana katika sehemu tofauti za image itakuwa ileile.
 
 ### Example defining a CNN
 
-*Hapa utapata maelezo juu ya jinsi ya kufafanua Mtandao wa Neva wa Convolutional (CNN) katika PyTorch unaoanza na kundi la picha za RGB kama dataset ya ukubwa 48x48 na kutumia tabaka za convolutional na maxpool ili kutoa vipengele, ikifuatiwa na tabaka zilizounganishwa kabisa kwa ajili ya uainishaji.*
+*Hapa utapata maelezo ya jinsi ya kufafanua Convolutional Neural Network (CNN) katika PyTorch ambayo huanza na batch ya RGB images kama dataset yenye ukubwa wa 48x48 na kutumia convolutional layers na maxpool kutoa features, ikifuatiwa na fully connected layers kwa classification.*
 
-Hivi ndivyo unaweza kufafanua tabaka 1 la convolutional katika PyTorch: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`.
+Hivi ndivyo unavyoweza kufafanua convolutional layer 1 katika PyTorch: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`.
 
-- `in_channels`: Idadi ya channel za ingizo. Katika kesi ya picha za RGB, hii ni 3 (moja kwa kila channel ya rangi). Ikiwa unafanya kazi na picha za grayscale, hii itakuwa 1.
+- `in_channels`: Idadi ya input channels. Kwa RGB images, hii ni 3 (moja kwa kila color channel). Ikiwa unafanya kazi na grayscale images, hii itakuwa 1.
 
-- `out_channels`: Idadi ya channel za matokeo (filters) ambazo tabaka la convolutional litajifunza. Hii ni hyperparameter ambayo unaweza kubadilisha kulingana na usanifu wa mfano wako.
+- `out_channels`: Idadi ya output channels (filters) ambazo convolutional layer itajifunza. Hii ni hyperparameter ambayo unaweza kurekebisha kulingana na model architecture yako.
 
-- `kernel_size`: Ukubwa wa filter ya convolutional. Chaguo la kawaida ni 3x3, ambayo inamaanisha filter itashughulikia eneo la 3x3 la picha ya ingizo. Hii ni kama stamp ya rangi ya 3×3×3 inayotumika kuzalisha out_channels kutoka in_channels:
-1. Weka stamp hiyo ya 3×3×3 kwenye kona ya juu-kushoto ya cube ya picha.
-2. Weka kila uzito kwa pikseli iliyo chini yake, ongeza zote, ongeza bias → unapata nambari moja.
-3. Andika nambari hiyo kwenye ramani tupu katika nafasi (0, 0).
-4. Teleza stamp hiyo pikseli moja kulia (stride = 1) na rudia hadi ujaze gridi nzima ya 48×48.
+- `kernel_size`: Ukubwa wa convolutional filter. Chaguo la kawaida ni 3x3, linalomaanisha kuwa filter itafunika eneo la 3x3 la input image. Hii ni kama stamp ya rangi ya 3×3×3 inayotumika kutengeneza out_channels kutoka kwa in_channels:
+1. Weka stamp hiyo ya 3×3×3 kwenye kona ya juu kushoto ya image cube.
+2. Zidisha kila weight kwa pixel iliyo chini yake, zijumlishe zote, kisha ongeza bias → utapata namba moja.
+3. Andika namba hiyo kwenye map tupu katika nafasi ya (0, 0).
+4. Telezesha stamp pixel moja kwenda kulia (stride = 1) na urudie hadi ujaze grid nzima ya 48×48.
 
-- `padding`: Idadi ya pikseli zilizoongezwa kwenye kila upande wa ingizo. Padding husaidia kuhifadhi vipimo vya nafasi vya ingizo, ikiruhusu udhibiti zaidi juu ya ukubwa wa matokeo. Kwa mfano, na kernel ya 3x3 na ingizo la pikseli 48x48, padding ya 1 itahifadhi ukubwa wa matokeo kuwa sawa (48x48) baada ya operesheni ya convolution. Hii ni kwa sababu padding inaongeza mpaka wa pikseli 1 kuzunguka picha ya ingizo, ikiruhusu kernel kuhamasisha juu ya mipaka bila kupunguza vipimo vya nafasi.
+- `padding`: Idadi ya pixels zinazoongezwa katika kila upande wa input. Padding husaidia kuhifadhi spatial dimensions za input, na kutoa udhibiti zaidi wa ukubwa wa output. Kwa mfano, kwa kernel ya 3x3 na input ya pixels 48x48, padding ya 1 itaweka ukubwa wa output kuwa uleule (48x48) baada ya convolution operation. Hii ni kwa sababu padding huongeza border ya pixel 1 kuzunguka input image, na kuiruhusu kernel kuteleza juu ya edges bila kupunguza spatial dimensions.
 
-Kisha, idadi ya vigezo vinavyoweza kufundishwa katika tabaka hii ni:
-- (3x3x3 (ukubwa wa kernel) + 1 (bias)) x 32 (out_channels) = 896 vigezo vinavyoweza kufundishwa.
+Kisha, idadi ya trainable parameters katika layer hii ni:
+- (3x3x3 (kernel size) + 1 (bias)) x 32 (out_channels) = 896 trainable parameters.
 
-Kumbuka kwamba Bias (+1) inaongezwa kwa kila kernel inayotumika kwa sababu kazi ya kila tabaka la convolutional ni kujifunza mabadiliko ya moja kwa moja ya ingizo, ambayo inawakilishwa na equation:
+Kumbuka kuwa Bias (+1) huongezwa kwa kila kernel inayotumika kwa sababu kazi ya kila convolutional layer ni kujifunza linear transformation ya input, inayowakilishwa na equation:
 ```plaintext
 Y = f(W * X + b)
 ```
-ambapo `W` ni matrix ya uzito (filta zilizojifunza, 3x3x3 = 27 params), `b` ni vector ya bias ambayo ni +1 kwa kila channel ya output.
+ambapo `W` ni weight matrix (learned filters, 3x3x3 = 27 params), `b` ni bias vector ambayo ni +1 kwa kila output channel.
 
-Kumbuka kwamba output ya `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` itakuwa tensor yenye umbo `(batch_size, 32, 48, 48)`, kwa sababu 32 ni idadi mpya ya channels zilizozalishwa za ukubwa wa 48x48 pixels.
+Kumbuka kwamba output ya `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` itakuwa tensor yenye shape `(batch_size, 32, 48, 48)`, kwa sababu 32 ni idadi mpya ya generated channels zenye ukubwa wa pixels 48x48.
 
-Kisha, tunaweza kuunganisha tabaka hili la convolution na tabaka lingine la convolution kama: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`.
+Kisha, tunaweza kuunganisha convolutional layer hii na convolutional layer nyingine kama hii: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`.
 
-Ambayo itaongeza: (32x3x3 (ukubwa wa kernel) + 1 (bias)) x 64 (out_channels) = 18,496 parameters zinazoweza kufundishwa na output yenye umbo `(batch_size, 64, 48, 48)`.
+Ambayo itaongeza: (32x3x3 (kernel size) + 1 (bias)) x 64 (out_channels) = 18,496 trainable parameters na output yenye shape `(batch_size, 64, 48, 48)`.
 
-Kama unavyoona, **idadi ya parameters inakua haraka na kila tabaka la convolution lililoongezwa**, hasa kadri idadi ya channels za output inavyoongezeka.
+Kama unavyoona, **number of parameters huongezeka haraka kwa kila convolutional layer inayoongezwa**, hasa kadiri idadi ya output channels inavyoongezeka.
 
-Chaguo moja la kudhibiti kiasi cha data kinachotumika ni kutumia **max pooling** baada ya kila tabaka la convolution. Max pooling inapunguza vipimo vya nafasi vya ramani za sifa, ambayo husaidia kupunguza idadi ya parameters na ugumu wa hesabu huku ikihifadhi sifa muhimu.
+Njia moja ya kudhibiti kiasi cha data kinachotumika ni kutumia **max pooling** baada ya kila convolutional layer. Max pooling hupunguza spatial dimensions za feature maps, jambo linalosaidia kupunguza idadi ya parameters na computational complexity huku ikihifadhi features muhimu.
 
-Inaweza kutangazwa kama: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`. Hii kimsingi inaonyesha kutumia gridi ya pixels 2x2 na kuchukua thamani ya juu kutoka kila gridi ili kupunguza ukubwa wa ramani ya sifa kwa nusu. Zaidi ya hayo, `stride=2` inamaanisha kwamba operesheni ya pooling itasonga pixels 2 kwa wakati, katika kesi hii, kuzuia overlap yoyote kati ya maeneo ya pooling.
+Inaweza kutangazwa kama: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`. Hii inaashiria kutumia grid ya pixels 2x2 na kuchukua thamani ya juu zaidi kutoka kwa kila grid ili kupunguza ukubwa wa feature map kwa nusu. Zaidi ya hayo, `stride=2` inamaanisha kwamba pooling operation itasogea pixels 2 kwa wakati mmoja; katika hali hii, inazuia overlap yoyote kati ya pooling regions.
 
-Kwa tabaka hili la pooling, umbo la output baada ya tabaka la kwanza la convolution litakuwa `(batch_size, 64, 24, 24)` baada ya kutumia `self.pool1` kwa output ya `self.conv2`, ikipunguza ukubwa hadi 1/4 ya tabaka la awali.
+Kwa pooling layer hii, output shape baada ya convolutional layer ya kwanza itakuwa `(batch_size, 64, 24, 24)` baada ya kutumia `self.pool1` kwenye output ya `self.conv2`, hivyo kupunguza ukubwa hadi 1/4 ya layer iliyotangulia.
 
 > [!TIP]
-> Ni muhimu kufanya pooling baada ya tabaka za convolution ili kupunguza vipimo vya nafasi vya ramani za sifa, ambayo husaidia kudhibiti idadi ya parameters na ugumu wa hesabu huku ikifanya parameter ya awali kujifunza sifa muhimu.
-> Unaweza kuona convolutions kabla ya tabaka la pooling kama njia ya kutoa sifa kutoka kwa data ya ingizo (kama mistari, mipaka), taarifa hii bado itakuwepo katika output iliyopool, lakini tabaka la convolution linalofuata haliwezi kuona data ya ingizo ya awali, bali tu output iliyopool, ambayo ni toleo lililopunguzwa la tabaka la awali lenye taarifa hiyo.
-> Katika mpangilio wa kawaida: `Conv → ReLU → Pool` kila dirisha la pooling la 2×2 sasa linashindana na uanzishaji wa sifa (“mipaka ipo / haipo”), si nguvu za pixel za asili. Kuhifadhi uanzishaji wenye nguvu zaidi kweli kunahifadhi ushahidi muhimu zaidi.
+> Ni muhimu kufanya pooling baada ya convolutional layers ili kupunguza spatial dimensions za feature maps, jambo linalosaidia kudhibiti idadi ya parameters na computational complexity huku ikifanya initial parameter ijifunze features muhimu.
+>Unaweza kuona convolutions kabla ya pooling layer kama njia ya kutoa features kutoka kwenye input data (kama mistari na edges); taarifa hii bado itakuwepo kwenye pooled output, lakini convolutional layer inayofuata haitaweza kuona original input data, itaona tu pooled output, ambayo ni toleo lililopunguzwa la layer iliyotangulia lenye taarifa hiyo.
+>Kwa mpangilio wa kawaida: `Conv → ReLU → Pool`, kila 2×2 pooling window sasa hushughulika na feature activations (“edge present / not”), badala ya raw pixel intensities. Kuhifadhi activation yenye nguvu zaidi kwa hakika huhifadhi ushahidi muhimu zaidi.
 
-Kisha, baada ya kuongeza tabaka nyingi za convolution na pooling kadri inavyohitajika, tunaweza kulainisha output ili kuipatia tabaka zilizounganishwa kikamilifu. Hii inafanywa kwa kubadilisha tensor kuwa vector ya 1D kwa kila sampuli katika kundi:
+Kisha, baada ya kuongeza convolutional na pooling layers nyingi kadiri inavyohitajika, tunaweza ku-flatten output ili kuiingiza kwenye fully connected layers. Hii hufanywa kwa kubadilisha umbo la tensor kuwa 1D vector kwa kila sample kwenye batch:
 ```python
 x = x.view(-1, 64*24*24)
 ```
-Na kwa hii 1D vector yenye vigezo vyote vya mafunzo vilivyoundwa na tabaka za convolutional na pooling zilizopita, tunaweza kufafanua tabaka lililounganishwa kikamilifu kama:
+Na kwa kutumia vector hii ya 1D yenye vigezo vyote vya mafunzo vilivyotengenezwa na layers za convolutional na pooling zilizotangulia, tunaweza kufafanua layer iliyounganishwa kikamilifu kama:
 ```python
 self.fc1 = nn.Linear(64 * 24 * 24, 512)
 ```
-Ambayo itachukua matokeo yaliyosafishwa ya safu ya awali na kuyapanga kwa vitengo 512 vilivyofichwa.
+Ambayo itachukua matokeo yaliyoflatteniwa ya layer iliyotangulia na kuyapanga kwenye hidden units 512.
 
-Tazama jinsi safu hii ilivyoongeza `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` vigezo vinavyoweza kufundishwa, ambavyo ni ongezeko kubwa ikilinganishwa na safu za convolutional. Hii ni kwa sababu safu zilizounganishwa kikamilifu zinawunganisha kila neuron katika safu moja na kila neuron katika safu inayofuata, na kusababisha idadi kubwa ya vigezo.
+Kumbuka jinsi layer hii ilivyoongeza `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` trainable parameters, ambalo ni ongezeko kubwa ikilinganishwa na convolutional layers. Hii ni kwa sababu fully connected layers huunganisha kila neuron katika layer moja na kila neuron katika layer inayofuata, na hivyo kusababisha idadi kubwa ya parameters.
 
-Hatimaye, tunaweza kuongeza safu ya matokeo ili kuzalisha logits za mwisho za darasa:
+Hatimaye, tunaweza kuongeza output layer ili kutoa class logits za mwisho:
 ```python
 self.fc2 = nn.Linear(512, num_classes)
 ```
-Hii itongeza `(512 + 1 (bias)) * num_classes` vigezo vinavyoweza kufundishwa, ambapo `num_classes` ni idadi ya madarasa katika kazi ya uainishaji (kwa mfano, 43 kwa seti ya data ya GTSRB).
+Hii itaongeza vigezo vinavyoweza kufunzwa `(512 + 1 (bias)) * num_classes`, ambapo `num_classes` ni idadi ya madarasa katika kazi ya classification (kwa mfano, 43 kwa dataset ya GTSRB).
 
-Njia nyingine ya kawaida ni kuongeza safu ya dropout kabla ya safu zilizounganishwa kikamilifu ili kuzuia overfitting. Hii inaweza kufanywa kwa:
+Mbinu nyingine ya kawaida ni kuongeza dropout layer kabla ya fully connected layers ili kuzuia overfitting. Hili linaweza kufanywa kwa:
 ```python
 self.dropout = nn.Dropout(0.5)
 ```
-Hii tabaka kwa bahati huweka sehemu ya vitengo vya ingizo kuwa sifuri wakati wa mafunzo, ambayo husaidia kuzuia overfitting kwa kupunguza utegemezi kwenye neuroni maalum.
+Safu hii huweka kwa nasibu sehemu ya vitengo vya ingizo kuwa sifuri wakati wa mafunzo, jambo linalosaidia kuzuia overfitting kwa kupunguza utegemezi wa neurons maalum.
 
-### CNN Code example
+### Mfano wa code ya CNN
 ```python
 import torch
 import torch.nn as nn
@@ -222,23 +223,23 @@ x = self.fc2(x)
 # Note that the output is not passed through a softmax activation here, as it is typically done in the loss function (e.g., CrossEntropyLoss)
 return x
 ```
-### CNN Code training example
+### Mfano wa mafunzo wa CNN Code
 
-Msimu ufuatao utaunda baadhi ya data za mafunzo na kufundisha modeli ya `MY_NET` iliyofafanuliwa hapo juu. Baadhi ya thamani za kuvutia za kuzingatia:
+Code ifuatayo itaunda training data na kufundisha model ya `MY_NET` iliyofafanuliwa hapo juu. Baadhi ya thamani za kuvutia za kuzingatia:
 
-- `EPOCHS` ni idadi ya nyakati ambazo modeli itaona seti nzima ya data wakati wa mafunzo. Ikiwa EPOCH ni ndogo sana, modeli inaweza isijifunze vya kutosha; ikiwa ni kubwa sana, inaweza kuathiriwa kupita kiasi.
-- `LEARNING_RATE` ni ukubwa wa hatua kwa ajili ya mboreshaji. Kiwango kidogo cha kujifunza kinaweza kusababisha mkusanyiko wa polepole, wakati kiwango kikubwa kinaweza kupita suluhisho bora na kuzuia mkusanyiko.
-- `WEIGHT_DECAY` ni neno la kawaida linalosaidia kuzuia kuathiriwa kupita kiasi kwa kuadhibu uzito mkubwa.
+- `EPOCHS` ni idadi ya mara ambazo model itaona dataset nzima wakati wa mafunzo. Ikiwa EPOCH ni ndogo sana, model inaweza isijifunze vya kutosha; ikiwa ni kubwa sana, inaweza kufanya overfit.
+- `LEARNING_RATE` ni ukubwa wa hatua wa optimizer. Learning rate ndogo inaweza kusababisha convergence ya polepole, ilhali kubwa inaweza kuvuka solution bora na kuzuia convergence.
+- `WEIGHT_DECAY` ni istilahi ya regularization inayosaidia kuzuia overfitting kwa kuadhibu weights kubwa.
 
-Kuhusu mzunguko wa mafunzo, hii ni baadhi ya taarifa za kuvutia kujua:
-- `criterion = nn.CrossEntropyLoss()` ni kazi ya hasara inayotumika kwa kazi za uainishaji wa madaraja mengi. Inachanganya uhamasishaji wa softmax na hasara ya msalaba katika kazi moja, na kuifanya iweze kutumika kwa mafunzo ya mifano inayotoa logiti za daraja.
-- Ikiwa modeli ilitarajiwa kutoa aina nyingine za matokeo, kama vile uainishaji wa binary au urejeleaji, tungetumia kazi tofauti za hasara kama `nn.BCEWithLogitsLoss()` kwa uainishaji wa binary au `nn.MSELoss()` kwa urejeleaji.
-- `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` inaanzisha mboreshaji wa Adam, ambao ni chaguo maarufu kwa mafunzo ya mifano ya kujifunza kwa kina. Inabadilisha kiwango cha kujifunza kwa kila parameter kulingana na nyakati za kwanza na pili za gradient.
-- Mboreshaji wengine kama `optim.SGD` (Stochastic Gradient Descent) au `optim.RMSprop` pia wanaweza kutumika, kulingana na mahitaji maalum ya kazi ya mafunzo.
-- Njia ya `model.train()` inaweka modeli katika hali ya mafunzo, ikiruhusu tabaka kama dropout na batch normalization kutenda tofauti wakati wa mafunzo ikilinganishwa na tathmini.
-- `optimizer.zero_grad()` inafuta gradient za tensors zote zilizoboreshwa kabla ya kupita nyuma, ambayo ni muhimu kwa sababu gradient hukusanywa kwa default katika PyTorch. Ikiwa hazifutwa, gradient kutoka kwa mizunguko ya awali zitaongezwa kwa gradient za sasa, na kusababisha sasisho zisizo sahihi.
-- `loss.backward()` inahesabu gradient za hasara kuhusiana na vigezo vya modeli, ambavyo vinatumika na mboreshaji kuboresha uzito.
-- `optimizer.step()` inasasisha vigezo vya modeli kulingana na gradient zilizohesabiwa na kiwango cha kujifunza.
+Kuhusu training loop, haya ni baadhi ya maelezo muhimu ya kujua:
+- `criterion = nn.CrossEntropyLoss()` ni loss function inayotumika kwa kazi za multi-class classification. Inachanganya softmax activation na cross-entropy loss katika function moja, hivyo kuifanya ifae kwa kufundisha models zinazotoa class logits.
+- Ikiwa model ilitarajiwa kutoa aina nyingine za outputs, kama binary classification au regression, tungetumia loss functions tofauti kama `nn.BCEWithLogitsLoss()` kwa binary classification au `nn.MSELoss()` kwa regression.
+- `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` huanzisha Adam optimizer, ambayo ni chaguo maarufu kwa kufundisha deep learning models. Hubadilisha learning rate kwa kila parameter kulingana na moments ya kwanza na ya pili ya gradients.
+- Optimizers nyingine kama `optim.SGD` (Stochastic Gradient Descent) au `optim.RMSprop` zinaweza pia kutumika, kulingana na mahitaji mahususi ya training task.
+- Method ya `model.train()` huweka model katika training mode, ikiwezesha layers kama dropout na batch normalization kufanya kazi kwa njia tofauti wakati wa mafunzo ikilinganishwa na evaluation.
+- `optimizer.zero_grad()` husafisha gradients za tensors zote zinazoboreshwa kabla ya backward pass, jambo linalohitajika kwa sababu gradients hukusanyika kwa default katika PyTorch. Zisiposafishwa, gradients kutoka iterations zilizopita zingeongezwa kwenye gradients za sasa, na kusababisha updates zisizo sahihi.
+- `loss.backward()` hukokotoa gradients za loss kuhusiana na model parameters, ambazo hutumiwa na optimizer kusasisha weights.
+- `optimizer.step()` husasisha model parameters kulingana na gradients zilizokokotolewa na learning rate.
 ```python
 import torch, torch.nn.functional as F
 from torch import nn, optim
@@ -375,46 +376,53 @@ print(classification_report(labels_all, preds_all, zero_division=0))
 print("Confusion matrix (rows = true, cols = pred):")
 print(confusion_matrix(labels_all, preds_all))
 ```
-## Recurrent Neural Networks (RNNs)
+## Recurrent Neural Networks (RNNs) <sup>[[3]](#references)</sup>
 
-Recurrent Neural Networks (RNNs) ni darasa la mitandao ya neva iliyoundwa kwa ajili ya kuchakata data za mfululizo, kama vile mfululizo wa wakati au lugha ya asili. Tofauti na mitandao ya neva ya kawaida ya feedforward, RNNs zina uhusiano unaozunguka nyuma, ikiruhusu kudumisha hali ya siri inayoshika taarifa kuhusu ingizo za awali katika mfululizo.
+Recurrent Neural Networks (RNNs) ni aina ya neural networks zilizoundwa kwa ajili ya kuchakata data za mfuatano, kama vile time series au lugha ya asili. Tofauti na feedforward neural networks za kawaida, RNNs zina connections zinazojirudia zenyewe, hivyo kuziruhusu kudumisha hidden state inayohifadhi taarifa kuhusu inputs zilizotangulia katika mfuatano.
 
 Vipengele vikuu vya RNNs ni pamoja na:
-- **Recurrent Layers**: Tabaka hizi zinachakata mfululizo wa ingizo hatua moja kwa wakati, zikisasisha hali yao ya siri kulingana na ingizo la sasa na hali ya siri ya awali. Hii inaruhusu RNNs kujifunza utegemezi wa muda katika data.
-- **Hidden State**: Hali ya siri ni vector inayofupisha taarifa kutoka hatua za zamani. Inasasishwa katika kila hatua ya wakati na inatumika kufanya makadirio kwa ingizo la sasa.
-- **Output Layer**: Tabaka la pato linaweza kutoa makadirio ya mwisho kulingana na hali ya siri. Katika kesi nyingi, RNNs zinatumika kwa kazi kama vile uundaji wa lugha, ambapo pato ni usambazaji wa uwezekano juu ya neno linalofuata katika mfululizo.
+- **Recurrent Layers**: Layers hizi huchakata input sequences hatua moja ya muda kwa wakati, zikisasisha hidden state yao kulingana na input ya sasa na hidden state ya awali. Hii huwezesha RNNs kujifunza temporal dependencies katika data.
+- **Hidden State**: Hidden state ni vector inayofupisha taarifa kutoka hatua za muda zilizotangulia. Husasishwa katika kila hatua ya muda na hutumika kufanya predictions kwa input ya sasa.
+- **Output Layer**: Output layer hutoa predictions za mwisho kulingana na hidden state. Mara nyingi, RNNs hutumika kwa kazi kama language modeling, ambapo output ni probability distribution ya neno linalofuata katika mfuatano.
 
-Kwa mfano, katika mfano wa lugha, RNN inachakata mfululizo wa maneno, kwa mfano, "Paka aliketi juu ya" na inakadiria neno linalofuata kulingana na muktadha uliopewa na maneno ya awali, katika kesi hii, "matt".
+Kwa mfano, katika language model, RNN huchakata mfuatano wa maneno, kwa mfano, "The cat sat on the" na hutabiri neno linalofuata kulingana na context iliyotolewa na maneno yaliyotangulia, katika hali hii, "mat".
 
-### Long Short-Term Memory (LSTM) and Gated Recurrent Unit (GRU)
+### Long Short-Term Memory (LSTM) and Gated Recurrent Unit (GRU) <sup>[[3]](#references)</sup>
 
-RNNs ni bora hasa kwa kazi zinazohusisha data za mfululizo, kama vile uundaji wa lugha, tafsiri ya mashine, na utambuzi wa sauti. Hata hivyo, wanaweza kuwa na shida na **utegemezi wa muda mrefu kutokana na matatizo kama vile gradients zinazopotea**.
+RNNs zinafaa hasa kwa kazi zinazohusisha sequential data, kama vile language modeling, machine translation, na speech recognition. Hata hivyo, zinaweza kupata changamoto katika **long-range dependencies kutokana na masuala kama vanishing gradients**.
 
-Ili kushughulikia hili, miundo maalum kama Long Short-Term Memory (LSTM) na Gated Recurrent Unit (GRU) zilianzishwa. Miundo hii inaingiza mekanizimu za milango zinazodhibiti mtiririko wa taarifa, ikiruhusu kushika utegemezi wa muda mrefu kwa ufanisi zaidi.
+Ili kushughulikia hili, architectures maalum kama Long Short-Term Memory (LSTM) na Gated Recurrent Unit (GRU) zilitengenezwa. Architectures hizi huanzisha gating mechanisms zinazodhibiti mtiririko wa taarifa, na kuziruhusu kushughulikia long-range dependencies kwa ufanisi zaidi.
 
-- **LSTM**: Mitandao ya LSTM hutumia milango mitatu (mlango wa ingizo, mlango wa kusahau, na mlango wa pato) kudhibiti mtiririko wa taarifa ndani na nje ya hali ya seli, ikiwaruhusu kukumbuka au kusahau taarifa juu ya mfululizo mrefu. Mlango wa ingizo unadhibiti ni kiasi gani cha taarifa mpya kinachoongezwa kulingana na ingizo na hali ya siri ya awali, mlango wa kusahau unadhibiti ni kiasi gani cha taarifa kinachotupwa. Kwa kuunganisha mlango wa ingizo na mlango wa kusahau tunapata hali mpya. Hatimaye, kwa kuunganisha hali mpya ya seli, na ingizo na hali ya siri ya awali pia tunapata hali mpya ya siri.
-- **GRU**: Mitandao ya GRU inarahisisha muundo wa LSTM kwa kuunganisha milango ya ingizo na kusahau kuwa mlango mmoja wa sasisho, ikifanya kuwa na ufanisi zaidi katika hesabu huku bado ikishika utegemezi wa muda mrefu.
+- **LSTM**: LSTM networks hutumia gates tatu (input gate, forget gate, na output gate) kudhibiti mtiririko wa taarifa kuingia na kutoka kwenye cell state, na kuziwezesha kukumbuka au kusahau taarifa katika sequences ndefu. Input gate hudhibiti kiasi cha taarifa mpya kinachoongezwa kulingana na input na hidden state ya awali, huku forget gate ikidhibiti kiasi cha taarifa kinachotupwa. Kwa kuchanganya input gate na forget gate tunapata state mpya. Hatimaye, kwa kuchanganya cell state mpya na input pamoja na hidden state ya awali, tunapata pia hidden state mpya.
+- **GRU**: GRU networks hurahisisha LSTM architecture kwa kuchanganya input gate na forget gate kuwa update gate moja, hivyo kuzifanya ziwe na ufanisi zaidi wa computational huku zikiendelea kushughulikia long-range dependencies.
 
 ## LLMs (Large Language Models)
 
-Large Language Models (LLMs) ni aina ya mfano wa kujifunza kwa kina iliyoundwa mahsusi kwa ajili ya kazi za usindikaji wa lugha ya asili. Zimefundishwa kwa kiasi kikubwa cha data ya maandiko na zinaweza kuzalisha maandiko yanayofanana na ya binadamu, kujibu maswali, kutafsiri lugha, na kutekeleza kazi mbalimbali zinazohusiana na lugha.
-LLMs kwa kawaida zinategemea miundo ya transformer, ambayo inatumia mekanizimu za kujitazama ili kushika uhusiano kati ya maneno katika mfululizo, ikiruhusu kuelewa muktadha na kuzalisha maandiko yanayofanana.
+Large Language Models (LLMs) ni aina ya deep learning models zilizoundwa mahususi kwa ajili ya kazi za natural language processing. Hufunzwa kwa kiasi kikubwa sana cha text data na zinaweza kuzalisha text inayofanana na ya binadamu, kujibu maswali, kutafsiri lugha, na kutekeleza kazi nyingine mbalimbali zinazohusiana na lugha.
+LLMs kwa kawaida hutegemea transformer architectures, ambazo hutumia self-attention mechanisms kunasa uhusiano kati ya maneno katika mfuatano, na kuziwezesha kuelewa context na kuzalisha text yenye mshikamano.
 
-### Transformer Architecture
-Muundo wa transformer ni msingi wa LLM nyingi. Unajumuisha muundo wa encoder-decoder, ambapo encoder inachakata mfululizo wa ingizo na decoder inazalisha mfululizo wa pato. Vipengele muhimu vya muundo wa transformer ni pamoja na:
-- **Self-Attention Mechanism**: Mekanizimu hii inaruhusu mfano kupima umuhimu wa maneno tofauti katika mfululizo wakati wa kuzalisha uwakilishi. Inahesabu alama za umakini kulingana na uhusiano kati ya maneno, ikiruhusu mfano kuzingatia muktadha muhimu.
-- **Multi-Head Attention**: Kipengele hiki kinaruhusu mfano kushika uhusiano mwingi kati ya maneno kwa kutumia vichwa vingi vya umakini, kila kikiwa na lengo tofauti la ingizo.
-- **Positional Encoding**: Kwa kuwa transformers hazina dhana ya ndani ya mpangilio wa maneno, encoding ya nafasi inaongezwa kwenye embeddings za ingizo ili kutoa taarifa kuhusu nafasi ya maneno katika mfululizo.
+### Transformer Architecture <sup>[[4]](#references)</sup>
+Transformer architecture ndiyo msingi wa LLMs nyingi. Inajumuisha muundo wa encoder-decoder, ambapo encoder huchakata input sequence na decoder huzalisha output sequence. Vipengele muhimu vya transformer architecture ni pamoja na:
+- **Self-Attention Mechanism**: Mechanism hii huwezesha model kupima umuhimu wa maneno mbalimbali katika mfuatano wakati wa kuzalisha representations. Hukokotoa attention scores kulingana na uhusiano kati ya maneno, na kuiwezesha model kulenga context inayohusika.
+- **Multi-Head Attention**: Kipengele hiki huwezesha model kunasa uhusiano mbalimbali kati ya maneno kwa kutumia attention heads nyingi, ambapo kila moja hulenga vipengele tofauti vya input.
+- **Positional Encoding**: Kwa kuwa transformers hazina dhana iliyojengwa ndani ya mpangilio wa maneno, positional encoding huongezwa kwenye input embeddings ili kutoa taarifa kuhusu nafasi ya maneno katika mfuatano.
 
-## Diffusion Models
-Diffusion models ni darasa la mifano ya kizazi ambayo inajifunza kuzalisha data kwa kuiga mchakato wa diffusion. Ni bora hasa kwa kazi kama vile uzalishaji wa picha na zimepata umaarufu katika miaka ya hivi karibuni.
-Diffusion models hufanya kazi kwa kubadilisha taratibu usambazaji wa kelele rahisi kuwa usambazaji wa data tata kupitia mfululizo wa hatua za diffusion. Vipengele muhimu vya diffusion models ni pamoja na:
-- **Forward Diffusion Process**: Mchakato huu unazidisha kelele kwenye data, ukibadilisha kuwa usambazaji wa kelele rahisi. Mchakato wa diffusion wa mbele kwa kawaida unafafanuliwa na mfululizo wa viwango vya kelele, ambapo kila kiwango kinahusiana na kiasi maalum cha kelele kilichoongezwa kwenye data.
-- **Reverse Diffusion Process**: Mchakato huu unajifunza kubadilisha mchakato wa diffusion wa mbele, ukiondoa kelele kwenye data ili kuzalisha sampuli kutoka kwa usambazaji wa lengo. Mchakato wa diffusion wa nyuma unafundishwa kwa kutumia kazi ya hasara inayohimiza mfano kujenga data ya awali kutoka kwa sampuli zenye kelele.
+## Diffusion Models <sup>[[5]](#references)</sup>
+Diffusion models ni aina ya generative models zinazojifunza kuzalisha data kwa kuiga diffusion process. Zinafaa hasa kwa kazi kama image generation na zimepata umaarufu katika miaka ya hivi karibuni.
+Diffusion models hufanya kazi kwa kubadilisha hatua kwa hatua simple noise distribution kuwa complex data distribution kupitia mfululizo wa diffusion steps. Vipengele muhimu vya diffusion models ni pamoja na:
+- **Forward Diffusion Process**: Process hii huongeza noise kwenye data hatua kwa hatua, na kuibadilisha kuwa simple noise distribution. Forward diffusion process kwa kawaida hufafanuliwa na mfululizo wa noise levels, ambapo kila level inawakilisha kiasi maalum cha noise kilichoongezwa kwenye data.
+- **Reverse Diffusion Process**: Process hii hujifunza kubadilisha forward diffusion process, ikiondoa noise kwenye data hatua kwa hatua ili kuzalisha samples kutoka kwenye target distribution. Reverse diffusion process hufunzwa kwa kutumia loss function inayohimiza model kuunda upya data ya awali kutoka kwenye noisy samples.
 
-Zaidi ya hayo, ili kuzalisha picha kutoka kwa kichocheo cha maandiko, diffusion models kwa kawaida hufuata hatua hizi:
-1. **Text Encoding**: Kichocheo cha maandiko kinahifadhiwa katika uwakilishi wa latent kwa kutumia encoder ya maandiko (kwa mfano, mfano wa msingi wa transformer). Uwiano huu unashika maana ya kisemantiki ya maandiko.
-2. **Noise Sampling**: Vector ya kelele isiyo ya kawaida inachukuliwa kutoka kwa usambazaji wa Gaussian.
-3. **Diffusion Steps**: Mfano unatumia mfululizo wa hatua za diffusion, ukibadilisha taratibu vector ya kelele kuwa picha inayolingana na kichocheo cha maandiko. Kila hatua inahusisha kutumia mabadiliko yaliyofundishwa ili kuondoa kelele kwenye picha.
+Zaidi ya hayo, ili kuzalisha image kutoka kwenye text prompt, diffusion models kwa kawaida hufuata hatua hizi:
+1. **Text Encoding**: Text prompt husimbwa kuwa latent representation kwa kutumia text encoder (kwa mfano, model inayotegemea transformer). Representation hii hunasa maana ya kisemantiki ya text.
+2. **Noise Sampling**: Random noise vector huchukuliwa kutoka kwenye Gaussian distribution.
+3. **Diffusion Steps**: Model hutumia mfululizo wa diffusion steps, ikibadilisha noise vector hatua kwa hatua kuwa image inayolingana na text prompt. Kila hatua inahusisha kutumia learned transformations ili kuondoa noise kwenye image.
 
+## References
+
+- [1] [PyTorch - Mafunzo ya Neural Networks](https://docs.pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html)
+- [2] [PyTorch - Conv2d](https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html)
+- [3] [PyTorch - LSTM](https://docs.pytorch.org/docs/stable/generated/torch.nn.LSTM.html)
+- [4] [PyTorch - Transformer](https://docs.pytorch.org/docs/stable/generated/torch.nn.Transformer.html)
+- [5] [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239)
 {{#include ../banners/hacktricks-training.md}}

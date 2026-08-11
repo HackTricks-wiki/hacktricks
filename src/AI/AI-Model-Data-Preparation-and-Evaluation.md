@@ -1,58 +1,63 @@
-# Model Data Preparation & Evaluation
+# Maandalizi na Tathmini ya Data ya Modeli
 
 {{#include ../banners/hacktricks-training.md}}
 
-Kuandaa data ya modeli ni hatua muhimu katika mchakato wa kujifunza mashine, kwani inahusisha kubadilisha data ghafi kuwa muundo unaofaa kwa mafunzo ya modeli za kujifunza mashine. Mchakato huu unajumuisha hatua kadhaa muhimu:
+Maandalizi ya data ya modeli ni hatua muhimu katika mchakato wa machine learning, kwa kuwa inahusisha kubadilisha data ghafi kuwa muundo unaofaa kwa kufundisha machine learning models. Mchakato huu unajumuisha hatua kadhaa muhimu:
 
-1. **Data Collection**: Kukusanya data kutoka vyanzo mbalimbali, kama vile hifadhidata, APIs, au faili. Data inaweza kuwa na muundo (mfano, meza) au isiyo na muundo (mfano, maandiko, picha).
-2. **Data Cleaning**: Kuondoa au kurekebisha alama za data zisizo sahihi, zisizokamilika, au zisizohusiana. Hatua hii inaweza kujumuisha kushughulikia thamani zinazokosekana, kuondoa nakala, na kuchuja alama za nje.
-3. **Data Transformation**: Kubadilisha data kuwa muundo unaofaa kwa mfano. Hii inaweza kujumuisha urekebishaji, kupima, kuandika mabadiliko ya kategoria, na kuunda vipengele vipya kupitia mbinu kama vile uhandisi wa vipengele.
-4. **Data Splitting**: Kugawa dataset katika seti za mafunzo, uthibitisho, na mtihani ili kuhakikisha modeli inaweza kujumlisha vizuri kwa data isiyoonekana.
+1. **Ukusanyaji wa Data**: Kukusanya data kutoka vyanzo mbalimbali, kama vile databases, APIs, au files. Data inaweza kuwa structured (kwa mfano, tables) au unstructured (kwa mfano, text, images).
+2. **Usafishaji wa Data**: Kuondoa au kurekebisha data yenye makosa, isiyokamilika, au isiyohusika. Hatua hii inaweza kujumuisha kushughulikia missing values, kuondoa duplicates, na kuchuja outliers.
+3. **Ubadilishaji wa Data**: Kubadilisha data kuwa muundo unaofaa kwa modeling. Hii inaweza kujumuisha normalization, scaling, encoding categorical variables, na kuunda features mpya kupitia techniques kama feature engineering.
+4. **Ugawaji wa Data**: Kugawa dataset kuwa training, validation, na test sets ili kuhakikisha model inaweza kufanya generalization vizuri kwenye data ambayo haijawahi kuonekana.
 
-## Data Collection
+## Ukusanyaji wa Data
 
-Kukusanya data kunahusisha kukusanya data kutoka vyanzo mbalimbali, ambavyo vinaweza kujumuisha:
-- **Databases**: Kutolewa kwa data kutoka hifadhidata za uhusiano (mfano, hifadhidata za SQL) au hifadhidata za NoSQL (mfano, MongoDB).
-- **APIs**: Kupata data kutoka kwa APIs za wavuti, ambazo zinaweza kutoa data ya wakati halisi au ya kihistoria.
-- **Files**: Kusoma data kutoka kwa faili katika muundo kama CSV, JSON, au XML.
-- **Web Scraping**: Kukusanya data kutoka tovuti kwa kutumia mbinu za kuchambua wavuti.
+Ukusanyaji wa data unahusisha kukusanya data kutoka vyanzo mbalimbali, ambavyo vinaweza kujumuisha:
+- **Databases**: Kutoa data kutoka relational databases (kwa mfano, SQL databases) au NoSQL databases (kwa mfano, MongoDB).
+- **APIs**: Kupata data kutoka web APIs, ambazo zinaweza kutoa data ya wakati halisi au ya kihistoria.
+- **Files**: Kusoma data kutoka files zenye formats kama CSV, JSON, au XML.
+- **Web Scraping**: Kukusanya data kutoka websites kwa kutumia web scraping techniques.
 
-Kulingana na lengo la mradi wa kujifunza mashine, data itachukuliwa na kukusanywa kutoka vyanzo husika ili kuhakikisha inawakilisha eneo la tatizo.
+Kulingana na lengo la machine learning project, data itatolewa na kukusanywa kutoka vyanzo vinavyohusika ili kuhakikisha inawakilisha problem domain.
 
-## Data Cleaning
+## Usafishaji wa Data <sup>[[1]](#references)</sup><sup>[[2]](#references)</sup>
 
-Kuondoa data ni mchakato wa kubaini na kurekebisha makosa au kutokuelewana katika dataset. Hatua hii ni muhimu ili kuhakikisha ubora wa data inayotumika kwa mafunzo ya modeli za kujifunza mashine. Kazi kuu katika kuondoa data ni pamoja na:
-- **Handling Missing Values**: Kubaini na kushughulikia alama za data zinazokosekana. Mikakati ya kawaida ni pamoja na:
-- Kuondoa safu au nguzo zenye thamani zinazokosekana.
-- Kuweka thamani zinazokosekana kwa kutumia mbinu kama vile wastani, median, au uhamasishaji wa kawaida.
-- Kutumia mbinu za kisasa kama vile uhamasishaji wa K-nearest neighbors (KNN) au uhamasishaji wa regression.
-- **Removing Duplicates**: Kubaini na kuondoa rekodi za nakala ili kuhakikisha kila alama ya data ni ya kipekee.
-- **Filtering Outliers**: Kugundua na kuondoa alama za nje ambazo zinaweza kuathiri utendaji wa mfano. Mbinu kama Z-score, IQR (Interquartile Range), au picha (mfano, sanduku la michoro) zinaweza kutumika kubaini alama za nje.
+Usafishaji wa data ni mchakato wa kutambua na kurekebisha makosa au kutokulingana ndani ya dataset. Hatua hii ni muhimu ili kuhakikisha ubora wa data inayotumika kufundisha machine learning models. Kazi muhimu katika usafishaji wa data ni pamoja na:
+- **Kushughulikia Missing Values**: Kutambua na kushughulikia data points zilizokosekana. Mikakati ya kawaida ni pamoja na:
+- Kuondoa rows au columns zenye missing values.
+- Kujaza missing values kwa kutumia techniques kama mean, median, au mode imputation.
+- Kutumia methods za hali ya juu kama K-nearest neighbors (KNN) imputation au regression imputation.
+- **Kuondoa Duplicates**: Kutambua na kuondoa records zilizorudiwa ili kuhakikisha kila data point ni ya kipekee.
+- **Kuchuja Outliers**: Kugundua na kuondoa outliers ambazo zinaweza kupotosha utendaji wa model. Techniques kama Z-score, IQR (Interquartile Range), au visualizations (kwa mfano, box plots) zinaweza kutumika kutambua outliers.
 
-### Example of data cleaning
+### Mfano wa usafishaji wa data
 ```python
+import re
+
+import numpy as np
 import pandas as pd
+from sklearn.impute import KNNImputer, SimpleImputer
+
 # Load the dataset
-data = pd.read_csv('data.csv')
+df = pd.read_csv('data.csv')
 
 # Finding invalid values based on a specific function
-def is_valid_possitive_int(num):
+def is_valid_positive_int(num):
 try:
 num = int(num)
 return 1 <= num <= 31
 except ValueError:
 return False
 
-invalid_days = data[~data['days'].astype(str).apply(is_valid_positive_int)]
+invalid_days = df[~df['days'].astype(str).apply(is_valid_positive_int)]
 
 ## Dropping rows with invalid days
-data = data.drop(invalid_days.index, errors='ignore')
+df = df.drop(invalid_days.index, errors='ignore')
 
 
 
 # Set "NaN" values to a specific value
 ## For example, setting NaN values in the 'days' column to 0
-data['days'] = pd.to_numeric(data['days'], errors='coerce')
+df['days'] = pd.to_numeric(df['days'], errors='coerce')
 
 ## For example, set "NaN" to not ips
 def is_valid_ip(ip):
@@ -81,154 +86,159 @@ df[numeric_cols] = knn_imputer.fit_transform(df[numeric_cols])
 
 
 # Filling missing values
-data.fillna(data.mean(), inplace=True)
+df.fillna(df.mean(numeric_only=True), inplace=True)
 
 # Removing duplicates
-data.drop_duplicates(inplace=True)
+df.drop_duplicates(inplace=True)
 # Filtering outliers using Z-score
 from scipy import stats
-z_scores = stats.zscore(data.select_dtypes(include=['float64', 'int64']))
-data = data[(z_scores < 3).all(axis=1)]
+z_scores = np.abs(stats.zscore(df.select_dtypes(include=['float64', 'int64']), nan_policy='omit'))
+df = df[(z_scores < 3).all(axis=1)]
 ```
-## Data Transformation
+## Data Transformation <sup>[[1]](#references)</sup>
 
-Data transformation inahusisha kubadilisha data kuwa katika muundo unaofaa kwa ajili ya uundaji wa mifano. Hatua hii inaweza kujumuisha:
-- **Normalization & Standarization**: Kupanua vipengele vya nambari hadi kiwango cha kawaida, kwa kawaida [0, 1] au [-1, 1]. Hii husaidia kuboresha mchakato wa kukaribia wa algorithimu za optimization.
-- **Min-Max Scaling**: Kupanua vipengele hadi kiwango kilichowekwa, kwa kawaida [0, 1]. Hii inafanywa kwa kutumia formula: `X' = (X - X_{min}) / (X_{max} - X_{min})`
-- **Z-Score Normalization**: Kuweka viwango vya vipengele kwa kupunguza wastani na kugawanya kwa kiwango cha kawaida, na kusababisha usambazaji wenye wastani wa 0 na kiwango cha kawaida cha 1. Hii inafanywa kwa kutumia formula: `X' = (X - μ) / σ`, ambapo μ ni wastani na σ ni kiwango cha kawaida.
-- **Skeyewness and Kurtosis**: Kurekebisha usambazaji wa vipengele ili kupunguza skewness (asymmetry) na kurtosis (peakedness). Hii inaweza kufanywa kwa kutumia mabadiliko kama vile logarithmic, square root, au Box-Cox transformations. Kwa mfano, ikiwa kipengele kina usambazaji ulio skewed, kutumia mabadiliko ya logarithmic kunaweza kusaidia kuifanya iwe ya kawaida.
-- **String Normalization**: Kubadilisha nyuzi kuwa muundo wa kawaida, kama vile:
-- Lowercasing
-- Kuondoa wahusika maalum (kuhifadhi wale muhimu)
-- Kuondoa maneno ya kusimamisha (maneno ya kawaida ambayo hayachangii maana, kama "the", "is", "and")
-- Kuondoa maneno yanayojirudia sana na maneno nadra sana (kwa mfano, maneno yanayoonekana katika zaidi ya 90% ya hati au chini ya mara 5 katika corpus)
-- Kukata nafasi za wazi
-- Stemming/Lemmatization: Kupunguza maneno kuwa katika mfumo wao wa msingi au mzizi (kwa mfano, "running" kuwa "run").
+Data transformation inahusisha kubadilisha data kuwa muundo unaofaa kwa modeling. Hatua hii inaweza kujumuisha:
+- **Normalization and standardization**: Kupanua vipengele vya nambari hadi kwenye range ya pamoja, kwa kawaida [0, 1] au [-1, 1]. Hii inaweza kuboresha convergence ya optimization algorithms.
+- **Min-Max Scaling**: Kubadilisha vipengele kwa scale ya kudumu, kwa kawaida [0, 1]. Hii hufanywa kwa kutumia formula: `X' = (X - X_{min}) / (X_{max} - X_{min})`
+- **Z-Score Normalization**: Kuweka vipengele kwenye kiwango sanifu kwa kutoa mean na kugawanya kwa standard deviation, hivyo kupata distribution yenye mean ya 0 na standard deviation ya 1. Hii hufanywa kwa kutumia formula: `X' = (X - μ) / σ`, ambapo μ ni mean na σ ni standard deviation.
+- **Skewness and kurtosis**: Kurekebisha distributions za vipengele kwa transformations kama logarithm, square root, au Box-Cox. Kwa mfano, logarithmic transformation inaweza kupunguza positive skew.
+- **String Normalization**: Kubadilisha strings kuwa format inayofanana, kama vile:
+- Kuweka herufi zote kuwa lowercase
+- Kuondoa special characters (kuhifadhi zinazohusika)
+- Kuondoa stop words (maneno ya kawaida yasiyochangia maana, kama vile "the", "is", na "and")
+- Kuondoa maneno yanayotokea mara nyingi sana na yanayotokea mara chache sana (kwa mfano, maneno yanayoonekana katika zaidi ya 90% ya documents au chini ya mara 5 kwenye corpus)
+- Kuondoa whitespace ya ziada
+- Stemming/Lemmatization: Kupunguza maneno hadi kwenye umbo lake la msingi au mzizi (kwa mfano, "running" kuwa "run").
 
-- **Encoding Categorical Variables**: Kubadilisha variables za kategoria kuwa uwakilishi wa nambari. Mbinu za kawaida ni pamoja na:
-- **One-Hot Encoding**: Kuunda safu za binary kwa kila kategoria.
-- Kwa mfano, ikiwa kipengele kina kategoria "red", "green", na "blue", kitabadilishwa kuwa safu tatu za binary: `is_red`(100), `is_green`(010), na `is_blue`(001).
-- **Label Encoding**: Kuweka nambari ya kipekee kwa kila kategoria.
+- **Encoding Categorical Variables**: Kubadilisha categorical variables kuwa representations za nambari. Techniques za kawaida zinajumuisha:
+- **One-Hot Encoding**: Kuunda binary columns kwa kila category.
+- Kwa mfano, ikiwa feature ina categories "red", "green", na "blue", itabadilishwa kuwa binary columns tatu: `is_red`(100), `is_green`(010), na `is_blue`(001).
+- **Label Encoding**: Kuweka integer ya kipekee kwa kila category.
 - Kwa mfano, "red" = 0, "green" = 1, "blue" = 2.
-- **Ordinal Encoding**: Kuweka nambari kulingana na mpangilio wa kategoria.
-- Kwa mfano, ikiwa kategoria ni "low", "medium", na "high", zinaweza kuwekwa kama 0, 1, na 2, mtawalia.
-- **Hashing Encoding**: Kutumia kazi ya hash kubadilisha kategoria kuwa vectors za ukubwa wa kudumu, ambayo inaweza kuwa muhimu kwa variables za kategoria zenye kadi nyingi.
-- Kwa mfano, ikiwa kipengele kina kategoria nyingi za kipekee, hashing inaweza kupunguza ukubwa wa dimensionality huku ikihifadhi baadhi ya taarifa kuhusu kategoria.
-- **Bag of Words (BoW)**: Kuonyesha data ya maandiko kama matrix ya hesabu za maneno au mara kwa mara, ambapo kila safu inahusiana na hati na kila safu inahusiana na neno la kipekee katika corpus.
-- Kwa mfano, ikiwa corpus ina maneno "cat", "dog", na "fish", hati inayojumuisha "cat" na "dog" itawakilishwa kama [1, 1, 0]. Uwakilishi huu maalum unaitwa "unigram" na hauwezi kukamata mpangilio wa maneno, hivyo hupoteza taarifa ya maana.
-- **Bigram/Trigram**: Kupanua BoW ili kukamata mfuatano wa maneno (bigrams au trigrams) ili kuhifadhi muktadha fulani. Kwa mfano, "cat and dog" itawakilishwa kama bigram [1, 1] kwa "cat and" na [1, 1] kwa "and dog". Katika kesi hizi, taarifa zaidi ya maana inakusanywa (kuongeza ukubwa wa uwakilishi) lakini kwa maneno 2 au 3 kwa wakati mmoja.
-- **TF-IDF (Term Frequency-Inverse Document Frequency)**: Kipimo cha takwimu kinachopima umuhimu wa neno katika hati kulingana na mkusanyiko wa hati (corpus). Kinachanganya mara ya neno (jinsi neno linavyoonekana katika hati) na mara ya kinyume ya hati (jinsi neno lilivyo nadra katika hati zote).
-- Kwa mfano, ikiwa neno "cat" linaonekana mara nyingi katika hati lakini ni nadra katika corpus nzima, litakuwa na alama ya juu ya TF-IDF, ikionyesha umuhimu wake katika hati hiyo.
+- **Ordinal Encoding**: Kuweka integers kulingana na mpangilio wa categories.
+- Kwa mfano, ikiwa categories ni "low", "medium", na "high", zinaweza ku-encodeiwa kama 0, 1, na 2, kwa mtiririko huo.
+- **Hashing Encoding**: Kutumia hash function kubadilisha categories kuwa vectors zenye size maalum, jambo linaloweza kuwa muhimu kwa categorical variables zenye cardinality kubwa.
+- Kwa mfano, ikiwa feature ina categories nyingi za kipekee, hashing inaweza kupunguza dimensionality huku ikihifadhi baadhi ya taarifa kuhusu categories.
+- **Bag of Words (BoW)**: Kuwakilisha text data kama matrix ya counts au frequencies za words, ambapo kila row inawakilisha document na kila column inawakilisha word ya kipekee kwenye corpus.
+- Kwa mfano, ikiwa corpus ina words "cat", "dog", na "fish", document iliyo na "cat" na "dog" ingewakilishwa kama [1, 1, 0]. Representation hii maalum huitwa "unigram" na haikamatili mpangilio wa words, hivyo hupoteza semantic information.
+- **Bigram/Trigram**: Kupanua BoW ili kukamata sequences za words (bigrams au trigrams) na kuhifadhi baadhi ya context. Kwa mfano, "cat and dog" ingewakilishwa kama bigram [1, 1] kwa "cat and" na [1, 1] kwa "and dog". Katika hali hizi semantic information zaidi hukusanywa (na kuongeza dimensionality ya representation), lakini kwa words 2 au 3 pekee kwa wakati mmoja.
+- **TF-IDF (Term Frequency-Inverse Document Frequency)**: Kipimo cha kitakwimu kinachotathmini umuhimu wa word katika document ikilinganishwa na mkusanyiko wa documents (corpus). Huchanganya term frequency (mara ambazo word huonekana katika document) na inverse document frequency (jinsi word ilivyo nadra katika documents zote).
+- Kwa mfano, ikiwa word "cat" inaonekana mara nyingi katika document lakini ni nadra katika corpus nzima, itakuwa na TF-IDF score ya juu, ikionyesha umuhimu wake katika document hiyo.
 
-- **Feature Engineering**: Kuunda vipengele vipya kutoka kwa vile vilivyopo ili kuboresha uwezo wa mfano wa kutabiri. Hii inaweza kujumuisha kuunganisha vipengele, kutoa vipengele vya tarehe/nyakati, au kutumia mabadiliko maalum ya eneo.
+- **Feature Engineering**: Kuunda features mpya kutoka kwa zilizopo ili kuongeza uwezo wa model wa kufanya predictions. Hii inaweza kuhusisha kuchanganya features, kutoa vipengele vya tarehe/muda, au kutumia transformations maalum za domain.
 
-## Data Splitting
+## Data Splitting <sup>[[3]](#references)</sup>
 
-Data splitting inahusisha kugawanya dataset katika sehemu tofauti kwa ajili ya mafunzo, uthibitisho, na upimaji. Hii ni muhimu ili kutathmini utendaji wa mfano kwenye data isiyoonekana na kuzuia overfitting. Mbinu za kawaida ni pamoja na:
-- **Train-Test Split**: Kugawanya dataset katika seti ya mafunzo (kwa kawaida 60-80% ya data), seti ya uthibitisho (10-15% ya data) ili kurekebisha hyperparameters, na seti ya upimaji (10-15% ya data). Mfano unafundishwa kwenye seti ya mafunzo na kutathminiwa kwenye seti ya upimaji.
-- Kwa mfano, ikiwa una dataset ya sampuli 1000, unaweza kutumia sampuli 700 kwa mafunzo, 150 kwa uthibitisho, na 150 kwa upimaji.
-- **Stratified Sampling**: Kuhakikisha kuwa usambazaji wa madaraja katika seti za mafunzo na upimaji ni sawa na dataset nzima. Hii ni muhimu hasa kwa datasets zisizo sawa, ambapo baadhi ya madaraja yanaweza kuwa na sampuli chache sana kuliko mengine.
-- **Time Series Split**: Kwa data ya mfululizo wa wakati, dataset inagawanywa kulingana na wakati, kuhakikisha kuwa seti ya mafunzo ina data kutoka nyakati za awali na seti ya upimaji ina data kutoka nyakati za baadaye. Hii husaidia kutathmini utendaji wa mfano kwenye data ya baadaye.
-- **K-Fold Cross-Validation**: Kugawanya dataset katika K sehemu (folds) na kufundisha mfano mara K, kila wakati ukitumia fold tofauti kama seti ya upimaji na folds zilizobaki kama seti ya mafunzo. Hii husaidia kuhakikisha kuwa mfano unathminiwa kwenye sehemu tofauti za data, ikitoa makadirio thabiti zaidi ya utendaji wake.
+Data splitting inahusisha kugawanya dataset kuwa subsets tofauti za training, validation, na testing. Hii ni muhimu kwa kutathmini performance ya model kwenye data ambayo haijaonekana na kuzuia overfitting. Strategies za kawaida zinajumuisha:
+- **Train-Test Split**: Kugawanya dataset kuwa training set (kwa kawaida 60-80% ya data), validation set (10-15% ya data) kwa ajili ya kurekebisha hyperparameters, na test set (10-15% ya data). Model hufunzwa kwa training set na kutathminiwa kwa test set.
+- Kwa mfano, ikiwa una dataset yenye samples 1000, unaweza kutumia samples 700 kwa training, 150 kwa validation, na 150 kwa testing.
+- **Stratified Sampling**: Kuhakikisha kuwa distribution ya classes katika training na test sets inafanana na dataset nzima. Hii ni muhimu hasa kwa imbalanced datasets, ambapo baadhi ya classes zinaweza kuwa na samples chache kwa kiasi kikubwa kuliko nyingine.
+- **Time Series Split**: Kwa time series data, dataset hugawanywa kulingana na muda, huku ikihakikisha kuwa training set ina data kutoka vipindi vya awali na test set ina data kutoka vipindi vya baadaye. Hii husaidia kutathmini performance ya model kwenye data ya baadaye.
+- **K-Fold Cross-Validation**: Kugawanya dataset kuwa subsets K (folds) na kufundisha model mara K, ambapo kila mara fold tofauti hutumika kama test set na folds zilizobaki hutumika kama training set. Hii husaidia kuhakikisha kuwa model inatathminiwa kwenye subsets tofauti za data, na kutoa makadirio thabiti zaidi ya performance yake.
 
-## Model Evaluation
+## Model Evaluation <sup>[[4]](#references)</sup>
 
-Model evaluation ni mchakato wa kutathmini utendaji wa mfano wa kujifunza mashine kwenye data isiyoonekana. Inahusisha kutumia vipimo mbalimbali kupima jinsi mfano unavyoweza kuhamasisha kwenye data mpya. Vipimo vya kawaida vya tathmini ni pamoja na:
+Model evaluation ni mchakato wa kutathmini performance ya machine learning model kwenye data ambayo haijaonekana. Unahusisha kutumia metrics mbalimbali kupima jinsi model inavyoweza ku-generalize kwenye data mpya. Metrics za kawaida za evaluation zinajumuisha:
 
 ### Accuracy
 
-Accuracy ni sehemu ya matukio yaliyotabiriwa kwa usahihi kati ya jumla ya matukio. Inakokotolewa kama:
+Accuracy ni uwiano wa instances zilizotabiriwa kwa usahihi dhidi ya instances zote. Hukokotolewa kama:
 ```plaintext
 Accuracy = (Number of Correct Predictions) / (Total Number of Predictions)
 ```
 > [!TIP]
-> Usahihi ni kipimo rahisi na cha kueleweka, lakini huenda usifae kwa seti za data zisizo na uwiano ambapo darasa moja linatawala mengine kwani linaweza kutoa picha isiyo sahihi ya utendaji wa mfano. Kwa mfano, ikiwa 90% ya data inahusiana na darasa A na mfano un预测所有实例为类A, itapata usahihi wa 90%, lakini haitakuwa na manufaa katika kutabiri darasa B.
+> Usahihi ni kipimo rahisi na angavu, lakini huenda kisifae kwa datasets zisizosawazika ambapo class moja inatawala nyingine, kwa sababu kinaweza kutoa taswira potofu ya utendaji wa model. Kwa mfano, ikiwa 90% ya data ni ya class A na model inatabiri matukio yote kuwa class A, itafikia usahihi wa 90%, lakini haitakuwa na manufaa katika kutabiri class B.
 
-### Usahihi
+### Precision
 
-Usahihi ni sehemu ya utabiri sahihi wa chanya kutoka kwa utabiri wote chanya uliofanywa na mfano. Inakokotolewa kama:
+Precision ni uwiano wa utabiri chanya wa kweli kati ya utabiri wote chanya uliofanywa na model. Huhesabiwa hivi:
 ```plaintext
 Precision = (True Positives) / (True Positives + False Positives)
 ```
 > [!TIP]
-> Usahihi ni muhimu hasa katika hali ambapo matokeo ya uwongo yana gharama kubwa au hayapendekezwi, kama katika uchunguzi wa matibabu au kugundua udanganyifu. Kwa mfano, ikiwa mfano un预测 100 matukio kama chanya, lakini tu 80 kati yao ni kweli chanya, usahihi utakuwa 0.8 (80%).
+> Precision ni muhimu hasa katika hali ambapo false positives ni za gharama kubwa au hazitakiwi, kama vile katika utambuzi wa magonjwa au detection ya fraud. Kwa mfano, ikiwa model inatabiri matukio 100 kuwa positive, lakini ni 80 tu kati yao ambayo kwa kweli ni positive, precision itakuwa 0.8 (80%).
 
-### Kumbukumbu (Sensitivity)
+### Recall (Sensitivity)
 
-Kumbukumbu, pia inajulikana kama sensitivity au kiwango cha kweli chanya, ni sehemu ya utabiri wa kweli chanya kati ya matukio yote halisi chanya. Inakokotwa kama:
+Recall, inayojulikana pia kama sensitivity au true positive rate, ni uwiano wa true positive predictions ikilinganishwa na matukio yote halisi yaliyo positive. Inahesabiwa kama:
 ```plaintext
 Recall = (True Positives) / (True Positives + False Negatives)
 ```
 > [!TIP]
-> Kumbuka ni muhimu katika hali ambapo hasi za uwongo ni za gharama kubwa au zisizohitajika, kama katika ugunduzi wa magonjwa au kuchuja barua taka. Kwa mfano, ikiwa mfano unapata 80 kati ya 100 ya matukio halisi chanya, kumbukumbu itakuwa 0.8 (80%).
+> Recall ni muhimu katika hali ambapo false negatives ni ghali au hazitakiwi, kama vile katika utambuzi wa magonjwa au uchujaji wa spam. Kwa mfano, ikiwa model itatambua matukio 80 kati ya 100 halisi yenye matokeo chanya, recall itakuwa 0.8 (80%).
 
 ### F1 Score
 
-F1 score ni wastani wa harmonic wa usahihi na kumbukumbu, ikitoa uwiano kati ya vipimo viwili. Inakokotolewa kama:
+F1 score ni harmonic mean ya precision na recall, ikitoa uwiano kati ya vipimo hivyo viwili. Hukokotolewa kama ifuatavyo:
 ```plaintext
 F1 Score = 2 * (Precision * Recall) / (Precision + Recall)
 ```
 > [!TIP]
-> Alama ya F1 ni muhimu hasa unaposhughulika na seti za data zisizo sawa, kwani inazingatia both false positives na false negatives. Inatoa kipimo kimoja kinachoshughulikia uwiano kati ya usahihi na ukumbusho. Kwa mfano, ikiwa mfano una usahihi wa 0.8 na ukumbusho wa 0.6, alama ya F1 itakuwa takriban 0.69.
+> Alama ya F1 ni muhimu hasa unaposhughulikia datasets zisizosawazika, kwa kuwa inazingatia false positives na false negatives. Inatoa metric moja inayowakilisha uwiano kati ya precision na recall. Kwa mfano, ikiwa model ina precision ya 0.8 na recall ya 0.6, alama ya F1 itakuwa takribani 0.69.
 
-### ROC-AUC (Receiver Operating Characteristic - Eneo Chini ya Curve)
+### ROC-AUC (Receiver Operating Characteristic - Area Under the Curve)
 
-Kipimo cha ROC-AUC kinatathmini uwezo wa mfano kutofautisha kati ya madaraja kwa kuchora kiwango halisi chanya (sensitivity) dhidi ya kiwango cha uwongo chanya katika mipangilio mbalimbali ya kigezo. Eneo chini ya curve ya ROC (AUC) kinakadiria utendaji wa mfano, ambapo thamani ya 1 inaashiria uainishaji kamili na thamani ya 0.5 inaashiria kubahatisha kwa nasibu.
+Metric ya ROC-AUC hutathmini uwezo wa model kutofautisha kati ya classes kwa kuchora kiwango cha true positives (sensitivity) dhidi ya kiwango cha false positives katika mipangilio mbalimbali ya threshold. Eneo lililo chini ya curve ya ROC (AUC) hupima utendaji wa model, ambapo thamani ya 1 inaonyesha classification kamili na thamani ya 0.5 inaonyesha kubahatisha bila mpangilio.
 
 > [!TIP]
-> ROC-AUC ni muhimu hasa kwa matatizo ya uainishaji wa binary na inatoa mtazamo mpana wa utendaji wa mfano katika mipangilio tofauti. Ni nyeti kidogo kwa kutokuwepo kwa uwiano wa madaraja ikilinganishwa na usahihi. Kwa mfano, mfano wenye AUC ya 0.9 inaashiria kuwa una uwezo mkubwa wa kutofautisha kati ya matukio chanya na hasi.
+> ROC-AUC ni muhimu hasa kwa matatizo ya binary classification na hutoa mtazamo mpana wa utendaji wa model katika thresholds tofauti. Haiathiriwi sana na kutosawazika kwa classes ikilinganishwa na accuracy. Kwa mfano, model yenye AUC ya 0.9 inaonyesha kuwa ina uwezo mkubwa wa kutofautisha instances chanya na hasi.
 
 ### Specificity
 
-Specificity, pia inajulikana kama kiwango halisi hasi, ni sehemu ya utabiri halisi hasi kati ya matukio yote halisi hasi. Inakadiriawa kama:
+Specificity, inayojulikana pia kama true negative rate, ni uwiano wa predictions hasi za kweli kati ya instances zote hasi halisi. Huhesabiwa kama:
 ```plaintext
 Specificity = (True Negatives) / (True Negatives + False Positives)
 ```
 > [!TIP]
-> Upeo ni muhimu katika hali ambapo matokeo ya uwongo yana gharama kubwa au si ya kutakikana, kama katika upimaji wa matibabu au kugundua udanganyifu. Inasaidia kutathmini jinsi vizuri mfano unavyotambua matukio mabaya. Kwa mfano, ikiwa mfano unapata kwa usahihi 90 kati ya 100 ya matukio halisi mabaya, upeo utakuwa 0.9 (90%).
+> Specificity ni muhimu katika hali ambapo false positives ni za gharama kubwa au hazitakiwi, kama vile katika upimaji wa kimatibabu au utambuzi wa ulaghai. Husaidia kutathmini jinsi model inavyotambua matukio hasi. Kwa mfano, ikiwa model inatambua kwa usahihi matukio 90 kati ya 100 halisi hasi, specificity itakuwa 0.9 (90%).
 
 ### Matthews Correlation Coefficient (MCC)
-Matthews Correlation Coefficient (MCC) ni kipimo cha ubora wa uainishaji wa binary. Inachukua katika akaunti ya kweli na uwongo chanya na hasi, ikitoa mtazamo wa usawa wa utendaji wa mfano. MCC inakokotolewa kama:
+Matthews Correlation Coefficient (MCC) ni kipimo cha ubora wa binary classifications. Huzingatia true positives, false positives, true negatives na false negatives, na kutoa mtazamo uliosawazika wa utendaji wa model. MCC huhesabiwa kama:
 ```plaintext
 MCC = (TP * TN - FP * FN) / sqrt((TP + FP) * (TP + FN) * (TN + FP) * (TN + FN))
 ```
-where:
-- **TP**: True Positives
-- **TN**: True Negatives
-- **FP**: False Positives
-- **FN**: False Negatives
+ambapo:
+- **TP**: Chanya za Kweli
+- **TN**: Hasi za Kweli
+- **FP**: Chanya za Uongo
+- **FN**: Hasi za Uongo
 
 > [!TIP]
-> MCC inashughulikia kutoka -1 hadi 1, ambapo 1 inaashiria uainishaji kamili, 0 inaashiria kubahatisha kwa nasibu, na -1 inaashiria kutokubaliana kabisa kati ya utabiri na uchunguzi. Ni muhimu hasa kwa seti za data zisizo sawa, kwani inazingatia vipengele vyote vinne vya matrix ya kuchanganya.
+> MCC huanzia -1 hadi 1, ambapo 1 huashiria uainishaji kamili, 0 huashiria kubahatisha kwa nasibu, na -1 huashiria kutokubaliana kabisa kati ya utabiri na uchunguzi. Ni muhimu hasa kwa datasets zisizo na uwiano, kwa kuwa huzingatia vipengele vyote vinne vya matrix ya mkanganyiko.
 
-### Mean Absolute Error (MAE)
-Mean Absolute Error (MAE) ni kipimo cha urudufu kinachopima tofauti ya wastani ya absolute kati ya thamani zilizotabiriwa na halisi. Inakokotolewa kama:
+### Kosa la Wastani la Thamani Kamili (MAE)
+Kosa la Wastani la Thamani Kamili (MAE) ni kipimo cha regression kinachopima tofauti ya wastani ya thamani kamili kati ya thamani zilizotabiriwa na thamani halisi. Hukokotolewa kama ifuatavyo:
 ```plaintext
 MAE = (1/n) * Σ|y_i - ŷ_i|
 ```
-where:
-- **n**: Idadi ya mifano
-- **y_i**: Thamani halisi ya mfano i
-- **ŷ_i**: Thamani iliy预测wa kwa mfano i
+ambapo:
+- **n**: Idadi ya instances
+- **y_i**: Thamani halisi ya instance i
+- **ŷ_i**: Thamani iliyotabiriwa ya instance i
 
 > [!TIP]
-> MAE inatoa tafsiri rahisi ya makosa ya wastani katika utabiri, na kufanya iwe rahisi kueleweka. Ni nyeti kidogo kwa viashiria vya nje ikilinganishwa na vipimo vingine kama Mean Squared Error (MSE). Kwa mfano, ikiwa mfano una MAE ya 5, inamaanisha kwamba, kwa wastani, utabiri wa mfano unachukua mbali na thamani halisi kwa vitengo 5.
+> MAE hutoa tafsiri rahisi ya kosa la wastani katika utabiri, hivyo kuifanya iwe rahisi kueleweka. Haisikii sana outliers ikilinganishwa na metrics nyingine kama Mean Squared Error (MSE). Kwa mfano, ikiwa model ina MAE ya 5, inamaanisha kuwa, kwa wastani, utabiri wa model unatofautiana na thamani halisi kwa units 5.
 
-### Confusion Matrix
+### Matrix ya Mkanganyiko
 
-Confusion matrix ni jedwali linaloelezea utendaji wa mfano wa uainishaji kwa kuonyesha hesabu za utabiri sahihi wa chanya, sahihi wa hasi, utabiri wa chanya wa uwongo, na utabiri wa hasi wa uwongo. Inatoa mtazamo wa kina wa jinsi mfano unavyofanya kazi katika kila daraja.
+Matrix ya mkanganyiko ni jedwali linalofupisha utendaji wa classification model kwa kuonyesha hesabu za utabiri wa true positive, true negative, false positive, na false negative. Hutoa mtazamo wa kina wa jinsi model inavyofanya kazi kwenye kila class.
 
 |               | Predicted Positive | Predicted Negative |
 |---------------|---------------------|---------------------|
 | Actual Positive| True Positive (TP)  | False Negative (FN)  |
 | Actual Negative| False Positive (FP) | True Negative (TN)   |
 
-- **True Positive (TP)**: Mfano ulitabiri kwa usahihi daraja chanya.
-- **True Negative (TN)**: Mfano ulitabiri kwa usahihi daraja hasi.
-- **False Positive (FP)**: Mfano ulitabiri kwa makosa daraja chanya (Kosa Aina I).
-- **False Negative (FN)**: Mfano ulitabiri kwa makosa daraja hasi (Kosa Aina II).
+- **True Positive (TP)**: Model ilitabiri kwa usahihi class chanya.
+- **True Negative (TN)**: Model ilitabiri kwa usahihi class hasi.
+- **False Positive (FP)**: Model ilitabiri kimakosa class chanya (kosa la Aina ya I).
+- **False Negative (FN)**: Model ilitabiri kimakosa class hasi (kosa la Aina ya II).
 
-Confusion matrix inaweza kutumika kuhesabu vipimo mbalimbali vya tathmini, kama usahihi, usahihi, kukumbuka, na alama ya F1.
+Matrix ya mkanganyiko inaweza kutumika kukokotoa evaluation metrics kama vile accuracy, precision, recall, na F1 score.
 
+## References
 
+- [1] [scikit-learn - Kuchakata data](https://scikit-learn.org/stable/modules/preprocessing.html)
+- [2] [scikit-learn - Imputation ya thamani zilizokosekana](https://scikit-learn.org/stable/modules/impute.html)
+- [3] [scikit-learn - Cross-validation: kutathmini utendaji wa estimator](https://scikit-learn.org/stable/modules/cross_validation.html)
+- [4] [scikit-learn - Metrics na scoring](https://scikit-learn.org/stable/modules/model_evaluation.html)
 {{#include ../banners/hacktricks-training.md}}

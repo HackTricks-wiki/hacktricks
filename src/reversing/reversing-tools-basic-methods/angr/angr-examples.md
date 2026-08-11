@@ -3,11 +3,11 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> Ikiwa program inatumia `scanf` kupata **thamani kadhaa kwa wakati mmoja kutoka stdin**, unahitaji kutengeneza state inayoanza baada ya **`scanf`**.
+> Ikiwa programu inatumia `scanf` kupata **thamani kadhaa kwa wakati mmoja kutoka stdin**, unahitaji kuunda state inayoanzia baada ya **`scanf`**.
 
-Misimbo imechukuliwa kutoka [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Codes zimechukuliwa kutoka [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### Input ya kufikia address (ikionyesha address)
+### Input ya kufikia address (inayoonyesha address)
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Ingizo la kufikia address (linaloonyesha print)
+### Ingizo la kufikia anwani (linaloonyesha uchapishaji)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -104,7 +104,7 @@ password1 = claripy.BVS('password1', password1_size_in_bits)
 password2_size_in_bits = 32  # :integer
 password2 = claripy.BVS('password2', password2_size_in_bits)
 
-# Relate it Vectors with the registriy values you are interested in to reach an address
+# Relate its vectors to the register values needed to reach an address
 initial_state.regs.eax = password0
 initial_state.regs.ebx = password1
 initial_state.regs.edx = password2
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-Katika scenario hii, input ilichukuliwa kwa kutumia `scanf("%u %u")` na thamani `"1 1"` ilitolewa, hivyo thamani **`0x00000001`** za stack zimetoka kwenye **user input**. Unaweza kuona jinsi thamani hizi zinavyoanza kwenye `$ebp - 8`. Kwa hiyo, kwenye code tulitoa bytes 8 kutoka kwa `$esp` (kwa kuwa wakati huo `$ebp` na `$esp` zilikuwa na thamani sawa), kisha tuka-push BVS.
+Katika hali hii, ingizo lilichukuliwa kwa kutumia `scanf("%u %u")` na thamani `"1 1"` ilitolewa, hivyo thamani **`0x00000001`** za stack zilitokana na **ingizo la mtumiaji**. Unaweza kuona jinsi thamani hizi zinavyoanzia kwenye `$ebp - 8`. Kwa hiyo, kwenye code tulitoa **baiti 8 kutoka kwa `$esp` (kwa kuwa wakati huo `$ebp` na `$esp` zilikuwa na thamani sawa)** kisha tukasukuma BVS.
 
-![Weka bit vectors kwenye stack ili kubaini thamani ambayo stack position inahitaji kuwa nayo ili kufikia program flow: Katika scenario hii, input ilichukuliwa kwa kutumia scanf("%u %u") na thamani "1...](<../../../images/image (136).png>)
+![Weka bit vectors kwenye stack ili kujua thamani ambayo stack position inahitaji kuwa nayo ili kufikia mtiririko wa programu: Katika hali hii, ingizo lilichukuliwa kwa kutumia scanf("%u %u") na thamani "1...](<../../../images/image (136).png>)
 
 ### Thamani za Static Memory (Global variables)
 ```python
@@ -215,7 +215,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-#Get an address after the scanf. Once the input has already being saved in the memory positions
+# Get an address after scanf, once the input has been saved in memory
 start_address = 0x8048606
 initial_state = project.factory.blank_state(addr=start_address)
 
@@ -266,7 +266,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Thamani za Kumbukumbu Inayobadilika (Malloc)
+### Dynamic Memory Values (Malloc)
 ```python
 import angr
 import claripy
@@ -337,7 +337,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-# Get an address just before opening the file with th simbolic content
+# Get an address just before opening the file with the symbolic content
 # Or at least when the file is not going to suffer more changes before being read
 start_address = 0x80488db
 initial_state = project.factory.blank_state(addr=start_address)
@@ -347,10 +347,10 @@ initial_state = project.factory.blank_state(addr=start_address)
 filename = 'WCEXPXBW.txt'
 symbolic_file_size_bytes = 64
 
-# Create a BV which is going to be the content of the simbolic file
+# Create a bit-vector that will hold the symbolic file content
 password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-# Create the file simulation with the simbolic content
+# Create the simulated file with symbolic content
 password_file = angr.storage.SimFile(filename, content=password)
 
 # Add the symbolic file we created to the symbolic filesystem.
@@ -402,13 +402,13 @@ main(sys.argv)
 >  # the string from the file, except four symbolic bytes where the name would be
 >  # stored.
 >  # (!)
-> ```
+>  ```
 
 ### Kutumia Constraints
 
 > [!TIP]
-> Wakati mwingine operations rahisi za kibinadamu, kama vile kulinganisha maneno 2 yenye urefu wa 16 **character by character** (loop), **hugharimu** sana kwenye **angr** kwa sababu inahitaji kutengeneza branches **exponentially**, kwani hutengeneza branch 1 kwa kila if: `2^16`\
-> Kwa hiyo, ni rahisi zaidi **kuomba angr irudi kwenye point ya awali** (ambapo sehemu halisi ngumu ilikuwa tayari imekamilika) na **kuweka hizo constraints manually**.
+> Wakati mwingine operations rahisi za kibinadamu kama compare maneno 2 yenye urefu wa 16 **char by char** (loop), **hugharimu** **angr** sana kwa sababu inahitaji kutengeneza branches **exponentially** kwa kuwa inatengeneza branch 1 kwa kila if: `2^16`\
+> Kwa hiyo, ni rahisi zaidi **kuomba angr ifikie point ya awali** (ambapo sehemu halisi ngumu ilikuwa tayari imekamilishwa) na **kuweka constraints hizo manually**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> Katika baadhi ya scenarios unaweza kuactivate **veritesting**, ambayo itaunganisha status zinazofanana, ili kuokoa branches zisizo na manufaa na kupata solution: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> Katika baadhi ya hali unaweza kuamilisha **veritesting**, ambayo itaunganisha hali zinazofanana, ili kuokoa branches zisizo na manufaa na kupata suluhisho: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Jambo lingine unaloweza kufanya katika scenarios hizi ni **ku-hook function ili kuipa angr kitu inachoweza kuelewa** kwa urahisi zaidi.
+> Jambo jingine unaloweza kufanya katika hali hizi ni **ku-hook function ili kuipa angr kitu inachoweza kuelewa** kwa urahisi zaidi.
 
 ### Wasimamizi wa Simulation
 
-Baadhi ya simulation managers wanaweza kuwa na manufaa zaidi kuliko wengine. Katika mfano uliotangulia kulikuwa na tatizo kwa sababu branches nyingi zenye manufaa ziliundwa. Hapa, technique ya **veritesting** itaunganisha hizo branches na kupata solution.\
-Simulation manager hii pia inaweza kuactivate kwa kutumia: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Baadhi ya simulation managers wanaweza kuwa na manufaa zaidi kuliko wengine. Katika mfano uliotangulia kulikuwa na tatizo kwa sababu branches nyingi zenye manufaa ziliundwa. Hapa, mbinu ya **veritesting** itaunganisha hizo na kupata suluhisho.\
+Simulation manager hii pia inaweza kuamilishwa kwa: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -562,7 +562,7 @@ user_input_buffer_address,
 user_input_buffer_length
 )
 
-# Create a simbolic IF that if the loaded string frommemory is the expected
+# Create a symbolic If expression that checks the string loaded from memory
 # return True (1) if not returns False (0) in eax
 check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Kuhook function / Simprocedure
+### Hooking a function / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -678,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Kuiga scanf yenye params kadhaa
+### Simulate scanf kwa kutumia params kadhaa
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -740,7 +740,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Binaries Tuli
+### Static Binaries
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard
@@ -807,8 +807,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-## Marejeo
+## References
 
-- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
-
+- [1] [jakespringer/angr_ctf - Hazina ya GitHub](https://github.com/jakespringer/angr_ctf)
 {{#include ../../../banners/hacktricks-training.md}}
