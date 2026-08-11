@@ -1,14 +1,16 @@
-# Docker forenzika
+# Forenzika Docker-a
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Izmena kontejnera
 
-Postoje sumnje da je neki docker kontejner kompromitovan:
+Postoje sumnje da je neki Docker kontejner kompromitovan:
 ```bash
 docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
-Možete lako **pronaći promene napravljene na sistemu datoteka ovog container-a od njegovog kreiranja** pomoću:<sup>[[1]](#references)</sup>
+Možete lako **pronaći izmene napravljene na sistemu datoteka ovog container-a od njegovog kreiranja** pomoću:<sup>[[1]](#references)</sup>
 ```bash
 docker diff wordpress
 C /var
@@ -22,41 +24,41 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-U prethodnoj komandi **C** znači **Izmenjeno**, a **A** znači **Dodato**.<sup>[[1]](#references)</sup>\
-Ako utvrdite da je neka zanimljiva datoteka, poput `/etc/shadow`, izmenjena, možete je preuzeti iz containera da biste proverili da li postoje zlonamerne aktivnosti:<sup>[[2]](#references)</sup>
+U prethodnoj komandi **C** znači **Changed**, a **A** znači **Added**.<sup>[[1]](#references)</sup>\
+Ako utvrdite da je neka zanimljiva datoteka, poput `/etc/shadow`, izmenjena, možete je preuzeti iz kontejnera da biste proverili da li postoje maliciozne aktivnosti:<sup>[[2]](#references)</sup>
 ```bash
 docker cp wordpress:/etc/shadow shadow
 ```
-Možete ga takođe **uporediti sa originalnom verzijom** pokretanjem novog kontejnera i izdvajanjem datoteke iz njega:<sup>[[2]](#references)[[3]](#references)</sup>
+Takođe ga možete **uporediti sa originalnim** pokretanjem novog container-a i izdvajanjem fajla iz njega:<sup>[[2]](#references)[[3]](#references)</sup>
 ```bash
 docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
 diff original_shadow shadow
 ```
-Ako utvrdite da je dodat **neki sumnjivi fajl**, možete pristupiti containeru i proveriti ga:<sup>[[4]](#references)</sup>
+Ako utvrdite da je **dodat neki sumnjivi fajl**, možete pristupiti kontejneru i proveriti ga:<sup>[[4]](#references)</sup>
 ```bash
 docker exec -it wordpress bash
 ```
 ## Izmene image-a
 
-Kada dobijete eksportovan docker image (verovatno u `.tar` formatu), možete koristiti [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) da **izvučete sažetak izmena**:<sup>[[5]](#references)[[6]](#references)</sup>
+Kada dobijete izvezeni Docker image (verovatno u `.tar` formatu), možete koristiti [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) da biste **izvukli sažetak izmena**:<sup>[[5]](#references)[[6]](#references)</sup>
 ```bash
 docker save <image> > image.tar #Export the image to a .tar file
 container-diff analyze -t sizelayer image.tar
 container-diff analyze -t history image.tar
 container-diff analyze -t metadata image.tar
 ```
-Zatim možete **dekompresovati** image i **pristupiti blobovima** kako biste pretražili sumnjive datoteke koje ste možda pronašli u istoriji izmena:<sup>[[7]](#references)</sup>
+Zatim možete **dekompresovati** sliku i **pristupiti blobovima** kako biste pretražili sumnjive datoteke koje ste možda pronašli u istoriji izmena:<sup>[[7]](#references)</sup>
 ```bash
 tar -xf image.tar
 ```
 ### Osnovna analiza
 
-**Osnovne informacije** možete dobiti iz image-a pokretanjem:<sup>[[8]](#references)</sup>
+Možete dobiti **osnovne informacije** iz slike pokretanjem:<sup>[[8]](#references)</sup>
 ```bash
 docker inspect <image>
 ```
-Takođe možete dobiti sažetak **istorije izmena** pomoću:<sup>[[9]](#references)</sup>
+Možete dobiti i sažetu **istoriju izmena** pomoću:<sup>[[9]](#references)</sup>
 ```bash
 docker history --no-trunc <image>
 ```
@@ -67,7 +69,7 @@ dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers
 ```
 ### Dive
 
-Da biste pronašli dodate/izmenjene datoteke u Docker images, možete koristiti i alat [**dive**](https://github.com/wagoodman/dive) (preuzmite ga sa stranice [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0):<sup>[[11]](#references)[[12]](#references)</sup>
+Da biste pronašli dodate/izmenjene datoteke u docker images, možete koristiti i alat [**dive**](https://github.com/wagoodman/dive) (preuzmite ga iz odeljka [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0):<sup>[[11]](#references)[[12]](#references)</sup>
 
 Učitajte sačuvanu arhivu u Docker pre nego što otvorite njenu image oznaku pomoću alata dive:<sup>[[11]](#references)[[13]](#references)</sup>
 ```bash
@@ -78,19 +80,19 @@ Loaded image: flask:latest
 #And then open it with dive:
 sudo dive flask:latest
 ```
-Ovo vam omogućava da **se krećete kroz različite blob-ove docker image-a** i proverite koji su fajlovi izmenjeni/dodati/uklonjeni. Koristite **tab** za prelazak na drugi prikaz, a **space** za sažimanje/otvaranje foldera.<sup>[[11]](#references)</sup>
+Ovo vam omogućava da **se krećete kroz različite blobove docker images** i proverite koji su fajlovi izmenjeni/dodati/uklonjeni. Koristite **tab** da biste prešli na drugi prikaz, a **space** da biste skupili/otvorili foldere.<sup>[[11]](#references)</sup>
 
 Pomoću alata dive nećete moći da pristupite sadržaju različitih stage-ova image-a. Da biste to uradili, moraćete da **dekompresujete svaki layer i pristupite mu**.\
-Možete dekompresovati sve layer-e iz image-a iz direktorijuma u kojem je image dekompresovan izvršavanjem:
+Sve layer-e iz image-a možete dekompresovati iz direktorijuma u kojem je image dekompresovan, izvršavanjem:
 ```bash
 tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
-## Kredencijali iz memorije
+## Akreditivi iz memorije
 
-Na Linux-u, ancestor PID namespace hosta može da vidi procese u child PID namespace-u containera, tako da listing procesa na hostu, kao što je `ps -ef`, može da ih prikaže.<sup>[[14]](#references)</sup>
+Na Linux-u, PID namespace pretka hosta može da vidi procese u child PID namespace-u containera, tako da listing procesa na hostu, kao što je `ps -ef`, može da ih prikaže.<sup>[[14]](#references)</sup>
 
-Kada kredencijali hosta, capabilities i LSM/ptrace policy to dozvoljavaju, odgovarajuće privilegovani investigator na hostu može da **izvuče memoriju procesa** i pretraži **kredencijale**, baš [**kao u sledećem primeru**](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#process-memory).<sup>[[15]](#references)</sup>
+Kada host credentials, capabilities i LSM/ptrace policy to dozvoljavaju, odgovarajuće privilegovan host investigator može da **dump-uje memoriju procesa** i pretraži je u potrazi za **credentials**, baš [**kao u sledećem primeru**](../../linux-hardening/linux-basics/linux-privilege-escalation/index.html#process-memory).<sup>[[15]](#references)</sup>
 
 ## References
 

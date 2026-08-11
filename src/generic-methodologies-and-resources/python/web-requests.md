@@ -1,8 +1,10 @@
-# Web zahtevi
+# Web Zahtevi
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Python Requests
 
-Ovi primeri koriste dokumentovane argumente zahteva, svojstva odgovora, tuple-ove multipart datoteka i sesije biblioteke Requests.<sup>[[1]](#references)</sup> Primeri sa `verify=False` onemogućavaju verifikaciju TLS sertifikata i treba ih ograničiti na kontrolisano testiranje.<sup>[[1]](#references)</sup>
+Ovi primeri koriste dokumentovane argumente zahteva, svojstva odgovora, multipart tuple-ove datoteka i sesije biblioteke Requests.<sup>[[1]](#references)</sup> Primeri sa `verify=False` onemogućavaju proveru TLS sertifikata i treba ih ograničiti na kontrolisano testiranje.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,7 +78,7 @@ return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 ## Python cmd za iskorišćavanje RCE-a
 
-Petlja komandi nasleđuje Python-ov `Cmd`; njen metod `default` obrađuje neprepoznate prefikse komandi, `cmdloop` prosleđuje ulazne redove, a `re.DOTALL` omogućava da obrazac za izdvajanje obuhvati više redova.<sup>[[2]](#references)[[3]](#references)</sup>
+Petlja komandi nasleđuje Python-ov `Cmd`; njen metod `default` obrađuje neprepoznate prefikse komandi, `cmdloop` prosleđuje ulazne linije, a `re.DOTALL` omogućava da obrazac za izdvajanje obuhvati nove redove.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -105,7 +107,7 @@ term.cmdloop()
 ```
 ## References
 
-- [1] [Razvojni interfejs za Requests](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — Podrška za linijski orijentisane interpretere komandi](https://docs.python.org/3/library/cmd.html)
-- [3] [Python `re` — Operacije regularnih izraza](https://docs.python.org/3/library/re.html)
+- [1] [Requests Developer Interface](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Podrška za komandne interpretere zasnovane na linijama](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Operacije sa regularnim izrazima](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

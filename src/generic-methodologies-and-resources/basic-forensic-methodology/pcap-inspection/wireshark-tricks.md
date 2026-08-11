@@ -1,10 +1,12 @@
 # Wireshark trikovi
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Poboljšajte svoje Wireshark veštine
 
 ### Tutorijali
 
-Sledeći tutorijali su odlični za učenje zanimljivih osnovnih trikova:
+Sledeći tutorijali su odlični za učenje korisnih osnovnih trikova:
 
 - [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
@@ -13,43 +15,43 @@ Sledeći tutorijali su odlični za učenje zanimljivih osnovnih trikova:
 
 ### Analizirane informacije
 
-**Stručne informacije**
+**Expert Information**
 
 Klikom na _**Analyze** --> **Expert Information**_ dobićete **pregled** onoga što se dešava u **analiziranim** paketima:
 
 ![Tutorijali - Analizirane informacije: Klikom na Analyze -- Expert Information dobićete pregled onoga što se dešava u analiziranim paketima](<../../../images/image (256).png>)
 
-**Razrešene adrese**
+**Resolved Addresses**
 
-U odeljku _**Statistics --> Resolved Addresses**_ možete pronaći nekoliko **informacija** koje je Wireshark "**razrešio**", kao što su port/transport do protokola, MAC adresa do proizvođača itd. Zanimljivo je znati šta je obuhvaćeno komunikacijom.
+U odeljku _**Statistics --> Resolved Addresses**_ možete pronaći nekoliko **informacija** koje je wireshark "**razrešio**", kao što su port/transport do protokola, MAC do proizvođača itd. Zanimljivo je znati šta je uključeno u komunikaciju.
 
-![Tutorijali - Analizirane informacije: U odeljku Statistics -- Resolved Addresses možete pronaći nekoliko informacija koje je Wireshark " razrešio ", kao što su port/transport do protokola, MAC adresa do...](<../../../images/image (893).png>)
+![Tutorijali - Analizirane informacije: U odeljku Statistics -- Resolved Addresses možete pronaći nekoliko informacija koje je wireshark " razrešio ", kao što su port/transport do protokola, MAC do...](<../../../images/image (893).png>)
 
-**Hijerarhija protokola**
+**Protocol Hierarchy**
 
 U odeljku _**Statistics --> Protocol Hierarchy**_ možete pronaći **protokole** **uključene** u komunikaciju i podatke o njima.
 
 ![Tutorijali - Analizirane informacije: U odeljku Statistics -- Protocol Hierarchy možete pronaći protokole uključene u komunikaciju i podatke o njima](<../../../images/image (586).png>)
 
-**Konverzacije**
+**Conversations**
 
-U odeljku _**Statistics --> Conversations**_ možete pronaći **rezime konverzacija** u komunikaciji i podatke o njima.
+U odeljku _**Statistics --> Conversations**_ možete pronaći **sažetak konverzacija** u komunikaciji i podatke o njima.
 
-![Tutorijali - Analizirane informacije: U odeljku Statistics -- Conversations možete pronaći rezime konverzacija u komunikaciji i podatke o njima](<../../../images/image (453).png>)
+![Tutorijali - Analizirane informacije: U odeljku Statistics -- Conversations možete pronaći sažetak konverzacija u komunikaciji i podatke o njima](<../../../images/image (453).png>)
 
-**Krajnje tačke**
+**Endpoints**
 
-U odeljku _**Statistics --> Endpoints**_ možete pronaći **rezime krajnjih tačaka** u komunikaciji i podatke o svakoj od njih.
+U odeljku _**Statistics --> Endpoints**_ možete pronaći **sažetak krajnjih tačaka** u komunikaciji i podatke o svakoj od njih.
 
-![Tutorijali - Analizirane informacije: U odeljku Statistics -- Endpoints možete pronaći rezime krajnjih tačaka u komunikaciji i podatke o svakoj od njih](<../../../images/image (896).png>)
+![Tutorijali - Analizirane informacije: U odeljku Statistics -- Endpoints možete pronaći sažetak krajnjih tačaka u komunikaciji i podatke o svakoj od njih](<../../../images/image (896).png>)
 
-**DNS informacije**
+**DNS info**
 
 U odeljku _**Statistics --> DNS**_ možete pronaći statistiku o uhvaćenom DNS zahtevu.
 
 ![Tutorijali - Analizirane informacije: U odeljku Statistics -- DNS možete pronaći statistiku o uhvaćenom DNS zahtevu](<../../../images/image (1063).png>)
 
-**I/O grafikon**
+**I/O Graph**
 
 U odeljku _**Statistics --> I/O Graph**_ možete pronaći **grafikon komunikacije.**
 
@@ -68,19 +70,19 @@ Ostali zanimljivi filteri:
 - `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
 - HTTP i početni HTTPS saobraćaj + TCP SYN + DNS zahtevi
 - `tls.handshake.extensions_server_name contains "example.com"`
-- Analizirajte SNI poslat u ClientHello poruci čak i kada ne možete da dešifrujete payload
+- Pivotiranje na SNI poslat u ClientHello poruci čak i kada ne možete da dešifrujete payload
 - `tls.handshake.extensions_alpn_str == "h2" or tls.handshake.extensions_alpn_str == "h3"`
-- Brzo razdvojite klasične HTTPS sesije i sesije koje podržavaju HTTP/2 i HTTP/3
+- Brzo razdvajanje klasičnih HTTPS, HTTP/2 i HTTP/3 sesija
 - `quic or http3`
-- Pronađite savremeni UDP/443 saobraćaj koji će biti propušten ako pregledate samo TCP konverzacije
+- Pronalaženje modernog UDP/443 saobraćaja koji će biti propušten ako pregledate samo TCP konverzacije
 
 ### Pretraga
 
-Ako želite da **pretražite** **sadržaj** unutar **paketa** sesija, pritisnite _CTRL+f_. Možete dodati nove slojeve u glavnu informacionu traku (No., Time, Source itd.) tako što ćete pritisnuti desno dugme, a zatim izabrati uređivanje kolone.
+Ako želite da **pretražite** **sadržaj** unutar **paketa** sesija, pritisnite _CTRL+f_. Možete dodati nove slojeve u glavnu informacionu traku (No., Time, Source itd.) tako što ćete pritisnuti desno dugme, a zatim izabrati opciju za uređivanje kolone.
 
 ### Praćenje multipleksiranih tokova
 
-Wireshark može direktno da prati `TLS`, `HTTP/2` i `QUIC` tokove. Njegovi HTTP/2 i QUIC dijalozi prikazuju birače konekcija i podtokova, što pomaže u izolovanju multipleksiranih tokova koji dele istu konekciju nižeg nivoa.<sup>[[4]](#references)</sup>
+Wireshark može direktno pratiti `TLS`, `HTTP/2` i `QUIC` tokove. Njegovi HTTP/2 i QUIC dijalozi prikazuju selektore konekcija i podtokova, što pomaže u izolovanju multipleksiranih tokova koji dele istu konekciju nižeg nivoa.<sup>[[4]](#references)</sup>
 
 ### Besplatne pcap laboratorije
 
@@ -88,13 +90,13 @@ Wireshark može direktno da prati `TLS`, `HTTP/2` i `QUIC` tokove. Njegovi HTTP/
 
 ## Identifikovanje domena
 
-Možete dodati kolonu koja prikazuje HTTP Host zaglavlje:
+Možete dodati kolonu koja prikazuje Host HTTP zaglavlje:
 
-![Besplatne pcap laboratorije - Identifikovanje domena: Možete dodati kolonu koja prikazuje HTTP Host zaglavlje](<../../../images/image (639).png>)
+![Besplatne pcap laboratorije - Identifikovanje domena: Možete dodati kolonu koja prikazuje Host HTTP zaglavlje](<../../../images/image (639).png>)
 
-I kolonu koja dodaje ime servera iz početne HTTPS konekcije (**tls.handshake.type == 1**):
+I kolonu koja dodaje ime servera iz inicirajuće HTTPS konekcije (**tls.handshake.type == 1**):
 
-![Besplatne pcap laboratorije - Identifikovanje domena: I kolonu koja dodaje ime servera iz početne HTTPS konekcije ( tls.handshake.type == 1 )](<../../../images/image (408) (1).png>)
+![Besplatne pcap laboratorije - Identifikovanje domena: I kolonu koja dodaje ime servera iz inicirajuće HTTPS konekcije ( tls.handshake.type == 1 )](<../../../images/image (408) (1).png>)
 
 Ako je capture uglavnom šifrovan, dodavanje ovih polja kao kolona znatno će ubrzati triage:
 
@@ -103,7 +105,7 @@ Ako je capture uglavnom šifrovan, dodavanje ovih polja kao kolona znatno će ub
 - `tls.handshake.ja3`
 - `tls.handshake.ja4` (Wireshark 4.2+)
 
-Ovo vam omogućava grupisanje sesija prema imenu hosta, ALPN-u (`http/1.1`, `h2`, `h3` itd.) i fingerprint-u klijenta, čak i kada sam payload ostane šifrovan. Za dešifrovane HTTP/2 i HTTP/3 capture-ove takođe je korisno dodati `http2.header.value` ili `http3.headers.header.value` kao kolone i analizirati putanje, authorities i druge zanimljive metapodatke.<sup>[[2]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+Ovo vam omogućava grupisanje sesija prema imenu hosta, ALPN-u (`http/1.1`, `h2`, `h3` itd.) i otisku klijenta čak i kada sam payload ostane šifrovan. Za dešifrovane HTTP/2 i HTTP/3 capture-e takođe je korisno dodati `http2.header.value` ili `http3.headers.header.value` kao kolone i pivotirati na putanjama, autoritetima i drugim zanimljivim metapodacima.<sup>[[2]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
 ```bash
 tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
 -e frame.number -e ip.src -e ip.dst \
@@ -111,47 +113,47 @@ tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
 -e tls.handshake.extensions_alpn_str \
 -e tls.handshake.ja3 -e tls.handshake.ja4
 ```
-## Identifikovanje lokalnih imena hostova
+## Identifikovanje lokalnih naziva hostova
 
 ### Iz DHCP-a
 
-U aktuelnom Wireshark-u, umesto `bootp`, potrebno je da pretražujete `DHCP`
+U aktuelnom Wireshark-u, umesto `bootp`, potrebno je pretraživati `DHCP`
 
-![Identifikovanje lokalnih imena hostova - Iz DHCP-a: U aktuelnom Wireshark-u, umesto bootp, potrebno je da pretražujete DHCP](<../../../images/image (1013).png>)
+![Identifikovanje lokalnih naziva hostova - Iz DHCP-a: U aktuelnom Wireshark-u, umesto bootp, potrebno je pretraživati DHCP](<../../../images/image (1013).png>)
 
 ### Iz NBNS-a
 
-![Iz DHCP-a - Iz NBNS-a: U aktuelnom Wireshark-u, umesto bootp, potrebno je da pretražujete DHCP](<../../../images/image (1003).png>)
+![Iz DHCP-a - Iz NBNS-a: U aktuelnom Wireshark-u, umesto bootp, potrebno je pretraživati DHCP](<../../../images/image (1003).png>)
 
 ## Dešifrovanje TLS-a
 
-### Dešifrovanje https saobraćaja privatnim ključem servera
+### Dešifrovanje https saobraćaja pomoću privatnog ključa servera
 
 _izaberite Edit > preferences > protocols > tls >_
 
-![Dešifrovanje TLS-a - Dešifrovanje https saobraćaja privatnim ključem servera: Dešifrovanje https saobraćaja privatnim ključem servera](<../../../images/image (1103).png>)
+![Dešifrovanje TLS-a - Dešifrovanje https saobraćaja pomoću privatnog ključa servera: Dešifrovanje https saobraćaja pomoću privatnog ključa servera](<../../../images/image (1103).png>)
 
-Pritisnite _Edit_ i dodajte sve podatke o serveru i privatnom ključu (_IP, Port, Protocol, Key file and password_)
+Pritisnite _Edit_ i dodajte sve podatke o serveru i privatnom ključu (_IP, Port, Protocol, Key file i password_)
 
-Ovaj metod funkcioniše samo u ograničenom broju slučajeva. Za aktuelni TLS 1.3 / ECDHE saobraćaj, metod evidentiranja ključeva sesije u nastavku obično je praktična opcija.<sup>[[1]](#references)</sup>
+Ovaj metod funkcioniše samo u ograničenom broju slučajeva. Za aktuelni TLS 1.3 / ECDHE saobraćaj, metod sa zapisom ključa sesije u nastavku obično je praktična opcija.<sup>[[1]](#references)</sup>
 
-### Dešifrovanje https saobraćaja simetričnim ključevima sesije
+### Dešifrovanje https saobraćaja pomoću simetričnih ključeva sesije
 
-I Firefox i Chrome mogu da evidentiraju ključeve TLS sesije, koji se mogu koristiti sa Wireshark-om za dešifrovanje TLS saobraćaja. Ovo omogućava detaljnu analizu bezbednih komunikacija. Više detalja o tome kako izvršiti ovo dešifrovanje možete pronaći u vodiču na adresi [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).<sup>[[3]](#references)</sup> Ovo je takođe uobičajen način za dešifrovanje modernih TLS 1.3 i QUIC/HTTP/3 snimaka.<sup>[[2]](#references)</sup>
+I Firefox i Chrome imaju mogućnost zapisivanja TLS ključeva sesije, koji se mogu koristiti sa Wireshark-om za dešifrovanje TLS saobraćaja. Ovo omogućava detaljnu analizu bezbednih komunikacija. Više detalja o tome kako izvršiti ovo dešifrovanje dostupno je u vodiču na sajtu [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).<sup>[[3]](#references)</sup> Ovo je takođe uobičajeni način za dešifrovanje modernih TLS 1.3 i QUIC/HTTP/3 capture-a.<sup>[[2]](#references)</sup>
 
-Da biste ovo otkrili, pretražite okruženje za promenljivu `SSLKEYLOGFILE`
+Da biste ovo otkrili, pretražite okruženje u potrazi za promenljivom `SSLKEYLOGFILE`
 
 Datoteka deljenih ključeva izgleda ovako:
 
-![Dešifrovanje https saobraćaja privatnim ključem servera - Dešifrovanje https saobraćaja simetričnim ključevima sesije: Datoteka deljenih ključeva izgleda ovako](<../../../images/image (820).png>)
+![Dešifrovanje https saobraćaja pomoću privatnog ključa servera - Dešifrovanje https saobraćaja pomoću simetričnih ključeva sesije: Datoteka deljenih ključeva izgleda ovako](<../../../images/image (820).png>)
 
-Ako je snimak u formatu `pcapng`, proverite da li već sadrži ugrađene tajne za dešifrovanje pre nego što počnete da pretražujete datotečni sistem hosta:<sup>[[1]](#references)</sup>
+Ako je capture u formatu `pcapng`, proverite da li već sadrži ugrađene tajne za dešifrovanje pre pretraživanja filesystem-a hosta:<sup>[[1]](#references)</sup>
 ```bash
 editcap --extract-secrets capture.pcapng tls-secrets.txt
 ```
-Da biste ovo uvezli u wireshark, idite na \_edit > preferences > protocols > tls > i uvezite ga u polje (Pre)-Master-Secret log filename:
+Da biste ovo uvezli u wireshark, idite na \_edit > preferences > protocols > tls > i uvezite ga u (Pre)-Master-Secret log filename:
 
-![Dešifrovanje https saobraćaja pomoću privatnog ključa servera - Dešifrovanje https saobraćaja pomoću simetričnih ključeva sesije: editcap --extract-secrets capture.pcapng tls-secrets.txt](<../../../images/image (989).png>)
+![Dešifrovanje https saobraćaja privatnim ključem servera - Dešifrovanje https saobraćaja simetričnim ključevima sesije: editcap --extract-secrets capture.pcapng tls-secrets.txt](<../../../images/image (989).png>)
 
 ## ADB komunikacija
 
@@ -186,7 +188,7 @@ f.close()
 
 - [1] [Wireshark TLS wiki](https://wiki.wireshark.org/TLS)
 - [2] [Dešifrovanje i parsiranje HTTP/3 saobraćaja u Wireshark-u](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
-- [3] [Dešifrovanje TLS saobraćaja pregledača pomoću Wireshark-a – jednostavan način!](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)
+- [3] [Dešifrovanje TLS saobraćaja browsera pomoću Wireshark-a – jednostavan način!](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)
 - [4] [Praćenje tokova protokola](https://www.wireshark.org/docs/wsug_html_chunked/ChAdvFollowStreamSection.html)
 - [5] [Referenca filtera prikaza: Transport Layer Security](https://www.wireshark.org/docs/dfref/t/tls.html)
 - [6] [Referenca filtera prikaza: HyperText Transfer Protocol 2](https://www.wireshark.org/docs/dfref/h/http2.html)

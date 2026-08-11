@@ -1,8 +1,10 @@
 # Class Pollution (Python's Prototype Pollution)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Osnovni primer
 
-Promena `__qualname__` kroz referencu na klasu instance ažurira klasu i njene promenljive bazne klase.<sup>[[1]](#references)</sup>
+Promena `__qualname__` kroz referencu klase instance ažurira klasu i njene promenljive bazne klase.<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +30,7 @@ print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
 ## Osnovni primer ranjivosti
 
-Rekurzivno spajanje može prihvatiti ključeve mapiranja pod kontrolom napadača i upisati ugnježdene vrednosti putem pristupa elementima ili atributima.<sup>[[1]](#references)</sup>
+Rekurzivno spajanje može prihvatiti ključeve mapiranja pod kontrolom napadača i upisati ugnježdene vrednosti putem pristupa stavkama ili atributima.<sup>[[1]](#references)</sup>
 ```python
 # Initial state
 class Employee: pass
@@ -67,7 +69,7 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <summary>Kreiranje podrazumevane vrednosti svojstva klase za RCE (subprocess)</summary>
 
-Deljena bazna klasa može obezbediti podrazumevani atribut koji koristi command gadget klase-sestre.<sup>[[1]](#references)</sup>
+Zajednička bazna klasa može da obezbedi podrazumevani atribut koji koristi command gadget klase-srodnika.<sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -118,9 +120,9 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Zagađivanje drugih klasa i globalnih promenljivih kroz <code>globals</code></summary>
+<summary>Polluting other classes and global vars through <code>globals</code></summary>
 
-Mapiranje funkcije `__globals__` izlaže prostor imena modula dostupan iz metode definisane u tom modulu.<sup>[[1]](#references)[[4]](#references)</sup>
+Mapiranje `__globals__` funkcije izlaže imenski prostor modula dostupan iz metode definisane u tom modulu.<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -152,7 +154,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Arbitrary subprocess execution</summary>
+<summary>Arbitrarno izvršavanje subprocess-a</summary>
 
 Na Windows-u, `Popen(..., shell=True)` koristi promenljivu okruženja `COMSPEC` kao podrazumevani shell, pa ovaj gadget demonstrira preusmeravanje komandi zasnovano na okruženju.<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
@@ -188,7 +190,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Prepisivanje <strong><code>__kwdefaults__</code></strong></summary>
 
-Python dokumentuje `__kwdefaults__` kao mapiranje podrazumevanih vrednosti za parametre dostupne samo preko ključnih reči, koji slede nakon `*` ili `*args` u definiciji funkcije.<sup>[[4]](#references)</sup> Sledeći gadget prepisuje to mapiranje kroz zagađenu putanju funkcije.<sup>[[1]](#references)</sup>
+Python dokumentuje `__kwdefaults__` kao mapiranje podrazumevanih vrednosti za parametre koji prihvataju samo imenovane argumente i koji slede nakon `*` ili `*args` u definiciji funkcije.<sup>[[4]](#references)</sup> Sledeći gadget prepisuje to mapiranje kroz polluted putanju funkcije.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -229,24 +231,24 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Prepisivanje Flask secret vrednosti kroz fajlove</summary>
+<summary>Prepisivanje Flask tajne kroz datoteke</summary>
 
-Ako se klasa polluted objekta nalazi u modulu koji se razlikuje od entry-point modula aplikacije, `__globals__` njegovih metoda u početku izlaže namespace modula klase. Traversal kroz loader i `sys.modules.__main__` zatim može da dosegne entry-point modul i njegov Flask `app` objekat.<sup>[[1]](#references)[[2]](#references)</sup>
+Ako se klasa kontaminiranog objekta nalazi u modulu koji se razlikuje od modula ulazne tačke aplikacije, metode te klase u početku izlažu imenski prostor modula klase preko `__globals__`. Traversal kroz loader i `sys.modules.__main__` zatim može dosegnuti modul ulazne tačke i njegov Flask `app` objekat.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Flask koristi `app.secret_key` za potpisivanje session cookie-ja; poznavanje ključa omogućava napadaču da kreira validne podatke sesije.<sup>[[6]](#references)</sup>
+Flask koristi `app.secret_key` za potpisivanje session cookie-ja; poznavanje ključa omogućava napadaču da kreira validne session podatke.<sup>[[6]](#references)</sup>
 
 Originalni writeup prikazuje sledeći put do `app.secret_key`; CTFtime takođe hostuje kopiju writeup-a.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Changing key može omogućiti potpisivanje zamenjujućih session cookies i može omogućiti eskalaciju privilegija; pogledajte [Flask session tooling page](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
+Promena ključa može omogućiti potpisivanje zamenjenih session cookies i može dovesti do eskalacije privilegija; pogledajte [Flask session tooling page](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
 
 </details>
 
-Pogledajte takođe sledeću stranicu za još read-only gadgeta:
+Pogledajte i sledeću stranicu za još read-only gadgeta:
 
 
 {{#ref}}
@@ -255,10 +257,10 @@ python-internal-read-gadgets.md
 
 ## References
 
-- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [1] [Prototype Pollution u Pythonu](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
 - [2] [idekCTF 2022 task manager writeup (original)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
 - [3] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
-- [4] [inspect — Inspekcija živih objekata](https://docs.python.org/3/library/inspect.html)
+- [4] [inspect — Inspekcija aktivnih objekata](https://docs.python.org/3/library/inspect.html)
 - [5] [subprocess — Upravljanje subprocess procesima](https://docs.python.org/3/library/subprocess.html)
 - [6] [Quickstart — Flask dokumentacija](https://flask.palletsprojects.com/en/stable/quickstart/)
 {{#include ../../banners/hacktricks-training.md}}

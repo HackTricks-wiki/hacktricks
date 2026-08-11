@@ -1,18 +1,20 @@
-# Suricata & Iptables cheatsheet
+# Suricata i Iptables podsetnik
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## Iptables
 
-### Chains
+### Lanci
 
-U iptables-u, svaki chain je sekvencijalna lista pravila za uparivanje paketa. Podrazumevana `filter` tabela sadrži ugrađene `INPUT`, `FORWARD` i `OUTPUT` chain-ove; druge tabele, kao što je `nat`, mogu biti dostupne u zavisnosti od konfiguracije kernela i učitanih modula.<sup>[[1]](#references)</sup>
+U iptables-u, svaki lanac je sekvencijalna lista pravila za podudaranje paketa. Podrazumevana `filter` tabela ima ugrađene lance `INPUT`, `FORWARD` i `OUTPUT`; druge tabele, kao što je `nat`, mogu biti dostupne u zavisnosti od konfiguracije kernela i učitanih modula.<sup>[[1]](#references)</sup>
 
 - **Input Chain**: Koristi se za upravljanje ponašanjem dolaznih konekcija.
-- **Forward Chain**: Koristi se za obradu dolaznih konekcija koje nisu namenjene lokalnom sistemu. Ovo je tipično za uređaje koji imaju ulogu routera, gde je primljene podatke potrebno proslediti drugom odredištu. Ovaj chain je prvenstveno relevantan kada sistem učestvuje u rutiranju, NATing-u ili sličnim aktivnostima.
+- **Forward Chain**: Koristi se za obradu dolaznih konekcija koje nisu namenjene lokalnom sistemu. Ovo je uobičajeno za uređaje koji imaju ulogu rutera, gde primljeni podaci treba da budu prosleđeni na drugo odredište. Ovaj lanac je prvenstveno relevantan kada je sistem uključen u rutiranje, NATing ili slične aktivnosti.
 - **Output Chain**: Namenjen je regulisanju odlaznih konekcija.
 
-Ovi chain-ovi obezbeđuju urednu obradu mrežnog saobraćaja, omogućavajući definisanje detaljnih pravila koja upravljaju protokom podataka u sistem, kroz njega i iz njega.
+Ovi lanci obezbeđuju uređenu obradu mrežnog saobraćaja, omogućavajući definisanje detaljnih pravila koja regulišu tok podataka u sistem, kroz sistem i iz sistema.
 
-Primeri za string-match koriste standardni `string` match; uparivanje razlikuje velika i mala slova osim ako se navede `--icase`, dok `--algo` bira strategiju pretrage BM ili KMP.<sup>[[2]](#references)</sup>
+Primeri podudaranja stringova koriste standardno `string` podudaranje; podudaranje razlikuje velika i mala slova osim ako se ne navede `--icase`, dok `--algo` bira strategiju pretrage BM ili KMP.<sup>[[2]](#references)</sup>
 ```bash
 # Delete all rules
 iptables -F
@@ -53,7 +55,7 @@ iptables-restore < /etc/sysconfig/iptables
 
 ### Instalacija i konfiguracija
 
-Komande za pakete u nastavku zavise od distribucije i izdanja; zvanični vodič za instalaciju dokumentuje Ubuntu PPA, Debian backports, RPM pakete i upravljanje systemd servisima.<sup>[[3]](#references)</sup>
+Komande za pakete navedene u nastavku zavise od distribucije i izdanja; zvanični vodič za instalaciju opisuje Ubuntu PPA, Debian backports, RPM pakete i upravljanje systemd servisima.<sup>[[3]](#references)</sup>
 ```bash
 # Package installation details vary by distribution and release; see References.
 # Ubuntu
@@ -116,27 +118,27 @@ Type=simple
 
 systemctl daemon-reload
 ```
-Sekvenca `suricata-update` prati dokumentovani workflow aplikacije Suricata za preuzimanje, izlistavanje, omogućavanje i učitavanje izvora pravila.<sup>[[4]](#references)</sup> Komanda `suricatasc` iznad je dokumentovani non-blocking metod za ponovno učitavanje pravila putem Unix-socket-a.<sup>[[8]](#references)</sup> NFQUEUE pravila prosleđuju lokalni ulazni/izlazni saobraćaj aplikaciji Suricata, dok `-q 0` bira queue 0 za inline obradu.<sup>[[7]](#references)</sup>
+Sekvenca `suricata-update` prati dokumentovani tok rada Suricata za preuzimanje, izlistavanje, omogućavanje i učitavanje izvora pravila.<sup>[[4]](#references)</sup> Komanda `suricatasc` iznad predstavlja dokumentovani neblokirajući metod ponovnog učitavanja pravila putem Unix soketa.<sup>[[8]](#references)</sup> Pravila NFQUEUE prosleđuju lokalni ulazni/izlazni saobraćaj Suricati, dok `-q 0` bira red 0 za inline obradu.<sup>[[7]](#references)</sup>
 
 ### Definicije pravila
 
-Suricata pravilo/signature ima tri dela.<sup>[[5]](#references)</sup>
+Suricata pravilo/potpis ima tri dela.<sup>[[5]](#references)</sup>
 
-- **action** određuje šta se dešava kada se signature podudara.
-- **header** bira protokol, IP adrese, portove i smer.
-- **rule options** definišu detalje specifične za podudaranje.
+- **Radnja** određuje šta se dešava kada se potpis podudari.
+- **Zaglavlje** bira protokol, IP adrese, portove i smer.
+- **Opcije pravila** definišu detalje specifične za podudaranje.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
-#### **Dozvoljene akcije su**
+#### **Važeće akcije su**
 
 - alert - generisanje upozorenja
-- pass - zaustavljanje dalje inspekcije paketa
+- pass - prekid dalje inspekcije paketa
 - **drop** - odbacivanje paketa i generisanje upozorenja
 - **reject** - slanje RST/ICMP unreachable greške pošiljaocu paketa koji se podudara.
 - rejectsrc - isto što i _reject_
-- rejectdst - slanje RST/ICMP error paketa primaocu paketa koji se podudara.
-- rejectboth - slanje RST/ICMP error paketa objema stranama komunikacije.
+- rejectdst - slanje RST/ICMP paketa sa greškom primaocu paketa koji se podudara.
+- rejectboth - slanje RST/ICMP paketa sa greškom objema stranama komunikacije.
 
 #### **Protokoli**
 
@@ -144,17 +146,17 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 - udp
 - icmp
 - ip (ip označava „all“ ili „any“)
-- _layer7 protokoli_: http, ftp, tls, smb, dns, ssh i drugi.<sup>[[5]](#references)</sup>
+- _layer7 protocols_: http, ftp, tls, smb, dns, ssh i drugi.<sup>[[5]](#references)</sup>
 
 #### Izvorne i odredišne adrese
 
-Suricata podržava IP opsege, negaciju i grupisane liste adresa.<sup>[[5]](#references)</sup>
+Suricata podržava opsege IP adresa, negaciju i grupisane liste adresa.<sup>[[5]](#references)</sup>
 
 | Primer                        | Značenje                                  |
 | ----------------------------- | ----------------------------------------- |
 | ! 1.1.1.1                     | Svaka IP adresa osim 1.1.1.1              |
-| !\[1.1.1.1, 1.1.1.2]          | Svaka IP adresa osim 1.1.1.1 i 1.1.1.2   |
-| $HOME_NET                     | Vaša postavka za HOME_NET u yaml-u        |
+| !\[1.1.1.1, 1.1.1.2]          | Svaka IP adresa osim 1.1.1.1 i 1.1.1.2    |
+| $HOME_NET                     | Vaša postavka za HOME_NET u yaml          |
 | \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET, ali ne HOME_NET             |
 | \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 osim 10.0.0.5                 |
 
@@ -165,23 +167,23 @@ Suricata podržava opsege portova, negaciju i liste portova.<sup>[[5]](#referenc
 | Primer          | Značenje                              |
 | --------------- | ------------------------------------- |
 | any             | bilo koja adresa                     |
-| \[80, 81, 82]   | portovi 80, 81 i 82                  |
-| \[80: 82]       | Opseg od 80 do 82                    |
-| \[1024: ]       | Od 1024 do najvišeg broja porta      |
-| !80             | Svaki port osim 80                   |
-| \[80:100,!99]   | Opseg od 80 do 100, osim 99          |
-| \[1:80,!\[2,4]] | Opseg od 1 do 80, osim portova 2 i 4 |
+| \[80, 81, 82]   | portovi 80, 81 i 82                   |
+| \[80: 82]       | Opseg od 80 do 82                     |
+| \[1024: ]       | Od 1024 do najvećeg broja porta      |
+| !80             | Svaki port osim 80                    |
+| \[80:100,!99]   | Opseg od 80 do 100, osim porta 99     |
+| \[1:80,!\[2,4]] | Opseg od 1 do 80, osim portova 2 i 4  |
 
 #### Smer
 
-Suricata pravila mogu da navedu smer komunikacije koji se procenjuje.<sup>[[5]](#references)</sup>
+Suricata pravila mogu navesti smer komunikacije koji se procenjuje.<sup>[[5]](#references)</sup>
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### Ključne reči
 
-Primeri u nastavku koriste Suricata ključne reči pravila, uključujući metapodatke, IP, ICMP, payload i opcije aplikacionog sloja; zvanična dokumentacija pravila navodi ove grupe i njihovu sintaksu.<sup>[[6]](#references)[[9]](#references)</sup>
+Primeri u nastavku koriste ključne reči Suricata pravila, uključujući metadata, IP, ICMP, payload i opcije aplikacionog sloja; zvanična dokumentacija pravila katalogizuje ove grupe i njihovu sintaksu.<sup>[[6]](#references)[[9]](#references)</sup>
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -230,7 +232,7 @@ drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 - [3] [3. Instalacija — Suricata 7.0.14 dokumentacija](https://docs.suricata.io/en/suricata-7.0.14/install.html)
 - [4] [9.1. Upravljanje pravilima pomoću Suricata-Update — Suricata 8.0.1 dokumentacija](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
 - [5] [8.1. Format pravila — Suricata 8.0.3 dokumentacija](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
-- [6] [8.7. Payload ključne reči — Suricata 8.0.3 dokumentacija](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
+- [6] [8.7. Ključne reči korisnog sadržaja — Suricata 8.0.3 dokumentacija](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
 - [7] [15. Podešavanje IPS/inline za Linux — Suricata 7.0.15 dokumentacija](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
 - [8] [9.3. Ponovno učitavanje pravila — Suricata 7.0.14 dokumentacija](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
 - [9] [8. Suricata pravila — Suricata 8.0.3 dokumentacija](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)

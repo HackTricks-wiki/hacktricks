@@ -1,6 +1,8 @@
 # venv
 
-Python-ov standardni modul `venv` kreira virtuelna okruženja, čija POSIX skripta za aktivaciju je `<venv>/bin/activate`; ukucajte `deactivate` da napustite aktivno okruženje.<sup>[[1]](#references)</sup> Na Ubuntu-u, paket `python3-venv` obezbeđuje modul kada nije instaliran zajedno sa osnovnim Python paketom.<sup>[[2]](#references)</sup>
+{{#include ../../banners/hacktricks-training.md}}
+
+Python-ov standardni modul `venv` kreira virtuelna okruženja, čija POSIX skripta za aktivaciju glasi `<venv>/bin/activate`; unesite `deactivate` da biste napustili aktivno okruženje.<sup>[[1]](#references)</sup> Na Ubuntu-u, paket `python3-venv` obezbeđuje modul kada nije instaliran zajedno sa osnovnim Python paketom.<sup>[[2]](#references)</sup>
 ```bash
 sudo apt-get install python3-venv
 #Now, go to the folder you want to create the virtual environment
@@ -11,7 +13,7 @@ source pvenv/bin/activate #Activate the environment
 #You can now install whatever python library you need
 deactivate #To deactivate the virtual environment
 ```
-Za starije tokove rada zasnovane na setuptools-u koji koriste `setup.py bdist_wheel`, instaliranje paketa `wheel` u aktivno okruženje omogućavalo je komandu `bdist_wheel`.<sup>[[3]](#references)</sup> Aktuelne verzije setuptools-a više ne zahtevaju `wheel` za tu komandu, a aktuelne smernice za packaging preporučuju `python -m build --wheel` umesto direktnog pozivanja `setup.py`.<sup>[[4]](#references)[[5]](#references)</sup>
+Za starije `setuptools` tokove rada zasnovane na `setup.py bdist_wheel`, instaliranje paketa `wheel` u aktivno okruženje obezbeđivalo je komandu `bdist_wheel`.<sup>[[3]](#references)</sup> Aktuelne verzije `setuptools` više ne zahtevaju `wheel` za tu komandu, a aktuelne smernice za packaging preporučuju `python -m build --wheel` umesto direktnog pozivanja `setup.py`.<sup>[[4]](#references)[[5]](#references)</sup>
 ```text
 error: invalid command 'bdist_wheel'
 ```

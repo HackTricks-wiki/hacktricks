@@ -1,14 +1,16 @@
 # Kloniranje veb-sajta
 
-Za phishing procenu ponekad može biti korisno potpuno **klonirati/izdumpovati veb-sajt**.
+{{#include ../../banners/hacktricks-training.md}}
 
-Imajte na umu da kloniranom veb-sajtu možete dodati i neke payload-e, kao što je BeEF hook, kako biste „kontrolisali“ korisnikov tab.
+Za procenu phishing-a ponekad može biti korisno potpuno **klonirati/izvući veb-sajt**.
+
+Imajte na umu da kloniranom veb-sajtu možete dodati i neke payload-e, kao što je BeEF hook, kako biste „kontrolisali“ korisnikovu karticu.
 
 U tu svrhu možete koristiti različite alate:
 
 ## wget
 
-Sledeća komanda koristi Wget-ove režime za mirroring, page-requisite, link-conversion i extension-adjustment, a zatim poslužuje preuzete fajlove iz trenutnog direktorijuma pomoću Python-ovog `http.server` modula na portu 8000.<sup>[[1]](#references)[[2]](#references)</sup>
+Sledeća komanda koristi Wget-ove režime za mirrorovanje, preuzimanje neophodnih elemenata stranice, konverziju linkova i prilagođavanje ekstenzija, a zatim preuzete fajlove poslužuje iz trenutnog direktorijuma pomoću Python-ovog `http.server` modula na portu 8000.<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 wget --mirror --page-requisites --convert-links --adjust-extension <URL>
 cd <URL>
@@ -16,14 +18,14 @@ python3 -m http.server 8000
 ```
 ## goclone
 
-goclone repository opisuje ovaj alat kao alat za preuzimanje website-a u lokalni direktorijum uz očuvanje strukture relativnih linkova i dokumentuje korišćenje naredbe `goclone <url>`.<sup>[[3]](#references)</sup>
+Repozitorijum goclone opisuje ovaj alat kao program koji preuzima veb-sajt u lokalni direktorijum uz očuvanje strukture relativnih veza i dokumentuje poziv `goclone <url>`.<sup>[[3]](#references)</sup>
 ```bash
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
-## Alat za socijalni inženjering
+## Alat za Social Engineering
 
-Repozitorijum Social-Engineer Toolkit (SET) navodi SET kao open-source penetration-testing framework za ovlašćene procene socijalnog inženjeringa.<sup>[[4]](#references)</sup>
+Repozitorijum Social-Engineer Toolkit (SET) navodi SET kao open-source penetration-testing framework za ovlašćene procene Social Engineering-a.<sup>[[4]](#references)</sup>
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit
 ```

@@ -1,19 +1,21 @@
-# Izdvajanje Mach-O entitlements i IPSW indeksiranje
+# Mach-O Entitlements Extraction & IPSW Indexing
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-Ova stranica objašnjava kako programski izdvojiti entitlements iz Mach-O binarnih datoteka prolaskom kroz LC_CODE_SIGNATURE i analizom code signing SuperBlob-a, kao i kako ovo skalirati na Apple IPSW firmware montiranjem i indeksiranjem njihovog sadržaja radi forenzičke pretrage/diff-a.
+Ova stranica opisuje kako programski izdvojiti entitlements iz Mach-O binarnih datoteka prolaskom kroz LC_CODE_SIGNATURE i parsiranjem code signing SuperBlob-a, kao i kako ovaj proces skalirati na Apple IPSW firmware-e montiranjem i indeksiranjem njihovog sadržaja radi forenzičke pretrage i poređenja.
 
-Ako vam je potrebno osvežavanje znanja o Mach-O formatu i code signing-u, pogledajte i: macOS code signing i interne detalje SuperBlob-a.
-- Pogledajte detalje macOS code signing-a (SuperBlob, Code Directory, special slots): [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
-- Pogledajte opšte Mach-O strukture/load commands: [Universal binaries & Mach-O Format](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
+Ako vam je potrebno osveženje o Mach-O formatu i code signing-u, pogledajte i: macOS code signing i SuperBlob internals.
+- Check macOS code signing details (SuperBlob, Code Directory, special slots): [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
+- Check general Mach-O structures/load commands: [Universal binaries & Mach-O Format](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
 
 
 ## Entitlements u Mach-O-u: gde se nalaze
 
-Entitlements se čuvaju unutar code signature podataka na koje ukazuje LC_CODE_SIGNATURE load command i smeštaju se u __LINKEDIT segment. Potpis je CS_SuperBlob koji sadrži više blob-ova (code directory, requirements, entitlements, CMS itd.). Entitlements blob je CS_GenericBlob čiji podaci predstavljaju serijalizovanu property listu koja povezuje entitlement ključeve sa vrednostima; parseri treba da podržavaju XML i binary plist enkodiranja.<sup>[[1]](#references)[[6]](#references)</sup>
+Entitlements se čuvaju unutar code signature podataka na koje upućuje LC_CODE_SIGNATURE load command i smeštaju se u segment __LINKEDIT. Potpis je CS_SuperBlob koji sadrži više blob-ova (code directory, requirements, entitlements, CMS itd.). Entitlements blob je CS_GenericBlob čiji su podaci serijalizovana property lista koja mapira entitlement ključeve na vrednosti; parseri treba da podržavaju i XML i binary plist kodiranja.<sup>[[1]](#references)[[6]](#references)</sup>
 
-Ključne strukture (iz xnu-a):<sup>[[6]](#references)[[7]](#references)</sup>
+Ključne strukture (iz xnu):<sup>[[6]](#references)[[7]](#references)</sup>
 ```c
 /* mach-o/loader.h */
 struct mach_header_64 {
@@ -59,32 +61,32 @@ uint32_t length;
 char data[];      /* serialized plist containing entitlements */
 } CS_GenericBlob;
 ```
-Važni konstanti iz Apple zaglavlja uključuju:<sup>[[6]](#references)[[7]](#references)</sup>
+Važne konstante iz Apple header fajlova uključuju:<sup>[[6]](#references)[[7]](#references)</sup>
 - LC_CODE_SIGNATURE cmd = 0x1d
 - CS SuperBlob magic = 0xfade0cc0
 - Entitlements index slot (`CSSLOT_ENTITLEMENTS`) = 5; blob na tom slotu ima magic `CSMAGIC_EMBEDDED_ENTITLEMENTS` = 0xfade7171
 - DER entitlements koriste slot `CSSLOT_DER_ENTITLEMENTS` = 7 i blob magic `CSMAGIC_EMBEDDED_DER_ENTITLEMENTS` = 0xfade7172
 
-Napomena: Multi-arch (fat) binarni fajlovi sadrže više Mach-O slice-ova. Morate izabrati slice za arhitekturu koju želite da analizirate, a zatim proći kroz njegove load commands.
+Napomena: Multi-arch (fat) binarni fajlovi sadrže više Mach-O slice-ova. Morate izabrati slice za arhitekturu koju želite da proverite, a zatim proći kroz njegove load commands.
 
 
 ## Koraci ekstrakcije (generički, dovoljno bez gubitaka)
 
 1) Parsirajte Mach-O header; iterirajte kroz onoliko `load_command` zapisa koliko je navedeno u ncmds.
-2) Pronađite LC_CODE_SIGNATURE; koristite `linkedit_data_command.dataoff/datasize` da mapirate Code Signing SuperBlob smešten u __LINKEDIT.
-3) Validirajte da je CS_SuperBlob.magic == 0xfade0cc0; iterirajte kroz count unosa strukture CS_BlobIndex.
+2) Pronađite LC_CODE_SIGNATURE; pročitajte `linkedit_data_command.dataoff/datasize` da biste mapirali Code Signing SuperBlob smešten u __LINKEDIT.
+3) Potvrdite da je CS_SuperBlob.magic == 0xfade0cc0; iterirajte kroz count stavki tipa CS_BlobIndex.
 4) Pronađite `index.type == CSSLOT_ENTITLEMENTS` (5), zatim proverite da pointed `CS_GenericBlob` ima magic `CSMAGIC_EMBEDDED_ENTITLEMENTS` (0xfade7171). Parsirajte njegove podatke kao property list da biste dobili key/value entitlements.<sup>[[1]](#references)[[6]](#references)</sup>
 
 Napomene za implementaciju:
-- Strukture code signature koriste big-endian polja; zamenite redosled bajtova prilikom parsiranja na little-endian hostovima.
-- Entitlements `GenericBlob` sadrži serijalizovani plist; standardne plist biblioteke mogu da obrade njegov XML ili binarni prikaz.
-- Neki iOS binarni fajlovi mogu sadržati DER entitlements; XNU izlaže zaseban DER blob tip, a reprezentacije entitlements ili slotovi mogu da se razlikuju između platformi i verzija, zato po potrebi uporedite standardne i DER entitlements.<sup>[[6]](#references)</sup>
-- Za fat binarne fajlove koristite fat headers (FAT_MAGIC/FAT_MAGIC_64) da pronađete odgovarajući slice i offset pre prolaska kroz Mach-O load commands.
+- Strukture code signature koriste big-endian polja; zamenite redosled bajtova pri parsiranju na little-endian hostovima.
+- Entitlements `GenericBlob` sadrži serijalizovani plist; standardne plist biblioteke mogu da obrade njegov XML ili binary prikaz.
+- Neki iOS binarni fajlovi mogu sadržati DER entitlements; XNU izlaže poseban DER blob tip, a prikazi entitlements ili slotovi mogu da se razlikuju između platformi i verzija, zato po potrebi uporedite standardne i DER entitlements.<sup>[[6]](#references)</sup>
+- Za fat binarne fajlove koristite fat headers (FAT_MAGIC/FAT_MAGIC_64) da biste pronašli odgovarajući slice i offset pre prolaska kroz Mach-O load commands.
 
 
-## Minimalni opis parsiranja (Python)
+## Minimalni outline parsiranja (Python)
 
-Sledeći je sažet opis koji prikazuje tok kontrole za pronalaženje i dekodiranje entitlements. Namerno izostavlja robusne provere granica i punu podršku za fat binarne fajlove radi sažetosti.<sup>[[6]](#references)[[7]](#references)</sup>
+U nastavku je kompaktan outline koji prikazuje tok kontrole za pronalaženje i dekodiranje entitlements. Namerno izostavlja robusne provere granica i punu podršku za fat binarne fajlove radi sažetosti.<sup>[[6]](#references)[[7]](#references)</sup>
 ```python
 import plistlib, struct
 
@@ -140,26 +142,26 @@ return plistlib.loads(data)
 return None
 ```
 Saveti za upotrebu:
-- Za rad sa fat binaries, prvo pročitajte struct fat_header/fat_arch, izaberite željeni architecture slice, a zatim prosledite podopseg funkciji parse_entitlements.
-- Na macOS-u možete proveriti rezultate pomoću: codesign -d --entitlements :- /path/to/binary
+- Za rad sa fat binarnim datotekama najpre pročitajte `struct fat_header/fat_arch`, izaberite željeni architecture slice, a zatim prosledite podopseg funkciji `parse_entitlements`.
+- Na macOS-u možete proveriti rezultate pomoću: `codesign -d --entitlements :- /path/to/binary`
 
 
-## Example findings
+## Primeri nalaza
 
-Izvorni članak prikazuje sledeće entitlements u macOS 14.0 `launchd` binaryju:<sup>[[1]](#references)</sup>
+Izvorni članak prikazuje sledeće entitlements u macOS 14.0 `launchd` binarnoj datoteci:<sup>[[1]](#references)</sup>
 - com.apple.security.network.server = true
 - com.apple.rootless.storage.early_boot_mount = true
 - com.apple.private.kernel.system-override = true
 - com.apple.private.pmap.load-trust-cache = ["cryptex1.boot.os", "cryptex1.boot.app", "cryptex1.safari-downlevel"]
 
-Pretraživanje ovih podataka u velikom obimu kroz firmware images izuzetno je korisno za mapiranje attack surface-a i poređenje razlika između izdanja/uređaja.
+Pretraživanje ovih stavki u velikom obimu kroz firmware images izuzetno je korisno za mapiranje površine napada i poređenje razlika između izdanja/uređaja.
 
 
-## Scaling across IPSWs (mounting and indexing)
+## Skaliranje kroz IPSW-ove (mounting i indeksiranje)
 
-Za popis izvršnih datoteka i izdvajanje entitlements-a u velikom obimu bez čuvanja kompletnih images:<sup>[[1]](#references)</sup>
+Za nabrajanje executable datoteka i izdvajanje entitlements u velikom obimu bez čuvanja potpunih images:<sup>[[1]](#references)</sup>
 
-- Koristite ipsw tool autora @blacktop za preuzimanje i mountovanje firmware filesystem-a. Mountovanje koristi apfs-fuse, pa možete prolaziti kroz APFS volumes bez potpunog extractovanja.<sup>[[1]](#references)[[3]](#references)</sup>
+- Koristite ipsw tool autora @blacktop za preuzimanje i mountovanje firmware filesystems. Mounting koristi apfs-fuse, tako da možete prolaziti kroz APFS volumes bez potpunog extraction-a.<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 # Download latest IPSW for iPhone11,2 (iPhone XS)
 ipsw download ipsw -y --device iPhone11,2 --latest
@@ -168,11 +170,11 @@ ipsw download ipsw -y --device iPhone11,2 --latest
 ipsw mount fs <IPSW_FILE>
 ```
 - Prođite kroz montirane volumene da biste pronašli Mach-O datoteke (proverite magic i/ili koristite file/otool), zatim analizirajte entitlements i uvezene frameworks.
-- Sačuvajte normalizovani prikaz u relacionoj bazi podataka da biste izbegli linearni rast pri radu sa hiljadama IPSW-ova:
+- Sačuvajte normalizovani prikaz u relacionoj bazi podataka da biste izbegli linearni rast među hiljadama IPSW-ova:
 - executables, operating_system_versions, entitlements, frameworks
 - many-to-many: executable↔OS version, executable↔entitlement, executable↔framework
 
-Primer upita za izlistavanje svih verzija OS-a koje sadrže dato ime executable-a (prilagođeno iz appledb_rs):<sup>[[1]](#references)</sup>
+Primer upita za izlistavanje svih OS verzija koje sadrže dati naziv executable-a (prilagođeno iz appledb_rs):<sup>[[1]](#references)</sup>
 ```sql
 SELECT osv.version AS "Versions"
 FROM device d
@@ -181,20 +183,20 @@ LEFT JOIN executable_operating_system_version eosv ON eosv.operating_system_vers
 LEFT JOIN executable e ON e.id = eosv.executable_id
 WHERE e.name = 'launchd';
 ```
-Napomene o prenosivosti DB-a (ako implementirate sopstveni indexer):<sup>[[1]](#references)</sup>
+Napomene o prenosivosti DB-a (ako implementirate sopstveni indeksator):<sup>[[1]](#references)</sup>
 - Koristite ORM/apstrakciju (npr. SeaORM) da bi code ostao nezavisan od DB-a (SQLite/PostgreSQL).
-- SQLite dozvoljava `AUTOINCREMENT` samo na `INTEGER PRIMARY KEY`; taj ključ predstavlja alias za potpisani 64-bitni ROWID, iako SQLite može koristiti manje širine integera na disku. Ako SeaORM-generisane Rust entitete zahtevaju i64 ID-jeve, generišite entitete kao i32 i konvertujte tipove na granici.<sup>[[1]](#references)[[8]](#references)[[9]](#references)</sup>
+- SQLite dozvoljava `AUTOINCREMENT` samo uz `INTEGER PRIMARY KEY`; taj ključ je alias za 64-bitni potpisani ROWID, iako SQLite može koristiti manje širine celih brojeva na disku. Ako entiteti u Rust-u generisani pomoću SeaORM-a zahtevaju i64 ID-jeve, generišite entitete kao i32 i konvertujte tipove na granici.<sup>[[1]](#references)[[8]](#references)[[9]](#references)</sup>
 
 
-## Open-source alati i reference za pronalaženje entitlementa
+## Alati otvorenog koda i reference za entitlement hunting
 
 - Montiranje/preuzimanje firmware-a: https://github.com/blacktop/ipsw.<sup>[[3]](#references)</sup>
-- Baze entitlementa i reference:
-- Baza entitlementa Jonathana Levina: https://newosxbook.com/ent.php.<sup>[[4]](#references)</sup>
+- Baze podataka entitlement-a i reference:
+- DB entitlement-a Jonathana Levina: https://newosxbook.com/ent.php.<sup>[[4]](#references)</sup>
 - entdb: https://github.com/ChiChou/entdb.<sup>[[5]](#references)</sup>
-- Indexer velikih razmera (Rust, self-hosted Web UI + OpenAPI): https://github.com/synacktiv/appledb_rs.<sup>[[2]](#references)</sup>
-- Apple headeri za strukture i konstante:
-- loader.h (Mach-O headeri, load commands)
+- Indeksator velikih razmera (Rust, self-hosted Web UI + OpenAPI): https://github.com/synacktiv/appledb_rs.<sup>[[2]](#references)</sup>
+- Apple zaglavlja za strukture i konstante:
+- loader.h (Mach-O zaglavlja, load commands)
 - cs_blobs.h (SuperBlob, GenericBlob, CodeDirectory)
 
 Za više informacija o internim detaljima code signing-a (Code Directory, special slots, DER entitlements), pogledajte: [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
@@ -205,10 +207,10 @@ Za više informacija o internim detaljima code signing-a (Code Directory, specia
 - [1] [Corentin Liaud (Synacktiv), appledb_rs: alat za podršku istraživanju Apple platformi](https://www.synacktiv.com/publications/appledbrs-un-outil-daide-a-la-recherche-sur-plateformes-apple.html)
 - [2] [synacktiv/appledb_rs](https://github.com/synacktiv/appledb_rs)
 - [3] [blacktop/ipsw](https://github.com/blacktop/ipsw)
-- [4] [Baza entitlementa Jonathana Levina](https://newosxbook.com/ent.php)
+- [4] [DB entitlement-a Jonathana Levina](https://newosxbook.com/ent.php)
 - [5] [ChiChou/entdb](https://github.com/ChiChou/entdb)
 - [6] [XNU cs_blobs.h](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
 - [7] [XNU mach-o/loader.h](https://github.com/apple-oss-distributions/xnu/blob/main/EXTERNAL_HEADERS/mach-o/loader.h)
-- [8] [SQLite tipovi podataka](https://sqlite.org/datatype3.html)
+- [8] [SQLite Datatypes](https://sqlite.org/datatype3.html)
 - [9] [SQLite Autoincrement](https://sqlite.org/autoinc.html)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,11 +1,13 @@
-# Izlazak iz Python sandboxa i Pyscript
+# Python Sandbox Escape & Pyscript
 
-**Zanimljive stranice za proveru:**
+{{#include ../../banners/hacktricks-training.md}}
 
-- [**Pyscript hacking tricks**](pyscript.md)
-- [**Python deserijalizacija**](../../pentesting-web/deserialization/README.md)
-- [**RCE pri deserijalizaciji Keras modela i lov na gadgete**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Trikovi za zaobilaženje Python sandboxova**](bypass-python-sandboxes/README.md)
+**Zanimljive stranice za pregled:**
+
+- [**Pyscript hacking trikovi**](pyscript.md)
+- [**Python deserializacije**](../../pentesting-web/deserialization/README.md)
+- [**RCE deserializacija Keras modela i gadget hunting**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**Trikovi za zaobilaženje Python sandboxa**](bypass-python-sandboxes/README.md)
 - [**Osnovna sintaksa Python web zahteva**](web-requests.md)
 - [**Osnovna Python sintaksa i biblioteke**](basic-python.md)
 

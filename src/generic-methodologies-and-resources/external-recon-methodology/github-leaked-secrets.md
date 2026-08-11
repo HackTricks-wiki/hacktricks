@@ -1,40 +1,42 @@
 # Github Dorks & Leaks
 
-### Alati za pronalaženje secrets u git repo-ima i sistemu datoteka
+{{#include ../../banners/hacktricks-training.md}}
+
+### Alati za pronalaženje secrets u git repo-ima i file systemu
 
 - [TruffleHog](https://github.com/dxa4481/truffleHog)
 - [Gitleaks](https://github.com/gitleaks/gitleaks)
-- [Nosey Parker](https://github.com/praetorian-inc/noseyparker) (arhiviran; zamenjen alatom [Titus](https://github.com/praetorian-inc/titus))
+- [Nosey Parker](https://github.com/praetorian-inc/noseyparker) (archived; zamenjen alatom [Titus](https://github.com/praetorian-inc/titus))
 - [ggshield](https://github.com/GitGuardian/ggshield)
 - [RExpository](https://github.com/JaimePolop/RExpository)
 - [detect-secrets](https://github.com/Yelp/detect-secrets)
 - [gitGraber](https://github.com/hisxo/gitGraber)
 - [shhgit](https://github.com/eth0izzle/shhgit) (ne održava se)
 - [github-dorks](https://github.com/techgaun/github-dorks)
-- [gitrob](https://github.com/michenriksen/gitrob) (arhiviran)
-- [git-all-secrets](https://github.com/anshumanbh/git-all-secrets) (arhiviran)
+- [gitrob](https://github.com/michenriksen/gitrob) (archived)
+- [git-all-secrets](https://github.com/anshumanbh/git-all-secrets) (archived)
 - [git-secrets](https://github.com/awslabs/git-secrets)
 - [gittyleaks](https://github.com/kootenpv/gittyleaks)
 - [GitDorker](https://github.com/obheda12/GitDorker)
 
 > Napomene
-> - TruffleHog v3 može da verifikuje mnoge credentials uživo i da skenira GitHub org-ove, issues/PR-ove, gists i wikije. Primer: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)[[13]](#references)</sup>
-> - Gitleaks skenira Git repozitorijume, direktorijume i arhive. Koristite `gitleaks git -v --log-opts="--all" <repo>` za history, `gitleaks dir -v <path>` za direktorijume i `--max-archive-depth 1` za pregled arhiva.<sup>[[6]](#references)</sup>
-> - Nosey Parker je arhiviran i zamenjen alatom Titus. Postojeće instalacije i dalje podržavaju `noseyparker scan --datastore np.db <path|repo>`, nakon čega sledi `noseyparker report --datastore np.db`.<sup>[[7]](#references)[[8]](#references)</sup>
-> - ggshield (GitGuardian CLI) skenira fajlove, repozitorijume i Docker images i integriše se sa lokalnim ili CI workflow-ima: `ggshield secret scan repo <path-or-url>`.<sup>[[9]](#references)</sup>
+> - TruffleHog v3 može da verifikuje mnoge credentials uživo i da skenira GitHub orgs, issues/PRs, gists i wikis. Primer: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)[[13]](#references)</sup>
+> - Gitleaks skenira Git repos, direktorijume i archives. Koristite `gitleaks git -v --log-opts="--all" <repo>` za history, `gitleaks dir -v <path>` za direktorijume i `--max-archive-depth 1` za pregled archives.<sup>[[6]](#references)</sup>
+> - Nosey Parker je archived i zamenjen alatom Titus. Postojeće instalacije i dalje podržavaju `noseyparker scan --datastore np.db <path|repo>`, nakon čega sledi `noseyparker report --datastore np.db`.<sup>[[7]](#references)[[8]](#references)</sup>
+> - ggshield (GitGuardian CLI) skenira files, repos i Docker images i integriše se sa local ili CI workflows: `ggshield secret scan repo <path-or-url>`.<sup>[[9]](#references)</sup>
 
-### Gde secrets najčešće leak-uju na GitHub-u
+### Gde secrets najčešće leak-uju na GitHubu
 
-- GitHub Code Search indeksira samo default branch; non-default branch-eve pregledajte direktno ili ih klonirajte.<sup>[[4]](#references)</sup>
-- Celokupni git history i druge grane/tag-ovi (klonirajte ih i skenirajte pomoću gitleaks/trufflehog; GitHub search obuhvata samo indeksirani sadržaj).<sup>[[4]](#references)[[6]](#references)</sup>
-- Issues, pull requests, komentari i opisi (TruffleHog-ov GitHub source ih podržava pomoću flag-ova kao što su `--issue-comments` i `--pr-comments`).<sup>[[2]](#references)</sup>
-- Actions workflow log-ovi i artifacts (read access omogućava njihov pregled ili preuzimanje, a redakcija secrets-a nije zagarantovana).<sup>[[11]](#references)[[12]](#references)</sup>
-- Wikiji i release assets.
-- Gists (pretražujte pomoću alata ili UI-ja; neki alati mogu da uključe gists).<sup>[[2]](#references)[[13]](#references)</sup>
+- GitHub Code Search indeksira samo default branch; non-default branches treba direktno pregledati ili ih clone-ovati.<sup>[[4]](#references)</sup>
+- Ceo git history i druge branches/tags (clone-ujte ih i skenirajte pomoću gitleaks/trufflehog; GitHub search pokriva samo indeksirani sadržaj).<sup>[[4]](#references)[[6]](#references)</sup>
+- Issues, pull requests, comments i descriptions (TruffleHog-ov GitHub source ih podržava pomoću flagova kao što su `--issue-comments` i `--pr-comments`).<sup>[[2]](#references)</sup>
+- Actions workflow logs i artifacts (read access omogućava njihovo pregledanje ili preuzimanje, a redaction secrets nije zagarantovan).<sup>[[11]](#references)[[12]](#references)</sup>
+- Wikis i release assets.
+- Gists (pretražujte pomoću tooling-a ili UI-ja; neki alati mogu da uključe gists).<sup>[[2]](#references)[[13]](#references)</sup>
 
 > Zamke
-> - GitHub-ov Code Search UI podržava regex, dok REST/API putanja (uključujući `gh search code`) koristi legacy engine i ne izlaže regex funkcije. Za regex upite preferirajte UI.<sup>[[3]](#references)[[5]](#references)</sup>
-> - GitHub search isključuje fajlove veće od dokumentovanog ograničenja veličine i nije iscrpan. Za temeljnost, klonirajte i skenirajte lokalno pomoću secrets scanner-a.<sup>[[4]](#references)</sup>
+> - GitHub-ov Code Search UI podržava regex, dok REST/API putanja (uključujući `gh search code`) koristi legacy engine i ne izlaže regex funkcionalnosti. Za regex queries prednost dajte UI-ju.<sup>[[3]](#references)[[5]](#references)</sup>
+> - GitHub search isključuje files veće od dokumentovanog size limita i nije sveobuhvatan. Za temeljnost, clone-ujte i lokalno skenirajte pomoću secrets scanner-a.<sup>[[4]](#references)</sup>
 
 ### Programatsko skeniranje cele org
 
@@ -44,7 +46,7 @@ export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
 --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- Gitleaks nad svim repozitorijumima organizacije (klonirajte ih plitko i skenirajte pomoću `gitleaks dir`).<sup>[[6]](#references)</sup>
+- Gitleaks nad svim repozitorijumima organizacije (plitko ih klonirajte i skenirajte pomoću `gitleaks dir`).<sup>[[6]](#references)</sup>
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
@@ -64,7 +66,7 @@ ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> Savet: Za git history, preferirajte scanner-e koji parsiraju `git log -p --all` kako bi pronašli uklonjene secrets.<sup>[[6]](#references)</sup>
+> Savet: Za git istoriju koristite prednost skenera koji analiziraju `git log -p --all` kako bi otkrili uklonjene secrets.<sup>[[6]](#references)</sup>
 
 ### Ažurirani dorks za moderne tokene
 
@@ -349,14 +351,14 @@ GCP SECRET
 AWS SECRET
 "private" extension:pgp
 ```
-Za dodatne code-search workflow-e pogledajte [Wide Source Code Search](wide-source-code-search.md).
+Za dodatne tokove rada pretrage koda pogledajte [Wide Source Code Search](wide-source-code-search.md).
 
 ## References
 
-- [1] [Držanje secrets van javnih repozitorijuma (GitHub Blog, 29. februar 2024.)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
-- [2] [TruffleHog v3 – Pronalaženje, verifikacija i analiza leaked credentials](https://github.com/trufflesecurity/trufflehog)
-- [3] [Razumevanje GitHub Code Search sintakse](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
-- [4] [Pretraga code-a (legacy)](https://docs.github.com/en/search-github/searching-on-github/searching-code)
+- [1] [Držanje secrets podalje od javnih repozitorijuma (GitHub Blog, 29. februar 2024.)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – Pronalaženje, verifikacija i analiza procurelih credentials](https://github.com/trufflesecurity/trufflehog)
+- [3] [Razumevanje sintakse GitHub Code Search](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
+- [4] [Pretraga koda (legacy)](https://docs.github.com/en/search-github/searching-on-github/searching-code)
 - [5] [gh search code](https://cli.github.com/manual/gh_search_code)
 - [6] [Gitleaks README](https://github.com/gitleaks/gitleaks/blob/master/README.md)
 - [7] [Nosey Parker README](https://github.com/praetorian-inc/noseyparker#readme)
@@ -365,5 +367,5 @@ Za dodatne code-search workflow-e pogledajte [Wide Source Code Search](wide-sour
 - [10] [Referenca za secrets (GitHub Actions)](https://docs.github.com/en/actions/reference/security/secrets)
 - [11] [Secrets (GitHub Actions)](https://docs.github.com/en/actions/concepts/security/secrets)
 - [12] [Korišćenje logova pokretanja workflow-a (GitHub Actions)](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
-- [13] [TruffleHog GitHub source](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
+- [13] [GitHub izvorni kod TruffleHog-a](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
 {{#include ../../banners/hacktricks-training.md}}

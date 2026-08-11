@@ -1,50 +1,52 @@
-# Široka pretraga izvornog koda
+# Wide Source Code Search
 
-Cilj ove stranice je da navede **platforme koje omogućavaju pretragu koda** (literalnu, regex, pretragu zasnovanu na simbolima ili ograničenu na putanju) kroz **hiljade/milione repos**.
+{{#include ../../banners/hacktricks-training.md}}
+
+Cilj ove stranice je da navede **platforme koje omogućavaju pretragu koda** (literalnu, regex, pretragu zasnovanu na simbolima ili ograničenu na putanju) kroz **hiljade/milione repo-a**.
 
 Ovo je korisno za:
 
-- **Pretragu informacija iz leak-a**
+- **Pretragu procurelih informacija**
 - **Pretragu ranjivih obrazaca**
-- **Mapiranje tehnologija, internih hostova, CI/CD-a i infrastrukture kao koda**
-- **Pivotiranje od imena kompanije/organizacije ka repos, granama i fajlovima sa visokim signalom**
+- **Mapiranje tehnologija, internih hostova, CI/CD-a i infrastructure-as-code-a**
+- **Prelazak sa naziva kompanije/organizacije na repo-e, grane i fajlove sa relevantnim signalima**
 
 - [**Sourcebot**](https://www.sourcebot.dev/): Open-source/self-hosted pretraga koda sa regex, symbol i filtriranom pretragom kroz repozitorijume. Konfigurišite dodatne grane/tagove i pretražujte ih pomoću `rev:` kada je pokrivenost grana važna.<sup>[[5]](#references)[[6]](#references)[[7]](#references)</sup>
-- [**Sourcegraph**](https://sourcegraph.com/search): Pretraga koda sa regex, boolean, symbol, repository/file/language, branch/commit, diff i commit-message upitima.<sup>[[8]](#references)[[10]](#references)</sup> Structural search je opcionalan jer trenutna dokumentacija navodi da je podrazumevano onemogućen i ograničen performansama.<sup>[[9]](#references)</sup>
+- [**Sourcegraph**](https://sourcegraph.com/search): Pretraga koda sa regex, boolean, symbol, repository/file/language, branch/commit, diff i commit-message upitima.<sup>[[8]](#references)[[10]](#references)</sup> Structural search je opcionalan jer aktuelna dokumentacija navodi da je podrazumevano onemogućen i ograničen performansama.<sup>[[9]](#references)</sup>
 - [**GitHub Code Search**](https://github.com/search): Podržava regex, boolean logiku i kvalifikatore kao što su `repo:`, `org:`, `user:`, `path:`, `language:`, `symbol:`, `content:` i `is:`.<sup>[[1]](#references)</sup>
-- [**GitLab Exact Code Search**](https://docs.gitlab.com/user/search/exact_code_search/): Pretraga koda zasnovana na Zoekt-u, sa exact i regex režimima i filterima kao što su `file:`, `lang:`, `repo:` i `sym:`.<sup>[[2]](#references)</sup>
-- [**GitLab Advanced Search**](https://docs.gitlab.com/user/search/advanced_search/) je šira rezervna opcija jer može da pretražuje kod, komentare, commit-e, merge request-ove i wikije.<sup>[[11]](#references)</sup>
+- [**GitLab Exact Code Search**](https://docs.gitlab.com/user/search/exact_code_search/): Pretraga koda koju pokreće Zoekt, sa exact i regex režimima i filterima kao što su `file:`, `lang:`, `repo:` i `sym:`.<sup>[[2]](#references)</sup>
+- [**GitLab Advanced Search**](https://docs.gitlab.com/user/search/advanced_search/) je šira rezervna opcija jer može da pretražuje kod, komentare, commit-e, merge request-ove i wiki-je.<sup>[[11]](#references)</sup>
 - [**SearchCode**](https://searchcode.com/): Code-intelligence servis sa boolean/regex/structural code search funkcijama, kao i preuzimanjem fajlova i simbola.<sup>[[12]](#references)</sup>
 - [**Grep**](https://grep.app/): Javna pretraga koda kroz milion GitHub repozitorijuma, sa pretragom sadržaja, fajlova i putanja.<sup>[[13]](#references)</sup>
 
-## Korisne mogućnosti pretrage
+## Useful search capabilities
 
-Prilikom audita organizacije u bug bounty/red team kontekstu, najkorisnije mogućnosti su obično:
+Prilikom auditovanja organizacije u bug bounty/red team kontekstu, najkorisnije mogućnosti obično su:
 
-- Podrška za **regex** radi pretrage formata tokena, URL šema, naziva opasnih funkcija ili višelinijskih fragmenata.
-- **Filteri putanja** za direktan prelazak na fajlove visoke vrednosti kao što su `.github/workflows/`, `terraform/`, `helm/`, `.env`, `values.yaml`, `secrets.*`, `credentials.*`, `Dockerfile`, `Jenkinsfile` ili `nginx.conf`.
-- **Jezički filteri** za razdvajanje aplikacionog koda od IaC-a i pipeline-ova.
-- **Pretraga zasnovana na simbolima** za enumeraciju handler-a, auth middleware-a, webhook consumer-a, opasnih pomoćnih funkcija ili određenih klasa/metoda.
+- Podrška za **Regex** radi pretrage formata tokena, URL šema, naziva opasnih funkcija ili multiline fragmenata.
+- **Path filteri** za direktan prelazak na fajlove visoke vrednosti kao što su `.github/workflows/`, `terraform/`, `helm/`, `.env`, `values.yaml`, `secrets.*`, `credentials.*`, `Dockerfile`, `Jenkinsfile` ili `nginx.conf`.
+- **Language filteri** za razdvajanje aplikacionog koda od IaC-a i pipeline-ova.
+- **Pretraga zasnovana na simbolima** za izlistavanje handler-a, auth middleware-a, webhook consumer-a, opasnih helper funkcija ili konkretnih klasa/metoda.
 - **Boolean operatori** za smanjenje šuma: `NOT path:test`, `NOT is:generated`, `NOT is:vendored`, `foo OR bar`.
-- **Pretraga revizija/diff-ova** kada je dostupna, kako biste mogli da pronađete **obrisane stringove**, pratite **promene relevantne za bezbednost** ili pregledate **nepodrazumevane grane/tagove** bez prethodnog kloniranja svega.
+- **Pretraga revizija/diff-ova** kada je dostupna, kako biste mogli da pronađete **obrisane stringove**, pratite **promene relevantne za bezbednost** ili pregledate **grane/tagove koji nisu podrazumevani** bez prethodnog kloniranja svega.
 
-## Praktična metodologija
+## Practical methodology
 
-1. **Započnite sa indeksiranim platformama** kako biste brzo identifikovali repos, vlasnike, putanje i porodice koda.
-2. **Pređite na lokacije sa visokim signalom** umesto da pretražujete samo generičke stringove `password`/`secret`.
-3. **Pretražujte attack surface, a ne samo credentials**:
+1. **Počnite sa indeksiranim platformama** kako biste brzo identifikovali repo-e, vlasnike, putanje i familije koda.
+2. **Pređite na lokacije sa relevantnim signalima** umesto da pretražujete samo generičke stringove kao što su `password`/`secret`.
+3. **Pretražujte attack surface, a ne samo credential-e**:
 - CI/CD workflow-e, reusable workflow-e, composite action-e i deployment skripte
 - Dev Containers / Codespaces bootstrap fajlove i custom features
 - Terraform/Helm/Kubernetes manifeste
 - SSO/OIDC/SAML integracije
 - Interne URL-ove, staging hostove, admin panele, message broker-e i callback endpoint-e
-- Opasne putanje koda (`exec`, renderovanje template-a, SSRF fetcher-e, deserializer-e, ZIP extraction, YAML loader-e itd.)
-4. **Klonirajte i pretražujte lokalno** kada su vam potrebne nepodrazumevane grane, kompletna istorija, bolja regex podrška ili bulk automatizacija.
-5. **Pređite na namenske scanner-e** kada je cilj triage ili verifikacija secrets-a (na primer, pogledajte namensku stranicu u nastavku).
+- Opasne putanje koda (`exec`, template rendering, SSRF fetcher-e, deserializer-e, ZIP extraction, YAML loader-e itd.)
+4. **Klonirajte i pretražujte lokalno** kada su vam potrebne grane koje nisu podrazumevane, kompletna istorija, bolja regex podrška ili bulk automatizacija.
+5. **Pređite na namenske skenere** kada je cilj triage ili verifikacija secret-a (na primer, pogledajte namensku stranicu u nastavku).
 
-### Ideje za upite sa visokim signalom
+### High-signal query ideas
 
-Ovi upiti su namerno široki kako biste ih mogli prilagoditi sintaksi GitHub-a, GitLab-a, Sourcegraph-a ili Sourcebot-a:
+Oni su namerno široki kako biste ih mogli prilagoditi sintaksi GitHub-a, GitLab-a, Sourcegraph-a ili Sourcebot-a:
 ```text
 org:target path:.github/workflows ("pull_request_target" OR "workflow_run" OR "ACTIONS_STEP_DEBUG")
 org:target (path:terraform OR path:helm OR language:HCL OR language:YAML) ("role_arn" OR "assume_role" OR "client_secret" OR "access_key")
@@ -58,12 +60,12 @@ org:target ("internal" OR "corp" OR "staging") ("https://" OR "ssh://") NOT path
 ```
 ### Noviji fajlovi sa mnogo korisnih signala kojima vredi dati prioritet
 
-- **`.github/workflows/*.yml`**: Proverite privilegovane `pull_request_target` i `workflow_run` trigere i linije trećih strana `uses:` koje su vezane samo za tagove/grane umesto za pune commit SHA vrednosti.<sup>[[3]](#references)</sup> Takođe pretražite `workflow_call`, `secrets: inherit`, `id-token: write` i `runs-on: self-hosted`.
-- **`.devcontainer/devcontainer.json`**, **`.devcontainer/<variant>/devcontainer.json`** i **`.devcontainer.json`**: Pretražite `remoteEnv`, `containerEnv`, `initializeCommand`, `postCreateCommand`, `mounts` i referencirane Dockerfile-ove/script-e kako biste otkrili vrednosti okruženja, bootstrap komande, mount-ove i povezane fajlove.<sup>[[4]](#references)</sup>
-- **Dev Container Features** (`devcontainer-feature.json`, `install.sh`): Pregledajte oba fajla zato što minimalni layout jednog Feature-a uključuje metadata i `install.sh` entrypoint script.<sup>[[14]](#references)</sup>
+- **`.github/workflows/*.yml`**: Pregledajte privilegovane `pull_request_target` i `workflow_run` trigere, kao i linije trećih strana `uses:` koje su zakačene samo za tagove/grane umesto za pune commit SHA vrednosti.<sup>[[3]](#references)</sup> Takođe pretražite `workflow_call`, `secrets: inherit`, `id-token: write` i `runs-on: self-hosted`.
+- **`.devcontainer/devcontainer.json`**, **`.devcontainer/<variant>/devcontainer.json`** i **`.devcontainer.json`**: Pretražite `remoteEnv`, `containerEnv`, `initializeCommand`, `postCreateCommand`, `mounts` i povezane Dockerfiles/scripts kako biste otkrili vrednosti okruženja, bootstrap komande, mount-ove i povezane fajlove.<sup>[[4]](#references)</sup>
+- **Dev Container Features** (`devcontainer-feature.json`, `install.sh`): Pregledajte oba fajla, jer minimalni raspored jednog Feature-a uključuje metadata podatke i ulazni `install.sh` script.<sup>[[14]](#references)</sup>
 - **Ostali CI/control-plane fajlovi**: `.gitlab-ci.yml`, `azure-pipelines.yml`, `cloudbuild.yaml`, `Jenkinsfile`, `buildkite*`, `atlantis.yaml`, `terragrunt.hcl`, `helmfile.yaml`, `skaffold.yaml`, `argocd*`.
 
-### Masovna lokalna pretraga kada indexed search nije dovoljna
+### Masovna lokalna pretraga kada indeksirana pretraga nije dovoljna
 ```bash
 gh repo list TARGET_ORG --limit 1000 --json nameWithOwner,sshUrl \
 | jq -r '.[].sshUrl' \
@@ -79,12 +81,12 @@ repos/
 ```
 Koristi lokalno pretraživanje kada treba da:
 
-- Pretražuješ **non-default branches** ili **tags**
+- Pretražuješ **grane** ili **tagove** koji nisu podrazumevani
 - Pretražuješ **git history**
-- Agresivnije izvršavaš **PCRE2/multiline** upite
-- Grupno obaviš početnu analizu mnogih repozitorijuma bez UI ograničenja
+- Agresivnije pokrećeš **PCRE2/multiline** upite
+- Grupno radiš **triage** nad mnogim repozitorijumima bez UI ograničenja
 
-### Eksplicitno pretraži history, branches i diffs
+### Eksplicitno pretraži history, grane i diff-oveેણ
 ```bash
 REPO_DIR=repos/some-repo
 git -C "$REPO_DIR" fetch --all --tags --prune
@@ -98,42 +100,42 @@ git -C "$REPO_DIR" log --all -p -G 'gh[pousr]_|github_pat_|BEGIN [A-Z ]+PRIVATE 
 ```
 Ovo je naročito korisno kada je zanimljiv string postojao samo u **release branch**, **tag** ili **deleted commit**. Ako vaša Sourcegraph deployment podržava ovu funkcionalnost, pretrage `type:diff` i `type:commit` predstavljaju odličan no-clone pivot za isti problem.<sup>[[8]](#references)[[10]](#references)</sup>
 
-## Common blind spots
+## Uobičajene slepe tačke
 
-- **Indexiranje samo default branch-a** je uobičajeno. Nemojte pretpostaviti da code search obuhvata sve branch-eve/tagove/istoriju.
-- **Veliki fajlovi, vendored code, generated code ili arhive** mogu biti preskočeni ili mogu stvarati šum.
-- **Komentari, issues, PR-ovi, gists i wikiji** često nisu obuhvaćeni generičkim code search-om i mogu zahtevati tooling specifičan za platformu.
-- **Codespaces / devcontainer konfiguracije mogu biti specifične za branch**. Mogu se nalaziti na više putanja kao što su `.devcontainer/<variant>/devcontainer.json`, tako da čist default branch ne znači da je dev okruženje čisto svuda.<sup>[[4]](#references)</sup>
-- **Reusable workflows/actions i devcontainer features mogu se nalaziti izvan očiglednog fajla**. Pretražujte `.github/actions/`, `action.yml`, `action.yaml`, `devcontainer-feature.json` i `install.sh`, a ne samo workflow fajl na najvišem nivou.
-- **Sintaksa pretrage se razlikuje po platformama**. Dork koji radi u GitHub Code Search-u možda će zahtevati manje izmene za GitLab, Sourcegraph ili Sourcebot.
+- **Indeksiranje samo podrazumevane grane** je uobičajeno. Nemojte pretpostaviti da code search obuhvata sve grane/tagove/istoriju.
+- **Veliki fajlovi, vendored code, generisani code ili arhive** mogu biti preskočeni ili mogu stvarati šum.
+- **Komentari, issues, PR-ovi, gists i wikis** često nisu obuhvaćeni generičkim code search-om i mogu zahtevati tooling specifičan za platformu.
+- **Codespaces / devcontainer konfiguracije mogu biti specifične za granu**. Mogu se nalaziti na više putanja poput `.devcontainer/<variant>/devcontainer.json`, tako da čista default grana ne znači da je dev okruženje svuda čisto.<sup>[[4]](#references)</sup>
+- **Reusable workflows/actions i devcontainer features mogu se nalaziti izvan očiglednog fajla**. Pretražite `.github/actions/`, `action.yml`, `action.yaml`, `devcontainer-feature.json` i `install.sh`, a ne samo workflow fajl na najvišem nivou.
+- **Sintaksa pretrage razlikuje se po platformama**. Dork koji radi u GitHub Code Search-u možda će zahtevati male izmene za GitLab, Sourcegraph ili Sourcebot.
 
-### Platform-specific gotchas
+### Specifične zamke platformi
 
-- **GitHub Code Search** je koristan za brzi recon, ali pretražuje samo **default branch**. Ako su vam potrebni feature branch-evi, obrisani secret-i ili istorijski code, klonirajte repo i pretražite ga lokalno.<sup>[[15]](#references)</sup>
-- **GitLab Exact Code Search** ima ograničenje na **default branch** i indexira samo fajlove manje od 1 MB sa manje od 20.000 trigram-a.<sup>[[2]](#references)</sup> **Advanced Search** i dalje može obuhvatiti komentare, commit-e i wikije.<sup>[[11]](#references)</sup>
-- **Sourcebot** podrazumevano indexira **default branch**, ali se može konfigurisati da indexira dodatne branch-eve/tagove, nakon čega se mogu pretraživati pomoću `rev:` filtera kada vi kontrolišete index.<sup>[[7]](#references)</sup>
-- **Sourcegraph** podržava regex, symbol, diff i commit upite; koristite structural search samo tamo gde je omogućen i uzmite u obzir njegova dokumentovana ograničenja performansi.<sup>[[8]](#references)[[9]](#references)[[10]](#references)</sup>
+- **GitHub Code Search** je koristan za brzi recon, ali pretražuje samo **default branch**. Ako su vam potrebne feature grane, obrisani secrets ili istorijski code, klonirajte repo i pretražite ga lokalno.<sup>[[15]](#references)</sup>
+- **GitLab Exact Code Search** ima ograničenje na **default branch** i indeksira samo fajlove manje od 1 MB sa manje od 20.000 trigram-a.<sup>[[2]](#references)</sup> **Advanced Search** i dalje može obuhvatiti komentare, commit-e i wikis.<sup>[[11]](#references)</sup>
+- **Sourcebot** po podrazumevanim postavkama indeksira **default branch**, ali može biti konfigurisan za indeksiranje dodatnih grana/tagova, nakon čega se može pretraživati pomoću `rev:` filtera kada kontrolišete indeks.<sup>[[7]](#references)</sup>
+- **Sourcegraph** podržava regex, symbol, diff i commit upite; structural search koristite samo tamo gde je omogućen i uzmite u obzir njegova dokumentovana ograničenja performansi.<sup>[[8]](#references)[[9]](#references)[[10]](#references)</sup>
 
 > [!WARNING]
-> Kada tražite leak-ove u repo-u i pokrenete nešto poput `git log -p`, ne zaboravite da mogu postojati **drugi branch-evi sa drugim commit-ima** koji sadrže secret-e!
+> Kada tražite leak-ove u repozitorijumu i pokrenete nešto poput `git log -p`, ne zaboravite da mogu postojati **druge grane sa drugim commit-ima** koji sadrže secrets!
 
-Za dedicated secret hunting, GitHub dork-ove na nivou cele organizacije i tooling kao što su TruffleHog/Gitleaks, pogledajte [stranicu o GitHub leaked secrets](github-leaked-secrets.md).
+Za namenski lov na secrets, GitHub dorks na nivou cele organizacije i alate kao što su TruffleHog/Gitleaks, pogledajte [GitHub stranicu sa procurelim secrets](github-leaked-secrets.md).
 
 ## References
 
-- [1] [GitHub Code Search sintaksa](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
+- [1] [Sintaksa GitHub Code Search-a](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
 - [2] [GitLab Exact Code Search](https://docs.gitlab.com/user/search/exact_code_search/)
-- [3] [GitHub Actions referenca za bezbednu upotrebu](https://docs.github.com/en/actions/reference/security/secure-use)
-- [4] [Referenca metapodataka za Dev Container](https://containers.dev/implementors/json_reference/)
+- [3] [Referenca za bezbednu upotrebu GitHub Actions](https://docs.github.com/en/actions/reference/security/secure-use)
+- [4] [Referenca Dev Container metadata](https://containers.dev/implementors/json_reference/)
 - [5] [Sourcebot](https://www.sourcebot.dev/)
 - [6] [Sourcebot search API](https://docs.sourcebot.dev/api-reference/search-%26-navigation/search-code)
-- [7] [Sourcebot multi-branch indexing](https://docs.sourcebot.dev/docs/features/search/multi-branch-indexing)
+- [7] [Sourcebot indeksiranje više grana](https://docs.sourcebot.dev/docs/features/search/multi-branch-indexing)
 - [8] [Sourcegraph Code Search](https://sourcegraph.com/docs/code-search)
 - [9] [Sourcegraph Structural Search](https://sourcegraph.com/docs/code-search/types/structural)
-- [10] [Sourcegraph Search Query Syntax](https://sourcegraph.com/docs/code-search/queries)
+- [10] [Sourcegraph sintaksa upita za pretragu](https://sourcegraph.com/docs/code-search/queries)
 - [11] [GitLab Advanced Search](https://docs.gitlab.com/user/search/advanced_search/)
 - [12] [SearchCode](https://searchcode.com/)
 - [13] [Grep.app](https://grep.app/)
 - [14] [Authoring a Dev Container Feature](https://containers.dev/guide/author-a-feature)
-- [15] [Investigation tools for security incidents](https://docs.github.com/en/enterprise-cloud%40latest/code-security/reference/security-incident-response/investigation-tools)
+- [15] [Alati za istragu bezbednosnih incidenata](https://docs.github.com/en/enterprise-cloud%40latest/code-security/reference/security-incident-response/investigation-tools)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,5 +1,7 @@
 # Osnovna forenzička metodologija
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Kreiranje i montiranje image-a
 
 
@@ -9,7 +11,7 @@
 
 ## Analiza malware-a
 
-Ovo **nije nužno prvi korak koji treba izvršiti nakon dobijanja image-a**. Međutim, ove tehnike analize malware-a možete koristiti nezavisno ako imate fajl, image file-systema, memory image, pcap... zato je dobro **imati ove radnje na umu**:
+Ovo **nije nužno prvi korak koji treba preduzeti nakon što dobijete image**. Međutim, ove tehnike analize malware-a možete koristiti nezavisno ako imate fajl, image sistema datoteka, memory image, pcap... zato je dobro **imati ove radnje na umu**:
 
 
 {{#ref}}
@@ -18,14 +20,14 @@ malware-analysis.md
 
 ## Pregled image-a
 
-ako vam je dat **forenzički image** uređaja, možete početi sa **analizom particija i file-systema** koji se koristi, kao i **oporavkom** potencijalno **zanimljivih fajlova** (čak i obrisanih). Saznajte kako:
+ako vam je dat **forenzički image** uređaja, možete početi sa **analizom particija i sistema datoteka** koji se koristi, kao i **oporavkom** potencijalno **zanimljivih fajlova** (čak i obrisanih). Saznajte kako:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-U zavisnosti od korišćenih OS-ova, pa čak i platforme, treba potražiti različite zanimljive artefakte:
+U zavisnosti od korišćenih OS-ova, pa čak i platforme, treba pretražiti različite zanimljive artefakte:
 
 
 {{#ref}}
@@ -47,9 +49,9 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Detaljan pregled specifičnih tipova fajlova i Software-a
+## Detaljan pregled određenih tipova fajlova i Software-a
 
-Ako imate veoma **sumnjiv** **fajl**, onda, **u zavisnosti od tipa fajla i software-a** koji ga je kreirao, različiti **trikovi** mogu biti korisni.\
+Ako imate veoma **sumnjiv** **fajl**, onda, **u zavisnosti od tipa fajla i Software-a** koji ga je kreirao, različiti **trikovi** mogu biti korisni.\
 Pročitajte sledeću stranicu da biste saznali neke zanimljive trikove:
 
 
@@ -71,7 +73,7 @@ specific-software-file-type-tricks/browser-artifacts.md
 memory-dump-analysis/
 {{#endref}}
 
-## Pregled Pcap-a
+## Pregled pcap-a
 
 
 {{#ref}}
@@ -80,7 +82,7 @@ pcap-inspection/
 
 ## **Anti-Forensic Techniques**
 
-Imajte na umu moguću upotrebu anti-forenzičkih tehnika:
+Imajte na umu moguću upotrebu anti-forensic techniques:
 
 
 {{#ref}}

