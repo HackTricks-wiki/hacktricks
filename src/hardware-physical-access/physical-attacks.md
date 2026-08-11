@@ -6,7 +6,7 @@
 
 Legacy PC firmware settings may be reset by disconnecting the CMOS battery or using a documented clear-CMOS jumper. The necessary power-off time is board-specific, and modern UEFI passwords or keys may live in nonvolatile flash, an embedded controller, or a security device and therefore survive a battery removal. Consult the board/service manual before shorting pins; this procedure can also invalidate TPM measurements and trigger disk-encryption recovery.
 
-On legacy x86 systems, tools such as **killCMOS** and **CmosPwd** can inspect or alter CMOS-backed settings from a bootable environment. They are not generic UEFI password removers and require sufficient hardware/firmware access.
+On legacy x86 systems, tools such as **killCMOS** and **CmosPwd** can inspect or alter CMOS-backed settings from a bootable environment. CmosPwd recognizes password formats from a documented set of older BIOS families and can back up, restore, or erase/kill CMOS state; its published builds target legacy DOS/Windows, Linux, FreeBSD, and NetBSD environments.<sup>[[18]](#references)</sup> These utilities are not generic UEFI password removers and require sufficient hardware/firmware access.
 
 Some laptop firmware displays a vendor-specific challenge code after several failed password attempts. Databases such as [bios-pw.org](https://bios-pw.org) can derive legacy vendor recovery passwords for some models, but many systems implement lockout without a derivable challenge. Treat any generated password as model-specific and avoid exhausting permanent attempt counters.
 
@@ -213,5 +213,6 @@ After the tenth cycle the EC sets a flag that instructs the BIOS to wipe NVRAM a
 - [15] [Hak5 USB Rubber Ducky documentation](https://docs.hak5.org/hak5-usb-rubber-ducky/)
 - [16] [Microsoft Learn - BitLocker operations guide](https://learn.microsoft.com/en-us/windows/security/operating-system-security/data-protection/bitlocker/operations-guide)
 - [17] [Microsoft Learn - holding Shift and automatic logon behavior](https://learn.microsoft.com/en-us/troubleshoot/windows-client/user-profiles-and-logon/hold-shift-key-shutting-down-not-disable-automatic-logon)
+- [18] [CGSecurity - CmosPwd documentation and downloads](https://www.cgsecurity.org/wiki/CmosPwd)
 
 {{#include ../banners/hacktricks-training.md}}
