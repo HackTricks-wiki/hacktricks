@@ -1,6 +1,4 @@
-# Eskalacja uprawnień RunC
-
-{{#include ../../banners/hacktricks-training.md}}
+# RunC Privilege Escalation
 
 ## Podstawowe informacje
 
@@ -12,7 +10,7 @@ Jeśli chcesz dowiedzieć się więcej o **runc**, sprawdź następującą stron
 
 ## PE
 
-Jeśli okaże się, że `runc` jest zainstalowany na hoście, możesz być w stanie **uruchomić kontener montujący folder root / hosta**.
+Jeśli `runc` jest dostępny dla procesu z uprawnieniami root na hoście, możesz użyć OCI bundle, którego konfiguracja mount rekurencyjnie bind-mountuje `/` hosta jako `/` wewnątrz kontenera, udostępniając system plików hosta w tej przestrzeni nazw mount.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -37,6 +35,11 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Nie zawsze będzie to działać, ponieważ domyślna operacja runc polega na uruchamianiu jako root, więc uruchomienie go jako użytkownik nieuprzywilejowany po prostu nie może zadziałać (chyba że używasz konfiguracji rootless). Ustawienie konfiguracji rootless jako domyślnej zasadniczo nie jest dobrym pomysłem, ponieważ wewnątrz kontenerów rootless występuje całkiem sporo ograniczeń, które nie obowiązują poza kontenerami rootless.
+> Udokumentowany workflow `runc run` jest rootful: własne przykłady runc oznaczają go jako „run as root”. Nieuprzywilejowany użytkownik potrzebuje konfiguracji rootless, takiej jak `runc spec --rootless`, a dokumentacja runc wskazuje, że dla tego trybu muszą być włączone user namespaces.<sup>[[1]](#references)</sup>
 
+## References
+
+- [1] [runc: Narzędzie CLI do tworzenia i uruchamiania kontenerów](https://github.com/opencontainers/runc#using-runc)
+- [2] [Specyfikacja OCI Runtime: Mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
+- [3] [Współdzielone poddrzewa](https://docs.kernel.org/filesystems/sharedsubtree.html)
 {{#include ../../banners/hacktricks-training.md}}

