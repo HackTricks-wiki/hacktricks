@@ -1,14 +1,16 @@
-# Перевірка Pcap
+# Аналіз Pcap
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> **PCAP** і **PCAPNG** — це різні формати захоплення; **PCAPNG — це гнучкий, розширюваний наступник PCAP**, але підтримка залежить від інструментів. Якщо інструмент не може прочитати PCAPNG, конвертуйте його в PCAP за допомогою Wireshark або іншого сумісного інструмента.<sup>[[1]](#references)[[18]](#references)</sup>
+> **PCAP** і **PCAPNG** є різними форматами захоплення; **PCAPNG — це гнучкий і розширюваний наступник PCAP**, але підтримка залежить від інструментів. Якщо інструмент не може прочитати PCAPNG, конвертуйте його в PCAP за допомогою Wireshark або іншого сумісного інструмента.<sup>[[1]](#references)[[18]](#references)</sup>
 
 ## Онлайн-інструменти для pcap
 
 - Якщо заголовок вашого pcap **пошкоджений**, спробуйте **виправити** його за допомогою: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php).<sup>[[2]](#references)</sup>
-- Витягуйте **інформацію** та шукайте **malware** усередині pcap за допомогою [**PacketTotal**](https://packettotal.com).<sup>[[19]](#references)</sup>
+- Витягуйте **інформацію** та шукайте **malware** у pcap за допомогою [**PacketTotal**](https://packettotal.com).<sup>[[19]](#references)</sup>
 - Шукайте **шкідливу активність** за допомогою [**www.virustotal.com**](https://www.virustotal.com) і [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com).<sup>[[3]](#references)[[4]](#references)</sup>
-- **Повний аналіз pcap у браузері за адресою** [**https://apackets.com/**](https://apackets.com/).<sup>[[5]](#references)</sup>
+- **Повний аналіз pcap у браузері за допомогою** [**https://apackets.com/**](https://apackets.com/).<sup>[[5]](#references)</sup>
 
 ## Витягування інформації
 
@@ -19,7 +21,7 @@
 > [!TIP]
 > **Якщо ви збираєтеся аналізувати PCAP, вам фактично необхідно знати, як користуватися Wireshark**
 
-Деякі трюки Wireshark можна знайти тут:
+Деякі прийоми Wireshark можна знайти тут:
 
 
 {{#ref}}
@@ -28,11 +30,11 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-Аналіз Pcap у браузері.<sup>[[5]](#references)</sup>
+Аналіз pcap у браузері.<sup>[[5]](#references)</sup>
 
 ### Xplico Framework
 
-[**Xplico**](https://github.com/xplico/xplico) — це Unix-подібний інструмент мережевої криміналістики, який декодує файли PCAP і може вилучати електронні листи через POP/IMAP/SMTP, вміст HTTP, VoIP-дзвінки SIP, дані FTP і дані TFTP.<sup>[[6]](#references)</sup>
+[**Xplico**](https://github.com/xplico/xplico) — це інструмент мережевої криміналістики для Unix-подібних систем, який декодує файли PCAP і може витягувати електронні листи через POP/IMAP/SMTP, вміст HTTP, VoIP-виклики SIP, дані FTP і дані TFTP.<sup>[[6]](#references)</sup>
 
 **Встановлення**
 ```bash
@@ -41,14 +43,14 @@ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE
 sudo apt-get update
 sudo apt-get install xplico
 ```
-**Запустити**
+**Запуск**
 ```
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
-Доступ до _**127.0.0.1:9876**_ із обліковими даними _**xplico:xplico**_
+Доступ до _**127.0.0.1:9876**_ з обліковими даними _**xplico:xplico**_
 
-Потім створіть **новий case**, створіть **нову session** усередині case і **завантажте** файл **pcap**.
+Потім створіть **новий case**, створіть **нову session** у case та **завантажте** файл **pcap**.
 
 ### NetworkMiner
 
@@ -56,12 +58,12 @@ sudo apt-get install xplico
 
 ### NetWitness Investigator
 
-Ви можете завантажити [**NetWitness Investigator звідси**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(він працює у Windows)**.\
-Постачальник описує freeware як інтерактивний інструмент аналізу мережевих сесій для первинного аналізу шкідливої активності й наразі надає доступ через контактну форму.<sup>[[8]](#references)</sup>
+Ви можете завантажити [**NetWitness Investigator звідси**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(працює у Windows)**.\
+Постачальник описує freeware як інтерактивний інструмент аналізу мережевих сесій для первинного аналізу шкідливої активності та наразі пропонує доступ через контактну форму.<sup>[[8]](#references)</sup>
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-Документовані модулі BruteShark можуть вилучати облікові дані з HTTP, FTP, Telnet, IMAP і SMTP, експортувати хеші автентифікації Kerberos, NTLM, CRAM-MD5 і HTTP-Digest для Hashcat, створювати карту мережевих вузлів і користувачів, вилучати DNS-запити, відновлювати TCP/UDP-сесії та вирізати файли.<sup>[[9]](#references)</sup>
+Документовані модулі BruteShark можуть вилучати облікові дані з HTTP, FTP, Telnet, IMAP і SMTP, експортувати хеші автентифікації Kerberos, NTLM, CRAM-MD5 і HTTP-Digest для Hashcat, створювати карту мережевих вузлів і користувачів, вилучати DNS-запити, відновлювати TCP/UDP-сесії та виділяти файли.<sup>[[9]](#references)</sup>
 
 ### Capinfos
 
@@ -71,24 +73,24 @@ capinfos capture.pcap
 ```
 ### Ngrep
 
-`ngrep` шукає вміст пакетів за допомогою регулярних виразів і приймає BPF-фільтри; `-I` читає файл захоплення, сумісний із pcap.<sup>[[11]](#references)</sup> У прикладі ці функції поєднано для пошуку HTTP-запиту у вибраному трафіку.
+`ngrep` шукає дані пакетів за допомогою регулярних виразів і підтримує BPF-фільтри; `-I` читає capture file, сумісний із pcap.<sup>[[11]](#references)</sup> У прикладі ці можливості поєднано для пошуку HTTP-запиту у вибраному трафіку.
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
 ### Carving
 
-Using common carving techniques can be useful to extract files and information from the pcap:
+Використання поширених технік carving може бути корисним для вилучення файлів та інформації з pcap:
 
 
 {{#ref}}
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Захоплення облікових даних
+### Збір облікових даних
 
-You can use [PCredz](https://github.com/lgandx/PCredz) to parse credentials from a stored PCAP file or a live interface.<sup>[[12]](#references)</sup>
+Ви можете використовувати [PCredz](https://github.com/lgandx/PCredz) для аналізу облікових даних зі збереженого PCAP-файлу або активного інтерфейсу.<sup>[[12]](#references)</sup>
 
-## Перевірка Exploits/Malware
+## Перевірка експлойтів/шкідливого ПЗ
 
 ### Suricata
 
@@ -101,17 +103,17 @@ oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
 **Перевірка pcap**
 
-Опція `-r` у Suricata відтворює PCAP в автономному режимі; у цьому прикладі `-k none` вимикає перевірку контрольних сум, `-v` збільшує деталізацію журналювання, а `-l` вибирає каталог журналів.<sup>[[13]](#references)</sup>
+Опція `-r` у Suricata відтворює PCAP в offline mode; у цьому прикладі `-k none` вимикає перевірки контрольних сум, `-v` збільшує обсяг журналювання, а `-l` вибирає каталог журналів.<sup>[[13]](#references)</sup>
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) обробляє HTTP-потоки з PCAP-файлів, за потреби розпаковує gzip-потоки, сканує витягнуті файли за допомогою YARA, записує `report.txt` і може зберігати файли, що відповідають правилам, до каталогу.<sup>[[14]](#references)</sup>
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) обробляє HTTP-потоки з PCAP-файлів, за потреби розпаковує gzip-потоки, сканує витягнуті файли за допомогою YARA, записує `report.txt` і може зберігати файли, що відповідають умовам, до каталогу.<sup>[[14]](#references)</sup>
 
-### Аналіз Malware
+### Аналіз шкідливого програмного забезпечення
 
-Перевірте, чи можете ви знайти будь-який відбиток відомого malware:
+Перевірте, чи можете ви знайти будь-який відбиток відомого шкідливого програмного забезпечення:
 
 
 {{#ref}}
@@ -122,7 +124,7 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 > [Zeek](https://docs.zeek.org/en/master/about.html) — це пасивний аналізатор мережевого трафіку з відкритим кодом, який використовується як Network Security Monitor (NSM) і для ширшого аналізу трафіку, зокрема вимірювання продуктивності та усунення несправностей.<sup>[[15]](#references)</sup>
 
-Zeek генерує структуровані журнали, а не PCAP-файли, тому для їх перегляду використовуйте інструменти аналізу журналів, такі як `zeek-cut`.<sup>[[15]](#references)[[16]](#references)</sup>
+Zeek створює структуровані журнали, а не PCAP-файли, тому для перевірки цих журналів використовуйте інструменти аналізу журналів, такі як `zeek-cut`.<sup>[[15]](#references)[[16]](#references)</sup>
 
 ### Інформація про з'єднання
 
@@ -176,7 +178,7 @@ Score,Source IP,Destination IP,Connections,Avg Bytes,Intvl Range,Size Range,Top 
 1,10.55.100.111,165.227.216.194,20054,92,29,52,1,52,7774,20053,0,0,0,0
 0.838,10.55.200.10,205.251.194.64,210,69,29398,4,300,70,109,205,0,0,0,0
 ```
-### DNS-інформація
+### Інформація про DNS
 ```bash
 #Get info about each DNS request performed
 cat dns.log | zeek-cut -c id.orig_h query qtype_name answers
@@ -193,7 +195,7 @@ cat dns.log | zeek-cut qtype_name | sort | uniq -c | sort -nr
 #See top DNS domain requested with rita
 rita show-exploded-dns -H --limit 10 zeek_logs
 ```
-## Інші прийоми аналізу pcap
+## Інші трюки аналізу pcap
 
 
 {{#ref}}
@@ -217,14 +219,14 @@ usb-keystrokes.md
 - [3] [Огляд VirusTotal API v3](https://docs.virustotal.com/reference/overview)
 - [4] [Hybrid Analysis](https://www.hybrid-analysis.com/)
 - [5] [Аналізатор PCAP A-Packets](https://apackets.com/)
-- [6] [Xplico — про програму](https://www.xplico.org/about)
+- [6] [Xplico — про проєкт](https://www.xplico.org/about)
 - [7] [NetworkMiner](https://www.netresec.com/?page=NetworkMiner)
 - [8] [Безкоштовна версія NetWitness Investigator](https://www.netwitness.com/contact-us/netwitness-investigator-freeware/)
 - [9] [Репозиторій BruteShark](https://github.com/odedshimon/BruteShark)
 - [10] [Посібник Wireshark `capinfos`](https://www.wireshark.org/docs/man-pages/capinfos.html)
 - [11] [Документація ngrep](https://ngrep.sourceforge.net/usage.html)
 - [12] [Репозиторій PCredz](https://github.com/lgandx/PCredz)
-- [13] [Параметри командного рядка Suricata](https://docs.suricata.io/en/latest/command-line-options.html)
+- [13] [Опції командного рядка Suricata](https://docs.suricata.io/en/latest/command-line-options.html)
 - [14] [Репозиторій YaraPcap](https://github.com/kevthehermit/YaraPcap)
 - [15] [Що таке Zeek?](https://docs.zeek.org/en/master/about/what.html)
 - [16] [Посібник із журналів Zeek](https://docs.zeek.org/en/master/tutorial/logs.html)

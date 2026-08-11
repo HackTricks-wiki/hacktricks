@@ -1,6 +1,8 @@
-# Volatility - Шпаргалка
+# Volatility - CheatSheet
 
-Якщо вам потрібен інструмент, який автоматизує аналіз пам’яті з різними рівнями сканування та паралельно запускає кілька плагінів Volatility3, ви можете використовувати autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+{{#include ../../../banners/hacktricks-training.md}}
+
+Якщо вам потрібен інструмент, який автоматизує аналіз пам’яті з різними рівнями сканування та запускає кілька плагінів Volatility3 паралельно, ви можете використовувати autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 ```bash
 # Full scan (runs all plugins)
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
@@ -12,7 +14,7 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-Якщо вам потрібно щось **швидке й шалене**, що запустить кілька плагінів Volatility паралельно, можете скористатися: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+Якщо вам потрібно щось **швидке й шалене**, що запустить кілька плагінів Volatility паралельно, ви можете використати: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -47,17 +49,17 @@ python setup.py install
 
 Перегляньте офіційну документацію в [довіднику команд Volatility](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
 
-### Примітка щодо plugins “list” і “scan”
+### Примітка щодо плагінів “list” і “scan”
 
-plugins `list` обходять структури, які підтримує kernel, тому працюють швидко, але можуть пропускати об’єкти, від’єднані malware. plugins `scan`, як-от `psscan`, шукають у memory сигнатури об’єктів; вони можуть відновлювати завершені або від’єднані processes, але працюють повільніше й можуть створювати false positives, якщо залишкові структури пошкоджені.<sup>[[8]](#references)</sup>
+Плагіни `list` проходять по структурах, які підтримує kernel, тому працюють швидко, але можуть пропускати об’єкти, від’єднані malware. Плагіни `scan`, як-от `psscan`, шукають у пам’яті сигнатури об’єктів; вони можуть відновлювати завершені або від’єднані процеси, але працюють повільніше й можуть створювати false positives, якщо залишкові структури пошкоджені.<sup>[[8]](#references)</sup>
 
-## Профілі OS
+## Профілі ОС
 
 ### Volatility3
 
-Volatility 3 потребує таблиць symbols для цільової operating system. У README проєкту перелічені пакети для Windows, Mac і Linux; розмістіть їх у `volatility3/symbols` або в каталозі `symbols` поруч із executable file. Відсутні symbols для Windows можуть бути отримані та згенеровані автоматично, тоді як таблиці для Mac і Linux, можливо, доведеться створювати окремо.<sup>[[9]](#references)</sup>
+Volatility 3 потребує таблиць символів для цільової операційної системи. README проєкту містить пакети для Windows, Mac і Linux; розмістіть їх у `volatility3/symbols` або в каталозі `symbols` поруч із executable-файлом. Відсутні символи Windows можуть бути отримані та згенеровані автоматично, тоді як таблиці для Mac і Linux, можливо, потрібно створити окремо.<sup>[[9]](#references)</sup>
 
-Пакети таблиць symbols для різних operating systems доступні для **завантаження** за адресами:
+Пакети таблиць символів для різних операційних систем доступні для **завантаження** за адресами:
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -65,13 +67,13 @@ Volatility 3 потребує таблиць symbols для цільової ope
 
 ### Volatility2
 
-#### External Profile
+#### Зовнішній профіль
 
-Список підтримуваних profiles можна отримати так:
+Список підтримуваних профілів можна отримати за допомогою:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-Якщо ви хочете використати **новий завантажений profile** (наприклад, linux), потрібно створити десь таку структуру папок: _plugins/overlays/linux_ і помістити в цю папку zip-файл, що містить profile. Потім отримайте кількість profiles за допомогою:
+Якщо ви хочете використовувати **новий завантажений профіль** (наприклад, linux), потрібно десь створити таку структуру папок: _plugins/overlays/linux_ і помістити в цю папку zip-файл, що містить профіль. Потім отримайте кількість профілів за допомогою:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -83,7 +85,7 @@ LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 - A Profile for Linux CentOS7_3.10
 VistaSP0x64                                   - A Profile for Windows Vista SP0 x64
 VistaSP0x86                                   - A Profile for Windows Vista SP0 x86
 ```
-You can **завантажити Linux і Mac profiles** from [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
+Ви можете **завантажити Linux і Mac profiles** з [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
 
 У попередньому фрагменті видно, що profile називається `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`, і його можна використати для виконання чогось на кшталт:
 ```bash
@@ -94,11 +96,11 @@ You can **завантажити Linux і Mac profiles** from [https://github.co
 volatility imageinfo -f file.dmp
 volatility kdbgscan -f file.dmp
 ```
-#### **Відмінності між imageinfo та kdbgscan**
+#### **Відмінності між imageinfo і kdbgscan**
 
-[Нотатки Andrea Fortuna щодо ідентифікації образу](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/) пояснюють, що `imageinfo` генерує пропозиції профілів, тоді як `kdbgscan` шукає сигнатури KDBG і виконує перевірки узгодженості, щоб визначити можливі профілі та адреси KDBG. Його вивід частково залежить від того, чи може Volatility знайти DTB, тому під час запуску передавайте відомий або запропонований профіль.<sup>[[1]](#references)</sup>
+[Нотатки Andrea Fortuna щодо ідентифікації образу](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/) пояснюють, що `imageinfo` створює пропозиції профілів, тоді як `kdbgscan` сканує сигнатури KDBG і виконує перевірки узгодженості, щоб ідентифікувати профілі-кандидати та адреси KDBG. Його вивід частково залежить від того, чи може Volatility знайти DTB, тому під час запуску передавайте відомий або запропонований профіль.<sup>[[1]](#references)</sup>
 
-Якщо повернуто кілька варіантів, порівняйте кількість процесів і модулів: варіант із нульовою кількістю процесів або модулів менш достовірний, ніж варіант із заповненими списками. Розглядайте це як перевірку узгодженості, а не як доказ правильності профілю.<sup>[[1]](#references)</sup>
+Якщо повертається кілька кандидатів, порівняйте кількість процесів і модулів: кандидат із нульовою кількістю процесів або модулів є менш достовірним, ніж кандидат із заповненими списками. Розглядайте це як перевірку узгодженості, а не як доказ правильності профілю.<sup>[[1]](#references)</sup>
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -112,18 +114,18 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-`KdDebuggerDataBlock`, відомий у Volatility як KDBG, — це структура `_KDDEBUGGER_DATA64`, яка містить `PsActiveProcessHead` — початок списку процесів, що використовується для переліку процесів.<sup>[[2]](#references)</sup>
+`KdDebuggerDataBlock`, відомий у Volatility як KDBG, — це структура `_KDDEBUGGER_DATA64`, яка містить `PsActiveProcessHead` — початок списку процесів, що використовується для перерахування процесів.<sup>[[2]](#references)</sup>
 
 ## Інформація про ОС
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-Плагін `banners.Banners` можна використовувати у **vol3, щоб спробувати знайти банери Linux** у дампі.
+Плагін `banners.Banners` можна використовувати у **vol3, щоб спробувати знайти linux banners** у дампі.
 
 ## Хеші/Паролі
 
-Витягніть SAM hashes, [кешовані облікові дані домену](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) та [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
+Витягніть SAM hashes, [domain cached credentials](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) і [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -143,17 +145,17 @@ volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 {{#endtab}}
 {{#endtabs}}
 
-## Дамп пам’яті
+## Дамп пам'яті
 
-Дамп пам’яті процесу **витягне все** з поточного стану процесу. Модуль **procdump** лише **витягне** **код**.
+Дамп пам'яті процесу **вилучить усе** з поточного стану процесу. Модуль **procdump** лише **вилучить** **код**.
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
 ## Процеси
 
-### Список процесів
+### Перелік процесів
 
-Спробуйте знайти **підозрілі** процеси (за назвою) або **неочікувані дочірні** **процеси** (наприклад, cmd.exe як дочірній процес iexplorer.exe).\
+Спробуйте знайти **підозрілі** процеси (за назвою) або **неочікувані дочірні процеси** (наприклад, cmd.exe як дочірній процес iexplorer.exe).\
 Може бути корисно **порівняти** результат pslist із результатом psscan, щоб виявити приховані процеси.
 
 {{#tabs}}
@@ -175,7 +177,7 @@ volatility --profile=PROFILE psxview -f file.dmp # Get hidden process list
 {{#endtab}}
 {{#endtabs}}
 
-### Дамп proc
+### Дамп процесу
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -210,11 +212,11 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-Команди, виконані в `cmd.exe`, обробляються **`conhost.exe`** (або **`csrss.exe`** у системах до Windows 7). Це означає, що якщо **`cmd.exe`** буде завершено атакувальником до отримання memory dump, все ще можна відновити історію команд сесії з пам'яті **`conhost.exe`**. Для цього, якщо в модулях консолі виявлено незвичну активність, слід створити memory dump пов'язаного процесу **`conhost.exe`**. Потім, виконавши пошук **strings** у цьому dump, можна потенційно отримати рядки команд, використані в сесії.
+Команди, виконані в `cmd.exe`, обробляються **`conhost.exe`** (або **`csrss.exe`** у системах до Windows 7). Це означає, що якщо **`cmd.exe`** буде завершено атакувальником до отримання memory dump, усе ще можна відновити історію команд сесії з пам’яті **`conhost.exe`**. Для цього, якщо в модулях консолі виявлено незвичну активність, слід створити memory dump пов’язаного процесу **`conhost.exe`**. Потім, виконавши пошук за **strings** у цьому dump, можна потенційно отримати командні рядки, використані в сесії.
 
 ### Середовище
 
-Отримайте змінні середовища кожного запущеного процесу. Там можуть бути цікаві значення.
+Отримайте змінні середовища кожного запущеного процесу. Серед них можуть бути цікаві значення.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -235,7 +237,7 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 ### Привілеї токенів
 
 Перевірте токени привілеїв у неочікуваних службах.\
-Може бути корисно перелічити процеси, які використовують певний привілейований токен.
+Може бути корисно перелічити процеси, які використовують привілейований токен.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -259,8 +261,8 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePri
 
 ### SIDs
 
-Перевірте кожен SSID, який належить процесу.\
-Може бути корисно перелічити процеси, що використовують привілейований SID (а також процеси, що використовують певний service SID).
+Перевірте кожен SSID, яким володіє процес.\
+Може бути цікаво перелічити процеси, що використовують привілейований SID (і процеси, що використовують деякі service SID).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -280,7 +282,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### Дескриптори
 
-Корисно знати, до яких інших файлів, ключів, потоків, процесів... **процес має дескриптор** (відкрив їх)
+Корисно знати, для яких інших файлів, ключів, потоків, процесів... **процес має дескриптор** (відкрив)
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -316,7 +318,7 @@ volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dm
 
 ### Рядки за процесами
 
-Volatility дає змогу перевірити, якому процесу належить рядок.
+Volatility дозволяє перевірити, якому процесу належить рядок.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -337,7 +339,7 @@ strings 3532.dmp > strings_file
 {{#endtab}}
 {{#endtabs}}
 
-Він також дає змогу шукати рядки всередині процесу за допомогою модуля yarascan:
+Це також дає змогу шукати рядки всередині процесу за допомогою модуля yarascan:
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -422,7 +424,7 @@ volatility --profile=SomeLinux -f file.dmp linux_route_cache
 
 ## Кущ реєстру
 
-### Вивести доступні кущі
+### Вивести доступні hive
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -467,7 +469,7 @@ volatility --profile=Win7SP1x86_23418 hivedump -f file.dmp
 ```
 ## Файлова система
 
-### Монтування
+### Mount
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -523,9 +525,9 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-У NTFS MFT має щонайменше один запис для кожного файла на томі, включно із самим собою. Метадані та вміст файлів зберігаються в записах MFT або в розташуваннях, описаних у цих записах; див. [документацію Microsoft](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
+У NTFS MFT має щонайменше один запис для кожного файлу на томі, включно із самим собою. Метадані та вміст файлів зберігаються в записах MFT або в розташуваннях, описаних у цих записах; див. [документацію Microsoft](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
 
-### SSL Keys/Certs
+### SSL ключі/сертифікати
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -584,8 +586,8 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 
 ### Сканування за допомогою yara
 
-Використовуйте цей скрипт, щоб завантажити й об'єднати всі правила malware yara з github: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-Створіть директорію _**rules**_ і виконайте його. Буде створено файл _**malware_rules.yar**_, який містить усі правила yara для malware.
+Використовуйте цей скрипт, щоб завантажити й об’єднати всі правила yara для malware з github: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
+Створіть директорію _**rules**_ і виконайте скрипт. У результаті буде створено файл _**malware_rules.yar**_, який містить усі правила yara для malware.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -612,9 +614,9 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 
 ## РІЗНЕ
 
-### Зовнішні plugins
+### Зовнішні плагіни
 
-Якщо ви хочете використовувати зовнішні plugins, переконайтеся, що папки, пов’язані з plugins, є першим використаним параметром.
+Якщо ви хочете використовувати зовнішні plugins, переконайтеся, що папки, пов’язані з plugins, є першим параметром.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -653,7 +655,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp handles -p <PID> -t mutant
 {{#endtab}}
 {{#endtabs}}
 
-### Символічні посилання
+### Симлінки
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -671,7 +673,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-Можна **прочитати історію bash із пам’яті.** Також можна отримати дамп файлу _.bash_history_, але якщо його було вимкнено, ви будете раді, що можете скористатися цим модулем Volatility
+Можна **прочитати історію bash із пам’яті.** Також можна отримати дамп файлу _.bash_history_, але якщо це було вимкнено, ви будете раді, що можете скористатися цим модулем volatility.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -687,7 +689,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp linux_bash
 {{#endtab}}
 {{#endtabs}}
 
-### Хронологія
+### Часова шкала
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -719,22 +721,22 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp driverscan
 {{#endtab}}
 {{#endtabs}}
 
-### Отримати вміст буфера обміну
+### Отримати буфер обміну
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp
 ```
-### Отримати історію IE
+### Отримання історії IE
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
 ```
-### Отримання тексту з notepad
+### Отримати текст із notepad
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 ```
-Будь ласка, надішліть скриншот або текст, який потрібно перекласти.
+Будь ласка, надішліть зображення або текст, який потрібно перекласти.
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
@@ -743,17 +745,17 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-У системах на основі BIOS MBR у секторі 0 містить master boot code і таблицю розділів. Microsoft зазначає, що `bootsect /mbr` оновлює код, не змінюючи цю таблицю.<sup>[[7]](#references)</sup>
+У системах на базі BIOS MBR у секторі 0 містить головний завантажувальний код і таблицю розділів. Microsoft зазначає, що `bootsect /mbr` оновлює код, не змінюючи цю таблицю.<sup>[[7]](#references)</sup>
 
 ## References
 
 - [1] [Volatility, моя власна шпаргалка (частина 1): ідентифікація образу](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
-- [2] [Пошук Kernel Debugger Block](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
+- [2] [Пошук блоку налагодження kernel](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
 - [3] [Ключі Windows UserAssist](https://www.aldeid.com/wiki/Windows-userassist-keys)
-- [4] [Master File Table (локальні файлові системи) - Win32 apps](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
-- [5] [Комп'ютер на основі UEFI, захисний MBR: що це таке? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
+- [4] [Master File Table (локальні файлові системи) — програми Win32](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
+- [5] [ПК на базі UEFI, захисний MBR: що це таке? — Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
 - [6] [Посібник: plugins Volatility для аналізу malware](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 - [7] [Параметри командного рядка Bootsect](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/bootsect-command-line-options?view=windows-11)
-- [8] [Посібник - plugins Volatility і аналіз malware](https://tomchop.me/posts/volatility-plugin-malware-analysis/)
+- [8] [Посібник — plugins Volatility і аналіз malware](https://tomchop.me/posts/volatility-plugin-malware-analysis/)
 - [9] [README Volatility 3](https://github.com/volatilityfoundation/volatility3/blob/develop/README.md)
 {{#include ../../../banners/hacktricks-training.md}}

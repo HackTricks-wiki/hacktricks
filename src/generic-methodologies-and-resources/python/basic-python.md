@@ -1,12 +1,14 @@
-# Базовий Python
+# Основи Python
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Основи Python
 
 ### Корисна інформація
 
 Усі наведені нижче приклади передбачають використання **Python 3**, якщо явно не зазначено інше.\
-`range()` повертає ітерований об'єкт у Python 3 (подібно до `xrange()` у Python 2).\
-Різниця між **кортежем** і **списком** полягає в тому, що **позиція** значення в кортежі зазвичай надає йому певного значення, тоді як список зазвичай є просто впорядкованою послідовністю значень.
+`range()` повертає ітерований об'єкт у Python 3 (аналогічно `xrange()` у Python 2).\
+Відмінність між **кортежем** і **списком** полягає в тому, що **позиція** значення в кортежі зазвичай надає йому певного значення, тоді як список зазвичай є лише впорядкованою послідовністю значень.
 
 ### Основні операції
 
@@ -77,7 +79,7 @@ for letter in "hola":
 ```
 ### Байти, hex і кодування
 
-Це дуже поширено в exploit-dev, reversing і CTFs:
+Це дуже поширено в exploit-dev, reversing і CTF:
 ```python
 b"ABC".hex() == "414243"
 bytes.fromhex("414243") == b"ABC"
@@ -91,11 +93,11 @@ b"admin".decode() == "admin"
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
-`(4,)` = одиночний кортеж\
+`(4,)` = singleton\
 `d = ()` порожній кортеж\
-`d += (4,)` --> add into a tuple\
-`# t1[1] = 'new value'` --> tuples are immutable\
-`list(t2) == [5, 6]` --> from tuple to list
+`d += (4,)` --> додати до кортежу\
+`# t1[1] = 'new value'` --> кортежі незмінні\
+`list(t2) == [5, 6]` --> з кортежу до списку
 
 ### Список (масив)
 
@@ -104,7 +106,7 @@ b"admin".decode() == "admin"
 `b = [4, 5]`\
 `a + b == [1, 2, 3, 4, 5]`\
 `b.append(6)` --> `b == [4, 5, 6]`\
-`tuple(a) == (1, 2, 3)` --> from list to tuple
+`tuple(a) == (1, 2, 3)` --> зі списку до кортежу
 
 ### Словник
 ```python
@@ -124,23 +126,23 @@ month_numbers.get('key', 0)  # default value if key does not exist
 У множинах немає повторень.\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
-`myset.add('a')` --> no change\
+`myset.add('a')` --> без змін\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> if present, remove it; if not, nothing\
-`myset.remove(10)` --> if not present, raises exception\
+`myset.discard(10)` --> якщо присутній, видалити його; якщо ні — нічого не робити\
+`myset.remove(10)` --> якщо відсутній, викликає виняток\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
 `myset.difference(myset2)`\
 `myset.symmetric_difference(myset2)`\
-`myset.pop()` --> get an arbitrary element and remove it\
+`myset.pop()` --> отримати довільний елемент і видалити його\
 `myset.intersection_update(myset2)`\
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
 
 ### Класи
 
-Метод у `__lt__` використовуватиметься `sort()` / `sorted()` для порівняння об'єктів.
+Метод у `__lt__` використовуватиметься `sort()` / `sorted()` для порівняння об’єктів.
 ```python
 import datetime
 
@@ -176,9 +178,9 @@ return self.id_num < other.id_num
 ```
 ### map, zip, filter, lambda, sorted та однорядкові вирази
 
-У **Python 3** `map()` і `filter()` повертають ітератори, тому перетворіть їх за допомогою `list()`, якщо хочете надрукувати всі значення одночасно.
+У **Python 3** `map()` і `filter()` повертають ітератори, тому перетворіть їх за допомогою `list()`, якщо хочете вивести всі значення одночасно.
 
-**Map** схожий на `[f(x) for x in iterable]`:
+**Map** працює як `[f(x) for x in iterable]`:
 ```python
 list(map(tuple, [[1, 2, 3], [4, 5]]))
 # [(1, 2, 3), (4, 5)]
@@ -186,14 +188,14 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-**zip** зупиняється, коли завершується коротший ітерований об’єкт:
+**zip** зупиняється, коли завершується коротший ітерований об'єкт:
 ```python
 for f, b in zip(foo, bar):
 print(f, b)
 ```
 **Lambda** використовується для визначення функції:\
-`(lambda x, y: x + y)(5, 3) == 8` --> use lambda as a simple function\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> use lambda to sort\
+`(lambda x, y: x + y)(5, 3) == 8` --> використання lambda як простої функції\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> використання lambda для сортування\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
 ```python
@@ -242,7 +244,7 @@ assert len(grades) == len(weights), 'wrong number of grades'
 ```
 ### Генератори, yield
 
-Генератор замість того, щоб повертати все одразу, **yield**-ить значення одне за одним. Це дуже корисно для величезних wordlist, bruteforcer-ів або великих відповідей.
+Генератор замість того, щоб повертати все одразу, **yield** значення по одному. Це дуже корисно для величезних wordlists, bruteforcers або великих відповідей.
 ```python
 def my_gen(n):
 yield n
@@ -265,13 +267,13 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 `.` --> будь-який символ, крім символу нового рядка\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> цифра\
-`\s` --> пробільний символ `[ \n\r\t\f]`\
-`\S` --> непробільний символ\
+`\s` --> символ пробілу `[ \n\r\t\f]`\
+`\S` --> символ, який не є пробілом\
 `^` --> починається з\
 `$` --> закінчується на\
 `+` --> один або більше\
 `*` --> 0 або більше\
-`?` --> 0 або 1 входжень
+`?` --> 0 або 1 входження
 
 **Параметри:**\
 `re.search(pat, string, re.IGNORECASE)`\
@@ -295,7 +297,7 @@ list(product([1, 2, 3], [3, 4]))
 list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
-**перестановки**\
+**permutations**\
 `from itertools import permutations` --> кожне можливе розташування
 ```python
 list(permutations(['1', '2', '3']))
@@ -314,7 +316,7 @@ list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> доступний у Python 3.12+, корисний для розбиття великих списків кандидатів для bruteforce або файлів IOC
+`from itertools import batched` --> доступний у Python 3.12+, корисний для розбиття великих списків кандидатів для bruteforce або файлів IOC на частини
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
@@ -349,7 +351,7 @@ Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### Корисні помічники стандартної бібліотеки для pentesting
+### Корисні допоміжні засоби стандартної бібліотеки для pentesting
 
 **Обхід файлової системи за допомогою `pathlib`** (`Path.walk()` доступний у Python 3.12+; у старіших інтерпретаторах використовуйте `os.walk()`):
 ```python
@@ -374,7 +376,7 @@ check=True,
 )
 print(cp.stdout)
 ```
-Якщо ви **мусите** створити команду shell, спочатку візьміть у лапки кожен токен, контрольований атакувальником:
+Якщо ви **мусите** створити команду shell, спочатку візьміть у лапки кожен токен, контрольований зловмисником:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
@@ -389,11 +391,11 @@ out = Path(tmp) / "loot.txt"
 out.write_text("secret\n")
 print(out.read_text())
 ```
-Для автоматизації HTTP перевірте [цю іншу сторінку про вебзапити Python](web-requests.md).
+Для автоматизації HTTP дивіться [цю іншу сторінку про вебзапити Python](web-requests.md).
 
-### Важливі нюанси видобування архівів (важливо для інструментів і парсерів файлів)
+### Важливі нюанси розпакування архівів (для інструментів і парсерів файлів)
 
-Починаючи з **Python 3.14**, `tarfile.extract()` / `extractall()` за замовчуванням використовують безпечніший фільтр `data`. У старіших версіях Python слід явно вказувати його під час обробки архівів, контрольованих зловмисником.<sup>[[1]](#references)[[2]](#references)</sup>
+Починаючи з **Python 3.14**, `tarfile.extract()` / `extractall()` за замовчуванням використовують безпечніший фільтр `data`. У старіших версіях Python слід явно встановлювати його під час роботи з архівами, контрольованими зловмисником.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 import tarfile
 import tempfile
@@ -402,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-Навіть із `filter="data"` розпаковуйте ненадійні архіви в новий тимчасовий каталог і перевіряйте записані дані, перш ніж переміщувати файли кудись важливе.
+Навіть із `filter="data"` розпаковуйте ненадійні архіви в новий тимчасовий каталог і перевіряйте записані дані, перш ніж переміщувати файли кудись важливіше.
 
-`zipfile.Path` відрізняється: він **не санітизує імена файлів** автоматично, тому перевіряйте шляхи перед розпакуванням контрольованих зловмисником елементів ZIP:
+`zipfile.Path` відрізняється: він **не санітизує імена файлів** автоматично, тому перевіряйте шляхи перед розпаковуванням контрольованих зловмисником членів ZIP:
 ```python
 import os
 import zipfile
@@ -417,15 +419,15 @@ if os.path.commonpath([base, final_path]) != base:
 raise ValueError(f"Path traversal inside ZIP: {info.filename}")
 zf.extract(info, base)
 ```
-### Небезпечні primitives, які варто пам’ятати
+### Небезпечні примітиви, про які слід пам’ятати
 
-- `eval()` / `exec()` — це **не** sandboxes.
-- `ast.literal_eval()` **не** виконує код Python, але ним усе одно можна зловживати для denial of service через вичерпання пам’яті / CPU за допомогою контрольованих атакувальником вхідних даних.
-- `pickle.loads()` — **небезпечно**; ніколи не виконуйте unpickle байтів, контрольованих атакувальником.
-- Для глибших offensive tricks див. [Обхід Python sandboxes](bypass-python-sandboxes/README.md), [Внутрішні read gadgets Python](python-internal-read-gadgets.md) та [Python deserializations](../../pentesting-web/deserialization/README.md).
+- `eval()` / `exec()` **не є** sandboxes.
+- `ast.literal_eval()` **не виконує** код Python, але його все одно можна використати для спричинення відмови в обслуговуванні через пам’ять / CPU за допомогою даних, контрольованих атакувальником.
+- `pickle.loads()` **не є безпечним**; ніколи не виконуйте unpickle байтів, контрольованих атакувальником.
+- Щоб дізнатися більше про offensive tricks, перегляньте [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) і [Python deserializations](../../pentesting-web/deserialization/README.md).
 
 ## References
 
-- [1] [Документація Python tarfile](https://docs.python.org/3/library/tarfile.html)
+- [1] [Документація Python для tarfile](https://docs.python.org/3/library/tarfile.html)
 - [2] [PEP 706 – Фільтр для tarfile.extractall()](https://peps.python.org/pep-0706/)
 {{#include ../../banners/hacktricks-training.md}}

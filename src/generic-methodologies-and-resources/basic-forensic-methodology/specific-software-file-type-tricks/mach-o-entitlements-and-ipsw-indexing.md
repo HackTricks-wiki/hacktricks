@@ -1,19 +1,21 @@
-# Витягування Entitlements із Mach-O та індексування IPSW
+# Витягування Entitlements Mach-O та індексація IPSW
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## Огляд
 
-На цій сторінці описано, як програмно витягувати entitlements із Mach-O бінарних файлів, проходячи через LC_CODE_SIGNATURE і аналізуючи code signing SuperBlob, а також як масштабувати цей процес для Apple IPSW firmware, монту​​ючи та індексуючи їхній вміст для forensic-пошуку й порівняння.
+На цій сторінці описано, як програмно витягувати entitlements із Mach-O-бінарних файлів шляхом обходу LC_CODE_SIGNATURE і аналізу code signing SuperBlob, а також як масштабувати цей процес для прошивок Apple IPSW, монтувати й індексувати їхній вміст для forensic-пошуку та diff.
 
-Якщо вам потрібно повторити формат Mach-O та code signing, див. також: macOS code signing і внутрішню будову SuperBlob.
-- Ознайомтеся з деталями macOS code signing (SuperBlob, Code Directory, special slots): [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
-- Ознайомтеся із загальними структурами Mach-O та load commands: [Universal binaries & Mach-O Format](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
+Якщо вам потрібно освіжити знання про формат Mach-O і code signing, також дивіться: внутрішня будова macOS code signing і SuperBlob.
+- Перегляньте деталі macOS code signing (SuperBlob, Code Directory, спеціальні слоти): [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
+- Перегляньте загальні структури Mach-O та load commands: [Universal binaries & Mach-O Format](../../../macos-hardening/macos-security-and-privilege-escalation/macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)
 
 
 ## Entitlements у Mach-O: де вони зберігаються
 
-Entitlements зберігаються всередині даних code signature, на які посилається load command LC_CODE_SIGNATURE, і розміщуються в сегменті __LINKEDIT. Підпис є CS_SuperBlob, що містить кілька blob-об’єктів (code directory, requirements, entitlements, CMS тощо). Entitlements blob є CS_GenericBlob, дані якого являють собою серіалізований property list, що зіставляє ключі entitlements зі значеннями; парсери мають підтримувати кодування як XML plist, так і binary plist.<sup>[[1]](#references)[[6]](#references)</sup>
+Entitlements зберігаються всередині даних code signature, на які посилається load command LC_CODE_SIGNATURE, і розміщуються в сегменті __LINKEDIT. Підпис є CS_SuperBlob, що містить кілька blob-структур (code directory, requirements, entitlements, CMS тощо). Entitlements blob є CS_GenericBlob, дані якого являють собою серіалізований property list, що зіставляє ключі entitlements зі значеннями; парсери мають підтримувати як XML-, так і binary plist-кодування.<sup>[[1]](#references)[[6]](#references)</sup>
 
-Ключові структури (із xnu):<sup>[[6]](#references)[[7]](#references)</sup>
+Ключові структури (з xnu):<sup>[[6]](#references)[[7]](#references)</sup>
 ```c
 /* mach-o/loader.h */
 struct mach_header_64 {
@@ -62,29 +64,29 @@ char data[];      /* serialized plist containing entitlements */
 Важливі константи із заголовків Apple включають:<sup>[[6]](#references)[[7]](#references)</sup>
 - LC_CODE_SIGNATURE cmd = 0x1d
 - CS SuperBlob magic = 0xfade0cc0
-- Entitlements index slot (`CSSLOT_ENTITLEMENTS`) = 5; blob у цьому slot має magic `CSMAGIC_EMBEDDED_ENTITLEMENTS` = 0xfade7171
+- Entitlements index slot (`CSSLOT_ENTITLEMENTS`) = 5; blob у цьому слоті має magic `CSMAGIC_EMBEDDED_ENTITLEMENTS` = 0xfade7171
 - DER entitlements використовують slot `CSSLOT_DER_ENTITLEMENTS` = 7 і blob magic `CSMAGIC_EMBEDDED_DER_ENTITLEMENTS` = 0xfade7172
 
-Примітка: Multi-arch (fat) бінарники містять кілька Mach-O slices. Потрібно вибрати slice для потрібної архітектури, а потім пройтися його load commands.
+Примітка: Multi-arch (fat) binaries містять кілька Mach-O slices. Потрібно вибрати slice для потрібної архітектури, а потім пройтися його load commands.
 
 
 ## Кроки extraction (generic, достатньо lossless)
 
-1) Розібрати Mach-O header; виконати ітерацію по `ncmds` записах load_command.
-2) Знайти LC_CODE_SIGNATURE; прочитати `linkedit_data_command.dataoff/datasize`, щоб відобразити Code Signing SuperBlob, розміщений у __LINKEDIT.
-3) Перевірити, що `CS_SuperBlob.magic == 0xfade0cc0`; виконати ітерацію по `count` записах CS_BlobIndex.
-4) Знайти `index.type == CSSLOT_ENTITLEMENTS` (5), потім перевірити, що вказаний `CS_GenericBlob` має magic `CSMAGIC_EMBEDDED_ENTITLEMENTS` (0xfade7171). Розібрати його data як property list, щоб отримати key/value entitlements.<sup>[[1]](#references)[[6]](#references)</sup>
+1) Розібрати Mach-O header; пройти `ncmds` записів load_command.
+2) Знайти LC_CODE_SIGNATURE; зчитати `linkedit_data_command.dataoff/datasize`, щоб відобразити Code Signing SuperBlob, розміщений у __LINKEDIT.
+3) Перевірити, що `CS_SuperBlob.magic == 0xfade0cc0`; пройти `count` записів CS_BlobIndex.
+4) Знайти `index.type == CSSLOT_ENTITLEMENTS` (5), потім перевірити, що вказаний `CS_GenericBlob` має magic `CSMAGIC_EMBEDDED_ENTITLEMENTS` (0xfade7171). Розібрати його дані як property list, щоб отримати key/value entitlements.<sup>[[1]](#references)[[6]](#references)</sup>
 
 Примітки щодо реалізації:
-- Структури code signature використовують big-endian поля; під час parsing на little-endian hosts потрібно поміняти порядок байтів.
-- `GenericBlob` entitlements містить serialized plist; стандартні plist libraries можуть обробляти її XML- або binary-представлення.
-- Деякі iOS бінарники можуть містити DER entitlements; XNU відкриває окремий тип DER blob, а представлення або slots entitlements можуть відрізнятися залежно від platforms і versions, тому за потреби перевіряйте стандартні та DER entitlements повторно.<sup>[[6]](#references)</sup>
-- Для fat бінарників використовуйте fat headers (FAT_MAGIC/FAT_MAGIC_64), щоб знайти правильний slice та offset перед проходженням Mach-O load commands.
+- Структури code signature використовують big-endian поля; під час parsing на little-endian hosts потрібно змінювати порядок байтів.
+- `GenericBlob` entitlements містить serialized plist; стандартні plist libraries можуть обробляти його XML- або binary-представлення.
+- Деякі iOS binaries можуть містити DER entitlements; XNU надає окремий DER blob type, а представлення або slots entitlements можуть відрізнятися залежно від platforms і versions, тому за потреби слід перехресно перевіряти standard і DER entitlements.<sup>[[6]](#references)</sup>
+- Для fat binaries використовуйте fat headers (FAT_MAGIC/FAT_MAGIC_64), щоб знайти правильний slice та offset перед проходженням Mach-O load commands.
 
 
-## Мінімальний parsing outline (Python)
+## Мінімальна outline parsing (Python)
 
-Нижче наведено компактний outline, що демонструє control flow для пошуку та декодування entitlements. Для стислості він навмисно не містить надійних bounds checks і повної підтримки fat бінарників.<sup>[[6]](#references)[[7]](#references)</sup>
+Нижче наведено compact outline, що показує control flow для пошуку та decoding entitlements. Для стислості навмисно пропущено robust bounds checks і повну підтримку fat binaries.<sup>[[6]](#references)[[7]](#references)</sup>
 ```python
 import plistlib, struct
 
@@ -140,26 +142,26 @@ return plistlib.loads(data)
 return None
 ```
 Поради щодо використання:
-- Щоб обробляти fat binaries, спочатку прочитайте struct fat_header/fat_arch, виберіть потрібний architecture slice, а потім передайте subrange до parse_entitlements.
-- У macOS можна перевірити результати за допомогою: codesign -d --entitlements :- /path/to/binary
+- Щоб обробляти fat binaries, спочатку прочитайте `struct fat_header/fat_arch`, виберіть потрібний architecture slice, а потім передайте піддіапазон до `parse_entitlements`.
+- У macOS результати можна перевірити за допомогою: `codesign -d --entitlements :- /path/to/binary`
 
 
 ## Приклади результатів
 
-У вихідній статті показано такі entitlements у бінарному файлі `launchd` для macOS 14.0:<sup>[[1]](#references)</sup>
+У вихідній статті показано такі entitlements у бінарному файлі `launchd` macOS 14.0:<sup>[[1]](#references)</sup>
 - com.apple.security.network.server = true
 - com.apple.rootless.storage.early_boot_mount = true
 - com.apple.private.kernel.system-override = true
 - com.apple.private.pmap.load-trust-cache = ["cryptex1.boot.os", "cryptex1.boot.app", "cryptex1.safari-downlevel"]
 
-Пошук цих entitlements у великому масштабі по образах firmware надзвичайно цінний для mapping attack surface і порівняння відмінностей між релізами та пристроями.
+Пошук цих entitlements у масштабі firmware images є надзвичайно цінним для mapping attack surface і порівняння відмінностей між релізами та пристроями.
 
 
-## Масштабування між IPSW (монтування та індексація)
+## Масштабування на IPSWs (монтування та індексація)
 
-Щоб перелічувати executables і видобувати entitlements у великому масштабі без зберігання повних образів:<sup>[[1]](#references)</sup>
+Щоб у масштабі перелічувати виконувані файли й видобувати entitlements без зберігання повних образів:<sup>[[1]](#references)</sup>
 
-- Використовуйте ipsw tool від @blacktop для завантаження та монтування файлових систем firmware. Монтування використовує apfs-fuse, тому можна переглядати APFS volumes без повного видобування.<sup>[[1]](#references)[[3]](#references)</sup>
+- Використовуйте інструмент ipsw від @blacktop для завантаження та монтування firmware filesystems. Монтування використовує apfs-fuse, тому можна переглядати томи APFS без повного extraction.<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 # Download latest IPSW for iPhone11,2 (iPhone XS)
 ipsw download ipsw -y --device iPhone11,2 --latest
@@ -167,12 +169,12 @@ ipsw download ipsw -y --device iPhone11,2 --latest
 # Mount IPSW filesystem (uses underlying apfs-fuse)
 ipsw mount fs <IPSW_FILE>
 ```
-- Пройдіть змонтовані томи, щоб знайти файли Mach-O (перевірте magic та/або використайте `file`/`otool`), після чого проаналізуйте entitlements та імпортовані frameworks.
-- Збережіть нормалізоване представлення в реляційній базі даних, щоб уникнути лінійного зростання обсягу даних під час роботи з тисячами IPSW:
+- Обійти змонтовані томи, щоб знайти Mach-O-файли (перевірити magic та/або використати file/otool), а потім проаналізувати entitlements та імпортовані frameworks.
+- Зберігати нормалізоване представлення в реляційній database, щоб уникнути лінійного зростання обсягу даних для тисяч IPSW:
 - executables, operating_system_versions, entitlements, frameworks
 - зв’язки багато-до-багатьох: executable↔OS version, executable↔entitlement, executable↔framework
 
-Приклад запиту для перелічення всіх версій ОС, що містять виконуваний файл із заданою назвою (адаптовано з appledb_rs):<sup>[[1]](#references)</sup>
+Приклад query для переліку всіх версій OS, що містять executable із заданою назвою (адаптовано з appledb_rs):<sup>[[1]](#references)</sup>
 ```sql
 SELECT osv.version AS "Versions"
 FROM device d
@@ -181,28 +183,28 @@ LEFT JOIN executable_operating_system_version eosv ON eosv.operating_system_vers
 LEFT JOIN executable e ON e.id = eosv.executable_id
 WHERE e.name = 'launchd';
 ```
-Нотатки щодо переносимості DB (якщо ви реалізуєте власний indexer):<sup>[[1]](#references)</sup>
+Нотатки щодо portability DB (якщо ви реалізуєте власний indexer):<sup>[[1]](#references)</sup>
 - Використовуйте ORM/abstraction (наприклад, SeaORM), щоб код не залежав від DB (SQLite/PostgreSQL).
-- SQLite дозволяє `AUTOINCREMENT` лише для `INTEGER PRIMARY KEY`; цей ключ є псевдонімом для знакового 64-бітного ROWID, хоча SQLite може використовувати на диску цілі числа меншої розрядності. Якщо згенеровані SeaORM Rust entities потребують ідентифікатори i64, генеруйте entities як i32 і конвертуйте типи на межі.<sup>[[1]](#references)[[8]](#references)[[9]](#references)</sup>
+- SQLite дозволяє `AUTOINCREMENT` лише для `INTEGER PRIMARY KEY`; цей ключ є псевдонімом для знакового 64-бітного ROWID, хоча SQLite може використовувати менші розміри integer на диску. Якщо згенеровані SeaORM Rust entities потребують ID типу i64, генеруйте entities як i32 і конвертуйте типи на межі системи.<sup>[[1]](#references)[[8]](#references)[[9]](#references)</sup>
 
 
-## Open-source інструменти та references для пошуку entitlements
+## Open-source tooling і references для пошуку entitlements
 
-- Монтування/завантаження Firmware: https://github.com/blacktop/ipsw.<sup>[[3]](#references)</sup>
+- Монтування/завантаження firmware: https://github.com/blacktop/ipsw.<sup>[[3]](#references)</sup>
 - Бази даних entitlements і references:
 - DB entitlements Jonathan Levin: https://newosxbook.com/ent.php.<sup>[[4]](#references)</sup>
 - entdb: https://github.com/ChiChou/entdb.<sup>[[5]](#references)</sup>
-- Indexer для великомасштабного використання (Rust, self-hosted Web UI + OpenAPI): https://github.com/synacktiv/appledb_rs.<sup>[[2]](#references)</sup>
-- Apple headers для структур і констант:
+- Масштабний indexer (Rust, self-hosted Web UI + OpenAPI): https://github.com/synacktiv/appledb_rs.<sup>[[2]](#references)</sup>
+- Apple headers для структур і constants:
 - loader.h (Mach-O headers, load commands)
 - cs_blobs.h (SuperBlob, GenericBlob, CodeDirectory)
 
-Докладніше про внутрішню будову code signing (Code Directory, special slots, DER entitlements) див. у: [Code signing у macOS](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
+Докладніше про internals code signing (Code Directory, special slots, DER entitlements) див. [macOS Code Signing](../../../macos-hardening/macos-security-and-privilege-escalation/macos-security-protections/macos-code-signing.md)
 
 
 ## References
 
-- [1] [Corentin Liaud (Synacktiv), appledb_rs: інструмент підтримки досліджень для Apple platforms](https://www.synacktiv.com/publications/appledbrs-un-outil-daide-a-la-recherche-sur-plateformes-apple.html)
+- [1] [Corentin Liaud (Synacktiv), appledb_rs: інструмент підтримки досліджень для платформ Apple](https://www.synacktiv.com/publications/appledbrs-un-outil-daide-a-la-recherche-sur-plateformes-apple.html)
 - [2] [synacktiv/appledb_rs](https://github.com/synacktiv/appledb_rs)
 - [3] [blacktop/ipsw](https://github.com/blacktop/ipsw)
 - [4] [DB entitlements Jonathan Levin](https://newosxbook.com/ent.php)
@@ -210,5 +212,5 @@ WHERE e.name = 'launchd';
 - [6] [XNU cs_blobs.h](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
 - [7] [XNU mach-o/loader.h](https://github.com/apple-oss-distributions/xnu/blob/main/EXTERNAL_HEADERS/mach-o/loader.h)
 - [8] [Типи даних SQLite](https://sqlite.org/datatype3.html)
-- [9] [SQLite Autoincrement](https://sqlite.org/autoinc.html)
+- [9] [Автоматичне збільшення SQLite](https://sqlite.org/autoinc.html)
 {{#include ../../../banners/hacktricks-training.md}}

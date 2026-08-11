@@ -1,8 +1,10 @@
 # Class Pollution (Python's Prototype Pollution)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Базовий приклад
 
-Зміна `__qualname__` через посилання екземпляра на його клас оновлює клас і його змінювані базові класи.<sup>[[1]](#references)</sup>
+Зміна `__qualname__` через посилання на клас екземпляра оновлює клас і його змінювані базові класи.<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -65,9 +67,9 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>Створення значення властивості класу за замовчуванням для RCE (subprocess)</summary>
+<summary>Створення стандартного значення властивості класу для RCE (subprocess)</summary>
 
-Спільний базовий клас може надавати атрибут за замовчуванням, який використовується command gadget sibling-класу.<sup>[[1]](#references)</sup>
+Спільний базовий клас може надавати атрибут за замовчуванням, який використовується командним gadget дочірнього класу.<sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -120,7 +122,7 @@ print(system_admin_emp.execute_command())
 
 <summary>Забруднення інших класів і глобальних змінних через <code>globals</code></summary>
 
-Відображення `__globals__` функції надає доступ до простору імен модуля, доступного з методу, визначеного в цьому модулі.<sup>[[1]](#references)[[4]](#references)</sup>
+Відображення `__globals__` функції відкриває простір імен модуля, доступний із методу, визначеного в цьому модулі.<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -152,9 +154,9 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Довільне виконання subprocess</summary>
+<summary>Довільне виконання підпроцесів</summary>
 
-У Windows `Popen(..., shell=True)` використовує змінну середовища `COMSPEC` як оболонку за замовчуванням, тому цей gadget демонструє перенаправлення команд через змінну середовища.<sup>[[1]](#references)[[5]](#references)</sup>
+У Windows `Popen(..., shell=True)` використовує змінну середовища `COMSPEC` як shell за замовчуванням, тому цей gadget демонструє перенаправлення команд на основі змінних середовища.<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -186,9 +188,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Перезапис <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Перезаписування <strong><code>__kwdefaults__</code></strong></summary>
 
-Python документує `__kwdefaults__` як відображення значень за замовчуванням для параметрів, доступних лише за ключовими словами, які йдуть після `*` або `*args` у визначенні функції.<sup>[[4]](#references)</sup> Наведений нижче gadget перезаписує це відображення через polluted шлях до функції.<sup>[[1]](#references)</sup>
+Python описує `__kwdefaults__` як відображення значень за замовчуванням для параметрів, доступних лише за ключовим словом, які йдуть після `*` або `*args` у визначенні функції.<sup>[[4]](#references)</sup> Наведений нижче gadget перезаписує це відображення через забруднений шлях функції.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -229,24 +231,24 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Перезапис секрету Flask у різних файлах</summary>
+<summary>Перезапис Flask secret між файлами</summary>
 
-Якщо клас забрудненого об'єкта знаходиться в модулі, відмінному від модуля точки входу застосунку, його методи `__globals__` спочатку відкривають простір імен модуля класу. Потім обхід через loader і `sys.modules.__main__` може досягти модуля точки входу та його об'єкта Flask `app`.<sup>[[1]](#references)[[2]](#references)</sup>
+Якщо клас polluted object розташований у модулі, відмінному від модуля entry-point застосунку, його методи спочатку мають доступ до namespace модуля класу через `__globals__`. Потім traversal через loader і `sys.modules.__main__` може дістатися модуля entry-point та його Flask `app` object.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Flask використовує `app.secret_key` для підпису session cookie; знання цього ключа дозволяє зловмиснику створювати дійсні дані session.<sup>[[6]](#references)</sup>
+Flask використовує `app.secret_key` для підпису cookie сесії; знаючи цей ключ, зловмисник може створювати дійсні дані сесії.<sup>[[6]](#references)</sup>
 
-В оригінальному writeup продемонстровано такий шлях до отримання доступу до `app.secret_key`; CTFtime також містить копію writeup.<sup>[[2]](#references)[[3]](#references)</sup>
+В оригінальному writeup продемонстровано такий шлях до `app.secret_key`; CTFtime також містить копію writeup.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Зміна ключа може дозволити підписувати підроблені session cookies і спричинити ескалацію привілеїв; див. [сторінку інструментів для Flask session](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
+Зміна ключа може дозволити підписувати підмінені session cookies і сприяти підвищенню привілеїв; див. [сторінку Flask session tooling](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
 
 </details>
 
-Також перегляньте наступну сторінку з додатковими read-only gadgets:
+Також перегляньте наступну сторінку, щоб ознайомитися з іншими read-only gadgets:
 
 
 {{#ref}}
@@ -256,9 +258,9 @@ python-internal-read-gadgets.md
 ## References
 
 - [1] [Prototype Pollution у Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
-- [2] [Розбір завдання task manager на idekCTF 2022 (оригінал)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
-- [3] [CTFtime — розбір завдання task manager на idekCTF 2022](https://ctftime.org/writeup/36082)
+- [2] [writeup завдання task manager на idekCTF 2022 (оригінал)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
+- [3] [CTFtime — writeup task manager на idekCTF 2022](https://ctftime.org/writeup/36082)
 - [4] [inspect — перевірка об'єктів у реальному часі](https://docs.python.org/3/library/inspect.html)
-- [5] [subprocess — керування підпроцесами](https://docs.python.org/3/library/subprocess.html)
+- [5] [subprocess — керування subprocess](https://docs.python.org/3/library/subprocess.html)
 - [6] [Quickstart — документація Flask](https://flask.palletsprojects.com/en/stable/quickstart/)
 {{#include ../../banners/hacktricks-training.md}}

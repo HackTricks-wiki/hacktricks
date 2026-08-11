@@ -1,8 +1,10 @@
-# Веб-запити
+# Вебзапити
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Python Requests
 
-У цих прикладах використовуються документовані аргументи запитів Requests, властивості відповідей, кортежі multipart-файлів і сесії.<sup>[[1]](#references)</sup> У прикладах із `verify=False` вимкнено перевірку TLS-сертифіката; їх слід використовувати лише під час контрольованого тестування.<sup>[[1]](#references)</sup>
+У цих прикладах використовуються задокументовані аргументи запитів Requests, властивості відповідей, кортежі multipart-файлів і сесії.<sup>[[1]](#references)</sup> У прикладах із `verify=False` вимкнено перевірку сертифікатів TLS; їх слід обмежити контрольованим тестуванням.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,7 +78,7 @@ return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 ## Python cmd для експлуатації RCE
 
-Цикл команд є підкласом Python's `Cmd`; його метод `default` обробляє нерозпізнані префікси команд, `cmdloop` розподіляє рядки вводу, а `re.DOTALL` дає змогу шаблону вилучення охоплювати кілька рядків.<sup>[[2]](#references)[[3]](#references)</sup>
+Цикл команд є підкласом Python's `Cmd`; його метод `default` обробляє нерозпізнані префікси команд, `cmdloop` розподіляє рядки введення, а `re.DOTALL` дає змогу шаблону вилучення охоплювати переноси рядків.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
