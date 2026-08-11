@@ -1,7 +1,5 @@
 # Runtime API And Daemon Exposure
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 ## Overview
 
 Many real container compromises do not begin with a namespace escape at all. They begin with access to the runtime control plane. If a workload can talk to `dockerd`, `containerd`, CRI-O, Podman, or kubelet through a mounted Unix socket or an exposed TCP listener, the attacker may be able to request a new container with better privileges, mount the host filesystem, join host namespaces, or retrieve sensitive node information. In those cases, the runtime API is the real security boundary, and compromising it is functionally close to compromising the host.
@@ -199,7 +197,6 @@ If the kubelet or API-server proxy path authorizes `exec`, a WebSocket-capable c
 The goal of these checks is to answer whether the container can reach any management plane that should have remained outside the trust boundary.
 
 ```bash
-find / -maxdepth 3 \( -name docker.sock -o -name containerd.sock -o -name crio.sock -o -name podman.sock -o -name kubelet.sock \) 2>/dev/null
 mount | grep -E '/var/run|/run|docker.sock|containerd.sock|crio.sock|podman.sock|kubelet.sock'
 ss -lntp 2>/dev/null | grep -E ':2375|:2376'
 env | grep -E 'DOCKER_HOST|CONTAINERD_ADDRESS|CRI_CONFIG_FILE|BUILDKIT_HOST|XDG_RUNTIME_DIR'

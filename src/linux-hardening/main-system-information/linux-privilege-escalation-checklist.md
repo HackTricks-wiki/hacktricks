@@ -1,7 +1,5 @@
 # Linux Privilege Escalation Checklist
 
-{{#include ../../banners/hacktricks-training.md}}
-
 # Checklist - Linux Privilege Escalation
 
 
@@ -96,7 +94,7 @@
 ### [SUDO and SUID commands](../linux-basics/linux-privilege-escalation/index.html#sudo-and-suid)
 
 - [ ] Can you execute **any command with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] If `sudo -l` allows `sudoedit`, check for **sudoedit argument injection** (CVE-2023-22809) via `SUDO_EDITOR`/`VISUAL`/`EDITOR` to edit arbitrary files on vulnerable versions (`sudo -V` < 1.9.12p2). Example: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`<sup>[[1]](#references)</sup>
+- [ ] If `sudo -l` allows `sudoedit`, check for **sudoedit argument injection** (CVE-2023-22809) via `SUDO_EDITOR`/`VISUAL`/`EDITOR` to edit arbitrary files on vulnerable versions (`sudo -V` < 1.9.12p2). Example: `SUDO_EDITOR="vim -- /etc/sudoers" sudoedit /etc/hosts`.<sup>[[1]](#references)</sup>
 - [ ] Is any **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
 - [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](../linux-basics/linux-privilege-escalation/index.html#sudo-execution-bypassing-paths)?
 - [ ] [**Sudo/SUID binary without path indicated**](../linux-basics/linux-privilege-escalation/index.html#sudo-command-suid-binary-without-command-path)?

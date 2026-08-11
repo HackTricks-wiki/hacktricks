@@ -1,7 +1,5 @@
 # ld.so privesc exploit example
 
-{{#include ../../banners/hacktricks-training.md}}
-
 This page is a focused lab for poisoning the **system linker cache through `/etc/ld.so.conf` or `ldconfig`**. For missing-library injection, writable `RPATH`/`RUNPATH`, `LD_PRELOAD`, and other generic SUID linker abuse, see [SUID Shared Library and Linker Abuse](suid-shared-library-and-linker-abuse.md).
 
 ## Prepare the environment
@@ -71,7 +69,7 @@ Hi
 
 ### Useful triage commands
 
-When attacking a real target, verify the **exact library name** the binary needs, what the loader is **currently resolving**, and which configured paths are writable without mutating the live cache.<sup>[[1]](#references)[[2]](#references)</sup>
+When attacking a real target, verify the **exact library name** the binary needs, what the loader is **currently resolving**, and which configured paths are writable without mutating the live cache.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
 
 ```bash
 # Needed SONAME and program interpreter
@@ -99,15 +97,16 @@ A couple of useful gotchas:
 - `sudo echo ... > /etc/ld.so.conf.d/x.conf` usually **doesn't work** because
   the redirection is done by your current shell. Use
   `echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf` instead.
-- **SUID/privileged** binaries ignore `LD_LIBRARY_PATH`/`LD_PRELOAD` in
-  **secure-execution mode**, but directories coming from `/etc/ld.so.conf` are
-  still part of the trusted loader configuration, so this misconfiguration can
-  still affect privileged programs.<sup>[[1]](#references)</sup>
+- **SUID/privileged** binaries run in **secure-execution mode**: `LD_LIBRARY_PATH`
+  is ignored, while `LD_PRELOAD` is restricted (slash-containing names are
+  ignored, and only setuid-marked libraries in standard directories may be
+  preloaded). Once root runs `ldconfig`, directories listed in
+  `/etc/ld.so.conf` can enter `/etc/ld.so.cache`, so this misconfiguration can
+  still affect privileged programs.<sup>[[1]](#references)[[2]](#references)</sup>
 - `LD_DEBUG` is also ignored in secure-execution mode unless `/etc/suid-debug` exists, so collect its trace from an equivalent non-SUID run rather than expecting output from the privileged execution.<sup>[[1]](#references)</sup>
-- On newer glibc versions, the dynamic loader also exposes
-  `--list-diagnostics`, which is handy to debug cache resolution and
-  `glibc-hwcaps` subdirectory selection when a hijack doesn't behave as
-  expected.<sup>[[1]](#references)</sup>
+- On glibc 2.33 and newer, the dynamic loader also exposes
+  `--list-diagnostics`, which prints machine-readable loader diagnostics and
+  built-in search-path information when a hijack doesn't behave as expected.<sup>[[1]](#references)[[6]](#references)</sup>
 
 ### Cache and SONAME constraints
 
@@ -124,7 +123,9 @@ Prefer a target-specific library such as this example. Shadowing a common SONAME
 
 ## Exploit
 
-In this scenario we are going to suppose that **someone has created a vulnerable entry** inside a file in _/etc/ld.so.conf/_:
+In this scenario, suppose an administrator has added a vulnerable entry to a
+file under `/etc/ld.so.conf.d/` that is included by the system's
+`/etc/ld.so.conf`.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ```bash
 echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf
@@ -205,12 +206,12 @@ The current glibc hardening guidance recommends avoiding duplicate SONAMEs, non-
 ### Other misconfigurations - Same vuln
 
 In the previous example we faked a misconfiguration where an administrator **set a non-privileged folder inside a configuration file inside `/etc/ld.so.conf.d/`**.\
-But there are other misconfigurations that can cause the same vulnerability, if you have **write permissions** in some **config file** inside `/etc/ld.so.conf.d`s, in the folder `/etc/ld.so.conf.d` or in the file `/etc/ld.so.conf` you can configure the same vulnerability and exploit it.
+But there are other misconfigurations that can cause the same vulnerability: if you have **write permissions** in a loaded **config file**, can create a file in a writable `/etc/ld.so.conf.d/` directory, or can write to `/etc/ld.so.conf`, you can configure and exploit the same vulnerability.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Exploit 2
 
 **Suppose you have sudo privileges over `ldconfig`**.\
-You can indicate `ldconfig` **where to load the conf files from**, so we can take advantage of it to make `ldconfig` load arbitrary folders.<sup>[[2]](#references)</sup>\
+You can indicate `ldconfig` **which configuration file to read** with `-f`, so a file that names attacker-controlled directories can make `ldconfig` add those folders to the cache.<sup>[[2]](#references)</sup>\
 So, lets create the files and folders needed to load "/tmp":
 
 ```bash
@@ -244,4 +245,6 @@ ldd sharedvuln
 - [2] [ldconfig(8) - Linux manual page](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
 - [3] [Dynamic Linker Hardening - The GNU C Library](https://sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Hardening.html)
 - [4] [ldd(1) - Linux manual page](https://man7.org/linux/man-pages/man1/ldd.1.html)
+- [5] [readelf (GNU Binary Utilities)](https://www.sourceware.org/binutils/docs/binutils/readelf.html)
+- [6] [Dynamic Linker Diagnostics (The GNU C Library)](https://sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Diagnostics.html)
 {{#include ../../banners/hacktricks-training.md}}
