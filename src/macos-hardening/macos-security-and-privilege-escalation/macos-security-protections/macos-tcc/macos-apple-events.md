@@ -4,19 +4,22 @@
 
 ## Основна інформація
 
-**Apple Events** — це функція в macOS від Apple, яка дозволяє застосункам взаємодіяти один з одним. Вони є частиною **Apple Event Manager** — компонента операційної системи macOS, відповідального за обробку міжпроцесної взаємодії. Ця система дозволяє одному застосунку надсилати повідомлення іншому застосунку із запитом виконати певну операцію, наприклад відкрити файл, отримати дані або виконати команду.
+**Apple events** — це структуровані міжпроцесні повідомлення, які застосунки використовують для запиту операцій або даних в інших застосунків. **Apple Event Manager** надає API для створення, надсилання, отримання та обробки цих повідомлень.<sup>[[1]](#references)</sup>
 
-Основним демоном є `/System/Library/CoreServices/appleeventsd`, який реєструє сервіс `com.apple.coreservices.appleevents`.
+У macOS основним брокером є `/System/Library/CoreServices/appleeventsd`, який реєструє Mach-сервіс `com.apple.coreservices.appleevents`. Застосунки, що отримують події, реєструють Apple-event Mach-порт у цьому сервісі; відправники отримують через нього порт призначення.<sup>[[3]](#references)</sup>
 
-Кожен застосунок, який може отримувати події, реєструється в цього демона, надаючи свій Apple Event Mach Port. Коли застосунок хоче надіслати йому подію, він запитує цей порт у демона.
-
-Для надсилання подій sandboxed-застосункам потрібні такі привілеї, як `allow appleevent-send` і `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))`. Зверніть увагу, що entitlements на кшталт `com.apple.security.temporary-exception.apple-events` можуть обмежувати, хто має доступ до надсилання подій; для цього можуть знадобитися entitlements на кшталт `com.apple.private.appleevents`.
+Правила sandbox і entitlements обмежують цю комунікацію. Профіль sandbox має надавати дозвіл на надсилання Apple events і пошук Mach-сервісу брокера. Entitlement `com.apple.security.temporary-exception.apple-events` може додатково обмежити sandboxed застосунок визначеними ідентифікаторами bundle призначення.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Для журналювання інформації про надіслане повідомлення можна використовувати змінну середовища **`AEDebugSends`**:
+> Установіть змінну середовища **`AEDebugSends`**, щоб журналювати інформацію про Apple events, надіслані процесом:<sup>[[3]](#references)</sup>
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
+## References
+
+- [1] [Документація Apple для розробників - Apple Event Manager](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
+- [2] [Документація Apple для розробників - Тимчасові винятки entitlement для App Sandbox](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
+- [3] [Внутрішня будова Mac OS X та iOS - Змінні середовища для налагодження Apple events](https://www.newosxbook.com/MOXiI.pdf)
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -1,25 +1,30 @@
-# Ін'єкція Ruby Applications
+# Ін’єкція в Ruby Applications на macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## RUBYOPT
 
-Використовуючи цю env variable, можна **додати нові параметри** до **ruby** щоразу, коли його запускають. Хоча параметр **`-e`** не можна використовувати для вказання ruby-коду для виконання, можна використати параметри **`-I`** і **`-r`**, щоб додати нову папку до шляху завантаження бібліотек, а потім **вказати бібліотеку для завантаження**.
+Ruby аналізує підтримувані перемикачі командного рядка зі змінної середовища `RUBYOPT` перед запуском скрипту. Хоча Ruby відхиляє деякі перемикачі в цій змінній, `-I` може додати директорію пошуку бібліотек, а `-r` — завантажити бібліотеку. Тому процес, який запускає Ruby з контрольованими attacker-ом змінними середовища, можна змусити завантажити контрольований attacker-ом Ruby-код.<sup>[[1]](#references)</sup>
 
-Створіть бібліотеку **`inject.rb`** у **`/tmp`**:
+Створіть `/tmp/inject.rb`:
 ```ruby:inject.rb
 puts `whoami`
 ```
-Створіть будь-де Ruby-скрипт, наприклад:
+Створіть нешкідливий Ruby-скрипт, наприклад `hello.rb`:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-Потім змусьте довільний Ruby-скрипт завантажити його за допомогою:
+Запустіть його з контрольованим значенням `RUBYOPT`:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-Цікавий факт: це працює навіть із параметром **`--disable-rubyopt`**:
+Щоб вимкнути цю поведінку, передайте `--disable=rubyopt` (або `--disable-rubyopt`) **перед** назвою скрипту:<sup>[[1]](#references)</sup>
 ```bash
-RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
+RUBYOPT="-I/tmp -rinject" ruby --disable=rubyopt hello.rb
 ```
+Опція, записана після `hello.rb`, передається скрипту в `ARGV`; вона не вимикає попередню обробку Ruby змінної `RUBYOPT`.<sup>[[1]](#references)</sup>
+
+## References
+
+- [1] [Документація Ruby - параметри командного рядка Ruby](https://ruby-doc.org/3.4/ruby/options_md.html)
 {{#include ../../../banners/hacktricks-training.md}}

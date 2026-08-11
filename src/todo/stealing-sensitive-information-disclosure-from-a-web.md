@@ -1,17 +1,15 @@
-# Викрадення розкритої конфіденційної інформації з вебсайту
+# Викрадення конфіденційної інформації з вебсторінки
 
 {{#include ../banners/hacktricks-training.md}}
 
-Якщо в якийсь момент ви знайдете **вебсторінку, яка відображає конфіденційну інформацію на основі вашої сесії**: можливо, вона відображає cookies, або виводить платіжні чи CC-дані, або будь-яку іншу конфіденційну інформацію, ви можете спробувати її викрасти.\
-Тут наведено основні способи, якими можна спробувати цього досягти:
+Якщо **вебсторінка відображає конфіденційну інформацію на основі поточної сесії** — наприклад, cookies, дані облікового запису або дані кредитної картки, — зловмисник може спробувати її ексфільтрувати. Основні техніки включають:
 
-- [**CORS bypass**](../pentesting-web/cors-bypass.md): Якщо ви можете обійти CORS-заголовки, то зможете викрасти інформацію, виконуючи Ajax-запит із malicious page.
-- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html): Якщо ви знайдете XSS-вразливість на сторінці, то зможете використати її для викрадення інформації.
-- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): Якщо ви не можете інжектити XSS-теги, то все одно можете викрасти інформацію за допомогою інших звичайних HTML-тегів.
-- [**Clickjaking**](../pentesting-web/clickjacking.md): Якщо захисту від цієї атаки немає, ви можете обманом змусити користувача надіслати вам конфіденційні дані (приклад [тут](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).<sup>[[1]](#references)</sup>
+- [**CORS bypass**](../pentesting-web/cors-bypass.md): неправильна конфігурація CORS може дозволити шкідливому origin читати конфіденційні відповіді через cross-origin запити.
+- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html): XSS-вразливість у цільовому origin може дозволити інжектованому JavaScript читати та ексфільтрувати інформацію.
+- [**Dangling markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): якщо ін'єкція скриптів недоступна, інжектовані HTML-елементи все одно можуть захоплювати конфіденційний вміст.
+- [**Clickjacking**](../pentesting-web/clickjacking.md): якщо захист від фреймів відсутній, зловмисник може обманом змусити користувача взаємодіяти з конфіденційною сторінкою. Пов'язане дослідження демонструє цю техніку.<sup>[[1]](#references)</sup>
 
-## Посилання
+## References
 
-- [1] [Apache example servlet leads to Information Disclosure](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
-
+- [1] [Прикладовий servlet Apache призводить до розкриття інформації](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
 {{#include ../banners/hacktricks-training.md}}
