@@ -1,8 +1,10 @@
 # Web Requests
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Python Requests
 
-इन examples में Requests के documented request arguments, response properties, multipart file tuples और sessions का उपयोग किया गया है।<sup>[[1]](#references)</sup> `verify=False` वाले examples TLS certificate verification को disable करते हैं और इनका उपयोग केवल controlled testing तक सीमित होना चाहिए।<sup>[[1]](#references)</sup>
+इन उदाहरणों में Requests के documented request arguments, response properties, multipart file tuples और sessions का उपयोग किया गया है।<sup>[[1]](#references)</sup> `verify=False` वाले उदाहरण TLS certificate verification को disable करते हैं और इनका उपयोग केवल controlled testing तक सीमित होना चाहिए।<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,7 +78,7 @@ return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 ## RCE exploit करने के लिए Python cmd
 
-The command loop Python के `Cmd` को subclass करता है; इसका `default` method unrecognized command prefixes को handle करता है, `cmdloop` input lines को dispatch करता है, और `re.DOTALL` extraction pattern को newlines तक फैलने देता है।<sup>[[2]](#references)[[3]](#references)</sup>
+कमांड लूप Python के `Cmd` को subclass करता है; इसकी `default` method अपरिचित command prefixes को संभालती है, `cmdloop` input lines को dispatch करता है, और `re.DOTALL` extraction pattern को newlines तक फैलने देता है।<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -105,7 +107,7 @@ term.cmdloop()
 ```
 ## References
 
-- [1] [Requests Developer Interface](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — लाइन-आधारित command interpreters के लिए support](https://docs.python.org/3/library/cmd.html)
-- [3] [Python `re` — Regular expression operations](https://docs.python.org/3/library/re.html)
+- [1] [Requests डेवलपर इंटरफ़ेस](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — रेखा-उन्मुख कमांड इंटरप्रेटर्स के लिए समर्थन](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — रेगुलर एक्सप्रेशन ऑपरेशंस](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

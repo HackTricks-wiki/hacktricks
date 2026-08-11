@@ -1,5 +1,7 @@
 # Image Acquisition & Mount
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Acquisition
 
 > हमेशा **read-only** तरीके से acquire करें और **copy करते समय hash करें**। मूल device को **write-blocked** रखें और केवल verified copies पर काम करें।
@@ -13,13 +15,13 @@ sha256sum disk.img > disk.img.sha256
 ```
 ### dc3dd / dcfldd
 
-`dc3dd`, dcfldd (DoD Computer Forensics Lab dd) का सक्रिय रूप से maintained fork है।
+`dc3dd`, dcfldd (DoD Computer Forensics Lab dd) का actively maintained fork है।
 ```bash
 # Create an image and calculate multiple hashes at acquisition time
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-**raw (dd)**, **EWF (E01/EWFX)** और **AFF4** output को parallel verification के साथ support करने वाला graphical, multithreaded imager। अधिकांश Linux repos में उपलब्ध है (`apt install guymager`)।
+ग्राफिकल, multithreaded imager जो **raw (dd)**, **EWF (E01/EWFX)** और **AFF4** output को parallel verification के साथ support करता है। अधिकांश Linux repos में उपलब्ध है (`apt install guymager`)।
 ```bash
 # Start in GUI mode
 sudo guymager
@@ -28,7 +30,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-Bradley L. Schatz और Michael I. Cohen द्वारा तैयार की गई AFF4 v1.0 specification, virtualized storage, arbitrary metadata, extensible compression और hashing, तथा high-throughput operation वाले forensic container को परिभाषित करती है।<sup>[[1]](#references)</sup>
+Bradley L. Schatz और Michael I. Cohen द्वारा लिखित AFF4 v1.0 specification, virtualized storage, arbitrary metadata, extensible compression और hashing, तथा high-throughput operation वाले forensic container को परिभाषित करती है।<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -39,32 +41,32 @@ velociraptor --config server.yaml frontend collect --artifact Windows.Disk.Acqui
 ```
 ### FTK Imager (Windows & Linux)
 
-आप [FTK Imager डाउनलोड](https://accessdata.com/product-download) कर सकते हैं और **raw, E01 या AFF4** images बना सकते हैं:
+आप [FTK Imager डाउनलोड](https://accessdata.com/product-download) कर सकते हैं और **raw, E01 या AFF4** इमेज बना सकते हैं:
 ```bash
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 --description 'Laptop seizure 2025-07-22' --examiner 'AnalystName' --compress 6
 ```
-### EWF टूल्स (libewf)
+### EWF उपकरण (libewf)
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
 ### Cloud Disks की Imaging
 
-*AWS* – instance को shutdown किए बिना **forensic snapshot** बनाएँ:
+*AWS* – instance को shut down किए बिना एक **forensic snapshot** बनाएँ:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – `az snapshot create` का उपयोग करें और SAS URL में export करें।
+*Azure* – `az snapshot create` का उपयोग करें और SAS URL पर export करें।
 
 
-## Mount
+## माउंट
 
 ### सही approach चुनना
 
-1. **पूरी disk** को mount करें जब आपको original partition table (MBR/GPT) चाहिए।
-2. **एक single partition file** को mount करें जब आपको केवल एक volume चाहिए।
-3. Image attachments को read-only रखें (उदाहरण के लिए, qemu-nbd का `--read-only`)।<sup>[[2]](#references)</sup> Filesystems को read-only (`-o ro`) mount करें।<sup>[[3]](#references)</sup> **Copies** पर काम करें।
+1. **पूरी disk** को माउंट करें, जब आपको original partition table (MBR/GPT) चाहिए।
+2. **एकल partition file** को माउंट करें, जब आपको केवल एक volume चाहिए।
+3. Image attachments को read-only रखें (उदाहरण के लिए, qemu-nbd का `--read-only`)।<sup>[[2]](#references)</sup> Filesystems को read-only (`-o ro`) माउंट करें।<sup>[[3]](#references)</sup> **Copies** पर काम करें।
 
 ### Raw images (dd, AFF4-extracted)
 ```bash
@@ -81,7 +83,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-पूरा होने पर अलग करें:
+अनुवाद करने के लिए कोई मूल पाठ प्रदान नहीं किया गया है।
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -97,7 +99,7 @@ sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 # 3. Mount the desired partition (XFS example; use the filesystem-specific option)
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-Filesystem-specific no-replay mounts के लिए, ext3/ext4 में `noload` का उपयोग करें, जबकि XFS में `norecovery` का उपयोग होता है और read-only mode आवश्यक है।<sup>[[3]](#references)[[4]](#references)</sup>
+filesystem-specific no-replay mounts के लिए, ext3/ext4 `noload` का उपयोग करते हैं, जबकि XFS `norecovery` का उपयोग करता है और read-only mode आवश्यक होता है।<sup>[[3]](#references)[[4]](#references)</sup>
 
 वैकल्पिक रूप से **xmount** के साथ on the fly convert करें:
 ```bash
@@ -116,26 +118,26 @@ sudo lvscan | grep "/dev/nbd0"
 sudo dislocker -V /dev/nbd0p3 -u -- /mnt/bitlocker
 sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 ```
-### kpartx helpers
+### kpartx सहायक
 
 `kpartx` किसी image से partitions को स्वचालित रूप से `/dev/mapper/` पर map करता है:
 ```bash
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
 ```
-### सामान्य mount त्रुटियाँ और समाधान
+### सामान्य mount errors और fixes
 
-गंदे ext3/ext4 filesystem के लिए, जब journal replay को रोकना आवश्यक हो, तो `ro,noload` का उपयोग करें।<sup>[[3]](#references)</sup>
+एक dirty ext3/ext4 filesystem के लिए, जब journal replay को रोकना आवश्यक हो, तब `ro,noload` का उपयोग करें।<sup>[[3]](#references)</sup>
 
-| त्रुटि | सामान्य कारण | समाधान |
+| Error | सामान्य कारण | Fix |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | Journaled FS (ext4) को clean तरीके से unmount नहीं किया गया | `-o ro,noload` का उपयोग करें |
-| `bad superblock …` | गलत offset या क्षतिग्रस्त FS | offset (`sector*size`) calculate करें या किसी copy पर `fsck -n` चलाएँ |
+| `cannot mount /dev/loop0 read-only` | Journaled FS (ext4) को cleanly unmount नहीं किया गया | `-o ro,noload` का उपयोग करें |
+| `bad superblock …` | गलत offset या damaged FS | offset (`sector*size`) calculate करें या किसी copy पर `fsck -n` चलाएँ |
 | `mount: unknown filesystem type 'LVM2_member'` | LVM container | `vgchange -ay` से volume group activate करें |
 
-### Cleanup
+### Clean-up
 
-आगे के काम को corrupt कर सकने वाली dangling mappings छोड़ने से बचने के लिए **umount** करें और loop/nbd devices को **disconnect** करें:
+आगे के work को corrupt करने वाली dangling mappings छोड़ने से बचने के लिए **umount** करें और loop/nbd devices को **disconnect** करें:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0

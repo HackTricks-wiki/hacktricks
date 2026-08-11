@@ -1,4 +1,6 @@
-# Suricata और Iptables चीटशीट
+# Suricata & Iptables cheatsheet
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## Iptables
 
@@ -6,13 +8,13 @@
 
 iptables में, प्रत्येक chain packet-matching rules की एक क्रमिक सूची होती है। डिफ़ॉल्ट `filter` table में अंतर्निहित `INPUT`, `FORWARD`, और `OUTPUT` chains होती हैं; kernel configuration और loaded modules के आधार पर `nat` जैसी अन्य tables भी उपलब्ध हो सकती हैं।<sup>[[1]](#references)</sup>
 
-- **Input Chain**: incoming connections के व्यवहार को प्रबंधित करने के लिए उपयोग की जाती है।
-- **Forward Chain**: उन incoming connections को संभालने के लिए उपयोग की जाती है जो local system के लिए निर्धारित नहीं होती हैं। यह उन devices के लिए सामान्य है जो routers के रूप में कार्य करते हैं, जहाँ प्राप्त data को किसी अन्य destination पर forward किया जाना होता है। यह chain मुख्य रूप से तब relevant होती है जब system routing, NATing या इसी प्रकार की activities में शामिल हो।
-- **Output Chain**: outgoing connections के regulation के लिए समर्पित होती है।
+- **Input Chain**: incoming connections के व्यवहार को manage करने के लिए उपयोग की जाती है।
+- **Forward Chain**: ऐसी incoming connections को handle करने के लिए उपयोग की जाती है जो local system के लिए destined नहीं होतीं। यह उन devices के लिए सामान्य है जो routers के रूप में कार्य करते हैं, जहाँ प्राप्त data को किसी अन्य destination पर forward किया जाना होता है। यह chain मुख्य रूप से तब relevant होती है जब system routing, NATing या इसी प्रकार की activities में शामिल हो।
+- **Output Chain**: outgoing connections के regulation के लिए dedicated होती है।
 
-ये chains network traffic की व्यवस्थित processing सुनिश्चित करती हैं, जिससे किसी system में data के आने, system के भीतर से गुजरने और बाहर जाने के flow को नियंत्रित करने वाले विस्तृत rules निर्दिष्ट किए जा सकते हैं।
+ये chains network traffic की orderly processing सुनिश्चित करती हैं और system में data के flow, system के through data के flow तथा system से बाहर data के flow को नियंत्रित करने वाले detailed rules निर्दिष्ट करने की अनुमति देती हैं।
 
-string-match examples standard `string` match का उपयोग करते हैं; `--icase` दिए जाने तक matching case-sensitive होती है, और `--algo` BM या KMP search strategy चुनता है।<sup>[[2]](#references)</sup>
+string-match examples standard `string` match का उपयोग करते हैं; जब तक `--icase` supplied न हो, matching case-sensitive होती है, और `--algo` BM या KMP search strategy का चयन करता है।<sup>[[2]](#references)</sup>
 ```bash
 # Delete all rules
 iptables -F
@@ -51,9 +53,9 @@ iptables-restore < /etc/sysconfig/iptables
 ```
 ## Suricata
 
-### Install और Config
+### Install & Config
 
-नीचे दिए गए Package commands distribution और release के अनुसार अलग-अलग होते हैं; official installation guide में Ubuntu PPA, Debian backports, RPM packages और systemd service management का विवरण दिया गया है।<sup>[[3]](#references)</sup>
+नीचे दिए गए Package commands distribution और release के अनुसार अलग-अलग होते हैं; official installation guide में Ubuntu PPA, Debian backports, RPM packages और systemd service management का documentation दिया गया है।<sup>[[3]](#references)</sup>
 ```bash
 # Package installation details vary by distribution and release; see References.
 # Ubuntu
@@ -116,27 +118,27 @@ Type=simple
 
 systemctl daemon-reload
 ```
-`suricata-update` sequence Suricata के documented workflow का पालन करता है, जिसमें rule sources को fetch, list, enable और load किया जाता है।<sup>[[4]](#references)</sup> ऊपर दिया गया `suricatasc` command documented non-blocking Unix-socket rule-reload method है।<sup>[[8]](#references)</sup> NFQUEUE rules local input/output traffic को Suricata तक भेजते हैं, जबकि `-q 0` inline processing के लिए queue 0 चुनता है।<sup>[[7]](#references)</sup>
+`suricata-update` sequence, rules sources को fetch, list, enable और load करने के लिए Suricata के documented workflow का पालन करता है।<sup>[[4]](#references)</sup> ऊपर दिया गया `suricatasc` command documented non-blocking Unix-socket rule-reload method है।<sup>[[8]](#references)</sup> NFQUEUE rules local input/output traffic को Suricata तक भेजते हैं, जबकि `-q 0` inline processing के लिए queue 0 चुनता है।<sup>[[7]](#references)</sup>
 
-### Rules की परिभाषाएँ
+### Rules की Definitions
 
-Suricata rule/signature के तीन parts होते हैं।<sup>[[5]](#references)</sup>
+एक Suricata rule/signature के तीन parts होते हैं।<sup>[[5]](#references)</sup>
 
-- **action** signature match होने पर होने वाली कार्रवाई निर्दिष्ट करता है।
+- **action** यह निर्दिष्ट करता है कि signature match होने पर क्या होता है।
 - **header** protocol, IP addresses, ports और direction चुनता है।
-- **rule options** match-specific details निर्धारित करते हैं।
+- **rule options** match-specific details को define करते हैं।
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
 #### **मान्य actions हैं**
 
-- alert - alert generate करें
-- pass - packet की आगे की inspection रोकें
-- **drop** - packet drop करें और alert generate करें
-- **reject** - matching packet के sender को RST/ICMP unreachable error भेजें।
+- alert - alert generate करना
+- pass - packet की आगे की inspection रोकना
+- **drop** - packet drop करना और alert generate करना
+- **reject** - matching packet के sender को RST/ICMP unreachable error भेजना।
 - rejectsrc - केवल _reject_ के समान
-- rejectdst - matching packet के receiver को RST/ICMP error packet भेजें।
-- rejectboth - conversation के दोनों sides को RST/ICMP error packets भेजें।
+- rejectdst - matching packet के receiver को RST/ICMP error packet भेजना।
+- rejectboth - conversation के दोनों sides को RST/ICMP error packets भेजना।
 
 #### **Protocols**
 
@@ -152,11 +154,11 @@ Suricata IP ranges, negation और grouped address lists को support कर�
 
 | Example                       | Meaning                                  |
 | ----------------------------- | ---------------------------------------- |
-| ! 1.1.1.1                     | 1.1.1.1 को छोड़कर हर IP address          |
-| !\[1.1.1.1, 1.1.1.2]          | 1.1.1.1 और 1.1.1.2 को छोड़कर हर IP address |
-| $HOME_NET                     | yaml में आपका HOME_NET setting           |
+| ! 1.1.1.1                     | 1.1.1.1 को छोड़कर प्रत्येक IP address             |
+| !\[1.1.1.1, 1.1.1.2]          | 1.1.1.1 और 1.1.1.2 को छोड़कर प्रत्येक IP address |
+| $HOME_NET                     | yaml में HOME_NET की आपकी setting         |
 | \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET और HOME_NET नहीं            |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.5 को छोड़कर 10.0.0.0/24           |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.5 को छोड़कर 10.0.0.0/24          |
 
 #### Source और Destination Ports
 
@@ -164,24 +166,24 @@ Suricata port ranges, negation और ports की lists को support कर�
 
 | Example         | Meaning                                |
 | --------------- | -------------------------------------- |
-| any             | कोई भी address                         |
-| \[80, 81, 82]   | port 80, 81 और 82                      |
-| \[80: 82]       | 80 से 82 तक की range                   |
+| any             | कोई भी address                            |
+| \[80, 81, 82]   | port 80, 81 और 82                     |
+| \[80: 82]       | 80 से 82 तक की range                  |
 | \[1024: ]       | 1024 से highest port-number तक         |
-| !80             | 80 को छोड़कर हर port                  |
+| !80             | 80 को छोड़कर प्रत्येक port             |
 | \[80:100,!99]   | 80 से 100 तक की range, लेकिन 99 excluded |
-| \[1:80,!\[2,4]] | 1-80 तक की range, ports 2 और 4 को छोड़कर |
+| \[1:80,!\[2,4]] | 1-80 तक की range, ports 2 और 4 को छोड़कर  |
 
 #### Direction
 
-Suricata rules evaluate किए जा रहे communication direction को specify कर सकते हैं।<sup>[[5]](#references)</sup>
+Suricata rules में evaluate की जा रही communication direction specify की जा सकती है।<sup>[[5]](#references)</sup>
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### Keywords
 
-नीचे दिए गए उदाहरण Suricata के rule keywords का उपयोग करते हैं, जिनमें metadata, IP, ICMP, payload और application-layer options शामिल हैं; official rule documentation इन families और उनके syntax को सूचीबद्ध करता है।<sup>[[6]](#references)[[9]](#references)</sup>
+नीचे दिए गए उदाहरणों में Suricata के rule keywords का उपयोग किया गया है, जिनमें metadata, IP, ICMP, payload और application-layer options शामिल हैं; आधिकारिक rule documentation इन families और उनके syntax को सूचीबद्ध करता है।<sup>[[6]](#references)[[9]](#references)</sup>
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -225,13 +227,13 @@ drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
 ## References
 
-- [1] [iptables(8) — Linux मैनुअल पेज](https://man7.org/linux/man-pages/man8/iptables.8.html)
-- [2] [iptables-extensions(8) — Linux मैनुअल पेज](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
-- [3] [3. इंस्टॉलेशन — Suricata 7.0.14 दस्तावेज़](https://docs.suricata.io/en/suricata-7.0.14/install.html)
-- [4] [9.1. Suricata-Update के साथ Rule Management — Suricata 8.0.1 दस्तावेज़](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
+- [1] [iptables(8) — Linux मैनुअल पृष्ठ](https://man7.org/linux/man-pages/man8/iptables.8.html)
+- [2] [iptables-extensions(8) — Linux मैनुअल पृष्ठ](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
+- [3] [3. Installation — Suricata 7.0.14 दस्तावेज़](https://docs.suricata.io/en/suricata-7.0.14/install.html)
+- [4] [9.1. Rule Management with Suricata-Update — Suricata 8.0.1 दस्तावेज़](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
 - [5] [8.1. Rules Format — Suricata 8.0.3 दस्तावेज़](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
 - [6] [8.7. Payload Keywords — Suricata 8.0.3 दस्तावेज़](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
-- [7] [15. Linux के लिए IPS/inline सेट अप करना — Suricata 7.0.15 दस्तावेज़](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
+- [7] [15. Setting up IPS/inline for Linux — Suricata 7.0.15 दस्तावेज़](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
 - [8] [9.3. Rule Reloads — Suricata 7.0.14 दस्तावेज़](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
 - [9] [8. Suricata Rules — Suricata 8.0.3 दस्तावेज़](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
 {{#include ../../../banners/hacktricks-training.md}}

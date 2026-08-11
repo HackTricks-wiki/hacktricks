@@ -1,33 +1,35 @@
 # PDF File analysis
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 **अधिक जानकारी के लिए देखें:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/).<sup>[[1]](#references)</sup>
 
-PDF format अपनी जटिलता और data छिपाने की संभावित क्षमता के लिए जाना जाता है, जिससे यह CTF forensics challenges का एक प्रमुख केंद्र बन जाता है। इसमें plain-text elements को binary objects के साथ जोड़ा जाता है, जिन्हें compress या encrypt किया जा सकता है, और इसमें JavaScript या Flash जैसी languages में scripts शामिल हो सकती हैं। PDF structure समझने के लिए Didier Stevens की [introductory material](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) देखी जा सकती है, या text editor अथवा Origami जैसे PDF-specific editor का उपयोग किया जा सकता है।
+PDF format अपनी जटिलता और data छिपाने की क्षमता के लिए जाना जाता है, जिससे यह CTF forensics challenges का एक प्रमुख विषय बन जाता है। इसमें plain-text elements को binary objects के साथ संयोजित किया जाता है, जो compressed या encrypted हो सकते हैं, और इसमें JavaScript या Flash जैसी languages में scripts शामिल हो सकती हैं। PDF structure को समझने के लिए Didier Stevens की [introductory material](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) देखी जा सकती है, या text editor अथवा Origami जैसे PDF-specific editor का उपयोग किया जा सकता है।
 
-PDFs की गहन जांच या manipulation के लिए [qpdf](https://github.com/qpdf/qpdf) और [Origami](https://github.com/mobmewireless/origami-pdf) जैसे tools उपलब्ध हैं। PDFs के भीतर hidden data को इन स्थानों पर छिपाया जा सकता है:
+PDFs की गहन जांच या manipulation के लिए [qpdf](https://github.com/qpdf/qpdf) और [Origami](https://github.com/mobmewireless/origami-pdf) जैसे tools उपलब्ध हैं। PDFs के भीतर hidden data निम्न स्थानों पर छिपा हो सकता है:
 
 - Invisible layers
 - Adobe का XMP metadata format
 - Incremental generations
 - Background के समान color वाला text
-- Images के पीछे या overlapping images के रूप में text
+- Images के पीछे का text या overlapping images
 - Non-displayed comments
 
-Custom PDF analysis के लिए [PeepDF](https://github.com/jesparza/peepdf) जैसी Python libraries का उपयोग bespoke parsing scripts बनाने के लिए किया जा सकता है। इसके अलावा, PDF में hidden data storage की क्षमता इतनी व्यापक है कि PDF risks और countermeasures पर NSA की guide, हालांकि अब अपने original location पर hosted नहीं है, फिर भी valuable insights प्रदान करती है। [Guide की copy](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) और Ange Albertini द्वारा तैयार किए गए [PDF format tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md) का collection इस विषय पर आगे पढ़ने के लिए उपयोगी हो सकता है।<sup>[[4]](#references)[[5]](#references)</sup>
+Custom PDF analysis के लिए [PeepDF](https://github.com/jesparza/peepdf) जैसी Python libraries का उपयोग bespoke parsing scripts बनाने के लिए किया जा सकता है। इसके अलावा, PDF में hidden data storage की संभावनाएं इतनी व्यापक हैं कि PDF risks और countermeasures पर NSA guide, जो अब अपने original location पर hosted नहीं है, फिर भी उपयोगी जानकारी प्रदान करती है। [इस guide की copy](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) और Ange Albertini द्वारा तैयार किए गए [PDF format tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md) का संग्रह इस विषय पर आगे पढ़ने के लिए उपयोगी हैं।<sup>[[4]](#references)[[5]](#references)</sup>
 
 ## Common Malicious Constructs
 
-Attackers अक्सर specific PDF objects और actions का दुरुपयोग करते हैं, जो document को खोलने या उसके साथ interaction करने पर automatically execute होते हैं। खोजने योग्य keywords:
+Attackers अक्सर specific PDF objects और actions का दुरुपयोग करते हैं, जो document खोलने या उसमें interaction करने पर automatically execute होते हैं। खोजने योग्य keywords:
 
-* **/OpenAction, /AA** – open होने पर या specific events पर execute होने वाले automatic actions।
+* **/OpenAction, /AA** – open होने पर या specific events पर execute होने वाली automatic actions।
 * **/JS, /JavaScript** – embedded JavaScript (अक्सर obfuscated या objects में split किया हुआ)।
 * **/Launch, /SubmitForm, /URI, /GoToE** – external process / URL launchers।
-* **/RichMedia, /Flash, /3D** – multimedia objects, जो payloads छिपा सकते हैं।
+* **/RichMedia, /Flash, /3D** – multimedia objects जो payloads छिपा सकते हैं।
 * **/EmbeddedFile /Filespec** – file attachments (EXE, DLL, OLE, आदि)।
-* **/ObjStm, /XFA, /AcroForm** – object streams या forms, जिनका shell-code छिपाने के लिए अक्सर दुरुपयोग किया जाता है।
+* **/ObjStm, /XFA, /AcroForm** – object streams या forms जिनका उपयोग shell-code छिपाने के लिए अक्सर किया जाता है।
 * **Incremental updates** – कई %%EOF markers या बहुत बड़ा **/Prev** offset यह संकेत दे सकता है कि AV को bypass करने के लिए signing के बाद data append किया गया है।
 
-जब previous tokens में से कोई भी suspicious strings (powershell, cmd.exe, calc.exe, base64, आदि) के साथ दिखाई दे, तो PDF की अधिक गहन analysis की जानी चाहिए।
+जब पिछले tokens में से कोई भी suspicious strings (powershell, cmd.exe, calc.exe, base64, आदि) के साथ दिखाई दे, तो PDF की अधिक गहन analysis की जानी चाहिए।
 
 ---
 
@@ -54,18 +56,18 @@ qpdf --password='secret' --decrypt suspicious.pdf clean.pdf
 # Lint the file with a Go verifier (checks structure violations)
 pdfcpu validate -mode strict clean.pdf
 ```
-Additional useful projects (actively maintained 2023-2025):
+अतिरिक्त उपयोगी projects (actively maintained 2023-2025):
 * **pdfcpu** – PDFs को validate, decrypt, extract, optimize और manipulate करने में सक्षम Go library/CLI।<sup>[[9]](#references)</sup>
-* **pdf-inspector** – object graph और streams को render करने वाला browser-based visualizer।
+* **pdf-inspector** – browser-based visualizer जो object graph और streams को render करता है।
 * **PyMuPDF** – PDFs का निरीक्षण करने और pages को raster images में render करने के लिए scriptable Python bindings। parser/renderer को untrusted-file attack surface मानें और इसे उचित रूप से isolated analysis environment के अंदर चलाएँ।<sup>[[8]](#references)</sup>
 
 ---
 
-## हाल की attack techniques (2023-2025)
+## हालिया attack techniques (2023-2025)
 
-* **MalDoc in PDF polyglot (2023)** – JPCERT/CC ने एक ऐसी technique की सूचना दी जिसमें VBA macros वाली Word-created MHT file को PDF के साथ append किया जाता है, जिससे PDF magic बना रहता है और file Word में भी खुलती है। PDF-only analysis tools, sandboxes या antivirus macro को miss कर सकते हैं, क्योंकि malicious behavior तब होता है जब file Word के रूप में खोली जाती है; अन्य MHT indicators के साथ `<w:WordDocument>` marker देखें।<sup>[[2]](#references)</sup>
-* **Shadow attacks on signed PDFs** – attackers PDF को sign किए जाने से पहले उसमें hidden content रख सकते हैं, फिर एक incremental update append कर सकते हैं जो catalog या object references को बदल देता है, ताकि viewers hidden content display करें जबकि original signature valid रहे। यह technique उन viewers को evade कर सकती है जो ऐसे updates को harmless classify करते हैं।<sup>[[6]](#references)</sup>
-* **Use-after-free – CVE-2024-30284 (Acrobat/Reader)** – Adobe इस critical vulnerability को use-after-free के रूप में rate करता है, जिससे arbitrary code execution हो सकता है; APSB24-29 को 14 मई, 2024 को publish किया गया था।<sup>[[3]](#references)</sup>
+* **MalDoc in PDF polyglot (2023)** – JPCERT/CC ने एक technique की report की जिसमें Word-created MHT file with VBA macros को PDF में append किया जाता है, जिससे PDF magic बना रहता है और file Word में भी खुलती है। PDF-only analysis tools, sandboxes या antivirus macro को miss कर सकते हैं क्योंकि malicious behavior Word के रूप में खोलने पर होता है; अन्य MHT indicators के साथ `<w:WordDocument>` marker देखें।<sup>[[2]](#references)</sup>
+* **Signed PDFs पर Shadow attacks** – attackers PDF को sign किए जाने से पहले उसमें hidden content रख सकते हैं, फिर एक incremental update append कर सकते हैं जो catalog या object references को बदल देता है, ताकि viewers hidden content display करें जबकि original signature valid रहे। यह technique उन viewers को evade कर सकती है जो ऐसे updates को harmless classify करते हैं।<sup>[[6]](#references)</sup>
+* **Use-after-free – CVE-2024-30284 (Acrobat/Reader)** – Adobe इस critical vulnerability को use-after-free के रूप में rate करता है, जिससे arbitrary code execution हो सकता है; APSB24-29 को May 14, 2024 को publish किया गया था।<sup>[[3]](#references)</sup>
 
 ---
 
@@ -87,12 +89,12 @@ $pdf_magic at 0 and ( all of ($aa, $openact) or ($openact and $js) )
 ```
 ---
 
-## रक्षात्मक सुझाव
+## Defensive tips
 
-1. **जल्दी Patch करें** – Acrobat/Reader को latest Continuous track पर रखें; wild में देखी गई अधिकांश RCE chains उन n-day vulnerabilities का लाभ उठाती हैं जिन्हें महीनों पहले fix किया जा चुका है।
-2. **Gateway पर active content हटाएँ** – purpose-built, policy-controlled sanitizer या CDR product का उपयोग करें, जो JavaScript, embedded files, launch actions, forms और multimedia को स्पष्ट रूप से हटाता हो। `qpdf --qdf` PDF objects को inspect करना आसान बनाता है, जबकि pdfcpu validation और manipulation features प्रदान करता है; active content हटाए जाने का प्रमाण अकेले कोई भी command नहीं है।<sup>[[9]](#references)[[10]](#references)</sup>
-3. **Content Disarm & Reconstruction (CDR)** – visual fidelity बनाए रखते हुए active objects को हटाने के लिए sandbox host पर PDFs को images (या PDF/A) में convert करें।
-4. **कम उपयोग किए जाने वाले features को block करें** – Reader की enterprise “Enhanced Security” settings में JavaScript, multimedia और 3D rendering को disable किया जा सकता है।
+1. **तेजी से Patch करें** – Acrobat/Reader को नवीनतम Continuous track पर रखें; wild में देखी गई अधिकांश RCE chains उन n-day vulnerabilities का लाभ उठाती हैं जिन्हें महीनों पहले fix किया जा चुका है।
+2. **Gateway पर active content हटाएँ** – purpose-built, policy-controlled sanitizer या CDR product का उपयोग करें, जो JavaScript, embedded files, launch actions, forms और multimedia को स्पष्ट रूप से हटाता हो। `qpdf --qdf` PDF objects को inspect करना आसान बनाता है, जबकि pdfcpu validation और manipulation features प्रदान करता है; केवल इनमें से कोई एक command active content हटाए जाने का प्रमाण नहीं है।<sup>[[9]](#references)[[10]](#references)</sup>
+3. **Content Disarm & Reconstruction (CDR)** – visual fidelity बनाए रखने और active objects को हटाने के लिए sandbox host पर PDFs को images (या PDF/A) में convert करें।
+4. **कम उपयोग किए जाने वाले features को Block करें** – Reader में enterprise “Enhanced Security” settings JavaScript, multimedia और 3D rendering को disable करने की अनुमति देती हैं।
 5. **User education** – social engineering (invoice और resume lures) initial vector बना हुआ है; employees को suspicious attachments IR को forward करना सिखाएँ।
 
 ## References

@@ -1,5 +1,7 @@
 # Basic Forensic Methodology
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Image बनाना और Mount करना
 
 
@@ -9,7 +11,7 @@
 
 ## Malware Analysis
 
-जब आपके पास **image** हो, तो Malware Analysis करना **आवश्यक नहीं कि पहला कदम हो**। लेकिन यदि आपके पास कोई file, file-system image, memory image, pcap... हो, तो आप इन Malware Analysis techniques का स्वतंत्र रूप से उपयोग कर सकते हैं; इसलिए इन actions को **ध्यान में रखना अच्छा है**:
+Image प्राप्त होने के बाद यह **पहला आवश्यक कदम नहीं है**। लेकिन यदि आपके पास कोई file, file-system image, memory image, pcap... हो, तो आप इन malware analysis techniques का स्वतंत्र रूप से उपयोग कर सकते हैं, इसलिए **इन actions को ध्यान में रखना अच्छा है**:
 
 
 {{#ref}}
@@ -18,14 +20,14 @@ malware-analysis.md
 
 ## Image का निरीक्षण
 
-यदि आपको किसी device की **forensic image** दी गई है, तो आप उपयोग किए गए **partitions और file-system का analysis** शुरू कर सकते हैं और संभावित रूप से **महत्वपूर्ण files को recover** कर सकते हैं (deleted files को भी)। इसका तरीका यहां जानें:
+यदि आपको किसी device की **forensic image** दी गई है, तो आप उपयोग किए गए **partitions, file-system** का **analysis** शुरू कर सकते हैं और संभावित रूप से **interesting files** (deleted files सहित) **recover** कर सकते हैं। तरीका यहां जानें:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-उपयोग किए गए OSs और platform के आधार पर खोजे जाने वाले अलग-अलग महत्वपूर्ण artifacts हो सकते हैं:
+उपयोग किए गए OSs और platform के आधार पर अलग-अलग interesting artifacts की खोज की जानी चाहिए:
 
 
 {{#ref}}
@@ -49,29 +51,29 @@ ios-backup-forensics.md
 
 ## Specific file-types और Software का गहन निरीक्षण
 
-यदि आपके पास कोई बहुत **suspicious** **file** है, तो उसे बनाने वाले **file-type और software के आधार पर** कई **tricks** उपयोगी हो सकती हैं।\
-कुछ रोचक tricks जानने के लिए निम्नलिखित page पढ़ें:
+यदि आपके पास कोई बहुत **suspicious** **file** है, तो उसे बनाने वाले **file-type और software** के आधार पर कई **tricks** उपयोगी हो सकती हैं।\
+कुछ interesting tricks सीखने के लिए निम्नलिखित page पढ़ें:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-मैं विशेष रूप से इस page का उल्लेख करना चाहता हूं:
+मैं page का विशेष उल्लेख करना चाहता हूं:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Memory Dump Inspection
+## Memory Dump का निरीक्षण
 
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap Inspection
+## Pcap का निरीक्षण
 
 
 {{#ref}}

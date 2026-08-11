@@ -1,10 +1,12 @@
 # VBS Files के लिए Desobfuscation Techniques
 
-कुछ चीज़ें malicious VBS file को debug/deobfuscate करने में उपयोगी हो सकती हैं:
+{{#include ../../../banners/hacktricks-training.md}}
+
+कुछ चीज़ें ऐसी हैं जो किसी malicious VBS file को debug/deobfuscate करने में उपयोगी हो सकती हैं:
 
 ## echo
 
-`WScript.Echo` का उपयोग diagnostic output के लिए किया जा सकता है; `cscript.exe` के अंतर्गत, इसे console पर लिखा जाता है।<sup>[[1]](#references)</sup>
+`WScript.Echo` का उपयोग diagnostic output के लिए किया जा सकता है; `cscript.exe` के अंतर्गत, इसे console में लिखा जाता है।<sup>[[1]](#references)</sup>
 ```bash
 Wscript.Echo "Like this?"
 ```
@@ -16,13 +18,13 @@ Wscript.Echo "Like this?"
 ```
 ## परीक्षण
 
-VBS फ़ाइल को command-line host में चलाएँ:<sup>[[3]](#references)</sup>
+VBS file को command-line host में चलाएँ:<sup>[[3]](#references)</sup>
 ```bash
 cscript.exe file.vbs
 ```
 ## फ़ाइल में डेटा लिखें
 
-यह helper Stack Overflow के एक उत्तर से अनुकूलित है और `FileSystemObject` text stream का उपयोग करता है। `CreateTextFile` एक `TextStream` लौटाता है, और `Write`/`Close` text data पर कार्य करते हैं; इसे सामान्य binary-safe writer के बजाय text-writing example मानें।<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+यह helper Stack Overflow के एक उत्तर से अनुकूलित है और `FileSystemObject` text stream का उपयोग करता है। `CreateTextFile` एक `TextStream` लौटाता है, और `Write`/`Close` text data पर कार्य करते हैं; इसे सामान्य binary-safe writer के बजाय text-writing उदाहरण के रूप में समझें।<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```js
 Function writeBinary(strBinary, strPath)
 

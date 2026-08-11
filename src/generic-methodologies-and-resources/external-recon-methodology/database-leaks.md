@@ -1,15 +1,17 @@
-# डेटाबेस leaks
+# Database leaks
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Data Breach Search Engines
 
 - [GreyNoise Visualizer](https://viz.greynoise.io/) - IPs और CIDRs देखें, और tags, CVEs तथा metadata के आधार पर scanner activity को query करें।<sup>[[1]](#references)</sup>
 - [DeHashed](https://www.dehashed.com/) - usernames, email addresses, IP addresses और अन्य selectors के आधार पर exposed data खोजें; monitoring और API भी उपलब्ध हैं।<sup>[[2]](#references)</sup>
-- [Have I Been Pwned?](https://haveibeenpwned.com/) - जाँचें कि कोई email address ज्ञात data breaches या paste records में दिखाई देता है या नहीं; notifications और API भी उपलब्ध हैं।<sup>[[3]](#references)</sup>
+- [Have I Been Pwned?](https://haveibeenpwned.com/) - जांचें कि कोई email address ज्ञात data breaches या paste records में दिखाई देता है या नहीं; notifications और API भी उपलब्ध हैं।<sup>[[3]](#references)</sup>
 - [ScamSearch](https://scamsearch.io/) - profile picture, email, username, phone number, crypto address या website के आधार पर reported scammer records खोजें।<sup>[[4]](#references)</sup>
 - [Intelligence X](https://intelx.io/) - indexed sources में email addresses, domains, URLs, IPs और CIDRs जैसे selectors खोजें।<sup>[[5]](#references)</sup>
-- [SpyCloud](https://spycloud.com/check-your-exposure/) - exposed credentials, infostealer-infected identities और stolen session cookies के लिए business email या domain की जाँच करें।<sup>[[6]](#references)</sup>
+- [SpyCloud](https://spycloud.com/check-your-exposure/) - exposed credentials, infostealer-infected identities और stolen session cookies के लिए business email या domain जांचें।<sup>[[6]](#references)</sup>
 - [WeLeakInfo](https://weleakinfo.io/) - domains, names, emails, IDs, phones, IPs, URLs या hashes का उपयोग करके leaked databases खोजें।<sup>[[7]](#references)</sup>
-- [BreachDirectory](https://breachdirectory.org/) - जाँचें कि आपका email या username compromised हुआ है या नहीं।
+- [BreachDirectory](https://breachdirectory.org/) - जांचें कि आपका email या username compromise हुआ है या नहीं।
 - [LeakCheck](https://leakcheck.io/) - exposed email, username, phone, hash या domain data खोजें और नई entries के लिए monitor करें।<sup>[[8]](#references)</sup>
 - [Findemail.io](https://findemail.io/) - किसी दी गई company के email addresses खोजें।
 - [Library of Leaks](https://search.libraryofleaks.org/) - leak datasets सहित public documents, companies और people खोजें।<sup>[[9]](#references)</sup>
@@ -23,7 +25,7 @@
 
 ## Tools to enumerate data leaks
 
-- [Leaker](https://github.com/vflame6/leaker) - passive leak discovery CLI, जो email, username, domain, keyword या phone के आधार पर कई online sources में खोज करता है।<sup>[[15]](#references)</sup>
+- [Leaker](https://github.com/vflame6/leaker) - passive leak discovery CLI, जो email, username, domain, keyword या phone के आधार पर कई online sources खोजता है।<sup>[[15]](#references)</sup>
 
 ## References
 
@@ -32,7 +34,7 @@
 - [3] [Have I Been Pwned](https://haveibeenpwned.com/)
 - [4] [Global Scammer Database - ScamSearch](https://scamsearch.io/)
 - [5] [Intelligence X](https://intelx.io/)
-- [6] [अपना Exposure जाँचें - SpyCloud](https://spycloud.com/check-your-exposure/)
+- [6] [अपना Exposure जांचें - SpyCloud](https://spycloud.com/check-your-exposure/)
 - [7] [WeLeakInfo](https://weleakinfo.io/)
 - [8] [Data Breach Search Engine - LeakCheck](https://leakcheck.io/)
 - [9] [Library of Leaks](https://search.libraryofleaks.org/)

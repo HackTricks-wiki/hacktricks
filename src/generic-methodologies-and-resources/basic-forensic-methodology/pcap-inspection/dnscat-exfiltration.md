@@ -1,8 +1,10 @@
 # DNSCat pcap analysis
 
-यदि आपके पास **DNSCat द्वारा exfiltrate किए गए data** वाला PCAP है (encryption का उपयोग किए बिना), तो संभव है कि आप exfiltrate किए गए content को recover कर सकें।
+{{#include ../../../banners/hacktricks-training.md}}
 
-नीचे संदर्भित BSidesSF 2017 capture के लिए, write-up में अनुमान लगाया गया था कि प्रत्येक decoded query transferred content से पहले 9 bytes का dnscat-specific data शुरू करती थी। क्योंकि dnscat2 अलग-अलग packet types और header layouts define करता है, इसलिए उस offset को अन्य traffic पर लागू करने से पहले संबंधित framing को verify करें।<sup>[[1]](#references)[[2]](#references)</sup>
+यदि आपके पास **DNSCat द्वारा exfiltrate किए जा रहे data** का PCAP है (encryption का उपयोग किए बिना), तो संभव है कि आप exfiltrate किए गए content को recover कर सकें।
+
+नीचे संदर्भित BSidesSF 2017 capture के write-up में अनुमान लगाया गया था कि प्रत्येक decoded query transferred content से पहले 9 bytes का dnscat-specific data रखती थी। चूंकि dnscat2 अलग-अलग packet types और header layouts परिभाषित करता है, इसलिए इस offset को अन्य traffic पर लागू करने से पहले संबंधित framing को verify करें।<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -21,7 +23,7 @@ last = qry
 
 #print(f)
 ```
-अधिक जानकारी के लिए [BSidesSF 2017 write-up](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap) और [dnscat2 protocol documentation](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md) देखें।
+अधिक जानकारी के लिए, [BSidesSF 2017 write-up](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap) और [dnscat2 protocol documentation](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md) देखें।
 
 [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder) repository एक Python 3 decoder प्रदान करती है, जो निर्दिष्ट domain के लिए DNS queries को filter करके PCAP से streams extract करता है।<sup>[[3]](#references)</sup>
 ```

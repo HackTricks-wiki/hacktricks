@@ -1,13 +1,15 @@
 # Python Sandbox Escape और Pyscript
 
-**देखने योग्य महत्वपूर्ण पृष्ठ:**
+{{#include ../../banners/hacktricks-training.md}}
+
+**जांचने योग्य रोचक पेज:**
 
 - [**Pyscript hacking tricks**](pyscript.md)
 - [**Python deserializations**](../../pentesting-web/deserialization/README.md)
 - [**Keras model deserialization RCE and gadget hunting**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/README.md)
-- [**Basic python web requests syntax**](web-requests.md)
-- [**Basic python syntax and libraries**](basic-python.md)
+- [**Python sandboxes को bypass करने की Tricks**](bypass-python-sandboxes/README.md)
+- [**Basic Python web requests syntax**](web-requests.md)
+- [**Basic Python syntax और libraries**](basic-python.md)
 
 ## References
 

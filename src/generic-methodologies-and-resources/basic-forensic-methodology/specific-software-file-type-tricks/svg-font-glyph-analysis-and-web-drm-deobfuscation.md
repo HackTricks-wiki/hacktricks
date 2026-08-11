@@ -1,25 +1,27 @@
 # SVG/Font Glyph Analysis & Web DRM Deobfuscation (Raster Hashing + SSIM)
 
-यह पृष्ठ उन web readers से text recover करने की practical techniques का दस्तावेज़ है, जो positioned glyph runs के साथ प्रति-request vector glyph definitions (SVG paths) भेजते हैं और scraping रोकने के लिए प्रत्येक request पर glyph IDs को randomize करते हैं। मुख्य विचार request-scoped numeric glyph IDs को ignore करना और raster hashing के माध्यम से visual shapes की fingerprint बनाना है, फिर reference font atlas के विरुद्ध SSIM का उपयोग करके shapes को characters से map करना है। यही approach समान protections वाले viewers पर भी सामान्यीकृत हो सकती है।<sup>[[1]](#references)</sup>
+{{#include ../../../banners/hacktricks-training.md}}
 
-चेतावनी: इन techniques का उपयोग केवल उस content का backup लेने के लिए करें, जिसके आप legitimately मालिक हैं, और लागू laws तथा terms के अनुपालन में करें।
+यह पृष्ठ उन web readers से text recover करने की practical techniques का documentation है, जो positioned glyph runs और per-request vector glyph definitions (SVG paths) भेजते हैं तथा scraping रोकने के लिए प्रत्येक request पर glyph IDs को randomize करते हैं। मुख्य विचार request-scoped numeric glyph IDs को ignore करना और raster hashing के ज़रिए visual shapes की fingerprint बनाना है, फिर reference font atlas के विरुद्ध SSIM का उपयोग करके shapes को characters से map करना है। यही approach समान protections वाले viewers पर भी लागू हो सकती है।<sup>[[1]](#references)</sup>
+
+Warning: इन techniques का उपयोग केवल उस content का backup लेने के लिए करें जिसका ownership आपके पास वैध रूप से है और applicable laws तथा terms के अनुरूप करें।
 
 ## Acquisition (example: Kindle Cloud Reader)
 
-देखा गया endpoint:<sup>[[1]](#references)</sup>
+Endpoint observed:<sup>[[1]](#references)</sup>
 - [https://read.amazon.com/renderer/render](https://read.amazon.com/renderer/render)
 
-प्रत्येक session के लिए आवश्यक materials:<sup>[[1]](#references)</sup>
+Required materials per session:<sup>[[1]](#references)</sup>
 - Browser session cookies (normal Amazon login)
-- startReading API call से rendering token
-- renderer द्वारा उपयोग किया जाने वाला अतिरिक्त ADP session token
+- startReading API call से प्राप्त rendering token
+- renderer द्वारा उपयोग किया जाने वाला additional ADP session token
 
-व्यवहार:<sup>[[1]](#references)</sup>
-- प्रत्येक request, जब browser-equivalent headers और cookies के साथ भेजी जाती है, तो अधिकतम 5 pages तक सीमित TAR archive लौटाती है।
-- एक लंबी book के लिए आपको कई batches की आवश्यकता होगी; प्रत्येक batch glyph IDs की अलग randomized mapping का उपयोग करता है।
+Behavior:<sup>[[1]](#references)</sup>
+- प्रत्येक request, जब browser-equivalent headers और cookies के साथ भेजी जाती है, तो अधिकतम 5 pages तक सीमित TAR archive return करती है।
+- किसी लंबी book के लिए आपको कई batches की आवश्यकता होगी; प्रत्येक batch में glyph IDs की अलग randomized mapping होती है।
 
-सामान्य TAR contents:<sup>[[1]](#references)</sup>
-- page_data_0_4.json — glyph IDs के sequences के रूप में positioned text runs (Unicode नहीं)
+Typical TAR contents:<sup>[[1]](#references)</sup>
+- page_data_0_4.json — positioned text runs, जो glyph IDs के sequences के रूप में होते हैं (Unicode नहीं)
 - glyphs.json — प्रत्येक glyph और fontFamily के लिए per-request SVG path definitions
 - toc.json — table of contents
 - metadata.json — book metadata
@@ -36,53 +38,53 @@ Example page run structure:<sup>[[1]](#references)</sup>
 "fontSize": 12.5
 }
 ```
-उदाहरण glyphs.json entry:<sup>[[1]](#references)</sup>
+glyphs.json entry का उदाहरण:<sup>[[1]](#references)</sup>
 ```json
 {
 "24": {"path": "M 450 1480 L 820 1480 L 820 0 L 1050 0 L 1050 1480 ...", "fontFamily": "bookerly_normal"}
 }
 ```
-anti-scraping path tricks पर Notes:<sup>[[1]](#references)</sup>
-- Paths में micro relative moves शामिल हो सकते हैं (जैसे, `m3,1 m1,6 m-4,-7`), जो कई vector parsers और naïve path sampling को भ्रमित करते हैं।
-- Command/coordinate differencing करने के बजाय, हमेशा robust SVG engine (जैसे, CairoSVG) से भरे हुए complete paths को render करें।
+anti-scraping path tricks पर notes:<sup>[[1]](#references)</sup>
+- Paths में micro relative moves (जैसे, `m3,1 m1,6 m-4,-7`) शामिल हो सकते हैं, जो कई vector parsers और naïve path sampling को भ्रमित करते हैं।
+- Command/coordinate differencing करने के बजाय हमेशा robust SVG engine (जैसे, CairoSVG) से भरे हुए complete paths को render करें।
 
 ## naïve decoding क्यों विफल होता है
 
 - Per-request randomized glyph substitution: glyph ID→character mapping हर batch में बदलती है; IDs globally meaningless होते हैं।<sup>[[1]](#references)</sup>
-- Direct SVG coordinate comparison brittle है: हर request में identical shapes के numeric coordinates या command encoding अलग हो सकते हैं।<sup>[[1]](#references)</sup>
-- Isolated glyphs पर OCR का प्रदर्शन कमजोर होता है (≈50%), punctuation और look-alike glyphs में भ्रम होता है, और यह ligatures को अनदेखा करता है।<sup>[[1]](#references)</sup>
+- Direct SVG coordinate comparison brittle होता है: समान shapes में हर request पर numeric coordinates या command encoding अलग हो सकती है।<sup>[[1]](#references)</sup>
+- Isolated glyphs पर OCR का प्रदर्शन खराब होता है (≈50%), punctuation और look-alike glyphs में भ्रम होता है, और ligatures को अनदेखा करता है।<sup>[[1]](#references)</sup>
 
 ## Working pipeline: request-agnostic glyph normalization और mapping
 
 1) Per-request SVG glyphs को rasterize करें
-- प्रत्येक glyph के लिए दिए गए `path` से एक minimal SVG document बनाएँ और CairoSVG या ऐसे equivalent engine का उपयोग करके fixed canvas (जैसे, 512×512) पर render करें, जो tricky path sequences को संभाल सके।<sup>[[1]](#references)[[2]](#references)</sup>
-- White background पर filled black render करें; renderer- और AA-dependent artifacts हटाने के लिए strokes से बचें।
+- दिए गए `path` के साथ हर glyph के लिए एक minimal SVG document बनाएं और CairoSVG या ऐसे equivalent engine का उपयोग करके fixed canvas (जैसे, 512×512) पर render करें, जो tricky path sequences को संभाल सके।<sup>[[1]](#references)[[2]](#references)</sup>
+- Filled black on white render करें; renderer- और AA-dependent artifacts को हटाने के लिए strokes से बचें।
 
 2) Cross-request identity के लिए perceptual hashing
 - प्रत्येक glyph image का perceptual hash (जैसे, `imagehash.phash` के माध्यम से pHash) compute करें।<sup>[[3]](#references)</sup>
-- Hash को stable ID मानें: requests के बीच समान visual shape एक ही perceptual hash में collapse हो जाता है, जिससे randomized IDs निष्प्रभावी हो जाते हैं।
+- Hash को stable ID मानें: requests के बीच समान visual shape एक ही perceptual hash में collapse हो जाती है, जिससे randomized IDs निष्प्रभावी हो जाते हैं।
 
 3) Reference font atlas generation
 - Target TTF/OTF fonts (जैसे, Bookerly normal/italic/bold/bold-italic) download करें।<sup>[[1]](#references)</sup>
-- A–Z, a–z, 0–9, punctuation, special marks (em/en dashes, quotes), और explicit ligatures के लिए candidates render करें: `ff`, `fi`, `fl`, `ffi`, `ffl`.
+- A–Z, a–z, 0–9, punctuation, special marks (em/en dashes, quotes), और explicit ligatures: `ff`, `fi`, `fl`, `ffi`, `ffl` के लिए candidates render करें।
 - प्रत्येक font variant (normal/italic/bold/bold-italic) के लिए अलग atlases रखें।
 - यदि ligatures के लिए glyph-level fidelity चाहिए, तो proper text shaper (HarfBuzz) का उपयोग करें; यदि आप ligature strings को सीधे render करते हैं और shaping engine उन्हें resolve करता है, तो Pillow ImageFont के माध्यम से simple rasterization पर्याप्त हो सकती है।
 
-4) SSIM के साथ visual similarity matching
-- प्रत्येक unknown glyph image के लिए, सभी font variant atlases में मौजूद सभी candidate images के विरुद्ध SSIM (Structural Similarity Index) compute करें।<sup>[[4]](#references)</sup>
-- Best-scoring match की character string assign करें। SSIM pixel-exact comparisons की तुलना में छोटे antialiasing, scale और coordinate differences को बेहतर तरीके से absorb करता है।<sup>[[1]](#references)[[4]](#references)</sup>
+4) SSIM के साथ Visual similarity matching
+- प्रत्येक unknown glyph image के लिए सभी font variant atlases में मौजूद सभी candidate images के विरुद्ध SSIM (Structural Similarity Index) compute करें।<sup>[[4]](#references)</sup>
+- Best-scoring match की character string assign करें। SSIM pixel-exact comparisons की तुलना में छोटे antialiasing, scale, और coordinate differences को बेहतर तरीके से absorb करता है।<sup>[[1]](#references)[[4]](#references)</sup>
 
 5) Edge handling और reconstruction
 - जब कोई glyph किसी ligature (multi-char) से map हो, तो decoding के दौरान उसे expand करें।<sup>[[1]](#references)</sup>
-- Paragraph breaks (Y deltas), alignment (X patterns), style और sizes का अनुमान लगाने के लिए run rectangles (top/left/right/bottom) का उपयोग करें।<sup>[[1]](#references)</sup>
-- `fontStyle`, `fontWeight`, `fontSize` और internal links को preserve करते हुए HTML/EPUB में serialize करें।<sup>[[1]](#references)</sup>
+- Paragraph breaks (Y deltas), alignment (X patterns), style, और sizes का अनुमान लगाने के लिए run rectangles (top/left/right/bottom) का उपयोग करें।<sup>[[1]](#references)</sup>
+- `fontStyle`, `fontWeight`, `fontSize`, और internal links को preserve करते हुए HTML/EPUB में serialize करें।<sup>[[1]](#references)</sup>
 
 ### Implementation tips
 
 - Hashing और SSIM से पहले सभी images को समान size और grayscale में normalize करें।
 - Batches के बीच repeated glyphs के लिए SSIM को दोबारा compute करने से बचने हेतु perceptual hash के आधार पर cache करें।
-- बेहतर discrimination के लिए high-quality raster size (जैसे, 256–512 px) का उपयोग करें; SSIM को तेज करने के लिए आवश्यकतानुसार downscale करें।
-- यदि TTF candidates render करने के लिए Pillow का उपयोग कर रहे हैं, तो समान canvas size set करें और glyph को center में रखें; ascenders/descenders को clip होने से बचाने के लिए padding दें।
+- बेहतर discrimination के लिए high-quality raster size (जैसे, 256–512 px) का उपयोग करें; SSIM को तेज़ करने के लिए आवश्यकता अनुसार downscale करें।
+- यदि TTF candidates render करने के लिए Pillow का उपयोग कर रहे हैं, तो समान canvas size सेट करें और glyph को center में रखें; ascenders/descenders को clip होने से बचाने के लिए padding दें।
 
 <details>
 <summary>Python: end-to-end glyph normalization और matching (raster hash + SSIM)</summary>
@@ -222,41 +224,41 @@ return out_runs
 
 ## Layout/EPUB reconstruction heuristics
 
-Source report ने reconstructed document की formatting को preserve करने के लिए run geometry, style fields और link metadata का उपयोग किया।<sup>[[1]](#references)</sup>
+Source report ने reconstructed document की formatting बनाए रखने के लिए run geometry, style fields और link metadata का उपयोग किया था।<sup>[[1]](#references)</sup>
 
-- Paragraph breaks: यदि अगले run का top Y, पिछले line के baseline से एक threshold (font size के सापेक्ष) से अधिक हो, तो नया paragraph शुरू करें।<sup>[[1]](#references)</sup>
-- Alignment: left-aligned paragraphs के लिए समान left X के आधार पर group करें; symmetric margins से centered lines का पता लगाएँ; right edges से right-aligned lines का पता लगाएँ।
-- Styling: `fontStyle`/`fontWeight` के माध्यम से italic/bold को preserve करें; headings और body का अनुमान लगाने के लिए `fontSize` buckets के आधार पर CSS classes बदलें।
+- Paragraph breaks: यदि अगले run का top Y, पिछले line के baseline से (font size के सापेक्ष) निर्धारित threshold से अधिक हो, तो नया paragraph शुरू करें।<sup>[[1]](#references)</sup>
+- Alignment: Left-aligned paragraphs के लिए समान left X वाले समूह बनाएँ; symmetric margins से centered lines का पता लगाएँ; right edges से right-aligned lines पहचानें।
+- Styling: `fontStyle`/`fontWeight` के माध्यम से italic/bold बनाए रखें; headings और body का अनुमान लगाने के लिए `fontSize` buckets के अनुसार CSS classes बदलें।
 - Links: यदि runs में link metadata (जैसे `positionId`) शामिल हो, तो anchors और internal hrefs emit करें।
 
 ## SVG anti-scraping path tricks को कम करना
 
-- `fill-rule: nonzero` वाले filled paths और proper renderer (CairoSVG, resvg) का उपयोग करें। Path token normalization पर निर्भर न रहें।<sup>[[1]](#references)[[2]](#references)[[5]](#references)[[6]](#references)</sup>
-- Stroke rendering से बचें; micro relative moves के कारण होने वाले hairline artifacts को टालने के लिए filled solids पर ध्यान दें।
-- प्रत्येक render के लिए stable viewBox रखें, ताकि identical shapes batches में consistently rasterize हों।
+- `fill-rule: nonzero` वाले filled paths और उचित renderer (CairoSVG, resvg) का उपयोग करें। Path token normalization पर निर्भर न रहें।<sup>[[1]](#references)[[2]](#references)[[5]](#references)[[6]](#references)</sup>
+- Stroke rendering से बचें; micro relative moves के कारण होने वाले hairline artifacts से बचने के लिए filled solids पर ध्यान दें।
+- प्रत्येक render के लिए stable viewBox रखें, ताकि समान shapes अलग-अलग batches में लगातार एक समान rasterize हों।
 
 ## Performance notes
 
-- व्यवहार में, books कुछ hundred unique glyphs (जैसे ligatures सहित ~361) तक converge करती हैं। SSIM results को perceptual hash के आधार पर cache करें।<sup>[[1]](#references)</sup>
-- Initial discovery के बाद, future batches मुख्यतः known hashes का पुनः उपयोग करते हैं; decoding I/O-bound हो जाता है।
-- Cited report ने लगभग 0.95 का average SSIM देखा; low-scoring matches को manual review के लिए flag करें।<sup>[[1]](#references)</sup>
+- व्यवहार में, books कुछ सौ unique glyphs (जैसे ligatures सहित लगभग 361) तक converge करती हैं। SSIM results को perceptual hash के आधार पर cache करें।<sup>[[1]](#references)</sup>
+- Initial discovery के बाद, भविष्य के batches मुख्य रूप से ज्ञात hashes का दोबारा उपयोग करते हैं; decoding I/O-bound हो जाती है।
+- d report ने लगभग 0.95 का average SSIM दर्ज किया; कम score वाले matches को manual review के लिए flag करें।<sup>[[1]](#references)</sup>
 
 ## Generalization to other viewers
 
-Kindle workflow संकेत देता है कि similar viewers में वही normalization लागू की जा सकती है, जब वे:<sup>[[1]](#references)</sup>
+Kindle workflow से संकेत मिलता है कि समान viewers में भी यही normalization संभव हो सकता है, यदि वे:<sup>[[1]](#references)</sup>
 - request-scoped numeric IDs वाले positioned glyph runs return करें
-- per-request vector glyphs (SVG paths या subset fonts) ship करें
-- प्रत्येक request में pages की संख्या सीमित रखें
+- प्रति-request vector glyphs (SVG paths या subset fonts) भेजें
+- प्रति-request pages की संख्या सीमित रखें
 
-…को उसी normalization से handle किया जा सकता है:
-- Per-request shapes को rasterize करें → perceptual hash → shape ID
+…तो इन्हें उसी normalization से handle किया जा सकता है:
+- प्रति-request shapes को rasterize करें → perceptual hash → shape ID
 - प्रत्येक font variant के लिए candidate glyphs/ligatures का atlas
-- Characters assign करने के लिए SSIM (या similar perceptual metric)
+- characters assign करने के लिए SSIM (या समान perceptual metric)
 - run rectangles/styles से layout reconstruct करें
 
 ## Minimal acquisition example (sketch)
 
-Reader द्वारा `/renderer/render` request करते समय उपयोग किए गए exact headers, cookies और tokens को capture करने के लिए अपने browser के DevTools का उपयोग करें। फिर उन्हें किसी script या curl से replicate करें।<sup>[[1]](#references)</sup> Example outline:
+जब reader `/renderer/render` का request करता है, तब उपयोग किए गए exact headers, cookies और tokens capture करने के लिए अपने browser के DevTools का उपयोग करें। फिर उन्हें किसी script या curl से replicate करें।<sup>[[1]](#references)</sup> Example outline:
 ```bash
 curl 'https://read.amazon.com/renderer/render' \
 -H 'Cookie: session-id=...; at-main=...; sess-at-main=...' \
@@ -266,17 +268,17 @@ curl 'https://read.amazon.com/renderer/render' \
 -H 'Accept: application/x-tar' \
 --compressed --output batch_000.tar
 ```
-पाठक के अनुरोधों के अनुसार parameterization (book ASIN, page window, viewport) समायोजित करें। प्रति request अधिकतम 5 pages की सीमा अपेक्षित है।<sup>[[1]](#references)</sup>
+Reader की requests से match करने के लिए parameterization (book ASIN, page window, viewport) को adjust करें। प्रति request 5-page cap की अपेक्षा करें।<sup>[[1]](#references)</sup>
 
 ## प्राप्त किए जा सकने वाले परिणाम
 
-- perceptual hashing के माध्यम से 100+ randomized alphabets को एकल glyph space में समेटें।<sup>[[1]](#references)</sup>
-- उद्धृत 920-page test में, औसत SSIM 0.9527 के साथ 361 unique glyphs का मिलान (100%) किया गया।<sup>[[1]](#references)</sup>
-- source report के अनुसार reconstructed EPUB मूल से लगभग अप्रभेद्य है।<sup>[[1]](#references)</sup>
+- Perceptual hashing के माध्यम से 100+ randomized alphabets को एक single glyph space में collapse करें।<sup>[[1]](#references)</sup>
+- d 920-page test में, 361 unique glyphs का मिलान (100%) हुआ, जिसका average SSIM 0.9527 था।<sup>[[1]](#references)</sup>
+- Source report reconstructed EPUB को original से लगभग indistinguishable बताती है।<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [मैंने Amazon के Kindle Web Obfuscation को reverse किया क्योंकि उनका App बहुत खराब था (Pixelmelt)](https://blog.pixelmelt.dev/kindle-web-drm/)
+- [1] [मैंने Amazon के Kindle Web Obfuscation को reverse किया क्योंकि उनका App बेकार था (Pixelmelt)](https://blog.pixelmelt.dev/kindle-web-drm/)
 - [2] [CairoSVG – SVG से PNG renderer](https://cairosvg.org/)
 - [3] [imagehash – Perceptual image hashing (pHash)](https://pypi.org/project/ImageHash/)
 - [4] [scikit-image – Structural Similarity Index (SSIM)](https://scikit-image.org/docs/stable/api/skimage.metrics.html#skimage.metrics.structural_similarity)
