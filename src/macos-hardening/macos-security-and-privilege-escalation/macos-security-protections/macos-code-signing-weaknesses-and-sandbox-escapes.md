@@ -6,16 +6,16 @@
 
 ### Basic Information
 
-**Ad-hoc signing** (`CS_ADHOC`) एक **code signature** बनाता है जिसमें **कोई certificate chain नहीं** होती — यह developer identity verification के बिना code का hash होता है। Binary के origin को किसी developer या organization तक trace नहीं किया जा सकता।<sup>[[1]](#references)[[4]](#references)</sup>
+**Ad-hoc signing** (`CS_ADHOC`) एक **certificate chain** के बिना code signature बनाता है — यह developer identity verification के बिना code का hash होता है। Binary के origin को किसी developer या organization तक trace नहीं किया जा सकता।<sup>[[1]](#references)[[4]](#references)</sup>
 
 Apple Silicon Macs पर सभी executables के लिए कम-से-कम एक ad-hoc signature आवश्यक होता है। इसका अर्थ है कि आपको कई development tools, Homebrew packages और third-party utilities पर ad-hoc signatures मिलेंगे।
 
 ### Why This Matters
 
-- **कोई verifiable identity नहीं** — identity-based checks द्वारा binary को बिना detection के बदला जा सकता है
+- **कोई verifiable identity नहीं** — identity-based checks द्वारा detection के बिना binary को replace किया जा सकता है
 - **Privileged positions** (FDA, daemon, helpers) में मौजूद third-party ad-hoc binaries high-priority targets होते हैं
 - कुछ configurations में, ad-hoc signatures को developer-signed code जितनी सख्ती से **verify नहीं किया जा सकता**
-- जिन ad-hoc signed binaries के पास **TCC grants** होते हैं, वे विशेष रूप से valuable होते हैं — binary content बदलने पर भी grants persist रहते हैं (यह इस बात पर निर्भर करता है कि TCC ने grant को किस प्रकार key किया है)
+- जिन ad-hoc signed binaries को **TCC grants** प्राप्त हैं, वे विशेष रूप से valuable होते हैं — grants तब भी persist करते हैं जब binary content बदल जाता है (यह इस बात पर निर्भर करता है कि TCC ने grant को कैसे key किया)
 
 ### Discovery
 ```bash
@@ -54,12 +54,12 @@ codesign -s - /path/to/target
 
 ### मूल जानकारी
 
-**`com.apple.security.get-task-allow`** entitlement (या `CS_GET_TASK_ALLOW` flag) **किसी भी process को debugger के रूप में attach होने**, memory पढ़ने, registers को modify करने, code inject करने और execution को control करने की अनुमति देता है।<sup>[[3]](#references)</sup>
+**`com.apple.security.get-task-allow`** entitlement (या **`CS_GET_TASK_ALLOW`** flag) **किसी भी process को debugger के रूप में attach होने**, memory पढ़ने, registers modify करने, code inject करने और execution को control करने की अनुमति देता है।<sup>[[3]](#references)</sup>
 
-यह entitlement **केवल development builds** के लिए intended है। हालांकि, कुछ third-party binaries production में इस entitlement के साथ ship होते हैं।
+यह **केवल development builds** के लिए intended है। हालांकि, कुछ third-party binaries इस entitlement के साथ production में ship होते हैं।
 
 > [!CAUTION]
-> `get-task-allow` वाला production binary **तुरंत exploitation primitive** होता है। कोई भी local process `task_for_pid()` को call कर सकता है, target का Mach task port प्राप्त कर सकता है और arbitrary code inject कर सकता है, जो target के entitlements, TCC grants और security context के साथ run होता है।
+> `get-task-allow` वाला production binary एक **instant exploitation primitive** है। कोई भी local process `task_for_pid()` call कर सकता है, target का Mach task port प्राप्त कर सकता है और ऐसा arbitrary code inject कर सकता है जो target के entitlements, TCC grants और security context के साथ चलता है।
 
 ### Discovery
 ```bash
@@ -76,7 +76,7 @@ JOIN capabilities c ON ec.capability_id = c.id
 WHERE c.name = 'get_task_allow_signature'
 ORDER BY e.privileged DESC;"
 ```
-### Attack: Task Port Injection
+### हमला: Task Port Injection
 ```c
 #include <mach/mach.h>
 #include <mach/mach_vm.h>
@@ -105,13 +105,17 @@ VM_PROT_READ | VM_PROT_EXECUTE);
 
 ## No Library Validation + DYLD Environment
 
-### घातक संयोजन
+### Runtime Library-Validation Clearing
+
+Private entitlement **`com.apple.private.security.clear-library-validation`** process launch पर library validation को disable नहीं करता। इसके बजाय, यह process को runtime पर स्वयं पर `csops(..., CS_OPS_CLEAR_LV, ...)` call करने की अनुमति देता है। इसके बाद XNU `CS_REQUIRE_LV | CS_FORCED_LV` को clear करता है, बशर्ते caller के पास entitlement हो और वह handler की अतिरिक्त checks को पूरा करता हो। नतीजतन, कोई process library-injection target तभी बन सकता है जब वह उस code path तक पहुंच जाए जो library validation को clear करता है।<sup>[[4]](#references)[[5]](#references)</sup>
+
+### The Deadly Combination
 
 जब किसी binary में **दोनों** मौजूद हों:<sup>[[3]](#references)</sup>
-- `com.apple.security.cs.disable-library-validation` (किसी भी dylib को load करता है)
+- `com.apple.security.cs.disable-library-validation` (कोई भी dylib load करता है)
 - `com.apple.security.cs.allow-dyld-environment-variables` (DYLD env vars स्वीकार करता है)
 
-यह **guaranteed code injection primitive** है — `DYLD_INSERT_LIBRARIES` पूरी तरह काम करता है।
+यह एक **guaranteed code injection primitive** है — `DYLD_INSERT_LIBRARIES` पूरी तरह काम करता है।
 
 ### Discovery
 ```bash
@@ -170,15 +174,15 @@ cat /tmp/injected_proof.txt
 
 ### वे Sandbox को कैसे कमजोर बनाते हैं
 
-Sandbox Temporary Exceptions (`com.apple.security.temporary-exception.*`) App Sandbox में छेद बना देते हैं:<sup>[[2]](#references)</sup>
+Sandbox temporary exceptions (`com.apple.security.temporary-exception.*`) App Sandbox में छेद बनाते हैं:<sup>[[2]](#references)</sup>
 
-| Exception | यह क्या अनुमति देता है |
+| Exception | What It Allows |
 |---|---|
 | `temporary-exception.mach-lookup.global-name` | System-wide XPC/Mach services से connect करना |
 | `temporary-exception.files.absolute-path.read-write` | App container के बाहर files को read/write करना |
 | `temporary-exception.iokit-user-client-class` | IOKit user-client connections खोलना |
 | `temporary-exception.shared-preference.read-only` | अन्य apps की preferences read करना |
-| `temporary-exception.files.home-relative-path.read-write` | `~` के सापेक्ष paths तक access करना |
+| `temporary-exception.files.home-relative-path.read-write` | `~` के relative paths को access करना |
 
 ### Mach-Lookup Exceptions = Sandbox Escape Primitive
 
@@ -196,7 +200,7 @@ echo "[$count exceptions] $(basename "$1")"
 }
 ' _ {} \; 2>/dev/null | sort -rn
 ```
-### हमला: Sandbox Escape via Mach-Lookup
+### Attack: Mach-Lookup के जरिए Sandbox Escape
 ```
 1. Compromise sandboxed app (renderer exploit, malicious document, etc.)
 2. Read entitlements to discover mach-lookup exceptions
@@ -211,15 +215,15 @@ c. Fuzz each exposed method
 
 ## Private Apple Entitlements
 
-### ये क्या हैं
+### वे क्या हैं
 
-`com.apple.private.*` से prefixed Entitlements **Apple-internal APIs** तक access प्रदान करते हैं, जो documented नहीं हैं या third-party developers के लिए उपलब्ध नहीं हैं। Private Entitlements वाले third-party binaries उन्हें enterprise cert, MDM या non-App-Store distribution के माध्यम से प्राप्त करते हैं।
+`com.apple.private.*` से prefixed Entitlements **Apple-internal APIs** तक access प्रदान करते हैं, जो third-party developers के लिए documented या available नहीं हैं। Private Entitlements वाले third-party binaries ने उन्हें enterprise cert, MDM या non-App-Store distribution के माध्यम से प्राप्त किया।
 
 ### Dangerous Private Entitlements
 
 | Entitlement | Capability |
 |---|---|
-| `com.apple.private.tcc.manager` | TCC database को पूरी तरह read/write करना |
+| `com.apple.private.tcc.manager` | Full TCC database read/write |
 | `com.apple.private.tcc.allow` | Specific TCC services तक access |
 | `com.apple.private.security.no-sandbox` | Sandbox के बिना run करना |
 | `com.apple.private.iokit` | Direct IOKit driver access |
@@ -250,7 +254,7 @@ ORDER BY privileged DESC;"
 
 ### ये क्या हैं
 
-Binaries, SBPL (Seatbelt Profile Language) में लिखे **custom sandbox profiles** के साथ आ सकती हैं। ये profiles default App Sandbox की तुलना में अधिक restrictive OR **अधिक permissive** हो सकती हैं।
+Binaries, SBPL (Seatbelt Profile Language) में लिखे गए **custom sandbox profiles** के साथ आ सकते हैं। ये profiles default App Sandbox की तुलना में अधिक प्रतिबंधात्मक OR **अधिक permissive** हो सकते हैं।
 
 ### Custom Profiles का Auditing
 ```bash
@@ -274,7 +278,7 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 
 ### ये क्या हैं
 
-जब कोई binary ऐसी dynamic library को किसी ऐसे path से load करती है, जिस पर current user **write** कर सकता है, तो उस library को malicious code से replace किया जा सकता है।
+जब कोई binary किसी ऐसी path से dynamic library लोड करती है, जिस पर current user **लिख सकता है**, तो उस library को malicious code से बदला जा सकता है।
 
 ### Discovery
 ```bash
@@ -293,7 +297,7 @@ otool -L /path/to/binary | awk '{print $1}' | while read lib; do
 [ -f "$lib" ] && [ -w "$lib" ] && echo "WRITABLE: $lib"
 done
 ```
-### Attack: Dylib Replacement
+### हमला: Dylib Replacement
 ```bash
 # 1. Find the writable library
 otool -L /path/to/target-daemon | grep "/usr/local\|/opt\|Library"
@@ -317,12 +321,11 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 
 # 5. When the daemon restarts, it loads the evil dylib with daemon privileges
 ```
-## संदर्भ
+## References
 
-- [1] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
+- [1] [Apple Developer — Code Signing गाइड](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
 - [2] [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
 - [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations और `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
-
+- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` ऑपरेशंस और `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` हैंडलर)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
 {{#include ../../../banners/hacktricks-training.md}}

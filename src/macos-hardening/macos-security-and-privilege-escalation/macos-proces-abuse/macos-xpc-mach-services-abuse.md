@@ -2,16 +2,16 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## मूल जानकारी
 
-**XPC** (Cross-Process Communication) macOS में primary IPC mechanism है। System daemons **Mach services** expose करते हैं — ये `launchd` के साथ registered named ports होते हैं, जिनसे अन्य processes `NSXPCConnection` के माध्यम से connect कर सकते हैं।<sup>[[1]](#references)</sup>
+**XPC** (Cross-Process Communication) macOS पर प्राथमिक IPC mechanism है। System daemons **Mach services** — `launchd` के साथ registered named ports — expose करते हैं, जिनसे अन्य processes `NSXPCConnection` के माध्यम से connect कर सकते हैं।<sup>[[1]](#references)</sup>
 
-`MachServices` key वाली प्रत्येक **LaunchDaemon** और **LaunchAgent** plist एक या अधिक named Mach ports register करती है। ये system-wide XPC endpoints होते हैं, जिनसे कोई भी process connect करने का प्रयास कर सकता है।<sup>[[2]](#references)</sup>
+`MachServices` key वाली प्रत्येक **LaunchDaemon** और **LaunchAgent** plist एक या अधिक named Mach ports register करती है। ये system-wide XPC endpoints हैं, जिनसे कोई भी process connect करने का प्रयास कर सकता है।<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> XPC Mach services macOS पर **single largest local privilege escalation attack surface** हैं। हाल के वर्षों में हुए अधिकांश local root exploits vulnerable XPC services वाले LaunchDaemons के माध्यम से हुए। Root daemon में exposed प्रत्येक method एक potential escalation vector है।
+> XPC Mach services macOS पर **local privilege escalation का सबसे बड़ा attack surface** हैं। हाल के वर्षों में हुए अधिकांश local root exploits, LaunchDaemons में मौजूद vulnerable XPC services के माध्यम से हुए। Root daemon में exposed प्रत्येक method एक संभावित escalation vector है।
 
-### Architecture
+### आर्किटेक्चर
 ```
 Client Process (user context)
 ↓ NSXPCConnection / xpc_connection_create_mach_service()
@@ -23,7 +23,7 @@ Daemon Process (root context)
 ```
 ## Enumeration
 
-### Mach Services वाले Daemons को खोजना
+### Mach Services वाले Daemons को ढूँढना
 ```bash
 # Find all LaunchDaemons with MachServices
 find /Library/LaunchDaemons /System/Library/LaunchDaemons -name "*.plist" -exec sh -c '
@@ -62,11 +62,11 @@ find /Applications -path "*/XPCServices/*.xpc" 2>/dev/null
 ```
 ## XPC Client Verification Vulnerabilities
 
-XPC services में सबसे सामान्य vulnerability class **अपर्याप्त client verification** है। daemon को निम्नलिखित की जाँच करनी चाहिए:
+XPC services में सबसे सामान्य vulnerability class **insufficient client verification** है। Daemon को निम्नलिखित का verification करना चाहिए:
 
-1. कनेक्ट होने वाली process का **Code signature**
-2. कनेक्ट होने वाली process के **Entitlements**
-3. **Audit token** (PID नहीं, क्योंकि उसका दोबारा उपयोग किया जा सकता है)
+1. Connecting process का **Code signature**
+2. Connecting process के **Entitlements**
+3. **Audit token** (PID नहीं, क्योंकि इसका reuse किया जा सकता है)
 
 ### Vulnerable Pattern: No Verification
 ```objc
@@ -79,7 +79,7 @@ newConnection.exportedObject = self;
 return YES; // No verification!
 }
 ```
-### कमजोर पैटर्न: PID-Based Verification (Race Condition)
+### असुरक्षित पैटर्न: PID-Based Verification (Race Condition)
 ```objc
 // VULNERABLE — PID can be reused between check and use
 - (BOOL)listener:(NSXPCListener *)listener
@@ -93,7 +93,7 @@ return YES;
 return NO;
 }
 ```
-### सुरक्षित पैटर्न: Audit Token Verification
+### सुरक्षित Pattern: Audit Token Verification
 ```objc
 // SECURE — Uses audit token which cannot be spoofed
 - (BOOL)listener:(NSXPCListener *)listener
@@ -121,7 +121,7 @@ return YES;
 return NO;
 }
 ```
-## Attack: Unprotected XPC Services से कनेक्ट करना
+## हमला: असुरक्षित XPC Services से कनेक्ट करना
 ```objc
 // Minimal XPC client — connect to a LaunchDaemon's Mach service
 #import <Foundation/Foundation.h>
@@ -157,7 +157,7 @@ NSLog(@"Result: %@", result);
 ```
 ## Attack: XPC Object Deserialization
 
-जटिल objects (`NSSecureCoding` conformant) स्वीकार करने वाली XPC services **deserialization attacks** के प्रति vulnerable हो सकती हैं:
+वे XPC services जो complex objects (`NSSecureCoding` conformant) accept करती हैं, **deserialization attacks** के प्रति vulnerable हो सकती हैं:
 ```objc
 // If the daemon accepts NSObject subclasses via XPC:
 // An attacker can send a crafted object that triggers:
@@ -168,7 +168,7 @@ NSLog(@"Result: %@", result);
 ```
 ## Mach-Lookup Sandbox Exceptions
 
-### Exceptions Sandbox Escape को कैसे सक्षम बनाते हैं
+### Exceptions Sandbox Escape को कैसे सक्षम करते हैं
 
 Sandboxed applications सामान्यतः केवल अपनी XPC services के साथ communicate कर सकती हैं। हालांकि, **mach-lookup exceptions** system-wide services तक पहुंचने की अनुमति देती हैं:
 ```xml
@@ -180,7 +180,7 @@ Sandboxed applications सामान्यतः केवल अपनी XPC
 <string>com.apple.CoreServices.coreservicesd</string>
 </array>
 ```
-### Broad Exceptions वाले Applications ढूँढना
+### Broad Exceptions वाले Applications खोजना
 ```bash
 # Find sandboxed apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -207,11 +207,11 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 
 ### ये कैसे काम करते हैं
 
-`SMJobBless` एक privileged helper इंस्टॉल करता है, जो launchd के माध्यम से root के रूप में चलता है। Helper अपने parent app के साथ XPC के माध्यम से संचार करता है:
+`SMJobBless` एक privileged Helper इंस्टॉल करता है, जो launchd के माध्यम से root के रूप में चलता है। Helper अपने parent app के साथ XPC के माध्यम से communicate करता है:
 ```
 App (user context) ←→ XPC ←→ Helper (root via launchd)
 ```
-### सामान्य Vulnerability: कमजोर Authorization
+### सामान्य भेद्यता: कमजोर Authorization
 ```objc
 // Many helpers check authorization but:
 // 1. Don't verify WHO is connecting (any process can connect)
@@ -238,7 +238,7 @@ reply(YES);
 }
 }
 ```
-### Weak Helpers का Exploitation
+### कमज़ोर Helpers का Exploitation
 ```bash
 # 1. Find installed privileged helpers
 ls /Library/PrivilegedHelperTools/
@@ -281,7 +281,7 @@ log stream --predicate 'process == "daemon-name" AND (eventMessage CONTAINS "cra
 | CVE-2022-22616 | XPC service abuse के माध्यम से Gatekeeper bypass |
 | CVE-2021-30657 | Sysmond XPC privilege escalation |
 | CVE-2020-9839 | system daemon में XPC race condition |
-| CVE-2019-8802 | Privileged helper tool में client verification का अभाव |
+| CVE-2019-8802 | Privileged helper tool में client verification का अभाव<sup>[[5]](#references)</sup> |
 | CVE-2023-32369 | Migraine — `systemmigrationd` XPC के माध्यम से SIP bypass<sup>[[3]](#references)</sup> |
 | CVE-2022-26712 | PackageKit XPC root escalation<sup>[[4]](#references)</sup> |
 
@@ -313,13 +313,11 @@ plutil -p "$plist" | grep -A5 "MachServices" | sed 's/^/    /'
 }
 done
 ```
-## संदर्भ
+## References
 
-- [1] [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
-- [2] [Apple Developer — Daemons and Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
-- [3] [New macOS vulnerability, Migraine, could bypass System Integrity Protection — Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
-- [4] [CVE-2022-26712: The POC for SIP-Bypass Is Even Tweetable](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
-- [5] [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
-- [6] [OBTS — XPC Attack Surface talks](https://objectivebythesea.org/)
-
+- [1] [Apple Developer — XPC सेवाएँ](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
+- [2] [Apple Developer — Daemons और Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
+- [3] [नई macOS vulnerability, Migraine, System Integrity Protection को bypass कर सकती है — Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [4] [CVE-2022-26712: SIP-Bypass का POC अब Tweetable भी है](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
+- [5] [Objective-See — XPC client validation और Rootpipe](https://objective-see.org/blog/blog_0x3E.html)
 {{#include ../../../banners/hacktricks-training.md}}

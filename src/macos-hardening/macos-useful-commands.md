@@ -1,14 +1,14 @@
-# macOS उपयोगी Commands
+# macOS Useful Commands
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS स्वचालित Enumeration Tools
+### MacOS Automatic Enumeration Tools
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### विशिष्ट MacOS Commands
+### Specific MacOS Commands
 ```bash
 #System info
 date
@@ -32,7 +32,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Quick anti-analysis / virtualization check
+### त्वरित anti-analysis / virtualization check
 
-कुछ macOS stealers VMs का पता लगाने के लिए `system_profiler` को call करते हैं और sandbox detonation से बचने के लिए **एक distinct exit code (जैसे, 100) के साथ abort** करते हैं<sup>[[1]](#references)</sup>:
+कुछ macOS stealers VMs का पता लगाने के लिए `system_profiler` को call करते हैं और sandbox detonation से बचने के लिए **एक अलग exit code (जैसे, 100)** के साथ abort करते हैं<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,14 +125,14 @@ fi
 ```
 ### इंस्टॉल किए गए Software और Services
 
-इंस्टॉल किए गए **suspicious** एप्लिकेशन और इंस्टॉल किए गए संसाधनों पर **privileges** की जाँच करें:
+इंस्टॉल किए गए **संदिग्ध** applications और इंस्टॉल किए गए resources पर **privileges** की जाँच करें:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### यूज़र Processes
+### उपयोगकर्ता Processes
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -143,14 +143,13 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
-### एक user बनाएं
+### user बनाएं
 
-बिना prompts के
+बिना prompts
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 
 - [1] [2025, Infostealer का वर्ष](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
 {{#include ../banners/hacktricks-training.md}}

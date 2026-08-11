@@ -7,9 +7,9 @@
 ### [System Info](windows-local-privilege-escalation/index.html#system-info)
 
 - [ ] [**System information**](windows-local-privilege-escalation/index.html#system-info) प्राप्त करें
-- [ ] [**scripts का उपयोग करके kernel exploits खोजें**](windows-local-privilege-escalation/index.html#version-exploits)
-- [ ] kernel **exploits खोजने के लिए Google का उपयोग करें**
-- [ ] kernel **exploits खोजने के लिए searchsploit का उपयोग करें**
+- [ ] [**scripts का उपयोग करके**](windows-local-privilege-escalation/index.html#version-exploits) **kernel** [**exploits खोजें**](windows-local-privilege-escalation/index.html#version-exploits)
+- [ ] **kernel exploits** खोजने के लिए **Google का उपयोग करें**
+- [ ] **kernel exploits** खोजने के लिए **searchsploit का उपयोग करें**
 - [ ] [**env vars**](windows-local-privilege-escalation/index.html#environment) में कोई उपयोगी info?
 - [ ] [**PowerShell history**](windows-local-privilege-escalation/index.html#powershell-history) में passwords?
 - [ ] [**Internet settings**](windows-local-privilege-escalation/index.html#internet-settings) में कोई उपयोगी info?
@@ -20,7 +20,7 @@
 
 ### [Logging/AV enumeration](windows-local-privilege-escalation/index.html#enumeration)
 
-- [ ] [**Audit** ](windows-local-privilege-escalation/index.html#audit-settings)और [**WEF** ](windows-local-privilege-escalation/index.html#wef)settings जाँचें
+- [ ] [**Audit** ](windows-local-privilege-escalation/index.html#audit-settings)और [**WEF** ](windows-local-privilege-escalation/index.html#wef) settings जाँचें
 - [ ] [**LAPS**](windows-local-privilege-escalation/index.html#laps) जाँचें
 - [ ] जाँचें कि [**WDigest** ](windows-local-privilege-escalation/index.html#wdigest)active है या नहीं
 - [ ] [**LSA Protection**](windows-local-privilege-escalation/index.html#lsa-protection)?
@@ -32,19 +32,19 @@
 - [ ] [**Admin Protection / UIAccess silent elevation**](windows-local-privilege-escalation/uiaccess-admin-protection-bypass.md)?<sup>[[1]](#references)</sup>
 - [ ] [**Secure Desktop accessibility registry propagation (RegPwn)**](windows-local-privilege-escalation/secure-desktop-accessibility-registry-propagation-regpwn.md)?<sup>[[2]](#references)</sup>
 - [ ] [**User Privileges**](windows-local-privilege-escalation/index.html#users-and-groups)
-- [ ] [**current**] user के **privileges** जाँचें
+- [ ] [**current**] user के [**privileges**](windows-local-privilege-escalation/index.html#users-and-groups) जाँचें
 - [ ] क्या आप किसी [**privileged group के member**](windows-local-privilege-escalation/index.html#privileged-groups) हैं?
-- [ ] जाँचें कि क्या आपके पास [इनमें से कोई token enabled है](windows-local-privilege-escalation/index.html#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
-- [ ] जाँचें कि आपके पास raw volumes पढ़ने और file ACLs को bypass करने के लिए [**SeManageVolumePrivilege**](windows-local-privilege-escalation/semanagevolume-perform-volume-maintenance-tasks.md) है या नहीं
+- [ ] जाँचें कि आपके पास [इनमें से कोई token enabled](windows-local-privilege-escalation/index.html#token-manipulation) है: **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
+- [ ] जाँचें कि आपके पास raw volumes पढ़ने और file ACLs bypass करने के लिए [**SeManageVolumePrivilege**](windows-local-privilege-escalation/semanagevolume-perform-volume-maintenance-tasks.md) है या नहीं
 - [ ] [**Users Sessions**](windows-local-privilege-escalation/index.html#logged-users-sessions)?
-- [ ] [ **users homes**](windows-local-privilege-escalation/index.html#home-folders) (access?) जाँचें
+- [ ] [**users homes**](windows-local-privilege-escalation/index.html#home-folders) जाँचें (access?)
 - [ ] [**Password Policy**](windows-local-privilege-escalation/index.html#password-policy) जाँचें
-- [ ] [ **Clipboard में क्या है**](windows-local-privilege-escalation/index.html#get-the-content-of-the-clipboard)?
+- [ ] [**Clipboard के अंदर**](windows-local-privilege-escalation/index.html#get-the-content-of-the-clipboard) क्या है?
 
 ### [Network](windows-local-privilege-escalation/index.html#network)
 
 - [ ] **current** [**network** **information**](windows-local-privilege-escalation/index.html#network) जाँचें
-- [ ] बाहरी access से restricted **hidden local services** जाँचें
+- [ ] बाहर से restricted **hidden local services** जाँचें
 
 ### [Running Processes](windows-local-privilege-escalation/index.html#running-processes)
 
@@ -56,21 +56,21 @@
 ### [Services](windows-local-privilege-escalation/index.html#services)
 
 - [ ] [क्या आप **किसी service को modify** कर सकते हैं?](windows-local-privilege-escalation/index.html#permissions)
-- [ ] [क्या आप किसी **service** द्वारा **executed** **binary** को **modify** कर सकते हैं?](windows-local-privilege-escalation/index.html#modify-service-binary-path)
-- [ ] [क्या आप किसी **service** की **registry** को **modify** कर सकते हैं?](windows-local-privilege-escalation/index.html#services-registry-modify-permissions)
+- [ ] [क्या आप किसी **service द्वारा **executed** **binary** को **modify** कर सकते हैं?](windows-local-privilege-escalation/index.html#modify-service-binary-path)
+- [ ] [क्या आप किसी **service की **registry** को **modify** कर सकते हैं?](windows-local-privilege-escalation/index.html#services-registry-modify-permissions)
 - [ ] [क्या आप किसी **unquoted service** binary **path** का लाभ उठा सकते हैं?](windows-local-privilege-escalation/index.html#unquoted-service-paths)
-- [ ] [Service Triggers: privileged services को enumerate और trigger करें](windows-local-privilege-escalation/service-triggers.md)
+- [ ] [Service Triggers: privileged services enumerate और trigger करें](windows-local-privilege-escalation/service-triggers.md)
 
 ### [**Applications**](windows-local-privilege-escalation/index.html#applications)
 
-- [ ] **installed applications पर** [**Write** **permissions**](windows-local-privilege-escalation/index.html#write-permissions)
+- [ ] Installed applications पर [**permissions लिखें**](windows-local-privilege-escalation/index.html#write-permissions)
 - [ ] [**Startup Applications**](windows-local-privilege-escalation/index.html#run-at-startup)
 - [ ] **Vulnerable** [**Drivers**](windows-local-privilege-escalation/index.html#drivers)
 
 ### [DLL Hijacking](windows-local-privilege-escalation/index.html#path-dll-hijacking)
 
 - [ ] क्या आप **PATH के अंदर किसी folder में write** कर सकते हैं?
-- [ ] क्या कोई ज्ञात service binary है जो **किसी non-existant DLL को load करने का प्रयास** करती है?
+- [ ] क्या कोई ज्ञात service binary है जो **किसी non-existent DLL को load करने का प्रयास** करती है?
 - [ ] क्या आप किसी **binaries folder में write** कर सकते हैं?
 
 ### [Network](windows-local-privilege-escalation/index.html#network)
@@ -84,10 +84,10 @@
 - [ ] [**Windows Vault**](windows-local-privilege-escalation/index.html#credentials-manager-windows-vault) credentials जिन्हें आप उपयोग कर सकते हैं?
 - [ ] उपयोगी [**DPAPI credentials**](windows-local-privilege-escalation/index.html#dpapi)?
 - [ ] Saved [**Wifi networks**](windows-local-privilege-escalation/index.html#wifi) के passwords?
-- [ ] [**saved RDP Connections**](windows-local-privilege-escalation/index.html#saved-rdp-connections) में उपयोगी info?
+- [ ] [**saved RDP Connections**](windows-local-privilege-escalation/index.html#saved-rdp-connections) में कोई उपयोगी info?
 - [ ] [**recently run commands**](windows-local-privilege-escalation/index.html#recently-run-commands) में passwords?
 - [ ] [**Remote Desktop Credentials Manager**](windows-local-privilege-escalation/index.html#remote-desktop-credential-manager) passwords?
-- [ ] क्या [**AppCmd.exe** मौजूद है](windows-local-privilege-escalation/index.html#appcmd-exe)? Credentials?
+- [ ] [**AppCmd.exe exists**](windows-local-privilege-escalation/index.html#appcmd-exe)? Credentials?
 - [ ] [**SCClient.exe**](windows-local-privilege-escalation/index.html#scclient-sccm)? DLL Side Loading?
 
 ### [Files and Registry (Credentials)](windows-local-privilege-escalation/index.html#files-and-registry-credentials)
@@ -101,13 +101,13 @@
 - [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/index.html#mcafee-sitelist.xml) file?
 - [ ] [**Cached GPP Password**](windows-local-privilege-escalation/index.html#cached-gpp-pasword)?
 - [ ] [**IIS Web config file**](windows-local-privilege-escalation/index.html#iis-web-config) में password?
-- [ ] [**web** **logs**](windows-local-privilege-escalation/index.html#logs) में उपयोगी info?
+- [ ] [**web** **logs**](windows-local-privilege-escalation/index.html#logs) में कोई उपयोगी info?
 - [ ] क्या आप user से [**credentials माँगना**](windows-local-privilege-escalation/index.html#ask-for-credentials) चाहते हैं?
-- [ ] [**Recycle Bin के अंदर interesting files**](windows-local-privilege-escalation/index.html#credentials-in-the-recyclebin)?
+- [ ] [**Recycle Bin के अंदर files**](windows-local-privilege-escalation/index.html#credentials-in-the-recyclebin) उपयोगी हैं?
 - [ ] अन्य [**registry containing credentials**](windows-local-privilege-escalation/index.html#inside-the-registry)?
 - [ ] [**Browser data**](windows-local-privilege-escalation/index.html#browsers-history) के अंदर (dbs, history, bookmarks, ...)?
-- [ ] files और registry में [**Generic password search**](windows-local-privilege-escalation/index.html#generic-password-search-in-files-and-registry)
-- [ ] passwords को automatically search करने के लिए [**Tools**](windows-local-privilege-escalation/index.html#tools-that-search-for-passwords)
+- [ ] Files और registry में [**Generic password search**](windows-local-privilege-escalation/index.html#generic-password-search-in-files-and-registry)
+- [ ] Passwords को automatically search करने के लिए [**Tools**](windows-local-privilege-escalation/index.html#tools-that-search-for-passwords)
 
 ### [Leaked Handlers](windows-local-privilege-escalation/index.html#leaked-handlers)
 
@@ -119,7 +119,6 @@
 
 ## References
 
-- [1] [Project Zero - Bypassing Administrator Protection by Abusing UI Access](https://projectzero.google/2026/02/windows-administrator-protection.html)
+- [1] [Project Zero - UI Access का abuse करके Administrator Protection को bypass करना](https://projectzero.google/2026/02/windows-administrator-protection.html)
 - [2] [MDSec - RIP RegPwn](https://www.mdsec.co.uk/2026/03/rip-regpwn/)
-
 {{#include ../banners/hacktricks-training.md}}
