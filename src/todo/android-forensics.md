@@ -47,6 +47,22 @@ Hash the result and record the exact command, device identifiers, time, and any 
 
 LiME can acquire physical memory from Linux and some Android devices, but its kernel module must be built for the target kernel and loaded with sufficient privileges. Module signing, kernel lockdown, and modern Android hardening may prevent it from loading.<sup>[[5]](#references)</sup>
 
+The project's Android workflow pushes the matching module with ADB, forwards a TCP port, loads the module from a root shell, and captures the stream on the examination host:<sup>[[5]](#references)</sup>
+
+```bash
+adb push lime.ko /sdcard/lime.ko
+adb forward tcp:4444 tcp:4444
+adb shell
+su
+insmod /sdcard/lime.ko "path=tcp:4444 format=lime"
+```
+
+```bash
+nc localhost 4444 > ram.lime
+```
+
+LiME can instead write to device storage with `path=/sdcard/ram.lime`, but that changes the device's storage and requires enough free space. Record that side effect and hash the acquired image.<sup>[[1]](#references)</sup><sup>[[5]](#references)</sup>
+
 ## References
 
 - [1] [NIST SP 800-101 Rev. 1 - Guidelines on Mobile Device Forensics](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-101r1.pdf)
