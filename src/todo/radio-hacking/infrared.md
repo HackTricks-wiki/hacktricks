@@ -2,73 +2,73 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Hoe die infrarooi werk <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
+## Hoe die Infrarooi Werk <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Infrarooi lig is onsigbaar vir mense**. Die IR-golflengte is van **0.7 tot 1000 mikron**. Huishoudelike afstandbeheerders gebruik 'n IR-sein vir data-oordrag en werk in die golflengtereeks van 0.75..1.4 mikron. 'n Mikrobeheerder in die afstandbeheerder laat 'n infrarooi-LED teen 'n spesifieke frekwensie flikker, wat die digitale sein in 'n IR-sein omskakel.
+**Infrarooi lig is onsigbaar vir mense**. IR-golflengte strek van **0.7 tot 1000 mikron**. Huishoudelike afstandbeheerders gebruik ’n IR-sein vir data-oordrag en werk binne die golflengtereeks van 0.75..1.4 mikron. ’n Mikrobeheerder in die afstandbeheerder laat ’n infrarooi-LED teen ’n spesifieke frekwensie flikker, wat die digitale sein in ’n IR-sein omskakel.
 
-'n **Fotontvanger** word gebruik om IR-seine te ontvang. Dit **skakel IR-lig om in spanningspulse**, wat reeds **digitale seine** is. Gewoonlik is daar 'n **donkerligfilter binne die ontvanger**, wat **slegs die verlangde golflengte deurlaat** en geraas uitsny.<sup>[[1]](#references)</sup>
+Om IR-seine te ontvang, word ’n **fotontvanger** gebruik. Dit **skakel IR-lig om in spanningspulse**, wat reeds **digitale seine** is. Gewoonlik is daar ’n **donkerligfilter binne die ontvanger**, wat **slegs die gewenste golflengte deurlaat** en geraas uitsny.<sup>[[1]](#references)</sup>
 
 ### Verskeidenheid IR-protokolle <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR-protokolle verskil in 3 faktore:<sup>[[1]](#references)</sup>
+IR-protokolle verskil volgens 3 faktore:<sup>[[1]](#references)</sup>
 
-- bis-enkodering
+- bisenkodering
 - datastruktuur
-- drafrekwensie — dikwels in die reeks 36..38 kHz
+- draagdraerfrekwensie — dikwels in die reeks 36..38 kHz
 
-#### Maniere van bis-enkodering <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
+#### Maniere van bisenkodering <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
 **1. Pulse Distance Encoding**
 
-Bisse word geënkodeer deur die duur van die spasie tussen pulse te moduleer. Die wydte van die puls self is konstant.
+Bisse word geënkodeer deur die duur van die spasie tussen pulse te moduleer. Die breedte van die puls self is konstant.
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
 **2. Pulse Width Encoding**
 
-Bisse word deur die modulasie van die pulswydte geënkodeer. Die wydte van die spasie ná die puls-burst is konstant.
+Bisse word geënkodeer deur die pulsbreedte te moduleer. Die breedte van die spasie ná die pulstrein is konstant.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
 **3. Phase Encoding**
 
-Dit staan ook as Manchester encoding bekend. Die logiese waarde word deur die polariteit van die oorgang tussen die puls-burst en spasie bepaal. "Spasie na puls-burst" dui logika "0" aan, en "puls-burst na spasie" dui logika "1" aan.
+Dit staan ook as Manchester encoding bekend. Die logiese waarde word deur die polariteit van die oorgang tussen die pulstrein en spasie bepaal. "Spasie na pulstrein" dui logika "0" aan, en "pulstrein na spasie" dui logika "1" aan.
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. Kombinasie van die voriges en ander eksotiese metodes**
+**4. Kombinasie van voriges en ander eksotiese metodes**
 
 > [!TIP]
-> Daar is IR-protokolle wat **universeel vir verskeie tipes toestelle probeer word**. Die bekendste is RC5 en NEC. Ongelukkig beteken die **bekendste nie die algemeenste nie**. In my omgewing het ek slegs twee NEC-afstandbeheerders en geen RC5-eenhede teëgekom nie.
+> Daar is IR-protokolle wat **universeel probeer word** vir verskeie tipes toestelle. Die bekendstes is RC5 en NEC. Ongelukkig beteken die **bekendste nie die algemeenste nie**. In my omgewing het ek slegs twee NEC-afstandbeheerders en geen RC5-eenhede teëgekom nie.
 >
 > Vervaardigers gebruik graag hul eie unieke IR-protokolle, selfs binne dieselfde reeks toestelle (byvoorbeeld TV-bokse). Daarom kan afstandbeheerders van verskillende maatskappye, en soms van verskillende modelle van dieselfde maatskappy, nie met ander toestelle van dieselfde tipe werk nie.
 
-### Verkenning van 'n IR-sein
+### Ondersoek van ’n IR-sein
 
-Die betroubaarste manier om te sien hoe die IR-sein van die afstandbeheerder lyk, is om 'n ossilloskoop te gebruik. Dit demoduleer of inverteer nie die ontvangde sein nie; dit word bloot "soos dit is" vertoon. Dit is nuttig vir toetsing en debugging. Ek sal die verwagte sein aan die hand van die NEC IR-protokol wys.<sup>[[1]](#references)</sup>
+Die betroubaarste manier om te sien hoe die IR-sein van die afstandbeheerder lyk, is om ’n ossilloskoop te gebruik. Dit demoduleer of inverteer nie die ontvangde sein nie; dit vertoon dit bloot "soos dit is". Dit is nuttig vir toetsing en ontfouting. Ek sal die verwagte sein aan die hand van die NEC IR-protokol wys.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-Gewoonlik is daar aan die begin van 'n geënkodeerde pakkie 'n aanhef. Dit stel die ontvanger in staat om die vlak van versterking en agtergrond te bepaal. Daar is ook protokolle sonder 'n aanhef, byvoorbeeld Sharp.
+Gewoonlik is daar ’n aanhef aan die begin van ’n geënkodeerde pakkie. Dit stel die ontvanger in staat om die vlak van versterking en die agtergrond te bepaal. Daar is ook protokolle sonder ’n aanhef, byvoorbeeld Sharp.
 
-Daarna word data oorgedra. Die struktuur, aanhef en bis-enkoderingsmetode word deur die spesifieke protokol bepaal.
+Daarna word data oorgedra. Die struktuur, aanhef en bisenkoderingsmetode word deur die spesifieke protokol bepaal.
 
-**Die NEC IR-protokol** bevat 'n kort opdrag en 'n herhalingskode, wat gestuur word terwyl die knoppie gedruk word. Beide die opdrag en die herhalingskode het dieselfde aanhef aan die begin.
+**NEC IR-protokol** bevat ’n kort command en ’n repeat code, wat gestuur word terwyl die knoppie gedruk word. Beide die command en die repeat code het dieselfde aanhef aan die begin.
 
-Die NEC-**opdrag** bestaan, benewens die aanhef, uit 'n adresgreep en 'n opdrag-nommer-greep, waarvolgens die toestel verstaan wat uitgevoer moet word. Adres- en opdrag-nommer-grepe word met inverse waardes gedupliseer om die integriteit van die oordrag te kontroleer. Daar is 'n bykomende stopbis aan die einde van die opdrag.
+Die NEC **command** bestaan, benewens die aanhef, uit ’n adresgreep en ’n command-nommergreep, waarmee die toestel verstaan wat uitgevoer moet word. Adres- en command-nommergrepe word met inverse waardes gedupliseer om die integriteit van die oordrag te kontroleer. Daar is ’n bykomende stopbis aan die einde van die command.
 
-Die **herhalingskode** het 'n "1" ná die aanhef, wat 'n stopbis is.
+Die **repeat code** het ’n "1" ná die aanhef, wat ’n stopbis is.
 
-Vir **logika "0" en "1"** gebruik NEC Pulse Distance Encoding: eerstens word 'n puls-burst gestuur, waarna daar 'n pouse is; die lengte daarvan bepaal die waarde van die bis.
+Vir **logika "0" en "1"** gebruik NEC Pulse Distance Encoding: eerstens word ’n pulstrein gestuur, gevolg deur ’n pouse waarvan die lengte die waarde van die bis bepaal.
 
 ### Lugversorgers
 
-Anders as ander afstandbeheerders, **stuur lugversorgers nie net die kode van die gedrukte knoppie nie**. Hulle **stuur ook al die inligting** wanneer 'n knoppie gedruk word om te verseker dat die **lugversorgde toestel en die afstandbeheerder gesinchroniseer is**.\
-Dit voorkom dat 'n toestel wat op 20ºC gestel is, met een afstandbeheerder na 21ºC verhoog word, en dat die temperatuur daarna met 'n ander afstandbeheerder, wat steeds die temperatuur as 20ºC het, verder verhoog word en dit na 21ºC "verhoog" (in plaas van na 22ºC, omdat dit dink die temperatuur is reeds 21ºC).<sup>[[1]](#references)</sup>
+Anders as ander afstandbeheerders, **stuur lugversorgers nie slegs die kode van die gedrukte knoppie nie**. Hulle **stuur ook al die inligting** wanneer ’n knoppie gedruk word om te verseker dat die **lugversorgingseenheid en die afstandbeheerder gesinchroniseer is**.\
+Dit voorkom dat ’n eenheid wat op 20ºC gestel is, met een afstandbeheerder na 21ºC verhoog word, en dat die temperatuur daarna met ’n ander afstandbeheerder, wat steeds die temperatuur as 20ºC het, verder verhoog word na 21ºC (en nie na 22ºC nie, omdat dit dink die temperatuur is reeds 21ºC).<sup>[[1]](#references)</sup>
 
 ---
 
-## Aanvalle & offensiewe navorsing <a href="#attacks" id="attacks"></a>
+## Aanvalle & Offensiewe Navorsing <a href="#attacks" id="attacks"></a>
 
 Jy kan Infrarooi met Flipper Zero aanval:
 
@@ -79,46 +79,45 @@ flipper-zero/fz-infrared.md
 
 ### Oorname van Smart-TV / Set-top Box (EvilScreen)
 
-Onlangse akademiese werk (EvilScreen, 2022) het gedemonstreer dat **multi-kanaal-afstandbeheerders wat Infrarooi met Bluetooth of Wi-Fi kombineer, misbruik kan word om moderne smart-TV's volledig te kaap**. Die aanval kombineer IR-dienskodes met hoë voorregte met geverifieerde Bluetooth-pakkette, omseil kanaalisolasie en maak arbitrêre programlanserings, mikrofoonaktivering of 'n fabriekterugstelling sonder fisiese toegang moontlik. Daar is bevestig dat agt hoofstroom-TV's van verskillende verskaffers — insluitend 'n Samsung-model wat ISO/IEC 27001-nakoming beweer — kwesbaar is. Versagting vereis firmware-regstellings van die verskaffer of die volledige deaktivering van ongebruikte IR-ontvangers.<sup>[[2]](#references)</sup>
+Onlangse akademiese navorsing (EvilScreen, 2022) het getoon dat **multi-kanaal-afstandbeheerders wat Infrarooi met Bluetooth of Wi-Fi kombineer, misbruik kan word om moderne smart-TV’s volledig te kaap**. Die aanvalsketting kombineer IR-dienskodes met hoë voorregte met geverifieerde Bluetooth-pakkies, omseil kanaalisolasie en maak arbitrêre programlanserings, mikrofoonaktivering of ’n fabrieksterugstelling sonder fisiese toegang moontlik. Daar is bevestig dat agt algemene TV’s van verskillende verskaffers — insluitend ’n Samsung-model wat ISO/IEC 27001-nakoming beweer — kwesbaar is. Versagting vereis firmware-herstelwerk deur die verskaffer of die volledige deaktivering van ongebruikte IR-ontvangers.<sup>[[2]](#references)</sup>
 
-### Lug-gaping-data-uitlekking via IR-LED's (aIR-Jumper-familie)
+### Data-ekfiltrasie vanaf ’n luggeïsoleerde netwerk via IR-LED’s (aIR-Jumper-familie)
 
-Sekuriteitskameras, routers en selfs kwaadwillige USB-stokkies bevat dikwels **infrarooi-LED's vir nagsig**. Navorsing toon dat malware hierdie LED's kan moduleer (<10–20 kbit/s met eenvoudige OOK) om **geheime deur mure en vensters uit te lek** na 'n eksterne kamera wat tientalle meter verder geplaas is.<sup>[[3]](#references)</sup> Omdat die lig buite die sigbare spektrum is, merk operateurs dit selde op. Teenmaatreëls:
+Sekuriteitskameras bevat dikwels **infrarooi-LED’s vir nagsig**. Die aIR-Jumper-prototipe het getoon dat malware wat daardie LED’s beheer, **geheime deur vensters na ’n eksterne kamera kan eksfiltreer** teen tot **20 bis/s per toesigkamera** oor tientalle meter. In die omgekeerde rigting het die navorsers infiltrasie teen meer as **100 bis/s** oor afstande van honderde meter tot kilometers gedemonstreer.<sup>[[3]](#references)</sup> Omdat die lig buite die sigbare spektrum is, sal operateurs dit moontlik nie opmerk nie. Teenmaatreëls sluit in:
 
-* Fisies beskerm of verwyder IR-LED's in sensitiewe gebiede
-* Monitor die LED-dienssiklus en firmware-integriteit van kameras
+* Skerm of verwyder IR-LED’s fisies in sensitiewe gebiede
+* Monitor die kameraled-dienssiklus en firmware-integriteit
 * Ontplooi IR-snyfilters op vensters en toesigkameras
 
-'n Aanvaller kan ook sterk IR-projektors gebruik om opdragte in die netwerk te **infiltreer** deur data terug te flits na onseker kameras.
+’n Aanvaller kan ook sterk IR-projektors gebruik om opdragte in die netwerk te **infiltreer** deur data terug na onveilige kameras te flits.
 
 ### Brute-force oor lang afstande & uitgebreide protokolle met Flipper Zero 1.0
 
-Firmware 1.0 (September 2024) het **dosyne ekstra IR-protokolle en opsionele eksterne versterkermodules** bygevoeg. Gekombineer met die universele-afstandbeheerder-brute-force-modus kan 'n Flipper die meeste openbare TV's/AC's van tot 30 m af deaktiveer of herkonfigureer deur 'n hoëkragdiode te gebruik.
+Firmware 1.0 (September 2024) het die universal-remotes-biblioteek uitgebrei en dinamiese laai van infrarooi-bate-lêers vanaf microSD bygevoeg.<sup>[[4]](#references)</sup> Die leer- en universal-remote-funksies kan bekende opdragte teen nabygeleë TV’s en lugversorgers herhaal of probeer. Bereik hang sterk af van die emitter, optika, omgewingslig en ontvanger; eksterne IR-hardeware kan dit uitbrei, maar ’n vaste afstand moet nie aanvaar word nie.
 
 ---
 
-## Tooling & praktiese voorbeelde <a href="#tooling" id="tooling"></a>
+## Gereedskap & Praktiese Voorbeelde <a href="#tooling" id="tooling"></a>
 
 ### Hardeware
 
-* **Flipper Zero** – draagbare transceiver met leer-, replay- en dictionary-bruteforce-modusse (sien hierbo).
-* **Arduino / ESP32** + IR-LED / TSOP38xx-ontvanger – goedkoop DIY-ontleder/-sender. Kombineer dit met die `Arduino-IRremote`-library (v4.x ondersteun >40 protokolle).
-* **Logic analysers** (Saleae/FX2) – neem rou tydsberekeninge vas wanneer die protokol onbekend is.
-* **Slimfone met IR-blaster** (bv. Xiaomi) – vinnige veldtoets, maar met beperkte reikwydte.
+* **Flipper Zero** – draagbare transceiver met leer-, herhaal- en dictionary-bruteforce-modusse (sien hierbo).
+* **Arduino / ESP32** + IR-LED / TSOP38xx-ontvanger – goedkoop DIY-ontleder/-sender. Kombineer met die `Arduino-IRremote`-biblioteek (v4.x ondersteun >40 protokolle).
+* **Logika-ontleders** (Saleae/FX2) – vang rou tydsberekeninge vas wanneer die protokol onbekend is.
+* **Slimfone met IR-blaster** (bv. Xiaomi) – vinnige veldtoets, maar met beperkte bereik.
 
 ### Sagteware
 
-* **`Arduino-IRremote`** – aktief onderhoude C++-library:
+* **`Arduino-IRremote`** – aktief onderhoude C++-biblioteek:<sup>[[5]](#references)</sup>
 ```cpp
 #include <IRremote.hpp>
-IRsend sender;
-void setup(){ sender.begin(); }
+void setup(){ IrSender.begin(3); }
 void loop(){
-sender.sendNEC(0x20DF10EF, 32); // Samsung TV Power
+IrSender.sendNEC(0x00, 0x10, 0); // address, command, repeats
 delay(5000);
 }
 ```
-* **IRscrutinizer / AnalysIR** – GUI-dekodeerders wat rou opnames invoer, die protokol outomaties identifiseer en Pronto/Arduino-kode genereer.
+* **IRscrutinizer / AnalysIR** – GUI-dekodeerders wat rou opnames invoer, die protokol outomaties identifiseer en Pronto-/Arduino-kode genereer.
 * **LIRC / ir-keytable (Linux)** – ontvang en injecteer IR vanaf die command line:
 ```bash
 sudo ir-keytable -p nec,rc5 -t   # live-dump decoded scancodes
@@ -127,17 +126,18 @@ irsend SEND_ONCE samsung KEY_POWER
 
 ---
 
-## Defensiewe maatreëls <a href="#defense" id="defense"></a>
+## Verdedigingsmaatreëls <a href="#defense" id="defense"></a>
 
 * Deaktiveer of bedek IR-ontvangers op toestelle wat in openbare ruimtes ontplooi is wanneer dit nie vereis word nie.
-* Dwing *pairing* of kriptografiese kontroles tussen smart-TV's en afstandbeheerders af; isoleer bevoorregte “diens”-kodes.
+* Dwing *pairing* of kriptografiese kontroles tussen smart-TV’s en afstandbeheerders af; isoleer bevoorregte “diens”-kodes.
 * Ontplooi IR-snyfilters of aaneenlopende-golf-detektors rondom geklassifiseerde gebiede om optiese geheime kanale te verbreek.
-* Monitor die firmware-integriteit van kameras/IoT-toestelle wat beheerbare IR-LED's blootstel.
+* Monitor die firmware-integriteit van kameras/IoT-toestelle wat beheerbare IR-LED’s blootstel.
 
-## Verwysings
+## References
 
-- [1] [Flipper Zero Infrared blog post](https://blog.flipperzero.one/infrared/)
-- [2] [EvilScreen Attack: Smart TV Hijacking via Multi-channel Remote Control Mimicry (arXiv:2210.03014)](https://arxiv.org/abs/2210.03014)
-- [3] [aIR-Jumper: Covert Air-Gap Exfiltration/Infiltration via Security Cameras & Infrared (IR) (arXiv:1709.05742)](https://arxiv.org/abs/1709.05742)
-
+- [1] [Flipper Zero Infrarooi-blogplasing](https://blog.flipperzero.one/infrared/)
+- [2] [EvilScreen-aanval: Smart-TV-kaapping via multikanaal-afstandbeheer-nabootsing (arXiv:2210.03014)](https://arxiv.org/abs/2210.03014)
+- [3] [aIR-Jumper: Bedekte lugruim-ekfiltrasie/-infiltrasie via sekuriteitskameras en infrarooi (IR) (arXiv:1709.05742)](https://arxiv.org/abs/1709.05742)
+- [4] [Flipper Zero-blog - Firmware 1.0 vrygestel](https://blog.flipper.net/released-firmware-1/)
+- [5] [Arduino-IRremote - gebruiks- en protokol-dokumentasie](https://github.com/Arduino-IRremote/Arduino-IRremote)
 {{#include ../../banners/hacktricks-training.md}}

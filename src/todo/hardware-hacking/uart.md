@@ -2,51 +2,51 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basiese Inligting
+## Basiese inligting
 
-UART is ’n serial protocol, wat beteken dat dit data tussen komponente een bis op ’n slag oordra. In teenstelling hiermee stuur parallelle kommunikasieprotokolle data gelyktydig deur verskeie kanale. Algemene serial protocols sluit RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express en USB in.
+UART is ’n asinchrone seriële koppelvlak wat ’n geraamde stroom bisse sonder ’n gedeelde klok oordra. Moenie UART op logikavlak met RS-232 verwar nie: RS-232 gebruik ander, dikwels negatiewe, spanningsvlakke en vereis ’n transceiver.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Oor die algemeen word die lyn hoog gehou (teen ’n logiese 1-waarde) terwyl UART in die idle-toestand is. Dan, om die begin van ’n data-oordrag aan te dui, stuur die transmitter ’n start bit na die receiver, waartydens die sein laag gehou word (teen ’n logiese 0-waarde). Vervolgens stuur die transmitter vyf tot agt databisse wat die werklike boodskap bevat, gevolg deur ’n opsionele parity bit en een of twee stop bits (met ’n logiese 1-waarde), afhangend van die konfigurasie. Die parity bit, wat vir foutkontrolering gebruik word, word selde in die praktyk gesien. Die stop bit (of bits) dui die einde van die transmissie aan.
+Oor die algemeen word die lyn hoog gehou (op ’n logiese 1-waarde) terwyl UART in die ledige toestand is. Om die begin van ’n data-oordrag aan te dui, stuur die sender ’n beginbis na die ontvanger, waartydens die sein laag gehou word (op ’n logiese 0-waarde). Vervolgens stuur die sender vyf tot agt databisse wat die werklike boodskap bevat, gevolg deur ’n opsionele pariteitsbis en een of twee stopbisse (met ’n logiese 1-waarde), afhangend van die konfigurasie. Die pariteitsbis, wat vir foutkontrole gebruik word, word selde in die praktyk gesien. Die stopbis (of -bisse) dui die einde van die oordrag aan.
 
-Ons noem die algemeenste konfigurasie 8N1: agt databisse, geen parity nie, en een stop bit. Byvoorbeeld, indien ons die karakter C, of 0x43 in ASCII, in ’n 8N1 UART-konfigurasie wou stuur, sou ons die volgende bisse stuur: 0 (die start bit); 0, 1, 0, 0, 0, 0, 1, 1 (die waarde van 0x43 in binêre), en 0 (die stop bit).
+Die algemeenste konfigurasie is 8N1: agt databisse, geen pariteit nie, en een stopbis. UART stuur die minste-betekenisvolle databis eerste, dus word ASCII `C` (`0x43`) as volg versend: begin `0`; data `1, 1, 0, 0, 0, 0, 1, 0`; stop `1`.<sup>[[1]](#references)</sup>
 
-![UART: Ons noem die algemeenste konfigurasie 8N1: agt databisse, geen parity nie, en een stop bit. Byvoorbeeld, indien ons die karakter C, of 0x43 in ASCII, in ’n 8N1 UART wou stuur](<../../images/image (764).png>)
+![UART: Ons noem die algemeenste konfigurasie 8N1: agt databisse, geen pariteit nie, en een stopbis. Byvoorbeeld, as ons die karakter C, of 0x43 in ASCII, in ’n 8N1 UART wou stuur](<../../images/image (764).png>)
 
-Hardware tools om met UART te kommunikeer:
+Hardeware-nutsmiddels om met UART te kommunikeer:
 
-- USB-to-serial adapter
-- Adapters met die CP2102- of PL2303-chips
-- Multipurpose tool soos: Bus Pirate, die Adafruit FT232H, die Shikra of die Attify Badge
+- USB-na-seriële adapter
+- Adapters met die CP2102- of PL2303-skyfies
+- Veeldoelige hulpmiddel soos: Bus Pirate, die Adafruit FT232H, die Shikra, of die Attify Badge
 
 ### Identifisering van UART-poorte
 
-UART het 4 poorte: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage) en **GND**(Ground). Jy kan moontlik 4 poorte vind met die letters **`TX`** en **`RX`** wat op die PCB **geskryf** is. Maar indien daar geen aanduiding is nie, moet jy dit moontlik self probeer vind deur ’n **multimeter** of ’n **logic analyzer** te gebruik.
+’n Tipiese debug-header stel **TX**, **RX**, en **GND** bloot; dit kan ook ’n **Vcc/Vref**-pen, reset- of vloeibeheerpenne blootstel. Vcc is nie ’n UART-sein nie en moet normaalweg slegs as ’n spanningsverwysing gebruik word—nie as ’n kragbron gekoppel word nie—tensy die bord se skematiese diagram en stroomvereistes bekend is.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Met ’n **multimeter** en die toestel afgeskakel:
+Begin met die toestel **afgeskakel** en ontkoppel:
 
-- Om die **GND**-pen te identifiseer, gebruik die **Continuity Test**-modus, plaas die swart meetpen op ground en toets met die rooi een totdat jy ’n geluid van die multimeter hoor. Verskeie GND-penne kan op die PCB gevind word, dus het jy moontlik die een gevind wat aan UART behoort, of moontlik nie.
-- Om die **VCC-poort** te identifiseer, stel die **DC voltage mode** in en stel dit op 20 V. Plaas die swart meetpen op ground en die rooi meetpen op die pen. Skakel die toestel aan. Indien die multimeter ’n konstante spanning van óf 3.3 V óf 5 V meet, het jy die Vcc-pen gevind. Indien jy ander spannings kry, probeer weer met ander poorte.
-- Om die **TX**-**poort** te identifiseer, gebruik **DC voltage mode** tot 20 V, plaas die swart meetpen op ground en die rooi meetpen op die pen, en skakel die toestel aan. Indien jy vind dat die spanning vir ’n paar sekondes fluktueer en dan by die Vcc-waarde stabiliseer, het jy heel waarskynlik die TX-poort gevind. Dit is omdat dit tydens aanskakeling debug-data stuur.
-- Die **RX-poort** sal die naaste een aan die ander 3 wees; dit het die laagste spanningsfluktuasie en laagste algehele waarde van al die UART-penne.
+- Identifiseer **GND** in kontinuïteitsmodus teenoor ’n bekende grondvlak, verbindingskerm of toevoergrond. Moet nooit kontinuïteits-/weerstandsmodus op ’n aangeskakelde bord gebruik nie.
+- Skakel na GS-spanningsmodus voordat jy die teiken aanskakel. Meet kandidaatpenne relatief tot grond om die logikaspanning te identifiseer. ’n Bestendige spoor kan Vcc/Vref wees; moenie aanvaar dat dit veilig is om te koppel nie.
+- Neem kandidate met ’n logiese ontleder of ossilloskoop waar tydens selflaai. **TX** is gewoonlik ledig hoog en toon sarsies geraamde data. ’n Multimeter kan ’n gemiddelde skommeling toon, maar kan nie die raamwerk of baudtempo bevestig nie.
+- **RX** kan ledig bly en kan nie veilig geïdentifiseer word bloot omdat dit langs TX is nie. Volg die PCB-spore, raadpleeg die SoC-datablad, of gebruik ’n ontleder met hoë impedansie voordat jy dit aandryf.
 
-Jy kan die TX- en RX-poorte verwar en niks sal gebeur nie, maar indien jy die GND- en VCC-poort verwar, kan jy die circuit beskadig.
+Om TX en RX om te ruil lewer normaalweg geen kommunikasie nie; verwarring tussen krag, grond of seinvlakke kan die teiken of adapter permanent beskadig. Koppel eers grond en begin **slegs met ontvangs** (teiken-TX na adapter-RX).
 
-In sommige target devices word die UART-poort deur die vervaardiger gedeaktiveer deur RX of TX, of selfs albei, te deaktiveer. In daardie geval kan dit nuttig wees om die verbindings op die circuit board na te spoor en ’n breakout point te vind. ’n Sterk aanduiding om te bevestig dat UART nie opgespoor word nie en dat die circuit onderbreek is, is om die toestel se warranty na te gaan. Indien die toestel met ’n warranty verskeep is, laat die vervaardiger sommige debug interfaces (in hierdie geval UART) agter en moes die UART dus ontkoppel het, om dit weer tydens debugging aan te sluit. Hierdie breakout pins kan deur soldering of jumper wires verbind word.
+Vervaardigers kan die header weglaat, serieweerstande ongepopuleer laat, die konsole in firmware deaktiveer, of slegs TX blootstel. Volg nabygeleë toetsblokkies en weerstandvoetspore na die SoC en voeg slegs ’n tydelike verbinding met hoë impedansie by nadat die elektriese vlak bevestig is. Die teenwoordigheid van ’n waarborg impliseer nie dat ’n toeganklike UART moet bestaan nie.
 
-### Identifisering van die UART Baud Rate
+### Identifisering van die UART-baudtempo
 
-Die maklikste manier om die korrekte baud rate te identifiseer, is om na die **TX-pin se output te kyk en die data te probeer lees**. Indien die data wat jy ontvang nie leesbaar is nie, skakel oor na die volgende moontlike baud rate totdat die data leesbaar word. Jy kan ’n USB-to-serial adapter of ’n multipurpose device soos Bus Pirate gebruik, saam met ’n helper script, soos [baudrate.py](https://github.com/devttys0/baudrate/). Die algemeenste baud rates is 9600, 38400, 19200, 57600 en 115200.
+Die maklikste manier om die korrekte baudtempo te identifiseer, is om na die **TX-pen se uitvoer te kyk en die data te probeer lees**. As die data wat jy ontvang nie leesbaar is nie, skakel oor na die volgende moontlike baudtempo totdat die data leesbaar word. Jy kan ’n USB-na-seriële adapter of ’n veeldoelige toestel soos Bus Pirate gebruik, saam met ’n helperskrip, soos [baudrate.py](https://github.com/devttys0/baudrate/). Die algemeenste baudtempo’s is 9600, 38400, 19200, 57600 en 115200.
 
 > [!CAUTION]
-> Dit is belangrik om daarop te let dat jy in hierdie protocol die TX van een toestel aan die RX van die ander moet koppel!
+> Dit is belangrik om daarop te let dat jy in hierdie protokol die TX van een toestel aan die RX van die ander toestel moet koppel!
 
-## CP210X UART to TTY Adapter
+## CP210X UART-na-TTY-adapter
 
-Die CP210X Chip word in baie prototyping boards soos NodeMCU (met esp8266) vir Serial Communication gebruik. Hierdie adapters is relatief goedkoop en kan gebruik word om aan die UART-interface van die target te koppel. Die toestel het 5 penne: 5V, GND, RXD, TXD, 3.3V. Maak seker dat jy die spanning koppel wat deur die target ondersteun word om enige skade te voorkom. Koppel laastens die RXD-pen van die Adapter aan die TXD van die target, en die TXD-pen van die Adapter aan die RXD van die target.
+CP210x USB-na-UART-bridges verskyn op baie prototiperingsborde en goedkoop adapters. Algemene modules stel toevoerpennetjies saam met GND, RXD en TXD bloot, maar hul headers en I/O-vlakke verskil. Bevestig die werklike spanning uit die bordontwerp of datablad. Gewoonlik moet slegs GND, adapter-RX na teiken-TX, en—nadat slegs-ontvangs gevalideer is—adapter-TX na teiken-RX gekoppel word. Moenie die adapter se 5 V/3.3 V-toevoerpen koppel nie, tensy jy doelbewus ’n teiken van krag voorsien wat bekend is dat dit dit kan verdra.<sup>[[3]](#references)</sup>
 
-Indien die adapter nie opgespoor word nie, maak seker dat die CP210X-drivers in die host system geïnstalleer is. Sodra die adapter opgespoor en gekoppel is, kan tools soos picocom, minicom of screen gebruik word.
+As die adapter nie bespeur word nie, maak seker dat die CP210X-drywers op die gasheerstelsel geïnstalleer is. Sodra die adapter bespeur en gekoppel is, kan nutsmiddels soos picocom, minicom of screen gebruik word.
 
-Om die toestelle wat aan Linux/MacOS-stelsels gekoppel is te lys:
+Om die toestelle wat aan Linux/MacOS-stelsels gekoppel is, te lys:
 ```
 ls /dev/
 ```
@@ -58,21 +58,21 @@ Vir minicom, gebruik die volgende opdrag om dit te konfigureer:
 ```
 minicom -s
 ```
-Stel die instellings soos baudrate en toestelnaam in die `Serial port setup`-opsie op.
+Konfigureer die instellings, soos baudrate en toestelnaam, in die `Serial port setup`-opsie.
 
-Gebruik ná die konfigurasie die opdrag `minicom` om die UART Console te begin.
+Begin ná konfigurasie `minicom` om die UART-konsole oop te maak.
 
-## UART Via Arduino UNO R3 (Removable Atmel 328p Chip Boards)
+## UART via Arduino UNO R3 (verwyderbare Atmel 328p-skyfieborde)
 
-Indien UART Serial to USB-adapters nie beskikbaar is nie, kan Arduino UNO R3 met ’n vinnige hack gebruik word. Aangesien Arduino UNO R3 gewoonlik oral beskikbaar is, kan dit baie tyd bespaar.
+Indien UART Serial to USB-adapters nie beskikbaar is nie, kan Arduino UNO R3 met ’n vinnige hack gebruik word. Omdat Arduino UNO R3 gewoonlik oral beskikbaar is, kan dit baie tyd bespaar.
 
-Arduino UNO R3 het ’n USB to Serial-adapter wat op die bord self gebou is. Om ’n UART-verbinding te kry, haal eenvoudig die Atmel 328p-mikrobeheerder-skyfie uit die bord. Hierdie hack werk op Arduino UNO R3-variante waar die Atmel 328p nie op die bord gesoldeer is nie (die SMD-weergawe word daarin gebruik). Verbind die RX-pen van Arduino (Digital Pin 0) met die TX-pen van die UART Interface, en TX-pen van Arduino (Digital Pin 1) met die RX-pen van die UART Interface.
+Arduino UNO R3 het ’n USB to Serial-adapter wat op die bord self gebou is. Om ’n UART-verbinding te kry, trek eenvoudig die Atmel 328p-mikrobeheerderskyfie uit die bord. Hierdie hack werk op Arduino UNO R3-variante waarvan die Atmel 328p nie op die bord gesoldeer is nie (die SMD-weergawe word daarin gebruik). Verbind die RX-pen van Arduino (Digital Pin 0) met die TX-pen van die UART Interface, en die TX-pen van Arduino (Digital Pin 1) met die RX-pen van die UART-interface.
 
-Laastens word dit aanbeveel om Arduino IDE te gebruik om die Serial Console te verkry. Kies in die `tools`-afdeling van die kieslys die `Serial Console`-opsie en stel die baud rate volgens die UART Interface in.
+Gebruik die Arduino IDE **Serial Monitor** of ’n toegewyde terminaal teen die teiken se baudrate. Klassieke Uno R3-serialseine is 5 V-logika, dus moet ’n level shifter of divider gebruik word voordat dit aan ’n 3.3 V- of laerspanningsteiken verbind word.
 
 ## Bus Pirate
 
-In hierdie scenario gaan ons die UART-kommunikasie van die Arduino afluister wat al die uitvoer van die program na die Serial Monitor stuur.
+Die volgende transkripsie gebruik die legacy Bus Pirate-firmware-interface om UART-uitvoer te monitor. Nuwer Bus Pirate-firmware gebruik opdragte soos `m uart`, `{`/`}`, `monitor` of `bridge`; raadpleeg die dokumentasie vir die geïnstalleerde weergawe.<sup>[[2]](#references)</sup>
 ```bash
 # Check the modes
 UART>m
@@ -144,30 +144,38 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
-## Dumping van Firmware met UART Console
+## Firmware met UART Console dump
 
-UART Console bied 'n uitstekende manier om met die onderliggende firmware in 'n runtime environment te werk. Maar wanneer toegang tot die UART Console slegs-lees is, kan dit baie beperkings veroorsaak. In baie embedded devices word die firmware in EEPROMs gestoor en uitgevoer in processors wat volatile memory het. Daarom word die firmware slegs-lees gehou, aangesien die oorspronklike firmware tydens vervaardiging binne die EEPROM self is en enige nuwe lêers weens volatile memory verlore sal gaan. Daarom is dumping van firmware 'n waardevolle poging wanneer met embedded firmwares gewerk word.
+'n UART-console bied runtime-toegang tot bootlogs en soms 'n bootloader- of operating-system-shell. Selfs 'n leesalleen-console onthul geheuekaarte, flash drivers, boot-argumente, partisieuitlegte en firmware-weergawes. Firmware kan in SPI NOR/NAND, eMMC of 'n ander toestel wees; dit word gewoonlik nie vanaf 'n EEPROM uitgevoer nie, en lêers wat na 'n gemonteerde persistente lêerstelsel geskryf word, verdwyn nie noodwendig ná 'n reboot nie.
 
-Daar is baie maniere om dit te doen, en die SPI-afdeling dek metodes om firmware direk uit die EEPROM te onttrek met verskeie devices. Dit word egter aanbeveel om eers firmware met UART te probeer dump, aangesien die dumping van firmware met fisiese devices en eksterne interaksies riskant kan wees.
+Daar is verskeie verkrygingspaaie, en die SPI-afdeling dek direkte leesaksies vanaf eksterne flash. Console-assisted acquisition kan minder indringend wees wanneer die bootloader reeds 'n veilige leesopdrag bied, maar enige bootonderbreking of flash-opdrag kan beskikbaarheid beïnvloed; teken dus die oorspronklike toestand aan en vermy write/erase-bewerkings.
 
-Om firmware uit UART Console te dump, moet jy eers toegang tot bootloaders verkry. Baie gewilde vendors gebruik uboot (Universal Bootloader) as hul bootloader om Linux te laai. Daarom is dit nodig om toegang tot uboot te verkry.
+Console-assisted firmware dumping begin dikwels deur 'n bootloader te onderbreek. Baie embedded Linux-toestelle gebruik **Das U-Boot**, maar ander gebruik proprietary bootloaders of deaktiveer die interactive console.
 
-Om toegang tot die bootloader te verkry, koppel die UART-poort aan die rekenaar en gebruik enige van die Serial Console-tools, terwyl die kragtoevoer na die device ontkoppel bly. Sodra die opstelling gereed is, druk die Enter Key en hou dit ingedruk. Koppel laastens die kragtoevoer aan die device en laat dit boot.
+Om vir 'n interactive bootloader te toets, koppel die UART receive path en terminal terwyl die target afgeskakel is, begin logging en skakel dit aan. Volg die vertoonde autoboot-prompt; afhangend van die build kan onderbreking 'n sleutel, 'n kort sequence vereis, of heeltemal gedeaktiveer wees.
 
-Deur dit te doen, sal uboot se laaiery onderbreek word en sal 'n menu verskyn. Dit word aanbeveel om uboot-opdragte te verstaan en die help-menu te gebruik om hulle te lys. Dit kan die `help`-opdrag wees. Aangesien verskillende vendors verskillende konfigurasies gebruik, is dit nodig om elkeen afsonderlik te verstaan.
+As die onderbreking slaag, gebruik `help`, `printenv` en read-only discovery commands om daardie vendor se memory- en storage-uitleg te verstaan voordat jy toegang tot adresse verkry.
 
-Gewoonlik is die opdrag om die firmware te dump:
+In U-Boot vertoon `md` **addressable memory**, nie outomaties “the EEPROM” nie. Gebruik eers board-specific commands soos `mtd list`, `sf probe`, `mmc info`, `part list`, environment variables en bootlogs om die korrekte mapped address te identifiseer, of laai 'n flash-region in RAM. Vertoon daarna 'n bekende reeks byte vir byte:<sup>[[4]](#references)</sup>
 ```
-md
+md.b <address> <byte_count>
 ```
-wat staan vir "memory dump". Dit sal die geheue (EEPROM Content) op die skerm dump. Dit word aanbeveel om die Serial Console-uitset aan te teken voordat die prosedure begin word, om die memory dump vas te lê.
+Teken die serial-uitvoer aan voordat jy begin. Die `md.b`-uitvoer bevat adresse en ’n ASCII-kolom, dus is dit ’n tekstuele voorstelling eerder as ’n rou ROM-image.
 
-Ten slotte, verwyder eenvoudig al die onnodige data uit die loglêer en stoor die lêer as `filename.rom`, en gebruik binwalk om die inhoud te onttrek:
+Verwyder die adres- en ASCII-kolomme, voeg slegs die heksadesimale bisvelde saam en dekodeer dit na binêr (byvoorbeeld met `xxd -r -p`). Verifieer die verwagte grepetelling en teken ’n hash aan voordat jy dit ontleed:
 ```
-binwalk -e <filename.rom>
+xxd -r -p firmware.hex > firmware.bin
+sha256sum firmware.bin
+binwalk -e firmware.bin
 ```
-Dit sal die moontlike inhoud van die EEPROM lys volgens die signatures wat in die hex file gevind is.
+Binwalk identifiseer dan bekende handtekeninge in die gerekonstrueerde binêre lêer. ’n Direkte flash-leesbewerking deur die toepaslike SPI/eMMC/NAND-koppelvlak is gewoonlik vinniger en minder foutgevoelig wanneer die console nie data betroubaar kan oordra nie.
 
-Dit is egter belangrik om daarop te let dat die uboot nie altyd unlocked is nie, selfs al word dit gebruik. As die Enter Key niks doen nie, kyk vir ander keys soos Space Key, ens. As die bootloader locked is en nie interrupted word nie, sal hierdie metode nie werk nie. Om te kyk of uboot die bootloader vir die toestel is, kontroleer die output op die UART Console tydens die toestel se boot. Dit mag uboot tydens die boot noem.
+U-Boot kan onderbreking deaktiveer, ’n verskafferspesifieke sleutelvolgorde vereis, of geheue-/flash-opdragte sluit. Volg die autoboot-prompt en boot-log eerder as om karakters blindelings te stuur. As die console nie onderbreek kan word nie, behou die boot-log en skakel oor na ’n nie-indringende firmware-verkrygingspad.
 
+## References
+
+- [1] [Microchip PIC32 Family Reference Manual - UART](https://ww1.microchip.com/downloads/en/DeviceDoc/60001107H.pdf)
+- [2] [Bus Pirate documentation - UART mode and electrical limits](https://docs.buspirate.com/docs/command-reference/#uart)
+- [3] [Silicon Labs - CP2102C data sheet](https://www.silabs.com/documents/public/data-sheets/cp2102c-datasheet.pdf)
+- [4] [U-Boot documentation - `md` memory-display command](https://docs.u-boot.org/en/latest/usage/cmd/md.html)
 {{#include ../../banners/hacktricks-training.md}}
