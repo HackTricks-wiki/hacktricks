@@ -4,19 +4,22 @@
 
 ## Informazioni di base
 
-**Apple Events** è una funzionalità di macOS di Apple che consente alle applicazioni di comunicare tra loro. Fa parte dell'**Apple Event Manager**, un componente del sistema operativo macOS responsabile della gestione della comunicazione tra processi. Questo sistema consente a un'applicazione di inviare un messaggio a un'altra applicazione per richiederle di eseguire una determinata operazione, come aprire un file, recuperare dati o eseguire un comando.
+Gli **Apple events** sono messaggi strutturati tra processi che le applicazioni utilizzano per richiedere operazioni o dati ad altre applicazioni. **Apple Event Manager** fornisce le API per creare, inviare, ricevere e rispondere a questi messaggi.<sup>[[1]](#references)</sup>
 
-Il daemon principale è `/System/Library/CoreServices/appleeventsd`, che registra il servizio `com.apple.coreservices.appleevents`.
+Su macOS, il broker principale è `/System/Library/CoreServices/appleeventsd`, che registra il servizio Mach `com.apple.coreservices.appleevents`. Le applicazioni che ricevono eventi registrano una porta Mach Apple-event presso questo servizio; i mittenti ottengono tramite esso la porta di destinazione.<sup>[[3]](#references)</sup>
 
-Ogni applicazione in grado di ricevere eventi comunica con questo daemon fornendo la propria Apple Event Mach Port. Quando un'app vuole inviarle un evento, richiede questa porta al daemon.
-
-Le applicazioni in sandbox richiedono privilegi come `allow appleevent-send` e `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` per poter inviare eventi. Tuttavia, entitlements come `com.apple.security.temporary-exception.apple-events` possono limitare chi ha accesso all'invio di eventi, il quale richiederà entitlements come `com.apple.private.appleevents`.
+Le regole della sandbox e gli entitlement limitano questa comunicazione. Un profilo sandbox deve avere l'autorizzazione a inviare Apple events e a cercare il servizio Mach del broker. L'entitlement `com.apple.security.temporary-exception.apple-events` può limitare ulteriormente un'applicazione in sandbox agli identificatori bundle delle destinazioni specificate.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> È possibile utilizzare la variabile d'ambiente **`AEDebugSends`** per registrare informazioni sul messaggio inviato:
+> Imposta la variabile d'ambiente **`AEDebugSends`** per registrare informazioni sugli Apple events inviati da un processo:<sup>[[3]](#references)</sup>
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
+## References
+
+- [1] [Documentazione Apple per gli sviluppatori - Apple Event Manager](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
+- [2] [Documentazione Apple per gli sviluppatori - Entitlement per le eccezioni temporanee della App Sandbox](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
+- [3] [Internals di Mac OS X e iOS - Variabili d'ambiente di debug degli Apple event](https://www.newosxbook.com/MOXiI.pdf)
 {{#include ../../../../banners/hacktricks-training.md}}

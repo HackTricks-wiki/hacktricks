@@ -2,21 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Scarica la versione gratuita dell'app da [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), eseguila e crea un wrapper del binario "**malicious**".\
-Nota che puoi creare un wrapper anche per un "**.bat**" se vuoi **solo** **eseguire** **righe di comando (invece di cmd.exe seleziona il file .bat)**
+MSI Wrapper può impacchettare un executable o uno script come file Windows Installer (`.msi`). Scarica e avvia la free edition, quindi seleziona l'executable da impacchettare. Per eseguire una sequenza di comandi, seleziona un file `.bat` come input invece di impacchettare `cmd.exe`.<sup>[[1]](#references)</sup>
 
-![MSI Wrapper: Nota che puoi creare un wrapper anche per un " .bat " se vuoi solo eseguire righe di comando (invece di cmd.exe seleziona il file .bat)](<../../images/image (417).png>)
+![Selezione dell'executable sorgente o dello script batch in MSI Wrapper](<../../images/image (417).png>)
 
-E questa è la parte più importante della configurazione:
+Configura con attenzione il contesto di esecuzione e le altre proprietà dell'installer:
 
-![MSI Wrapper: E questa è la parte più importante della configurazione](<../../images/image (312).png>)
+![Configurazione dell'application ID e del contesto di sicurezza in MSI Wrapper](<../../images/image (312).png>)
 
-![MSI Wrapper: E questa è la parte più importante della configurazione](<../../images/image (346).png>)
+![Configurazione delle proprietà dell'installer in MSI Wrapper](<../../images/image (346).png>)
 
-![MSI Wrapper: E questa è la parte più importante della configurazione](<../../images/image (1072).png>)
+![Revisione delle impostazioni di build di MSI Wrapper](<../../images/image (1072).png>)
 
-(Nota che, se provi a impacchettare un tuo binario, potrai modificare questi valori)
+Questi valori possono essere modificati durante l'impacchettamento di un binary personalizzato.
 
-Da qui fai clic sui **pulsanti Next** e, infine, sul **pulsante build**: verrà generato il tuo installer/wrapper.
+Prosegui nelle pagine rimanenti del wizard e seleziona **Build** per generare l'installer.<sup>[[1]](#references)</sup>
 
+> [!WARNING]
+> La creazione di un MSI non concede di per sé privilegi elevati. L'elevazione durante l'installazione dipende dai criteri di Windows Installer, dal contesto del package e dall'autorizzazione dell'utente. Microsoft avverte che l'abilitazione di `AlwaysInstallElevated` sia per l'utente sia per il computer consente ai non amministratori di installare package con privilegi di sistema.<sup>[[2]](#references)</sup>
+
+## References
+
+- [1] [Documentazione di MSI Wrapper - Introduzione](https://www.exemsi.com/documentation/getting-started/)
+- [2] [Microsoft Learn - Installazione di un package con privilegi elevati per un non amministratore](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
 {{#include ../../banners/hacktricks-training.md}}

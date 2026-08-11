@@ -1,17 +1,15 @@
-# Sottrarre la divulgazione di informazioni sensibili dal Web
+# Sottrarre informazioni sensibili da una pagina web
 
 {{#include ../banners/hacktricks-training.md}}
 
-Se a un certo punto trovi una **pagina Web che presenta informazioni sensibili in base alla tua sessione**: potrebbe riflettere i cookie, oppure stampare dati di pagamento o dettagli CC o qualsiasi altra informazione sensibile, potresti provare a sottrarla.\
-Qui presento i principali metodi che puoi provare a utilizzare:
+Se una **pagina web visualizza informazioni sensibili in base alla sessione corrente**—come cookie, dati dell'account o dati della carta di credito—un attacker potrebbe tentare di esfiltrarle. Le tecniche principali includono:
 
-- [**CORS bypass**](../pentesting-web/cors-bypass.md): se riesci ad aggirare gli header CORS, potrai sottrarre le informazioni eseguendo una richiesta Ajax da una pagina dannosa.
-- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html): se trovi una vulnerabilità XSS nella pagina, potresti riuscire a sfruttarla per sottrarre le informazioni.
-- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): se non puoi iniettare tag XSS, potresti comunque riuscire a sottrarre le informazioni utilizzando altri normali tag HTML.
-- [**Clickjaking**](../pentesting-web/clickjacking.md): se non è presente alcuna protezione contro questo attacco, potresti riuscire a indurre l'utente a inviarti i dati sensibili (un esempio [qui](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).<sup>[[1]](#references)</sup>
+- [**CORS bypass**](../pentesting-web/cors-bypass.md): una configurazione errata di CORS potrebbe consentire a un'origine malevola di leggere risposte sensibili tramite richieste cross-origin.
+- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html): una vulnerabilità XSS nell'origine target potrebbe consentire al JavaScript iniettato di leggere ed esfiltrare le informazioni.
+- [**Dangling markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): quando l'iniezione di script non è disponibile, gli elementi HTML iniettati potrebbero comunque catturare contenuti sensibili.
+- [**Clickjacking**](../pentesting-web/clickjacking.md): se le protezioni contro il framing sono assenti, un attacker potrebbe indurre un utente a interagire con la pagina sensibile. Il case study collegato dimostra questa tecnica.<sup>[[1]](#references)</sup>
 
-## Riferimenti
+## References
 
-- [1] [Un servlet di esempio Apache porta alla divulgazione di informazioni](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
-
+- [1] [Apache example servlet porta alla divulgazione di informazioni](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
 {{#include ../banners/hacktricks-training.md}}
