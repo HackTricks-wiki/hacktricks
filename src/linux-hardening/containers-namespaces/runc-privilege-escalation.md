@@ -1,10 +1,8 @@
 # RunC Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## 기본 정보
 
-**runc**에 대해 더 자세히 알아보려면 다음 페이지를 확인하세요:
+**runc**에 대해 더 알아보려면 다음 페이지를 확인하세요:
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -12,7 +10,7 @@
 
 ## PE
 
-호스트에 `runc`가 설치되어 있다면 **호스트의 root / 폴더를 mount하는 container를 실행할 수 있습니다**.
+호스트에서 `runc`를 rootful process가 사용할 수 있다면, 호스트의 `/`를 컨테이너 내부의 `/`에 재귀적으로 bind-mount하도록 mount configuration이 설정된 OCI bundle을 사용하여 해당 mount namespace에서 호스트 파일 시스템을 노출할 수 있습니다.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -37,6 +35,11 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> 이는 항상 작동하는 것은 아닙니다. runc의 기본 동작은 root로 실행하는 것이므로, 권한이 없는 사용자로 실행하면 단순히 작동할 수 없습니다(루트리스 구성이 있는 경우 제외). 루트리스 구성을 기본값으로 설정하는 것은 일반적으로 좋은 생각이 아닙니다. 루트리스 컨테이너 내부에는 루트리스 컨테이너 외부에는 적용되지 않는 여러 제한이 있기 때문입니다.
+> 문서화된 `runc run` workflow는 rootful입니다. runc 자체 예시는 이를 "run as root"로 표시합니다. 권한이 없는 사용자는 `runc spec --rootless`와 같은 rootless configuration이 필요하며, runc는 해당 모드에서 user namespaces가 활성화되어 있어야 한다고 문서화하고 있습니다.<sup>[[1]](#references)</sup>
 
+## References
+
+- [1] [runc: 컨테이너를 생성하고 실행하기 위한 CLI 도구](https://github.com/opencontainers/runc#using-runc)
+- [2] [OCI Runtime Specification: Mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
+- [3] [Shared Subtrees](https://docs.kernel.org/filesystems/sharedsubtree.html)
 {{#include ../../banners/hacktricks-training.md}}
