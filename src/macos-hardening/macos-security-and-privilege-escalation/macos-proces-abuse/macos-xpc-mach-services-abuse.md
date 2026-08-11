@@ -6,10 +6,10 @@
 
 **XPC** (Cross-Process Communication) je primarni IPC mehanizam na macOS-u. Sistemski daemoni izlažu **Mach services** — imenovane portove registrovane kod `launchd` — sa kojima drugi procesi mogu da se povežu putem `NSXPCConnection`.<sup>[[1]](#references)</sup>
 
-Svaki plist za **LaunchDaemon** i **LaunchAgent** sa ključem `MachServices` registruje jedan ili više imenovanih Mach portova. To su sistemski XPC endpointi sa kojima svaki proces može pokušati da se poveže.<sup>[[2]](#references)</sup>
+Svaki **LaunchDaemon** i **LaunchAgent** plist sa ključem `MachServices` registruje jedan ili više imenovanih Mach portova. To su XPC endpointi dostupni na nivou celog sistema, sa kojima svaki proces može pokušati da uspostavi vezu.<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> XPC Mach services predstavljaju **najveću pojedinačnu lokalnu attack surface za privilege escalation** na macOS-u. Većina lokalnih root exploit-a poslednjih godina koristila je ranjive XPC services u LaunchDaemon-ima. Svaki izloženi metod u root daemon-u predstavlja potencijalni vektor za escalation.
+> XPC Mach services predstavljaju **najveću pojedinačnu lokalnu attack surface za privilege escalation** na macOS-u. Većina lokalnih root exploit-a poslednjih godina iskorišćavala je ranjive XPC servise u LaunchDaemon-ima. Svaka izložena metoda u root daemon-u predstavlja potencijalni escalation vector.
 
 ### Arhitektura
 ```
@@ -23,7 +23,7 @@ Daemon Process (root context)
 ```
 ## Enumeracija
 
-### Pronalaženje demona sa Mach Services
+### Pronalaženje daemon-a sa Mach Services
 ```bash
 # Find all LaunchDaemons with MachServices
 find /Library/LaunchDaemons /System/Library/LaunchDaemons -name "*.plist" -exec sh -c '
@@ -47,7 +47,7 @@ WHERE e.isDaemon = 1
 ORDER BY e.privileged DESC
 LIMIT 50;"
 ```
-### Enumerisanje XPC interfejsa
+### Nabrajanje XPC interfejsa
 
 Kada identifikujete daemon, izvršite reverse engineering njegovog XPC interfejsa:
 ```bash
@@ -60,15 +60,15 @@ class-dump /path/to/daemon | grep -A20 "@protocol"
 # Check for XPC service bundles inside app bundles
 find /Applications -path "*/XPCServices/*.xpc" 2>/dev/null
 ```
-## XPC ranjivosti verifikacije klijenta
+## XPC ranjivosti provere klijenta
 
-Najčešća klasa ranjivosti u XPC services je **nedovoljna verifikacija klijenta**. daemon treba da proveri:
+Najčešća klasa ranjivosti u XPC servisima jeste **nedovoljna provera klijenta**. Daemon treba da proveri:
 
 1. **Code signature** procesa koji se povezuje
 2. **Entitlements** procesa koji se povezuje
 3. **Audit token** (ne PID, koji može biti ponovo iskorišćen)
 
-### Ranjivi obrazac: bez verifikacije
+### Ranjivi obrazac: bez provere
 ```objc
 // VULNERABLE — daemon accepts any connection
 - (BOOL)listener:(NSXPCListener *)listener
@@ -79,7 +79,7 @@ newConnection.exportedObject = self;
 return YES; // No verification!
 }
 ```
-### Ranjivi obrazac: verifikacija zasnovana na PID-u (Race Condition)
+### Ranjivi obrazac: provera zasnovana na PID-u (Race Condition)
 ```objc
 // VULNERABLE — PID can be reused between check and use
 - (BOOL)listener:(NSXPCListener *)listener
@@ -93,7 +93,7 @@ return YES;
 return NO;
 }
 ```
-### Bezbedni obrazac: Verifikacija audit tokena
+### Bezbedan obrazac: Provera audit tokena
 ```objc
 // SECURE — Uses audit token which cannot be spoofed
 - (BOOL)listener:(NSXPCListener *)listener
@@ -155,9 +155,9 @@ NSLog(@"Result: %@", result);
 }
 }
 ```
-## Attack: XPC Object Deserialization
+## Napad: XPC Object Deserialization
 
-XPC servisi koji prihvataju složene objekte (usklađene sa `NSSecureCoding`) mogu biti ranjivi na **deserialization attacks**:
+XPC servisi koji prihvataju složene objekte (koji su usklađeni sa `NSSecureCoding`) mogu biti ranjivi na **deserialization attacks**:
 ```objc
 // If the daemon accepts NSObject subclasses via XPC:
 // An attacker can send a crafted object that triggers:
@@ -170,7 +170,7 @@ XPC servisi koji prihvataju složene objekte (usklađene sa `NSSecureCoding`) mo
 
 ### Kako izuzeci omogućavaju bekstvo iz Sandbox-a
 
-Sandbox aplikacije obično mogu da komuniciraju samo sa sopstvenim XPC servisima. Međutim, **mach-lookup izuzeci** omogućavaju pristup sistemskim servisima:
+Aplikacije ograničene Sandbox-om obično mogu da komuniciraju samo sa sopstvenim XPC servisima. Međutim, **mach-lookup exceptions** omogućavaju pristup sistemskim servisima:
 ```xml
 <!-- Entitlement granting mach-lookup exception -->
 <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
@@ -194,7 +194,7 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 }
 ' _ {} \; 2>/dev/null
 ```
-### Lanac za izlazak iz Sandbox-a
+### Lanac za bekstvo iz sandboxa
 ```
 1. Compromise sandboxed app (e.g., via renderer exploit in browser/email)
 2. Enumerate mach-lookup exceptions from entitlements
@@ -203,15 +203,15 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 5. Exploit a daemon bug → code execution outside the sandbox
 6. Escalate from daemon's privilege level (often root)
 ```
-## Privilegovani pomoćni alati (SMJobBless)
+## Privileged Helper Tools (SMJobBless)
 
 ### Kako funkcionišu
 
-`SMJobBless` instalira privilegovani pomoćni alat koji se izvršava kao root putem launchd-a. Pomoćni alat komunicira sa nadređenom aplikacijom putem XPC-a:
+`SMJobBless` instalira privileged helper koji se izvršava kao root putem launchd-a. Helper komunicira sa svojom parent aplikacijom putem XPC-a:
 ```
 App (user context) ←→ XPC ←→ Helper (root via launchd)
 ```
-### Česta ranjivost: slaba autorizacija
+### Uobičajena ranjivost: Slaba autorizacija
 ```objc
 // Many helpers check authorization but:
 // 1. Don't verify WHO is connecting (any process can connect)
@@ -277,15 +277,15 @@ log stream --predicate 'process == "daemon-name" AND (eventMessage CONTAINS "cra
 
 | CVE | Opis |
 |---|---|
-| CVE-2023-41993 | Ranljivost deserializacije XPC servisa |
-| CVE-2022-22616 | Zaobilaženje Gatekeeper-a putem zloupotrebe XPC servisa |
-| CVE-2021-30657 | Eskalacija privilegija putem Sysmond XPC-a |
-| CVE-2020-9839 | Race condition u sistemskom daemon-u putem XPC-a |
-| CVE-2019-8802 | Privileged helper tool bez verifikacije klijenta |
-| CVE-2023-32369 | Migraine — zaobilaženje SIP-a putem `systemmigrationd` XPC-a<sup>[[3]](#references)</sup> |
+| CVE-2023-41993 | Vulnerability deserializacije XPC service-a |
+| CVE-2022-22616 | Gatekeeper bypass putem abuse-a XPC service-a |
+| CVE-2021-30657 | Eskalacija privilegija Sysmond XPC-a |
+| CVE-2020-9839 | Race condition XPC-a u system daemon-u |
+| CVE-2019-8802 | Privileged helper tool bez verifikacije klijenta<sup>[[5]](#references)</sup> |
+| CVE-2023-32369 | Migraine — SIP bypass kroz `systemmigrationd` XPC<sup>[[3]](#references)</sup> |
 | CVE-2022-26712 | PackageKit XPC eskalacija na root<sup>[[4]](#references)</sup> |
 
-## Enumeration Script
+## Skripta za enumeraciju
 ```bash
 #!/bin/bash
 echo "=== XPC Mach Services Security Audit ==="
@@ -313,13 +313,11 @@ plutil -p "$plist" | grep -A5 "MachServices" | sed 's/^/    /'
 }
 done
 ```
-## Reference
+## References
 
 - [1] [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
-- [2] [Apple Developer — Vodič za programiranje Daemons and Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
+- [2] [Apple Developer — Vodič za programiranje daemona i servisa](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
 - [3] [Nova macOS ranjivost, Migraine, mogla bi da zaobiđe System Integrity Protection — Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
-- [4] [CVE-2022-26712: POC za SIP-Bypass je čak i tweetable](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
-- [5] [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
-- [6] [OBTS — XPC Attack Surface talks](https://objectivebythesea.org/)
-
+- [4] [CVE-2022-26712: POC za SIP-Bypass može da se objavi čak i na Twitteru](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
+- [5] [Objective-See — Validacija XPC klijenta i Rootpipe](https://objective-see.org/blog/blog_0x3E.html)
 {{#include ../../../banners/hacktricks-training.md}}

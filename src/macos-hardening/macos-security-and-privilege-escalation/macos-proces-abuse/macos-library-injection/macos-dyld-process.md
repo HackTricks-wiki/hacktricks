@@ -4,56 +4,56 @@
 
 ## Osnovne informacije
 
-Pravi **entrypoint** Mach-o binary-ja je dynamic linker, definisan u `LC_LOAD_DYLINKER`, i obično je `/usr/lib/dyld`.<sup>[[3]](#references)</sup>
+Pravi **entrypoint** Mach-o binarnog fajla je dynamic linker, definisan u `LC_LOAD_DYLINKER`, a obično je to `/usr/lib/dyld`.<sup>[[3]](#references)</sup>
 
-Ovaj linker mora da pronađe sve executable libraries, mapira ih u memoriju i poveže sve non-lazy libraries. Tek nakon ovog procesa izvršava se entry-point binary-ja.
+Ovaj linker mora da pronađe sve biblioteke izvršnog fajla, mapira ih u memoriju i poveže sve non-lazy biblioteke. Tek nakon ovog procesa izvršava se entry-point binarnog fajla.
 
-Naravno, **`dyld`** nema dependencies (koristi syscalls i izvode iz libSystem-a).
+Naravno, **`dyld`** nema nikakve dependencies (koristi syscalls i izvode iz libSystem-a).
 
 > [!CAUTION]
-> Ako ovaj linker sadrži vulnerability, pošto se izvršava pre izvršavanja bilo kog binary-ja (čak i onih sa visokim privilegijama), bilo bi moguće **escalate privileges**.
+> Ako ovaj linker sadrži bilo kakvu ranjivost, pošto se izvršava pre izvršavanja bilo kog binarnog fajla (čak i onih sa visokim privilegijama), bilo bi moguće **escalate privileges**.
 
-### Flow
+### Tok
 
-Dyld će učitati **`dyldboostrap::start`**, koji će takođe učitati stvari kao što je **stack canary**. To je zato što će ova funkcija u svom **`apple`** argument vector-u primiti ovu i druge **sensitive** **values**.<sup>[[1]](#references)</sup>
+Dyld učitava **`dyldboostrap::start`**, koji takođe učitava stvari kao što je **stack canary**. To je zato što će ova funkcija u svom vektoru argumenata **`apple`** primiti ovu i druge **osetljive** **vrednosti**.<sup>[[1]](#references)</sup>
 
-**`dyls::_main()`** je entry point dyld-a i njegov prvi zadatak je da pokrene `configureProcessRestrictions()`, koji obično ograničava **`DYLD_*`** environment variables objašnjene u:<sup>[[2]](#references)</sup>
+**`dyls::_main()`** je entry point dyld-a i njegov prvi zadatak je pokretanje `configureProcessRestrictions()`, koji obično ograničava **`DYLD_*`** environment variables objašnjene u:<sup>[[2]](#references)</sup>
 
 
 {{#ref}}
 ./
 {{#endref}}
 
-Zatim mapira dyld shared cache, koji prelink-uje sve važne system libraries, nakon čega mapira libraries od kojih binary zavisi i nastavlja rekurzivno dok se sve potrebne libraries ne učitaju. Dakle:
+Zatim mapira dyld shared cache, koji prelinkuje sve važne sistemske biblioteke, nakon čega mapira biblioteke od kojih binarni fajl zavisi i nastavlja rekurzivno sve dok se ne učitaju sve potrebne biblioteke. Dakle:
 
-1. počinje učitavanje inserted libraries pomoću `DYLD_INSERT_LIBRARIES` (ako je dozvoljeno)
-2. Zatim shared cached libraries
-3. Zatim imported libraries
-1. Zatim nastavlja sa rekurzivnim importovanjem libraries
+1. počinje učitavanje ubačenih biblioteka pomoću `DYLD_INSERT_LIBRARIES` (ako je dozvoljeno)
+2. Zatim učitava one iz shared cache-a
+3. Zatim učitava importovane biblioteke
+1. Zatim nastavlja sa rekurzivnim importovanjem biblioteka
 
-Kada se sve učitaju, pokreću se **initialisers** ovih libraries. Oni su kodirani pomoću **`__attribute__((constructor))`**, definisani u `LC_ROUTINES[_64]` (sada deprecated), ili pomoću pointer-a u section-u označenom sa `S_MOD_INIT_FUNC_POINTERS` (obično: **`__DATA.__MOD_INIT_FUNC`**).
+Kada se sve biblioteke učitaju, pokreću se njihovi **inicijalizatori**. Oni se kodiraju pomoću **`__attribute__((constructor))`**, definisanog u `LC_ROUTINES[_64]` (sada deprecated), ili pomoću pokazivača u sekciji označenoj sa `S_MOD_INIT_FUNC_POINTERS` (obično: **`__DATA.__MOD_INIT_FUNC`**).
 
-Terminators su kodirani pomoću **`__attribute__((destructor))`** i nalaze se u section-u označenom sa `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
+Terminatori se kodiraju pomoću **`__attribute__((destructor))`** i nalaze se u sekciji označenoj sa `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
 
 ### Stubs
 
-Svi binary-ji na macOS-u su dynamically linked. Zato sadrže određene stub sections koje pomažu binary-ju da skoči na odgovarajući code na različitim machines i u različitim contexts. Dyld je, kada se binary izvrši, zadužen za rešavanje ovih addresses (najmanje non-lazy addresses).
+Svi binarni fajlovi na macOS-u su dinamički linkovani. Zbog toga sadrže određene stub sekcije koje pomažu binarnom fajlu da skoči na odgovarajući kod na različitim mašinama i u različitim kontekstima. Dyld je taj koji, kada se binarni fajl izvršava, treba da razreši ove adrese (barem one non-lazy).
 
-Neke stub sections u binary-ju:
+Neke stub sekcije u binarnom fajlu:
 
-- **`__TEXT.__[auth_]stubs`**: Pointers iz `__DATA` sections
-- **`__TEXT.__stub_helper`**: Mali code koji poziva dynamic linking sa informacijama o funkciji koju treba pozvati
-- **`__DATA.__[auth_]got`**: Global Offset Table (addresses imported functions, kada se razreše, (bound tokom load time-a jer su označene flag-om `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__nl_symbol_ptr`**: Non-lazy symbol pointers (bound tokom load time-a jer su označene flag-om `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__la_symbol_ptr`**: Lazy symbols pointers (bound pri prvom pristupu)
+- **`__TEXT.__[auth_]stubs`**: Pokazivači iz `__DATA` sekcija
+- **`__TEXT.__stub_helper`**: Mali kod koji poziva dynamic linking sa informacijama o funkciji koju treba pozvati
+- **`__DATA.__[auth_]got`**: Global Offset Table (adrese importovanih funkcija, kada se razreše, (bound tokom učitavanja jer su označene zastavicom `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__nl_symbol_ptr`**: Pokazivači na non-lazy simbole (bound tokom učitavanja jer su označeni zastavicom `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__la_symbol_ptr`**: Pokazivači na lazy simbole (bound pri prvom pristupu)
 
 > [!WARNING]
-> Imajte na umu da pointers sa prefix-om "auth_" koriste jedan in-process encryption key za njihovu zaštitu (PAC). Takođe je moguće koristiti arm64 instruction `BLRA[A/B]` za proveru pointer-a pre njegovog praćenja. A RETA\[A/B] može da se koristi umesto RET address-a.\
-> Zapravo, code u **`__TEXT.__auth_stubs`** koristi **`braa`** umesto **`bl`** za pozivanje zahtevane funkcije i autentifikaciju pointer-a.
+> Imajte na umu da pokazivači sa prefiksom "auth\_" koriste jedan in-process encryption key za zaštitu (PAC). Takođe, moguće je koristiti arm64 instrukciju `BLRA[A/B]` za verifikaciju pokazivača pre njegovog praćenja. A RETA\[A/B] se može koristiti umesto RET adrese.\
+> Zapravo, kod u **`__TEXT.__auth_stubs`** koristi **`braa`** umesto **`bl`** za pozivanje zahtevane funkcije i autentifikaciju pokazivača.
 >
-> Takođe imajte na umu da aktuelne dyld versions učitavaju **sve kao non-lazy**.
+> Takođe imajte na umu da aktuelne verzije dyld-a učitavaju **sve kao non-lazy**.
 
-### Pronalaženje lazy symbols
+### Pronalaženje lazy simbola
 ```c
 //gcc load.c -o load
 #include <stdio.h>
@@ -62,14 +62,14 @@ int main (int argc, char **argv, char **envp, char **apple)
 printf("Hi\n");
 }
 ```
-Zanimljiv deo disassembly-ja:
+Zanimljiv deo disasembliranja:
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-Moguće je videti da skok ka pozivu **`printf`** vodi do **`__TEXT.__stubs`**:
+Moguće je videti da skok ka pozivu `printf` vodi do **`__TEXT.__stubs`**:
 ```bash
 objdump --section-headers ./load
 
@@ -83,7 +83,7 @@ Idx Name          Size     VMA              Type
 3 __unwind_info 00000058 0000000100003fa8 DATA
 4 __got         00000008 0000000100004000 DATA
 ```
-U disasembliranju sekcije **`__stubs`**:
+Prilikom disasembliranja odeljka **`__stubs`**:
 ```bash
 objdump -d --section=__stubs ./load
 
@@ -96,13 +96,13 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
-možete videti da **skačemo na adresu GOT-a**, koja je u ovom slučaju razrešena non-lazy i sadržavaće adresu funkcije `printf`.
+možete videti da **skačemo na adresu GOT-a**, koja se u ovom slučaju razrešava non-lazy i sadržaće adresu printf funkcije.
 
-U drugim situacijama, umesto direktnog skoka na GOT, može se skočiti na **`__DATA.__la_symbol_ptr`**, što će učitati vrednost koja predstavlja funkciju koju pokušava da učita, a zatim skočiti na **`__TEXT.__stub_helper`**, koji skače na **`__DATA.__nl_symbol_ptr`**, koji sadržava adresu funkcije **`dyld_stub_binder`**, koja kao parametre prima broj funkcije i adresu.\
-Ova poslednja funkcija, nakon pronalaženja adrese tražene funkcije, upisuje je na odgovarajuću lokaciju u **`__TEXT.__stub_helper`** kako bi izbegla buduća pretraživanja.
+U drugim situacijama, umesto direktnog skoka na GOT, može se skočiti na **`__DATA.__la_symbol_ptr`**, što će učitati vrednost koja predstavlja funkciju koju pokušava da učita, a zatim skočiti na **`__TEXT.__stub_helper`**, koji skače na **`__DATA.__nl_symbol_ptr`**, što sadrži adresu funkcije **`dyld_stub_binder`**, koja kao parametre prima broj funkcije i adresu.\
+Ova poslednja funkcija, nakon pronalaženja adrese tražene funkcije, upisuje je na odgovarajuću lokaciju u **`__TEXT.__stub_helper`** kako bi se izbeglo buduće pretraživanje.
 
 > [!TIP]
-> Međutim, imajte na umu da aktuelne verzije dyld-a učitavaju sve kao non-lazy.
+> Međutim, imajte na umu da trenutne verzije dyld učitavaju sve kao non-lazy.
 
 #### Dyld opcodes
 
@@ -110,7 +110,7 @@ Na kraju, **`dyld_stub_binder`** treba da pronađe navedenu funkciju i upiše je
 
 ## apple\[] vektor argumenata
 
-U macOS-u glavna funkcija zapravo prima 4 argumenta umesto 3. Četvrti se naziva apple, a svaki unos je u obliku `key=value`. Na primer:
+U macOS-u glavna funkcija zapravo prima 4 argumenta umesto 3. Četvrti se zove apple, a svaki unos je u obliku `key=value`. Na primer:
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
@@ -120,7 +120,7 @@ for (int i=0; apple[i]; i++)
 printf("%d: %s\n", i, apple[i])
 }
 ```
-Rezultat:
+Pošaljite sadržaj za prevođenje.
 ```
 0: executable_path=./a
 1:
@@ -136,9 +136,9 @@ Rezultat:
 11: th_port=
 ```
 > [!TIP]
-> Dok ove vrednosti stignu do main funkcije, osetljive informacije su već uklonjene iz njih ili bi u suprotnom došlo do data leak-a.
+> Do trenutka kada ove vrednosti stignu do glavne funkcije, osetljive informacije su već uklonjene iz njih ili bi to predstavljalo data leak.
 
-moguće je videti sve ove zanimljive vrednosti tokom debugovanja, pre ulaska u main, pomoću:
+moguće je videti sve ove zanimljive vrednosti tokom debugging-a, pre ulaska u main, pomoću:
 
 <pre><code>lldb ./apple
 
@@ -181,17 +181,17 @@ moguće je videti sve ove zanimljive vrednosti tokom debugovanja, pre ulaska u m
 
 ## dyld_all_image_infos
 
-Ovo je struktura koju eksportuje dyld, sa informacijama o stanju dyld-a. Može se pronaći u [**izvornom kodu**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html), a sadrži informacije poput verzije, pokazivača na niz dyld_image_info struktura, pokazivača na dyld_image_notifier, podatka da li je proc odvojen od shared cache-a, podatka da li je libSystem initializer pozvan, pokazivača na sopstveni Mach header dyld-a, pokazivača na string sa verzijom dyld-a...<sup>[[4]](#references)</sup>
+Ovo je struktura koju exportuje dyld i koja sadrži informacije o stanju dyld-a. Može se pronaći u [**source code-u**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html), a sadrži informacije kao što su verzija, pointer na niz dyld_image_info struktura, pointer na dyld_image_notifier, informacija da li je proc odvojen od shared cache-a, informacija da li je libSystem initializer pozvan, pointer na sopstveni Mach header dyld-a, pointer na string sa verzijom dyld-a...<sup>[[4]](#references)</sup>
 
-## dyld env promenljive
+## dyld env variables
 
 ### debug dyld
 
-Zanimljive env promenljive koje pomažu da se razume šta dyld radi:
+Zanimljive env promenljive koje pomažu u razumevanju onoga što dyld radi:
 
 - **DYLD_PRINT_LIBRARIES**
 
-Proverite svaku učitanu library:
+Proverava svaku učitanu library:
 ```
 DYLD_PRINT_LIBRARIES=1 ./apple
 dyld[19948]: <9F848759-9AB8-3BD2-96A1-C069DC1FFD43> /private/tmp/a
@@ -212,7 +212,7 @@ dyld[19948]: <1A7038EC-EE49-35AE-8A3C-C311083795FB> /usr/lib/system/libmacho.dyl
 Proverite kako se učitava svaka biblioteka:
 ```
 DYLD_PRINT_SEGMENTS=1 ./apple
-dyld[21147]: re-using existing shared cache (/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e):
+dyld[21147]: reusing existing shared cache (/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e):
 dyld[21147]:         0x181944000->0x1D5D4BFFF init=5, max=5 __TEXT
 dyld[21147]:         0x1D5D4C000->0x1D5EC3FFF init=1, max=3 __DATA_CONST
 dyld[21147]:         0x1D7EC4000->0x1D8E23FFF init=3, max=3 __DATA
@@ -246,7 +246,7 @@ dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 ```
 - **DYLD_PRINT_INITIALIZERS**
 
-Ispisuje kada se pokreće svaki inicijalizator biblioteke:
+Ispisuje kada se pokreće inicijalizator svake biblioteke:
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
@@ -256,43 +256,42 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 
 - `DYLD_BIND_AT_LAUNCH`: Lazy bindings se razrešavaju zajedno sa non-lazy bindings
 - `DYLD_DISABLE_PREFETCH`: Onemogućava pre-fetching sadržaja \_\_DATA i \_\_LINKEDIT
-- `DYLD_FORCE_FLAT_NAMESPACE`: Jednonivovska bindings
+- `DYLD_FORCE_FLAT_NAMESPACE`: Single-level bindings
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Putanje za razrešavanje
-- `DYLD_INSERT_LIBRARIES`: Učitava određenu biblioteku
+- `DYLD_INSERT_LIBRARIES`: Učitava određenu library
 - `DYLD_PRINT_TO_FILE`: Upisuje dyld debug u datoteku
 - `DYLD_PRINT_APIS`: Ispisuje pozive libdyld API-ja
-- `DYLD_PRINT_APIS_APP`: Ispisuje libdyld API pozive koje izvršava glavni program
-- `DYLD_PRINT_BINDINGS`: Ispisuje simbole prilikom njihovog povezivanja
-- `DYLD_WEAK_BINDINGS`: Ispisuje samo weak simbole prilikom njihovog povezivanja
-- `DYLD_PRINT_CODE_SIGNATURES`: Ispisuje operacije registracije code signatures
-- `DYLD_PRINT_DOFS`: Ispisuje D-Trace object format sekcije kada se učitaju
-- `DYLD_PRINT_ENV`: Ispisuje environment koji dyld vidi
+- `DYLD_PRINT_APIS_APP`: Ispisuje pozive libdyld API-ja koje izvršava glavni proces
+- `DYLD_PRINT_BINDINGS`: Ispisuje simbole prilikom binding-a
+- `DYLD_WEAK_BINDINGS`: Ispisuje samo weak simbole prilikom binding-a
+- `DYLD_PRINT_CODE_SIGNATURES`: Ispisuje operacije registracije code signature-a
+- `DYLD_PRINT_DOFS`: Ispisuje odeljke D-Trace object format-a prilikom učitavanja
+- `DYLD_PRINT_ENV`: Ispisuje env koji dyld vidi
 - `DYLD_PRINT_INTERPOSTING`: Ispisuje interposting operacije
-- `DYLD_PRINT_LIBRARIES`: Ispisuje učitane biblioteke
+- `DYLD_PRINT_LIBRARIES`: Ispisuje učitane libraries
 - `DYLD_PRINT_OPTS`: Ispisuje opcije učitavanja
 - `DYLD_REBASING`: Ispisuje operacije rebasing-a simbola
 - `DYLD_RPATHS`: Ispisuje proširenja za @rpath
 - `DYLD_PRINT_SEGMENTS`: Ispisuje mapiranja Mach-O segmenata
-- `DYLD_PRINT_STATISTICS`: Ispisuje statistiku vremena
-- `DYLD_PRINT_STATISTICS_DETAILS`: Ispisuje detaljnu statistiku vremena
+- `DYLD_PRINT_STATISTICS`: Ispisuje statistiku vremena izvršavanja
+- `DYLD_PRINT_STATISTICS_DETAILS`: Ispisuje detaljnu statistiku vremena izvršavanja
 - `DYLD_PRINT_WARNINGS`: Ispisuje poruke upozorenja
 - `DYLD_SHARED_CACHE_DIR`: Putanja koja se koristi za shared library cache
 - `DYLD_SHARED_REGION`: "use", "private", "avoid"
 - `DYLD_USE_CLOSURES`: Omogućava closures
 
-Moguće je pronaći još opcija pomoću nečega poput:
+Moguće je pronaći još promenljivih pomoću nečega poput:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
-Ili preuzimanjem dyld projekta sa [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) i pokretanjem sledećeg unutar fascikle:
+Ili preuzimanjem dyld projekta sa [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) i pokretanjem unutar foldera:
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
-## Reference
+## References
 
 - [1] [dyld — `dyld/dyldMain.cpp` (putanja pokretanja procesa)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/dyldMain.cpp)
 - [2] [dyld — `dyld/DyldProcessConfig.cpp` (konfiguracija procesa/bezbednosti)](https://github.com/apple-oss-distributions/dyld/blob/main/dyld/DyldProcessConfig.cpp)
 - [3] [XNU — `bsd/kern/kern_exec.c` (kernel strana funkcije `execve`, učitavanje dyld-a)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_exec.c)
 - [4] [dyld — `include/mach-o/dyld_images.h` (struktura `dyld_all_image_infos`)](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)
-
 {{#include ../../../../banners/hacktricks-training.md}}

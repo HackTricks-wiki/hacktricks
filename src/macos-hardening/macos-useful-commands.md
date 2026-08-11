@@ -32,7 +32,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -117,7 +117,7 @@ sudo killall -HUP mDNSResponder
 ```
 ### Brza provera protiv analize / virtuelizacije
 
-Neki macOS stealers pozivaju `system_profiler` da bi otkrili VM-ove i **prekidaju izvršavanje karakterističnim izlaznim kodom (npr. 100)** kako bi izbegli detonaciju u sandboxu<sup>[[1]](#references)</sup>:
+Neki macOS stealers pozivaju `system_profiler` da bi otkrili VM-ove i **prekidaju rad sa posebnom izlaznom šifrom (npr. 100)** kako bi izbegli sandbox detonaciju<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -128,7 +128,7 @@ fi
 Proverite da li su instalirane **sumnjive** aplikacije i **privilegije** nad instaliranim resursima:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
@@ -149,8 +149,7 @@ Bez upita
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## Reference
+## References
 
-- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
+- [1] [2025, godina Infostealer-a](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 {{#include ../banners/hacktricks-training.md}}

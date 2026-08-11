@@ -1,46 +1,48 @@
-# macOS datoteke, fascikle, binarni fajlovi i memorija
+# macOS fajlovi, fascikle, binarni fajlovi i memorija
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Hijerarhijski raspored datoteka
+## Hijerarhijski raspored fajl sistema
+
+Apple dokumentuje macOS fajl sistem kao hijerarhiju sistemskih, lokalnih, mrežnih i korisničkih domena. Tačan sadržaj se razlikuje u zavisnosti od izdanja OS-a, a sistemske lokacije su sve češće zaštićene ili sintetizovane. <sup>[[1]](#references)</sup>
 
 - **/Applications**: Instalirane aplikacije bi trebalo da se nalaze ovde. Svi korisnici će moći da im pristupe.
 - **/bin**: Binarni fajlovi komandne linije
 - **/cores**: Ako postoji, koristi se za čuvanje core dump-ova
-- **/dev**: Sve se tretira kao datoteka, pa ovde možete videti sačuvane hardverske uređaje.
-- **/etc**: Konfiguracione datoteke
-- **/Library**: Ovde se može pronaći veliki broj poddirektorijuma i datoteka povezanih sa podešavanjima, kešom i logovima. Library fascikla postoji u root direktorijumu i u direktorijumu svakog korisnika.
-- **/private**: Nije dokumentovan, ali veliki broj prethodno pomenutih fascikli predstavljaju simboličke linkove ka private direktorijumu.
+- **/dev**: Sve se tretira kao fajl, pa ovde možete videti sačuvane hardverske uređaje.
+- **/etc**: Konfiguracioni fajlovi
+- **/Library**: Ovde se mogu pronaći brojni poddirektorijumi i fajlovi povezani sa preferencama, keš memorijom i logovima. Library fascikla postoji u root direktorijumu i u direktorijumu svakog korisnika.
+- **/private**: Nije dokumentovan, ali su mnoge pomenute fascikle simboličke veze ka private direktorijumu.
 - **/sbin**: Osnovni sistemski binarni fajlovi (povezani sa administracijom)
-- **/System**: Datoteke potrebne za pokretanje OS X-a. Ovde bi uglavnom trebalo da se nalaze samo datoteke specifične za Apple (ne third-party datoteke).
-- **/tmp**: Datoteke se brišu nakon 3 dana (ovo je soft link ka /private/tmp)
-- **/Users**: Home direktorijum korisnika.
+- **/System**: Fajlovi potrebni macOS-u; ovo stablo prvenstveno sadrži komponente koje obezbeđuje Apple.
+- **/tmp**: Privremeni fajlovi (simbolička veza ka `/private/tmp`). Istorijske instalacije su često periodično brisale stare privremene fajlove, ponekad uz period od tri dana, ali trenutno vreme čišćenja zavisi od sistema i politike; nemojte se oslanjati na to da će podaci ovde opstati.
+- **/Users**: Matični direktorijum korisnika.
 - **/usr**: Konfiguracioni i sistemski binarni fajlovi
-- **/var**: Log datoteke
-- **/Volumes**: Ovde će se prikazati montirani diskovi.
-- **/.vol**: Pokretanjem `stat a.txt` dobijate nešto poput `16777223 7545753 -rw-r--r-- 1 username wheel ...`, gde je prvi broj ID broj volumena na kom se datoteka nalazi, a drugi je inode broj. Sadržaju ove datoteke možete pristupiti kroz /.vol/ sa tim informacijama, pokretanjem komande `cat /.vol/16777223/7545753`
+- **/var**: Log fajlovi
+- **/Volumes**: Ovde se pojavljuju montirani volumeni.
+- **/.vol**: Pokretanjem `stat a.txt` dobijate nešto poput `16777223 7545753 -rw-r--r-- 1 username wheel ...`, pri čemu je prvi broj ID broj volumena na kojem fajl postoji, a drugi broj inode broj. Sadržaju ovog fajla možete pristupiti preko /.vol/ koristeći te informacije i pokretanjem komande `cat /.vol/16777223/7545753`
 
-### Applications fascikle
+### Fascikle aplikacija
 
-- **System aplikacije** se nalaze u `/System/Applications`
+- **Sistemske aplikacije** se nalaze u `/System/Applications`
 - **Instalirane** aplikacije se obično instaliraju u `/Applications` ili u `~/Applications`
-- **Podaci aplikacija** mogu se pronaći u `/Library/Application Support` za aplikacije koje se pokreću kao root i u `~/Library/Application Support` za aplikacije koje se pokreću kao korisnik.
-- Third-party aplikacioni **daemoni** koji **moraju da se pokreću kao root** obično se nalaze u `/Library/PrivilegedHelperTools/`
-- **Sandboxed** aplikacije su mapirane u fasciklu `~/Library/Containers`. Svaka aplikacija ima fasciklu imenovanu prema bundle ID-u aplikacije (`com.apple.Safari`).
-- **Kernel** se nalazi u `/System/Library/Kernels/kernel`
+- **Podaci aplikacija** mogu se pronaći u `/Library/Application Support` za aplikacije koje rade kao root i u `~/Library/Application Support` za aplikacije koje rade kao korisnik.
+- **Daemoni** aplikacija trećih strana koji **moraju da rade kao root** obično se nalaze u `/Library/PrivilegedHelperTools/`.
+- **Sandboxed** aplikacije su mapirane u fasciklu `~/Library/Containers`. Svaka aplikacija ima fasciklu imenovanu prema ID-u bundle-a aplikacije (`com.apple.Safari`).
+- **kernel** se nalazi u `/System/Library/Kernels/kernel`
 - **Apple kernel ekstenzije** nalaze se u `/System/Library/Extensions`
-- **Third-party kernel ekstenzije** čuvaju se u `/Library/Extensions`
+- **Kernel ekstenzije trećih strana** čuvaju se u `/Library/Extensions`
 
-### Datoteke sa osetljivim informacijama
+### Fajlovi sa osetljivim informacijama
 
-MacOS čuva informacije kao što su lozinke na nekoliko mesta:
+macOS čuva osetljive informacije, uključujući credentials, na nekoliko lokacija:
 
 
 {{#ref}}
 macos-sensitive-locations.md
 {{#endref}}
 
-### Ranjivi pkg installer-i
+### Vulnerable pkg installers
 
 
 {{#ref}}
@@ -49,27 +51,27 @@ macos-installers-abuse.md
 
 ## Specifične OS X ekstenzije
 
-- **`.dmg`**: Apple Disk Image datoteke su veoma česte za installere.
-- **`.kext`**: Mora da prati specifičnu strukturu i predstavlja OS X verziju driver-a. (bundle je)
-- **`.plist`**: Takođe poznat kao property list, čuva informacije u XML ili binarnom formatu.
-- Može biti XML ili binarni format. Binarne datoteke mogu se čitati pomoću:
+- **`.dmg`**: Apple Disk Image fajlovi su veoma česti kod instalera.
+- **`.kext`**: Mora da prati određenu strukturu i predstavlja OS X verziju driver-a. (bundle je)
+- **`.plist`**: Property list čuva strukturisane informacije u XML ili binarnom formatu.
+- Može biti XML ili binarni. Binarni fajlovi mogu se pročitati pomoću:
 - `defaults read config.plist`
-- `/usr/libexec/PlistBuddy -c print config.plsit`
+- `/usr/libexec/PlistBuddy -c print config.plist`
 - `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
 - `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
 - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
-- **`.app`**: Apple aplikacije koje prate strukturu direktorijuma (bundle).
-- **`.dylib`**: Dinamičke biblioteke (poput Windows DLL datoteka)
-- **`.pkg`**: Iste su kao xar (eXtensible Archive format). Installer komanda može da se koristi za instaliranje sadržaja ovih datoteka.
-- **`.DS_Store`**: Ova datoteka postoji u svakom direktorijumu i čuva atribute i prilagođavanja direktorijuma.
+- **`.app`**: Application bundle koji prati standardnu macOS strukturu direktorijuma.
+- **`.dylib`**: Dynamic libraries (poput Windows DLL fajlova)
+- **`.pkg`**: Isti su kao xar (eXtensible Archive format). Installer komanda može da se koristi za instaliranje sadržaja ovih fajlova.
+- **`.DS_Store`**: Ovaj fajl se nalazi u svakom direktorijumu i čuva atribute i prilagođavanja direktorijuma.
 - **`.Spotlight-V100`**: Ova fascikla se pojavljuje u root direktorijumu svakog volumena na sistemu.
-- **`.metadata_never_index`**: Ako se ova datoteka nalazi u root direktorijumu volumena, Spotlight neće indeksirati taj volumen.
-- **`.noindex`**: Datoteke i fascikle sa ovom ekstenzijom neće biti indeksirane pomoću Spotlight-a.
-- **`.sdef`**: Datoteke unutar bundle-ova koje određuju kako je moguće komunicirati sa aplikacijom iz AppleScript-a.
+- **`.metadata_never_index`**: Ako se ovaj fajl nalazi u root direktorijumu volumena, Spotlight neće indeksirati taj volumen.
+- **`.noindex`**: Fajlovi i fascikle sa ovom ekstenzijom neće biti indeksirani pomoću Spotlight-a.
+- **`.sdef`**: Scripting definition fajl koji opisuje kako AppleScript može da komunicira sa aplikacijom.
 
-### macOS Bundle-ovi
+### macOS Bundles
 
-Bundle je **direktorijum** koji u Finder-u **izgleda kao objekat** (Primer bundle-a su `*.app` datoteke).
+Bundle je direktorijum sa standardizovanom hijerarhijom koji Finder može da prikaže kao jedan objekat; application bundles koriste ekstenziju `.app`. <sup>[[2]](#references)</sup>
 
 
 {{#ref}}
@@ -78,14 +80,14 @@ macos-bundles.md
 
 ## Dyld Shared Library Cache (SLC)
 
-Na macOS-u (i iOS-u) sve sistemske shared biblioteke, kao što su framework-ovi i dylib-ovi, **kombinuju se u jednu datoteku**, koja se naziva **dyld shared cache**. Ovo poboljšava performanse, jer se kod može brže učitati.
+Na macOS-u i iOS-u, često korišćene sistemske biblioteke i framework-ovi unapred se povezuju u **dyld shared cache**, čime se poboljšavaju performanse pokretanja aplikacija. Iako se tretira kao jedan logički keš, aktuelna izdanja mogu da ga čuvaju kao glavni keš i više subcache fajlova, umesto bukvalno u jednom fajlu. Njegov format i lokacija predstavljaju detalje implementacije koji se menjaju kroz izdanja OS-a. <sup>[[3]](#references)</sup>
 
-Na macOS-u se nalazi u `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/`, a u starijim verzijama **shared cache** možete pronaći u **`/System/Library/dyld/`**.\
+Na macOS-u se nalazi u `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/`, a u starijim verzijama možda ćete moći da pronađete **shared cache** u **`/System/Library/dyld/`**.\
 Na iOS-u ih možete pronaći u **`/System/Library/Caches/com.apple.dyld/`**.
 
-Slično dyld shared cache-u, kernel i kernel ekstenzije se takođe kompajliraju u kernel cache, koji se učitava prilikom pokretanja sistema.
+Slično kao dyld shared cache, kernel i kernel ekstenzije se takođe kompajliraju u kernel cache, koji se učitava prilikom boot-a.
 
-Da bi se biblioteke izdvojile iz jedne datoteke dylib shared cache-a, bilo je moguće koristiti binarni fajl [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip), koji možda danas više ne radi, ali možete koristiti i [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
+Starija izdanja mogla su se ekstrahovati pomoću alata [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip). Ta verzija možda ne podržava aktuelne formate keša; [**dyldextractor**](https://github.com/arandomdev/dyldextractor) je druga opcija:
 ```bash
 # dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -96,75 +98,75 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 # More options inside the readme
 ```
 > [!TIP]
-> Imajte na umu da čak i ako alat `dyld_shared_cache_util` ne radi, možete proslediti **shared dyld binary u Hopper** i Hopper će moći da identifikuje sve biblioteke i omogući vam da **izaberete onu koju želite da istražite**:
+> Imajte na umu da, čak i ako alat `dyld_shared_cache_util` ne radi, možete proslediti **shared dyld binary alatu Hopper** i Hopper će moći da identifikuje sve biblioteke i omogući vam da **izaberete onu** koju želite da istražite:
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Neki extractors neće raditi jer su dylibs prelinkovani sa hardkodiranim adresama, pa mogu skakati na nepoznate adrese
+Neki extractors neće raditi jer su dylibs unapred povezane sa hard-coded adresama, pa mogu skakati na nepoznate adrese
 
 > [!TIP]
-> Takođe je moguće preuzeti Shared Library Cache drugih \*OS uređaja u macOS-u korišćenjem emulatora u Xcode-u. Oni će biti preuzeti u: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, kao što je:`$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
+> Takođe je moguće preuzeti Shared Library Cache drugih \*OS uređaja u macOS-u korišćenjem emulatora u Xcode-u. Biće preuzeti unutar: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, kao što je:`$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
 
-### Mapiranje SLC-a
+### Mapiranje SLC
 
-**`dyld`** koristi syscall **`shared_region_check_np`** da bi utvrdio da li je SLC mapiran (što vraća adresu) i **`shared_region_map_and_slide_np`** za mapiranje SLC-a.
+**`dyld`** koristi syscall **`shared_region_check_np`** da proveri da li je SLC mapiran (što vraća adresu), a **`shared_region_map_and_slide_np`** za mapiranje SLC-a.
 
-Imajte na umu da čak i kada se SLC pomeri pri prvom korišćenju, svi **procesi** koriste **istu kopiju**, čime se **uklanja ASLR** zaštita ako je napadač mogao da pokreće procese na sistemu. Ovo je zapravo ranije bilo iskorišćeno i rešeno pomoću shared region pager-a.
+Imajte na umu da, čak i ako se SLC sliduje pri prvom korišćenju, svi **procesi** koriste **istu kopiju**, čime se **uklanja ASLR** zaštita ako je attacker uspeo da pokreće procese na sistemu. Ovo je ranije zaista bilo iskorišćeno i rešeno pomoću shared region pager-a.
 
-Branch pools su male Mach-O dylibs koje stvaraju male prostore između mapiranja image-a, čime onemogućavaju interponovanje funkcija.
+Branch pools su male Mach-O dylibs koje stvaraju male prostore između image mapping-a, čime interpose funkcija postaje nemoguć.
 
-### Override SLC-ova
+### Override SLCs
 
-Korišćenjem env promenljivih:
+Korišćenjem env variables:
 
 - **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Ovo će omogućiti učitavanje novog shared library cache-a
-- **`DYLD_SHARED_CACHE_DIR=avoid`** i ručna zamena biblioteka symlinkovima ka shared cache-u sa stvarnim bibliotekama (moraćete da ih ekstraktujete)
+- **`DYLD_SHARED_CACHE_DIR=avoid`** i ručno zamenite biblioteke symlink-ovima ka shared cache-u sa stvarnim bibliotekama (moraćete da ih extract-ujete)
 
-## Posebne dozvole fajlova
+## Posebne dozvole datoteka
 
 ### Dozvole foldera
 
-U **folderu**, **read** omogućava njegovo **izlistavanje**, **write** omogućava **brisanje** i **upisivanje** fajlova u njega, a **execute** omogućava **prolazak** kroz direktorijum. Na primer, korisnik sa **read dozvolom nad fajlom** unutar direktorijuma nad kojim **nema execute** dozvolu **neće moći da pročita** fajl.
+Za directory, **read** omogućava izlistavanje entries, **write** omogućava kreiranje ili uklanjanje entries, a **execute** omogućava traversal. Shodno tome, korisnik koji može da čita file, ali ne može da izvrši traversal kroz parent directory, ne može da pristupi tom file-u putem putanje. <sup>[[4]](#references)</sup>
 
-### Modifikatori flagova
+### Modifikatori flag-ova
 
-Postoje flagovi koji mogu biti postavljeni na fajlovima i zbog kojih će se fajl ponašati drugačije. Možete **proveriti flagove** fajlova unutar direktorijuma pomoću `ls -lO /path/directory`
+Files mogu imati flag-ove koji menjaju njihovo ponašanje. Inspect-ujte flag-ove u directory-ju pomoću `ls -lO /path/directory`.
 
-- **`uchg`**: Poznat kao **uchange** flag, sprečiće bilo koju radnju koja menja ili briše **fajl**. Da biste ga postavili, koristite: `chflags uchg file.txt`
-- root korisnik može **ukloniti flag** i izmeniti fajl
-- **`restricted`**: Ovaj flag čini fajl **zaštićenim pomoću SIP-a** (ne možete dodati ovaj flag fajlu).
-- **`Sticky bit`**: Ako direktorijum ima sticky bit, samo **vlasnik direktorijuma ili root mogu preimenovati ili obrisati** fajlove. Ovo se obično postavlja na direktorijum /tmp kako bi se sprečilo da obični korisnici brišu ili premeštaju fajlove drugih korisnika.
+- **`uchg`**: Poznat kao **uchange** flag, onemogućava bilo koju akciju koja menja ili briše **file**. Za njegovo postavljanje koristite: `chflags uchg file.txt`
+- Root user može **ukloniti flag** i izmeniti file
+- **`restricted`**: Ovaj flag čini file **zaštićenim pomoću SIP-a** (ne možete dodati ovaj flag file-u).
+- **`Sticky bit`**: U directory-ju sa postavljenim sticky bit-om, samo vlasnik file-a, vlasnik directory-ja ili root mogu preimenovati ili obrisati entry. Ovo se obično omogućava na `/tmp`, kako bi se sprečilo da users brišu ili premeštaju files drugih users.
 
-Svi flagovi se mogu pronaći u fajlu `sys/stat.h` (pronađite ga pomoću `mdfind stat.h | grep stat.h`) i jesu:
+Svi flag-ovi se mogu pronaći u file-u `sys/stat.h` (pronađite ga pomoću `mdfind stat.h | grep stat.h`) i to su:
 
-- `UF_SETTABLE` 0x0000ffff: Maska flagova koje vlasnik može menjati.
-- `UF_NODUMP` 0x00000001: Ne dumpovati fajl.
-- `UF_IMMUTABLE` 0x00000002: Fajl se ne može menjati.
-- `UF_APPEND` 0x00000004: Upisivanje u fajl može biti samo dodavanje.
-- `UF_OPAQUE` 0x00000008: Direktorijum je opaque u odnosu na union.
-- `UF_COMPRESSED` 0x00000020: Fajl je kompresovan (neki fajl-sistemi).
-- `UF_TRACKED` 0x00000040: Nema obaveštenja o brisanjima/preimenovanjima za fajlove sa ovim flagom.
-- `UF_DATAVAULT` 0x00000080: Za čitanje i upisivanje je potreban entitlement.
-- `UF_HIDDEN` 0x00008000: Nagoveštaj da ovu stavku ne treba prikazivati u GUI-ju.
-- `SF_SUPPORTED` 0x009f0000: Maska flagova koje podržava superuser.
-- `SF_SETTABLE` 0x3fff0000: Maska flagova koje superuser može menjati.
-- `SF_SYNTHETIC` 0xc0000000: Maska sistemskih synthetic flagova samo za čitanje.
-- `SF_ARCHIVED` 0x00010000: Fajl je arhiviran.
-- `SF_IMMUTABLE` 0x00020000: Fajl se ne može menjati.
-- `SF_APPEND` 0x00040000: Upisivanje u fajl može biti samo dodavanje.
-- `SF_RESTRICTED` 0x00080000: Za upisivanje je potreban entitlement.
-- `SF_NOUNLINK` 0x00100000: Stavka se ne može ukloniti, preimenovati ili montirati.
-- `SF_FIRMLINK` 0x00800000: Fajl je firmlink.
-- `SF_DATALESS` 0x40000000: Fajl je dataless objekat.
+- `UF_SETTABLE` 0x0000ffff: Maska flag-ova koje owner može da menja.
+- `UF_NODUMP` 0x00000001: Ne dump-ovati file.
+- `UF_IMMUTABLE` 0x00000002: File se ne može menjati.
+- `UF_APPEND` 0x00000004: Upis u file može biti samo append.
+- `UF_OPAQUE` 0x00000008: Directory je opaque u odnosu na union.
+- `UF_COMPRESSED` 0x00000020: File je kompresovan (neki file sistemi).
+- `UF_TRACKED` 0x00000040: Nema notifications za brisanja/preimenovanja files sa ovim flag-om.
+- `UF_DATAVAULT` 0x00000080: Potreban je entitlement za čitanje i upis.
+- `UF_HIDDEN` 0x00008000: Hint da ovu stavku ne treba prikazivati u GUI-ju.
+- `SF_SUPPORTED` 0x009f0000: Maska flag-ova koje podržava superuser.
+- `SF_SETTABLE` 0x3fff0000: Maska flag-ova koje superuser može da menja.
+- `SF_SYNTHETIC` 0xc0000000: Maska system read-only synthetic flag-ova.
+- `SF_ARCHIVED` 0x00010000: File je arhiviran.
+- `SF_IMMUTABLE` 0x00020000: File se ne može menjati.
+- `SF_APPEND` 0x00040000: Upis u file može biti samo append.
+- `SF_RESTRICTED` 0x00080000: Potreban je entitlement za upis.
+- `SF_NOUNLINK` 0x00100000: Stavka se ne može ukloniti, preimenovati ili montirati na nju.
+- `SF_FIRMLINK` 0x00800000: File je firmlink.
+- `SF_DATALESS` 0x40000000: File je dataless object.
 
-### **ACL-ovi fajlova**
+### **File ACL-ovi**
 
-ACL-ovi fajlova sadrže **ACE** (Access Control Entries), gde se mogu dodeliti **preciznije dozvole** različitim korisnicima.
+File **ACL-ovi** sadrže **ACE** (Access Control Entries), gde se različitim users mogu dodeliti **granularnije dozvole**.
 
-Direktorijumu je moguće dodeliti sledeće dozvole: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
-A fajlu: `read`, `write`, `append`, `execute`.
+Directory-ju je moguće dodeliti sledeće dozvole: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
+Za **file**: `read`, `write`, `append` i `execute`.
 
-Kada fajl sadrži ACL-ove, videćete **„+“ prilikom izlistavanja dozvola, kao u**:
+Kada file sadrži ACL-ove, prilikom izlistavanja dozvola **videćete znak „+" kao u**:
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
@@ -175,31 +177,31 @@ ls -lde Movies
 drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
 0: group:everyone deny delete
 ```
-Možete pronaći **sve datoteke sa ACL-ovima** pomoću (ovo je veoma sporo):
+Sve datoteke sa ACL-ovima možete pronaći pomoću sledeće komande (ovo je veoma sporo):
 ```bash
 ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
 ### Prošireni atributi
 
-Prošireni atributi imaju naziv i proizvoljnu vrednost, a mogu se videti pomoću `ls -@` i menjati pomoću komande `xattr`. Neki uobičajeni prošireni atributi su:
+Prošireni atributi su imenovane vrednosti metapodataka koje se čuvaju odvojeno od uobičajenih atributa datoteke. Izlistajte ih pomoću `ls -l@`, a pregledajte ili izmenite pomoću `xattr`. <sup>[[5]](#references)</sup> Neki uobičajeni prošireni atributi su:
 
-- `com.apple.resourceFork`: Kompatibilnost sa Resource fork-om. Takođe vidljivo kao `filename/..namedfork/rsrc`
-- `com.apple.quarantine`: macOS: Gatekeeper mehanizam karantina (III/6)
-- `metadata:*`: macOS: različiti metapodaci, kao što su `_backup_excludeItem` ili `kMD*`
-- `com.apple.lastuseddate` (#PS): Datum poslednje upotrebe fajla
-- `com.apple.FinderInfo`: macOS: Finder informacije (npr. Tags u boji)
-- `com.apple.TextEncoding`: Navodi kodiranje teksta ASCII tekstualnih fajlova
-- `com.apple.logd.metadata`: Koristi ga logd za fajlove u `/var/db/diagnostics`
+- `com.apple.resourceFork`: Kompatibilnost resource fork-a. Takođe vidljivo kao `filename/..namedfork/rsrc`
+- `com.apple.quarantine`: macOS Gatekeeper metapodaci karantina
+- `metadata:*`: macOS metapodaci, kao što su `_backup_excludeItem` ili `kMD*`
+- `com.apple.lastuseddate` (#PS): Datum poslednjeg korišćenja datoteke
+- `com.apple.FinderInfo`: Informacije macOS Finder-a, kao što su oznake u boji
+- `com.apple.TextEncoding`: Određuje kodiranje teksta ASCII datoteka
+- `com.apple.logd.metadata`: Koristi ga logd za datoteke u `/var/db/diagnostics`
 - `com.apple.genstore.*`: Generational storage (`/.DocumentRevisions-V100` u root-u filesystem-a)
-- `com.apple.rootless`: macOS: Koristi ga System Integrity Protection za označavanje fajla (III/10)
-- `com.apple.uuidb.boot-uuid`: logd oznake epoha pokretanja sistema sa jedinstvenim UUID-om
-- `com.apple.decmpfs`: macOS: Transparentna kompresija fajlova (II/7)
-- `com.apple.cprotect`: \*OS: Podaci o enkripciji po fajlu (III/11)
+- `com.apple.rootless`: macOS metapodaci povezani sa System Integrity Protection
+- `com.apple.uuidb.boot-uuid`: Oznake logd-a za epohe pokretanja sa jedinstvenim UUID-om
+- `com.apple.decmpfs`: macOS metapodaci transparentne kompresije datoteka
+- `com.apple.cprotect`: \*OS: Podaci o enkripciji po datoteci (III/11)
 - `com.apple.installd.*`: \*OS: Metapodaci koje koristi installd, npr. `installType`, `uniqueInstallID`
 
-### Resource Forks | macOS ADS
+### Resource Fork-ovi | macOS ADS
 
-Ovo je način za dobijanje **Alternate Data Streams na MacOS** mašinama. Sadržaj možete sačuvati unutar proširenog atributa pod nazivom **com.apple.ResourceFork** u fajlu tako što ćete ga sačuvati u **file/..namedfork/rsrc**.
+Resource fork-ovi obezbeđuju alternativni tok podataka na macOS-u. Sadržaj može biti sačuvan u proširenom atributu `com.apple.ResourceFork` i pristupljen kroz `file/..namedfork/rsrc`.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -207,7 +209,7 @@ echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
 xattr -l a.txt #Read extended attributes
 com.apple.ResourceFork: Hello Mac ADS
 
-ls -l a.txt #The file length is still q
+ls -l a.txt # The data-fork length is still 6 bytes
 -rw-r--r--@ 1 username  wheel  6 17 Jul 01:15 a.txt
 ```
 Možete **pronaći sve datoteke koje sadrže ovaj prošireni atribut** pomoću:
@@ -216,65 +218,91 @@ find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf
 ```
 ### decmpfs
 
-Prošireni atribut `com.apple.decmpfs` ukazuje da je datoteka sačuvana šifrovano, `ls -l` će prijaviti **veličinu 0**, a kompresovani podaci se nalaze unutar ovog atributa. Kada se datoteci pristupi, ona će biti dešifrovana u memoriji.
+Prošireni atribut `com.apple.decmpfs` čuva metapodatke za transparentnu kompresiju; ne ukazuje na enkripciju. U zavisnosti od formata kompresije, kompresovani podaci mogu biti sačuvani u atributu ili u resource fork-u i transparentno se dekompresuju prilikom čitanja.
 
-Ovaj atribut se može videti pomoću `ls -lO`, gde je označen kao kompresovan, jer su kompresovane datoteke takođe označene zastavicom `UF_COMPRESSED`. Ako se kod kompresovane datoteke ukloni ova zastavica pomoću `chflags nocompressed </path/to/file>`, sistem neće znati da je datoteka bila kompresovana i zato neće moći da dekompresuje i pristupi podacima (misliće da je datoteka zapravo prazna).
+Zastavica `UF_COMPRESSED` prikazuje se kao `compressed` u `ls -lO`. Nemojte je ručno uklanjati: time sistem može početi da neispravno tumači kompresovanu reprezentaciju.
 
-Alat afscexpand može da se koristi za prinudnu dekompresiju datoteke.
+Komanda koja uklanja zastavicu prikazana je ovde jer je korisna tokom forenzičkog pregleda, ali njeno pokretanje nad kompresovanim fajlom može učiniti da fajl izgleda prazno ili da mu se ne može pristupiti dok se njegovi metapodaci ne poprave:
+```bash
+chflags nocompressed /path/to/file
+```
+Ugrađeni uslužni program `/usr/bin/afscexpand` može prinudno da proširi transparentno kompresovane datoteke. Zaseban third-party uslužni program `afsctool` takođe može da pregleda ili dekompresuje Apple filesystem compression, ali ga ne treba mešati sa ugrađenom komandom. <sup>[[8]](#references)</sup>
 
 
 ### Zanimljive lokacije konfiguracije (macOS)
 
-| Path / Lokacija | Namena / Šta konfiguriše | Security / Attack-Potential |
+| Putanja / lokacija | Svrha / šta konfiguriše | Bezbednosni / napadački potencijal |
 |---|---|---|
-| `/System/Library/FeatureFlags/Domain/` | Čuva Apple-ove plist datoteke sa feature flagovima koji kontrolišu opcionalna ili eksperimentalna ponašanja u system daemonima / frameworkovima | Ako attacker može da zaobiđe SIP ili stekne privilege, menjanje ovih datoteka može omogućiti skrivene code pathove ili onemogućiti safeguards |
-| `/System/Library/CoreServices/systemVersion.plist` | Sadrži metapodatke o macOS verziji (ProductVersion, BuildVersion) koje koriste aplikacije / installeri za ograničavanje ponašanja | Izmena može prevariti aplikacije ili installere da prihvate nepodržane verzije OS-a ili otključaju features |
-| `/Library/Preferences/com.apple.*.plist` & `~/Library/Preferences/*.plist` | Application / system-wide preferences | Ako su writable, attackeri mogu ubaciti settings za usmeravanje ponašanja aplikacije, onemogućavanje protections ili izazivanje misconfiguration-a |
-| `/Library/LaunchDaemons/` / `/Library/LaunchAgents/` | Plist definicije za background daemon-e i agente | Ubacivanje ili menjanje malicious plist datoteka (ako permissions to dozvoljavaju) omogućava persistence ili privilege escalations |
-| `/etc/hosts` | Mapiranja Hostname ↔ IP koja koristi system DNS resolver | Preusmeravanje domain name-ova, interception traffic-a, spoofing services pod lokalnom kontrolom |
-| `/etc/sudoers` | Definiše ko može da izvršava commands pomoću `sudo` i pod kojim uslovima | Oštećena sudoers datoteka može attacker account-ima dodeliti root ili neodgovarajuće privileges |
-| `/private/var/db/dslocal/nodes/Default/users/` | Plist definicije lokalnih user account-a | Tampering omogućava kreiranje ili menjanje user account-a, password hash-ova ili user metadata |
-| `/System/Library/Extensions/` / `/Library/Extensions/` | Kernel extensions / drivers | Instaliranje ili menjanje kext-ova može dovesti do kernel-level control-a; SIP / signature policies ih strogo štite |
-| `/private/var/db/SystemPolicyConfiguration/` | Čuva konfiguraciju za enforcement system policy-ja (npr. Gatekeeper, notarization) | Tampering ovih datoteka može omogućiti zaobilaženje policy checks ili trust rules |
-| `/usr/libexec/ssh-keysign`, `/etc/ssh/ssh_config`, `/etc/ssh/sshd_config` | SSH helper binaries i config datoteke | Misconfiguration dovodi do slabe SSH security, unauthorized access-a ili insecure algorithms |
-| `/System/Library/Sandbox/Profiles` | System sandbox profiles (SBPL) koji se koriste za ograničavanje akcija process-a | Zamena ili izmena profila može otvoriti sandbox escape vektore ili oslabiti containment |
+| `/System/Library/FeatureFlags/Domain/` | Čuva Apple-ove feature-flag plist datoteke koje kontrolišu opcionalna ili eksperimentalna ponašanja u system daemons / frameworks | Ako napadač može da zaobiđe SIP ili dobije privilegije, menjanje ovih datoteka može da omogući skrivene code paths ili onemogući zaštitne mehanizme |
+| `/System/Library/CoreServices/systemVersion.plist` | Sadrži macOS metapodatke o verziji (ProductVersion, BuildVersion) koje aplikacije / installers koriste za ograničavanje ponašanja | Izmena može navesti aplikacije ili installers da prihvate nepodržane verzije OS-a ili otključaju funkcije |
+| `/Library/Preferences/com.apple.*.plist` & `~/Library/Preferences/*.plist` | Podešavanja aplikacija / sistema | Ako su writable, napadači mogu ubaciti podešavanja koja usmeravaju ponašanje aplikacija, onemogućavaju zaštite ili izazivaju pogrešnu konfiguraciju |
+| `/Library/LaunchDaemons/` / `/Library/LaunchAgents/` | Plist definicije za background daemons i agents | Ubacivanje ili izmena zlonamernog plist-a (ako permissions to dozvoljavaju) omogućava persistence ili privilege escalations |
+| `/etc/hosts` | Mapiranja hostname ↔ IP koja koristi system DNS resolver | Preusmeravanje imena domena, presretanje saobraćaja, spoofing servisa pod lokalnom kontrolom |
+| `/etc/sudoers` | Definiše ko može da izvršava komande sa `sudo` i pod kojim uslovima | Oštećen sudoers fajl može nalozima napadača dodeliti root ili neodgovarajuće privilegije |
+| `/private/var/db/dslocal/nodes/Default/users/` | Plist definicije lokalnih korisničkih naloga | Menjanje omogućava kreiranje ili izmenu korisničkih naloga, password hashes ili korisničkih metapodataka |
+| `/System/Library/Extensions/` / `/Library/Extensions/` | Kernel extensions / drivers | Instaliranje ili izmena kext-ova može dovesti do kontrole na nivou kernela; SIP / signature policies ih strogo štite |
+| `/private/var/db/SystemPolicyConfiguration/` | Čuva konfiguraciju za sprovođenje system policy-ja (npr. Gatekeeper, notarization) | Menjanje ovih datoteka može omogućiti zaobilaženje policy checks ili trust rules |
+| `/usr/libexec/ssh-keysign`, `/etc/ssh/ssh_config`, `/etc/ssh/sshd_config` | SSH helper binaries i config fajlovi | Pogrešna konfiguracija dovodi do slabe SSH bezbednosti, neovlašćenog pristupa ili nesigurnih algoritama |
+| `/System/Library/Sandbox/Profiles` | System sandbox profiles (SBPL) koji se koriste za ograničavanje radnji procesa | Zamena ili izmena profila može otvoriti sandbox escape vektore ili oslabiti containment |
 
-> **Napomena**: Mnoge od ovih putanja nalaze se u SIP-protected direktorijumima (npr. `/System`) i zaštićene su od upisivanja, osim ako je SIP disabled ili bypassovan.
+> **Napomena**: Mnoge od ovih putanja nalaze se u SIP-protected direktorijumima (npr. `/System`) i zaštićene su od upisivanja, osim ako je SIP disabled ili bypassed.
 
 
-## **Universal binaries &** Mach-o Format
+## Universal Binaries i Mach-O format
 
-Mac OS binaries se obično kompajliraju kao **universal binaries**. **Universal binary** može da **podržava više architecture-a u istoj datoteci**.
+Mach-O je native executable format na macOS-u. Universal, odnosno fat, binary objedinjuje više architecture-specific Mach-O slices u jednoj datoteci; posebna stranica objašnjava oba formata:
 
 {{#ref}}
 universal-binaries-and-mach-o-format.md
 {{#endref}}
 
 
-## macOS memory dumping
+## Dumping macOS memorije
 
 {{#ref}}
 macos-memory-dumping.md
 {{#endref}}
 
-## Risk Category Files Mac OS
+## Rizik datoteka i metapodaci handler-a
 
-Direktorijum `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` je mesto gde se čuvaju informacije o **riziku povezanom sa različitim ekstenzijama datoteka**. Ovaj direktorijum klasifikuje datoteke u različite nivoe rizika, što utiče na način na koji Safari postupa sa ovim datotekama nakon preuzimanja. Kategorije su sledeće:
+LaunchServices, file quarantine i Gatekeeper zajedno utiču na to kako macOS obrađuje preuzete datoteke i bira aplikacije za ekstenzije i URL schemes. Njihove baze podataka i interne resource datoteke menjaju se između izdanja; koristite posebne stranice umesto da privatnu CoreTypes putanju tretirate kao stabilan policy interface:
 
-- **LSRiskCategorySafe**: Datoteke u ovoj kategoriji smatraju se **potpuno bezbednim**. Safari će automatski otvoriti ove datoteke nakon preuzimanja.
-- **LSRiskCategoryNeutral**: Ove datoteke ne prikazuju upozorenja i Safari ih **ne otvara automatski**.
-- **LSRiskCategoryUnsafeExecutable**: Datoteke u ovoj kategoriji **pokreću upozorenje** koje ukazuje da je datoteka aplikacija. Ovo služi kao security measure za upozoravanje user-a.
-- **LSRiskCategoryMayContainUnsafeExecutable**: Ova kategorija je namenjena datotekama, kao što su arhive, koje mogu sadržati executable. Safari će **prikazati upozorenje**, osim ako ne može da potvrdi da je sav sadržaj bezbedan ili neutralan.
+Na izdanjima koja izlažu legacy CoreTypes risk metadata pod `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System`, najčešće kategorije su:<sup>[[7]](#references)</sup>
 
-## Log files
+- **`LSRiskCategorySafe`**: sadržaj koji se smatra dovoljno bezbednim za automatsko otvaranje u okviru odgovarajuće application policy.
+- **`LSRiskCategoryNeutral`**: sadržaj koji obično ne pokreće upozorenje i ne otvara se automatski.
+- **`LSRiskCategoryUnsafeExecutable`**: izvršni sadržaj za koji korisnik treba da dobije application warning.
+- **`LSRiskCategoryMayContainUnsafeExecutable`**: containers, kao što su archives, koji mogu sadržati izvršni sadržaj i zahtevaju dodatnu proveru.
 
-- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Sadrži informacije o preuzetim datotekama, kao što je URL sa kog su preuzete.
-- **`/var/log/system.log`**: Glavni log OSX sistema. com.apple.syslogd.plist je odgovoran za izvršavanje syslogging-a (možete proveriti da li je disabled tako što ćete u `launchctl list` potražiti "com.apple.syslogd".
-- **`/private/var/log/asl/*.asl`**: Ovo su Apple System Logs koji mogu sadržati zanimljive informacije.
+Ovo su implementation details, a ne stabilan public policy API; proverite stvarne metapodatke i Safari/Gatekeeper ponašanje na macOS verziji koja se testira.
+
+{{#ref}}
+../macos-file-extension-apps.md
+{{#endref}}
+
+{{#ref}}
+../macos-security-protections/macos-gatekeeper.md
+{{#endref}}
+
+## Log fajlovi
+
+- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Sadrži informacije o preuzetim datotekama, kao što je URL sa kojeg su preuzete.
+- **Unified log**: Na aktuelnim verzijama macOS-a, sistemske i aplikacione događaje možete upitati pomoću `log show` i `log stream`. <sup>[[6]](#references)</sup>
+- **`/var/log/system.log`** i **`/private/var/log/asl/*.asl`**: Legacy logging artifacts koji mogu i dalje biti relevantni na starijim sistemima. Na tim izdanjima, `/System/Library/LaunchDaemons/com.apple.syslogd.plist` konfiguriše `syslogd`; `launchctl list | grep com.apple.syslogd` može pomoći pri utvrđivanju da li je servis učitan.
 - **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Čuva nedavno pristupane datoteke i aplikacije kroz "Finder".
-- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Čuva items za pokretanje prilikom startup-a sistema
-- **`$HOME/Library/Logs/DiskUtility.log`**: Log datoteka za DiskUtility App (informacije o drive-ovima, uključujući USB uređaje)
-- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Podaci o wireless access point-ovima.
-- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: Lista deactivated daemon-a.
+- **`$HOME/Library/Preferences/com.apple.loginitems.plist`**: Legacy preference path povezan sa login items; moderne verzije macOS-a koriste dodatne mehanizme.
+- **`$HOME/Library/Logs/DiskUtility.log`**: Legacy Disk Utility log koji može sadržati informacije o diskovima, uključujući USB uređaje.
+- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Podaci o wireless access points.
+- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: Legacy launchd override podaci.
 
+## References
+
+- [1] [Apple - Vodič za programiranje file system-a](https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/)
+- [2] [Apple - Vodič za programiranje bundle-ova](https://developer.apple.com/library/archive/documentation/CoreFoundation/Conceptual/CFBundles/AboutBundles/AboutBundles.html)
+- [3] [Apple Developer Forums - pregled dyld shared cache-a](https://developer.apple.com/forums/thread/692383)
+- [4] [Apple - Vodič za programiranje file system-a: macOS bezbednost file system-a](https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/FileSystemDetails/FileSystemDetails.html)
+- [5] [`xattr(1)` - macOS man stranica](https://manp.gs/mac/1/xattr)
+- [6] [`log(1)` - macOS man stranica](https://manp.gs/mac/1/log)
+- [7] [Apple Developer - Launch Services](https://developer.apple.com/documentation/coreservices/launch_services)
+- [8] [`afscexpand(1)` - macOS man stranica](https://manp.gs/mac/1/afscexpand)
 {{#include ../../../banners/hacktricks-training.md}}
