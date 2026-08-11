@@ -4,49 +4,49 @@
 
 ## Maelezo ya Msingi
 
-UART ni serial protocol, ambayo huhamisha data kati ya components bit moja kwa wakati. Kinyume chake, parallel communication protocols hutuma data kwa wakati mmoja kupitia channels nyingi. Serial protocols za kawaida zinajumuisha RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express, na USB.
+UART ni interface ya serial isiyosawazishwa inayohamisha mkondo wa bits uliowekwa katika fremu bila clock ya pamoja. Usichanganye UART ya kiwango cha logic na RS-232: RS-232 hutumia viwango tofauti vya voltage, ambavyo mara nyingi huwa hasi, na huhitaji transceiver.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Kwa ujumla, line hudumishwa ikiwa juu (kwenye logical 1) wakati UART iko katika hali ya kusubiri. Kisha, ili kuashiria kuanza kwa uhamishaji wa data, transmitter hutuma start bit kwa receiver, ambapo signal hudumishwa ikiwa chini (kwenye logical 0). Baada ya hapo, transmitter hutuma data bits tano hadi nane zenye ujumbe halisi, ikifuatiwa na parity bit ya hiari na stop bits moja au mbili (zenye logical 1), kulingana na configuration. Parity bit, inayotumika kukagua makosa, huonekana mara chache katika matumizi ya kawaida. Stop bit (au bits) huashiria mwisho wa transmission.
+Kwa ujumla, laini hushikiliwa juu (kwenye thamani ya kimantiki 1) wakati UART iko katika hali ya kutofanya kazi. Kisha, kuashiria mwanzo wa uhamishaji wa data, transmitter hutuma start bit kwa receiver, ambapo signal hushikiliwa chini (kwenye thamani ya kimantiki 0). Baada ya hapo, transmitter hutuma bits tano hadi nane za data zilizo na ujumbe halisi, zikifuatiwa na parity bit ya hiari na stop bits moja au mbili (zenye thamani ya kimantiki 1), kulingana na configuration. Parity bit, inayotumika kukagua errors, huonekana mara chache katika matumizi halisi. Stop bit (au bits) huashiria mwisho wa transmission.
 
-Configuration inayotumika zaidi huitwa 8N1: data bits nane, hakuna parity, na stop bit moja. Kwa mfano, ikiwa tungetaka kutuma character C, au 0x43 katika ASCII, kwenye 8N1 UART configuration, tungetuma bits zifuatazo: 0 (start bit); 0, 1, 0, 0, 0, 0, 1, 1 (thamani ya 0x43 katika binary), na 0 (stop bit).
+Configuration inayotumika zaidi ni 8N1: bits nane za data, hakuna parity, na stop bit moja. UART hutuma data bit yenye uzito mdogo zaidi kwanza, kwa hiyo ASCII `C` (`0x43`) hutumwa kama: start `0`; data `1, 1, 0, 0, 0, 0, 1, 0`; stop `1`.<sup>[[1]](#references)</sup>
 
-![UART: Configuration inayotumika zaidi huitwa 8N1: data bits nane, hakuna parity, na stop bit moja. Kwa mfano, ikiwa tungetaka kutuma character C, au 0x43 katika ASCII, kwenye 8N1 UART](<../../images/image (764).png>)
+![UART: Tunaita configuration inayotumika zaidi 8N1: bits nane za data, hakuna parity, na stop bit moja. Kwa mfano, ikiwa tungetaka kutuma herufi C, au 0x43 katika ASCII, kwenye UART ya 8N1](<../../images/image (764).png>)
 
-Hardware tools za kuwasiliana na UART:
+Vifaa vya hardware vya kuwasiliana na UART:
 
 - USB-to-serial adapter
-- Adapters zenye chips za CP2102 au PL2303
-- Tool ya matumizi mengi kama vile: Bus Pirate, Adafruit FT232H, Shikra, au Attify Badge
+- Adapters zilizo na chips za CP2102 au PL2303
+- Kifaa cha matumizi mengi kama vile: Bus Pirate, Adafruit FT232H, Shikra, au Attify Badge
 
-### Kutambua UART Ports
+### Kutambua Ports za UART
 
-UART ina ports 4: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), na **GND**(Ground). Huenda ukaweza kupata ports 4 zenye herufi **`TX`** na **`RX`** **zilizoandikwa** kwenye PCB. Lakini ikiwa hakuna alama, huenda ukahitaji kujaribu kuzipata mwenyewe kwa kutumia **multimeter** au **logic analyzer**.
+Debug header ya kawaida huonyesha **TX**, **RX**, na **GND**; pia inaweza kuonyesha pin ya **Vcc/Vref**, reset, au pins za flow-control. Vcc si signal ya UART na kwa kawaida inapaswa kutumika tu kama reference ya voltage—si kuunganishwa kama chanzo cha power—isipokuwa schematic ya board na mahitaji ya current yajulikane.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Kwa kutumia **multimeter** na device ikiwa imezimwa:
+Anza kifaa kikiwa **kimezimwa** na kimetenganishwa:
 
-- Ili kutambua pin ya **GND**, tumia hali ya **Continuity Test**, weka probe ya nyuma kwenye ground na pima kwa ile nyekundu hadi usikie sauti kutoka kwenye multimeter. Pins kadhaa za GND zinaweza kupatikana kwenye PCB, kwa hiyo huenda ukawa umepata au hukupata ile inayohusiana na UART.
-- Ili kutambua **VCC port**, chagua **DC voltage mode** na uiweke kwenye voltage ya 20 V. Weka probe nyeusi kwenye ground na probe nyekundu kwenye pin. Washa device. Ikiwa multimeter inapima voltage thabiti ya 3.3 V au 5 V, umepata pin ya Vcc. Ukipata voltages nyingine, jaribu ports nyingine.
-- Ili kutambua **TX** **port**, tumia **DC voltage mode** hadi voltage ya 20 V, weka probe nyeusi kwenye ground na probe nyekundu kwenye pin, kisha washa device. Ukiona voltage inabadilika kwa sekunde chache na kisha kutulia kwenye thamani ya Vcc, kuna uwezekano mkubwa umepata TX port. Hii ni kwa sababu wakati wa kuwasha, hutuma debug data.
-- **RX port** itakuwa iliyo karibu zaidi na zile 3 nyingine, ikiwa na mabadiliko madogo zaidi ya voltage na thamani ya chini zaidi kwa ujumla kati ya UART pins zote.
+- Tambua **GND** katika continuity mode dhidi ya ground plane inayojulikana, connector shield, au supply ground. Usitumie kamwe continuity/resistance mode kwenye board iliyo na power.
+- Badilisha kwenda DC-voltage mode kabla ya kuwasha target. Pima pins zinazoweza kuwa candidates zikilinganishwa na ground ili kutambua logic voltage. Rail thabiti inaweza kuwa Vcc/Vref; usidhani ni salama kuunganisha.
+- Chunguza candidates kwa kutumia logic analyzer au oscilloscope wakati wa boot. **TX** kwa kawaida hukaa high ikiwa idle na huonyesha bursts za data iliyowekwa katika frames. Multimeter inaweza kuonyesha fluctuation ya wastani lakini haiwezi kuthibitisha framing au baud rate.
+- **RX** inaweza kubaki idle na haiwezi kutambuliwa kwa usalama kwa sababu tu iko karibu na TX. Fuatilia PCB, soma datasheet ya SoC, au tumia analyzer yenye impedance kubwa kabla ya kuiendesha.
 
-Ukichanganya TX na RX ports hakuna kitakachotokea, lakini ukichanganya GND na VCC port unaweza kuunguza circuit.
+Kubadilisha TX na RX kwa kawaida hakutoi mawasiliano; kuchanganya power, ground, au viwango vya signal kunaweza kuharibu target au adapter kabisa. Unganisha ground kwanza na anza katika hali ya **receive-only** (target TX kwenda adapter RX).
 
-Katika baadhi ya target devices, UART port huwa imezimwa na manufacturer kwa kuzima RX au TX, au zote mbili. Katika hali hiyo, inaweza kusaidia kufuatilia connections kwenye circuit board na kutafuta breakout point. Dokezo muhimu la kuthibitisha kutogunduliwa kwa UART na kukatika kwa circuit ni kuangalia warranty ya device. Ikiwa device ilisafirishwa ikiwa na warranty, manufacturer huacha baadhi ya debug interfaces (katika hali hii, UART), na hivyo lazima awe ameitenganisha UART na kuiunganisha tena wakati wa debugging. Breakout pins hizi zinaweza kuunganishwa kwa soldering au jumper wires.
+Manufacturers wanaweza kuacha header, kuacha series resistors bila kuwekwa, kuzima console kwenye firmware, au kuonyesha TX pekee. Fuatilia test pads na resistor footprints zilizo karibu hadi kwenye SoC na ongeza connection ya muda yenye impedance kubwa baada ya kuthibitisha electrical level. Uwepo wa warranty haumaanishi kwamba UART inayoweza kufikiwa lazima iwepo.
 
 ### Kutambua UART Baud Rate
 
-Njia rahisi zaidi ya kutambua baud rate sahihi ni kuangalia **TX pin’s output na kujaribu kusoma data**. Ikiwa data unayopokea haisomeki, badilisha hadi baud rate inayofuata inayowezekana mpaka data isomeke. Unaweza kutumia USB-to-serial adapter au device ya matumizi mengi kama Bus Pirate kufanya hivi, pamoja na helper script kama [baudrate.py](https://github.com/devttys0/baudrate/). Baud rates zinazotumika zaidi ni 9600, 38400, 19200, 57600, na 115200.
+Njia rahisi zaidi ya kutambua baud rate sahihi ni kuangalia **output ya pin ya TX na kujaribu kusoma data**. Ikiwa data unayopokea haisomeki, badilisha kwenda baud rate inayofuata inayowezekana hadi data isomeke. Unaweza kutumia USB-to-serial adapter au kifaa cha matumizi mengi kama Bus Pirate kufanya hivyo, ukikiunganisha na helper script kama [baudrate.py](https://github.com/devttys0/baudrate/). Baud rates zinazotumika zaidi ni 9600, 38400, 19200, 57600, na 115200.
 
 > [!CAUTION]
-> Ni muhimu kutambua kwamba katika protocol hii unahitaji kuunganisha TX ya device moja na RX ya nyingine!
+> Ni muhimu kutambua kwamba katika protocol hii unahitaji kuunganisha TX ya kifaa kimoja na RX ya kifaa kingine!
 
-## CP210X UART to TTY Adapter
+## CP210X UART kwenda TTY Adapter
 
-CP210X Chip hutumika kwenye prototyping boards nyingi kama NodeMCU (yenye esp8266) kwa Serial Communication. Adapters hizi zina bei nafuu kiasi na zinaweza kutumika kuunganisha kwenye UART interface ya target. Device hii ina pins 5: 5V, GND, RXD, TXD, 3.3V. Hakikisha unaunganisha voltage inayoungwa mkono na target ili kuepuka uharibifu wowote. Mwisho, unganisha RXD pin ya Adapter na TXD ya target na TXD pin ya Adapter na RXD ya target.
+CP210x USB-to-UART bridges hupatikana kwenye prototyping boards nyingi na adapters za bei nafuu. Modules za kawaida huonyesha supply pins pamoja na GND, RXD, na TXD, lakini headers na I/O levels zao hutofautiana. Thibitisha voltage halisi kutoka kwenye muundo wa board au data sheet. Kwa kawaida unganisha GND pekee, adapter RX kwenda target TX, na—baada ya kuthibitisha receive-only—adapter TX kwenda target RX. Usiunganishe supply pin ya 5 V/3.3 V ya adapter isipokuwa unaiwasha target inayojulikana kustahimili voltage hiyo kwa makusudi.<sup>[[3]](#references)</sup>
 
-Ikiwa adapter haitambuliwi, hakikisha drivers za CP210X zimesakinishwa kwenye host system. Baada ya adapter kutambuliwa na kuunganishwa, tools kama picocom, minicom au screen zinaweza kutumika.
+Ikiwa adapter haitambuliwi, hakikisha kwamba CP210X drivers zimesakinishwa kwenye host system. Baada ya adapter kutambuliwa na kuunganishwa, tools kama picocom, minicom au screen zinaweza kutumika.
 
-Kuorodhesha devices zilizounganishwa kwenye Linux/MacOS systems:
+Kuorodhesha vifaa vilivyounganishwa kwenye Linux/MacOS systems:
 ```
 ls /dev/
 ```
@@ -60,19 +60,19 @@ minicom -s
 ```
 Sanidi mipangilio kama vile baudrate na jina la kifaa katika chaguo la `Serial port setup`.
 
-Baada ya usanidi, tumia command `minicom` kuanzisha UART Console.
+Baada ya usanidi, endesha `minicom` ili kufungua UART console.
 
-## UART Kupitia Arduino UNO R3 (Vibao Vyenye Atmel 328p Inayoweza Kutolewa)
+## UART Via Arduino UNO R3 (Removable Atmel 328p Chip Boards)
 
-Iwapo UART Serial to USB adapters hazipatikani, Arduino UNO R3 inaweza kutumika kwa hack ya haraka. Kwa kuwa Arduino UNO R3 hupatikana karibu kila mahali, hii inaweza kuokoa muda mwingi.
+Ikiwa UART Serial to USB adapters hazipatikani, Arduino UNO R3 inaweza kutumika kwa hack ya haraka. Kwa kuwa Arduino UNO R3 hupatikana kwa kawaida karibu kila mahali, hii inaweza kuokoa muda mwingi.
 
-Arduino UNO R3 ina USB to Serial adapter iliyojengwa kwenye board yenyewe. Ili kupata UART connection, toa tu microcontroller chip ya Atmel 328p kutoka kwenye board. Hack hii hufanya kazi kwenye variants za Arduino UNO R3 zilizo na Atmel 328p ambayo haijauzwa moja kwa moja kwenye board (toleo la SMD hutumika ndani yake). Unganisha pin ya RX ya Arduino (Digital Pin 0) na pin ya TX ya UART Interface, kisha unganisha pin ya TX ya Arduino (Digital Pin 1) na pin ya RX ya UART interface.
+Arduino UNO R3 ina USB to Serial adapter iliyojengwa kwenye board yenyewe. Ili kupata UART connection, ing’oa tu chip ya Atmel 328p microcontroller kutoka kwenye board. Hack hii hufanya kazi kwenye variants za Arduino UNO R3 zilizo na Atmel 328p ambayo haijasolderiwa kwenye board (toleo la SMD hutumika ndani yake). Unganisha RX pin ya Arduino (Digital Pin 0) na TX pin ya UART Interface, na TX pin ya Arduino (Digital Pin 1) na RX pin ya UART interface.
 
-Hatimaye, inapendekezwa kutumia Arduino IDE kupata Serial Console. Katika sehemu ya `tools` kwenye menu, chagua chaguo la `Serial Console` na uweke baud rate kulingana na UART interface.
+Tumia Arduino IDE **Serial Monitor** au terminal maalum kwa target baud rate. Classic Uno R3 serial signals ni 5 V logic, kwa hivyo tumia level shifter au divider kabla ya kuziunganisha kwenye target ya 3.3 V au voltage ya chini zaidi.
 
 ## Bus Pirate
 
-Katika hali hii tutasniff mawasiliano ya UART ya Arduino ambayo inatuma prints zote za program kwenye Serial Monitor.
+Transcript ifuatayo hutumia legacy Bus Pirate firmware interface kufuatilia UART output. Bus Pirate firmware mpya zaidi hutumia commands kama vile `m uart`, `{`/`}`, `monitor`, au `bridge`; soma documentation ya version iliyosakinishwa.<sup>[[2]](#references)</sup>
 ```bash
 # Check the modes
 UART>m
@@ -146,28 +146,36 @@ waiting a few secs to repeat....
 ```
 ## Kudump Firmware kwa kutumia UART Console
 
-UART Console hutoa njia nzuri ya kufanya kazi na firmware ya msingi katika mazingira ya runtime. Lakini wakati access ya UART Console ni ya kusoma pekee, inaweza kuleta constraints nyingi. Katika vifaa vingi vya embedded, firmware huhifadhiwa kwenye EEPROM na kutekelezwa na processors zenye memory ya muda (volatile). Kwa hivyo, firmware huwekwa read-only kwa sababu firmware ya awali kutoka wakati wa manufacturing huwa ndani ya EEPROM yenyewe, na files zozote mpya hupotea kutokana na memory ya muda. Kwa hivyo, kudump firmware ni juhudi muhimu wakati wa kufanya kazi na embedded firmware.
+UART console hutoa ufikiaji wa wakati wa uendeshaji kwa boot logs na, wakati mwingine, bootloader au operating-system shell. Console ya read-only bado hufichua memory maps, flash drivers, boot arguments, partition layouts, na firmware versions. Firmware inaweza kuwa kwenye SPI NOR/NAND, eMMC, au kifaa kingine; kwa kawaida haiendeshwi kutoka EEPROM, na mafaili yaliyoandikwa kwenye mounted persistent filesystem si lazima yapotee baada ya reboot.
 
-Kuna njia nyingi za kufanya hivi, na sehemu ya SPI inaelezea mbinu za ku-extract firmware moja kwa moja kutoka kwenye EEPROM kwa kutumia vifaa mbalimbali. Hata hivyo, inashauriwa kujaribu kwanza kudump firmware kwa kutumia UART, kwa kuwa kudump firmware kwa kutumia vifaa vya kimwili na interactions za nje kunaweza kuwa risky.
+Kuna njia kadhaa za kupata firmware, na sehemu ya SPI inaeleza usomaji wa moja kwa moja kutoka external flash. Console-assisted acquisition inaweza kuwa na uingiliaji mdogo wakati bootloader tayari inatoa safe read command, lakini boot interruption au flash command yoyote inaweza kuathiri upatikanaji, kwa hiyo hifadhi hali ya awali na epuka write/erase operations.
 
-Kudump firmware kutoka kwa UART Console kunahitaji kwanza kupata access kwa bootloaders. Vendors wengi maarufu hutumia uboot (Universal Bootloader) kama bootloader yao ya kupakia Linux. Kwa hivyo, kupata access kwa uboot ni muhimu.
+Console-assisted firmware dumping mara nyingi huanza kwa kukatiza bootloader. Vifaa vingi vya embedded Linux hutumia **Das U-Boot**, lakini vingine hutumia proprietary bootloaders au huzima interactive console.
 
-Ili kupata access kwa bootloader, connect UART port kwenye computer na utumie mojawapo ya tools za Serial Console, huku power supply ya kifaa ikiwa imekatwa. Setup ikiwa tayari, bonyeza Enter Key na uishikilie. Hatimaye, connect power supply kwenye kifaa na kiruhusu kianze boot.
+Ili kujaribu interactive bootloader, unganisha UART receive path na terminal wakati target haijawashwa, anza logging, kisha iwashie. Fuata autoboot prompt inayoonyeshwa; kulingana na build, interruption inaweza kuhitaji key, sequence fupi, au inaweza kuwa imezimwa kabisa.
 
-Kufanya hivi kutakatiza uboot isi-load na kutatoa menu. Inashauriwa kuelewa commands za uboot na kutumia help menu kuziorodhesha. Hii inaweza kuwa command ya `help`. Kwa kuwa vendors tofauti hutumia configurations tofauti, ni muhimu kuzielewa kila moja kivyake.
+Ikiwa interruption itafanikiwa, tumia `help`, `printenv`, na read-only discovery commands ili kuelewa memory na storage layout ya vendor huyo kabla ya kufikia addresses.
 
-Kwa kawaida, command ya kudump firmware ni:
+Katika U-Boot, `md` huonyesha **addressable memory**, si “EEPROM” moja kwa moja. Kwanza tumia commands zinazolenga board kama `mtd list`, `sf probe`, `mmc info`, `part list`, environment variables, na boot logs ili kutambua mapped address sahihi au kupakia flash region kwenye RAM. Kisha onyesha range inayojulikana byte-by-byte:<sup>[[4]](#references)</sup>
 ```
-md
+md.b <address> <byte_count>
 ```
-ambayo inawakilisha "memory dump". Hii itadump memory (EEPROM Content) kwenye skrini. Inapendekezwa kurekodi matokeo ya Serial Console kabla ya kuanza utaratibu ili kunasa memory dump.
+Hifadhi serial output kabla ya kuanza. Output ya `md.b` ina anwani na safu ya ASCII, hivyo ni uwasilishaji wa maandishi badala ya ROM image ghafi.
 
-Hatimaye, ondoa data yote isiyohitajika kwenye log file na hifadhi file kama `filename.rom`, kisha tumia binwalk kutoa yaliyomo:
+Ondoa safu za anwani na ASCII, unganisha tu sehemu za hexadecimal byte, kisha zidecode kuwa binary (kwa mfano kwa `xxd -r -p`). Thibitisha idadi ya byte inayotarajiwa na hifadhi hash kabla ya analysis:
 ```
-binwalk -e <filename.rom>
+xxd -r -p firmware.hex > firmware.bin
+sha256sum firmware.bin
+binwalk -e firmware.bin
 ```
-Hii itaorodhesha maudhui yanayowezekana kutoka kwenye EEPROM kulingana na signatures zilizopatikana kwenye hex file.
+Binwalk kisha hutambua signatures zinazojulikana katika binary iliyoundwa upya. Kusoma flash moja kwa moja kupitia interface inayofaa ya SPI/eMMC/NAND kwa kawaida huwa haraka zaidi na huwa na uwezekano mdogo wa makosa wakati console haiwezi kuhamisha data kwa uaminifu.
 
-Hata hivyo, ni muhimu kutambua kwamba si mara zote uboot huwa unlocked hata ikiwa inatumika. Ikiwa Enter Key haifanyi chochote, jaribu keys tofauti kama Space Key, n.k. Ikiwa bootloader imefungwa na haiingiliwi, method hii haitafanya kazi. Ili kuangalia ikiwa uboot ndiyo bootloader ya kifaa, angalia output kwenye UART Console wakati kifaa kinaboot. Huenda ikataja uboot wakati wa kuboot.
+U-Boot inaweza kuzima uingiliaji, kuhitaji mfuatano wa vitufe maalum wa vendor, au kufunga amri za memory/flash. Fuata prompt ya autoboot na boot log badala ya kutuma herufi bila kufikiri. Ikiwa console haiwezi kuingiliwa, hifadhi boot log na utumie njia isiyovamizi ya kupata firmware.
 
+## References
+
+- [1] [Mwongozo wa Marejeleo wa Familia ya Microchip PIC32 - UART](https://ww1.microchip.com/downloads/en/DeviceDoc/60001107H.pdf)
+- [2] [Nyaraka za Bus Pirate - hali ya UART na mipaka ya umeme](https://docs.buspirate.com/docs/command-reference/#uart)
+- [3] [Silicon Labs - data sheet ya CP2102C](https://www.silabs.com/documents/public/data-sheets/cp2102c-datasheet.pdf)
+- [4] [Nyaraka za U-Boot - amri ya `md` ya kuonyesha memory](https://docs.u-boot.org/en/latest/usage/cmd/md.html)
 {{#include ../../banners/hacktricks-training.md}}

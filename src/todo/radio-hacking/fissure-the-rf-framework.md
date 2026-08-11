@@ -2,15 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Uelewaji na Reverse Engineering ya Signal kwa kutumia SDR isiyotegemea Frequency**
+**Uelewa na Reverse Engineering ya Signals kwa kutumia SDR Isiyotegemea Frequency**
 
-FISSURE ni framework ya RF na reverse engineering ya open-source iliyoundwa kwa viwango vyote vya ujuzi, ikiwa na hooks za signal detection na classification, protocol discovery, attack execution, IQ manipulation, vulnerability analysis, automation, na AI/ML. Framework hii iliundwa kuwezesha integration ya haraka ya software modules, radios, protocols, signal data, scripts, flow graphs, reference material, na third-party tools. FISSURE ni workflow enabler inayoweka software yote katika location moja na kuruhusu teams kuanza kazi kwa urahisi huku zikishiriki baseline configuration ileile iliyothibitishwa kwa Linux distributions maalum.<sup>[[1]](#references)[[2]](#references)</sup>
+FISSURE ni framework ya RF na reverse engineering ya open-source iliyoundwa kwa ajili ya viwango vyote vya ujuzi, ikiwa na hooks za utambuzi na uainishaji wa signal, ugunduzi wa protocol, utekelezaji wa attack, uchezaji wa IQ, uchambuzi wa vulnerability, automation, na AI/ML. Framework hii iliundwa kuwezesha ujumuishaji wa haraka wa software modules, radios, protocols, signal data, scripts, flow graphs, reference material, na third-party tools. FISSURE ni workflow enabler inayoweka software katika eneo moja na kuruhusu teams kuanza kufanya kazi kwa urahisi huku zikishiriki baseline configuration ileile iliyothibitishwa kwa Linux distributions mahususi.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Framework na tools zilizojumuishwa katika FISSURE zimeundwa kutambua uwepo wa RF energy, kuelewa sifa za signal, kukusanya na kuchanganua samples, kuunda transmit na/au injection techniques, na kutengeneza custom payloads au messages. FISSURE ina library inayokua ya protocol na signal information kusaidia katika identification, packet crafting, na fuzzing. Online archive capabilities zinapatikana kwa kupakua signal files na kuunda playlists za kuiga traffic na kujaribu systems.
+Framework na tools zilizo pamoja na FISSURE zimeundwa kutambua RF energy, kubainisha signals, kukusanya na kuchanganua samples, kutengeneza transmit au injection techniques, na kuunda payloads au messages maalum. FISSURE pia hutoa taarifa za protocols na signals kwa ajili ya identification, packet crafting, na fuzzing, pamoja na archives na playlists za traffic simulation na testing.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Python codebase na user interface yake rafiki huruhusu beginners kujifunza haraka kuhusu tools na techniques maarufu zinazohusisha RF na reverse engineering. Educators katika cybersecurity na engineering wanaweza kutumia material iliyojengwa ndani au kutumia framework kuonyesha matumizi yao ya real-world. Developers na researchers wanaweza kutumia FISSURE kwa kazi zao za kila siku au kuonyesha solutions zao za cutting-edge kwa audience pana zaidi. Awareness na matumizi ya FISSURE yanapoongezeka katika community, ndivyo capabilities zake na upana wa technology inayohusisha utakavyoongezeka.
+Python codebase na graphical interface husaidia beginners kujifunza RF na reverse-engineering tools. Educators wanaweza kutumia lessons zilizojengewa ndani, huku developers na researchers wakiunganisha modules na workflows zao wenyewe. Releases za sasa pia zinaunga mkono distributed sensor nodes, TAK integration, geolocation workflows, na role-specific Apptainer deployments.<sup>[[1]](#references)[[3]](#references)</sup>
 
-**Taarifa za Ziada**
+**Taarifa Zaidi**
 
 * [AIS Page](https://www.ainfosec.com/technologies/fissure/)
 * [GRCon22 Slides](https://events.gnuradio.org/event/18/contributions/246/attachments/84/164/FISSURE\_Poore\_GRCon22.pdf)
@@ -20,39 +20,42 @@ Python codebase na user interface yake rafiki huruhusu beginners kujifunza harak
 
 ## Kuanza
 
-**Zinazotumika**
+**Zinazoungwa Mkono**
 
-Kuna branches tatu ndani ya FISSURE ili kurahisisha navigation ya files na kupunguza code redundancy. Branch ya Python2\_maint-3.7 ina codebase iliyojengwa kwa kutumia Python2, PyQt4, na GNU Radio 3.7; Python3\_maint-3.8 imejengwa kwa kutumia Python3, PyQt5, na GNU Radio 3.8; na Python3\_maint-3.10 imejengwa kwa kutumia Python3, PyQt5, na GNU Radio 3.10.
+FISSURE ya sasa hutumia branch ya **`Python3`** kwa active development pamoja na PyQt5 na GNU Radio 3.8 au 3.10. Branch ya zamani **`Python2_maint-3.7`**, ambayo imepitwa na wakati, bado inapatikana kwa operating systems za zamani na third-party tools zinazohitaji GNU Radio 3.7. Majina ya zamani ya branches `Python3_maint-3.8` na `Python3_maint-3.10` ni ya kihistoria; uteuzi wa GNU Radio maintenance sasa unashughulikiwa kutoka branch ya `Python3`.<sup>[[1]](#references)[[3]](#references)</sup>
 
-|   Operating System   |   FISSURE Branch   |
-| :------------------: | :----------------: |
-|  Ubuntu 18.04 (x64)  | Python2\_maint-3.7 |
-| Ubuntu 18.04.5 (x64) | Python2\_maint-3.7 |
-| Ubuntu 18.04.6 (x64) | Python2\_maint-3.7 |
-| Ubuntu 20.04.1 (x64) | Python3\_maint-3.8 |
-| Ubuntu 20.04.4 (x64) | Python3\_maint-3.8 |
-|  KDE neon 5.25 (x64) | Python3\_maint-3.8 |
+| Operating System | FISSURE Branch | Default GNU Radio branch |
+| :--: | :--: | :--: |
+| DragonOS Noble (24.04) | Python3 | maint-3.10 |
+| Kali | Python3 | maint-3.10 |
+| Raspberry Pi OS | Python3 | maint-3.10 |
+| Ubuntu 18.04 | Python2\_maint-3.7 | maint-3.7 |
+| Ubuntu 20.04 | Python3 | maint-3.8 |
+| Ubuntu 22.04 | Python3 | maint-3.10 |
+| Ubuntu 24.04 / Ubuntu ARM | Python3 | maint-3.10 |
+| Windows 11 WSL2 | tumia Linux version inayoungwa mkono | tumia version inayolingana |
 
-**Ziko Kwenye Maendeleo (beta)**
+**Zinaendelea (beta)**
 
-Operating systems hizi bado ziko katika hali ya beta. Ziko kwenye development na features kadhaa zinajulikana kuwa hazipo. Items zilizo katika installer zinaweza kugongana na programs zilizopo au kushindwa ku-install hadi status hiyo iondolewe.
+Operating systems hizi bado ziko katika hali ya beta. Zinaendelea kutengenezwa na inajulikana kuwa features kadhaa hazipo. Vitu vilivyo kwenye installer vinaweza kuleta conflict na programs zilizopo au kushindwa ku-install hadi hali hii iondolewe.
 
-|     Operating System     |    FISSURE Branch   |
-| :----------------------: | :-----------------: |
-| DragonOS Focal (x86\_64) |  Python3\_maint-3.8 |
-|    Ubuntu 22.04 (x64)    | Python3\_maint-3.10 |
+| Operating System | FISSURE Branch | Default GNU Radio branch |
+| :--: | :--: | :--: |
+| BackBox Linux | Python3 | maint-3.10 |
+| KDE neon | Python3 | maint-3.10 |
+| Parrot Security 6.1 | Python3 | maint-3.10 |
 
-Kumbuka: Baadhi ya software tools hazifanyi kazi katika kila OS. Tazama [Software And Conflicts](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Help/Markdown/SoftwareAndConflicts.md)
+Baadhi ya third-party tools hazifanyi kazi kwenye kila OS. Kagua nyaraka za sasa za [Known Conflicts and Third-Party Software](https://fissure.readthedocs.io/en/latest/pages/installation.html#known-conflicts) kabla ya ku-install.<sup>[[3]](#references)</sup>
 
-**Installation**
+**Usakinishaji**
 ```
 git clone https://github.com/ainfosec/FISSURE.git
 cd FISSURE
-git checkout <Python2_maint-3.7> or <Python3_maint-3.8> or <Python3_maint-3.10>
+git checkout Python3  # optional; use Python2_maint-3.7 only for legacy requirements
 git submodule update --init
 ./install
 ```
-Hii itaweka dependencies za software ya PyQt zinazohitajika kuzindua installation GUIs ikiwa hazijapatikana.
+Hatua ya submodule hupakua GNU Radio out-of-tree modules zinazotumiwa na FISSURE na inahitajika wakati wa kusakinisha modules hizo. Installer pia itasakinisha PyQt dependencies zinazokosekana zinazohitajika kuanzisha installation GUIs zake.<sup>[[3]](#references)</sup>
 
 Kisha, chagua option inayolingana zaidi na operating system yako (inapaswa kutambuliwa automatically ikiwa OS yako inalingana na option fulani).
 
@@ -60,17 +63,17 @@ Kisha, chagua option inayolingana zaidi na operating system yako (inapaswa kutam
 | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
 | ![install1b](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1b.png) | ![install1a](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1a.png) | ![install1c](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1c.png) |
 
-Inapendekezwa kusakinisha FISSURE kwenye operating system safi ili kuepuka conflicts zilizopo. Chagua checkboxes zote zinazopendekezwa (Default button) ili kuepuka errors unapotumia tools mbalimbali ndani ya FISSURE. Kutakuwa na prompts nyingi wakati wa installation, ambazo mara nyingi zitaomba elevated permissions na user names. Ikiwa kipengee kina sehemu ya "Verify" mwishoni, installer itaendesha command inayofuata na kuonyesha checkbox hiyo ikiwa ya kijani au nyekundu kulingana na kama command hiyo imetoa errors. Vipengee vilivyochaguliwa bila sehemu ya "Verify" vitaendelea kuwa vyeusi baada ya installation.
+Inapendekezwa kusakinisha FISSURE kwenye operating system safi ili kuepuka conflicts zilizopo. Chagua checkboxes zote zinazopendekezwa (Default button) ili kuepuka errors wakati wa kutumia tools mbalimbali ndani ya FISSURE. Kutakuwa na prompts nyingi wakati wa installation, ambazo nyingi zitaomba elevated permissions na user names. Ikiwa item ina sehemu ya "Verify" mwishoni, installer itaendesha command inayofuata na kuangazia checkbox item kwa rangi ya kijani au nyekundu kulingana na ikiwa command hiyo itazalisha errors. Items zilizochaguliwa zisizo na sehemu ya "Verify" zitasalia nyeusi baada ya installation.
 
 ![install2](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install2.png)
 
 **Matumizi**
 
-Fungua terminal na uandike:
+Fungua terminal na uweke:
 ```
 fissure
 ```
-Rejelea menyu ya FISSURE Help kwa maelezo zaidi kuhusu matumizi.
+Rejelea menyu ya Help ya FISSURE kwa maelezo zaidi kuhusu matumizi.
 
 ## Maelezo
 
@@ -86,27 +89,28 @@ Rejelea menyu ya FISSURE Help kwa maelezo zaidi kuhusu matumizi.
 
 **Uwezo**
 
-| ![Signal Detector icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/detector.png)_**Kigunduzi cha Mawimbi**_ | ![IQ Manipulation icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/iq.png)_**Udanganyaji wa IQ**_      | ![Signal Lookup icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/library.png)_**Utafutaji wa Mawimbi**_          | ![Pattern Recognition icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/pd.png)_**Utambuzi wa Miundo**_ |
+| ![Signal Detector icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/detector.png)_**Signal Detector**_ | ![IQ Manipulation icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/iq.png)_**IQ Manipulation**_      | ![Signal Lookup icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/library.png)_**Signal Lookup**_          | ![Pattern Recognition icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/pd.png)_**Pattern Recognition**_ |
 | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| ![Attacks icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/attack.png)_**Mashambulizi**_           | ![Fuzzing icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/fuzzing.png)_**Fuzzing**_         | ![Signal Playlists icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/archive.png)_**Orodha za Kuchezesha Mawimbi**_       | ![Image Gallery icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/gallery.png)_**Mkusanyiko wa Picha**_  |
-| ![Packet Crafting icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/packet.png)_**Uundaji wa Pakiti**_   | ![Scapy Integration icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/scapy.png)_**Ujumuishaji wa Scapy**_ | ![CRC Calculator icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/crc\_calculator.png)_**Kikokotoo cha CRC**_ | ![Logging icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/log.png)_**Uwekaji wa Kumbukumbu**_            |
+| ![Attacks icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/attack.png)_**Attacks**_           | ![Fuzzing icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/fuzzing.png)_**Fuzzing**_         | ![Signal Playlists icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/archive.png)_**Signal Playlists**_       | ![Image Gallery icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/gallery.png)_**Image Gallery**_  |
+| ![Packet Crafting icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/packet.png)_**Packet Crafting**_   | ![Scapy Integration icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/scapy.png)_**Scapy Integration**_ | ![CRC Calculator icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/crc\_calculator.png)_**CRC Calculator**_ | ![Logging icon](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/log.png)_**Logging**_            |
 
-**Vifaa**
+**Hardware**
 
-Ifuatayo ni orodha ya vifaa "vinavyoungwa mkono" kwa viwango tofauti vya ujumuishaji:
+Hardware ifuatayo ina viwango tofauti vya integration katika FISSURE:<sup>[[1]](#references)[[3]](#references)</sup>
 
-* USRP: X3xx, B2xx, B20xmini, USRP2, N2xx
+* USRP: X3xx, B2xx, B20xmini, USRP2, N2xx, X410
 * HackRF
 * RTL2832U
-* Adapta za 802.11
+* 802.11 Adapters
 * LimeSDR
 * bladeRF, bladeRF 2.0 micro
 * Open Sniffer
 * PlutoSDR
+* SDRplay: RSPduo, RSPdx, RSPdx R2
 
 ## Masomo
 
-FISSURE inakuja na miongozo kadhaa yenye manufaa ya kufahamu teknolojia na mbinu mbalimbali. Mingi yake ina hatua za kutumia tools mbalimbali zilizounganishwa kwenye FISSURE.
+FISSURE inakuja na miongozo kadhaa yenye msaada ili kufahamiana na technologies na techniques mbalimbali. Mingi kati yake ina hatua za kutumia tools mbalimbali zilizounganishwa katika FISSURE.
 
 * [Lesson1: OpenBTS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson1\_OpenBTS.md)
 * [Lesson2: Lua Dissectors](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
@@ -119,71 +123,74 @@ FISSURE inakuja na miongozo kadhaa yenye manufaa ya kufahamu teknolojia na mbinu
 * [Lesson9: TPMS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson9\_TPMS.md)
 * [Lesson10: Ham Radio Exams](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson10\_Ham\_Radio\_Exams.md)
 * [Lesson11: Wi-Fi Tools](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson11\_WiFi\_Tools.md)
+* [Lesson12: Creating Bootable USBs](https://github.com/ainfosec/FISSURE/blob/Python3/docs/Lessons/Markdown/Lesson12_Creating_Bootable_USBs.md)
+* [Lesson13: Z-Wave](https://github.com/ainfosec/FISSURE/blob/Python3/docs/Lessons/Markdown/Lesson13_Z-Wave.md)
+* [Lesson14: Ceiling Fans](https://github.com/ainfosec/FISSURE/blob/Python3/docs/Lessons/Markdown/Lesson14_Ceiling_Fans.md)
 
 ## Mpango wa Maendeleo
 
-* [ ] Ongeza aina zaidi za vifaa, RF protocols, vigezo vya mawimbi na tools za uchanganuzi
+* [ ] Ongeza aina zaidi za hardware, RF protocols, signal parameters na analysis tools
 * [ ] Saidia operating systems zaidi
-* [ ] Tengeneza nyenzo za masomo kuhusu FISSURE (RF Attacks, Wi-Fi, GNU Radio, PyQt, n.k.)
-* [ ] Tengeneza signal conditioner, feature extractor na signal classifier yenye mbinu za AI/ML zinazoweza kuchaguliwa
-* [ ] Tekeleza mbinu za recursive demodulation za kuzalisha bitstream kutoka kwa mawimbi yasiyojulikana
-* [ ] Hamisha vipengele vikuu vya FISSURE kwenda kwenye mpango wa jumla wa deployment ya sensor nodes
+* [ ] Tengeneza class material kuhusu FISSURE (RF Attacks, Wi-Fi, GNU Radio, PyQt, n.k.)
+* [ ] Unda signal conditioner, feature extractor na signal classifier yenye techniques za AI/ML zinazoweza kuchaguliwa
+* [ ] Tekeleza mechanisms za recursive demodulation kwa ajili ya kuzalisha bitstream kutoka kwa signals zisizojulikana
+* [ ] Hamisha components kuu za FISSURE kwenda kwenye generic sensor node deployment scheme
 
 ## Kuchangia
 
-Mapendekezo ya kuboresha FISSURE yanahimizwa sana. Acha maoni kwenye ukurasa wa [Discussions](https://github.com/ainfosec/FISSURE/discussions) au kwenye Discord Server ikiwa una mawazo kuhusu yafuatayo:
+Mapendekezo ya kuboresha FISSURE yanakaribishwa sana. Acha maoni katika ukurasa wa [Discussions](https://github.com/ainfosec/FISSURE/discussions) au katika Discord Server ikiwa una mawazo kuhusu yafuatayo:
 
-* Mapendekezo ya vipengele vipya na mabadiliko ya muundo
-* Software tools pamoja na hatua za usakinishaji
+* Mapendekezo ya features mpya na mabadiliko ya design
+* Software tools pamoja na hatua za installation
 * Masomo mapya au nyenzo za ziada kwa masomo yaliyopo
 * RF protocols zinazovutia
-* Aina zaidi za vifaa na SDR kwa ajili ya ujumuishaji
+* Aina zaidi za hardware na SDR kwa ajili ya integration
 * IQ analysis scripts katika Python
-* Marekebisho na maboresho ya usakinishaji
+* Marekebisho na maboresho ya installation
 
-Michango ya kuboresha FISSURE ni muhimu katika kuharakisha maendeleo yake. Tunathamini sana mchango wowote utakaotoa. Ikiwa ungependa kuchangia kupitia code development, fork repo na uunde pull request:
+Michango ya kuboresha FISSURE ni muhimu katika kuharakisha maendeleo yake. Mchango wowote unaotoa unathaminiwa sana. Ikiwa ungependa kuchangia kupitia code development, fork repo na uunde pull request:
 
-1. Fork the project
+1. Fork project
 2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a pull request
 
-Kuunda [Issues](https://github.com/ainfosec/FISSURE/issues) ili kuarifu kuhusu bugs pia kunakaribishwa.
+Kuunda [Issues](https://github.com/ainfosec/FISSURE/issues) ili kuleta bugs kwenye uangalizi pia kunakaribishwa.
 
 ## Kushirikiana
 
-Wasiliana na Business Development ya Assured Information Security, Inc. (AIS) ili kupendekeza na kurasimisha fursa zozote za ushirikiano wa FISSURE - iwe ni kupitia kutenga muda wa kuunganisha software yako, kuwa na wataalamu wenye vipaji wa AIS watengeneze solutions kwa changamoto zako za kiufundi, au kuunganisha FISSURE kwenye platforms/applications nyingine.
+Wasiliana na Business Development ya Assured Information Security, Inc. (AIS) ili kupendekeza na kurasimisha fursa zozote za collaboration kuhusu FISSURE–iwe ni kwa kutenga muda wa ku-integrate software yako, kuwaacha wataalamu wenye uwezo wa AIS watengeneze solutions kwa changamoto zako za kiufundi, au ku-integrate FISSURE katika platforms/applications nyingine.
 
 ## Leseni
 
 GPL-3.0
 
-Kwa maelezo ya leseni, tazama faili la LICENSE.
+Kwa maelezo ya leseni, angalia faili ya LICENSE.
 
 ## Mawasiliano
 
 Jiunge na Discord Server: [https://discord.gg/JZDs5sgxcG](https://discord.gg/JZDs5sgxcG)
 
-Follow on Twitter: [@FissureRF](https://twitter.com/fissurerf), [@AinfoSec](https://twitter.com/ainfosec)
+Tufuate kwenye Twitter: [@FissureRF](https://twitter.com/fissurerf), [@AinfoSec](https://twitter.com/ainfosec)
 
 Chris Poore - Assured Information Security, Inc. - poorec@ainfosec.com
 
 Business Development - Assured Information Security, Inc. - bd@ainfosec.com
 
-## Waandaaji
+## Shukrani
 
-Tunawashukuru na kutambua waandaaji hawa:
+Tunawatambua na kuwashukuru developers hawa:
 
 [Credits](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/CREDITS.md)
 
-## Shukrani
+## Shukrani za Pekee
 
-Shukrani za pekee kwa Dr. Samuel Mantravadi na Joseph Reith kwa michango yao kwenye mradi huu.
+Shukrani za pekee kwa Dr. Samuel Mantravadi na Joseph Reith kwa michango yao katika project hii.
 
-## Marejeo
+## References
 
 - [1] [FISSURE - The RF Framework (GitHub)](https://github.com/ainfosec/FISSURE)
 - [2] [FISSURE Paper (GRCon22)](https://events.gnuradio.org/event/18/contributions/246/attachments/84/167/FISSURE_Paper_Poore_GRCon22.pdf)
-
+- [3] [FISSURE documentation - Installation](https://fissure.readthedocs.io/en/latest/pages/installation.html)
 {{#include ../../banners/hacktricks-training.md}}
