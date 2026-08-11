@@ -1,8 +1,10 @@
 # RunC Privilege Escalation
 
-## Basic information
+{{#include ../../banners/hacktricks-training.md}}
 
-यदि आप **runc** के बारे में अधिक जानना चाहते हैं, तो निम्नलिखित पेज देखें:
+## मूल जानकारी
+
+यदि आप **runc** के बारे में अधिक जानना चाहते हैं, तो निम्नलिखित page देखें:
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -10,7 +12,7 @@
 
 ## PE
 
-यदि host पर किसी rootful process के लिए `runc` उपलब्ध है, तो आप ऐसे OCI bundle का उपयोग कर सकते हैं जिसका mount configuration host के `/` को container के अंदर `/` पर recursively bind-mount करता है, जिससे उस mount namespace में host filesystem प्रदर्शित हो जाता है।<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
+यदि host पर किसी rootful process के लिए `runc` उपलब्ध है, तो आप ऐसे OCI bundle का उपयोग कर सकते हैं जिसकी mount configuration host के `/` को container के अंदर `/` पर recursively bind-mount करती है, जिससे उस mount namespace में host filesystem exposed हो जाता है।<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -35,7 +37,7 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> दस्तावेज़ किया गया `runc run` workflow rootful है: runc के अपने examples में इसे "run as root" कहा गया है। किसी unprivileged user को `runc spec --rootless` जैसी rootless configuration की आवश्यकता होती है, और runc दस्तावेज़ करता है कि इस mode के लिए user namespaces enabled होने चाहिए।<sup>[[1]](#references)</sup>
+> दस्तावेज़ीकृत `runc run` workflow rootful है: runc के अपने उदाहरण इसे "run as root" कहते हैं। किसी unprivileged user को `runc spec --rootless` जैसे rootless configuration की आवश्यकता होती है, और runc के documentation में बताया गया है कि इस mode के लिए user namespaces enabled होने चाहिए।<sup>[[1]](#references)</sup>
 
 ## References
 

