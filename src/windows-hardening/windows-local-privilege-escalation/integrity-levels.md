@@ -8,13 +8,15 @@ In Windows Vista and later versions, securable objects can carry an **integrity 
 
 A key rule is that objects cannot be modified by processes with a lower integrity level than the object's level. Windows applies this Mandatory Integrity Control (MIC) check before evaluating the object's discretionary access control list (DACL). The commonly encountered levels are:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- **Untrusted**: The lowest level, represented by `SECURITY_MANDATORY_UNTRUSTED_RID`. As a real-world example, Chromium's Windows sandbox initially assigns sandboxed targets Low integrity and then lowers renderer targets to Untrusted integrity after startup.<sup>[[5]](#references)</sup>
+- **Untrusted**: The lowest level, represented by `SECURITY_MANDATORY_UNTRUSTED_RID` (`S-1-16-0`). Do not confuse this integrity label with the **Anonymous Logon** identity (`S-1-5-7`); authentication identities and MIC labels are separate SID namespaces. As a real-world example, Chromium's Windows sandbox initially assigns sandboxed targets Low integrity and then lowers renderer targets to Untrusted integrity after startup.<sup>[[5]](#references)[[6]](#references)</sup>
 - **Low**: Mainly for internet interactions, especially in Internet Explorer's Protected Mode, affecting associated files and processes, and certain folders like the **Temporary Internet Folder**. Low integrity processes face significant restrictions, including no registry write access and limited user profile write access.
 - **Medium**: The default level for most activities, assigned to standard users and objects without specific integrity levels. Even members of the Administrators group operate at this level by default.
 - **High**: Reserved for administrators, allowing them to modify objects at lower integrity levels, including those at the high level itself.
 - **System**: The highest operational level for the Windows kernel and core services, out of reach even for administrators, ensuring protection of vital system functions.
 
 Windows also defines a protected-process integrity value above System. **TrustedInstaller**, however, is a Windows service identity rather than a separate MIC level; its ability to modify protected operating-system resources comes from the permissions granted to that identity.
+
+Do not assume that a location such as the root of a system drive always has a fixed High integrity label. Inspect the effective DACL and any explicit mandatory label with `icacls`; an unlabeled object is treated as Medium for MIC, while its DACL and ownership can still independently restrict access.<sup>[[1]](#references)[[4]](#references)</sup>
 
 You can obtain the integrity level of a process using **Process Explorer** from **Sysinternals** by opening the process properties and viewing the **Security** tab:<sup>[[3]](#references)</sup>
 
@@ -103,5 +105,6 @@ Because of these restrictions, the safest approach is to **run each process at t
 - [3] [Microsoft Sysinternals – Process Explorer](https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer)
 - [4] [Microsoft Learn – icacls](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls)
 - [5] [Chromium source – Default Windows sandbox integrity policy](https://github.com/chromium/chromium/blob/main/sandbox/policy/win/sandbox_win.cc#L212-L216)
+- [6] [Microsoft Learn – Well-known SIDs](https://learn.microsoft.com/en-us/windows/win32/secauthz/well-known-sids)
 
 {{#include ../../banners/hacktricks-training.md}}
