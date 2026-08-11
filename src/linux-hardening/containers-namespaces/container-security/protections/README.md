@@ -4,13 +4,13 @@
 
 The most important idea in container hardening is that there is no single control called "container security". What people call container isolation is really the result of several Linux security and resource-management mechanisms working together. If documentation describes only one of them, readers tend to overestimate its strength. If documentation lists all of them without explaining how they interact, readers get a catalog of names but no real model. This section tries to avoid both mistakes.
 
-At the center of the model are **namespaces**, which isolate what the workload can see. They give the process a private or partially private view of filesystem mounts, PIDs, networking, IPC objects, hostnames, user/group mappings, cgroup paths, and some clocks. But namespaces alone do not decide what a process is allowed to do. That is where the next layers enter.
+At the center of the model are **namespaces**, which isolate what the workload can see. They give the process a private or partially private view of filesystem mounts, PIDs, networking, IPC objects, hostnames, user/group mappings, cgroup paths, and some clocks. But namespaces alone do not decide what a process is allowed to do. That is where the next layers enter. <sup>[[1]](#references)</sup>
 
-**cgroups** govern resource usage. They are not primarily an isolation boundary in the same sense as mount or PID namespaces, but they are crucial operationally because they constrain memory, CPU, PIDs, I/O, and device access. They also have security relevance because historical breakout techniques abused writable cgroup features, especially in cgroup v1 environments.
+**cgroups** govern resource usage. They are not primarily an isolation boundary in the same sense as mount or PID namespaces, but they are crucial operationally because they constrain memory, CPU, PIDs, I/O, and device access. They also have security relevance because historical breakout techniques abused writable cgroup features, especially in cgroup v1 environments. <sup>[[2]](#references)</sup>
 
-**Capabilities** split the old all-powerful root model into smaller privilege units. This is fundamental for containers because many workloads still run as UID 0 inside the container. The question is therefore not merely "is the process root?", but rather "which capabilities survived, inside which namespaces, under which seccomp and MAC restrictions?" That is why a root process in one container can be relatively constrained while a root process in another container can be almost indistinguishable from host root in practice.
+**Capabilities** split the old all-powerful root model into smaller privilege units. This is fundamental for containers because many workloads still run as UID 0 inside the container. The question is therefore not merely "is the process root?", but rather "which capabilities survived, inside which namespaces, under which seccomp and MAC restrictions?" That is why a root process in one container can be relatively constrained while a root process in another container can be almost indistinguishable from host root in practice. <sup>[[3]](#references)</sup>
 
-**seccomp** filters syscalls and reduces the kernel attack surface exposed to the workload. This is often the mechanism that blocks obviously dangerous calls such as `unshare`, `mount`, `keyctl`, or other syscalls used in breakout chains. Even if a process has a capability that would otherwise permit an operation, seccomp may still block the syscall path before the kernel fully processes it.
+**seccomp** filters syscalls and reduces the kernel attack surface exposed to the workload. This is often the mechanism that blocks dangerous calls such as `unshare`, `mount`, `keyctl`, and other syscalls used in breakout chains when the active profile denies them. Even if a process has a capability that would otherwise permit an operation, seccomp may still block the syscall path before the kernel fully processes it. <sup>[[4]](#references)</sup>
 
 **AppArmor** and **SELinux** add Mandatory Access Control on top of normal filesystem and privilege checks. These are particularly important because they continue to matter even when a container has more capabilities than it should. A workload may possess the theoretical privilege to attempt an action but still be prevented from carrying it out because its label or profile forbids access to the relevant path, object, or operation.
 
@@ -61,5 +61,12 @@ Many real escapes also depend on what host content was mounted into the workload
 {{#ref}}
 ../sensitive-host-mounts.md
 {{#endref}}
+
+## References
+
+- [1] [namespaces(7) - Linux manual page](https://man7.org/linux/man-pages/man7/namespaces.7.html)
+- [2] [Control Group v2 - Linux kernel documentation](https://docs.kernel.org/admin-guide/cgroup-v2.html)
+- [3] [capabilities(7) - Linux manual page](https://man7.org/linux/man-pages/man7/capabilities.7.html)
+- [4] [Seccomp BPF - Linux kernel documentation](https://docs.kernel.org/userspace-api/seccomp_filter.html)
 
 {{#include ../../../../banners/hacktricks-training.md}}
