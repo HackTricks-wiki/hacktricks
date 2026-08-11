@@ -2,130 +2,157 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## [ProjectHoneypot](https://www.projecthoneypot.org/)
+这些服务支持侦察、信誉评估、breach 或 enrichment 工作流。其 API、配额、定价和允许的用途经常变化；在发送客户标识符或敏感数据之前，请确认当前的供应商文档和 engagement 授权。
 
-可以查询某个 IP 是否与可疑/恶意活动有关。完全免费。
+## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
-## [**BotScout**](http://botscout.com/api.htm)
+查询某个 IP 地址是否曾与可疑或恶意活动相关联。访问可能需要账户或 API key。
 
-检查 IP 地址是否与用于注册账户的 bot 有关。也可以检查用户名和电子邮件。最初免费。
+## [**BotScout**](https://botscout.com/api.htm) <sup>[[2]](#references)</sup>
 
-## [Hunter](https://hunter.io/)
+检查某个 IP 地址、用户名或电子邮件地址是否曾与自动化账户注册或其他已报告的 bot 活动相关联。
 
-查找并验证电子邮件。\
-部分 API 请求免费，更多请求需要付费。\
-商业用途？
+## [Hunter](https://hunter.io/) <sup>[[3]](#references)</sup>
 
-## [AlientVault](https://otx.alienvault.com/api)
+查找并验证专业电子邮件地址和与域名相关的联系人模式。请检查当前方案的请求限制和允许用途。
 
-查找与 IP 和域名相关的恶意活动。免费。
+## [AlienVault OTX](https://otx.alienvault.com/api) <sup>[[4]](#references)</sup>
 
-## [Clearbit](https://dashboard.clearbit.com/)
+搜索与 IP 地址和域名相关的威胁情报指标及活动。
 
-查找与电子邮件（其他平台上的个人资料）、域名（基本公司信息、邮件和员工）以及公司（通过邮件获取公司信息）相关的个人数据。\
-需要付费才能使用全部功能。\
-商业用途？
+## [Clearbit](https://dashboard.clearbit.com/) <sup>[[5]](#references)</sup>
 
-## [BuiltWith](https://builtwith.com/)
+使用可用的业务/profile 数据丰富电子邮件地址、域名或公司信息。覆盖范围、访问权限和隐私限制取决于当前产品和方案。
 
-查找网站使用的技术。价格昂贵……\
-商业用途？
+## [BuiltWith](https://builtwith.com/) <sup>[[6]](#references)</sup>
 
-## [Fraudguard](https://fraudguard.io/)
+识别网站上观察到的技术，并在所选方案允许的情况下获取历史数据或关联数据。
 
-检查主机（域名或 IP）是否与可疑/恶意活动有关。提供部分免费的 API 访问权限。\
-商业用途？
+## [FraudGuard](https://fraudguard.io/) <sup>[[7]](#references)</sup>
 
-## [FortiGuard](https://fortiguard.com/)
+检查某个 IP 地址是否与可疑或恶意活动相关联。请确认当前的 API 方案和限制。
 
-检查主机（域名或 IP）是否与可疑/恶意活动有关。提供部分免费的 API 访问权限。
+## [FortiGuard](https://fortiguard.com/) <sup>[[8]](#references)</sup>
 
-## [SpamCop](https://www.spamcop.net/)
+查询 FortiGuard 对域名、URL 或 IP 地址的分类和威胁情报。可用性因服务而异。
 
-指示主机是否与垃圾邮件活动有关。提供部分免费的 API 访问权限。
+## [SpamCop](https://www.spamcop.net/) <sup>[[9]](#references)</sup>
 
-## [mywot](https://www.mywot.com/)
+检查某个 IP 地址是否因已报告的 spam 活动而被列入名单。
 
-根据评价和其他指标，判断域名是否与可疑/恶意信息有关。
+## [myWOT](https://www.mywot.com/) <sup>[[10]](#references)</sup>
 
-## [ipinfo](https://ipinfo.io/)
+根据该服务的社区信号和其他信号获取域名信誉。
 
-获取 IP 地址的基本信息。每月最多可以测试 100K 次。
+## [IPinfo](https://ipinfo.io/) <sup>[[11]](#references)</sup>
 
-## [securitytrails](https://securitytrails.com/app/account)
+获取 IP 地址的地理位置、ASN、组织及相关元数据。请检查当前方案的配额。
 
-该平台提供域名和 IP 地址相关的信息，例如某个 IP 中的域名或某个域名服务器中的域名、某个电子邮件所拥有的域名（查找相关域名）、域名的 IP 历史记录（查找 CloudFlare 背后的主机）、使用某个 nameserver 的所有域名……\
-提供部分免费访问权限。
+## [SecurityTrails](https://securitytrails.com/app/account) <sup>[[12]](#references)</sup>
 
-## [fullcontact](https://www.fullcontact.com/)
+该平台提供 DNS 和基础设施情报，例如历史解析结果、与 IP 或 name server 相关联的域名以及相关记录。历史 DNS 可能会暴露较早的源地址，但不能可靠地绕过 CDN，必须进行验证。
 
-允许通过电子邮件、域名或公司名称进行搜索，并获取相关的“个人”信息。也可以验证电子邮件。提供部分免费访问权限。
+## [FullContact](https://www.fullcontact.com/) <sup>[[13]](#references)</sup>
 
-## [RiskIQ](https://www.spiderfoot.net/documentation/)
+使用可用的身份和业务属性丰富电子邮件地址、域名或公司名称。请根据授权和隐私要求处理个人数据。
 
-即使在免费/社区版本中，也能获取大量域名和 IP 相关信息。
+## RiskIQ / Microsoft Defender Threat Intelligence (legacy transition) <sup>[[14]](#references)</sup>
 
-## [\_IntelligenceX](https://intelx.io/)
+RiskIQ 的 PassiveTotal 功能已转入 Microsoft Defender Threat Intelligence。产品访问权限、API 和保留的功能均已发生变化，因此应使用 Microsoft 的当前文档，而不是基于旧版 PassiveTotal 的假设。
 
-搜索域名、IP 和电子邮件，并从 dumps 中获取信息。提供部分免费访问权限。
+## [Intelligence X](https://intelx.io/) <sup>[[15]](#references)</sup>
 
-## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+搜索域名、IP 地址、电子邮件地址以及已索引的历史数据或 leaked data，但须遵守该服务的访问控制。
 
-通过 IP 进行搜索，并收集与可疑活动相关的信息。提供部分免费访问权限。
+## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/) <sup>[[16]](#references)</sup>
 
-## [Greynoise](https://viz.greynoise.io/)
+搜索 IP 地址和其他指标，以获取威胁情报和信誉数据。
 
-通过 IP 或 IP 范围进行搜索，并获取扫描 Internet 的 IP 相关信息。免费访问 15 天。
+## [GreyNoise](https://viz.greynoise.io/) <sup>[[17]](#references)</sup>
 
-## [Shodan](https://www.shodan.io/)
+搜索 IP 地址或地址范围，以获取互联网扫描和常见服务活动的观测结果。请检查当前的试用和社区访问条款。
 
-获取 IP 地址的扫描信息。提供部分免费的 api 访问权限。
+## [Shodan](https://www.shodan.io/) <sup>[[18]](#references)</sup>
 
-## [Censys](https://censys.io/)
+获取某个 IP 地址、主机或搜索查询的互联网扫描和服务信息。API 访问取决于账户方案。
 
-与 shodan 非常相似。
+## [Censys](https://censys.io/) <sup>[[19]](#references)</sup>
 
-## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
+搜索主机、证书、域名和互联网服务数据集；其数据模型和覆盖范围与 Shodan 不同。
 
-通过关键词搜索开放的 S3 buckets。
+## [GrayHatWarfare bucket search](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
 
-## [Dehashed](https://www.dehashed.com/data)
+按关键词搜索该提供商索引的、公开观察到的 cloud-storage 对象和 buckets。
 
-查找电子邮件甚至域名的 leaked 凭据。\
-商业用途？
+## [DeHashed](https://www.dehashed.com/data) <sup>[[21]](#references)</sup>
 
-## [psbdmp](https://psbdmp.ws/)
+搜索已索引的 breach 数据中的电子邮件地址、用户名、域名和相关记录。仅在获得授权的情况下使用，并避免不必要地暴露 breach 数据。
 
-搜索出现过某个电子邮件的 pastebins。商业用途？
+## [psbdmp](https://psbdmp.ws/) <sup>[[22]](#references)</sup>
 
-## [emailrep.io](https://emailrep.io/key)
+搜索已索引的 paste 内容，以查找某个电子邮件地址或其他术语的出现位置。在集成之前，请确认该服务仍然可用。
 
-获取电子邮件的信誉信息。商业用途？
+## [EmailRep](https://emailrep.io/key) <sup>[[23]](#references)</sup>
 
-## [ghostproject](https://ghostproject.fr/)
+获取某个电子邮件地址的信誉和风险信号。
 
-获取 leaked 电子邮件中的密码。商业用途？
+## GhostProject (historical) <sup>[[24]](#references)</sup>
 
-## [Binaryedge](https://www.binaryedge.io/)
+历史上曾宣传可搜索 leaked 的电子邮件/密码数据。应将该服务视为高风险的第三方数据处理服务，并在使用前验证其可用性、合法性和授权情况。
 
-获取 IP 的有趣信息。
+## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
 
-## [haveibeenpwned](https://haveibeenpwned.com/)
+获取 IP 地址及相关资产的互联网扫描、暴露面和威胁情报数据。
 
-通过域名和电子邮件进行搜索，并获取其是否被 pwned 以及相关密码的信息。商业用途？
+## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
-### [IP2Location.io](https://www.ip2location.io/)
+检查某个电子邮件地址或已验证域名是否出现在已知 breach 中。独立的 Pwned Passwords 服务通过前缀检查密码哈希；它不会泄露明文密码。
 
-检测 IP 地理位置、数据中心、ASN 甚至 VPN 信息。每月提供 30K 次免费查询。
+### [IP2Location.io](https://www.ip2location.io/) <sup>[[27]](#references)</sup>
 
-### [IPQuery.io](https://www.ipquery.io/)
-IP 地理位置和 OISNT，包含针对性的 datapoints。非商业用途。
+获取 IP 地理位置、数据中心、ASN、proxy/VPN 及相关 enrichment 字段。配额取决于当前方案。
+
+### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
+提供包含选定数据点的 IP 地理位置和面向 OSINT 的 enrichment。请检查当前条款中关于商业用途的规定。
 
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(商业工具中？)
+[DNSDumpster](https://dnsdumpster.com/) 提供 DNS-reconnaissance 结果。<sup>[[29]](#references)</sup>
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (商业工具中？)
+[Netcraft](https://www.netcraft.com/) 提供网站、托管和互联网基础设施情报。<sup>[[30]](#references)</sup>
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (商业工具中？)
+[NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/) 提供在线子域名发现界面。<sup>[[31]](#references)</sup>
 
+## References
+
+- [1] [Project Honey Pot](https://www.projecthoneypot.org/)
+- [2] [BotScout API](https://botscout.com/api.htm)
+- [3] [Hunter API](https://hunter.io/api-documentation)
+- [4] [AlienVault OTX API](https://otx.alienvault.com/api)
+- [5] [Clearbit](https://dashboard.clearbit.com/)
+- [6] [BuiltWith](https://builtwith.com/)
+- [7] [FraudGuard](https://fraudguard.io/)
+- [8] [FortiGuard Labs](https://www.fortiguard.com/)
+- [9] [SpamCop](https://www.spamcop.net/)
+- [10] [Web of Trust](https://www.mywot.com/)
+- [11] [IPinfo](https://ipinfo.io/)
+- [12] [SecurityTrails](https://securitytrails.com/)
+- [13] [FullContact](https://www.fullcontact.com/)
+- [14] [Microsoft Defender Threat Intelligence](https://learn.microsoft.com/en-us/defender/threat-intelligence/what-is-microsoft-defender-threat-intelligence-defender-ti)
+- [15] [Intelligence X](https://intelx.io/)
+- [16] [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+- [17] [GreyNoise](https://www.greynoise.io/)
+- [18] [Shodan](https://www.shodan.io/)
+- [19] [Censys](https://censys.com/)
+- [20] [GrayHatWarfare](https://buckets.grayhatwarfare.com/)
+- [21] [DeHashed](https://www.dehashed.com/)
+- [22] [psbdmp](https://psbdmp.ws/)
+- [23] [EmailRep](https://emailrep.io/)
+- [24] [Cornell research — 用于检查泄露凭据的协议（包括 GhostProject）](https://rist.tech.cornell.edu/papers/c3.pdf)
+- [25] [BinaryEdge](https://www.binaryedge.io/)
+- [26] [Have I Been Pwned API](https://haveibeenpwned.com/API/v3)
+- [27] [IP2Location.io](https://www.ip2location.io/)
+- [28] [IPQuery](https://www.ipquery.io/)
+- [29] [DNSDumpster](https://dnsdumpster.com/)
+- [30] [Netcraft](https://www.netcraft.com/)
+- [31] [NMMapper Subdomain Finder](https://www.nmmapper.com/sys/tools/subdomainfinder/)
 {{#include ../banners/hacktricks-training.md}}

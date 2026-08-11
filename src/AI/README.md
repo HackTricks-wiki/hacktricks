@@ -2,9 +2,9 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 主要 Machine Learning 算法
+## 主要机器学习算法
 
-学习 AI 的最佳起点是了解主要 Machine Learning 算法的工作原理。这将帮助你理解 AI 的工作方式、如何使用 AI 以及如何攻击 AI：
+学习 AI 的最佳起点是了解主要机器学习算法的工作原理。这将帮助你理解 AI 的工作方式、如何使用它以及如何攻击它：
 
 
 {{#ref}}
@@ -26,7 +26,7 @@
 ./AI-Deep-Learning.md
 {{#endref}}
 
-### LLM 架构
+### LLMs 架构
 
 在以下页面中，你将找到使用 transformers 构建基础 LLM 所需的各个组件的基础知识：
 
@@ -35,20 +35,20 @@
 AI-llm-architecture/README.md
 {{#endref}}
 
-## AI Security
+## AI 安全
 
-### AI Risk Frameworks
+### AI 风险框架
 
-目前，用于评估 AI 系统风险的两个主要框架是 OWASP ML Top 10 和 Google SAIF：
+用于评估 AI 系统风险的两个实用起始框架是 OWASP Machine Learning Security Top 10 和 Google 的 Secure AI Framework (SAIF)。它们是互补的，并非完整的 AI 风险框架列表。<sup>[[1]](#references)[[2]](#references)</sup>
 
 
 {{#ref}}
 AI-Risk-Frameworks.md
 {{#endref}}
 
-### AI Prompts Security
+### AI Prompts 安全
 
-LLM 让 AI 在过去几年中的使用量大幅增加，但它们并不完美，可能会被 adversarial prompts 欺骗。这是理解如何安全使用 AI 以及如何攻击 AI 的重要主题：
+过去几年，LLMs 极大推动了 AI 的使用，但它们并不完美，可能会受到对抗性 prompts 的欺骗。这是理解如何安全使用 AI 以及如何攻击它的重要主题：
 
 
 {{#ref}}
@@ -57,7 +57,7 @@ AI-Prompts.md
 
 ### AI Models RCE
 
-开发者和公司运行从 Internet 下载的模型非常普遍，然而，仅加载模型就可能足以在系统上执行 arbitrary code。这是理解如何安全使用 AI 以及如何攻击 AI 的重要主题：
+开发者和公司从 Internet 下载并运行模型是非常常见的，但仅加载模型就可能足以在系统上执行任意代码。这是理解如何安全使用 AI 以及如何攻击它的重要主题：
 
 
 {{#ref}}
@@ -66,7 +66,7 @@ AI-Models-RCE.md
 
 ### AI-Assisted KYC Bypass
 
-Generative video 可以与 virtual-camera injection 和 camera API manipulation 结合使用，以绕过防护较弱的 KYC、年龄验证和 biometric liveness 流程：
+生成式视频可以与虚拟摄像头注入和摄像头 API 操作结合使用，以绕过较弱的 KYC、年龄验证和生物特征活体检测流程：
 
 
 {{#ref}}
@@ -75,7 +75,7 @@ KYC-Bypass-Using-AI.md
 
 ### AI Model Context Protocol
 
-MCP（Model Context Protocol）是一种允许 AI agent 客户端以 plug-and-play 方式连接外部工具和数据源的协议。这使 AI 模型与外部系统之间能够进行复杂的工作流和交互：
+MCP (Model Context Protocol) 是一种用于将 AI 应用连接到工具和数据源的开放协议。由于 MCP servers 可以暴露数据和操作，评估必须包括授权、同意、工具输入验证以及信任边界审查。<sup>[[3]](#references)</sup>
 
 
 {{#ref}}
@@ -91,11 +91,16 @@ AI-Assisted-Fuzzing-and-Vulnerability-Discovery.md
 
 ### Web Black-Box AI Pentester Bots
 
-由 LLM 驱动的 agents 可以自动化长期运行的 black-box Web pentesting 工作流，但前提是这些工作流具备 observability、orchestration、authenticated session handling 和 adversarial validation 支持：
+当具备可观测性、编排、authenticated session 处理和对抗性验证支持时，由 LLM 驱动的 agents 可以自动化长时间运行的黑盒 Web pentesting 工作流：
 
 
 {{#ref}}
 Web-Black-Box-AI-Pentester-Bots.md
 {{#endref}}
 
+## References
+
+- [1] [OWASP 机器学习安全 Top 10](https://owasp.org/www-project-machine-learning-security-top-10/)
+- [2] [Google — 安全 AI 框架 (SAIF)](https://saif.google/)
+- [3] [模型上下文协议 — 简介](https://modelcontextprotocol.io/docs/getting-started/intro)
 {{#include ../banners/hacktricks-training.md}}

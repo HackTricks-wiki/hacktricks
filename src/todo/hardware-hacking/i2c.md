@@ -4,7 +4,10 @@
 
 ## Bus Pirate
 
-要测试 Bus Pirate 是否正常工作，请将 +5V 连接到 VPU，将 3.3V 连接到 ADC，然后访问 bus pirate（例如使用 Tera Term），并使用命令 `~`：
+> [!CAUTION]
+> 在连接 Bus Pirate 之前，请确认目标电压、引脚排列、上拉配置以及共地情况。不要仅为了 sniff 总线，就在目标设备已供电且正在运行的总线上启用 Bus Pirate 的电源；两个电源可能发生争用并损坏硬件。下面的操作记录是针对特定设备的 Bus Pirate v3/community-firmware 示例，并非通用接线方案。<sup>[[1]](#references)[[2]](#references)</sup>
+
+要测试 Bus Pirate 是否正常工作，请将 +5V 连接到 VPU，将 3.3V 连接到 ADC，然后访问 Bus Pirate（例如使用 Tera Term），并使用命令 `~`：
 ```bash
 # Use command
 HiZ>~
@@ -43,18 +46,18 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-如你在上一条命令行中看到的，它显示发现了 0 个错误。购买设备或刷写 firmware 后，确认其正常工作非常有用。
+如你在上一条命令行中所看到的，它显示发现了 0 个错误。购买设备或刷写 firmware 后，了解它正在正常工作非常有用。
 
-要连接 Bus Pirate，可以参考文档：
+要连接 Bus Pirate，可以按照文档操作：
 
-![使用命令 - 按空格键：要连接 Bus Pirate，可以参考文档](<../../images/image (484).png>)
+![使用命令 - 按空格键：要连接 Bus Pirate，可以按照文档操作](<../../images/image (484).png>)
 
-在本例中，我将连接到一个 EPROM：ATMEL901 24C256 PU27：
+本例中的目标是 24C256 系列 I²C EEPROM。请确认确切的后缀和 datasheet，因为不同部件支持的供电电压可能有所不同。<sup>[[3]](#references)</sup>
 
-![使用命令 - 按空格键：在本例中，我将连接到一个 EPROM：ATMEL901 24C256 PU27](<../../images/image (964).png>)
+![使用命令 - 按空格键：本例中，我将连接到一个 EPROM：ATMEL901 24C256 PU27](<../../images/image (964).png>)
 
-为了与 Bus Pirate 通信，我使用 Tera Term 连接到 Bus Pirate 的 COM 端口，并在 Setup --> Serial Port --> Speed 中将速度设置为 115200。\
-在以下通信内容中，你可以看到如何设置 Bus Pirate 以使用 I2C，以及如何从 memory 中写入和读取数据（注释使用 "#"，不要将这部分视为通信内容）：
+要与 Bus Pirate 通信，我使用了 Tera Term，通过 `Setup --> Serial Port --> Speed` 设置为 115200，连接到 Bus Pirate 的 COM 端口。\
+在下面的通信记录中，你可以看到如何准备 Bus Pirate 以进行 I2C 通信，以及如何向 memory 写入和读取数据（注释使用 "#"，通信记录中不会出现这部分）：
 ```bash
 # Check communication with buspirate
 i
@@ -71,7 +74,7 @@ GND     3.3V    5.0V    ADC     VPU     AUX     SCL     SDA     -       -
 P       P       P       I       I       I       I       I       I       I
 GND     3.27V   4.96V   0.00V   4.96V   L       H       H       L       L
 
-#Notice how the VPU is in 5V becausethe EPROM needs 5V signals
+# This particular setup used 5 V pull-ups; do not generalize it to every 24C256 variant or board
 
 # Get mode options
 HiZ>m
@@ -102,7 +105,7 @@ Set speed:
 3. ~100kHz
 4. ~240kHz
 
-# Select communication spped
+# Select communication speed
 (1)> 2
 Clutch disengaged!!!
 To finish setup, start up the power supplies with command 'W'
@@ -124,8 +127,8 @@ I2C>(1)
 Searching I2C address space. Found devices at:
 0xA0(0x50 W) 0xA1(0x50 R)
 
-# Note that each slave will have a write address and a read address
-# 0xA0 ad 0xA1 in the previous case
+# Bus Pirate displays the 8-bit address bytes 0xA0 (write) and 0xA1 (read)
+# Both correspond to the same 7-bit I2C target address, 0x50
 
 # Write "BBB" in address 0x69
 I2C>[0xA0 0x00 0x69 0x42 0x42 0x42]
@@ -155,9 +158,9 @@ NACK
 ```
 ### Sniffer
 
-在此场景中，我们将 sniff Arduino 与前一个 EPROM 之间的 I2C 通信。你只需让两个设备进行通信，然后将 bus pirate 连接到 SCL、SDA 和 GND 引脚：
+在此场景中，我们将 sniff Arduino 与之前的 EPROM 之间的 I2C 通信；你只需让两个设备相互通信，然后将 bus pirate 连接到 SCL、SDA 和 GND 引脚：
 
-![Read 20B from address 0x69 configured before - Sniffer: 在此场景中，我们将 sniff Arduino 与前一个 EPROM 之间的 I2C 通信。你只需让两个设备进行通信，然后将 bus pirate 连接到...](<../../images/image (166).png>)
+![从之前配置的地址 0x69 读取 20B - Sniffer：在此场景中，我们将 sniff Arduino 与之前的 EPROM 之间的 I2C 通信；你只需...](<../../images/image (166).png>)
 ```bash
 I2C>m
 1. HiZ
@@ -190,7 +193,7 @@ Clutch disengaged!!!
 To finish setup, start up the power supplies with command 'W'
 Ready
 
-# EVEN IF YOU ARE GOING TO SNIFF YOU NEED TO POWER ON!
+# Historical transcript powered this bench setup. On a live target-powered bus, leave Bus Pirate power OFF.
 
 I2C>W
 POWER SUPPLIES ON
@@ -203,4 +206,9 @@ Sniffer
 Any key to exit
 [0xA0+0x00+0x69+0x41+0x41+0x41+0x20+0x48+0x69+0x20+0x44+0x72+0x65+0x67+0x21+0x20+0x41+0x41+0x41+0x00+]
 ```
+## References
+
+- [1] [Bus Pirate 文档 — I²C](https://docs.buspirate.com/docs/devices/i2c-eeprom/)
+- [2] [NXP — I²C 总线规范和用户手册](https://www.nxp.com/docs/en/user-guide/UM10204.pdf)
+- [3] [Microchip — AT24C256C I²C 串行 EEPROM 数据表](https://ww1.microchip.com/downloads/en/DeviceDoc/AT24C256C-I2C-Compatible-Two-Wire-Serial-EEPROM-256-Kbit-32,768-x-8-20005915A.pdf)
 {{#include ../../banners/hacktricks-training.md}}
