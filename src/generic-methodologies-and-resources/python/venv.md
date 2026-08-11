@@ -1,5 +1,7 @@
 # venv
 
+{{#include ../../banners/hacktricks-training.md}}
+
 Il modulo standard `venv` di Python crea ambienti virtuali, il cui script di attivazione POSIX è `<venv>/bin/activate`; digita `deactivate` per uscire dall'ambiente attivo.<sup>[[1]](#references)</sup> Su Ubuntu, il pacchetto `python3-venv` fornisce il modulo quando non è installato insieme al pacchetto Python di base.<sup>[[2]](#references)</sup>
 ```bash
 sudo apt-get install python3-venv
@@ -11,7 +13,7 @@ source pvenv/bin/activate #Activate the environment
 #You can now install whatever python library you need
 deactivate #To deactivate the virtual environment
 ```
-Per i workflow meno recenti basati su setuptools che utilizzavano `setup.py bdist_wheel`, installare `wheel` nell'ambiente attivo forniva il comando `bdist_wheel`.<sup>[[3]](#references)</sup> Le versioni correnti di setuptools non richiedono più `wheel` per quel comando e le linee guida attuali per il packaging raccomandano `python -m build --wheel` invece di richiamare direttamente `setup.py`.<sup>[[4]](#references)[[5]](#references)</sup>
+Per i workflow più vecchi basati su `setuptools` con `setup.py bdist_wheel`, l'installazione di `wheel` nell'ambiente attivo forniva il comando `bdist_wheel`.<sup>[[3]](#references)</sup> Le versioni attuali di setuptools non richiedono più `wheel` per quel comando e le attuali indicazioni sul packaging raccomandano `python -m build --wheel` invece di invocare direttamente `setup.py`.<sup>[[4]](#references)[[5]](#references)</sup>
 ```text
 error: invalid command 'bdist_wheel'
 ```

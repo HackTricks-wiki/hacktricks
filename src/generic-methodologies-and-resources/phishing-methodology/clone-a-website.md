@@ -1,14 +1,16 @@
-# Clonare un sito web
+# Clonazione di un sito web
 
-Per una valutazione di phishing, a volte può essere utile **clonare/effettuare il dump completo di un sito web**.
+{{#include ../../banners/hacktricks-training.md}}
 
-Nota che puoi anche aggiungere alcuni payload al sito web clonato, come un hook BeEF per "controllare" la scheda dell'utente.
+Per una valutazione di phishing, a volte può essere utile **clonare/effettuare il dump di un sito web**.
 
-Puoi utilizzare diversi strumenti a questo scopo:
+Tieni presente che puoi anche aggiungere alcuni payload al sito web clonato, come un hook BeEF, per "controllare" la scheda dell'utente.
+
+Esistono diversi tool che puoi utilizzare a questo scopo:
 
 ## wget
 
-Il comando seguente utilizza le modalità di mirroring, page-requisite, conversione dei link e regolazione delle estensioni di Wget, quindi serve i file scaricati dalla directory corrente con il modulo `http.server` di Python sulla porta 8000.<sup>[[1]](#references)[[2]](#references)</sup>
+Il comando seguente utilizza le modalità di mirroring, inclusione dei requisiti della pagina, conversione dei link e modifica delle estensioni di Wget, quindi serve i file scaricati dalla directory corrente con il modulo `http.server` di Python sulla porta 8000.<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 wget --mirror --page-requisites --convert-links --adjust-extension <URL>
 cd <URL>
@@ -21,16 +23,16 @@ Il repository goclone descrive l'utility come uno strumento che scarica un sito 
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
-## Social Engineering Toolkit
+## Kit di Social Engineering
 
-Il repository del Social-Engineer Toolkit (SET) identifica SET come un framework open-source per il penetration testing, destinato a valutazioni autorizzate di social engineering.<sup>[[4]](#references)</sup>
+Il repository Social-Engineer Toolkit (SET) identifica SET come un framework open-source per il penetration testing destinato alle valutazioni autorizzate di social engineering.<sup>[[4]](#references)</sup>
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit
 ```
 ## References
 
-- [1] [Manuale di GNU Wget](https://www.gnu.org/software/wget/manual/wget.html)
-- [2] [Documentazione di Python `http.server`](https://docs.python.org/3/library/http.server.html)
+- [1] [Manuale GNU Wget](https://www.gnu.org/software/wget/manual/wget.html)
+- [2] [Documentazione Python `http.server`](https://docs.python.org/3/library/http.server.html)
 - [3] [Repository goclone](https://github.com/imthaghost/goclone)
-- [4] [Repository del Social-Engineer Toolkit](https://github.com/trustedsec/social-engineer-toolkit)
+- [4] [Repository Social-Engineer Toolkit](https://github.com/trustedsec/social-engineer-toolkit)
 {{#include ../../banners/hacktricks-training.md}}

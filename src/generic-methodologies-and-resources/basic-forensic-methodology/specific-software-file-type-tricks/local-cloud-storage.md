@@ -1,8 +1,10 @@
 # Archiviazione cloud locale
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## OneDrive
 
-In Windows, puoi trovare la cartella OneDrive in `\Users\<username>\AppData\Local\Microsoft\OneDrive`. Inoltre, all'interno di `logs\Personal` è possibile trovare il file `SyncDiagnostics.log`, che contiene alcuni dati interessanti relativi ai file sincronizzati:<sup>[[3]](#references)</sup>
+In Windows, puoi trovare la cartella OneDrive in `\Users\<username>\AppData\Local\Microsoft\OneDrive`. E all'interno di `logs\Personal` è possibile trovare il file `SyncDiagnostics.log`, che contiene alcuni dati interessanti riguardo ai file sincronizzati:<sup>[[3]](#references)</sup>
 
 - Dimensione in byte
 - Data di creazione
@@ -13,7 +15,7 @@ In Windows, puoi trovare la cartella OneDrive in `\Users\<username>\AppData\Loca
 - Ora di generazione del report
 - Dimensione dell'HD del sistema operativo
 
-Una volta trovato il CID, è consigliato **cercare i file che contengono questo ID**. Potresti riuscire a trovare file con i nomi: _**\<CID>.ini**_ e _**\<CID>.dat**_, che possono contenere informazioni interessanti, come i nomi dei file sincronizzati con OneDrive.<sup>[[3]](#references)</sup>
+Una volta trovato il CID, è consigliato **cercare i file che contengono questo ID**. Potresti riuscire a trovare file con i nomi: _**\<CID>.ini**_ e _**\<CID>.dat**_, che potrebbero contenere informazioni interessanti come i nomi dei file sincronizzati con OneDrive.<sup>[[3]](#references)</sup>
 
 ## Google Drive
 
@@ -28,8 +30,8 @@ I dati della tabella del database **`Sync_config.db`** contengono l'indirizzo em
 
 ## Dropbox
 
-Dropbox utilizza **database SQLite** per gestire i file.<sup>[[2]](#references)</sup> In questa\
-cartella puoi trovare i database:
+Dropbox utilizza **database SQLite** per gestire i file.<sup>[[2]](#references)</sup> In questo\
+Puoi trovare i database nelle cartelle:
 
 - `\Users\<username>\AppData\Local\Dropbox`
 - `\Users\<username>\AppData\Local\Dropbox\Instance1`
@@ -53,20 +55,20 @@ Tuttavia, le informazioni principali sono:<sup>[[1]](#references)</sup>
 - **Algoritmo**: PBKDF2
 - **Iterazioni**: 1066
 
-Oltre a queste informazioni, per decrittografare i database sono ancora necessari:<sup>[[2]](#references)</sup>
+Oltre a queste informazioni, per decrittografare i database hai ancora bisogno di:<sup>[[2]](#references)</sup>
 
-- La **chiave DPAPI crittografata**: puoi trovarla nel registro all'interno di `NTUSER.DAT\Software\Dropbox\ks\client` (esporta questi dati come binario)
+- La **chiave DPAPI crittografata**: puoi trovarla nel registro, all'interno di `NTUSER.DAT\Software\Dropbox\ks\client` (esporta questi dati come binario)
 - Gli hive **`SYSTEM`** e **`SECURITY`**
-- Le **chiavi master DPAPI**: che si trovano in `\Users\<username>\AppData\Roaming\Microsoft\Protect`
+- Le **chiavi master DPAPI**: che possono essere trovate in `\Users\<username>\AppData\Roaming\Microsoft\Protect`
 - Il **nome utente** e la **password** dell'utente Windows
 
-Quindi puoi utilizzare lo strumento [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
+Puoi quindi utilizzare lo strumento [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
 
-![Google Drive - Dropbox: Quindi puoi utilizzare lo strumento DataProtectionDecryptor](<../../../images/image (443).png>)
+![Google Drive - Dropbox: Puoi quindi utilizzare lo strumento DataProtectionDecryptor](<../../../images/image (443).png>)
 
 Se tutto procede come previsto, lo strumento indicherà la **chiave primaria** che devi **utilizzare per recuperare quella originale**. Per recuperare quella originale, usa semplicemente questa [ricetta cyber_chef](<https://gchq.github.io/CyberChef/index.html#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) inserendo la chiave primaria come "passphrase" all'interno della ricetta.
 
-Il valore hex risultante è la chiave finale utilizzata per crittografare i database, che può essere decrittografata con:<sup>[[2]](#references)</sup>
+Il valore esadecimale risultante è la chiave finale utilizzata per crittografare i database, che possono essere decrittografati con:<sup>[[2]](#references)</sup>
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
@@ -87,7 +89,7 @@ Il database **`filecache.db`** contiene informazioni su tutti i file e le cartel
 
 Altre tabelle all'interno di questo database contengono informazioni più interessanti:
 
-- **block_cache**: hash di tutti i file e le cartelle di Dropbox
+- **block_cache**: Hash di tutti i file e le cartelle di Dropbox
 - **block_ref**: Collega l'ID hash della tabella `block_cache` all'ID del file nella tabella `file_journal`
 - **mount_table**: Cartelle condivise di Dropbox
 - **deleted_fields**: File eliminati di Dropbox
@@ -96,9 +98,9 @@ Altre tabelle all'interno di questo database contengono informazioni più intere
 ## References
 
 - [1] [Un'analisi critica della sicurezza del software Dropbox (hack.lu 2012)](http://archive.hack.lu/2012/Dropbox%20security.pdf)
-- [2] [Approfondimento sulla decrittazione di Dropbox DBX](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html)
-- [3] [Analisi forense del cloud storage (Darren Quick, 2012)](https://studylib.net/doc/9417205/cloud-storage-forensic-analysis)
-- [4] [Caso NIST CFReDS Data Leakage: risposte sulla leakage](https://cfreds-archive.nist.gov/data_leakage_case/leakage-answers.pdf)
+- [2] [Ripasso della decrittazione DBX di Dropbox](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html)
+- [3] [Analisi forense del Cloud Storage (Darren Quick, 2012)](https://studylib.net/doc/9417205/cloud-storage-forensic-analysis)
+- [4] [Caso di perdita di dati NIST CFReDS: risposte sulla perdita](https://cfreds-archive.nist.gov/data_leakage_case/leakage-answers.pdf)
 - [5] [Analisi forense di Dropbox](https://www.forensicfocus.com/articles/dropbox-forensics/)
 - [6] [Artefatti dell'utilizzo di Google Drive in Windows](https://digitalinvestigator.blogspot.com/2021/03/artifacts-of-google-drive-usage-on.html)
 {{#include ../../../banners/hacktricks-training.md}}

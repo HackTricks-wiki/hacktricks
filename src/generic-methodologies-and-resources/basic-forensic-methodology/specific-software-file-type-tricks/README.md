@@ -1,6 +1,8 @@
 # Trucchi specifici per software/tipi di file
 
-Qui puoi trovare trucchi interessanti per tipi di file e/o software specifici:
+{{#include ../../../banners/hacktricks-training.md}}
+
+Qui puoi trovare trucchi interessanti per specifici tipi di file e/o software:
 
 
 {{#ref}}

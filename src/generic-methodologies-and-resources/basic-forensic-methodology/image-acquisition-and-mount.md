@@ -1,8 +1,10 @@
-# Acquisizione e montaggio
+# Acquisizione e montaggio delle immagini
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Acquisizione
 
-> Acquisisci sempre in modalità **sola lettura** ed esegui l'hashing **durante la copia**. Mantieni il dispositivo originale **protetto dalla scrittura** e lavora solo su copie verificate.
+> Acquisisci sempre in modalità **sola lettura** e **calcola l'hash durante la copia**. Mantieni il dispositivo originale **protetto dalla scrittura** e lavora solo su copie verificate.
 
 ### DD
 ```bash
@@ -13,13 +15,13 @@ sha256sum disk.img > disk.img.sha256
 ```
 ### dc3dd / dcfldd
 
-`dc3dd` è il fork attivamente mantenuto di dcfldd (DoD Computer Forensics Lab dd).
+`dc3dd` è il fork mantenuto attivamente di dcfldd (DoD Computer Forensics Lab dd).
 ```bash
 # Create an image and calculate multiple hashes at acquisition time
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-Imager grafico e multithread che supporta output **raw (dd)**, **EWF (E01/EWFX)** e **AFF4** con verifica parallela. Disponibile nella maggior parte dei repository Linux (`apt install guymager`).
+Strumento grafico e multithread per l'acquisizione di immagini, che supporta output **raw (dd)**, **EWF (E01/EWFX)** e **AFF4**, con verifica parallela. Disponibile nella maggior parte dei repository Linux (`apt install guymager`).
 ```bash
 # Start in GUI mode
 sudo guymager
@@ -28,7 +30,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-La specifica AFF4 v1.0, redatta da Bradley L. Schatz e Michael I. Cohen, definisce un contenitore forense con storage virtualizzato, metadati arbitrari, compressione e hashing estensibili e operazioni ad alta velocità.<sup>[[1]](#references)</sup>
+La specifica AFF4 v1.0, redatta da Bradley L. Schatz e Michael I. Cohen, definisce un contenitore forense con storage virtualizzato, metadati arbitrari, compressione ed hashing estensibili e operazioni ad alta velocità.<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -37,7 +39,7 @@ sudo aff4imager acquire /dev/nvme0n1 /evidence/nvme.aff4 --hash sha256
 # Velociraptor can also acquire AFF4 images remotely
 velociraptor --config server.yaml frontend collect --artifact Windows.Disk.Acquire --args device="\\.\\PhysicalDrive0" format=AFF4
 ```
-### FTK Imager (Windows e Linux)
+### FTK Imager (Windows & Linux)
 
 Puoi [scaricare FTK Imager](https://accessdata.com/product-download) e creare immagini **raw, E01 o AFF4**:
 ```bash
@@ -48,25 +50,25 @@ ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
-### Imaging Cloud Disks
+### Acquisizione di immagini dei dischi Cloud
 
 *AWS* – crea uno **snapshot forense** senza arrestare l'istanza:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – use `az snapshot create` and export to a SAS URL.
+*Azure* – usa `az snapshot create` ed esporta in un SAS URL.
 
 
 ## Montaggio
 
 ### Scelta dell'approccio corretto
 
-1. Monta il **disco intero** quando vuoi la tabella delle partizioni originale (MBR/GPT).
-2. Monta il **file di una singola partizione** quando ti serve un solo volume.
+1. Monta l'**intero disco** quando vuoi la tabella delle partizioni originale (MBR/GPT).
+2. Monta un **file di partizione singolo** quando ti serve un solo volume.
 3. Mantieni gli allegati delle immagini in sola lettura (ad esempio, `--read-only` di qemu-nbd).<sup>[[2]](#references)</sup> Monta i filesystem in sola lettura (`-o ro`).<sup>[[3]](#references)</sup> Lavora su **copie**.
 
-### Immagini raw (estratte con dd, AFF4)
+### Immagini raw (dd, estratte da AFF4)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -97,16 +99,16 @@ sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 # 3. Mount the desired partition (XFS example; use the filesystem-specific option)
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-Per i mount no-replay specifici del filesystem, ext3/ext4 usano `noload`, mentre XFS usa `norecovery` e richiede la modalità read-only.<sup>[[3]](#references)[[4]](#references)</sup>
+Per i mount no-replay specifici del filesystem, ext3/ext4 usano `noload`, mentre XFS usa `norecovery` e richiede la modalità di sola lettura.<sup>[[3]](#references)[[4]](#references)</sup>
 
-In alternativa, converti on the fly con **xmount**:
+In alternativa, converti al volo con **xmount**:
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
 mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
 ### Volumi LVM / BitLocker / VeraCrypt
 
-Dopo aver collegato il block device (loop o nbd):
+Dopo aver collegato il dispositivo a blocchi (loop o nbd):
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -116,26 +118,26 @@ sudo lvscan | grep "/dev/nbd0"
 sudo dislocker -V /dev/nbd0p3 -u -- /mnt/bitlocker
 sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 ```
-### Helper di kpartx
+### helper di kpartx
 
 `kpartx` mappa automaticamente le partizioni di un'immagine in `/dev/mapper/`:
 ```bash
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
 ```
-### Errori comuni di mount e relative correzioni
+### Errori comuni di mount e correzioni
 
-Per un filesystem ext3/ext4 non pulito, usa `ro,noload` quando è necessario impedire il replay del journal.<sup>[[3]](#references)</sup>
+Per un filesystem ext3/ext4 sporco, usa `ro,noload` quando è necessario impedire il replay del journal.<sup>[[3]](#references)</sup>
 
 | Errore | Causa tipica | Correzione |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | Filesystem con journal (ext4) non smontato correttamente | usa `-o ro,noload` |
-| `bad superblock …` | Offset errato o filesystem danneggiato | calcola l'offset (`sector*size`) o esegui `fsck -n` su una copia |
+| `cannot mount /dev/loop0 read-only` | FS con journal (ext4) non smontato correttamente | usa `-o ro,noload` |
+| `bad superblock …` | Offset errato o FS danneggiato | calcola l'offset (`sector*size`) o esegui `fsck -n` su una copia |
 | `mount: unknown filesystem type 'LVM2_member'` | Container LVM | attiva il volume group con `vgchange -ay` |
 
 ### Pulizia
 
-Ricorda di eseguire **umount** e di **disconnect** dei dispositivi loop/nbd per evitare di lasciare mapping pendenti che potrebbero corrompere le operazioni successive:
+Ricorda di eseguire **umount** e **disconnect** dei device loop/nbd per evitare di lasciare mapping pendenti che potrebbero corrompere le operazioni successive:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
@@ -145,5 +147,5 @@ kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 - [1] [Specifiche dello standard AFF4 (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
 - [2] [Documentazione di QEMU qemu-nbd](https://www.qemu.org/docs/master/tools/qemu-nbd.html)
 - [3] [Pagina del manuale Linux mount(8)](https://man7.org/linux/man-pages/man8/mount.8.html)
-- [4] [Il filesystem SGI XFS (documentazione del kernel Linux)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
+- [4] [Il filesystem XFS di SGI (documentazione del kernel Linux)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
 {{#include ../../banners/hacktricks-training.md}}

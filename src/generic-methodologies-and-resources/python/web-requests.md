@@ -1,8 +1,10 @@
 # Richieste Web
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Python Requests
 
-Questi esempi usano gli argomenti documentati delle richieste di Requests, le proprietà delle risposte, le tuple dei file multipart e le sessioni.<sup>[[1]](#references)</sup> Gli esempi con `verify=False` disabilitano la verifica dei certificati TLS e dovrebbero essere limitati a test controllati.<sup>[[1]](#references)</sup>
+Questi esempi utilizzano gli argomenti documentati delle richieste di Requests, le proprietà delle risposte, le tuple di file multipart e le sessioni.<sup>[[1]](#references)</sup> Gli esempi con `verify=False` disabilitano la verifica dei certificati TLS e dovrebbero essere limitati a test controllati.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -74,9 +76,9 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## Comando Python per sfruttare un RCE
+## Comando Python per sfruttare una RCE
 
-Il ciclo dei comandi sottoclassa `Cmd` di Python; il suo metodo `default` gestisce i prefissi dei comandi non riconosciuti, `cmdloop` inoltra le righe di input e `re.DOTALL` consente al pattern di estrazione di estendersi su più righe.<sup>[[2]](#references)[[3]](#references)</sup>
+Il ciclo dei comandi sottoclassifica `Cmd` di Python; il suo metodo `default` gestisce i prefissi di comando non riconosciuti, `cmdloop` instrada le righe di input e `re.DOTALL` consente al pattern di estrazione di estendersi su più righe.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re

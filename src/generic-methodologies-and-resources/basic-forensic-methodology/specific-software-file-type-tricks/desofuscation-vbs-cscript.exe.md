@@ -1,6 +1,8 @@
-# Tecniche di desoffuscamento per file VBS
+# Tecniche di deoffuscamento per file VBS
 
-Alcune cose che potrebbero essere utili per eseguire il debug/desoffuscare un file VBS dannoso:
+{{#include ../../../banners/hacktricks-training.md}}
+
+Alcuni elementi che potrebbero essere utili per eseguire il debug/deoffuscare un file VBS dannoso:
 
 ## echo
 
@@ -22,7 +24,7 @@ cscript.exe file.vbs
 ```
 ## Scrivere dati in un file
 
-Questo helper è adattato da una risposta su Stack Overflow e utilizza un flusso di testo `FileSystemObject`. `CreateTextFile` restituisce un `TextStream`, mentre `Write`/`Close` operano sui dati testuali; consideralo un esempio di scrittura di testo, non un writer generico sicuro per i dati binari.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+Questo helper è adattato da una risposta su Stack Overflow e utilizza un flusso di testo `FileSystemObject`. `CreateTextFile` restituisce un `TextStream`, mentre `Write`/`Close` operano sui dati di testo; consideralo un esempio di scrittura di testo, non uno scrittore generico sicuro per i dati binari.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```js
 Function writeBinary(strBinary, strPath)
 
@@ -49,7 +51,7 @@ End Function
 ```
 ## References
 
-- [1] [Esecuzione di una query Visual Basic Scripting Edition (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/indexsrv/running-a-visual-basic-scripting-edition-query)
+- [1] [Esecuzione di una query di Visual Basic Scripting Edition (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/indexsrv/running-a-visual-basic-scripting-edition-query)
 - [2] [Utilizzo dei linguaggi di scripting (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525153%28v%3Dvs.90%29)
 - [3] [cscript (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cscript)
 - [4] [Lettura e scrittura di file binari in VBScript (Stack Overflow)](https://stackoverflow.com/questions/6060529/read-and-write-binary-file-in-vbscript/6087783)
