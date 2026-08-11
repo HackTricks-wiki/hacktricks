@@ -1,21 +1,19 @@
-# SUID Shared Library and Linker Abuse
+# SUID Shared Library और Linker Abuse
 
-{{#include ../../banners/hacktricks-training.md}}
-
-SUID binaries की आमतौर पर direct command execution के लिए समीक्षा की जाती है, लेकिन custom SUID programs dynamic linker के माध्यम से भी vulnerable हो सकते हैं। सामान्य theme सरल है: कोई privileged executable ऐसे path या configuration से code load करता है, जिसे lower-privileged user प्रभावित कर सकता है।
+SUID binaries की आमतौर पर direct command execution के लिए समीक्षा की जाती है, लेकिन custom SUID programs dynamic linker के माध्यम से भी vulnerable हो सकते हैं। सामान्य theme सरल है: कोई privileged executable ऐसे path या configuration से code load करता है, जिसे lower-privileged user प्रभावित कर सकता है।<sup>[[1]](#references)</sup>
 
 यह page generic technique patterns पर केंद्रित है: missing libraries, writable library directories, `RPATH`/`RUNPATH`, sudo के माध्यम से `LD_PRELOAD`, linker configuration और SUID hardlink confusion।
 
 ## Fast Enumeration
 
-असामान्य SUID files ढूंढकर और यह जांचकर शुरुआत करें कि वे dynamically linked हैं या नहीं:
+असामान्य SUID files खोजने और यह जाँचने से शुरुआत करें कि वे dynamically linked हैं या नहीं:<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 find / -perm -4000 -type f -ls 2>/dev/null
 file /path/to/suid-binary
 ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'NEEDED|RPATH|RUNPATH'
 ```
-गैर-मानक locations, custom application paths, root के स्वामित्व वाली लेकिन package-managed directories के बाहर स्थित binaries, और writable directories से load की जाने वाली dependencies पर ध्यान दें।
+गैर-मानक स्थानों, custom application paths, root के स्वामित्व वाली लेकिन package-managed directories के बाहर स्थित binaries और writable directories से load की जाने वाली dependencies पर ध्यान दें।<sup>[[1]](#references)</sup>
 
 उपयोगी writeability checks:
 ```bash
@@ -25,13 +23,13 @@ find / -writable -type d 2>/dev/null | head -n 50
 ```
 ## Missing Shared Object Injection
 
-कुछ custom SUID binaries ऐसी shared object load करने का प्रयास करती हैं जो मौजूद नहीं होती। यदि missing path attacker द्वारा नियंत्रित directory के अंतर्गत है, तो binary attacker द्वारा supplied code को effective user के रूप में load कर सकती है।
+कुछ custom SUID binaries ऐसे shared object को load करने का प्रयास करते हैं जो मौजूद नहीं होता। यदि missing path attacker द्वारा नियंत्रित directory के अंतर्गत है, तो binary effective user के रूप में attacker द्वारा उपलब्ध कराया गया code load कर सकती है।<sup>[[1]](#references)</sup>
 
-Failed library lookups खोजें:
+`strace` के syscall filter से failed library lookups खोजें:<sup>[[2]](#references)</sup>
 ```bash
 strace -f -e trace=openat,access /path/to/suid-binary 2>&1 | grep -Ei 'ENOENT|\\.so'
 ```
-यदि binary `libexample.so` के लिए किसी writable path में search करता है, तो एक minimal proof library constructor का उपयोग कर सकती है। validation के दौरान proof-of-impact को harmless रखें:
+यदि binary `libexample.so` के लिए किसी writable path में search करता है, तो एक minimal proof library constructor का उपयोग कर सकती है। Validation के दौरान proof-of-impact को harmless रखें:<sup>[[6]](#references)</sup>
 ```c
 #include <stdlib.h>
 #include <unistd.h>
@@ -49,67 +47,67 @@ gcc -shared -fPIC proof.c -o /writable/path/libexample.so
 /path/to/suid-binary
 cat /tmp/suid-so-ran
 ```
-The exploitable condition केवल missing library नहीं है। Attacker के लिए यह आवश्यक है कि वह किसी ऐसे path पर compatible shared object रख सके, जिसे privileged loader स्वीकार करेगा।
+यह exploitable condition केवल missing library नहीं है। Attacker को किसी ऐसे path पर compatible shared object रखने में सक्षम होना चाहिए जिसे privileged loader स्वीकार करेगा।<sup>[[1]](#references)</sup>
 
 ## Writable Library Directory
 
-कभी-कभी सभी dependencies मौजूद होती हैं, लेकिन उन्हें resolve करने के लिए उपयोग की जाने वाली directories में से कोई एक writable होती है। इससे loaded library को replace करने या उसी नाम वाली higher-priority library को plant करने का अवसर मिल सकता है।
+कभी-कभी सभी dependencies मौजूद होती हैं, लेकिन उन्हें resolve करने के लिए उपयोग की जाने वाली directories में से कोई एक writable होती है। इससे loaded library को replace करना या उसी नाम की higher-priority library रखना संभव हो सकता है।<sup>[[1]](#references)</sup>
 
-Dependency paths की समीक्षा करें:
+Dependency paths की समीक्षा करें:<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 ldd /path/to/suid-binary 2>/dev/null
 readelf -d /path/to/suid-binary 2>/dev/null | egrep 'NEEDED|RPATH|RUNPATH'
 namei -om /path/to/library.so
 ```
-यदि directory writable है, तो lab में copy-safe approach से validate करें। Live host पर system libraries को replace करने से authentication, package management या boot-critical services में समस्या आ सकती है।
+यदि directory writable है, तो lab में copy-safe approach का उपयोग करके validate करें। Live host पर system libraries को replace करने से concurrently start होने वाली processes inconsistent library versions के साथ चल सकती हैं।<sup>[[8]](#references)</sup>
 
-## RPATH और RUNPATH
+## RPATH and RUNPATH
 
-`RPATH` और `RUNPATH` dynamic-section entries हैं, जो loader को बताते हैं कि libraries के लिए कहाँ search करना है। जब वे attacker-writable directories की ओर point करते हैं, तो SUID programs में वे खतरनाक होते हैं।
+`RPATH` और `RUNPATH` dynamic-section entries हैं, जो loader को बताते हैं कि libraries के लिए कहाँ search करना है। जब ये attacker-writable directories की ओर point करते हैं, तो SUID programs में ये dangerous होते हैं।<sup>[[1]](#references)</sup>
 
-उन्हें detect करें:
+उन्हें detect करें:<sup>[[3]](#references)[[10]](#references)</sup>
 ```bash
 readelf -d /path/to/suid-binary | egrep 'RPATH|RUNPATH'
 objdump -p /path/to/suid-binary 2>/dev/null | egrep 'RPATH|RUNPATH'
 ```
-उदाहरण जोखिमपूर्ण आउटपुट:
+जोखिमपूर्ण आउटपुट का उदाहरण:
 ```text
 0x000000000000001d (RUNPATH)            Library runpath: [/opt/app/lib]
 0x0000000000000001 (NEEDED)             Shared library: [libcustom.so]
 ```
-यदि `/opt/app/lib` writable है और binary को `libcustom.so` की आवश्यकता है, तो attacker वहां malicious `libcustom.so` रख सकता है:
+यदि `/opt/app/lib` writable है और binary को `libcustom.so` की आवश्यकता है, तो attacker वहाँ malicious `libcustom.so` रख सकता है:<sup>[[1]](#references)</sup>
 ```bash
 ls -ld /opt/app/lib
 gcc -shared -fPIC proof.c -o /opt/app/lib/libcustom.so
 /path/to/suid-binary
 ```
-`RPATH` और `RUNPATH` सभी resolution details में identical नहीं होते, लेकिन privilege-escalation review के लिए practical question एक ही है: क्या SUID binary किसी library name के लिए attacker-writable directory में search करती है?
+`RPATH` और `RUNPATH` सभी resolution details में समान नहीं होते, लेकिन privilege-escalation review के लिए व्यावहारिक प्रश्न एक ही है: क्या SUID binary किसी library name के लिए attacker-writable directory में search करती है?<sup>[[1]](#references)</sup>
 
 ## LD_PRELOAD, LD_LIBRARY_PATH और SUID
 
-Normal programs के लिए, `LD_PRELOAD` और `LD_LIBRARY_PATH` shared object loading को force या influence कर सकते हैं। SUID programs के लिए, dynamic loader सामान्यतः secure-execution mode में प्रवेश करता है और dangerous environment variables को ignore करता है।
+सामान्य programs के लिए, `LD_PRELOAD` और `LD_LIBRARY_PATH` shared object loading को force या influence कर सकते हैं। SUID programs के लिए, dynamic loader सामान्यतः secure-execution mode में प्रवेश करता है और खतरनाक environment variables को ignore करता है।<sup>[[1]](#references)</sup>
 
-इसका अर्थ है कि केवल user द्वारा `LD_PRELOAD` set कर पाने के कारण कोई plain SUID binary आमतौर पर vulnerable नहीं होती:
+इसका अर्थ है कि कोई plain SUID binary केवल इसलिए आमतौर पर vulnerable नहीं होती क्योंकि user `LD_PRELOAD` set कर सकता है:<sup>[[1]](#references)</sup>
 ```bash
 LD_PRELOAD=/tmp/proof.so /path/to/suid-binary
 ```
-सामान्य अपवाद sudo misconfiguration है। यदि `sudo -l` दिखाता है कि `LD_PRELOAD` या `LD_LIBRARY_PATH` जैसा कोई variable preserved है, तो sudo-अनुमत command attacker-controlled code load कर सकता है:
+सामान्य अपवाद ऐसी sudo policy है जो target command के लिए loader variables को set या preserve करने की अनुमति देती है। `sudo -l` में `env_keep+=LD_PRELOAD` या `env_keep+=LD_LIBRARY_PATH` जैसी entries देखें; यदि target dynamically linked है, तो यह attacker-controlled code load कर सकता है:<sup>[[4]](#references)[[5]](#references)</sup>
 ```bash
 sudo -l
 # Look for env_keep+=LD_PRELOAD or env_keep+=LD_LIBRARY_PATH
 sudo LD_PRELOAD=/tmp/proof.so /allowed/command
 ```
-इन cases को आपस में confuse न करें:
+इन मामलों को आपस में confuse न करें; ऊपर दिए गए loader और sudo policy rules इनके बीच अंतर स्पष्ट करते हैं:<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 
-- सामान्य SUID binary के विरुद्ध `LD_PRELOAD`: आमतौर पर secure execution द्वारा block किया जाता है।
-- sudo द्वारा preserved `LD_PRELOAD`: potentially exploitable।
+- `LD_PRELOAD` एक सामान्य SUID binary के विरुद्ध: secure execution द्वारा आमतौर पर blocked।
+- sudo द्वारा `LD_PRELOAD` preserved: संभावित रूप से exploitable।
 - writable path में missing `.so`: जब SUID binary स्वाभाविक रूप से उस path को load करती है, तब exploitable।
-- writable directory की ओर `RPATH`/`RUNPATH`: जब किसी needed library को control किया जा सके, तब exploitable।
+- writable directory की ओर `RPATH`/`RUNPATH`: जब आवश्यक library को नियंत्रित किया जा सके, तब exploitable।
 - `/etc/ld.so.preload` या linker config पर write access: system-wide और high impact।
 
 ## Linker Configuration
 
-dynamic linker `/etc/ld.so.conf`, `/etc/ld.so.conf.d/`, linker cache और कुछ cases में `/etc/ld.so.preload` जैसी system configuration को भी read करता है।
+`ld.so` linker cache और `/etc/ld.so.preload` का उपयोग करता है; `ldconfig` इस cache को `/etc/ld.so.conf` और उससे included files से बनाता है, जो आमतौर पर `/etc/ld.so.conf.d/` में होती हैं।<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
 
 High-value checks:
 ```bash
@@ -118,30 +116,42 @@ find /etc/ld.so.conf.d -type f -writable -ls 2>/dev/null
 find /etc/ld.so.conf.d -type d -writable -ls 2>/dev/null
 ldconfig -v 2>/dev/null | head -n 50
 ```
-Writable linker configuration आमतौर पर किसी एक vulnerable SUID binary से अधिक गंभीर होती है, क्योंकि यह कई dynamically linked processes को प्रभावित कर सकती है। `/etc/ld.so.preload` विशेष रूप से खतरनाक है, क्योंकि यह privileged processes में किसी shared object को force कर सकती है।
+Writable linker configuration आमतौर पर एक single vulnerable SUID binary से अधिक गंभीर होती है, क्योंकि यह कई dynamically linked processes को प्रभावित कर सकती है। `/etc/ld.so.preload` विशेष रूप से खतरनाक है, क्योंकि यह privileged processes में किसी shared object को जबरन load कर सकती है।<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
 
 ## SUID Hardlink Confusion
 
-Hardlinks एक ही SUID inode को कई names के अंतर्गत दिखा सकते हैं। यह किसी privileged helper को छिपाने, cleanup को भ्रमित करने या naive path-based review को bypass करने के लिए उपयोगी है।
+Hardlinks एक ही SUID inode को कई नामों के अंतर्गत दिखा सकते हैं।<sup>[[9]](#references)</sup> यह किसी privileged helper को छिपाने, cleanup को भ्रमित करने या सरल path-based review को bypass करने के लिए उपयोगी है।
 
-एक से अधिक links वाली SUID files खोजें:
+एक से अधिक links वाली SUID files खोजें:<sup>[[9]](#references)</sup>
 ```bash
 find / -xdev -perm -4000 -type f -links +1 -ls 2>/dev/null
 ```
-समान inode के सभी paths का निरीक्षण करें:
+एक ही inode के सभी paths की जाँच करें:<sup>[[9]](#references)</sup>
 ```bash
 stat /path/to/suid-wrapper
 find / -xdev -samefile /path/to/suid-wrapper -ls 2>/dev/null
 ```
-इसका abuse यह नहीं है कि hardlink permissions बदलता है। abuse path confusion है: किसी privileged inode तक ऐसे name के माध्यम से पहुँचा जा सकता है जिसकी defenders या scripts अपेक्षा नहीं करते। inode और hardlink workflow की अधिक गहराई से जानकारी के लिए [Filesystem, Inodes and Recovery](../main-system-information/filesystem-inodes-and-recovery.md) देखें।
+इसका abuse यह नहीं है कि hardlink permissions बदलता है। इसका abuse path confusion है: privileged inode ऐसे नाम के माध्यम से पहुंच योग्य हो सकता है जिसकी defenders या scripts अपेक्षा नहीं करते।<sup>[[9]](#references)</sup> inode और hardlink workflow की अधिक गहराई से जानकारी के लिए [Filesystem, Inodes and Recovery](../main-system-information/filesystem-inodes-and-recovery.md) देखें।
 
-## Defensive Notes
+## रक्षात्मक नोट्स
 
-- SUID binaries को minimal, audited और जहाँ संभव हो package-managed रखें।
-- ऐसे `RPATH`/`RUNPATH` entries से बचें जो writable या application-managed directories की ओर point करती हों।
-- library directories को root-owned और regular users के लिए non-writable रखें।
-- sudo के माध्यम से `LD_PRELOAD`, `LD_LIBRARY_PATH` या इसी प्रकार के loader variables को preserve न करें।
-- `/etc/ld.so.preload`, `/etc/ld.so.conf`, `/etc/ld.so.conf.d/` और unexpected SUID files को monitor करें।
-- hardlinked SUID files की समीक्षा करें और standard system paths के बाहर मौजूद custom SUID wrappers की जाँच करें।
+- SUID binaries को minimal, audited और जहां संभव हो package-managed रखें।
+- `RPATH`/`RUNPATH` entries को writable या application-managed directories की ओर point करने से बचें।<sup>[[1]](#references)[[8]](#references)</sup>
+- library directories को root-owned रखें और regular users द्वारा writable न होने दें।<sup>[[8]](#references)</sup>
+- sudo के माध्यम से `LD_PRELOAD`, `LD_LIBRARY_PATH` या इसी प्रकार के loader variables को preserve न करें।<sup>[[1]](#references)[[5]](#references)</sup>
+- `/etc/ld.so.preload`, `/etc/ld.so.conf`, `/etc/ld.so.conf.d/` और unexpected SUID files को monitor करें।<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
+- hardlinked SUID files की समीक्षा करें और standard system paths के बाहर मौजूद custom SUID wrappers की जांच करें।<sup>[[9]](#references)</sup>
 
+## References
+
+- [1] [ld.so(8) — Linux manual page](https://man7.org/linux/man-pages/man8/ld.so.8.html)
+- [2] [strace(1) — Linux manual page](https://man7.org/linux/man-pages/man1/strace.1.html)
+- [3] [readelf (GNU Binary Utilities)](https://sourceware.org/binutils/docs/binutils/readelf.html)
+- [4] [sudo(8) — Linux manual page](https://www.man7.org/linux/man-pages/man8/sudo.8.html)
+- [5] [sudoers(5) — Linux manual page](https://man7.org/linux/man-pages/man5/sudoers.5.html)
+- [6] [Common Attributes (GCC)](https://gcc.gnu.org/onlinedocs/gcc/Common-Attributes.html)
+- [7] [ldconfig(8) — Linux manual page](https://man7.org/linux/man-pages/man8/ldconfig.8.html)
+- [8] [Dynamic Linker Hardening (The GNU C Library)](https://www.sourceware.org/glibc/manual/latest/html_node/Dynamic-Linker-Hardening.html)
+- [9] [Hard Links (GNU Findutils)](https://www.gnu.org/software/findutils/manual/html_node/find_html/Hard-Links.html)
+- [10] [objdump (GNU Binary Utilities)](https://www.sourceware.org/binutils/docs/binutils/objdump.html)
 {{#include ../../banners/hacktricks-training.md}}
