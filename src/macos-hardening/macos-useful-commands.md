@@ -1,14 +1,14 @@
-# macOS便利なコマンド
+# macOS Useful Commands
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS自動Enumerationツール
+### MacOS 自動 Enumeration ツール
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### MacOS固有のコマンド
+### MacOS 固有のコマンド
 ```bash
 #System info
 date
@@ -32,7 +32,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -115,20 +115,20 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### 簡易 anti-analysis / virtualization check
+### 簡易な anti-analysis / 仮想化チェック
 
-一部の macOS stealers は、VM を検出するために `system_profiler` を呼び出し、sandbox detonation を回避する目的で**特定の exit code（例: 100）を返して abort します**<sup>[[1]](#references)</sup>：
+一部の macOS stealer は `system_profiler` を呼び出して VM を検出し、sandbox detonation を回避するために、**異なる終了コード（例: 100）で abort** します<sup>[[1]](#references)</sup>：
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### インストールされているソフトウェアとサービス
+### インストール済みソフトウェアとサービス
 
-インストールされている**疑わしい**アプリケーションと、インストールされているリソースに対する**権限**を確認します:
+インストールされている**不審な**アプリケーションと、インストール済みリソースに対する**権限**を確認します：
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
@@ -145,12 +145,11 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### ユーザーを作成
 
-プロンプトなし
+プロンプトなしで
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## 参考資料
+## References
 
-- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
+- [1] [2025年、Infostealerの年](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 {{#include ../banners/hacktricks-training.md}}

@@ -4,22 +4,22 @@
 
 ## 基本情報
 
-Quick LookはmacOSの**ファイルプレビュー framework**です。Finderでユーザーがファイルを選択したとき、Spaceキーを押したとき、ファイルにカーソルを合わせたとき、またはサムネイルが有効なディレクトリを表示したとき、Quick Lookは**generator pluginを自動的にロード**してファイルを解析し、視覚的なプレビューを生成します。<sup>[[1]](#references)</sup>
+Quick LookはmacOSの**ファイルプレビュー framework**です。ユーザーがFinderでファイルを選択したり、Spaceキーを押したり、ファイルにカーソルを合わせたり、サムネイルを有効にしたディレクトリを表示したりすると、Quick Lookは**generator pluginを自動的にロード**してファイルを解析し、視覚的なプレビューを生成します。<sup>[[1]](#references)</sup>
 
-Quick Look generatorsは、特定の**Uniform Type Identifiers (UTIs)** に対して登録される**bundles**（`.qlgenerator`）です。macOSがそのUTIに一致するファイルのプレビューを必要とすると、generatorをsandbox化されたhelper process（`QuickLookSatellite`または`qlmanage`）にロードし、そのgenerator functionを呼び出します。
+Quick Look generatorsは、特定の**Uniform Type Identifiers (UTIs)** に登録される**bundles**（`.qlgenerator`）です。macOSがそのUTIに一致するファイルのプレビューを必要とすると、generatorをsandbox化されたhelper process（`QuickLookSatellite`または`qlmanage`）にロードし、そのgenerator functionを呼び出します。
 
-### セキュリティ上重要な理由
+### これがSecurity上重要な理由
 
 > [!WARNING]
-> Quick Look generatorsは**ファイルを選択または表示するだけ**でトリガーされます。「Open」actionは必要ありません。つまり、ユーザーがmalicious fileを含むディレクトリに移動するだけでよいため、強力な**passive exploitation vector**になります。
+> Quick Look generatorsは**ファイルを選択または表示するだけ**で起動されます。「Open」操作は必要ありません。つまり、ユーザーがmalicious fileを含むディレクトリに移動するだけでよく、強力な**passive exploitation vector**になります。
 
 **Attack surface:**
-- Generatorsは、disk、downloads、email attachments、またはnetwork sharesにある**任意のファイルコンテンツを解析**する
-- Crafted fileは、generator codeの**parsing vulnerabilities**（buffer overflows、format strings、type confusion）を悪用できる
-- Preview renderingは**自動的に**実行されるため、malicious fileが保存されたDownloads folderを表示するだけで十分
-- Quick Lookは**sandbox化されたhelper**で実行されるが、このcontextからのsandbox escapesも実証されている
+- Generatorsは、ディスク、downloads、email attachments、またはnetwork shares上の**任意のファイル内容を解析**します
+- 細工されたファイルは、generator codeの**parsing vulnerabilities**（buffer overflows、format strings、type confusion）を悪用できます
+- プレビューのrenderingは**自動的に**実行されるため、malicious fileが保存されたDownloadsフォルダを表示するだけで十分です
+- Quick Lookは**sandbox化されたhelper**内で実行されますが、このcontextからのsandbox escapesが実証されています
 
-## Architecture
+## アーキテクチャ
 ```
 User selects file in Finder
 ↓
@@ -33,7 +33,7 @@ Preview displayed to user
 ```
 ## 列挙
 
-### インストール済み Generator の一覧
+### インストール済みジェネレータの一覧表示
 ```bash
 # List all Quick Look generators with their UTI registrations
 qlmanage -m plugins 2>&1
@@ -89,9 +89,9 @@ cp malicious.xyz ~/Downloads/
 5. Generator parses malicious file → code execution in QuickLookSatellite
 6. (Optional) Sandbox escape from QuickLookSatellite context
 ```
-### Third-Party Generator Replacement
+### Third-Party Generator の置き換え
 
-Quick Look ジェネレータ bundle が **user-writable location**（`~/Library/QuickLook/`）にインストールされている場合、置き換えることができます:
+Quick Look generator bundle が **user-writable location**（`~/Library/QuickLook/`）にインストールされている場合、置き換えることができます：
 ```bash
 # Check for user-writable generators
 ls -la ~/Library/QuickLook/ 2>/dev/null
@@ -100,7 +100,7 @@ ls -la ~/Library/QuickLook/ 2>/dev/null
 # 1. Executes payload when any matching file is previewed
 # 2. Optionally still generates a valid preview to avoid suspicion
 ```
-### リモートからQuick Lookを起動する
+### Quick Lookをリモートでトリガーする
 ```bash
 # Force Quick Look preview generation (for testing)
 qlmanage -p /path/to/malicious/file
@@ -111,14 +111,14 @@ qlmanage -t /path/to/malicious/file
 # Force thumbnail regeneration for a directory
 qlmanage -r cache
 ```
-## Sandbox に関する考慮事項
+## Sandboxに関する考慮事項
 
-Quick Look generators は sandbox 化された helper process 内で実行されます。sandbox profile により、以下が制限されます。
-- File system access（プレビュー対象ファイルへの mostly read-only）
-- Network access（restricted）
-- IPC（limited mach-lookup）
+Quick Look generatorsは、sandbox化されたhelper process内で実行されます。sandbox profileによって以下が制限されます：
+- File system access（プレビュー対象ファイルへのほぼread-onlyアクセス）
+- Network access（制限あり）
+- IPC（mach-lookupは制限あり）
 
-ただし、sandbox には既知の escape vectors があります:
+ただし、sandboxには既知のescape vectorsがあります：
 ```bash
 # Check the sandbox profile used by QuickLookSatellite
 sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
@@ -127,14 +127,14 @@ sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
 # Quick Look processes may have mach-lookup exceptions to system services
 # A sandbox escape chain: QLGenerator vuln → QuickLookSatellite → mach-lookup → system daemon
 ```
-## Real-World CVEs
+## 実際のCVE<sup>[[2]](#references)</sup>
 
-| CVE | Description |
+| CVE | 説明 |
 |---|---|
-| CVE-2019-8741 | crafted file による Quick Look preview のメモリ破壊 |
-| CVE-2018-4293 | Quick Look generator の sandbox escape |
-| CVE-2020-9963 | Quick Look preview の処理による information disclosure |
-| CVE-2021-30876 | Thumbnail generation におけるメモリ破壊 |
+| CVE-2019-8741 | 細工したファイルによるQuick Lookプレビューのメモリ破損 |
+| CVE-2018-4293 | Quick Look generatorのsandbox escape |
+| CVE-2020-9963 | Quick Lookプレビュー処理による情報漏えい |
+| CVE-2021-30876 | サムネイル生成時のメモリ破損 |
 
 ## Fuzzing Quick Look Generators
 ```bash
@@ -158,10 +158,8 @@ timeout 5 qlmanage -t /tmp/fuzz_input.targetext 2>&1
 log show --last 5s --predicate 'process == "QuickLookSatellite" AND eventMessage CONTAINS "crash"' 2>/dev/null
 done
 ```
-## 参照
+## References
 
-- [1] [Apple Developer — Quick Look Programming Guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
-- [2] [Apple Security Updates — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
-- [3] [Objective-See — Quick Look Attack Surface](https://objective-see.org/blog.html)
-
+- [1] [Apple Developer — Quick Look プログラミングガイド](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
+- [2] [Apple セキュリティアップデート — Quick Look CVE](https://support.apple.com/en-us/HT201222)
 {{#include ../../../banners/hacktricks-training.md}}

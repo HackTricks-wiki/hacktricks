@@ -1,30 +1,30 @@
-# TCC Permissions による macOS Credential & Data Theft
+# TCC PermissionsによるmacOS Credential & Data Theft
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## 概要
+## Overview
 
-macOS TCC (Transparency, Consent, and Control) は、機密性の高いユーザーデータへのアクセスを保護します。攻撃者が **すでに TCC grants を持つ binary を compromise した場合**、その permissions を引き継ぎます。このページでは、data-theft に関連する各 TCC permission の exploitation potential について説明します。<sup>[[2]](#references)</sup>
+macOS TCC (Transparency, Consent, and Control) は、機密性の高いユーザーデータへのアクセスを保護します。攻撃者が**すでにTCC grantsを持つbinaryをcompromise**すると、そのpermissionsを引き継ぎます。このページでは、data-theftに関連する各TCC permissionの悪用可能性について説明します。<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> TCC-granted binary への code injection (DYLD injection、dylib hijacking、または task port 経由) は、**その binary のすべての TCC permissions をサイレントに継承します**。同じ process が保護された data を読み取る際に、追加の prompt や verification はありません。
+> TCC-granted binaryへのcode injection（DYLD injection、dylib hijacking、またはtask port経由）では、**そのbinaryのすべてのTCC permissionsが無条件で引き継がれます**。同じprocessが保護されたdataを読み取る際に、追加のpromptやverificationはありません。<sup>[[4]](#references)</sup>
 
 ---
 
 ## Keychain Access Groups
 
-### 取得できるもの
+### The Prize
 
-macOS Keychain には以下が保存されます。
-- **Wi-Fi passwords** — 保存済み wireless network のすべての credentials
-- **Website passwords** — Safari、Chrome (Keychain 使用時)、その他の browser passwords
+macOS Keychainには以下が保存されます。
+- **Wi-Fi passwords** — 保存済みワイヤレスネットワークのすべてのcredentials
+- **Website passwords** — Safari、Chrome（Keychainを使用する場合）、その他のbrowser passwords
 - **Application passwords** — email accounts、VPN credentials、development tokens
 - **Certificates and private keys** — code signing、client TLS、S/MIME encryption
-- **Secure notes** — user-stored secrets
+- **Secure notes** — ユーザーが保存したsecrets
 
 ### Entitlement: `keychain-access-groups`
 
-Keychain items は **access groups** に分類されます。アプリケーションの `keychain-access-groups` entitlement には、アクセス可能な groups が列挙されます。<sup>[[1]](#references)</sup>
+Keychain itemsは**access groups**に整理されています。アプリケーションの`keychain-access-groups` entitlementには、アクセス可能なgroupsが一覧化されています。<sup>[[1]](#references)</sup>
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -85,13 +85,13 @@ NSString *password = [[NSString alloc] initWithData:passData encoding:NSUTF8Stri
 
 ### Exploitation
 
-カメラのTCC許可（`kTCCServiceCamera` または `com.apple.security.device.camera` entitlement）を持つバイナリは、写真や動画を撮影できます：
+カメラのTCC grant（`kTCCServiceCamera` または `com.apple.security.device.camera` entitlement経由）を持つバイナリは、写真や動画をキャプチャできます：
 ```bash
 # Find camera-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceCamera' AND auth_value=2;"
 ```
-### サイレントキャプチャ
+### Silent Capture
 ```objc
 // Injected into a camera-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -125,15 +125,15 @@ fromConnection:(AVCaptureConnection *)connection {
 @end
 ```
 > [!TIP]
-> **macOS Sonoma** 以降では、メニューバーのカメラインジケーターは常時表示され、プログラムから非表示にすることはできません。**古い macOS バージョン**では、短時間のキャプチャでは目立つインジケーターが表示されない場合があります。
+> **macOS Sonoma** 以降では、メニューバーのカメラインジケーターは常時表示され、プログラムによって非表示にすることはできません。**macOS** の旧バージョンでは、短時間のキャプチャでは目立つインジケーターが表示されない場合があります。
 
 ---
 
-## マイクアクセス (kTCCServiceMicrophone)
+## マイクアクセス（kTCCServiceMicrophone）
 
 ### Exploitation
 
-マイクアクセスでは、内蔵マイク、ヘッドセット、または接続されたオーディオ入力デバイスからすべての音声をキャプチャします。
+マイクアクセスにより、内蔵マイク、ヘッドセット、または接続されたオーディオ入力デバイスからすべての音声をキャプチャできます：
 ```bash
 # Find mic-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -165,7 +165,7 @@ dispatch_get_main_queue(), ^{
 ```
 ---
 
-## Location Tracking (kTCCServiceLocation)
+## 位置情報の追跡 (kTCCServiceLocation)
 
 ### Exploitation
 ```bash
@@ -201,15 +201,15 @@ loc.coordinate.latitude, loc.coordinate.longitude, [NSDate date]];
 ```
 ---
 
-## Contacts / Calendar / Photos
+## 連絡先 / カレンダー / 写真
 
-### Personal Data Exfiltration
+### 個人データの Exfiltration
 
 | TCC Service | Framework | Data |
 |---|---|---|
-| `kTCCServiceAddressBook` | `Contacts.framework` | Names, emails, phones, addresses |
-| `kTCCServiceCalendar` | `EventKit` | Meetings, attendees, locations |
-| `kTCCServicePhotos` | `Photos.framework` | Photos, screenshots, location metadata |
+| `kTCCServiceAddressBook` | `Contacts.framework` | 氏名、メールアドレス、電話番号、住所 |
+| `kTCCServiceCalendar` | `EventKit` | 会議、参加者、場所 |
+| `kTCCServicePhotos` | `Photos.framework` | 写真、スクリーンショット、位置情報メタデータ |
 ```bash
 # Find authorized binaries for each service
 for svc in kTCCServiceAddressBook kTCCServiceCalendar kTCCServicePhotos; do
@@ -236,15 +236,15 @@ usingBlock:^(CNContact *contact, BOOL *stop) {
 ```
 ---
 
-## iCloud Account Access
+## iCloudアカウントアクセス
 
 ### Entitlement: `com.apple.private.icloud-account-access`
 
-この entitlement により、`com.apple.iCloudHelper` XPC service との通信が可能になり、以下へのアクセスが提供されます:
-- **iCloud tokens** — ユーザーの Apple ID の authentication tokens
-- **iCloud Drive** — すべてのデバイスから同期された documents
-- **iCloud Keychain** — すべての Apple devices 間で同期された passwords
-- **Find My** — ユーザーのすべての Apple devices の location<sup>[[3]](#references)</sup>
+このentitlementにより、`com.apple.iCloudHelper` XPC serviceとの通信が可能になり、以下へのアクセスが提供されます。
+- **iCloud tokens** — ユーザーのApple IDの認証トークン
+- **iCloud Drive** — すべてのデバイスから同期されたドキュメント
+- **iCloud Keychain** — すべてのAppleデバイス間で同期されたパスワード
+- **Find My** — ユーザーのすべてのAppleデバイスの位置情報<sup>[[3]](#references)</sup>
 ```bash
 # Find iCloud-entitled binaries
 sqlite3 /tmp/executables.db "
@@ -253,20 +253,20 @@ WHERE iCloudAccs = 1
 ORDER BY privileged DESC;"
 ```
 > [!CAUTION]
-> iCloud-entitled binaryをCompromisingすると、攻撃範囲が**単一のデバイスからAppleエコシステム全体**へ拡大します：他のMac、iPhone、iPad、Apple Watch。iCloud Keychainのsyncにより、すべてのデバイスのpasswordにアクセスできます。
+> iCloud-entitled binary を侵害すると、攻撃範囲が**単一のデバイスから Apple エコシステム全体へ拡大**します: 他の Mac、iPhone、iPad、Apple Watch。iCloud Keychain の同期により、すべてのデバイスのパスワードにアクセスできます。
 
 ---
 
-## フルディスクアクセス (kTCCServiceSystemPolicyAllFiles)
+## Full Disk Access (kTCCServiceSystemPolicyAllFiles)
 
-### 最も強力なTCC Permission
+### 最も強力な TCC Permission
 
-フルディスクアクセスは、以下を含む**システム上のすべてのファイル**へのread capabilityを付与します：
-- 他のアプリのdata（Messages、Mail、Safari history）
-- TCC databases（他のすべてのpermissionを明らかにする）
-- SSH keysとconfiguration
-- Browser cookiesとsession tokens
-- Application databasesとcaches
+Full Disk Access は、以下を含む**システム上のすべてのファイル**への読み取り権限を付与します:
+- 他のアプリのデータ（Messages、Mail、Safari の履歴）
+- TCC データベース（他のすべての権限を明らかにする）
+- SSH keys と設定
+- Browser cookies と session tokens
+- Application databases と caches
 ```bash
 # Find FDA-granted binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -282,23 +282,23 @@ cat ~/.ssh/id_rsa                           # SSH private key
 
 ## Exploitation Priority Matrix
 
-injectable な TCC-granted binaries を評価する際は、data value に基づいて優先順位を付けます。
+TCC の権限が付与された、injectable なバイナリを評価する際は、データの価値に基づいて優先順位を付けます。
 
 | Priority | TCC Permission | Why |
 |---|---|---|
 | **Critical** | Full Disk Access | すべてへのアクセス |
-| **Critical** | TCC Manager | 任意の permission を付与可能 |
-| **High** | Keychain Access Groups | 保存されているすべての password |
-| **High** | iCloud Account Access | 複数デバイスの compromise |
-| **High** | Input Monitoring (ListenEvent) | Keylogging |
+| **Critical** | TCC Manager | あらゆる権限を付与可能 |
+| **High** | Keychain Access Groups | 保存されているすべてのパスワード |
+| **High** | iCloud Account Access | 複数デバイスの侵害 |
+| **High** | Input Monitoring (ListenEvent) | keylogging |
 | **High** | Accessibility | GUI control、self-granting |
-| **Medium** | Screen Capture | Visual data capture |
-| **Medium** | Camera + Microphone | Surveillance |
-| **Medium** | Contacts + Calendar | Social engineering data |
-| **Low** | Location | Physical tracking |
-| **Low** | Photos | Personal data |
+| **Medium** | Screen Capture | 視覚データの取得 |
+| **Medium** | Camera + Microphone | 監視 |
+| **Medium** | Contacts + Calendar | ソーシャルエンジニアリングに利用できるデータ |
+| **Low** | Location | 物理的な追跡 |
+| **Low** | Photos | 個人データ |
 
-## Enumeration Script
+## 列挙スクリプト
 ```bash
 #!/bin/bash
 echo "=== TCC Credential Theft Surface Audit ==="
@@ -326,7 +326,6 @@ SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 
 - [1] [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
 - [2] [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
-- [3] [OBTS v5.0 — 「Macで起きることはAppleのiCloudに残るのか?!」(Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [3] [OBTS v5.0 — 「Macで起きたことは、AppleのiCloudに残るのか？！」（Wojciech Regula）](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 - [4] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
-
 {{#include ../../../../banners/hacktricks-training.md}}

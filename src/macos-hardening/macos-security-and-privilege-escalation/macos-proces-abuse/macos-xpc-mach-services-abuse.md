@@ -4,12 +4,12 @@
 
 ## 基本情報
 
-**XPC** (Cross-Process Communication) は macOS における主要な IPC メカニズムです。システム daemon は **Mach services**（`launchd` に登録された名前付き port）を公開し、他の process は `NSXPCConnection` 経由で接続できます。<sup>[[1]](#references)</sup>
+**XPC**（Cross-Process Communication）は、macOSにおける主要なIPCメカニズムです。システムデーモンは**Mach services**（`launchd`に登録された名前付きポート）を公開し、他のプロセスは`NSXPCConnection`を介して接続できます。<sup>[[1]](#references)</sup>
 
-`MachServices` key を持つすべての **LaunchDaemon** および **LaunchAgent** plist は、1 つ以上の名前付き Mach port を登録します。これらは system-wide XPC endpoint であり、任意の process が接続を試行できます。<sup>[[2]](#references)</sup>
+`MachServices`キーを持つすべての**LaunchDaemon**および**LaunchAgent** plistは、1つ以上の名前付きMachポートを登録します。これらはシステム全体で利用できるXPCエンドポイントであり、あらゆるプロセスが接続を試行できます。<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> XPC Mach services は macOS における**最大の local privilege escalation attack surface** です。近年の local root exploit の多くは、LaunchDaemon 内の脆弱な XPC service を経由していました。root daemon で公開されているすべての method は、潜在的な escalation vector です。
+> XPC Mach servicesは、macOSにおける**最大のローカル権限昇格攻撃対象領域**です。近年のローカルroot exploitの大半は、LaunchDaemon内の脆弱なXPC servicesを経由していました。root daemonで公開されているすべてのメソッドは、権限昇格ベクトルとなる可能性があります。
 
 ### アーキテクチャ
 ```
@@ -23,7 +23,7 @@ Daemon Process (root context)
 ```
 ## 列挙
 
-### Mach Services を持つデーモンの検索
+### Mach Servicesを持つデーモンの特定
 ```bash
 # Find all LaunchDaemons with MachServices
 find /Library/LaunchDaemons /System/Library/LaunchDaemons -name "*.plist" -exec sh -c '
@@ -47,7 +47,7 @@ WHERE e.isDaemon = 1
 ORDER BY e.privileged DESC
 LIMIT 50;"
 ```
-### XPC Interfaces の列挙
+### XPC Interface の列挙
 
 daemon を特定したら、その XPC interface を reverse-engineer します：
 ```bash
@@ -62,13 +62,13 @@ find /Applications -path "*/XPCServices/*.xpc" 2>/dev/null
 ```
 ## XPC Client Verification Vulnerabilities
 
-XPC services で最も一般的な脆弱性クラスは、**client verification の不足**です。daemon は以下を検証する必要があります。
+XPC serviceで最も一般的な脆弱性クラスは、**client verificationの不備**です。daemonは以下を検証する必要があります。
 
-1. 接続元プロセスの **Code signature**
-2. 接続元プロセスの **Entitlements**
-3. **Audit token**（再利用される可能性がある PID ではない）
+1. 接続しているprocessの**code signature**
+2. 接続しているprocessの**entitlements**
+3. **audit token**（再利用される可能性があるPIDではない）
 
-### 脆弱なパターン: 検証なし
+### Vulnerable Pattern: No Verification
 ```objc
 // VULNERABLE — daemon accepts any connection
 - (BOOL)listener:(NSXPCListener *)listener
@@ -79,7 +79,7 @@ newConnection.exportedObject = self;
 return YES; // No verification!
 }
 ```
-### 脆弱なパターン：PIDベースの検証（Race Condition）
+### 脆弱なパターン: PIDベースの検証（Race Condition）
 ```objc
 // VULNERABLE — PID can be reused between check and use
 - (BOOL)listener:(NSXPCListener *)listener
@@ -93,7 +93,7 @@ return YES;
 return NO;
 }
 ```
-### 安全なパターン: 監査トークンの検証
+### Secure Pattern: Audit Token Verification
 ```objc
 // SECURE — Uses audit token which cannot be spoofed
 - (BOOL)listener:(NSXPCListener *)listener
@@ -121,7 +121,7 @@ return YES;
 return NO;
 }
 ```
-## Attack: 保護されていない XPC Services への接続
+## 攻撃: 保護されていない XPC Services への接続
 ```objc
 // Minimal XPC client — connect to a LaunchDaemon's Mach service
 #import <Foundation/Foundation.h>
@@ -157,7 +157,7 @@ NSLog(@"Result: %@", result);
 ```
 ## Attack: XPC Object Deserialization
 
-複雑なオブジェクト（`NSSecureCoding` に準拠）を受け入れる XPC services は、**deserialization attacks** に対して脆弱になる可能性があります：
+複雑なオブジェクト（`NSSecureCoding` 準拠）を受け入れる XPC services は、**deserialization attacks** に対して脆弱になる可能性があります：
 ```objc
 // If the daemon accepts NSObject subclasses via XPC:
 // An attacker can send a crafted object that triggers:
@@ -168,9 +168,9 @@ NSLog(@"Result: %@", result);
 ```
 ## Mach-Lookup Sandbox Exceptions
 
-### Exceptions による Sandbox Escape の実現
+### Exceptions による Sandbox Escape
 
-Sandbox 化された application は通常、自身の XPC services としか通信できません。しかし、**mach-lookup exceptions** により、system-wide services に到達できます:
+Sandbox 化されたアプリケーションは通常、自身の XPC services とのみ通信できます。しかし、**mach-lookup exceptions** により、system-wide services へのアクセスが可能になります：
 ```xml
 <!-- Entitlement granting mach-lookup exception -->
 <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
@@ -180,7 +180,7 @@ Sandbox 化された application は通常、自身の XPC services としか通
 <string>com.apple.CoreServices.coreservicesd</string>
 </array>
 ```
-### 広範な例外を持つアプリケーションの発見
+### 広範な例外を持つアプリケーションの特定
 ```bash
 # Find sandboxed apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -207,11 +207,11 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 
 ### 仕組み
 
-`SMJobBless` は、launchd を介して root として実行される privileged helper をインストールします。helper は XPC を介して親アプリと通信します：
+`SMJobBless` は、launchd 経由で root として実行される privileged helper をインストールします。helper は XPC を介して親アプリと通信します：
 ```
 App (user context) ←→ XPC ←→ Helper (root via launchd)
 ```
-### よくある脆弱性: 弱い認可
+### 共通する脆弱性: 不十分な認可
 ```objc
 // Many helpers check authorization but:
 // 1. Don't verify WHO is connecting (any process can connect)
@@ -238,7 +238,7 @@ reply(YES);
 }
 }
 ```
-### 脆弱な Helper の悪用
+### 弱いヘルパーの悪用
 ```bash
 # 1. Find installed privileged helpers
 ls /Library/PrivilegedHelperTools/
@@ -277,15 +277,15 @@ log stream --predicate 'process == "daemon-name" AND (eventMessage CONTAINS "cra
 
 | CVE | 説明 |
 |---|---|
-| CVE-2023-41993 | XPC service のデシリアライゼーション脆弱性 |
-| CVE-2022-22616 | XPC service の abuse による Gatekeeper bypass |
-| CVE-2021-30657 | Sysmond XPC の privilege escalation |
-| CVE-2020-9839 | system daemon における XPC race condition |
-| CVE-2019-8802 | client verification が欠如した privileged helper tool |
-| CVE-2023-32369 | Migraine — `systemmigrationd` XPC を介した SIP bypass<sup>[[3]](#references)</sup> |
-| CVE-2022-26712 | PackageKit XPC による root escalation<sup>[[4]](#references)</sup> |
+| CVE-2023-41993 | XPC serviceのデシリアライゼーション脆弱性 |
+| CVE-2022-22616 | XPC service abuseによるGatekeeper bypass |
+| CVE-2021-30657 | Sysmond XPC privilege escalation |
+| CVE-2020-9839 | system daemonにおけるXPC race condition |
+| CVE-2019-8802 | クライアント検証が欠如したprivileged helper tool<sup>[[5]](#references)</sup> |
+| CVE-2023-32369 | Migraine — `systemmigrationd` XPCを介したSIP bypass<sup>[[3]](#references)</sup> |
+| CVE-2022-26712 | PackageKit XPCによるroot escalation<sup>[[4]](#references)</sup> |
 
-## 列挙 Script
+## Enumeration Script
 ```bash
 #!/bin/bash
 echo "=== XPC Mach Services Security Audit ==="
@@ -313,13 +313,11 @@ plutil -p "$plist" | grep -A5 "MachServices" | sed 's/^/    /'
 }
 done
 ```
-## 参考資料
+## References
 
 - [1] [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
 - [2] [Apple Developer — Daemons and Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
 - [3] [New macOS vulnerability, Migraine, could bypass System Integrity Protection — Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
 - [4] [CVE-2022-26712: The POC for SIP-Bypass Is Even Tweetable](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
-- [5] [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
-- [6] [OBTS — XPC Attack Surface talks](https://objectivebythesea.org/)
-
+- [5] [Objective-See — XPC client validation and Rootpipe](https://objective-see.org/blog/blog_0x3E.html)
 {{#include ../../../banners/hacktricks-training.md}}

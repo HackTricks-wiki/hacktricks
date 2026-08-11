@@ -4,7 +4,7 @@
 
 ## Gatekeeper
 
-Gatekeeper は通常、**Quarantine + Gatekeeper + XProtect** の組み合わせを指します。これは、**ダウンロードされた悪意のある可能性があるソフトウェアをユーザーが実行するのを防止**しようとする macOS の 3 つのセキュリティモジュールです。
+Gatekeeperは通常、**Quarantine + Gatekeeper + XProtect**の組み合わせを指します。これは、**ダウンロードされた潜在的に悪意のあるソフトウェアをユーザーが実行するのを防ぐ**3つのmacOSセキュリティモジュールです。
 
 詳細情報:
 
@@ -26,7 +26,7 @@ macos-sip.md
 
 ### Sandbox
 
-MacOS Sandbox は、Sandbox 内で実行される**アプリケーションを、アプリが使用する Sandbox profile に指定された許可済みのアクションに制限**します。これにより、**アプリケーションが想定されたリソースにのみアクセスする**ことを保証できます。
+MacOS Sandboxは、Sandbox内で実行される**アプリケーションを、そのアプリが使用しているSandbox profileで指定された許可済みのアクションに制限**します。これにより、**アプリケーションが想定されたリソースにのみアクセスする**ことを保証できます。
 
 
 {{#ref}}
@@ -35,7 +35,7 @@ macos-sandbox/
 
 ### TCC - **Transparency, Consent, and Control**
 
-**TCC (Transparency, Consent, and Control)** はセキュリティフレームワークです。これは、アプリケーションの**権限を管理**するために設計されており、具体的には機密性の高い機能へのアクセスを制御します。これには、**位置情報サービス、連絡先、写真、マイク、カメラ、アクセシビリティ、フルディスクアクセス**などが含まれます。TCC は、アプリがこれらの機能にアクセスする前に明示的なユーザーの同意を得る必要があるようにすることで、プライバシーと個人データの管理を強化します。
+**TCC (Transparency, Consent, and Control)**はセキュリティフレームワークです。これは、アプリケーションの**権限を管理**するために設計されており、特に機密性の高い機能へのアクセスを制御します。これには、**位置情報サービス、連絡先、写真、マイク、カメラ、アクセシビリティ、フルディスクアクセス**などが含まれます。TCCは、アプリが明示的なユーザーの同意を得た後にのみこれらの機能へアクセスできるようにすることで、プライバシーと個人データの管理を強化します。
 
 
 {{#ref}}
@@ -44,7 +44,7 @@ macos-tcc/
 
 ### Launch/Environment Constraints & Trust Cache
 
-macOS の launch constraints は、プロセスの**起動を制御**するためのセキュリティ機能であり、プロセスを**誰が**、**どのように**、**どこから起動できるか**を定義します。macOS Ventura で導入され、システムバイナリを **trust cache** 内の constraint category に分類します。すべての executable binary には、**self**、**parent**、**responsible** constraints を含む、**launch** に関する**ルール**が設定されています。macOS Sonoma ではサードパーティ製アプリにも **Environment Constraints** として拡張され、これらの機能はプロセスの起動条件を管理することで、システムの潜在的な exploit を軽減します。
+macOSのLaunch constraintsは、**プロセスを起動できる主体**、**方法**、**場所**を定義して、**プロセスの開始を制御**するセキュリティ機能です。macOS Venturaで導入され、**trust cache**内でシステムバイナリを制約カテゴリに分類します。すべての実行可能バイナリには、**self**、**parent**、**responsible**の制約を含む、**起動**に関する**ルール**が設定されています。macOS Sonomaではサードパーティ製アプリにも**Environment** Constraintsとして拡張され、プロセスの起動条件を管理することで、潜在的なシステム悪用の軽減に役立ちます。
 
 
 {{#ref}}
@@ -53,28 +53,28 @@ macos-launch-environment-constraints.md
 
 ## MRT - Malware Removal Tool
 
-Malware Removal Tool (MRT) は、macOS のセキュリティインフラストラクチャのもう 1 つの要素です。その名前が示すとおり、MRT の主な機能は**感染したシステムから既知の malware を削除すること**です。
+Malware Removal Tool (MRT)は、macOSのセキュリティインフラストラクチャの一部です。その名前が示すとおり、MRTの主な機能は、**感染したシステムから既知のマルウェアを削除すること**です。
 
-Mac 上で malware が検出されると（XProtect による検出でも、その他の手段による検出でも）、MRT を使用して**malware を自動的に削除**できます。MRT はバックグラウンドで静かに動作し、通常はシステムが更新されたとき、または新しい malware definition がダウンロードされたときに実行されます（MRT が malware を検出するためのルールは binary 内に存在するようです）。
+Macでマルウェアが検出されると（XProtectによる検出か、それ以外の方法による検出かを問わず）、MRTを使用して**マルウェアを自動的に削除**できます。MRTはバックグラウンドで静かに動作し、通常はシステムが更新されたとき、または新しいマルウェア定義がダウンロードされたときに実行されます（MRTがマルウェアを検出するためのルールはバイナリ内にあるようです）。
 
-XProtect と MRT はどちらも macOS のセキュリティ対策の一部ですが、それぞれ異なる機能を実行します。
+XProtectとMRTはいずれもmacOSのセキュリティ対策の一部ですが、それぞれ異なる機能を実行します。
 
-- **XProtect** は予防的なツールです。**ファイルがダウンロードされる際に**（特定のアプリケーション経由で）**ファイルをチェック**し、既知の種類の malware を検出すると、**ファイルが開かれるのを防止**します。これにより、そもそも malware がシステムに感染するのを防ぎます。
-- 一方、**MRT** は**事後対応型のツール**です。システム上で malware が検出された後に動作し、問題のソフトウェアを削除してシステムをクリーンアップすることを目的とします。
+- **XProtect**は予防ツールです。**ファイルがダウンロードされる際にチェック**し（特定のアプリケーション経由）、既知の種類のマルウェアを検出すると、**ファイルが開かれるのを防ぎます**。これにより、そもそもマルウェアがシステムに感染するのを防ぎます。
+- 一方、**MRT**は**事後対応ツール**です。システム上でマルウェアが検出された後に動作し、問題のソフトウェアを削除してシステムをクリーンアップすることを目的とします。
 
-MRT アプリケーションは **`/Library/Apple/System/Library/CoreServices/MRT.app`** にあります。
+MRTアプリケーションは**`/Library/Apple/System/Library/CoreServices/MRT.app`**にあります。
 
 ## Background Tasks Management
 
-**macOS** は現在、ツールが Login Items や Daemons などの、code execution を永続化するよく知られた**手法を使用するたびに警告**を表示します。これにより、ユーザーは**どのソフトウェアが永続化しているのか**をより正確に把握できます。<sup>[[3]](#references)</sup>
+**macOS**は現在、ツールがコード実行を永続化する、よく知られた**手法**（Login Items、Daemonsなど）を使用するたびに**警告**を表示するため、ユーザーは**どのソフトウェアが永続化しているのか**をより正確に把握できます。<sup>[[3]](#references)</sup>
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
-これは、`/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` にある **daemon** と、`/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app` にある **agent** によって動作します。<sup>[[1]](#references)</sup>
+これは、`/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd`にある**daemon**と、`/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`にある**agent**によって実行されます。<sup>[[1]](#references)</sup>
 
-**`backgroundtaskmanagementd`** が、永続化に使用されるフォルダーに何かがインストールされたことを把握する方法は、**FSEvents を取得**し、それらに対するいくつかの **handler** を作成することです。<sup>[[1]](#references)</sup>
+**`backgroundtaskmanagementd`**が、何かが永続化用フォルダにインストールされたことを認識する方法は、**FSEventsを取得**し、それらに対するいくつかの**handlers**を作成することです。<sup>[[1]](#references)</sup>
 
-さらに、頻繁に永続化を行う**よく知られたアプリケーション**を記載した plist file があり、Apple によって管理されています。このファイルは `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist` にあります。<sup>[[3]](#references)</sup>
+さらに、**よく知られたアプリケーション**が記載されたplistファイルがあり、Appleによって頻繁に永続化されるアプリケーションが管理されています。このファイルは次の場所にあります: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[[3]](#references)</sup>
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -90,9 +90,9 @@ MRT アプリケーションは **`/Library/Apple/System/Library/CoreServices/MR
 }
 [...]
 ```
-### Enumeration
+### 列挙
 
-Apple の cli tool を実行して、設定されている **すべての** background items を **enumerate** できます。<sup>[[3]](#references)</sup>
+Apple cli tool を実行して、設定されている**すべての**バックグラウンド項目を列挙できます。<sup>[[3]](#references)</sup>
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
@@ -106,17 +106,17 @@ xattr -rc dumpBTM # Remove quarantine attr
 ```
 この情報は **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** に保存されており、Terminal には FDA が必要です。<sup>[[2]](#references)</sup>
 
-### BTM への干渉
+### BTMへの干渉
 
-新しい persistence が検出されると、**`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** タイプの event が発生します。そのため、この **event** が送信されるのを**防止**する方法、または **agent がユーザーに alert するのを防止**する方法は、攻撃者による BTM の _**bypass**_ に役立ちます。<sup>[[1]](#references)</sup>
+新しい persistence が検出されると、タイプ **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** のイベントが発生します。したがって、この **event** が送信されるのを**防ぐ**、または **agent がユーザーに alert するのを防ぐ**方法は、攻撃者による BTM の _**bypass**_ に役立ちます。<sup>[[1]](#references)</sup>
 
-- **データベースのリセット**: 以下のコマンドを実行するとデータベースがリセットされます（ゼロから再構築されるはずです）。ただし、何らかの理由により、これを実行した後はシステムを reboot するまで、**新しい persistence が alert されなくなります**。<sup>[[1]](#references)</sup>
+- **データベースのリセット**: 次のコマンドを実行するとデータベースがリセットされます（最初から再構築されるはずです）。ただし、これを実行した後は、システムを再起動するまで**新しい persistence の alert は表示されません**。<sup>[[1]](#references)</sup>
 - **root** が必要です。
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
-- **Agentを停止**: Agentに停止シグナルを送信すると、新しい検出結果が見つかったときに**ユーザーへ警告しなくなります**。<sup>[[1]](#references)</sup>
+- **エージェントを停止**: エージェントに停止シグナルを送信すると、新しい検知結果が見つかったときに**ユーザーへ通知しなくなる**ようにできます。<sup>[[1]](#references)</sup>
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent
@@ -129,12 +129,11 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Bug**: **persistenceを作成したプロセスが、その直後にすぐ終了した場合**、daemonはそのプロセスに関する**情報を取得**しようとしますが、**失敗**し、新しいものがpersistenceしていることを示す**eventを送信できません**。<sup>[[1]](#references)</sup>
+- **Bug**: **persistenceを作成したプロセスが直後に終了すると**、daemonはそのプロセスに関する**情報を取得**しようとしますが、**失敗し、新しいitemがpersistenceしていることを示すeventを送信できません**。<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [OBTS v6.0: "macOSのBackground Task Managementの謎を解明（およびバイパス）" - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
-- [2] [新しい（Developer向け）Tool: "DumpBTM" - Patrick Wardle (Patreon)](https://www.patreon.com/posts/new-developer-77420730?l=fr)
+- [1] [OBTS v6.0: 「macOSのBackground Task Managementを解明（およびBypass）する」 - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
+- [2] [新しい（Developer向け）Tool: 「DumpBTM」 - Patrick Wardle (Patreon)](https://www.patreon.com/posts/new-developer-77420730?l=fr)
 - [3] [Macでlogin itemsとbackground tasksを管理する - Apple Platform Deployment](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
-
 {{#include ../../../banners/hacktricks-training.md}}

