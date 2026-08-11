@@ -1,18 +1,20 @@
-# Word-Makros
+# Word Macros
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Junk Code
+## Junk Code
 
-Es ist sehr üblich, **Junk Code zu finden, der nie verwendet wird**, um das Reversing des Makros zu erschweren.\
-Im folgenden Bild können Sie beispielsweise sehen, dass ein `If`, das niemals wahr sein wird, verwendet wird, um etwas Junk Code und nutzlosen Code auszuführen.
+Macros können **unerreichbaren oder irrelevanten Code** enthalten, der die Analyse verlangsamen soll. Identifizieren Sie konstante Bedingungen und verfolgen Sie das erreichbare Verhalten, bevor Sie Zeit in das Reverse Engineering eines Zweigs investieren. Das folgende Beispiel verwendet eine `If`-Bedingung, die niemals wahr sein kann, um Junk Code zu verbergen.
 
-![Word-Makros - Junk Code: Im folgenden Bild können Sie beispielsweise sehen, dass ein If, das niemals wahr sein wird, verwendet wird, um etwas Junk Code und nutzlosen Code auszuführen](<../images/image (369).png>)
+![Ein Word-Makro mit einem unerreichbaren bedingten Zweig mit Junk Code](<../images/image (369).png>)
 
-### Makro-Formulare
+## Macro Forms
 
-Mit der Funktion **GetObject** ist es möglich, Daten aus Formularen des Makros abzurufen. Dies kann verwendet werden, um die Analyse zu erschweren. Das folgende Bild zeigt ein Makro-Formular, das verwendet wird, um **Daten in Textfeldern zu verbergen** (ein Textfeld kann weitere Textfelder verbergen):
+VBA UserForms können Daten in Controls wie Textfeldern speichern. Da Formulare, Frames und Seiten jeweils eine `Controls`-Sammlung bereitstellen können, sollten Analysten die gesamte Control-Hierarchie enumerieren, anstatt sich nur auf das zu verlassen, was das Formular anzeigt. Das folgende Beispiel speichert verborgene Daten in überlappenden Textfeldern.<sup>[[1]](#references)</sup>
 
-![Junk Code - Makro-Formulare: Mit der Funktion GetObject ist es möglich, Daten aus Formularen des Makros abzurufen. Dies kann verwendet werden, um die Analyse zu erschweren. Das folgende Bild zeigt ein...](<../images/image (344).png>)
+![Eine Makro-UserForm mit in überlappenden Textfeldern verborgenen Daten](<../images/image (344).png>)
 
+## References
+
+- [1] [Microsoft Learn - Sammlungen, Steuerelemente und Objekte (Microsoft Forms)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/objects-microsoft-forms)
 {{#include ../banners/hacktricks-training.md}}

@@ -2,20 +2,24 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Basic Payloads
+## Intruder-Payload-Typen
 
-- **Simple List:** Eine Liste, die in jeder Zeile einen Eintrag enthält
-- **Runtime File:** Eine Liste, die zur Laufzeit gelesen wird (nicht in den Speicher geladen). Zur Unterstützung großer Listen.
-- **Case Modification:** Wendet Änderungen auf eine Liste von Zeichenfolgen an (Keine Änderung, in Kleinbuchstaben, in GROSSBUCHSTABEN, als Eigenname - erster Buchstabe groß und der Rest klein -, als Eigenname - erster Buchstabe groß und der Rest unverändert -).
-- **Numbers:** Generiert Zahlen von X bis Y mit der Schrittweite Z oder zufällig.
-- **Brute Forcer:** Zeichensatz, minimale und maximale Länge.
+- **Simple list:** Verwende eine konfigurierte Liste von Zeichenfolgen als Payloads.
+- **Runtime file:** Lies zur Laufzeit einen Payload pro Zeile ein. Dies ist für große Listen nützlich, da Burp nicht die gesamte Datei in den Speicher lädt.
+- **Case modification:** Ändere die Groß- und Kleinschreibung einer Eingabezeichenfolge, beispielsweise in Kleinbuchstaben, Großbuchstaben, Satzschreibung oder Titelschreibung.
+- **Numbers:** Generiere fortlaufende oder zufällige Zahlen innerhalb eines konfigurierten Bereichs.
+- **Brute forcer:** Generiere jede Permutation für einen ausgewählten Zeichensatz sowie eine minimale und maximale Länge.<sup>[[1]](#references)</sup>
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator): Payload zum Ausführen von Befehlen und Abrufen der Ausgabe über DNS requests an burpcollab.
+## Extensions und Begleittools
 
-{{#ref}}
-https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e
-{{#endref}}
+- **Collabfiltrator** generiert Payloads, die Befehle ausführen und deren Ausgabe über DNS-Abfragen an Burp Collaborator exfiltrieren.<sup>[[2]](#references)</sup>
+- **Burp Suite Exporter** exportiert Burp-Ergebnisse zur Verwendung in anderen Reporting-Workflows.<sup>[[3]](#references)</sup>
+- **HTTP Script Generator** konvertiert HTTP-Anfragen in Scripts in mehreren Sprachen.<sup>[[4]](#references)</sup>
 
-[https://github.com/h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
+## References
 
+- [1] [PortSwigger-Dokumentation - Burp Intruder-Payload-Typen](https://portswigger.net/burp/documentation/desktop/tools/intruder/configure-attack/payload-types)
+- [2] [GitHub - 0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator)
+- [3] [ArtsSEC - Burp Suite Exporter](https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e)
+- [4] [GitHub - h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
 {{#include ../banners/hacktricks-training.md}}

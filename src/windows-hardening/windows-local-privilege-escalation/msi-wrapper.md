@@ -2,21 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Lade die kostenlose Version der App von [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/) herunter, führe sie aus und verpacke die „schädliche“ Binary damit.\
-Beachte, dass du eine „**.bat**“-Datei verpacken kannst, wenn du **nur** **Befehlszeilen ausführen** möchtest (wähle anstelle von cmd.exe die .bat-Datei aus).
+MSI Wrapper kann eine ausführbare Datei oder ein Skript als Windows-Installer-Datei (`.msi`) verpacken. Laden Sie die kostenlose Edition herunter und starten Sie sie. Wählen Sie anschließend die ausführbare Datei aus, die verpackt werden soll. Um eine Befehlssequenz auszuführen, wählen Sie eine `.bat`-Datei als Eingabe aus, anstatt `cmd.exe` zu verpacken.<sup>[[1]](#references)</sup>
 
-![MSI Wrapper: Beachte, dass du eine „.bat“-Datei verpacken kannst, wenn du nur Befehlszeilen ausführen möchtest (wähle anstelle von cmd.exe die .bat-Datei aus)](<../../images/image (417).png>)
+![Auswählen der Quelldatei oder des Batchskripts in MSI Wrapper](<../../images/image (417).png>)
 
-Und dies ist der wichtigste Teil der Konfiguration:
+Konfigurieren Sie den Ausführungskontext und andere Eigenschaften des Installers sorgfältig:
 
-![MSI Wrapper: Und dies ist der wichtigste Teil der Konfiguration](<../../images/image (312).png>)
+![Konfigurieren der Anwendungs-ID und des Sicherheitskontexts in MSI Wrapper](<../../images/image (312).png>)
 
-![MSI Wrapper: Und dies ist der wichtigste Teil der Konfiguration](<../../images/image (346).png>)
+![Konfigurieren der Eigenschaften des Installers in MSI Wrapper](<../../images/image (346).png>)
 
-![MSI Wrapper: Und dies ist der wichtigste Teil der Konfiguration](<../../images/image (1072).png>)
+![Überprüfen der Build-Einstellungen von MSI Wrapper](<../../images/image (1072).png>)
 
-(Beachte bitte, dass du diese Werte ändern kannst, wenn du versuchst, deine eigene Binary zu verpacken.)
+Diese Werte können beim Verpacken einer benutzerdefinierten Binärdatei geändert werden.
 
-Klicke von hier aus einfach auf die **Weiter-Schaltflächen** und anschließend auf die letzte **Build-Schaltfläche**. Dein Installer/Wrapper wird dann generiert.
+Fahren Sie mit den verbleibenden Seiten des Assistenten fort und wählen Sie **Build**, um den Installer zu erstellen.<sup>[[1]](#references)</sup>
 
+> [!WARNING]
+> Das Erstellen einer MSI-Datei gewährt allein keine erhöhten Rechte. Ob die Installation mit erhöhten Rechten erfolgt, hängt von der Windows-Installer-Richtlinie, dem Paketkontext und der Benutzerautorisierung ab. Microsoft weist darauf hin, dass die Aktivierung von `AlwaysInstallElevated` sowohl für den Benutzer als auch für den Computer Nichtadministratoren ermöglicht, Pakete mit Systemrechten zu installieren.<sup>[[2]](#references)</sup>
+
+## References
+
+- [1] [MSI Wrapper-Dokumentation - Erste Schritte](https://www.exemsi.com/documentation/getting-started/)
+- [2] [Microsoft Learn - Installieren eines Pakets mit erhöhten Rechten für einen Nichtadministrator](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
 {{#include ../../banners/hacktricks-training.md}}

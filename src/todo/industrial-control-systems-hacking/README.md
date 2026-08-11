@@ -4,16 +4,19 @@
 
 ## Über diesen Abschnitt
 
-Dieser Abschnitt behandelt industrielle Steuerungssysteme, einschließlich grundlegender Konzepte sowie Methoden, um sie mit verschiedenen in ihnen bestehenden Sicherheitsproblemen zu hacken.
+Dieser Abschnitt stellt Komponenten, Architekturen, Protokolle und Methoden zur Sicherheitsbewertung industrieller Steuerungssysteme (ICS) vor. ICS sind Teil des übergeordneten Bereichs der Operational Technology (OT): programmierbare Systeme und Geräte, die physische Prozesse überwachen oder Veränderungen daran bewirken. Häufige Beispiele sind Supervisory-Control-and-Data-Acquisition-(SCADA-)Systeme, Distributed-Control-Systems (DCSs) und Programmable Logic Controllers (PLCs).<sup>[[1]](#references)</sup>
 
-Industrielle Steuerungssysteme sind überall zu finden, da Industrien für die wirtschaftliche Entwicklung einer Nation von entscheidender Bedeutung sind. Diese ICS lassen sich jedoch nur schwer aktualisieren, und in diesem Bereich werden geringere Fortschritte erzielt. Daher ist das Auffinden von Sicherheitslücken hier häufig. Die meisten hier verwendeten Protokolle und Standards wurden in den 90er-Jahren entwickelt und verfügen im Vergleich zu aktuellen Angriffsszenarien über deutlich geringere Fähigkeiten.
+Bei der Sicherheitsarbeit in diesen Umgebungen müssen Anforderungen berücksichtigt werden, die sich von denen herkömmlicher IT unterscheiden, darunter Prozesssicherheit, Zuverlässigkeit, Verfügbarkeit, deterministischer Betrieb und Gerätelebenszyklen. Eine technisch gültige Sicherheitsmaßnahme kann dennoch ungeeignet sein, wenn sie den physischen Prozess stört. Daher sollten Tests und Abhilfemaßnahmen mit dem Systemverantwortlichen und dem Betriebspersonal koordiniert werden.<sup>[[1]](#references)</sup>
 
-Es ist wichtig geworden, diese Systeme zu sichern, da ihre Beschädigung hohe Kosten verursachen und im schlimmsten Fall sogar Menschenleben fordern kann. Um die Sicherheit industrieller Steuerungssysteme zu verstehen, ist es notwendig, ihre Interna zu kennen.
+## Bewertungsschwerpunkte
 
-Da industrielle Steuerungssysteme nach festgelegten Standards installiert werden, hilft die Kenntnis jeder Komponente dabei, alle anderen Mechanismen im Steuerungssystem miteinander zu verbinden. Die Installation dieser Geräte wie PLCs und SCADA-Systeme unterscheidet sich je nach Industrie. Daher ist die Informationsbeschaffung entscheidend.
+Beginne damit, den gesteuerten Prozess, Systemgrenzen, Netzwerktopologie, Assets, Datenflüsse, Vertrauensbeziehungen und externen Verbindungen zu verstehen. Ähnliche Gerätetypen können an verschiedenen Standorten unterschiedliche Funktionen erfüllen. Vermeide daher die Annahme, dass die Architektur oder das Auswirkungsmodell einer Bereitstellung auf eine andere übertragbar ist.<sup>[[1]](#references)</sup>
 
-Industrielle Steuerungssysteme können mitunter kompliziert sein und erfordern daher viel Geduld. Vor der Planung von Angriffen und der Entwicklung von Exploits geht es zunächst um Probing und Reconnaissance.
+Bevorzuge nach Möglichkeit passive Erkundung und vorhandene technische Dokumentation. Jedes aktive Scanning oder jede Exploitation sollte einem genehmigten Testplan folgen, der Sicherheitsvorgaben, Wartungsfenster, Wiederherstellungsverfahren und Abbruchbedingungen festlegt. Findings sollten sowohl hinsichtlich ihrer Auswirkungen auf die Cybersicherheit als auch hinsichtlich möglicher Auswirkungen auf den physischen Prozess bewertet werden.<sup>[[1]](#references)</sup>
 
-Diese Techniken können auch zum Schutz vor Angriffen und für Blue Teaming bei industriellen Steuerungssystemen eingesetzt werden.
+Dasselbe Architekturwissen unterstützt defensive Aktivitäten wie Asset-Inventarisierung, Netzwerksegmentierung, Monitoring, Incident Response und risikobasiertes Vulnerability Management.<sup>[[1]](#references)</sup>
 
+## References
+
+- [1] [NIST SP 800-82 Rev. 3 - Leitfaden zur Sicherheit von Operational Technology (OT)](https://csrc.nist.gov/pubs/sp/800/82/r3/final)
 {{#include ../../banners/hacktricks-training.md}}
