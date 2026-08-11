@@ -15,7 +15,8 @@ Default: Administrators on servers and domain controllers.<sup>[[1]](#references
 ## Abuse scenarios
 
 - If the account can actually obtain a readable raw-volume handle, an NTFS-aware parser can bypass per-file ACLs and recover protected or locked files from allocated clusters.
-- Possible targets include registry hives, DPAPI material, the SAM, and—where separately accessible through a snapshot or offline volume—`ntds.dit`.
+- Possible targets include locked or ACL-protected content under `C:\Windows\System32`, registry hives, DPAPI master keys, the SAM, and—where separately accessible through a snapshot or offline volume—`ntds.dit`.
+- On certificate services hosts, useful software-key locations include `%ProgramData%\Microsoft\Crypto\RSA\MachineKeys` and `%ProgramData%\Microsoft\Crypto\Keys`; recovering a file is useful only when its key material is exportable and can also be decrypted.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 - On an AD CS host, a successfully recovered **exportable/software-backed** CA private key can enable Golden Certificate abuse. Hardware-backed or non-exportable key designs change this path.<sup>[[2]](#references)</sup>
 
 Note: You still need a parser for NTFS structures unless you rely on helper tools. Many off-the-shelf tools abstract the raw access.
@@ -79,7 +80,7 @@ If you can read the Enterprise CA’s private key from the machine key store, yo
 
 - Strongly limit assignment of SeManageVolumePrivilege (Perform volume maintenance tasks) to only trusted admins.
 - Monitor Sensitive Privilege Use and process handle opens to device objects like \\.\C:, \\.\PhysicalDrive0.
-- Prefer properly configured HSM-backed, non-exportable CA keys so a copied key-container file is not sufficient to recover usable private-key material.
+- Prefer properly configured HSM- or TPM-backed, non-exportable CA keys so a copied key-container file is not sufficient to recover usable private-key material.
 - Keep uploads, temp, and extraction paths non-executable and separated (web context defense that often pairs with this chain post‑exploitation).
 
 ## References

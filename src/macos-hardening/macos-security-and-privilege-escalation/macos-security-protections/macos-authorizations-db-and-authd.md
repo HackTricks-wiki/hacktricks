@@ -14,7 +14,7 @@ The `rules` table observed on the documented build contains the following column
 - **name**: The unique name of the rule used to identify and reference it within the authorization system.
 - **type**: Specifies the type of the rule, restricted to values 1 or 2 to define its authorization logic.
 - **class**: Categorizes the rule into a specific class, ensuring it is a positive integer.
-  - Common rule classes include `allow`, `deny`, `user`, `rule`, and `evaluate-mechanisms`. Mechanisms can be built-ins or Security Agent plug-ins under system or library plug-in paths.
+  - Common rule classes include `allow`, `deny`, `user`, `rule`, and `evaluate-mechanisms`. Mechanisms can be built-ins or Security Agent plug-ins under `/System/Library/CoreServices/SecurityAgentPlugins/` or `/Library/Security/SecurityAgentPlugins/`.<sup>[[2]](#references)</sup>
 - **group**: Indicates the user group associated with the rule for group-based authorization.
 - **kofn**: Represents the "k-of-n" parameter, determining how many subrules must be satisfied out of a total number.
 - **timeout**: Defines the duration in seconds before the authorization granted by the rule expires.
