@@ -6,49 +6,60 @@
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers je jedna od najpopularnijih open-source biblioteka za korišćenje, treniranje i implementaciju LLM-ova kao što su GPT, BERT i mnogi drugi. Nudi sveobuhvatan ekosistem koji obuhvata pre-trained modele, datasete i besprekornu integraciju sa Hugging Face Hub-om za fine-tuning i implementaciju.
+Hugging Face Transformers je open-source biblioteka za učitavanje, treniranje i posluživanje unapred obučenih modela za zadatke koji obuhvataju tekst, vizuelni sadržaj, audio, video i multimodalne podatke. Hosting modela i skupova podataka obezbeđen je zasebno putem Hugging Face Hub-a.<sup>[[1]](#references)</sup>
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain je framework namenjen izradi aplikacija sa LLM-ovima. Omogućava developerima povezivanje jezičkih modela sa spoljnim izvorima podataka, API-jima i bazama podataka. LangChain pruža alate za napredni prompt engineering, upravljanje istorijom razgovora i integraciju LLM-ova u složene workflow-e.
+LangChain je framework za izgradnju aplikacija i agenata zasnovanih na modelima, sa podrškom za konstruisanje promptova, upravljanje istorijom/stanjem razgovora, alatke, retrieval, modele, API-je i integracije sa bazama podataka.<sup>[[2]](#references)</sup>
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT je projekat koji je razvio Lightning AI i koji koristi Lightning framework za olakšavanje treniranja, fine-tuning-a i implementacije modela zasnovanih na GPT-u. Besprekorno se integriše sa drugim Lightning AI alatima i pruža optimizovane workflow-e za rad sa jezičkim modelima velikih razmera, uz bolje performanse i skalabilnost.
+LitGPT pruža čitljive implementacije i command-line workflow-e za pretraining, fine-tuning, evaluaciju i deployment podržanih jezičkih modela.<sup>[[3]](#references)</sup>
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
 **Opis:**\
-LitServe je deployment alat kompanije Lightning AI, namenjen brzom i efikasnom pokretanju AI modela. Pojednostavljuje integraciju LLM-ova u aplikacije u realnom vremenu tako što pruža skalabilne i optimizovane mogućnosti za serving.
+LitServe je framework kompanije Lightning AI za posluživanje modela, koji omogućava izlaganje inference API-ja uz podršku za batching, streaming, ubrzavanje i hooks za skaliranje.<sup>[[4]](#references)</sup>
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl je cloud-based platforma namenjena pojednostavljivanju implementacije, skaliranja i upravljanja AI modelima, uključujući LLM-ove. Nudi funkcije kao što su automatsko skaliranje, monitoring i integracija sa različitim cloud servisima, čime olakšava implementaciju modela u production okruženjima bez opsežnog upravljanja infrastrukturom.
+Axolotl je open-source framework za post-training i fine-tuning, kojim se upravlja putem YAML konfiguracije. Podržava tehnike kao što su full fine-tuning, LoRA/QLoRA, preference optimization i multi-GPU training; sam po sebi nije cloud deployment platforma.<sup>[[5]](#references)</sup>
 
 ## Isprobavanje modela online
 
 ### [**Hugging Face**](https://huggingface.co/)
 
-**Hugging Face** je vodeća platforma i zajednica za machine learning, posebno poznata po radu u oblasti obrade prirodnog jezika (NLP). Pruža alate, biblioteke i resurse koji olakšavaju razvoj, deljenje i implementaciju machine learning modela.\
-Nudi nekoliko sekcija, kao što su:
+**Hugging Face** je vodeća platforma i zajednica za machine learning, posebno poznata po radu u oblasti obrade prirodnog jezika (NLP). Pruža alatke, biblioteke i resurse koji olakšavaju razvoj, deljenje i deployment machine learning modela.\
+Hub nudi nekoliko relevantnih odeljaka:<sup>[[6]](#references)</sup>
 
-* **Models**: Ogroman repozitorijum **pre-trained machine learning modela** u kojem korisnici mogu da pretražuju, preuzimaju i integrišu modele za različite zadatke, kao što su generisanje teksta, prevođenje, prepoznavanje slika i drugo.
-* **Datasets:** Sveobuhvatna **kolekcija dataseta** koji se koriste za treniranje i evaluaciju modela. Omogućava jednostavan pristup raznovrsnim izvorima podataka, pa korisnici mogu da pronađu i koriste podatke za svoje konkretne machine learning projekte.
-* **Spaces:** Platforma za hosting i deljenje **interaktivnih machine learning aplikacija** i demo-verzija. Omogućava developerima da **prikažu** svoje modele u radu, kreiraju korisnički prilagođene interfejse i sarađuju sa drugima deljenjem live demo-verzija.
+* **Models**: Ogromno spremište **pre-trained machine learning modela** u kojem korisnici mogu da pregledaju, preuzmu i integrišu modele za različite zadatke, kao što su generisanje teksta, prevođenje, prepoznavanje slika i drugo.
+* **Datasets:** Sveobuhvatna **kolekcija skupova podataka** koji se koriste za treniranje i evaluaciju modela. Omogućava jednostavan pristup raznovrsnim izvorima podataka, tako da korisnici mogu da pronađu i koriste podatke za svoje konkretne machine learning projekte.
+* **Spaces:** Platforma za hosting i deljenje **interaktivnih machine learning aplikacija** i demo primera. Omogućava developerima da **prikažu** svoje modele u radu, kreiraju korisnički prijemčive interfejse i sarađuju sa drugima deljenjem aktivnih demo primera.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub** je sveobuhvatan repozitorijum reusable machine learning modula koji je razvio Google. Fokusira se na olakšavanje deljenja i implementacije machine learning modela, posebno onih napravljenih pomoću TensorFlow-a.
+**TensorFlow Hub** je repozitorijum i biblioteka za reusable komponente treniranih modela, naročito module koji se koriste putem TensorFlow/Keras-a. **Kaggle** zasebno pruža notebooks, skupove podataka, takmičenja i modele.<sup>[[7]](#references)[[9]](#references)</sup>
 
-* **Modules:** Ogromna kolekcija pre-trained modela i komponenti modela u kojoj korisnici mogu da pretražuju, preuzimaju i integrišu module za zadatke kao što su klasifikacija slika, text embedding i drugo.
-* **Tutorials:** Vodiči i primeri korak po korak koji korisnicima pomažu da razumeju kako da implementiraju i fine-tune-uju modele pomoću TensorFlow Hub-a.
+* **Modules:** Ogromna kolekcija pre-trained modela i komponenti modela u kojoj korisnici mogu da pregledaju, preuzmu i integrišu module za zadatke kao što su klasifikacija slika, text embedding i drugo.
+* **Tutorials:** Vodiči i primeri korak po korak koji pomažu korisnicima da implementiraju i fine-tune-uju modele koristeći TensorFlow Hub.
 * **Documentation:** Sveobuhvatni vodiči i API reference koje developerima pomažu da efikasno koriste resurse repozitorijuma.
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** je platforma koja developerima omogućava pokretanje machine learning modela u cloud-u putem jednostavnog API-ja. Fokusira se na to da ML modeli budu lako dostupni i da se mogu implementirati bez potrebe za opsežnim podešavanjem infrastrukture.
+**Replicate** je hosted platforma za pokretanje upakovanih machine-learning modela putem web interfejsa ili API-ja.<sup>[[8]](#references)</sup>
 
-* **Models:** Repozitorijum machine learning modela koje doprinosi zajednica, a korisnici mogu da ih pretražuju, isprobavaju i integrišu u svoje aplikacije uz minimalan trud.
-* **API Access:** Jednostavni API-ji za pokretanje modela koji developerima omogućavaju jednostavnu implementaciju i skaliranje modela unutar sopstvenih aplikacija.
+* **Models:** Repozitorijum machine learning modela koje je doprinela zajednica, u kojem korisnici mogu da pregledaju i isprobaju modele i da ih uz minimalan napor integrišu u svoje aplikacije.
+* **API access:** API-ji za pozivanje modela iz aplikacija bez upravljanja osnovnom infrastrukturom za inference.
 
+## References
+
+- [1] [Hugging Face Transformers](https://github.com/huggingface/transformers)
+- [2] [LangChain](https://github.com/langchain-ai/langchain)
+- [3] [LitGPT](https://github.com/Lightning-AI/litgpt)
+- [4] [LitServe](https://github.com/Lightning-AI/LitServe)
+- [5] [Axolotl](https://github.com/axolotl-ai-cloud/axolotl)
+- [6] [Hugging Face Hub dokumentacija](https://huggingface.co/docs/hub/index)
+- [7] [TensorFlow Hub](https://www.tensorflow.org/hub)
+- [8] [Replicate dokumentacija](https://replicate.com/docs)
+- [9] [Kaggle dokumentacija](https://www.kaggle.com/docs)
 {{#include ../banners/hacktricks-training.md}}

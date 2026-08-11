@@ -1,41 +1,39 @@
-# FZ - Infracrveni
+# FZ - Infracrveno
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Uvod <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Za više informacija o tome kako infracrveni signal funkcioniše, pogledajte:
+Za više informacija o tome kako funkcioniše Infracrveno, pogledajte:
 
 
 {{#ref}}
 ../infrared.md
 {{#endref}}
 
-## IR prijemnik signala u Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## IR prijemnik signala u Flipper Zero uređaju <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper koristi digitalni IR prijemnik signala TSOP, koji **omogućava presretanje signala sa IR daljinskih upravljača**. Postoje neki **pametni telefoni**, kao što je Xiaomi, koji takođe imaju IR port, ali imajte na umu da **većina njih može samo da šalje** signale i **nije u mogućnosti da ih prima**.<sup>[[1]](#references)</sup>
+Flipper Zero koristi demodulišući IR prijemnik za hvatanje signala sa uobičajenih IR daljinskih upravljača. Neki telefoni, uključujući određene Xiaomi modele, imaju IR predajnik, ali većina ne može da prima i dekoduje signale daljinskog upravljača.<sup>[[1]](#references)</sup>
 
-Flipperov infracrveni **prijemnik je veoma osetljiv**. Signal možete čak **uhvatiti** dok se nalazite **negde između** daljinskog upravljača i televizora. Nije neophodno usmeriti daljinski upravljač direktno ka Flipperovom IR portu. Ovo je korisno kada neko menja kanale dok stoji blizu televizora, a vi i Flipper ste udaljeni od njega.
+Flipper infracrveni **prijemnik je veoma osetljiv**. Možete čak **uhvatiti signal** dok se nalazite **negde između** daljinskog upravljača i televizora. Nije neophodno usmeriti daljinski upravljač direktno ka IR portu Flipper uređaja. Ovo je korisno kada neko menja kanale dok stoji blizu televizora, a vi i Flipper ste udaljeni od njega.
 
-Pošto se **dekodiranje infracrvenog** signala odvija na **softverskoj** strani, Flipper Zero potencijalno podržava **prijem i slanje bilo kojih kodova IR daljinskih upravljača**. U slučaju **nepoznatih** protokola koji nisu mogli da budu prepoznati, on **snima i reprodukuje** sirovi signal tačno onako kako je primljen.<sup>[[1]](#references)</sup>
+Dekodiranje protokola obavlja se u softveru. Prepoznati protokoli mogu se sačuvati kao dekodovane komande; nepodržani protokoli mogu se uhvatiti i reprodukovati kao raw podaci o vremenskom rasporedu, u okviru ograničenja hardvera u pogledu noseće frekvencije i vremenskog rasporeda.<sup>[[1]](#references)</sup>
 
 ## Radnje
 
 ### Univerzalni daljinski upravljači
 
-Flipper Zero se može koristiti kao **univerzalni daljinski upravljač za kontrolu bilo kog televizora, klima-uređaja ili media centra**. U ovom režimu, Flipper **bruteforces** sve **poznate kodove** svih podržanih proizvođača **prema rečniku sa SD kartice**. Nije potrebno da izaberete određeni daljinski upravljač da biste isključili televizor u restoranu.<sup>[[1]](#references)</sup>
+Režim univerzalnog daljinskog upravljača Flipper Zero uređaja prolazi kroz poznate komande iz svoje infracrvene baze podataka za podržane televizore, audio-opremu, projektore i klima-uređaje. Nije garantovano da će upravljati svakim uređajem i treba ga koristiti samo na opremi koja je u vašem vlasništvu ili za čije testiranje imate ovlašćenje.<sup>[[1]](#references)</sup>
 
-Dovoljno je pritisnuti dugme za napajanje u režimu Universal Remote i Flipper će **uzastopno slati komande "Power Off"** svih televizora koje poznaje: Sony, Samsung, Panasonic... i tako dalje. Kada televizor primi njegov signal, reagovaće i isključiti se.
+Dovoljno je pritisnuti dugme za napajanje u režimu Universal Remote i Flipper će **uzastopno slati komande "Power Off"** za sve televizore koje poznaje: Sony, Samsung, Panasonic... i tako dalje. Kada televizor primi njegov signal, reagovaće i isključiće se.
 
-Ovakav brute-force zahteva vreme. Što je rečnik veći, duže će trajati završetak procesa. Nije moguće saznati koji je signal televizor tačno prepoznao, pošto televizor ne daje povratne informacije.
+Takav brute-force zahteva vreme. Što je rečnik veći, duže će trajati njegovo izvršavanje. Nije moguće saznati koji je signal televizor tačno prepoznao, jer televizor ne pruža povratne informacije.
 
 ### Učenje novog daljinskog upravljača
 
-Moguće je **uhvatiti infracrveni signal** pomoću Flipper Zero uređaja. Ako **pronađe signal u bazi podataka**, Flipper će automatski **znati o kom uređaju je reč** i omogućiće vam interakciju sa njim.\
-Ako ga ne pronađe, Flipper može **sačuvati** **signal** i omogućiti vam da ga **ponovo reprodukujete**.<sup>[[1]](#references)</sup>
+Flipper Zero može da **uhvati infracrveni signal**. Ako prepozna protokol i komandu, čuva dekodovanu reprezentaciju; u suprotnom, može sačuvati raw podatke o vremenskom rasporedu za kasniju reprodukciju.<sup>[[1]](#references)</sup>
 
-## Reference
+## References
 
-- [1] [Taking over TVs with Flipper Zero Infrared Port](https://blog.flipperzero.one/infrared/)
-
+- [1] [Preuzimanje kontrole nad televizorima pomoću infracrvenog porta Flipper Zero uređaja](https://blog.flipperzero.one/infrared/)
 {{#include ../../../banners/hacktricks-training.md}}

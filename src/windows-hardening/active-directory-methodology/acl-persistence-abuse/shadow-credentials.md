@@ -6,58 +6,57 @@
 
 **Pogledajte originalnu objavu za [sve informacije o ovoj tehnici](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab).**<sup>[[1]](#references)</sup>
 
-**Ukratko**: ako možete da upisujete u svojstvo **msDS-KeyCredentialLink** korisnika ili računara, možete preuzeti **NT hash tog objekta**.<sup>[[1]](#references)</sup>
+Ukratko, kontrola nad atributom **`msDS-KeyCredentialLink`** korisnika ili računara može napadaču omogućiti da doda key credential, autentifikuje se kao taj objekat pomoću PKINIT-a i — kada KDC i nalog podržavaju neophodne tokove — iskoristi dobijenu ulaznicu sa `S4U2Self`/user-to-user da povrati NT hash objekta.<sup>[[1]](#references)</sup>
 
-U objavi je opisana metoda za podešavanje **akreditiva za autentifikaciju pomoću javnog i privatnog ključa**, kako bi se dobio jedinstveni **Service Ticket** koji sadrži NTLM hash cilja. Ovaj proces uključuje šifrovani NTLM_SUPPLEMENTAL_CREDENTIAL unutar Privilege Attribute Certificate-a (PAC), koji se može dešifrovati.<sup>[[1]](#references)</sup>
+U objavi je opisana metoda za podešavanje **public-private key authentication credentials** radi dobijanja jedinstvenog **Service Ticket-a** koji sadrži NTLM hash cilja. Ovaj proces uključuje šifrovani NTLM_SUPPLEMENTAL_CREDENTIAL unutar Privilege Attribute Certificate-a (PAC), koji se može dešifrovati.<sup>[[1]](#references)</sup>
 
 ### Zahtevi
 
 Da bi se ova tehnika primenila, moraju biti ispunjeni određeni uslovi:<sup>[[1]](#references)</sup>
 
 - Potreban je najmanje jedan Windows Server 2016 Domain Controller.
-- Domain Controller mora imati instaliran digitalni sertifikat za server authentication.
-- Active Directory mora biti na Windows Server 2016 Functional Level-u.
-- Potreban je nalog sa delegiranim pravima za izmenu atributa msDS-KeyCredentialLink ciljnog objekta.
+- Domain Controller mora imati instaliran server authentication digital certificate.
+- Šema direktorijuma mora sadržati `msDS-KeyCredentialLink`; Windows Server 2016 ili noviji DC i PKINIT-capable certificate na KDC-u predstavljaju praktične platform requirements opisane u istraživanju. Proverite kombinaciju schema/DC u domenu, umesto da pretpostavite da samo oznaka domain functional-level određuje mogućnost exploit-a.
+- Potreban je nalog sa delegated rights za izmenu atributa msDS-KeyCredentialLink ciljnog objekta.
 
-## Abuse
+## Zloupotreba
 
-Abuse Key Trust-a nad računarskim objektima obuhvata korake koji prevazilaze dobijanje Ticket Granting Ticket-a (TGT) i NTLM hash-a. Dostupne opcije uključuju:<sup>[[1]](#references)</sup>
+Zloupotreba Key Trust-a za computer objects obuhvata korake koji prevazilaze dobijanje Ticket Granting Ticket-a (TGT) i NTLM hash-a. Opcije uključuju:<sup>[[1]](#references)</sup>
 
-1. Kreiranje **RC4 silver ticket-a** za delovanje u svojstvu privilegovanih korisnika na predviđenom hostu.
-2. Korišćenje TGT-a sa **S4U2Self** za impersonaciju **privilegovanih korisnika**, što zahteva izmene Service Ticket-a radi dodavanja klase servisa nazivu servisa.
+1. Kreiranje **RC4 silver ticket-a** za delovanje kao privileged users na predviđenom hostu.
+2. Korišćenje TGT-a sa **S4U2Self** za impersonation **privileged users**, što zahteva izmene Service Ticket-a radi dodavanja service class-a u service name.
 
-Značajna prednost abuse-a Key Trust-a jeste to što je ograničen na privatni ključ koji je generisao attacker, čime se izbegava delegacija potencijalno ranjivim nalozima i ne zahteva kreiranje računarskog naloga, koji bi moglo biti teško ukloniti.<sup>[[1]](#references)</sup>
+Značajna prednost zloupotrebe Key Trust-a jeste to što je ograničena na private key koji je generisao napadač, čime se izbegava delegation ka potencijalno ranjivim nalozima i ne zahteva kreiranje computer account-a, koji bi moglo biti teško ukloniti.<sup>[[1]](#references)</sup>
 
 ## Alati
 
 ### [**Whisker**](https://github.com/eladshamir/Whisker)
 
-Zasnovan je na DSInternals-u i pruža C# interfejs za ovaj attack. Whisker i njegov Python pandan, **pyWhisker**, omogućavaju manipulaciju atributom `msDS-KeyCredentialLink` radi preuzimanja kontrole nad Active Directory nalozima. Ovi alati podržavaju različite operacije, kao što su dodavanje, prikazivanje, uklanjanje i brisanje key credentials-a iz ciljnog objekta.
+Whisker koristi DSInternals za manipulaciju atributom `msDS-KeyCredentialLink` iz C#-a. Whisker i njegov Python counterpart **pyWhisker** podržavaju dodavanje, izlistavanje, uklanjanje i brisanje key credentials.<sup>[[2]](#references)[[4]](#references)</sup>
 
 Funkcije alata **Whisker** uključuju:
 
-- **Add**: Generiše par ključeva i dodaje key credential.
-- **List**: Prikazuje sve unose key credentials-a.
+- **Add**: Generiše key pair i dodaje key credential.
+- **List**: Prikazuje sve key credential entries.
 - **Remove**: Briše navedeni key credential.
-- **Clear**: Briše sve key credentials-e, što može potencijalno prekinuti legitimnu upotrebu WHfB-a.
+- **Clear**: Briše sve key credentials, što potencijalno može prekinuti legitimnu WHfB upotrebu.
 ```shell
 Whisker.exe add /target:computername$ /domain:constoso.local /dc:dc1.contoso.local /path:C:\path\to\file.pfx /password:P@ssword1
 ```
 ### [pyWhisker](https://github.com/ShutdownRepo/pywhisker)
 
-Proširuje funkcionalnost alata Whisker na **sisteme zasnovane na UNIX-u**, koristeći Impacket i PyDSInternals za sveobuhvatne mogućnosti eksploatacije, uključujući izlistavanje, dodavanje i uklanjanje KeyCredentials, kao i njihov uvoz i izvoz u JSON formatu.
+pyWhisker donosi tok rada na **UNIX-like systems** uz Impacket i PyDSInternals, uključujući operacije list/add/remove i JSON import/export.<sup>[[4]](#references)</sup>
 ```shell
 python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target "user2" --action "list"
 ```
 ### [ShadowSpray](https://github.com/Dec0ne/ShadowSpray/)
 
-ShadowSpray ima za cilj da **iskoristi GenericWrite/GenericAll dozvole koje široke korisničke grupe mogu imati nad objektima domena** kako bi široko primenio ShadowCredentials. To podrazumeva prijavljivanje na domen, proveru funkcionalnog nivoa domena, enumeraciju objekata domena i pokušaj dodavanja KeyCredentials radi pribavljanja TGT-a i otkrivanja NT hash-a. Opcije čišćenja i rekurzivne taktike eksploatacije dodatno povećavaju njegovu korisnost.
+ShadowSpray enumeriše objekte domena nad kojima operator ima prava kao što su `GenericWrite`/`GenericAll`, pokušava da široko doda ključne kredencijale i uključuje cleanup/recursive režime. Široko spraying ponašanje je ometajuće i upadljivo; koristite eksplicitne ciljeve i sačuvajte svaki dodat DeviceID radi preciznog uklanjanja.<sup>[[3]](#references)</sup>
 
-## Reference
+## References
 
-- [1] [Shadow Credentials: Zloupotreba Key Trust Account Mapping-a za preuzimanje naloga](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)
-- [2] [Whisker - Alat za preuzimanje AD naloga manipulisanjem atributom msDS-KeyCredentialLink](https://github.com/eladshamir/Whisker)
-- [3] [ShadowSpray - Alat za primenu Shadow Credentials-a kroz domen](https://github.com/Dec0ne/ShadowSpray/)
+- [1] [Shadow Credentials: Zloupotreba mapiranja naloga putem Key Trust mehanizma za preuzimanje naloga](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)
+- [2] [Whisker - Alat za preuzimanje AD naloga manipulacijom atributom msDS-KeyCredentialLink](https://github.com/eladshamir/Whisker)
+- [3] [ShadowSpray - Alat za širenje Shadow Credentials kroz domen](https://github.com/Dec0ne/ShadowSpray/)
 - [4] [pywhisker - Python verzija Shadow Credentials alata](https://github.com/ShutdownRepo/pywhisker)
-
 {{#include ../../../banners/hacktricks-training.md}}

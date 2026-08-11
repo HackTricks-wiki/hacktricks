@@ -4,12 +4,12 @@
 
 ## JTAG
 
-JTAG omogućava obavljanje boundary scan-a. Boundary scan analizira određena kola, uključujući ugrađene boundary-scan ćelije i registre za svaki pin.
+JTAG (IEEE 1149.1) podržava boundary-scan testiranje kroz ćelije postavljene oko I/O pinova uređaja. Mnogi procesori takođe izlažu debug funkcije specifične za proizvođača kroz isti Test Access Port (TAP); boundary scan i CPU debugging su povezane primene JTAG-a, ali nisu sinonimi.<sup>[[1]](#references)</sup>
 
-JTAG standard definiše **specific commands for conducting boundary scans**, uključujući sledeće:
+JTAG standard definiše **specifične komande za sprovođenje boundary scanova**, uključujući sledeće:
 
-- **BYPASS** omogućava testiranje određenog čipa bez dodatnog opterećenja prolaska kroz druge čipove.
-- **SAMPLE/PRELOAD** uzima uzorak podataka koji ulaze u uređaj i izlaze iz njega dok je u svom uobičajenom režimu rada.
+- **BYPASS** bira jednobitni bypass registar kako bi se drugim uređajima u scan chain-u pristupilo uz minimalni overhead.
+- **SAMPLE/PRELOAD** preuzima vrednosti pinova tokom normalnog rada i može unapred učitati boundary-scan registar pre druge instrukcije.
 - **EXTEST** postavlja i očitava stanja pinova.
 
 Može podržavati i druge komande, kao što su:
@@ -21,32 +21,39 @@ Na ove instrukcije možete naići kada koristite alat kao što je JTAGulator.
 
 ### Test Access Port
 
-Boundary scan uključuje testiranje četvorožičnog **Test Access Port (TAP)**, porta opšte namene koji omogućava **access to the JTAG test support** funkcijama ugrađenim u komponentu. TAP koristi sledećih pet signala:
+**Test Access Port (TAP)** omogućava pristup JTAG testnoj logici komponente. Potrebna su četiri signala, dok je `TRST` opcionalan:<sup>[[1]](#references)</sup>
 
-- Ulaz testnog takta (**TCK**) TCK je **clock** koji određuje koliko često će TAP kontroler izvršiti jednu radnju (drugim rečima, preći u sledeće stanje u state machine-u).
-- Ulaz za izbor testnog režima (**TMS**) TMS kontroliše **finite state machine**. Pri svakom taktu, JTAG TAP kontroler uređaja proverava napon na TMS pinu. Ako je napon ispod određenog praga, signal se smatra niskim i tumači kao 0, dok se, ako je napon iznad određenog praga, signal smatra visokim i tumači kao 1.
-- Ulaz testnih podataka (**TDI**) TDI je pin koji šalje **data into the chip through the scan cells**. Svaki proizvođač je odgovoran za definisanje komunikacionog protokola preko ovog pina, jer ga JTAG ne definiše.
-- Izlaz testnih podataka (**TDO**) TDO je pin koji šalje **data out of the chip**.
-- Ulaz za resetovanje testa (**TRST**) Opciono TRST resetuje finite state machine **to a known good state**. Druga mogućnost je da se TMS drži na 1 tokom pet uzastopnih taktova, čime se pokreće reset na isti način kao putem TRST pina, zbog čega je TRST opcioni.
+- Ulaz testnog takta (**TCK**) TCK je **takt** koji definiše koliko često će TAP kontroler izvršiti jednu radnju (drugim rečima, preći u sledeće stanje u state machine-u).
+- Ulaz za izbor testnog režima (**TMS**) TMS kontroliše **finite state machine**. Pri svakom taktu uređajov JTAG TAP kontroler proverava napon na TMS pinu. Ako je napon ispod određenog praga, signal se smatra niskim i tumači kao 0, dok se, ako je napon iznad određenog praga, signal smatra visokim i tumači kao 1.
+- Ulaz testnih podataka (**TDI**) serijski pomera instrukciju ili testne podatke u izabrani TAP registar. IEEE 1149.1 definiše ponašanje TAP transfera, dok proizvođači definišu opcione instrukcije i debug registre.
+- Izlaz testnih podataka (**TDO**) TDO je pin koji šalje **podatke iz čipa**.
+- Ulaz za reset testa (**TRST**) Opcioni TRST resetuje finite state machine **u poznato dobro stanje**. Alternativno, ako se TMS drži na 1 tokom pet uzastopnih ciklusa takta, aktivira se reset na isti način kao preko TRST pina, zbog čega je TRST opcionalan.
 
-Ponekad ćete moći da pronađete te pinove označene na PCB-u. U drugim slučajevima možda ćete morati da ih **pronađete**.
+Ponekad ćete moći da pronađete te pinove označene na PCB-u. U drugim slučajevima moraćete da ih **pronađete**.
 
-### Identifying JTAG pins
+### Identifikacija JTAG pinova
 
-Najbrži, ali najskuplji način za otkrivanje JTAG portova jeste korišćenje **JTAGulator** uređaja, napravljenog upravo za tu svrhu (iako može **also detect UART pinouts**).
+Brza, namenski napravljena, ali relativno skupa opcija za otkrivanje JTAG portova jeste **JTAGulator**, koji takođe može da identifikuje UART pinout-e.<sup>[[2]](#references)</sup>
 
-Ima **24 kanala** koje možete povezati sa pinovima ploče. Zatim izvršava **BF attack** svih mogućih kombinacija, šaljući **IDCODE** i **BYPASS** boundary scan komande. Ako primi odgovor, prikazuje kanal koji odgovara svakom JTAG signalu.
+Ima **24 kanala** koji se mogu povezati sa testnim tačkama na ploči. Nabrajа kombinacije kandidata za pinove koristeći **IDCODE** i **BYPASS** scanove i prijavljuje kanale koji odgovaraju detektovanim JTAG signalima.
 
-Jeftiniji, ali mnogo sporiji način identifikacije JTAG pinout-a jeste korišćenje [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) učitanog na mikrokontroleru kompatibilnom sa Arduinom.
+Jeftiniji, ali mnogo sporiji način identifikacije JTAG pinout-a jeste korišćenje alata [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) učitanog na mikrokontroleru kompatibilnom sa Arduinom.
 
-Korišćenjem alata **JTAGenum**, najpre biste **definisali pinove probing** uređaja koji ćete koristiti za enumeraciju. Morali biste da pogledate dijagram pinout-a uređaja, a zatim da povežete te pinove sa testnim tačkama na ciljnom uređaju.
+Sa **JTAGenum** alatom najpre definišite pinove mikrokontrolera za probing koji se koriste za enumeraciju. Pogledajte njegov pinout, a zatim povežite te pinove sa testnim tačkama kandidatima na ciljnoj ploči.<sup>[[3]](#references)</sup>
 
-**Treći način** za identifikaciju JTAG pinova jeste **inspecting the PCB** kako biste pronašli neki od pinout-a. U nekim slučajevima PCB-ovi mogu praktično da obezbede **Tag-Connect interface**, što jasno ukazuje da ploča takođe ima JTAG konektor. Kako taj interfejs izgleda možete videti na [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Pored toga, pregled **datasheets of the chipsets on the PCB** može otkriti dijagrame pinout-a koji ukazuju na JTAG interfejse.
+**Treći način** za identifikaciju JTAG pinova jeste **pregled PCB-a** u potrazi za poznatim footprintom. Neke ploče imaju **Tag-Connect** footprint, iako je Tag-Connect sistem konektora koji može prenositi JTAG, SWD, UART ili neki drugi interfejs — sam po sebi nije dokaz da su pinovi JTAG. Datasheet-i komponenti i merenja kontinuiteta zatim mogu da identifikuju stvarne signale.<sup>[[5]](#references)</sup>
 
 ## SDW
 
-SWD je ARM-specifičan protokol dizajniran za debugging.
+SWD je Arm-ov dvopinski, packet-based debug interfejs.<sup>[[4]](#references)</sup>
 
-SWD interfejs zahteva **two pins**: bidirekcioni signal **SWDIO**, koji je ekvivalent **TDI and TDO pins and a clock** kod JTAG-a, i **SWCLK**, koji je ekvivalent za **TCK** kod JTAG-a. Mnogi uređaji podržavaju **Serial Wire or JTAG Debug Port (SWJ-DP)**, kombinovani JTAG i SWD interfejs koji omogućava povezivanje SWD ili JTAG probe sa ciljem.
+Interfejs koristi bidirekcioni **SWDIO** za podatke i **SWCLK** za takt. Mnogi uređaji implementiraju **Serial Wire/JTAG Debug Port (SWJ-DP)**, koji omogućava izbor između SWD-a i JTAG-a na zajedničkim pinovima.<sup>[[4]](#references)</sup>
 
+## References
+
+- [1] [IEEE 1149.1 radna grupa — JTAG i boundary scan](https://sagroups.ieee.org/1149/1/)
+- [2] [JTAGulator dokumentacija](https://github.com/grandideastudio/jtagulator/wiki)
+- [3] [JTAGenum — enumeracija JTAG pinova za Arduino](https://github.com/cyphunk/JTAGenum/)
+- [4] [Arm — Debug interfejsi sa malim brojem pinova za sisteme sa više uređaja](https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Low_Pin-Count_Debug_Interfaces_for_Multi-device_Systems.pdf)
+- [5] [Tag-Connect — Footprint-i debug i programskih kablova](https://www.tag-connect.com/info/)
 {{#include ../../banners/hacktricks-training.md}}

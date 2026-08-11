@@ -1,60 +1,61 @@
-# macOS Office Sandbox Bypasses
+# Zaobilaženja macOS Office Sandbox-a
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-### Word Sandbox bypass preko Launch Agents
+U nastavku su navedeni **istorijski načini za izlazak iz Microsoft Office for Mac sandbox-a**. Oni dokumentuju ponovljive greške na granici poverenja, ali ne treba pretpostaviti da su zakrpljene kombinacije Office/macOS ranjive bez reprodukovanja tačne verzije i politike.
 
-Aplikacija koristi **custom Sandbox** uz entitlement **`com.apple.security.temporary-exception.sbpl`**, a ovaj custom sandbox omogućava upisivanje fajlova bilo gde, sve dok naziv fajla počinje sa `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
+### Zaobilaženje Word sandbox-a putem LaunchAgents-a
 
-Zato je escape bio jednostavan kao **upisivanje `plist`** LaunchAgent-a u `~/Library/LaunchAgents/~$escape.plist`.
+Pogođena aplikacija koristila je prilagođeno sandbox pravilo kroz `com.apple.security.temporary-exception.sbpl`. Ono je dozvoljavalo regularne datoteke čiji je basename počinjao sa `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`.<sup>[[1]](#references)</sup>
+
+Zato je izlazak bio jednostavan kao **upisivanje `plist`** LaunchAgent-a u `~/Library/LaunchAgents/~$escape.plist`.
 
 Pogledajte [**originalni izveštaj ovde**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/).<sup>[[1]](#references)</sup>
 
-### Word Sandbox bypass preko Login Items i zip-a
+### Zaobilaženje Word Sandbox-a putem Login Items-a i zip-a
 
-Imajte na umu da od prvog escape-a Word može da upisuje proizvoljne fajlove čiji naziv počinje sa `~$`, iako nakon patch-a prethodnog vuln-a više nije bilo moguće upisivati u `/Library/Application Scripts` ili u `/Library/LaunchAgents`.
+Imajte na umu da Word, nakon prvog izlaska, može da upisuje proizvoljne datoteke čiji naziv počinje sa `~$`, iako nakon zakrpe prethodne ranjivosti više nije bilo moguće upisivati u `/Library/Application Scripts` ili `/Library/LaunchAgents`.
 
-Otkriveno je da je iz sandbox-a moguće kreirati **Login Item** (aplikacije koje će biti izvršene kada se korisnik prijavi). Međutim, ove aplikacije **neće biti izvršene osim ako** nisu **notarized**, a **nije moguće dodati args** (zato nije moguće jednostavno pokrenuti reverse shell koristeći **`bash`**).
+Pogođeni sandbox je dozvoljavao kreiranje **Login Item-a**, koji se pokreće kada se korisnik prijavi. Demonstrirana putanja zahtevala je prihvatljivu potpisanu/notarizovanu aplikaciju i nije dozvoljavala proizvoljne argumente, pa dodavanje `bash`-a sa reverse-shell argumentom nije bilo dovoljno.<sup>[[2]](#references)</sup>
 
-Nakon prethodnog Sandbox bypass-a, Microsoft je onemogućio upisivanje fajlova u `~/Library/LaunchAgents`. Međutim, otkriveno je da će, ako se **zip fajl postavi kao Login Item**, `Archive Utility` jednostavno **raspakovati** taj fajl na njegovoj trenutnoj lokaciji. Pošto se folder `LaunchAgents` iz `~/Library` podrazumevano ne kreira, bilo je moguće **zip-ovati plist u `LaunchAgents/~$escape.plist`** i **postaviti** zip fajl u **`~/Library`**, tako da prilikom raspakivanja dospe na lokaciju za persistence.
+Nakon prethodnog Sandbox bypass-a, Microsoft je onemogućio opciju upisivanja datoteka u `~/Library/LaunchAgents`. Međutim, otkriveno je da će, ako stavite **zip datoteku kao Login Item**, `Archive Utility` jednostavno **raspakovati** na njenoj trenutnoj lokaciji. Pošto se folder `LaunchAgents` iz `~/Library` podrazumevano ne kreira, bilo je moguće **zip-ovati plist u `LaunchAgents/~$escape.plist`** i **postaviti** zip datoteku u **`~/Library`**, tako da prilikom raspakivanja stigne do odredišta za persistence.
 
 Pogledajte [**originalni izveštaj ovde**](https://objective-see.org/blog/blog_0x4B.html).<sup>[[2]](#references)</sup>
 
-### Word Sandbox bypass preko Login Items i .zshenv
+### Zaobilaženje Word Sandbox-a putem Login Items-a i .zshenv-a
 
-(Imajte na umu da od prvog escape-a Word može da upisuje proizvoljne fajlove čiji naziv počinje sa `~$`.)
+(Imajte na umu da Word, nakon prvog izlaska, može da upisuje proizvoljne datoteke čiji naziv počinje sa `~$`.)
 
-Međutim, prethodna tehnika je imala ograničenje: ako folder **`~/Library/LaunchAgents`** postoji zato što ga je kreirao neki drugi software, tehnika bi bila neuspešna. Zato je za ovo otkriven drugačiji Login Items chain.
+Međutim, prethodna tehnika imala je ograničenje: ako folder **`~/Library/LaunchAgents`** postoji zato što ga je kreirao neki drugi softver, tehnika bi bila neuspešna. Zbog toga je otkriven drugačiji lanac Login Items-a.
 
-Napadač je mogao da kreira fajlove **`.bash_profile`** i **`.zshenv`** sa payload-om koji treba izvršiti, a zatim da ih zip-uje i **upiše zip u korisnički folder žrtve**: **`~/~$escape.zip`**.
+Napadač je mogao da kreira **`.bash_profile`** i **`.zshenv`** koji sadrže payload, da ih arhivira i upiše ZIP u home direktorijum **žrtve** kao **`~/~$escape.zip`**.
 
-Zatim bi dodao zip fajl u **Login Items**, a nakon toga i aplikaciju **`Terminal`**. Kada bi se korisnik ponovo prijavio, zip fajl bi bio raspakovan u korisnički folder, čime bi se prepisali **`.bash_profile`** i **`.zshenv`**, pa bi terminal izvršio jedan od ovih fajlova (u zavisnosti od toga da li se koristi bash ili zsh).
+Zatim bi ZIP i **Terminal** bili dodati kao Login Items. Prilikom sledeće prijave, Archive Utility izvlači dotfiles u korisnikov home direktorijum, a shell aplikacije Terminal-a izvršava odgovarajuću startup datoteku (`.bash_profile` za demonstriranu Bash putanju ili `.zshenv` za Zsh).<sup>[[3]](#references)</sup>
 
 Pogledajte [**originalni izveštaj ovde**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).<sup>[[3]](#references)</sup>
 
-### Word Sandbox Bypass pomoću Open-a i env promenljivih
+### Word Sandbox Bypass sa Open i env promenljivama
 
-Iz sandbox-ovanih procesa i dalje je moguće pozvati druge procese pomoću **`open`** utility-ja. Štaviše, ovi procesi će se izvršavati **unutar sopstvenog sandbox-a**.
+Sandbox-ovani procesi su i dalje mogli da zahtevaju pokretanje aplikacija putem **`open`**. Pokrenuta aplikacija radila je u sopstvenom bezbednosnom kontekstu, umesto da nasledi tačan sandbox profil Word-a.<sup>[[4]](#references)</sup>
 
-Otkriveno je da `open` utility ima opciju **`--env`** za pokretanje aplikacije sa **specifičnim env** promenljivama. Zato je bilo moguće kreirati fajl **`.zshenv`** unutar foldera **u sandbox-u**, a zatim koristiti `open` sa `--env`, postavljajući promenljivu **`HOME`** na taj folder i otvarajući aplikaciju `Terminal`, koja će izvršiti fajl `.zshenv` (iz nekog razloga je bilo potrebno postaviti i promenljivu `__OSINSTALL_ENVIROMENT`).
+Pogođeni `open` utility imao je opciju **`--env`** za prosleđivanje environment promenljivih. Exploit je kreirao `.zshenv` unutar sandbox-a, postavio `HOME` na taj direktorijum i pokrenuo Terminal, tako da ga Zsh izvrši. Prijavljeni lanac je takođe postavljao pogrešno napisanu privatnu promenljivu `__OSINSTALL_ENVIROMENT`; sačuvajte upravo takvo pisanje prilikom reprodukcije istorijskog PoC-a.<sup>[[4]](#references)</sup>
 
 Pogledajte [**originalni izveštaj ovde**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).<sup>[[4]](#references)</sup>
 
-### Word Sandbox Bypass pomoću Open-a i stdin-a
+### Word Sandbox Bypass sa Open i stdin
 
 Utility **`open`** je takođe podržavao parametar **`--stdin`** (a nakon prethodnog bypass-a više nije bilo moguće koristiti `--env`).
 
-Stvar je u tome da, iako je **`python`** bio potpisan od strane Apple-a, **neće izvršiti** skriptu sa atributom **`quarantine`**. Međutim, bilo je moguće proslediti mu skriptu preko stdin-a, pa neće proveravati da li je ona bila quarantined:
+Iako bi Apple-ova Python aplikacija odbila quarantined script datoteku, ranjivi workflow je mogao da prosledi istu skriptu putem standardnog ulaza, čime se zaobilazila provera quarantine-a zasnovana na datoteci:<sup>[[5]](#references)</sup>
 
-1. Drop-ujte fajl **`~$exploit.py`** sa proizvoljnim Python komandama.
-2. Pokrenite _open_ **`–stdin='~$exploit.py' -a Python`**, čime se Python aplikacija pokreće tako da naš drop-ovani fajl služi kao njen standardni input. Python bez problema izvršava naš kod, a pošto je child process od **`launchd`**, nije ograničen pravilima Word-ovog sandbox-a.<sup>[[5]](#references)</sup>
+1. Ostavite datoteku **`~$exploit.py`** sa proizvoljnim Python komandama.
+2. Pokrenite `open --stdin='~$exploit.py' -a Python`. Pokrenuta Python aplikacija prima ostavljeni kod preko standardnog ulaza i, u ranjivim verzijama, izvršava se izvan Word sandbox-a zato što je LaunchServices kreira pod `launchd`-om.<sup>[[5]](#references)</sup>
 
 ## References
 
-- [1] [Escaping the Sandbox – Microsoft Office on macOS](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/)
-- [2] [Office Drama on macOS](https://objective-see.org/blog/blog_0x4B.html)
-- [3] [Office365 MacOS Sandbox Escape](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)
-- [4] [Technical Analysis of CVE-2021-30864](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/)
-- [5] [Uncovering a macOS App Sandbox escape vulnerability: A deep dive into CVE-2022-26706 - Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2022/07/13/uncovering-a-macos-app-sandbox-escape-vulnerability-a-deep-dive-into-cve-2022-26706/)
-
+- [1] [Izlazak iz Sandbox-a – Microsoft Office na macOS-u](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/)
+- [2] [Office drama na macOS-u](https://objective-see.org/blog/blog_0x4B.html)
+- [3] [Office365 MacOS izlazak iz Sandbox-a](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)
+- [4] [Tehnička analiza CVE-2021-30864](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/)
+- [5] [Otkrivanje ranjivosti za izlazak iz macOS App Sandbox-a: Detaljna analiza CVE-2022-26706 - Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2022/07/13/uncovering-a-macos-app-sandbox-escape-vulnerability-a-deep-dive-into-cve-2022-26706/)
 {{#include ../../../../../banners/hacktricks-training.md}}

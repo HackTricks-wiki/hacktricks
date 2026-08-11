@@ -1,35 +1,40 @@
-# Modbus protokol
+# Protokol Modbus
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Uvod u Modbus protokol
+## Uvod u Modbus
 
-Modbus protokol je široko korišćen protokol u industrijskoj automatizaciji i kontrolnim sistemima. Modbus omogućava komunikaciju između različitih uređaja, kao što su programabilni logički kontroleri (PLCs), senzori, aktuatori i drugi industrijski uređaji. Razumevanje Modbus protokola je od suštinskog značaja, pošto je to najkorišćeniji komunikacioni protokol u ICS-u i ima veliku potencijalnu attack surface za sniffing, pa čak i injection komandi u PLCs.
+Modbus je otvoreni protokol aplikacionog sloja koji se široko implementira u PLC-ovima, senzorima, aktuatorima i drugim industrijskim uređajima. Njegov model zahtev/odgovor izlaže coils i registre putem function codes. Zbog toga se bezbednosno testiranje fokusira na neovlašćena čitanja/upisivanja, posmatranje saobraćaja, replay i nebezbedno ponašanje uređaja — a ne samo na pronalaženje TCP porta 502.<sup>[[1]](#references)</sup>
 
-Ovde su koncepti navedeni po tačkama, uz pružanje konteksta o protokolu i njegovom načinu rada. Najveći izazov u bezbednosti ICS sistema predstavljaju troškovi implementacije i nadogradnje. Ovi protokoli i standardi dizajnirani su početkom 80-ih i 90-ih godina, a i dalje se široko koriste. Pošto industrija ima veliki broj uređaja i veza, nadogradnja uređaja je veoma teška, što hakerima daje prednost u radu sa zastarelim protokolima. Attacks na Modbus su praktično neizbežni, jer će se koristiti bez nadogradnje ukoliko je njegov rad od kritičnog značaja za industriju.
+Mnoge implementacije zadržavaju staru serijsku opremu zato što nadogradnje zahtevaju prekid rada, ponovnu sertifikaciju ili zamenu terenskih uređaja. Tradicionalni Modbus ne pruža ni poverljivost ni autentikaciju ravnopravnih učesnika; Modbus Security je zaseban profil zasnovan na TLS-u, koji koristi X.509 sertifikate i TCP port 802. Pošto je specifikacija javna i može se nezavisno implementirati, ponašanje proizvođača i podrška za opcione funkcije variraju i treba ih fingerprintovati, a ne pretpostavljati.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Client-Server arhitektura
+## Arhitektura klijent-server
 
-Modbus protokol se obično koristi u Client-Server arhitekturi, gde master uređaj (client) pokreće komunikaciju sa jednim ili više slave uređaja (servera). Ovo se takođe naziva Master-Slave arhitektura, koja se široko koristi u elektronici i IoT-u sa SPI, I2C itd.
+U aktuelnoj terminologiji, **klijent** pokreće transakciju, a **server** vraća odgovor. Starija dokumentacija koristi termine **master/slave**. Ovaj odnos na nivou aplikacije ne treba mešati sa SPI ili I2C protokolima: to su različiti bus protokoli.<sup>[[1]](#references)</sup>
 
-## Serijske i Etherent verzije
+## Serijski i Ethernet transporti
 
-Modbus protokol je dizajniran i za serijsku komunikaciju i za Ethernet komunikaciju. Serijska komunikacija se široko koristi u legacy sistemima, dok moderni uređaji podržavaju Ethernet, koji nudi veće brzine prenosa podataka i pogodniji je za moderne industrijske mreže.
+Isti Modbus aplikacioni podaci mogu se prenositi serijskim varijantama (RTU ili ASCII framing) i putem Modbus TCP-a. Modbus TCP dodaje MBAP header i obično koristi TCP port 502; serijski RTU koristi kompaktni binarni framing i CRC, dok serijski ASCII predstavlja bajtove kao heksadecimalne karaktere i koristi LRC.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## Predstavljanje podataka
 
-Podaci se u Modbus protokolu prenose kao ASCII ili Binary, iako se Binary format koristi zbog svoje kompaktibilnosti sa starijim uređajima.
+Model podataka sastoji se od jednobitnih coils/discrete inputs i 16-bitnih input/holding registara. Vrednosti koje zauzimaju više registara, redosled bajtova, skaliranje i semantičko značenje specifični su za uređaj i moraju se potvrditi u mapi registara proizvođača.<sup>[[1]](#references)</sup>
 
-## Function Codes
+## Function codes
 
-ModBus protokol radi sa prenosom specifičnih function codes koji se koriste za upravljanje PLCs i različitim kontrolnim uređajima. Ovaj deo je važno razumeti, jer se replay attacks mogu izvesti ponovnim slanjem function codes. Legacy uređaji ne podržavaju nikakvu enkripciju prenosa podataka i obično imaju dugačke kablove koji ih povezuju, što omogućava tampering nad ovim kablovima, kao i hvatanje i injection podataka.
+Function codes biraju operacije kao što su čitanje coils (`0x01`), čitanje holding registara (`0x03`), upisivanje jednog coil/registera (`0x05`/`0x06`) i upisivanje više coils/registara (`0x0F`/`0x10`). Uhvaćeni zahtev za upisivanje može moći da se replay-uje kada implementacija nema kompenzujuću autentikaciju ili provere stanja procesa. Uz autorizovani fizički pristup dugim serijskim vodovima, assessor takođe može da uhvati ili ubaci frame-ove direktno na ožičenje nakon utvrđivanja električnog interfejsa, terminacije i bezbednog načina povezivanja. Svaka od ovih radnji može uticati na fizički proces, zato koristite lab ili izričito operativno odobrenje.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Adresiranje u Modbusu
+## Adresiranje
 
-Svaki uređaj u mreži ima jedinstvenu adresu, koja je neophodna za komunikaciju između uređaja. Protokoli kao što su Modbus RTU, Modbus TCP itd. koriste se za implementaciju adresiranja i služe kao transportni sloj za prenos podataka. Podaci koji se prenose nalaze se u formatu Modbus protokola, koji sadrži poruku.
+Serijski uređaji koriste unit adresu. Modbus TCP koristi IP adresiranje zajedno sa Unit Identifier-om u MBAP header-u, što je naročito relevantno kada TCP-to-serial gateway usmerava zahteve ka nizvodnim jedinicama. Reference registara prikazane u dokumentaciji proizvoda mogu biti zasnovane na indeksiranju od jedan (`40001`), dok su protokolarne adrese zasnovane na indeksiranju od nule, što je čest izvor off-by-one grešaka.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Pored toga, Modbus implementira i provere grešaka kako bi se obezbedio integritet prenetih podataka. Ali najvažnije je to što je Modbus Open Standard i svako može da ga implementira u svojim uređajima. Zbog toga je ovaj protokol postao globalni standard i široko je rasprostranjen u industrijskoj automatizaciji.
+Serijski framing uključuje provere grešaka u prenosu (CRC za RTU i LRC za ASCII), a TCP obezbeđuje svoj uobičajeni transportni checksum. Oni otkrivaju slučajnu korupciju; ne predstavljaju kriptografski integritet niti autentikaciju porekla.<sup>[[3]](#references)</sup>
 
-Zbog široke upotrebe i nedostatka nadogradnji, napad na Modbus pruža značajnu prednost zahvaljujući njegovoj attack surface. ICS u velikoj meri zavisi od komunikacije između uređaja, a svi napadi izvedeni nad njima mogu biti opasni po rad industrijskih sistema. Attacks kao što su replay, data injection, data sniffing i leak, Denial of Service, data forgery itd. mogu se izvesti ako napadač identifikuje medijum prenosa.
+Tokom autorizovane procene testirajte izloženost, dozvoljene function codes, opsege upisivih adresa, obradu izuzetaka, rate limits i da li network segmentation ili Modbus-aware firewall ograničava klijente. Relevantne pretnje uključuju pasivno otkrivanje podataka, neovlašćenu command injection, replay, falsifikovanje podataka i denial of service. Koordinirajte sva aktivna testiranja sa vlasnicima procesa, jer naizgled male promene registara mogu izmeniti fizički proces.
 
+## References
+
+- [1] [Modbus Organization — Specifikacija Modbus aplikacionog protokola V1.1b3](https://www.modbus.org/file/secure/modbusprotocolspecification.pdf)
+- [2] [Modbus Organization — Modbus Security protokol i vodiči za implementaciju](https://www.modbus.org/modbus-specifications)
+- [3] [Modbus Organization — Specifikacija i vodič za implementaciju Modbus-a preko serijske linije V1.02](https://www.modbus.org/file/secure/modbusoverserial.pdf)
 {{#include ../../banners/hacktricks-training.md}}
