@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Εργαλεία αυτόματης Enumeration για MacOS
+### Εργαλεία αυτόματης Enumeration σε macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Συγκεκριμένες εντολές MacOS
+### Συγκεκριμένες εντολές macOS
 ```bash
 #System info
 date
@@ -32,7 +32,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -117,22 +117,22 @@ sudo killall -HUP mDNSResponder
 ```
 ### Γρήγορος έλεγχος anti-analysis / virtualization
 
-Ορισμένα macOS stealers καλούν το `system_profiler` για να εντοπίσουν VMs και **τερματίζουν με διακριτό exit code (π.χ. 100)** ώστε να αποφεύγουν το sandbox detonation<sup>[[1]](#references)</sup>:
+Ορισμένα macOS stealers καλούν το `system_profiler` για να ανιχνεύσουν VM και **τερματίζουν με διακριτό exit code (π.χ. 100)**, ώστε να αποφεύγουν το sandbox detonation<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Εγκατεστημένο λογισμικό και υπηρεσίες
+### Εγκατεστημένο Λογισμικό & Υπηρεσίες
 
-Ελέγξτε για **ύποπτες** εγκατεστημένες εφαρμογές και **δικαιώματα** στους εγκατεστημένους πόρους:
+Ελέγξτε για **ύποπτες** εφαρμογές που είναι εγκατεστημένες και για **δικαιώματα** επί των εγκατεστημένων πόρων:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-### Διεργασίες χρήστη
+### Διεργασίες χρηστών
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -149,8 +149,7 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## Αναφορές
+## References
 
 - [1] [2025, η χρονιά του Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
 {{#include ../banners/hacktricks-training.md}}

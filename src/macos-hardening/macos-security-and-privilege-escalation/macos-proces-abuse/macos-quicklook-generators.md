@@ -4,20 +4,20 @@
 
 ## Βασικές πληροφορίες
 
-Το Quick Look είναι το **framework προεπισκόπησης αρχείων** του macOS. Όταν ένας χρήστης επιλέγει ένα αρχείο στο Finder, πατά Space, τοποθετεί τον δείκτη πάνω του ή προβάλλει έναν κατάλογο με ενεργοποιημένες τις μικρογραφίες, το Quick Look **φορτώνει αυτόματα ένα generator plugin** για να αναλύσει το αρχείο και να αποδώσει μια οπτική προεπισκόπηση.<sup>[[1]](#references)</sup>
+Το Quick Look είναι το **framework προεπισκόπησης αρχείων** του macOS. Όταν ένας χρήστης επιλέγει ένα αρχείο στο Finder, πατά Space, τοποθετεί τον δείκτη πάνω του ή προβάλλει έναν κατάλογο με ενεργοποιημένες τις μικρογραφίες, το Quick Look **φορτώνει αυτόματα ένα generator plugin** για την ανάλυση του αρχείου και την απόδοση μιας οπτικής προεπισκόπησης.<sup>[[1]](#references)</sup>
 
-Τα Quick Look generators είναι **bundles** (`.qlgenerator`) που κάνουν register για συγκεκριμένα **Uniform Type Identifiers (UTIs)**. Όταν το macOS χρειάζεται προεπισκόπηση για ένα αρχείο που αντιστοιχεί σε αυτό το UTI, φορτώνει το generator σε μια sandboxed βοηθητική process (`QuickLookSatellite` ή `qlmanage`) και καλεί τη generator function του.
+Τα Quick Look generators είναι **bundles** (`.qlgenerator`) που κάνουν register για συγκεκριμένα **Uniform Type Identifiers (UTIs)**. Όταν το macOS χρειάζεται προεπισκόπηση για ένα αρχείο που αντιστοιχεί σε αυτό το UTI, φορτώνει το generator σε μια βοηθητική διαδικασία που εκτελείται σε sandbox (`QuickLookSatellite` ή `qlmanage`) και καλεί τη συνάρτηση του generator.
 
-### Γιατί αυτό έχει σημασία για την ασφάλεια
+### Γιατί έχει σημασία για την ασφάλεια
 
 > [!WARNING]
-> Τα Quick Look generators ενεργοποιούνται **απλώς με την επιλογή ή την προβολή ενός αρχείου** — δεν απαιτείται ενέργεια "Open". Αυτό τα καθιστά ένα ισχυρό **passive exploitation vector**: ο χρήστης χρειάζεται απλώς να μεταβεί σε έναν κατάλογο που περιέχει ένα malicious file.
+> Τα Quick Look generators ενεργοποιούνται με **την απλή επιλογή ή προβολή ενός αρχείου** — δεν απαιτείται ενέργεια "Open". Αυτό τα καθιστά ένα ισχυρό **passive exploitation vector**: ο χρήστης χρειάζεται απλώς να περιηγηθεί σε έναν κατάλογο που περιέχει ένα κακόβουλο αρχείο.
 
 **Attack surface:**
-- Τα generators **αναλύουν αυθαίρετο περιεχόμενο αρχείων** από τον δίσκο, downloads, email attachments ή network shares
-- Ένα crafted file μπορεί να εκμεταλλευτεί **parsing vulnerabilities** (buffer overflows, format strings, type confusion) στον κώδικα του generator
-- Η απόδοση της προεπισκόπησης πραγματοποιείται **αυτόματα** — αρκεί η προβολή του φακέλου Downloads όπου έχει καταλήξει ένα malicious file
-- Το Quick Look εκτελείται σε έναν **sandboxed helper**, όμως έχουν επιδειχθεί sandbox escapes από αυτό το context
+- Τα generators **αναλύουν αυθαίρετο περιεχόμενο αρχείων** από τον δίσκο, downloads, συνημμένα email ή network shares
+- Ένα ειδικά διαμορφωμένο αρχείο μπορεί να εκμεταλλευτεί **parsing vulnerabilities** (buffer overflows, format strings, type confusion) στον κώδικα του generator
+- Η απόδοση της προεπισκόπησης πραγματοποιείται **αυτόματα** — αρκεί η προβολή ενός φακέλου Downloads στον οποίο έχει καταλήξει ένα κακόβουλο αρχείο
+- Το Quick Look εκτελείται σε έναν **sandboxed helper**, όμως έχουν καταδειχθεί sandbox escapes από αυτό το context
 
 ## Αρχιτεκτονική
 ```
@@ -31,7 +31,7 @@ Plugin parses file content → Returns preview image/HTML
 ↓
 Preview displayed to user
 ```
-## Αναγνώριση
+## Απαρίθμηση
 
 ### Λίστα εγκατεστημένων Generators
 ```bash
@@ -63,7 +63,7 @@ ORDER BY e.path;"
 
 ### Εκμετάλλευση μέσω Αρχείων
 
-Ένας third-party Quick Look generator που αναλύει σύνθετες μορφές αρχείων (3D models, scientific data, archive formats) αποτελεί κύριο στόχο:
+Ένας third-party Quick Look generator που αναλύει σύνθετες μορφές αρχείων (3D models, επιστημονικά δεδομένα, μορφές αρχειοθέτησης) αποτελεί κύριο στόχο:
 ```bash
 # 1. Identify a third-party generator and its UTI
 qlmanage -m plugins 2>&1 | grep -v "com.apple" | head -20
@@ -80,7 +80,7 @@ cp malicious.xyz ~/Downloads/
 
 # 5. When user opens Downloads in Finder → preview triggers → exploit fires
 ```
-### Drive-By μέσω Downloads
+### Drive-By μέσω Λήψεων
 ```
 1. Send crafted file via email/AirDrop/web download
 2. File lands in ~/Downloads/
@@ -89,9 +89,9 @@ cp malicious.xyz ~/Downloads/
 5. Generator parses malicious file → code execution in QuickLookSatellite
 6. (Optional) Sandbox escape from QuickLookSatellite context
 ```
-### Αντικατάσταση Generator τρίτου μέρους
+### Αντικατάσταση generator τρίτων
 
-Αν ένα bundle Quick Look generator είναι εγκατεστημένο σε **τοποθεσία εγγράψιμη από τον χρήστη** (`~/Library/QuickLook/`), μπορεί να αντικατασταθεί:
+Εάν ένα bundle generator του Quick Look είναι εγκατεστημένο σε **τοποθεσία εγγράψιμη από τον χρήστη** (`~/Library/QuickLook/`), μπορεί να αντικατασταθεί:
 ```bash
 # Check for user-writable generators
 ls -la ~/Library/QuickLook/ 2>/dev/null
@@ -100,7 +100,7 @@ ls -la ~/Library/QuickLook/ 2>/dev/null
 # 1. Executes payload when any matching file is previewed
 # 2. Optionally still generates a valid preview to avoid suspicion
 ```
-### Ενεργοποίηση Quick Look απομακρυσμένα
+### Απομακρυσμένη ενεργοποίηση του Quick Look
 ```bash
 # Force Quick Look preview generation (for testing)
 qlmanage -p /path/to/malicious/file
@@ -111,14 +111,14 @@ qlmanage -t /path/to/malicious/file
 # Force thumbnail regeneration for a directory
 qlmanage -r cache
 ```
-## Considerations για το Sandbox
+## Ζητήματα Sandbox
 
-Οι Quick Look generators εκτελούνται μέσα σε μια διεργασία helper με Sandbox. Το προφίλ του Sandbox περιορίζει:
-- Την πρόσβαση στο σύστημα αρχείων (κυρίως μόνο για ανάγνωση του αρχείου που γίνεται preview)
-- Την πρόσβαση στο δίκτυο (περιορισμένη)
-- Το IPC (περιορισμένο `mach-lookup`)
+Οι Quick Look generators εκτελούνται μέσα σε μια helper process που βρίσκεται σε sandbox. Το sandbox profile περιορίζει:
+- Πρόσβαση στο file system (κυρίως μόνο για ανάγνωση του file που γίνεται preview)
+- Πρόσβαση στο network (περιορισμένη)
+- IPC (περιορισμένο mach-lookup)
 
-Ωστόσο, το Sandbox διαθέτει γνωστά escape vectors:
+Ωστόσο, το sandbox έχει γνωστά escape vectors:
 ```bash
 # Check the sandbox profile used by QuickLookSatellite
 sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
@@ -127,7 +127,7 @@ sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
 # Quick Look processes may have mach-lookup exceptions to system services
 # A sandbox escape chain: QLGenerator vuln → QuickLookSatellite → mach-lookup → system daemon
 ```
-## CVEs σε πραγματικές συνθήκες
+## CVE σε πραγματικές συνθήκες<sup>[[2]](#references)</sup>
 
 | CVE | Περιγραφή |
 |---|---|
@@ -158,10 +158,8 @@ timeout 5 qlmanage -t /tmp/fuzz_input.targetext 2>&1
 log show --last 5s --predicate 'process == "QuickLookSatellite" AND eventMessage CONTAINS "crash"' 2>/dev/null
 done
 ```
-## Αναφορές
+## References
 
-- [1] [Apple Developer — Quick Look Οδηγός Προγραμματισμού](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
-- [2] [Ενημερώσεις Ασφαλείας της Apple — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
-- [3] [Objective-See — Επιφάνεια Επίθεσης του Quick Look](https://objective-see.org/blog.html)
-
+- [1] [Apple Developer — Οδηγός προγραμματισμού του Quick Look](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
+- [2] [Apple Security Updates — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
 {{#include ../../../banners/hacktricks-training.md}}

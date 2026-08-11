@@ -9,11 +9,11 @@
 {{#endref}}
 
 
-Τα Mach-o binaries περιέχουν μια load command που ονομάζεται **`LC_CODE_SIGNATURE`** και υποδεικνύει το **offset** και το **size** των signatures μέσα στο binary. Στην πραγματικότητα, χρησιμοποιώντας το GUI tool MachOView, είναι δυνατό να βρεθεί στο τέλος του binary μια ενότητα που ονομάζεται **Code Signature** με αυτές τις πληροφορίες:
+Τα Mach-o binaries περιέχουν μια load command που ονομάζεται **`LC_CODE_SIGNATURE`** και υποδεικνύει το **offset** και το **μέγεθος** των signatures μέσα στο binary. Μάλιστα, χρησιμοποιώντας το GUI tool MachOView, είναι δυνατό να βρεθεί στο τέλος του binary ένα section που ονομάζεται **Code Signature**, με αυτές τις πληροφορίες:
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-Το magic header του Code Signature είναι **`0xFADE0CC0`** (embedded code signature) ή **`0xFADE0CC1`** (detached code signature). Στη συνέχεια, υπάρχουν πληροφορίες όπως το length και ο αριθμός των blobs του superBlob που τα περιέχει.\
+Το magic header του Code Signature είναι **`0xFADE0CC0`** (embedded code signature) ή **`0xFADE0CC1`** (detached code signature). Στη συνέχεια υπάρχουν πληροφορίες όπως το μήκος και ο αριθμός των blobs του superBlob που τα περιέχει.\
 Είναι δυνατό να βρεθούν αυτές οι πληροφορίες στον [πηγαίο κώδικα εδώ](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):<sup>[[1]](#references)</sup>
 ```c
 /*
@@ -43,10 +43,10 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-Τα συνήθη blobs που περιέχονται είναι τα Code Directory, Requirements και Entitlements, καθώς και ένα Cryptographic Message Syntax (CMS).\
+Τα συνηθισμένα blobs που περιέχονται είναι τα Code Directory, Requirements και Entitlements, καθώς και ένα Cryptographic Message Syntax (CMS).\
 Επιπλέον, σημειώστε ότι τα δεδομένα που είναι encoded στα blobs είναι encoded σε **Big Endian.**
 
-Επιπλέον, σημειώστε ότι τα signatures μπορούν να αποσυνδεθούν από τα binaries και να αποθηκευτούν στο `/var/db/DetachedSignatures` (χρησιμοποιείται από το iOS).
+Επιπλέον, σημειώστε ότι οι signatures μπορούν να αποσπαστούν από τα binaries και να αποθηκευτούν στο `/var/db/DetachedSignatures` (χρησιμοποιείται από το iOS).
 
 ## Code Directory Blob
 
@@ -108,12 +108,12 @@ __attribute__ ((aligned(1)));
 ```
 Σημειώστε ότι υπάρχουν διαφορετικές εκδόσεις αυτού του struct, όπου οι παλαιότερες ενδέχεται να περιέχουν λιγότερες πληροφορίες.
 
-Σημειώστε ότι το Code directory μπορεί να χρησιμοποιεί οποιονδήποτε hashing algorithm. Προς το παρόν, ο πιο συνηθισμένος είναι ο **SHA256** (υποδεικνύεται από την τιμή 2 στο πεδίο `hashType`), αλλά στο μέλλον, αν αυτό το hash παραβιαστεί, η Apple θα μπορούσε να αρχίσει να χρησιμοποιεί διαφορετικό.
+Σημειώστε ότι ο κατάλογος Code μπορεί να χρησιμοποιεί οποιονδήποτε hashing algorithm. Προς το παρόν, ο πιο συνηθισμένος είναι ο **SHA256** (υποδεικνύεται από την τιμή 2 στο πεδίο `hashType`), αλλά στο μέλλον, αν αυτό το hash παραβιαστεί, η Apple θα μπορούσε να αρχίσει να χρησιμοποιεί διαφορετικό.
 
-## Υπογραφή Code Pages
+## Signing Code Pages
 
-Το hashing ολόκληρου του binary θα ήταν μη αποδοτικό και ακόμη και άχρηστο, αν αυτό φορτωνόταν στη μνήμη μόνο μερικώς. Επομένως, το code signature είναι στην πραγματικότητα ένα hash από hashes, όπου κάθε binary page γίνεται hash ξεχωριστά.\
-Στην πραγματικότητα, στον προηγούμενο κώδικα του **Code Directory** μπορείτε να δείτε ότι το **page size καθορίζεται** σε ένα από τα πεδία του. Επιπλέον, αν το μέγεθος του binary δεν είναι πολλαπλάσιο του μεγέθους μιας page, το πεδίο **CodeLimit** καθορίζει πού βρίσκεται το τέλος του signature.
+Το hashing ολόκληρου του binary θα ήταν inefficient και ακόμη και άχρηστο αν αυτό φορτώνεται στη μνήμη μόνο μερικώς. Επομένως, η code signature είναι στην πραγματικότητα ένα hash από hashes, όπου κάθε binary page γίνεται hashed ξεχωριστά.\
+Στην πραγματικότητα, στον προηγούμενο κώδικα **Code Directory** μπορείτε να δείτε ότι το **page size καθορίζεται** σε ένα από τα πεδία του. Επιπλέον, αν το μέγεθος του binary δεν είναι πολλαπλάσιο του μεγέθους μιας page, το πεδίο **CodeLimit** καθορίζει πού βρίσκεται το τέλος της signature.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -184,11 +184,11 @@ openssl sha256 /tmp/*.page.*
 ```
 ## Entitlements Blob
 
-Σημειώστε ότι οι εφαρμογές ενδέχεται επίσης να περιέχουν ένα **entitlement blob**, όπου ορίζονται όλα τα entitlements. Επιπλέον, ορισμένα iOS binaries ενδέχεται να έχουν τα entitlements τους συγκεκριμένα στο special slot -7 (αντί για το special slot -5 των entitlements).
+Σημειώστε ότι οι εφαρμογές μπορεί επίσης να περιέχουν ένα **entitlement blob**, όπου ορίζονται όλα τα entitlements. Επιπλέον, ορισμένα iOS binaries μπορεί να έχουν τα entitlements τους ειδικά στο slot -7 (αντί για το ειδικό slot entitlements -5).
 
 ## Special Slots
 
-Οι εφαρμογές MacOS δεν έχουν όλα όσα χρειάζονται για την εκτέλεσή τους μέσα στο binary, αλλά χρησιμοποιούν επίσης **external resources** (συνήθως μέσα στο **bundle** των εφαρμογών). Επομένως, υπάρχουν ορισμένα slots μέσα στο binary που περιέχουν τα hashes κάποιων σημαντικών external resources, ώστε να ελέγχεται ότι δεν έχουν τροποποιηθεί.
+Οι εφαρμογές MacOS δεν περιέχουν όλα όσα χρειάζονται για την εκτέλεσή τους μέσα στο binary, αλλά χρησιμοποιούν επίσης **external resources** (συνήθως μέσα στο **bundle** των εφαρμογών). Επομένως, υπάρχουν ορισμένα slots μέσα στο binary που περιέχουν τα hashes κάποιων ενδιαφερόντων external resources, ώστε να ελέγχεται ότι δεν έχουν τροποποιηθεί.
 
 Στην πραγματικότητα, είναι δυνατό να δούμε στα Code Directory structs μια παράμετρο που ονομάζεται **`nSpecialSlots`**, η οποία υποδεικνύει τον αριθμό των special slots. Δεν υπάρχει special slot 0 και τα πιο συνηθισμένα (από -1 έως -6) είναι:
 
@@ -197,12 +197,14 @@ openssl sha256 /tmp/*.page.*
 - Hash του Resource Directory (hash του αρχείου `_CodeSignature/CodeResources` μέσα στο bundle).
 - Application specific (unused)
 - Hash των entitlements
-- DMG code signatures only
+- Μόνο για DMG code signatures
 - DER Entitlements
 
 ## Code Signing Flags
 
-Κάθε process έχει μια σχετική bitmask, γνωστή ως `status`, η οποία αρχικοποιείται από τον kernel, και ορισμένα από τα bits της μπορούν να παρακαμφθούν από το **code signature**. Αυτά τα flags που μπορούν να συμπεριληφθούν στο code signing [ορίζονται στον κώδικα](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[[1]](#references)</sup>
+Κάθε process διαθέτει μια σχετική bitmask, γνωστή ως `status`, η οποία αρχικοποιείται από τον kernel, και ορισμένα από τα στοιχεία της μπορούν να παρακαμφθούν από το **code signature**. Αυτά τα flags που μπορούν να συμπεριληφθούν στο code signing [ορίζονται στον κώδικα](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[[1]](#references)</sup>
+
+Το user space μπορεί να υποβάλει ερώτημα ή να ενημερώσει τα επιτρεπόμενα τμήματα αυτής της κατάστασης μέσω των operations `csops` και `csops_audittoken`, που ορίζονται από το XNU.<sup>[[5]](#references)</sup>
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -249,13 +251,13 @@ CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
 ```
 Σημειώστε ότι η συνάρτηση [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) μπορεί επίσης να προσθέσει δυναμικά τα flags `CS_EXEC_*` κατά την έναρξη της εκτέλεσης.
 
-## Απαιτήσεις Code Signature
+## Code Signature Requirements
 
-Κάθε application αποθηκεύει ορισμένες **requirements** που πρέπει να **ικανοποιεί**, ώστε να μπορεί να εκτελεστεί. Αν οι **requirements που περιέχει το application δεν ικανοποιούνται από το application**, δεν θα εκτελεστεί, καθώς πιθανότατα έχει τροποποιηθεί.
+Κάθε εφαρμογή αποθηκεύει ορισμένα **requirements** τα οποία πρέπει να **ικανοποιεί**, ώστε να μπορεί να εκτελεστεί. Αν η **εφαρμογή περιέχει requirements που δεν ικανοποιούνται από την ίδια την εφαρμογή**, δεν θα εκτελεστεί (καθώς πιθανότατα έχει τροποποιηθεί).
 
-Οι requirements ενός binary χρησιμοποιούν μια **ειδική γραμματική**, η οποία είναι μια ροή από **expressions**, και κωδικοποιούνται ως blobs χρησιμοποιώντας το `0xfade0c00` ως magic, του οποίου το **hash αποθηκεύεται σε ένα ειδικό code slot**.<sup>[[4]](#references)</sup>
+Τα requirements ενός binary χρησιμοποιούν μια **ειδική γραμματική**, η οποία αποτελείται από μια ροή **expressions** και κωδικοποιούνται ως blobs, χρησιμοποιώντας το `0xfade0c00` ως magic, του οποίου το **hash αποθηκεύεται σε ένα ειδικό code slot**.<sup>[[4]](#references)</sup>
 
-Οι requirements ενός binary μπορούν να προβληθούν εκτελώντας:
+Τα requirements ενός binary μπορούν να εμφανιστούν εκτελώντας:
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls
@@ -268,7 +270,7 @@ designated => identifier "org.whispersystems.signal-desktop" and anchor apple ge
 > [!TIP]
 > Σημειώστε ότι αυτές οι υπογραφές μπορούν να ελέγξουν στοιχεία όπως πληροφορίες πιστοποιητικών, TeamID, IDs, entitlements και πολλά άλλα δεδομένα.
 
-Επιπλέον, είναι δυνατή η δημιουργία ορισμένων compiled requirements με το εργαλείο `csreq`:
+Επιπλέον, είναι δυνατή η δημιουργία ορισμένων compiled requirements χρησιμοποιώντας το εργαλείο `csreq`:
 ```bash
 # Generate compiled requirements
 csreq -b /tmp/output.csreq -r='identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR'
@@ -280,20 +282,20 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
-Είναι δυνατό να προσπελάσετε αυτές τις πληροφορίες και να δημιουργήσετε ή να τροποποιήσετε requirements με ορισμένα APIs από το `Security.framework`, όπως:<sup>[[3]](#references)</sup>
+Είναι δυνατή η πρόσβαση σε αυτές τις πληροφορίες και η δημιουργία ή τροποποίηση requirements με ορισμένα APIs από το `Security.framework`, όπως:<sup>[[3]](#references)</sup>
 
 #### **Έλεγχος εγκυρότητας**
 
 - **`Sec[Static]CodeCheckValidity`**: Ελέγχει την εγκυρότητα του SecCodeRef σύμφωνα με το Requirement.
 - **`SecRequirementEvaluate`**: Επικυρώνει το requirement στο πλαίσιο του certificate.
-- **`SecTaskValidateForRequirement`**: Επικυρώνει ένα εκτελούμενο SecTask έναντι requirement τύπου `CFString`.
+- **`SecTaskValidateForRequirement`**: Επικυρώνει ένα εκτελούμενο SecTask έναντι ενός requirement `CFString`.
 
 #### **Δημιουργία και διαχείριση Code Requirements**
 
 - **`SecRequirementCreateWithData`:** Δημιουργεί ένα `SecRequirementRef` από binary data που αναπαριστούν το requirement.
 - **`SecRequirementCreateWithString`:** Δημιουργεί ένα `SecRequirementRef` από string expression του requirement.
-- **`SecRequirementCopy[Data/String]`**: Ανακτά την αναπαράσταση binary data ενός `SecRequirementRef`.
-- **`SecRequirementCreateGroup`**: Δημιουργεί ένα requirement για συμμετοχή σε app-group.
+- **`SecRequirementCopy[Data/String]`**: Ανακτά τη binary data αναπαράσταση ενός `SecRequirementRef`.
+- **`SecRequirementCreateGroup`**: Δημιουργεί ένα requirement για membership σε app-group.
 
 #### **Πρόσβαση σε πληροφορίες Code Signing**
 
@@ -303,16 +305,16 @@ od -A x -t x1 /tmp/output.csreq
 #### **Τροποποίηση Code Requirements**
 
 - **`SecCodeSignerCreate`**: Δημιουργεί ένα αντικείμενο `SecCodeSignerRef` για την εκτέλεση ενεργειών code signing.
-- **`SecCodeSignerSetRequirement`**: Ορίζει ένα νέο requirement ώστε να εφαρμοστεί από τον code signer κατά το signing.
-- **`SecCodeSignerAddSignature`**: Προσθέτει μια signature στον code που υπογράφεται με τον指定μένο signer.
+- **`SecCodeSignerSetRequirement`**: Ορίζει ένα νέο requirement για εφαρμογή από τον code signer κατά το signing.
+- **`SecCodeSignerAddSignature`**: Προσθέτει μια signature στον κώδικα που υπογράφεται με τον καθορισμένο signer.
 
-#### **Επικύρωση Code με Requirements**
+#### **Επικύρωση κώδικα με Requirements**
 
-- **`SecStaticCodeCheckValidity`**: Επικυρώνει ένα static code object έναντι των καθορισμένων requirements.
+- **`SecStaticCodeCheckValidity`**: Επικυρώνει ένα static code object έναντι καθορισμένων requirements.
 
 #### **Πρόσθετα χρήσιμα APIs**
 
-- **`SecCodeCopy[Internal/Designated]Requirement`: Λαμβάνει SecRequirementRef από SecCodeRef**
+- **`SecCodeCopy[Internal/Designated]Requirement`:** Λαμβάνει ένα SecRequirementRef από ένα SecCodeRef.
 - **`SecCodeCopyGuestWithAttributes`**: Δημιουργεί ένα `SecCodeRef` που αναπαριστά ένα code object με βάση συγκεκριμένα attributes, χρήσιμο για sandboxing.
 - **`SecCodeCopyPath`**: Ανακτά το file system path που σχετίζεται με ένα `SecCodeRef`.
 - **`SecCodeCopySigningIdentifier`**: Λαμβάνει το signing identifier (π.χ. Team ID) από ένα `SecCodeRef`.
@@ -321,19 +323,19 @@ od -A x -t x1 /tmp/output.csreq
 
 #### **Code Signing Flags και Constants**
 
-- **`kSecCSDefaultFlags`**: Προεπιλεγμένα flags που χρησιμοποιούνται σε πολλές functions του Security.framework για ενέργειες code signing.
-- **`kSecCSSigningInformation`**: Flag που χρησιμοποιείται για να καθοριστεί ότι πρέπει να ανακτηθεί signing information.
+- **`kSecCSDefaultFlags`**: Προεπιλεγμένα flags που χρησιμοποιούνται σε πολλές functions του `Security.framework` για ενέργειες code signing.
+- **`kSecCSSigningInformation`**: Flag που χρησιμοποιείται για να καθοριστεί ότι πρέπει να ανακτηθούν signing information.
 
 ## Επιβολή Code Signature
 
-Ο **kernel** είναι αυτός που **ελέγχει το code signature** πριν επιτρέψει την εκτέλεση του code της εφαρμογής. Επιπλέον, ένας τρόπος για να είναι δυνατή η εγγραφή και εκτέλεση νέου code στη μνήμη είναι η κατάχρηση του JIT, αν το `mprotect` κληθεί με το flag `MAP_JIT`. Σημειώστε ότι η εφαρμογή χρειάζεται ένα ειδικό entitlement για να μπορεί να το κάνει αυτό.
+Ο **kernel** είναι αυτός που **ελέγχει το code signature** πριν επιτρέψει την εκτέλεση του κώδικα της εφαρμογής. Επιπλέον, ένας τρόπος για να είναι δυνατή η εγγραφή και εκτέλεση νέου κώδικα στη μνήμη είναι η κατάχρηση του JIT, εάν το `mprotect` κληθεί με το flag `MAP_JIT`. Σημειώστε ότι η εφαρμογή χρειάζεται ειδικό entitlement για να μπορεί να το κάνει αυτό.
 
 ## `cs_blobs` & `cs_blob`
 
-Το struct [**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) περιέχει τις πληροφορίες σχετικά με το entitlement της εκτελούμενης διεργασίας. Το `csb_platform_binary` ενημερώνει επίσης αν η εφαρμογή είναι **platform binary** (κάτι που ελέγχεται σε διαφορετικές χρονικές στιγμές από το OS, ώστε να εφαρμόζονται security mechanisms, όπως η προστασία των δικαιωμάτων SEND στα task ports αυτών των διεργασιών).<sup>[[2]](#references)</sup>
+Η δομή [**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) περιέχει τις πληροφορίες σχετικά με το entitlement της εκτελούμενης διεργασίας. Το `csb_platform_binary` ενημερώνει επίσης αν η εφαρμογή είναι **platform binary** (κάτι που ελέγχεται σε διαφορετικές χρονικές στιγμές από το OS για την εφαρμογή μηχανισμών ασφαλείας, όπως η προστασία των δικαιωμάτων SEND στα task ports αυτών των διεργασιών).<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> Σημειώστε ότι αρκετά security measures εξαρτώνται από το αν το binary είναι platform binary. Επομένως, ένας τρόπος για privilege escalation είναι να **κάνετε το binary platform binary** (για παράδειγμα, υπογράφοντάς το ξανά με certificate που το επιτρέπει).
+> Σημειώστε ότι αρκετά μέτρα ασφαλείας εξαρτώνται από το αν το binary είναι platform binary, επομένως ένας τρόπος για privilege escalation είναι να **μετατρέψετε το binary σε platform binary** (για παράδειγμα, υπογράφοντάς το ξανά με certificate που το επιτρέπει).
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;
@@ -392,12 +394,11 @@ bool csb_csm_managed;
 #endif
 };
 ```
-## Αναφορές
+## References
 
 - [1] [XNU — `osfmk/kern/cs_blobs.h` (`CodeDirectory`, `CS_*` flags, blob magic values)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
 - [2] [XNU — `bsd/kern/ubc_subr.c` (`cs_blob` handling and signature validation)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
 - [3] [Πηγαίος κώδικας του Apple Security framework — `libsecurity_codesigning`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/libsecurity_codesigning)
 - [4] [Apple Developer — Οδηγός Code Signing](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Introduction/Introduction.html)
 - [5] [XNU — `bsd/sys/codesign.h` (`csops`/`csops_audittoken` operations)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-
 {{#include ../../../banners/hacktricks-training.md}}
