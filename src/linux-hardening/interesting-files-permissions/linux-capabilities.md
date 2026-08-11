@@ -1,5 +1,7 @@
 # Linux Capabilities
 
+{{#include ../../banners/hacktricks-training.md}}
+
 Linux capabilities divide **root privileges into smaller, distinct units**, allowing processes to have a subset of privileges. This minimizes the risks by not granting full root privileges unnecessarily.<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[14]](#references)</sup>
 
 ### The Problem:

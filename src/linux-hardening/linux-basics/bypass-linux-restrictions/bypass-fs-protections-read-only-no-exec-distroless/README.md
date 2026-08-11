@@ -1,5 +1,7 @@
 # Bypass FS protections: read-only / no-exec / Distroless
 
+{{#include ../../../../banners/hacktricks-training.md}}
+
 ## Videos
 
 In the following videos you can find the techniques mentioned in this page explained more in depth:<sup>[[1]](#references)[[2]](#references)</sup>

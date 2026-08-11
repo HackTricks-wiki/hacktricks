@@ -1,5 +1,7 @@
 # Node inspector/CEF debug abuse
 
+{{#include ../../banners/hacktricks-training.md}}
+
 Historical practical examples include the Multimaster walkthrough and the CVE-2019-1414 Visual Studio Code debugger attack; use them as version-specific context rather than assuming every current Electron or Chromium target exposes the same primitives.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## Basic Information

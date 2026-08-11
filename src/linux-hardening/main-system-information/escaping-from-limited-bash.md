@@ -1,5 +1,7 @@
 # Escaping from Jails
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## **GTFOBins**
 
 **Search in** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **if you can execute any binary with "Shell" property**

@@ -1,5 +1,7 @@
 # RunC Privilege Escalation
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Basic information
 
 If you want to learn more about **runc** check the following page:

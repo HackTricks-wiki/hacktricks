@@ -1,5 +1,7 @@
 # Linux Privilege Escalation Checklist
 
+{{#include ../../banners/hacktricks-training.md}}
+
 # Checklist - Linux Privilege Escalation
 
 

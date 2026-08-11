@@ -1,5 +1,7 @@
 # Wildcards Spare Tricks
 
+{{#include ../../banners/hacktricks-training.md}}
+
 > Wildcard (aka *glob*) **argument injection** happens when a privileged script runs a Unix binary such as `tar`, `chown`, `rsync`, `zip`, `7z`, … with an unquoted wildcard like `*`.  
 > Since the shell expands the wildcard **before** executing the binary, an attacker who can create files in the working directory can craft filenames that begin with `-` so they are interpreted as **options instead of data**, effectively smuggling arbitrary flags or even commands.<sup>[[6]](#references)</sup>
 > This page collects the most useful primitives, recent research and modern detections for 2023-2025.

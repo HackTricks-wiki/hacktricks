@@ -1,5 +1,7 @@
 # Payloads to execute
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Bash
 
 `bash -p` enables privileged mode: when Bash starts with different real and effective IDs, it does not reset the effective ID to the real ID. The resulting shell still depends on the caller's existing credentials.<sup>[[1]](#references)[[3]](#references)</sup>

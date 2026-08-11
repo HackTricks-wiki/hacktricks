@@ -1,5 +1,7 @@
 # Container Runtimes, Engines, Builders, And Sandboxes
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 One of the biggest sources of confusion in container security is that several completely different components are often collapsed into the same word. "Docker" might refer to an image format, a CLI, a daemon, a build system, a runtime stack, or simply the idea of containers in general. For security work, that ambiguity is a problem, because different layers are responsible for different protections. A breakout caused by a bad bind mount is not the same thing as a breakout caused by a low-level runtime bug, and neither is the same thing as a cluster policy mistake in Kubernetes.
 
 This page separates the ecosystem by role so that the rest of the section can talk precisely about where a protection or weakness actually lives.

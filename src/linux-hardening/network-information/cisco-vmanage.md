@@ -1,5 +1,7 @@
 # Cisco - vmanage
 
+{{#include ../../banners/hacktricks-training.md}}
+
 Once you have code execution on Cisco vManage / *Catalyst SD-WAN Manager* as `vmanage`, `netadmin`, or `vmanage-admin`, the most interesting local privesc surfaces are usually the `confd` CLI stack, the `cmdptywrapper` helper, localhost REST APIs, and root-owned import/upload handlers.
 
 If you still need the **initial foothold** on a controller, check the dedicated control-plane page first:

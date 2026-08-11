@@ -1,5 +1,7 @@
 # Logstash Privilege Escalation
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Logstash
 
 Logstash is used to **gather, transform, and dispatch logs** through a system known as **pipelines**. These pipelines are made up of **input**, **filter**, and **output** stages.<sup>[[4]](#references)</sup> An interesting aspect arises when Logstash operates on a compromised machine.
