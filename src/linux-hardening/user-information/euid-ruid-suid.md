@@ -1,66 +1,64 @@
 # euid, ruid, suid
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ### Variabili di identificazione dell'utente
 
-- **`ruid`**: il **real user ID** indica l'utente che ha avviato il processo.
-- **`euid`**: noto come **effective user ID**, rappresenta l'identità utente utilizzata dal sistema per determinare i privilegi del processo. In genere, `euid` coincide con `ruid`, fatta eccezione per casi come l'esecuzione di un binario SetUID, in cui `euid` assume l'identità del proprietario del file, concedendo così specifici permessi operativi.
-- **`suid`**: questo **saved user ID** è fondamentale quando un processo con privilegi elevati (in genere in esecuzione come root) deve rinunciare temporaneamente ai propri privilegi per eseguire determinate attività, per poi recuperare successivamente il proprio stato iniziale elevato.
+- **`ruid`**: Il **real user ID** indica l'utente che ha avviato il processo.<sup>[[1]](#references)</sup>
+- **`euid`**: Noto come **effective user ID**, rappresenta l'identità utente utilizzata dal sistema per determinare i privilegi del processo. In genere, `euid` corrisponde a `ruid`, salvo in casi come l'esecuzione di un binario SetUID (quando la transizione set-user-ID viene rispettata), in cui `euid` assume l'identità del proprietario del file, concedendo così specifiche autorizzazioni operative.<sup>[[1]](#references)[[5]](#references)</sup>
+- **`suid`**: Questo **saved user ID** è fondamentale quando un processo con privilegi elevati (in genere eseguito come root) deve rinunciare temporaneamente ai propri privilegi per eseguire determinate attività, per poi recuperare successivamente il proprio stato iniziale elevato.<sup>[[1]](#references)</sup>
 
 #### Nota importante
 
-Un processo non eseguito come root può modificare il proprio `euid` solo per farlo coincidere con l'attuale `ruid`, `euid` o `suid`.
+Un processo senza privilegi può modificare il proprio `euid` solo per farlo corrispondere all'attuale `ruid`, `euid` o `suid`.<sup>[[3]](#references)</sup>
 
 ### Comprendere le funzioni set\*uid
 
-- **`setuid`**: contrariamente a quanto si potrebbe pensare inizialmente, `setuid` modifica principalmente `euid` anziché `ruid`. Nello specifico, per i processi privilegiati, allinea `ruid`, `euid` e `suid` all'utente specificato, spesso root, rendendo di fatto permanenti questi ID a causa del `suid` sovrascritto. Informazioni dettagliate sono disponibili nella [setuid man page](https://man7.org/linux/man-pages/man2/setuid.2.html).<sup>[[2]](#references)</sup>
-- **`setreuid`** e **`setresuid`**: queste funzioni consentono di modificare in modo granulare `ruid`, `euid` e `suid`. Tuttavia, le loro capacità dipendono dal livello di privilegio del processo. Per i processi non-root, le modifiche sono limitate ai valori correnti di `ruid`, `euid` e `suid`. Al contrario, i processi root o quelli con la capability `CAP_SETUID` possono assegnare valori arbitrari a questi ID. Ulteriori informazioni sono disponibili nella [setresuid man page](https://man7.org/linux/man-pages/man2/setresuid.2.html) e nella [setreuid man page](https://man7.org/linux/man-pages/man2/setreuid.2.html).<sup>[[3]](#references)[[4]](#references)</sup>
+- **`setuid`**: Contrariamente a quanto si potrebbe pensare inizialmente, `setuid` imposta l'`euid` del processo chiamante. Per un processo privilegiato, imposta anche `ruid` e `suid` sull'utente specificato; dopo che tutti gli ID sono stati impostati su root, il processo non può recuperare un'identità precedente utilizzando `setuid`. Informazioni dettagliate sono disponibili nella [setuid man page](https://man7.org/linux/man-pages/man2/setuid.2.html).<sup>[[2]](#references)</sup>
+- **`setreuid`** e **`setresuid`**: `setreuid` modifica `ruid` ed `euid`, mentre `setresuid` modifica tutti e tre gli ID. Per un processo senza privilegi, `setresuid` limita ogni destinazione all'attuale `ruid`, `euid` o `suid`; `setreuid` limita `euid` a tali valori e `ruid` all'attuale `ruid` o `euid`. Un processo con `CAP_SETUID` può assegnare valori arbitrari agli ID supportati da ciascuna chiamata. Ulteriori informazioni sono disponibili nella [setresuid man page](https://man7.org/linux/man-pages/man2/setresuid.2.html) e nella [setreuid man page](https://man7.org/linux/man-pages/man2/setreuid.2.html).<sup>[[3]](#references)[[4]](#references)</sup>
 
-Queste funzionalità non sono progettate come meccanismo di sicurezza, ma per facilitare il flusso operativo previsto, ad esempio quando un programma assume l'identità di un altro utente modificando il proprio effective user ID.
+Queste funzionalità non sono progettate come meccanismo di sicurezza, ma per facilitare il flusso operativo previsto, ad esempio quando un programma adotta l'identità di un altro utente modificando il proprio effective user ID.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
 
-È importante notare che, sebbene `setuid` possa essere una scelta comune per l'elevazione dei privilegi a root (poiché allinea tutti gli ID a root), distinguere tra queste funzioni è fondamentale per comprendere e manipolare il comportamento degli user ID in scenari diversi.
+È importante notare che una chiamata privilegiata a `setuid` può assegnare tutti e tre gli ID, mentre `setreuid` e `setresuid` offrono controlli differenti; distinguere queste funzioni è fondamentale per comprendere le transizioni degli user ID.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
 ### Meccanismi di esecuzione dei programmi in Linux
 
-#### **System Call `execve`**
+#### **System call `execve`**
 
-- **Funzionalità**: `execve` avvia un programma, determinato dal primo argomento. Accetta due array di argomenti, `argv` per gli argomenti ed `envp` per l'ambiente.
-- **Comportamento**: conserva lo spazio di memoria del chiamante, ma aggiorna lo stack, l'heap e i segmenti dati. Il codice del programma viene sostituito dal nuovo programma.
+- **Funzionalità**: `execve` avvia un programma, determinato dal primo argomento. Accetta due argomenti array, `argv` per gli argomenti ed `envp` per l'ambiente.<sup>[[5]](#references)</sup>
+- **Comportamento**: Mantiene lo spazio di memoria del chiamante, ma aggiorna i segmenti stack, heap e dati. Il codice del programma viene sostituito dal nuovo programma.<sup>[[5]](#references)</sup>
 - **Conservazione degli User ID**:
-- `ruid`, `euid` e gli ID dei gruppi supplementari rimangono invariati.
-- `euid` può subire modifiche specifiche se il nuovo programma ha il bit SetUID impostato.
-- `suid` viene aggiornato a partire da `euid` dopo l'esecuzione.
-- **Documentazione**: informazioni dettagliate sono disponibili nella [`execve` man page](https://man7.org/linux/man-pages/man2/execve.2.html).<sup>[[5]](#references)</sup>
+- `ruid` e gli ID dei gruppi supplementari rimangono invariati.<sup>[[5]](#references)</sup>
+- `euid` normalmente non cambia, ma può cambiare se il nuovo programma ha impostato il bit SetUID.<sup>[[5]](#references)</sup>
+- `suid` viene aggiornato dall'`euid` dopo l'esecuzione.<sup>[[5]](#references)</sup>
+- **Documentazione**: Informazioni dettagliate sono disponibili nella [`execve` man page](https://man7.org/linux/man-pages/man2/execve.2.html).<sup>[[5]](#references)</sup>
 
 #### **Funzione `system`**
 
-- **Funzionalità**: a differenza di `execve`, `system` crea un processo figlio usando `fork` ed esegue un comando all'interno di tale processo figlio usando `execl`.
-- **Esecuzione dei comandi**: esegue il comando tramite `sh` con `execl("/bin/sh", "sh", "-c", command, (char *) NULL);`.
-- **Comportamento**: poiché `execl` è una forma di `execve`, opera in modo simile, ma nel contesto di un nuovo processo figlio.
-- **Documentazione**: ulteriori informazioni sono disponibili nella [`system` man page](https://man7.org/linux/man-pages/man3/system.3.html).
+- **Funzionalità**: A differenza di `execve`, `system` si comporta come se creasse un processo figlio utilizzando `fork` ed eseguisse il comando all'interno di quel processo figlio tramite `execl`.<sup>[[6]](#references)</sup>
+- **Esecuzione dei comandi**: Esegue il comando tramite `sh` con `execl("/bin/sh", "sh", "-c", command, (char *) NULL);`.<sup>[[6]](#references)</sup>
+- **Comportamento**: Poiché `execl` è una chiamata della famiglia `exec`, opera in modo simile a `execve`, ma nel contesto di un nuovo processo figlio.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+- **Documentazione**: Ulteriori informazioni sono disponibili nella [`system` man page](https://man7.org/linux/man-pages/man3/system.3.html).<sup>[[6]](#references)</sup>
 
 #### **Comportamento di `bash` e `sh` con SUID**
 
 - **`bash`**:
-- Dispone di un'opzione `-p` che influenza il modo in cui vengono gestiti `euid` e `ruid`.
-- Senza `-p`, `bash` imposta `euid` su `ruid` se inizialmente sono diversi.
-- Con `-p`, viene preservato l'`euid` iniziale.
-- Ulteriori dettagli sono disponibili nella [`bash` man page](https://linux.die.net/man/1/bash).
+- Dispone di un'opzione `-p` che influenza il modo in cui vengono trattati `euid` e `ruid`.<sup>[[7]](#references)</sup>
+- Senza `-p`, `bash` imposta `euid` su `ruid` se inizialmente sono differenti.<sup>[[7]](#references)</sup>
+- Con `-p`, l'`euid` iniziale viene preservato.<sup>[[7]](#references)</sup>
+- Ulteriori dettagli sono disponibili nella [`bash` man page](https://linux.die.net/man/1/bash).<sup>[[7]](#references)</sup>
 - **`sh`**:
-- Non dispone di un meccanismo simile a `-p` in `bash`.
-- Il comportamento relativo agli user ID non è menzionato esplicitamente, fatta eccezione per l'opzione `-i`, che enfatizza la conservazione dell'uguaglianza tra `euid` e `ruid`.
-- Ulteriori informazioni sono disponibili nella [`sh` man page](https://man7.org/linux/man-pages/man1/sh.1p.html).
+- POSIX `sh` non definisce un'opzione di conservazione dei privilegi `-p` in stile Bash.<sup>[[8]](#references)</sup>
+- Il suo elenco di opzioni POSIX include `-i`, che seleziona la modalità interattiva e può essere rifiutata quando gli ID reali ed effettivi sono differenti.<sup>[[8]](#references)</sup>
+- Ulteriori informazioni sono disponibili nella [`sh` man page](https://man7.org/linux/man-pages/man1/sh.1p.html).<sup>[[8]](#references)</sup>
 
-Questi meccanismi, distinti nel loro funzionamento, offrono una gamma versatile di opzioni per eseguire e passare da un programma all'altro, con specifiche peculiarità nella gestione e nella conservazione degli user ID.
+Questi meccanismi, distinti nel loro funzionamento, offrono una gamma versatile di opzioni per eseguire e gestire le transizioni tra programmi, con specifiche differenze nel modo in cui gli User ID vengono gestiti e preservati.
 
-### Test del comportamento degli User ID nelle esecuzioni
+### Test dei comportamenti degli User ID nelle esecuzioni
 
-Esempi tratti da https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail, consultalo per ulteriori informazioni<sup>[[1]](#references)</sup>
+Esempi tratti da https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail; consultalo per ulteriori informazioni.<sup>[[1]](#references)</sup>
 
-#### Caso 1: utilizzo di `setuid` con `system`
+#### Caso 1: Utilizzo di `setuid` con `system`
 
-**Obiettivo**: comprendere l'effetto di `setuid` in combinazione con `system` e `bash` come `sh`.
+**Obiettivo**: Comprendere l'effetto di `setuid` in combinazione con `system` e `bash` come `sh`.
 
 **Codice C**:
 ```c
@@ -87,9 +85,9 @@ uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconf
 **Analisi:**
 
 - `ruid` ed `euid` iniziano rispettivamente come 99 (nobody) e 1000 (frank).
-- `setuid` li allinea entrambi a 1000.
+- In questo contesto senza privilegi, `setuid(1000)` lascia `ruid` a 99 ed `euid` a 1000.<sup>[[1]](#references)</sup>
 - `system` esegue `/bin/bash -c id` a causa del symlink da sh a bash.
-- `bash`, senza `-p`, adegua `euid` per corrispondere a `ruid`, con il risultato che entrambi diventano 99 (nobody).
+- `bash`, senza `-p`, adegua `euid` affinché corrisponda a `ruid`, facendo sì che entrambi siano 99 (nobody).<sup>[[1]](#references)</sup>
 
 #### Caso 2: Utilizzo di setreuid con system
 
@@ -116,8 +114,8 @@ uid=1000(frank) gid=99(nobody) groups=99(nobody) context=system_u:system_r:uncon
 ```
 **Analisi:**
 
-- `setreuid` imposta sia ruid che euid su 1000.
-- `system` invoca bash, che mantiene gli user ID invariati poiché sono uguali, operando di fatto come frank.
+- `setreuid` imposta sia ruid che euid a 1000.
+- `system` invoca bash, che mantiene gli user ID poiché sono uguali, operando di fatto come frank.<sup>[[1]](#references)</sup>
 
 #### Caso 3: Utilizzo di setuid con execve
 
@@ -140,9 +138,9 @@ uid=99(nobody) gid=99(nobody) euid=1000(frank) groups=99(nobody) context=system_
 ```
 **Analisi:**
 
-- `ruid` rimane 99, ma euid viene impostato su 1000, in linea con l'effetto di setuid.
+- `ruid` rimane 99, ma euid viene impostato su 1000, in linea con l'effetto di setuid.<sup>[[1]](#references)</sup>
 
-**Esempio di codice C 2 (Invocazione di Bash):**
+**Esempio di codice C 2 (Chiamata a Bash):**
 ```bash
 #define _GNU_SOURCE
 #include <stdlib.h>
@@ -162,7 +160,7 @@ uid=99(nobody) gid=99(nobody) groups=99(nobody) context=system_u:system_r:unconf
 ```
 **Analisi:**
 
-- Sebbene `euid` sia impostato su 1000 da `setuid`, `bash` reimposta `euid` su `ruid` (99) a causa dell'assenza di `-p`.
+- Sebbene `euid` sia impostato su 1000 da `setuid`, `bash` reimposta `euid` su `ruid` (99) a causa dell'assenza di `-p`.<sup>[[1]](#references)</sup>
 
 **Esempio di codice C 3 (Utilizzo di bash -p):**
 ```bash
@@ -181,14 +179,16 @@ return 0;
 ```bash
 bash-4.2$ $ ./e
 bash-4.2$ $ id
-uid=99(nobody) gid=99(nobody) euid=100
+uid=99(nobody) gid=99(nobody) euid=1000(frank)
 ```
-## Riferimenti
+## References
 
 - [1] [SetUID Rabbit Hole - 0xdf](https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail)
 - [2] [man7.org - pagina man di setuid](https://man7.org/linux/man-pages/man2/setuid.2.html)
 - [3] [man7.org - pagina man di setresuid](https://man7.org/linux/man-pages/man2/setresuid.2.html)
 - [4] [man7.org - pagina man di setreuid](https://man7.org/linux/man-pages/man2/setreuid.2.html)
 - [5] [man7.org - pagina man di execve](https://man7.org/linux/man-pages/man2/execve.2.html)
-
+- [6] [man7.org - pagina man di system](https://man7.org/linux/man-pages/man3/system.3.html)
+- [7] [man7.org - pagina man di bash](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [8] [man7.org - pagina man di POSIX sh](https://man7.org/linux/man-pages/man1/sh.1p.html)
 {{#include ../../banners/hacktricks-training.md}}

