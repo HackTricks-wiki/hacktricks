@@ -1,8 +1,10 @@
-# Maombi ya Wavuti
+# Web Requests
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Python Requests
 
-Mifano hii hutumia arguments za request zilizoandikwa kwenye nyaraka za Requests, properties za response, tuples za faili za multipart, na sessions.<sup>[[1]](#references)</sup> Mifano ya `verify=False` huzima uthibitishaji wa certificate za TLS na inapaswa kutumika tu katika testing inayodhibitiwa.<sup>[[1]](#references)</sup>
+Mifano hii hutumia request arguments, response properties, multipart file tuples, na sessions zilizoandikwa kwenye nyaraka za Requests.<sup>[[1]](#references)</sup> Mifano ya `verify=False` huzima uthibitishaji wa TLS certificate na inapaswa kutumika tu katika majaribio yanayodhibitiwa.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,7 +78,7 @@ return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 ## Python cmd ya kutumia RCE
 
-Command loop inaunda subclass ya Python's `Cmd`; method ya `default` hushughulikia command prefixes zisizotambuliwa, `cmdloop` husambaza mistari ya input, na `re.DOTALL` huruhusu extraction pattern kuvuka mistari mipya.<sup>[[2]](#references)[[3]](#references)</sup>
+Mzunguko wa amri huunda subclass ya Python's `Cmd`; method ya `default` hushughulikia command prefixes zisizotambuliwa, `cmdloop` husambaza input lines, na `re.DOTALL` huruhusu extraction pattern kuvuka newlines.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -106,6 +108,6 @@ term.cmdloop()
 ## References
 
 - [1] [Kiolesura cha Msanidi cha Requests](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — Usaidizi wa wakalimani wa amri wanaotumia mistari](https://docs.python.org/3/library/cmd.html)
+- [2] [Python `cmd` — Usaidizi kwa wakalimani wa amri wa mstari](https://docs.python.org/3/library/cmd.html)
 - [3] [Python `re` — Uendeshaji wa regular expression](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

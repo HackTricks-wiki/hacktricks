@@ -1,6 +1,8 @@
-# Volatility - Karatasi ya Marejeo
+# Volatility - CheatSheet
 
-Ikiwa unahitaji tool inayofanya memory analysis kiotomatiki kwa viwango tofauti vya scanning na kuendesha Volatility3 plugins nyingi kwa wakati mmoja, unaweza kutumia autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+{{#include ../../../banners/hacktricks-training.md}}
+
+Ikiwa unahitaji tool inayofanya memory analysis kiotomatiki kwa viwango tofauti vya scan na kuendesha Volatility3 plugins nyingi kwa wakati mmoja, unaweza kutumia autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 ```bash
 # Full scan (runs all plugins)
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
@@ -12,7 +14,7 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-Ikiwa unataka kitu **cha haraka na cha ajabu** kitakachoanzisha Volatility plugins kadhaa kwa wakati mmoja, unaweza kutumia: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+Ikiwa unataka kitu **cha haraka na chenye fujo** kitakachoanzisha Volatility plugins kadhaa kwa sambamba, unaweza kutumia: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -49,15 +51,15 @@ Fikia nyaraka rasmi katika [Volatility command reference](https://github.com/vol
 
 ### Dokezo kuhusu plugins za “list” dhidi ya “scan”
 
-Plugins za `list` hupitia miundo inayodumishwa na kernel, hivyo ni za haraka lakini huenda zikakosa objects ambazo malware imeziondoa kwenye orodha. Plugins za `scan` kama vile `psscan` hutafuta saini za objects kwenye memory; zinaweza kurejesha processes zilizositishwa au kuondolewa kwenye orodha, lakini ni za polepole zaidi na zinaweza kutoa false positives wakati miundo iliyobaki imeharibika.<sup>[[8]](#references)</sup>
+Plugins za `list` hupitia miundo inayodumishwa na kernel, hivyo ni za haraka lakini zinaweza kukosa objects ambazo malware imeziondoa kwenye orodha. Plugins za `scan`, kama vile `psscan`, hutafuta memory kwa signatures za objects; zinaweza kurejesha processes zilizositishwa au kuondolewa kwenye orodha, lakini ni za polepole zaidi na zinaweza kutoa false positives wakati miundo iliyobaki imeharibika.<sup>[[8]](#references)</sup>
 
-## Wasifu wa OS
+## Profiles za OS
 
 ### Volatility3
 
-Volatility 3 inahitaji symbol tables za mfumo wa uendeshaji unaolengwa. README ya mradi inaorodhesha packs za Windows, Mac, na Linux; ziweke katika `volatility3/symbols` au kwenye directory ya `symbols` iliyo kando ya executable. Symbols za Windows ambazo hazipo zinaweza kufetchiwa na kutengenezwa automatically, huku tables za Mac na Linux huenda zikahitaji kutengenezwa separately.<sup>[[9]](#references)</sup>
+Volatility 3 inahitaji symbol tables za operating system inayolengwa. README ya project inaorodhesha packs za Windows, Mac, na Linux; ziweke katika `volatility3/symbols` au kwenye directory ya `symbols` iliyo karibu na executable. Windows symbols ambazo hazipo zinaweza kutafutwa na kutengenezwa automatically, huku tables za Mac na Linux zikihitaji kuzalishwa separately.<sup>[[9]](#references)</sup>
 
-Symbol table packs za mifumo mbalimbali ya uendeshaji zinapatikana kwa **kupakua** katika:
+Symbol table packs za operating systems mbalimbali zinapatikana kwa **kupakua** katika:
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -65,13 +67,13 @@ Symbol table packs za mifumo mbalimbali ya uendeshaji zinapatikana kwa **kupakua
 
 ### Volatility2
 
-#### Wasifu wa Nje
+#### Profile ya Nje
 
-Unaweza kupata orodha ya profiles zinazoungwa mkono kwa kutekeleza:
+Unaweza kupata orodha ya profiles zinazotumika kwa kufanya:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-Ikiwa unataka kutumia **profaili mpya uliyopakua** (kwa mfano, ya Linux), unahitaji kuunda mahali fulani muundo wa folda ufuatao: _plugins/overlays/linux_ na uweke ndani ya folda hii faili ya zip iliyo na profaili. Kisha, pata nambari ya profaili kwa kutumia:
+Ikiwa unataka kutumia **profile mpya uliyopakua** (kwa mfano ya linux), unahitaji kuunda mahali fulani muundo wa folda ufuatao: _plugins/overlays/linux_ na kuweka ndani ya folda hii faili ya zip iliyo na profile. Kisha, pata nambari ya profiles kwa kutumia:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -83,22 +85,22 @@ LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 - A Profile for Linux CentOS7_3.10
 VistaSP0x64                                   - A Profile for Windows Vista SP0 x64
 VistaSP0x86                                   - A Profile for Windows Vista SP0 x86
 ```
-Unaweza **kupakua Linux na Mac profiles** kutoka [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
+Unaweza **download profiles za Linux na Mac** kutoka [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
 
 Katika sehemu iliyotangulia unaweza kuona kwamba profile inaitwa `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`, na unaweza kuitumia kutekeleza kitu kama:
 ```bash
 ./vol -f file.dmp --plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
 ```
-#### Gundua Profaili
+#### Gundua Profile
 ```
 volatility imageinfo -f file.dmp
 volatility kdbgscan -f file.dmp
 ```
 #### **Tofauti kati ya imageinfo na kdbgscan**
 
-[Maelezo ya Andrea Fortuna kuhusu utambuzi wa image](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/) yanaeleza kuwa `imageinfo` hutoa mapendekezo ya profile, huku `kdbgscan` ikitafuta KDBG signatures na kutumia ukaguzi wa sanity ili kutambua profile zinazowezekana na anwani za KDBG. Matokeo yake hutegemea kwa kiasi fulani ikiwa Volatility inaweza kupata DTB, kwa hivyo tumia profile inayojulikana au iliyopendekezwa unapoiendesha.<sup>[[1]](#references)</sup>
+[Maelezo ya Andrea Fortuna kuhusu utambuzi wa image](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/) yanaeleza kuwa `imageinfo` hutoa mapendekezo ya wasifu, huku `kdbgscan` ikichanganua saini za KDBG na kufanya ukaguzi wa mantiki ili kutambua wasifu wanaowezekana na anwani za KDBG. Matokeo yake hutegemea kwa kiasi fulani ikiwa Volatility inaweza kupata DTB, kwa hivyo tumia wasifu unaojulikana au uliopendekezwa unapoiendesha.<sup>[[1]](#references)</sup>
 
-Wakati candidates wengi wanaporejeshwa, linganisha idadi ya processes na modules: candidate yenye processes au modules sifuri inaaminika kidogo kuliko iliyo na lists zilizojaa. Chukulia hii kama ukaguzi wa sanity badala ya uthibitisho kwamba profile ni sahihi.<sup>[[1]](#references)</sup>
+Wakati wagombea wengi wanaporejeshwa, linganisha idadi yao ya michakato na modules: mgombea mwenye michakato au modules sifuri anaaminika kwa kiwango kidogo kuliko mwenye orodha zilizojaa. Chukulia hili kama ukaguzi wa mantiki badala ya uthibitisho kwamba wasifu ni sahihi.<sup>[[1]](#references)</sup>
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -112,18 +114,18 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-`KdDebuggerDataBlock`, inayojulikana kwa Volatility kama KDBG, ni muundo wa `_KDDEBUGGER_DATA64` unaojumuisha `PsActiveProcessHead`, kichwa cha orodha ya processes kinachotumika kwa enumeration ya processes.<sup>[[2]](#references)</sup>
+`KdDebuggerDataBlock`, inayojulikana kwa Volatility kama KDBG, ni muundo wa `_KDDEBUGGER_DATA64` unaojumuisha `PsActiveProcessHead`, kichwa cha orodha ya michakato kinachotumika kwa kuorodhesha michakato.<sup>[[2]](#references)</sup>
 
-## Taarifa za Mfumo wa Uendeshaji
+## Taarifa za OS
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-Plugin `banners.Banners` inaweza kutumiwa katika **vol3 kujaribu kutafuta linux banners** kwenye dump.
+Plugin `banners.Banners` inaweza kutumika katika **vol3 kujaribu kutafuta linux banners** kwenye dump.
 
-## Hashes/Nywila
+## Hashes/Passwords
 
-Toa SAM hashes, [credentials zilizohifadhiwa za domain](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) na [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
+Toa SAM hashes, [domain cached credentials](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) na [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -145,7 +147,7 @@ volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 
 ## Memory Dump
 
-The memory dump of a process will **extract everything** of the current status of the process. The **procdump** module will only **extract** the **code**.
+Memory dump ya process **itatoa kila kitu** kuhusu hali ya sasa ya process. Module ya **procdump** itatoa tu **code**.
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
@@ -153,8 +155,8 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 
 ### Orodhesha michakato
 
-Jaribu kutafuta michakato **inayotiliwa shaka** (kwa jina) au **michakato** ya watoto **isiyotarajiwa** (kwa mfano cmd.exe ikiwa mtoto wa iexplorer.exe).\
-Inaweza kuwa muhimu **kulinganisha** matokeo ya pslist na ya psscan ili kutambua michakato iliyofichwa.
+Jaribu kupata michakato **ya kutiliwa shaka** (kwa jina) au **michakato** ya watoto **isiyotarajiwa** (kwa mfano cmd.exe ikiwa mtoto wa iexplorer.exe).\
+Inaweza kuwa muhimu **kulinganisha** matokeo ya pslist na yale ya psscan ili kutambua michakato iliyofichwa.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -191,9 +193,9 @@ volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f fil
 {{#endtab}}
 {{#endtabs}}
 
-### Mstari wa amri
+### Command line
 
-Je, kuna chochote cha kutiliwa shaka kilitekelezwa?
+Anything suspicious was executed?
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -210,11 +212,11 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-Commands zinazotekelezwa katika `cmd.exe` zinasimamiwa na **`conhost.exe`** (au **`csrss.exe`** kwenye mifumo ya kabla ya Windows 7). Hii inamaanisha kwamba ikiwa **`cmd.exe`** itasitishwa na mshambuliaji kabla ya memory dump kupatikana, bado inawezekana kurejesha historia ya amri za session kutoka kwenye memory ya **`conhost.exe`**. Ili kufanya hivi, ikiwa shughuli zisizo za kawaida zitagunduliwa ndani ya modules za console, memory ya mchakato husika wa **`conhost.exe`** inapaswa kudumpiwa. Kisha, kwa kutafuta **strings** ndani ya dump hii, mistari ya amri iliyotumika kwenye session inaweza kutolewa.
+Commands executed in `cmd.exe` hudhibitiwa na **`conhost.exe`** (au **`csrss.exe`** kwenye mifumo ya kabla ya Windows 7). Hii inamaanisha kuwa ikiwa **`cmd.exe`** itasitishwa na mshambulizi kabla ya memory dump kupatikana, bado inawezekana kurejesha historia ya commands ya session kutoka kwenye memory ya **`conhost.exe`**. Ili kufanya hivyo, ikiwa shughuli zisizo za kawaida zitagunduliwa ndani ya modules za console, memory ya process husika ya **`conhost.exe`** inapaswa kudumpiwa. Kisha, kwa kutafuta **strings** ndani ya dump hii, command lines zilizotumika kwenye session zinaweza kutolewa.
 
 ### Mazingira
 
-Pata env variables za kila mchakato unaoendesha. Huenda kukawa na values za kuvutia.
+Pata env variables za kila process inayoendeshwa. Huenda kukawa na values za kuvutia.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -232,10 +234,10 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 {{#endtab}}
 {{#endtabs}}
 
-### Privileges za token
+### Ruhusa za Token
 
-Angalia token zenye privileges katika services zisizotarajiwa.\
-Inaweza kuwa muhimu kuorodhesha processes zinazotumia token yenye privileges.
+Kagua tokens za ruhusa katika services zisizotarajiwa.\
+Inaweza kuvutia kuorodhesha processes zinazotumia token yenye ruhusa maalum.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -259,8 +261,8 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePri
 
 ### SIDs
 
-Kagua kila SSID inayomilikiwa na process.\
-Inaweza kuwa muhimu kuorodhesha processes zinazotumia SID yenye privileges (na processes zinazotumia service SID).
+Kagua kila SSID inayomilikiwa na mchakato.\
+Inaweza kuvutia kuorodhesha michakato inayotumia SID yenye privileges (na michakato inayotumia service SID).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -280,7 +282,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### Handles
 
-Ni muhimu kujua ni faili, funguo, nyuzi, process... nyingine zipi ambazo **process ina handle** (imefungua)
+Ni muhimu kujua ni faili, funguo, nyuzi, michakato... ipi mingine ambayo **mchakato una handle** (imefungua)
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -316,7 +318,7 @@ volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dm
 
 ### Strings kwa kila process
 
-Volatility hutuwezesha kuangalia string inahusishwa na process gani.
+Volatility hutuwezesha kuangalia string inamilikiwa na process gani.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -356,7 +358,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-Thamani za registry za `UserAssist` huhifadhi rekodi za programu zilizozinduliwa kupitia Windows Explorer, ikijumuisha idadi ya utekelezaji na mihuri ya muda ya uzinduzi wa mwisho; uzinduzi kupitia command line hauhifadhiwi katika funguo hizi.<sup>[[3]](#references)</sup>
+Thamani za registry za `UserAssist` hurekodi programu zilizozinduliwa kupitia Windows Explorer, ikijumuisha idadi ya utekelezaji na mihuri ya muda ya uzinduzi wa mwisho; uzinduzi kupitia command line harekodiwi katika funguo hizi.<sup>[[3]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -422,7 +424,7 @@ volatility --profile=SomeLinux -f file.dmp linux_route_cache
 
 ## Hive ya Registry
 
-### Onyesha hives zinazopatikana
+### Chapisha hives zinazopatikana
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -523,9 +525,9 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-Kwenye NTFS, MFT ina angalau ingizo moja kwa kila faili kwenye volume, ikijumuisha yenyewe. Metadata na maudhui ya faili huhifadhiwa katika maingizo ya MFT au katika maeneo yanayoelezwa na maingizo hayo; tazama [Microsoft documentation](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
+Kwenye NTFS, MFT ina angalau ingizo moja kwa kila faili kwenye volume, ikijumuisha yenyewe. Metadata na maudhui ya faili huhifadhiwa kwenye maingizo ya MFT au katika maeneo yanayoelezwa na maingizo hayo; tazama [Microsoft documentation](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
 
-### SSL Keys/Certs
+### Vifunguo/Vyeti vya SSL
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -544,7 +546,7 @@ volatility --profile=Win7SP1x86_23418 dumpcerts --dump-dir=. -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-## Malware
+## Programu hasidi
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -582,10 +584,10 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 {{#endtab}}
 {{#endtabs}}
 
-### Kuchanganua kwa kutumia yara
+### Scanning with yara
 
 Tumia script hii kupakua na kuunganisha rules zote za yara za malware kutoka github: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-Unda directory ya _**rules**_ na uiendeshe. Hii itaunda faili iitwayo _**malware_rules.yar**_ ambayo ina rules zote za yara za malware.
+Unda directory ya _**rules**_ na uiiendeshe. Hii itaunda file inayoitwa _**malware_rules.yar**_ ambayo ina yara rules zote za malware.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -612,9 +614,9 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 
 ## MISC
 
-### Plugins za nje
+### External plugins
 
-Ikiwa unataka kutumia plugins za nje, hakikisha kwamba folda zinazohusiana na plugins ndizo parameter ya kwanza inayotumika.
+Ikiwa unataka kutumia external plugins, hakikisha kwamba folda zinazohusiana na plugins ndizo parameter ya kwanza inayotumika.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -632,7 +634,7 @@ volatilitye --plugins="/tmp/plugins/" [...]
 
 #### Autoruns
 
-Ipakue kutoka [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns)
+Pakua kutoka [https://github.com/tomchop/volatility-autoruns](https://github.com/tomchop/volatility-autoruns)
 ```
 volatility --plugins=volatility-autoruns/ --profile=WinXPSP2x86 -f file.dmp autoruns
 ```
@@ -653,7 +655,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp handles -p <PID> -t mutant
 {{#endtab}}
 {{#endtabs}}
 
-### Viungo vya mfano
+### Symlinks
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -671,7 +673,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-Inawezekana **kusoma bash history kutoka kwenye memory.** Unaweza pia kudump file ya _.bash_history_, lakini ikiwa hiyo ilizimwa, utafurahi kwamba unaweza kutumia volatility module hii
+Inawezekana **kusoma historia ya bash kutoka kwenye memory.** Unaweza pia kudump faili ya _.bash_history_, lakini ikiwa ilikuwa disabled, utafurahi kwamba unaweza kutumia volatility module hii
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -687,7 +689,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp linux_bash
 {{#endtab}}
 {{#endtabs}}
 
-### TimeLine
+### Ratiba ya Muda
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -703,7 +705,7 @@ volatility --profile=Win7SP1x86_23418 -f timeliner
 {{#endtab}}
 {{#endtabs}}
 
-### Viendeshi
+### Madereva
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -729,12 +731,12 @@ volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp
 #Just vol2
 volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
 ```
-### Pata maandishi ya Notepad
+### Pata maandishi ya notepad
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 ```
-Please upload the screenshot or paste the Markdown content to translate.
+Please provide the screenshot or source text to translate.
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
@@ -743,17 +745,17 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-Kwenye mifumo inayotumia BIOS, MBR katika sector 0 ina msimbo mkuu wa boot na jedwali la partitions. Microsoft inaeleza kwamba `bootsect /mbr` husasisha msimbo bila kubadilisha jedwali hilo.<sup>[[7]](#references)</sup>
+Kwenye mifumo inayotumia BIOS, MBR iliyo kwenye sector 0 huwa na msimbo mkuu wa kuwasha na jedwali la partitions. Microsoft inaeleza kwamba `bootsect /mbr` husasisha msimbo huo bila kubadilisha jedwali hilo.<sup>[[7]](#references)</sup>
 
 ## References
 
 - [1] [Volatility, cheatsheet yangu mwenyewe (Sehemu ya 1): Utambuzi wa Image](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
 - [2] [Kupata Kernel Debugger Block](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
-- [3] [Windows UserAssist Keys](https://www.aldeid.com/wiki/Windows-userassist-keys)
-- [4] [Jedwali Kuu la Faili (Local File Systems) - Win32 apps](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
+- [3] [Vifunguo vya Windows UserAssist](https://www.aldeid.com/wiki/Windows-userassist-keys)
+- [4] [Master File Table (Local File Systems) - programu za Win32](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
 - [5] [PC inayotumia UEFI, protective MBR: ni nini? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
 - [6] [Mafunzo: Volatility plugins kwa uchanganuzi wa malware](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
-- [7] [Chaguo za Command-Line za Bootsect](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/bootsect-command-line-options?view=windows-11)
+- [7] [Chaguo za Mstari wa Amri za Bootsect](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/bootsect-command-line-options?view=windows-11)
 - [8] [Mafunzo - Volatility plugins na uchanganuzi wa malware](https://tomchop.me/posts/volatility-plugin-malware-analysis/)
-- [9] [Volatility 3 README](https://github.com/volatilityfoundation/volatility3/blob/develop/README.md)
+- [9] [README ya Volatility 3](https://github.com/volatilityfoundation/volatility3/blob/develop/README.md)
 {{#include ../../../banners/hacktricks-training.md}}

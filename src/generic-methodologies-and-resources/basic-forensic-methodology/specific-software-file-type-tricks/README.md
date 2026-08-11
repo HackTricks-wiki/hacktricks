@@ -1,5 +1,7 @@
 # Mbinu Maalum za Software/Aina za Faili
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 Hapa unaweza kupata mbinu za kuvutia za aina maalum za faili na/au software:
 
 

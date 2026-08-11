@@ -1,14 +1,16 @@
 # Kuhusu mwandishi
 
+{{#include ../banners/hacktricks-training.md}}
+
 ### Habari!!
 
-Techniques zilizochangiwa na watafiti wengine zinaendelea kutambuliwa kwa waandishi wao wa awali. Shukrani kwa kila mtu anayeshiriki maarifa ili kuboresha usalama wa intaneti.
+Techniques zilizochangiwa na researchers wengine zinaendelea kuhusishwa na waandishi wake wa awali. Shukrani kwa kila mtu anayeshiriki maarifa ili kuboresha usalama wa internet.
 
-Carlos anaongoza HackTricks. Mradi huu ni wiki ya cybersecurity inayodumishwa na jamii, inayokusanya techniques za usalama za vitendo na kukaribisha michango; ukipata kitu kinachokosekana au kilichopitwa na wakati, tafadhali fungua pull request katika project repository.<sup>[[1]](#references)</sup>
+Carlos anaongoza HackTricks. Mradi huu ni wiki ya cybersecurity inayosimamiwa na jamii, hukusanya techniques za kiusalama na kukaribisha michango; ukipata kitu kinachokosekana au kimepitwa na wakati, tafadhali fungua pull request katika repository ya mradi.<sup>[[1]](#references)</sup>
 
-HackTricks pia huwapa watafiti mahali pa kushiriki findings mpya, na kuwasaidia wasomaji kuendelea kufuatilia techniques za sasa za usalama.
+HackTricks pia huwapa researchers mahali pa kushiriki findings mpya, na kuwasaidia wasomaji kuendelea kufuatilia techniques za sasa za kiusalama.
 
 ## References
 
-- [1] [HackTricks-wiki/hacktricks — Hifadhi ya GitHub](https://github.com/HackTricks-wiki/hacktricks)
+- [1] [HackTricks-wiki/hacktricks — Repository ya GitHub](https://github.com/HackTricks-wiki/hacktricks)
 {{#include ../banners/hacktricks-training.md}}

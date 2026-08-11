@@ -1,41 +1,43 @@
 # Discord Invite Hijacking
 
-Discord Invite Hijacking hutumia vibaya sheria za utumiaji tena za custom vanity links: invite code ya muda iliyoisha muda wake, au code ya kudumu iliyofutwa inayoundwa tu na herufi ndogo na tarakimu, inaweza kusajiliwa kama vanity link kwenye server yenye Level 3 Boost. Custom vanity link pia inaweza kupatikana wakati server yake ya awali inapopoteza Level 3 Boost; kwa invite ya muda yenye herufi kubwa, attacker anaweza kusajili mapema vanity form yenye herufi ndogo huku invite ya kawaida ikiwa bado inafanya kazi, lakini uelekezaji upya huanza tu baada ya invite hiyo kuisha muda wake.<sup>[[1]](#references)[[2]](#references)</sup>
+{{#include ../../banners/hacktricks-training.md}}
 
-## Aina za Invite na Hatari ya Hijack
+Discord invite hijacking hutumia vibaya kanuni za utumiaji tena za vanity links maalum: invite code ya muda iliyo-expire, au code ya kudumu iliyofutwa inayoundwa tu na herufi ndogo na tarakimu, inaweza kusajiliwa kama vanity link kwenye server yenye Level 3 Boost. Vanity link maalum inaweza pia kupatikana wakati server yake ya awali inapoteza Level 3 Boost; kwa invite ya muda yenye herufi kubwa, mshambuliaji anaweza kusajili mapema vanity form yenye herufi ndogo huku invite ya kawaida ikiendelea kuwa active, lakini redirection huanza tu baada ya invite hiyo ku-expire.<sup>[[1]](#references)[[2]](#references)</sup>
+
+## Invite Types and Hijack Risk
 
 Hatari iliyoonekana hutofautiana kulingana na aina ya invite:<sup>[[1]](#references)[[2]](#references)</sup>
 
 | Invite Type           | Hijackable? | Condition / Comments                                                                                       |
 |-----------------------|-------------|------------------------------------------------------------------------------------------------------------|
-| Temporary Invite Link | ✅          | Baada ya kuisha muda wake, code hiyo hupatikana na inaweza kusajiliwa tena kama vanity URL na server yenye Boost. |
-| Permanent Invite Link | ⚠️          | Ikiwa imefutwa na inaundwa tu na herufi ndogo na tarakimu, code hiyo inaweza kupatikana tena.        |
-| Custom Vanity Link    | ✅          | Ikiwa server ya awali inapoteza Level 3 Boost, vanity invite yake hupatikana kwa usajili mpya.    |
+| Temporary Invite Link | ✅          | Baada ya ku-expire, code hupatikana na inaweza kusajiliwa tena kama vanity URL na server yenye Boost. |
+| Permanent Invite Link | ⚠️          | Ikiwa itafutwa na inajumuisha herufi ndogo na tarakimu pekee, code inaweza kupatikana tena.        |
+| Custom Vanity Link    | ✅          | Ikiwa server ya awali itapoteza Level 3 Boost, vanity invite yake hupatikana kwa ajili ya usajili mpya.    |
 
-## Hatua za Exploitation
+## Exploitation Steps
 
 1. Reconnaissance
-- Fuatilia vyanzo vya umma (forums, social media, Telegram channels) kwa invite links zinazolingana na muundo wa `discord.gg/{code}` au `discord.com/invite/{code}`.<sup>[[1]](#references)</sup>
+- Fuatilia vyanzo vya umma (forums, social media, Telegram channels) kwa invite links zinazolingana na muundo `discord.gg/{code}` au `discord.com/invite/{code}`.<sup>[[1]](#references)</sup>
 - Kusanya invite codes zinazovutia (za muda au vanity).<sup>[[1]](#references)</sup>
 2. Pre-registration
-- Unda au tumia Discord server iliyopo yenye ruhusa za Level 3 Boost.<sup>[[1]](#references)[[2]](#references)</sup>
-- Kwenye **Server Settings → Vanity URL**, jaribu kuhusisha target invite code. Ikikubaliwa, code hiyo huhifadhiwa na server hasidi.<sup>[[1]](#references)</sup>
+- Unda au tumia Discord server iliyopo yenye haki za Level 3 Boost.<sup>[[1]](#references)[[2]](#references)</sup>
+- Kwenye **Server Settings → Vanity URL**, jaribu kuassign target invite code. Ikikubaliwa, code inahifadhiwa na server hasidi.<sup>[[1]](#references)</sup>
 3. Hijack Activation
-- Kwa temporary invites, subiri hadi invite ya awali iishe muda wake (au ifute mwenyewe ikiwa unadhibiti chanzo).<sup>[[1]](#references)</sup>
-- Kwa codes zenye herufi kubwa, variant yenye herufi ndogo inaweza kudaiwa mara moja, ingawa uelekezaji upya huanza tu baada ya kuisha muda wake.<sup>[[1]](#references)</sup>
+- Kwa invites za muda, subiri hadi invite ya awali i-expire (au ifute mwenyewe ikiwa unadhibiti source).<sup>[[1]](#references)</sup>
+- Kwa codes zenye herufi kubwa, variant yenye herufi ndogo inaweza kudaiwa mara moja, ingawa redirection huanza tu baada ya expiration.<sup>[[1]](#references)</sup>
 4. Silent Redirection
-- Watumiaji wanaotembelea link ya zamani hutumwa bila kuonekana kwa server inayodhibitiwa na attacker mara hijack inapokuwa active.<sup>[[1]](#references)</sup>
+- Watumiaji wanaotembelea link ya zamani hutumwa bila kutambua kwenye server inayodhibitiwa na mshambuliaji mara hijack inapoanza kufanya kazi.<sup>[[1]](#references)</sup>
 
-## Phishing Flow kupitia Discord Server
+## Phishing Flow via Discord Server
 
 1. Zuia channels za server ili channel ya **#verify** pekee ionekane.<sup>[[1]](#references)</sup>
-2. Deploy bot (kwa mfano, **Safeguard#0786**) ili kuwahimiza wageni kufanya verification kupitia OAuth2.<sup>[[1]](#references)</sup>
-3. Bot huwaelekeza watumiaji kwenye phishing site (kwa mfano, `captchaguard.me`) kwa kisingizio cha CAPTCHA au hatua ya verification.<sup>[[1]](#references)</sup>
-4. Tumia ujanja wa UX wa **ClickFix**:<sup>[[1]](#references)</sup>
+2. Deploy bot (kwa mfano, **Safeguard#0786**) ili kuwaomba newcomers wathibitishe kupitia OAuth2.<sup>[[1]](#references)</sup>
+3. Bot huwapeleka watumiaji kwenye phishing site (kwa mfano, `captchaguard.me`) kwa kisingizio cha CAPTCHA au hatua ya verification.<sup>[[1]](#references)</sup>
+4. Tekeleza hila ya UX ya **ClickFix**:<sup>[[1]](#references)</sup>
 - Onyesha ujumbe wa CAPTCHA iliyoharibika.
-- Waelekeze watumiaji kufungua dialog ya **Win+R**, kubandika PowerShell command iliyopakiwa tayari, kisha kubonyeza Enter.
+- Waelekeze watumiaji wafungue dialog ya **Win+R**, wapaste PowerShell command iliyopakiwa mapema, kisha wabonyeze Enter.
 
-### Mfano wa ClickFix Clipboard Injection
+### ClickFix Clipboard Injection Example
 
 Campaign ilitumia JavaScript kunakili PowerShell command hasidi kwenye clipboard:<sup>[[1]](#references)</sup>
 ```javascript
@@ -50,10 +52,10 @@ Mbinu hii huepuka upakuaji wa faili moja kwa moja na hutumia vipengele vya UI vi
 
 ## Mitigations
 
-- Pendelea invite links za kudumu na uhakikishe kuwa code ina angalau herufi moja kubwa; permanent codes zilizofutwa zilizo na herufi kubwa haziwezi kutumika tena kama vanity links.<sup>[[1]](#references)</sup>
+- Pendelea invite links za kudumu na uhakikishe kuwa code ina angalau herufi moja kubwa; permanent codes zilizofutwa zenye herufi kubwa haziwezi kutumiwa tena kama vanity links.<sup>[[1]](#references)</sup>
 - Badilisha invite codes mara kwa mara na ubatilishe links za zamani.
 - Fuatilia hali ya Discord server boost na madai ya vanity URL.<sup>[[1]](#references)[[2]](#references)</sup>
-- Wafundishe watumiaji kuthibitisha uhalisi wa server na kuepuka kutekeleza commands zilizobandikwa kutoka kwenye clipboard.
+- Waelimishe watumiaji kuthibitisha uhalali wa server na kuepuka kuendesha amri zilizobandikwa kutoka clipboard.
 
 ## References
 

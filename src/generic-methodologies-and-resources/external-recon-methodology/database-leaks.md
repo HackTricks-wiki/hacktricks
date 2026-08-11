@@ -1,29 +1,31 @@
 # Database leaks
 
-## Injini za Kutafuta Data Breach
+{{#include ../../banners/hacktricks-training.md}}
 
-- [GreyNoise Visualizer](https://viz.greynoise.io/) - Tafuta IPs na CIDRs, na ulizie shughuli za scanners kwa kutumia tags, CVEs, na metadata.<sup>[[1]](#references)</sup>
-- [DeHashed](https://www.dehashed.com/) - Tafuta data iliyo wazi kwa kutumia usernames, email addresses, IP addresses, na selectors wengine; monitoring na API pia zinapatikana.<sup>[[2]](#references)</sup>
+## Search Engines za Data Breach
+
+- [GreyNoise Visualizer](https://viz.greynoise.io/) - Tafuta IPs na CIDRs, na query shughuli za scanners kwa tags, CVEs, na metadata.<sup>[[1]](#references)</sup>
+- [DeHashed](https://www.dehashed.com/) - Tafuta data iliyo exposed kwa usernames, email addresses, IP addresses, na selectors wengine; monitoring na API pia zinapatikana.<sup>[[2]](#references)</sup>
 - [Have I Been Pwned?](https://haveibeenpwned.com/) - Kagua ikiwa email address inaonekana kwenye data breaches zinazojulikana au paste records; notifications na API pia zinapatikana.<sup>[[3]](#references)</sup>
-- [ScamSearch](https://scamsearch.io/) - Tafuta records za scammers walioripotiwa kwa kutumia profile picture, email, username, phone number, crypto address, au website.<sup>[[4]](#references)</sup>
-- [Intelligence X](https://intelx.io/) - Tafuta selectors kama email addresses, domains, URLs, IPs, na CIDRs kwenye sources zilizowekwa kwenye index.<sup>[[5]](#references)</sup>
-- [SpyCloud](https://spycloud.com/check-your-exposure/) - Kagua business email au domain kwa credentials zilizo wazi, identities zilizoambukizwa na infostealer, na session cookies zilizoibwa.<sup>[[6]](#references)</sup>
-- [WeLeakInfo](https://weleakinfo.io/) - Tafuta databases zilizo na leak kwa kutumia domains, names, emails, IDs, phones, IPs, URLs, au hashes.<sup>[[7]](#references)</sup>
-- [BreachDirectory](https://breachdirectory.org/) - Kagua ikiwa email au username yako iliathiriwa.
-- [LeakCheck](https://leakcheck.io/) - Tafuta data iliyo wazi ya email, username, phone, hash, au domain na ufuatilie entries mpya.<sup>[[8]](#references)</sup>
+- [ScamSearch](https://scamsearch.io/) - Tafuta records za scammers walioripotiwa kwa profile picture, email, username, phone number, crypto address, au website.<sup>[[4]](#references)</sup>
+- [Intelligence X](https://intelx.io/) - Tafuta selectors kama email addresses, domains, URLs, IPs, na CIDRs kwenye sources zilizo indexed.<sup>[[5]](#references)</sup>
+- [SpyCloud](https://spycloud.com/check-your-exposure/) - Kagua business email au domain kwa credentials zilizo exposed, identities zilizoambukizwa na infostealer, na session cookies zilizoibwa.<sup>[[6]](#references)</sup>
+- [WeLeakInfo](https://weleakinfo.io/) - Tafuta databases zilizo leak kwa kutumia domains, names, emails, IDs, phones, IPs, URLs, au hashes.<sup>[[7]](#references)</sup>
+- [BreachDirectory](https://breachdirectory.org/) - Kagua ikiwa email au username yako iliathirika.
+- [LeakCheck](https://leakcheck.io/) - Tafuta data iliyo exposed ya email, username, phone, hash, au domain na monitor entries mpya.<sup>[[8]](#references)</sup>
 - [Findemail.io](https://findemail.io/) - Tafuta email addresses za kampuni fulani.
 - [Library of Leaks](https://search.libraryofleaks.org/) - Tafuta public documents, companies, na people, ikijumuisha leak datasets.<sup>[[9]](#references)</sup>
-- [LeakRadar](https://leakradar.io/) - Tafuta credentials zilizo na leak kwa kutumia email, domain, au raw string na ufuatilie exposures mpya.<sup>[[10]](#references)</sup>
-- [InfoStealers](https://infostealers.info/en/info) - Tafuta infostealer logs kutoka kwenye vifaa vilivyoambukizwa na ufuatilie data mpya.<sup>[[11]](#references)</sup>
-- [Leak-Lookup](https://leak-lookup.com/) - Tafuta kwenye data breaches na ufuatilie credential exposure.<sup>[[12]](#references)</sup>
-- [Scylla.so](https://scylla.so/) - Search engine ya database breaches inayoendeshwa na community.
-- [Leaked.domains](https://leaked.domains/) - Tafuta credentials zilizo na leak na records zinazohusiana kwa kutumia domain, email, username, password, IP, na selectors wengine.<sup>[[13]](#references)</sup>
-- [WhiteIntel](https://whiteintel.io/) - Fuatilia shughuli za dark web, credential leaks, infostealer data, na brand mentions.<sup>[[14]](#references)</sup>
-- [PSBDMP](https://psbdmp.ws/) - Jukwaa la kutafuta na kufuatilia dumps za Pastebin.
+- [LeakRadar](https://leakradar.io/) - Tafuta credentials zilizo leak kwa email, domain, au raw string na monitor exposures mpya.<sup>[[10]](#references)</sup>
+- [InfoStealers](https://infostealers.info/en/info) - Tafuta infostealer logs kutoka kwenye devices zilizoambukizwa na monitor data mpya.<sup>[[11]](#references)</sup>
+- [Leak-Lookup](https://leak-lookup.com/) - Tafuta kwenye data breaches na monitor credential exposure.<sup>[[12]](#references)</sup>
+- [Scylla.so](https://scylla.so/) - Search engine ya community ya database breaches.
+- [Leaked.domains](https://leaked.domains/) - Tafuta credentials zilizo leak na records zinazohusiana kwa domain, email, username, password, IP, na selectors wengine.<sup>[[13]](#references)</sup>
+- [WhiteIntel](https://whiteintel.io/) - Monitor shughuli za dark web, credential leaks, infostealer data, na brand mentions.<sup>[[14]](#references)</sup>
+- [PSBDMP](https://psbdmp.ws/) - Platform ya kutafuta na kufanya monitoring ya Pastebin dumps.
 
-## Tools za ku-enumerate data leaks
+## Tools za kuorodhesha data leaks
 
-- [Leaker](https://github.com/vflame6/leaker) - CLI ya passive leak discovery inayotafuta kwenye online sources mbalimbali kwa kutumia email, username, domain, keyword, au phone.<sup>[[15]](#references)</sup>
+- [Leaker](https://github.com/vflame6/leaker) - CLI ya passive leak discovery inayotafuta sources nyingi za mtandaoni kwa email, username, domain, keyword, au phone.<sup>[[15]](#references)</sup>
 
 ## References
 
@@ -40,6 +42,6 @@
 - [11] [OSINT InfoStealers.Info](https://infostealers.info/en/info)
 - [12] [Leak-Lookup - Search Engine ya Data Breach](https://leak-lookup.com/)
 - [13] [Leaked.Domains - Universal Search](https://leaked.domains/)
-- [14] [WhiteIntel - Jukwaa la Dark Web Intelligence na Monitoring](https://whiteintel.io/)
+- [14] [WhiteIntel - Dark Web Intelligence & Monitoring Platform](https://whiteintel.io/)
 - [15] [vflame6/leaker](https://github.com/vflame6/leaker)
 {{#include ../../banners/hacktricks-training.md}}

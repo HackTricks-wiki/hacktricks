@@ -1,4 +1,6 @@
-# Bruteforce Hash yenye Herufi Chache
+# Bruteforce Hash ya Herufi Chache
+
+{{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib
 

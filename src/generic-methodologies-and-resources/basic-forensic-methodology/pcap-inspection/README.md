@@ -1,23 +1,25 @@
 # Ukaguzi wa Pcap
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 > [!TIP]
-> **PCAP** na **PCAPNG** ni fomati tofauti za capture; **PCAPNG ni mrithi wa PCAP unaobadilika na kupanuka**, lakini support hutofautiana kulingana na tools. Ikiwa tool haiwezi kusoma PCAPNG, ibadilishe kuwa PCAP kwa kutumia Wireshark au tool nyingine inayooana.<sup>[[1]](#references)[[18]](#references)</sup>
+> **PCAP** na **PCAPNG** ni formats tofauti za capture; **PCAPNG ni toleo linaloweza kunyumbulika na kupanuka la PCAP**, lakini support hutofautiana kati ya tools. Ikiwa tool haiwezi kusoma PCAPNG, ibadilishe kuwa PCAP kwa kutumia Wireshark au tool nyingine inayooana.<sup>[[1]](#references)[[18]](#references)</sup>
 
 ## Tools za mtandaoni za pcaps
 
-- Ikiwa header ya pcap yako **imeharibika** unapaswa kujaribu **kuirekebisha** kwa kutumia: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php).<sup>[[2]](#references)</sup>
-- Extract **taarifa** na tafuta **malware** ndani ya pcap katika [**PacketTotal**](https://packettotal.com).<sup>[[19]](#references)</sup>
-- Tafuta **shughuli hasidi** ukitumia [**www.virustotal.com**](https://www.virustotal.com) na [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com).<sup>[[3]](#references)[[4]](#references)</sup>
-- **Uchambuzi kamili wa pcap kutoka browser katika** [**https://apackets.com/**](https://apackets.com/).<sup>[[5]](#references)</sup>
+- Ikiwa header ya pcap yako **imeharibika**, unapaswa kujaribu **kuirekebisha** kwa kutumia: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php).<sup>[[2]](#references)</sup>
+- Extract **information** na tafuta **malware** ndani ya pcap katika [**PacketTotal**](https://packettotal.com).<sup>[[19]](#references)</sup>
+- Tafuta **malicious activity** kwa kutumia [**www.virustotal.com**](https://www.virustotal.com) na [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com).<sup>[[3]](#references)[[4]](#references)</sup>
+- **Full pcap analysis from the browser in** [**https://apackets.com/**](https://apackets.com/).<sup>[[5]](#references)</sup>
 
-## Extract Taarifa
+## Extract Information
 
-Tools zifuatazo ni muhimu kwa ku-extract takwimu, files, n.k.
+Tools zifuatazo ni muhimu kwa ku-extract statistics, files, n.k.
 
 ### Wireshark
 
 > [!TIP]
-> **Ikiwa utaenda kuchanganua PCAP, kwa msingi lazima ujue jinsi ya kutumia Wireshark**
+> **Ikiwa uta-analyze PCAP, kimsingi lazima ujue jinsi ya kutumia Wireshark**
 
 Unaweza kupata mbinu kadhaa za Wireshark katika:
 
@@ -28,40 +30,40 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-Uchambuzi wa Pcap kutoka browser.<sup>[[5]](#references)</sup>
+Pcap analysis kutoka kwenye browser.<sup>[[5]](#references)</sup>
 
 ### Xplico Framework
 
-[**Xplico**](https://github.com/xplico/xplico) ni tool ya Unix-like network-forensics inayodecode files za PCAP na inaweza ku-extract email kupitia POP/IMAP/SMTP, contents za HTTP, simu za SIP VoIP, data za FTP, na data za TFTP.<sup>[[6]](#references)</sup>
+[**Xplico**](https://github.com/xplico/xplico) ni network-forensics tool ya Unix-like inayodecode files za PCAP na inaweza ku-extract email kupitia POP/IMAP/SMTP, HTTP contents, SIP VoIP calls, FTP data, na TFTP data.<sup>[[6]](#references)</sup>
 
-**Sakinisha**
+**Install**
 ```bash
 sudo bash -c 'echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" /etc/apt/sources.list'
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE
 sudo apt-get update
 sudo apt-get install xplico
 ```
-**Endesha**
+Endesha
 ```
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
-Ufikiaji wa _**127.0.0.1:9876**_ kwa kutumia credentials _**xplico:xplico**_
+Ufikiaji wa _**127.0.0.1:9876**_ kwa credentials _**xplico:xplico**_
 
-Kisha unda **case mpya**, unda **session mpya** ndani ya case hiyo na **upload** faili la **pcap**.
+Kisha create **case** mpya, create **session** mpya ndani ya case hiyo na **upload** faili la **pcap**.
 
 ### NetworkMiner
 
-Kama Xplico, [**NetworkMiner**](https://www.netresec.com/?page=NetworkMiner) huchanganua traffic ya PCAP ili kutoa artifacts kama vile mafaili, picha, barua pepe na passwords, na hukusanya taarifa za hosts; free edition yake inalenga zaidi Windows.<sup>[[7]](#references)</sup>
+Kama Xplico, [**NetworkMiner**](https://www.netresec.com/?page=NetworkMiner) huchanganua traffic ya PCAP ili kutoa artifacts kama vile faili, picha, barua pepe na passwords, na hukusanya taarifa za hosts; toleo lake lisilolipishwa ni hasa kwa Windows.<sup>[[7]](#references)</sup>
 
 ### NetWitness Investigator
 
-Unaweza kudownload [**NetWitness Investigator kutoka hapa**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Inafanya kazi kwenye Windows)**.\
-Vendor anaeleza freeware hiyo kuwa ni tool shirikishi ya kuchanganua network-session kwa triage ya malicious activity, na kwa sasa anatoa access kupitia contact form.<sup>[[8]](#references)</sup>
+Unaweza kupakua [**NetWitness Investigator kutoka hapa**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Inafanya kazi kwenye Windows)**.\
+Vendor anaeleza freeware hiyo kama tool ya interactive network-session analysis kwa triage ya malicious activity, na kwa sasa anawasilisha access kupitia contact form.<sup>[[8]](#references)</sup>
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-Modules zilizodocumentiwa za BruteShark zinaweza kuparse credentials kutoka HTTP, FTP, Telnet, IMAP na SMTP, ku-export authentication hashes za Kerberos, NTLM, CRAM-MD5 na HTTP-Digest kwa Hashcat, ku-map network nodes na users, kutoa DNS queries, kujenga upya TCP/UDP sessions na kufanya file carving.<sup>[[9]](#references)</sup>
+Modules zilizoandikwa za BruteShark zinaweza kuchanganua credentials kutoka HTTP, FTP, Telnet, IMAP na SMTP, ku-export authentication hashes za Kerberos, NTLM, CRAM-MD5 na HTTP-Digest kwa Hashcat, ku-map network nodes na users, kutoa DNS queries, kujenga upya TCP/UDP sessions na ku-carve files.<sup>[[9]](#references)</sup>
 
 ### Capinfos
 
@@ -71,7 +73,7 @@ capinfos capture.pcap
 ```
 ### Ngrep
 
-`ngrep` hutafuta payload za packets kwa kutumia regular expressions na hukubali BPF filters; `-I` husoma capture file inayooana na pcap.<sup>[[11]](#references)</sup> Mfano huu unachanganya vipengele hivyo kutafuta HTTP request katika trafiki iliyochaguliwa.
+`ngrep` hutafuta payload za packet kwa kutumia regular expressions na inakubali BPF filters; `-I` husoma capture file inayooana na pcap.<sup>[[11]](#references)</sup> Mfano huu unaunganisha vipengele hivyo kutafuta HTTP request katika traffic iliyochaguliwa.
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
@@ -84,15 +86,15 @@ Kutumia mbinu za kawaida za carving kunaweza kusaidia kutoa faili na taarifa kut
 ../partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-### Kukamata credentials
+### Kukusanya credentials
 
-Unaweza kutumia [PCredz](https://github.com/lgandx/PCredz) kuchanganua credentials kutoka kwenye faili ya PCAP iliyohifadhiwa au interface inayofanya kazi.<sup>[[12]](#references)</sup>
+Unaweza kutumia [PCredz](https://github.com/lgandx/PCredz) kuchanganua credentials kutoka kwenye faili ya PCAP iliyohifadhiwa au interface ya moja kwa moja.<sup>[[12]](#references)</sup>
 
-## Kagua Exploits/Malware
+## Kukagua Exploits/Malware
 
 ### Suricata
 
-**Kusakinisha na kusanidi**
+**Sakinisha na usanidi**
 ```
 apt-get install suricata
 apt-get install oinkmaster
@@ -101,15 +103,15 @@ oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
 **Kagua pcap**
 
-Chaguo la `-r` la Suricata hucheza tena PCAP katika hali ya offline; katika mfano huu, `-k none` huzima ukaguzi wa checksum, `-v` huongeza logging, na `-l` huchagua saraka ya log.<sup>[[13]](#references)</sup>
+Chaguo la `-r` la Suricata hucheza tena PCAP katika offline mode; katika mfano huu, `-k none` huzima ukaguzi wa checksum, `-v` huongeza logging, na `-l` huchagua saraka ya log.<sup>[[13]](#references)</sup>
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) huchakata HTTP streams kutoka kwenye PCAP files, kwa hiari decompress gzip streams, huchanganua files zilizotolewa kwa YARA, huandika `report.txt`, na inaweza kuhifadhi files zinazolingana kwenye directory.<sup>[[14]](#references)</sup>
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) huchakata HTTP streams kutoka kwenye PCAP files, kwa hiari hufungua gzip streams, hukagua files zilizotolewa kwa YARA, huandika `report.txt`, na inaweza kuhifadhi files zinazolingana kwenye directory.<sup>[[14]](#references)</sup>
 
-### Uchambuzi wa Malware
+### Malware Analysis
 
 Angalia kama unaweza kupata fingerprint yoyote ya malware inayojulikana:
 
@@ -120,13 +122,13 @@ Angalia kama unaweza kupata fingerprint yoyote ya malware inayojulikana:
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) ni network traffic analyzer ya passive na open-source inayotumiwa kama Network Security Monitor (NSM) na kwa traffic analysis pana zaidi, ikijumuisha kupima utendaji na troubleshooting.<sup>[[15]](#references)</sup>
+> [Zeek](https://docs.zeek.org/en/master/about.html) ni network traffic analyzer ya passive na open-source inayotumika kama Network Security Monitor (NSM) na kwa traffic analysis pana zaidi, ikijumuisha kupima utendaji na troubleshooting.<sup>[[15]](#references)</sup>
 
-Zeek hutengeneza structured logs badala ya PCAP files, kwa hivyo tumia log-analysis tools kama `zeek-cut` kukagua logs hizo.<sup>[[15]](#references)[[16]](#references)</sup>
+Zeek hutengeneza logs zilizopangwa badala ya PCAP files, kwa hivyo tumia log-analysis tools kama `zeek-cut` kukagua logs hizo.<sup>[[15]](#references)[[16]](#references)</sup>
 
-### Taarifa za Connections
+### Connections Info
 
-Mifano iliyo hapa chini hutumia `zeek-cut` kuchagua fields zilizopewa majina kutoka kwenye TSV logs, kisha Unix tools za kawaida kupanga na kuhesabu connections; RITA pia inaweza kuingiza Zeek logs kwa uchambuzi wa long-connection, beaconing, na DNS-tunneling.<sup>[[16]](#references)[[17]](#references)</sup>
+Mifano iliyo hapa chini hutumia `zeek-cut` kuchagua fields zilizopewa majina kutoka kwenye TSV logs, kisha Unix tools za kawaida kupanga na kuhesabu connections; RITA pia inaweza kuingiza Zeek logs kwa ajili ya uchanganuzi wa long-connection, beaconing, na DNS-tunneling.<sup>[[16]](#references)[[17]](#references)</sup>
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -216,19 +218,19 @@ usb-keystrokes.md
 - [2] [pcapfix - huduma ya mtandaoni ya kurekebisha pcap / pcapng](https://f00l.de/hacking/pcapfix.php)
 - [3] [Muhtasari wa VirusTotal API v3](https://docs.virustotal.com/reference/overview)
 - [4] [Hybrid Analysis](https://www.hybrid-analysis.com/)
-- [5] [PCAP Analyzer ya A-Packets](https://apackets.com/)
+- [5] [A-Packets PCAP Analyzer](https://apackets.com/)
 - [6] [Xplico - Kuhusu](https://www.xplico.org/about)
 - [7] [NetworkMiner](https://www.netresec.com/?page=NetworkMiner)
 - [8] [NetWitness Investigator Freeware](https://www.netwitness.com/contact-us/netwitness-investigator-freeware/)
 - [9] [Hazina ya BruteShark](https://github.com/odedshimon/BruteShark)
-- [10] [Mwongozo wa Wireshark `capinfos`](https://www.wireshark.org/docs/man-pages/capinfos.html)
+- [10] [Mwongozo wa `capinfos` wa Wireshark](https://www.wireshark.org/docs/man-pages/capinfos.html)
 - [11] [Nyaraka za ngrep](https://ngrep.sourceforge.net/usage.html)
 - [12] [Hazina ya PCredz](https://github.com/lgandx/PCredz)
-- [13] [Chaguo za mstari wa amri za Suricata](https://docs.suricata.io/en/latest/command-line-options.html)
+- [13] [Chaguo za command-line za Suricata](https://docs.suricata.io/en/latest/command-line-options.html)
 - [14] [Hazina ya YaraPcap](https://github.com/kevthehermit/YaraPcap)
-- [15] [Zeek ni Nini?](https://docs.zeek.org/en/master/about/what.html)
-- [16] [Mafunzo ya Zeek logs](https://docs.zeek.org/en/master/tutorial/logs.html)
+- [15] [Zeek ni nini?](https://docs.zeek.org/en/master/about/what.html)
+- [16] [Mafunzo ya logs za Zeek](https://docs.zeek.org/en/master/tutorial/logs.html)
 - [17] [Hazina ya RITA](https://github.com/activecm/rita)
-- [18] [Nyaraka za Wireshark `editcap`](https://www.wireshark.org/docs/wsug_html_chunked/AppToolseditcap.html)
+- [18] [Nyaraka za `editcap` za Wireshark](https://www.wireshark.org/docs/wsug_html_chunked/AppToolseditcap.html)
 - [19] [Tangazo la PacketTotal Upload API](https://medium.com/packettotal/the-packettotal-upload-api-26f48e53f0ee)
 {{#include ../../../banners/hacktricks-training.md}}

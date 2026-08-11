@@ -1,28 +1,30 @@
 # Mbinu za Kuondoa Obfuscation kwenye Faili za VBS
 
-Baadhi ya mambo yanayoweza kuwa muhimu kwa ajili ya kutatua hitilafu au kuondoa obfuscation kwenye faili hasidi ya VBS:
+{{#include ../../../banners/hacktricks-training.md}}
+
+Baadhi ya mambo yanayoweza kusaidia kutatua hitilafu/kufanya deobfuscation ya faili hasidi ya VBS:
 
 ## echo
 
-`WScript.Echo` inaweza kutumika kwa kutoa taarifa za uchunguzi; chini ya `cscript.exe`, huandikwa kwenye console.<sup>[[1]](#references)</sup>
+`WScript.Echo` inaweza kutumika kutoa taarifa za uchunguzi; chini ya `cscript.exe`, huandikwa kwenye console.<sup>[[1]](#references)</sup>
 ```bash
 Wscript.Echo "Like this?"
 ```
 ## Maoni
 
-Apostrofi moja huanzisha maoni ya VBScript.<sup>[[2]](#references)</sup>
+Apostrophe moja huanzisha comment ya VBScript.<sup>[[2]](#references)</sup>
 ```bash
 ' this is a comment
 ```
 ## Jaribio
 
-Endesha faili ya VBS katika command-line host kwa:<sup>[[3]](#references)</sup>
+Endesha faili la VBS katika command-line host kwa:<sup>[[3]](#references)</sup>
 ```bash
 cscript.exe file.vbs
 ```
 ## Andika data kwenye faili
 
-Msaidizi huyu umebadilishwa kutoka jibu la Stack Overflow na hutumia text stream ya `FileSystemObject`. `CreateTextFile` hurudisha `TextStream`, na `Write`/`Close` hufanya kazi kwenye data ya maandishi; ichukulie kama mfano wa kuandika maandishi badala ya writer ya jumla inayohifadhi data ya binary kwa usalama.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+Msaidizi huyu umechukuliwa kutoka kwenye jibu la Stack Overflow na hutumia text stream ya `FileSystemObject`. `CreateTextFile` hurejesha `TextStream`, na `Write`/`Close` hufanya kazi kwenye data ya maandishi; ichukulie kama mfano wa kuandika maandishi badala ya writer ya jumla iliyo salama kwa binary.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```js
 Function writeBinary(strBinary, strPath)
 
@@ -54,5 +56,5 @@ End Function
 - [3] [cscript (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cscript)
 - [4] [Kusoma na kuandika faili ya binary katika VBScript (Stack Overflow)](https://stackoverflow.com/questions/6060529/read-and-write-binary-file-in-vbscript/6087783)
 - [5] [Mbinu ya CreateTextFile (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/createtextfile-method)
-- [6] [Object ya TextStream (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/textstream-object)
+- [6] [Kipengee cha TextStream (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/textstream-object)
 {{#include ../../../banners/hacktricks-training.md}}
