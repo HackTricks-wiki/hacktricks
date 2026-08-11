@@ -4,7 +4,7 @@
 
 ## RUBYOPT
 
-Ruby parses supported command-line switches from the `RUBYOPT` environment variable before running a script. Although Ruby rejects some switches there, `-I` can prepend a library-search directory and `-r` can require a library. A process that launches Ruby with attacker-controlled environment variables can therefore be made to load attacker-controlled Ruby code.<sup>[[1]](#references)</sup>
+Ruby parses supported command-line switches from the `RUBYOPT` environment variable before running a script. Ruby rejects code execution through `-e` in `RUBYOPT`, but `-I` can prepend a library-search directory and `-r` can require a library. A process that launches Ruby with attacker-controlled environment variables can therefore be made to load attacker-controlled Ruby code.<sup>[[1]](#references)</sup>
 
 Create `/tmp/inject.rb`:
 
@@ -31,6 +31,11 @@ RUBYOPT="-I/tmp -rinject" ruby --disable=rubyopt hello.rb
 ```
 
 An option written after `hello.rb` is passed to the script in `ARGV`; it does not disable Ruby's earlier processing of `RUBYOPT`.<sup>[[1]](#references)</sup>
+
+```bash
+# This still loads /tmp/inject.rb because --disable-rubyopt is an argument to hello.rb.
+RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
+```
 
 ## References
 
