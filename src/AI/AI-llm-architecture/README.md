@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**これは非常に推奨されている書籍** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **からの私のメモに、追加情報を加えたものです。**<sup>[[1]](#references)</sup>
+**これらは、非常におすすめの書籍** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **からの私のメモに、追加情報を加えたものです。**<sup>[[1]](#references)</sup>
 
-## 基本情報
+## Basic Information
 
 まず、知っておくべき基本概念について、この投稿を読んでください:
 
@@ -16,7 +16,7 @@
 ## 1. Tokenization
 
 > [!TIP]
-> この初期フェーズの目標は非常に単純です: **入力を、意味のある方法で tokens（ids）に分割すること**。
+> このフェーズの目的は、**入力をトークンに分割し、それらをトークン ID にマッピングすること**です。
 
 
 {{#ref}}
@@ -26,7 +26,7 @@
 ## 2. Data Sampling
 
 > [!TIP]
-> この第2フェーズの目標も非常に単純です: **入力データをサンプリングし、通常はデータセットを特定の長さの文に分割し、期待される応答も生成することで、training phase 用に準備すること**。
+> このフェーズの目的は、選択したコンテキスト長の学習シーケンスと、それに対応するシフトされた予測対象を準備することです。
 
 
 {{#ref}}
@@ -36,10 +36,10 @@
 ## 3. Token Embeddings
 
 > [!TIP]
-> この第3フェーズの目標は非常に単純です: **前述の vocabulary 内の各 token に、model の training 用として必要な次元数の vector を割り当てること**。vocabulary 内の各単語は、X 次元の空間上の1つの点になります。\
-> 最初は、空間内の各単語の位置は単に「ランダムに」初期化されることに注意してください。これらの位置は trainable parameters であり、training 中に改善されます。
+> この第 3 フェーズの目的は非常に単純です。**語彙内の各トークンに、モデルの学習に使用する目的の次元数のベクトルを割り当てます。** 語彙内の各単語は、X 次元の空間上の点になります。\
+> なお、最初は空間内の各単語の位置は「ランダムに」初期化され、これらの位置は学習可能なパラメータです（学習中に改善されます）。
 >
-> さらに、token embedding 中には、**別の embedding layer が作成されます**。これは、この場合、**training sentence 内での単語の絶対位置**を表します。これにより、文中の異なる位置にある単語は、異なる表現（意味）を持つようになります。
+> さらに、token embedding の際には、**別の embedding layer が作成されます**。これは、この場合、**学習用の文中における単語の絶対位置**を表します。これにより、文中の異なる位置にある単語は、異なる表現を持つことになります。
 
 
 {{#ref}}
@@ -49,8 +49,8 @@
 ## 4. Attention Mechanisms
 
 > [!TIP]
-> この第4フェーズの目標は非常に単純です: **いくつかの attention mechanisms を適用すること**。これらは、**LLM の training に使用されている現在の文において、vocabulary 内の単語とその隣接する単語との関係を捉える、繰り返し使用される多数の layers** になります。\
-> このために多数の layers が使用されるため、多数の trainable parameters がこの情報を捉えることになります。
+> この第 4 フェーズの目的は非常に単純です。**いくつかの attention mechanisms を適用します**。これらは、**LLM の学習に使用されている現在の文において、語彙内の単語とその隣接する単語との関係を捉える**、多数の**反復レイヤー**になります。\
+> これには多数のレイヤーが使用されるため、多くの学習可能なパラメータがこの情報を捉えることになります。
 
 
 {{#ref}}
@@ -60,9 +60,9 @@
 ## 5. LLM Architecture
 
 > [!TIP]
-> この第5フェーズの目標は非常に単純です: **完全な LLM の architecture を構築すること**。すべてを組み合わせ、すべての layers を適用し、text を生成したり、text を IDs に変換したり、その逆を行ったりするためのすべての functions を作成します。
+> この第 5 フェーズの目的は非常に単純です。**完全な LLM の architecture を構築します**。すべてを組み合わせ、すべてのレイヤーを適用し、テキストを生成したり、テキストを ID に変換したり、その逆を行ったりするためのすべての関数を作成します。
 >
-> この architecture は、training と、training 後の text の prediction の両方に使用されます。
+> この architecture は、学習と、学習後のテキスト予測の両方に使用されます。
 
 
 {{#ref}}
@@ -72,7 +72,7 @@
 ## 6. Pre-training & Loading models
 
 > [!TIP]
-> この第6フェーズの目標は非常に単純です: **model を scratch から training すること**。そのために、前述の LLM architecture を使用し、定義された loss functions と optimizer を用いて、data sets を反復処理するいくつかの loops により、model のすべての parameters を training します。
+> この第 6 フェーズの目的は非常に単純です。**モデルをゼロから学習させます**。そのために、前述の LLM architecture を使用し、定義した loss functions と optimizer によってモデルのすべてのパラメータを学習させるため、データセットを反復処理します。
 
 
 {{#ref}}
@@ -82,7 +82,7 @@
 ## 7.0. LoRA Improvements in fine-tuning
 
 > [!TIP]
-> **LoRA を使用すると、すでに training 済みの models を fine-tuning するために必要な computation を大幅に削減できます**。
+> LoRA は、pretrained model の fine-tuning に必要な学習可能なパラメータ数と optimizer state を大幅に削減します。
 
 
 {{#ref}}
@@ -92,7 +92,7 @@
 ## 7.1. Fine-Tuning for Classification
 
 > [!TIP]
-> この section の目標は、すでに pre-trained された model を fine-tuning し、新しい text を生成する代わりに、LLM が**与えられた text がそれぞれのカテゴリに分類される確率**（text が spam であるかどうかなど）を示す方法を説明することです。
+> このセクションの目的は、すでに pre-trained model となっているモデルを fine-tuning し、新しいテキストを生成するのではなく、LLM が**与えられたテキストが各カテゴリーに分類される確率**（テキストが spam であるかどうかなど）を選択して示す方法を説明することです。
 
 
 {{#ref}}
@@ -102,7 +102,7 @@
 ## 7.2. Fine-Tuning to follow instructions
 
 > [!TIP]
-> この section の目標は、単に text を生成するのではなく、**指示に従うように、すでに pre-trained された model を fine-tuning する**方法を説明することです。たとえば、chat bot として tasks に応答する場合などです。
+> このセクションの目的は、単にテキストを生成するのではなく、**指示に従うように、すでに pre-trained model となっているモデルを fine-tuning する**方法を説明することです。たとえば、chat bot としてタスクに応答する場合などです。
 
 
 {{#ref}}
@@ -111,6 +111,5 @@
 
 ## References
 
-- [1] [Build a Large Language Model (From Scratch) - Manning](https://www.manning.com/books/build-a-large-language-model-from-scratch)
-
+- [1] [大規模言語モデルを構築する（ゼロから） - Manning](https://www.manning.com/books/build-a-large-language-model-from-scratch)
 {{#include ../../banners/hacktricks-training.md}}
