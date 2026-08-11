@@ -1,18 +1,20 @@
 # Suricata & Iptables-Spickzettel
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Iptables
 
-### Ketten
+### Chains
 
-In iptables ist jede Kette eine sequenzielle Liste von Regeln, die Pakete abgleichen. Die standardmäßige Tabelle `filter` enthält die integrierten Ketten `INPUT`, `FORWARD` und `OUTPUT`; je nach Kernel-Konfiguration und geladenen Modulen können weitere Tabellen wie `nat` verfügbar sein.<sup>[[1]](#references)</sup>
+In iptables ist jede Chain eine sequenzielle Liste von Regeln zum Abgleichen von Paketen. Die standardmäßige `filter`-Tabelle enthält die integrierten Chains `INPUT`, `FORWARD` und `OUTPUT`; andere Tabellen wie `nat` können abhängig von der Kernel-Konfiguration und den geladenen Modulen verfügbar sein.<sup>[[1]](#references)</sup>
 
-- **Input Chain**: Wird zur Verwaltung des Verhaltens eingehender Verbindungen verwendet.
-- **Forward Chain**: Wird zur Verarbeitung eingehender Verbindungen verwendet, die nicht für das lokale System bestimmt sind. Dies ist typisch für Geräte, die als Router fungieren, bei denen die empfangenen Daten an ein anderes Ziel weitergeleitet werden sollen. Diese Kette ist hauptsächlich relevant, wenn das System am Routing, NATing oder ähnlichen Aktivitäten beteiligt ist.
+- **Input Chain**: Wird zur Steuerung des Verhaltens eingehender Verbindungen verwendet.
+- **Forward Chain**: Wird zur Verarbeitung eingehender Verbindungen verwendet, die nicht für das lokale System bestimmt sind. Dies ist typisch für Geräte, die als Router fungieren, wobei die empfangenen Daten an ein anderes Ziel weitergeleitet werden sollen. Diese Chain ist hauptsächlich relevant, wenn das System am Routing, NATing oder an ähnlichen Aktivitäten beteiligt ist.
 - **Output Chain**: Dient der Regulierung ausgehender Verbindungen.
 
-Diese Ketten gewährleisten die geordnete Verarbeitung des Netzwerkverkehrs und ermöglichen die Festlegung detaillierter Regeln für den Datenfluss in ein System, durch ein System hindurch und aus einem System heraus.
+Diese Chains gewährleisten die geordnete Verarbeitung des Netzwerkverkehrs und ermöglichen die Definition detaillierter Regeln für den Datenfluss in ein System, durch ein System hindurch und aus einem System heraus.
 
-Die Beispiele für String-Matching verwenden den standardmäßigen `string`-Match; das Matching unterscheidet zwischen Groß- und Kleinschreibung, sofern nicht `--icase` angegeben wird, und `--algo` wählt die BM- oder KMP-Suchstrategie aus.<sup>[[2]](#references)</sup>
+Die Beispiele für String-Matching verwenden den standardmäßigen `string`-Match; das Matching unterscheidet standardmäßig zwischen Groß- und Kleinschreibung, sofern nicht `--icase` angegeben wird, und `--algo` wählt die BM- oder KMP-Suchstrategie aus.<sup>[[2]](#references)</sup>
 ```bash
 # Delete all rules
 iptables -F
@@ -116,7 +118,7 @@ Type=simple
 
 systemctl daemon-reload
 ```
-Die `suricata-update`-Sequenz folgt dem dokumentierten Suricata-Workflow zum Abrufen, Auflisten, Aktivieren und Laden von Regelquellen.<sup>[[4]](#references)</sup> Der oben gezeigte Befehl `suricatasc` ist eine dokumentierte Methode zum nicht blockierenden Neuladen von Regeln über einen Unix-Socket.<sup>[[8]](#references)</sup> Die NFQUEUE-Regeln leiten lokalen eingehenden und ausgehenden Datenverkehr an Suricata weiter, während `-q 0` die Queue 0 für die Inline-Verarbeitung auswählt.<sup>[[7]](#references)</sup>
+Die `suricata-update`-Sequenz folgt dem dokumentierten Workflow von Suricata zum Abrufen, Auflisten, Aktivieren und Laden von Regelquellen.<sup>[[4]](#references)</sup> Der oben aufgeführte `suricatasc`-Befehl ist eine dokumentierte Methode zum Neuladen von Regeln über einen nicht blockierenden Unix-Socket.<sup>[[8]](#references)</sup> Die NFQUEUE-Regeln senden lokalen eingehenden und ausgehenden Datenverkehr an Suricata, während `-q 0` die Warteschlange 0 für die Inline-Verarbeitung auswählt.<sup>[[7]](#references)</sup>
 
 ### Regeldefinitionen
 
@@ -124,15 +126,15 @@ Eine Suricata-Regel/Signatur besteht aus drei Teilen.<sup>[[5]](#references)</su
 
 - Die **action** legt fest, was geschieht, wenn die Signatur übereinstimmt.
 - Der **header** wählt das Protokoll, die IP-Adressen, die Ports und die Richtung aus.
-- Die **rule options** definieren die detailspezifischen Übereinstimmungsbedingungen.
+- Die **rule options** definieren die spezifischen Details der Übereinstimmung.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
 #### **Gültige Aktionen sind**
 
-- alert - eine Warnung erzeugen
+- alert - einen Alert erzeugen
 - pass - weitere Inspektion des Pakets stoppen
-- **drop** - Paket verwerfen und eine Warnung erzeugen
+- **drop** - Paket verwerfen und einen Alert erzeugen
 - **reject** - einen RST/ICMP-unreachable-Fehler an den Absender des passenden Pakets senden.
 - rejectsrc - dasselbe wie _reject_
 - rejectdst - ein RST/ICMP-Fehlerpaket an den Empfänger des passenden Pakets senden.
@@ -140,11 +142,11 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 
 #### **Protokolle**
 
-- tcp (für tcp-traffic)
+- tcp (für tcp-Datenverkehr)
 - udp
 - icmp
 - ip (ip steht für „alle“ oder „beliebige“)
-- _Layer-7-Protokolle_: http, ftp, tls, smb, dns, ssh und andere.<sup>[[5]](#references)</sup>
+- _layer7 protocols_: http, ftp, tls, smb, dns, ssh und weitere.<sup>[[5]](#references)</sup>
 
 #### Quell- und Zieladressen
 
@@ -156,32 +158,32 @@ Suricata unterstützt IP-Bereiche, Negation und gruppierte Adresslisten.<sup>[[5
 | !\[1.1.1.1, 1.1.1.2]          | Jede IP-Adresse außer 1.1.1.1 und 1.1.1.2 |
 | $HOME_NET                     | Ihre Einstellung von HOME_NET in yaml      |
 | \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET und nicht HOME_NET            |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 außer 10.0.0.5                 |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 mit Ausnahme von 10.0.0.5      |
 
 #### Quell- und Zielports
 
 Suricata unterstützt Portbereiche, Negation und Portlisten.<sup>[[5]](#references)</sup>
 
-| Beispiel         | Bedeutung                                  |
-| --------------- | ------------------------------------------ |
-| any             | beliebige Adresse                          |
-| \[80, 81, 82]   | Port 80, 81 und 82                          |
-| \[80: 82]       | Bereich von 80 bis 82                       |
-| \[1024: ]       | Von 1024 bis zur höchsten Portnummer        |
-| !80             | Jeder Port außer 80                         |
-| \[80:100,!99]   | Bereich von 80 bis 100, jedoch ohne 99      |
-| \[1:80,!\[2,4]] | Bereich von 1–80, außer den Ports 2 und 4   |
+| Beispiel         | Bedeutung                                |
+| --------------- | -------------------------------------- |
+| any             | beliebiger Port                         |
+| \[80, 81, 82]   | Port 80, 81 und 82                      |
+| \[80: 82]       | Bereich von 80 bis 82                   |
+| \[1024: ]       | Von 1024 bis zur höchsten Portnummer   |
+| !80             | Jeder Port außer 80                     |
+| \[80:100,!99]   | Bereich von 80 bis 100, außer 99        |
+| \[1:80,!\[2,4]] | Bereich von 1 bis 80, außer Port 2 und 4 |
 
 #### Richtung
 
-Suricata-Regeln können die zu bewertende Kommunikationsrichtung angeben.<sup>[[5]](#references)</sup>
+Suricata-Regeln können die Richtung der zu bewertenden Kommunikation angeben.<sup>[[5]](#references)</sup>
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### Schlüsselwörter
 
-Die folgenden Beispiele verwenden die Regel-Schlüsselwörter von Suricata, einschließlich Optionen für Metadaten, IP, ICMP, Payload und die Anwendungsschicht; die offizielle Regeldokumentation katalogisiert diese Kategorien und ihre Syntax.<sup>[[6]](#references)[[9]](#references)</sup>
+Die folgenden Beispiele verwenden die Regel-Schlüsselwörter von Suricata, einschließlich Metadaten-, IP-, ICMP-, Payload- und Optionen der Anwendungsschicht; die offizielle Regeldokumentation katalogisiert diese Familien und ihre Syntax.<sup>[[6]](#references)[[9]](#references)</sup>
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -231,7 +233,7 @@ drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 - [4] [9.1. Regelverwaltung mit Suricata-Update — Suricata 8.0.1-Dokumentation](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
 - [5] [8.1. Regelformat — Suricata 8.0.3-Dokumentation](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
 - [6] [8.7. Payload-Schlüsselwörter — Suricata 8.0.3-Dokumentation](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
-- [7] [15. Einrichten von IPS/inline für Linux — Suricata 7.0.15-Dokumentation](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
+- [7] [15. Einrichten von IPS/Inline für Linux — Suricata 7.0.15-Dokumentation](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
 - [8] [9.3. Neuladen von Regeln — Suricata 7.0.14-Dokumentation](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
 - [9] [8. Suricata-Regeln — Suricata 8.0.3-Dokumentation](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
 {{#include ../../../banners/hacktricks-training.md}}

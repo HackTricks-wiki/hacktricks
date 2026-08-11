@@ -1,6 +1,8 @@
 # Grundlegende forensische Methodik
 
-## Erstellen und Mounten eines Images
+{{#include ../../banners/hacktricks-training.md}}
+
+## Erstellen und Einbinden eines Abbilds
 
 
 {{#ref}}
@@ -9,16 +11,16 @@
 
 ## Malware-Analyse
 
-Dies **ist nicht unbedingt der erste Schritt, den man nach dem Erhalt des Images durchführen muss**. Diese Malware-Analyse-Techniken können jedoch unabhängig davon eingesetzt werden, wenn eine Datei, ein Dateisystem-Image, ein Speicherabbild, ein pcap usw. vorliegt. Daher ist es sinnvoll, **diese Maßnahmen im Hinterkopf zu behalten**:
+Dies **ist nicht unbedingt der erste Schritt, den man nach Erhalt des Abbilds durchführen muss**. Du kannst diese Malware-Analysetechniken jedoch unabhängig davon einsetzen, ob du eine Datei, ein Dateisystem-Abbild, ein Speicherabbild, einen pcap usw. hast. Daher ist es sinnvoll, **diese Maßnahmen im Hinterkopf zu behalten**:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Untersuchung eines Images
+## Untersuchen eines Abbilds
 
-Wenn dir ein **forensisches Image** eines Geräts vorliegt, kannst du mit der **Analyse der Partitionen und des verwendeten Dateisystems** sowie der **Wiederherstellung** potenziell **interessanter Dateien** beginnen, einschließlich gelöschter Dateien. Erfahre hier, wie:
+Wenn du ein **forensisches Abbild** eines Geräts erhältst, kannst du damit beginnen, die verwendeten **Partitionen und das Dateisystem zu analysieren** und potenziell **interessante Dateien wiederherzustellen** (auch gelöschte). Wie das funktioniert, erfährst du hier:
 
 
 {{#ref}}
@@ -47,9 +49,9 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Tiefgehende Untersuchung spezifischer Dateitypen und Software
+## Tiefgehende Untersuchung bestimmter Dateitypen und Software
 
-Wenn du eine sehr **verdächtige** **Datei** hast, können je nach **Dateityp und der Software**, mit der sie erstellt wurde, verschiedene **Tricks** hilfreich sein.\
+Wenn du eine sehr **verdächtige** **Datei** hast, können je nach **Dateityp und der Software**, die sie erstellt hat, verschiedene **Tricks** nützlich sein.\
 Lies die folgende Seite, um einige interessante Tricks kennenzulernen:
 
 
@@ -57,21 +59,21 @@ Lies die folgende Seite, um einige interessante Tricks kennenzulernen:
 specific-software-file-type-tricks/
 {{#endref}}
 
-Besonders erwähnen möchte ich die folgende Seite:
+Ich möchte besonders auf folgende Seite hinweisen:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Untersuchung von Speicherabbildern
+## Untersuchung eines Speicherabbilds
 
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap-Untersuchung
+## Untersuchung eines Pcaps
 
 
 {{#ref}}
@@ -80,7 +82,7 @@ pcap-inspection/
 
 ## **Anti-Forensik-Techniken**
 
-Behalte die mögliche Verwendung von Anti-Forensik-Techniken im Hinterkopf:
+Behalte den möglichen Einsatz von Anti-Forensik-Techniken im Hinterkopf:
 
 
 {{#ref}}

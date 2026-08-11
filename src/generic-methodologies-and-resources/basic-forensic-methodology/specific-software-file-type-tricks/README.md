@@ -1,6 +1,8 @@
-# Tricks für spezifische Software-/Dateitypen
+# Spezifische Tricks für Software-/Dateitypen
 
-Hier findest du interessante Tricks für spezifische Dateitypen und/oder Software:
+{{#include ../../../banners/hacktricks-training.md}}
+
+Hier findest du interessante Tricks für bestimmte Dateitypen und/oder Software:
 
 
 {{#ref}}

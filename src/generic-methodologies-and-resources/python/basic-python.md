@@ -1,17 +1,19 @@
 # Grundlegendes Python
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Python-Grundlagen
 
 ### Nützliche Informationen
 
 Alle folgenden Beispiele gehen von **Python 3** aus, sofern nicht ausdrücklich anders angegeben.\
 `range()` gibt in Python 3 ein iterierbares Objekt zurück (ähnlich wie `xrange()` in Python 2).\
-Der Unterschied zwischen einem **Tuple** und einer **Liste** besteht darin, dass die **Position** eines Werts in einem Tuple ihm normalerweise eine Bedeutung gibt, während eine Liste normalerweise einfach eine geordnete Folge von Werten ist.
+Der Unterschied zwischen einem **tuple** und einer **list** besteht darin, dass die **Position** eines Werts in einem tuple normalerweise dessen Bedeutung angibt, während eine list normalerweise lediglich eine geordnete Folge von Werten ist.
 
 ### Hauptoperationen
 
 Um eine Zahl zu potenzieren, verwendet man: `3**2` (nicht `3^2`)\
-`2/3 == 0.666666...` in Python 3, während `2//3 == 0` eine Ganzzahldivision durchführt.\
+`2/3 == 0.666666...` in Python 3, während `2//3 == 0` eine Ganzzahldivision ausführt.\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -33,7 +35,7 @@ Um eine Zahl zu potenzieren, verwendet man: `3**2` (nicht `3^2`)\
 `"abc" in "abcdef"`\
 `"abc\n".strip() == "abc"`\
 `"apbc".replace("p", "") == "abc"`\
-`dir(str)` = listet verfügbare Methoden auf\
+`dir(str)` = Liste der verfügbaren Methoden\
 `help(str)` = Definition der Klasse `str`\
 `"a".upper() == "A"`\
 `"A".lower() == "a"`\
@@ -47,7 +49,7 @@ Um eine Zahl zu potenzieren, verwendet man: `3**2` (nicht `3^2`)\
 `'a' + str(3) == 'a3'`\
 `[1, 2, 3] + [4, 5] == [1, 2, 3, 4, 5]`
 
-**Teile einer Liste / eines Strings**\
+**Teile einer list / eines string**\
 `'abc'[0] == 'a'`\
 `'abc'[-1] == 'c'`\
 `'abc'[1:3] == 'bc'`\
@@ -77,7 +79,7 @@ for letter in "hola":
 ```
 ### Bytes, Hex und Encodings
 
-Dies ist in exploit-dev, reversing und CTFs sehr üblich:
+Dies ist bei exploit-dev, Reverse Engineering und CTFs sehr üblich:
 ```python
 b"ABC".hex() == "414243"
 bytes.fromhex("414243") == b"ABC"
@@ -174,7 +176,7 @@ MITPerson.next_id_num += 1
 def __lt__(self, other):
 return self.id_num < other.id_num
 ```
-### map, zip, filter, lambda, sorted und Einzeiler
+### map, zip, filter, lambda, sorted und One-Liner
 
 In **Python 3** geben `map()` und `filter()` Iteratoren zurück. Verwende daher `list()`, wenn du alle Werte auf einmal ausgeben möchtest.
 
@@ -186,7 +188,7 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-**zip** endet, sobald das kürzere iterierbare Objekt endet:
+**zip** endet, sobald das kürzere Iterable endet:
 ```python
 for f, b in zip(foo, bar):
 print(f, b)
@@ -233,16 +235,16 @@ print("executing finally clause in any case")
 ```
 ### Assert()
 
-Wenn die Bedingung falsch ist, wird der String ausgegeben.\
-Denke daran, dass `assert`-Anweisungen mit `python -O` deaktiviert werden können. Verwende sie daher nicht zur Zugriffskontrolle oder Eingabevalidierung.
+Wenn die Bedingung falsch ist, wird die Zeichenfolge ausgegeben.\
+Denke daran, dass `assert`-Anweisungen mit `python -O` deaktiviert werden können. Verwende sie daher nicht für Zugriffskontrolle oder Eingabevalidierung.
 ```python
 def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
 assert len(grades) == len(weights), 'wrong number of grades'
 ```
-### Generators, yield
+### Generatoren, yield
 
-Ein Generator gibt nicht alles auf einmal zurück, sondern **yield**et Werte einzeln aus. Das ist sehr nützlich für riesige Wordlists, Bruteforcer oder große Responses.
+Ein Generator gibt nicht alles auf einmal zurück, sondern **yield**-t Werte einzeln. Das ist sehr nützlich für riesige Wordlists, Bruteforcer oder große Responses.
 ```python
 def my_gen(n):
 yield n
@@ -261,12 +263,12 @@ re.search(r"\w", "hola").group() == "h"
 re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
 re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 ```
-**Sonderbedeutungen:**\
+**Besondere Bedeutungen:**\
 `.` --> jedes Zeichen außer einem Zeilenumbruch\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> Ziffer\
-`\s` --> Leerzeichenzeichen `[ \n\r\t\f]`\
-`\S` --> Zeichen, das kein Leerzeichen ist\
+`\s` --> Whitespace-Zeichen `[ \n\r\t\f]`\
+`\S` --> Nicht-Whitespace-Zeichen\
 `^` --> beginnt mit\
 `$` --> endet mit\
 `+` --> eines oder mehrere\
@@ -275,8 +277,8 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 
 **Optionen:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> erlaubt dem Punkt, Zeilenumbrüche zu matchen\
-`re.search(pat, string, re.MULTILINE)` --> erlaubt `^` und `$`, in verschiedenen Zeilen zu matchen
+`re.search(pat, string, re.DOTALL)` --> erlaubt, dass der Punkt auf einen Zeilenumbruch passt\
+`re.search(pat, string, re.MULTILINE)` --> erlaubt, dass `^` und `$` in verschiedenen Zeilen passen
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -287,7 +289,7 @@ re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 ### IterTools
 
 **product**\
-`from itertools import product` --> kartesisches Produkt zwischen einem oder mehreren iterierbaren Objekten
+`from itertools import product` --> kartesisches Produkt zwischen einer oder mehreren iterierbaren Strukturen
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -295,7 +297,7 @@ list(product([1, 2, 3], [3, 4]))
 list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
-**permutations**\
+**Permutationen**\
 `from itertools import permutations` --> jede mögliche Anordnung
 ```python
 list(permutations(['1', '2', '3']))
@@ -319,7 +321,7 @@ list(combinations_with_replacement('123', 2))
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
-### Decorators
+### Dekoratoren
 
 Decorator, der die Zeit misst, die eine Funktion zur Ausführung benötigt:
 ```python
@@ -349,9 +351,9 @@ Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### Nützliche Standardbibliotheks-Hilfsfunktionen für pentesting
+### Nützliche Helfer der Standardbibliothek für pentesting
 
-**Dateisystem-Durchlauf mit `pathlib`** (`Path.walk()` ist in Python 3.12+ verfügbar; verwenden Sie bei älteren Interpretern `os.walk()`):
+**Dateisystemdurchlauf mit `pathlib`** (`Path.walk()` ist in Python 3.12+ verfügbar; verwende `os.walk()` bei älteren Interpretern):
 ```python
 from pathlib import Path
 
@@ -362,7 +364,7 @@ for name in files:
 if name.endswith((".py", ".env", ".bak")):
 print(root / name)
 ```
-**Befehle sicher starten** (`shell=False` ist normalerweise das, was du verwenden möchtest):
+**Befehle sicher starten** (`shell=False` ist standardmäßig normalerweise das, was du möchtest):
 ```python
 import subprocess
 
@@ -379,7 +381,7 @@ Wenn du **unbedingt** einen Shell-Befehl erstellen musst, setze jedes vom Angrei
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
-**Temporäre Dateien / Verzeichnisse** (sicherer als fest codierte `/tmp/foo`-Pfade):
+**Temporäre Dateien / Verzeichnisse** (sicherer als hartcodierte `/tmp/foo`-Pfade):
 ```python
 import tempfile
 from pathlib import Path
@@ -389,11 +391,11 @@ out = Path(tmp) / "loot.txt"
 out.write_text("secret\n")
 print(out.read_text())
 ```
-Für die HTTP-Automatisierung siehe [diese andere Seite über Python-Webanfragen](web-requests.md).
+Für die HTTP-Automatisierung findest du [auf dieser anderen Seite Informationen zu Python-Webrequests](web-requests.md).
 
-### Fallstricke bei der Archivextraktion (wichtig für Tooling und Dateiparser)
+### Fallstricke bei der Archivextraktion (wichtig für Tools und Dateiparser)
 
-Ab **Python 3.14** verwenden `tarfile.extract()` / `extractall()` standardmäßig den sichereren `data`-Filter. In älteren Python-Versionen sollten Sie ihn bei der Verarbeitung von Archiven, die von Angreifern kontrolliert werden, explizit festlegen.<sup>[[1]](#references)[[2]](#references)</sup>
+Ab **Python 3.14** verwenden `tarfile.extract()` / `extractall()` standardmäßig den sichereren `data`-Filter. In älteren Python-Versionen solltest du ihn bei der Verarbeitung von Archiven unter Kontrolle eines Angreifers explizit setzen.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 import tarfile
 import tempfile
@@ -402,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-Auch mit `filter="data"` solltest du nicht vertrauenswürdige Archive in ein neues temporäres Verzeichnis extrahieren und überprüfen, was geschrieben wurde, bevor du Dateien an einen interessanten Ort verschiebst.
+Auch mit `filter="data"` sollten nicht vertrauenswürdige Archive in ein neues temporäres Verzeichnis entpackt und die geschriebenen Dateien überprüft werden, bevor Dateien an einen anderen relevanten Ort verschoben werden.
 
-`zipfile.Path` ist anders: Es **bereinigt Dateinamen nicht** für dich. Validiere daher Pfade, bevor du von Angreifern kontrollierte ZIP-Mitglieder extrahierst:
+`zipfile.Path` ist anders: Es **bereinigt Dateinamen nicht** für dich. Überprüfe daher Pfade, bevor du von Angreifern kontrollierte ZIP-Mitglieder entpackst:
 ```python
 import os
 import zipfile
@@ -417,12 +419,12 @@ if os.path.commonpath([base, final_path]) != base:
 raise ValueError(f"Path traversal inside ZIP: {info.filename}")
 zf.extract(info, base)
 ```
-### Gefährliche Primitives, die man sich merken sollte
+### Gefährliche Primitive, die man sich merken sollte
 
 - `eval()` / `exec()` sind **keine** Sandboxes.
-- `ast.literal_eval()` führt keinen Python-Code aus, kann aber mit angreifergesteuerten Eingaben weiterhin für einen Denial of Service durch Speicher- oder CPU-Verbrauch missbraucht werden.
-- `pickle.loads()` ist **nicht sicher**; niemals angreifergesteuerte Bytes unpicklen.
-- Für weiterführende offensive Tricks siehe [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) und [Python deserializations](../../pentesting-web/deserialization/README.md).
+- `ast.literal_eval()` führt keinen Python-Code aus, kann aber mit angreifergesteuerten Eingaben weiterhin für Speicher-/CPU-Denial-of-Service missbraucht werden.
+- `pickle.loads()` ist **nicht sicher**; niemals angreifergesteuerte Bytes unpickle'n.
+- Für weiterführende offensive Tricks siehe [Python-Sandboxes umgehen](bypass-python-sandboxes/README.md), [Interne Python-Read-Gadgets](python-internal-read-gadgets.md) und [Python-Deserialisierungen](../../pentesting-web/deserialization/README.md).
 
 ## References
 

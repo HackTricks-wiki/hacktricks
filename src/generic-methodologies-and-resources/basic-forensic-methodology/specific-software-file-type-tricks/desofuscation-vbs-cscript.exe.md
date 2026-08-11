@@ -1,6 +1,8 @@
 # Desobfuscation-Techniken für VBS-Dateien
 
-Einige Dinge, die beim Debuggen/Desobfuscieren einer schädlichen VBS-Datei nützlich sein können:
+{{#include ../../../banners/hacktricks-training.md}}
+
+Einige Dinge, die beim Debuggen/Deobfuscation einer schädlichen VBS-Datei hilfreich sein könnten:
 
 ## echo
 
@@ -22,7 +24,7 @@ cscript.exe file.vbs
 ```
 ## Daten in eine Datei schreiben
 
-Dieser Helfer wurde aus einer Stack Overflow-Antwort übernommen und verwendet einen `FileSystemObject`-Textstream. `CreateTextFile` gibt einen `TextStream` zurück, und `Write`/`Close` arbeiten mit Textdaten. Betrachte dies daher als Beispiel zum Schreiben von Text und nicht als allgemein binärsicheren Writer.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+Diese Hilfsfunktion ist an eine Stack-Overflow-Antwort angelehnt und verwendet einen `FileSystemObject`-Textstream. `CreateTextFile` gibt einen `TextStream` zurück, und `Write`/`Close` arbeiten mit Textdaten. Betrachte dies daher als Beispiel zum Schreiben von Text und nicht als allgemein binärsicheren Writer.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```js
 Function writeBinary(strBinary, strPath)
 
