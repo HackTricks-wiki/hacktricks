@@ -4,75 +4,75 @@
 
 ## 基本情報
 
-UARTはシリアルプロトコルです。つまり、コンポーネント間で一度に1ビットずつデータを転送します。これに対して、パラレル通信プロトコルは複数のチャネルを通じてデータを同時に送信します。一般的なシリアルプロトコルには、RS-232、I2C、SPI、CAN、Ethernet、HDMI、PCI Express、USBなどがあります。
+UARTは、共有クロックなしでフレーム化されたビットストリームを転送する非同期シリアルインターフェースです。ロジックレベルのUARTとRS-232を混同しないでください。RS-232は異なる、しばしば負の電圧レベルを使用し、トランシーバーが必要です。<sup>[[1]](#references)[[3]](#references)</sup>
 
-通常、UARTがアイドル状態のとき、ラインはHigh（論理値1）に保持されます。次に、データ転送の開始を知らせるため、送信側は受信側にstart bitを送信します。この間、信号はLow（論理値0）に保持されます。その後、送信側は実際のメッセージを含む5～8個のdata bitを送信し、設定に応じて、オプションのparity bitと1個または2個のstop bit（論理値1）が続きます。エラーチェックに使用されるparity bitは、実際にはほとんど見られません。stop bit（または複数のstop bit）は送信の終了を示します。
+一般的に、UARTがアイドル状態のとき、ラインはHigh（論理値1）に保たれます。データ転送の開始を知らせるため、送信側は受信側にスタートビットを送信し、その間、信号はLow（論理値0）に保たれます。次に送信側は、実際のメッセージを含む5～8個のデータビットを送信し、設定に応じて、オプションのパリティビットと1個または2個のストップビット（論理値1）を続けます。エラーチェックに使用されるパリティビットは、実際にはほとんど見られません。ストップビットは送信の終了を示します。
 
-最も一般的な設定を8N1と呼びます。これは、8個のdata bit、parityなし、1個のstop bitを意味します。たとえば、文字C、つまりASCIIで0x43を8N1 UART設定で送信する場合、次のビットを送信します：0（start bit）、0、1、0、0、0、0、1、1（0x43の2進値）、そして0（stop bit）。
+最も一般的な設定は8N1です。これは、データビット8個、パリティなし、ストップビット1個を意味します。UARTは最下位データビットから先に送信するため、ASCIIの`C`（`0x43`）は、スタート`0`、データ`1, 1, 0, 0, 0, 0, 1, 0`、ストップ`1`として送信されます。<sup>[[1]](#references)</sup>
 
-![UART: 最も一般的な設定を8N1と呼びます。これは、8個のdata bit、parityなし、1個のstop bitを意味します。たとえば、文字C、つまりASCIIで0x43を8N1 UART設定で送信する場合](<../../images/image (764).png>)
+![UART: 最も一般的な設定を8N1と呼びます。これは、データビット8個、パリティなし、ストップビット1個です。たとえば、文字C（ASCIIでは0x43）を8N1 UARTで送信する場合](<../../images/image (764).png>)
 
-UARTと通信するためのHardware tools：
+UARTと通信するためのハードウェアツール：
 
 - USB-to-serial adapter
-- CP2102またはPL2303チップを搭載したAdapter
-- Bus Pirate、Adafruit FT232H、Shikra、Attify BadgeなどのMultipurpose tool
+- CP2102またはPL2303チップを搭載したアダプター
+- Bus Pirate、Adafruit FT232H、Shikra、Attify Badgeなどの多目的ツール
 
-### UART Portの特定
+### UARTポートの特定
 
-UARTには4つのportがあります：**TX**（Transmit）、**RX**（Receive）、**Vcc**（Voltage）、**GND**（Ground）です。PCB上に**`TX`**と**`RX`**の文字が**書かれた**4つのportを見つけられる場合があります。しかし、表示がない場合は、**multimeter**または**logic analyzer**を使って自分で特定する必要があります。
+一般的なデバッグヘッダーには、**TX**、**RX**、**GND**があり、さらに**Vcc/Vref**ピン、リセット、またはフロー制御ピンがある場合もあります。VccはUART信号ではないため、通常は電圧リファレンスとしてのみ使用し、電源として接続しないでください。ただし、基板の回路図と電流要件が分かっている場合は例外です。<sup>[[2]](#references)[[3]](#references)</sup>
 
-デバイスの電源をオフにした状態で**multimeter**を使用します：
+まず、デバイスの**電源をオフ**にし、接続を外した状態から始めます。
 
-- **GND** pinを特定するには、**Continuity Test** modeを使用し、黒のリードをgroundに接続して、multimeterから音が鳴るまで赤のリードでテストします。PCB上には複数のGND pinが存在する可能性があるため、UARTに属するpinを見つけたとは限りません。
-- **VCC port**を特定するには、**DC voltage mode**に設定し、電圧を20 Vまでに設定します。黒のprobeをgroundに、赤のprobeをpinに接続します。デバイスの電源を入れます。multimeterが3.3 Vまたは5 Vの一定電圧を測定した場合、Vcc pinが見つかったことになります。それ以外の電圧が得られた場合は、別のportで再試行します。
-- **TX** **port**を特定するには、**DC voltage mode**を20 Vまでに設定し、黒のprobeをgroundに、赤のprobeをpinに接続して、デバイスの電源を入れます。電圧が数秒間変動した後、Vccの値で安定する場合、TX portである可能性が高いです。これは、電源投入時にdebug dataが送信されるためです。
-- **RX port**は、他の3つに最も近いものです。UART pinの中で電圧変動が最も小さく、全体的な電圧値も最も低くなります。
+- 既知のグランドプレーン、コネクターシールド、または電源グランドとの導通を、導通モードで確認して**GND**を特定します。電源が入った基板で導通／抵抗モードを使用しないでください。
+- ターゲットの電源を入れる前に、DC電圧モードへ切り替えます。候補ピンの電圧をグランド基準で測定し、ロジック電圧を特定します。安定した電源レールはVcc/Vrefである可能性がありますが、安全に接続できると決めつけないでください。
+- 起動中にロジックアナライザーまたはオシロスコープで候補ピンを観察します。**TX**は通常アイドル時にHighで、フレーム化されたデータのバーストが現れます。マルチメーターでは平均的な変動を確認できる場合がありますが、フレーム構造やボーレートを検証することはできません。
+- **RX**はアイドル状態のままの場合があり、TXの隣にあるというだけで安全に特定することはできません。PCBを追跡し、SoCのデータシートを参照するか、高インピーダンスのアナライザーを使用してから信号を駆動してください。
 
-TXとRX portを取り違えても何も起こりませんが、GNDとVCC portを取り違えると回路を焼損する可能性があります。
+TXとRXを入れ替えると通常は通信できません。電源、グランド、または信号レベルを取り違えると、ターゲットやアダプターを恒久的に損傷する可能性があります。まずグランドを接続し、**受信専用**（ターゲットTXからアダプターRX）で開始してください。
 
-一部のtarget deviceでは、manufacturerがRXまたはTX、あるいはその両方を無効にすることでUART portを無効化しています。その場合、circuit board上の接続をたどり、breakout pointを見つけると役立つことがあります。UARTが検出されず、回路が切断されていることを確認する強い手がかりとして、device warrantyを確認できます。deviceにwarrantyが付属して出荷されている場合、manufacturerはdebug interface（この場合はUART）を残しているため、debugging中にUARTを再接続できるよう、あらかじめ切断しているはずです。これらのbreakout pinは、solderingまたはjumper wireで接続できます。
+メーカーがヘッダーを省略したり、シリーズ抵抗を未実装のままにしたり、ファームウェアでコンソールを無効にしたり、TXのみを公開したりする場合があります。近くのテストパッドと抵抗フットプリントをSoCまで追跡し、電気的なレベルを確認してから、一時的な高インピーダンス接続を追加してください。保証が存在するからといって、アクセス可能なUARTが必ず存在するとは限りません。
 
-### UART Baud Rateの特定
+### UARTのボーレートの特定
 
-正しいbaud rateを特定する最も簡単な方法は、**TX pinの出力を確認してdataを読み取ろうとすること**です。受信したdataが読めない場合は、dataが読めるようになるまで、次に考えられるbaud rateへ切り替えます。これにはUSB-to-serial adapterまたはBus Pirateのようなmultipurpose deviceを使用し、[baudrate.py](https://github.com/devttys0/baudrate/)などのhelper scriptと組み合わせます。一般的なbaud rateは9600、38400、19200、57600、115200です。
+正しいボーレートを特定する最も簡単な方法は、**TXピンの出力を確認し、データを読み取ってみること**です。受信したデータが読めない場合は、データが読めるようになるまで、次に考えられるボーレートへ切り替えます。これにはUSB-to-serial adapterやBus Pirateなどの多目的デバイスを使用でき、[baudrate.py](https://github.com/devttys0/baudrate/)のようなヘルパースクリプトと組み合わせます。一般的なボーレートは9600、38400、19200、57600、115200です。
 
 > [!CAUTION]
-> このprotocolでは、一方のdeviceのTXをもう一方のdeviceのRXに接続する必要がある点に注意してください！
+> このプロトコルでは、一方のデバイスのTXをもう一方のデバイスのRXに接続する必要があることに注意してください！
 
-## CP210X UART to TTY Adapter
+## CP210X UART to TTYアダプター
 
-CP210X Chipは、Serial Communication用のNodeMCU（esp8266搭載）のようなprototyping boardで広く使用されています。これらのadapterは比較的安価で、targetのUART interfaceへの接続に使用できます。deviceには5つのpinがあります：5V、GND、RXD、TXD、3.3V。損傷を避けるため、targetがサポートする電圧を接続してください。最後に、AdapterのRXD pinをtargetのTXDに、AdapterのTXD pinをtargetのRXDに接続します。
+CP210x USB-to-UARTブリッジは、多くのプロトタイピングボードや安価なアダプターに搭載されています。一般的なモジュールでは、GND、RXD、TXDとともに電源ピンが公開されていますが、ヘッダーとI/Oレベルは異なります。基板の設計またはデータシートで実際の電圧を確認してください。通常はGND、アダプターRXからターゲットTXのみを接続し、受信専用での検証後に、アダプターTXからターゲットRXを接続します。意図的に電源を供給し、その電圧に耐えられることが分かっているターゲットでない限り、アダプターの5 V／3.3 V電源ピンを接続しないでください。<sup>[[3]](#references)</sup>
 
-adapterが検出されない場合は、host systemにCP210X driverがインストールされていることを確認してください。adapterが検出されて接続されたら、picocom、minicom、screenなどのtoolを使用できます。
+アダプターが検出されない場合は、ホストシステムにCP210Xドライバーがインストールされていることを確認してください。アダプターが検出されて接続されたら、picocom、minicom、screenなどのツールを使用できます。
 
-Linux/MacOS systemに接続されているdeviceを一覧表示するには：
+Linux／MacOSシステムに接続されたデバイスを一覧表示するには：
 ```
 ls /dev/
 ```
-UART interfaceとの基本的な対話には、次のコマンドを使用します：
+UART interface と basic に interaction するには、次の command を使用します：
 ```
 picocom /dev/<adapter> --baud <baudrate>
 ```
-minicom では、次のコマンドを使用して設定します：
+minicomでは、次のコマンドを使用して設定します。
 ```
 minicom -s
 ```
-`Serial port setup` オプションで、baudrate やデバイス名などの設定を行います。
+`Serial port setup`オプションで、baudrateやデバイス名などの設定を行います。
 
-設定後、`minicom` コマンドを使用して UART Console を起動します。
+設定後、`minicom`を実行してUARTコンソールを開きます。
 
-## Arduino UNO R3 経由の UART（取り外し可能な Atmel 328p チップ搭載ボード）
+## Arduino UNO R3経由のUART（Atmel 328pチップを取り外せるボード）
 
-UART Serial to USB adapters が利用できない場合は、簡単な hack により Arduino UNO R3 を使用できます。Arduino UNO R3 は通常どこでも入手できるため、多くの時間を節約できます。
+UART Serial to USB adaptersが利用できない場合は、簡単なhackでArduino UNO R3を使用できます。Arduino UNO R3は通常どこでも入手できるため、多くの時間を節約できます。
 
-Arduino UNO R3 には、ボード自体に USB to Serial adapter が組み込まれています。UART 接続を確立するには、ボードから Atmel 328p microcontroller chip を取り外すだけです。この hack は、Atmel 328p がボードに solder されていない Arduino UNO R3 の variant（SMD version が使用されているもの）で機能します。Arduino の RX pin（Digital Pin 0）を UART Interface の TX pin に、Arduino の TX pin（Digital Pin 1）を UART interface の RX pin に接続します。
+Arduino UNO R3には、USB to Serial adapterがボード自体に搭載されています。UART接続を行うには、ボードからAtmel 328p microcontroller chipを取り外すだけです。このhackは、Atmel 328pがボードにはんだ付けされていないArduino UNO R3のvariant（SMD versionが使用されているもの）で動作します。ArduinoのRX pin（Digital Pin 0）をUART InterfaceのTX pinに、ArduinoのTX pin（Digital Pin 1）をUART interfaceのRX pinに接続します。
 
-最後に、Serial Console には Arduino IDE を使用することを推奨します。メニューの `tools` セクションで `Serial Console` オプションを選択し、UART interface に応じて baud rate を設定します。
+Arduino IDEの**Serial Monitor**または専用terminalを、targetのbaud rateに設定して使用します。Classic Uno R3のserial signalsは5 V logicであるため、3.3 Vまたはそれ以下の電圧のtargetに接続する前に、level shifterまたはdividerを使用してください。
 
 ## Bus Pirate
 
-このシナリオでは、プログラムのすべての print を Serial Monitor に送信している Arduino の UART 通信を sniff します。
+以下のtranscriptでは、legacy Bus Pirate firmware interfaceを使用してUART outputを監視しています。新しいBus Pirate firmwareでは、`m uart`、`{`/`}`、`monitor`、`bridge`などのcommandsが使用されます。インストールされているversionのdocumentationを確認してください。<sup>[[2]](#references)</sup>
 ```bash
 # Check the modes
 UART>m
@@ -144,30 +144,38 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
-## UART ConsoleでFirmwareをDumpする
+## UART ConsoleによるFirmwareのDump
 
-UART Consoleは、runtime environmentで基盤となるfirmwareを扱う優れた方法です。しかし、UART Consoleへのaccessがread-onlyの場合、多くの制約が生じる可能性があります。多くのembedded deviceでは、firmwareはEEPROMに保存され、volatile memoryを持つprocessor上で実行されます。そのため、製造時のoriginal firmware自体がEEPROM内にあり、新しいfileはvolatile memoryのため失われてしまうことから、firmwareはread-onlyのまま保持されます。したがって、embedded firmwareを扱う際、firmwareをdumpすることは有益な作業です。
+UART consoleは、boot logへのruntime accessと、場合によってはbootloaderまたはoperating-system shellへのaccessを提供します。read-only consoleであっても、memory map、flash driver、boot argument、partition layout、firmware versionが明らかになります。FirmwareはSPI NOR/NAND、eMMC、または別のdeviceに存在する可能性があります。一般にEEPROMから実行されるわけではなく、mountされたpersistent filesystemに書き込んだfileは、reboot時に必ずしも消えるとは限りません。
 
-これを行う方法は数多くあり、SPIセクションでは、さまざまなdeviceを使用してEEPROMからfirmwareを直接extractする方法を説明しています。ただし、physical deviceや外部とのinteractionsを伴うfirmwareのdumpは危険を伴う可能性があるため、まずUARTを使用したfirmwareのdumpを試すことを推奨します。
+取得経路はいくつかあり、SPI sectionではexternal flashからの直接readについて説明します。bootloaderが安全なread commandをすでに提供している場合、console-assisted acquisitionはより侵襲性を抑えられます。ただし、bootの中断やflash commandによってavailabilityに影響する可能性があるため、元の状態を記録し、write/erase operationは避けてください。
 
-UART Consoleからfirmwareをdumpするには、まずbootloaderへのaccessを取得する必要があります。多くの主要なvendorは、Linuxをloadするbootloaderとしてuboot (Universal Bootloader)を使用しています。そのため、ubootへのaccessを取得することが必要です。
+Console-assisted firmware dumpingは、多くの場合bootloaderを中断することから始まります。多くのembedded Linux deviceは**Das U-Boot**を使用しますが、proprietary bootloaderを使用するdeviceや、interactive consoleを無効化しているdeviceもあります。
 
-bootloaderを起動するには、UART portをcomputerに接続し、任意のSerial Console toolを使用します。このとき、deviceへの電源供給は切断したままにします。setupの準備ができたら、Enter Keyを押したままにします。最後に、deviceへの電源供給を接続し、bootさせます。
+interactive bootloaderをテストするには、targetの電源が入っていない状態でUART receive pathとterminalを接続し、loggingを開始してから電源を入れます。表示されるautoboot promptに従ってください。buildによっては、中断にkey、短いsequenceが必要な場合や、完全に無効化されている場合があります。
 
-これにより、ubootのloadがinterruptされ、menuが表示されます。uboot commandを理解し、help menuを使用してcommandを一覧表示することを推奨します。これは`help` commandの場合があります。vendorごとに異なるconfigurationが使用されているため、それぞれを個別に理解する必要があります。
+中断に成功したら、`help`、`printenv`、およびread-onlyのdiscovery commandを使用して、addressにaccessする前に、そのvendorのmemory layoutとstorage layoutを把握します。
 
-通常、firmwareをdumpするcommandは次のとおりです。
+U-Bootでは、`md`は自動的に「EEPROM」を表示するのではなく、**addressable memory**を表示します。まず、`mtd list`、`sf probe`、`mmc info`、`part list`などのboard-specific command、environment variable、boot logを使用して、正しいmapped addressを特定するか、flash regionをRAMにloadします。その後、既知のrangeをbyte単位で表示します:<sup>[[4]](#references)</sup>
 ```
-md
+md.b <address> <byte_count>
 ```
-これは「memory dump」を意味します。画面にメモリ（EEPROM Content）をダンプします。memory dumpを取得する手順を開始する前に、Serial Consoleの出力を記録しておくことを推奨します。
+開始前にシリアル出力をログに記録します。`md.b` の出力にはアドレス列と ASCII 列が含まれているため、生の ROM イメージではなく、テキスト表現です。
 
-最後に、ログファイルから不要なデータをすべて取り除き、ファイルを`filename.rom`として保存して、binwalkを使用して内容を抽出します。
+アドレス列と ASCII 列を削除し、16進バイトフィールドのみを連結して、バイナリにデコードします（たとえば `xxd -r -p` を使用）。解析前に想定バイト数を確認し、ハッシュを記録します:
 ```
-binwalk -e <filename.rom>
+xxd -r -p firmware.hex > firmware.bin
+sha256sum firmware.bin
+binwalk -e firmware.bin
 ```
-これは、hex file で見つかった signatures に基づいて、EEPROM に含まれている可能性のある内容を一覧表示します。
+Binwalk は再構成されたバイナリ内の既知のシグネチャを特定します。コンソールでデータを確実に転送できない場合は、適切な SPI/eMMC/NAND インターフェースを介して直接 flash を読み取る方が、通常は高速でエラーも少なくなります。
 
-ただし、uboot が使用されている場合でも、常に unlocked であるとは限らない点に注意が必要です。Enter Key を押しても何も起こらない場合は、Space Key などの別のキーを試してください。bootloader が locked で割り込みを受け付けない場合、この方法は機能しません。uboot がそのデバイスの bootloader かどうかを確認するには、デバイスの boot 中に UART Console の出力を確認してください。boot 中に uboot について表示される場合があります。
+U-Boot は割り込みを無効化したり、vendor 固有のキーシーケンスを要求したり、memory/flash コマンドをロックしたりする場合があります。文字を無闇に送信するのではなく、autoboot プロンプトと boot log に従ってください。コンソールを中断できない場合は、boot log を保存し、非侵襲的な firmware acquisition 手段に移行してください。
 
+## References
+
+- [1] [Microchip PIC32 Family Reference Manual - UART](https://ww1.microchip.com/downloads/en/DeviceDoc/60001107H.pdf)
+- [2] [Bus Pirate documentation - UART mode and electrical limits](https://docs.buspirate.com/docs/command-reference/#uart)
+- [3] [Silicon Labs - CP2102C data sheet](https://www.silabs.com/documents/public/data-sheets/cp2102c-datasheet.pdf)
+- [4] [U-Boot documentation - `md` memory-display command](https://docs.u-boot.org/en/latest/usage/cmd/md.html)
 {{#include ../../banners/hacktricks-training.md}}
