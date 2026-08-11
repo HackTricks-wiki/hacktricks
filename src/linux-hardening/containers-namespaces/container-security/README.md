@@ -1,36 +1,38 @@
-# Usalama wa Kontena
+# Usalama wa Container
 
-## Kontena Ni Nini Kwa Hakika
+{{#include ../../../banners/hacktricks-training.md}}
 
-Njia ya kivitendo ya kufafanua kontena ni hii: kontena ni **mti wa kawaida wa michakato ya Linux** ulioanzishwa chini ya usanidi maalum wa mtindo wa OCI ili uone mfumo wa faili unaodhibitiwa, seti inayodhibitiwa ya rasilimali za kernel, na muundo wa privileges uliowekewa mipaka. Mchakato unaweza kuamini kuwa ni PID 1, unaweza kuamini kuwa una network stack yake, unaweza kuamini kuwa unamiliki hostname na rasilimali zake za IPC, na unaweza hata kuendeshwa kama root ndani ya user namespace yake. Lakini kwa ndani bado ni mchakato wa host ambao kernel huupangia muda wa CPU kama michakato mingine yote.
+## Container Ni Nini Hasa
 
-Hii ndiyo sababu container security kwa hakika ni utafiti wa jinsi taswira hiyo inavyoundwa na jinsi inavyoshindwa. Ikiwa mount namespace ni dhaifu, mchakato unaweza kuona mfumo wa faili wa host. Ikiwa user namespace haipo au imezimwa, root ndani ya kontena inaweza kuhusishwa kwa ukaribu sana na root kwenye host. Ikiwa seccomp haijawekewa vizuizi na seti ya capabilities ni pana mno, mchakato unaweza kufikia syscalls na vipengele vya kernel vyenye privileges ambavyo vilipaswa kubaki nje ya ufikiaji. Ikiwa runtime socket ime-mount ndani ya kontena, kontena huenda lisihitaji kernel breakout hata kidogo kwa sababu linaweza kuiomba runtime ianzishe sibling container yenye nguvu zaidi au i-mount moja kwa moja host root filesystem.
+Njia ya kivitendo ya kufafanua container ni hii: container ni **mti wa kawaida wa Linux process** ulioanzishwa chini ya configuration maalum ya mtindo wa OCI, ili uone filesystem inayodhibitiwa, seti inayodhibitiwa ya kernel resources, na privilege model yenye vikwazo. Process inaweza kuamini kuwa ni PID 1, inaweza kuamini kuwa ina network stack yake, inaweza kuamini kuwa inamiliki hostname na IPC resources zake, na inaweza hata kuendesha kama root ndani ya user namespace yake. Lakini kwa ndani bado ni host process ambayo kernel hui-schedule kama process nyingine yoyote.
 
-## Kontena Zinatofautianaje na Virtual Machines
+Hii ndiyo sababu container security kwa kweli ni utafiti wa jinsi illusion hiyo inavyoundwa na jinsi inavyoshindwa. Ikiwa mount namespace ni dhaifu, process inaweza kuona host filesystem. Ikiwa user namespace haipo au imezimwa, root ndani ya container inaweza kuunganishwa kwa karibu sana na root kwenye host. Ikiwa seccomp haijawekewa vikwazo na capability set ni pana mno, process inaweza kufikia syscalls na privileged kernel features ambazo zilipaswa kubaki nje ya uwezo wake. Ikiwa runtime socket ime-mount ndani ya container, container huenda isihitaji kernel breakout kabisa, kwa sababu inaweza kuiomba runtime ianzishe sibling container yenye nguvu zaidi au i-mount host root filesystem moja kwa moja.
 
-VM kwa kawaida huwa na kernel yake na mpaka wake wa hardware abstraction. Hii inamaanisha guest kernel inaweza ku-crash, ku-panic, au kutumiwa vibaya bila kuashiria moja kwa moja udhibiti wa host kernel. Kwenye kontena, workload haipati kernel tofauti. Badala yake, hupata mwonekano wa kernel hiyo hiyo inayotumiwa na host, lakini uliyochujwa na kuwekwa kwenye namespaces kwa uangalifu. Kwa hiyo, kontena kwa kawaida huwa nyepesi zaidi, huanza haraka zaidi, ni rahisi kupakia nyingi kwenye mashine moja, na zinafaa zaidi kwa application deployment za muda mfupi. Gharama yake ni kwamba mpaka wa isolation hutegemea zaidi usahihi wa usanidi wa host na runtime.
+## Containers Hutofautianaje na Virtual Machines
 
-Hii haimaanishi kuwa kontena ni "insecure" na VM ni "secure". Inamaanisha kuwa security model ni tofauti. Container stack iliyosanidiwa vizuri ikiwa na rootless execution, user namespaces, default seccomp, seti madhubuti ya capabilities, kutoshirikisha host namespaces, na utekelezaji imara wa SELinux au AppArmor inaweza kuwa imara sana. Kinyume chake, kontena lililoanzishwa kwa `--privileged`, kushirikisha host PID/network, Docker socket iliyo-mount ndani yake, na bind mount inayoweza kuandikwa ya `/`, huwa kiutendaji karibu zaidi na ufikiaji wa host root kuliko application sandbox iliyotengwa salama. Tofauti hiyo hutokana na layers zilizowezeshwa au kuzimwa.
+VM kwa kawaida huwa na kernel yake na hardware abstraction boundary yake. Hii inamaanisha guest kernel inaweza ku-crash, ku-panic, au kutumiwa vibaya bila kumaanisha moja kwa moja udhibiti wa host kernel. Katika containers, workload haipati kernel tofauti. Badala yake, hupata mwonekano uliowekewa vichujio na namespaces wa kernel ileile inayotumiwa na host. Kwa hiyo, containers kwa kawaida huwa nyepesi, huanza haraka, ni rahisi kuweka nyingi kwenye machine moja, na zinafaa zaidi kwa deployment ya applications za muda mfupi. Gharama yake ni kwamba isolation boundary inategemea zaidi usahihi wa host na runtime configuration.
 
-Pia kuna hali ya kati ambayo wasomaji wanapaswa kuielewa kwa sababu inaonekana zaidi na zaidi katika mazingira halisi. **Sandboxed container runtimes** kama **gVisor** na **Kata Containers** huimarisha mpaka zaidi ya kontena la kawaida la `runc`. gVisor huweka userspace kernel layer kati ya workload na interfaces nyingi za host kernel, huku Kata ikiendesha workload ndani ya virtual machine nyepesi. Hizi bado hutumiwa kupitia container ecosystems na orchestration workflows, lakini security properties zake hutofautiana na plain OCI runtimes na hazipaswi kuwekwa kiakili pamoja na "normal Docker containers" kana kwamba kila kitu hufanya kazi kwa njia ileile.
+Hii haimaanishi kuwa containers ni "insecure" na VMs ni "secure". Inamaanisha security model ni tofauti. Container stack iliyosanidiwa vizuri, yenye rootless execution, user namespaces, default seccomp, capability set kali, kutoshiriki host namespaces, na enforcement thabiti ya SELinux au AppArmor inaweza kuwa imara sana. Kinyume chake, container iliyoanzishwa kwa `--privileged`, host PID/network sharing, Docker socket iliyowekwa ndani yake, na writable bind mount ya `/`, kwa utendaji iko karibu zaidi na host root access kuliko application sandbox iliyotengwa kwa usalama. Tofauti inatokana na layers zilizowezeshwa au kuzimwa.
+
+Pia kuna hali ya kati ambayo wasomaji wanapaswa kuielewa kwa sababu inaonekana zaidi na zaidi katika mazingira halisi. **Sandboxed container runtimes** kama **gVisor** na **Kata Containers** huimarisha boundary zaidi ya `runc` container ya kawaida. gVisor huweka userspace kernel layer kati ya workload na host kernel interfaces nyingi, huku Kata ikiendesha workload ndani ya lightweight virtual machine. Hizi bado hutumiwa kupitia container ecosystems na orchestration workflows, lakini security properties zake hutofautiana na plain OCI runtimes na hazipaswi kuwekwa kiakili pamoja na "normal Docker containers" kana kwamba kila kitu hufanya kazi kwa njia ileile.
 
 ## Container Stack: Layers Kadhaa, Sio Moja
 
-Mtu anaposema "this container is insecure", swali muhimu linalofuata ni: **ni layer ipi iliyoifanya isiwe salama?** Workload ya containerized kwa kawaida hutokana na vipengele kadhaa vinavyofanya kazi pamoja.
+Mtu anaposema "container hii si salama", swali muhimu la kufuatilia ni: **ni layer gani iliyoifanya isiwe salama?** Containerized workload kwa kawaida hutokana na components kadhaa zinazofanya kazi pamoja.
 
-Juu kabisa, mara nyingi kuna **image build layer** kama BuildKit, Buildah, au Kaniko, ambayo huunda OCI image na metadata. Juu ya low-level runtime, kunaweza kuwa na **engine au manager** kama Docker Engine, Podman, containerd, CRI-O, Incus, au systemd-nspawn. Katika cluster environments, kunaweza pia kuwa na **orchestrator** kama Kubernetes inayoamua security posture inayohitajika kupitia workload configuration. Hatimaye, **kernel** ndiyo inayotekeleza namespaces, cgroups, seccomp, na MAC policy.
+Juu kabisa, mara nyingi kuna **image build layer** kama BuildKit, Buildah, au Kaniko, ambayo huunda OCI image na metadata. Juu ya low-level runtime, kunaweza kuwa na **engine au manager** kama Docker Engine, Podman, containerd, CRI-O, Incus, au systemd-nspawn. Katika cluster environments, kunaweza pia kuwa na **orchestrator** kama Kubernetes inayoweka security posture iliyoombwa kupitia workload configuration. Hatimaye, **kernel** ndiyo inayotekeleza namespaces, cgroups, seccomp, na MAC policy.
 
-Mfano huu wa layers ni muhimu kwa kuelewa defaults. Restriction inaweza kuombwa na Kubernetes, kutafsiriwa kupitia CRI na containerd au CRI-O, kubadilishwa kuwa OCI spec na runtime wrapper, kisha kutekelezwa na `runc`, `crun`, `runsc`, au runtime nyingine dhidi ya kernel. Defaults zinapotofautiana kati ya environments, mara nyingi ni kwa sababu moja ya layers hizi ilibadilisha configuration ya mwisho. Kwa hiyo, mechanism hiyo hiyo inaweza kuonekana kwenye Docker au Podman kama CLI flag, kwenye Kubernetes kama Pod au `securityContext` field, na kwenye lower-level runtime stacks kama OCI configuration iliyozalishwa kwa workload. Kwa sababu hiyo, mifano ya CLI katika sehemu hii inapaswa kusomwa kama **runtime-specific syntax ya container concept ya jumla**, si flags za jumla zinazoungwa mkono na kila tool.
+Layered model hii ni muhimu kwa kuelewa defaults. Restriction inaweza kuombwa na Kubernetes, kutafsiriwa kupitia CRI na containerd au CRI-O, kubadilishwa kuwa OCI spec na runtime wrapper, na kisha kutekelezwa na `runc`, `crun`, `runsc`, au runtime nyingine dhidi ya kernel. Defaults zinapotofautiana kati ya environments, mara nyingi ni kwa sababu moja ya layers hizi ilibadilisha final configuration. Kwa hiyo, mechanism ileile inaweza kuonekana katika Docker au Podman kama CLI flag, katika Kubernetes kama Pod au `securityContext` field, na katika lower-level runtime stacks kama OCI configuration iliyotengenezwa kwa workload. Kwa sababu hiyo, CLI examples katika section hii zinapaswa kusomwa kama **runtime-specific syntax ya container concept ya jumla**, si flags za jumla zinazoungwa mkono na kila tool.
 
-## Mpaka Halisi wa Container Security
+## Container Security Boundary Halisi
 
-Kwa vitendo, container security hutokana na **controls zinazoingiliana**, si control moja kamili. Namespaces hutenga mwonekano. cgroups husimamia na kuweka mipaka ya matumizi ya rasilimali. Capabilities hupunguza kile ambacho mchakato unaoonekana kuwa na privileges unaweza kufanya kwa hakika. seccomp huzuia syscalls hatari kabla hazijaufikia kernel. AppArmor na SELinux huongeza Mandatory Access Control juu ya ukaguzi wa kawaida wa DAC. `no_new_privs`, masked procfs paths, na read-only system paths hufanya privilege na proc/sys abuse chains za kawaida kuwa ngumu zaidi. Runtime yenyewe pia ni muhimu kwa sababu huamua jinsi mounts, sockets, labels, na namespace joins zinavyoundwa.
+Kwa vitendo, container security hutokana na **overlapping controls**, si control moja kamilifu. Namespaces hutenga visibility. cgroups hudhibiti na kuweka mipaka ya matumizi ya resources. Capabilities hupunguza kile ambacho process inayoonekana kuwa privileged inaweza kufanya. seccomp huzuia dangerous syscalls kabla hazijafika kwenye kernel. AppArmor na SELinux huongeza Mandatory Access Control juu ya DAC checks za kawaida. `no_new_privs`, masked procfs paths, na read-only system paths hufanya privilege na proc/sys abuse chains za kawaida kuwa ngumu zaidi. Runtime yenyewe pia ni muhimu kwa sababu huamua jinsi mounts, sockets, labels, na namespace joins zinavyoundwa.
 
-Ndiyo sababu nyaraka nyingi za container security huonekana kujirudia. Escape chain hiyo hiyo mara nyingi hutegemea mechanisms nyingi kwa wakati mmoja. Kwa mfano, writable host bind mount ni hatari, lakini huwa mbaya zaidi ikiwa kontena pia linaendeshwa kama root halisi kwenye host, lina `CAP_SYS_ADMIN`, halijawekewa vizuizi na seccomp, na halizuiliwi na SELinux au AppArmor. Vivyo hivyo, host PID sharing ni exposure kubwa, lakini huwa na manufaa makubwa zaidi kwa attacker inapounganishwa na `CAP_SYS_PTRACE`, procfs protections dhaifu, au namespace-entry tools kama `nsenter`. Njia sahihi ya kuandika kuhusu mada hii si kurudia attack hiyo hiyo kwenye kila ukurasa, bali kueleza kile ambacho kila layer huongeza kwenye mpaka wa mwisho.
+Ndiyo sababu nyaraka nyingi za container security zinaonekana kujirudia. Escape chain ileile mara nyingi hutegemea mechanisms nyingi kwa wakati mmoja. Kwa mfano, writable host bind mount ni hatari, lakini huwa hatari zaidi ikiwa container pia inaendesha kama real root kwenye host, ina `CAP_SYS_ADMIN`, haijawekewa vikwazo na seccomp, na haijazuiwa na SELinux au AppArmor. Vivyo hivyo, host PID sharing ni exposure kubwa, lakini huwa muhimu zaidi kwa attacker inapounganishwa na `CAP_SYS_PTRACE`, procfs protections dhaifu, au namespace-entry tools kama `nsenter`. Njia sahihi ya kuandika kuhusu mada hii si kurudia attack ileile kwenye kila ukurasa, bali kueleza mchango wa kila layer kwenye final boundary.
 
-## Jinsi ya Kusoma Sehemu Hii
+## Jinsi ya Kusoma Section Hii
 
-Sehemu hii imepangwa kutoka concepts za jumla zaidi hadi zile mahususi zaidi.
+Section hii imepangwa kutoka kwenye concepts za jumla zaidi hadi zile maalum zaidi.
 
 Anza na runtime na ecosystem overview:
 
@@ -38,7 +40,7 @@ Anza na runtime na ecosystem overview:
 runtimes-and-engines.md
 {{#endref}}
 
-Kisha pitia control planes na supply-chain surfaces ambazo mara nyingi huamua ikiwa attacker anahitaji hata kernel escape:
+Kisha pitia control planes na supply-chain surfaces ambazo mara nyingi huamua ikiwa attacker anahitaji kernel escape hata kidogo:
 
 {{#ref}}
 runtime-api-and-daemon-exposure.md
@@ -62,13 +64,13 @@ Kisha nenda kwenye protection model:
 protections/
 {{#endref}}
 
-Kurasa za namespace zinaeleza kernel isolation primitives moja moja:
+Namespace pages zinaeleza kernel isolation primitives moja moja:
 
 {{#ref}}
 protections/namespaces/
 {{#endref}}
 
-Kurasa kuhusu cgroups, capabilities, seccomp, AppArmor, SELinux, `no_new_privs`, masked paths, na read-only system paths zinaeleza mechanisms ambazo kwa kawaida huwekwa juu ya namespaces:
+Pages kuhusu cgroups, capabilities, seccomp, AppArmor, SELinux, `no_new_privs`, masked paths, na read-only system paths zinaeleza mechanisms ambazo kwa kawaida huwekwa juu ya namespaces:
 
 {{#ref}}
 protections/cgroups.md
@@ -114,14 +116,14 @@ privileged-containers.md
 sensitive-host-mounts.md
 {{#endref}}
 
-## Mtazamo Mzuri wa Kuanza Enumeration
+## Mtazamo Mzuri wa Kwanza wa Enumeration
 
-Unapotathmini target ya containerized, ni muhimu zaidi kuuliza seti ndogo ya maswali sahihi ya kiufundi kuliko kurukia mara moja escape PoCs maarufu. Kwanza, tambua **stack**: Docker, Podman, containerd, CRI-O, Incus/LXC, systemd-nspawn, Apptainer, au kitu maalum zaidi. Kisha tambua **runtime**: `runc`, `crun`, `runsc`, `kata-runtime`, au implementation nyingine inayooana na OCI. Baada ya hapo, angalia ikiwa environment ni **rootful au rootless**, ikiwa **user namespaces** ziko active, ikiwa kuna **host namespaces** zinazoshirikiwa, ni **capabilities** zipi zimesalia, ikiwa **seccomp** imewezeshwa, ikiwa **MAC policy** inatekelezwa kwa hakika, ikiwa **dangerous mounts au sockets** zipo, na ikiwa mchakato unaweza kuwasiliana na container runtime API.
+Unapotathmini containerized target, ni muhimu zaidi kuuliza seti ndogo ya maswali sahihi ya kiufundi kuliko kurukia mara moja famous escape PoCs. Kwanza, tambua **stack**: Docker, Podman, containerd, CRI-O, Incus/LXC, systemd-nspawn, Apptainer, au kitu maalum zaidi. Kisha tambua **runtime**: `runc`, `crun`, `runsc`, `kata-runtime`, au implementation nyingine inayooana na OCI. Baada ya hapo, angalia ikiwa environment ni **rootful au rootless**, ikiwa **user namespaces** ziko active, ikiwa kuna **host namespaces** zinazoshirikiwa, ni **capabilities** zipi zimesalia, ikiwa **seccomp** imewezeshwa, ikiwa **MAC policy** inatekelezwa kwa kweli, ikiwa **dangerous mounts au sockets** zipo, na ikiwa process inaweza kuwasiliana na container runtime API.
 
-Majibu hayo yanakuambia mengi zaidi kuhusu security posture halisi kuliko jina la base image. Katika assessments nyingi, unaweza kutabiri family ya breakout inayowezekana kabla ya kusoma hata file moja ya application kwa kuelewa tu container configuration ya mwisho.
+Majibu hayo yanakuambia mengi zaidi kuhusu real security posture kuliko jina la base image. Katika assessments nyingi, unaweza kutabiri breakout family inayowezekana kabla ya kusoma application file hata moja, kwa kuelewa tu final container configuration.
 
 ## Coverage
 
-Sehemu hii inashughulikia material ya zamani iliyolenga Docker, sasa ikiwa chini ya mpangilio unaolenga kontena: runtime na daemon exposure, authorization plugins, image trust na build secrets, sensitive host mounts, distroless workloads, privileged containers, na kernel protections ambazo kwa kawaida huwekwa kuzunguka container execution.
+Section hii inashughulikia material ya zamani iliyolenga Docker chini ya organization inayolenga containers: runtime na daemon exposure, authorization plugins, image trust na build secrets, sensitive host mounts, distroless workloads, privileged containers, na kernel protections ambazo kwa kawaida huwekwa karibu na container execution.
 
 {{#include ../../../banners/hacktricks-training.md}}

