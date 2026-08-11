@@ -2,17 +2,19 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Junk Code
+## Junk Code
 
-Ni jambo la kawaida sana kupata **junk code ambayo haitumiki kamwe** ili kufanya reversing ya macro iwe ngumu zaidi.\
-Kwa mfano, katika picha ifuatayo unaweza kuona kwamba `If` ambayo haitawahi kuwa kweli inatumika kutekeleza junk code na code isiyo na manufaa.
+Macros zinaweza kuwa na **msimbo usiofikiwa au usiohusika** uliokusudiwa kuchelewesha uchanganuzi. Tambua masharti yasiyobadilika na fuatilia tabia inayofikiwa kabla ya kutumia muda ku-reverse branch. Mfano ulio hapa chini unatumia sharti la `If` ambalo haliwezi kamwe kuwa kweli ili kuficha junk code.
 
-![Word Macros - Junk Code: Kwa mfano, katika picha ifuatayo unaweza kuona kwamba If ambayo haitawahi kuwa kweli inatumika kutekeleza junk code na code isiyo na manufaa](<../images/image (369).png>)
+![Word macro iliyo na conditional branch isiyofikiwa yenye junk code](<../images/image (369).png>)
 
-### Macro Forms
+## Macro Forms
 
-Kwa kutumia function ya **GetObject**, inawezekana kupata data kutoka kwenye forms za macro. Hii inaweza kutumika kufanya uchanganuzi kuwa mgumu. Ifuatayo ni picha ya macro form inayotumika **kuficha data ndani ya text boxes** (text box inaweza kuwa inaficha text boxes nyingine):
+VBA UserForms zinaweza kuhifadhi data katika controls kama vile text boxes. Kwa sababu forms, frames, na pages zinaweza kila moja kufichua mkusanyiko wa `Controls`, wachanganuzi wanapaswa kuorodhesha hierarchy nzima ya controls badala ya kutegemea tu kile kinachoonyeshwa na form. Mfano ulio hapa chini unahifadhi data iliyofichwa katika text boxes zinazoingiliana.<sup>[[1]](#references)</sup>
 
-![Junk Code - Macro Forms: Kwa kutumia function ya GetObject, inawezekana kupata data kutoka kwenye forms za macro. Hii inaweza kutumika kufanya uchanganuzi kuwa mgumu. Ifuatayo ni picha ya...](<../images/image (344).png>)
+![Macro UserForm iliyo na data iliyofichwa katika text boxes zinazoingiliana](<../images/image (344).png>)
 
+## References
+
+- [1] [Microsoft Learn - Mikusanyiko, controls, na objects (Microsoft Forms)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/objects-microsoft-forms)
 {{#include ../banners/hacktricks-training.md}}

@@ -4,19 +4,22 @@
 
 ## Taarifa za Msingi
 
-**Apple Events** ni kipengele katika Apple's macOS kinachoruhusu applications kuwasiliana. Ni sehemu ya **Apple Event Manager**, ambayo ni component ya macOS operating system inayohusika na kushughulikia interprocess communication. Mfumo huu huwezesha application moja kutuma message kwa application nyingine ili iombe ifanye operation fulani, kama vile kufungua file, kupata data, au kutekeleza command.
+**Apple events** ni ujumbe wa interprocess ulioundwa kwa muundo maalum ambao applications hutumia kuomba utendakazi au data kutoka kwa applications nyingine. **Apple Event Manager** hutoa APIs za kuunda, kutuma, kupokea na kujibu ujumbe huu.<sup>[[1]](#references)</sup>
 
-Daemon kuu ni `/System/Library/CoreServices/appleeventsd`, ambayo husajili service `com.apple.coreservices.appleevents`.
+Kwenye macOS, broker mkuu ni `/System/Library/CoreServices/appleeventsd`, ambao husajili huduma ya Mach `com.apple.coreservices.appleevents`. Applications zinazopokea events husajili Apple-event Mach port kwa huduma hii; watumaji hupata destination port kupitia huduma hiyo.<sup>[[3]](#references)</sup>
 
-Kila application inayoweza kupokea events huwasiliana na daemon hii na kutoa Apple Event Mach Port yake. Na application inapotaka kutuma event kwake, application hiyo huomba port hii kutoka kwa daemon.
-
-Sandboxed applications zinahitaji privileges kama `allow appleevent-send` na `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` ili ziweze kutuma events. Kumbuka kuwa entitlements kama `com.apple.security.temporary-exception.apple-events` zinaweza kuzuia ni nani anayeweza kutuma events, jambo ambalo litahitaji entitlements kama `com.apple.private.appleevents`.
+Sheria za sandbox na entitlements hupunguza mawasiliano haya. Sandbox profile inahitaji ruhusa ya kutuma Apple events na kutafuta huduma ya Mach ya broker. Entitlement ya `com.apple.security.temporary-exception.apple-events` inaweza kuzuia zaidi application iliyo kwenye sandbox kutuma kwa destination bundle identifiers zilizotajwa pekee.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> Inawezekana kutumia env variable **`AEDebugSends`** ili kurekodi taarifa kuhusu message iliyotumwa:
+> Weka environment variable ya **`AEDebugSends`** ili kurekodi taarifa kuhusu Apple events zinazotumwa na process:<sup>[[3]](#references)</sup>
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
+## References
+
+- [1] [Apple Developer Documentation - Apple Event Manager](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
+- [2] [Apple Developer Documentation - App Sandbox Temporary Exception Entitlements](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
+- [3] [Mac OS X and iOS Internals - Apple-event debug environment variables](https://www.newosxbook.com/MOXiI.pdf)
 {{#include ../../../../banners/hacktricks-training.md}}

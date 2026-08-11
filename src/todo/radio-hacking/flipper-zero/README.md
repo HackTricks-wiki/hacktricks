@@ -2,17 +2,21 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-Ukiwa na [**Flipper Zero**](https://flipperzero.one/) unaweza:
+Flipper Zero ni kifaa cha multifunction cha hardware kinachobebeka na kinachosaidia uwezo ufuatao:<sup>[[1]](#references)</sup>
 
-- **Kusikiliza/Kunasa/Kurudia masafa ya redio:** [**Sub-GHz**](fz-sub-ghz.md)
-- **Kusoma/Kunasa/Kuiga kadi za NFC:** [**NFC**](fz-nfc.md)
-- **Kusoma/Kunasa/Kuiga tags za 125kHz:** [**125kHz RFID**](fz-125khz-rfid.md)
-- **Kusoma/Kunasa/Kutuma ishara za Infrared:** [**Infrared**](fz-infrared.md)
-- **Kusoma/Kunasa/Kuiga iButtons:** [**iButton**](../ibutton.md)
-- **Kuitumia kama Bad USB**
-- **Kuitumia kama ufunguo wa usalama (U2F)**
-- **Kucheza Snake**
+- **Kupokea, kunasa, na kucheza tena radio signals zinazotumika:** [**Sub-GHz**](fz-sub-ghz.md)
+- **Kusoma, kunasa, na kuiga NFC cards zinazotumika:** [**NFC**](fz-nfc.md)
+- **Kusoma, kunasa, na kuiga tags zinazotumika za 125 kHz:** [**125 kHz RFID**](fz-125khz-rfid.md)
+- **Kusoma, kunasa, na kutuma infrared signals:** [**Infrared**](fz-infrared.md)
+- **Kusoma, kunasa, na kuiga iButtons zinazotumika:** [**iButton**](../ibutton.md)
+- **Kufanya kazi kama kifaa cha BadUSB**
+- **Kufanya kazi kama security key ya U2F**
+- **Kuendesha applications na games kama vile Snake**
 
-**Rasilimali nyingine za Flipper Zero zinapatikana kwenye** [**https://github.com/djsime1/awesome-flipperzer**](https://github.com/djsime1/awesome-flipperzero)
+Kwa firmware, applications, databases, na resources nyingine zinazodumishwa na community, angalia mkusanyiko wa Awesome Flipper Zero.<sup>[[2]](#references)</sup>
 
+## References
+
+- [1] [Flipper Zero - Muhtasari Rasmi wa Bidhaa](https://flipper.net/)
+- [2] [GitHub - Awesome Flipper Zero](https://github.com/djsime1/awesome-flipperzero)
 {{#include ../../../banners/hacktricks-training.md}}

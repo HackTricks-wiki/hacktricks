@@ -1,19 +1,24 @@
-# Uhamaji wa Pembeni
+# Lateral Movement
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Kuna njia mbalimbali za kutekeleza commands katika mifumo ya nje; hapa unaweza kupata maelezo kuhusu jinsi mbinu kuu za Windows lateral movement zinavyofanya kazi:
+Windows inaunga mkono mbinu kadhaa zinazoweza kutumika kutekeleza commands kwenye mifumo ya remote. Kurasa zifuatazo zinaeleza mbinu za kawaida za lateral movement na masharti yake ya awali:
 
 - [**PsExec**](psexec-and-winexec.md)
-- [**SmbExec**](smbexec.md)
+- [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
 - [**WmiExec**](wmiexec.md)
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
-- [**DCOM Exec**](dcom-exec.md)
+- [**DCOM Exec**](dcomexec.md)
 - [**RDPexec**](rdpexec.md)
 - [**SCMexec**](scmexec.md)
-- [**Pass the cookie**](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-cookie.html) (cloud)
-- [**Pass the PRT**](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html) (cloud)
-- [**Pass the AzureAD Certificate**](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-certificate.html) (cloud)
+- **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
+- **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
+- **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
 
+## References
+
+- [1] [HackTricks Cloud - Pass the cookie](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-cookie.html)
+- [2] [HackTricks Cloud - Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html)
+- [3] [HackTricks Cloud - Pass the certificate](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-certificate.html)
 {{#include ../../banners/hacktricks-training.md}}

