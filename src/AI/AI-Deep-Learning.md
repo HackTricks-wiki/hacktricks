@@ -1,127 +1,128 @@
-# Deep Learning
+# Aprendizaje profundo
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Deep Learning
+## Aprendizaje profundo <sup>[[1]](#references)</sup>
 
-El aprendizaje profundo es un subconjunto del aprendizaje automático que utiliza redes neuronales con múltiples capas (redes neuronales profundas) para modelar patrones complejos en los datos. Ha logrado un éxito notable en varios dominios, incluyendo visión por computadora, procesamiento de lenguaje natural y reconocimiento de voz.
+El aprendizaje profundo es un subconjunto del aprendizaje automático que utiliza redes neuronales con múltiples capas (redes neuronales profundas) para modelar patrones complejos en los datos. Ha logrado un éxito notable en diversos dominios, incluidos la visión artificial, el procesamiento del lenguaje natural y el reconocimiento de voz.
 
-### Neural Networks
+### Redes neuronales
 
-Las redes neuronales son los bloques de construcción del aprendizaje profundo. Consisten en nodos interconectados (neuronas) organizados en capas. Cada neurona recibe entradas, aplica una suma ponderada y pasa el resultado a través de una función de activación para producir una salida. Las capas se pueden categorizar de la siguiente manera:
-- **Input Layer**: La primera capa que recibe los datos de entrada.
-- **Hidden Layers**: Capas intermedias que realizan transformaciones en los datos de entrada. El número de capas ocultas y neuronas en cada capa puede variar, lo que lleva a diferentes arquitecturas.
-- **Output Layer**: La capa final que produce la salida de la red, como probabilidades de clase en tareas de clasificación.
+Las redes neuronales son los componentes básicos del aprendizaje profundo. Están formadas por nodos interconectados (neuronas) organizados en capas. Cada neurona recibe entradas, aplica una suma ponderada y pasa el resultado por una función de activación para producir una salida. Las capas se pueden clasificar de la siguiente manera:
+- **Capa de entrada**: La primera capa que recibe los datos de entrada.
+- **Capas ocultas**: Capas intermedias que realizan transformaciones sobre los datos de entrada. El número de capas ocultas y de neuronas en cada capa puede variar, dando lugar a diferentes arquitecturas.
+- **Capa de salida**: La capa final que produce la salida de la red, como las probabilidades de clase en tareas de clasificación.
 
-### Activation Functions
 
-Cuando una capa de neuronas procesa datos de entrada, cada neurona aplica un peso y un sesgo a la entrada (`z = w * x + b`), donde `w` es el peso, `x` es la entrada y `b` es el sesgo. La salida de la neurona se pasa a través de una **función de activación para introducir no linealidad** en el modelo. Esta función de activación indica básicamente si la siguiente neurona "debería ser activada y cuánto". Esto permite que la red aprenda patrones y relaciones complejas en los datos, lo que le permite aproximar cualquier función continua.
+### Funciones de activación
 
-Por lo tanto, las funciones de activación introducen no linealidad en la red neuronal, permitiéndole aprender relaciones complejas en los datos. Las funciones de activación comunes incluyen:
-- **Sigmoid**: Mapea valores de entrada a un rango entre 0 y 1, a menudo utilizada en clasificación binaria.
-- **ReLU (Rectified Linear Unit)**: Salida directa de la entrada si es positiva; de lo contrario, produce cero. Se utiliza ampliamente debido a su simplicidad y efectividad en el entrenamiento de redes profundas.
-- **Tanh**: Mapea valores de entrada a un rango entre -1 y 1, a menudo utilizada en capas ocultas.
-- **Softmax**: Convierte puntuaciones brutas en probabilidades, a menudo utilizada en la capa de salida para clasificación multiclase.
+Cuando una capa de neuronas procesa datos de entrada, cada neurona aplica un peso y un sesgo a la entrada (`z = w * x + b`), donde `w` es el peso, `x` es la entrada y `b` es el sesgo. A continuación, la salida de la neurona pasa por una **función de activación para introducir no linealidad** en el modelo. Esta función de activación básicamente indica si la siguiente neurona "debería activarse y en qué medida". Esto permite que la red aprenda patrones y relaciones complejos en los datos, lo que le permite aproximar cualquier función continua.
+
+Por lo tanto, las funciones de activación introducen no linealidad en la red neuronal, permitiéndole aprender relaciones complejas en los datos. Entre las funciones de activación comunes se incluyen:
+- **Sigmoid**: Asigna los valores de entrada a un rango entre 0 y 1; se utiliza habitualmente en la clasificación binaria.
+- **ReLU (Rectified Linear Unit)**: Devuelve directamente la entrada si es positiva; de lo contrario, devuelve cero. Se utiliza ampliamente por su simplicidad y eficacia al entrenar redes profundas.
+- **Tanh**: Asigna los valores de entrada a un rango entre -1 y 1; se utiliza habitualmente en las capas ocultas.
+- **Softmax**: Convierte las puntuaciones sin procesar en probabilidades; se utiliza habitualmente en la capa de salida para la clasificación multiclase.
 
 ### Backpropagation
 
-La retropropagación es el algoritmo utilizado para entrenar redes neuronales ajustando los pesos de las conexiones entre neuronas. Funciona calculando el gradiente de la función de pérdida con respecto a cada peso y actualizando los pesos en la dirección opuesta del gradiente para minimizar la pérdida. Los pasos involucrados en la retropropagación son:
+Backpropagation es el algoritmo utilizado para entrenar redes neuronales ajustando los pesos de las conexiones entre las neuronas. Funciona calculando el gradiente de la función de pérdida con respecto a cada peso y actualizando los pesos en la dirección opuesta al gradiente para minimizar la pérdida. Los pasos implicados en Backpropagation son:
 
-1. **Forward Pass**: Calcular la salida de la red pasando la entrada a través de las capas y aplicando funciones de activación.
-2. **Loss Calculation**: Calcular la pérdida (error) entre la salida predicha y el objetivo verdadero utilizando una función de pérdida (por ejemplo, error cuadrático medio para regresión, entropía cruzada para clasificación).
-3. **Backward Pass**: Calcular los gradientes de la pérdida con respecto a cada peso utilizando la regla de la cadena del cálculo.
-4. **Weight Update**: Actualizar los pesos utilizando un algoritmo de optimización (por ejemplo, descenso de gradiente estocástico, Adam) para minimizar la pérdida.
+1. **Forward Pass**: Calcula la salida de la red pasando la entrada por las capas y aplicando funciones de activación.
+2. **Cálculo de la pérdida**: Calcula la pérdida (error) entre la salida predicha y el objetivo real utilizando una función de pérdida (por ejemplo, el error cuadrático medio para la regresión o la entropía cruzada para la clasificación).
+3. **Backward Pass**: Calcula los gradientes de la pérdida con respecto a cada peso utilizando la regla de la cadena del cálculo.
+4. **Actualización de los pesos**: Actualiza los pesos mediante un algoritmo de optimización (por ejemplo, el descenso de gradiente estocástico o Adam) para minimizar la pérdida.
 
-## Convolutional Neural Networks (CNNs)
+## Redes neuronales convolucionales (CNNs) <sup>[[2]](#references)</sup>
 
-Las Redes Neuronales Convolucionales (CNNs) son un tipo especializado de red neuronal diseñada para procesar datos en forma de cuadrícula, como imágenes. Son particularmente efectivas en tareas de visión por computadora debido a su capacidad para aprender automáticamente jerarquías espaciales de características.
+Las redes neuronales convolucionales (CNNs) son un tipo especializado de red neuronal diseñado para procesar datos estructurados en forma de cuadrícula, como las imágenes. Son especialmente eficaces en tareas de visión artificial debido a su capacidad para aprender automáticamente jerarquías espaciales de características.
 
 Los componentes principales de las CNNs incluyen:
-- **Convolutional Layers**: Aplican operaciones de convolución a los datos de entrada utilizando filtros (kernels) aprendibles para extraer características locales. Cada filtro se desliza sobre la entrada y calcula un producto punto, produciendo un mapa de características.
-- **Pooling Layers**: Reducen las dimensiones espaciales de los mapas de características mientras retienen características importantes. Las operaciones de agrupamiento comunes incluyen max pooling y average pooling.
-- **Fully Connected Layers**: Conectan cada neurona en una capa con cada neurona en la siguiente capa, similar a las redes neuronales tradicionales. Estas capas se utilizan típicamente al final de la red para tareas de clasificación.
+- **Capas convolucionales**: Aplican operaciones de convolución a los datos de entrada utilizando filtros aprendibles (kernels) para extraer características locales. Cada filtro se desliza sobre la entrada y calcula un producto escalar, produciendo un mapa de características.
+- **Capas de pooling**: Reducen la resolución de los mapas de características para disminuir sus dimensiones espaciales, conservando al mismo tiempo las características importantes. Entre las operaciones de pooling comunes se incluyen max pooling y average pooling.
+- **Capas totalmente conectadas**: Conectan cada neurona de una capa con cada neurona de la siguiente, de forma similar a las redes neuronales tradicionales. Estas capas suelen utilizarse al final de la red para tareas de clasificación.
 
-Dentro de una CNN **`Convolutional Layers`**, también podemos distinguir entre:
-- **Initial Convolutional Layer**: La primera capa convolucional que procesa los datos de entrada en bruto (por ejemplo, una imagen) y es útil para identificar características básicas como bordes y texturas.
-- **Intermediate Convolutional Layers**: Capas convolucionales subsiguientes que se basan en las características aprendidas por la capa inicial, permitiendo que la red aprenda patrones y representaciones más complejas.
-- **Final Convolutional Layer**: Las últimas capas convolucionales antes de las capas completamente conectadas, que capturan características de alto nivel y preparan los datos para la clasificación.
+Dentro de las **`Convolutional Layers`** de una CNN, también podemos distinguir entre:
+- **Capa convolucional inicial**: La primera capa convolucional que procesa los datos de entrada sin procesar (por ejemplo, una imagen) y es útil para identificar características básicas como bordes y texturas.
+- **Capas convolucionales intermedias**: Capas convolucionales posteriores que se basan en las características aprendidas por la capa inicial, permitiendo que la red aprenda patrones y representaciones más complejos.
+- **Capa convolucional final**: Las últimas capas convolucionales antes de las capas totalmente conectadas, que capturan características de alto nivel y preparan los datos para la clasificación.
 
 > [!TIP]
-> Las CNNs son particularmente efectivas para tareas de clasificación de imágenes, detección de objetos y segmentación de imágenes debido a su capacidad para aprender jerarquías espaciales de características en datos en forma de cuadrícula y reducir el número de parámetros a través del uso compartido de pesos.
-> Además, funcionan mejor con datos que apoyan el principio de localidad de características donde los datos vecinos (píxeles) son más propensos a estar relacionados que los píxeles distantes, lo que podría no ser el caso para otros tipos de datos como texto.
-> Además, note cómo las CNNs podrán identificar incluso características complejas pero no podrán aplicar ningún contexto espacial, lo que significa que la misma característica encontrada en diferentes partes de la imagen será la misma.
+> Las CNNs son especialmente eficaces para tareas de clasificación de imágenes, detección de objetos y segmentación de imágenes debido a su capacidad para aprender jerarquías espaciales de características en datos estructurados en forma de cuadrícula y reducir el número de parámetros mediante el uso compartido de pesos.
+> Además, funcionan mejor con datos que siguen el principio de localidad de características, según el cual es más probable que los datos vecinos (píxeles) estén relacionados que los píxeles distantes, lo que podría no darse en otros tipos de datos, como el texto.
+> Asimismo, cabe señalar que las CNNs pueden identificar incluso características complejas, pero no pueden aplicar ningún contexto espacial, lo que significa que la misma característica encontrada en diferentes partes de la imagen será la misma.
 
-### Example defining a CNN
+### Ejemplo de definición de una CNN
 
-*Aquí encontrará una descripción sobre cómo definir una Red Neuronal Convolucional (CNN) en PyTorch que comienza con un lote de imágenes RGB como conjunto de datos de tamaño 48x48 y utiliza capas convolucionales y maxpool para extraer características, seguidas de capas completamente conectadas para clasificación.*
+*Aquí encontrarás una descripción de cómo definir una red neuronal convolucional (CNN) en PyTorch que comienza con un batch de imágenes RGB como dataset de tamaño 48x48 y utiliza capas convolucionales y maxpool para extraer características, seguidas de capas totalmente conectadas para la clasificación.*
 
-Así es como puede definir 1 capa convolucional en PyTorch: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`.
+Así es como se puede definir 1 capa convolucional en PyTorch: `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`.
 
-- `in_channels`: Número de canales de entrada. En el caso de imágenes RGB, esto es 3 (uno para cada canal de color). Si está trabajando con imágenes en escala de grises, esto sería 1.
+- `in_channels`: Número de canales de entrada. En el caso de imágenes RGB, este valor es 3 (uno por cada canal de color). Si se trabaja con imágenes en escala de grises, este valor sería 1.
 
-- `out_channels`: Número de canales de salida (filtros) que la capa convolucional aprenderá. Este es un hiperparámetro que puede ajustar según la arquitectura de su modelo.
+- `out_channels`: Número de canales de salida (filtros) que aprenderá la capa convolucional. Este es un hiperparámetro que se puede ajustar según la arquitectura del modelo.
 
-- `kernel_size`: Tamaño del filtro de convolución. Una elección común es 3x3, lo que significa que el filtro cubrirá un área de 3x3 de la imagen de entrada. Esto es como un sello de color 3×3×3 que se utiliza para generar los out_channels a partir de los in_channels:
-1. Coloque ese sello de 3×3×3 en la esquina superior izquierda del cubo de imagen.
-2. Multiplique cada peso por el píxel debajo de él, súmelos todos, añada el sesgo → obtendrá un número.
-3. Escriba ese número en un mapa en blanco en la posición (0, 0).
-4. Deslice el sello un píxel a la derecha (stride = 1) y repita hasta llenar toda una cuadrícula de 48×48.
+- `kernel_size`: Tamaño del filtro convolucional. Una opción habitual es 3x3, lo que significa que el filtro cubrirá un área de 3x3 de la imagen de entrada. Es como un sello de color de 3×3×3 que se utiliza para generar los out_channels a partir de los in_channels:
+1. Coloca ese sello de 3×3×3 en la esquina superior izquierda del cubo de la imagen.
+2. Multiplica cada peso por el píxel situado debajo, súmalos todos y añade el sesgo → obtienes un número.
+3. Escribe ese número en un mapa vacío en la posición (0, 0).
+4. Desliza el sello un píxel hacia la derecha (stride = 1) y repite hasta llenar una cuadrícula completa de 48×48.
 
-- `padding`: Número de píxeles añadidos a cada lado de la entrada. El padding ayuda a preservar las dimensiones espaciales de la entrada, permitiendo un mayor control sobre el tamaño de salida. Por ejemplo, con un kernel de 3x3 y una entrada de 48x48 píxeles, un padding de 1 mantendrá el tamaño de salida igual (48x48) después de la operación de convolución. Esto se debe a que el padding añade un borde de 1 píxel alrededor de la imagen de entrada, permitiendo que el kernel se deslice sobre los bordes sin reducir las dimensiones espaciales.
+- `padding`: Número de píxeles añadidos a cada lado de la entrada. El padding ayuda a conservar las dimensiones espaciales de la entrada, permitiendo un mayor control sobre el tamaño de salida. Por ejemplo, con un kernel de 3x3 y una entrada de 48x48 píxeles, un padding de 1 mantendrá el mismo tamaño de salida (48x48) después de la operación de convolución. Esto se debe a que el padding añade un borde de 1 píxel alrededor de la imagen de entrada, permitiendo que el kernel se deslice sobre los bordes sin reducir las dimensiones espaciales.
 
-Luego, el número de parámetros entrenables en esta capa es:
-- (3x3x3 (tamaño del kernel) + 1 (sesgo)) x 32 (out_channels) = 896 parámetros entrenables.
+Por lo tanto, el número de parámetros entrenables en esta capa es:
+- (3x3x3 (kernel size) + 1 (bias)) x 32 (out_channels) = 896 parámetros entrenables.
 
-Tenga en cuenta que se añade un sesgo (+1) por cada kernel utilizado porque la función de cada capa convolucional es aprender una transformación lineal de la entrada, que se representa mediante la ecuación:
+Ten en cuenta que se añade un Bias (+1) por cada kernel utilizado, porque la función de cada capa convolucional es aprender una transformación lineal de la entrada, que se representa mediante la ecuación:
 ```plaintext
 Y = f(W * X + b)
 ```
-donde `W` es la matriz de pesos (los filtros aprendidos, 3x3x3 = 27 parámetros), `b` es el vector de sesgo que es +1 para cada canal de salida.
+donde `W` es la matriz de pesos (los filtros aprendidos, 3x3x3 = 27 parámetros), `b` es el vector de sesgo, que es +1 para cada canal de salida.
 
-Tenga en cuenta que la salida de `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` será un tensor de forma `(batch_size, 32, 48, 48)`, porque 32 es el nuevo número de canales generados de tamaño 48x48 píxeles.
+Ten en cuenta que la salida de `self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` será un tensor con forma `(batch_size, 32, 48, 48)`, porque 32 es el nuevo número de canales generados de 48x48 píxeles.
 
-Luego, podríamos conectar esta capa convolucional a otra capa convolucional como: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`.
+A continuación, podríamos conectar esta capa convolucional a otra capa convolucional, como: `self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`.
 
-Lo que añadirá: (32x3x3 (tamaño del kernel) + 1 (sesgo)) x 64 (canales de salida) = 18,496 parámetros entrenables y una salida de forma `(batch_size, 64, 48, 48)`.
+Esto añadirá: (32x3x3 (tamaño del kernel) + 1 (sesgo)) x 64 (out_channels) = 18,496 parámetros entrenables y una salida con forma `(batch_size, 64, 48, 48)`.
 
-Como puede ver, **el número de parámetros crece rápidamente con cada capa convolucional adicional**, especialmente a medida que aumenta el número de canales de salida.
+Como puedes ver, el **número de parámetros crece rápidamente con cada capa convolucional adicional**, especialmente a medida que aumenta el número de canales de salida.
 
-Una opción para controlar la cantidad de datos utilizados es usar **max pooling** después de cada capa convolucional. Max pooling reduce las dimensiones espaciales de los mapas de características, lo que ayuda a reducir el número de parámetros y la complejidad computacional mientras se retienen características importantes.
+Una opción para controlar la cantidad de datos utilizados es usar **max pooling** después de cada capa convolucional. El max pooling reduce las dimensiones espaciales de los mapas de características, lo que ayuda a reducir el número de parámetros y la complejidad computacional, al tiempo que conserva las características importantes.
 
-Se puede declarar como: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`. Esto indica básicamente usar una cuadrícula de 2x2 píxeles y tomar el valor máximo de cada cuadrícula para reducir el tamaño del mapa de características a la mitad. Además, `stride=2` significa que la operación de pooling se moverá 2 píxeles a la vez, en este caso, evitando cualquier superposición entre las regiones de pooling.
+Se puede declarar como: `self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`. Básicamente, esto indica que se debe usar una cuadrícula de 2x2 píxeles y tomar el valor máximo de cada cuadrícula para reducir a la mitad el tamaño del mapa de características. Además, `stride=2` significa que la operación de pooling avanzará 2 píxeles cada vez, evitando en este caso cualquier solapamiento entre las regiones de pooling.
 
-Con esta capa de pooling, la forma de salida después de la primera capa convolucional sería `(batch_size, 64, 24, 24)` después de aplicar `self.pool1` a la salida de `self.conv2`, reduciendo el tamaño a 1/4 del de la capa anterior.
+Con esta capa de pooling, la forma de salida después de la primera capa convolucional sería `(batch_size, 64, 24, 24)` tras aplicar `self.pool1` a la salida de `self.conv2`, reduciendo el tamaño a 1/4 del de la capa anterior.
 
 > [!TIP]
-> Es importante hacer pooling después de las capas convolucionales para reducir las dimensiones espaciales de los mapas de características, lo que ayuda a controlar el número de parámetros y la complejidad computacional mientras se hace que el parámetro inicial aprenda características importantes.
-> Puede ver las convoluciones antes de una capa de pooling como una forma de extraer características de los datos de entrada (como líneas, bordes), esta información seguirá presente en la salida agrupada, pero la siguiente capa convolucional no podrá ver los datos de entrada originales, solo la salida agrupada, que es una versión reducida de la capa anterior con esa información.
-> En el orden habitual: `Conv → ReLU → Pool` cada ventana de pooling de 2×2 ahora compite con activaciones de características (“borde presente / no”), no con intensidades de píxeles en bruto. Mantener la activación más fuerte realmente conserva la evidencia más saliente.
+> Es importante aplicar pooling después de las capas convolucionales para reducir las dimensiones espaciales de los mapas de características. Esto ayuda a controlar el número de parámetros y la complejidad computacional, a la vez que permite que el parámetro inicial aprenda características importantes.
+>Puedes ver las convoluciones antes de una capa de pooling como una forma de extraer características de los datos de entrada (como líneas y bordes). Esta información seguirá presente en la salida agrupada, pero la siguiente capa convolucional no podrá ver los datos de entrada originales, sino únicamente la salida agrupada, que es una versión reducida de la capa anterior que conserva esa información.
+>En el orden habitual: `Conv → ReLU → Pool`, cada ventana de pooling de 2×2 opera ahora sobre activaciones de características (“borde presente / no presente”), no sobre intensidades de píxeles sin procesar. Conservar la activación más fuerte realmente conserva la evidencia más relevante.
 
-Luego, después de agregar tantas capas convolucionales y de pooling como sea necesario, podemos aplanar la salida para alimentarla a capas completamente conectadas. Esto se hace reestructurando el tensor a un vector 1D para cada muestra en el lote:
+Después de añadir tantas capas convolucionales y de pooling como sean necesarias, podemos aplanar la salida para introducirla en capas fully connected. Esto se hace cambiando la forma del tensor a un vector 1D para cada muestra del batch:
 ```python
 x = x.view(-1, 64*24*24)
 ```
-Y con este vector 1D con todos los parámetros de entrenamiento generados por las capas convolucionales y de agrupamiento anteriores, podemos definir una capa completamente conectada como:
+Y con este vector 1D que contiene todos los parámetros de entrenamiento generados por las capas convolucionales y de pooling anteriores, podemos definir una capa totalmente conectada como:
 ```python
 self.fc1 = nn.Linear(64 * 24 * 24, 512)
 ```
-Que tomará la salida aplanada de la capa anterior y la mapeará a 512 unidades ocultas.
+Que tomará la salida aplanada de la capa anterior y la asignará a 512 unidades ocultas.
 
-Nota cómo esta capa agregó `(64 * 24 * 24 + 1 (sesgo)) * 512 = 3,221,504` parámetros entrenables, lo que representa un aumento significativo en comparación con las capas convolucionales. Esto se debe a que las capas completamente conectadas conectan cada neurona en una capa con cada neurona en la siguiente capa, lo que lleva a un gran número de parámetros.
+Observa cómo esta capa añadió `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` parámetros entrenables, lo que supone un aumento significativo en comparación con las capas convolucionales. Esto se debe a que las capas totalmente conectadas conectan cada neurona de una capa con cada neurona de la siguiente, lo que da lugar a un gran número de parámetros.
 
-Finalmente, podemos agregar una capa de salida para producir los logits de clase finales:
+Finalmente, podemos añadir una capa de salida para producir los logits de clase finales:
 ```python
 self.fc2 = nn.Linear(512, num_classes)
 ```
-Esto añadirá `(512 + 1 (sesgo)) * num_classes` parámetros entrenables, donde `num_classes` es el número de clases en la tarea de clasificación (por ejemplo, 43 para el conjunto de datos GTSRB).
+Esto añadirá `(512 + 1 (bias)) * num_classes` parámetros entrenables, donde `num_classes` es el número de clases de la tarea de clasificación (p. ej., 43 para el dataset GTSRB).
 
-Una última práctica común es agregar una capa de dropout antes de las capas completamente conectadas para prevenir el sobreajuste. Esto se puede hacer con:
+Otra práctica común es añadir una capa de dropout antes de las capas fully connected para evitar el overfitting. Esto se puede hacer con:
 ```python
 self.dropout = nn.Dropout(0.5)
 ```
-Esta capa establece aleatoriamente una fracción de las unidades de entrada en cero durante el entrenamiento, lo que ayuda a prevenir el sobreajuste al reducir la dependencia de neuronas específicas.
+Esta capa establece aleatoriamente una fracción de las unidades de entrada en cero durante el entrenamiento, lo que ayuda a evitar el sobreajuste al reducir la dependencia de neuronas específicas.
 
-### CNN Code example
+### Ejemplo de código de CNN
 ```python
 import torch
 import torch.nn as nn
@@ -224,21 +225,21 @@ return x
 ```
 ### Ejemplo de entrenamiento de código CNN
 
-El siguiente código generará algunos datos de entrenamiento y entrenará el modelo `MY_NET` definido arriba. Algunos valores interesantes a tener en cuenta:
+El siguiente código generará algunos datos de entrenamiento y entrenará el modelo `MY_NET` definido anteriormente. Algunos valores interesantes que conviene tener en cuenta:
 
-- `EPOCHS` es el número de veces que el modelo verá todo el conjunto de datos durante el entrenamiento. Si EPOCH es demasiado pequeño, el modelo puede no aprender lo suficiente; si es demasiado grande, puede sobreajustarse.
-- `LEARNING_RATE` es el tamaño del paso para el optimizador. Una tasa de aprendizaje pequeña puede llevar a una convergencia lenta, mientras que una grande puede sobrepasar la solución óptima y prevenir la convergencia.
-- `WEIGHT_DECAY` es un término de regularización que ayuda a prevenir el sobreajuste penalizando pesos grandes.
+- `EPOCHS` es el número de veces que el modelo verá el conjunto de datos completo durante el entrenamiento. Si EPOCH es demasiado pequeño, es posible que el modelo no aprenda lo suficiente; si es demasiado grande, podría producirse overfitting.
+- `LEARNING_RATE` es el tamaño del paso del optimizador. Un learning rate pequeño puede provocar una convergencia lenta, mientras que uno grande podría sobrepasar la solución óptima e impedir la convergencia.
+- `WEIGHT_DECAY` es un término de regularización que ayuda a evitar el overfitting penalizando los pesos grandes.
 
-Respecto al bucle de entrenamiento, esta es información interesante a saber:
-- La `criterion = nn.CrossEntropyLoss()` es la función de pérdida utilizada para tareas de clasificación multiclase. Combina la activación softmax y la pérdida de entropía cruzada en una sola función, lo que la hace adecuada para entrenar modelos que producen logits de clase.
-- Si se esperaba que el modelo produjera otros tipos de salidas, como clasificación binaria o regresión, usaríamos diferentes funciones de pérdida como `nn.BCEWithLogitsLoss()` para clasificación binaria o `nn.MSELoss()` para regresión.
-- El `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` inicializa el optimizador Adam, que es una opción popular para entrenar modelos de aprendizaje profundo. Se adapta la tasa de aprendizaje para cada parámetro en función de los primeros y segundos momentos de los gradientes.
-- Otros optimizadores como `optim.SGD` (Descenso de Gradiente Estocástico) o `optim.RMSprop` también podrían usarse, dependiendo de los requisitos específicos de la tarea de entrenamiento.
-- El método `model.train()` establece el modelo en modo de entrenamiento, permitiendo que capas como dropout y normalización por lotes se comporten de manera diferente durante el entrenamiento en comparación con la evaluación.
-- `optimizer.zero_grad()` limpia los gradientes de todos los tensores optimizados antes de la pasada hacia atrás, lo cual es necesario porque los gradientes se acumulan por defecto en PyTorch. Si no se limpian, los gradientes de iteraciones anteriores se sumarían a los gradientes actuales, llevando a actualizaciones incorrectas.
-- `loss.backward()` calcula los gradientes de la pérdida con respecto a los parámetros del modelo, que luego son utilizados por el optimizador para actualizar los pesos.
-- `optimizer.step()` actualiza los parámetros del modelo en función de los gradientes calculados y la tasa de aprendizaje.
+En cuanto al training loop, esta es información interesante que conviene conocer:
+- `criterion = nn.CrossEntropyLoss()` es la función de pérdida utilizada para tareas de clasificación multiclase. Combina la activación softmax y la pérdida de entropía cruzada en una sola función, lo que la hace adecuada para entrenar modelos que generan class logits.
+- Si se esperara que el modelo generase otros tipos de outputs, como clasificación binaria o regresión, utilizaríamos funciones de pérdida diferentes, como `nn.BCEWithLogitsLoss()` para clasificación binaria o `nn.MSELoss()` para regresión.
+- `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` inicializa el optimizador Adam, que es una opción popular para entrenar modelos de deep learning. Adapta el learning rate de cada parámetro basándose en el primer y segundo momento de los gradientes.
+- También podrían utilizarse otros optimizadores, como `optim.SGD` (Stochastic Gradient Descent) o `optim.RMSprop`, dependiendo de los requisitos específicos de la tarea de entrenamiento.
+- El método `model.train()` establece el modelo en modo de entrenamiento, permitiendo que capas como dropout y batch normalization se comporten de forma diferente durante el entrenamiento que durante la evaluación.
+- `optimizer.zero_grad()` borra los gradientes de todos los tensores optimizados antes del backward pass, lo cual es necesario porque los gradientes se acumulan de forma predeterminada en PyTorch. Si no se borrasen, los gradientes de iteraciones anteriores se sumarían a los gradientes actuales, provocando actualizaciones incorrectas.
+- `loss.backward()` calcula los gradientes de la pérdida con respecto a los parámetros del modelo, que posteriormente utiliza el optimizador para actualizar los pesos.
+- `optimizer.step()` actualiza los parámetros del modelo basándose en los gradientes calculados y el learning rate.
 ```python
 import torch, torch.nn.functional as F
 from torch import nn, optim
@@ -375,46 +376,53 @@ print(classification_report(labels_all, preds_all, zero_division=0))
 print("Confusion matrix (rows = true, cols = pred):")
 print(confusion_matrix(labels_all, preds_all))
 ```
-## Redes Neuronales Recurrentes (RNNs)
+## Redes neuronales recurrentes (RNNs) <sup>[[3]](#references)</sup>
 
-Las Redes Neuronales Recurrentes (RNNs) son una clase de redes neuronales diseñadas para procesar datos secuenciales, como series temporales o lenguaje natural. A diferencia de las redes neuronales tradicionales de avance, las RNNs tienen conexiones que se retroalimentan, lo que les permite mantener un estado oculto que captura información sobre entradas anteriores en la secuencia.
+Las redes neuronales recurrentes (RNNs) son una clase de redes neuronales diseñadas para procesar datos secuenciales, como series temporales o lenguaje natural. A diferencia de las redes neuronales feedforward tradicionales, las RNNs tienen conexiones que vuelven sobre sí mismas, lo que les permite mantener un estado oculto que captura información sobre las entradas anteriores de la secuencia.
 
 Los componentes principales de las RNNs incluyen:
-- **Capas Recurrentes**: Estas capas procesan secuencias de entrada un paso de tiempo a la vez, actualizando su estado oculto en función de la entrada actual y el estado oculto anterior. Esto permite que las RNNs aprendan dependencias temporales en los datos.
-- **Estado Oculto**: El estado oculto es un vector que resume la información de pasos de tiempo anteriores. Se actualiza en cada paso de tiempo y se utiliza para hacer predicciones sobre la entrada actual.
-- **Capa de Salida**: La capa de salida produce las predicciones finales basadas en el estado oculto. En muchos casos, las RNNs se utilizan para tareas como modelado de lenguaje, donde la salida es una distribución de probabilidad sobre la siguiente palabra en una secuencia.
+- **Capas recurrentes**: Estas capas procesan las secuencias de entrada paso a paso, actualizando su estado oculto según la entrada actual y el estado oculto anterior. Esto permite a las RNNs aprender dependencias temporales en los datos.
+- **Estado oculto**: El estado oculto es un vector que resume la información de los pasos temporales anteriores. Se actualiza en cada paso temporal y se utiliza para realizar predicciones para la entrada actual.
+- **Capa de salida**: La capa de salida produce las predicciones finales basándose en el estado oculto. En muchos casos, las RNNs se utilizan para tareas como el modelado del lenguaje, donde la salida es una distribución de probabilidad sobre la siguiente palabra de una secuencia.
 
-Por ejemplo, en un modelo de lenguaje, la RNN procesa una secuencia de palabras, por ejemplo, "El gato se sentó en el" y predice la siguiente palabra en función del contexto proporcionado por las palabras anteriores, en este caso, "tapete".
+Por ejemplo, en un modelo de lenguaje, la RNN procesa una secuencia de palabras, por ejemplo, "The cat sat on the", y predice la siguiente palabra basándose en el contexto proporcionado por las palabras anteriores, en este caso, "mat".
 
-### Memoria a Largo y Corto Plazo (LSTM) y Unidad Recurrente Con Puertas (GRU)
+### Memoria a largo y corto plazo (LSTM) y unidad recurrente con compuertas (GRU) <sup>[[3]](#references)</sup>
 
-Las RNNs son particularmente efectivas para tareas que involucran datos secuenciales, como modelado de lenguaje, traducción automática y reconocimiento de voz. Sin embargo, pueden tener dificultades con **dependencias a largo plazo debido a problemas como el desvanecimiento de gradientes**.
+Las RNNs son especialmente eficaces para tareas que implican datos secuenciales, como el modelado del lenguaje, la traducción automática y el reconocimiento del habla. Sin embargo, pueden tener dificultades con **dependencias de largo alcance debido a problemas como la desaparición de gradientes**.
 
-Para abordar esto, se desarrollaron arquitecturas especializadas como Memoria a Largo y Corto Plazo (LSTM) y Unidad Recurrente Con Puertas (GRU). Estas arquitecturas introducen mecanismos de puertas que controlan el flujo de información, permitiéndoles capturar dependencias a largo plazo de manera más efectiva.
+Para abordar esto, se desarrollaron arquitecturas especializadas como Long Short-Term Memory (LSTM) y Gated Recurrent Unit (GRU). Estas arquitecturas introducen mecanismos de compuertas que controlan el flujo de información, lo que les permite capturar dependencias de largo alcance de forma más eficaz.
 
-- **LSTM**: Las redes LSTM utilizan tres puertas (puerta de entrada, puerta de olvido y puerta de salida) para regular el flujo de información dentro y fuera del estado de la celda, lo que les permite recordar o olvidar información a lo largo de secuencias largas. La puerta de entrada controla cuánto nueva información agregar en función de la entrada y el estado oculto anterior, la puerta de olvido controla cuánto información descartar. Combinando la puerta de entrada y la puerta de olvido obtenemos el nuevo estado. Finalmente, combinando el nuevo estado de la celda, con la entrada y el estado oculto anterior también obtenemos el nuevo estado oculto.
-- **GRU**: Las redes GRU simplifican la arquitectura LSTM al combinar las puertas de entrada y olvido en una única puerta de actualización, haciéndolas computacionalmente más eficientes mientras aún capturan dependencias a largo plazo.
+- **LSTM**: Las redes LSTM utilizan tres compuertas (compuerta de entrada, compuerta de olvido y compuerta de salida) para regular el flujo de información hacia dentro y fuera del estado de la celda, lo que les permite recordar u olvidar información a lo largo de secuencias extensas. La compuerta de entrada controla cuánta información nueva se añade en función de la entrada y del estado oculto anterior; la compuerta de olvido controla cuánta información se descarta. Al combinar la compuerta de entrada y la compuerta de olvido obtenemos el nuevo estado. Finalmente, al combinar el nuevo estado de la celda con la entrada y el estado oculto anterior también obtenemos el nuevo estado oculto.
+- **GRU**: Las redes GRU simplifican la arquitectura LSTM al combinar las compuertas de entrada y de olvido en una única compuerta de actualización, lo que las hace más eficientes computacionalmente y les permite seguir capturando dependencias de largo alcance.
 
-## LLMs (Modelos de Lenguaje Grande)
+## LLMs (modelos de lenguaje grandes)
 
-Los Modelos de Lenguaje Grande (LLMs) son un tipo de modelo de aprendizaje profundo diseñado específicamente para tareas de procesamiento de lenguaje natural. Se entrenan con grandes cantidades de datos textuales y pueden generar texto similar al humano, responder preguntas, traducir idiomas y realizar diversas otras tareas relacionadas con el lenguaje. 
-Los LLMs se basan típicamente en arquitecturas de transformadores, que utilizan mecanismos de autoatención para capturar relaciones entre palabras en una secuencia, lo que les permite entender el contexto y generar texto coherente.
+Los modelos de lenguaje grandes (LLMs) son un tipo de modelo de deep learning diseñado específicamente para tareas de procesamiento del lenguaje natural. Se entrenan con enormes cantidades de datos de texto y pueden generar texto similar al humano, responder preguntas, traducir idiomas y realizar otras tareas relacionadas con el lenguaje.
+Los LLMs suelen basarse en arquitecturas transformer, que utilizan mecanismos de self-attention para capturar las relaciones entre las palabras de una secuencia, lo que les permite comprender el contexto y generar texto coherente.
 
-### Arquitectura de Transformador
-La arquitectura de transformador es la base de muchos LLMs. Consiste en una estructura de codificador-decodificador, donde el codificador procesa la secuencia de entrada y el decodificador genera la secuencia de salida. Los componentes clave de la arquitectura de transformador incluyen:
-- **Mecanismo de Autoatención**: Este mecanismo permite al modelo ponderar la importancia de diferentes palabras en una secuencia al generar representaciones. Calcula puntajes de atención basados en las relaciones entre palabras, lo que permite al modelo centrarse en el contexto relevante.
-- **Atención Multi-Cabeza**: Este componente permite al modelo capturar múltiples relaciones entre palabras utilizando múltiples cabezas de atención, cada una enfocándose en diferentes aspectos de la entrada.
-- **Codificación Posicional**: Dado que los transformadores no tienen una noción incorporada del orden de las palabras, se agrega codificación posicional a las incrustaciones de entrada para proporcionar información sobre la posición de las palabras en la secuencia.
+### Arquitectura Transformer <sup>[[4]](#references)</sup>
+La arquitectura transformer es la base de muchos LLMs. Consta de una estructura encoder-decoder, donde el encoder procesa la secuencia de entrada y el decoder genera la secuencia de salida. Los componentes clave de la arquitectura transformer incluyen:
+- **Mecanismo de Self-Attention**: Este mecanismo permite al modelo ponderar la importancia de las distintas palabras de una secuencia al generar representaciones. Calcula puntuaciones de atención basándose en las relaciones entre las palabras, lo que permite al modelo centrarse en el contexto relevante.
+- **Atención Multi-Head**: Este componente permite al modelo capturar múltiples relaciones entre las palabras mediante el uso de múltiples attention heads, cada uno centrado en distintos aspectos de la entrada.
+- **Codificación Posicional**: Dado que los transformers no tienen una noción integrada del orden de las palabras, se añade codificación posicional a los embeddings de entrada para proporcionar información sobre la posición de las palabras en la secuencia.
 
-## Modelos de Difusión
-Los modelos de difusión son una clase de modelos generativos que aprenden a generar datos simulando un proceso de difusión. Son particularmente efectivos para tareas como la generación de imágenes y han ganado popularidad en los últimos años. 
-Los modelos de difusión funcionan transformando gradualmente una distribución de ruido simple en una distribución de datos compleja a través de una serie de pasos de difusión. Los componentes clave de los modelos de difusión incluyen:
-- **Proceso de Difusión Adelante**: Este proceso agrega gradualmente ruido a los datos, transformándolos en una distribución de ruido simple. El proceso de difusión hacia adelante se define típicamente por una serie de niveles de ruido, donde cada nivel corresponde a una cantidad específica de ruido agregado a los datos.
-- **Proceso de Difusión Inversa**: Este proceso aprende a revertir el proceso de difusión hacia adelante, desruido gradualmente los datos para generar muestras de la distribución objetivo. El proceso de difusión inversa se entrena utilizando una función de pérdida que alienta al modelo a reconstruir los datos originales a partir de muestras ruidosas.
+## Modelos de difusión <sup>[[5]](#references)</sup>
+Los modelos de difusión son una clase de modelos generativos que aprenden a generar datos simulando un proceso de difusión. Son especialmente eficaces para tareas como la generación de imágenes y han ganado popularidad en los últimos años.
+Los modelos de difusión funcionan transformando gradualmente una distribución simple de ruido en una distribución de datos compleja mediante una serie de pasos de difusión. Los componentes clave de los modelos de difusión incluyen:
+- **Proceso de difusión hacia adelante**: Este proceso añade ruido gradualmente a los datos, transformándolos en una distribución simple de ruido. El proceso de difusión hacia adelante suele definirse mediante una serie de niveles de ruido, donde cada nivel corresponde a una cantidad específica de ruido añadida a los datos.
+- **Proceso de difusión inverso**: Este proceso aprende a invertir el proceso de difusión hacia adelante, eliminando gradualmente el ruido de los datos para generar muestras de la distribución objetivo. El proceso de difusión inverso se entrena utilizando una función de pérdida que incentiva al modelo a reconstruir los datos originales a partir de muestras con ruido.
 
-Además, para generar una imagen a partir de un aviso de texto, los modelos de difusión típicamente siguen estos pasos:
-1. **Codificación de Texto**: El aviso de texto se codifica en una representación latente utilizando un codificador de texto (por ejemplo, un modelo basado en transformadores). Esta representación captura el significado semántico del texto.
-2. **Muestreo de Ruido**: Se muestrea un vector de ruido aleatorio de una distribución gaussiana.
-3. **Pasos de Difusión**: El modelo aplica una serie de pasos de difusión, transformando gradualmente el vector de ruido en una imagen que corresponde al aviso de texto. Cada paso implica aplicar transformaciones aprendidas para desruido la imagen.
+Además, para generar una imagen a partir de un prompt de texto, los modelos de difusión suelen seguir estos pasos:
+1. **Codificación del texto**: El prompt de texto se codifica en una representación latente mediante un encoder de texto (por ejemplo, un modelo basado en transformer). Esta representación captura el significado semántico del texto.
+2. **Muestreo de ruido**: Se muestrea un vector de ruido aleatorio a partir de una distribución gaussiana.
+3. **Pasos de difusión**: El modelo aplica una serie de pasos de difusión, transformando gradualmente el vector de ruido en una imagen que corresponde al prompt de texto. Cada paso implica aplicar transformaciones aprendidas para eliminar el ruido de la imagen.
 
+## References
+
+- [1] [PyTorch - Tutorial de redes neuronales](https://docs.pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html)
+- [2] [PyTorch - Conv2d](https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html)
+- [3] [PyTorch - LSTM](https://docs.pytorch.org/docs/stable/generated/torch.nn.LSTM.html)
+- [4] [PyTorch - Transformer](https://docs.pytorch.org/docs/stable/generated/torch.nn.Transformer.html)
+- [5] [Modelos probabilísticos de difusión para eliminación de ruido](https://arxiv.org/abs/2006.11239)
 {{#include ../banners/hacktricks-training.md}}
