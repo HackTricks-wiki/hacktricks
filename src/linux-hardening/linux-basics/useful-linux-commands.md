@@ -1,8 +1,6 @@
 # 便利な Linux コマンド
 
-{{#include ../../banners/hacktricks-training.md}}
-
-## 一般的な Bash
+## よく使う Bash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -229,7 +227,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## 検索
+## Find
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -258,7 +256,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Nmap 検索ヘルプ
+## Nmap検索ヘルプ
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -303,7 +301,7 @@ iptables -P OUTPUT ACCEPT
 ```
 ## eBPF Telemetry と Rootkit Hunting
 
-Modern Rootkit（TripleCross、BPFDoor variants など）は、hidden eBPF programs として persist するケースが増えています。`bpftool`/`eBPFmon` を使って fleet の baseline を作成し、detach する前に unsigned programs、想定外の cgroup hooks、または malicious map contents を検出できるようにしましょう。<sup>[[1]](#references)</sup>
+Rootkit の研究では、TripleCross のような eBPF-based implants と、BPFDoor variants のような BPF-based backdoors の両方が実証されています。予期しない BPF programs、attachments、または maps は、compromise の証拠ではなく、調査の手がかりとして扱ってください。<sup>[[3]](#references)[[4]](#references)</sup> `bpftool` または `eBPFmon` を使用して、認証済みシステムの baseline を取得します。`bpftool` は programs と maps の列挙、program instructions のダンプ、サポートされている features の照会に対応しており、eBPFmon はその情報を TUI で表示します。<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +319,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-bpftool の出力を、想定される NIC/cgroup のアタッチメントと照合します。承認されていない PID が所有する突然の `xdp` または `kprobe` プログラムは、注入された eBPF payload の強力な兆候です。
+`bpftool`の出力を、想定されるNIC/cgroupへのアタッチメントと照合します。承認されていないPIDが所有する突然の`xdp`または`kprobe`プログラムは、調査の手掛かりではありますが、ペイロードがインジェクトされたことの決定的な証拠ではありません。<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Journald インシデントトリアージ
+## Journaldインシデントトリアージ
 
-systemd-journald は構造化されたメタデータを保持しているため、`/var/log/*` に触れることなく、boot、severity、unit、UID を基準に調査対象を切り替えられます。フィルターと相対タイムスタンプを組み合わせることで、攻撃ウィンドウを特定したり、ログ改ざんを迅速に立証したりできます。<sup>[[2]](#references)</sup>
+`journalctl`は`systemd-journald`から構造化されたエントリを読み取り、boot、priority、unit、UID、相対時刻によるフィルタリングをサポートします。証拠を保持または比較する必要がある場合は、これらのフィルターをJSON出力と組み合わせます。フィルタリングだけでは、ログが改ざんされていないことを証明できません。<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +334,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-より厳密にフィルタリングする必要がある場合は、`--grep 'Invalid user' --case-sensitive` または `-k`（kernel ring buffer のみ）を追加し、複数テナントの調査では `_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME`、`_TRANSPORT` のセレクターが組み合わせて適用されることを覚えておいてください。
+`--grep 'Invalid user' --case-sensitive` または `-k`（kernel messages のみ）を追加すると、より厳密にフィルタリングできます。また、`_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME`、`_TRANSPORT` の selector は組み合わせて、対象を絞り込んだ調査に使用できます。<sup>[[7]](#references)</sup>
 
-## 参考資料
+## References
 
-- [1] [eBPFmon: eBPF applications を探索および操作するための新しいツール](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [2] [journalctl コマンドを使用して Linux logs を表示する方法](https://www.hostinger.com/tutorials/journalctl-command)
-
+- [1] [eBPFmon: eBPF applications を探索および操作するための新しい tool](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Linux logs を表示するための journalctl command の使用方法](https://www.hostinger.com/tutorials/journalctl-command)
+- [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
+- [4] [Rapid7 Labs: Telecom Networks における BPFdoor](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [5] [BPF Documentation — Linux Kernel のドキュメント](https://docs.kernel.org/bpf/)
+- [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
+- [7] [journalctl(1) — Linux manual page](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}

