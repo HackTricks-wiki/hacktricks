@@ -1,7 +1,5 @@
 # RunC 权限提升
 
-{{#include ../../banners/hacktricks-training.md}}
-
 ## 基本信息
 
 如果你想进一步了解 **runc**，请查看以下页面：
@@ -12,7 +10,7 @@
 
 ## PE
 
-如果发现主机上安装了 `runc`，你可能能够**运行一个将主机的 root / 目录挂载到容器中的容器**。
+如果主机上的 rootful 进程可以使用 `runc`，你可以使用一个 OCI bundle，其挂载配置会将主机的 `/` 递归 bind-mount 到容器内部的 `/`，从而在该挂载命名空间中暴露主机文件系统。<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -37,6 +35,11 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> 这并不总是可行，因为 runc 的默认操作是以 root 身份运行，因此以非特权用户身份运行它根本无法工作（除非你使用 rootless 配置）。将 rootless 配置设为默认通常不是一个好主意，因为在 rootless 容器中存在相当多在非 rootless 容器外不适用的限制。
+> 文档中介绍的 `runc run` 工作流程是 rootful：runc 自身的示例将其标记为 "run as root。" 非特权用户需要使用类似 `runc spec --rootless` 的 rootless 配置，并且 runc 文档说明必须为该模式启用 user namespaces。<sup>[[1]](#references)</sup>
 
+## References
+
+- [1] [runc：用于生成和运行容器的 CLI 工具](https://github.com/opencontainers/runc#using-runc)
+- [2] [OCI Runtime Specification：Mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
+- [3] [Shared Subtrees](https://docs.kernel.org/filesystems/sharedsubtree.html)
 {{#include ../../banners/hacktricks-training.md}}
