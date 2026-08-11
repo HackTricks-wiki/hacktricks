@@ -1,5 +1,7 @@
 # Shells - Linux
 
+{{#include ../../banners/hacktricks-training.md}}
+
 **If you have questions about any of these shells you could check them with** [**https://explainshell.com/**](https://explainshell.com/).<sup>[[9]](#references)</sup>
 
 ## Full TTY

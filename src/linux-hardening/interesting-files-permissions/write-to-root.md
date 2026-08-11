@@ -1,5 +1,7 @@
 # Arbitrary File Write to Root
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ### /etc/ld.so.preload
 
 `/etc/ld.so.preload` is a system-wide list of shared objects that the dynamic linker loads before other shared objects. Secure-execution mode applies additional restrictions to preloading, so a library path such as `/tmp/pe.so` is not a universal SUID-binary technique.\

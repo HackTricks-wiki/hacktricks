@@ -1,5 +1,7 @@
 # SELinux
 
+{{#include ../../banners/hacktricks-training.md}}
+
 SELinux is a **label-based Mandatory Access Control (MAC)** system. In practice, this means that even if DAC permissions, groups, or Linux capabilities look enough for an action, the kernel can still deny it because the **source context** is not allowed to access the **target context** with the requested class/permission.<sup>[[1]](#references)</sup>
 
 A context usually looks like:<sup>[[1]](#references)</sup>

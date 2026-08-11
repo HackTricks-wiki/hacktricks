@@ -1,5 +1,7 @@
 # euid, ruid, suid
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ### User Identification Variables
 
 - **`ruid`**: The **real user ID** denotes the user who initiated the process.<sup>[[1]](#references)</sup>

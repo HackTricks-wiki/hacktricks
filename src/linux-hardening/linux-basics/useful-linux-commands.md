@@ -1,5 +1,7 @@
 # Useful Linux Commands
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Common Bash
 
 ```bash

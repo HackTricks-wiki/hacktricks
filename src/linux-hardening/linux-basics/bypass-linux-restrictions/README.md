@@ -1,5 +1,7 @@
 # Bypass Linux Restrictions
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Common Limitations Bypasses
 
 The command-injection and WAF-evasion collections in PayloadsAllTheThings, Bo0oM's cheat sheet, and the two linked Secjuice articles provide background for the shell-syntax variations in this section.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
@@ -356,7 +358,7 @@ Therefore you can create a *NOP sled for Bash* by prefixing your real command wi
 # 16× spaces ───┘ ↑ real command
 ```
 
-If a ROP chain (or another memory-corruption primitive) passes a command-string pointer that begins anywhere within the space block, Bash can parse the remaining leading blanks until it reaches the command; in the cited router exploit, this made uncertain string offsets usable.<sup>[[5]](#references)[[7]](#references)</sup>
+If a ROP chain (or another memory-corruption primitive) passes a command-string pointer that begins anywhere within the space block, Bash can parse the remaining leading blanks until it reaches the command; in the d router exploit, this made uncertain string offsets usable.<sup>[[5]](#references)[[7]](#references)</sup>
 
 Practical use cases in constrained embedded targets include:<sup>[[5]](#references)</sup>
 
@@ -364,7 +366,7 @@ Practical use cases in constrained embedded targets include:<sup>[[5]](#referenc
 2. Payload channels where the attacker cannot write NULL bytes to align the payload (a general adaptation of the alignment problem).<sup>[[5]](#references)</sup>
 3. Embedded devices with a small BusyBox `ash`/`sh` environment, which BusyBox documents as applets in resource-constrained systems.<sup>[[10]](#references)</sup>
 
-> 🛠️  Combine this technique with ROP gadgets that call `system()` in a controlled lab; the cited router research demonstrates this combination on constrained hardware.<sup>[[5]](#references)</sup>
+> 🛠️  Combine this technique with ROP gadgets that call `system()` in a controlled lab; the d router research demonstrates this combination on constrained hardware.<sup>[[5]](#references)</sup>
 
 ## References
 

@@ -1,5 +1,7 @@
 # Shells - Windows
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Lolbas
 
 The page [lolbas-project.github.io](https://lolbas-project.github.io/) is for Windows, just as [https://gtfobins.github.io/](https://gtfobins.github.io/) is for Linux.<sup>[[13]](#references)[[14]](#references)</sup>

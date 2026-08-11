@@ -1,5 +1,7 @@
 # PAM - Pluggable Authentication Modules
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ### Basic Information
 
 **PAM (Pluggable Authentication Modules)** acts as a security mechanism that **verifies the identity of users attempting to access computer services**, controlling their access based on various criteria. It's akin to a digital gatekeeper, ensuring that only authorized users can engage with specific services while potentially limiting their usage to prevent system overloads.

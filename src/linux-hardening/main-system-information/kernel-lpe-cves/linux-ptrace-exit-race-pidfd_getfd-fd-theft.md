@@ -1,5 +1,7 @@
 # Linux ptrace exit-race `pidfd_getfd()` FD theft
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 A useful **Linux kernel privesc pattern** is to turn a **ptrace authorization bug** into **file descriptor theft** from a privileged process.
 
 In the Qualys `__ptrace_may_access()` case study (CVE-2026-46333), the attacker races a **privileged process that is exiting or dropping credentials** and uses `pidfd_getfd()` to duplicate an FD into the attacker process.<sup>[[1]](#references)[[2]](#references)</sup>
