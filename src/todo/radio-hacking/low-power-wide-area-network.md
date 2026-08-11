@@ -1,48 +1,48 @@
-# 저전력 광역 네트워크
+# Low-Power Wide Area Network
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 소개
+## Introduction
 
-**저전력 광역 네트워크**(LPWAN)는 낮은 bit rate로 **장거리 통신**을 수행하도록 설계된 무선 저전력 광역 네트워크 기술의 그룹입니다.
-6마일 이상 도달할 수 있으며 **배터리** 수명은 최대 **20년**까지 지속될 수 있습니다.
+**Low-Power Wide Area Network** (LPWAN)은 낮은 bit rate로 **장거리 통신**을 수행하도록 설계된 무선 저전력 광역 네트워크 기술 그룹입니다.
+무선 파라미터, 안테나, 규제 지역, 지형 및 duty cycle에 따라 LPWAN deployment는 처리량을 낮추는 대신 수 킬로미터의 커버리지와 수년의 배터리 수명을 확보할 수 있습니다. 공급업체가 제시하는 통신 거리와 배터리 수명은 보장값이 아니라 설계 목표로 간주해야 합니다.<sup>[[3]](#references)</sup>
 
-Long Range(**LoRa**)는 현재 가장 많이 배포된 LPWAN 물리 계층이며, 개방형 MAC 계층 사양은 **LoRaWAN**입니다.
-
----
-
-## LPWAN, LoRa 및 LoRaWAN
-
-* LoRa – Semtech에서 개발한 Chirp Spread Spectrum(CSS) 물리 계층(독점 기술이지만 문서화되어 있음).
-* LoRaWAN – LoRa-Alliance가 유지 관리하는 Open MAC/Network 계층. 현장에서 버전 1.0.x와 1.1이 일반적으로 사용됩니다.
-* 일반적인 아키텍처: *end-device → gateway (packet-forwarder) → network-server → application-server*.
-
-> **security model**은 두 개의 AES-128 root key(AppKey/NwkKey)에 의존하며, 이 키는 *join* 절차(OTAA) 중 session key를 파생하거나 ABP에서 하드코딩됩니다. 키가 하나라도 leak되면 공격자는 해당 traffic에 대한 완전한 read/write capability를 획득합니다.
+Long Range (**LoRa**)는 현재 가장 널리 deployment된 LPWAN physical layer이며, 해당 open MAC-layer specification은 **LoRaWAN**입니다.
 
 ---
 
-## Attack surface 요약
+## LPWAN, LoRa, and LoRaWAN
+
+* LoRa – Semtech가 개발한 Chirp Spread Spectrum (CSS) physical layer입니다(proprietary이지만 문서화되어 있음).
+* LoRaWAN – LoRa-Alliance가 유지 관리하는 Open MAC/Network layer입니다. 현장에서는 Versions 1.0.x와 1.1이 일반적으로 사용됩니다.
+* 일반적인 architecture: *end-device → gateway (packet-forwarder) → network-server → application-server*.<sup>[[3]](#references)</sup>
+
+> LoRaWAN 1.1에서 **security model**은 별도의 AES-128 application 및 network root key를 사용하여 OTAA 중 역할별 session key를 도출합니다. 이전 1.0.x deployment에서는 일반적으로 하나의 AppKey를 사용해 network 및 application session key를 도출하는 반면, ABP는 session key를 직접 provision합니다. 따라서 leaked key를 통해 얻을 수 있는 capability는 LoRaWAN version과 노출된 key에 따라 달라집니다.<sup>[[3]](#references)</sup>
+
+---
+
+## Attack surface summary
 
 | Layer | Weakness | Practical impact |
 |-------|----------|------------------|
-| PHY | Reactive / selective jamming | 단일 SDR과 1 W 미만의 출력으로 100 % packet loss 시연 가능 |
-| MAC | Join-Accept 및 data-frame replay(nonce 재사용, ABP counter rollover) | Device spoofing, message injection, DoS |
-| Network-Server | Insecure packet-forwarder, weak MQTT/UDP filters, outdated gateway firmware | Gateway에서 RCE 발생 → OT/IT network로 pivot |
-| Application | Hard-coded 또는 predictable AppKeys | Traffic brute-force/decrypt, sensor impersonation |
+| PHY | Reactive / selective jamming | Localized packet loss; 효과는 link budget, timing, bandwidth 및 regulatory constraints에 따라 달라짐 |
+| MAC | nonce/counter state가 재사용되는 join 및 data-frame replay | Device desynchronization, spoofing 또는 injection; server/device가 replay protection을 위반하는 경우 |
+| Network-Server | Insecure packet-forwarder, weak MQTT/UDP filters, outdated gateway firmware | 게이트웨이에서의 RCE → OT/IT network로 pivot |
+| Application | Hard-coded 또는 predictable AppKeys | Brute-force/decrypt traffic, 센서 사칭 |
 
 ---
 
-## 최근 vulnerabilities (2023-2025)
+## Representative implementation vulnerabilities
 
-* **CVE-2024-29862** – *ChirpStack gateway-bridge & mqtt-forwarder*는 Kerlink gateway에서 stateful firewall rule을 우회하는 TCP packet을 허용하여 remote management interface가 노출될 수 있었습니다. 각각 4.0.11 / 4.2.1에서 수정되었습니다.
-* **Dragino LG01/LG308 series** – 여러 2022-2024 CVE(예: 2022-45227 directory traversal, 2022-45228 CSRF)가 2025년에도 patch되지 않은 상태로 발견되었습니다. 수천 개의 public gateway에서 unauthenticated firmware dump 또는 config overwrite를 활성화할 수 있습니다.
-* Semtech *packet-forwarder UDP* overflow(공개되지 않은 advisory, 2023-10에 patch됨): 255 B보다 큰 crafted uplink가 stack-smash를 유발하여 SX130x reference gateway에서 RCE를 실행할 수 있었습니다(Black Hat EU 2023의 “LoRa Exploitation Reloaded”에서 발견).
+* **CVE-2024-29862** – 4.0.11 이전의 ChirpStack Gateway Bridge version과 4.2.1 이전의 MQTT Forwarder version은 TLS server-certificate validation이 비활성화되어 있어 attacker-controlled MQTT broker에 연결할 수 있었습니다. 이로 인해 credentials와 gateway traffic이 노출될 수 있으므로 fixed release로 upgrade해야 합니다.<sup>[[4]](#references)</sup>
+* **Dragino LG01 firmware 4.3.4** – CVE-2022-45227은 download 가능한 backup file이 포함된 unauthenticated `/lib/` directory listing을 설명하며, CVE-2022-45228은 logout page의 low-severity CSRF입니다. 이러한 기록만으로는 주장된 LG308 impact, configuration overwrite, population size 또는 2025 patch state를 입증할 수 없습니다.<sup>[[6]](#references)[[7]](#references)</sup>
+* 이 페이지의 이전 version에서는 주장된 Semtech UDP packet-forwarder issue를 **greater-than-255-byte crafted uplink causing a stack smash and RCE on SX130x reference gateways**로 설명했으며, 이를 “LoRa Exploitation Reloaded” Black Hat Europe 2023 presentation 및 2023년 10월의 private patch와 연관 지었습니다. 해당 구체적인 내용은 research lead로서 여기에 유지하지만, 일치하는 public advisory, presentation 또는 patch는 corroborate할 수 없었습니다. 영향받는 product/version과 검증 가능한 primary source를 확보하기 전에는 이 issue를 known vulnerability로 취급하지 마십시오.
 
 ---
 
 ## Practical attack techniques
 
-### 1. Traffic Sniff & Decrypt
+### 1. Sniff & Decrypt traffic
 ```bash
 # Capture all channels around 868.3 MHz with an SDR (USRP B205)
 python3 lorattack/sniffer.py \
@@ -51,19 +51,21 @@ python3 lorattack/sniffer.py \
 # Bruteforce AppKey from captured OTAA join-request/accept pairs
 python3 lorapwn/bruteforce_join.py --pcap smartcity.pcap --wordlist top1m.txt
 ```
-### 2. OTAA join-replay (DevNonce reuse)
+이 명령은 원래 workflow를 **illustrative syntax**로 보존한 것입니다. repository layout과 flags는 프로젝트/release마다 다릅니다. Passive capture만으로는 강력한 AppKey를 알아낼 수 없습니다. Offline guessing은 root key가 발견될 만큼 약하고, 캡처한 join exchange가 후보를 검증할 값을 제공하는 경우에만 유용합니다.<sup>[[2]](#references)[[3]](#references)</sup>
 
-1. 합법적인 **JoinRequest**를 캡처합니다.
-2. 원래 장치가 다시 전송하기 전에 즉시 재전송하거나 RSSI를 증가시킵니다.
-3. network-server는 새로운 DevAddr 및 session keys를 할당하지만 대상 장치는 기존 session을 계속 사용하므로, attacker는 비어 있는 session을 소유하고 위조된 uplink를 주입할 수 있습니다.
+### 2. OTAA replay protection 및 nonce state 테스트
+
+1. authorized test network에서 정상적인 **JoinRequest**를 capture합니다.
+2. 동일한 request를 replay하고, network server가 재사용된 `DevNonce`를 거부하는지 확인합니다.
+3. test device를 reboot하거나 reset한 뒤 검사를 반복하여 nonce state 손실 여부를 확인합니다. compliant server는 사용된 nonce를 추적해야 합니다. JoinRequest만 replay해도 새로 파생된 session keys가 노출되거나 replayer가 session을 제어할 수 있는 것은 아닙니다.<sup>[[3]](#references)</sup><sup>[[5]](#references)</sup>
 
 ### 3. Adaptive Data-Rate (ADR) downgrading
 
-SF12/125 kHz를 강제하여 airtime을 증가시킵니다. 이렇게 하면 gateway의 duty-cycle을 소진시켜 denial-of-service를 일으킬 수 있으며, attacker의 배터리 영향은 낮게 유지됩니다(network-level MAC commands만 전송).
+network-layer MAC commands를 authenticate할 수 있는 attacker는—예를 들어 해당 network session key 또는 network server를 compromise한 후—비효율적인 data-rate parameters를 강제하고 airtime을 증가시키려 할 수 있습니다. 근처의 unauthenticated transmitter는 device address를 알고 있다는 이유만으로 ADR commands를 정당하게 발행할 수 없습니다.<sup>[[3]](#references)</sup>
 
 ### 4. Reactive jamming
 
-*HackRF One*에서 실행되는 GNU Radio flowgraph가 preamble을 감지할 때마다 wide-band chirp를 트리거하여 모든 spreading factor를 차단합니다. TX 출력이 ≤200 mW이며, 2 km 거리에서 완전한 outage가 측정되었습니다.
+reactive jammer는 LoRa preamble을 감지한 후 transmit하여 frame을 선택적으로 방해할 수 있습니다. 이전 페이지에서는 HackRF/GNU Radio setup이 **2 km에서 200 mW 이하로** 전면적인 outage를 일으켰다고 주장했지만, 이를 뒷받침하는 측정 source가 제공되지 않았습니다. 따라서 해당 수치는 예상 결과가 아니라 reproduction target으로만 유지합니다. 필요한 transmit power, timing, bandwidth, 영향을 받는 spreading factors 및 range는 환경에 따라 다릅니다. authorized하고 RF-contained된 setup 내부에서만 테스트하며 현지 spectrum 규정을 준수합니다.
 
 ---
 
@@ -71,28 +73,34 @@ SF12/125 kHz를 강제하여 airtime을 증가시킵니다. 이렇게 하면 gat
 
 | Tool | Purpose | Notes |
 |------|---------|-------|
-| **LoRaWAN Auditing Framework (LAF)** | LoRaWAN frames 생성/파싱/공격, DB 기반 analyzers, brute-forcer | Docker image이며 Semtech UDP input 지원 |
-| **LoRaPWN** | OTAA brute-forcing, downlinks 생성, payloads 복호화를 위한 Trend Micro Python utility | 2023년에 demo 공개, SDR-agnostic |
-| **LoRAttack** | USRP를 사용한 multi-channel sniffer + replay, PCAP/LoRaTap export | 우수한 Wireshark integration |
-| **gr-lora / gr-lorawan** | baseband TX/RX용 GNU Radio OOT blocks | custom attacks를 위한 기반 |
+| **LoRaWAN Auditing Framework (LAF)** | LoRaWAN frames를 craft/parse/attack하고, DB-backed analyzers 및 brute-forcer 제공 | Docker image; Semtech UDP input 지원<sup>[[1]](#references)</sup> |
+| **LoRaPWN** | OTAA를 brute하고 downlinks를 생성하며 payloads를 decrypt하는 Trend Micro Python utility | Public research utility; 지원 hardware 및 protocol versions 확인 필요<sup>[[2]](#references)</sup> |
+| **LoRAttack** | multi-channel LoRaWAN capture, session analysis, key derivation 및 replay testing을 위한 research framework | 2024년 master's thesis에 설명되어 있음; example flags에 의존하기 전에 정확한 implementation을 확보하고 검증해야 함<sup>[[8]](#references)</sup> |
+| **gr-lora / gr-lora_sdr** | LoRa baseband reception 또는 transceiver research를 위한 GNU Radio out-of-tree blocks | 프로젝트마다 GNU Radio compatibility 및 feature set이 다름<sup>[[9]](#references)</sup> |
 
 ---
 
 ## Defensive recommendations (pentester checklist)
 
-1. 진정으로 무작위인 DevNonce를 사용하는 **OTAA** devices를 우선 사용하고 중복을 모니터링합니다.
-2. **LoRaWAN 1.1**을 적용합니다: 32-bit frame counters 및 서로 다른 FNwkSIntKey / SNwkSIntKey를 사용합니다.
-3. frame-counter를 non-volatile memory에 저장하거나(**ABP**) OTAA로 마이그레이션합니다.
-4. firmware extraction으로부터 root keys를 보호하기 위해 **secure-element**(ATECC608A/SX1262-TRX-SE)을 배포합니다.
-5. 원격 UDP packet-forwarder ports(1700/1701)를 비활성화하거나 WireGuard/VPN으로 제한합니다.
-6. gateways를 최신 상태로 유지합니다. Kerlink/Dragino는 2024년에 patch된 images를 제공합니다.
-7. **traffic anomaly detection**(예: LAF analyzer)을 구현하여 counter resets, duplicate joins, 갑작스러운 ADR changes를 flag합니다.<sup>[[1]](#references)</sup>
+1. **OTAA**를 우선 사용하고 device와 server가 필요한 nonce state를 persist하는지 확인합니다. rejected duplicate joins를 monitor합니다.
+2. 지원되는 경우 **LoRaWAN 1.1**을 우선 사용하여 network functions가 distinct session keys와 updated nonce handling을 사용하도록 합니다.<sup>[[3]](#references)</sup>
+3. frame-counter를 non-volatile memory에 저장하거나(**ABP**) OTAA로 migrate합니다.
+4. 적합한 **secure element**(예: 지원되는 design의 ATECC608A)을 배포하여 일반적인 firmware storage에서 root keys가 노출될 위험을 줄입니다.
+5. 구성된 packet-forwarder UDP listeners(일반적으로 1700)를 untrusted networks에 노출하지 않습니다. gateway backhaul을 authenticate/encrypt하거나 VPN으로 제한합니다.
+6. gateway를 vendor-supported firmware로 유지하고, 해당 advisories를 기준으로 정확한 model/version을 확인합니다.
+7. **traffic anomaly detection**(예: LAF analyzer)을 구현하여 counter resets, duplicate joins 및 갑작스러운 ADR changes를 flag합니다.<sup>[[1]](#references)</sup>
 
 
 
 ## References
 
 - [1] [LoRaWAN Auditing Framework (LAF)](https://github.com/IOActive/laf)
-- [2] [Trend Micro LoRaPWN overview](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
-
+- [2] [Trend Micro LoRaPWN 개요](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
+- [3] [LoRa Alliance - LoRaWAN L2 1.1 사양](https://resources.lora-alliance.org/technical-specifications/lorawan-specification-v1-1)
+- [4] [NVD - CVE-2024-29862](https://nvd.nist.gov/vuln/detail/CVE-2024-29862)
+- [5] [LoRa Alliance - LoRaWAN 1.1 regional parameters 및 join synchronization](https://resources.lora-alliance.org/technical-specifications/lorawan-backend-interfaces-v1-1)
+- [6] [NVD - CVE-2022-45227](https://nvd.nist.gov/vuln/detail/CVE-2022-45227)
+- [7] [NVD - CVE-2022-45228](https://nvd.nist.gov/vuln/detail/CVE-2022-45228)
+- [8] [CTU thesis catalogue - SDR Technology를 활용한 LPWAN Protocol Security Analysis](https://fit.cvut.cz/en/faculty/people/5076-ing-jiri-dostal-ph-d/theses)
+- [9] [EPFL `gr-lora_sdr` GNU Radio transceiver](https://github.com/tapparelj/gr-lora_sdr)
 {{#include ../../banners/hacktricks-training.md}}

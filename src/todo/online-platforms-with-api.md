@@ -1,131 +1,158 @@
-# API를 지원하는 Online Platforms
+# API가 있는 Online Platforms
 
 {{#include ../banners/hacktricks-training.md}}
 
-## [ProjectHoneypot](https://www.projecthoneypot.org/)
+이러한 service는 reconnaissance, reputation, breach 또는 enrichment workflow를 지원합니다. 해당 service의 API, quota, pricing 및 허용된 사용 방식은 자주 변경되므로, customer identifier 또는 민감한 데이터를 전송하기 전에 현재 vendor documentation과 engagement authorization을 확인하세요.
 
-IP가 의심스럽거나 악의적인 활동과 관련되어 있는지 확인할 수 있습니다. 완전히 무료입니다.
+## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
-## [**BotScout**](http://botscout.com/api.htm)
+IP address가 의심스럽거나 악의적인 activity와 연관된 적이 있는지 query합니다. Access에는 account 또는 API key가 필요할 수 있습니다.
 
-IP 주소가 계정을 등록하는 bot과 관련되어 있는지 확인합니다. username과 email도 확인할 수 있습니다. 처음에는 무료입니다.
+## [**BotScout**](https://botscout.com/api.htm) <sup>[[2]](#references)</sup>
 
-## [Hunter](https://hunter.io/)
+IP address, username 또는 email address가 자동화된 account registration이나 기타 보고된 bot activity와 연관된 적이 있는지 확인합니다.
 
-email을 찾고 검증합니다.\
-일부 API 요청은 무료이며, 더 많은 요청을 사용하려면 비용을 지불해야 합니다.\
-상업용인가요?
+## [Hunter](https://hunter.io/) <sup>[[3]](#references)</sup>
 
-## [AlientVault](https://otx.alienvault.com/api)
+Professional email address와 domain 관련 contact pattern을 찾고 verify합니다. Request limit과 허용된 사용 방식은 현재 plan에서 확인하세요.
 
-IP와 Domain과 관련된 악의적인 활동을 찾습니다. 무료입니다.
+## [AlienVault OTX](https://otx.alienvault.com/api) <sup>[[4]](#references)</sup>
 
-## [Clearbit](https://dashboard.clearbit.com/)
+IP address 및 domain과 연관된 threat-intelligence indicator와 activity를 검색합니다.
 
-email(다른 플랫폼의 profile), domain(기본적인 회사 정보, mail 및 근무자), companies(mail에서 회사 정보 확인)와 관련된 개인 데이터를 찾습니다.\
-모든 기능을 사용하려면 비용을 지불해야 합니다.\
-상업용인가요?
+## [Clearbit](https://dashboard.clearbit.com/) <sup>[[5]](#references)</sup>
 
-## [BuiltWith](https://builtwith.com/)
+사용 가능한 business/profile data를 이용해 email address, domain 또는 company를 enrich합니다. Coverage, access 및 privacy 제약은 현재 product와 plan에 따라 달라집니다.
 
-web에서 사용되는 기술을 확인합니다. 비쌉니다...\
-상업용인가요?
+## [BuiltWith](https://builtwith.com/) <sup>[[6]](#references)</sup>
 
-## [Fraudguard](https://fraudguard.io/)
+Website에서 관찰된 technology를 식별하고, 선택한 plan에서 허용하는 경우 historical 또는 relationship data를 가져옵니다.
 
-host(domain 또는 IP)가 의심스럽거나 악의적인 활동과 관련되어 있는지 확인합니다. 일부 API를 무료로 사용할 수 있습니다.\
-상업용인가요?
+## [FraudGuard](https://fraudguard.io/) <sup>[[7]](#references)</sup>
 
-## [FortiGuard](https://fortiguard.com/)
+IP address가 의심스럽거나 악의적인 activity와 연관되어 있는지 확인합니다. 현재 API plan과 limit을 확인하세요.
 
-host(domain 또는 IP)가 의심스럽거나 악의적인 활동과 관련되어 있는지 확인합니다. 일부 API를 무료로 사용할 수 있습니다.
+## [FortiGuard](https://fortiguard.com/) <sup>[[8]](#references)</sup>
 
-## [SpamCop](https://www.spamcop.net/)
+Domain, URL 또는 IP address에 대한 FortiGuard categorization과 threat intelligence를 조회합니다. Availability는 service에 따라 다릅니다.
 
-host가 spam 활동과 관련되어 있는지 알려줍니다. 일부 API를 무료로 사용할 수 있습니다.
+## [SpamCop](https://www.spamcop.net/) <sup>[[9]](#references)</sup>
 
-## [mywot](https://www.mywot.com/)
+IP address가 보고된 spam activity로 등재되어 있는지 확인합니다.
 
-의견 및 기타 지표를 기반으로 domain이 의심스럽거나 악의적인 정보와 관련되어 있는지 확인합니다.
+## [myWOT](https://www.mywot.com/) <sup>[[10]](#references)</sup>
 
-## [ipinfo](https://ipinfo.io/)
+해당 service의 community 및 기타 signal을 기반으로 domain의 reputation을 가져옵니다.
 
-IP 주소의 기본 정보를 가져옵니다. 월 최대 100K까지 테스트할 수 있습니다.
+## [IPinfo](https://ipinfo.io/) <sup>[[11]](#references)</sup>
 
-## [securitytrails](https://securitytrails.com/app/account)
+IP address에 대한 geolocation, ASN, organization 및 관련 metadata를 가져옵니다. Quota는 현재 plan에서 확인하세요.
 
-이 platform은 IP 및 domain에 대한 정보를 제공합니다. 예를 들어 IP 내부의 domain 또는 domain server 내부의 domain, email이 소유한 domain(관련 domain 찾기), domain의 IP history(CloudFlare 뒤에 있는 host 찾기), nameserver를 사용하는 모든 domain 등을 확인할 수 있습니다.\
-일부 기능은 무료로 사용할 수 있습니다.
+## [SecurityTrails](https://securitytrails.com/app/account) <sup>[[12]](#references)</sup>
 
-## [fullcontact](https://www.fullcontact.com/)
+이 platform은 historical resolution, IP 또는 name server와 연관된 domain 및 관련 record와 같은 DNS 및 infrastructure intelligence를 제공합니다. Historical DNS는 이전 origin address를 노출할 수 있지만 CDN을 안정적으로 우회하지는 않으며 검증이 필요합니다.
 
-email, domain 또는 company name으로 검색하고 관련된 "개인" 정보를 가져올 수 있습니다. email을 검증할 수도 있습니다. 일부 기능은 무료로 사용할 수 있습니다.
+## [FullContact](https://www.fullcontact.com/) <sup>[[13]](#references)</sup>
 
-## [RiskIQ](https://www.spiderfoot.net/documentation/)
+사용 가능한 identity 및 business attribute를 이용해 email address, domain 또는 company name을 enrich합니다. Authorization 및 privacy requirement에 따라 personal data를 처리하세요.
 
-무료/community version에서도 domain과 IP에 대한 많은 정보를 제공합니다.
+## RiskIQ / Microsoft Defender Threat Intelligence (legacy transition) <sup>[[14]](#references)</sup>
 
-## [\_IntelligenceX](https://intelx.io/)
+RiskIQ의 PassiveTotal capability는 Microsoft Defender Threat Intelligence로 transition되었습니다. Product access, API 및 유지되는 functionality가 변경되었으므로 legacy PassiveTotal 가정 대신 Microsoft의 현재 documentation을 사용하세요.
 
-Domain, IP 및 email을 검색하고 dump에서 정보를 가져옵니다. 일부 기능은 무료로 사용할 수 있습니다.
+## [Intelligence X](https://intelx.io/) <sup>[[15]](#references)</sup>
 
-## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+Service의 access control에 따라 domain, IP address, email address 및 index된 historical 또는 leaked data를 검색합니다.
 
-IP로 검색하고 의심스러운 활동과 관련된 정보를 수집합니다. 일부 기능은 무료로 사용할 수 있습니다.
+## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/) <sup>[[16]](#references)</sup>
 
-## [Greynoise](https://viz.greynoise.io/)
+Threat-intelligence 및 reputation data를 위해 IP address와 기타 indicator를 검색합니다.
 
-IP 또는 IP range로 검색하고 Internet을 scanning하는 IP에 대한 정보를 가져옵니다. 15일 동안 무료로 사용할 수 있습니다.
+## [GreyNoise](https://viz.greynoise.io/) <sup>[[17]](#references)</sup>
 
-## [Shodan](https://www.shodan.io/)
+Internet scanning 및 일반적인 service activity에 대한 observation을 위해 IP address 또는 range를 검색합니다. 현재 trial 및 community-access 약관을 확인하세요.
 
-IP 주소의 scan 정보를 가져옵니다. 일부 API를 무료로 사용할 수 있습니다.
+## [Shodan](https://www.shodan.io/) <sup>[[18]](#references)</sup>
 
-## [Censys](https://censys.io/)
+IP address, host 또는 search query에 대한 internet-scan 및 service information을 가져옵니다. API access는 account plan에 따라 달라집니다.
 
-Shodan과 매우 유사합니다.
+## [Censys](https://censys.io/) <sup>[[19]](#references)</sup>
 
-## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
+Host, certificate, domain 및 internet-service dataset을 검색합니다. 해당 data model과 coverage는 Shodan과 다릅니다.
 
-keyword로 검색하여 공개된 S3 bucket을 찾습니다.
+## [GrayHatWarfare bucket search](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
 
-## [Dehashed](https://www.dehashed.com/data)
+Keyword를 사용해 provider가 공개적으로 관찰한 cloud-storage object 및 bucket의 index를 검색합니다.
 
-email 및 심지어 domain의 leaked credential을 찾습니다.\
-상업용인가요?
+## [DeHashed](https://www.dehashed.com/data) <sup>[[21]](#references)</sup>
 
-## [psbdmp](https://psbdmp.ws/)
+Email address, username, domain 및 관련 record에 대한 index된 breach data를 검색합니다. Authorization이 있는 경우에만 사용하고 breach data가 불필요하게 노출되지 않도록 하세요.
 
-email이 등장한 pastebin을 검색합니다. 상업용인가요?
+## [psbdmp](https://psbdmp.ws/) <sup>[[22]](#references)</sup>
 
-## [emailrep.io](https://emailrep.io/key)
+Email address 또는 기타 term이 포함된 index된 paste content를 검색합니다. 통합하기 전에 service가 여전히 available한지 확인하세요.
 
-mail의 reputation을 확인합니다. 상업용인가요?
+## [EmailRep](https://emailrep.io/key) <sup>[[23]](#references)</sup>
 
-## [ghostproject](https://ghostproject.fr/)
+Email address에 대한 reputation 및 risk signal을 가져옵니다.
 
-leaked email에서 password를 가져옵니다. 상업용인가요?
+## GhostProject (historical) <sup>[[24]](#references)</sup>
 
-## [Binaryedge](https://www.binaryedge.io/)
+과거에 leaked email/password data 검색 기능을 광고했습니다. 해당 service를 high-risk third-party handling으로 간주하고 사용하기 전에 availability, legality 및 authorization을 확인하세요.
 
-IP에서 흥미로운 정보를 가져옵니다.
+## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
 
-## [haveibeenpwned](https://haveibeenpwned.com/)
+IP address 및 관련 asset에 대한 internet-scan, exposure 및 threat-intelligence data를 가져옵니다.
 
-domain 및 email로 검색하여 pwned되었는지와 password를 확인합니다. 상업용인가요?
+## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
-### [IP2Location.io](https://www.ip2location.io/)
+Email address 또는 verified domain이 알려진 breach에 포함되어 있는지 확인합니다. 별도의 Pwned Passwords service는 prefix를 사용해 password hash를 확인하며, plaintext password를 노출하지 **않습니다**.
 
-IP geolocation, data center, ASN 및 VPN 정보까지 감지합니다. 월 30K query를 무료로 제공합니다.
+### [IP2Location.io](https://www.ip2location.io/) <sup>[[27]](#references)</sup>
 
-### [IPQuery.io](https://www.ipquery.io/)
-대상화된 datapoint를 사용하는 IP Geolocation 및 OISNT입니다. 비상업용입니다.
+IP geolocation, data-center, ASN, proxy/VPN 및 관련 enrichment field를 가져옵니다. Quota는 현재 plan에 따라 달라집니다.
+
+### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
+선택된 data point를 사용한 IP geolocation 및 OSINT 지향 enrichment를 제공합니다. Commercial use에 대한 현재 약관을 확인하세요.
 
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(상업용 tool에 포함되어 있나요?)
+[DNSDumpster](https://dnsdumpster.com/)는 DNS-reconnaissance result를 제공합니다.<sup>[[29]](#references)</sup>
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (상업용 tool에 포함되어 있나요?)
+[Netcraft](https://www.netcraft.com/)는 site, hosting 및 internet-infrastructure intelligence를 제공합니다.<sup>[[30]](#references)</sup>
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (상업용 tool에 포함되어 있나요?)
+[NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/)는 online subdomain-discovery interface를 제공합니다.<sup>[[31]](#references)</sup>
 
+## References
+
+- [1] [Project Honey Pot](https://www.projecthoneypot.org/)
+- [2] [BotScout API](https://botscout.com/api.htm)
+- [3] [Hunter API](https://hunter.io/api-documentation)
+- [4] [AlienVault OTX API](https://otx.alienvault.com/api)
+- [5] [Clearbit](https://dashboard.clearbit.com/)
+- [6] [BuiltWith](https://builtwith.com/)
+- [7] [FraudGuard](https://fraudguard.io/)
+- [8] [FortiGuard Labs](https://www.fortiguard.com/)
+- [9] [SpamCop](https://www.spamcop.net/)
+- [10] [Web of Trust](https://www.mywot.com/)
+- [11] [IPinfo](https://ipinfo.io/)
+- [12] [SecurityTrails](https://securitytrails.com/)
+- [13] [FullContact](https://www.fullcontact.com/)
+- [14] [Microsoft Defender Threat Intelligence](https://learn.microsoft.com/en-us/defender/threat-intelligence/what-is-microsoft-defender-threat-intelligence-defender-ti)
+- [15] [Intelligence X](https://intelx.io/)
+- [16] [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+- [17] [GreyNoise](https://www.greynoise.io/)
+- [18] [Shodan](https://www.shodan.io/)
+- [19] [Censys](https://censys.com/)
+- [20] [GrayHatWarfare](https://buckets.grayhatwarfare.com/)
+- [21] [DeHashed](https://www.dehashed.com/)
+- [22] [psbdmp](https://psbdmp.ws/)
+- [23] [EmailRep](https://emailrep.io/)
+- [24] [Cornell research — 침해된 자격 증명 확인을 위한 Protocol (GhostProject 포함)](https://rist.tech.cornell.edu/papers/c3.pdf)
+- [25] [BinaryEdge](https://www.binaryedge.io/)
+- [26] [Have I Been Pwned API](https://haveibeenpwned.com/API/v3)
+- [27] [IP2Location.io](https://www.ip2location.io/)
+- [28] [IPQuery](https://www.ipquery.io/)
+- [29] [DNSDumpster](https://dnsdumpster.com/)
+- [30] [Netcraft](https://www.netcraft.com/)
+- [31] [NMMapper Subdomain Finder](https://www.nmmapper.com/sys/tools/subdomainfinder/)
 {{#include ../banners/hacktricks-training.md}}
