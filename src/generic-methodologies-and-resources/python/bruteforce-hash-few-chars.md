@@ -1,4 +1,6 @@
 # Bruteforce Hash με λίγους χαρακτήρες
+
+{{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib
 

@@ -1,4 +1,6 @@
-# Class Pollution (Python's Prototype Pollution)
+# Class Pollution (Prototype Pollution της Python)
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Βασικό Παράδειγμα
 
@@ -28,7 +30,7 @@ print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
 ## Βασικό Παράδειγμα Ευπάθειας
 
-Ένα recursive merge μπορεί να αποδεχτεί attacker-controlled κλειδιά mapping και να εγγράψει ένθετες τιμές μέσω πρόσβασης είτε σε items είτε σε attributes.<sup>[[1]](#references)</sup>
+Μια αναδρομική συγχώνευση μπορεί να δέχεται keys αντιστοίχισης που ελέγχονται από τον attacker και να εγγράφει nested values μέσω είτε item access είτε attribute access.<sup>[[1]](#references)</sup>
 ```python
 # Initial state
 class Employee: pass
@@ -67,7 +69,7 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <summary>Δημιουργία προεπιλεγμένης τιμής ιδιότητας κλάσης για RCE (subprocess)</summary>
 
-Μια κοινόχρηστη base class μπορεί να παρέχει ένα προεπιλεγμένο attribute που καταναλώνεται από ένα command gadget μιας sibling class.<sup>[[1]](#references)</sup>
+Μια κοινόχρηστη base class μπορεί να παρέχει ένα προεπιλεγμένο attribute που καταναλώνεται από ένα command gadget sibling class.<sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -118,9 +120,9 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Polluting άλλων κλάσεων και global vars μέσω του <code>globals</code></summary>
+<summary>Ρύπανση άλλων κλάσεων και global μεταβλητών μέσω του <code>globals</code></summary>
 
-Το mapping `__globals__` μιας συνάρτησης εκθέτει το namespace του module που είναι προσβάσιμο από μια μέθοδο ορισμένη σε αυτό το module.<sup>[[1]](#references)[[4]](#references)</sup>
+Η αντιστοίχιση `__globals__` μιας συνάρτησης εκθέτει τον χώρο ονομάτων της μονάδας στον οποίο είναι προσβάσιμη μια μέθοδος που έχει οριστεί σε αυτή τη μονάδα.<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -152,9 +154,9 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <details>
 
-<summary>Αυθαίρετη εκτέλεση subprocess</summary>
+<summary>Arbitrary subprocess execution</summary>
 
-Στα Windows, το `Popen(..., shell=True)` χρησιμοποιεί τη μεταβλητή περιβάλλοντος `COMSPEC` ως προεπιλεγμένο shell, επομένως αυτό το gadget επιδεικνύει ανακατεύθυνση command μέσω environment.<sup>[[1]](#references)[[5]](#references)</sup>
+Στα Windows, το `Popen(..., shell=True)` χρησιμοποιεί τη μεταβλητή περιβάλλοντος `COMSPEC` ως προεπιλεγμένο shell, επομένως αυτό το gadget επιδεικνύει ανακατεύθυνση εντολών μέσω του περιβάλλοντος.<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -188,7 +190,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Παράκαμψη του <strong><code>__kwdefaults__</code></strong></summary>
 
-Η Python τεκμηριώνει το `__kwdefaults__` ως την αντιστοίχιση των προεπιλεγμένων τιμών για παραμέτρους που δέχονται μόνο keyword arguments και ακολουθούν τα `*` ή `*args` σε έναν ορισμό συνάρτησης.<sup>[[4]](#references)</sup> Το ακόλουθο gadget αντικαθιστά αυτή την αντιστοίχιση μέσω ενός polluted function path.<sup>[[1]](#references)</sup>
+Η Python τεκμηριώνει το `__kwdefaults__` ως την αντιστοίχιση των προεπιλεγμένων τιμών για παραμέτρους μόνο με keyword, οι οποίες ακολουθούν τα `*` ή `*args` σε έναν ορισμό συνάρτησης.<sup>[[4]](#references)</sup> Το ακόλουθο gadget παρακάμπτει αυτή την αντιστοίχιση μέσω ενός polluted function path.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -229,20 +231,20 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Αντικατάσταση του Flask secret μεταξύ αρχείων</summary>
+<summary>Overwriting Flask secret across files</summary>
 
-Αν η κλάση του polluted object βρίσκεται σε διαφορετικό module από το module του entry point της εφαρμογής, τα methods της `__globals__` εκθέτουν αρχικά το namespace του module της κλάσης. Στη συνέχεια, μια traversal μέσω του loader και του `sys.modules.__main__` μπορεί να φτάσει στο module του entry point και στο Flask `app` object.<sup>[[1]](#references)[[2]](#references)</sup>
+Εάν η κλάση του polluted object βρίσκεται σε module διαφορετικό από το entry-point module της εφαρμογής, τα methods του `__globals__` εκθέτουν αρχικά το namespace του class module. Στη συνέχεια, μέσω μιας traversal μέσω του loader και του `sys.modules.__main__`, μπορεί να γίνει πρόσβαση στο entry-point module και στο Flask `app` object.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
 Το Flask χρησιμοποιεί το `app.secret_key` για να υπογράφει το session cookie· η γνώση του key επιτρέπει σε έναν attacker να δημιουργήσει έγκυρα session data.<sup>[[6]](#references)</sup>
 
-Το αρχικό writeup παρουσιάζει την ακόλουθη διαδρομή για την πρόσβαση στο `app.secret_key`· το CTFtime φιλοξενεί επίσης ένα αντίγραφο του writeup.<sup>[[2]](#references)[[3]](#references)</sup>
+Το original writeup παρουσιάζει την ακόλουθη διαδρομή για την πρόσβαση στο `app.secret_key`· το CTFtime φιλοξενεί επίσης ένα αντίγραφο του writeup.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Η αλλαγή του key μπορεί να επιτρέψει την υπογραφή replacement session cookies και ενδέχεται να επιτρέψει privilege escalation· δείτε τη [σελίδα εργαλείων Flask session](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
+Η αλλαγή του key μπορεί να επιτρέψει την υπογραφή replacement session cookies και ενδέχεται να επιτρέψει privilege escalation· δείτε τη [Flask session tooling page](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
 
 </details>
 
@@ -255,10 +257,10 @@ python-internal-read-gadgets.md
 
 ## References
 
-- [1] [Prototype Pollution στην Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
-- [2] [idekCTF 2022 writeup του task manager (αρχικό)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
+- [1] [Prototype Pollution in Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
+- [2] [idekCTF 2022 task manager writeup (αρχικό)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
 - [3] [CTFtime - idekCTF 2022: writeup του task manager](https://ctftime.org/writeup/36082)
 - [4] [inspect — Επιθεώρηση live objects](https://docs.python.org/3/library/inspect.html)
-- [5] [subprocess — Διαχείριση subprocess](https://docs.python.org/3/library/subprocess.html)
-- [6] [Quickstart — Τεκμηρίωση Flask](https://flask.palletsprojects.com/en/stable/quickstart/)
+- [5] [subprocess — Διαχείριση subprocesses](https://docs.python.org/3/library/subprocess.html)
+- [6] [Γρήγορη εκκίνηση — Τεκμηρίωση Flask](https://flask.palletsprojects.com/en/stable/quickstart/)
 {{#include ../../banners/hacktricks-training.md}}

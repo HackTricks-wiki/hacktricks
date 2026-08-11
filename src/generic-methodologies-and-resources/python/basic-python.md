@@ -1,16 +1,18 @@
 # Βασική Python
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Βασικές αρχές της Python
 
 ### Χρήσιμες πληροφορίες
 
-Όλα τα παρακάτω παραδείγματα θεωρούν ότι χρησιμοποιείται **Python 3**, εκτός αν αναφέρεται ρητά κάτι διαφορετικό.\
+Όλα τα παρακάτω παραδείγματα θεωρούν **Python 3**, εκτός αν αναφέρεται ρητά κάτι διαφορετικό.\
 Η `range()` επιστρέφει ένα iterable object στην Python 3 (παρόμοιο με την `xrange()` στην Python 2).\
-Η διαφορά μεταξύ ενός **tuple** και μιας **list** είναι ότι η **θέση** μιας τιμής σε ένα tuple συνήθως της προσδίδει σημασία, ενώ μια list είναι συνήθως απλώς μια διατεταγμένη ακολουθία τιμών.
+Η διαφορά μεταξύ ενός **tuple** και μιας **list** είναι ότι η **θέση** μιας τιμής σε ένα tuple συνήθως της προσδίδει σημασία, ενώ μια list είναι συνήθως απλώς μια ταξινομημένη ακολουθία τιμών.
 
 ### Κύριες λειτουργίες
 
-Για να υψώσετε έναν αριθμό σε δύναμη χρησιμοποιείτε: `3**2` (όχι `3^2`)\
+Για να υψώσετε έναν αριθμό σε δύναμη, χρησιμοποιείτε: `3**2` (όχι `3^2`)\
 `2/3 == 0.666666...` στην Python 3, ενώ το `2//3 == 0` εκτελεί ακέραια διαίρεση.\
 `i >= j`\
 `i <= j`\
@@ -77,7 +79,7 @@ for letter in "hola":
 ```
 ### Bytes, hex και encodings
 
-Αυτό είναι πολύ συνηθισμένο σε exploit-dev, reversing και CTFs:
+Αυτό είναι πολύ συνηθισμένο στο exploit-dev, το reversing και τα CTFs:
 ```python
 b"ABC".hex() == "414243"
 bytes.fromhex("414243") == b"ABC"
@@ -86,25 +88,25 @@ int.from_bytes(b"\x41\x42\x43", "big") == 0x414243
 "admin".encode() == b"admin"
 b"admin".decode() == "admin"
 ```
-### Tuples
+### Πλειάδες
 
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
 `(4,)` = singleton\
-`d = ()` empty tuple\
-`d += (4,)` --> add into a tuple\
-`# t1[1] = 'new value'` --> tuples are immutable\
-`list(t2) == [5, 6]` --> from tuple to list
+`d = ()` κενή πλειάδα\
+`d += (4,)` --> προσθήκη σε πλειάδα\
+`# t1[1] = 'new value'` --> οι πλειάδες είναι immutable\
+`list(t2) == [5, 6]` --> από πλειάδα σε λίστα
 
 ### Λίστα (array)
 
-`d = []` empty\
+`d = []` κενή\
 `a = [1, 2, 3]`\
 `b = [4, 5]`\
 `a + b == [1, 2, 3, 4, 5]`\
 `b.append(6)` --> `b == [4, 5, 6]`\
-`tuple(a) == (1, 2, 3)` --> from list to tuple
+`tuple(a) == (1, 2, 3)` --> από λίστα σε πλειάδα
 
 ### Λεξικό
 ```python
@@ -119,9 +121,9 @@ month_numbers.update(a)
 mn = month_numbers.copy()  # independent copy
 month_numbers.get('key', 0)  # default value if key does not exist
 ```
-### Σύνολα
+### Set
 
-Στα σύνολα δεν υπάρχουν επαναλήψεις.\
+Στα sets δεν υπάρχουν επαναλήψεις.\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
 `myset.add('a')` --> καμία αλλαγή\
@@ -186,14 +188,14 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-Το **zip** σταματά όταν σταματήσει το συντομότερο iterable:
+**zip** σταματά όταν σταματήσει το μικρότερο iterable:
 ```python
 for f, b in zip(foo, bar):
 print(f, b)
 ```
 **Lambda** χρησιμοποιείται για τον ορισμό μιας συνάρτησης:\
-`(lambda x, y: x + y)(5, 3) == 8` --> χρήση του lambda ως απλής συνάρτησης\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> χρήση του lambda για ταξινόμηση\
+`(lambda x, y: x + y)(5, 3) == 8` --> χρήση της lambda ως απλής συνάρτησης\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> χρήση της lambda για ταξινόμηση\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
 ```python
@@ -233,8 +235,8 @@ print("executing finally clause in any case")
 ```
 ### Assert()
 
-Αν η συνθήκη είναι false, θα εκτυπωθεί το string.\
-Να θυμάστε ότι οι δηλώσεις `assert` μπορούν να απενεργοποιηθούν με `python -O`, επομένως μην τις χρησιμοποιείτε για access control ή input validation.
+Εάν η συνθήκη είναι false, θα εκτυπωθεί η συμβολοσειρά.\
+Να θυμάστε ότι οι δηλώσεις `assert` μπορούν να απενεργοποιηθούν με `python -O`, επομένως μην τις χρησιμοποιείτε για έλεγχο πρόσβασης ή επικύρωση εισόδου.
 ```python
 def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
@@ -242,7 +244,7 @@ assert len(grades) == len(weights), 'wrong number of grades'
 ```
 ### Generators, yield
 
-Ένας generator, αντί να επιστρέφει τα πάντα ταυτόχρονα, κάνει **yield** στις τιμές μία-μία. Αυτό είναι πολύ χρήσιμο για τεράστιες wordlists, bruteforcers ή μεγάλες αποκρίσεις.
+Ένας generator, αντί να επιστρέφει τα πάντα μονομιάς, κάνει **yield** στις τιμές μία-μία. Αυτό είναι πολύ χρήσιμο για τεράστιες wordlists, bruteforcers ή μεγάλες responses.
 ```python
 def my_gen(n):
 yield n
@@ -262,21 +264,21 @@ re.findall(r"\w", "hola") == ['h', 'o', 'l', 'a']
 re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 ```
 **Ειδικές σημασίες:**\
-`.` --> οποιοσδήποτε χαρακτήρας εκτός newline\
+`.` --> οποιοσδήποτε χαρακτήρας εκτός από newline\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> ψηφίο\
-`\s` --> χαρακτήρας κενού `[ \n\r\t\f]`\
-`\S` --> χαρακτήρας που δεν είναι κενό\
-`^` --> ξεκινά με\
+`\s` --> χαρακτήρας whitespace `[ \n\r\t\f]`\
+`\S` --> χαρακτήρας που δεν είναι whitespace\
+`^` --> αρχίζει με\
 `$` --> τελειώνει με\
 `+` --> ένα ή περισσότερα\
-`*` --> 0 ή περισσότερες\
+`*` --> 0 ή περισσότερα\
 `?` --> 0 ή 1 εμφανίσεις
 
 **Επιλογές:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> επιτρέπει στο dot να ταιριάζει με newline\
-`re.search(pat, string, re.MULTILINE)` --> επιτρέπει στα `^` και `$` να ταιριάζουν σε διαφορετικές γραμμές
+`re.search(pat, string, re.DOTALL)` --> επιτρέπει στην τελεία να αντιστοιχεί σε newline\
+`re.search(pat, string, re.MULTILINE)` --> επιτρέπει στα `^` και `$` να αντιστοιχούν σε διαφορετικές γραμμές
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -301,7 +303,7 @@ list(product([1, 2, 3], repeat=2))
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
 ```
-**συνδυασμοί**\
+**combinations**\
 `from itertools import combinations` --> όλοι οι δυνατοί συνδυασμοί χωρίς επανάληψη
 ```python
 list(combinations('123', 2))
@@ -321,7 +323,7 @@ list(batched(range(10), 4))
 ```
 ### Decorators
 
-Decorator που μετρά τον χρόνο που χρειάζεται για να εκτελεστεί μια συνάρτηση:
+Decorator που μετρά τον χρόνο που χρειάζεται μια συνάρτηση για να εκτελεστεί:
 ```python
 from functools import wraps
 import time
@@ -343,13 +345,13 @@ return wrapper
 def decorated_func():
 print("Decorated func!")
 ```
-Αν το εκτελέσετε, θα δείτε κάτι σαν το παρακάτω:
+Αν το εκτελέσετε, θα δείτε κάτι σαν το εξής:
 ```text
 Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### Χρήσιμα βοηθητικά εργαλεία της standard library για pentesting
+### Χρήσιμες βοηθητικές συναρτήσεις της standard library για pentesting
 
 **Περιήγηση στο filesystem με `pathlib`** (`Path.walk()` είναι διαθέσιμο στην Python 3.12+· χρησιμοποιήστε `os.walk()` σε παλαιότερους interpreters):
 ```python
@@ -362,7 +364,7 @@ for name in files:
 if name.endswith((".py", ".env", ".bak")):
 print(root / name)
 ```
-**Ασφαλής εκτέλεση εντολών** (`shell=False` από προεπιλογή είναι συνήθως αυτό που θέλετε):
+**Εκτελείτε εντολές με ασφάλεια** (`shell=False` από προεπιλογή είναι συνήθως αυτό που θέλετε):
 ```python
 import subprocess
 
@@ -374,7 +376,7 @@ check=True,
 )
 print(cp.stdout)
 ```
-Αν **πρέπει οπωσδήποτε** να δημιουργήσεις μια shell command, κάνε πρώτα quote σε κάθε token που ελέγχεται από τον επιτιθέμενο:
+Αν **πρέπει οπωσδήποτε** να δημιουργήσεις μια εντολή shell, κάνε πρώτα quoting σε κάθε token που ελέγχεται από τον επιτιθέμενο:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
@@ -391,9 +393,9 @@ print(out.read_text())
 ```
 Για αυτοματοποίηση HTTP, δείτε [αυτήν τη σελίδα σχετικά με τα web requests στην Python](web-requests.md).
 
-### Παγίδες εξαγωγής archive (σημαντικό για tooling και file parsers)
+### Σημαντικές παγίδες στην εξαγωγή αρχείων archive (για tooling και file parsers)
 
-Από την **Python 3.14**, τα `tarfile.extract()` / `extractall()` χρησιμοποιούν από προεπιλογή το ασφαλέστερο φίλτρο `data`. Σε παλαιότερες εκδόσεις της Python, θα πρέπει να το ορίζετε ρητά κατά τον χειρισμό archives που ελέγχονται από attacker.<sup>[[1]](#references)[[2]](#references)</sup>
+Από την **Python 3.14**, τα `tarfile.extract()` / `extractall()` χρησιμοποιούν από προεπιλογή το ασφαλέστερο φίλτρο `data`. Σε παλαιότερες εκδόσεις της Python, θα πρέπει να το ορίζετε ρητά όταν χειρίζεστε archives που ελέγχονται από επιτιθέμενους.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 import tarfile
 import tempfile
@@ -402,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-Ακόμα και με το `filter="data"`, εξαγάγετε μη αξιόπιστα αρχεία σε έναν νέο προσωρινό κατάλογο και επικυρώστε ό,τι γράφτηκε πριν μετακινήσετε αρχεία οπουδήποτε σημαντικά.
+Ακόμη και με `filter="data"`, κάντε extract μη αξιόπιστων archives σε έναν νέο προσωρινό κατάλογο και επικυρώστε όσα γράφτηκαν πριν μετακινήσετε αρχεία οπουδήποτε σημαντικά.
 
-Το `zipfile.Path` είναι διαφορετικό: **δεν απολυμαίνει τα ονόματα αρχείων** για εσάς, επομένως επικυρώστε τις διαδρομές πριν από την εξαγωγή μελών ZIP που ελέγχονται από attacker:
+Το `zipfile.Path` διαφέρει: **δεν κάνει sanitize στα filenames** για εσάς, επομένως επικυρώστε τα paths πριν κάνετε extract members από ZIP που ελέγχει ο attacker:
 ```python
 import os
 import zipfile
@@ -419,13 +421,13 @@ zf.extract(info, base)
 ```
 ### Επικίνδυνα primitives που πρέπει να θυμάστε
 
-- Τα `eval()` / `exec()` **δεν είναι** sandboxes.
-- Το `ast.literal_eval()` **δεν εκτελεί** κώδικα Python, αλλά μπορεί και πάλι να γίνει αντικείμενο abuse για denial of service στη μνήμη / CPU με input που ελέγχεται από τον attacker.
-- Το `pickle.loads()` **δεν είναι ασφαλές**· μην κάνετε ποτέ unpickle bytes που ελέγχονται από τον attacker.
-- Για πιο προχωρημένα offensive tricks, ελέγξτε τα [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) και [Python deserializations](../../pentesting-web/deserialization/README.md).
+- Τα `eval()` / `exec()` **δεν** είναι sandboxes.
+- Η `ast.literal_eval()` **δεν** εκτελεί κώδικα Python, αλλά μπορεί να γίνει αντικείμενο κατάχρησης για denial of service σε μνήμη / CPU με input που ελέγχεται από attacker.
+- Η `pickle.loads()` **δεν είναι ασφαλής**· μην κάνετε ποτέ unpickle bytes που ελέγχονται από attacker.
+- Για βαθύτερα offensive tricks, ελέγξτε τα [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) και [Python deserializations](../../pentesting-web/deserialization/README.md).
 
 ## References
 
-- [1] [Έγγραφα Python tarfile](https://docs.python.org/3/library/tarfile.html)
+- [1] [Τεκμηρίωση Python tarfile](https://docs.python.org/3/library/tarfile.html)
 - [2] [PEP 706 – Φίλτρο για το tarfile.extractall()](https://peps.python.org/pep-0706/)
 {{#include ../../banners/hacktricks-training.md}}

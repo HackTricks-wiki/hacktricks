@@ -1,5 +1,7 @@
 # Ανάλυση Wifi Pcap
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Έλεγχος BSSIDs
 
 Με μια Wi-Fi capture ανοιχτή στο Wireshark, επιλέξτε _Wireless → WLAN Traffic_ για να συνοψίσετε τα wireless networks που παρατηρήθηκαν στην capture· κάθε γραμμή αντιπροσωπεύει ένα wireless network.<sup>[[1]](#references)</sup>
@@ -10,33 +12,33 @@
 
 ### Brute Force
 
-Για WPA/WPA2-PSK captures, το `aircrack-ng` απαιτεί ένα usable four-way EAPOL handshake και ελέγχει candidate passphrases με ένα dictionary. Χρησιμοποιήστε το `-w` για να καθορίσετε το wordlist και το `-b` για να στοχεύσετε το BSSID του access point:<sup>[[2]](#references)</sup>
+Για WPA/WPA2-PSK captures, το `aircrack-ng` απαιτεί ένα usable four-way EAPOL handshake και δοκιμάζει candidate passphrases με ένα dictionary. Χρησιμοποιήστε το `-w` για να παρέχετε το wordlist και το `-b` για να στοχεύσετε το BSSID του access point:<sup>[[2]](#references)</sup>
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
-Εάν βρεθεί υποψήφιο που ταιριάζει, το Aircrack-ng ανακτά το pre-shared key· στη συνέχεια, το password και το SSID που ταιριάζουν μπορούν να ρυθμιστούν στις ρυθμίσεις αποκρυπτογράφησης 802.11 του Wireshark, όταν το capture και το security mode το υποστηρίζουν.<sup>[[2]](#references)[[5]](#references)</sup>
+Εάν βρεθεί υποψήφιο που ταιριάζει, το Aircrack-ng ανακτά το pre-shared key· ο κωδικός πρόσβασης και το SSID που ταιριάζουν μπορούν στη συνέχεια να ρυθμιστούν στις ρυθμίσεις αποκρυπτογράφησης 802.11 του Wireshark, όταν το capture και η λειτουργία ασφάλειας το υποστηρίζουν.<sup>[[2]](#references)[[5]](#references)</sup>
 
 ## Δεδομένα σε Beacons / Side Channel
 
-Εάν υποψιάζεστε ότι **δεδομένα διαρρέουν σε beacon-side-channel traffic**, ξεκινήστε με ένα display filter όπως `wlan contains "NAMEofNETWORK"` ή `wlan.ssid == "NAMEofNETWORK"`, και στη συνέχεια ελέγξτε τα matching frames για ύποπτες συμβολοσειρές. Η πρώτη μορφή εκτελεί ευρεία αναζήτηση bytes· η δεύτερη αντιστοιχεί στο πεδίο SSID.<sup>[[3]](#references)[[4]](#references)</sup>
+Εάν υποψιάζεστε ότι **δεδομένα διαρρέουν μέσω beacon-side-channel traffic**, ξεκινήστε με ένα display filter όπως `wlan contains "NAMEofNETWORK"` ή `wlan.ssid == "NAMEofNETWORK"`, και στη συνέχεια εξετάστε τα frames που ταιριάζουν για ύποπτες συμβολοσειρές. Η πρώτη μορφή πραγματοποιεί ευρεία αναζήτηση σε bytes· η δεύτερη αντιστοιχεί στο πεδίο SSID.<sup>[[3]](#references)[[4]](#references)</sup>
 
-## Εύρεση άγνωστων MAC διευθύνσεων σε Wi-Fi Network
+## Εύρεση άγνωστων MAC Addresses σε Wi-Fi Network
 
-Το Wireshark εμφανίζει το `wlan.ta` ως transmitter address και το `wlan.addr` ως hardware/MAC address· τα display filters μπορούν να συνδυάσουν αυτά τα πεδία με logical operators:<sup>[[3]](#references)[[4]](#references)</sup>
+Το Wireshark εκθέτει το `wlan.ta` ως transmitter address και το `wlan.addr` ως hardware/MAC address· τα display filters μπορούν να συνδυάζουν αυτά τα πεδία με logical operators:<sup>[[3]](#references)[[4]](#references)</sup>
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-Εάν γνωρίζετε ήδη **MAC addresses, αφαιρέστε τις από το output** προσθέτοντας checks όπως `&& !(wlan.addr == 5c:51:88:31:a0:3b)`.
+Εάν γνωρίζετε ήδη **MAC addresses, αφαιρέστε τις από την έξοδο** προσθέτοντας ελέγχους όπως `&& !(wlan.addr == 5c:51:88:31:a0:3b)`.
 
-Μόλις εντοπίσετε **άγνωστες MAC** addresses που επικοινωνούν μέσα στο network, χρησιμοποιήστε ένα filter όπως `wlan.addr == <MAC address> && (ftp || http || ssh || telnet)` για να περιορίσετε το traffic της. Τα FTP, HTTP, SSH και Telnet filters είναι χρήσιμα μόνο όταν το Wireshark μπορεί να κάνει dissect το αντίστοιχο decrypted payload.<sup>[[3]](#references)[[5]](#references)</sup>
+Αφού εντοπίσετε **άγνωστες MAC** addresses που επικοινωνούν μέσα στο network, χρησιμοποιήστε ένα filter όπως `wlan.addr == <MAC address> && (ftp || http || ssh || telnet)` για να περιορίσετε την κίνησή του. Τα FTP, HTTP, SSH και Telnet filters είναι χρήσιμα μόνο όταν το Wireshark μπορεί να κάνει dissect το αντίστοιχο decrypted payload.<sup>[[3]](#references)[[5]](#references)</sup>
 
-## Αποκρυπτογράφηση Traffic
+## Decrypt Traffic
 
 Για να προσθέσετε ένα 802.11 decryption key στο Wireshark, ανοίξτε _Edit → Preferences → Protocols → IEEE 802.11_ και κάντε κλικ στο _Edit_ δίπλα στο _Decryption Keys_.<sup>[[5]](#references)</sup>
 
-![Εύρεση άγνωστων MAC διευθύνσεων σε Wi-Fi Network - Αποκρυπτογράφηση Traffic: Μόλις εντοπίσετε άγνωστες MAC διευθύνσεις που επικοινωνούν μέσα στο network, μπορείτε να χρησιμοποιήσετε filters όπως το ακόλουθο:...](<../../../images/image (499).png>)
+![Εύρεση άγνωστων MAC Addresses σε Wi-Fi Network - Decrypt Traffic: Αφού εντοπίσετε άγνωστες MAC addresses που επικοινωνούν μέσα στο network, μπορείτε να χρησιμοποιήσετε filters όπως το ακόλουθο:...](<../../../images/image (499).png>)
 
-Για WPA/WPA2, το Wireshark συνήθως χρειάζεται το EAPOL four-way handshake και το matching password/SSID· η παροχή του transient key μπορεί να παρακάμψει την απαίτηση για handshake. Η per-connection αποκρυπτογράφηση WPA3 απαιτεί το PMK της σύνδεσης.<sup>[[5]](#references)</sup>
+Για WPA/WPA2, το Wireshark χρειάζεται συνήθως το EAPOL four-way handshake και τον αντίστοιχο κωδικό πρόσβασης/SSID· η παροχή του transient key μπορεί να παρακάμψει την απαίτηση για handshake. Η per-connection αποκρυπτογράφηση WPA3 απαιτεί το PMK της connection.<sup>[[5]](#references)</sup>
 
 ## References
 

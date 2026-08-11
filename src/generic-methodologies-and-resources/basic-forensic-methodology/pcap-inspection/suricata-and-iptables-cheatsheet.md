@@ -1,18 +1,20 @@
-# Suricata & Iptables: φυλλάδιο αναφοράς
+# Suricata & Iptables σκονάκι
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## Iptables
 
 ### Αλυσίδες
 
-Στο iptables, κάθε αλυσίδα είναι μια διαδοχική λίστα κανόνων αντιστοίχισης πακέτων. Ο προεπιλεγμένος πίνακας `filter` διαθέτει τις ενσωματωμένες αλυσίδες `INPUT`, `FORWARD` και `OUTPUT`· άλλοι πίνακες, όπως ο `nat`, ενδέχεται να είναι διαθέσιμοι ανάλογα με τη διαμόρφωση του kernel και τα φορτωμένα modules.<sup>[[1]](#references)</sup>
+Στο iptables, κάθε αλυσίδα είναι μια διαδοχική λίστα κανόνων αντιστοίχισης πακέτων. Ο προεπιλεγμένος πίνακας `filter` διαθέτει τις ενσωματωμένες αλυσίδες `INPUT`, `FORWARD` και `OUTPUT`. Ενδέχεται να είναι διαθέσιμοι και άλλοι πίνακες, όπως ο `nat`, ανάλογα με τη ρύθμιση του kernel και τα φορτωμένα modules.<sup>[[1]](#references)</sup>
 
 - **Αλυσίδα Input**: Χρησιμοποιείται για τη διαχείριση της συμπεριφοράς των εισερχόμενων συνδέσεων.
-- **Αλυσίδα Forward**: Χρησιμοποιείται για τον χειρισμό εισερχόμενων συνδέσεων που δεν προορίζονται για το τοπικό σύστημα. Αυτό είναι σύνηθες σε συσκευές που λειτουργούν ως routers, όπου τα δεδομένα που λαμβάνονται προορίζονται να προωθηθούν σε άλλο προορισμό. Αυτή η αλυσίδα είναι κυρίως σχετική όταν το σύστημα συμμετέχει σε routing, NATing ή παρόμοιες δραστηριότητες.
-- **Αλυσίδα Output**: Είναι αφιερωμένη στη ρύθμιση των εξερχόμενων συνδέσεων.
+- **Αλυσίδα Forward**: Χρησιμοποιείται για τη διαχείριση εισερχόμενων συνδέσεων που δεν προορίζονται για το τοπικό σύστημα. Αυτό είναι τυπικό για συσκευές που λειτουργούν ως routers, όπου τα δεδομένα που λαμβάνονται προορίζονται για προώθηση σε άλλον προορισμό. Αυτή η αλυσίδα είναι κυρίως σχετική όταν το σύστημα συμμετέχει σε routing, NATing ή παρόμοιες δραστηριότητες.
+- **Αλυσίδα Output**: Αφιερωμένη στη ρύθμιση των εξερχόμενων συνδέσεων.
 
-Αυτές οι αλυσίδες εξασφαλίζουν την orderly επεξεργασία της κίνησης δικτύου, επιτρέποντας τον καθορισμό λεπτομερών κανόνων που διέπουν τη ροή δεδομένων προς, μέσα από και έξω από ένα σύστημα.
+Αυτές οι αλυσίδες εξασφαλίζουν την orderly επεξεργασία της κίνησης δικτύου, επιτρέποντας τον καθορισμό λεπτομερών κανόνων που διέπουν τη ροή δεδομένων προς, μέσω και από ένα σύστημα.
 
-Τα παραδείγματα αντιστοίχισης συμβολοσειρών χρησιμοποιούν την τυπική αντιστοίχιση `string`· η αντιστοίχιση κάνει διάκριση πεζών-κεφαλαίων, εκτός εάν παρέχεται το `--icase`, ενώ το `--algo` επιλέγει τη στρατηγική αναζήτησης BM ή KMP.<sup>[[2]](#references)</sup>
+Τα παραδείγματα αντιστοίχισης συμβολοσειρών χρησιμοποιούν την τυπική αντιστοίχιση `string`. Η αντιστοίχιση κάνει διάκριση πεζών-κεφαλαίων, εκτός εάν παρέχεται το `--icase`, ενώ το `--algo` επιλέγει τη στρατηγική αναζήτησης BM ή KMP.<sup>[[2]](#references)</sup>
 ```bash
 # Delete all rules
 iptables -F
@@ -53,7 +55,7 @@ iptables-restore < /etc/sysconfig/iptables
 
 ### Εγκατάσταση & Ρύθμιση
 
-Οι εντολές πακέτων παρακάτω είναι συγκεκριμένες για κάθε distribution και release· ο επίσημος οδηγός εγκατάστασης τεκμηριώνει το Ubuntu PPA, τα Debian backports, τα πακέτα RPM και τη διαχείριση υπηρεσιών systemd.<sup>[[3]](#references)</sup>
+Οι εντολές πακέτων διαφέρουν ανάλογα με τη διανομή και την έκδοση· ο επίσημος οδηγός εγκατάστασης τεκμηριώνει το Ubuntu PPA, τα Debian backports, τα πακέτα RPM και τη διαχείριση υπηρεσιών systemd.<sup>[[3]](#references)</sup>
 ```bash
 # Package installation details vary by distribution and release; see References.
 # Ubuntu
@@ -116,13 +118,13 @@ Type=simple
 
 systemctl daemon-reload
 ```
-Η ακολουθία `suricata-update` ακολουθεί την τεκμηριωμένη ροή εργασίας του Suricata για τη λήψη, την καταχώριση, την ενεργοποίηση και τη φόρτωση πηγών κανόνων.<sup>[[4]](#references)</sup> Η εντολή `suricatasc` παραπάνω είναι μια τεκμηριωμένη μέθοδος επαναφόρτωσης κανόνων μέσω Unix socket χωρίς αποκλεισμό.<sup>[[8]](#references)</sup> Οι κανόνες NFQUEUE αποστέλλουν την τοπική εισερχόμενη/εξερχόμενη κίνηση στο Suricata, ενώ το `-q 0` επιλέγει την ουρά 0 για inline επεξεργασία.<sup>[[7]](#references)</sup>
+Η ακολουθία `suricata-update` ακολουθεί την τεκμηριωμένη ροή εργασίας του Suricata για τη λήψη, την εμφάνιση λίστας, την ενεργοποίηση και τη φόρτωση πηγών κανόνων.<sup>[[4]](#references)</sup> Η εντολή `suricatasc` παραπάνω είναι μια τεκμηριωμένη μέθοδος μη αποκλειστικής επαναφόρτωσης κανόνων μέσω Unix socket.<sup>[[8]](#references)</sup> Οι κανόνες NFQUEUE στέλνουν την τοπική εισερχόμενη/εξερχόμενη κίνηση στο Suricata, ενώ το `-q 0` επιλέγει την ουρά 0 για inline επεξεργασία.<sup>[[7]](#references)</sup>
 
 ### Ορισμοί κανόνων
 
 Ένας κανόνας/υπογραφή του Suricata αποτελείται από τρία μέρη.<sup>[[5]](#references)</sup>
 
-- Η **ενέργεια** καθορίζει τι συμβαίνει όταν υπάρχει αντιστοίχιση με την υπογραφή.
+- Η **ενέργεια** καθορίζει τι συμβαίνει όταν ταιριάζει η υπογραφή.
 - Η **κεφαλίδα** επιλέγει το πρωτόκολλο, τις διευθύνσεις IP, τις θύρες και την κατεύθυνση.
 - Οι **επιλογές κανόνα** καθορίζουν τις λεπτομέρειες που αφορούν τη συγκεκριμένη αντιστοίχιση.
 ```bash
@@ -133,22 +135,22 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 - alert - δημιουργία alert
 - pass - διακοπή περαιτέρω επιθεώρησης του packet
 - **drop** - απόρριψη του packet και δημιουργία alert
-- **reject** - αποστολή σφάλματος RST/ICMP unreachable στον αποστολέα του packet που ταιριάζει.
+- **reject** - αποστολή σφάλματος RST/ICMP unreachable στον αποστολέα του matching packet.
 - rejectsrc - ίδιο με το _reject_
-- rejectdst - αποστολή packet σφάλματος RST/ICMP στον παραλήπτη του packet που ταιριάζει.
-- rejectboth - αποστολή packet σφαλμάτων RST/ICMP και στις δύο πλευρές της επικοινωνίας.
+- rejectdst - αποστολή packet σφάλματος RST/ICMP στον παραλήπτη του matching packet.
+- rejectboth - αποστολή packet σφάλματος RST/ICMP και στις δύο πλευρές της επικοινωνίας.
 
 #### **Πρωτόκολλα**
 
 - tcp (για tcp-traffic)
 - udp
 - icmp
-- ip (το ip σημαίνει «όλα» ή «οποιοδήποτε»)
-- _πρωτόκολλα layer7_: http, ftp, tls, smb, dns, ssh και άλλα.<sup>[[5]](#references)</sup>
+- ip (το ip σημαίνει ‘all’ ή ‘any’)
+- _layer7 protocols_: http, ftp, tls, smb, dns, ssh και άλλα.<sup>[[5]](#references)</sup>
 
-#### Διευθύνσεις Πηγής και Προορισμού
+#### Διευθύνσεις Source και Destination
 
-Το Suricata υποστηρίζει ranges IP, άρνηση και ομαδοποιημένες λίστες διευθύνσεων.<sup>[[5]](#references)</sup>
+Το Suricata υποστηρίζει ranges IP, negation και grouped address lists.<sup>[[5]](#references)</sup>
 
 | Example                       | Meaning                                  |
 | ----------------------------- | ---------------------------------------- |
@@ -156,16 +158,16 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 | !\[1.1.1.1, 1.1.1.2]          | Κάθε διεύθυνση IP εκτός από τις 1.1.1.1 και 1.1.1.2 |
 | $HOME_NET                     | Η ρύθμισή σας για το HOME_NET στο yaml         |
 | \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET και όχι HOME_NET            |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 εκτός από τη 10.0.0.5          |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 εκτός από το 10.0.0.5          |
 
-#### Ports Πηγής και Προορισμού
+#### Ports Source και Destination
 
-Το Suricata υποστηρίζει ranges ports, άρνηση και λίστες ports.<sup>[[5]](#references)</sup>
+Το Suricata υποστηρίζει port ranges, negation και lists of ports.<sup>[[5]](#references)</sup>
 
 | Example         | Meaning                                |
 | --------------- | -------------------------------------- |
 | any             | οποιαδήποτε διεύθυνση                            |
-| \[80, 81, 82]   | τα ports 80, 81 και 82                     |
+| \[80, 81, 82]   | οι ports 80, 81 και 82                     |
 | \[80: 82]       | Range από το 80 έως το 82                  |
 | \[1024: ]       | Από το 1024 έως τον υψηλότερο αριθμό port |
 | !80             | Κάθε port εκτός από το 80                      |
@@ -179,9 +181,9 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 source -> destination
 source <> destination  (both directions)
 ```
-#### Λέξεις-κλειδιά
+#### Keywords
 
-Τα παρακάτω παραδείγματα χρησιμοποιούν λέξεις-κλειδιά κανόνων του Suricata, συμπεριλαμβανομένων επιλογών για metadata, IP, ICMP, payload και application layer· η επίσημη τεκμηρίωση κανόνων καταγράφει αυτές τις κατηγορίες και τη σύνταξή τους.<sup>[[6]](#references)[[9]](#references)</sup>
+Τα παραδείγματα παρακάτω χρησιμοποιούν τα rule keywords του Suricata, συμπεριλαμβανομένων των επιλογών metadata, IP, ICMP, payload και application-layer· η επίσημη τεκμηρίωση κανόνων καταγράφει αυτές τις οικογένειες και τη σύνταξή τους.<sup>[[6]](#references)[[9]](#references)</sup>
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -228,10 +230,10 @@ drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 - [1] [iptables(8) — Σελίδα εγχειριδίου Linux](https://man7.org/linux/man-pages/man8/iptables.8.html)
 - [2] [iptables-extensions(8) — Σελίδα εγχειριδίου Linux](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
 - [3] [3. Εγκατάσταση — Τεκμηρίωση Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/install.html)
-- [4] [9.1. Διαχείριση κανόνων με Suricata-Update — Τεκμηρίωση Suricata 8.0.1](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
+- [4] [9.1. Διαχείριση κανόνων με το Suricata-Update — Τεκμηρίωση Suricata 8.0.1](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
 - [5] [8.1. Μορφή κανόνων — Τεκμηρίωση Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
-- [6] [8.7. Λέξεις-κλειδιά Payload — Τεκμηρίωση Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
+- [6] [8.7. Λέξεις-κλειδιά payload — Τεκμηρίωση Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
 - [7] [15. Ρύθμιση IPS/inline για Linux — Τεκμηρίωση Suricata 7.0.15](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
-- [8] [9.3. Επαναφορτώσεις κανόνων — Τεκμηρίωση Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
+- [8] [9.3. Επαναφόρτωση κανόνων — Τεκμηρίωση Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
 - [9] [8. Κανόνες Suricata — Τεκμηρίωση Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
 {{#include ../../../banners/hacktricks-training.md}}

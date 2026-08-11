@@ -1,8 +1,10 @@
-# Ανάλυση pcap του DNSCat
+# DNSCat ανάλυση pcap
 
-Εάν έχετε ένα PCAP με δεδομένα που **εξάγονται μέσω DNSCat** (χωρίς χρήση encryption), ενδέχεται να μπορείτε να ανακτήσετε το περιεχόμενο που εξήχθη.
+{{#include ../../../banners/hacktricks-training.md}}
 
-Για το capture του BSidesSF 2017 που αναφέρεται παρακάτω, το write-up συμπέρανε ότι κάθε decoded query ξεκινούσε με 9 bytes ειδικών δεδομένων του dnscat, πριν από το μεταφερόμενο περιεχόμενο. Επειδή το dnscat2 ορίζει διαφορετικούς τύπους packet και διατάξεις header, επαληθεύστε το σχετικό framing πριν εφαρμόσετε αυτό το offset σε άλλη κίνηση.<sup>[[1]](#references)[[2]](#references)</sup>
+Εάν έχετε ένα PCAP με δεδομένα που **έχουν εξαχθεί μέσω DNSCat** (χωρίς χρήση encryption), ίσως μπορέσετε να ανακτήσετε το περιεχόμενο που εξήχθη.
+
+Για το capture του BSidesSF 2017 που αναφέρεται παρακάτω, το write-up συμπέρανε ότι κάθε decoded query ξεκινούσε με 9 bytes δεδομένων ειδικών για το dnscat, πριν από το μεταφερόμενο περιεχόμενο. Επειδή το dnscat2 ορίζει διαφορετικούς τύπους πακέτων και διατάξεις header, επαληθεύστε το σχετικό framing πριν εφαρμόσετε αυτό το offset σε άλλη κίνηση.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -21,9 +23,9 @@ last = qry
 
 #print(f)
 ```
-Για περισσότερες πληροφορίες, δείτε την [αναφορά του BSidesSF 2017](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap) και την [τεκμηρίωση του dnscat2 protocol](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md).
+Για περισσότερες πληροφορίες, δείτε την [τεχνική ανάλυση του BSidesSF 2017](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap) και την [τεκμηρίωση του πρωτοκόλλου dnscat2](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md).
 
-Το repository [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder) παρέχει έναν decoder σε Python 3 που εξάγει streams από ένα PCAP φιλτράροντας τα DNS queries για ένα καθορισμένο domain.<sup>[[3]](#references)</sup>
+Το repository [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder) παρέχει έναν decoder σε Python 3, ο οποίος εξάγει streams από ένα PCAP φιλτράροντας τα DNS queries για ένα καθορισμένο domain.<sup>[[3]](#references)</sup>
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```

@@ -1,8 +1,10 @@
 # Web Requests
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Python Requests
 
-Αυτά τα παραδείγματα χρησιμοποιούν τα τεκμηριωμένα ορίσματα αιτημάτων, τις ιδιότητες αποκρίσεων, τα tuples αρχείων multipart και τα sessions του Requests.<sup>[[1]](#references)</sup> Τα παραδείγματα με `verify=False` απενεργοποιούν την επαλήθευση πιστοποιητικών TLS και θα πρέπει να περιορίζονται σε ελεγχόμενες δοκιμές.<sup>[[1]](#references)</sup>
+Αυτά τα παραδείγματα χρησιμοποιούν τα τεκμηριωμένα ορίσματα αιτημάτων, τις ιδιότητες αποκρίσεων, τις πλειάδες αρχείων multipart και τα sessions του Requests.<sup>[[1]](#references)</sup> Τα παραδείγματα με `verify=False` απενεργοποιούν την επαλήθευση πιστοποιητικών TLS και θα πρέπει να περιορίζονται σε ελεγχόμενες δοκιμές.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,7 +78,7 @@ return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 ## Εντολή Python για εκμετάλλευση ενός RCE
 
-Ο βρόχος εντολών υποκλάση του `Cmd` της Python· η μέθοδος `default` χειρίζεται μη αναγνωρισμένα προθέματα εντολών, η `cmdloop` δρομολογεί τις γραμμές εισόδου και το `re.DOTALL` επιτρέπει στο μοτίβο εξαγωγής να εκτείνεται σε πολλές γραμμές.<sup>[[2]](#references)[[3]](#references)</sup>
+Ο βρόχος εντολών κληρονομεί από την `Cmd` της Python· η μέθοδός του `default` χειρίζεται μη αναγνωρισμένα prefixes εντολών, το `cmdloop` διανέμει γραμμές εισόδου και το `re.DOTALL` επιτρέπει στο pattern εξαγωγής να εκτείνεται σε πολλές γραμμές.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -105,7 +107,7 @@ term.cmdloop()
 ```
 ## References
 
-- [1] [Διεπαφή προγραμματιστών Requests](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — Υποστήριξη για διερμηνείς εντολών προσανατολισμένους σε γραμμές](https://docs.python.org/3/library/cmd.html)
-- [3] [Python `re` — Λειτουργίες κανονικών εκφράσεων](https://docs.python.org/3/library/re.html)
+- [1] [Διεπαφή προγραμματιστή Requests](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Υποστήριξη για διερμηνευτές εντολών προσανατολισμένους σε γραμμές](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Λειτουργίες regular expression](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}
