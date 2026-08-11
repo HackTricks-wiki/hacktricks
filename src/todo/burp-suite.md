@@ -2,20 +2,24 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 基本 Payload
+## Intruder payload types
 
-- **简单列表：** 每行只包含一个条目的列表
-- **运行时文件：** 在运行时读取的列表（不会加载到内存中），用于支持大型列表
-- **大小写修改：** 对字符串列表应用一些更改（不变、转换为小写、转换为大写、Proper name——首字母大写，其余字母小写——、Proper Name——首字母大写，其余字母保持不变）。
-- **数字：** 使用 Z 步长或随机方式生成从 X 到 Y 的数字。
-- **Brute Forcer：** 字符集、最小和最大长度。
+- **Simple list:** 使用配置好的字符串列表作为 payload。
+- **Runtime file:** 在运行时逐行读取 payload。对于大型列表很有用，因为 Burp 不会将整个文件加载到内存中。
+- **Case modification:** 更改输入字符串的大小写，例如改为小写、大写、句首字母大写或标题格式。
+- **Numbers:** 在配置的范围内生成连续或随机数字。
+- **Brute forcer:** 为选定的字符集以及最小/最大长度生成所有排列组合。<sup>[[1]](#references)</sup>
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator)：通过向 burpcollab 发送 DNS requests 来执行命令并获取输出的 Payload。
+## Extensions and companion tools
 
-{{#ref}}
-https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e
-{{#endref}}
+- **Collabfiltrator** 生成可执行命令并通过 DNS 查询将其输出 exfiltrate 到 Burp Collaborator 的 payload。<sup>[[2]](#references)</sup>
+- **Burp Suite Exporter** 导出 Burp findings，以便用于其他报告工作流。<sup>[[3]](#references)</sup>
+- **HTTP Script Generator** 将 HTTP requests 转换为多种语言的 scripts。<sup>[[4]](#references)</sup>
 
-[https://github.com/h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
+## References
 
+- [1] [PortSwigger documentation - Burp Intruder payload types](https://portswigger.net/burp/documentation/desktop/tools/intruder/configure-attack/payload-types)
+- [2] [GitHub - 0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator)
+- [3] [ArtsSEC - Burp Suite Exporter](https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e)
+- [4] [GitHub - h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
 {{#include ../banners/hacktricks-training.md}}

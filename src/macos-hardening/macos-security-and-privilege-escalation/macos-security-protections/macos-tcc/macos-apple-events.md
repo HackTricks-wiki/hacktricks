@@ -4,19 +4,22 @@
 
 ## 基本信息
 
-**Apple Events** 是 Apple macOS 中的一项功能，允许应用程序相互通信。它们属于 **Apple Event Manager**，这是 macOS 操作系统中负责处理进程间通信的组件。该系统使一个应用程序能够向另一个应用程序发送消息，请求其执行特定操作，例如打开文件、检索数据或执行命令。
+**Apple events** 是一种结构化的进程间消息，应用程序使用它们向其他应用程序请求操作或数据。**Apple Event Manager** 提供用于创建、发送、接收和响应这些消息的 API。<sup>[[1]](#references)</sup>
 
-主要 daemon 是 `/System/Library/CoreServices/appleeventsd`，它注册了服务 `com.apple.coreservices.appleevents`。
+在 macOS 上，主要 broker 是 `/System/Library/CoreServices/appleeventsd`，它注册了 `com.apple.coreservices.appleevents` Mach service。接收事件的应用程序会向该 service 注册一个 Apple-event Mach port；发送方则通过它获取目标 port。<sup>[[3]](#references)</sup>
 
-每个能够接收事件的应用程序都会向该 daemon 注册，并提供其 Apple Event Mach Port。当某个应用程序希望向其发送事件时，该应用程序会向 daemon 请求此端口。
-
-Sandboxed 应用程序需要 `allow appleevent-send` 和 `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` 等权限才能发送事件。请注意，`com.apple.security.temporary-exception.apple-events` 等 entitlement 可能会限制哪些对象有权发送事件，而这需要 `com.apple.private.appleevents` 等 entitlement。
+Sandbox 规则和 entitlements 会限制这种通信。Sandbox profile 需要具备发送 Apple events 以及查找 broker 的 Mach service 的权限。`com.apple.security.temporary-exception.apple-events` entitlement 还可以进一步将 sandboxed application 限制为指定的目标 bundle identifiers。<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> 可以使用环境变量 **`AEDebugSends`** 记录有关已发送消息的信息：
+> 设置 **`AEDebugSends`** 环境变量，可以记录进程发送的 Apple events 信息：<sup>[[3]](#references)</sup>
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
+## References
+
+- [1] [Apple Developer Documentation - Apple Event Manager](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
+- [2] [Apple Developer Documentation - App Sandbox Temporary Exception Entitlements](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
+- [3] [Mac OS X and iOS Internals - Apple-event debug environment variables](https://www.newosxbook.com/MOXiI.pdf)
 {{#include ../../../../banners/hacktricks-training.md}}

@@ -2,21 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-从 [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/) 下载免费版本的应用，执行它，然后将“恶意”二进制文件封装到其中。\
-请注意，如果你**只**想要**执行**命令行，可以封装一个 "**.bat**" 文件（不要选择 cmd.exe，而是选择 .bat 文件）
+MSI Wrapper 可以将可执行文件或脚本打包为 Windows Installer（`.msi`）文件。下载并启动免费版，然后选择要打包的可执行文件。若要运行一系列命令，请选择 `.bat` 文件作为输入，而不是打包 `cmd.exe`。<sup>[[1]](#references)</sup>
 
-![MSI Wrapper：请注意，如果你只想要执行命令行，可以封装一个“ .bat ”文件（不要选择 cmd.exe，而是选择 .bat 文件）](<../../images/image (417).png>)
+![在 MSI Wrapper 中选择源可执行文件或批处理脚本](<../../images/image (417).png>)
 
-以下是配置中最重要的部分：
+请谨慎配置执行上下文和其他安装程序属性：
 
-![MSI Wrapper：以下是配置中最重要的部分](<../../images/image (312).png>)
+![在 MSI Wrapper 中配置应用程序 ID 和安全上下文](<../../images/image (312).png>)
 
-![MSI Wrapper：以下是配置中最重要的部分](<../../images/image (346).png>)
+![在 MSI Wrapper 中配置安装程序属性](<../../images/image (346).png>)
 
-![MSI Wrapper：以下是配置中最重要的部分](<../../images/image (1072).png>)
+![检查 MSI Wrapper 的构建设置](<../../images/image (1072).png>)
 
-（请注意，如果你尝试打包自己的二进制文件，就可以修改这些值）
+打包自定义 binary 时可以更改这些值。
 
-接下来只需点击**下一步按钮**，最后点击**构建按钮**，系统就会生成你的安装程序/Wrapper。
+继续完成剩余的向导页面，然后选择 **Build** 生成安装程序。<sup>[[1]](#references)</sup>
 
+> [!WARNING]
+> 创建 MSI 本身并不会授予提升的权限。安装是否以提升的权限执行，取决于 Windows Installer policy、package context 和 user authorization。Microsoft 警告称，同时为用户和计算机启用 `AlwaysInstallElevated` 会允许非管理员用户以 system privileges 安装 packages。<sup>[[2]](#references)</sup>
+
+## References
+
+- [1] [MSI Wrapper documentation - Getting started](https://www.exemsi.com/documentation/getting-started/)
+- [2] [Microsoft Learn - Installing a package with elevated privileges for a non-admin](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
 {{#include ../../banners/hacktricks-training.md}}

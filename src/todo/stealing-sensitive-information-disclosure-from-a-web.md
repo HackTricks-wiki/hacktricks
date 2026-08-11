@@ -1,17 +1,15 @@
-# 从 Web 窃取敏感信息泄露
+# 从 Web 页面窃取敏感信息
 
 {{#include ../banners/hacktricks-training.md}}
 
-如果你在某个时候发现一个**根据你的 session 向你呈现敏感信息的 web 页面**：可能是反射 cookies，或者打印密码、CC 详细信息或任何其他敏感信息，你可以尝试窃取这些信息。\
-下面介绍实现这一目标时可以尝试的主要方法：
+如果一个 **Web 页面根据当前会话显示敏感信息**，例如 cookies、账户数据或信用卡详细信息，攻击者可能会尝试将其 exfiltrate。主要技术包括：
 
-- [**CORS bypass**](../pentesting-web/cors-bypass.md)：如果你可以绕过 CORS headers，就能够通过向恶意页面执行 Ajax 请求来窃取信息。
-- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html)：如果你在页面上发现 XSS 漏洞，可能可以滥用它来窃取信息。
-- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html)：即使无法注入 XSS tags，你仍然可能通过使用其他常规 HTML tags 来窃取信息。
-- [**Clickjaking**](../pentesting-web/clickjacking.md)：如果没有针对该攻击的保护措施，你可能可以诱骗用户向你发送敏感数据（示例见[这里](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)）。<sup>[[1]](#references)</sup>
+- [**CORS bypass**](../pentesting-web/cors-bypass.md)：CORS 配置错误可能允许恶意 origin 通过跨源请求读取敏感响应。
+- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html)：目标 origin 中的 XSS 漏洞可能允许注入的 JavaScript 读取并 exfiltrate 相关信息。
+- [**Dangling markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html)：当无法进行 script 注入时，注入的 HTML 元素仍可能捕获敏感内容。
+- [**Clickjacking**](../pentesting-web/clickjacking.md)：如果缺少 frame 防护，攻击者可能诱骗用户与敏感页面进行交互。链接的案例研究演示了这一技术。<sup>[[1]](#references)</sup>
 
-## 参考资料
+## References
 
-- [1] [Apache example servlet leads to Information Disclosure](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
-
+- [1] [Apache 示例 servlet 导致 Information Disclosure](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
 {{#include ../banners/hacktricks-training.md}}
