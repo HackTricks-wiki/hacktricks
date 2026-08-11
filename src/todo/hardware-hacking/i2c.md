@@ -4,7 +4,10 @@
 
 ## Bus Pirate
 
-Щоб перевірити, чи працює Bus Pirate, з'єднайте +5V з VPU, а 3.3V — з ADC, отримайте доступ до bus pirate (наприклад, використовуючи Tera Term) і виконайте команду `~`:
+> [!CAUTION]
+> Перевірте напругу цільового пристрою, розпіновку, схему підтягування та спільну землю перед підключенням Bus Pirate. Не вмикайте джерела живлення Bus Pirate на шині, яка вже живиться від цільового пристрою, лише для її прослуховування; два джерела живлення можуть конфліктувати та пошкодити обладнання. Наведений нижче транскрипт є прикладом для конкретного пристрою — Bus Pirate v3 із community-firmware, а не універсальною схемою підключення.<sup>[[1]](#references)[[2]](#references)</sup>
+
+Щоб перевірити, чи працює Bus Pirate, підключіть +5V до VPU, а 3.3V до ADC, отримайте доступ до bus pirate (наприклад, за допомогою Tera Term) і використайте команду `~`:
 ```bash
 # Use command
 HiZ>~
@@ -43,18 +46,18 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-Як видно з попереднього командного рядка, він повідомив, що знайшов 0 помилок. Це дуже корисно, щоб переконатися, що пристрій працює після його придбання або прошивання firmware.
+Як видно з попереднього командного рядка, було виявлено 0 помилок. Це дуже корисно для перевірки працездатності після придбання або після прошивання firmware.
 
 Щоб підключитися до bus pirate, можна скористатися документацією:
 
-![Використайте команду - натисніть пробіл: Щоб підключитися до bus pirate, можна скористатися документацією](<../../images/image (484).png>)
+![Використайте команду - Натисніть пробіл: Щоб підключитися до bus pirate, можна скористатися документацією](<../../images/image (484).png>)
 
-У цьому випадку я підключуся до EPROM: ATMEL901 24C256 PU27:
+У цьому випадку ціллю є I²C EEPROM сімейства 24C256. Перевірте точний суфікс і datasheet, оскільки підтримувана напруга живлення залежить від конкретного компонента.<sup>[[3]](#references)</sup>
 
-![Використайте команду - натисніть пробіл: У цьому випадку я підключуся до EPROM: ATMEL901 24C256 PU27](<../../images/image (964).png>)
+![Використайте команду - Натисніть пробіл: У цьому випадку я підключуся до EPROM: ATMEL901 24C256 PU27](<../../images/image (964).png>)
 
-Для взаємодії з bus pirate я використовував Tera Term, підключений до COM-порту bus pirate, із налаштуванням Setup --> Serial Port --> Speed на 115200.\
-У наведеній нижче комунікації показано, як підготувати bus pirate до роботи з I2C, а також як записувати дані в пам’ять і читати їх із неї (коментарі позначаються символом "#", тому не очікуйте побачити цю частину в комунікації):
+Для взаємодії з bus pirate я використав Tera Term, підключений до COM-порту bus pirate, з налаштуванням Setup --> Serial Port --> Speed на 115200.\
+У наведеній нижче комунікації показано, як підготувати bus pirate для роботи з I2C, а також як записувати дані в пам’ять і зчитувати їх (коментарі позначені символом "#", тому не очікуйте побачити цю частину в комунікації):
 ```bash
 # Check communication with buspirate
 i
@@ -71,7 +74,7 @@ GND     3.3V    5.0V    ADC     VPU     AUX     SCL     SDA     -       -
 P       P       P       I       I       I       I       I       I       I
 GND     3.27V   4.96V   0.00V   4.96V   L       H       H       L       L
 
-#Notice how the VPU is in 5V becausethe EPROM needs 5V signals
+# This particular setup used 5 V pull-ups; do not generalize it to every 24C256 variant or board
 
 # Get mode options
 HiZ>m
@@ -102,7 +105,7 @@ Set speed:
 3. ~100kHz
 4. ~240kHz
 
-# Select communication spped
+# Select communication speed
 (1)> 2
 Clutch disengaged!!!
 To finish setup, start up the power supplies with command 'W'
@@ -124,8 +127,8 @@ I2C>(1)
 Searching I2C address space. Found devices at:
 0xA0(0x50 W) 0xA1(0x50 R)
 
-# Note that each slave will have a write address and a read address
-# 0xA0 ad 0xA1 in the previous case
+# Bus Pirate displays the 8-bit address bytes 0xA0 (write) and 0xA1 (read)
+# Both correspond to the same 7-bit I2C target address, 0x50
 
 # Write "BBB" in address 0x69
 I2C>[0xA0 0x00 0x69 0x42 0x42 0x42]
@@ -155,9 +158,9 @@ NACK
 ```
 ### Sniffer
 
-У цьому сценарії ми будемо sniff-ити I2C-комунікацію між arduino та попередньою EPROM. Вам потрібно лише забезпечити зв’язок між обома пристроями, а потім під’єднати bus pirate до контактів SCL, SDA та GND:
+У цьому сценарії ми прослуховуватимемо I2C-комунікацію між arduino та попередньою EPROM. Вам потрібно лише забезпечити обмін даними між обома пристроями, а потім під'єднати bus pirate до контактів SCL, SDA і GND:
 
-![Read 20B from address 0x69 configured before - Sniffer: У цьому сценарії ми будемо sniff-ити I2C-комунікацію між arduino та попередньою EPROM. Вам потрібно лише...](<../../images/image (166).png>)
+![Read 20B from address 0x69 configured before - Sniffer: У цьому сценарії ми прослуховуватимемо I2C-комунікацію між arduino та попередньою EPROM. Вам потрібно лише...](<../../images/image (166).png>)
 ```bash
 I2C>m
 1. HiZ
@@ -190,7 +193,7 @@ Clutch disengaged!!!
 To finish setup, start up the power supplies with command 'W'
 Ready
 
-# EVEN IF YOU ARE GOING TO SNIFF YOU NEED TO POWER ON!
+# Historical transcript powered this bench setup. On a live target-powered bus, leave Bus Pirate power OFF.
 
 I2C>W
 POWER SUPPLIES ON
@@ -203,4 +206,9 @@ Sniffer
 Any key to exit
 [0xA0+0x00+0x69+0x41+0x41+0x41+0x20+0x48+0x69+0x20+0x44+0x72+0x65+0x67+0x21+0x20+0x41+0x41+0x41+0x00+]
 ```
+## References
+
+- [1] [Документація Bus Pirate — I²C](https://docs.buspirate.com/docs/devices/i2c-eeprom/)
+- [2] [NXP — специфікація та посібник користувача I²C-bus](https://www.nxp.com/docs/en/user-guide/UM10204.pdf)
+- [3] [Microchip — технічна документація послідовної I²C EEPROM AT24C256C](https://ww1.microchip.com/downloads/en/DeviceDoc/AT24C256C-I2C-Compatible-Two-Wire-Serial-EEPROM-256-Kbit-32,768-x-8-20005915A.pdf)
 {{#include ../../banners/hacktricks-training.md}}
