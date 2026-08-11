@@ -1,6 +1,8 @@
-# 便利な Linux コマンド
+# 便利なLinuxコマンド
 
-## よく使う Bash
+{{#include ../../banners/hacktricks-training.md}}
+
+## 一般的なBash
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -256,7 +258,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Nmap検索ヘルプ
+## Nmapの検索ヘルプ
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -301,7 +303,7 @@ iptables -P OUTPUT ACCEPT
 ```
 ## eBPF Telemetry と Rootkit Hunting
 
-Rootkit の研究では、TripleCross のような eBPF-based implants と、BPFDoor variants のような BPF-based backdoors の両方が実証されています。予期しない BPF programs、attachments、または maps は、compromise の証拠ではなく、調査の手がかりとして扱ってください。<sup>[[3]](#references)[[4]](#references)</sup> `bpftool` または `eBPFmon` を使用して、認証済みシステムの baseline を取得します。`bpftool` は programs と maps の列挙、program instructions のダンプ、サポートされている features の照会に対応しており、eBPFmon はその情報を TUI で表示します。<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+Rootkit research では、TripleCross のような eBPF-based implants と、BPFDoor variants のような BPF-based backdoors の両方が実証されています。予期しない BPF programs、attachments、または maps は、侵害の証拠ではなく、調査の手がかりとして扱ってください。<sup>[[3]](#references)[[4]](#references)</sup> `bpftool` または `eBPFmon` を使用して認可済みシステムの baseline を取得します。`bpftool` は programs と maps の列挙、program instructions のダンプ、サポートされている features の照会を実行でき、eBPFmon はその情報を TUI で表示します。<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -319,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-`bpftool`の出力を、想定されるNIC/cgroupへのアタッチメントと照合します。承認されていないPIDが所有する突然の`xdp`または`kprobe`プログラムは、調査の手掛かりではありますが、ペイロードがインジェクトされたことの決定的な証拠ではありません。<sup>[[5]](#references)[[6]](#references)</sup>
+`bpftool`の出力を、想定されるNIC/cgroupへのアタッチと照合します。承認されていないPIDが所有する突然の`xdp`または`kprobe`プログラムは、調査の手掛かりではありますが、injected payloadの決定的な証拠ではありません。<sup>[[5]](#references)[[6]](#references)</sup>
 
 ## Journaldインシデントトリアージ
 
-`journalctl`は`systemd-journald`から構造化されたエントリを読み取り、boot、priority、unit、UID、相対時刻によるフィルタリングをサポートします。証拠を保持または比較する必要がある場合は、これらのフィルターをJSON出力と組み合わせます。フィルタリングだけでは、ログが改ざんされていないことを証明できません。<sup>[[2]](#references)[[7]](#references)</sup>
+`journalctl`は`systemd-journald`から構造化されたエントリを読み取り、boot、priority、unit、UID、相対時間によるフィルタリングをサポートします。証拠を保持または比較する必要がある場合は、これらのフィルターをJSON出力と組み合わせます。フィルタリングだけでは、ログが改ざんされていないことを証明できません。<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -334,15 +336,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-`--grep 'Invalid user' --case-sensitive` または `-k`（kernel messages のみ）を追加すると、より厳密にフィルタリングできます。また、`_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME`、`_TRANSPORT` の selector は組み合わせて、対象を絞り込んだ調査に使用できます。<sup>[[7]](#references)</sup>
+`--grep 'Invalid user' --case-sensitive` または `-k`（kernel messages のみ）を追加すると、より厳密にフィルタリングできます。また、`_PID`、`_SYSTEMD_UNIT`、`_HOSTNAME`、`_TRANSPORT` の selector は組み合わせて、対象を絞った調査に使用できます。<sup>[[7]](#references)</sup>
 
 ## References
 
 - [1] [eBPFmon: eBPF applications を探索および操作するための新しい tool](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [2] [Linux logs を表示するための journalctl command の使用方法](https://www.hostinger.com/tutorials/journalctl-command)
+- [2] [journalctl command を使用して Linux logs を表示する方法](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
 - [4] [Rapid7 Labs: Telecom Networks における BPFdoor](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
-- [5] [BPF Documentation — Linux Kernel のドキュメント](https://docs.kernel.org/bpf/)
+- [5] [BPF Documentation — Linux Kernel documentation](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
 - [7] [journalctl(1) — Linux manual page](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}

