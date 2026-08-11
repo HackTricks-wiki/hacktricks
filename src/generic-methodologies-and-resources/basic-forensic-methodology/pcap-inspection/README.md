@@ -1,25 +1,27 @@
-# Pcap Inspection
+# Pcap 검사
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> **PCAP**과 **PCAPNG**는 서로 다른 capture format입니다. **PCAPNG는 PCAP의 유연하고 확장 가능한 후속 format**이지만, tool에 따라 지원 여부가 다릅니다. tool이 PCAPNG를 읽을 수 없다면 Wireshark 또는 호환되는 다른 tool을 사용해 PCAP로 변환하세요.<sup>[[1]](#references)[[18]](#references)</sup>
+> **PCAP**과 **PCAPNG**는 서로 다른 capture format입니다. **PCAPNG는 PCAP을 계승한 유연하고 확장 가능한 format**이지만, tool마다 지원 여부가 다릅니다. tool이 PCAPNG를 읽지 못하면 Wireshark 또는 호환되는 다른 tool을 사용해 PCAP으로 변환하세요.<sup>[[1]](#references)[[18]](#references)</sup>
 
-## PCAP용 온라인 tool
+## pcap용 온라인 도구
 
-- pcap의 header가 **손상된** 경우 다음을 사용해 **복구**해 보세요: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php).<sup>[[2]](#references)</sup>
+- pcap의 header가 **손상된** 경우 다음을 사용해 **수정**해 보세요: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php).<sup>[[2]](#references)</sup>
 - [**PacketTotal**](https://packettotal.com)에서 pcap 내부의 **정보**를 추출하고 **malware**를 검색하세요.<sup>[[19]](#references)</sup>
-- [**www.virustotal.com**](https://www.virustotal.com) 및 [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)을 사용해 **악성 activity**를 검색하세요.<sup>[[3]](#references)[[4]](#references)</sup>
-- [**https://apackets.com/**](https://apackets.com/)에서 **browser를 통한 전체 pcap 분석**을 수행할 수 있습니다.<sup>[[5]](#references)</sup>
+- [**www.virustotal.com**](https://www.virustotal.com) 및 [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com)을 사용해 **악성 활동**을 검색하세요.<sup>[[3]](#references)[[4]](#references)</sup>
+- 브라우저에서 수행하는 **전체 pcap 분석**: [**https://apackets.com/**](https://apackets.com/).<sup>[[5]](#references)</sup>
 
 ## 정보 추출
 
-다음 tool은 통계, file 등을 추출하는 데 유용합니다.
+다음 tool은 통계, 파일 등을 추출하는 데 유용합니다.
 
 ### Wireshark
 
 > [!TIP]
-> **PCAP를 분석하려면 기본적으로 Wireshark 사용법을 알아야 합니다**
+> **PCAP을 분석하려면 기본적으로 Wireshark 사용법을 알아야 합니다**
 
-다음에서 일부 Wireshark tricks를 확인할 수 있습니다:
+다음에서 Wireshark tricks를 확인할 수 있습니다:
 
 
 {{#ref}}
@@ -28,11 +30,11 @@ wireshark-tricks.md
 
 ### [**https://apackets.com/**](https://apackets.com/)
 
-browser에서 수행하는 Pcap 분석입니다.<sup>[[5]](#references)</sup>
+브라우저에서 수행하는 pcap 분석입니다.<sup>[[5]](#references)</sup>
 
 ### Xplico Framework
 
-[**Xplico**](https://github.com/xplico/xplico)는 PCAP file을 decode하고 POP/IMAP/SMTP를 통한 email, HTTP contents, SIP VoIP calls, FTP data 및 TFTP data를 추출할 수 있는 Unix-like network-forensics tool입니다.<sup>[[6]](#references)</sup>
+[**Xplico**](https://github.com/xplico/xplico)는 PCAP 파일을 decode하고 POP/IMAP/SMTP를 통한 email, HTTP contents, SIP VoIP calls, FTP data 및 TFTP data를 추출할 수 있는 Unix-like network-forensics tool입니다.<sup>[[6]](#references)</sup>
 
 **설치**
 ```bash
@@ -46,22 +48,22 @@ sudo apt-get install xplico
 /etc/init.d/apache2 restart
 /etc/init.d/xplico start
 ```
-자격 증명 _**xplico:xplico**_를 사용하여 _**127.0.0.1:9876**_에 접속합니다.
+_**127.0.0.1:9876**_에 _**xplico:xplico**_ 자격 증명으로 접속합니다.
 
 그런 다음 **새 case**를 생성하고, case 내부에 **새 session**을 생성한 후 **pcap** 파일을 업로드합니다.
 
 ### NetworkMiner
 
-Xplico와 마찬가지로 [**NetworkMiner**](https://www.netresec.com/?page=NetworkMiner)는 PCAP 트래픽을 파싱하여 파일, 이미지, 이메일, 비밀번호 등의 artifact를 추출하고 host 정보를 집계합니다. 무료 버전은 주로 Windows용입니다.<sup>[[7]](#references)</sup>
+Xplico와 마찬가지로 [**NetworkMiner**](https://www.netresec.com/?page=NetworkMiner)는 PCAP 트래픽을 분석하여 파일, 이미지, email, password 등의 artifact를 추출하고 host 정보를 집계합니다. 무료 버전은 주로 Windows용입니다.<sup>[[7]](#references)</sup>
 
 ### NetWitness Investigator
 
 [**NetWitness Investigator는 여기에서 다운로드할 수 있습니다**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Windows에서 작동합니다)**.\
-제조사는 이 freeware를 악성 활동 triage를 위한 interactive network-session analysis tool로 설명하며, 현재는 contact form을 통해 접근할 수 있도록 제공하고 있습니다.<sup>[[8]](#references)</sup>
+공급업체는 이 freeware를 악성 활동 triage를 위한 대화형 network-session analysis tool로 설명하며, 현재는 contact form을 통해 액세스를 제공합니다.<sup>[[8]](#references)</sup>
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
-BruteShark의 문서화된 모듈은 HTTP, FTP, Telnet, IMAP, SMTP에서 credentials를 파싱하고, Hashcat용 Kerberos, NTLM, CRAM-MD5, HTTP-Digest authentication hashes를 export하며, network nodes와 users를 매핑하고, DNS queries를 추출하고, TCP/UDP sessions를 재구성하며, files를 carve할 수 있습니다.<sup>[[9]](#references)</sup>
+BruteShark의 문서화된 modules는 HTTP, FTP, Telnet, IMAP, SMTP에서 credentials를 파싱하고, Hashcat용 Kerberos, NTLM, CRAM-MD5, HTTP-Digest authentication hashes를 export하며, network nodes와 users를 매핑하고, DNS queries를 추출하며, TCP/UDP sessions를 재구성하고, files를 carve할 수 있습니다.<sup>[[9]](#references)</sup>
 
 ### Capinfos
 
@@ -71,13 +73,13 @@ capinfos capture.pcap
 ```
 ### Ngrep
 
-`ngrep`은 정규 표현식으로 패킷 페이로드를 검색하고 BPF 필터를 허용하며, `-I`는 pcap 호환 캡처 파일을 읽습니다.<sup>[[11]](#references)</sup> 다음 예제는 이러한 기능을 결합하여 선택한 트래픽에서 HTTP 요청을 검색합니다.
+`ngrep`은 정규 표현식으로 packet payload를 검색하고 BPF filters를 허용하며, `-I`는 pcap 호환 캡처 파일을 읽습니다.<sup>[[11]](#references)</sup> 이 예제는 이러한 기능을 결합하여 선택한 traffic에서 HTTP 요청을 검색합니다.
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
-### Carving
+### 카빙
 
-일반적인 carving 기법을 사용하면 pcap에서 파일과 정보를 추출하는 데 유용합니다:
+일반적인 카빙 기법을 사용하면 pcap에서 파일과 정보를 추출하는 데 유용합니다:
 
 
 {{#ref}}
@@ -86,9 +88,9 @@ ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.
 
 ### 자격 증명 캡처
 
-저장된 PCAP 파일 또는 live interface에서 자격 증명을 파싱하려면 [PCredz](https://github.com/lgandx/PCredz)를 사용할 수 있습니다.<sup>[[12]](#references)</sup>
+[PCredz](https://github.com/lgandx/PCredz)를 사용하여 저장된 PCAP 파일 또는 라이브 인터페이스에서 자격 증명을 파싱할 수 있습니다.<sup>[[12]](#references)</sup>
 
-## Exploits/Malware 확인
+## 익스플로잇/멀웨어 확인
 
 ### Suricata
 
@@ -101,13 +103,13 @@ oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
 **pcap 확인**
 
-Suricata의 `-r` 옵션은 오프라인 모드에서 PCAP을 재생합니다. 이 예제에서 `-k none`은 checksum 검사를 비활성화하고, `-v`는 logging을 늘리며, `-l`은 log 디렉터리를 선택합니다.<sup>[[13]](#references)</sup>
+Suricata의 `-r` 옵션은 오프라인 모드에서 PCAP을 재생합니다. 이 예제에서 `-k none`은 checksum 검사를 비활성화하고, `-v`는 logging을 증가시키며, `-l`은 log 디렉터리를 지정합니다.<sup>[[13]](#references)</sup>
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap)는 PCAP 파일에서 HTTP 스트림을 처리하고, 필요에 따라 gzip 스트림의 압축을 해제하며, 추출된 파일을 YARA로 스캔하고, `report.txt`를 작성하며, 일치하는 파일을 디렉터리에 저장할 수 있습니다.<sup>[[14]](#references)</sup>
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap)는 PCAP 파일의 HTTP 스트림을 처리하고, 선택적으로 gzip 스트림의 압축을 해제하며, 추출된 파일을 YARA로 스캔하고, `report.txt`를 작성하며, 일치하는 파일을 디렉터리에 저장할 수 있습니다.<sup>[[14]](#references)</sup>
 
 ### Malware Analysis
 
@@ -120,13 +122,13 @@ suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html)는 Network Security Monitor (NSM) 및 성능 측정과 troubleshooting을 비롯한 광범위한 traffic analysis에 사용되는 passive 오픈 소스 network traffic analyzer입니다.<sup>[[15]](#references)</sup>
+> [Zeek](https://docs.zeek.org/en/master/about.html)는 Network Security Monitor (NSM) 및 성능 측정과 문제 해결을 포함한 광범위한 traffic analysis에 사용되는 passive open-source network traffic analyzer입니다.<sup>[[15]](#references)</sup>
 
-Zeek는 PCAP 파일 대신 구조화된 로그를 생성하므로 `zeek-cut`과 같은 log-analysis tools를 사용하여 해당 로그를 검사합니다.<sup>[[15]](#references)[[16]](#references)</sup>
+Zeek는 PCAP 파일 대신 구조화된 로그를 생성하므로, `zeek-cut`과 같은 log-analysis 도구를 사용하여 해당 로그를 검사합니다.<sup>[[15]](#references)[[16]](#references)</sup>
 
 ### Connections Info
 
-아래 예제에서는 `zeek-cut`을 사용하여 TSV 로그에서 이름이 지정된 필드를 선택한 다음, 표준 Unix tools를 사용하여 connections의 순위를 지정하고 개수를 계산합니다. 또한 RITA는 장시간 connections, beaconing 및 DNS-tunneling analysis를 위해 Zeek 로그를 수집할 수 있습니다.<sup>[[16]](#references)[[17]](#references)</sup>
+아래 예제에서는 `zeek-cut`을 사용하여 TSV 로그에서 지정된 field를 선택한 다음, 표준 Unix 도구를 사용하여 connection의 순위를 정하고 개수를 계산합니다. RITA를 사용하면 장시간 connection, beaconing 및 DNS-tunneling analysis를 위해 Zeek 로그를 ingest할 수도 있습니다.<sup>[[16]](#references)[[17]](#references)</sup>
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -212,23 +214,23 @@ usb-keystrokes.md
 
 ## References
 
-- [1] [Wireshark 사용자 가이드: 캡처 파일 열기](https://www.wireshark.org/docs/wsug_html_chunked/ChIOOpenSection.html)
+- [1] [Wireshark User's Guide: 캡처 파일 열기](https://www.wireshark.org/docs/wsug_html_chunked/ChIOOpenSection.html)
 - [2] [pcapfix - 온라인 pcap / pcapng 복구 서비스](https://f00l.de/hacking/pcapfix.php)
 - [3] [VirusTotal API v3 개요](https://docs.virustotal.com/reference/overview)
 - [4] [Hybrid Analysis](https://www.hybrid-analysis.com/)
 - [5] [A-Packets PCAP Analyzer](https://apackets.com/)
-- [6] [Xplico - 정보](https://www.xplico.org/about)
+- [6] [Xplico - 소개](https://www.xplico.org/about)
 - [7] [NetworkMiner](https://www.netresec.com/?page=NetworkMiner)
 - [8] [NetWitness Investigator Freeware](https://www.netwitness.com/contact-us/netwitness-investigator-freeware/)
-- [9] [BruteShark 저장소](https://github.com/odedshimon/BruteShark)
+- [9] [BruteShark repository](https://github.com/odedshimon/BruteShark)
 - [10] [Wireshark `capinfos` 매뉴얼](https://www.wireshark.org/docs/man-pages/capinfos.html)
-- [11] [ngrep 문서](https://ngrep.sourceforge.net/usage.html)
-- [12] [PCredz 저장소](https://github.com/lgandx/PCredz)
-- [13] [Suricata 명령줄 옵션](https://docs.suricata.io/en/latest/command-line-options.html)
-- [14] [YaraPcap 저장소](https://github.com/kevthehermit/YaraPcap)
-- [15] [Zeek이란?](https://docs.zeek.org/en/master/about/what.html)
-- [16] [Zeek logs 튜토리얼](https://docs.zeek.org/en/master/tutorial/logs.html)
-- [17] [RITA 저장소](https://github.com/activecm/rita)
-- [18] [Wireshark `editcap` 문서](https://www.wireshark.org/docs/wsug_html_chunked/AppToolseditcap.html)
-- [19] [PacketTotal Upload API 발표](https://medium.com/packettotal/the-packettotal-upload-api-26f48e53f0ee)
+- [11] [ngrep documentation](https://ngrep.sourceforge.net/usage.html)
+- [12] [PCredz repository](https://github.com/lgandx/PCredz)
+- [13] [Suricata command-line options](https://docs.suricata.io/en/latest/command-line-options.html)
+- [14] [YaraPcap repository](https://github.com/kevthehermit/YaraPcap)
+- [15] [Zeek이란 무엇인가?](https://docs.zeek.org/en/master/about/what.html)
+- [16] [Zeek logs tutorial](https://docs.zeek.org/en/master/tutorial/logs.html)
+- [17] [RITA repository](https://github.com/activecm/rita)
+- [18] [Wireshark `editcap` documentation](https://www.wireshark.org/docs/wsug_html_chunked/AppToolseditcap.html)
+- [19] [PacketTotal Upload API announcement](https://medium.com/packettotal/the-packettotal-upload-api-26f48e53f0ee)
 {{#include ../../../banners/hacktricks-training.md}}

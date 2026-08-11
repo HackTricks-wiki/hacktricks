@@ -1,8 +1,10 @@
-# 웹 요청
+# Web Requests
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Python Requests
 
-이 예제는 Requests의 문서화된 request 인자, response 속성, multipart 파일 튜플 및 세션을 사용합니다.<sup>[[1]](#references)</sup> `verify=False` 예제는 TLS 인증서 검증을 비활성화하므로, 통제된 테스트로 제한해야 합니다.<sup>[[1]](#references)</sup>
+이 예제에서는 Requests에 문서화된 요청 인수, 응답 속성, multipart 파일 튜플 및 세션을 사용합니다.<sup>[[1]](#references)</sup> `verify=False` 예제는 TLS 인증서 검증을 비활성화하므로 통제된 테스트로 제한해야 합니다.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -74,9 +76,9 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## RCE exploit을 위한 Python cmd
+## Python cmd를 이용한 RCE exploit
 
-명령 루프는 Python의 `Cmd`를 subclass하며, 해당 `default` method는 인식되지 않은 command prefix를 처리하고, `cmdloop`는 input line을 dispatch하며, `re.DOTALL`은 extraction pattern이 여러 줄에 걸쳐 일치하도록 합니다.<sup>[[2]](#references)[[3]](#references)</sup>
+명령 루프는 Python의 `Cmd`를 subclass하며, `default` 메서드는 인식할 수 없는 command prefix를 처리하고, `cmdloop`은 입력 줄을 dispatch하며, `re.DOTALL`은 extraction pattern이 여러 줄에 걸쳐 일치할 수 있도록 합니다.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -106,6 +108,6 @@ term.cmdloop()
 ## References
 
 - [1] [Requests 개발자 인터페이스](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — 줄 단위 명령 인터프리터 지원](https://docs.python.org/3/library/cmd.html)
+- [2] [Python `cmd` — 줄 지향 명령 인터프리터 지원](https://docs.python.org/3/library/cmd.html)
 - [3] [Python `re` — 정규 표현식 연산](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

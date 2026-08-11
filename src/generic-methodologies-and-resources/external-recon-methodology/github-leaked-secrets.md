@@ -1,6 +1,8 @@
-# GitHub Dorks & Leaks
+# Github Dorks & Leaks
 
-### git repo와 파일 시스템에서 secrets를 찾는 Tools
+{{#include ../../banners/hacktricks-training.md}}
+
+### Git repo 및 file system에서 secrets를 찾는 Tools
 
 - [TruffleHog](https://github.com/dxa4481/truffleHog)
 - [Gitleaks](https://github.com/gitleaks/gitleaks)
@@ -18,23 +20,23 @@
 - [GitDorker](https://github.com/obheda12/GitDorker)
 
 > Notes
-> - TruffleHog v3는 많은 credentials를 live 환경에서 검증하고 GitHub orgs, issues/PRs, gists, wikis를 scan할 수 있습니다. 예: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)[[13]](#references)</sup>
-> - Gitleaks는 Git repositories, directories 및 archives를 scan합니다. history에는 `gitleaks git -v --log-opts="--all" <repo>`, directories에는 `gitleaks dir -v <path>`를 사용하고, archives를 검사하려면 `--max-archive-depth 1`을 사용합니다.<sup>[[6]](#references)</sup>
-> - Nosey Parker는 archived되었으며 Titus로 대체되었습니다. 기존 installations에서는 여전히 `noseyparker scan --datastore np.db <path|repo>`를 실행한 다음 `noseyparker report --datastore np.db`를 사용할 수 있습니다.<sup>[[7]](#references)[[8]](#references)</sup>
+> - TruffleHog v3는 많은 credentials를 실시간으로 verify하고 GitHub orgs, issues/PRs, gists 및 wikis를 scan할 수 있습니다. 예: `trufflehog github --org <ORG> --results=verified`.<sup>[[2]](#references)[[13]](#references)</sup>
+> - Gitleaks는 Git repositories, directories 및 archives를 scan합니다. history에는 `gitleaks git -v --log-opts="--all" <repo>`, directories에는 `gitleaks dir -v <path>`, archives 검사에는 `--max-archive-depth 1`을 사용합니다.<sup>[[6]](#references)</sup>
+> - Nosey Parker는 archived 상태이며 Titus로 대체되었습니다. 기존 installations에서는 여전히 `noseyparker scan --datastore np.db <path|repo>`를 실행한 다음 `noseyparker report --datastore np.db`를 사용할 수 있습니다.<sup>[[7]](#references)[[8]](#references)</sup>
 > - ggshield (GitGuardian CLI)는 files, repositories 및 Docker images를 scan하며 local 또는 CI workflows와 통합됩니다: `ggshield secret scan repo <path-or-url>`.<sup>[[9]](#references)</sup>
 
 ### GitHub에서 secrets가 흔히 leak되는 위치
 
-- GitHub Code Search는 default branch만 index합니다. non-default branches는 직접 검사하거나 clone해야 합니다.<sup>[[4]](#references)</sup>
-- 전체 git history 및 기타 branches/tags (clone한 후 gitleaks/trufflehog로 scan; GitHub search는 index된 content만 검색합니다).<sup>[[4]](#references)[[6]](#references)</sup>
-- Issues, pull requests, comments 및 descriptions (TruffleHog의 GitHub source는 `--issue-comments`, `--pr-comments`와 같은 flags를 통해 이를 지원합니다).<sup>[[2]](#references)</sup>
-- Actions workflow logs 및 artifacts (read access가 있으면 이를 확인하거나 download할 수 있으며, secret redaction은 보장되지 않습니다).<sup>[[11]](#references)[[12]](#references)</sup>
+- GitHub Code Search는 default branch만 index합니다. non-default branches는 직접 inspect하거나 clone해야 합니다.<sup>[[4]](#references)</sup>
+- 전체 git history 및 기타 branches/tags (clone한 뒤 gitleaks/trufflehog로 scan; GitHub search는 index된 content만 검색합니다).<sup>[[4]](#references)[[6]](#references)</sup>
+- Issues, pull requests, comments 및 descriptions (TruffleHog의 GitHub source는 `--issue-comments` 및 `--pr-comments`와 같은 flags를 통해 이를 지원합니다).<sup>[[2]](#references)</sup>
+- Actions workflow logs 및 artifacts (read access가 있으면 이를 보거나 download할 수 있으며, secret redaction은 보장되지 않습니다).<sup>[[11]](#references)[[12]](#references)</sup>
 - Wikis 및 release assets.
-- Gists (tooling 또는 UI로 검색하며, 일부 tools는 gists를 포함할 수 있습니다).<sup>[[2]](#references)[[13]](#references)</sup>
+- Gists (tooling 또는 UI로 검색; 일부 tools는 gists를 포함할 수 있습니다).<sup>[[2]](#references)[[13]](#references)</sup>
 
 > Gotchas
-> - GitHub의 Code Search UI는 regex를 지원하지만 REST/API 경로(`gh search code` 포함)는 legacy engine을 사용하며 regex 기능을 노출하지 않습니다. regex queries에는 UI를 사용하는 것이 좋습니다.<sup>[[3]](#references)[[5]](#references)</sup>
-> - GitHub search는 문서에 명시된 size limit를 초과하는 files를 제외하며 exhaustive하지 않습니다. 철저하게 검사하려면 secrets scanner를 사용해 local 환경에서 clone하고 scan해야 합니다.<sup>[[4]](#references)</sup>
+> - GitHub의 Code Search UI는 regex를 지원하지만 REST/API 경로(`gh search code` 포함)는 legacy engine을 사용하며 regex features를 노출하지 않습니다. regex queries에는 UI를 우선 사용하세요.<sup>[[3]](#references)[[5]](#references)</sup>
+> - GitHub search는 문서화된 size limit를 초과하는 files를 제외하며 exhaustive하지 않습니다. 철저히 검사하려면 clone한 뒤 secrets scanner로 local scan을 수행하세요.<sup>[[4]](#references)</sup>
 
 ### Programmatic org-wide scanning
 
@@ -44,7 +46,7 @@ export GITHUB_TOKEN=<token>
 trufflehog github --org Target --results=verified \
 --include-wikis --issue-comments --pr-comments --gist-comments
 ```
-- 모든 조직 repo에 대해 Gitleaks 실행 (shallow clone 후 `gitleaks dir`로 scan).<sup>[[6]](#references)</sup>
+- 조직의 모든 repo에 Gitleaks 적용 (shallow clone 후 `gitleaks dir`로 scan).<sup>[[6]](#references)</sup>
 ```bash
 gh repo list Target --limit 1000 --json nameWithOwner,url \
 | jq -r '.[].url' | while read -r r; do
@@ -52,21 +54,21 @@ tmp=$(mktemp -d); git clone --depth 1 "$r" "$tmp" && \
 gitleaks dir -v "$tmp" || true; rm -rf "$tmp";
 done
 ```
-- 기존 설치 환경용 mono checkout에서 Nosey Parker를 사용합니다.<sup>[[7]](#references)</sup>
+- 기존 설치 환경에서 mono checkout에 대해 Nosey Parker를 실행합니다.<sup>[[7]](#references)</sup>
 ```bash
 # after cloning many repos beneath ./org
 noseyparker scan --datastore np.db org/ && noseyparker report --datastore np.db
 ```
-- ggshield 빠른 스캔.<sup>[[9]](#references)</sup>
+- ggshield 빠른 scan.<sup>[[9]](#references)</sup>
 ```bash
 # current working tree
 ggshield secret scan path -r .
 # full git history of a repo
 ggshield secret scan repo <path-or-url>
 ```
-> Tip: git history의 경우 제거된 secret을 포착할 수 있도록 `git log -p --all`을 파싱하는 scanner를 우선 사용하세요.<sup>[[6]](#references)</sup>
+> 팁: git history의 경우 삭제된 secrets를 포착할 수 있도록 `git log -p --all`을 파싱하는 scanner를 우선 사용하세요.<sup>[[6]](#references)</sup>
 
-### 최신 token을 위한 업데이트된 dorks
+### 최신 token을 위한 Dorks
 
 - GitHub tokens: `ghp_` `gho_` `ghu_` `ghs_` `ghr_` `github_pat_`.<sup>[[10]](#references)</sup>
 - Slack tokens: `xoxb-` `xoxp-` `xoxa-` `xoxs-` `xoxc-` `xoxe-`
@@ -349,12 +351,12 @@ GCP SECRET
 AWS SECRET
 "private" extension:pgp
 ```
-추가적인 code-search workflow는 [Wide Source Code Search](wide-source-code-search.md)를 참조하세요.
+추가적인 code-search workflows는 [Wide Source Code Search](wide-source-code-search.md)를 참조하세요.
 
 ## References
 
-- [1] [public repository에 secret을 포함하지 않기 (GitHub Blog, 2024년 2월 29일)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
-- [2] [TruffleHog v3 – 유출된 credential 찾기, 검증 및 분석](https://github.com/trufflesecurity/trufflehog)
+- [1] [public repositories에서 secrets 제외하기 (GitHub Blog, 2024년 2월 29일)](https://github.blog/news-insights/product-news/keeping-secrets-out-of-public-repositories/)
+- [2] [TruffleHog v3 – leak된 credentials 찾기, verify 및 analyze](https://github.com/trufflesecurity/trufflehog)
 - [3] [GitHub Code Search syntax 이해하기](https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax)
 - [4] [code 검색 (legacy)](https://docs.github.com/en/search-github/searching-on-github/searching-code)
 - [5] [gh search code](https://cli.github.com/manual/gh_search_code)
@@ -362,8 +364,8 @@ AWS SECRET
 - [7] [Nosey Parker README](https://github.com/praetorian-inc/noseyparker#readme)
 - [8] [Titus README](https://github.com/praetorian-inc/titus#readme)
 - [9] [ggshield README](https://github.com/GitGuardian/ggshield#readme)
-- [10] [Secret reference (GitHub Actions)](https://docs.github.com/en/actions/reference/security/secrets)
-- [11] [Secret (GitHub Actions)](https://docs.github.com/en/actions/concepts/security/secrets)
-- [12] [workflow run log 사용하기 (GitHub Actions)](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
+- [10] [Secrets reference (GitHub Actions)](https://docs.github.com/en/actions/reference/security/secrets)
+- [11] [Secrets (GitHub Actions)](https://docs.github.com/en/actions/concepts/security/secrets)
+- [12] [workflow run logs 사용하기 (GitHub Actions)](https://docs.github.com/en/actions/how-tos/monitor-workflows/use-workflow-run-logs)
 - [13] [TruffleHog GitHub source](https://github.com/trufflesecurity/trufflehog/blob/main/main.go)
 {{#include ../../banners/hacktricks-training.md}}

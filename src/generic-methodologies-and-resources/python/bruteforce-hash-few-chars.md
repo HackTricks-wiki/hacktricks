@@ -1,4 +1,6 @@
-# 몇 글자 Hash 무차별 대입
+# 몇 글자 Hash Bruteforce
+
+{{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib
 

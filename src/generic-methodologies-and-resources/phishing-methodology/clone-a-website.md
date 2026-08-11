@@ -1,14 +1,16 @@
-# Website Clone
+# Website 복제
 
-phishing assessment에서는 때때로 website를 완전히 **clone/dump**하는 것이 유용할 수 있습니다.
+{{#include ../../banners/hacktricks-training.md}}
 
-cloned website에 BeEF hook과 같은 payload도 추가하여 사용자의 탭을 "control"할 수 있습니다.
+phishing assessment를 위해 때로는 **웹사이트를 완전히 clone/dump**하는 것이 유용할 수 있습니다.
 
-이 용도로 사용할 수 있는 tool은 여러 가지가 있습니다.
+복제된 웹사이트에 BeEF hook과 같은 payloads를 추가하여 사용자의 탭을 "control"할 수도 있습니다.
+
+이 용도로 사용할 수 있는 도구는 여러 가지가 있습니다.
 
 ## wget
 
-다음 command는 Wget의 mirroring, page-requisite, link-conversion 및 extension-adjustment mode를 사용한 다음, Python의 `http.server` module을 사용하여 current directory에 다운로드된 파일을 port 8000에서 serve합니다.<sup>[[1]](#references)[[2]](#references)</sup>
+다음 명령은 Wget의 mirroring, page-requisite, link-conversion 및 extension-adjustment 모드를 사용한 다음, Python의 `http.server` 모듈을 사용하여 현재 디렉터리에서 다운로드한 파일을 포트 8000으로 제공합니다.<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 wget --mirror --page-requisites --convert-links --adjust-extension <URL>
 cd <URL>
@@ -16,14 +18,14 @@ python3 -m http.server 8000
 ```
 ## goclone
 
-goclone repository는 상대 링크 구조를 유지하면서 website를 local directory에 다운로드하는 utility로 이 도구를 설명하며, `goclone <url>` 실행 방법을 문서화하고 있습니다.<sup>[[3]](#references)</sup>
+goclone repository는 상대 링크 구조를 유지하면서 웹사이트를 로컬 디렉터리에 다운로드하는 utility로 설명하며, `goclone <url>` 실행 방법을 문서화합니다.<sup>[[3]](#references)</sup>
 ```bash
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
-## Social Engineering 도구 모음
+## Social Engineering Toolit
 
-Social-Engineer Toolkit (SET) 저장소에서는 SET를 승인을 받은 social-engineering 평가를 위한 오픈 소스 penetration-testing 프레임워크로 설명합니다.<sup>[[4]](#references)</sup>
+Social-Engineer Toolkit (SET) repository는 SET를 authorized social-engineering assessments를 위한 오픈 소스 penetration-testing framework로 식별합니다.<sup>[[4]](#references)</sup>
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit
 ```

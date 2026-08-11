@@ -1,6 +1,8 @@
 # Volatility - 치트시트
 
-다양한 scan level로 memory analysis를 자동화하고 여러 Volatility3 plugins를 병렬로 실행하는 tool이 필요하다면 autoVolatility3을 사용할 수 있습니다:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+{{#include ../../../banners/hacktricks-training.md}}
+
+서로 다른 scan level로 memory analysis를 자동화하고 여러 Volatility3 plugin을 병렬로 실행하는 tool이 필요하다면 autoVolatility3를 사용할 수 있습니다:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 ```bash
 # Full scan (runs all plugins)
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
@@ -12,7 +14,7 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-**빠르고 미친 듯이 강력한** 방법으로 여러 Volatility plugins를 병렬로 실행하려면 다음을 사용할 수 있습니다: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+**빠르고 강력하게** 여러 Volatility 플러그인을 병렬로 실행하려면 다음을 사용할 수 있습니다: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -45,19 +47,19 @@ python setup.py install
 
 ## Volatility 명령어
 
-공식 문서는 [Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)에서 확인할 수 있습니다.
+[Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)의 공식 문서를 참고하세요.
 
-### “list”와 “scan” plugin에 대한 참고 사항
+### “list” 플러그인과 “scan” 플러그인에 대한 참고 사항
 
-`list` plugin은 kernel이 유지 관리하는 구조를 순회하므로 빠르지만, malware가 unlink한 객체를 놓칠 수 있습니다. `psscan`과 같은 `scan` plugin은 메모리에서 객체 시그니처를 검색하므로 종료되었거나 unlink된 process를 복구할 수 있지만, 속도가 느리고 잔여 구조가 손상된 경우 false positive가 발생할 수 있습니다.<sup>[[8]](#references)</sup>
+`list` 플러그인은 kernel이 유지 관리하는 구조를 순회하므로 빠르지만, malware가 unlink한 object를 놓칠 수 있습니다. `psscan`과 같은 `scan` 플러그인은 memory에서 object signature를 검색합니다. 따라서 종료되었거나 unlink된 process를 복구할 수 있지만, 속도가 느리고 잔여 구조가 손상된 경우 false positive가 발생할 수 있습니다.<sup>[[8]](#references)</sup>
 
-## 운영체제 프로필
+## OS 프로필
 
 ### Volatility3
 
-Volatility 3는 대상 운영체제에 대한 symbol table을 필요로 합니다. 프로젝트 README에는 Windows, Mac, Linux용 pack이 나와 있으며, 이를 `volatility3/symbols` 또는 executable 옆의 `symbols` directory에 배치해야 합니다. 누락된 Windows symbol은 자동으로 가져와 생성할 수 있지만, Mac 및 Linux table은 별도로 생성해야 할 수 있습니다.<sup>[[9]](#references)</sup>
+Volatility 3에는 대상 operating system에 대한 symbol table이 필요합니다. 프로젝트 README에는 Windows, Mac, Linux용 pack이 나와 있으며, 이를 `volatility3/symbols` 또는 executable과 같은 위치에 있는 `symbols` directory에 배치해야 합니다. 누락된 Windows symbol은 자동으로 가져와 생성할 수 있지만, Mac 및 Linux table은 별도로 생성해야 할 수 있습니다.<sup>[[9]](#references)</sup>
 
-다양한 운영체제용 symbol table pack은 다음 위치에서 **다운로드**할 수 있습니다.
+다양한 operating system용 symbol table pack은 다음에서 **download**할 수 있습니다.
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -65,13 +67,13 @@ Volatility 3는 대상 운영체제에 대한 symbol table을 필요로 합니�
 
 ### Volatility2
 
-#### External Profile
+#### 외부 프로필
 
-다음 명령을 실행하면 지원되는 profile 목록을 확인할 수 있습니다:
+다음 명령을 실행하면 지원되는 profile 목록을 확인할 수 있습니다.
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-**다운로드한 새 profile**(예: linux one)을 사용하려면 다음 폴더 구조를 어딘가에 생성해야 합니다: _plugins/overlays/linux_ 그리고 이 폴더 안에 profile이 포함된 zip 파일을 넣습니다. 그런 다음 다음을 사용하여 profile 수를 확인합니다:
+**다운로드한 새 profile**(예: linux profile)을 사용하려면 다음 폴더 구조를 _plugins/overlays/linux_ 경로에 생성하고, profile이 포함된 zip 파일을 이 폴더 안에 넣어야 합니다. 그런 다음 다음 명령을 사용하여 profile 수를 확인합니다:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -85,7 +87,7 @@ VistaSP0x86                                   - A Profile for Windows Vista SP0 
 ```
 [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)에서 **Linux 및 Mac 프로파일**을 다운로드할 수 있습니다.
 
-이전 청크에서 프로파일 이름이 `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`임을 확인할 수 있으며, 이를 사용해 다음과 같은 명령을 실행할 수 있습니다:
+이전 청크에서 프로파일 이름이 `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`임을 확인할 수 있으며, 이를 사용해 다음과 같은 작업을 실행할 수 있습니다:
 ```bash
 ./vol -f file.dmp --plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
 ```
@@ -96,9 +98,9 @@ volatility kdbgscan -f file.dmp
 ```
 #### **imageinfo와 kdbgscan의 차이**
 
-[Andrea Fortuna의 image-identification notes](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)에 따르면 `imageinfo`는 profile 제안 목록을 생성하는 반면, `kdbgscan`은 KDBG signature를 검색하고 sanity check를 적용하여 후보 profile과 KDBG 주소를 식별합니다. 출력 결과는 부분적으로 Volatility가 DTB를 찾을 수 있는지에 따라 달라지므로, 실행할 때 알려진 profile 또는 제안된 profile을 전달해야 합니다.<sup>[[1]](#references)</sup>
+[Andrea Fortuna의 image-identification notes](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)에 따르면 `imageinfo`는 프로필 제안을 생성하는 반면, `kdbgscan`은 KDBG signature를 검색하고 sanity check를 적용하여 후보 프로필과 KDBG 주소를 식별합니다. 출력 결과는 Volatility가 DTB를 찾을 수 있는지에 따라 부분적으로 달라지므로, 실행할 때 알려진 프로필이나 제안된 프로필을 전달해야 합니다.<sup>[[1]](#references)</sup>
 
-여러 후보가 반환되면 process 및 module 수를 비교하세요. process나 module이 0개인 후보는 목록이 채워진 후보보다 신뢰도가 낮습니다. 이는 profile이 올바르다는 증명이 아니라 sanity check로 사용해야 합니다.<sup>[[1]](#references)</sup>
+여러 후보가 반환되면 process 및 module 수를 비교하세요. process 또는 module이 0개인 후보는 목록이 채워진 후보보다 신뢰도가 낮습니다. 이는 프로필이 올바르다는 증명이 아니라 sanity check로 간주해야 합니다.<sup>[[1]](#references)</sup>
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -112,18 +114,18 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-`KdDebuggerDataBlock`은 Volatility에서 KDBG로 알려진 `_KDDEBUGGER_DATA64` 구조체로, 프로세스 열거에 사용되는 프로세스 목록의 헤드인 `PsActiveProcessHead`를 포함합니다.<sup>[[2]](#references)</sup>
+`KdDebuggerDataBlock`은 Volatility에서 KDBG로 알려져 있으며, 프로세스 열거에 사용되는 프로세스 목록의 헤드인 `PsActiveProcessHead`를 포함하는 `_KDDEBUGGER_DATA64` 구조체입니다.<sup>[[2]](#references)</sup>
 
-## 운영 체제 정보
+## OS 정보
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-plugin `banners.Banners`는 dump에서 **linux 배너를 찾아보는** 데 사용할 수 있습니다.
+The plugin `banners.Banners` can be used in **vol3 to try to find linux banners** in the dump.
 
 ## 해시/비밀번호
 
-SAM 해시, [domain cached credentials](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) 및 [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets)를 추출합니다.
+Extract SAM 해시, [도메인 캐시 자격 증명](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) 및 [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets).
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -145,7 +147,7 @@ volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 
 ## 메모리 덤프
 
-프로세스의 메모리 덤프는 프로세스의 현재 상태에 대한 **모든 것을 추출**합니다. **procdump** 모듈은 **코드**만 **추출**합니다.
+프로세스의 메모리 덤프는 프로세스의 현재 상태에 대한 **모든 것을 추출**합니다. **procdump** 모듈은 **code**만 **추출**합니다.
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
@@ -153,8 +155,8 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 
 ### 프로세스 목록
 
-**의심스러운** 프로세스(이름 기준) 또는 **예상하지 못한** 하위 **프로세스**(예: iexplorer.exe의 하위 프로세스인 cmd.exe)를 찾아보세요.\
-숨겨진 프로세스를 식별하기 위해 pslist의 결과를 psscan의 결과와 **비교**해 보는 것이 유용할 수 있습니다.
+이름을 기준으로 **의심스러운** 프로세스 또는 **예상치 못한** 자식 **프로세스**를 찾아보세요(예: iexplorer.exe의 자식 프로세스인 cmd.exe).\
+숨겨진 프로세스를 식별하기 위해 pslist의 결과를 psscan의 결과와 **비교**해 보는 것도 유용할 수 있습니다.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -175,7 +177,7 @@ volatility --profile=PROFILE psxview -f file.dmp # Get hidden process list
 {{#endtab}}
 {{#endtabs}}
 
-### proc 덤프
+### 프로세스 덤프
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -193,7 +195,7 @@ volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f fil
 
 ### 명령줄
 
-의심스러운 명령이 실행되었나요?
+의심스러운 명령이 실행되었는가?
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -210,7 +212,7 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-`cmd.exe`에서 실행된 명령은 **`conhost.exe`**(또는 Windows 7 이전 시스템에서는 **`csrss.exe`**)가 관리합니다. 따라서 메모리 덤프를 확보하기 전에 공격자가 **`cmd.exe`**를 종료하더라도 **`conhost.exe`**의 메모리에서 세션의 명령 기록을 복구할 수 있습니다. 이를 위해 콘솔의 모듈에서 비정상적인 활동이 감지되면 연결된 **`conhost.exe`** 프로세스의 메모리를 덤프해야 합니다. 그런 다음 이 덤프 내에서 **strings**를 검색하면 세션에서 사용된 명령줄을 추출할 수 있습니다.
+`cmd.exe`에서 실행된 명령은 **`conhost.exe`**(Windows 7 이전 시스템에서는 **`csrss.exe`**)가 관리합니다. 즉, 메모리 덤프를 확보하기 전에 공격자가 **`cmd.exe`**를 종료하더라도 **`conhost.exe`**의 메모리에서 해당 세션의 명령 기록을 복구할 수 있습니다. 이를 위해 콘솔의 모듈에서 비정상적인 활동이 감지되면 관련 **`conhost.exe`** 프로세스의 메모리를 덤프해야 합니다. 그런 다음 이 덤프 내에서 **strings**를 검색하면 세션에서 사용된 명령줄을 추출할 수 있습니다.
 
 ### 환경
 
@@ -232,10 +234,10 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 {{#endtab}}
 {{#endtabs}}
 
-### 토큰 권한
+### Token 권한
 
-예상하지 못한 서비스에서 권한 토큰을 확인합니다.\
-일부 권한 토큰을 사용하는 프로세스를 나열하는 것이 유용할 수 있습니다.
+예상하지 못한 services에서 privileges tokens를 확인합니다.\
+일부 privileged token을 사용하는 processes를 나열하는 것이 유용할 수 있습니다.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -260,7 +262,7 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePri
 ### SIDs
 
 프로세스가 소유한 각 SSID를 확인합니다.\
-권한 SID를 사용하는 프로세스와 일부 서비스 SID를 사용하는 프로세스를 나열하는 것이 유용할 수 있습니다.
+권한이 있는 SID를 사용하는 프로세스와 일부 service SID를 사용하는 프로세스를 나열하면 유용할 수 있습니다.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -280,7 +282,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### 핸들
 
-어떤 다른 파일, 키, 스레드, 프로세스 등에 **프로세스가 핸들을 가지고 있는지**(열었는지) 파악하는 데 유용합니다.
+**process가 핸들을 가지고 있는(열어 둔)** 다른 파일, 키, 스레드, 프로세스 등을 알아두면 유용합니다.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -314,9 +316,9 @@ volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dm
 {{#endtab}}
 {{#endtabs}}
 
-### 프로세스별 문자열
+### 프로세스별 Strings
 
-Volatility를 사용하면 특정 문자열이 어느 프로세스에 속하는지 확인할 수 있습니다.
+Volatility를 사용하면 문자열이 어떤 프로세스에 속하는지 확인할 수 있습니다.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -356,7 +358,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-`UserAssist` 레지스트리 값에는 Windows Explorer를 통해 실행된 프로그램이 기록되며, 실행 횟수와 마지막 실행 타임스탬프가 포함됩니다. 명령줄을 통해 실행된 항목은 이러한 키에 기록되지 않습니다.<sup>[[3]](#references)</sup>
+`UserAssist` 레지스트리 값은 실행 횟수와 마지막 실행 타임스탬프를 포함하여 Windows Explorer를 통해 실행된 프로그램을 기록합니다. 명령줄을 통해 실행된 프로그램은 이러한 키에 기록되지 않습니다.<sup>[[3]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -465,7 +467,7 @@ volatility --profile=Win7SP1x86_23418 hivedump -o 0x9aad6148 -f file.dmp #Offset
 #Dump all hives
 volatility --profile=Win7SP1x86_23418 hivedump -f file.dmp
 ```
-## 파일 시스템
+## 파일시스템
 
 ### 마운트
 
@@ -484,7 +486,7 @@ volatility --profile=SomeLinux -f file.dmp linux_recover_filesystem #Dump the en
 {{#endtab}}
 {{#endtabs}}
 
-### Scan/dump
+### 스캔/덤프
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -507,7 +509,7 @@ volatility --profile=SomeLinux -f file.dmp linux_find_file -i 0xINODENUMBER -O /
 {{#endtab}}
 {{#endtabs}}
 
-### Master File Table
+### 마스터 파일 테이블
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -523,7 +525,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-NTFS에서 MFT에는 볼륨의 각 파일마다 최소 하나의 항목이 있으며, MFT 자체도 포함됩니다. 파일 메타데이터와 콘텐츠는 MFT 항목 또는 해당 항목이 설명하는 위치에 저장됩니다. 자세한 내용은 [Microsoft documentation](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)을 참조하세요.<sup>[[4]](#references)</sup>
+NTFS에서 MFT에는 볼륨의 각 파일마다 최소 하나의 항목이 있으며, MFT 자체도 포함됩니다. 파일 메타데이터와 콘텐츠는 MFT 항목 또는 해당 항목이 설명하는 위치에 저장됩니다. 자세한 내용은 [Microsoft 문서](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)를 참조하세요.<sup>[[4]](#references)</sup>
 
 ### SSL 키/인증서
 
@@ -582,10 +584,10 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 {{#endtab}}
 {{#endtabs}}
 
-### yara로 스캔
+### yara를 사용한 스캔
 
-github에서 모든 yara malware rules를 다운로드하고 병합하려면 다음 스크립트를 사용하세요: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-_**rules**_ 디렉터리를 생성하고 실행하세요. 그러면 malware에 대한 모든 yara rules가 포함된 _**malware_rules.yar**_ 파일이 생성됩니다.
+github에서 모든 yara malware rules를 다운로드하고 병합하려면 다음 script를 사용하세요: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
+_**rules**_ directory를 생성하고 실행하세요. 그러면 malware에 대한 모든 yara rules가 포함된 _**malware_rules.yar**_ 파일이 생성됩니다.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -612,9 +614,9 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 
 ## 기타
 
-### 외부 plugins
+### External plugins
 
-외부 plugins를 사용하려면 plugins와 관련된 폴더가 사용되는 첫 번째 parameter인지 확인하세요.
+External plugins을 사용하려면 해당 plugins와 관련된 폴더가 사용되는 첫 번째 parameter인지 확인하세요.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -671,7 +673,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-**메모리에서 bash history를 읽을 수 있습니다.** _.bash_history_ 파일을 덤프할 수도 있지만, 해당 기능이 비활성화되어 있었다면 이 volatility 모듈을 사용할 수 있어 다행일 것입니다.
+**메모리에서 bash history를 읽을 수 있습니다.** _.bash_history_ 파일을 dump할 수도 있지만, 해당 기능이 비활성화되어 있다면 이 Volatility module을 사용할 수 있어 다행일 것입니다.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -734,7 +736,7 @@ volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
 #Just vol2
 volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 ```
-### Screenshot
+번역할 원문이 제공되지 않았습니다. Markdown 내용을 붙여 넣거나 스크린샷을 업로드해 주세요.
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
@@ -743,7 +745,7 @@ volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-BIOS 기반 시스템에서 섹터 0의 MBR에는 master boot code와 partition table이 포함됩니다. Microsoft 문서에 따르면 `bootsect /mbr`은 해당 table을 변경하지 않고 code를 업데이트합니다.<sup>[[7]](#references)</sup>
+BIOS 기반 시스템에서 섹터 0의 MBR에는 master boot code와 partition table이 포함되어 있습니다. Microsoft 문서에 따르면 `bootsect /mbr`은 해당 table을 변경하지 않고 code를 업데이트합니다.<sup>[[7]](#references)</sup>
 
 ## References
 
@@ -751,7 +753,7 @@ BIOS 기반 시스템에서 섹터 0의 MBR에는 master boot code와 partition 
 - [2] [Kernel Debugger Block 찾기](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
 - [3] [Windows UserAssist Keys](https://www.aldeid.com/wiki/Windows-userassist-keys)
 - [4] [Master File Table (Local File Systems) - Win32 apps](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
-- [5] [UEFI 기반 PC, protective MBR: 이것은 무엇인가? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
+- [5] [UEFI-based PC, protective MBR: what is it? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
 - [6] [Tutorial: malware analysis를 위한 Volatility plugins](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
 - [7] [Bootsect Command-Line Options](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/bootsect-command-line-options?view=windows-11)
 - [8] [Tutorial - Volatility plugins 및 malware analysis](https://tomchop.me/posts/volatility-plugin-malware-analysis/)

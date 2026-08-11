@@ -1,12 +1,14 @@
-# Basic Python
+# Python 기초
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Python 기초
 
 ### 유용한 정보
 
-아래의 모든 예제는 별도로 명시하지 않는 한 **Python 3**을 전제로 합니다.\
+아래의 모든 예제는 별도로 명시하지 않는 한 **Python 3**을 기준으로 합니다.\
 Python 3에서 `range()`는 iterable 객체를 반환합니다(Python 2의 `xrange()`와 유사함).\
-**tuple**과 **list**의 차이점은 tuple에서 값의 **position**이 일반적으로 해당 값의 의미를 나타내는 반면, list는 보통 값이 순서대로 나열된 sequence일 뿐이라는 점입니다.
+**tuple**과 **list**의 차이점은 tuple에서 값의 **위치**가 일반적으로 해당 값의 의미를 나타내는 반면, list는 보통 순서가 있는 값의 시퀀스일 뿐이라는 점입니다.
 
 ### 주요 연산
 
@@ -34,14 +36,14 @@ Python 3에서 `2/3 == 0.666666...`인 반면, `2//3 == 0`은 정수 나눗셈�
 `"abc\n".strip() == "abc"`\
 `"apbc".replace("p", "") == "abc"`\
 `dir(str)` = 사용 가능한 메서드 목록\
-`help(str)` = `str` class의 정의\
+`help(str)` = `str` 클래스의 정의\
 `"a".upper() == "A"`\
 `"A".lower() == "a"`\
 `"abc".capitalize() == "Abc"`\
 `sum([1, 2, 3]) == 6`\
 `sorted([1, 43, 5, 3, 21, 4]) == [1, 3, 4, 5, 21, 43]`
 
-**문자열 결합**\
+**문자 결합**\
 `3 * 'a' == 'aaa'`\
 `'a' + 'b' == 'ab'`\
 `'a' + str(3) == 'a3'`\
@@ -54,8 +56,8 @@ Python 3에서 `2/3 == 0.666666...`인 반면, `2//3 == 0`은 정수 나눗셈�
 `"qwertyuiop"[:-1] == 'qwertyuio'`
 
 **주석**\
-`# One line comment`\
-`""" Several lines comment """`
+`# 한 줄 주석`\
+`""" 여러 줄 주석 """`
 
 **반복문**
 ```python
@@ -75,9 +77,9 @@ for i in range(0, 100):
 for letter in "hola":
 # something with each letter
 ```
-### Bytes, hex 및 encodings
+### 바이트, 16진수 및 인코딩
 
-이는 exploit-dev, reversing 및 CTFs에서 매우 흔합니다:
+exploit-dev, reversing 및 CTF에서 매우 흔히 사용됩니다:
 ```python
 b"ABC".hex() == "414243"
 bytes.fromhex("414243") == b"ABC"
@@ -91,7 +93,7 @@ b"admin".decode() == "admin"
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
-`(4,)` = singleton\
+`(4,)` = 싱글턴\
 `d = ()` 빈 튜플\
 `d += (4,)` --> 튜플에 추가\
 `# t1[1] = 'new value'` --> 튜플은 변경할 수 없음\
@@ -119,15 +121,15 @@ month_numbers.update(a)
 mn = month_numbers.copy()  # independent copy
 month_numbers.get('key', 0)  # default value if key does not exist
 ```
-### 집합
+### Set
 
-집합에는 중복이 없습니다.\
+Set에는 중복 항목이 없습니다.\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
 `myset.add('a')` --> 변경 없음\
 `myset.update([1, 2, 3])`\
 `myset.discard(10)` --> 존재하면 제거하고, 존재하지 않으면 아무 작업도 하지 않음\
-`myset.remove(10)` --> 존재하지 않으면 exception 발생\
+`myset.remove(10)` --> 존재하지 않으면 예외 발생\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
@@ -138,9 +140,9 @@ month_numbers.get('key', 0)  # default value if key does not exist
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
 
-### 클래스
+### Classes
 
-`__lt__`의 method는 객체를 비교하기 위해 `sort()` / `sorted()`에서 사용됩니다.
+`__lt__`의 메서드는 `sort()` / `sorted()`가 객체를 비교할 때 사용합니다.
 ```python
 import datetime
 
@@ -174,9 +176,9 @@ MITPerson.next_id_num += 1
 def __lt__(self, other):
 return self.id_num < other.id_num
 ```
-### map, zip, filter, lambda, sorted 및 one-liners
+### map, zip, filter, lambda, sorted 및 한 줄 코드
 
-**Python 3**에서는 `map()`과 `filter()`가 iterator를 반환하므로, 모든 값을 한 번에 출력하려면 `list()`로 변환하세요.
+**Python 3**에서는 `map()`과 `filter()`가 iterator를 반환하므로 모든 값을 한 번에 출력하려면 `list()`로 변환하세요.
 
 **Map**은 `[f(x) for x in iterable]`과 같습니다:
 ```python
@@ -192,8 +194,8 @@ for f, b in zip(foo, bar):
 print(f, b)
 ```
 **Lambda**는 함수를 정의하는 데 사용됩니다:\
-`(lambda x, y: x + y)(5, 3) == 8` --> lambda를 간단한 함수로 사용\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> lambda를 사용하여 정렬\
+`(lambda x, y: x + y)(5, 3) == 8` --> 간단한 함수로 lambda 사용\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> 정렬에 lambda 사용\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
 ```python
@@ -234,7 +236,7 @@ print("executing finally clause in any case")
 ### Assert()
 
 조건이 false이면 문자열이 출력됩니다.\
-`assert` 문은 `python -O`로 비활성화할 수 있으므로 access control 또는 input validation에 사용하지 마세요.
+`assert` 문은 `python -O`를 사용하여 비활성화할 수 있으므로, access control 또는 input validation에 사용하지 마세요.
 ```python
 def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
@@ -242,7 +244,7 @@ assert len(grades) == len(weights), 'wrong number of grades'
 ```
 ### Generators, yield
 
-Generator는 모든 값을 한 번에 반환하는 대신, 값을 하나씩 **yield**합니다. 이는 매우 큰 wordlist, bruteforcer 또는 대용량 응답에 매우 유용합니다.
+Generator는 모든 값을 한 번에 반환하는 대신, 값을 하나씩 **yield**합니다. 이는 대규모 wordlists, bruteforcers 또는 대규모 응답에 매우 유용합니다.
 ```python
 def my_gen(n):
 yield n
@@ -267,16 +269,16 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 `\d` --> 숫자\
 `\s` --> 공백 문자 `[ \n\r\t\f]`\
 `\S` --> 공백이 아닌 문자\
-`^` --> 다음으로 시작\
-`$` --> 다음으로 끝남\
+`^` --> 시작\
+`$` --> 끝\
 `+` --> 하나 이상\
 `*` --> 0개 이상\
-`?` --> 0개 또는 1개의 발생
+`?` --> 0개 또는 1개
 
 **옵션:**\
 `re.search(pat, string, re.IGNORECASE)`\
 `re.search(pat, string, re.DOTALL)` --> 점이 줄바꿈과 일치하도록 허용\
-`re.search(pat, string, re.MULTILINE)` --> `^` 및 `$`가 여러 줄에서 일치하도록 허용
+`re.search(pat, string, re.MULTILINE)` --> `^`와 `$`가 서로 다른 줄에서 일치하도록 허용
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -287,7 +289,7 @@ re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 ### IterTools
 
 **product**\
-`from itertools import product` --> 하나 이상의 iterable 간의 데카르트 곱
+`from itertools import product` --> 하나 이상의 iterable 간 카테시안 곱
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -314,14 +316,14 @@ list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> Python 3.12 이상에서 사용 가능하며, 큰 bruteforce 후보 목록이나 IOC 파일을 여러 청크로 나누는 데 유용합니다.
+`from itertools import batched` --> Python 3.12+에서 사용 가능하며, 대규모 bruteforce 후보 목록이나 IOC 파일을 청크로 나누는 데 유용합니다.
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
-### Decorators
+### 데코레이터
 
-함수 실행에 걸리는 시간을 측정하는 Decorator:
+함수 실행에 필요한 시간을 측정하는 데코레이터:
 ```python
 from functools import wraps
 import time
@@ -351,7 +353,7 @@ Execution time: 4.79e-05 seconds
 ```
 ### pentesting에 유용한 표준 라이브러리 헬퍼
 
-**`pathlib`을 사용한 파일 시스템 순회** (`Path.walk()`는 Python 3.12+에서 사용할 수 있으며, 이전 인터프리터에서는 `os.walk()`를 사용):
+**`pathlib`을 사용한 파일시스템 순회** (`Path.walk()`는 Python 3.12 이상에서 사용할 수 있으며, 이전 인터프리터에서는 `os.walk()`를 사용):
 ```python
 from pathlib import Path
 
@@ -362,7 +364,7 @@ for name in files:
 if name.endswith((".py", ".env", ".bak")):
 print(root / name)
 ```
-**명령을 안전하게 실행** (`shell=False`가 기본값인 경우가 대부분 원하는 설정입니다):
+**명령을 안전하게 실행하기** (`shell=False` 기본값이 일반적으로 원하는 설정입니다):
 ```python
 import subprocess
 
@@ -374,12 +376,12 @@ check=True,
 )
 print(cp.stdout)
 ```
-**반드시** shell command를 생성해야 한다면, 먼저 공격자가 제어하는 각 토큰을 quoting하세요:
+**반드시** shell command를 구성해야 한다면, 공격자가 제어하는 각 토큰을 먼저 quote하세요:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
-**임시 파일 / 디렉터리** (`/tmp/foo` 경로를 하드코딩하는 것보다 안전):
+**임시 파일 / 디렉터리** (하드코딩된 `/tmp/foo` 경로보다 안전):
 ```python
 import tempfile
 from pathlib import Path
@@ -389,9 +391,9 @@ out = Path(tmp) / "loot.txt"
 out.write_text("secret\n")
 print(out.read_text())
 ```
-HTTP 자동화를 위해서는 [Python 웹 요청에 대한 이 페이지](web-requests.md)를 확인하세요.
+HTTP automation의 경우 [Python web requests에 관한 다른 페이지](web-requests.md)를 확인하세요.
 
-### Archive 추출 시 주의 사항 (tooling 및 file parser에 중요)
+### Archive extraction 관련 주의 사항 (tooling 및 file parser에 중요)
 
 **Python 3.14**부터 `tarfile.extract()` / `extractall()`은 기본적으로 더 안전한 `data` filter를 사용합니다. 이전 Python 버전에서는 공격자가 제어하는 archive를 처리할 때 이를 명시적으로 설정해야 합니다.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
@@ -402,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-`filter="data"`를 사용하더라도 신뢰할 수 없는 archive는 새 임시 디렉터리에 extract하고, 파일을 어디든 중요한 위치로 이동하기 전에 기록된 내용을 검증하세요.
+`filter="data"`를 사용하더라도 신뢰할 수 없는 archive는 새 임시 디렉터리에 extract하고, 파일을 다른 중요한 위치로 이동하기 전에 기록된 내용을 검증하세요.
 
-`zipfile.Path`는 다릅니다. **파일 이름을 자동으로 sanitize하지 않으므로**, 공격자가 제어하는 ZIP 멤버를 extract하기 전에 경로를 검증하세요:
+`zipfile.Path`는 다릅니다. **파일 이름을 자동으로 sanitize하지 않으므로**, 공격자가 제어하는 ZIP member를 extract하기 전에 경로를 검증하세요:
 ```python
 import os
 import zipfile
@@ -420,12 +422,12 @@ zf.extract(info, base)
 ### 기억해야 할 위험한 primitive
 
 - `eval()` / `exec()`는 **sandbox가 아닙니다**.
-- `ast.literal_eval()`은 Python 코드를 실행하지 않지만, 공격자가 제어하는 입력을 통해 메모리 / CPU denial of service를 일으키는 데 악용될 수 있습니다.
-- `pickle.loads()`는 **안전하지 않습니다**. 공격자가 제어하는 바이트를 절대 unpickle하지 마세요.
-- 더 심화된 offensive trick은 [Python sandboxes 우회](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) 및 [Python deserializations](../../pentesting-web/deserialization/README.md)를 확인하세요.
+- `ast.literal_eval()`은 **Python 코드를 실행하지 않지만**, 공격자가 제어하는 입력을 사용하면 여전히 memory / CPU denial of service에 악용될 수 있습니다.
+- `pickle.loads()`는 **안전하지 않습니다**. 공격자가 제어하는 bytes를 절대 unpickle하지 마세요.
+- 더 심층적인 offensive tricks는 [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) 및 [Python deserializations](../../pentesting-web/deserialization/README.md)를 확인하세요.
 
 ## References
 
 - [1] [Python tarfile 문서](https://docs.python.org/3/library/tarfile.html)
-- [2] [PEP 706 – tarfile.extractall()용 필터](https://peps.python.org/pep-0706/)
+- [2] [PEP 706 – tarfile.extractall() 필터](https://peps.python.org/pep-0706/)
 {{#include ../../banners/hacktricks-training.md}}

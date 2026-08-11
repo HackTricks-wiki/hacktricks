@@ -1,18 +1,20 @@
-# Suricata & Iptables 치트시트
+# Suricata & Iptables cheatsheet
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## Iptables
 
 ### Chains
 
-iptables에서 각 chain은 packet-matching rule의 순차 목록입니다. 기본 `filter` table에는 기본 제공되는 `INPUT`, `FORWARD`, `OUTPUT` chain이 있으며, `nat`과 같은 다른 table은 kernel configuration 및 로드된 module에 따라 사용 가능할 수 있습니다.<sup>[[1]](#references)</sup>
+iptables에서 각 chain은 packet-matching rules가 순차적으로 나열된 목록입니다. 기본 `filter` table에는 내장된 `INPUT`, `FORWARD`, `OUTPUT` chain이 있으며, `nat`과 같은 다른 table은 kernel configuration 및 로드된 module에 따라 사용할 수 있습니다.<sup>[[1]](#references)</sup>
 
-- **Input Chain**: 들어오는 connection의 동작을 관리하는 데 사용됩니다.
-- **Forward Chain**: 로컬 system을 대상으로 하지 않는 들어오는 connection을 처리하는 데 사용됩니다. 이는 수신한 data를 다른 destination으로 전달해야 하는 router 역할의 device에서 일반적입니다. 이 chain은 주로 system이 routing, NATing 또는 이와 유사한 작업에 관여할 때 관련됩니다.
-- **Output Chain**: 나가는 connection을 제어하는 데 사용됩니다.
+- **Input Chain**: incoming connections의 동작을 관리하는 데 사용됩니다.
+- **Forward Chain**: local system을 대상으로 하지 않는 incoming connections을 처리하는 데 사용됩니다. 이는 수신한 data를 다른 destination으로 forward해야 하는 router 역할의 device에서 일반적입니다. 이 chain은 주로 system이 routing, NATing 또는 이와 유사한 activity에 관여할 때 관련됩니다.
+- **Output Chain**: outgoing connections을 조절하는 역할을 전담합니다.
 
-이러한 chain은 network traffic을 질서 있게 처리하며, system 내부로 들어오고, system을 통과하고, system 밖으로 나가는 data의 흐름을 제어하는 세부 rule을 지정할 수 있게 합니다.
+이러한 chain은 network traffic을 질서 있게 처리하며, system으로 들어오고, system을 통과하고, system에서 나가는 data의 흐름을 제어하는 세부 rules를 지정할 수 있도록 합니다.
 
-string-match 예제에서는 표준 `string` match를 사용합니다. `--icase`가 제공되지 않는 한 matching은 대소문자를 구분하며, `--algo`는 BM 또는 KMP search strategy를 선택합니다.<sup>[[2]](#references)</sup>
+string-match examples는 standard `string` match를 사용합니다. `--icase`가 제공되지 않으면 matching은 case-sensitive이며, `--algo`는 BM 또는 KMP search strategy를 선택합니다.<sup>[[2]](#references)</sup>
 ```bash
 # Delete all rules
 iptables -F
@@ -53,7 +55,7 @@ iptables-restore < /etc/sysconfig/iptables
 
 ### 설치 및 설정
 
-아래 패키지 명령은 배포판과 릴리스에 따라 다릅니다. 공식 설치 가이드에는 Ubuntu PPA, Debian backports, RPM 패키지 및 systemd 서비스 관리 방법이 설명되어 있습니다.<sup>[[3]](#references)</sup>
+아래의 패키지 명령은 배포판 및 릴리스에 따라 다릅니다. 공식 설치 가이드에는 Ubuntu PPA, Debian backports, RPM 패키지 및 systemd 서비스 관리 방법이 설명되어 있습니다.<sup>[[3]](#references)</sup>
 ```bash
 # Package installation details vary by distribution and release; see References.
 # Ubuntu
@@ -116,7 +118,7 @@ Type=simple
 
 systemctl daemon-reload
 ```
-`suricata-update` 시퀀스는 rule source를 가져오고, 나열하고, 활성화하고, 로드하기 위한 Suricata의 문서화된 workflow를 따릅니다.<sup>[[4]](#references)</sup> 위의 `suricatasc` command는 문서화된 non-blocking Unix-socket rule-reload 방법입니다.<sup>[[8]](#references)</sup> NFQUEUE rules는 로컬 input/output traffic을 Suricata로 전송하며, `-q 0`은 inline processing을 위해 queue 0을 선택합니다.<sup>[[7]](#references)</sup>
+`suricata-update` 시퀀스는 rule source를 가져오고, 나열하고, 활성화하고, 로드하는 Suricata의 문서화된 workflow를 따릅니다.<sup>[[4]](#references)</sup> 위의 `suricatasc` command는 문서화된 non-blocking Unix-socket rule-reload method입니다.<sup>[[8]](#references)</sup> NFQUEUE rules는 local input/output traffic을 Suricata로 전송하며, `-q 0`은 inline processing을 위해 queue 0을 선택합니다.<sup>[[7]](#references)</sup>
 
 ### Rules Definitions
 
@@ -124,11 +126,11 @@ Suricata rule/signature는 세 부분으로 구성됩니다.<sup>[[5]](#referenc
 
 - **action**은 signature가 match될 때 발생하는 동작을 지정합니다.
 - **header**는 protocol, IP addresses, ports 및 direction을 선택합니다.
-- **rule options**는 match별 세부 사항을 정의합니다.
+- **rule options**는 match에 필요한 세부 사항을 정의합니다.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
-#### **유효한 actions은 다음과 같습니다**
+#### **유효한 action은 다음과 같습니다**
 
 - alert - alert 생성
 - pass - packet에 대한 추가 inspection 중지
@@ -136,31 +138,31 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 - **reject** - 일치하는 packet의 sender에게 RST/ICMP unreachable error 전송
 - rejectsrc - 단순히 _reject_와 동일
 - rejectdst - 일치하는 packet의 receiver에게 RST/ICMP error packet 전송
-- rejectboth - conversation의 양쪽에 RST/ICMP error packet 전송
+- rejectboth - 통신 양쪽에 RST/ICMP error packet 전송
 
-#### **Protocols**
+#### **프로토콜**
 
 - tcp (tcp-traffic용)
 - udp
 - icmp
 - ip (ip는 ‘all’ 또는 ‘any’를 의미)
-- _layer7 protocols_: http, ftp, tls, smb, dns, ssh 및 기타 프로토콜.<sup>[[5]](#references)</sup>
+- _layer7 프로토콜_: http, ftp, tls, smb, dns, ssh 및 기타 프로토콜.<sup>[[5]](#references)</sup>
 
-#### Source 및 Destination Addresses
+#### Source 및 Destination Address
 
-Suricata는 IP ranges, negation 및 grouped address lists를 지원합니다.<sup>[[5]](#references)</sup>
+Suricata는 IP range, negation 및 그룹화된 address list를 지원합니다.<sup>[[5]](#references)</sup>
 
 | Example                       | Meaning                                  |
 | ----------------------------- | ---------------------------------------- |
 | ! 1.1.1.1                     | 1.1.1.1을 제외한 모든 IP address             |
 | !\[1.1.1.1, 1.1.1.2]          | 1.1.1.1 및 1.1.1.2를 제외한 모든 IP address |
 | $HOME_NET                     | yaml의 HOME_NET 설정         |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET이며 HOME_NET은 아님            |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET이면서 HOME_NET이 아님            |
 | \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.5를 제외한 10.0.0.0/24          |
 
-#### Source 및 Destination Ports
+#### Source 및 Destination Port
 
-Suricata는 port ranges, negation 및 lists of ports를 지원합니다.<sup>[[5]](#references)</sup>
+Suricata는 port range, negation 및 port list를 지원합니다.<sup>[[5]](#references)</sup>
 
 | Example         | Meaning                                |
 | --------------- | -------------------------------------- |
@@ -170,18 +172,18 @@ Suricata는 port ranges, negation 및 lists of ports를 지원합니다.<sup>[[5
 | \[1024: ]       | 1024부터 가장 높은 port-number까지 |
 | !80             | 80을 제외한 모든 port                      |
 | \[80:100,!99]   | 80부터 100까지의 range에서 99는 제외 |
-| \[1:80,!\[2,4]] | 1-80 range에서 port 2 및 4를 제외  |
+| \[1:80,!\[2,4]] | 1-80의 range에서 port 2 및 4는 제외  |
 
 #### Direction
 
-Suricata rules는 평가할 communication direction을 지정할 수 있습니다.<sup>[[5]](#references)</sup>
+Suricata rule은 평가할 communication direction을 지정할 수 있습니다.<sup>[[5]](#references)</sup>
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### 키워드
 
-아래 예제에서는 metadata, IP, ICMP, payload 및 application-layer 옵션을 포함한 Suricata의 rule keywords를 사용합니다. 공식 rule documentation에는 이러한 family와 해당 syntax가 정리되어 있습니다.<sup>[[6]](#references)[[9]](#references)</sup>
+아래 예제에서는 metadata, IP, ICMP, payload 및 application-layer options를 비롯한 Suricata의 규칙 키워드를 사용하며, 공식 규칙 문서에는 이러한 분류와 구문이 정리되어 있습니다.<sup>[[6]](#references)[[9]](#references)</sup>
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
