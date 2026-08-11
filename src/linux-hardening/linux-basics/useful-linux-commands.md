@@ -1,8 +1,6 @@
-# Comandos Linux Úteis
+# Comandos Linux úteis
 
-{{#include ../../banners/hacktricks-training.md}}
-
-## Bash Comum
+## Bash comum
 ```bash
 #Exfiltration using Base64
 base64 -w 0 file
@@ -301,9 +299,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## Telemetria eBPF e Caça a Rootkits
+## Telemetria de eBPF e busca por Rootkits
 
-Rootkits modernos (TripleCross, variantes do BPFDoor etc.) persistem cada vez mais como programas eBPF ocultos. Estabeleça uma baseline da sua frota com `bpftool`/`eBPFmon` para identificar programas não assinados, hooks inesperados de cgroup ou conteúdo malicioso em maps antes de desanexá-los.<sup>[[1]](#references)</sup>
+Pesquisas sobre Rootkits demonstraram tanto implantes baseados em eBPF, como o TripleCross, quanto backdoors baseados em BPF, como variantes do BPFDoor. Trate programas, attachments ou maps BPF inesperados como pistas para investigação, e não como prova de comprometimento.<sup>[[3]](#references)[[4]](#references)</sup> Estabeleça uma baseline dos sistemas autorizados com `bpftool` ou `eBPFmon`: o `bpftool` pode enumerar programas e maps, despejar instruções de programas e consultar recursos compatíveis, enquanto o eBPFmon apresenta essas informações em uma TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -321,11 +319,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Correlacione a saída do bpftool com os attachments esperados de NIC/cgroup; um programa `xdp` ou `kprobe` inesperado, pertencente a um PID não aprovado, é um forte indicador de um payload eBPF injetado.
+Correlacione a saída do `bpftool` com os anexos esperados de NIC/cgroup; um programa `xdp` ou `kprobe` repentino pertencente a um PID não aprovado é uma pista de investigação, não uma prova conclusiva de um payload injetado.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ## Triagem de Incidentes do Journald
 
-O systemd-journald mantém metadados estruturados, permitindo fazer pivôs por boot, severidade, unidade ou UID sem acessar `/var/log/*`. Combine filtros com timestamps relativos para isolar rapidamente as janelas de ataque ou comprovar a adulteração dos logs.<sup>[[2]](#references)</sup>
+`journalctl` lê entradas estruturadas de `systemd-journald` e oferece suporte à filtragem por boot, prioridade, unidade, UID e tempo relativo. Combine esses filtros com a saída JSON quando precisar preservar ou comparar evidências; a filtragem, por si só, não prova que os logs não foram adulterados.<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -336,11 +334,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Adicione `--grep 'Invalid user' --case-sensitive` ou `-k` (somente o kernel ring buffer) quando precisar de filtros mais precisos e lembre-se de que os seletores `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` e `_TRANSPORT` são combinados para investigações multi-tenant.
+Adicione `--grep 'Invalid user' --case-sensitive` ou `-k` (apenas mensagens do kernel) quando precisar de filtros mais restritos e lembre-se de que os seletores `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` e `_TRANSPORT` podem ser combinados para buscas direcionadas.<sup>[[7]](#references)</sup>
 
-## Referências
+## References
 
-- [1] [eBPFmon: A new tool for exploring and interacting with eBPF applications](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [2] [How to use the journalctl command to view Linux logs](https://www.hostinger.com/tutorials/journalctl-command)
-
+- [1] [eBPFmon: Uma nova ferramenta para explorar e interagir com aplicações eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Como usar o comando journalctl para visualizar logs do Linux](https://www.hostinger.com/tutorials/journalctl-command)
+- [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
+- [4] [Rapid7 Labs: BPFdoor em redes de telecomunicações](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [5] [Documentação do BPF — Documentação do kernel Linux](https://docs.kernel.org/bpf/)
+- [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
+- [7] [journalctl(1) — Página de manual do Linux](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}

