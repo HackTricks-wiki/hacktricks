@@ -2,57 +2,51 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-
 ## Intro
 
-For more info about how 125kHz tags work check:
-
+For background on how 125 kHz tags work, see:
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Actions
+The [low-frequency RFID introduction](../pentesting-rfid.md#low-frequency-rfid-tags-125khz) explains the common tag families and their data formats.
 
-For more info about these types of tags [**read this intro**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+## Actions
 
 ### Read
 
-Tries to **read** the card info. Then it can **emulate** them.<sup>[[1]](#references)</sup>
+Use **Read** to capture the tag data. After a successful read, Flipper Zero can emulate the saved tag.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Note that some intercoms try to protect themselves from key duplication by sending a write command prior to reading. If the write succeeds, that tag is considered fake. When Flipper emulates RFID there is no way for the reader to distinguish it from the original one, so no such problems occur.
+> Some intercom readers attempt to detect writable duplicate tags by issuing a write command before reading. A Flipper Zero emulation does not expose writable tag memory in the same way.<sup>[[1]](#references)</sup>
 
-### Add Manually
+### Add manually
 
-You can create **fake cards in Flipper Zero indicating the data** you manually and then emulate it.
+You can manually enter tag data in Flipper Zero, save it, and then emulate it.<sup>[[1]](#references)</sup>
 
 #### IDs on cards
 
-Some times, when you get a card you will find the ID (or part) of it written in the card visible.
+Sometimes a card has all or part of its ID printed on its exterior.
 
 - **EM Marin**
 
-For example in this EM-Marin card in the physical card is possible to **read the last 3 of 5 bytes in clear**.\
-The other 2 can be brute-forced if you cannot read them from the card.<sup>[[1]](#references)</sup>
+For example, the pictured EM-Marin card exposes the last three of its five ID bytes. If the tag cannot be read, the two missing bytes may be brute-forced.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Same happens in this HID card where only 2 out of 3 bytes can be found printed in the card
+Similarly, the pictured HID card prints only two of the three ID bytes.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
 ### Emulate/Write
 
-After **copying** a card or **entering** the ID **manually** it's possible to **emulate** it with Flipper Zero or **write** it in a real card.<sup>[[1]](#references)</sup>
+After reading a tag or entering its ID manually, Flipper Zero can emulate the saved credential. For supported writable tags, it can also write the saved data to a compatible card.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Diving into RFID Protocols with Flipper Zero](https://blog.flipperzero.one/rfid/)
-
+- [1] [Flipper Zero: Diving into RFID Protocols](https://blog.flipperzero.one/rfid/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-

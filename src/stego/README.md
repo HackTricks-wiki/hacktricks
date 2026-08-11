@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-This section focuses on **finding and extracting hidden data** from files (images/audio/video/documents/archives) and from text-based steganography.
+This section focuses on **finding and extracting hidden data** from images, audio, video, documents, archives, and text. Steganography conceals the existence of a communication by embedding data inside other data.<sup>[[1]](#references)</sup>
 
 If you're here for cryptographic attacks, go to the **Crypto** section.
 
@@ -52,10 +52,14 @@ documents/README.md
 
 ### Malware and delivery-style steganography
 
-Payload delivery frequently uses valid-looking files (e.g., GIF/PNG) that carry marker-delimited text payloads, rather than pixel-level hiding.
+Payload delivery can use valid-looking files, such as GIF or PNG images, that carry marker-delimited text payloads rather than hiding data in pixels.
 
 {{#ref}}
 malware-and-network/README.md
 {{#endref}}
+
+## References
+
+- [1] [NIST CSRC Glossary - Steganography](https://csrc.nist.gov/glossary/term/steganography)
 
 {{#include ../banners/hacktricks-training.md}}
