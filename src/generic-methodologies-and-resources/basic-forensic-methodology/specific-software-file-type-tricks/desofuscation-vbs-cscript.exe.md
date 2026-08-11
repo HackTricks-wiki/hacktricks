@@ -1,10 +1,12 @@
 # Técnicas de desofuscación para archivos VBS
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 Algunas cosas que pueden ser útiles para depurar/desofuscar un archivo VBS malicioso:
 
 ## echo
 
-`WScript.Echo` se puede utilizar para mostrar información de diagnóstico; con `cscript.exe`, se escribe en la consola.<sup>[[1]](#references)</sup>
+`WScript.Echo` se puede usar para mostrar resultados de diagnóstico; con `cscript.exe`, se escriben en la consola.<sup>[[1]](#references)</sup>
 ```bash
 Wscript.Echo "Like this?"
 ```
@@ -52,7 +54,7 @@ End Function
 - [1] [Ejecución de una consulta de Visual Basic Scripting Edition (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/indexsrv/running-a-visual-basic-scripting-edition-query)
 - [2] [Trabajo con lenguajes de scripting (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525153%28v%3Dvs.90%29)
 - [3] [cscript (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cscript)
-- [4] [Lectura y escritura de archivos binarios en VBScript (Stack Overflow)](https://stackoverflow.com/questions/6060529/read-and-write-binary-file-in-vbscript/6087783)
+- [4] [Leer y escribir archivos binarios en VBScript (Stack Overflow)](https://stackoverflow.com/questions/6060529/read-and-write-binary-file-in-vbscript/6087783)
 - [5] [Método CreateTextFile (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/createtextfile-method)
 - [6] [Objeto TextStream (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/textstream-object)
 {{#include ../../../banners/hacktricks-training.md}}

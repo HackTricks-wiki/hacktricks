@@ -1,6 +1,8 @@
 # Solicitudes web
 
-## Requests de Python
+{{#include ../../banners/hacktricks-training.md}}
+
+## Python Requests
 
 Estos ejemplos utilizan los argumentos de solicitud documentados de Requests, las propiedades de respuesta, las tuplas de archivos multipart y las sesiones.<sup>[[1]](#references)</sup> Los ejemplos con `verify=False` deshabilitan la verificación de certificados TLS y deben limitarse a pruebas controladas.<sup>[[1]](#references)</sup>
 ```python
@@ -76,7 +78,7 @@ return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 ## Comando de Python para explotar un RCE
 
-El bucle de comandos subclasifica `Cmd` de Python; su método `default` gestiona los prefijos de comandos no reconocidos, `cmdloop` procesa las líneas de entrada y `re.DOTALL` permite que el patrón de extracción abarque varias líneas.<sup>[[2]](#references)[[3]](#references)</sup>
+El bucle de comandos hereda de `Cmd` de Python; su método `default` gestiona los prefijos de comando no reconocidos, `cmdloop` distribuye las líneas de entrada y `re.DOTALL` permite que el patrón de extracción abarque varias líneas.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re

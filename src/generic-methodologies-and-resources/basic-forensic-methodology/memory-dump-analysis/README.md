@@ -1,8 +1,10 @@
-# Análisis de volcado de memoria
+# Análisis de volcados de memoria
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## Inicio
 
-Comienza **buscando** **malware** dentro del pcap. Utiliza las **herramientas** mencionadas en [**Análisis de malware**](../malware-analysis.md).
+Empieza **buscando** **malware** dentro del pcap. Usa las **herramientas** mencionadas en [**Malware Analysis**](../malware-analysis.md).
 
 ## [Volatility](volatility-cheatsheet.md)
 
@@ -10,25 +12,25 @@ Comienza **buscando** **malware** dentro del pcap. Utiliza las **herramientas** 
 
 [**Encuentra aquí una cheatsheet**](volatility-cheatsheet.md)
 
-## Informe de fallo de minidump
+## Informe de fallo de minivolcado
 
-Cuando el volcado es pequeño (solo algunos KB, quizá unos pocos MB), puede tratarse de un informe de fallo de minidump en lugar de un volcado de memoria completo.<sup>[[3]](#references)</sup>
+Cuando el volcado es pequeño (solo algunos KB, quizá unos pocos MB), puede tratarse de un informe de fallo de minivolcado en lugar de un volcado completo de memoria.<sup>[[3]](#references)</sup>
 
-![Volatility - Informe de fallo de minidump: un archivo de volcado pequeño identificado como un informe de fallo de Mini DuMP](<../../../images/image (532).png>)
+![Volatility - Informe de fallo de minivolcado: Un archivo de volcado pequeño identificado como un informe de fallo Mini DuMP](<../../../images/image (532).png>)
 
-Si tienes Visual Studio instalado, puedes abrir este archivo para ver información básica, como el nombre del proceso, la arquitectura, los detalles de la excepción y los módulos cargados:<sup>[[4]](#references)</sup>
+Si tienes Visual Studio instalado, puedes abrir este archivo para ver información básica como el nombre del proceso, la arquitectura, los detalles de la excepción y los módulos cargados:<sup>[[4]](#references)</sup>
 
-![Volatility - Informe de fallo de minidump: si tienes Visual Studio instalado, puedes abrir este archivo y obtener información básica como el nombre del proceso, la arquitectura, la información de la excepción y...](<../../../images/image (263).png>)
+![Volatility - Informe de fallo de minivolcado: Si tienes Visual Studio instalado, puedes abrir este archivo y obtener información básica como el nombre del proceso, la arquitectura, la información de la excepción y...](<../../../images/image (263).png>)
 
 También puedes inspeccionar la excepción y ver el desensamblado del módulo.<sup>[[4]](#references)</sup>
 
-![Panel de acciones de Visual Studio para minidump, con opciones para depurar de forma nativa y establecer las rutas de símbolos](<../../../images/image (142).png>)
+![Panel de acciones de Visual Studio para minivolcados con opciones para depurar de forma nativa y establecer rutas de símbolos](<../../../images/image (142).png>)
 
-![Desensamblado de Visual Studio de instrucciones de la excepción del minidump](<../../../images/image (610).png>)
+![Desensamblado de Visual Studio de instrucciones de la excepción del minivolcado](<../../../images/image (610).png>)
 
 En cualquier caso, Visual Studio no es la mejor herramienta para realizar un análisis profundo del volcado.
 
-Deberías **abrirlo** con **IDA** o **Radare** para inspeccionarlo en **profundidad**.
+Debes **abrirlo** con **IDA** o **Radare** para inspeccionarlo en **profundidad**.
 
 ## References
 

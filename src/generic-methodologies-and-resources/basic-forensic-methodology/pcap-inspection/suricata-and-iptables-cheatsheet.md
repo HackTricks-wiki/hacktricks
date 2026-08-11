@@ -1,16 +1,18 @@
-# Suricata e Iptables: hoja de trucos
+# Chuleta de Suricata e Iptables
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## Iptables
 
-### Cadenas
+### Chains
 
-En iptables, cada cadena es una lista secuencial de reglas de coincidencia de paquetes. La tabla `filter` predeterminada tiene las cadenas integradas `INPUT`, `FORWARD` y `OUTPUT`; otras tablas, como `nat`, pueden estar disponibles según la configuración del kernel y los módulos cargados.<sup>[[1]](#references)</sup>
+En iptables, cada chain es una lista secuencial de reglas que hacen coincidir paquetes. La tabla `filter` predeterminada tiene las chains integradas `INPUT`, `FORWARD` y `OUTPUT`; otras tablas, como `nat`, pueden estar disponibles según la configuración del kernel y los módulos cargados.<sup>[[1]](#references)</sup>
 
-- **Cadena Input**: Se utiliza para gestionar el comportamiento de las conexiones entrantes.
-- **Cadena Forward**: Se emplea para gestionar las conexiones entrantes que no están destinadas al sistema local. Esto es habitual en dispositivos que actúan como routers, donde los datos recibidos deben reenviarse a otro destino. Esta cadena es relevante principalmente cuando el sistema participa en actividades de routing, NATing o similares.
-- **Cadena Output**: Se dedica a regular las conexiones salientes.
+- **Input Chain**: Se utiliza para gestionar el comportamiento de las conexiones entrantes.
+- **Forward Chain**: Se utiliza para gestionar las conexiones entrantes que no están destinadas al sistema local. Esto es habitual en dispositivos que actúan como routers, donde los datos recibidos deben reenviarse a otro destino. Esta chain es relevante principalmente cuando el sistema participa en tareas de routing, NATing o actividades similares.
+- **Output Chain**: Está dedicada a regular las conexiones salientes.
 
-Estas cadenas garantizan el procesamiento ordenado del tráfico de red, permitiendo especificar reglas detalladas que gobiernan el flujo de datos hacia dentro, a través y hacia fuera de un sistema.
+Estas chains garantizan el procesamiento ordenado del tráfico de red y permiten especificar reglas detalladas que controlan el flujo de datos hacia un sistema, a través de él y desde él.
 
 Los ejemplos de coincidencia de cadenas utilizan la coincidencia estándar `string`; la coincidencia distingue entre mayúsculas y minúsculas a menos que se proporcione `--icase`, y `--algo` selecciona la estrategia de búsqueda BM o KMP.<sup>[[2]](#references)</sup>
 ```bash
@@ -53,7 +55,7 @@ iptables-restore < /etc/sysconfig/iptables
 
 ### Instalación y configuración
 
-Los comandos de paquetes que aparecen a continuación dependen de la distribución y la versión; la guía oficial de instalación documenta el PPA de Ubuntu, los backports de Debian, los paquetes RPM y la gestión del servicio systemd.<sup>[[3]](#references)</sup>
+Los comandos de paquetes dependen de la distribución y la versión; la guía oficial de instalación documenta el PPA de Ubuntu, los backports de Debian, los paquetes RPM y la gestión del servicio systemd.<sup>[[3]](#references)</sup>
 ```bash
 # Package installation details vary by distribution and release; see References.
 # Ubuntu
@@ -116,15 +118,15 @@ Type=simple
 
 systemctl daemon-reload
 ```
-La secuencia de `suricata-update` sigue el flujo de trabajo documentado de Suricata para obtener, enumerar, habilitar y cargar fuentes de reglas.<sup>[[4]](#references)</sup> El comando `suricatasc` anterior es un método documentado de recarga de reglas mediante un socket Unix sin bloqueo.<sup>[[8]](#references)</sup> Las reglas de NFQUEUE envían el tráfico local de entrada/salida a Suricata, mientras que `-q 0` selecciona la cola 0 para el procesamiento inline.<sup>[[7]](#references)</sup>
+La secuencia de `suricata-update` sigue el flujo de trabajo documentado de Suricata para obtener, listar, habilitar y cargar fuentes de reglas.<sup>[[4]](#references)</sup> El comando `suricatasc` anterior es un método documentado de recarga de reglas mediante un Unix socket sin bloqueo.<sup>[[8]](#references)</sup> Las reglas de NFQUEUE envían el tráfico local de entrada/salida a Suricata, mientras que `-q 0` selecciona la cola 0 para el procesamiento inline.<sup>[[7]](#references)</sup>
 
 ### Definiciones de reglas
 
 Una regla/firma de Suricata tiene tres partes.<sup>[[5]](#references)</sup>
 
-- La **acción** especifica qué sucede cuando la firma coincide.
+- La **acción** especifica qué ocurre cuando la firma coincide.
 - El **encabezado** selecciona el protocolo, las direcciones IP, los puertos y la dirección.
-- Las **opciones de la regla** definen los detalles específicos de la coincidencia.
+- Las **opciones de regla** definen los detalles específicos de la coincidencia.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
@@ -133,43 +135,43 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 - alert - generar una alerta
 - pass - detener la inspección adicional del paquete
 - **drop** - descartar el paquete y generar una alerta
-- **reject** - enviar un error RST/ICMP unreachable al emisor del paquete coincidente.
+- **reject** - enviar un error RST/ICMP unreachable al remitente del paquete coincidente.
 - rejectsrc - igual que _reject_
 - rejectdst - enviar un paquete de error RST/ICMP al receptor del paquete coincidente.
-- rejectboth - enviar paquetes de error RST/ICMP a ambos lados de la conversación.
+- rejectboth - enviar paquetes de error RST/ICMP a ambos lados de la comunicación.
 
 #### **Protocolos**
 
-- tcp (para tcp-traffic)
+- tcp (para tráfico tcp)
 - udp
 - icmp
 - ip (ip significa ‘all’ o ‘any’)
-- _protocolos layer7_: http, ftp, tls, smb, dns, ssh y otros.<sup>[[5]](#references)</sup>
+- _protocolos de layer7_: http, ftp, tls, smb, dns, ssh y otros.<sup>[[5]](#references)</sup>
 
 #### Direcciones de origen y destino
 
 Suricata admite rangos de IP, negación y listas de direcciones agrupadas.<sup>[[5]](#references)</sup>
 
-| Ejemplo                       | Significado                                  |
-| ----------------------------- | -------------------------------------------- |
-| ! 1.1.1.1                     | Todas las direcciones IP excepto 1.1.1.1    |
-| !\[1.1.1.1, 1.1.1.2]          | Todas las direcciones IP excepto 1.1.1.1 y 1.1.1.2 |
-| $HOME_NET                     | Tu configuración de HOME_NET en yaml         |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET y no HOME_NET                   |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 excepto 10.0.0.5                 |
+| Example                       | Meaning                                  |
+| ----------------------------- | ---------------------------------------- |
+| ! 1.1.1.1                     | Cada dirección IP excepto 1.1.1.1        |
+| !\[1.1.1.1, 1.1.1.2]          | Cada dirección IP excepto 1.1.1.1 y 1.1.1.2 |
+| $HOME_NET                     | Tu configuración de HOME_NET en yaml     |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET y no HOME_NET               |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 excepto 10.0.0.5             |
 
 #### Puertos de origen y destino
 
 Suricata admite rangos de puertos, negación y listas de puertos.<sup>[[5]](#references)</sup>
 
-| Ejemplo         | Significado                             |
-| --------------- | --------------------------------------- |
-| any             | cualquier dirección                    |
-| \[80, 81, 82]   | puertos 80, 81 y 82                     |
-| \[80: 82]       | Rango de 80 a 82                        |
+| Example         | Meaning                                |
+| --------------- | -------------------------------------- |
+| any             | cualquier dirección                   |
+| \[80, 81, 82]   | puertos 80, 81 y 82                    |
+| \[80: 82]       | Rango de 80 a 82                       |
 | \[1024: ]       | De 1024 hasta el número de puerto más alto |
-| !80             | Todos los puertos excepto el 80         |
-| \[80:100,!99]   | Rango de 80 a 100, excepto el 99        |
+| !80             | Todos los puertos excepto el 80        |
+| \[80:100,!99]   | Rango de 80 a 100, excepto el 99       |
 | \[1:80,!\[2,4]] | Rango de 1 a 80, excepto los puertos 2 y 4 |
 
 #### Dirección
@@ -181,7 +183,7 @@ source <> destination  (both directions)
 ```
 #### Palabras clave
 
-Los ejemplos siguientes utilizan las palabras clave de las reglas de Suricata, incluidos los metadatos y las opciones de IP, ICMP, payload y de la capa de aplicación; la documentación oficial de las reglas cataloga estas familias y su sintaxis.<sup>[[6]](#references)[[9]](#references)</sup>
+Los ejemplos siguientes utilizan las palabras clave de reglas de Suricata, incluidos metadatos y opciones de IP, ICMP, payload y de la capa de aplicación; la documentación oficial de reglas cataloga estas familias y su sintaxis.<sup>[[6]](#references)[[9]](#references)</sup>
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -229,9 +231,9 @@ drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 - [2] [iptables-extensions(8) — página del manual de Linux](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
 - [3] [3. Instalación — documentación de Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/install.html)
 - [4] [9.1. Gestión de reglas con Suricata-Update — documentación de Suricata 8.0.1](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
-- [5] [8.1. Formato de las reglas — documentación de Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
-- [6] [8.7. Palabras clave de Payload — documentación de Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
+- [5] [8.1. Formato de reglas — documentación de Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
+- [6] [8.7. Palabras clave de payload — documentación de Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
 - [7] [15. Configuración de IPS/inline para Linux — documentación de Suricata 7.0.15](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
-- [8] [9.3. Recargas de reglas — documentación de Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
+- [8] [9.3. Recarga de reglas — documentación de Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
 - [9] [8. Reglas de Suricata — documentación de Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
 {{#include ../../../banners/hacktricks-training.md}}

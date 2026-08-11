@@ -1,11 +1,13 @@
 # Inspección de Pcap
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 > [!TIP]
 > **PCAP** y **PCAPNG** son formatos de captura distintos; **PCAPNG es un sucesor flexible y extensible de PCAP**, pero la compatibilidad varía según las herramientas. Si una herramienta no puede leer PCAPNG, conviértelo a PCAP con Wireshark u otra herramienta compatible.<sup>[[1]](#references)[[18]](#references)</sup>
 
 ## Herramientas online para pcaps
 
-- Si el encabezado de tu pcap está **dañado**, deberías intentar **repararlo** usando: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php).<sup>[[2]](#references)</sup>
+- Si la cabecera de tu pcap está **dañada**, deberías intentar **repararla** usando: [http://f00l.de/hacking/**pcapfix.php**](http://f00l.de/hacking/pcapfix.php).<sup>[[2]](#references)</sup>
 - Extrae **información** y busca **malware** dentro de un pcap en [**PacketTotal**](https://packettotal.com).<sup>[[19]](#references)</sup>
 - Busca **actividad maliciosa** usando [**www.virustotal.com**](https://www.virustotal.com) y [**www.hybrid-analysis.com**](https://www.hybrid-analysis.com).<sup>[[3]](#references)[[4]](#references)</sup>
 - **Análisis completo de pcap desde el navegador en** [**https://apackets.com/**](https://apackets.com/).<sup>[[5]](#references)</sup>
@@ -17,7 +19,7 @@ Las siguientes herramientas son útiles para extraer estadísticas, archivos, et
 ### Wireshark
 
 > [!TIP]
-> **Si vas a analizar un PCAP, básicamente debes saber cómo usar Wireshark**
+> **Si vas a analizar un PCAP, básicamente debes saber utilizar Wireshark**
 
 Puedes encontrar algunos trucos de Wireshark en:
 
@@ -32,9 +34,9 @@ Análisis de pcap desde el navegador.<sup>[[5]](#references)</sup>
 
 ### Xplico Framework
 
-[**Xplico**](https://github.com/xplico/xplico) es una herramienta de network-forensics similar a Unix que decodifica archivos PCAP y puede extraer correos electrónicos mediante POP/IMAP/SMTP, contenido HTTP, llamadas VoIP SIP, datos FTP y datos TFTP.<sup>[[6]](#references)</sup>
+[**Xplico**](https://github.com/xplico/xplico) es una herramienta de network-forensics para sistemas tipo Unix que decodifica archivos PCAP y puede extraer correos electrónicos mediante POP/IMAP/SMTP, contenidos HTTP, llamadas SIP VoIP, datos FTP y datos TFTP.<sup>[[6]](#references)</sup>
 
-**Instalar**
+**Instalación**
 ```bash
 sudo bash -c 'echo "deb http://repo.xplico.org/ $(lsb_release -s -c) main" /etc/apt/sources.list'
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 791C25CE
@@ -48,16 +50,16 @@ sudo apt-get install xplico
 ```
 Accede a _**127.0.0.1:9876**_ con las credenciales _**xplico:xplico**_
 
-A continuación, crea un **nuevo caso**, crea una **nueva sesión** dentro del caso y **carga** el archivo **pcap**.
+Después, crea un **new case**, crea una **new session** dentro del caso y **upload the pcap** file.
 
 ### NetworkMiner
 
-Al igual que Xplico, [**NetworkMiner**](https://www.netresec.com/?page=NetworkMiner) analiza el tráfico PCAP para extraer artefactos como archivos, imágenes, correos electrónicos y contraseñas, y agrega información sobre los hosts; su edición gratuita está destinada principalmente a Windows.<sup>[[7]](#references)</sup>
+Al igual que Xplico, [**NetworkMiner**](https://www.netresec.com/?page=NetworkMiner) analiza el tráfico PCAP para extraer artefactos como archivos, imágenes, correos electrónicos y contraseñas, y agrega información de los hosts; su edición gratuita está destinada principalmente a Windows.<sup>[[7]](#references)</sup>
 
 ### NetWitness Investigator
 
-Puedes descargar [**NetWitness Investigator desde aquí**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(Funciona en Windows)**.\
-El proveedor describe el freeware como una herramienta interactiva de análisis de sesiones de red para la clasificación inicial de actividad maliciosa y actualmente ofrece el acceso mediante un formulario de contacto.<sup>[[8]](#references)</sup>
+Puedes descargar [**NetWitness Investigator from here**](https://www.rsa.com/en-us/contact-us/netwitness-investigator-freeware) **(It works in Windows)**.\
+El proveedor describe el freeware como una herramienta interactiva de análisis de sesiones de red para la clasificación de actividades maliciosas y actualmente ofrece acceso mediante un formulario de contacto.<sup>[[8]](#references)</sup>
 
 ### [BruteShark](https://github.com/odedshimon/BruteShark)
 
@@ -65,19 +67,19 @@ Los módulos documentados de BruteShark pueden analizar credenciales de HTTP, FT
 
 ### Capinfos
 
-El `capinfos` de Wireshark imprime de forma predeterminada un informe detallado para un archivo de captura.<sup>[[10]](#references)</sup>
+El `capinfos` de Wireshark muestra de forma predeterminada un informe detallado de un archivo de captura.<sup>[[10]](#references)</sup>
 ```
 capinfos capture.pcap
 ```
 ### Ngrep
 
-`ngrep` busca cargas útiles de paquetes mediante expresiones regulares y acepta filtros BPF; `-I` lee un archivo de captura compatible con pcap.<sup>[[11]](#references)</sup> El ejemplo combina esas funciones para buscar una solicitud HTTP en el tráfico seleccionado.
+`ngrep` busca cargas útiles de paquetes con expresiones regulares y acepta filtros BPF; `-I` lee un archivo de captura compatible con pcap.<sup>[[11]](#references)</sup> El ejemplo combina esas funciones para buscar una solicitud HTTP en el tráfico seleccionado.
 ```bash
 ngrep -I packets.pcap "^GET" "port 80 and tcp and host 192.168 and dst host 192.168 and src host 192.168"
 ```
 ### Carving
 
-Usar técnicas comunes de carving puede ser útil para extraer archivos e información del pcap:
+El uso de técnicas comunes de carving puede ser útil para extraer archivos e información del pcap:
 
 
 {{#ref}}
@@ -92,7 +94,7 @@ Puedes usar [PCredz](https://github.com/lgandx/PCredz) para analizar credenciale
 
 ### Suricata
 
-**Instalar y configurar**
+**Instalación y configuración**
 ```
 apt-get install suricata
 apt-get install oinkmaster
@@ -101,17 +103,17 @@ oinkmaster -C /etc/oinkmaster.conf -o /etc/suricata/rules
 ```
 **Comprobar pcap**
 
-La opción `-r` de Suricata reproduce un PCAP en modo offline; en este ejemplo, `-k none` deshabilita las comprobaciones de checksum, `-v` aumenta el registro y `-l` selecciona el directorio de logs.<sup>[[13]](#references)</sup>
+La opción `-r` de Suricata reproduce un PCAP en modo offline; en este ejemplo, `-k none` desactiva las comprobaciones de checksum, `-v` aumenta el registro y `-l` selecciona el directorio de logs.<sup>[[13]](#references)</sup>
 ```
 suricata -r packets.pcap -c /etc/suricata/suricata.yaml -k none -v -l log
 ```
 ### YaraPcap
 
-[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) procesa streams HTTP de archivos PCAP, descomprime opcionalmente streams gzip, analiza los archivos extraídos con YARA, escribe `report.txt` y puede guardar los archivos coincidentes en un directorio.<sup>[[14]](#references)</sup>
+[**YaraPCAP**](https://github.com/kevthehermit/YaraPcap) procesa streams HTTP de archivos PCAP, descomprime opcionalmente los streams gzip, analiza los archivos extraídos con YARA, escribe `report.txt` y puede guardar los archivos coincidentes en un directorio.<sup>[[14]](#references)</sup>
 
 ### Análisis de Malware
 
-Comprueba si puedes encontrar alguna huella de un malware conocido:
+Comprueba si puedes encontrar alguna huella digital de un malware conocido:
 
 
 {{#ref}}
@@ -120,13 +122,13 @@ Comprueba si puedes encontrar alguna huella de un malware conocido:
 
 ## Zeek
 
-> [Zeek](https://docs.zeek.org/en/master/about.html) es un analizador pasivo y de código abierto del tráfico de red, utilizado como Network Security Monitor (NSM) y para análisis más amplios del tráfico, incluyendo la medición del rendimiento y la resolución de problemas.<sup>[[15]](#references)</sup>
+> [Zeek](https://docs.zeek.org/en/master/about.html) es un analizador pasivo y open-source del tráfico de red, utilizado como Network Security Monitor (NSM) y para un análisis más amplio del tráfico, incluida la medición del rendimiento y la resolución de problemas.<sup>[[15]](#references)</sup>
 
-Zeek genera logs estructurados en lugar de archivos PCAP, por lo que debes usar herramientas de análisis de logs como `zeek-cut` para inspeccionar esos logs.<sup>[[15]](#references)[[16]](#references)</sup>
+Zeek genera logs estructurados en lugar de archivos PCAP, por lo que debes usar herramientas de análisis de logs como `zeek-cut` para inspeccionarlos.<sup>[[15]](#references)[[16]](#references)</sup>
 
-### Información de conexiones
+### Información de las conexiones
 
-Los ejemplos siguientes utilizan `zeek-cut` para seleccionar campos con nombre de logs TSV y, después, herramientas estándar de Unix para clasificar y contar conexiones; RITA también puede ingerir logs de Zeek para analizar conexiones largas, beaconing y túneles DNS.<sup>[[16]](#references)[[17]](#references)</sup>
+Los ejemplos siguientes utilizan `zeek-cut` para seleccionar campos con nombre de logs TSV y, posteriormente, herramientas estándar de Unix para clasificar y contar conexiones; RITA también puede ingerir logs de Zeek para analizar conexiones de larga duración, beaconing y DNS-tunneling.<sup>[[16]](#references)[[17]](#references)</sup>
 ```bash
 #Get info about longest connections (add "grep udp" to see only udp traffic)
 #The longest connection might be of malware (constant reverse shell?)
@@ -214,7 +216,7 @@ usb-keystrokes.md
 
 - [1] [Guía del usuario de Wireshark: abrir archivos de captura](https://www.wireshark.org/docs/wsug_html_chunked/ChIOOpenSection.html)
 - [2] [pcapfix - servicio online de reparación de pcap / pcapng](https://f00l.de/hacking/pcapfix.php)
-- [3] [Descripción general de VirusTotal API v3](https://docs.virustotal.com/reference/overview)
+- [3] [Descripción general de la API v3 de VirusTotal](https://docs.virustotal.com/reference/overview)
 - [4] [Hybrid Analysis](https://www.hybrid-analysis.com/)
 - [5] [Analizador de PCAP de A-Packets](https://apackets.com/)
 - [6] [Xplico - Acerca de](https://www.xplico.org/about)
@@ -227,7 +229,7 @@ usb-keystrokes.md
 - [13] [Opciones de línea de comandos de Suricata](https://docs.suricata.io/en/latest/command-line-options.html)
 - [14] [Repositorio de YaraPcap](https://github.com/kevthehermit/YaraPcap)
 - [15] [¿Qué es Zeek?](https://docs.zeek.org/en/master/about/what.html)
-- [16] [Tutorial de registros de Zeek](https://docs.zeek.org/en/master/tutorial/logs.html)
+- [16] [Tutorial sobre los logs de Zeek](https://docs.zeek.org/en/master/tutorial/logs.html)
 - [17] [Repositorio de RITA](https://github.com/activecm/rita)
 - [18] [Documentación de `editcap` de Wireshark](https://www.wireshark.org/docs/wsug_html_chunked/AppToolseditcap.html)
 - [19] [Anuncio de la API de carga de PacketTotal](https://medium.com/packettotal/the-packettotal-upload-api-26f48e53f0ee)
