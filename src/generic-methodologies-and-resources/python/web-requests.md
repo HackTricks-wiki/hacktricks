@@ -1,8 +1,10 @@
 # Webリクエスト
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Python Requests
 
-これらの例では、Requests にドキュメント化されているリクエスト引数、レスポンスプロパティ、multipart file tuples、sessions を使用します。<sup>[[1]](#references)</sup> `verify=False` の例では TLS 証明書の検証を無効化しているため、管理されたテスト環境に限定して使用してください。<sup>[[1]](#references)</sup>
+これらの例では、Requestsでdocumentedされているrequest arguments、response properties、multipart file tuples、sessionsを使用します。<sup>[[1]](#references)</sup> `verify=False`の例ではTLS certificate verificationを無効化しているため、controlled testingに限定してください。<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -74,9 +76,9 @@ return resp.json()
 def get_random_string(guid, path):
 return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
-## RCEをexploitするPython cmd
+## Python cmd to exploit an RCE
 
-このcommand loopはPythonの`Cmd`をsubclass化しています。`default` methodは認識されないcommand prefixを処理し、`cmdloop`はinput lineをdispatchします。また、`re.DOTALL`によりextraction patternが改行をまたいで適用されます。<sup>[[2]](#references)[[3]](#references)</sup>
+コマンドループは Python の `Cmd` をサブクラス化しています。`default` メソッドは認識されないコマンドプレフィックスを処理し、`cmdloop` は入力行をディスパッチします。また、`re.DOTALL` により抽出パターンが改行をまたいでマッチできます。<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -105,7 +107,7 @@ term.cmdloop()
 ```
 ## References
 
-- [1] [Requests Developer Interface](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — 行指向のコマンドインタープリターのサポート](https://docs.python.org/3/library/cmd.html)
+- [1] [Requests 開発者インターフェース](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — 行指向コマンドインタープリターのサポート](https://docs.python.org/3/library/cmd.html)
 - [3] [Python `re` — 正規表現操作](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

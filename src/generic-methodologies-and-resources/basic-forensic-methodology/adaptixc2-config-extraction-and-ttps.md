@@ -1,35 +1,37 @@
-# AdaptixC2 Configuration Extraction and TTPs
+# AdaptixC2 Configuration Extraction と TTPs
 
-AdaptixC2は、Windows x86/x64 beacon（EXE/DLL/service EXE/raw shellcode）とBOFをサポートする、モジュール式のオープンソース post-exploitation/C2 frameworkです。<sup>[[1]](#references)</sup> このページでは以下について説明します。
-- RC4でpackedされたconfigurationがどのように埋め込まれているか、およびbeaconから抽出する方法
-- HTTP/SMB/TCP listenerのnetwork/profile indicators
-- 実環境で確認されている一般的なloaderおよびpersistence TTPsと、関連するWindows technique pagesへのリンク
+{{#include ../../banners/hacktricks-training.md}}
 
-最近のupstreamリリースでは、DNS/DoH beacon listenerと、独立したGopher agent/listener familyも提供されています。そのため、特定のsampleが従来のbeacon agentを使用している場合でも、最新のAdaptix infrastructureは従来のHTTP/SMB/TCP surface以外の要素を公開している可能性があります。<sup>[[2]](#references)</sup>
+AdaptixC2 は、Windows x86/x64 beacon（EXE/DLL/service EXE/raw shellcode）と BOF をサポートする、モジュール式のオープンソース post-exploitation/C2 framework です。<sup>[[1]](#references)</sup> このページでは以下について説明します。
+- RC4-packed configuration がどのように埋め込まれているか、および beacon から抽出する方法
+- HTTP/SMB/TCP listener の network/profile indicators
+- 実環境で観測された一般的な loader と persistence TTPs、および関連する Windows technique pages への links
+
+最近の upstream releases には DNS/DoH beacon listeners と、独立した Gopher agent/listener family も含まれています。そのため、特定の sample が classic beacon agent を使用している場合でも、現代の Adaptix infrastructure は元来の HTTP/SMB/TCP surfaces 以外も公開している可能性があります。<sup>[[2]](#references)</sup>
 
 ## Beacon profiles and fields
 
-AdaptixC2は、3種類の主要なbeacon typeをサポートしています。<sup>[[1]](#references)</sup>
-- BEACON_HTTP: configurableなserver/port/SSL、method、URI、header、user-agent、custom parameter nameを備えたweb C2
+AdaptixC2 は 3 種類の主要な beacon types をサポートします。<sup>[[1]](#references)</sup>
+- BEACON_HTTP: configurable な servers/ports/SSL、method、URI、headers、user-agent、custom parameter name を備えた web C2
 - BEACON_SMB: named-pipe peer-to-peer C2（intranet）
-- BEACON_TCP: protocol startをobfuscateするためのprepended markerを任意で付加できるdirect socket
+- BEACON_TCP: protocol start を obfuscate するための prepended marker を任意で付加できる direct sockets
 
-これらは、初期のAdaptix analysisで公開されたbeacon layoutであり、現在もsample-side extractionの最も一般的な出発点です。<sup>[[1]](#references)</sup> ただし、現在のupstream buildではserver sideに`BeaconDNS`とGopher extenderも提供されているため、稼働中のすべてのAdaptix deploymentがHTTP/SMB/TCP infrastructureのみを公開しているとは限りません。<sup>[[2]](#references)</sup>
+これらは初期の Adaptix analyses で公開された beacon layouts であり、現在も sample-side extraction の最も一般的な出発点です。<sup>[[1]](#references)</sup> ただし、現在の upstream builds には server side の `BeaconDNS` と Gopher extenders も含まれているため、稼働中のすべての Adaptix deployment が HTTP/SMB/TCP infrastructure のみを公開しているとは想定しないでください。<sup>[[2]](#references)</sup>
 
-HTTP beacon configで確認される一般的なprofile field（decryption後）：<sup>[[1]](#references)</sup>
+HTTP beacon configs で観測される典型的な profile fields（decryption 後）：<sup>[[1]](#references)</sup>
 - agent_type (u32)
 - use_ssl (bool)
-- servers_count (u32)、servers（stringのarray）、ports（u32のarray）
-- http_method、uri、parameter、user_agent、http_headers（length-prefixed string）
-- ans_pre_size (u32)、ans_size (u32) – response sizeのparseに使用
-- kill_date (u32)、working_time (u32)
-- sleep_delay (u32)、jitter_delay (u32)
+- servers_count (u32), servers (array of strings), ports (array of u32)
+- http_method, uri, parameter, user_agent, http_headers (length-prefixed strings)
+- ans_pre_size (u32), ans_size (u32) – response sizes の parse に使用
+- kill_date (u32), working_time (u32)
+- sleep_delay (u32), jitter_delay (u32)
 - listener_type (u32)
 - download_chunk_size (u32)
 
-最近のBeaconHTTP buildでは、複数のURI、user-agent、Host header、server間のoperator-selected rotationもサポートされており、sequentialまたはrandom selectionを使用できます。<sup>[[2]](#references)</sup> Huntingの観点では、これは単一の感染hostが、従来のRC4-packed beacon familyを使用したまま、複数のcallback pathとheader combinationに分散して通信する可能性があることを意味します。
+最近の BeaconHTTP builds は、複数の URIs、user-agents、Host headers、servers を対象に、sequential または random selection を行う operator-selected rotation もサポートしています。<sup>[[2]](#references)</sup> Hunting の観点では、これは 1 台の infected host が、classic RC4-packed beacon family を使用しているにもかかわらず、複数の callback paths と header combinations に対して通信を分散させる可能性があることを意味します。
 
-Example default HTTP profile（beacon build由来）：<sup>[[1]](#references)</sup>
+Example default HTTP profile（beacon build から）：<sup>[[1]](#references)</sup>
 ```json
 {
 "agent_type": 3192652105,
@@ -52,7 +54,7 @@ Example default HTTP profile（beacon build由来）：<sup>[[1]](#references)</
 "download_chunk_size": 102400
 }
 ```
-観測された悪意のある HTTP プロファイル（実際の攻撃）:<sup>[[1]](#references)</sup>
+観測された悪意のあるHTTP profile（実際の攻撃）:<sup>[[1]](#references)</sup>
 ```json
 {
 "agent_type": 3192652105,
@@ -75,10 +77,10 @@ Example default HTTP profile（beacon build由来）：<sup>[[1]](#references)</
 "download_chunk_size": 102400
 }
 ```
-## 暗号化された configuration のパッキングとロードパス
+## 暗号化された設定のパッキングとロードパス
 
-operator が builder で Create をクリックすると、AdaptixC2 は暗号化された profile を beacon の末尾 blob として埋め込みます。形式は次のとおりです:<sup>[[1]](#references)</sup>
-- 4 bytes: configuration size (uint32、little-endian)
+オペレーターが builder で Create をクリックすると、AdaptixC2 は暗号化された profile を beacon の末尾 blob として埋め込みます。形式は次のとおりです:<sup>[[1]](#references)</sup>
+- 4 bytes: configuration size (uint32, little-endian)
 - N bytes: RC4-encrypted configuration data
 - 16 bytes: RC4 key
 
@@ -89,21 +91,21 @@ this->encrypt_key = (PBYTE) MemAllocLocal(16);
 memcpy(this->encrypt_key, packer->data() + 4 + profileSize, 16);
 DecryptRC4(packer->data()+4, profileSize, this->encrypt_key, 16);
 ```
-Practical implications:<sup>[[1]](#references)</sup>
-- 構造全体は、PE の .rdata セクション内に存在することが多い。
-- Extraction は決定論的に行える。size を読み取り、そのサイズ分の ciphertext を読み取り、その直後に配置された 16 バイトの key を読み取り、その後 RC4 で復号する。
+実用上の意味:<sup>[[1]](#references)</sup>
+- 構造全体は、多くの場合 PE の .rdata セクション内に存在します。
+- Extraction は決定論的です。サイズを読み取り、そのサイズ分の ciphertext を読み取り、その直後に配置された 16 バイトの key を読み取り、その後 RC4-decrypt します。
 
 ## Configuration extraction workflow (defenders)
 
-beacon のロジックを模倣する extractor を作成する:<sup>[[1]](#references)</sup>
-1) PE 内（一般的には .rdata）で blob を特定する。実用的な方法は、.rdata をスキャンして、妥当と思われる [size|ciphertext|16-byte key] のレイアウトを探し、RC4 を試行すること。
-2) 最初の 4 バイトを読み取る → size（uint32 LE）。
+beacon logic を模倣する extractor を作成します:<sup>[[1]](#references)</sup>
+1) PE 内（一般的には .rdata）で blob を特定します。実用的な方法は、.rdata をスキャンして、妥当と思われる [size|ciphertext|16-byte key] のレイアウトを探し、RC4 を試行することです。
+2) 最初の 4 バイトを読み取る → size (uint32 LE)。
 3) 次の N=size バイトを読み取る → ciphertext。
 4) 最後の 16 バイトを読み取る → RC4 key。
-5) ciphertext を RC4 で復号する。その後、plain profile を次の形式で parse する:
-- 上記のとおりの u32/boolean スカラー
-- length-prefixed strings（u32 length に続いて bytes。末尾に NUL が存在する場合がある）
-- arrays: servers_count に続いて、その数の [string, u32 port] ペア
+5) ciphertext を RC4-decrypt します。その後、plain profile を次のように parse します:
+- 上記のとおり、u32/boolean の scalar
+- length-prefixed strings（u32 length の後に bytes が続く形式。末尾に NUL が含まれる場合があります）
+- arrays: servers_count に続いて、[string, u32 port] pair をその数だけ格納
 
 pre-extracted blob に対して動作する、外部依存関係のない最小限の Python proof-of-concept:
 ```python
@@ -171,15 +173,15 @@ return cfg
 # pt   = rc4(key, ct)
 # cfg  = parse_http_cfg(pt)
 ```
-Tips:
-- 自動化する場合は、PE parser を使用して .rdata を読み取り、sliding window を適用します。各 offset o について、size = u32(.rdata[o:o+4])、ct = .rdata[o+4:o+4+size]、candidate key = 次の 16 バイトを試します。RC4 で復号し、string fields が UTF-8 としてデコードでき、lengths が妥当であることを確認します。
-- 同じ length-prefixed conventions に従って SMB/TCP profiles を解析します。
+ヒント:
+- 自動化する場合は、PE parserを使用して.rdataを読み取り、sliding windowを適用します。各オフセットoについて、size = u32(.rdata[o:o+4])、ct = .rdata[o+4:o+4+size]、candidate key = 次の16バイトを試します。RC4で復号し、文字列フィールドがUTF-8としてデコードでき、長さが妥当か確認します。
+- SMB/TCP profilesは、同じlength-prefixedの規則に従って解析します。
 
-## Custom listener profiles: classic HTTP schema のみに hard-code しない
+## Custom listener profiles: classic HTTP schemaだけをハードコードしない
 
-外側の packing format（`u32 size | RC4 ciphertext | 16-byte key`）は再利用できるため、actor がカスタマイズした listeners でも、復号後の field layout を完全に変更しながら同じ extraction workflow を維持できます。
+外側のpacking format（`u32 size | RC4 ciphertext | 16-byte key`）は再利用できるため、actor-customized listenersでも同じ抽出ワークフローを維持しながら、復号後のfield layoutを完全に変更できます。
 
-最近の良い例は、2026 年 3 月の Tropic Trooper campaign です。この campaign で抽出された Adaptix beacon には standard HTTP/TCP profile が含まれていませんでした。代わりに、復号された blob には次のような GitHub transport parameters が格納されていました。<sup>[[5]](#references)</sup>
+最近の良い例は、2026年3月のTropic Trooper campaignです。このcampaignで抽出されたAdaptix beaconにはstandard HTTP/TCP profileが含まれていませんでした。代わりに、復号されたblobには次のようなGitHub transport parametersが保存されていました:<sup>[[5]](#references)</sup>
 - `repo_owner`
 - `repo_name`
 - `api_host`（例: `api.github.com`）
@@ -187,63 +189,63 @@ Tips:
 - `issues_api_path`
 - `kill_date` / `working_time` / `sleep_delay` / `jitter`
 
-実用的な parser strategy:
-- まず、通常どおり outer RC4 blob を正確に検出します。
-- 復号後は、すぐに HTTP parser を強制するのではなく、sentinel strings と field sanity に基づいて分岐します。
-- 有効な sentinel には、`api.github.com`、`/issues?state=open`、HTTP verbs/URIs、named-pipe-style strings、または明らかに有効な server/port arrays などがあります。
-- HTTP parser が失敗しても、plaintext に一貫性のある length-prefixed UTF-8 strings が含まれている場合は、false positive として破棄せず、sample を保持して alternative schemas を試します。
+実用的なparser strategy:
+- まず、通常どおりouter RC4 blobを正確に検出します。
+- 復号後は、HTTP parserをすぐに強制するのではなく、sentinel stringsとfield sanityに基づいて分岐します。
+- 有効なsentinelには、`api.github.com`、`/issues?state=open`、HTTP verbs/URIs、named-pipe-style strings、または明らかに有効なserver/port arraysなどがあります。
+- HTTP parserが失敗しても、plaintextに一貫したlength-prefixed UTF-8 stringsが含まれている場合は、false positiveとして破棄せず、sampleを保持して別のschemaを試します。
 
-この campaign では、custom listener が GitHub issues を C2 transport として使用していました。また、GitHub API は victim の source address を operator に直接明らかにしないため、beacon は外部 IP を把握する目的で `ipinfo.io` に問い合わせていました。<sup>[[5]](#references)</sup>
+このcampaignでは、custom listenerがGitHub issuesをC2 transportとして使用していました。また、GitHub APIはoperatorにvictimのsource addressを直接公開しないため、beaconは外部IPを知る目的で`ipinfo.io`に問い合わせていました。<sup>[[5]](#references)</sup>
 
-## Network fingerprinting and hunting
+## Network fingerprintingとhunting
 
 HTTP:<sup>[[1]](#references)</sup>
-- 一般的な特徴: operator が選択した URIs（例: /uri.php、/endpoint/api）への POST
-- beacon ID に使用される custom header parameter（例: X‑Beacon‑Id、X‑App‑Id）
-- Firefox 20 または当時の Chrome builds を模倣した User-agents
-- sleep_delay/jitter_delay によって確認できる polling cadence
-- 新しい builds では callback ごとに URIs、user-agents、Host headers、servers を rotate できるため、単一の path/UA pair を想定するのではなく、珍しい header names、response-size patterns、TLS reuse、timing を基準に cluster 化します。<sup>[[2]](#references)</sup>
+- Common: operatorが選択したURIへのPOST（例: /uri.php、/endpoint/api）
+- beacon IDに使用されるcustom header parameter（例: X‑Beacon‑Id、X‑App‑Id）
+- Firefox 20または現在のChrome buildsを模倣するUser-agents
+- sleep_delay/jitter_delayで確認できるpolling cadence
+- 新しいbuildでは、callbackごとにURI、user-agents、Host headers、serversをrotateできるため、単一のpath/UA pairを前提とせず、珍しいheader names、response-size patterns、TLS reuse、timingを基準にcluster化します。<sup>[[2]](#references)</sup>
 
 SMB/TCP:<sup>[[1]](#references)</sup>
-- web egress が制限されている環境で intranet C2 に使用される SMB named-pipe listeners
-- TCP beacons は protocol start を obfuscate するため、traffic の前に数バイトを付加する場合がある
+- web egressが制限されているintranet C2向けのSMB named-pipe listeners
+- TCP beaconsは、protocol startをobfuscateするため、trafficの前に数バイトを付加する場合があります
 
 Current upstream teamserver defaults
-- `profile.yaml` には現在、teamserver `0.0.0.0:4321`、endpoint `/endpoint`、certificate/key filenames `server.rsa.crt` および `server.rsa.key`、さらに HTTP、SMB、TCP、DNS、Beacon agent、Gopher 用の extenders が含まれています。<sup>[[2]](#references)</sup>
-- 一致する route がない場合、default error handler は `Server: AdaptixC2` および `Adaptix-Version: v1.2` を返します。<sup>[[4]](#references)</sup>
-- stock 404 body には `AdaptixC2 404` および `You need to enter the correct connection details` が含まれます。<sup>[[4]](#references)</sup>
-- 2026 年の Internet-wide scans では、`4321` で exposed teamservers が多数、`43211` で beacon listeners が多数確認されたため、両ポートは有用な seed pivots ですが、網羅的なものとして扱うべきではありません。<sup>[[4]](#references)</sup>
+- `profile.yaml`には現在、teamserver `0.0.0.0:4321`、endpoint `/endpoint`、certificate/key filenames `server.rsa.crt`および`server.rsa.key`、さらにHTTP、SMB、TCP、DNS、Beacon agent、Gopher向けのextendersが含まれています。<sup>[[2]](#references)</sup>
+- 一致しないroutesでは、default error handlerが`Server: AdaptixC2`および`Adaptix-Version: v1.2`を返します。<sup>[[4]](#references)</sup>
+- stock 404 bodyには`AdaptixC2 404`および`You need to enter the correct connection details`が含まれます。<sup>[[4]](#references)</sup>
+- 2026年のInternet-wide scansでは、`4321`でexposed teamserversが多数、`43211`でbeacon listenersが多数確認されたため、両portはseed pivotsとして有用ですが、網羅的なものとして扱うべきではありません。<sup>[[4]](#references)</sup>
 
 DNS/DoH listener fingerprints:<sup>[[4]](#references)</sup>
-- 現在の BeaconDNS extender は authoritative に応答します（`AA=true`）。
-- beacon protocol shape に一致しない queries、特に configured domain より前の labels が 5 個未満の names には、通常 `TXT "OK"` で応答します。
-- configured base TTL が zero のままの場合、listener は 10 秒の base を使用し、最大 59 秒の jitter を追加します。
-- そのため、HTTP listener が exposed でない場合は、short-label active probes が有用です。
+- 現在のBeaconDNS extenderはauthoritatively応答します（`AA=true`）。
+- beacon protocol shapeに一致しないqueries、特にconfigured domainの前に5個未満のlabelsしかないnamesには、通常`TXT "OK"`で応答します。
+- configured base TTLをzeroのままにすると、listenerは10秒のbaseを使用し、最大59秒のjitterを追加します。
+- そのため、HTTP listenerがexposedでない場合には、short-label active probesが有用です。
 
-## Loader and persistence TTPs seen in incidents
+## Incidentsで確認されたLoaderとpersistence TTPs
 
 In-memory PowerShell loaders:<sup>[[1]](#references)</sup>
-- Base64/XOR payloads を Download します（Invoke‑RestMethod / WebClient）。<sup>[[9]](#references)</sup>
-- unmanaged memory を Allocate し、shellcode を copy して、VirtualProtect により protection を 0x40（PAGE_EXECUTE_READWRITE）へ切り替えます。<sup>[[7]](#references)</sup>
-- .NET dynamic invocation により実行します: Marshal.GetDelegateForFunctionPointer + delegate.Invoke()。<sup>[[6]](#references)</sup>
+- Base64/XOR payloadsをdownloadします（Invoke‑RestMethod / WebClient）。<sup>[[9]](#references)</sup>
+- unmanaged memoryをallocateし、shellcodeをcopyした後、VirtualProtectを介してprotectionを0x40（PAGE_EXECUTE_READWRITE）に切り替えます。<sup>[[7]](#references)</sup>
+- .NET dynamic invocationにより実行します: Marshal.GetDelegateForFunctionPointer + delegate.Invoke()。<sup>[[6]](#references)</sup>
 
 Trojanized signed software / staged shellcode loaders:<sup>[[5]](#references)</sup>
-- 2026 年の Tropic Trooper chain では、trojanized SumatraPDF executable（TOSHIS loader）が `_security_init_cookie` を patching the PE entry point の代わりに malicious code へ redirect しました。
-- loader は Adler-32 hashing により APIs を resolve し、decoy PDF を download し、second-stage shellcode を取得しました。その後、hardcoded seed から WinCrypt（`CryptDeriveKey`）を通じて AES-128-CBC で復号し、Adaptix beacon を memory 内で reflectively execute しました。
-- Persistence は後に scheduled tasks へ移行し、`\MSDNSvc` や `\MicrosoftUDN` のような benign-looking names を使用して、agent をおよそ 2 時間ごとに再 launch するよう設定されました。
+- 2026年のTropic Trooper chainでは、trojanized SumatraPDF executable（TOSHIS loader）が、PE entry pointをpatchする代わりに`_security_init_cookie`をmalicious codeへredirectしました。
+- loaderはAdler-32 hashingでAPIsをresolveし、decoy PDFをdownloadし、second-stage shellcodeをfetchした後、hardcoded seedからWinCrypt（`CryptDeriveKey`）を使用してAES-128-CBCで復号し、Adaptix beaconをmemory内でreflectively実行しました。
+- その後、persistenceは`\MSDNSvc`や`\MicrosoftUDN`などのbenign-looking namesを持つscheduled tasksへ移行し、agentを約2時間ごとに再起動するよう設定されました。
 
-in-memory execution と AMSI/ETW considerations については、次の pages を確認してください。
+in-memory executionとAMSI/ETW considerationsについては、次のページを確認してください:
 
 {{#ref}}
 ../../windows-hardening/av-bypass.md
 {{#endref}}
 
-Persistence mechanisms observed:<sup>[[1]](#references)</sup>
-- logon 時に loader を再 launch する Startup folder shortcut（.lnk）
-- Registry Run keys（HKCU/HKLM ...\CurrentVersion\Run）。loader.ps1 を start するために、"Updater" のような benign-sounding names が使用されることがよくあります。<sup>[[10]](#references)</sup>
-- susceptible processes 向けに `%APPDATA%\Microsoft\Windows\Templates` 配下へ msimg32.dll を drop する DLL search-order hijack
+確認されたPersistence mechanisms:<sup>[[1]](#references)</sup>
+- logon時にloaderを再起動するStartup folder shortcut（.lnk）
+- Registry Run keys（HKCU/HKLM ...\CurrentVersion\Run）。多くの場合、"Updater"のようなbenign-sounding namesでloader.ps1をstartします。<sup>[[10]](#references)</sup>
+- susceptible processes向けに、%APPDATA%\Microsoft\Windows\Templatesへmsimg32.dllをdropするDLL search-order hijack
 
-Technique deep-dives and checks:
+Technique deep-divesとchecks:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md
@@ -254,34 +256,34 @@ Technique deep-dives and checks:
 {{#endref}}
 
 Hunting ideas
-- PowerShell が RW→RX transitions を spawn するケース: powershell.exe 内での PAGE_EXECUTE_READWRITE への VirtualProtect。<sup>[[8]](#references)</sup>
+- PowerShellがRW→RX transitionsをspawnするケース: powershell.exe内部でVirtualProtectからPAGE_EXECUTE_READWRITEへ移行。<sup>[[8]](#references)</sup>
 - Dynamic invocation patterns（GetDelegateForFunctionPointer）
-- `Server: AdaptixC2`、`Adaptix-Version`、`AdaptixC2 404`、または `You need to enter the correct connection details` を伴う unmatched HTTPS 404s。<sup>[[4]](#references)</sup>
-- suspect domains 配下の short queries に対する、`AA=true` および `TXT "OK"` を伴う DNS responses。<sup>[[4]](#references)</sup>
-- `/repos/<owner>/<repo>/issues` への GitHub API traffic と、同じ loader/beacon chain からの `ipinfo.io` lookups。<sup>[[5]](#references)</sup>
-- user または common Startup folders 配下の Startup .lnk。<sup>[[1]](#references)</sup>
-- suspicious Run keys（例: "Updater"）および update.ps1/loader.ps1 のような loader names。<sup>[[1]](#references)</sup>
-- decoy document を表示する前に `_security_init_cookie` を downloader code へ redirect する trojanized PE samples。<sup>[[5]](#references)</sup>
-- `%APPDATA%\Microsoft\Windows\Templates` 配下の user-writable DLL paths にある msimg32.dll。<sup>[[1]](#references)</sup>
+- `Server: AdaptixC2`、`Adaptix-Version`、`AdaptixC2 404`、または`You need to enter the correct connection details`を伴うunmatched HTTPS 404s。<sup>[[4]](#references)</sup>
+- suspect domains配下のshort queriesに対する、`AA=true`および`TXT "OK"`を伴うDNS responses。<sup>[[4]](#references)</sup>
+- `/repos/<owner>/<repo>/issues`へのGitHub API trafficに続き、同じloader/beacon chainから`ipinfo.io` lookupsが発生するケース。<sup>[[5]](#references)</sup>
+- userまたはcommon Startup folders配下のStartup .lnk。<sup>[[1]](#references)</sup>
+- Suspicious Run keys（例: "Updater"）、およびupdate.ps1/loader.ps1のようなloader names。<sup>[[1]](#references)</sup>
+- decoy documentを表示する前に`_security_init_cookie`をdownloader codeへredirectするTrojanized PE samples。<sup>[[5]](#references)</sup>
+- %APPDATA%\Microsoft\Windows\Templates配下のuser-writable DLL pathsにあるmsimg32.dll。<sup>[[1]](#references)</sup>
 
-## Notes on OpSec fields
+## OpSec fieldsに関するNotes
 
-- KillDate: agent が self-expires する timestamp。<sup>[[1]](#references)</sup>
-- WorkingTime: business activity に blend するため、agent が active であるべき hours。<sup>[[1]](#references)</sup>
+- KillDate: agentがself-expiresする時点以降のtimestamp。<sup>[[1]](#references)</sup>
+- WorkingTime: business activityに紛れるためにagentがactiveであるべき時間帯。<sup>[[1]](#references)</sup>
 
-これらの fields は clustering に使用でき、観測された quiet periods の説明にも役立ちます。
+これらのfieldsは、clusteringや確認されたquiet periodsの説明に利用できます。
 
-## YARA and static leads
+## YARAとstatic leads
 
-Unit 42 は beacons（C/C++ および Go）と loader API-hashing constants 向けの basic YARA を公開しています。<sup>[[1]](#references)</sup> PE .rdata end 付近の [size|ciphertext|16-byte-key] layout、default HTTP profile strings、新しい server/listener markers（`AdaptixC2 404`、`You need to enter the correct connection details.`、`Adaptix-Version`、`server.rsa.crt`、`server.rsa.key`、`api.github.com`、`/issues?state=open`、`ipinfo.io` など）を探す rules で補完することを検討してください。<sup>[[4]](#references)[[5]](#references)</sup>
+Unit 42は、beacons（C/C++およびGo）とloader API-hashing constants向けのbasic YARAを公開しています。<sup>[[1]](#references)</sup> PE .rdata end付近の[size|ciphertext|16-byte-key] layout、default HTTP profile strings、さらに`AdaptixC2 404`、`You need to enter the correct connection details.`、`Adaptix-Version`、`server.rsa.crt`、`server.rsa.key`、`api.github.com`、`/issues?state=open`、`ipinfo.io`などの新しいserver/listener markersを探すrulesで補完することを検討してください。<sup>[[4]](#references)[[5]](#references)</sup>
 
 ## References
 
-- [1] [AdaptixC2: 実際の攻撃で悪用された新しい Open-Source Framework（Unit 42）](https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/)
+- [1] [AdaptixC2: 実際の攻撃で利用された新しいOpen-Source Framework (Unit 42)](https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/)
 - [2] [AdaptixC2 GitHub](https://github.com/Adaptix-Framework/AdaptixC2)
 - [3] [Adaptix Framework Docs](https://adaptix-framework.gitbook.io/adaptix-framework)
-- [4] [AdaptixC2: 大規模な Open-Source C2 Framework の Fingerprinting（Censys）](https://censys.com/blog/adaptixc2-open-source-c2-framework/)
-- [5] [Tropic Trooper が AdaptixC2 および Custom Beacon Listener へ Pivot（Zscaler ThreatLabz）](https://www.zscaler.com/blogs/security-research/tropic-trooper-pivots-adaptixc2-and-custom-beacon-listener)
+- [4] [AdaptixC2: 大規模環境でのOpen-Source C2 FrameworkのFingerprinting (Censys)](https://censys.com/blog/adaptixc2-open-source-c2-framework/)
+- [5] [Tropic Trooper、AdaptixC2およびCustom Beacon ListenerへPivot (Zscaler ThreatLabz)](https://www.zscaler.com/blogs/security-research/tropic-trooper-pivots-adaptixc2-and-custom-beacon-listener)
 - [6] [Marshal.GetDelegateForFunctionPointer – Microsoft Docs](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.marshal.getdelegateforfunctionpointer)
 - [7] [VirtualProtect – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/api/memoryapi/nf-memoryapi-virtualprotect)
 - [8] [Memory protection constants – Microsoft Docs](https://learn.microsoft.com/en-us/windows/win32/memory/memory-protection-constants)

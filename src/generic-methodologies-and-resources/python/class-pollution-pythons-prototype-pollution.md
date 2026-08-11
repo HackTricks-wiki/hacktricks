@@ -1,8 +1,10 @@
 # Class Pollution (Python's Prototype Pollution)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## 基本例
 
-インスタンスのクラス参照を通じて `__qualname__` を変更すると、クラスとその変更可能な基底クラスが更新されます。<sup>[[1]](#references)</sup>
+インスタンスのクラス参照を通じて `__qualname__` を変更すると、クラスおよびその可変な基底クラスが更新されます。<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -28,7 +30,7 @@ print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
 ## 基本的な脆弱性の例
 
-recursive merge は、攻撃者が制御する mapping keys を受け入れ、item または attribute access のいずれかを通じてネストされた値を書き込む可能性があります。<sup>[[1]](#references)</sup>
+再帰的なマージでは、攻撃者が制御するマッピングキーを受け入れ、項目アクセスまたは属性アクセスを通じてネストされた値を書き込むことができます。<sup>[[1]](#references)</sup>
 ```python
 # Initial state
 class Employee: pass
@@ -65,9 +67,9 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <details>
 
-<summary>クラスプロパティのデフォルト値を作成してRCE (subprocess) を実行</summary>
+<summary>class property の default value を作成して RCE を実行する (subprocess)</summary>
 
-共有ベースクラスは、兄弟クラスのコマンド gadget が使用するデフォルト属性を提供できます。<sup>[[1]](#references)</sup>
+共有の base class は、sibling-class の command gadget によって使用される default attribute を提供できます。<sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -118,9 +120,9 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary><code>globals</code> を通じた他の class と global vars の汚染</summary>
+<summary><code>globals</code> を介した他のクラスおよびグローバル変数の汚染</summary>
 
-関数の `__globals__` mapping は、その module で定義された method から到達可能な module namespace を公開します。<sup>[[1]](#references)[[4]](#references)</sup>
+関数の `__globals__` mapping は、そのモジュール内で定義された method から到達可能な module namespace を公開します。<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -154,7 +156,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <summary>任意の subprocess 実行</summary>
 
-Windows では、`Popen(..., shell=True)` がデフォルトの shell として `COMSPEC` 環境変数を使用するため、この gadget は環境変数を利用した command のリダイレクトを実証します。<sup>[[1]](#references)[[5]](#references)</sup>
+Windows では、`Popen(..., shell=True)` はデフォルトの shell として `COMSPEC` 環境変数を使用するため、この gadget は環境変数を利用したコマンドリダイレクトを示します。<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -186,9 +188,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary><strong><code>__kwdefaults__</code></strong>の上書き</summary>
+<summary>​​<strong><code>__kwdefaults__</code></strong>の上書き</summary>
 
-Pythonでは、`__kwdefaults__`を、関数定義において`*`または`*args`に続く、keyword-only parametersのデフォルト値のmappingとして定義しています。<sup>[[4]](#references)</sup> 以下のgadgetは、polluted function pathを通じてそのmappingを上書きします。<sup>[[1]](#references)</sup>
+Pythonでは、`__kwdefaults__`を、関数定義において`*`または`*args`の後に続くキーワード専用パラメータのデフォルト値のmappingとして文書化しています。<sup>[[4]](#references)</sup> 以下のgadgetは、polluted function pathを通じてそのmappingを上書きします。<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -231,18 +233,18 @@ execute() #> Executing echo Polluted
 
 <summary>ファイル間で Flask secret を上書きする</summary>
 
-汚染されたオブジェクトのクラスがアプリケーションのエントリーポイントモジュールとは異なるモジュールに存在する場合、そのメソッドの `__globals__` は最初、クラスモジュールの名前空間を公開します。続いて loader と `sys.modules.__main__` を経由して辿ることで、エントリーポイントモジュールとその Flask `app` オブジェクトに到達できます。<sup>[[1]](#references)[[2]](#references)</sup>
+汚染されたオブジェクトの class がアプリケーションの entry-point module とは異なる module に存在する場合、そのメソッドの `__globals__` には、初期状態では class module の namespace が公開されています。そこから loader と `sys.modules.__main__` を経由して traversal することで、entry-point module とその Flask `app` オブジェクトに到達できます。<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Flask は `app.secret_key` を使用して session cookie に署名するため、この key を知っていれば、攻撃者は有効な session data を作成できます。<sup>[[6]](#references)</sup>
+Flask は `app.secret_key` を使用して session cookie に署名するため、この key を知っている攻撃者は有効な session data を作成できます。<sup>[[6]](#references)</sup>
 
-元の writeup では、`app.secret_key` に到達するための次の経路が示されています。CTFtime でもその writeup のコピーが公開されています。<sup>[[2]](#references)[[3]](#references)</sup>
+元の writeup では、`app.secret_key` に到達するための以下の path が示されています。CTFtime にもこの writeup のコピーがあります。<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-キーを変更すると、置き換えた session cookie に署名できるようになり、privilege escalation が可能になる場合があります。[Flask session tooling page](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign) を参照してください。<sup>[[6]](#references)</sup>
+キーを変更すると、置き換えた session cookie に署名できるようになり、権限昇格が可能になる場合があります。[Flask session tooling page](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign) を参照してください。<sup>[[6]](#references)</sup>
 
 </details>
 

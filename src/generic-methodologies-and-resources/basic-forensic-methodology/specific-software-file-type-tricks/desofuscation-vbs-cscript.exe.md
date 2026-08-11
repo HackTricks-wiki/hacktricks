@@ -1,28 +1,30 @@
-# VBSファイルのデオブファスケーション技法
+# VBSファイルの難読化解除テクニック
 
-悪意のあるVBSファイルをデバッグまたはデオブファスケーションする際に役立つ可能性がある方法：
+{{#include ../../../banners/hacktricks-training.md}}
+
+悪意のあるVBSファイルのデバッグや難読化解除に役立つことがあります。
 
 ## echo
 
-`WScript.Echo`は診断出力に使用できます。`cscript.exe`では、コンソールに書き込まれます。<sup>[[1]](#references)</sup>
+`WScript.Echo` は診断用の出力に使用できます。`cscript.exe` では、コンソールに書き込まれます。<sup>[[1]](#references)</sup>
 ```bash
 Wscript.Echo "Like this?"
 ```
 ## Comments
 
-単一のアポストロフィは、VBScriptのコメントを開始します。<sup>[[2]](#references)</sup>
+単一のアポストロフィはVBScriptのコメントを開始します。<sup>[[2]](#references)</sup>
 ```bash
 ' this is a comment
 ```
 ## テスト
 
-次のコマンドを使用して、command-line hostでVBSファイルを実行します:<sup>[[3]](#references)</sup>
+VBS fileを command-line hostで実行します:<sup>[[3]](#references)</sup>
 ```bash
 cscript.exe file.vbs
 ```
 ## ファイルにデータを書き込む
 
-このヘルパーは Stack Overflow の回答を元にしており、`FileSystemObject` のテキストストリームを使用します。`CreateTextFile` は `TextStream` を返し、`Write`/`Close` はテキストデータを操作します。そのため、一般的なバイナリ安全のライターではなく、テキスト書き込みの例として扱ってください。<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+このヘルパーは Stack Overflow の回答をもとにしており、`FileSystemObject` の text stream を使用します。`CreateTextFile` は `TextStream` を返し、`Write`/`Close` はテキストデータに対して動作します。一般的にバイナリデータを安全に扱える writer ではなく、テキスト書き込みの例として扱ってください。<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```js
 Function writeBinary(strBinary, strPath)
 

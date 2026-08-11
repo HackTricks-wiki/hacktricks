@@ -1,4 +1,6 @@
-# Bruteforce Hashの数文字
+# 少数文字のHashをBruteforce
+
+{{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib
 

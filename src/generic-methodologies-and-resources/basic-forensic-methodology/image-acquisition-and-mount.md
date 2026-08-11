@@ -1,8 +1,10 @@
 # イメージの取得とマウント
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## 取得
 
-> 常に**読み取り専用**で取得し、**コピー中にハッシュを計算**します。元のデバイスは**書き込みブロック**したままにし、検証済みのコピーのみで作業します。
+> 常に **read-only** で取得し、**コピー中にハッシュを計算**してください。元のデバイスは **write-blocked** の状態に保ち、検証済みのコピーのみを使用してください。
 
 ### DD
 ```bash
@@ -13,7 +15,7 @@ sha256sum disk.img > disk.img.sha256
 ```
 ### dc3dd / dcfldd
 
-`dc3dd`は、dcfldd（DoD Computer Forensics Lab dd）の現在も保守されているforkです。
+`dc3dd`は、dcfldd（DoD Computer Forensics Lab dd）から分岐した、現在も積極的にメンテナンスされているforkです。
 ```bash
 # Create an image and calculate multiple hashes at acquisition time
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
@@ -26,9 +28,9 @@ sudo guymager
 # Or acquire from CLI (since v0.9.5)
 sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /evidence/drive.e01
 ```
-### AFF4 (Advanced Forensics Format 4)
+### AFF4（Advanced Forensics Format 4）
 
-Bradley L. Schatz と Michael I. Cohen が策定した AFF4 v1.0 仕様は、仮想化ストレージ、任意のメタデータ、拡張可能な圧縮およびハッシュ機能、高スループット処理を備えたフォレンジックコンテナを定義しています。<sup>[[1]](#references)</sup>
+Bradley L. Schatz と Michael I. Cohen が執筆した AFF4 v1.0 仕様は、仮想化ストレージ、任意のメタデータ、拡張可能な圧縮およびハッシュ機能、高スループットの操作を備えたフォレンジックコンテナを定義しています。<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -39,32 +41,32 @@ velociraptor --config server.yaml frontend collect --artifact Windows.Disk.Acqui
 ```
 ### FTK Imager (Windows & Linux)
 
-[FTK Imagerをダウンロード](https://accessdata.com/product-download)して、**raw、E01、またはAFF4**イメージを作成できます：
+[FTK Imagerをダウンロード](https://accessdata.com/product-download)して、**raw、E01、またはAFF4**イメージを作成できます。
 ```bash
 ftkimager /dev/sdb evidence --e01 --case-number 1 --evidence-number 1 \
 --description 'Laptop seizure 2025-07-22' --examiner 'AnalystName' --compress 6
 ```
-### EWF ツール（libewf）
+### EWF ツール (libewf)
 ```bash
 sudo ewfacquire /dev/sdb -u evidence -c 1 -d "Seizure 2025-07-22" -e 1 -X examiner --format encase6 --compression best
 ```
-### Cloud Disk のイメージ取得
+### クラウドディスクのイメージ取得
 
-*AWS* – インスタンスをシャットダウンせずに**forensic snapshot**を作成します：
+*AWS* – インスタンスをシャットダウンせずに**forensic snapshot**を作成します:
 ```bash
 aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web-server 2025-07-22"
 # Copy the snapshot to S3 and download with aws cli / aws snowball
 ```
-*Azure* – `az snapshot create` を使用して、SAS URL にエクスポートします。
+*Azure* – `az snapshot create` を使用し、SAS URL にエクスポートします。
 
 
-## Mount
+## マウント
 
-### 適切な方法の選択
+### 適切なアプローチの選択
 
-1. 元のパーティションテーブル（MBR/GPT）が必要な場合は、**ディスク全体**を Mount します。
-2. 1つのボリュームだけが必要な場合は、**単一のパーティションファイル**を Mount します。
-3. イメージのアタッチは読み取り専用にします（例：qemu-nbd の `--read-only`）。<sup>[[2]](#references)</sup> ファイルシステムも読み取り専用（`-o ro`）で Mount します。<sup>[[3]](#references)</sup> **コピー**上で作業します。
+1. 元のパーティションテーブル（MBR/GPT）が必要な場合は、**ディスク全体**をマウントします。
+2. 1つのボリュームだけが必要な場合は、**単一のパーティションファイル**をマウントします。
+3. イメージのアタッチは読み取り専用にします（例：qemu-nbd の `--read-only`）。<sup>[[2]](#references)</sup> ファイルシステムは読み取り専用（`-o ro`）でマウントします。<sup>[[3]](#references)</sup> **コピー**上で作業します。
 
 ### Raw images（dd、AFF4-extracted）
 ```bash
@@ -81,7 +83,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-完了したら切り離す：
+完了したら切り離す:
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -97,16 +99,16 @@ sudo qemu-nbd --connect=/dev/nbd1 --read-only /mnt/ewf/ewf1
 # 3. Mount the desired partition (XFS example; use the filesystem-specific option)
 sudo mount -o ro,norecovery /dev/nbd1p1 /mnt/evidence
 ```
-ファイルシステム固有の no-replay マウントでは、ext3/ext4 は `noload` を使用し、XFS は `norecovery` を使用して読み取り専用モードにする必要があります。<sup>[[3]](#references)[[4]](#references)</sup>
+ファイルシステム固有の再再生なしマウントでは、ext3/ext4 は `noload` を使用し、XFS は `norecovery` を使用して読み取り専用モードにする必要があります。<sup>[[3]](#references)[[4]](#references)</sup>
 
-または **xmount** を使用してオンザフライで変換します：
+または、**xmount** を使用してオンザフライで変換します：
 ```bash
 xmount --in ewf evidence.E01 --out raw /tmp/raw_mount
 mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
 ### LVM / BitLocker / VeraCrypt ボリューム
 
-ブロックデバイス（loop または nbd）を接続した後:
+block device（loop または nbd）を接続した後:
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -118,7 +120,7 @@ sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 ```
 ### kpartx ヘルパー
 
-`kpartx` はイメージ内のパーティションを自動的に `/dev/mapper/` にマッピングします:
+`kpartx` はイメージからパーティションを自動的に `/dev/mapper/` にマッピングします:
 ```bash
 sudo kpartx -av disk.img  # creates /dev/mapper/loop0p1, loop0p2 …
 mount -o ro /dev/mapper/loop0p2 /mnt
@@ -129,13 +131,13 @@ dirty な ext3/ext4 filesystem では、journal replay を防止する必要が�
 
 | エラー | 典型的な原因 | 修正方法 |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | Journaled FS (ext4) が正常に unmount されていない | `-o ro,noload` を使用 |
+| `cannot mount /dev/loop0 read-only` | journaled FS (ext4) が正常に unmount されていない | `-o ro,noload` を使用 |
 | `bad superblock …` | offset が間違っている、または FS が破損している | offset (`sector*size`) を計算するか、コピーに対して `fsck -n` を実行 |
 | `mount: unknown filesystem type 'LVM2_member'` | LVM container | `vgchange -ay` で volume group を activate |
 
 ### クリーンアップ
 
-以降の作業を破損させる可能性がある dangling mappings を残さないよう、loop/nbd devices を **umount** して **disconnect** することを忘れないでください:
+作業の続行時に破損を引き起こす可能性のある dangling mapping を残さないよう、loop/nbd devices を **umount** して **disconnect** することを忘れないでください：
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0

@@ -1,18 +1,20 @@
 # Suricata & Iptables チートシート
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Iptables
 
-### Chains
+### チェーン
 
-iptables では、各 chain はパケットに一致するルールを順番に並べたリストです。デフォルトの `filter` table には、組み込みの `INPUT`、`FORWARD`、`OUTPUT` chain があります。`nat` などの他の table は、kernel の設定やロードされている module に応じて利用できる場合があります。<sup>[[1]](#references)</sup>
+iptables では、各チェーンはパケットに一致するルールを順番に並べたリストです。デフォルトの `filter` テーブルには、組み込みの `INPUT`、`FORWARD`、`OUTPUT` チェーンがあります。`nat` などの他のテーブルは、カーネルの設定やロードされているモジュールによって利用できる場合があります。<sup>[[1]](#references)</sup>
 
-- **Input Chain**: incoming connection の動作を管理するために使用されます。
-- **Forward Chain**: local system 宛てではない incoming connection を処理するために使用されます。これは、受信したデータを別の宛先へ転送する router として動作する device で一般的です。この chain は、system が routing、NATing、または類似の処理に関与している場合に主に関係します。
-- **Output Chain**: outgoing connection を制御します。
+- **入力チェーン**: 受信接続の動作を管理するために使用されます。
+- **転送チェーン**: ローカルシステム宛てではない受信接続を処理するために使用されます。これは、受信したデータを別の宛先へ転送するルーターとして動作するデバイスで一般的です。このチェーンは、主にシステムがルーティング、NAT、または類似の処理に関与している場合に関係します。
+- **出力チェーン**: 送信接続を制御するために使用されます。
 
-これらの chain により network traffic を秩序立てて処理でき、system に入るデータ、system を通過するデータ、system から出るデータの流れを制御する詳細なルールを指定できます。
+これらのチェーンにより、ネットワークトラフィックが秩序立って処理され、システムへのデータの流入、システム内の通過、システムからの流出を制御する詳細なルールを指定できます。
 
-string-match の例では標準の `string` match を使用します。`--icase` を指定しない限り matching は大文字と小文字を区別し、`--algo` により BM または KMP の検索方式を選択します。<sup>[[2]](#references)</sup>
+文字列マッチの例では標準の `string` マッチを使用します。`--icase` を指定しない限り、大文字と小文字は区別されます。また、`--algo` によって BM または KMP の検索方式を選択できます。<sup>[[2]](#references)</sup>
 ```bash
 # Delete all rules
 iptables -F
@@ -53,7 +55,7 @@ iptables-restore < /etc/sysconfig/iptables
 
 ### インストールと設定
 
-以下のパッケージコマンドはディストリビューションおよびリリース固有です。公式のインストールガイドには、Ubuntu PPA、Debian backports、RPM packages、systemd service managementについて記載されています。<sup>[[3]](#references)</sup>
+以下のパッケージコマンドはディストリビューションおよびリリース固有です。公式のインストールガイドでは、Ubuntu PPA、Debian backports、RPM packages、systemd service managementについて説明しています。<sup>[[3]](#references)</sup>
 ```bash
 # Package installation details vary by distribution and release; see References.
 # Ubuntu
@@ -116,72 +118,72 @@ Type=simple
 
 systemctl daemon-reload
 ```
-`suricata-update` のシーケンスは、rule source の取得、一覧表示、有効化、読み込みに関する Suricata の文書化された workflow に従います。<sup>[[4]](#references)</sup> 上記の `suricatasc` コマンドは、文書化された non-blocking Unix-socket による rule-reload method です。<sup>[[8]](#references)</sup> NFQUEUE rules は local input/output traffic を Suricata に送信し、`-q 0` は inline processing 用の queue 0 を選択します。<sup>[[7]](#references)</sup>
+`suricata-update` の手順は、ルールソースの取得、一覧表示、有効化、読み込みを行う Suricata の文書化されたワークフローに従います。<sup>[[4]](#references)</sup> 上記の `suricatasc` コマンドは、文書化されている非ブロッキングの Unix ソケットによるルール再読み込み方法です。<sup>[[8]](#references)</sup> NFQUEUE ルールはローカルの入力/出力トラフィックを Suricata に送信し、`-q 0` は inline 処理用のキュー 0 を選択します。<sup>[[7]](#references)</sup>
 
-### Rules Definitions
+### ルールの定義
 
-Suricata の rule/signature には3つの部分があります。<sup>[[5]](#references)</sup>
+Suricata のルール/シグネチャには 3 つの部分があります。<sup>[[5]](#references)</sup>
 
-- **action** は、signature が match したときに何が起こるかを指定します。
-- **header** は、protocol、IP addresses、ports、direction を選択します。
-- **rule options** は、match 固有の詳細を定義します。
+- **action** は、シグネチャが一致したときに何が起こるかを指定します。
+- **header** は、プロトコル、IP アドレス、ポート、方向を選択します。
+- **rule options** は、一致に固有の詳細を定義します。
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
 #### **有効なアクション**
 
-- alert - alertを生成
-- pass - packetの以降の検査を停止
-- **drop** - packetをdropし、alertを生成
-- **reject** - 該当するpacketの送信元にRST/ICMP unreachableエラーを送信
-- rejectsrc - _reject_と同じ
-- rejectdst - 該当するpacketの受信側にRST/ICMPエラーpacketを送信
-- rejectboth - 通信の両側にRST/ICMPエラーpacketを送信
+- alert - alert を生成する
+- pass - パケットの以降の検査を停止する
+- **drop** - パケットを drop し、alert を生成する
+- **reject** - 一致したパケットの送信元に RST/ICMP unreachable エラーを送信する。
+- rejectsrc - _reject_ と同じ
+- rejectdst - 一致したパケットの受信先に RST/ICMP エラーパケットを送信する。
+- rejectboth - 通信の両側に RST/ICMP エラーパケットを送信する。
 
 #### **Protocols**
 
-- tcp (tcp-traffic用)
+- tcp (tcp-traffic 用)
 - udp
 - icmp
-- ip (ipは「all」または「any」を表す)
-- _layer7 protocols_: http、ftp、tls、smb、dns、sshなど。<sup>[[5]](#references)</sup>
+- ip (ip は「all」または「any」を意味する)
+- _layer7 protocols_: http、ftp、tls、smb、dns、ssh、その他。<sup>[[5]](#references)</sup>
 
 #### Source and Destination Addresses
 
-SuricataはIP range、negation、group化されたaddress listをサポートします。<sup>[[5]](#references)</sup>
+Suricata は、IP 範囲、否定、およびグループ化されたアドレスリストをサポートする。<sup>[[5]](#references)</sup>
 
 | Example                       | Meaning                                  |
 | ----------------------------- | ---------------------------------------- |
-| ! 1.1.1.1                     | 1.1.1.1以外のすべてのIP address             |
-| !\[1.1.1.1, 1.1.1.2]          | 1.1.1.1と1.1.1.2以外のすべてのIP address |
-| $HOME_NET                     | yaml内のHOME_NETの設定         |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NETで、HOME_NETではない            |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.5を除く10.0.0.0/24          |
+| ! 1.1.1.1                     | 1.1.1.1 以外のすべての IP アドレス       |
+| !\[1.1.1.1, 1.1.1.2]          | 1.1.1.1 と 1.1.1.2 以外のすべての IP アドレス |
+| $HOME_NET                     | yaml 内の HOME_NET の設定                |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET かつ HOME_NET ではない      |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.5 を除く 10.0.0.0/24              |
 
 #### Source and Destination Ports
 
-Suricataはport range、negation、port listをサポートします。<sup>[[5]](#references)</sup>
+Suricata は、ポート範囲、否定、およびポートのリストをサポートする。<sup>[[5]](#references)</sup>
 
 | Example         | Meaning                                |
 | --------------- | -------------------------------------- |
-| any             | 任意のaddress                            |
-| \[80, 81, 82]   | port 80、81、82                     |
-| \[80: 82]       | 80から82までのrange                  |
-| \[1024: ]       | 1024から最大port-numberまで |
-| !80             | 80以外のすべてのport                      |
-| \[80:100,!99]   | 99を除く80から100までのrange |
-| \[1:80,!\[2,4]] | 2と4を除く1から80までのrange  |
+| any             | 任意のアドレス                         |
+| \[80, 81, 82]   | ポート 80、81、82                      |
+| \[80: 82]       | 80 から 82 までの範囲                  |
+| \[1024: ]       | 1024 から最大のポート番号まで          |
+| !80             | 80 以外のすべてのポート               |
+| \[80:100,!99]   | 80 から 100 までの範囲。ただし 99 を除く |
+| \[1:80,!\[2,4]] | 1 から 80 までの範囲。ただしポート 2 と 4 を除く |
 
 #### Direction
 
-Suricata rulesでは、評価対象となるcommunicationのdirectionを指定できます。<sup>[[5]](#references)</sup>
+Suricata のルールでは、評価対象となる通信方向を指定できる。<sup>[[5]](#references)</sup>
 ```
 source -> destination
 source <> destination  (both directions)
 ```
-#### Keywords
+#### キーワード
 
-以下の例では、metadata、IP、ICMP、payload、application-layer options など、Suricata の rule keywords を使用しています。公式の rule documentation では、これらのカテゴリとその構文がまとめられています。<sup>[[6]](#references)[[9]](#references)</sup>
+以下の例では、Suricata のルールキーワード（metadata、IP、ICMP、payload、アプリケーション層オプションなど）を使用しています。公式のルールドキュメントでは、これらの分類と構文がまとめられています。<sup>[[6]](#references)[[9]](#references)</sup>
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -227,11 +229,11 @@ drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 
 - [1] [iptables(8) — Linux マニュアルページ](https://man7.org/linux/man-pages/man8/iptables.8.html)
 - [2] [iptables-extensions(8) — Linux マニュアルページ](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
-- [3] [3. Installation — Suricata 7.0.14 ドキュメント](https://docs.suricata.io/en/suricata-7.0.14/install.html)
-- [4] [9.1. Rule Management with Suricata-Update — Suricata 8.0.1 ドキュメント](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
-- [5] [8.1. Rules Format — Suricata 8.0.3 ドキュメント](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
-- [6] [8.7. Payload Keywords — Suricata 8.0.3 ドキュメント](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
-- [7] [15. Setting up IPS/inline for Linux — Suricata 7.0.15 ドキュメント](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
-- [8] [9.3. Rule Reloads — Suricata 7.0.14 ドキュメント](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
-- [9] [8. Suricata Rules — Suricata 8.0.3 ドキュメント](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
+- [3] [3. インストール — Suricata 7.0.14 ドキュメント](https://docs.suricata.io/en/suricata-7.0.14/install.html)
+- [4] [9.1. Suricata-Update によるルール管理 — Suricata 8.0.1 ドキュメント](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
+- [5] [8.1. ルール形式 — Suricata 8.0.3 ドキュメント](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
+- [6] [8.7. Payload キーワード — Suricata 8.0.3 ドキュメント](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
+- [7] [15. Linux での IPS/inline のセットアップ — Suricata 7.0.15 ドキュメント](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
+- [8] [9.3. ルールの再読み込み — Suricata 7.0.14 ドキュメント](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
+- [9] [8. Suricata ルール — Suricata 8.0.3 ドキュメント](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
 {{#include ../../../banners/hacktricks-training.md}}

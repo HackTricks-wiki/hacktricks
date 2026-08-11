@@ -1,31 +1,33 @@
 # Mobile Phishing & Malicious App Distribution (Android & iOS)
 
-> [!INFO]
-> このページでは、脅威アクターがフィッシング（SEO、ソーシャルエンジニアリング、偽ストア、dating apps など）を通じて、**悪意のある Android APK** と **iOS mobile-configuration profiles** を配布するために使用する技術を解説します。
-> この内容は、Zimperium zLabs（2025）が公開した SarangTrap campaign およびその他の公開調査をもとにしています。<sup>[[1]](#references)</sup>
+{{#include ../../banners/hacktricks-training.md}}
 
-## 攻撃フロー
+> [!INFO]
+> このページでは、脅威アクターが phishing（SEO、ソーシャルエンジニアリング、偽ストア、dating apps など）を通じて、**malicious Android APKs** や **iOS mobile-configuration profiles** を配布するために使用する手法を扱います。
+> 内容は、Zimperium zLabs（2025）が公開した SarangTrap campaign およびその他の公開 research をもとにしています。<sup>[[1]](#references)</sup>
+
+## Attack Flow
 
 1. **SEO/Phishing Infrastructure**
-* 数十個の look-alike domains（dating、cloud share、car service など）を登録する。
-– `<title>` element に現地語の keywords と emojis を使用して Google でのランキングを上げる。
-– 同じ landing page 上で、Android（`.apk`）と iOS の install instructions の両方をホストする。
+* dating、cloud share、car service などを装った look-alike domains を数十件登録する。
+– `<title>` 要素に現地語の keywords と emojis を使用し、Google での ranking を高める。
+– 同じ landing page 上で、Android（`.apk`）と iOS の install instructions の**両方**をホストする。
 2. **First Stage Download**
 * Android: *unsigned* または “third-party store” APK への直接リンク。
 * iOS: 悪意のある **mobileconfig** profile への `itms-services://` または通常の HTTPS link（下記参照）。
 3. **Android Post-install Behaviour**
-* C2-gated execution、permission abuse、dropper bypasses、background collection、その他の post-install malware behaviour については、下記の専用 Android Malware Post-Exploitation page で解説します。
+* C2-gated execution、permission abuse、dropper bypasses、background collection、その他の post-install malware behaviour については、下記の専用 Android Malware Post-Exploitation page で扱います。
 4. **iOS Delivery Technique**
-* 1つの **mobile-configuration profile** で、`PayloadType=com.apple.sharedlicenses`、`com.apple.managedConfiguration` などを要求し、デバイスを「MDM」に似た supervision に enroll できます。
+* 1つの **mobile-configuration profile** で、`PayloadType=com.apple.sharedlicenses`、`com.apple.managedConfiguration` などを要求し、device を “MDM” に似た supervision に enroll できる。
 * Social-engineering instructions:
 1. Settings ➜ *Profile downloaded* を開く。
-2. *Install* を3回タップする（phishing page に screenshots を表示）。
-3. unsigned profile を trust する ➜ App Store review なしで、攻撃者が *Contacts* と *Photo* entitlement を取得する。
+2. *Install* を3回 tap する（phishing page に screenshots を掲載）。
+3. unsigned profile を trust する ➜ App Store review なしで、attacker が *Contacts* と *Photo* の entitlement を取得する。
 5. **iOS Web Clip Payload (phishing app icon)**
-* `com.apple.webClip.managed` payloads により、branded icon/label を付けた phishing URL を **Home Screen に pin** できます。
-* Web Clips は **full-screen** で実行でき（browser UI を非表示にする）、**non-removable** としてマークできるため、icon を削除するには victim が profile を削除する必要があります。<sup>[[3]](#references)</sup>
+* `com.apple.webClip.managed` payloads により、branded icon/label 付きの phishing URL を **Home Screen に pin** できる。
+* Web Clips は **full-screen** で実行できる（browser UI を隠す）ほか、**non-removable** に設定できるため、icon を削除するには victim が profile を削除する必要がある。<sup>[[3]](#references)</sup>
 6. **Network Layer**
-* Plain HTTP。多くの場合、`api.<phishingdomain>.com` のような HOST header を使用して port 80 で動作します。
+* Plain HTTP。多くの場合 port 80 で、`api.<phishingdomain>.com` のような HOST header を使用する。
 * `User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; Pixel 6 Build/TQ3A.230805.001)`（TLS なし → 簡単に発見できる）。
 
 ## Android Malware Post-Exploitation
@@ -36,11 +38,11 @@ C2、Accessibility abuse、overlays、ATS automation、staged DEX loading、prem
 ../basic-forensic-methodology/android-malware-post-exploitation.md
 {{#endref}}
 
-## Socket.IO/WebSocket-based APK Smuggling + 偽 Google Play Pages
+## Socket.IO/WebSocket-based APK Smuggling + Fake Google Play Pages
 
-攻撃者は、static APK links を Google Play に似せた lures に埋め込まれた Socket.IO/WebSocket channel に置き換えるケースを増やしています。これにより payload URL を隠し、URL/extension filters を bypass し、現実的な install UX を維持できます。<sup>[[2]](#references)[[4]](#references)</sup>
+Attacker は、static APK links を Google Play に見せかけた lure に埋め込まれた Socket.IO/WebSocket channel に置き換えるケースを増やしています。これにより payload URL を隠し、URL/extension filters を bypass し、現実的な install UX を維持できます。<sup>[[2]](#references)[[4]](#references)</sup>
 
-実際の環境で観測された typical client flow:
+実際の環境で確認された typical client flow:
 
 <details>
 <summary>Socket.IO fake Play downloader (JavaScript)</summary>
@@ -65,12 +67,12 @@ document.body.appendChild(a); a.click();
 ```
 </details>
 
-単純な制御を回避する理由:
-- 静的な APK URL は公開されず、ペイロードは WebSocket フレームからメモリ上で再構成されます。
-- 直接的な .apk レスポンスをブロックする URL/MIME/拡張子フィルターでは、WebSockets/Socket.IO 経由でトンネルされたバイナリデータを見逃す可能性があります。
-- WebSockets を実行しないクローラーや URL サンドボックスは、ペイロードを取得できません。
+単純な controls を回避できる理由:
+- 静的な APK URL は公開されず、payload は WebSocket frames からメモリ上で再構築される。
+- 直接的な .apk response をブロックする URL/MIME/extension filters では、WebSockets/Socket.IO 経由でトンネルされた binary data を見逃す可能性がある。
+- WebSockets を実行しない crawlers や URL sandboxes は payload を取得できない。
 
-WebSocket の tradecraft とツールについては、以下も参照してください:
+WebSocket tradecraft と tooling も参照:
 
 {{#ref}}
 ../../pentesting-web/websocket-attacks.md
@@ -79,8 +81,8 @@ WebSocket の tradecraft とツールについては、以下も参照してく�
 
 ## References
 
-- [1] [Romance の闇: SarangTrap 恐喝キャンペーン](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
+- [1] [ロマンスの暗黒面: SarangTrap Extortion Campaign](https://zimperium.com/blog/the-dark-side-of-romance-sarangtrap-extortion-campaign)
 - [2] [Socket.IO](https://socket.io)
-- [3] [Apple デバイス向け Web Clips ペイロード設定](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
-- [4] [インドネシアおよびベトナムの Android ユーザーを標的とする Banker Trojan](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
+- [3] [Apple devices 向け Web Clips payload settings](https://support.apple.com/guide/deployment/web-clips-payload-settings-depbc7c7808/web)
+- [4] [インドネシアおよびベトナムの Android Users を標的とする Banker Trojan](https://dti.domaintools.com/banker-trojan-targeting-indonesian-and-vietnamese-android-users/)
 {{#include ../../banners/hacktricks-training.md}}

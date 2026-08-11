@@ -1,17 +1,19 @@
 # Basic Python
 
-## Pythonの基礎
+{{#include ../../banners/hacktricks-training.md}}
+
+## Python Basics
 
 ### 役立つ情報
 
-以下のすべての例では、明示的に記載されていない限り **Python 3** を前提とします。\
-Python 3では `range()` は iterable object を返します（Python 2の `xrange()` に類似）。\
-**tuple** と **list** の違いは、tupleでは通常、値の **position** が意味を持つのに対し、listは通常、値を順番に並べたものにすぎない点です。
+以下のすべての例は、明示的に記載されていない限り **Python 3** を前提としています。\
+`range()` は Python 3 では iterable object を返します（Python 2 の `xrange()` に相当）。\
+**tuple** と **list** の違いは、tuple では通常、値の **position** が意味を持つのに対し、list は通常、値を順番に並べた sequence にすぎない点です。
 
 ### 主な操作
 
 数値を累乗するには、`3**2` を使用します（`3^2` ではありません）。\
-Python 3では `2/3 == 0.666666...` ですが、`2//3 == 0` は整数除算を実行します。\
+Python 3 では `2/3 == 0.666666...` ですが、`2//3 == 0` は整数除算を実行します。\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -33,7 +35,7 @@ Python 3では `2/3 == 0.666666...` ですが、`2//3 == 0` は整数除算を�
 `"abc" in "abcdef"`\
 `"abc\n".strip() == "abc"`\
 `"apbc".replace("p", "") == "abc"`\
-`dir(str)` = 利用可能なメソッドを一覧表示\
+`dir(str)` = 利用可能なメソッドの list\
 `help(str)` = class `str` の定義\
 `"a".upper() == "A"`\
 `"A".lower() == "a"`\
@@ -91,13 +93,13 @@ b"admin".decode() == "admin"
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
 `t3 = t1 + t2 == (1, '2', 'three', 5, 6)`\
-`(4,)` = 単一要素\
+`(4,)` = singleton\
 `d = ()` 空のタプル\
 `d += (4,)` --> タプルに追加\
 `# t1[1] = 'new value'` --> タプルは変更不可\
 `list(t2) == [5, 6]` --> タプルからリストへ
 
-### リスト (array)
+### リスト（array）
 
 `d = []` 空\
 `a = [1, 2, 3]`\
@@ -119,9 +121,9 @@ month_numbers.update(a)
 mn = month_numbers.copy()  # independent copy
 month_numbers.get('key', 0)  # default value if key does not exist
 ```
-### セット
+### Set
 
-セットには重複がありません。\
+Set には重複がありません。\
 `myset = set(['a', 'b']) == {'a', 'b'}`\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
 `myset.add('a')` --> 変更なし\
@@ -138,9 +140,9 @@ month_numbers.get('key', 0)  # default value if key does not exist
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
 
-### クラス
+### Classes
 
-`__lt__` 内のメソッドが、オブジェクトの比較で `sort()` / `sorted()` によって使用されます。
+`__lt__` 内のメソッドが、オブジェクトの比較のために `sort()` / `sorted()` で使用されます。
 ```python
 import datetime
 
@@ -174,11 +176,11 @@ MITPerson.next_id_num += 1
 def __lt__(self, other):
 return self.id_num < other.id_num
 ```
-### map, zip, filter, lambda, sorted とワンライナー
+### map, zip, filter, lambda, sorted and one-liners
 
-**Python 3** では、`map()` と `filter()` は iterator を返すため、すべての値を一度に表示したい場合は `list()` に変換します。
+**Python 3** では、`map()` と `filter()` は iterator を返すため、すべての値を一度に表示したい場合は `list()` で変換します。
 
-**Map** は `[f(x) for x in iterable]` と同様です：
+**Map** は `[f(x) for x in iterable]` のようなものです:
 ```python
 list(map(tuple, [[1, 2, 3], [4, 5]]))
 # [(1, 2, 3), (4, 5)]
@@ -186,15 +188,15 @@ list(map(tuple, [[1, 2, 3], [4, 5]]))
 list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 # [False, False, True, False, False, True, False, False, True]
 ```
-**zip** は短い方の iterable が終了すると停止します:
+**zip** は短い方の反復可能オブジェクトが終了すると停止します:
 ```python
 for f, b in zip(foo, bar):
 print(f, b)
 ```
 **Lambda** は関数を定義するために使用されます:\
-`(lambda x, y: x + y)(5, 3) == 8` --> lambda を単純な関数として使用\
-`sorted(range(-5, 6), key=lambda x: x**2)` --> lambda を使用してソート\
-`list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]` --> lambda を使用してフィルタリング\
+`(lambda x, y: x + y)(5, 3) == 8` --> use lambda as a simple function\
+`sorted(range(-5, 6), key=lambda x: x**2)` --> use lambda to sort\
+`list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
 `reduce(lambda x, y: x * y, [1, 2, 3, 4]) == 24`
 ```python
 from functools import reduce
@@ -240,9 +242,9 @@ def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
 assert len(grades) == len(weights), 'wrong number of grades'
 ```
-### ジェネレータ、yield
+### Generator、yield
 
-ジェネレータは、すべてを一度に返す代わりに、値を1つずつ **yield** します。これは巨大なワードリスト、bruteforcer、または大きなレスポンスに非常に便利です。
+Generatorはすべてを一度にreturnする代わりに、値を1つずつ**yield**します。これは巨大なwordlist、bruteforcer、大きなレスポンスに非常に便利です。
 ```python
 def my_gen(n):
 yield n
@@ -269,13 +271,13 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 `\S` --> 空白以外の文字\
 `^` --> で始まる\
 `$` --> で終わる\
-`+` --> 1個以上\
-`*` --> 0個以上\
-`?` --> 0個または1個の出現
+`+` --> 1回以上\
+`*` --> 0回以上\
+`?` --> 0回または1回
 
 **オプション:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> ドットで改行にもマッチできるようにする\
+`re.search(pat, string, re.DOTALL)` --> ドットで改行にマッチできるようにする\
 `re.search(pat, string, re.MULTILINE)` --> `^` と `$` が異なる行でもマッチできるようにする
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
@@ -287,7 +289,7 @@ re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 ### IterTools
 
 **product**\
-`from itertools import product` --> 1つ以上のイテラブル間の直積
+`from itertools import product` --> 1つ以上の iterable 間の直積
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -296,7 +298,7 @@ list(product([1, 2, 3], repeat=2))
 # [(1, 1), (1, 2), (1, 3), (2, 1), (2, 2), (2, 3), (3, 1), (3, 2), (3, 3)]
 ```
 **permutations**\
-`from itertools import permutations` --> あらゆる可能な配置
+`from itertools import permutations` --> 考えられるすべての配置
 ```python
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
@@ -314,14 +316,14 @@ list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> Python 3.12以降で利用可能。大規模なbruteforce候補リストやIOCファイルをchunk化するのに便利。
+`from itertools import batched` --> Python 3.12以降で利用可能。大規模なbruteforce候補リストやIOCファイルをchunkに分割するのに便利です。
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
 ### デコレータ
 
-関数の実行に必要な時間を測定するデコレータ:
+関数の実行にかかる時間を測定するデコレータ：
 ```python
 from functools import wraps
 import time
@@ -349,9 +351,9 @@ Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### pentesting に便利な標準ライブラリヘルパー
+### pentesting に役立つ標準ライブラリのヘルパー
 
-**`pathlib` によるファイルシステムのトラバーサル**（`Path.walk()` は Python 3.12 以降で使用可能です。古いインタープリターでは `os.walk()` を使用してください）：
+**`pathlib` による Filesystem の走査**（`Path.walk()` は Python 3.12 以降で利用可能です。古いインタープリターでは `os.walk()` を使用してください）：
 ```python
 from pathlib import Path
 
@@ -362,7 +364,7 @@ for name in files:
 if name.endswith((".py", ".env", ".bak")):
 print(root / name)
 ```
-**コマンドを安全に起動する**（通常、`shell=False` が望ましいデフォルトです）：
+**コマンドを安全に起動する**（通常は `shell=False` が望ましいです）：
 ```python
 import subprocess
 
@@ -374,12 +376,12 @@ check=True,
 )
 print(cp.stdout)
 ```
-**どうしても** shell command を構築する必要がある場合は、まず攻撃者が制御する各トークンをクォートしてください:
+**どうしても** shell command を構築する必要がある場合は、攻撃者が制御する各 token を最初に quote してください:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
-**一時ファイル / ディレクトリ**（ハードコードされた `/tmp/foo` パスより安全）：
+**一時ファイル / ディレクトリ**（ハードコードされた`/tmp/foo`パスより安全）:
 ```python
 import tempfile
 from pathlib import Path
@@ -391,9 +393,9 @@ print(out.read_text())
 ```
 HTTP automation については、[Python の web requests に関するこちらのページ](web-requests.md)を確認してください。
 
-### Archive の抽出に関する注意点（tooling と file parsers では重要）
+### Archive extraction の注意点（tooling と file parser では重要）
 
-**Python 3.14** 以降では、`tarfile.extract()` / `extractall()` はデフォルトでより安全な `data` filter を使用します。古い Python バージョンで攻撃者が制御する Archive を扱う場合は、明示的に設定してください。<sup>[[1]](#references)[[2]](#references)</sup>
+**Python 3.14** 以降では、`tarfile.extract()` / `extractall()` はデフォルトでより安全な `data` filter を使用します。古い Python バージョンで攻撃者が制御する archive を扱う場合は、明示的に設定してください。<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 import tarfile
 import tempfile
@@ -402,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-`filter="data"`を使用する場合でも、untrusted archivesは新しい一時ディレクトリにextractし、ファイルを重要な場所へ移動する前に、書き込まれた内容をvalidateしてください。
+`filter="data"` を使用していても、信頼できないアーカイブは新しい一時ディレクトリに展開し、ファイルを重要な場所へ移動する前に、書き込まれた内容を検証してください。
 
-`zipfile.Path`は異なります。**filenamesを自動的にsanitizeしない**ため、攻撃者が制御するZIP membersをextractする前にpathsをvalidateしてください：
+`zipfile.Path` は異なります。**ファイル名を自動的にサニタイズしない**ため、攻撃者が制御する ZIP メンバーを展開する前にパスを検証してください:
 ```python
 import os
 import zipfile
@@ -419,9 +421,9 @@ zf.extract(info, base)
 ```
 ### 覚えておくべき危険なプリミティブ
 
-- `eval()` / `exec()` は **サンドボックスではありません**。
-- `ast.literal_eval()` は **Python コードを実行しません**が、攻撃者が制御する入力によって、メモリ / CPU の denial of service に悪用される可能性があります。
-- `pickle.loads()` は **secure ではありません**。攻撃者が制御する bytes を決して unpickle しないでください。
+- `eval()` / `exec()` は **sandbox ではありません**。
+- `ast.literal_eval()` は Python code を実行しませんが、attacker-controlled input によってメモリ / CPU denial of service に悪用される可能性があります。
+- `pickle.loads()` は **secure ではありません**。attacker-controlled bytes を決して unpickle しないでください。
 - より高度な offensive tricks については、[Bypass Python sandboxes](bypass-python-sandboxes/README.md)、[Python internal read gadgets](python-internal-read-gadgets.md)、[Python deserializations](../../pentesting-web/deserialization/README.md) を確認してください。
 
 ## References

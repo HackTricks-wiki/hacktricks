@@ -1,13 +1,15 @@
 # Python Sandbox Escape & Pyscript
 
-**確認しておきたいページ:**
+{{#include ../../banners/hacktricks-training.md}}
+
+**確認すべき興味深いページ:**
 
 - [**Pyscript hacking tricks**](pyscript.md)
-- [**Python deserializations**](../../pentesting-web/deserialization/README.md)
-- [**Keras model deserialization RCE and gadget hunting**](keras-model-deserialization-rce-and-gadget-hunting.md)
-- [**Tricks to bypass python sandboxes**](bypass-python-sandboxes/README.md)
-- [**Basic python web requests syntax**](web-requests.md)
-- [**Basic python syntax and libraries**](basic-python.md)
+- [**Pythonのデシリアライゼーション**](../../pentesting-web/deserialization/README.md)
+- [**KerasモデルのデシリアライゼーションRCEとガジェットハンティング**](keras-model-deserialization-rce-and-gadget-hunting.md)
+- [**PythonサンドボックスをバイパスするためのTricks**](bypass-python-sandboxes/README.md)
+- [**PythonのWebリクエストの基本構文**](web-requests.md)
+- [**Pythonの基本構文とライブラリ**](basic-python.md)
 
 ## References
 
