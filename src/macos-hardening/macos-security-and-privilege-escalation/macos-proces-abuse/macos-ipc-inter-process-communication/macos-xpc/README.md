@@ -4,31 +4,31 @@
 
 ## 基本情報
 
-XPCは、macOSおよびiOSにおける**プロセス間の通信**のためのframeworkです。**プロセス間で安全かつ非同期な呼び出しを行う**ためのメカニズムを提供します。XPCは**権限分離されたアプリケーション**をサポートしており、各**コンポーネント**は**必要な権限のみ**で実行されるため、侵害されたプロセスによる潜在的な被害を制限できます。<sup>[[1]](#references)</sup>
+XPCは、macOSおよびiOSにおける**プロセス間の通信**のためのフレームワークです。**プロセス間で安全かつ非同期な呼び出しを行う**ためのメカニズムを提供します。XPCは**権限分離されたアプリケーション**をサポートしており、各**コンポーネント**は**必要な権限のみ**で実行されるため、プロセスが侵害された場合の潜在的な被害を制限できます。<sup>[[1]](#references)</sup>
 
-XPCは、Inter-Process Communication（IPC）の一種を使用します。IPCとは、同じシステム上で実行されている異なるプログラムがデータを相互に送受信するための一連の方法です。
+XPCは、Inter-Process Communication（IPC）の一種を使用します。IPCは、同じシステム上で実行されている異なるプログラムがデータを相互に送受信するための一連の方式です。
 
-XPCの主なメリットは次のとおりです。
+XPCの主な利点は次のとおりです。
 
-1. **Security**: 作業を異なるプロセスに分離することで、各プロセスには必要な権限のみを付与できます。つまり、プロセスが侵害された場合でも、被害を与える能力は制限されます。
-2. **Stability**: XPCは、クラッシュの影響を発生したコンポーネントに隔離するのに役立ちます。プロセスがクラッシュした場合でも、システムの他の部分に影響を与えずに再起動できます。
-3. **Performance**: XPCにより、異なるタスクを異なるプロセスで同時に実行できるため、concurrencyを容易に実現できます。
+1. **Security**: 作業を異なるプロセスに分離することで、各プロセスには必要な権限のみを付与できます。つまり、プロセスが侵害された場合でも、害を及ぼす能力は制限されます。
+2. **Stability**: XPCは、クラッシュを発生したコンポーネント内に隔離するのに役立ちます。プロセスがクラッシュした場合でも、システムの他の部分に影響を与えずに再起動できます。
+3. **Performance**: XPCでは、異なるタスクを異なるプロセスで同時に実行できるため、並行処理を容易に実現できます。
 
-主な**欠点**は、**アプリケーションを複数のプロセスに分離**し、それらをXPCを介して通信させると、overheadが発生することです。最新のシステムでは、このoverheadは通常、securityとstabilityのメリットと比較して小さいものです。<sup>[[1]](#references)</sup>
+主な**欠点**は、**アプリケーションを複数のプロセスに分離**し、それらをXPC経由で通信させることでオーバーヘッドが発生することです。最新のシステムでは、このオーバーヘッドは通常、SecurityとStabilityの利点と比較すれば小さいものです。<sup>[[1]](#references)</sup>
 
 ## Application-Specific XPC Services
 
-アプリケーションのXPCコンポーネントは、**アプリケーション自体の内部**にあります。たとえば、Safariでは**`/Applications/Safari.app/Contents/XPCServices`**にあります。これらは**`.xpc`**という拡張子を持ち（**`com.apple.Safari.SandboxBroker.xpc`**など）、**bundleでもあります**。bundle内にはmain binaryと`Info.plist`が含まれています。例: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`および`/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`。<sup>[[2]](#references)</sup>
+アプリケーションのXPCコンポーネントは、**アプリケーション自体の内部**にあります。たとえばSafariでは、**`/Applications/Safari.app/Contents/XPCServices`**にあります。これらは**`.xpc`**拡張子（**`com.apple.Safari.SandboxBroker.xpc`**など）を持ち、**bundle**でもあります。bundle内にはメインバイナリと`Info.plist`があります。例: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker`および`/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`。<sup>[[2]](#references)</sup>
 
-**XPCコンポーネントは、他のXPCコンポーネントやmain application binaryとは異なるentitlementsとprivilegesを持つことができます**。例外の1つは、**Info.plist**ファイルで**`JoinExistingSession`**が`true`に設定されたXPC serviceです。この場合、XPC serviceは、それを呼び出した**アプリケーションと同じsecurity sessionに参加します**。<sup>[[4]](#references)</sup>
+**XPCコンポーネントは、他のXPCコンポーネントやメインアプリケーションバイナリとは異なるentitlementsと権限を持つことができます**。例外の1つは、**Info.plist**ファイルで**`JoinExistingSession`**を`true`に設定したXPC serviceです。この場合、XPC serviceは、それを呼び出した**アプリケーションと同じsecurity session**に参加します。<sup>[[4]](#references)</sup>
 
-XPC servicesは、必要になると**launchdによって起動**され、タスクが**完了**するとシステムリソースを解放するために**shutdownできます**。**Application-specific XPCコンポーネントは、それを含むアプリケーションのみが使用できます**。これにより、潜在的な脆弱性へのexposureが減少します。<sup>[[2]](#references)</sup>
+XPC servicesは、必要に応じて**launchd**によって**起動**され、タスクが**完了**するとシステムリソースを解放するために**停止**できます。**Application-specific XPCコンポーネントは、それを含むアプリケーションのみが使用できる**ため、潜在的な脆弱性への露出を低減できます。<sup>[[2]](#references)</sup>
 
 ## System-Wide XPC Services
 
-System-wide XPC servicesは、単一のアプリケーションの外部からアクセスできます。これらのlaunchd-managed Mach servicesは、**`/System/Library/LaunchDaemons`**、**`/Library/LaunchDaemons`**、**`/System/Library/LaunchAgents`**、または**`/Library/LaunchAgents`**などのdirectoryにある**plist**ファイルで**定義**する必要があります。<sup>[[3]](#references)</sup>
+Application-specific servicesとは異なり、system-wide XPC servicesは、それを含むアプリケーションに限定されません。launchd domainとservice自体のauthorization checksに応じて、複数のユーザーのclientから到達可能な場合があります。これらのlaunchd-managed Mach servicesは、**`/System/Library/LaunchDaemons`**、**`/Library/LaunchDaemons`**、**`/System/Library/LaunchAgents`**、**`/Library/LaunchAgents`**などのディレクトリにある**plist**ファイルで**定義**する必要があります。<sup>[[2]](#references)[[3]](#references)</sup>
 
-これらのplistファイルには、service nameを含む**`MachServices`** keyと、binaryへのpathを含む**`Program`** keyがあります。
+これらのplistファイルには、service nameを含む**`MachServices`** keyと、バイナリへのpathを含む**`Program`** keyがあります:
 ```xml
 cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 
@@ -62,35 +62,35 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 </dict>
 </plist>
 ```
-**`LaunchDaemons`** の Services は、一般的に root として実行されます。したがって、権限のないプロセスがこれらの Services のいずれかによって公開された脆弱なメソッドにアクセスできる場合、権限昇格が可能になることがあります。
+`LaunchDaemons` のサービスは一般的に root として実行されます。したがって、権限のないプロセスがこれらのサービスによって公開された脆弱なメソッドにアクセスできる場合、権限昇格が可能になることがあります。
 
 ## XPC Objects
 
 - **`xpc_object_t`**
 
-XPC の request と reply の payload には、serialization と deserialization を簡略化できる dictionary objects が一般的に使用されます。`libxpc.dylib` には、受信したデータが想定された type であることを検証するために必要な data types も定義されています。C API では、すべての object が `xpc_object_t` であり、その type は `xpc_get_type(object)` を使用して確認できます。<sup>[[2]](#references)</sup>\
-さらに、`xpc_copy_description(object)` 関数を使用すると、debugging に役立つ object の string representation を取得できます。\
+XPC の request と reply の payload には、serialization と deserialization を簡単にする dictionary object が一般的に使用されます。`libxpc.dylib` には、受信したデータが想定された type であることを確認するために必要な data type も定義されています。C API では、すべての object が `xpc_object_t` であり、その type は `xpc_get_type(object)` を使用して確認できます。<sup>[[2]](#references)</sup>\
+さらに、`xpc_copy_description(object)` 関数を使用すると、debugging に役立つ object の文字列表現を取得できます。\
 これらの object には、`xpc_<object>_copy`、`xpc_<object>_equal`、`xpc_<object>_hash`、`xpc_<object>_serialize`、`xpc_<object>_deserialize` などの呼び出し可能なメソッドもあります。
 
-`xpc_object_t` objects は `xpc_<objectType>_create` 関数を呼び出して作成されます。この関数は内部で `_xpc_base_create(Class, Size)` を呼び出し、object の class（`XPC_TYPE_*` のいずれか）と size を指定します。metadata 用に追加で 40 bytes が加えられるため、object data は offset 40 bytes から始まります。\
+`xpc_object_t` object は `xpc_<objectType>_create` 関数を呼び出して作成されます。この関数は内部で `_xpc_base_create(Class, Size)` を呼び出し、object の class（`XPC_TYPE_*` のいずれか）と size を指定します。metadata 用に追加で 40 bytes が追加されるため、object data は offset 40 bytes から始まります。\
 したがって、`xpc_<objectType>_t` は `xpc_object_t` の subclass のようなものであり、`xpc_object_t` は `os_object_t*` の subclass です。
 
 > [!WARNING]
-> type と key の実際の value を取得または設定するために `xpc_dictionary_[get/set]_<objectType>` を使用するのは developer である必要があります。
+> type と key の実際の value の取得または設定には、developer が `xpc_dictionary_[get/set]_<objectType>` を使用する必要があることに注意してください。
 
 - **`xpc_pipe`**
 
-**`xpc_pipe`** は、process が通信に使用できる FIFO pipe です（通信には Mach messages を使用します）。\
-`xpc_pipe_create()` または `xpc_pipe_create_from_port()` を呼び出し、特定の Mach port を使用して作成することで、XPC server を作成できます。続いて、messages を受信するには `xpc_pipe_receive` と `xpc_pipe_try_receive` を呼び出します。
+**`xpc_pipe`** は、process 間の communication に使用できる FIFO pipe です（communication には Mach messages が使用されます）。\
+`xpc_pipe_create()` または `xpc_pipe_create_from_port()` を呼び出すことで XPC server を作成できます。後者では、特定の Mach port を使用して作成します。messages を受信するには、`xpc_pipe_receive` と `xpc_pipe_try_receive` を呼び出せます。
 
-**`xpc_pipe`** object は、2 つの Mach ports と name（存在する場合）に関する情報を struct 内に持つ **`xpc_object_t`** である点に注意してください。たとえば、daemon `secinitd` は plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` で、`com.apple.secinitd` という pipe を設定しています。
+**`xpc_pipe`** object は、2 つの Mach port と name（存在する場合）に関する情報を struct 内に持つ **`xpc_object_t`** であることに注意してください。例えば、daemon `secinitd` は plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` で、`com.apple.secinitd` という pipe を設定しています。
 
-**`xpc_pipe`** の例として、**`launchd`** が作成する **bootstrap pipe** があります。これにより Mach ports を共有できます。
+**`xpc_pipe`** の例として、**`launchd`** によって作成される **bootstrap pipe** があります。これにより Mach port を共有できます。
 
 - **`NSXPC*`**
 
 これらは XPC connections を抽象化する high-level の Objective-C objects です。\
-さらに、これらの objects は前述のものよりも DTrace で簡単に debug できます。
+さらに、これらの object は前述の object よりも DTrace で簡単に debug できます。
 
 - **`GCD Queues`**
 
@@ -98,38 +98,38 @@ XPC は messages の受け渡しに GCD を使用し、`xpc.transactionq`、`xpc
 
 ## XPC Services
 
-これらは、他の projects の **`XPCServices`** folder 内に配置される、拡張子 **`.xpc`** の bundles です。また、`Info.plist` では `CFBundlePackageType` が **`XPC!`** に設定されています。\
-この file には、`ServiceType`（Application、User、System のいずれか）、sandbox を定義できる `_SandboxProfile`、service への contact に必要な entitlements または identity を示す可能性がある `_AllowedClients` など、その他の configuration keys も含まれています。これらの options などによって、service の launch 時の設定が決まります。<sup>[[2]](#references)</sup>
+これらは、他の project の **`XPCServices`** folder 内に配置された **`.xpc`** extension の bundles であり、`Info.plist` では `CFBundlePackageType` が **`XPC!`** に設定されています。\
+この file には、`ServiceType` などの他の configuration key もあります。`ServiceType` には Application、User、System を指定できます。また、`_SandboxProfile` では sandbox を定義でき、`_AllowedClients` では service への contact に必要な entitlement または identity を示すことができます。これらの option などによって、service の launch 時の動作が設定されます。<sup>[[2]](#references)</sup>
 
 ### Starting a Service
 
-app は `xpc_connection_create_mach_service` を使用して XPC service への **connection** を試みます。その後、launchd が daemon を検索して **`xpcproxy`** を起動します。**`xpcproxy`** は設定された restrictions を適用し、提供された file descriptors と Mach ports を使って service を spawn します。<sup>[[3]](#references)</sup>
+app は `xpc_connection_create_mach_service` を使用して XPC service に **connect** しようとします。その後、launchd が daemon を検索して **`xpcproxy`** を起動します。**`xpcproxy`** は設定された restriction を適用し、提供された file descriptor と Mach port を使用して service を spawn します。<sup>[[3]](#references)</sup>
 
 XPC service の検索速度を向上させるため、cache が使用されます。
 
-以下を使用して、`xpcproxy` の actions を trace できます。
+以下を使用して `xpcproxy` の actions を trace できます：
 ```bash
 supraudit S -C -o /tmp/output /dev/auditpipe
 ```
-XPC library は `kdebug` を使用して、`xpc_ktrace_pid0` と `xpc_ktrace_pid1` を呼び出してアクションをログに記録します。使用されるコードは文書化されていないため、`/usr/share/misc/trace.codes` に追加する必要があります。これらには `0x29` プレフィックスが付きます。例えば、`0x29000004` は `XPC_serializer_pack` です。\
-ユーティリティ `xpcproxy` は `0x22` プレフィックスを使用します。例えば、`0x2200001c: xpcproxy:will_do_preexec` です。
+XPC libraryは、`xpc_ktrace_pid0`および`xpc_ktrace_pid1`を呼び出してアクションをログに記録するために、`kdebug`を使用します。使用されるコードは文書化されていないため、`/usr/share/misc/trace.codes`に追加する必要があります。これらのコードには`0x29`というプレフィックスが付いています。たとえば、`0x29000004`は`XPC_serializer_pack`です。\
+`xpcproxy`ユーティリティは`0x22`というプレフィックスを使用します。たとえば、`0x2200001c: xpcproxy:will_do_preexec`です。
 
-## XPC Event Messages
+## XPCイベントメッセージ
 
-アプリケーションは異なるイベント **messages** を **subscribe** でき、そのようなイベントが発生したときに **on-demand で起動** できるようになります。これらのサービスの **setup** は、**以前のものと同じディレクトリ** にある l**aunchd plist ファイル** で行われ、追加の **`LaunchEvent`** キーが含まれます。
+アプリケーションは、さまざまなイベント**メッセージ**を**subscribe**できます。これにより、そのようなイベントが発生したときに、アプリケーションを**オンデマンドで開始**できます。これらのサービスの**設定**は、以前のものと**同じディレクトリにあるlaunchd plistファイル**で行われ、追加の**`LaunchEvent`**キーが含まれます。
 
-### XPC Connecting Process Check
+### XPC接続プロセスのチェック
 
-プロセスが XPC connection を介してメソッドを呼び出そうとすると、**XPC service は、そのプロセスが接続を許可されているかを確認する必要があります**。一般的な検証方法とその落とし穴を以下に示します。
+プロセスがXPC接続を介してメソッドを呼び出そうとすると、**XPC serviceは、そのプロセスが接続を許可されているか確認する必要があります**。一般的な検証方法と、その落とし穴を以下に示します。
 
 
 {{#ref}}
 macos-xpc-connecting-process-check/
 {{#endref}}
 
-## XPC Authorization
+## XPC認証
 
-Apple は、アプリが **authorization rights と caller がそれらを取得する方法を設定すること** も許可しています。そのため、必要な rights を持つプロセスは、XPC service が公開する **method を呼び出すことが許可されます**。
+Appleは、アプリが**認証権限と、callerがそれを取得する方法を設定すること**も許可しています。そのため、必要な権限を持つプロセスは、XPC serviceによって公開された**メソッドを呼び出すことができます**。
 
 
 {{#ref}}
@@ -138,7 +138,7 @@ macos-xpc-authorization.md
 
 ## XPC Sniffer
 
-XPC messages を sniff するには、**Frida** を使用する **xpcspy** を利用できます。<sup>[[5]](#references)</sup>
+XPCメッセージをsniffするには、**Frida**を使用する**xpcspy**を利用できます。<sup>[[5]](#references)</sup>
 ```bash
 # Install
 pip3 install xpcspy
@@ -149,9 +149,9 @@ xpcspy -U -r -W <bundle-id>
 ## Using filters (i: for input, o: for output)
 xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
 ```
-もう1つの利用可能な tool は **XPoCe2** です。<sup>[[6]](#references)</sup>
+もう1つの可能な tool は **XPoCe2** です。<sup>[[6]](#references)</sup>
 
-## XPC 通信 C コード例
+## XPC Communication C のコード例
 
 {{#tabs}}
 {{#tab name="xpc_server.c"}}
@@ -283,7 +283,7 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 ```
-## XPC通信のObjective-Cコード例
+## XPC Communication Objective-C Code Example
 
 {{#tabs}}
 {{#tab name="oc_xpc_server.m"}}
@@ -441,14 +441,14 @@ return;
 ```
 ## Remote XPC
 
-`libxpc` の `RemoteXPC.framework` が提供する機能により、異なるホスト間で XPC 通信を行えます。\
-Remote XPC をサポートするサービスには plist 内に `UsesRemoteXPC` キーがあり、`/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist` がその例です。このサービスは `launchd` に登録されていますが、機能自体は `UserEventAgent` と、その `com.apple.remoted.plugin` および `com.apple.remoteservicediscovery.events.plugin` プラグインによって提供されます。
+`RemoteXPC.framework`（`libxpc`由来）が提供する機能により、異なるホスト間でXPC通信を行えます。\
+Remote XPCをサポートするサービスには、plist内に`UsesRemoteXPC`キーがあります。`/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`がその例です。このサービスは`launchd`に登録されていますが、機能は`UserEventAgent`と、その`com.apple.remoted.plugin`および`com.apple.remoteservicediscovery.events.plugin`プラグインによって提供されます。
 
-さらに、`RemoteServiceDiscovery.framework` は `com.apple.remoted.plugin` から情報を取得し、`get_device`、`get_unique_device`、`connect` などの関数を公開します。
+さらに、`RemoteServiceDiscovery.framework`は`com.apple.remoted.plugin`から情報を取得し、`get_device`、`get_unique_device`、`connect`などの関数を公開します。
 
-`connect` がサービスの socket file descriptor を返した後は、`remote_xpc_connection_*` class を使用できます。
+`connect`がサービスのソケットファイルディスクリプタを返した後は、`remote_xpc_connection_*`クラスを使用できます。
 
-`/usr/libexec/remotectl` CLI で、次のようなコマンドを使用して remote services に関する情報を取得できます：
+`/usr/libexec/remotectl` CLIで次のようなコマンドを使用すると、remote servicesに関する情報を取得できます。
 ```bash
 /usr/libexec/remotectl list # Get bridge devices
 /usr/libexec/remotectl show ...# Get device properties and services
@@ -456,13 +456,13 @@ Remote XPC をサポートするサービスには plist 内に `UsesRemoteXPC` 
 /usr/libexec/remotectl [netcat|relay] ... # Expose a service in a port
 ...
 ```
-bridgeOS と host 間の通信は、専用の IPv6 interface を介して行われます。`MultiverseSupport.framework` は、通信に使用される file descriptor を持つ sockets を確立します。\
-これらの通信は、`netstat`、`nettop`、または open-source alternative の `netbottom` を使用して確認できます。
+bridgeOS とホスト間の通信は、専用の IPv6 インターフェースを介して行われます。`MultiverseSupport.framework` は、通信に使用されるファイルディスクリプターを持つソケットを確立します。\
+これらの通信は、`netstat`、`nettop`、または open-source の代替ツールである `netbottom` を使用して確認できます。
 
 ## References
 
 - [1] [Apple Developer — XPC](https://developer.apple.com/documentation/xpc)
-- [2] [Apple Developer Archive — XPCサービスの作成](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
+- [2] [Apple Developer Archive — XPC サービスの作成](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
 - [3] [Apple Developer — `xpc_connection_create_mach_service`](https://developer.apple.com/documentation/xpc/xpc_connection_create_mach_service(_:_:_:))
 - [4] [Apple Developer — `JoinExistingSession`](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession)
 - [5] [hot3eed/xpcspy](https://github.com/hot3eed/xpcspy)
