@@ -1,9 +1,9 @@
-# Angr - 例
+# Angr - Examples
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> プログラムが`scanf`を使用して**stdinから複数の値を一度に取得**している場合は、**`scanf`**の後から開始するstateを生成する必要があります。
+> プログラムが`scanf`を使用して**stdinから複数の値を一度に取得する**場合は、**`scanf`**の後から開始するstateを生成する必要があります。
 
 Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### アドレスに到達するための入力（printを示す）
+### アドレスに到達するための入力（出力を示す）
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -104,7 +104,7 @@ password1 = claripy.BVS('password1', password1_size_in_bits)
 password2_size_in_bits = 32  # :integer
 password2 = claripy.BVS('password2', password2_size_in_bits)
 
-# Relate it Vectors with the registriy values you are interested in to reach an address
+# Relate its vectors to the register values needed to reach an address
 initial_state.regs.eax = password0
 initial_state.regs.ebx = password1
 initial_state.regs.edx = password2
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-このシナリオでは、入力は `scanf("%u %u")` で取得され、値 `"1 1"` が与えられたため、stack の **`0x00000001`** という値は **user input** に由来します。この値が `$ebp - 8` から始まっていることが分かります。したがって、コードでは **`$esp` から 8 bytes を減算し（その時点では `$ebp` と `$esp` が同じ値だったため）、その後 BVS を push しています。**
+このシナリオでは、入力は `scanf("%u %u")` で取得され、値 `"1 1"` が指定されたため、stack 上の **`0x00000001`** の値は **user input** に由来します。この値が `$ebp - 8` から始まっていることがわかります。したがって、コードでは **`$esp` から 8 bytes を減算し（その時点で `$ebp` と `$esp` は同じ値でした）、その後 BVS を push しています。**
 
-![stack に bit vectors を配置して、program flow に到達するために stack position が保持すべき値を確認する: このシナリオでは、入力は scanf("%u %u") で取得され、値 "1...](<../../../images/image (136).png>)
+![stack に bit vectors を配置して、プログラムフローに到達するために stack position が持つべき値を確認する: このシナリオでは、入力は scanf("%u %u") で取得され、値 "1...](<../../../images/image (136).png>)
 
 ### Static Memory values (Global variables)
 ```python
@@ -215,7 +215,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-#Get an address after the scanf. Once the input has already being saved in the memory positions
+# Get an address after scanf, once the input has been saved in memory
 start_address = 0x8048606
 initial_state = project.factory.blank_state(addr=start_address)
 
@@ -337,7 +337,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-# Get an address just before opening the file with th simbolic content
+# Get an address just before opening the file with the symbolic content
 # Or at least when the file is not going to suffer more changes before being read
 start_address = 0x80488db
 initial_state = project.factory.blank_state(addr=start_address)
@@ -347,10 +347,10 @@ initial_state = project.factory.blank_state(addr=start_address)
 filename = 'WCEXPXBW.txt'
 symbolic_file_size_bytes = 64
 
-# Create a BV which is going to be the content of the simbolic file
+# Create a bit-vector that will hold the symbolic file content
 password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-# Create the file simulation with the simbolic content
+# Create the simulated file with symbolic content
 password_file = angr.storage.SimFile(filename, content=password)
 
 # Add the symbolic file we created to the symbolic filesystem.
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> symbolic fileには、symbolic dataと結合されたconstant dataが含まれる場合もあることに注意してください。
+> symbolic file には、symbolic data と統合された constant data が含まれる場合もあることに注意してください:
 >
 > ```python
 >  # Hello world, my name is John.
@@ -402,13 +402,13 @@ main(sys.argv)
 >  # the string from the file, except four symbolic bytes where the name would be
 >  # stored.
 >  # (!)
->  ```
+> ```
 
-### Constrainsの適用
+### 制約の適用
 
 > [!TIP]
-> 16文字の2つの単語を**1文字ずつ**（loopで）比較するような単純な人間の操作でも、**angr**にとっては多くの**コスト**がかかる場合があります。これは、各ifごとに1つのbranchを生成するため、**指数関数的に**branchesを生成する必要があるからです: `2^16`\
-> そのため、**angrに以前のポイントへ戻らせ**（本当に難しい部分がすでに完了している地点）、それらの**constraintsを手動で設定する**ほうが簡単です。
+> 16 文字の 2 つの単語を **1 文字ずつ**（loop で）比較するような単純な人間の操作でも、**angr** にとっては多くの **cost** がかかることがあります。これは、各 if に対して 1 つの branch を生成するため、branch が **指数関数的** に増加するからです: `2^16`\
+> そのため、**angr に以前の地点まで戻らせ**（実際に難しい部分がすでに完了している地点）、それらの **制約を手動で設定する**ほうが簡単です。
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -480,15 +480,15 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!CAUTION]
-> 一部のシナリオでは **veritesting** を有効化できます。これは類似した状態をマージして、不要なブランチを省き、解を見つけるものです: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+> 一部のシナリオでは、**veritesting** を有効化できます。これにより、類似した状態がマージされ、不要なブランチを減らして解を見つけられます: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> これらのシナリオでできるもう1つのことは、**angr がより容易に理解できるものを与える関数を hook する**ことです。
+> これらのシナリオでできるもう1つのことは、**angr が理解しやすいものを返すように関数を hook すること**です。
 
-### シミュレーションマネージャー
+### Simulation Managers
 
-一部のシミュレーションマネージャーは、他のものよりも有用です。前の例では、多数の有用なブランチが作成されるという問題がありました。ここでは、**veritesting** technique がそれらをマージして、解を見つけます。\
-このシミュレーションマネージャーは、次の方法でも有効化できます: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+一部の simulation manager は、他のものより役立つ場合があります。前の例では、多数の有用なブランチが作成されるという問題がありました。ここでは、**veritesting** technique がそれらをマージし、解を見つけます。\
+この simulation manager は、次の方法でも有効化できます: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -562,7 +562,7 @@ user_input_buffer_address,
 user_input_buffer_length
 )
 
-# Create a simbolic IF that if the loaded string frommemory is the expected
+# Create a symbolic If expression that checks the string loaded from memory
 # return True (1) if not returns False (0) in eax
 check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 関数のHooking / Simprocedure
+### 関数のHook / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -678,7 +678,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 複数のパラメータを使って scanf をシミュレートする
+### 複数のパラメータでscanfをシミュレートする
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.
@@ -809,6 +809,5 @@ main(sys.argv)
 ```
 ## References
 
-- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
-
+- [1] [jakespringer/angr_ctf - GitHubリポジトリ](https://github.com/jakespringer/angr_ctf)
 {{#include ../../../banners/hacktricks-training.md}}
