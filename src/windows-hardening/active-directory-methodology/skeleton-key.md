@@ -4,51 +4,51 @@
 
 ## Skeleton Key Attack
 
-**Skeleton Key attack** は、各ドメインコントローラーの LSASS プロセスに **master password** を **inject** することで、攻撃者が **Active Directory authentication を bypass** できる technique です。inject 後は、ユーザーの実際の password が引き続き有効なまま、master password（デフォルトは **`mimikatz`**）を使用して **any domain user** として authenticate できます。<sup>[[1]](#references)[[2]](#references)</sup>
+**Skeleton Key attack**は、各ドメインコントローラーのLSASSプロセスに**マスターパスワードを注入**することで、攻撃者が**Active Directory認証をバイパス**できるtechniqueです。注入後は、マスターパスワード（デフォルトでは **`mimikatz`**）を使用して、**任意のドメインユーザー**として認証できます。このとき、ユーザーの実際のパスワードも引き続き使用できます。<sup>[[1]](#references)[[2]](#references)</sup>
 
-Key facts:
+主な事実：
 
-- すべての DC 上で **Domain Admin/SYSTEM + SeDebugPrivilege** が必要で、**各 reboot 後に再適用**する必要があります。<sup>[[2]](#references)</sup>
-- **NTLM** と **Kerberos RC4 (etype 0x17)** の validation paths に patch を適用します。AES-only realms または AES を強制する accounts では、**skeleton key は受け入れられません**。<sup>[[2]](#references)</sup>
-- third-party LSA authentication packages や、追加の smart-card / MFA providers と競合する可能性があります。<sup>[[2]](#references)</sup>
-- Mimikatz module は optional switch `/letaes` を受け付けます。これにより、compatibility issues が発生した場合に Kerberos/AES hooks への変更を回避できます。<sup>[[3]](#references)</sup>
+- すべてのDCで**Domain Admin/SYSTEM + SeDebugPrivilege**が必要で、**再起動のたびに再適用**する必要があります。<sup>[[2]](#references)</sup>
+- Classic Mimikatz実装は、**NTLM**および**Kerberos RC4 (etype 0x17)**の検証パスにpatchを適用します。AES-only認証では、RC4 hook経由のそのskeleton passwordは**受け入れられません**。<sup>[[2]](#references)</sup>
+- サードパーティ製のLSA authentication packageや、追加のsmart-card / MFA providerと競合する可能性があります。<sup>[[2]](#references)</sup>
+- Mimikatz moduleは、互換性の問題がある場合にKerberos/AES hookへの変更を避けるため、オプションのswitch `/letaes`を受け付けます。<sup>[[3]](#references)</sup>
 
-### Execution
+### 実行
 
-Classic、non‑PPL protected LSASS:
+Classicで、PPLによって保護されていないLSASS：
 ```text
 mimikatz # privilege::debug
 mimikatz # misc::skeleton
 ```
-**LSASS が PPL として実行されている場合**（RunAsPPL/Credential Guard/Windows 11 Secure LSASS）、LSASS にパッチを適用する前に保護を解除するためのカーネルドライバーが必要です:<sup>[[3]](#references)</sup>
+**LSASS が protected process light (PPL) として実行されている場合**、user-mode からの debug access はブロックされます。以下の従来の Mimikatz の手順では、kernel driver をロードして保護を解除した後、LSASS にパッチを適用します。Credential Guard は別の isolation control であり、PPL の同義語として使用しないでください。<sup>[[3]](#references)[[4]](#references)</sup>
 ```text
 mimikatz # privilege::debug
 mimikatz # !+
 mimikatz # !processprotect /process:lsass.exe /remove   # drop PPL
 mimikatz # misc::skeleton                               # inject master password 'mimikatz'
 ```
-Injection 後、任意のドメインアカウントで認証しますが、パスワードには `mimikatz`（またはオペレーターが設定した値）を使用します。複数の DC がある環境では、**すべての DC** で繰り返すことを忘れないでください。
+インジェクション後、任意のドメインアカウントで認証しますが、パスワードには `mimikatz`（またはオペレーターが設定した値）を使用します。複数の DC がある環境では、**すべての DC** で繰り返し実行することを忘れないでください。
 
-## 緩和策
+## Mitigations
 
 - **ログ監視**
-- 未署名ドライバー（`mimidrv.sys` など）のサービスまたはドライバーインストールを示す System **Event ID 7045**。
-- **Sysmon**: `mimidrv.sys` のドライバー読み込みに対する Event ID 7、およびシステムプロセス以外からの `lsass.exe` への疑わしいアクセスに対する Event ID 10。
-- 機密性の高い特権の使用または LSA authentication package 登録の異常を示す Security **Event ID 4673/4611**。DC から RC4（etype 0x17）を使用した予期しない 4624 ログオンと関連付けます。
+- unsigned driver などの `mimidrv.sys` のインストールに対する System **Event ID 7045**（service/driver install）。
+- **Sysmon**: `mimidrv.sys` の driver load に対する Event ID 7、および non-system process からの `lsass.exe` への不審なアクセスに対する Event ID 10。
+- sensitive privilege の使用または LSA authentication package の登録異常に対する Security **Event ID 4673/4611**。DC から RC4（etype 0x17）を使用した、予期しない 4624 logon と相関分析します。
 - **LSASS の hardening**
-- DC で **RunAsPPL/Credential Guard/Secure LSASS** を有効にしておき、攻撃者を kernel-mode driver のデプロイに追い込みます（より多くの telemetry が得られ、exploit が困難になります）。
-- 可能な場合は legacy **RC4** を無効化します。AES に限定された Kerberos tickets により、skeleton key が使用する RC4 hook path を防止できます。<sup>[[2]](#references)</sup>
-- 簡易的な PowerShell hunts:
-- 未署名 kernel driver のインストールを検出: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
+- サポートされている環境では、**RunAsPPL** と **Credential Guard** を有効に保ちます。これらは異なる保護を提供し、組み合わせることで LSASS の secret を変更または抽出する試みに必要なコストと telemetry を高めます。<sup>[[4]](#references)</sup>
+- 可能な場合は legacy **RC4** を無効化します。AES に限定された Kerberos ticket により、skeleton key が使用する RC4 hook path を防止できます。<sup>[[2]](#references)</sup>
+- 簡易 PowerShell hunt:
+- unsigned kernel driver のインストールを検出: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
 - Mimikatz driver を hunt: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
-- reboot 後に PPL が強制されていることを検証: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*"}`
+- reboot 後に PPL が enforced されていることを検証: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*"}`
 
-追加の credential-hardening guidance については、[Windows credentials protections](../stealing-credentials/credentials-protections.md) を確認してください。
+credential hardening に関する追加の guidance については、[Windows credentials protections](../stealing-credentials/credentials-protections.md) を確認してください。
 
 ## References
 
-- [1] [Netwrix – Skeleton Key attack in Active Directory (2022)](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
-- [2] [TheHacker.recipes – Skeleton key (2026)](https://www.thehacker.recipes/ad/persistence/skeleton-key/)
+- [1] [Netwrix – Active Directory における Skeleton Key attack（2022）](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
+- [2] [TheHacker.recipes – Skeleton key（2026）](https://www.thehacker.recipes/ad/persistence/skeleton-key/)
 - [3] [TheHacker.Tools – Mimikatz misc::skeleton module](https://tools.thehacker.recipes/mimikatz/modules/misc/skeleton)
-
+- [4] [Microsoft Learn — 追加の LSA protection の構成](https://learn.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/configuring-additional-lsa-protection)
 {{#include ../../banners/hacktricks-training.md}}

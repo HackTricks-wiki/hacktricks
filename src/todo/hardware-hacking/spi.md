@@ -4,60 +4,67 @@
 
 ## 基本情報
 
-SPI（Serial Peripheral Interface）は、組み込みシステムでIC（Integrated Circuits）間の短距離通信に使用される同期シリアル通信プロトコルです。SPI Communication Protocolは、ClockとChip Select Signalによって制御されるmaster-slave architectureを使用します。master-slave architectureは、EEPROM、センサー、制御デバイスなどの外部周辺機器を管理するmaster（通常はマイクロプロセッサ）で構成され、これらの周辺機器がslaveとみなされます。
+SPI（Serial Peripheral Interface）は、集積回路間の短距離通信に一般的に使用される同期シリアルバスです。コントローラーはクロックを供給し、chip-select信号を使用してEEPROM、センサー、制御デバイスなどのペリフェラルを選択します。<sup>[[1]](#references)</sup>
 
-複数のslaveを1つのmasterに接続できますが、slave同士は通信できません。slaveは、clockとchip selectという2つのピンによって管理されます。SPIは同期通信プロトコルであるため、入力ピンと出力ピンはclock信号に従います。chip selectは、masterがslaveを選択して通信するために使用されます。chip selectがhighの場合、slave deviceは選択されていません。一方、lowの場合はchipが選択され、masterはslaveと通信します。
+複数のペリフェラルでクロック線とデータ線を共有でき、通常はペリフェラルごとに個別のchip-selectを使用します。コントローラーが転送を調整し、ペリフェラル同士がSPIバス上で直接通信することは通常ありません。chip-selectの極性とタイミングはデバイスごとに異なります。active-lowによる選択が一般的ですが、普遍的ではありません。SPIは、discovery、アドレス指定、コマンド、単一の最大転送長を定義していないため、必ず対象データシートを確認してください。<sup>[[1]](#references)</sup>
 
-MOSI（Master Out, Slave In）とMISO（Master In, Slave Out）は、データの送受信を担当します。chip selectがlowに保持されている間、MOSIピンを通じてslave deviceにデータが送信されます。入力データには、slave deviceのベンダーが提供するdatasheetに基づき、命令、メモリアドレス、またはデータが含まれます。有効な入力を受け取ると、MISOピンがmasterへのデータ送信を担当します。出力データは、入力が終了した直後の次のclock cycleで正確に送信されます。MISOピンは、データの送信が完全に完了するまで、またはmasterがchip select pinをhighに設定するまでデータを送信します（その場合、slaveは送信を停止し、masterはそのclock cycle以降を受信しません）。
+MOSI/COPIはコントローラーからペリフェラルへのデータを運び、MISO/CIPOはペリフェラルからコントローラーへのデータを運びます。両方向のシフトを同時に実行できます。コマンド、アドレス、dummy cycles、返されるデータの関係はSPIではなくペリフェラルによって定義され、clock polarityとphase（mode 0～3）に依存します。入力の終了からちょうど1クロック後に出力が始まるとは限りません。<sup>[[1]](#references)</sup>
 
-## EEPROMからのFirmwareのDump
+## EEPROMからのFirmwareのダンプ
 
-Firmwareのdumpは、firmwareを分析して脆弱性を発見する際に役立ちます。多くの場合、firmwareはインターネット上で入手できないか、model number、versionなどの要因の違いにより利用できません。そのため、物理deviceから直接firmwareを抽出することは、脅威を調査する際に対象を正確に絞り込むうえで役立ちます。
+Firmwareをダンプすると、その解析や脆弱性の発見に役立ちます。正しいイメージがオンラインで入手できない場合や、モデル、hardware revision、versionによって異なる場合があるため、物理デバイスから直接抽出することで、正確な評価対象を取得できます。
 
-Serial Consoleを取得できると便利ですが、ファイルがread-onlyであることも少なくありません。これにはさまざまな理由があり、分析が制限されます。たとえば、パッケージの送受信に必要なtoolがfirmware内に存在しない場合があります。そのため、binaryを抽出してreverse engineerすることは現実的ではありません。そこで、システム上にfirmware全体をdumpし、分析のためにbinaryを抽出できるようにすると非常に役立ちます。
+シリアルコンソールは役立ちますが、そのファイルシステムがread-onlyである可能性があり、対象にテストトラフィックの送受信やバイナリの便利な抽出に必要なユーティリティなど、解析ツールが存在しない場合があります。offline imageを使用すれば、完全なflash layoutを保持でき、実行中の対象を変更せずにファイルシステムの抽出とreverse engineeringを実行できます。
 
-また、red teamingやdeviceへの物理アクセスを行う際、firmwareをdumpしてファイルを変更したり、malicious fileをinjectしたりしたうえでmemoryにreflashすることもできます。これはdeviceにbackdoorをimplantするのに役立ちます。そのため、firmware dumpingによって多数の可能性が開かれます。
+承認済みの物理評価では、検証済みのダンプを制御された変更やreflashingテストにも利用できます。これには、ファイルの変更やtest payload/backdoorの注入によってfirmware-level persistenceを実証することが含まれます。書き込みを行う前に、一致する複数回の読み取り結果と元のイメージを保存してください。誤った電圧、chip selection、layout、またはイメージによってデバイスがbrickする可能性があります。
 
 ### CH341A EEPROM Programmer and Reader
 
-このdeviceは、EEPROMからfirmwareをdumpしたり、firmware fileをreflashしたりするための安価なtoolです。computerのBIOS chip（単なるEEPROMです）を扱う際によく利用されます。このdeviceはUSB経由で接続し、使用開始に必要なtoolも最小限です。また、通常は作業を短時間で完了できるため、物理deviceへのアクセス時にも役立ちます。
+この安価なUSBツールは、互換性のあるserial EEPROMおよびSPI flashデバイスのダンプとreflashに使用できます。PCのBIOS/UEFI firmwareを保存するSPI NOR flash chipで一般的に使用され、時間が限られた物理アクセス時に便利です。
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-EEPROM memoryをCH341a Programmerに接続し、deviceをcomputerに接続します。deviceが検出されない場合は、computerにdriverをインストールしてみてください。また、EEPROMが正しい向きで接続されていることを確認してください（通常は、VCC PinをUSB connectorに対して逆向きに配置します）。そうしないと、softwareがchipを検出できません。必要に応じて、次のdiagramを参照してください。
+flash memoryをCH341Aに接続し、次にprogrammerをコンピューターへ接続します。programmer自体が検出されない場合は、対象chipのトラブルシューティングを行う前に、USBケーブル、OSの権限、適切なCH341A driverを確認してください。データシートまたはmeterを使用して、chipの電圧、pin 1、adapter wiring、programmerの出力を確認してください。「VCCをUSBコネクターの反対側に配置する」といったルールに**依存してはいけません**。向きを誤ったり、3.3/1.8 V用の部品に5 Vを印加したりすると、部品が破壊される可能性があります。in-circuit readも、ボード上の他の回路がバスに負荷をかけたり電力を供給したりするため、失敗する場合があります。<sup>[[2]](#references)</sup>
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-最後に、flashrom、G-Flash（GUI）などのsoftwareを使用してfirmwareをdumpします。G-Flashは最小限のGUI toolで高速に動作し、EEPROMを自動的に検出します。documentationを詳しく確認せずにfirmwareを素早く抽出する必要がある場合に役立ちます。
+`flashrom`やG-Flashなどのソフトウェアを使用してchipを読み取ります。G-Flashはminimal GUIであり、互換性のあるデバイスをauto-detectできる場合があります。これは迅速な取得時に便利ですが、検出されたモデルと電圧は自分で確認してください。正確なprogrammerを指定し、必要に応じて正確なchip modelも指定してください。ダンプを信頼できるものとして扱う前に、少なくとも2回読み取り、それらのhashを比較してください。<sup>[[2]](#references)</sup>
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-firmwareをdumpした後は、binary fileを分析できます。strings、hexdump、xxd、binwalkなどのtoolを使用すると、firmwareだけでなく、file system全体からも多くの情報を抽出できます。
+firmwareをダンプした後は、バイナリファイルを解析できます。strings、hexdump、xxd、binwalkなどのツールを使用して、firmwareおよびファイルシステム全体から大量の情報を抽出できます。
 
-firmwareの内容を抽出するには、binwalkを使用できます。Binwalkはhex signatureを分析してbinary file内のfileを特定し、それらをextractできます。
+初期triageでは、Binwalkを使用して既知のsignatureをスキャンし、対応しているembedded contentを抽出できます：
 ```
 binwalk -e <filename>
 ```
-使用するツールや設定に応じて、`.bin` または `.rom` になります。
+出力ファイルには `.bin`、`.rom`、または別の拡張子が使用される場合がありますが、拡張子によって形式が決まるわけではありません。
 
 > [!CAUTION]
-> ファームウェアの抽出は繊細な作業であり、多くの忍耐を必要とします。取り扱いを誤ると、ファームウェアが破損したり、完全に消去されたりして、デバイスが使用不能になる可能性があります。ファームウェアの抽出を試みる前に、対象デバイスについて十分に調査することを推奨します。
+> firmware の抽出は繊細な作業であり、多くの忍耐が必要です。取り扱いを誤ると、firmware が破損したり、完全に消去されたりして、デバイスが使用不能になる可能性があります。firmware の抽出を試みる前に、対象デバイスについて調査することを推奨します。
 
 ### Bus Pirate + flashrom
 
 ![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Bus Pirate + flashrom](<../../images/image (910).png>)
 
-Pirate Bus の PINOUT に SPI 接続用の **MOSI** および **MISO** のピンが示されていても、SPI によってはピンが DI および DO と示されている場合があることに注意してください。**MOSI -> DI、MISO -> DO**
+一部のデータシートでは、対象のピンに `DI` および `DO` というラベルが付けられています。従来の単一データ線 flash 接続では、controller の **MOSI/COPI は DI に接続**し、controller の **MISO/CIPO は DO に接続**します。dual/quad I/O 部品では別のモードで同じピンを再利用するため、対象のデータシートを確認してください。
 
-![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Pirate Bus の PINOUT に MOSI および MISO のピンが示されていても、SPI によってはピンが MOSI および MISO と示されている場合があります。](<../../images/image (360).png>)
+![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom: Bus Pirate の PINOUT に MOSI と MISO を SPI に接続するためのピンが示されていても、一部の SPI では...](<../../images/image (360).png>)
 
 Windows または Linux では、[**`flashrom`**](https://www.flashrom.org/Flashrom) プログラムを使用して、次のようなコマンドを実行し、flash memory の内容を dump できます:
 ```bash
 # In this command we are indicating:
 # -VV Verbose
-# -c <chip> The chip (if you know it better, if not, don'tindicate it and the program might be able to find it)
-# -p <programmer> In this case how to contact th chip via the Bus Pirate
+# -c <chip> Exact chip model (omit it to let flashrom probe candidates)
+# -p <programmer> Programmer configuration; here, the Bus Pirate connection
 # -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
+最近の Bus Pirate documentation には、オプションの `serialspeed` および `spispeed` パラメータも記載されています。長い配線や回路内の負荷によって読み取りが不安定になる場合は、控えめな値から開始してください。<sup>[[3]](#references)</sup>
+
+## References
+
+- [1] [Analog Devices — SPIインターフェースの紹介](https://www.analog.com/en/resources/analog-dialogue/articles/introduction-to-spi-interface.html)
+- [2] [flashrom manual — CH341A SPI programmer and read/write options](https://flashrom.org/classic_cli_manpage.html)
+- [3] [Bus Pirate documentation — flashrom](https://docs.buspirate.com/docs/software/flashrom/)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,54 +1,65 @@
-# LLMsをテストする
+# LLMをテストする
 
 {{#include ../banners/hacktricks-training.md}}
 
-## モデルをローカルで実行・trainingする
+## モデルをローカルで実行・トレーニングする
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformersは、GPT、BERTなどのLLMを使用、training、deployするための、最も人気のあるopen-sourceライブラリの1つです。pre-trained models、datasets、fine-tuningやdeploymentのためのHugging Face Hubとのシームレスな統合を含む、包括的なecosystemを提供します。
+Hugging Face Transformersは、テキスト、ビジョン、音声、動画、マルチモーダルタスク向けの事前学習済みモデルを読み込み、トレーニングし、提供するためのオープンソースライブラリです。モデルとデータセットのホスティングは、Hugging Face Hubによって別途提供されています。<sup>[[1]](#references)</sup>
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChainは、LLMを使用したapplication構築用に設計されたframeworkです。developerは、language modelを外部のdata source、API、databaseに接続できます。LangChainは、高度なprompt engineering、conversation historyの管理、複雑なworkflowへのLLMの統合のためのtoolsを提供します。
+LangChainは、promptの構築、会話履歴や状態の管理、tools、retrieval、model、API、データベースとの統合に対応した、model-drivenアプリケーションやagentを構築するためのframeworkです。<sup>[[2]](#references)</sup>
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPTはLightning AIが開発したprojectで、Lightning frameworkを活用し、GPT-based modelのtraining、fine-tuning、deploymentを容易にします。他のLightning AI toolsとシームレスに統合され、performanceとscalabilityを向上させながら、大規模language modelを扱うための最適化されたworkflowを提供します。
+LitGPTは、対応するlanguage modelのpretraining、fine-tuning、評価、deployを行うための、読みやすい実装とcommand-line workflowを提供します。<sup>[[3]](#references)</sup>
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
-**Description:**\
-LitServeはLightning AIのdeployment toolで、AI modelを迅速かつ効率的にdeployするために設計されています。scalableかつ最適化されたserving機能を提供することで、LLMをreal-time applicationに統合する作業を簡素化します。
+**説明:**\
+LitServeはLightning AIのmodel-serving frameworkであり、batching、streaming、acceleration、scaling用のhooksを備えたinference APIを公開します。<sup>[[4]](#references)</sup>
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotlは、LLMを含むAI modelのdeployment、scaling、管理を効率化するために設計されたcloud-based platformです。automated scaling、monitoring、さまざまなcloud serviceとの統合などの機能を提供し、大規模なinfrastructure管理を必要とせずにproduction環境へmodelをdeployしやすくします。
+Axolotlは、YAML設定によって動作するオープンソースのpost-trainingおよびfine-tuning frameworkです。full fine-tuning、LoRA/QLoRA、preference optimization、multi-GPU trainingなどのtechniqueをサポートします。ただし、それ自体はcloud deployment platformではありません。<sup>[[5]](#references)</sup>
 
 ## オンラインでモデルを試す
 
 ### [**Hugging Face**](https://huggingface.co/)
 
-**Hugging Face**は、特にnatural language processing (NLP)分野で知られる、machine learning向けの主要なplatformおよびcommunityです。machine learning modelの開発、共有、deployを容易にするtools、library、resourceを提供します。\
-以下のような複数のsectionがあります。
+**Hugging Face**は、特に自然言語処理（NLP）分野で知られる、machine learning向けの主要なplatformおよびcommunityです。machine learning modelの開発、共有、deployを容易にするtools、libraries、resourcesを提供しています。\
+Hubには、以下の関連セクションがあります。<sup>[[6]](#references)</sup>
 
-* **Models**: **pre-trained machine learning model**の膨大なrepositoryで、text generation、translation、image recognitionなど、さまざまなtask向けのmodelをbrowse、download、統合できます。
-* **Datasets:** modelのtrainingと評価に使用される**datasetの包括的なcollection**です。多様なdata sourceへ簡単にaccessでき、各自のmachine learning projectに適したdataを見つけて利用できます。
-* **Spaces:** **interactive machine learning application**やdemoをhostおよび共有するためのplatformです。developerはmodelの動作を**showcase**し、user-friendlyなinterfaceを作成し、live demoを共有して他者とcollaborateできます。
+* **Models**: **pre-trained machine learning models**の広大なrepositoryで、ユーザーはtext generation、translation、image recognitionなど、さまざまなtask向けのmodelを閲覧、download、統合できます。
+* **Datasets:** modelのtrainingとevaluationに使用される**datasetの包括的なcollection**です。多様なdata sourceへ簡単にaccessでき、ユーザーは各自のmachine learning projectに適したdataを見つけて利用できます。
+* **Spaces:** **interactive machine learning application**やdemoをhostingおよび共有するためのplatformです。developerはmodelの動作を**showcase**し、user-friendlyなinterfaceを作成し、live demoを共有して他のユーザーとcollaborateできます。
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub**は、Googleが開発した再利用可能なmachine learning moduleの包括的なrepositoryです。machine learning model、特にTensorFlowで構築されたmodelの共有とdeploymentを容易にすることに重点を置いています。
+**TensorFlow Hub**は、再利用可能なtrained model componentのrepositoryおよびlibraryであり、特にTensorFlow/Keras経由で利用されるmoduleを扱います。**Kaggle**は別途、notebook、dataset、competition、modelを提供します。<sup>[[7]](#references)[[9]](#references)</sup>
 
-* **Modules:** pre-trained modelとmodel componentの膨大なcollectionで、image classification、text embeddingなどのtask向けにmoduleをbrowse、download、統合できます。
-* **Tutorials:** TensorFlow Hubを使用してmodelを実装およびfine-tuningする方法を理解するための、step-by-step guideとexampleです。
-* **Documentation:** repositoryのresourceを効果的に利用するための、包括的なguideとAPI referenceです。
+* **Modules:** pre-trained modelおよびmodel componentの広大なcollectionで、ユーザーはimage classification、text embeddingなどのtask向けmoduleを閲覧、download、統合できます。
+* **Tutorials:** TensorFlow Hubを使用してmodelを実装およびfine-tuningするためのstep-by-step guideとexampleです。
+* **Documentation:** developerがrepositoryのresourceを効果的に利用するための包括的なguideとAPI referenceです。
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate**は、developerがシンプルなAPI経由でcloud上のmachine learning modelを実行できるplatformです。大規模なinfrastructure setupを必要とせず、ML modelへ簡単にaccessしてdeployできるようにすることに重点を置いています。
+**Replicate**は、web interfaceまたはAPIを通じてpackaged machine-learning modelを実行するためのhosted platformです。<sup>[[8]](#references)</sup>
 
-* **Models:** communityから提供されたmachine learning modelのrepositoryで、modelをbrowse、試用し、最小限の労力でapplicationに統合できます。
-* **API Access:** developerが各自のapplication内でmodelを容易にdeployおよびscaleできる、シンプルなAPIです。
+* **Models:** communityから提供されたmachine learning modelのrepositoryで、ユーザーはmodelを閲覧、試用し、最小限の手間でapplicationに統合できます。
+* **API access:** underlying inference infrastructureを運用せずに、applicationからmodelを呼び出すためのAPIです。
 
+## References
+
+- [1] [Hugging Face Transformers](https://github.com/huggingface/transformers)
+- [2] [LangChain](https://github.com/langchain-ai/langchain)
+- [3] [LitGPT](https://github.com/Lightning-AI/litgpt)
+- [4] [LitServe](https://github.com/Lightning-AI/LitServe)
+- [5] [Axolotl](https://github.com/axolotl-ai-cloud/axolotl)
+- [6] [Hugging Face Hubのドキュメント](https://huggingface.co/docs/hub/index)
+- [7] [TensorFlow Hub](https://www.tensorflow.org/hub)
+- [8] [Replicateのドキュメント](https://replicate.com/docs)
+- [9] [Kaggleのドキュメント](https://www.kaggle.com/docs)
 {{#include ../banners/hacktricks-training.md}}

@@ -2,49 +2,50 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Generative modelsは、**browser-based KYC、age-verification、biometric livenessのworkflowをbypassする**ために使用できます。弱点は、多くの場合、**transportやcloud liveness providerではなく、camera trust boundary**にあります。通常、desktop browserは、`getUserMedia()`がwebcamとして公開するデバイスをそのまま信頼します。<sup>[[1]](#references)</sup>
+Generative models can be used to **ブラウザベースのKYC、年齢確認、生体 liveness ワークフローを bypass する**ことができます。弱点は、多くの場合、**transport や cloud liveness provider ではなく、camera trust boundary にあります**。デスクトップブラウザは通常、`getUserMedia()` が webcam として公開するデバイスを、そのまま信頼します。<sup>[[1]](#references)</sup>
 
 ## Practical Attack Chain
 
-1. **challengeに準拠したmediaを生成**します。source actorとvictimのreference imageから、video-to-video modelを使用します。<sup>[[1]](#references)</sup>
-2. **signingまたはuploadの前に偽造したstreamをinject**します。たとえば、`v4l2loopback`で作成したLinux virtual cameraに、OBSまたはFFmpegから入力します。<sup>[[3]](#references)</sup>
-3. Browserとvendor SDK（WebRTC、AWSなど）に、**attackerが制御するframesを、real webcamから取得されたかのようにcapture、sign、uploadさせます**。<sup>[[2]](#references)</sup>
+1. **challenge に準拠した media を生成する**。source actor と victim reference image を使用し、video-to-video model で生成します。<sup>[[1]](#references)</sup>
+2. **signing または upload の前に偽造した stream を inject する**。たとえば、`v4l2loopback` で作成した Linux virtual camera に、OBS または FFmpeg から入力します。<sup>[[3]](#references)</sup>
+3. ブラウザと vendor SDK（WebRTC、AWS など）に、**攻撃者が制御する frames を、実際の webcam から取得されたかのように capture、sign、upload させる**。<sup>[[2]](#references)</sup>
 
-これはassessmentにおいて重要です。signed WebSocket chunksやproprietary SDK framingによって**network-layer tampering**が実用的でなくなる場合でも、**camera-layer injection**は機能する可能性があるためです。<sup>[[1]](#references)</sup>
+これは assessment で重要です。signed WebSocket chunks や proprietary SDK framing により、**network-layer tampering** は実行が難しい場合がありますが、**camera-layer injection** は依然として機能する可能性があるためです。<sup>[[1]](#references)</sup>
 
 ## High-Value Testing Angles
 
-- **Virtual webcam acceptance**: desktop browserからworkflowが動作する場合、OBS、`v4l2loopback`、またはvendor virtual camerasが通常のperipheralsとして受け入れられるかをテストします。<sup>[[1]](#references)</sup>
-- **Camera API redirection on mobile**: native mobile flowでも、Fridaがcamera APIsにhooksし、sensor buffersをMP4またはemulator-backed virtual cameraからのframesに置き換える場合は、なお脆弱な可能性があります。
-- **Constraint weakening**: `deviceId`、`frameRate`、`width`、`height`、または`facingMode`を正確に要求するpagesは、`navigator.mediaDevices.getUserMedia`をmonkeypatchし、strict constraintsをより広いrangesに置き換えることで、bypassできる場合があります。<sup>[[4]](#references)</sup>
-- **Low-quality generation plus post-processing**: modelが安定してrenderできる最も低コストのvideoを生成し、その後FFmpegのupscalingまたはframe interpolationを使用してcapture requirementsを満たします。
-- **Predictable active challenges**: head-movementまたはlight-flash sequencesが繰り返される場合は、それらをrecordし、generative workflowを通じてreplayする価値があります。
-- **Weak replay detection**: cropやposition shifts、overlay changes、またはわずかなmotionなどの単純なscene perturbationsでも、anti-replay logicが表面的なframe similarityのみをチェックしている場合には十分なことがあります。<sup>[[1]](#references)</sup>
+- **Virtual webcam acceptance**: デスクトップブラウザから flow が機能する場合、OBS、`v4l2loopback`、または vendor virtual cameras が通常の peripherals として受け入れられるかをテストします。<sup>[[1]](#references)</sup>
+- **Camera API redirection on mobile**: Frida などの runtime instrumentation が camera APIs に hook し、sensor buffers を MP4 ファイルまたは emulator-backed virtual camera の frames に置き換える場合、native flow も脆弱である可能性があります。これには client execution environment の制御が必要であり、root/jailbreak および application-integrity signals と併せて assessment する必要があります。<sup>[[1]](#references)</sup>
+- **Constraint weakening**: 正確な `deviceId`、`frameRate`、`width`、`height`、または `facingMode` を要求するページでは、`navigator.mediaDevices.getUserMedia` を monkeypatching し、strict constraints をより広い ranges に置き換えることで bypass できる場合があります。<sup>[[4]](#references)</sup>
+- **Low-quality generation plus post-processing**: 安価に生成した video を、FFmpeg で upscale または frame-interpolated することで capture constraints を満たせるかをテストします。<sup>[[1]](#references)</sup>
+- **Predictable active challenges**: 繰り返し行われる head-movement や light-flash sequences は、recording して generative workflow を通じて replay できる可能性があります。
+- **Weak replay detection**: crop や position shifts、overlay changes、わずかな motion などの単純な scene perturbations は、anti-replay logic が表面的な frame similarity のみを確認する場合に十分となる可能性があります。<sup>[[1]](#references)</sup>
 
 ## Mobile vs. Desktop Trust Differences
 
-Native mobile appsは、以下によってattackerのコストを高められます。<sup>[[1]](#references)</sup>
+Native mobile apps は、次の要素によって攻撃者のコストを高められます。<sup>[[1]](#references)</sup>
 
-- camera buffersに対する**sensorまたはSecure Element attestation**;
-- **Play Integrity**または**App Attest**などの**execution-integrity** signals;
-- videoとaccelerometerまたはgyroscope telemetry間の**motion correlation**。
+- **hardware-backed provenance または attestation signals**。platform と capture stack が実際に公開している場合は、Secure Element-backed evidence を含みます。
+- **execution-integrity** signals。**Play Integrity** や **App Attest** などです。<sup>[[5]](#references)[[6]](#references)</sup>
+- video と accelerometer または gyroscope telemetry 間の **motion correlation**。
 
-Desktop web flowsには通常、同等のcamera chain of trustがないため、一般に最も抵抗の少ないpathとなります。<sup>[[1]](#references)</sup>
+Desktop web flows には、通常、同等の camera chain of trust がないため、一般的に最も容易な path となります。<sup>[[1]](#references)</sup>
 
 ## Defensive Review Notes
 
-KYCまたはliveness integrationをreviewする際は、以下を確認します。<sup>[[1]](#references)</sup>
+KYC または liveness integration を review する際は、次の点を確認します。<sup>[[1]](#references)</sup>
 
-- mobile captureのみを対象にthreat-modelingされていたworkflowに対して、**desktop-browser fallback**を許可しているか;
-- suspicious sessionsに対する強力なhuman escalationなしに、主に**algorithmic liveness**に依存しているか;
-- pre-recordしてgeneration pipelineに入力できる、**stableまたはpredictableなchallenges**を使用しているか;
-- **`getUserMedia` monkeypatching**、virtual cameras、矛盾したbrowser hardware telemetry、または欠落したdevice attestationを検出しているか。<sup>[[1]](#references)</sup>
+- mobile capture のみを対象に threat-modeling された workflow に対して、**desktop-browser fallback** を許可していないか。
+- suspicious sessions に対する強力な human escalation なしに、主に **algorithmic liveness** に依存していないか。
+- pre-record して generation pipeline に入力できる、**stable または predictable な challenges** を使用していないか。
+- **`getUserMedia` monkeypatching**、virtual cameras、整合しない browser hardware telemetry、または device attestation の欠如を検出しているか。<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Synacktiv - KYC: Bypass age verification using generative video models](https://www.synacktiv.com/en/publications/kyc-bypass-age-verification-using-generative-video-models.html)
+- [1] [Synacktiv - KYC: generative video models を使用した年齢確認の Bypass](https://www.synacktiv.com/en/publications/kyc-bypass-age-verification-using-generative-video-models.html)
 - [2] [Amazon Rekognition Face Liveness](https://docs.aws.amazon.com/rekognition/latest/dg/face-liveness.html)
 - [3] [v4l2loopback](https://github.com/v4l2loopback/v4l2loopback)
 - [4] [MDN - MediaDevices.getUserMedia()](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia)
-
+- [5] [Android Developers — Play Integrity API](https://developer.android.com/google/play/integrity)
+- [6] [Apple Developer — App Attest](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity)
 {{#include ../banners/hacktricks-training.md}}
