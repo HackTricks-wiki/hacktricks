@@ -32,7 +32,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Rapido controllo anti-analisi / virtualizzazione
+### Controllo rapido anti-analysis / virtualization
 
-Alcuni stealers per macOS chiamano `system_profiler` per rilevare le VM e **terminano con un codice di uscita distinto (ad es., 100)** per evitare la detonazione nella sandbox<sup>[[1]](#references)</sup>:
+Alcuni stealer per macOS chiamano `system_profiler` per rilevare le VM e **si interrompono con un codice di uscita distinto (ad esempio, 100)** per evitare la detonazione nella sandbox<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,10 +125,10 @@ fi
 ```
 ### Software e servizi installati
 
-Verifica la presenza di applicazioni **sospette** installate e dei **privilegi** sulle risorse installate:
+Verifica la presenza di applicazioni **sospette** installate e dei **privilegi** sulle risorse.installate:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
@@ -149,8 +149,7 @@ Senza prompt
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## Riferimenti
+## References
 
-- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
+- [1] [2025, l'anno degli Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 {{#include ../banners/hacktricks-training.md}}
