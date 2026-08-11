@@ -4,19 +4,22 @@
 
 ## 기본 정보
 
-**Apple Events**는 애플리케이션이 서로 통신할 수 있도록 하는 Apple macOS의 기능입니다. 이는 프로세스 간 통신을 처리하는 macOS 운영 체제 구성 요소인 **Apple Event Manager**의 일부입니다. 이 시스템을 사용하면 한 애플리케이션이 다른 애플리케이션에 메시지를 보내 파일 열기, 데이터 가져오기 또는 명령 실행과 같은 특정 작업을 수행하도록 요청할 수 있습니다.
+**Apple events**는 애플리케이션이 다른 애플리케이션에 작업이나 데이터를 요청할 때 사용하는 구조화된 프로세스 간 메시지입니다. **Apple Event Manager**는 이러한 메시지를 생성, 전송, 수신 및 응답하기 위한 API를 제공합니다.<sup>[[1]](#references)</sup>
 
-주요 daemon은 `/System/Library/CoreServices/appleeventsd`이며, `com.apple.coreservices.appleevents` 서비스를 등록합니다.
+macOS에서 주요 broker는 `/System/Library/CoreServices/appleeventsd`이며, `com.apple.coreservices.appleevents` Mach 서비스를 등록합니다. 이벤트를 수신하는 애플리케이션은 이 서비스에 Apple-event Mach port를 등록하고, sender는 이를 통해 destination port를 가져옵니다.<sup>[[3]](#references)</sup>
 
-이벤트를 수신할 수 있는 모든 애플리케이션은 Apple Event Mach Port를 제공하여 이 daemon에 등록합니다. 애플리케이션이 해당 애플리케이션으로 이벤트를 보내려는 경우, daemon에 이 port를 요청합니다.
-
-Sandboxed 애플리케이션이 이벤트를 보낼 수 있으려면 `allow appleevent-send` 및 `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))`와 같은 권한이 필요합니다. `com.apple.security.temporary-exception.apple-events`와 같은 entitlement는 이벤트 전송 권한이 있는 대상을 제한할 수 있으며, 이 경우 `com.apple.private.appleevents`와 같은 entitlement가 필요합니다.
+Sandbox 규칙과 entitlements는 이 통신을 제한합니다. sandbox profile에는 Apple events를 전송하고 broker의 Mach 서비스를 조회할 수 있는 권한이 필요합니다. `com.apple.security.temporary-exception.apple-events` entitlement를 사용하면 sandboxed application이 지정된 destination bundle identifier로만 제한되도록 할 수 있습니다.<sup>[[2]](#references)</sup>
 
 > [!TIP]
-> 전송된 메시지에 대한 정보를 기록하려면 환경 변수 **`AEDebugSends`**를 사용할 수 있습니다.
+> 프로세스가 전송하는 Apple events에 대한 정보를 기록하려면 **`AEDebugSends`** environment variable을 설정합니다:<sup>[[3]](#references)</sup>
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
+## References
+
+- [1] [Apple Developer Documentation - Apple Event Manager](https://developer.apple.com/documentation/applicationservices/apple_event_manager)
+- [2] [Apple Developer Documentation - App Sandbox Temporary Exception Entitlements](https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/EntitlementKeyReference/Chapters/AppSandboxTemporaryExceptionEntitlements.html)
+- [3] [Mac OS X and iOS Internals - Apple-event debug environment variables](https://www.newosxbook.com/MOXiI.pdf)
 {{#include ../../../../banners/hacktricks-training.md}}

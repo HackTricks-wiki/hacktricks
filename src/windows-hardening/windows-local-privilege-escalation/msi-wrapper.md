@@ -2,21 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/)에서 무료 버전 앱을 다운로드하고, 실행한 다음 "malicious" 바이너리를 사용해 래핑합니다.\
-**명령줄을 실행**하기만 원하는 경우에는 "**.bat**" 파일도 래핑할 수 있습니다**(cmd.exe 대신 .bat 파일을 선택하세요)**
+MSI Wrapper는 실행 파일 또는 스크립트를 Windows Installer (`.msi`) 파일로 패키징할 수 있습니다. 무료 버전을 다운로드하고 시작한 다음, 패키징할 실행 파일을 선택합니다. 명령을 순서대로 실행하려면 `cmd.exe`를 패키징하는 대신 입력 파일로 `.bat` 파일을 선택합니다.<sup>[[1]](#references)</sup>
 
-![MSI Wrapper: 명령줄을 실행하기만 원하는 경우 " .bat " 파일을 래핑할 수 있습니다 (cmd.exe 대신 .bat 파일을 선택하세요)](<../../images/image (417).png>)
+![MSI Wrapper에서 소스 실행 파일 또는 배치 스크립트 선택](<../../images/image (417).png>)
 
-다음은 구성에서 가장 중요한 부분입니다:
+실행 컨텍스트와 기타 installer 속성을 신중하게 구성합니다:
 
-![MSI Wrapper: 구성에서 가장 중요한 부분입니다](<../../images/image (312).png>)
+![MSI Wrapper에서 애플리케이션 ID 및 보안 컨텍스트 구성](<../../images/image (312).png>)
 
-![MSI Wrapper: 구성에서 가장 중요한 부분입니다](<../../images/image (346).png>)
+![MSI Wrapper에서 installer 속성 구성](<../../images/image (346).png>)
 
-![MSI Wrapper: 구성에서 가장 중요한 부분입니다](<../../images/image (1072).png>)
+![MSI Wrapper 빌드 설정 검토](<../../images/image (1072).png>)
 
-(직접 만든 바이너리를 패키징하려고 하면 이러한 값을 수정할 수 있다는 점에 유의하세요.)
+이 값은 custom binary를 패키징할 때 변경할 수 있습니다.
 
-여기서 **next 버튼**을 클릭하고 마지막으로 **build 버튼**을 클릭하면 installer/wrapper가 생성됩니다.
+나머지 wizard 페이지를 계속 진행한 다음 **Build**를 선택하여 installer를 생성합니다.<sup>[[1]](#references)</sup>
 
+> [!WARNING]
+> MSI를 생성하는 것만으로 elevated privileges가 부여되지는 않습니다. 설치가 elevated 상태로 실행되는지는 Windows Installer policy, package context 및 user authorization에 따라 달라집니다. Microsoft는 사용자와 컴퓨터 모두에 대해 `AlwaysInstallElevated`를 활성화하면 non-administrator가 system privileges로 package를 설치할 수 있다고 경고합니다.<sup>[[2]](#references)</sup>
+
+## References
+
+- [1] [MSI Wrapper documentation - Getting started](https://www.exemsi.com/documentation/getting-started/)
+- [2] [Microsoft Learn - Installing a package with elevated privileges for a non-admin](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
 {{#include ../../banners/hacktricks-training.md}}
