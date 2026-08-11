@@ -1,131 +1,158 @@
-# Online Platforms with API
+# Majukwaa ya Mtandaoni yenye API
 
 {{#include ../banners/hacktricks-training.md}}
 
-## [ProjectHoneypot](https://www.projecthoneypot.org/)
+Huduma hizi huwezesha workflows za reconnaissance, reputation, breach, au enrichment. API, quotas, bei, na matumizi yanayoruhusiwa hubadilika mara kwa mara; thibitisha nyaraka za sasa za vendor na authorization ya engagement kabla ya kutuma vitambulisho vya wateja au data nyeti.
 
-Unaweza kuuliza ikiwa IP inahusiana na shughuli za kutiliwa shaka/hasidi. Bure kabisa.
+## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
-## [**BotScout**](http://botscout.com/api.htm)
+Uliza ikiwa IP address imehusishwa na shughuli za kutiliwa shaka au hasidi. Access inaweza kuhitaji account au API key.
 
-Angalia ikiwa anwani ya IP inahusiana na bot inayosajili akaunti. Inaweza pia kuangalia usernames na emails. Mwanzoni ni bure.
+## [**BotScout**](https://botscout.com/api.htm) <sup>[[2]](#references)</sup>
 
-## [Hunter](https://hunter.io/)
+Kagua ikiwa IP address, username, au email address imehusishwa na usajili wa akaunti kiotomatiki au shughuli nyingine za bot zilizoripotiwa.
 
-Tafuta na uthibitishe emails.\
-Baadhi ya maombi ya API ni bure; kwa mengine unahitaji kulipa.\
-Ya kibiashara?
+## [Hunter](https://hunter.io/) <sup>[[3]](#references)</sup>
 
-## [AlientVault](https://otx.alienvault.com/api)
+Tafuta na uthibitishe email addresses za kikazi na mifumo ya mawasiliano inayohusiana na domains. Kagua mpango wa sasa kwa request limits na matumizi yanayoruhusiwa.
 
-Tafuta shughuli hasidi zinazohusiana na IPs na Domains. Bure.
+## [AlienVault OTX](https://otx.alienvault.com/api) <sup>[[4]](#references)</sup>
 
-## [Clearbit](https://dashboard.clearbit.com/)
+Tafuta threat-intelligence indicators na shughuli zinazohusishwa na IP addresses na domains.
 
-Tafuta data binafsi inayohusiana na email (profiles kwenye platforms nyingine), domain (maelezo ya msingi ya kampuni, mails na watu wanaofanya kazi hapo) na kampuni (pata maelezo ya kampuni kutoka kwenye mail).\
-Unahitaji kulipa ili kufikia uwezekano wote.\
-Ya kibiashara?
+## [Clearbit](https://dashboard.clearbit.com/) <sup>[[5]](#references)</sup>
 
-## [BuiltWith](https://builtwith.com/)
+Ongeza data ya biashara/profile inayopatikana kwenye email address, domain, au kampuni. Coverage, access, na masharti ya faragha hutegemea product na plan ya sasa.
 
-Technologies zinazotumiwa na webs. Ghali...\
-Ya kibiashara?
+## [BuiltWith](https://builtwith.com/) <sup>[[6]](#references)</sup>
 
-## [Fraudguard](https://fraudguard.io/)
+Tambua technologies zinazoonekana kwenye websites na upate data ya kihistoria au ya mahusiano pale ambapo plan iliyochaguliwa inaruhusu.
 
-Angalia ikiwa host (domain au IP) inahusiana na shughuli za kutiliwa shaka/hasidi. Ina API access ya bure kwa kiasi.\
-Ya kibiashara?
+## [FraudGuard](https://fraudguard.io/) <sup>[[7]](#references)</sup>
 
-## [FortiGuard](https://fortiguard.com/)
+Kagua ikiwa IP address inahusishwa na shughuli za kutiliwa shaka au hasidi. Thibitisha API plans na limits za sasa.
 
-Angalia ikiwa host (domain au IP) inahusiana na shughuli za kutiliwa shaka/hasidi. Ina API access ya bure kwa kiasi.
+## [FortiGuard](https://fortiguard.com/) <sup>[[8]](#references)</sup>
 
-## [SpamCop](https://www.spamcop.net/)
+Tafuta uainishaji wa FortiGuard na threat intelligence kwa domains, URLs, au IP addresses. Upatikanaji hutofautiana kulingana na service.
 
-Inaonyesha ikiwa host inahusiana na shughuli za spam. Ina API access ya bure kwa kiasi.
+## [SpamCop](https://www.spamcop.net/) <sup>[[9]](#references)</sup>
 
-## [mywot](https://www.mywot.com/)
+Kagua ikiwa IP address imeorodheshwa kwa shughuli za spam zilizoripotiwa.
 
-Kwa kutumia maoni na metrics nyingine, pata ikiwa domain inahusiana na taarifa za kutiliwa shaka/hasidi.
+## [myWOT](https://www.mywot.com/) <sup>[[10]](#references)</sup>
 
-## [ipinfo](https://ipinfo.io/)
+Pata reputation ya domain kulingana na community ya service na signals nyingine.
 
-Hupata maelezo ya msingi kutoka kwa anwani ya IP. Unaweza kuijaribu hadi mara 100K kwa mwezi.
+## [IPinfo](https://ipinfo.io/) <sup>[[11]](#references)</sup>
 
-## [securitytrails](https://securitytrails.com/app/account)
+Pata geolocation, ASN, organization, na metadata inayohusiana na IP address. Kagua quotas za plan ya sasa.
 
-Platform hii hutoa taarifa kuhusu domains na anwani za IP, kama vile domains zilizo ndani ya IP au ndani ya server ya domain, domains zinazomilikiwa na email (tafuta domains zinazohusiana), historia ya IP za domains (tafuta host iliyo nyuma ya CloudFlare), domains zote zinazotumia nameserver....\
-Una access ya bure kwa kiasi.
+## [SecurityTrails](https://securitytrails.com/app/account) <sup>[[12]](#references)</sup>
 
-## [fullcontact](https://www.fullcontact.com/)
+Platform hii hutoa DNS na infrastructure intelligence kama vile historical resolutions, domains zinazohusishwa na IPs au name servers, na records zinazohusiana. Historical DNS inaweza kufichua origin address ya awali, lakini haiwezi reliably bypass CDN na lazima ithibitishwe.
 
-Inaruhusu kutafuta kwa email, domain au jina la kampuni na kupata taarifa "binafsi" zinazohusiana. Inaweza pia kuthibitisha emails. Kuna access ya bure kwa kiasi.
+## [FullContact](https://www.fullcontact.com/) <sup>[[13]](#references)</sup>
 
-## [RiskIQ](https://www.spiderfoot.net/documentation/)
+Ongeza identity na business attributes zinazopatikana kwenye email address, domain, au jina la kampuni. Shughulikia personal data kulingana na authorization na mahitaji ya faragha.
 
-Taarifa nyingi kutoka kwa domains na IPs hata katika toleo la bure/community.
+## RiskIQ / Microsoft Defender Threat Intelligence (legacy transition) <sup>[[14]](#references)</sup>
 
-## [\_IntelligenceX](https://intelx.io/)
+Uwezo wa RiskIQ's PassiveTotal ulihamia Microsoft Defender Threat Intelligence. Product access, APIs, na functionality iliyohifadhiwa imebadilika, kwa hiyo tumia nyaraka za sasa za Microsoft badala ya assumptions za legacy PassiveTotal.
 
-Tafuta Domains, IPs na emails na upate taarifa kutoka kwenye dumps. Ina access ya bure kwa kiasi.
+## [Intelligence X](https://intelx.io/) <sup>[[15]](#references)</sup>
 
-## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+Tafuta domains, IP addresses, email addresses, na data ya kihistoria au leaked iliyo-indexiwa, kwa kuzingatia access controls za service.
 
-Tafuta kwa IP na kukusanya taarifa zinazohusiana na shughuli za kutiliwa shaka. Kuna access ya bure kwa kiasi.
+## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/) <sup>[[16]](#references)</sup>
 
-## [Greynoise](https://viz.greynoise.io/)
+Tafuta IP addresses na indicators nyingine kwa threat-intelligence na reputation data.
 
-Tafuta kwa IP au range ya IP na upate taarifa kuhusu IPs zinazochanganua Internet. Access ya bure kwa siku 15.
+## [GreyNoise](https://viz.greynoise.io/) <sup>[[17]](#references)</sup>
 
-## [Shodan](https://www.shodan.io/)
+Tafuta IP addresses au ranges kwa observations za internet scanning na shughuli za kawaida za services. Kagua masharti ya sasa ya trial na community access.
 
-Pata taarifa za scan za anwani ya IP. Ina api access ya bure kwa kiasi.
+## [Shodan](https://www.shodan.io/) <sup>[[18]](#references)</sup>
 
-## [Censys](https://censys.io/)
+Pata taarifa za internet-scan na services kwa IP address, host, au search query. API access hutegemea account plan.
 
-Inafanana sana na shodan
+## [Censys](https://censys.io/) <sup>[[19]](#references)</sup>
 
-## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
+Tafuta datasets za hosts, certificates, domains, na internet services; data model na coverage yake hutofautiana na za Shodan.
 
-Tafuta buckets za S3 zilizo wazi kwa kutafuta kwa keyword.
+## [GrayHatWarfare bucket search](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
 
-## [Dehashed](https://www.dehashed.com/data)
+Tafuta kwenye index ya provider ya cloud-storage objects na buckets zilizoonekana hadharani kwa kutumia keyword.
 
-Tafuta credentials zilizoleak za emails na hata domains\
-Ya kibiashara?
+## [DeHashed](https://www.dehashed.com/data) <sup>[[21]](#references)</sup>
 
-## [psbdmp](https://psbdmp.ws/)
+Tafuta breach data iliyo-indexiwa kwa email addresses, usernames, domains, na records zinazohusiana. Tumia tu ukiwa na authorization na epuka kufichua breach data isiyohitajika.
 
-Tafuta pastebins ambako email ilionekana. Ya kibiashara?
+## [psbdmp](https://psbdmp.ws/) <sup>[[22]](#references)</sup>
 
-## [emailrep.io](https://emailrep.io/key)
+Tafuta paste content iliyo-indexiwa kwa occurrences za email address au neno jingine. Thibitisha kuwa service bado inapatikana kabla ya kui-integrate.
 
-Pata reputation ya mail. Ya kibiashara?
+## [EmailRep](https://emailrep.io/key) <sup>[[23]](#references)</sup>
 
-## [ghostproject](https://ghostproject.fr/)
+Pata reputation na risk signals za email address.
 
-Pata passwords kutoka kwenye emails zilizoleak. Ya kibiashara?
+## GhostProject (historical) <sup>[[24]](#references)</sup>
 
-## [Binaryedge](https://www.binaryedge.io/)
+Kihistoria ilitangaza searches za leaked email/password data. Ichukulie service hii kama third-party handling yenye risk kubwa na thibitisha upatikanaji, uhalali, na authorization yake kabla ya kuitumia.
 
-Pata taarifa zinazovutia kutoka kwa IPs
+## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
 
-## [haveibeenpwned](https://haveibeenpwned.com/)
+Pata internet-scan, exposure, na threat-intelligence data kwa IP addresses na assets zinazohusiana.
 
-Tafuta kwa domain na email na ujue ikiwa ilipwniwa na passwords. Ya kibiashara?
+## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
-### [IP2Location.io](https://www.ip2location.io/)
+Kagua ikiwa email address au verified domain inaonekana kwenye breaches zinazojulikana. Service tofauti ya Pwned Passwords hukagua password hashes kwa prefix; **haifichui** plaintext passwords.
 
-Hutambua IP geolocation, data center, ASN na hata taarifa za VPN. Inatoa queries 30K za bure kwa mwezi.
+### [IP2Location.io](https://www.ip2location.io/) <sup>[[27]](#references)</sup>
 
-### [IPQuery.io](https://www.ipquery.io/)
-IP Geolocation na OISNT yenye datapoints zinazolengwa. Si ya kibiashara.
+Pata IP geolocation, data-center, ASN, proxy/VPN, na fields nyingine za enrichment. Quotas hutegemea plan ya sasa.
+
+### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
+IP geolocation na enrichment inayolenga OSINT yenye data points zilizochaguliwa. Kagua masharti ya sasa kuhusu matumizi ya kibiashara.
 
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(kwenye tool ya kibiashara?)
+[DNSDumpster](https://dnsdumpster.com/) hutoa matokeo ya DNS-reconnaissance.<sup>[[29]](#references)</sup>
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (kwenye tool ya kibiashara?)
+[Netcraft](https://www.netcraft.com/) hutoa site, hosting, na internet-infrastructure intelligence.<sup>[[30]](#references)</sup>
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (kwenye tool ya kibiashara?)
+[NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/) hutoa interface ya mtandaoni ya subdomain-discovery.<sup>[[31]](#references)</sup>
 
+## References
+
+- [1] [Project Honey Pot](https://www.projecthoneypot.org/)
+- [2] [BotScout API](https://botscout.com/api.htm)
+- [3] [Hunter API](https://hunter.io/api-documentation)
+- [4] [AlienVault OTX API](https://otx.alienvault.com/api)
+- [5] [Clearbit](https://dashboard.clearbit.com/)
+- [6] [BuiltWith](https://builtwith.com/)
+- [7] [FraudGuard](https://fraudguard.io/)
+- [8] [FortiGuard Labs](https://www.fortiguard.com/)
+- [9] [SpamCop](https://www.spamcop.net/)
+- [10] [Web of Trust](https://www.mywot.com/)
+- [11] [IPinfo](https://ipinfo.io/)
+- [12] [SecurityTrails](https://securitytrails.com/)
+- [13] [FullContact](https://www.fullcontact.com/)
+- [14] [Microsoft Defender Threat Intelligence](https://learn.microsoft.com/en-us/defender/threat-intelligence/what-is-microsoft-defender-threat-intelligence-defender-ti)
+- [15] [Intelligence X](https://intelx.io/)
+- [16] [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+- [17] [GreyNoise](https://www.greynoise.io/)
+- [18] [Shodan](https://www.shodan.io/)
+- [19] [Censys](https://censys.com/)
+- [20] [GrayHatWarfare](https://buckets.grayhatwarfare.com/)
+- [21] [DeHashed](https://www.dehashed.com/)
+- [22] [psbdmp](https://psbdmp.ws/)
+- [23] [EmailRep](https://emailrep.io/)
+- [24] [Cornell research — Protocols for Checking Compromised Credentials (includes GhostProject)](https://rist.tech.cornell.edu/papers/c3.pdf)
+- [25] [BinaryEdge](https://www.binaryedge.io/)
+- [26] [Have I Been Pwned API](https://haveibeenpwned.com/API/v3)
+- [27] [IP2Location.io](https://www.ip2location.io/)
+- [28] [IPQuery](https://www.ipquery.io/)
+- [29] [DNSDumpster](https://dnsdumpster.com/)
+- [30] [Netcraft](https://www.netcraft.com/)
+- [31] [NMMapper Subdomain Finder](https://www.nmmapper.com/sys/tools/subdomainfinder/)
 {{#include ../banners/hacktricks-training.md}}

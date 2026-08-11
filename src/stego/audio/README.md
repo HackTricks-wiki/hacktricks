@@ -1,47 +1,47 @@
-# Steganography ya Sauti
+# Steganografia ya Sauti
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Miundo ya kawaida:
+Mifumo ya kawaida:
 
 - Ujumbe wa Spectrogram
 - Uingizaji wa WAV LSB
 - Usimbaji wa DTMF / dial tones
 - Payloads za Metadata
 
-## Triage ya haraka
+## Uchunguzi wa haraka
 
-Kabla ya kutumia tools maalum:
+Kabla ya kutumia zana maalum:
 
 - Thibitisha maelezo ya codec/container na anomalies:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Ikiwa audio ina maudhui yanayofanana na noise au muundo wa tonal, kagua spectrogram mapema.
+- Ikiwa audio ina maudhui yanayofanana na noise au muundo wa tones, kagua spectrogram mapema.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
 ## Spectrogram steganography
 
-### Technique
+### Mbinu
 
-Spectrogram stego huficha data kwa kuunda umbo la nishati katika muda/marudio ili ionekane tu kwenye mchoro wa muda-marudio (mara nyingi haisikiki au hutambulika kama kelele).
+Spectrogram stego huficha data kwa kuunda mpangilio wa nishati kwa muda/marudio ili ionekane katika mchoro wa time-frequency, huku sauti ikiweza kusikika kama tones au noise.<sup>[[3]](#references)</sup>
 
 ### Sonic Visualiser
 
-Chombo kikuu cha kukagua spectrogram:
+Zana kuu ya kukagua spectrogram:
 
-- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
+- [Sonic Visualiser](https://www.sonicvisualiser.org/)<sup>[[3]](#references)</sup>
 
-### Alternatives
+### Njia mbadala
 
-- Audacity (mwonekano wa spectrogram, filters): https://www.audacityteam.org/
-- `sox` inaweza kutengeneza spectrograms kutoka CLI:
+- Audacity (mwonekano wa spectrogram na filters).<sup>[[6]](#references)</sup>
+- `sox` inaweza kutengeneza spectrograms kutoka kwa CLI:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
-## Usimbuaji wa FSK / modem
+## FSK / modem decoding
 
-Sauti ya frequency-shift keyed mara nyingi huonekana kama toni moja zinazobadilishana katika spectrogram. Baada ya kupata makadirio ya awali ya center/shift na baud, tumia brute force kwa `minimodem`:<sup>[[1]](#references)</sup>
+Sauti iliyowekwa kwa Frequency-shift keying mara nyingi huonekana kama toni moja zinazopishana kwenye spectrogramu. Baada ya kupata makadirio ya takribani ya center/shift na baud, tumia brute force kwa `minimodem`:<sup>[[1]](#references)</sup>
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,19 +52,19 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` autogains na hugundua kiotomatiki toni za mark/space; rekebisha `--rx-invert` au `--samplerate` ikiwa matokeo yamevurugika.
+`minimodem` inasaidia Bell na modes nyingine za FSK pamoja na mark/space frequencies maalum; angalia options zake badala ya kudhani kwamba kila recording inaweza kutambuliwa kiotomatiki. Jaribu `--rx-invert`, baud mode iliyo wazi, au `--samplerate <Hz>` wakati output haieleweki.<sup>[[4]](#references)</sup>
 
 ## WAV LSB
 
-### Mbinu
+### Technique
 
-Kwa PCM isiyobanwa (WAV), kila sampuli ni integer. Kubadilisha biti za chini hubadilisha waveform kwa kiwango kidogo sana, hivyo attackers wanaweza kuficha:
+Kwa PCM isiyobanwa (WAV), kila sample ni integer. Kubadilisha bits za chini hubadilisha waveform kwa kiwango kidogo sana, hivyo attackers wanaweza kuficha:
 
-- biti 1 kwa kila sampuli (au zaidi)
-- Zikiwa zimeingiliana katika channels
+- bit 1 kwa kila sample (au zaidi)
+- Zikiwa zimeingiliana kati ya channels
 - Kwa kutumia stride/permutation
 
-Familia nyingine za audio-hiding unazoweza kukutana nazo:
+Familia nyingine za kuficha data kwenye audio unazoweza kukutana nazo:
 
 - Phase coding
 - Echo hiding
@@ -73,29 +73,35 @@ Familia nyingine za audio-hiding unazoweza kukutana nazo:
 
 ### WavSteg
 
-Kutoka: https://github.com/ragibson/Steganography#WavSteg<sup>[[2]](#references)</sup>
+Commands zifuatazo zinatumia WavSteg kutoka kwenye toolkit ya `ragibson/Steganography`.<sup>[[2]](#references)</sup>
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 ```
 ### DeepSound
 
-- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
+- Hifadhi rasmi ya DeepSound na matoleo yake.<sup>[[7]](#references)</sup>
 
-## DTMF / dial tones
+## DTMF / toni za kupiga
 
-### Technique
+### Mbinu
 
-DTMF husimba herufi kama jozi za masafa yaliyowekwa (keypad ya simu). Ikiwa sauti inafanana na milio ya keypad au milio ya kawaida ya masafa mawili, jaribu DTMF decoding mapema.
+DTMF huwakilisha kila ishara ya vitufe kwa kutumia frequency moja kutoka kwenye kundi la chini na frequency moja kutoka kwenye kundi la juu. Ikiwa audio inafanana na toni za vitufe au milio miwili ya frequency inayojirudia, jaribu decoding ya DTMF mapema.<sup>[[5]](#references)</sup>
 
-Online decoders:
+Decoders za mtandaoni:
 
-- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
-- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
+- Tool ya browser ya `dtmf-detect`.<sup>[[8]](#references)</sup>
+- `ribt/dtmf-decoder`, decoder ya offline ya mafaili ya audio.<sup>[[9]](#references)</sup>
 
 ## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Orodha ya Matamanio ya Santa, Metadata ya Krismasi, Noise Iliyorekodiwa](https://0xdf.gitlab.io/flagvent2025/medium)
 - [2] [ragibson/Steganography](https://github.com/ragibson/Steganography#WavSteg)
-
+- [3] [Sonic Visualiser — nyaraka](https://www.sonicvisualiser.org/documentation.html)
+- [4] [kamalmostafa/minimodem — modem ya FSK ya command-line](https://github.com/kamalmostafa/minimodem)
+- [5] [Pendekezo la ITU-T Q.23 — vipengele vya kiufundi vya simu zenye vitufe vya kubonyeza](https://www.itu.int/rec/T-REC-Q.23/en)
+- [6] [Audacity](https://www.audacityteam.org/)
+- [7] [Jpinsoft/DeepSound — hifadhi rasmi na matoleo](https://github.com/Jpinsoft/DeepSound)
+- [8] [`dtmf-detect`](https://unframework.github.io/dtmf-detect/)
+- [9] [ribt/dtmf-decoder](https://github.com/ribt/dtmf-decoder)
 {{#include ../../banners/hacktricks-training.md}}

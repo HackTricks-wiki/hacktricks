@@ -4,7 +4,7 @@
 
 **Haya ni maelezo yangu kutoka kwenye kitabu kinachopendekezwa sana** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **pamoja na maelezo ya ziada.**<sup>[[1]](#references)</sup>
 
-## Taarifa za Msingi
+## Maelezo ya Msingi
 
 Unapaswa kuanza kwa kusoma chapisho hili kuhusu dhana za msingi unazopaswa kuzifahamu:
 
@@ -16,17 +16,17 @@ Unapaswa kuanza kwa kusoma chapisho hili kuhusu dhana za msingi unazopaswa kuzif
 ## 1. Tokenization
 
 > [!TIP]
-> Lengo la awamu hii ya awali ni rahisi sana: **Gawanya input kuwa tokens (ids) kwa namna yenye mantiki**.
+> Lengo la awamu hii ni **kugawanya ingizo kuwa tokens na kuzipangia token IDs**.
 
 
 {{#ref}}
 1.-tokenizing.md
 {{#endref}}
 
-## 2. Data Sampling
+## 2. Usampulishaji wa Data
 
 > [!TIP]
-> Lengo la awamu hii ya pili ni rahisi sana: **Chukua sampuli za input data na uitayarishe kwa awamu ya training, kwa kawaida kwa kugawanya dataset kuwa sentensi zenye urefu maalum na pia kutengeneza jibu linalotarajiwa.**
+> Lengo la awamu hii ni kuandaa mfuatano wa mafunzo wenye urefu wa context uliochaguliwa, pamoja na malengo yao ya utabiri yaliyosogezwa.
 
 
 {{#ref}}
@@ -36,10 +36,10 @@ Unapaswa kuanza kwa kusoma chapisho hili kuhusu dhana za msingi unazopaswa kuzif
 ## 3. Token Embeddings
 
 > [!TIP]
-> Lengo la awamu hii ya tatu ni rahisi sana: **Wape kila token ya awali katika vocabulary vector yenye dimensions zinazohitajika ili ku-train model.** Kila neno katika vocabulary litakuwa pointi katika space yenye dimensions X.\
-> Kumbuka kuwa mwanzoni nafasi ya kila neno katika space huanzishwa kwa njia ya "random" na nafasi hizi ni trainable parameters (zitaboreshwa wakati wa training).
+> Lengo la awamu hii ya tatu ni rahisi sana: **Kupa kila token ya awali katika vocabulary vector yenye vipimo vinavyohitajika ili kufunza model.** Kila neno katika vocabulary litakuwa nukta katika space yenye vipimo X.\
+> Kumbuka kuwa mwanzoni, nafasi ya kila neno katika space huanzishwa tu kwa njia ya "random", na nafasi hizi ni trainable parameters (zitaboreshwa wakati wa mafunzo).
 >
-> Zaidi ya hayo, wakati wa token embedding **layer nyingine ya embeddings huundwa** ambayo inawakilisha (katika hali hii) **nafasi ya absolute ya neno katika training sentence**. Kwa njia hii, neno lililo katika nafasi tofauti katika sentence litakuwa na representation (maana) tofauti.
+> Zaidi ya hayo, wakati wa token embedding, **embedding layer nyingine huundwa** ambayo inawakilisha (katika hali hii) **nafasi kamili ya neno katika sentensi ya mafunzo**. Kwa njia hii, neno lililo katika nafasi tofauti katika sentensi huwa na representation tofauti.
 
 
 {{#ref}}
@@ -49,8 +49,8 @@ Unapaswa kuanza kwa kusoma chapisho hili kuhusu dhana za msingi unazopaswa kuzif
 ## 4. Attention Mechanisms
 
 > [!TIP]
-> Lengo la awamu hii ya nne ni rahisi sana: **Tumia attention mechanisms**. Hizi zitakuwa **layers nyingi zinazojirudia** ambazo **zitakamata uhusiano wa neno katika vocabulary na majirani zake katika sentence ya sasa inayotumika ku-train LLM**.\
-> Layers nyingi hutumika kwa ajili hii, hivyo trainable parameters nyingi zitakamata taarifa hii.
+> Lengo la awamu hii ya nne ni rahisi sana: **Kutumia baadhi ya attention mechanisms**. Hizi zitakuwa **layers zinazorudiwa mara nyingi** ambazo **zitakamata uhusiano kati ya neno katika vocabulary na majirani zake katika sentensi ya sasa inayotumika kufunza LLM**.\
+> Layers nyingi hutumika kwa ajili hii, hivyo trainable parameters nyingi zitakuwa zikikamata taarifa hii.
 
 
 {{#ref}}
@@ -60,9 +60,9 @@ Unapaswa kuanza kwa kusoma chapisho hili kuhusu dhana za msingi unazopaswa kuzif
 ## 5. LLM Architecture
 
 > [!TIP]
-> Lengo la awamu hii ya tano ni rahisi sana: **Tengeneza architecture ya LLM kamili**. Unganisha kila kitu, tumia layers zote na uunde functions zote za kuzalisha text au kubadilisha text kuwa IDs na kinyume chake.
+> Lengo la awamu hii ya tano ni rahisi sana: **Kutengeneza architecture kamili ya LLM**. Weka kila kitu pamoja, tumia layers zote na uunde functions zote za kuzalisha text au kubadilisha text kuwa IDs na kurudi kinyume.
 >
-> Architecture hii itatumika kwa training na pia kwa predicting text baada ya model ku-trainiwa.
+> Architecture hii itatumika kwa mafunzo na kwa kutabiri text baada ya kufunzwa.
 
 
 {{#ref}}
@@ -72,45 +72,44 @@ Unapaswa kuanza kwa kusoma chapisho hili kuhusu dhana za msingi unazopaswa kuzif
 ## 6. Pre-training & Loading models
 
 > [!TIP]
-> Lengo la awamu hii ya sita ni rahisi sana: **Train model kutoka mwanzo**. Kwa ajili hii, architecture ya awali ya LLM itatumika pamoja na loops zinazopitia data sets kwa kutumia loss functions na optimizer zilizofafanuliwa ili ku-train parameters zote za model.
+> Lengo la awamu hii ya sita ni rahisi sana: **Kufunza model kutoka mwanzo**. Kwa ajili hii, architecture ya awali ya LLM itatumika pamoja na loops zinazopitia data sets kwa kutumia loss functions na optimizer zilizofafanuliwa ili kufunza parameters zote za model.
 
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
 {{#endref}}
 
-## 7.0. LoRA Improvements in fine-tuning
+## 7.0. Maboresho ya LoRA katika fine-tuning
 
 > [!TIP]
-> Matumizi ya **LoRA hupunguza sana computation** inayohitajika ili **fine-tune** models ambazo tayari zime-trainiwa.
+> LoRA hupunguza kwa kiasi kikubwa idadi ya trainable parameters na optimizer state inayohitajika kufanya fine-tune ya model iliyofunzwa awali.
 
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
 {{#endref}}
 
-## 7.1. Fine-Tuning for Classification
+## 7.1. Fine-Tuning kwa Classification
 
 > [!TIP]
-> Lengo la sehemu hii ni kuonyesha jinsi ya kufanya fine-tune model ambayo tayari ime-pre-trainiwa ili badala ya kuzalisha text mpya, LLM itoe **probabilities za text iliyotolewa kuainishwa katika kila mojawapo ya categories zilizotolewa** (kwa mfano, ikiwa text ni spam au la).
+> Lengo la sehemu hii ni kuonyesha jinsi ya kufanya fine-tune ya model iliyokwisha pre-trained ili badala ya kuzalisha text mpya, LLM itoe **probabilities za text iliyotolewa kuainishwa katika kila moja ya categories zilizotolewa** (kwa mfano, kama text ni spam au la).
 
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
 {{#endref}}
 
-## 7.2. Fine-Tuning to follow instructions
+## 7.2. Fine-Tuning ili kufuata instructions
 
 > [!TIP]
-> Lengo la sehemu hii ni kuonyesha jinsi ya **kufanya fine-tune model ambayo tayari ime-pre-trainiwa ili ifuate instructions** badala ya kuzalisha text tu, kwa mfano, kujibu tasks kama chat bot.
+> Lengo la sehemu hii ni kuonyesha jinsi ya **kufanya fine-tune ya model iliyokwisha pre-trained ili ifuate instructions** badala ya kuzalisha text tu, kwa mfano, kujibu tasks kama chat bot.
 
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
 
-## Marejeo
+## References
 
 - [1] [Build a Large Language Model (From Scratch) - Manning](https://www.manning.com/books/build-a-large-language-model-from-scratch)
-
 {{#include ../../banners/hacktricks-training.md}}

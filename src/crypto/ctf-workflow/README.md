@@ -2,43 +2,45 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Orodha ya ukaguzi wa Triage
+## Orodha ya ukaguzi wa awali
 
 1. Tambua ulicho nacho: encoding dhidi ya encryption dhidi ya hash dhidi ya signature dhidi ya MAC.
-2. Tambua kinachodhibitiwa: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
-3. Ainisha: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Anza na ukaguzi wenye uwezekano mkubwa zaidi: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
+2. Bainisha kinachodhibitiwa: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), partial leakage.
+3. Panga kwa makundi: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
+4. Tumia ukaguzi wenye uwezekano mkubwa kwanza: decode layers, known-plaintext XOR, nonce reuse, mode misuse, oracle behavior.
 5. Tumia advanced methods pale tu inapohitajika: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
 ## Rasilimali za mtandaoni na utilities
 
 Hizi ni muhimu wakati kazi ni kutambua na kuondoa layers, au unapohitaji uthibitisho wa haraka wa hypothesis.
 
-### Hash lookups
+### Utafutaji wa hash
 
-- Google hash hiyo (inafaa kwa kiwango cha kushangaza).
-- [https://crackstation.net/](https://crackstation.net/)
-- [https://md5decrypt.net/](https://md5decrypt.net/)
-- [https://hashes.org/search.php](https://hashes.org/search.php)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com/)
-- [https://gpuhash.me/](https://gpuhash.me/)
-- [http://hashtoolkit.com/reverse-hash](http://hashtoolkit.com/reverse-hash)
+- Tafuta challenge hash inapojulikana kuwa synthetic/public.
+- CrackStation.<sup>[[1]](#references)</sup>
+- MD5Decrypt.<sup>[[2]](#references)</sup>
+- Utafutaji wa hashes.org.<sup>[[3]](#references)</sup>
+- OnlineHashCrack.<sup>[[4]](#references)</sup>
+- GPUHash.me.<sup>[[5]](#references)</sup>
+- Hash Toolkit.<sup>[[6]](#references)</sup>
 
-### Vifaa vya kusaidia utambuzi
+Usiwasilishe real password hashes au confidential challenge material kwenye lookup services za third-party. Pendelea offline wordlist/rule attack wakati disclosure, terms of service, au competition rules ni jambo la kuzingatia.
 
-- CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
-- dCode (uwanja wa majaribio wa ciphers/encodings): https://www.dcode.fr/tools-list
-- Boxentriq (substitution solvers): https://www.boxentriq.com/code-breaking
+### Vifaa vya kusaidia identification
+
+- CyberChef (Magic, decoding, na conversion).<sup>[[7]](#references)</sup>
+- dCode (cipher/encoding playground).<sup>[[8]](#references)</sup>
+- Boxentriq (substitution solvers).<sup>[[9]](#references)</sup>
 
 ### Practice platforms / references
 
-- CryptoHack (hands-on crypto challenges): https://cryptohack.org/
-- Cryptopals (classic modern crypto pitfalls): https://cryptopals.com/
+- CryptoHack (hands-on cryptography challenges).<sup>[[10]](#references)</sup>
+- Cryptopals (classic modern-cryptography pitfalls).<sup>[[11]](#references)</sup>
 
 ### Automated decoding
 
-- Ciphey: https://github.com/Ciphey/Ciphey
-- python-codext (inajaribu bases/encodings nyingi): https://github.com/dhondta/python-codext
+- Ciphey.<sup>[[12]](#references)</sup>
+- python-codext (tries many bases/encodings).<sup>[[13]](#references)</sup>
 
 ## Encodings na classical ciphers
 
@@ -48,31 +50,31 @@ Kazi nyingi za crypto za CTF ni layered transforms: base encoding + simple subst
 
 ### Encodings: jaribu bases nyingi
 
-Ikiwa unashuku layered encoding (base64 → base32 → …), jaribu:
+Ukihisi kuna layered encoding (base64 → base32 → …), jaribu:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
-Dalili za kawaida:
+Viashiria vya kawaida:
 
 - Base64: `A-Za-z0-9+/=` (padding `=` ni ya kawaida)
 - Base32: `A-Z2-7=` (mara nyingi huwa na `=` padding nyingi)
-- Ascii85/Base85: punctuation nyingi iliyosongamana; wakati mwingine hufungwa ndani ya `<~ ~>`
+- Ascii85/Base85: punctuation nyingi; wakati mwingine hufungwa ndani ya `<~ ~>`
 
 ### Substitution / monoalphabetic
 
-- Boxentriq cryptogram solver: https://www.boxentriq.com/code-breaking/cryptogram
-- quipqiup: https://quipqiup.com/
+- Boxentriq cryptogram solver.<sup>[[9]](#references)</sup>
+- quipqiup.<sup>[[14]](#references)</sup>
 
 ### Caesar / ROT / Atbash
 
-- Nayuki auto breaker: https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript
-- Atbash: http://rumkin.com/tools/cipher/atbash.php
+- Nayuki automatic Caesar-cipher breaker.<sup>[[15]](#references)</sup>
+- Rumkin Atbash tool.<sup>[[16]](#references)</sup>
 
 ### Vigenère
 
-- [https://www.dcode.fr/vigenere-cipher](https://www.dcode.fr/vigenere-cipher)
-- [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)
+- dCode Vigenère tool.<sup>[[8]](#references)</sup>
+- Guballa Vigenère solver.<sup>[[17]](#references)</sup>
 
 ### Bacon cipher
 
@@ -100,7 +102,7 @@ Compression hujitokeza mara kwa mara kama layer ya ziada (zlib/deflate/gzip/xz/z
 - `file <blob>`
 - Tafuta magic bytes:
 - gzip: `1f 8b`
-- zlib: mara nyingi `78 01/9c/da`
+- zlib: kwa kawaida `78 01`, `78 5e`, `78 9c`, au `78 da` (byte ya pili hutegemea compression flags)
 - zip: `50 4b 03 04`
 - bzip2: `42 5a 68` (`BZh`)
 - xz: `fd 37 7a 58 5a 00`
@@ -112,9 +114,9 @@ CyberChef ina **Raw Deflate/Raw Inflate**, ambayo mara nyingi ndiyo njia ya hara
 
 ### Useful CLI
 ```bash
-python3 - <<'PY'
+python3 - blob.bin <<'PY'
 import sys, zlib
-data = sys.stdin.buffer.read()
+data = open(sys.argv[1], 'rb').read()
 for wbits in [zlib.MAX_WBITS, -zlib.MAX_WBITS]:
 try:
 print(zlib.decompress(data, wbits=wbits)[:200])
@@ -124,48 +126,77 @@ PY
 ```
 ## Miundo ya kawaida ya crypto ya CTF
 
-### Technique
+### Mbinu
 
-Hii huonekana mara kwa mara kwa sababu ni makosa halisi ya developers au matumizi yasiyo sahihi ya libraries za kawaida. Lengo kwa kawaida ni kutambua tatizo na kutumia extraction au reconstruction workflow inayojulikana.
+Haya hujitokeza mara kwa mara kwa sababu ni makosa halisi ya developers au libraries za kawaida zilizotumiwa vibaya. Kwa kawaida lengo ni kuyatambua na kutumia workflow inayojulikana ya extraction au reconstruction.
 
 ### Fernet
 
-Kidokezo cha kawaida: strings mbili za Base64 (token + key).
+Hint ya kawaida: strings mbili za Base64 (token + key).
 
-- Decoder/notes: https://asecuritysite.com/encryption/ferdecode
+- Decoder/notes: Asecuritysite Fernet decoder.<sup>[[18]](#references)</sup>
 - Katika Python: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
-Ukiona shares nyingi na threshold `t` imetajwa, kuna uwezekano mkubwa ni Shamir.
+Ukiona shares nyingi na threshold `t` imetajwa, huenda ni Shamir.
 
-- Online reconstructor (inafaa kwa CTFs): http://christian.gen.co/secrets/
+- Online reconstructor (kwa shares za CTF zisizo na taarifa nyeti pekee).<sup>[[19]](#references)</sup>
 
 ### OpenSSL salted formats
 
-CTFs wakati mwingine hutoa outputs za `openssl enc` (header mara nyingi huanza na `Salted__`).
+Wakati mwingine CTF hutoa matokeo ya `openssl enc` (header mara nyingi huanza na `Salted__`).
 
 Bruteforce helpers:
 
-- [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
-- [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
+- `bruteforce-salted-openssl`.<sup>[[20]](#references)</sup>
+- `easy_BFopensslCTF`.<sup>[[21]](#references)</sup>
 
 ### General toolset
 
-- RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
-- featherduster: https://github.com/nccgroup/featherduster
-- cryptovenom: https://github.com/lockedbyte/cryptovenom
+- RsaCtfTool.<sup>[[22]](#references)</sup>
+- featherduster.<sup>[[23]](#references)</sup>
+- cryptovenom.<sup>[[24]](#references)</sup>
 
-## Recommended local setup
+## Mpangilio wa local unaopendekezwa
 
 CTF stack ya matumizi ya vitendo:
 
-- Python + `pycryptodome` kwa symmetric primitives na fast prototyping
-- SageMath kwa modular arithmetic, CRT, lattices, na RSA/ECC work
-- Z3 kwa challenges zinazotegemea constraints (wakati crypto inapopunguzwa kuwa constraints)
+- Python pamoja na `pycryptodome` kwa symmetric primitives na prototyping ya haraka.<sup>[[25]](#references)</sup>
+- SageMath kwa modular arithmetic, CRT, lattices, na kazi za RSA/ECC.<sup>[[26]](#references)</sup>
+- Z3 kwa challenges zinazotegemea constraints (crypto inapopunguzwa kuwa constraints).<sup>[[27]](#references)</sup>
 
 Python packages zinazopendekezwa:
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
+## References
+
+- [1] [CrackStation](https://crackstation.net/)
+- [2] [MD5Decrypt](https://md5decrypt.net/)
+- [3] [Utafutaji wa hashes.org](https://hashes.org/search.php)
+- [4] [OnlineHashCrack](https://www.onlinehashcrack.com/)
+- [5] [GPUHash.me](https://gpuhash.me/)
+- [6] [Hash Toolkit](https://hashtoolkit.com/reverse-hash)
+- [7] [GCHQ CyberChef](https://gchq.github.io/CyberChef/)
+- [8] [Zana za dCode](https://www.dcode.fr/tools-list)
+- [9] [Zana za Boxentriq za kuvunja misimbo](https://www.boxentriq.com/code-breaking)
+- [10] [CryptoHack](https://cryptohack.org/)
+- [11] [Cryptopals](https://cryptopals.com/)
+- [12] [Ciphey](https://github.com/Ciphey/Ciphey)
+- [13] [python-codext](https://github.com/dhondta/python-codext)
+- [14] [quipqiup](https://quipqiup.com/)
+- [15] [Nayuki - Kivunja cipher ya Caesar kiotomatiki](https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript)
+- [16] [Rumkin - cipher ya Atbash](https://rumkin.com/tools/cipher/atbash/)
+- [17] [Kisuluhishi cha Vigenère cha Guballa](https://www.guballa.de/vigenere-solver)
+- [18] [Asecuritysite - decoder ya Fernet](https://asecuritysite.com/encryption/ferdecode)
+- [19] [Kijenzi upya cha ushiriki wa siri cha Shamir](https://christian.gen.co/secrets/)
+- [20] [bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
+- [21] [easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
+- [22] [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool)
+- [23] [featherduster](https://github.com/nccgroup/featherduster)
+- [24] [cryptovenom](https://github.com/lockedbyte/cryptovenom)
+- [25] [Nyaraka za PyCryptodome](https://pycryptodome.readthedocs.io/en/latest/)
+- [26] [SageMath](https://www.sagemath.org/)
+- [27] [Z3](https://github.com/Z3Prover/z3)
 {{#include ../../banners/hacktricks-training.md}}
