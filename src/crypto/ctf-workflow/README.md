@@ -1,78 +1,80 @@
-# Crypto CTF Workflow
+# Crypto CTF tok rada
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Checklist za trijažu
+## Kontrolna lista za trijažu
 
-1. Utvrdite šta imate: encoding naspram encryption, hash, signature ili MAC.
+1. Identifikujte šta imate: encoding naspram encryption, hash naspram signature ili MAC.
 2. Utvrdite šta je pod vašom kontrolom: plaintext/ciphertext, IV/nonce, key, oracle (padding/error/timing), delimični leak.
 3. Klasifikujte: symmetric (AES/CTR/GCM), public-key (RSA/ECC), hash/MAC (SHA/MD5/HMAC), classical (Vigenere/XOR).
-4. Prvo primenite provere sa najvećom verovatnoćom uspeha: decode slojeva, known-plaintext XOR, ponovna upotreba nonce-a, pogrešna upotreba mode-a, ponašanje oracle-a.
-5. Pređite na napredne metode samo kada je potrebno: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
+4. Prvo primenite provere sa najvećom verovatnoćom uspeha: dekodiranje slojeva, known-plaintext XOR, ponovna upotreba nonce-a, pogrešna upotreba mode-a, ponašanje oracle-a.
+5. Napredne metode koristite samo kada su neophodne: lattices (LLL/Coppersmith), SMT/Z3, side-channels.
 
-## Online resources & utilities
+## Online resursi i utilities
 
 Ovo je korisno kada je zadatak identifikacija i uklanjanje slojeva ili kada vam je potrebna brza potvrda hipoteze.
 
-### Hash lookups
+### Pretraga hash vrednosti
 
-- Google-ujte hash (iznenađujuće je efikasno).
-- [https://crackstation.net/](https://crackstation.net/)
-- [https://md5decrypt.net/](https://md5decrypt.net/)
-- [https://hashes.org/search.php](https://hashes.org/search.php)
-- [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com/)
-- [https://gpuhash.me/](https://gpuhash.me/)
-- [http://hashtoolkit.com/reverse-hash](http://hashtoolkit.com/reverse-hash)
+- Pretražite hash challenge-a kada se zna da je synthetic/public.
+- CrackStation.<sup>[[1]](#references)</sup>
+- MD5Decrypt.<sup>[[2]](#references)</sup>
+- hashes.org search.<sup>[[3]](#references)</sup>
+- OnlineHashCrack.<sup>[[4]](#references)</sup>
+- GPUHash.me.<sup>[[5]](#references)</sup>
+- Hash Toolkit.<sup>[[6]](#references)</sup>
+
+Ne šaljite stvarne password hash vrednosti niti poverljivi materijal challenge-a third-party lookup servisima. Kada postoji zabrinutost u vezi sa disclosure-om, uslovima korišćenja ili pravilima takmičenja, prednost dajte offline wordlist/rule napadu.
 
 ### Pomagala za identifikaciju
 
-- CyberChef (magic, decode, convert): https://gchq.github.io/CyberChef/
-- dCode (playground za ciphers/encodings): https://www.dcode.fr/tools-list
-- Boxentriq (substitution solvers): https://www.boxentriq.com/code-breaking
+- CyberChef (Magic, dekodiranje i konverzija).<sup>[[7]](#references)</sup>
+- dCode (cipher/encoding playground).<sup>[[8]](#references)</sup>
+- Boxentriq (substitution solvers).<sup>[[9]](#references)</sup>
 
-### Practice platforms / references
+### Practice platforme / reference
 
-- CryptoHack (praktični crypto izazovi): https://cryptohack.org/
-- Cryptopals (klasične slabosti moderne kriptografije): https://cryptopals.com/
+- CryptoHack (hands-on cryptography challenges).<sup>[[10]](#references)</sup>
+- Cryptopals (classic modern-cryptography pitfalls).<sup>[[11]](#references)</sup>
 
 ### Automated decoding
 
-- Ciphey: https://github.com/Ciphey/Ciphey
-- python-codext (isprobava mnoge baze/encodings): https://github.com/dhondta/python-codext
+- Ciphey.<sup>[[12]](#references)</sup>
+- python-codext (isprobava mnoge baze/encodings).<sup>[[13]](#references)</sup>
 
-## Encodings & classical ciphers
+## Encodings i classical ciphers
 
 ### Technique
 
-Mnogi CTF crypto zadaci koriste transformacije u slojevima: base encoding + simple substitution + compression. Cilj je identifikovati slojeve i bezbedno ih ukloniti.
+Mnogi CTF crypto zadaci koriste slojevite transformacije: base encoding + simple substitution + compression. Cilj je identifikovati slojeve i bezbedno ih ukloniti.
 
 ### Encodings: isprobajte mnoge baze
 
-Ako sumnjate na layered encoding (base64 → base32 → …), probajte:
+Ako sumnjate na layered encoding (base64 → base32 → …), isprobajte:
 
 - CyberChef "Magic"
 - `codext` (python-codext): `codext <string>`
 
-Uobičajeni indikatori:
+Uobičajeni pokazatelji:
 
-- Base64: `A-Za-z0-9+/=` (padding `=` je uobičajen)
+- Base64: `A-Za-z0-9+/=` (padding `=` je čest)
 - Base32: `A-Z2-7=` (često ima mnogo `=` padding-a)
-- Ascii85/Base85: gusta interpunkcija; ponekad je obavijeno oznakama `<~ ~>`
+- Ascii85/Base85: gusta interpunkcija; ponekad je obavijen sa `<~ ~>`
 
 ### Substitution / monoalphabetic
 
-- Boxentriq cryptogram solver: https://www.boxentriq.com/code-breaking/cryptogram
-- quipqiup: https://quipqiup.com/
+- Boxentriq cryptogram solver.<sup>[[9]](#references)</sup>
+- quipqiup.<sup>[[14]](#references)</sup>
 
 ### Caesar / ROT / Atbash
 
-- Nayuki auto breaker: https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript
-- Atbash: http://rumkin.com/tools/cipher/atbash.php
+- Nayuki automatic Caesar-cipher breaker.<sup>[[15]](#references)</sup>
+- Rumkin Atbash tool.<sup>[[16]](#references)</sup>
 
 ### Vigenère
 
-- [https://www.dcode.fr/vigenere-cipher](https://www.dcode.fr/vigenere-cipher)
-- [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)
+- dCode Vigenère tool.<sup>[[8]](#references)</sup>
+- Guballa Vigenère solver.<sup>[[17]](#references)</sup>
 
 ### Bacon cipher
 
@@ -87,20 +89,20 @@ AABBB ABBAB ABABA AAAAA ...
 ```
 ### Runes
 
-Runes su često supstitucioni alfabeti; pretražite "futhark cipher" i isprobajte tabele za mapiranje.
+Runes su često substitution alphabets; pretražite "futhark cipher" i pokušajte sa mapping tabelama.
 
 ## Kompresija u izazovima
 
 ### Tehnika
 
-Kompresija se stalno pojavljuje kao dodatni sloj (zlib/deflate/gzip/xz/zstd), ponekad ugnježden. Ako se izlaz gotovo parsira, ali izgleda kao besmislice, posumnjajte na kompresiju.
+Kompresija se stalno pojavljuje kao dodatni sloj (zlib/deflate/gzip/xz/zstd), ponekad ugnježden. Ako se izlaz skoro parsira, ali izgleda kao besmisleni podaci, posumnjajte na kompresiju.
 
 ### Brza identifikacija
 
 - `file <blob>`
 - Potražite magic bytes:
 - gzip: `1f 8b`
-- zlib: često `78 01/9c/da`
+- zlib: najčešće `78 01`, `78 5e`, `78 9c` ili `78 da` (drugi byte zavisi od compression flags)
 - zip: `50 4b 03 04`
 - bzip2: `42 5a 68` (`BZh`)
 - xz: `fd 37 7a 58 5a 00`
@@ -110,11 +112,11 @@ Kompresija se stalno pojavljuje kao dodatni sloj (zlib/deflate/gzip/xz/zstd), po
 
 CyberChef ima **Raw Deflate/Raw Inflate**, što je često najbrži način kada blob izgleda kompresovano, ali `zlib` ne uspe.
 
-### Koristan CLI
+### Korisne CLI
 ```bash
-python3 - <<'PY'
+python3 - blob.bin <<'PY'
 import sys, zlib
-data = sys.stdin.buffer.read()
+data = open(sys.argv[1], 'rb').read()
 for wbits in [zlib.MAX_WBITS, -zlib.MAX_WBITS]:
 try:
 print(zlib.decompress(data, wbits=wbits)[:200])
@@ -124,22 +126,22 @@ PY
 ```
 ## Uobičajene CTF crypto konstrukcije
 
-### Technique
+### Tehnika
 
-Ove tehnike se često pojavljuju zato što predstavljaju realne greške developera ili nepravilno korišćene uobičajene biblioteke. Cilj je obično prepoznavanje i primena poznatog workflow-a za ekstrakciju ili rekonstrukciju.
+Ovo se često pojavljuje zato što predstavlja realne greške developera ili uobičajene biblioteke koje se nepravilno koriste. Cilj je obično prepoznavanje i primena poznatog workflow-a za ekstrakciju ili rekonstrukciju.
 
 ### Fernet
 
 Tipičan hint: dva Base64 stringa (token + key).
 
-- Decoder/notes: https://asecuritysite.com/encryption/ferdecode
-- U Python-u: `from cryptography.fernet import Fernet`
+- Decoder/notes: Asecuritysite Fernet decoder.<sup>[[18]](#references)</sup>
+- U Pythonu: `from cryptography.fernet import Fernet`
 
 ### Shamir Secret Sharing
 
 Ako vidite više share-ova i pominje se prag `t`, verovatno je u pitanju Shamir.
 
-- Online reconstructor (koristan za CTF-ove): http://christian.gen.co/secrets/
+- Online reconstructor (samo za nesenzitivne CTF share-ove).<sup>[[19]](#references)</sup>
 
 ### OpenSSL salted formati
 
@@ -147,25 +149,54 @@ CTF-ovi ponekad daju izlaze komande `openssl enc` (header često počinje sa `Sa
 
 Bruteforce helpers:
 
-- [https://github.com/glv2/bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
-- [https://github.com/carlospolop/easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
+- `bruteforce-salted-openssl`.<sup>[[20]](#references)</sup>
+- `easy_BFopensslCTF`.<sup>[[21]](#references)</sup>
 
-### Opšti toolset
+### Opšti alatni skup
 
-- RsaCtfTool: https://github.com/Ganapati/RsaCtfTool
-- featherduster: https://github.com/nccgroup/featherduster
-- cryptovenom: https://github.com/lockedbyte/cryptovenom
+- RsaCtfTool.<sup>[[22]](#references)</sup>
+- featherduster.<sup>[[23]](#references)</sup>
+- cryptovenom.<sup>[[24]](#references)</sup>
 
 ## Preporučeno lokalno okruženje
 
-Praktičan CTF stack:
+Praktični CTF stack:
 
-- Python + `pycryptodome` za simetrične primitive i brzo prototipisanje
-- SageMath za modularnu aritmetiku, CRT, lattice algoritme i RSA/ECC rad
-- Z3 za izazove zasnovane na constraint-ima (kada se crypto svodi na constraint-e)
+- Python plus `pycryptodome` za simetrične primitive i brzo prototipisanje.<sup>[[25]](#references)</sup>
+- SageMath za modularnu aritmetiku, CRT, lattice algoritme i RSA/ECC rad.<sup>[[26]](#references)</sup>
+- Z3 za izazove zasnovane na ograničenjima (kada se crypto svodi na ograničenja).<sup>[[27]](#references)</sup>
 
 Predloženi Python paketi:
 ```bash
 pip install pycryptodome gmpy2 sympy pwntools z3-solver
 ```
+## References
+
+- [1] [CrackStation](https://crackstation.net/)
+- [2] [MD5Decrypt](https://md5decrypt.net/)
+- [3] [hashes.org pretraga](https://hashes.org/search.php)
+- [4] [OnlineHashCrack](https://www.onlinehashcrack.com/)
+- [5] [GPUHash.me](https://gpuhash.me/)
+- [6] [Hash Toolkit](https://hashtoolkit.com/reverse-hash)
+- [7] [GCHQ CyberChef](https://gchq.github.io/CyberChef/)
+- [8] [dCode alati](https://www.dcode.fr/tools-list)
+- [9] [Boxentriq alati za razbijanje kodova](https://www.boxentriq.com/code-breaking)
+- [10] [CryptoHack](https://cryptohack.org/)
+- [11] [Cryptopals](https://cryptopals.com/)
+- [12] [Ciphey](https://github.com/Ciphey/Ciphey)
+- [13] [python-codext](https://github.com/dhondta/python-codext)
+- [14] [quipqiup](https://quipqiup.com/)
+- [15] [Nayuki - Automatski razbijač Cezarove šifre](https://www.nayuki.io/page/automatic-caesar-cipher-breaker-javascript)
+- [16] [Rumkin - Atbash šifra](https://rumkin.com/tools/cipher/atbash/)
+- [17] [Guballa Vigenère rešavač](https://www.guballa.de/vigenere-solver)
+- [18] [Asecuritysite - Fernet dekoder](https://asecuritysite.com/encryption/ferdecode)
+- [19] [Rekonstruktor Shamir-ovog deljenja tajne](https://christian.gen.co/secrets/)
+- [20] [bruteforce-salted-openssl](https://github.com/glv2/bruteforce-salted-openssl)
+- [21] [easy_BFopensslCTF](https://github.com/carlospolop/easy_BFopensslCTF)
+- [22] [RsaCtfTool](https://github.com/RsaCtfTool/RsaCtfTool)
+- [23] [featherduster](https://github.com/nccgroup/featherduster)
+- [24] [cryptovenom](https://github.com/lockedbyte/cryptovenom)
+- [25] [PyCryptodome dokumentacija](https://pycryptodome.readthedocs.io/en/latest/)
+- [26] [SageMath](https://www.sagemath.org/)
+- [27] [Z3](https://github.com/Z3Prover/z3)
 {{#include ../../banners/hacktricks-training.md}}

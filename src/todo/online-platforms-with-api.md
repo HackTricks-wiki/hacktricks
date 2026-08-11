@@ -1,131 +1,158 @@
-# Online Platforms with API
+# Online Platforme sa API-jem
 
 {{#include ../banners/hacktricks-training.md}}
 
-## [ProjectHoneypot](https://www.projecthoneypot.org/)
+Ove usluge podržavaju procese izviđanja, procene reputacije, provere breach podataka ili obogaćivanja podataka. Njihovi API-ji, kvote, cene i dozvoljene namene često se menjaju; proverite aktuelnu dokumentaciju vendora i autorizaciju angažmana pre slanja identifikatora korisnika ili osetljivih podataka.
 
-Možete proveriti da li je IP povezan sa sumnjivim/zlonamernim aktivnostima. Potpuno besplatno.
+## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
-## [**BotScout**](http://botscout.com/api.htm)
+Proverite da li je IP adresa bila povezana sa sumnjivom ili zlonamernom aktivnošću. Pristup može zahtevati nalog ili API ključ.
 
-Proverite da li je IP adresa povezana sa botom koji registruje naloge. Takođe može da proverava korisnička imena i email adrese. U početku besplatno.
+## [**BotScout**](https://botscout.com/api.htm) <sup>[[2]](#references)</sup>
 
-## [Hunter](https://hunter.io/)
+Proverite da li su IP adresa, korisničko ime ili email adresa bili povezani sa automatskom registracijom naloga ili drugom prijavljenom bot aktivnošću.
 
-Pronađite i verifikujte email adrese.\
-Neki API zahtevi su besplatni, a za veći broj morate platiti.\
-Komercijalno?
+## [Hunter](https://hunter.io/) <sup>[[3]](#references)</sup>
 
-## [AlientVault](https://otx.alienvault.com/api)
+Pronađite i verifikujte profesionalne email adrese i obrasce kontakata povezane sa domenom. Proverite trenutni plan za ograničenja zahteva i dozvoljene namene.
 
-Pronađite zlonamerne aktivnosti povezane sa IP adresama i domenima. Besplatno.
+## [AlienVault OTX](https://otx.alienvault.com/api) <sup>[[4]](#references)</sup>
 
-## [Clearbit](https://dashboard.clearbit.com/)
+Pretražite indikatore threat intelligence-a i aktivnosti povezane sa IP adresama i domenima.
 
-Pronađite povezane lične podatke za email adresu (profile na drugim platformama), domen (osnovne informacije o kompaniji, email adrese i zaposlene) i kompanije (dobijte informacije o kompaniji na osnovu email adrese).\
-Morate platiti da biste pristupili svim mogućnostima.\
-Komercijalno?
+## [Clearbit](https://dashboard.clearbit.com/) <sup>[[5]](#references)</sup>
 
-## [BuiltWith](https://builtwith.com/)
+Obogatite email adresu, domen ili kompaniju dostupnim poslovnim/profilnim podacima. Pokrivenost, pristup i ograničenja privatnosti zavise od trenutnog proizvoda i plana.
 
-Tehnologije koje koriste web sajtovi. Skupo...\
-Komercijalno?
+## [BuiltWith](https://builtwith.com/) <sup>[[6]](#references)</sup>
 
-## [Fraudguard](https://fraudguard.io/)
+Identifikujte tehnologije uočene na sajtovima i pribavite istorijske podatke ili podatke o povezanosti tamo gde ih izabrani plan dozvoljava.
 
-Proverite da li je host (domen ili IP) povezan sa sumnjivim/zlonamernim aktivnostima. Omogućava određeni besplatan API pristup.\
-Komercijalno?
+## [FraudGuard](https://fraudguard.io/) <sup>[[7]](#references)</sup>
 
-## [FortiGuard](https://fortiguard.com/)
+Proverite da li je IP adresa povezana sa sumnjivom ili zlonamernom aktivnošću. Potvrdite aktuelne API planove i ograničenja.
 
-Proverite da li je host (domen ili IP) povezan sa sumnjivim/zlonamernim aktivnostima. Omogućava određeni besplatan API pristup.
+## [FortiGuard](https://fortiguard.com/) <sup>[[8]](#references)</sup>
 
-## [SpamCop](https://www.spamcop.net/)
+Proverite FortiGuard kategorizaciju i threat intelligence za domene, URL-ove ili IP adrese. Dostupnost se razlikuje u zavisnosti od usluge.
 
-Pokazuje da li je host povezan sa spam aktivnostima. Omogućava određeni besplatan API pristup.
+## [SpamCop](https://www.spamcop.net/) <sup>[[9]](#references)</sup>
 
-## [mywot](https://www.mywot.com/)
+Proverite da li je IP adresa navedena zbog prijavljene spam aktivnosti.
 
-Na osnovu mišljenja i drugih metrika utvrdite da li je domen povezan sa sumnjivim/zlonamernim informacijama.
+## [myWOT](https://www.mywot.com/) <sup>[[10]](#references)</sup>
 
-## [ipinfo](https://ipinfo.io/)
+Preuzmite reputaciju domena na osnovu zajednice korisnika usluge i drugih signala.
 
-Dobija osnovne informacije sa IP adrese. Možete testirati do 100K upita mesečno.
+## [IPinfo](https://ipinfo.io/) <sup>[[11]](#references)</sup>
 
-## [securitytrails](https://securitytrails.com/app/account)
+Dobijte geolokaciju, ASN, organizaciju i povezane metapodatke za IP adresu. Proverite trenutni plan za kvote.
 
-Ova platforma pruža informacije o domenima i IP adresama, kao što su domeni unutar IP adrese ili na serveru domena, domeni u vlasništvu email adrese (pronalaženje povezanih domena), istorija IP adresa domena (pronalaženje hosta iza CloudFlare-a), svi domeni koji koriste nameserver....\
-Imate određeni besplatan pristup.
+## [SecurityTrails](https://securitytrails.com/app/account) <sup>[[12]](#references)</sup>
 
-## [fullcontact](https://www.fullcontact.com/)
+Ova platforma pruža DNS i infrastrukturni intelligence, kao što su istorijska razrešenja, domeni povezani sa IP adresama ili name serverima i povezani zapisi. Istorijski DNS može otkriti raniju origin adresu, ali ne zaobilazi pouzdano CDN i mora biti validiran.
 
-Omogućava pretragu po email adresi, domenu ili nazivu kompanije i preuzimanje povezanih „ličnih“ informacija. Takođe može da verifikuje email adrese. Dostupan je određeni besplatan pristup.
+## [FullContact](https://www.fullcontact.com/) <sup>[[13]](#references)</sup>
 
-## [RiskIQ](https://www.spiderfoot.net/documentation/)
+Obogatite email adresu, domen ili naziv kompanije dostupnim identitetskim i poslovnim atributima. Postupajte sa ličnim podacima u skladu sa zahtevima autorizacije i privatnosti.
 
-Velika količina informacija o domenima i IP adresama, čak i u besplatnoj/community verziji.
+## RiskIQ / Microsoft Defender Threat Intelligence (legacy transition) <sup>[[14]](#references)</sup>
 
-## [\_IntelligenceX](https://intelx.io/)
+RiskIQ PassiveTotal mogućnosti prešle su u Microsoft Defender Threat Intelligence. Pristup proizvodu, API-ji i zadržane funkcionalnosti su promenjeni, zato koristite aktuelnu Microsoft dokumentaciju umesto pretpostavki zasnovanih na legacy PassiveTotal-u.
 
-Pretražite domene, IP adrese i email adrese i dobijte informacije iz dumpova. Dostupan je određeni besplatan pristup.
+## [Intelligence X](https://intelx.io/) <sup>[[15]](#references)</sup>
 
-## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+Pretražite domene, IP adrese, email adrese i indeksirane istorijske ili leaked podatke, u skladu sa kontrolama pristupa usluge.
 
-Pretražite po IP adresi i prikupite informacije povezane sa sumnjivim aktivnostima. Dostupan je određeni besplatan pristup.
+## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/) <sup>[[16]](#references)</sup>
 
-## [Greynoise](https://viz.greynoise.io/)
+Pretražite IP adrese i druge indikatore radi threat intelligence podataka i podataka o reputaciji.
 
-Pretražite po IP adresi ili opsegu IP adresa i dobijte informacije o IP adresama koje skeniraju Internet. Besplatan pristup u trajanju od 15 dana.
+## [GreyNoise](https://viz.greynoise.io/) <sup>[[17]](#references)</sup>
 
-## [Shodan](https://www.shodan.io/)
+Pretražite IP adrese ili opsege radi uvida u internet skeniranje i uobičajene aktivnosti servisa. Proverite trenutne uslove za trial i community pristup.
 
-Dobijte informacije o skeniranju IP adrese. Dostupan je određeni besplatan API pristup.
+## [Shodan](https://www.shodan.io/) <sup>[[18]](#references)</sup>
 
-## [Censys](https://censys.io/)
+Preuzmite informacije o internet skeniranju i servisima za IP adresu, host ili upit za pretragu. API pristup zavisi od plana naloga.
 
-Veoma slično kao shodan
+## [Censys](https://censys.io/) <sup>[[19]](#references)</sup>
 
-## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
+Pretražujte skupove podataka o hostovima, sertifikatima, domenima i internet servisima; njegov model podataka i pokrivenost razlikuju se od Shodan-ovih.
 
-Pronađite otvorene S3 buckets pretragom po ključnoj reči.
+## [GrayHatWarfare bucket search](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
 
-## [Dehashed](https://www.dehashed.com/data)
+Pretražite indeks provajdera sa javno uočenim cloud-storage objektima i bucketima prema ključnoj reči.
 
-Pronađite leakovane akreditive email adresa, pa čak i domena\
-Komercijalno?
+## [DeHashed](https://www.dehashed.com/data) <sup>[[21]](#references)</sup>
 
-## [psbdmp](https://psbdmp.ws/)
+Pretražite indeksirane breach podatke za email adrese, korisnička imena, domene i povezane zapise. Koristite samo uz autorizaciju i izbegavajte nepotrebno izlaganje breach podataka.
 
-Pretražite pastebin sajtove na kojima se pojavila email adresa. Komercijalno?
+## [psbdmp](https://psbdmp.ws/) <sup>[[22]](#references)</sup>
 
-## [emailrep.io](https://emailrep.io/key)
+Pretražite indeksirani paste sadržaj radi pojavljivanja email adrese ili drugog termina. Proverite da li je usluga još dostupna pre integracije.
 
-Dobijte reputaciju email adrese. Komercijalno?
+## [EmailRep](https://emailrep.io/key) <sup>[[23]](#references)</sup>
 
-## [ghostproject](https://ghostproject.fr/)
+Preuzmite signale reputacije i rizika za email adresu.
 
-Dobijte lozinke iz leakovanih email adresa. Komercijalno?
+## GhostProject (historical) <sup>[[24]](#references)</sup>
 
-## [Binaryedge](https://www.binaryedge.io/)
+Istorijski je oglašavao pretrage leaked email/password podataka. Tretirajte uslugu kao visokorizično rukovanje podacima od strane treće strane i proverite njenu dostupnost, zakonitost i autorizaciju pre upotrebe.
 
-Dobijte zanimljive informacije o IP adresama
+## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
 
-## [haveibeenpwned](https://haveibeenpwned.com/)
+Dobijte podatke o internet skeniranju, izloženosti i threat intelligence-u za IP adrese i povezane resurse.
 
-Pretražite po domenu i email adresi i proverite da li je bila pwned, kao i lozinke. Komercijalno?
+## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
-### [IP2Location.io](https://www.ip2location.io/)
+Proverite da li se email adresa ili verifikovani domen pojavljuju u poznatim breach-ovima. Zasebna usluga Pwned Passwords proverava hash-eve lozinki prema prefiksu; ona **ne** otkriva lozinke u otvorenom tekstu.
 
-Detektuje geolokaciju IP adrese, data centar, ASN i čak VPN informacije. Nudi 30K besplatnih upita mesečno.
+### [IP2Location.io](https://www.ip2location.io/) <sup>[[27]](#references)</sup>
 
-### [IPQuery.io](https://www.ipquery.io/)
-Geolokacija IP adrese i OISNT sa ciljanim tačkama podataka. Nije komercijalno.
+Preuzmite geolokaciju IP adrese, podatke o data centru, ASN-u, proxy/VPN-u i povezana polja za obogaćivanje podataka. Kvote zavise od trenutnog plana.
+
+### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
+Geolokacija IP adrese i OSINT-orijentisano obogaćivanje podataka sa odabranim tačkama podataka. Proverite aktuelne uslove za komercijalnu upotrebu.
 
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(u komercijalnom alatu?)
+[DNSDumpster](https://dnsdumpster.com/) pruža rezultate DNS izviđanja.<sup>[[29]](#references)</sup>
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (u komercijalnom alatu?)
+[Netcraft](https://www.netcraft.com/) pruža intelligence o sajtovima, hostingu i internet infrastrukturi.<sup>[[30]](#references)</sup>
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (u komercijalnom alatu?)
+[NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/) pruža online interfejs za otkrivanje poddomena.<sup>[[31]](#references)</sup>
 
+## References
+
+- [1] [Project Honey Pot](https://www.projecthoneypot.org/)
+- [2] [BotScout API](https://botscout.com/api.htm)
+- [3] [Hunter API](https://hunter.io/api-documentation)
+- [4] [AlienVault OTX API](https://otx.alienvault.com/api)
+- [5] [Clearbit](https://dashboard.clearbit.com/)
+- [6] [BuiltWith](https://builtwith.com/)
+- [7] [FraudGuard](https://fraudguard.io/)
+- [8] [FortiGuard Labs](https://www.fortiguard.com/)
+- [9] [SpamCop](https://www.spamcop.net/)
+- [10] [Web of Trust](https://www.mywot.com/)
+- [11] [IPinfo](https://ipinfo.io/)
+- [12] [SecurityTrails](https://securitytrails.com/)
+- [13] [FullContact](https://www.fullcontact.com/)
+- [14] [Microsoft Defender Threat Intelligence](https://learn.microsoft.com/en-us/defender/threat-intelligence/what-is-microsoft-defender-threat-intelligence-defender-ti)
+- [15] [Intelligence X](https://intelx.io/)
+- [16] [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+- [17] [GreyNoise](https://www.greynoise.io/)
+- [18] [Shodan](https://www.shodan.io/)
+- [19] [Censys](https://censys.com/)
+- [20] [GrayHatWarfare](https://buckets.grayhatwarfare.com/)
+- [21] [DeHashed](https://www.dehashed.com/)
+- [22] [psbdmp](https://psbdmp.ws/)
+- [23] [EmailRep](https://emailrep.io/)
+- [24] [Cornell istraživanje — Protokoli za proveru kompromitovanih akreditiva (uključuje GhostProject)](https://rist.tech.cornell.edu/papers/c3.pdf)
+- [25] [BinaryEdge](https://www.binaryedge.io/)
+- [26] [Have I Been Pwned API](https://haveibeenpwned.com/API/v3)
+- [27] [IP2Location.io](https://www.ip2location.io/)
+- [28] [IPQuery](https://www.ipquery.io/)
+- [29] [DNSDumpster](https://dnsdumpster.com/)
+- [30] [Netcraft](https://www.netcraft.com/)
+- [31] [NMMapper Subdomain Finder](https://www.nmmapper.com/sys/tools/subdomainfinder/)
 {{#include ../banners/hacktricks-training.md}}
