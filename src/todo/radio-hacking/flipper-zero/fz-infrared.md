@@ -1,4 +1,4 @@
-# FZ - Infrared
+# FZ - 红外
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -13,29 +13,27 @@
 
 ## Flipper Zero 中的 IR 信号接收器 <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper 使用 TSOP 数字 IR 信号接收器，**可以拦截来自 IR 遥控器的信号**。有一些**智能手机**（例如 Xiaomi）也配备了 IR 接口，但请注意，**大多数手机只能发送**信号，**无法接收**信号。<sup>[[1]](#references)</sup>
+Flipper Zero 使用解调型 IR 接收器来捕获常见 IR 遥控器发出的信号。部分手机（包括某些 Xiaomi 型号）配备了 IR 发射器，但大多数手机无法接收和解码遥控信号。<sup>[[1]](#references)</sup>
 
-Flipper 的 Infrared **接收器非常灵敏**。即使你位于遥控器和电视之间的**某处位置**，也能**捕获信号**。无需将遥控器直接对准 Flipper 的 IR 接口。当有人站在电视旁切换频道，而你和 Flipper 都距离电视较远时，这一功能非常实用。
+Flipper 的 Infrared **接收器非常灵敏**。即使你位于遥控器和电视之间的**某个位置**，也可以**捕获信号**。无需将遥控器直接对准 Flipper 的 IR 接口。当有人站在电视附近切换频道，而你和 Flipper 都距离电视较远时，这一特性非常实用。
 
-由于红外信号的**解码**发生在**软件**侧，Flipper Zero 理论上支持**接收和发送任意 IR 遥控器代码**。对于无法识别的**未知**协议，它会准确地**记录并回放**接收到的原始信号。<sup>[[1]](#references)</sup>
+Protocol decoding 在软件中完成。已识别的 protocols 可以保存为 decoded commands；不支持的 protocols 则可以作为 raw timing data 捕获并重放，但受硬件载波频率和 timing 限制。<sup>[[1]](#references)</sup>
 
 ## 操作
 
 ### Universal Remotes
 
-Flipper Zero 可作为**通用遥控器，用于控制任何电视、空调或媒体中心**。在此模式下，Flipper 会根据 SD 卡中的字典，对所有受支持制造商的所有**已知代码**进行 **bruteforces**。你无需选择特定遥控器即可关闭餐厅里的电视。<sup>[[1]](#references)</sup>
+Flipper Zero 的 universal-remote 模式会针对受支持的电视、音频设备、投影仪和空调，从其 infrared database 中循环发送已知 commands。它不保证能够控制所有设备，并且只能用于你拥有或获授权测试的设备。<sup>[[1]](#references)</sup>
 
-在 Universal Remote 模式下，只需按下电源按钮，Flipper 就会**依次发送所有已知电视的“Power Off”**命令：Sony、Samsung、Panasonic……等等。当电视接收到对应信号后，就会作出反应并关闭。
+在 Universal Remote 模式下，只需按下电源按钮，Flipper 就会**依次发送**它所知的所有电视的“Power Off” commands：Sony、Samsung、Panasonic……等等。当电视接收到相应信号后，就会做出响应并关机。
 
-这种 brute-force 需要一定时间。字典越大，完成所需的时间越长。由于电视不会提供反馈，因此无法得知电视究竟识别了哪个信号。
+这种 brute-force 需要一定时间。dictionary 越大，完成所需的时间就越长。由于电视不会返回反馈，因此无法确定电视究竟识别了哪个信号。
 
-### 学习新遥控器
+### Learn New Remote
 
-Flipper Zero 可以**捕获红外信号**。如果它在数据库中**找到该信号**，Flipper 将自动**识别对应设备**，并允许你与其交互。\
-如果找不到，Flipper 可以**存储**该**信号**，并允许你**重放该信号**。<sup>[[1]](#references)</sup>
+Flipper Zero 可以**捕获 infrared signal**。如果它识别出 protocol 和 command，就会保存 decoded representation；否则，可以保存 raw timing data 以便之后重放。<sup>[[1]](#references)</sup>
 
-## 参考资料
+## References
 
-- [1] [Taking over TVs with Flipper Zero Infrared Port](https://blog.flipperzero.one/infrared/)
-
+- [1] [使用 Flipper Zero Infrared Port 控制电视](https://blog.flipperzero.one/infrared/)
 {{#include ../../../banners/hacktricks-training.md}}

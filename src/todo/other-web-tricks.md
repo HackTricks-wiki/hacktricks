@@ -2,42 +2,41 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Host header
+## Host header
 
-后端有时会信任 **Host header** 来执行某些操作。例如，它可能会将其值用作**发送密码重置链接的域名**。因此，当你收到一封包含密码重置链接的邮件时，所使用的域名就是你在 Host header 中设置的域名。然后，你可以请求重置其他用户的密码，并将域名修改为由你控制的域名，从而窃取他们的密码重置代码。[WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)。<sup>[[1]](#references)</sup>
+后端有时会信任 HTTP `Host` 字段来构造绝对链接。如果密码重置邮件使用了攻击者提供的主机名，攻击者可以为受害者请求重置，使包含 token 的链接通过攻击者控制的域名发送出去。还应在每个代理跃点测试 forwarded-host 字段、重复 Host 的处理方式，以及 absolute-form 请求目标。<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> 注意，你甚至可能不需要等待用户点击密码重置链接就能获取 token，因为**spam filters 或其他中间设备/bots 可能会点击该链接来分析它**。
+> 可能不需要用户点击：**邮件安全扫描器、预览服务或其他中间件可能会自动请求攻击者控制的链接**，从而泄露重置 token。
 
-### Session booleans
+## Session booleans
 
-有时，当你正确完成某项验证后，后端**只会向你 session 的某个安全属性添加一个值为 "True" 的 boolean**。随后，另一个 endpoint 会判断你是否成功通过了该检查。\
-但是，如果你**通过了检查**，并且你的 session 在该安全属性中获得了 "True" 值，那么你可以尝试**访问其他依赖同一属性的资源**，尽管你**本不应该拥有访问权限**。[WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)。<sup>[[2]](#references)</sup>
+某些应用会在 session 中将完成验证记录为布尔值，然后让其他 endpoint 依赖该标志。针对某个资源合法通过检查后，测试同一个标志是否会错误地授权访问其他用户、对象或工作流。这属于二阶授权/状态复用漏洞，而不只是 IDOR。<sup>[[2]](#references)</sup>
 
-### Register functionality
+## Registration functionality
 
-尝试注册为一个已经存在的用户。也可以尝试使用等效字符（点号、大量空格和 Unicode）。
+尝试注册一个已经存在的用户。还可以尝试使用等价字符（点号、大量空格和 Unicode）。
 
-### Takeover emails
+## Email-change state confusion
 
-注册一个 email，在确认它之前修改该 email；如果新的确认 email 被发送到最初注册的 email，你就可以 takeover 任意 email。或者，如果你可以通过确认第一个 email 来启用第二个 email，那么你也可以 takeover 任意 account。
+注册一个 email 地址，并在确认前修改它。检查新地址的确认邮件是否被发送到旧地址，或者确认旧 token 是否会激活新地址。确认 token 必须绑定到确切的账户、待确认地址、用途和当前状态。
 
-### 使用 atlassian 访问公司的内部 servicedesk
+## Exposed Atlassian service desks
 
 
 {{#ref}}
 https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 {{#endref}}
 
-### TRACE method
+## TRACE method
 
-开发人员可能会忘记在 production environment 中禁用各种 debugging 选项。例如，HTTP `TRACE` method 用于诊断目的。如果启用，web server 将通过在响应中回显收到的完整 request，来响应使用 `TRACE` method 的请求。这种行为通常无害，但有时会导致 information disclosure，例如泄露 reverse proxies 可能附加到请求中的内部 authentication headers 的名称。![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+HTTP `TRACE` method 会请求回显收到的请求，用于诊断。RFC 9110 要求接收方从回显内容中省略凭据和 cookies 等敏感字段，但不安全的实现或由中间件添加的 headers 仍可能泄露内部请求转换过程。浏览器会阻止脚本生成 TRACE 请求，因此历史上的跨站追踪攻击还依赖另一种注入受保护字段的方式。<sup>[[3]](#references)</sup>![显示 TRACE 响应的图片](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
-![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
+![post 图片](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
 ## References
 
-- [1] [How I was able to take over any user's account with Host Header Injection](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
-- [2] [A less known attack vector: Second Order IDOR attacks](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
-
+- [1] [我如何通过 Host Header Injection 接管任意用户的账户](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
+- [2] [一个较少人知的攻击向量：Second Order IDOR attacks](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
+- [3] [RFC 9110，第 9.3.8 节 — TRACE](https://www.rfc-editor.org/rfc/rfc9110.html#name-trace)
 {{#include ../banners/hacktricks-training.md}}

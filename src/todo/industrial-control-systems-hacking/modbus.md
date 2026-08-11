@@ -2,34 +2,39 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Modbus 协议简介
+## Modbus 简介
 
-Modbus 协议是工业自动化与控制系统中广泛使用的一种协议。Modbus 支持可编程逻辑控制器（PLCs）、传感器、执行器及其他工业设备之间的通信。理解 Modbus 协议非常重要，因为它是 ICS 中使用最广泛的通信协议，并且具有很大的攻击面，可用于 sniffing，甚至向 PLCs 注入命令。
+Modbus 是一种开放的应用层协议，广泛用于 PLC、传感器、执行器及其他工业设备。其请求/响应模型通过功能码暴露线圈和寄存器。因此，安全测试应重点关注未授权读取/写入、流量观察、replay 以及不安全的设备行为，而不应仅仅停留在发现 TCP 端口 502。<sup>[[1]](#references)</sup>
 
-下面将以要点形式介绍相关概念，为理解该协议及其运行方式提供背景。ICS 系统安全面临的最大挑战是实施和升级的成本。这些协议和标准是在 80 年代和 90 年代初设计的，至今仍被广泛使用。由于一个工业系统通常包含大量设备和连接，升级设备非常困难，这使 hackers 能够利用过时协议进行攻击。由于 Modbus 将在工业运行关键的环境中持续使用且难以升级，因此针对 Modbus 的攻击实际上几乎不可避免。
+许多部署仍保留传统串行设备，因为升级需要停机、重新认证或更换现场设备。传统 Modbus 不提供机密性或对端身份验证；Modbus Security 是一种独立的、基于 TLS 的配置文件，使用 X.509 证书和 TCP 端口 802。由于该规范是公开的，且可以由不同厂商独立实现，因此各厂商的行为和可选功能支持情况存在差异，应进行指纹识别，而不是想当然地假设其行为。<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Client-Server 架构
+## 客户端-服务器架构
 
-Modbus 协议通常采用 Client-Server 架构，其中主设备（client）向一个或多个从设备（servers）发起通信。这也被称为 Master-Slave 架构，广泛应用于电子设备和 IoT 中的 SPI、I2C 等技术。
+在当前术语中，**客户端**发起事务，**服务器**返回响应。较早的文档使用 **master/slave**。不要将这种应用层关系与 SPI 或 I2C 混淆：它们是不同的总线协议。<sup>[[1]](#references)</sup>
 
-## Serial 和 Ethernet 版本
+## 串行与以太网传输
 
-Modbus 协议既支持 Serial Communication，也支持 Ethernet Communication。Serial Communication 广泛用于 legacy systems，而现代设备支持 Ethernet，后者能够提供更高的数据速率，也更适合现代工业网络。
+相同的 Modbus 应用数据可以通过串行变体（RTU 或 ASCII 帧格式）以及 Modbus TCP 传输。Modbus TCP 增加了 MBAP header，通常使用 TCP 端口 502；串行 RTU 使用紧凑的二进制帧格式和 CRC，而串行 ASCII 将字节表示为十六进制字符，并使用 LRC。<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## 数据表示
 
-在 Modbus 协议中，数据可以通过 ASCII 或 Binary 进行传输，但由于 Binary 格式与旧设备的兼容性更好且更加紧凑，因此得到了广泛使用。
+数据模型由单比特线圈/离散输入以及 16 位输入/保持寄存器组成。多寄存器值、字节序、缩放方式和语义含义均由设备决定，必须根据厂商的寄存器映射进行确认。<sup>[[1]](#references)</sup>
 
-## Function Codes
+## 功能码
 
-Modbus 协议通过传输特定的 Function Codes 来操作 PLCs 和各种控制设备。理解这一部分非常重要，因为攻击者可以通过重新传输 Function Codes 来实施 replay attacks。Legacy devices 不支持数据传输加密，并且通常通过较长的线缆进行连接，这可能导致线缆被篡改，以及数据被捕获或注入。
+功能码用于选择操作，例如读取线圈（`0x01`）、读取保持寄存器（`0x03`）、写入单个线圈/寄存器（`0x05`/`0x06`），以及写入多个线圈/寄存器（`0x0F`/`0x10`）。当部署没有补偿性身份验证或过程状态检查时，捕获到的写入请求可能可以 replay。在获得授权的情况下，如果能够识别电气接口、终端电阻和安全连接方法，评估人员还可以在较长的串行线路上直接捕获或注入帧。上述任一操作都可能影响物理过程，因此应在实验室环境中进行，或取得明确的运行授权。<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Modbus 的寻址
+## 寻址
 
-网络中的每个设备都有一个唯一地址，这是设备之间进行通信的必要条件。Modbus RTU、Modbus TCP 等协议用于实现寻址，并在数据传输中充当类似传输层的角色。传输的数据采用包含消息的 Modbus 协议格式。
+串行设备使用单元地址。Modbus TCP 使用 IP 地址以及 MBAP header 中的 Unit Identifier；当 TCP-to-serial gateway 将请求路由到下游单元时，这一点尤其重要。产品文档中显示的寄存器引用可能采用从 1 开始的编号（`40001`），而协议地址则从 0 开始，这是产生 off-by-one 错误的常见原因。<sup>[[1]](#references)[[3]](#references)</sup>
 
-此外，Modbus 还实现了错误检查，以确保传输数据的完整性。但最重要的是，Modbus 是一种 Open Standard，任何人都可以在自己的设备中实现它。这使该协议成为全球标准，并在工业自动化行业中得到广泛应用。
+串行帧格式包含传输错误检查（RTU 使用 CRC，ASCII 使用 LRC），而 TCP 提供其常规的传输校验和。这些机制可以检测意外损坏，但不提供加密完整性或源身份验证。<sup>[[3]](#references)</sup>
 
-由于 Modbus 使用规模庞大且缺乏升级，攻击 Modbus 能够利用其攻击面带来显著优势。ICS 高度依赖设备之间的通信，针对这些设备的任何攻击都可能危及工业系统的运行。如果攻击者识别出数据传输媒介，就可以实施 replay、data injection、data sniffing 和 leak、Denial of Service、data forgery 等攻击。
+在获得授权的评估期间，应测试暴露情况、允许使用的功能码、可写地址范围、异常处理、速率限制，以及网络分段或支持 Modbus 的 firewall 是否限制客户端。相关威胁包括被动泄露、未授权命令注入、replay、数据伪造和 denial of service。应与流程负责人协调所有主动测试，因为看似微小的寄存器更改也可能改变物理过程。
 
+## References
+
+- [1] [Modbus Organization — Modbus 应用协议规范 V1.1b3](https://www.modbus.org/file/secure/modbusprotocolspecification.pdf)
+- [2] [Modbus Organization — Modbus Security 协议和实施指南](https://www.modbus.org/modbus-specifications)
+- [3] [Modbus Organization — Modbus 串行线路规范和实施指南 V1.02](https://www.modbus.org/file/secure/modbusoverserial.pdf)
 {{#include ../../banners/hacktricks-training.md}}

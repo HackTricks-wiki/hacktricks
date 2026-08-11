@@ -4,60 +4,67 @@
 
 ## 基本信息
 
-SPI（Serial Peripheral Interface）是一种同步串行通信协议，用于嵌入式系统中 IC（集成电路）之间的短距离通信。SPI 通信协议采用由 Clock 和 Chip Select Signal 协调的 master-slave 架构。master-slave 架构由一个 master（通常是微处理器）管理外部外围设备，例如 EEPROM、传感器、控制设备等，这些设备被视为 slaves。
+SPI（Serial Peripheral Interface，串行外设接口）是一种同步串行总线，通常用于集成电路之间的短距离通信。控制器提供时钟，并使用片选信号选择某个外设，例如 EEPROM、传感器或控制设备。<sup>[[1]](#references)</sup>
 
-一个 master 可以连接多个 slaves，但 slaves 之间无法相互通信。Slaves 由两个引脚管理：clock 和 chip select。由于 SPI 是一种同步通信协议，输入和输出引脚会遵循 clock 信号。Chip select 由 master 用于选择某个 slave 并与其交互。当 chip select 为高电平时，slave 设备未被选中；当其为低电平时，芯片已被选中，master 会与该 slave 进行交互。
+多个外设可以共享时钟线和数据线，通常每个外设对应一个独立的片选信号。控制器负责协调传输；外设通常不会通过 SPI 总线直接相互通信。片选的极性和时序取决于具体设备；低电平有效很常见，但并非普遍适用。SPI 不规定发现、寻址、命令或单次传输的最大长度，因此务必查阅目标设备的数据手册。<sup>[[1]](#references)</sup>
 
-MOSI（Master Out, Slave In）和 MISO（Master In, Slave Out）负责数据发送和接收。数据会通过 MOSI 引脚发送到 slave 设备，同时 chip select 保持低电平。输入数据包含指令、内存地址或数据，具体取决于 slave 设备厂商提供的 datasheet。收到有效输入后，MISO 引脚负责向 master 传输数据。输出数据会在输入结束后的下一个 clock cycle 中准确发送。MISO 引脚会持续传输数据，直到数据全部发送完毕，或 master 将 chip select 引脚置为高电平（在这种情况下，slave 会停止传输，master 也不会在该 clock cycle 之后继续监听）。
+MOSI/COPI 携带从控制器到外设的数据，MISO/CIPO 携带从外设到控制器的数据。两个方向可以同时进行移位传输。命令、地址、dummy cycles 与返回数据之间的关系由外设定义，而不是由 SPI 定义，并且取决于时钟极性和相位（模式 0–3）。不要假设输入结束后恰好一个时钟周期输出就会开始。<sup>[[1]](#references)</sup>
 
-## 从 EEPROM 中 Dump Firmware
+## 从 EEPROM 中转储固件
 
-Dump firmware 有助于分析 firmware 并发现其中的漏洞。很多时候，firmware 在互联网上不可用，或者由于型号、版本等因素的差异而不适用。因此，直接从物理设备中提取 firmware，有助于在 threat hunting 时确保目标的准确性。
+转储固件有助于对其进行分析并发现漏洞。网上可能找不到正确的镜像，或者镜像可能因型号、硬件修订版本或软件版本而有所不同，因此直接从物理设备中提取固件可以获得精确的评估目标。
 
-获取 Serial Console 可能会有所帮助，但很多时候文件是只读的。这会由于各种原因限制分析。例如，firmware 中可能不存在用于发送和接收数据包的工具。因此，提取二进制文件并对其进行 reverse engineering 并不可行。所以，将完整的 firmware dump 到系统中，再提取二进制文件进行分析，会非常有帮助。
+串行控制台可能会有所帮助，但其文件系统可能是只读的，且目标设备可能缺少分析工具，包括用于发送/接收测试流量或方便地提取二进制文件所需的实用程序。离线镜像可以保留完整的闪存布局，并允许在不修改运行中目标的情况下提取文件系统和进行逆向工程。
 
-此外，在 red teaming 和获得设备的物理访问权限期间，dump firmware 可以帮助修改文件或注入恶意文件，然后将其重新刷写到内存中，从而有助于在设备中植入 backdoor。因此，firmware dumping 可以解锁许多可能性。
+在经过授权的物理评估期间，经过验证的转储还可以支持受控修改和重新刷写测试。这包括修改文件或注入测试 payload/backdoor，以证明固件级持久化。在进行任何写入操作前，应保留多个相互匹配的读取结果以及原始镜像：错误的电压、芯片选择、布局或镜像可能会导致设备变砖。
 
 ### CH341A EEPROM Programmer and Reader
 
-该设备是一种价格低廉的工具，可用于从 EEPROM 中 dump firmware，也可以使用 firmware 文件对其进行重新刷写。它一直是处理计算机 BIOS 芯片（本质上也是 EEPROM）的热门选择。该设备通过 USB 连接，只需极少的工具即可开始使用。此外，它通常能够快速完成任务，因此在对物理设备进行访问时也很有帮助。
+这个价格低廉的 USB 工具可以转储和重新刷写兼容的串行 EEPROM 与 SPI flash 设备。它通常用于处理存储 PC BIOS/UEFI 固件的 SPI NOR flash 芯片，在时间受限的物理访问期间非常方便。
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-将 EEPROM 内存连接到 CH341a Programmer，然后将设备插入计算机。如果设备未被检测到，请尝试在计算机中安装 drivers。此外，请确保 EEPROM 的方向正确（通常需要将 VCC Pin 以与 USB connector 相反的方向放置），否则软件将无法检测到芯片。如有需要，请参考下图：
+将 flash memory 连接到 CH341A，然后将 programmer 连接到计算机。如果 programmer 本身未被检测到，请先检查 USB 线缆、操作系统权限以及适用的 CH341A driver，再排查目标芯片。根据数据手册或使用万用表确认芯片电压、引脚 1、适配器接线和 programmer 输出——**不要**依赖诸如将 VCC 放在 USB 接口对面之类的规则。方向错误，或将 5 V 施加到 3.3/1.8 V 器件上，可能会将其损坏。电路内读取也可能失败，因为电路板的其余部分会对总线产生负载或供电。<sup>[[2]](#references)</sup>
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-最后，可以使用 flashrom、G-Flash（GUI）等 software 来 dump firmware。G-Flash 是一个简洁的 GUI tool，运行速度快，并且能够自动检测 EEPROM。当需要快速提取 firmware，且不想过多查阅 documentation 时，它会非常有帮助。
+使用 `flashrom` 或 G-Flash 等软件读取芯片。G-Flash 是一个简易 GUI，可能会自动检测兼容设备；在快速获取期间这很方便，但仍需自行确认检测到的型号和电压。指定确切的 programmer，并在必要时指定确切的芯片型号；至少执行两次读取，并在将转储视为可靠之前比较它们的哈希值。<sup>[[2]](#references)</sup>
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-Dump firmware 后，可以对 binary files 进行分析。可以使用 strings、hexdump、xxd、binwalk 等 tools 提取大量 firmware 信息以及整个 file system 的信息。
+转储固件后，可以对二进制文件进行分析。可以使用 strings、hexdump、xxd、binwalk 等工具提取有关固件以及整个文件系统的大量信息。
 
-要从 firmware 中提取内容，可以使用 binwalk。Binwalk 会分析 hex signatures，识别 binary file 中的文件，并能够将其提取出来。
+在初步筛查阶段，Binwalk 可以扫描已知签名，并提取受支持的嵌入式内容：
 ```
 binwalk -e <filename>
 ```
-可以是 `.bin` 或 `.rom`，具体取决于所使用的工具和配置。
+输出文件可能使用 `.bin`、`.rom` 或其他扩展名；扩展名并不能确定其格式。
 
 > [!CAUTION]
-> 请注意，固件提取是一个需要耐心的精细过程。任何操作不当都可能损坏固件，甚至将其完全擦除，导致设备无法使用。建议在尝试提取固件之前，先研究特定设备。
+> 请注意，firmware 提取是一个需要谨慎处理的过程，并且需要大量耐心。任何操作不当都可能损坏 firmware，甚至将其完全擦除，导致设备无法使用。建议在尝试提取 firmware 之前，先研究特定设备。
 
 ### Bus Pirate + flashrom
 
-![CH341A EEPROM 编程器和读取器 - Bus Pirate + flashrom：Bus Pirate + flashrom](<../../images/image (910).png>)
+![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom：Bus Pirate + flashrom](<../../images/image (910).png>)
 
-请注意，即使 Pirate Bus 的 PINOUT 标示了用于连接 SPI 的 **MOSI** 和 **MISO** 引脚，某些 SPI 也可能将引脚标示为 DI 和 DO。**MOSI -> DI，MISO -> DO**
+一些 datasheet 将目标引脚标记为 `DI` 和 `DO`：对于传统的单数据线 flash 连接，控制器的 **MOSI/COPI 连接到 DI**，控制器的 **MISO/CIPO 连接到 DO**。请确认目标 datasheet，因为双路/四路 I/O 器件会在其他模式下复用这些引脚。
 
-![CH341A EEPROM 编程器和读取器 - Bus Pirate + flashrom：请注意，即使 Pirate Bus 的 PINOUT 标示了用于连接 SPI 的 MOSI 和 MISO 引脚，某些 SPI 也可能将引脚标示为 DI 和 DO](<../../images/image (360).png>)
+![CH341A EEPROM Programmer and Reader - Bus Pirate + flashrom：请注意，即使 Pirate Bus 的 PINOUT 指示了用于连接 SPI 的 MOSI 和 MISO 引脚，某些 SPI 可能……](<../../images/image (360).png>)
 
-在 Windows 或 Linux 中，可以使用 [**`flashrom`**](https://www.flashrom.org/Flashrom) 程序，通过运行类似以下的命令来 dump flash memory 的内容：
+在 Windows 或 Linux 中，可以使用程序 [**`flashrom`**](https://www.flashrom.org/Flashrom) 转储 flash memory 的内容，运行类似以下命令：
 ```bash
 # In this command we are indicating:
 # -VV Verbose
-# -c <chip> The chip (if you know it better, if not, don'tindicate it and the program might be able to find it)
-# -p <programmer> In this case how to contact th chip via the Bus Pirate
+# -c <chip> Exact chip model (omit it to let flashrom probe candidates)
+# -p <programmer> Programmer configuration; here, the Bus Pirate connection
 # -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
+Recent Bus Pirate 文档还显示了可选的 `serialspeed` 和 `spispeed` 参数。如果长线或电路内负载导致读取不稳定，请从较保守的设置开始。<sup>[[3]](#references)</sup>
+
+## References
+
+- [1] [Analog Devices — SPI 接口简介](https://www.analog.com/en/resources/analog-dialogue/articles/introduction-to-spi-interface.html)
+- [2] [flashrom 手册 — CH341A SPI programmer 及读写选项](https://flashrom.org/classic_cli_manpage.html)
+- [3] [Bus Pirate 文档 — flashrom](https://docs.buspirate.com/docs/software/flashrom/)
 {{#include ../../banners/hacktricks-training.md}}

