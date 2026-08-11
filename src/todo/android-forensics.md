@@ -13,7 +13,7 @@ Prefer acquisition methods that preserve the device's state and document every a
 
 ## Data acquisition
 
-On older devices, a legacy [ADB backup](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) may produce a `.backup` file that Android Backup Extractor can unpack:
+On older devices, a legacy [ADB backup](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) may produce a `.backup` file that Android Backup Extractor can unpack:<sup>[[5]](#references)</sup>
 
 ```bash
 java -jar abe.jar unpack file.backup file.tar
@@ -22,6 +22,8 @@ java -jar abe.jar unpack file.backup file.tar
 Do not assume this captures every application. ADB labels the command deprecated, and Android 12 excludes data from apps targeting API level 31 or later unless the app is debuggable.<sup>[[4]](#references)</sup>
 
 ### Root or physical debug access
+
+Where the exact device exposes a documented and tested JTAG or other board-level debug interface, a forensic lab may be able to acquire storage or volatile data below the Android operating system. Availability is highly device-specific, and invasive procedures can alter or damage evidence, so record the interface, tooling, and acquisition procedure and follow the applicable forensic process.<sup>[[1]](#references)</sup>
 
 The correct block device is hardware-dependent; do not assume it is always `mmcblk0`. First inventory the partitions and mounts, then image the verified source to separate storage:
 
@@ -35,7 +37,7 @@ Hash the result and record the exact command, device identifiers, time, and any 
 
 ### Memory
 
-LiME can acquire physical memory from Linux and some Android devices, but its kernel module must be built for the target kernel and loaded with sufficient privileges. Module signing, kernel lockdown, and modern Android hardening may prevent it from loading.<sup>[[5]](#references)</sup>
+LiME can acquire physical memory from Linux and some Android devices, but its kernel module must be built for the target kernel and loaded with sufficient privileges. Module signing, kernel lockdown, and modern Android hardening may prevent it from loading.<sup>[[6]](#references)</sup>
 
 ## References
 
@@ -43,6 +45,7 @@ LiME can acquire physical memory from Linux and some Android devices, but its ke
 - [2] [USENIX WOOT 2010 - Smudge Attacks on Smartphone Touch Screens](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
 - [3] [Android Developers - Android Debug Bridge](https://developer.android.com/tools/adb)
 - [4] [Android Developers - Android 12 ADB backup restriction](https://developer.android.com/about/versions/12/behavior-changes-12#adb-backup-restrictions)
-- [5] [504ensicsLabs - Linux Memory Extractor (LiME)](https://github.com/504ensicsLabs/LiME)
+- [5] [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/)
+- [6] [504ensicsLabs - Linux Memory Extractor (LiME)](https://github.com/504ensicsLabs/LiME)
 
 {{#include ../banners/hacktricks-training.md}}
