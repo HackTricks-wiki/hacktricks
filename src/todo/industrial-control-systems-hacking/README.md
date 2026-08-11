@@ -4,16 +4,19 @@
 
 ## À propos de cette section
 
-Cette section présente tout ce qui concerne les systèmes de contrôle industriel, notamment leurs concepts ainsi que les méthodologies permettant de les hacker en exploitant les différents problèmes de sécurité qui les affectent.
+Cette section présente les composants, les architectures, les protocoles et les méthodes d’évaluation de la sécurité des systèmes de contrôle industriel (ICS). Les ICS font partie du domaine plus large des technologies opérationnelles (OT) : des systèmes et appareils programmables qui surveillent les processus physiques ou provoquent des changements dans ceux-ci. Les exemples courants incluent les systèmes de contrôle et d’acquisition de données (SCADA), les systèmes de contrôle distribués (DCS) et les automates programmables industriels (PLC).<sup>[[1]](#references)</sup>
 
-Les systèmes de contrôle industriel sont présents partout, car les industries sont essentielles au développement économique d'une nation. Cependant, ces ICS sont difficiles à mettre à jour et les avancées dans ce domaine sont limitées. Il est donc courant d'y trouver des failles de sécurité. La plupart des protocoles et standards utilisés ici ont été développés dans les années 1990 et disposent de capacités bien moindres que celles requises face aux scénarios d'attaque actuels.
+Les travaux de sécurité dans ces environnements doivent tenir compte d’exigences différentes de celles de l’IT conventionnelle, notamment la sécurité des processus, la fiabilité, la disponibilité, le fonctionnement déterministe et le cycle de vie des équipements. Une mesure de sécurité techniquement valide peut néanmoins être inadaptée si elle perturbe le processus physique ; les tests et la remédiation doivent donc être coordonnés avec le propriétaire du système et le personnel chargé des opérations.<sup>[[1]](#references)</sup>
 
-Il est devenu important de sécuriser ces systèmes, car les endommager peut coûter très cher et, dans le pire des cas, entraîner des pertes humaines. Pour comprendre la sécurité des systèmes de contrôle industriel, il est nécessaire d'en connaître le fonctionnement interne.
+## Priorités de l’évaluation
 
-Comme les systèmes de contrôle industriel sont installés selon des standards établis, connaître chaque composant permettrait d'interconnecter tous les autres mécanismes du système de contrôle. L'installation de ces dispositifs, tels que les PLC et les systèmes SCADA, diffère selon les industries ; la collecte d'informations est donc essentielle.
+Commencez par comprendre le processus contrôlé, les limites du système, la topologie réseau, les actifs, les flux de données, les relations de confiance et les connexions externes. Des types d’appareils similaires peuvent remplir des fonctions différentes selon les sites ; évitez donc de supposer que l’architecture ou le modèle d’impact d’un déploiement s’applique à un autre.<sup>[[1]](#references)</sup>
 
-Les systèmes de contrôle industriel peuvent parfois être complexes et nécessitent donc beaucoup de patience pour intervenir dessus. Tout repose sur le probing et la reconnaissance avant de planifier les attaques et de développer des exploits.
+Privilégiez autant que possible la découverte passive et la documentation d’ingénierie existante. Toute analyse active ou exploitation doit suivre un plan de test approuvé définissant les contraintes de sécurité, les fenêtres de maintenance, les procédures de récupération et les conditions d’arrêt. Les résultats doivent être évalués à la fois selon leur impact sur la cybersécurité et selon leurs effets potentiels sur le processus physique.<sup>[[1]](#references)</sup>
 
-Ces techniques peuvent également être utilisées pour se protéger contre les attaques et faire du blue teaming pour les systèmes de contrôle industriel.
+Les mêmes connaissances architecturales permettent également de soutenir des activités défensives telles que l’inventaire des actifs, la segmentation réseau, la surveillance, la réponse aux incidents et la gestion des vulnérabilités fondée sur les risques.<sup>[[1]](#references)</sup>
 
+## References
+
+- [1] [NIST SP 800-82 Rev. 3 - Guide to Operational Technology (OT) Security](https://csrc.nist.gov/pubs/sp/800/82/r3/final)
 {{#include ../../banners/hacktricks-training.md}}

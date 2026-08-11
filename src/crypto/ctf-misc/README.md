@@ -2,28 +2,23 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Pages fourre-tout qui apparaissent souvent dans les challenges de cryptographie, mais qui ne trouvent pas facilement leur place ailleurs.
+Cette section rassemble des techniques qui apparaissent dans les challenges de cryptographie, mais qui ne correspondent pas clairement aux autres catégories.
 
 ## Langages ésotériques
 
 ### Technique
 
-Utilisez ceci lorsqu'une tâche de cryptographie consiste en réalité à exécuter un programme en esolang, puis à décoder ce qu'il produit.
+Utilisez ce workflow lorsqu’un challenge nécessite d’exécuter un programme écrit dans un langage ésotérique et de décoder sa sortie.
 
 Si un challenge vous fournit du code qui ne ressemble pas à un langage standard :
 
-- Identifiez l'esolang (recherchez un token distinctif sur Google).
+- Identifiez le langage en recherchant un token distinctif ou une séquence d’instructions.
 - Utilisez un interpréteur en ligne ou une image Docker.
-- Si la sortie est étrange, recherchez un encodage ou une compression par couches après l'exécution.
+- Si la sortie est étrange, recherchez un encodage ou une compression en couches après l’exécution.
 
-Bonne liste de départ :<sup>[[1]](#references)</sup>
+Un index utile des langages est le wiki Esolang.<sup>[[1]](#references)</sup>
 
-{{#ref}}
-https://esolangs.org/wiki/Main_Page
-{{#endref}}
+## References
 
-## Références
-
-- [1] [Esolang, the esoteric programming languages wiki](https://esolangs.org/wiki/Main_Page)
-
+- [1] [Esolang, le wiki des langages de programmation ésotériques](https://esolangs.org/wiki/Main_Page)
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,17 +1,15 @@
-# Voler des informations sensibles divulguées par un site Web
+# Voler des informations sensibles depuis une page web
 
 {{#include ../banners/hacktricks-training.md}}
 
-Si, à un moment donné, vous trouvez une **page Web qui vous présente des informations sensibles en fonction de votre session** : Peut-être qu'elle renvoie les cookies, ou affiche des informations de carte bancaire ou toute autre information sensible, vous pouvez essayer de les voler.\
-Voici les principales méthodes que vous pouvez tenter pour y parvenir :
+Si une **page web affiche des informations sensibles en fonction de la session actuelle**—telles que des cookies, des données de compte ou des informations de carte bancaire—un attaquant peut tenter de les exfiltrer. Les principales techniques incluent :
 
-- [**CORS bypass**](../pentesting-web/cors-bypass.md) : Si vous pouvez contourner les en-têtes CORS, vous pourrez voler les informations en effectuant une requête Ajax depuis une page malveillante.
-- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html) : Si vous trouvez une vulnérabilité XSS sur la page, vous pourrez peut-être l'exploiter pour voler les informations.
-- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html) : Si vous ne pouvez pas injecter de balises XSS, vous pourrez peut-être tout de même voler les informations en utilisant d'autres balises HTML classiques.
-- [**Clickjaking**](../pentesting-web/clickjacking.md) : S'il n'existe aucune protection contre cette attaque, vous pourrez peut-être tromper l'utilisateur pour qu'il vous envoie les données sensibles (un exemple [ici](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).<sup>[[1]](#references)</sup>
+- [**CORS bypass**](../pentesting-web/cors-bypass.md) : Une mauvaise configuration de CORS peut permettre à une origine malveillante de lire des réponses sensibles via des requêtes cross-origin.
+- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html) : Une vulnérabilité XSS dans l’origine cible peut permettre à du JavaScript injecté de lire et d’exfiltrer les informations.
+- [**Dangling markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html) : Lorsque l’injection de scripts n’est pas possible, des éléments HTML injectés peuvent tout de même capturer du contenu sensible.
+- [**Clickjacking**](../pentesting-web/clickjacking.md) : Si les protections contre l’encadrement sont absentes, un attaquant peut inciter un utilisateur à interagir avec la page sensible. L’étude de cas liée présente cette technique.<sup>[[1]](#references)</sup>
 
-## Références
+## References
 
-- [1] [Apache example servlet leads to Information Disclosure](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
-
+- [1] [Le servlet d’exemple Apache entraîne une divulgation d’informations](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
 {{#include ../banners/hacktricks-training.md}}

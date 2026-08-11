@@ -1,18 +1,20 @@
-# Word Macros
+# Macros Word
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Junk Code
+## Junk Code
 
-Il est très courant de trouver du **junk code qui n'est jamais utilisé** afin de rendre le reversing de la macro plus difficile.\
-Par exemple, dans l'image suivante, vous pouvez voir qu'un `If` dont la condition ne sera jamais vraie est utilisé pour exécuter du junk code inutile.
+Les macros peuvent contenir du **code inaccessible ou non pertinent** destiné à ralentir l'analyse. Identifiez les conditions constantes et suivez le comportement accessible avant de consacrer du temps à l'analyse inversée d'une branche. L'exemple ci-dessous utilise une condition `If` qui ne peut jamais être vraie afin de dissimuler du Junk Code.
 
-![Word Macros - Junk Code : par exemple, dans l'image suivante, vous pouvez voir qu'un If dont la condition ne sera jamais vraie est utilisé pour exécuter du junk code inutile](<../images/image (369).png>)
+![Une macro Word contenant une branche conditionnelle inaccessible avec du Junk Code](<../images/image (369).png>)
 
-### Macro Forms
+## Macro Forms
 
-En utilisant la fonction **GetObject**, il est possible d'obtenir des données provenant des forms de la macro. Cela peut être utilisé pour compliquer l'analyse. Voici une image d'une macro form utilisée pour **cacher des données à l'intérieur de zones de texte** (une zone de texte peut en cacher d'autres) :
+Les UserForms VBA peuvent stocker des données dans des contrôles tels que des zones de texte. Comme les forms, frames et pages peuvent chacune exposer une collection `Controls`, les analystes doivent énumérer toute la hiérarchie des contrôles plutôt que de se fier uniquement à ce que le form affiche. L'exemple ci-dessous stocke des données dissimulées dans des zones de texte superposées.<sup>[[1]](#references)</sup>
 
-![Junk Code - Macro Forms : en utilisant la fonction GetObject, il est possible d'obtenir des données provenant des forms de la macro. Cela peut être utilisé pour compliquer l'analyse. Voici une image d'une...](<../images/image (344).png>)
+![Un UserForm de macro contenant des données dissimulées dans des zones de texte superposées](<../images/image (344).png>)
 
+## References
+
+- [1] [Microsoft Learn - Collections, contrôles et objets (Microsoft Forms)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/objects-microsoft-forms)
 {{#include ../banners/hacktricks-training.md}}
