@@ -8,22 +8,22 @@
 
 The Data Protection API (DPAPI) is primarily utilized within the Windows operating system for the **symmetric encryption of asymmetric private keys**, leveraging either user or system secrets as a significant source of entropy. This approach simplifies encryption for developers by enabling them to encrypt data using a key derived from the user's logon secrets or, for system encryption, the system's domain authentication secrets, thus obviating the need for developers to manage the protection of the encryption key themselves.
 
-The most common way to use DPAPI is through the **`CryptProtectData` and `CryptUnprotectData`** functions, which allow applications to encrypt and decrypt data securely with the session of the process that is currently logged on. This means that the encrypted data can only be decrypted by the same user or system that encrypted it.
+The most common way to use DPAPI is through the **`CryptProtectData` and `CryptUnprotectData`** functions, which allow applications to encrypt and decrypt data using the security context of the currently logged-on process. By default, the data can be decrypted only by the same user or system context that encrypted it.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Moreover, these functions accepts also an **`entropy` parameter** which will also be used during encryption and decryption, therefore, in order to decrypt something encrypted using this parameter, you must provide the same entropy value that was used during encryption.
+These functions also accept an optional **entropy parameter** used during encryption and decryption. Data protected with optional entropy requires that same entropy value for decryption.<sup>[[2]](#references)[[6]](#references)</sup>
 
 ### Users key generation
 
-The DPAPI generates a unique key (called **`pre-key`**) for each user based on their credentials. This key is derived from the user's password and other factors and the algorithm depends on the type of user but ends being a SHA1. For example, for domain users, **it depends on the NTLM hash of the user**.
+DPAPI derives a user-specific value (often called a **pre-key**) from the user's credentials. The exact derivation depends on the account and operating-system version; for domain users, tooling can derive the needed value from the user's NTLM material.<sup>[[2]](#references)</sup>
 
 This is specially interesting because if an attacker can obtain the user's password hash, they can:
 
 - **Decrypt any data that was encrypted using DPAPI** with that user's key without needing to contact any API
 - Try to **crack the password** offline trying to generate the valid DPAPI key
 
-Moreover, every time some data is encrypted by a user using DPAPI, a new **master key** is generated. This master key is the one actually used to encrypt data. Each master key is given with a **GUID** (Globally Unique Identifier) that identifies it.
+DPAPI maintains one or more **master keys** for each user rather than creating a new master key for every protected blob. Each master key has a **GUID** (Globally Unique Identifier), and an encrypted blob records which master key protects it.<sup>[[2]](#references)</sup>
 
-The master keys are stored in the **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** directory, where `{SID}` is the Security Identifier of that user. The master key is stored encrypted by the user's **`pre-key`** and also by a **domain backup key** for recovery (so the same key is stored encrypted 2 times by 2 different pass).
+Master keys are stored in the **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** directory, where `{SID}` is the user's Security Identifier. The master-key file contains material protected by the user's **pre-key** and, for domain users, recovery material protected by a **domain backup key**.<sup>[[2]](#references)</sup>
 
 Note that the **domain key used to encrypt the master key is in the domain controllers and never changes**, so if an attacker has access to the domain controller, they can retrieve the domain backup key and decrypt the master keys of all users in the domain.<sup>[[2]](#references)</sup>
 
