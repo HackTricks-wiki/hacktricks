@@ -1,6 +1,8 @@
 # SELinux
 
-SELinux — це система **Mandatory Access Control (MAC)** на основі міток. На практиці це означає, що навіть якщо дозволи DAC, групи або можливості Linux виглядають достатніми для виконання дії, ядро все одно може заборонити її, оскільки **контексту джерела** не дозволено отримувати доступ до **контексту цілі** із запитаним класом/дозволом.<sup>[[1]](#references)</sup>
+{{#include ../../banners/hacktricks-training.md}}
+
+SELinux — це система **Mandatory Access Control (MAC)** на основі міток. На практиці це означає, що навіть якщо дозволи DAC, групи або можливості Linux виглядають достатніми для виконання дії, ядро все одно може заборонити її, оскільки **контексту джерела** не дозволено отримувати доступ до **цільового контексту** із запитаним класом/дозволом.<sup>[[1]](#references)</sup>
 
 Контекст зазвичай має такий вигляд:<sup>[[1]](#references)</sup>
 ```text
@@ -8,15 +10,15 @@ user:role:type:level
 system_u:system_r:httpd_t:s0
 unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023
 ```
-З погляду privesc, поле `type` (domain для процесів, type для об'єктів) зазвичай є найважливішим:<sup>[[1]](#references)</sup>
+З погляду privesc, `type` (domain для процесів, type для об’єктів) зазвичай є найважливішим полем:<sup>[[1]](#references)</sup>
 
-- Процес працює в **domain**, як-от `unconfined_t`, `staff_t`, `httpd_t`, `container_t`, `sysadm_t`
-- Файли й сокети мають **type**, як-от `admin_home_t`, `shadow_t`, `httpd_sys_rw_content_t`, `container_file_t`
-- Policy визначає, чи може один domain читати, записувати, виконувати або переходити до іншого
+- Процес працює в **domain**, наприклад `unconfined_t`, `staff_t`, `httpd_t`, `container_t`, `sysadm_t`
+- Файли та сокети мають **type**, наприклад `admin_home_t`, `shadow_t`, `httpd_sys_rw_content_t`, `container_file_t`
+- Політика визначає, чи може один domain читати, записувати, виконувати або переходити до іншого
 
 ## Швидке перерахування
 
-Якщо SELinux увімкнено, перевірте його на ранньому етапі, оскільки він може пояснити, чому стандартні шляхи Linux privesc не працюють або чому привілейована обгортка навколо «нешкідливого» SELinux tool насправді є критично важливою:<sup>[[1]](#references)</sup>
+Якщо SELinux увімкнено, перевірте його на ранньому етапі, оскільки він може пояснити, чому поширені шляхи Linux privesc не працюють або чому привілейована обгортка навколо «нешкідливого» інструмента SELinux насправді є критично важливою:<sup>[[1]](#references)</sup>
 ```bash
 getenforce
 sestatus
@@ -41,21 +43,21 @@ find / -context '*:default_t:*' -o -context '*:file_t:*' 2>/dev/null
 matchpathcon -V /path/of/interest 2>/dev/null
 restorecon -n -v /path/of/interest 2>/dev/null
 ```
-Цікаві висновки:<sup>[[1]](#references)[[3]](#references)[[7]](#references)[[19]](#references)</sup>
+Цікаві знахідки:<sup>[[1]](#references)[[3]](#references)[[7]](#references)[[19]](#references)</sup>
 
-- Режими `Disabled` або `Permissive` позбавляють SELinux більшої частини його цінності як межі безпеки.
+- Режим `Disabled` або `Permissive` позбавляє SELinux більшої частини його цінності як межі безпеки.
 - `unconfined_t` зазвичай означає, що SELinux присутній, але фактично не обмежує цей процес.
-- `default_t`, `file_t` або явно неправильні labels у custom paths часто вказують на помилкове маркування чи неповне розгортання.
-- Локальні перевизначення у `file_contexts.local` мають пріоритет над типовими налаштуваннями policy, тому їх слід уважно перевіряти.
+- `default_t`, `file_t` або явно неправильні мітки на custom paths часто вказують на неправильне маркування чи неповне розгортання.
+- Локальні перевизначення у `file_contexts.local` мають пріоритет над типовими налаштуваннями policy, тому їх слід ретельно перевіряти.
 
-## Аналіз політики
+## Аналіз policy
 
-SELinux значно легше атакувати або обходити, якщо ви можете відповісти на два запитання:
+SELinux значно легше атакувати або обходити, коли ви можете відповісти на два запитання:
 
-1. **До чого може отримати доступ мій поточний domain?**
-2. **У які domains я можу перейти?**
+1. **До чого може отримати доступ мій поточний домен?**
+2. **У які домени я можу перейти?**
 
-Найкорисніші інструменти для цього — `sepolicy` і **SETools** (`seinfo`, `sesearch`, `sedta`):<sup>[[2]](#references)[[9]](#references)</sup>
+Найкориснішими tools для цього є `sepolicy` та **SETools** (`seinfo`, `sesearch`, `sedta`):<sup>[[2]](#references)[[9]](#references)</sup>
 ```bash
 # Transition graph from the current domain
 sepolicy transition -s "$(id -Z | awk -F: '{print $3}')" 2>/dev/null
@@ -68,14 +70,14 @@ sesearch --type_transition -s staff_t 2>/dev/null | head
 seinfo -t 2>/dev/null | head
 seinfo -r 2>/dev/null | head
 ```
-Це особливо корисно, коли хост використовує **ізольованих користувачів**, а не зіставляє всіх із `unconfined_u`. У такому разі шукайте:<sup>[[3]](#references)</sup>
+Це особливо корисно, коли на хості використовуються **ізольовані користувачі**, а не всі користувачі зіставляються з `unconfined_u`. У такому разі шукайте:<sup>[[3]](#references)</sup>
 
 - зіставлення користувачів через `semanage login -l`
 - дозволені ролі через `semanage user -l`
 - доступні адміністративні домени, такі як `sysadm_t`, `secadm_t`, `webadm_t`
 - записи `sudoers`, що використовують `ROLE=` або `TYPE=`
 
-Якщо `sudo -l` містить такі записи, SELinux є частиною межі привілеїв:<sup>[[3]](#references)</sup>
+Якщо `sudo -l` містить подібні записи, SELinux є частиною межі привілеїв:<sup>[[3]](#references)</sup>
 ```text
 linux_user ALL=(ALL) ROLE=webadm_r TYPE=webadm_t /bin/bash
 ```
@@ -85,52 +87,52 @@ sudo -l
 which newrole runcon
 newrole -l 2>/dev/null
 ```
-`runcon` і `newrole` не є автоматично придатними для експлуатації, але якщо привілейована обгортка або правило `sudoers` дає змогу вибрати кращу роль/тип, вони стають цінними примітивами для ескалації привілеїв.<sup>[[3]](#references)[[10]](#references)[[11]](#references)</sup>
+`runcon` і `newrole` не є автоматично придатними для експлуатації, але якщо privileged wrapper або правило `sudoers` дає змогу вибрати кращу роль/тип, вони стають цінними примітивами для ескалації привілеїв.<sup>[[3]](#references)[[10]](#references)[[11]](#references)</sup>
 
-## Файли, перерозмітка та високопріоритетні помилкові конфігурації
+## Files, Relabeling, and High-Value Misconfigurations
 
-Найважливіша операційна відмінність між поширеними інструментами SELinux полягає в такому:<sup>[[1]](#references)[[6]](#references)[[7]](#references)[[8]](#references)</sup>
+Найважливіша практична відмінність між поширеними інструментами SELinux:<sup>[[1]](#references)[[6]](#references)[[7]](#references)[[8]](#references)</sup>
 
 - `chcon`: тимчасова зміна мітки для певного шляху
 - `semanage fcontext`: постійне правило відповідності шляху мітці
-- `restorecon` / `setfiles`: повторне застосування мітки згідно з політикою/типовою міткою
+- `restorecon` / `setfiles`: повторне застосування мітки відповідно до політики/типової мітки
 
-Це має велике значення під час privesc, оскільки **перерозмітка — це не просто косметична зміна**. Вона може перетворити файл із "заблокованого політикою" на "доступний для читання/виконання привілейованим ізольованим сервісом".<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
+Це дуже важливо під час privesc, оскільки **relabeling — це не просто косметична зміна**. Воно може перетворити файл із такого, що "заблокований політикою", на такий, що "доступний для читання/виконання привілейованою confined-службою".<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
 
-Перевірте локальні правила перерозмітки та відхилення міток від заданих політикою:<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
+Перевірте локальні правила relabeling і відхилення міток від очікуваних:<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
 ```bash
 grep -R . /etc/selinux/*/contexts/files/file_contexts.local 2>/dev/null
 restorecon -nvr / 2>/dev/null | head -n 50
 matchpathcon -V /etc/passwd /etc/shadow /usr/local/bin/* 2>/dev/null
 ```
-Одна тонка, але корисна деталь: звичайний `restorecon` **не завжди повністю скасовує підозрілу мітку**. Якщо цільовий тип міститься в `customizable_types`, може знадобитися `-F`, щоб примусово виконати повне скидання. З offensive perspective це пояснює, чому незвичний `chcon` іноді може пережити недбале очищення після того, як «ми вже запустили restorecon».<sup>[[8]](#references)</sup>
+Одна малопомітна, але корисна деталь: звичайний `restorecon` **не завжди повністю скасовує підозрілий label**. Якщо цільовий type входить до `customizable_types`, може знадобитися `-F`, щоб примусово виконати повне скидання. З offensive perspective це пояснює, чому незвичний `chcon` іноді може пережити поверхове очищення на кшталт «ми вже запускали restorecon».<sup>[[8]](#references)</sup>
 ```bash
 grep -R . /etc/selinux/*/contexts/customizable_types 2>/dev/null | head
 restorecon -n -v /path/of/interest 2>/dev/null
 restorecon -F -v /path/of/interest 2>/dev/null
 ```
-Команди, що мають високу цінність, для пошуку в `sudo -l`, root wrappers, скриптах автоматизації або file capabilities:<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+Високоцінні команди для пошуку в `sudo -l`, root wrappers, скриптах автоматизації або файлових capabilities:<sup>[[1]](#references)[[4]](#references)[[5]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 ```bash
 which semanage restorecon chcon setfiles semodule audit2allow runcon newrole setsebool load_policy 2>/dev/null
 getcap -r / 2>/dev/null | grep -E 'cap_mac_admin|cap_mac_override'
 ```
-Якщо з’являється будь-яка з MAC capabilities, також перевірте [сторінку про Linux capabilities](linux-capabilities.md); документація Linux описує `cap_mac_admin` і `cap_mac_override` як специфічні для Smack, тому не слід вважати, що самі лише їхні назви обходять SELinux.<sup>[[5]](#references)</sup>
+Якщо з’являється будь-яка з можливостей MAC, також перевірте [сторінку Linux capabilities](linux-capabilities.md); документація Linux capabilities описує `cap_mac_admin` і `cap_mac_override` як специфічні для Smack, тому не слід вважати, що самі лише їхні назви обходять SELinux.<sup>[[5]](#references)</sup>
 
 Особливо цікаві:<sup>[[1]](#references)[[4]](#references)[[7]](#references)[[8]](#references)[[12]](#references)[[13]](#references)</sup>
 
 - `semanage fcontext`: постійно змінює мітку, яку має отримувати шлях
 - `restorecon` / `setfiles`: повторно застосовує ці зміни у великому масштабі
-- `semodule -i`: завантажує власний policy module
+- `semodule -i`: завантажує custom policy module
 - `semanage permissive -a <domain_t>`: робить один домен permissive, не перемикаючи весь хост
 - `setsebool -P`: назавжди змінює policy booleans
 - `load_policy`: перезавантажує активну policy
 
-Часто це **допоміжні примітиви**, а не standalone root exploits. Їхня цінність полягає в тому, що вони дають змогу:<sup>[[1]](#references)[[4]](#references)[[7]](#references)[[8]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
+Часто це **допоміжні примітиви**, а не самостійні root exploits. Їхня цінність полягає в тому, що вони дають змогу:<sup>[[1]](#references)[[4]](#references)[[7]](#references)[[8]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 
 - зробити цільовий домен permissive
 - розширити доступ між вашим доменом і захищеним типом
-- повторно призначити мітки файлам, контрольованим attacker, щоб privileged service міг їх прочитати або виконати
-- послабити обмеження для confined service настільки, щоб наявна локальна вразливість стала експлуатованою
+- повторно позначити контрольовані attacker файли так, щоб privileged service міг їх прочитати або виконати
+- послабити confined service настільки, щоб наявна local bug стала експлуатованою
 
 Приклади перевірок:<sup>[[1]](#references)[[7]](#references)[[8]](#references)</sup>
 ```bash
@@ -141,16 +143,16 @@ sudo -l | grep -E 'semanage|restorecon|setfiles|semodule|runcon|newrole|setseboo
 semanage fcontext -C -l 2>/dev/null
 restorecon -n -v /usr/local/bin /opt /srv /var/www 2>/dev/null
 ```
-Якщо ви можете завантажити модуль політики з правами root, зазвичай ви контролюєте межі SELinux:<sup>[[1]](#references)[[4]](#references)[[14]](#references)</sup>
+Якщо ви можете завантажити модуль політики з правами root, ви зазвичай контролюєте межу SELinux:<sup>[[1]](#references)[[4]](#references)[[14]](#references)</sup>
 ```bash
 ausearch -m AVC,USER_AVC -ts recent 2>/dev/null | audit2allow -M localfix
 sudo semodule -i localfix.pp
 ```
-Саме тому `audit2allow`, `semodule` і `semanage permissive` слід розглядати як чутливі адміністративні поверхні під час post-exploitation. Вони можуть непомітно перетворити заблокований ланцюжок на робочий, не змінюючи класичних UNIX-дозволів.<sup>[[1]](#references)[[4]](#references)[[12]](#references)[[14]](#references)</sup>
+Саме тому `audit2allow`, `semodule` і `semanage permissive` слід вважати чутливими адміністративними поверхнями під час post-exploitation. Вони можуть непомітно перетворити заблокований ланцюжок на робочий, не змінюючи класичні UNIX permissions.<sup>[[1]](#references)[[4]](#references)[[12]](#references)[[14]](#references)</sup>
 
 ## Приховані відмови та вилучення модулів
 
-Дуже поширена offensive-проблема — ланцюжок завершується звичайною помилкою `EACCES`, хоча очікувана відмова AVC так і не з’являється. Правила `dontaudit` можуть приховувати саме потрібний вам дозвіл. Якщо ви можете запускати `semodule` через `sudo` або іншу привілейовану оболонку, тимчасове вимкнення `dontaudit` може перетворити непомітний збій на точну підказку щодо policy:<sup>[[4]](#references)[[15]](#references)</sup>
+Дуже поширена offensive-проблема — ланцюжок завершується звичайною помилкою `EACCES`, хоча очікувана відмова AVC так і не з’являється. Правила `dontaudit` можуть приховувати саме потрібний дозвіл. Якщо ви можете запустити `semodule` через `sudo` або іншу привілейовану оболонку, тимчасове вимкнення `dontaudit` може перетворити тихий збій на точну підказку щодо policy:<sup>[[4]](#references)[[15]](#references)</sup>
 ```bash
 # Rebuild policy without dontaudit rules, trigger the action again, then inspect AVCs
 sudo semodule -DB
@@ -161,25 +163,25 @@ sudo semodule -B
 semodule -lfull 2>/dev/null
 semodule -E --cil <module_name> 2>/dev/null
 ```
-Це також корисно для перевірки того, що локальні адміністратори вже змінили. Невеликий custom module або permissive rule для одного домену часто є причиною того, що цільовий сервіс поводиться значно менш обмежено, ніж можна було б припустити з базової policy.<sup>[[1]](#references)[[4]](#references)[[12]](#references)</sup>
+Це також корисно для перевірки того, що локальні адміністратори вже змінили. Невеликий custom module або permissive rule для одного домену часто є причиною, через яку цільовий сервіс поводиться значно менш обмежено, ніж можна було б припустити з базової policy.<sup>[[1]](#references)[[4]](#references)[[12]](#references)</sup>
 
-## Ознаки для аудиту
+## Audit Clues
 
-AVC denials часто є наступальним сигналом, а не просто захисним шумом. Вони повідомляють:<sup>[[1]](#references)[[15]](#references)</sup>
+AVC denials часто є наступальним сигналом, а не просто захисним шумом. Вони повідомляють вам:<sup>[[1]](#references)[[15]](#references)</sup>
 
-- до якого target object/type ви звернулися
-- яку permission було заборонено
+- до якого цільового object/type ви звернулися
+- який permission було заборонено
 - який domain ви наразі контролюєте
-- чи зробить невелика зміна policy цей ланцюжок працездатним
+- чи зробить невелика зміна policy цей ланцюжок робочим
 ```bash
 ausearch -m AVC,USER_AVC,SELINUX_ERR -ts recent 2>/dev/null
 journalctl -t setroubleshoot --no-pager 2>/dev/null | tail -n 50
 ```
-Якщо локальний exploit або спроба persistence постійно завершується помилкою `EACCES` чи дивними помилками "permission denied", незважаючи на DAC-дозволи, які виглядають як root, зазвичай варто перевірити SELinux, перш ніж відкидати цей vector.<sup>[[1]](#references)</sup>
+Якщо локальний exploit або спроба persistence постійно завершується помилкою `EACCES` чи дивними помилками "permission denied", незважаючи на DAC permissions, які виглядають як root, зазвичай варто перевірити SELinux, перш ніж відкидати цей vector.<sup>[[1]](#references)</sup>
 
 ## Користувачі SELinux
 
-Окрім звичайних користувачів Linux, існують користувачі SELinux. Кожен користувач Linux зіставляється з користувачем SELinux у межах policy, що дає системі змогу призначати різні дозволені ролі та domains для різних облікових записів.<sup>[[3]](#references)</sup>
+Окрім звичайних користувачів Linux, існують користувачі SELinux. Кожен користувач Linux зіставляється з користувачем SELinux у межах policy, що дає системі змогу застосовувати різні дозволені ролі та домени до різних облікових записів.<sup>[[3]](#references)</sup>
 
 Швидкі перевірки:<sup>[[3]](#references)</sup>
 ```bash
@@ -189,11 +191,11 @@ semanage user -l 2>/dev/null
 sudo -l 2>/dev/null
 grep -R "ROLE=\|TYPE=" /etc/sudoers /etc/sudoers.d 2>/dev/null
 ```
-У багатьох поширених системах користувачі відображаються на `unconfined_u`, що зменшує практичний вплив обмеження користувачів. Однак у hardened deployments обмежені користувачі можуть зробити `sudo`, `su`, `newrole` і `runcon` набагато цікавішими, оскільки **шлях ескалації може залежати від переходу до кращої ролі/типу SELinux, а не лише від отримання UID 0**. Також пам’ятайте, що деякі обмежені користувачі взагалі не можуть викликати `sudo`/`su`, якщо policy явно не дозволяє базовий setuid-перехід, тому хост, що використовує `staff_u` + `sysadm_r`, може перетворити, на перший погляд, незначне правило `sudo ROLE=` / `TYPE=` на справжню межу привілеїв.<sup>[[3]](#references)</sup>
+У багатьох поширених системах користувачів зіставляють із `unconfined_u`, що зменшує практичний вплив обмеження користувачів. Однак у hardened-розгортаннях обмежені користувачі можуть зробити `sudo`, `su`, `newrole` і `runcon` набагато цікавішими, оскільки **шлях ескалації може залежати від переходу до кращої ролі/типу SELinux, а не лише від отримання UID 0**. Також пам’ятайте, що деякі обмежені користувачі взагалі не можуть викликати `sudo`/`su`, якщо policy явно не дозволяє відповідний setuid-перехід, тому хост, що використовує `staff_u` + `sysadm_r`, може перетворити, на перший погляд, незначне правило `sudo ROLE=` / `TYPE=` на справжню межу привілеїв.<sup>[[3]](#references)</sup>
 
 ## SELinux у контейнерах
 
-Container runtimes зазвичай запускають workloads в обмеженому домені, наприклад `container_t`, і позначають container content як `container_file_t`. Якщо процес контейнера виходить за межі контейнера, але продовжує працювати з container label, записи на хості все одно можуть завершуватися помилкою, оскільки межа label залишилася незмінною.<sup>[[1]](#references)[[17]](#references)</sup>
+Container runtimes зазвичай запускають workloads в обмеженому domain, наприклад `container_t`, і маркують container content як `container_file_t`. Якщо container process виконає escape, але все ще працюватиме з container label, записи на host усе одно можуть завершуватися помилкою, оскільки межа label залишилася чинною.<sup>[[1]](#references)[[17]](#references)</sup>
 
 Короткий приклад:<sup>[[16]](#references)[[18]](#references)</sup>
 ```shell
@@ -203,15 +205,15 @@ $ podman top -l label
 LABEL
 system_u:system_r:container_t:s0:c647,c780
 ```
-Частина `c647,c780` — це не декорація. У багатьох розгортаннях контейнерів runtime динамічно призначає категорії MCS, щоб два процеси, які працюють як `container_t`, усе одно були ізольовані один від одного. Якщо escape переводить вас у namespace хоста, але зберігає початковий набір категорій, невідповідності категорій усе ще можуть пояснити, чому деякі шляхи хоста залишаються недоступними для читання або запису.<sup>[[17]](#references)</sup>
+Частина `c647,c780` — не декорація. У багатьох розгортаннях контейнерів runtime динамічно призначають категорії MCS, щоб два процеси, які працюють як `container_t`, усе одно були ізольовані один від одного. Якщо після escape ви опиняєтеся в namespace хоста, але зберігаєте початковий набір категорій, невідповідність категорій усе ще може пояснити, чому деякі шляхи хоста залишаються недоступними для читання або запису.<sup>[[17]](#references)</sup>
 
-Сучасні аспекти роботи з контейнерами, на які варто звернути увагу:<sup>[[16]](#references)[[17]](#references)</sup>
+Сучасні операції з контейнерами, на які варто звернути увагу:<sup>[[16]](#references)[[17]](#references)</sup>
 
-- `--security-opt label=disable` вимикає розділення контейнера за SELinux label
-- bind mounts із `:z` / `:Z` запускають повторне маркування шляху хоста для спільного/приватного використання контейнером
-- широке повторне маркування вмісту хоста саме по собі може стати проблемою безпеки
+- `--security-opt label=disable` вимикає розділення контейнерів за SELinux labels
+- bind mounts із `:z` / `:Z` запускають relabeling шляху хоста для спільного/приватного використання контейнером
+- широке relabeling вмісту хоста саме по собі може стати проблемою безпеки
 
-На цій сторінці матеріал про контейнери залишено стислим, щоб уникнути дублювання. Приклади зловживань, специфічні для контейнерів, і приклади використання runtime дивіться тут:
+На цій сторінці вміст про контейнери залишено стислим, щоб уникнути дублювання. Приклади зловживань і runtime-приклади, специфічні для контейнерів, дивіться тут:
 
 {{#ref}}
 ../containers-namespaces/container-security/protections/selinux.md
