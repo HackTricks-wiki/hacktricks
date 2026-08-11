@@ -1,5 +1,7 @@
 # Wireshark tricks
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Improve your Wireshark skills
 
 ### Tutorials

@@ -1,5 +1,7 @@
 # Basic Python
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Python Basics
 
 ### Useful information

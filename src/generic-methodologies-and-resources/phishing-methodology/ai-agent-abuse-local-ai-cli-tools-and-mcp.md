@@ -1,5 +1,7 @@
 # AI Agent Abuse: Local AI CLI Tools & MCP (Claude/Gemini/Codex/Warp)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Overview
 
 Local AI command-line interfaces (AI CLIs) such as Claude Code, Gemini CLI, Codex CLI, Warp and similar tools often ship with powerful built‑ins: filesystem read/write, shell execution and outbound network access. Many act as MCP clients (Model Context Protocol), letting the model call external tools over STDIO or HTTP.<sup>[[2]](#references)[[7]](#references)</sup> Because the LLM plans tool-chains non‑deterministically, identical prompts can lead to different process, file and network behaviours across runs and hosts.

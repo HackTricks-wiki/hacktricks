@@ -1,5 +1,7 @@
 # Pcap Inspection
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 > [!TIP]
 > **PCAP** and **PCAPNG** are distinct capture formats; **PCAPNG is a flexible, extensible successor to PCAP**, but support varies across tools. If a tool cannot read PCAPNG, convert it to PCAP with Wireshark or another compatible tool.<sup>[[1]](#references)[[18]](#references)</sup>
 

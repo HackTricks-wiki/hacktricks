@@ -1,5 +1,7 @@
 # Exfiltration
 
+{{#include ../banners/hacktricks-training.md}}
+
 > [!TIP]
 > For an end-to-end example of staging loot in `C:\Users\Public` and exfiltrating it with Rclone to mimic legitimate backups, review the workflow below.
 

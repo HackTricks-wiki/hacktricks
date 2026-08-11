@@ -1,5 +1,7 @@
 # Fuzzing Methodology
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## Mutational Grammar Fuzzing: Coverage vs. Semantics
 
 In **mutational grammar fuzzing**, inputs are mutated while staying **grammar-valid**. In coverage-guided mode, only samples that trigger **new coverage** are saved as corpus seeds. For **language targets** (parsers, interpreters, engines), this can miss bugs that require **semantic/dataflow chains** where the output of one construct becomes the input of another.<sup>[[1]](#references)</sup>

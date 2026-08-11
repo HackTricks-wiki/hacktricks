@@ -1,5 +1,7 @@
 # ERC-4337 Smart Account Security Pitfalls
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ERC-4337 account abstraction turns wallets into programmable systems. The core flow is **validate-then-execute** across a whole bundle: the `EntryPoint` validates every `UserOperation` before executing any of them.<sup>[[5]](#references)</sup> This ordering creates non-obvious attack surface when validation is permissive, stateful, or inconsistent with bundler simulation rules.
 
 ## 1) Direct-call bypass of privileged functions

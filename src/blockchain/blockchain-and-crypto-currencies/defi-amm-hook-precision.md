@@ -1,5 +1,7 @@
 # DeFi/AMM Exploitation: Uniswap v4 Hook Precision/Rounding Abuse
 
+{{#include ../../banners/hacktricks-training.md}}
+
 This page documents a class of DeFi/AMM exploitation techniques against Uniswap v4–style DEXes that extend core math with custom hooks. A Bunni V2 incident illustrates a related failure: a rounding-direction bug in withdrawal accounting understated active liquidity, and a later swap exposed that underestimation in a profitable sandwich.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
 Key idea: if a hook implements additional accounting that depends on fixed‑point math, tick rounding, and threshold logic, an attacker can craft exact‑input swaps that cross specific thresholds so that rounding discrepancies accumulate in their favor. Repeating the pattern and then withdrawing the inflated balance realizes profit, often financed with a flash loan.

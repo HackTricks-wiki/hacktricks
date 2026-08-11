@@ -1,5 +1,7 @@
 # Mutation Testing for Smart Contracts (slither-mutate, mewt, MuTON)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 Mutation testing "tests your tests" by systematically introducing small changes (mutants) into contract code and re-running the test suite. If a test fails, the mutant is killed. If the tests still pass, the mutant survives, revealing a blind spot that line/branch coverage cannot detect.
 
 Key idea: Coverage shows code was executed; mutation testing shows whether behavior is actually asserted.<sup>[[2]](#references)</sup>

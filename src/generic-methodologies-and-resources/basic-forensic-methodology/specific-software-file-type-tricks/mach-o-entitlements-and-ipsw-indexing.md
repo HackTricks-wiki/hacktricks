@@ -1,5 +1,7 @@
 # Mach-O Entitlements Extraction & IPSW Indexing
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Overview
 
 This page covers how to extract entitlements from Mach-O binaries programmatically by walking LC_CODE_SIGNATURE and parsing the code signing SuperBlob, and how to scale this across Apple IPSW firmwares by mounting and indexing their contents for forensic search/diff.

@@ -1,5 +1,7 @@
 # Brute Force - CheatSheet
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## Default Credentials
 
 **Search in google** for default credentials of the technology that is being used, or **try these links**:

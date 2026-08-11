@@ -1,5 +1,7 @@
 # Local Cloud Storage
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## OneDrive
 
 In Windows, you can find the OneDrive folder in `\Users\<username>\AppData\Local\Microsoft\OneDrive`. And inside `logs\Personal` it's possible to find the file `SyncDiagnostics.log` which contains some interesting data regarding the synchronized files:<sup>[[3]](#references)</sup>

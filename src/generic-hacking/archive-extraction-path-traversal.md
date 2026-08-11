@@ -1,5 +1,7 @@
 # Archive Extraction Path Traversal ("Zip-Slip" / WinRAR CVE-2025-8088)
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## Overview
 
 Many archive formats (ZIP, RAR, TAR, 7-ZIP, etc.) allow each entry to carry its own **internal path**. When an extraction utility blindly honours that path, a crafted filename containing `..` or an **absolute path** (e.g. `C:\Windows\System32\`) will be written outside of the user-chosen directory.  
@@ -97,7 +99,7 @@ ESET reported RomCom (Storm-0978/UNC2596) spear-phishing campaigns that attached
 
 ## Mitigation & Hardening
 
-1. **Update the extractor** – WinRAR 7.13+ and 7-Zip 25.00+ contain fixes for the cited path/symlink issues.<sup>[[1]](#references)[[5]](#references)</sup>
+1. **Update the extractor** – WinRAR 7.13+ and 7-Zip 25.00+ contain fixes for the d path/symlink issues.<sup>[[1]](#references)[[5]](#references)</sup>
 2. Extract archives with “**Do not extract paths**” / “**Ignore paths**” when possible.
 3. On Unix, drop privileges & mount a **chroot/namespace** before extraction; on Windows, use **AppContainer** or a sandbox.
 4. If writing custom code, normalise with `realpath()`/`PathCanonicalize()` **before** create/write, and reject any entry that escapes the destination.

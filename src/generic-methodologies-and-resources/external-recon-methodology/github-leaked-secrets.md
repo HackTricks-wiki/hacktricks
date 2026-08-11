@@ -1,5 +1,7 @@
 # Github Dorks & Leaks
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ### Tools to find secrets in git repos and file system
 
 - [TruffleHog](https://github.com/dxa4481/truffleHog)

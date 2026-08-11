@@ -1,5 +1,7 @@
 # Reverse Shells
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## [Shells - Linux](linux.md)
 
 ---
