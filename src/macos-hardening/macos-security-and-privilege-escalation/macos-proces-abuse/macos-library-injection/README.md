@@ -57,8 +57,8 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 > [!CAUTION]
 > Remember that **previous Library Validation restrictions also apply** to perform Dylib hijacking attacks.
 
-As in Windows, in MacOS you can also **hijack dylibs** to make **applications** **execute** **arbitrary** **code** (well, actually froma regular user this could not be possible as you might need a TCC permission towrite inside an `.app` bundle and hijack a library).\
-However, the way **MacOS** applications **load** libraries is **more restricted** than in Windows. This implies that **malware** developers can still use this technique for **stealth**, but the probably to be able to **abuse this to escalate privileges is much lower**.
+As on Windows, on macOS you can **hijack dylibs** to make **applications execute arbitrary code**. From a regular user account this may not be possible, because writing inside an `.app` bundle to hijack a library can require a TCC permission.\
+However, the way **macOS** applications **load** libraries is **more restricted** than on Windows. Malware developers can still use this technique for **stealth**, but abusing it to escalate privileges is much less likely.
 
 First of all, is **more common** to find that **MacOS binaries indicates the full path** to the libraries to load. And second, **MacOS never search** in the folders of the **$PATH** for libraries.
 

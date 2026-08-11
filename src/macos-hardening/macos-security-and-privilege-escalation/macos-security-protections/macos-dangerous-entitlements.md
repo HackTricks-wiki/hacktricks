@@ -82,9 +82,9 @@ This entitlement allows to **use DYLD environment variables** that could be used
 
 [**According to this blog**](https://objective-see.org/blog/blog_0x4C.html) **and** [**this blog**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), these entitlements allow a process to **modify** the **TCC** database.<sup>[[6]](#references)[[7]](#references)</sup>
 
-### **`system.install.apple-software`** and **`system.install.apple-software.standar-user`**
+### Authorization rights **`system.install.apple-software`** and **`system.install.apple-software.standard-user`**
 
-These entitlements allow a process to **install software without asking the user for permission**, which can be helpful for **privilege escalation**.
+These Authorization Services rights govern the installation of Apple-provided software. A process entitled to obtain them may bypass the usual authorization flow, which can be helpful for **privilege escalation**.<sup>[[14]](#references)</sup>
 
 ### `com.apple.private.security.kext-management`
 
@@ -313,5 +313,6 @@ For detailed IOKit/DriverKit exploitation, see:
 - [11] [Apple Developer — Allow Unsigned Executable Memory Entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)
 - [12] [Apple Developer — Disable Executable Memory Protection Entitlement](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection)
 - [13] [Apple Developer — Entitlements](https://developer.apple.com/documentation/bundleresources/entitlements)
+- [14] [Apple Developer Archive — Authorization Services Programming Guide](https://developer.apple.com/library/archive/documentation/Security/Conceptual/authorization_concepts/01introduction/introduction.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
