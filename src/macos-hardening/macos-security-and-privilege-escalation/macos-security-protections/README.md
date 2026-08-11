@@ -4,7 +4,7 @@
 
 ## Gatekeeper
 
-Gatekeeper зазвичай використовується для позначення комбінації **Quarantine + Gatekeeper + XProtect** — 3 модулів безпеки macOS, які намагаються **не дозволити користувачам виконувати потенційно шкідливе програмне забезпечення, завантажене з мережі**.
+Gatekeeper зазвичай використовують для позначення поєднання **Quarantine + Gatekeeper + XProtect** — 3 модулів безпеки macOS, які намагаються **перешкодити користувачам виконувати потенційно шкідливе програмне забезпечення, завантажене з Інтернету**.
 
 Додаткова інформація:
 
@@ -26,7 +26,7 @@ macos-sip.md
 
 ### Sandbox
 
-Sandbox macOS **обмежує застосунки**, що працюють усередині sandbox, **дозволеними діями, визначеними в профілі Sandbox**, з яким працює застосунок. Це допомагає гарантувати, що **застосунок отримуватиме доступ лише до очікуваних ресурсів**.
+Sandbox macOS **обмежує застосунки**, що працюють усередині sandbox, **дозволеними діями, визначеними в Sandbox profile**, з яким запускається застосунок. Це допомагає гарантувати, що **застосунок отримуватиме доступ лише до очікуваних ресурсів**.
 
 
 {{#ref}}
@@ -35,7 +35,7 @@ macos-sandbox/
 
 ### TCC - **Transparency, Consent, and Control**
 
-**TCC (Transparency, Consent, and Control)** — це security framework. Він призначений для **керування дозволами** застосунків, зокрема регулювання їхнього доступу до чутливих функцій. Сюди належать такі елементи, як **служби геолокації, контакти, фотографії, мікрофон, камера, accessibility і full disk access**. TCC гарантує, що застосунки можуть отримувати доступ до цих функцій лише після явної згоди користувача, посилюючи конфіденційність і контроль над персональними даними.
+**TCC (Transparency, Consent, and Control)** — це security framework. Він призначений для **керування дозволами** застосунків, зокрема шляхом регулювання їхнього доступу до чутливих функцій. Сюди належать такі елементи, як **служби геолокації, контакти, фотографії, мікрофон, камера, accessibility і повний доступ до диска**. TCC гарантує, що застосунки можуть отримати доступ до цих функцій лише після явної згоди користувача, посилюючи таким чином приватність і контроль над персональними даними.
 
 
 {{#ref}}
@@ -44,7 +44,7 @@ macos-tcc/
 
 ### Launch/Environment Constraints & Trust Cache
 
-Launch constraints у macOS — це функція безпеки для **регулювання запуску процесів** шляхом визначення **того, хто може запустити** процес, **як** і **звідки**. Запроваджені в macOS Ventura, вони розподіляють системні binaries за категоріями constraints у **trust cache**. Кожен executable binary має набір **правил** для свого **запуску**, зокрема **self**, **parent** і **responsible** constraints. Розширені для third-party застосунків як **Environment** Constraints у macOS Sonoma, ці функції допомагають зменшити ризик потенційної exploitation системи, регулюючи умови запуску процесів.
+Launch constraints у macOS — це функція безпеки для **регулювання ініціації процесів** шляхом визначення того, **хто може запустити** процес, **як** і **звідки**. Представлені в macOS Ventura, вони класифікують системні binary у категорії обмежень усередині **trust cache**. Кожен executable binary має набір **правил** для свого **запуску**, зокрема обмеження **self**, **parent** і **responsible**. У macOS Sonoma ці функції були поширені на сторонні застосунки як **Environment Constraints**. Вони допомагають пом’якшити потенційні system exploitations, регулюючи умови запуску процесів.
 
 
 {{#ref}}
@@ -55,26 +55,26 @@ macos-launch-environment-constraints.md
 
 Malware Removal Tool (MRT) — ще одна частина security infrastructure macOS. Як випливає з назви, основна функція MRT — **видаляти відоме malware із заражених систем**.
 
-Після виявлення malware на Mac (XProtect або іншим способом) MRT можна використовувати для автоматичного **видалення malware**. MRT непомітно працює у фоновому режимі та зазвичай запускається під час оновлення системи або завантаження нового визначення malware (схоже, правила, за якими MRT виявляє malware, містяться всередині binary).
+Після виявлення malware на Mac (XProtect або іншим способом) MRT можна використовувати для автоматичного **видалення malware**. MRT непомітно працює у фоні й зазвичай запускається під час оновлення системи або завантаження нових malware definitions (схоже, правила, за якими MRT виявляє malware, містяться всередині binary).
 
-Хоча XProtect і MRT є частинами security measures macOS, вони виконують різні функції:
+Хоча XProtect і MRT є частинами заходів безпеки macOS, вони виконують різні функції:
 
-- **XProtect** — це preventative tool. Він **перевіряє файли під час їх завантаження** (через певні застосунки), і якщо виявляє будь-які відомі типи malware, **не дозволяє відкрити файл**, запобігаючи зараженню системи malware.
-- **MRT**, натомість, — це **reactive tool**. Він працює після виявлення malware у системі, маючи на меті видалити небезпечне програмне забезпечення та очистити систему.
+- **XProtect** — preventative tool. Він **перевіряє файли під час їхнього завантаження** (через певні застосунки), і якщо виявляє відомі типи malware, **перешкоджає відкриттю файлу**, не даючи malware заразити систему.
+- **MRT**, зі свого боку, — **reactive tool**. Він працює після виявлення malware у системі, маючи на меті видалити шкідливе програмне забезпечення та очистити систему.
 
 Застосунок MRT розташований у **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
 ## Керування фоновими завданнями
 
-**macOS** тепер **попереджає** щоразу, коли інструмент використовує добре відому **technique для persistence code execution** (наприклад, Login Items, Daemons...), щоб користувач краще розумів, **яке програмне забезпечення зберігає persistence**.<sup>[[3]](#references)</sup>
+**macOS** тепер **показує сповіщення** щоразу, коли інструмент використовує відому **техніку для забезпечення persistence виконання коду** (наприклад, Login Items, Daemons...), щоб користувач краще розумів, **яке програмне забезпечення забезпечує persistence**.<sup>[[3]](#references)</sup>
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
 Це працює за допомогою **daemon**, розташованого в `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd`, і **agent** у `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`<sup>[[1]](#references)</sup>
 
-**`backgroundtaskmanagementd`** визначає, що щось встановлено в persistent folder, шляхом **отримання FSEvents** і створення відповідних **handlers**.<sup>[[1]](#references)</sup>
+**`backgroundtaskmanagementd`** визначає, що щось встановлено в persistent folder, шляхом **отримання FSEvents** і створення певних **handlers** для них.<sup>[[1]](#references)</sup>
 
-Крім того, існує plist-файл, що містить **добре відомі застосунки**, які часто забезпечують persistence; він підтримується apple і розташований у: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[[3]](#references)</sup>
+Крім того, існує plist-файл із переліком **добре відомих застосунків**, які часто забезпечують persistence; його підтримує Apple, і він розташований у: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[[3]](#references)</sup>
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -92,7 +92,7 @@ Malware Removal Tool (MRT) — ще одна частина security infrastruct
 ```
 ### Перерахування
 
-Можна **перерахувати всі** налаштовані фонові елементи, запустивши інструмент командного рядка Apple:<sup>[[3]](#references)</sup>
+Можна **перерахувати всі** налаштовані фонові елементи за допомогою cli-інструмента Apple:<sup>[[3]](#references)</sup>
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
@@ -104,19 +104,19 @@ chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-Ця інформація зберігається в **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`**, а Terminal потребує FDA.<sup>[[2]](#references)</sup>
+Ця інформація зберігається у **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`**, а Terminal потребує FDA.<sup>[[2]](#references)</sup>
 
 ### Втручання в BTM
 
-Коли виявляється нова persistence, генерується подія типу **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Отже, будь-який спосіб **перешкодити** надсиланню цієї **події** або **сповістити** користувача агентом допоможе зловмиснику _**обійти**_ BTM.<sup>[[1]](#references)</sup>
+Коли виявляється новий persistence, генерується подія типу **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Отже, будь-який спосіб **перешкодити** надсиланню цієї **події** або **сповістити** користувача через **agent** допоможе зловмиснику _**обійти**_ BTM.<sup>[[1]](#references)</sup>
 
-- **Скидання database**: виконання наведеної нижче команди скине database (її має бути перебудовано з нуля), однак з незрозумілої причини після цього про нову persistence **не надходитимуть сповіщення, доки систему не буде перезавантажено**.<sup>[[1]](#references)</sup>
-- Потрібен **root**.
+- **Скидання бази даних**: виконання наведеної нижче команди скидає базу даних (яку має бути перебудовано з нуля). Однак після цього **нові сповіщення про persistence не з’являються, доки систему не буде перезавантажено**.<sup>[[1]](#references)</sup>
+- Потрібні права **root**.
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
-- **Зупинка Agent**: Можна надіслати Agent сигнал зупинки, щоб він **не сповіщав користувача** про виявлення нових загроз.<sup>[[1]](#references)</sup>
+- **Зупинка Agent**: Можна надіслати Agent сигнал зупинки, щоб він **не сповіщав користувача**, коли виявляються нові події.<sup>[[1]](#references)</sup>
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent
@@ -129,12 +129,11 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Bug**: Якщо **процес, який створив persistence, одразу після цього завершує роботу**, daemon спробує **отримати інформацію** про нього, **зазнає невдачі** та **не зможе надіслати event**, який повідомляє про створення нової persistence.<sup>[[1]](#references)</sup>
+- **Bug**: Якщо **процес, який створив persistence, одразу після цього завершується**, daemon намагається **отримати інформацію** про нього, **зазнає невдачі** й **не може надіслати подію**, яка вказує, що новий елемент зберігається.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [OBTS v6.0: «Demystifying (& Bypassing) macOS's Background Task Management» - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
-- [2] [New (Developer) Tool: «DumpBTM» - Patrick Wardle (Patreon)](https://www.patreon.com/posts/new-developer-77420730?l=fr)
-- [3] [Manage login items and background tasks on Mac - Apple Platform Deployment](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
-
+- [1] [OBTS v6.0: «Розвінчання міфів про керування фоновими завданнями macOS (і його обхід)» - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
+- [2] [Новий інструмент для розробників: «DumpBTM» - Patrick Wardle (Patreon)](https://www.patreon.com/posts/new-developer-77420730?l=fr)
+- [3] [Керування елементами входу та фоновими завданнями на Mac - розгортання платформ Apple](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 {{#include ../../../banners/hacktricks-training.md}}

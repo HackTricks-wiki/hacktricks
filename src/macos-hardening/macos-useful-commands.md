@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Інструменти автоматичного перерахування macOS
+### Інструменти автоматичного перерахування для macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Специфічні команди macOS
+### Спеціальні команди macOS
 ```bash
 #System info
 date
@@ -32,7 +32,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Швидка anti-analysis / virtualization check
+### Швидка перевірка на anti-analysis / virtualization
 
-Деякі macOS stealers викликають `system_profiler`, щоб виявити ВМ і **припиняють роботу з окремим кодом виходу (наприклад, 100)**, щоб уникнути sandbox detonation<sup>[[1]](#references)</sup>:
+Деякі macOS stealers викликають `system_profiler`, щоб виявити VM, і **завершують роботу з окремим кодом виходу (наприклад, 100)**, щоб уникнути детонації в sandbox<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -128,7 +128,7 @@ fi
 Перевірте наявність **підозрілих** встановлених застосунків і **привілеїв** щодо встановлених ресурсів:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
@@ -145,12 +145,11 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### Створення користувача
 
-Без підказок
+Без запитів
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## Посилання
+## References
 
-- [1] [2025, рік Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
+- [1] [2025 рік Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 {{#include ../banners/hacktricks-training.md}}

