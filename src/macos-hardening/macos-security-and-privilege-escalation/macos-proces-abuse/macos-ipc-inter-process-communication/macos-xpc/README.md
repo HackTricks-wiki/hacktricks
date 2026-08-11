@@ -6,27 +6,27 @@
 
 XPC es un framework para la **comunicación entre procesos** en macOS e iOS. Proporciona mecanismos para realizar **llamadas seguras y asíncronas entre procesos**. XPC admite **aplicaciones con privilegios separados**, donde cada **componente** se ejecuta con **solo los permisos que necesita**, limitando así el daño potencial causado por un proceso comprometido.<sup>[[1]](#references)</sup>
 
-XPC utiliza una forma de Inter-Process Communication (IPC), que es un conjunto de métodos para que diferentes programas que se ejecutan en el mismo sistema envíen datos de un lado a otro.
+XPC utiliza una forma de comunicación entre procesos (IPC), que es un conjunto de métodos para que diferentes programas que se ejecutan en el mismo sistema intercambien datos.
 
 Los principales beneficios de XPC incluyen:
 
-1. **Seguridad**: Al separar el trabajo en diferentes procesos, cada proceso puede recibir únicamente los permisos que necesita. Esto significa que, incluso si un proceso se ve comprometido, su capacidad para causar daños es limitada.
-2. **Estabilidad**: XPC ayuda a aislar los crashes en el componente donde ocurren. Si un proceso falla, puede reiniciarse sin afectar al resto del sistema.
+1. **Seguridad**: Al separar el trabajo en diferentes procesos, a cada proceso se le pueden conceder solo los permisos que necesita. Esto significa que, incluso si un proceso se ve comprometido, su capacidad para causar daños es limitada.
+2. **Estabilidad**: XPC ayuda a aislar los crashes en el componente donde se producen. Si un proceso falla, puede reiniciarse sin afectar al resto del sistema.
 3. **Rendimiento**: XPC permite una concurrencia sencilla, ya que diferentes tareas pueden ejecutarse simultáneamente en distintos procesos.
 
 El principal **inconveniente** es que **separar una aplicación en varios procesos** y hacer que se comuniquen mediante XPC añade sobrecarga. En los sistemas modernos, esta sobrecarga suele ser pequeña en comparación con los beneficios de seguridad y estabilidad.<sup>[[1]](#references)</sup>
 
 ## Servicios XPC específicos de una aplicación
 
-Los componentes XPC de una aplicación se encuentran **dentro de la propia aplicación**. Por ejemplo, en Safari se pueden encontrar en **`/Applications/Safari.app/Contents/XPCServices`**. Tienen la extensión **`.xpc`** (como **`com.apple.Safari.SandboxBroker.xpc`**) y **también son bundles**, con el binario principal y un `Info.plist` en su interior. Por ejemplo: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` y `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`.<sup>[[2]](#references)</sup>
+Los componentes XPC de una aplicación se encuentran **dentro de la propia aplicación**. Por ejemplo, en Safari se pueden encontrar en **`/Applications/Safari.app/Contents/XPCServices`**. Tienen la extensión **`.xpc`** (como **`com.apple.Safari.SandboxBroker.xpc`**) y también son **bundles**, con el binario principal y un `Info.plist` en su interior. Por ejemplo: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` y `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`.<sup>[[2]](#references)</sup>
 
-Un **componente XPC puede tener entitlements y privilegios diferentes** de los de otros componentes XPC o del binario principal de la aplicación. Una excepción es un servicio XPC configurado con **`JoinExistingSession`** establecido en `true` en su archivo **Info.plist**. En este caso, el servicio XPC se une a la **misma sesión de seguridad que la aplicación** que lo llamó.<sup>[[4]](#references)</sup>
+Un **componente XPC puede tener diferentes entitlements y privilegios** de los de otros componentes XPC o del binario principal de la aplicación. Una excepción es un servicio XPC configurado con **`JoinExistingSession`** establecido en `true` en su archivo **Info.plist**. En este caso, el servicio XPC se une a la **misma sesión de seguridad que la aplicación** que lo llamó.<sup>[[4]](#references)</sup>
 
-Los servicios XPC son **iniciados** por **launchd** cuando es necesario y pueden **apagarse** una vez que sus tareas están **completas** para liberar recursos del sistema. **Los componentes XPC específicos de una aplicación solo pueden ser utilizados por la aplicación que los contiene**, reduciendo así la exposición a posibles vulnerabilidades.<sup>[[2]](#references)</sup>
+Los servicios XPC son **iniciados** por **launchd** cuando es necesario y pueden **apagarse** una vez que sus tareas se **completan** para liberar recursos del sistema. **Los componentes XPC específicos de una aplicación solo pueden ser utilizados por la aplicación que los contiene**, reduciendo así la exposición a posibles vulnerabilidades.<sup>[[2]](#references)</sup>
 
 ## Servicios XPC de todo el sistema
 
-Los servicios XPC de todo el sistema son accesibles desde fuera de una única aplicación. Estos servicios Mach gestionados por launchd deben estar **definidos en archivos plist** ubicados en directorios como **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`** o **`/Library/LaunchAgents`**.<sup>[[3]](#references)</sup>
+A diferencia de los servicios específicos de una aplicación, los servicios XPC de todo el sistema no están restringidos a la aplicación que los contiene. Pueden ser accesibles para clientes de varios usuarios, según el dominio de launchd y las propias comprobaciones de autorización del servicio. Estos servicios Mach gestionados por launchd deben estar **definidos en archivos plist** ubicados en directorios como **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`** o **`/Library/LaunchAgents`**.<sup>[[2]](#references)[[3]](#references)</sup>
 
 Estos archivos plist tienen una clave **`MachServices`** que contiene el nombre del servicio y una clave **`Program`** que contiene la ruta al binario:
 ```xml
@@ -62,9 +62,9 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 </dict>
 </plist>
 ```
-Los servicios en **`LaunchDaemons`** suelen ejecutarse como root. Por lo tanto, si un proceso sin privilegios puede acceder a un método vulnerable expuesto por uno de estos servicios, podría lograr una escalada de privilegios.
+Los servicios en **`LaunchDaemons`** suelen ejecutarse como root. Por lo tanto, si un proceso sin privilegios puede acceder a un método vulnerable expuesto por uno de estos servicios, podría escalar privilegios.
 
-## Objetos XPC
+## XPC Objects
 
 - **`xpc_object_t`**
 
@@ -80,12 +80,12 @@ Por lo tanto, `xpc_<objectType>_t` es una especie de subclase de `xpc_object_t`,
 
 - **`xpc_pipe`**
 
-Un **`xpc_pipe`** es un pipe FIFO que los procesos pueden utilizar para comunicarse (la comunicación utiliza mensajes Mach).\
-Es posible crear un servidor XPC llamando a `xpc_pipe_create()` o `xpc_pipe_create_from_port()` para crearlo utilizando un puerto Mach específico. Después, para recibir mensajes, es posible llamar a `xpc_pipe_receive` y `xpc_pipe_try_receive`.
+Un **`xpc_pipe`** es una tubería FIFO que los procesos pueden utilizar para comunicarse (la comunicación usa mensajes Mach).\
+Es posible crear un servidor XPC llamando a `xpc_pipe_create()` o `xpc_pipe_create_from_port()` para crearlo usando un puerto Mach específico. Después, para recibir mensajes, es posible llamar a `xpc_pipe_receive` y `xpc_pipe_try_receive`.
 
-Ten en cuenta que el objeto **`xpc_pipe`** es un **`xpc_object_t`** con información en su struct sobre los dos puertos Mach utilizados y el nombre (si existe). El nombre, por ejemplo, es configurado por el daemon `secinitd` en su plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist`, que configura el pipe llamado `com.apple.secinitd`.
+Ten en cuenta que el objeto **`xpc_pipe`** es un **`xpc_object_t`** con información en su struct sobre los dos puertos Mach utilizados y el nombre, si existe. El nombre, por ejemplo, del daemon `secinitd` en su plist `/System/Library/LaunchDaemons/com.apple.secinitd.plist` configura la tubería llamada `com.apple.secinitd`.
 
-Un ejemplo de un **`xpc_pipe`** es el **bootstrap pipe** creado por **`launchd`**, que permite compartir puertos Mach.
+Un ejemplo de un **`xpc_pipe`** es la **bootstrap pipe** creada por **`launchd`**, que permite compartir puertos Mach.
 
 - **`NSXPC*`**
 
@@ -94,18 +94,18 @@ Además, es más fácil hacer debugging de estos objetos con DTrace que de los a
 
 - **`GCD Queues`**
 
-XPC utiliza GCD para pasar mensajes y, además, genera determinadas dispatch queues, como `xpc.transactionq`, `xpc.io`, `xpc-events.add-listenerq`, `xpc.service-instance`...
+XPC utiliza GCD para pasar mensajes; además, genera determinadas dispatch queues como `xpc.transactionq`, `xpc.io`, `xpc-events.add-listenerq`, `xpc.service-instance`...
 
-## Servicios XPC
+## XPC Services
 
-Son **bundles con extensión `.xpc`** ubicados dentro de la carpeta **`XPCServices`** de otros proyectos y, en `Info.plist`, tienen `CFBundlePackageType` establecido como **`XPC!`**.\
+Son **bundles con extensión `.xpc`** ubicados dentro de la carpeta **`XPCServices`** de otros proyectos y, en el `Info.plist`, tienen `CFBundlePackageType` establecido como **`XPC!`**.\
 Este archivo contiene otras claves de configuración, como `ServiceType`, que puede ser Application, User o System; `_SandboxProfile`, que puede definir un sandbox; y `_AllowedClients`, que puede indicar los entitlements o la identidad necesarios para contactar con el servicio. Estas y otras opciones configuran el servicio cuando se inicia.<sup>[[2]](#references)</sup>
 
-### Iniciar un servicio
+### Iniciar un Service
 
 La app intenta **conectarse** a un servicio XPC usando `xpc_connection_create_mach_service`; launchd localiza entonces el daemon e inicia **`xpcproxy`**. **`xpcproxy`** aplica las restricciones configuradas y ejecuta el servicio con los file descriptors y puertos Mach proporcionados.<sup>[[3]](#references)</sup>
 
-Para mejorar la velocidad de búsqueda del servicio XPC, se utiliza una cache.
+Para mejorar la velocidad de búsqueda del servicio XPC, se utiliza una caché.
 
 Es posible rastrear las acciones de `xpcproxy` usando:
 ```bash
@@ -116,11 +116,11 @@ La utilidad `xpcproxy` utiliza el prefijo `0x22`; por ejemplo: `0x2200001c: xpcp
 
 ## Mensajes de eventos XPC
 
-Las aplicaciones pueden **suscribirse** a diferentes **mensajes** de eventos, lo que permite que sean **iniciadas bajo demanda** cuando ocurren dichos eventos. La **configuración** de estos servicios se realiza en archivos plist de l**aunchd**, ubicados en los **mismos directorios que los anteriores** y que contienen una clave adicional **`LaunchEvent`**.
+Las aplicaciones pueden **suscribirse** a distintos **mensajes** de eventos, lo que permite que se **inicien bajo demanda** cuando ocurran dichos eventos. La **configuración** de estos servicios se realiza en l**archivos plist de launchd**, ubicados en los **mismos directorios que los anteriores** y que contienen una clave adicional **`LaunchEvent`**.
 
-### Comprobación del proceso que se conecta mediante XPC
+### Comprobación del proceso que conecta mediante XPC
 
-Cuando un proceso intenta invocar un método a través de una conexión XPC, el **servicio XPC debería comprobar si ese proceso tiene permiso para conectarse**. Estos son métodos de verificación habituales y sus riesgos:
+Cuando un proceso intenta llamar a un método a través de una conexión XPC, el **servicio XPC debería comprobar si ese proceso tiene permiso para conectarse**. Estos son métodos de verificación habituales y sus inconvenientes:
 
 
 {{#ref}}
@@ -129,16 +129,16 @@ macos-xpc-connecting-process-check/
 
 ## Autorización XPC
 
-Apple también permite que las aplicaciones **configuren derechos de autorización y cómo los obtienen los llamadores**, de modo que un proceso con los derechos necesarios **pueda invocar un método** expuesto por el servicio XPC:
+Apple también permite que las aplicaciones **configuren derechos de autorización y cómo los obtienen los callers**, de modo que un proceso con los derechos requeridos **pueda llamar a un método** expuesto por el servicio XPC:
 
 
 {{#ref}}
 macos-xpc-authorization.md
 {{#endref}}
 
-## Sniffer XPC
+## XPC Sniffer
 
-Para interceptar mensajes XPC, puedes utilizar **xpcspy**, que utiliza **Frida**.<sup>[[5]](#references)</sup>
+Para sniff XPC messages, puedes utilizar **xpcspy**, que usa **Frida**.<sup>[[5]](#references)</sup>
 ```bash
 # Install
 pip3 install xpcspy
@@ -442,7 +442,7 @@ return;
 ## Remote XPC
 
 La funcionalidad proporcionada por `RemoteXPC.framework` (de `libxpc`) permite la comunicación XPC entre distintos hosts.\
-Los servicios que admiten Remote XPC tienen la clave `UsesRemoteXPC` en su plist, como ocurre con `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. Aunque el servicio está registrado con `launchd`, `UserEventAgent` y sus plugins `com.apple.remoted.plugin` y `com.apple.remoteservicediscovery.events.plugin` proporcionan la funcionalidad.
+Los servicios compatibles con Remote XPC tienen la clave `UsesRemoteXPC` en su plist, como ocurre con `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist`. Aunque el servicio está registrado con `launchd`, `UserEventAgent` y sus plugins `com.apple.remoted.plugin` y `com.apple.remoteservicediscovery.events.plugin` proporcionan la funcionalidad.
 
 Además, `RemoteServiceDiscovery.framework` obtiene información de `com.apple.remoted.plugin`, exponiendo funciones como `get_device`, `get_unique_device` y `connect`.
 
@@ -456,7 +456,7 @@ Es posible obtener información sobre servicios remotos con la CLI `/usr/libexec
 /usr/libexec/remotectl [netcat|relay] ... # Expose a service in a port
 ...
 ```
-La comunicación entre bridgeOS y el host ocurre a través de una interfaz IPv6 dedicada. `MultiverseSupport.framework` establece sockets cuyos descriptores de archivo se utilizan para la comunicación.\
+La comunicación entre bridgeOS y el host se realiza a través de una interfaz IPv6 dedicada. `MultiverseSupport.framework` establece sockets cuyos file descriptors se utilizan para la comunicación.\
 Es posible encontrar estas comunicaciones mediante `netstat`, `nettop` o la alternativa open-source `netbottom`.
 
 ## References
