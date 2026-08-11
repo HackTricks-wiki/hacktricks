@@ -16,6 +16,8 @@ $packages = (Get-ItemProperty -Path $lsaPath -Name 'Security Packages').'Securit
 $packages
 ```
 
+A typical existing value can contain packages such as `kerberos`, `msv1_0`, `schannel`, `wdigest`, `tspkg`, and `pku2u`. Preserve every existing entry when adding the custom package.<sup>[[1]](#references)</sup>
+
 Append `mimilib` without replacing the existing packages:
 
 ```powershell

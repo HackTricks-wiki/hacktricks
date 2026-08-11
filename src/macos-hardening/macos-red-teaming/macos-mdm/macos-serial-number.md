@@ -17,7 +17,7 @@ For many devices manufactured from 2010 until the randomized transition, the 12-
 
 For example, `C02L13ECF8J2` follows this legacy structure. Community-maintained factory mappings include prefixes such as `FC`, `F`, `XA`, `XB`, `QP`, and `G8` for United States locations; `RN` for Mexico; `CK` for Cork; `VM` for a Foxconn location in the Czech Republic; `SG` or `E` for Singapore; `MB` for Malaysia; `PT` or `CY` for Korea; and `EE`, `QT`, or `UV` for Taiwan. Numerous prefixes—including `FK`, `F1`, `F2`, `W8`, `DL`, `DM`, `DN`, `YM`, `7J`, `1C`, `4H`, `WQ`, `F7`, `C0`, `C3`, and `C7`—have been associated with Chinese facilities; `RM` has been associated with refurbished devices.<sup>[[3]](#references)</sup>
 
-The fourth-character date codes run from `C` (first half of 2010) through `Z` (second half of 2019), with the sequence reused afterward. For the fifth character, digits `1`–`9` represent weeks 1–9 and selected letters represent later weeks; add 26 when the fourth character denotes the second half of a year.<sup>[[3]](#references)</sup>
+The fourth-character date codes run from `C` (first half of 2010) through `Z` (second half of 2019), with the sequence reused afterward. For the fifth character, digits `1`–`9` represent weeks 1–9, while letters `C`–`Y` excluding vowels and `S` represent weeks 10–27; add 26 when the fourth character denotes the second half of a year.<sup>[[3]](#references)</sup>
 
 These mappings are useful for legacy triage but are not authoritative proof of origin, age, or authenticity. Confirm the result through Apple's inventory data.
 

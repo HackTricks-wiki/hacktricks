@@ -21,6 +21,8 @@ Review at least:
 - the `notBefore` and `notAfter` validity times;
 - the public-key parameters and signature algorithm.
 
+Legacy signatures such as MD5- or SHA-1-based certificate signatures are particularly important findings, although the exact acceptance and impact depend on the validator and trust context.<sup>[[3]](#references)</sup>
+
 RFC 5280 defines the Internet X.509 profile and the processing rules for extensions such as SAN, key usage, name constraints, and basic constraints.<sup>[[3]](#references)</sup>
 
 ## Encodings and Containers

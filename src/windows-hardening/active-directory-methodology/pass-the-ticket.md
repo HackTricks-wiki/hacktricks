@@ -17,7 +17,9 @@ Kerberos caches commonly appear as MIT `ccache` files on Linux and `.kirbi` file
 
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
+# Expected message: Converting ccache => kirbi
 python ticket_converter.py velociraptor.kirbi velociraptor.ccache
+# Expected message: Converting kirbi => ccache
 ```
 
 Kekeo also provides Kerberos ticket tooling on Windows.<sup>[[3]](#references)</sup>
@@ -42,6 +44,8 @@ klist
 
 Ticket import does not grant privileges beyond those represented by the ticket and the target service's authorization policy. Expired, revoked, malformed, or incorrectly scoped tickets may fail.<sup>[[1]](#references)</sup>
 
+For broader Kerberos attack context and related ticket-acquisition techniques, see Tarlogic's Kerberos attack guide.<sup>[[7]](#references)</sup>
+
 ## References
 
 - [1] [MITRE ATT&CK T1550.003 - Pass the Ticket](https://attack.mitre.org/techniques/T1550/003/)
@@ -50,5 +54,6 @@ Ticket import does not grant privileges beyond those represented by the ticket a
 - [4] [Fortra - Impacket examples](https://github.com/fortra/impacket/tree/master/examples)
 - [5] [gentilkiwi - Mimikatz](https://github.com/gentilkiwi/mimikatz)
 - [6] [GhostPack - Rubeus](https://github.com/GhostPack/Rubeus)
+- [7] [Tarlogic - Kerberos attack techniques](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 
 {{#include ../../banners/hacktricks-training.md}}

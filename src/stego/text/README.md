@@ -12,7 +12,7 @@ Text steganography frequently relies on characters that render identically or in
 
 - Homoglyphs: different Unicode codepoints that look alike (for example, Latin `a` and Cyrillic `а`)<sup>[[1]](#references)</sup>
 - Zero-width characters: joiners, non-joiners, and zero-width spaces<sup>[[2]](#references)</sup>
-- Whitespace encodings: spaces versus tabs and trailing-space patterns<sup>[[4]](#references)</sup>
+- Whitespace encodings: spaces versus tabs, trailing-space patterns, and deliberate line-length patterns<sup>[[3]](#references)[[4]](#references)</sup>
 
 Additional high-signal cases:
 
