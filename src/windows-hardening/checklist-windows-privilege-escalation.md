@@ -70,7 +70,7 @@
 ### [DLL Hijacking](windows-local-privilege-escalation/index.html#path-dll-hijacking)
 
 - [ ] Can you **write in any folder inside PATH**?
-- [ ] Is there any known service binary that **tries to load any non-existant DLL**?
+- [ ] Is there any known service binary that **tries to load any non-existent DLL**?
 - [ ] Can you **write** in any **binaries folder**?
 
 ### [Network](windows-local-privilege-escalation/index.html#network)

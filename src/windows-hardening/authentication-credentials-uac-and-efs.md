@@ -136,9 +136,11 @@ You can also use `cipher /e` and `cipher /d` inside a folder to **encrypt** and 
 
 #### Being Authority System
 
-This way requires the **victim user** to be **running** a **process** inside the host. If that is the case, using a `meterpreter` sessions you can impersonate the token of the process of the user (`impersonate_token` from `incognito`). Or you could just `migrate` to process of the user.
+This approach requires the **victim user** to be **running** a **process** on the host. If so, from a `meterpreter` session you can impersonate the user's process token (`impersonate_token` from `incognito`). Alternatively, you can `migrate` into the user's process.
 
-#### Knowing the users password
+#### Knowing the User's Password
+
+Mimikatz can import the user's certificate and private key, then use them to decrypt EFS-protected files.<sup>[[2]](#references)</sup>
 
 {{#ref}}
 https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
@@ -268,7 +270,7 @@ authentication-credentials-uac-and-efs/uac-user-account-control.md
 
 ## References
 
-- [1] [Bypassing Applocker and Powershell contstrained language mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)
+- [1] [Bypassing AppLocker and PowerShell constrained language mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)
 - [2] [howto ~ decrypt EFS files](https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files)
 - [3] [Relaying for gMSA](https://cube0x0.github.io/Relaying-for-gMSA/)
 - [4] [15 Ways to Bypass the PowerShell Execution Policy](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)

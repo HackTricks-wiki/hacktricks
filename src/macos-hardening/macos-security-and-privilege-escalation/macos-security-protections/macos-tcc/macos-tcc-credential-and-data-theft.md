@@ -7,7 +7,7 @@
 macOS TCC (Transparency, Consent, and Control) protects access to sensitive user data. When an attacker **compromises a binary that already has TCC grants**, they inherit those permissions. This page documents the exploitation potential of each data-theft-related TCC permission.<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> Code injection into a TCC-granted binary (via DYLD injection, dylib hijacking, or task port) **silently inherits all its TCC permissions**. There is no additional prompt or verification when the same process reads protected data.
+> Code injection into a TCC-granted binary (via DYLD injection, dylib hijacking, or task port) **silently inherits all its TCC permissions**. There is no additional prompt or verification when the same process reads protected data.<sup>[[4]](#references)</sup>
 
 ---
 

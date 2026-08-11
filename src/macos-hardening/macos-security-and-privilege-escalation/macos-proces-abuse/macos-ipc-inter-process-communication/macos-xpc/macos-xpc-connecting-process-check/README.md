@@ -13,7 +13,7 @@ When a connection is stablished to an XPC service, the server will check if the 
 3. Check if the connecting process **contains a proper bundle ID**.
    - If this **isn't verified**, any tool **signed by the same org** could be used to interact with the XPC service.
 4. (4 or 5) Check if the connecting process has a **proper software version number**.
-   - If this **isn't verified,** an old, insecure clients, vulnerable to process injection could be used to connect to the XPC service even with the other checks in place.
+   - If this **isn't verified**, an old, insecure client vulnerable to process injection could be used to connect to the XPC service even with the other checks in place.
 5. (4 or 5) Check if the connecting process has hardened runtime without dangerous entitlements (like the ones that allows to load arbitrary libraries or use DYLD env vars)
    1. If this **isn't verified,** the client might be **vulnerable to code injection**
 6. Check if the connecting process has an **entitlement** that allows it to connect to the service. This is applicable for Apple binaries.
@@ -53,7 +53,7 @@ The server will implement this **verification** in a function called **`shouldAc
 }
 ```
 
-The object NSXPCConnection has a **private** property **`auditToken`** (the one that should be used but could change) and a the **public** property **`processIdentifier`** (the one that shouldn't be used).
+The `NSXPCConnection` object has a **private** **`auditToken`** property (the one that should be used, although a private API can change) and a **public** **`processIdentifier`** property (which should not be used for authentication).
 
 The connecting process could be verified with something like:<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 
@@ -113,4 +113,3 @@ The `cs_*` constants above are the code-signing flags defined in XNU's `osfmk/ke
 - [5] [Sector 7 — XPC audit token spoofing](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
-
