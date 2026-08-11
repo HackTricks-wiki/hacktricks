@@ -1,35 +1,40 @@
-# Modbus Protocol
+# Modbus 프로토콜
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Modbus Protocol 소개
+## Modbus 소개
 
-Modbus protocol은 Industrial Automation and Control Systems에서 널리 사용되는 protocol입니다. Modbus를 사용하면 programmable logic controllers(PLCs), sensors, actuators 및 기타 industrial devices와 같은 다양한 장치 간에 통신할 수 있습니다. Modbus Protocol을 이해하는 것은 매우 중요합니다. ICS에서 가장 많이 사용되는 communication protocol이며, sniffing은 물론 PLC에 commands를 주입하는 데에도 많은 attack surface를 제공하기 때문입니다.
+Modbus는 PLC, 센서, 액추에이터 및 기타 산업용 장치에서 널리 구현되는 개방형 애플리케이션 계층 프로토콜입니다. 요청/응답 모델은 function code를 통해 coil과 register를 노출합니다. 따라서 Security testing은 단순히 TCP port 502를 찾는 것이 아니라, 무단 읽기/쓰기, traffic observation, replay 및 안전하지 않은 장치 동작에 초점을 맞춥니다.<sup>[[1]](#references)</sup>
 
-여기서는 protocol의 개념과 작동 특성을 설명하기 위해 내용을 요점별로 정리합니다. ICS system security에서 가장 큰 과제는 구현 및 업그레이드 비용입니다. 이러한 protocol과 standards는 1980년대와 1990년대 초에 설계되었지만 현재도 널리 사용되고 있습니다. 산업 현장에는 많은 장치와 연결이 존재하므로 장치를 업그레이드하기가 매우 어렵습니다. 이로 인해 hackers는 오래된 protocol을 대상으로 공격할 수 있는 이점을 얻습니다. Modbus에 대한 attacks는 산업 운영에 중요한 protocol이 업그레이드 없이 계속 사용될 것이므로 사실상 피하기 어렵습니다.
+많은 배포 환경에서는 업그레이드에 가동 중지, 재인증 또는 field device 교체가 필요하기 때문에 legacy serial 장비를 계속 사용합니다. 기존 Modbus는 confidentiality와 peer authentication을 모두 제공하지 않습니다. Modbus Security는 X.509 certificate와 TCP port 802를 사용하는 별도의 TLS 기반 profile입니다. 또한 specification이 공개되어 있고 독립적으로 구현할 수 있으므로 vendor 동작과 optional-function 지원은 서로 다를 수 있으며, 이를 가정하지 말고 fingerprinting해야 합니다.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## Client-Server Architecture
+## Client-Server 아키텍처
 
-Modbus Protocol은 일반적으로 Client Server Architecture에서 사용되며, master device(client)가 하나 이상의 slave devices(servers)와 통신을 시작합니다. 이는 Master-Slave architecture라고도 하며, SPI, I2C 등 electronics 및 IoT에서 널리 사용됩니다.
+현재 용어에서 **client**는 transaction을 시작하고 **server**는 response를 반환합니다. 이전 문서에서는 **master/slave**라는 용어를 사용합니다. 이 애플리케이션 관계를 SPI 또는 I2C와 혼동하지 마십시오. 이들은 서로 다른 bus protocol입니다.<sup>[[1]](#references)</sup>
 
-## Serial 및 Etherent Versions
+## Serial 및 Ethernet transport
 
-Modbus Protocol은 Serial Communication과 Ethernet Communications 모두를 지원하도록 설계되었습니다. Serial Communication은 legacy systems에서 널리 사용되는 반면, modern devices는 높은 data rates를 제공하고 modern industrial networks에 더 적합한 Ethernet을 지원합니다.
+동일한 Modbus 애플리케이션 data는 serial variant(RTU 또는 ASCII framing)와 Modbus TCP를 통해 전송할 수 있습니다. Modbus TCP는 MBAP header를 추가하며 일반적으로 TCP port 502를 사용합니다. serial RTU는 compact binary framing과 CRC를 사용하고, serial ASCII는 byte를 hexadecimal character로 표현하며 LRC를 사용합니다.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Data Representation
+## Data 표현
 
-Data는 Modbus protocol에서 ASCII 또는 Binary 형식으로 전송되지만, 오래된 devices와의 호환성 및 compact한 특성 때문에 binary format이 사용됩니다.
+data model은 single-bit coil/discrete input과 16-bit input/holding register로 구성됩니다. multi-register value, byte order, scaling 및 semantic meaning은 device-specific하며 vendor의 register map을 기준으로 확인해야 합니다.<sup>[[1]](#references)</sup>
 
-## Function Codes
+## Function code
 
-ModBus Protocol은 PLCs와 다양한 control devices를 작동시키는 데 사용되는 특정 function codes를 전송하는 방식으로 동작합니다. replay attacks는 function codes를 재전송하여 수행할 수 있으므로 이 부분을 이해하는 것이 중요합니다. Legacy devices는 data transmission에 대한 encryption을 지원하지 않으며, 일반적으로 이를 연결하는 긴 wires가 사용됩니다. 이로 인해 wires를 tampering하고 data를 capture하거나 inject할 수 있습니다.
+Function code는 coil 읽기(`0x01`), holding register 읽기(`0x03`), 단일 coil/register 쓰기(`0x05`/`0x06`), 여러 coil/register 쓰기(`0x0F`/`0x10`)와 같은 operation을 선택합니다. 캡처된 write request는 해당 deployment에 보완적인 authentication 또는 process-state check가 없을 경우 replay할 수 있습니다. 장거리 serial 배선에 대한 authorized physical access가 있는 경우, assessor는 electrical interface, termination 및 안전한 connection method를 식별한 후 배선에서 직접 frame을 캡처하거나 inject할 수도 있습니다. 두 작업 모두 physical process에 영향을 줄 수 있으므로 lab 환경 또는 명시적인 operational authorization을 사용하십시오.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Modbus Addressing
+## Addressing
 
-Network의 각 device에는 devices 간 통신에 필수적인 고유 address가 있습니다. Modbus RTU, Modbus TCP 등의 protocols는 addressing을 구현하는 데 사용되며 data transmission에서 transport layer와 같은 역할을 합니다. 전송되는 data는 message를 포함하는 Modbus protocol format으로 구성됩니다.
+Serial device는 unit address를 사용합니다. Modbus TCP는 IP addressing과 MBAP header의 Unit Identifier를 함께 사용하며, 이는 TCP-to-serial gateway가 downstream unit으로 request를 route할 때 특히 중요합니다. 제품 문서에 표시된 register reference는 one-based(`40001`)일 수 있지만 protocol address는 zero-based이므로, 이는 off-by-one error의 일반적인 원인입니다.<sup>[[1]](#references)[[3]](#references)</sup>
 
-또한 Modbus는 전송된 data의 integrity를 보장하기 위해 error checks를 구현합니다. 하지만 무엇보다도 Modbus는 Open Standard이므로 누구나 자신의 devices에 이를 구현할 수 있습니다. 이로 인해 Modbus protocol은 global standard가 되었으며 industrial automation industry 전반에 널리 확산되었습니다.
+Serial framing에는 transmission-error check가 포함됩니다(RTU의 CRC 및 ASCII의 LRC). TCP는 일반적인 transport checksum을 제공합니다. 이러한 기능은 우발적인 corruption을 감지할 뿐 cryptographic integrity나 origin authentication을 제공하지 않습니다.<sup>[[3]](#references)</sup>
 
-광범위한 사용과 업그레이드 부족으로 인해 Modbus를 attacking하면 attack surface 측면에서 상당한 이점을 얻을 수 있습니다. ICS는 devices 간 통신에 크게 의존하며, 이러한 devices에 대한 attacks는 industrial systems의 운영에 위험할 수 있습니다. Attacker가 transmission medium을 식별할 수 있다면 replay, data injection, data sniffing 및 leaking, Denial of Service, data forgery 등의 attacks를 수행할 수 있습니다.
+Authorized assessment 중에는 exposure, 허용된 function code, writable address range, exception handling, rate limit, 그리고 network segmentation 또는 Modbus-aware firewall이 client를 제한하는지 여부를 test하십시오. 관련 threat에는 passive disclosure, unauthorized command injection, replay, data forgery 및 denial of service가 포함됩니다. 겉보기에 작은 register 변경도 physical process를 변경할 수 있으므로 모든 active test를 process owner와 조율하십시오.
 
+## References
+
+- [1] [Modbus Organization — Modbus 애플리케이션 프로토콜 사양 V1.1b3](https://www.modbus.org/file/secure/modbusprotocolspecification.pdf)
+- [2] [Modbus Organization — Modbus Security 프로토콜 및 구현 가이드](https://www.modbus.org/modbus-specifications)
+- [3] [Modbus Organization — Serial Line을 통한 Modbus 사양 및 구현 가이드 V1.02](https://www.modbus.org/file/secure/modbusoverserial.pdf)
 {{#include ../../banners/hacktricks-training.md}}
