@@ -4,15 +4,15 @@
 
 ## Nasıl Çalıştığı Açıklanıyor
 
-WMI kullanılarak username ve password veya hash bilinen host'larda process'ler açılabilir. Komutlar, Wmiexec tarafından WMI kullanılarak yürütülür ve semi-interactive shell deneyimi sağlanır.
+Kullanıcı adı ve parola veya hash bilgileri bilinen host'larda, WMI kullanılarak process'ler açılabilir. Komutlar, Wmiexec tarafından WMI kullanılarak yürütülür ve yarı etkileşimli bir shell deneyimi sağlanır.
 
-**dcomexec.py:** Farklı DCOM endpoint'lerinden yararlanan bu script, özellikle ShellBrowserWindow DCOM object'ini kullanarak wmiexec.py'ye benzer bir semi-interactive shell sunar. Şu anda MMC20. Application, Shell Windows ve Shell Browser Window object'lerini desteklemektedir. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
+**dcomexec.py:** Bu script, farklı DCOM endpoint'lerini kullanarak `wmiexec.py`'ye benzer yarı etkileşimli bir shell sunar. Seçilen `-object` değeri endpoint'i belirler; desteklenen object'ler arasında `MMC20.Application`, `ShellWindows` ve orijinal walkthrough'da vurgulanan Shell Browser Window tekniğini sağlayan `ShellBrowserWindow` bulunur.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## WMI Temelleri
 
 ### Namespace
 
-Directory tarzı bir hierarchy içinde yapılandırılan WMI'ın top-level container'ı \root'tur; bunun altında namespace olarak adlandırılan ek directory'ler düzenlenir.<sup>[[1]](#references)</sup>
+Directory tarzı bir hiyerarşi içinde yapılandırılan WMI'nin en üst düzey container'ı `\root`'tur; bunun altında namespace olarak adlandırılan ek directory'ler düzenlenir.<sup>[[1]](#references)</sup>
 Namespace'leri listeleme komutları:
 ```bash
 # Retrieval of Root namespaces
@@ -31,7 +31,7 @@ gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **Sınıflar**
 
-win32_process gibi bir WMI sınıf adını ve bulunduğu namespace'i bilmek, herhangi bir WMI işlemi için kritik öneme sahiptir.
+win32_process gibi bir WMI sınıf adını ve sınıfın bulunduğu namespace'i bilmek, herhangi bir WMI işlemi için kritik öneme sahiptir.  
 `win32` ile başlayan sınıfları listeleme komutları:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
@@ -43,9 +43,9 @@ Bir sınıfın çağrılması:
 Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
-### Yöntemler
+### Methods
 
-WMI sınıflarının bir veya daha fazla çalıştırılabilir işlevi olan yöntemler yürütülebilir.
+Çalıştırılabilir bir veya daha fazla WMI class işlevi olan Methods çalıştırılabilir.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -59,9 +59,9 @@ Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Descrip
 ```
 ## WMI Enumeration
 
-### WMI Servis Durumu
+### WMI Service Status
 
-WMI servisinin çalışır durumda olup olmadığını doğrulamak için komutlar:
+WMI service'inin çalışır durumda olup olmadığını doğrulamak için komutlar:
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -85,19 +85,19 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-WMI'nin belirli bilgileri, örneğin yerel admin'leri veya oturum açmış kullanıcıları uzaktan sorgulaması, dikkatli komut oluşturmayla mümkündür.
+Uzak bir makinede local admins veya oturum açmış kullanıcılar gibi belirli bilgileri almak için WMI üzerinden dikkatle oluşturulmuş komutlarla sorgulama yapılabilir.
 
 ### **Manual Remote WMI Querying**
 
-Uzak bir makinedeki yerel admin'lerin ve oturum açmış kullanıcıların stealthy şekilde tespit edilmesi, belirli WMI sorguları kullanılarak gerçekleştirilebilir. `wmic`, komutları aynı anda birden fazla node üzerinde çalıştırmak için bir metin dosyasından okuma özelliğini de destekler.<sup>[[1]](#references)</sup>
+Uzak bir makinedeki local admins ve oturum açmış kullanıcıları stealthy bir şekilde tespit etmek, belirli WMI sorguları aracılığıyla gerçekleştirilebilir. `wmic`, komutları aynı anda birden fazla node üzerinde yürütmek için bir metin dosyasından okuma işlemini de destekler.<sup>[[1]](#references)</sup>
 
-WMI üzerinden bir process'i uzaktan çalıştırmak, örneğin bir Empire agent dağıtmak için aşağıdaki komut yapısı kullanılır. Başarılı çalıştırma, "0" dönüş değeriyle belirtilir:<sup>[[1]](#references)</sup>
+Empire agent gibi bir process'i WMI üzerinden uzaktan çalıştırmak için aşağıdaki komut yapısı kullanılır. Başarılı yürütme, `"0"` dönüş değeriyle belirtilir:<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Bu süreç, WMI'ın uzaktan çalıştırma ve sistem enumerasyonu yeteneğini göstererek hem sistem yönetimi hem de penetration testing için kullanım alanını vurgular.
+Bu süreç, WMI'ın uzaktan çalıştırma ve sistem enumeration yeteneğini göstererek hem sistem yönetimi hem de penetration testing için kullanımını vurgular.
 
-## Automatic Tools
+## Otomatik Araçlar
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
@@ -118,10 +118,9 @@ SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug a
 - **Impacket'ın `wmiexec` aracını** da kullanabilirsiniz.
 
 
-## Referanslar
+## References
 
-- [1] [Windows Kutularını Ele Geçirmek için Kimlik Bilgilerini Kullanma - Bölüm 3 (WMI ve WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
-- [2] [Impacket Tool Kit için Başlangıç Rehberi - Bölüm 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
-
-
+- [1] [Windows Sistemlerini Ele Geçirmek için Kimlik Bilgilerini Kullanma - Bölüm 3 (WMI ve WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Fortra Impacket – dcomexec.py](https://github.com/fortra/impacket/blob/master/examples/dcomexec.py)
+- [3] [Impacket Tool Kit için Başlangıç Rehberi, Bölüm 1 – Hacking Articles (Internet Archive)](https://web.archive.org/web/20190822180831/https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 {{#include ../../banners/hacktricks-training.md}}
