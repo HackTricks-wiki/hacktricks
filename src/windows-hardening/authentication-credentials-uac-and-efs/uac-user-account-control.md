@@ -174,8 +174,8 @@ Documentation and tool in [https://github.com/wh0amitz/KRBUACBypass](https://git
 
 ### UAC bypass exploits
 
-[**UACME** ](https://github.com/hfiref0x/UACME)which is a **compilation** of several UAC bypass exploits. Note that you will need to **compile UACME using visual studio or msbuild**. The compilation will create several executables (like `Source\Akagi\outout\x64\Debug\Akagi.exe`) , you will need to know **which one you need.**<sup>[[3]](#references)</sup>\
-You should **be careful** because some bypasses will **promtp some other programs** that will **alert** the **user** that something is happening.<sup>[[3]](#references)</sup>
+[**UACME**](https://github.com/hfiref0x/UACME) is a collection of UAC bypass techniques. Compile it with Visual Studio or MSBuild; the build creates several executables (for example, `Source\Akagi\output\x64\Debug\Akagi.exe`), so select the method appropriate to the target build.<sup>[[3]](#references)</sup>\
+Be careful: some bypasses launch visible programs or prompts that can alert the user.<sup>[[3]](#references)</sup>
 
 UACME has the **build version from which each technique started working**.<sup>[[3]](#references)</sup> You can search for a technique affecting your versions:
 
@@ -287,7 +287,7 @@ Moreover, if you get a GUI session that someone was using (potentially via RDP) 
 
 ### Noisy brute-force UAC bypass
 
-If you don't care about being noisy you could always **run something like** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) that **ask to elevate permissions until the user does accepts it**.
+If noise is acceptable, a tool such as [**ForceAdmin**](https://github.com/Chainski/ForceAdmin) can repeatedly request elevation until the user accepts it.
 
 ### Your own bypass - Basic UAC bypass methodology
 
