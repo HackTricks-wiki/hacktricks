@@ -1,15 +1,15 @@
-# macOS XPC Mach Services Abuse
+# macOS XPC Mach Services 滥用
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## 基本信息
 
-**XPC**（Cross-Process Communication）是 macOS 上主要的 IPC 机制。系统守护进程会公开 **Mach services** ——由 `launchd` 注册的命名端口，其他进程可以通过 `NSXPCConnection` 连接到这些端口。<sup>[[1]](#references)</sup>
+**XPC**（跨进程通信）是 macOS 上主要的 IPC 机制。系统守护进程会暴露 **Mach services**——由 `launchd` 注册的命名端口，其他进程可以通过 `NSXPCConnection` 连接到这些端口。<sup>[[1]](#references)</sup>
 
-每个包含 `MachServices` 键的 **LaunchDaemon** 和 **LaunchAgent** plist 都会注册一个或多个命名 Mach 端口。这些端口是系统范围的 XPC 端点，任何进程都可以尝试连接。<sup>[[2]](#references)</sup>
+每个包含 `MachServices` 键的 **LaunchDaemon** 和 **LaunchAgent** plist 都会注册一个或多个命名 Mach 端口。这些是系统范围的 XPC 端点，任何进程都可以尝试连接。<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> XPC Mach services 是 macOS 上**最大的本地权限提升攻击面**。近年来大多数本地 root exploit 都是通过 LaunchDaemon 中存在漏洞的 XPC services 实现的。root daemon 中公开的每个方法都可能成为权限提升向量。
+> XPC Mach services 是 macOS 上**最大的单一本地提权攻击面**。近年来大多数本地 root exploit 都是通过 LaunchDaemons 中存在漏洞的 XPC services 实现的。root daemon 中暴露的每个方法都可能成为提权向量。
 
 ### 架构
 ```
@@ -23,7 +23,7 @@ Daemon Process (root context)
 ```
 ## 枚举
 
-### 查找拥有 Mach Services 的守护进程
+### 查找提供 Mach Services 的 Daemons
 ```bash
 # Find all LaunchDaemons with MachServices
 find /Library/LaunchDaemons /System/Library/LaunchDaemons -name "*.plist" -exec sh -c '
@@ -47,9 +47,9 @@ WHERE e.isDaemon = 1
 ORDER BY e.privileged DESC
 LIMIT 50;"
 ```
-### 枚举 XPC 接口
+### 枚举 XPC Interfaces
 
-识别出 daemon 后，对其 XPC 接口进行逆向分析：
+识别出 daemon 后，对其 XPC interface 进行 reverse-engineer：
 ```bash
 # Find the protocol definition in the binary
 strings /path/to/daemon | grep -i "protocol\|interface\|xpc\|method"
@@ -62,11 +62,11 @@ find /Applications -path "*/XPCServices/*.xpc" 2>/dev/null
 ```
 ## XPC Client Verification Vulnerabilities
 
-XPC services 中最常见的漏洞类别是**客户端验证不足**。daemon 应验证：
+XPC services 中最常见的漏洞类型是**客户端验证不足**。守护进程应验证：
 
-1. 连接进程的 **Code signature**
-2. 连接进程的 **Entitlements**
-3. **Audit token**（而不是可被重新使用的 PID）
+1. 连接进程的**代码签名**
+2. 连接进程的**Entitlements**
+3. **Audit token**（而不是 PID，因为 PID 可能被重新使用）
 
 ### Vulnerable Pattern: No Verification
 ```objc
@@ -79,7 +79,7 @@ newConnection.exportedObject = self;
 return YES; // No verification!
 }
 ```
-### 易受攻击模式：基于 PID 的验证（竞态条件）
+### 漏洞模式：基于 PID 的验证（竞态条件）
 ```objc
 // VULNERABLE — PID can be reused between check and use
 - (BOOL)listener:(NSXPCListener *)listener
@@ -93,7 +93,7 @@ return YES;
 return NO;
 }
 ```
-### 安全模式：审计 Token 验证
+### 安全模式：Audit Token Verification
 ```objc
 // SECURE — Uses audit token which cannot be spoofed
 - (BOOL)listener:(NSXPCListener *)listener
@@ -121,7 +121,7 @@ return YES;
 return NO;
 }
 ```
-## 连接未受保护的 XPC Services
+## 攻击：连接到未受保护的 XPC Services
 ```objc
 // Minimal XPC client — connect to a LaunchDaemon's Mach service
 #import <Foundation/Foundation.h>
@@ -166,11 +166,11 @@ NSLog(@"Result: %@", result);
 // 3. Format string bugs (string objects as format arguments)
 // 4. Integer overflow (large numeric values)
 ```
-## Mach-Lookup 沙箱例外
+## Mach-Lookup Sandbox Exceptions
 
-### 例外如何实现沙箱逃逸
+### How Exceptions Enable Sandbox Escape
 
-沙箱应用通常只能与自己的 XPC 服务通信。然而，**mach-lookup 例外**允许访问系统范围的服务：
+Sandboxed applications normally can only communicate with their own XPC services. However, **mach-lookup exceptions** allow reaching system-wide services:
 ```xml
 <!-- Entitlement granting mach-lookup exception -->
 <key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
@@ -194,7 +194,7 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 }
 ' _ {} \; 2>/dev/null
 ```
-### Sandbox Escape Chain
+### Sandbox 逃逸链
 ```
 1. Compromise sandboxed app (e.g., via renderer exploit in browser/email)
 2. Enumerate mach-lookup exceptions from entitlements
@@ -203,11 +203,11 @@ echo "$ents" | grep -B1 -A10 "mach-lookup"
 5. Exploit a daemon bug → code execution outside the sandbox
 6. Escalate from daemon's privilege level (often root)
 ```
-## 特权 Helper Tools（SMJobBless）
+## 特权 Helper 工具（SMJobBless）
 
 ### 工作原理
 
-`SMJobBless` 会安装一个通过 launchd 以 root 身份运行的特权 helper。该 helper 通过 XPC 与其父应用通信：
+`SMJobBless` 会安装一个由 launchd 以 root 身份运行的特权 Helper。该 Helper 通过 XPC 与其父应用通信：
 ```
 App (user context) ←→ XPC ←→ Helper (root via launchd)
 ```
@@ -273,17 +273,17 @@ class-dump /path/to/daemon
 # 3. Monitor for crashes
 log stream --predicate 'process == "daemon-name" AND (eventMessage CONTAINS "crash" OR eventMessage CONTAINS "fault")'
 ```
-## 真实世界中的 CVE
+## 现实世界中的 CVE
 
 | CVE | 描述 |
 |---|---|
 | CVE-2023-41993 | XPC service 反序列化漏洞 |
-| CVE-2022-22616 | 通过滥用 XPC service 绕过 Gatekeeper |
-| CVE-2021-30657 | Sysmond XPC 提权 |
+| CVE-2022-22616 | 通过 XPC service abuse 绕过 Gatekeeper |
+| CVE-2021-30657 | Sysmond XPC 权限提升 |
 | CVE-2020-9839 | system daemon 中的 XPC 竞态条件 |
-| CVE-2019-8802 | 特权 helper tool 缺少客户端验证 |
+| CVE-2019-8802 | 特权 helper tool 缺少客户端验证<sup>[[5]](#references)</sup> |
 | CVE-2023-32369 | Migraine —— 通过 `systemmigrationd` XPC 绕过 SIP<sup>[[3]](#references)</sup> |
-| CVE-2022-26712 | PackageKit XPC root 提权<sup>[[4]](#references)</sup> |
+| CVE-2022-26712 | 通过 PackageKit XPC 提升至 root 权限<sup>[[4]](#references)</sup> |
 
 ## 枚举脚本
 ```bash
@@ -317,9 +317,7 @@ done
 
 - [1] [Apple Developer — XPC Services](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingXPCServices.html)
 - [2] [Apple Developer — Daemons and Services Programming Guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html)
-- [3] [macOS 新漏洞 Migraine 可能绕过 System Integrity Protection — Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
-- [4] [CVE-2022-26712：SIP-Bypass 的 POC 甚至可以发到 Twitter](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
-- [5] [Objective-See — XPC Exploitation](https://objective-see.org/blog.html)
-- [6] [OBTS — XPC Attack Surface 演讲](https://objectivebythesea.org/)
-
+- [3] [New macOS vulnerability, Migraine, could bypass System Integrity Protection — Microsoft Security Blog](https://www.microsoft.com/en-us/security/blog/2023/05/30/new-macos-vulnerability-migraine-could-bypass-system-integrity-protection/)
+- [4] [CVE-2022-26712: The POC for SIP-Bypass Is Even Tweetable](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/)
+- [5] [Objective-See — XPC client validation and Rootpipe](https://objective-see.org/blog/blog_0x3E.html)
 {{#include ../../../banners/hacktricks-training.md}}

