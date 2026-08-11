@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Einleitung**
+## **Einführung**
 
 ### Verwandte Ressourcen
 
@@ -23,55 +23,55 @@ android-mediatek-secure-boot-bl2_ext-bypass-el3.md
 mediatek-xflash-carbonara-da2-hash-bypass.md
 {{#endref}}
 
-Firmware ist eine essenzielle Software, die den ordnungsgemäßen Betrieb von Geräten ermöglicht, indem sie die Kommunikation zwischen den Hardwarekomponenten und der Software, mit der Benutzer interagieren, verwaltet und erleichtert. Sie ist in einem permanenten Speicher abgelegt, sodass das Gerät ab dem Einschalten auf wichtige Anweisungen zugreifen kann, was zum Start des Betriebssystems führt. Die Untersuchung und potenzielle Änderung der Firmware ist ein entscheidender Schritt bei der Identifizierung von Sicherheitslücken.<sup>[[2]](#references)[[3]](#references)</sup>
+Firmware ist eine essenzielle Software, die den korrekten Betrieb von Geräten ermöglicht, indem sie die Kommunikation zwischen den Hardwarekomponenten und der Software, mit der Benutzer interagieren, verwaltet und erleichtert. Sie wird in einem permanenten Speicher abgelegt, sodass das Gerät ab dem Einschalten auf wichtige Anweisungen zugreifen kann, was letztendlich zum Start des Betriebssystems führt. Die Untersuchung und potenzielle Modifizierung der Firmware ist ein wichtiger Schritt bei der Identifizierung von Sicherheitslücken.<sup>[[2]](#references)[[3]](#references)</sup>
 
-## **Informationen sammeln**
+## **Sammeln von Informationen**
 
-Das **Sammeln von Informationen** ist ein entscheidender erster Schritt, um den Aufbau eines Geräts und die verwendeten Technologien zu verstehen. Dieser Prozess umfasst das Sammeln von Daten zu:
+Das **Sammeln von Informationen** ist ein wichtiger erster Schritt, um den Aufbau eines Geräts und die darin verwendeten Technologien zu verstehen. Dieser Prozess umfasst die Erfassung von Daten zu:
 
 - Der CPU-Architektur und dem darauf ausgeführten Betriebssystem
 - Details zum Bootloader
 - Hardwareaufbau und Datenblättern
-- Kennzahlen der Codebasis und Speicherorten des Quellcodes
+- Metriken der Codebasis und Speicherorten des Quellcodes
 - Externen Bibliotheken und Lizenztypen
-- Update-Historien und behördlichen Zertifizierungen
+- Update-Verläufen und behördlichen Zertifizierungen
 - Architektur- und Ablaufdiagrammen
-- Sicherheitsbewertungen und identifizierten Schwachstellen
+- Sicherheitsbewertungen und identifizierten Sicherheitslücken
 
-Zu diesem Zweck sind **Open-Source-Intelligence (OSINT)**-Tools äußerst wertvoll, ebenso wie die Analyse aller verfügbaren Open-Source-Softwarekomponenten durch manuelle und automatisierte Prüfprozesse. Tools wie [Coverity Scan](https://scan.coverity.com) und [Semmle’s LGTM](https://lgtm.com/#explore) bieten kostenlose statische Analysen, mit denen sich potenzielle Probleme finden lassen.
+Zu diesem Zweck sind **Open-Source-Intelligence (OSINT)**-Tools von unschätzbarem Wert, ebenso wie die Analyse aller verfügbaren Open-Source-Softwarekomponenten durch manuelle und automatisierte Prüfprozesse. Tools wie [Coverity Scan](https://scan.coverity.com) und [Semmle’s LGTM](https://lgtm.com/#explore) bieten kostenlose statische Analysen, mit denen potenzielle Probleme gefunden werden können.
 
-## **Firmware beschaffen**
+## **Beschaffen der Firmware**
 
 Firmware kann auf verschiedene Arten beschafft werden, die jeweils einen eigenen Komplexitätsgrad aufweisen:
 
-- **Direkt** von der Quelle (Entwickler, Hersteller)
-- **Durch Erstellen** anhand bereitgestellter Anweisungen
-- **Herunterladen** von offiziellen Support-Websites
-- Nutzung von **Google dork**-Abfragen, um gehostete Firmware-Dateien zu finden
+- **Direkt** aus der Quelle (Entwickler, Hersteller)
+- Durch **Erstellen** anhand bereitgestellter Anweisungen
+- Durch **Herunterladen** von offiziellen Support-Websites
+- Verwendung von **Google-dork**-Abfragen, um gehostete Firmware-Dateien zu finden
 - Direkter Zugriff auf **Cloud-Speicher** mit Tools wie [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Abfangen von **Updates** durch Man-in-the-Middle-Techniken
+- Abfangen von **Updates** mithilfe von Man-in-the-Middle-Techniken
 - **Extrahieren** vom Gerät über Verbindungen wie **UART**, **JTAG** oder **PICit**
 - **Mithören** von Update-Anfragen innerhalb der Gerätekommunikation
-- Identifizieren und Verwenden von **hartcodierten Update-Endpunkten**
-- **Dumping** aus dem Bootloader oder Netzwerk
-- **Entfernen und Auslesen** des Speicherchips, wenn alle anderen Möglichkeiten scheitern, unter Verwendung geeigneter Hardware-Tools
+- Identifizieren und Verwenden von **hardcodierten Update-Endpunkten**
+- **Dumpen** aus dem Bootloader oder Netzwerk
+- **Entfernen und Auslesen** des Speicherchips, wenn alle anderen Möglichkeiten scheitern, mithilfe geeigneter Hardware-Tools
 
 ### Nur-UART-Logs: Eine Root-Shell über die U-Boot-Umgebung im Flash erzwingen
 
-Wenn UART RX ignoriert wird (nur Logs), kannst du dennoch eine Init-Shell erzwingen, indem du den **U-Boot-Umgebungsblob** offline **bearbeitest**:<sup>[[6]](#references)</sup>
+Wenn UART RX ignoriert wird (nur Logs), kannst du trotzdem eine Init-Shell erzwingen, indem du den **U-Boot-Umgebungs-Blob** offline **bearbeitest**:<sup>[[6]](#references)</sup>
 
-1. Den SPI-Flash mit einem SOIC-8-Clip und Programmer (3,3 V) dumpen:
+1. Den SPI-Flash mit einem SOIC-8-Clip und einem Programmer (3,3 V) dumpen:
 ```bash
 flashrom -p ch341a_spi -r flash.bin
 ```
-2. Die U-Boot-Umgebungspartition lokalisieren, `bootargs` so bearbeiten, dass `init=/bin/sh` enthalten ist, und die **U-Boot-Umgebungs-CRC32** für den Blob **neu berechnen**.
-3. Nur die Umgebungs-Partition zurückflashen und neu starten; auf UART sollte eine Shell erscheinen.
+2. Die U-Boot-Env-Partition lokalisieren, `bootargs` so bearbeiten, dass `init=/bin/sh` enthalten ist, und die **U-Boot-Env-CRC32** für den Blob **neu berechnen**.
+3. Nur die Env-Partition zurückschreiben und neu starten; auf UART sollte eine Shell erscheinen.
 
-Dies ist bei Embedded-Geräten hilfreich, bei denen die Bootloader-Shell deaktiviert ist, die Umgebungs-Partition jedoch über einen externen Flash-Zugriff beschreibbar ist.
+Dies ist bei Embedded-Geräten nützlich, bei denen die Bootloader-Shell deaktiviert ist, die Env-Partition jedoch über einen externen Flash-Zugriff beschreibbar ist.
 
-## Firmware analysieren
+## Analyse der Firmware
 
-Nachdem du nun **über die Firmware verfügst**, musst du Informationen über sie extrahieren, um zu wissen, wie du mit ihr umgehen sollst. Dafür stehen verschiedene Tools zur Verfügung:
+Nachdem du nun **die Firmware hast**, musst du Informationen daraus extrahieren, um zu wissen, wie du mit ihr umgehen sollst. Dafür kannst du verschiedene Tools verwenden:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -91,14 +91,14 @@ Außerdem kannst du diese Tools verwenden, um **in der Firmware eingebettete Dat
 
 Oder [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)), um die Datei zu untersuchen.
 
-### Das Dateisystem abrufen
+### Das Dateisystem erhalten
 
-Mit den zuvor genannten Tools wie `binwalk -ev <bin>` solltest du in der Lage gewesen sein, **das Dateisystem zu extrahieren**.\
-Binwalk extrahiert es normalerweise in einen **Ordner, der nach dem Dateisystemtyp benannt ist**. Dabei handelt es sich üblicherweise um einen der folgenden Typen: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
+Mit den zuvor erwähnten Tools wie `binwalk -ev <bin>` solltest du in der Lage gewesen sein, das **Dateisystem zu extrahieren**.\
+Binwalk extrahiert es normalerweise in einem **Ordner, der nach dem Dateisystemtyp benannt ist**. Dies ist normalerweise einer der folgenden: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Manuelle Dateisystemextraktion
 
-Manchmal enthält binwalk **nicht das Magic-Byte des Dateisystems in seinen Signaturen**. Verwende in diesen Fällen binwalk, um den **Offset des Dateisystems zu finden und das komprimierte Dateisystem** aus der Binärdatei zu extrahieren und das Dateisystem anschließend anhand der folgenden Schritte je nach Typ **manuell zu extrahieren**.
+Manchmal enthält binwalk **nicht die Magic Bytes des Dateisystems in seinen Signaturen**. Verwende in diesen Fällen binwalk, um den **Offset des Dateisystems zu finden und das komprimierte Dateisystem** aus der Binärdatei zu extrahieren und das Dateisystem anschließend anhand der folgenden Schritte entsprechend seinem Typ **manuell zu extrahieren**.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -120,11 +120,11 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-Alternativ könnte auch der folgende Befehl ausgeführt werden.
+Alternativ kann auch der folgende Befehl ausgeführt werden.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- Für squashfs (im obigen Beispiel verwendet)
+- Für squashfs (wie im obigen Beispiel verwendet)
 
 `$ unsquashfs dir.squashfs`
 
@@ -138,7 +138,7 @@ Die Dateien befinden sich anschließend im Verzeichnis "`squashfs-root`".
 
 `$ jefferson rootfsfile.jffs2`
 
-- Für ubifs-Dateisysteme mit NAND-Flash
+- Für ubifs-Dateisysteme mit NAND flash
 
 `$ ubireader_extract_images -u UBI -s <start_offset> <bin>`
 
@@ -146,11 +146,11 @@ Die Dateien befinden sich anschließend im Verzeichnis "`squashfs-root`".
 
 ## Firmware analysieren
 
-Sobald die Firmware beschafft wurde, ist es wichtig, sie zu untersuchen, um ihre Struktur und potenzielle Schwachstellen zu verstehen. Dieser Prozess umfasst die Verwendung verschiedener Tools zur Analyse und Extraktion wertvoller Daten aus dem Firmware-Image.
+Sobald die Firmware beschafft wurde, ist es wichtig, sie zur Analyse ihrer Struktur und potenzieller Schwachstellen zu zerlegen. Dieser Prozess umfasst die Verwendung verschiedener Tools, um die Firmware-Image zu analysieren und wertvolle Daten daraus zu extrahieren.
 
 ### Tools für die erste Analyse
 
-Eine Reihe von Befehlen wird für die erste Untersuchung der Binärdatei (als `<bin>` bezeichnet) bereitgestellt. Diese Befehle helfen dabei, Dateitypen zu identifizieren, Strings zu extrahieren, Binärdaten zu analysieren und die Details zu Partitionen und Dateisystemen zu verstehen:
+Für die erste Untersuchung der Binärdatei (bezeichnet als `<bin>`) steht eine Reihe von Befehlen zur Verfügung. Diese Befehle helfen dabei, Dateitypen zu identifizieren, Strings zu extrahieren, Binärdaten zu analysieren und die Details zu Partitionen und Dateisystemen zu verstehen:
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -159,49 +159,49 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head #useful for finding signatures in the header
 fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
-Um den Verschlüsselungsstatus des Images zu bewerten, wird die **Entropie** mit `binwalk -E <bin>` überprüft. Eine niedrige Entropie deutet auf fehlende Verschlüsselung hin, während eine hohe Entropie auf mögliche Verschlüsselung oder Kompression hinweist.
+Um den Verschlüsselungsstatus des Images zu beurteilen, wird die **Entropie** mit `binwalk -E <bin>` überprüft. Eine niedrige Entropie deutet auf fehlende Verschlüsselung hin, während eine hohe Entropie auf mögliche Verschlüsselung oder Komprimierung hindeutet.
 
-Für das Extrahieren **eingebetteter Dateien** werden Tools und Ressourcen wie die Dokumentation zu **file-data-carving-recovery-tools** sowie **binvis.io** zur Dateiuntersuchung empfohlen.
+Zum Extrahieren **eingebetteter Dateien** werden Tools und Ressourcen wie die Dokumentation zu **file-data-carving-recovery-tools** sowie **binvis.io** zur Dateiinspektion empfohlen.
 
 ### Extrahieren des Dateisystems
 
-Mit `binwalk -ev <bin>` kann man das Dateisystem normalerweise extrahieren, häufig in ein Verzeichnis, das nach dem Dateisystemtyp benannt ist (z. B. squashfs, ubifs). Wenn **binwalk** den Dateisystemtyp aufgrund fehlender Magic Bytes nicht erkennt, ist eine manuelle Extraktion erforderlich. Dabei wird zunächst mit `binwalk` der Offset des Dateisystems ermittelt. Anschließend wird das Dateisystem mit dem Befehl `dd` herausgeschnitten:
+Mit `binwalk -ev <bin>` kann man das Dateisystem normalerweise extrahieren, häufig in ein Verzeichnis, das nach dem Dateisystemtyp benannt ist (z. B. squashfs, ubifs). Wenn **binwalk** den Dateisystemtyp aufgrund fehlender Magic Bytes nicht erkennt, ist eine manuelle Extraktion erforderlich. Dabei wird zunächst mit `binwalk` der Offset des Dateisystems ermittelt und anschließend mit dem Befehl `dd` das Dateisystem herausgeschnitten:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
-Anschließend werden abhängig vom Dateisystemtyp (z. B. squashfs, cpio, jffs2, ubifs) unterschiedliche Befehle verwendet, um den Inhalt manuell zu extrahieren.
+Anschließend werden je nach Dateisystemtyp (z. B. squashfs, cpio, jffs2, ubifs) unterschiedliche Befehle verwendet, um den Inhalt manuell zu extrahieren.
 
 ### Dateisystemanalyse
 
-Nach der Extraktion des Dateisystems beginnt die Suche nach Sicherheitslücken. Dabei wird auf unsichere Netzwerk-Daemons, hardcodierte Zugangsdaten, API-Endpunkte, Funktionen des Update-Servers, nicht kompilierten Code, Startskripte und kompilierte Binaries zur Offline-Analyse geachtet.
+Nach dem Extrahieren des Dateisystems beginnt die Suche nach Sicherheitslücken. Dabei wird auf unsichere Netzwerk-Daemons, fest codierte Zugangsdaten, API-Endpunkte, Funktionen des Update-Servers, nicht kompilierten Code, Startskripte und kompilierte Binaries zur Offline-Analyse geachtet.
 
-**Wichtige Speicherorte** und **Elemente**, die untersucht werden sollten, umfassen:
+**Wichtige Orte** und **Elemente**, die untersucht werden sollten:
 
-- **etc/shadow** und **etc/passwd** für Benutzerzugangsdaten
+- **etc/shadow** und **etc/passwd** auf Benutzerzugangsdaten
 - SSL-Zertifikate und Schlüssel in **etc/ssl**
-- Konfigurations- und Skriptdateien auf potenzielle Sicherheitslücken
-- Eingebettete Binaries für weitere Analysen
+- Konfigurations- und Skriptdateien auf potenzielle Schwachstellen
+- Eingebettete Binaries zur weiteren Analyse
 - Übliche Webserver und Binaries von IoT-Geräten
 
-Mehrere Tools helfen dabei, sensible Informationen und Sicherheitslücken im Dateisystem aufzudecken:
+Mehrere Tools helfen dabei, vertrauliche Informationen und Schwachstellen im Dateisystem aufzudecken:
 
-- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) und [**Firmwalker**](https://github.com/craigz28/firmwalker) zur Suche nach sensiblen Informationen
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) für umfassende Firmware-Analyse
-- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) und [**EMBA**](https://github.com/e-m-b-a/emba) für statische und dynamische Analysen
+- [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) und [**Firmwalker**](https://github.com/craigz28/firmwalker) zur Suche nach vertraulichen Informationen
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) für eine umfassende Firmware-Analyse
+- [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go) und [**EMBA**](https://github.com/e-m-b-a/emba) für statische und dynamische Analyse
 
 ### Sicherheitsprüfungen kompilierter Binaries
 
-Sowohl im Dateisystem gefundener Quellcode als auch kompilierte Binaries müssen sorgfältig auf Sicherheitslücken untersucht werden. Tools wie **checksec.sh** für Unix-Binaries und **PESecurity** für Windows-Binaries helfen dabei, ungeschützte Binaries zu identifizieren, die ausgenutzt werden könnten.
+Sowohl der Quellcode als auch die im Dateisystem gefundenen kompilierten Binaries müssen sorgfältig auf Schwachstellen untersucht werden. Tools wie **checksec.sh** für Unix-Binaries und **PESecurity** für Windows-Binaries helfen dabei, ungeschützte Binaries zu identifizieren, die ausgenutzt werden könnten.
 
-## Cloud-Konfiguration und MQTT-Zugangsdaten über abgeleitete URL-Tokens abrufen
+## Cloud-Konfiguration und MQTT-Zugangsdaten über abgeleitete URL-Tokens auslesen
 
 Viele IoT-Hubs rufen ihre gerätespezifische Konfiguration von einem Cloud-Endpunkt ab, der wie folgt aussieht:<sup>[[5]](#references)</sup>
 
 - `https://<api-host>/pf/<deviceId>/<token>`
 
-Während der Firmware-Analyse kann festgestellt werden, dass `<token>` lokal aus der Geräte-ID und einem hardcodierten Secret abgeleitet wird, zum Beispiel:
+Während der Firmware-Analyse kann festgestellt werden, dass `<token>` lokal aus der Geräte-ID und einem fest codierten Secret abgeleitet wird, zum Beispiel:
 
 - token = MD5( deviceId || STATIC_KEY ) und als Hexadezimalwert in Großbuchstaben dargestellt
 
@@ -211,46 +211,46 @@ Praktischer Ablauf:
 
 1) deviceId aus UART-Boot-Logs extrahieren
 
-- Einen 3,3-V-UART-Adapter (TX/RX/GND) anschließen und die Logs mitschneiden:
+- Einen 3,3-V-UART-Adapter (TX/RX/GND) anschließen und die Logs aufzeichnen:
 ```bash
 picocom -b 115200 /dev/ttyUSB0
 ```
-- Suche nach Zeilen, die das Cloud-Konfigurations-URL-Muster und die Broker-Adresse ausgeben, zum Beispiel:
+- Suche nach Zeilen, die das URL-Muster der Cloud-Konfiguration und die Broker-Adresse ausgeben, zum Beispiel:
 ```
 Online Config URL https://api.vendor.tld/pf/<deviceId>/<token>
 MQTT: mqtt://mq-gw.vendor.tld:8001
 ```
-2) STATIC_KEY und Token-Algorithmus aus der Firmware wiederherstellen
+2) STATIC_KEY und den Token-Algorithmus aus der Firmware ermitteln
 
-- Lade die Binaries in Ghidra/radare2 und suche nach dem config path ("/pf/") oder nach der MD5-Nutzung.
-- Bestätige den Algorithmus (z. B. MD5(deviceId||STATIC_KEY)).
-- Leite das Token in Bash ab und wandle den Digest in Großbuchstaben um:
+- Binärdateien in Ghidra/radare2 laden und nach dem Konfigurationspfad ("/pf/") oder der Verwendung von MD5 suchen.
+- Den Algorithmus bestätigen (z. B. MD5(deviceId||STATIC_KEY)).
+- Den Token in Bash ableiten und den Digest in Großbuchstaben umwandeln:
 ```bash
 DEVICE_ID="d88b00112233"
 STATIC_KEY="cf50deadbeefcafebabe"
 printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}'
 ```
-3) Cloud-Konfiguration und MQTT-Credentials abgreifen
+3) Cloud-Konfiguration und MQTT-Zugangsdaten sammeln
 
-- Die URL zusammensetzen und mit curl JSON abrufen; mit jq parsen, um Secrets zu extrahieren:
+- URL zusammenstellen und JSON mit curl abrufen; mit jq analysieren, um Geheimnisse zu extrahieren:
 ```bash
 API_HOST="https://api.vendor.tld"
 TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($1)}')
 curl -sS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq .
 # Fields often include: mqtt host/port, clientId, username, password, topic prefix (tpkfix)
 ```
-4) Missbrauch von MQTT im Klartext und schwachen Topic-ACLs (falls vorhanden)
+4) Missbrauche unverschlüsseltes MQTT und schwache Topic-ACLs (falls vorhanden)
 
-- Verwende wiederhergestellte Credentials, um Maintenance-Topics zu abonnieren und nach sensiblen Events zu suchen:
+- Verwende wiederhergestellte Zugangsdaten, um Wartungs-Topics zu abonnieren und nach sensiblen Ereignissen zu suchen:
 ```bash
 mosquitto_sub -h <broker> -p <port> -V mqttv311 \
 -i <client_id> -u <username> -P <password> \
 -t "<topic_prefix>/<deviceId>/admin" -v
 ```
-5) Vorhersehbare Geräte-IDs enumerieren (skalierbar und mit Autorisierung)
+5) Vorhersehbare Geräte-IDs enumerieren (in großem Umfang, mit Genehmigung)
 
-- Viele Ökosysteme betten OUI-/Produkt-/Typ-Bytes des Anbieters gefolgt von einem sequenziellen Suffix ein.
-- Du kannst mögliche IDs iterieren, daraus Tokens ableiten und Konfigurationen programmgesteuert abrufen:
+- Viele Ökosysteme enthalten Vendor-OUI-, Produkt- und Typ-Bytes, gefolgt von einem sequenziellen Suffix.
+- Du kannst Kandidaten-IDs durchlaufen, programmgesteuert tokens ableiten und Konfigurationen abrufen:
 ```bash
 API_HOST="https://api.vendor.tld"; STATIC_KEY="cf50deadbeef"; PREFIX="d88b1603" # OUI+type
 for SUF in $(seq -w 000000 0000FF); do
@@ -259,46 +259,46 @@ TOKEN=$(printf "%s" "${DEVICE_ID}${STATIC_KEY}" | md5sum | awk '{print toupper($
 curl -fsS "$API_HOST/pf/${DEVICE_ID}/${TOKEN}" | jq -r '.mqtt.username,.mqtt.password' | sed "/null/d" && echo "$DEVICE_ID"
 done
 ```
-Hinweise
-- Hole immer eine ausdrückliche Genehmigung ein, bevor du eine umfassende Enumeration durchführst.
+Notizen
+- Hole immer eine ausdrückliche Genehmigung ein, bevor du eine massenhafte Enumeration versuchst.
 - Bevorzuge nach Möglichkeit Emulation oder statische Analyse, um Secrets wiederherzustellen, ohne die Zielhardware zu verändern.
 
 
-Der Prozess der Firmware-Emulation ermöglicht eine **dynamische Analyse** entweder des Betriebs eines Geräts oder eines einzelnen Programms. Dieser Ansatz kann auf Herausforderungen durch Hardware- oder Architekturabhängigkeiten stoßen. Das Übertragen des Root-Dateisystems oder bestimmter Binaries auf ein Gerät mit passender Architektur und Endianness, beispielsweise einen Raspberry Pi, oder auf eine vorgefertigte virtuelle Maschine kann jedoch weitere Tests ermöglichen.
+Der Prozess der Emulation von Firmware ermöglicht eine **dynamische Analyse** entweder des Betriebs eines Geräts oder eines einzelnen Programms. Dieser Ansatz kann auf Herausforderungen durch Hardware- oder Architekturabhängigkeiten stoßen. Das Übertragen des root-Dateisystems oder bestimmter Binaries auf ein Gerät mit übereinstimmender Architektur und Endianness, beispielsweise einen Raspberry Pi, oder auf eine vorgefertigte virtuelle Maschine kann jedoch weitere Tests ermöglichen.
 
-### Einzelne Binaries emulieren
+### Emulation einzelner Binaries
 
-Bei der Untersuchung einzelner Programme ist es entscheidend, die Endianness und CPU-Architektur des Programms zu bestimmen.
+Bei der Untersuchung einzelner Programme ist es entscheidend, die Endianness und die CPU-Architektur des Programms zu ermitteln.
 
 #### Beispiel mit MIPS-Architektur
 
-Um ein Binary mit MIPS-Architektur zu emulieren, kann folgender Befehl verwendet werden:
+Um ein Binary mit MIPS-Architektur zu emulieren, kann der folgende Befehl verwendet werden:
 ```bash
 file ./squashfs-root/bin/busybox
 ```
-Und um die notwendigen Emulationswerkzeuge zu installieren:
+Und zur Installation der erforderlichen Emulations-Tools:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-Für MIPS (Big-Endian) wird `qemu-mips` verwendet, und für Little-Endian-Binaries wäre `qemu-mipsel` die richtige Wahl.
+Für MIPS (Big-Endian) wird `qemu-mips` verwendet, und für Little-Endian-Binaries wäre `qemu-mipsel` die passende Wahl.
 
-#### ARM-Architektur-Emulation
+#### Emulation der ARM-Architektur
 
-Für ARM-Binaries ist der Prozess ähnlich, wobei der Emulator `qemu-arm` für die Emulation verwendet wird.
+Für ARM-Binaries ist der Prozess ähnlich, wobei der `qemu-arm`-Emulator für die Emulation verwendet wird.
 
-### Full-System-Emulation
+### Vollständige Systememulation
 
 Tools wie [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit) und andere ermöglichen die vollständige Firmware-Emulation, automatisieren den Prozess und unterstützen die dynamische Analyse.
 
 ## Dynamische Analyse in der Praxis
 
-In dieser Phase wird entweder eine reale oder emulierte Geräteumgebung für die Analyse verwendet. Es ist wichtig, Shell-Zugriff auf das OS und das Dateisystem aufrechtzuerhalten. Die Emulation bildet Hardware-Interaktionen möglicherweise nicht perfekt nach, sodass gelegentliche Neustarts der Emulation erforderlich sein können. Die Analyse sollte das Dateisystem erneut untersuchen, exponierte Webseiten und Netzwerkdienste ausnutzen und Schwachstellen im Bootloader untersuchen. Firmware-Integritätstests sind entscheidend, um potenzielle Backdoor-Schwachstellen zu identifizieren.
+In dieser Phase wird entweder eine reale oder eine emulierte Geräteumgebung für die Analyse verwendet. Es ist wichtig, den Shell-Zugriff auf das OS und das Dateisystem aufrechtzuerhalten. Die Emulation bildet Hardware-Interaktionen möglicherweise nicht perfekt nach, weshalb gelegentliche Neustarts der Emulation erforderlich sein können. Bei der Analyse sollten das Dateisystem erneut untersucht, exponierte Webseiten und Netzwerkdienste ausgenutzt und Schwachstellen im Bootloader untersucht werden. Firmware-Integritätstests sind entscheidend, um potenzielle Backdoor-Schwachstellen zu identifizieren.
 
 ## Techniken der Laufzeitanalyse
 
 Bei der Laufzeitanalyse wird mit einem Prozess oder Binary in seiner Betriebsumgebung interagiert. Dabei werden Tools wie gdb-multiarch, Frida und Ghidra verwendet, um Breakpoints zu setzen und durch Fuzzing sowie andere Techniken Schwachstellen zu identifizieren.
 
-Für Embedded-Targets ohne vollständigen Debugger **kopiere ein statisch gelinktes `gdbserver`** auf das Gerät und verbinde es remote:<sup>[[6]](#references)</sup>
+Für Embedded-Ziele ohne vollständigen Debugger **kopiere einen statisch gelinkten `gdbserver`** auf das Gerät und verbinde dich remote:<sup>[[6]](#references)</sup>
 ```bash
 # On device
 gdbserver :1234 /usr/bin/targetd
@@ -309,99 +309,99 @@ gdbserver :1234 /usr/bin/targetd
 gdb-multiarch /path/to/targetd
 target remote <device-ip>:1234
 ```
-### Zigbee / Zuordnung von Radio-Co-Processor-Nachrichten
+### Zuordnung von Zigbee-/Radio-Co-Processor-Nachrichten
 
-Auf IoT-Hubs ist der RF-Stack häufig zwischen einem **Radio-MCU** und einem Linux-Userland-Prozess aufgeteilt. Ein sinnvoller Workflow besteht darin, den Pfad abzubilden:<sup>[[8]](#references)</sup>
+Auf IoT-Hubs ist der RF-Stack häufig zwischen einem **Radio-MCU** und einem Linux-Userland-Prozess aufgeteilt. Ein nützlicher Workflow besteht darin, den Pfad abzubilden:<sup>[[8]](#references)</sup>
 
 1. **RF-Frame** über Funk
-2. **controllerseitiger Parser** auf dem Radio-MCU
-3. **serielles/UART-Text- oder TLV-Protokoll**, das an Linux weitergeleitet wird (zum Beispiel `/dev/tty*`)
+2. **Controller-seitiger Parser** auf dem Radio-MCU
+3. **Serielles/UART-Text- oder TLV-Protokoll**, das an Linux weitergeleitet wird (zum Beispiel `/dev/tty*`)
 4. **Application-Dispatcher** im Haupt-Daemon
-5. **protokollspezifischer Handler / State Machine**
+5. **Protokollspezifischer Handler / State Machine**
 
-Diese Architektur erzeugt zwei Reversing-Ziele statt eines. Wenn der Controller binäre Radio-Frames in ein Textprotokoll wie `Group,Command,arg1,arg2,...` umwandelt, ermittle:
+Diese Architektur erzeugt zwei Reversing-Ziele statt nur eines. Wenn der Controller binäre Radio-Frames in ein Textprotokoll wie `Group,Command,arg1,arg2,...` umwandelt, ermittle:
 
 - Die **Message-Gruppen** und Dispatch-Tabellen
-- Welche Messages aus dem **Netzwerk** und welche vom Controller selbst stammen können
+- Welche Messages aus dem **Netzwerk** beziehungsweise vom Controller selbst stammen können
 - Die exakten **herstellerspezifischen Discriminator-Felder** (zum Beispiel Zigbee `manufacturer_code` und `cluster_command`)
 - Welche Handler nur während **Commissioning**, Discovery oder Firmware-/Model-Download-Phasen erreichbar sind
 
-Speziell bei Zigbee solltest du den Pairing-Traffic aufzeichnen und prüfen, ob das Ziel weiterhin den standardmäßigen **Link Key** `ZigBeeAlliance09` verwendet. Falls ja, kann das Sniffen des Commissioning-Traffics den **Network Key** offenlegen. Zigbee-3.0-Install-Codes verringern diese Gefährdung. Notiere daher, ob das getestete Gerät sie tatsächlich erzwingt.
+Speziell bei Zigbee solltest du Pairing-Traffic mitschneiden und prüfen, ob das Ziel weiterhin den standardmäßigen **Link Key** `ZigBeeAlliance09` verwendet. Falls ja, kann das Sniffing des Commissioning-Traffics den **Network Key** offenlegen. Zigbee-3.0-Install-Codes reduzieren diese Angriffsfläche. Daher sollte festgehalten werden, ob das getestete Gerät sie tatsächlich erzwingt.
 
-### Herstellerspezifische Protokoll-Handler und FSM-gesteuerte Erreichbarkeit
+### Herstellerspezifische Protokoll-Handler und durch FSM eingeschränkte Erreichbarkeit
 
-Herstellerspezifische Zigbee-/ZCL-Commands sind oft ein besseres Ziel als standardisierte Cluster, da sie **Custom-Parsing-Code** und interne **FSMs** mit weniger ausgereifter Validierung erreichen.<sup>[[8]](#references)</sup>
+Herstellerspezifische Zigbee-/ZCL-Commands sind oft ein besseres Ziel als standardisierte Cluster, da sie **benutzerdefinierten Parsing-Code** und interne **FSMs** mit weniger erprobter Validierung speisen.<sup>[[8]](#references)</sup>
 
 Praktischer Workflow:
 
-- Reverse den Command-Dispatcher, bis du den **herstellerspezifischen Handler** findest.
-- Ermittle die Tabellen für **FSM-State**, **Event**, **Check**, **Action** und **Next-State**.
-- Identifiziere **Übergangszustände**, die automatisch weiterschalten, sowie Retry-/Error-Zweige, die schließlich attacker-kontrollierten State zurücksetzen oder freigeben.
-- Bestätige, welche legitimen Protokollaustausche erforderlich sind, um den Daemon in den verwundbaren State zu versetzen, statt anzunehmen, dass der fehlerhafte Handler immer erreichbar ist.
+- Reversiere den Command-Dispatcher, bis du den **Vendor-only-Handler** findest.
+- Rekonstruiere die Tabellen für **FSM-State**, **Event**, **Check**, **Action** und **Next-State**.
+- Identifiziere **Transitionszustände**, die automatisch weiterlaufen, sowie Retry-/Error-Zweige, die den vom Angreifer kontrollierten State schließlich zurücksetzen oder freigeben.
+- Bestätige, welche legitimen Protokollaustausche erforderlich sind, um den Daemon in den verwundbaren Zustand zu versetzen, statt anzunehmen, dass der fehlerhafte Handler immer erreichbar ist.
 
-Bei timing-sensitiven Protokollen kann Packet-Replay aus einem Python-Framework zu langsam sein. Zuverlässiger ist es, ein legitimes Gerät auf echter Hardware (zum Beispiel einem **nRF52840**) mit einem Vendor-Grade-Stack zu emulieren, damit du die korrekten **Endpoints**, **Attributes** und das Commissioning-Timing bereitstellen kannst.
+Bei zeitkritischen Protokollen kann Packet-Replay aus einem Python-Framework zu langsam sein. Ein zuverlässigerer Ansatz besteht darin, ein legitimes Gerät auf echter Hardware (zum Beispiel einem **nRF52840**) mit einem herstellergeeigneten Stack zu emulieren, damit die korrekten **Endpoints**, **Attributes** und das richtige Commissioning-Timing offengelegt werden.
 
-### Klasse fragmentierter Download-Bugs in Embedded-Daemons
+### Fehlerklasse fehlerhafter fragmentierter Downloads in Embedded-Daemons
 
-Eine wiederkehrende Firmware-Bugklasse tritt bei **fragmentierten Blob-/Model-/Configuration-Downloads** auf:<sup>[[8]](#references)</sup>
+Eine wiederkehrende Firmware-Fehlerklasse tritt bei **fragmentierten Blob-/Model-/Konfigurations-Downloads** auf:<sup>[[8]](#references)</sup>
 
 1. Das **erste Fragment** (`offset == 0`) speichert `ctx->total_size` und allokiert `malloc(total_size)`.
-2. Spätere Fragmente validieren nur die attacker-kontrollierten **paketlokalen** Felder wie `packet_total_size >= offset + chunk_len`.
-3. Der Copy-Vorgang verwendet `memcpy(&ctx->buffer[offset], chunk, chunk_len)`, ohne die **ursprüngliche Allokationsgröße** zu prüfen.
+2. Spätere Fragmente validieren nur die vom Angreifer kontrollierten **paketlokalen** Felder wie `packet_total_size >= offset + chunk_len`.
+3. Der Copy-Vorgang verwendet `memcpy(&ctx->buffer[offset], chunk, chunk_len)`, ohne die Größe gegen die **ursprünglich allokierte Größe** zu prüfen.
 
 Dadurch kann ein Angreifer Folgendes senden:
 
 - Ein erstes gültiges Fragment mit einer **kleinen** deklarierten Gesamtgröße, um eine kleine Heap-Allokation zu erzwingen.
-- Ein späteres Fragment mit dem **erwarteten Offset**, aber einer größeren `chunk_len`.
-- Eine gefälschte paketlokale Größe, die die erneuten Checks erfüllt und dennoch den ursprünglich allokierten Buffer überschreibt.
+- Ein späteres Fragment mit dem **erwarteten Offset**, aber einem größeren `chunk_len`.
+- Eine gefälschte paketlokale Größe, die die neuen Prüfungen erfüllt und dennoch den ursprünglich allokierten Buffer überschreibt.
 
-Wenn der verwundbare Pfad hinter Commissioning-Logik liegt, muss der Exploit ausreichend **Device-Emulation** enthalten, um das Ziel vor dem Senden der fehlerhaften Fragmente in den erwarteten Model-Download- oder Blob-Download-State zu bringen.
+Wenn der verwundbare Pfad hinter Commissioning-Logik liegt, muss der Exploit ausreichend **Device-Emulation** umfassen, um das Ziel vor dem Senden der fehlerhaften Fragmente in den erwarteten Model-Download- oder Blob-Download-State zu bringen.
 
-### Protokollgesteuerte `free()`-Trigger
+### Durch das Protokoll ausgelöste `free()`-Trigger
 
-Bei Embedded-Daemons lässt sich Heap-Metadata-Exploitation oft nicht am einfachsten durch „auf Cleanup warten“, sondern durch das **Erzwingen des protokolleigenen Error-Handlings** auslösen:<sup>[[8]](#references)</sup>
+Bei Embedded-Daemons lässt sich Heap-Metadata-Exploitation häufig nicht am einfachsten durch „Aufräumen abwarten“, sondern durch das **Erzwingen des protokolleigenen Error-Handlings** auslösen:<sup>[[8]](#references)</sup>
 
 - Sende fehlerhafte Folgefragmente, um die FSM in **Retry-** oder **Error-States** zu bringen.
-- Überschreite das Retry-Limit, damit der Daemon den **Context zurücksetzt** und den beschädigten Buffer freigibt.
-- Nutze dieses vorhersehbare `free()`, um Allocator-seitige Primitives auszulösen, bevor der Prozess aus anderen Gründen abstürzt.
+- Überschreite den Retry-Schwellenwert, damit der Daemon den **Context zurücksetzt** und den beschädigten Buffer freigibt.
+- Verwende dieses vorhersehbare `free()`, um Allocator-seitige Primitives auszulösen, bevor der Prozess aus anderen Gründen abstürzt.
 
-Das ist besonders nützlich gegen **musl/uClibc/dlmalloc-ähnliche** Allocators in Embedded Linux, bei denen die Beschädigung von Chunk-Metadaten die Unlink-/Unbin-Logik in eine Write-Primitive umwandeln kann. Ein stabiles Muster besteht darin, ein **Size-Feld** zu beschädigen, um die Allocator-Traversierung auf **Fake Chunks zu lenken, die innerhalb des überschriebenen Buffers vorbereitet wurden**, statt sofort echte Bin-Pointer zu überschreiben und den Prozess zum Absturz zu bringen.
+Dies ist besonders nützlich gegen **musl-/uClibc-/dlmalloc-ähnliche** Allocators in Embedded Linux, bei denen die Beschädigung von Chunk-Metadaten die Unlink-/Unbin-Logik in ein Write-Primitive verwandeln kann. Ein stabiles Muster besteht darin, ein **Size-Feld** zu beschädigen, um die Traversierung des Allocators auf **Fake Chunks** umzuleiten, die innerhalb des überschriebenen Buffers platziert wurden, anstatt sofort echte Bin-Pointer zu überschreiben und den Prozess zum Absturz zu bringen.
 
 ## Binary Exploitation und Proof-of-Concept
 
-Die Entwicklung eines PoC für identifizierte Schwachstellen erfordert ein tiefes Verständnis der Zielarchitektur und Programmierkenntnisse in niedrigeren Programmiersprachen. Binäre Runtime-Protections sind in Embedded-Systemen selten. Wenn sie vorhanden sind, können jedoch Techniken wie Return Oriented Programming (ROP) erforderlich sein.
+Die Entwicklung eines PoC für identifizierte Schwachstellen erfordert ein tiefes Verständnis der Zielarchitektur und die Programmierung in Low-Level-Sprachen. Binäre Runtime-Schutzmechanismen sind in Embedded-Systemen selten. Wenn sie vorhanden sind, können jedoch Techniken wie Return Oriented Programming (ROP) erforderlich sein.
 
 ### Hinweise zur uClibc-Fastbin-Exploitation (Embedded Linux)
 
-- **Fastbins + Consolidation:** uClibc verwendet Fastbins ähnlich wie glibc. Eine spätere große Allokation kann `__malloc_consolidate()` auslösen. Daher muss jeder Fake Chunk die Checks überstehen (sane Größe, `fd = 0` und umgebende Chunks werden als „in use“ erkannt).<sup>[[6]](#references)</sup>
-- **Nicht-PIE-Binaries unter ASLR:** Wenn ASLR aktiviert ist, das Haupt-Binary aber **non-PIE** ist, sind Adressen in `.data/.bss` innerhalb des Binaries stabil. Du kannst einen Bereich anvisieren, der bereits einem gültigen Heap-Chunk-Header ähnelt, um eine Fastbin-Allokation auf eine **Function-Pointer-Tabelle** zu lenken.
-- **Parser-stoppendes NUL:** Beim Parsen von JSON kann ein `\x00` im Payload das Parsen beenden und gleichzeitig nachfolgende attacker-kontrollierte Bytes für einen Stack Pivot/ROP-Chain erhalten.
-- **Shellcode über `/proc/self/mem`:** Eine ROP-Chain, die `open("/proc/self/mem")`, `lseek()` und `write()` aufruft, kann ausführbaren Shellcode in einer bekannten Mapping platzieren und dorthin springen.
+- **Fastbins + Consolidation:** uClibc verwendet Fastbins ähnlich wie glibc. Eine spätere große Allokation kann `__malloc_consolidate()` auslösen. Daher muss jeder Fake Chunk die Prüfungen überstehen (sinnvolle Größe, `fd = 0` und umgebende Chunks, die als „in use“ erkannt werden).<sup>[[6]](#references)</sup>
+- **Nicht-PIE-Binaries unter ASLR:** Wenn ASLR aktiviert ist, das Haupt-Binary aber **non-PIE** ist, sind Adressen innerhalb von `.data/.bss` stabil. Du kannst einen Bereich anvisieren, der bereits einem gültigen Heap-Chunk-Header ähnelt, um eine Fastbin-Allokation auf eine **Function-Pointer-Tabelle** zu lenken.
+- **Parser-stoppendes NUL:** Wenn JSON geparst wird, kann ein `\x00` im Payload das Parsing beenden und gleichzeitig nachfolgende, vom Angreifer kontrollierte Bytes für einen Stack-Pivot-/ROP-Chain erhalten.
+- **Shellcode über `/proc/self/mem`:** Eine ROP-Chain, die `open("/proc/self/mem")`, `lseek()` und `write()` aufruft, kann ausführbaren Shellcode in einem bekannten Mapping platzieren und dorthin springen.
 
 ## Vorbereitete Betriebssysteme für Firmware-Analyse
 
 Betriebssysteme wie [AttifyOS](https://github.com/adi0x90/attifyos) und [EmbedOS](https://github.com/scriptingxss/EmbedOS) stellen vorkonfigurierte Umgebungen für Firmware-Security-Testing bereit, die mit den erforderlichen Tools ausgestattet sind.
 
-## Vorbereitete OSs zur Firmware-Analyse
+## Vorbereitete OSs zur Analyse von Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ist eine Distro, die dich bei Security Assessments und Penetrationstests von Internet-of-Things-(IoT-)Geräten unterstützt. Sie spart viel Zeit, da sie eine vorkonfigurierte Umgebung mit allen erforderlichen Tools bereitstellt.
-- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Auf Ubuntu 18.04 basierendes Betriebssystem für Embedded-Security-Testing, das bereits mit Tools für Firmware-Security-Testing ausgestattet ist.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ist eine Distro, die dich bei Security Assessments und Penetration-Tests von Internet-of-Things-(IoT-)Geräten unterstützt. Sie spart viel Zeit, da sie eine vorkonfigurierte Umgebung mit bereits geladenen erforderlichen Tools bereitstellt.
+- [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Auf Ubuntu 18.04 basierendes Betriebssystem für Embedded-Security-Testing, das mit Tools für Firmware-Security-Testing vorinstalliert ist.
 
 ## Firmware-Downgrade-Angriffe und unsichere Update-Mechanismen
 
-Selbst wenn ein Hersteller kryptografische Signaturprüfungen für Firmware-Images implementiert, wird der **Schutz vor Versions-Rollbacks (Downgrades) häufig ausgelassen**. Wenn der Boot- oder Recovery-Loader nur die Signatur mit einem eingebetteten Public Key überprüft, aber nicht die *Version* (oder einen monotonen Counter) des zu flashenden Images vergleicht, kann ein Angreifer **ältere, verwundbare Firmware mit weiterhin gültiger Signatur** legitim installieren und dadurch bereits behobene Schwachstellen erneut einführen.<sup>[[4]](#references)</sup>
+Selbst wenn ein Hersteller kryptografische Signaturprüfungen für Firmware-Images implementiert, wird der **Schutz vor Version-Rollbacks (Downgrades) häufig ausgelassen**. Wenn der Boot- oder Recovery-Loader nur die Signatur mit einem eingebetteten Public Key prüft, aber die *Version* (oder einen monotonen Zähler) des zu flashenden Images nicht vergleicht, kann ein Angreifer **ältere, verwundbare Firmware mit weiterhin gültiger Signatur** legitim installieren und dadurch bereits behobene Schwachstellen erneut einführen.<sup>[[4]](#references)</sup>
 
-Typischer Angriffs-Workflow:
+Typischer Angriffsablauf:
 
 1. **Ein älteres signiertes Image beschaffen**
-* Lade es aus dem öffentlichen Download-Portal, CDN oder von der Support-Website des Herstellers herunter.
-* Extrahiere es aus zugehörigen Mobile-/Desktop-Anwendungen (z. B. innerhalb eines Android-APKs unter `assets/firmware/`).
+* Lade es vom öffentlichen Download-Portal, CDN oder Support-Portal des Herstellers herunter.
+* Extrahiere es aus zugehörigen Mobile-/Desktop-Anwendungen (zum Beispiel innerhalb eines Android-APKs unter `assets/firmware/`).
 * Beziehe es aus Third-Party-Repositories wie VirusTotal, Internetarchiven, Foren usw.
-2. **Das Image über einen offengelegten Update-Kanal auf das Gerät hochladen oder dort bereitstellen:**
+2. **Das Image über einen beliebigen exponierten Update-Kanal auf das Gerät hochladen oder dort bereitstellen:**
 * Web-UI, Mobile-App-API, USB, TFTP, MQTT usw.
-* Viele Consumer-IoT-Geräte stellen *nicht authentifizierte* HTTP(S)-Endpoints bereit, die Base64-kodierte Firmware-Blobs akzeptieren, diese serverseitig decodieren und Recovery/Upgrade auslösen.
-3. Nach dem Downgrade eine Schwachstelle ausnutzen, die im neueren Release behoben wurde (zum Beispiel einen Command-Injection-Filter, der erst später hinzugefügt wurde).
-4. Optional wieder das aktuelle Image flashen oder Updates deaktivieren, um nach dem Erlangen der Persistence eine Entdeckung zu vermeiden.
+* Viele Consumer-IoT-Geräte stellen *nicht authentifizierte* HTTP(S)-Endpoints bereit, die Base64-kodierte Firmware-Blobs akzeptieren, serverseitig dekodieren und anschließend Recovery/Upgrade auslösen.
+3. Nach dem Downgrade eine Schwachstelle ausnutzen, die im neueren Release behoben wurde (zum Beispiel einen Command-Injection-Filter, der später hinzugefügt wurde).
+4. Optional das neueste Image zurückflashen oder Updates deaktivieren, um nach dem Erlangen von Persistence eine Entdeckung zu vermeiden.
 
 ### Beispiel: Command Injection nach einem Downgrade
 ```http
@@ -410,62 +410,62 @@ Host: 192.168.0.1
 Content-Type: application/octet-stream
 Content-Length: 0
 ```
-In der anfälligen (herabgestuften) Firmware wird der Parameter `md5` ohne Bereinigung direkt in einen Shell-Befehl verkettet, wodurch die Injection beliebiger Befehle möglich ist (hier zur Aktivierung eines SSH-Schlüssel-basierten Root-Zugriffs). Spätere Firmware-Versionen führten einen einfachen Zeichenfilter ein, doch das Fehlen eines Downgrade-Schutzes macht die Behebung wirkungslos.<sup>[[4]](#references)</sup>
+In der verwundbaren (downgradebaren) Firmware wird der Parameter `md5` ohne Bereinigung direkt in einen Shell-Befehl eingefügt, wodurch die Injection beliebiger Befehle möglich ist (hier zur Aktivierung des Root-Zugriffs per SSH-Schlüssel). Spätere Firmware-Versionen führten einen einfachen Zeichenfilter ein, doch das Fehlen eines Downgrade-Schutzes macht die Behebung gegenstandslos.<sup>[[4]](#references)</sup>
 
-### Firmware aus Mobile Apps extrahieren
+### Firmware aus mobilen Apps extrahieren
 
-Viele Hersteller bündeln vollständige Firmware-Images in ihren begleitenden Mobile Apps, damit die App das Gerät über Bluetooth/Wi-Fi aktualisieren kann. Diese Pakete werden üblicherweise unverschlüsselt im APK/APEX unter Pfaden wie `assets/fw/` oder `res/raw/` gespeichert. Mit Tools wie `apktool`, `ghidra` oder sogar einfachem `unzip` lassen sich signierte Images extrahieren, ohne die physische Hardware anzufassen.<sup>[[4]](#references)</sup>
+Viele Anbieter bündeln vollständige Firmware-Images in ihren zugehörigen mobilen Anwendungen, damit die App das Gerät über Bluetooth/Wi-Fi aktualisieren kann. Diese Pakete werden im APK/APEX häufig unverschlüsselt unter Pfaden wie `assets/fw/` oder `res/raw/` gespeichert. Tools wie `apktool`, `ghidra` oder sogar das einfache `unzip` ermöglichen das Extrahieren signierter Images, ohne auf die physische Hardware zugreifen zu müssen.<sup>[[4]](#references)</sup>
 ```
 $ apktool d vendor-app.apk -o vendor-app
 $ ls vendor-app/assets/firmware
 firmware_v1.3.11.490_signed.bin
 ```
-### Updater-only Anti-Rollback-Bypass in A/B-Slot-Designs
+### Updater-only Anti-Rollback-Umgehung in A/B-Slot-Designs
 
-Einige Anbieter implementieren zwar einen Anti-Downgrade-**ratchet**, jedoch nur innerhalb der *Updater*-Logik (beispielsweise eine UDS-Routine über CAN, einen Recovery-Befehl oder einen OTA-Agent im Userspace). Wenn der **bootloader** später nur die Image-Signatur/CRC prüft und der Partitionstabelle oder den Slot-Metadaten vertraut, kann der Rollback-Schutz weiterhin umgangen werden.<sup>[[7]](#references)</sup>
+Einige Anbieter implementieren zwar einen Anti-Downgrade-**Ratchet**, jedoch nur innerhalb der *Updater*-Logik (beispielsweise eine UDS-Routine über CAN, einen Recovery-Befehl oder einen OTA-Agent im Userspace). Wenn der **Bootloader** später nur die Image-Signatur/CRC prüft und der Partitionstabelle oder den Slot-Metadaten vertraut, kann der Rollback-Schutz weiterhin umgangen werden.<sup>[[7]](#references)</sup>
 
 Typisches schwaches Design:
 
-- Firmware-Metadaten enthalten sowohl einen Versionsdeskriptor als auch einen **security ratchet** / monotonen Zähler.
-- Der Updater vergleicht den Image-ratchet mit einem im persistenten Speicher abgelegten Wert und weist ältere signierte Images zurück.
-- Der **bootloader** parst diesen ratchet **nicht** und prüft vor dem Booten des ausgewählten Slots nur Header, CRC und Signatur.
-- Die Slot-Aktivierung wird separat in einer Partitionstabelle oder einem Generation Counter pro Slot gespeichert und ist **nicht kryptografisch an den exakten Firmware-Digest gebunden**, der validiert wurde.
+- Firmware-Metadaten enthalten sowohl einen Versionsdeskriptor als auch einen **Security-Ratchet** / monotonen Zähler.
+- Der Updater vergleicht den Image-Ratchet mit einem in persistentem Speicher abgelegten Wert und weist ältere signierte Images zurück.
+- Der Bootloader **parst** diesen Ratchet nicht und prüft vor dem Booten des ausgewählten Slots nur Header, CRC und Signatur.
+- Die Slot-Aktivierung wird separat in einer Partitionstabelle oder einem generationsbezogenen Zähler pro Slot gespeichert und ist **nicht kryptografisch** an den exakten Firmware-Digest gebunden, der validiert wurde.
 
-Dies erzeugt in Dual-Slot-Systemen ein **validate-one-image / boot-another-image**-Primitiv. Wenn der Angreifer den Updater dazu bringen kann, Slot B mithilfe eines aktuellen signierten Images als nächstes Boot-Ziel zu markieren, und Slot B später vor dem Reboot überschreiben kann, bootet der **bootloader** möglicherweise trotzdem das downgraded Image, weil er nur den bereits festgeschriebenen Slot-Metadaten vertraut.
+Dadurch entsteht in Dual-Slot-Systemen ein **validate-one-image / boot-another-image**-Primitiv. Wenn der Angreifer den Updater dazu bringen kann, Slot B mithilfe eines aktuell signierten Images als nächstes Boot-Ziel zu markieren, und Slot B anschließend vor dem Neustart überschreiben kann, bootet der Bootloader möglicherweise trotzdem das ältere Image, da er nur den bereits festgeschriebenen Slot-Metadaten vertraut.
 
-Häufiges Abuse-Muster:
+Typisches Missbrauchsmuster:
 
-1. Eine **aktuelle signierte** Firmware in den passiven Slot hochladen und die normale Validierungs-/Switch-Routine ausführen, sodass das Layout diesen Slot als nächsten aktiven Slot markiert.
-2. **Noch nicht rebooten**. In derselben Session erneut die Slot-Vorbereitungs-/Erase-Routine aufrufen.
-3. Stale Boot-State- oder stale Slot-Selection-Logik ausnutzen, sodass der Updater den **gleichen physischen Slot** löscht, der gerade aktiviert wurde.
+1. Eine **aktuell signierte** Firmware in den passiven Slot hochladen und die normale Validierungs-/Umschaltroutine ausführen, sodass das Layout diesen Slot als nächsten aktiven Slot markiert.
+2. **Noch keinen Neustart durchführen**. In derselben Sitzung erneut die Slot-Vorbereitungs-/Löschroutine aufrufen.
+3. Veraltete Boot-State- oder Slot-Auswahllogik missbrauchen, sodass der Updater **denselben physischen Slot** löscht, der gerade aktiviert wurde.
 4. Eine **ältere, aber weiterhin signierte** Firmware in diesen Slot schreiben.
-5. Die Validierungsroutine überspringen, die den ratchet erzwingt, und direkt rebooten.
-6. Der **bootloader** wählt den aktivierten Slot aus, prüft nur Signatur/Integrität und bootet das alte Image.
+5. Die Validierungsroutine überspringen, die den Ratchet durchsetzt, und direkt neu starten.
+6. Der Bootloader wählt den aktivierten Slot aus, prüft nur Signatur/Integrität und bootet das alte Image.
 
-Beim Reversen von A/B-Update-Implementierungen sollte man auf Folgendes achten:
+Dinge, nach denen beim Reverse Engineering von A/B-Update-Implementierungen gesucht werden sollte:
 
-- Slot-Auswahl, die aus **Boot-Time-Flags** abgeleitet wird, die nach einem erfolgreichen Switch nicht aktualisiert werden.
-- Eine Routine im Stil von `prepare_passive_slot()`, die einen Slot anhand von stale State statt anhand des **aktuell festgeschriebenen Layouts** löscht.
-- Eine Funktion im Stil von `part_write_layout()`, die nur einen **Generation Counter** / ein Active-Flag erhöht und den Hash des validierten Images nicht speichert.
-- Ratchet-Prüfungen, die im Userspace oder im Updater-Code implementiert sind, aber **nicht in ROM / bootloader / Secure-Boot-Stages**.
-- Erase- oder Recovery-Routinen, die den Slot auch dann als bootfähig markiert lassen, nachdem sein Inhalt entfernt und neu geschrieben wurde.
+- Slot-Auswahl, die aus **Boot-Time-Flags** abgeleitet wird, die nach einer erfolgreichen Umschaltung nicht aktualisiert werden.
+- Eine Routine im Stil von `prepare_passive_slot()`, die einen Slot anhand veralteten Zustands statt anhand des **aktuell festgeschriebenen Layouts** löscht.
+- Eine Funktion im Stil von `part_write_layout()`, die nur einen **Generationszähler** / ein Aktiv-Flag erhöht und den Hash des validierten Images nicht speichert.
+- Ratchet-Prüfungen, die im Userspace oder im Updater-Code implementiert sind, aber **nicht** in ROM- / Bootloader- / Secure-Boot-Stufen.
+- Lösch- oder Recovery-Routinen, die den Slot auch dann als bootfähig markiert lassen, nachdem sein Inhalt entfernt und neu geschrieben wurde.
 
-### Checklist zur Bewertung der Update-Logik
+### Checkliste zur Bewertung der Update-Logik
 
-* Ist der Transport/die Authentifizierung des *Update-Endpoints* ausreichend geschützt (TLS + Authentifizierung)?
-* Vergleicht das Gerät vor dem Flashen **Versionsnummern** oder einen **monotonen Anti-Rollback-Counter**?
-* Wird das Image innerhalb einer Secure-Boot-Chain verifiziert (z. B. durch Signaturprüfung im ROM-Code)?
-* Erzwingt der **bootloader denselben ratchet** wie der Updater, statt nur Signatur/CRC zu prüfen?
-* Sind die Slot-Aktivierungsmetadaten **an den Digest/die Version der validierten Firmware gebunden**, oder kann ein Slot nach seiner Aktivierung verändert werden?
-* Wird das Gerät nach einem erfolgreichen Slot-Switch zum Reboot gezwungen, oder sind spätere Update-/Erase-Routinen weiterhin in derselben Session erreichbar?
-* Führt der Userland-Code zusätzliche Plausibilitätsprüfungen durch (z. B. zulässige Partition Map, Modellnummer)?
-* Verwenden *partielle* oder *Backup*-Update-Flows dieselbe Validierungslogik erneut?
+* Ist der Transport/die Authentifizierung des *Update-Endpunkts* angemessen geschützt (TLS + Authentifizierung)?
+* Vergleicht das Gerät vor dem Flashen **Versionsnummern** oder einen **monotonen Anti-Rollback-Zähler**?
+* Wird das Image innerhalb einer Secure-Boot-Kette verifiziert (z. B. durch Signaturprüfung im ROM-Code)?
+* Erzwingt der **Bootloader denselben Ratchet** wie der Updater, statt nur Signatur/CRC zu prüfen?
+* Sind die Metadaten zur Slot-Aktivierung **an den validierten Firmware-Digest/die Version gebunden**, oder kann ein Slot nach seiner Aktivierung verändert werden?
+* Wird das Gerät nach erfolgreicher Slot-Umschaltung zum Neustart gezwungen, oder sind spätere Update-/Löschroutinen weiterhin in derselben Sitzung erreichbar?
+* Führt der Userland-Code zusätzliche Plausibilitätsprüfungen durch (z. B. zulässige Partitionszuordnung, Modellnummer)?
+* Verwenden *partielle* oder *Backup*-Update-Flows dieselbe Validierungslogik wieder?
 
 > 💡  Wenn eines der oben genannten Elemente fehlt, ist die Plattform wahrscheinlich anfällig für Rollback-Angriffe.
 
 ## Vulnerable firmware to practice
 
-Um das Entdecken von Vulnerabilities in Firmware zu üben, können die folgenden Vulnerable-Firmware-Projekte als Ausgangspunkt verwendet werden.
+Um das Auffinden von Schwachstellen in Firmware zu üben, können die folgenden Vulnerable-Firmware-Projekte als Ausgangspunkt verwendet werden.
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
@@ -480,22 +480,22 @@ Um das Entdecken von Vulnerabilities in Firmware zu üben, können die folgenden
 - Damn Vulnerable IoT Device (DVID)
 - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## Recovering firmware decryption keys from embedded KMS/Vault state
+## Wiederherstellung von Firmware-Entschlüsselungsschlüsseln aus eingebettetem KMS/Vault-Zustand
 
-Wenn ein Update-Image kleine Klartext-Metadaten mit einem großen Blob hoher Entropie kombiniert, sollte vor dem Brute-Forcing zunächst eine Container-Triage durchgeführt werden:<sup>[[1]](#references)</sup>
+Wenn ein Update-Image kleine Klartext-Metadaten mit einem großen Blob hoher Entropie kombiniert, sollte vor jeglichem Brute-Forcing zunächst eine Container-Analyse durchgeführt werden:<sup>[[1]](#references)</sup>
 
 - Header, Offsets und Zeilengrenzen mit `hexdump`, `xxd`, `strings -tx`, `base64 -d` und `binwalk -E` ausgeben.
-- `Salted__` bedeutet normalerweise das OpenSSL-`enc`-Format: Die nächsten 8 Bytes sind der Salt, die verbleibenden Bytes sind der Ciphertext.
-- Ein Base64-Feld, das exakt zu `256` Bytes dekodiert wird, ist ein starker Hinweis darauf, dass es sich um einen RSA-2048-Ciphertext handelt, der ein zufälliges Firmware-Passwort/einen Session-Key verpackt.
-- Detached-PGP-Material in derselben Datei schützt häufig nur die Authentizität; man sollte nicht davon ausgehen, dass es als Vertraulichkeitsmechanismus dient.
+- `Salted__` bedeutet üblicherweise das OpenSSL-`enc`-Format: Die nächsten 8 Bytes sind der Salt, die verbleibenden Bytes der Ciphertext.
+- Ein Base64-Feld, das exakt `256` Bytes decodiert, ist ein starker Hinweis darauf, dass es sich um einen RSA-2048-Ciphertext handelt, der ein zufälliges Firmware-Passwort/einen zufälligen Session-Key verpackt.
+- Separates PGP-Material in derselben Datei schützt häufig nur die Authentizität; es sollte nicht angenommen werden, dass es sich dabei um den Vertraulichkeitsmechanismus handelt.
 
-Wenn die Suche nach statischen Keys (`grep`, `strings`, PEM-/PGP-Suchen) erfolglos bleibt, sollte stattdessen der **operative Decrypt-Pfad** zurückverfolgt werden, anstatt nur nach Private Keys zu suchen:
+Wenn die Suche nach statischen Schlüsseln (`grep`, `strings`, PEM-/PGP-Suchen) erfolglos bleibt, sollte stattdessen der **operative Entschlüsselungspfad** rückwärts analysiert werden, anstatt nur nach privaten Schlüsseln zu suchen:
 
-- Den Updater-/Management-Binary dekompilieren und nachvollziehen, wer den verschlüsselten Blob liest, welcher Helper/API ihn unwrappt und welchen logischen Key-Namen er anfordert.
-- Das extrahierte Root-Filesystem nach KMS-State (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`) sowie nach Unit-Files und Init-Skripten durchsuchen.
-- Klartextbefehle wie `vault operator unseal ...`, Recovery-Keys, Bootstrap-Tokens oder lokale KMS-Auto-Unseal-Skripte als gleichwertig zu Private-Key-Material behandeln.
+- Den Updater / das Management-Binary dekompilieren und nachverfolgen, wer den verschlüsselten Blob liest, welcher Helper/welche API ihn auspackt und welchen logischen Schlüsselnamen er anfordert.
+- Das extrahierte Root-Dateisystem nach KMS-Zustand (`vault/`, `transit/`, `pkcs11`, `keystore`, `sealed-secrets`) sowie nach Unit-Dateien und Init-Skripten durchsuchen.
+- Klartextbefehle wie `vault operator unseal ...`, Recovery Keys, Bootstrap-Tokens oder lokale KMS-Auto-Unseal-Skripte als gleichwertig zu Private-Key-Material behandeln.
 
-Wenn das Appliance-Image die originale Vault-Binary und das Storage-Backend enthält, ist das Replay dieser Umgebung normalerweise einfacher als eine Neuimplementierung der Vault-Interna:
+Wenn das Appliance das originale Vault-Binary und das Storage-Backend enthält, ist das Replay dieser Umgebung normalerweise einfacher, als die internen Vault-Mechanismen neu zu implementieren:
 ```bash
 vault server -config=/tmp/vault.hcl
 vault operator unseal <share1>
@@ -512,26 +512,25 @@ TOKEN=$(vault operator generate-root -decode="$(printf '%s\n' "$FINAL" | awk '/R
 ```
 Mit root auf dem geklonten KMS:
 
-- Mache Transit-Schlüssel nur innerhalb des isolierten Klons exportierbar: `vault write transit/keys/<name>/config exportable=true`
-- Exportiere den Unwrap-Schlüssel: `vault read transit/export/encryption-key/<name>`
-- Teste den wiederhergestellten RSA-Schlüssel mit dem exakten Padding-/Hash-Paar, das vom KMS verwendet wird. Eine fehlgeschlagene PKCS#1-v1.5-Entschlüsselung und eine fehlgeschlagene standardmäßige OAEP-Entschlüsselung **beweisen nicht**, dass der Schlüssel falsch ist; viele von Vault unterstützte Abläufe verwenden OAEP mit SHA-256, während gängige Libraries standardmäßig SHA-1 verwenden.
-- Wenn der Payload mit `Salted__` beginnt, reproduziere exakt die OpenSSL-KDF des Herstellers (`EVP_BytesToKey`, bei älteren Appliances häufig MD5), bevor du eine AES-CBC-Entschlüsselung versuchst.
+- Transit-Schlüssel nur innerhalb des isolierten Klons exportierbar machen: `vault write transit/keys/<name>/config exportable=true`
+- Den Unwrap-Schlüssel exportieren: `vault read transit/export/encryption-key/<name>`
+- Den wiederhergestellten RSA-Schlüssel mit dem exakten Padding-/Hash-Paar testen, das vom KMS verwendet wird. Eine fehlgeschlagene PKCS#1-v1.5-Entschlüsselung und eine fehlgeschlagene standardmäßige OAEP-Entschlüsselung **beweisen nicht**, dass der Schlüssel falsch ist; viele von Vault unterstützte Abläufe verwenden OAEP mit SHA-256, während gängige Bibliotheken standardmäßig SHA-1 verwenden.
+- Wenn der Payload mit `Salted__` beginnt, die OpenSSL-KDF des Herstellers exakt reproduzieren (`EVP_BytesToKey`, bei älteren Appliances häufig MD5), bevor eine AES-CBC-Entschlüsselung versucht wird.
 
-Damit wird "verschlüsselte Firmware" zu einem allgemeineren Problem: **die operativen Schlüssel auf der Appliance wiederherstellen und anschließend die exakten Unwrap- und KDF-Parameter offline reproduzieren**.
+Damit wird „verschlüsselte Firmware“ zu einem allgemeineren Problem: **Die operativen Schlüssel auf Appliance-Seite wiederherstellen und anschließend die exakten Unwrap- und KDF-Parameter offline reproduzieren**.
 
-## Training und Zertifizierung
+## Schulungen und Zertifizierungen
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
-## Referenzen
+## References
 
-- [1] [Cracking Firmware with Claude: Senior-Level Skill, Junior-Level Autonomy](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
-- [2] [Firmware Security Testing Methodology](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [3] [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
-- [4] [Exploiting zero days in abandoned hardware – Trail of Bits blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
-- [5] [How a $20 Smart Device Gave Me Access to Your Home](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
-- [6] [Now You See mi: Now You're Pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
-- [7] [Synacktiv - Exploiting the Tesla Wall Connector from its charge port connector - Part 2: bypassing the anti-downgrade](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
-- [8] [Make it Blink: Over-the-Air Exploitation of the Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
-
+- [1] [Firmware mit Claude knacken: Senior-Level-Skill, Junior-Level-Autonomie](https://bishopfox.com/blog/cracking-firmware-with-claude-senior-level-skill-junior-level-autonomy)
+- [2] [Methodik für Firmware-Sicherheitstests](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+- [3] [Praktisches IoT-Hacking: Der definitive Leitfaden zum Angriff auf das Internet der Dinge](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
+- [4] [Ausnutzen von Zero-Days in aufgegebener Hardware – Trail-of-Bits-Blog](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
+- [5] [Wie mir ein 20-Dollar-Smartgerät Zugriff auf Ihr Zuhause verschaffte](https://bishopfox.com/blog/how-a-20-smart-device-gave-me-access-to-your-home)
+- [6] [Jetzt siehst du mich: Jetzt bist du pwned](https://labs.taszk.io/articles/post/nowyouseemi/)
+- [7] [Synacktiv – Ausnutzen des Tesla Wall Connector über dessen Ladeanschluss – Teil 2: Umgehen des Anti-Downgrades](https://www.synacktiv.com/en/publications/exploiting-the-tesla-wall-connector-from-its-charge-port-connector-part-2-bypassing)
+- [8] [Bring es zum Blinken: Over-the-Air-Exploitation der Philips Hue Bridge](https://www.synacktiv.com/en/publications/make-it-blink-over-the-air-exploitation-of-the-philips-hue-bridge.html)
 {{#include ../../banners/hacktricks-training.md}}
