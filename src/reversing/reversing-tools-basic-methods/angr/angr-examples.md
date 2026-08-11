@@ -1,13 +1,13 @@
-# Angr - 示例
+# Angr - Examples
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!TIP]
-> 如果程序使用 `scanf` 从 **stdin 一次获取多个值**，你需要生成一个从 **`scanf`** 之后开始的 state。
+> 如果程序使用 `scanf` 从 stdin **一次获取多个值**，则需要生成一个从 **`scanf`** 之后开始的 state。
 
-代码取自 [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
+Codes taken from [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)<sup>[[1]](#references)</sup>
 
-### 用于到达地址的输入（指示地址）
+### 用于到达地址的输入（指示该地址）
 ```python
 import angr
 import sys
@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 到达地址的输入（表示打印输出）
+### 到达地址的输入（指示打印内容）
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -104,7 +104,7 @@ password1 = claripy.BVS('password1', password1_size_in_bits)
 password2_size_in_bits = 32  # :integer
 password2 = claripy.BVS('password2', password2_size_in_bits)
 
-# Relate it Vectors with the registriy values you are interested in to reach an address
+# Relate its vectors to the register values needed to reach an address
 initial_state.regs.eax = password0
 initial_state.regs.ebx = password1
 initial_state.regs.edx = password2
@@ -201,9 +201,9 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-在此场景中，输入通过 `scanf("%u %u")` 获取，并提供了值 `"1 1"`，因此栈中的 **`0x00000001`** 值来自**用户输入**。你可以看到这些值从 `$ebp - 8` 开始。因此，在代码中我们对 `$esp` **减去了 8 个字节（因为当时 `$ebp` 和 `$esp` 的值相同）**，然后 push 了 BVS。
+在此场景中，输入通过 `scanf("%u %u")` 获取，并提供了值 `"1 1"`，因此栈中的 **`0x00000001`** 值来自**用户输入**。你可以看到这些值从 `$ebp - 8` 开始。因此，在代码中，我们对 `$esp` **减去了 8 字节**（因为当时 `$ebp` 和 `$esp` 的值相同），然后压入了 BVS。
 
-![将位向量放入栈中，以找出需要对该栈位置执行减法或加法才能到达某个程序流程的值：在此场景中，输入通过 scanf("%u %u") 获取，并提供了值 "1...](<../../../images/image (136).png>)
+![将位向量放入栈中，以找出栈位置需要具有什么值，才能到达程序流程：在此场景中，输入通过 scanf("%u %u") 获取，并提供了值 "1...](<../../../images/image (136).png>)
 
 ### 静态内存值（全局变量）
 ```python
@@ -215,7 +215,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-#Get an address after the scanf. Once the input has already being saved in the memory positions
+# Get an address after scanf, once the input has been saved in memory
 start_address = 0x8048606
 initial_state = project.factory.blank_state(addr=start_address)
 
@@ -266,7 +266,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 动态内存值（Malloc）
+### 动态内存值 (Malloc)
 ```python
 import angr
 import claripy
@@ -337,7 +337,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-# Get an address just before opening the file with th simbolic content
+# Get an address just before opening the file with the symbolic content
 # Or at least when the file is not going to suffer more changes before being read
 start_address = 0x80488db
 initial_state = project.factory.blank_state(addr=start_address)
@@ -347,10 +347,10 @@ initial_state = project.factory.blank_state(addr=start_address)
 filename = 'WCEXPXBW.txt'
 symbolic_file_size_bytes = 64
 
-# Create a BV which is going to be the content of the simbolic file
+# Create a bit-vector that will hold the symbolic file content
 password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-# Create the file simulation with the simbolic content
+# Create the simulated file with symbolic content
 password_file = angr.storage.SimFile(filename, content=password)
 
 # Add the symbolic file we created to the symbolic filesystem.
@@ -381,7 +381,7 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!TIP]
-> 注意，symbolic file 也可能包含与 symbolic data 合并的 constant data：
+> 请注意，symbolic file 也可能包含与 symbolic data 合并的 constant data：
 >
 > ```python
 >  # Hello world, my name is John.
@@ -402,13 +402,13 @@ main(sys.argv)
 >  # the string from the file, except four symbolic bytes where the name would be
 >  # stored.
 >  # (!)
->  ```
+> ```
 
 ### 应用约束
 
 > [!TIP]
-> 有时，一些简单的人类操作，例如将两个长度为 16 的单词进行 **char by char** 比较（循环），对 **angr** 来说也非常 **costly**，因为它需要生成呈指数增长的分支：每个 if 生成一个分支，即 `2^16`\
-> 因此，更简单的方法是 **让 angr 回到之前的某个点**（真正困难的部分已经完成），然后**手动设置这些约束**。
+> 有时，像将两个长度为 16 的单词**逐字符**进行比较（循环）这样的简单人类操作，对 **angr** 来说也会**耗费**大量资源，因为它需要生成呈**指数级**增长的分支：每个 if 生成 1 个分支，即 `2^16` 个分支。\
+> 因此，更简单的方法是**让 angr 回到之前的某个位置**（真正困难的部分已经完成），然后**手动设置这些约束**。
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -483,12 +483,12 @@ main(sys.argv)
 > 在某些场景中，你可以启用 **veritesting**，它会合并相似的状态，从而节省无用的分支并找到解决方案：`simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> 在这些场景中，你还可以**hook 该函数，为 angr 提供更容易理解的内容**。
+> 在这些场景中，你还可以**hook 函数，让 angr 更容易理解它**。
 
 ### Simulation Managers
 
-某些模拟管理器可能比其他管理器更有用。在前面的示例中存在一个问题，因为创建了大量有用的分支。在这里，**veritesting** 技术会合并这些分支并找到解决方案。\
-该模拟管理器也可以通过以下方式启用：`simulation = project.factory.simgr(initial_state, veritesting=True)`
+某些模拟管理器可能比其他管理器更有用。在前面的示例中存在一个问题：创建了大量有用的分支。在这里，**veritesting** 技术会合并这些分支并找到解决方案。\
+此模拟管理器也可以通过以下方式启用：`simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -562,7 +562,7 @@ user_input_buffer_address,
 user_input_buffer_length
 )
 
-# Create a simbolic IF that if the loaded string frommemory is the expected
+# Create a symbolic If expression that checks the string loaded from memory
 # return True (1) if not returns False (0) in eax
 check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
@@ -807,8 +807,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-## 参考资料
+## References
 
-- [1] [jakespringer/angr_ctf - GitHub repository](https://github.com/jakespringer/angr_ctf)
-
+- [1] [jakespringer/angr_ctf - GitHub 仓库](https://github.com/jakespringer/angr_ctf)
 {{#include ../../../banners/hacktricks-training.md}}

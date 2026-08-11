@@ -2,124 +2,125 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## 深度学习
+## 深度学习 <sup>[[1]](#references)</sup>
 
-深度学习是机器学习的一个子集，它使用具有多个层（深度神经网络）的神经网络来建模数据中的复杂模式。它在多个领域取得了显著成功，包括计算机视觉、自然语言处理和语音识别。
+深度学习是 machine learning 的一个子集，它使用具有多个层的神经网络（深度神经网络）来对数据中的复杂模式进行建模。它已在多个领域取得了显著成功，包括 computer vision、natural language processing 和 speech recognition。
 
 ### 神经网络
 
-神经网络是深度学习的构建块。它们由互联的节点（神经元）组成，组织成层。每个神经元接收输入，应用加权和，并通过激活函数传递结果以产生输出。层可以分为以下几类：
+神经网络是深度学习的构建模块。它们由按层组织的互连节点（神经元）组成。每个神经元接收输入，应用加权和，并通过 activation function 传递结果以生成输出。这些层可以分类如下：
 - **输入层**：接收输入数据的第一层。
-- **隐藏层**：对输入数据进行变换的中间层。隐藏层和每层中的神经元数量可以变化，从而导致不同的架构。
-- **输出层**：产生网络输出的最后一层，例如分类任务中的类别概率。
+- **隐藏层**：对输入数据执行转换的中间层。隐藏层的数量以及每层中的神经元数量可以变化，从而形成不同的架构。
+- **输出层**：生成网络输出的最后一层，例如 classification 任务中的类别概率。
+
 
 ### 激活函数
 
-当一层神经元处理输入数据时，每个神经元对输入应用权重和偏置（`z = w * x + b`），其中 `w` 是权重，`x` 是输入，`b` 是偏置。然后，神经元的输出通过**激活函数引入非线性**到模型中。这个激活函数基本上指示下一个神经元“是否应该被激活以及激活的程度”。这使得网络能够学习数据中的复杂模式和关系，从而能够近似任何连续函数。
+当一层神经元处理输入数据时，每个神经元都会对输入应用权重和偏置（`z = w * x + b`），其中 `w` 是权重，`x` 是输入，`b` 是偏置。随后，神经元的输出会经过一个**activation function，以向模型引入非线性**。这个 activation function 基本上表示下一个神经元“是否应该被激活，以及激活程度”。这使网络能够学习数据中的复杂模式和关系，从而使其能够逼近任意连续函数。
 
-因此，激活函数将非线性引入神经网络，使其能够学习数据中的复杂关系。常见的激活函数包括：
-- **Sigmoid**：将输入值映射到0和1之间的范围，通常用于二分类。
-- **ReLU（修正线性单元）**：如果输入为正，则直接输出输入；否则，输出零。由于其简单性和在训练深度网络中的有效性，广泛使用。
-- **Tanh**：将输入值映射到-1和1之间的范围，通常用于隐藏层。
-- **Softmax**：将原始分数转换为概率，通常用于多类分类的输出层。
+因此，activation functions 会向神经网络引入非线性，使其能够学习数据中的复杂关系。常见的 activation functions 包括：
+- **Sigmoid**：将输入值映射到 0 和 1 之间的范围，通常用于 binary classification。
+- **ReLU (Rectified Linear Unit)**：如果输入为正，则直接输出输入；否则输出零。由于其简单且在训练 deep networks 时效果良好，因此被广泛使用。
+- **Tanh**：将输入值映射到 -1 和 1 之间的范围，通常用于隐藏层。
+- **Softmax**：将原始分数转换为概率，通常用于 multi-class classification 的输出层。
 
 ### 反向传播
 
-反向传播是用于通过调整神经元之间连接的权重来训练神经网络的算法。它通过计算损失函数相对于每个权重的梯度，并在梯度的相反方向更新权重以最小化损失。反向传播涉及的步骤包括：
+Backpropagation 是用于训练神经网络的算法，通过调整神经元之间连接的权重来实现训练。它通过计算 loss function 相对于每个权重的梯度，并沿梯度的相反方向更新权重，以最小化 loss。Backpropagation 涉及的步骤如下：
 
-1. **前向传播**：通过将输入传递通过层并应用激活函数来计算网络的输出。
-2. **损失计算**：使用损失函数（例如，回归的均方误差，分类的交叉熵）计算预测输出与真实目标之间的损失（误差）。
-3. **反向传播**：使用微积分的链式法则计算损失相对于每个权重的梯度。
-4. **权重更新**：使用优化算法（例如，随机梯度下降，Adam）更新权重以最小化损失。
+1. **前向传播**：将输入传过各层并应用 activation functions，计算网络的输出。
+2. **Loss 计算**：使用 loss function 计算预测输出与真实目标之间的 loss（误差）（例如，回归中的 mean squared error，以及 classification 中的 cross-entropy）。
+3. **反向传播**：使用微积分的 chain rule，计算 loss 相对于每个权重的梯度。
+4. **权重更新**：使用 optimization algorithm（例如 stochastic gradient descent、Adam）更新权重，以最小化 loss。
 
-## 卷积神经网络（CNNs）
+## 卷积神经网络（CNNs） <sup>[[2]](#references)</sup>
 
-卷积神经网络（CNNs）是一种专门设计用于处理网格状数据（如图像）的神经网络。由于其能够自动学习特征的空间层次结构，因此在计算机视觉任务中特别有效。
+卷积神经网络（CNNs）是一种专门用于处理网格状数据（例如图像）的神经网络。由于能够自动学习特征的空间层次结构，它们在 computer vision 任务中尤其有效。
 
-CNN的主要组成部分包括：
-- **卷积层**：使用可学习的滤波器（内核）对输入数据应用卷积操作，以提取局部特征。每个滤波器在输入上滑动并计算点积，生成特征图。
-- **池化层**：对特征图进行下采样，以减少其空间维度，同时保留重要特征。常见的池化操作包括最大池化和平均池化。
-- **全连接层**：将一层中的每个神经元与下一层中的每个神经元连接，类似于传统神经网络。这些层通常在网络的末尾用于分类任务。
+CNNs 的主要组件包括：
+- **卷积层**：使用可学习的 filters（kernels）对输入数据执行卷积操作，以提取局部特征。每个 filter 会在输入上滑动并计算点积，从而生成 feature map。
+- **池化层**：对 feature maps 进行下采样，以减少其空间维度，同时保留重要特征。常见的池化操作包括 max pooling 和 average pooling。
+- **全连接层**：将一层中的每个神经元连接到下一层中的每个神经元，类似于传统神经网络。这些层通常在网络末端用于 classification 任务。
 
-在CNN的**卷积层**中，我们还可以区分：
-- **初始卷积层**：处理原始输入数据（例如图像）的第一卷积层，有助于识别基本特征，如边缘和纹理。
-- **中间卷积层**：后续卷积层，基于初始层学习的特征，允许网络学习更复杂的模式和表示。
-- **最终卷积层**：在全连接层之前的最后卷积层，捕获高级特征并为分类准备数据。
+在 CNN 的 **`Convolutional Layers`** 内部，我们还可以进行如下区分：
+- **初始卷积层**：处理原始输入数据（例如图像）的第一层卷积层，有助于识别边缘和纹理等基础特征。
+- **中间卷积层**：后续的卷积层，在初始层学习到的特征之上继续构建，使网络能够学习更复杂的模式和表示。
+- **最终卷积层**：全连接层之前的最后几个卷积层，用于捕获高级特征，并为 classification 准备数据。
 
 > [!TIP]
-> CNN在图像分类、物体检测和图像分割任务中特别有效，因为它们能够学习网格状数据中特征的空间层次结构，并通过权重共享减少参数数量。
-> 此外，它们在支持特征局部性原则的数据上表现更好，其中相邻数据（像素）更可能相关，而远离的像素可能不是其他类型数据（如文本）的情况。
-> 此外，请注意，CNN能够识别甚至复杂的特征，但无法应用任何空间上下文，这意味着在图像不同部分发现的相同特征将是相同的。
+> CNNs 特别适用于 image classification、object detection 和 image segmentation 任务，这是因为它们能够学习网格状数据中的特征空间层次结构，并通过权重共享减少参数数量。
+> 此外，它们在支持特征局部性原则的数据上表现更好：相邻数据（像素）之间比相距较远的像素更可能存在关联，而 text 等其他类型的数据可能并不具备这一特性。
+> 另外需要注意的是，CNNs 能够识别复杂特征，但无法应用任何空间上下文，这意味着在图像不同位置发现的相同特征将被视为相同。
 
-### 定义CNN的示例
+### 定义 CNN 的示例
 
-*在这里，您将找到如何在PyTorch中定义卷积神经网络（CNN）的描述，该网络以大小为48x48的RGB图像批次作为数据集，并使用卷积层和最大池化提取特征，随后是全连接层进行分类。*
+*这里将介绍如何在 PyTorch 中定义一个 Convolutional Neural Network (CNN)：它以大小为 48x48 的 RGB 图像批次作为数据集，使用卷积层和 maxpool 提取特征，然后使用全连接层进行 classification。*
 
-这就是您如何在PyTorch中定义1个卷积层：`self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`。
+以下是在 PyTorch 中定义 1 个卷积层的方法：`self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)`。
 
-- `in_channels`：输入通道的数量。在RGB图像的情况下，这是3（每个颜色通道一个）。如果您使用的是灰度图像，则为1。
+- `in_channels`：输入通道的数量。对于 RGB 图像，该值为 3（每种颜色通道各一个）。如果处理的是灰度图像，则该值为 1。
 
-- `out_channels`：卷积层将学习的输出通道（滤波器）数量。这是一个超参数，您可以根据模型架构进行调整。
+- `out_channels`：输出通道（filters）的数量，即卷积层将学习的 filters 数量。这是一个 hyperparameter，可以根据模型架构进行调整。
 
-- `kernel_size`：卷积滤波器的大小。常见选择是3x3，这意味着滤波器将覆盖输入图像的3x3区域。这就像一个3×3×3的颜色印章，用于从输入通道生成输出通道：
-1. 将该3×3×3的印章放在图像立方体的左上角。
-2. 将每个权重乘以其下方的像素，将它们相加，添加偏置→您得到一个数字。
-3. 将该数字写入位置（0, 0）的空白图中。
-4. 将印章向右滑动一个像素（步幅=1），重复直到填满整个48×48的网格。
+- `kernel_size`：卷积 filter 的大小。常见选择是 3x3，这意味着 filter 将覆盖输入图像中的 3x3 区域。它就像一个 3×3×3 的彩色印章，用于从 in_channels 生成 out_channels：
+1. 将这个 3×3×3 的印章放在图像立方体的左上角。
+2. 将每个权重与其下方的像素相乘，把所有结果相加，再加上 bias → 得到一个数字。
+3. 将这个数字写入空白 map 的位置 (0, 0)。
+4. 将印章向右移动一个像素（stride = 1），并重复操作，直到填满整个 48×48 网格。
 
-- `padding`：添加到输入每一侧的像素数量。填充有助于保持输入的空间维度，从而更好地控制输出大小。例如，对于一个3x3的内核和48x48像素的输入，填充1将使卷积操作后的输出大小保持不变（48x48）。这是因为填充在输入图像周围添加了1像素的边框，使内核能够在边缘滑动而不减少空间维度。
+- `padding`：添加到输入每一侧的像素数量。Padding 有助于保留输入的空间维度，从而更好地控制输出大小。例如，对于 3x3 kernel 和 48x48 像素的输入，padding 为 1 将使卷积操作后的输出大小保持不变（48x48）。这是因为 padding 会在输入图像周围添加 1 像素的边框，使 kernel 能够覆盖边缘，同时不会缩小空间维度。
 
-然后，这一层中的可训练参数数量为：
-- (3x3x3（内核大小） + 1（偏置）) x 32（out_channels） = 896个可训练参数。
+然后，该层中的可训练参数数量为：
+- (3x3x3 (kernel size) + 1 (bias)) x 32 (out_channels) = 896 个可训练参数。
 
-请注意，每个使用的内核添加了一个偏置（+1），因为每个卷积层的功能是学习输入的线性变换，这由以下方程表示：
+请注意，每使用一个 kernel 都会添加一个 Bias (+1)，因为每个卷积层的作用是学习输入的线性变换，其表示方式为以下公式：
 ```plaintext
 Y = f(W * X + b)
 ```
-`W` 是权重矩阵（学习到的滤波器，3x3x3 = 27 个参数），`b` 是偏置向量，对于每个输出通道为 +1。
+其中，`W` 是权重矩阵（学习到的 filters，3x3x3 = 27 个参数），`b` 是偏置向量，每个输出 channel 的值为 +1。
 
-请注意，`self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` 的输出将是形状为 `(batch_size, 32, 48, 48)` 的张量，因为 32 是生成的新的 48x48 像素大小的通道数量。
+注意，`self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1)` 的输出将是形状为 `(batch_size, 32, 48, 48)` 的 tensor，因为 32 是新生成的 channels 数量，每个 channel 的大小为 48x48 pixels。
 
-然后，我们可以将这个卷积层连接到另一个卷积层，如：`self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`。
+然后，我们可以将这一 convolutional layer 连接到另一个 convolutional layer，例如：`self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1)`。
 
-这将增加：(32x3x3（卷积核大小） + 1（偏置）) x 64（输出通道） = 18,496 个可训练参数，输出形状为 `(batch_size, 64, 48, 48)`。
+这将增加：(32x3x3 (kernel size) + 1 (bias)) x 64 (out_channels) = 18,496 个可训练参数，并生成形状为 `(batch_size, 64, 48, 48)` 的输出。
 
-正如你所看到的，**每增加一个卷积层，参数的数量迅速增长**，尤其是当输出通道的数量增加时。
+正如你所看到的，**每增加一个 convolutional layer，参数数量都会快速增长**，尤其是在 output channels 数量增加时。
 
-控制使用数据量的一个选项是在每个卷积层后使用 **最大池化**。最大池化减少特征图的空间维度，这有助于减少参数数量和计算复杂性，同时保留重要特征。
+控制数据量的一种方法是在每个 convolutional layer 后使用 **max pooling**。Max pooling 会缩小 feature maps 的空间维度，这有助于减少参数数量和计算复杂度，同时保留重要 features。
 
-可以声明为：`self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`。这基本上表示使用 2x2 像素的网格，并从每个网格中取最大值，以将特征图的大小减少一半。此外，`stride=2` 意味着池化操作每次移动 2 个像素，在这种情况下，防止池化区域之间的重叠。
+它可以声明为：`self.pool1 = nn.MaxPool2d(kernel_size=2, stride=2)`。这基本表示使用一个 2x2 pixels 的网格，并从每个网格中取最大值，从而将 feature map 的大小缩小一半。此外，`stride=2` 表示 pooling 操作每次移动 2 pixels，在本例中可以防止 pooling 区域之间发生重叠。
 
-使用这个池化层，经过第一个卷积层后的输出形状将是 `(batch_size, 64, 24, 24)`，在将 `self.pool1` 应用到 `self.conv2` 的输出后，大小减少到前一层的 1/4。
+使用这一 pooling layer 后，将 `self.pool1` 应用于 `self.conv2` 的输出时，第一次 convolutional layer 后的输出形状将变为 `(batch_size, 64, 24, 24)`，大小缩小为上一 layer 的 1/4。
 
 > [!TIP]
-> 在卷积层后进行池化是很重要的，以减少特征图的空间维度，这有助于控制参数数量和计算复杂性，同时使初始参数学习重要特征。
-> 你可以将池化层前的卷积视为从输入数据中提取特征（如线条、边缘），这些信息仍然会存在于池化输出中，但下一个卷积层将无法看到原始输入数据，只能看到池化输出，这是前一层的简化版本，包含了这些信息。
-> 按照通常的顺序：`Conv → ReLU → Pool`，每个 2×2 的池化窗口现在处理特征激活（“边缘存在/不存在”），而不是原始像素强度。保留最强的激活确实保留了最显著的证据。
+> 在 convolutional layers 之后进行 pooling 非常重要，因为它可以缩小 feature maps 的空间维度，有助于控制参数数量和计算复杂度，同时使初始参数能够学习重要 features。
+>你可以将 pooling layer 之前的 convolutions 看作从输入数据中提取 features（例如 lines、edges）的方法。这些信息仍会存在于 pooled output 中，但下一个 convolutional layer 将无法看到原始输入数据，只能看到 pooled output；后者是上一 layer 的缩减版本，但仍包含这些信息。
+>在通常的顺序 `Conv → ReLU → Pool` 中，每个 2×2 pooling window 现在处理的是 feature activations（“edge present / not”），而不是原始 pixel intensities。保留最强的 activation 确实保留了最显著的 evidence。
 
-然后，在添加所需的卷积层和池化层后，我们可以将输出展平，以便将其输入到全连接层。这是通过将张量重塑为每个批次样本的 1D 向量来完成的：
+然后，在添加所需数量的 convolutional 和 pooling layers 后，我们可以将输出 flatten，以便将其输入 fully connected layers。具体做法是将 tensor 重塑为 batch 中每个 sample 对应的 1D vector：
 ```python
 x = x.view(-1, 64*24*24)
 ```
-通过这个包含所有由前面的卷积层和池化层生成的训练参数的1D向量，我们可以定义一个全连接层，如下所示：
+有了这个由前面的 convolutional 和 pooling layers 生成的、包含所有 training parameters 的 1D vector，我们可以定义一个 fully connected layer，如下所示：
 ```python
 self.fc1 = nn.Linear(64 * 24 * 24, 512)
 ```
-将前一层的扁平输出映射到512个隐藏单元。
+它会将上一层的扁平化输出映射到 512 个 hidden units。
 
-注意，这一层增加了`(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504`个可训练参数，这与卷积层相比是一个显著的增加。这是因为全连接层将一层中的每个神经元与下一层中的每个神经元连接，从而导致参数数量庞大。
+请注意，该层新增了 `(64 * 24 * 24 + 1 (bias)) * 512 = 3,221,504` 个可训练参数，相比卷积层有显著增加。这是因为 fully connected 层会将一层中的每个神经元连接到下一层中的每个神经元，从而产生大量参数。
 
-最后，我们可以添加一个输出层以生成最终的类别logits：
+最后，我们可以添加一个输出层来生成最终的 class logits：
 ```python
 self.fc2 = nn.Linear(512, num_classes)
 ```
-这将添加 `(512 + 1 (bias)) * num_classes` 可训练参数，其中 `num_classes` 是分类任务中的类别数量（例如，对于 GTSRB 数据集为 43）。
+这将添加 `(512 + 1 (bias)) * num_classes` 个可训练参数，其中 `num_classes` 是分类任务中的类别数量（例如，GTSRB 数据集有 43 个类别）。
 
-另一个常见做法是在全连接层之前添加一个 dropout 层以防止过拟合。这可以通过以下方式完成：
+另一个常见做法是在 fully connected layers 之前添加 dropout layer，以防止 overfitting。可以通过以下方式实现：
 ```python
 self.dropout = nn.Dropout(0.5)
 ```
-这一层在训练期间随机将一部分输入单元设置为零，这有助于通过减少对特定神经元的依赖来防止过拟合。
+该层在训练期间随机将一部分输入单元设置为零，通过减少对特定神经元的依赖来帮助防止过拟合。
 
 ### CNN 代码示例
 ```python
@@ -222,23 +223,23 @@ x = self.fc2(x)
 # Note that the output is not passed through a softmax activation here, as it is typically done in the loss function (e.g., CrossEntropyLoss)
 return x
 ```
-### CNN 代码训练示例
+### CNN Code training 示例
 
-以下代码将生成一些训练数据并训练上面定义的 `MY_NET` 模型。一些有趣的值需要注意：
+以下代码将生成一些训练数据，并训练上文定义的 `MY_NET` 模型。以下是一些值得注意的参数：
 
-- `EPOCHS` 是模型在训练期间查看整个数据集的次数。如果 EPOCH 太小，模型可能学得不够；如果太大，可能会过拟合。
-- `LEARNING_RATE` 是优化器的步长。较小的学习率可能导致收敛缓慢，而较大的学习率可能会超出最佳解并阻止收敛。
-- `WEIGHT_DECAY` 是一个正则化项，通过惩罚大权重来帮助防止过拟合。
+- `EPOCHS` 表示模型在训练期间完整遍历整个数据集的次数。如果 EPOCH 太小，模型可能学习不足；如果太大，则可能发生过拟合。
+- `LEARNING_RATE` 是 optimizer 的步长。较小的 learning rate 可能导致收敛缓慢，而较大的 learning rate 可能越过最优解，从而无法收敛。
+- `WEIGHT_DECAY` 是一种 regularization 项，通过惩罚较大的权重来帮助防止过拟合。
 
-关于训练循环，这里有一些有趣的信息需要了解：
-- `criterion = nn.CrossEntropyLoss()` 是用于多类分类任务的损失函数。它将 softmax 激活和交叉熵损失结合在一个函数中，使其适合训练输出类 logits 的模型。
-- 如果模型预期输出其他类型的输出，如二元分类或回归，我们将使用不同的损失函数，如 `nn.BCEWithLogitsLoss()` 用于二元分类或 `nn.MSELoss()` 用于回归。
-- `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` 初始化了 Adam 优化器，这是训练深度学习模型的热门选择。它根据梯度的一阶和二阶矩调整每个参数的学习率。
-- 其他优化器如 `optim.SGD`（随机梯度下降）或 `optim.RMSprop` 也可以使用，具体取决于训练任务的特定要求。
-- `model.train()` 方法将模型设置为训练模式，使得像 dropout 和批量归一化这样的层在训练期间与评估期间的行为不同。
-- `optimizer.zero_grad()` 在反向传播之前清除所有优化张量的梯度，这是必要的，因为在 PyTorch 中，梯度默认是累积的。如果不清除，前几次迭代的梯度将被添加到当前梯度中，导致更新不正确。
-- `loss.backward()` 计算损失相对于模型参数的梯度，然后优化器使用这些梯度来更新权重。
-- `optimizer.step()` 根据计算出的梯度和学习率更新模型参数。
+关于训练循环，以下是一些需要了解的重要信息：
+- `criterion = nn.CrossEntropyLoss()` 是用于 multi-class classification 任务的 loss function。它将 softmax activation 和 cross-entropy loss 合并到一个函数中，因此适合训练输出 class logits 的模型。
+- 如果模型需要输出其他类型的结果，例如 binary classification 或 regression，我们会使用不同的 loss function，例如用于 binary classification 的 `nn.BCEWithLogitsLoss()`，或用于 regression 的 `nn.MSELoss()`。
+- `optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)` 会初始化 Adam optimizer。Adam 是训练 deep learning 模型时常用的选择，它会根据 gradients 的一阶和二阶矩为每个 parameter 调整 learning rate。
+- 根据训练任务的具体要求，也可以使用其他 optimizer，例如 `optim.SGD`（Stochastic Gradient Descent）或 `optim.RMSprop`。
+- `model.train()` 方法会将模型设置为 training mode，使 dropout 和 batch normalization 等 layers 在 training 期间与 evaluation 期间采用不同的行为。
+- `optimizer.zero_grad()` 会在 backward pass 之前清除所有 optimized tensors 的 gradients，这是必要的，因为在 PyTorch 中 gradients 默认会累积。如果不清除，前一次迭代的 gradients 会被添加到当前 gradients 中，从而导致错误的更新。
+- `loss.backward()` 会计算 loss 相对于 model parameters 的 gradients，随后 optimizer 会使用这些 gradients 更新 weights。
+- `optimizer.step()` 会根据计算出的 gradients 和 learning rate 更新 model parameters。
 ```python
 import torch, torch.nn.functional as F
 from torch import nn, optim
@@ -375,46 +376,53 @@ print(classification_report(labels_all, preds_all, zero_division=0))
 print("Confusion matrix (rows = true, cols = pred):")
 print(confusion_matrix(labels_all, preds_all))
 ```
-## 循环神经网络 (RNNs)
+## Recurrent Neural Networks (RNNs) <sup>[[3]](#references)</sup>
 
-循环神经网络 (RNNs) 是一种专为处理序列数据（如时间序列或自然语言）而设计的神经网络类别。与传统的前馈神经网络不同，RNNs 具有自我回环的连接，使其能够保持一个隐藏状态，该状态捕捉序列中先前输入的信息。
+Recurrent Neural Networks (RNNs) 是一类专为处理序列数据而设计的神经网络，例如时间序列或自然语言。与传统的前馈神经网络不同，RNNs 包含会回连自身的连接，使其能够维护一个隐藏状态，用于捕获序列中先前输入的信息。
 
-RNNs 的主要组成部分包括：
-- **循环层**：这些层一次处理一个时间步的输入序列，根据当前输入和先前的隐藏状态更新其隐藏状态。这使得 RNNs 能够学习数据中的时间依赖性。
-- **隐藏状态**：隐藏状态是一个向量，汇总了先前时间步的信息。它在每个时间步更新，并用于对当前输入进行预测。
-- **输出层**：输出层根据隐藏状态生成最终预测。在许多情况下，RNNs 用于语言建模等任务，其中输出是序列中下一个单词的概率分布。
+RNNs 的主要组件包括：
+- **Recurrent Layers**：这些层一次处理一个时间步的输入序列，并根据当前输入和之前的隐藏状态更新其隐藏状态。这使 RNNs 能够学习数据中的时间依赖关系。
+- **Hidden State**：隐藏状态是一个总结之前时间步信息的向量。它会在每个时间步更新，并用于对当前输入进行预测。
+- **Output Layer**：输出层根据隐藏状态生成最终预测。在许多情况下，RNNs 被用于 language modeling 等任务，其中输出是序列中下一个单词的概率分布。
 
-例如，在语言模型中，RNN 处理一个单词序列，例如 "The cat sat on the"，并根据前面单词提供的上下文预测下一个单词，在这种情况下是 "mat"。
+例如，在 language model 中，RNN 会处理一个单词序列，例如 “The cat sat on the”，并根据前面单词提供的上下文预测下一个单词，在此例中为 “mat”。
 
-### 长短期记忆 (LSTM) 和门控循环单元 (GRU)
+### Long Short-Term Memory (LSTM) and Gated Recurrent Unit (GRU) <sup>[[3]](#references)</sup>
 
-RNNs 在处理涉及序列数据的任务（如语言建模、机器翻译和语音识别）时特别有效。然而，由于 **梯度消失等问题，它们在处理长范围依赖性时可能会遇到困难**。
+RNNs 对涉及序列数据的任务尤其有效，例如 language modeling、machine translation 和 speech recognition。然而，由于 **vanishing gradients 等问题，它们可能难以处理长程依赖关系**。
 
-为了解决这个问题，开发了长短期记忆 (LSTM) 和门控循环单元 (GRU) 等专门架构。这些架构引入了控制信息流动的门控机制，使其能够更有效地捕捉长范围依赖性。
+为了解决这一问题，研究人员开发了 Long Short-Term Memory (LSTM) 和 Gated Recurrent Unit (GRU) 等专用架构。这些架构引入了 gating mechanisms 来控制信息流，使其能够更有效地捕获长程依赖关系。
 
-- **LSTM**：LSTM 网络使用三个门（输入门、遗忘门和输出门）来调节信息在单元状态中的流动，使其能够在长序列中记住或遗忘信息。输入门根据输入和先前的隐藏状态控制添加多少新信息，遗忘门控制丢弃多少信息。结合输入门和遗忘门，我们得到新的状态。最后，将新的单元状态与输入和先前的隐藏状态结合，我们也得到新的隐藏状态。
-- **GRU**：GRU 网络通过将输入门和遗忘门合并为一个更新门来简化 LSTM 架构，使其在计算上更高效，同时仍能捕捉长范围依赖性。
+- **LSTM**：LSTM networks 使用三个 gates（input gate、forget gate 和 output gate）来调节信息进出 cell state 的流动，使其能够在较长序列中记住或遗忘信息。input gate 根据输入和之前的隐藏状态控制要添加多少新信息，forget gate 控制要丢弃多少信息。结合 input gate 和 forget gate 后，我们得到新的 state。最后，将新的 cell state、输入和之前的隐藏状态结合起来，即可得到新的 hidden state。
+- **GRU**：GRU networks 通过将 input gate 和 forget gate 合并为单个 update gate，简化了 LSTM 架构，使其在仍能捕获长程依赖关系的同时，具备更高的 computational efficiency。
 
-## LLMs (大型语言模型)
+## LLMs (Large Language Models)
 
-大型语言模型 (LLMs) 是一种专门为自然语言处理任务设计的深度学习模型。它们在大量文本数据上进行训练，能够生成类人文本、回答问题、翻译语言以及执行各种其他与语言相关的任务。
-LLMs 通常基于变换器架构，该架构使用自注意力机制来捕捉序列中单词之间的关系，使其能够理解上下文并生成连贯的文本。
+Large Language Models (LLMs) 是一种专门为 natural language processing 任务设计的 deep learning model。它们使用海量文本数据进行训练，能够生成类似人类的文本、回答问题、翻译语言，以及执行各种其他与语言相关的任务。
+LLMs 通常基于 transformer architectures，使用 self-attention mechanisms 捕获序列中单词之间的关系，使其能够理解上下文并生成连贯的文本。
 
-### 变换器架构
-变换器架构是许多 LLMs 的基础。它由编码器-解码器结构组成，其中编码器处理输入序列，解码器生成输出序列。变换器架构的关键组成部分包括：
-- **自注意力机制**：该机制允许模型在生成表示时权衡序列中不同单词的重要性。它根据单词之间的关系计算注意力分数，使模型能够关注相关上下文。
-- **多头注意力**：该组件允许模型通过使用多个注意力头来捕捉单词之间的多种关系，每个头关注输入的不同方面。
-- **位置编码**：由于变换器没有内置的单词顺序概念，因此在输入嵌入中添加位置编码，以提供有关序列中单词位置的信息。
+### Transformer Architecture <sup>[[4]](#references)</sup>
+transformer architecture 是许多 LLMs 的基础。它由 encoder-decoder 结构组成，其中 encoder 处理输入序列，decoder 生成输出序列。transformer architecture 的关键组件包括：
+- **Self-Attention Mechanism**：该机制允许模型在生成 representations 时评估序列中不同单词的重要性。它根据单词之间的关系计算 attention scores，使模型能够关注相关上下文。
+- **Multi-Head Attention**：该组件通过使用多个 attention heads，使模型能够捕获单词之间的多种关系；每个 attention head 关注输入的不同方面。
+- **Positional Encoding**：由于 transformers 没有内置的单词顺序概念，因此会将 positional encoding 添加到 input embeddings 中，以提供序列中单词位置的信息。
 
-## 扩散模型
-扩散模型是一类生成模型，通过模拟扩散过程来学习生成数据。它们在图像生成等任务中特别有效，并在近年来获得了广泛关注。
-扩散模型通过逐渐将简单的噪声分布转变为复杂的数据分布，经过一系列扩散步骤。扩散模型的关键组成部分包括：
-- **前向扩散过程**：该过程逐渐向数据添加噪声，将其转变为简单的噪声分布。前向扩散过程通常由一系列噪声水平定义，每个水平对应于添加到数据中的特定噪声量。
-- **反向扩散过程**：该过程学习反转前向扩散过程，逐渐去噪数据以从目标分布生成样本。反向扩散过程使用损失函数进行训练，该函数鼓励模型从噪声样本中重建原始数据。
+## Diffusion Models <sup>[[5]](#references)</sup>
+Diffusion models 是一类通过模拟 diffusion process 来学习生成数据的 generative models。它们尤其适用于 image generation 等任务，并在近年来获得了广泛关注。
+Diffusion models 通过一系列 diffusion steps，逐步将简单的 noise distribution 转换为复杂的 data distribution。Diffusion models 的关键组件包括：
+- **Forward Diffusion Process**：该过程逐步向数据添加 noise，将其转换为简单的 noise distribution。Forward diffusion process 通常由一系列 noise levels 定义，其中每个 level 对应于向数据中添加的特定数量的 noise。
+- **Reverse Diffusion Process**：该过程学习反转 forward diffusion process，通过逐步对数据进行 denoising，从 target distribution 生成 samples。Reverse diffusion process 使用 loss function 进行训练，该函数促使模型从 noisy samples 中重建原始数据。
 
-此外，为了从文本提示生成图像，扩散模型通常遵循以下步骤：
-1. **文本编码**：使用文本编码器（例如基于变换器的模型）将文本提示编码为潜在表示。该表示捕捉文本的语义含义。
-2. **噪声采样**：从高斯分布中采样一个随机噪声向量。
-3. **扩散步骤**：模型应用一系列扩散步骤，逐渐将噪声向量转变为与文本提示对应的图像。每一步涉及应用学习到的变换以去噪图像。
+此外，为了根据 text prompt 生成图像，diffusion models 通常遵循以下步骤：
+1. **Text Encoding**：使用 text encoder（例如基于 transformer 的模型）将 text prompt 编码为 latent representation。该 representation 捕获文本的语义含义。
+2. **Noise Sampling**：从 Gaussian distribution 中采样一个随机 noise vector。
+3. **Diffusion Steps**：模型应用一系列 diffusion steps，逐步将 noise vector 转换为与 text prompt 对应的图像。每个步骤都涉及应用 learned transformations，对图像进行 denoising。
 
+## References
+
+- [1] [PyTorch - Neural Networks 教程](https://docs.pytorch.org/tutorials/beginner/blitz/neural_networks_tutorial.html)
+- [2] [PyTorch - Conv2d](https://docs.pytorch.org/docs/stable/generated/torch.nn.Conv2d.html)
+- [3] [PyTorch - LSTM](https://docs.pytorch.org/docs/stable/generated/torch.nn.LSTM.html)
+- [4] [PyTorch - Transformer](https://docs.pytorch.org/docs/stable/generated/torch.nn.Transformer.html)
+- [5] [去噪扩散概率模型](https://arxiv.org/abs/2006.11239)
 {{#include ../banners/hacktricks-training.md}}
