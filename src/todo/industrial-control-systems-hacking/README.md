@@ -1,19 +1,22 @@
-# Hacking van industriële beheerstelsels
+# Hacking van Industriële Beheerstelsels
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Oor hierdie afdeling
+## Oor Hierdie Afdeling
 
-Hierdie afdeling bevat alles oor Industrial Control Systems, insluitend konsepte sowel as metodologieë om hulle met verskeie sekuriteitskwessies wat daarin voorkom, te hack.
+Hierdie afdeling stel komponente, argitekture, protokolle en metodes vir sekuriteitsassessering van industriële beheerstelsels (ICS) bekend. ICS is deel van die breër operasionele tegnologie-domein (OT): programmeerbare stelsels en toestelle wat fisiese prosesse monitor of veranderinge daarin veroorsaak. Algemene voorbeelde sluit toesighoudende beheer- en data-insamelingstelsels (SCADA), verspreide beheerstelsels (DCSs) en programmeerbare logiese beheerders (PLCs) in.<sup>[[1]](#references)</sup>
 
-Industrial Control Systems is oral, aangesien nywerhede noodsaaklik is vir die ekonomiese ontwikkeling van ’n nasie. Hierdie ICS is egter moeilik om op te dateer, en daar word minder vordering op hierdie gebied gemaak. Daarom is dit algemeen om sekuriteitsfoute hier te vind. Die meeste protokolle en standaarde wat hier gebruik word, is in die 90's ontwikkel en het baie minder vermoëns in vergelyking met huidige aanvalscenario's.
+Sekuriteitswerk in hierdie omgewings moet vereistes in ag neem wat van konvensionele IT verskil, insluitend prosesveiligheid, betroubaarheid, beskikbaarheid, deterministiese werking en toerustinglewensiklusse. ’n Tegnies geldige sekuriteitsbeheer kan steeds ongeskik wees indien dit die fisiese proses ontwrig; daarom moet testing en remediëring met die stelseleienaar en bedryfspersoneel gekoördineer word.<sup>[[1]](#references)</sup>
 
-Dit het belangrik geword om hierdie stelsels te beveilig, aangesien die beskadiging daarvan baie geld en, in die ergste geval, selfs lewens kan kos. Om Industrial Control Systems-sekuriteit te verstaan, is dit nodig om die interne werking daarvan te ken.
+## Assesseringprioriteite
 
-Aangesien Industrial Control Systems volgens vasgestelde standaarde geïnstalleer word, sal kennis van elke komponent help om elke ander meganisme in die beheerstelsel met mekaar te verbind. Die installering van hierdie toestelle, soos PLCs en SCADA-stelsels, verskil in verskeie nywerhede; daarom is inligtinginsameling krities.
+Begin deur die beheerde proses, stelselgrense, netwerktopologie, bates, datavloei, vertrouensverhoudings en eksterne verbindings te verstaan. Soortgelyke toestelsoorte kan verskillende funksies oor terreine heen verrig; vermy dus die aanname dat een ontplooiing se argitektuur of impakmodel op ’n ander van toepassing is.<sup>[[1]](#references)</sup>
 
-Industrial Control Systems kan soms ingewikkeld wees en vereis dus baie geduld om enigiets te doen. Dit gaan alles oor probing en reconnaissance voordat aanvalle beplan en exploits ontwikkel word.
+Verkies passiewe ontdekking en bestaande ingenieursdokumentasie waar moontlik. Enige aktiewe scanning of exploitation moet ’n goedgekeurde toetsplan volg wat veiligheidsbeperkings, instandhoudingsvensters, herstelprosedures en stoptoestande definieer. Bevindings moet geëvalueer word vir sowel kuberveiligheidsimpak as moontlike uitwerking op die fisiese proses.<sup>[[1]](#references)</sup>
 
-Hierdie tegnieke kan ook gebruik word om teen aanvalle te beskerm en blue teaming vir Industrial Control Systems uit te voer.
+Dieselfde argitektoniese kennis ondersteun defensiewe aktiwiteite soos bate-inventaris, netwerksegmentering, monitering, insidentrespons en risiko-gebaseerde kwesbaarheidsbestuur.<sup>[[1]](#references)</sup>
 
+## References
+
+- [1] [NIST SP 800-82 Rev. 3 - Gids tot Operasionele Tegnologie (OT)-sekuriteit](https://csrc.nist.gov/pubs/sp/800/82/r3/final)
 {{#include ../../banners/hacktricks-training.md}}

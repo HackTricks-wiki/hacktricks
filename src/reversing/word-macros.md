@@ -2,17 +2,19 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Junk Code
+## Junk Code
 
-Dit is baie algemeen om **junk code wat nooit gebruik word nie** te vind om die reversing van die makro moeiliker te maak.\
-Byvoorbeeld, in die volgende prent kan jy sien dat 'n If wat nooit waar gaan wees nie, gebruik word om 'n bietjie junk en nuttelose code uit te voer.
+Makro's kan **onbereikbare of irrelevante kode** bevat wat bedoel is om analise te vertraag. Identifiseer konstante voorwaardes en volg bereikbare gedrag voordat jy tyd spandeer aan die reversing van 'n vertakking. Die voorbeeld hieronder gebruik 'n `If`-voorwaarde wat nooit waar kan wees nie om junk code te verberg.
 
-![Word Macros - Junk Code: Byvoorbeeld, in die volgende prent kan jy sien dat 'n If wat nooit waar gaan wees nie, gebruik word om 'n bietjie junk en nuttelose code uit te voer](<../images/image (369).png>)
+!['n Word-makro wat 'n onbereikbare voorwaardelike vertakking met junk code bevat](<../images/image (369).png>)
 
-### Macro-vorms
+## Makro-vorms
 
-Deur die **GetObject**-funksie te gebruik, is dit moontlik om data uit vorms van die makro te verkry. Dit kan gebruik word om die analise te bemoeilik. Die volgende is 'n foto van 'n makro-vorm wat gebruik word om **data binne tekskassies te versteek** ('n tekskassie kan ander tekskassies versteek):
+VBA UserForms kan data in kontroles soos tekskassies stoor. Omdat vorms, rame en bladsye elk 'n `Controls`-versameling kan blootstel, moet analysts die volledige beheerhiërargie opsom eerder as om slegs te vertrou op wat die vorm vertoon. Die voorbeeld hieronder stoor verborge data in oorvleuelende tekskassies.<sup>[[1]](#references)</sup>
 
-![Junk Code - Macro Forms: Deur die GetObject-funksie te gebruik, is dit moontlik om data uit vorms van die makro te verkry. Dit kan gebruik word om die analise te bemoeilik. Die volgende is 'n foto van 'n...](<../images/image (344).png>)
+!['n Makro UserForm met data wat in oorvleuelende tekskassies versteek is](<../images/image (344).png>)
 
+## References
+
+- [1] [Microsoft Learn - Versamelings, kontroles en objekte (Microsoft Forms)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/objects-microsoft-forms)
 {{#include ../banners/hacktricks-training.md}}

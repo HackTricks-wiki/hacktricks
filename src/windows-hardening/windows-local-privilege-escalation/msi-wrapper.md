@@ -2,21 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Laai die gratis weergawe van die toepassing af vanaf [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), voer dit uit en wrap die "malicious" binary daarmee.\
-Let daarop dat jy ’n "**.bat**" kan wrap as jy **slegs** **command lines** wil **execute** (kies die .bat-lêer in plaas van cmd.exe)
+MSI Wrapper kan ’n uitvoerbare lêer of script as ’n Windows Installer (`.msi`)-lêer verpak. Laai die gratis weergawe af en begin dit, en kies dan die uitvoerbare lêer om te verpak. Om ’n reeks opdragte uit te voer, kies ’n `.bat`-lêer as die invoer in plaas daarvan om `cmd.exe` te verpak.<sup>[[1]](#references)</sup>
 
-![MSI Wrapper: Let daarop dat jy ’n " .bat " kan wrap as jy slegs command lines wil execute (kies die .bat-lêer in plaas van cmd.exe)](<../../images/image (417).png>)
+![Kies die bron-uitvoerbare lêer of bondelskrip in MSI Wrapper](<../../images/image (417).png>)
 
-En dit is die belangrikste deel van die konfigurasie:
+Stel die uitvoeringskonteks en ander installer-eienskappe noukeurig op:
 
-![MSI Wrapper: En dit is die belangrikste deel van die konfigurasie](<../../images/image (312).png>)
+![Konfigureer die toepassings-ID en sekuriteitskonteks in MSI Wrapper](<../../images/image (312).png>)
 
-![MSI Wrapper: En dit is die belangrikste deel van die konfigurasie](<../../images/image (346).png>)
+![Konfigureer installer-eienskappe in MSI Wrapper](<../../images/image (346).png>)
 
-![MSI Wrapper: En dit is die belangrikste deel van die konfigurasie](<../../images/image (1072).png>)
+![Hersien die MSI Wrapper-bouinstellings](<../../images/image (1072).png>)
 
-(Let asseblief daarop dat jy hierdie waardes sal kan wysig as jy probeer om jou eie binary te pack)
+Hierdie waardes kan verander word wanneer ’n custom binary verpak word.
 
-Klik van hier af net op die **next-knoppies**, en die laaste **build-knoppie**, waarna jou installer/wrapper gegenereer sal word.
+Gaan voort deur die oorblywende wizard-bladsye en kies **Build** om die installer te genereer.<sup>[[1]](#references)</sup>
 
+> [!WARNING]
+> Die skep van ’n MSI verleen nie op sigself verhoogde privileges nie. Of die installasie verhoog word, hang af van Windows Installer-beleid, pakketkonteks en gebruikerstoestemming. Microsoft waarsku dat die aktivering van `AlwaysInstallElevated` vir sowel die gebruiker as die rekenaar nie-administrateurs toelaat om pakkette met system privileges te installeer.<sup>[[2]](#references)</sup>
+
+## References
+
+- [1] [MSI Wrapper-dokumentasie - Aan die gang kom](https://www.exemsi.com/documentation/getting-started/)
+- [2] [Microsoft Learn - Installeer ’n pakket met verhoogde privileges vir ’n nie-admin](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
 {{#include ../../banners/hacktricks-training.md}}

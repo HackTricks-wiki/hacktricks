@@ -4,22 +4,27 @@
 
 ## RUBYOPT
 
-Deur hierdie env variable te gebruik, is dit moontlik om **nuwe params** by **ruby** te voeg wanneer dit uitgevoer word. Hoewel die param **`-e`** nie gebruik kan word om ruby-kode te spesifiseer wat uitgevoer moet word nie, is dit moontlik om die params **`-I`** en **`-r`** te gebruik om ’n nuwe folder by die libraries se laaipad te voeg en dan **’n library te spesifiseer wat gelaai moet word**.
+Ruby ontleed ondersteunde command-line switches vanuit die `RUBYOPT`-omgewingsveranderlike voordat dit ’n script uitvoer. Hoewel Ruby sommige switches daar verwerp, kan `-I` ’n library-search directory vooraf plaas en `-r` kan ’n library require. ’n Proses wat Ruby met attacker-controlled environment variables begin, kan dus gedwing word om attacker-controlled Ruby code te laai.<sup>[[1]](#references)</sup>
 
-Skep die library **`inject.rb`** in **`/tmp`**:
+Skep `/tmp/inject.rb`:
 ```ruby:inject.rb
 puts `whoami`
 ```
-Skep enige plek 'n Ruby script soos:
+Skep ’n onskadelike Ruby-script soos `hello.rb`:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-Laat dan ’n arbitrêre Ruby script dit laai met:
+Voer dit uit met 'n beheerde `RUBYOPT`-waarde:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-Interessante feit, dit werk selfs met param **`--disable-rubyopt`**:
+Om hierdie gedrag te deaktiveer, gee `--disable=rubyopt` (of `--disable-rubyopt`) **voor** die skripnaam deur:<sup>[[1]](#references)</sup>
 ```bash
-RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
+RUBYOPT="-I/tmp -rinject" ruby --disable=rubyopt hello.rb
 ```
+'n Opsie wat ná `hello.rb` geskryf word, word in `ARGV` aan die script oorgedra; dit deaktiveer nie Ruby se vroeëre verwerking van `RUBYOPT` nie.<sup>[[1]](#references)</sup>
+
+## References
+
+- [1] [Ruby-dokumentasie - Ruby-opdragreëlopsies](https://ruby-doc.org/3.4/ruby/options_md.html)
 {{#include ../../../banners/hacktricks-training.md}}
