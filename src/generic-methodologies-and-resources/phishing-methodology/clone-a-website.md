@@ -1,8 +1,10 @@
 # Kloning van 'n webwerf
 
+{{#include ../../banners/hacktricks-training.md}}
+
 Vir 'n phishing-assessment kan dit soms nuttig wees om 'n webwerf volledig te **clone/dump**.
 
-Let daarop dat jy ook sommige payloads by die gekloonde webwerf kan voeg, soos 'n BeEF hook om die gebruiker se "tab" te "beheer".
+Let daarop dat jy ook sekere payloads by die gekloonde webwerf kan voeg, soos 'n BeEF hook om die gebruiker se tab te "beheer".
 
 Daar is verskillende tools wat jy hiervoor kan gebruik:
 
@@ -16,14 +18,14 @@ python3 -m http.server 8000
 ```
 ## goclone
 
-Die goclone repository beskryf die hulpprogram as iets wat ’n webwerf na ’n plaaslike gids aflaai terwyl die relatiewe skakelstruktuur daarvan behoue bly, en dokumenteer die `goclone <url>`-aanroep.<sup>[[3]](#references)</sup>
+Die goclone-bewaarplek beskryf die hulpmiddel as iets wat ’n webwerf na ’n plaaslike gids aflaai terwyl die relatiewe skakelstruktuur daarvan behoue bly, en dokumenteer die `goclone <url>`-aanroep.<sup>[[3]](#references)</sup>
 ```bash
 #https://github.com/imthaghost/goclone
 goclone <url>
 ```
-## Social Engineering Toolit
+## Sosiale-ingenieurswese-gereedskapstel
 
-Die Social-Engineer Toolkit (SET)-repository identifiseer SET as ’n open-source penetration-testing framework vir gemagtigde social-engineering assessments.<sup>[[4]](#references)</sup>
+Die Social-Engineer Toolkit (SET)-repository identifiseer SET as 'n open-source penetration-testing framework vir gemagtigde sosiale-ingenieurswese-assesserings.<sup>[[4]](#references)</sup>
 ```bash
 #https://github.com/trustedsec/social-engineer-toolkit
 ```

@@ -1,6 +1,8 @@
 # Volatility - CheatSheet
 
-As jy 'n hulpmiddel benodig wat memory analysis met verskillende scan levels outomatiseer en verskeie Volatility3 plugins parallel laat loop, kan jy autoVolatility3 gebruik:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
+{{#include ../../../banners/hacktricks-training.md}}
+
+As jy ’n hulpmiddel benodig wat geheue-analise met verskillende skandeervlakke outomatiseer en verskeie Volatility3-plugins parallel uitvoer, kan jy autoVolatility3 gebruik:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 ```bash
 # Full scan (runs all plugins)
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s full
@@ -12,7 +14,7 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-As jy iets **vinnig en mal** wil hê wat verskeie Volatility-plugins parallel sal uitvoer, kan jy gebruik: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
+As jy iets **vinnig en mal** wil hê wat verskeie Volatility-plugins parallel sal uitvoer, kan jy die volgende gebruik: [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -45,19 +47,19 @@ python setup.py install
 
 ## Volatility-opdragte
 
-Besoek die amptelike dokumentasie in [Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
+Toegang tot die amptelike dokumentasie by [Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
 
 ### ’n Nota oor “list”- teenoor “scan”-plugins
 
-`list`-plugins deurloop kernel-onderhoude strukture, dus is hulle vinnig, maar hulle kan objekte mis wat malware ontkoppel. `scan`-plugins soos `psscan` soek geheue vir objekhandtekeninge; hulle kan beëindigde of ontkoppelde prosesse herstel, maar is stadiger en kan vals positiewe lewer wanneer oorblywende strukture beskadig is.<sup>[[8]](#references)</sup>
+`list`-plugins deurloop strukture wat deur die kernel onderhou word, dus is hulle vinnig, maar hulle kan objek­te mis wat deur malware ontkoppel word. `scan`-plugins soos `psscan` soek geheue vir objek-handtekeninge; hulle kan beëindigde of ontkoppelde prosesse herwin, maar is stadiger en kan vals positiewe oplewer wanneer oorblywende strukture beskadig is.<sup>[[8]](#references)</sup>
 
 ## OS-profiele
 
 ### Volatility3
 
-Volatility 3 vereis simbooltabelle vir die teikenbedryfstelsel. Die projek se README lys Windows-, Mac- en Linux-pakkette; plaas hulle in `volatility3/symbols` of in ’n `symbols`-gids langs die uitvoerbare lêer. Windows-simbole wat ontbreek, kan outomaties afgelaai en gegenereer word, terwyl Mac- en Linux-tabelle moontlik afsonderlik geproduseer moet word.<sup>[[9]](#references)</sup>
+Volatility 3 vereis simbooltabelle vir die teiken-bedryfstelsel. Die projek se README lys Windows-, Mac- en Linux-pakke; plaas hulle in `volatility3/symbols` of in ’n `symbols`-gids langs die uitvoerbare lêer. Ontbrekende Windows-simbole kan outomaties verkry en gegenereer word, terwyl Mac- en Linux-tabelle moontlik afsonderlik geproduseer moet word.<sup>[[9]](#references)</sup>
 
-Simbooltabelpakkette vir die verskeie bedryfstelsels is beskikbaar vir **aflaai** by:
+Simbooltabelpakke vir die verskillende bedryfstelsels is beskikbaar vir **aflaai** by:
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -71,7 +73,7 @@ Jy kan die lys van ondersteunde profiele kry deur:
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
-As jy 'n **nuwe profiel wat jy afgelaai het** wil gebruik (byvoorbeeld een vir Linux), moet jy êrens die volgende vouerstruktuur skep: _plugins/overlays/linux_ en die zip-lêer wat die profiel bevat binne hierdie vouer plaas. Kry dan die nommer van die profiele deur:
+As jy ’n **nuwe profiel wat jy afgelaai het** wil gebruik (byvoorbeeld ’n linux-een), moet jy die volgende vouerstruktuur êrens skep: _plugins/overlays/linux_ en die zip-lêer wat die profiel bevat, binne hierdie vouer plaas. Kry dan die nommer van die profiele met:
 ```bash
 ./vol --plugins=/home/kali/Desktop/ctfs/final/plugins --info
 Volatility Foundation Volatility Framework 2.6
@@ -83,9 +85,9 @@ LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 - A Profile for Linux CentOS7_3.10
 VistaSP0x64                                   - A Profile for Windows Vista SP0 x64
 VistaSP0x86                                   - A Profile for Windows Vista SP0 x86
 ```
-Jy kan **Linux- en Mac-profiele** vanaf [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles) **aflaai**
+Jy kan **Linux- en Mac-profiele aflaai** vanaf [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles)
 
-In die vorige brokkie kan jy sien dat die profiel `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64` genoem word, en jy kan dit gebruik om iets soos die volgende uit te voer:
+In die vorige gedeelte kan jy sien dat die profile `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64` genoem word, en jy kan dit gebruik om iets soos die volgende uit te voer:
 ```bash
 ./vol -f file.dmp --plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
 ```
@@ -96,9 +98,9 @@ volatility kdbgscan -f file.dmp
 ```
 #### **Verskille tussen imageinfo en kdbgscan**
 
-[Andrea Fortuna se notas oor image-identifikasie](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/) verduidelik dat `imageinfo` profielvoorstelle lewer, terwyl `kdbgscan` vir KDBG-handtekeninge skandeer en sanity checks toepas om kandidaatprofiele en KDBG-adresse te identifiseer. Die uitvoer hang deels daarvan af of Volatility 'n DTB kan vind, dus moet jy 'n bekende of voorgestelde profiel verskaf wanneer jy dit uitvoer.<sup>[[1]](#references)</sup>
+[Andrea Fortuna se notas oor beeldidentifikasie](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/) verduidelik dat `imageinfo` profielvoorstelle genereer, terwyl `kdbgscan` vir KDBG-handtekeninge skandeer en sanity checks toepas om kandidaatprofiele en KDBG-adresse te identifiseer. Die uitvoer hang gedeeltelik daarvan af of Volatility 'n DTB kan opspoor; gee dus 'n bekende of voorgestelde profiel wanneer jy dit uitvoer.<sup>[[1]](#references)</sup>
 
-Wanneer verskeie kandidate teruggestuur word, vergelyk hul proses- en module-tellings: 'n kandidaat met nul prosesse of modules is minder geloofwaardig as een met bevolkte lyste. Behandel dit as 'n sanity check eerder as bewys dat 'n profiel korrek is.<sup>[[1]](#references)</sup>
+Wanneer veelvuldige kandidate teruggestuur word, vergelyk hul proses- en moduletellings: 'n kandidaat met nul prosesse of modules is minder geloofwaardig as een met bevolkte lyste. Gebruik dit as 'n sanity check eerder as bewys dat 'n profiel korrek is.<sup>[[1]](#references)</sup>
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -112,14 +114,14 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-`KdDebuggerDataBlock`, wat aan Volatility bekend is as KDBG, is ’n `_KDDEBUGGER_DATA64`-struktuur wat `PsActiveProcessHead` insluit, die kop van die proseslys wat vir prosesopnoeming gebruik word.<sup>[[2]](#references)</sup>
+`KdDebuggerDataBlock`, wat aan Volatility as KDBG bekend is, is ’n `_KDDEBUGGER_DATA64`-struktuur wat `PsActiveProcessHead` insluit, die hoof van die proseslys wat vir proses-enumerasie gebruik word.<sup>[[2]](#references)</sup>
 
-## Bedryfstelsel-inligting
+## OS-inligting
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-Die plugin `banners.Banners` kan in **vol3 gebruik word om linux banners in die dump te probeer vind**.
+Die plugin `banners.Banners` kan in **vol3 gebruik word om linux banners** in die dump te probeer vind.
 
 ## Hashes/Wagwoorde
 
@@ -143,9 +145,9 @@ volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 {{#endtab}}
 {{#endtabs}}
 
-## Geheuestorting
+## Geheuedump
 
-Die geheuestorting van ’n proses sal **alles van die huidige status van die proses onttrek**. Die **procdump**-module sal slegs die **kode** **onttrek**.
+Die geheuedump van ’n proses sal **alles** van die proses se huidige status **ekstraheer**. Die **procdump**-module sal slegs die **kode** **ekstraheer**.
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
@@ -153,7 +155,7 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 
 ### Lys prosesse
 
-Probeer om **verdagte** prosesse (volgens naam) of **onverwagte** kind-**prosesse** te vind (byvoorbeeld 'n cmd.exe as 'n kind van iexplorer.exe).\
+Probeer om **verdagte** prosesse (volgens naam) of **onverwagte** kinder-**prosesse** te vind (byvoorbeeld ’n cmd.exe as ’n kind van iexplorer.exe).\
 Dit kan interessant wees om die resultaat van pslist met dié van psscan te **vergelyk** om versteekte prosesse te identifiseer.
 
 {{#tabs}}
@@ -193,7 +195,7 @@ volatility --profile=Win7SP1x86_23418 procdump --pid=3152 -n --dump-dir=. -f fil
 
 ### Opdragreël
 
-Is enigiets verdag uitgevoer?
+Is enigiets verdags uitgevoer?
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -210,11 +212,11 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-Commands executed in `cmd.exe` word bestuur deur **`conhost.exe`** (of **`csrss.exe`** op stelsels voor Windows 7). Dit beteken dat indien **`cmd.exe`** deur 'n aanvaller beëindig word voordat 'n memory dump verkry word, dit steeds moontlik is om die sessie se command history uit die geheue van **`conhost.exe`** te herstel. Om dit te doen, indien ongewone aktiwiteit binne die console se modules bespeur word, moet die geheue van die geassosieerde **`conhost.exe`**-proses gedump word. Deur dan binne hierdie dump na **strings** te soek, kan command lines wat in die sessie gebruik is, moontlik onttrek word.
+Opdragte wat in `cmd.exe` uitgevoer word, word deur **`conhost.exe`** (of **`csrss.exe`** op stelsels voor Windows 7) bestuur. Dit beteken dat, indien **`cmd.exe`** deur ’n aanvaller beëindig word voordat ’n memory dump verkry word, dit steeds moontlik is om die sessie se opdraggeskiedenis uit die geheue van **`conhost.exe`** te herstel. Om dit te doen, moet die geheue van die geassosieerde **`conhost.exe`**-proses gedump word indien ongewone aktiwiteit binne die console se modules bespeur word. Deur dan binne hierdie dump vir **strings** te soek, kan opdraglyne wat in die sessie gebruik is, moontlik onttrek word.
 
 ### Omgewing
 
-Kry die env variables van elke lopende proses. Daar kan interessante waardes wees.
+Kry die env-veranderlikes van elke lopende proses. Daar kan interessante waardes wees.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -234,8 +236,8 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 
 ### Token-voorregte
 
-Kontroleer vir voorregtetokens in onverwagte dienste.\
-Dit kan interessant wees om die prosesse te lys wat ’n voorregtetoken gebruik.
+Kontroleer vir bevoorregte tokens in onverwagte dienste.\
+Dit kan interessant wees om die prosesse te lys wat ’n bevoorregte token gebruik.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -280,7 +282,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### Handles
 
-Nuttig om te weet vir watter ander lêers, sleutels, threads, prosesse... 'n **process 'n handle het** (oopgemaak het)
+Nuttig om te weet vir watter ander lêers, sleutels, threads, prosesse... ’n **proses ’n handle het** (oopgemaak het)
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -337,7 +339,7 @@ strings 3532.dmp > strings_file
 {{#endtab}}
 {{#endtabs}}
 
-Dit laat ook toe om met behulp van die yarascan-module na stringe binne ’n proses te soek:
+Dit laat jou ook toe om met behulp van die yarascan-module na stringe binne 'n proses te soek:
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -356,7 +358,7 @@ volatility --profile=Win7SP1x86_23418 yarascan -Y "https://" -p 3692,3840,3976,3
 
 ### UserAssist
 
-`UserAssist`-registerwaardes teken programme aan wat deur Windows Explorer geloods is, insluitend uitvoertellings en tydstempels van die laaste uitvoering; opdragreël-lanserings word nie in hierdie sleutels aangeteken nie.<sup>[[3]](#references)</sup>
+`UserAssist`-registerwaardes teken programme aan wat deur Windows Explorer geloods is, insluitend uitvoeringsaantalle en tydstempels van die laaste uitvoering; opdragreël-lanserings word nie in hierdie sleutels aangeteken nie.<sup>[[3]](#references)</sup>
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -422,7 +424,7 @@ volatility --profile=SomeLinux -f file.dmp linux_route_cache
 
 ## Registerkorf
 
-### Wys beskikbare korwe
+### Druk beskikbare korwe
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -467,7 +469,7 @@ volatility --profile=Win7SP1x86_23418 hivedump -f file.dmp
 ```
 ## Lêerstelsel
 
-### Mount
+### Montering
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -484,7 +486,7 @@ volatility --profile=SomeLinux -f file.dmp linux_recover_filesystem #Dump the en
 {{#endtab}}
 {{#endtabs}}
 
-### Skandeer/stort
+### Skandeer/dump
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -507,7 +509,7 @@ volatility --profile=SomeLinux -f file.dmp linux_find_file -i 0xINODENUMBER -O /
 {{#endtab}}
 {{#endtabs}}
 
-### Meesterlêertabel
+### Master File Table
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -523,7 +525,7 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-Op NTFS het die MFT ten minste een inskrywing per lêer op die volume, insluitend homself. Lêermetadata en inhoud word in MFT-inskrywings gestoor of op plekke waarna daardie inskrywings verwys; sien die [Microsoft-dokumentasie](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
+Op NTFS het die MFT ten minste een inskrywing per lêer op die volume, insluitend homself. Lêermetadata en inhoud word in MFT-inskrywings of op liggings wat deur daardie inskrywings beskryf word, gestoor; sien die [Microsoft-dokumentasie](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table).<sup>[[4]](#references)</sup>
 
 ### SSL Keys/Certs
 
@@ -584,8 +586,8 @@ volatility --profile=SomeLinux -f file.dmp linux_keyboard_notifiers #Keyloggers
 
 ### Skandering met yara
 
-Gebruik hierdie script om al die yara malware-reëls vanaf github af te laai en saam te voeg: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
-Skep die _**rules**_-gids en voer dit uit. Dit sal 'n lêer genaamd _**malware_rules.yar**_ skep wat al die yara-reëls vir malware bevat.
+Gebruik hierdie script om al die yara-malware-reëls vanaf github af te laai en saam te voeg: [https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9](https://gist.github.com/andreafortuna/29c6ea48adf3d45a979a78763cdc7ce9)\
+Skep die _**rules**_-gids en voer dit uit. Dit sal ’n lêer genaamd _**malware_rules.yar**_ skep wat al die yara-reëls vir malware bevat.
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -671,7 +673,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-Dit is moontlik om die **bash-geskiedenis uit die geheue te lees.** Jy kan ook die _.bash_history_-lêer dump, maar aangesien dit gedeaktiveer was, sal jy bly wees dat jy hierdie Volatility-module kan gebruik
+Dit is moontlik om die **bash-geskiedenis uit die geheue te lees.** Jy kan ook die _.bash_history_-lêer dump, maar as dit gedeaktiveer was, sal jy bly wees dat jy hierdie volatility-module kan gebruik
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -687,7 +689,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp linux_bash
 {{#endtab}}
 {{#endtabs}}
 
-### Tydlyn
+### TimeLine
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -719,7 +721,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp driverscan
 {{#endtab}}
 {{#endtabs}}
 
-### Kry die knipbord
+### Kry knipbord
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp
@@ -729,31 +731,31 @@ volatility --profile=Win7SP1x86_23418 clipboard -f file.dmp
 #Just vol2
 volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
 ```
-### Kry notepad-teks
+### Kry teks uit Notepad
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 ```
-Geen screenshot of teks is ontvang nie. Laai dit asseblief op of plak die inhoud hier.
+Laai asseblief die screenshot op of verskaf die teks wat vertaal moet word.
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```
-### Meester-selflaairekord (MBR)
+### Meesterlaairekord (MBR)
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-Op BIOS-gebaseerde stelsels bevat die MBR by sektor 0 die meesterlaaikode en die partisietabel. Microsoft dokumenteer dat `bootsect /mbr` die kode opdateer sonder om daardie tabel te verander.<sup>[[7]](#references)</sup>
+Op BIOS-gebaseerde stelsels bevat die MBR by sektor 0 die hooflaaikode en die partisietabel. Microsoft dokumenteer dat `bootsect /mbr` die kode bywerk sonder om daardie tabel te verander.<sup>[[7]](#references)</sup>
 
 ## References
 
-- [1] [Volatility, my eie cheatsheet (Deel 1): Beeldidentifikasie](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
+- [1] [Volatility, my own cheatsheet (Part 1): Beeldidentifikasie](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
 - [2] [Vind die Kernel Debugger Block](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
 - [3] [Windows UserAssist-sleutels](https://www.aldeid.com/wiki/Windows-userassist-keys)
-- [4] [Master File Table (Plaaslike lêerstelsels) - Win32-toepassings](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
-- [5] [UEFI-gebaseerde rekenaar, beskermende MBR: wat is dit? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
-- [6] [Tutoriaal: Volatility-plugins vir malware-analise](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
-- [7] [Bootsect-opdragreëlopsies](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/bootsect-command-line-options?view=windows-11)
-- [8] [Tutoriaal - Volatility-plugins en malware-analise](https://tomchop.me/posts/volatility-plugin-malware-analysis/)
+- [4] [Master File Table (Plaaslike lêerstelsels) - Win32 apps](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
+- [5] [UEFI-gebaseerde rekenaar, protective MBR: wat is dit? - Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
+- [6] [Tutoriaal: Volatility plugins vir malware-analise](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
+- [7] [Bootsect Command-Line Options](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/bootsect-command-line-options?view=windows-11)
+- [8] [Tutoriaal - Volatility plugins en malware-analise](https://tomchop.me/posts/volatility-plugin-malware-analysis/)
 - [9] [Volatility 3 README](https://github.com/volatilityfoundation/volatility3/blob/develop/README.md)
 {{#include ../../../banners/hacktricks-training.md}}

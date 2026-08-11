@@ -1,6 +1,8 @@
 # Basiese Forensiese Metodologie
 
-## Skep en Monteer van 'n Image
+{{#include ../../banners/hacktricks-training.md}}
+
+## Skep en Monteer van 'n Beeld
 
 
 {{#ref}}
@@ -9,23 +11,23 @@
 
 ## Malware-analise
 
-Dit **is nie noodwendig die eerste stap om uit te voer nadat jy die image het nie**. Jy kan egter hierdie malware-analise-tegnieke onafhanklik gebruik as jy 'n lêer, 'n lêerstelsel-image, memory image, pcap... het, dus is dit goed om **hierdie aksies in gedagte te hou**:
+Dit **is nie noodwendig die eerste stap om uit te voer sodra jy die beeld het nie**. Maar jy kan hierdie malware-analise-tegnieke onafhanklik gebruik indien jy 'n lêer, 'n lêerstelselbeeld, geheuebeeld, pcap... het, dus is dit goed om **hierdie aksies in gedagte te hou**:
 
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspeksie van 'n Image
+## Inspeksie van 'n Beeld
 
-As jy 'n **forensiese image** van 'n toestel ontvang, kan jy begin om die gebruikte **partisies en lêerstelsel** te **analiseer** en moontlik **interessante lêers** te **herwin** (selfs geskrapte lêers). Leer hoe by:
+indien jy 'n **forensiese beeld** van 'n toestel ontvang, kan jy begin om die gebruikte **partisies en lêerstelsel** te **analiseer** en potensieel **interessante lêers** te **herwin** (selfs geskrapte lêers). Leer hoe by:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Afhangend van die gebruikte OS'e en selfs platform, moet daar na verskillende interessante artefakte gesoek word:
+Afhangende van die gebruikte OS'e en selfs platform, moet daar na verskillende interessante artefakte gesoek word:
 
 
 {{#ref}}
@@ -47,24 +49,24 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Diepgaande inspeksie van spesifieke lêertipes en Software
+## Diep inspeksie van spesifieke lêertipes en Software
 
-As jy 'n baie **verdagte** **lêer** het, kan verskeie **tricks**, **afhangend van die lêertipe en Software** wat dit geskep het, nuttig wees.\
-Lees die volgende bladsy om van interessante tricks te leer:
+Indien jy 'n baie **verdagte** **lêer** het, kan verskeie **tricks**, **afhangende van die lêertipe en die software** wat dit geskep het, nuttig wees.\
+Lees die volgende bladsy om van die interessante tricks te leer:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Ek wil spesifiek die volgende bladsy noem:
+Ek wil spesiale vermelding maak van die bladsy:
 
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Inspeksie van Memory Dumps
+## Inspeksie van 'n Memory Dump
 
 
 {{#ref}}

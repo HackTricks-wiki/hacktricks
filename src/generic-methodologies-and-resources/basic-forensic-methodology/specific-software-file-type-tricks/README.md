@@ -1,4 +1,6 @@
-# Spesifieke truuks vir sagteware/lêertipes
+# Spesifieke sagteware-/lêertipe-truuks
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 Hier kan jy interessante truuks vir spesifieke lêertipes en/of sagteware vind:
 

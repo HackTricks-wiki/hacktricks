@@ -1,8 +1,10 @@
 # Webversoeke
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Python Requests
 
-Hierdie voorbeelde gebruik Requests se gedokumenteerde versoek-argumente, respons-eienskappe, multipart-lêertupels en sessies.<sup>[[1]](#references)</sup> Die `verify=False`-voorbeelde deaktiveer TLS-sertifikaatverifikasie en moet tot beheerde toetsing beperk word.<sup>[[1]](#references)</sup>
+Hierdie voorbeelde gebruik Requests se gedokumenteerde versoekargumente, antwoordeienskappe, multipart-lêer-tuples en sessies.<sup>[[1]](#references)</sup> Die `verify=False`-voorbeelde deaktiveer TLS-sertifikaatverifikasie en moet tot beheerde toetsing beperk word.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,7 +78,7 @@ return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 ## Python cmd om 'n RCE te exploit
 
-Die command loop subclass Python se `Cmd`; sy `default`-metode hanteer onbekende command prefixes, `cmdloop` stuur input lines af, en `re.DOTALL` laat die extraction pattern oor newlines strek.<sup>[[2]](#references)[[3]](#references)</sup>
+Die command loop subclass Python se `Cmd`; sy `default`-metode hanteer onherkende command prefixes, `cmdloop` stuur invoerlyne, en `re.DOTALL` laat die ekstraksiepatroon oor nuwe lyne strek.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -105,7 +107,7 @@ term.cmdloop()
 ```
 ## References
 
-- [1] [Requests-ontwikkelaarkoppelvlak](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — Ondersteuning vir lyngeoriënteerde bevelinterpreteerders](https://docs.python.org/3/library/cmd.html)
-- [3] [Python `re` — Bewerkings met gereelde uitdrukkings](https://docs.python.org/3/library/re.html)
+- [1] [Requests-ontwikkelaarskoppelvlak](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Ondersteuning vir lyngebaseerde bevelinterpreteerders](https://docs.python.org/3/library/cmd.html)
+- [3] [Python `re` — Bewerkings met reguliere uitdrukkings](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

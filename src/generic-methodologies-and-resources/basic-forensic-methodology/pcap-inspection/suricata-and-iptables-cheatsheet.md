@@ -1,16 +1,18 @@
 # Suricata & Iptables-cheatsheet
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Iptables
 
 ### Kettings
 
 In iptables is elke ketting ’n opeenvolgende lys reëls wat met pakkette ooreenstem. Die verstek-`filter`-tabel het die ingeboude `INPUT`-, `FORWARD`- en `OUTPUT`-kettings; ander tabelle, soos `nat`, kan beskikbaar wees, afhangend van die kernkonfigurasie en gelaaide modules.<sup>[[1]](#references)</sup>
 
-- **Input Chain**: Word gebruik om die gedrag van inkomende verbindings te beheer.
+- **Input Chain**: Word gebruik om die gedrag van inkomende verbindings te bestuur.
 - **Forward Chain**: Word gebruik om inkomende verbindings te hanteer wat nie vir die plaaslike stelsel bestem is nie. Dit is tipies vir toestelle wat as routers optree, waar die ontvangde data na ’n ander bestemming aangestuur moet word. Hierdie ketting is hoofsaaklik relevant wanneer die stelsel by routing, NATing of soortgelyke aktiwiteite betrokke is.
-- **Output Chain**: Word toegewy aan die regulering van uitgaande verbindings.
+- **Output Chain**: Toegewy aan die regulering van uitgaande verbindings.
 
-Hierdie kettings verseker die ordelike verwerking van netwerkverkeer, wat die spesifikasie van gedetailleerde reëls moontlik maak om die vloei van data na, deur en uit ’n stelsel te beheer.
+Hierdie kettings verseker die ordelike verwerking van netwerkverkeer, wat die spesifikasie van gedetailleerde reëls moontlik maak wat die vloei van data na, deur en uit ’n stelsel beheer.
 
 Die string-match-voorbeelde gebruik die standaard `string`-passing; passing is hooflettergevoelig tensy `--icase` verskaf word, en `--algo` kies die BM- of KMP-soekstrategie.<sup>[[2]](#references)</sup>
 ```bash
@@ -53,7 +55,7 @@ iptables-restore < /etc/sysconfig/iptables
 
 ### Installasie & Konfigurasie
 
-Pakketopdragte hieronder is verspreidings- en vrystelling-spesifiek; die amptelike installasiegids dokumenteer die Ubuntu PPA, Debian-backports, RPM-pakkette en systemd-diensbestuur.<sup>[[3]](#references)</sup>
+Pakketopdragte is spesifiek vir die verspreiding en vrystelling; die amptelike installasiegids dokumenteer die Ubuntu PPA, Debian backports, RPM packages en systemd-diensbestuur.<sup>[[3]](#references)</sup>
 ```bash
 # Package installation details vary by distribution and release; see References.
 # Ubuntu
@@ -116,14 +118,14 @@ Type=simple
 
 systemctl daemon-reload
 ```
-Die `suricata-update`-volgorde volg Suricata se gedokumenteerde werksvloei vir die ophaal, lys, aktiveer en laai van reëlbronne.<sup>[[4]](#references)</sup> Die `suricatasc`-opdrag hierbo is ’n gedokumenteerde nie-blokkerende metode om reëls via ’n Unix-sok te herlaai.<sup>[[8]](#references)</sup> Die NFQUEUE-reëls stuur plaaslike in- en uitgaande verkeer na Suricata, terwyl `-q 0` tou 0 vir inline-verwerking kies.<sup>[[7]](#references)</sup>
+Die `suricata-update`-volgorde volg Suricata se gedokumenteerde werkvloei vir die ophaal, lys, aktivering en laai van reëlbronne.<sup>[[4]](#references)</sup> Die `suricatasc`-opdrag hierbo is ’n gedokumenteerde nie-blokkerende Unix-soketmetode vir die herlaai van reëls.<sup>[[8]](#references)</sup> Die NFQUEUE-reëls stuur plaaslike in- en uitsetverkeer na Suricata, terwyl `-q 0` tou 0 vir inline-verwerking kies.<sup>[[7]](#references)</sup>
 
 ### Reëldefinisies
 
-’n Suricata-reël/handtekening bestaan uit drie dele.<sup>[[5]](#references)</sup>
+’n Suricata-reël/signature het drie dele.<sup>[[5]](#references)</sup>
 
-- Die **aksie** spesifiseer wat gebeur wanneer die handtekening ooreenstem.
-- Die **kop** kies die protokol, IP-adresse, poorte en rigting.
+- Die **aksie** spesifiseer wat gebeur wanneer die signature ooreenstem.
+- Die **kopskrif** kies die protokol, IP-adresse, poorte en rigting.
 - Die **reëlopsies** definieer die besonderhede wat spesifiek vir die passing is.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
@@ -132,11 +134,11 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 
 - alert - genereer 'n alert
 - pass - stop verdere inspeksie van die packet
-- **drop** - laat die packet val en genereer 'n alert
+- **drop** - drop packet en genereer 'n alert
 - **reject** - stuur 'n RST/ICMP unreachable-fout aan die sender van die ooreenstemmende packet.
-- rejectsrc - dieselfde as net _reject_
+- rejectsrc - dieselfde as _reject_
 - rejectdst - stuur 'n RST/ICMP-foutpacket aan die ontvanger van die ooreenstemmende packet.
-- rejectboth - stuur RST/ICMP-foutpackets aan albei kante van die gesprek.
+- rejectboth - stuur RST/ICMP-foutpakette aan albei kante van die gesprek.
 
 #### **Protokolle**
 
@@ -152,11 +154,11 @@ Suricata ondersteun IP-reekse, negasie en gegroepeerde adreslyste.<sup>[[5]](#re
 
 | Example                       | Meaning                                  |
 | ----------------------------- | ---------------------------------------- |
-| ! 1.1.1.1                     | Elke IP-adres behalwe 1.1.1.1             |
+| ! 1.1.1.1                     | Elke IP-adres behalwe 1.1.1.1            |
 | !\[1.1.1.1, 1.1.1.2]          | Elke IP-adres behalwe 1.1.1.1 en 1.1.1.2 |
-| $HOME_NET                     | Jou instelling van HOME_NET in yaml         |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET en nie HOME_NET nie            |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 behalwe 10.0.0.5          |
+| $HOME_NET                     | Jou instelling van HOME_NET in yaml      |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET en nie HOME_NET nie         |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 behalwe 10.0.0.5             |
 
 #### Bron- en Bestemmingspoorte
 
@@ -164,17 +166,17 @@ Suricata ondersteun poortreekse, negasie en lyste van poorte.<sup>[[5]](#referen
 
 | Example         | Meaning                                |
 | --------------- | -------------------------------------- |
-| any             | enige adres                            |
+| any             | enige adres                           |
 | \[80, 81, 82]   | poort 80, 81 en 82                     |
-| \[80: 82]       | Reeks van 80 tot 82                  |
-| \[1024: ]       | Van 1024 tot die hoogste poortnommer |
-| !80             | Elke poort behalwe 80                      |
+| \[80: 82]       | Reeks van 80 tot 82                    |
+| \[1024: ]       | Vanaf 1024 tot by die hoogste poortnommer |
+| !80             | Elke poort behalwe 80                 |
 | \[80:100,!99]   | Reeks van 80 tot 100, maar 99 uitgesluit |
 | \[1:80,!\[2,4]] | Reeks van 1-80, behalwe poorte 2 en 4  |
 
 #### Rigting
 
-Suricata-reëls kan die kommunikasierigting wat geëvalueer word, spesifiseer.<sup>[[5]](#references)</sup>
+Suricata-reëls kan die kommunikasierigting spesifiseer wat geëvalueer word.<sup>[[5]](#references)</sup>
 ```
 source -> destination
 source <> destination  (both directions)
@@ -225,13 +227,13 @@ drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
 ## References
 
-- [1] [iptables(8) — Linux-manualbladsy](https://man7.org/linux/man-pages/man8/iptables.8.html)
-- [2] [iptables-extensions(8) — Linux-manualbladsy](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
+- [1] [iptables(8) — Linux-handleidingblad](https://man7.org/linux/man-pages/man8/iptables.8.html)
+- [2] [iptables-extensions(8) — Linux-handleidingblad](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
 - [3] [3. Installasie — Suricata 7.0.14-dokumentasie](https://docs.suricata.io/en/suricata-7.0.14/install.html)
 - [4] [9.1. Reëlbestuur met Suricata-Update — Suricata 8.0.1-dokumentasie](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
 - [5] [8.1. Reëlsformaat — Suricata 8.0.3-dokumentasie](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
 - [6] [8.7. Payload-sleutelwoorde — Suricata 8.0.3-dokumentasie](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
-- [7] [15. Stel IPS/inline vir Linux op — Suricata 7.0.15-dokumentasie](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
+- [7] [15. Opstelling van IPS/inline vir Linux — Suricata 7.0.15-dokumentasie](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
 - [8] [9.3. Herlaai van reëls — Suricata 7.0.14-dokumentasie](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
 - [9] [8. Suricata-reëls — Suricata 8.0.3-dokumentasie](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)
 {{#include ../../../banners/hacktricks-training.md}}

