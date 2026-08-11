@@ -81,6 +81,7 @@ If you can read the Enterprise CA’s private key from the machine key store, yo
 - Strongly limit assignment of SeManageVolumePrivilege (Perform volume maintenance tasks) to only trusted admins.
 - Monitor Sensitive Privilege Use and process handle opens to device objects like \\.\C:, \\.\PhysicalDrive0.
 - Prefer properly configured HSM- or TPM-backed, non-exportable CA keys so a copied key-container file is not sufficient to recover usable private-key material.
+- For application secrets outside the CA-key path, DPAPI or DPAPI-NG can make a copied data file insufficient by protecting it to a user, machine, group, or other authorized principal. This does not protect plaintext already accessible to the compromised principal.<sup>[[4]](#references)</sup>
 - Keep uploads, temp, and extraction paths non-executable and separated (web context defense that often pairs with this chain post‑exploitation).
 
 ## References
@@ -88,5 +89,6 @@ If you can read the Enterprise CA’s private key from the machine key store, yo
 - [1] [Microsoft – Perform volume maintenance tasks (SeManageVolumePrivilege)](https://learn.microsoft.com/previous-versions/windows/it-pro/windows-10/security/threat-protection/security-policy-settings/perform-volume-maintenance-tasks)
 - [2] [0xdf – HTB: Certificate (SeManageVolumePrivilege used to read CA key → Golden Certificate)](https://0xdf.gitlab.io/2025/10/04/htb-certificate.html)
 - [3] [Microsoft - `CreateFile` physical disks and volumes](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea#physical-disks-and-volumes)
+- [4] [Microsoft - Cryptography API: Next Generation and DPAPI-NG](https://learn.microsoft.com/en-us/windows/win32/seccng/cng-portal)
 
 {{#include ../../banners/hacktricks-training.md}}
