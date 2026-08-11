@@ -4,24 +4,24 @@
 
 ## Security Descriptors
 
-[From the docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Security Descriptor Definition Language (SDDL) defines the format which is used to describe a security descriptor. SDDL uses ACE strings for DACL and SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`<sup>[[1]](#references)</sup>
+Windows security descriptors contain an owner SID, a primary-group SID, a discretionary ACL (DACL) that controls access, and a system ACL (SACL) used mainly for auditing. Security Descriptor Definition Language (SDDL) is the textual representation; an ACE string has the form `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`.<sup>[[1]](#references)[[4]](#references)</sup>
 
-The **security descriptors** are used to **store** the **permissions** an **object** has **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.
+A security descriptor stores who owns a securable object and which principals are allowed or denied specific rights over it. If an attacker can change a DACL, they may grant a low-privileged principal rights that normally require an administrative role.
 
-Then, this persistence technique is based on the ability to win every privilege needed against certain objects, to be able to perform a task that usually requires admin privileges but without the need of being admin.
+This makes narrowly modified descriptors useful for persistence: the account remains outside obvious privileged groups while retaining access to a particular management surface. Preserve the original descriptor before testing so the change can be removed exactly.
 
 ### Access to WMI
 
 You can give a user access to **execute remotely WMI** [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)<sup>[[2]](#references)</sup>:
 
 ```bash
-Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc –namespace 'root\cimv2' -Verbose
-Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2' -Remove -Verbose #Remove
+Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc -Namespace 'root\cimv2' -Verbose
+Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc -Namespace 'root\cimv2' -Remove -Verbose # Remove
 ```
 
 ### Access to WinRM
 
-Give access to **winrm PS console to a user** [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**<sup>[[2]](#references)</sup>
+Grant a user access to a remote PowerShell/WinRM endpoint with Nishang's `Set-RemotePSRemoting` function:<sup>[[2]](#references)</sup>
 
 ```bash
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Verbose
@@ -30,7 +30,7 @@ Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remo
 
 ### Remote access to hashes
 
-Access the **registry** and **dump hashes** creating a **Reg backdoor using** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** so you can at any moment retrieve the **hash of the computer**, the **SAM** and any **cached AD** credential in the computer. So, it's very useful to give this permission to a **regular user against a Domain Controller computer**:<sup>[[3]](#references)</sup>
+DAMP can create a registry-ACL backdoor that later permits remote retrieval of the machine-account hash, local SAM hashes, and cached domain credentials. Granting these narrow rights to an otherwise ordinary account—especially against a domain controller—provides powerful persistence without privileged-group membership.<sup>[[3]](#references)</sup>
 
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
@@ -53,5 +53,6 @@ Check [**Silver Tickets**](silver-ticket.md) to learn how you could use the hash
 - [1] [Security Descriptor Definition Language - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language)
 - [2] [nishang - Set-RemoteWMI.ps1](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)
 - [3] [DAMP - Discretionary ACL Modification Project](https://github.com/HarmJ0y/DAMP)
+- [4] [Microsoft Learn — Security descriptor string format](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format)
 
 {{#include ../../banners/hacktricks-training.md}}

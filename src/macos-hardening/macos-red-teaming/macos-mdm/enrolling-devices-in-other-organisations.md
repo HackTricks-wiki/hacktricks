@@ -4,14 +4,13 @@
 
 ## Intro
 
-As [**previously commented**](#what-is-mdm-mobile-device-management)**,** in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected.
+Apple Automated Device Enrollment (formerly DEP) begins by identifying a device assigned to an organization. The 2018 research summarized here showed that knowledge of an assigned serial number was sufficient to retrieve some organizations' enrollment profiles because those organizations did not require adequate additional authentication. This is a historical finding, not a claim that every current MDM can be joined with only a serial number. Profiles may contain certificates, applications, Wi-Fi secrets, VPN settings, and other sensitive configuration.<sup>[[1]](#references)[[2]](#references)</sup>
 
 **The following is a summary of the research [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Check it for further technical details!**<sup>[[1]](#references)</sup>
 
 ## Overview of DEP and MDM Binary Analysis
 
-This research delves into the binaries associated with the Device Enrollment Program (DEP) and Mobile Device Management (MDM) on macOS. Key components include:
+The research analyzed binaries associated with DEP and MDM on the macOS versions current at the time. Component names and responsibilities can change across releases:
 
 - **`mdmclient`**: Communicates with MDM servers and triggers DEP check-ins on macOS versions before 10.13.4.
 - **`profiles`**: Manages Configuration Profiles, and triggers DEP check-ins on macOS versions 10.13.4 and later.
@@ -38,7 +37,7 @@ Modifying the DEP request payload before JSON serialization in `cloudconfigurati
 2. Locating the point where the system serial number is fetched.
 3. Injecting an arbitrary serial number into the memory before the payload is encrypted and sent.
 
-This method allowed for retrieving complete DEP profiles for arbitrary serial numbers, demonstrating a potential vulnerability.<sup>[[1]](#references)</sup>
+This method allowed the researchers to retrieve DEP profiles for supplied, assigned serial numbers. It did not make an unassigned arbitrary serial number valid.<sup>[[1]](#references)</sup>
 
 ### Automating Instrumentation with Python
 
@@ -53,5 +52,6 @@ The research highlighted significant security concerns:
 ## References
 
 - [1] [Duo Labs — MDM Me Maybe: Device Enrollment Program Security](https://duo.com/labs/research/mdm-me-maybe)
+- [2] [Apple Platform Deployment — Automated Device Enrollment](https://support.apple.com/guide/deployment/automated-device-enrollment-and-mdm-dep73069dd57/web)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-Modern Windows applications that render Markdown/HTML often turn user-supplied links into clickable elements and hand them to `ShellExecuteExW`. Without strict scheme allowlisting, any registered protocol handler (e.g., `file:`, `ms-appinstaller:`) can be triggered, leading to code execution in the current user context.<sup>[[1]](#references)</sup>
+Windows applications that render Markdown or HTML may hand clicked targets to `ShellExecuteExW`. Because ShellExecute dispatches registered URI schemes and file associations, a renderer needs an explicit allowlist rather than assuming every link is HTTP(S). The Notepad behavior below describes CVE-2026-20841 and should not be generalized to every renderer.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## ShellExecuteExW surface in Windows Notepad Markdown mode
 - Notepad chooses Markdown mode **only for `.md` extensions** via a fixed string comparison in `sub_1400ED5D0()`.<sup>[[1]](#references)</sup>
@@ -39,10 +39,11 @@ Modern Windows applications that render Markdown/HTML often turn user-supplied l
 (\x3C|\[[^\x5d]+\]\()file:(\x2f|\x5c\x5c){4}
 (\x3C|\[[^\x5d]+\]\()ms-appinstaller:(\x2f|\x5c\x5c){2}
 ```
-- Patch behavior reportedly **allowlists local files and HTTP(S)**; anything else reaching `ShellExecuteExW` is suspicious. Extend detections to other installed protocol handlers as needed, since attack surface varies by system.<sup>[[1]](#references)</sup>
+- The vendor fix described by ZDI restricts accepted targets to local files and HTTP(S). Extend detections to other installed protocol handlers as needed because the registered attack surface varies by system.<sup>[[1]](#references)</sup>
 
 ## References
 - [1] [CVE-2026-20841: Arbitrary Code Execution in the Windows Notepad](https://www.thezdi.com/blog/2026/2/19/cve-2026-20841-arbitrary-code-execution-in-the-windows-notepad)
 - [2] [CVE-2026-20841 PoC](https://github.com/BTtea/CVE-2026-20841-PoC)
+- [3] [Microsoft Learn — `ShellExecuteExW`](https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-shellexecuteexw)
 
 {{#include ../banners/hacktricks-training.md}}
