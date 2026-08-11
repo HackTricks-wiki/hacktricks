@@ -1,8 +1,10 @@
 # Análise de pcap do DNSCat
 
-Se você tiver um PCAP com dados sendo **exfiltrados pelo DNSCat** (sem usar criptografia), poderá conseguir recuperar o conteúdo exfiltrado.
+{{#include ../../../banners/hacktricks-training.md}}
 
-Para a captura do BSidesSF 2017 referenciada abaixo, o write-up inferiu que cada consulta decodificada começava com 9 bytes de dados específicos do dnscat antes do conteúdo transferido. Como o dnscat2 define diferentes tipos de pacotes e layouts de cabeçalho, verifique o framing relevante antes de aplicar esse deslocamento a outro tráfego.<sup>[[1]](#references)[[2]](#references)</sup>
+Se você tiver um PCAP com dados sendo **exfiltrados pelo DNSCat** (sem usar criptografia), talvez seja possível recuperar o conteúdo exfiltrado.
+
+Para a captura do BSidesSF 2017 referenciada abaixo, o write-up inferiu que cada consulta decodificada começava com 9 bytes de dados específicos do dnscat antes do conteúdo transferido. Como o dnscat2 define diferentes tipos de pacotes e layouts de cabeçalho, verifique o framing relevante antes de aplicar esse offset a outro tráfego.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -21,9 +23,9 @@ last = qry
 
 #print(f)
 ```
-Para mais informações, consulte o [relato do BSidesSF 2017](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap) e a [documentação do protocolo dnscat2](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md).
+Para mais informações, consulte o [relatório do BSidesSF 2017](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap) e a [documentação do protocolo dnscat2](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md).
 
-O repositório [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder) fornece um decoder em Python 3 que extrai streams de um PCAP filtrando consultas DNS para um domínio especificado.<sup>[[3]](#references)</sup>
+O repositório [DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder) fornece um decoder em Python 3 que extrai fluxos de um PCAP filtrando consultas DNS para um domínio especificado.<sup>[[3]](#references)</sup>
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```

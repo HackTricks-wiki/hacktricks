@@ -1,10 +1,12 @@
 # Truques do Wireshark
 
-## Melhore suas habilidades com o Wireshark
+{{#include ../../../banners/hacktricks-training.md}}
+
+## Aprimore suas habilidades com o Wireshark
 
 ### Tutoriais
 
-Os tutoriais a seguir são excelentes para aprender alguns truques básicos interessantes:
+Os tutoriais a seguir são excelentes para aprender alguns truques básicos:
 
 - [https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/](https://unit42.paloaltonetworks.com/unit42-customizing-wireshark-changing-column-display/)
 - [https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/](https://unit42.paloaltonetworks.com/using-wireshark-display-filter-expressions/)
@@ -13,7 +15,7 @@ Os tutoriais a seguir são excelentes para aprender alguns truques básicos inte
 
 ### Informações analisadas
 
-**Informações para especialistas**
+**Informações de especialista**
 
 Ao clicar em _**Analyze** --> **Expert Information**_, você terá uma **visão geral** do que está acontecendo nos pacotes **analisados**:
 
@@ -68,11 +70,11 @@ Outros filtros interessantes:
 - `(http.request or tls.handshake.type == 1 or tcp.flags eq 0x0002 or dns) and !(udp.port eq 1900)`
 - Tráfego HTTP e HTTPS inicial + TCP SYN + requisições DNS
 - `tls.handshake.extensions_server_name contains "example.com"`
-- Faça pivot no SNI enviado no ClientHello mesmo quando não puder descriptografar o payload
+- Faça pivot com base no SNI enviado no ClientHello, mesmo quando não for possível descriptografar o payload
 - `tls.handshake.extensions_alpn_str == "h2" or tls.handshake.extensions_alpn_str == "h3"`
-- Separe rapidamente sessões clássicas HTTPS, HTTP/2 e compatíveis com HTTP/3
+- Separe rapidamente as sessões clássicas compatíveis com HTTPS, HTTP/2 e HTTP/3
 - `quic or http3`
-- Encontre tráfego UDP/443 moderno que não será identificado se você revisar apenas conversas TCP
+- Encontre tráfego UDP/443 moderno que será ignorado se você revisar apenas as conversas TCP
 
 ### Pesquisa
 
@@ -80,7 +82,7 @@ Se quiser **pesquisar** por **conteúdo** dentro dos **pacotes** das sessões, p
 
 ### Seguindo streams multiplexados
 
-O Wireshark pode seguir streams `TLS`, `HTTP/2` e `QUIC` diretamente. Seus diálogos de HTTP/2 e QUIC exibem seletores de conexão e substream, o que ajuda a isolar streams multiplexados que compartilham a mesma conexão de nível inferior.<sup>[[4]](#references)</sup>
+O Wireshark pode seguir streams `TLS`, `HTTP/2` e `QUIC` diretamente. Os diálogos de HTTP/2 e QUIC expõem seletores de conexão e substream, o que ajuda a isolar streams multiplexados que compartilham a mesma conexão de nível inferior.<sup>[[4]](#references)</sup>
 
 ### Labs gratuitos de pcap
 
@@ -88,22 +90,22 @@ O Wireshark pode seguir streams `TLS`, `HTTP/2` e `QUIC` diretamente. Seus diál
 
 ## Identificando domínios
 
-Você pode adicionar uma coluna que exiba o cabeçalho HTTP Host:
+Você pode adicionar uma coluna que mostre o cabeçalho Host do HTTP:
 
-![Labs gratuitos de pcap - Identificando domínios: você pode adicionar uma coluna que exiba o cabeçalho HTTP Host](<../../../images/image (639).png>)
+![Labs gratuitos de pcap - Identificando domínios: você pode adicionar uma coluna que mostre o cabeçalho Host do HTTP](<../../../images/image (639).png>)
 
-E uma coluna que adicione o nome do servidor de uma conexão HTTPS inicial (**tls.handshake.type == 1**):
+E uma coluna que adicione o nome do servidor de uma conexão HTTPS iniciada (**tls.handshake.type == 1**):
 
-![Labs gratuitos de pcap - Identificando domínios: e uma coluna que adicione o nome do servidor de uma conexão HTTPS inicial ( tls.handshake.type == 1 )](<../../../images/image (408) (1).png>)
+![Labs gratuitos de pcap - Identificando domínios: e uma coluna que adicione o nome do servidor de uma conexão HTTPS iniciada ( tls.handshake.type == 1 )](<../../../images/image (408) (1).png>)
 
-Se a captura estiver principalmente criptografada, adicionar estes campos como colunas acelerará bastante a triagem:
+Se a captura estiver principalmente criptografada, adicionar esses campos como colunas acelerará bastante a triagem:
 
 - `tls.handshake.extensions_server_name`
 - `tls.handshake.extensions_alpn_str`
 - `tls.handshake.ja3`
 - `tls.handshake.ja4` (Wireshark 4.2+)
 
-Isso permite agrupar sessões por hostname, ALPN (`http/1.1`, `h2`, `h3` etc.) e fingerprint do cliente, mesmo quando o payload permanece criptografado. Para capturas HTTP/2 e HTTP/3 descriptografadas, também é útil adicionar `http2.header.value` ou `http3.headers.header.value` como colunas e fazer pivot em paths, authorities e outros metadados interessantes.<sup>[[2]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
+Isso permite agrupar sessões por hostname, ALPN (`http/1.1`, `h2`, `h3` etc.) e fingerprint do cliente, mesmo quando o próprio payload permanece criptografado. Para capturas HTTP/2 e HTTP/3 descriptografadas, também é útil adicionar `http2.header.value` ou `http3.headers.header.value` como colunas e fazer pivot com base em paths, authorities e outros metadados interessantes.<sup>[[2]](#references)[[5]](#references)[[6]](#references)[[7]](#references)</sup>
 ```bash
 tshark -r capture.pcapng -Y "tls.handshake.type == 1" -T fields \
 -e frame.number -e ip.src -e ip.dst \
@@ -133,11 +135,11 @@ _editar > preferências > protocolos > tls >_
 
 Pressione _Editar_ e adicione todos os dados do servidor e da chave privada (_IP, Porta, Protocolo, Arquivo de chave e senha_)
 
-Este método funciona apenas em um número limitado de casos. Para o tráfego atual de TLS 1.3 / ECDHE, o método de registro da chave de sessão abaixo geralmente é a opção prática.<sup>[[1]](#references)</sup>
+Este método funciona apenas em um número limitado de casos. Para tráfego TLS 1.3 / ECDHE atual, o método de registro da chave da sessão abaixo geralmente é a opção prática.<sup>[[1]](#references)</sup>
 
 ### Descriptografando tráfego https com chaves de sessão simétricas
 
-Tanto o Firefox quanto o Chrome têm a capacidade de registrar chaves de sessão TLS, que podem ser usadas com o Wireshark para descriptografar o tráfego TLS. Isso permite uma análise aprofundada de comunicações seguras. Mais detalhes sobre como realizar essa descriptografia podem ser encontrados em um guia da [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).<sup>[[3]](#references)</sup> Esse também é o procedimento normal para descriptografar capturas modernas de TLS 1.3 e QUIC/HTTP/3.<sup>[[2]](#references)</sup>
+Tanto o Firefox quanto o Chrome têm a capacidade de registrar chaves de sessão TLS, que podem ser usadas com o Wireshark para descriptografar o tráfego TLS. Isso permite uma análise detalhada das comunicações seguras. Mais detalhes sobre como realizar essa descriptografia podem ser encontrados em um guia da [Red Flag Security](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/).<sup>[[3]](#references)</sup> Essa também é a abordagem normal para descriptografar capturas modernas de TLS 1.3 e QUIC/HTTP/3.<sup>[[2]](#references)</sup>
 
 Para detectar isso, pesquise no ambiente pela variável `SSLKEYLOGFILE`
 
@@ -145,13 +147,13 @@ Um arquivo de chaves compartilhadas terá esta aparência:
 
 ![Descriptografando tráfego https com a chave privada do servidor - Descriptografando tráfego https com chaves de sessão simétricas: Um arquivo de chaves compartilhadas terá esta aparência](<../../../images/image (820).png>)
 
-Se a captura estiver no formato `pcapng`, verifique se ela já contém secrets de descriptografia incorporados antes de procurar no filesystem do host:<sup>[[1]](#references)</sup>
+Se a captura estiver em `pcapng`, verifique se ela já contém secrets de descriptografia incorporados antes de procurar no sistema de arquivos do host:<sup>[[1]](#references)</sup>
 ```bash
 editcap --extract-secrets capture.pcapng tls-secrets.txt
 ```
-Para importar isso no Wireshark, acesse \_edit > preferences > protocols > tls > e importe-o em Pre-Master-Secret log filename:
+Para importar isso no Wireshark, acesse \_edit > preferences > protocols > tls > e importe-o em (Pre)-Master-Secret log filename:
 
-![Descriptografando tráfego https com a chave privada do servidor - Descriptografando tráfego https com chaves de sessão simétricas: editcap --extract-secrets capture.pcapng tls-secrets.txt](<../../../images/image (989).png>)
+![Descriptografando tráfego HTTPS com a chave privada do servidor - Descriptografando tráfego HTTPS com chaves de sessão simétricas: editcap --extract-secrets capture.pcapng tls-secrets.txt](<../../../images/image (989).png>)
 
 ## Comunicação ADB
 
@@ -184,10 +186,10 @@ f.close()
 ```
 ## References
 
-- [1] [Wiki do TLS do Wireshark](https://wiki.wireshark.org/TLS)
+- [1] [Wiki do Wireshark TLS](https://wiki.wireshark.org/TLS)
 - [2] [Descriptografando e analisando tráfego HTTP/3 no Wireshark](https://blog.elmo.sg/posts/parsing-decrypted-quic-traffic-in-wireshark/)
 - [3] [Descriptografando o tráfego TLS do navegador com o Wireshark – do jeito fácil!](https://redflagsecurity.net/2019/03/10/decrypting-tls-wireshark/)
-- [4] [Seguindo fluxos de protocolos](https://www.wireshark.org/docs/wsug_html_chunked/ChAdvFollowStreamSection.html)
+- [4] [Seguindo fluxos de protocolo](https://www.wireshark.org/docs/wsug_html_chunked/ChAdvFollowStreamSection.html)
 - [5] [Referência de filtros de exibição: Transport Layer Security](https://www.wireshark.org/docs/dfref/t/tls.html)
 - [6] [Referência de filtros de exibição: HyperText Transfer Protocol 2](https://www.wireshark.org/docs/dfref/h/http2.html)
 - [7] [Referência de filtros de exibição: Hypertext Transfer Protocol Version 3](https://www.wireshark.org/docs/dfref/h/http3.html)

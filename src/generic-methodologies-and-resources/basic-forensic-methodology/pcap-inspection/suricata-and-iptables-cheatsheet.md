@@ -1,18 +1,20 @@
-# Suricata & Iptables cheatsheet
+# Suricata & Iptables: folha de consulta
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## Iptables
 
 ### Chains
 
-No iptables, cada chain é uma lista sequencial de regras de correspondência de pacotes. A tabela `filter` padrão possui as chains integradas `INPUT`, `FORWARD` e `OUTPUT`; outras tabelas, como `nat`, podem estar disponíveis dependendo da configuração do kernel e dos módulos carregados.<sup>[[1]](#references)</sup>
+No iptables, cada chain é uma lista sequencial de regras de correspondência de pacotes. A tabela `filter` padrão contém as chains integradas `INPUT`, `FORWARD` e `OUTPUT`; outras tabelas, como `nat`, podem estar disponíveis dependendo da configuração do kernel e dos módulos carregados.<sup>[[1]](#references)</sup>
 
 - **Input Chain**: Utilizada para gerenciar o comportamento das conexões de entrada.
-- **Forward Chain**: Empregada para lidar com conexões de entrada que não são destinadas ao sistema local. Isso é típico de dispositivos que atuam como roteadores, nos quais os dados recebidos devem ser encaminhados para outro destino. Essa chain é relevante principalmente quando o sistema está envolvido em routing, NATing ou atividades semelhantes.
+- **Forward Chain**: Empregada para lidar com conexões de entrada que não se destinam ao sistema local. Isso é típico de dispositivos que atuam como routers, nos quais os dados recebidos devem ser encaminhados para outro destino. Essa chain é relevante principalmente quando o sistema está envolvido em routing, NATing ou atividades semelhantes.
 - **Output Chain**: Dedicada à regulamentação das conexões de saída.
 
 Essas chains garantem o processamento ordenado do tráfego de rede, permitindo a especificação de regras detalhadas que governam o fluxo de dados para dentro, através e para fora de um sistema.
 
-Os exemplos de correspondência de strings usam o match padrão `string`; a correspondência diferencia maiúsculas de minúsculas, a menos que `--icase` seja fornecido, e `--algo` seleciona a estratégia de pesquisa BM ou KMP.<sup>[[2]](#references)</sup>
+Os exemplos de correspondência de strings usam a correspondência padrão `string`; a correspondência diferencia maiúsculas de minúsculas, a menos que `--icase` seja fornecido, e `--algo` seleciona a estratégia de pesquisa BM ou KMP.<sup>[[2]](#references)</sup>
 ```bash
 # Delete all rules
 iptables -F
@@ -53,7 +55,7 @@ iptables-restore < /etc/sysconfig/iptables
 
 ### Instalação e Configuração
 
-Os comandos de pacotes abaixo são específicos da distribuição e da versão; o guia oficial de instalação documenta o PPA do Ubuntu, os backports do Debian, os pacotes RPM e o gerenciamento de serviços do systemd.<sup>[[3]](#references)</sup>
+Os comandos de pacote abaixo são específicos da distribuição e da versão; o guia oficial de instalação documenta o PPA do Ubuntu, os backports do Debian, os pacotes RPM e o gerenciamento do serviço systemd.<sup>[[3]](#references)</sup>
 ```bash
 # Package installation details vary by distribution and release; see References.
 # Ubuntu
@@ -116,7 +118,7 @@ Type=simple
 
 systemctl daemon-reload
 ```
-A sequência `suricata-update` segue o fluxo de trabalho documentado do Suricata para buscar, listar, habilitar e carregar fontes de regras.<sup>[[4]](#references)</sup> O comando `suricatasc` acima é um método documentado e não bloqueante de recarregamento de regras por Unix socket.<sup>[[8]](#references)</sup> As regras NFQUEUE enviam o tráfego local de entrada/saída para o Suricata, enquanto `-q 0` seleciona a fila 0 para processamento inline.<sup>[[7]](#references)</sup>
+A sequência `suricata-update` segue o fluxo de trabalho documentado do Suricata para buscar, listar, habilitar e carregar fontes de regras.<sup>[[4]](#references)</sup> O comando `suricatasc` acima é um método documentado e não bloqueante para recarregar regras por Unix socket.<sup>[[8]](#references)</sup> As regras NFQUEUE enviam o tráfego local de entrada/saída para o Suricata, enquanto `-q 0` seleciona a fila 0 para processamento inline.<sup>[[7]](#references)</sup>
 
 ### Definições de regras
 
@@ -135,42 +137,42 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 - **drop** - descartar o pacote e gerar um alerta
 - **reject** - enviar um erro RST/ICMP unreachable ao remetente do pacote correspondente.
 - rejectsrc - igual a _reject_
-- rejectdst - enviar um pacote de erro RST/ICMP ao destinatário do pacote correspondente.
+- rejectdst - enviar um pacote de erro RST/ICMP ao receptor do pacote correspondente.
 - rejectboth - enviar pacotes de erro RST/ICMP para ambos os lados da comunicação.
 
-#### **Protocols**
+#### **Protocolos**
 
 - tcp (para tráfego tcp)
 - udp
 - icmp
 - ip (ip significa ‘all’ ou ‘any’)
-- _layer7 protocols_: http, ftp, tls, smb, dns, ssh e outros.<sup>[[5]](#references)</sup>
+- _protocolos de layer7_: http, ftp, tls, smb, dns, ssh e outros.<sup>[[5]](#references)</sup>
 
 #### Endereços de origem e destino
 
-Suricata suporta intervalos de IP, negação e listas de endereços agrupadas.<sup>[[5]](#references)</sup>
+Suricata oferece suporte a intervalos de IP, negação e listas de endereços agrupados.<sup>[[5]](#references)</sup>
 
-| Example                       | Meaning                                  |
-| ----------------------------- | ---------------------------------------- |
-| ! 1.1.1.1                     | Todo endereço IP, exceto 1.1.1.1         |
+| Exemplo                       | Significado                                  |
+| ----------------------------- | -------------------------------------------- |
+| ! 1.1.1.1                     | Todo endereço IP, exceto 1.1.1.1             |
 | !\[1.1.1.1, 1.1.1.2]          | Todo endereço IP, exceto 1.1.1.1 e 1.1.1.2 |
-| $HOME_NET                     | Sua configuração de HOME_NET em yaml     |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET e não HOME_NET              |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24, exceto 10.0.0.5              |
+| $HOME_NET                     | Sua configuração de HOME_NET em yaml         |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET e não HOME_NET            |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24, exceto 10.0.0.5          |
 
 #### Portas de origem e destino
 
-Suricata suporta intervalos de portas, negação e listas de portas.<sup>[[5]](#references)</sup>
+Suricata oferece suporte a intervalos de portas, negação e listas de portas.<sup>[[5]](#references)</sup>
 
-| Example         | Meaning                                  |
-| --------------- | ---------------------------------------- |
-| any             | qualquer endereço                        |
-| \[80, 81, 82]   | portas 80, 81 e 82                       |
-| \[80: 82]       | Intervalo de 80 a 82                     |
-| \[1024: ]       | De 1024 até o maior número de porta      |
-| !80             | Todas as portas, exceto a 80              |
-| \[80:100,!99]   | Intervalo de 80 a 100, exceto 99         |
-| \[1:80,!\[2,4]] | Intervalo de 1 a 80, exceto as portas 2 e 4 |
+| Exemplo         | Significado                                |
+| --------------- | -------------------------------------- |
+| any             | qualquer endereço                            |
+| \[80, 81, 82]   | portas 80, 81 e 82                     |
+| \[80: 82]       | Intervalo de 80 a 82                  |
+| \[1024: ]       | De 1024 até o número de porta mais alto |
+| !80             | Todas as portas, exceto a 80                      |
+| \[80:100,!99]   | Intervalo de 80 a 100, exceto a 99 |
+| \[1:80,!\[2,4]] | Intervalo de 1 a 80, exceto as portas 2 e 4  |
 
 #### Direção
 
@@ -225,12 +227,12 @@ drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
 ## References
 
-- [1] [iptables(8) — página do manual do Linux](https://man7.org/linux/man-pages/man8/iptables.8.html)
-- [2] [iptables-extensions(8) — página do manual do Linux](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
+- [1] [iptables(8) — página de manual do Linux](https://man7.org/linux/man-pages/man8/iptables.8.html)
+- [2] [iptables-extensions(8) — página de manual do Linux](https://man7.org/linux/man-pages/man8/iptables-extensions.8.html)
 - [3] [3. Instalação — documentação do Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/install.html)
 - [4] [9.1. Gerenciamento de regras com Suricata-Update — documentação do Suricata 8.0.1](https://docs.suricata.io/en/suricata-8.0.1/rule-management/suricata-update.html)
 - [5] [8.1. Formato das regras — documentação do Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/intro.html)
-- [6] [8.7. Palavras-chave de payload — documentação do Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
+- [6] [8.7. Keywords de payload — documentação do Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/payload-keywords.html)
 - [7] [15. Configurando IPS/inline para Linux — documentação do Suricata 7.0.15](https://docs.suricata.io/en/suricata-7.0.15/setting-up-ipsinline-for-linux.html)
 - [8] [9.3. Recarregamento de regras — documentação do Suricata 7.0.14](https://docs.suricata.io/en/suricata-7.0.14/rule-management/rule-reload.html)
 - [9] [8. Regras do Suricata — documentação do Suricata 8.0.3](https://docs.suricata.io/en/suricata-8.0.3/rules/index.html)

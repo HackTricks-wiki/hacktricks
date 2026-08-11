@@ -1,5 +1,7 @@
 # venv
 
+{{#include ../../banners/hacktricks-training.md}}
+
 O módulo padrão `venv` do Python cria ambientes virtuais, cujo script de ativação POSIX é `<venv>/bin/activate`; digite `deactivate` para sair do ambiente ativo.<sup>[[1]](#references)</sup> No Ubuntu, o pacote `python3-venv` fornece o módulo quando ele não está instalado com o pacote base do Python.<sup>[[2]](#references)</sup>
 ```bash
 sudo apt-get install python3-venv
@@ -11,7 +13,7 @@ source pvenv/bin/activate #Activate the environment
 #You can now install whatever python library you need
 deactivate #To deactivate the virtual environment
 ```
-Para workflows mais antigos baseados em `setuptools` com `setup.py bdist_wheel`, instalar `wheel` no ambiente ativo fornecia o comando `bdist_wheel`.<sup>[[3]](#references)</sup> As versões atuais do `setuptools` não precisam mais de `wheel` para esse comando, e as orientações atuais de packaging recomendam `python -m build --wheel` em vez de invocar `setup.py` diretamente.<sup>[[4]](#references)[[5]](#references)</sup>
+Para fluxos mais antigos baseados em setuptools que usavam `setup.py bdist_wheel`, instalar `wheel` no ambiente ativo disponibilizava o comando `bdist_wheel`.<sup>[[3]](#references)</sup> As versões atuais do setuptools não precisam mais de `wheel` para esse comando, e as orientações atuais de packaging recomendam `python -m build --wheel` em vez de invocar `setup.py` diretamente.<sup>[[4]](#references)[[5]](#references)</sup>
 ```text
 error: invalid command 'bdist_wheel'
 ```
@@ -26,7 +28,7 @@ python3 -m build --wheel
 ```
 ## References
 
-- [1] [venv — Criação de ambientes virtuais — Documentação do Python 3.14](https://docs.python.org/3/library/venv.html)
+- [1] [venv — Criação de ambientes virtuais — documentação do Python 3.14](https://docs.python.org/3/library/venv.html)
 - [2] [Pacote: python3-venv — Pacotes do Ubuntu](https://packages.ubuntu.com/noble/python/python3-venv)
 - [3] [wheel 0.24.0 — PyPI](https://pypi.org/project/wheel/0.24.0/)
 - [4] [wheel — PyPI](https://pypi.org/project/wheel/)

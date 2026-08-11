@@ -1,12 +1,14 @@
-# Truques com PNG
+# Truques de PNG
 
-**Arquivos PNG** são muito comuns em **CTFs**, **resposta a incidentes** e **preparação de malware** porque são **sem perdas**, **baseados em chunks**, e muitas ferramentas os renderizam sem problemas mesmo quando contêm **metadados extras**, **payloads anexados** ou **chunks parcialmente corrompidos**.
+{{#include ../../../banners/hacktricks-training.md}}
+
+**Arquivos PNG** são muito comuns em **CTFs**, **resposta a incidentes** e **malware staging** porque são **sem perdas**, **baseados em chunks**, e muitas ferramentas os renderizam sem problemas mesmo quando contêm **metadados extras**, **payloads anexados** ou **chunks parcialmente corrompidos**.
 
 Trate um PNG como um **container**, não apenas como uma imagem.
 
 ## Triagem rápida
 
-Comece com verificações no nível do container antes de partir para LSB stego. Para o fluxo de trabalho de bit-plane/LSB, consulte [a página dedicada a image stego](../../../stego/images/README.md).
+Comece pelas verificações no nível do container antes de partir para LSB stego. Para o fluxo de trabalho de bit-plane/LSB, consulte [a página dedicada sobre image stego](../../../stego/images/README.md).
 ```bash
 file suspect.png
 pngcheck -vp suspect.png
@@ -20,19 +22,19 @@ Coisas úteis para procurar:
 - **Erros de CRC** ou comprimentos de chunks malformados
 - **Dados adicionais após `IEND`**
 - **Vários marcadores `IEND`** ou fragmentos `IDAT` recuperáveis após o fim formal do arquivo
-- Um arquivo que seja um PNG válido **e** que também pareça um ZIP/PDF/script quando submetido a carving
+- Um arquivo que seja um PNG válido **e** também se pareça com um ZIP/PDF/script ao ser carved
 
-Lembre-se de que a estrutura mínima válida normalmente é:
+Lembre-se de que a estrutura mínima válida geralmente é:
 
 - `IHDR` (deve ser o primeiro)
 - `IDAT` (um ou mais chunks consecutivos)
 - `IEND` (deve ser o último)
 
-## Dados após `IEND`
+## Dados posteriores a `IEND`
 
-Um dos artefatos PNG com maior sinal é a **existência de dados anexados após o chunk `IEND` final**. Muitos decoders ignoram esses dados, o que os torna úteis para:
+Um dos artefatos PNG com maior sinal é **a existência de dados anexados após o chunk `IEND` final**. Muitos decoders ignoram esses dados, o que os torna úteis para:
 
-- **Simple stego / payloads ocultos**
+- **Stego simples / payloads ocultos**
 - **PNG polyglots**
 - **Malware staging**
 - **Recuperação de dados de imagem antigos** de editores com bugs
@@ -55,16 +57,16 @@ dd if=suspect.png of=png-trailer.bin bs=1 skip=$((IEND_OFF+8))
 file png-trailer.bin
 binwalk -eM png-trailer.bin
 ```
-Também tente analisadores genéricos de arquivos diretamente no PNG ou no trailer extraído:
+Também tente analisadores genéricos de arquivos compactados diretamente no PNG ou no trailer extraído:
 ```bash
 7z l suspect.png
 unzip -l suspect.png
 ```
-## Recuperação no estilo Acropalypse de screenshots cortadas/redacted
+## Recuperação no estilo Acropalypse de screenshots cortados/redigidos
 
-Um truque forense de PNG muito prático e recente é verificar se um editor de screenshots **sobrescreveu** um PNG sem **truncar** o arquivo antigo primeiro. Nesses casos, bytes da **imagem anterior** podem permanecer após `IEND`, e, às vezes, dados `IDAT` adicionais podem ser parcialmente reconstruídos.
+Um truque forense muito prático e recente para PNG é verificar se um editor de screenshots **sobrescreveu** um PNG sem **truncar** o arquivo antigo primeiro. Nesses casos, bytes da **imagem anterior** podem permanecer após `IEND`, e, às vezes, dados `IDAT` adicionais podem ser parcialmente reconstruídos.
 
-Isso ficou conhecido com o **aCropalypse** (Google Pixel Markup) e o problema relacionado do **Windows Snipping Tool**.<sup>[[3]](#references)</sup> Na prática, se um PNG "cortado" ou "redacted" ainda contiver dados antigos no final, talvez seja possível recuperar parte do screenshot original.<sup>[[1]](#references)</sup>
+Isso se tornou conhecido com o **aCropalypse** (Google Pixel Markup) e o problema relacionado do **Windows Snipping Tool**.<sup>[[3]](#references)</sup> Na prática, se um PNG "cortado" ou "redigido" ainda contiver dados antigos no final, talvez seja possível recuperar parte do screenshot original.<sup>[[1]](#references)</sup>
 
 Fluxo de trabalho prático:
 ```bash
@@ -80,16 +82,16 @@ Sinais que justificam fortemente uma análise mais aprofundada:
 - Você encontra **chunks `IDAT` extras** após o fim aparente da imagem
 - A captura de tela veio de um dispositivo/editor conhecido por ter sido afetado
 
-Se isso acontecer, passe o arquivo por uma **aCropalypse recovery tool** antes de considerar a ocultação confiável.
+Se isso acontecer, passe o arquivo por uma **ferramenta de recuperação aCropalypse** antes de considerar a ocultação confiável.
 
-## Abuso de chunks importante na prática
+## Abuso de chunks que importa na prática
 
-Os chunks PNG mais interessantes para investigações geralmente não são os chunks óbvios da imagem, mas os que podem transportar **texto**, **metadados** ou **bytes de payload**:
+Os chunks PNG mais interessantes para investigações geralmente não são os óbvios da imagem, mas os chunks que podem transportar **texto**, **metadados** ou **bytes de payload**:
 
 - `tEXt` / `zTXt` / `iTXt` – metadados de texto e texto compactado
 - `eXIf` – dados EXIF dentro de PNG
 - `iCCP` – perfil ICC incorporado
-- `PLTE` – dados da paleta em imagens indexadas, mas também úteis em cenários de payload-smuggling.<sup>[[2]](#references)</sup>
+- `PLTE` – dados da paleta em imagens indexadas, mas também úteis em cenários de ocultação de payload.<sup>[[2]](#references)</sup>
 
 Extraia-os com:
 ```bash
@@ -104,21 +106,21 @@ Para persistência de payloads ofensivos dentro de chunks PNG (por exemplo, truq
 
 ## Reparo de PNG corrompido
 
-Para verificar a integridade e localizar a área exata danificada, **pngcheck** continua sendo uma das melhores ferramentas iniciais:
+Para verificar a integridade e localizar a área exata que está corrompida, **pngcheck** continua sendo uma das melhores ferramentas iniciais:
 
 - [pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)
 
-Se o arquivo estiver danificado, em vez de ser intencionalmente malicioso, **PCRT** pode ser útil em CTFs e trabalhos de laboratório para corrigir problemas comuns, como headers inválidos, valores IHDR incorretos, problemas de CRC ou layouts de chunks malformados.
+Se o arquivo estiver danificado, e não for intencionalmente malicioso, **PCRT** pode ser útil em CTFs e trabalhos de laboratório para corrigir problemas comuns, como cabeçalhos incorretos, valores IHDR errados, problemas de CRC ou estruturas de chunks malformadas.
 
-Se o objetivo for **sanitizar** um PNG que contenha dados suspeitos no trailer, preservando a imagem visível, o ExifTool pode remover explicitamente o trailer:
+Se o seu objetivo for **sanitizar** um PNG que contenha dados suspeitos no trailer, preservando a imagem visível, o ExifTool pode remover explicitamente o trailer:
 ```bash
 exiftool -Trailer:All= -overwrite_original suspect.png
 ```
-Para evidências sensíveis, sempre trabalhe em uma **cópia** e mantenha os hashes do original antes de tentar reparos.
+Para evidências sensíveis, sempre trabalhe em uma **cópia** e mantenha hashes do original antes de tentar reparos.
 
 ## References
 
 - [1] [Explorando o aCropalypse: Recuperando PNGs truncados](https://www.da.vidbuchanan.co.uk/blog/exploiting-acropalypse.html)
-- [2] [Payloads PHP persistentes em PNGs: Como injetar código PHP em uma imagem — e mantê-lo lá](https://www.synacktiv.com/en/publications/persistent-php-payloads-in-pngs-how-to-inject-php-code-in-an-image-and-keep-it-there)
+- [2] [Payloads persistentes de PHP em PNGs: Como injetar código PHP em uma imagem — e mantê-lo nela](https://www.synacktiv.com/en/publications/persistent-php-payloads-in-pngs-how-to-inject-php-code-in-an-image-and-keep-it-there)
 - [3] [NVD - CVE-2023-28303](https://nvd.nist.gov/vuln/detail/CVE-2023-28303)
 {{#include ../../../banners/hacktricks-training.md}}

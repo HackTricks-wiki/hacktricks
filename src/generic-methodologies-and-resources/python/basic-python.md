@@ -1,17 +1,19 @@
 # Python Básico
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Fundamentos de Python
 
 ### Informações úteis
 
-Todos os exemplos abaixo assumem **Python 3**, salvo indicação explícita em contrário.\
-`range()` retorna um objeto iterável no Python 3 (semelhante a `xrange()` no Python 2).\
-A diferença entre uma **tupla** e uma **lista** é que a **posição** de um valor em uma tupla geralmente dá significado a ele, enquanto uma lista normalmente é apenas uma sequência ordenada de valores.
+Todos os exemplos abaixo pressupõem **Python 3**, salvo indicação explícita em contrário.\
+`range()` retorna um objeto iterável em Python 3 (semelhante a `xrange()` no Python 2).\
+A diferença entre uma **tupla** e uma **lista** é que a **posição** de um valor em uma tupla geralmente lhe atribui significado, enquanto uma lista normalmente é apenas uma sequência ordenada de valores.
 
 ### Operações principais
 
 Para elevar um número, use: `3**2` (não `3^2`)\
-`2/3 == 0.666666...` no Python 3, enquanto `2//3 == 0` realiza uma divisão inteira.\
+`2/3 == 0.666666...` em Python 3, enquanto `2//3 == 0` realiza uma divisão inteira.\
 `i >= j`\
 `i <= j`\
 `i == j`\
@@ -33,7 +35,7 @@ Para elevar um número, use: `3**2` (não `3^2`)\
 `"abc" in "abcdef"`\
 `"abc\n".strip() == "abc"`\
 `"apbc".replace("p", "") == "abc"`\
-`dir(str)` = lista dos métodos disponíveis\
+`dir(str)` = lista de métodos disponíveis\
 `help(str)` = definição da classe `str`\
 `"a".upper() == "A"`\
 `"A".lower() == "a"`\
@@ -41,7 +43,7 @@ Para elevar um número, use: `3**2` (não `3^2`)\
 `sum([1, 2, 3]) == 6`\
 `sorted([1, 43, 5, 3, 21, 4]) == [1, 3, 4, 5, 21, 43]`
 
-**Junção de caracteres**\
+**Unir caracteres**\
 `3 * 'a' == 'aaa'`\
 `'a' + 'b' == 'ab'`\
 `'a' + str(3) == 'a3'`\
@@ -77,7 +79,7 @@ for letter in "hola":
 ```
 ### Bytes, hex e encodings
 
-Isso é muito comum em exploit-dev, reversing e CTFs:
+Isto é muito comum em exploit-dev, reversing e CTFs:
 ```python
 b"ABC".hex() == "414243"
 bytes.fromhex("414243") == b"ABC"
@@ -126,14 +128,14 @@ Em conjuntos, não há repetições.\
 `myset.add('c')` --> `{'a', 'b', 'c'}`\
 `myset.add('a')` --> nenhuma alteração\
 `myset.update([1, 2, 3])`\
-`myset.discard(10)` --> se estiver presente, remove-o; caso contrário, nada\
+`myset.discard(10)` --> se estiver presente, remove; caso contrário, nada\
 `myset.remove(10)` --> se não estiver presente, gera uma exceção\
 `myset2 = set([1, 2, 3, 4])`\
 `myset.union(myset2)`\
 `myset.intersection(myset2)`\
 `myset.difference(myset2)`\
 `myset.symmetric_difference(myset2)`\
-`myset.pop()` --> obtém um elemento arbitrário e remove-o\
+`myset.pop()` --> obtém um elemento arbitrário e o remove\
 `myset.intersection_update(myset2)`\
 `myset.difference_update(myset2)`\
 `myset.symmetric_difference_update(myset2)`
@@ -176,7 +178,7 @@ return self.id_num < other.id_num
 ```
 ### map, zip, filter, lambda, sorted e one-liners
 
-No **Python 3**, `map()` e `filter()` retornam iteradores; portanto, converta-os com `list()` se quiser imprimir todos os valores de uma só vez.
+No **Python 3**, `map()` e `filter()` retornam iteradores; portanto, converta-os com `list()` se quiser imprimir todos os valores de uma vez.
 
 **Map** é como `[f(x) for x in iterable]`:
 ```python
@@ -191,7 +193,7 @@ list(map(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
 for f, b in zip(foo, bar):
 print(f, b)
 ```
-**Lambda** é usada para definir uma função:\
+**Lambda** é usado para definir uma função:\
 `(lambda x, y: x + y)(5, 3) == 8` --> usar lambda como uma função simples\
 `sorted(range(-5, 6), key=lambda x: x**2)` --> usar lambda para ordenar\
 `list(filter(lambda x: x % 3 == 0, [1, 2, 3, 4, 5, 6, 7, 8, 9])) == [3, 6, 9]`\
@@ -233,16 +235,16 @@ print("executing finally clause in any case")
 ```
 ### Assert()
 
-Se a condição for falsa, a string será exibida.\
-Lembre-se de que as instruções `assert` podem ser desativadas com `python -O`, portanto, não as use para controle de acesso ou validação de entrada.
+Se a condição for falsa, a string será impressa.\
+Lembre-se de que as instruções `assert` podem ser desabilitadas com `python -O`; portanto, não as use para controle de acesso ou validação de entrada.
 ```python
 def avg(grades, weights):
 assert len(grades) != 0, 'no grades data'
 assert len(grades) == len(weights), 'wrong number of grades'
 ```
-### Geradores, yield
+### Generators, yield
 
-Um generator, em vez de retornar tudo de uma vez, **yield** valores um por um. Isso é muito útil para wordlists enormes, bruteforcers ou respostas grandes.
+Um generator, em vez de retornar tudo de uma vez, **produz** valores um por um. Isso é muito útil para wordlists enormes, bruteforcers ou respostas grandes.
 ```python
 def my_gen(n):
 yield n
@@ -301,7 +303,7 @@ list(product([1, 2, 3], repeat=2))
 list(permutations(['1', '2', '3']))
 list(permutations('123', 2))
 ```
-**combinações**\
+**combinations**\
 `from itertools import combinations` --> todas as combinações possíveis sem repetição
 ```python
 list(combinations('123', 2))
@@ -314,14 +316,14 @@ list(combinations_with_replacement('123', 2))
 # [('1', '1'), ('1', '2'), ('1', '3'), ('2', '2'), ('2', '3'), ('3', '3')]
 ```
 **batched**\
-`from itertools import batched` --> disponível no Python 3.12+, útil para dividir grandes listas de candidatos de bruteforce ou arquivos de IOC
+`from itertools import batched` --> disponível no Python 3.12+, útil para dividir grandes listas de candidatos de bruteforce ou arquivos de IOC em blocos
 ```python
 list(batched(range(10), 4))
 # [(0, 1, 2, 3), (4, 5, 6, 7), (8, 9)]
 ```
-### Decoradores
+### Decorators
 
-Decorador que mede o tempo necessário para executar uma função:
+Decorator que mede o tempo necessário para executar uma função:
 ```python
 from functools import wraps
 import time
@@ -349,9 +351,9 @@ Let's call our decorated function
 Decorated func!
 Execution time: 4.79e-05 seconds
 ```
-### Recursos úteis da biblioteca padrão para pentesting
+### Helpers úteis da biblioteca padrão para pentesting
 
-**Percorrendo o sistema de arquivos com `pathlib`** (`Path.walk()` está disponível no Python 3.12+; use `os.walk()` em interpretadores mais antigos):
+**Percurso do sistema de arquivos com `pathlib`** (`Path.walk()` está disponível no Python 3.12+; use `os.walk()` em interpretadores mais antigos):
 ```python
 from pathlib import Path
 
@@ -374,12 +376,12 @@ check=True,
 )
 print(cp.stdout)
 ```
-Se você **precisar** criar um comando de shell, coloque aspas em cada token controlado pelo atacante primeiro:
+Se você **precisar** criar um comando de shell, coloque entre aspas primeiro cada token controlado pelo atacante:
 ```python
 import shlex
 cmd = f"grep -R {shlex.quote(user_controlled)} /var/www"
 ```
-**Arquivos / diretórios temporários** (mais seguros do que caminhos `/tmp/foo` codificados diretamente):
+**Arquivos / diretórios temporários** (mais seguros do que caminhos `/tmp/foo` codificados):
 ```python
 import tempfile
 from pathlib import Path
@@ -391,7 +393,7 @@ print(out.read_text())
 ```
 Para automação HTTP, consulte [esta outra página sobre requisições web em Python](web-requests.md).
 
-### Armadilhas na extração de arquivos compactados (importante para ferramentas e analisadores de arquivos)
+### Cuidados importantes na extração de arquivos compactados (importantes para ferramentas e analisadores de arquivos)
 
 A partir do **Python 3.14**, `tarfile.extract()` / `extractall()` usam o filtro mais seguro `data` por padrão. Em versões mais antigas do Python, você deve defini-lo explicitamente ao lidar com arquivos compactados controlados por um atacante.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
@@ -402,9 +404,9 @@ with tempfile.TemporaryDirectory() as out:
 with tarfile.open("sample.tar.gz") as tf:
 tf.extractall(out, filter="data")
 ```
-Mesmo com `filter="data"`, extraia archives não confiáveis em um novo diretório temporário e valide o que foi gravado antes de mover arquivos para qualquer local importante.
+Mesmo com `filter="data"`, extraia archives não confiáveis para um diretório temporário novo e valide o que foi gravado antes de mover os arquivos para qualquer local relevante.
 
-`zipfile.Path` é diferente: ele **não sanitiza filenames** para você; portanto, valide os paths antes de extrair membros de ZIP controlados pelo atacante:
+`zipfile.Path` é diferente: ele **não sanitiza nomes de arquivo** para você; portanto, valide os caminhos antes de extrair membros ZIP controlados pelo atacante:
 ```python
 import os
 import zipfile
@@ -417,12 +419,12 @@ if os.path.commonpath([base, final_path]) != base:
 raise ValueError(f"Path traversal inside ZIP: {info.filename}")
 zf.extract(info, base)
 ```
-### Primitivas perigosas para lembrar
+### Primitivas perigosas a lembrar
 
-- `eval()` / `exec()` **não** são sandboxes.
-- `ast.literal_eval()` **não** executa código Python, mas ainda pode ser abusado para causar negação de serviço de memória / CPU com entrada controlada pelo atacante.
+- `eval()` / `exec()` **não são** sandboxes.
+- `ast.literal_eval()` **não executa** código Python, mas ainda pode ser abusado para causar negação de serviço de memória / CPU com entrada controlada pelo atacante.
 - `pickle.loads()` **não é seguro**; nunca faça unpickle de bytes controlados pelo atacante.
-- Para técnicas ofensivas mais avançadas, confira [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) e [Python deserializations](../../pentesting-web/deserialization/README.md).
+- Para técnicas ofensivas mais avançadas, consulte [Bypass Python sandboxes](bypass-python-sandboxes/README.md), [Python internal read gadgets](python-internal-read-gadgets.md) e [Python deserializations](../../pentesting-web/deserialization/README.md).
 
 ## References
 

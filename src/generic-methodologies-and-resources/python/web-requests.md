@@ -1,8 +1,10 @@
 # Requisições Web
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Python Requests
 
-Estes exemplos usam os argumentos de requisição, as propriedades de resposta, as tuplas de arquivos multipart e as sessões documentados do Requests.<sup>[[1]](#references)</sup> Os exemplos com `verify=False` desabilitam a verificação de certificados TLS e devem ser limitados a testes controlados.<sup>[[1]](#references)</sup>
+Estes exemplos usam os argumentos de requisição documentados do Requests, as propriedades de resposta, as tuplas de arquivos multipart e as sessões.<sup>[[1]](#references)</sup> Os exemplos com `verify=False` desativam a verificação do certificado TLS e devem ser limitados a testes controlados.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,7 +78,7 @@ return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 ## Comando Python para explorar um RCE
 
-O loop de comandos herda de `Cmd` do Python; seu método `default` processa prefixos de comando não reconhecidos, `cmdloop` distribui as linhas de entrada, e `re.DOTALL` permite que o padrão de extração atravesse novas linhas.<sup>[[2]](#references)[[3]](#references)</sup>
+O loop de comandos herda de `Cmd` do Python; seu método `default` lida com prefixos de comando não reconhecidos, `cmdloop` despacha linhas de entrada, e `re.DOTALL` permite que o padrão de extração atravesse quebras de linha.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re

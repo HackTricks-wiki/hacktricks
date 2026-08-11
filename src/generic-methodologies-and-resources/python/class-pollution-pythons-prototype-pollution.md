@@ -1,5 +1,7 @@
 # Class Pollution (Python's Prototype Pollution)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Exemplo básico
 
 Alterar `__qualname__` por meio da referência à classe de uma instância atualiza a classe e suas classes base mutáveis.<sup>[[1]](#references)</sup>
@@ -26,9 +28,9 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## Exemplo Básico de Vulnerabilidade
+## Exemplo básico de vulnerabilidade
 
-Uma mesclagem recursiva pode aceitar chaves de mapeamento controladas pelo atacante e gravar valores aninhados por meio do acesso a itens ou atributos.<sup>[[1]](#references)</sup>
+Uma mesclagem recursiva pode aceitar chaves de mapeamento controladas pelo atacante e gravar valores aninhados por meio de acesso a itens ou atributos.<sup>[[1]](#references)</sup>
 ```python
 # Initial state
 class Employee: pass
@@ -67,7 +69,7 @@ print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 
 <summary>Criando um valor padrão de propriedade de classe para RCE (subprocess)</summary>
 
-Uma classe base compartilhada pode fornecer um atributo padrão consumido por um gadget de comando de uma classe irmã.<sup>[[1]](#references)</sup>
+Uma classe base compartilhada pode fornecer um atributo padrão consumido por um gadget de comando da classe irmã.<sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -118,7 +120,7 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Poluindo outras classes e variáveis globais através de <code>globals</code></summary>
+<summary>Poluindo outras classes e variáveis globais por meio de <code>globals</code></summary>
 
 O mapeamento `__globals__` de uma função expõe o namespace do módulo acessível a partir de um método definido nesse módulo.<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
@@ -154,7 +156,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <summary>Execução arbitrária de subprocessos</summary>
 
-No Windows, `Popen(..., shell=True)` usa a variável de ambiente `COMSPEC` como shell padrão; portanto, este gadget demonstra o redirecionamento de comandos baseado no ambiente.<sup>[[1]](#references)[[5]](#references)</sup>
+No Windows, `Popen(..., shell=True)` usa a variável de ambiente `COMSPEC` como shell padrão, portanto este gadget demonstra o redirecionamento de comandos baseado no ambiente.<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -188,7 +190,7 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <summary>Sobrescrevendo <strong><code>__kwdefaults__</code></strong></summary>
 
-O Python documenta `__kwdefaults__` como o mapeamento dos valores padrão para parâmetros somente de palavras-chave, que vêm após `*` ou `*args` em uma definição de função.<sup>[[4]](#references)</sup> O gadget a seguir sobrescreve esse mapeamento por meio de um caminho de função poluído.<sup>[[1]](#references)</sup>
+Python documenta `__kwdefaults__` como o mapeamento dos valores padrão para parâmetros somente de palavra-chave, que seguem `*` ou `*args` em uma definição de função.<sup>[[4]](#references)</sup> O gadget a seguir sobrescreve esse mapeamento por meio de um caminho de função poluído.<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -231,18 +233,18 @@ execute() #> Executing echo Polluted
 
 <summary>Sobrescrevendo o secret do Flask entre arquivos</summary>
 
-Se a classe do objeto poluído estiver em um módulo diferente do módulo de entrada da aplicação, os métodos desse objeto terão inicialmente `__globals__` expondo o namespace do módulo da classe. Uma travessia pelo loader e por `sys.modules.__main__` pode então alcançar o módulo de entrada e seu objeto `app` do Flask.<sup>[[1]](#references)[[2]](#references)</sup>
+Se a classe do objeto polluted reside em um módulo diferente do módulo de entrada da aplicação, os métodos dela `__globals__` inicialmente expõem o namespace do módulo da classe. Uma travessia pelo loader e por `sys.modules.__main__` pode então alcançar o módulo de entrada e seu objeto Flask `app`.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-O Flask usa `app.secret_key` para assinar o cookie da sessão; conhecer a chave permite que um atacante crie dados de sessão válidos.<sup>[[6]](#references)</sup>
+Flask usa `app.secret_key` para assinar o cookie de sessão; conhecer a chave permite que um atacante crie dados de sessão válidos.<sup>[[6]](#references)</sup>
 
 O writeup original demonstra o seguinte caminho para alcançar `app.secret_key`; o CTFtime também hospeda uma cópia do writeup.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Alterar a chave pode permitir assinar cookies de sessão substitutos e possibilitar a escalação de privilégios; consulte [a página de ferramentas de sessão do Flask](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
+Alterar a key pode permitir assinar cookies de sessão substitutos e possibilitar a escalação de privilégios; consulte [a página de ferramentas de sessão do Flask](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
 
 </details>
 

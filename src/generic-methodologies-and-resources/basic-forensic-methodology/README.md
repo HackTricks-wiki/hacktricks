@@ -1,4 +1,6 @@
-# Metodologia Básica de Forense
+# Metodologia Básica de Perícia
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Criando e Montando uma Imagem
 
@@ -9,7 +11,7 @@
 
 ## Análise de Malware
 
-Isso **não é necessariamente o primeiro passo a ser realizado depois que você obtém a imagem**. Mas você pode usar essas técnicas de análise de malware de forma independente se tiver um arquivo, uma imagem de sistema de arquivos, uma imagem de memória, um pcap... portanto, é bom **manter essas ações em mente**:
+Isso **não é necessariamente o primeiro passo a ser executado depois que você obtém a imagem**. Mas você pode usar estas técnicas de análise de malware de forma independente se tiver um arquivo, uma imagem de sistema de arquivos, uma imagem de memória, um pcap... portanto, é importante **manter estas ações em mente**:
 
 
 {{#ref}}
@@ -18,7 +20,7 @@ malware-analysis.md
 
 ## Inspecionando uma Imagem
 
-se receber uma **imagem forense** de um dispositivo, você pode começar a **analisar as partições e o sistema de arquivos** utilizado e **recuperar** possíveis **arquivos interessantes** (inclusive arquivos excluídos). Saiba como em:
+se você receber uma **imagem forense** de um dispositivo, poderá começar **analisando as partições e o sistema de arquivos** utilizado e **recuperando** **arquivos potencialmente interessantes** (até mesmo os excluídos). Saiba como em:
 
 
 {{#ref}}
@@ -47,7 +49,7 @@ docker-forensics.md
 ios-backup-forensics.md
 {{#endref}}
 
-## Inspeção aprofundada de tipos de arquivos e Software específicos
+## Inspeção aprofundada de tipos de arquivo e Software específicos
 
 Se você tiver um **arquivo** muito **suspeito**, então, **dependendo do tipo de arquivo e do software** que o criou, vários **truques** podem ser úteis.\
 Leia a página a seguir para conhecer alguns truques interessantes:
@@ -57,7 +59,7 @@ Leia a página a seguir para conhecer alguns truques interessantes:
 specific-software-file-type-tricks/
 {{#endref}}
 
-Gostaria de fazer uma menção especial à página:
+Quero fazer uma menção especial à página:
 
 
 {{#ref}}
