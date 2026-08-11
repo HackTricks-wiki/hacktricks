@@ -9,11 +9,11 @@
 {{#endref}}
 
 
-Mach-o 바이너리에는 바이너리 내부 서명의 **오프셋**과 **크기**를 나타내는 **`LC_CODE_SIGNATURE`**라는 load command가 포함되어 있습니다. 실제로 GUI 도구인 MachOView를 사용하면 바이너리 끝부분에서 이 정보가 포함된 **Code Signature**라는 섹션을 확인할 수 있습니다:
+Mach-o 바이너리에는 바이너리 내부 signature의 **`offset`**과 **`size`**를 나타내는 **`LC_CODE_SIGNATURE`**라는 load command가 포함되어 있습니다. 실제로 GUI tool인 MachOView를 사용하면 바이너리의 끝부분에서 다음 정보가 포함된 **Code Signature**라는 section을 확인할 수 있습니다:
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-Code Signature의 magic header는 **`0xFADE0CC0`**(embedded code signature) 또는 **`0xFADE0CC1`**(detached code signature)입니다. 그런 다음 이를 포함하는 superBlob의 길이와 blob 개수 등의 정보를 확인할 수 있습니다.\
+Code Signature의 magic header는 **`0xFADE0CC0`**(embedded code signature) 또는 **`0xFADE0CC1`**(detached code signature)입니다. 그런 다음 해당 signature를 포함하는 superBlob의 length 및 blob 개수와 같은 정보를 확인할 수 있습니다.\
 이 정보는 [source code here](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276)에서 확인할 수 있습니다:<sup>[[1]](#references)</sup>
 ```c
 /*
@@ -43,14 +43,14 @@ char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
-일반적으로 포함되는 blob은 Code Directory, Requirements 및 Entitlements, 그리고 Cryptographic Message Syntax (CMS)입니다.\
+일반적으로 포함되는 blob은 Code Directory, Requirements 및 Entitlements, 그리고 Cryptographic Message Syntax(CMS)입니다.\
 또한 blob에 인코딩된 데이터가 **Big Endian**으로 인코딩된다는 점에 유의하세요.
 
-또한 서명을 바이너리에서 분리하여 `/var/db/DetachedSignatures`에 저장할 수 있습니다(iOS에서 사용됨).
+또한 signatures는 바이너리에서 분리되어 `/var/db/DetachedSignatures`에 저장될 수 있습니다(iOS에서 사용됨).
 
 ## Code Directory Blob
 
-[코드에서 Code Directory Blob의 선언을 확인할 수 있습니다](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):<sup>[[1]](#references)</sup>
+[Code Directory Blob의 선언은 code에서 확인할 수 있습니다](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):<sup>[[1]](#references)</sup>
 ```c
 typedef struct __CodeDirectory {
 uint32_t magic;                                 /* magic number (CSMAGIC_CODEDIRECTORY) */
@@ -106,14 +106,14 @@ char end_withLinkage[0];
 } CS_CodeDirectory
 __attribute__ ((aligned(1)));
 ```
-이 구조체에는 여러 버전이 있으며, 이전 버전에는 더 적은 정보가 포함될 수 있다는 점에 유의하세요.
+이 struct에는 여러 버전이 있으며, 이전 버전에는 정보가 더 적을 수 있다는 점에 유의하세요.
 
-Code directory에서는 어떤 hashing algorithm이든 사용할 수 있다는 점에 유의하세요. 현재 가장 일반적인 것은 **SHA256**이며 (`hashType` 필드의 값 2로 표시됨), 향후 이 hash가 깨질 경우 Apple은 다른 hash를 사용하기 시작할 수 있습니다.
+Code directory에서는 어떤 hashing algorithm이든 사용할 수 있습니다. 현재 가장 일반적인 것은 **SHA256**이며, 이는 `hashType` 필드의 값 2로 표시됩니다. 하지만 향후 이 hash가 깨질 경우 Apple은 다른 hash를 사용하기 시작할 수 있습니다.
 
 ## Signing Code Pages
 
-전체 binary를 hashing하는 것은 비효율적이며, binary가 메모리에 일부만 로드되는 경우에는 사실상 무의미합니다. 따라서 code signature는 실제로 hash들의 hash이며, 각 binary page가 개별적으로 hashing됩니다.\
-실제로 앞서 설명한 **Code Directory** code에서 **page size가 지정되어 있음**을 해당 필드 중 하나에서 확인할 수 있습니다. 또한 binary의 크기가 page 크기의 배수가 아닌 경우, **CodeLimit** 필드가 signature의 끝 위치를 지정합니다.
+전체 binary를 hashing하는 것은 비효율적이며, binary가 메모리에 부분적으로만 로드되는 경우에는 쓸모가 없습니다. 따라서 code signature는 실제로 각 binary page를 개별적으로 hashing한 hash들의 hash입니다.\
+실제로 앞의 **Code Directory** code에서 **page size가 지정되어 있음**을 해당 필드 중 하나에서 확인할 수 있습니다. 또한 binary의 크기가 page 크기의 배수가 아닌 경우, **CodeLimit** 필드가 signature의 끝나는 위치를 지정합니다.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -184,25 +184,27 @@ openssl sha256 /tmp/*.page.*
 ```
 ## Entitlements Blob
 
-애플리케이션에는 모든 entitlements가 정의된 **entitlement blob**이 포함되어 있을 수도 있습니다. 또한 일부 iOS 바이너리는 entitlements가 -5 entitlements special slot이 아닌 특수 슬롯 -7에 저장되어 있을 수 있습니다.
+애플리케이션에는 모든 entitlements가 정의된 **entitlement blob**도 포함될 수 있습니다. 또한 일부 iOS 바이너리는 entitlements를 -5 entitlements special slot이 아니라 특수 슬롯 -7에 지정할 수 있습니다.
 
 ## Special Slots
 
-MacOS 애플리케이션은 실행에 필요한 모든 것을 바이너리 내부에 포함하지 않고, **external resources**(일반적으로 애플리케이션의 **bundle** 내부에 있음)도 사용합니다. 따라서 바이너리 내부에는 일부 중요한 external resources의 해시가 포함된 슬롯이 있으며, 이를 통해 해당 리소스가 수정되지 않았는지 확인합니다.
+MacOS 애플리케이션은 실행에 필요한 모든 항목을 바이너리 내부에 포함하지 않으며, **외부 리소스**(일반적으로 애플리케이션 **bundle** 내부)도 사용합니다. 따라서 바이너리 내부에는 일부 중요한 외부 리소스의 해시를 포함하는 슬롯이 있으며, 이를 통해 해당 리소스가 수정되지 않았는지 확인합니다.
 
-실제로 Code Directory structs에서 특수 슬롯의 개수를 나타내는 **`nSpecialSlots`**라는 파라미터를 확인할 수 있습니다. 특수 슬롯 0은 존재하지 않으며, 가장 일반적인 슬롯(-1부터 -6까지)은 다음과 같습니다.
+실제로 Code Directory structs에서 특수 슬롯의 개수를 나타내는 **`nSpecialSlots`**라는 parameter를 확인할 수 있습니다. 특수 슬롯 0은 존재하지 않으며, 가장 일반적인 슬롯(-1부터 -6까지)은 다음과 같습니다.
 
-- `info.plist`의 해시(또는 `__TEXT.__info__plist` 내부에 있는 파일의 해시).
+- `info.plist`의 해시(또는 `__TEXT.__info__plist` 내부에 있는 plist의 해시)
 - Requirements의 해시
-- Resource Directory의 해시(bundle 내부의 `_CodeSignature/CodeResources` 파일 해시).
-- 애플리케이션별 항목(사용되지 않음)
+- Resource Directory의 해시(bundle 내부 `_CodeSignature/CodeResources` 파일의 해시)
+- Application specific (unused)
 - entitlements의 해시
-- DMG code signatures 전용
+- DMG code signatures only
 - DER Entitlements
 
 ## Code Signing Flags
 
-모든 프로세스에는 `status`라는 bitmask가 연결되어 있으며, 이는 kernel에 의해 설정되고 일부는 **code signature**로 재정의될 수 있습니다. code signing에 포함될 수 있는 이러한 flags는 [code에 정의되어 있습니다](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[[1]](#references)</sup>
+모든 process에는 `status`라는 bitmask가 연결되어 있으며, 이 값은 kernel에 의해 설정되고 일부는 **code signature**로 재정의될 수 있습니다. Code signing에 포함할 수 있는 이러한 flags는 [code에 정의되어 있습니다](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):<sup>[[1]](#references)</sup>
+
+User space는 XNU에 정의된 `csops` 및 `csops_audittoken` operations를 통해 이 state에서 허용된 부분을 조회하거나 업데이트할 수 있습니다.<sup>[[5]](#references)</sup>
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -247,15 +249,15 @@ CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
 
 #define CS_ENTITLEMENT_FLAGS        (CS_GET_TASK_ALLOW | CS_INSTALLER | CS_DATAVAULT_CONTROLLER | CS_NVRAM_UNRESTRICTED)
 ```
-`exec_mach_imgact` 함수는 실행을 시작할 때 `CS_EXEC_*` 플래그를 동적으로 추가할 수도 있다는 점에 유의하세요.
+참고로 [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) 함수는 실행을 시작할 때 `CS_EXEC_*` flags를 동적으로 추가할 수도 있습니다.
 
 ## Code Signature Requirements
 
-각 애플리케이션은 실행되기 위해 **충족해야 하는** **requirements**를 저장합니다. **애플리케이션에 포함된 requirements가 애플리케이션에 의해 충족되지 않으면**, 해당 애플리케이션은 실행되지 않습니다(변조되었을 가능성이 높기 때문입니다).
+각 application은 실행될 수 있으려면 **충족해야 하는 requirements**를 저장합니다. **application에 포함된 requirements가 application에 의해 충족되지 않으면**, 해당 application은 실행되지 않습니다(변조되었을 가능성이 높기 때문입니다).
 
-바이너리의 requirements는 **expressions** 스트림으로 구성된 **특수 문법**을 사용하며, 매직 값으로 `0xfade0c00`을 사용하는 blob으로 인코딩되고, 해당 **hash는 특수 code slot에 저장**됩니다.<sup>[[4]](#references)</sup>
+바이너리의 requirements는 **expressions**의 stream으로 구성된 **특수 grammar**를 사용하며, `0xfade0c00`을 magic으로 사용해 blobs로 인코딩되고, 해당 **hash는 특수 code slot에 저장됩니다**.<sup>[[4]](#references)</sup>
 
-바이너리의 requirements는 다음을 실행하여 확인할 수 있습니다:
+바이너리의 requirements는 다음 명령을 실행하여 확인할 수 있습니다:
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls
@@ -266,7 +268,7 @@ Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
 > [!TIP]
-> 이러한 signature는 certification 정보, TeamID, ID, entitlement 및 기타 여러 데이터를 확인할 수 있다는 점에 유의하세요.
+> 이러한 signature는 인증서 정보, TeamID, ID, entitlements 및 기타 여러 데이터와 같은 항목을 확인할 수 있다는 점에 유의하세요.
 
 또한 `csreq` tool을 사용하여 일부 compiled requirements를 생성할 수 있습니다:
 ```bash
@@ -280,57 +282,57 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
-이 정보를 확인하고 `Security.framework`의 일부 API를 사용하여 requirements를 생성하거나 수정할 수 있습니다:<sup>[[3]](#references)</sup>
+이 정보에 액세스하고 다음과 같은 `Security.framework`의 일부 API를 사용하여 requirements를 생성하거나 수정할 수 있습니다:<sup>[[3]](#references)</sup>
 
-#### **유효성 확인**
+#### **Validity 확인**
 
-- **`Sec[Static]CodeCheckValidity`**: Requirement에 따라 SecCodeRef의 유효성을 확인합니다.
+- **`Sec[Static]CodeCheckValidity`**: Requirement에 따라 SecCodeRef의 validity를 확인합니다.
 - **`SecRequirementEvaluate`**: certificate context에서 requirement를 검증합니다.
-- **`SecTaskValidateForRequirement`**: 실행 중인 SecTask를 `CFString` requirement와 비교하여 검증합니다.
+- **`SecTaskValidateForRequirement`**: 실행 중인 SecTask를 `CFString` requirement에 대해 검증합니다.
 
 #### **Code Requirements 생성 및 관리**
 
-- **`SecRequirementCreateWithData`:** requirement를 나타내는 binary data로부터 `SecRequirementRef`를 생성합니다.
-- **`SecRequirementCreateWithString`:** requirement의 string expression으로부터 `SecRequirementRef`를 생성합니다.
+- **`SecRequirementCreateWithData`:** requirement를 나타내는 binary data에서 `SecRequirementRef`를 생성합니다.
+- **`SecRequirementCreateWithString`:** requirement의 string expression에서 `SecRequirementRef`를 생성합니다.
 - **`SecRequirementCopy[Data/String]`**: `SecRequirementRef`의 binary data representation을 가져옵니다.
 - **`SecRequirementCreateGroup`**: app-group membership를 위한 requirement를 생성합니다.
 
-#### **Code Signing 정보 접근**
+#### **Code Signing 정보 액세스**
 
-- **`SecStaticCodeCreateWithPath`**: code signature를 검사하기 위해 file system path로부터 `SecStaticCodeRef` object를 초기화합니다.
-- **`SecCodeCopySigningInformation`**: `SecCodeRef` 또는 `SecStaticCodeRef`에서 signing information을 가져옵니다.
+- **`SecStaticCodeCreateWithPath`**: code signature를 검사하기 위해 file system path에서 `SecStaticCodeRef` object를 초기화합니다.
+- **`SecCodeCopySigningInformation`**: `SecCodeRef` 또는 `SecStaticCodeRef`에서 signing 정보를 가져옵니다.
 
 #### **Code Requirements 수정**
 
 - **`SecCodeSignerCreate`**: code signing 작업을 수행하기 위한 `SecCodeSignerRef` object를 생성합니다.
-- **`SecCodeSignerSetRequirement`**: signing 중 code signer가 적용할 새로운 requirement를 설정합니다.
+- **`SecCodeSignerSetRequirement`**: signing 중 code signer가 적용할 새 requirement를 설정합니다.
 - **`SecCodeSignerAddSignature`**: 지정된 signer를 사용하여 signing 중인 code에 signature를 추가합니다.
 
 #### **Requirements를 사용한 Code 검증**
 
-- **`SecStaticCodeCheckValidity`**: 지정된 requirements에 대해 static code object를 검증합니다.
+- **`SecStaticCodeCheckValidity`**: static code object를 지정된 requirements에 대해 검증합니다.
 
 #### **추가로 유용한 API**
 
-- **`SecCodeCopy[Internal/Designated]Requirement`: `SecCodeRef`에서 SecRequirementRef를 가져옵니다.**
+- **`SecCodeCopy[Internal/Designated]Requirement`:** SecCodeRef에서 SecRequirementRef를 가져옵니다.
 - **`SecCodeCopyGuestWithAttributes`**: 특정 attributes를 기반으로 code object를 나타내는 `SecCodeRef`를 생성하며, sandboxing에 유용합니다.
 - **`SecCodeCopyPath`**: `SecCodeRef`와 연결된 file system path를 가져옵니다.
 - **`SecCodeCopySigningIdentifier`**: `SecCodeRef`에서 signing identifier(예: Team ID)를 가져옵니다.
-- **`SecCodeGetTypeID`**: `SecCodeRef` objects의 type identifier를 반환합니다.
+- **`SecCodeGetTypeID`**: `SecCodeRef` object의 type identifier를 반환합니다.
 - **`SecRequirementGetTypeID`**: `SecRequirementRef`의 CFTypeID를 가져옵니다.
 
 #### **Code Signing Flags 및 Constants**
 
 - **`kSecCSDefaultFlags`**: code signing 작업을 위한 여러 Security.framework 함수에서 사용되는 기본 flags입니다.
-- **`kSecCSSigningInformation`**: signing information을 가져와야 함을 지정하는 flag입니다.
+- **`kSecCSSigningInformation`**: signing 정보를 가져와야 함을 지정하는 flag입니다.
 
 ## Code Signature Enforcement
 
-**kernel**은 app의 code 실행을 허용하기 전에 **code signature를 확인**합니다. 또한 memory에 새로운 code를 작성하고 실행할 수 있는 한 가지 방법은 `mprotect`가 `MAP_JIT` flag와 함께 호출될 때 JIT를 abuse하는 것입니다. 이를 수행하려면 application에 special entitlement가 필요합니다.
+**kernel**은 app의 code가 실행되도록 허용하기 전에 **code signature를 확인**합니다. 또한 memory에 새로운 code를 작성하고 실행할 수 있는 한 가지 방법은 `mprotect`가 `MAP_JIT` flag와 함께 호출될 때 JIT를 abuse하는 것입니다. 이를 수행하려면 application에 특별한 entitlement가 필요합니다.
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct에는 실행 중인 process의 entitlement 정보가 포함되어 있습니다. `csb_platform_binary`는 application이 **platform binary**인지도 알려줍니다. 이는 OS가 이러한 process의 task port에 대한 SEND rights를 보호하는 것과 같은 security mechanisms를 적용하기 위해 여러 시점에 확인합니다.<sup>[[2]](#references)</sup>
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct에는 실행 중인 process의 entitlement 정보가 포함되어 있습니다. `csb_platform_binary`는 application이 **platform binary**인지도 알려줍니다. 이는 OS가 이러한 process의 task port에 대한 SEND rights를 보호하는 등의 security mechanisms를 적용하기 위해 여러 시점에 확인합니다.<sup>[[2]](#references)</sup>
 
 > [!WARNING]
 > 여러 security measures는 binary가 platform binary인지에 따라 달라집니다. 따라서 privileges를 escalate하는 한 가지 방법은 **binary를 platform binary로 만드는 것**입니다(예: 이를 허용하는 certificate로 re-signing하는 방법).
@@ -392,12 +394,11 @@ bool csb_csm_managed;
 #endif
 };
 ```
-## 참고 자료
+## References
 
 - [1] [XNU — `osfmk/kern/cs_blobs.h` (`CodeDirectory`, `CS_*` 플래그, blob 매직 값)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/kern/cs_blobs.h)
 - [2] [XNU — `bsd/kern/ubc_subr.c` (`cs_blob` 처리 및 서명 검증)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/kern/ubc_subr.c)
 - [3] [Apple Security framework 소스 — `libsecurity_codesigning`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/libsecurity_codesigning)
 - [4] [Apple Developer — 코드 서명 가이드](https://developer.apple.com/library/archive/documentation/Security/Conceptual/CodeSigningGuide/Introduction/Introduction.html)
 - [5] [XNU — `bsd/sys/codesign.h` (`csops`/`csops_audittoken` 작업)](https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/codesign.h)
-
 {{#include ../../../banners/hacktricks-training.md}}

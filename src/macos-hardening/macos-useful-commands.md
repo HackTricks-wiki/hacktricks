@@ -2,13 +2,13 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS 자동 열거 도구
+### macOS 자동 열거 도구
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### 특정 MacOS 명령어
+### 특정 macOS 명령어
 ```bash
 #System info
 date
@@ -32,7 +32,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -117,18 +117,18 @@ sudo killall -HUP mDNSResponder
 ```
 ### 빠른 anti-analysis / virtualization 확인
 
-일부 macOS stealer는 VM을 탐지하기 위해 `system_profiler`를 호출하고, sandbox detonation을 피하기 위해 **고유한 exit code(예: 100)** 로 중단합니다<sup>[[1]](#references)</sup>:
+일부 macOS stealer는 VM을 탐지하기 위해 `system_profiler`를 호출하고, sandbox detonation을 피하기 위해 **서로 다른 exit code(예: 100)**로 abort합니다<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### 설치된 Software 및 Services
+### 설치된 소프트웨어 및 서비스
 
-설치된 **suspicious** 애플리케이션과 설치된 리소스에 대한 **privileges**을 확인합니다:
+설치된 **의심스러운** 애플리케이션과 설치된 리소스에 대한 **권한**을 확인하세요:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
@@ -149,8 +149,7 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## 참고 자료
+## References
 
 - [1] [2025년, Infostealer의 해](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
 {{#include ../banners/hacktricks-training.md}}
