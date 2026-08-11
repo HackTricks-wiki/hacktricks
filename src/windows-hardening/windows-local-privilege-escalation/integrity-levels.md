@@ -4,29 +4,29 @@
 
 ## Viwango vya Uadilifu
 
-Katika Windows Vista na matoleo ya baadaye, vipengee vyote vilivyolindwa huja na tag ya **kiwango cha uadilifu**. Mpangilio huu kwa kawaida huweka kiwango cha uadilifu cha "medium" kwa files na registry keys, isipokuwa folders na files fulani ambazo Internet Explorer 7 inaweza kuandikia katika kiwango cha low cha uadilifu. Tabia chaguomsingi ni kwamba processes zinazoanzishwa na standard users ziwe na kiwango cha medium cha uadilifu, huku services kwa kawaida zikiendesha katika kiwango cha system cha uadilifu. Label ya high-integrity hulinda root directory.
+Katika Windows Vista na matoleo ya baadaye, vitu vinavyoweza kulindwa vinaweza kuwa na lebo ya **kiwango cha uadilifu**. Vitu vingi huchukuliwa kuwa na uadilifu wa kati, huku maeneo mahususi yaliyokusudiwa kwa applications zenye uadilifu wa chini yakiweza kuwekwa lebo ya chini. Processes zinazoanzishwa na watumiaji wa kawaida kwa kawaida huendeshwa kwa uadilifu wa kati, applications zilizoinuliwa huendeshwa kwa uadilifu wa juu, na services nyingi huendeshwa kwa uadilifu wa mfumo.<sup>[[1]](#references)</sup>
 
-Kanuni muhimu ni kwamba objects haziwezi kurekebishwa na processes zilizo na kiwango cha chini cha uadilifu kuliko kiwango cha object hiyo. Viwango vya uadilifu ni:
+Kanuni muhimu ni kwamba vitu haviwezi kurekebishwa na processes zilizo na kiwango cha uadilifu cha chini kuliko kiwango cha kitu hicho. Windows hutumia ukaguzi huu wa Mandatory Integrity Control (MIC) kabla ya kutathmini discretionary access control list (DACL) ya kitu. Viwango vinavyokutana mara nyingi ni:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- **Untrusted**: Kiwango hiki ni cha processes zilizo na anonymous logins. Mfano: Chrome
-- **Low**: Hutumika hasa kwa maingiliano ya internet, haswa katika Protected Mode ya Internet Explorer, na huathiri files na processes zinazohusiana, pamoja na folders fulani kama **Temporary Internet Folder**. Low integrity processes hukabiliwa na vizuizi vikubwa, ikiwemo kutokuwa na uwezo wa kuandika kwenye registry na kuwa na uwezo mdogo wa kuandika kwenye user profile.
-- **Medium**: Kiwango chaguomsingi kwa shughuli nyingi, hupewa standard users na objects zisizo na viwango maalum vya uadilifu. Hata members wa Administrators group huendesha katika kiwango hiki kwa chaguomsingi.
-- **High**: Kimehifadhiwa kwa administrators, na kuwawezesha kurekebisha objects zilizo katika viwango vya chini vya uadilifu, pamoja na zile zilizo katika kiwango cha high chenyewe.
-- **System**: Kiwango cha juu zaidi cha uendeshaji kwa Windows kernel na core services, ambacho hata administrators hawawezi kufikia, hivyo kuhakikisha ulinzi wa system functions muhimu.
-- **Installer**: Kiwango cha kipekee kinachozidi viwango vingine vyote, na kuwezesha objects zilizo katika kiwango hiki ku-uninstall object nyingine yoyote.
+- **Untrusted**: Kiwango cha chini kabisa, kinachowakilishwa na `SECURITY_MANDATORY_UNTRUSTED_RID`.
+- **Low**: Hutumika hasa kwa interactions za mtandao, hususan katika Internet Explorer's Protected Mode, ikiathiri files na processes zinazohusiana, pamoja na folders fulani kama **Temporary Internet Folder**. Processes zenye uadilifu wa chini hukabiliwa na vizuizi vikubwa, ikiwemo kutokuwa na uwezo wa kuandika kwenye registry na uwezo mdogo wa kuandika kwenye user profile.
+- **Medium**: Kiwango chaguo-msingi kwa shughuli nyingi, kinachotolewa kwa watumiaji wa kawaida na vitu visivyo na viwango mahususi vya uadilifu. Hata washiriki wa Administrators group huendesha kwa kiwango hiki kwa chaguo-msingi.
+- **High**: Hutengwa kwa administrators, na kuwawezesha kurekebisha vitu vilivyo katika viwango vya chini vya uadilifu, ikiwemo vile vilivyo katika kiwango cha juu chenyewe.
+- **System**: Kiwango cha juu zaidi cha uendeshaji kwa Windows kernel na core services, kisichofikiwa hata na administrators, na hivyo kuhakikisha ulinzi wa system functions muhimu.
 
-Unaweza kupata kiwango cha uadilifu cha process kwa kutumia **Process Explorer** kutoka **Sysinternals**, kwa kufungua **properties** za process na kuangalia tab ya "**Security**":
+Windows pia hufafanua thamani ya uadilifu ya protected-process iliyo juu ya System. Hata hivyo, **TrustedInstaller** ni utambulisho wa Windows service badala ya kuwa kiwango tofauti cha MIC; uwezo wake wa kurekebisha protected operating-system resources unatokana na permissions alizopewa utambulisho huo.
 
-![Viwango vya Uadilifu - Viwango vya Uadilifu: Unaweza kupata kiwango cha uadilifu cha process kwa kutumia Process Explorer kutoka Sysinternals, kwa kufungua properties za process na kuangalia tab ya "...](<../../images/image (824).png>)
+Unaweza kupata kiwango cha uadilifu cha process kwa kutumia **Process Explorer** kutoka **Sysinternals** kwa kufungua process properties na kuangalia kichupo cha **Security**:<sup>[[3]](#references)</sup>
 
-Pia unaweza kupata **kiwango chako cha sasa cha uadilifu** kwa kutumia `whoami /groups`
+![Viwango vya Uadilifu - Viwango vya Uadilifu: Unaweza kupata kiwango cha uadilifu cha process kwa kutumia Process Explorer kutoka Sysinternals, kwa kufikia properties za process na kuangalia "...](<../../images/image (824).png>)
 
-![Viwango vya Uadilifu - Viwango vya Uadilifu: Pia unaweza kupata kiwango chako cha sasa cha uadilifu kwa kutumia whoami /groups](<../../images/image (325).png>)
+Unaweza pia kupata **kiwango chako cha sasa cha uadilifu** kwa kutumia `whoami /groups`:
 
-### Viwango vya Uadilifu katika File-system
+![Viwango vya Uadilifu - Viwango vya Uadilifu: Unaweza pia kupata kiwango chako cha sasa cha uadilifu kwa kutumia whoami /groups](<../../images/image (325).png>)
 
-Object iliyo ndani ya file-system inaweza kuhitaji **minimum integrity level requirement**, na ikiwa process haina kiwango hiki cha uadilifu, haitaweza kuingiliana nayo.\
-Kwa mfano, **create regular file from a regular user console and check the permissions**:
+### Viwango vya Uadilifu katika File System
+
+Kitu katika file system kinaweza kuwa na **sharti la chini la kiwango cha uadilifu**. Process iliyo chini ya kiwango hicho inakabiliwa na mandatory policy ya kitu hicho hata wakati DACL yake ingeidhinisha access. Kwa mfano, tengeneza file la kawaida kutoka kwenye console ya standard-user na ukague permissions zake:<sup>[[1]](#references)[[4]](#references)</sup>
 ```
 echo asd >asd.txt
 icacls asd.txt
@@ -37,7 +37,7 @@ NT AUTHORITY\INTERACTIVE:(I)(M,DC)
 NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-Sasa, hebu tuteue kiwango cha chini cha integrity cha **High** kwa file. Hili **lazima lifanywe kutoka kwenye console** inayotumika kama **administrator**, kwa sababu **console ya kawaida** itakuwa ikitumia kiwango cha Medium Integrity na **haitaruhusiwa** kuteua kiwango cha High Integrity kwa object:
+Sasa, weka kiwango cha chini cha integrity cha **High** kwenye faili. Hili **lazima lifanywe kutoka kwenye console** inayoendeshwa kama **administrator**, kwa sababu console ya kawaida huendeshwa katika integrity ya Medium na **haitaruhusiwa** kukabidhi integrity ya High kwa object:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -52,7 +52,7 @@ NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 Mandatory Label\High Mandatory Level:(NW)
 ```
-Hapa ndipo mambo yanapovutia. Unaweza kuona kwamba mtumiaji `DESKTOP-IDJHTKP\user` ana **FULL privileges** juu ya faili (kwa hakika, huyu ndiye mtumiaji aliyeunda faili), hata hivyo, kutokana na minimum integrity level iliyotekelezwa, hataweza tena kurekebisha faili isipokuwa anaendesha ndani ya High Integrity Level (kumbuka kwamba ataweza kuisoma):
+Mtumiaji `DESKTOP-IDJHTKP\user` ana **FULL privileges** juu ya faili kwa sababu ndiye aliyeiunda. Hata hivyo, mandatory label inamzuia mtumiaji kurekebisha faili isipokuwa mchakato unaendeshwa katika High integrity. Mtumiaji bado anaweza kuisoma kwa sababu mandatory policy iliyoonyeshwa ni `(NW)`, au no-write-up:
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -62,11 +62,11 @@ C:\Users\Public\asd.txt
 Access is denied.
 ```
 > [!TIP]
-> **Kwa hivyo, faili inapokuwa na kiwango cha chini kabisa cha integrity, ili kuirekebisha unahitaji kuwa unaendesha angalau katika kiwango hicho cha integrity.**
+> **Kwa hiyo, faili inapokuwa na minimum integrity level, ili kuirekebisha lazima uwe unaendesha angalau katika integrity level hiyo.**
 
-### Integrity Levels in Binaries
+### Integrity Levels katika Binaries
 
-Nilitengeneza nakala ya `cmd.exe` katika `C:\Windows\System32\cmd-low.exe` na nikaiwekea **kiwango cha integrity cha low kutoka kwenye administrator console:**
+Mfano ufuatao unatumia nakala ya `cmd.exe` katika `C:\Windows\System32\cmd-low.exe` na kuikabidhi **Low integrity level kutoka kwa administrator console**:
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
@@ -80,12 +80,18 @@ Sasa, ninapoendesha `cmd-low.exe` itaendeshwa **chini ya kiwango cha uadilifu ch
 
 ![Viwango vya Uadilifu katika Mfumo wa Faili - Viwango vya Uadilifu katika Binaries: Sasa, ninapoendesha cmd-low.exe itaendeshwa chini ya kiwango cha uadilifu cha chini badala ya cha kati](<../../images/image (313).png>)
 
-Kwa watu wenye udadisi, ukiweka kiwango cha uadilifu cha juu kwenye binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) haitaendeshwa kiotomatiki kwa kiwango cha uadilifu cha juu (ukiianzisha kutoka kwenye kiwango cha uadilifu cha kati --kwa chaguo-msingi-- itaendeshwa chini ya kiwango cha uadilifu cha kati).
+Kuweka lebo ya uadilifu ya High kwenye binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) hakufanyi iendeshwe katika uadilifu wa High kiotomatiki. Ikiitwa kutoka kwa mchakato wenye uadilifu wa Medium, itaendeshwa kwa uadilifu wa Medium kwa sababu mchakato mpya hupokea kiwango cha chini kati ya viwango vya uadilifu vya faili inayotekelezwa na cha mchakato anayeiita.<sup>[[1]](#references)</sup>
 
-### Viwango vya Uadilifu katika Processes
+### Viwango vya Uadilifu katika Michakato
 
-Si faili na folda zote zilizo na kiwango cha chini cha uadilifu, **lakini processes zote zinaendeshwa chini ya kiwango fulani cha uadilifu**. Na kama ilivyotokea kwenye mfumo wa faili, **ikiwa process inataka kuandika ndani ya process nyingine, lazima iwe na angalau kiwango sawa cha uadilifu**. Hii inamaanisha kuwa process yenye kiwango cha chini cha uadilifu haiwezi kufungua handle yenye ufikiaji kamili kwa process yenye kiwango cha kati cha uadilifu.
+Si faili na folda zote zilizo na lebo ya chini ya uadilifu iliyo wazi, **lakini kila mchakato huendeshwa katika kiwango fulani cha uadilifu**. Kama ilivyo kwa vitu vya mfumo wa faili, **mchakato unaotaka kupata ruhusa ya kuandika kwenye mchakato mwingine lazima uwe na angalau kiwango sawa cha uadilifu**. Kwa hiyo, mchakato wenye uadilifu wa Low hauwezi kufungua mchakato wenye uadilifu wa Medium kwa ufikiaji kamili.<sup>[[1]](#references)</sup>
 
-Kwa sababu ya vikwazo vilivyoelezwa katika sehemu hii na iliyotangulia, kwa mtazamo wa usalama, daima **inapendekezwa kuendesha process katika kiwango cha chini kabisa cha uadilifu kinachowezekana**.
+Kwa sababu ya vizuizi hivi, njia salama zaidi ni **kuendesha kila mchakato katika kiwango cha chini kabisa cha uadilifu kinachouwezesha kutekeleza kazi iliyokusudiwa**.
 
+## References
+
+- [1] [Microsoft Learn – Udhibiti wa Uadilifu wa Lazima](https://learn.microsoft.com/en-us/windows/win32/secauthz/mandatory-integrity-control)
+- [2] [Microsoft Learn – Uorodheshaji wa MANDATORY_LEVEL](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ne-winnt-mandatory_level)
+- [3] [Microsoft Sysinternals – Process Explorer](https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer)
+- [4] [Microsoft Learn – icacls](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/icacls)
 {{#include ../../banners/hacktricks-training.md}}

