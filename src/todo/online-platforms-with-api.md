@@ -1,131 +1,158 @@
-# API'li Çevrim İçi Platformlar
+# API'li Online Platformlar
 
 {{#include ../banners/hacktricks-training.md}}
 
-## [ProjectHoneypot](https://www.projecthoneypot.org/)
+Bu servisler reconnaissance, reputation, breach veya enrichment iş akışlarını destekler. API'leri, kotaları, fiyatlandırmaları ve izin verilen kullanımları sık sık değişir; müşteri tanımlayıcılarını veya hassas verileri göndermeden önce güncel vendor dokümantasyonunu ve engagement yetkilendirmesini doğrulayın.
 
-Bir IP'nin şüpheli/kötü amaçlı etkinliklerle ilişkili olup olmadığını sorabilirsiniz. Tamamen ücretsizdir.
+## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
-## [**BotScout**](http://botscout.com/api.htm)
+Bir IP adresinin şüpheli veya kötü amaçlı etkinlikle ilişkilendirilip ilişkilendirilmediğini sorgulayın. Erişim için hesap veya API key gerekebilir.
 
-IP adresinin hesap kaydeden bir botla ilişkili olup olmadığını kontrol edin. Kullanıcı adlarını ve e-postaları da kontrol edebilir. Başlangıçta ücretsizdir.
+## [**BotScout**](https://botscout.com/api.htm) <sup>[[2]](#references)</sup>
 
-## [Hunter](https://hunter.io/)
+Bir IP adresinin, kullanıcı adının veya e-posta adresinin otomatik hesap kaydı ya da bildirilen diğer bot etkinlikleriyle ilişkilendirilip ilişkilendirilmediğini kontrol edin.
 
-E-postaları bulun ve doğrulayın.\
-Bazı ücretsiz API istekleri vardır; daha fazlası için ödeme yapmanız gerekir.\
-Ticari mi?
+## [Hunter](https://hunter.io/) <sup>[[3]](#references)</sup>
 
-## [AlientVault](https://otx.alienvault.com/api)
+Profesyonel e-posta adreslerini ve domain ile ilişkili iletişim kalıplarını bulun ve doğrulayın. Request limitlerini ve izin verilen kullanımları güncel planda kontrol edin.
 
-IP'ler ve Domain'lerle ilişkili kötü amaçlı etkinlikleri bulun. Ücretsizdir.
+## [AlienVault OTX](https://otx.alienvault.com/api) <sup>[[4]](#references)</sup>
 
-## [Clearbit](https://dashboard.clearbit.com/)
+IP adresleri ve domainlerle ilişkili threat-intelligence göstergelerini ve etkinlikleri arayın.
 
-Bir e-posta ile ilişkili kişisel verileri (diğer platformlardaki profiller), domain ile ilişkili verileri (temel şirket bilgileri, e-postalar ve çalışan kişiler) ve şirket bilgilerini (e-postadan şirket bilgilerini alma) bulun.\
-Tüm olanaklara erişmek için ödeme yapmanız gerekir.\
-Ticari mi?
+## [Clearbit](https://dashboard.clearbit.com/) <sup>[[5]](#references)</sup>
 
-## [BuiltWith](https://builtwith.com/)
+Bir e-posta adresini, domaini veya şirketi mevcut business/profile verileriyle enrich edin. Kapsam, erişim ve privacy kısıtlamaları mevcut ürüne ve plana bağlıdır.
 
-Web siteleri tarafından kullanılan teknolojiler. Pahalı...\
-Ticari mi?
+## [BuiltWith](https://builtwith.com/) <sup>[[6]](#references)</sup>
 
-## [Fraudguard](https://fraudguard.io/)
+Web sitelerinde gözlemlenen teknolojileri belirleyin ve seçilen planın izin verdiği durumlarda historical veya relationship verilerini edinin.
 
-Bir host'un (domain veya IP) şüpheli/kötü amaçlı etkinliklerle ilişkili olup olmadığını kontrol edin. Bazı ücretsiz API erişimleri vardır.\
-Ticari mi?
+## [FraudGuard](https://fraudguard.io/) <sup>[[7]](#references)</sup>
 
-## [FortiGuard](https://fortiguard.com/)
+Bir IP adresinin şüpheli veya kötü amaçlı etkinlikle ilişkili olup olmadığını kontrol edin. Güncel API planlarını ve limitlerini doğrulayın.
 
-Bir host'un (domain veya IP) şüpheli/kötü amaçlı etkinliklerle ilişkili olup olmadığını kontrol edin. Bazı ücretsiz API erişimleri vardır.
+## [FortiGuard](https://fortiguard.com/) <sup>[[8]](#references)</sup>
 
-## [SpamCop](https://www.spamcop.net/)
+Domainler, URL'ler veya IP adresleri için FortiGuard categorization ve threat intelligence verilerini sorgulayın. Kullanılabilirlik servise göre değişir.
 
-Host'un spam etkinliğiyle ilişkili olup olmadığını belirtir. Bazı ücretsiz API erişimleri vardır.
+## [SpamCop](https://www.spamcop.net/) <sup>[[9]](#references)</sup>
 
-## [mywot](https://www.mywot.com/)
+Bir IP adresinin bildirilen spam etkinliği nedeniyle listelenip listelenmediğini kontrol edin.
 
-Görüşlere ve diğer metriklere dayanarak bir domain'in şüpheli/kötü amaçlı bilgilerle ilişkili olup olmadığını belirler.
+## [myWOT](https://www.mywot.com/) <sup>[[10]](#references)</sup>
 
-## [ipinfo](https://ipinfo.io/)
+Bir domainin reputation bilgisini servisin community verilerine ve diğer sinyallerine göre alın.
 
-Bir IP adresinden temel bilgileri elde eder. Ayda 100K'ya kadar test yapabilirsiniz.
+## [IPinfo](https://ipinfo.io/) <sup>[[11]](#references)</sup>
 
-## [securitytrails](https://securitytrails.com/app/account)
+Bir IP adresi için geolocation, ASN, organization ve ilgili metadata bilgilerini edinin. Kotalar için güncel planı kontrol edin.
 
-Bu platform; domain'ler ve IP adresleri hakkında, bir IP'nin veya domain sunucusunun içindeki domain'ler, bir e-postanın sahip olduğu domain'ler (ilişkili domain'leri bulma), domain'lerin IP geçmişi (CloudFlare arkasındaki host'u bulma), bir nameserver kullanan tüm domain'ler gibi bilgiler sağlar....\
-Bazı ücretsiz erişim sunar.
+## [SecurityTrails](https://securitytrails.com/app/account) <sup>[[12]](#references)</sup>
 
-## [fullcontact](https://www.fullcontact.com/)
+Bu platform; historical resolution'lar, IP'lerle veya name server'larla ilişkili domainler ve ilgili kayıtlar gibi DNS ve infrastructure intelligence bilgileri sağlar. Historical DNS, önceki bir origin adresini ortaya çıkarabilir; ancak CDN'i güvenilir şekilde bypass etmez ve doğrulanmalıdır.
 
-E-posta, domain veya şirket adına göre arama yapmanıza ve ilişkili "kişisel" bilgileri almanıza olanak tanır. E-postaları da doğrulayabilir. Bazı ücretsiz erişim sunar.
+## [FullContact](https://www.fullcontact.com/) <sup>[[13]](#references)</sup>
 
-## [RiskIQ](https://www.spiderfoot.net/documentation/)
+Bir e-posta adresini, domaini veya şirket adını mevcut identity ve business attribute'larıyla enrich edin. Kişisel verileri authorization ve privacy gereksinimlerine uygun şekilde işleyin.
 
-Ücretsiz/community sürümünde bile domain'ler ve IP'ler hakkında çok miktarda bilgi sunar.
+## RiskIQ / Microsoft Defender Threat Intelligence (legacy transition) <sup>[[14]](#references)</sup>
 
-## [\_IntelligenceX](https://intelx.io/)
+RiskIQ'nun PassiveTotal yetenekleri Microsoft Defender Threat Intelligence'a taşındı. Ürün erişimi, API'ler ve korunan işlevler değişmiştir; bu nedenle legacy PassiveTotal varsayımları yerine Microsoft'un güncel dokümantasyonunu kullanın.
 
-Domain'leri, IP'leri ve e-postaları arayın ve dump'lar üzerinden bilgi alın. Bazı ücretsiz erişim sunar.
+## [Intelligence X](https://intelx.io/) <sup>[[15]](#references)</sup>
 
-## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+Servisin access control mekanizmalarına tabi olarak domainleri, IP adreslerini, e-posta adreslerini ve index'lenmiş historical veya leak verilerini arayın.
 
-IP'ye göre arama yapın ve şüpheli etkinliklerle ilgili bilgileri toplayın. Bazı ücretsiz erişim sunar.
+## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/) <sup>[[16]](#references)</sup>
 
-## [Greynoise](https://viz.greynoise.io/)
+Threat-intelligence ve reputation verileri için IP adreslerini ve diğer göstergeleri arayın.
 
-IP veya IP aralığına göre arama yapın ve Internet'i tarayan IP'ler hakkında bilgi alın. 15 gün ücretsiz erişim sunar.
+## [GreyNoise](https://viz.greynoise.io/) <sup>[[17]](#references)</sup>
 
-## [Shodan](https://www.shodan.io/)
+Internet scanning ve yaygın servis etkinliği gözlemleri için IP adreslerini veya aralıklarını arayın. Güncel trial ve community-access koşullarını kontrol edin.
 
-Bir IP adresinin tarama bilgilerini alın. Bazı ücretsiz api erişimleri vardır.
+## [Shodan](https://www.shodan.io/) <sup>[[18]](#references)</sup>
 
-## [Censys](https://censys.io/)
+Bir IP adresi, host veya search query için internet-scan ve servis bilgilerini alın. API erişimi hesap planına bağlıdır.
 
-Shodan'a çok benzer.
+## [Censys](https://censys.io/) <sup>[[19]](#references)</sup>
 
-## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
+Host, certificate, domain ve internet-service dataset'lerini arayın; data model'i ve kapsamı Shodan'ınkinden farklıdır.
 
-Anahtar kelime kullanarak açık S3 bucket'larını bulun.
+## [GrayHatWarfare bucket search](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
 
-## [Dehashed](https://www.dehashed.com/data)
+Provider'ın herkese açık olarak gözlemlenen cloud-storage object ve bucket index'ini keyword ile arayın.
 
-E-postaların ve hatta domain'lerin leak olmuş kimlik bilgilerini bulun.\
-Ticari mi?
+## [DeHashed](https://www.dehashed.com/data) <sup>[[21]](#references)</sup>
 
-## [psbdmp](https://psbdmp.ws/)
+E-posta adresleri, kullanıcı adları, domainler ve ilgili kayıtlar için index'lenmiş breach verilerini arayın. Yalnızca authorization ile kullanın ve breach verilerinin gereksiz şekilde açığa çıkarılmasından kaçının.
 
-Bir e-postanın göründüğü pastebin'leri arayın. Ticari mi?
+## [psbdmp](https://psbdmp.ws/) <sup>[[22]](#references)</sup>
 
-## [emailrep.io](https://emailrep.io/key)
+Bir e-posta adresinin veya başka bir terimin geçtiği index'lenmiş paste içeriklerini arayın. Entegrasyon öncesinde servisin hâlâ kullanılabilir olduğunu doğrulayın.
 
-Bir e-postanın itibarını öğrenin. Ticari mi?
+## [EmailRep](https://emailrep.io/key) <sup>[[23]](#references)</sup>
 
-## [ghostproject](https://ghostproject.fr/)
+Bir e-posta adresi için reputation ve risk sinyallerini alın.
 
-Leak olmuş e-postalardan parolaları alın. Ticari mi?
+## GhostProject (historical) <sup>[[24]](#references)</sup>
 
-## [Binaryedge](https://www.binaryedge.io/)
+Historical olarak leak e-posta/şifre verilerinde arama sunduğunu duyurmuştur. Servisi high-risk üçüncü taraf işleme olarak değerlendirin ve kullanmadan önce kullanılabilirliğini, yasallığını ve authorization durumunu doğrulayın.
 
-IP'lerden ilginç bilgiler elde edin.
+## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
 
-## [haveibeenpwned](https://haveibeenpwned.com/)
+IP adresleri ve ilgili asset'ler için internet-scan, exposure ve threat-intelligence verilerini edinin.
 
-Domain ve e-postaya göre arama yapın; pwned olup olmadığını ve parolaları öğrenin. Ticari mi?
+## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
-### [IP2Location.io](https://www.ip2location.io/)
+Bir e-posta adresinin veya doğrulanmış bir domainin bilinen breach'lerde görünüp görünmediğini kontrol edin. Ayrı Pwned Passwords servisi, password hash'lerini prefix ile kontrol eder; plaintext password'leri **açığa çıkarmaz**.
 
-IP geolocation, data center, ASN ve hatta VPN bilgilerini tespit eder. Ayda 30K ücretsiz sorgu sunar.
+### [IP2Location.io](https://www.ip2location.io/) <sup>[[27]](#references)</sup>
 
-### [IPQuery.io](https://www.ipquery.io/)
-Hedeflenmiş veri noktalarıyla IP Geolocation ve OISNT. Ticari değildir.
+IP geolocation, data-center, ASN, proxy/VPN ve ilgili enrichment alanlarını alın. Kotalar güncel plana bağlıdır.
+
+### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
+Seçili data point'lerle IP geolocation ve OSINT odaklı enrichment sağlar. Ticari kullanım için güncel koşulları kontrol edin.
 
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(ticari bir araçta mı?)
+[DNSDumpster](https://dnsdumpster.com/) DNS-reconnaissance sonuçları sağlar.<sup>[[29]](#references)</sup>
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (ticari bir araçta mı?)
+[Netcraft](https://www.netcraft.com/) site, hosting ve internet-infrastructure intelligence bilgileri sağlar.<sup>[[30]](#references)</sup>
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (ticari bir araçta mı?)
+[NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/) online subdomain-discovery arayüzü sağlar.<sup>[[31]](#references)</sup>
 
+## References
+
+- [1] [Project Honey Pot](https://www.projecthoneypot.org/)
+- [2] [BotScout API](https://botscout.com/api.htm)
+- [3] [Hunter API](https://hunter.io/api-documentation)
+- [4] [AlienVault OTX API](https://otx.alienvault.com/api)
+- [5] [Clearbit](https://dashboard.clearbit.com/)
+- [6] [BuiltWith](https://builtwith.com/)
+- [7] [FraudGuard](https://fraudguard.io/)
+- [8] [FortiGuard Labs](https://www.fortiguard.com/)
+- [9] [SpamCop](https://www.spamcop.net/)
+- [10] [Web of Trust](https://www.mywot.com/)
+- [11] [IPinfo](https://ipinfo.io/)
+- [12] [SecurityTrails](https://securitytrails.com/)
+- [13] [FullContact](https://www.fullcontact.com/)
+- [14] [Microsoft Defender Threat Intelligence](https://learn.microsoft.com/en-us/defender/threat-intelligence/what-is-microsoft-defender-threat-intelligence-defender-ti)
+- [15] [Intelligence X](https://intelx.io/)
+- [16] [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+- [17] [GreyNoise](https://www.greynoise.io/)
+- [18] [Shodan](https://www.shodan.io/)
+- [19] [Censys](https://censys.com/)
+- [20] [GrayHatWarfare](https://buckets.grayhatwarfare.com/)
+- [21] [DeHashed](https://www.dehashed.com/)
+- [22] [psbdmp](https://psbdmp.ws/)
+- [23] [EmailRep](https://emailrep.io/)
+- [24] [Cornell research — Compromised Credentials'ı Kontrol Etme Protokolleri (GhostProject'i içerir)](https://rist.tech.cornell.edu/papers/c3.pdf)
+- [25] [BinaryEdge](https://www.binaryedge.io/)
+- [26] [Have I Been Pwned API](https://haveibeenpwned.com/API/v3)
+- [27] [IP2Location.io](https://www.ip2location.io/)
+- [28] [IPQuery](https://www.ipquery.io/)
+- [29] [DNSDumpster](https://dnsdumpster.com/)
+- [30] [Netcraft](https://www.netcraft.com/)
+- [31] [NMMapper Subdomain Finder](https://www.nmmapper.com/sys/tools/subdomainfinder/)
 {{#include ../banners/hacktricks-training.md}}

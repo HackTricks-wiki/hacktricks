@@ -8,19 +8,19 @@
 
 ### Hızlı triage kontrol listesi
 
-Amaç, iki soruyu verimli şekilde yanıtlamaktır:
+Amaç, iki soruyu verimli bir şekilde yanıtlamaktır:
 
 1. Gerçek container/format nedir?
-2. Payload metadata'da, eklenmiş byte'larda, gömülü dosyalarda veya content-level stego'da mı?
+2. Payload metadata'da mı, eklenmiş byte'larda mı, gömülü dosyalarda mı yoksa içerik düzeyinde stego olarak mı bulunuyor?
 
 #### 1) Container'ı belirleyin
 ```bash
 file target
 ls -lah target
 ```
-`file` ve uzantı birbiriyle uyuşmuyorsa `file` komutuna güvenin. Uygun olduğunda yaygın formatları container olarak değerlendirin (ör. OOXML belgeleri ZIP dosyalarıdır).
+`file` ve uzantı uyuşmuyorsa soneke güvenmek yerine imzayı inceleyin. `file` de sezgiseldir ve hatalı biçimlendirilmiş veya polyglot girdiler nedeniyle yanıltılabilir. Uygun olduğunda yaygın formatları container olarak değerlendirin (örneğin, OOXML belgeleri ZIP paketleridir).<sup>[[2]](#references)</sup>
 
-#### 2) Metadata ve bariz string'leri arayın
+#### 2) Metadata ve belirgin string'leri arayın
 ```bash
 exiftool target
 strings -n 6 target | head
@@ -31,29 +31,29 @@ Birden fazla encoding deneyin:
 strings -e l -n 6 target | head
 strings -e b -n 6 target | head
 ```
-#### 3) Sona eklenmiş verileri / gömülü dosyaları kontrol edin
+#### 3) Eklenmiş verileri / gömülü dosyaları kontrol edin
 ```bash
 binwalk target
 binwalk -e target
 ```
-Çıkarma başarısız olur ancak imzalar raporlanırsa offset'leri `dd` ile manuel olarak carve edin ve carve edilen bölge üzerinde `file` komutunu yeniden çalıştırın.
+Çıkarma başarısız olur ancak imzalar raporlanırsa, `dd` ile offset'leri manuel olarak carve edin ve carve edilen bölge üzerinde `file` komutunu yeniden çalıştırın.
 
 #### 4) Görüntü ise
 
 - Anomalileri inceleyin: `magick identify -verbose file`
-- PNG/BMP ise bit-plane/LSB'leri enumerate edin: `zsteg -a file.png`
+- PNG/BMP ise bit düzlemlerini/LSB'yi listeleyin: `zsteg -a file.png`
 - PNG yapısını doğrulayın: `pngcheck -v file.png`
-- İçerik channel/plane dönüşümleriyle ortaya çıkabilecekse görsel filtreler (Stegsolve / StegoVeritas) kullanın
+- İçerik kanal/düzlem dönüşümleriyle ortaya çıkabilecekse görsel filtreleri (Stegsolve / StegoVeritas) kullanın
 
 #### 5) Ses ise
 
-- Önce spectrogram oluşturun (Sonic Visualiser)
-- Stream'leri decode/inceleyin: `ffmpeg -v info -i file -f null -`
+- Önce spektrogramı inceleyin (Sonic Visualiser)
+- Akışları decode edin/inceleyin: `ffmpeg -v info -i file -f null -`
 - Ses yapılandırılmış tonlara benziyorsa DTMF decoding'i test edin
 
 ### Temel araçlar
 
-Bunlar yüksek sıklıkta karşılaşılan container-level durumları yakalar: metadata payload'ları, sona eklenmiş byte'lar ve uzantısıyla gizlenmiş embedded file'lar.<sup>[[1]](#references)</sup>
+Bunlar yüksek sıklıkta görülen container-level durumlarını yakalar: metadata payload'ları, eklenmiş byte'lar ve uzantı aracılığıyla gizlenmiş embedded file'lar.<sup>[[1]](#references)[[3]](#references)</sup>
 
 #### Binwalk
 ```bash
@@ -67,14 +67,14 @@ Repo: https://github.com/ReFirmLabs/binwalk
 ```bash
 foremost -i file
 ```
-Repo: https://github.com/korczis/foremost
+Proje deposu: `korczis/foremost`.<sup>[[4]](#references)</sup>
 
 #### Exiftool / Exiv2
 ```bash
 exiftool file
 exiv2 file
 ```
-#### dosya / strings
+#### dosya / dizeler
 ```bash
 file file
 strings -n 6 file
@@ -83,13 +83,13 @@ strings -n 6 file
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
-### Konteynerler, eklenmiş veriler ve polyglot teknikleri
+### Container'lar, eklenen veriler ve polyglot teknikleri
 
-Birçok steganography challenge'ı, geçerli bir dosyanın sonuna eklenmiş ekstra byte'lardan veya uzantıyla gizlenmiş embedded archive'lar içerir.
+Birçok steganography challenge'ı, geçerli bir dosyadan sonra gelen ek byte'lar veya uzantı değiştirilerek gizlenmiş embedded archive'lar içerir.
 
-#### Eklenmiş payload'lar
+#### Eklenen payload'lar
 
-Birçok format sondaki byte'ları yok sayar. Bir ZIP/PDF/script, bir image/audio container'ının sonuna eklenebilir.
+Birçok format, sondaki byte'ları yok sayar. Bir ZIP/PDF/script, bir image/audio container'ına eklenebilir.
 
 Hızlı kontroller:
 ```bash
@@ -103,38 +103,42 @@ file carved.bin
 ```
 #### Magic bytes
 
-`file` kafası karıştığında, `xxd` ile magic bytes değerlerini arayın ve bilinen signature'larla karşılaştırın:
+`file` kararsız kaldığında, `xxd` ile magic bytes değerlerini arayın ve bilinen signature'larla karşılaştırın:
 ```bash
 xxd -g 1 -l 32 file
 ```
 #### Zip-in-disguise
 
-Uzantı zip olduğunu belirtmese bile `7z` ve `unzip` kullanmayı deneyin:
+Uzantısı zip olduğunu belirtmese bile `7z` ve `unzip` komutlarını deneyin:
 ```bash
 7z l file
 unzip -l file
 ```
-### Near-stego oddities
+### Yakın stego tuhaflıkları
 
-stego ile bitişik olarak düzenli şekilde ortaya çıkan pattern'ler için hızlı bağlantılar (binary'den QR, braille vb.).
+Stego'nun yakınında düzenli olarak görülen pattern'ler için hızlı bağlantılar (QR-from-binary, braille vb.).
 
-#### QR codes from binary
+#### Binary'den QR kodları
 
-Bir blob uzunluğu perfect square ise, bu değer bir image/QR için raw pixel'lar olabilir.
+Bir blob uzunluğu tam kareyse bu, bir görüntü/QR için ham pikseller olabilir.
 ```python
 import math
 math.isqrt(2500)  # 50
 ```
 Binary-to-image helper:
 
-- [https://www.dcode.fr/binary-image](https://www.dcode.fr/binary-image)
+- dCode binary-image helper.<sup>[[5]](#references)</sup>
 
 #### Braille
 
-- [https://www.branah.com/braille-translator](https://www.branah.com/braille-translator)
+- Branah Braille translator.<sup>[[6]](#references)</sup>
 
-## Referanslar
+## References
 
-- [1] [DominicBreuker/stego-toolkit - En popüler steganography araçlarının bir arada bulunduğu Docker image](https://github.com/DominicBreuker/stego-toolkit)
-
+- [1] [DominicBreuker/stego-toolkit - En popüler steganography araçlarını bir araya getiren Docker image](https://github.com/DominicBreuker/stego-toolkit)
+- [2] [Daston et al. — ECMA-376 Open Packaging Conventions](https://ecma-international.org/publications-and-standards/standards/ecma-376/)
+- [3] [ReFirmLabs/binwalk](https://github.com/ReFirmLabs/binwalk)
+- [4] [korczis/foremost](https://github.com/korczis/foremost)
+- [5] [dCode — Binary Image](https://www.dcode.fr/binary-image)
+- [6] [Branah — Braille Translator](https://www.branah.com/braille-translator)
 {{#include ../../banners/hacktricks-training.md}}
