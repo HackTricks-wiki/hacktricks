@@ -4,13 +4,13 @@
 
 ## Overview
 
-The IPC namespace isolates **System V IPC objects** and **POSIX message queues**. That includes shared memory segments, semaphores, and message queues that would otherwise be visible across unrelated processes on the host. In practical terms, this prevents a container from casually attaching to IPC objects belonging to other workloads or the host.
+The IPC namespace isolates **System V IPC objects** and **POSIX message queues**. That includes shared memory segments, semaphores, and message queues that would otherwise be visible across unrelated processes on the host. In practical terms, this prevents a container from casually attaching to IPC objects belonging to other workloads or the host. <sup>[[1]](#references)</sup>
 
 Compared with mount, PID, or user namespaces, the IPC namespace is often discussed less often, but that should not be confused with irrelevance. Shared memory and related IPC mechanisms can contain highly useful state. If the host IPC namespace is exposed, the workload may gain visibility into inter-process coordination objects or data that was never intended to cross the container boundary.
 
 ## Operation
 
-When the runtime creates a fresh IPC namespace, the process gets its own isolated set of IPC identifiers. This means commands such as `ipcs` show only the objects available in that namespace. If the container instead joins the host IPC namespace, those objects become part of a shared global view.
+When the runtime creates a fresh IPC namespace, the process gets its own isolated set of IPC identifiers. This means commands such as `ipcs` show only the objects available in that namespace. If the container instead joins the host IPC namespace, those objects become part of a shared global view. POSIX shared-memory objects are exposed through a `tmpfs` normally mounted at `/dev/shm`. <sup>[[1]](#references)</sup> <sup>[[2]](#references)</sup>
 
 This matters especially in environments where applications or services use shared memory heavily. Even when the container cannot directly break out through IPC alone, the namespace may leak information or enable cross-process interference that materially helps a later attack.
 
@@ -32,7 +32,7 @@ docker run --rm --ipc=host debian:stable-slim ipcs
 
 ## Runtime Usage
 
-Docker and Podman isolate IPC by default. Kubernetes typically gives the Pod its own IPC namespace, shared by containers in the same Pod but not by default with the host. Host IPC sharing is possible, but it should be treated as a meaningful reduction in isolation rather than a minor runtime option.
+Docker and Podman isolate IPC by default. Kubernetes typically gives the Pod its own IPC namespace, shared by containers in the same Pod but not by default with the host. Host IPC sharing is possible through `hostIPC`, but it should be treated as a meaningful reduction in isolation rather than a minor runtime option. <sup>[[3]](#references)</sup>
 
 ## Misconfigurations
 
@@ -100,5 +100,11 @@ What is interesting here:
 - A broad `/dev/shm` mount is not automatically a bug, but in some environments it leaks filenames, artifacts, and transient secrets.
 
 IPC rarely receives as much attention as the bigger namespace types, but in environments that use it heavily, sharing it with the host is very much a security decision.
+
+## References
+
+- [1] [`ipc_namespaces(7)` - Linux manual page](https://man7.org/linux/man-pages/man7/ipc_namespaces.7.html)
+- [2] [`shm_overview(7)` - Linux manual page](https://man7.org/linux/man-pages/man7/shm_overview.7.html)
+- [3] [Kubernetes API Reference - PodSpec `hostIPC`](https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#PodSpec)
 
 {{#include ../../../../../banners/hacktricks-training.md}}

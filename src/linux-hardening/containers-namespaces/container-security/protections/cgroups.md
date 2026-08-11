@@ -276,7 +276,7 @@ The important distinction is that **cgroup existence** is usually default, while
 ## References
 
 - [1] [Understanding Docker container escapes](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
-- [2] [Privileged Container Escape - Control Groups release_agent](http://blog.ajxchapman.com/containers/2020/11/19/privileged-container-escape.html)
+- [2] [Privileged Container Escape - Control Groups release_agent](https://blog.ajxchapman.com/posts/2020/11/19/privileged-container-escape.html)
 - [3] [New Linux Vulnerability CVE-2022-0492 Affecting Cgroups: Can Containers Escape?](https://unit42.paloaltonetworks.com/cve-2022-0492-cgroups/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
