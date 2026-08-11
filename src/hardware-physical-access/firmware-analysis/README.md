@@ -491,7 +491,7 @@ Things to look for when reversing A/B update implementations:
 * Is slot activation metadata **bound to the validated firmware digest/version**, or can a slot be modified after promotion?
 * After a slot switch succeeds, is the device forced to reboot or are later update/erase routines still reachable in the same session?
 * Does userland code perform additional sanity checks (e.g. allowed partition map, model number)?
-* Are *partial* or *backup* update flows re-using the same validation logic?
+* Are *partial* or *backup* update flows reusing the same validation logic?
 
 > 💡  If any of the above are missing, the platform is probably vulnerable to rollback attacks.
 
@@ -553,7 +553,7 @@ With root on the cloned KMS:
 
 This turns "encrypted firmware" into a more general problem: **recover the appliance-side operational keys, then reproduce the exact unwrap + KDF parameters offline**.
 
-## Trainning and Cert
+## Training and Certifications
 
 - [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
 
