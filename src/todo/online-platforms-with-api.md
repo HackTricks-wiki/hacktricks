@@ -2,130 +2,157 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## [ProjectHoneypot](https://www.projecthoneypot.org/)
+Hierdie dienste ondersteun reconnaissance-, reputasie-, breach- of enrichment-werkvloeie. Hul API's, kwotas, pryse en toegelate gebruike verander gereeld; bevestig die huidige verskafferdokumentasie en toestemming vir die engagement voordat kliëntidentifiseerders of sensitiewe data gestuur word.
 
-Jy kan vra of 'n IP met verdagte/kwaadwillige aktiwiteite verband hou. Heeltemal gratis.
+## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
-## [**BotScout**](http://botscout.com/api.htm)
+Doen navraag of 'n IP-adres met verdagte of kwaadwillige aktiwiteit geassosieer is. Toegang kan 'n rekening of API-sleutel vereis.
 
-Kontroleer of die IP-adres verband hou met 'n bot wat rekeninge registreer. Dit kan ook usernames en e-posse kontroleer. Aanvanklik gratis.
+## [**BotScout**](https://botscout.com/api.htm) <sup>[[2]](#references)</sup>
 
-## [Hunter](https://hunter.io/)
+Kontroleer of 'n IP-adres, gebruikersnaam of e-posadres met outomatiese rekeningregistrasie of ander gerapporteerde botaktiwiteit geassosieer is.
 
-Vind en verifieer e-posse.\
-Sommige API-versoeke is gratis; vir meer moet jy betaal.\
-Kommersieel?
+## [Hunter](https://hunter.io/) <sup>[[3]](#references)</sup>
 
-## [AlientVault](https://otx.alienvault.com/api)
+Vind en verifieer professionele e-posadresse en kontakpatrone wat met domeine verband hou. Kontroleer die huidige plan vir versoeklimiete en toegelate gebruike.
 
-Vind kwaadwillige aktiwiteite wat met IP's en domeine verband hou. Gratis.
+## [AlienVault OTX](https://otx.alienvault.com/api) <sup>[[4]](#references)</sup>
 
-## [Clearbit](https://dashboard.clearbit.com/)
+Soek threat-intelligence-aanwysers en aktiwiteit wat met IP-adresse en domeine geassosieer word.
 
-Vind verwante persoonlike data vir 'n e-pos (profiele op ander platforms), domein (basiese maatskappy-inligting, e-posse en mense wat daar werk) en maatskappye (verkry maatskappy-inligting uit e-pos).\
-Jy moet betaal om toegang tot al die moontlikhede te verkry.\
-Kommersieel?
+## [Clearbit](https://dashboard.clearbit.com/) <sup>[[5]](#references)</sup>
 
-## [BuiltWith](https://builtwith.com/)
+Verryk 'n e-posadres, domein of maatskappy met beskikbare besigheids-/profieldata. Dekking, toegang en privaatheidsbeperkings hang van die huidige produk en plan af.
 
-Tegnologieë wat deur webwerwe gebruik word. Duur...\
-Kommersieel?
+## [BuiltWith](https://builtwith.com/) <sup>[[6]](#references)</sup>
 
-## [Fraudguard](https://fraudguard.io/)
+Identifiseer tegnologieë wat op webwerwe waargeneem word en verkry historiese of verhoudingsdata waar die gekose plan dit toelaat.
 
-Kontroleer of 'n host (domein of IP) met verdagte/kwaadwillige aktiwiteite verband hou. Het beperkte gratis API-toegang.\
-Kommersieel?
+## [FraudGuard](https://fraudguard.io/) <sup>[[7]](#references)</sup>
 
-## [FortiGuard](https://fortiguard.com/)
+Kontroleer of 'n IP-adres met verdagte of kwaadwillige aktiwiteit geassosieer word. Bevestig die huidige API-planne en -limiete.
 
-Kontroleer of 'n host (domein of IP) met verdagte/kwaadwillige aktiwiteite verband hou. Het beperkte gratis API-toegang.
+## [FortiGuard](https://fortiguard.com/) <sup>[[8]](#references)</sup>
 
-## [SpamCop](https://www.spamcop.net/)
+Soek FortiGuard-kategorisering en threat intelligence vir domeine, URL's of IP-adresse op. Beskikbaarheid verskil volgens diens.
 
-Dui aan of 'n host met spamaktiwiteit verband hou. Het beperkte gratis API-toegang.
+## [SpamCop](https://www.spamcop.net/) <sup>[[9]](#references)</sup>
 
-## [mywot](https://www.mywot.com/)
+Kontroleer of 'n IP-adres vir gerapporteerde spam-aktiwiteit gelys is.
 
-Bepaal op grond van opinies en ander maatstawwe of 'n domein met verdagte/kwaadwillige inligting verband hou.
+## [myWOT](https://www.mywot.com/) <sup>[[10]](#references)</sup>
 
-## [ipinfo](https://ipinfo.io/)
+Verkry 'n domein se reputasie gebaseer op die diens se gemeenskap en ander seine.
 
-Verkry basiese inligting van 'n IP-adres. Jy kan tot 100K per maand toets.
+## [IPinfo](https://ipinfo.io/) <sup>[[11]](#references)</sup>
 
-## [securitytrails](https://securitytrails.com/app/account)
+Verkry geoligging-, ASN-, organisasie- en verwante metadata vir 'n IP-adres. Kontroleer die huidige plan vir kwotas.
 
-Hierdie platform verskaf inligting oor domeine en IP-adresse, soos domeine binne 'n IP of binne 'n domeinbediener, domeine wat deur 'n e-pos besit word (vind verwante domeine), IP-geskiedenis van domeine (vind die host agter CloudFlare), alle domeine wat 'n nameserver gebruik....\
-Jy het beperkte gratis toegang.
+## [SecurityTrails](https://securitytrails.com/app/account) <sup>[[12]](#references)</sup>
 
-## [fullcontact](https://www.fullcontact.com/)
+Hierdie platform verskaf DNS- en infrastruktuurintelligensie, soos historiese resolusies, domeine wat met IP's of naambedieners geassosieer word, en verwante rekords. Historiese DNS kan 'n vroeëre oorsprongadres openbaar, maar dit omseil nie betroubaar 'n CDN nie en moet gevalideer word.
 
-Laat jou toe om volgens e-pos, domein of maatskappynaam te soek en verwante "persoonlike" inligting te verkry. Dit kan ook e-posse verifieer. Daar is beperkte gratis toegang.
+## [FullContact](https://www.fullcontact.com/) <sup>[[13]](#references)</sup>
 
-## [RiskIQ](https://www.spiderfoot.net/documentation/)
+Verryk 'n e-posadres, domein of maatskappynaam met beskikbare identiteit- en besigheidskenmerke. Hanteer persoonlike data volgens magtigings- en privaatheidsvereistes.
 
-Baie inligting van domeine en IP's, selfs in die gratis/community-weergawe.
+## RiskIQ / Microsoft Defender Threat Intelligence (legacy transition) <sup>[[14]](#references)</sup>
 
-## [\_IntelligenceX](https://intelx.io/)
+RiskIQ se PassiveTotal-vermoëns het na Microsoft Defender Threat Intelligence oorgegaan. Produktoegang, API's en behoue funksionaliteit het verander; gebruik dus Microsoft se huidige dokumentasie eerder as legacy PassiveTotal-aannames.
 
-Soek domeine, IP's en e-posse en verkry inligting uit dumps. Het beperkte gratis toegang.
+## [Intelligence X](https://intelx.io/) <sup>[[15]](#references)</sup>
 
-## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+Soek domeine, IP-adresse, e-posadresse en geïndekseerde historiese of leaked data, onderhewig aan die diens se toegangsbeheer.
 
-Soek volgens IP en versamel inligting wat met verdagte aktiwiteite verband hou. Daar is beperkte gratis toegang.
+## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/) <sup>[[16]](#references)</sup>
 
-## [Greynoise](https://viz.greynoise.io/)
+Soek IP-adresse en ander aanwysers vir threat-intelligence- en reputasiedata.
 
-Soek volgens IP of IP-reeks en verkry inligting oor IP's wat die Internet skandeer. 15 dae se gratis toegang.
+## [GreyNoise](https://viz.greynoise.io/) <sup>[[17]](#references)</sup>
 
-## [Shodan](https://www.shodan.io/)
+Soek IP-adresse of reekse vir waarnemings van internetskandering en algemene diensaktiwiteit. Kontroleer die huidige bepalings vir proef- en gemeenskapstoegang.
 
-Verkry scan-inligting van 'n IP-adres. Het beperkte gratis API-toegang.
+## [Shodan](https://www.shodan.io/) <sup>[[18]](#references)</sup>
 
-## [Censys](https://censys.io/)
+Verkry internetskandering- en diensinligting vir 'n IP-adres, gasheer of soeknavraag. API-toegang hang van die rekeningplan af.
 
-Baie soortgelyk aan shodan
+## [Censys](https://censys.io/) <sup>[[19]](#references)</sup>
 
-## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
+Soek gasheer-, sertifikaat-, domein- en internetdiensdatastelle; die datamodel en dekking daarvan verskil van Shodan s'n.
 
-Vind oop S3-buckets deur volgens sleutelwoord te soek.
+## [GrayHatWarfare bucket search](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
 
-## [Dehashed](https://www.dehashed.com/data)
+Soek die verskaffer se indeks van publiek waargenome cloud-storage-objekte en buckets volgens sleutelwoord.
 
-Vind gelekte credentials van e-posse en selfs domeine\
-Kommersieel?
+## [DeHashed](https://www.dehashed.com/data) <sup>[[21]](#references)</sup>
 
-## [psbdmp](https://psbdmp.ws/)
+Soek geïndekseerde breach-data vir e-posadresse, gebruikersname, domeine en verwante rekords. Gebruik dit slegs met magtiging en vermy onnodige blootstelling van breach-data.
 
-Soek pastebins waarin 'n e-pos verskyn het. Kommersieel?
+## [psbdmp](https://psbdmp.ws/) <sup>[[22]](#references)</sup>
 
-## [emailrep.io](https://emailrep.io/key)
+Soek geïndekseerde paste-inhoud vir voorkomste van 'n e-posadres of ander term. Verifieer dat die diens steeds beskikbaar is voordat dit geïntegreer word.
 
-Verkry die reputasie van 'n e-pos. Kommersieel?
+## [EmailRep](https://emailrep.io/key) <sup>[[23]](#references)</sup>
 
-## [ghostproject](https://ghostproject.fr/)
+Verkry reputasie- en risikoseine vir 'n e-posadres.
 
-Verkry wagwoorde uit gelekte e-posse. Kommersieel?
+## GhostProject (historical) <sup>[[24]](#references)</sup>
 
-## [Binaryedge](https://www.binaryedge.io/)
+Het histories searches van leaked e-pos-/wagwoorddata geadverteer. Behandel die diens as 'n hoërisiko-derdeparty-hanteerder en verifieer die beskikbaarheid, wettigheid en magtiging daarvan voor gebruik.
 
-Verkry interessante inligting van IP's
+## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
 
-## [haveibeenpwned](https://haveibeenpwned.com/)
+Verkry internetskandering-, blootstellings- en threat-intelligence-data vir IP-adresse en verwante bates.
 
-Soek volgens domein en e-pos en vind uit of dit pwned is en of daar wagwoorde is. Kommersieel?
+## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
-### [IP2Location.io](https://www.ip2location.io/)
+Kontroleer of 'n e-posadres of geverifieerde domein in bekende breaches voorkom. Die afsonderlike Pwned Passwords-diens kontroleer wagwoord-hashes volgens voorvoegsel; dit openbaar **nie** plaintext-wagwoorde nie.
 
-Dit bespeur IP-geoligging, datasentrum-, ASN- en selfs VPN-inligting. Dit bied 30K gratis navrae per maand.
+### [IP2Location.io](https://www.ip2location.io/) <sup>[[27]](#references)</sup>
 
-### [IPQuery.io](https://www.ipquery.io/)
-IP-geoligging en OISNT met geteikende datapunte. Nie-kommersieel.
+Verkry IP-geoligging-, datasentrum-, ASN-, proxy/VPN- en verwante verrykingsvelde. Kwotas hang van die huidige plan af.
+
+### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
+IP-geoligging en OSINT-georiënteerde verryking met geselekteerde datapunte. Kontroleer die huidige bepalings vir kommersiële gebruik.
 
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(in 'n kommersiële tool?)
+[DNSDumpster](https://dnsdumpster.com/) verskaf DNS-reconnaissance-resultate.<sup>[[29]](#references)</sup>
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (in 'n kommersiële tool?)
+[Netcraft](https://www.netcraft.com/) verskaf webwerf-, hosting- en internetinfrastruktuur-intelligensie.<sup>[[30]](#references)</sup>
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (in 'n kommersiële tool?)
+[NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/) verskaf 'n aanlyn subdomein-ontdekkingskoppelvlak.<sup>[[31]](#references)</sup>
 
+## References
+
+- [1] [Project Honey Pot](https://www.projecthoneypot.org/)
+- [2] [BotScout API](https://botscout.com/api.htm)
+- [3] [Hunter API](https://hunter.io/api-documentation)
+- [4] [AlienVault OTX API](https://otx.alienvault.com/api)
+- [5] [Clearbit](https://dashboard.clearbit.com/)
+- [6] [BuiltWith](https://builtwith.com/)
+- [7] [FraudGuard](https://fraudguard.io/)
+- [8] [FortiGuard Labs](https://www.fortiguard.com/)
+- [9] [SpamCop](https://www.spamcop.net/)
+- [10] [Web of Trust](https://www.mywot.com/)
+- [11] [IPinfo](https://ipinfo.io/)
+- [12] [SecurityTrails](https://securitytrails.com/)
+- [13] [FullContact](https://www.fullcontact.com/)
+- [14] [Microsoft Defender Threat Intelligence](https://learn.microsoft.com/en-us/defender/threat-intelligence/what-is-microsoft-defender-threat-intelligence-defender-ti)
+- [15] [Intelligence X](https://intelx.io/)
+- [16] [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+- [17] [GreyNoise](https://www.greynoise.io/)
+- [18] [Shodan](https://www.shodan.io/)
+- [19] [Censys](https://censys.com/)
+- [20] [GrayHatWarfare](https://buckets.grayhatwarfare.com/)
+- [21] [DeHashed](https://www.dehashed.com/)
+- [22] [psbdmp](https://psbdmp.ws/)
+- [23] [EmailRep](https://emailrep.io/)
+- [24] [Cornell research — Protocols for Checking Compromised Credentials (includes GhostProject)](https://rist.tech.cornell.edu/papers/c3.pdf)
+- [25] [BinaryEdge](https://www.binaryedge.io/)
+- [26] [Have I Been Pwned API](https://haveibeenpwned.com/API/v3)
+- [27] [IP2Location.io](https://www.ip2location.io/)
+- [28] [IPQuery](https://www.ipquery.io/)
+- [29] [DNSDumpster](https://dnsdumpster.com/)
+- [30] [Netcraft](https://www.netcraft.com/)
+- [31] [NMMapper Subdomain Finder](https://www.nmmapper.com/sys/tools/subdomainfinder/)
 {{#include ../banners/hacktricks-training.md}}
