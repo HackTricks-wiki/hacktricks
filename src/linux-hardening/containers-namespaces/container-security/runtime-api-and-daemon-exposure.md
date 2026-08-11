@@ -1,5 +1,7 @@
 # Runtime API And Daemon Exposure
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Overview
 
 Many real container compromises do not begin with a namespace escape at all. They begin with access to the runtime control plane. If a workload can talk to `dockerd`, `containerd`, CRI-O, Podman, or kubelet through a mounted Unix socket or an exposed TCP listener, the attacker may be able to request a new container with better privileges, mount the host filesystem, join host namespaces, or retrieve sensitive node information. In those cases, the runtime API is the real security boundary, and compromising it is functionally close to compromising the host.

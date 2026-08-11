@@ -1,5 +1,7 @@
 # Full TTYs
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Full TTY
 
 `/etc/shells` lists valid login-shell pathnames and is consulted by some programs; it is not a universal prerequisite for allocating a PTY.<sup>[[3]](#references)[[4]](#references)</sup> If a program such as `pkexec` rejects `SHELL` with `The value for the SHELL variable was not found in the /etc/shells file`, ensure the exact shell path (for example, `/bin/bash`) appears in `/etc/shells`.<sup>[[10]](#references)</sup> The `CTRL+Z`/`fg` recovery sequence below uses Bash job control; if the current shell is not Bash, start Bash before using that sequence.<sup>[[7]](#references)</sup>

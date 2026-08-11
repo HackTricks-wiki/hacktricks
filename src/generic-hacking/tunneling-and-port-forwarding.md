@@ -1,5 +1,7 @@
 # Tunneling and Port Forwarding
 
+{{#include ../banners/hacktricks-training.md}}
+
 ## Nmap tip
 
 > [!WARNING]
@@ -815,7 +817,7 @@ qemu-system-x86_64.exe ^
 
 ### Launching stealthily through VBScript
 
-TrustedSec observed VBS-driven QEMU launches and Tiny Core images in the incident cited above.<sup>[[1]](#references)</sup>
+TrustedSec observed VBS-driven QEMU launches and Tiny Core images in the incident d above.<sup>[[1]](#references)</sup>
 
 ```vb
 ' update.vbs – lived in C:\ProgramData\update
@@ -827,7 +829,7 @@ Running the script with `cscript.exe //B update.vbs` keeps the window hidden.<su
 
 ### In-guest persistence
 
-The cited incident describes persistence in the stateless Tiny Core guest through `/opt/bootlocal.sh` and `/opt/filetool.lst`:<sup>[[1]](#references)</sup>
+The d incident describes persistence in the stateless Tiny Core guest through `/opt/bootlocal.sh` and `/opt/filetool.lst`:<sup>[[1]](#references)</sup>
 
 1. Drop payload to `/opt/123.out`  
 2. Append to `/opt/bootlocal.sh`:

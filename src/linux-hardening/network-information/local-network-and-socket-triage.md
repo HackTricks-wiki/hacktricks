@@ -1,5 +1,7 @@
 # Local Network and Socket Triage
 
+{{#include ../../banners/hacktricks-training.md}}
+
 After getting a shell on a Linux host, the most useful network targets are often not exposed externally. Loopback-only services, veth networks, Unix sockets, temporary listeners, packet captures, and local firewall rules can expose credentials or local-only attack surfaces.
 
 This page focuses on practical local post-exploitation techniques, not general remote network pentesting.

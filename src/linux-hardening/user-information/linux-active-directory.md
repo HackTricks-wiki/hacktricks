@@ -1,5 +1,7 @@
 # Linux Active Directory
 
+{{#include ../../banners/hacktricks-training.md}}
+
 A linux machine can also be present inside an Active Directory environment.
 
 A Linux machine inside an AD can **store Kerberos material locally**: user ccaches, machine/service keytabs, and SSSD-managed secrets. These artefacts can usually be reused as any other Kerberos credential. In order to read most of them you will need to be the user owner of the ticket or **root** on the machine.<sup>[[1]](#references)[[4]](#references)[[5]](#references)</sup>

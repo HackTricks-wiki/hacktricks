@@ -1,5 +1,7 @@
 # Linux Privilege Escalation
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 For broader background and historical enumeration workflows, compare the g0tmi1k, Payatu, SANS, LPE Workshop, Linux-Privilege-Escalation, and linux-private-i resources listed in the references.<sup>[[5]](#references)[[6]](#references)[[7]](#references)[[10]](#references)[[11]](#references)[[13]](#references)</sup>
 
 ## System Information

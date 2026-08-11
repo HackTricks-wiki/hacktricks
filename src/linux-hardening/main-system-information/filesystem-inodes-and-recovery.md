@@ -1,5 +1,7 @@
 # Filesystem, Inodes and Recovery
 
+{{#include ../../banners/hacktricks-training.md}}
+
 Filesystem abuse is often about confusing the relationship between a visible path and the object behind it.
 
 Disk images may hide another filesystem.<sup>[[1]](#references)</sup> Writable mounts may be consumed by privileged jobs.
