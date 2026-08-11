@@ -1,8 +1,10 @@
-# Class Pollution（Python 的 Prototype Pollution）
+# Class Pollution (Python's Prototype Pollution)
 
-## 基础示例
+{{#include ../../banners/hacktricks-training.md}}
 
-通过实例的类引用更改 `__qualname__`，会更新该类及其可变基类。<sup>[[1]](#references)</sup>
+## 基本示例
+
+通过实例的 class 引用修改 `__qualname__` 会更新该 class 及其可变基类。<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -61,13 +63,13 @@ USER_INPUT = {
 merge(USER_INPUT, emp)
 print(vars(emp)) #{'name': 'Ahemd', 'age': 23, 'manager': {'name': 'Sarah'}}
 ```
-## Gadget Examples
+## Gadget 示例
 
 <details>
 
-<summary>创建类属性默认值以实现 RCE (subprocess)</summary>
+<summary>创建类属性默认值以实现 RCE（subprocess）</summary>
 
-共享基类可以提供一个默认属性，供兄弟类的命令 gadget 使用。<sup>[[1]](#references)</sup>
+共享基类可以提供一个由 sibling-class command gadget 使用的默认属性。<sup>[[1]](#references)</sup>
 ```python
 from os import popen
 class Employee: pass # Creating an empty class
@@ -120,7 +122,7 @@ print(system_admin_emp.execute_command())
 
 <summary>通过 <code>globals</code> 污染其他类和全局变量</summary>
 
-函数的 `__globals__` 映射公开了从该模块中定义的方法可访问的模块命名空间。<sup>[[1]](#references)[[4]](#references)</sup>
+函数的 `__globals__` 映射会暴露从该模块中定义的方法可访问的模块命名空间。<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -154,7 +156,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <summary>任意 subprocess 执行</summary>
 
-在 Windows 上，`Popen(..., shell=True)` 会使用 `COMSPEC` 环境变量作为默认 shell，因此该 gadget 演示了基于环境变量的命令重定向。<sup>[[1]](#references)[[5]](#references)</sup>
+在 Windows 上，`Popen(..., shell=True)` 使用 `COMSPEC` 环境变量作为默认 shell，因此该 gadget 演示了基于环境变量的命令重定向。<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -186,9 +188,9 @@ subprocess.Popen('whoami', shell=True) # Calc.exe will pop up
 
 <details>
 
-<summary>覆写 <strong><code>__kwdefaults__</code></strong></summary>
+<summary>覆盖 <strong><code>__kwdefaults__</code></strong></summary>
 
-Python 将 `__kwdefaults__` 记录为仅限关键字参数的默认值映射，这些参数位于函数定义中的 `*` 或 `*args` 之后。<sup>[[4]](#references)</sup> 以下 gadget 通过污染的函数路径覆写了该映射。<sup>[[1]](#references)</sup>
+Python 将 `__kwdefaults__` 记录为仅限关键字参数的默认值映射，这些参数位于函数定义中的 `*` 或 `*args` 之后。<sup>[[4]](#references)</sup>以下 gadget 通过污染的函数路径覆盖该映射。<sup>[[1]](#references)</sup>
 ```python
 from os import system
 import json
@@ -231,18 +233,18 @@ execute() #> Executing echo Polluted
 
 <summary>跨文件覆盖 Flask secret</summary>
 
-如果被污染对象的 class 位于与应用程序 entry-point module 不同的模块中，其方法的 `__globals__` 最初会暴露该 class module 的 namespace。随后，通过 loader 和 `sys.modules.__main__` 进行 traversal，即可访问 entry-point module 及其 Flask `app` 对象。<sup>[[1]](#references)[[2]](#references)</sup>
+如果被污染对象的 class 位于与应用程序 entry-point module 不同的 module 中，则其 methods 的 `__globals__` 最初会暴露该 class module 的 namespace。随后，可以通过 loader 和 `sys.modules.__main__` 遍历到 entry-point module 及其 Flask `app` 对象。<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
-Flask 使用 `app.secret_key` 对 session cookie 进行签名；知道该 key 后，攻击者即可创建有效的 session 数据。<sup>[[6]](#references)</sup>
+Flask 使用 `app.secret_key` 对 session cookie 进行签名；获知该 key 后，攻击者即可创建有效的 session 数据。<sup>[[6]](#references)</sup>
 
-原始 writeup 展示了访问 `app.secret_key` 的以下路径；CTFtime 也托管了该 writeup 的副本。<sup>[[2]](#references)[[3]](#references)</sup>
+原始 writeup 展示了获取 `app.secret_key` 的路径；CTFtime 也托管了该 writeup 的副本。<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-更改该 key 可以允许签署替换后的 session cookies，并可能实现权限提升；请参阅 [Flask session tooling page](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)。<sup>[[6]](#references)</sup>
+更改密钥可以用于签署替换后的 session cookies，并可能实现权限提升；请参阅 [Flask session 工具页面](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign)。<sup>[[6]](#references)</sup>
 
 </details>
 
@@ -256,9 +258,9 @@ python-internal-read-gadgets.md
 ## References
 
 - [1] [Python 中的 Prototype Pollution](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
-- [2] [idekCTF 2022 task manager writeup（原始版本）](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
+- [2] [idekCTF 2022 task manager writeup（原文）](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
 - [3] [CTFtime - idekCTF 2022：task manager writeup](https://ctftime.org/writeup/36082)
 - [4] [inspect — 检查实时对象](https://docs.python.org/3/library/inspect.html)
 - [5] [subprocess — Subprocess 管理](https://docs.python.org/3/library/subprocess.html)
-- [6] [Quickstart — Flask Documentation](https://flask.palletsprojects.com/en/stable/quickstart/)
+- [6] [Quickstart — Flask 文档](https://flask.palletsprojects.com/en/stable/quickstart/)
 {{#include ../../banners/hacktricks-training.md}}

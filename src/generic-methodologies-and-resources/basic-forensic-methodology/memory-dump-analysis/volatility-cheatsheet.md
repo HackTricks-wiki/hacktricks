@@ -1,5 +1,7 @@
 # Volatility - 速查表
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 如果你需要一个能够以不同扫描级别自动执行内存分析，并行运行多个 Volatility3 plugins 的工具，可以使用 autoVolatility3:: [https://github.com/H3xKatana/autoVolatility3/](https://github.com/H3xKatana/autoVolatility3/)
 ```bash
 # Full scan (runs all plugins)
@@ -12,7 +14,7 @@ python3 autovol3.py -f MEMFILE -o OUT_DIR -s minimal
 python3 autovol3.py -f MEMFILE -o OUT_DIR -s normal
 
 ```
-如果你想要一个**快速又疯狂**的工具，可以使用 [https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility) 并行启动多个 Volatility plugins。
+如果你想要一些**快速而疯狂**的工具，以并行方式运行多个 Volatility plugins，可以使用：[https://github.com/carlospolop/autoVolatility](https://github.com/carlospolop/autoVolatility)
 ```bash
 python autoVolatility.py -f MEMFILE -d OUT_DIRECTORY -e /home/user/tools/volatility/vol.py # It will use the most important plugins (could use a lot of space depending on the size of the memory)
 ```
@@ -45,19 +47,19 @@ python setup.py install
 
 ## Volatility 命令
 
-访问官方文档：[Volatility 命令参考](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
+访问官方文档：[Volatility command reference](https://github.com/volatilityfoundation/volatility/wiki/Command-Reference#kdbgscan)
 
 ### 关于“list”与“scan”插件的说明
 
-`list` 插件会遍历由内核维护的结构，因此速度较快，但可能遗漏被 malware 取消链接的对象。`scan` 插件（例如 `psscan`）会在内存中搜索对象签名；它们可以恢复已终止或被取消链接的进程，但速度较慢，并且当残留结构损坏时可能产生误报。<sup>[[8]](#references)</sup>
+`list` 插件遍历由 kernel 维护的结构，因此速度较快，但可能遗漏被 malware unlink 的对象。`scan` 插件（例如 `psscan`）会在 memory 中搜索对象签名；它们可以恢复已终止或被 unlink 的进程，但速度较慢，并且当残留结构受损时可能产生 false positive。<sup>[[8]](#references)</sup>
 
-## 操作系统配置文件
+## OS 配置文件
 
 ### Volatility3
 
-Volatility 3 需要目标操作系统的符号表。项目 README 列出了 Windows、Mac 和 Linux 的符号包；将它们放入 `volatility3/symbols`，或放入可执行文件旁的 `symbols` 目录中。缺失的 Windows 符号可能会被自动获取并生成，而 Mac 和 Linux 的符号表可能需要单独生成。<sup>[[9]](#references)</sup>
+Volatility 3 需要目标 operating system 的 symbol tables。项目 README 列出了 Windows、Mac 和 Linux 的 packs；将它们放置在 `volatility3/symbols` 中，或放在 executable 旁边的 `symbols` directory 中。缺失的 Windows symbols 可能会被自动获取和生成，而 Mac 和 Linux tables 可能需要单独生成。<sup>[[9]](#references)</sup>
 
-可在以下位置**下载**适用于各种操作系统的符号表包：
+各种 operating system 的 symbol table packs 可**下载**于：
 
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/windows.zip)
 - [https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip](https://downloads.volatilityfoundation.org/volatility3/symbols/mac.zip)
@@ -65,9 +67,9 @@ Volatility 3 需要目标操作系统的符号表。项目 README 列出了 Wind
 
 ### Volatility2
 
-#### 外部配置文件
+#### External Profile
 
-可以通过以下方式获取受支持配置文件的列表：
+你可以通过以下方式获取 supported profiles 的列表：
 ```bash
 ./volatility_2.6_lin64_standalone --info | grep "Profile"
 ```
@@ -83,22 +85,22 @@ LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 - A Profile for Linux CentOS7_3.10
 VistaSP0x64                                   - A Profile for Windows Vista SP0 x64
 VistaSP0x86                                   - A Profile for Windows Vista SP0 x86
 ```
-你可以从 [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles) **download Linux and Mac profiles**
+你可以从 [https://github.com/volatilityfoundation/profiles](https://github.com/volatilityfoundation/profiles) **下载 Linux 和 Mac profiles**
 
-在上一部分中，你可以看到 profile 名称为 `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`，你可以使用它执行类似以下的命令：
+在前一个部分中，你可以看到 profile 名称为 `LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64`，你可以使用它来执行类似以下的命令：
 ```bash
 ./vol -f file.dmp --plugins=. --profile=LinuxCentOS7_3_10_0-123_el7_x86_64_profilex64 linux_netscan
 ```
-#### 发现 Profile
+#### 发现配置文件
 ```
 volatility imageinfo -f file.dmp
 volatility kdbgscan -f file.dmp
 ```
-#### **imageinfo 与 kdbgscan 的区别**
+#### **imageinfo 和 kdbgscan 的区别**
 
-[Andrea Fortuna 的 image-identification 笔记](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/) 说明，`imageinfo` 会生成 profile 建议，而 `kdbgscan` 会扫描 KDBG signatures，并通过 sanity checks 识别候选 profile 和 KDBG addresses。其输出部分取决于 Volatility 是否能够定位 DTB，因此运行时应传入已知或建议的 profile。<sup>[[1]](#references)</sup>
+[Andrea Fortuna 的 image-identification 笔记](https://www.andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/) 说明，`imageinfo` 会生成 profile 建议，而 `kdbgscan` 会扫描 KDBG 特征并执行合理性检查，以识别候选 profile 和 KDBG 地址。其输出部分取决于 Volatility 是否能定位 DTB，因此运行时应传入已知或建议的 profile。<sup>[[1]](#references)</sup>
 
-当返回多个候选项时，请比较它们的进程数和模块数：进程或模块数为零的候选项，其可信度低于包含完整列表的候选项。应将此视为 sanity check，而不是 profile 正确的证明。<sup>[[1]](#references)</sup>
+当返回多个候选项时，请比较它们的进程数和模块数：进程或模块数为零的候选项，其可信度低于包含有效列表的候选项。应将此视为合理性检查，而不是 profile 正确的证明。<sup>[[1]](#references)</sup>
 ```bash
 # GOOD
 PsActiveProcessHead           : 0xfffff800011977f0 (37 processes)
@@ -112,18 +114,18 @@ PsLoadedModuleList            : 0xfffff80001197ac0 (0 modules)
 ```
 #### KDBG
 
-`KdDebuggerDataBlock`（在 Volatility 中称为 KDBG）是一个 `_KDDEBUGGER_DATA64` 结构，其中包含用于进程枚举的进程列表头 `PsActiveProcessHead`。<sup>[[2]](#references)</sup>
+`KdDebuggerDataBlock`（Volatility 将其称为 KDBG）是一个 `_KDDEBUGGER_DATA64` 结构，其中包含 `PsActiveProcessHead`，即用于进程枚举的进程列表头部。<sup>[[2]](#references)</sup>
 
 ## 操作系统信息
 ```bash
 #vol3 has a plugin to give OS information (note that imageinfo from vol2 will give you OS info)
 ./vol.py -f file.dmp windows.info.Info
 ```
-插件 `banners.Banners` 可用于在 **vol3 中尝试查找 dump 里的 Linux banners**。
+插件 `banners.Banners` 可用于在转储中尝试查找 linux banners。
 
 ## 哈希/密码
 
-提取 SAM 哈希、[域缓存凭据](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) 和 [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets)。
+提取 SAM hashes、[domain cached credentials](../../../windows-hardening/stealing-credentials/credentials-protections.md#cached-credentials) 和 [lsa secrets](../../../windows-hardening/authentication-credentials-uac-and-efs/index.html#lsa-secrets)。
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -145,7 +147,7 @@ volatility --profile=Win7SP1x86_23418 lsadump -f file.dmp #Grab lsa secrets
 
 ## 内存转储
 
-进程的内存转储将**提取**进程当前状态的**所有内容**。**procdump** 模块只会**提取** **代码**。
+进程的内存转储将**提取**进程当前状态的**所有内容**。**procdump** 模块只会**提取** **code**。
 ```
 volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 ```
@@ -153,8 +155,8 @@ volatility -f file.dmp --profile=Win7SP1x86 memdump -p 2168 -D conhost/
 
 ### 列出进程
 
-尝试查找名称**可疑**的进程，或**意外的**子**进程**（例如，作为 iexplorer.exe 子进程的 cmd.exe）。\
-将 pslist 的结果与 psscan 的结果进行**比较**，以识别隐藏进程，可能会很有帮助。
+尝试查找**可疑**的进程（按名称）或**意外的**子**进程**（例如作为 iexplorer.exe 子进程的 cmd.exe）。\
+比较 pslist 与 psscan 的结果以识别隐藏进程可能会很有帮助。
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -210,11 +212,11 @@ volatility --profile=PROFILE consoles -f file.dmp #command history by scanning f
 {{#endtab}}
 {{#endtabs}}
 
-在 `cmd.exe` 中执行的命令由 **`conhost.exe`** 管理（在 Windows 7 之前的系统上由 **`csrss.exe`** 管理）。这意味着，如果攻击者在获取 memory dump 之前终止了 **`cmd.exe`**，仍然可以从 **`conhost.exe`** 的内存中恢复该会话的 command history。为此，如果在 console 的 modules 中检测到异常活动，应转储关联 **`conhost.exe`** 进程的内存。然后，通过在该 dump 中搜索 **strings**，可能可以提取会话中使用的命令行。
+在 `cmd.exe` 中执行的命令由 **`conhost.exe`** 管理（在 Windows 7 之前的系统中由 **`csrss.exe`** 管理）。这意味着，如果攻击者在获取内存转储之前终止了 **`cmd.exe`**，仍然可以从 **`conhost.exe`** 的内存中恢复会话的命令历史记录。为此，如果在控制台的模块中检测到异常活动，则应转储关联的 **`conhost.exe`** 进程的内存。然后，通过在该转储中搜索 **strings**，可能可以提取会话中使用的命令行。
 
-### Environment
+### 环境
 
-获取每个正在运行的进程的环境变量。其中可能包含一些有趣的值。
+获取每个正在运行的进程的环境变量。其中可能包含一些有价值的值。
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -232,10 +234,10 @@ volatility --profile=PROFILE -f file.dmp linux_psenv [-p <pid>] #Get env of proc
 {{#endtab}}
 {{#endtabs}}
 
-### Token 权限
+### Token privileges
 
-检查异常服务中的权限 token。\
-列出使用某个高权限 token 的进程可能会很有价值。
+检查异常 services 中的 privileges tokens。\
+列出使用某些 privileged token 的 processes 可能会很有用。
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -259,8 +261,8 @@ volatility --profile=Win7SP1x86_23418 privs -f file.dmp | grep "SeImpersonatePri
 
 ### SIDs
 
-检查每个进程所拥有的 SSID。\
-列出使用特权 SID 的进程（以及使用某些服务 SID 的进程）可能会很有价值。
+检查每个进程拥有的 SSID。\
+列出使用权限 SID 的进程（以及使用某些服务 SID 的进程）可能会很有价值。
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -280,7 +282,7 @@ volatility --profile=Win7SP1x86_23418 getservicesids -f file.dmp #Get the SID of
 
 ### 句柄
 
-了解某个 **process** 对哪些其他文件、密钥、线程、进程……拥有句柄（已打开）非常有用
+了解某个 **进程持有哪些句柄**（已打开）对应的其他文件、键、线程、进程等很有用
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -316,7 +318,7 @@ volatility --profile=Win7SP1x86_23418 dlldump --pid=3152 --dump-dir=. -f file.dm
 
 ### 每个进程的字符串
 
-Volatility allows us to check which process a string belongs to.
+Volatility 允许我们检查某个字符串属于哪个进程。
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -337,7 +339,7 @@ strings 3532.dmp > strings_file
 {{#endtab}}
 {{#endtabs}}
 
-它还可以使用 yarascan 模块搜索进程中的字符串：
+它还允许使用 yarascan 模块在进程内部搜索字符串：
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -507,7 +509,7 @@ volatility --profile=SomeLinux -f file.dmp linux_find_file -i 0xINODENUMBER -O /
 {{#endtab}}
 {{#endtabs}}
 
-### Master File Table
+### 主文件表
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -523,9 +525,9 @@ volatility --profile=Win7SP1x86_23418 mftparser -f file.dmp
 {{#endtab}}
 {{#endtabs}}
 
-在 NTFS 上，MFT 中为卷上的每个文件至少包含一个条目，其中也包括 MFT 自身。文件元数据和内容存储在 MFT 条目中，或存储在这些条目所描述的位置；请参阅 [Microsoft documentation](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)。<sup>[[4]](#references)</sup>
+在 NTFS 中，MFT 为卷上的每个文件至少包含一个条目，其中也包括 MFT 自身。文件元数据和内容存储在 MFT 条目中，或存储在这些条目所描述的位置；请参阅 [Microsoft documentation](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)。<sup>[[4]](#references)</sup>
 
-### SSL 密钥/证书
+### SSL Keys/Certs
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -610,11 +612,11 @@ volatility --profile=Win7SP1x86_23418 yarascan -y malware_rules.yar -f ch2.dmp |
 {{#endtab}}
 {{#endtabs}}
 
-## 杂项
+## 其他
 
 ### 外部插件
 
-如果要使用外部插件，请确保与插件相关的文件夹是使用的第一个参数。
+如果要使用外部插件，请确保与插件相关的文件夹是所使用的第一个参数。
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -671,7 +673,7 @@ volatility --profile=Win7SP1x86_23418 -f file.dmp symlinkscan
 
 ### Bash
 
-可以**从内存中读取 bash 历史记录。**你也可以转储 _.bash_history_ 文件，但如果该功能被禁用，你会很高兴能够使用这个 Volatility module。
+可以**从内存中读取 bash history。** 你也可以转储 _.bash_history_ 文件，但如果该功能被禁用，你会庆幸还能使用这个 volatility module
 
 {{#tabs}}
 {{#tab name="vol3"}}
@@ -734,26 +736,26 @@ volatility --profile=Win7SP1x86_23418 iehistory -f file.dmp
 #Just vol2
 volatility --profile=Win7SP1x86_23418 notepad -f file.dmp
 ```
-无法读取截图内容。
+请上传截图或粘贴需要翻译的 Markdown 内容。
 ```bash
 #Just vol2
 volatility --profile=Win7SP1x86_23418 screenshot -f file.dmp
 ```
-### 主引导记录（MBR）
+### 主引导记录 (MBR)
 ```bash
 volatility --profile=Win7SP1x86_23418 mbrparser -f file.dmp
 ```
-在基于 BIOS 的系统上，扇区 0 中的 MBR 包含主引导代码和分区表。Microsoft 文档说明，`bootsect /mbr` 会更新代码，而不会更改该分区表。<sup>[[7]](#references)</sup>
+在基于 BIOS 的系统上，扇区 0 中的 MBR 包含主引导代码和分区表。Microsoft 文档说明，`bootsect /mbr` 会更新代码，而不会更改该表。<sup>[[7]](#references)</sup>
 
 ## References
 
-- [1] [Volatility，我自己的 cheatsheet（第 1 部分）：镜像识别](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
-- [2] [查找内核调试器块](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
+- [1] [Volatility，我自己的 cheatsheet（第 1 部分）：Image Identification](https://andreafortuna.org/2017/06/25/volatility-my-own-cheatsheet-part-1-image-identification/)
+- [2] [查找 Kernel Debugger Block](https://scudette.blogspot.com/2012/11/finding-kernel-debugger-block.html)
 - [3] [Windows UserAssist Keys](https://www.aldeid.com/wiki/Windows-userassist-keys)
-- [4] [主文件表（本地文件系统）- Win32 apps](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
+- [4] [Master File Table（Local File Systems）- Win32 apps](https://learn.microsoft.com/en-us/windows/win32/fileio/master-file-table)
 - [5] [基于 UEFI 的 PC，保护性 MBR：它是什么？- Microsoft Community](https://answers.microsoft.com/en-us/windows/forum/all/uefi-based-pc-protective-mbr-what-is-it/0fc7b558-d8d4-4a7d-bae2-395455bb19aa)
 - [6] [教程：用于 malware analysis 的 Volatility plugins](http://tomchop.me/2016/11/21/tutorial-volatility-plugins-malware-analysis/)
-- [7] [Bootsect 命令行选项](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/bootsect-command-line-options?view=windows-11)
+- [7] [Bootsect Command-Line Options](https://learn.microsoft.com/en-us/windows-hardware/manufacture/desktop/bootsect-command-line-options?view=windows-11)
 - [8] [教程 - Volatility plugins 与 malware analysis](https://tomchop.me/posts/volatility-plugin-malware-analysis/)
 - [9] [Volatility 3 README](https://github.com/volatilityfoundation/volatility3/blob/develop/README.md)
 {{#include ../../../banners/hacktricks-training.md}}

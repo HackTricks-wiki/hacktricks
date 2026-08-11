@@ -1,4 +1,6 @@
-# 暴力破解少量字符的 Hash
+# 暴力破解仅少数字符的哈希
+
+{{#include ../../banners/hacktricks-training.md}}
 ```python
 import hashlib
 

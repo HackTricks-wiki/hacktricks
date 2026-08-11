@@ -1,16 +1,18 @@
 # Suricata & Iptables 速查表
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Iptables
 
 ### 链
 
-在 iptables 中，每条链都是由数据包匹配规则组成的有序列表。默认的 `filter` 表包含内置的 `INPUT`、`FORWARD` 和 `OUTPUT` 链；其他表（例如 `nat`）是否可用，取决于内核配置和已加载的模块。<sup>[[1]](#references)</sup>
+在 iptables 中，每个链都是按顺序排列的数据包匹配规则列表。默认的 `filter` 表包含内置的 `INPUT`、`FORWARD` 和 `OUTPUT` 链；根据内核配置和已加载的模块，可能还会有其他表，例如 `nat`。<sup>[[1]](#references)</sup>
 
 - **Input Chain**：用于管理传入连接的行为。
-- **Forward Chain**：用于处理并非发往本地系统的传入连接。这通常适用于充当路由器的设备，因为接收到的数据需要被转发到其他目标。此链主要与系统参与路由、NAT 或类似活动时相关。
-- **Output Chain**：专门用于调节传出连接。
+- **Forward Chain**：用于处理目标不是本地系统的传入连接。这通常适用于充当路由器的设备，因为接收到的数据需要被转发到其他目标。此链主要在系统参与路由、NAT 或类似活动时发挥作用。
+- **Output Chain**：专门用于管理传出连接。
 
-这些链确保网络流量得到有序处理，从而可以制定详细规则来控制数据流入、经过和离开系统的过程。
+这些链确保网络流量得到有序处理，从而可以指定详细规则来控制数据流入、经过和流出系统的过程。
 
 字符串匹配示例使用标准的 `string` match；除非提供 `--icase`，否则匹配区分大小写；`--algo` 用于选择 BM 或 KMP 搜索策略。<sup>[[2]](#references)</sup>
 ```bash
@@ -53,7 +55,7 @@ iptables-restore < /etc/sysconfig/iptables
 
 ### 安装与配置
 
-下面的 package commands 取决于 distribution 和 release；官方 installation guide 介绍了 Ubuntu PPA、Debian backports、RPM packages 以及 systemd service management。<sup>[[3]](#references)</sup>
+下面的包管理命令因发行版和版本而异；官方安装指南介绍了 Ubuntu PPA、Debian backports、RPM packages 以及 systemd 服务管理。<sup>[[3]](#references)</sup>
 ```bash
 # Package installation details vary by distribution and release; see References.
 # Ubuntu
@@ -116,13 +118,13 @@ Type=simple
 
 systemctl daemon-reload
 ```
-`suricata-update` 序列遵循 Suricata 文档中规定的工作流程，用于获取、列出、启用和加载规则源。<sup>[[4]](#references)</sup> 上述 `suricatasc` 命令是一种有文档说明的非阻塞 Unix 套接字规则重新加载方法。<sup>[[8]](#references)</sup> NFQUEUE 规则将本地输入/输出流量发送到 Suricata，而 `-q 0` 选择队列 0 进行 inline 处理。<sup>[[7]](#references)</sup>
+`suricata-update` sequence 遵循 Suricata 记录的工作流程，用于获取、列出、启用和加载规则源。<sup>[[4]](#references)</sup> 上面的 `suricatasc` 命令是一种有文档说明的非阻塞 Unix socket 规则重新加载方法。<sup>[[8]](#references)</sup> NFQUEUE 规则将本地输入/输出流量发送到 Suricata，而 `-q 0` 选择队列 0 进行 inline 处理。<sup>[[7]](#references)</sup>
 
 ### 规则定义
 
-Suricata 规则/签名由三个部分组成。<sup>[[5]](#references)</sup>
+Suricata 规则/签名由三部分组成。<sup>[[5]](#references)</sup>
 
-- **action** 指定签名匹配时执行的操作。
+- **action** 指定签名匹配时发生的情况。
 - **header** 选择协议、IP 地址、端口和方向。
 - **rule options** 定义与匹配相关的具体细节。
 ```bash
@@ -130,20 +132,20 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 ```
 #### **有效操作包括**
 
-- alert - 生成警报
+- alert - 生成 alert
 - pass - 停止对数据包的进一步检查
-- **drop** - 丢弃数据包并生成警报
+- **drop** - 丢弃数据包并生成 alert
 - **reject** - 向匹配数据包的发送方发送 RST/ICMP unreachable 错误。
 - rejectsrc - 与 _reject_ 相同
 - rejectdst - 向匹配数据包的接收方发送 RST/ICMP 错误数据包。
 - rejectboth - 向通信双方发送 RST/ICMP 错误数据包。
 
-#### **协议**
+#### **Protocols**
 
 - tcp（用于 tcp-traffic）
 - udp
 - icmp
-- ip（ip 表示“全部”或“任意”）
+- ip（ip 代表“all”或“any”）
 - _layer7 protocols_：http、ftp、tls、smb、dns、ssh 及其他协议。<sup>[[5]](#references)</sup>
 
 #### 源地址和目标地址
@@ -162,15 +164,15 @@ Suricata 支持 IP 范围、否定和分组地址列表。<sup>[[5]](#references
 
 Suricata 支持端口范围、否定和端口列表。<sup>[[5]](#references)</sup>
 
-| Example         | Meaning                                |
-| --------------- | -------------------------------------- |
-| any             | 任意地址                               |
-| \[80, 81, 82]   | 端口 80、81 和 82                       |
-| \[80: 82]       | 从 80 到 82 的范围                     |
-| \[1024: ]       | 从 1024 到最高端口号                   |
-| !80             | 除 80 之外的所有端口                   |
-| \[80:100,!99]   | 从 80 到 100 的范围，但不包括 99       |
-| \[1:80,!\[2,4]] | 从 1 到 80 的范围，但不包括端口 2 和 4 |
+| Example         | Meaning                                  |
+| --------------- | ---------------------------------------- |
+| any             | 任意地址                                 |
+| \[80, 81, 82]   | 端口 80、81 和 82                        |
+| \[80: 82]       | 从 80 到 82 的范围                       |
+| \[1024: ]       | 从 1024 到最高端口号                     |
+| !80             | 除 80 之外的所有端口                    |
+| \[80:100,!99]   | 从 80 到 100 的范围，但不包括 99         |
+| \[1:80,!\[2,4]] | 从 1 到 80 的范围，但不包括端口 2 和 4   |
 
 #### 方向
 
@@ -181,7 +183,7 @@ source <> destination  (both directions)
 ```
 #### 关键词
 
-下面的示例使用了 Suricata 的规则关键字，包括 metadata、IP、ICMP、payload 和应用层选项；官方规则文档列出了这些类别及其语法。<sup>[[6]](#references)[[9]](#references)</sup>
+下面的示例使用 Suricata 的规则关键字，包括 metadata、IP、ICMP、payload 和应用层选项；官方规则文档对这些类别及其语法进行了分类说明。<sup>[[6]](#references)[[9]](#references)</sup>
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule

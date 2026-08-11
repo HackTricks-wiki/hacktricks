@@ -1,16 +1,18 @@
 # VBS 文件的反混淆技术
 
-以下是一些可能有助于调试/反混淆恶意 VBS 文件的方法：
+{{#include ../../../banners/hacktricks-training.md}}
+
+以下是一些可用于调试/反混淆恶意 VBS 文件的方法：
 
 ## echo
 
-`WScript.Echo` 可用于输出诊断信息；在 `cscript.exe` 下，它会写入控制台。<sup>[[1]](#references)</sup>
+`WScript.Echo` 可用于输出诊断信息；在 `cscript.exe` 下，输出内容会写入控制台。<sup>[[1]](#references)</sup>
 ```bash
 Wscript.Echo "Like this?"
 ```
 ## 注释
 
-单个撇号表示 VBScript 注释的开始。<sup>[[2]](#references)</sup>
+单个撇号用于开始 VBScript 注释。<sup>[[2]](#references)</sup>
 ```bash
 ' this is a comment
 ```
@@ -22,7 +24,7 @@ cscript.exe file.vbs
 ```
 ## 将数据写入文件
 
-此 helper 改编自 Stack Overflow 的一个回答，并使用 `FileSystemObject` text stream。`CreateTextFile` 返回一个 `TextStream`，而 `Write`/`Close` 作用于文本数据；应将其视为文本写入示例，而不是通用的二进制安全写入器。<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+此 helper 改编自 Stack Overflow 的一个回答，并使用 `FileSystemObject` 文本流。`CreateTextFile` 返回一个 `TextStream`，而 `Write`/`Close` 操作的是文本数据；应将其视为文本写入示例，而不是通用的二进制安全写入器。<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```js
 Function writeBinary(strBinary, strPath)
 
