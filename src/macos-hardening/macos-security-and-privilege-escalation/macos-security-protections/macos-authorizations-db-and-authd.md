@@ -77,7 +77,7 @@ The following decoded rule illustrates `authenticate-admin-nonshared` on a docum
 
 ## Authd
 
-`authd` is the daemon that evaluates Authorization Services requests. Older releases wrote `/var/log/authd.log`; current releases primarily use the unified logging system, which can be queried with `log show`/`log stream` using an `authd` process predicate.<sup>[[2]](#references)</sup>
+`authd` is the XPC service that evaluates Authorization Services requests. On current macOS builds its bundle can be inspected at `/System/Library/Frameworks/Security.framework/XPCServices/authd.xpc`; the path is an implementation detail and may differ across releases. Older releases wrote `/var/log/authd.log`; current releases primarily use the unified logging system, which can be queried with `log show`/`log stream` using an `authd` process predicate.<sup>[[2]](#references)</sup><sup>[[5]](#references)</sup>
 
 The `security` tool exposes several Authorization Services operations. A historical example invokes `AuthorizationExecuteWithPrivileges` with `security execute-with-privileges /bin/ls`. Apple deprecated that API in macOS 10.7; modern privileged helpers should use a launchd-managed helper and XPC authorization instead.<sup>[[2]](#references)</sup><sup>[[4]](#references)</sup>
 
@@ -91,6 +91,7 @@ On releases that still support it, this uses `/usr/libexec/security_authtrampoli
 - [2] [Apple Authorization Services Programming Guide (archive)](https://developer.apple.com/library/archive/documentation/Security/Conceptual/authorization_concepts/)
 - [3] [`security(1)` macOS manual page](https://keith.github.io/xcode-man-pages/security.1.html)
 - [4] [Apple - Daemons and Services Programming Guide: Creating launchd jobs](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
+- [5] [Apple open-source Security project - `authd`](https://github.com/apple-oss-distributions/Security/tree/main/OSX/authd)
 
 
 {{#include ../../../banners/hacktricks-training.md}}
