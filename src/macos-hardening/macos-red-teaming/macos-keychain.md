@@ -18,11 +18,11 @@ These files, while they do not have inherent protection and can be **downloaded*
 
 ### ACLs
 
-Each entry in the keychain is governed by **Access Control Lists (ACLs)** which dictate who can perform various actions on the keychain entry, including:<sup>[[1]](#references)</sup>
+Each entry in the keychain is governed by **Access Control Lists (ACLs)** which dictate who can perform various actions on the keychain entry, including:<sup>[[1]](#references)[[2]](#references)</sup>
 
-- **ACLAuthorizationExportClear**: Allows the holder to get the clear text of the secret.
-- **ACLAuthorizationExportWrapped**: Allows the holder to get the clear text encrypted with another provided password.
-- **ACLAuthorizationAny**: Allows the holder to perform any action.
+- **`kSecACLAuthorizationExportClear`**: Allows the holder to get the clear text of the secret.
+- **`kSecACLAuthorizationExportWrapped`**: Allows the holder to get the clear text encrypted with another provided password.
+- **`kSecACLAuthorizationAny`**: Allows the holder to perform any action.
 
 The ACLs are further accompanied by a **list of trusted applications** that can perform these actions without prompting. This could be:<sup>[[1]](#references)</sup>
 
@@ -30,7 +30,7 @@ The ACLs are further accompanied by a **list of trusted applications** that can 
 - An **empty** list (**nobody** is trusted)
 - **List** of specific **applications**.
 
-Also the entry might contain the key **`ACLAuthorizationPartitionID`,** which is use to identify the **teamid, apple,** and **cdhash.**<sup>[[1]](#references)</sup>
+Also the entry might contain the key **`kSecACLAuthorizationPartitionID`,** which is used to identify the **teamid, apple,** and **cdhash.**<sup>[[1]](#references)[[2]](#references)</sup>
 
 - If the **teamid** is specified, the application must have the **same teamid** to **access the entry** value **without** a **prompt**.
 - If the **apple** is specified, then the app needs to be **signed** by **Apple**.
@@ -93,7 +93,7 @@ List and get **info** about each keychain entry using the **Security Framework**
 
 Get **ACLs** of each entry:<sup>[[1]](#references)</sup>
 
-- With the API **`SecAccessCopyACLList`** you can get the **ACL for the keychain item**. It returns a list of ACLs (such as `ACLAuthorizationExportClear` and the others previously mentioned), where each entry has:
+- With the API **`SecAccessCopyACLList`** you can get the **ACL for the keychain item**. It returns a list of ACLs (such as `kSecACLAuthorizationExportClear` and the others previously mentioned), where each entry has:<sup>[[1]](#references)[[2]](#references)</sup>
   - Description
   - **Trusted Application List**. This could be:
     - An app: /Applications/Slack.app
@@ -130,5 +130,6 @@ And these are the **requirements** to be able to **export a secret without a pro
 ## References
 
 - [1] [#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas](https://www.youtube.com/watch?v=jKE1ZW33JpY)
+- [2] [Apple Developer — kSecACLAuthorizationExportClear](https://developer.apple.com/documentation/security/ksecaclauthorizationexportclear)
 
 {{#include ../../banners/hacktricks-training.md}}
