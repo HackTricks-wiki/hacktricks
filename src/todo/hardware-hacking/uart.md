@@ -4,13 +4,13 @@
 
 ## Osnovne informacije
 
-UART je serijski protokol, što znači da prenosi podatke između komponenti bit po bit. Nasuprot tome, paralelni komunikacioni protokoli prenose podatke istovremeno kroz više kanala. Uobičajeni serijski protokoli uključuju RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express i USB.
+UART je asinhroni serijski interfejs koji prenosi uokvireni tok bitova bez zajedničkog takta. Nemojte mešati UART na logičkom nivou sa RS-232: RS-232 koristi drugačije, često negativne naponske nivoe i zahteva transceiver.<sup>[[1]](#references)[[3]](#references)</sup>
 
-Uopšteno, linija je na visokom nivou (logička vrednost 1) dok je UART u stanju mirovanja. Zatim, da bi signalizirao početak prenosa podataka, predajnik šalje startni bit prijemniku, pri čemu se signal drži na niskom nivou (logička vrednost 0). Nakon toga predajnik šalje pet do osam bitova podataka koji sadrže stvarnu poruku, zatim opcioni bit parnosti i jedan ili dva stop bita (sa logičkom vrednošću 1), u zavisnosti od konfiguracije. Bit parnosti, koji se koristi za proveru grešaka, retko se viđa u praksi. Stop bit (ili bitovi) označava kraj prenosa.
+Linija se uglavnom održava na visokom nivou (logička vrednost 1) dok je UART u stanju mirovanja. Zatim, da bi signalizirao početak prenosa podataka, predajnik šalje start bit prijemniku, pri čemu se signal održava na niskom nivou (logička vrednost 0). Nakon toga predajnik šalje pet do osam bitova podataka koji sadrže stvarnu poruku, zatim opcioni parity bit i jedan ili dva stop bita (sa logičkom vrednošću 1), u zavisnosti od konfiguracije. Parity bit, koji se koristi za proveru grešaka, retko se viđa u praksi. Stop bit (ili bitovi) označava kraj prenosa.
 
-Najčešću konfiguraciju nazivamo 8N1: osam bitova podataka, bez parnosti i jedan stop bit. Na primer, ako želimo da pošaljemo znak C, odnosno 0x43 u ASCII-ju, u 8N1 UART konfiguraciji, poslali bismo sledeće bitove: 0 (startni bit); 0, 1, 0, 0, 0, 0, 1, 1 (vrednost 0x43 u binarnom obliku) i 0 (stop bit).
+Najčešća konfiguracija je 8N1: osam bitova podataka, bez parity bita i jedan stop bit. UART najpre šalje bit podataka najmanje težine, tako da se ASCII `C` (`0x43`) prenosi kao: start `0`; podaci `1, 1, 0, 0, 0, 0, 1, 0`; stop `1`.<sup>[[1]](#references)</sup>
 
-![UART: Najčešću konfiguraciju nazivamo 8N1: osam bitova podataka, bez parnosti i jedan stop bit. Na primer, ako želimo da pošaljemo znak C, odnosno 0x43 u ASCII-ju, u 8N1 UART konfiguraciji](<../../images/image (764).png>)
+![UART: Najčešću konfiguraciju nazivamo 8N1: osam bitova podataka, bez parity bita i jedan stop bit. Na primer, ako želimo da pošaljemo znak C, odnosno 0x43 u ASCII-ju, kroz 8N1 UART](<../../images/image (764).png>)
 
 Hardverski alati za komunikaciju sa UART-om:
 
@@ -20,59 +20,59 @@ Hardverski alati za komunikaciju sa UART-om:
 
 ### Identifikacija UART portova
 
-UART ima 4 porta: **TX** (Transmit), **RX** (Receive), **Vcc** (Voltage) i **GND** (Ground). Možda ćete moći da pronađete 4 porta sa slovima **`TX`** i **`RX`** **ispisanim** na PCB-u. Ali ako nema oznaka, možda ćete morati sami da ih pronađete pomoću **multimetra** ili **logičkog analizatora**.
+Tipičan debug header izlaže **TX**, **RX** i **GND**; može izlagati i pin **Vcc/Vref**, reset ili pinove za kontrolu toka. Vcc nije UART signal i normalno bi trebalo da se koristi samo kao naponska referenca, a ne da se povezuje kao izvor napajanja, osim ako su šema ploče i zahtevi za strujom poznati.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Sa **multimetrom** i isključenim uređajem:
+Počnite sa **isključenim** i odspojenim uređajem:
 
-- Da biste identifikovali **GND** pin, koristite režim **Continuity Test**, postavite crnu sondu na uzemljenje i testirajte crvenom sondom dok ne čujete zvuk multimetra. Na PCB-u se može pronaći više GND pinova, pa možda jeste, a možda i niste pronašli onaj koji pripada UART-u.
-- Da biste identifikovali **VCC port**, podesite režim **DC voltage** i opseg napona na 20 V. Crnu sondu postavite na uzemljenje, a crvenu na pin. Uključite uređaj. Ako multimetar izmeri konstantan napon od 3,3 V ili 5 V, pronašli ste Vcc pin. Ako dobijete druge vrednosti napona, pokušajte sa drugim portovima.
-- Da biste identifikovali **TX** **port**, podesite režim **DC voltage** i opseg napona do 20 V, postavite crnu sondu na uzemljenje, a crvenu na pin i uključite uređaj. Ako napon nekoliko sekundi varira, a zatim se stabilizuje na vrednosti Vcc, najverovatnije ste pronašli TX port. To je zato što se pri uključivanju šalju određeni debug podaci.
-- **RX port** bi trebalo da bude najbliži ostala 3 porta; on ima najmanje variranje napona i najnižu ukupnu vrednost od svih UART pinova.
+- Identifikujte **GND** u continuity režimu u odnosu na poznatu ground plane površinu, oklop konektora ili masu napajanja. Nikada ne koristite continuity/resistance režim na ploči koja je pod napajanjem.
+- Pre uključivanja cilja prebacite multimetar u režim merenja jednosmernog napona. Izmerite potencijal kandidata za pinove u odnosu na masu da biste identifikovali logički napon. Stabilna naponska grana može biti Vcc/Vref; nemojte pretpostaviti da je bezbedno povezati je.
+- Posmatrajte kandidate pomoću logic analyzer-a ili osciloskopa tokom pokretanja. **TX** je obično u stanju mirovanja na visokom nivou i prikazuje burst-ove uokvirenih podataka. Multimetar može prikazati prosečnu promenu, ali ne može potvrditi framing ili baud rate.
+- **RX** može ostati u stanju mirovanja i ne može se bezbedno identifikovati samo zato što se nalazi pored TX-a. Pratite vodove na PCB-u, konsultujte datasheet SoC-a ili koristite analyzer visoke impedanse pre nego što ga pobudite.
 
-Možete zameniti TX i RX portove i ništa se neće dogoditi, ali ako pomešate GND i VCC port, mogli biste da spržite kolo.
+Zamena TX i RX obično ne proizvodi komunikaciju; mešanje napajanja, mase ili nivoa signala može trajno oštetiti cilj ili adapter. Prvo povežite masu i počnite u režimu **receive-only** (TX cilja na RX adaptera).
 
-Na nekim ciljnim uređajima proizvođač onemogućava UART port tako što onemogući RX ili TX, ili čak oba. U tom slučaju može biti korisno pratiti veze na ploči i pronaći neku breakout tačku. Dobar pokazatelj za potvrdu da UART nije detektovan i da je kolo prekinuto jeste provera garancije uređaja. Ako je uređaj isporučen sa garancijom, proizvođač ostavlja neke debug interfejse (u ovom slučaju UART) i zato mora da odvoji UART, a zatim da ga ponovo poveže tokom debugovanja. Ovi breakout pinovi mogu se povezati lemljenjem ili jumper žicama.
+Proizvođači mogu izostaviti header, ostaviti serijske otpornike nepopunjene, onemogućiti konzolu u firmware-u ili izložiti samo TX. Pratite obližnje test padove i footprint-e otpornika do SoC-a i dodajte privremenu vezu visoke impedanse tek nakon potvrde električnog nivoa. Postojanje garancije ne znači da UART mora biti dostupan.
 
-### Identifikacija UART Baud Rate-a
+### Identifikacija UART baud rate-a
 
-Najlakši način da identifikujete ispravan baud rate jeste da pogledate izlaz sa **TX pina i pokušate da pročitate podatke**. Ako podaci koje primite nisu čitljivi, pređite na sledeći mogući baud rate dok podaci ne postanu čitljivi. Za to možete koristiti USB-to-serial adapter ili višenamenski uređaj kao što je Bus Pirate, u kombinaciji sa pomoćnom skriptom, kao što je [baudrate.py](https://github.com/devttys0/baudrate/). Najčešći baud rate-ovi su 9600, 38400, 19200, 57600 i 115200.
+Najlakši način za identifikaciju ispravnog baud rate-a jeste da posmatrate izlaz pina **TX** i pokušate da pročitate podatke. Ako podaci koje primite nisu čitljivi, pređite na sledeći mogući baud rate dok podaci ne postanu čitljivi. Za to možete koristiti USB-to-serial adapter ili višenamenski uređaj kao što je Bus Pirate, u kombinaciji sa pomoćnom skriptom kao što je [baudrate.py](https://github.com/devttys0/baudrate/). Najčešći baud rate-ovi su 9600, 38400, 19200, 57600 i 115200.
 
 > [!CAUTION]
 > Važno je napomenuti da u ovom protokolu morate povezati TX jednog uređaja sa RX-om drugog uređaja!
 
-## CP210X UART to TTY Adapter
+## CP210X UART u TTY adapter
 
-CP210X čip se koristi na velikom broju prototyping ploča, kao što je NodeMCU (sa esp8266), za serijsku komunikaciju. Ovi adapteri su relativno jeftini i mogu se koristiti za povezivanje sa UART interfejsom cilja. Uređaj ima 5 pinova: 5V, GND, RXD, TXD, 3.3V. Obavezno povežite napon koji podržava cilj kako biste izbegli oštećenja. Na kraju povežite RXD pin adaptera sa TXD pinom cilja, a TXD pin adaptera sa RXD pinom cilja.
+CP210x USB-to-UART bridge-ovi se pojavljuju na mnogim prototyping pločama i jeftinim adapterima. Uobičajeni moduli izlažu pinove napajanja zajedno sa GND, RXD i TXD, ali njihovi header-i i I/O nivoi se razlikuju. Potvrdite stvarni napon na osnovu dizajna ploče ili datasheet-a. Obično se povezuju samo GND, RX adaptera na TX cilja i, nakon validacije u režimu receive-only, TX adaptera na RX cilja. Nemojte povezivati 5 V/3.3 V pin za napajanje adaptera, osim ako namerno napajate cilj za koji je poznato da to može da podnese.<sup>[[3]](#references)</sup>
 
-Ako adapter nije detektovan, proverite da li su CP210X drajveri instalirani na host sistemu. Kada se adapter detektuje i poveže, mogu se koristiti alati kao što su picocom, minicom ili screen.
+Ako adapter nije detektovan, proverite da li su CP210X drivers instalirani na host sistemu. Kada adapter bude detektovan i povezan, mogu se koristiti alati kao što su picocom, minicom ili screen.
 
 Za izlistavanje uređaja povezanih sa Linux/MacOS sistemima:
 ```
 ls /dev/
 ```
-Za osnovnu interakciju sa UART interfejsom, koristite sledeću komandu:
+Za osnovnu interakciju sa UART interfejsom koristite sledeću komandu:
 ```
 picocom /dev/<adapter> --baud <baudrate>
 ```
-Za minicom koristite sledeću komandu da ga konfigurišete:
+Za minicom koristite sledeću komandu da biste ga konfigurisali:
 ```
 minicom -s
 ```
 Konfigurišite podešavanja kao što su baudrate i naziv uređaja u opciji `Serial port setup`.
 
-Nakon konfiguracije, koristite komandu `minicom` da pokrenete UART Console.
+Nakon konfigurisanja, pokrenite `minicom` da biste otvorili UART konzolu.
 
-## UART preko Arduino UNO R3 (ploče sa uklonjivim Atmel 328p čipom)
+## UART putem Arduino UNO R3 (ploče sa uklonjivim Atmel 328p čipom)
 
-U slučaju da UART Serial to USB adapteri nisu dostupni, Arduino UNO R3 može da se koristi uz brzu izmenu. Pošto je Arduino UNO R3 obično dostupan svuda, ovo može značajno uštedeti vreme.
+U slučaju da UART Serial to USB adapteri nisu dostupni, Arduino UNO R3 može da se koristi uz brzi hack. Pošto je Arduino UNO R3 obično dostupan svuda, ovo može uštedeti mnogo vremena.
 
-Arduino UNO R3 na samoj ploči ima ugrađen USB to Serial adapter. Da biste ostvarili UART vezu, jednostavno izvadite Atmel 328p mikrokontrolerski čip sa ploče. Ovaj hack radi na Arduino UNO R3 varijantama kod kojih Atmel 328p nije zalemljen na ploču (u njima se koristi SMD verzija). Povežite RX pin Arduina (Digital Pin 0) sa TX pinom UART Interface-a, a TX pin Arduina (Digital Pin 1) sa RX pinom UART Interface-a.
+Arduino UNO R3 ima USB to Serial adapter ugrađen na samoj ploči. Da biste ostvarili UART vezu, jednostavno izvadite Atmel 328p mikrokontrolerski čip sa ploče. Ovaj hack funkcioniše na Arduino UNO R3 varijantama kod kojih Atmel 328p nije zalemljen na ploču (u njima se koristi SMD verzija). Povežite RX pin Arduina (Digital Pin 0) sa TX pinom UART interfejsa, a TX pin Arduina (Digital Pin 1) sa RX pinom UART interfejsa.
 
-Na kraju, preporučuje se korišćenje Arduino IDE-a za pristup Serial Console-u. U odeljku `tools` u meniju izaberite opciju `Serial Console` i podesite baud rate u skladu sa UART Interface-om.
+Koristite Arduino IDE **Serial Monitor** ili namenski terminal sa baudrate-om ciljnog uređaja. Klasični Uno R3 serijski signali koriste logiku od 5 V, zato pre povezivanja sa ciljnim uređajem od 3,3 V ili nižeg napona koristite level shifter ili naponski delilac.
 
 ## Bus Pirate
 
-U ovom scenariju ćemo presretati UART komunikaciju Arduina koji šalje sve ispise programa u Serial Monitor.
+Sledeći transcript koristi legacy Bus Pirate firmware interfejs za praćenje UART izlaza. Noviji Bus Pirate firmware koristi komande kao što su `m uart`, `{`/`}`, `monitor` ili `bridge`; pogledajte dokumentaciju za instaliranu verziju.<sup>[[2]](#references)</sup>
 ```bash
 # Check the modes
 UART>m
@@ -144,30 +144,38 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
-## Dumping Firmware with UART Console
+## Dumpovanje firmvera pomoću UART Console
 
-UART Console pruža odličan način za rad sa osnovnim firmware-om u runtime environment-u. Međutim, kada je pristup UART Console-u read-only, to može predstavljati brojna ograničenja. U mnogim embedded uređajima, firmware se čuva u EEPROM-ovima i izvršava u procesorima koji imaju volatile memory. Zbog toga se firmware čuva kao read-only, jer se originalni firmware tokom proizvodnje nalazi unutar samog EEPROM-a, dok bi se sve nove datoteke izgubile zbog volatile memory-ja. Zbog toga je dumping firmware-a vredan postupak pri radu sa embedded firmware-ima.
+UART konzola pruža pristup tokom izvršavanja boot logovima i, ponekad, bootloaderu ili shell-u operativnog sistema. Konzola samo za čitanje i dalje otkriva mape memorije, flash drajvere, boot argumente, rasporede particija i verzije firmvera. Firmware može biti smešten u SPI NOR/NAND, eMMC ili drugom uređaju; obično se ne izvršava iz EEPROM-a, a fajlovi upisani u montirani persistentni filesystem ne moraju nestati nakon reboot-a.
 
-Postoji mnogo načina za ovo, a SPI sekcija obuhvata metode za direktno izvlačenje firmware-a iz EEPROM-a pomoću različitih uređaja. Ipak, preporučuje se da najpre pokušate dumping firmware-a pomoću UART-a, jer dumping firmware-a fizičkim uređajima i spoljnim interakcijama može biti rizičan.
+Postoji nekoliko načina pribavljanja, a SPI odeljak pokriva direktna čitanja iz eksternog flash-a. Pribavljanje uz pomoć konzole može biti manje invazivno kada bootloader već pruža bezbednu komandu za čitanje, ali svaki prekid boot-a ili flash komanda može uticati na dostupnost, zato zabeležite prvobitno stanje i izbegavajte write/erase operacije.
 
-Dumping firmware-a iz UART Console-a najpre zahteva pristup bootloader-ima. Mnogi popularni vendor-i koriste uboot (Universal Bootloader) kao bootloader za učitavanje Linux-a. Zbog toga je neophodno dobiti pristup uboot-u.
+Dumpovanje firmvera uz pomoć konzole često počinje prekidom bootloadera. Mnogi embedded Linux uređaji koriste **Das U-Boot**, ali drugi koriste vlasničke bootloadere ili onemogućavaju interaktivnu konzolu.
 
-Da biste dobili pristup bootloader-u, povežite UART port sa računarom i upotrebite neki od Serial Console alata, a napajanje uređaja ostavite isključeno. Kada je podešavanje spremno, pritisnite i zadržite Enter Key. Zatim povežite napajanje uređaja i pustite ga da se pokrene.
+Da biste proverili da li bootloader podržava interakciju, povežite prijemnu putanju UART-a i terminal dok je target isključen, pokrenite logging i uključite ga. Pratite prikazani autoboot prompt; u zavisnosti od build-a, prekid može zahtevati taster, kratku sekvencu ili može biti potpuno onemogućen.
 
-Ovim ćete prekinuti učitavanje uboot-a i prikazaće se meni. Preporučuje se da razumete uboot komande i da koristite help meni za njihovo izlistavanje. To može biti komanda `help`. Pošto različiti vendor-i koriste različite konfiguracije, neophodno je razumeti svaku od njih zasebno.
+Ako prekid uspe, koristite `help`, `printenv` i read-only discovery komande da biste razumeli raspored memorije i storage-a tog proizvođača pre pristupanja adresama.
 
-Obično je komanda za dumping firmware-a:
+U U-Boot-u, `md` prikazuje **adresabilnu memoriju**, a ne automatski „EEPROM“. Najpre koristite board-specific komande kao što su `mtd list`, `sf probe`, `mmc info`, `part list`, environment variables i boot logove da biste identifikovali odgovarajuću mapiranu adresu ili učitali flash region u RAM. Zatim prikažite poznati opseg bajt po bajt:<sup>[[4]](#references)</sup>
 ```
-md
+md.b <address> <byte_count>
 ```
-što znači „memory dump“. Ovo će prikazati memoriju (EEPROM Content) na ekranu. Preporučuje se da pre pokretanja procedure zabeležite izlaz Serial Console-a kako biste sačuvali memory dump.
+Zabeležite serijski izlaz pre početka. Izlaz `md.b` sadrži adrese i ASCII kolonu, pa predstavlja tekstualni prikaz, a ne sirovu ROM sliku.
 
-Na kraju, jednostavno uklonite sve nepotrebne podatke iz log datoteke, sačuvajte datoteku kao `filename.rom` i koristite binwalk za izdvajanje sadržaja:
+Uklonite kolone sa adresama i ASCII vrednostima, spojite samo heksadecimalna polja bajtova i dekodirajte ih u binarni format (na primer pomoću `xxd -r -p`). Proverite očekivani broj bajtova i zabeležite hash pre analize:
 ```
-binwalk -e <filename.rom>
+xxd -r -p firmware.hex > firmware.bin
+sha256sum firmware.bin
+binwalk -e firmware.bin
 ```
-Ovo će izlistati moguće sadržaje EEPROM-a na osnovu potpisa pronađenih u hex fajlu.
+Binwalk zatim identifikuje poznate potpise u rekonstruisanom binarnom fajlu. Direktno čitanje flash memorije putem odgovarajućeg SPI/eMMC/NAND interfejsa obično je brže i manje podložno greškama kada konzola ne može pouzdano da prenosi podatke.
 
-Ipak, važno je napomenuti da uboot nije uvek otključan čak i kada se koristi. Ako pritiskanje tastera Enter ne radi ništa, proverite druge tastere, kao što je Space, itd. Ako je bootloader zaključan i ne može da se prekine, ova metoda neće raditi. Da biste proverili da li je uboot bootloader uređaja, proverite izlaz na UART Console tokom pokretanja uređaja. Možda će se tokom pokretanja pomenuti uboot.
+U-Boot može onemogućiti prekid, zahtevati sekvencu tastera specifičnu za proizvođača ili zaključati komande za memoriju/flash. Pratite prompt za autoboot i boot log, umesto da naslepo šaljete karaktere. Ako se konzola ne može prekinuti, sačuvajte boot log i pređite na neinvazivni način preuzimanja firmware-a.
 
+## References
+
+- [1] [Microchip PIC32 Family Reference Manual - UART](https://ww1.microchip.com/downloads/en/DeviceDoc/60001107H.pdf)
+- [2] [Bus Pirate dokumentacija - UART mode i električna ograničenja](https://docs.buspirate.com/docs/command-reference/#uart)
+- [3] [Silicon Labs - CP2102C tehnički list](https://www.silabs.com/documents/public/data-sheets/cp2102c-datasheet.pdf)
+- [4] [U-Boot dokumentacija - `md` komanda za prikaz memorije](https://docs.u-boot.org/en/latest/usage/cmd/md.html)
 {{#include ../../banners/hacktricks-training.md}}
