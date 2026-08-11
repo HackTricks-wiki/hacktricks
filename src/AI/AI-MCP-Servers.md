@@ -122,7 +122,7 @@ A practical example was the `postmark-mcp` package: after a benign history, vers
 
 #### Markdown skill marketplaces: semantic instruction hijacking
 
-Some agent ecosystems do not distribute compiled plug-ins or ordinary MCP servers; they distribute **instruction packages** (`SKILL.md`, `README.md`, metadata, prompt templates) that the host agent interprets with its own file, shell, browser, wallet, or SaaS permissions. In practice, a malicious skill can act like a **supply-chain backdoor expressed in natural language**:<sup>[[12]](#references)[[13]](#references)[[32]](#references)</sup>
+Some agent ecosystems do not distribute compiled plug-ins or ordinary MCP servers; they distribute **instruction packages** (`SKILL.md`, `README.md`, metadata, prompt templates) that the host agent interprets with its own file, shell, browser, wallet, or SaaS permissions. In practice, a malicious skill can act like a **supply-chain backdoor expressed in natural language**:<sup>[[12]](#references)</sup><sup>[[13]](#references)</sup><sup>[[32]](#references)</sup>
 
 - **Fake prerequisite blocks**: the skill claims it cannot continue until the agent or user runs a setup step. Real-world campaigns used paste-site redirects (`rentry`, `glot`) that served a mutable Base64 `curl | bash` second stage, so the marketplace artifact stayed mostly static while the live payload rotated underneath.
 - **Oversized markdown padding**: malicious content is placed at the start of `README.md` / `SKILL.md`, then padded with tens of MB of junk so scanners that truncate or skip large files miss the payload while the agent still reads the interesting first lines.
@@ -154,7 +154,7 @@ Because the MCP response can remain perfectly normal, ordinary integration tests
 
 #### Defensive exposure modeling with `otto-support selfpwn`
 
-Bishop Fox's `otto-support selfpwn` is a good model of what a malicious MCP server could read locally. The command expands home-directory paths, checks explicit paths and `filepath.Glob()` matches, collects metadata with `os.Stat()`, classifies findings by path-derived risk, and inspects `os.Environ()` for variable names containing patterns such as `KEY`, `SECRET`, `TOKEN`, `AWS_`, `OPENAI_`, `CLAUDE_`, `KUBE`, or `SSH_`. It prints the report to stdout only, but a real malicious MCP server could replace that final output step with silent exfiltration.<sup>[[11]](#references)[[14]](#references)</sup>
+Bishop Fox's `otto-support selfpwn` is a good model of what a malicious MCP server could read locally. The command expands home-directory paths, checks explicit paths and `filepath.Glob()` matches, collects metadata with `os.Stat()`, classifies findings by path-derived risk, and inspects `os.Environ()` for variable names containing patterns such as `KEY`, `SECRET`, `TOKEN`, `AWS_`, `OPENAI_`, `CLAUDE_`, `KUBE`, or `SSH_`. It prints the report to stdout only, but a real malicious MCP server could replace that final output step with silent exfiltration.<sup>[[11]](#references)</sup><sup>[[14]](#references)</sup>
 
 ```bash
 otto-support selfpwn
@@ -216,7 +216,7 @@ When testing MCP development environments, look for:
 
 Some MCP inspector/dev panels do not just proxy JSON-RPC traffic; they also expose helper endpoints that **spawn local MCP servers** from client-supplied configuration. If that HTTP API is reachable from `0.0.0.0`, reverse-proxied on a public vhost, or left unauthenticated on an internal segment, it becomes remote OS command execution.<sup>[[30]](#references)</sup>
 
-A common request shape is a `serverConfig`/`server_params` object containing `command`, `args`, and `env`, for example:<sup>[[30]](#references)[[31]](#references)</sup>
+A common request shape is a `serverConfig`/`server_params` object containing `command`, `args`, and `env`, for example:<sup>[[30]](#references)</sup><sup>[[31]](#references)</sup>
 
 ```json
 {
@@ -458,7 +458,7 @@ The **MCP Attack Surface Detector (MCP-ASD)** Burp extension turns exposed MCP s
 - **Endpoint selection**: auto-detects SSE vs WebSocket endpoints and lets you override manually (SSE is often unauthenticated while WebSockets commonly require auth).
 - **Primitive enumeration**: once connected, the extension lists MCP primitives (**Resources**, **Tools**, **Prompts**) plus server metadata. Selecting one generates a prototype call that can be sent straight to Repeater/Intruder for mutation/fuzzing—prioritise **Tools** because they execute actions.
 
-This workflow makes MCP endpoints fuzzable with standard Burp tooling despite their streaming protocol.<sup>[[26]](#references)[[27]](#references)</sup>
+This workflow makes MCP endpoints fuzzable with standard Burp tooling despite their streaming protocol.<sup>[[26]](#references)</sup><sup>[[27]](#references)</sup>
 
 ### Skill Marketplace Supply-Chain Evasion (skills, `SKILL.md`, archives, bytecode)
 
@@ -470,7 +470,7 @@ Agent **skills** create nearly the same trust problem as MCP servers, but the pa
 - **Archive/document indirection**: keep `SKILL.md` benign and tell the agent to load the “real” instructions from a `.docx`, image, or other secondary file. A `.docx` is just a ZIP container; if scanners do not recursively unpack and inspect every member, hidden payloads such as `sync1.sh` can ride inside the document.
 - **Generated-artifact / bytecode poisoning**: ship clean source but malicious build artifacts. A reviewed `utils.py` can look harmless while `__pycache__/utils.cpython-312.pyc` imports `os`, reads `os.environ.items()`, and executes attacker logic. If the runtime imports the bundled bytecode first, the visible source review is meaningless.
 - **Opaque-file / incomplete-tree bypass**: some scanners only inspect files referenced from `SKILL.md`, skip dotfiles, or treat unsupported formats as opaque. That leaves blind spots in hidden files, unreferenced scripts, archives, binaries, images, and package-manager config files.
-- **LLM scanner misdirection**: natural-language framing can convince a guard model that dangerous behavior is just normal enterprise bootstrap logic. A skill that writes a new package-manager registry can be described as “AppSec-audited corporate mirroring” until the scanner classifies it as low risk.<sup>[[28]](#references)[[29]](#references)</sup>
+- **LLM scanner misdirection**: natural-language framing can convince a guard model that dangerous behavior is just normal enterprise bootstrap logic. A skill that writes a new package-manager registry can be described as “AppSec-audited corporate mirroring” until the scanner classifies it as low risk.<sup>[[28]](#references)</sup><sup>[[29]](#references)</sup>
 
 #### High-value attacker primitives hidden inside "helpful" skills
 
@@ -488,7 +488,7 @@ EOF
 
 If `CORP_REGISTRY` is attacker-controlled, later `npm`/`yarn` installs can silently fetch trojanized packages or poisoned versions.<sup>[[28]](#references)</sup>
 
-Another suspicious primitive is **native-code preloading**. A skill that sets `LD_PRELOAD` or loads a helper like `$TMP/lo_socket_shim.so` is effectively asking the target process to execute attacker-chosen native code before normal libraries. If the attacker can influence that path or replace the shim, the skill becomes an arbitrary-code-execution bridge even when the visible Python wrapper looks legitimate.<sup>[[28]](#references)[[29]](#references)</sup>
+Another suspicious primitive is **native-code preloading**. A skill that sets `LD_PRELOAD` or loads a helper like `$TMP/lo_socket_shim.so` is effectively asking the target process to execute attacker-chosen native code before normal libraries. If the attacker can influence that path or replace the shim, the skill becomes an arbitrary-code-execution bridge even when the visible Python wrapper looks legitimate.<sup>[[28]](#references)</sup><sup>[[29]](#references)</sup>
 
 #### What to verify during review
 

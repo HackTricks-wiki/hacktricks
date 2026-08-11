@@ -386,7 +386,7 @@ Random Forest is an **ensemble learning** method that builds upon decision trees
 
 By averaging the results of many trees, the random forest reduces the variance that a single decision tree might have. In simple terms, individual trees might overfit or be noisy, but a large number of diverse trees voting together smooths out those errors. The result is often a model with **higher accuracy** and better generalization than a single decision tree. In addition, random forests can provide an estimate of feature importance (by looking at how much each feature split reduces impurity on average).
 
-Random forests have become a **workhorse in cybersecurity** for tasks like intrusion detection, malware classification, and spam detection. They often perform well out-of-the-box with minimal tuning and can handle large feature sets. For example, in intrusion detection, a random forest may outperform an individual decision tree by catching more subtle patterns of attacks with fewer false positives. Research has shown random forests performing favorably compared to other algorithms in classifying attacks in datasets like NSL-KDD and UNSW-NB15.<sup>[[6]](#references)[[7]](#references)</sup>
+Random forests have become a **workhorse in cybersecurity** for tasks like intrusion detection, malware classification, and spam detection. They often perform well out-of-the-box with minimal tuning and can handle large feature sets. For example, in intrusion detection, a random forest may outperform an individual decision tree by catching more subtle patterns of attacks with fewer false positives. Research has shown random forests performing favorably compared to other algorithms in classifying attacks in datasets like NSL-KDD and UNSW-NB15.<sup>[[6]](#references)</sup><sup>[[7]](#references)</sup>
 
 #### **Key characteristics of Random Forests:**
 
@@ -602,7 +602,7 @@ The SVM model will output metrics that we can compare to logistic regression on 
 
 </details>
 
-#### Difference Logistic Rergessions & SVM
+#### Differences Between Logistic Regression and SVM
 
 | Aspect | **Logistic Regression** | **Support Vector Machines** |
 |---|---|---|
@@ -1007,6 +1007,8 @@ Ensemble methods like this demonstrate the principle that *"combining multiple m
 
 </details>
 
+The neural-network approaches described in the [deep-learning page](AI-Deep-Learning.md) can complement these classical models for intrusion detection when the dataset and compute budget justify the additional complexity.<sup>[[13]](#references)</sup>
+
 ## References
 
 - [1] [AI and Machine Learning in Cybersecurity - zvelo](https://zvelo.com/ai-and-machine-learning-in-cybersecurity/)
@@ -1024,4 +1026,3 @@ Ensemble methods like this demonstrate the principle that *"combining multiple m
 - [13] [How Deep Learning Enhances Intrusion Detection Systems](https://cybersecurity-magazine.com/how-deep-learning-enhances-intrusion-detection-systems/)
 
 {{#include ../banners/hacktricks-training.md}}
-
