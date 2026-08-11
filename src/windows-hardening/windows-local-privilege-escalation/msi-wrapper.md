@@ -2,21 +2,27 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Ücretsiz sürüm uygulamasını [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/) adresinden indirin, çalıştırın ve "malicious" binary dosyasını bununla wrap edin.\
-Yalnızca **komut satırlarını çalıştırmak** istiyorsanız "**.bat**" dosyasını wrap edebileceğinizi unutmayın (**cmd.exe** yerine .bat dosyasını seçin).
+MSI Wrapper, bir executable veya script'i Windows Installer (`.msi`) dosyası olarak paketleyebilir. Ücretsiz sürümü indirip başlatın, ardından paketlenecek executable'ı seçin. Bir komut dizisini çalıştırmak için `cmd.exe`'yi paketlemek yerine girdi olarak bir `.bat` dosyası seçin.<sup>[[1]](#references)</sup>
 
-![MSI Wrapper: Yalnızca komut satırlarını çalıştırmak istiyorsanız " .bat " dosyasını wrap edebileceğinizi unutmayın (cmd.exe yerine .bat dosyasını seçin)](<../../images/image (417).png>)
+![MSI Wrapper'da kaynak executable veya batch script'in seçilmesi](<../../images/image (417).png>)
 
-Ve yapılandırmanın en önemli kısmı:
+Çalıştırma bağlamını ve diğer installer özelliklerini dikkatlice yapılandırın:
 
-![MSI Wrapper: Yapılandırmanın en önemli kısmı](<../../images/image (312).png>)
+![MSI Wrapper'da application ID ve security context'in yapılandırılması](<../../images/image (312).png>)
 
-![MSI Wrapper: Yapılandırmanın en önemli kısmı](<../../images/image (346).png>)
+![MSI Wrapper'da installer özelliklerinin yapılandırılması](<../../images/image (346).png>)
 
-![MSI Wrapper: Yapılandırmanın en önemli kısmı](<../../images/image (1072).png>)
+![MSI Wrapper build ayarlarının incelenmesi](<../../images/image (1072).png>)
 
-(Lütfen kendi binary dosyanızı pack etmeyi denerseniz bu değerleri değiştirebileceğinizi unutmayın.)
+Bu değerler, custom binary paketlenirken değiştirilebilir.
 
-Buradan yalnızca **next buttons** düğmelerine ve son **build button** düğmesine tıklayın; installer/wrapper oluşturulacaktır.
+Kalan wizard sayfalarında ilerleyin ve installer'ı oluşturmak için **Build** seçeneğini belirleyin.<sup>[[1]](#references)</sup>
 
+> [!WARNING]
+> Bir MSI oluşturmak, tek başına elevated privileges sağlamaz. Installation işleminin elevated olup olmadığı Windows Installer policy'sine, package context'e ve user authorization'a bağlıdır. Microsoft, `AlwaysInstallElevated` seçeneğinin hem user hem de computer için etkinleştirilmesinin, administrator olmayan kullanıcıların system privileges ile package install etmesine olanak tanıdığı konusunda uyarır.<sup>[[2]](#references)</sup>
+
+## References
+
+- [1] [MSI Wrapper documentation - Başlarken](https://www.exemsi.com/documentation/getting-started/)
+- [2] [Microsoft Learn - Administrator olmayan bir kullanıcı için elevated privileges ile package installation'ı](https://learn.microsoft.com/en-us/windows/win32/msi/installing-a-package-with-elevated-privileges-for-a-non-admin)
 {{#include ../../banners/hacktricks-training.md}}

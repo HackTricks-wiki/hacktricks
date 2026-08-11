@@ -1,17 +1,15 @@
-# Web Üzerinden Hassas Bilgi İfşasını Çalma
+# Bir Web Sayfasından Hassas Bilgi Çalma
 
 {{#include ../banners/hacktricks-training.md}}
 
-Bir noktada **session'ınıza dayalı hassas bilgiler sunan bir web sayfası bulursanız**: Belki cookie'leri yansıtıyor, CC bilgilerini yazdırıyor veya başka herhangi bir hassas bilgi sunuyor olabilir; bunları çalmayı deneyebilirsiniz.\
-Burada bunu gerçekleştirmek için deneyebileceğiniz başlıca yöntemleri sunuyorum:
+Bir **web sayfası mevcut oturuma göre hassas bilgiler görüntülüyorsa**—çerezler, hesap verileri veya kredi kartı bilgileri gibi—bir saldırgan bu bilgileri dışarı sızdırmaya çalışabilir. Başlıca teknikler şunlardır:
 
-- [**CORS bypass**](../pentesting-web/cors-bypass.md): CORS header'larını bypass edebilirseniz, kötü amaçlı bir sayfaya Ajax request gerçekleştirerek bilgileri çalabilirsiniz.
-- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html): Sayfada bir XSS açığı bulursanız, bilgileri çalmak için bunu abuse edebilirsiniz.
-- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): XSS tag'lerini inject edemiyorsanız bile, diğer standart HTML tag'lerini kullanarak bilgileri çalabilirsiniz.
-- [**Clickjaking**](../pentesting-web/clickjacking.md): Bu saldırıya karşı herhangi bir koruma yoksa, kullanıcıyı hassas verileri size göndermesi için kandırabilirsiniz (bir örnek [burada](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).<sup>[[1]](#references)</sup>
+- [**CORS bypass**](../pentesting-web/cors-bypass.md): Bir CORS yanlış yapılandırması, kötü amaçlı bir origin'in cross-origin istekler aracılığıyla hassas yanıtları okumasına izin verebilir.
+- [**XSS**](../pentesting-web/xss-cross-site-scripting/index.html): Hedef origin'deki bir XSS güvenlik açığı, enjekte edilen JavaScript'in bilgileri okumasına ve dışarı sızdırmasına izin verebilir.
+- [**Dangling markup**](../pentesting-web/dangling-markup-html-scriptless-injection/index.html): Script injection kullanılamadığında, enjekte edilen HTML öğeleri yine de hassas içeriği yakalayabilir.
+- [**Clickjacking**](../pentesting-web/clickjacking.md): Framing korumaları yoksa saldırgan, kullanıcıyı hassas sayfayla etkileşime girmesi için kandırabilir. Bağlantısı verilen vaka çalışması bu tekniği göstermektedir.<sup>[[1]](#references)</sup>
 
 ## References
 
-- [1] [Apache example servlet leads to Information Disclosure](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
-
+- [1] [Apache örnek servlet'i Information Disclosure'a yol açıyor](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)
 {{#include ../banners/hacktricks-training.md}}

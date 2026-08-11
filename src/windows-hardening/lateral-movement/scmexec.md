@@ -1,19 +1,19 @@
-# DCOM Exec
+# SCMExec
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## SCM
+## Nasıl Çalışır
 
-**SCMExec**, komutu çalıştıran bir service oluşturmak için Service Control Manager (SCM) kullanarak uzak sistemlerde komut çalıştırmaya yönelik bir tekniktir. Bu yöntem, User Account Control (UAC) ve Windows Defender gibi bazı security controls'leri atlayabilir.
+Service Control Manager Remote Protocol (SCMR), uzak bir bilgisayardaki Windows services yapılandırmak ve kontrol etmek için kullanılan RPC tabanlı bir protokoldür. Yeterli izinlere sahip bir operator, binary path'i bir command içeren bir service oluşturabilir veya yeniden yapılandırabilir ve ardından command'i uzaktan execute etmek için bu service'i başlatabilir.<sup>[[1]](#references)</sup>
 
-## Tools
+## Araçlar
 
-- [**https://github.com/0xthirteen/SharpMove**](https://github.com/0xthirteen/SharpMove):<sup>[[1]](#references)</sup>
-
+**SharpMove**, SCM ve diğer birkaç Windows mekanizması üzerinden authenticated remote execution özelliğini destekler. Aşağıdaki örnek SCM action'ını seçer, `WindowsDebug` adlı bir service oluşturur ve bunu remote host'ta zaten bulunan bir payload'a yönlendirir.<sup>[[2]](#references)</sup>
+```powershell
 SharpMove.exe action=scm computername=remote.host.local command="C:\windows\temp\payload.exe" servicename=WindowsDebug amsi=true
-
+```
 ## References
 
-- [1] [SharpMove - GitHub repository](https://github.com/0xthirteen/SharpMove)
-
+- [1] [Microsoft Open Specifications - Service Control Manager Remote Protocol genel bakışı](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-scmr/d5bd5712-fa64-44bf-9433-3651f6a5ce97)
+- [2] [GitHub - SharpMove](https://github.com/0xthirteen/SharpMove)
 {{#include ../../banners/hacktricks-training.md}}

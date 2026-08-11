@@ -4,16 +4,19 @@
 
 ## Bu Bölüm Hakkında
 
-Bu bölüm, kavramlar ve çeşitli security issues kullanılarak Industrial Control Systems hackleme metodolojileri de dahil olmak üzere Industrial Control Systems hakkındaki tüm bilgileri içerir.
+Bu bölümde industrial control system (ICS) bileşenleri, mimarileri, protokolleri ve security assessment yöntemleri tanıtılmaktadır. ICS, fiziksel süreçleri izleyen veya bu süreçlerde değişikliklere neden olan programlanabilir sistemleri ve cihazları kapsayan daha geniş operational technology (OT) alanının bir parçasıdır. Yaygın örnekler arasında supervisory control and data acquisition (SCADA) sistemleri, distributed control systems (DCSs) ve programmable logic controllers (PLCs) bulunur.<sup>[[1]](#references)</sup>
 
-Industrial Control Systems, bir ülkenin ekonomik gelişimi için endüstriler hayati önem taşıdığından her yerde bulunur. Ancak bu ICS'lerin güncellenmesi zordur ve bu alanda daha az ilerleme kaydedilmiştir. Bu nedenle security flaws bulmak burada yaygındır. Burada kullanılan protokollerin ve standartların çoğu 90'lı yıllarda geliştirilmiştir ve mevcut attack scenarios ile karşılaştırıldığında çok daha düşük yeteneklere sahiptir.
+Bu ortamlardaki security çalışmaları; süreç güvenliği, güvenilirlik, kullanılabilirlik, deterministik çalışma ve ekipman yaşam döngüleri gibi geleneksel IT'den farklı gereksinimleri dikkate almalıdır. Teknik olarak geçerli bir security control, fiziksel süreci aksatıyorsa yine de uygun olmayabilir; bu nedenle test ve remediation işlemleri sistem sahibi ve operasyon personeliyle koordineli şekilde yürütülmelidir.<sup>[[1]](#references)</sup>
 
-Bu sistemlerin güvenliğini sağlamak önemli hale gelmiştir; çünkü sistemlere zarar vermek yüksek maliyetlere ve en kötü durumda can kayıplarına bile yol açabilir. Industrial Control Systems security'yi anlamak için bunların iç işleyişini bilmek gerekir.
+## Assessment Öncelikleri
 
-Industrial Control Systems belirli standartlara uygun olarak kurulduğundan, her bir component'i bilmek control system içerisindeki diğer tüm mekanizmaların birbirine bağlanmasına yardımcı olur. PLC'ler ve SCADA systems gibi bu cihazların kurulumu çeşitli endüstrilerde farklılık gösterir; bu nedenle information gathering kritik öneme sahiptir.
+Kontrol edilen süreci, sistem sınırlarını, network topology'sini, varlıkları, data flow'larını, trust relationship'lerini ve harici bağlantıları anlayarak başlayın. Benzer cihaz türleri farklı tesislerde farklı işlevler üstlenebilir; bu nedenle bir deployment'ın mimarisinin veya impact model'inin başka bir deployment için geçerli olduğunu varsaymaktan kaçının.<sup>[[1]](#references)</sup>
 
-Industrial Control Systems zaman zaman karmaşık olabilir ve bu nedenle herhangi bir işlem yapmak için büyük sabır gerektirir. Her şey, attacks planlamadan ve exploits geliştirmeden önce probing ve reconnaissance yapmaktan ibarettir.
+Mümkün olduğunda passive discovery'yi ve mevcut engineering dokümantasyonunu tercih edin. Her türlü active scanning veya exploitation işlemi; güvenlik kısıtlarını, maintenance window'larını, recovery prosedürlerini ve durdurma koşullarını tanımlayan onaylı bir test planını izlemelidir. Bulgular hem cybersecurity impact hem de fiziksel süreç üzerindeki olası etkiler açısından değerlendirilmelidir.<sup>[[1]](#references)</sup>
 
-Bu teknikler, attacks karşı korunmak ve Industrial Control Systems için blue teaming yapmak amacıyla da kullanılabilir.
+Aynı mimari bilgisi; asset inventory, network segmentation, monitoring, incident response ve risk-based vulnerability management gibi defensive faaliyetleri de destekler.<sup>[[1]](#references)</sup>
 
+## References
+
+- [1] [NIST SP 800-82 Rev. 3 - Operational Technology (OT) Security Rehberi](https://csrc.nist.gov/pubs/sp/800/82/r3/final)
 {{#include ../../banners/hacktricks-training.md}}

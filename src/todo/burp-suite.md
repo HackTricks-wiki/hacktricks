@@ -2,20 +2,24 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Temel Payload'lar
+## Intruder payload türleri
 
-- **Basit Liste:** Her satırda bir giriş içeren liste
-- **Runtime File:** Runtime'da okunan liste (belleğe yüklenmez). Büyük listeleri desteklemek için.
-- **Case Modification:** String listesine bazı değişiklikler uygular (Değişiklik yok, küçük harfe dönüştür, BÜYÜK harfe dönüştür, Proper name - İlk harf büyük, geri kalanı küçük-, Proper Name -İlk harf büyük, geri kalanı aynı kalır-.
-- **Numbers:** Z adımıyla veya rastgele şekilde X ile Y arasındaki sayıları oluşturur.
-- **Brute Forcer:** Karakter kümesi, min ve max uzunluk.
+- **Simple list:** Payload olarak yapılandırılmış bir string listesi kullanır.
+- **Runtime file:** Çalışma zamanında satır başına bir payload okur. Burp tüm dosyayı belleğe yüklemediği için bu, büyük listeler açısından kullanışlıdır.
+- **Case modification:** Bir input string'inin büyük/küçük harf kullanımını değiştirir; örneğin lowercase, uppercase, sentence case veya title case yapar.
+- **Numbers:** Yapılandırılmış bir aralık içinde sıralı veya rastgele sayılar oluşturur.
+- **Brute forcer:** Seçilen bir karakter kümesi ve minimum/maksimum uzunluk için tüm permütasyonları oluşturur.<sup>[[1]](#references)</sup>
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Komutları çalıştırmak ve çıktıyı burpcollab'a DNS istekleri üzerinden almak için Payload.
+## Extensions ve yardımcı araçlar
 
-{{#ref}}
-https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e
-{{#endref}}
+- **Collabfiltrator**, komutları çalıştıran ve çıktıları Burp Collaborator'a DNS sorguları üzerinden exfiltrate eden payload'lar oluşturur.<sup>[[2]](#references)</sup>
+- **Burp Suite Exporter**, Burp bulgularını diğer raporlama iş akışlarında kullanılmak üzere dışa aktarır.<sup>[[3]](#references)</sup>
+- **HTTP Script Generator**, HTTP isteklerini çeşitli dillerdeki script'lere dönüştürür.<sup>[[4]](#references)</sup>
 
-[https://github.com/h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
+## References
 
+- [1] [PortSwigger documentation - Burp Intruder payload türleri](https://portswigger.net/burp/documentation/desktop/tools/intruder/configure-attack/payload-types)
+- [2] [GitHub - 0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator)
+- [3] [ArtsSEC - Burp Suite Exporter](https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e)
+- [4] [GitHub - h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
 {{#include ../banners/hacktricks-training.md}}

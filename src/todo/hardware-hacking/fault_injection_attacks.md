@@ -2,8 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Fault injection attacks, elektronik devrelerde davranışlarını etkilemek amacıyla harici bozulmalar oluşturmayı içerir; bunun sonucunda bilgiler açığa çıkabilir veya devredeki belirli kısıtlamalar aşılabilir. Bu saldırılar, elektronik devrelere saldırmak için birçok olasılık sunar. Bu saldırı, elektronik devrelerde glitching olarak da adlandırılır.
+Fault injection, bir cihaz çalışırken onu kasıtlı olarak bozarak yanlış bir hesaplama yapmasını sağlar. Kullanışlı bir fault; bir talimatı atlayabilir, verileri bozabilir, bir security check'i atlayabilir veya gizli bilgilerin türetilebileceği hatalı cryptographic output üretebilir.<sup>[[1]](#references)</sup>
 
-Bir elektronik devreye fault injection yapmak için birçok yöntem ve ortam vardır.
+Yaygın teknikler supply voltage veya clock sinyalini manipüle eder, electromagnetic interference enjekte eder ya da optical veya laser stimulation kullanır.<sup>[[1]](#references)</sup> Hassasiyetleri ve müdahale düzeyleri farklıdır; ancak başarılı testler genellikle tekrarlanabilir bir trigger ile timing, pulse width ve intensity üzerinde sistematik taramalar gerektirir. Kararlı bir baseline ile başlayın, reset'leri ve hatalı output'ları ayrı ayrı kaydedin ve her seferinde yalnızca bir parametreyi değiştirin.<sup>[[2]](#references)</sup>
 
+## References
+
+- [1] [Hayashi et al. - Kasıtlı Electromagnetic Interference'a Dayalı Non-invasive Trigger-free Fault Injection Method](https://csrc.nist.gov/csrc/media/events/non-invasive-attack-testing-workshop/documents/04_hayashi.pdf)
+- [2] [ChipWhisperer Documentation - Capture Hardware Overview and Comparison](https://chipwhisperer.readthedocs.io/en/latest/Capture/overview.html)
 {{#include ../../banners/hacktricks-training.md}}
