@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Entrée pour atteindre l’adresse (indiquant les affichages)
+### Entrée pour atteindre l'adresse (indiquant les prints)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -104,7 +104,7 @@ password1 = claripy.BVS('password1', password1_size_in_bits)
 password2_size_in_bits = 32  # :integer
 password2 = claripy.BVS('password2', password2_size_in_bits)
 
-# Relate it Vectors with the registriy values you are interested in to reach an address
+# Relate its vectors to the register values needed to reach an address
 initial_state.regs.eax = password0
 initial_state.regs.ebx = password1
 initial_state.regs.edx = password2
@@ -139,7 +139,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Valeurs de la pile
+### Valeurs de la stack
 ```python
 # Put bit vectors in th stack to find out the vallue that stack position need to
 # have to reach a rogram flow
@@ -201,11 +201,11 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-Dans ce scénario, l’entrée a été récupérée avec `scanf("%u %u")` et la valeur `"1 1"` a été fournie. Les valeurs **`0x00000001`** de la stack proviennent donc de **l’entrée utilisateur**. Vous pouvez voir que ces valeurs commencent à `$ebp - 8`. Par conséquent, dans le code, nous avons **soustrait 8 octets à `$esp` (à ce moment-là, `$ebp` et `$esp` avaient la même valeur)**, puis nous avons effectué un push du BVS.
+Dans ce scénario, l’entrée a été récupérée avec `scanf("%u %u")` et la valeur `"1 1"` a été fournie. Les valeurs **`0x00000001`** de la stack proviennent donc de l’**entrée utilisateur**. Vous pouvez voir que ces valeurs commencent à `$ebp - 8`. Ainsi, dans le code, nous avons **soustrait 8 octets à `$esp` (à ce moment-là, `$ebp` et `$esp` avaient la même valeur)**, puis nous avons effectué un push du BVS.
 
-![Placez les vecteurs de bits dans la stack pour déterminer la valeur que cette position de la stack doit avoir afin d'atteindre un flux d'exécution du programme : dans ce scénario, l'entrée a été récupérée avec scanf("%u %u") et la valeur "1...](<../../../images/image (136).png>)
+![Placer des vecteurs de bits dans la stack pour déterminer la valeur que cette position de la stack doit avoir afin d’atteindre un flux d’exécution du programme : dans ce scénario, l’entrée a été récupérée avec scanf("%u %u") et la valeur "1...](<../../../images/image (136).png>)
 
-### Valeurs mémoire statiques (variables globales)
+### Valeurs de mémoire statique (variables globales)
 ```python
 import angr
 import claripy
@@ -215,7 +215,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-#Get an address after the scanf. Once the input has already being saved in the memory positions
+# Get an address after scanf, once the input has been saved in memory
 start_address = 0x8048606
 initial_state = project.factory.blank_state(addr=start_address)
 
@@ -266,7 +266,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Valeurs de mémoire dynamiques (Malloc)
+### Valeurs de mémoire dynamique (Malloc)
 ```python
 import angr
 import claripy
@@ -337,7 +337,7 @@ def main(argv):
 path_to_binary = argv[1]
 project = angr.Project(path_to_binary)
 
-# Get an address just before opening the file with th simbolic content
+# Get an address just before opening the file with the symbolic content
 # Or at least when the file is not going to suffer more changes before being read
 start_address = 0x80488db
 initial_state = project.factory.blank_state(addr=start_address)
@@ -347,10 +347,10 @@ initial_state = project.factory.blank_state(addr=start_address)
 filename = 'WCEXPXBW.txt'
 symbolic_file_size_bytes = 64
 
-# Create a BV which is going to be the content of the simbolic file
+# Create a bit-vector that will hold the symbolic file content
 password = claripy.BVS('password', symbolic_file_size_bytes * 8)
 
-# Create the file simulation with the simbolic content
+# Create the simulated file with symbolic content
 password_file = angr.storage.SimFile(filename, content=password)
 
 # Add the symbolic file we created to the symbolic filesystem.
@@ -407,7 +407,7 @@ main(sys.argv)
 ### Application des contraintes
 
 > [!TIP]
-> Parfois, de simples opérations humaines comme comparer 2 mots de longueur 16 **char by char** (boucle) **coûtent** beaucoup à **angr**, car il doit générer des branches **exponentiellement**, puisqu'il génère 1 branche par if : `2^16`\
+> Parfois, des opérations humaines simples comme comparer 2 mots de 16 caractères **caractère par caractère** (boucle) **coûtent** beaucoup à **angr**, car il doit générer des branches **exponentiellement**, puisqu’il génère 1 branche par `if` : `2^16`\
 > Il est donc plus facile de **demander à angr de revenir à un point précédent** (où la partie réellement difficile a déjà été effectuée) et de **définir ces contraintes manuellement**.
 ```python
 # After perform some complex poperations to the input the program checks
@@ -483,11 +483,11 @@ main(sys.argv)
 > Dans certains scénarios, vous pouvez activer le **veritesting**, qui fusionnera les états similaires afin d’éviter les branches inutiles et de trouver la solution : `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!TIP]
-> Une autre chose que vous pouvez faire dans ces scénarios est de **hook la fonction afin de fournir à angr quelque chose qu’il peut comprendre** plus facilement.
+> Une autre chose que vous pouvez faire dans ces scénarios est de **hook la fonction en fournissant à angr quelque chose qu’il peut comprendre** plus facilement.
 
 ### Gestionnaires de simulation
 
-Certains gestionnaires de simulation peuvent être plus utiles que d’autres. Dans l’exemple précédent, un problème se posait, car de nombreuses branches utiles étaient créées. Ici, la technique de **veritesting** les fusionnera et trouvera une solution.\
+Certains gestionnaires de simulation peuvent être plus utiles que d’autres. Dans l’exemple précédent, il y avait un problème, car de nombreuses branches utiles étaient créées. Ici, la technique de **veritesting** les fusionnera et trouvera une solution.\
 Ce gestionnaire de simulation peut également être activé avec : `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Contournement d'un appel à une fonction
+### Hooking/Bypassing un appel à une fonction
 ```python
 # This level performs the following computations:
 #
@@ -562,7 +562,7 @@ user_input_buffer_address,
 user_input_buffer_length
 )
 
-# Create a simbolic IF that if the loaded string frommemory is the expected
+# Create a symbolic If expression that checks the string loaded from memory
 # return True (1) if not returns False (0) in eax
 check_against_string = 'XKSPZSJKJYQCQXZV'.encode() # :string
 
@@ -594,7 +594,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking d'une fonction / Simprocedure
+### Hooking d’une fonction / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -807,8 +807,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-## Références
+## References
 
 - [1] [jakespringer/angr_ctf - dépôt GitHub](https://github.com/jakespringer/angr_ctf)
-
 {{#include ../../../banners/hacktricks-training.md}}
