@@ -112,7 +112,7 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 ```
 
 > [!WARNING]
-> Everything created/modified by a Sandboxed application will get the **quarantine attribute**e. This will prevent a sandbox space by triggering Gatekeeper if the sandbox app tries to execute something with **`open`**.
+> Everything created or modified by a sandboxed application gets the **quarantine attribute**. This can prevent a sandbox escape by triggering Gatekeeper if the sandboxed application tries to execute something with **`open`**.
 
 ## Sandbox Profiles
 

@@ -263,7 +263,7 @@ Plugins are extra code usually in the form of libraries or plist, that will be *
 
 The application `/System/Library/CoreServices/Applications/Directory Utility.app` had the entitlement **`kTCCServiceSystemPolicySysAdminFiles`**, loaded plugins with **`.daplug`** extension and **didn't have the hardened** runtime.
 
-In order to weaponize this CVE, the **`NFSHomeDirectory`** is **changed** (abusing the previous entitlement) in order to be able to **take over the users TCC database**e to bypass TCC.
+To weaponize this CVE, the **`NFSHomeDirectory`** is **changed** (abusing the previous entitlement) to **take over the user's TCC database** and bypass TCC.
 
 For more info check the [**original report**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).<sup>[[12]](#references)</sup>
 

@@ -227,7 +227,7 @@ Check how is each library loaded:
 
 ```
 DYLD_PRINT_SEGMENTS=1 ./apple
-dyld[21147]: reusing existing shared cache (/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e):
+dyld[21147]: re-using existing shared cache (/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e):
 dyld[21147]:         0x181944000->0x1D5D4BFFF init=5, max=5 __TEXT
 dyld[21147]:         0x1D5D4C000->0x1D5EC3FFF init=1, max=3 __DATA_CONST
 dyld[21147]:         0x1D7EC4000->0x1D8E23FFF init=3, max=3 __DATA
@@ -273,10 +273,10 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 ### Others
 
 - `DYLD_BIND_AT_LAUNCH`: Lazy bindings are resolved with non lazy ones
-- `DYLD_DISABLE_PREFETCH`: DIsable pre-fetching of \_\_DATA and \_\_LINKEDIT content
+- `DYLD_DISABLE_PREFETCH`: Disable pre-fetching of \_\_DATA and \_\_LINKEDIT content
 - `DYLD_FORCE_FLAT_NAMESPACE`: Single-level bindings
 - `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Resolution paths
-- `DYLD_INSERT_LIBRARIES`: Load an specific library
+- `DYLD_INSERT_LIBRARIES`: Load a specific library
 - `DYLD_PRINT_TO_FILE`: Write dyld debug in a file
 - `DYLD_PRINT_APIS`: Print libdyld API calls
 - `DYLD_PRINT_APIS_APP`: Print libdyld API calls made by main
