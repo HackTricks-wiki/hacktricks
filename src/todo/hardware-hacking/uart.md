@@ -4,49 +4,49 @@
 
 ## Informações básicas
 
-UART é um protocolo serial, o que significa que transfere dados entre componentes um bit por vez. Em contraste, os protocolos de comunicação paralela transmitem dados simultaneamente por vários canais. Protocolos seriais comuns incluem RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express e USB.
+UART é uma interface serial assíncrona que transfere um fluxo de bits enquadrado sem um clock compartilhado. Não confunda UART em nível lógico com RS-232: RS-232 usa níveis de tensão diferentes, frequentemente negativos, e requer um transceiver.<sup>[[1]](#references)[[3]](#references)</sup>
 
 Geralmente, a linha é mantida em nível alto (valor lógico 1) enquanto UART está no estado ocioso. Então, para sinalizar o início de uma transferência de dados, o transmissor envia um bit de início ao receptor, durante o qual o sinal é mantido em nível baixo (valor lógico 0). Em seguida, o transmissor envia de cinco a oito bits de dados contendo a mensagem real, seguidos por um bit de paridade opcional e um ou dois bits de parada (com valor lógico 1), dependendo da configuração. O bit de paridade, usado para verificação de erros, raramente é visto na prática. O bit (ou bits) de parada indica o fim da transmissão.
 
-Chamamos a configuração mais comum de 8N1: oito bits de dados, sem paridade e um bit de parada. Por exemplo, se quiséssemos enviar o caractere C, ou 0x43 em ASCII, em uma configuração UART 8N1, enviaríamos os seguintes bits: 0 (o bit de início); 0, 1, 0, 0, 0, 0, 1, 1 (o valor de 0x43 em binário); e 0 (o bit de parada).
+A configuração mais comum é 8N1: oito bits de dados, sem paridade e um bit de parada. UART envia primeiro o bit de dados menos significativo, portanto, o ASCII `C` (`0x43`) é transmitido como: início `0`; dados `1, 1, 0, 0, 0, 0, 1, 0`; parada `1`.<sup>[[1]](#references)</sup>
 
-![UART: Chamamos a configuração mais comum de 8N1: oito bits de dados, sem paridade e um bit de parada. Por exemplo, se quiséssemos enviar o caractere C, ou 0x43 em ASCII, em uma configuração UART 8N1](<../../images/image (764).png>)
+![UART: Chamamos a configuração mais comum de 8N1: oito bits de dados, sem paridade e um bit de parada. Por exemplo, se quiséssemos enviar o caractere C, ou 0x43 em ASCII, em uma UART 8N1](<../../images/image (764).png>)
 
 Ferramentas de hardware para se comunicar com UART:
 
-- Adaptador USB-serial
+- Adaptador USB para serial
 - Adaptadores com os chips CP2102 ou PL2303
 - Ferramenta multipropósito, como: Bus Pirate, Adafruit FT232H, Shikra ou Attify Badge
 
 ### Identificando portas UART
 
-UART tem 4 portas: **TX** (Transmissão), **RX** (Recepção), **Vcc** (Tensão) e **GND** (Terra). Você pode conseguir encontrar 4 portas com as letras **`TX`** e **`RX`** **escritas** na PCB. Mas, se não houver indicação, talvez seja necessário tentar encontrá-las usando um **multímetro** ou um **analisador lógico**.
+Um header de debug típico expõe **TX**, **RX** e **GND**; ele também pode expor um pino **Vcc/Vref**, reset ou pinos de controle de fluxo. Vcc não é um sinal UART e normalmente deve ser usado apenas como referência de tensão — não conectado como fonte de alimentação — a menos que o esquema da placa e os requisitos de corrente sejam conhecidos.<sup>[[2]](#references)[[3]](#references)</sup>
 
-Com um **multímetro** e o dispositivo desligado:
+Comece com o dispositivo **desligado** e desconectado:
 
-- Para identificar o pino **GND**, use o modo **Teste de Continuidade**, coloque a ponta preta no terra e teste com a vermelha até ouvir um som do multímetro. Vários pinos GND podem ser encontrados na PCB, então você pode ter encontrado ou não o pertencente à UART.
-- Para identificar a **porta VCC**, selecione o **modo de tensão DC** e configure-o para 20 V. Coloque a ponta preta no terra e a vermelha no pino. Ligue o dispositivo. Se o multímetro medir uma tensão constante de 3,3 V ou 5 V, você encontrou o pino Vcc. Se obtiver outras tensões, tente novamente com outras portas.
-- Para identificar a **porta TX**, use o **modo de tensão DC** de até 20 V, coloque a ponta preta no terra e a vermelha no pino, e ligue o dispositivo. Se a tensão variar por alguns segundos e depois estabilizar no valor de Vcc, provavelmente você encontrou a porta TX. Isso ocorre porque, ao ligar, o dispositivo envia alguns dados de debug.
-- A **porta RX** seria a mais próxima das outras 3; ela apresenta a menor variação de tensão e o menor valor geral entre todos os pinos UART.
+- Identifique **GND** no modo de continuidade em relação a um plano de terra conhecido, à blindagem de um conector ou ao terra da fonte. Nunca use o modo de continuidade/resistência em uma placa energizada.
+- Mude para o modo de tensão DC antes de ligar o alvo. Meça os pinos candidatos em relação ao terra para identificar a tensão lógica. Um rail estável pode ser Vcc/Vref; não presuma que seja seguro conectá-lo.
+- Observe os candidatos com um analisador lógico ou osciloscópio durante o boot. **TX** normalmente fica em nível alto quando ocioso e apresenta rajadas de dados enquadrados. Um multímetro pode mostrar uma oscilação média, mas não consegue validar o enquadramento ou a baud rate.
+- **RX** pode permanecer ocioso e não pode ser identificado com segurança apenas por estar próximo de TX. Rastreie a PCB, consulte o datasheet do SoC ou use um analisador de alta impedância antes de acioná-lo.
 
-Você pode confundir as portas TX e RX e nada acontecerá, mas, se confundir as portas GND e VCC, poderá queimar o circuito.
+A troca de TX e RX normalmente não produz comunicação; confundir alimentação, terra ou níveis de sinal pode danificar permanentemente o alvo ou o adaptador. Conecte o terra primeiro e comece em modo **somente recepção** (TX do alvo para RX do adaptador).
 
-Em alguns dispositivos-alvo, a porta UART é desabilitada pelo fabricante ao desabilitar RX ou TX, ou até mesmo ambos. Nesse caso, pode ser útil rastrear as conexões na placa de circuito e encontrar algum ponto de breakout. Uma forte indicação para confirmar a não detecção de UART e a interrupção do circuito é verificar a garantia do dispositivo. Se o dispositivo tiver sido enviado com alguma garantia, o fabricante deixa algumas interfaces de debug (neste caso, UART) e, portanto, deve ter desconectado a UART, conectando-a novamente durante o debug. Esses pinos de breakout podem ser conectados por soldagem ou fios jumper.
+Os fabricantes podem omitir o header, deixar resistores em série sem montagem, desabilitar o console no firmware ou expor apenas TX. Rastreie os test pads e footprints de resistores próximos até o SoC e adicione uma conexão temporária de alta impedância somente após confirmar o nível elétrico. A presença de uma garantia não implica que uma UART acessível necessariamente exista.
 
-### Identificando a taxa de baud da UART
+### Identificando a baud rate da UART
 
-A maneira mais fácil de identificar a taxa de baud correta é observar a saída do **pino TX e tentar ler os dados**. Se os dados recebidos não forem legíveis, alterne para a próxima taxa de baud possível até que os dados se tornem legíveis. Você pode usar um adaptador USB-serial ou um dispositivo multipropósito, como o Bus Pirate, junto com um script auxiliar, como [baudrate.py](https://github.com/devttys0/baudrate/). As taxas de baud mais comuns são 9600, 38400, 19200, 57600 e 115200.
+A maneira mais fácil de identificar a baud rate correta é observar a saída do pino **TX** e tentar ler os dados. Se os dados recebidos não forem legíveis, mude para a próxima baud rate possível até que os dados se tornem legíveis. Você pode usar um adaptador USB para serial ou um dispositivo multipropósito como o Bus Pirate para fazer isso, junto com um helper script, como [baudrate.py](https://github.com/devttys0/baudrate/). As baud rates mais comuns são 9600, 38400, 19200, 57600 e 115200.
 
 > [!CAUTION]
 > É importante observar que, neste protocolo, você precisa conectar o TX de um dispositivo ao RX do outro!
 
 ## Adaptador CP210X UART para TTY
 
-O chip CP210X é usado em muitas placas de prototipagem, como a NodeMCU (com esp8266), para comunicação serial. Esses adaptadores são relativamente baratos e podem ser usados para conectar-se à interface UART do alvo. O dispositivo tem 5 pinos: 5V, GND, RXD, TXD e 3.3V. Certifique-se de conectar a tensão compatível com o alvo para evitar danos. Por fim, conecte o pino RXD do adaptador ao TXD do alvo e o pino TXD do adaptador ao RXD do alvo.
+As bridges USB para UART CP210x aparecem em muitas placas de prototipagem e adaptadores baratos. Módulos comuns expõem pinos de alimentação junto com GND, RXD e TXD, mas seus headers e níveis de I/O variam. Confirme a tensão real com base no design da placa ou no data sheet. Normalmente, conecte apenas GND, RX do adaptador ao TX do alvo e — após a validação em modo somente recepção — TX do adaptador ao RX do alvo. Não conecte o pino de alimentação de 5 V/3,3 V do adaptador, a menos que esteja alimentando intencionalmente um alvo conhecido por tolerá-lo.<sup>[[3]](#references)</sup>
 
-Caso o adaptador não seja detectado, certifique-se de que os drivers CP210X estejam instalados no sistema host. Depois que o adaptador for detectado e conectado, ferramentas como picocom, minicom ou screen podem ser usadas.
+Caso o adaptador não seja detectado, verifique se os drivers CP210X estão instalados no sistema host. Depois que o adaptador for detectado e conectado, ferramentas como picocom, minicom ou screen podem ser usadas.
 
-Para listar os dispositivos conectados aos sistemas Linux/MacOS:
+Para listar os dispositivos conectados a sistemas Linux/MacOS:
 ```
 ls /dev/
 ```
@@ -58,21 +58,21 @@ Para o minicom, use o seguinte comando para configurá-lo:
 ```
 minicom -s
 ```
-Configure as configurações, como baudrate e nome do dispositivo, na opção `Serial port setup`.
+Configure as opções, como baudrate e nome do dispositivo, em `Serial port setup`.
 
-Após a configuração, use o comando `minicom` para iniciar e obter o UART Console.
+Após a configuração, execute `minicom` para abrir o console UART.
 
-## UART via Arduino UNO R3 (placas com chip Atmel 328p removível)
+## UART Via Arduino UNO R3 (Placas com Chip Atmel 328p Removível)
 
 Caso adaptadores UART Serial para USB não estejam disponíveis, o Arduino UNO R3 pode ser usado com um hack rápido. Como o Arduino UNO R3 geralmente está disponível em qualquer lugar, isso pode economizar bastante tempo.
 
-O Arduino UNO R3 possui um adaptador USB para Serial integrado à própria placa. Para obter uma conexão UART, basta retirar o chip microcontrolador Atmel 328p da placa. Esse hack funciona nas variantes do Arduino UNO R3 que possuem o Atmel 328p não soldado à placa (a versão SMD é usada nele). Conecte o pino RX do Arduino (pino digital 0) ao pino TX da interface UART e o pino TX do Arduino (pino digital 1) ao pino RX da interface UART.
+O Arduino UNO R3 tem um adaptador USB para Serial integrado na própria placa. Para obter uma conexão UART, basta remover o microcontrolador Atmel 328p da placa. Esse hack funciona nas variantes do Arduino UNO R3 que possuem o Atmel 328p não soldado na placa (a versão SMD o utiliza). Conecte o pino RX do Arduino (Digital Pin 0) ao pino TX da interface UART e o pino TX do Arduino (Digital Pin 1) ao pino RX da interface UART.
 
-Por fim, recomenda-se usar o Arduino IDE para obter o Serial Console. Na seção `tools` do menu, selecione a opção `Serial Console` e defina o baud rate de acordo com a interface UART.
+Use o **Serial Monitor** da Arduino IDE ou um terminal dedicado com a baudrate de destino. Os sinais seriais do Uno R3 clássico usam lógica de 5 V; portanto, use um level shifter ou divisor antes de conectá-los a um dispositivo de destino de 3,3 V ou com tensão inferior.
 
 ## Bus Pirate
 
-Neste cenário, vamos sniffar a comunicação UART do Arduino, que está enviando todas as mensagens do programa para o Serial Monitor.
+A transcrição a seguir usa a interface de firmware legada do Bus Pirate para monitorar a saída UART. Versões mais recentes do firmware do Bus Pirate usam comandos como `m uart`, `{`/`}`, `monitor` ou `bridge`; consulte a documentação da versão instalada.<sup>[[2]](#references)</sup>
 ```bash
 # Check the modes
 UART>m
@@ -144,30 +144,38 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
-## Dumping Firmware com UART Console
+## Extraindo Firmware com Console UART
 
-A UART Console oferece uma ótima forma de trabalhar com o firmware subjacente em um ambiente de runtime. Porém, quando o acesso à UART Console é somente leitura, isso pode introduzir muitas restrições. Em muitos dispositivos embarcados, o firmware é armazenado em EEPROMs e executado em processadores que possuem memória volátil. Portanto, o firmware é mantido somente para leitura, pois o firmware original durante a fabricação está dentro da própria EEPROM, e quaisquer arquivos novos seriam perdidos devido à memória volátil. Assim, fazer o dump do firmware é uma atividade valiosa ao trabalhar com firmwares embarcados.
+Um console UART fornece acesso em tempo de execução aos logs de inicialização e, às vezes, a um shell do bootloader ou do sistema operacional. Mesmo um console somente leitura revela mapas de memória, drivers de flash, argumentos de inicialização, layouts de partições e versões do firmware. O firmware pode estar armazenado em SPI NOR/NAND, eMMC ou outro dispositivo; em geral, ele não é executado a partir de uma EEPROM, e os arquivos gravados em um sistema de arquivos persistente montado não necessariamente desaparecem após uma reinicialização.
 
-Há várias formas de fazer isso, e a seção sobre SPI aborda métodos para extrair o firmware diretamente da EEPROM usando diversos dispositivos. No entanto, recomenda-se tentar primeiro fazer o dump do firmware com UART, pois fazer o dump do firmware com dispositivos físicos e interações externas pode ser arriscado.
+Há vários caminhos de aquisição, e a seção sobre SPI aborda leituras diretas de flash externa. A aquisição auxiliada pelo console pode ser menos invasiva quando o bootloader já fornece um comando de leitura seguro, mas qualquer interrupção da inicialização ou comando de flash pode afetar a disponibilidade; portanto, registre o estado original e evite operações de gravação/eliminação.
 
-Fazer o dump do firmware a partir da UART Console exige primeiro obter acesso aos bootloaders. Muitos vendors populares usam o uboot (Universal Bootloader) como bootloader para carregar o Linux. Portanto, obter acesso ao uboot é necessário.
+A extração de firmware auxiliada pelo console geralmente começa interrompendo um bootloader. Muitos dispositivos Linux embarcados usam o **Das U-Boot**, mas outros usam bootloaders proprietários ou desabilitam o console interativo.
 
-Para obter acesso ao bootloader, conecte a porta UART ao computador e use qualquer uma das ferramentas de Serial Console, mantendo a fonte de alimentação do dispositivo desconectada. Quando a configuração estiver pronta, pressione a tecla Enter e mantenha-a pressionada. Por fim, conecte a fonte de alimentação ao dispositivo e deixe-o inicializar.
+Para testar a existência de um bootloader interativo, conecte o caminho de recepção UART e o terminal enquanto o alvo estiver desligado, inicie o registro e ligue-o. Siga o prompt de autoboot exibido; dependendo da compilação, a interrupção pode exigir uma tecla, uma sequência curta ou pode estar totalmente desabilitada.
 
-Isso interromperá o carregamento do uboot e exibirá um menu. Recomenda-se entender os comandos do uboot e usar o menu de ajuda para listá-los. Esse comando pode ser `help`. Como vendors diferentes usam configurações diferentes, é necessário entender cada uma separadamente.
+Se a interrupção for bem-sucedida, use `help`, `printenv` e comandos de descoberta somente leitura para entender o layout de memória e armazenamento específico daquele fornecedor antes de acessar endereços.
 
-Normalmente, o comando para fazer o dump do firmware é:
+No U-Boot, `md` exibe **memória endereçável**, e não automaticamente “a EEPROM”. Primeiro, use comandos específicos da placa, como `mtd list`, `sf probe`, `mmc info`, `part list`, variáveis de ambiente e logs de inicialização para identificar o endereço mapeado correto ou carregar uma região de flash na RAM. Em seguida, exiba um intervalo conhecido byte a byte:<sup>[[4]](#references)</sup>
 ```
-md
+md.b <address> <byte_count>
 ```
-que significa "memory dump". Isso exibirá a memória (conteúdo da EEPROM) na tela. É recomendável registrar a saída do Serial Console antes de iniciar o procedimento para capturar o memory dump.
+Registre a saída serial antes de iniciar. A saída de `md.b` contém endereços e uma coluna ASCII, portanto é uma representação textual, e não uma imagem ROM bruta.
 
-Por fim, basta remover todos os dados desnecessários do arquivo de log, salvá-lo como `filename.rom` e usar o binwalk para extrair o conteúdo:
+Remova as colunas de endereço e ASCII, concatene apenas os campos de bytes hexadecimais e decodifique-os para binário (por exemplo, com `xxd -r -p`). Verifique a quantidade esperada de bytes e registre um hash antes da análise:
 ```
-binwalk -e <filename.rom>
+xxd -r -p firmware.hex > firmware.bin
+sha256sum firmware.bin
+binwalk -e firmware.bin
 ```
-Isso listará os possíveis conteúdos da EEPROM de acordo com as assinaturas encontradas no arquivo hex.
+O Binwalk então identifica assinaturas conhecidas no binário reconstruído. Uma leitura direta da flash pela interface SPI/eMMC/NAND apropriada geralmente é mais rápida e menos propensa a erros quando o console não consegue transferir dados de forma confiável.
 
-No entanto, é necessário observar que nem sempre o uboot está desbloqueado, mesmo quando está sendo usado. Se a tecla Enter não fizer nada, verifique outras teclas, como a tecla Espaço, etc. Se o bootloader estiver bloqueado e não for interrompido, este método não funcionará. Para verificar se o uboot é o bootloader do dispositivo, verifique a saída no Console UART durante a inicialização do dispositivo. Ele pode mencionar o uboot durante a inicialização.
+O U-Boot pode desabilitar a interrupção, exigir uma sequência de teclas específica do vendor ou bloquear comandos de memória/flash. Siga o prompt de autoboot e o log de boot em vez de transmitir caracteres às cegas. Se o console não puder ser interrompido, preserve o log de boot e use um caminho não invasivo para aquisição do firmware.
 
+## References
+
+- [1] [Manual de Referência da Família Microchip PIC32 - UART](https://ww1.microchip.com/downloads/en/DeviceDoc/60001107H.pdf)
+- [2] [Documentação do Bus Pirate - modo UART e limites elétricos](https://docs.buspirate.com/docs/command-reference/#uart)
+- [3] [Silicon Labs - folha de dados do CP2102C](https://www.silabs.com/documents/public/data-sheets/cp2102c-datasheet.pdf)
+- [4] [Documentação do U-Boot - comando `md` para exibição de memória](https://docs.u-boot.org/en/latest/usage/cmd/md.html)
 {{#include ../../banners/hacktricks-training.md}}
