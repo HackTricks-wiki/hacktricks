@@ -4,19 +4,19 @@
 
 ## Basiese Inligting
 
-Quick Look is macOS se **lêervoorskouraamwerk**. Wanneer 'n gebruiker 'n lêer in Finder kies, Space druk, daaroor beweeg, of 'n gids met geaktiveerde duimnaels bekyk, **laai Quick Look outomaties 'n generator-plugin** om die lêer te ontleed en 'n visuele voorskou te vertoon.<sup>[[1]](#references)</sup>
+Quick Look is macOS se **lêervoorbeeldraamwerk**. Wanneer 'n gebruiker 'n lêer in Finder kies, Space druk, daaroor beweeg, of 'n gids met geaktiveerde duimnaels bekyk, **laai Quick Look outomaties 'n generator-plugin** om die lêer te ontleed en 'n visuele voorskou te lewer.<sup>[[1]](#references)</sup>
 
-Quick Look generators is **bundles** (`.qlgenerator`) wat vir spesifieke **Uniform Type Identifiers (UTIs)** registreer. Wanneer macOS 'n voorskou benodig vir 'n lêer wat met daardie UTI ooreenstem, laai dit die generator in 'n sandboxed helper process (`QuickLookSatellite` of `qlmanage`) en roep sy generator-funksie aan.
+Quick Look generators is **bundles** (`.qlgenerator`) wat vir spesifieke **Uniform Type Identifiers (UTIs)** registreer. Wanneer macOS 'n voorskou benodig vir 'n lêer wat by daardie UTI pas, laai dit die generator in 'n sandboxed helper process (`QuickLookSatellite` of `qlmanage`) en roep sy generator-funksie aan.
 
 ### Waarom Dit Belangrik is vir Sekuriteit
 
 > [!WARNING]
-> Quick Look generators word geaktiveer deur **bloot 'n lêer te kies of te bekyk** — geen "Open"-aksie word vereis nie. Dit maak hulle 'n kragtige **passive exploitation vector**: die gebruiker hoef slegs na 'n gids te navigeer wat 'n malicious file bevat.
+> Quick Look generators word geaktiveer deur **bloot 'n lêer te kies of te bekyk** — geen "Open"-aksie word vereis nie. Dit maak hulle 'n kragtige **passiewe exploitation vector**: die gebruiker hoef slegs na 'n gids te navigeer wat 'n kwaadwillige lêer bevat.
 
 **Attack surface:**
-- Generators **ontleed arbitrêre lêerinhoud** vanaf skyf, downloads, email attachments of network shares
-- 'n Crafted file kan **parsing vulnerabilities** (buffer overflows, format strings, type confusion) in die generator-kode uitbuit
-- Die voorskouweergawe gebeur **outomaties** — dit is genoeg om 'n Downloads-gids te bekyk waarin 'n malicious file beland het
+- Generators **ontleed arbitrêre lêerinhoud** vanaf skyf, downloads, e-posaanhegsels of network shares
+- 'n Gevormde lêer kan **parsing vulnerabilities** (buffer overflows, format strings, type confusion) in die generator-kode uitbuit
+- Die voorskou-rendering gebeur **outomaties** — dit is genoeg om 'n Downloads-gids te bekyk waar 'n kwaadwillige lêer beland het
 - Quick Look loop in 'n **sandboxed helper**, maar sandbox escapes vanuit hierdie konteks is gedemonstreer
 
 ## Argitektuur
@@ -49,7 +49,7 @@ ls /System/Library/QuickLook/
 # Check a generator's Info.plist for UTI registrations
 defaults read /path/to/Generator.qlgenerator/Contents/Info.plist 2>/dev/null
 ```
-### Gebruik van die Scanner
+### Gebruik van die skandeerder
 ```bash
 sqlite3 /tmp/executables.db "
 SELECT e.path, h.handler_type, h.handler_metadata
@@ -61,9 +61,9 @@ ORDER BY e.path;"
 ```
 ## Aanvalscenario's
 
-### Lêer-gebaseerde Exploitation
+### Lêergebaseerde Uitbuiting
 
-'n Third-party Quick Look generator wat komplekse lêerformate (3D-modelle, wetenskaplike data, argiefformate) ontleed, is 'n uitstekende teiken:
+'n Derdeparty Quick Look-generator wat komplekse lêerformate (3D-modelle, wetenskaplike data, argiefformate) ontleed, is 'n uitstekende teiken:
 ```bash
 # 1. Identify a third-party generator and its UTI
 qlmanage -m plugins 2>&1 | grep -v "com.apple" | head -20
@@ -80,7 +80,7 @@ cp malicious.xyz ~/Downloads/
 
 # 5. When user opens Downloads in Finder → preview triggers → exploit fires
 ```
-### Drive-By deur Downloads
+### Drive-By via Downloads
 ```
 1. Send crafted file via email/AirDrop/web download
 2. File lands in ~/Downloads/
@@ -89,9 +89,9 @@ cp malicious.xyz ~/Downloads/
 5. Generator parses malicious file → code execution in QuickLookSatellite
 6. (Optional) Sandbox escape from QuickLookSatellite context
 ```
-### Third-Party Generator Replacement
+### Vervanging van derdeparty-Generator
 
-As 'n Quick Look generator bundle in 'n **user-writable location** (`~/Library/QuickLook/`) geïnstalleer is, kan dit vervang word:
+As ’n Quick Look-generator-bundle in ’n **gebruiker-skryfbare ligging** (`~/Library/QuickLook/`) geïnstalleer is, kan dit vervang word:
 ```bash
 # Check for user-writable generators
 ls -la ~/Library/QuickLook/ 2>/dev/null
@@ -100,7 +100,7 @@ ls -la ~/Library/QuickLook/ 2>/dev/null
 # 1. Executes payload when any matching file is previewed
 # 2. Optionally still generates a valid preview to avoid suspicion
 ```
-### Aktiveer Quick Look op afstand
+### Aktiveer Quick Look op Afstand
 ```bash
 # Force Quick Look preview generation (for testing)
 qlmanage -p /path/to/malicious/file
@@ -113,12 +113,12 @@ qlmanage -r cache
 ```
 ## Sandbox-oorwegings
 
-Quick Look generators loop binne 'n sandboxed helper process. Die sandbox-profiel beperk:
-- Lêerstelseltoegang (meestal slegs lees-toegang tot die lêer wat voorbeskou word)
-- Network access (beperk)
+Quick Look generators loop binne ’n sandbox-helperproses. Die sandbox-profiel beperk:
+- Lêerstelseltoegang (meestal leesalleen tot die lêer wat voorbeskou word)
+- Netwerktoegang (beperk)
 - IPC (beperkte mach-lookup)
 
-Die sandbox het egter bekende escape vectors:
+Die sandbox het egter bekende ontsnappingsvektore:
 ```bash
 # Check the sandbox profile used by QuickLookSatellite
 sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
@@ -127,7 +127,7 @@ sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
 # Quick Look processes may have mach-lookup exceptions to system services
 # A sandbox escape chain: QLGenerator vuln → QuickLookSatellite → mach-lookup → system daemon
 ```
-## CVE's in die werklike wêreld
+## Werklike CVEs<sup>[[2]](#references)</sup>
 
 | CVE | Beskrywing |
 |---|---|
@@ -158,10 +158,8 @@ timeout 5 qlmanage -t /tmp/fuzz_input.targetext 2>&1
 log show --last 5s --predicate 'process == "QuickLookSatellite" AND eventMessage CONTAINS "crash"' 2>/dev/null
 done
 ```
-## Verwysings
+## References
 
-- [1] [Apple Developer — Quick Look Programming Guide](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
-- [2] [Apple Security Updates — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
-- [3] [Objective-See — Quick Look Attack Surface](https://objective-see.org/blog.html)
-
+- [1] [Apple Developer — Quick Look-programmeringsgids](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
+- [2] [Apple-sekuriteitsopdaterings — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
 {{#include ../../../banners/hacktricks-training.md}}

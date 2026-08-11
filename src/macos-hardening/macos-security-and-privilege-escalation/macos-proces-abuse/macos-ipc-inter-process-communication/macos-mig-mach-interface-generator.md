@@ -4,28 +4,28 @@
 
 ## Basiese Inligting
 
-MIG is geskep om die **proses van Mach IPC**-kode-skepping te **vereenvoudig**. Dit **genereer basies die nodige kode** sodat server en client met 'n gegewe definisie kan kommunikeer. Selfs al is die gegenereerde kode lelik, hoef 'n ontwikkelaar dit net in te voer, en sy kode sal baie eenvoudiger wees as voorheen.<sup>[[1]](#references)</sup>
+MIG is geskep om die **proses van Mach IPC**-kode-ontwikkeling te **vereenvoudig**. Dit **genereer basies die nodige kode** vir server en client om met ’n gegewe definisie te kommunikeer. Selfs al is die gegenereerde kode lelik, hoef ’n ontwikkelaar dit net in te voer, en sy kode sal baie eenvoudiger as voorheen wees.<sup>[[1]](#references)</sup>
 
-Die definisie word in Interface Definition Language (IDL) gespesifiseer deur die `.defs`-uitbreiding te gebruik.
+Die definisie word in Interface Definition Language (IDL) gespesifiseer met die `.defs`-uitbreiding.
 
 Hierdie definisies het 5 afdelings:
 
 - **Subsystem declaration**: Die sleutelwoord subsystem word gebruik om die **naam** en die **id** aan te dui. Dit is ook moontlik om dit as **`KernelServer`** te merk indien die server in die kernel moet loop.<sup>[[4]](#references)</sup>
-- **Inclusions and imports**: MIG gebruik die C-prepocessor, dus kan dit imports gebruik. Boonop is dit moontlik om `uimport` en `simport` vir user- of server-gegenereerde kode te gebruik.
-- **Type declarations**: Dit is moontlik om datatipes te definieer, hoewel dit gewoonlik `mach_types.defs` en `std_types.defs` sal import. Vir pasgemaakte tipes kan die volgende sintaksis gebruik word:
-- \[i`n/out]tran`: Funksie wat vanaf 'n inkomende of na 'n uitgaande boodskap vertaal moet word
-- `c[user/server]type`: Mapping na 'n ander C-tipe.
-- `destructor`: Roep hierdie funksie aan wanneer die tipe vrygestel word.
-- **Operations**: Dit is die definisies van die RPC-metodes. Daar is 5 verskillende tipes:
-- `routine`: Verwag 'n antwoord
-- `simpleroutine`: Verwag nie 'n antwoord nie
-- `procedure`: Verwag 'n antwoord
-- `simpleprocedure`: Verwag nie 'n antwoord nie
-- `function`: Verwag 'n antwoord
+- **Inclusions and imports**: MIG gebruik die C-preprocessor, dus kan dit imports gebruik. Daarbenewens is dit moontlik om `uimport` en `simport` vir user- of server-gegenereerde kode te gebruik.
+- **Type declarations**: Dit is moontlik om data types te definieer, hoewel dit gewoonlik `mach_types.defs` en `std_types.defs` sal import. Vir custom types kan sommige syntax gebruik word:
+- \[i`n/out]tran`: Function wat van ’n inkomende of na ’n uitgaande message vertaal moet word
+- `c[user/server]type`: Mapping na ’n ander C type.
+- `destructor`: Roep hierdie function wanneer die type vrygestel word.
+- **Operations**: Dit is die definisies van die RPC methods. Daar is 5 verskillende types:
+- `routine`: Verwag reply
+- `simpleroutine`: Verwag nie reply nie
+- `procedure`: Verwag reply
+- `simpleprocedure`: Verwag nie reply nie
+- `function`: Verwag reply
 
 ### Voorbeeld
 
-Skep 'n definisielêer, in hierdie geval met 'n baie eenvoudige funksie:
+Skep ’n definition file, in hierdie geval met ’n baie eenvoudige function:
 ```cpp:myipc.defs
 subsystem myipc 500; // Arbitrary name and id
 
@@ -40,19 +40,19 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Let daarop dat die eerste **argument die port is waaraan gebind moet word** en MIG die **reply port outomaties sal hanteer** (tensy `mig_get_reply_port()` in die client code geroep word). Boonop sal die **ID's van die operations** **opeenvolgend wees**, vanaf die aangeduide subsystem ID (dus, as 'n operation deprecated is, word dit verwyder en `skip` gebruik om steeds sy ID te gebruik).
+Let daarop dat die eerste **argument die poort is waaraan gebind moet word** en dat MIG die **reply port outomaties sal hanteer** (tensy `mig_get_reply_port()` in die kliëntkode geroep word). Verder sal die **ID van die bewerkings** **opeenvolgend** wees, vanaf die aangeduide subsisteem-ID (dus, as ’n bewerking afgekeur word, word dit verwyder en word `skip` gebruik om steeds sy ID te gebruik).
 
-Gebruik nou MIG om die server- en client code te genereer wat met mekaar sal kan kommunikeer om die Subtract-funksie te roep:
+Gebruik nou MIG om die bediener- en kliëntkode te genereer wat met mekaar sal kan kommunikeer om die Subtract-funksie aan te roep:
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
 Verskeie nuwe lêers sal in die huidige gids geskep word.
 
 > [!TIP]
-> Jy kan ’n meer komplekse voorbeeld in jou stelsel vind met: `mdfind mach_port.defs`\
-> En jy kan dit vanuit dieselfde gids as die lêer compile met: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`<sup>[[2]](#references)</sup>
+> Jy kan ’n meer komplekse voorbeeld op jou stelsel vind met: `mdfind mach_port.defs`\
+> En jy kan dit vanuit dieselfde vouer as die lêer saamstel met: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`<sup>[[2]](#references)</sup>
 
-In die lêers **`myipcServer.c`** en **`myipcServer.h`** kan jy die verklaring en definisie van die struktuur **`SERVERPREFmyipc_subsystem`** vind, wat basies die funksie definieer wat op grond van die ontvangde boodskap-ID geroep moet word (ons het ’n begintal van 500 aangedui):
+In die lêers **`myipcServer.c`** en **`myipcServer.h`** kan jy die verklaring en definisie van die struktuur **`SERVERPREFmyipc_subsystem`** vind, wat basies die funksie definieer wat op grond van die ontvangde boodskap-ID geroep moet word (ons het ’n beginnommer van 500 aangedui):
 
 {{#tabs}}
 {{#tab name="myipcServer.c"}}
@@ -89,7 +89,7 @@ routine[1];
 {{#endtab}}
 {{#endtabs}}
 
-Based on the previous struct the function **`myipc_server_routine`** will get the **message ID** and return the proper function to call:
+Gebaseer op die vorige struct sal die funksie **`myipc_server_routine`** die **boodskap-ID** kry en die korrekte funksie terugstuur om aan te roep:
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -104,7 +104,7 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-In hierdie voorbeeld het ons slegs 1 funksie in die definisies gedefinieer, maar indien ons meer funksies gedefinieer het, sou hulle binne die array **`SERVERPREFmyipc_subsystem`** gewees het, en die eerste een sou aan die ID **500** toegeken gewees het, die tweede een aan die ID **501**...
+In hierdie voorbeeld het ons slegs 1 funksie in die definisies gedefinieer, maar indien ons meer funksies gedefinieer het, sou hulle binne die array van **`SERVERPREFmyipc_subsystem`** gewees het, en die eerste een sou aan die ID **500** toegeken gewees het, die tweede een aan die ID **501**...
 
 Indien daar van die funksie verwag is om ’n **reply** te stuur, sou die funksie `mig_internal kern_return_t __MIG_check__Reply__<name>` ook bestaan het.
 
@@ -115,7 +115,7 @@ Dit is eintlik moontlik om hierdie verhouding in die struct **`subsystem_to_name
 { "Subtract", 500 }
 #endif
 ```
-Uiteindelik sal nog ’n belangrike funksie om die server te laat werk **`myipc_server`** wees, wat die funksie wat met die ontvangde id verband hou, werklik sal **aanroep**:<sup>[[3]](#references)</sup>
+Laastens is nog ’n belangrike funksie om die server te laat werk **`myipc_server`**, wat die funksie wat met die ontvangde id verband hou, werklik sal **call**:<sup>[[3]](#references)</sup>
 
 <pre class="language-c"><code class="lang-c">mig_external boolean_t myipc_server
 (mach_msg_header_t *InHeadP, mach_msg_header_t *OutHeadP)
@@ -149,9 +149,9 @@ return FALSE;
 }
 </code></pre>
 
-Kontroleer die lyne wat hierbo uitgelig is en wat toegang verkry tot die funksie wat volgens die ID aangeroep moet word.
+Gaan die lyne wat voorheen uitgelig is na wat toegang verkry tot die funksie wat volgens die ID uitgevoer moet word.
 
-Die volgende is die kode om ’n eenvoudige **server** en **client** te skep waar die client die Subtract-funksies vanaf die server kan aanroep:
+Die volgende is die kode om ’n eenvoudige **server** en **client** te skep waar die client die funksies Subtract vanaf die server kan call:
 
 {{#tabs}}
 {{#tab name="myipc_server.c"}}
@@ -217,31 +217,31 @@ USERPREFSubtract(port, 40, 2);
 
 ### The NDR_record
 
-Die NDR_record word deur `libsystem_kernel.dylib` uitgevoer, en dit is 'n struct wat MIG toelaat om **data te transformeer sodat dit sisteem-onafhanklik is** aangesien MIG ontwerp is om tussen verskillende sisteme gebruik te word (en nie slegs op dieselfde masjien nie).
+Die NDR_record word deur `libsystem_kernel.dylib` uitgevoer, en dit is ’n struct wat MIG toelaat om **data te transformeer sodat dit onafhanklik van die stelsel is** waarin dit gebruik word, aangesien MIG ontwerp is om tussen verskillende stelsels gebruik te word (en nie net op dieselfde masjien nie).
 
-Dit is interessant, want as `_NDR_record` in 'n binary as 'n dependency gevind word (`jtool2 -S <binary> | grep NDR` of `nm`), beteken dit dat die binary 'n MIG client of Server is.
+Dit is interessant, want as `_NDR_record` in ’n binary as ’n dependency gevind word (`jtool2 -S <binary> | grep NDR` of `nm`), beteken dit dat die binary ’n MIG client of Server is.
 
 Verder het **MIG servers** die dispatch table in `__DATA.__const` (of in `__CONST.__constdata` in die macOS-kernel en `__DATA_CONST.__const` in ander \*OS-kernels). Dit kan met **`jtool2`** gedump word.
 
-En **MIG clients** sal die `__NDR_record` gebruik om dit met `__mach_msg` na die servers te stuur.
+En **MIG clients** sal die `__NDR_record` gebruik om dit saam met `__mach_msg` na die servers te stuur.
 
-## Binary Analysis
+## Binêre Analise
 
 ### jtool
 
 Aangesien baie binaries nou MIG gebruik om mach ports bloot te stel, is dit interessant om te weet hoe om **te identifiseer dat MIG gebruik is** en die **funksies wat MIG met elke message ID uitvoer**.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) kan MIG-inligting uit 'n Mach-O-binary parseer, wat die message ID aandui en die funksie identifiseer wat uitgevoer moet word:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) kan MIG-inligting uit ’n Mach-O binary ontleed en die message ID aandui, asook die funksie identifiseer wat uitgevoer moet word:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Boonop is MIG-funksies bloot wrappers van die werklike funksie wat aangeroep word, wat beteken dat jy moontlik die werklike funksie wat aangeroep word kan vind deur die disassembly daarvan te verkry en vir BL te grep:
+Boonop is MIG-funksies wrappers rondom die werklike funksie wat aangeroep word. Deur dus die disassembly te verkry en na `BL` te soek, kan jy moontlik die werklike funksie vind wat aangeroep word:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
-### Samestelling
+### Assembly
 
-Daar is voorheen genoem dat die funksie wat sal sorg dat **die korrekte funksie geroep word, afhangend van die ontvangde message ID**, `myipc_server` is. Jy sal egter gewoonlik nie die simbole van die binary hê nie (geen funksiename nie), daarom is dit interessant om te **kyk hoe dit gedecompileer lyk**, aangesien dit altyd baie soortgelyk sal wees (die kode van hierdie funksie is onafhanklik van die blootgestelde funksies):
+Daar is voorheen genoem dat die funksie wat sal sorg dat die **korrekte funksie geroep word, afhangende van die ontvangde boodskap-ID**, `myipc_server` was. Jy sal egter gewoonlik nie die simbole van die binary hê nie (geen funksiename nie), daarom is dit interessant om te **kontroleer hoe dit gedecompileer lyk**, aangesien dit altyd baie soortgelyk sal wees (die kode van hierdie funksie is onafhanklik van die blootgestelde funksies):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -261,7 +261,7 @@ rax = *(int32_t *)(var_10 + 0x14);
 // Call to sign_extend_64 that can help to identifyf this function
 // This stores in rax the pointer to the call that needs to be called
 // Check the used of the address 0x100004040 (functions addresses array)
-// 0x1f4 = 500 (the strating ID)
+// 0x1f4 = 500 (the starting ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
 // If - else, the if returns false, while the else call the correct function and returns true
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-Dit is dieselfde funksie wat in ’n ander Hopper free-weergawe gedecompileer is:
+Dit is dieselfde funksie, gedecompileer in ’n ander gratis Hopper-weergawe:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -321,7 +321,7 @@ r8 = 0x1;
 }
 if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
-// 0x1f4 = 500 (the strating ID)
+// 0x1f4 = 500 (the starting ID)
 <strong>                    r8 = r8 - 0x1f4;
 </strong>                    asm { smaddl     x8, w8, w9, x10 };
 r8 = *(r8 + 0x8);
@@ -365,23 +365,22 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-As jy eintlik na die funksie **`0x100004000`** gaan, sal jy die array van **`routine_descriptor`**-structs vind. Die eerste element van die struct is die **adres** waar die **funksie** geïmplementeer is, en die **struct neem 0x28 bytes** in beslag. Dus kan jy vir elke 0x28 bytes (begin by byte 0) 8 bytes kry, wat die **adres van die funksie** sal wees wat geroep gaan word:
+As jy eintlik na die funksie **`0x100004000`** gaan, sal jy die array van **`routine_descriptor`**-strukture vind. Die eerste element van die struktuur is die **adres** waar die **funksie** geïmplementeer is, en die **struktuur neem 0x28 grepe in beslag**, dus kan jy vir elke 0x28 grepe (begin by greep 0) 8 grepe kry, wat die **adres van die funksie** is wat geroep sal word:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../../../../images/image (36).png" alt=""><figcaption></figcaption></figure>
 
-Hierdie data kan [**met hierdie Hopper-script**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py) onttrek word.
+Hierdie data kan onttrek word [**met hierdie Hopper script**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
 
-### Ontfouting
+### Debug
 
-Die kode wat deur MIG gegenereer word, roep ook `kernel_debug` aan om logs oor operasies by entry en exit te genereer. Dit is moontlik om dit met **`trace`** of **`kdv`** na te gaan: `kdv all | grep MIG`
+Die kode wat deur MIG gegenereer word, roep ook `kernel_debug` aan om logs oor bewerkings by toetrede en uittrede te genereer. Dit is moontlik om hulle met **`trace`** of **`kdv`** te inspekteer: `kdv all | grep MIG`
 
-## Verwysings
+## References
 
 - [1] [bootstrap_cmds — `migcom.tproj` (die MIG compiler self)](https://github.com/apple-oss-distributions/bootstrap_cmds/tree/main/migcom.tproj)
-- [2] [XNU — `osfmk/mach/mach_port.defs` (voorbeeld van ’n MIG subsystem-definisie)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
-- [3] [XNU — `osfmk/mach/message.h` (uitleg van die Mach message-header)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
-- [4] [XNU — `osfmk/mach/task.defs` (MIG-definisie van die task-subsystem)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
-
+- [2] [XNU — `osfmk/mach/mach_port.defs` (voorbeeld van ’n MIG-substelseldefinisie)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
+- [3] [XNU — `osfmk/mach/message.h` (uitleg van die Mach-boodskapkop)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
+- [4] [XNU — `osfmk/mach/task.defs` (MIG-definisie van die taaksubstelsel)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
 {{#include ../../../../banners/hacktricks-training.md}}

