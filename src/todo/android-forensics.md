@@ -37,7 +37,7 @@ Hash the result and record the exact command, device identifiers, time, and any 
 
 ### Memory
 
-LiME can acquire physical memory from Linux and some Android devices, but its kernel module must be built for the target kernel and loaded with sufficient privileges. Module signing, kernel lockdown, and modern Android hardening may prevent it from loading.<sup>[[6]](#references)</sup>
+LiME can acquire physical memory (RAM) from Linux and some Android devices, but its kernel module must be built for the target kernel and loaded with sufficient privileges. Module signing, kernel lockdown, and modern Android hardening may prevent it from loading.<sup>[[6]](#references)</sup>
 
 ## References
 
