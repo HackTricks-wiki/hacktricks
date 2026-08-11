@@ -1,35 +1,37 @@
-# Ekstrakcja konfiguracji AdaptixC2 i TTPs
+# Ekstrakcja konfiguracji i TTPs AdaptixC2
 
-AdaptixC2 to modularny, open-source'owy framework post-exploitation/C2 z beaconami Windows x86/x64 (EXE/DLL/service EXE/raw shellcode) oraz obsługą BOF.<sup>[[1]](#references)</sup> Ta strona opisuje:
-- sposób osadzenia konfiguracji spakowanej za pomocą RC4 oraz jej ekstrakcję z beaconów
+{{#include ../../banners/hacktricks-training.md}}
+
+AdaptixC2 to modularny, open‑source’owy framework post‑exploitation/C2 z beaconami Windows x86/x64 (EXE/DLL/service EXE/raw shellcode) oraz obsługą BOF.<sup>[[1]](#references)</sup> Ta strona opisuje:
+- sposób osadzania konfiguracji spakowanej za pomocą RC4 oraz jej ekstrakcji z beaconów
 - wskaźniki sieciowe/profile dla listenerów HTTP/SMB/TCP
-- typowe TTPs loaderów i persistence obserwowane w środowisku rzeczywistym, wraz z linkami do odpowiednich stron dotyczących technik Windows
+- typowe loaderowe i persistence TTPs obserwowane w praktyce, wraz z linkami do odpowiednich stron dotyczących technik Windows
 
-Nowsze upstream releases zawierają również listenery beaconów DNS/DoH oraz oddzielną rodzinę agentów/listenerów Gopher, dlatego współczesna infrastruktura Adaptix może ujawniać więcej niż pierwotne powierzchnie HTTP/SMB/TCP, nawet gdy konkretny sample nadal używa klasycznego agenta beacon.<sup>[[2]](#references)</sup>
+Nowsze wydania upstream zawierają również listenery beaconów DNS/DoH oraz oddzielną rodzinę agentów/listenerów Gopher, dlatego współczesna infrastruktura Adaptix może ujawniać więcej niż pierwotne powierzchnie HTTP/SMB/TCP, nawet gdy konkretny sample nadal używa klasycznego beacona.<sup>[[2]](#references)</sup>
 
 ## Profile beaconów i pola
 
 AdaptixC2 obsługuje trzy podstawowe typy beaconów:<sup>[[1]](#references)</sup>
-- BEACON_HTTP: web C2 z konfigurowalnymi serwerami/portami/SSL, metodą, URI, headers, user-agentem oraz niestandardową nazwą parametru
-- BEACON_SMB: peer-to-peer C2 oparte na named pipe (intranet)
-- BEACON_TCP: bezpośrednie sockets, opcjonalnie z poprzedzającym markerem maskującym początek protokołu
+- BEACON_HTTP: web C2 z konfigurowalnymi serwerami/portami/SSL, metodą, URI, nagłówkami, user-agentem i niestandardową nazwą parametru
+- BEACON_SMB: komunikacja C2 peer-to-peer oparta na named pipe (intranet)
+- BEACON_TCP: bezpośrednie sockety, opcjonalnie z poprzedzającym markerem do zaciemniania początku protokołu
 
-Są to layouty beaconów publicznie opisane we wczesnych analizach Adaptix i nadal stanowią najczęstszy punkt wyjścia do ekstrakcji po stronie sample'a.<sup>[[1]](#references)</sup> Jednak obecne upstream builds zawierają również extenders `BeaconDNS` i Gopher po stronie serwera, dlatego nie należy zakładać, że każde aktywne wdrożenie Adaptix ujawnia wyłącznie infrastrukturę HTTP/SMB/TCP.<sup>[[2]](#references)</sup>
+Są to układy beaconów publicznie opisane we wczesnych analizach Adaptix i nadal stanowią najczęstszy punkt wyjścia do ekstrakcji po stronie sample’a.<sup>[[1]](#references)</sup> Jednak obecne buildy upstream zawierają również rozszerzenia `BeaconDNS` i Gopher po stronie serwera, dlatego nie należy zakładać, że każda działająca infrastruktura Adaptix udostępnia wyłącznie infrastrukturę HTTP/SMB/TCP.<sup>[[2]](#references)</sup>
 
-Typowe pola profilu obserwowane w konfiguracjach beaconów HTTP (po odszyfrowaniu):<sup>[[1]](#references)</sup>
+Typowe pola profilu obserwowane w konfiguracjach beaconów HTTP (po deszyfracji):<sup>[[1]](#references)</sup>
 - agent_type (u32)
 - use_ssl (bool)
 - servers_count (u32), servers (array of strings), ports (array of u32)
-- http_method, uri, parameter, user_agent, http_headers (length-prefixed strings)
+- http_method, uri, parameter, user_agent, http_headers (length‑prefixed strings)
 - ans_pre_size (u32), ans_size (u32) – używane do parsowania rozmiarów odpowiedzi
 - kill_date (u32), working_time (u32)
 - sleep_delay (u32), jitter_delay (u32)
 - listener_type (u32)
 - download_chunk_size (u32)
 
-Nowsze buildy BeaconHTTP obsługują również wybieraną przez operatora rotację pomiędzy wieloma URI, user-agentami, nagłówkami Host i serwerami, z wyborem sekwencyjnym lub losowym.<sup>[[2]](#references)</sup> Z perspektywy threat hunting oznacza to, że pojedynczy zainfekowany host może komunikować się z wieloma ścieżkami callback oraz kombinacjami headers, nie pozostawiając przy tym klasycznej rodziny beaconów spakowanych za pomocą RC4.
+Nowsze buildy BeaconHTTP obsługują również wybieraną przez operatora rotację pomiędzy wieloma URI, user-agentami, nagłówkami Host i serwerami, z wyborem sekwencyjnym lub losowym.<sup>[[2]](#references)</sup> Z perspektywy threat hunting oznacza to, że pojedynczy zainfekowany host może komunikować się z kilkoma ścieżkami callback oraz kombinacjami nagłówków, nie opuszczając klasycznej rodziny beaconów spakowanych za pomocą RC4.
 
-Przykładowy domyślny profil HTTP (z builda beaconu):<sup>[[1]](#references)</sup>
+Przykładowy domyślny profil HTTP (z builda beacona):<sup>[[1]](#references)</sup>
 ```json
 {
 "agent_type": 3192652105,
@@ -77,12 +79,12 @@ Zaobserwowany złośliwy profil HTTP (rzeczywisty atak):<sup>[[1]](#references)<
 ```
 ## Szyfrowanie konfiguracji, pakowanie i ścieżka ładowania
 
-Gdy operator klika Create w builderze, AdaptixC2 osadza zaszyfrowany profil w beaconie jako końcowy blob. Format jest następujący:<sup>[[1]](#references)</sup>
+Gdy operator klika Create w builderze, AdaptixC2 osadza zaszyfrowany profil jako końcowy blob w beaconie. Format to:<sup>[[1]](#references)</sup>
 - 4 bajty: rozmiar konfiguracji (uint32, little-endian)
-- N bajtów: konfiguracja zaszyfrowana za pomocą RC4
+- N bajtów: dane konfiguracji zaszyfrowane RC4
 - 16 bajtów: klucz RC4
 
-Loader beacona kopiuje 16-bajtowy klucz z końca i odszyfrowuje za pomocą RC4 blok o długości N bajtów w miejscu:<sup>[[1]](#references)</sup>
+Loader beacona kopiuje 16-bajtowy klucz z końca i odszyfrowuje blok N bajtów za pomocą RC4 w miejscu:<sup>[[1]](#references)</sup>
 ```c
 ULONG profileSize = packer->Unpack32();
 this->encrypt_key = (PBYTE) MemAllocLocal(16);
@@ -91,21 +93,21 @@ DecryptRC4(packer->data()+4, profileSize, this->encrypt_key, 16);
 ```
 Praktyczne implikacje:<sup>[[1]](#references)</sup>
 - Cała struktura często znajduje się wewnątrz sekcji PE .rdata.
-- Ekstrakcja jest deterministyczna: odczytaj rozmiar, odczytaj ciphertext o tym rozmiarze, odczytaj 16-bajtowy klucz umieszczony bezpośrednio za nim, a następnie wykonaj deszyfrowanie RC4.
+- Ekstrakcja jest deterministyczna: odczytaj rozmiar, odczytaj ciphertext o tym rozmiarze, odczytaj 16‑bajtowy klucz umieszczony bezpośrednio za nim, a następnie wykonaj RC4‑decrypt.
 
-## Przepływ ekstrakcji konfiguracji (dla obrońców)
+## Workflow ekstrakcji konfiguracji (obrońcy)
 
-Napisz extractor, który naśladuje logikę beacon:<sup>[[1]](#references)</sup>
+Napisz extractor, który naśladuje logikę beaconu:<sup>[[1]](#references)</sup>
 1) Zlokalizuj blob wewnątrz PE (zwykle w .rdata). Praktyczne podejście polega na przeskanowaniu .rdata w poszukiwaniu wiarygodnego układu [size|ciphertext|16‑byte key] i podjęciu próby użycia RC4.
 2) Odczytaj pierwsze 4 bajty → size (uint32 LE).
 3) Odczytaj następne N=size bajtów → ciphertext.
-4) Odczytaj końcowe 16 bajtów → klucz RC4.
-5) Wykonaj deszyfrowanie ciphertext za pomocą RC4. Następnie przeanalizuj plain profile jako:
+4) Odczytaj ostatnie 16 bajtów → klucz RC4.
+5) Wykonaj RC4‑decrypt ciphertextu. Następnie sparsuj plain profile jako:
 - skalary u32/boolean, jak opisano powyżej
-- strings z prefiksem długości (długość u32, po której następują bajty; końcowy NUL może występować)
-- arrays: servers_count, po którym następuje określona liczba par [string, u32 port]
+- stringi z prefiksem długości (długość u32, po której następują bajty; końcowy NUL może występować)
+- tablice: servers_count, po którym następuje określona liczba par [string, u32 port]
 
-Minimalny Python proof‑of‑concept (samodzielny, bez zewnętrznych zależności), który działa z wcześniej wyekstrahowanym blobem:
+Minimalny Python proof‑of‑concept (standalone, bez zewnętrznych zależności), działający z wcześniej wyekstrahowanym blobem:
 ```python
 import struct
 from typing import List, Tuple
@@ -172,14 +174,14 @@ return cfg
 # cfg  = parse_http_cfg(pt)
 ```
 Wskazówki:
-- Podczas automatyzacji użyj parsera PE do odczytu `.rdata`, a następnie zastosuj przesuwane okno: dla każdego offsetu `o` spróbuj `size = u32(.rdata[o:o+4])`, `ct = .rdata[o+4:o+4+size]`, a jako potencjalnego klucza użyj kolejnych 16 bajtów; odszyfruj RC4 i sprawdź, czy pola tekstowe dekodują się jako UTF-8, a długości są poprawne.
-- Parsuj profile SMB/TCP, stosując te same konwencje z prefiksem długości.
+- Podczas automatyzacji użyj parsera PE do odczytu sekcji .rdata, a następnie zastosuj przesuwane okno: dla każdego przesunięcia o spróbuj size = u32(.rdata[o:o+4]), ct = .rdata[o+4:o+4+size], candidate key = next 16 bytes; odszyfruj za pomocą RC4 i sprawdź, czy pola łańcuchów znaków dekodują się jako UTF-8, a długości są prawidłowe.
+- Parsuj profile SMB/TCP, korzystając z tych samych konwencji pól poprzedzonych długością.
 
 ## Custom listener profiles: don't hard-code only the classic HTTP schema
 
-Format pakowania zewnętrznego (`u32 size | RC4 ciphertext | 16-byte key`) można ponownie wykorzystać, dlatego listenery dostosowane przez aktora mogą korzystać z tego samego workflow ekstrakcji, jednocześnie całkowicie zmieniając układ odszyfrowanych pól.
+Zewnętrzny format pakowania (`u32 size | RC4 ciphertext | 16-byte key`) można ponownie wykorzystać, dlatego listenery dostosowane przez aktora mogą zachować ten sam proces ekstrakcji, zmieniając jednocześnie całkowicie układ odszyfrowanych pól.
 
-Dobrym aktualnym przykładem jest kampania Tropic Trooper z marca 2026 roku, w której wyekstrahowany Adaptix beacon nie zawierał standardowego profilu HTTP/TCP. Zamiast tego odszyfrowany blob przechowywał parametry transportu GitHub, takie jak:<sup>[[5]](#references)</sup>
+Dobrym, niedawnym przykładem jest kampania Tropic Trooper z marca 2026 roku, w której wyekstrahowany Adaptix beacon nie zawierał standardowego profilu HTTP/TCP. Zamiast tego odszyfrowany blob przechowywał parametry transportu GitHub, takie jak:<sup>[[5]](#references)</sup>
 - `repo_owner`
 - `repo_name`
 - `api_host` (na przykład `api.github.com`)
@@ -188,51 +190,51 @@ Dobrym aktualnym przykładem jest kampania Tropic Trooper z marca 2026 roku, w k
 - `kill_date` / `working_time` / `sleep_delay` / `jitter`
 
 Praktyczna strategia parsera:
-- Najpierw wykryj zewnętrzny blob RC4 dokładnie tak jak zwykle.
-- Po odszyfrowaniu rozgałęź parser na podstawie ciągów-sentinelów i poprawności pól, zamiast od razu wymuszać parser HTTP.
-- Dobrymi sentinelami są `api.github.com`, `/issues?state=open`, czasowniki/URI HTTP, ciągi w stylu named pipe lub wyraźnie poprawne tablice serwerów/portów.
-- Jeśli parser HTTP zawiedzie, ale plaintext zawiera spójne ciągi UTF-8 z prefiksem długości, zachowaj próbkę i spróbuj alternatywnych schematów zamiast odrzucać ją jako false positive.
+- Najpierw wykryj zewnętrzny blob RC4 dokładnie jak zwykle.
+- Po odszyfrowaniu rozgałęź parser na podstawie łańcuchów sygnaturowych i poprawności pól, zamiast od razu wymuszać parser HTTP.
+- Dobrymi sygnaturami są `api.github.com`, `/issues?state=open`, czasowniki/URI HTTP, łańcuchy w stylu named pipe lub wyraźnie poprawne tablice serwerów/portów.
+- Jeśli parser HTTP zawiedzie, ale plaintext zawiera spójne łańcuchy UTF-8 poprzedzone długością, zachowaj próbkę i spróbuj alternatywnych schematów zamiast odrzucać ją jako false positive.
 
-W tej kampanii custom listener wykorzystywał GitHub issues jako transport C2, a beacon odpytywał `ipinfo.io`, aby poznać swój zewnętrzny adres IP, ponieważ GitHub API nie ujawnia operatorowi bezpośrednio źródłowego adresu ofiary.<sup>[[5]](#references)</sup>
+W tej kampanii custom listener wykorzystywał GitHub issues jako transport C2, a beacon odpytywał `ipinfo.io`, aby poznać swój zewnętrzny adres IP, ponieważ GitHub API nie ujawnia operatorowi bezpośrednio adresu źródłowego ofiary.<sup>[[5]](#references)</sup>
 
 ## Network fingerprinting and hunting
 
 HTTP:<sup>[[1]](#references)</sup>
-- Typowe: POST do URI wybranych przez operatora (np. `/uri.php`, `/endpoint/api`)
-- Niestandardowy parametr nagłówka używany jako beacon ID (np. `X‑Beacon‑Id`, `X‑App‑Id`)
-- User-agenty naśladujące Firefox 20 lub współczesne buildy Chrome
-- Częstotliwość odpytywania widoczna przez `sleep_delay`/`jitter_delay`
-- Nowsze buildy mogą rotować URI, user-agenty, nagłówki Host i serwery między callbackami, dlatego należy grupować ruch na podstawie nietypowych nazw nagłówków, wzorców rozmiaru odpowiedzi, ponownego użycia TLS i czasu, zamiast zakładać pojedynczą parę ścieżka/UA.<sup>[[2]](#references)</sup>
+- Typowe: żądania POST do URI wybranych przez operatora (np. /uri.php, /endpoint/api)
+- Custom header parameter używany jako beacon ID (np. X‑Beacon‑Id, X‑App‑Id)
+- User-agenty naśladujące Firefox 20 lub współczesne wersje Chrome
+- Częstotliwość odpytywania widoczna za pośrednictwem sleep_delay/jitter_delay
+- Nowsze buildy mogą rotować URI, user-agenty, nagłówki Host i serwery między callbackami, dlatego należy grupować zdarzenia na podstawie rzadko spotykanych nazw nagłówków, wzorców rozmiaru odpowiedzi, ponownego użycia TLS i czasu, zamiast zakładać pojedynczą parę ścieżka/UA.<sup>[[2]](#references)</sup>
 
 SMB/TCP:<sup>[[1]](#references)</sup>
-- Listenery SMB oparte na named pipe do intranetowego C2, gdy web egress jest ograniczony
-- TCP beacons mogą dodawać kilka bajtów przed ruchem w celu ukrycia początku protokołu
+- Listenery named pipe SMB do intranetowego C2, gdy web egress jest ograniczony
+- TCP beacons mogą poprzedzać ruch kilkoma bajtami w celu zaciemnienia początku protokołu
 
-Obecne domyślne ustawienia upstream teamserver
-- `profile.yaml` zawiera obecnie teamserver `0.0.0.0:4321`, endpoint `/endpoint`, nazwy plików certificate/key `server.rsa.crt` i `server.rsa.key` oraz extenders dla HTTP, SMB, TCP, DNS, Beacon agent i Gopher.<sup>[[2]](#references)</sup>
-- Dla niedopasowanych tras domyślny error handler zwraca `Server: AdaptixC2` oraz `Adaptix-Version: v1.2`.<sup>[[4]](#references)</sup>
-- Domyślne body odpowiedzi 404 zawiera `AdaptixC2 404` oraz `You need to enter the correct connection details`.<sup>[[4]](#references)</sup>
-- Skanowania obejmujące cały Internet w 2026 roku wykazały wiele exposed teamservers na porcie `4321` oraz wiele beacon listenerów na porcie `43211`, dlatego oba porty są użytecznymi punktami wyjścia, ale nie należy traktować ich jako wyczerpujących.<sup>[[4]](#references)</sup>
+Bieżące domyślne wartości upstream teamserver
+- `profile.yaml` obecnie zawiera teamserver `0.0.0.0:4321`, endpoint `/endpoint`, nazwy plików certyfikatu/klucza `server.rsa.crt` i `server.rsa.key` oraz extenders dla HTTP, SMB, TCP, DNS, Beacon agent i Gopher.<sup>[[2]](#references)</sup>
+- W przypadku niedopasowanych tras domyślny error handler zwraca `Server: AdaptixC2` oraz `Adaptix-Version: v1.2`.<sup>[[4]](#references)</sup>
+- Standardowe body odpowiedzi 404 zawiera `AdaptixC2 404` oraz `You need to enter the correct connection details`.<sup>[[4]](#references)</sup>
+- Skany obejmujące cały Internet przeprowadzone w 2026 roku wykazały wiele exposed teamservers na porcie `4321` oraz wiele beacon listenerów na `43211`, dlatego oba porty są użytecznymi punktami początkowymi, ale nie należy traktować ich jako wyczerpującego zestawu.<sup>[[4]](#references)</sup>
 
-Odciski DNS/DoH listenerów:<sup>[[4]](#references)</sup>
-- Obecny extender BeaconDNS odpowiada autorytatywnie (`AA=true`)
-- Zapytania, które nie pasują do struktury protokołu beacon — w szczególności nazwy zawierające mniej niż 5 labels przed skonfigurowaną domeną — są zwykle obsługiwane odpowiedzią `TXT "OK"`
-- Jeśli bazowy TTL pozostawiono jako zero, listener używa wartości bazowej 10 sekund i dodaje do 59 sekund jitter
-- Dzięki temu krótkie aktywne probe'y są przydatne, gdy nie jest wystawiony żaden HTTP listener
+Sygnatury listenerów DNS/DoH:<sup>[[4]](#references)</sup>
+- Bieżący extender BeaconDNS odpowiada autorytatywnie (`AA=true`)
+- Zapytania, które nie pasują do kształtu protokołu beacon — w szczególności nazwy zawierające mniej niż 5 labeli przed skonfigurowaną domeną — często otrzymują odpowiedź `TXT "OK"`
+- Jeśli skonfigurowany bazowy TTL pozostawiono na zero, listener używa wartości bazowej 10 sekund i dodaje jitter do 59 sekund
+- Dzięki temu krótkie aktywne sondy są przydatne, gdy nie jest wystawiony żaden listener HTTP
 
 ## Loader and persistence TTPs seen in incidents
 
 Loadery PowerShell działające in-memory:<sup>[[1]](#references)</sup>
-- Pobierają payloady Base64/XOR (`Invoke‑RestMethod` / `WebClient`).<sup>[[9]](#references)</sup>
-- Alokują unmanaged memory, kopiują shellcode i zmieniają ochronę na `0x40` (`PAGE_EXECUTE_READWRITE`) za pomocą `VirtualProtect`.<sup>[[7]](#references)</sup>
-- Wykonują kod przez dynamic invocation .NET: `Marshal.GetDelegateForFunctionPointer` + `delegate.Invoke()`.<sup>[[6]](#references)</sup>
+- Pobierają payloady Base64/XOR (Invoke‑RestMethod / WebClient).<sup>[[9]](#references)</sup>
+- Przydzielają unmanaged memory, kopiują shellcode i zmieniają ochronę na 0x40 (PAGE_EXECUTE_READWRITE) za pomocą VirtualProtect.<sup>[[7]](#references)</sup>
+- Wykonują kod przez dynamic invocation .NET: Marshal.GetDelegateForFunctionPointer + delegate.Invoke().<sup>[[6]](#references)</sup>
 
 Trojanized signed software / staged shellcode loaders:<sup>[[5]](#references)</sup>
-- Łańcuch Tropic Trooper z 2026 roku wykorzystywał trojanized executable SumatraPDF (loader TOSHIS), który przekierowywał `_security_init_cookie` do złośliwego kodu zamiast modyfikować punkt wejścia PE
-- Loader rozwiązywał API za pomocą haszowania Adler-32, pobierał decoy PDF, pobierał shellcode drugiego etapu, odszyfrowywał go za pomocą AES-128-CBC przez WinCrypt (`CryptDeriveKey` z hardcoded seed), a następnie wykonywał reflectively Adaptix beacon w pamięci
-- Persistence przeniesiono później do scheduled tasks o pozornie nieszkodliwych nazwach, takich jak `\MSDNSvc` lub `\MicrosoftUDN`, skonfigurowanych tak, aby ponownie uruchamiać agenta mniej więcej co dwie godziny
+- W 2026 roku jeden z łańcuchów Tropic Trooper wykorzystywał trojanized executable SumatraPDF (TOSHIS loader), który przekierowywał `_security_init_cookie` do złośliwego kodu zamiast modyfikować punkt wejścia PE
+- Loader rozwiązywał API za pomocą haszowania Adler-32, pobierał decoy PDF, pobierał second-stage shellcode, odszyfrowywał go za pomocą AES-128-CBC przez WinCrypt (`CryptDeriveKey` z hardcoded seed), a następnie wykonywał reflectively Adaptix beacon w pamięci
+- Persistence została później przeniesiona do scheduled tasks o pozornie nieszkodliwych nazwach, takich jak `\MSDNSvc` lub `\MicrosoftUDN`, skonfigurowanych do ponownego uruchamiania agenta mniej więcej co dwie godziny
 
-Sprawdź te strony pod kątem wykonywania in-memory oraz kwestii AMSI/ETW:
+Sprawdź te strony pod kątem wykonywania in-memory oraz zagadnień AMSI/ETW:
 
 {{#ref}}
 ../../windows-hardening/av-bypass.md
@@ -240,10 +242,10 @@ Sprawdź te strony pod kątem wykonywania in-memory oraz kwestii AMSI/ETW:
 
 Zaobserwowane mechanizmy persistence:<sup>[[1]](#references)</sup>
 - Skrót (.lnk) w Startup folder, uruchamiający loader ponownie podczas logowania
-- Registry Run keys (HKCU/HKLM ...\CurrentVersion\Run), często z pozornie nieszkodliwymi nazwami, takimi jak `"Updater"`, uruchamiającymi `loader.ps1`.<sup>[[10]](#references)</sup>
-- DLL search-order hijack poprzez umieszczenie `msimg32.dll` w `%APPDATA%\Microsoft\Windows\Templates` dla podatnych procesów
+- Registry Run keys (HKCU/HKLM ...\CurrentVersion\Run), często z pozornie nieszkodliwymi nazwami, takimi jak "Updater", aby uruchamiać loader.ps1.<sup>[[10]](#references)</sup>
+- DLL search-order hijack przez umieszczenie msimg32.dll w %APPDATA%\Microsoft\Windows\Templates dla podatnych procesów
 
-Szczegółowe omówienia technik i kontrole:
+Szczegółowe analizy technik i kontrole:
 
 {{#ref}}
 ../../windows-hardening/windows-local-privilege-escalation/privilege-escalation-with-autorun-binaries.md
@@ -254,30 +256,30 @@ Szczegółowe omówienia technik i kontrole:
 {{#endref}}
 
 Pomysły na hunting
-- PowerShell tworzący przejścia RW→RX: `VirtualProtect` do `PAGE_EXECUTE_READWRITE` wewnątrz `powershell.exe`.<sup>[[8]](#references)</sup>
-- Wzorce dynamic invocation (`GetDelegateForFunctionPointer`)
+- PowerShell generujący przejścia RW→RX: VirtualProtect do PAGE_EXECUTE_READWRITE wewnątrz powershell.exe.<sup>[[8]](#references)</sup>
+- Wzorce dynamic invocation (GetDelegateForFunctionPointer)
 - Niedopasowane odpowiedzi HTTPS 404 zawierające `Server: AdaptixC2`, `Adaptix-Version`, `AdaptixC2 404` lub `You need to enter the correct connection details`.<sup>[[4]](#references)</sup>
 - Odpowiedzi DNS z `AA=true` i `TXT "OK"` dla krótkich zapytań w podejrzanych domenach.<sup>[[4]](#references)</sup>
-- Ruch GitHub API do `/repos/<owner>/<repo>/issues`, po którym następują zapytania do `ipinfo.io` z tego samego łańcucha loader/beacon.<sup>[[5]](#references)</sup>
-- Startup `.lnk` w folderach Startup użytkownika lub wspólnych folderach Startup.<sup>[[1]](#references)</sup>
-- Podejrzane Run keys (np. `"Updater"`) oraz nazwy loaderów, takie jak `update.ps1`/`loader.ps1`.<sup>[[1]](#references)</sup>
-- Próbki trojanized PE, które przekierowują `_security_init_cookie` do kodu downloadera przed wyświetleniem decoy document.<sup>[[5]](#references)</sup>
-- Ścieżki DLL zapisywalne przez użytkownika w `%APPDATA%\Microsoft\Windows\Templates`, zawierające `msimg32.dll`.<sup>[[1]](#references)</sup>
+- Ruch GitHub API do `/repos/<owner>/<repo>/issues`, po którym następują odwołania do `ipinfo.io` z tego samego łańcucha loader/beacon.<sup>[[5]](#references)</sup>
+- Plik Startup .lnk w folderach Startup użytkownika lub wspólnych folderach Startup.<sup>[[1]](#references)</sup>
+- Podejrzane Run keys (np. "Updater") oraz nazwy loaderów, takie jak update.ps1/loader.ps1.<sup>[[1]](#references)</sup>
+- Trojanized próbki PE, które przekierowują `_security_init_cookie` do kodu downloadera przed wyświetleniem decoy document.<sup>[[5]](#references)</sup>
+- Ścieżki DLL zapisywalne przez użytkownika w %APPDATA%\Microsoft\Windows\Templates, zawierające msimg32.dll.<sup>[[1]](#references)</sup>
 
 ## Notes on OpSec fields
 
 - KillDate: timestamp, po którym agent sam wygasa.<sup>[[1]](#references)</sup>
-- WorkingTime: godziny, w których agent powinien być aktywny, aby wtapiać się w aktywność biznesową.<sup>[[1]](#references)</sup>
+- WorkingTime: godziny, w których agent powinien być aktywny, aby upodobnić się do aktywności biznesowej.<sup>[[1]](#references)</sup>
 
-Pola te można wykorzystywać do grupowania oraz wyjaśniania zaobserwowanych okresów ciszy.
+Pola te mogą służyć do grupowania zdarzeń i wyjaśniania zaobserwowanych okresów ciszy.
 
 ## YARA and static leads
 
-Unit 42 opublikowało podstawowe reguły YARA dla beaconów (C/C++ i Go) oraz stałych używanych do haszowania API w loaderach.<sup>[[1]](#references)</sup> Warto uzupełnić je regułami wyszukującymi układ `[size|ciphertext|16‑byte‑key]` w pobliżu końca PE `.rdata`, domyślne ciągi profilu HTTP oraz nowsze markery serwera/listenera, takie jak `AdaptixC2 404`, `You need to enter the correct connection details.`, `Adaptix-Version`, `server.rsa.crt`, `server.rsa.key`, `api.github.com`, `/issues?state=open` i `ipinfo.io`.<sup>[[4]](#references)[[5]](#references)</sup>
+Unit 42 opublikowało podstawowe reguły YARA dla beaconów (C/C++ i Go) oraz stałych używanych do haszowania API przez loadery.<sup>[[1]](#references)</sup> Rozważ uzupełnienie ich o reguły wyszukujące układ [size|ciphertext|16‑byte‑key] w pobliżu końca sekcji PE .rdata, domyślne łańcuchy profilu HTTP oraz nowsze znaczniki serwera/listenera, takie jak `AdaptixC2 404`, `You need to enter the correct connection details.`, `Adaptix-Version`, `server.rsa.crt`, `server.rsa.key`, `api.github.com`, `/issues?state=open` i `ipinfo.io`.<sup>[[4]](#references)[[5]](#references)</sup>
 
 ## References
 
-- [1] [AdaptixC2: Nowy framework Open-Source wykorzystywany w rzeczywistych atakach (Unit 42)](https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/)
+- [1] [AdaptixC2: Nowy open-source framework wykorzystywany w atakach w świecie rzeczywistym (Unit 42)](https://unit42.paloaltonetworks.com/adaptixc2-post-exploitation-framework/)
 - [2] [AdaptixC2 GitHub](https://github.com/Adaptix-Framework/AdaptixC2)
 - [3] [Dokumentacja Adaptix Framework](https://adaptix-framework.gitbook.io/adaptix-framework)
 - [4] [AdaptixC2: Fingerprinting open-source frameworka C2 na dużą skalę (Censys)](https://censys.com/blog/adaptixc2-open-source-c2-framework/)

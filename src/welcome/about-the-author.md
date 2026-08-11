@@ -1,12 +1,14 @@
 # O autorze
 
-### Witaj!!
+{{#include ../banners/hacktricks-training.md}}
 
-Techniki wniesione przez innych badaczy pozostają przypisane ich pierwotnym autorom. Podziękowania dla wszystkich, którzy dzielą się wiedzą, aby poprawiać bezpieczeństwo internetu.
+### Cześć!!
 
-Carlos prowadzi HackTricks. Projekt to utrzymywana przez społeczność wiki poświęcona cyberbezpieczeństwu, która gromadzi praktyczne techniki i zachęca do współtworzenia; jeśli znajdziesz coś brakującego lub nieaktualnego, otwórz pull request w repozytorium projektu.<sup>[[1]](#references)</sup>
+Techniki wniesione przez innych badaczy pozostają przypisane ich oryginalnym autorom. Podziękowania dla wszystkich, którzy dzielą się wiedzą, aby poprawiać bezpieczeństwo internetu.
 
-HackTricks daje również badaczom miejsce do dzielenia się nowymi odkryciami, pomagając czytelnikom być na bieżąco z aktualnymi technikami bezpieczeństwa.
+Carlos prowadzi HackTricks. Projekt jest utrzymywaną przez społeczność wiki poświęconą cybersecurity, która gromadzi praktyczne techniki i zachęca do współpracy; jeśli znajdziesz coś brakującego lub nieaktualnego, otwórz pull request w repozytorium projektu.<sup>[[1]](#references)</sup>
+
+HackTricks zapewnia również badaczom miejsce do dzielenia się nowymi odkryciami, pomagając czytelnikom być na bieżąco z aktualnymi technikami bezpieczeństwa.
 
 ## References
 

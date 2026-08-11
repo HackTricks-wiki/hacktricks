@@ -1,18 +1,20 @@
-# Suricata & Iptables - ściągawka
+# Suricata i Iptables — ściągawka
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## Iptables
 
 ### Łańcuchy
 
-W iptables każdy łańcuch jest sekwencyjną listą reguł dopasowujących pakiety. Domyślna tabela `filter` zawiera wbudowane łańcuchy `INPUT`, `FORWARD` i `OUTPUT`; inne tabele, takie jak `nat`, mogą być dostępne w zależności od konfiguracji kernela i załadowanych modułów.<sup>[[1]](#references)</sup>
+W iptables każdy łańcuch jest sekwencyjną listą reguł dopasowujących pakiety. Domyślna tabela `filter` zawiera wbudowane łańcuchy `INPUT`, `FORWARD` i `OUTPUT`; inne tabele, takie jak `nat`, mogą być dostępne w zależności od konfiguracji jądra i załadowanych modułów.<sup>[[1]](#references)</sup>
 
-- **Łańcuch Input**: Służy do zarządzania zachowaniem połączeń przychodzących.
-- **Łańcuch Forward**: Służy do obsługi połączeń przychodzących, które nie są przeznaczone dla systemu lokalnego. Jest to typowe dla urządzeń działających jako routery, gdzie odebrane dane mają zostać przekazane do innego miejsca docelowego. Ten łańcuch ma znaczenie głównie wtedy, gdy system zajmuje się routingiem, NATingiem lub podobnymi działaniami.
-- **Łańcuch Output**: Służy do regulowania połączeń wychodzących.
+- **Łańcuch Input**: Wykorzystywany do zarządzania zachowaniem połączeń przychodzących.
+- **Łańcuch Forward**: Służy do obsługi połączeń przychodzących, które nie są przeznaczone dla systemu lokalnego. Jest to typowe dla urządzeń działających jako routery, gdzie odebrane dane mają zostać przekazane do innego miejsca docelowego. Ten łańcuch ma znaczenie przede wszystkim wtedy, gdy system uczestniczy w routingu, NATowaniu lub podobnych działaniach.
+- **Łańcuch Output**: Przeznaczony do regulowania połączeń wychodzących.
 
-Łańcuchy te zapewniają uporządkowane przetwarzanie ruchu sieciowego, umożliwiając definiowanie szczegółowych reguł określających przepływ danych do systemu, przez system i z systemu.
+Łańcuchy te zapewniają uporządkowane przetwarzanie ruchu sieciowego, umożliwiając określanie szczegółowych reguł zarządzających przepływem danych do systemu, przez system i z systemu.
 
-Przykłady dopasowywania ciągów używają standardowego dopasowania `string`; dopasowanie uwzględnia wielkość liter, chyba że zostanie podany `--icase`, a `--algo` wybiera strategię wyszukiwania BM lub KMP.<sup>[[2]](#references)</sup>
+Przykłady dopasowywania ciągów znaków używają standardowego dopasowania `string`; dopasowywanie uwzględnia wielkość liter, chyba że podano `--icase`, a `--algo` wybiera strategię wyszukiwania BM lub KMP.<sup>[[2]](#references)</sup>
 ```bash
 # Delete all rules
 iptables -F
@@ -53,7 +55,7 @@ iptables-restore < /etc/sysconfig/iptables
 
 ### Instalacja i konfiguracja
 
-Poniższe polecenia pakietów zależą od dystrybucji i wydania; oficjalny przewodnik instalacji opisuje Ubuntu PPA, backports dla Debiana, pakiety RPM oraz zarządzanie usługami systemd.<sup>[[3]](#references)</sup>
+Poniższe polecenia dotyczące pakietów są zależne od dystrybucji i wydania; oficjalny przewodnik instalacji opisuje Ubuntu PPA, backporty Debiana, pakiety RPM oraz zarządzanie usługami systemd.<sup>[[3]](#references)</sup>
 ```bash
 # Package installation details vary by distribution and release; see References.
 # Ubuntu
@@ -116,15 +118,15 @@ Type=simple
 
 systemctl daemon-reload
 ```
-Sekwencja `suricata-update` jest zgodna z udokumentowanym przepływem pracy Suricata dotyczącym pobierania, wyświetlania, włączania i ładowania źródeł reguł.<sup>[[4]](#references)</sup> Polecenie `suricatasc` powyżej jest udokumentowaną, nieblokującą metodą ponownego ładowania reguł przez Unix socket.<sup>[[8]](#references)</sup> Reguły NFQUEUE przekazują lokalny ruch wejściowy/wyjściowy do Suricata, a `-q 0` wybiera kolejkę 0 na potrzeby przetwarzania inline.<sup>[[7]](#references)</sup>
+Sekwencja `suricata-update` jest zgodna z udokumentowanym workflow Suricata dotyczącym pobierania, wyświetlania, włączania i ładowania źródeł reguł.<sup>[[4]](#references)</sup> Powyższe polecenie `suricatasc` to udokumentowana, nieblokująca metoda przeładowywania reguł za pośrednictwem gniazda Unix.<sup>[[8]](#references)</sup> Reguły NFQUEUE przekazują lokalny ruch przychodzący i wychodzący do Suricata, natomiast `-q 0` wybiera kolejkę 0 na potrzeby przetwarzania inline.<sup>[[7]](#references)</sup>
 
 ### Definicje reguł
 
 Reguła/sygnatura Suricata składa się z trzech części.<sup>[[5]](#references)</sup>
 
-- **action** określa, co dzieje się po dopasowaniu sygnatury.
-- **header** wybiera protokół, adresy IP, porty i kierunek.
-- **rule options** definiują szczegóły charakterystyczne dla dopasowania.
+- **Akcja** określa, co się stanie, gdy sygnatura zostanie dopasowana.
+- **Nagłówek** określa protokół, adresy IP, porty i kierunek.
+- **Opcje reguły** definiują szczegóły właściwe dla danego dopasowania.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
@@ -150,38 +152,38 @@ alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing 
 
 Suricata obsługuje zakresy adresów IP, negację i grupowane listy adresów.<sup>[[5]](#references)</sup>
 
-| Przykład                      | Znaczenie                                  |
-| ----------------------------- | ------------------------------------------ |
-| ! 1.1.1.1                     | Każdy adres IP z wyjątkiem 1.1.1.1         |
-| !\[1.1.1.1, 1.1.1.2]          | Każdy adres IP z wyjątkiem 1.1.1.1 i 1.1.1.2 |
-| $HOME_NET                     | Ustawienie HOME_NET w yaml                 |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET, ale nie HOME_NET              |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 z wyjątkiem 10.0.0.5            |
+| Example                       | Meaning                                  |
+| ----------------------------- | ---------------------------------------- |
+| ! 1.1.1.1                     | Każdy adres IP oprócz 1.1.1.1            |
+| !\[1.1.1.1, 1.1.1.2]          | Każdy adres IP oprócz 1.1.1.1 i 1.1.1.2  |
+| $HOME_NET                     | Ustawienie HOME_NET w yaml               |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET, ale nie HOME_NET           |
+| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 z wyjątkiem 10.0.0.5         |
 
 #### Porty źródłowe i docelowe
 
 Suricata obsługuje zakresy portów, negację i listy portów.<sup>[[5]](#references)</sup>
 
-| Przykład         | Znaczenie                                |
+| Example         | Meaning                                |
 | --------------- | -------------------------------------- |
 | any             | dowolny adres                          |
-| \[80, 81, 82]   | porty 80, 81 i 82                     |
-| \[80: 82]       | Zakres od 80 do 82                    |
-| \[1024: ]       | Od 1024 do najwyższego numeru portu   |
-| !80             | Każdy port z wyjątkiem 80              |
-| \[80:100,!99]   | Zakres od 80 do 100, z wyłączeniem 99 |
-| \[1:80,!\[2,4]] | Zakres od 1 do 80, z wyjątkiem portów 2 i 4 |
+| \[80, 81, 82]   | porty 80, 81 i 82                      |
+| \[80: 82]       | zakres od 80 do 82                     |
+| \[1024: ]       | od 1024 do najwyższego numeru portu    |
+| !80             | każdy port oprócz 80                   |
+| \[80:100,!99]   | zakres od 80 do 100 bez portu 99       |
+| \[1:80,!\[2,4]] | zakres od 1 do 80 oprócz portów 2 i 4  |
 
 #### Kierunek
 
-Reguły Suricata mogą określać analizowany kierunek komunikacji.<sup>[[5]](#references)</sup>
+Reguły Suricata mogą określać kierunek analizowanej komunikacji.<sup>[[5]](#references)</sup>
 ```
 source -> destination
 source <> destination  (both directions)
 ```
 #### Słowa kluczowe
 
-Poniższe przykłady używają słów kluczowych reguł Suricata, w tym opcji metadanych, IP, ICMP, payloadu i warstwy aplikacji; oficjalna dokumentacja reguł opisuje te rodziny oraz ich składnię.<sup>[[6]](#references)[[9]](#references)</sup>
+Poniższe przykłady używają słów kluczowych reguł Suricata, w tym opcji dotyczących metadanych, IP, ICMP, payloadu i warstwy aplikacji; oficjalna dokumentacja reguł zawiera katalog tych rodzin oraz ich składnię.<sup>[[6]](#references)[[9]](#references)</sup>
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule

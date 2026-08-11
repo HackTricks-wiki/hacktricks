@@ -1,8 +1,10 @@
-# Żądania sieciowe
+# Żądania webowe
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Python Requests
 
-Te przykłady używają udokumentowanych argumentów żądań, właściwości odpowiedzi, krotek plików multipart oraz sesji w bibliotece Requests.<sup>[[1]](#references)</sup> Przykłady z `verify=False` wyłączają weryfikację certyfikatu TLS i powinny być ograniczone do kontrolowanych testów.<sup>[[1]](#references)</sup>
+Te przykłady używają udokumentowanych argumentów żądań, właściwości odpowiedzi, krotek plików multipart oraz sesji w Requests.<sup>[[1]](#references)</sup> Przykłady z `verify=False` wyłączają weryfikację certyfikatu TLS i powinny być ograniczone do kontrolowanych testów.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -105,7 +107,7 @@ term.cmdloop()
 ```
 ## References
 
-- [1] [Interfejs programistyczny Requests](https://requests.readthedocs.io/en/stable/api/)
-- [2] [Python `cmd` — Obsługa interpreterów poleceń działających w trybie wiersza poleceń](https://docs.python.org/3/library/cmd.html)
+- [1] [Interfejs deweloperski Requests](https://requests.readthedocs.io/en/stable/api/)
+- [2] [Python `cmd` — Obsługa interpreterów poleceń zorientowanych liniowo](https://docs.python.org/3/library/cmd.html)
 - [3] [Python `re` — Operacje na wyrażeniach regularnych](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

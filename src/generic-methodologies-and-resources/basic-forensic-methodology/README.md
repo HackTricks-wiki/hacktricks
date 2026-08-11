@@ -1,4 +1,6 @@
-# Podstawowa metodologia analizy kryminalistycznej
+# Podstawowa metodologia kryminalistyczna
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Tworzenie i montowanie obrazu
 
@@ -7,9 +9,9 @@
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Analiza Malware
+## Analiza malware
 
-Nie jest to **koniecznie pierwszy krok do wykonania po uzyskaniu obrazu**. Możesz jednak używać tych technik analizy malware niezależnie od tego, czy masz plik, obraz systemu plików, obraz pamięci, pcap... dlatego warto **mieć te działania na uwadze**:
+**Nie musi to być pierwszy krok po uzyskaniu obrazu**. Możesz jednak korzystać z tych technik analizy malware niezależnie od tego, czy masz plik, obraz systemu plików, obraz pamięci, pcap... dlatego warto **mieć te działania na uwadze**:
 
 
 {{#ref}}
@@ -18,14 +20,14 @@ malware-analysis.md
 
 ## Inspekcja obrazu
 
-Jeśli otrzymasz **forensic image** urządzenia, możesz rozpocząć **analizowanie partycji i systemu plików** oraz **odzyskiwanie** potencjalnie **interesujących plików** (w tym usuniętych). Dowiedz się, jak to zrobić:
+Jeśli otrzymasz **obraz kryminalistyczny** urządzenia, możesz rozpocząć **analizowanie partycji i używanego systemu plików** oraz **odzyskiwanie** potencjalnie **interesujących plików** (również usuniętych). Dowiedz się, jak to zrobić:
 
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-W zależności od użytych systemów operacyjnych, a nawet platform, należy szukać różnych interesujących artefaktów:
+W zależności od używanych systemów operacyjnych, a nawet platform, należy szukać różnych interesujących artefaktów:
 
 
 {{#ref}}
@@ -49,15 +51,15 @@ ios-backup-forensics.md
 
 ## Szczegółowa inspekcja określonych typów plików i Software
 
-Jeśli masz bardzo **podejrzany** **plik**, to **w zależności od typu pliku i software'u**, który go utworzył, przydatnych może być kilka **tricków**.\
-Przeczytaj poniższą stronę, aby poznać kilka interesujących tricków:
+Jeśli masz **bardzo podejrzany** **plik**, to **w zależności od typu pliku i Software**, który go utworzył, przydatne mogą być różne **triki**.\
+Przeczytaj następującą stronę, aby poznać kilka interesujących trików:
 
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-Chcę szczególnie wspomnieć o stronie:
+Chcę szczególnie wyróżnić stronę:
 
 
 {{#ref}}
@@ -78,9 +80,9 @@ memory-dump-analysis/
 pcap-inspection/
 {{#endref}}
 
-## **Techniki Anti-Forensic**
+## **Techniki antykryminalistyczne**
 
-Należy pamiętać o możliwości użycia technik anti-forensic:
+Pamiętaj o możliwości zastosowania technik antykryminalistycznych:
 
 
 {{#ref}}

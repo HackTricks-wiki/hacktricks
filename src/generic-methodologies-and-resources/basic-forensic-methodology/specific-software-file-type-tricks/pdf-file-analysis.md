@@ -1,31 +1,33 @@
 # Analiza plików PDF
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 **Więcej informacji znajdziesz tutaj:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/).<sup>[[1]](#references)</sup>
 
-Format PDF jest znany ze swojej złożoności i możliwości ukrywania danych, co czyni go częstym celem wyzwań CTF z zakresu forensics. Łączy elementy tekstowe z obiektami binarnymi, które mogą być skompresowane lub zaszyfrowane, a także może zawierać skrypty w językach takich jak JavaScript lub Flash. Aby zrozumieć strukturę PDF, można zapoznać się z [materiałem wprowadzającym](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) Didiera Stevensa albo użyć narzędzi takich jak edytor tekstu lub specjalistyczny edytor PDF, np. Origami.
+Format PDF jest znany ze swojej złożoności i możliwości ukrywania danych, co sprawia, że jest częstym przedmiotem wyzwań z zakresu forensics w CTF. Łączy elementy tekstowe z obiektami binarnymi, które mogą być kompresowane lub szyfrowane, a także może zawierać skrypty w językach takich jak JavaScript lub Flash. Aby zrozumieć strukturę PDF, można zapoznać się z [materiałem wprowadzającym](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) Didiera Stevensa lub użyć narzędzi takich jak edytor tekstu albo edytor przeznaczony do PDF, na przykład Origami.
 
-Do szczegółowej analizy lub modyfikowania plików PDF dostępne są narzędzia takie jak [qpdf](https://github.com/qpdf/qpdf) i [Origami](https://github.com/mobmewireless/origami-pdf). Ukryte dane w plikach PDF mogą znajdować się w:
+Do szczegółowego badania lub modyfikowania plików PDF dostępne są narzędzia takie jak [qpdf](https://github.com/qpdf/qpdf) i [Origami](https://github.com/mobmewireless/origami-pdf). Ukryte dane w plikach PDF mogą znajdować się w:
 
 - Niewidocznych warstwach
 - Formacie metadanych XMP firmy Adobe
-- Generacjach przyrostowych
-- Tekście w tym samym kolorze co tło
-- Tekście znajdującym się za obrazami lub nakładającymi się obrazami
+- Przyrostowych generacjach
+- Tekście w kolorze identycznym z tłem
+- Tekście znajdującym się za obrazami lub nachodzącymi na siebie obrazami
 - Niewyświetlanych komentarzach
 
-Do niestandardowej analizy plików PDF można użyć bibliotek Python, takich jak [PeepDF](https://github.com/jesparza/peepdf), aby tworzyć niestandardowe skrypty parsujące. Ponadto możliwości ukrywania danych w plikach PDF są tak szerokie, że materiały takie jak przewodnik NSA dotyczący zagrożeń i środków zaradczych dla PDF, choć nie jest już hostowany w swojej pierwotnej lokalizacji, nadal dostarczają cennych informacji. [Kopia przewodnika](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) oraz zbiór [trików dotyczących formatu PDF](https://github.com/corkami/docs/blob/master/PDF/PDF.md) autorstwa Ange Albertiniego mogą posłużyć jako dalsze materiały do lektury na ten temat.<sup>[[4]](#references)[[5]](#references)</sup>
+Do niestandardowej analizy PDF można używać bibliotek Python, takich jak [PeepDF](https://github.com/jesparza/peepdf), aby tworzyć własne skrypty do parsowania. Możliwości ukrywania danych w PDF są tak szerokie, że materiały takie jak przewodnik NSA dotyczący zagrożeń i środków zaradczych związanych z PDF, mimo że nie jest już hostowany w pierwotnej lokalizacji, nadal dostarczają cennych informacji. [Kopia przewodnika](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) oraz zbiór [trików dotyczących formatu PDF](https://github.com/corkami/docs/blob/master/PDF/PDF.md) autorstwa Ange Albertiniego mogą posłużyć jako dalsze materiały do lektury.<sup>[[4]](#references)[[5]](#references)</sup>
 
-## Common Malicious Constructs
+## Często występujące złośliwe konstrukcje
 
-Atakujący często nadużywają określonych obiektów i akcji PDF, które są automatycznie wykonywane po otwarciu dokumentu lub wejściu z nim w interakcję. Warto wyszukiwać następujące słowa kluczowe:
+Atakujący często nadużywają określonych obiektów i akcji PDF, które wykonują się automatycznie po otwarciu dokumentu lub wejściu z nim w interakcję. Warto wyszukiwać następujące słowa kluczowe:
 
-* **/OpenAction, /AA** – automatyczne akcje wykonywane przy otwarciu lub w reakcji na określone zdarzenia.
-* **/JS, /JavaScript** – osadzony JavaScript (często obfuskowany lub podzielony między obiekty).
-* **/Launch, /SubmitForm, /URI, /GoToE** – mechanizmy uruchamiania zewnętrznych procesów / adresów URL.
+* **/OpenAction, /AA** – akcje automatycznie wykonywane podczas otwierania lub w odpowiedzi na określone zdarzenia.
+* **/JS, /JavaScript** – osadzony JavaScript (często zaciemniony lub podzielony między obiekty).
+* **/Launch, /SubmitForm, /URI, /GoToE** – mechanizmy uruchamiania procesów zewnętrznych / adresów URL.
 * **/RichMedia, /Flash, /3D** – obiekty multimedialne, które mogą ukrywać payloady.
 * **/EmbeddedFile /Filespec** – załączniki plików (EXE, DLL, OLE itd.).
-* **/ObjStm, /XFA, /AcroForm** – strumienie obiektów lub formularze często wykorzystywane do ukrywania shell-code.
-* **Aktualizacje przyrostowe** – wiele znaczników %%EOF lub bardzo duży offset **/Prev** może wskazywać na dane dołączone po podpisaniu w celu ominięcia AV.
+* **/ObjStm, /XFA, /AcroForm** – strumienie obiektów lub formularze, które są często wykorzystywane do ukrywania shell-code.
+* **Aktualizacje przyrostowe** – wiele znaczników %%EOF lub bardzo duży offset **/Prev** może wskazywać na dane dołączone po podpisaniu pliku w celu ominięcia AV.
 
 Gdy którykolwiek z powyższych tokenów występuje razem z podejrzanymi ciągami znaków (powershell, cmd.exe, calc.exe, base64 itd.), plik PDF wymaga dokładniejszej analizy.
 
@@ -54,22 +56,22 @@ qpdf --password='secret' --decrypt suspicious.pdf clean.pdf
 # Lint the file with a Go verifier (checks structure violations)
 pdfcpu validate -mode strict clean.pdf
 ```
-Dodatkowe przydatne projekty (aktywnie utrzymywane w latach 2023–2025):
-* **pdfcpu** – biblioteka/CLI w Go umożliwiająca walidowanie, odszyfrowywanie, ekstrakcję, optymalizację i modyfikowanie plików PDF.<sup>[[9]](#references)</sup>
-* **pdf-inspector** – wizualizator działający w przeglądarce, który renderuje graf obiektów i strumienie.
-* **PyMuPDF** – możliwe do skryptowania Python bindings do inspekcji plików PDF i renderowania stron do obrazów rastrowych. Parser/renderer należy traktować jako attack surface w przypadku niezaufanych plików i uruchamiać go w odpowiednio odizolowanym środowisku analitycznym.<sup>[[8]](#references)</sup>
+Dodatkowe przydatne projekty (aktywnie utrzymywane w latach 2023-2025):
+* **pdfcpu** – biblioteka/CLI w Go umożliwiające walidowanie, odszyfrowywanie, ekstrakcję, optymalizowanie i modyfikowanie plików PDF.<sup>[[9]](#references)</sup>
+* **pdf-inspector** – oparty na przeglądarce wizualizer renderujący graf obiektów i strumienie.
+* **PyMuPDF** – możliwe do skryptowania Python bindings do inspekcji plików PDF i renderowania stron do obrazów rastrowych. Traktuj parser/renderer jako niezaufaną powierzchnię ataku na pliki i uruchamiaj go w odpowiednio izolowanym środowisku analitycznym.<sup>[[8]](#references)</sup>
 
 ---
 
-## Najnowsze techniki ataków (2023–2025)
+## Najnowsze techniki ataków (2023-2025)
 
-* **MalDoc in PDF polyglot (2023)** – JPCERT/CC poinformował o technice, która dołącza plik MHT utworzony przez Worda i zawierający makra VBA do pliku PDF, zachowując magiczne bajty PDF, a jednocześnie umożliwiając otwarcie pliku w Wordzie. Narzędzia do analizy wyłącznie plików PDF, sandboxy lub antywirusy mogą nie wykryć makra, ponieważ złośliwe działanie występuje po otwarciu pliku w Wordzie; należy szukać znacznika `<w:WordDocument>` wraz z innymi wskaźnikami MHT.<sup>[[2]](#references)</sup>
-* **Shadow attacks on signed PDFs** – atakujący mogą umieścić ukrytą zawartość w pliku PDF przed jego podpisaniem, a następnie dołączyć incremental update, który zmienia odwołania do katalogu lub obiektów, tak aby przeglądarki wyświetlały ukrytą zawartość, podczas gdy oryginalny podpis pozostaje ważny. Technika ta może omijać zabezpieczenia przeglądarek, które klasyfikują takie aktualizacje jako nieszkodliwe.<sup>[[6]](#references)</sup>
-* **Use-after-free – CVE-2024-30284 (Acrobat/Reader)** – Adobe ocenia tę krytyczną lukę jako use-after-free, która może prowadzić do wykonania dowolnego kodu; APSB24-29 opublikowano 14 maja 2024 r.<sup>[[3]](#references)</sup>
+* **MalDoc in PDF polyglot (2023)** – JPCERT/CC zgłosiło technikę, która dołącza do pliku PDF plik MHT utworzony w Wordzie i zawierający makra VBA, zachowując sygnaturę PDF, a jednocześnie umożliwiając otwarcie pliku w Wordzie. Narzędzia do analizy wyłącznie plików PDF, sandboxes lub antivirus mogą przeoczyć makro, ponieważ złośliwe działanie występuje podczas otwierania pliku jako dokumentu Word; szukaj znacznika `<w:WordDocument>` wraz z innymi wskaźnikami MHT.<sup>[[2]](#references)</sup>
+* **Shadow attacks on signed PDFs** – attackerzy mogą umieścić ukrytą zawartość w pliku PDF przed jego podpisaniem, a następnie dołączyć incremental update zmieniający odwołania do katalogu lub obiektów, aby przeglądarki wyświetlały ukrytą zawartość, podczas gdy oryginalny podpis pozostaje ważny. Technika ta może omijać przeglądarki, które klasyfikują takie aktualizacje jako nieszkodliwe.<sup>[[6]](#references)</sup>
+* **Use-after-free – CVE-2024-30284 (Acrobat/Reader)** – Adobe ocenia tę krytyczną podatność jako use-after-free, która może prowadzić do arbitrary code execution; APSB24-29 opublikowano 14 maja 2024 r.<sup>[[3]](#references)</sup>
 
 ---
 
-## Szybki szablon reguły YARA
+## Skrócony szablon reguły YARA
 ```yara
 rule Suspicious_PDF_AutoExec {
 meta:
@@ -89,20 +91,20 @@ $pdf_magic at 0 and ( all of ($aa, $openact) or ($openact and $js) )
 
 ## Wskazówki dotyczące ochrony
 
-1. **Szybko instaluj poprawki** – utrzymuj Acrobat/Reader na najnowszym kanale Continuous; większość łańcuchów RCE obserwowanych w środowisku naturalnym wykorzystuje podatności n-day, które zostały załatane kilka miesięcy wcześniej.
-2. **Usuwaj aktywną zawartość na gatewayu** – używaj specjalizowanego, kontrolowanego przez polityki sanitizera lub produktu CDR, który jawnie usuwa JavaScript, osadzone pliki, akcje uruchamiania, formularze i multimedia. `qpdf --qdf` ułatwia inspekcję obiektów PDF, a pdfcpu udostępnia funkcje walidacji i modyfikacji; żadna z tych komend użyta samodzielnie nie stanowi dowodu, że aktywna zawartość została usunięta.<sup>[[9]](#references)[[10]](#references)</sup>
-3. **Content Disarm & Reconstruction (CDR)** – konwertuj pliki PDF do obrazów (lub PDF/A) na hoście sandboxowym, aby zachować wierność wizualną i jednocześnie usunąć aktywne obiekty.
-4. **Blokuj rzadko używane funkcje** – ustawienia „Enhanced Security” w Readerze dla środowisk enterprise umożliwiają wyłączenie JavaScript, multimediów i renderowania 3D.
-5. **Edukacja użytkowników** – inżynieria społeczna (przynęty w postaci faktur i CV) nadal pozostaje początkowym wektorem ataku; naucz pracowników przekazywania podejrzanych załączników do zespołu IR.
+1. **Szybko instaluj poprawki** – utrzymuj Acrobat/Reader na najnowszej wersji Continuous track; większość łańcuchów RCE obserwowanych w środowisku naturalnym wykorzystuje podatności n-day naprawione kilka miesięcy wcześniej.
+2. **Usuwaj aktywną zawartość na gatewayu** – używaj specjalizowanego, kontrolowanego przez polityki sanitizera lub produktu CDR, który jawnie usuwa JavaScript, osadzone pliki, akcje uruchamiania, formularze i multimedia. `qpdf --qdf` ułatwia inspekcję obiektów PDF, natomiast pdfcpu zapewnia funkcje walidacji i modyfikacji; żadna z tych komend użyta samodzielnie nie stanowi dowodu, że aktywna zawartość została usunięta.<sup>[[9]](#references)[[10]](#references)</sup>
+3. **Content Disarm & Reconstruction (CDR)** – konwertuj pliki PDF do obrazów (lub PDF/A) na hoście sandboxowym, aby zachować wierność wizualną i jednocześnie odrzucić aktywne obiekty.
+4. **Blokuj rzadko używane funkcje** – ustawienia „Enhanced Security” w Reader umożliwiają wyłączenie JavaScript, multimediów i renderowania 3D.
+5. **Edukacja użytkowników** – social engineering (przynęty w postaci faktur i CV) nadal pozostaje początkowym vectorem; naucz pracowników przekazywać podejrzane załączniki do zespołu IR.
 
 ## References
 
 - [1] [Przewodnik terenowy Forensics CTF](https://trailofbits.github.io/ctf/forensics/)
-- [2] [MalDoc in PDF – omijanie detekcji poprzez osadzenie złośliwego pliku Word w pliku PDF](https://blogs.jpcert.or.jp/en/2023/08/maldocinpdf.html)
+- [2] [MalDoc in PDF – omijanie wykrywania przez osadzenie złośliwego pliku Word w pliku PDF](https://blogs.jpcert.or.jp/en/2023/08/maldocinpdf.html)
 - [3] [Biuletyn bezpieczeństwa Adobe – dostępna aktualizacja zabezpieczeń dla Adobe Acrobat i Reader (APSB24-29)](https://helpx.adobe.com/security/products/acrobat/apsb24-29.html)
 - [4] [itsecure.hu - kopia przewodnika](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf)
 - [5] [corkami/docs - sztuczki dotyczące formatu PDF](https://github.com/corkami/docs/blob/master/PDF/PDF.md)
-- [6] [Shadow Attacks: ukrywanie i zastępowanie treści w podpisanych plikach PDF](https://www.pdf-insecurity.org/download/Shadow_Attacks__Hiding_and_Replacing_Content_in_Signed_PDFs.pdf)
+- [6] [Shadow Attacks: ukrywanie i zastępowanie zawartości w podpisanych plikach PDF](https://www.pdf-insecurity.org/download/Shadow_Attacks__Hiding_and_Replacing_Content_in_Signed_PDFs.pdf)
 - [7] [DidierStevensSuite: pdf-parser.py](https://github.com/DidierStevens/DidierStevensSuite/blob/master/pdf-parser.py)
 - [8] [Samouczek PyMuPDF](https://pymupdf.readthedocs.io/en/latest/tutorial.html)
 - [9] [pdfcpu](https://github.com/pdfcpu/pdfcpu)
