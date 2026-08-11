@@ -189,9 +189,9 @@ blobrunner.md
 
 ### Debugging a shellcode with jmp2it
 
-[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) is similar to BlobRunner. It allocates the shellcode and enters an infinite loop. Attach the debugger, resume for a few seconds, pause, and step past the loop into the call that transfers execution to the shellcode.
+[**jmp2it**](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) is similar to BlobRunner. It allocates the shellcode and enters an infinite loop. Attach the debugger, resume for **2–5 seconds**, pause inside that loop, and step to the following call that transfers execution to the allocated shellcode.
 
-![Debugging a shellcode with blobrunner - Debugging a shellcode with jmp2it: jmp2it is very similar to blobrunner. It will allocate the shellcode inside a space of memory, and start an...](<../../images/image (509).png>)
+![Debugger paused in jmp2it's infinite loop immediately before the call to the allocated shellcode](<../../images/image (509).png>)
 
 You can download a compiled version of [jmp2it inside the releases page](https://github.com/adamkramer/jmp2it/releases/).
 
@@ -201,17 +201,17 @@ You can download a compiled version of [jmp2it inside the releases page](https:/
 
 Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it decompiled it correctly, but when I opened it as a shellcode it didn't:
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it...](<../../images/image (562).png>)
+![Cutter showing different analysis results when opening the same bytes as a file or as shellcode](<../../images/image (562).png>)
 
 In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically start the emulation from there:
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically...](<../../images/image (589).png>)
+![Setting a breakpoint at the desired shellcode entry before starting Cutter emulation](<../../images/image (589).png>)
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically...](<../../images/image (387).png>)
+![Cutter emulator paused at the selected shellcode breakpoint](<../../images/image (387).png>)
 
 You can see the stack for example inside a hex dump:
 
-![Debugging a shellcode with jmp2it - Debugging shellcode using Cutter: You can see the stack for example inside a hex dump](<../../images/image (186).png>)
+![Viewing the emulated shellcode stack in Cutter's hex dump](<../../images/image (186).png>)
 
 ### Deobfuscating shellcode and getting executed functions
 
@@ -229,7 +229,7 @@ scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 
 scDbg also counts with a graphical launcher where you can select the options you want and execute the shellcode
 
-![Debugging shellcode using Cutter - Deobfuscating shellcode and getting executed functions: scDbg also counts with a graphical launcher where you can select the options you want and...](<../../images/image (258).png>)
+![scDbg graphical launcher for selecting shellcode emulation and tracing options](<../../images/image (258).png>)
 
 The **Create Dump** option will dump the final shellcode if any change is done to the shellcode dynamically in memory (useful to download the decoded shellcode). The **start offset** can be useful to start the shellcode at a specific offset. The **Debug Shell** option is useful to debug the shellcode using the scDbg terminal (however I find any of the options explained before better for this matter as you will be able to use Ida or x64dbg).
 
@@ -330,7 +330,7 @@ If you are playing a **CTF, this workaround to find the flag** could be very use
 
 To find the **entry point** search the functions by `::main` like in:
 
-![Movfuscator - Rust: To find the entry point search the functions by ::main like in](<../../images/image (1080).png>)
+![Finding a Rust entry point in Ghidra by searching function names for double-colon main](<../../images/image (1080).png>)
 
 In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.\
 Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
