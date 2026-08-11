@@ -1,6 +1,4 @@
-# Élévation de privilèges avec RunC
-
-{{#include ../../banners/hacktricks-training.md}}
+# Élévation de privilèges RunC
 
 ## Informations de base
 
@@ -12,7 +10,7 @@ Si vous souhaitez en savoir plus sur **runc**, consultez la page suivante :
 
 ## PE
 
-Si vous constatez que `runc` est installé sur l'hôte, vous pourrez peut-être **exécuter un container en montant le dossier racine / de l'hôte**.
+Si `runc` est disponible pour un processus rootful sur l’hôte, vous pouvez utiliser un OCI bundle dont la configuration de montage effectue un bind mount récursif du `/` de l’hôte vers `/` à l’intérieur du container, exposant ainsi le système de fichiers de l’hôte dans cet espace de noms de montage.<sup>[[1]](#references)[[2]](#references)[[3]](#references)</sup>
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
@@ -37,6 +35,11 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Cela ne fonctionnera pas toujours, car le fonctionnement par défaut de runc consiste à s'exécuter en tant que root. L'exécuter en tant qu'utilisateur non privilégié ne peut donc tout simplement pas fonctionner (sauf si vous disposez d'une configuration rootless). Faire d'une configuration rootless la configuration par défaut n'est généralement pas une bonne idée, car les conteneurs rootless présentent plusieurs restrictions qui ne s'appliquent pas aux conteneurs non rootless.
+> Le workflow documenté de `runc run` est rootful : les propres exemples de runc le qualifient de « run as root ». Un utilisateur non privilégié a besoin d'une configuration rootless telle que `runc spec --rootless`, et runc précise que les user namespaces doivent être activés pour ce mode.<sup>[[1]](#references)</sup>
 
+## References
+
+- [1] [runc : outil CLI pour le lancement et l'exécution de containers](https://github.com/opencontainers/runc#using-runc)
+- [2] [Spécification du runtime OCI : Mounts](https://github.com/opencontainers/runtime-spec/blob/main/config.md#mounts)
+- [3] [Sous-arbres partagés](https://docs.kernel.org/filesystems/sharedsubtree.html)
 {{#include ../../banners/hacktricks-training.md}}
