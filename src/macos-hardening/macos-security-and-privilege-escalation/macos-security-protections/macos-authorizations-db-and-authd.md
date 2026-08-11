@@ -2,19 +2,19 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Athorizarions DB**
+## Authorization Database
 
-The database located in `/var/db/auth.db` is database used to store permissions to perform sensitive operations. These operations are performed completely in **user space** and are usually used by **XPC services** which need to check **if the calling client is authorized** to perform certain action checking this database.
+The Security framework's Authorization Services let privileged helpers and other components evaluate named authorization rights. On current macOS versions, many of those rules are persisted in `/var/db/auth.db` and evaluated by `authd`; this file and its SQLite schema are implementation details and can change between releases.<sup>[[2]](#references)</sup><sup>[[3]](#references)</sup>
 
-Initially this database is created from the content of `/System/Library/Security/authorization.plist`. Then, some services might add or modify this dataabse to add other permissions to it.
+System defaults have historically been seeded from `/System/Library/Security/authorization.plist`, and installers or privileged services may add named rights. Prefer the supported `security authorizationdb read|write|remove` interface over editing the database directly.<sup>[[3]](#references)</sup>
 
-The rules are stored in the `rules` table inside the database and contains the folliwing colmns:
+The `rules` table observed on the documented build contains the following columns. Treat this as a forensic map, not a stable public schema:
 
 - **id**: A unique identifier for each rule, automatically incremented and serving as the primary key.
 - **name**: The unique name of the rule used to identify and reference it within the authorization system.
 - **type**: Specifies the type of the rule, restricted to values 1 or 2 to define its authorization logic.
 - **class**: Categorizes the rule into a specific class, ensuring it is a positive integer.
-  - "allow" for allow, "deny" for deny, "user" if the group property indicated a group which membership allows the access, "rule" indicates in an array a rule to be fulfilled, "evaluate-mechanisms" followed by a `mechanisms` array which are either builtins or a name of a bundle inside `/System/Library/CoreServices/SecurityAgentPlugins/` or /Library/Security//SecurityAgentPlugins
+  - Common rule classes include `allow`, `deny`, `user`, `rule`, and `evaluate-mechanisms`. Mechanisms can be built-ins or Security Agent plug-ins under system or library plug-in paths.
 - **group**: Indicates the user group associated with the rule for group-based authorization.
 - **kofn**: Represents the "k-of-n" parameter, determining how many subrules must be satisfied out of a total number.
 - **timeout**: Defines the duration in seconds before the authorization granted by the rule expires.
@@ -58,7 +58,7 @@ security authorizationdb read com.apple.tcc.util.admin
 </plist>
 ```
 
-Moreover in [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) it's possible to see the meaning of `authenticate-admin-nonshared`:<sup>[[1]](#references)</sup>
+The following decoded rule illustrates `authenticate-admin-nonshared` on a documented macOS version:<sup>[[1]](#references)</sup>
 
 ```json
 {
@@ -77,17 +77,20 @@ Moreover in [https://www.dssw.co.uk/reference/authorization-rights/authenticate-
 
 ## Authd
 
-It's a deamon that will receive requests to authorize clients to perform sensitive actions. It works as a XPC service defined inside the `XPCServices/` folder and use to write its logs in `/var/log/authd.log`.
+`authd` is the daemon that evaluates Authorization Services requests. Older releases wrote `/var/log/authd.log`; current releases primarily use the unified logging system, which can be queried with `log show`/`log stream` using an `authd` process predicate.<sup>[[2]](#references)</sup>
 
-Moreover using the security tool it's possible to test many `Security.framework` APIs. For example the `AuthorizationExecuteWithPrivileges` running: `security execute-with-privileges /bin/ls`
+The `security` tool exposes several Authorization Services operations. A historical example invokes `AuthorizationExecuteWithPrivileges` with `security execute-with-privileges /bin/ls`. Apple deprecated that API in macOS 10.7; modern privileged helpers should use a launchd-managed helper and XPC authorization instead.<sup>[[2]](#references)</sup><sup>[[4]](#references)</sup>
 
-That will fork and exec `/usr/libexec/security_authtrampoline /bin/ls` as root, which will ask for permissions in a prompt to execute ls as root:
+On releases that still support it, this uses `/usr/libexec/security_authtrampoline` and displays an authorization prompt before running the command as root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
 ## References
 
 - [1] [authenticate-admin-nonshared - Overview of the macOS Authorization Right](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/)
+- [2] [Apple Authorization Services Programming Guide (archive)](https://developer.apple.com/library/archive/documentation/Security/Conceptual/authorization_concepts/)
+- [3] [`security(1)` macOS manual page](https://keith.github.io/xcode-man-pages/security.1.html)
+- [4] [Apple - Daemons and Services Programming Guide: Creating launchd jobs](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
 
 
 {{#include ../../../banners/hacktricks-training.md}}
