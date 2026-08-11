@@ -69,7 +69,7 @@ Acoustic leakage has been used to recover RSA keys from laptop noise in a contro
 ---
 
 ## Fault Injection & Differential Fault Analysis (DFA)
-Combining controlled faults with side-channel observations can reduce the key search for some algorithms and implementations. Common lab platforms include ChipWhisperer's voltage/clock glitching features and dedicated EM fault-injection tools such as ChipSHOUTER or PicoEMP. The required timing resolution, probe placement, and number of faulty outputs depend on the target and fault model.<sup>[[1]](#references)</sup>
+Combining controlled faults with side-channel observations can reduce the key search for some algorithms and implementations. Common lab platforms include ChipWhisperer's voltage/clock glitching features and dedicated EM fault-injection tools such as ChipSHOUTER or PicoEMP. The earlier draft's “sub-1 ns” description should not be used as a specification: ChipSHOUTER's published manual lists typical inserted-pulse widths of **15–80 ns** with its 1 mm tip and **24–480 ns** with its 4 mm tip (although trigger/pulse jitter is specified in picoseconds). The required timing resolution, probe placement, and number of faulty outputs depend on the target and fault model.<sup>[[1]](#references)[[10]](#references)</sup>
 
 ---
 
@@ -111,5 +111,6 @@ Combining controlled faults with side-channel observations can reduce the key se
 - [7] [Information Leakage from Optical Emanations](https://ora.ox.ac.uk/objects/uuid%3A4fe94cf8-052a-4025-a312-4a62f58fffac)
 - [8] [pyecsca artifact documentation](https://artifacts.iacr.org/tches/2024/a26/readme.html)
 - [9] [A Practical Deep Learning-Based Acoustic Side Channel Attack on Keyboards](https://arxiv.org/abs/2308.01074)
+- [10] [NewAE - ChipSHOUTER user manual](https://media.newae.com/manuals/ChipSHOUTER_PRESS_1.3.pdf)
 
 {{#include ../../banners/hacktricks-training.md}}

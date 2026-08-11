@@ -36,7 +36,7 @@ Long Range (**LoRa**) is currently the most deployed LPWAN physical layer and it
 
 * **CVE-2024-29862** – Affected ChirpStack Gateway Bridge versions before 4.0.11 and MQTT Forwarder versions before 4.2.1 could connect to an attacker-controlled MQTT broker because TLS server-certificate validation was disabled. This could expose credentials and gateway traffic; upgrade to the fixed releases.<sup>[[4]](#references)</sup>
 * **Dragino LG01 firmware 4.3.4** – CVE-2022-45227 describes an unauthenticated `/lib/` directory listing containing a downloadable backup file; CVE-2022-45228 is a low-severity CSRF in the logout page. These records do not establish the claimed LG308 impact, configuration overwrite, population size, or 2025 patch state.<sup>[[6]](#references)[[7]](#references)</sup>
-* Claims about an unreleased Semtech UDP packet-forwarder overflow could not be corroborated with a public advisory or patch. Do not treat that claim as a known vulnerability without obtaining the affected product/version and a verifiable source.
+* An earlier version of this page described an alleged Semtech UDP packet-forwarder issue as a **greater-than-255-byte crafted uplink causing a stack smash and RCE on SX130x reference gateways**, attributed to a “LoRa Exploitation Reloaded” Black Hat Europe 2023 presentation and an October 2023 private patch. Those precise details are retained here as a research lead, but no matching public advisory, presentation, or patch could be corroborated. Do not treat the issue as a known vulnerability without obtaining the affected product/version and a verifiable primary source.
 
 ---
 
@@ -67,7 +67,7 @@ An attacker who can authenticate network-layer MAC commands—for example, after
 
 ### 4. Reactive jamming
 
-A reactive jammer can transmit after detecting a LoRa preamble and selectively disrupt frames. Required transmit power, timing, bandwidth, affected spreading factors, and range are environment-specific. Test only inside an authorized, RF-contained setup and comply with local spectrum rules.
+A reactive jammer can transmit after detecting a LoRa preamble and selectively disrupt frames. The earlier page claimed a HackRF/GNU Radio setup caused a full outage at **2 km with no more than 200 mW**, but no supporting measurement source was provided; retain those numbers only as a reproduction target, not an expected result. Required transmit power, timing, bandwidth, affected spreading factors, and range are environment-specific. Test only inside an authorized, RF-contained setup and comply with local spectrum rules.
 
 ---
 
