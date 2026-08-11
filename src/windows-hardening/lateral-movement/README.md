@@ -1,19 +1,24 @@
-# 横方向移動
+# ラテラルムーブメント
 
 {{#include ../../banners/hacktricks-training.md}}
 
-外部システム上でコマンドを実行する方法にはさまざまなものがあります。ここでは、主要な Windows lateral movement techniques の仕組みについて説明します。
+Windows は、リモートシステム上でコマンドを実行するために使用できる複数のメカニズムをサポートしています。以下のページでは、一般的なラテラルムーブメントの手法と、その前提条件について説明します。
 
 - [**PsExec**](psexec-and-winexec.md)
-- [**SmbExec**](smbexec.md)
+- [**SmbExec**](psexec-and-winexec.md#impacket-smbexecpy-smbexec)
 - [**WmiExec**](wmiexec.md)
 - [**AtExec / SchtasksExec**](atexec.md)
 - [**WinRM**](winrm.md)
-- [**DCOM Exec**](dcom-exec.md)
+- [**DCOM Exec**](dcomexec.md)
 - [**RDPexec**](rdpexec.md)
 - [**SCMexec**](scmexec.md)
-- [**Pass the cookie**](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-cookie.html)（クラウド）
-- [**Pass the PRT**](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html)（クラウド）
-- [**Pass the AzureAD Certificate**](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-certificate.html)（クラウド）
+- **Pass the cookie** (cloud)<sup>[[1]](#references)</sup>
+- **Pass the PRT** (cloud)<sup>[[2]](#references)</sup>
+- **Pass the Microsoft Entra ID certificate** (cloud)<sup>[[3]](#references)</sup>
 
+## References
+
+- [1] [HackTricks Cloud - Pass the cookie](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-cookie.html)
+- [2] [HackTricks Cloud - Pass the PRT](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/pass-the-prt.html)
+- [3] [HackTricks Cloud - Pass the certificate](https://cloud.hacktricks.wiki/en/pentesting-cloud/azure-security/az-lateral-movement-cloud-on-prem/az-pass-the-certificate.html)
 {{#include ../../banners/hacktricks-training.md}}

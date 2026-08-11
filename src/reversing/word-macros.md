@@ -1,18 +1,20 @@
-# Word Macros
+# Word マクロ
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Junk Code
+## ジャンクコード
 
-マクロのreversingをより困難にするため、**決して使用されないjunk code**が見つかることは非常に一般的です。\
-例えば、以下の画像では、決してtrueにならないIfが、junkで役に立たないコードを実行するために使われていることがわかります。
+Macros may contain **解析を遅らせる目的の、到達不能または無関係なコード**。定数条件を特定し、branch の reverse に時間をかける前に、到達可能な挙動を追跡する。以下の例では、決して true にならない `If` condition を使用して、ジャンクコードを隠している。
 
-![Word Macros - Junk Code: 例えば、以下の画像では、決してtrueにならないIfが、junkで役に立たないコードを実行するために使われていることがわかります](<../images/image (369).png>)
+![到達不能な conditional branch とジャンクコードを含む Word マクロ](<../images/image (369).png>)
 
-### Macro Forms
+## Macro Forms
 
-**GetObject**関数を使用すると、マクロのフォームからデータを取得できます。これは分析を困難にするために使用できます。以下は、**テキストボックス内にデータを隠す**ために使用されたマクロフォームの画像です（1つのテキストボックスに他のテキストボックスを隠すこともできます）。
+VBA UserForms は、text box などの control に data を保存できる。form、frame、page はそれぞれ `Controls` collection を公開できるため、analyst は form に表示される内容だけに依存せず、control hierarchy 全体を列挙する必要がある。以下の例では、重なった text box に concealed data を保存している。<sup>[[1]](#references)</sup>
 
-![Junk Code - Macro Forms: GetObject関数を使用すると、マクロのフォームからデータを取得できます。これは分析を困難にするために使用できます。以下は、...](<../images/image (344).png>)
+![重なった text box に data を隠した macro UserForm](<../images/image (344).png>)
 
+## References
+
+- [1] [Microsoft Learn - Collections、controls、objects（Microsoft Forms）](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/objects-microsoft-forms)
 {{#include ../banners/hacktricks-training.md}}
