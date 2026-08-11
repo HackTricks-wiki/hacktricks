@@ -2,72 +2,74 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Wprowadzenie <a href="#kfpn7" id="kfpn7"></a>
+## Wprowadzenie <a href="#introduction" id="introduction"></a>
 
-Flipper Zero może **odbierać i nadawać częstotliwości radiowe w zakresie 300–928 MHz** za pomocą wbudowanego modułu, który potrafi odczytywać, zapisywać i emulować piloty. Piloty te służą do obsługi bram, szlabanów, zamków radiowych, przełączników sterowanych pilotem, bezprzewodowych dzwonków do drzwi, inteligentnych świateł i nie tylko. Flipper Zero może pomóc sprawdzić, czy Twoje zabezpieczenia zostały naruszone.
+Flipper Zero może **odbierać i transmitować częstotliwości radiowe w zakresie 300-928 MHz** za pomocą wbudowanego modułu, z uwzględnieniem ograniczeń częstotliwości obowiązujących w skonfigurowanym regionie. Może odczytywać, zapisywać i emulować kompatybilne piloty używane do bram, szlabanów, zamków radiowych, przełączników, bezprzewodowych dzwonków do drzwi, inteligentnych świateł i innych urządzeń.<sup>[[1]](#references)</sup>
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
-## Hardware Sub-GHz <a href="#kfpn7" id="kfpn7"></a>
+## Sprzęt Sub-GHz <a href="#sub-ghz-hardware" id="sub-ghz-hardware"></a>
 
-Flipper Zero ma wbudowany moduł poniżej 1 GHz oparty na układzie [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101](https://www.ti.com/lit/ds/symlink/cc1101.pdf) oraz antenę radiową (maksymalny zasięg wynosi 50 metrów). Zarówno układ CC1101, jak i antena są zaprojektowane do pracy w pasmach 300–348 MHz, 387–464 MHz oraz 779–928 MHz.
+Flipper Zero ma wbudowany moduł poniżej 1 GHz oparty na transceiverze CC1101 oraz antenę radiową. Rzeczywisty zasięg zależy od częstotliwości, anteny, otoczenia i nadajnika; dokumentacja Flipper podaje do około 50 metrów w korzystnych warunkach. Sprzęt obsługuje zakresy 300-348 MHz, 387-464 MHz i 779-928 MHz, natomiast firmware oraz przepisy regionalne dodatkowo ograniczają transmisję.<sup>[[1]](#references)[[2]](#references)</sup>
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
 ## Działania
 
-### Frequency Analyser
+### Analizator częstotliwości
 
 > [!TIP]
 > Jak znaleźć częstotliwość używaną przez pilota
 
-Podczas analizy Flipper Zero skanuje siłę sygnału (RSSI) na wszystkich częstotliwościach dostępnych w konfiguracji częstotliwości. Flipper Zero wyświetla częstotliwość z najwyższą wartością RSSI i siłą sygnału większą niż -90 [dBm](https://en.wikipedia.org/wiki/DBm).<sup>[[1]](#references)</sup>
+Podczas analizy Flipper Zero skanuje siłę sygnału (RSSI) na wszystkich częstotliwościach dostępnych w konfiguracji częstotliwości. Flipper Zero wyświetla częstotliwość z najwyższą wartością RSSI, przy sile sygnału wyższej niż -90 [dBm](https://en.wikipedia.org/wiki/DBm).<sup>[[1]](#references)</sup>
 
 Aby określić częstotliwość pilota, wykonaj następujące czynności:
 
 1. Umieść pilot bardzo blisko lewej strony Flipper Zero.
 2. Przejdź do **Main Menu** **→ Sub-GHz**.
-3. Wybierz **Frequency Analyzer**, a następnie naciśnij i przytrzymaj przycisk na pilocie, który chcesz przeanalizować.
+3. Wybierz **Frequency Analyzer**, a następnie naciśnij i przytrzymaj przycisk pilota, który chcesz przeanalizować.
 4. Sprawdź wartość częstotliwości na ekranie.
 
-### Read
+### Odczyt
 
 > [!TIP]
 > Znajdź informacje o używanej częstotliwości (to także sposób na znalezienie używanej częstotliwości)
 
-Opcja **Read** **nasłuchuje skonfigurowanej częstotliwości** przy wskazanej modulacji: domyślnie 433.92 AM. Jeśli podczas odczytu **coś zostanie znalezione**, **informacje zostaną wyświetlone** na ekranie. Informacje te mogą zostać wykorzystane do odtworzenia sygnału w przyszłości.<sup>[[1]](#references)</sup>
+Opcja **Read** nasłuchuje na skonfigurowanej częstotliwości i przy użyciu modulacji (domyślnie 433.92 MHz AM). Po rozpoznaniu obsługiwanego sygnału na ekranie wyświetlane są informacje, które można później zapisać i odtworzyć.<sup>[[1]](#references)</sup>
 
 Podczas korzystania z Read można nacisnąć **lewy przycisk** i **skonfigurować tę opcję**.\
 Obecnie dostępne są **4 modulacje** (AM270, AM650, FM328 i FM476) oraz **kilka istotnych częstotliwości**:
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-Możesz ustawić **dowolną częstotliwość, która Cię interesuje**, jednak jeśli **nie masz pewności, która częstotliwość** jest używana przez posiadanego pilota, **włącz Hopping** (domyślnie wyłączone) i naciśnij przycisk kilka razy, aż Flipper przechwyci sygnał i poda informacje potrzebne do ustawienia częstotliwości.
+Możesz wybrać dowolną dozwoloną częstotliwość. Jeśli nie masz pewności, jakiej częstotliwości używa pilot, ustaw **Hopping na ON** (domyślnie wyłączone), a następnie naciśnij przycisk pilota kilka razy, aż Flipper przechwyci sygnał i zgłosi częstotliwość.
 
 > [!CAUTION]
-> Przełączanie między częstotliwościami zajmuje trochę czasu, dlatego sygnały nadawane w momencie przełączania mogą zostać pominięte. Aby poprawić odbiór sygnału, ustaw stałą częstotliwość określoną przez Frequency Analyzer.
+> Przełączanie między częstotliwościami zajmuje trochę czasu, dlatego sygnały transmitowane w momencie przełączania mogą zostać pominięte. Aby uzyskać lepszy odbiór sygnału, ustaw stałą częstotliwość określoną za pomocą Frequency Analyzer.
 
 ### **Read Raw**
 
 > [!TIP]
 > Przechwyć (i odtwórz) sygnał na skonfigurowanej częstotliwości
 
-Opcja **Read Raw** **rejestruje sygnały** wysyłane na nasłuchiwanej częstotliwości. Można jej użyć do **przechwycenia** sygnału i **powtórzenia** go.<sup>[[1]](#references)</sup>
+Opcja **Read Raw** rejestruje sygnały wysyłane na wybranej częstotliwości. Można jej użyć do przechwycenia i odtworzenia sygnału podczas autoryzowanych testów.<sup>[[1]](#references)</sup>
 
-Domyślnie **Read Raw również działa na częstotliwości 433.92 w AM650**, ale jeśli za pomocą opcji Read znajdziesz, że interesujący Cię sygnał jest na **innej częstotliwości lub przy innej modulacji, możesz to również zmienić**, naciskając lewy przycisk (wewnątrz opcji Read Raw).
+Domyślnie **Read Raw również używa 433.92 MHz z AM650**. Jeśli opcja Read znalazła sygnał na innej częstotliwości lub przy użyciu innej modulacji, naciśnij przycisk Left w Read Raw, aby zmienić te ustawienia.
 
 ### Brute-Force
 
-Jeśli znasz protokół używany na przykład przez bramę garażową, możesz **g**enerować wszystkie kody i wysyłać je za pomocą Flipper Zero.** Jest to przykład obsługujący popularne typy bram garażowych: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
+Jeśli znasz protokół używany przez urządzenie, takie jak drzwi garażowe, możliwe może być **generowanie kodów-kandydatów i transmitowanie ich za pomocą Flipper Zero**. Projekt `flipperzero-bruteforce` obsługuje kilka popularnych protokołów kodów statycznych.<sup>[[3]](#references)</sup>
 
-### Add Manually
+### Dodawanie ręczne
 
 > [!TIP]
 > Dodaj sygnały z skonfigurowanej listy protokołów
 
-#### Lista [obsługiwanych protokołów](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
+#### Lista obsługiwanych protokołów <a href="#id-3iglu" id="id-3iglu"></a>
 
-| Princeton_433 (works with the majority of static code systems) | 433.92 | Statyczny |
+Menu Add Manually udostępnia ustawienia wstępne protokołów udokumentowane przez Flipper Zero.<sup>[[4]](#references)</sup>
+
+| Princeton_433 (działa z większością systemów kodów statycznych) | 433.92 | Statyczny |
 | -------------------------------------------------------------- | ------ | --------- |
 | Nice Flo 12bit_433                                             | 433.92 | Statyczny |
 | Nice Flo 24bit_433                                             | 433.92 | Statyczny |
@@ -86,19 +88,23 @@ Jeśli znasz protokół używany na przykład przez bramę garażową, możesz *
 
 ### Obsługiwani dostawcy Sub-GHz
 
-Sprawdź listę na stronie [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+Sprawdź listę obsługiwanych dostawców Flipper Zero.<sup>[[5]](#references)</sup>
 
 ### Obsługiwane częstotliwości według regionu
 
-Sprawdź listę na stronie [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+Przed rozpoczęciem transmisji sprawdź oficjalną listę częstotliwości regionalnych.<sup>[[6]](#references)</sup>
 
 ### Test
 
 > [!TIP]
 > Uzyskaj wartości dBm zapisanych częstotliwości
 
-## Referencje
+## References
 
-- [1] [Sub-GHz - Flipper Zero User Documentation](https://docs.flipperzero.one/sub-ghz)
-
+- [1] [Sub-GHz - Dokumentacja użytkownika Flipper Zero](https://docs.flipperzero.one/sub-ghz)
+- [2] [Karta katalogowa Texas Instruments CC1101](https://www.ti.com/lit/ds/symlink/cc1101.pdf)
+- [3] [tobiabocchi/flipperzero-bruteforce](https://github.com/tobiabocchi/flipperzero-bruteforce)
+- [4] [Flipper Zero - Dodawanie ręcznie utworzonego pilota](https://docs.flipperzero.one/sub-ghz/add-new-remote)
+- [5] [Flipper Zero - Obsługiwani dostawcy Sub-GHz](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+- [6] [Flipper Zero - Regionalne częstotliwości Sub-GHz](https://docs.flipperzero.one/sub-ghz/frequencies)
 {{#include ../../../banners/hacktricks-training.md}}
