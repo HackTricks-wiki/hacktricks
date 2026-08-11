@@ -1,43 +1,42 @@
-# Інші Web Tricks
+# Інші вебтрюки
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Host header
+## Host header
 
-У багатьох випадках back-end довіряє **Host header** для виконання певних дій. Наприклад, він може використовувати його значення як **домен для надсилання скидання пароля**. Тож коли ви отримуєте email із посиланням для скидання пароля, використовується домен, який ви вказали в Host header.Then, ви можете запросити скидання пароля інших користувачів і змінити домен на контрольований вами, щоб викрасти їхні коди скидання пароля. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).<sup>[[1]](#references)</sup>
+Бекенди іноді довіряють полю HTTP `Host` під час формування абсолютних посилань. Якщо email для скидання пароля використовує host, наданий атакувальником, запит на скидання пароля для жертви може надіслати посилання з токеном через домен під контролем атакувальника. Також перевіряйте поля forwarded-host, обробку дублікатів Host і цілі запитів в absolute-form на кожному проксі-хопі.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Зверніть увагу, що, можливо, вам навіть не потрібно чекати, поки користувач натисне на посилання для скидання пароля, щоб отримати token, оскільки його можуть натиснути **spam filters або інші проміжні пристрої/bots для аналізу**.
+> Клік користувача може бути непотрібним: **сканери безпеки пошти, сервіси попереднього перегляду або інші посередники можуть автоматично запитати посилання під контролем атакувальника**, розкривши токен скидання.
 
-### Session booleans
+## Логічні значення сесії
 
-Іноді, коли ви успішно проходите певну перевірку, back-end **просто додає boolean зі значенням "True" до security attribute вашої session**. Після цього інший endpoint знатиме, чи успішно ви пройшли цю перевірку.\
-Однак якщо ви **проходите перевірку**, а вашій session надається значення "True" у security attribute, ви можете спробувати **отримати доступ до інших ресурсів**, які **залежать від того самого attribute**, але до яких ви **не повинні мати permissions**. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).<sup>[[2]](#references)</sup>
+Деякі застосунки записують завершену перевірку як логічне значення в сесії, а потім дозволяють іншому endpoint покладатися на цей прапорець. Після легітимного проходження перевірки для одного ресурсу перевірте, чи той самий прапорець помилково авторизує іншого користувача, об'єкт або workflow. Це вразливість авторизації/повторного використання стану другого порядку, а не просто IDOR.<sup>[[2]](#references)</sup>
 
-### Register functionality
+## Функціональність реєстрації
 
-Спробуйте зареєструватися як уже existent користувач. Також спробуйте використати equivalent characters (крапки, багато пробілів і Unicode).
+Спробуйте зареєструватися як уже існуючий користувач. Також спробуйте використовувати еквівалентні символи (крапки, багато пробілів і Unicode).
 
-### Takeover emails
+## Плутанина станів під час зміни email
 
-Зареєструйте email, до його підтвердження змініть email, а потім, якщо новий confirmation email буде надіслано на перший зареєстрований email, ви зможете takeover будь-який email. Або якщо ви можете enable другий email, підтвердивши перший, ви також зможете takeover будь-який account.
+Зареєструйте email-адресу та змініть її до підтвердження. Перевірте, чи надсилається підтвердження для нової адреси на стару адресу або чи активує підтвердження старого токена нову адресу. Токени підтвердження мають бути прив'язані до точного облікового запису, адреси в очікуванні підтвердження, призначення та поточного стану.
 
-### Access Internal servicedesk of companies using atlassian
+## Відкриті Atlassian service desks
 
 
 {{#ref}}
 https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 {{#endref}}
 
-### TRACE method
+## Метод TRACE
 
-Розробники можуть забути вимкнути різні debugging options у production environment. Наприклад, HTTP `TRACE` method призначений для діагностичних цілей. Якщо його увімкнено, web server відповідатиме на requests, що використовують `TRACE` method, відображаючи у відповіді точний request, який було отримано. Така поведінка часто є нешкідливою, але іноді призводить до information disclosure, наприклад розкриття назв internal authentication headers, які reverse proxies можуть додавати до requests.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Метод HTTP `TRACE` запитує loop-back отриманого запиту для діагностики. RFC 9110 вимагає, щоб одержувачі вилучали конфіденційні поля, як-от облікові дані та cookies, із відображеного вмісту, але небезпечні реалізації або заголовки, додані посередниками, усе ще можуть розкривати внутрішні перетворення запиту. Браузери забороняють скриптам генерувати запити TRACE, тому історична атака cross-site tracing також залежить від окремого способу впровадження захищених полів.<sup>[[3]](#references)</sup>![Зображення відповіді TRACE](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
-![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
+![Зображення для допису](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
 ## References
 
-- [1] [How I was able to take over any user's account with Host Header Injection](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
-- [2] [A less known attack vector: Second Order IDOR attacks](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
-
+- [1] [Як мені вдалося захопити обліковий запис будь-якого користувача за допомогою Host Header Injection](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
+- [2] [Менш відомий вектор атаки: атаки Second Order IDOR](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
+- [3] [RFC 9110, розділ 9.3.8 — TRACE](https://www.rfc-editor.org/rfc/rfc9110.html#name-trace)
 {{#include ../banners/hacktricks-training.md}}
