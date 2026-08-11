@@ -1,8 +1,10 @@
 # Acquisition et montage
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Acquisition
 
-> Acquérez toujours en **read-only** et calculez le **hash** pendant la copie. Gardez le périphérique d’origine **write-blocked** et travaillez uniquement sur des copies vérifiées.
+> Effectuez toujours l’acquisition en **lecture seule** et **calculez le hash pendant la copie**. Maintenez le périphérique d’origine **protégé en écriture** et travaillez uniquement sur des copies vérifiées.
 
 ### DD
 ```bash
@@ -19,7 +21,7 @@ sha256sum disk.img > disk.img.sha256
 sudo dc3dd if=/dev/sdc of=/forensics/pc.img hash=sha256,sha1 hashlog=/forensics/pc.hashes log=/forensics/pc.log bs=1M
 ```
 ### Guymager
-Outil d’imagerie graphique et multithread prenant en charge les formats de sortie **raw (dd)**, **EWF (E01/EWFX)** et **AFF4**, avec vérification parallèle. Disponible dans la plupart des dépôts Linux (`apt install guymager`).
+Imageur graphique et multithread qui prend en charge les sorties **raw (dd)**, **EWF (E01/EWFX)** et **AFF4** avec vérification parallèle. Disponible dans la plupart des dépôts Linux (`apt install guymager`).
 ```bash
 # Start in GUI mode
 sudo guymager
@@ -28,7 +30,7 @@ sudo guymager --simulate --input /dev/sdb --format EWF --hash sha256 --output /e
 ```
 ### AFF4 (Advanced Forensics Format 4)
 
-La spécification AFF4 v1.0, rédigée par Bradley L. Schatz et Michael I. Cohen, définit un conteneur forensique doté d’un stockage virtualisé, de métadonnées arbitraires, d’une compression et d’un hachage extensibles, ainsi que d’opérations à haut débit.<sup>[[1]](#references)</sup>
+La spécification AFF4 v1.0, rédigée par Bradley L. Schatz et Michael I. Cohen, définit un conteneur forensique avec un stockage virtualisé, des métadonnées arbitraires, une compression et un hachage extensibles, ainsi qu'un fonctionnement à haut débit.<sup>[[1]](#references)</sup>
 ```bash
 # Acquire to AFF4 using the reference tool
 pipx install aff4imager
@@ -37,7 +39,7 @@ sudo aff4imager acquire /dev/nvme0n1 /evidence/nvme.aff4 --hash sha256
 # Velociraptor can also acquire AFF4 images remotely
 velociraptor --config server.yaml frontend collect --artifact Windows.Disk.Acquire --args device="\\.\\PhysicalDrive0" format=AFF4
 ```
-### FTK Imager (Windows et Linux)
+### FTK Imager (Windows & Linux)
 
 Vous pouvez [télécharger FTK Imager](https://accessdata.com/product-download) et créer des images **raw, E01 ou AFF4** :
 ```bash
@@ -62,9 +64,9 @@ aws ec2 create-snapshot --volume-id vol-01234567 --description "IR-case-1234 web
 
 ### Choisir la bonne approche
 
-1. Montez le **disque entier** lorsque vous voulez conserver la table de partitions d’origine (MBR/GPT).
+1. Montez le **disque entier** lorsque vous voulez conserver la table de partition d’origine (MBR/GPT).
 2. Montez un **fichier de partition unique** lorsque vous n’avez besoin que d’un seul volume.
-3. Gardez les pièces jointes d’image en lecture seule (par exemple, `--read-only` de qemu-nbd).<sup>[[2]](#references)</sup> Montez les systèmes de fichiers en lecture seule (`-o ro`).<sup>[[3]](#references)</sup> Travaillez sur des **copies**.
+3. Gardez les images attachées en lecture seule (par exemple, avec `--read-only` de qemu-nbd).<sup>[[2]](#references)</sup> Montez les systèmes de fichiers en lecture seule (`-o ro`).<sup>[[3]](#references)</sup> Travaillez sur des **copies**.
 
 ### Images brutes (dd, extraites d’AFF4)
 ```bash
@@ -81,7 +83,7 @@ lsblk /dev/nbd0 -o NAME,SIZE,TYPE,FSTYPE,LABEL,UUID
 # Mount a partition (e.g. /dev/nbd0p2)
 sudo mount -o ro,uid=$(id -u) /dev/nbd0p2 /mnt
 ```
-No content was provided for translation.
+Détachez-vous une fois terminé :
 ```bash
 sudo umount /mnt && sudo qemu-nbd --disconnect /dev/nbd0
 ```
@@ -106,7 +108,7 @@ mount -o ro /tmp/raw_mount/image.dd /mnt
 ```
 ### Volumes LVM / BitLocker / VeraCrypt
 
-Après avoir attaché le block device (loop ou nbd) :
+Après avoir attaché le périphérique bloc (loop ou nbd) :
 ```bash
 # LVM
 sudo vgchange -ay               # activate logical volumes
@@ -116,7 +118,7 @@ sudo lvscan | grep "/dev/nbd0"
 sudo dislocker -V /dev/nbd0p3 -u -- /mnt/bitlocker
 sudo mount -o ro /mnt/bitlocker/dislocker-file /mnt/evidence
 ```
-### Helpers kpartx
+### Aides kpartx
 
 `kpartx` mappe automatiquement les partitions d’une image vers `/dev/mapper/` :
 ```bash
@@ -125,17 +127,17 @@ mount -o ro /dev/mapper/loop0p2 /mnt
 ```
 ### Erreurs courantes de montage et corrections
 
-Pour un système de fichiers ext3/ext4 « dirty », utilisez `ro,noload` lorsque la relecture du journal doit être empêchée.<sup>[[3]](#references)</sup>
+Pour un système de fichiers ext3/ext4 marqué comme non propre, utilisez `ro,noload` lorsqu’il faut empêcher la relecture du journal.<sup>[[3]](#references)</sup>
 
-| Erreur | Cause typique | Correction |
+| Erreur | Cause habituelle | Correction |
 |-------|---------------|-----|
-| `cannot mount /dev/loop0 read-only` | FS journalisé (ext4) non démonté proprement | utilisez `-o ro,noload` |
-| `bad superblock …` | Offset incorrect ou FS endommagé | calculez l’offset (`sector*size`) ou exécutez `fsck -n` sur une copie |
-| `mount: unknown filesystem type 'LVM2_member'` | Conteneur LVM | activez le volume group avec `vgchange -ay` |
+| `cannot mount /dev/loop0 read-only` | Système de fichiers journalisé (ext4) démonté de manière incorrecte | utiliser `-o ro,noload` |
+| `bad superblock …` | Offset incorrect ou système de fichiers endommagé | calculer l’offset (`sector*size`) ou exécuter `fsck -n` sur une copie |
+| `mount: unknown filesystem type 'LVM2_member'` | Conteneur LVM | activer le volume group avec `vgchange -ay` |
 
 ### Nettoyage
 
-N’oubliez pas de **umount** et de **disconnect** les devices loop/nbd afin d’éviter de laisser des mappings orphelins susceptibles de corrompre les opérations ultérieures :
+N’oubliez pas d’exécuter **umount** et de **déconnecter** les périphériques loop/nbd afin d’éviter de laisser des mappings persistants susceptibles de corrompre les opérations ultérieures :
 ```bash
 umount -Rl /mnt/evidence
 kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
@@ -145,5 +147,5 @@ kpartx -dv /dev/loop0  # or qemu-nbd --disconnect /dev/nbd0
 - [1] [Spécification de la norme AFF4 (Advanced Forensic Format v4)](https://github.com/aff4/Standard)
 - [2] [Documentation de QEMU qemu-nbd](https://www.qemu.org/docs/master/tools/qemu-nbd.html)
 - [3] [Page du manuel Linux mount(8)](https://man7.org/linux/man-pages/man8/mount.8.html)
-- [4] [Le système de fichiers SGI XFS (documentation du noyau Linux)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
+- [4] [Le système de fichiers SGI XFS (documentation du kernel Linux)](https://kernel.org/doc/html/v5.9/admin-guide/xfs.html)
 {{#include ../../banners/hacktricks-training.md}}

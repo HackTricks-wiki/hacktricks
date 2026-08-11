@@ -1,4 +1,6 @@
-# Analyse d'un dump mémoire
+# Analyse d’un dump mémoire
+
+{{#include ../../../banners/hacktricks-training.md}}
 
 ## Début
 
@@ -6,29 +8,29 @@ Commencez par **rechercher** des **malwares** dans le pcap. Utilisez les **outil
 
 ## [Volatility](volatility-cheatsheet.md)
 
-**Volatility est un framework open source d'analyse de dumps mémoire**. Cet outil Python analyse les dumps provenant de sources externes ou de machines virtuelles VMware, en identifiant des données telles que les processus et les mots de passe en fonction du profil de l'OS du dump. Il est extensible grâce à des plugins, ce qui le rend très polyvalent pour les investigations forensics.<sup>[[1]](#references)[[2]](#references)</sup>
+**Volatility est un framework open source pour l’analyse des dumps mémoire**. Cet outil Python analyse les dumps provenant de sources externes ou de machines virtuelles VMware, en identifiant des données comme les processus et les mots de passe à partir du profil de l’OS du dump. Il est extensible grâce à des plugins, ce qui le rend très polyvalent pour les investigations forensics.<sup>[[1]](#references)[[2]](#references)</sup>
 
 [**Trouvez ici une cheatsheet**](volatility-cheatsheet.md)
 
-## Rapport de crash mini dump
+## Rapport de crash d’un mini dump
 
-Lorsque le dump est petit (seulement quelques Ko, voire quelques Mo), il peut s'agir d'un rapport de crash mini dump plutôt que d'un dump mémoire complet.<sup>[[3]](#references)</sup>
+Lorsque le dump est petit (quelques Ko, voire quelques Mo), il peut s’agir d’un rapport de crash de mini dump plutôt que d’un dump mémoire complet.<sup>[[3]](#references)</sup>
 
-![Volatility - Rapport de crash mini dump : petit fichier dump identifié comme rapport de crash Mini DuMP](<../../../images/image (532).png>)
+![Volatility - Rapport de crash d’un mini dump : un petit fichier dump identifié comme un rapport de crash Mini DuMP](<../../../images/image (532).png>)
 
-Si Visual Studio est installé, vous pouvez ouvrir ce fichier pour afficher des informations de base telles que le nom du processus, l'architecture, les détails de l'exception et les modules chargés :<sup>[[4]](#references)</sup>
+Si Visual Studio est installé, vous pouvez ouvrir ce fichier pour afficher des informations de base telles que le nom du processus, l’architecture, les détails de l’exception et les modules chargés :<sup>[[4]](#references)</sup>
 
-![Volatility - Rapport de crash mini dump : si Visual Studio est installé, vous pouvez ouvrir ce fichier et obtenir des informations de base comme le nom du processus, l'architecture, les informations sur l'exception et...](<../../../images/image (263).png>)
+![Volatility - Rapport de crash d’un mini dump : si Visual Studio est installé, vous pouvez ouvrir ce fichier et obtenir des informations de base comme le nom du processus, l’architecture, les informations sur l’exception et...](<../../../images/image (263).png>)
 
-Vous pouvez également examiner l'exception et afficher le désassemblage du module.<sup>[[4]](#references)</sup>
+Vous pouvez également examiner l’exception et afficher le désassemblage du module.<sup>[[4]](#references)</sup>
 
-![Panneau Actions de Visual Studio pour le minidump, avec des options pour déboguer nativement et définir les chemins des symboles](<../../../images/image (142).png>)
+![Panneau Actions de Visual Studio pour un minidump, avec des options permettant de déboguer nativement et de définir les chemins des symboles](<../../../images/image (142).png>)
 
-![Désassemblage Visual Studio des instructions provenant de l'exception du minidump](<../../../images/image (610).png>)
+![Désassemblage Visual Studio des instructions provenant de l’exception du minidump](<../../../images/image (610).png>)
 
-Quoi qu'il en soit, Visual Studio n'est pas le meilleur outil pour effectuer une analyse approfondie du dump.
+Quoi qu’il en soit, Visual Studio n’est pas le meilleur outil pour effectuer une analyse approfondie du dump.
 
-Vous devriez **l'ouvrir** avec **IDA** ou **Radare** afin de l'inspecter en **profondeur**.
+Vous devriez l’**ouvrir** avec **IDA** ou **Radare** afin de l’inspecter en **profondeur**.
 
 ## References
 

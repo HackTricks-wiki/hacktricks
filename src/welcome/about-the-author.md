@@ -1,12 +1,14 @@
-# À propos de l'auteur
+# À propos de l’auteur
+
+{{#include ../banners/hacktricks-training.md}}
 
 ### Bonjour !!
 
-Les techniques apportées par d'autres chercheurs restent attribuées à leurs auteurs d'origine. Merci à toutes les personnes qui partagent leurs connaissances pour améliorer la sécurité sur Internet.
+Les techniques apportées par d’autres chercheurs restent attribuées à leurs auteurs d’origine. Merci à toutes les personnes qui partagent leurs connaissances pour améliorer la sécurité d’Internet.
 
-Carlos dirige HackTricks. Le projet est un wiki de cybersécurité maintenu par la communauté, qui rassemble des techniques de sécurité pratiques et accueille les contributions ; si vous trouvez quelque chose qui manque ou qui est obsolète, veuillez ouvrir une pull request dans le dépôt du projet.<sup>[[1]](#references)</sup>
+Carlos dirige HackTricks. Le projet est un wiki communautaire consacré à la cybersécurité, qui rassemble des techniques pratiques et accueille les contributions ; si vous trouvez quelque chose de manquant ou obsolète, veuillez ouvrir une pull request dans le dépôt du projet.<sup>[[1]](#references)</sup>
 
-HackTricks offre également aux chercheurs un espace pour partager leurs nouvelles découvertes, aidant ainsi les lecteurs à rester informés des techniques de sécurité actuelles.
+HackTricks offre également aux chercheurs un espace où partager leurs nouvelles découvertes, permettant aux lecteurs de rester au fait des techniques de sécurité actuelles.
 
 ## References
 

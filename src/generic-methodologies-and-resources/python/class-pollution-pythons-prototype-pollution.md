@@ -1,8 +1,10 @@
 # Class Pollution (Python's Prototype Pollution)
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Exemple de base
 
-La modification de `__qualname__` via la référence de classe d'une instance met à jour la classe ainsi que ses classes de base mutables.<sup>[[1]](#references)</sup>
+Modifier `__qualname__` via la référence à la classe d'une instance met à jour la classe ainsi que ses classes de base mutables.<sup>[[1]](#references)</sup>
 ```python
 class Company: pass
 class Developer(Company): pass
@@ -26,7 +28,7 @@ e.__class__.__base__.__base__.__qualname__ = 'Polluted_Company'
 print(d) #<__main__.Polluted_Developer object at 0x1041d2b80>
 print(c) #<__main__.Polluted_Company object at 0x1043a72b0>
 ```
-## Exemple de vulnérabilité de base
+## Exemple basique de vulnérabilité
 
 Une fusion récursive peut accepter des clés de mapping contrôlées par l'attaquant et écrire des valeurs imbriquées via un accès par élément ou par attribut.<sup>[[1]](#references)</sup>
 ```python
@@ -118,9 +120,9 @@ print(system_admin_emp.execute_command())
 
 <details>
 
-<summary>Pollution d'autres classes et variables globales via <code>globals</code></summary>
+<summary>Polluer d'autres classes et variables globales via <code>globals</code></summary>
 
-La mapping `__globals__` d'une fonction expose l'espace de noms du module accessible depuis une méthode définie dans ce module.<sup>[[1]](#references)[[4]](#references)</sup>
+Le mapping `__globals__` d'une fonction expose l'espace de noms du module accessible depuis une méthode définie dans ce module.<sup>[[1]](#references)[[4]](#references)</sup>
 ```python
 def merge(src, dst):
 # Recursive merge function
@@ -154,7 +156,7 @@ print(NotAccessibleClass) #> <class '__main__.PollutedClass'>
 
 <summary>Exécution arbitraire de subprocess</summary>
 
-Sous Windows, `Popen(..., shell=True)` utilise la variable d'environnement `COMSPEC` comme shell par défaut, ce qui permet à ce gadget de démontrer la redirection de commandes basée sur l'environnement.<sup>[[1]](#references)[[5]](#references)</sup>
+Sous Windows, `Popen(..., shell=True)` utilise la variable d’environnement `COMSPEC` comme shell par défaut ; ce gadget démontre une redirection des commandes basée sur l’environnement.<sup>[[1]](#references)[[5]](#references)</sup>
 ```python
 import subprocess, json
 
@@ -229,25 +231,24 @@ execute() #> Executing echo Polluted
 
 <details>
 
-<summary>Écrasement du secret Flask entre plusieurs fichiers</summary>
+<summary>Remplacer le secret Flask entre plusieurs fichiers</summary>
 
-Si la classe de l'objet pollué se trouve dans un module différent de celui du module d'entrée de l'application, les méthodes de cette classe exposent initialement l'espace de noms du module de la classe via `__globals__`. Une traversée via le loader et `sys.modules.__main__` peut ensuite atteindre le module d'entrée et son objet Flask `app`.<sup>[[1]](#references)[[2]](#references)</sup>
+Si la classe de l'objet pollué se trouve dans un module différent du module d'entrée de l'application, les méthodes de cette classe exposent initialement l'espace de noms du module de la classe via `__globals__`. Un parcours à travers le loader et `sys.modules.__main__` permet ensuite d'atteindre le module d'entrée ainsi que son objet Flask `app`.<sup>[[1]](#references)[[2]](#references)</sup>
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
 Flask utilise `app.secret_key` pour signer le cookie de session ; connaître cette clé permet à un attaquant de créer des données de session valides.<sup>[[6]](#references)</sup>
 
-Le writeup original présente le chemin suivant pour atteindre `app.secret_key` ; CTFtime héberge également une copie du writeup.<sup>[[2]](#references)[[3]](#references)</sup>
+Le writeup original démontre le chemin suivant pour atteindre `app.secret_key` ; CTFtime héberge également une copie du writeup.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
-Changer la clé peut permettre de signer des cookies de session de remplacement et éventuellement d'élever les privilèges ; consultez [la page d'outils de session Flask](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
+Changer la clé peut permettre de signer des cookies de session de remplacement et éventuellement d'élever les privilèges ; voir [la page Flask consacrée aux outils de session](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).<sup>[[6]](#references)</sup>
 
 </details>
 
-Consultez également la page suivante pour obtenir davantage de gadgets en lecture seule :
-
+Consultez également la page suivante pour découvrir davantage de gadgets en lecture seule :
 
 {{#ref}}
 python-internal-read-gadgets.md
@@ -256,9 +257,9 @@ python-internal-read-gadgets.md
 ## References
 
 - [1] [Prototype Pollution en Python](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
-- [2] [Writeup de la tâche task manager d'idekCTF 2022 (original)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
-- [3] [CTFtime - Writeup de la tâche task manager d'idekCTF 2022](https://ctftime.org/writeup/36082)
+- [2] [writeup de la tâche task manager d'idekCTF 2022 (original)](https://kdxcxs.github.io/posts/wp/idekctf-2022-task-manager-wp/)
+- [3] [CTFtime - writeup de la tâche task manager d'idekCTF 2022](https://ctftime.org/writeup/36082)
 - [4] [inspect — Inspecter les objets actifs](https://docs.python.org/3/library/inspect.html)
 - [5] [subprocess — Gestion des sous-processus](https://docs.python.org/3/library/subprocess.html)
-- [6] [Quickstart — Documentation Flask](https://flask.palletsprojects.com/en/stable/quickstart/)
+- [6] [Démarrage rapide — Documentation Flask](https://flask.palletsprojects.com/en/stable/quickstart/)
 {{#include ../../banners/hacktricks-training.md}}

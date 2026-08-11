@@ -1,8 +1,10 @@
 # Requêtes Web
 
-## Python Requests
+{{#include ../../banners/hacktricks-training.md}}
 
-Ces exemples utilisent les arguments de requête documentés de Requests, les propriétés des réponses, les tuples de fichiers multipart et les sessions.<sup>[[1]](#references)</sup> Les exemples avec `verify=False` désactivent la vérification des certificats TLS et doivent être limités à des tests contrôlés.<sup>[[1]](#references)</sup>
+## Requests Python
+
+Ces exemples utilisent les arguments de requête documentés de Requests, les propriétés de réponse, les tuples de fichiers multipart et les sessions.<sup>[[1]](#references)</sup> Les exemples utilisant `verify=False` désactivent la vérification des certificats TLS et doivent être limités à des tests contrôlés.<sup>[[1]](#references)</sup>
 ```python
 import random
 import re
@@ -76,7 +78,7 @@ return ''.join(random.choice(string.ascii_letters) for i in range(10))
 ```
 ## Commande Python pour exploiter une RCE
 
-La boucle de commandes dérive de `Cmd` de Python ; sa méthode `default` gère les préfixes de commande non reconnus, `cmdloop` distribue les lignes d’entrée, et `re.DOTALL` permet au motif d’extraction de couvrir plusieurs lignes.<sup>[[2]](#references)[[3]](#references)</sup>
+La boucle de commandes sous-classe `Cmd` de Python ; sa méthode `default` gère les préfixes de commande non reconnus, `cmdloop` distribue les lignes d’entrée, et `re.DOTALL` permet au motif d’extraction de s’étendre sur plusieurs lignes.<sup>[[2]](#references)[[3]](#references)</sup>
 ```python
 import requests
 import re
@@ -105,7 +107,7 @@ term.cmdloop()
 ```
 ## References
 
-- [1] [Interface de développement de Requests](https://requests.readthedocs.io/en/stable/api/)
+- [1] [Interface développeur de Requests](https://requests.readthedocs.io/en/stable/api/)
 - [2] [Python `cmd` — Prise en charge des interpréteurs de commandes orientés ligne](https://docs.python.org/3/library/cmd.html)
 - [3] [Python `re` — Opérations sur les expressions régulières](https://docs.python.org/3/library/re.html)
 {{#include ../../banners/hacktricks-training.md}}

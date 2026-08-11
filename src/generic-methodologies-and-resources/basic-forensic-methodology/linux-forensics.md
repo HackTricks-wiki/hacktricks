@@ -1,15 +1,17 @@
-# Forensics Linux
+# Analyse forensique Linux
+
+{{#include ../../banners/hacktricks-training.md}}
 
 ## Collecte initiale d’informations
 
 ### Informations de base
 
-Tout d’abord, il est recommandé d’avoir une clé **USB** contenant des **binaires et bibliothèques fiables** (vous pouvez simplement récupérer Ubuntu et copier les dossiers _/bin_, _/sbin_, _/lib,_ et _/lib64_), puis de monter la clé USB et de modifier les variables d’environnement afin d’utiliser ces binaires :
+Tout d’abord, il est recommandé d’avoir une **clé USB** contenant des **binaires et bibliothèques fiables et connus** (vous pouvez simplement récupérer Ubuntu et copier les dossiers _/bin_, _/sbin_, _/lib,_ et _/lib64_), puis de monter la clé USB et de modifier les variables d’environnement afin d’utiliser ces binaires :
 ```bash
 export PATH=/mnt/usb/bin:/mnt/usb/sbin
 export LD_LIBRARY_PATH=/mnt/usb/lib:/mnt/usb/lib64
 ```
-Une fois que vous avez configuré le système pour utiliser des binaires fiables et connus, vous pouvez commencer à **extraire des informations de base** :
+Une fois que vous avez configuré le système pour utiliser des binaires fiables et connus, vous pouvez commencer à **extraire quelques informations de base** :
 ```bash
 date #Date and time (Clock may be skewed, Might be at a different timezone)
 uname -a #OS info
@@ -29,22 +31,22 @@ find /directory -type f -mtime -1 -print #Find modified files during the last mi
 ```
 #### Informations suspectes
 
-Lors de l’obtention des informations de base, vous devez rechercher les éléments inhabituels suivants :
+Lors de l'obtention des informations de base, vous devez vérifier la présence d'éléments inhabituels tels que :
 
-- Les processus **root** s’exécutent généralement avec des PIDS faibles. Si vous trouvez donc un processus **root** avec un PID élevé, vous pouvez avoir des soupçons.
+- Les processus **root** s'exécutent généralement avec des PID faibles ; si vous trouvez un processus **root** avec un PID élevé, cela peut être suspect
 - Vérifiez les **connexions enregistrées** des utilisateurs sans shell dans `/etc/passwd`
 - Vérifiez la présence de **hashes de mots de passe** dans `/etc/shadow` pour les utilisateurs sans shell
 
-### Dump mémoire
+### Memory Dump
 
-Pour obtenir la mémoire du système en cours d’exécution, il est recommandé d’utiliser [**LiME**](https://github.com/504ensicsLabs/LiME).\
+Pour obtenir la mémoire du système en cours d'exécution, il est recommandé d'utiliser [**LiME**](https://github.com/504ensicsLabs/LiME).\
 Pour le **compiler**, vous devez utiliser le **même kernel** que celui utilisé par la machine victime.
 
 > [!TIP]
-> N’oubliez pas que vous **ne pouvez pas installer LiME ni quoi que ce soit d’autre** sur la machine victime, car cela y apportera plusieurs modifications.
+> N'oubliez pas que vous **ne pouvez pas installer LiME ni quoi que ce soit d'autre** sur la machine victime, car cela y entraînerait plusieurs modifications
 
-Ainsi, si vous disposez d’une version identique d’Ubuntu, vous pouvez utiliser `apt-get install lime-forensics-dkms`\
-Dans les autres cas, vous devez télécharger [**LiME**](https://github.com/504ensicsLabs/LiME) depuis github et le compiler avec les headers du kernel appropriés. Pour **obtenir les headers exacts du kernel** de la machine victime, vous pouvez simplement **copier le répertoire** `/lib/modules/<kernel version>` sur votre machine, puis **compiler** LiME en les utilisant :
+Ainsi, si vous disposez d'une version identique d'Ubuntu, vous pouvez utiliser `apt-get install lime-forensics-dkms`\
+Dans les autres cas, vous devez télécharger [**LiME**](https://github.com/504ensicsLabs/LiME) depuis github et le compiler avec les headers du kernel appropriés. Pour **obtenir les headers exacts du kernel** de la machine victime, il vous suffit de **copier le répertoire** `/lib/modules/<kernel version>` sur votre machine, puis de **compiler** LiME en les utilisant :
 ```bash
 make -C /lib/modules/<kernel version>/build M=$PWD
 sudo insmod lime.ko "path=/home/sansforensics/Desktop/mem_dump.bin format=lime"
@@ -57,16 +59,16 @@ LiME prend en charge 3 **formats** :
 
 LiME peut également être utilisé pour **envoyer le dump via le réseau** au lieu de le stocker sur le système, en utilisant quelque chose comme : `path=tcp:4444`
 
-### Disk Imaging
+### Imaging du disque
 
-#### Shutting down
+#### Arrêt
 
 Tout d'abord, vous devrez **arrêter le système**. Ce n'est pas toujours une option, car il peut parfois s'agir d'un serveur de production que l'entreprise ne peut pas se permettre d'arrêter.\
-Il existe **2 façons** d'arrêter le système : un **arrêt normal** et un **arrêt par "débranchement de la prise"**. La première méthode permettra aux **processus de se terminer comme d'habitude** et au **système de fichiers** d'être **synchronisé**, mais elle permettra également au **malware** éventuel de **détruire les preuves**. L'approche consistant à **débrancher la prise** peut entraîner **une certaine perte d'informations** (une grande partie des informations ne sera pas perdue, car nous avons déjà effectué une image de la mémoire) et le **malware n'aura aucune possibilité** d'intervenir. Par conséquent, si vous **suspectez** la présence d'un **malware**, exécutez simplement la **commande** **`sync`** sur le système, puis débranchez la prise.
+Il existe **2 façons** d'arrêter le système : un **arrêt normal** et un **arrêt en « retirant la prise »**. Le premier permettra aux **processus de se terminer normalement** et au **système de fichiers** d'être **synchronisé**, mais il permettra également au **malware** éventuel de **détruire les preuves**. L'approche consistant à « retirer la prise » peut entraîner **une certaine perte d'informations** (une grande partie des informations ne sera pas perdue, car nous avons déjà effectué une image de la mémoire) et le **malware n'aura aucune possibilité** d'agir. Par conséquent, si vous **suspectez** la présence d'un **malware**, exécutez simplement la **commande** **`sync`** sur le système, puis retirez la prise.
 
-#### Taking an image of the disk
+#### Création d'une image du disque
 
-Il est important de noter qu'**avant de connecter votre ordinateur à tout élément lié à l'affaire**, vous devez vous assurer qu'il sera **monté en lecture seule** afin d'éviter de modifier des informations.
+Il est important de noter qu'**avant de connecter votre ordinateur à tout élément lié à l'affaire**, vous devez vous assurer qu'il sera **monté en lecture seule** afin d'éviter de modifier toute information.
 ```bash
 #Create a raw copy of the disk
 dd if=<subject device> of=<image file> bs=512
@@ -75,9 +77,9 @@ dd if=<subject device> of=<image file> bs=512
 dcfldd if=<subject device> of=<image file> bs=512 hash=<algorithm> hashwindow=<chunk size> hashlog=<hash file>
 dcfldd if=/dev/sdc of=/media/usb/pc.image hash=sha256 hashwindow=1M hashlog=/media/usb/pc.hashes
 ```
-### Pré-analyse de l'image disque
+### Pré-analyse de l’image disque
 
-Création d'une image disque sans données supplémentaires.
+Création d’une image disque ne contenant pas davantage de données.
 ```bash
 #Find out if it's a disk image using "file" command
 file disk.img
@@ -130,18 +132,19 @@ r/r 16: secret.txt
 icat -i raw -f ext4 disk.img 16
 ThisisTheMasterSecret
 ```
-## Rechercher des Malware connus
+## Rechercher les Malware connus
 
 ### Fichiers système modifiés
 
-Linux fournit des outils permettant de vérifier l’intégrité des composants système, ce qui est essentiel pour repérer les fichiers potentiellement problématiques.<sup>[[1]](#references)</sup>
+Linux propose des outils permettant de vérifier l’intégrité des composants système, ce qui est essentiel pour repérer les fichiers potentiellement problématiques.<sup>[[1]](#references)</sup>
 
 - **Systèmes basés sur RedHat** : utilisez `rpm -Va` pour effectuer une vérification complète.
-- **Systèmes basés sur Debian** : utilisez d’abord `dpkg --verify`, puis `debsums | grep -v "OK$"` (après avoir installé `debsums` avec `apt-get install debsums`) afin d’identifier les problèmes éventuels.
+- **Systèmes basés sur Debian** : utilisez `dpkg --verify` pour une première vérification, puis `debsums | grep -v "OK$"` (après avoir installé `debsums` avec `apt-get install debsums`) afin d’identifier les problèmes éventuels.
 
 ### Détecteurs de Malware/Rootkit
 
 Consultez la page suivante pour découvrir les outils qui peuvent être utiles pour trouver des Malware :
+
 
 {{#ref}}
 malware-analysis.md
@@ -149,12 +152,12 @@ malware-analysis.md
 
 ## Rechercher les programmes installés
 
-Pour rechercher efficacement les programmes installés sur les systèmes Debian et RedHat, utilisez les journaux et les bases de données système en complément de vérifications manuelles dans les répertoires courants.<sup>[[1]](#references)</sup>
+Pour rechercher efficacement les programmes installés sur les systèmes Debian et RedHat, envisagez d’exploiter les journaux et les bases de données système, en complément de vérifications manuelles dans les répertoires courants.<sup>[[1]](#references)</sup>
 
-- Pour Debian, examinez _**`/var/lib/dpkg/status`**_ et _**`/var/log/dpkg.log`**_ afin d’obtenir des informations sur les installations de paquets, en utilisant `grep` pour filtrer les informations spécifiques.
-- Les utilisateurs de RedHat peuvent interroger la base de données RPM avec `rpm -qa --root=/mntpath/var/lib/rpm` pour lister les paquets installés.
+- Pour Debian, examinez _**`/var/lib/dpkg/status`**_ et _**`/var/log/dpkg.log`**_ afin d’obtenir les détails sur les installations de packages, en utilisant `grep` pour filtrer les informations spécifiques.
+- Les utilisateurs de RedHat peuvent interroger la base de données RPM avec `rpm -qa --root=/mntpath/var/lib/rpm` pour lister les packages installés.
 
-Pour découvrir les logiciels installés manuellement ou en dehors de ces gestionnaires de paquets, explorez les répertoires tels que _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_ et _**`/sbin`**_. Combinez les listes de répertoires avec des commandes spécifiques au système afin d’identifier les exécutables qui ne sont associés à aucun paquet connu, ce qui améliore votre recherche de tous les programmes installés.
+Pour repérer les logiciels installés manuellement ou en dehors de ces gestionnaires de packages, explorez des répertoires tels que _**`/usr/local`**_, _**`/opt`**_, _**`/usr/sbin`**_, _**`/usr/bin`**_, _**`/bin`**_ et _**`/sbin`**_. Combinez les listes de répertoires avec des commandes spécifiques au système afin d’identifier les exécutables qui ne sont associés à aucun package connu, ce qui améliore votre recherche de tous les programmes installés.
 ```bash
 # Debian package and log details
 cat /var/lib/dpkg/status | grep -E "Package:|Status:"
@@ -170,17 +173,17 @@ find /sbin/ –exec rpm -qf {} \; | grep "is not"
 # Find exacuable files
 find / -type f -executable | grep <something>
 ```
-## Récupérer des binaires supprimés en cours d’exécution
+## Récupérer des binaires en cours d’exécution supprimés
 
-Imaginez un processus exécuté depuis /tmp/exec, puis supprimé. Il est possible de l’extraire.
+Imaginez un processus qui a été exécuté depuis `/tmp/exec`, puis supprimé. Il est possible de l’extraire
 ```bash
 cd /proc/3746/ #PID with the exec file deleted
 head -1 maps #Get address of the file. It was 08048000-08049000
 dd if=mem bs=1 skip=08048000 count=1000 of=/tmp/exec2 #Recorver it
 ```
-## Triage des syscalls avec SQLite et FTS5
+## Triage des traces d’appels système avec SQLite et FTS5
 
-Lorsqu’un processus est toujours en cours d’exécution ou peut être réexécuté dans un lab, **`strace`** peut fournir rapidement une trace comportementale sans nécessiter de modules du kernel ni de télémétrie EDR complète. Pour les traces volumineuses, évitez de lire directement le log brut ou de le coller dans un LLM : stockez-le dans une base de données **SQLite** et n’interrogez que le sous-ensemble minimal dont vous avez besoin.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
+Lorsqu’un processus est toujours en cours d’exécution ou peut être réexécuté dans un lab, **`strace`** peut fournir rapidement une trace comportementale sans nécessiter de modules du kernel ni une télémétrie EDR complète. Pour les traces volumineuses, évitez de lire directement le journal brut ou de le coller dans un LLM : stockez-le dans une base de données **SQLite** et n’interrogez que le sous-ensemble minimal dont vous avez besoin.<sup>[[7]](#references)[[8]](#references)[[9]](#references)</sup>
 
 > [!WARNING]
 > L’attachement de `strace` modifie le timing du processus et peut affecter les race conditions ou d’autres bugs fragiles. Privilégiez si possible la reproduction sur une copie ou un système de lab.
@@ -197,14 +200,14 @@ strace -ff -ttt -yy -s 4096 -o /tmp/trace.log -p <PID>
 ```
 Options utiles :
 
-- `-ff` : suivre les forks/threads et conserver les sorties par processus
-- `-ttt` : timestamps epoch pour faciliter la corrélation temporelle
-- `-yy` : résoudre les descripteurs de fichiers en chemins de fichiers/sockets sous-jacents lorsque cela est possible
-- `-s 4096` : éviter la troncature des chemins et des arguments de buffer longs
+- `-ff` : suivre les forks/threads et conserver des sorties par processus
+- `-ttt` : horodatages epoch pour faciliter la corrélation chronologique
+- `-yy` : résoudre les descripteurs de fichiers en chemins/sockets sous-jacents lorsque cela est possible
+- `-s 4096` : empêcher la troncature des arguments contenant des chemins et des buffers longs
 
 ### Normaliser
 
-Un schéma pratique consiste à utiliser une ligne par syscall et par argument :
+Un schéma pratique consiste à utiliser une ligne par appel système et une ligne par argument :
 ```sql
 CREATE TABLE syscalls (
 id        INTEGER PRIMARY KEY,
@@ -223,11 +226,11 @@ raw        TEXT    NOT NULL,
 type       INTEGER NOT NULL
 );
 ```
-Cela évite d’essayer d’aplatir des lignes de syscall hétérogènes en une seule table très large et rend les jointures prévisibles pendant le triage.
+Cela évite d’essayer d’aplatir des lignes de syscall hétérogènes dans une seule table très large et garantit que les jointures restent prévisibles pendant le triage.
 
-### Indexez les arguments riches en texte avec FTS5
+### Indexer les arguments riches en texte avec FTS5
 
-La recherche naïve de chemins avec `LIKE "%...%"` devient très lente sur les traces volumineuses. Créez un index FTS5 pour le texte des arguments et effectuez plutôt la recherche dedans :
+La recherche naïve de chemins avec `LIKE "%...%"` devient très lente sur les traces volumineuses. Créez un index FTS5 pour le texte des arguments et effectuez plutôt les recherches dessus :
 ```sql
 CREATE VIRTUAL TABLE syscall_args_fts
 USING fts5(raw, content='syscall_args', content_rowid='id');
@@ -235,7 +238,7 @@ USING fts5(raw, content='syscall_args', content_rowid='id');
 INSERT INTO syscall_args_fts(rowid, raw)
 SELECT id, raw FROM syscall_args;
 ```
-Exemple : reconstituer l’activité des fichiers sous `/tmp` sans analyser chaque ligne :
+Exemple : récupérer l’activité des fichiers sous `/tmp` sans analyser chaque ligne :
 ```sql
 SELECT s.timestamp, s.pid, s.name, a.position, a.raw
 FROM syscall_args_fts f
@@ -245,26 +248,26 @@ WHERE syscall_args_fts MATCH 'tmp'
 AND s.name IN ('openat', 'stat', 'lstat', 'rename', 'unlink', 'execve')
 ORDER BY s.timestamp;
 ```
-### Investigations à signaux forts
+### Investigations à signal élevé
 
-- **PATH hijacking / fake sudo** : recherchez les écritures et les activités de `chmod`/`rename` sous `~/.local/bin/`, puis corrélez-les avec des `execve` ultérieurs de noms ressemblant à des commandes privilégiées, comme `sudo`.
-- **TOCTOU on temporary files** : effectuez un pivot sur le même chemin `/tmp/...` à travers `stat`, `access`, `openat`, `rename`, `unlink`, `link`, `symlink` et `execve` afin d’identifier les écarts entre la vérification et l’utilisation.
-- **Crash root cause** : corrélez le `mmap` d’un fichier avec les écritures ou la troncature du même inode/chemin par un autre processus, puis examinez la séquence du signal/de la sortie pour détecter `SIGBUS`.
-- **Network destination recovery** : filtrez `connect`, `sendto`, `sendmsg`, `recvfrom` et les arguments liés aux sockets afin d’extraire les IP et ports pairs.
+- **PATH hijacking / fake sudo** : rechercher les écritures ainsi que les activités `chmod`/`rename` sous `~/.local/bin/`, puis les corréler avec les appels `execve` ultérieurs de noms évoquant des privilèges, tels que `sudo`.
+- **TOCTOU sur les fichiers temporaires** : suivre le même chemin `/tmp/...` à travers `stat`, `access`, `openat`, `rename`, `unlink`, `link`, `symlink` et `execve` afin d’identifier les écarts entre la vérification et l’utilisation.
+- **Cause racine d’un crash** : corréler le `mmap` d’un fichier avec les écritures ou la troncature du même inode/chemin par un autre processus, puis examiner la séquence du signal/de la sortie pour détecter `SIGBUS`.
+- **Récupération de la destination réseau** : filtrer `connect`, `sendto`, `sendmsg`, `recvfrom` ainsi que les arguments liés aux sockets afin d’extraire les IP et ports pairs.
 
 ### Analyse de traces assistée par LLM
 
-Si vous souhaitez qu’un LLM vous assiste, exposez une interface SQLite **en lecture seule** et fournissez-lui le schéma complet. Laissez-le exécuter du SQL brut plutôt que de dissimuler la base de données derrière des fonctions d’assistance limitées. Cela fonctionne généralement mieux pour les jointures, la corrélation temporelle et les recherches FTS.
+Si vous souhaitez qu’un LLM vous assiste, exposez une handle SQLite en **lecture seule** et fournissez-lui le schéma complet. Laissez-le exécuter du SQL brut au lieu de masquer la base de données derrière des fonctions d’aide limitées. Cette approche fonctionne généralement mieux pour les jointures, la corrélation temporelle et les recherches FTS.
 
 Règles pratiques :
 
-- Gardez la base de données en lecture seule, par exemple avec `sqlite3 'file:trace.db?mode=ro'`.
-- Fournissez au modèle des exemples de requêtes `JOIN` et `FTS5 MATCH` valides.
-- **Ne** collez **pas** de logs `strace` bruts de plusieurs Go dans le prompt.
-- Posez des questions ciblées comme :
-- "List persistent files written by this program."
-- "Did it create or replace executables in user-controlled PATH directories?"
-- "Explain why this trace ends in SIGBUS."
+- Conservez la base de données en lecture seule, par exemple avec `sqlite3 'file:trace.db?mode=ro'`.
+- Donnez au modèle des exemples de requêtes `JOIN` et `FTS5 MATCH` valides.
+- Ne collez **pas** de logs `strace` bruts de plusieurs Go dans le prompt.
+- Posez des questions ciblées telles que :
+- « Liste les fichiers persistants écrits par ce programme. »
+- « A-t-il créé ou remplacé des exécutables dans des répertoires PATH contrôlés par l’utilisateur ? »
+- « Explique pourquoi cette trace se termine par SIGBUS. »
 
 ## Inspecter les emplacements de démarrage automatique
 
@@ -282,7 +285,7 @@ cat /var/spool/cron/crontabs/*  \
 #MacOS
 ls -l /usr/lib/cron/tabs/ /Library/LaunchAgents/ /Library/LaunchDaemons/ ~/Library/LaunchAgents/
 ```
-#### Recherche : abuse de Cron/Anacron via 0anacron et stubs suspects
+#### Chasse : abus de Cron/Anacron via 0anacron et stubs suspects
 Les attaquants modifient souvent le stub 0anacron présent dans chaque répertoire /etc/cron.*/ afin de garantir une exécution périodique.<sup>[[4]](#references)</sup>
 ```bash
 # List 0anacron files and their timestamps/sizes
@@ -291,8 +294,8 @@ for d in /etc/cron.*; do [ -f "$d/0anacron" ] && stat -c '%n %y %s' "$d/0anacron
 # Look for obvious execution of shells or downloaders embedded in cron stubs
 grep -R --line-number -E 'curl|wget|/bin/sh|python|bash -c' /etc/cron.*/* 2>/dev/null
 ```
-#### Recherche : annulation du durcissement de SSH et shells backdoor
-Les modifications apportées à sshd_config et aux shells des comptes système sont courantes après une exploitation pour conserver l’accès.<sup>[[4]](#references)</sup>
+#### Hunt: rollback du hardening SSH et shells backdoor
+Les modifications apportées à sshd_config et aux shells des comptes système sont courantes après une post-exploitation pour conserver l’accès.<sup>[[4]](#references)</sup>
 ```bash
 # Root login enablement (flag "yes" or lax values)
 grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
@@ -300,9 +303,9 @@ grep -E '^\s*PermitRootLogin' /etc/ssh/sshd_config
 # System accounts with interactive shells (e.g., games → /bin/sh)
 awk -F: '($7 ~ /bin\/(sh|bash|zsh)/ && $1 ~ /^(games|lp|sync|shutdown|halt|mail|operator)$/) {print}' /etc/passwd
 ```
-#### Recherche : indicateurs de C2 Cloud (Dropbox/Cloudflare Tunnel)
-- Les beacons de l’API Dropbox utilisent généralement api.dropboxapi.com ou content.dropboxapi.com via HTTPS avec des jetons Authorization: Bearer.
-- Recherchez dans proxy/Zeek/NetFlow des connexions sortantes Dropbox inattendues depuis les serveurs.
+#### Chasse : marqueurs de Cloud C2 (Dropbox/Cloudflare Tunnel)
+- Les beacons de l’API Dropbox utilisent généralement api.dropboxapi.com ou content.dropboxapi.com via HTTPS avec des tokens Authorization: Bearer.
+- Recherchez dans les proxy/Zeek/NetFlow un trafic sortant Dropbox inattendu depuis les serveurs.
 - Cloudflare Tunnel (`cloudflared`) fournit un C2 de secours via le port 443 sortant.<sup>[[4]](#references)</sup>
 ```bash
 ps aux | grep -E '[c]loudflared|trycloudflare'
@@ -314,17 +317,17 @@ Chemins où un malware peut être installé en tant que service :
 
 - **/etc/inittab** : Appelle des scripts d'initialisation comme rc.sysinit, qui redirige ensuite vers les scripts de démarrage.
 - **/etc/rc.d/** et **/etc/rc.boot/** : Contiennent des scripts de démarrage des services, ce dernier étant présent dans les anciennes versions de Linux.
-- **/etc/init.d/** : Utilisé dans certaines versions de Linux, comme Debian, pour stocker les scripts de démarrage.
+- **/etc/init.d/** : Utilisé dans certaines versions de Linux comme Debian pour stocker les scripts de démarrage.
 - Les services peuvent également être activés via **/etc/inetd.conf** ou **/etc/xinetd/**, selon la variante de Linux.
-- **/etc/systemd/system** : Un répertoire contenant les scripts du gestionnaire du système et des services.
+- **/etc/systemd/system** : Un répertoire contenant les scripts du gestionnaire système et des services.
 - **/etc/systemd/system/multi-user.target.wants/** : Contient des liens vers les services qui doivent être démarrés dans un runlevel multi-utilisateur.
 - **/usr/local/etc/rc.d/** : Pour les services personnalisés ou tiers.
-- **\~/.config/autostart/** : Pour les applications démarrées automatiquement et spécifiques à l'utilisateur, ce qui peut constituer un emplacement de dissimulation pour un malware ciblant un utilisateur.
-- **/lib/systemd/system/** : Fichiers d'unités par défaut à l'échelle du système, fournis par les packages installés.
+- **\~/.config/autostart/** : Pour les applications à démarrage automatique spécifiques à l'utilisateur, ce qui peut constituer un emplacement de dissimulation pour un malware ciblant l'utilisateur.
+- **/lib/systemd/system/** : Fichiers unités par défaut à l'échelle du système, fournis par les packages installés.
 
-#### Recherche : timers systemd et unités transitoires
+#### Recherche : systemd timers et unités transitoires
 
-La persistence de systemd ne se limite pas aux fichiers `.service`. Examinez les unités `.timer`, les unités au niveau utilisateur et les **unités transitoires** créées au moment de l'exécution.
+La persistence de Systemd ne se limite pas aux fichiers `.service`. Examinez les unités `.timer`, les unités de niveau utilisateur et les **unités transitoires** créées au runtime.
 ```bash
 # Enumerate timers and inspect referenced services
 systemctl list-timers --all
@@ -342,50 +345,50 @@ find /run/systemd/transient -maxdepth 2 -type f -ls 2>/dev/null
 journalctl -u <name>.service
 journalctl _SYSTEMD_UNIT=<name>.service
 ```
-Les unités transitoires sont faciles à manquer, car `/run/systemd/transient/` est **non persistant**. Si vous collectez une image live, récupérez-la avant l’arrêt.
+Les unités transitoires sont faciles à manquer, car `/run/systemd/transient/` est **non persistant**. Si vous collectez une image live, récupérez-la avant l'arrêt.
 
 ### Modules du noyau
 
-Les modules du noyau Linux, souvent utilisés par les malware comme composants de rootkit, sont chargés au démarrage du système. Les répertoires et fichiers essentiels pour ces modules incluent :
+Les modules du noyau Linux, souvent utilisés par les malwares comme composants de rootkit, sont chargés au démarrage du système. Les répertoires et fichiers essentiels pour ces modules incluent :
 
-- **/lib/modules/$(uname -r)** : Contient les modules correspondant à la version du noyau en cours d’exécution.
+- **/lib/modules/$(uname -r)** : Contient les modules correspondant à la version du noyau en cours d'exécution.
 - **/etc/modprobe.d** : Contient les fichiers de configuration permettant de contrôler le chargement des modules.
 - **/etc/modprobe** et **/etc/modprobe.conf** : Fichiers contenant les paramètres globaux des modules.
 
-### Autres emplacements d’autostart
+### Autres emplacements d'autostart
 
-Linux utilise différents fichiers pour exécuter automatiquement des programmes lors de la connexion d’un utilisateur, lesquels peuvent potentiellement abriter des malware :
+Linux utilise différents fichiers pour exécuter automatiquement des programmes lors de la connexion d'un utilisateur, lesquels peuvent potentiellement abriter des malwares :
 
-- **/etc/profile.d/**\*, **/etc/profile** et **/etc/bash.bashrc** : Exécutés lors de la connexion de n’importe quel utilisateur.
-- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile** et **\~/.config/autostart** : Fichiers spécifiques à l’utilisateur, exécutés lors de sa connexion.
-- **/etc/rc.local** : S’exécute après le démarrage de tous les services système, marquant la fin de la transition vers un environnement multiutilisateur.
+- **/etc/profile.d/**\*, **/etc/profile** et **/etc/bash.bashrc** : Exécutés lors de la connexion de tout utilisateur.
+- **\~/.bashrc**, **\~/.bash_profile**, **\~/.profile** et **\~/.config/autostart** : Fichiers spécifiques à l'utilisateur exécutés lors de sa connexion.
+- **/etc/rc.local** : S'exécute après le démarrage de tous les services système, marquant la fin de la transition vers un environnement multiutilisateur.
 
-## Examiner les logs
+## Examiner les journaux
 
-Les systèmes Linux suivent les activités des utilisateurs et les événements système au moyen de différents fichiers de logs. Ces logs sont essentiels pour identifier les accès non autorisés, les infections par malware et autres incidents de sécurité.<sup>[[2]](#references)</sup> Les principaux fichiers de logs incluent :
+Les systèmes Linux suivent les activités des utilisateurs et les événements système au moyen de différents fichiers journaux. Ces journaux sont essentiels pour identifier les accès non autorisés, les infections par des malwares et les autres incidents de sécurité.<sup>[[2]](#references)</sup> Les principaux fichiers journaux incluent :
 
-- **/var/log/syslog** (Debian) ou **/var/log/messages** (RedHat) : Enregistrent les messages et activités à l’échelle du système.
-- **/var/log/auth.log** (Debian) ou **/var/log/secure** (RedHat) : Enregistrent les tentatives d’authentification ainsi que les connexions réussies et échouées.
-- Utilisez `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` pour filtrer les événements d’authentification pertinents.
+- **/var/log/syslog** (Debian) ou **/var/log/messages** (RedHat) : Enregistrent les messages et activités à l'échelle du système.
+- **/var/log/auth.log** (Debian) ou **/var/log/secure** (RedHat) : Enregistrent les tentatives d'authentification ainsi que les connexions réussies et échouées.
+- Utilisez `grep -iE "session opened for|accepted password|new session|not in sudoers" /var/log/auth.log` pour filtrer les événements d'authentification pertinents.
 - **/var/log/boot.log** : Contient les messages de démarrage du système.
-- **/var/log/maillog** ou **/var/log/mail.log** : Enregistrent les activités du serveur de messagerie, ce qui est utile pour suivre les services liés aux e-mails.
+- **/var/log/maillog** ou **/var/log/mail.log** : Enregistre les activités du serveur de messagerie, ce qui est utile pour suivre les services liés aux e-mails.
 - **/var/log/kern.log** : Stocke les messages du noyau, notamment les erreurs et les avertissements.
 - **/var/log/dmesg** : Contient les messages des pilotes de périphériques.
-- **/var/log/faillog** : Enregistre les tentatives de connexion échouées, ce qui aide à enquêter sur les compromissions de sécurité.
+- **/var/log/faillog** : Enregistre les tentatives de connexion échouées, ce qui facilite les investigations liées aux failles de sécurité.
 - **/var/log/cron** : Enregistre les exécutions des tâches cron.
 - **/var/log/daemon.log** : Suit les activités des services en arrière-plan.
 - **/var/log/btmp** : Documente les tentatives de connexion échouées.
-- **/var/log/httpd/** : Contient les logs d’erreur et d’accès d’Apache HTTPD.
-- **/var/log/mysqld.log** ou **/var/log/mysql.log** : Enregistre les activités des bases de données MySQL.
+- **/var/log/httpd/** : Contient les journaux d'erreurs et d'accès d'Apache HTTPD.
+- **/var/log/mysqld.log** ou **/var/log/mysql.log** : Enregistre les activités de la base de données MySQL.
 - **/var/log/xferlog** : Enregistre les transferts de fichiers FTP.
-- **/var/log/** : Vérifiez toujours la présence de logs inattendus ici.
+- **/var/log/** : Vérifiez toujours la présence de journaux inattendus à cet emplacement.
 
 > [!TIP]
-> Les logs système Linux et les sous-systèmes d’audit peuvent être désactivés ou supprimés lors d’une intrusion ou d’un incident lié à un malware. Comme les logs des systèmes Linux contiennent généralement certaines des informations les plus utiles sur les activités malveillantes, les intrus les suppriment régulièrement. Par conséquent, lors de l’examen des fichiers de logs disponibles, il est important de rechercher des lacunes ou des entrées dans le désordre, qui pourraient indiquer une suppression ou une altération.
+> Les journaux système Linux et les sous-systèmes d'audit peuvent être désactivés ou supprimés lors d'une intrusion ou d'un incident lié à un malware. Comme les journaux des systèmes Linux contiennent généralement certaines des informations les plus utiles sur les activités malveillantes, les intrus les suppriment régulièrement. Par conséquent, lors de l'examen des fichiers journaux disponibles, il est important de rechercher des lacunes ou des entrées dans le désordre qui pourraient indiquer une suppression ou une falsification.
 
 ### Triage de Journald (`journalctl`)
 
-Sur les hôtes Linux modernes, le **journal systemd** est généralement la source la plus utile pour l’**exécution des services**, les **événements d’authentification**, les **opérations sur les paquets** et les **messages du noyau et de l’espace utilisateur**. Lors d’une réponse live, essayez de préserver à la fois le journal **persistant** (`/var/log/journal/`) et le journal **d’exécution** (`/run/log/journal/`), car l’activité de courte durée d’un attaquant peut n’exister que dans ce dernier.<sup>[[5]](#references)</sup>
+Sur les hôtes Linux modernes, le **journal systemd** est généralement la source la plus précieuse pour l'**exécution des services**, les **événements d'authentification**, les **opérations sur les paquets** et les **messages du noyau et de l'espace utilisateur**. Lors d'une réponse live, essayez de préserver à la fois le journal **persistant** (`/var/log/journal/`) et le journal **d'exécution** (`/run/log/journal/`), car l'activité de courte durée d'un attaquant peut n'exister que dans ce dernier.<sup>[[5]](#references)</sup>
 ```bash
 # List available boots and pivot around the suspicious one
 journalctl --list-boots
@@ -405,11 +408,11 @@ journalctl _SYSTEMD_UNIT=cron.service
 journalctl _UID=0
 journalctl _EXE=/usr/sbin/useradd
 ```
-Les champs de journal utiles pour le triage incluent `_SYSTEMD_UNIT`, `_EXE`, `_COMM`, `_CMDLINE`, `_UID`, `_GID`, `_PID`, `_BOOT_ID` et `MESSAGE`. Si journald a été configuré sans stockage persistant, attendez-vous à ne trouver que des données récentes sous `/run/log/journal/`.
+Les champs utiles du journal pour le triage incluent `_SYSTEMD_UNIT`, `_EXE`, `_COMM`, `_CMDLINE`, `_UID`, `_GID`, `_PID`, `_BOOT_ID` et `MESSAGE`. Si journald a été configuré sans stockage persistant, attendez-vous à ne trouver que des données récentes sous `/run/log/journal/`.
 
-### Triage du framework Audit (`auditd`)
+### Triage de l’audit framework (`auditd`)
 
-Si `auditd` est activé, privilégiez-le chaque fois que vous avez besoin d’attribuer des modifications de fichiers, une exécution de commandes, une activité de connexion ou une installation de packages à un processus.<sup>[[6]](#references)</sup>
+Si `auditd` est activé, privilégiez-le lorsque vous avez besoin de l’**attribution des processus** pour les modifications de fichiers, l’exécution de commandes, l’activité de connexion ou l’installation de packages.<sup>[[6]](#references)</sup>
 ```bash
 # Fast summaries
 aureport --start today --summary -i
@@ -424,7 +427,7 @@ ausearch --start today -m SERVICE_START,SERVICE_STOP -i
 # Software installation/update events (especially useful on RHEL-like systems)
 ausearch -m SOFTWARE_UPDATE -i
 ```
-Lorsque des règles ont été déployées avec des keys, pivotez à partir de celles-ci au lieu de grepper les raw logs :
+Lorsque des règles ont été déployées avec des clés, pivotez à partir de celles-ci au lieu de rechercher dans les logs bruts :
 ```bash
 ausearch --start this-week -k <rule_key> --raw | aureport --file --summary -i
 ausearch --start this-week -k <rule_key> --raw | aureport --user --summary -i
@@ -437,32 +440,32 @@ ausearch --start this-week -k <rule_key> --raw | aureport --user --summary -i
 - \~/.python_history
 - \~/.\*\_history
 
-De plus, la commande `last -Faiwx` fournit une liste des connexions des utilisateurs. Vérifiez-la pour repérer les connexions inconnues ou inattendues.
+De plus, la commande `last -Faiwx` fournit une liste des connexions des utilisateurs. Vérifiez-la pour détecter les connexions inconnues ou inattendues.
 
 Vérifiez les fichiers susceptibles d'accorder des privilèges supplémentaires :
 
-- Examinez `/etc/sudoers` afin d'identifier les privilèges inattendus qui auraient pu être accordés à des utilisateurs.
-- Examinez `/etc/sudoers.d/` afin d'identifier les privilèges inattendus qui auraient pu être accordés à des utilisateurs.
+- Examinez `/etc/sudoers` pour repérer les privilèges inattendus qui auraient pu être accordés à des utilisateurs.
+- Examinez `/etc/sudoers.d/` pour repérer les privilèges inattendus qui auraient pu être accordés à des utilisateurs.
 - Examinez `/etc/groups` afin d'identifier les appartenances à des groupes ou les permissions inhabituelles.
 - Examinez `/etc/passwd` afin d'identifier les appartenances à des groupes ou les permissions inhabituelles.
 
 Certaines applications génèrent également leurs propres logs :
 
-- **SSH** : Examinez _\~/.ssh/authorized_keys_ et _\~/.ssh/known_hosts_ pour repérer les connexions distantes non autorisées.
-- **Gnome Desktop** : Consultez _\~/.recently-used.xbel_ pour connaître les fichiers récemment ouverts via les applications Gnome.
-- **Firefox/Chrome** : Vérifiez l'historique de navigation et les téléchargements dans _\~/.mozilla/firefox_ ou _\~/.config/google-chrome_ afin de repérer les activités suspectes.
-- **VIM** : Examinez _\~/.viminfo_ pour obtenir des informations sur l'utilisation, comme les chemins des fichiers consultés et l'historique des recherches.
+- **SSH** : Examinez _\~/.ssh/authorized_keys_ et _\~/.ssh/known_hosts_ à la recherche de connexions distantes non autorisées.
+- **Gnome Desktop** : Consultez _\~/.recently-used.xbel_ pour connaître les fichiers récemment consultés via les applications Gnome.
+- **Firefox/Chrome** : Vérifiez l'historique et les téléchargements des navigateurs dans _\~/.mozilla/firefox_ ou _\~/.config/google-chrome_ à la recherche d'activités suspectes.
+- **VIM** : Examinez _\~/.viminfo_ pour obtenir des détails sur l'utilisation, tels que les chemins des fichiers consultés et l'historique des recherches.
 - **Open Office** : Vérifiez les accès récents aux documents, qui pourraient indiquer la présence de fichiers compromis.
 - **FTP/SFTP** : Examinez les logs dans _\~/.ftp_history_ ou _\~/.sftp_history_ pour repérer les transferts de fichiers potentiellement non autorisés.
-- **MySQL** : Examinez _\~/.mysql_history_ pour identifier les requêtes MySQL exécutées, qui pourraient révéler des activités non autorisées sur les bases de données.
+- **MySQL** : Analysez _\~/.mysql_history_ pour examiner les requêtes MySQL exécutées, qui pourraient révéler des activités non autorisées sur les bases de données.
 - **Less** : Analysez _\~/.lesshst_ pour consulter l'historique d'utilisation, notamment les fichiers affichés et les commandes exécutées.
-- **Git** : Examinez _\~/.gitconfig_ et les fichiers _.git/logs_ des projets pour repérer les modifications apportées aux repositories.
+- **Git** : Examinez _\~/.gitconfig_ et les fichiers _.git/logs_ des projets pour détecter les modifications apportées aux repositories.
 
-### Logs USB
+### Journaux USB
 
-[**usbrip**](https://github.com/snovvcrash/usbrip) est un petit logiciel écrit en Python 3 pur qui analyse les fichiers de log Linux (`/var/log/syslog*` ou `/var/log/messages*` selon la distribution) afin de construire des tableaux d'historique des événements USB.
+[**usbrip**](https://github.com/snovvcrash/usbrip) est un petit logiciel écrit en Python 3 pur qui analyse les fichiers de logs Linux (`/var/log/syslog*` ou `/var/log/messages*`, selon la distribution) afin de générer des tableaux d'historique des événements USB.
 
-Il est intéressant de **connaître tous les périphériques USB qui ont été utilisés**. Cela sera encore plus utile si vous disposez d'une liste autorisée de périphériques USB afin d'identifier les « événements de violation » (l'utilisation de périphériques USB qui ne figurent pas dans cette liste).
+Il est intéressant de **connaître tous les périphériques USB qui ont été utilisés**. Cela sera encore plus utile si vous disposez d'une liste autorisée de périphériques USB pour détecter les « événements de violation » (l'utilisation de périphériques USB qui ne figurent pas dans cette liste).
 
 ### Installation
 ```bash
@@ -477,29 +480,29 @@ usbrip events history --pid 0002 --vid 0e0f --user kali #Search by pid OR vid OR
 usbrip ids download #Downlaod database
 usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 ```
-Plus d'exemples et d'informations sur github : [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
+Plus d'exemples et d'informations dans le github : [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
-## Examiner les comptes utilisateurs et les activités de connexion
+## Examiner les comptes utilisateur et les activités de connexion
 
-Examinez _**/etc/passwd**_, _**/etc/shadow**_ et les **journaux de sécurité** à la recherche de noms ou de comptes inhabituels créés et/ou utilisés à proximité d'événements non autorisés connus. Vérifiez également les éventuelles attaques sudo par brute-force.\
-En outre, vérifiez des fichiers comme _**/etc/sudoers**_ et _**/etc/groups**_ pour détecter les privilèges inattendus accordés aux utilisateurs.\
-Enfin, recherchez les comptes **sans mots de passe** ou avec des mots de passe **facilement devinables**.<sup>[[1]](#references)</sup>
+Examinez _**/etc/passwd**_, _**/etc/shadow**_ et les **security logs** à la recherche de noms inhabituels ou de comptes créés et/ou utilisés peu avant ou après des événements non autorisés connus. Vérifiez également les éventuelles attaques de brute-force contre sudo.\
+En outre, vérifiez des fichiers tels que _**/etc/sudoers**_ et _**/etc/groups**_ afin d'identifier les privilèges inattendus accordés aux utilisateurs.\
+Enfin, recherchez les comptes **sans mot de passe** ou dotés de mots de passe **facilement devinables**.<sup>[[1]](#references)</sup>
 
 ## Examiner le système de fichiers
 
 ### Analyser les structures du système de fichiers lors d'une investigation de malware
 
-Lors de l'investigation d'incidents liés à des malwares, la structure du système de fichiers constitue une source d'informations cruciale, révélant à la fois la séquence des événements et le contenu du malware. Cependant, les auteurs de malwares développent des techniques visant à entraver cette analyse, comme la modification des timestamps des fichiers ou l'évitement du système de fichiers pour le stockage des données.<sup>[[1]](#references)</sup>
+Lors de l'investigation d'incidents liés à des malwares, la structure du système de fichiers constitue une source d'informations cruciale, révélant à la fois la séquence des événements et le contenu du malware. Cependant, les auteurs de malwares développent des techniques visant à entraver cette analyse, comme la modification des horodatages des fichiers ou l'évitement du système de fichiers pour le stockage des données.<sup>[[1]](#references)</sup>
 
-Pour contrer ces méthodes anti-forensics, il est essentiel de :
+Pour contrer ces méthodes anti-forensic, il est essentiel de :
 
-- **Effectuer une analyse approfondie de la timeline** à l'aide d'outils comme **Autopsy** pour visualiser les timelines d'événements ou `mactime` de **Sleuth Kit** pour obtenir des données détaillées sur la timeline.
+- **Effectuer une analyse approfondie de la timeline** à l'aide d'outils tels qu'**Autopsy** pour visualiser les timelines d'événements ou `mactime` de **Sleuth Kit** pour obtenir des données détaillées sur la timeline.
 - **Rechercher les scripts inattendus** dans le $PATH du système, qui peuvent inclure des scripts shell ou PHP utilisés par les attaquants.
 - **Examiner `/dev` à la recherche de fichiers atypiques**, car ce répertoire contient traditionnellement des fichiers spéciaux, mais peut également héberger des fichiers liés à des malwares.
-- **Rechercher les fichiers ou répertoires cachés** portant des noms comme ".. " (deux points espace) ou "..^G" (deux points control-G), qui pourraient dissimuler du contenu malveillant.
-- **Identifier les fichiers setuid root** à l'aide de la commande : `find / -user root -perm -04000 -print` Cette commande recherche les fichiers disposant de permissions élevées, qui pourraient être exploités par des attaquants.
-- **Examiner les timestamps de suppression** dans les tables d'inodes afin de repérer les suppressions massives de fichiers, ce qui peut indiquer la présence de rootkits ou de trojans.
-- **Inspecter les inodes consécutifs** à la recherche de fichiers malveillants proches après en avoir identifié un, car ils peuvent avoir été placés ensemble.
+- **Rechercher les fichiers ou répertoires cachés** portant des noms tels que ".. " (deux points suivis d'un espace) ou "..^G" (deux points suivis d'un contrôle-G), qui pourraient dissimuler du contenu malveillant.
+- **Identifier les fichiers setuid root** à l'aide de la commande : `find / -user root -perm -04000 -print` Cette commande trouve les fichiers dotés de permissions élevées, qui pourraient être exploitées par des attaquants.
+- **Examiner les horodatages de suppression** dans les tables d'inodes afin de détecter les suppressions massives de fichiers, pouvant indiquer la présence de rootkits ou de trojans.
+- **Inspecter les inodes consécutifs** à la recherche de fichiers malveillants situés à proximité après en avoir identifié un, car ils peuvent avoir été placés ensemble.
 - **Vérifier les répertoires binaires courants** (_/bin_, _/sbin_) à la recherche de fichiers récemment modifiés, car ceux-ci pourraient avoir été altérés par un malware.
 ````bash
 # List recent files in a directory:
@@ -509,11 +512,11 @@ ls -laR --sort=time /bin```
 ls -lai /bin | sort -n```
 ````
 > [!TIP]
-> Notez qu'un **attacker** peut **modifier** l'**heure** pour faire **paraître** les **fichiers** **légitimes**, mais il ne peut pas modifier l'**inode**. Si vous constatez qu'un **fichier** indique avoir été créé et modifié au **même moment** que le reste des fichiers du même dossier, mais que l'**inode** est **étonnamment plus grand**, alors les **horodatages de ce fichier ont été modifiés**.
+> Notez qu’un **attacker** peut **modifier** l’**heure** pour faire **paraître les fichiers** **légitimes**, mais il ne peut pas modifier l’**inode**. Si vous constatez qu’un **fichier** indique qu’il a été créé et modifié au **même moment** que le reste des fichiers du même dossier, mais que l’**inode** est **inattenduement plus grand**, alors les **horodatages de ce fichier ont été modifiés**.
 
-### Triage rapide axé sur l'inode
+### Triage rapide axé sur les inodes
 
-Si vous suspectez de l'anti-forensics, exécutez rapidement ces vérifications axées sur l'inode :
+Si vous suspectez de l’anti-forensics, exécutez rapidement ces vérifications axées sur les inodes :
 ```bash
 # Filesystem inode pressure (possible inode exhaustion DoS)
 df -i
@@ -525,18 +528,18 @@ find / -xdev -inum <inode_number> 2>/dev/null
 lsof +L1
 lsof | grep '(deleted)'
 ```
-Lorsqu’un inode suspect se trouve sur une image ou un périphérique de système de fichiers EXT, inspectez directement les métadonnées de l’inode :
+Lorsqu’un inode suspect se trouve sur une image ou un périphérique de système de fichiers EXT, examinez directement les métadonnées de l’inode :
 ```bash
 sudo debugfs -R "stat <inode_number>" /dev/sdX
 ```
 Champs utiles :
 - **Links** : si `0`, aucune entrée de répertoire ne référence actuellement l’inode.
-- **dtime** : horodatage de suppression défini lorsque l’inode n’est plus lié.
-- **ctime/mtime** : aide à corréler les modifications des métadonnées/du contenu avec la chronologie de l’incident.
+- **dtime** : horodatage de suppression défini lorsque l’inode a été désalloué.
+- **ctime/mtime** : aide à corréler les modifications des métadonnées et du contenu avec la chronologie de l’incident.
 
-### Capabilities, xattrs et rootkits userland basés sur preload
+### Capabilities, xattrs et userland rootkits basés sur preload
 
-La persistance moderne sous Linux évite souvent les binaires **setuid** évidents et exploite plutôt les **file capabilities**, les **extended attributes** et le chargeur dynamique.
+La persistance Linux moderne évite souvent les binaires `setuid` évidents et abuse plutôt des **file capabilities**, des **extended attributes** et du dynamic loader.
 ```bash
 # Enumerate file capabilities (think cap_setuid, cap_sys_admin, cap_dac_override)
 getcap -r / 2>/dev/null
@@ -552,13 +555,13 @@ stat /etc/ld.so.preload 2>/dev/null
 ls -lah /lib /lib64 /usr/lib /usr/lib64 /usr/local/lib 2>/dev/null | grep -E '\\.so(\\.|$)'
 ldd /bin/ls
 ```
-Accordez une attention particulière aux libraries référencées depuis des chemins **writable** tels que `/tmp`, `/dev/shm`, `/var/tmp` ou des emplacements inhabituels sous `/usr/local/lib`. Vérifiez également les binaires dotés de capabilities situés en dehors des chemins d’appartenance habituels des packages et corrélez-les avec les résultats de vérification des packages (`rpm -Va`, `dpkg --verify`, `debsums`).
+Accordez une attention particulière aux libraries référencées depuis des chemins **writable** tels que `/tmp`, `/dev/shm`, `/var/tmp` ou des emplacements inhabituels sous `/usr/local/lib`. Vérifiez également les binaires dotés de capabilities situés en dehors de la propriété habituelle des packages, et mettez-les en corrélation avec les résultats de vérification des packages (`rpm -Va`, `dpkg --verify`, `debsums`).
 
-## Comparer des fichiers de différentes versions du filesystem
+## Compare files of different filesystem versions
 
 ### Résumé de la comparaison des versions du filesystem
 
-Pour comparer les versions du filesystem et identifier précisément les changements, nous utilisons des commandes `git diff` simplifiées :<sup>[[3]](#references)</sup>
+Pour comparer des versions du filesystem et identifier précisément les modifications, nous utilisons des commandes `git diff` simplifiées :<sup>[[3]](#references)</sup>
 
 - **Pour trouver les nouveaux fichiers**, comparez deux répertoires :
 ```bash
@@ -585,10 +588,10 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 
 ## References
 
-- [1] [Guide pratique de la malware forensics pour les systèmes Linux : guides pratiques de la forensique numérique – chapitre 3](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
+- [1] [Guide de terrain de la forensique des malwares pour les systèmes Linux : guides de terrain de la forensique numérique – chapitre 3](https://cdn.ttgtmedia.com/rms/security/Malware%20Forensics%20Field%20Guide%20for%20Linux%20Systems_Ch3.pdf)
 - [2] [Les logs Linux expliqués](https://www.plesk.com/blog/featured/linux-logs-explained/)
 - [3] [Documentation de git diff – option --diff-filter](https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203)
-- [4] [Red Canary – Patching for persistence : comment le malware Linux DripDropper se déplace dans le cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
+- [4] [Red Canary – Patcher pour assurer la persistence : comment le malware Linux DripDropper se déplace dans le cloud](https://redcanary.com/blog/threat-intelligence/dripdropper-linux-malware/)
 - [5] [Analyse forensique des journaux Linux](https://stuxnet999.github.io/dfir/linux-journal-forensics/)
 - [6] [Red Hat Enterprise Linux 9 - Auditer le système](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html/security_hardening/auditing-the-system_security-hardening)
 - [7] [Dites bonjour à Pike !](https://www.synacktiv.com/en/publications/say-hi-to-pike.html)

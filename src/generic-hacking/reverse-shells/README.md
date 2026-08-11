@@ -1,5 +1,7 @@
 # Reverse Shells
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## [Shells - Linux](linux.md)
 
 ---
@@ -20,9 +22,9 @@
 
 - [1] [reverse-shell.sh - Générateur de reverse shell](https://reverse-shell.sh/)
 - [2] [revshells.com - Générateur de reverse shell](https://www.revshells.com/)
-- [3] [Shellerator - Outil CLI pour la génération de bind et reverse shells dans plusieurs langages](https://github.com/ShutdownRepo/shellerator)
-- [4] [ShellPop - Faites apparaître des shells comme un master](https://github.com/0x00-0x00/ShellPop)
-- [5] [ShellReverse - Créateur de reverse shell pour python, perl, ruby, bash, netcat, php, java, powershell, etc.](https://github.com/cybervaca/ShellReverse)
+- [3] [Shellerator - Outil CLI pour générer des bind shells et des reverse shells dans plusieurs langages](https://github.com/ShutdownRepo/shellerator)
+- [4] [ShellPop - Lancer des shells comme un maître](https://github.com/0x00-0x00/ShellPop)
+- [5] [ShellReverse - Créateur de reverse shells pour python, perl, ruby, bash, netcat, php, java, powershell, etc.](https://github.com/cybervaca/ShellReverse)
 - [6] [pyminifier - Minificateur/obfuscateur de code Python](https://liftoff.github.io/pyminifier/)
 - [7] [xc - Petit reverse shell pour Linux et Windows](https://github.com/xct/xc/)
 - [8] [Générateur de reverse shell](https://weibell.github.io/reverse-shell-generator/)

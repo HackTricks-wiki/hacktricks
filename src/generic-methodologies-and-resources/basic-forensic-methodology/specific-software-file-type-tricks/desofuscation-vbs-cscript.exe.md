@@ -1,6 +1,8 @@
 # Techniques de désobfuscation des fichiers VBS
 
-Voici quelques éléments qui peuvent être utiles pour déboguer/désobfusquer un fichier VBS malveillant :
+{{#include ../../../banners/hacktricks-training.md}}
+
+Quelques éléments utiles pour déboguer/désobfusquer un fichier VBS malveillant :
 
 ## echo
 
@@ -10,7 +12,7 @@ Wscript.Echo "Like this?"
 ```
 ## Commentaires
 
-Une seule apostrophe commence un commentaire VBScript.<sup>[[2]](#references)</sup>
+Une apostrophe simple commence un commentaire VBScript.<sup>[[2]](#references)</sup>
 ```bash
 ' this is a comment
 ```
@@ -22,7 +24,7 @@ cscript.exe file.vbs
 ```
 ## Écrire des données dans un fichier
 
-Cet utilitaire est adapté d'une réponse de Stack Overflow et utilise un flux texte `FileSystemObject`. `CreateTextFile` renvoie un `TextStream`, et `Write`/`Close` opèrent sur des données textuelles ; considérez-le comme un exemple d'écriture de texte plutôt que comme un writer général prenant en charge les données binaires.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+Cet utilitaire est adapté d'une réponse Stack Overflow et utilise un flux de texte `FileSystemObject`. `CreateTextFile` renvoie un `TextStream`, et `Write`/`Close` opèrent sur des données textuelles ; considérez-le comme un exemple d'écriture de texte plutôt que comme un writer général compatible avec les données binaires.<sup>[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 ```js
 Function writeBinary(strBinary, strPath)
 
@@ -50,7 +52,7 @@ End Function
 ## References
 
 - [1] [Exécuter une requête Visual Basic Scripting Edition (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/indexsrv/running-a-visual-basic-scripting-edition-query)
-- [2] [Travailler avec des langages de script (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525153%28v%3Dvs.90%29)
+- [2] [Utiliser les langages de script (Microsoft Learn)](https://learn.microsoft.com/en-us/previous-versions/iis/6.0-sdk/ms525153%28v%3Dvs.90%29)
 - [3] [cscript (Microsoft Learn)](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/cscript)
 - [4] [Lire et écrire un fichier binaire en VBScript (Stack Overflow)](https://stackoverflow.com/questions/6060529/read-and-write-binary-file-in-vbscript/6087783)
 - [5] [Méthode CreateTextFile (Microsoft Learn)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/createtextfile-method)
