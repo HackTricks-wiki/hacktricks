@@ -1,4 +1,4 @@
-# Training de LLM - Preparación de datos
+# Entrenamiento de LLM - Preparación de datos
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,7 +6,7 @@
 
 ## Información básica
 
-Deberías empezar leyendo este post para conocer algunos conceptos básicos:
+Deberías comenzar leyendo este post para conocer algunos conceptos básicos:
 
 
 {{#ref}}
@@ -16,7 +16,7 @@ Deberías empezar leyendo este post para conocer algunos conceptos básicos:
 ## 1. Tokenización
 
 > [!TIP]
-> El objetivo de esta fase inicial es muy sencillo: **Dividir la entrada en tokens (ids) de alguna manera que tenga sentido**.
+> El objetivo de esta fase es **dividir la entrada en tokens y asignarles IDs de token**.
 
 
 {{#ref}}
@@ -26,20 +26,20 @@ Deberías empezar leyendo este post para conocer algunos conceptos básicos:
 ## 2. Muestreo de datos
 
 > [!TIP]
-> El objetivo de esta segunda fase es muy sencillo: **Muestrear los datos de entrada y prepararlos para la fase de training, normalmente separando el dataset en frases de una longitud específica y generando también la respuesta esperada.**
+> El objetivo de esta fase es preparar secuencias de entrenamiento de una longitud de contexto determinada junto con sus objetivos de predicción desplazados.
 
 
 {{#ref}}
 2.-data-sampling.md
 {{#endref}}
 
-## 3. Token Embeddings
+## 3. Embeddings de tokens
 
 > [!TIP]
-> El objetivo de esta tercera fase es muy sencillo: **Asignar a cada uno de los tokens anteriores del vocabulario un vector con las dimensiones deseadas para entrenar el modelo.** Cada palabra del vocabulario será un punto en un espacio de X dimensiones.\
-> Ten en cuenta que inicialmente la posición de cada palabra en el espacio se inicializa de forma «aleatoria» y estas posiciones son parámetros entrenables (se mejorarán durante el training).
+> El objetivo de esta tercera fase es muy sencillo: **Asignar a cada uno de los tokens anteriores del vocabulario un vector de las dimensiones deseadas para entrenar el modelo.** Cada palabra del vocabulario será un punto en un espacio de X dimensiones.\
+> Ten en cuenta que inicialmente la posición de cada palabra en el espacio se inicializa de forma "aleatoria" y estas posiciones son parámetros entrenables (se mejorarán durante el entrenamiento).
 >
-> Además, durante el token embedding **se crea otra capa de embeddings** que representa (en este caso) la **posición absoluta de la palabra en la frase de training**. De esta manera, una palabra situada en diferentes posiciones de la frase tendrá una representación (significado) diferente.
+> Además, durante el embedding de tokens, **se crea otra capa de embeddings** que representa (en este caso) la **posición absoluta de la palabra en la frase de entrenamiento**. De esta forma, una palabra situada en distintas posiciones de la frase tiene una representación diferente.
 
 
 {{#ref}}
@@ -49,8 +49,8 @@ Deberías empezar leyendo este post para conocer algunos conceptos básicos:
 ## 4. Mecanismos de atención
 
 > [!TIP]
-> El objetivo de esta cuarta fase es muy sencillo: **Aplicar algunos mecanismos de atención**. Estos consistirán en muchas **capas repetidas** que van a **capturar la relación de una palabra del vocabulario con sus palabras vecinas en la frase actual que se está utilizando para entrenar el LLM**.\
-> Se utilizan muchas capas para esto, por lo que muchos parámetros entrenables van a capturar esta información.
+> El objetivo de esta cuarta fase es muy sencillo: **Aplicar algunos mecanismos de atención**. Estos consistirán en muchas **capas repetidas** que van a **capturar la relación de una palabra del vocabulario con sus vecinas en la frase actual que se está utilizando para entrenar el LLM**.\
+> Para ello se utilizan muchas capas, por lo que una gran cantidad de parámetros entrenables capturarán esta información.
 
 
 {{#ref}}
@@ -60,29 +60,29 @@ Deberías empezar leyendo este post para conocer algunos conceptos básicos:
 ## 5. Arquitectura del LLM
 
 > [!TIP]
-> El objetivo de esta quinta fase es muy sencillo: **Desarrollar la arquitectura completa del LLM**. Integrarlo todo, aplicar todas las capas y crear todas las funciones para generar texto o transformar texto a IDs y viceversa.
+> El objetivo de esta quinta fase es muy sencillo: **Desarrollar la arquitectura completa del LLM**. Unirlo todo, aplicar todas las capas y crear todas las funciones para generar texto o transformar texto en IDs y viceversa.
 >
-> Esta arquitectura se utilizará tanto para el training como para predecir texto después de haber sido entrenada.
+> Esta arquitectura se utilizará tanto para entrenar como para predecir texto después del entrenamiento.
 
 
 {{#ref}}
 5.-llm-architecture.md
 {{#endref}}
 
-## 6. Pre-training y carga de modelos
+## 6. Preentrenamiento y carga de modelos
 
 > [!TIP]
-> El objetivo de esta sexta fase es muy sencillo: **Entrenar el modelo desde cero**. Para ello, se utilizará la arquitectura del LLM anterior con algunos bucles que recorren los datasets usando las funciones de pérdida y el optimizador definidos para entrenar todos los parámetros del modelo.
+> El objetivo de esta sexta fase es muy sencillo: **Entrenar el modelo desde cero**. Para ello se utilizará la arquitectura del LLM anterior con algunos bucles que recorren los conjuntos de datos usando las funciones de pérdida y el optimizador definidos para entrenar todos los parámetros del modelo.
 
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
 {{#endref}}
 
-## 7.0. Mejoras de LoRA en fine-tuning
+## 7.0. Mejoras de LoRA en el fine-tuning
 
 > [!TIP]
-> El uso de **LoRA reduce mucho la computación** necesaria para hacer **fine-tuning** de modelos ya entrenados.
+> LoRA reduce considerablemente el número de parámetros entrenables y el estado del optimizador necesarios para aplicar fine-tuning a un modelo preentrenado.
 
 
 {{#ref}}
@@ -92,7 +92,7 @@ Deberías empezar leyendo este post para conocer algunos conceptos básicos:
 ## 7.1. Fine-Tuning para clasificación
 
 > [!TIP]
-> El objetivo de esta sección es mostrar cómo hacer fine-tuning de un modelo ya pre-entrenado para que, en lugar de generar texto nuevo, el LLM seleccione y proporcione las **probabilidades de que el texto dado pertenezca a cada una de las categorías indicadas** (por ejemplo, si un texto es spam o no).
+> El objetivo de esta sección es mostrar cómo aplicar fine-tuning a un modelo ya preentrenado para que, en lugar de generar texto nuevo, el LLM seleccione y proporcione las **probabilidades de que el texto dado se clasifique en cada una de las categorías indicadas** (por ejemplo, si un texto es spam o no).
 
 
 {{#ref}}
@@ -102,15 +102,14 @@ Deberías empezar leyendo este post para conocer algunos conceptos básicos:
 ## 7.2. Fine-Tuning para seguir instrucciones
 
 > [!TIP]
-> El objetivo de esta sección es mostrar cómo hacer **fine-tuning de un modelo ya pre-entrenado para seguir instrucciones**, en lugar de limitarse a generar texto; por ejemplo, respondiendo a tareas como un chatbot.
+> El objetivo de esta sección es mostrar cómo **aplicar fine-tuning a un modelo ya preentrenado para que siga instrucciones**, en lugar de limitarse a generar texto; por ejemplo, respondiendo a tareas como un chatbot.
 
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
 
-## Referencias
+## References
 
 - [1] [Build a Large Language Model (From Scratch) - Manning](https://www.manning.com/books/build-a-large-language-model-from-scratch)
-
 {{#include ../../banners/hacktricks-training.md}}

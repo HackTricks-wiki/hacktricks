@@ -1,23 +1,23 @@
-# Red de área amplia de bajo consumo
+# Red de Área Amplia de Baja Potencia
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Introducción
 
-**Low-Power Wide Area Network** (LPWAN) es un grupo de tecnologías inalámbricas de red de área amplia y bajo consumo, diseñadas para **comunicaciones de largo alcance** a una velocidad de bits baja.
-Pueden alcanzar más de **seis millas** y sus **baterías** pueden durar hasta **20 años**.
+**Low-Power Wide Area Network** (LPWAN) es un grupo de tecnologías de red inalámbricas de baja potencia y área amplia diseñadas para **comunicaciones de largo alcance** a una baja tasa de bits.
+Dependiendo de los parámetros de radio, la antena, la región regulatoria, el terreno y el duty cycle, las implementaciones de LPWAN pueden intercambiar rendimiento por una cobertura de varios kilómetros y una duración de batería de varios años. Considera las cifras de alcance y batería de los proveedores como objetivos de diseño, no como garantías.<sup>[[3]](#references)</sup>
 
-Long Range (**LoRa**) es actualmente la capa física LPWAN más implementada y su especificación abierta de la capa MAC es **LoRaWAN**.
+Long Range (**LoRa**) es actualmente la physical layer de LPWAN más implementada y su especificación abierta de la capa MAC es **LoRaWAN**.
 
 ---
 
 ## LPWAN, LoRa y LoRaWAN
 
-* LoRa – Capa física Chirp Spread Spectrum (CSS) desarrollada por Semtech (propietaria, pero documentada).
+* LoRa – Physical layer de Chirp Spread Spectrum (CSS) desarrollada por Semtech (propietaria, pero documentada).
 * LoRaWAN – Capa MAC/Network abierta mantenida por LoRa-Alliance. Las versiones 1.0.x y 1.1 son comunes en entornos reales.
-* Arquitectura típica: *end-device → gateway (packet-forwarder) → network-server → application-server*.
+* Arquitectura típica: *end-device → gateway (packet-forwarder) → network-server → application-server*.<sup>[[3]](#references)</sup>
 
-> El **modelo de seguridad** depende de dos claves raíz AES-128 (AppKey/NwkKey) que derivan claves de sesión durante el procedimiento de *join* (OTAA) o están codificadas de forma fija (ABP). Si alguna clave sufre un leak, el atacante obtiene capacidad total de lectura/escritura sobre el tráfico correspondiente.
+> En LoRaWAN 1.1, el **modelo de seguridad** utiliza claves raíz de aplicación y de red AES-128 independientes para derivar session keys específicas de cada rol durante OTAA. Las implementaciones anteriores de 1.0.x normalmente utilizan una única AppKey para derivar las claves de sesión de red y aplicación, mientras que ABP aprovisiona directamente las claves de sesión. Por tanto, la capacidad obtenida de una clave filtrada depende de la versión de LoRaWAN y de qué clave haya quedado expuesta.<sup>[[3]](#references)</sup>
 
 ---
 
@@ -25,18 +25,18 @@ Long Range (**LoRa**) es actualmente la capa física LPWAN más implementada y s
 
 | Capa | Debilidad | Impacto práctico |
 |-------|----------|------------------|
-| PHY | Jamming reactivo / selectivo | Pérdida del 100 % de los paquetes demostrada con un único SDR y una salida inferior a 1 W |
-| MAC | Replay de Join-Accept y tramas de datos (reutilización de nonce, rollover del contador ABP) | Suplantación de dispositivos, inyección de mensajes, DoS |
-| Network-Server | packet-forwarder inseguro, filtros MQTT/UDP débiles, firmware de gateway obsoleto | RCE en gateways → pivotaje hacia la red OT/IT |
-| Application | AppKeys codificadas de forma fija o predecibles | Fuerza bruta/descifrado del tráfico, suplantación de sensores |
+| PHY | Jamming reactivo / selectivo | Pérdida de paquetes localizada; la efectividad depende del link budget, el timing, el ancho de banda y las restricciones regulatorias |
+| MAC | Replay de joins y data-frames cuando se reutiliza el estado de nonce/counter | Desincronización del dispositivo, spoofing o injection si el servidor/dispositivo incumple las protecciones contra replay |
+| Network-Server | Packet-forwarder inseguro, filtros MQTT/UDP débiles, firmware de gateway obsoleto | RCE en gateways → pivot hacia la red OT/IT |
+| Application | AppKeys hard-coded o predecibles | Fuerza bruta/descifrado del tráfico, suplantación de sensores |
 
 ---
 
-## Vulnerabilidades recientes (2023-2025)
+## Vulnerabilidades representativas de implementaciones
 
-* **CVE-2024-29862** – *ChirpStack gateway-bridge & mqtt-forwarder* aceptaban paquetes TCP que eludían las reglas del firewall con estado en gateways Kerlink, permitiendo la exposición de la interfaz de gestión remota. Corregido en 4.0.11 / 4.2.1, respectivamente .
-* **Serie Dragino LG01/LG308** – Múltiples CVE de 2022-2024 (por ejemplo, 2022-45227 directory traversal, 2022-45228 CSRF) todavía se observaban sin parchear en 2025; permitían un firmware dump no autenticado o sobrescribir la configuración en miles de gateways públicos .
-* Desbordamiento de *packet-forwarder UDP* de Semtech (advisory no publicado, parcheado en 2023-10): un uplink manipulado de más de 255 B activaba un stack-smash ‑> RCE en gateways de referencia SX130x (descubierto por Black Hat EU 2023, “LoRa Exploitation Reloaded”).
+* **CVE-2024-29862** – Las versiones de ChirpStack Gateway Bridge anteriores a 4.0.11 y las versiones de MQTT Forwarder anteriores a 4.2.1 podían conectarse a un MQTT broker controlado por un atacante porque la validación del certificado del servidor TLS estaba deshabilitada. Esto podía exponer credenciales y tráfico del gateway; actualiza a las versiones corregidas.<sup>[[4]](#references)</sup>
+* **Dragino LG01 firmware 4.3.4** – CVE-2022-45227 describe un listado no autenticado del directorio `/lib/` que contenía un archivo de backup descargable; CVE-2022-45228 es un CSRF de baja severidad en la página de logout. Estos registros no establecen el impacto declarado sobre LG308, la sobrescritura de configuración, el tamaño de la población ni el estado de los parches de 2025.<sup>[[6]](#references)[[7]](#references)</sup>
+* Una versión anterior de esta página describía un supuesto problema del Semtech UDP packet-forwarder como un **uplink diseñado de más de 255 bytes que provocaba un stack smash y RCE en gateways de referencia SX130x**, atribuido a una presentación de Black Hat Europe 2023 titulada “LoRa Exploitation Reloaded” y a un parche privado de octubre de 2023. Esos detalles específicos se conservan aquí como una línea de investigación, pero no se pudo corroborar ningún advisory, presentación o parche público coincidente. No consideres el problema una vulnerabilidad conocida sin obtener el producto/versión afectados y una fuente primaria verificable.
 
 ---
 
@@ -51,48 +51,56 @@ python3 lorattack/sniffer.py \
 # Bruteforce AppKey from captured OTAA join-request/accept pairs
 python3 lorapwn/bruteforce_join.py --pcap smartcity.pcap --wordlist top1m.txt
 ```
-### 2. Join-replay OTAA (reutilización de DevNonce)
+Estos comandos conservan el flujo de trabajo original como **sintaxis ilustrativa**; la estructura del repositorio y los flags difieren entre proyectos/releases. La captura pasiva no revela una AppKey sólida. La adivinación offline solo es útil cuando la root key es lo suficientemente débil como para encontrarla y un intercambio de join capturado proporciona un valor que permite validar candidatos.<sup>[[2]](#references)[[3]](#references)</sup>
 
-1. Captura un **JoinRequest** legítimo.
-2. Retransmítelo inmediatamente (o incrementa el RSSI) antes de que el dispositivo original vuelva a transmitir.
-3. El network-server asigna un nuevo DevAddr y nuevas session keys, mientras el dispositivo objetivo continúa con la sesión antigua → el atacante controla la sesión vacante y puede inyectar uplinks falsificados.
+### 2. Probar la protección contra replay de OTAA y el estado de los nonces
 
-### 3. Degradación del Adaptive Data-Rate (ADR)
+1. En una red de pruebas autorizada, captura un **JoinRequest** legítimo.
+2. Reproduce la misma solicitud y confirma que el network server rechaza el `DevNonce` reutilizado.
+3. Reinicia o restablece el dispositivo de pruebas y repite la comprobación para detectar la pérdida del estado de los nonces. Un servidor conforme debe realizar un seguimiento de los nonces usados; reproducir un JoinRequest por sí solo no revela las session keys recién derivadas ni proporciona al atacante el control de una sesión.<sup>[[3]](#references)</sup><sup>[[5]](#references)</sup>
 
-Fuerza SF12/125 kHz para aumentar el airtime → agota el duty-cycle del gateway (denial-of-service), manteniendo bajo el impacto en la batería del atacante (solo envía comandos MAC a nivel de red).
+### 3. Degradación de Adaptive Data-Rate (ADR)
+
+Un atacante que pueda autenticar comandos MAC de la capa de red —por ejemplo, después de comprometer la network session key aplicable o el network server— puede intentar forzar parámetros ineficientes de data-rate y aumentar el airtime. Un transmisor no autenticado cercano no puede emitir legítimamente comandos ADR simplemente conociendo la dirección de un dispositivo.<sup>[[3]](#references)</sup>
 
 ### 4. Jamming reactivo
 
-*HackRF One*, ejecutando un flowgraph de GNU Radio, activa un chirp de banda ancha cada vez que detecta un preámbulo; bloquea todos los spreading factors con ≤200 mW de TX; se midió una interrupción total a una distancia de 2 km.
+Un jammer reactivo puede transmitir después de detectar un preámbulo LoRa e interrumpir selectivamente las tramas. La página anterior afirmaba que una configuración de HackRF/GNU Radio provocaba una interrupción total a **2 km con no más de 200 mW**, pero no se proporcionó ninguna fuente de medición que lo respaldara; conserva esas cifras solo como objetivo de reproducción, no como resultado esperado. La potencia de transmisión, el timing, el ancho de banda, los spreading factors afectados y el alcance necesarios dependen del entorno. Realiza pruebas únicamente dentro de una configuración autorizada y con RF contenida, y cumple las normas locales sobre el espectro.
 
 ---
 
 ## Herramientas ofensivas (2025)
 
-| Herramienta | Propósito | Notas |
+| Tool | Purpose | Notes |
 |------|---------|-------|
-| **LoRaWAN Auditing Framework (LAF)** | Crear/analizar/atacar frames de LoRaWAN, analizadores respaldados por DB, brute-forcer | Imagen de Docker, compatible con entrada UDP de Semtech |
-| **LoRaPWN** | Utilidad Python de Trend Micro para brute-force de OTAA, generar downlinks y descifrar payloads | Demo publicada en 2023, independiente del SDR |
-| **LoRAttack** | Sniffer multicanal + replay con USRP; exporta PCAP/LoRaTap | Buena integración con Wireshark |
-| **gr-lora / gr-lorawan** | Bloques OOT de GNU Radio para TX/RX de banda base | Base para ataques personalizados |
+| **LoRaWAN Auditing Framework (LAF)** | Crear/analizar/atacar tramas LoRaWAN, analizadores respaldados por DB, brute-forcer | Imagen de Docker; admite entrada UDP de Semtech<sup>[[1]](#references)</sup> |
+| **LoRaPWN** | Utility de Python de Trend Micro para hacer brute-force de OTAA, generar downlinks y descifrar payloads | Utility de investigación pública; verifica el hardware y las versiones del protocolo compatibles<sup>[[2]](#references)</sup> |
+| **LoRAttack** | Framework de investigación para captura LoRaWAN multicanal, análisis de sesiones, derivación de claves y pruebas de replay | Descrito en una tesis de máster de 2024; obtén y verifica la implementación exacta antes de confiar en los flags del ejemplo<sup>[[8]](#references)</sup> |
+| **gr-lora / gr-lora_sdr** | Bloques out-of-tree de GNU Radio para recepción de banda base LoRa o investigación de transceptores | Los proyectos difieren en compatibilidad con GNU Radio y conjunto de funcionalidades<sup>[[9]](#references)</sup> |
 
 ---
 
 ## Recomendaciones defensivas (checklist de pentester)
 
-1. Prefiere dispositivos **OTAA** con DevNonce realmente aleatorio; supervisa los duplicados.
-2. Aplica **LoRaWAN 1.1**: contadores de frames de 32 bits, FNwkSIntKey / SNwkSIntKey distintos.
-3. Almacena el contador de frames en memoria no volátil (**ABP**) o migra a OTAA.
-4. Implementa un **secure-element** (ATECC608A/SX1262-TRX-SE) para proteger las root keys contra la extracción del firmware.
-5. Deshabilita los puertos UDP remotos del packet-forwarder (1700/1701) o restríngeos mediante WireGuard/VPN.
-6. Mantén los gateways actualizados; Kerlink/Dragino proporcionan imágenes parcheadas en 2024.
-7. Implementa **detección de anomalías de tráfico** (por ejemplo, el analizador de LAF); marca los reinicios de contadores, los joins duplicados y los cambios repentinos de ADR.<sup>[[1]](#references)</sup>
+1. Da preferencia a **OTAA** y verifica que los dispositivos y servidores conserven el estado de los nonces requerido; monitoriza los joins duplicados rechazados.
+2. Da preferencia a **LoRaWAN 1.1** cuando sea compatible, para que las funciones de red utilicen session keys distintas y un manejo actualizado de los nonces.<sup>[[3]](#references)</sup>
+3. Almacena el frame-counter en memoria no volátil (**ABP**) o migra a OTAA.
+4. Implementa un **secure element** adecuado (por ejemplo, ATECC608A en un diseño compatible) para reducir la exposición de las root keys en el almacenamiento de firmware habitual.
+5. No expongas listeners UDP configurados del packet-forwarder (normalmente el puerto 1700) a redes no confiables; autentica/cifra el backhaul del gateway o restríngelo mediante una VPN.
+6. Mantén los gateways con firmware compatible con el soporte del fabricante y confirma el modelo/versión exactos frente a los advisories aplicables.
+7. Implementa **detección de anomalías de tráfico** (p. ej., el analizador de LAF): marca resets de contadores, joins duplicados y cambios repentinos de ADR.<sup>[[1]](#references)</sup>
 
 
 
-## Referencias
+## References
 
 - [1] [LoRaWAN Auditing Framework (LAF)](https://github.com/IOActive/laf)
-- [2] [Descripción general de Trend Micro LoRaPWN](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
-
+- [2] [Descripción general de LoRaPWN de Trend Micro](https://www.hackster.io/news/trend-micro-finds-lorawan-security-lacking-develops-lorapwn-python-utility-bba60c27d57a)
+- [3] [LoRa Alliance - especificación LoRaWAN L2 1.1](https://resources.lora-alliance.org/technical-specifications/lorawan-specification-v1-1)
+- [4] [NVD - CVE-2024-29862](https://nvd.nist.gov/vuln/detail/CVE-2024-29862)
+- [5] [LoRa Alliance - parámetros regionales de LoRaWAN 1.1 y sincronización de joins](https://resources.lora-alliance.org/technical-specifications/lorawan-backend-interfaces-v1-1)
+- [6] [NVD - CVE-2022-45227](https://nvd.nist.gov/vuln/detail/CVE-2022-45227)
+- [7] [NVD - CVE-2022-45228](https://nvd.nist.gov/vuln/detail/CVE-2022-45228)
+- [8] [Catálogo de tesis de CTU - Análisis de seguridad de protocolos LPWAN mediante tecnología SDR](https://fit.cvut.cz/en/faculty/people/5076-ing-jiri-dostal-ph-d/theses)
+- [9] [Transceptor GNU Radio `gr-lora_sdr` de EPFL](https://github.com/tapparelj/gr-lora_sdr)
 {{#include ../../banners/hacktricks-training.md}}

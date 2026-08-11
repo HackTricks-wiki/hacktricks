@@ -2,130 +2,157 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## [ProjectHoneypot](https://www.projecthoneypot.org/)
+Estos servicios admiten flujos de trabajo de reconocimiento, reputación, breach o enriquecimiento. Sus API, cuotas, precios y usos permitidos cambian con frecuencia; confirma la documentación actual del proveedor y la autorización del engagement antes de enviar identificadores de clientes o datos confidenciales.
 
-Puedes preguntar si una IP está relacionada con actividades sospechosas/maliciosas. Completamente gratuito.
+## [Project Honey Pot](https://www.projecthoneypot.org/) <sup>[[1]](#references)</sup>
 
-## [**BotScout**](http://botscout.com/api.htm)
+Consulta si una dirección IP ha estado asociada con actividad sospechosa o maliciosa. El acceso puede requerir una cuenta o una API key.
 
-Comprueba si la dirección IP está relacionada con un bot que registra cuentas. También puede comprobar usernames y emails. Inicialmente gratuito.
+## [**BotScout**](https://botscout.com/api.htm) <sup>[[2]](#references)</sup>
 
-## [Hunter](https://hunter.io/)
+Comprueba si una dirección IP, nombre de usuario o dirección de correo electrónico ha estado asociada con registros automatizados de cuentas u otra actividad de bots reportada.
 
-Encuentra y verifica emails.\
-Algunas solicitudes de API son gratuitas; para obtener más, debes pagar.\
-¿Comercial?
+## [Hunter](https://hunter.io/) <sup>[[3]](#references)</sup>
 
-## [AlientVault](https://otx.alienvault.com/api)
+Busca y verifica direcciones de correo electrónico profesionales y patrones de contacto relacionados con dominios. Comprueba el plan actual para conocer los límites de solicitudes y los usos permitidos.
 
-Encuentra actividades maliciosas relacionadas con IPs y Domains. Gratuito.
+## [AlienVault OTX](https://otx.alienvault.com/api) <sup>[[4]](#references)</sup>
 
-## [Clearbit](https://dashboard.clearbit.com/)
+Busca indicadores de threat intelligence y actividad asociada con direcciones IP y dominios.
 
-Encuentra datos personales relacionados con un email (profiles en otras plataformas), un domain (información básica de la empresa, emails y personas que trabajan en ella) y empresas (obtiene información de la empresa a partir de un email).\
-Debes pagar para acceder a todas las posibilidades.\
-¿Comercial?
+## [Clearbit](https://dashboard.clearbit.com/) <sup>[[5]](#references)</sup>
 
-## [BuiltWith](https://builtwith.com/)
+Enriquece una dirección de correo electrónico, dominio o empresa con los datos empresariales o de perfil disponibles. La cobertura, el acceso y las restricciones de privacidad dependen del producto y plan actuales.
 
-Tecnologías utilizadas por webs. Caro...\
-¿Comercial?
+## [BuiltWith](https://builtwith.com/) <sup>[[6]](#references)</sup>
 
-## [Fraudguard](https://fraudguard.io/)
+Identifica tecnologías observadas en sitios web y obtiene datos históricos o de relaciones cuando el plan seleccionado lo permite.
 
-Comprueba si un host (domain o IP) está relacionado con actividades sospechosas/maliciosas. Tiene cierto acceso gratuito a la API.\
-¿Comercial?
+## [FraudGuard](https://fraudguard.io/) <sup>[[7]](#references)</sup>
 
-## [FortiGuard](https://fortiguard.com/)
+Comprueba si una dirección IP está asociada con actividad sospechosa o maliciosa. Confirma los planes y límites actuales de la API.
 
-Comprueba si un host (domain o IP) está relacionado con actividades sospechosas/maliciosas. Tiene cierto acceso gratuito a la API.
+## [FortiGuard](https://fortiguard.com/) <sup>[[8]](#references)</sup>
 
-## [SpamCop](https://www.spamcop.net/)
+Consulta la categorización y threat intelligence de FortiGuard para dominios, URL o direcciones IP. La disponibilidad varía según el servicio.
 
-Indica si un host está relacionado con actividad de spam. Tiene cierto acceso gratuito a la API.
+## [SpamCop](https://www.spamcop.net/) <sup>[[9]](#references)</sup>
 
-## [mywot](https://www.mywot.com/)
+Comprueba si una dirección IP está incluida en listas por actividad de spam reportada.
 
-Basándose en opiniones y otras métricas, indica si un domain está relacionado con información sospechosa/maliciosa.
+## [myWOT](https://www.mywot.com/) <sup>[[10]](#references)</sup>
 
-## [ipinfo](https://ipinfo.io/)
+Obtén la reputación de un dominio basándote en la comunidad del servicio y otras señales.
 
-Obtiene información básica de una dirección IP. Puedes probar hasta 100K al mes.
+## [IPinfo](https://ipinfo.io/) <sup>[[11]](#references)</sup>
 
-## [securitytrails](https://securitytrails.com/app/account)
+Obtén geolocalización, ASN, organización y metadatos relacionados de una dirección IP. Comprueba el plan actual para conocer las cuotas.
 
-Esta plataforma proporciona información sobre domains y direcciones IP, como domains dentro de una IP o dentro de un servidor de domain, domains pertenecientes a un email (encuentra domains relacionados), historial de IPs de domains (encuentra el host detrás de CloudFlare), todos los domains que utilizan un nameserver....\
-Tienes cierto acceso gratuito.
+## [SecurityTrails](https://securitytrails.com/app/account) <sup>[[12]](#references)</sup>
 
-## [fullcontact](https://www.fullcontact.com/)
+Esta plataforma proporciona inteligencia sobre DNS e infraestructura, como resoluciones históricas, dominios asociados con IP o servidores de nombres y registros relacionados. El DNS histórico puede revelar una dirección de origen anterior, pero no permite omitir de forma fiable una CDN y debe validarse.
 
-Permite buscar por email, domain o nombre de empresa y recuperar información "personal" relacionada. También puede verificar emails. Hay cierto acceso gratuito.
+## [FullContact](https://www.fullcontact.com/) <sup>[[13]](#references)</sup>
 
-## [RiskIQ](https://www.spiderfoot.net/documentation/)
+Enriquece una dirección de correo electrónico, dominio o nombre de empresa con los atributos de identidad y empresariales disponibles. Trata los datos personales de acuerdo con los requisitos de autorización y privacidad.
 
-Mucha información de domains e IPs incluso en la versión gratuita/community.
+## RiskIQ / Microsoft Defender Threat Intelligence (transición de legacy) <sup>[[14]](#references)</sup>
 
-## [\_IntelligenceX](https://intelx.io/)
+Las capacidades de PassiveTotal de RiskIQ pasaron a formar parte de Microsoft Defender Threat Intelligence. El acceso al producto, las API y las funciones conservadas han cambiado, por lo que debes utilizar la documentación actual de Microsoft en lugar de asumir el funcionamiento de PassiveTotal legacy.
 
-Busca Domains, IPs y emails y obtiene información de dumps. Tiene cierto acceso gratuito.
+## [Intelligence X](https://intelx.io/) <sup>[[15]](#references)</sup>
 
-## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+Busca dominios, direcciones IP, direcciones de correo electrónico y datos históricos o leaked indexados, sujetos a los controles de acceso del servicio.
 
-Busca por IP y recopila información relacionada con actividades sospechosas. Hay cierto acceso gratuito.
+## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/) <sup>[[16]](#references)</sup>
 
-## [Greynoise](https://viz.greynoise.io/)
+Busca direcciones IP y otros indicadores para obtener datos de threat intelligence y reputación.
 
-Busca por IP o rango de IPs y obtiene información sobre IPs que escanean Internet. Acceso gratuito durante 15 días.
+## [GreyNoise](https://viz.greynoise.io/) <sup>[[17]](#references)</sup>
 
-## [Shodan](https://www.shodan.io/)
+Busca direcciones IP o rangos para consultar observaciones de escaneo de Internet y actividad de servicios comunes. Comprueba las condiciones actuales de prueba y acceso comunitario.
 
-Obtiene información de escaneo de una dirección IP. Tiene cierto acceso gratuito a la API.
+## [Shodan](https://www.shodan.io/) <sup>[[18]](#references)</sup>
 
-## [Censys](https://censys.io/)
+Obtén información de escaneos de Internet y servicios para una dirección IP, host o consulta de búsqueda. El acceso a la API depende del plan de la cuenta.
 
-Muy similar a shodan
+## [Censys](https://censys.io/) <sup>[[19]](#references)</sup>
 
-## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
+Busca en datasets de hosts, certificados, dominios y servicios de Internet; su modelo de datos y cobertura difieren de los de Shodan.
 
-Encuentra buckets S3 abiertos buscando por keyword.
+## [GrayHatWarfare bucket search](https://buckets.grayhatwarfare.com/) <sup>[[20]](#references)</sup>
 
-## [Dehashed](https://www.dehashed.com/data)
+Busca por palabra clave en el índice del proveedor de objetos y buckets de cloud-storage observados públicamente.
 
-Encuentra credenciales filtradas de emails e incluso de domains\
-¿Comercial?
+## [DeHashed](https://www.dehashed.com/data) <sup>[[21]](#references)</sup>
 
-## [psbdmp](https://psbdmp.ws/)
+Busca datos de breach indexados para direcciones de correo electrónico, nombres de usuario, dominios y registros relacionados. Utilízalo únicamente con autorización y evita la exposición innecesaria de datos de breach.
 
-Busca pastebins donde apareció un email. ¿Comercial?
+## [psbdmp](https://psbdmp.ws/) <sup>[[22]](#references)</sup>
 
-## [emailrep.io](https://emailrep.io/key)
+Busca en contenido de paste indexado la aparición de una dirección de correo electrónico u otro término. Verifica que el servicio siga disponible antes de integrarlo.
 
-Obtiene la reputación de un email. ¿Comercial?
+## [EmailRep](https://emailrep.io/key) <sup>[[23]](#references)</sup>
 
-## [ghostproject](https://ghostproject.fr/)
+Obtén señales de reputación y riesgo para una dirección de correo electrónico.
 
-Obtiene passwords de emails filtrados. ¿Comercial?
+## GhostProject (histórico) <sup>[[24]](#references)</sup>
 
-## [Binaryedge](https://www.binaryedge.io/)
+Históricamente anunciaba búsquedas de datos leaked de correos electrónicos y contraseñas. Trata el servicio como un tercero de alto riesgo para el tratamiento de datos y verifica su disponibilidad, legalidad y autorización antes de utilizarlo.
 
-Obtiene información interesante de IPs
+## [BinaryEdge](https://www.binaryedge.io/) <sup>[[25]](#references)</sup>
 
-## [haveibeenpwned](https://haveibeenpwned.com/)
+Obtén datos de escaneos de Internet, exposición y threat intelligence para direcciones IP y activos relacionados.
 
-Busca por domain y email e indica si fue pwned y sus passwords. ¿Comercial?
+## [Have I Been Pwned](https://haveibeenpwned.com/) <sup>[[26]](#references)</sup>
 
-### [IP2Location.io](https://www.ip2location.io/)
+Comprueba si una dirección de correo electrónico o un dominio verificado aparece en breachs conocidos. El servicio independiente Pwned Passwords comprueba hashes de contraseñas mediante un prefijo; **no** revela contraseñas en texto plano.
 
-Detecta la geolocalización de la IP, el data center, el ASN e incluso información de VPN. Ofrece 30K consultas gratuitas al mes.
+### [IP2Location.io](https://www.ip2location.io/) <sup>[[27]](#references)</sup>
 
-### [IPQuery.io](https://www.ipquery.io/)
-Geolocalización de IP y OISNT con datapoints específicos. No comercial.
+Obtén geolocalización IP, centro de datos, ASN, proxy/VPN y campos de enriquecimiento relacionados. Las cuotas dependen del plan actual.
+
+### [IPQuery.io](https://www.ipquery.io/) <sup>[[28]](#references)</sup>
+Geolocalización IP y enriquecimiento orientado a OSINT con puntos de datos seleccionados. Comprueba las condiciones actuales para el uso comercial.
 
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(¿en una herramienta comercial?)
+[DNSDumpster](https://dnsdumpster.com/) proporciona resultados de DNS-reconnaissance.<sup>[[29]](#references)</sup>
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (¿en una herramienta comercial?)
+[Netcraft](https://www.netcraft.com/) proporciona inteligencia sobre sitios, hosting e infraestructura de Internet.<sup>[[30]](#references)</sup>
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (¿en una herramienta comercial?)
+[NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/) proporciona una interfaz online para el descubrimiento de subdominios.<sup>[[31]](#references)</sup>
 
+## References
+
+- [1] [Project Honey Pot](https://www.projecthoneypot.org/)
+- [2] [BotScout API](https://botscout.com/api.htm)
+- [3] [Hunter API](https://hunter.io/api-documentation)
+- [4] [AlienVault OTX API](https://otx.alienvault.com/api)
+- [5] [Clearbit](https://dashboard.clearbit.com/)
+- [6] [BuiltWith](https://builtwith.com/)
+- [7] [FraudGuard](https://fraudguard.io/)
+- [8] [FortiGuard Labs](https://www.fortiguard.com/)
+- [9] [SpamCop](https://www.spamcop.net/)
+- [10] [Web of Trust](https://www.mywot.com/)
+- [11] [IPinfo](https://ipinfo.io/)
+- [12] [SecurityTrails](https://securitytrails.com/)
+- [13] [FullContact](https://www.fullcontact.com/)
+- [14] [Microsoft Defender Threat Intelligence](https://learn.microsoft.com/en-us/defender/threat-intelligence/what-is-microsoft-defender-threat-intelligence-defender-ti)
+- [15] [Intelligence X](https://intelx.io/)
+- [16] [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
+- [17] [GreyNoise](https://www.greynoise.io/)
+- [18] [Shodan](https://www.shodan.io/)
+- [19] [Censys](https://censys.com/)
+- [20] [GrayHatWarfare](https://buckets.grayhatwarfare.com/)
+- [21] [DeHashed](https://www.dehashed.com/)
+- [22] [psbdmp](https://psbdmp.ws/)
+- [23] [EmailRep](https://emailrep.io/)
+- [24] [Investigación de Cornell — Protocolos para comprobar credenciales comprometidas (incluye GhostProject)](https://rist.tech.cornell.edu/papers/c3.pdf)
+- [25] [BinaryEdge](https://www.binaryedge.io/)
+- [26] [Have I Been Pwned API](https://haveibeenpwned.com/API/v3)
+- [27] [IP2Location.io](https://www.ip2location.io/)
+- [28] [IPQuery](https://www.ipquery.io/)
+- [29] [DNSDumpster](https://dnsdumpster.com/)
+- [30] [Netcraft](https://www.netcraft.com/)
+- [31] [Buscador de subdominios de NMMapper](https://www.nmmapper.com/sys/tools/subdomainfinder/)
 {{#include ../banners/hacktricks-training.md}}

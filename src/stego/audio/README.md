@@ -5,43 +5,43 @@
 Patrones comunes:
 
 - Mensajes en espectrogramas
-- Embedding LSB en WAV
+- Embedding de LSB en WAV
 - Codificación DTMF / tonos de marcado
 - Payloads en metadatos
 
-## Triage rápido
+## Triaje rápido
 
 Antes de usar herramientas especializadas:
 
-- Confirma los detalles del códec/contenedor y las anomalías:
+- Confirma los detalles del codec/contenedor y las anomalías:
 - `file audio`
 - `ffmpeg -v info -i audio -f null -`
-- Si el audio contiene contenido similar a ruido o una estructura tonal, inspecciona un espectrograma desde el principio.
+- Si el audio contiene contenido similar a ruido o una estructura tonal, inspecciona pronto un espectrograma.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
-## Esteganografía en espectrogramas
+## Esteganografía de espectrograma
 
 ### Técnica
 
-El stego de espectrogramas oculta datos moldeando la energía a lo largo del tiempo y la frecuencia, de modo que solo se vuelve visible en un gráfico tiempo-frecuencia (a menudo es inaudible o se percibe como ruido).
+El stego de espectrograma oculta datos moldeando la energía a lo largo del tiempo y la frecuencia para que se vuelva visible en un gráfico tiempo-frecuencia, mientras que el audio puede sonar como tonos o ruido.<sup>[[3]](#references)</sup>
 
 ### Sonic Visualiser
 
-Herramienta principal para la inspección de espectrogramas:
+Herramienta principal para inspeccionar espectrogramas:
 
-- [https://www.sonicvisualiser.org/](https://www.sonicvisualiser.org/)
+- [Sonic Visualiser](https://www.sonicvisualiser.org/)<sup>[[3]](#references)</sup>
 
 ### Alternativas
 
-- Audacity (vista de espectrograma, filtros): https://www.audacityteam.org/
+- Audacity (vista de espectrograma y filtros).<sup>[[6]](#references)</sup>
 - `sox` puede generar espectrogramas desde la CLI:
 ```bash
 sox input.wav -n spectrogram -o spectrogram.png
 ```
-## Decodificación de FSK / módem
+## Decodificación de FSK / modem
 
-El audio con modulación por desplazamiento de frecuencia suele verse como tonos individuales alternos en un espectrograma. Cuando tengas una estimación aproximada del centro, el desplazamiento y la velocidad en baudios, prueba por fuerza bruta con `minimodem`:<sup>[[1]](#references)</sup>
+El audio con frequency-shift keying suele verse como tonos individuales alternos en un espectrograma. Una vez que tengas una estimación aproximada del centro/desplazamiento y de la velocidad en baudios, usa fuerza bruta con `minimodem`:<sup>[[1]](#references)</sup>
 ```bash
 # Visualize the band to pick baud/frequency
 sox noise.wav -n spectrogram -o spec.png
@@ -52,16 +52,16 @@ minimodem -f noise.wav 300
 minimodem -f noise.wav 1200
 minimodem -f noise.wav 2400
 ```
-`minimodem` ajusta automáticamente la ganancia y detecta automáticamente los tonos mark/space; ajusta `--rx-invert` o `--samplerate` si la salida está distorsionada.
+`minimodem` admite modos Bell y otros modos FSK, además de frecuencias mark/space personalizadas; consulta sus opciones en lugar de asumir que cada grabación puede autodetectarse. Prueba `--rx-invert`, un modo de baud explícito o `--samplerate <Hz>` cuando la salida esté distorsionada.<sup>[[4]](#references)</sup>
 
 ## WAV LSB
 
 ### Técnica
 
-Para PCM sin comprimir (WAV), cada muestra es un entero. Modificar los bits de menor peso cambia la forma de onda muy ligeramente, por lo que los atacantes pueden ocultar:
+Para PCM sin comprimir (WAV), cada sample es un entero. Modificar los bits bajos cambia la forma de onda muy ligeramente, por lo que los atacantes pueden ocultar:
 
-- 1 bit por muestra (o más)
-- Intercalados entre canales
+- 1 bit por sample (o más)
+- Intercalado entre canales
 - Con un stride/permutación
 
 Otras familias de ocultación de audio que puedes encontrar:
@@ -73,29 +73,35 @@ Otras familias de ocultación de audio que puedes encontrar:
 
 ### WavSteg
 
-De: https://github.com/ragibson/Steganography#WavSteg<sup>[[2]](#references)</sup>
+Los siguientes comandos usan WavSteg del toolkit `ragibson/Steganography`.<sup>[[2]](#references)</sup>
 ```bash
 python3 WavSteg.py -r -b 1 -s sound.wav -o out.bin
 python3 WavSteg.py -r -b 2 -s sound.wav -o out.bin
 ```
 ### DeepSound
 
-- [http://jpinsoft.net/deepsound/download.aspx](http://jpinsoft.net/deepsound/download.aspx)
+- Repositorio oficial y releases de DeepSound.<sup>[[7]](#references)</sup>
 
-## DTMF / tonos de marcación
+## DTMF / tonos de marcado
 
 ### Técnica
 
-DTMF codifica caracteres como pares de frecuencias fijas (teclado telefónico). Si el audio se parece a tonos de teclado o pitidos regulares de doble frecuencia, prueba la decodificación DTMF al principio.
+DTMF representa cada señal del teclado usando una frecuencia de un grupo bajo y otra de un grupo alto. Si el audio se parece a tonos de teclado o a pitidos regulares de doble frecuencia, prueba la decodificación DTMF desde el principio.<sup>[[5]](#references)</sup>
 
 Decodificadores online:
 
-- [https://unframework.github.io/dtmf-detect/](https://unframework.github.io/dtmf-detect/)
-- [http://dialabc.com/sound/detect/index.html](http://dialabc.com/sound/detect/index.html)
+- Herramienta de navegador `dtmf-detect`.<sup>[[8]](#references)</sup>
+- `ribt/dtmf-decoder`, un decodificador de archivos de audio offline.<sup>[[9]](#references)</sup>
 
-## Referencias
+## References
 
-- [1] [Flagvent 2025 (Medium) — pink, Santa’s Wishlist, Christmas Metadata, Captured Noise](https://0xdf.gitlab.io/flagvent2025/medium)
+- [1] [Flagvent 2025 (Medium) — pink, Wishlist de Santa, Metadatos navideños, Ruido capturado](https://0xdf.gitlab.io/flagvent2025/medium)
 - [2] [ragibson/Steganography](https://github.com/ragibson/Steganography#WavSteg)
-
+- [3] [Sonic Visualiser — documentación](https://www.sonicvisualiser.org/documentation.html)
+- [4] [kamalmostafa/minimodem — módem FSK de línea de comandos](https://github.com/kamalmostafa/minimodem)
+- [5] [Recomendación Q.23 de la ITU-T — características técnicas de los teléfonos de botones](https://www.itu.int/rec/T-REC-Q.23/en)
+- [6] [Audacity](https://www.audacityteam.org/)
+- [7] [Jpinsoft/DeepSound — repositorio oficial y releases](https://github.com/Jpinsoft/DeepSound)
+- [8] [`dtmf-detect`](https://unframework.github.io/dtmf-detect/)
+- [9] [ribt/dtmf-decoder](https://github.com/ribt/dtmf-decoder)
 {{#include ../../banners/hacktricks-training.md}}
