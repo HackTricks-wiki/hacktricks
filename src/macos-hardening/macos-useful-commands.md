@@ -1,4 +1,4 @@
-# Amri Muhimu za macOS
+# Commands Muhimu za macOS
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -8,7 +8,7 @@
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Amri Mahususi za MacOS
+### Commands Maalum za MacOS
 ```bash
 #System info
 date
@@ -32,7 +32,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -117,7 +117,7 @@ sudo killall -HUP mDNSResponder
 ```
 ### Ukaguzi wa haraka wa anti-analysis / virtualization
 
-Baadhi ya macOS stealers huita `system_profiler` ili kutambua VMs na **abort kwa exit code tofauti (k.m., 100)** ili kuepuka sandbox detonation<sup>[[1]](#references)</sup>:
+Baadhi ya stealers za macOS huita `system_profiler` ili kugundua VMs na **kusitisha kwa exit code maalum (kwa mfano, 100)** ili kuepuka sandbox detonation<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,10 +125,10 @@ fi
 ```
 ### Programu na Huduma Zilizosakinishwa
 
-Kagua programu **zinazotia shaka** zilizosakinishwa na **mapendeleo** juu ya rasilimali zilizosakinishwa:
+Kagua programu **zinazotiliwa shaka** zilizosakinishwa na **ruhusa** juu ya rasilimali zilizosakinishwa:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
@@ -145,12 +145,11 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### Unda mtumiaji
 
-Bila vidokezo
+Bila maulizo
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## Marejeo
+## References
 
 - [1] [2025, mwaka wa Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
 {{#include ../banners/hacktricks-training.md}}

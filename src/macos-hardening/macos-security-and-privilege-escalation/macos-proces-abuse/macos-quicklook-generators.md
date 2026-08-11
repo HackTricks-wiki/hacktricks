@@ -4,22 +4,22 @@
 
 ## Taarifa za Msingi
 
-Quick Look ni **mfumo wa macOS wa kuonyesha hakikisho la faili**. Mtumiaji anapochagua faili katika Finder, kubonyeza Space, kuweka pointer juu yake, au kuangalia directory yenye thumbnails zilizowashwa, Quick Look **hupakia kiotomatiki generator plugin** ili kuchanganua faili na kuonyesha hakikisho la kionekano.<sup>[[1]](#references)</sup>
+Quick Look ni **framework ya preview ya faili** ya macOS. Mtumiaji anapochagua faili katika Finder, kubonyeza Space, kuweka kielekezi juu yake, au kuangalia directory yenye thumbnails zilizowashwa, Quick Look **hupakia kiotomatiki plugin ya generator** ili kuchanganua faili na kuonyesha preview ya kuona.<sup>[[1]](#references)</sup>
 
-Quick Look generators ni **bundles** (`.qlgenerator`) zinazojiandikisha kwa **Uniform Type Identifiers (UTIs)** maalum. macOS inapohitaji hakikisho la faili inayolingana na UTI hiyo, hupakia generator ndani ya sandboxed helper process (`QuickLookSatellite` au `qlmanage`) na kuita generator function yake.
+Quick Look generators ni **bundles** (`.qlgenerator`) zinazojiandikisha kwa **Uniform Type Identifiers (UTIs)** maalum. macOS inapohitaji preview ya faili inayolingana na UTI hiyo, hupakia generator ndani ya helper process yenye sandbox (`QuickLookSatellite` au `qlmanage`) na kuita function ya generator.
 
 ### Kwa Nini Hili Ni Muhimu kwa Usalama
 
 > [!WARNING]
-> Quick Look generators huanzishwa kwa **kuchagua au kuangalia faili tu** — hakuna kitendo cha "Open" kinachohitajika. Hii huzifanya kuwa **passive exploitation vector** yenye nguvu: mtumiaji anahitaji tu kwenda kwenye directory iliyo na faili hasidi.
+> Quick Look generators huanzishwa kwa **kuchagua au kuangalia faili tu** — hakuna hatua ya "Open" inayohitajika. Hii inazifanya kuwa **passive exploitation vector** yenye nguvu: mtumiaji anahitaji tu kwenda kwenye directory iliyo na faili hasidi.
 
 **Attack surface:**
 - Generators **huchanganua maudhui ya faili kiholela** kutoka kwenye disk, downloads, email attachments, au network shares
-- Faili iliyotengenezwa kwa makusudi inaweza kutumia **parsing vulnerabilities** (buffer overflows, format strings, type confusion) katika generator code
-- Utoaji wa hakikisho hutokea **kiotomatiki** — kuangalia Downloads folder ambako faili hasidi imehifadhiwa kunatosha
-- Quick Look huendeshwa katika **sandboxed helper**, lakini sandbox escapes kutoka kwenye mazingira haya zimeonyeshwa
+- Faili iliyoundwa mahsusi inaweza kutumia **parsing vulnerabilities** (buffer overflows, format strings, type confusion) ndani ya code ya generator
+- Uonyeshaji wa preview hufanyika **kiotomatiki** — kuangalia Downloads folder ambako faili hasidi imehifadhiwa kunatosha
+- Quick Look huendeshwa ndani ya **sandboxed helper**, lakini sandbox escapes kutoka kwenye mazingira haya zimedhihirishwa
 
-## Muundo wa Mfumo
+## Muundo
 ```
 User selects file in Finder
 ↓
@@ -63,7 +63,7 @@ ORDER BY e.path;"
 
 ### Unyonyaji Unaotegemea Faili
 
-Quick Look generator ya mtu wa tatu inayochanganua miundo changamano ya faili (miundo ya 3D, data za kisayansi, miundo ya kumbukumbu) ni shabaha kuu:
+Quick Look generator ya third-party inayochanganua fomati changamano za faili (miundo ya 3D, data za kisayansi, fomati za archive) ni lengo kuu:
 ```bash
 # 1. Identify a third-party generator and its UTI
 qlmanage -m plugins 2>&1 | grep -v "com.apple" | head -20
@@ -80,7 +80,7 @@ cp malicious.xyz ~/Downloads/
 
 # 5. When user opens Downloads in Finder → preview triggers → exploit fires
 ```
-### Drive-By kupitia Downloads
+### Drive-By via Downloads
 ```
 1. Send crafted file via email/AirDrop/web download
 2. File lands in ~/Downloads/
@@ -89,9 +89,9 @@ cp malicious.xyz ~/Downloads/
 5. Generator parses malicious file → code execution in QuickLookSatellite
 6. (Optional) Sandbox escape from QuickLookSatellite context
 ```
-### Kubadilisha Third-Party Generator
+### Ubadilishaji wa Generator ya Third-Party
 
-Ikiwa bundle ya Quick Look generator imesakinishwa katika **eneo linaloweza kuandikwa na mtumiaji** (`~/Library/QuickLook/`), inaweza kubadilishwa:
+Ikiwa bundle ya generator ya Quick Look imesakinishwa katika **user-writable location** (`~/Library/QuickLook/`), inaweza kubadilishwa:
 ```bash
 # Check for user-writable generators
 ls -la ~/Library/QuickLook/ 2>/dev/null
@@ -100,7 +100,7 @@ ls -la ~/Library/QuickLook/ 2>/dev/null
 # 1. Executes payload when any matching file is previewed
 # 2. Optionally still generates a valid preview to avoid suspicion
 ```
-### Trigger Quick Look kwa Mbali
+### Kuwasha Quick Look kwa Mbali
 ```bash
 # Force Quick Look preview generation (for testing)
 qlmanage -p /path/to/malicious/file
@@ -113,10 +113,10 @@ qlmanage -r cache
 ```
 ## Mazingatio ya Sandbox
 
-Quick Look generators huendeshwa ndani ya mchakato msaidizi ulio kwenye sandbox. Wasifu wa sandbox unaweka mipaka kwa:
+Quick Look generators huendeshwa ndani ya helper process iliyo kwenye sandbox. Sandbox profile hupunguza:
 - Ufikiaji wa mfumo wa faili (hasa kusoma tu faili inayotazamwa)
-- Ufikiaji wa mtandao (wenye vikwazo)
-- IPC (mach-lookup yenye mipaka)
+- Ufikiaji wa mtandao (uliowekewa vizuizi)
+- IPC (mach-lookup iliyowekewa mipaka)
 
 Hata hivyo, sandbox ina njia zinazojulikana za kutoroka:
 ```bash
@@ -127,13 +127,13 @@ sandbox-exec -p '(version 1)(allow default)' /usr/bin/true 2>&1
 # Quick Look processes may have mach-lookup exceptions to system services
 # A sandbox escape chain: QLGenerator vuln → QuickLookSatellite → mach-lookup → system daemon
 ```
-## CVEs za Ulimwengu Halisi
+## CVE za Ulimwengu Halisi<sup>[[2]](#references)</sup>
 
 | CVE | Maelezo |
 |---|---|
-| CVE-2019-8741 | Uharibifu wa memory kwenye preview ya Quick Look kupitia faili iliyoundwa mahsusi |
-| CVE-2018-4293 | Kutoka kwenye sandbox ya Quick Look generator |
-| CVE-2020-9963 | Ufichuaji wa taarifa wakati wa kuchakata preview ya Quick Look |
+| CVE-2019-8741 | Uharibifu wa memory katika Quick Look preview kupitia faili iliyoundwa mahususi |
+| CVE-2018-4293 | Kutoroka sandbox ya Quick Look generator |
+| CVE-2020-9963 | Kufichua taarifa wakati wa kuchakata Quick Look preview |
 | CVE-2021-30876 | Uharibifu wa memory wakati wa kutengeneza thumbnail |
 
 ## Fuzzing Quick Look Generators
@@ -158,10 +158,8 @@ timeout 5 qlmanage -t /tmp/fuzz_input.targetext 2>&1
 log show --last 5s --predicate 'process == "QuickLookSatellite" AND eventMessage CONTAINS "crash"' 2>/dev/null
 done
 ```
-## Marejeo
+## References
 
 - [1] [Apple Developer — Mwongozo wa Programming wa Quick Look](https://developer.apple.com/library/archive/documentation/UserExperience/Conceptual/Quicklook_Programming_Guide/Introduction/Introduction.html)
-- [2] [Apple Security Updates — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
-- [3] [Objective-See — Quick Look Attack Surface](https://objective-see.org/blog.html)
-
+- [2] [Sasisho za Usalama za Apple — Quick Look CVEs](https://support.apple.com/en-us/HT201222)
 {{#include ../../../banners/hacktricks-training.md}}

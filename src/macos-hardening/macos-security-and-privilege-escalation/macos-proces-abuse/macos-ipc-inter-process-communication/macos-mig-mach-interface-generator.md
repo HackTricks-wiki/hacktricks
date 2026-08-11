@@ -2,20 +2,20 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Taarifa za Msingi
+## Maelezo ya Msingi
 
-MIG iliundwa ili **kurahisisha mchakato wa kuunda** code ya Mach IPC. Kimsingi **hutengeneza code inayohitajika** kwa server na client kuwasiliana kwa kutumia definition fulani. Hata kama code iliyotengenezwa si nzuri, developer atahitaji tu kui-import, na code yake itakuwa rahisi zaidi kuliko hapo awali.<sup>[[1]](#references)</sup>
+MIG iliundwa ili **kurahisisha mchakato wa kuunda** code ya Mach IPC. Kimsingi, **hutengeneza code inayohitajika** ili server na client ziwasiliane kwa kutumia definition iliyotolewa. Hata kama code iliyotengenezwa si nzuri, developer atahitaji tu kui-import, na code yake itakuwa rahisi zaidi kuliko awali.<sup>[[1]](#references)</sup>
 
 Definition hubainishwa katika Interface Definition Language (IDL) kwa kutumia extension ya `.defs`.
 
-Definitions hizi zina sehemu 5:
+Definitions hizi zina sections 5:
 
-- **Tangazo la Subsystem**: Keyword ya subsystem hutumika kuonyesha **jina** na **id**. Pia inawezekana kuiweka alama kama **`KernelServer`** ikiwa server inapaswa kuendeshwa kwenye kernel.<sup>[[4]](#references)</sup>
-- **Ujumuishaji na imports**: MIG hutumia C-prepocessor, hivyo inaweza kutumia imports. Zaidi ya hayo, inawezekana kutumia `uimport` na `simport` kwa code inayotengenezwa na user au server.
-- **Matangazo ya Type**: Inawezekana kufafanua data types, ingawa kwa kawaida ita-import `mach_types.defs` na `std_types.defs`. Kwa custom ones, syntax fulani inaweza kutumika:
+- **Subsystem declaration**: Keyword subsystem hutumika kuonyesha **jina** na **id**. Pia inawezekana kuiweka kama **`KernelServer`** ikiwa server inapaswa kuendeshwa kwenye kernel.<sup>[[4]](#references)</sup>
+- **Inclusions and imports**: MIG hutumia C-prepocessor, hivyo inaweza kutumia imports. Zaidi ya hayo, inawezekana kutumia `uimport` na `simport` kwa code inayotengenezwa ya user au server.
+- **Type declarations**: Inawezekana kufafanua data types, ingawa kwa kawaida ita-import `mach_types.defs` na `std_types.defs`. Kwa custom ones, baadhi ya syntax zinaweza kutumika:
 - \[i`n/out]tran`: Function inayohitaji kutafsiriwa kutoka kwenye message inayoingia au kwenda kwenye message inayotoka
 - `c[user/server]type`: Mapping kwenda kwenye C type nyingine.
-- `destructor`: Ita-call function hii wakati type inapoachiliwa.
+- `destructor`: Huita function hii wakati type inapoachiliwa.
 - **Operations**: Hizi ni definitions za RPC methods. Kuna types 5 tofauti:
 - `routine`: Inatarajia reply
 - `simpleroutine`: Haitarajii reply
@@ -40,19 +40,19 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Kumbuka kwamba **argument ya kwanza ni port ya ku-bind** na MIG **itashughulikia reply port kiotomatiki** (isipokuwa unapowita `mig_get_reply_port()` kwenye client code). Zaidi ya hayo, **ID za operations** zitakuwa **za mfuatano**, zikianza na subsystem ID iliyoonyeshwa (kwa hiyo ikiwa operation imepitwa na wakati, inafutwa na `skip` hutumiwa ili kuendelea kutumia ID yake).
+Kumbuka kwamba **argument ya kwanza ni port ya kufunga** na MIG **itashughulikia kiotomatiki reply port** (isipokuwa ukiita `mig_get_reply_port()` katika client code). Zaidi ya hayo, **ID za operations** zitakuwa **za mfuatano** kuanzia subsystem ID iliyoonyeshwa (hivyo ikiwa operation imepitwa na wakati, inafutwa na `skip` hutumiwa ili kuendelea kutumia ID yake).
 
 Sasa tumia MIG kutengeneza server na client code zitakazoweza kuwasiliana ili kuita function ya Subtract:
 ```bash
 mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 ```
-Faili mpya kadhaa zitaundwa katika directory ya sasa.
+Faili kadhaa mpya zitatengenezwa katika directory ya sasa.
 
 > [!TIP]
-> Unaweza kupata mfano changamano zaidi kwenye system yako kwa kutumia: `mdfind mach_port.defs`\
-> Na unaweza kuicompile kutoka folder ileile iliyo na file kwa kutumia: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`<sup>[[2]](#references)</sup>
+> Unaweza kupata mfano changamano zaidi kwenye mfumo wako kwa kutumia: `mdfind mach_port.defs`\
+> Na unaweza kuikompile kutoka folder ileile iliyo na faili kwa kutumia: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`<sup>[[2]](#references)</sup>
 
-Katika files **`myipcServer.c`** na **`myipcServer.h`** unaweza kupata declaration na definition ya struct **`SERVERPREFmyipc_subsystem`**, ambayo kimsingi hufafanua function ya kuita kulingana na message ID iliyopokelewa (tulionyesha starting number ya 500):
+Katika faili **`myipcServer.c`** na **`myipcServer.h`** unaweza kupata declaration na definition ya struct **`SERVERPREFmyipc_subsystem`**, ambayo kimsingi hufafanua function ya kuita kulingana na message ID iliyopokelewa (tulionyesha nambari ya kuanzia kuwa 500):
 
 {{#tabs}}
 {{#tab name="myipcServer.c"}}
@@ -89,7 +89,7 @@ routine[1];
 {{#endtab}}
 {{#endtabs}}
 
-Kulingana na struct iliyotangulia, function **`myipc_server_routine`** itapata **message ID** na kurudisha function sahihi ya kuitisha:
+Kulingana na struct ya awali, function **`myipc_server_routine`** itapata **message ID** na kurejesha function sahihi ya kuita:
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -104,11 +104,11 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-Katika mfano huu tumefafanua function 1 pekee kwenye definitions, lakini kama tungefafanua functions zaidi, zingekuwa ndani ya array ya **`SERVERPREFmyipc_subsystem`**, na ya kwanza ingepewa ID **500**, ya pili ID **501**...
+Katika mfano huu tumefafanua function 1 pekee katika definitions, lakini kama tungefafanua functions zaidi, zingekuwa ndani ya array ya **`SERVERPREFmyipc_subsystem`**, na ya kwanza ingepewa ID **500**, ya pili ID **501**...
 
-Kama function ilitarajiwa kutuma **reply**, function `mig_internal kern_return_t __MIG_check__Reply__<name>` nayo ingekuwepo.
+Ikiwa function ilitarajiwa kutuma **reply**, function `mig_internal kern_return_t __MIG_check__Reply__<name>` pia ingekuwepo.
 
-Kwa kweli, inawezekana kutambua uhusiano huu kwenye struct **`subsystem_to_name_map_myipc`** kutoka **`myipcServer.h`** (**`subsystem*to_name_map*\***`** kwenye files nyingine):
+Kwa kweli, inawezekana kutambua uhusiano huu katika struct **`subsystem_to_name_map_myipc`** kutoka **`myipcServer.h`** (**`subsystem*to_name_map*\***`** katika files nyingine):
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
@@ -149,9 +149,9 @@ return FALSE;
 }
 </code></pre>
 
-Angalia mistari iliyowekewa msisitizo hapo awali inayofikia function itakayoitwa kwa kutumia ID.
+Angalia mistari iliyoangaziwa hapo awali inayofikia function ya kuitwa kwa kutumia ID.
 
-Ifuatayo ni code ya kuunda **server** na **client** rahisi ambapo client inaweza kuita functions za Subtract kutoka kwenye server:
+Ifuatayo ni code ya kuunda **server** na **client** rahisi, ambapo client anaweza kuita functions za Subtract kutoka kwa server:
 
 {{#tabs}}
 {{#tab name="myipc_server.c"}}
@@ -217,31 +217,31 @@ USERPREFSubtract(port, 40, 2);
 
 ### The NDR_record
 
-NDR_record inaeakshiwa na `libsystem_kernel.dylib`, na ni struct inayowezesha MIG **kubadilisha data ili isiwe tegemezi kwa mfumo** unaoitumia, kwa kuwa MIG iliundwa kutumiwa kati ya mifumo tofauti (na si ndani ya mashine moja pekee).
+NDR_record inatumwa na `libsystem_kernel.dylib`, na ni struct inayowezesha MIG **kubadilisha data ili isiwe tegemezi kwa mfumo** unaotumika, kwa kuwa MIG ilibuniwa kutumiwa kati ya mifumo tofauti (na si kwenye mashine moja pekee).
 
-Hili ni muhimu kwa sababu ikiwa `_NDR_record` itapatikana kwenye binary kama dependency (`jtool2 -S <binary> | grep NDR` au `nm`), inamaanisha kuwa binary hiyo ni MIG client au Server.
+Hili ni muhimu kwa sababu ikiwa `_NDR_record` inapatikana kwenye binary kama dependency (`jtool2 -S <binary> | grep NDR` au `nm`), inamaanisha kuwa binary hiyo ni MIG client au Server.
 
-Zaidi ya hayo, **MIG servers** huwa na dispatch table ndani ya `__DATA.__const` (au `__CONST.__constdata` kwenye macOS kernel na `__DATA_CONST.__const` kwenye \*OS kernels nyingine). Hii inaweza kudumpiwa kwa kutumia **`jtool2`**.
+Zaidi ya hayo, **MIG servers** huwa na dispatch table katika `__DATA.__const` (au katika `__CONST.__constdata` kwenye macOS kernel na `__DATA_CONST.__const` kwenye kernels nyingine za \*OS). Hii inaweza kudumpiwa kwa kutumia **`jtool2`**.
 
-Na **MIG clients** hutumia `__NDR_record` kutuma ujumbe kwa servers kupitia `__mach_msg`.
+Na **MIG clients** zitatumia `__NDR_record` kutuma pamoja na `__mach_msg` kwa servers.
 
-## Uchambuzi wa Binary
+## Binary Analysis
 
 ### jtool
 
-Kwa kuwa binaries nyingi sasa hutumia MIG kufichua mach ports, ni muhimu kujua jinsi ya **kutambua kuwa MIG ilitumika** na **functions ambazo MIG hutekeleza** kwa kila message ID.
+Kwa kuwa binaries nyingi sasa zinatumia MIG kufichua mach ports, ni muhimu kujua jinsi ya **kutambua kuwa MIG ilitumika** na **functions ambazo MIG hutekeleza** kwa kila message ID.
 
-[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) inaweza kuchanganua maelezo ya MIG kutoka kwenye Mach-O binary, ikionyesha message ID na kubainisha function ya kutekeleza:
+[**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/index.html#jtool2) inaweza kuchanganua taarifa za MIG kutoka kwenye Mach-O binary, ikionyesha message ID na kutambua function ya kutekelezwa:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep MIG
 ```
-Zaidi ya hayo, MIG functions ni wrappers tu za actual function inayopigiwa simu, hivyo kupata disassembly yake na kufanya grep ya BL kunaweza kukuwezesha kupata actual function inayopigiwa simu:
+Zaidi ya hayo, functions za MIG ni wrappers zinazozunguka function halisi inayoitwa. Kwa hiyo, kwa kupata disassembly na kutafuta `BL`, unaweza kuweza kupata function halisi inayoitwa:
 ```bash
 jtool2 -d __DATA.__const myipc_server | grep BL
 ```
 ### Assembly
 
-Hapo awali ilitajwa kwamba function itakayoshughulikia **kuita function sahihi kulingana na message ID iliyopokelewa** ilikuwa `myipc_server`. Hata hivyo, kwa kawaida hutakuwa na symbols za binary (majina ya functions), kwa hiyo ni muhimu **kuangalia jinsi inavyoonekana ikiwa ime-decompile** kwa kuwa daima itafanana sana (code ya function hii haitegemei functions zilizowekwa wazi):
+Hapo awali ilitajwa kuwa function itakayoshughulikia **kuita function sahihi kulingana na message ID iliyopokelewa** ilikuwa `myipc_server`. Hata hivyo, kwa kawaida hutakuwa na symbols za binary (majina ya functions), kwa hiyo ni muhimu **kuangalia inavyoonekana baada ya decompilation**, kwa kuwa mara zote itafanana sana (code ya function hii haitegemei functions zilizo exposed):
 
 {{#tabs}}
 {{#tab name="myipc_server decompiled 1"}}
@@ -261,7 +261,7 @@ rax = *(int32_t *)(var_10 + 0x14);
 // Call to sign_extend_64 that can help to identifyf this function
 // This stores in rax the pointer to the call that needs to be called
 // Check the used of the address 0x100004040 (functions addresses array)
-// 0x1f4 = 500 (the strating ID)
+// 0x1f4 = 500 (the starting ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
 // If - else, the if returns false, while the else call the correct function and returns true
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-Hii ni function ileile ikiwa ime-decompile katika toleo tofauti la bure la Hopper:
+Hii ni function ileile iliyofanyiwa decompilation katika version tofauti ya Hopper free:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -321,7 +321,7 @@ r8 = 0x1;
 }
 if ((r8 & 0x1) == 0x0) {
 r8 = *(int32_t *)(var_10 + 0x14);
-// 0x1f4 = 500 (the strating ID)
+// 0x1f4 = 500 (the starting ID)
 <strong>                    r8 = r8 - 0x1f4;
 </strong>                    asm { smaddl     x8, w8, w9, x10 };
 r8 = *(r8 + 0x8);
@@ -365,23 +365,22 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-Kwa kweli, ukienda kwenye function **`0x100004000`** utapata array ya structs za **`routine_descriptor`**. Element ya kwanza ya struct ni **address** ambayo **function** imetekelezwa, na **struct ina ukubwa wa 0x28 bytes**, kwa hiyo kila baada ya 0x28 bytes (kuanzia byte 0) unaweza kupata 8 bytes, ambazo zitakuwa **address ya function** itakayopigwa simu:
+Kwa kweli, ukienda kwenye function **`0x100004000`**, utapata array ya structs za **`routine_descriptor`**. Kipengele cha kwanza cha struct ni **address** ambako **function** imetekelezwa, na **struct ina ukubwa wa 0x28 bytes**. Kwa hiyo, kila baada ya 0x28 bytes (kuanzia byte 0), unaweza kuchukua bytes 8, ambazo zitakuwa **address ya function** itakayoitwa:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../../../../images/image (36).png" alt=""><figcaption></figcaption></figure>
 
-Data hii inaweza kutolewa [**kwa kutumia script hii ya Hopper**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
+Data hii inaweza kutolewa [**kwa kutumia Hopper script hii**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py).
 
 ### Debug
 
-Code inayozalishwa na MIG pia huita `kernel_debug` ili kutengeneza logs kuhusu operations wakati wa kuingia na kutoka. Inawezekana kuzikagua kwa kutumia **`trace`** au **`kdv`**: `kdv all | grep MIG`
+Code inayozalishwa na MIG pia huita `kernel_debug` ili kutengeneza logs kuhusu operations wakati wa kuingia na kutoka. Inawezekana kuzichunguza kwa kutumia **`trace`** au **`kdv`**: `kdv all | grep MIG`
 
-## Marejeo
+## References
 
-- [1] [bootstrap_cmds — `migcom.tproj` (the MIG compiler itself)](https://github.com/apple-oss-distributions/bootstrap_cmds/tree/main/migcom.tproj)
-- [2] [XNU — `osfmk/mach/mach_port.defs` (example MIG subsystem definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
-- [3] [XNU — `osfmk/mach/message.h` (Mach message header layout)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
-- [4] [XNU — `osfmk/mach/task.defs` (task subsystem MIG definition)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
-
+- [1] [bootstrap_cmds — `migcom.tproj` (compiler ya MIG yenyewe)](https://github.com/apple-oss-distributions/bootstrap_cmds/tree/main/migcom.tproj)
+- [2] [XNU — `osfmk/mach/mach_port.defs` (mfano wa definition ya MIG subsystem)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/mach_port.defs)
+- [3] [XNU — `osfmk/mach/message.h` (mpangilio wa Mach message header)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/message.h)
+- [4] [XNU — `osfmk/mach/task.defs` (definition ya task subsystem ya MIG)](https://github.com/apple-oss-distributions/xnu/blob/main/osfmk/mach/task.defs)
 {{#include ../../../../banners/hacktricks-training.md}}
