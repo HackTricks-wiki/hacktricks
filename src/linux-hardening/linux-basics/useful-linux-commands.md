@@ -1,5 +1,7 @@
 # 유용한 Linux 명령어
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## 일반적인 Bash
 ```bash
 #Exfiltration using Base64
@@ -227,7 +229,7 @@ grep -Po 'd{3}[s-_]?d{3}[s-_]?d{4}' *.txt > us-phones.txt
 #Extract ISBN Numbers
 egrep -a -o "\bISBN(?:-1[03])?:? (?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]\b" *.txt > isbn.txt
 ```
-## Find
+## 찾기
 ```bash
 # Find SUID set files.
 find / -perm /u=s -ls 2>/dev/null
@@ -299,9 +301,9 @@ iptables -P INPUT DROP
 iptables -P FORWARD ACCEPT
 iptables -P OUTPUT ACCEPT
 ```
-## eBPF Telemetry 및 Rootkit Hunting
+## eBPF Telemetry & Rootkit Hunting
 
-Rootkit 연구에서는 TripleCross와 같은 eBPF 기반 implant와 BPFDoor variants와 같은 BPF 기반 backdoor가 모두 확인되었습니다. 예상치 못한 BPF program, attachment 또는 map은 compromise의 증거가 아니라 조사 단서로 취급해야 합니다.<sup>[[3]](#references)[[4]](#references)</sup> `bpftool` 또는 `eBPFmon`을 사용해 authorized system의 baseline을 설정하세요. `bpftool`은 program과 map을 열거하고, program instruction을 dump하며, 지원되는 feature를 조회할 수 있고, eBPFmon은 해당 정보를 TUI로 표시합니다.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
+Rootkit 연구에서는 TripleCross와 같은 eBPF-based implants와 BPFDoor variants와 같은 BPF-based backdoors가 확인되었습니다. 예상하지 못한 BPF programs, attachments 또는 maps는 침해의 증거라기보다 조사 단서로 간주해야 합니다.<sup>[[3]](#references)[[4]](#references)</sup> `bpftool` 또는 `eBPFmon`을 사용하여 승인된 시스템의 기준 상태를 설정하십시오. `bpftool`은 programs와 maps를 열거하고, program instructions를 덤프하며, 지원되는 features를 조회할 수 있고, eBPFmon은 해당 정보를 TUI로 표시합니다.<sup>[[1]](#references)[[5]](#references)[[6]](#references)</sup>
 ```bash
 #Enumerate all eBPF programs, attach points, owning PIDs and map IDs
 sudo bpftool prog
@@ -319,11 +321,11 @@ sudo bpftool feature probe | less
 #TUI wrapper that tracks program/map diffs in real time (wraps bpftool perf/net output)
 sudo ebpfmon
 ```
-`bpftool` 출력을 예상되는 NIC/cgroup 연결과 대조하세요. 승인되지 않은 PID가 소유한 갑작스러운 `xdp` 또는 `kprobe` 프로그램은 조사 단서이지, 주입된 payload의 결정적 증거는 아닙니다.<sup>[[5]](#references)[[6]](#references)</sup>
+`bpftool` 출력을 예상되는 NIC/cgroup attachment와 대조하세요. 승인되지 않은 PID가 소유한 갑작스러운 `xdp` 또는 `kprobe` 프로그램은 조사 단서이지, 주입된 payload의 확정적 증거는 아닙니다.<sup>[[5]](#references)[[6]](#references)</sup>
 
-## Journald 인시던트 트리아지
+## Journald Incident Triage
 
-`journalctl`은 `systemd-journald`에서 구조화된 항목을 읽고, boot, priority, unit, UID 및 상대 시간을 기준으로 필터링할 수 있습니다. 증거를 보존하거나 비교해야 할 때는 이러한 필터를 JSON 출력과 함께 사용하세요. 필터링만으로 로그가 변조되지 않았음을 입증할 수는 없습니다.<sup>[[2]](#references)[[7]](#references)</sup>
+`journalctl`은 `systemd-journald`에서 구조화된 항목을 읽고 boot, priority, unit, UID 및 상대 시간 기준의 filtering을 지원합니다. 증거를 보존하거나 비교해야 할 때 이러한 filter를 JSON output과 함께 사용하세요. filtering만으로는 로그가 변조되지 않았음을 입증할 수 없습니다.<sup>[[2]](#references)[[7]](#references)</sup>
 ```bash
 journalctl --list-boots                                #Enumerate boot IDs with timestamps
 journalctl -b -1 -p err -o short-iso                   #Previous boot only, severity >= err
@@ -334,15 +336,15 @@ journalctl --disk-usage                               #Quickly show journal size
 sudo journalctl --vacuum-size=1G --vacuum-time=7days   #Trim only after taking evidence
 journalctl --no-pager --since="2025-06-01" --until="2025-06-10" > system_logs_2025-06-01_to_06-10.log
 ```
-`--grep 'Invalid user' --case-sensitive` 또는 `-k`(커널 메시지만)를 추가하면 더 엄격하게 필터링할 수 있으며, `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, `_TRANSPORT` selector를 결합하여 특정 대상을 집중적으로 조사할 수 있습니다.<sup>[[7]](#references)</sup>
+더 세밀한 필터가 필요하면 `--grep 'Invalid user' --case-sensitive` 또는 `-k`(kernel messages only)를 추가하고, `_PID`, `_SYSTEMD_UNIT`, `_HOSTNAME`, `_TRANSPORT` selector를 결합해 targeted hunts를 수행할 수 있다는 점을 기억하세요.<sup>[[7]](#references)</sup>
 
 ## References
 
-- [1] [eBPF 애플리케이션을 탐색하고 상호작용하기 위한 새로운 도구: eBPFmon](https://redcanary.com/blog/linux-security/ebpfmon/)
-- [2] [Linux 로그를 확인하기 위한 journalctl 명령 사용 방법](https://www.hostinger.com/tutorials/journalctl-command)
+- [1] [eBPFmon: eBPF 애플리케이션을 탐색하고 상호작용하기 위한 새로운 tool](https://redcanary.com/blog/linux-security/ebpfmon/)
+- [2] [Linux logs를 확인하기 위해 journalctl command를 사용하는 방법](https://www.hostinger.com/tutorials/journalctl-command)
 - [3] [h3xduck/TripleCross](https://github.com/h3xduck/TripleCross)
-- [4] [Rapid7 Labs: 통신 네트워크의 BPFdoor](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
+- [4] [Rapid7 Labs: Telecom Networks의 BPFdoor](https://www.rapid7.com/blog/post/tr-bpfdoor-telecom-networks-sleeper-cells-threat-research-report/)
 - [5] [BPF Documentation — Linux Kernel documentation](https://docs.kernel.org/bpf/)
 - [6] [libbpf/bpftool](https://github.com/libbpf/bpftool)
-- [7] [journalctl(1) — Linux 매뉴얼 페이지](https://man7.org/linux/man-pages/man1/journalctl.1.html)
+- [7] [journalctl(1) — Linux manual page](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 {{#include ../../banners/hacktricks-training.md}}

