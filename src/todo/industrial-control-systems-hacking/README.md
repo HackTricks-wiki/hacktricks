@@ -2,18 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Sobre esta Seção
+## Sobre esta seção
 
-Esta seção contém tudo sobre Sistemas de Controle Industrial, incluindo conceitos e metodologias para hackeá-los com diversas questões de segurança que persistem neles.
+Esta seção apresenta componentes, arquiteturas, protocolos e métodos de avaliação de segurança de sistemas de controle industrial (ICS). ICS faz parte do domínio mais amplo de tecnologia operacional (OT): sistemas e dispositivos programáveis que monitoram ou causam alterações em processos físicos. Exemplos comuns incluem sistemas de controle supervisório e aquisição de dados (SCADA), sistemas de controle distribuído (DCSs) e controladores lógicos programáveis (PLCs).<sup>[[1]](#references)</sup>
 
-Os Sistemas de Controle Industrial estão presentes em todos os lugares, pois as indústrias são vitais para o desenvolvimento econômico de uma nação. Porém, esses ICS são difíceis de atualizar e poucos avanços são feitos nesse campo. Portanto, encontrar falhas de segurança é comum nesse contexto. A maioria dos protocolos e padrões usados aqui foi desenvolvida na década de 1990 e possui capacidades muito inferiores em comparação com os cenários de ataque atuais.
+O trabalho de segurança nesses ambientes deve considerar requisitos diferentes dos ambientes de TI convencionais, incluindo segurança do processo, confiabilidade, disponibilidade, operação determinística e ciclos de vida dos equipamentos. Um controle de segurança tecnicamente válido ainda pode ser inadequado se interromper o processo físico; portanto, os testes e a correção devem ser coordenados com o responsável pelo sistema e a equipe de operações.<sup>[[1]](#references)</sup>
 
-Tornou-se importante proteger esses sistemas, pois danificá-los pode custar muito dinheiro e até vidas, no pior caso. Para compreender a segurança dos Sistemas de Controle Industrial, é necessário conhecer seu funcionamento interno.
+## Prioridades da avaliação
 
-Como os Sistemas de Controle Industrial são instalados seguindo padrões definidos, conhecer cada componente ajuda a interconectar todos os outros mecanismos do sistema de controle. A instalação desses dispositivos, como PLCs e sistemas SCADA, varia entre os setores; portanto, a coleta de informações é crítica.
+Comece entendendo o processo controlado, os limites do sistema, a topologia da rede, os ativos, os fluxos de dados, as relações de confiança e as conexões externas. Dispositivos de tipos semelhantes podem desempenhar funções diferentes em locais distintos; portanto, evite presumir que a arquitetura ou o modelo de impacto de uma implantação se aplica a outra.<sup>[[1]](#references)</sup>
 
-Os Sistemas de Controle Industrial podem ser complicados às vezes e, por isso, exigem muita paciência para realizar qualquer ação. Tudo se resume a sondagem e reconhecimento antes de planejar ataques e desenvolver exploits.
+Dê preferência à descoberta passiva e à documentação de engenharia existente sempre que possível. Qualquer varredura ativa ou exploração deve seguir um plano de teste aprovado que defina restrições de segurança, janelas de manutenção, procedimentos de recuperação e condições de interrupção. As descobertas devem ser avaliadas tanto pelo impacto na cybersecurity quanto pelos possíveis efeitos sobre o processo físico.<sup>[[1]](#references)</sup>
 
-Essas técnicas também podem ser usadas para proteger contra ataques e realizar blue teaming em sistemas de controle industrial.
+O mesmo conhecimento arquitetural apoia atividades defensivas, como inventário de ativos, segmentação de rede, monitoramento, resposta a incidentes e gerenciamento de vulnerabilidades baseado em risco.<sup>[[1]](#references)</sup>
 
+## References
+
+- [1] [NIST SP 800-82 Rev. 3 - Guia de segurança de tecnologia operacional (OT)](https://csrc.nist.gov/pubs/sp/800/82/r3/final)
 {{#include ../../banners/hacktricks-training.md}}

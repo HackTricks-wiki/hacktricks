@@ -4,13 +4,15 @@
 
 ## Como funciona
 
-**RDPexec** serve basicamente para executar comandos fazendo login no sistema usando RDP.
+**RDPexec** refere-se à execução de comandos em um sistema remoto após fazer login por meio do Remote Desktop Protocol (RDP). O RDP fornece uma interface gráfica remota e normalmente requer uma conta autorizada no host alvo.<sup>[[1]](#references)</sup>
 
-Para mais informações, consulte:
-
+Para obter informações básicas sobre enumeração, configuração e técnicas de ataque do RDP, consulte:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-rdp.md
 {{#endref}}
 
+## References
+
+- [1] [Microsoft Learn - Sobre os Remote Desktop Services](https://learn.microsoft.com/en-us/windows/win32/termserv/about-terminal-services)
 {{#include ../../banners/hacktricks-training.md}}

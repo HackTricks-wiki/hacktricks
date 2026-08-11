@@ -2,17 +2,19 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Código inútil
+## Código inútil
 
-É muito comum encontrar **código inútil que nunca é usado** para tornar a análise reversa da macro mais difícil.\
-Por exemplo, na imagem a seguir, você pode ver que uma condição `If` que nunca será verdadeira é usada para executar código inútil e sem propósito.
+As macros podem conter **código inalcançável ou irrelevante** destinado a dificultar a análise. Identifique condições constantes e rastreie o comportamento alcançável antes de gastar tempo fazendo reverse de uma ramificação. O exemplo abaixo usa uma condição `If` que nunca pode ser verdadeira para ocultar código inútil.
 
-![Macros do Word - Código inútil: por exemplo, na imagem a seguir, você pode ver que uma condição If que nunca será verdadeira é usada para executar código inútil e sem propósito](<../images/image (369).png>)
+![Uma macro do Word contendo uma ramificação condicional inalcançável com código inútil](<../images/image (369).png>)
 
-### Formulários de macro
+## Formulários de macro
 
-Usando a função **GetObject**, é possível obter dados dos formulários da macro. Isso pode ser usado para dificultar a análise. A seguir, há uma foto de um formulário de macro usado para **ocultar dados dentro de caixas de texto** (uma caixa de texto pode estar ocultando outras caixas de texto):
+VBA UserForms podem armazenar dados em controles, como caixas de texto. Como forms, frames e pages podem expor uma coleção `Controls`, os analistas devem enumerar toda a hierarquia de controles, em vez de depender apenas do que o form exibe. O exemplo abaixo armazena dados ocultos em caixas de texto sobrepostas.<sup>[[1]](#references)</sup>
 
-![Código inútil - Formulários de macro: usando a função GetObject, é possível obter dados dos formulários da macro. Isso pode ser usado para dificultar a análise. A seguir, há uma foto de um...](<../images/image (344).png>)
+![Um UserForm de macro com dados ocultos em caixas de texto sobrepostas](<../images/image (344).png>)
 
+## References
+
+- [1] [Microsoft Learn - Coleções, controles e objetos (Microsoft Forms)](https://learn.microsoft.com/en-us/office/vba/language/reference/user-interface-help/objects-microsoft-forms)
 {{#include ../banners/hacktricks-training.md}}

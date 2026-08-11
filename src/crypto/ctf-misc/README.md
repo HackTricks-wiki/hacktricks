@@ -1,29 +1,24 @@
-# Crypto CTF Misc
+# Cripto CTF Diversos
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Páginas variadas que aparecem com frequência em desafios de criptografia, mas que não se encaixam perfeitamente em outras categorias.
+Esta seção reúne técnicas que aparecem em desafios de criptografia, mas que não se encaixam perfeitamente nas outras categorias.
 
 ## Linguagens esotéricas
 
 ### Técnica
 
-Use isto quando uma tarefa de criptografia for, na verdade: executar um programa esolang e depois decodificar o que ele produz.
+Use este fluxo de trabalho quando um desafio exigir a execução de um programa em uma linguagem esotérica e a decodificação de sua saída.
 
 Se um desafio fornecer um código que não se pareça com uma linguagem padrão:
 
-- Identifique o esolang (pesquise no Google um token distintivo).
+- Identifique a linguagem pesquisando um token distintivo ou uma sequência de instruções.
 - Use um interpretador online ou uma imagem Docker.
-- Se a saída for estranha, procure por encoding/compressão em camadas após a execução.
+- Se a saída for estranha, procure por codificação ou compressão em camadas após a execução.
 
-Boa lista para começar:<sup>[[1]](#references)</sup>
+Um índice útil de linguagens é a wiki Esolang.<sup>[[1]](#references)</sup>
 
-{{#ref}}
-https://esolangs.org/wiki/Main_Page
-{{#endref}}
-
-## Referências
+## References
 
 - [1] [Esolang, a wiki das linguagens de programação esotéricas](https://esolangs.org/wiki/Main_Page)
-
 {{#include ../../banners/hacktricks-training.md}}
