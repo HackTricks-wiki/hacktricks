@@ -4,29 +4,29 @@
 
 ## Temel Bilgiler
 
-XPC, macOS ve iOS üzerinde **process'ler arası iletişim** için kullanılan bir framework'tür. **Process'ler arasında güvenli, asynchronous çağrılar** yapmak için mekanizmalar sağlar. XPC, her **component'in** yalnızca **ihtiyaç duyduğu izinlerle** çalıştığı **privilege-separated uygulamaları** destekler; böylece ele geçirilmiş bir process'in verebileceği potansiyel zarar sınırlandırılır.<sup>[[1]](#references)</sup>
+XPC, macOS ve iOS üzerinde **process'ler arası iletişim** için kullanılan bir framework'tür. **Process'ler arasında güvenli, asenkron çağrılar** yapmak için mekanizmalar sağlar. XPC, her **component'in** **yalnızca ihtiyaç duyduğu izinlerle** çalıştığı **ayrıcalıkları ayrıştırılmış uygulamaları** destekler; böylece ele geçirilmiş bir process'in verebileceği potansiyel zarar sınırlandırılır.<sup>[[1]](#references)</sup>
 
-XPC, aynı sistemde çalışan farklı programların birbirlerine veri gönderip alması için kullanılan bir yöntemler kümesi olan Inter-Process Communication (IPC) biçimini kullanır.
+XPC, aynı sistemde çalışan farklı programların veri gönderip almasını sağlayan bir yöntemler kümesi olan Process'ler Arası İletişim'in (IPC) bir biçimini kullanır.
 
-XPC'nin başlıca faydaları şunlardır:
+XPC'nin başlıca avantajları şunlardır:
 
-1. **Güvenlik**: Çalışmalar farklı process'lere ayrıldığında her process'e yalnızca ihtiyaç duyduğu izinler verilebilir. Bu, bir process ele geçirilse bile zarar verme kabiliyetinin sınırlı olduğu anlamına gelir.
-2. **Stabilite**: XPC, crash'lerin oluştukları component ile sınırlanmasına yardımcı olur. Bir process crash olursa sistemin geri kalanını etkilemeden yeniden başlatılabilir.
-3. **Performans**: XPC, farklı görevlerin farklı process'lerde eş zamanlı olarak çalıştırılabilmesi sayesinde concurrency kullanımını kolaylaştırır.
+1. **Güvenlik**: Çalışma farklı process'lere ayrılarak her process'e yalnızca ihtiyaç duyduğu izinler verilebilir. Bu, bir process ele geçirilse bile zarar verme yeteneğinin sınırlı olduğu anlamına gelir.
+2. **Kararlılık**: XPC, crash'lerin oluştukları component ile sınırlanmasına yardımcı olur. Bir process crash olursa sistemin geri kalanını etkilemeden yeniden başlatılabilir.
+3. **Performans**: XPC, farklı görevlerin farklı process'lerde eşzamanlı olarak çalıştırılabilmesi sayesinde concurrency kullanımını kolaylaştırır.
 
-Temel **dezavantaj**, **bir uygulamanın birkaç process'e ayrılmasının** ve bunların XPC üzerinden iletişim kurmasının ek yük oluşturmasıdır. Modern sistemlerde bu ek yük genellikle güvenlik ve stabilite faydalarına kıyasla küçüktür.<sup>[[1]](#references)</sup>
+Temel **dezavantaj**, **bir uygulamanın birden fazla process'e ayrılması** ve bunların XPC üzerinden iletişim kurmasının ek yük oluşturmasıdır. Modern sistemlerde bu ek yük, genellikle güvenlik ve kararlılık avantajlarına kıyasla küçüktür.<sup>[[1]](#references)</sup>
 
-## Uygulamaya Özel XPC Services
+## Uygulamaya Özel XPC Servisleri
 
-Bir uygulamanın XPC component'leri **uygulamanın kendisinin içindedir**. Örneğin Safari'de bunları **`/Applications/Safari.app/Contents/XPCServices`** altında bulabilirsiniz. Bunlar **`.xpc`** uzantısına sahiptir (örneğin **`com.apple.Safari.SandboxBroker.xpc`**) ve ana binary ile içlerinde bir `Info.plist` bulunan **bundle'lardır**. Örneğin: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` ve `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`.<sup>[[2]](#references)</sup>
+Bir uygulamanın XPC component'leri **uygulamanın kendisinin içindedir**. Örneğin Safari'de bunları **`/Applications/Safari.app/Contents/XPCServices`** içinde bulabilirsiniz. Bunlar **`.xpc`** uzantısına sahiptir (örneğin **`com.apple.Safari.SandboxBroker.xpc`**) ve ana binary ile içlerinde bir `Info.plist` bulunan **bundle'lardır**. Örneğin: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` ve `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`.<sup>[[2]](#references)</sup>
 
-Bir **XPC component'i**, diğer XPC component'lerinden veya ana uygulama binary'sinden **farklı entitlement'lara ve privilege'lara** sahip olabilir. Bir istisna, **Info.plist** dosyasında **`JoinExistingSession`** değeri **`true`** olarak yapılandırılmış bir XPC service'tir. Bu durumda XPC service, kendisini çağıran **uygulamayla aynı security session'a** katılır.<sup>[[4]](#references)</sup>
+Bir **XPC component'i**, diğer XPC component'lerinden veya ana uygulama binary'sinden **farklı entitlement'lara ve ayrıcalıklara** sahip olabilir. Bunun bir istisnası, **Info.plist** dosyasında **`JoinExistingSession`** değeri **`true`** olarak yapılandırılmış bir XPC service'tir. Bu durumda XPC service, kendisini çağıran **uygulamayla aynı security session'a** katılır.<sup>[[4]](#references)</sup>
 
-XPC service'leri gerektiğinde **launchd** tarafından **başlatılır** ve sistem kaynaklarını serbest bırakmak için görevleri **tamamlandığında** kapatılabilir. **Uygulamaya özel XPC component'leri yalnızca onları içeren uygulama tarafından kullanılabilir**; böylece potansiyel vulnerability'lerin maruz kalma alanı azaltılır.<sup>[[2]](#references)</sup>
+XPC servisleri gerektiğinde **launchd** tarafından **başlatılır** ve sistem kaynaklarını serbest bırakmak için görevleri **tamamlandığında** kapatılabilir. **Uygulamaya özel XPC component'leri yalnızca kendilerini içeren uygulama tarafından kullanılabilir**; böylece potansiyel güvenlik açıklarının exposure'ı azaltılır.<sup>[[2]](#references)</sup>
 
-## Sistem Genelindeki XPC Services
+## Sistem Genelindeki XPC Servisleri
 
-Sistem genelindeki XPC service'lerine tek bir uygulamanın dışından erişilebilir. launchd tarafından yönetilen bu Mach service'lerinin, **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`** veya **`/Library/LaunchAgents`** gibi dizinlerde bulunan **plist** dosyalarında tanımlanması gerekir.<sup>[[3]](#references)</sup>
+Uygulamaya özel servislerin aksine, sistem genelindeki XPC servisleri kendilerini içeren uygulamayla sınırlı değildir. launchd domain'ine ve servisin kendi authorization kontrollerine bağlı olarak birden fazla kullanıcıdaki client'lar tarafından erişilebilir olabilirler. launchd tarafından yönetilen bu Mach servislerinin, **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`** veya **`/Library/LaunchAgents`** gibi dizinlerde bulunan **plist** dosyalarında **tanımlanması** gerekir.<sup>[[2]](#references)[[3]](#references)</sup>
 
 Bu plist dosyaları, service adını içeren bir **`MachServices`** anahtarına ve binary'nin yolunu içeren bir **`Program`** anahtarına sahiptir:
 ```xml
@@ -62,35 +62,35 @@ cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 </dict>
 </plist>
 ```
-`LaunchDaemons` içindeki **`LaunchDaemons`** hizmetleri genellikle root olarak çalışır. Bu nedenle, ayrıcalıksız bir process bu hizmetlerden biri tarafından açığa çıkarılan güvenlik açığı bulunan bir metoda erişebiliyorsa, privilege escalation gerçekleştirebilir.
+Services in **`LaunchDaemons`** genellikle root olarak çalışır. Bu nedenle, ayrıcalıksız bir process bu servislerden biri tarafından sunulan güvenlik açığı bulunan bir metoda erişebiliyorsa, ayrıcalıkları yükseltebilir.
 
-## XPC Nesneleri
+## XPC Objects
 
 - **`xpc_object_t`**
 
-XPC request ve reply payload'ları genellikle dictionary nesneleridir; bu da serialization ve deserialization işlemlerini kolaylaştırır. `libxpc.dylib` ayrıca alınan verinin beklenen tipe sahip olduğunu doğrulamak için gereken veri tiplerini de tanımlar. C API'de her nesne bir `xpc_object_t`'dir (tipi `xpc_get_type(object)` kullanılarak kontrol edilebilir).<sup>[[2]](#references)</sup>\
-Ayrıca `xpc_copy_description(object)`, debugging amacıyla yararlı olabilecek nesnenin string gösterimini almak için kullanılabilir.\
-Bu nesnelerin ayrıca `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize` gibi çağrılabilecek bazı method'ları vardır...
+XPC request ve reply payload'ları genellikle dictionary object'leridir; bu da serialization ve deserialization işlemlerini kolaylaştırır. `libxpc.dylib`, alınan verinin beklenen type'a sahip olduğunu doğrulamak için gereken data type'larını da tanımlar. C API'de her object bir `xpc_object_t`'dir (type'ı `xpc_get_type(object)` kullanılarak kontrol edilebilir).<sup>[[2]](#references)</sup>\
+Ayrıca `xpc_copy_description(object)` fonksiyonu, debugging amaçları için yararlı olabilecek bir string representation elde etmek amacıyla kullanılabilir.\
+Bu object'lerin ayrıca `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize` gibi çağrılabilecek bazı method'ları vardır...
 
-`xpc_object_t` nesneleri, dahili olarak `_xpc_base_create(Class, Size)` fonksiyonunu çağıran bir `xpc_<objectType>_create` fonksiyonu çağrılarak oluşturulur; bu fonksiyon nesnenin class'ını (`XPC_TYPE_*` değerlerinden biri) ve boyutunu belirtir. Metadata için fazladan 40 byte eklenir; bu nedenle nesne verisi 40 byte offset'te başlar.\
-Bu nedenle `xpc_<objectType>_t`, `xpc_object_t`'nin bir subclass'ı olan ve kendisi de `os_object_t*`'nin subclass'ı sayılabilecek bir yapıdadır.
+`xpc_object_t` object'leri, dahili olarak `_xpc_base_create(Class, Size)` fonksiyonunu çağıran bir `xpc_<objectType>_create` fonksiyonu çağrılarak oluşturulur; bu fonksiyon object'in class'ını (`XPC_TYPE_*` değerlerinden biri) ve size'ını belirtir. Metadata için ekstra 40 byte eklenir; dolayısıyla object data'sı 40 byte offset'te başlar.\
+Bu nedenle `xpc_<objectType>_t`, `xpc_object_t`'nin bir subclass'ı; `xpc_object_t` de `os_object_t*`'ın bir subclass'ı gibidir.
 
 > [!WARNING]
-> Tipi ve bir key'in gerçek değerini almak veya ayarlamak için `xpc_dictionary_[get/set]_<objectType>` kullanması gereken kişi developer'dır.
+> Type'ı ve bir key'in gerçek value'sunu almak veya ayarlamak için `xpc_dictionary_[get/set]_<objectType>` kullanan developer olmalıdır.
 
 - **`xpc_pipe`**
 
-Bir **`xpc_pipe`**, process'lerin iletişim kurmak için kullanabildiği bir FIFO pipe'dır (iletişim Mach message'ları kullanır).\
-`xpc_pipe_create()` veya belirli bir Mach port kullanarak oluşturmak için `xpc_pipe_create_from_port()` çağrılarak bir XPC server oluşturulabilir. Ardından message'ları almak için `xpc_pipe_receive` ve `xpc_pipe_try_receive` çağrılabilir.
+Bir **`xpc_pipe`**, process'lerin iletişim kurmak için kullanabileceği bir FIFO pipe'tır (iletişim Mach message'larını kullanır).\
+Bir XPC server, `xpc_pipe_create()` çağrılarak veya belirli bir Mach port kullanılarak `xpc_pipe_create_from_port()` ile oluşturulabilir. Ardından message'ları almak için `xpc_pipe_receive` ve `xpc_pipe_try_receive` çağrılabilir.
 
-**`xpc_pipe`** nesnesinin, kullanılan iki Mach port ve name (varsa) hakkındaki bilgileri struct'ında bulunduran bir **`xpc_object_t`** olduğunu unutmayın. Örneğin `secinitd` daemon'ı, `/System/Library/LaunchDaemons/com.apple.secinitd.plist` plist dosyasında `com.apple.secinitd` adlı pipe'ı yapılandırır.
+**`xpc_pipe`** object'inin, kullanılan iki Mach port ve name (varsa) hakkında struct'ında bilgi bulunan bir **`xpc_object_t`** olduğunu unutmayın. Örneğin `secinitd` daemon'ı, `/System/Library/LaunchDaemons/com.apple.secinitd.plist` içindeki plist'te `com.apple.secinitd` adlı pipe'ı yapılandırır.
 
-Bir **`xpc_pipe`** örneği, **`launchd`** tarafından oluşturulan ve Mach port'larının paylaşılmasını mümkün kılan **bootstrap pipe**'dır.
+Bir **`xpc_pipe`** örneği, **`launchd`** tarafından oluşturulan ve Mach port'larının paylaşılmasını mümkün kılan **bootstrap pipe**'tır.
 
 - **`NSXPC*`**
 
-Bunlar XPC connection'larını soyutlayan high-level Objective-C nesneleridir.\
-Ayrıca bu nesneleri DTrace ile debug etmek öncekilere göre daha kolaydır.
+Bunlar XPC connection'larını soyutlayan high-level Objective-C object'leridir.\
+Ayrıca bu object'leri önceki object'lere kıyasla DTrace ile debug etmek daha kolaydır.
 
 - **`GCD Queues`**
 
@@ -98,29 +98,29 @@ XPC, message'ları iletmek için GCD kullanır; ayrıca `xpc.transactionq`, `xpc
 
 ## XPC Services
 
-Bunlar diğer project'lerin **`XPCServices`** klasörü içinde bulunan ve `.xpc` uzantısına sahip bundle'lardır; `Info.plist` dosyalarında `CFBundlePackageType` değeri **`XPC!`** olarak ayarlanmıştır.\
-Bu dosyada ayrıca `ServiceType` (Application, User veya System olabilir), sandbox tanımlayabilen `_SandboxProfile` ve service'e erişmek için gereken entitlement'ları veya identity'yi belirtebilen `_AllowedClients` gibi configuration key'leri bulunur. Bu ve diğer seçenekler, service başlatıldığında nasıl yapılandırılacağını belirler.<sup>[[2]](#references)</sup>
+Bunlar diğer project'lerin **`XPCServices`** folder'ı içinde bulunan ve `.xpc` extension'ına sahip bundle'lardır; `Info.plist` dosyalarında `CFBundlePackageType` değeri **`XPC!`** olarak ayarlanmıştır.\
+Bu dosyada ayrıca `ServiceType` (Application, User veya System olabilir), sandbox tanımlayabilen `_SandboxProfile` ve service ile iletişim kurmak için gereken entitlement'ları veya identity'yi belirtebilen `_AllowedClients` gibi configuration key'leri bulunur. Bu ve diğer option'lar, service launch edildiğinde nasıl çalışacağını yapılandırır.<sup>[[2]](#references)</sup>
 
-### Service Başlatma
+### Starting a Service
 
-App, `xpc_connection_create_mach_service` kullanarak bir XPC service'e **connect** olmaya çalışır; ardından launchd daemon'ı bulur ve **`xpcproxy`**'yi başlatır. **`xpcproxy`**, yapılandırılmış kısıtlamaları uygular ve service'i sağlanan file descriptor'lar ve Mach port'larıyla başlatır.<sup>[[3]](#references)</sup>
+App, `xpc_connection_create_mach_service` kullanarak bir XPC service'e **connect** olmaya çalışır; ardından launchd daemon'ı bulur ve **`xpcproxy`**'yi başlatır. **`xpcproxy`**, yapılandırılmış restriction'ları uygular ve service'i sağlanan file descriptor'lar ve Mach port'larıyla spawn eder.<sup>[[3]](#references)</sup>
 
 XPC service aramasının hızını artırmak için bir cache kullanılır.
 
-`xpcproxy`'nin işlemlerini şu şekilde trace etmek mümkündür:
+`xpcproxy`'nin action'larını şu şekilde trace etmek mümkündür:
 ```bash
 supraudit S -C -o /tmp/output /dev/auditpipe
 ```
-The XPC library, `xpc_ktrace_pid0` ve `xpc_ktrace_pid1` çağrılarını kullanarak eylemleri `kdebug` ile günlüğe kaydeder. Kullandığı kodlar belgelenmemiştir; bu nedenle `/usr/share/misc/trace.codes` dosyasına eklenmeleri gerekir. `0x29` önekini kullanırlar; örneğin, `0x29000004`, `XPC_serializer_pack` değeridir.\
-`xpcproxy` utility'si `0x22` önekini kullanır; örneğin: `0x2200001c: xpcproxy:will_do_preexec`.
+XPC library, `xpc_ktrace_pid0` ve `xpc_ktrace_pid1` çağrılarını kullanarak eylemleri `kdebug` ile günlüğe kaydeder. Kullandığı kodlar belgelenmemiştir; bu nedenle `/usr/share/misc/trace.codes` dosyasına eklenmeleri gerekir. `0x29` ön ekini kullanırlar; örneğin, `0x29000004`, `XPC_serializer_pack` anlamına gelir.\
+`xpcproxy` utility'si `0x22` ön ekini kullanır; örneğin: `0x2200001c: xpcproxy:will_do_preexec`.
 
-## XPC Event Messages
+## XPC Event Mesajları
 
-Uygulamalar farklı event **mesajlarına** **subscribe** olabilir; böylece bu tür olaylar gerçekleştiğinde **on-demand** olarak **başlatılabilirler**. Bu servislerin **setup** işlemi, önceki dosyalarla **aynı dizinlerde** bulunan ve ek bir **`LaunchEvent`** anahtarı içeren **launchd plist dosyalarında** yapılır.
+Uygulamalar farklı event **mesajlarına** **subscribe** olabilir; böylece bu tür event'ler gerçekleştiğinde **on-demand olarak başlatılabilirler**. Bu servislerin **setup** işlemi, önceki dosyalarla **aynı dizinlerde** bulunan ve ek bir **`LaunchEvent`** anahtarı içeren **launchd plist dosyalarında** yapılır.
 
-### XPC Connecting Process Check
+### XPC Bağlanan İşlem Kontrolü
 
-Bir process, bir XPC connection üzerinden method çağırmaya çalıştığında, **XPC service bu process'in bağlanmasına izin verilip verilmediğini kontrol etmelidir**. Yaygın doğrulama yöntemleri ve bunların sorunları şunlardır:
+Bir process, XPC connection üzerinden bir method çağırmaya çalıştığında, **XPC service bu process'in bağlanmasına izin verilip verilmediğini kontrol etmelidir**. Yaygın doğrulama yöntemleri ve bunların sakıncaları şunlardır:
 
 
 {{#ref}}
@@ -138,7 +138,7 @@ macos-xpc-authorization.md
 
 ## XPC Sniffer
 
-XPC mesajlarını sniff etmek için **Frida** kullanan **xpcspy** aracını kullanabilirsiniz.<sup>[[5]](#references)</sup>
+XPC mesajlarını sniff etmek için **Frida** kullanan **xpcspy**'ı kullanabilirsiniz.<sup>[[5]](#references)</sup>
 ```bash
 # Install
 pip3 install xpcspy
@@ -149,9 +149,9 @@ xpcspy -U -r -W <bundle-id>
 ## Using filters (i: for input, o: for output)
 xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
 ```
-Bir diğer olası araç **XPoCe2**.<sup>[[6]](#references)</sup>
+Başka bir olası araç **XPoCe2**'dir.<sup>[[6]](#references)</sup>
 
-## XPC Communication C Code Example
+## XPC İletişimi C Kod Örneği
 
 {{#tabs}}
 {{#tab name="xpc_server.c"}}
@@ -283,7 +283,7 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.service.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.service.plist /tmp/xpc_server
 ```
-## XPC Communication Objective-C Code Example
+## XPC Communication Objective-C Kod Örneği
 
 {{#tabs}}
 {{#tab name="oc_xpc_server.m"}}
@@ -405,7 +405,7 @@ sudo launchctl load /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo launchctl unload /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist
 sudo rm /Library/LaunchDaemons/xyz.hacktricks.svcoc.plist /tmp/oc_xpc_server
 ```
-## Bir Dylib İçindeki Client
+## Dylib İçindeki Client
 ```objectivec
 // gcc -dynamiclib -framework Foundation oc_xpc_client.m -o oc_xpc_client.dylib
 // gcc injection example:
@@ -441,14 +441,14 @@ return;
 ```
 ## Remote XPC
 
-`libxpc` içindeki `RemoteXPC.framework` tarafından sağlanan işlevsellik, farklı host'lar arasında XPC iletişimine olanak tanır.\
-Remote XPC desteği sunan servisler, `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist` dosyasında olduğu gibi plist'lerinde `UsesRemoteXPC` anahtarına sahiptir. Servis `launchd` ile kaydedilmiş olsa da işlevselliği `UserEventAgent` ile onun `com.apple.remoted.plugin` ve `com.apple.remoteservicediscovery.events.plugin` eklentileri sağlar.
+`RemoteXPC.framework` (from `libxpc`) tarafından sağlanan functionality, farklı host'lar arasında XPC communication yapılmasına olanak tanır.\
+Remote XPC'yi destekleyen services, `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist` örneğinde olduğu gibi plist'lerinde `UsesRemoteXPC` key'ine sahiptir. Service `launchd` ile register edilmiş olsa da functionality, `UserEventAgent` ve onun `com.apple.remoted.plugin` ile `com.apple.remoteservicediscovery.events.plugin` plugin'leri tarafından sağlanır.
 
-Ayrıca `RemoteServiceDiscovery.framework`, `com.apple.remoted.plugin` üzerinden bilgi alarak `get_device`, `get_unique_device` ve `connect` gibi işlevleri dışa sunar.
+Ayrıca `RemoteServiceDiscovery.framework`, `com.apple.remoted.plugin`'dan information alarak `get_device`, `get_unique_device` ve `connect` gibi functions'ları expose eder.
 
-`connect` servis için socket dosya tanımlayıcısını döndürdüğünde, `remote_xpc_connection_*` sınıfını kullanmak mümkündür.
+`connect` service'in socket file descriptor'ını döndürdüğünde, `remote_xpc_connection_*` class'ını kullanmak mümkündür.
 
-`/usr/libexec/remotectl` CLI kullanılarak, aşağıdakiler gibi komutlarla remote servisler hakkında bilgi alınabilir:
+`/usr/libexec/remotectl` CLI'ını aşağıdakiler gibi command'lerle kullanarak remote services hakkında information almak mümkündür:
 ```bash
 /usr/libexec/remotectl list # Get bridge devices
 /usr/libexec/remotectl show ...# Get device properties and services
@@ -456,7 +456,7 @@ Ayrıca `RemoteServiceDiscovery.framework`, `com.apple.remoted.plugin` üzerinde
 /usr/libexec/remotectl [netcat|relay] ... # Expose a service in a port
 ...
 ```
-bridgeOS ile host arasındaki iletişim, özel bir IPv6 arayüzü üzerinden gerçekleşir. `MultiverseSupport.framework`, iletişim için kullanılan file descriptor'lara sahip socket'ler oluşturur.\
+bridgeOS ile host arasındaki iletişim, özel bir IPv6 arayüzü üzerinden gerçekleşir. `MultiverseSupport.framework`, iletişim için kullanılan dosya tanımlayıcılarına sahip socket'ler oluşturur.\
 Bu iletişimleri `netstat`, `nettop` veya open-source alternatif olan `netbottom` kullanarak bulmak mümkündür.
 
 ## References
