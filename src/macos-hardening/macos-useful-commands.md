@@ -1,14 +1,14 @@
-# Commandes utiles macOS
+# Commandes utiles pour macOS
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Outils d’énumération automatique de macOS
+### Outils d'énumération automatique de macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Commandes spécifiques à macOS
+### Commandes macOS spécifiques
 ```bash
 #System info
 date
@@ -32,7 +32,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -117,7 +117,7 @@ sudo killall -HUP mDNSResponder
 ```
 ### Vérification rapide anti-analyse / virtualisation
 
-Certains stealers macOS appellent `system_profiler` pour détecter les VM et **abandonnent avec un code de sortie distinct (par ex. 100)** afin d’éviter le sandbox detonation<sup>[[1]](#references)</sup> :
+Certains stealers macOS appellent `system_profiler` pour détecter les VM et **quittent avec un code de sortie distinct (par ex. 100)** afin d’éviter la détonation dans un sandbox<sup>[[1]](#references)</sup> :
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -128,7 +128,7 @@ fi
 Vérifiez les applications **suspectes** installées et les **privilèges** sur les ressources installées :
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
@@ -145,12 +145,11 @@ launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
 ### Créer un utilisateur
 
-Sans invite
+Sans invites
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## Références
+## References
 
-- [1] [2025, l'année des Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
+- [1] [2025, l'année de l'Infostealer](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 {{#include ../banners/hacktricks-training.md}}

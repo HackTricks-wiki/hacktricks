@@ -4,7 +4,7 @@
 
 ## Gatekeeper
 
-Gatekeeper désigne généralement la combinaison de **Quarantine + Gatekeeper + XProtect**, 3 modules de sécurité de macOS qui tenteront **d'empêcher les utilisateurs d'exécuter des logiciels potentiellement malveillants téléchargés**.
+Gatekeeper désigne généralement la combinaison de **Quarantine + Gatekeeper + XProtect**, trois modules de sécurité de macOS qui tenteront **d'empêcher les utilisateurs d'exécuter des logiciels potentiellement malveillants téléchargés**.
 
 Plus d'informations dans :
 
@@ -13,7 +13,7 @@ Plus d'informations dans :
 macos-gatekeeper.md
 {{#endref}}
 
-## Limitations des processus
+## Processus limitants
 
 ### MACF
 
@@ -26,7 +26,7 @@ macos-sip.md
 
 ### Sandbox
 
-MacOS Sandbox **limite les applications** exécutées dans le sandbox aux **actions autorisées spécifiées dans le profil Sandbox** avec lequel l'application s'exécute. Cela contribue à garantir que **l'application n'accédera qu'aux ressources attendues**.
+Le Sandbox de macOS **limite les applications** exécutées dans le sandbox aux **actions autorisées spécifiées dans le profil Sandbox** avec lequel l'application s'exécute. Cela contribue à garantir que **l'application n'accédera qu'aux ressources attendues**.
 
 
 {{#ref}}
@@ -44,7 +44,7 @@ macos-tcc/
 
 ### Launch/Environment Constraints & Trust Cache
 
-Les launch constraints dans macOS sont une fonctionnalité de sécurité qui **régule le démarrage des processus** en définissant **qui peut lancer** un processus, **comment** et **depuis où**. Introduites dans macOS Ventura, elles classent les binaires système dans des catégories de contraintes au sein d'un **trust cache**. Chaque binaire exécutable possède un ensemble de **règles** pour son **lancement**, notamment des contraintes **self**, **parent** et **responsible**. Étendues aux applications tierces sous la forme d'**Environment Constraints** dans macOS Sonoma, ces fonctionnalités contribuent à limiter les exploitations potentielles du système en régissant les conditions de lancement des processus.
+Les contraintes de lancement dans macOS sont une fonctionnalité de sécurité qui vise à **réguler l'initiation des processus** en définissant **qui peut lancer** un processus, **comment** et **depuis où**. Introduites dans macOS Ventura, elles classent les binaires système dans des catégories de contraintes au sein d'un **trust cache**. Chaque binaire exécutable possède un ensemble de **règles** pour son **lancement**, notamment des contraintes **self**, **parent** et **responsible**. Étendues aux applications tierces sous la forme de contraintes d'**Environment** dans macOS Sonoma, ces fonctionnalités contribuent à limiter les exploitations potentielles du système en contrôlant les conditions de lancement des processus.
 
 
 {{#ref}}
@@ -59,14 +59,14 @@ Une fois qu'un malware est détecté sur un Mac (par XProtect ou par un autre mo
 
 Bien que XProtect et MRT fassent tous deux partie des mesures de sécurité de macOS, ils remplissent des fonctions différentes :
 
-- **XProtect** est un outil préventif. Il **vérifie les fichiers lorsqu'ils sont téléchargés** (via certaines applications) et, s'il détecte un type connu de malware, il **empêche l'ouverture du fichier**, empêchant ainsi le malware d'infecter le système dès le départ.
-- **MRT**, en revanche, est un **outil réactif**. Il intervient après qu'un malware a été détecté sur un système, dans le but de supprimer le logiciel malveillant afin de nettoyer le système.
+- **XProtect** est un outil préventif. Il **vérifie les fichiers lors de leur téléchargement** (via certaines applications) et, s'il détecte des types connus de malware, **empêche l'ouverture du fichier**, empêchant ainsi le malware d'infecter le système dès le départ.
+- **MRT**, en revanche, est un **outil réactif**. Il intervient après la détection d'un malware sur un système, avec pour objectif de supprimer le logiciel malveillant afin de nettoyer le système.
 
 L'application MRT se trouve dans **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
 ## Gestion des tâches en arrière-plan
 
-**macOS** **alerte** désormais l'utilisateur chaque fois qu'un outil utilise une **technique connue pour maintenir l'exécution de code** (comme les Login Items, les Daemons...), afin qu'il sache mieux **quel logiciel assure sa persistance**.<sup>[[3]](#references)</sup>
+**macOS** affiche désormais une **alerte** chaque fois qu'un outil utilise une **technique bien connue pour maintenir une exécution de code persistante** (telles que les Login Items, les Daemons...), afin que l'utilisateur sache mieux **quel logiciel assure sa persistance**.<sup>[[3]](#references)</sup>
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
@@ -74,7 +74,7 @@ Cela fonctionne avec un **daemon** situé dans `/System/Library/PrivateFramework
 
 La manière dont **`backgroundtaskmanagementd`** sait qu'un élément est installé dans un dossier persistant consiste à **récupérer les FSEvents** et à créer des **handlers** pour ceux-ci.<sup>[[1]](#references)</sup>
 
-De plus, un fichier plist contient les **applications connues** qui assurent fréquemment leur persistance et qui sont maintenues par Apple. Il se trouve dans : `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[[3]](#references)</sup>
+De plus, un fichier plist contenant les **applications bien connues** qui assurent fréquemment leur persistance, maintenu par Apple, se trouve à l'emplacement suivant : `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`<sup>[[3]](#references)</sup>
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -92,7 +92,7 @@ De plus, un fichier plist contient les **applications connues** qui assurent fr�
 ```
 ### Énumération
 
-Il est possible d’**énumérer tous** les éléments d’arrière-plan configurés à l’aide de l’outil cli d’Apple :<sup>[[3]](#references)</sup>
+Il est possible d’**énumérer tous** les éléments d’arrière-plan configurés en exécutant l’outil CLI d’Apple :<sup>[[3]](#references)</sup>
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
@@ -104,14 +104,14 @@ chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
-Ces informations sont stockées dans **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** et le Terminal nécessite la FDA.<sup>[[2]](#references)</sup>
+Ces informations sont stockées dans **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** et le Terminal nécessite FDA.<sup>[[2]](#references)</sup>
 
 ### Manipulation de BTM
 
-Lorsqu'une nouvelle persistence est détectée, un événement de type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** est généré. Ainsi, tout moyen d'**empêcher** l'envoi de cet **événement** ou d'**empêcher l'agent d'alerter** l'utilisateur aidera un attaquant à _**contourner**_ BTM.<sup>[[1]](#references)</sup>
+Lorsqu'une nouvelle persistence est détectée, un événement de type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** est généré. Ainsi, tout moyen d'**empêcher** l'envoi de cet **événement** ou d'empêcher **l'agent d'alerter** l'utilisateur aidera un attaquant à _**bypass**_ BTM.<sup>[[1]](#references)</sup>
 
-- **Réinitialisation de la base de données** : l'exécution de la commande suivante réinitialisera la base de données (elle devrait être reconstruite depuis zéro). Cependant, pour une raison inconnue, après cette opération, **aucune nouvelle persistence ne sera signalée jusqu'au redémarrage du système**.<sup>[[1]](#references)</sup>
-- **`root`** est requis.
+- **Réinitialisation de la base de données** : L'exécution de la commande suivante réinitialise la base de données (qui devrait être reconstruite à partir de zéro). Cependant, après cette opération, **aucune nouvelle alerte de persistence n'apparaît jusqu'au redémarrage du système**.<sup>[[1]](#references)</sup>
+- **root** est requis.
 ```bash
 # Reset the database
 sfltool resettbtm
@@ -129,12 +129,11 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Bug** : Si le **processus ayant créé la persistence se termine immédiatement après**, le daemon tentera d'**obtenir des informations** à son sujet, **échouera** et **ne pourra pas envoyer l'événement** indiquant qu'un nouvel élément est persistant.<sup>[[1]](#references)</sup>
+- **Bug** : Si le **processus qui a créé la persistance se termine immédiatement après**, le daemon essaie d’**obtenir des informations** à son sujet, **échoue** et **ne peut pas envoyer l’événement** indiquant qu’un nouvel élément est persistant.<sup>[[1]](#references)</sup>
 
-## Références
+## References
 
-- [1] [OBTS v6.0 : « Démythifier (et contourner) la gestion des tâches en arrière-plan de macOS » - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
+- [1] [OBTS v6.0 : « Demystifying (& Bypassing) macOS's Background Task Management » - Patrick Wardle & Chris Lopez](https://youtu.be/9hjUmT031tc?t=26481)
 - [2] [Nouvel outil (pour développeurs) : « DumpBTM » - Patrick Wardle (Patreon)](https://www.patreon.com/posts/new-developer-77420730?l=fr)
 - [3] [Gérer les éléments de connexion et les tâches en arrière-plan sur Mac - Apple Platform Deployment](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
-
 {{#include ../../../banners/hacktricks-training.md}}

