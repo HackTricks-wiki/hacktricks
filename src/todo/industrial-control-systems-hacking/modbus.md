@@ -6,7 +6,7 @@
 
 Modbus is an open application-layer protocol widely implemented by PLCs, sensors, actuators, and other industrial devices. Its request/response model exposes coils and registers through function codes. Security testing therefore focuses on unauthorized reads/writes, traffic observation, replay, and unsafe device behavior—not merely on finding TCP port 502.<sup>[[1]](#references)</sup>
 
-Many deployments retain legacy serial equipment because upgrades require downtime, recertification, or replacement of field devices. Traditional Modbus provides neither confidentiality nor peer authentication; Modbus Security is a separate TLS-based profile using X.509 certificates and TCP port 802.<sup>[[2]](#references)</sup>
+Many deployments retain legacy serial equipment because upgrades require downtime, recertification, or replacement of field devices. Traditional Modbus provides neither confidentiality nor peer authentication; Modbus Security is a separate TLS-based profile using X.509 certificates and TCP port 802. Because the specification is public and independently implementable, vendor behavior and optional-function support vary and should be fingerprinted rather than assumed.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## The Client-Server Architecture
 
@@ -22,7 +22,7 @@ The data model consists of single-bit coils/discrete inputs and 16-bit input/hol
 
 ## Function codes
 
-Function codes select operations such as reading coils (`0x01`), reading holding registers (`0x03`), writing a single coil/register (`0x05`/`0x06`), and writing multiple coils/registers (`0x0F`/`0x10`). A captured write request may be replayable when the deployment has no compensating authentication or process-state checks, but replaying control traffic can cause physical harm; use a lab or explicit operational authorization.<sup>[[1]](#references)</sup>
+Function codes select operations such as reading coils (`0x01`), reading holding registers (`0x03`), writing a single coil/register (`0x05`/`0x06`), and writing multiple coils/registers (`0x0F`/`0x10`). A captured write request may be replayable when the deployment has no compensating authentication or process-state checks. With authorized physical access to long serial runs, an assessor may also capture or inject frames directly on the wiring after identifying the electrical interface, termination, and safe connection method. Either action can affect the physical process, so use a lab or explicit operational authorization.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## Addressing
 

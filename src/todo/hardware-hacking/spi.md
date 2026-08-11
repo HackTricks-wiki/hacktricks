@@ -6,7 +6,7 @@
 
 SPI (Serial Peripheral Interface) is a synchronous serial bus commonly used for short-distance communication between integrated circuits. A controller supplies the clock and selects a peripheral, such as an EEPROM, sensor, or control device, using a chip-select signal.<sup>[[1]](#references)</sup>
 
-Multiple peripherals can share the clock and data lines, normally with a separate chip-select per peripheral. Chip-select polarity and timing are device-specific; active-low selection is common but not universal. SPI does not define discovery, addressing, commands, or a single maximum transfer length, so always consult the target datasheet.<sup>[[1]](#references)</sup>
+Multiple peripherals can share the clock and data lines, normally with a separate chip-select per peripheral. The controller orchestrates transfers; peripherals normally do not communicate directly with each other over the SPI bus. Chip-select polarity and timing are device-specific; active-low selection is common but not universal. SPI does not define discovery, addressing, commands, or a single maximum transfer length, so always consult the target datasheet.<sup>[[1]](#references)</sup>
 
 MOSI/COPI carries controller-to-peripheral data and MISO/CIPO carries peripheral-to-controller data. Both directions can shift simultaneously. The relationship between a command, address, dummy cycles, and returned data is defined by the peripheral—not by SPI—and depends on clock polarity and phase (modes 0–3). Do not assume that output begins exactly one clock after input ends.<sup>[[1]](#references)</sup>
 
@@ -14,7 +14,7 @@ MOSI/COPI carries controller-to-peripheral data and MISO/CIPO carries peripheral
 
 Dumping firmware can be useful for analyzing it and finding vulnerabilities. The correct image may be unavailable online or differ by model, hardware revision, or version, so extracting it directly from the physical device provides an exact assessment target.
 
-A serial console can help, but its filesystem may be read-only and the target may lack analysis tools. An offline image preserves the complete flash layout and permits filesystem extraction and reverse engineering without modifying the running target.
+A serial console can help, but its filesystem may be read-only and the target may lack analysis tools, including utilities needed to send/receive test traffic or extract binaries conveniently. An offline image preserves the complete flash layout and permits filesystem extraction and reverse engineering without modifying the running target.
 
 During an authorized physical assessment, a verified dump can also support controlled modification and reflashing tests. This includes changing files or injecting a test payload/backdoor to demonstrate firmware-level persistence. Preserve multiple matching reads and the original image before any write: an incorrect voltage, chip selection, layout, or image can brick the device.
 
@@ -24,7 +24,7 @@ This inexpensive USB tool can dump and reflash compatible serial EEPROM and SPI 
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Connect the flash memory to the CH341A and then connect the programmer to the computer. Confirm the chip's voltage, pin 1, adapter wiring, and programmer output with the datasheets or a meter—do **not** rely on a rule such as placing VCC opposite the USB connector. Incorrect orientation or 5 V applied to a 3.3/1.8 V part can destroy it. In-circuit reads may also fail because the rest of the board loads or powers the bus.<sup>[[2]](#references)</sup>
+Connect the flash memory to the CH341A and then connect the programmer to the computer. If the programmer itself is not detected, check the USB cable, OS permissions, and the appropriate CH341A driver before troubleshooting the target chip. Confirm the chip's voltage, pin 1, adapter wiring, and programmer output with the datasheets or a meter—do **not** rely on a rule such as placing VCC opposite the USB connector. Incorrect orientation or 5 V applied to a 3.3/1.8 V part can destroy it. In-circuit reads may also fail because the rest of the board loads or powers the bus.<sup>[[2]](#references)</sup>
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 

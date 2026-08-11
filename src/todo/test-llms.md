@@ -10,7 +10,7 @@ Hugging Face Transformers is an open-source library for loading, training, and s
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain is a framework for building model-driven applications and agents with model, tool, retrieval, and state integrations.<sup>[[2]](#references)</sup>
+LangChain is a framework for building model-driven applications and agents with prompt construction, conversation-history/state management, tools, retrieval, model, API, and database integrations.<sup>[[2]](#references)</sup>
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 

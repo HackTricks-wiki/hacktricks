@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-TimeRoasting abuses legacy MS-SNTP authentication. An unauthenticated client can send a 68-byte request containing a chosen computer-account RID. The domain controller derives the response authenticator through Netlogon using that account's password-derived secret, giving the attacker a challenge/MAC pair suitable for offline password guessing (Hashcat mode 31300).<sup>[[1]](#references)[[2]](#references)</sup>
+TimeRoasting abuses legacy MS-SNTP authentication. An unauthenticated client can send a 68-byte request containing a chosen computer-account RID. For the exploitable legacy path, the domain controller derives the response authenticator through Netlogon using the computer account's NT hash (the MD4-derived password secret), giving the attacker a challenge/MAC pair suitable for offline password guessing (Hashcat mode 31300).<sup>[[1]](#references)[[2]](#references)</sup>
 
 Sections 3.1.5.1 and 4 of MS-SNTP describe the request and response behavior:<sup>[[1]](#references)</sup>
 ![TimeRoasting: See section 3.1.5.1 "Authentication Request Behavior" and 4 "Protocol Examples" in the official MS-SNTP spec for details](../../images/Pasted%20image%2020250709114508.png)

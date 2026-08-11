@@ -15,7 +15,7 @@ This is important during assessments because signed WebSocket chunks or propriet
 ## High-Value Testing Angles
 
 - **Virtual webcam acceptance**: if the flow works from a desktop browser, test whether OBS, `v4l2loopback`, or vendor virtual cameras are accepted as normal peripherals.<sup>[[1]](#references)</sup>
-- **Camera API redirection on mobile**: native flows may still be vulnerable when runtime instrumentation hooks camera APIs and replaces sensor buffers with frames from a file or emulator-backed virtual camera. This requires control of the client execution environment and should be assessed together with root/jailbreak and application-integrity signals.<sup>[[1]](#references)</sup>
+- **Camera API redirection on mobile**: native flows may still be vulnerable when runtime instrumentation such as Frida hooks camera APIs and replaces sensor buffers with frames from an MP4 file or emulator-backed virtual camera. This requires control of the client execution environment and should be assessed together with root/jailbreak and application-integrity signals.<sup>[[1]](#references)</sup>
 - **Constraint weakening**: pages that require exact `deviceId`, `frameRate`, `width`, `height`, or `facingMode` can sometimes be bypassed by monkeypatching `navigator.mediaDevices.getUserMedia` and replacing strict constraints with broader ranges.<sup>[[4]](#references)</sup>
 - **Low-quality generation plus post-processing**: test whether inexpensive generated video can be upscaled or frame-interpolated with FFmpeg sufficiently to meet capture constraints.<sup>[[1]](#references)</sup>
 - **Predictable active challenges**: repeated head-movement or light-flash sequences are worth recording and replaying through a generative workflow.
@@ -25,7 +25,7 @@ This is important during assessments because signed WebSocket chunks or propriet
 
 Native mobile apps can raise the attacker's cost with:<sup>[[1]](#references)</sup>
 
-- **hardware-backed provenance or attestation signals**, where the platform and capture stack actually expose them;
+- **hardware-backed provenance or attestation signals**, including Secure Element-backed evidence where the platform and capture stack actually expose it;
 - **execution-integrity** signals such as **Play Integrity** or **App Attest**;<sup>[[5]](#references)[[6]](#references)</sup>
 - **motion correlation** between video and accelerometer or gyroscope telemetry.
 

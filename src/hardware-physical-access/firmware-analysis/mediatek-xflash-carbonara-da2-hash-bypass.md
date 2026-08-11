@@ -18,7 +18,7 @@
 2. **Hash-slot overwrite:** Send a small payload that scans DA1 memory for the stored DA2-expected hash and overwrites it with the SHA-256 of the attacker-modified DA2. This leverages the user-controlled load to land the payload where the hash resides.
 3. **Second `BOOT_TO` + digest:** Trigger another `BOOT_TO` with the patched DA2 metadata and send the raw 32-byte digest matching the modified DA2. DA1 recomputes SHA-256 over the received DA2, compares it against the now-patched expected hash, and the jump succeeds into attacker code.
 
-On affected loaders, the unchecked address/size form a pre-OS memory-write primitive beyond the hash slot. Practical impact still depends on the SoC memory map, subsequent verification stages, and persistence mechanism; code execution in the DA does not automatically imply a persistent secure-boot bypass.<sup>[[1]](#references)[[2]](#references)</sup>
+On affected loaders, the unchecked address and size can provide an attacker-selected pre-OS memory-write primitive beyond the hash slot. Depending on the SoC memory map and later verification stages, this can support early-boot implants, secure-boot-bypass helpers, or rootkit-style payloads. DA code execution alone does not automatically provide persistence or a complete secure-boot bypass; a separate persistence mechanism and compatible verification chain are still required.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Minimal PoC pattern (mtkclient-style)
 
@@ -33,9 +33,9 @@ if self.xsend(self.Cmd.BOOT_TO):
             self.info("All good!")
 ```
 
-- The 16-byte `payload` is an observed, loader-specific blob used by the published implementation; it is not a portable hash-slot patch for every SoC or DA.
+- The 16-byte `payload` reproduces the blob observed in the paid-tool workflow and used by the published implementation to patch the expected-hash buffer. It is loader-specific, not a portable hash-slot patch for every SoC or DA.<sup>[[1]](#references)[[2]](#references)</sup>
 - `sha256(...).digest()` sends raw bytes (not hex) so DA1 compares against the patched buffer.
-- On a vulnerable, matched loader, DA2 can be attacker-modified and the chosen load metadata controls placement. Validate the DA/SoC combination before transmission because incorrect addresses can hang or damage the target.<sup>[[3]](#references)</sup>
+- On a vulnerable, matched loader, DA2 can be an attacker-built image and the chosen load metadata controls its memory placement. Validate the DA/SoC combination before transmission because incorrect addresses can hang or damage the target.<sup>[[3]](#references)</sup>
 
 ## Patch landscape (hardened loaders)
 

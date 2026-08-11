@@ -33,7 +33,7 @@ Sometimes you will be able to find those pins marked in the PCB. In other occasi
 
 ### Identifying JTAG pins
 
-One purpose-built option for detecting JTAG ports is the **JTAGulator**, which can also identify UART pinouts.<sup>[[2]](#references)</sup>
+A fast, purpose-built—but comparatively expensive—option for detecting JTAG ports is the **JTAGulator**, which can also identify UART pinouts.<sup>[[2]](#references)</sup>
 
 It has **24 channels** that can be connected to board test points. It enumerates candidate pin combinations using **IDCODE** and **BYPASS** scans and reports the channels corresponding to the detected JTAG signals.
 

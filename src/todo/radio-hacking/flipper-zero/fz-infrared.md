@@ -13,7 +13,7 @@ For more info about how Infrared works check:
 
 ## IR Signal Receiver in Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper Zero uses a demodulating IR receiver to capture signals from common IR remotes. Some phones include an IR transmitter, but most cannot receive and decode remote-control signals.<sup>[[1]](#references)</sup>
+Flipper Zero uses a demodulating IR receiver to capture signals from common IR remotes. Some phones, including certain Xiaomi models, include an IR transmitter, but most cannot receive and decode remote-control signals.<sup>[[1]](#references)</sup>
 
 The Flipper infrared **receiver is quite sensitive**. You can even **catch the signal** while remaining **somewhere in between** the remote and the TV. Pointing the remote directly at Flipper's IR port is unnecessary. This comes in handy when someone is switching channels while standing near the TV, and both you and Flipper are some distance away.
 
