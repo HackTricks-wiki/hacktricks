@@ -1,14 +1,14 @@
-# Przydatne polecenia macOS
+# Przydatne komendy macOS
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Narzędzia automatycznej enumeracji macOS
+### Narzędzia do automatycznej Enumeration macOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Konkretne polecenia macOS
+### Konkretne komendy macOS
 ```bash
 #System info
 date
@@ -32,7 +32,7 @@ nettop #Monitor network usage of processes in top style
 system_profiler SPSoftwareDataType #System info
 system_profiler SPPrintersDataType #Printer
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 system_profiler SPDeveloperToolsDataType #Developer tools info
 system_profiler SPStartupItemDataType #Startup Items
 system_profiler SPNetworkDataType #Network Capabilities
@@ -115,9 +115,9 @@ sudo apachectl (start|status|restart|stop)
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
-### Szybkie sprawdzenie anti-analysis / wirtualizacji
+### Szybkie sprawdzenie pod kątem anti-analysis / wirtualizacji
 
-Niektóre stealery macOS wywołują `system_profiler`, aby wykrywać VM, i **przerywają działanie z charakterystycznym kodem wyjścia (np. 100)**, aby uniknąć detonacji w sandboxie<sup>[[1]](#references)</sup>:
+Niektóre macOS stealers wywołują `system_profiler`, aby wykrywać maszyny wirtualne, i **przerywają działanie z odrębnym kodem wyjścia (np. 100)**, aby uniknąć detonacji w sandboxie<sup>[[1]](#references)</sup>:
 ```bash
 if system_profiler SPHardwareDataType SPDisplaysDataType | grep -Eiq 'qemu|kvm|vmware|virtualbox'; then
 exit 100
@@ -125,10 +125,10 @@ fi
 ```
 ### Zainstalowane oprogramowanie i usługi
 
-Sprawdź, czy zainstalowane są **podejrzane** aplikacje oraz jakie **uprawnienia** mają do zainstalowanych zasobów:
+Sprawdź, czy zainstalowane aplikacje są **podejrzane** oraz jakie mają **uprawnienia** do zainstalowanych zasobów:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
-system_profiler SPFrameworksDataType #Instaled framework
+system_profiler SPFrameworksDataType #Installed framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
@@ -149,8 +149,7 @@ Bez monitów
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 
-## Odnośniki
+## References
 
-- [1] [2025, rok Infostealerów](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
-
+- [1] [2025, rok Infostealera](https://www.pentestpartners.com/security-blog/2025-the-year-of-the-infostealer/)
 {{#include ../banners/hacktricks-training.md}}
