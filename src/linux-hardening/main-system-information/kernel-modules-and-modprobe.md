@@ -1,16 +1,18 @@
-# Abuso de módulos do kernel e modprobe
+# Abuso de Kernel Modules e modprobe
 
-## Configurações incorretas de módulos do kernel e carregamento de módulos
+{{#include ../../banners/hacktricks-training.md}}
 
-O suporte a módulos do kernel é uma área de alto impacto durante a análise de privilege escalation no Linux. Não trate toda mensagem sobre módulos não assinados como explorável por si só, mas use-a para responder a perguntas práticas.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[8]](#references)[[9]](#references)[[10]](#references)</sup>
+## Misconfigurações de Kernel modules e carregamento de modules
 
-- O usuário atual pode carregar módulos por meio de `sudo`, capabilities ou um helper path gravável?
-- O carregamento de módulos ainda está habilitado?
-- A imposição de assinaturas de módulos está desabilitada?
-- Os diretórios ou arquivos de módulos podem ser gravados?
-- Os logs do kernel podem ser lidos para confirmar o que aconteceu?
+O suporte a Kernel modules é uma área de alto impacto durante a revisão de privilege escalation no Linux. Não trate toda mensagem sobre módulos unsigned como explorável por si só, mas use-a para responder a perguntas práticas.<sup>[[1]](#references)[[2]](#references)[[3]](#references)[[8]](#references)[[9]](#references)[[10]](#references)</sup>
 
-A triagem rápida começa com as seguintes verificações do status dos módulos, das assinaturas, dos logs e da árvore de módulos.<sup>[[1]](#references)[[2]](#references)[[6]](#references)[[8]](#references)</sup>
+- O usuário atual pode carregar modules por meio de `sudo`, capabilities ou de um helper path gravável?
+- O carregamento de modules ainda está habilitado?
+- A imposição de assinaturas de modules está desabilitada?
+- Os diretórios de modules ou os arquivos de modules são graváveis?
+- Os logs do Kernel podem ser lidos para confirmar o que aconteceu?
+
+A triagem rápida começa com as seguintes verificações de status de modules, assinaturas, logging e da árvore de modules.<sup>[[1]](#references)[[2]](#references)[[6]](#references)[[8]](#references)</sup>
 ```bash
 uname -a
 uname -r
@@ -27,11 +29,11 @@ Interpretação:
 - `modules_disabled=1` significa que os módulos não podem ser carregados nem descarregados, e o valor não pode ser redefinido para `0` até a reinicialização.<sup>[[1]](#references)</sup>
 - `module.sig_enforce=1` na linha de comando do kernel ou `CONFIG_MODULE_SIG_FORCE=y` exige módulos assinados validamente; caso contrário, módulos não assinados podem ser carregados e contaminar o kernel.<sup>[[2]](#references)</sup>
 - `dmesg_restrict=0` não impõe nenhuma restrição ao `dmesg`; quando é `1`, o acesso exige `CAP_SYSLOG`.<sup>[[1]](#references)</sup>
-- Caminhos graváveis em `/lib/modules/$(uname -r)/` são perigosos porque o `modprobe` pesquisa essa árvore e seus dados de dependências ao carregar módulos.<sup>[[8]](#references)</sup>
+- Caminhos graváveis sob `/lib/modules/$(uname -r)/` são perigosos porque o `modprobe` pesquisa essa árvore e seus dados de dependências ao carregar módulos.<sup>[[8]](#references)</sup>
 
 ### Carregando um módulo e lendo a saída do kernel
 
-Se você tiver permissão legítima para carregar um módulo local, `insmod` insere o arquivo `.ko` exato que você fornecer. A função de inicialização do módulo é executada como parte do carregamento, e as mensagens gravadas com `printk()` são enviadas para o buffer de log do kernel, que normalmente é lido com `dmesg`.<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[6]](#references)</sup>
+Se você tiver permissão legítima para carregar um módulo local, `insmod` insere o arquivo `.ko` exato que você fornecer. A função de inicialização do módulo é executada como parte do carregamento, e as mensagens escritas com `printk()` vão para o buffer de logs do kernel, que normalmente é lido com `dmesg`.<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[6]](#references)</sup>
 
 Um workflow mínimo de revisão usa `modinfo` para inspecionar metadados, `insmod` e `rmmod` para carregar e remover um módulo, `lsmod` para confirmar o estado de carregamento e `dmesg` para inspecionar os logs do kernel.<sup>[[4]](#references)[[6]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 ```bash
@@ -43,14 +45,14 @@ dmesg | tail -n 30
 sudo rmmod example
 dmesg | tail -n 30
 ```
-Se `sudo -l` permitir `insmod`, `modprobe` ou um wrapper em torno deles, trate isso como crítico: `sudo -l` lista os privilégios do usuário que o executa, e carregar um kernel module requer `CAP_SYS_MODULE`.<sup>[[3]](#references)[[9]](#references)[[10]](#references)</sup>
+Se `sudo -l` permitir `insmod`, `modprobe` ou um wrapper em torno deles, trate isso como crítico: `sudo -l` lista os privilégios do usuário que o invoca, e carregar um módulo do kernel requer `CAP_SYS_MODULE`.<sup>[[3]](#references)[[9]](#references)[[10]](#references)</sup>
 ```bash
 sudo -l
 sudo /sbin/insmod ./example.ko
 ```
 ### `insmod` permitido pelo Sudo
 
-Uma regra do sudo que permite a um usuário executar `insmod` não é comparável à permissão para executar um helper administrativo comum. O código de inicialização do módulo é executado como parte da inserção, portanto a questão prática da revisão é se esse usuário pode escolher ou modificar o módulo que está sendo carregado.<sup>[[3]](#references)</sup>
+Uma regra do sudo que permite a um usuário executar `insmod` não é comparável a permitir um helper administrativo comum. O código de inicialização do módulo é executado como parte da inserção, portanto, a questão prática da revisão é saber se esse usuário pode escolher ou modificar o módulo que está sendo carregado.<sup>[[3]](#references)</sup>
 
 O fluxo genérico de revisão a seguir repete essas verificações de inspeção, carregamento, estado, logs e remoção para um módulo candidato.<sup>[[4]](#references)[[6]](#references)[[12]](#references)[[13]](#references)[[14]](#references)</sup>
 ```bash
@@ -62,9 +64,9 @@ lsmod | grep -i candidate
 dmesg | tail -n 30
 sudo /sbin/rmmod candidate
 ```
-Se o usuário puder fornecer um arquivo `.ko` arbitrário, a regra deverá ser tratada como comprometimento total do sistema em uma avaliação autorizada. Um padrão operacional mais seguro é evitar delegar o carregamento de módulos por meio do sudo; se isso for inevitável, restrinja o caminho exato, a propriedade, as permissões, a política de assinatura e o fluxo de remoção.<sup>[[3]](#references)[[10]](#references)</sup>
+Se o usuário puder fornecer um `.ko` arbitrário, a regra deverá ser tratada como comprometimento total do sistema em uma avaliação autorizada. Um padrão operacional mais seguro é evitar delegar o carregamento de módulos por meio do sudo; se isso for inevitável, restrinja o caminho exato, a propriedade, as permissões, a política de assinatura e o fluxo de remoção.<sup>[[3]](#references)[[10]](#references)</sup>
 
-Para um padrão inofensivo de compilação de módulos em um laboratório controlado, um código-fonte mínimo e um Makefile são mostrados abaixo; a forma `make -C /lib/modules/$(uname -r)/build M=$PWD` segue o fluxo de trabalho kbuild documentado pelo kernel para módulos externos.<sup>[[5]](#references)[[7]](#references)</sup>
+Para um padrão inofensivo de compilação de módulo em um laboratório controlado, um código-fonte mínimo e um Makefile são mostrados abaixo; a forma `make -C /lib/modules/$(uname -r)/build M=$PWD` segue o fluxo de trabalho kbuild documentado pelo kernel para módulos externos.<sup>[[5]](#references)[[7]](#references)</sup>
 ```c
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -92,7 +94,7 @@ make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 clean:
 make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 ```
-Compile e carregue somente em um laboratório autorizado; o kbuild compila o módulo externo, e os comandos de carregamento/remoção invocam as interfaces de módulos do kernel.<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[7]](#references)</sup>
+Compile e carregue apenas em um laboratório autorizado; o kbuild compila o módulo externo, e os comandos de carregamento/remoção invocam as interfaces de módulos do kernel.<sup>[[3]](#references)[[4]](#references)[[5]](#references)[[7]](#references)</sup>
 ```bash
 make
 sudo insmod demo.ko
@@ -101,23 +103,23 @@ sudo rmmod demo
 ```
 ### Verificações de abuso de `kernel.modprobe` / `modprobe_path`
 
-`kernel.modprobe` define o helper de userspace que o kernel executa para solicitações de autoload de módulos; esse sysctl afeta o autoload, não a inserção explícita de módulos. Se um atacante puder alterá-lo para o caminho de um executável gravável e disparar uma solicitação de módulo, esse helper se tornará um caminho privilegiado para execução de código.<sup>[[1]](#references)</sup>
+`kernel.modprobe` identifica o helper userspace que o kernel executa para solicitações de autoload de módulos; esse sysctl afeta o autoloading, não a inserção explícita de módulos. Se um atacante puder alterá-lo para o caminho de um executável gravável e disparar uma solicitação de módulo, esse helper se tornará um caminho privilegiado para execução de código.<sup>[[1]](#references)</sup>
 
-Verifique o caminho atual do helper pela interface de sysctl do kernel e inspecione a propriedade e o modo do alvo.<sup>[[1]](#references)</sup>
+Verifique o caminho atual do helper por meio da interface sysctl do kernel e inspecione a propriedade e o modo do alvo.<sup>[[1]](#references)</sup>
 ```bash
 cat /proc/sys/kernel/modprobe 2>/dev/null
 sysctl kernel.modprobe 2>/dev/null
 ls -l "$(cat /proc/sys/kernel/modprobe 2>/dev/null)" 2>/dev/null
 ```
-Verifique se o sysctl, as regras sudo delegadas ou as capabilities de arquivos podem ser influenciados.<sup>[[1]](#references)[[9]](#references)[[10]](#references)[[15]](#references)</sup>
+Verifique se o sysctl, as regras de sudo delegadas ou as file capabilities podem ser influenciados.<sup>[[1]](#references)[[9]](#references)[[10]](#references)[[15]](#references)</sup>
 ```bash
 ls -l /proc/sys/kernel/modprobe
 sudo -l | grep -E 'sysctl|tee|bash|sh|modprobe'
 getcap -r / 2>/dev/null | grep -E 'cap_sys_admin|cap_sys_module'
 ```
-O padrão a seguir, exclusivo para laboratório, altera o caminho do helper e aciona uma requisição documentada de module-autoload; use-o somente em um sistema isolado e autorizado.<sup>[[1]](#references)</sup>
+O padrão a seguir, exclusivo para laboratórios, altera o caminho do helper e aciona uma solicitação documentada de autoload de módulo; use-o somente em um sistema isolado e autorizado.<sup>[[1]](#references)</sup>
 
-Nos kernels Linux atuais, não use um executável desconhecido como gatilho genérico: o module autoloading de formatos binários personalizados legado foi removido no Linux 6.14, enquanto a documentação do kernel identifica um tipo de filesystem desconhecido como um caminho de requisição de module-autoload.<sup>[[1]](#references)[[11]](#references)</sup>
+Nos kernels Linux atuais, não use um executável desconhecido como trigger genérico: o autoload legado de módulos por formatos binários personalizados foi removido no Linux 6.14, enquanto a documentação do kernel identifica um tipo de filesystem desconhecido como um caminho de solicitação de autoload de módulo.<sup>[[1]](#references)[[11]](#references)</sup>
 ```bash
 # Example only: requires permission to write kernel.modprobe
 printf '#!/bin/sh\nid > /tmp/modprobe-helper-ran\n' > /tmp/helper
@@ -128,11 +130,11 @@ echo /tmp/helper | sudo tee /proc/sys/kernel/modprobe
 sudo mount -t definitely-not-a-filesystem none /mnt 2>/dev/null || true
 cat /tmp/modprobe-helper-ran 2>/dev/null
 ```
-Em sistemas hardened, isso deve falhar quando as permissões impedirem gravações não privilegiadas em `kernel.modprobe`, o caminho do helper não for gravável ou o carregamento automático de módulos estiver desativado.<sup>[[1]](#references)</sup>
+Em sistemas reforçados, isso deve falhar quando as permissões impedirem gravações não privilegiadas em `kernel.modprobe`, o caminho do helper não for gravável ou o carregamento automático de módulos estiver desabilitado.<sup>[[1]](#references)</sup>
 
 ### Revisão de `/lib/modules` gravável
 
-Diretórios de módulos graváveis podem permitir a substituição de módulos, o planting de módulos maliciosos ou o abuso do carregamento automático, dependendo de como `modprobe` for invocado posteriormente; `modprobe` pesquisa `/lib/modules/$(uname -r)` e usa seus dados de dependências ao resolver módulos.<sup>[[8]](#references)</sup>
+Diretórios de módulos graváveis podem permitir a substituição de módulos, o plantio de módulos maliciosos ou o abuso do carregamento automático, dependendo de como `modprobe` for invocado posteriormente; `modprobe` pesquisa `/lib/modules/$(uname -r)` e usa seus dados de dependência ao resolver módulos.<sup>[[8]](#references)</sup>
 
 Revise os arquivos de módulos graváveis e os metadados de dependências/aliases na árvore de módulos da versão ativa do kernel.<sup>[[8]](#references)</sup>
 ```bash
@@ -141,7 +143,7 @@ find "/lib/modules/$KREL" -type d -writable -ls 2>/dev/null
 find "/lib/modules/$KREL" -type f -name '*.ko*' -writable -ls 2>/dev/null
 find "/lib/modules/$KREL" -type f \( -name 'modules.dep' -o -name 'modules.alias' -o -name 'modules.order' \) -writable -ls 2>/dev/null
 ```
-Se encontrar conteúdo de módulo gravável, examine como o `modprobe` resolve dependências e como o `modinfo` relata os metadados do módulo.<sup>[[8]](#references)[[12]](#references)</sup>
+Se encontrar conteúdo de módulo gravável, analise como `modprobe` resolve dependências e como `modinfo` relata os metadados do módulo.<sup>[[8]](#references)[[12]](#references)</sup>
 ```bash
 modprobe --show-depends <module_name> 2>/dev/null
 modinfo <module_name> 2>/dev/null
@@ -149,10 +151,10 @@ grep -R "<module_name>" /lib/modules/$(uname -r)/modules.* 2>/dev/null
 ```
 Notas defensivas:
 
-- Mantenha `/lib/modules` pertencente a `root:root` e não gravável por usuários.<sup>[[8]](#references)</sup>
-- Defina `kernel.modules_disabled=1` após a inicialização quando operacionalmente possível.<sup>[[1]](#references)</sup>
-- Aplique a assinatura de módulos em sistemas que exigem módulos carregáveis.<sup>[[2]](#references)</sup>
-- Monitore gravações em `/proc/sys/kernel/modprobe`, `/lib/modules` e a execução inesperada de `insmod`/`modprobe`.<sup>[[1]](#references)[[8]](#references)</sup>
+- Mantenha `/lib/modules` pertencente a `root:root` e sem permissão de escrita para usuários.<sup>[[8]](#references)</sup>
+- Defina `kernel.modules_disabled=1` após a inicialização, quando for operacionalmente possível.<sup>[[1]](#references)</sup>
+- Enforce module signing em sistemas que exigem módulos carregáveis.<sup>[[2]](#references)</sup>
+- Monitore escritas em `/proc/sys/kernel/modprobe`, `/lib/modules` e a execução inesperada de `insmod`/`modprobe`.<sup>[[1]](#references)[[8]](#references)</sup>
 
 ## References
 
