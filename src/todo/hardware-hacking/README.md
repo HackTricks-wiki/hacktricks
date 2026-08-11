@@ -4,49 +4,56 @@
 
 ## JTAG
 
-JTAG permet d’effectuer un boundary scan. Le boundary scan analyse certains circuits, notamment les boundary-scan cells et les registres associés à chaque broche.
+JTAG (IEEE 1149.1) prend en charge les tests boundary-scan au moyen de cellules placées autour des broches d'E/S d'un composant. De nombreux processeurs exposent également des fonctions de debug propres au fabricant via le même Test Access Port (TAP) ; le boundary scan et le debug du CPU sont des utilisations liées de JTAG, mais ne sont pas synonymes.<sup>[[1]](#references)</sup>
 
 Le standard JTAG définit des **commandes spécifiques pour effectuer des boundary scans**, notamment les suivantes :
 
-- **BYPASS** permet de tester une puce spécifique sans subir la surcharge liée au passage par les autres puces.
-- **SAMPLE/PRELOAD** capture un échantillon des données entrant dans le composant et en sortant lorsqu’il fonctionne normalement.
-- **EXTEST** définit et lit l’état des broches.
+- **BYPASS** sélectionne un registre de bypass d'un bit afin que les autres composants d'une chaîne de scan puissent être atteints avec un surcoût minimal.
+- **SAMPLE/PRELOAD** capture les valeurs des broches pendant le fonctionnement normal et peut précharger le registre boundary-scan avant une autre instruction.
+- **EXTEST** définit et lit l'état des broches.
 
-Il peut également prendre en charge d’autres commandes, telles que :
+Il prend également en charge d'autres commandes, telles que :
 
 - **IDCODE** pour identifier un composant
-- **INTEST** pour effectuer un test interne du composant
+- **INTEST** pour effectuer les tests internes du composant
 
 Vous pouvez rencontrer ces instructions lorsque vous utilisez un outil comme le JTAGulator.
 
-### The Test Access Port
+### Le Test Access Port
 
-Les boundary scans incluent des tests du **Test Access Port (TAP)** à quatre fils, un port polyvalent qui fournit un **accès aux fonctions de support des tests JTAG** intégrées à un composant. Le TAP utilise les cinq signaux suivants :
+Le **Test Access Port (TAP)** permet d'accéder à la logique de test JTAG d'un composant. Quatre signaux sont requis et `TRST` est optionnel :<sup>[[1]](#references)</sup>
 
-- Entrée d’horloge de test (**TCK**) Le TCK est l’**horloge** qui définit la fréquence à laquelle le contrôleur TAP effectue une action unique (autrement dit, passe à l’état suivant de la machine à états).
-- Entrée de sélection du mode de test (**TMS**) Le TMS contrôle la **machine à états finis**. À chaque cycle d’horloge, le contrôleur JTAG TAP du composant vérifie la tension sur la broche TMS. Si la tension est inférieure à un certain seuil, le signal est considéré comme bas et interprété comme 0 ; si elle est supérieure à un certain seuil, le signal est considéré comme haut et interprété comme 1.
-- Entrée de données de test (**TDI**) Le TDI est la broche qui envoie les **données dans la puce via les scan cells**. Chaque fabricant est responsable de la définition du protocole de communication utilisé sur cette broche, car JTAG ne le définit pas.
-- Sortie de données de test (**TDO**) Le TDO est la broche qui envoie les **données hors de la puce**.
-- Entrée de réinitialisation de test (**TRST**) La TRST, facultative, réinitialise la machine à états finis **dans un état connu et fiable**. Sinon, si le TMS est maintenu à 1 pendant cinq cycles d’horloge consécutifs, une réinitialisation est déclenchée de la même manière que par la broche TRST, ce qui explique pourquoi TRST est facultative.
+- Entrée d'horloge de test (**TCK**) TCK est l'**horloge** qui définit la fréquence à laquelle le contrôleur TAP effectue une action unique (autrement dit, passe à l'état suivant de la machine à états).
+- Entrée de sélection du mode de test (**TMS**) TMS contrôle la **machine à états finis**. À chaque cycle d'horloge, le contrôleur JTAG TAP du composant vérifie la tension sur la broche TMS. Si la tension est inférieure à un certain seuil, le signal est considéré comme bas et interprété comme 0 ; si la tension est supérieure à un certain seuil, le signal est considéré comme haut et interprété comme 1.
+- Entrée de données de test (**TDI**) TDI décale les instructions série ou les données de test dans le registre TAP sélectionné. IEEE 1149.1 définit le comportement du transfert TAP, tandis que les fabricants définissent les instructions optionnelles et les registres de debug.
+- Sortie de données de test (**TDO**) TDO est la broche qui envoie les **données hors de la puce**.
+- Entrée de réinitialisation de test (**TRST**) L'entrée TRST optionnelle réinitialise la machine à états finis **dans un état connu et fonctionnel**. Alternativement, si TMS est maintenu à 1 pendant cinq cycles d'horloge consécutifs, une réinitialisation est déclenchée, de la même manière qu'avec la broche TRST, ce qui explique pourquoi TRST est optionnel.
 
-Il est parfois possible de trouver ces broches marquées sur le PCB. Dans d’autres cas, vous devrez les **trouver**.
+Il est parfois possible de trouver ces broches marquées sur le PCB. Dans d'autres cas, vous devrez les **identifier**.
 
-### Identifying JTAG pins
+### Identification des broches JTAG
 
-La manière la plus rapide, mais aussi la plus coûteuse, de détecter les ports JTAG consiste à utiliser le **JTAGulator**, un appareil créé spécifiquement à cette fin (bien qu’il puisse **également détecter les pinouts UART**).
+Une option rapide et conçue spécifiquement à cet effet, mais relativement coûteuse, pour détecter les ports JTAG est le **JTAGulator**, qui peut également identifier les brochages UART.<sup>[[2]](#references)</sup>
 
-Il possède **24 canaux** que vous pouvez connecter aux broches de la carte. Il effectue ensuite une **attaque BF** sur toutes les combinaisons possibles en envoyant les commandes de boundary scan **IDCODE** et **BYPASS**. S’il reçoit une réponse, il affiche le canal correspondant à chaque signal JTAG.
+Il dispose de **24 canaux** pouvant être connectés aux points de test de la carte. Il énumère les combinaisons de broches candidates à l'aide de scans **IDCODE** et **BYPASS**, puis indique les canaux correspondant aux signaux JTAG détectés.
 
-Une manière moins coûteuse, mais beaucoup plus lente, d’identifier les pinouts JTAG consiste à utiliser [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) chargé sur un microcontrôleur compatible Arduino.
+Une méthode moins coûteuse, mais beaucoup plus lente, pour identifier les brochages JTAG consiste à utiliser [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) chargé sur un microcontrôleur compatible Arduino.
 
-Avec **JTAGenum**, vous devez d’abord **définir les broches du dispositif de probing** que vous utiliserez pour l’énumération. Vous devez consulter le schéma de brochage du dispositif, puis connecter ces broches aux points de test de votre dispositif cible.
+Avec **JTAGenum**, commencez par définir les broches du microcontrôleur de sondage utilisées pour l'énumération. Consultez son brochage, puis connectez ces broches aux points de test candidats de la carte cible.<sup>[[3]](#references)</sup>
 
-Une **troisième manière** d’identifier les broches JTAG consiste à **inspecter le PCB** pour trouver l’un des pinouts. Dans certains cas, les PCB peuvent fournir de manière pratique l’**interface Tag-Connect**, ce qui indique clairement que la carte possède également un connecteur JTAG. Vous pouvez voir à quoi ressemble cette interface à l’adresse [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). En outre, l’inspection des **datasheets des chipsets du PCB** peut révéler des schémas de brochage indiquant la présence d’interfaces JTAG.
+Une **troisième méthode** pour identifier les broches JTAG consiste à **inspecter le PCB** à la recherche d'une empreinte connue. Certaines cartes exposent une empreinte **Tag-Connect**, bien que Tag-Connect soit un système de connecteurs pouvant transporter du JTAG, du SWD, de l'UART ou une autre interface : cela ne prouve pas à lui seul que les broches sont JTAG. Les fiches techniques des composants et les mesures de continuité peuvent ensuite permettre d'identifier les signaux réels.<sup>[[5]](#references)</sup>
 
 ## SDW
 
-SWD est un protocole spécifique à ARM conçu pour le debugging.
+SWD est l'interface de debug à deux broches et basée sur des paquets d'Arm.<sup>[[4]](#references)</sup>
 
-L’interface SWD nécessite **deux broches** : un signal bidirectionnel **SWDIO**, qui équivaut aux **broches TDI et TDO de JTAG ainsi qu’à une horloge**, et **SWCLK**, qui équivaut à **TCK** dans JTAG. De nombreux composants prennent en charge le **Serial Wire or JTAG Debug Port (SWJ-DP)**, une interface combinant JTAG et SWD qui permet de connecter au dispositif cible une sonde SWD ou JTAG.
+L'interface utilise **SWDIO** bidirectionnel pour les données et **SWCLK** pour l'horloge. De nombreux composants implémentent un **Serial Wire/JTAG Debug Port (SWJ-DP)** qui permet de sélectionner SWD ou JTAG sur des broches partagées.<sup>[[4]](#references)</sup>
 
+## References
+
+- [1] [Groupe de travail IEEE 1149.1 — JTAG et boundary scan](https://sagroups.ieee.org/1149/1/)
+- [2] [Documentation de JTAGulator](https://github.com/grandideastudio/jtagulator/wiki)
+- [3] [JTAGenum — Énumération des broches JTAG avec Arduino](https://github.com/cyphunk/JTAGenum/)
+- [4] [Arm — Interfaces de debug à faible nombre de broches pour les systèmes multi-composants](https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Low_Pin-Count_Debug_Interfaces_for_Multi-device_Systems.pdf)
+- [5] [Tag-Connect — Empreintes pour câbles de debug et de programmation](https://www.tag-connect.com/info/)
 {{#include ../../banners/hacktricks-training.md}}

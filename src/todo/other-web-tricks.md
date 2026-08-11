@@ -1,43 +1,42 @@
-# Autres astuces Web
+# Autres astuces web
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Host header
+## Host header
 
-À plusieurs reprises, le back-end fait confiance au **Host header** pour effectuer certaines actions. Par exemple, il peut utiliser sa valeur comme **domaine auquel envoyer une réinitialisation de mot de passe**. Ainsi, lorsque vous recevez un e-mail contenant un lien pour réinitialiser votre mot de passe, le domaine utilisé est celui que vous avez placé dans le Host header. Ensuite, vous pouvez demander la réinitialisation du mot de passe d'autres utilisateurs et modifier le domaine pour utiliser un domaine que vous contrôlez afin de voler leurs codes de réinitialisation de mot de passe. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).<sup>[[1]](#references)</sup>
+Les backends font parfois confiance au champ HTTP `Host` lors de la construction de liens absolus. Si un e-mail de réinitialisation de mot de passe utilise un host fourni par l'attaquant, demander une réinitialisation pour une victime peut envoyer un lien contenant un token via un domaine contrôlé par l'attaquant. Testez également les champs forwarded-host, la gestion des `Host` en double et les cibles de requête en forme absolue à chaque étape du proxy.<sup>[[1]](#references)</sup>
 
 > [!WARNING]
-> Notez qu'il est possible que vous n'ayez même pas besoin d'attendre que l'utilisateur clique sur le lien de réinitialisation du mot de passe pour obtenir le token, car **les filtres anti-spam ou d'autres appareils/bots intermédiaires peuvent cliquer dessus pour l'analyser**.
+> Le clic d'un utilisateur peut ne pas être nécessaire : **les scanners de sécurité des e-mails, les services d'aperçu ou d'autres intermédiaires peuvent demander automatiquement le lien contrôlé par l'attaquant**, divulguant ainsi le token de réinitialisation.
 
-### Booléens de session
+## Booléens de session
 
-Parfois, lorsque vous terminez correctement une vérification, le back-end **ajoute simplement un booléen ayant la valeur "True" à un attribut de sécurité de votre session**. Ensuite, un autre endpoint saura si vous avez réussi cette vérification.\
-Cependant, si vous **réussissez la vérification** et que votre session reçoit cette valeur "True" dans l'attribut de sécurité, vous pouvez essayer **d'accéder à d'autres ressources** qui **dépendent du même attribut**, mais auxquelles vous **ne devriez pas avoir les permissions** d'accéder. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).<sup>[[2]](#references)</sup>
+Certaines applications enregistrent une vérification terminée sous forme de booléen dans la session, puis permettent à un autre endpoint de se fier à ce flag. Après avoir légitimement réussi la vérification pour une ressource, testez si le même flag autorise incorrectement un autre utilisateur, objet ou workflow. Il s'agit d'une faille d'autorisation/réutilisation d'état de second ordre, et pas simplement d'un IDOR.<sup>[[2]](#references)</sup>
 
-### Fonctionnalité d'inscription
+## Fonctionnalité d'inscription
 
 Essayez de vous inscrire en tant qu'utilisateur déjà existant. Essayez également d'utiliser des caractères équivalents (points, nombreux espaces et Unicode).
 
-### Prise de contrôle d'e-mails
+## Confusion d'état lors du changement d'e-mail
 
-Enregistrez une adresse e-mail, puis modifiez-la avant de la confirmer. Ensuite, si le nouvel e-mail de confirmation est envoyé à la première adresse e-mail enregistrée, vous pouvez prendre le contrôle de n'importe quelle adresse e-mail. Ou, si vous pouvez activer la deuxième adresse e-mail en confirmant la première, vous pouvez également prendre le contrôle de n'importe quel compte.
+Enregistrez une adresse e-mail, puis modifiez-la avant de la confirmer. Vérifiez si la confirmation de la nouvelle adresse est envoyée à l'ancienne adresse, ou si la confirmation de l'ancien token active la nouvelle adresse. Les tokens de confirmation doivent être liés au compte exact, à l'adresse en attente, à l'objectif et à l'état actuel.
 
-### Accéder au servicedesk interne d'entreprises utilisant atlassian
+## Services desks Atlassian exposés
 
 
 {{#ref}}
 https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
 {{#endref}}
 
-### Méthode TRACE
+## Méthode TRACE
 
-Les développeurs peuvent oublier de désactiver diverses options de debug dans l'environnement de production. Par exemple, la méthode HTTP `TRACE` est conçue à des fins de diagnostic. Si elle est activée, le serveur Web répond aux requêtes utilisant la méthode `TRACE` en renvoyant dans la réponse la requête exacte qui a été reçue. Ce comportement est souvent inoffensif, mais peut parfois entraîner une divulgation d'informations, comme le nom des en-têtes d'authentification internes qui peuvent être ajoutés aux requêtes par des reverse proxies.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+La méthode HTTP `TRACE` demande une retransmission de la requête reçue à des fins de diagnostic. La RFC 9110 exige que les destinataires omettent du contenu réfléchi les champs sensibles tels que les identifiants et les cookies, mais des implémentations non sécurisées ou des en-têtes ajoutés par des intermédiaires peuvent tout de même divulguer les transformations internes de la requête. Les navigateurs empêchent les requêtes `TRACE` générées par des scripts ; l'attaque historique de cross-site tracing dépend donc également d'un autre moyen d'injecter des champs protégés.<sup>[[3]](#references)</sup>![Image showing a TRACE response](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
-## Références
+## References
 
-- [1] [How I was able to take over any user's account with Host Header Injection](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
-- [2] [A less known attack vector: Second Order IDOR attacks](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
-
+- [1] [Comment j'ai pu prendre le contrôle du compte de n'importe quel utilisateur avec une injection de Host Header](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2)
+- [2] [Un vecteur d'attaque moins connu : les attaques IDOR de second ordre](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a)
+- [3] [RFC 9110, section 9.3.8 — TRACE](https://www.rfc-editor.org/rfc/rfc9110.html#name-trace)
 {{#include ../banners/hacktricks-training.md}}

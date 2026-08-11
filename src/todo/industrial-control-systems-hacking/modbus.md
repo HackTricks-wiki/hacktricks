@@ -2,34 +2,39 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction au protocole Modbus
+## Introduction à Modbus
 
-Le protocole Modbus est un protocole largement utilisé dans les systèmes d’automatisation et de contrôle industriels. Modbus permet la communication entre différents appareils tels que les automates programmables industriels (PLC), les capteurs, les actionneurs et autres appareils industriels. Comprendre le protocole Modbus est essentiel, car il s’agit du protocole de communication le plus utilisé dans les ICS et qu’il présente une importante attack surface potentielle pour le sniffing et même l’injection de commandes dans les PLC.
+Modbus est un protocole largement implémenté de la couche application, utilisé par les PLC, les capteurs, les actionneurs et d'autres appareils industriels. Son modèle requête/réponse expose des bobines et des registres via des codes de fonction. Les tests de sécurité se concentrent donc sur les lectures/écritures non autorisées, l'observation du trafic, le rejeu et les comportements dangereux des appareils, et pas uniquement sur la détection du port TCP 502.<sup>[[1]](#references)</sup>
 
-Ici, les concepts sont présentés sous forme de points afin de fournir un contexte sur le protocole et son mode de fonctionnement. Le plus grand défi pour la sécurité des systèmes ICS réside dans le coût de la mise en œuvre et des mises à niveau. Ces protocoles et standards ont été conçus au début des années 80 et 90 et sont encore largement utilisés. Comme une industrie possède de nombreux appareils et connexions, la mise à niveau des appareils est très difficile, ce qui donne aux hackers l’avantage de devoir composer avec des protocoles obsolètes. Les attaques contre Modbus sont pratiquement inévitables, puisqu’il continuera à être utilisé sans mise à niveau si son fonctionnement est critique pour l’industrie.
+De nombreux déploiements conservent des équipements série anciens, car les mises à niveau nécessitent un arrêt, une nouvelle certification ou le remplacement des appareils de terrain. Le Modbus traditionnel ne fournit ni confidentialité ni authentification des pairs ; Modbus Security est un profil distinct basé sur TLS, utilisant des certificats X.509 et le port TCP 802. Comme la spécification est publique et peut être implémentée indépendamment, le comportement des fournisseurs et la prise en charge des fonctions optionnelles varient et doivent être identifiés par fingerprinting plutôt que supposés.<sup>[[1]](#references)[[2]](#references)</sup>
 
-## L’architecture Client-Serveur
+## L'architecture client-serveur
 
-Le protocole Modbus est généralement utilisé dans une architecture Client-Serveur, où un appareil maître (client) initie la communication avec un ou plusieurs appareils esclaves (serveurs). Cette architecture est également appelée architecture maître-esclave et est largement utilisée dans l’électronique et l’IoT avec SPI, I2C, etc.
+Dans la terminologie actuelle, un **client** initie une transaction et un **serveur** renvoie une réponse. Les anciennes documentations utilisent **master/slave**. Ne confondez pas cette relation applicative avec SPI ou I2C : il s'agit de protocoles de bus différents.<sup>[[1]](#references)</sup>
 
-## Versions série et Ethernet
+## Transports série et Ethernet
 
-Le protocole Modbus est conçu à la fois pour les communications série et les communications Ethernet. La communication série est largement utilisée dans les systèmes legacy, tandis que les appareils modernes prennent en charge Ethernet, qui offre des débits de données élevés et est mieux adapté aux réseaux industriels modernes.
+Les mêmes données applicatives Modbus peuvent être transportées par des variantes série (framing RTU ou ASCII) et par Modbus TCP. Modbus TCP ajoute un en-tête MBAP et utilise normalement le port TCP 502 ; le RTU série utilise un framing binaire compact et un CRC, tandis que l'ASCII série représente les octets sous forme de caractères hexadécimaux et utilise un LRC.<sup>[[1]](#references)[[3]](#references)</sup>
 
 ## Représentation des données
 
-Les données sont transmises dans le protocole Modbus au format ASCII ou binaire, bien que le format binaire soit utilisé en raison de sa compatibilité avec les anciens appareils.
+Le modèle de données se compose de bobines/entrées discrètes sur un bit et de registres d'entrée/de maintien de 16 bits. Les valeurs sur plusieurs registres, l'ordre des octets, la mise à l'échelle et la signification sémantique sont propres à chaque appareil et doivent être confirmés à l'aide de la table des registres du fournisseur.<sup>[[1]](#references)</sup>
 
-## Codes fonctionnels
+## Codes de fonction
 
-Le protocole Modbus fonctionne avec la transmission de codes fonctionnels spécifiques utilisés pour faire fonctionner les PLC et différents appareils de contrôle. Cette partie est importante à comprendre, car des replay attacks peuvent être effectuées en retransmettant les codes fonctionnels. Les appareils legacy ne prennent en charge aucun chiffrement pour la transmission des données et utilisent généralement de longs câbles qui les relient, ce qui permet de falsifier ces câbles et de capturer ou d’injecter des données.
+Les codes de fonction sélectionnent des opérations telles que la lecture de bobines (`0x01`), la lecture de registres de maintien (`0x03`), l'écriture d'une bobine/d'un registre unique (`0x05`/`0x06`) et l'écriture de plusieurs bobines/registres (`0x0F`/`0x10`). Une requête d'écriture capturée peut être rejouable lorsque le déploiement ne dispose d'aucune authentification compensatoire ni de vérifications de l'état du processus. Avec un accès physique autorisé à de longues liaisons série, un évaluateur peut également capturer ou injecter directement des trames sur le câblage après avoir identifié l'interface électrique, la terminaison et la méthode de connexion sûre. Ces deux actions peuvent affecter le processus physique ; utilisez donc un laboratoire ou obtenez une autorisation opérationnelle explicite.<sup>[[1]](#references)[[3]](#references)</sup>
 
-## Adressage de Modbus
+## Adressage
 
-Chaque appareil du réseau possède une adresse unique, essentielle à la communication entre les appareils. Des protocoles tels que Modbus RTU, Modbus TCP, etc. sont utilisés pour implémenter l’adressage et servent de couche de transport pour la transmission des données. Les données transférées sont au format du protocole Modbus et contiennent le message.
+Les appareils série utilisent une adresse d'unité. Modbus TCP utilise l'adressage IP ainsi qu'un identifiant d'unité dans l'en-tête MBAP, ce qui est particulièrement pertinent lorsqu'une passerelle TCP-vers-série achemine les requêtes vers des unités en aval. Les références de registres présentées dans la documentation des produits peuvent être basées sur un index commençant à un (`40001`), tandis que les adresses du protocole commencent à zéro, ce qui constitue une source courante d'erreurs d'un décalage d'une unité.<sup>[[1]](#references)[[3]](#references)</sup>
 
-En outre, Modbus implémente également des contrôles d’erreur afin de garantir l’intégrité des données transmises. Mais surtout, Modbus est un Open Standard que chacun peut implémenter dans ses appareils. Cela a permis à ce protocole de devenir un standard mondial et d’être largement répandu dans le secteur de l’automatisation industrielle.
+Le framing série inclut des contrôles des erreurs de transmission (CRC pour le RTU et LRC pour l'ASCII), et TCP fournit sa somme de contrôle de transport normale. Ces mécanismes détectent les corruptions accidentelles ; ils ne fournissent ni intégrité cryptographique ni authentification de l'origine.<sup>[[3]](#references)</sup>
 
-En raison de son utilisation à grande échelle et du manque de mises à niveau, attaquer Modbus offre un avantage important grâce à son attack surface. Les ICS dépendent fortement de la communication entre les appareils, et toute attaque les ciblant peut être dangereuse pour le fonctionnement des systèmes industriels. Des attaques telles que le replay, la data injection, le data sniffing et le leaking, le Denial of Service, la falsification de données, etc. peuvent être menées si le support de transmission est identifié par l’attaquant.
+Lors d'une évaluation autorisée, testez l'exposition, les codes de fonction autorisés, les plages d'adresses accessibles en écriture, la gestion des exceptions, les limites de débit, ainsi que la capacité de la segmentation réseau ou d'un firewall conscient de Modbus à restreindre les clients. Les menaces pertinentes comprennent la divulgation passive, l'injection de commandes non autorisées, le rejeu, la falsification des données et le déni de service. Coordonnez tous les tests actifs avec les responsables du processus, car des modifications apparemment minimes de registres peuvent altérer un processus physique.
 
+## References
+
+- [1] [Modbus Organization — Spécification du protocole applicatif Modbus V1.1b3](https://www.modbus.org/file/secure/modbusprotocolspecification.pdf)
+- [2] [Modbus Organization — Protocole Modbus Security et guides d'implémentation](https://www.modbus.org/modbus-specifications)
+- [3] [Modbus Organization — Spécification et guide d'implémentation de Modbus sur liaison série V1.02](https://www.modbus.org/file/secure/modbusoverserial.pdf)
 {{#include ../../banners/hacktricks-training.md}}
